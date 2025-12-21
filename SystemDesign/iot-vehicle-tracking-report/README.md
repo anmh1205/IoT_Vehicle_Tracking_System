@@ -35,7 +35,16 @@
 - [Database Schema SQL](./04-server/backend/schema.sql)
 
 #### Frontend
-- [THIẾT KẾ FRONTEND (GIAO DIỆN NGƯỜI DÙNG)](./04-server/frontend/part-01-frontend.md)
+- [PHẦN XII: THIẾT KẾ FRONTEND (GIAO DIỆN NGƯỜI DÙNG)](./04-server/frontend/part-01-frontend.md)
+- [PHẦN XIII: FRONTEND DESIGN & IMPLEMENTATION PLAN](./04-server/frontend/part-02-frontend-design.md)
+  - [XIII.1: Setup & Structure](./04-server/frontend/part-02-01-setup-and-structure.md)
+  - [XIII.2: Theme & Styling](./04-server/frontend/part-02-02-theme-and-styling.md)
+  - [XIII.3: Layout Components](./04-server/frontend/part-02-03-layout-components.md)
+  - [XIII.4: UI Components](./04-server/frontend/part-02-04-ui-components.md)
+  - [XIII.5: Pages & Features](./04-server/frontend/part-02-05-pages-and-features.md)
+  - [XIII.6: API Integration](./04-server/frontend/part-02-06-api-integration.md)
+  - [XIII.7: Realtime Integration](./04-server/frontend/part-02-07-realtime-integration.md)
+  - [XIII.8: Implementation Steps (Copy Template)](./04-server/frontend/part-02-08-implementation-steps.md)
 
 ### 📝 05. Conclusion (Kết luận)
 - [PHẦN X: KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN](./05-conclusion/part-01-ket-luan.md)
