@@ -31,7 +31,7 @@
 
 **Điều Kiện:**
 
-- IGN = LOW
+- IGN = LOW (đã được xác nhận từ chế độ 1)
 - Không có chuyển động trong vài phút
 
 **Hành Động:**
@@ -51,24 +51,44 @@
 
 **Ước Lượng Dòng:** ~2–3 mA trung bình (từ ắc quy)
 
+**Tại Sao Không Cần Bluetooth OBD2 Khi Đỗ:**
+
+1. **IGN đã OFF**: Không cần đọc IGN status từ OBD2 (đã biết là OFF)
+2. **Không cần dữ liệu xe**: RPM, tốc độ, nhiên liệu không cần khi đỗ
+3. **IMU đủ để phát hiện chuyển động**: LIS3DH có thể phát hiện rung, kéo, cẩu xe mà không cần OBD2
+4. **Tiết kiệm năng lượng**: Không cần Bluetooth (~30–50 mA) → tiết kiệm ~7,000 lần năng lượng
+5. **Tiết kiệm thời gian**: Không cần reconnect Bluetooth (2–5 giây) → wake up nhanh hơn
+6. **Đơn giản hóa logic**: Không cần quản lý kết nối Bluetooth khi đỗ
+
 **Lưu Ý:**
 
-- Không cần kết nối OBD2 khi đỗ → tiết kiệm thời gian wake up
 - IGN status đã được xác nhận trước khi deep sleep (từ chế độ 1)
+- IMU (LIS3DH) đủ để phát hiện chuyển động khi đỗ → không cần OBD2
+- Chỉ cần kết nối OBD2 khi IGN ON (chế độ 1) để đọc dữ liệu xe
 
 #### Chế Độ 3: Cảnh Báo (Security/Tow Alarm)
 
 **Điều Kiện:**
 
 - LIS3DH phát hiện gia tốc > ngưỡng trong thời gian định trước
+- Wake-up từ GPIO interrupt (LIS3DH INT pin)
 
 **Hành Động:**
 
-- ESP32 thức dậy
+- ESP32 thức dậy ngay (từ deep sleep)
 - Bật **GNSS + 4G** ngay (A7600CE‑T)
-- Gửi cảnh báo ưu tiên
+- Gửi cảnh báo ưu tiên (rung, kéo, cẩu xe)
 - Chuyển sang track liên tục (gần giống chế độ 1)
+- **Có thể kết nối Bluetooth OBD2** (tùy chọn):
+  - Nếu cần xác nhận IGN status (xe có đang chạy không?)
+  - Hoặc chỉ dùng IMU + GPS để phát hiện chuyển động → đơn giản hơn
 - Duy trì thêm 2–4 giờ hoặc cho đến khi xác nhận
+
+**Lưu Ý:**
+
+- IMU đã phát hiện chuyển động → không nhất thiết cần OBD2
+- Có thể kết nối OBD2 để xác nhận IGN status (nếu cần)
+- Hoặc chỉ dùng IMU + GPS → đơn giản và tiết kiệm năng lượng hơn
 
 ### IV.2 Quản Lý Nguồn và Low Voltage Disconnect (LVD)
 

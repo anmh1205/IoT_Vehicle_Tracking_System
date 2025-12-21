@@ -1,0 +1,827 @@
+-- ============================================================================
+-- DATABASE SCHEMA - IoT Vehicle Tracking System (Car Rental)
+-- ============================================================================
+-- Phase 1: Core functionality (vehicles, customers, trips, alerts, violations)
+-- Phase 2: Booking management (bookings, contracts, payments, damage reports, reviews)
+-- 
+-- Lưu ý: Tất cả các bảng và fields Phase 2 đã được tạo sẵn trong schema này
+-- Code Phase 1 sẽ không sử dụng các bảng/fields Phase 2, nhưng database đã sẵn sàng
+-- ============================================================================
+
+-- ============================================================================
+-- IX.3.1 Users & Authentication
+-- ============================================================================
+
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  full_name VARCHAR(100),
+  phone VARCHAR(20),
+  role VARCHAR(20) DEFAULT 'staff', -- 'admin', 'manager', 'staff' (nhân viên dịch vụ cho thuê)
+  status VARCHAR(20) DEFAULT 'active', -- 'active', 'inactive', 'suspended'
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  last_login TIMESTAMP
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
+
+CREATE TABLE user_sessions (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  token VARCHAR(255) UNIQUE NOT NULL,
+  refresh_token VARCHAR(255),
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX idx_sessions_token ON user_sessions(token);
+
+-- ============================================================================
+-- IX.3.2 Vehicles & Devices
+-- ============================================================================
+
+CREATE TABLE vehicles (
+  id SERIAL PRIMARY KEY,
+  vehicle_id VARCHAR(50) UNIQUE NOT NULL, -- Biển số hoặc mã xe
+  plate_number VARCHAR(20) UNIQUE,
+  owner_id INT REFERENCES users(id), -- Chủ dịch vụ cho thuê
+  vehicle_type VARCHAR(50), -- 'sedan', 'suv', 'hatchback', 'coupe', etc.
+  brand VARCHAR(50),
+  model VARCHAR(50),
+  year INT,
+  color VARCHAR(30),
+  vin VARCHAR(50), -- Vehicle Identification Number
+  seats INT DEFAULT 5, -- Số chỗ ngồi
+  transmission VARCHAR(20), -- 'manual', 'automatic'
+  fuel_type VARCHAR(20), -- 'gasoline', 'diesel', 'hybrid', 'electric'
+  mileage_km INT DEFAULT 0, -- Số km hiện tại
+  -- Giấy tờ
+  registration_number VARCHAR(50), -- Số đăng ký
+  insurance_expiry DATE, -- Ngày hết hạn bảo hiểm
+  -- Trạng thái
+  status VARCHAR(20) DEFAULT 'active', -- 'active', 'inactive', 'maintenance', 'retired'
+  -- [Phase 2] Thông tin cho thuê
+  rental_price_per_day DECIMAL(10, 2), -- [Phase 2] Giá thuê mỗi ngày
+  rental_price_per_hour DECIMAL(10, 2), -- [Phase 2] Giá thuê mỗi giờ (nếu có)
+  deposit_amount DECIMAL(10, 2), -- [Phase 2] Tiền cọc
+  availability_status VARCHAR(20) DEFAULT 'available', -- [Phase 2] 'available', 'rented', 'maintenance', 'reserved', 'inactive'
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_vehicles_owner_id ON vehicles(owner_id);
+CREATE INDEX idx_vehicles_status ON vehicles(status);
+CREATE INDEX idx_vehicles_plate ON vehicles(plate_number);
+CREATE INDEX idx_vehicles_availability_status ON vehicles(availability_status); -- [Phase 2]
+CREATE INDEX idx_vehicles_vehicle_type ON vehicles(vehicle_type);
+
+CREATE TABLE devices (
+  id SERIAL PRIMARY KEY,
+  device_id VARCHAR(50) UNIQUE NOT NULL, -- MAC address hoặc serial number
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE SET NULL,
+  device_type VARCHAR(50) DEFAULT 'tracker', -- 'tracker', 'dashcam', etc.
+  firmware_version VARCHAR(20),
+  hardware_version VARCHAR(20),
+  imei VARCHAR(20) UNIQUE, -- IMEI của modem 4G
+  sim_card_number VARCHAR(20),
+  status VARCHAR(20) DEFAULT 'active', -- 'active', 'inactive', 'offline', 'error'
+  last_seen TIMESTAMP, -- Thời gian kết nối cuối cùng
+  battery_level DECIMAL(5,2), -- Pin backup (%)
+  signal_strength INT, -- RSSI
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_devices_vehicle_id ON devices(vehicle_id);
+CREATE INDEX idx_devices_status ON devices(status);
+CREATE INDEX idx_devices_last_seen ON devices(last_seen);
+
+CREATE TABLE device_configurations (
+  id SERIAL PRIMARY KEY,
+  device_id INT REFERENCES devices(id) ON DELETE CASCADE,
+  config_key VARCHAR(100) NOT NULL, -- 'heartbeat_interval', 'tracking_interval', etc.
+  config_value TEXT NOT NULL,
+  updated_at TIMESTAMP DEFAULT NOW(),
+  updated_by INT REFERENCES users(id),
+  UNIQUE(device_id, config_key)
+);
+
+CREATE INDEX idx_device_config_device_id ON device_configurations(device_id);
+
+-- ============================================================================
+-- IX.3.3 Customers (Khách Hàng Thuê Xe)
+-- ============================================================================
+
+CREATE TABLE customers (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE SET NULL, -- Link với user account nếu có
+  full_name VARCHAR(100) NOT NULL,
+  email VARCHAR(100),
+  phone VARCHAR(20) NOT NULL,
+  date_of_birth DATE,
+  id_card_number VARCHAR(20) UNIQUE, -- CMND/CCCD
+  id_card_issue_date DATE,
+  id_card_issue_place VARCHAR(200),
+  address TEXT,
+  -- Bằng lái xe
+  license_number VARCHAR(50),
+  license_type VARCHAR(20), -- 'B1', 'B2', 'C', etc.
+  license_issue_date DATE,
+  license_expiry_date DATE,
+  license_issue_place VARCHAR(200),
+  -- Trạng thái
+  status VARCHAR(20) DEFAULT 'active', -- 'active', 'suspended', 'blacklisted'
+  verification_status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'verified', 'rejected'
+  verified_by INT REFERENCES users(id), -- Admin xác minh
+  verified_at TIMESTAMP,
+  -- Đánh giá
+  total_rentals INT DEFAULT 0, -- Tổng số lần thuê
+  total_spent DECIMAL(12, 2) DEFAULT 0, -- Tổng chi tiêu
+  rating_average DECIMAL(3, 2) DEFAULT 0, -- Điểm đánh giá trung bình
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_customers_user_id ON customers(user_id);
+CREATE INDEX idx_customers_phone ON customers(phone);
+CREATE INDEX idx_customers_id_card ON customers(id_card_number);
+CREATE INDEX idx_customers_status ON customers(status);
+CREATE INDEX idx_customers_verification_status ON customers(verification_status);
+
+-- ============================================================================
+-- IX.3.4 Bookings & Reservations [Phase 2]
+-- ============================================================================
+
+-- [Phase 2] Quản lý đặt xe và hợp đồng thuê
+CREATE TABLE bookings (
+  id SERIAL PRIMARY KEY,
+  booking_number VARCHAR(50) UNIQUE NOT NULL, -- Mã đặt xe (VD: BK-20240115-001)
+  customer_id INT REFERENCES customers(id) ON DELETE CASCADE,
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE RESTRICT,
+  -- Thời gian
+  pickup_time TIMESTAMP NOT NULL, -- Thời gian nhận xe
+  return_time TIMESTAMP NOT NULL, -- Thời gian trả xe dự kiến
+  actual_pickup_time TIMESTAMP, -- Thời gian nhận xe thực tế
+  actual_return_time TIMESTAMP, -- Thời gian trả xe thực tế
+  -- Địa điểm
+  pickup_location VARCHAR(200), -- Địa điểm nhận xe
+  pickup_lat DECIMAL(10, 8),
+  pickup_lon DECIMAL(11, 8),
+  return_location VARCHAR(200), -- Địa điểm trả xe
+  return_lat DECIMAL(10, 8),
+  return_lon DECIMAL(11, 8),
+  -- Giá cả
+  rental_days INT, -- Số ngày thuê
+  rental_hours INT, -- Số giờ thuê (nếu < 1 ngày)
+  daily_rate DECIMAL(10, 2), -- Giá mỗi ngày tại thời điểm đặt
+  hourly_rate DECIMAL(10, 2), -- Giá mỗi giờ (nếu có)
+  subtotal DECIMAL(10, 2), -- Tổng tiền thuê
+  discount_amount DECIMAL(10, 2) DEFAULT 0, -- Giảm giá
+  deposit_amount DECIMAL(10, 2), -- Tiền cọc
+  total_amount DECIMAL(10, 2), -- Tổng cộng
+  -- Trạng thái
+  status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'
+  cancellation_reason TEXT, -- Lý do hủy
+  cancelled_by INT REFERENCES users(id), -- Ai hủy (customer hoặc admin)
+  cancelled_at TIMESTAMP,
+  -- Ghi chú
+  special_requests TEXT, -- Yêu cầu đặc biệt từ khách hàng
+  admin_notes TEXT, -- Ghi chú của admin
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_bookings_customer_id ON bookings(customer_id);
+CREATE INDEX idx_bookings_vehicle_id ON bookings(vehicle_id);
+CREATE INDEX idx_bookings_status ON bookings(status);
+CREATE INDEX idx_bookings_pickup_time ON bookings(pickup_time);
+CREATE INDEX idx_bookings_booking_number ON bookings(booking_number);
+CREATE INDEX idx_bookings_vehicle_pickup ON bookings(vehicle_id, pickup_time, return_time) WHERE status IN ('confirmed', 'in_progress');
+
+-- [Phase 2] Hợp đồng thuê xe
+CREATE TABLE rental_contracts (
+  id SERIAL PRIMARY KEY,
+  booking_id INT REFERENCES bookings(id) ON DELETE CASCADE,
+  contract_number VARCHAR(50) UNIQUE NOT NULL, -- Số hợp đồng
+  -- Thông tin hợp đồng
+  start_date TIMESTAMP NOT NULL,
+  end_date TIMESTAMP NOT NULL,
+  terms_and_conditions TEXT, -- Điều khoản và điều kiện
+  -- Giấy tờ
+  customer_id_card_image_url VARCHAR(500), -- Ảnh CMND/CCCD
+  customer_license_image_url VARCHAR(500), -- Ảnh bằng lái
+  contract_document_url VARCHAR(500), -- File hợp đồng đã ký
+  -- Trạng thái
+  status VARCHAR(20) DEFAULT 'draft', -- 'draft', 'signed', 'active', 'completed', 'terminated'
+  signed_at TIMESTAMP, -- Thời gian ký hợp đồng
+  signed_by_customer BOOLEAN DEFAULT FALSE,
+  signed_by_admin INT REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_rental_contracts_booking_id ON rental_contracts(booking_id);
+CREATE INDEX idx_rental_contracts_status ON rental_contracts(status);
+CREATE INDEX idx_rental_contracts_contract_number ON rental_contracts(contract_number);
+
+-- ============================================================================
+-- IX.3.5 Payments [Phase 2]
+-- ============================================================================
+
+-- [Phase 2] Quản lý thanh toán
+CREATE TABLE payments (
+  id SERIAL PRIMARY KEY,
+  booking_id INT REFERENCES bookings(id) ON DELETE CASCADE,
+  payment_number VARCHAR(50) UNIQUE NOT NULL, -- Mã thanh toán
+  payment_type VARCHAR(20) NOT NULL, -- 'deposit', 'rental_fee', 'additional_fee', 'refund', 'penalty'
+  amount DECIMAL(10, 2) NOT NULL,
+  payment_method VARCHAR(50), -- 'cash', 'bank_transfer', 'credit_card', 'debit_card', 'e_wallet'
+  payment_status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'completed', 'failed', 'refunded'
+  transaction_id VARCHAR(100), -- Mã giao dịch từ payment gateway
+  payment_date TIMESTAMP,
+  notes TEXT,
+  processed_by INT REFERENCES users(id), -- Nhân viên xử lý
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_payments_booking_id ON payments(booking_id);
+CREATE INDEX idx_payments_status ON payments(payment_status);
+CREATE INDEX idx_payments_payment_number ON payments(payment_number);
+CREATE INDEX idx_payments_payment_date ON payments(payment_date DESC);
+
+-- ============================================================================
+-- IX.3.6 Trips & Rental Journeys
+-- ============================================================================
+
+-- Chuyến đi (Phase 1: không liên kết booking, Phase 2: liên kết booking)
+CREATE TABLE trips (
+  id SERIAL PRIMARY KEY,
+  booking_id INT REFERENCES bookings(id) ON DELETE CASCADE, -- [Phase 2] Liên kết với booking
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
+  customer_id INT REFERENCES customers(id) ON DELETE SET NULL,
+  trip_id VARCHAR(50) UNIQUE NOT NULL, -- UUID hoặc mã chuyến đi
+  start_time TIMESTAMP NOT NULL, -- Bắt đầu từ khi nhận xe
+  end_time TIMESTAMP, -- Kết thúc khi trả xe
+  start_location_lat DECIMAL(10, 8),
+  start_location_lon DECIMAL(11, 8),
+  end_location_lat DECIMAL(10, 8),
+  end_location_lon DECIMAL(11, 8),
+  distance_km DECIMAL(10, 2), -- Tổng quãng đường (km) trong thời gian thuê
+  duration_minutes INT, -- Thời gian di chuyển (phút)
+  max_speed DECIMAL(5, 2), -- Tốc độ tối đa (km/h)
+  avg_speed DECIMAL(5, 2), -- Tốc độ trung bình (km/h)
+  mileage_at_start INT, -- Số km khi nhận xe
+  mileage_at_end INT, -- Số km khi trả xe
+  status VARCHAR(20) DEFAULT 'in_progress', -- 'in_progress', 'completed', 'cancelled'
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_trips_booking_id ON trips(booking_id); -- [Phase 2]
+CREATE INDEX idx_trips_vehicle_id ON trips(vehicle_id);
+CREATE INDEX idx_trips_customer_id ON trips(customer_id);
+CREATE INDEX idx_trips_start_time ON trips(start_time DESC);
+CREATE INDEX idx_trips_status ON trips(status);
+
+CREATE TABLE trip_events (
+  id SERIAL PRIMARY KEY,
+  trip_id INT REFERENCES trips(id) ON DELETE CASCADE,
+  event_type VARCHAR(50) NOT NULL, -- 'ignition_on', 'ignition_off', 'speeding', 'idle', 'stop'
+  event_time TIMESTAMP NOT NULL,
+  location_lat DECIMAL(10, 8),
+  location_lon DECIMAL(11, 8),
+  speed DECIMAL(5, 2),
+  description TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_trip_events_trip_id ON trip_events(trip_id);
+CREATE INDEX idx_trip_events_event_time ON trip_events(event_time DESC);
+
+-- ============================================================================
+-- IX.3.7 Damage Reports [Phase 2]
+-- ============================================================================
+
+-- [Phase 2] Báo cáo hư hỏng khi nhận/trả xe
+CREATE TABLE damage_reports (
+  id SERIAL PRIMARY KEY,
+  booking_id INT REFERENCES bookings(id) ON DELETE CASCADE,
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
+  report_type VARCHAR(50) NOT NULL, -- 'pickup', 'return', 'during_rental'
+  damage_description TEXT NOT NULL,
+  damage_location VARCHAR(200), -- Vị trí hư hỏng trên xe
+  damage_images JSONB, -- URLs của ảnh hư hỏng
+  estimated_repair_cost DECIMAL(10, 2),
+  actual_repair_cost DECIMAL(10, 2),
+  reported_by INT REFERENCES users(id), -- Nhân viên hoặc customer
+  reported_at TIMESTAMP DEFAULT NOW(),
+  status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'inspected', 'repaired', 'waived'
+  inspected_by INT REFERENCES users(id),
+  inspected_at TIMESTAMP,
+  repair_completed_at TIMESTAMP,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_damage_reports_booking_id ON damage_reports(booking_id);
+CREATE INDEX idx_damage_reports_vehicle_id ON damage_reports(vehicle_id);
+CREATE INDEX idx_damage_reports_status ON damage_reports(status);
+
+-- ============================================================================
+-- IX.3.8 Reviews & Ratings [Phase 2]
+-- ============================================================================
+
+-- [Phase 2] Đánh giá từ khách hàng
+CREATE TABLE reviews (
+  id SERIAL PRIMARY KEY,
+  booking_id INT REFERENCES bookings(id) ON DELETE CASCADE,
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
+  customer_id INT REFERENCES customers(id) ON DELETE SET NULL,
+  -- Đánh giá xe
+  vehicle_rating INT CHECK (vehicle_rating >= 1 AND vehicle_rating <= 5),
+  vehicle_comment TEXT,
+  -- Đánh giá dịch vụ
+  service_rating INT CHECK (service_rating >= 1 AND service_rating <= 5),
+  service_comment TEXT,
+  -- Tổng đánh giá
+  overall_rating DECIMAL(3, 2), -- Trung bình của vehicle_rating và service_rating
+  is_public BOOLEAN DEFAULT TRUE, -- Có hiển thị công khai không
+  status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+  moderated_by INT REFERENCES users(id),
+  moderated_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_reviews_booking_id ON reviews(booking_id);
+CREATE INDEX idx_reviews_vehicle_id ON reviews(vehicle_id);
+CREATE INDEX idx_reviews_customer_id ON reviews(customer_id);
+CREATE INDEX idx_reviews_overall_rating ON reviews(overall_rating DESC);
+CREATE INDEX idx_reviews_is_public ON reviews(is_public) WHERE is_public = TRUE;
+
+-- ============================================================================
+-- IX.3.9 Alerts & Notifications
+-- ============================================================================
+
+CREATE TABLE alerts (
+  id SERIAL PRIMARY KEY,
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
+  booking_id INT REFERENCES bookings(id) ON DELETE SET NULL, -- [Phase 2] Liên kết với booking nếu đang thuê
+  device_id INT REFERENCES devices(id) ON DELETE SET NULL,
+  alert_type VARCHAR(50) NOT NULL, -- 'motion_detected', 'low_battery', 'geofence_exit', 'speeding', 'ignition_on', 'unauthorized_movement', etc.
+  severity VARCHAR(20) DEFAULT 'medium', -- 'low', 'medium', 'high', 'critical'
+  title VARCHAR(200),
+  message TEXT,
+  location_lat DECIMAL(10, 8),
+  location_lon DECIMAL(11, 8),
+  acknowledged BOOLEAN DEFAULT FALSE,
+  acknowledged_at TIMESTAMP,
+  acknowledged_by INT REFERENCES users(id),
+  resolved BOOLEAN DEFAULT FALSE,
+  resolved_at TIMESTAMP,
+  resolved_by INT REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_alerts_vehicle_id ON alerts(vehicle_id);
+CREATE INDEX idx_alerts_booking_id ON alerts(booking_id); -- [Phase 2]
+CREATE INDEX idx_alerts_device_id ON alerts(device_id);
+CREATE INDEX idx_alerts_type ON alerts(alert_type);
+CREATE INDEX idx_alerts_severity ON alerts(severity);
+CREATE INDEX idx_alerts_acknowledged ON alerts(acknowledged);
+CREATE INDEX idx_alerts_created_at ON alerts(created_at DESC);
+
+CREATE TABLE alert_rules (
+  id SERIAL PRIMARY KEY,
+  rule_name VARCHAR(100) NOT NULL,
+  rule_type VARCHAR(50) NOT NULL, -- 'speed_limit', 'geofence', 'battery_level', etc.
+  conditions JSONB NOT NULL, -- Điều kiện kích hoạt alert
+  severity VARCHAR(20) DEFAULT 'medium',
+  enabled BOOLEAN DEFAULT TRUE,
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE, -- NULL = áp dụng cho tất cả
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_alert_rules_vehicle_id ON alert_rules(vehicle_id);
+CREATE INDEX idx_alert_rules_enabled ON alert_rules(enabled);
+
+-- ============================================================================
+-- IX.3.10 Geofences
+-- ============================================================================
+
+CREATE TABLE geofences (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  geofence_type VARCHAR(20) DEFAULT 'circle', -- 'circle', 'polygon', 'rectangle'
+  center_lat DECIMAL(10, 8),
+  center_lon DECIMAL(11, 8),
+  radius_meters INT, -- Cho circle
+  coordinates JSONB, -- Cho polygon: [[lat, lon], [lat, lon], ...]
+  alert_on_entry BOOLEAN DEFAULT FALSE,
+  alert_on_exit BOOLEAN DEFAULT TRUE,
+  enabled BOOLEAN DEFAULT TRUE,
+  created_by INT REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_geofences_enabled ON geofences(enabled);
+
+CREATE TABLE vehicle_geofences (
+  id SERIAL PRIMARY KEY,
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
+  geofence_id INT REFERENCES geofences(id) ON DELETE CASCADE,
+  assigned_at TIMESTAMP DEFAULT NOW(),
+  is_active BOOLEAN DEFAULT TRUE,
+  UNIQUE(vehicle_id, geofence_id, is_active) WHERE is_active = TRUE
+);
+
+CREATE INDEX idx_vehicle_geofences_vehicle ON vehicle_geofences(vehicle_id);
+CREATE INDEX idx_vehicle_geofences_geofence ON vehicle_geofences(geofence_id);
+
+-- ============================================================================
+-- IX.3.11 Commands & Device Control
+-- ============================================================================
+
+CREATE TABLE commands (
+  id SERIAL PRIMARY KEY,
+  device_id INT REFERENCES devices(id) ON DELETE CASCADE,
+  command_type VARCHAR(50) NOT NULL, -- 'update_config', 'request_location', 'enable_tracking', etc.
+  command_data JSONB, -- Parameters của command
+  status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'sent', 'acknowledged', 'failed'
+  sent_at TIMESTAMP,
+  acknowledged_at TIMESTAMP,
+  response_data JSONB, -- Response từ device
+  created_by INT REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_commands_device_id ON commands(device_id);
+CREATE INDEX idx_commands_status ON commands(status);
+CREATE INDEX idx_commands_created_at ON commands(created_at DESC);
+
+-- ============================================================================
+-- IX.3.12 Maintenance
+-- ============================================================================
+
+CREATE TABLE maintenance_records (
+  id SERIAL PRIMARY KEY,
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
+  maintenance_type VARCHAR(50), -- 'oil_change', 'tire_replacement', 'battery_check', etc.
+  description TEXT,
+  cost DECIMAL(10, 2),
+  mileage_km INT, -- Số km khi bảo trì
+  performed_by VARCHAR(100), -- Tên người/kỹ thuật viên
+  next_maintenance_date DATE,
+  next_maintenance_mileage INT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_maintenance_vehicle_id ON maintenance_records(vehicle_id);
+CREATE INDEX idx_maintenance_next_date ON maintenance_records(next_maintenance_date);
+
+-- ============================================================================
+-- IX.3.13 Logs & Audit
+-- ============================================================================
+
+CREATE TABLE connection_logs (
+  id SERIAL PRIMARY KEY,
+  device_id INT REFERENCES devices(id) ON DELETE CASCADE,
+  connection_type VARCHAR(20), -- 'mqtt', 'http', 'websocket'
+  status VARCHAR(20), -- 'connected', 'disconnected', 'failed'
+  ip_address VARCHAR(45),
+  message TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_connection_logs_device_id ON connection_logs(device_id);
+CREATE INDEX idx_connection_logs_created_at ON connection_logs(created_at DESC);
+
+CREATE TABLE user_actions (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE SET NULL,
+  action_type VARCHAR(50) NOT NULL, -- 'login', 'logout', 'create_vehicle', 'update_config', etc.
+  resource_type VARCHAR(50), -- 'vehicle', 'device', 'alert', etc.
+  resource_id INT,
+  details JSONB, -- Chi tiết hành động
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_user_actions_user_id ON user_actions(user_id);
+CREATE INDEX idx_user_actions_action_type ON user_actions(action_type);
+CREATE INDEX idx_user_actions_created_at ON user_actions(created_at DESC);
+
+-- ============================================================================
+-- XII. Notifications & Integrations
+-- ============================================================================
+
+-- Notification Preferences
+CREATE TABLE notification_preferences (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  -- Telegram
+  telegram_enabled BOOLEAN DEFAULT FALSE,
+  telegram_chat_id VARCHAR(50),
+  telegram_verified BOOLEAN DEFAULT FALSE,
+  -- Email
+  email_enabled BOOLEAN DEFAULT TRUE,
+  email_address VARCHAR(100),
+  -- Loại cảnh báo muốn nhận
+  alert_types JSONB DEFAULT '["motion_detected", "speeding", "low_battery", "geofence_exit"]'::jsonb,
+  -- Severity filter
+  min_severity VARCHAR(20) DEFAULT 'low', -- 'low', 'medium', 'high', 'critical'
+  -- Vehicle filter (NULL = tất cả xe)
+  vehicle_ids INT[], -- Array of vehicle IDs
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(user_id)
+);
+
+CREATE INDEX idx_notification_preferences_user_id ON notification_preferences(user_id);
+CREATE INDEX idx_notification_preferences_telegram_enabled ON notification_preferences(telegram_enabled) WHERE telegram_enabled = TRUE;
+CREATE INDEX idx_notification_preferences_email_enabled ON notification_preferences(email_enabled) WHERE email_enabled = TRUE;
+
+-- Notification Logs (để tracking và debug)
+CREATE TABLE notification_logs (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE SET NULL,
+  notification_type VARCHAR(50) NOT NULL, -- 'alert', 'violation', 'system'
+  channel VARCHAR(20) NOT NULL, -- 'telegram', 'email', 'sms'
+  recipient VARCHAR(255) NOT NULL, -- chat_id hoặc email
+  subject VARCHAR(200),
+  message TEXT,
+  status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'sent', 'failed'
+  error_message TEXT,
+  sent_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_notification_logs_user_id ON notification_logs(user_id);
+CREATE INDEX idx_notification_logs_status ON notification_logs(status);
+CREATE INDEX idx_notification_logs_created_at ON notification_logs(created_at DESC);
+
+-- ============================================================================
+-- IX.3.14 Stops & Idle Time
+-- ============================================================================
+
+CREATE TABLE stops (
+  id SERIAL PRIMARY KEY,
+  trip_id INT REFERENCES trips(id) ON DELETE CASCADE,
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
+  stop_type VARCHAR(20) DEFAULT 'unknown', -- 'parking', 'fuel', 'rest', 'delivery', 'unknown'
+  arrival_time TIMESTAMP NOT NULL,
+  departure_time TIMESTAMP,
+  location_lat DECIMAL(10, 8),
+  location_lon DECIMAL(11, 8),
+  address TEXT, -- Địa chỉ từ reverse geocoding
+  duration_minutes INT, -- Thời gian dừng (phút)
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_stops_trip_id ON stops(trip_id);
+CREATE INDEX idx_stops_vehicle_id ON stops(vehicle_id);
+CREATE INDEX idx_stops_arrival_time ON stops(arrival_time DESC);
+
+-- ============================================================================
+-- IX.3.15 Violations & Speeding Events
+-- ============================================================================
+
+CREATE TABLE violations (
+  id SERIAL PRIMARY KEY,
+  booking_id INT REFERENCES bookings(id) ON DELETE SET NULL, -- [Phase 2] Liên kết với booking
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
+  trip_id INT REFERENCES trips(id) ON DELETE SET NULL,
+  customer_id INT REFERENCES customers(id) ON DELETE SET NULL,
+  violation_type VARCHAR(50) NOT NULL, -- 'speeding', 'hard_braking', 'hard_acceleration', 'idle_too_long', 'geofence_violation', 'unauthorized_area'
+  severity VARCHAR(20) DEFAULT 'medium', -- 'low', 'medium', 'high', 'critical'
+  speed_limit DECIMAL(5, 2), -- Giới hạn tốc độ (nếu speeding)
+  actual_speed DECIMAL(5, 2), -- Tốc độ thực tế
+  location_lat DECIMAL(10, 8),
+  location_lon DECIMAL(11, 8),
+  violation_time TIMESTAMP NOT NULL,
+  description TEXT,
+  fine_amount DECIMAL(10, 2) DEFAULT 0, -- Tiền phạt (nếu có)
+  acknowledged BOOLEAN DEFAULT FALSE,
+  acknowledged_by INT REFERENCES users(id),
+  acknowledged_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_violations_booking_id ON violations(booking_id); -- [Phase 2]
+CREATE INDEX idx_violations_vehicle_id ON violations(vehicle_id);
+CREATE INDEX idx_violations_trip_id ON violations(trip_id);
+CREATE INDEX idx_violations_customer_id ON violations(customer_id);
+CREATE INDEX idx_violations_type ON violations(violation_type);
+CREATE INDEX idx_violations_violation_time ON violations(violation_time DESC);
+
+-- ============================================================================
+-- IX.3.16 Fuel Management
+-- ============================================================================
+
+CREATE TABLE fuel_records (
+  id SERIAL PRIMARY KEY,
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
+  fuel_type VARCHAR(20) DEFAULT 'gasoline', -- 'gasoline', 'diesel', 'electric', etc.
+  quantity_liters DECIMAL(10, 2), -- Số lít
+  cost DECIMAL(10, 2), -- Chi phí
+  price_per_liter DECIMAL(8, 2), -- Giá mỗi lít
+  odometer_km INT, -- Số km khi đổ nhiên liệu
+  location_lat DECIMAL(10, 8),
+  location_lon DECIMAL(11, 8),
+  station_name VARCHAR(200), -- Tên trạm xăng
+  recorded_by INT REFERENCES users(id),
+  recorded_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_fuel_records_vehicle_id ON fuel_records(vehicle_id);
+CREATE INDEX idx_fuel_records_recorded_at ON fuel_records(recorded_at DESC);
+
+-- ============================================================================
+-- IX.3.17 Notifications (System Notifications)
+-- ============================================================================
+
+CREATE TABLE notifications (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  notification_type VARCHAR(50) NOT NULL, -- 'alert', 'system', 'maintenance', 'violation'
+  title VARCHAR(200) NOT NULL,
+  message TEXT NOT NULL,
+  related_resource_type VARCHAR(50), -- 'vehicle', 'alert', 'trip', etc.
+  related_resource_id INT,
+  read BOOLEAN DEFAULT FALSE,
+  read_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_notifications_read ON notifications(read);
+CREATE INDEX idx_notifications_created_at ON notifications(created_at DESC);
+CREATE INDEX idx_notifications_user_unread ON notifications(user_id, read) WHERE read = FALSE;
+
+-- ============================================================================
+-- IX.3.18 Routes & Planned Routes (Optional)
+-- ============================================================================
+
+CREATE TABLE routes (
+  id SERIAL PRIMARY KEY,
+  route_name VARCHAR(100) NOT NULL,
+  description TEXT,
+  start_location_lat DECIMAL(10, 8),
+  start_location_lon DECIMAL(11, 8),
+  end_location_lat DECIMAL(10, 8),
+  end_location_lon DECIMAL(11, 8),
+  waypoints JSONB, -- [[lat, lon], [lat, lon], ...]
+  estimated_distance_km DECIMAL(10, 2),
+  estimated_duration_minutes INT,
+  created_by INT REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_routes_created_by ON routes(created_by);
+
+CREATE TABLE route_assignments (
+  id SERIAL PRIMARY KEY,
+  route_id INT REFERENCES routes(id) ON DELETE CASCADE,
+  vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
+  customer_id INT REFERENCES customers(id) ON DELETE SET NULL, -- Thay driver_id bằng customer_id
+  scheduled_start_time TIMESTAMP,
+  scheduled_end_time TIMESTAMP,
+  status VARCHAR(20) DEFAULT 'scheduled', -- 'scheduled', 'in_progress', 'completed', 'cancelled'
+  assigned_by INT REFERENCES users(id),
+  assigned_at TIMESTAMP DEFAULT NOW(),
+  completed_at TIMESTAMP
+);
+
+CREATE INDEX idx_route_assignments_route_id ON route_assignments(route_id);
+CREATE INDEX idx_route_assignments_vehicle_id ON route_assignments(vehicle_id);
+CREATE INDEX idx_route_assignments_status ON route_assignments(status);
+
+-- ============================================================================
+-- IX.3.19 Device Status History
+-- ============================================================================
+
+CREATE TABLE device_status_history (
+  id SERIAL PRIMARY KEY,
+  device_id INT REFERENCES devices(id) ON DELETE CASCADE,
+  old_status VARCHAR(20),
+  new_status VARCHAR(20) NOT NULL,
+  reason TEXT, -- Lý do thay đổi trạng thái
+  changed_by INT REFERENCES users(id), -- NULL nếu tự động
+  changed_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_device_status_history_device_id ON device_status_history(device_id);
+CREATE INDEX idx_device_status_history_changed_at ON device_status_history(changed_at DESC);
+
+-- ============================================================================
+-- IX.3.20 Soft Delete Support (Optional)
+-- ============================================================================
+
+-- Có thể thêm soft delete cho các bảng quan trọng:
+-- ALTER TABLE vehicles ADD COLUMN deleted_at TIMESTAMP NULL;
+-- CREATE INDEX idx_vehicles_deleted_at ON vehicles(deleted_at) WHERE deleted_at IS NULL;
+-- 
+-- ALTER TABLE customers ADD COLUMN deleted_at TIMESTAMP NULL;
+-- CREATE INDEX idx_customers_deleted_at ON customers(deleted_at) WHERE deleted_at IS NULL;
+-- 
+-- ALTER TABLE bookings ADD COLUMN deleted_at TIMESTAMP NULL; -- [Phase 2]
+-- CREATE INDEX idx_bookings_deleted_at ON bookings(deleted_at) WHERE deleted_at IS NULL;
+-- 
+-- ALTER TABLE devices ADD COLUMN deleted_at TIMESTAMP NULL;
+-- CREATE INDEX idx_devices_deleted_at ON devices(deleted_at) WHERE deleted_at IS NULL;
+-- 
+-- ALTER TABLE users ADD COLUMN deleted_at TIMESTAMP NULL;
+-- CREATE INDEX idx_users_deleted_at ON users(deleted_at) WHERE deleted_at IS NULL;
+
+-- ============================================================================
+-- Triggers cho Auto-Update updated_at
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_vehicles_updated_at BEFORE UPDATE ON vehicles
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_devices_updated_at BEFORE UPDATE ON devices
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_customers_updated_at BEFORE UPDATE ON customers
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_bookings_updated_at BEFORE UPDATE ON bookings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_rental_contracts_updated_at BEFORE UPDATE ON rental_contracts
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_alert_rules_updated_at BEFORE UPDATE ON alert_rules
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_geofences_updated_at BEFORE UPDATE ON geofences
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_maintenance_records_updated_at BEFORE UPDATE ON maintenance_records
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_routes_updated_at BEFORE UPDATE ON routes
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_damage_reports_updated_at BEFORE UPDATE ON damage_reports
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_notification_preferences_updated_at BEFORE UPDATE ON notification_preferences
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================================
+-- Composite Indexes cho Performance Optimization
+-- ============================================================================
+
+-- Cho queries: Lấy alerts chưa acknowledge của một vehicle
+CREATE INDEX idx_alerts_vehicle_unacknowledged ON alerts(vehicle_id, acknowledged, created_at DESC)
+  WHERE acknowledged = FALSE;
+
+-- Cho queries: Lấy trips đang diễn ra của một vehicle
+CREATE INDEX idx_trips_vehicle_active ON trips(vehicle_id, status, start_time DESC)
+  WHERE status = 'in_progress';
+
+-- Cho queries: Lấy violations của một vehicle trong khoảng thời gian
+CREATE INDEX idx_violations_vehicle_time ON violations(vehicle_id, violation_time DESC);
+
+-- Cho queries: Lấy notifications chưa đọc của user
+CREATE INDEX idx_notifications_user_unread ON notifications(user_id, read, created_at DESC)
+  WHERE read = FALSE;
+
+-- ============================================================================
+-- END OF SCHEMA
+-- ============================================================================
+

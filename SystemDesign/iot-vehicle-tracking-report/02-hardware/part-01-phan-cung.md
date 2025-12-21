@@ -209,6 +209,10 @@ Mặc dù **STM32L4 có ưu thế về tiêu thụ năng lượng** (1–3 μA v
 - **Ngắt kết nối Bluetooth** trước khi deep sleep
 - ESP32 deep sleep → tiết kiệm năng lượng
 - **Không cần kết nối Bluetooth** khi đỗ (không đọc OBD2)
+- **Chỉ cần IMU (LIS3DH)** để phát hiện chuyển động:
+  - IMU đủ để phát hiện rung, kéo, cẩu xe
+  - Không cần OBD2 để phát hiện chuyển động vật lý
+  - Tiết kiệm năng lượng đáng kể (~7,000 lần so với giữ Bluetooth)
 
 **4. Xử Lý Lỗi Kết Nối:**
 
@@ -221,6 +225,7 @@ Mặc dù **STM32L4 có ưu thế về tiêu thụ năng lượng** (1–3 μA v
 
 - **Lưu MAC address**: Lưu MAC của ELM327 vào flash → reconnect nhanh hơn
 - **Chỉ kết nối khi cần**: Chỉ kết nối khi IGN ON, không giữ kết nối khi đỗ
+- **Không cần OBD2 khi đỗ**: IMU đủ để phát hiện chuyển động → tiết kiệm năng lượng
 - **Đọc batch**: Đọc nhiều thông số cùng lúc (IGN, RPM, tốc độ) → giảm số lần giao tiếp
 - **Cache dữ liệu**: Lưu dữ liệu OBD2 vào RAM → có thể dùng khi mất kết nối tạm thời
 
@@ -236,8 +241,17 @@ Mặc dù **STM32L4 có ưu thế về tiêu thụ năng lượng** (1–3 μA v
 - **Deep sleep sẽ ngắt Bluetooth** → cần reconnect mỗi lần wake up
 - **Thời gian reconnect: 2–5 giây** (chấp nhận được)
 - **Chiến lược**: Chỉ kết nối khi IGN ON, không cần kết nối khi đỗ
+- **IMU đủ để phát hiện chuyển động**: Không cần OBD2 khi đỗ → tiết kiệm năng lượng
 - **Fallback**: Đo điện áp nếu không kết nối được OBD2
 - **Thiết kế hợp lý**: Tracker giấu + OBD2 adapter riêng → bảo mật và linh hoạt
+
+**Bảng Tóm Tắt Khi Nào Cần Bluetooth OBD2:**
+
+| Trạng Thái          | Cần Bluetooth?  | Lý Do                                                        |
+| ------------------- | --------------- | ------------------------------------------------------------ |
+| **IGN ON (Lái xe)** | ✅ **Có**       | Đọc dữ liệu OBD2 (RPM, tốc độ, nhiên liệu)                   |
+| **IGN OFF (Đỗ xe)** | ❌ **Không**    | Không cần dữ liệu OBD2, chỉ cần IMU để phát hiện chuyển động |
+| **Motion Detected** | ⚠️ **Tùy chọn** | Có thể kết nối để xác nhận IGN, hoặc chỉ dùng IMU + GPS      |
 
 #### III.1.5 Modem 4G/LTE + GNSS: **SIMCom A7600CE‑T**
 
@@ -363,6 +377,437 @@ Mặc dù **STM32L4 có ưu thế về tiêu thụ năng lượng** (1–3 μA v
 - **Module sẵn có**: Không cần thiết kế PCB riêng, tiết kiệm thời gian
 - **Type-C**: Dễ sử dụng, hiện đại
 - **Tích hợp bảo vệ**: Bảo vệ quá dòng, quá nhiệt tự động
+
+#### III.1.10 Thiết Kế Mạch Chuyển Đổi Nguồn (Power Path Management)
+
+**Yêu Cầu:**
+
+- Chuyển đổi tự động giữa ắc quy (12V) và pin backup (3.7V)
+- Điều khiển sạc pin theo trạng thái IGN
+- Low Voltage Disconnect (LVD) khi ắc quy < 12V
+- Hysteresis để tránh dao động (12.0V OFF → 12.2V ON)
+
+**Giải Pháp: Module + MOSFET (Giải Pháp A)**
+
+**1. Power Path Management: MOSFET + Diode OR**
+
+**Thành Phần:**
+
+- **Q1, Q2**: IRF9540N (P-MOSFET, Vds = -100V, Id = -19A)
+- **D1, D2**: 1N5822 (Schottky Diode, 3A, 40V) - backup
+- **Gate Driver**: 2N7002 (N-MOSFET) hoặc transistor để điều khiển
+
+**Nguyên Lý:**
+
+- Q1 điều khiển nguồn từ ắc quy (Buck output)
+- Q2 điều khiển nguồn từ pin (Boost output)
+- ESP32 GPIO điều khiển gate Q1, Q2
+- Diode OR (D1, D2) làm backup nếu MOSFET lỗi
+- Logic: Ưu tiên ắc quy, tự động chuyển sang pin khi ắc quy mất
+
+**Sơ Đồ Kết Nối:**
+
+```
+Ắc Quy (12V) ── Buck (12V→5V) ──┬── Q1 (P-MOS) ──┬── 5V Rail
+                                  │                │
+                                  └── Gate Control │
+                                                   │
+Pin (3.7V) ─── Boost (3.7V→5V) ──┬── Q2 (P-MOS) ──┘
+                                  │
+                                  └── Gate Control
+
+Diode OR Backup:
+D1 (Schottky) từ Buck ──┬── 5V Rail
+D2 (Schottky) từ Boost ─┘
+```
+
+**Lợi Ích:**
+
+- ✅ **Dễ mua ở VN**: MOSFET và diode phổ biến, dễ tìm
+- ✅ **Giá rẻ**: ~10,000–15,000 VNĐ cho MOSFET + diode
+- ✅ **Đơn giản**: Dễ hiểu, dễ debug
+- ✅ **Linh hoạt**: Có thể điều khiển bằng firmware
+
+**Nhược Điểm:**
+
+- ⚠️ **Cần firmware**: Cần logic điều khiển trong ESP32
+- ⚠️ **Tổn hao**: MOSFET có Rds(on) ~0.2Ω → tổn hao nhỏ
+- ⚠️ **Cần gate driver**: Có thể cần transistor để điều khiển P-MOS
+
+**2. Buck Converter: IC LM2596 + Linh Kiện Phụ Trợ**
+
+**IC: LM2596-5.0 (Fixed 5V Output) hoặc LM2596-ADJ (Adjustable)**
+
+**Đặc Tính:**
+
+- **Input**: 7–40 V
+- **Output**: 5 V @ 3 A (fixed) hoặc 1.23–37 V (adjustable)
+- **Hiệu suất**: ~85%
+- **Package**: TO-220-5 hoặc DDPAK
+- **Giá IC**: ~5,000–10,000 VNĐ
+
+**Linh Kiện Phụ Trợ:**
+
+- **Inductor**: 100 µH, 3–5 A (L1) - ~10,000–15,000 VNĐ
+- **Input Capacitor**: 100 µF, 50 V (C1) - ~3,000 VNĐ
+- **Output Capacitor**: 220 µF, 16 V (C2) - ~3,000 VNĐ
+- **Diode**: 1N5822 (Schottky, 3A, 40V) - ~2,000 VNĐ
+- **Feedback Resistor**: R1 = 1 kΩ, R2 = 3.3 kΩ (nếu dùng ADJ) - ~1,000 VNĐ
+- **Bootstrap Capacitor**: 10 µF, 16 V (C3) - ~1,000 VNĐ
+
+**Lý Do Chọn:**
+
+- ✅ **Phổ biến ở VN**: IC và linh kiện dễ mua
+- ✅ **Thiết kế PCB**: Có thể tích hợp vào PCB tự vẽ
+- ✅ **Giá rẻ**: IC ~5,000–10,000 VNĐ + linh kiện ~20,000 VNĐ
+- ✅ **Đủ công suất**: 3A đủ cho tracker + sạc pin
+- ✅ **Kích thước nhỏ**: Tích hợp vào PCB → gọn hơn module
+
+**3. Boost Converter: IC MT3608 + Linh Kiện Phụ Trợ**
+
+**IC: MT3608 (Step-Up Converter)**
+
+**Đặc Tính:**
+
+- **Input**: 2–24 V
+- **Output**: 5–28 V (adjustable) @ 2 A
+- **Hiệu suất**: ~85%
+- **Package**: SOT23-6 hoặc SOP-8
+- **Giá IC**: ~3,000–8,000 VNĐ
+
+**Linh Kiện Phụ Trợ:**
+
+- **Inductor**: 22 µH, 2–3 A (L1) - ~8,000–12,000 VNĐ
+- **Input Capacitor**: 100 µF, 16 V (C1) - ~2,000 VNĐ
+- **Output Capacitor**: 220 µF, 16 V (C2) - ~3,000 VNĐ
+- **Feedback Resistor**: R1 = 10 kΩ, R2 = 10 kΩ (cho 5V output) - ~1,000 VNĐ
+- **Bootstrap Capacitor**: 10 µF, 16 V (C3) - ~1,000 VNĐ
+
+**Lý Do Chọn:**
+
+- ✅ **Phổ biến ở VN**: IC và linh kiện dễ mua
+- ✅ **Thiết kế PCB**: Có thể tích hợp vào PCB tự vẽ
+- ✅ **Giá rẻ**: IC ~3,000–8,000 VNĐ + linh kiện ~15,000 VNĐ
+- ✅ **Đủ công suất**: 2A đủ cho tracker khi dùng pin
+- ✅ **Kích thước nhỏ**: Package SOT23-6 → rất nhỏ gọn
+
+**4. Low Voltage Disconnect (LVD): LM393 Comparator**
+
+**IC: LM393 (Dual Comparator)**
+
+**Đặc Tính:**
+
+- **Chức năng**: So sánh điện áp
+- **Điện áp hoạt động**: 2–36 V
+- **Output**: Open-drain (cần pull-up)
+- **Giá**: ~3,000–8,000 VNĐ
+
+**Sơ Đồ:**
+
+```
+U_batt ── Voltage Divider (R1=10k, R2=2.2k) ── LM393 (-)
+                                                      │
+Reference (TL431, 2.16V) ─────────────────────────── LM393 (+)
+                                                      │
+                                                      └── GPIO ESP32
+```
+
+**Tính Toán:**
+
+- Voltage divider: R1 = 10 kΩ, R2 = 2.2 kΩ
+- V_ref = U_batt × R2/(R1+R2) = U_batt × 0.18
+- Khi U_batt = 12 V → V_ref = 2.16 V
+- Comparator reference: 2.16 V (TL431)
+
+**Hysteresis:**
+
+- R3, R4 feedback để tạo hysteresis
+- 12.0 V (OFF) → 12.2 V (ON)
+- Tránh dao động khi điện áp gần ngưỡng
+
+**5. Charger: IC IP2312 + Linh Kiện Phụ Trợ**
+
+**IC: IP2312 (Injoinic) - Li-ion Charger**
+
+**Đặc Tính:**
+
+- **Input**: 4.5–5.5 V (USB Type-C hoặc 5V từ buck)
+- **Output**: 4.2 V (Li-ion standard)
+- **Dòng sạc**: 3 A (có thể điều chỉnh bằng resistor)
+- **Package**: QFN-16 hoặc SOP-16
+- **Giá IC**: ~10,000–20,000 VNĐ
+
+**Linh Kiện Phụ Trợ:**
+
+- **Input Capacitor**: 10 µF, 10 V (C1) - ~1,000 VNĐ
+- **Output Capacitor**: 22 µF, 10 V (C2) - ~1,000 VNĐ
+- **Charge Current Resistor**: R_ISET = 0.1 Ω (cho 3A) - ~1,000 VNĐ
+- **Enable Resistor**: R_EN = 10 kΩ (pull-up) - ~500 VNĐ
+- **Status LED Resistor**: R_LED = 1 kΩ (nếu dùng LED) - ~500 VNĐ
+
+**Điều Khiển Charger: GPIO ESP32**
+
+**Kết Nối:**
+
+```
+ESP32 GPIO ── R (10kΩ) ── IP2312 EN Pin
+```
+
+**Logic:**
+
+- GPIO HIGH → Charger enabled (sạc pin)
+- GPIO LOW → Charger disabled (không sạc)
+
+**6. Kiến Trúc Tổng Thể**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    NGUỒN ĐẦU VÀO                        │
+├─────────────────────────────────────────────────────────┤
+│   Ắc Quy Xe (12V)          Pin 21700 (3.7V)            │
+│         │                        │                      │
+│    ┌────▼────┐              ┌────▼────┐                │
+│    │ LM2596  │              │ MT3608  │                │
+│    │ IC +    │              │ IC +    │                │
+│    │ Phụ Trợ │              │ Phụ Trợ │                │
+│    │12V→5V   │              │3.7V→5V  │                │
+│    └────┬────┘              └────┬────┘                │
+│         │                        │                      │
+│         └────────┬───────────────┘                      │
+│                  │                                      │
+│         ┌────────▼────────┐                            │
+│         │ MOSFET Switch  │                            │
+│         │ Q1 (Ắc quy)     │                            │
+│         │ Q2 (Pin)        │                            │
+│         │ + Diode OR      │                            │
+│         └────────┬────────┘                            │
+│                  │                                      │
+│         ┌────────▼────────┐                            │
+│         │  5V Rail        │                            │
+│         └────────┬────────┘                            │
+│                  │                                      │
+│    ┌─────────────┼─────────────┐                      │
+│    │             │             │                      │
+│ ┌──▼──┐    ┌─────▼─────┐  ┌───▼───┐                   │
+│ │LDO  │    │  Modem    │  │IP2312 │                   │
+│ │5→3.3│    │  A7600    │  │IC +   │                   │
+│ │IC   │    │           │  │Phụ Trợ│                   │
+│ └──┬──┘    └───────────┘  └───┬───┘                   │
+│    │                           │                        │
+│ ┌──▼──┐                    ┌──▼──┐                    │
+│ │ESP32│                    │Pin  │                    │
+│ └─────┘                    └─────┘                    │
+│                                                         │
+│ ┌──────────────────────────────────────┐               │
+│ │  Điều Khiển (ESP32 GPIO + ADC)      │               │
+│ │  - Đọc IGN (GPIO hoặc OBD2)         │               │
+│ │  - Đọc U_batt (ADC)                 │               │
+│ │  - Điều khiển Q1, Q2 (Power MUX)    │               │
+│ │  - Điều khiển Charger EN            │               │
+│ │  - Đọc LVD Status                   │               │
+│ └──────────────────────────────────────┘               │
+└─────────────────────────────────────────────────────────┘
+```
+
+**7. Logic Điều Khiển**
+
+**Bảng Trạng Thái:**
+
+| IGN | U_batt   | Power MUX (Q1/Q2) | Charger EN | Cảnh Báo |
+| --- | -------- | ----------------- | ---------- | -------- |
+| ON  | > 12 V   | Q1=ON, Q2=OFF     | ✅ HIGH    | -        |
+| OFF | > 12 V   | Q1=ON, Q2=OFF     | ❌ LOW     | -        |
+| OFF | < 12 V   | Q1=OFF, Q2=ON     | ❌ LOW     | ✅ Có    |
+| OFF | > 12.2 V | Q1=ON, Q2=OFF     | ❌ LOW     | ✅ Có    |
+
+**Flowchart:**
+
+```
+START
+  │
+  ├─ Đọc IGN (GPIO hoặc OBD2)
+  │
+  ├─ Đọc U_batt (ADC)
+  │
+  ├─ IGN = ON?
+  │   ├─ YES → Charger_EN = HIGH (sạc pin)
+  │   │         Q1 = ON, Q2 = OFF (dùng ắc quy)
+  │   │         DONE
+  │   │
+  │   └─ NO → Charger_EN = LOW (không sạc)
+  │            │
+  │            ├─ U_batt < 12.0 V?
+  │            │   ├─ YES → Q1 = OFF, Q2 = ON (chuyển sang pin)
+  │            │   │         Gửi cảnh báo
+  │            │   │         DONE
+  │            │   │
+  │            │   └─ NO → U_batt > 12.2 V?
+  │            │            ├─ YES → Q1 = ON, Q2 = OFF (chuyển lại ắc quy)
+  │            │            │         Gửi cảnh báo phục hồi
+  │            │            │         DONE
+  │            │            │
+  │            │            └─ NO → Giữ nguyên trạng thái
+  │            │                      DONE
+```
+
+**8. Lợi Ích Giải Pháp A (IC Rời + MOSFET)**
+
+**Ưu Điểm:**
+
+1. ✅ **Dễ mua ở VN**: IC và linh kiện phụ trợ phổ biến, dễ tìm trên Shopee/Lazada
+2. ✅ **Giá rẻ**: ~60,000–90,000 VNĐ (IC rời rẻ hơn module)
+3. ✅ **Thiết kế PCB**: Có thể tích hợp tất cả vào PCB tự vẽ → gọn gàng, chuyên nghiệp
+4. ✅ **Linh hoạt**: Có thể điều khiển bằng firmware → dễ tùy chỉnh
+5. ✅ **Kích thước nhỏ**: IC rời nhỏ hơn module → PCB gọn hơn
+6. ✅ **Phù hợp sản xuất**: Thiết kế PCB một lần, sản xuất nhiều bản
+
+**Nhược Điểm:**
+
+1. ⚠️ **Cần firmware**: Cần logic điều khiển trong ESP32
+2. ⚠️ **Cần thiết kế PCB**: Phải thiết kế PCB và layout đúng
+3. ⚠️ **Tổn hao nhỏ**: MOSFET có Rds(on) ~0.2Ω → tổn hao ~0.05W
+4. ⚠️ **Cần gate driver**: Có thể cần transistor để điều khiển P-MOS
+5. ⚠️ **Phức tạp hơn**: Cần hiểu datasheet và thiết kế đúng
+
+**9. Danh Sách Linh Kiện Chi Tiết (IC Rời)**
+
+**IC Chính:**
+
+- **LM2596-5.0**: Buck converter IC (TO-220-5) (~5,000–10,000 VNĐ)
+- **MT3608**: Boost converter IC (SOT23-6) (~3,000–8,000 VNĐ)
+- **IP2312**: Charger IC (QFN-16) (~10,000–20,000 VNĐ)
+- **LM393**: Dual comparator (DIP-8 hoặc SOIC-8) (~3,000–8,000 VNĐ)
+- **TL431**: Voltage reference (TO-92 hoặc SOT-23) (~2,000–5,000 VNĐ)
+
+**Linh Kiện Buck Converter (LM2596):**
+
+- **L1**: Inductor 100 µH, 3–5 A (~10,000–15,000 VNĐ)
+- **C1**: Capacitor 100 µF, 50 V (input) (~3,000 VNĐ)
+- **C2**: Capacitor 220 µF, 16 V (output) (~3,000 VNĐ)
+- **D1**: Diode 1N5822 (Schottky, 3A, 40V) (~2,000 VNĐ)
+- **C3**: Capacitor 10 µF, 16 V (bootstrap) (~1,000 VNĐ)
+
+**Linh Kiện Boost Converter (MT3608):**
+
+- **L1**: Inductor 22 µH, 2–3 A (~8,000–12,000 VNĐ)
+- **C1**: Capacitor 100 µF, 16 V (input) (~2,000 VNĐ)
+- **C2**: Capacitor 220 µF, 16 V (output) (~3,000 VNĐ)
+- **R1, R2**: Resistor 10 kΩ (feedback, 2 cái) (~1,000 VNĐ)
+- **C3**: Capacitor 10 µF, 16 V (bootstrap) (~1,000 VNĐ)
+
+**Linh Kiện Charger (IP2312):**
+
+- **C1**: Capacitor 10 µF, 10 V (input) (~1,000 VNĐ)
+- **C2**: Capacitor 22 µF, 10 V (output) (~1,000 VNĐ)
+- **R_ISET**: Resistor 0.1 Ω (charge current) (~1,000 VNĐ)
+- **R_EN**: Resistor 10 kΩ (enable pull-up) (~500 VNĐ)
+- **R_LED**: Resistor 1 kΩ (status LED, optional) (~500 VNĐ)
+
+**Linh Kiện Power Path:**
+
+- **Q1, Q2**: IRF9540N P-MOSFET (2 cái) (~10,000 VNĐ)
+- **D1, D2**: 1N5822 Schottky Diode (2 cái, backup) (~5,000 VNĐ)
+- **Q3, Q4**: 2N7002 N-MOSFET (gate driver, 2 cái) (~3,000 VNĐ)
+- **R_G1, R_G2**: Resistor 10 kΩ (gate pull-down, 2 cái) (~1,000 VNĐ)
+
+**Linh Kiện LVD:**
+
+- **R1**: Resistor 10 kΩ (voltage divider) (~500 VNĐ)
+- **R2**: Resistor 2.2 kΩ (voltage divider) (~500 VNĐ)
+- **R3, R4**: Resistor 100 kΩ (hysteresis feedback, 2 cái) (~1,000 VNĐ)
+- **R_PU**: Resistor 10 kΩ (comparator pull-up) (~500 VNĐ)
+
+**Linh Kiện Phụ Trợ:**
+
+- **Capacitor**: 10 µF, 100 µF (decoupling, nhiều giá trị) (~5,000 VNĐ)
+- **Resistor**: 1 kΩ, 3.3 kΩ, 10 kΩ (nhiều giá trị) (~3,000 VNĐ)
+- **Connector**: Terminal block, header pin (~5,000 VNĐ)
+
+**Tổng Chi Phí:** ~60,000–90,000 VNĐ (rẻ hơn module vì không có PCB sẵn)
+
+**10. Nơi Mua Hàng**
+
+**Trên Shopee/Lazada VN:**
+
+1. **IC LM2596**: Tìm "LM2596 IC", "LM2596-5.0", "buck converter IC"
+
+   - Giá: ~5,000–10,000 VNĐ
+
+2. **IC MT3608**: Tìm "MT3608 IC", "boost converter IC"
+
+   - Giá: ~3,000–8,000 VNĐ
+
+3. **IC IP2312**: Tìm "IP2312 IC", "IP2312 charger IC"
+
+   - Giá: ~10,000–20,000 VNĐ
+
+4. **IC LM393**: Tìm "LM393 IC", "comparator IC"
+
+   - Giá: ~3,000–8,000 VNĐ
+
+5. **IC TL431**: Tìm "TL431 IC", "voltage reference IC"
+
+   - Giá: ~2,000–5,000 VNĐ
+
+6. **MOSFET IRF9540N**: Tìm "IRF9540N", "P-MOSFET"
+
+   - Giá: ~5,000–10,000 VNĐ/cái
+
+7. **Diode 1N5822**: Tìm "1N5822", "Schottky diode 3A"
+
+   - Giá: ~2,000–5,000 VNĐ/cái
+
+8. **Inductor**: Tìm "inductor 100uH 3A", "inductor 22uH 2A"
+
+   - Giá: ~8,000–15,000 VNĐ/cái
+
+9. **Capacitor**: Tìm "capacitor 100uF 50V", "capacitor 220uF 16V"
+
+   - Giá: ~1,000–3,000 VNĐ/cái
+
+10. **Resistor**: Tìm "resistor 10k", "resistor 2.2k", "resistor 0.1 ohm"
+    - Giá: ~500–1,000 VNĐ/gói
+
+**Cửa Hàng Linh Kiện VN:**
+
+- **Chipdientu.com.vn**: Linh kiện điện tử
+- **DKE.vn**: Điện tử Kỹ Thuật
+- **Linhkienfpt.vn**: Linh kiện FPT
+- **Linh Kiện Điện Tử 3M**: Cửa hàng linh kiện
+
+**11. Thiết Kế PCB**
+
+**Yêu Cầu:**
+
+- **PCB 2 lớp**: Đủ cho mạch này
+- **Kích thước**: ~50×50 mm (ước tính)
+- **Package**: SMD (ưu tiên) hoặc through-hole
+- **Layout**: Tách phần analog (power) và digital (logic)
+
+**Lưu Ý Thiết Kế:**
+
+- **Power traces**: Dày ít nhất 0.5 mm cho dòng 3A
+- **Ground plane**: Tạo ground plane lớn để giảm nhiễu
+- **Decoupling**: Đặt capacitor gần IC (10–100 µF)
+- **Thermal**: Thêm thermal via cho IC công suất (LM2596)
+- **Inductor**: Đặt xa phần nhạy cảm (ADC, analog)
+
+**12. Kết Luận**
+
+Giải pháp A (IC Rời + MOSFET) phù hợp khi:
+
+- ✅ **Thiết kế PCB tự vẽ**: Muốn tích hợp tất cả vào một PCB
+- ✅ **Sản xuất số lượng**: Thiết kế một lần, sản xuất nhiều bản
+- ✅ **Kích thước nhỏ gọn**: IC rời nhỏ hơn module → PCB gọn hơn
+- ✅ **Giá thành hợp lý**: IC rời rẻ hơn module
+- ✅ **Chuyên nghiệp**: Thiết kế PCB riêng → sản phẩm chuyên nghiệp hơn
+
+**Khuyến Nghị:**
+
+- ✅ **Nên dùng cho đồ án**: Thiết kế PCB tự vẽ → học hỏi nhiều hơn
+- ✅ **Phù hợp sản xuất**: Thiết kế một lần, sản xuất nhiều bản
+- ⚠️ **Cần kiến thức**: Phải hiểu datasheet và thiết kế PCB đúng
+- ⚠️ **Prototype**: Có thể dùng module để test trước, sau đó thiết kế PCB
 - **Giá hợp lý**: ~20,000–40,000 VNĐ
 
 **Chức Năng:**

@@ -11,25 +11,34 @@
 - [PHẦN II: LỰA CHỌN PHẠM VI (SCOPE)](./01-introduction/part-02-scope.md)
 
 ### 🔧 02. Hardware (Phần cứng)
-- [PHẦN III: LỰA CHỌN GIẢI PHÁP PHẦN CỨNG](./02-hardware/part-03-phan-cung.md)
-- [PHẦN IV: CHIẾN LƯỢC QUẢN LÝ NĂNG LƯỢNG](./02-hardware/part-04-quan-ly-nang-luong.md)
-- [PHẦN VI: TÍNH TOÁN NĂNG LƯỢNG](./02-hardware/part-06-tinh-toan-nang-luong.md)
+- [PHẦN III: LỰA CHỌN GIẢI PHÁP PHẦN CỨNG](./02-hardware/part-01-phan-cung.md)
+- [PHẦN IV: CHIẾN LƯỢC QUẢN LÝ NĂNG LƯỢNG](./02-hardware/part-02-quan-ly-nang-luong.md)
+- [PHẦN VI: TÍNH TOÁN NĂNG LƯỢNG](./02-hardware/part-03-tinh-toan-nang-luong.md)
 
-### 💻 03. Software (Phần mềm)
-- [PHẦN V: THIẾT KẾ PHẦN MỀM (FIRMWARE)](./03-software/part-05-firmware.md)
+### 💻 03. Firmware (Phần mềm)
+- [PHẦN V.1: KIẾN TRÚC VÀ LUỒNG HOẠT ĐỘNG](./03-firmware/part-01-kien-truc-va-luong-hoat-dong.md)
+- [PHẦN V.2: BLUETOOTH OBD2](./03-firmware/part-02-bluetooth-obd2.md)
+- [PHẦN V.3: MODEM SIMCOM A7600CE-T](./03-firmware/part-03-modem-simcom.md)
+- [PHẦN V.4: POWER MANAGEMENT VÀ GPIO](./03-firmware/part-04-power-management-gpio.md)
+- [PHẦN V.5: DATA FORMAT VÀ STATE MACHINE](./03-firmware/part-05-data-format-state-machine.md)
+- [PHẦN V.6: CONFIGURATION MANAGEMENT](./03-firmware/part-06-configuration.md)
 
-### 🖥️ 05. Server (Hệ thống Server - Backend + Frontend)
+### 🖥️ 04. Server (Hệ thống Server - Backend + Frontend)
 
 #### Backend
-- [PHẦN VII: LỰA CHỌN VÀ CẤU HÌNH MQTT BROKER](./05-server/backend/part-07-mqtt-broker.md)
-- [PHẦN VIII: EMQX RULES ENGINE](./05-server/backend/part-08-emqx-rules-engine.md)
-- [PHẦN IX: KIẾN TRÚC CƠ SỞ DỮ LIỆU](./05-server/backend/part-09-database.md)
+- [PHẦN VII: LỰA CHỌN VÀ CẤU HÌNH MQTT BROKER](./04-server/backend/part-01-mqtt-broker.md)
+- [PHẦN VIII: EMQX RULES ENGINE](./04-server/backend/part-02-emqx-rules-engine.md)
+- [PHẦN IX: KIẾN TRÚC CƠ SỞ DỮ LIỆU](./04-server/backend/part-03-database.md)
+- [PHẦN X: API SERVER (BACKEND APPLICATION)](./04-server/backend/part-04-api-server.md)
+- [PHẦN XI: API ENDPOINTS DESIGN](./04-server/backend/part-05-api-endpoints.md)
+- [PHẦN XII: NOTIFICATIONS & INTEGRATIONS (Telegram + Email)](./04-server/backend/part-06-notifications-integrations.md)
+- [Database Schema SQL](./04-server/backend/schema.sql)
 
 #### Frontend
-- [THIẾT KẾ FRONTEND (GIAO DIỆN NGƯỜI DÙNG)](./05-server/frontend/part-frontend.md)
+- [THIẾT KẾ FRONTEND (GIAO DIỆN NGƯỜI DÙNG)](./04-server/frontend/part-01-frontend.md)
 
-### 📝 06. Conclusion (Kết luận)
-- [PHẦN X: KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN](./06-conclusion/part-10-ket-luan.md)
+### 📝 05. Conclusion (Kết luận)
+- [PHẦN X: KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN](./05-conclusion/part-01-ket-luan.md)
 
 ### 📎 Appendix (Phụ lục)
 - [Github repository naming](./appendix/appendix-github-repo-naming.md)
@@ -41,23 +50,31 @@
 ### Khi thiết kế phần cứng:
 - Mở song song:
   - `01-introduction/part-01-...` (ý tưởng/giả định)
-  - `02-hardware/part-03-...` (phần cứng)
-  - `02-hardware/part-04-...` (năng lượng)
+  - `02-hardware/part-01-...` (phần cứng)
+  - `02-hardware/part-02-...` (năng lượng)
 
 ### Khi thiết kế firmware:
 - Mở song song:
-  - `02-hardware/part-03-...` (phần cứng)
-  - `03-software/part-05-...` (firmware)
+  - `02-hardware/part-01-...` (phần cứng)
+  - `03-firmware/part-01-...` (kiến trúc firmware)
+  - `03-firmware/part-02-...` (Bluetooth OBD2)
+  - `03-firmware/part-03-...` (Modem SIMCom)
+  - `03-firmware/part-04-...` (Power Management)
+  - `03-firmware/part-05-...` (Data Format & State Machine)
+  - `03-firmware/part-06-...` (Configuration)
 
 ### Khi thiết kế server (backend + frontend):
 - **Backend**: Mở song song:
-  - `05-server/backend/part-07-...` (MQTT)
-  - `05-server/backend/part-08-...` (Rules Engine)
-  - `05-server/backend/part-09-...` (Database)
+  - `04-server/backend/part-01-...` (MQTT)
+  - `04-server/backend/part-02-...` (Rules Engine)
+  - `04-server/backend/part-03-...` (Database)
+  - `04-server/backend/part-04-...` (API Server - Tech Stack)
+  - `04-server/backend/part-05-...` (API Endpoints Design)
+  - `04-server/backend/schema.sql` (Database Schema SQL)
 - **Frontend**: Sau khi backend xong, thiết kế:
-  - `05-server/frontend/part-frontend.md` (Giao diện người dùng)
+  - `04-server/frontend/part-01-frontend.md` (Giao diện người dùng)
 
 ### Khi tổng kết:
-- Cập nhật "đề xuất cuối" ở `06-conclusion/part-10-...`
+- Cập nhật "đề xuất cuối" ở `05-conclusion/part-01-...`
 
 

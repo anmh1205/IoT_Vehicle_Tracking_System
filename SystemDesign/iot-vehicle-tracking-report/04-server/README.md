@@ -1,18 +1,18 @@
-# 05. Server (Hệ thống Server)
+# 04. Server (Hệ thống Server)
 
 Folder này chứa thiết kế toàn bộ hệ thống server, bao gồm cả **backend** và **frontend**.
 
 ## Cấu trúc
 
 ```
-05-server/
+04-server/
 ├── backend/          # Backend (MQTT, Database, API)
-│   ├── part-07-mqtt-broker.md
-│   ├── part-08-emqx-rules-engine.md
-│   ├── part-09-database.md
+│   ├── part-01-mqtt-broker.md
+│   ├── part-02-emqx-rules-engine.md
+│   ├── part-03-database.md
 │   └── README.md
 └── frontend/         # Frontend (Web/Mobile UI)
-    ├── part-frontend.md
+    ├── part-01-frontend.md
     └── README.md
 ```
 

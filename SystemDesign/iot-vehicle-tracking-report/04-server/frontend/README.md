@@ -4,7 +4,7 @@ Folder này chứa thiết kế giao diện frontend (web/mobile) cho hệ thố
 
 ## Nội dung
 
-- **part-frontend.md**: Thiết kế frontend, các chức năng chính, công nghệ đề xuất, và kiến trúc
+- **part-01-frontend.md**: Thiết kế frontend, các chức năng chính, công nghệ đề xuất, và kiến trúc
 
 ## Workflow
 
