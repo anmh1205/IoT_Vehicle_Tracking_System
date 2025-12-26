@@ -13,31 +13,7 @@
 
 ---
 
-## Tổng Quan
-
-**Ngữ Cảnh:** Hệ thống cho thuê xe tự lái - Chủ dịch vụ quản lý xe và theo dõi khách hàng đang thuê xe.
-
-**Phạm Vi Đồ Án (Phase 1):**
-
-- ✅ Quản lý xe và thiết bị tracker
-- ✅ Quản lý khách hàng (thông tin cơ bản)
-- ✅ Theo dõi chuyến đi (trips) và vị trí xe
-- ✅ Cảnh báo và vi phạm
-- ⏸️ **Phase 2**: Bookings, Contracts, Payments, Damage Reports, Reviews
-
-Hệ thống tracker cần lưu **hai loại dữ liệu**:
-
-1. **Raw Data**: Location GPS, battery level, OBD2 data
-   - Tần suất: Cao (mỗi phút khi đang lái)
-   - Thời gian lưu: Ngắn (7–30 ngày)
-   - Dung lượng: Lớn
-   - **Mục đích**: Theo dõi vị trí xe, phát hiện vi phạm
-
-2. **Dữ Liệu Quan Trọng**: Vehicle info, customers, trips, alerts, violations, bookings (phase 2), rental contracts (phase 2), payments (phase 2)
-   - Tần suất: Thấp
-   - Thời gian lưu: Dài (vĩnh viễn)
-   - Dung lượng: Nhỏ
-   - **Mục đích**: Quản lý hệ thống, báo cáo
+### IX.1 Lựa Chọn Database
 
 **Ngữ Cảnh:** Hệ thống cho thuê xe tự lái - Chủ dịch vụ quản lý xe và theo dõi khách hàng đang thuê xe.
 

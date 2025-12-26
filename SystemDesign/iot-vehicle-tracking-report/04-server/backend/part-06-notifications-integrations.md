@@ -1,5 +1,11 @@
 ## PHẦN XII: NOTIFICATIONS & INTEGRATIONS (Telegram Bot + Email)
 
+**File này đã được tách thành các file chi tiết trong folder `part-06-notifications-integrations/`:**
+
+Xem [`part-06-notifications-integrations/README.md`](./part-06-notifications-integrations/README.md) để xem danh sách đầy đủ các file.
+
+---
+
 ### XII.1 Tổng Quan
 
 Hệ thống hỗ trợ gửi thông báo và cảnh báo qua **2 kênh chính**:

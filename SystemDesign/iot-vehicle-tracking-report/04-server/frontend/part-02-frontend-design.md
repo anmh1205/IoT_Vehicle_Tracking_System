@@ -9,11 +9,24 @@
 - [`part-02-05-pages-and-features.md`](./part-02-05-pages-and-features.md) - Pages và features
 - [`part-02-06-api-integration.md`](./part-02-06-api-integration.md) - API integration
 - [`part-02-07-realtime-integration.md`](./part-02-07-realtime-integration.md) - Realtime integration
-- [`part-02-08-implementation-steps.md`](./part-02-08-implementation-steps.md) - **Các bước copy template và phát triển**
+- [`part-02-08-implementation-steps/README.md`](./part-02-08-implementation-steps/README.md) - **Các bước copy template và phát triển**
+- [`part-02-09-code-review-lessons/README.md`](./part-02-09-code-review-lessons/README.md) - **Code review và bài học từ example**
 
 ---
 
-### XIII.1 Tổng Quan (Tóm tắt)
+## Tổng Quan
+
+**Tech Stack:** Next.js 16+ (App Router) + React 19 + TypeScript + Tailwind CSS v4
+
+**UI Framework:** shadcn/ui (Radix UI + Tailwind CSS)
+
+**State Management:** Zustand (auth), TanStack Query (server state)
+
+**Realtime:** Socket.io Client
+
+**Styling:** Tailwind CSS v4 với CSS Variables cho theme
+
+**Inspiration:** Dựa trên cấu trúc và design patterns từ `Example/frontend_v2`
 
 **Tech Stack:** Next.js 16+ (App Router) + React 19 + TypeScript + Tailwind CSS v4
 

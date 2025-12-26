@@ -25,24 +25,25 @@
 - Phát tín hiệu interrupt qua chân INT → GPIO ESP32
 - Đánh thức ESP32 từ deep sleep mà không cần ESP32 chạy liên tục
 
-#### III.1.2 So Sánh MCU: STM32 vs ESP32
+#### III.1.2 So Sánh MCU: STM32 vs ESP32-S3
 
 Để lựa chọn vi điều khiển phù hợp cho hệ thống tracker, cần đánh giá dựa trên các tiêu chí cụ thể của ứng dụng:
 
-| Tiêu Chí                   | STM32 (STM32L4)            | ESP32                     | Đánh Giá                                           |
+| Tiêu Chí                   | STM32 (STM32L4)            | ESP32-S3                  | Đánh Giá                                           |
 | -------------------------- | -------------------------- | ------------------------- | -------------------------------------------------- |
 | **Deep Sleep Current**     | ~1–3 μA (STOP2 mode)       | ~10–15 μA (deep sleep)    | ⭐⭐⭐⭐⭐ STM32 thấp hơn 3–5 lần                  |
 | **Wakeup từ GPIO**         | ✅ Hỗ trợ (EXTI)           | ✅ Hỗ trợ (EXT0/EXT1)     | ⭐⭐⭐⭐ Cả hai đều đáp ứng                        |
 | **UART/AT Commands**       | ✅ Nhiều UART (3–8)        | ✅ Nhiều UART (3)         | ⭐⭐⭐⭐ Đủ cho modem A7600                        |
 | **ADC (đo U_batt)**        | ✅ 12-bit ADC              | ✅ 12-bit ADC             | ⭐⭐⭐⭐ Tương đương                               |
 | **I2C (LIS3DH)**           | ✅ I2C                     | ✅ I2C                    | ⭐⭐⭐⭐ Tương đương                               |
-| **Bộ nhớ RAM**             | 64–320 KB (tùy dòng)       | 520 KB                    | ⭐⭐⭐ ESP32 nhiều hơn                             |
-| **Flash**                  | 64 KB–2 MB (on-chip)       | 4 MB (thường external)    | ⭐⭐⭐ ESP32 linh hoạt hơn                         |
-| **WiFi/Bluetooth**         | ❌ Cần module ngoài        | ✅ Tích hợp sẵn           | ⭐⭐⭐ ESP32 có lợi (không dùng trong tracker này) |
-| **Chi phí**                | ~150,000–300,000 VNĐ       | ~80,000–200,000 VNĐ       | ⭐⭐⭐⭐ ESP32 rẻ hơn                              |
-| **Độ phức tạp phát triển** | ⚠️ Cao (STM32 HAL/CubeMX)  | ✅ Thấp (Arduino/ESP-IDF) | ⭐⭐⭐⭐⭐ ESP32 dễ hơn                            |
-| **Cộng đồng/Tài liệu**     | ⭐⭐⭐⭐ Tốt (công nghiệp) | ⭐⭐⭐⭐⭐ Rất tốt (IoT)  | ⭐⭐⭐⭐⭐ ESP32 phong phú hơn                     |
-| **Thời gian phát triển**   | ⚠️ Lâu hơn                 | ✅ Nhanh hơn              | ⭐⭐⭐⭐⭐ ESP32 nhanh hơn                         |
+| **Bộ nhớ RAM**             | 64–320 KB (tùy dòng)       | 512 KB SRAM               | ⭐⭐⭐ ESP32-S3 nhiều hơn                          |
+| **Flash**                  | 64 KB–2 MB (on-chip)       | 4–16 MB (external)        | ⭐⭐⭐ ESP32-S3 linh hoạt hơn                      |
+| **WiFi/Bluetooth**         | ❌ Cần module ngoài        | ✅ Tích hợp sẵn           | ⭐⭐⭐⭐⭐ ESP32-S3 có lợi (BLE 5.0)              |
+| **BLE Support**            | ⚠️ STM32WB (riêng)         | ✅ BLE 5.0 native         | ⭐⭐⭐⭐⭐ ESP32-S3 tốt hơn                        |
+| **Chi phí**                | ~150,000–300,000 VNĐ       | ~100,000–250,000 VNĐ      | ⭐⭐⭐⭐ ESP32-S3 rẻ hơn                           |
+| **Độ phức tạp phát triển** | ⚠️ Cao (STM32 HAL/CubeMX)  | ✅ Thấp (Arduino/ESP-IDF) | ⭐⭐⭐⭐⭐ ESP32-S3 dễ hơn                          |
+| **Cộng đồng/Tài liệu**     | ⭐⭐⭐⭐ Tốt (công nghiệp) | ⭐⭐⭐⭐⭐ Rất tốt (IoT)  | ⭐⭐⭐⭐⭐ ESP32-S3 phong phú hơn                   |
+| **Thời gian phát triển**   | ⚠️ Lâu hơn                 | ✅ Nhanh hơn              | ⭐⭐⭐⭐⭐ ESP32-S3 nhanh hơn                      |
 
 **Phân Tích Chi Tiết:**
 
@@ -59,11 +60,11 @@
 
 - Cả hai đều có đủ UART và khả năng xử lý AT commands → **tương đương**.
 
-**6. Kết Nối OBD2 Bluetooth:**
+**6. Kết Nối OBD2 BLE:**
 
-- **ESP32**: Hỗ trợ **Bluetooth Classic (SPP)** → kết nối trực tiếp với OBD2 adapter ELM327
-- **STM32WB**: Chỉ có BLE → **không tương thích** với ELM327 (cần adapter phức tạp)
-- → **ESP32 có lợi thế lớn** cho việc đọc dữ liệu xe qua OBD2
+- **ESP32-S3**: Hỗ trợ **BLE 5.0** → kết nối trực tiếp với OBD2 adapter vgate iCar Pro (BLE 4.0)
+- **STM32WB**: Có BLE nhưng ESP32-S3 có BLE 5.0 tốt hơn, cộng đồng lớn hơn
+- → **ESP32-S3 có lợi thế** cho việc đọc dữ liệu xe qua OBD2 BLE
 
 **4. Phát Triển và Bảo Trì:**
 
@@ -78,63 +79,65 @@
 
 Mặc dù **STM32L4 có ưu thế về tiêu thụ năng lượng** (1–3 μA vs 10–15 μA), nhưng với pin backup 15,000 mAh và chiến lược deep sleep + heartbeat, **sự khác biệt này không đủ để bù đắp** các nhược điểm:
 
-- ✅ **ESP32 được chọn** vì:
+- ✅ **ESP32-S3 được chọn** vì:
 
-  1. **Hỗ trợ Bluetooth Classic**: Kết nối trực tiếp với OBD2 adapter ELM327 → đọc dữ liệu xe chính xác (IGN, RPM, tốc độ, v.v.)
+  1. **Hỗ trợ BLE 5.0**: Kết nối trực tiếp với OBD2 adapter vgate iCar Pro (BLE 4.0) → đọc dữ liệu xe chính xác (IGN, RPM, tốc độ, v.v.)
   2. **Dễ phát triển**: Arduino/ESP-IDF, cộng đồng lớn → phù hợp đồ án
   3. **Chi phí thấp**: Rẻ hơn 30–50%
-  4. **Bộ nhớ lớn**: 520 KB RAM đủ cho xử lý AT commands, MQTT, OBD2
+  4. **Bộ nhớ lớn**: 512 KB SRAM đủ cho xử lý AT commands, MQTT, OBD2
   5. **Tiêu thụ vẫn chấp nhận được**: 10–15 μA deep sleep → đủ cho 2–3 tháng với pin 15,000 mAh
   6. **Thời gian phát triển ngắn**: Quan trọng cho đồ án có deadline
+  7. **BLE 5.0 tốt hơn**: Hỗ trợ BLE tốt hơn ESP32 classic, tương thích với vgate iCar Pro
 
 - ⚠️ **STM32L4 phù hợp hơn nếu**:
   - Yêu cầu tiêu thụ cực thấp là ưu tiên số 1 (ví dụ: pin nhỏ hơn, cần hoạt động >6 tháng)
   - Ứng dụng công nghiệp yêu cầu độ tin cậy cao
   - Team có kinh nghiệm với STM32
 
-#### III.1.3 Vi Điều Khiển: **ESP32-WROOM-32** (Lựa Chọn)
+#### III.1.3 Vi Điều Khiển: **ESP32-S3** (Lựa Chọn)
 
 **Mã Cụ Thể:**
 
-- **Module**: ESP32-WROOM-32 (4MB Flash)
-- **Board**: ESP32 DevKitC V4 hoặc ESP32-DevKit V1
-- **Giá**: ~80,000–120,000 VNĐ
+- **Module**: ESP32-S3-WROOM-1 (4–16MB Flash)
+- **Board**: ESP32-S3-DevKitC-1 hoặc ESP32-S3-DevKitM-1
+- **Giá**: ~100,000–200,000 VNĐ
 
 **Đặc Tính:**
 
-- **CPU**: Dual-core Xtensa LX6 @ 240 MHz
-- **RAM**: 520 KB SRAM
-- **Flash**: 4 MB (on-board)
+- **CPU**: Dual-core Xtensa LX7 @ 240 MHz (32-bit RISC-V)
+- **RAM**: 512 KB SRAM
+- **Flash**: 4–16 MB (on-board, tùy variant)
 - **WiFi**: 802.11 b/g/n (không sử dụng trong tracker này)
-- **Bluetooth**: v4.2 BR/EDR (Classic) + BLE
-  - **Bluetooth Classic SPP**: Kết nối với OBD2 adapter ELM327
-  - **BLE**: Có thể dùng cho kết nối khác (nếu cần)
-- **GPIO**: 34 chân (30 chân sử dụng được)
+- **Bluetooth**: BLE 5.0
+  - **BLE 5.0**: Kết nối với OBD2 adapter vgate iCar Pro (BLE 4.0 compatible)
+  - **BLE Central/Peripheral**: Hỗ trợ đầy đủ BLE stack
+- **GPIO**: 45 chân (nhiều hơn ESP32 classic)
 - **UART**: 3 cổng (đủ cho modem A7600CE‑T)
 - **I2C**: 2 cổng (cho LIS3DH)
 - **SPI**: 3 cổng
-- **ADC**: 12-bit, 18 kênh (đo điện áp ắc quy)
+- **ADC**: 12-bit, 20 kênh (đo điện áp ắc quy)
 - **Deep Sleep**: ~10–15 μA (với external wakeup)
-- **Active (Bluetooth Classic)**: ~30–50 mA
+- **Active (BLE)**: ~20–40 mA
 - **Active (WiFi)**: ~80–240 mA
 
 **Lý Do Chọn:**
 
-1. **Hỗ trợ Bluetooth Classic SPP**: Kết nối trực tiếp với OBD2 adapter ELM327 → đọc dữ liệu xe (IGN, RPM, tốc độ, nhiên liệu, mã lỗi)
-2. **Đủ mạnh**: Dual-core 240 MHz, 520 KB RAM → xử lý đồng thời OBD2 + modem + IMU
+1. **Hỗ trợ BLE 5.0**: Kết nối trực tiếp với OBD2 adapter vgate iCar Pro (BLE 4.0) → đọc dữ liệu xe (IGN, RPM, tốc độ, nhiên liệu, mã lỗi)
+2. **Đủ mạnh**: Dual-core 240 MHz, 512 KB RAM → xử lý đồng thời OBD2 + modem + IMU
 3. **Nhiều UART**: 3 cổng → đủ cho modem A7600CE‑T và các thiết bị khác
 4. **Hỗ trợ external wakeup**: EXT0/EXT1 từ GPIO → đánh thức từ deep sleep bằng IMU interrupt
 5. **ADC 12-bit**: Đo chính xác điện áp ắc quy
-6. **Thư viện phong phú**: Arduino OBD2, ESP32 Bluetooth SPP, cộng đồng lớn
+6. **Thư viện phong phú**: Arduino BLE, ESP32 BLE, cộng đồng lớn
 7. **Chi phí thấp**: Rẻ hơn STM32 30–50%
 8. **Dễ phát triển**: Arduino IDE, ESP-IDF → phù hợp đồ án
 9. **Tiêu thụ chấp nhận được**: Deep sleep 10–15 μA → đủ cho pin 15,000 mAh hoạt động 2–3 tháng
+10. **BLE 5.0 tốt hơn**: Hỗ trợ BLE tốt hơn ESP32 classic, tương thích ngược với BLE 4.0
 
 **Chức Năng:**
 
 - Xử lý logic chính (3 chế độ: lái xe, đỗ, cảnh báo)
 - Giao tiếp I2C với LIS3DH (IMU)
-- Kết nối Bluetooth Classic với OBD2 adapter ELM327
+- Kết nối BLE với OBD2 adapter vgate iCar Pro
 - Điều khiển UART với modem 4G (A7600CE‑T)
 - Đo điện áp ắc quy qua ADC
 - Điều khiển mạch LVD (relay/MOSFET) để tách tải
@@ -142,62 +145,66 @@ Mặc dù **STM32L4 có ưu thế về tiêu thụ năng lượng** (1–3 μA v
 
 **Lưu Ý:**
 
-- Chọn board có USB-C hoặc micro-USB (dễ cắm)
+- Chọn board có USB-C (dễ cắm, ESP32-S3 thường dùng USB-C)
 - Kiểm tra có CP2102 hoặc CH340 USB-to-UART chip
 - Nên chọn board có pin header sẵn (dễ breadboard và debug)
+- ESP32-S3 có native USB support (có thể không cần USB-to-UART)
 
-#### III.1.4 OBD2 Bluetooth Adapter: **ELM327 Bluetooth Classic**
+#### III.1.4 OBD2 BLE Adapter: **vgate iCar Pro (BLE 4.0)**
 
 **Đặc Tính:**
 
-- **Giao thức**: Bluetooth Classic với Serial Port Profile (SPP)
-- **Chuẩn OBD2**: ELM327 protocol
-- **Kết nối**: Bluetooth Classic (BR/EDR) → ESP32-WROOM-32
-- **Giao tiếp**: AT commands (ELM327 commands)
-- **Tiêu thụ**: ~10–30 mA khi active (chỉ khi IGN ON)
-- **Giá**: ~50,000–150,000 VNĐ (tùy chất lượng)
+- **Giao thức**: Bluetooth Low Energy (BLE) 4.0
+- **Chuẩn OBD2**: ELM327 protocol qua BLE
+- **Kết nối**: BLE 4.0 → ESP32-S3 (BLE 5.0, tương thích ngược)
+- **Giao tiếp**: AT commands (ELM327 commands) qua BLE GATT characteristics
+- **Tiêu thụ**: ~5–15 mA khi active (thấp hơn Bluetooth Classic, chỉ khi IGN ON)
+- **Giá**: ~150,000–300,000 VNĐ (tùy chất lượng)
 
 **Lý Do Chọn:**
 
-- **Bán sẵn, phổ biến**: Dễ mua, giá rẻ, tương thích tốt
+- **Bán sẵn, phổ biến**: Dễ mua, giá hợp lý, tương thích tốt
 - **Kết nối không dây**: Không cần dây nối phức tạp đến OBD2 port
-- **Tương thích ESP32**: ESP32-WROOM-32 hỗ trợ Bluetooth Classic SPP → kết nối trực tiếp
+- **Tương thích ESP32-S3**: ESP32-S3 hỗ trợ BLE 5.0 → tương thích ngược với BLE 4.0
+- **Tiêu thụ thấp hơn**: BLE tiêu thụ ít hơn Bluetooth Classic (~5–15 mA vs ~10–30 mA)
 - **Đọc nhiều dữ liệu**: IGN status, RPM, tốc độ, nhiên liệu, mã lỗi (DTC), v.v.
 - **Chính xác hơn**: Đọc IGN status từ ECU chính xác hơn đo điện áp
+- **Kết nối nhanh hơn**: BLE kết nối nhanh hơn Bluetooth Classic (~1–3 giây vs 2–5 giây)
 
 **Chức Năng:**
 
 - Kết nối với OBD2 port của xe (16-pin OBD2 connector)
-- Đọc dữ liệu từ ECU qua Bluetooth Classic
-- Truyền dữ liệu đến ESP32 qua Serial Port Profile (SPP)
+- Đọc dữ liệu từ ECU qua BLE GATT characteristics
+- Truyền dữ liệu đến ESP32-S3 qua BLE
 - Cung cấp thông tin: IGN status, RPM, tốc độ, nhiên liệu, nhiệt độ động cơ, mã lỗi
 
 **Lưu Ý:**
 
-- Chọn adapter ELM327 **Bluetooth Classic** (không phải BLE-only)
+- Chọn adapter **vgate iCar Pro** hoặc tương thích BLE 4.0+
 - Tránh adapter giả mạo (có thể không hoạt động đúng)
-- Chỉ bật Bluetooth khi IGN ON để tiết kiệm pin
+- Chỉ bật BLE khi IGN ON để tiết kiệm pin
 - Cần xử lý lỗi khi adapter không kết nối được (fallback về đo điện áp)
+- BLE GATT characteristics cần được map đúng với ELM327 commands
 
-**Vấn Đề Kết Nối Bluetooth Khi Deep Sleep:**
+**Vấn Đề Kết Nối BLE Khi Deep Sleep:**
 
-**1. Deep Sleep và Bluetooth Disconnect:**
+**1. Deep Sleep và BLE Disconnect:**
 
-- **Khi ESP32 deep sleep**: Bluetooth Classic sẽ **bị ngắt kết nối** hoàn toàn
-- **ELM327 adapter**: Vẫn hoạt động, chờ kết nối mới (không tự tắt)
-- **Kết quả**: Mỗi lần ESP32 wake up, cần **kết nối lại** với ELM327
+- **Khi ESP32-S3 deep sleep**: BLE sẽ **bị ngắt kết nối** hoàn toàn
+- **vgate iCar Pro adapter**: Vẫn hoạt động, chờ kết nối mới (không tự tắt)
+- **Kết quả**: Mỗi lần ESP32-S3 wake up, cần **kết nối lại** với vgate iCar Pro
 
 **2. Thời Gian Kết Nối Lại:**
 
-- **Pairing lần đầu**: 5–15 giây (nếu chưa có trong danh sách paired devices)
-- **Reconnect (đã paired)**: 2–5 giây (nếu đã lưu trong cache)
-- **Tối ưu**: Lưu MAC address của ELM327 → reconnect nhanh hơn
+- **Pairing lần đầu**: 3–10 giây (nếu chưa có trong danh sách paired devices)
+- **Reconnect (đã paired)**: 1–3 giây (nếu đã lưu BLE address trong cache)
+- **Tối ưu**: Lưu BLE address (MAC address) của vgate iCar Pro → reconnect nhanh hơn
 
 **3. Chiến Lược Kết Nối:**
 
 **Khi Xe Chạy (IGN ON):**
 
-- ESP32 wake up → Kết nối Bluetooth với ELM327 (2–5 giây)
+- ESP32-S3 wake up → Kết nối BLE với vgate iCar Pro (1–3 giây)
 - Đọc IGN status từ OBD2 (xác nhận IGN ON)
 - Đọc các thông số khác (RPM, tốc độ, nhiên liệu) định kỳ
 - **Giữ kết nối** trong suốt thời gian IGN ON
@@ -206,13 +213,13 @@ Mặc dù **STM32L4 có ưu thế về tiêu thụ năng lượng** (1–3 μA v
 **Khi Xe Đỗ (IGN OFF):**
 
 - Đọc IGN status từ OBD2 lần cuối → xác nhận IGN OFF
-- **Ngắt kết nối Bluetooth** trước khi deep sleep
-- ESP32 deep sleep → tiết kiệm năng lượng
-- **Không cần kết nối Bluetooth** khi đỗ (không đọc OBD2)
+- **Ngắt kết nối BLE** trước khi deep sleep
+- ESP32-S3 deep sleep → tiết kiệm năng lượng
+- **Không cần kết nối BLE** khi đỗ (không đọc OBD2)
 - **Chỉ cần IMU (LIS3DH)** để phát hiện chuyển động:
   - IMU đủ để phát hiện rung, kéo, cẩu xe
   - Không cần OBD2 để phát hiện chuyển động vật lý
-  - Tiết kiệm năng lượng đáng kể (~7,000 lần so với giữ Bluetooth)
+  - Tiết kiệm năng lượng đáng kể (~7,000 lần so với giữ BLE)
 
 **4. Xử Lý Lỗi Kết Nối:**
 
@@ -223,11 +230,12 @@ Mặc dù **STM32L4 có ưu thế về tiêu thụ năng lượng** (1–3 μA v
 
 **5. Tối Ưu Hóa:**
 
-- **Lưu MAC address**: Lưu MAC của ELM327 vào flash → reconnect nhanh hơn
+- **Lưu BLE address**: Lưu BLE address (MAC) của vgate iCar Pro vào flash → reconnect nhanh hơn
 - **Chỉ kết nối khi cần**: Chỉ kết nối khi IGN ON, không giữ kết nối khi đỗ
 - **Không cần OBD2 khi đỗ**: IMU đủ để phát hiện chuyển động → tiết kiệm năng lượng
 - **Đọc batch**: Đọc nhiều thông số cùng lúc (IGN, RPM, tốc độ) → giảm số lần giao tiếp
 - **Cache dữ liệu**: Lưu dữ liệu OBD2 vào RAM → có thể dùng khi mất kết nối tạm thời
+- **BLE kết nối nhanh hơn**: BLE kết nối nhanh hơn Bluetooth Classic (~1–3 giây vs 2–5 giây)
 
 **6. Lợi Ích của Thiết Kế Giấu Thiết Bị:**
 
@@ -238,16 +246,16 @@ Mặc dù **STM32L4 có ưu thế về tiêu thụ năng lượng** (1–3 μA v
 
 **Kết Luận:**
 
-- **Deep sleep sẽ ngắt Bluetooth** → cần reconnect mỗi lần wake up
-- **Thời gian reconnect: 2–5 giây** (chấp nhận được)
+- **Deep sleep sẽ ngắt BLE** → cần reconnect mỗi lần wake up
+- **Thời gian reconnect: 1–3 giây** (nhanh hơn Bluetooth Classic)
 - **Chiến lược**: Chỉ kết nối khi IGN ON, không cần kết nối khi đỗ
 - **IMU đủ để phát hiện chuyển động**: Không cần OBD2 khi đỗ → tiết kiệm năng lượng
 - **Fallback**: Đo điện áp nếu không kết nối được OBD2
 - **Thiết kế hợp lý**: Tracker giấu + OBD2 adapter riêng → bảo mật và linh hoạt
 
-**Bảng Tóm Tắt Khi Nào Cần Bluetooth OBD2:**
+**Bảng Tóm Tắt Khi Nào Cần BLE OBD2:**
 
-| Trạng Thái          | Cần Bluetooth?  | Lý Do                                                        |
+| Trạng Thái          | Cần BLE?        | Lý Do                                                        |
 | ------------------- | --------------- | ------------------------------------------------------------ |
 | **IGN ON (Lái xe)** | ✅ **Có**       | Đọc dữ liệu OBD2 (RPM, tốc độ, nhiên liệu)                   |
 | **IGN OFF (Đỗ xe)** | ❌ **Không**    | Không cần dữ liệu OBD2, chỉ cần IMU để phát hiện chuyển động |
@@ -851,20 +859,21 @@ Giải pháp A (IC Rời + MOSFET) phù hợp khi:
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
 │  ┌──────────────────────────────────────┐                │
-│  │  ESP32-WROOM-32 (Vi Điều Khiển)      │                │
+│  │  ESP32-S3 (Vi Điều Khiển)            │                │
 │  │  - Xử lý logic                       │                │
 │  │  - Deep sleep management            │                │
 │  │  - ADC (đo U_batt)                   │                │
-│  │  - Bluetooth Classic (OBD2)          │                │
+│  │  - BLE 5.0 (OBD2)                    │                │
 │  └──────────────────────────────────────┘                │
 │     │      │        │          │          │               │
-│     I2C    BT       UART       GPIO       ADC             │
+│     I2C    BLE      UART       GPIO       ADC             │
 │     │      │        │          │          │               │
 │  ┌──┴──┐ ┌─┴──┐ ┌───┴──────────┐  ┌──┴──────┐          │
 │  │LIS3DH│ │OBD2│ │A7600CE‑T     │  │LVD      │          │
-│  │(IMU) │ │BT  │ │(4G + GNSS)   │  │Control  │          │
-│  └──────┘ │ELM │ └───────┘  └─────────┘                 │
-│           │327 │                                            │
+│  │(IMU) │ │BLE │ │(4G + GNSS)   │  │Control  │          │
+│  └──────┘ │vgate│ └───────┘  └─────────┘                 │
+│           │iCar│                                            │
+│           │Pro │                                            │
 │           └────┘                                            │
 │           │                       │                      │
 │           └───────────┬───────────┘                      │
@@ -900,9 +909,9 @@ Giải pháp A (IC Rời + MOSFET) phù hợp khi:
 
 | STT | Thành Phần                  | Đơn Vị   | SL  | Ghi Chú                              |
 | --- | --------------------------- | -------- | --- | ------------------------------------ |
-| 1   | ESP32-WROOM-32 DevKit       | Cái      | 1   | ESP32 DevKitC V4 hoặc DevKit V1      |
-| 2   | LIS3DH                      | Cái      | 1   | Breakout board hoặc IC riêng         |
-| 3   | OBD2 Bluetooth (ELM327)     | Cái      | 1   | Bluetooth Classic, không phải BLE    |
+| 1   | ESP32-S3 DevKit              | Cái      | 1   | ESP32-S3-DevKitC-1 hoặc DevKitM-1   |
+| 2   | LIS3DH                       | Cái      | 1   | Breakout board hoặc IC riêng         |
+| 3   | OBD2 BLE (vgate iCar Pro)    | Cái      | 1   | BLE 4.0, tương thích với ESP32-S3    |
 | 4   | Modem 4G + GNSS (A7600CE‑T) | Cái      | 1   | Kèm LTE antenna + GNSS antenna + SIM |
 | 5   | 21700 Li-ion 5000mAh        | Cái      | 1   | Loại có protection board             |
 | 6   | Module sạc IP2312 (3A)      | Cái      | 1   | IP2312 charger module Type-C, 3A     |

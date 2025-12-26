@@ -17,11 +17,12 @@
 
 ### 💻 03. Firmware (Phần mềm)
 - [PHẦN V.1: KIẾN TRÚC VÀ LUỒNG HOẠT ĐỘNG](./03-firmware/part-01-kien-truc-va-luong-hoat-dong.md)
-- [PHẦN V.2: BLUETOOTH OBD2](./03-firmware/part-02-bluetooth-obd2.md)
+- [PHẦN V.2: BLE OBD2](./03-firmware/part-02-ble-obd2.md)
 - [PHẦN V.3: MODEM SIMCOM A7600CE-T](./03-firmware/part-03-modem-simcom.md)
 - [PHẦN V.4: POWER MANAGEMENT VÀ GPIO](./03-firmware/part-04-power-management-gpio.md)
 - [PHẦN V.5: DATA FORMAT VÀ STATE MACHINE](./03-firmware/part-05-data-format-state-machine.md)
 - [PHẦN V.6: CONFIGURATION MANAGEMENT](./03-firmware/part-06-configuration.md)
+- [PHẦN V.7: THAM KHẢO ESP-IDF CHO VGATE ICAR PRO](./03-firmware/part-07-vgate-icar-pro-esp-idf-reference.md)
 
 ### 🖥️ 04. Server (Hệ thống Server - Backend + Frontend)
 
@@ -48,6 +49,9 @@
 
 ### 📝 05. Conclusion (Kết luận)
 - [PHẦN X: KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN](./05-conclusion/part-01-ket-luan.md)
+
+### 🔍 06. Improvements (Cải Tiến)
+- [PHẦN XIV: CÁC ĐIỂM CẦN CẢI TIẾN](./06-improvements/part-01-improvement-opportunities.md)
 
 ### 📎 Appendix (Phụ lục)
 - [Github repository naming](./appendix/appendix-github-repo-naming.md)

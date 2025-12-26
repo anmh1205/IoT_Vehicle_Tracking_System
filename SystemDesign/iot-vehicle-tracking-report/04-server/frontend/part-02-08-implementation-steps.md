@@ -1,5 +1,11 @@
 ## PHẦN XIII.8: IMPLEMENTATION STEPS - COPY TEMPLATE & DEVELOP
 
+**File này đã được tách thành các file chi tiết trong folder `part-02-08-implementation-steps/`:**
+
+Xem [`part-02-08-implementation-steps/README.md`](./part-02-08-implementation-steps/README.md) để xem danh sách đầy đủ các file.
+
+---
+
 ### XIII.8.1 Tổng Quan
 
 Hướng dẫn chi tiết các bước copy template từ `Example/frontend_v2` và phát triển thành Vehicle Tracking System frontend.

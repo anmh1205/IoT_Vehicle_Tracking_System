@@ -1,6 +1,12 @@
 ## PHẦN XI: API ENDPOINTS DESIGN
 
-### XI.1 Tổng Quan
+**File này đã được tách thành các file chi tiết trong folder `part-05-api-endpoints/`:**
+
+Xem [`part-05-api-endpoints/README.md`](./part-05-api-endpoints/README.md) để xem danh sách đầy đủ các file.
+
+---
+
+## Tổng Quan
 
 **Base URL:** `https://api.example.com/api`
 
@@ -9,6 +15,29 @@
 **Response Format:** JSON
 
 **Error Format:**
+
+```json
+{
+  "statusCode": 400,
+  "message": "Validation failed",
+  "error": "Bad Request",
+  "details": [
+    {
+      "field": "email",
+      "message": "Email must be a valid email"
+    }
+  ]
+}
+```
+
+**Base URL:** `https://api.example.com/api`
+
+**Authentication:** JWT Bearer Token (trừ auth endpoints)
+
+**Response Format:** JSON
+
+**Error Format:**
+
 ```json
 {
   "statusCode": 400,
@@ -30,6 +59,7 @@
 **Mô tả:** Đăng nhập admin/staff
 
 **Request:**
+
 ```json
 {
   "email": "admin@example.com",
@@ -38,6 +68,7 @@
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -53,6 +84,7 @@
 ```
 
 **Errors:**
+
 - `401 Unauthorized`: Email hoặc password sai
 - `400 Bad Request`: Validation failed
 
@@ -63,6 +95,7 @@
 **Mô tả:** Đăng ký tài khoản admin/staff mới (chỉ admin mới được tạo)
 
 **Request:**
+
 ```json
 {
   "username": "staff01",
@@ -75,6 +108,7 @@
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 2,
@@ -88,6 +122,7 @@
 ```
 
 **Errors:**
+
 - `400 Bad Request`: Email/username đã tồn tại
 - `403 Forbidden`: Không có quyền tạo user
 
@@ -98,6 +133,7 @@
 **Mô tả:** Refresh access token
 
 **Request:**
+
 ```json
 {
   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -105,6 +141,7 @@
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -121,6 +158,7 @@
 **Headers:** `Authorization: Bearer {access_token}`
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Logged out successfully"
@@ -136,6 +174,7 @@
 **Mô tả:** Lấy danh sách xe (có pagination và filter)
 
 **Query Parameters:**
+
 - `page` (number, default: 1): Số trang
 - `limit` (number, default: 20): Số item mỗi trang
 - `status` (string, optional): Filter theo status ('active', 'inactive', 'maintenance', 'retired')
@@ -143,6 +182,7 @@
 - `search` (string, optional): Tìm kiếm theo biển số, brand, model
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -182,6 +222,7 @@
 **Mô tả:** Lấy chi tiết một xe
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -219,6 +260,7 @@
 ```
 
 **Errors:**
+
 - `404 Not Found`: Không tìm thấy xe
 
 ---
@@ -228,6 +270,7 @@
 **Mô tả:** Tạo xe mới
 
 **Request:**
+
 ```json
 {
   "vehicle_id": "VEHICLE_002",
@@ -247,6 +290,7 @@
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 2,
@@ -258,6 +302,7 @@
 ```
 
 **Errors:**
+
 - `400 Bad Request`: Validation failed, duplicate vehicle_id/plate_number
 - `403 Forbidden`: Không có quyền tạo xe
 
@@ -268,6 +313,7 @@
 **Mô tả:** Cập nhật thông tin xe
 
 **Request:**
+
 ```json
 {
   "brand": "Honda",
@@ -278,6 +324,7 @@
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 2,
@@ -297,6 +344,7 @@
 **Mô tả:** Xóa xe (soft delete hoặc hard delete)
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Vehicle deleted successfully"
@@ -310,6 +358,7 @@
 **Mô tả:** Lấy trạng thái hiện tại của xe (vị trí, device status, alerts)
 
 **Response (200 OK):**
+
 ```json
 {
   "vehicle_id": 1,
@@ -351,10 +400,12 @@
 **Mô tả:** [Phase 2] Kiểm tra availability của xe trong khoảng thời gian
 
 **Query Parameters:**
+
 - `start_time` (ISO 8601): Thời gian bắt đầu
 - `end_time` (ISO 8601): Thời gian kết thúc
 
 **Response (200 OK):**
+
 ```json
 {
   "vehicle_id": 1,
@@ -372,6 +423,7 @@
 **Mô tả:** Lấy danh sách khách hàng
 
 **Query Parameters:**
+
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 - `status` (string, optional): 'active', 'suspended', 'blacklisted'
@@ -379,6 +431,7 @@
 - `search` (string, optional): Tìm kiếm theo tên, phone, email, CMND
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -411,6 +464,7 @@
 **Mô tả:** Lấy chi tiết khách hàng
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -447,6 +501,7 @@
 **Mô tả:** Tạo khách hàng mới
 
 **Request:**
+
 ```json
 {
   "full_name": "Nguyễn Văn B",
@@ -466,6 +521,7 @@
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 2,
@@ -484,6 +540,7 @@
 **Mô tả:** Cập nhật thông tin khách hàng
 
 **Request:**
+
 ```json
 {
   "email": "newemail@example.com",
@@ -493,6 +550,7 @@
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -509,6 +567,7 @@
 **Mô tả:** Xác minh khách hàng (chỉ admin/manager)
 
 **Request:**
+
 ```json
 {
   "verification_status": "verified",
@@ -517,6 +576,7 @@
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -533,6 +593,7 @@
 **Mô tả:** [Phase 2] Lấy lịch sử thuê xe của khách hàng
 
 **Response (200 OK):**
+
 ```json
 {
   "customer_id": 1,
@@ -561,6 +622,7 @@
 **Mô tả:** Lấy danh sách chuyến đi
 
 **Query Parameters:**
+
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 - `vehicle_id` (number, optional): Filter theo xe
@@ -570,6 +632,7 @@
 - `end_date` (ISO 8601, optional): Đến ngày
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -609,6 +672,7 @@
 **Mô tả:** Lấy chi tiết chuyến đi
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -697,9 +761,11 @@
 **Mô tả:** Lấy route (tuyến đường) của chuyến đi từ InfluxDB
 
 **Query Parameters:**
+
 - `interval` (string, optional): '1m', '5m', '10m' - Khoảng thời gian giữa các điểm
 
 **Response (200 OK):**
+
 ```json
 {
   "trip_id": 1,
@@ -730,12 +796,14 @@
 **Mô tả:** Lấy dữ liệu vị trí từ InfluxDB
 
 **Query Parameters:**
+
 - `device_id` (string, required): Device ID
 - `start_time` (ISO 8601, required): Thời gian bắt đầu
 - `end_time` (ISO 8601, required): Thời gian kết thúc
 - `interval` (string, optional): '1m', '5m', '10m', '1h' - Aggregate interval
 
 **Response (200 OK):**
+
 ```json
 {
   "device_id": "TRACKER_001",
@@ -762,12 +830,14 @@
 **Mô tả:** Lấy lịch sử di chuyển của xe trong khoảng thời gian
 
 **Query Parameters:**
+
 - `vehicle_id` (number, required)
 - `start_date` (ISO 8601, required)
 - `end_date` (ISO 8601, required)
 - `include_stops` (boolean, default: false): Bao gồm điểm dừng
 
 **Response (200 OK):**
+
 ```json
 {
   "vehicle_id": 1,
@@ -812,11 +882,13 @@
 **Mô tả:** WebSocket endpoint cho real-time location updates
 
 **WebSocket Connection:**
+
 ```
 ws://api.example.com/api/telemetry/realtime
 ```
 
 **Subscribe Message:**
+
 ```json
 {
   "action": "subscribe",
@@ -825,6 +897,7 @@ ws://api.example.com/api/telemetry/realtime
 ```
 
 **Unsubscribe Message:**
+
 ```json
 {
   "action": "unsubscribe",
@@ -833,6 +906,7 @@ ws://api.example.com/api/telemetry/realtime
 ```
 
 **Location Update Message (Server → Client):**
+
 ```json
 {
   "type": "location",
@@ -857,6 +931,7 @@ ws://api.example.com/api/telemetry/realtime
 **Mô tả:** Lấy danh sách cảnh báo
 
 **Query Parameters:**
+
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 - `vehicle_id` (number, optional): Filter theo xe
@@ -867,6 +942,7 @@ ws://api.example.com/api/telemetry/realtime
 - `end_date` (ISO 8601, optional)
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -906,6 +982,7 @@ ws://api.example.com/api/telemetry/realtime
 **Mô tả:** Lấy chi tiết cảnh báo
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -943,6 +1020,7 @@ ws://api.example.com/api/telemetry/realtime
 **Mô tả:** Acknowledge cảnh báo
 
 **Request:**
+
 ```json
 {
   "notes": "Đã kiểm tra, không có vấn đề"
@@ -950,6 +1028,7 @@ ws://api.example.com/api/telemetry/realtime
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -966,6 +1045,7 @@ ws://api.example.com/api/telemetry/realtime
 **Mô tả:** Resolve cảnh báo
 
 **Request:**
+
 ```json
 {
   "notes": "Đã xử lý xong"
@@ -973,6 +1053,7 @@ ws://api.example.com/api/telemetry/realtime
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -989,11 +1070,13 @@ ws://api.example.com/api/telemetry/realtime
 **Mô tả:** WebSocket endpoint cho real-time alerts
 
 **WebSocket Connection:**
+
 ```
 ws://api.example.com/api/alerts/realtime
 ```
 
 **Alert Message (Server → Client):**
+
 ```json
 {
   "type": "alert",
@@ -1021,6 +1104,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Lấy danh sách vi phạm
 
 **Query Parameters:**
+
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 - `vehicle_id` (number, optional)
@@ -1032,6 +1116,7 @@ ws://api.example.com/api/alerts/realtime
 - `end_date` (ISO 8601, optional)
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -1080,6 +1165,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Lấy chi tiết vi phạm
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -1122,6 +1208,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Acknowledge vi phạm
 
 **Request:**
+
 ```json
 {
   "fine_amount": 500000,
@@ -1130,6 +1217,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -1149,6 +1237,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Gửi command đến tracker qua MQTT
 
 **Request:**
+
 ```json
 {
   "command": "update_config",
@@ -1160,6 +1249,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Hoặc:**
+
 ```json
 {
   "command": "request_location",
@@ -1168,6 +1258,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Hoặc:**
+
 ```json
 {
   "command": "enable_tracking",
@@ -1178,6 +1269,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "command_id": 1,
@@ -1189,6 +1281,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Errors:**
+
 - `404 Not Found`: Device không tồn tại hoặc offline
 - `400 Bad Request`: Command không hợp lệ
 
@@ -1199,12 +1292,14 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Lấy danh sách commands đã gửi
 
 **Query Parameters:**
+
 - `device_id` (string, optional)
 - `status` (string, optional): 'pending', 'sent', 'acknowledged', 'failed'
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -1238,12 +1333,14 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Lấy danh sách devices
 
 **Query Parameters:**
+
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 - `status` (string, optional): 'active', 'inactive', 'offline', 'error'
 - `vehicle_id` (number, optional): Filter theo xe
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -1278,6 +1375,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Lấy chi tiết device
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -1317,6 +1415,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Đăng ký device mới
 
 **Request:**
+
 ```json
 {
   "device_id": "TRACKER_002",
@@ -1329,6 +1428,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 2,
@@ -1345,6 +1445,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Cập nhật cấu hình device
 
 **Request:**
+
 ```json
 {
   "heartbeat_interval": 900,
@@ -1353,6 +1454,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "device_id": "TRACKER_001",
@@ -1379,6 +1481,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Lấy danh sách geofences
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -1404,6 +1507,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Tạo geofence mới
 
 **Request (Circle):**
+
 ```json
 {
   "name": "Văn phòng chính",
@@ -1418,6 +1522,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Request (Polygon):**
+
 ```json
 {
   "name": "Khu vực cấm",
@@ -1434,6 +1539,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -1450,6 +1556,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Gán geofence cho xe
 
 **Request:**
+
 ```json
 {
   "vehicle_ids": [1, 2, 3]
@@ -1457,6 +1564,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "geofence_id": 1,
@@ -1478,11 +1586,13 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Lấy danh sách bảo trì
 
 **Query Parameters:**
+
 - `vehicle_id` (number, optional)
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -1518,6 +1628,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** Tạo bản ghi bảo trì mới
 
 **Request:**
+
 ```json
 {
   "vehicle_id": 1,
@@ -1532,6 +1643,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -1550,6 +1662,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Lấy danh sách đặt xe
 
 **Query Parameters:**
+
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 - `customer_id` (number, optional)
@@ -1559,6 +1672,7 @@ ws://api.example.com/api/alerts/realtime
 - `end_date` (ISO 8601, optional)
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -1596,6 +1710,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Tạo đặt xe mới
 
 **Request:**
+
 ```json
 {
   "customer_id": 1,
@@ -1613,6 +1728,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -1630,6 +1746,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Xác nhận nhận xe
 
 **Request:**
+
 ```json
 {
   "actual_pickup_time": "2024-01-20T08:30:00Z",
@@ -1639,6 +1756,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -1655,6 +1773,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Xác nhận trả xe
 
 **Request:**
+
 ```json
 {
   "actual_return_time": "2024-01-22T18:30:00Z",
@@ -1664,6 +1783,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -1682,6 +1802,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Lấy danh sách hợp đồng
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -1708,6 +1829,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Tạo hợp đồng mới
 
 **Request:**
+
 ```json
 {
   "booking_id": 1,
@@ -1719,6 +1841,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -1737,6 +1860,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Lấy danh sách thanh toán
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -1764,6 +1888,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Tạo thanh toán mới
 
 **Request:**
+
 ```json
 {
   "booking_id": 1,
@@ -1774,6 +1899,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -1792,6 +1918,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Lấy danh sách báo cáo hư hỏng
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -1822,6 +1949,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Tạo báo cáo hư hỏng mới
 
 **Request:**
+
 ```json
 {
   "booking_id": 1,
@@ -1838,6 +1966,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -1855,6 +1984,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Lấy danh sách đánh giá
 
 **Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -1886,6 +2016,7 @@ ws://api.example.com/api/alerts/realtime
 **Mô tả:** [Phase 2] Tạo đánh giá mới
 
 **Request:**
+
 ```json
 {
   "booking_id": 1,
@@ -1898,6 +2029,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -1911,6 +2043,7 @@ ws://api.example.com/api/alerts/realtime
 ### XI.18 Error Handling
 
 **Standard Error Response:**
+
 ```json
 {
   "statusCode": 400,
@@ -1926,6 +2059,7 @@ ws://api.example.com/api/alerts/realtime
 ```
 
 **HTTP Status Codes:**
+
 - `200 OK`: Success
 - `201 Created`: Resource created successfully
 - `400 Bad Request`: Validation error, invalid input
@@ -1940,6 +2074,7 @@ ws://api.example.com/api/alerts/realtime
 ### XI.19 Pagination
 
 **Standard Pagination Format:**
+
 ```json
 {
   "data": [...],
@@ -1957,11 +2092,13 @@ ws://api.example.com/api/alerts/realtime
 ### XI.20 Authentication & Authorization
 
 **JWT Token Format:**
+
 ```
 Authorization: Bearer {access_token}
 ```
 
 **Token Payload:**
+
 ```json
 {
   "sub": 1,
@@ -1974,6 +2111,7 @@ Authorization: Bearer {access_token}
 ```
 
 **Role-based Access:**
+
 - `admin`: Full access
 - `manager`: Read/write access (không thể tạo/xóa admin)
 - `staff`: Read/write access (hạn chế một số operations)
@@ -1983,11 +2121,13 @@ Authorization: Bearer {access_token}
 ### XI.21 Rate Limiting
 
 **Limits:**
+
 - Public endpoints: 100 requests/hour
 - Authenticated endpoints: 1000 requests/hour
 - Admin endpoints: 5000 requests/hour
 
 **Response Headers:**
+
 ```
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 999
@@ -2015,6 +2155,7 @@ X-RateLimit-Reset: 1705318800
 **Headers:** `Authorization: Bearer {access_token}`
 
 **Response (200 OK):**
+
 ```json
 {
   "user_id": 1,
@@ -2045,6 +2186,7 @@ X-RateLimit-Reset: 1705318800
 **Mô tả:** Cập nhật notification preferences
 
 **Request:**
+
 ```json
 {
   "telegram_enabled": true,
@@ -2062,6 +2204,7 @@ X-RateLimit-Reset: 1705318800
 **Mô tả:** Lấy link để kết nối Telegram bot
 
 **Response (200 OK):**
+
 ```json
 {
   "bot_username": "@your_vehicle_tracking_bot",
@@ -2076,6 +2219,7 @@ X-RateLimit-Reset: 1705318800
 **Mô tả:** Xác minh Telegram chat ID
 
 **Request:**
+
 ```json
 {
   "token": "USER_TOKEN_123",
@@ -2090,6 +2234,7 @@ X-RateLimit-Reset: 1705318800
 **Mô tả:** Ngắt kết nối Telegram
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Đã ngắt kết nối Telegram"
@@ -2103,6 +2248,7 @@ X-RateLimit-Reset: 1705318800
 **Mô tả:** Test gửi notification
 
 **Request:**
+
 ```json
 {
   "channels": ["telegram", "email"],
@@ -2117,6 +2263,7 @@ X-RateLimit-Reset: 1705318800
 ### XI.24 Summary
 
 **Phase 1 APIs (Core):**
+
 - ✅ Authentication (login, register, refresh, logout)
 - ✅ Vehicles (CRUD, status)
 - ✅ Customers (CRUD, verification)
@@ -2131,6 +2278,7 @@ X-RateLimit-Reset: 1705318800
 - ✅ Notifications (preferences, Telegram connect/verify, test)
 
 **[Phase 2] APIs:**
+
 - ⏸️ Bookings (CRUD, pickup, return, tracking)
 - ⏸️ Contracts (CRUD, sign, document)
 - ⏸️ Payments (CRUD, process)
@@ -2138,4 +2286,3 @@ X-RateLimit-Reset: 1705318800
 - ⏸️ Reviews (CRUD, moderate)
 
 **Total Endpoints:** ~55+ endpoints (Phase 1: ~40, Phase 2: ~15)
-

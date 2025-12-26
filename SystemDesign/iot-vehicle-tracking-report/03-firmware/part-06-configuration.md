@@ -18,7 +18,7 @@ typedef struct {
     char mqtt_password[32];
     uint16_t heartbeat_interval;  // giây
     uint16_t tracking_interval;  // giây
-    char obd2_mac[18];  // MAC address ELM327
+    char obd2_ble_address[18];  // BLE address (MAC) của vgate iCar Pro
     float lvd_threshold;  // 12.0 V
     float lvd_hysteresis;  // 12.2 V
 } config_t;
