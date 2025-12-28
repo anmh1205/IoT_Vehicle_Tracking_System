@@ -3,7 +3,7 @@
 Tài liệu này đã được tách thành các file chi tiết:
 
 - [`01-overview.md`](./01-overview.md) - Tổng quan và lựa chọn database
-- [`02-postgresql-schema.md`](./02-postgresql-schema.md) - PostgreSQL Schema chi tiết (tất cả tables)
+- [`02-postgresql-schema/README.md`](./02-postgresql-schema/README.md) - PostgreSQL Schema chi tiết (tất cả tables)
 - [`03-influxdb-schema.md`](./03-influxdb-schema.md) - InfluxDB Schema (time-series data)
 - [`04-relationships.md`](./04-relationships.md) - Database Relationships và ER Diagram
 - [`05-indexes-performance.md`](./05-indexes-performance.md) - Indexes và Performance Optimization

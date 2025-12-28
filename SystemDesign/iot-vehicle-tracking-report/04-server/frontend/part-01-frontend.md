@@ -1,6 +1,6 @@
 ## PHẦN XII: THIẾT KẾ FRONTEND (GIAO DIỆN NGƯỜI DÙNG)
 
-**Chi tiết thiết kế và implementation plan:** [`part-02-frontend-design.md`](./part-02-frontend-design.md)
+**Chi tiết thiết kế và implementation plan:** [`part-02-frontend-design/README.md`](./part-02-frontend-design/README.md)
 
 ---
 
@@ -89,7 +89,7 @@ Frontend (Next.js)
 
 ### XII.6 Chi Tiết Thiết Kế
 
-Xem file [`part-02-frontend-design.md`](./part-02-frontend-design.md) để biết:
+Xem folder [`part-02-frontend-design/`](./part-02-frontend-design/) để biết:
 - Cấu trúc thư mục chi tiết
 - Tech stack đầy đủ
 - Theme & màu sắc

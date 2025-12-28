@@ -27,24 +27,89 @@ Frontend (Web/Mobile)
 
 **So Sánh Ngắn Gọn:**
 
-| Tiêu Chí             | Node.js + NestJS | Python + FastAPI  | Go + Gin/Echo |
-| -------------------- | ---------------- | ----------------- | ------------- |
-| **Learning Curve**   | ⭐⭐⭐⭐⭐ (Dễ)  | ⭐⭐⭐⭐⭐ (Dễ)   | ⭐⭐⭐ (Khó)  |
-| **Ecosystem**        | ⭐⭐⭐⭐⭐ (npm) | ⭐⭐⭐⭐⭐ (PyPI) | ⭐⭐⭐⭐      |
-| **Real-time**        | ⭐⭐⭐⭐⭐       | ⭐⭐⭐⭐          | ⭐⭐⭐⭐      |
-| **MQTT Support**     | ⭐⭐⭐⭐⭐       | ⭐⭐⭐⭐⭐        | ⭐⭐⭐⭐      |
-| **Phù Hợp Luận Văn** | ⭐⭐⭐⭐⭐       | ⭐⭐⭐⭐          | ⭐⭐⭐        |
+| Tiêu Chí              | Node.js + NestJS      | Rust + Actix-web/Axum     | Python + FastAPI    | Go + Gin/Echo           |
+| --------------------- | --------------------- | ------------------------- | ------------------- | ----------------------- |
+| **Learning Curve**    | ⭐⭐⭐⭐⭐ (Dễ)       | ⭐⭐ (Rất khó)            | ⭐⭐⭐⭐⭐ (Dễ)     | ⭐⭐⭐ (Khó)            |
+| **Ecosystem**         | ⭐⭐⭐⭐⭐ (npm)      | ⭐⭐⭐ (Cargo)            | ⭐⭐⭐⭐⭐ (PyPI)   | ⭐⭐⭐⭐                |
+| **Performance**       | ⭐⭐⭐⭐              | ⭐⭐⭐⭐⭐ (Cực cao)      | ⭐⭐⭐              | ⭐⭐⭐⭐⭐              |
+| **Memory Usage**      | ⭐⭐⭐                | ⭐⭐⭐⭐⭐ (Rất thấp)     | ⭐⭐⭐              | ⭐⭐⭐⭐⭐              |
+| **Real-time**         | ⭐⭐⭐⭐⭐            | ⭐⭐⭐⭐                  | ⭐⭐⭐⭐            | ⭐⭐⭐⭐                |
+| **MQTT Support**      | ⭐⭐⭐⭐⭐            | ⭐⭐⭐⭐                  | ⭐⭐⭐⭐⭐          | ⭐⭐⭐⭐                |
+| **Concurrency**       | ⭐⭐⭐⭐ (Event Loop) | ⭐⭐⭐⭐⭐ (Async/Await)  | ⭐⭐⭐⭐ (AsyncIO)  | ⭐⭐⭐⭐⭐ (Goroutines) |
+| **Type Safety**       | ⭐⭐⭐⭐ (TypeScript) | ⭐⭐⭐⭐⭐ (Compile-time) | ⭐⭐⭐ (Type hints) | ⭐⭐⭐⭐                |
+| **Development Speed** | ⭐⭐⭐⭐⭐            | ⭐⭐ (Chậm)               | ⭐⭐⭐⭐⭐          | ⭐⭐⭐⭐                |
+| **Phù Hợp Luận Văn**  | ⭐⭐⭐⭐⭐            | ⭐⭐                      | ⭐⭐⭐⭐            | ⭐⭐⭐                  |
+
+**So Sánh Chi Tiết: Node.js vs Rust**
+
+#### Node.js + NestJS
+
+**Ưu Điểm:**
+
+- ✅ **Dễ học và phát triển nhanh**: TypeScript/JavaScript phổ biến, nhiều tài liệu, cộng đồng lớn
+- ✅ **Ecosystem phong phú**: npm có sẵn thư viện cho MQTT, PostgreSQL, InfluxDB, WebSocket
+- ✅ **NestJS Framework**: Cấu trúc rõ ràng, Dependency Injection, Decorators, phù hợp dự án lớn
+- ✅ **Real-time tốt**: Socket.io tích hợp dễ dàng, event-driven architecture
+- ✅ **TypeScript**: Type safety, IntelliSense tốt, dễ maintain
+- ✅ **Development Speed**: Hot reload, debugging dễ dàng
+- ✅ **Phù hợp IoT**: Nhiều dự án IoT dùng Node.js (Home Assistant, Node-RED, etc.)
+- ✅ **Phù hợp luận văn**: Dễ giải thích, nhiều ví dụ, tài liệu đầy đủ
+
+**Nhược Điểm:**
+
+- ⚠️ **Performance**: Chậm hơn Rust/Go (nhưng đủ cho IoT tracking system)
+- ⚠️ **Memory Usage**: Tiêu thụ RAM cao hơn (nhưng không phải vấn đề với server hiện đại)
+- ⚠️ **Single-threaded**: Event loop có thể bị block nếu code không tối ưu
+
+#### Rust + Actix-web/Axum
+
+**Ưu Điểm:**
+
+- ✅ **Performance cực cao**: Zero-cost abstractions, không có GC, tốc độ gần như C/C++
+- ✅ **Memory Safety**: Compile-time checks, không có null pointer, data races
+- ✅ **Memory Usage thấp**: Tiêu thụ RAM rất ít, phù hợp embedded/IoT
+- ✅ **Concurrency mạnh**: Async/await hiệu quả, tokio runtime
+- ✅ **Type Safety tuyệt đối**: Compile-time guarantees, không có runtime errors
+- ✅ **Phù hợp hệ thống real-time**: Latency thấp, throughput cao
+
+**Nhược Điểm:**
+
+- ❌ **Learning Curve rất cao**: Ownership, Borrowing, Lifetimes khó học
+- ❌ **Development Speed chậm**: Compile time lâu, debugging khó hơn
+- ❌ **Ecosystem nhỏ hơn**: Ít thư viện hơn npm, một số thư viện chưa mature
+- ❌ **MQTT/WebSocket libraries**: Có nhưng ít tài liệu và ví dụ hơn
+- ❌ **Không phù hợp luận văn**: Khó giải thích, ít ví dụ IoT, thời gian phát triển lâu
+- ❌ **Overkill cho dự án này**: Performance của Rust không cần thiết cho IoT tracking system
+
+**Kết Luận So Sánh:**
+
+| Khía Cạnh                | Node.js + NestJS | Rust + Actix-web      | Lựa Chọn                               |
+| ------------------------ | ---------------- | --------------------- | -------------------------------------- |
+| **Thời gian phát triển** | 2-3 tháng        | 4-6 tháng             | ✅ Node.js                             |
+| **Độ khó học**           | Dễ               | Rất khó               | ✅ Node.js                             |
+| **Tài liệu IoT**         | Nhiều            | Ít                    | ✅ Node.js                             |
+| **Performance**          | Đủ (1000+ req/s) | Cực cao (100k+ req/s) | ⚖️ Rust tốt hơn nhưng không cần        |
+| **Memory**               | ~200-500 MB      | ~50-100 MB            | ⚖️ Rust tốt hơn nhưng không quan trọng |
+| **Phù hợp luận văn**     | Rất phù hợp      | Không phù hợp         | ✅ Node.js                             |
 
 **Lựa Chọn: Node.js + NestJS**
 
-**Lý Do:**
+**Lý Do Chọn Node.js thay vì Rust:**
 
-- ✅ **Dễ học**: TypeScript/JavaScript phổ biến, nhiều tài liệu
-- ✅ **Ecosystem phong phú**: npm có sẵn thư viện cho MQTT, PostgreSQL, InfluxDB, WebSocket
-- ✅ **NestJS**: Framework có cấu trúc rõ ràng, phù hợp dự án lớn
-- ✅ **Real-time tốt**: Socket.io tích hợp dễ dàng
-- ✅ **TypeScript**: Type safety, dễ maintain
-- ✅ **Phù hợp IoT**: Nhiều dự án IoT dùng Node.js
+1. **Thời gian phát triển**: Node.js cho phép hoàn thành dự án trong 2-3 tháng, Rust cần 4-6 tháng do learning curve cao
+2. **Phù hợp luận văn**: Dễ giải thích, nhiều ví dụ, tài liệu đầy đủ, phù hợp với mục tiêu đồ án
+3. **Ecosystem IoT**: npm có nhiều thư viện mature cho MQTT, WebSocket, PostgreSQL, InfluxDB
+4. **Development experience**: Hot reload, debugging dễ, TypeScript IntelliSense tốt
+5. **Performance đủ dùng**: Node.js đủ xử lý hàng nghìn requests/s cho IoT tracking system
+6. **Rust overkill**: Performance của Rust (100k+ req/s) không cần thiết cho hệ thống này (chỉ cần 1k+ req/s)
+
+**Lý Do Không Chọn Rust:**
+
+- ❌ Learning curve quá cao (Ownership, Borrowing, Lifetimes) → mất nhiều thời gian học
+- ❌ Ecosystem nhỏ hơn, ít thư viện IoT mature
+- ❌ Compile time lâu, development chậm
+- ❌ Khó giải thích trong luận văn, ít ví dụ IoT
+- ❌ Performance không cần thiết cho quy mô dự án này
 
 **Tech Stack:**
 
@@ -184,7 +249,7 @@ api-server/
 
 ### X.4 API Endpoints
 
-**Chi tiết API endpoints được mô tả trong file:** [`part-05-api-endpoints.md`](./part-05-api-endpoints.md)
+**Chi tiết API endpoints được mô tả trong folder:** [`part-05-api-endpoints/README.md`](./part-05-api-endpoints/README.md)
 
 **Tóm tắt:**
 

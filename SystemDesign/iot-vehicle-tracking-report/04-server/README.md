@@ -9,7 +9,9 @@ Folder này chứa thiết kế toàn bộ hệ thống server, bao gồm cả *
 ├── backend/          # Backend (MQTT, Database, API)
 │   ├── part-01-mqtt-broker.md
 │   ├── part-02-emqx-rules-engine.md
-│   ├── part-03-database.md
+│   ├── part-03-database/ (folder)
+│   ├── part-05-api-endpoints/ (folder)
+│   ├── part-06-notifications-integrations/ (folder)
 │   └── README.md
 └── frontend/         # Frontend (Web/Mobile UI)
     ├── part-01-frontend.md

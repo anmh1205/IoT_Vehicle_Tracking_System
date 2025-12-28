@@ -7,6 +7,7 @@
 ### VIII.2 Ví Dụ Rule 1: Low Battery Alert
 
 **SQL Rule:**
+
 ```sql
 SELECT
   clientid as vehicle_id,
@@ -20,6 +21,7 @@ WHERE payload.battery < 20
 ### VIII.3 Ví Dụ Rule 2: Detect Motion
 
 **SQL Rule:**
+
 ```sql
 SELECT
   clientid as vehicle_id,
@@ -34,6 +36,7 @@ WHERE payload.speed > 0.5
 ### VIII.4 Ví Dụ Rule 3: Motion Detected Alert
 
 **SQL Rule:**
+
 ```sql
 SELECT
   clientid as device_id,
@@ -50,6 +53,7 @@ WHERE payload.alert_type = 'motion_detected'
 **[Phase 2] Ví Dụ Rule 4: Unauthorized Movement Alert**
 
 **SQL Rule:**
+
 ```sql
 SELECT
   clientid as device_id,
@@ -69,6 +73,7 @@ WHERE payload.status.mode = 'driving'
 **[Phase 2] Ví Dụ Rule 5: Motion Detected When Not Rented**
 
 **SQL Rule:**
+
 ```sql
 SELECT
   clientid as device_id,
@@ -85,6 +90,7 @@ WHERE payload.alert_type = 'motion_detected'
 ### VIII.5 Ví Dụ Rule 4: Speeding Alert
 
 **SQL Rule:**
+
 ```sql
 SELECT
   clientid as device_id,
@@ -104,6 +110,7 @@ WHERE payload.location.speed > 100
 ### VIII.6 Ví Dụ Rule 5: Low Battery Alert
 
 **SQL Rule:**
+
 ```sql
 SELECT
   clientid as device_id,
@@ -158,6 +165,4 @@ MQTT Message → Rules Engine → Check Booking Status → Create Alert/Violatio
 
 - Rules Engine có thể gọi webhook đến API Server
 - API Server sẽ gửi notifications qua Telegram và Email dựa trên user preferences
-- Chi tiết: Xem [`part-06-notifications-integrations.md`](./part-06-notifications-integrations.md)
-
-
+- Chi tiết: Xem [`part-06-notifications-integrations/README.md`](./part-06-notifications-integrations/README.md)

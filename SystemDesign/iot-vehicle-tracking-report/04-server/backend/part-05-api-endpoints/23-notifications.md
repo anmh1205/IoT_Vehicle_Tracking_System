@@ -110,7 +110,7 @@
 }
 ```
 
-**Chi tiết thiết kế:** Xem [`part-06-notifications-integrations.md`](../part-06-notifications-integrations.md)
+**Chi tiết thiết kế:** Xem [`../part-06-notifications-integrations/README.md`](../part-06-notifications-integrations/README.md)
 
 ---
 

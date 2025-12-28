@@ -10,7 +10,8 @@ Folder này chứa thiết kế firmware cho thiết bị tracker.
 - **part-04-power-management-gpio.md**: Power Path Management Control, GPIO mapping và configuration
 - **part-05-data-format-state-machine.md**: Data format (MQTT), protocol, và state machine chi tiết
 - **part-06-configuration.md**: Configuration management và calibration
-- **part-07-vgate-icar-pro-esp-idf-reference.md**: Tham khảo code ESP-IDF cho vgate iCar Pro (từ project esp32-obd2-meter)
+- **part-07-vgate-icar-pro-esp-idf-reference/**: Tham khảo code ESP-IDF cho vgate iCar Pro (từ project esp32-obd2-meter)
+  - Xem [`part-07-vgate-icar-pro-esp-idf-reference/README.md`](./part-07-vgate-icar-pro-esp-idf-reference/README.md) để biết danh sách đầy đủ
 
 ## Workflow
 

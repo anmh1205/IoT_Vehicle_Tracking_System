@@ -4,7 +4,8 @@ Folder này chứa các tài liệu về các điểm cần cải tiến trong h
 
 ## Nội dung
 
-- **part-01-improvement-opportunities.md**: Tổng hợp các điểm cần cải tiến, được phân loại theo:
+- **part-01-improvement-opportunities/**: Tổng hợp các điểm cần cải tiến, được phân loại theo:
+  - Xem [`part-01-improvement-opportunities/README.md`](./part-01-improvement-opportunities/README.md) để biết danh sách đầy đủ
   - Bảo mật (Security)
   - Hiệu năng (Performance)
   - Độ tin cậy (Reliability)
@@ -23,7 +24,7 @@ Tài liệu này giúp:
 
 ## Cách sử dụng
 
-1. Đọc `part-01-improvement-opportunities.md` để hiểu các điểm cần cải tiến
+1. Đọc `part-01-improvement-opportunities/README.md` để hiểu các điểm cần cải tiến
 2. Ưu tiên các cải tiến theo mức độ quan trọng (🔴 Cao, 🟡 Trung bình, 🟢 Thấp)
 3. Lập kế hoạch triển khai cho từng phase
 4. Cập nhật tài liệu khi có thêm điểm cần cải tiến

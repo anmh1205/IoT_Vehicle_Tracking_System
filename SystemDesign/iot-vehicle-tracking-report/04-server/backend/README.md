@@ -6,10 +6,13 @@ Folder này chứa thiết kế hệ thống backend (MQTT broker, rules engine,
 
 - **part-01-mqtt-broker.md**: Lựa chọn và cấu hình MQTT broker (EMQX được khuyến nghị)
 - **part-02-emqx-rules-engine.md**: Sử dụng EMQX Rules Engine để xử lý dữ liệu
-- **part-03-database.md**: Kiến trúc database (PostgreSQL + InfluxDB)
+- **part-03-database/**: Kiến trúc database (PostgreSQL + InfluxDB)
+  - Xem [`part-03-database/README.md`](./part-03-database/README.md) để biết danh sách đầy đủ
 - **part-04-api-server.md**: API Server backend (Node.js + NestJS được khuyến nghị)
-- **part-05-api-endpoints.md**: Chi tiết thiết kế API endpoints (REST + WebSocket)
-- **part-06-notifications-integrations.md**: Tích hợp Telegram Bot và Email notifications
+- **part-05-api-endpoints/**: Chi tiết thiết kế API endpoints (REST + WebSocket)
+  - Xem [`part-05-api-endpoints/README.md`](./part-05-api-endpoints/README.md) để biết danh sách đầy đủ
+- **part-06-notifications-integrations/**: Tích hợp Telegram Bot và Email notifications
+  - Xem [`part-06-notifications-integrations/README.md`](./part-06-notifications-integrations/README.md) để biết danh sách đầy đủ
 - **schema.sql**: Database schema SQL file (đầy đủ Phase 1 + Phase 2)
 
 ## Workflow
