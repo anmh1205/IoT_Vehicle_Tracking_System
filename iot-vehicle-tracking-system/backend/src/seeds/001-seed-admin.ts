@@ -26,7 +26,7 @@ export async function seedAdmin(dataSource: DataSource): Promise<void> {
     passwordHash: passwordHash,
     fullName: 'System Administrator',
     role: 'admin',
-    active: true,
+    status: 'active',
   });
 
   await userRepository.save(admin);

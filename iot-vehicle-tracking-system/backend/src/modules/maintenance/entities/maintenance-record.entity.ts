@@ -41,7 +41,7 @@ export class MaintenanceRecord {
   @Column({ name: 'mileage_km', type: 'int', nullable: true })
   mileageKm: number | null;
 
-  @Column({ name: 'performed_by', nullable: true, length: 100 })
+  @Column({ name: 'performed_by', type: 'varchar', nullable: true, length: 100 })
   performedBy: string | null;
 
   @Column({ name: 'next_maintenance_date', type: 'date', nullable: true })

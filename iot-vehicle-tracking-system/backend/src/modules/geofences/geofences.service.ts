@@ -21,11 +21,11 @@ export class GeofencesService {
     @InjectRepository(Geofence)
     private geofenceRepository: Repository<Geofence>,
     private vehiclesService: VehiclesService
-  ) {}
+  ) { }
 
   async findAll() {
     return this.geofenceRepository.find({
-      relations: ['vehicles', 'creator'],
+      relations: ['creator'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -33,7 +33,7 @@ export class GeofencesService {
   async findOne(id: number) {
     const geofence = await this.geofenceRepository.findOne({
       where: { id },
-      relations: ['vehicles', 'creator'],
+      relations: ['creator'],
     });
 
     if (!geofence) {
@@ -89,45 +89,9 @@ export class GeofencesService {
     return { message: 'Geofence deleted successfully' };
   }
 
+  // assignVehicles temporarily disabled - ManyToMany relation commented out
   async assignVehicles(id: number, assignDto: AssignVehiclesDto) {
-    const geofence = await this.findOne(id);
-
-    // Verify all vehicles exist
-    const vehicles = await this.vehiclesService.findAll({
-      page: 1,
-      limit: assignDto.vehicleIds.length,
-    });
-
-    const existingVehicleIds = vehicles.data.map((v) => v.id);
-    const invalidIds = assignDto.vehicleIds.filter(
-      (id) => !existingVehicleIds.includes(id)
-    );
-
-    if (invalidIds.length > 0) {
-      throw new BadRequestException(
-        `Vehicles with IDs ${invalidIds.join(', ')} not found`
-      );
-    }
-
-    // Get vehicle entities
-    const vehicleEntities = await this.vehiclesService.findAll({
-      page: 1,
-      limit: 1000,
-    });
-    const vehiclesToAssign = vehicleEntities.data.filter((v) =>
-      assignDto.vehicleIds.includes(v.id)
-    );
-
-    geofence.vehicles = vehiclesToAssign;
-    await this.geofenceRepository.save(geofence);
-
-    return {
-      geofence_id: id,
-      assigned_vehicles: vehiclesToAssign.map((v) => ({
-        vehicle_id: v.id,
-        plate_number: v.plateNumber,
-      })),
-    };
+    throw new BadRequestException('Vehicle assignment feature is temporarily disabled');
   }
 }
 

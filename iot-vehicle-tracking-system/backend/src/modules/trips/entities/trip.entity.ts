@@ -21,7 +21,7 @@ export class Trip {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'booking_id', nullable: true })
+  @Column({ name: 'booking_id', type: 'int', nullable: true })
   bookingId: number | null;
 
   @Column({ name: 'vehicle_id' })
@@ -31,7 +31,7 @@ export class Trip {
   @JoinColumn({ name: 'vehicle_id' })
   vehicle: Vehicle;
 
-  @Column({ name: 'customer_id', nullable: true })
+  @Column({ name: 'customer_id', type: 'int', nullable: true })
   customerId: number | null;
 
   @ManyToOne(() => Customer, { nullable: true, onDelete: 'SET NULL' })

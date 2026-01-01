@@ -104,7 +104,7 @@ export class CommandsService {
       // Publish command to MQTT
       const topic = `vehicle/${deviceId}/commands`;
       const payload = {
-        command_id: savedCommand.id,
+        commandId: savedCommand.id,
         command: sendCommandDto.command,
         params: sendCommandDto.params || {},
         timestamp: new Date().toISOString(),
@@ -122,11 +122,11 @@ export class CommandsService {
       );
 
       return {
-        command_id: savedCommand.id,
-        device_id: deviceId,
+        commandId: savedCommand.id,
+        deviceId: deviceId,
         command: sendCommandDto.command,
         status: 'sent',
-        sent_at: savedCommand.sentAt.toISOString(),
+        sentAt: savedCommand.sentAt.toISOString(),
       };
     } catch (error) {
       // Update command status to failed

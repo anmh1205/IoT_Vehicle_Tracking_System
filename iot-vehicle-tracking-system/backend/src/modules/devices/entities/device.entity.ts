@@ -23,7 +23,7 @@ export class Device {
   @Column({ name: 'device_id', unique: true, length: 50 })
   deviceId: string;
 
-  @Column({ name: 'vehicle_id', nullable: true })
+  @Column({ name: 'vehicle_id', type: 'int', nullable: true })
   vehicleId: number | null;
 
   @ManyToOne(() => Vehicle, { nullable: true, onDelete: 'SET NULL' })
@@ -33,16 +33,16 @@ export class Device {
   @Column({ name: 'device_type', length: 50, default: 'tracker' })
   deviceType: string;
 
-  @Column({ name: 'firmware_version', nullable: true, length: 20 })
+  @Column({ name: 'firmware_version', type: 'varchar', nullable: true, length: 20 })
   firmwareVersion: string | null;
 
-  @Column({ name: 'hardware_version', nullable: true, length: 20 })
+  @Column({ name: 'hardware_version', type: 'varchar', nullable: true, length: 20 })
   hardwareVersion: string | null;
 
-  @Column({ unique: true, nullable: true, length: 20 })
+  @Column({ type: 'varchar', unique: true, nullable: true, length: 20 })
   imei: string | null;
 
-  @Column({ name: 'sim_card_number', nullable: true, length: 20 })
+  @Column({ name: 'sim_card_number', type: 'varchar', nullable: true, length: 20 })
   simCardNumber: string | null;
 
   @Column({

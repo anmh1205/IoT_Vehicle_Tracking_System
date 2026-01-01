@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UserRole } from '../entities/user.entity';
 
 export class UserResponseDto {
   @ApiProperty()
@@ -16,13 +17,16 @@ export class UserResponseDto {
   @ApiProperty({ required: false })
   phone?: string;
 
-  @ApiProperty({ enum: ['admin', 'staff', 'user'] })
-  role: 'admin' | 'staff' | 'user';
+  @ApiProperty({ enum: ['admin', 'manager', 'staff', 'user'] })
+  role: UserRole;
 }
 
 export class SessionResponseDto {
   @ApiProperty()
   token: string;
+
+  @ApiProperty()
+  refreshToken: string;
 
   @ApiProperty()
   expiresAt: string;
@@ -34,5 +38,21 @@ export class LoginResponseDto {
 
   @ApiProperty({ type: SessionResponseDto })
   session: SessionResponseDto;
+}
+
+export class TokenResponseDto {
+  @ApiProperty()
+  accessToken: string;
+
+  @ApiProperty()
+  refreshToken: string;
+
+  @ApiProperty()
+  expiresAt: string;
+}
+
+export class RefreshTokenDto {
+  @ApiProperty()
+  refreshToken: string;
 }
 

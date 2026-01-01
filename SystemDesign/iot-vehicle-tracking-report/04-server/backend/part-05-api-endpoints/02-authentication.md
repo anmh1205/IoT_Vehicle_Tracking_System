@@ -8,25 +8,33 @@
 
 **Request:**
 
+> **NOTE**: Backend accepts `username` field which can be either username or email address.
+
 ```json
 {
-  "email": "admin@example.com",
+  "username": "admin@example.com",
   "password": "password123"
 }
 ```
 
 **Response (200 OK):**
 
+> **NOTE**: Backend wraps tokens in `session` object, not at root level.
+
 ```json
 {
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "id": 1,
     "username": "admin",
     "email": "admin@example.com",
-    "full_name": "Admin User",
-    "role": "admin"
+    "fullName": "Admin User",
+    "role": "admin",
+    "status": "active"
+  },
+  "session": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "expiresAt": "2024-01-15T11:00:00Z"
   }
 }
 ```

@@ -28,7 +28,7 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 export class CommandsController {
   constructor(private readonly commandsService: CommandsService) {}
 
-  @Post(':device_id')
+  @Post(':deviceId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Send command to device via MQTT' })
   @ApiResponse({
@@ -44,7 +44,7 @@ export class CommandsController {
     description: 'Invalid command or MQTT not connected',
   })
   sendCommand(
-    @Param('device_id') deviceId: string,
+    @Param('deviceId') deviceId: string,
     @Body() sendCommandDto: SendCommandDto,
     @CurrentUser() user: any
   ) {

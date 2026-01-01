@@ -14,12 +14,12 @@
     {
       "id": 1,
       "name": "Văn phòng chính",
-      "geofence_type": "circle",
+      "geofenceType": "circle",
       "center": {
         "lat": 21.028511,
         "lon": 105.804817
       },
-      "radius_meters": 500,
+      "radiusMeters": 500,
       "enabled": true
     }
   ]
@@ -38,12 +38,12 @@
 {
   "name": "Văn phòng chính",
   "description": "Khu vực văn phòng",
-  "geofence_type": "circle",
-  "center_lat": 21.028511,
-  "center_lon": 105.804817,
-  "radius_meters": 500,
-  "alert_on_entry": false,
-  "alert_on_exit": true
+  "geofenceType": "circle",
+  "centerLat": 21.028511,
+  "centerLon": 105.804817,
+  "radiusMeters": 500,
+  "alertOnEntry": false,
+  "alertOnExit": true
 }
 ```
 
@@ -52,15 +52,15 @@
 ```json
 {
   "name": "Khu vực cấm",
-  "geofence_type": "polygon",
+  "geofenceType": "polygon",
   "coordinates": [
     [21.028511, 105.804817],
     [21.029511, 105.805817],
     [21.030511, 105.806817],
     [21.028511, 105.804817]
   ],
-  "alert_on_entry": true,
-  "alert_on_exit": true
+  "alertOnEntry": true,
+  "alertOnExit": true
 }
 ```
 
@@ -71,7 +71,7 @@
   "id": 1,
   "name": "Văn phòng chính",
   "enabled": true,
-  "created_at": "2024-01-15T10:00:00Z"
+  "createdAt": "2024-01-15T10:00:00Z"
 }
 ```
 
@@ -85,7 +85,7 @@
 
 ```json
 {
-  "vehicle_ids": [1, 2, 3]
+  "vehicleIds": [1, 2, 3]
 }
 ```
 
@@ -93,11 +93,11 @@
 
 ```json
 {
-  "geofence_id": 1,
-  "assigned_vehicles": [
+  "geofenceId": 1,
+  "assignedVehicles": [
     {
-      "vehicle_id": 1,
-      "plate_number": "30A-12345"
+      "vehicleId": 1,
+      "plateNumber": "30A-12345"
     }
   ]
 }

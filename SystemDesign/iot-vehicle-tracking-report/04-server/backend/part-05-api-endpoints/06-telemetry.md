@@ -8,17 +8,17 @@
 
 **Query Parameters:**
 
-- `device_id` (string, required): Device ID
-- `start_time` (ISO 8601, required): Thời gian bắt đầu
-- `end_time` (ISO 8601, required): Thời gian kết thúc
+- `deviceId` (string, required): Device ID
+- `startTime` (ISO 8601, required): Thời gian bắt đầu
+- `endTime` (ISO 8601, required): Thời gian kết thúc
 - `interval` (string, optional): '1m', '5m', '10m', '1h' - Aggregate interval
 
 **Response (200 OK):**
 
 ```json
 {
-  "device_id": "TRACKER_001",
-  "vehicle_id": 1,
+  "deviceId": "TRACKER_001",
+  "vehicleId": 1,
   "data": [
     {
       "lat": 21.028511,
@@ -30,22 +30,23 @@
       "timestamp": "2024-01-15T10:00:00Z"
     }
   ],
-  "total_points": 100
+  "totalPoints": 100
 }
 ```
 
 **Errors:**
 
 **400 Bad Request - Missing required parameters:**
+
 ```json
 {
   "error": {
     "code": "BAD_REQUEST",
-    "message": "Missing required parameters: device_id, start_time, end_time",
+    "message": "Missing required parameters: deviceId, startTime, endTime",
     "status": 400,
     "path": "/api/v1/telemetry/location",
     "details": {
-      "missing_fields": ["device_id", "start_time"]
+      "missingFields": ["deviceId", "startTime"]
     },
     "traceId": "550e8400-e29b-41d4-a716-446655440000"
   },
@@ -54,6 +55,7 @@
 ```
 
 **404 Not Found - Device not found:**
+
 ```json
 {
   "error": {
@@ -62,7 +64,7 @@
     "status": 404,
     "path": "/api/v1/telemetry/location",
     "details": {
-      "device_id": "TRACKER_999"
+      "deviceId": "TRACKER_999"
     },
     "traceId": "550e8400-e29b-41d4-a716-446655440000"
   },
@@ -78,41 +80,41 @@
 
 **Query Parameters:**
 
-- `vehicle_id` (number, required)
-- `start_date` (ISO 8601, required)
-- `end_date` (ISO 8601, required)
-- `include_stops` (boolean, default: false): Bao gồm điểm dừng
+- `vehicleId` (number, required)
+- `startDate` (ISO 8601, required)
+- `endDate` (ISO 8601, required)
+- `includeStops` (boolean, default: false): Bao gồm điểm dừng
 
 **Response (200 OK):**
 
 ```json
 {
-  "vehicle_id": 1,
+  "vehicleId": 1,
   "period": {
     "start": "2024-01-15T00:00:00Z",
     "end": "2024-01-15T23:59:59Z"
   },
   "summary": {
-    "total_distance_km": 250.5,
-    "total_duration_minutes": 480,
-    "max_speed": 80.0,
-    "avg_speed": 45.0,
-    "stops_count": 5
+    "totalDistanceKm": 250.5,
+    "totalDurationMinutes": 480,
+    "maxSpeed": 80.0,
+    "avgSpeed": 45.0,
+    "stopsCount": 5
   },
   "trips": [
     {
-      "trip_id": 1,
-      "start_time": "2024-01-15T08:00:00Z",
-      "end_time": "2024-01-15T18:00:00Z",
-      "distance_km": 150.5
+      "tripId": 1,
+      "startTime": "2024-01-15T08:00:00Z",
+      "endTime": "2024-01-15T18:00:00Z",
+      "distanceKm": 150.5
     }
   ],
   "stops": [
     {
-      "stop_type": "parking",
-      "arrival_time": "2024-01-15T10:00:00Z",
-      "departure_time": "2024-01-15T10:30:00Z",
-      "duration_minutes": 30,
+      "stopType": "parking",
+      "arrivalTime": "2024-01-15T10:00:00Z",
+      "departureTime": "2024-01-15T10:30:00Z",
+      "durationMinutes": 30,
       "location": {
         "lat": 21.018511,
         "lon": 105.814817
@@ -128,10 +130,16 @@
 
 **Mô tả:** WebSocket endpoint cho real-time location updates
 
+> **BACKEND IMPLEMENTATION NOTE**:
+>
+> - Backend uses **Socket.io** with namespace pattern
+> - Connection URL: `ws://host/ws` → namespace `vehicles`
+> - Client should use `socket.io-client` library
+
 **WebSocket Connection:**
 
 ```
-ws://api.example.com/api/telemetry/realtime
+ws://api.example.com/ws (namespace: vehicles)
 ```
 
 **Subscribe Message:**
@@ -139,7 +147,7 @@ ws://api.example.com/api/telemetry/realtime
 ```json
 {
   "action": "subscribe",
-  "vehicle_ids": [1, 2, 3]
+  "vehicleIds": [1, 2, 3]
 }
 ```
 
@@ -148,7 +156,7 @@ ws://api.example.com/api/telemetry/realtime
 ```json
 {
   "action": "unsubscribe",
-  "vehicle_ids": [1]
+  "vehicleIds": [1]
 }
 ```
 
@@ -157,8 +165,8 @@ ws://api.example.com/api/telemetry/realtime
 ```json
 {
   "type": "location",
-  "vehicle_id": 1,
-  "device_id": "TRACKER_001",
+  "vehicleId": 1,
+  "deviceId": "TRACKER_001",
   "data": {
     "lat": 21.028511,
     "lon": 105.804817,
@@ -170,4 +178,3 @@ ws://api.example.com/api/telemetry/realtime
 ```
 
 ---
-

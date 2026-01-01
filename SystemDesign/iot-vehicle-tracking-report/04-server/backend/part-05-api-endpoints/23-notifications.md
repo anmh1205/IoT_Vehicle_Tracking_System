@@ -12,24 +12,24 @@
 
 ```json
 {
-  "user_id": 1,
+  "userId": 1,
   "telegram": {
     "enabled": true,
-    "chat_id": "123456789",
+    "chatId": "123456789",
     "verified": true
   },
   "email": {
     "enabled": true,
-    "email_address": "user@example.com"
+    "emailAddress": "user@example.com"
   },
-  "alert_types": [
+  "alertTypes": [
     "motion_detected",
     "speeding",
     "low_battery",
     "geofence_exit"
   ],
-  "min_severity": "medium",
-  "vehicle_ids": null
+  "minSeverity": "medium",
+  "vehicleIds": null
 }
 ```
 
@@ -43,11 +43,11 @@
 
 ```json
 {
-  "telegram_enabled": true,
-  "email_enabled": true,
-  "alert_types": ["motion_detected", "speeding", "low_battery"],
-  "min_severity": "high",
-  "vehicle_ids": [1, 2, 3]
+  "telegramEnabled": true,
+  "emailEnabled": true,
+  "alertTypes": ["motion_detected", "speeding", "low_battery"],
+  "minSeverity": "high",
+  "vehicleIds": [1, 2, 3]
 }
 ```
 
@@ -61,8 +61,8 @@
 
 ```json
 {
-  "bot_username": "@your_vehicle_tracking_bot",
-  "connect_url": "https://t.me/your_vehicle_tracking_bot?start=USER_TOKEN_123"
+  "botUsername": "@your_vehicle_tracking_bot",
+  "connectUrl": "https://t.me/your_vehicle_tracking_bot?start=USER_TOKEN_123"
 }
 ```
 
@@ -77,7 +77,7 @@
 ```json
 {
   "token": "USER_TOKEN_123",
-  "chat_id": "123456789"
+  "chatId": "123456789"
 }
 ```
 

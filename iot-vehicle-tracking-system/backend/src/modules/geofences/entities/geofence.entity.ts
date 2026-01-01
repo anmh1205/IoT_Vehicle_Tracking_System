@@ -65,7 +65,7 @@ export class Geofence {
   @Column({ default: true })
   enabled: boolean;
 
-  @Column({ name: 'created_by', nullable: true })
+  @Column({ name: 'created_by', type: 'int', nullable: true })
   createdBy: number | null;
 
   @ManyToOne(() => User, { nullable: true })
@@ -78,12 +78,14 @@ export class Geofence {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @ManyToMany(() => require('@/modules/vehicles/entities/vehicle.entity').Vehicle, 'geofences')
-  @JoinTable({
-    name: 'vehicle_geofences',
-    joinColumn: { name: 'geofence_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'vehicle_id', referencedColumnName: 'id' },
-  })
-  vehicles: any[];
+  // ManyToMany relation with Vehicle commented out due to TypeORM issue with require()
+  // TODO: Fix by using proper imports with forwardRef
+  // @ManyToMany(() => require('@/modules/vehicles/entities/vehicle.entity').Vehicle, 'geofences')
+  // @JoinTable({
+  //   name: 'vehicle_geofences',
+  //   joinColumn: { name: 'geofence_id', referencedColumnName: 'id' },
+  //   inverseJoinColumn: { name: 'vehicle_id', referencedColumnName: 'id' },
+  // })
+  // vehicles: any[];
 }
 

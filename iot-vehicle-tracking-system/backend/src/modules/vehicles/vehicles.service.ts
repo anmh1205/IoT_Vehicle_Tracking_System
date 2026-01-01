@@ -19,7 +19,7 @@ export class VehiclesService {
   constructor(
     @InjectRepository(Vehicle)
     private vehicleRepository: Repository<Vehicle>
-  ) {}
+  ) { }
 
   async findAll(queryDto: QueryVehicleDto) {
     const { page = 1, limit = 20, status, vehicleType, search } = queryDto;
@@ -166,6 +166,41 @@ export class VehiclesService {
     this.logger.log(`Vehicle ${vehicle.vehicleId} deleted`);
 
     return { message: 'Vehicle deleted successfully' };
+  }
+
+  async getStatus(id: number) {
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { id },
+      relations: ['owner'],
+    });
+
+    if (!vehicle) {
+      throw new NotFoundException(`Vehicle with ID ${id} not found`);
+    }
+
+    // In a real implementation, you would query:
+    // 1. Device service for device status
+    // 2. InfluxDB for current location
+    // 3. Trips service for current trip
+    // 4. Alerts service for active alerts
+
+    // For now, return basic status structure that can be extended
+    return {
+      vehicleId: vehicle.id,
+      vehicleCode: vehicle.vehicleId,
+      status: vehicle.status,
+      availabilityStatus: vehicle.availabilityStatus,
+      currentLocation: null, // TODO: Query from InfluxDB via TelemetryService
+      device: vehicle.deviceId ? {
+        id: vehicle.deviceId,
+        status: 'unknown', // TODO: Query from DevicesService
+        lastSeen: null,
+        batteryLevel: null,
+        signalStrength: null,
+      } : null,
+      currentTrip: null, // TODO: Query from TripsService
+      activeAlerts: [], // TODO: Query from AlertsService
+    };
   }
 }
 

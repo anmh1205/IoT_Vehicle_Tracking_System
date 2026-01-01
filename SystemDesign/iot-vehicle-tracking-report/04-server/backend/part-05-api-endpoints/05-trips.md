@@ -10,11 +10,11 @@
 
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
-- `vehicle_id` (number, optional): Filter theo xe
-- `customer_id` (number, optional): Filter theo khách hàng
+- `vehicleId` (number, optional): Filter theo xe
+- `customerId` (number, optional): Filter theo khách hàng
 - `status` (string, optional): 'in_progress', 'completed', 'cancelled'
-- `start_date` (ISO 8601, optional): Từ ngày
-- `end_date` (ISO 8601, optional): Đến ngày
+- `startDate` (ISO 8601, optional): Từ ngày
+- `endDate` (ISO 8601, optional): Đến ngày
 
 **Response (200 OK):**
 
@@ -23,21 +23,21 @@
   "data": [
     {
       "id": 1,
-      "trip_id": "TRIP-20240115-001",
+      "tripId": "TRIP-20240115-001",
       "vehicle": {
         "id": 1,
-        "plate_number": "30A-12345"
+        "plateNumber": "30A-12345"
       },
       "customer": {
         "id": 1,
-        "full_name": "Nguyễn Văn A"
+        "fullName": "Nguyễn Văn A"
       },
-      "start_time": "2024-01-15T08:00:00Z",
-      "end_time": "2024-01-15T18:00:00Z",
-      "distance_km": 150.5,
-      "duration_minutes": 600,
-      "max_speed": 80.0,
-      "avg_speed": 45.0,
+      "startTime": "2024-01-15T08:00:00Z",
+      "endTime": "2024-01-15T18:00:00Z",
+      "distanceKm": 150.5,
+      "durationMinutes": 600,
+      "maxSpeed": 80.0,
+      "avgSpeed": 45.0,
       "status": "completed"
     }
   ],
@@ -61,43 +61,43 @@
 ```json
 {
   "id": 1,
-  "trip_id": "TRIP-20240115-001",
-  "booking_id": null,
+  "tripId": "TRIP-20240115-001",
+  "bookingId": null,
   "vehicle": {
     "id": 1,
-    "plate_number": "30A-12345",
+    "plateNumber": "30A-12345",
     "brand": "Toyota",
     "model": "Camry"
   },
   "customer": {
     "id": 1,
-    "full_name": "Nguyễn Văn A",
+    "fullName": "Nguyễn Văn A",
     "phone": "0123456789"
   },
-  "start_time": "2024-01-15T08:00:00Z",
-  "end_time": "2024-01-15T18:00:00Z",
-  "start_location": {
+  "startTime": "2024-01-15T08:00:00Z",
+  "endTime": "2024-01-15T18:00:00Z",
+  "startLocation": {
     "lat": 21.028511,
     "lon": 105.804817,
     "address": "123 Đường ABC, Hà Nội"
   },
-  "end_location": {
+  "endLocation": {
     "lat": 20.998511,
     "lon": 105.824817,
     "address": "456 Đường XYZ, Hà Nội"
   },
-  "distance_km": 150.5,
-  "duration_minutes": 600,
-  "max_speed": 80.0,
-  "avg_speed": 45.0,
-  "mileage_at_start": 15000,
-  "mileage_at_end": 15150,
+  "distanceKm": 150.5,
+  "durationMinutes": 600,
+  "maxSpeed": 80.0,
+  "avgSpeed": 45.0,
+  "mileageAtStart": 15000,
+  "mileageAtEnd": 15150,
   "status": "completed",
   "events": [
     {
       "id": 1,
-      "event_type": "ignition_on",
-      "event_time": "2024-01-15T08:00:00Z",
+      "eventType": "ignition_on",
+      "eventTime": "2024-01-15T08:00:00Z",
       "location": {
         "lat": 21.028511,
         "lon": 105.804817
@@ -114,10 +114,10 @@
   "stops": [
     {
       "id": 1,
-      "stop_type": "parking",
+      "stopType": "parking",
       "arrival_time": "2024-01-15T10:00:00Z",
       "departure_time": "2024-01-15T10:30:00Z",
-      "duration_minutes": 30,
+      "durationMinutes": 30,
       "location": {
         "lat": 21.018511,
         "lon": 105.814817,
@@ -128,14 +128,14 @@
   "violations": [
     {
       "id": 1,
-      "violation_type": "speeding",
+      "violationType": "speeding",
       "violation_time": "2024-01-15T09:30:00Z",
       "speed_limit": 80.0,
-      "actual_speed": 85.0,
+      "actualSpeed": 85.0,
       "severity": "medium"
     }
   ],
-  "created_at": "2024-01-15T08:00:00Z"
+  "createdAt": "2024-01-15T08:00:00Z"
 }
 ```
 
@@ -153,7 +153,7 @@
 
 ```json
 {
-  "trip_id": 1,
+  "tripId": 1,
   "route": [
     {
       "lat": 21.028511,

@@ -40,20 +40,20 @@ export class TelemetryController {
     description: 'Device not found',
   })
   async getLocation(
-    @Query('device_id') deviceId: string,
-    @Query('start_time') startTime: string,
-    @Query('end_time') endTime: string,
+    @Query('deviceId') deviceId: string,
+    @Query('startTime') startTime: string,
+    @Query('endTime') endTime: string,
     @Query('interval') interval?: string
   ) {
     if (!deviceId || !startTime || !endTime) {
       throw new BadRequestException({
         code: 'BAD_REQUEST',
-        message: 'Missing required parameters: device_id, start_time, end_time',
+        message: 'Missing required parameters: deviceId, startTime, endTime',
         details: {
-          missing_fields: [
-            !deviceId ? 'device_id' : null,
-            !startTime ? 'start_time' : null,
-            !endTime ? 'end_time' : null,
+          missingFields: [
+            !deviceId ? 'deviceId' : null,
+            !startTime ? 'startTime' : null,
+            !endTime ? 'endTime' : null,
           ].filter(Boolean),
         },
       });
@@ -66,7 +66,7 @@ export class TelemetryController {
       throw new BadRequestException({
         code: 'NOT_FOUND',
         message: `Device with ID '${deviceId}' not found`,
-        details: { device_id: deviceId },
+        details: { deviceId: deviceId },
       });
     }
 
@@ -83,15 +83,15 @@ export class TelemetryController {
     description: 'Movement history',
   })
   async getHistory(
-    @Query('vehicle_id') vehicleId: string,
-    @Query('start_date') startDate: string,
-    @Query('end_date') endDate: string,
-    @Query('include_stops') includeStops?: boolean
+    @Query('vehicleId') vehicleId: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Query('includeStops') includeStops?: boolean
   ) {
     if (!vehicleId || !startDate || !endDate) {
       throw new BadRequestException({
         code: 'BAD_REQUEST',
-        message: 'Missing required parameters: vehicle_id, start_date, end_date',
+        message: 'Missing required parameters: vehicleId, startDate, endDate',
       });
     }
 

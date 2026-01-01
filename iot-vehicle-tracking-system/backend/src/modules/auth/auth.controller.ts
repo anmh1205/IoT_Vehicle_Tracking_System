@@ -13,14 +13,14 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { LoginResponseDto, UserResponseDto } from './dto/auth-response.dto';
+import { LoginResponseDto, UserResponseDto, TokenResponseDto, RefreshTokenDto } from './dto/auth-response.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { Public } from './decorators/public.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Public()
   @Post('login')
@@ -54,6 +54,36 @@ export class AuthController {
   })
   async register(@Body() registerDto: RegisterDto): Promise<UserResponseDto> {
     return this.authService.register(registerDto);
+  }
+
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    type: TokenResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid or expired refresh token',
+  })
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<TokenResponseDto> {
+    return this.authService.refresh(refreshTokenDto.refreshToken);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Logout and invalidate refresh token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Logged out successfully',
+  })
+  async logout(@Request() req: ExpressRequest & { user: any }): Promise<{ message: string }> {
+    return this.authService.logout(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)

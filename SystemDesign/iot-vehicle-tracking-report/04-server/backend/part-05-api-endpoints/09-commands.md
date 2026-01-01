@@ -2,7 +2,7 @@
 
 ### XI.9 Commands APIs (MQTT)
 
-#### POST /api/commands/:device_id
+#### POST /api/commands/:deviceId
 
 **Mô tả:** Gửi command đến tracker qua MQTT
 
@@ -12,8 +12,8 @@
 {
   "command": "update_config",
   "params": {
-    "heartbeat_interval": 900,
-    "tracking_interval": 10
+    "heartbeatInterval": 900,
+    "trackingInterval": 10
   }
 }
 ```
@@ -42,11 +42,11 @@
 
 ```json
 {
-  "command_id": 1,
-  "device_id": "TRACKER_001",
+  "commandId": 1,
+  "deviceId": "TRACKER_001",
   "command": "update_config",
   "status": "sent",
-  "sent_at": "2024-01-15T10:00:00Z"
+  "sentAt": "2024-01-15T10:00:00Z"
 }
 ```
 
@@ -61,7 +61,7 @@
     "status": 404,
     "path": "/api/v1/commands/TRACKER_001",
     "details": {
-      "device_id": "TRACKER_001"
+      "deviceId": "TRACKER_001"
     },
     "traceId": "550e8400-e29b-41d4-a716-446655440000"
   },
@@ -79,7 +79,7 @@
     "path": "/api/v1/commands/TRACKER_001",
     "details": {
       "command": "invalid_command",
-      "allowed_commands": ["update_config", "request_location", "enable_tracking"]
+      "allowedCommands": ["update_config", "request_location", "enable_tracking"]
     },
     "traceId": "550e8400-e29b-41d4-a716-446655440000"
   },
@@ -95,7 +95,7 @@
 
 **Query Parameters:**
 
-- `device_id` (string, optional)
+- `deviceId` (string, optional)
 - `status` (string, optional): 'pending', 'sent', 'acknowledged', 'failed'
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
@@ -107,12 +107,12 @@
   "data": [
     {
       "id": 1,
-      "device_id": "TRACKER_001",
-      "command_type": "update_config",
+      "deviceId": "TRACKER_001",
+      "commandType": "update_config",
       "status": "acknowledged",
-      "sent_at": "2024-01-15T10:00:00Z",
-      "acknowledged_at": "2024-01-15T10:00:05Z",
-      "response_data": {
+      "sentAt": "2024-01-15T10:00:00Z",
+      "acknowledgedAt": "2024-01-15T10:00:05Z",
+      "responseData": {
         "success": true
       }
     }

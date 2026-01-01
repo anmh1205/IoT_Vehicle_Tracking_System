@@ -11,7 +11,7 @@
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 - `status` (string, optional): 'active', 'inactive', 'offline', 'error'
-- `vehicle_id` (number, optional): Filter theo xe
+- `vehicleId` (number, optional): Filter theo xe
 
 **Response (200 OK):**
 
@@ -20,17 +20,17 @@
   "data": [
     {
       "id": 1,
-      "device_id": "TRACKER_001",
+      "deviceId": "TRACKER_001",
       "vehicle": {
         "id": 1,
-        "plate_number": "30A-12345"
+        "plateNumber": "30A-12345"
       },
-      "firmware_version": "1.0.0",
-      "hardware_version": "1.0",
+      "firmwareVersion": "1.0.0",
+      "hardwareVersion": "1.0",
       "status": "active",
-      "last_seen": "2024-01-15T10:00:00Z",
-      "battery_level": 85.5,
-      "signal_strength": 20
+      "lastSeen": "2024-01-15T10:00:00Z",
+      "batteryLevel": 85.5,
+      "signalStrength": 20
     }
   ],
   "meta": {
@@ -53,32 +53,32 @@
 ```json
 {
   "id": 1,
-  "device_id": "TRACKER_001",
+  "deviceId": "TRACKER_001",
   "vehicle": {
     "id": 1,
-    "plate_number": "30A-12345"
+    "plateNumber": "30A-12345"
   },
-  "device_type": "tracker",
-  "firmware_version": "1.0.0",
-  "hardware_version": "1.0",
+  "deviceType": "tracker",
+  "firmwareVersion": "1.0.0",
+  "hardwareVersion": "1.0",
   "imei": "123456789012345",
-  "sim_card_number": "0123456789",
+  "simCardNumber": "0123456789",
   "status": "active",
-  "last_seen": "2024-01-15T10:00:00Z",
-  "battery_level": 85.5,
-  "signal_strength": 20,
+  "lastSeen": "2024-01-15T10:00:00Z",
+  "batteryLevel": 85.5,
+  "signalStrength": 20,
   "configurations": [
     {
-      "config_key": "heartbeat_interval",
-      "config_value": "900"
+      "configKey": "heartbeat_interval",
+      "configValue": "900"
     },
     {
-      "config_key": "tracking_interval",
-      "config_value": "10"
+      "configKey": "tracking_interval",
+      "configValue": "10"
     }
   ],
-  "created_at": "2024-01-01T00:00:00Z",
-  "updated_at": "2024-01-15T10:00:00Z"
+  "createdAt": "2024-01-01T00:00:00Z",
+  "updatedAt": "2024-01-15T10:00:00Z"
 }
 ```
 
@@ -92,12 +92,12 @@
 
 ```json
 {
-  "device_id": "TRACKER_002",
-  "vehicle_id": 2,
+  "deviceId": "TRACKER_002",
+  "vehicleId": 2,
   "imei": "123456789012346",
-  "sim_card_number": "0987654321",
-  "firmware_version": "1.0.0",
-  "hardware_version": "1.0"
+  "simCardNumber": "0987654321",
+  "firmwareVersion": "1.0.0",
+  "hardwareVersion": "1.0"
 }
 ```
 
@@ -106,9 +106,9 @@
 ```json
 {
   "id": 2,
-  "device_id": "TRACKER_002",
+  "deviceId": "TRACKER_002",
   "status": "active",
-  "created_at": "2024-01-15T10:00:00Z"
+  "createdAt": "2024-01-15T10:00:00Z"
 }
 ```
 
@@ -122,8 +122,8 @@
 
 ```json
 {
-  "heartbeat_interval": 900,
-  "tracking_interval": 10
+  "heartbeatInterval": 900,
+  "trackingInterval": 10
 }
 ```
 
@@ -131,18 +131,18 @@
 
 ```json
 {
-  "device_id": "TRACKER_001",
+  "deviceId": "TRACKER_001",
   "configurations": [
     {
-      "config_key": "heartbeat_interval",
-      "config_value": "900"
+      "configKey": "heartbeat_interval",
+      "configValue": "900"
     },
     {
-      "config_key": "tracking_interval",
-      "config_value": "10"
+      "configKey": "tracking_interval",
+      "configValue": "10"
     }
   ],
-  "updated_at": "2024-01-15T11:00:00Z"
+  "updatedAt": "2024-01-15T11:00:00Z"
 }
 ```
 
@@ -173,7 +173,7 @@
     "path": "/api/v1/devices",
     "details": [
       {
-        "field": "device_id",
+        "field": "deviceId",
         "message": "Device ID is required",
         "value": null
       },
@@ -198,8 +198,8 @@
     "status": 409,
     "path": "/api/v1/devices",
     "details": {
-      "field": "device_id",
-      "existing_id": 1
+      "field": "deviceId",
+      "existingId": 1
     },
     "traceId": "550e8400-e29b-41d4-a716-446655440000"
   },

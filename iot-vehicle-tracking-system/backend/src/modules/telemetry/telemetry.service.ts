@@ -12,7 +12,7 @@ export class TelemetryService {
     private readonly influxDBService: InfluxDBService,
     private readonly devicesService: DevicesService,
     private readonly vehiclesService: VehiclesService
-  ) {}
+  ) { }
 
   async getLocation(
     deviceId: string,
@@ -20,20 +20,30 @@ export class TelemetryService {
     endTime: Date,
     interval?: string
   ) {
-    const data = await this.influxDBService.queryLocation(
-      deviceId,
-      startTime,
-      endTime
-    );
+    let data: any[] = [];
+    
+    try {
+      data = await this.influxDBService.queryLocation(
+        deviceId,
+        startTime,
+        endTime
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to query location data from InfluxDB: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+      // Return empty data instead of throwing error
+      data = [];
+    }
 
     // Get device and vehicle info
     const device = await this.devicesService.findByDeviceId(deviceId);
 
     return {
-      device_id: deviceId,
-      vehicle_id: device.vehicleId,
+      deviceId: deviceId,
+      vehicleId: device.vehicleId,
       data,
-      total_points: data.length,
+      totalPoints: data.length,
     };
   }
 
@@ -47,16 +57,16 @@ export class TelemetryService {
     const vehicle = await this.vehiclesService.findOne(vehicleId);
     if (!vehicle.deviceId) {
       return {
-        vehicle_id: vehicleId,
+        vehicleId: vehicleId,
         period: { start: startDate, end: endDate },
         summary: {
-          total_distance_km: 0,
-          total_duration_minutes: 0,
-          max_speed: 0,
-          avg_speed: 0,
-          stops_count: 0,
+          totalDistanceKm: 0,
+          totalDurationMinutes: 0,
+          maxSpeed: 0,
+          avgSpeed: 0,
+          stopsCount: 0,
         },
-        route: [],
+        trips: [],
         stops: [],
       };
     }
@@ -99,21 +109,21 @@ export class TelemetryService {
         : 0;
     const durationMinutes = locationData.length > 0
       ? Math.round(
-          (endDate.getTime() - startDate.getTime()) / (1000 * 60)
-        )
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60)
+      )
       : 0;
 
     return {
-      vehicle_id: vehicleId,
+      vehicleId: vehicleId,
       period: { start: startDate, end: endDate },
       summary: {
-        total_distance_km: Math.round(totalDistance * 100) / 100,
-        total_duration_minutes: durationMinutes,
-        max_speed: Math.round(maxSpeed * 100) / 100,
-        avg_speed: Math.round(avgSpeed * 100) / 100,
-        stops_count: 0, // TODO: Calculate stops
+        totalDistanceKm: Math.round(totalDistance * 100) / 100,
+        totalDurationMinutes: durationMinutes,
+        maxSpeed: Math.round(maxSpeed * 100) / 100,
+        avgSpeed: Math.round(avgSpeed * 100) / 100,
+        stopsCount: 0, // TODO: Calculate stops
       },
-      route: locationData,
+      trips: locationData,
       stops: includeStops ? [] : undefined, // TODO: Calculate stops
     };
   }
@@ -130,9 +140,9 @@ export class TelemetryService {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(lat1)) *
-        Math.cos(this.toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(this.toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }

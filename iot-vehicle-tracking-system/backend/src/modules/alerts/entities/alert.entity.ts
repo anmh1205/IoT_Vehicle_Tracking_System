@@ -22,17 +22,17 @@ export class Alert {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'vehicle_id', nullable: true })
+  @Column({ name: 'vehicle_id', type: 'int', nullable: true })
   vehicleId: number | null;
 
   @ManyToOne(() => Vehicle, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'vehicle_id' })
   vehicle: Vehicle | null;
 
-  @Column({ name: 'booking_id', nullable: true })
+  @Column({ name: 'booking_id', type: 'int', nullable: true })
   bookingId: number | null;
 
-  @Column({ name: 'device_id', nullable: true })
+  @Column({ name: 'device_id', type: 'int', nullable: true })
   deviceId: number | null;
 
   @ManyToOne(() => Device, { nullable: true, onDelete: 'SET NULL' })
@@ -49,7 +49,7 @@ export class Alert {
   })
   severity: string;
 
-  @Column({ nullable: true, length: 200 })
+  @Column({ type: 'varchar', nullable: true, length: 200 })
   title: string | null;
 
   @Column({ type: 'text', nullable: true })
@@ -79,7 +79,7 @@ export class Alert {
   @Column({ name: 'acknowledged_at', type: 'timestamp', nullable: true })
   acknowledgedAt: Date | null;
 
-  @Column({ name: 'acknowledged_by', nullable: true })
+  @Column({ name: 'acknowledged_by', type: 'int', nullable: true })
   acknowledgedBy: number | null;
 
   @ManyToOne(() => User, { nullable: true })
@@ -92,7 +92,7 @@ export class Alert {
   @Column({ name: 'resolved_at', type: 'timestamp', nullable: true })
   resolvedAt: Date | null;
 
-  @Column({ name: 'resolved_by', nullable: true })
+  @Column({ name: 'resolved_by', type: 'int', nullable: true })
   resolvedBy: number | null;
 
   @ManyToOne(() => User, { nullable: true })

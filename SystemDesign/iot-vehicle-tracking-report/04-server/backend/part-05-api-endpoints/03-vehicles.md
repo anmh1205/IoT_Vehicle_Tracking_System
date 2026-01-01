@@ -11,7 +11,7 @@
 - `page` (number, default: 1): Số trang
 - `limit` (number, default: 20): Số item mỗi trang
 - `status` (string, optional): Filter theo status ('active', 'inactive', 'maintenance', 'retired')
-- `vehicle_type` (string, optional): Filter theo loại xe
+- `vehicleType` (string, optional): Filter theo loại xe
 - `search` (string, optional): Tìm kiếm theo biển số, brand, model
 
 **Response (200 OK):**
@@ -21,21 +21,21 @@
   "data": [
     {
       "id": 1,
-      "vehicle_id": "VEHICLE_001",
-      "plate_number": "30A-12345",
+      "vehicleId": "VEHICLE_001",
+      "plateNumber": "30A-12345",
       "brand": "Toyota",
       "model": "Camry",
       "year": 2020,
       "color": "White",
-      "vehicle_type": "sedan",
+      "vehicleType": "sedan",
       "status": "active",
-      "mileage_km": 15000,
+      "mileageKm": 15000,
       "device": {
         "id": 1,
-        "device_id": "TRACKER_001",
+        "deviceId": "TRACKER_001",
         "status": "active",
-        "last_seen": "2024-01-15T10:00:00Z",
-        "battery_level": 85.5
+        "lastSeen": "2024-01-15T10:00:00Z",
+        "batteryLevel": 85.5
       }
     }
   ],
@@ -59,9 +59,9 @@
 ```json
 {
   "id": 1,
-  "vehicle_id": "VEHICLE_001",
-  "plate_number": "30A-12345",
-  "owner_id": 1,
+  "vehicleId": "VEHICLE_001",
+  "plateNumber": "30A-12345",
+  "ownerId": 1,
   "brand": "Toyota",
   "model": "Camry",
   "year": 2020,
@@ -69,26 +69,26 @@
   "vin": "JT1234567890",
   "seats": 5,
   "transmission": "automatic",
-  "fuel_type": "gasoline",
-  "mileage_km": 15000,
-  "registration_number": "REG123456",
-  "insurance_expiry": "2024-12-31",
+  "fuelType": "gasoline",
+  "mileageKm": 15000,
+  "registrationNumber": "REG123456",
+  "insuranceExpiry": "2024-12-31",
   "status": "active",
-  "rental_price_per_day": 500000, // [Phase 2]
-  "rental_price_per_hour": 50000, // [Phase 2]
-  "deposit_amount": 5000000, // [Phase 2]
-  "availability_status": "available", // [Phase 2]
+  "rentalPricePerDay": 500000, // [Phase 2]
+  "rentalPricePerHour": 50000, // [Phase 2]
+  "depositAmount": 5000000, // [Phase 2]
+  "availabilityStatus": "available", // [Phase 2]
   "device": {
     "id": 1,
-    "device_id": "TRACKER_001",
-    "firmware_version": "1.0.0",
+    "deviceId": "TRACKER_001",
+    "firmwareVersion": "1.0.0",
     "status": "active",
-    "last_seen": "2024-01-15T10:00:00Z",
-    "battery_level": 85.5,
-    "signal_strength": 20
+    "lastSeen": "2024-01-15T10:00:00Z",
+    "batteryLevel": 85.5,
+    "signalStrength": 20
   },
-  "created_at": "2024-01-01T00:00:00Z",
-  "updated_at": "2024-01-15T10:00:00Z"
+  "createdAt": "2024-01-01T00:00:00Z",
+  "updatedAt": "2024-01-15T10:00:00Z"
 }
 ```
 
@@ -119,19 +119,19 @@
 
 ```json
 {
-  "vehicle_id": "VEHICLE_002",
-  "plate_number": "30A-12346",
+  "vehicleId": "VEHICLE_002",
+  "plateNumber": "30A-12346",
   "brand": "Honda",
   "model": "Civic",
   "year": 2021,
   "color": "Black",
-  "vehicle_type": "sedan",
+  "vehicleType": "sedan",
   "vin": "JT1234567891",
   "seats": 5,
   "transmission": "automatic",
-  "fuel_type": "gasoline",
-  "registration_number": "REG123457",
-  "insurance_expiry": "2024-12-31"
+  "fuelType": "gasoline",
+  "registrationNumber": "REG123457",
+  "insuranceExpiry": "2024-12-31"
 }
 ```
 
@@ -140,10 +140,10 @@
 ```json
 {
   "id": 2,
-  "vehicle_id": "VEHICLE_002",
-  "plate_number": "30A-12346",
+  "vehicleId": "VEHICLE_002",
+  "plateNumber": "30A-12346",
   "status": "active",
-  "created_at": "2024-01-15T10:00:00Z"
+  "createdAt": "2024-01-15T10:00:00Z"
 }
 ```
 
@@ -159,12 +159,12 @@
     "path": "/api/v1/vehicles",
     "details": [
       {
-        "field": "plate_number",
+        "field": "plateNumber",
         "message": "Plate number is required",
         "value": null
       },
       {
-        "field": "vehicle_id",
+        "field": "vehicleId",
         "message": "Vehicle ID must be unique",
         "value": "VEHICLE_001"
       }
@@ -184,8 +184,8 @@
     "status": 409,
     "path": "/api/v1/vehicles",
     "details": {
-      "field": "plate_number",
-      "existing_id": 1
+      "field": "plateNumber",
+      "existingId": 1
     },
     "traceId": "550e8400-e29b-41d4-a716-446655440000"
   },
@@ -210,9 +210,11 @@
 
 ---
 
-#### PUT /api/vehicles/:id
+#### PATCH /api/vehicles/:id
 
-**Mô tả:** Cập nhật thông tin xe
+> **NOTE**: Backend uses PATCH (partial update) not PUT (full replacement)
+
+**Mô tả:** Cập nhật thông tin xe (partial update)
 
 **Request:**
 
@@ -233,9 +235,9 @@
   "vehicle_id": "VEHICLE_002",
   "brand": "Honda",
   "model": "Civic 2022",
-  "mileage_km": 20000,
+  "mileageKm": 20000,
   "status": "maintenance",
-  "updated_at": "2024-01-15T11:00:00Z"
+  "updatedAt": "2024-01-15T11:00:00Z"
 }
 ```
 
@@ -263,9 +265,9 @@
 
 ```json
 {
-  "vehicle_id": 1,
+  "vehicleId": 1,
   "status": "active",
-  "current_location": {
+  "currentLocation": {
     "lat": 21.028511,
     "lon": 105.804817,
     "speed": 60.0,
@@ -274,22 +276,22 @@
   },
   "device": {
     "status": "active",
-    "last_seen": "2024-01-15T10:00:00Z",
-    "battery_level": 85.5,
-    "signal_strength": 20
+    "lastSeen": "2024-01-15T10:00:00Z",
+    "batteryLevel": 85.5,
+    "signalStrength": 20
   },
-  "current_trip": {
+  "currentTrip": {
     "id": 10,
     "status": "in_progress",
-    "start_time": "2024-01-15T09:00:00Z",
-    "distance_km": 50.5
+    "startTime": "2024-01-15T09:00:00Z",
+    "distanceKm": 50.5
   },
-  "active_alerts": [
+  "activeAlerts": [
     {
       "id": 5,
-      "alert_type": "speeding",
+      "alertType": "speeding",
       "severity": "high",
-      "created_at": "2024-01-15T09:30:00Z"
+      "createdAt": "2024-01-15T09:30:00Z"
     }
   ]
 }
@@ -303,16 +305,16 @@
 
 **Query Parameters:**
 
-- `start_time` (ISO 8601): Thời gian bắt đầu
-- `end_time` (ISO 8601): Thời gian kết thúc
+- `startTime` (ISO 8601): Thời gian bắt đầu
+- `endTime` (ISO 8601): Thời gian kết thúc
 
 **Response (200 OK):**
 
 ```json
 {
-  "vehicle_id": 1,
+  "vehicleId": 1,
   "available": true,
-  "conflicting_bookings": []
+  "conflictingBookings": []
 }
 ```
 

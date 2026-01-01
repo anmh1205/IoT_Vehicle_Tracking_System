@@ -10,12 +10,12 @@
 
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
-- `vehicle_id` (number, optional): Filter theo xe
-- `alert_type` (string, optional): Filter theo loại alert
+- `vehicleId` (number, optional): Filter theo xe
+- `alertType` (string, optional): Filter theo loại alert
 - `severity` (string, optional): 'low', 'medium', 'high', 'critical'
 - `acknowledged` (boolean, optional): Filter theo trạng thái acknowledge
-- `start_date` (ISO 8601, optional)
-- `end_date` (ISO 8601, optional)
+- `startDate` (ISO 8601, optional)
+- `endDate` (ISO 8601, optional)
 
 **Response (200 OK):**
 
@@ -26,10 +26,10 @@
       "id": 1,
       "vehicle": {
         "id": 1,
-        "plate_number": "30A-12345"
+        "plateNumber": "30A-12345"
       },
-      "booking_id": null,
-      "alert_type": "motion_detected",
+      "bookingId": null,
+      "alertType": "motion_detected",
       "severity": "high",
       "title": "Xe di chuyển khi đỗ",
       "message": "Phát hiện chuyển động khi xe đang đỗ",
@@ -39,7 +39,7 @@
       },
       "acknowledged": false,
       "resolved": false,
-      "created_at": "2024-01-15T10:00:00Z"
+      "createdAt": "2024-01-15T10:00:00Z"
     }
   ],
   "meta": {
@@ -64,14 +64,14 @@
   "id": 1,
   "vehicle": {
     "id": 1,
-    "plate_number": "30A-12345"
+    "plateNumber": "30A-12345"
   },
-  "booking_id": null,
+  "bookingId": null,
   "device": {
     "id": 1,
-    "device_id": "TRACKER_001"
+    "deviceId": "TRACKER_001"
   },
-  "alert_type": "motion_detected",
+  "alertType": "motion_detected",
   "severity": "high",
   "title": "Xe di chuyển khi đỗ",
   "message": "Phát hiện chuyển động khi xe đang đỗ",
@@ -80,12 +80,12 @@
     "lon": 105.804817
   },
   "acknowledged": false,
-  "acknowledged_by": null,
-  "acknowledged_at": null,
+  "acknowledgedBy": null,
+  "acknowledgedAt": null,
   "resolved": false,
-  "resolved_by": null,
-  "resolved_at": null,
-  "created_at": "2024-01-15T10:00:00Z"
+  "resolvedBy": null,
+  "resolvedAt": null,
+  "createdAt": "2024-01-15T10:00:00Z"
 }
 ```
 
@@ -126,8 +126,8 @@
 {
   "id": 1,
   "acknowledged": true,
-  "acknowledged_by": 1,
-  "acknowledged_at": "2024-01-15T11:00:00Z"
+  "acknowledgedBy": 1,
+  "acknowledgedAt": "2024-01-15T11:00:00Z"
 }
 ```
 
@@ -151,8 +151,8 @@
 {
   "id": 1,
   "resolved": true,
-  "resolved_by": 1,
-  "resolved_at": "2024-01-15T11:30:00Z"
+  "resolvedBy": 1,
+  "resolvedAt": "2024-01-15T11:30:00Z"
 }
 ```
 
@@ -175,15 +175,15 @@ ws://api.example.com/api/alerts/realtime
   "type": "alert",
   "data": {
     "id": 1,
-    "vehicle_id": 1,
-    "alert_type": "motion_detected",
+    "vehicleId": 1,
+    "alertType": "motion_detected",
     "severity": "high",
     "title": "Xe di chuyển khi đỗ",
     "location": {
       "lat": 21.028511,
       "lon": 105.804817
     },
-    "created_at": "2024-01-15T10:00:00Z"
+    "createdAt": "2024-01-15T10:00:00Z"
   }
 }
 ```

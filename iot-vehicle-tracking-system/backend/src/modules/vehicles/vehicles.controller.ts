@@ -29,7 +29,7 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class VehiclesController {
-  constructor(private readonly vehiclesService: VehiclesService) {}
+  constructor(private readonly vehiclesService: VehiclesService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -100,6 +100,20 @@ export class VehiclesController {
   })
   remove(@Param('id') id: string) {
     return this.vehiclesService.remove(+id);
+  }
+
+  @Get(':id/status')
+  @ApiOperation({ summary: 'Get real-time status of a vehicle (location, device, trip, alerts)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Vehicle real-time status',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vehicle not found',
+  })
+  getStatus(@Param('id') id: string) {
+    return this.vehiclesService.getStatus(+id);
   }
 }
 

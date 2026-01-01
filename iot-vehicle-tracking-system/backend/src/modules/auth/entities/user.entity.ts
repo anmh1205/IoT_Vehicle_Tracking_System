@@ -8,6 +8,9 @@ import {
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
+export type UserRole = 'admin' | 'manager' | 'staff' | 'user';
+export type UserStatus = 'active' | 'inactive' | 'suspended';
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
@@ -23,21 +26,28 @@ export class User {
   @Exclude()
   passwordHash: string;
 
-  @Column({ name: 'full_name', length: 255, nullable: true })
+  @Column({ name: 'full_name', type: 'varchar', length: 255, nullable: true })
   fullName: string | null;
 
-  @Column({ length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string | null;
 
   @Column({
-    type: 'enum',
-    enum: ['admin', 'staff', 'user'],
+    type: 'varchar',
+    length: 20,
     default: 'staff',
   })
-  role: 'admin' | 'staff' | 'user';
+  role: UserRole;
 
-  @Column({ default: true })
-  active: boolean;
+  @Column({
+    type: 'varchar',
+    length: 20,
+    default: 'active',
+  })
+  status: UserStatus;
+
+  @Column({ name: 'last_login', type: 'timestamp', nullable: true })
+  lastLogin: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

@@ -8,7 +8,7 @@
 
 **Query Parameters:**
 
-- `vehicle_id` (number, optional)
+- `vehicleId` (number, optional)
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 
@@ -21,16 +21,16 @@
       "id": 1,
       "vehicle": {
         "id": 1,
-        "plate_number": "30A-12345"
+        "plateNumber": "30A-12345"
       },
-      "maintenance_type": "oil_change",
+      "maintenanceType": "oil_change",
       "description": "Thay dầu động cơ",
       "cost": 500000,
-      "mileage_km": 15000,
-      "performed_by": "Kỹ thuật viên A",
-      "next_maintenance_date": "2024-04-15",
-      "next_maintenance_mileage": 20000,
-      "created_at": "2024-01-15T10:00:00Z"
+      "mileageKm": 15000,
+      "performedBy": "Kỹ thuật viên A",
+      "nextMaintenanceDate": "2024-04-15",
+      "nextMaintenanceMileage": 20000,
+      "createdAt": "2024-01-15T10:00:00Z"
     }
   ],
   "meta": {
@@ -52,14 +52,14 @@
 
 ```json
 {
-  "vehicle_id": 1,
-  "maintenance_type": "oil_change",
+  "vehicleId": 1,
+  "maintenanceType": "oil_change",
   "description": "Thay dầu động cơ",
   "cost": 500000,
-  "mileage_km": 15000,
-  "performed_by": "Kỹ thuật viên A",
-  "next_maintenance_date": "2024-04-15",
-  "next_maintenance_mileage": 20000
+  "mileageKm": 15000,
+  "performedBy": "Kỹ thuật viên A",
+  "nextMaintenanceDate": "2024-04-15",
+  "nextMaintenanceMileage": 20000
 }
 ```
 
@@ -68,9 +68,9 @@
 ```json
 {
   "id": 1,
-  "vehicle_id": 1,
-  "maintenance_type": "oil_change",
-  "created_at": "2024-01-15T10:00:00Z"
+  "vehicleId": 1,
+  "maintenanceType": "oil_change",
+  "createdAt": "2024-01-15T10:00:00Z"
 }
 ```
 
@@ -86,12 +86,12 @@
     "path": "/api/v1/maintenance",
     "details": [
       {
-        "field": "vehicle_id",
+        "field": "vehicleId",
         "message": "Vehicle ID is required",
         "value": null
       },
       {
-        "field": "maintenance_type",
+        "field": "maintenanceType",
         "message": "Maintenance type is required",
         "value": null
       }

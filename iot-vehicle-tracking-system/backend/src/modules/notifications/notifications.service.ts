@@ -209,7 +209,7 @@ export class NotificationsService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          chat_id: chatId,
+          chatId: chatId,
           text: message,
           parse_mode: 'HTML',
         }),

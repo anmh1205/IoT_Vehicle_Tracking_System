@@ -19,7 +19,7 @@ export class Customer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'user_id', nullable: true })
+  @Column({ name: 'user_id', type: 'int', nullable: true })
   userId: number | null;
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
@@ -29,7 +29,7 @@ export class Customer {
   @Column({ name: 'full_name', length: 100 })
   fullName: string;
 
-  @Column({ nullable: true, length: 100 })
+  @Column({ type: 'varchar', nullable: true, length: 100 })
   email: string | null;
 
   @Column({ length: 20 })
@@ -38,22 +38,22 @@ export class Customer {
   @Column({ name: 'date_of_birth', type: 'date', nullable: true })
   dateOfBirth: Date | null;
 
-  @Column({ name: 'id_card_number', unique: true, nullable: true, length: 20 })
+  @Column({ name: 'id_card_number', type: 'varchar', unique: true, nullable: true, length: 20 })
   idCardNumber: string | null;
 
   @Column({ name: 'id_card_issue_date', type: 'date', nullable: true })
   idCardIssueDate: Date | null;
 
-  @Column({ name: 'id_card_issue_place', nullable: true, length: 200 })
+  @Column({ name: 'id_card_issue_place', type: 'varchar', nullable: true, length: 200 })
   idCardIssuePlace: string | null;
 
   @Column({ type: 'text', nullable: true })
   address: string | null;
 
-  @Column({ name: 'license_number', nullable: true, length: 50 })
+  @Column({ name: 'license_number', type: 'varchar', nullable: true, length: 50 })
   licenseNumber: string | null;
 
-  @Column({ name: 'license_type', nullable: true, length: 20 })
+  @Column({ name: 'license_type', type: 'varchar', nullable: true, length: 20 })
   licenseType: string | null;
 
   @Column({ name: 'license_issue_date', type: 'date', nullable: true })
@@ -62,7 +62,7 @@ export class Customer {
   @Column({ name: 'license_expiry_date', type: 'date', nullable: true })
   licenseExpiryDate: Date | null;
 
-  @Column({ name: 'license_issue_place', nullable: true, length: 200 })
+  @Column({ name: 'license_issue_place', type: 'varchar', nullable: true, length: 200 })
   licenseIssuePlace: string | null;
 
   @Column({
@@ -80,7 +80,7 @@ export class Customer {
   })
   verificationStatus: string;
 
-  @Column({ name: 'verified_by', nullable: true })
+  @Column({ name: 'verified_by', type: 'int', nullable: true })
   verifiedBy: number | null;
 
   @ManyToOne(() => User, { nullable: true })
