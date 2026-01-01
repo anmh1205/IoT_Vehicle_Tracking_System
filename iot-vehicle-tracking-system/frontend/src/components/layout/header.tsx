@@ -3,10 +3,11 @@
  */
 'use client';
 
-import { Menu, Bell, User } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUIStore } from '@/lib/store/ui-store';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { NotificationDropdown } from '@/features/notifications/components/notification-dropdown';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,9 +30,7 @@ export function Header() {
       <div className="flex-1" />
 
       {/* Notifications */}
-      <Button variant="ghost" size="icon">
-        <Bell className="h-5 w-5" />
-      </Button>
+      <NotificationDropdown />
 
       {/* User Menu */}
       <DropdownMenu>

@@ -17,13 +17,14 @@ SRC_DIR = {PROJECT_ROOT}\src
 
 ## 🎯 PHASE 1: TYPE DEFINITIONS
 
-### Task 1.1: Create `types/common.ts`
+- [x] ### Task 1.1: Create `types/common.ts`
 
 **File Path**: `{SRC_DIR}/types/common.ts`
 
 **Instructions**: Tạo file với các common types dùng chung trong toàn bộ app.
 
 **Code Template**:
+
 ```typescript
 /**
  * Common Types - CORRECTED based on REVIEW_CORRECTIONS.md
@@ -35,14 +36,14 @@ export interface PaginationMeta {
   limit: number;
   total: number;
   totalPages: number;
-  timestamp: string;  // Backend always includes timestamp
+  timestamp: string; // Backend always includes timestamp
 }
 
 // Standard API response wrapper - Backend TransformInterceptor wraps ALL responses
 export interface ApiResponse<T> {
   data: T;
   meta: {
-    timestamp: string;  // Backend always adds timestamp
+    timestamp: string; // Backend always adds timestamp
     [key: string]: any; // May have additional meta fields
   };
 }
@@ -59,7 +60,7 @@ export interface QueryParams {
   limit?: number;
   search?: string;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 // Date range filter
@@ -89,12 +90,12 @@ export interface BaseEntity {
 }
 
 // Status enum
-export type StatusType = 'active' | 'inactive' | 'pending' | 'deleted';
+export type StatusType = "active" | "inactive" | "pending" | "deleted";
 ```
 
 ---
 
-### Task 1.2: Create `types/auth.ts`
+- [x] ### Task 1.2: Create `types/auth.ts`
 
 **File Path**: `{SRC_DIR}/types/auth.ts`
 
@@ -103,18 +104,19 @@ export type StatusType = 'active' | 'inactive' | 'pending' | 'deleted';
 **Instructions**: Tạo auth types. Import `BaseEntity` từ `./common`.
 
 **Code Template**:
+
 ```typescript
 /**
  * Auth Types - Aligned with backend User entity
  * CORRECTED based on REVIEW_CORRECTIONS.md
  */
-import type { BaseEntity } from './common';
+import type { BaseEntity } from "./common";
 
 // Backend has 4 roles: admin, manager, staff, user
-export type UserRole = 'admin' | 'manager' | 'staff' | 'user';
+export type UserRole = "admin" | "manager" | "staff" | "user";
 
 // Backend User status enum
-export type UserStatus = 'active' | 'inactive' | 'suspended';
+export type UserStatus = "active" | "inactive" | "suspended";
 
 export interface User extends BaseEntity {
   email: string;
@@ -122,25 +124,25 @@ export interface User extends BaseEntity {
   fullName?: string;
   phone?: string;
   role: UserRole;
-  status: UserStatus;     // Backend uses "status" not "isActive"
-  lastLogin?: string;     // Backend uses "lastLogin" not "lastLoginAt"
+  status: UserStatus; // Backend uses "status" not "isActive"
+  lastLogin?: string; // Backend uses "lastLogin" not "lastLoginAt"
 }
 
 // Backend returns session object, not tokens
 export interface SessionResponse {
-  token: string;          // Backend uses "token" not "accessToken"
+  token: string; // Backend uses "token" not "accessToken"
   refreshToken: string;
-  expiresAt: string;      // Backend returns ISO string, not expiresIn number
+  expiresAt: string; // Backend returns ISO string, not expiresIn number
 }
 
 export interface LoginDto {
-  username: string;       // Backend accepts username OR email in this field
+  username: string; // Backend accepts username OR email in this field
   password: string;
 }
 
 export interface LoginResponse {
   user: User;
-  session: SessionResponse;  // Backend uses "session" not "tokens"
+  session: SessionResponse; // Backend uses "session" not "tokens"
 }
 
 export interface RegisterDto {
@@ -153,16 +155,16 @@ export interface RegisterDto {
 
 export interface AuthState {
   user: User | null;
-  token: string | null;      // Match backend field name
+  token: string | null; // Match backend field name
   refreshToken: string | null;
-  expiresAt: string | null;  // For token expiration check
+  expiresAt: string | null; // For token expiration check
   isAuthenticated: boolean;
 }
 ```
 
 ---
 
-### Task 1.3: Create `types/vehicle.ts`
+- [x] ### Task 1.3: Create `types/vehicle.ts`
 
 **File Path**: `{SRC_DIR}/types/vehicle.ts`
 
@@ -171,17 +173,18 @@ export interface AuthState {
 **Instructions**: Tạo vehicle types dựa trên backend Vehicle entity.
 
 **Code Template**:
+
 ```typescript
 /**
  * Vehicle Types - Aligned with backend Vehicle entity
  */
-import type { BaseEntity, QueryParams } from './common';
+import type { BaseEntity, QueryParams } from "./common";
 
 // Backend status enum: 'active' | 'inactive' | 'maintenance' | 'retired'
-export type VehicleStatus = 'active' | 'inactive' | 'maintenance' | 'retired';
+export type VehicleStatus = "active" | "inactive" | "maintenance" | "retired";
 
 // Availability status for rental feature
-export type AvailabilityStatus = 'available' | 'rented' | 'maintenance' | 'reserved' | 'inactive';
+export type AvailabilityStatus = "available" | "rented" | "maintenance" | "reserved" | "inactive";
 
 export interface Vehicle extends BaseEntity {
   vehicleId: string;
@@ -190,14 +193,14 @@ export interface Vehicle extends BaseEntity {
   model?: string;
   year?: number;
   color?: string;
-  vehicleType?: string;      // sedan, suv, truck, etc.
-  vin?: string;              // Vehicle Identification Number
+  vehicleType?: string; // sedan, suv, truck, etc.
+  vin?: string; // Vehicle Identification Number
   seats?: number;
-  transmission?: string;     // automatic, manual
-  fuelType?: string;         // gasoline, diesel, electric, hybrid
+  transmission?: string; // automatic, manual
+  fuelType?: string; // gasoline, diesel, electric, hybrid
   mileageKm?: number;
   registrationNumber?: string;
-  insuranceExpiry?: string;  // Date string
+  insuranceExpiry?: string; // Date string
   status: VehicleStatus;
   // Rental pricing fields (Phase 2)
   rentalPricePerDay?: number;
@@ -266,7 +269,7 @@ export interface QueryVehicleDto extends QueryParams {
 
 ---
 
-### Task 1.4: Create `types/device.ts`
+- [x] ### Task 1.4: Create `types/device.ts`
 
 **File Path**: `{SRC_DIR}/types/device.ts`
 
@@ -275,23 +278,24 @@ export interface QueryVehicleDto extends QueryParams {
 **Instructions**: Tạo device types.
 
 **Code Template**:
+
 ```typescript
 /**
  * Device Types - CORRECTED based on REVIEW_CORRECTIONS.md
  */
-import type { BaseEntity, QueryParams } from './common';
+import type { BaseEntity, QueryParams } from "./common";
 
 // Backend status enum (not 'online', 'maintenance')
-export type DeviceStatus = 'active' | 'inactive' | 'offline' | 'error';
+export type DeviceStatus = "active" | "inactive" | "offline" | "error";
 
 export interface Device extends BaseEntity {
   deviceId: string;
   vehicleId?: number;
-  deviceType?: string;      // Backend has this (default: 'tracker')
+  deviceType?: string; // Backend has this (default: 'tracker')
   firmwareVersion?: string;
   hardwareVersion?: string; // Backend has this
-  imei?: string;            // Backend has this (unique)
-  simCardNumber?: string;   // Backend has this
+  imei?: string; // Backend has this (unique)
+  simCardNumber?: string; // Backend has this
   status: DeviceStatus;
   lastSeen?: string;
   batteryLevel?: number;
@@ -302,12 +306,12 @@ export interface Device extends BaseEntity {
 export interface CreateDeviceDto {
   deviceId: string;
   vehicleId?: number;
-  deviceType?: string;      // Optional, default: 'tracker'
+  deviceType?: string; // Optional, default: 'tracker'
   firmwareVersion?: string;
   hardwareVersion?: string;
   imei?: string;
   simCardNumber?: string;
-  status?: DeviceStatus;    // Optional, default: 'active'
+  status?: DeviceStatus; // Optional, default: 'active'
 }
 
 export interface UpdateDeviceDto {
@@ -331,27 +335,28 @@ export interface AssignDeviceDto {
 
 ---
 
-### Task 1.5: Create `types/customer.ts`
+- [x] ### Task 1.5: Create `types/customer.ts`
 
 **File Path**: `{SRC_DIR}/types/customer.ts`
 
 **Dependencies**: Task 1.1
 
 **Code Template**:
+
 ```typescript
 /**
  * Customer Types - CORRECTED based on REVIEW_CORRECTIONS.md
  */
-import type { BaseEntity, QueryParams } from './common';
+import type { BaseEntity, QueryParams } from "./common";
 
-export type CustomerStatus = 'active' | 'suspended' | 'blacklisted';
-export type VerificationStatus = 'pending' | 'verified' | 'rejected';
+export type CustomerStatus = "active" | "suspended" | "blacklisted";
+export type VerificationStatus = "pending" | "verified" | "rejected";
 
 export interface Customer extends BaseEntity {
   userId?: number;
-  fullName: string;           // Backend uses "fullName" not "name"
+  fullName: string; // Backend uses "fullName" not "name"
   email?: string;
-  phone: string;              // Required in backend
+  phone: string; // Required in backend
   dateOfBirth?: string;
   // ID Card info
   idCardNumber?: string;
@@ -365,7 +370,7 @@ export interface Customer extends BaseEntity {
   licenseExpiryDate?: string;
   licenseIssuePlace?: string;
   // Status
-  status: CustomerStatus;     // Backend uses "status" not "isActive"
+  status: CustomerStatus; // Backend uses "status" not "isActive"
   verificationStatus: VerificationStatus;
   verifiedBy?: number;
   verifiedAt?: string;
@@ -378,7 +383,7 @@ export interface Customer extends BaseEntity {
 export interface CreateCustomerDto {
   fullName: string;
   email?: string;
-  phone: string;              // Required
+  phone: string; // Required
   dateOfBirth?: string;
   idCardNumber?: string;
   idCardIssueDate?: string;
@@ -419,20 +424,21 @@ export interface QueryCustomerDto extends QueryParams {
 
 ---
 
-### Task 1.6: Create `types/trip.ts`
+- [x] ### Task 1.6: Create `types/trip.ts`
 
 **File Path**: `{SRC_DIR}/types/trip.ts`
 
 **Dependencies**: Task 1.1
 
 **Code Template**:
+
 ```typescript
 /**
  * Trip Types
  */
-import type { BaseEntity, QueryParams, DateRange } from './common';
+import type { BaseEntity, QueryParams, DateRange } from "./common";
 
-export type TripStatus = 'active' | 'completed' | 'cancelled';
+export type TripStatus = "active" | "completed" | "cancelled";
 
 export interface Trip extends BaseEntity {
   vehicleId: number;
@@ -481,18 +487,19 @@ export interface QueryTripDto extends QueryParams, Partial<DateRange> {
 
 ---
 
-### Task 1.7: Create `types/telemetry.ts`
+- [x] ### Task 1.7: Create `types/telemetry.ts`
 
 **File Path**: `{SRC_DIR}/types/telemetry.ts`
 
 **Dependencies**: Task 1.1
 
 **Code Template**:
+
 ```typescript
 /**
  * Telemetry Types
  */
-import type { DateRange } from './common';
+import type { DateRange } from "./common";
 
 export interface TelemetryData {
   deviceId: string;
@@ -535,31 +542,32 @@ export interface QueryTelemetryDto extends Partial<DateRange> {
 
 ---
 
-### Task 1.8: Create `types/alert.ts`
+- [x] ### Task 1.8: Create `types/alert.ts`
 
 **File Path**: `{SRC_DIR}/types/alert.ts`
 
 **Dependencies**: Task 1.1
 
 **Code Template**:
+
 ```typescript
 /**
  * Alert Types
  */
-import type { BaseEntity, QueryParams, DateRange } from './common';
+import type { BaseEntity, QueryParams, DateRange } from "./common";
 
-export type AlertType = 
-  | 'speeding' 
-  | 'geofence_enter' 
-  | 'geofence_exit' 
-  | 'harsh_braking' 
-  | 'harsh_acceleration'
-  | 'idle'
-  | 'low_battery'
-  | 'device_offline';
+export type AlertType =
+  | "speeding"
+  | "geofence_enter"
+  | "geofence_exit"
+  | "harsh_braking"
+  | "harsh_acceleration"
+  | "idle"
+  | "low_battery"
+  | "device_offline";
 
-export type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
-export type AlertStatus = 'new' | 'acknowledged' | 'resolved';
+export type AlertSeverity = "low" | "medium" | "high" | "critical";
+export type AlertStatus = "new" | "acknowledged" | "resolved";
 
 export interface Alert extends BaseEntity {
   vehicleId: number;
@@ -595,20 +603,21 @@ export interface QueryAlertDto extends QueryParams, Partial<DateRange> {
 
 ---
 
-### Task 1.9: Create `types/geofence.ts`
+- [x] ### Task 1.9: Create `types/geofence.ts`
 
 **File Path**: `{SRC_DIR}/types/geofence.ts`
 
 **Dependencies**: Task 1.1
 
 **Code Template**:
+
 ```typescript
 /**
  * Geofence Types
  */
-import type { BaseEntity, QueryParams } from './common';
+import type { BaseEntity, QueryParams } from "./common";
 
-export type GeofenceType = 'circle' | 'polygon';
+export type GeofenceType = "circle" | "polygon";
 
 export interface GeoPoint {
   latitude: number;
@@ -659,28 +668,29 @@ export interface QueryGeofenceDto extends QueryParams {
 
 ---
 
-### Task 1.10: Create `types/maintenance.ts`
+- [x] ### Task 1.10: Create `types/maintenance.ts`
 
 **File Path**: `{SRC_DIR}/types/maintenance.ts`
 
 **Dependencies**: Task 1.1
 
 **Code Template**:
+
 ```typescript
 /**
  * Maintenance Types
  */
-import type { BaseEntity, QueryParams, DateRange } from './common';
+import type { BaseEntity, QueryParams, DateRange } from "./common";
 
-export type MaintenanceType = 
-  | 'oil_change' 
-  | 'tire_rotation' 
-  | 'brake_service' 
-  | 'inspection' 
-  | 'repair' 
-  | 'other';
+export type MaintenanceType =
+  | "oil_change"
+  | "tire_rotation"
+  | "brake_service"
+  | "inspection"
+  | "repair"
+  | "other";
 
-export type MaintenanceStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+export type MaintenanceStatus = "scheduled" | "in_progress" | "completed" | "cancelled";
 
 export interface Maintenance extends BaseEntity {
   vehicleId: number;
@@ -720,29 +730,30 @@ export interface QueryMaintenanceDto extends QueryParams, Partial<DateRange> {
 
 ---
 
-### Task 1.11: Create `types/command.ts`
+- [x] ### Task 1.11: Create `types/command.ts`
 
 **File Path**: `{SRC_DIR}/types/command.ts`
 
 **Dependencies**: Task 1.1
 
 **Code Template**:
+
 ```typescript
 /**
  * Command Types
  */
-import type { BaseEntity, QueryParams } from './common';
+import type { BaseEntity, QueryParams } from "./common";
 
-export type CommandType = 
-  | 'engine_on' 
-  | 'engine_off' 
-  | 'lock' 
-  | 'unlock' 
-  | 'locate' 
-  | 'reboot'
-  | 'update_config';
+export type CommandType =
+  | "engine_on"
+  | "engine_off"
+  | "lock"
+  | "unlock"
+  | "locate"
+  | "reboot"
+  | "update_config";
 
-export type CommandStatus = 'pending' | 'sent' | 'delivered' | 'executed' | 'failed';
+export type CommandStatus = "pending" | "sent" | "delivered" | "executed" | "failed";
 
 export interface Command extends BaseEntity {
   deviceId: number;
@@ -772,20 +783,21 @@ export interface QueryCommandDto extends QueryParams {
 
 ---
 
-### Task 1.12: Create `types/notification.ts`
+- [x] ### Task 1.12: Create `types/notification.ts`
 
 **File Path**: `{SRC_DIR}/types/notification.ts`
 
 **Dependencies**: Task 1.1
 
 **Code Template**:
+
 ```typescript
 /**
  * Notification Types
  */
-import type { BaseEntity, QueryParams } from './common';
+import type { BaseEntity, QueryParams } from "./common";
 
-export type NotificationType = 'alert' | 'info' | 'warning' | 'success';
+export type NotificationType = "alert" | "info" | "warning" | "success";
 
 export interface Notification extends BaseEntity {
   userId: number;
@@ -810,25 +822,26 @@ export interface QueryNotificationDto extends QueryParams {
 
 ---
 
-### Task 1.13: Create `types/violation.ts`
+- [x] ### Task 1.13: Create `types/violation.ts`
 
 **File Path**: `{SRC_DIR}/types/violation.ts`
 
 **Dependencies**: Task 1.1
 
 **Code Template**:
+
 ```typescript
 /**
  * Violation Types
  */
-import type { BaseEntity, QueryParams, DateRange } from './common';
+import type { BaseEntity, QueryParams, DateRange } from "./common";
 
-export type ViolationType = 
-  | 'speeding' 
-  | 'harsh_braking' 
-  | 'harsh_acceleration' 
-  | 'geofence_breach'
-  | 'unauthorized_use';
+export type ViolationType =
+  | "speeding"
+  | "harsh_braking"
+  | "harsh_acceleration"
+  | "geofence_breach"
+  | "unauthorized_use";
 
 export interface Violation extends BaseEntity {
   vehicleId: number;
@@ -853,16 +866,22 @@ export interface QueryViolationDto extends QueryParams, Partial<DateRange> {
 
 ---
 
-### Task 1.14: Create `types/data-table.ts`
+- [x] ### Task 1.14: Create `types/data-table.ts`
 
 **File Path**: `{SRC_DIR}/types/data-table.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * Data Table Types for TanStack Table
  */
-import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table';
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+} from "@tanstack/react-table";
 
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -879,7 +898,7 @@ export interface DataTableProps<TData, TValue> {
 }
 
 export interface DataTableToolbarProps<TData> {
-  table: import('@tanstack/react-table').Table<TData>;
+  table: import("@tanstack/react-table").Table<TData>;
   searchPlaceholder?: string;
   filters?: React.ReactNode;
 }
@@ -894,7 +913,7 @@ export interface UseDataTableOptions {
 
 ---
 
-### Task 1.15: Create `types/index.ts`
+- [x] ### Task 1.15: Create `types/index.ts`
 
 **File Path**: `{SRC_DIR}/types/index.ts`
 
@@ -903,45 +922,47 @@ export interface UseDataTableOptions {
 **Instructions**: Re-export tất cả types từ một file index.
 
 **Code Template**:
+
 ```typescript
 /**
  * Type exports - Re-export all types
  */
 
 // Common
-export * from './common';
+export * from "./common";
 
 // Auth
-export * from './auth';
+export * from "./auth";
 
 // Entities
-export * from './vehicle';
-export * from './device';
-export * from './customer';
-export * from './trip';
-export * from './telemetry';
-export * from './alert';
-export * from './geofence';
-export * from './maintenance';
-export * from './command';
-export * from './notification';
-export * from './violation';
+export * from "./vehicle";
+export * from "./device";
+export * from "./customer";
+export * from "./trip";
+export * from "./telemetry";
+export * from "./alert";
+export * from "./geofence";
+export * from "./maintenance";
+export * from "./command";
+export * from "./notification";
+export * from "./violation";
 
 // UI
-export * from './data-table';
+export * from "./data-table";
 ```
 
 ---
 
 ## 🎯 PHASE 2: API LAYER
 
-### Task 2.1: Create `lib/api/endpoints.ts`
+- [x] ### Task 2.1: Create `lib/api/endpoints.ts`
 
 **File Path**: `{SRC_DIR}/lib/api/endpoints.ts`
 
 **Instructions**: Định nghĩa tất cả API endpoints dựa trên backend routes.
 
 **Code Template**:
+
 ```typescript
 /**
  * API Endpoints Constants - Aligned with backend routes
@@ -949,82 +970,82 @@ export * from './data-table';
 
 export const API = {
   AUTH: {
-    LOGIN: '/auth/login',
-    LOGOUT: '/auth/logout',
-    REGISTER: '/auth/register',
-    REFRESH: '/auth/refresh',
-    PROFILE: '/auth/profile',  // Backend uses /profile not /me
+    LOGIN: "/auth/login",
+    LOGOUT: "/auth/logout",
+    REGISTER: "/auth/register",
+    REFRESH: "/auth/refresh",
+    PROFILE: "/auth/profile", // Backend uses /profile not /me
   },
   VEHICLES: {
-    LIST: '/vehicles',
-    CREATE: '/vehicles',
+    LIST: "/vehicles",
+    CREATE: "/vehicles",
     DETAILS: (id: number | string) => `/vehicles/${id}`,
-    UPDATE: (id: number | string) => `/vehicles/${id}`,  // Uses PATCH
+    UPDATE: (id: number | string) => `/vehicles/${id}`, // Uses PATCH
     DELETE: (id: number | string) => `/vehicles/${id}`,
     STATUS: (id: number | string) => `/vehicles/${id}/status`,
   },
   DEVICES: {
-    LIST: '/devices',
-    CREATE: '/devices',
+    LIST: "/devices",
+    CREATE: "/devices",
     DETAILS: (id: number | string) => `/devices/${id}`,
-    UPDATE: (id: number | string) => `/devices/${id}`,  // Uses PATCH
+    UPDATE: (id: number | string) => `/devices/${id}`, // Uses PATCH
     DELETE: (id: number | string) => `/devices/${id}`,
     ASSIGN: (id: number | string) => `/devices/${id}/assign`,
   },
   CUSTOMERS: {
-    LIST: '/customers',
-    CREATE: '/customers',
+    LIST: "/customers",
+    CREATE: "/customers",
     DETAILS: (id: number | string) => `/customers/${id}`,
     UPDATE: (id: number | string) => `/customers/${id}`,
     DELETE: (id: number | string) => `/customers/${id}`,
   },
   TRIPS: {
-    LIST: '/trips',
-    CREATE: '/trips',
-    DETAILS: (id: number | string) => `/trips/${id}`,  // Returns trip with events
+    LIST: "/trips",
+    CREATE: "/trips",
+    DETAILS: (id: number | string) => `/trips/${id}`, // Returns trip with events
     UPDATE: (id: number | string) => `/trips/${id}`,
     DELETE: (id: number | string) => `/trips/${id}`,
     // Note: No separate /events or /route endpoints - included in DETAILS response
   },
   TELEMETRY: {
     // Note: Backend uses camelCase query params: deviceId, startTime, endTime, vehicleId, startDate, endDate
-    LOCATION: '/telemetry/location',   // Params: deviceId, startTime, endTime, interval
-    HISTORY: '/telemetry/history',     // Params: vehicleId, startDate, endDate, includeStops
+    LOCATION: "/telemetry/location", // Params: deviceId, startTime, endTime, interval
+    HISTORY: "/telemetry/history", // Params: vehicleId, startDate, endDate, includeStops
   },
   ALERTS: {
-    LIST: '/alerts',
-    CREATE: '/alerts',
+    LIST: "/alerts",
+    CREATE: "/alerts",
     DETAILS: (id: number | string) => `/alerts/${id}`,
-    ACKNOWLEDGE: (id: number | string) => `/alerts/${id}/acknowledge`,  // POST
-    RESOLVE: (id: number | string) => `/alerts/${id}/resolve`,  // POST
+    ACKNOWLEDGE: (id: number | string) => `/alerts/${id}/acknowledge`, // POST
+    RESOLVE: (id: number | string) => `/alerts/${id}/resolve`, // POST
   },
   VIOLATIONS: {
-    LIST: '/violations',
+    LIST: "/violations",
     DETAILS: (id: number | string) => `/violations/${id}`,
   },
   GEOFENCES: {
-    LIST: '/geofences',
-    CREATE: '/geofences',
+    LIST: "/geofences",
+    CREATE: "/geofences",
     DETAILS: (id: number | string) => `/geofences/${id}`,
     UPDATE: (id: number | string) => `/geofences/${id}`,
     DELETE: (id: number | string) => `/geofences/${id}`,
-    ASSIGN_VEHICLES: (id: number | string) => `/geofences/${id}/assign`,  // Backend uses /assign not /vehicles
+    ASSIGN_VEHICLES: (id: number | string) => `/geofences/${id}/assign`, // Backend uses /assign not /vehicles
   },
   MAINTENANCE: {
-    LIST: '/maintenance',
-    CREATE: '/maintenance',
+    LIST: "/maintenance",
+    CREATE: "/maintenance",
     DETAILS: (id: number | string) => `/maintenance/${id}`,
     UPDATE: (id: number | string) => `/maintenance/${id}`,
     DELETE: (id: number | string) => `/maintenance/${id}`,
   },
   COMMANDS: {
-    LIST: '/commands',
+    LIST: "/commands",
     DETAILS: (id: number | string) => `/commands/${id}`,
     // Backend route: POST /commands/:deviceId
     SEND: (deviceId: string) => `/commands/${deviceId}`,
   },
   NOTIFICATIONS: {
-    LIST: '/notifications',
+    LIST: "/notifications",
     DETAILS: (id: number | string) => `/notifications/${id}`,
     // Backend has PATCH /:id/delivered and POST /:id/retry
     MARK_DELIVERED: (id: number | string) => `/notifications/${id}/delivered`,
@@ -1041,23 +1062,24 @@ export const API = {
 
 ---
 
-### Task 2.2: Create `lib/api/http.ts`
+- [x] ### Task 2.2: Create `lib/api/http.ts`
 
 **File Path**: `{SRC_DIR}/lib/api/http.ts`
 
 **Instructions**: HTTP client wrapper với error handling, auth headers, retry logic.
 
 **Code Template**:
+
 ```typescript
 /**
  * HTTP Client - Wrapper for fetch with auth and error handling
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api/v1";
 
 // Get auth store - lazy import to avoid circular dependency
 const getAuthStore = async () => {
-  const { useAuthStore } = await import('@/lib/store/auth-store');
+  const { useAuthStore } = await import("@/lib/store/auth-store");
   return useAuthStore.getState();
 };
 
@@ -1070,7 +1092,7 @@ function isRetryableError(error: unknown): boolean {
   return false;
 }
 
-// Retry with exponential backoff  
+// Retry with exponential backoff
 async function retryRequest<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
@@ -1095,15 +1117,15 @@ async function retryRequest<T>(
 // Main request function
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const authStore = await getAuthStore();
-  
+
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...options.headers,
   };
 
   // Add auth token if available
   if (authStore.token) {
-    (headers as Record<string, string>)['Authorization'] = `Bearer ${authStore.token}`;
+    (headers as Record<string, string>)["Authorization"] = `Bearer ${authStore.token}`;
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -1114,7 +1136,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   // Handle 401 - Token expired
   if (response.status === 401) {
     authStore.logout();
-    throw new Error('Session expired. Please login again.');
+    throw new Error("Session expired. Please login again.");
   }
 
   // Handle error responses
@@ -1133,25 +1155,25 @@ export const http = {
 
   post: <T>(endpoint: string, body?: unknown) =>
     request<T>(endpoint, {
-      method: 'POST',
+      method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     }),
 
   put: <T>(endpoint: string, body?: unknown) =>
     request<T>(endpoint, {
-      method: 'PUT',
+      method: "PUT",
       body: body ? JSON.stringify(body) : undefined,
     }),
 
   patch: <T>(endpoint: string, body?: unknown) =>
     request<T>(endpoint, {
-      method: 'PATCH',
+      method: "PATCH",
       body: body ? JSON.stringify(body) : undefined,
     }),
 
   delete: <T>(endpoint: string, body?: unknown) =>
     request<T>(endpoint, {
-      method: 'DELETE',
+      method: "DELETE",
       body: body ? JSON.stringify(body) : undefined,
     }),
 };
@@ -1159,7 +1181,7 @@ export const http = {
 
 ---
 
-### Task 2.3: Create `lib/api/vehicles.ts`
+- [x] ### Task 2.3: Create `lib/api/vehicles.ts`
 
 **File Path**: `{SRC_DIR}/lib/api/vehicles.ts`
 
@@ -1168,12 +1190,13 @@ export const http = {
 **Instructions**: Vehicle API service. Import types từ `@/types`, http từ `./http`, endpoints từ `./endpoints`.
 
 **Code Template**:
+
 ```typescript
 /**
  * Vehicle API Service
  */
-import { http } from './http';
-import { API } from './endpoints';
+import { http } from "./http";
+import { API } from "./endpoints";
 import type {
   Vehicle,
   CreateVehicleDto,
@@ -1182,11 +1205,11 @@ import type {
   VehicleLocation,
   PaginatedResponse,
   ApiResponse,
-} from '@/types';
+} from "@/types";
 
 // Build query string from params
 function buildQueryString(params?: QueryVehicleDto): string {
-  if (!params) return '';
+  if (!params) return "";
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
@@ -1194,7 +1217,7 @@ function buildQueryString(params?: QueryVehicleDto): string {
     }
   });
   const query = searchParams.toString();
-  return query ? `?${query}` : '';
+  return query ? `?${query}` : "";
 }
 
 export const vehicleServices = {
@@ -1233,7 +1256,7 @@ export const vehicleServices = {
 
 ---
 
-### Task 2.4: Create `lib/api/devices.ts`
+- [x] ### Task 2.4: Create `lib/api/devices.ts`
 
 **File Path**: `{SRC_DIR}/lib/api/devices.ts`
 
@@ -1242,12 +1265,13 @@ export const vehicleServices = {
 **Instructions**: Device API service. Follow same pattern as vehicles.ts.
 
 **Code Template**:
+
 ```typescript
 /**
  * Device API Service
  */
-import { http } from './http';
-import { API } from './endpoints';
+import { http } from "./http";
+import { API } from "./endpoints";
 import type {
   Device,
   CreateDeviceDto,
@@ -1256,10 +1280,10 @@ import type {
   AssignDeviceDto,
   PaginatedResponse,
   ApiResponse,
-} from '@/types';
+} from "@/types";
 
 function buildQueryString(params?: QueryDeviceDto): string {
-  if (!params) return '';
+  if (!params) return "";
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
@@ -1267,7 +1291,7 @@ function buildQueryString(params?: QueryDeviceDto): string {
     }
   });
   const query = searchParams.toString();
-  return query ? `?${query}` : '';
+  return query ? `?${query}` : "";
 }
 
 export const deviceServices = {
@@ -1292,7 +1316,10 @@ export const deviceServices = {
     await http.delete(API.DEVICES.DELETE(id));
   },
 
-  assignToVehicle: async (id: number | string, data: AssignDeviceDto): Promise<ApiResponse<Device>> => {
+  assignToVehicle: async (
+    id: number | string,
+    data: AssignDeviceDto
+  ): Promise<ApiResponse<Device>> => {
     return http.post<ApiResponse<Device>>(API.DEVICES.ASSIGN(id), data);
   },
 };
@@ -1300,40 +1327,42 @@ export const deviceServices = {
 
 ---
 
-### Task 2.5 - 2.12: Create remaining API services
+- [x] ### Task 2.5 - 2.12: Create remaining API services
 
 **Pattern**: Follow same pattern as Task 2.3 và 2.4 cho các services sau:
 
-| Task | File Path | Type Dependencies |
-|------|-----------|-------------------|
-| 2.5 | `lib/api/customers.ts` | Customer types |
-| 2.6 | `lib/api/trips.ts` | Trip types |
-| 2.7 | `lib/api/telemetry.ts` | Telemetry types |
-| 2.8 | `lib/api/alerts.ts` | Alert types |
-| 2.9 | `lib/api/geofences.ts` | Geofence types |
-| 2.10 | `lib/api/maintenance.ts` | Maintenance types |
-| 2.11 | `lib/api/commands.ts` | Command types |
+| Task | File Path                  | Type Dependencies  |
+| ---- | -------------------------- | ------------------ |
+| 2.5  | `lib/api/customers.ts`     | Customer types     |
+| 2.6  | `lib/api/trips.ts`         | Trip types         |
+| 2.7  | `lib/api/telemetry.ts`     | Telemetry types    |
+| 2.8  | `lib/api/alerts.ts`        | Alert types        |
+| 2.9  | `lib/api/geofences.ts`     | Geofence types     |
+| 2.10 | `lib/api/maintenance.ts`   | Maintenance types  |
+| 2.11 | `lib/api/commands.ts`      | Command types      |
 | 2.12 | `lib/api/notifications.ts` | Notification types |
 
-**Agent Instructions**: 
+**Agent Instructions**:
+
 1. Copy pattern từ Task 2.3/2.4
 2. Thay thế entity name và types tương ứng
 3. Thêm các methods đặc biệt nếu có (e.g., alerts có `acknowledge`, `resolve`)
 
 ---
 
-### Task 2.13: Create `lib/api/auth.ts`
+- [x] ### Task 2.13: Create `lib/api/auth.ts`
 
 **File Path**: `{SRC_DIR}/lib/api/auth.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * Auth API Service - Aligned with backend routes
  */
-import { http } from './http';
-import { API } from './endpoints';
-import type { LoginDto, LoginResponse, RegisterDto, User, ApiResponse } from '@/types';
+import { http } from "./http";
+import { API } from "./endpoints";
+import type { LoginDto, LoginResponse, RegisterDto, User, ApiResponse } from "@/types";
 
 export const authServices = {
   login: async (data: LoginDto): Promise<LoginResponse> => {
@@ -1363,18 +1392,19 @@ export const authServices = {
 
 ## 🎯 PHASE 3: ZUSTAND STORES
 
-### Task 3.1: Create `lib/store/auth-store.ts`
+- [x] ### Task 3.1: Create `lib/store/auth-store.ts`
 
 **File Path**: `{SRC_DIR}/lib/store/auth-store.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * Auth Store - CORRECTED based on REVIEW_CORRECTIONS.md
  */
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import type { User, AuthState } from '@/types';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import type { User, AuthState } from "@/types";
 
 interface AuthActions {
   setUser: (user: User) => void;
@@ -1382,7 +1412,7 @@ interface AuthActions {
   setSession: (token: string, refreshToken: string, expiresAt: string) => void;
   logout: () => void;
   hydrate: () => void;
-  isTokenExpired: () => boolean;  // Helper to check expiration
+  isTokenExpired: () => boolean; // Helper to check expiration
 }
 
 type AuthStore = AuthState & AuthActions;
@@ -1392,9 +1422,9 @@ export const useAuthStore = create<AuthStore>()(
     (set, get) => ({
       // State - matches backend response structure
       user: null,
-      token: null,           // Backend uses "token" not "accessToken"
+      token: null, // Backend uses "token" not "accessToken"
       refreshToken: null,
-      expiresAt: null,       // For token expiration check
+      expiresAt: null, // For token expiration check
       isAuthenticated: false,
 
       // Actions
@@ -1423,7 +1453,7 @@ export const useAuthStore = create<AuthStore>()(
       },
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         token: state.token,
@@ -1438,28 +1468,29 @@ export const useAuthStore = create<AuthStore>()(
 
 ---
 
-### Task 3.2: Create `lib/store/ui-store.ts`
+- [x] ### Task 3.2: Create `lib/store/ui-store.ts`
 
 **File Path**: `{SRC_DIR}/lib/store/ui-store.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * UI Store - Zustand store for UI state
  */
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface UIState {
   sidebarOpen: boolean;
   sidebarCollapsed: boolean;
-  theme: 'light' | 'dark' | 'system';
+  theme: "light" | "dark" | "system";
 }
 
 interface UIActions {
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebarCollapse: () => void;
-  setTheme: (theme: UIState['theme']) => void;
+  setTheme: (theme: UIState["theme"]) => void;
 }
 
 type UIStore = UIState & UIActions;
@@ -1468,7 +1499,7 @@ export const useUIStore = create<UIStore>((set) => ({
   // State
   sidebarOpen: true,
   sidebarCollapsed: false,
-  theme: 'system',
+  theme: "system",
 
   // Actions
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
@@ -1482,71 +1513,73 @@ export const useUIStore = create<UIStore>((set) => ({
 
 ## 🎯 PHASE 4: REACT QUERY HOOKS
 
-### Task 4.1: Create `lib/constants/query-keys.ts`
+- [x] ### Task 4.1: Create `lib/constants/query-keys.ts`
 
 **File Path**: `{SRC_DIR}/lib/constants/query-keys.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * React Query Keys - Centralized query key management
  */
 export const QUERY_KEYS = {
   // Vehicles
-  VEHICLES: ['vehicles'] as const,
-  VEHICLE: (id: number | string) => ['vehicles', id] as const,
-  VEHICLE_STATUS: (id: number | string) => ['vehicles', id, 'status'] as const,
+  VEHICLES: ["vehicles"] as const,
+  VEHICLE: (id: number | string) => ["vehicles", id] as const,
+  VEHICLE_STATUS: (id: number | string) => ["vehicles", id, "status"] as const,
 
   // Devices
-  DEVICES: ['devices'] as const,
-  DEVICE: (id: number | string) => ['devices', id] as const,
+  DEVICES: ["devices"] as const,
+  DEVICE: (id: number | string) => ["devices", id] as const,
 
   // Customers
-  CUSTOMERS: ['customers'] as const,
-  CUSTOMER: (id: number | string) => ['customers', id] as const,
+  CUSTOMERS: ["customers"] as const,
+  CUSTOMER: (id: number | string) => ["customers", id] as const,
 
   // Trips
-  TRIPS: ['trips'] as const,
-  TRIP: (id: number | string) => ['trips', id] as const,
-  TRIP_EVENTS: (id: number | string) => ['trips', id, 'events'] as const,
-  TRIP_ROUTE: (id: number | string) => ['trips', id, 'route'] as const,
+  TRIPS: ["trips"] as const,
+  TRIP: (id: number | string) => ["trips", id] as const,
+  TRIP_EVENTS: (id: number | string) => ["trips", id, "events"] as const,
+  TRIP_ROUTE: (id: number | string) => ["trips", id, "route"] as const,
 
   // Telemetry
-  TELEMETRY_LOCATION: ['telemetry', 'location'] as const,
-  TELEMETRY_HISTORY: (vehicleId: number) => ['telemetry', 'history', vehicleId] as const,
+  TELEMETRY_LOCATION: ["telemetry", "location"] as const,
+  TELEMETRY_HISTORY: (vehicleId: number) => ["telemetry", "history", vehicleId] as const,
 
   // Alerts
-  ALERTS: ['alerts'] as const,
-  ALERT: (id: number | string) => ['alerts', id] as const,
+  ALERTS: ["alerts"] as const,
+  ALERT: (id: number | string) => ["alerts", id] as const,
 
   // Geofences
-  GEOFENCES: ['geofences'] as const,
-  GEOFENCE: (id: number | string) => ['geofences', id] as const,
+  GEOFENCES: ["geofences"] as const,
+  GEOFENCE: (id: number | string) => ["geofences", id] as const,
 
   // Maintenance
-  MAINTENANCE: ['maintenance'] as const,
-  MAINTENANCE_RECORD: (id: number | string) => ['maintenance', id] as const,
+  MAINTENANCE: ["maintenance"] as const,
+  MAINTENANCE_RECORD: (id: number | string) => ["maintenance", id] as const,
 
   // Commands
-  COMMANDS: ['commands'] as const,
+  COMMANDS: ["commands"] as const,
 
   // Notifications
-  NOTIFICATIONS: ['notifications'] as const,
+  NOTIFICATIONS: ["notifications"] as const,
 
   // Dashboard
-  DASHBOARD_STATS: ['dashboard', 'stats'] as const,
-  DASHBOARD_RECENT_ALERTS: ['dashboard', 'recent-alerts'] as const,
-  DASHBOARD_ACTIVE_VEHICLES: ['dashboard', 'active-vehicles'] as const,
+  DASHBOARD_STATS: ["dashboard", "stats"] as const,
+  DASHBOARD_RECENT_ALERTS: ["dashboard", "recent-alerts"] as const,
+  DASHBOARD_ACTIVE_VEHICLES: ["dashboard", "active-vehicles"] as const,
 } as const;
 ```
 
 ---
 
-### Task 4.2: Create `lib/constants/query-cache.ts`
+- [x] ### Task 4.2: Create `lib/constants/query-cache.ts`
 
 **File Path**: `{SRC_DIR}/lib/constants/query-cache.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * Query Cache Configuration
@@ -1578,20 +1611,21 @@ export const CACHE_TIMES = {
 
 ---
 
-### Task 4.3: Create `hooks/queries/use-vehicles.ts`
+- [x] ### Task 4.3: Create `hooks/queries/use-vehicles.ts`
 
 **File Path**: `{SRC_DIR}/hooks/queries/use-vehicles.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * useVehicles Hook - Fetch vehicles list
  */
-import { useQuery } from '@tanstack/react-query';
-import { vehicleServices } from '@/lib/api/vehicles';
-import { QUERY_KEYS } from '@/lib/constants/query-keys';
-import { STALE_TIMES } from '@/lib/constants/query-cache';
-import type { QueryVehicleDto } from '@/types';
+import { useQuery } from "@tanstack/react-query";
+import { vehicleServices } from "@/lib/api/vehicles";
+import { QUERY_KEYS } from "@/lib/constants/query-keys";
+import { STALE_TIMES } from "@/lib/constants/query-cache";
+import type { QueryVehicleDto } from "@/types";
 
 export function useVehicles(params?: QueryVehicleDto, enabled: boolean = true) {
   return useQuery({
@@ -1605,19 +1639,20 @@ export function useVehicles(params?: QueryVehicleDto, enabled: boolean = true) {
 
 ---
 
-### Task 4.4: Create `hooks/queries/use-vehicle.ts`
+- [x] ### Task 4.4: Create `hooks/queries/use-vehicle.ts`
 
 **File Path**: `{SRC_DIR}/hooks/queries/use-vehicle.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * useVehicle Hook - Fetch single vehicle
  */
-import { useQuery } from '@tanstack/react-query';
-import { vehicleServices } from '@/lib/api/vehicles';
-import { QUERY_KEYS } from '@/lib/constants/query-keys';
-import { STALE_TIMES } from '@/lib/constants/query-cache';
+import { useQuery } from "@tanstack/react-query";
+import { vehicleServices } from "@/lib/api/vehicles";
+import { QUERY_KEYS } from "@/lib/constants/query-keys";
+import { STALE_TIMES } from "@/lib/constants/query-cache";
 
 export function useVehicle(id: number | string | undefined) {
   return useQuery({
@@ -1641,37 +1676,38 @@ export function useVehicleStatus(id: number | string | undefined) {
 
 ---
 
-### Task 4.5 - 4.12: Create remaining query hooks
+- [x] ### Task 4.5 - 4.12: Create remaining query hooks
 
 **Pattern**: Follow same pattern as Task 4.3/4.4 cho các hooks sau:
 
-| Task | File Path | API Service |
-|------|-----------|-------------|
-| 4.5 | `hooks/queries/use-devices.ts` | deviceServices |
-| 4.6 | `hooks/queries/use-customers.ts` | customerServices |
-| 4.7 | `hooks/queries/use-trips.ts` | tripServices |
-| 4.8 | `hooks/queries/use-telemetry.ts` | telemetryServices |
-| 4.9 | `hooks/queries/use-alerts.ts` | alertServices |
-| 4.10 | `hooks/queries/use-geofences.ts` | geofenceServices |
+| Task | File Path                          | API Service         |
+| ---- | ---------------------------------- | ------------------- |
+| 4.5  | `hooks/queries/use-devices.ts`     | deviceServices      |
+| 4.6  | `hooks/queries/use-customers.ts`   | customerServices    |
+| 4.7  | `hooks/queries/use-trips.ts`       | tripServices        |
+| 4.8  | `hooks/queries/use-telemetry.ts`   | telemetryServices   |
+| 4.9  | `hooks/queries/use-alerts.ts`      | alertServices       |
+| 4.10 | `hooks/queries/use-geofences.ts`   | geofenceServices    |
 | 4.11 | `hooks/queries/use-maintenance.ts` | maintenanceServices |
-| 4.12 | `hooks/queries/use-commands.ts` | commandServices |
+| 4.12 | `hooks/queries/use-commands.ts`    | commandServices     |
 
 ---
 
-### Task 4.13: Create `hooks/mutations/use-vehicle-mutations.ts`
+- [x] ### Task 4.13: Create `hooks/mutations/use-vehicle-mutations.ts`
 
 **File Path**: `{SRC_DIR}/hooks/mutations/use-vehicle-mutations.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * Vehicle Mutation Hooks
  */
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { vehicleServices } from '@/lib/api/vehicles';
-import { QUERY_KEYS } from '@/lib/constants/query-keys';
-import { toast } from 'sonner';
-import type { CreateVehicleDto, UpdateVehicleDto } from '@/types';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { vehicleServices } from "@/lib/api/vehicles";
+import { QUERY_KEYS } from "@/lib/constants/query-keys";
+import { toast } from "sonner";
+import type { CreateVehicleDto, UpdateVehicleDto } from "@/types";
 
 export function useCreateVehicle() {
   const queryClient = useQueryClient();
@@ -1680,10 +1716,10 @@ export function useCreateVehicle() {
     mutationFn: (data: CreateVehicleDto) => vehicleServices.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.VEHICLES });
-      toast.success('Vehicle created successfully');
+      toast.success("Vehicle created successfully");
     },
     onError: (error: Error) => {
-      toast.error('Failed to create vehicle', { description: error.message });
+      toast.error("Failed to create vehicle", { description: error.message });
     },
   });
 }
@@ -1697,10 +1733,10 @@ export function useUpdateVehicle() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.VEHICLES });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.VEHICLE(variables.id) });
-      toast.success('Vehicle updated successfully');
+      toast.success("Vehicle updated successfully");
     },
     onError: (error: Error) => {
-      toast.error('Failed to update vehicle', { description: error.message });
+      toast.error("Failed to update vehicle", { description: error.message });
     },
   });
 }
@@ -1712,10 +1748,10 @@ export function useDeleteVehicle() {
     mutationFn: (id: number | string) => vehicleServices.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.VEHICLES });
-      toast.success('Vehicle deleted successfully');
+      toast.success("Vehicle deleted successfully");
     },
     onError: (error: Error) => {
-      toast.error('Failed to delete vehicle', { description: error.message });
+      toast.error("Failed to delete vehicle", { description: error.message });
     },
   });
 }
@@ -1723,135 +1759,135 @@ export function useDeleteVehicle() {
 
 ---
 
-### Task 4.14 - 4.20: Create remaining mutation hooks
+- [x] ### Task 4.14 - 4.20: Create remaining mutation hooks
 
 **Pattern**: Follow same pattern as Task 4.13 cho các mutations:
 
-| Task | File Path | Mutations |
-|------|-----------|-----------|
-| 4.14 | `hooks/mutations/use-device-mutations.ts` | create, update, delete, assign |
-| 4.15 | `hooks/mutations/use-customer-mutations.ts` | create, update, delete |
-| 4.16 | `hooks/mutations/use-trip-mutations.ts` | create, update |
-| 4.17 | `hooks/mutations/use-alert-mutations.ts` | acknowledge, resolve |
-| 4.18 | `hooks/mutations/use-geofence-mutations.ts` | create, update, delete, assignVehicles |
-| 4.19 | `hooks/mutations/use-maintenance-mutations.ts` | create, update, delete |
-| 4.20 | `hooks/mutations/use-command-mutations.ts` | send |
+| Task | File Path                                      | Mutations                              |
+| ---- | ---------------------------------------------- | -------------------------------------- |
+| 4.14 | `hooks/mutations/use-device-mutations.ts`      | create, update, delete, assign         |
+| 4.15 | `hooks/mutations/use-customer-mutations.ts`    | create, update, delete                 |
+| 4.16 | `hooks/mutations/use-trip-mutations.ts`        | create, update                         |
+| 4.17 | `hooks/mutations/use-alert-mutations.ts`       | acknowledge, resolve                   |
+| 4.18 | `hooks/mutations/use-geofence-mutations.ts`    | create, update, delete, assignVehicles |
+| 4.19 | `hooks/mutations/use-maintenance-mutations.ts` | create, update, delete                 |
+| 4.20 | `hooks/mutations/use-command-mutations.ts`     | send                                   |
 
 ---
 
 ## 📋 SUMMARY - TASK INDEX
 
 ```
-PHASE 1: TYPES (15 tasks)
-├── 1.1  types/common.ts
-├── 1.2  types/auth.ts
-├── 1.3  types/vehicle.ts
-├── 1.4  types/device.ts
-├── 1.5  types/customer.ts
-├── 1.6  types/trip.ts
-├── 1.7  types/telemetry.ts
-├── 1.8  types/alert.ts
-├── 1.9  types/geofence.ts
-├── 1.10 types/maintenance.ts
-├── 1.11 types/command.ts
-├── 1.12 types/notification.ts
-├── 1.13 types/violation.ts
-├── 1.14 types/data-table.ts
-└── 1.15 types/index.ts
+PHASE 1: TYPES (15 tasks) ✅ COMPLETED
+├── [x] 1.1  types/common.ts
+├── [x] 1.2  types/auth.ts
+├── [x] 1.3  types/vehicle.ts
+├── [x] 1.4  types/device.ts
+├── [x] 1.5  types/customer.ts
+├── [x] 1.6  types/trip.ts
+├── [x] 1.7  types/telemetry.ts
+├── [x] 1.8  types/alert.ts
+├── [x] 1.9  types/geofence.ts
+├── [x] 1.10 types/maintenance.ts
+├── [x] 1.11 types/command.ts
+├── [x] 1.12 types/notification.ts
+├── [x] 1.13 types/violation.ts
+├── [x] 1.14 types/data-table.ts
+└── [x] 1.15 types/index.ts
 
-PHASE 2: API LAYER (13 tasks)
-├── 2.1  lib/api/endpoints.ts
-├── 2.2  lib/api/http.ts
-├── 2.3  lib/api/vehicles.ts
-├── 2.4  lib/api/devices.ts
-├── 2.5  lib/api/customers.ts
-├── 2.6  lib/api/trips.ts
-├── 2.7  lib/api/telemetry.ts
-├── 2.8  lib/api/alerts.ts
-├── 2.9  lib/api/geofences.ts
-├── 2.10 lib/api/maintenance.ts
-├── 2.11 lib/api/commands.ts
-├── 2.12 lib/api/notifications.ts
-└── 2.13 lib/api/auth.ts
+PHASE 2: API LAYER (13 tasks) ✅ COMPLETED
+├── [x] 2.1  lib/api/endpoints.ts
+├── [x] 2.2  lib/api/http.ts
+├── [x] 2.3  lib/api/vehicles.ts
+├── [x] 2.4  lib/api/devices.ts
+├── [x] 2.5  lib/api/customers.ts
+├── [x] 2.6  lib/api/trips.ts
+├── [x] 2.7  lib/api/telemetry.ts
+├── [x] 2.8  lib/api/alerts.ts
+├── [x] 2.9  lib/api/geofences.ts
+├── [x] 2.10 lib/api/maintenance.ts
+├── [x] 2.11 lib/api/commands.ts
+├── [x] 2.12 lib/api/notifications.ts
+└── [x] 2.13 lib/api/auth.ts
 
-PHASE 3: STORES (2 tasks)
-├── 3.1  lib/store/auth-store.ts
-└── 3.2  lib/store/ui-store.ts
+PHASE 3: STORES (2 tasks) ✅ COMPLETED
+├── [x] 3.1  lib/store/auth-store.ts
+└── [x] 3.2  lib/store/ui-store.ts
 
-PHASE 4: HOOKS (20 tasks)
-├── 4.1  lib/constants/query-keys.ts
-├── 4.2  lib/constants/query-cache.ts
-├── 4.3  hooks/queries/use-vehicles.ts
-├── 4.4  hooks/queries/use-vehicle.ts
-├── 4.5  hooks/queries/use-devices.ts
-├── 4.6  hooks/queries/use-customers.ts
-├── 4.7  hooks/queries/use-trips.ts
-├── 4.8  hooks/queries/use-telemetry.ts
-├── 4.9  hooks/queries/use-alerts.ts
-├── 4.10 hooks/queries/use-geofences.ts
-├── 4.11 hooks/queries/use-maintenance.ts
-├── 4.12 hooks/queries/use-commands.ts
-├── 4.13 hooks/mutations/use-vehicle-mutations.ts
-├── 4.14 hooks/mutations/use-device-mutations.ts
-├── 4.15 hooks/mutations/use-customer-mutations.ts
-├── 4.16 hooks/mutations/use-trip-mutations.ts
-├── 4.17 hooks/mutations/use-alert-mutations.ts
-├── 4.18 hooks/mutations/use-geofence-mutations.ts
-├── 4.19 hooks/mutations/use-maintenance-mutations.ts
-└── 4.20 hooks/mutations/use-command-mutations.ts
+PHASE 4: HOOKS (20 tasks) ✅ COMPLETED
+├── [x] 4.1  lib/constants/query-keys.ts
+├── [x] 4.2  lib/constants/query-cache.ts
+├── [x] 4.3  hooks/queries/use-vehicles.ts
+├── [x] 4.4  hooks/queries/use-vehicle.ts
+├── [x] 4.5  hooks/queries/use-devices.ts
+├── [x] 4.6  hooks/queries/use-customers.ts
+├── [x] 4.7  hooks/queries/use-trips.ts
+├── [x] 4.8  hooks/queries/use-telemetry.ts
+├── [x] 4.9  hooks/queries/use-alerts.ts
+├── [x] 4.10 hooks/queries/use-geofences.ts
+├── [x] 4.11 hooks/queries/use-maintenance.ts
+├── [x] 4.12 hooks/queries/use-commands.ts
+├── [x] 4.13 hooks/mutations/use-vehicle-mutations.ts
+├── [x] 4.14 hooks/mutations/use-device-mutations.ts
+├── [x] 4.15 hooks/mutations/use-customer-mutations.ts
+├── [x] 4.16 hooks/mutations/use-trip-mutations.ts
+├── [x] 4.17 hooks/mutations/use-alert-mutations.ts
+├── [x] 4.18 hooks/mutations/use-geofence-mutations.ts
+├── [x] 4.19 hooks/mutations/use-maintenance-mutations.ts
+└── [x] 4.20 hooks/mutations/use-command-mutations.ts
 
-PHASE 5: UI COMPONENTS (25 tasks)
-├── 5.1  components/ui/button.tsx (shadcn)
-├── 5.2  components/ui/input.tsx (shadcn)
-├── 5.3  components/ui/card.tsx (shadcn)
-├── 5.4  components/ui/dialog.tsx (shadcn)
-├── 5.5  components/ui/form.tsx (shadcn)
-├── 5.6  components/ui/table/data-table.tsx
-├── 5.7  components/ui/table/data-table-pagination.tsx
-├── 5.8  components/ui/table/data-table-toolbar.tsx
-├── 5.9  components/layout/app-sidebar.tsx
-├── 5.10 components/layout/header.tsx
-├── 5.11 components/layout/page-container.tsx
-├── 5.12 components/layout/auth-guard.tsx
-├── 5.13 components/providers/index.tsx
-├── 5.14 config/nav-config.ts
-├── 5.15 features/auth/components/login-form.tsx
-├── 5.16 features/auth/schemas/login.schema.ts
-├── 5.17 features/vehicles/components/vehicle-table.tsx
-├── 5.18 features/vehicles/components/vehicle-table-columns.tsx
-├── 5.19 features/vehicles/components/vehicle-form.tsx
-├── 5.20 features/vehicles/schemas/vehicle.schema.ts
-├── 5.21 features/tracking/components/tracking-map.tsx
-├── 5.22 features/tracking/components/vehicle-marker.tsx
-├── 5.23 features/dashboard/components/stats-cards.tsx
-├── 5.24 features/dashboard/components/recent-alerts.tsx
-└── 5.25 features/dashboard/components/active-vehicles.tsx
+PHASE 5: UI COMPONENTS (25 tasks) ✅ COMPLETED
+├── [x] 5.1  components/ui/button.tsx (shadcn)
+├── [x] 5.2  components/ui/input.tsx (shadcn)
+├── [x] 5.3  components/ui/card.tsx (shadcn)
+├── [x] 5.4  components/ui/dialog.tsx (shadcn)
+├── [x] 5.5  components/ui/form.tsx (shadcn)
+├── [x] 5.6  components/ui/table/data-table.tsx
+├── [x] 5.7  components/ui/table/data-table-pagination.tsx
+├── [x] 5.8  components/ui/table/data-table-toolbar.tsx
+├── [x] 5.9  components/layout/app-sidebar.tsx
+├── [x] 5.10 components/layout/header.tsx
+├── [x] 5.11 components/layout/page-container.tsx
+├── [x] 5.12 components/layout/auth-guard.tsx
+├── [x] 5.13 components/providers/index.tsx
+├── [x] 5.14 config/nav-config.ts
+├── [x] 5.15 features/auth/components/login-form.tsx
+├── [x] 5.16 features/auth/schemas/login.schema.ts
+├── [x] 5.17 features/vehicles/components/vehicle-table.tsx
+├── [x] 5.18 features/vehicles/components/vehicle-table-columns.tsx
+├── [x] 5.19 features/vehicles/components/vehicle-form.tsx
+├── [x] 5.20 features/vehicles/schemas/vehicle.schema.ts
+├── [x] 5.21 features/tracking/components/tracking-map.tsx
+├── [x] 5.22 features/tracking/components/vehicle-marker.tsx
+├── [x] 5.23 features/dashboard/components/stats-cards.tsx
+├── [x] 5.24 features/dashboard/components/recent-alerts.tsx
+└── [x] 5.25 features/dashboard/components/active-vehicles.tsx
 
-PHASE 6: PAGES (15 tasks)
-├── 6.1  app/globals.css
-├── 6.2  app/layout.tsx
-├── 6.3  app/page.tsx
-├── 6.4  app/(auth)/login/page.tsx
-├── 6.5  app/(auth)/layout.tsx
-├── 6.6  app/(dashboard)/layout.tsx
-├── 6.7  app/(dashboard)/dashboard/page.tsx
-├── 6.8  app/(dashboard)/vehicles/page.tsx
-├── 6.9  app/(dashboard)/vehicles/[id]/page.tsx
-├── 6.10 app/(dashboard)/vehicles/new/page.tsx
-├── 6.11 app/(dashboard)/devices/page.tsx
-├── 6.12 app/(dashboard)/tracking/page.tsx
-├── 6.13 app/(dashboard)/trips/page.tsx
-├── 6.14 app/(dashboard)/alerts/page.tsx
-└── 6.15 app/(dashboard)/geofences/page.tsx
+PHASE 6: PAGES (15 tasks) ✅ COMPLETED
+├── [x] 6.1  app/globals.css
+├── [x] 6.2  app/layout.tsx
+├── [x] 6.3  app/page.tsx
+├── [x] 6.4  app/(auth)/login/page.tsx
+├── [x] 6.5  app/(auth)/layout.tsx
+├── [x] 6.6  app/(dashboard)/layout.tsx
+├── [x] 6.7  app/(dashboard)/dashboard/page.tsx
+├── [x] 6.8  app/(dashboard)/vehicles/page.tsx
+├── [x] 6.9  app/(dashboard)/vehicles/[id]/page.tsx
+├── [x] 6.10 app/(dashboard)/vehicles/new/page.tsx
+├── [x] 6.11 app/(dashboard)/devices/page.tsx
+├── [x] 6.12 app/(dashboard)/tracking/page.tsx
+├── [x] 6.13 app/(dashboard)/trips/page.tsx
+├── [x] 6.14 app/(dashboard)/alerts/page.tsx
+└── [x] 6.15 app/(dashboard)/geofences/page.tsx
 
-TOTAL: 90 tasks
+TOTAL: 90 tasks | ✅ COMPLETED: 90/90 (100%)
 ```
 
 ---
 
 ## 🎯 PHASE 5: UI COMPONENTS
 
-### Task 5.1 - 5.5: Install shadcn/ui Components
+- [x] ### Task 5.1 - 5.5: Install shadcn/ui Components
 
 **Instructions**: Chạy CLI command để install shadcn components. Agent KHÔNG cần viết code thủ công.
 
@@ -1876,11 +1912,12 @@ npx shadcn-ui@latest add separator
 
 ---
 
-### Task 5.6: Create `components/ui/table/data-table.tsx`
+- [x] ### Task 5.6: Create `components/ui/table/data-table.tsx`
 
 **File Path**: `{SRC_DIR}/components/ui/table/data-table.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * DataTable Component - Reusable table with TanStack Table
@@ -1998,11 +2035,12 @@ export function DataTable<TData, TValue>({
 
 ---
 
-### Task 5.7: Create `components/ui/table/data-table-pagination.tsx`
+- [x] ### Task 5.7: Create `components/ui/table/data-table-pagination.tsx`
 
 **File Path**: `{SRC_DIR}/components/ui/table/data-table-pagination.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * DataTable Pagination Component
@@ -2065,11 +2103,12 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
 
 ---
 
-### Task 5.9: Create `components/layout/app-sidebar.tsx`
+- [x] ### Task 5.9: Create `components/layout/app-sidebar.tsx`
 
 **File Path**: `{SRC_DIR}/components/layout/app-sidebar.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * App Sidebar - Main navigation sidebar
@@ -2162,11 +2201,12 @@ export function AppSidebar() {
 
 ---
 
-### Task 5.10: Create `components/layout/header.tsx`
+- [x] ### Task 5.10: Create `components/layout/header.tsx`
 
 **File Path**: `{SRC_DIR}/components/layout/header.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Header - Top navigation header
@@ -2230,11 +2270,12 @@ export function Header() {
 
 ---
 
-### Task 5.11: Create `components/layout/page-container.tsx`
+- [x] ### Task 5.11: Create `components/layout/page-container.tsx`
 
 **File Path**: `{SRC_DIR}/components/layout/page-container.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * PageContainer - Wrapper for page content
@@ -2277,11 +2318,12 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
 
 ---
 
-### Task 5.12: Create `components/layout/auth-guard.tsx`
+- [x] ### Task 5.12: Create `components/layout/auth-guard.tsx`
 
 **File Path**: `{SRC_DIR}/components/layout/auth-guard.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * AuthGuard - Protects routes that require authentication
@@ -2316,11 +2358,12 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
 ---
 
-### Task 5.13: Create `components/providers/index.tsx`
+- [x] ### Task 5.13: Create `components/providers/index.tsx`
 
 **File Path**: `{SRC_DIR}/components/providers/index.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Providers - Combines all app providers
@@ -2364,11 +2407,12 @@ export function Providers({ children }: ProvidersProps) {
 
 ---
 
-### Task 5.14: Create `config/nav-config.ts`
+- [x] ### Task 5.14: Create `config/nav-config.ts`
 
 **File Path**: `{SRC_DIR}/config/nav-config.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * Navigation Configuration
@@ -2381,28 +2425,29 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { title: 'Dashboard', url: '/dashboard', icon: 'dashboard' },
-  { title: 'Vehicles', url: '/dashboard/vehicles', icon: 'vehicles' },
-  { title: 'Devices', url: '/dashboard/devices', icon: 'devices' },
-  { title: 'Tracking', url: '/dashboard/tracking', icon: 'tracking' },
-  { title: 'Trips', url: '/dashboard/trips', icon: 'trips' },
-  { title: 'Alerts', url: '/dashboard/alerts', icon: 'alerts' },
-  { title: 'Geofences', url: '/dashboard/geofences', icon: 'geofences' },
-  { title: 'Customers', url: '/dashboard/customers', icon: 'customers' },
-  { title: 'Maintenance', url: '/dashboard/maintenance', icon: 'maintenance' },
-  { title: 'Commands', url: '/dashboard/commands', icon: 'commands' },
-  { title: 'Notifications', url: '/dashboard/notifications', icon: 'notifications' },
-  { title: 'Settings', url: '/dashboard/settings', icon: 'settings' },
+  { title: "Dashboard", url: "/dashboard", icon: "dashboard" },
+  { title: "Vehicles", url: "/dashboard/vehicles", icon: "vehicles" },
+  { title: "Devices", url: "/dashboard/devices", icon: "devices" },
+  { title: "Tracking", url: "/dashboard/tracking", icon: "tracking" },
+  { title: "Trips", url: "/dashboard/trips", icon: "trips" },
+  { title: "Alerts", url: "/dashboard/alerts", icon: "alerts" },
+  { title: "Geofences", url: "/dashboard/geofences", icon: "geofences" },
+  { title: "Customers", url: "/dashboard/customers", icon: "customers" },
+  { title: "Maintenance", url: "/dashboard/maintenance", icon: "maintenance" },
+  { title: "Commands", url: "/dashboard/commands", icon: "commands" },
+  { title: "Notifications", url: "/dashboard/notifications", icon: "notifications" },
+  { title: "Settings", url: "/dashboard/settings", icon: "settings" },
 ];
 ```
 
 ---
 
-### Task 5.15: Create `features/auth/components/login-form.tsx`
+- [x] ### Task 5.15: Create `features/auth/components/login-form.tsx`
 
 **File Path**: `{SRC_DIR}/features/auth/components/login-form.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Login Form Component
@@ -2504,20 +2549,21 @@ export function LoginForm() {
 
 ---
 
-### Task 5.16: Create `features/auth/schemas/login.schema.ts`
+- [x] ### Task 5.16: Create `features/auth/schemas/login.schema.ts`
 
 **File Path**: `{SRC_DIR}/features/auth/schemas/login.schema.ts`
 
 **Code Template**:
+
 ```typescript
 /**
  * Login Form Schema
  */
-import { z } from 'zod';
+import { z } from "zod";
 
 export const loginSchema = z.object({
-  username: z.string().min(1, 'Username or email is required'), // Backend accepts username OR email
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  username: z.string().min(1, "Username or email is required"), // Backend accepts username OR email
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
@@ -2525,11 +2571,12 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 
 ---
 
-### Task 5.17: Create `features/vehicles/components/vehicle-table.tsx`
+- [x] ### Task 5.17: Create `features/vehicles/components/vehicle-table.tsx`
 
 **File Path**: `{SRC_DIR}/features/vehicles/components/vehicle-table.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Vehicle Table Component
@@ -2562,11 +2609,12 @@ export function VehicleTable() {
 
 ---
 
-### Task 5.18: Create `features/vehicles/components/vehicle-table-columns.tsx`
+- [x] ### Task 5.18: Create `features/vehicles/components/vehicle-table-columns.tsx`
 
 **File Path**: `{SRC_DIR}/features/vehicles/components/vehicle-table-columns.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Vehicle Table Columns Definition
@@ -2626,29 +2674,30 @@ export const vehicleColumns: ColumnDef<Vehicle>[] = [
 
 ---
 
-### Task 5.19 - 5.25: Remaining Feature Components
+- [x] ### Task 5.19 - 5.25: Remaining Feature Components
 
 **Pattern**: Follow templates above cho các components:
 
-| Task | File Path | Template Pattern |
-|------|-----------|------------------|
-| 5.19 | `features/vehicles/components/vehicle-form.tsx` | Same as login-form.tsx |
-| 5.20 | `features/vehicles/schemas/vehicle.schema.ts` | Same as login.schema.ts |
-| 5.21 | `features/tracking/components/tracking-map.tsx` | Leaflet MapContainer |
-| 5.22 | `features/tracking/components/vehicle-marker.tsx` | Leaflet Marker |
-| 5.23 | `features/dashboard/components/stats-cards.tsx` | Card grid |
-| 5.24 | `features/dashboard/components/recent-alerts.tsx` | List component |
-| 5.25 | `features/dashboard/components/active-vehicles.tsx` | Mini map widget |
+| Task | File Path                                           | Template Pattern        |
+| ---- | --------------------------------------------------- | ----------------------- |
+| 5.19 | `features/vehicles/components/vehicle-form.tsx`     | Same as login-form.tsx  |
+| 5.20 | `features/vehicles/schemas/vehicle.schema.ts`       | Same as login.schema.ts |
+| 5.21 | `features/tracking/components/tracking-map.tsx`     | Leaflet MapContainer    |
+| 5.22 | `features/tracking/components/vehicle-marker.tsx`   | Leaflet Marker          |
+| 5.23 | `features/dashboard/components/stats-cards.tsx`     | Card grid               |
+| 5.24 | `features/dashboard/components/recent-alerts.tsx`   | List component          |
+| 5.25 | `features/dashboard/components/active-vehicles.tsx` | Mini map widget         |
 
 ---
 
 ## 🎯 PHASE 6: PAGES
 
-### Task 6.1: Create `app/globals.css`
+- [x] ### Task 6.1: Create `app/globals.css`
 
 **File Path**: `{SRC_DIR}/app/globals.css`
 
 **Code Template**:
+
 ```css
 @tailwind base;
 @tailwind components;
@@ -2713,11 +2762,12 @@ export const vehicleColumns: ColumnDef<Vehicle>[] = [
 
 ---
 
-### Task 6.2: Create `app/layout.tsx`
+- [x] ### Task 6.2: Create `app/layout.tsx`
 
 **File Path**: `{SRC_DIR}/app/layout.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Root Layout
@@ -2751,29 +2801,31 @@ export default function RootLayout({
 
 ---
 
-### Task 6.3: Create `app/page.tsx`
+- [x] ### Task 6.3: Create `app/page.tsx`
 
 **File Path**: `{SRC_DIR}/app/page.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Root Page - Redirect to dashboard or login
  */
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  redirect('/dashboard');
+  redirect("/dashboard");
 }
 ```
 
 ---
 
-### Task 6.4: Create `app/(auth)/login/page.tsx`
+- [x] ### Task 6.4: Create `app/(auth)/login/page.tsx`
 
 **File Path**: `{SRC_DIR}/app/(auth)/login/page.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Login Page
@@ -2791,11 +2843,12 @@ export default function LoginPage() {
 
 ---
 
-### Task 6.5: Create `app/(auth)/layout.tsx`
+- [x] ### Task 6.5: Create `app/(auth)/layout.tsx`
 
 **File Path**: `{SRC_DIR}/app/(auth)/layout.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Auth Layout - No sidebar
@@ -2811,11 +2864,12 @@ export default function AuthLayout({
 
 ---
 
-### Task 6.6: Create `app/(dashboard)/layout.tsx`
+- [x] ### Task 6.6: Create `app/(dashboard)/layout.tsx`
 
 **File Path**: `{SRC_DIR}/app/(dashboard)/layout.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Dashboard Layout - With sidebar and header
@@ -2845,11 +2899,12 @@ export default function DashboardLayout({
 
 ---
 
-### Task 6.7: Create `app/(dashboard)/dashboard/page.tsx`
+- [x] ### Task 6.7: Create `app/(dashboard)/dashboard/page.tsx`
 
 **File Path**: `{SRC_DIR}/app/(dashboard)/dashboard/page.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Dashboard Overview Page
@@ -2877,11 +2932,12 @@ export default function DashboardPage() {
 
 ---
 
-### Task 6.8: Create `app/(dashboard)/vehicles/page.tsx`
+- [x] ### Task 6.8: Create `app/(dashboard)/vehicles/page.tsx`
 
 **File Path**: `{SRC_DIR}/app/(dashboard)/vehicles/page.tsx`
 
 **Code Template**:
+
 ```typescript
 /**
  * Vehicles List Page
@@ -2915,19 +2971,19 @@ export default function VehiclesPage() {
 
 ---
 
-### Task 6.9 - 6.15: Remaining Pages
+- [x] ### Task 6.9 - 6.15: Remaining Pages
 
 **Pattern**: Follow Task 6.8 pattern cho các pages:
 
-| Task | File Path | Feature Component |
-|------|-----------|-------------------|
-| 6.9 | `app/(dashboard)/vehicles/[id]/page.tsx` | VehicleDetails |
-| 6.10 | `app/(dashboard)/vehicles/new/page.tsx` | VehicleForm |
-| 6.11 | `app/(dashboard)/devices/page.tsx` | DeviceTable |
-| 6.12 | `app/(dashboard)/tracking/page.tsx` | TrackingMap |
-| 6.13 | `app/(dashboard)/trips/page.tsx` | TripTable |
-| 6.14 | `app/(dashboard)/alerts/page.tsx` | AlertTable |
-| 6.15 | `app/(dashboard)/geofences/page.tsx` | GeofenceMap |
+| Task | File Path                                | Feature Component |
+| ---- | ---------------------------------------- | ----------------- |
+| 6.9  | `app/(dashboard)/vehicles/[id]/page.tsx` | VehicleDetails    |
+| 6.10 | `app/(dashboard)/vehicles/new/page.tsx`  | VehicleForm       |
+| 6.11 | `app/(dashboard)/devices/page.tsx`       | DeviceTable       |
+| 6.12 | `app/(dashboard)/tracking/page.tsx`      | TrackingMap       |
+| 6.13 | `app/(dashboard)/trips/page.tsx`         | TripTable         |
+| 6.14 | `app/(dashboard)/alerts/page.tsx`        | AlertTable        |
+| 6.15 | `app/(dashboard)/geofences/page.tsx`     | GeofenceMap       |
 
 ---
 
@@ -2947,6 +3003,8 @@ END
 
 ---
 
-*Document Version: 3.0*
-*Last Updated: 2026-01-01*
-*Total Tasks: 90*
+_Document Version: 3.1_
+_Last Updated: 2026-01-01_
+_Total Tasks: 90_
+_Completed Tasks: 90/90 (100%)_
+_Status: ✅ ALL TASKS COMPLETED_
