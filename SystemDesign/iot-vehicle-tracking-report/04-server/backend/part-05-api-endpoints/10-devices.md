@@ -146,5 +146,66 @@
 }
 ```
 
+**Errors:**
+
+**404 Not Found:**
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Device with ID 123 not found",
+    "status": 404,
+    "path": "/api/v1/devices/123",
+    "details": null,
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**400 Bad Request - Validation failed:**
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "status": 400,
+    "path": "/api/v1/devices",
+    "details": [
+      {
+        "field": "device_id",
+        "message": "Device ID is required",
+        "value": null
+      },
+      {
+        "field": "imei",
+        "message": "IMEI must be 15 digits",
+        "value": "12345"
+      }
+    ],
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**409 Conflict - Duplicate device_id:**
+```json
+{
+  "error": {
+    "code": "CONFLICT",
+    "message": "Device with ID 'TRACKER_001' already exists",
+    "status": 409,
+    "path": "/api/v1/devices",
+    "details": {
+      "field": "device_id",
+      "existing_id": 1
+    },
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
 ---
 

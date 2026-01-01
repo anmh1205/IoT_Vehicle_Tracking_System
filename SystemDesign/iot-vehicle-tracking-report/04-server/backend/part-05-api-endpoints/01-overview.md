@@ -10,17 +10,21 @@
 
 **Error Format:**
 
+Tất cả các lỗi API đều tuân theo cấu trúc thống nhất:
+
 ```json
 {
-  "statusCode": 400,
-  "message": "Validation failed",
-  "error": "Bad Request",
-  "details": [
-    {
-      "field": "email",
-      "message": "Email must be a valid email"
-    }
-  ]
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Error message description",
+    "status": 400,
+    "path": "/api/v1/endpoint",
+    "details": null,
+    "traceId": null
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
+
+Xem chi tiết trong [`18-error-handling.md`](./18-error-handling.md)
 

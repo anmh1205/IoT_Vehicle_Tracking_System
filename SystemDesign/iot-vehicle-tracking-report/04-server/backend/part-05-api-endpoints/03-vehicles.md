@@ -94,7 +94,20 @@
 
 **Errors:**
 
-- `404 Not Found`: Không tìm thấy xe
+**404 Not Found:**
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Vehicle with ID 123 not found",
+    "status": 404,
+    "path": "/api/v1/vehicles/123",
+    "details": null,
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
 
 ---
 
@@ -136,8 +149,64 @@
 
 **Errors:**
 
-- `400 Bad Request`: Validation failed, duplicate vehicle_id/plate_number
-- `403 Forbidden`: Không có quyền tạo xe
+**400 Bad Request - Validation failed:**
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "status": 400,
+    "path": "/api/v1/vehicles",
+    "details": [
+      {
+        "field": "plate_number",
+        "message": "Plate number is required",
+        "value": null
+      },
+      {
+        "field": "vehicle_id",
+        "message": "Vehicle ID must be unique",
+        "value": "VEHICLE_001"
+      }
+    ],
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**409 Conflict - Duplicate vehicle_id/plate_number:**
+```json
+{
+  "error": {
+    "code": "CONFLICT",
+    "message": "Vehicle with plate number '30A-12345' already exists",
+    "status": 409,
+    "path": "/api/v1/vehicles",
+    "details": {
+      "field": "plate_number",
+      "existing_id": 1
+    },
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**403 Forbidden:**
+```json
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "You do not have permission to create vehicles",
+    "status": 403,
+    "path": "/api/v1/vehicles",
+    "details": null,
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
 
 ---
 

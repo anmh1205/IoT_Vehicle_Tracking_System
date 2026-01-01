@@ -36,6 +36,7 @@ Folder này chứa thiết kế toàn bộ hệ thống server, bao gồm cả *
 1. Thiết kế backend trước (MQTT → Rules → Database → API)
 2. Sau đó thiết kế frontend để kết nối với backend API
 3. Đảm bảo frontend và backend tích hợp tốt với nhau
+4. ⭐ **Docker & Deployment**: Xem [`part-08-docker-deployment.md`](./part-08-docker-deployment.md) để biết cách setup Docker, docker-compose, và tổ chức folder project
 
 ## Lưu ý
 

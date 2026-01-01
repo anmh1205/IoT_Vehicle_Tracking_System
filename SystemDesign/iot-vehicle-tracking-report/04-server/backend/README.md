@@ -13,6 +13,10 @@ Folder này chứa thiết kế hệ thống backend (MQTT broker, rules engine,
   - Xem [`part-05-api-endpoints/README.md`](./part-05-api-endpoints/README.md) để biết danh sách đầy đủ
 - **part-06-notifications-integrations/**: Tích hợp Telegram Bot và Email notifications
   - Xem [`part-06-notifications-integrations/README.md`](./part-06-notifications-integrations/README.md) để biết danh sách đầy đủ
+- **part-07-agent-coding-plan.md**: ⭐ **Kế hoạch chi tiết cho agent code backend & frontend**
+  - Clean code principles, SOLID, design patterns
+  - Templates và patterns cho NestJS và Next.js
+  - Implementation order và best practices
 - **schema.sql**: Database schema SQL file (đầy đủ Phase 1 + Phase 2)
 
 ## Workflow

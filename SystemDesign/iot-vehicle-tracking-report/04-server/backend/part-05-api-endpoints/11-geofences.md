@@ -103,5 +103,48 @@
 }
 ```
 
+**Errors:**
+
+**400 Bad Request - Validation failed:**
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "status": 400,
+    "path": "/api/v1/geofences",
+    "details": [
+      {
+        "field": "name",
+        "message": "Name is required",
+        "value": null
+      },
+      {
+        "field": "geofence_type",
+        "message": "Geofence type must be 'circle' or 'polygon'",
+        "value": "invalid"
+      }
+    ],
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**404 Not Found:**
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Geofence with ID 123 not found",
+    "status": 404,
+    "path": "/api/v1/geofences/123",
+    "details": null,
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
 ---
 

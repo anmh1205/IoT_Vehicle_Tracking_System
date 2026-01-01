@@ -89,6 +89,23 @@
 }
 ```
 
+**Errors:**
+
+**404 Not Found:**
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Alert with ID 123 not found",
+    "status": 404,
+    "path": "/api/v1/alerts/123",
+    "details": null,
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
 ---
 
 #### PUT /api/alerts/:id/acknowledge

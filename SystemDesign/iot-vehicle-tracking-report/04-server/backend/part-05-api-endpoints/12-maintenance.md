@@ -74,5 +74,50 @@
 }
 ```
 
+**Errors:**
+
+**400 Bad Request - Validation failed:**
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "status": 400,
+    "path": "/api/v1/maintenance",
+    "details": [
+      {
+        "field": "vehicle_id",
+        "message": "Vehicle ID is required",
+        "value": null
+      },
+      {
+        "field": "maintenance_type",
+        "message": "Maintenance type is required",
+        "value": null
+      }
+    ],
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**404 Not Found - Vehicle not found:**
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Vehicle with ID 999 not found",
+    "status": 404,
+    "path": "/api/v1/maintenance",
+    "details": {
+      "vehicle_id": 999
+    },
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
 ---
 

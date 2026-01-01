@@ -34,6 +34,42 @@
 }
 ```
 
+**Errors:**
+
+**400 Bad Request - Missing required parameters:**
+```json
+{
+  "error": {
+    "code": "BAD_REQUEST",
+    "message": "Missing required parameters: device_id, start_time, end_time",
+    "status": 400,
+    "path": "/api/v1/telemetry/location",
+    "details": {
+      "missing_fields": ["device_id", "start_time"]
+    },
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**404 Not Found - Device not found:**
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Device with ID 'TRACKER_999' not found",
+    "status": 404,
+    "path": "/api/v1/telemetry/location",
+    "details": {
+      "device_id": "TRACKER_999"
+    },
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
 ---
 
 #### GET /api/telemetry/history

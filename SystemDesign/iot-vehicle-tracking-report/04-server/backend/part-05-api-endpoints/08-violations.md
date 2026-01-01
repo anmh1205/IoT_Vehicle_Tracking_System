@@ -104,6 +104,23 @@
 }
 ```
 
+**Errors:**
+
+**404 Not Found:**
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Violation with ID 123 not found",
+    "status": 404,
+    "path": "/api/v1/violations/123",
+    "details": null,
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
 ---
 
 #### PUT /api/violations/:id/acknowledge

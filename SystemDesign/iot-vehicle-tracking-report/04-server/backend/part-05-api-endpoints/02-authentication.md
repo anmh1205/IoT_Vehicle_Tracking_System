@@ -33,8 +33,46 @@
 
 **Errors:**
 
-- `401 Unauthorized`: Email hoặc password sai
-- `400 Bad Request`: Validation failed
+**401 Unauthorized - Invalid credentials:**
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid email or password",
+    "status": 401,
+    "path": "/api/v1/auth/login",
+    "details": null,
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**400 Bad Request - Validation failed:**
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "status": 400,
+    "path": "/api/v1/auth/login",
+    "details": [
+      {
+        "field": "email",
+        "message": "Email must be a valid email",
+        "value": "invalid-email"
+      },
+      {
+        "field": "password",
+        "message": "Password is required",
+        "value": null
+      }
+    ],
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
 
 ---
 
@@ -71,8 +109,38 @@
 
 **Errors:**
 
-- `400 Bad Request`: Email/username đã tồn tại
-- `403 Forbidden`: Không có quyền tạo user
+**400 Bad Request - Duplicate email/username:**
+```json
+{
+  "error": {
+    "code": "CONFLICT",
+    "message": "Email or username already exists",
+    "status": 400,
+    "path": "/api/v1/auth/register",
+    "details": {
+      "field": "email",
+      "existing_id": 2
+    },
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**403 Forbidden - Insufficient permissions:**
+```json
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "You do not have permission to create users",
+    "status": 403,
+    "path": "/api/v1/auth/register",
+    "details": null,
+    "traceId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
 
 ---
 
