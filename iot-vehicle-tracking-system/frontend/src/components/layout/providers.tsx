@@ -3,6 +3,8 @@ import React from "react";
 import QueryProvider from "@/components/providers/QueryProvider";
 import RealtimeProvider from "@/components/providers/RealtimeProvider";
 import NotificationProvider from "@/components/providers/NotificationProvider";
+import { ThemeProvider } from "next-themes";
+import { Toaster } from "sonner";
 
 export default function Providers({
   activeThemeValue,
@@ -13,9 +15,14 @@ export default function Providers({
 }) {
   return (
     <QueryProvider>
-      <RealtimeProvider>
-        <NotificationProvider>{children}</NotificationProvider>
-      </RealtimeProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <RealtimeProvider>
+          <NotificationProvider>
+            {children}
+            <Toaster position="top-right" richColors />
+          </NotificationProvider>
+        </RealtimeProvider>
+      </ThemeProvider>
     </QueryProvider>
   );
 }

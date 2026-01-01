@@ -1,28 +1,29 @@
-"use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/store/authStore";
+/**
+ * AuthGuard - Protects routes that require authentication
+ */
+'use client';
 
-export default function AuthGuard({ children }: { children: React.ReactNode }) {
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/store/auth-store';
+
+interface AuthGuardProps {
+  children: React.ReactNode;
+}
+
+export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
-  const { token, hasHydrated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (hasHydrated && !token) {
-      router.replace("/login");
+    if (!isAuthenticated) {
+      router.push('/login');
     }
-  }, [hasHydrated, token, router]);
+  }, [isAuthenticated, router]);
 
-  if (!hasHydrated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
-        Loading session...
-      </div>
-    );
+  if (!isAuthenticated) {
+    return null; // or loading spinner
   }
-
-  if (!token) return null;
 
   return <>{children}</>;
 }
-
