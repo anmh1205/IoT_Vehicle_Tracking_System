@@ -18,7 +18,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <AppSidebar />
             <SidebarInset>
                 <Header />
-                <main className='flex-1 overflow-auto p-6'>{children}</main>
+                {/* page main content */}
+                {children}
+                {/* page main content ends */}
             </SidebarInset>
         </SidebarProvider>
     );

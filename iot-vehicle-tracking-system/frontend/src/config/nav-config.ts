@@ -5,7 +5,6 @@ export const navItems: NavItem[] = [
         title: 'Tổng quan',
         url: '/dashboard',
         icon: 'dashboard',
-        shortcut: ['d', 'd'],
     },
     {
         title: 'Bản đồ',
@@ -16,19 +15,11 @@ export const navItems: NavItem[] = [
         title: 'Phương tiện',
         url: '/dashboard/vehicles',
         icon: 'car',
-        items: [
-            { title: 'Danh sách', url: '/dashboard/vehicles' },
-            { title: 'Thêm mới', url: '/dashboard/vehicles/new' },
-        ],
     },
     {
         title: 'Khách hàng',
         url: '/dashboard/customers',
         icon: 'users',
-        items: [
-            { title: 'Danh sách', url: '/dashboard/customers' },
-            { title: 'Thêm mới', url: '/dashboard/customers/new' },
-        ],
     },
     {
         title: 'Chuyến đi',
@@ -54,10 +45,6 @@ export const navItems: NavItem[] = [
         title: 'Thiết bị',
         url: '/dashboard/devices',
         icon: 'device',
-        items: [
-            { title: 'Danh sách', url: '/dashboard/devices' },
-            { title: 'Thêm mới', url: '/dashboard/devices/new' },
-        ],
     },
     {
         title: 'Bảo trì',
@@ -68,10 +55,5 @@ export const navItems: NavItem[] = [
         title: 'Cài đặt',
         url: '/dashboard/settings',
         icon: 'settings',
-        items: [
-            { title: 'Hồ sơ', url: '/dashboard/settings/profile' },
-            { title: 'Thông báo', url: '/dashboard/settings/notifications' },
-            { title: 'Hệ thống', url: '/dashboard/settings/system' },
-        ],
     },
 ];
