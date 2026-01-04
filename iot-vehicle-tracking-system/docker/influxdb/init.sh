@@ -5,7 +5,5 @@
 # Note: InfluxDB setup is handled by environment variables
 # This file is for any custom initialization needed
 
-# Example: Create additional buckets, retention policies, etc.
-
-echo "InfluxDB initialization completed"
+echo "InfluxDB initialization script completed"
 

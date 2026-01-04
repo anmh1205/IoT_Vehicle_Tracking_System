@@ -19,15 +19,15 @@ lerna-debug.log*
 pnpm-debug.log*
 
 # Environment variables (commented out - allow .env files for local dev)
-# .env
-# .env.local
-# .env.*.local
-# .env.production
-# .env.development
-# .env.test
-# **/.env
-# **/.env.local
-# **/.env.*.local
+!.env
+!.env.local
+!.env.*.local
+!.env.production
+!.env.development
+!.env.test
+!**/.env
+!**/.env.local
+!**/.env.*.local
 
 # IDE
 .vscode/

@@ -29,11 +29,11 @@ services:
     container_name: iot_vehicle_backend
     restart: always
     ports:
-      - "${BACKEND_PORT:-3000}:${BACKEND_CONTAINER_PORT:-3000}"
+      - "${BACKEND_PORT:-4000}:${BACKEND_CONTAINER_PORT:-4000}"
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       DOCKER_ENV: "true"
-      PORT: ${BACKEND_CONTAINER_PORT:-3000}
+      PORT: ${BACKEND_CONTAINER_PORT:-4000}
       HOST: 0.0.0.0
       TZ: ${TZ:-Asia/Ho_Chi_Minh}
 
@@ -92,7 +92,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          'node -e "require(''http'').get(''http://localhost:'' + (process.env.PORT || ''3000'') + ''/health'', {timeout: 2000}, (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on(''error'', () => process.exit(1))"',
+          'node -e "require(''http'').get(''http://localhost:'' + (process.env.PORT || ''4000'') + ''/health'', {timeout: 2000}, (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on(''error'', () => process.exit(1))"',
         ]
       interval: ${BACKEND_HEALTHCHECK_INTERVAL:-15s}
       timeout: ${BACKEND_HEALTHCHECK_TIMEOUT:-5s}
@@ -113,9 +113,9 @@ services:
     container_name: iot_vehicle_frontend
     restart: unless-stopped
     ports:
-      - "${FRONTEND_PORT:-3001}:${FRONTEND_CONTAINER_PORT:-3000}"
+      - "${FRONTEND_PORT:-4001}:${FRONTEND_CONTAINER_PORT:-4001}"
     environment:
-      PORT: ${FRONTEND_CONTAINER_PORT:-3000}
+      PORT: ${FRONTEND_CONTAINER_PORT:-4001}
       NEXT_PUBLIC_API_BASE_URL: ${API_BASE_URL:-https://api.example.com/api/v1}
       NEXT_PUBLIC_WS_URL: ${WS_URL:-https://api.example.com}
       TZ: ${TZ:-Asia/Ho_Chi_Minh}
@@ -128,7 +128,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "wget --quiet --tries=1 --spider http://localhost:${PORT:-3000} || exit 1",
+          "wget --quiet --tries=1 --spider http://localhost:${PORT:-4001} || exit 1",
         ]
       interval: ${FRONTEND_HEALTHCHECK_INTERVAL:-20s}
       timeout: ${FRONTEND_HEALTHCHECK_TIMEOUT:-3s}
@@ -184,11 +184,10 @@ services:
       DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG:-vehicle_tracking}
       DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET:-telemetry}
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_TOKEN}
+      DOCKER_INFLUXDB_INIT_CLI_CONFIG_NAME: docker_setup
       TZ: ${TZ:-Asia/Ho_Chi_Minh}
     volumes:
       - influxdb_data:/var/lib/influxdb2
-      - influxdb_config:/etc/influxdb2
-      - ./docker/influxdb/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
     networks:
       - iot_vehicle_network
     healthcheck:
@@ -250,9 +249,6 @@ volumes:
   influxdb_data:
     driver: local
     name: iot_vehicle_influxdb_data
-  influxdb_config:
-    driver: local
-    name: iot_vehicle_influxdb_config
   emqx_data:
     driver: local
     name: iot_vehicle_emqx_data

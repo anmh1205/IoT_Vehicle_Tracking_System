@@ -37,8 +37,8 @@ docker-compose logs -f
 
 ### 3. Access Services
 
-- **Frontend**: http://localhost:3001
-- **Backend API**: http://localhost:3000
+- **Frontend**: http://localhost:4001
+- **Backend API**: http://localhost:4000
 - **PostgreSQL**: localhost:5432
 - **InfluxDB**: http://localhost:8086
 - **EMQX Dashboard**: http://localhost:18083
@@ -46,8 +46,8 @@ docker-compose logs -f
 
 ## 📋 Services
 
-- **Backend**: NestJS API Server (Port 3000)
-- **Frontend**: Next.js Web App (Port 3001)
+- **Backend**: NestJS API Server (Port 4000)
+- **Frontend**: Next.js Web App (Port 4001)
 - **PostgreSQL**: Relational database
 - **InfluxDB**: Time-series database
 - **EMQX**: MQTT Broker
@@ -55,13 +55,46 @@ docker-compose logs -f
 
 ## 🔧 Development
 
+### Option 1: Run cả Frontend và Backend cùng lúc (Recommended)
+
+```bash
+# Cài đặt dependencies cho root, backend và frontend
+npm run install:all
+
+# Chạy cả frontend và backend với một lệnh
+npm run dev
+```
+
+Lệnh này sẽ chạy:
+
+- **Backend**: http://localhost:4000 (hoặc port được cấu hình trong .env)
+- **Frontend**: http://localhost:4001
+
+### Option 2: Run riêng biệt
+
 ```bash
 # Start only databases
 docker-compose up -d postgres influxdb emqx
 
-# Run backend và frontend locally với hot reload
+# Run backend và frontend riêng biệt
 cd backend && npm run start:dev
 cd frontend && npm run dev
+```
+
+### Các lệnh khác
+
+```bash
+# Chỉ chạy backend
+npm run dev:backend
+
+# Chỉ chạy frontend
+npm run dev:frontend
+
+# Build cả hai
+npm run build
+
+# Start production
+npm run start
 ```
 
 ## 📚 Documentation
