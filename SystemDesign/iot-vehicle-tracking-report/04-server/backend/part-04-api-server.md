@@ -1,15 +1,17 @@
 ## PHẦN X: API SERVER (BACKEND APPLICATION)
 
+> **📌 Cập nhật**: Tech stack đã được điều chỉnh theo kiến trúc IVM26 (Express + VictoriaMetrics) thay vì NestJS + InfluxDB ban đầu.
+
 ### X.1 Vai Trò API Server
 
 **API Server** là lớp ứng dụng backend cung cấp:
 
 1. **REST API**: Giao tiếp với frontend (web/mobile)
-2. **WebSocket**: Real-time updates (vị trí, cảnh báo)
+2. **WebSocket**: Real-time updates (vị trí, cảnh báo) via Socket.IO
 3. **Business Logic**: Xử lý nghiệp vụ (quản lý xe, người dùng, cảnh báo)
-4. **Authentication/Authorization**: Xác thực và phân quyền
-5. **Database Integration**: Kết nối PostgreSQL và InfluxDB
-6. **MQTT Integration**: Gửi commands đến trackers qua MQTT
+4. **Authentication/Authorization**: Xác thực JWT và phân quyền
+5. **Database Integration**: Kết nối PostgreSQL và VictoriaMetrics
+6. **MQTT Integration**: Gửi commands đến trackers qua EMQX
 
 **Kiến Trúc:**
 
@@ -17,489 +19,477 @@
 Frontend (Web/Mobile)
     │
     ├─ REST API ──→ API Server ──→ PostgreSQL
-    │                                    │
-    └─ WebSocket ──→ API Server ──→ InfluxDB
-                            │
-                            └─ MQTT ──→ EMQX ──→ Trackers
+    │                    │
+    └─ WebSocket ──→ Socket.IO ──→ VictoriaMetrics
+                         │
+                         └─ MQTT Bridge ──→ EMQX ──→ Trackers
 ```
-
-### X.2 Lựa Chọn Công Nghệ
-
-**So Sánh Ngắn Gọn:**
-
-| Tiêu Chí              | Node.js + NestJS      | Rust + Actix-web/Axum     | Python + FastAPI    | Go + Gin/Echo           |
-| --------------------- | --------------------- | ------------------------- | ------------------- | ----------------------- |
-| **Learning Curve**    | ⭐⭐⭐⭐⭐ (Dễ)       | ⭐⭐ (Rất khó)            | ⭐⭐⭐⭐⭐ (Dễ)     | ⭐⭐⭐ (Khó)            |
-| **Ecosystem**         | ⭐⭐⭐⭐⭐ (npm)      | ⭐⭐⭐ (Cargo)            | ⭐⭐⭐⭐⭐ (PyPI)   | ⭐⭐⭐⭐                |
-| **Performance**       | ⭐⭐⭐⭐              | ⭐⭐⭐⭐⭐ (Cực cao)      | ⭐⭐⭐              | ⭐⭐⭐⭐⭐              |
-| **Memory Usage**      | ⭐⭐⭐                | ⭐⭐⭐⭐⭐ (Rất thấp)     | ⭐⭐⭐              | ⭐⭐⭐⭐⭐              |
-| **Real-time**         | ⭐⭐⭐⭐⭐            | ⭐⭐⭐⭐                  | ⭐⭐⭐⭐            | ⭐⭐⭐⭐                |
-| **MQTT Support**      | ⭐⭐⭐⭐⭐            | ⭐⭐⭐⭐                  | ⭐⭐⭐⭐⭐          | ⭐⭐⭐⭐                |
-| **Concurrency**       | ⭐⭐⭐⭐ (Event Loop) | ⭐⭐⭐⭐⭐ (Async/Await)  | ⭐⭐⭐⭐ (AsyncIO)  | ⭐⭐⭐⭐⭐ (Goroutines) |
-| **Type Safety**       | ⭐⭐⭐⭐ (TypeScript) | ⭐⭐⭐⭐⭐ (Compile-time) | ⭐⭐⭐ (Type hints) | ⭐⭐⭐⭐                |
-| **Development Speed** | ⭐⭐⭐⭐⭐            | ⭐⭐ (Chậm)               | ⭐⭐⭐⭐⭐          | ⭐⭐⭐⭐                |
-| **Phù Hợp Luận Văn**  | ⭐⭐⭐⭐⭐            | ⭐⭐                      | ⭐⭐⭐⭐            | ⭐⭐⭐                  |
-
-**So Sánh Chi Tiết: Node.js vs Rust**
-
-#### Node.js + NestJS
-
-**Ưu Điểm:**
-
-- ✅ **Dễ học và phát triển nhanh**: TypeScript/JavaScript phổ biến, nhiều tài liệu, cộng đồng lớn
-- ✅ **Ecosystem phong phú**: npm có sẵn thư viện cho MQTT, PostgreSQL, InfluxDB, WebSocket
-- ✅ **NestJS Framework**: Cấu trúc rõ ràng, Dependency Injection, Decorators, phù hợp dự án lớn
-- ✅ **Real-time tốt**: Socket.io tích hợp dễ dàng, event-driven architecture
-- ✅ **TypeScript**: Type safety, IntelliSense tốt, dễ maintain
-- ✅ **Development Speed**: Hot reload, debugging dễ dàng
-- ✅ **Phù hợp IoT**: Nhiều dự án IoT dùng Node.js (Home Assistant, Node-RED, etc.)
-- ✅ **Phù hợp luận văn**: Dễ giải thích, nhiều ví dụ, tài liệu đầy đủ
-
-**Nhược Điểm:**
-
-- ⚠️ **Performance**: Chậm hơn Rust/Go (nhưng đủ cho IoT tracking system)
-- ⚠️ **Memory Usage**: Tiêu thụ RAM cao hơn (nhưng không phải vấn đề với server hiện đại)
-- ⚠️ **Single-threaded**: Event loop có thể bị block nếu code không tối ưu
-
-#### Rust + Actix-web/Axum
-
-**Ưu Điểm:**
-
-- ✅ **Performance cực cao**: Zero-cost abstractions, không có GC, tốc độ gần như C/C++
-- ✅ **Memory Safety**: Compile-time checks, không có null pointer, data races
-- ✅ **Memory Usage thấp**: Tiêu thụ RAM rất ít, phù hợp embedded/IoT
-- ✅ **Concurrency mạnh**: Async/await hiệu quả, tokio runtime
-- ✅ **Type Safety tuyệt đối**: Compile-time guarantees, không có runtime errors
-- ✅ **Phù hợp hệ thống real-time**: Latency thấp, throughput cao
-
-**Nhược Điểm:**
-
-- ❌ **Learning Curve rất cao**: Ownership, Borrowing, Lifetimes khó học
-- ❌ **Development Speed chậm**: Compile time lâu, debugging khó hơn
-- ❌ **Ecosystem nhỏ hơn**: Ít thư viện hơn npm, một số thư viện chưa mature
-- ❌ **MQTT/WebSocket libraries**: Có nhưng ít tài liệu và ví dụ hơn
-- ❌ **Không phù hợp luận văn**: Khó giải thích, ít ví dụ IoT, thời gian phát triển lâu
-- ❌ **Overkill cho dự án này**: Performance của Rust không cần thiết cho IoT tracking system
-
-**Kết Luận So Sánh:**
-
-| Khía Cạnh                | Node.js + NestJS | Rust + Actix-web      | Lựa Chọn                               |
-| ------------------------ | ---------------- | --------------------- | -------------------------------------- |
-| **Thời gian phát triển** | 2-3 tháng        | 4-6 tháng             | ✅ Node.js                             |
-| **Độ khó học**           | Dễ               | Rất khó               | ✅ Node.js                             |
-| **Tài liệu IoT**         | Nhiều            | Ít                    | ✅ Node.js                             |
-| **Performance**          | Đủ (1000+ req/s) | Cực cao (100k+ req/s) | ⚖️ Rust tốt hơn nhưng không cần        |
-| **Memory**               | ~200-500 MB      | ~50-100 MB            | ⚖️ Rust tốt hơn nhưng không quan trọng |
-| **Phù hợp luận văn**     | Rất phù hợp      | Không phù hợp         | ✅ Node.js                             |
-
-**Lựa Chọn: Node.js + NestJS**
-
-**Lý Do Chọn Node.js thay vì Rust:**
-
-1. **Thời gian phát triển**: Node.js cho phép hoàn thành dự án trong 2-3 tháng, Rust cần 4-6 tháng do learning curve cao
-2. **Phù hợp luận văn**: Dễ giải thích, nhiều ví dụ, tài liệu đầy đủ, phù hợp với mục tiêu đồ án
-3. **Ecosystem IoT**: npm có nhiều thư viện mature cho MQTT, WebSocket, PostgreSQL, InfluxDB
-4. **Development experience**: Hot reload, debugging dễ, TypeScript IntelliSense tốt
-5. **Performance đủ dùng**: Node.js đủ xử lý hàng nghìn requests/s cho IoT tracking system
-6. **Rust overkill**: Performance của Rust (100k+ req/s) không cần thiết cho hệ thống này (chỉ cần 1k+ req/s)
-
-**Lý Do Không Chọn Rust:**
-
-- ❌ Learning curve quá cao (Ownership, Borrowing, Lifetimes) → mất nhiều thời gian học
-- ❌ Ecosystem nhỏ hơn, ít thư viện IoT mature
-- ❌ Compile time lâu, development chậm
-- ❌ Khó giải thích trong luận văn, ít ví dụ IoT
-- ❌ Performance không cần thiết cho quy mô dự án này
-
-**Tech Stack:**
-
-```
-- Runtime: Node.js 18+ (LTS)
-- Framework: NestJS 10+
-- Language: TypeScript
-- Database ORM: TypeORM hoặc Prisma (PostgreSQL)
-- InfluxDB Client: @influxdata/influxdb-client
-- MQTT Client: mqtt.js hoặc @nestjs/mqtt
-- WebSocket: @nestjs/websockets (Socket.io)
-- Authentication: @nestjs/passport (JWT)
-- Validation: class-validator
-- API Docs: Swagger (@nestjs/swagger)
-```
-
-**Ưu Điểm:**
-
-- Cấu trúc module rõ ràng (Controllers, Services, Modules)
-- Dependency Injection built-in
-- Decorators cho routing, validation
-- Auto-generate API documentation
-- Testing framework tích hợp
 
 ---
 
-### X.3 Kiến Trúc API Server (NestJS)
+### X.2 Lựa Chọn Công Nghệ
+
+**So Sánh Framework:**
+
+| Tiêu Chí              | Express + TypeScript  | NestJS                | Go + Gin              |
+| --------------------- | --------------------- | --------------------- | --------------------- |
+| **Learning Curve**    | ⭐⭐⭐⭐⭐ (Rất dễ)   | ⭐⭐⭐⭐ (Trung bình) | ⭐⭐⭐ (Khó)          |
+| **Flexibility**       | ⭐⭐⭐⭐⭐            | ⭐⭐⭐                | ⭐⭐⭐⭐              |
+| **Performance**       | ⭐⭐⭐⭐              | ⭐⭐⭐⭐              | ⭐⭐⭐⭐⭐            |
+| **Boilerplate**       | ⭐⭐⭐⭐⭐ (Ít)       | ⭐⭐⭐ (Nhiều)        | ⭐⭐⭐⭐              |
+| **IoT Ecosystem**     | ⭐⭐⭐⭐⭐            | ⭐⭐⭐⭐              | ⭐⭐⭐⭐              |
+| **Real-time**         | ⭐⭐⭐⭐⭐            | ⭐⭐⭐⭐⭐            | ⭐⭐⭐⭐              |
+
+**✅ Lựa Chọn: Node.js + Express + TypeScript**
+
+**Lý Do:**
+
+1. **Linh hoạt**: Không bị ràng buộc bởi decorators/DI framework
+2. **Nhẹ**: Ít overhead, phù hợp IoT với high-frequency data
+3. **Control**: Toàn quyền kiểm soát middleware chain
+4. **TypeScript**: Type safety mà không cần class-validator
+5. **Zod Validation**: Runtime validation với type inference
+6. **Domain-Driven**: Dễ tổ chức code theo feature/domain
+
+---
+
+### X.3 Tech Stack Chi Tiết
+
+```
+Backend Tech Stack:
+├── Runtime: Node.js 20+ (LTS)
+├── Framework: Express 4.x
+├── Language: TypeScript 5.x
+├── Validation: Zod (runtime + type inference)
+├── Database:
+│   ├── PostgreSQL 16 (relational data)
+│   │   └── Driver: pg (raw queries, không ORM)
+│   └── VictoriaMetrics (time-series data)
+│       └── Query: PromQL/MetricsQL
+├── Real-time:
+│   ├── Socket.IO 4.x (WebSocket)
+│   └── MQTT.js (EMQX integration)
+├── Authentication: JWT (jsonwebtoken + bcryptjs)
+├── Monitoring:
+│   ├── prom-client (Prometheus metrics)
+│   ├── VictoriaLogs (structured logging)
+│   └── Sentry (error tracking)
+├── Security:
+│   ├── Helmet (security headers)
+│   ├── CORS (cross-origin)
+│   └── Rate Limiting (express-rate-limit)
+└── API Docs: swagger-ui-express + OpenAPI
+```
+
+---
+
+### X.4 Kiến Trúc API Server (Express + Domain-Driven)
 
 **Cấu Trúc Thư Mục:**
 
 ```
-api-server/
-├── src/
-│   ├── main.ts                 # Entry point
-│   ├── app.module.ts           # Root module
-│   │
-│   ├── auth/                   # Authentication module
+backend/src/
+├── index.ts                    # Entry point
+├── api/                        # API Layer
+│   ├── controllers/            # Request handlers
 │   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
-│   │   ├── jwt.strategy.ts
-│   │   └── guards/
-│   │
-│   ├── vehicles/               # Vehicle management
-│   │   ├── vehicles.controller.ts
-│   │   ├── vehicles.service.ts
-│   │   └── vehicles.entity.ts
-│   │
-│   ├── customers/              # Customer management
-│   │   ├── customers.controller.ts
-│   │   ├── customers.service.ts
-│   │   └── customers.entity.ts
-│   │
-│   ├── bookings/               # Booking management
-│   │   ├── bookings.controller.ts
-│   │   ├── bookings.service.ts
-│   │   └── bookings.entity.ts
-│   │
-│   ├── contracts/              # Rental contracts
-│   │   ├── contracts.controller.ts
-│   │   ├── contracts.service.ts
-│   │   └── contracts.entity.ts
-│   │
-│   ├── payments/               # Payment processing
-│   │   ├── payments.controller.ts
-│   │   ├── payments.service.ts
-│   │   └── payments.entity.ts
-│   │
-│   ├── damage-reports/         # Damage reports
-│   │   ├── damage-reports.controller.ts
-│   │   ├── damage-reports.service.ts
-│   │   └── damage-reports.entity.ts
-│   │
-│   ├── reviews/                # Reviews & ratings
-│   │   ├── reviews.controller.ts
-│   │   ├── reviews.service.ts
-│   │   └── reviews.entity.ts
-│   │
-│   ├── telemetry/              # Telemetry data
-│   │   ├── telemetry.controller.ts
-│   │   ├── telemetry.service.ts
-│   │   └── dto/
-│   │
-│   ├── alerts/                 # Alert management
-│   │   ├── alerts.controller.ts
-│   │   ├── alerts.service.ts
-│   │   └── alerts.gateway.ts   # WebSocket
-│   │
-│   ├── notifications/          # Notifications & Integrations
-│   │   ├── notifications.module.ts
-│   │   ├── notifications.service.ts
-│   │   ├── telegram/
-│   │   │   ├── telegram.service.ts
-│   │   │   ├── telegram.controller.ts
-│   │   │   └── telegram.commands.ts
-│   │   ├── email/
-│   │   │   ├── email.service.ts
-│   │   │   └── templates/
-│   │   └── dto/
-│   │
-│   ├── mqtt/                   # MQTT integration
-│   │   ├── mqtt.module.ts
-│   │   ├── mqtt.service.ts
-│   │   └── mqtt.controller.ts
-│   │
-│   ├── database/               # Database config
-│   │   ├── postgres.module.ts
-│   │   ├── influxdb.module.ts
-│   │   └── entities/
-│   │
-│   └── common/                 # Shared utilities
-│       ├── filters/
-│       ├── interceptors/
-│       └── decorators/
+│   │   ├── device.controller.ts
+│   │   ├── dashboard.controller.ts
+│   │   ├── firmware.controller.ts
+│   │   ├── iot.controller.ts
+│   │   └── export.controller.ts
+│   ├── routes/                 # Route definitions
+│   │   ├── auth.routes.ts
+│   │   ├── device.routes.ts
+│   │   ├── iot.routes.ts
+│   │   └── index.ts
+│   ├── validators/             # Zod schemas
+│   │   ├── auth.validator.ts
+│   │   ├── device.validator.ts
+│   │   └── iot.validator.ts
+│   └── openapi/                # Swagger specs
 │
-├── test/                       # Unit tests
-├── docker-compose.yml          # Local development
-├── Dockerfile                  # Production build
-└── package.json
+├── domain/                     # Business Logic (by feature)
+│   ├── auth/
+│   │   ├── services/
+│   │   │   ├── auth-session.service.ts
+│   │   │   └── user-management.service.ts
+│   │   ├── repositories/
+│   │   │   └── user.repository.ts
+│   │   └── types/
+│   │       └── auth.types.ts
+│   │
+│   ├── device/
+│   │   ├── services/
+│   │   │   ├── device-list.service.ts
+│   │   │   ├── device-crud.service.ts
+│   │   │   └── device-sessions.service.ts
+│   │   ├── repositories/
+│   │   │   ├── device.repository.ts
+│   │   │   └── device-session.repository.ts
+│   │   └── types/
+│   │
+│   ├── iot/
+│   │   ├── services/
+│   │   │   ├── iot-data-processing.service.ts
+│   │   │   ├── session-tracking.service.ts
+│   │   │   └── heartbeat-tracking.service.ts
+│   │   └── types/
+│   │
+│   ├── dashboard/
+│   │   ├── services/
+│   │   │   └── dashboard-stats.service.ts
+│   │   └── repositories/
+│   │
+│   ├── firmware/
+│   │   ├── services/
+│   │   │   ├── firmware-upload.service.ts
+│   │   │   └── firmware-assignment.service.ts
+│   │   └── repositories/
+│   │
+│   ├── notification/
+│   │   └── services/
+│   │       └── hybrid-notification.service.ts
+│   │
+│   └── audit/
+│       └── services/
+│           └── audit.service.ts
+│
+├── infrastructure/             # External Services
+│   ├── database/
+│   │   ├── pool.ts             # PostgreSQL connection pool
+│   │   └── queries.ts          # Query helpers
+│   ├── victoriametrics/
+│   │   ├── client.ts           # VM write client
+│   │   └── query.ts            # PromQL queries
+│   ├── victorialogs/
+│   │   └── client.ts           # VL write client
+│   └── logger/
+│       └── winston.ts
+│
+├── middleware/                 # Express Middleware
+│   ├── auth.ts                 # JWT authentication
+│   ├── cors.ts
+│   ├── security.ts             # Helmet
+│   ├── rate-limit.ts
+│   ├── metrics.ts              # Prometheus
+│   └── error-handler.ts
+│
+├── realtime/                   # WebSocket Server
+│   ├── socket-server.ts        # Socket.IO setup
+│   ├── socket-auth.ts          # WS authentication
+│   └── event-bus.ts            # Internal pub/sub
+│
+├── mqtt-bridge/                # MQTT Integration (standalone capable)
+│   ├── index.ts
+│   ├── mqtt.client.ts
+│   ├── handlers/
+│   │   └── rawdata.handler.ts
+│   └── batch/
+│       └── database-batch.service.ts
+│
+├── config/                     # Configuration
+│   ├── env.ts                  # Environment variables
+│   └── sentry.ts
+│
+├── shared/                     # Shared Utilities
+│   ├── constants/
+│   ├── utils/
+│   └── types/
+│
+└── types/                      # Global TypeScript types
 ```
 
-**Các Module Chính:**
+---
 
-**Phase 1:**
+### X.5 Domain Modules
 
-1. **Auth Module**: JWT authentication, user management (admin/staff)
-2. **Vehicles Module**: CRUD vehicles
-3. **Customers Module**: CRUD customers, verification
-4. **Trips Module**: Quản lý chuyến đi, theo dõi vị trí
-5. **Telemetry Module**: Query location data từ InfluxDB
-6. **Alerts Module**: Quản lý cảnh báo, WebSocket real-time
-7. **Violations Module**: Quản lý vi phạm
-8. **Notifications Module**: Telegram Bot + Email notifications
-9. **MQTT Module**: Gửi commands đến trackers
-10. **Database Module**: PostgreSQL + InfluxDB connections
+**Phase 1 (Core):**
 
-**[Phase 2]:** 10. **Bookings Module**: Tạo/quản lý bookings, pickup/return workflow 11. **Contracts Module**: Tạo/ký hợp đồng thuê, document management 12. **Payments Module**: Xử lý thanh toán (deposit, rental fee, penalties) 13. **Damage Reports Module**: Báo cáo hư hỏng khi nhận/trả xe 14. **Reviews Module**: Quản lý đánh giá từ khách hàng 15. **Vehicles Module**: Thêm availability management 16. **Alerts Module**: Liên kết alerts với booking
+| Domain | Services | Description |
+|--------|----------|-------------|
+| **auth** | 4 | JWT login/logout, user CRUD, device access control |
+| **device** | 8 | Device CRUD, sessions, runtime tracking |
+| **iot** | 7 | Data ingestion, status tracking, heartbeat |
+| **dashboard** | 3 | Statistics, activity log, alerts |
+| **firmware** | 7 | OTA upload, assignment, activation |
+| **notification** | 1 | Hybrid FCM + Socket.IO notifications |
+| **audit** | 1 | Action logging |
 
-### X.4 API Endpoints
+**Phase 2 (Optional - Rental Features):**
 
-**Chi tiết API endpoints được mô tả trong folder:** [`part-05-api-endpoints/README.md`](./part-05-api-endpoints/README.md)
+| Domain | Services | Description |
+|--------|----------|-------------|
+| **customers** | 3 | Customer management, verification |
+| **bookings** | 4 | Booking workflow, pickup/return |
+| **payments** | 3 | Payment processing |
+| **contracts** | 2 | Rental contracts |
 
-**Tóm tắt:**
+---
+
+### X.6 API Endpoints
 
 **Authentication:**
 
 ```
-POST   /api/auth/login          # Đăng nhập
-POST   /api/auth/register       # Đăng ký
-POST   /api/auth/refresh        # Refresh token
-POST   /api/auth/logout         # Đăng xuất
+POST   /api/v1/auth/login              # Đăng nhập
+GET    /api/v1/auth/me                 # Current user info
+POST   /api/v1/auth/logout             # Đăng xuất
+POST   /api/v1/auth/change-password    # Đổi mật khẩu
+GET    /api/v1/auth/users              # List users (admin)
+POST   /api/v1/auth/users              # Create user (admin)
+PUT    /api/v1/auth/users/:id          # Update user (admin)
+DELETE /api/v1/auth/users/:id          # Delete user (admin)
 ```
 
-**Vehicles:**
+**Devices:**
 
 ```
-GET    /api/vehicles                    # Danh sách xe
-GET    /api/vehicles/:id                # Chi tiết xe
-POST   /api/vehicles                    # Thêm xe mới
-PUT    /api/vehicles/:id                # Cập nhật xe
-DELETE /api/vehicles/:id                # Xóa xe
-GET    /api/vehicles/:id/status         # Trạng thái hiện tại
-GET    /api/vehicles/:id/availability   # [Phase 2] Kiểm tra availability
+GET    /api/v1/device/list             # Danh sách thiết bị
+GET    /api/v1/device/details          # Chi tiết thiết bị
+POST   /api/v1/device/manage           # Thêm thiết bị (admin)
+PUT    /api/v1/device/manage           # Cập nhật thiết bị (admin)
+DELETE /api/v1/device/manage           # Xóa thiết bị (admin)
+GET    /api/v1/device/sessions         # Lịch sử sessions
+GET    /api/v1/device/runtime          # Runtime analytics
+GET    /api/v1/device/status           # System status
 ```
 
-**Customers:**
+**IoT Data (PUBLIC - No Auth):**
 
 ```
-GET    /api/customers                   # Danh sách khách hàng
-GET    /api/customers/:id               # Chi tiết khách hàng
-POST   /api/customers                   # Thêm khách hàng mới
-PUT    /api/customers/:id               # Cập nhật khách hàng
-GET    /api/customers/:id/verify        # Xác minh khách hàng
-GET    /api/customers/:id/rentals       # [Phase 2] Lịch sử thuê xe
+POST   /api/v1/iot/data                # Gửi sensor data
+GET    /api/v1/iot/status              # Device status
+GET    /api/v1/iot/latest              # Latest data
+GET    /api/v1/iot/bootstrap           # Device config
 ```
 
-**[Phase 2] Bookings:**
+**Dashboard:**
 
 ```
-GET    /api/bookings                    # Danh sách đặt xe
-GET    /api/bookings/:id                # Chi tiết đặt xe
-POST   /api/bookings                    # Tạo đặt xe mới
-PUT    /api/bookings/:id                # Cập nhật đặt xe
-PUT    /api/bookings/:id/cancel         # Hủy đặt xe
-GET    /api/bookings/:id/tracking       # Theo dõi xe trong thời gian thuê
-POST   /api/bookings/:id/pickup         # Xác nhận nhận xe
-POST   /api/bookings/:id/return         # Xác nhận trả xe
+GET    /api/v1/dashboard/stats         # Statistics
+GET    /api/v1/dashboard/activity-log  # Activity feed
+GET    /api/v1/dashboard/alerts        # Alerts
 ```
 
-**[Phase 2] Rental Contracts:**
+**Firmware:**
 
 ```
-GET    /api/contracts                   # Danh sách hợp đồng
-GET    /api/contracts/:id               # Chi tiết hợp đồng
-POST   /api/contracts                   # Tạo hợp đồng mới
-PUT    /api/contracts/:id/sign          # Ký hợp đồng
-GET    /api/contracts/:id/document      # Tải file hợp đồng
+GET    /api/v1/firmware/list           # List firmware
+POST   /api/v1/firmware/upload         # Upload firmware
+POST   /api/v1/firmware/activate       # Activate version
+POST   /api/v1/firmware/assign         # Assign to devices
+DELETE /api/v1/firmware/delete         # Delete firmware
 ```
 
-**[Phase 2] Payments:**
+---
 
-```
-GET    /api/payments                    # Danh sách thanh toán
-GET    /api/payments/:id                # Chi tiết thanh toán
-POST   /api/payments                    # Tạo thanh toán mới
-PUT    /api/payments/:id/process        # Xử lý thanh toán
-GET    /api/bookings/:id/payments       # Thanh toán của một booking
-```
-
-**[Phase 2] Damage Reports:**
-
-```
-GET    /api/damage-reports              # Danh sách báo cáo hư hỏng
-GET    /api/damage-reports/:id          # Chi tiết báo cáo
-POST   /api/damage-reports              # Tạo báo cáo mới
-PUT    /api/damage-reports/:id          # Cập nhật báo cáo
-PUT    /api/damage-reports/:id/inspect  # Xác nhận kiểm tra
-```
-
-**[Phase 2] Reviews:**
-
-```
-GET    /api/reviews                     # Danh sách đánh giá
-GET    /api/reviews/:id                 # Chi tiết đánh giá
-POST   /api/reviews                     # Tạo đánh giá mới
-PUT    /api/reviews/:id/moderate        # Duyệt/từ chối đánh giá
-GET    /api/vehicles/:id/reviews        # Đánh giá của một xe
-```
-
-**Telemetry:**
-
-```
-GET    /api/telemetry/location  # Lấy vị trí (query InfluxDB)
-GET    /api/telemetry/history   # Lịch sử di chuyển
-GET    /api/telemetry/realtime  # WebSocket real-time
-```
-
-**Alerts:**
-
-```
-GET    /api/alerts              # Danh sách cảnh báo
-GET    /api/alerts/:id          # Chi tiết cảnh báo
-PUT    /api/alerts/:id/ack      # Acknowledge cảnh báo
-GET    /api/alerts/realtime     # WebSocket alerts
-```
-
-**Commands (MQTT):**
-
-```
-POST   /api/commands/:device_id # Gửi command đến tracker
-```
-
-### X.5 WebSocket Real-time Updates
-
-**Connection:**
+### X.7 WebSocket (Socket.IO) Namespaces
 
 ```typescript
-// Client connects
-ws://api.example.com/ws
+// 7 Namespaces với authentication
+/dashboard      # Dashboard updates (auth required)
+/devices        # Device status changes (auth required)
+/firmware       # Firmware assignments (auth required)
+/exports        # Export job progress (auth required)
+/notifications  # Push notifications (auth required)
+/mobile         # Mobile app events (auth required)
+/iot            # IoT device data (PUBLIC)
+```
 
-// Subscribe to vehicle location
-{
-  "type": "subscribe",
-  "topic": "vehicle/TRACKER_001/location"
-}
+**Events:**
 
-// Receive updates
-{
-  "type": "location",
-  "vehicle_id": "TRACKER_001",
-  "data": {
-    "lat": 22.123456,
-    "lon": 105.123456,
-    "speed": 60.0,
-    "timestamp": "2024-01-01T12:00:00Z"
-  }
+```typescript
+// Server → Client
+'device.status.changed'     // Device online/offline
+'device.sessions.updated'   // Session start/end
+'dashboard.stats.updated'   // Stats refresh
+'notification.received'     // New notification
+
+// Client → Server
+'device:join'               // Subscribe to device room
+'device:leave'              // Unsubscribe
+```
+
+---
+
+### X.8 Database Integration
+
+**PostgreSQL (Raw Queries + Zod):**
+
+```typescript
+// device.repository.ts
+import { z } from 'zod';
+import { pool } from '@/infrastructure/database/pool';
+
+const DeviceSchema = z.object({
+  id: z.number(),
+  device_id: z.string(),
+  device_name: z.string(),
+  current_status: z.enum(['running', 'stopped', 'disconnected']),
+  last_seen_at: z.date().nullable(),
+});
+
+export async function findDeviceById(deviceId: string) {
+  const result = await pool.query(
+    'SELECT * FROM devices WHERE device_id = $1',
+    [deviceId]
+  );
+  return DeviceSchema.parse(result.rows[0]);
 }
 ```
 
-### X.6 Database Integration
-
-**PostgreSQL (TypeORM):**
+**VictoriaMetrics (PromQL):**
 
 ```typescript
-// vehicles.entity.ts
-@Entity("vehicles")
-export class Vehicle {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ unique: true })
-  vehicle_id: string;
-
-  @Column()
-  plate: string;
-
-  @Column()
-  device_id: string;
-
-  @Column({ default: "active" })
-  status: string;
-
-  @CreateDateColumn()
-  created_at: Date;
+// victoriametrics/query.ts
+export async function queryDeviceLocation(deviceId: string, range: string) {
+  const query = `
+    device_location{device_id="${deviceId}"}[${range}]
+  `;
+  const response = await fetch(
+    `${VICTORIAMETRICS_URL}/api/v1/query_range?query=${encodeURIComponent(query)}`
+  );
+  return response.json();
 }
 ```
 
-**InfluxDB:**
+---
+
+### X.9 MQTT Bridge (Standalone)
 
 ```typescript
-// Query location data
-const query = `
-  from(bucket: "vehicle_telemetry")
-    |> range(start: -1h)
-    |> filter(fn: (r) => r["_measurement"] == "location")
-    |> filter(fn: (r) => r["device_id"] == "TRACKER_001")
-`;
-```
+// mqtt-bridge/index.ts
+// Có thể chạy độc lập: npm run mqtt-bridge
 
-### X.7 MQTT Integration
+import { connectMQTT } from './mqtt.client';
+import { handleRawData } from './handlers/rawdata.handler';
 
-**Subscribe to EMQX:**
+const client = await connectMQTT();
 
-```typescript
-// Subscribe to telemetry topics
-mqttClient.subscribe("vehicle/+/telemetry");
-mqttClient.subscribe("vehicle/+/alerts");
+client.subscribe('v1/+/rawdata');
 
-// Handle incoming messages
-mqttClient.on("message", (topic, message) => {
-  const data = JSON.parse(message.toString());
-  // Process and save to database
+client.on('message', async (topic, payload) => {
+  const deviceId = topic.split('/')[1];
+  await handleRawData(deviceId, JSON.parse(payload.toString()));
 });
 ```
 
-**Publish Commands:**
+**Data Flow:**
 
-```typescript
-// Send command to tracker
-mqttClient.publish(
-  `vehicle/${deviceId}/commands`,
-  JSON.stringify({
-    command: "update_config",
-    params: { heartbeat_interval: 900 },
-  })
-);
+```
+IoT Device (ESP32)
+    → MQTT: v1/{device_id}/rawdata
+    → EMQX Broker
+    → MQTT Bridge
+        ├── Validate payload (Zod)
+        ├── Write to VictoriaMetrics (time-series)
+        ├── Write to VictoriaLogs (events)
+        ├── Update PostgreSQL (device status, sessions)
+        └── Emit event to Socket.IO (real-time)
+    → Dashboard updates
 ```
 
-### X.8 Deployment
+---
 
-**Docker Compose (Development):**
+### X.10 Middleware Chain
+
+```typescript
+// index.ts - Thứ tự middleware
+app.use(sentryRequestHandler);      // 1. Sentry (error tracking)
+app.use(helmetMiddleware);          // 2. Security headers
+app.use(compressionMiddleware);     // 3. Gzip/Brotli
+app.use(corsMiddleware);            // 4. CORS
+app.use(httpMetricsMiddleware);     // 5. Prometheus metrics
+app.use(express.json());            // 6. Body parser
+app.use(requestLogger);             // 7. Request logging
+app.use(rateLimitMiddleware);       // 8. Rate limiting
+
+// Routes
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/device', deviceRoutes);
+app.use('/api/v1/iot', iotRoutes);  // No auth for IoT endpoints
+
+// Error handling (last)
+app.use(errorHandler);
+app.use(sentryErrorHandler);
+```
+
+---
+
+### X.11 Deployment
+
+**Docker Compose:**
 
 ```yaml
 version: "3.8"
 services:
   api-server:
-    build: .
+    build: ./backend
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/tracking
-      - INFLUXDB_URL=http://influxdb:8086
+      - POSTGRESQL_URL=postgresql://user:pass@postgres:5432/tracking
+      - VICTORIAMETRICS_URL=http://victoriametrics:8428
+      - VICTORIALOGS_URL=http://victorialogs:9428
       - MQTT_BROKER=mqtt://emqx:1883
     depends_on:
       - postgres
-      - influxdb
+      - victoriametrics
       - emqx
+
+  mqtt-bridge:
+    build: ./backend
+    command: npm run mqtt-bridge
+    environment:
+      - POSTGRESQL_URL=...
+      - VICTORIAMETRICS_URL=...
+      - MQTT_BROKER=...
 ```
 
-**Production:**
+---
 
-- **Container**: Docker
-- **Orchestration**: Docker Compose hoặc Kubernetes
-- **Reverse Proxy**: Nginx
-- **SSL**: Let's Encrypt (certbot)
+### X.12 So Sánh: NestJS vs Express (Tại sao chọn Express)
 
-### X.9 Kết Luận
+| Aspect | NestJS | Express (Đã chọn) |
+|--------|--------|-------------------|
+| **Boilerplate** | Nhiều (decorators, modules) | Ít (direct routing) |
+| **Flexibility** | Ràng buộc bởi conventions | Tự do hoàn toàn |
+| **Learning Curve** | Cần học DI, decorators | Đơn giản, trực tiếp |
+| **IoT Suitability** | OK | Tốt hơn (nhẹ, nhanh) |
+| **Code Organization** | Module-based | Domain-based |
+| **Validation** | class-validator (runtime) | Zod (compile + runtime) |
+
+**Kết luận:** Express phù hợp hơn cho IoT system với high-frequency data và yêu cầu linh hoạt.
+
+---
+
+### X.13 Tóm Tắt
 
 **Tech Stack Hoàn Chỉnh:**
 
 ```
-Frontend ──→ API Server (NestJS) ──→ PostgreSQL
-                              │
-                              └─→ InfluxDB
-                              │
-                              └─→ EMQX (MQTT)
+┌─────────────────────────────────────────────────────────────┐
+│                    BACKEND ARCHITECTURE                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Frontend ──→ Express API Server ──→ PostgreSQL             │
+│      │              │                                        │
+│      │              ├──→ VictoriaMetrics (time-series)      │
+│      │              │                                        │
+│      └─→ Socket.IO ─┼──→ VictoriaLogs (logging)             │
+│                     │                                        │
+│                     └──→ MQTT Bridge ──→ EMQX ──→ Devices   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**Tóm Tắt:**
+**Ưu điểm:**
 
-- ✅ Node.js + NestJS phù hợp nhất cho luận văn
-- ✅ Dễ học, nhiều tài liệu và ecosystem phong phú
-- ✅ Real-time tốt với WebSocket và MQTT integration
-- ✅ TypeScript type safety và cấu trúc rõ ràng
+- ✅ Express nhẹ, linh hoạt, phù hợp IoT
+- ✅ Zod validation với type inference
+- ✅ VictoriaMetrics hiệu năng cao hơn InfluxDB
+- ✅ Domain-driven structure dễ maintain
+- ✅ MQTT Bridge standalone (scalable)
+- ✅ Socket.IO với 7 namespaces (organized)
+- ✅ Prometheus metrics + Sentry (observability)

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "Bash(npm run dev)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run install:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(powershell:*)",
+      "Bash(docker-compose:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker exec:*)",
+      "Bash(bash:*)",
+      "Bash(chmod:*)",
+      "Bash(findstr:*)"
+    ]
+  }
+}

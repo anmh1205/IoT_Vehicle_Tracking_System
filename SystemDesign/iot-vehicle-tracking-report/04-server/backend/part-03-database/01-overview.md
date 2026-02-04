@@ -27,7 +27,9 @@ Hệ thống tracker cần lưu **hai loại dữ liệu**:
    - Dung lượng: Nhỏ
    - **Mục đích**: Quản lý xe, khách hàng, theo dõi chuyến đi
 
-### IX.2 PostgreSQL + InfluxDB (RECOMMENDED)
+### IX.2 PostgreSQL + VictoriaMetrics + VictoriaLogs (RECOMMENDED)
+
+> **📌 Cập nhật**: Đã chuyển từ InfluxDB sang VictoriaMetrics + VictoriaLogs theo kiến trúc IVM26.
 
 ```
 ┌──────────────────────────────────────┐
@@ -35,26 +37,49 @@ Hệ thống tracker cần lưu **hai loại dữ liệu**:
 │   ESP32 + 4G Modem                   │
 └──────────────┬───────────────────────┘
                │ MQTT
-    ┌──────────┴──────────┐
-    │                     │
-    ▼                     ▼
-┌──────────────┐    ┌─────────────────────┐
-│ PostgreSQL   │    │   InfluxDB          │
-│ (Quan Trọng) │    │   (Raw Data)        │
-├──────────────┤    ├─────────────────────┤
-│ Vehicles     │    │ Locations (30 days) │
-│ Customers    │    │ Battery metrics     │
-│ Trips        │    │ Speed analytics     │
-│ Alerts       │    │ OBD2 data           │
-│ Violations   │    │                     │
-│ Commands     │    │ Auto-delete after   │
-│ History      │    │ retention period    │
-│ (aggregated) │    │                     │
-│              │    │                     │
-│ [Phase 2]    │    │                     │
-│ Bookings     │    │                     │
-│ Contracts    │    │                     │
-│ Payments     │    │                     │
-└──────────────┘    └─────────────────────┘
+               ▼
+         ┌───────────┐
+         │   EMQX    │
+         │  Broker   │
+         └─────┬─────┘
+               │
+               ▼
+         ┌───────────┐
+         │MQTT Bridge│
+         └─────┬─────┘
+               │
+    ┌──────────┼──────────┬──────────────┐
+    │          │          │              │
+    ▼          ▼          ▼              ▼
+┌──────────┐ ┌────────────────┐ ┌──────────────┐
+│PostgreSQL│ │VictoriaMetrics │ │VictoriaLogs  │
+│(Relational)│ │ (Time-Series) │ │ (Logging)    │
+├──────────┤ ├────────────────┤ ├──────────────┤
+│ Vehicles │ │ GPS Locations  │ │ Device Events│
+│ Customers│ │ Speed data     │ │ Error Logs   │
+│ Trips    │ │ Battery levels │ │ Session Logs │
+│ Alerts   │ │ OBD2 metrics   │ │ MQTT Messages│
+│ Violations│ │ IMU data      │ │ Audit Trail  │
+│ Commands │ │                │ │              │
+│ History  │ │ Retention: 30d │ │ Retention: 7d│
+│          │ │                │ │              │
+│ [Phase 2]│ │                │ │              │
+│ Bookings │ │                │ │              │
+│ Contracts│ │                │ │              │
+│ Payments │ │                │ │              │
+└──────────┘ └────────────────┘ └──────────────┘
 ```
+
+### IX.2.1 Lý Do Chọn VictoriaMetrics + VictoriaLogs
+
+| Database | Mục Đích | Ưu Điểm |
+|----------|----------|---------|
+| **PostgreSQL** | Dữ liệu quan hệ | ACID, relationships, complex queries |
+| **VictoriaMetrics** | Time-series metrics | 10x faster than InfluxDB, PromQL, low RAM |
+| **VictoriaLogs** | Centralized logging | Fast search, low storage, LogsQL |
+
+**So sánh với InfluxDB:**
+- VictoriaMetrics: 10x nhanh hơn, compression tốt hơn
+- VictoriaLogs: Thay thế ELK stack, nhẹ hơn nhiều
+- Cả hai đều từ cùng vendor, tích hợp tốt với Grafana
 
