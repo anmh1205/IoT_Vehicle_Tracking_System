@@ -1,33 +1,34 @@
-# Docker Deployment
+# Docker Deployment (IVM26 Pattern)
 
-> Docker Compose configuration cho IoT Vehicle Tracking System
+> Docker Compose configuration theo mô hình IVM26 - Mỗi service có docker-compose.yml riêng
 
 ---
 
-## 1. Architecture Overview
+## 1. Architecture Overview (IVM26 Pattern)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    DOCKER COMPOSE STACK                      │
+│              DOCKER SERVICES (Per-folder compose)           │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
+│  APPLICATION SERVICES (Tracking_*/docker-compose.yml)       │
 │  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐        │
-│  │   Nginx     │   │   Frontend  │   │   Backend   │        │
-│  │  (Reverse)  │──▶│  (Next.js)  │──▶│  (Express)  │        │
-│  │   :80/443   │   │    :3002    │   │    :3000    │        │
+│  │  Frontend   │   │   Backend   │   │ MQTT Bridge │        │
+│  │ Tracking_   │   │ Tracking_   │   │ Tracking_   │        │
+│  │   :3002     │   │    :3000    │   │  MqttBridge │        │
 │  └─────────────┘   └─────────────┘   └─────────────┘        │
 │                                              │               │
-│         ┌────────────────────────────────────┤               │
-│         │                │                   │               │
-│         ▼                ▼                   ▼               │
+│  INFRASTRUCTURE SERVICES (Tracking_*/docker-compose.yml)    │
 │  ┌─────────────┐  ┌─────────────┐   ┌─────────────┐         │
 │  │ PostgreSQL  │  │VictoriaMetrics│  │    EMQX    │         │
+│  │ Tracking_   │  │  Tracking_  │   │ Tracking_   │         │
 │  │    :5432    │  │    :8428    │   │ :1883/8083  │         │
 │  └─────────────┘  └─────────────┘   └─────────────┘         │
 │                                                              │
 │  ┌─────────────┐  ┌─────────────┐   ┌─────────────┐         │
-│  │ MQTT Bridge │  │VictoriaLogs │   │   Grafana   │         │
-│  │  (Worker)   │  │    :9428    │   │    :3001    │         │
+│  │VictoriaLogs │  │   Grafana   │   │    NPM      │         │
+│  │ Tracking_   │  │ Tracking_   │   │ Tracking_   │         │
+│  │    :9428    │  │    :3001    │   │   :80/443   │         │
 │  └─────────────┘  └─────────────┘   └─────────────┘         │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
@@ -35,7 +36,58 @@
 
 ---
 
-## 2. docker-compose.yml
+## 2. Folder Structure (IVM26 Pattern)
+
+```
+IoT_Vehicle_Tracking_System/
+├── Tracking_Backend/
+│   ├── docker-compose.yml        # Dev
+│   └── docker-compose.uat.yml    # UAT
+├── Tracking_Frontend/
+│   ├── docker-compose.yml
+│   └── docker-compose.uat.yml
+├── Tracking_MqttBridge/
+│   ├── docker-compose.yml
+│   └── docker-compose.uat.yml
+├── Tracking_PostgreSQL/
+│   ├── init/                     # SQL scripts
+│   ├── docker-compose.yml
+│   └── docker-compose.uat.yml
+├── Tracking_EMQX/
+│   ├── etc/                      # Config files
+│   ├── docker-compose.yml
+│   └── docker-compose.uat.yml
+├── Tracking_VictoriaMetrics/
+│   ├── docker-compose.yml
+│   └── docker-compose.uat.yml
+├── Tracking_VictoriaLogs/
+│   └── docker-compose.yml
+├── Tracking_Grafana/
+│   ├── provisioning/
+│   └── docker-compose.yml
+├── Tracking_NPM/
+│   └── docker-compose.yml
+└── Tracking_Data/                # Persistent data (gitignored)
+    ├── Tracking_PostgreSQL/data/
+    ├── Tracking_VictoriaMetrics/
+    └── ...
+```
+
+---
+
+## 3. Shared Docker Network
+
+```bash
+# Tạo network dùng chung TRƯỚC khi start services
+docker network create tracking-network
+```
+
+Tất cả docker-compose.yml phải có:
+```yaml
+networks:
+  tracking-network:
+    external: true
+```
 
 ```yaml
 version: '3.8'

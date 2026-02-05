@@ -311,17 +311,264 @@ CREATE TRIGGER trigger_devices_updated_at
 
 ---
 
-## 8. So Sánh với SystemDesign Gốc (Vehicle Rental)
+## 8. Vehicle Tracking Domain Tables
 
-| SystemDesign Gốc | Tracking (Đã cập nhật) | Note |
-|------------------|------------------------|------|
-| vehicles | **devices** | Renamed |
-| trips | **device_sessions** | Renamed |
-| customers | ❌ Removed | Not needed |
-| bookings | ❌ Removed | Rental-specific |
-| payments | ❌ Removed | Rental-specific |
-| contracts | ❌ Removed | Rental-specific |
-| reviews | ❌ Removed | Rental-specific |
-| geofences | ⏸️ Phase 2 | Optional |
-| alerts | **event_logs** | Merged |
-| violations | **event_logs** | Merged into events |
+> Các tables bổ sung cho Vehicle Tracking System (ngoài Device Monitoring core)
+
+### 8.1 vehicles
+
+```sql
+CREATE TYPE vehicle_status AS ENUM ('active', 'inactive', 'maintenance', 'retired');
+CREATE TYPE vehicle_type AS ENUM ('sedan', 'suv', 'hatchback', 'coupe', 'pickup', 'van', 'truck', 'motorcycle');
+CREATE TYPE fuel_type AS ENUM ('gasoline', 'diesel', 'hybrid', 'electric');
+CREATE TYPE transmission_type AS ENUM ('manual', 'automatic');
+
+CREATE TABLE vehicles (
+    id SERIAL PRIMARY KEY,
+    vehicle_id VARCHAR(50) UNIQUE NOT NULL,
+    plate_number VARCHAR(20) UNIQUE,
+    device_id VARCHAR(50) REFERENCES devices(device_id),
+    customer_id INT REFERENCES customers(id),
+    vehicle_type vehicle_type,
+    brand VARCHAR(50),
+    model VARCHAR(50),
+    year INTEGER,
+    color VARCHAR(30),
+    vin VARCHAR(50),
+    seats INTEGER DEFAULT 5,
+    transmission transmission_type,
+    fuel_type fuel_type,
+    mileage_km INTEGER DEFAULT 0,
+    registration_number VARCHAR(50),
+    insurance_expiry DATE,
+    status vehicle_status DEFAULT 'active',
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_vehicles_vehicle_id ON vehicles(vehicle_id);
+CREATE INDEX idx_vehicles_plate_number ON vehicles(plate_number);
+CREATE INDEX idx_vehicles_device_id ON vehicles(device_id);
+CREATE INDEX idx_vehicles_customer_id ON vehicles(customer_id);
+CREATE INDEX idx_vehicles_status ON vehicles(status);
+```
+
+### 8.2 customers
+
+```sql
+CREATE TYPE customer_type AS ENUM ('individual', 'company');
+CREATE TYPE customer_status AS ENUM ('active', 'inactive', 'suspended');
+
+CREATE TABLE customers (
+    id SERIAL PRIMARY KEY,
+    customer_code VARCHAR(50) UNIQUE NOT NULL,
+    customer_type customer_type DEFAULT 'individual',
+    name VARCHAR(200) NOT NULL,
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    address TEXT,
+    tax_code VARCHAR(20),
+    contact_person VARCHAR(100),
+    status customer_status DEFAULT 'active',
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_customers_code ON customers(customer_code);
+CREATE INDEX idx_customers_status ON customers(status);
+```
+
+### 8.3 trips
+
+```sql
+CREATE TYPE trip_status AS ENUM ('planned', 'in_progress', 'completed', 'cancelled');
+
+CREATE TABLE trips (
+    id BIGSERIAL PRIMARY KEY,
+    trip_code VARCHAR(50) UNIQUE NOT NULL,
+    vehicle_id VARCHAR(50) REFERENCES vehicles(vehicle_id),
+    device_id VARCHAR(50) REFERENCES devices(device_id),
+    driver_name VARCHAR(100),
+    driver_phone VARCHAR(20),
+    start_location TEXT,
+    start_latitude DECIMAL(10, 8),
+    start_longitude DECIMAL(11, 8),
+    end_location TEXT,
+    end_latitude DECIMAL(10, 8),
+    end_longitude DECIMAL(11, 8),
+    planned_start TIMESTAMPTZ,
+    planned_end TIMESTAMPTZ,
+    actual_start TIMESTAMPTZ,
+    actual_end TIMESTAMPTZ,
+    distance_km DECIMAL(10, 2),
+    fuel_used_liters DECIMAL(10, 2),
+    status trip_status DEFAULT 'planned',
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_trips_vehicle_id ON trips(vehicle_id);
+CREATE INDEX idx_trips_device_id ON trips(device_id);
+CREATE INDEX idx_trips_status ON trips(status);
+CREATE INDEX idx_trips_dates ON trips(planned_start, planned_end);
+```
+
+### 8.4 geofences
+
+```sql
+CREATE TYPE geofence_type AS ENUM ('circle', 'polygon', 'rectangle');
+CREATE TYPE geofence_trigger AS ENUM ('enter', 'exit', 'both');
+
+CREATE TABLE geofences (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    geofence_type geofence_type DEFAULT 'circle',
+    -- For circle: center point + radius
+    center_latitude DECIMAL(10, 8),
+    center_longitude DECIMAL(11, 8),
+    radius_meters INTEGER,
+    -- For polygon/rectangle: GeoJSON
+    coordinates JSONB,
+    trigger_on geofence_trigger DEFAULT 'both',
+    is_active BOOLEAN DEFAULT true,
+    notify_email BOOLEAN DEFAULT false,
+    notify_push BOOLEAN DEFAULT true,
+    created_by INT REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE geofence_vehicles (
+    id SERIAL PRIMARY KEY,
+    geofence_id INT REFERENCES geofences(id) ON DELETE CASCADE,
+    vehicle_id VARCHAR(50) REFERENCES vehicles(vehicle_id) ON DELETE CASCADE,
+    assigned_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(geofence_id, vehicle_id)
+);
+
+CREATE INDEX idx_geofences_active ON geofences(is_active);
+```
+
+### 8.5 alerts
+
+```sql
+CREATE TYPE alert_type AS ENUM (
+    'speeding', 'geofence_enter', 'geofence_exit',
+    'harsh_braking', 'harsh_acceleration', 'idle_too_long',
+    'low_battery', 'device_offline', 'sos', 'maintenance_due'
+);
+CREATE TYPE alert_status AS ENUM ('active', 'acknowledged', 'resolved', 'dismissed');
+CREATE TYPE alert_severity AS ENUM ('low', 'medium', 'high', 'critical');
+
+CREATE TABLE alerts (
+    id BIGSERIAL PRIMARY KEY,
+    vehicle_id VARCHAR(50) REFERENCES vehicles(vehicle_id),
+    device_id VARCHAR(50) REFERENCES devices(device_id),
+    trip_id BIGINT REFERENCES trips(id),
+    geofence_id INT REFERENCES geofences(id),
+    alert_type alert_type NOT NULL,
+    severity alert_severity DEFAULT 'medium',
+    status alert_status DEFAULT 'active',
+    title VARCHAR(200) NOT NULL,
+    message TEXT,
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    speed DECIMAL(6, 2),
+    threshold_value DECIMAL(10, 2),
+    actual_value DECIMAL(10, 2),
+    acknowledged_by INT REFERENCES users(id),
+    acknowledged_at TIMESTAMPTZ,
+    resolved_by INT REFERENCES users(id),
+    resolved_at TIMESTAMPTZ,
+    resolution_notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_alerts_vehicle_id ON alerts(vehicle_id);
+CREATE INDEX idx_alerts_device_id ON alerts(device_id);
+CREATE INDEX idx_alerts_status ON alerts(status);
+CREATE INDEX idx_alerts_type ON alerts(alert_type);
+CREATE INDEX idx_alerts_severity ON alerts(severity);
+CREATE INDEX idx_alerts_created ON alerts(created_at DESC);
+```
+
+### 8.6 maintenance
+
+```sql
+CREATE TYPE maintenance_type AS ENUM (
+    'oil_change', 'tire_rotation', 'brake_service',
+    'engine_service', 'transmission', 'battery',
+    'inspection', 'other'
+);
+CREATE TYPE maintenance_status AS ENUM ('scheduled', 'in_progress', 'completed', 'cancelled');
+
+CREATE TABLE maintenance (
+    id SERIAL PRIMARY KEY,
+    vehicle_id VARCHAR(50) REFERENCES vehicles(vehicle_id),
+    maintenance_type maintenance_type NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    scheduled_date DATE,
+    completed_date DATE,
+    mileage_at_service INTEGER,
+    next_service_mileage INTEGER,
+    next_service_date DATE,
+    cost DECIMAL(12, 2),
+    service_provider VARCHAR(200),
+    status maintenance_status DEFAULT 'scheduled',
+    notes TEXT,
+    created_by INT REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_maintenance_vehicle_id ON maintenance(vehicle_id);
+CREATE INDEX idx_maintenance_status ON maintenance(status);
+CREATE INDEX idx_maintenance_scheduled ON maintenance(scheduled_date);
+```
+
+---
+
+## 9. Entity Relationship Diagram
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   users     │     │  customers  │     │  geofences  │
+└──────┬──────┘     └──────┬──────┘     └──────┬──────┘
+       │                   │                   │
+       │    ┌──────────────┼───────────────────┤
+       │    │              │                   │
+       ▼    ▼              ▼                   ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   devices   │◄────│  vehicles   │────▶│geofence_veh │
+└──────┬──────┘     └──────┬──────┘     └─────────────┘
+       │                   │
+       │                   │
+       ▼                   ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│device_sess  │     │    trips    │     │   alerts    │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                   │                   │
+       ▼                   ▼                   │
+┌─────────────┐     ┌─────────────┐            │
+│ event_logs  │     │ maintenance │◄───────────┘
+└─────────────┘     └─────────────┘
+```
+
+---
+
+## 10. So Sánh Schema
+
+| Core (Device Monitoring) | Vehicle Tracking Extension |
+|--------------------------|---------------------------|
+| users | customers |
+| devices | vehicles |
+| device_sessions | trips |
+| event_logs | alerts |
+| firmware | maintenance |
+| error_code_definitions | geofences |

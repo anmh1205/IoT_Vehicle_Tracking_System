@@ -46,12 +46,17 @@
 
 ### 2.2 Phạm Vi
 
-| Component | Action | Tỷ lệ tái sử dụng |
-|-----------|--------|-------------------|
-| **Backend** | Viết lại 100% | Tham khảo logic từ code cũ |
-| **MQTT Bridge** | Viết mới 100% | Không có trong code cũ |
-| **Frontend** | Copy 70%, Update 30% | UI components giữ nguyên |
-| **Infrastructure** | Viết lại 100% | Docker, migrations mới |
+| Component | Action | Tỷ lệ tái sử dụng | Ghi chú |
+|-----------|--------|-------------------|---------|
+| **Backend** | Viết lại 100% | Tham khảo logic từ code cũ | NestJS → Express |
+| **MQTT Bridge** | Viết mới 100% | Không có trong code cũ | Standalone service |
+| **Frontend** | Viết lại ~60% | UI components (40%) reuse | Xem chi tiết ở Section 3.1 |
+| **Infrastructure** | Viết lại 100% | Docker, migrations mới | VictoriaMetrics thay InfluxDB |
+
+> ⚠️ **Lưu ý quan trọng về Frontend:**
+> - UI Components (shadcn/ui): ✅ Copy 100% - Hoạt động tốt
+> - Pages/Features: ⚠️ Chỉ ~40% hoạt động - Nhiều tính năng là TODO/skeleton
+> - Chi tiết bugs và fixes: Xem `32-frontend-implementation.md`
 
 ---
 
@@ -272,55 +277,160 @@ E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\
 │   ├── package.json
 │   └── Dockerfile
 │
-├── frontend/                             # Next.js 16
+├── frontend/                             # Next.js 16 (Feature-Sliced Architecture)
 │   ├── src/
-│   │   ├── app/                          # App Router
+│   │   ├── app/                          # App Router (routing only)
 │   │   │   ├── layout.tsx
 │   │   │   ├── page.tsx
 │   │   │   ├── login/
+│   │   │   │   └── page.tsx
 │   │   │   └── dashboard/
 │   │   │       ├── layout.tsx
-│   │   │       ├── page.tsx
+│   │   │       ├── page.tsx              # Overview
 │   │   │       ├── map/
+│   │   │       │   └── page.tsx
 │   │   │       ├── vehicles/
+│   │   │       │   ├── page.tsx
+│   │   │       │   └── [id]/
+│   │   │       │       └── page.tsx
 │   │   │       ├── devices/
+│   │   │       │   ├── page.tsx
+│   │   │       │   └── [id]/
+│   │   │       │       └── page.tsx
 │   │   │       ├── customers/
+│   │   │       │   ├── page.tsx
+│   │   │       │   └── [id]/
+│   │   │       │       └── page.tsx
 │   │   │       ├── trips/
+│   │   │       │   └── page.tsx
 │   │   │       ├── alerts/
+│   │   │       │   └── page.tsx
 │   │   │       ├── violations/
+│   │   │       │   └── page.tsx
 │   │   │       ├── geofences/
+│   │   │       │   ├── page.tsx
+│   │   │       │   └── [id]/
+│   │   │       │       └── page.tsx
 │   │   │       ├── maintenance/
+│   │   │       │   ├── page.tsx
+│   │   │       │   └── [id]/
+│   │   │       │       └── page.tsx
 │   │   │       └── settings/
+│   │   │           └── page.tsx
 │   │   │
-│   │   ├── components/
-│   │   │   ├── ui/                       # ✅ Copy từ backup
-│   │   │   ├── layout/                   # ⚡ Refactor
+│   │   ├── components/                   # Shared components
+│   │   │   ├── ui/                       # ✅ Copy từ backup (shadcn/ui)
+│   │   │   ├── common/                   # Common UI elements
+│   │   │   ├── forms/                    # Form components
+│   │   │   ├── layout/                   # Layout components
 │   │   │   │   ├── app-sidebar.tsx
 │   │   │   │   ├── header.tsx
 │   │   │   │   └── page-container.tsx
-│   │   │   ├── map/                      # ⚡ Copy và update
+│   │   │   ├── providers/                # React context providers
+│   │   │   ├── error/                    # Error boundaries
 │   │   │   └── icons.tsx                 # ✅ Copy từ backup
 │   │   │
-│   │   ├── hooks/                        # ❌ Viết lại
-│   │   │   ├── use-auth.ts
-│   │   │   ├── use-vehicles.ts
-│   │   │   ├── use-realtime.ts
-│   │   │   └── ...
+│   │   ├── features/                     # ⭐ Feature modules (IVM26 pattern)
+│   │   │   ├── auth/
+│   │   │   │   └── components/
+│   │   │   │       ├── login-form.tsx
+│   │   │   │       └── auth-guard.tsx
+│   │   │   ├── vehicles/
+│   │   │   │   ├── components/
+│   │   │   │   │   ├── vehicle-list.tsx
+│   │   │   │   │   ├── vehicle-card.tsx
+│   │   │   │   │   └── vehicle-detail-modal/
+│   │   │   │   ├── hooks/
+│   │   │   │   │   └── use-vehicle-filters.ts
+│   │   │   │   ├── types/
+│   │   │   │   │   └── vehicle.types.ts
+│   │   │   │   └── utils/
+│   │   │   ├── devices/
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   ├── types/
+│   │   │   │   └── utils/
+│   │   │   ├── customers/
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   └── types/
+│   │   │   ├── trips/
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   └── types/
+│   │   │   ├── alerts/
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   └── types/
+│   │   │   ├── violations/
+│   │   │   │   ├── components/
+│   │   │   │   └── types/
+│   │   │   ├── geofences/
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   └── types/
+│   │   │   ├── maintenance/
+│   │   │   │   ├── components/
+│   │   │   │   └── types/
+│   │   │   ├── map/
+│   │   │   │   ├── components/           # ⚡ Move từ backup/components/map
+│   │   │   │   │   ├── vehicle-map.tsx
+│   │   │   │   │   └── vehicle-trail-map.tsx
+│   │   │   │   ├── hooks/
+│   │   │   │   │   └── use-map-tracking.ts
+│   │   │   │   ├── constants/
+│   │   │   │   └── types/
+│   │   │   ├── dashboard/
+│   │   │   │   ├── components/
+│   │   │   │   │   ├── stats-cards.tsx
+│   │   │   │   │   └── activity-feed.tsx
+│   │   │   │   └── hooks/
+│   │   │   └── settings/
+│   │   │       └── components/
 │   │   │
-│   │   ├── lib/
-│   │   │   ├── api/                      # ❌ Viết lại
-│   │   │   │   └── client.ts
-│   │   │   ├── store/                    # ⚡ Update
+│   │   ├── hooks/                        # Global hooks
+│   │   │   ├── queries/                  # React Query fetch hooks
+│   │   │   │   ├── use-vehicles-query.ts
+│   │   │   │   ├── use-devices-query.ts
+│   │   │   │   ├── use-alerts-query.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── mutations/                # React Query mutation hooks
+│   │   │   │   ├── use-create-vehicle.ts
+│   │   │   │   ├── use-update-vehicle.ts
+│   │   │   │   └── index.ts
+│   │   │   └── realtime/                 # WebSocket/real-time hooks
+│   │   │       ├── use-socket.ts
+│   │   │       ├── use-device-telemetry.ts
+│   │   │       └── use-alerts-stream.ts
+│   │   │
+│   │   ├── lib/                          # Core utilities
+│   │   │   ├── api/                      # API client
+│   │   │   │   ├── client.ts             # HTTP client setup
+│   │   │   │   ├── endpoints.ts          # API endpoint definitions
+│   │   │   │   └── interceptors.ts       # Request/response interceptors
+│   │   │   ├── realtime/                 # Real-time connections
+│   │   │   │   ├── socket-client.ts      # Socket.IO client
+│   │   │   │   └── event-handlers.ts
+│   │   │   ├── store/                    # Zustand stores
 │   │   │   │   ├── auth.store.ts
-│   │   │   │   └── ui.store.ts
-│   │   │   └── utils/
+│   │   │   │   ├── ui.store.ts
+│   │   │   │   └── notifications.store.ts
+│   │   │   ├── constants/                # Global constants
+│   │   │   └── utils/                    # Utility functions
+│   │   │       ├── date.ts
+│   │   │       ├── format.ts
+│   │   │       └── validation.ts
 │   │   │
-│   │   └── types/                        # ❌ Viết lại (sync với backend)
-│   │       ├── auth.ts
-│   │       ├── vehicle.ts
-│   │       ├── device.ts
-│   │       └── ...
+│   │   ├── types/                        # Global TypeScript types
+│   │   │   ├── api.types.ts              # API response types
+│   │   │   ├── common.types.ts           # Common types
+│   │   │   └── index.ts
+│   │   │
+│   │   └── config/                       # Configuration
+│   │       ├── site.ts                   # Site metadata
+│   │       └── navigation.ts             # Navigation config
 │   │
+│   ├── e2e/                              # Playwright E2E tests
 │   ├── package.json
 │   └── Dockerfile
 │

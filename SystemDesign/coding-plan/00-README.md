@@ -4,14 +4,57 @@
 
 ---
 
+## 📁 Cấu Trúc File (Đã Sắp Xếp Theo Phase)
+
+```
+coding-plan/
+│
+├── 📋 PHASE 0: OVERVIEW & STANDARDS
+│   ├── 00-README.md                    ← FILE NÀY
+│   ├── 01-rewrite-plan.md              ← Master plan
+│   ├── 02-coding-standards.md          ← Naming conventions
+│   ├── 03-execution-guide.md           ← AI agent execution guide
+│   └── 04-project-structure.md         ← IVM26-style folder structure
+│
+├── 🗄️ PHASE 1: DATABASE & INFRASTRUCTURE
+│   ├── 10-database-postgresql.md       ← PostgreSQL schema
+│   ├── 11-database-victoriametrics.md  ← Time-series DB
+│   └── 12-docker-infrastructure.md     ← Docker setup
+│
+├── ⚙️ PHASE 2: BACKEND
+│   ├── 20-backend-architecture.md      ← DDD structure
+│   ├── 21-backend-api-endpoints.md     ← REST API design
+│   ├── 22-backend-mqtt-bridge.md       ← MQTT integration
+│   └── 23-backend-security.md          ← Security implementation
+│
+├── 🎨 PHASE 3: FRONTEND
+│   ├── 30-frontend-architecture.md     ← Feature-Sliced architecture
+│   ├── 31-frontend-features.md         ← Feature specifications
+│   └── 32-frontend-implementation.md   ← Detailed implementation
+│
+├── 📱 PHASE 4: MOBILE
+│   └── 40-mobile-strategy.md           ← Flutter WebView strategy
+│
+├── 🚀 PHASE 5: DEPLOYMENT & OPS
+│   └── 50-observability.md             ← Prometheus + Logging + Sentry
+│
+└── 📁 config/
+    ├── domains.example.ts
+    ├── metrics.example.ts
+    └── sensors.example.ts
+```
+
+---
+
 ## 🤖 Agent Instructions
 
 ### Nguồn Tham Khảo
 
 | Source | Path | Purpose |
 |--------|------|---------|
-| **Template** | `../IoT_Project_Template/` | Generic IoT architecture |
+| **Template** | `../iot-project-template/` | Generic IoT architecture |
 | **Reference** | `E:\anmh1205\IVM26\` | Existing implementation patterns |
+| **Backup** | `../../iot-vehicle-tracking-system-backup/` | Old NestJS code (reference only) |
 | **This Plan** | `./` | Vehicle Tracking specific |
 
 ### Build Workflow
@@ -21,21 +64,23 @@
 │                    AGENT BUILD WORKFLOW                      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│  Step 1: READ Template                                       │
-│  ├── IoT_Project_Template/system-design/                     │
-│  ├── IoT_Project_Template/coding-plan/                       │
-│  └── IoT_Project_Template/coding-plan/config/                │
+│  Step 1: READ Phase 0 Files (MANDATORY FIRST)               │
+│  ├── 01-rewrite-plan.md (master plan)                       │
+│  ├── 02-coding-standards.md (naming, patterns)              │
+│  └── 03-execution-guide.md (step-by-step)                   │
 │                                                              │
-│  Step 2: READ This Plan (Vehicle Tracking Specific)          │
-│  ├── 01-coding-standards.md (naming, patterns)               │
-│  ├── 07-database-schema.md (PostgreSQL)                      │
-│  └── Other files per phase                                   │
+│  Step 2: READ Phase Files Per Implementation Phase          │
+│  ├── Phase 1: 10-*, 11-*, 12-* (Database & Docker)          │
+│  ├── Phase 2: 20-*, 21-*, 22-*, 23-* (Backend)              │
+│  ├── Phase 3: 30-*, 31-*, 32-* (Frontend)                   │
+│  ├── Phase 4: 40-* (Mobile)                                 │
+│  └── Phase 5: 50-* (Deployment)                             │
 │                                                              │
-│  Step 3: REFERENCE IVM26 Project                             │
-│  ├── IVM26_Backend/src/ (Express patterns)                   │
-│  └── IVM26_Frontend/src/ (Next.js patterns)                  │
+│  Step 3: REFERENCE IVM26 Project                            │
+│  ├── IVM26_Backend/src/ (Express patterns)                  │
+│  └── IVM26_Frontend/src/ (Next.js patterns)                 │
 │                                                              │
-│  Step 4: IMPLEMENT Following Phases Below                    │
+│  Step 4: IMPLEMENT Following Phases Below                   │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -44,32 +89,40 @@
 
 ## 📋 Implementation Phases
 
-### Phase 1: Project Setup & Database ⭐⭐⭐⭐⭐
+### Phase 1: Database & Infrastructure ⭐⭐⭐⭐⭐
 
 **Files to Read:**
-- `01-coding-standards.md` - Naming conventions (MUST READ FIRST)
-- `07-database-schema.md` - PostgreSQL tables
-- `09-docker-deployment.md` - Docker Compose
+- `02-coding-standards.md` - Naming conventions (MUST READ FIRST)
+- `10-database-postgresql.md` - PostgreSQL tables
+- `11-database-victoriametrics.md` - Time-series database
+- `12-docker-infrastructure.md` - Docker Compose
 
 **Tasks:**
 
 | Step | Task | Output |
 |------|------|--------|
-| 1.1 | Create backend folder structure | `backend/src/` với domain folders |
-| 1.2 | Create frontend folder structure | `frontend/src/` với feature folders |
-| 1.3 | Create PostgreSQL migrations | `docker/postgres/init/*.sql` |
-| 1.4 | Setup Docker Compose | `docker-compose.yml` |
-| 1.5 | Setup environment files | `.env.example` |
+| 1.1 | Create backend folder structure | `Tracking_Backend/src/` với domain folders |
+| 1.2 | Create frontend folder structure | `Tracking_Frontend/src/` với feature folders |
+| 1.3 | Create PostgreSQL migrations | `Tracking_PostgreSQL/init/*.sql` |
+| 1.4 | Setup Docker Compose per service | Mỗi folder có `docker-compose.yml` riêng |
+| 1.5 | Setup environment files | `.env.example` trong mỗi service |
 
 **Agent Commands:**
 ```bash
 # Read template first
-READ: ../IoT_Project_Template/coding-plan/02-project-structure.md
-READ: ../IoT_Project_Template/coding-plan/config/domains.example.ts
+READ: ../iot-project-template/system-design/04-database-design.md
+READ: ./config/domains.example.ts
 
-# Create project structure
-mkdir -p backend/src/{domain,infrastructure,middleware,shared}
-mkdir -p frontend/src/{app,features,components,hooks,lib}
+# Create project structure (IVM26 pattern)
+mkdir -p Tracking_Backend/src/{domain,infrastructure,middleware,shared}
+mkdir -p Tracking_Frontend/src/{app,features,components,hooks,lib}
+mkdir -p Tracking_MqttBridge/src/{handlers,batch,cache}
+mkdir -p Tracking_PostgreSQL/init
+mkdir -p Tracking_EMQX/etc
+mkdir -p Tracking_VictoriaMetrics
+mkdir -p Tracking_VictoriaLogs
+mkdir -p Tracking_Grafana/provisioning/{datasources,dashboards}
+mkdir -p Tracking_Data/{Tracking_PostgreSQL/data,Tracking_EMQX,Tracking_VictoriaMetrics,Tracking_VictoriaLogs}
 
 # Reference IVM26 for exact patterns
 REFERENCE: E:\anmh1205\IVM26\IVM26_Backend\src\
@@ -81,8 +134,10 @@ REFERENCE: E:\anmh1205\IVM26\IVM26_Frontend\src\
 ### Phase 2: Backend Core ⭐⭐⭐⭐⭐
 
 **Files to Read:**
-- `02-backend-architecture.md` - Domain structure
-- `03-backend-api-endpoints.md` - REST API design
+- `20-backend-architecture.md` - Domain structure
+- `21-backend-api-endpoints.md` - REST API design
+- `22-backend-mqtt-bridge.md` - MQTT integration
+- `23-backend-security.md` - Security (Helmet, Rate Limiting, Auth)
 
 **Tasks:**
 
@@ -107,7 +162,7 @@ REFERENCE: E:\anmh1205\IVM26\IVM26_Frontend\src\
 **Agent Commands:**
 ```bash
 # Read domain patterns from template
-READ: ../IoT_Project_Template/coding-plan/03-backend-domains.md
+READ: ../iot-project-template/system-design/05-api-design.md
 
 # Implement in order
 IMPLEMENT: domain/auth/ (login, JWT, user management)
@@ -124,29 +179,29 @@ REFERENCE: E:\anmh1205\IVM26\IVM26_Backend\src\domain\device\
 ### Phase 3: MQTT & Time-Series ⭐⭐⭐⭐
 
 **Files to Read:**
-- `04-backend-mqtt-bridge.md` - MQTT integration
-- `08-victoriametrics.md` - Time-series database
+- `22-backend-mqtt-bridge.md` - MQTT integration
+- `11-database-victoriametrics.md` - Time-series database
 
 **Tasks:**
 
 | Step | Task | Output |
 |------|------|--------|
-| 3.1 | MQTT Client | `mqtt-bridge/mqtt.client.ts` |
-| 3.2 | Message Handlers | `mqtt-bridge/handlers/*.ts` |
-| 3.3 | Batch Service | `mqtt-bridge/batch/` |
-| 3.4 | VictoriaMetrics Client | `infrastructure/victoriametrics/` |
-| 3.5 | Socket.IO Setup | `realtime/socket.server.ts` |
+| 3.1 | MQTT Client | `Tracking_MqttBridge/src/mqtt.client.ts` |
+| 3.2 | Message Handlers | `Tracking_MqttBridge/src/handlers/*.ts` |
+| 3.3 | Batch Service | `Tracking_MqttBridge/src/batch/` |
+| 3.4 | VictoriaMetrics Client | `Tracking_Backend/src/infrastructure/victoriametrics/` |
+| 3.5 | Socket.IO Setup | `Tracking_Backend/src/realtime/socket.server.ts` |
 
 **Agent Commands:**
 ```bash
 # Read MQTT patterns
-READ: ../IoT_Project_Template/system-design/06-realtime-design.md
-READ: ../IoT_Project_Template/coding-plan/config/sensors.example.ts
+READ: ../iot-project-template/system-design/06-realtime-design.md
+READ: ./config/sensors.example.ts
 
 # Implement MQTT Bridge
-IMPLEMENT: mqtt-bridge/index.ts (entry point)
-IMPLEMENT: mqtt-bridge/handlers/rawdata.handler.ts
-IMPLEMENT: mqtt-bridge/batch/database-batch.service.ts
+IMPLEMENT: Tracking_MqttBridge/src/index.ts (entry point)
+IMPLEMENT: Tracking_MqttBridge/src/handlers/rawdata.handler.ts
+IMPLEMENT: Tracking_MqttBridge/src/batch/database-batch.service.ts
 
 # Reference IVM26
 REFERENCE: E:\anmh1205\IVM26\IVM26_Backend\src\mqtt-bridge\
@@ -157,8 +212,9 @@ REFERENCE: E:\anmh1205\IVM26\IVM26_Backend\src\mqtt-bridge\
 ### Phase 4: Frontend Core ⭐⭐⭐⭐
 
 **Files to Read:**
-- `05-frontend-architecture.md` - Next.js structure
-- `06-frontend-features.md` - Feature modules
+- `30-frontend-architecture.md` - Next.js structure
+- `31-frontend-features.md` - Feature modules
+- `32-frontend-implementation.md` - Detailed implementation plan
 
 **Tasks:**
 
@@ -180,7 +236,7 @@ REFERENCE: E:\anmh1205\IVM26\IVM26_Backend\src\mqtt-bridge\
 **Agent Commands:**
 ```bash
 # Read frontend patterns
-READ: ../IoT_Project_Template/system-design/07-frontend-design.md
+READ: ../iot-project-template/system-design/07-frontend-design.md
 
 # Implement features
 IMPLEMENT: features/auth/components/login-form.tsx
@@ -196,7 +252,8 @@ REFERENCE: E:\anmh1205\IVM26\IVM26_Frontend\src\features\
 ### Phase 5: Advanced Features ⭐⭐⭐
 
 **Files to Read:**
-- `06-frontend-features.md` - Map, Firmware, Notifications
+- `31-frontend-features.md` - Map, Firmware, Notifications
+- `32-frontend-implementation.md` - Detailed implementation
 
 **Tasks:**
 
@@ -210,20 +267,37 @@ REFERENCE: E:\anmh1205\IVM26\IVM26_Frontend\src\features\
 
 ---
 
-### Phase 6: Deployment ⭐⭐⭐
+### Phase 6: Mobile ⭐⭐⭐
 
 **Files to Read:**
-- `09-docker-deployment.md` - Docker setup
+- `40-mobile-strategy.md` - Flutter WebView Hybrid
 
 **Tasks:**
 
 | Step | Task |
 |------|------|
-| 6.1 | Backend Dockerfile |
-| 6.2 | Frontend Dockerfile |
-| 6.3 | Nginx configuration |
-| 6.4 | Grafana dashboards |
-| 6.5 | Production checklist |
+| 6.1 | Flutter project setup |
+| 6.2 | WebView integration |
+| 6.3 | Native features (GPS, Push) |
+| 6.4 | App store preparation |
+
+---
+
+### Phase 7: Deployment & Ops ⭐⭐⭐
+
+**Files to Read:**
+- `12-docker-infrastructure.md` - Docker setup
+- `50-observability.md` - Monitoring
+
+**Tasks:**
+
+| Step | Task |
+|------|------|
+| 7.1 | Backend Dockerfile |
+| 7.2 | Frontend Dockerfile |
+| 7.3 | Nginx configuration |
+| 7.4 | Grafana dashboards |
+| 7.5 | Production checklist |
 
 ---
 
@@ -271,22 +345,26 @@ export const METRICS_CONFIG = {
 
 ---
 
-## 📁 File Index
+## 📁 File Index (Quick Reference)
 
-| File | Content | When to Read |
-|------|---------|--------------|
-| `01-coding-standards.md` | Naming, patterns, TypeScript | 🔴 Phase 1 (FIRST) |
-| `02-backend-architecture.md` | Backend structure | 🔴 Phase 2 |
-| `03-backend-api-endpoints.md` | REST API design | 🔴 Phase 2 |
-| `04-backend-mqtt-bridge.md` | MQTT integration | 🟡 Phase 3 |
-| `05-frontend-architecture.md` | Frontend structure | 🔴 Phase 4 |
-| `06-frontend-features.md` | Feature modules | 🔴 Phase 4-5 |
-| `07-database-schema.md` | PostgreSQL schema | 🔴 Phase 1 |
-| `08-victoriametrics.md` | Time-series DB | 🟡 Phase 3 |
-| `09-docker-deployment.md` | Docker Compose | 🟢 Phase 6 |
-| `10-observability.md` | Prometheus + Logging + Sentry | 🟡 Phase 3 |
-| `11-mobile-strategy.md` | Flutter WebView Hybrid | 🟢 Phase 7 |
-| `12-security.md` | Helmet + Rate Limiting + Auth | 🔴 Phase 2 |
+| File | Content | Phase |
+|------|---------|-------|
+| `00-README.md` | This index file | - |
+| `01-rewrite-plan.md` | Master rewrite plan | 🔴 Read First |
+| `02-coding-standards.md` | Naming, patterns, TypeScript | 🔴 Read First |
+| `03-execution-guide.md` | Step-by-step AI guide | 🔴 Read First |
+| `10-database-postgresql.md` | PostgreSQL schema | Phase 1 |
+| `11-database-victoriametrics.md` | Time-series DB | Phase 1 |
+| `12-docker-infrastructure.md` | Docker Compose | Phase 1 |
+| `20-backend-architecture.md` | Backend DDD structure | Phase 2 |
+| `21-backend-api-endpoints.md` | REST API design | Phase 2 |
+| `22-backend-mqtt-bridge.md` | MQTT integration | Phase 2-3 |
+| `23-backend-security.md` | Security implementation | Phase 2 |
+| `30-frontend-architecture.md` | Frontend structure | Phase 4 |
+| `31-frontend-features.md` | Feature modules | Phase 4-5 |
+| `32-frontend-implementation.md` | Detailed frontend guide | Phase 4-5 |
+| `40-mobile-strategy.md` | Flutter WebView Hybrid | Phase 6 |
+| `50-observability.md` | Prometheus + Logging + Sentry | Phase 7 |
 
 ---
 
@@ -295,7 +373,7 @@ export const METRICS_CONFIG = {
 ### MUST DO
 
 ```
-✅ Read 01-coding-standards.md FIRST before any implementation
+✅ Read 02-coding-standards.md FIRST before any implementation
 ✅ Read template files before implementing each phase
 ✅ Reference IVM26 project for exact code patterns
 ✅ Follow naming conventions strictly (kebab-case files, PascalCase classes)
@@ -359,16 +437,24 @@ export const METRICS_CONFIG = {
 | Real-time | Socket.IO 4 + MQTT (EMQX) |
 | UI | shadcn/ui + TanStack Query + Zustand |
 
-### Development Commands
+### Development Commands (IVM26 Pattern)
 
 ```bash
+# Create docker network first
+docker network create tracking-network
+
+# Start infrastructure (from each folder)
+cd Tracking_PostgreSQL && docker-compose up -d
+cd Tracking_EMQX && docker-compose up -d
+cd Tracking_VictoriaMetrics && docker-compose up -d
+cd Tracking_VictoriaLogs && docker-compose up -d
+
 # Backend
-cd backend && npm run dev          # Start dev server
-cd backend && npm run mqtt-bridge  # Run MQTT bridge
+cd Tracking_Backend && npm run dev          # Start dev server
+
+# MQTT Bridge
+cd Tracking_MqttBridge && npm run dev       # Run MQTT bridge
 
 # Frontend
-cd frontend && npm run dev         # Next.js dev (port 3002)
-
-# Docker
-docker-compose up -d               # Start all services
+cd Tracking_Frontend && npm run dev         # Next.js dev (port 3002)
 ```

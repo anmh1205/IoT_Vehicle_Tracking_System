@@ -23,7 +23,7 @@
 │                            │                                 │
 │  ┌─────────────────────────▼───────────────────────────┐    │
 │  │               INFRASTRUCTURE LAYER                   │    │
-│  │  Database → VictoriaMetrics → Logger → HTTP Client  │    │
+│  │  Database → VictoriaMetrics → VictoriaLogs → Logger │    │
 │  └─────────────────────────────────────────────────────┘    │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
@@ -31,10 +31,10 @@
 
 ---
 
-## 2. Cấu Trúc Thư Mục
+## 2. Cấu Trúc Thư Mục (IVM26 Pattern)
 
 ```
-backend/src/
+Tracking_Backend/src/
 ├── index.ts                        # Entry point
 │
 ├── api/                            # API Layer
@@ -137,6 +137,72 @@ backend/src/
 │   │   │   └── export-file.service.ts
 │   │   └── repositories/
 │   │       └── export.repository.ts
+│   │
+│   │   # ═══════════════════════════════════════════════════════════
+│   │   # VEHICLE TRACKING DOMAINS (Extension)
+│   │   # ═══════════════════════════════════════════════════════════
+│   │
+│   ├── vehicle/                        # Vehicle Management
+│   │   ├── services/
+│   │   │   ├── vehicle-list.service.ts
+│   │   │   ├── vehicle-crud.service.ts
+│   │   │   └── vehicle-assignment.service.ts
+│   │   ├── repositories/
+│   │   │   └── vehicle.repository.ts
+│   │   └── types/
+│   │       └── vehicle.types.ts
+│   │
+│   ├── customer/                       # Customer Management
+│   │   ├── services/
+│   │   │   ├── customer-list.service.ts
+│   │   │   └── customer-crud.service.ts
+│   │   ├── repositories/
+│   │   │   └── customer.repository.ts
+│   │   └── types/
+│   │       └── customer.types.ts
+│   │
+│   ├── trip/                           # Trip Tracking
+│   │   ├── services/
+│   │   │   ├── trip-list.service.ts
+│   │   │   ├── trip-crud.service.ts
+│   │   │   ├── trip-tracking.service.ts
+│   │   │   └── trip-history.service.ts
+│   │   ├── repositories/
+│   │   │   └── trip.repository.ts
+│   │   └── types/
+│   │       └── trip.types.ts
+│   │
+│   ├── alert/                          # Alert Management
+│   │   ├── services/
+│   │   │   ├── alert-list.service.ts
+│   │   │   ├── alert-crud.service.ts
+│   │   │   ├── alert-trigger.service.ts
+│   │   │   └── alert-notification.service.ts
+│   │   ├── repositories/
+│   │   │   └── alert.repository.ts
+│   │   └── types/
+│   │       └── alert.types.ts
+│   │
+│   ├── geofence/                       # Geofence Management
+│   │   ├── services/
+│   │   │   ├── geofence-list.service.ts
+│   │   │   ├── geofence-crud.service.ts
+│   │   │   ├── geofence-check.service.ts
+│   │   │   └── geofence-assignment.service.ts
+│   │   ├── repositories/
+│   │   │   └── geofence.repository.ts
+│   │   └── types/
+│   │       └── geofence.types.ts
+│   │
+│   ├── maintenance/                    # Maintenance Scheduling
+│   │   ├── services/
+│   │   │   ├── maintenance-list.service.ts
+│   │   │   ├── maintenance-crud.service.ts
+│   │   │   └── maintenance-reminder.service.ts
+│   │   ├── repositories/
+│   │   │   └── maintenance.repository.ts
+│   │   └── types/
+│   │       └── maintenance.types.ts
 │   │
 │   ├── notification/
 │   │   └── services/
