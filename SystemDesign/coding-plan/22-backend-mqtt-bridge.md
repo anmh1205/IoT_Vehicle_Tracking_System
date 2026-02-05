@@ -1,6 +1,8 @@
 # MQTT Bridge Architecture
 
 > MQTT Bridge xử lý dữ liệu từ IoT devices qua EMQX broker
+>
+> ⚠️ **Kiến trúc:** MQTT Bridge là **standalone service** tại `mqtt-bridge/` (root level), KHÔNG nằm trong `backend/src/`
 
 ---
 
@@ -103,6 +105,8 @@ v1/{device_id}/ota          # OTA firmware instructions
 ---
 
 ## 4. Cấu Trúc Thư Mục
+
+> 📁 **Vị trí:** `iot-vehicle-tracking-system/mqtt-bridge/` (standalone service, tách biệt khỏi backend)
 
 ```
 mqtt-bridge/

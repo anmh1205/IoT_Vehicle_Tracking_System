@@ -159,16 +159,28 @@ CORS_ORIGIN=http://localhost:3002
 Detailed system design documentation is in `/SystemDesign/`:
 
 - `coding-plan/` - Implementation guides for AI agents
-  - `00-rewrite-plan.md` - Master plan for project rewrite
-  - `02-backend-architecture.md` - Backend structure (Express + DDD)
-  - `05-frontend-architecture.md` - Frontend structure (Feature-Sliced)
-  - `08-victoriametrics.md` - Time-series database
-  - `10-observability.md` - Prometheus, logging, Sentry
-  - `12-security.md` - Security implementation
+  - `00-README.md` - Master index with multi-agent orchestration
+  - `01-rewrite-plan.md` - Master plan for project rewrite
+  - `02-coding-standards.md` - Naming conventions from IVM26
+  - `03-execution-guide.md` - AI agent execution guide
+  - `10-database-postgresql.md` - PostgreSQL schema
+  - `11-database-victoriametrics.md` - Time-series database
+  - `12-docker-infrastructure.md` - Docker setup
+  - `20-backend-architecture.md` - Backend structure (Express + DDD)
+  - `21-backend-api-endpoints.md` - REST API design
+  - `22-backend-mqtt-bridge.md` - MQTT Bridge (standalone service)
+  - `23-backend-security.md` - Security implementation
+  - `30-frontend-architecture.md` - Frontend structure (Feature-Sliced)
+  - `31-frontend-features.md` - Feature specifications
+  - `32-frontend-implementation.md` - Detailed frontend guide
+  - `40-mobile-strategy.md` - Flutter WebView Hybrid
+  - `50-observability.md` - Prometheus, logging, Sentry
 - `iot-vehicle-tracking-report/` - System design docs (Vietnamese)
 - `iot-project-template/` - Generic IoT project template
 
 ## Reference Projects
 
-- IVM26: `E:\anmh1205\IVM26\` - Reference implementation patterns
+- IVM26: `E:\anmh1205\IVM26\` - Reference implementation patterns (optional, if available)
 - Backup: `iot-vehicle-tracking-system-backup/` - Old NestJS code (for reference only)
+
+> **Note:** Reference paths are optional. The project can be built without them using the documentation in SystemDesign/.

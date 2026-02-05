@@ -48,14 +48,14 @@
 
 | Component | Action | Tỷ lệ tái sử dụng | Ghi chú |
 |-----------|--------|-------------------|---------|
-| **Backend** | Viết lại 100% | Tham khảo logic từ code cũ | NestJS → Express |
-| **MQTT Bridge** | Viết mới 100% | Không có trong code cũ | Standalone service |
-| **Frontend** | Viết lại ~60% | UI components (40%) reuse | Xem chi tiết ở Section 3.1 |
-| **Infrastructure** | Viết lại 100% | Docker, migrations mới | VictoriaMetrics thay InfluxDB |
+| **Backend** | Viết lại 100% | 0% reuse (tham khảo logic) | NestJS → Express |
+| **MQTT Bridge** | Viết mới 100% | 0% reuse | Standalone service tại `mqtt-bridge/` |
+| **Frontend** | Viết lại ~80% | ~20% reuse (UI components) | Xem chi tiết ở Section 3.1 |
+| **Infrastructure** | Viết lại 100% | 0% reuse | VictoriaMetrics thay InfluxDB |
 
 > ⚠️ **Lưu ý quan trọng về Frontend:**
-> - UI Components (shadcn/ui): ✅ Copy 100% - Hoạt động tốt
-> - Pages/Features: ⚠️ Chỉ ~40% hoạt động - Nhiều tính năng là TODO/skeleton
+> - UI Components (shadcn/ui): ✅ Copy 100% - Hoạt động tốt (~20% tổng frontend)
+> - Pages/Features: ⚠️ Cần viết lại ~80% - Nhiều tính năng là TODO/skeleton
 > - Chi tiết bugs và fixes: Xem `32-frontend-implementation.md`
 
 ---
