@@ -36,102 +36,88 @@
 E:\anmh1205\IoT_Vehicle_Tracking_System\
 │
 ├── .github/                           # GitHub Actions
-│   └── workflows/
-│
 ├── CLAUDE.md                          # AI instructions
 ├── README.md                          # Project overview
 │
-│   # ═══════════════════════════════════════════════════════════════
-│   # APPLICATION SERVICES
-│   # ═══════════════════════════════════════════════════════════════
-│
-├── Tracking_Backend/                  # Express + TypeScript API
-│   ├── src/
-│   ├── tests/
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── Dockerfile
-│   ├── docker-compose.yml             # Dev environment
-│   └── docker-compose.uat.yml         # UAT environment
-│
-├── Tracking_Frontend/                 # Next.js Web App
-│   ├── src/
-│   ├── public/
-│   ├── e2e/
-│   ├── package.json
-│   ├── next.config.js
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── docker-compose.uat.yml
-│
-├── Tracking_MqttBridge/               # MQTT Bridge Service
-│   ├── src/
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── docker-compose.uat.yml
-│
-├── Tracking_Mobile/                   # Flutter (Phase 2)
-│   ├── lib/
-│   └── pubspec.yaml
-│
-│   # ═══════════════════════════════════════════════════════════════
-│   # INFRASTRUCTURE SERVICES (Mỗi service 1 folder riêng)
-│   # ═══════════════════════════════════════════════════════════════
-│
-├── Tracking_PostgreSQL/               # PostgreSQL Database
-│   ├── init/                          # SQL init scripts
-│   │   ├── 00-extensions.sql
-│   │   ├── 01-enums.sql
-│   │   ├── 02-core-tables.sql
-│   │   ├── 03-tracking-tables.sql
-│   │   └── 99-seed-data.sql
-│   ├── docker-compose.yml
-│   └── docker-compose.uat.yml
-│
-├── Tracking_EMQX/                     # MQTT Broker
-│   ├── etc/                           # EMQX config files
-│   │   ├── emqx.conf
-│   │   └── acl.conf
-│   ├── docker-compose.yml
-│   └── docker-compose.uat.yml
-│
-├── Tracking_VictoriaMetrics/          # Time-series Database
-│   ├── docker-compose.yml
-│   └── docker-compose.uat.yml
-│
-├── Tracking_VictoriaLogs/             # Logging Database
-│   ├── docker-compose.yml
-│   └── docker-compose.uat.yml
-│
-├── Tracking_Grafana/                  # Monitoring Dashboards
-│   ├── provisioning/
-│   │   ├── datasources/
-│   │   └── dashboards/
-│   ├── docker-compose.yml
-│   └── docker-compose.uat.yml
-│
-├── Tracking_NPM/                      # Nginx Proxy Manager
-│   ├── docker-compose.yml
-│   └── docker-compose.uat.yml
-│
-│   # ═══════════════════════════════════════════════════════════════
-│   # SHARED DATA (Persistent Runtime Data)
-│   # ═══════════════════════════════════════════════════════════════
-│
-├── Tracking_Data/                     # Persistent data (gitignored)
-│   ├── Tracking_PostgreSQL/           # PostgreSQL data directory
-│   │   └── data/
-│   ├── Tracking_EMQX/                 # EMQX persistent data
-│   ├── Tracking_VictoriaMetrics/      # Metrics storage
-│   ├── Tracking_VictoriaLogs/         # Logs storage
-│   ├── Tracking_Grafana/              # Grafana data
-│   └── Tracking_NPM/                  # NPM data
-│
-│   # ═══════════════════════════════════════════════════════════════
-│   # DOCUMENTATION & RESOURCES
-│   # ═══════════════════════════════════════════════════════════════
+├── IoT_Vehicle_Tracking_System/       # ✅ ROOT FOR ALL SERVICES
+│   │
+│   │   # ═══════════════════════════════════════════════════════════════
+│   │   # APPLICATION SERVICES
+│   │   # ═══════════════════════════════════════════════════════════════
+│   │
+│   ├── Tracking_Backend/                  # Express + TypeScript API
+│   │   ├── src/
+│   │   ├── tests/
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   ├── Dockerfile
+│   │   ├── docker-compose.yml             # Dev environment
+│   │   └── docker-compose.uat.yml         # UAT environment
+│   │
+│   ├── Tracking_Frontend/                 # Next.js Web App
+│   │   ├── src/
+│   │   ├── public/
+│   │   ├── e2e/
+│   │   ├── package.json
+│   │   ├── next.config.js
+│   │   ├── Dockerfile
+│   │   ├── docker-compose.yml
+│   │   └── docker-compose.uat.yml
+│   │
+│   ├── Tracking_MqttBridge/               # MQTT Bridge Service
+│   │   ├── src/
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   ├── Dockerfile
+│   │   ├── docker-compose.yml
+│   │   └── docker-compose.uat.yml
+│   │
+│   ├── Tracking_Mobile/                   # Flutter (Phase 2)
+│   │   ├── lib/
+│   │   └── pubspec.yaml
+│   │
+│   │   # ═══════════════════════════════════════════════════════════════
+│   │   # INFRASTRUCTURE SERVICES (Mỗi service 1 folder riêng)
+│   │   # ═══════════════════════════════════════════════════════════════
+│   │
+│   ├── Tracking_PostgreSQL/               # PostgreSQL Database
+│   │   ├── init/                          # SQL init scripts
+│   │   ├── docker-compose.yml
+│   │   └── docker-compose.uat.yml
+│   │
+│   ├── Tracking_EMQX/                     # MQTT Broker
+│   │   ├── etc/                           # EMQX config files
+│   │   ├── docker-compose.yml
+│   │   └── docker-compose.uat.yml
+│   │
+│   ├── Tracking_VictoriaMetrics/          # Time-series Database
+│   │   ├── docker-compose.yml
+│   │   └── docker-compose.uat.yml
+│   │
+│   ├── Tracking_VictoriaLogs/             # Logging Database
+│   │   ├── docker-compose.yml
+│   │   └── docker-compose.uat.yml
+│   │
+│   ├── Tracking_Grafana/                  # Monitoring Dashboards
+│   │   ├── provisioning/
+│   │   ├── docker-compose.yml
+│   │   └── docker-compose.uat.yml
+│   │
+│   ├── Tracking_NPM/                      # Nginx Proxy Manager
+│   │   ├── docker-compose.yml
+│   │   └── docker-compose.uat.yml
+│   │
+│   │   # ═══════════════════════════════════════════════════════════════
+│   │   # SHARED DATA (Persistent Runtime Data)
+│   │   # ═══════════════════════════════════════════════════════════════
+│   │
+│   └── Tracking_Data/                     # Persistent data (gitignored)
+│       ├── Tracking_PostgreSQL/           # PostgreSQL data directory
+│       ├── Tracking_EMQX/                 # EMQX persistent data
+│       ├── Tracking_VictoriaMetrics/      # Metrics storage
+│       ├── Tracking_VictoriaLogs/         # Logs storage
+│       ├── Tracking_Grafana/              # Grafana data
+│       └── Tracking_NPM/                  # NPM data
 │
 ├── SystemDesign/                      # System Design Docs
 │   ├── coding-plan/
@@ -584,20 +570,22 @@ IoT_Vehicle_Tracking_System/
 ### Cấu Trúc Mới (ĐÚNG theo IVM26)
 ```
 IoT_Vehicle_Tracking_System/
-├── Tracking_Backend/           # ✅ Prefix + docker-compose.yml
-├── Tracking_MqttBridge/        # ✅ Prefix + docker-compose.yml
-├── Tracking_Frontend/          # ✅ Prefix + docker-compose.yml
-├── Tracking_PostgreSQL/        # ✅ Infrastructure riêng
-│   ├── init/                   # ✅ SQL scripts ở đây
-│   └── docker-compose.yml
-├── Tracking_EMQX/              # ✅ Infrastructure riêng
-│   ├── etc/                    # ✅ Config ở đây
-│   └── docker-compose.yml
-├── Tracking_VictoriaMetrics/   # ✅ Infrastructure riêng
-├── Tracking_VictoriaLogs/      # ✅ Infrastructure riêng
-├── Tracking_Grafana/           # ✅ Infrastructure riêng
-├── Tracking_NPM/               # ✅ Infrastructure riêng
-└── Tracking_Data/              # ✅ Chỉ chứa runtime data (gitignored)
+│
+├── IoT_Vehicle_Tracking_System/    # ✅ Subfolder
+│   ├── Tracking_Backend/           # ✅ Prefix + docker-compose.yml
+│   ├── Tracking_MqttBridge/        # ✅ Prefix + docker-compose.yml
+│   ├── Tracking_Frontend/          # ✅ Prefix + docker-compose.yml
+│   ├── Tracking_PostgreSQL/        # ✅ Infrastructure riêng
+│   │   ├── init/                   # ✅ SQL scripts ở đây
+│   │   └── docker-compose.yml
+│   ├── Tracking_EMQX/              # ✅ Infrastructure riêng
+│   │   ├── etc/                    # ✅ Config ở đây
+│   │   └── docker-compose.yml
+│   ├── Tracking_VictoriaMetrics/   # ✅ Infrastructure riêng
+│   ├── Tracking_VictoriaLogs/      # ✅ Infrastructure riêng
+│   ├── Tracking_Grafana/           # ✅ Infrastructure riêng
+│   ├── Tracking_NPM/               # ✅ Infrastructure riêng
+│   └── Tracking_Data/              # ✅ Chỉ chứa runtime data (gitignored)
 ```
 
 ---
@@ -609,27 +597,29 @@ IoT_Vehicle_Tracking_System/
 │            PROJECT STRUCTURE (IVM26 Pattern)                 │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│  📦 APPLICATION SERVICES                                    │
-│  ├── Tracking_Backend/        # Express API                 │
-│  ├── Tracking_MqttBridge/     # MQTT processing            │
-│  ├── Tracking_Frontend/       # Next.js web app            │
-│  └── Tracking_Mobile/         # Flutter (Phase 2)          │
-│                                                              │
-│  🗄️ INFRASTRUCTURE SERVICES                                 │
-│  ├── Tracking_PostgreSQL/     # + init/ SQL scripts        │
-│  ├── Tracking_EMQX/           # + etc/ config files        │
-│  ├── Tracking_VictoriaMetrics/                              │
-│  ├── Tracking_VictoriaLogs/                                 │
-│  ├── Tracking_Grafana/        # + provisioning/            │
-│  └── Tracking_NPM/            # Nginx Proxy Manager        │
-│                                                              │
-│  💾 PERSISTENT DATA (gitignored)                            │
-│  └── Tracking_Data/           # Runtime data volumes       │
-│                                                              │
+│  📁 IoT_Vehicle_Tracking_System (Subfolder)                 │
+│  │                                                           │
+│  │  📦 APPLICATION SERVICES                                 │
+│  │  ├── Tracking_Backend/        # Express API              │
+│  │  ├── Tracking_MqttBridge/     # MQTT processing          │
+│  │  ├── Tracking_Frontend/       # Next.js web app          │
+│  │  └── Tracking_Mobile/         # Flutter (Phase 2)        │
+│  │                                                           │
+│  │  🗄️ INFRASTRUCTURE SERVICES                              │
+│  │  ├── Tracking_PostgreSQL/     # + init/ SQL scripts      │
+│  │  ├── Tracking_EMQX/           # + etc/ config files      │
+│  │  ├── Tracking_VictoriaMetrics/                           │
+│  │  ├── Tracking_VictoriaLogs/                              │
+│  │  ├── Tracking_Grafana/        # + provisioning/          │
+│  │  └── Tracking_NPM/            # Nginx Proxy Manager      │
+│  │                                                           │
+│  │  💾 PERSISTENT DATA (gitignored)                         │
+│  │  └── Tracking_Data/           # Runtime data volumes     │
+│  │                                                           │
 │  📄 ROOT FILES                                               │
-│  ├── CLAUDE.md                # AI instructions            │
-│  ├── README.md                # Project overview           │
-│  └── .gitignore               # Include Tracking_Data/     │
+│  ├── CLAUDE.md                # AI instructions             │
+│  ├── README.md                # Project overview            │
+│  └── .gitignore               # Include Tracking_Data/      │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```

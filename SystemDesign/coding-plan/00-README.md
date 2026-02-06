@@ -87,7 +87,41 @@ coding-plan/
 
 ---
 
+## 🏗️ Root Orchestration
+
+> **Strategy:** The project uses a **Flat Monorepo** structure inside the `IoT_Vehicle_Tracking_System` subfolder.
+> All services sit at the `IoT_Vehicle_Tracking_System/Tracking_*` level.
+
+### Root Scripts
+The root `package.json` (inside `IoT_Vehicle_Tracking_System/`) allows running all services from one terminal:
+
+```json
+{
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:mqtt\"",
+    "dev:backend": "cd Tracking_Backend && npm run dev",
+    "dev:frontend": "cd Tracking_Frontend && npm run dev",
+    "dev:mqtt": "cd Tracking_MqttBridge && npm run dev",
+    "install:all": "npm install && cd Tracking_Backend && npm install && cd ../Tracking_Frontend && npm install && cd ../Tracking_MqttBridge && npm install",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  }
+}
+```
+
+---
+
 ## 📋 Implementation Phases
+
+### Phase 0: Root Setup (New) ⭐⭐⭐
+
+**Tasks:**
+1. Create root folder `IoT_Vehicle_Tracking_System`.
+2. Create root `package.json` with orchestration scripts inside that folder.
+3. Create `.tracking/CONFIG.json` for agent configuration.
+4. Verify folder structure matches `IoT_Vehicle_Tracking_System/Tracking_*` convention.
+
+---
 
 ### Phase 1: Database & Infrastructure ⭐⭐⭐⭐⭐
 
@@ -113,16 +147,15 @@ coding-plan/
 READ: ../iot-project-template/system-design/04-database-design.md
 READ: ./config/domains.example.ts
 
-# Create project structure (IVM26 pattern)
-mkdir -p Tracking_Backend/src/{domain,infrastructure,middleware,shared}
-mkdir -p Tracking_Frontend/src/{app,features,components,hooks,lib}
-mkdir -p Tracking_MqttBridge/src/{handlers,batch,cache}
-mkdir -p Tracking_PostgreSQL/init
-mkdir -p Tracking_EMQX/etc
-mkdir -p Tracking_VictoriaMetrics
-mkdir -p Tracking_VictoriaLogs
-mkdir -p Tracking_Grafana/provisioning/{datasources,dashboards}
-mkdir -p Tracking_Data/{Tracking_PostgreSQL/data,Tracking_EMQX,Tracking_VictoriaMetrics,Tracking_VictoriaLogs}
+# Create project structure (IVM26 pattern) inside subfolder
+mkdir -p IoT_Vehicle_Tracking_System/Tracking_Backend/src/{domain,infrastructure,middleware,shared}
+mkdir -p IoT_Vehicle_Tracking_System/Tracking_Frontend/src/{app,features,components,hooks,lib}
+mkdir -p IoT_Vehicle_Tracking_System/Tracking_MqttBridge/src/{handlers,batch,cache}
+mkdir -p IoT_Vehicle_Tracking_System/Tracking_PostgreSQL/init
+mkdir -p IoT_Vehicle_Tracking_System/Tracking_EMQX/etc
+mkdir -p IoT_Vehicle_Tracking_System/Tracking_VictoriaMetrics/data
+mkdir -p IoT_Vehicle_Tracking_System/Tracking_VictoriaLogs/data
+mkdir -p IoT_Vehicle_Tracking_System/Tracking_Grafana/provisioning/{datasources,dashboards}
 
 # Reference IVM26 for exact patterns
 REFERENCE: E:\anmh1205\IVM26\IVM26_Backend\src\
@@ -199,9 +232,9 @@ READ: ../iot-project-template/system-design/06-realtime-design.md
 READ: ./config/sensors.example.ts
 
 # Implement MQTT Bridge
-IMPLEMENT: Tracking_MqttBridge/src/index.ts (entry point)
-IMPLEMENT: Tracking_MqttBridge/src/handlers/rawdata.handler.ts
-IMPLEMENT: Tracking_MqttBridge/src/batch/database-batch.service.ts
+IMPLEMENT: IoT_Vehicle_Tracking_System/Tracking_MqttBridge/src/index.ts (entry point)
+IMPLEMENT: IoT_Vehicle_Tracking_System/Tracking_MqttBridge/src/handlers/rawdata.handler.ts
+IMPLEMENT: IoT_Vehicle_Tracking_System/Tracking_MqttBridge/src/batch/database-batch.service.ts
 
 # Reference IVM26
 REFERENCE: E:\anmh1205\IVM26\IVM26_Backend\src\mqtt-bridge\
@@ -1837,20 +1870,29 @@ git push origin <current-branch>
 ### Development Commands (IVM26 Pattern)
 
 ```bash
+# Switch to project directory
+cd IoT_Vehicle_Tracking_System
+
 # Create docker network first
 docker network create tracking-network
 
 # Start infrastructure (from each folder)
 cd Tracking_PostgreSQL && docker-compose up -d
+cd ..
 cd Tracking_EMQX && docker-compose up -d
+cd ..
 cd Tracking_VictoriaMetrics && docker-compose up -d
+cd ..
 cd Tracking_VictoriaLogs && docker-compose up -d
+cd ..
 
 # Backend
 cd Tracking_Backend && npm run dev          # Start dev server
+cd ..
 
 # MQTT Bridge
 cd Tracking_MqttBridge && npm run dev       # Run MQTT bridge
+cd ..
 
 # Frontend
 cd Tracking_Frontend && npm run dev         # Next.js dev (port 3002)

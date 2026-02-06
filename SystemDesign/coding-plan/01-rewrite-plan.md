@@ -9,17 +9,15 @@
 ```
 📁 E:\anmh1205\IoT_Vehicle_Tracking_System\
 │
-├── 📁 iot-vehicle-tracking-system-backup/    ← CODE CŨ (tham khảo)
-│   ├── backend/                               ← NestJS backend cũ
-│   │   └── src/modules/                       ← Entities, Services, DTOs
-│   └── frontend/                              ← Next.js frontend cũ
-│       └── src/components/                    ← UI components (copy sang)
-│
-├── 📁 iot-vehicle-tracking-system/           ← PROJECT MỚI (viết vào đây)
-│   ├── backend/                               ← Express + TypeScript
-│   ├── mqtt-bridge/                           ← Standalone MQTT Bridge
-│   ├── frontend/                              ← Next.js (update)
-│   └── docker/                                ← Infrastructure
+├── 📁 IoT_Vehicle_Tracking_System/           ← SUBFOLDER (ROOT FOR SERVICES)
+│   ├── 📁 Tracking_Backend/                  ← Express + TypeScript
+│   ├── 📁 Tracking_Frontend/                 ← Next.js (update)
+│   ├── 📁 Tracking_MqttBridge/               ← Standalone MQTT Bridge
+│   ├── 📁 Tracking_PostgreSQL/               ← PostgreSQL Infrastructure
+│   ├── 📁 Tracking_EMQX/                     ← MQTT Broker Infrastructure
+│   ├── 📁 Tracking_VictoriaMetrics/          ← Time-series DB
+│   ├── 📁 Tracking_VictoriaLogs/             ← Logging
+│   └── 📁 Tracking_Grafana/                  ← Visualization
 │
 ├── 📁 SystemDesign/                          ← Documentation
 │   ├── coding-plan/                           ← Hướng dẫn implement
@@ -122,15 +120,15 @@ cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\f
 
 | Entity cũ | File nguồn | Chuyển thành |
 |-----------|------------|--------------|
-| User | `auth/entities/user.entity.ts` | `docker/postgres/init/01-users.sql` |
-| Vehicle | `vehicles/entities/vehicle.entity.ts` | `docker/postgres/init/02-vehicles.sql` |
-| Device | `devices/entities/device.entity.ts` | `docker/postgres/init/03-devices.sql` |
-| Customer | `customers/entities/customer.entity.ts` | `docker/postgres/init/04-customers.sql` |
-| Trip | `trips/entities/trip.entity.ts` | `docker/postgres/init/05-trips.sql` |
-| Alert | `alerts/entities/alert.entity.ts` | `docker/postgres/init/06-alerts.sql` |
-| Violation | `violations/entities/violation.entity.ts` | `docker/postgres/init/07-violations.sql` |
-| Geofence | `geofences/entities/geofence.entity.ts` | `docker/postgres/init/08-geofences.sql` |
-| Maintenance | `maintenance/entities/maintenance.entity.ts` | `docker/postgres/init/09-maintenance.sql` |
+| User | `auth/entities/user.entity.ts` | `Tracking_PostgreSQL/init/01-users.sql` |
+| Vehicle | `vehicles/entities/vehicle.entity.ts` | `Tracking_PostgreSQL/init/02-vehicles.sql` |
+| Device | `devices/entities/device.entity.ts` | `Tracking_PostgreSQL/init/03-devices.sql` |
+| Customer | `customers/entities/customer.entity.ts` | `Tracking_PostgreSQL/init/04-customers.sql` |
+| Trip | `trips/entities/trip.entity.ts` | `Tracking_PostgreSQL/init/05-trips.sql` |
+| Alert | `alerts/entities/alert.entity.ts` | `Tracking_PostgreSQL/init/06-alerts.sql` |
+| Violation | `violations/entities/violation.entity.ts` | `Tracking_PostgreSQL/init/07-violations.sql` |
+| Geofence | `geofences/entities/geofence.entity.ts` | `Tracking_PostgreSQL/init/08-geofences.sql` |
+| Maintenance | `maintenance/entities/maintenance.entity.ts` | `Tracking_PostgreSQL/init/09-maintenance.sql` |
 
 ### 3.5 Business Logic (THAM KHẢO PATTERNS)
 
@@ -166,11 +164,13 @@ cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\f
 ### 4.1 Folder Structure
 
 ```
-E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\
+E:\anmh1205\IoT_Vehicle_Tracking_System\
 │
-├── backend/                              # Express + TypeScript
-│   ├── src/
-│   │   ├── index.ts                      # Entry point
+├── IoT_Vehicle_Tracking_System\              # Root Subfolder
+│   │
+│   ├── Tracking_Backend/                     # Express + TypeScript
+│   │   ├── src/
+│   │   │   ├── index.ts                      # Entry point
 │   │   │
 │   │   ├── api/                          # API Layer
 │   │   │   ├── controllers/
@@ -473,21 +473,28 @@ E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\
 #### 1.1 Tạo cấu trúc thư mục
 
 ```bash
-# Tạo thư mục gốc
+# Vào thư mục gốc
 cd "E:\anmh1205\IoT_Vehicle_Tracking_System"
-mkdir -p iot-vehicle-tracking-system/{backend,mqtt-bridge,frontend,docker}
+
+# Tạo subfolder chính
+mkdir -p IoT_Vehicle_Tracking_System
+cd IoT_Vehicle_Tracking_System
 
 # Tạo cấu trúc backend
-mkdir -p iot-vehicle-tracking-system/backend/src/{api/{controllers,routes,validators,openapi},domain/{auth,vehicle,device,customer,trip,alert,violation,geofence,maintenance,dashboard,notification}/{services,repositories,types},infrastructure/{database,victoriametrics,victorialogs,metrics,logger},middleware,realtime,config,shared/{constants,utils,types}}
+mkdir -p Tracking_Backend/src/{api/{controllers,routes,validators,openapi},domain/{auth,vehicle,device,customer,trip,alert,violation,geofence,maintenance,dashboard,notification}/{services,repositories,types},infrastructure/{database,victoriametrics,victorialogs,metrics,logger},middleware,realtime,config,shared/{constants,utils,types}}
 
 # Tạo cấu trúc mqtt-bridge
-mkdir -p iot-vehicle-tracking-system/mqtt-bridge/src/{handlers,batch,cache,infrastructure,validators}
+mkdir -p Tracking_MqttBridge/src/{handlers,batch,cache,infrastructure,validators}
 
 # Tạo cấu trúc frontend
-mkdir -p iot-vehicle-tracking-system/frontend/src/{app/{login,dashboard/{map,vehicles,devices,customers,trips,alerts,violations,geofences,maintenance,settings}},components/{ui,layout,map},hooks,lib/{api,store,utils},types}
+mkdir -p Tracking_Frontend/src/{app/{login,dashboard/{map,vehicles,devices,customers,trips,alerts,violations,geofences,maintenance,settings}},components/{ui,layout,map},hooks,lib/{api,store,utils},types}
 
-# Tạo cấu trúc docker
-mkdir -p iot-vehicle-tracking-system/docker/{postgres/init,prometheus,grafana/provisioning/{datasources,dashboards},nginx}
+# Tạo cấu trúc docker infra
+mkdir -p Tracking_PostgreSQL/init
+mkdir -p Tracking_EMQX/etc
+mkdir -p Tracking_VictoriaMetrics/data
+mkdir -p Tracking_VictoriaLogs/data
+mkdir -p Tracking_Grafana/provisioning/{datasources,dashboards}
 ```
 
 #### 1.2 Copy Frontend UI Components từ backup
@@ -495,19 +502,19 @@ mkdir -p iot-vehicle-tracking-system/docker/{postgres/init,prometheus,grafana/pr
 ```bash
 # Copy UI components (giữ nguyên)
 cp -r "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\frontend\src\components\ui\*" \
-      "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\frontend\src\components\ui\"
+      "E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Frontend\src\components\ui\"
 
 # Copy map components
 cp -r "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\frontend\src\components\map\*" \
-      "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\frontend\src\components\map\"
+      "E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Frontend\src\components\map\"
 
 # Copy icons
 cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\frontend\src\components\icons.tsx" \
-   "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\frontend\src\components\"
+   "E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Frontend\src\components\"
 
 # Copy providers (sẽ update sau)
 cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\frontend\src\components\providers.tsx" \
-   "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\frontend\src\components\"
+   "E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Frontend\src\components\"
 ```
 
 #### 1.3 Chuyển đổi Entities sang SQL Migrations
@@ -527,49 +534,21 @@ export class Vehicle {
 
     @Column({ name: 'vehicle_id', unique: true, length: 50 })
     vehicleId: string;
-
-    @Column({ name: 'plate_number', unique: true, length: 20, nullable: true })
-    plateNumber: string;
-
-    @Column({ type: 'enum', enum: VehicleStatus, default: VehicleStatus.ACTIVE })
-    status: VehicleStatus;
     // ...
 }
 ```
 
 ```sql
--- ĐÍCH: docker/postgres/init/02-vehicles.sql
+-- ĐÍCH: Tracking_PostgreSQL/init/02-vehicles.sql
 
 CREATE TYPE vehicle_status AS ENUM ('active', 'inactive', 'maintenance', 'retired');
-CREATE TYPE vehicle_type AS ENUM ('sedan', 'suv', 'hatchback', 'coupe', 'pickup', 'van', 'truck');
-CREATE TYPE fuel_type AS ENUM ('gasoline', 'diesel', 'hybrid', 'electric');
-CREATE TYPE transmission_type AS ENUM ('manual', 'automatic');
+-- ... (như cũ)
 
 CREATE TABLE vehicles (
     id SERIAL PRIMARY KEY,
     vehicle_id VARCHAR(50) UNIQUE NOT NULL,
-    plate_number VARCHAR(20) UNIQUE,
-    owner_id INTEGER REFERENCES users(id),
-    vehicle_type vehicle_type,
-    brand VARCHAR(50),
-    model VARCHAR(50),
-    year INTEGER,
-    color VARCHAR(30),
-    vin VARCHAR(50),
-    seats INTEGER DEFAULT 5,
-    transmission transmission_type,
-    fuel_type fuel_type,
-    mileage_km INTEGER DEFAULT 0,
-    registration_number VARCHAR(50),
-    insurance_expiry DATE,
-    status vehicle_status DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    -- ...
 );
-
-CREATE INDEX idx_vehicles_vehicle_id ON vehicles(vehicle_id);
-CREATE INDEX idx_vehicles_plate_number ON vehicles(plate_number);
-CREATE INDEX idx_vehicles_status ON vehicles(status);
 ```
 
 #### 1.4 Package.json Files
@@ -640,7 +619,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-vehicle_tracking}
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+      - ./Tracking_PostgreSQL/init:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:
@@ -693,7 +672,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./Tracking_Backend
       dockerfile: Dockerfile
     container_name: tracking-backend
     environment:
@@ -718,7 +697,7 @@ services:
 
   mqtt-bridge:
     build:
-      context: ./mqtt-bridge
+      context: ./Tracking_MqttBridge
       dockerfile: Dockerfile
     container_name: tracking-mqtt-bridge
     environment:
@@ -739,7 +718,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./Tracking_Frontend
       dockerfile: Dockerfile
     container_name: tracking-frontend
     environment:
@@ -762,7 +741,7 @@ services:
       - "3001:3000"
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+      - ./Tracking_Grafana/provisioning:/etc/grafana/provisioning
     networks:
       - tracking-network
 
@@ -845,7 +824,7 @@ export class VehiclesService {
 ```
 
 ```typescript
-// MỚI: backend/src/domain/vehicle/services/vehicle.service.ts
+// MỚI: Tracking_Backend/src/domain/vehicle/services/vehicle.service.ts
 import { VehicleRepository } from '../repositories/vehicle.repository';
 import { CreateVehicleInput } from '../types/vehicle.types';
 import { ConflictError } from '../../../shared/errors';
@@ -870,7 +849,7 @@ export class VehicleService {
 ```
 
 ```typescript
-// MỚI: backend/src/domain/vehicle/repositories/vehicle.repository.ts
+// MỚI: Tracking_Backend/src/domain/vehicle/repositories/vehicle.repository.ts
 import { pool } from '../../../infrastructure/database/pool';
 import { CreateVehicleInput, Vehicle } from '../types/vehicle.types';
 
@@ -966,22 +945,22 @@ export function buildTelemetryMetrics(deviceId: string, data: TelemetryData): st
 ```bash
 # UI Components (copy nguyên)
 cp -r iot-vehicle-tracking-system-backup/frontend/src/components/ui/* \
-      iot-vehicle-tracking-system/frontend/src/components/ui/
+      IoT_Vehicle_Tracking_System/Tracking_Frontend/src/components/ui/
 
 # Map components (copy, update types sau)
 cp -r iot-vehicle-tracking-system-backup/frontend/src/components/map/* \
-      iot-vehicle-tracking-system/frontend/src/components/map/
+      IoT_Vehicle_Tracking_System/Tracking_Frontend/src/components/map/
 
 # Icons
 cp iot-vehicle-tracking-system-backup/frontend/src/components/icons.tsx \
-   iot-vehicle-tracking-system/frontend/src/components/
+   IoT_Vehicle_Tracking_System/Tracking_Frontend/src/components/
 
 # Page layouts (copy structure, update imports)
 cp iot-vehicle-tracking-system-backup/frontend/src/app/layout.tsx \
-   iot-vehicle-tracking-system/frontend/src/app/
+   IoT_Vehicle_Tracking_System/Tracking_Frontend/src/app/
 
 cp iot-vehicle-tracking-system-backup/frontend/src/app/dashboard/layout.tsx \
-   iot-vehicle-tracking-system/frontend/src/app/dashboard/
+   IoT_Vehicle_Tracking_System/Tracking_Frontend/src/app/dashboard/
 ```
 
 #### 4.2 Files cần VIẾT LẠI
@@ -1026,13 +1005,13 @@ rm iot-vehicle-tracking-system-backup/frontend/src/components/layout/simple-side
 ## 6. Checklist Tổng Hợp
 
 ### Phase 1: Setup ✅
-- [ ] Tạo cấu trúc thư mục mới
+- [ ] Tạo cấu trúc thư mục mới (FLAT structure)
 - [ ] Copy UI components từ backup
 - [ ] Copy icons từ backup
 - [ ] Chuyển đổi entities → SQL migrations
 - [ ] Tạo docker-compose.yml
-- [ ] Tạo package.json cho backend, mqtt-bridge, frontend
-- [ ] Test `docker-compose up postgres victoriametrics emqx`
+- [ ] Tạo package.json cho Tracking_Backend, Tracking_MqttBridge, Tracking_Frontend
+- [ ] Test `docker-compose up` các service hạ tầng
 
 ### Phase 2: Backend Core
 - [ ] Implement infrastructure/database (pool, queries)
@@ -1086,7 +1065,10 @@ rm iot-vehicle-tracking-system-backup/frontend/src/components/layout/simple-side
 | Mục đích | Đường dẫn |
 |----------|-----------|
 | Code cũ (tham khảo) | `E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\` |
-| Project mới | `E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\` |
+| Project Root | `E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\` |
+| Project Backend | `E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Backend\` |
+| Project Frontend | `E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Frontend\` |
+| Project MQTT Bridge | `E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_MqttBridge\` |
 | IVM26 Reference | `E:\anmh1205\IVM26\` |
 | System Design | `E:\anmh1205\IoT_Vehicle_Tracking_System\SystemDesign\` |
 | Coding Plan | `SystemDesign\coding-plan\` |
