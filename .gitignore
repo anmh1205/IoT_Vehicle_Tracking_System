@@ -8,3 +8,8 @@
 # **/.env
 # **/.env.local
 # **/.env.*.local
+/iot-vehicle-tracking-system/backend/dist
+/iot-vehicle-tracking-system/backend/node_modules
+/iot-vehicle-tracking-system/frontend/.next/build
+/iot-vehicle-tracking-system/frontend/.next
+/iot-vehicle-tracking-system/frontend/node_modules
