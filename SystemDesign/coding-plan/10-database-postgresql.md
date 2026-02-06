@@ -43,6 +43,8 @@ CREATE TABLE users (
     device_access_mode VARCHAR(20) DEFAULT 'all',  -- all, limited
     status VARCHAR(20) DEFAULT 'active',
     email VARCHAR(100),
+    avatar_url TEXT,
+    preferences JSONB DEFAULT '{}',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -342,6 +344,8 @@ CREATE TABLE vehicles (
     registration_number VARCHAR(50),
     insurance_expiry DATE,
     status vehicle_status DEFAULT 'active',
+    icon_type VARCHAR(20) DEFAULT 'default',
+    color_hex VARCHAR(7) DEFAULT '#000000',
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -437,6 +441,8 @@ CREATE TABLE geofences (
     is_active BOOLEAN DEFAULT true,
     notify_email BOOLEAN DEFAULT false,
     notify_push BOOLEAN DEFAULT true,
+    color VARCHAR(7) DEFAULT '#3388ff',
+    display_hidden BOOLEAN DEFAULT false,
     created_by INT REFERENCES users(id),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -530,6 +536,29 @@ CREATE TABLE maintenance (
 CREATE INDEX idx_maintenance_vehicle_id ON maintenance(vehicle_id);
 CREATE INDEX idx_maintenance_status ON maintenance(status);
 CREATE INDEX idx_maintenance_scheduled ON maintenance(scheduled_date);
+```
+
+### 8.7 System Configuration
+
+```sql
+CREATE TABLE system_settings (
+    key VARCHAR(100) PRIMARY KEY,
+    value JSONB NOT NULL,
+    description TEXT,
+    group_name VARCHAR(50) NOT NULL, -- 'system', 'email', 'sms', 'feature_flags'
+    is_public BOOLEAN DEFAULT false, -- if true, exposed to frontend without auth
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE notification_preferences (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    event_type VARCHAR(50) NOT NULL, -- 'alert', 'report', 'system'
+    channels JSONB NOT NULL DEFAULT '["email"]', -- ['email', 'sms', 'push']
+    enabled BOOLEAN DEFAULT true,
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, event_type)
+);
 ```
 
 ---

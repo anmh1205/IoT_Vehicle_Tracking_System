@@ -406,7 +406,29 @@ export function useDeviceRealtime(deviceId: string) {
 
 ---
 
-## 6. Dependencies
+## 6. Map Strategy (Leaflet & Performance)
+
+### 6.1 Core Technology
+-   **Library:** `react-leaflet` v5 (Leaflet 1.9 core).
+-   **Tiles:** OpenStreetMap (Dev) / Google Maps or Mapbox (Prod - abstraction layer required).
+
+### 6.2 Performance Optimization (Cluster & Throttling)
+-   **Clustering:** Use `react-leaflet-cluster` to group markers when zoom level < 14.
+    -   *Logic:* If > 500 markers, clustering is mandatory to maintain 60FPS.
+    -   *Custom Icon:* Cluster icon shows count + color status (Red if any critical inside).
+-   **Canvas Rendering:** For high-density non-clustered views (e.g., history trails with 10k points), use `L.canvas()` renderer instead of SVG.
+-   **Throttling Updates:**
+    -   Incoming Socket data (10 events/sec) is buffered.
+    -   `useMapRealtime` hook updates the internal React state at max 2Hz (every 500ms) to prevent UI thread blocking.
+
+### 6.3 Interaction Patterns
+-   **FlyTo Animation:** Smooth transition when selecting a vehicle from the sidebar.
+-   **Boundaries:** `map.fitBounds(featureGroup)` used on initial load to show all vehicles.
+-   **Popup Management:** Only one popup open at a time. Clicking map background closes all.
+
+---
+
+## 7. Dependencies
 
 ```json
 {
@@ -450,7 +472,7 @@ export function useDeviceRealtime(deviceId: string) {
 
 ---
 
-## 7. Scripts
+## 8. Scripts
 
 ```json
 {

@@ -1,716 +1,298 @@
-# Frontend Features
+# Frontend Features Specification
 
-> Chi tiết các feature modules trong frontend
+> Detailed feature specifications for the IoT Fleet Management System, aligned with the PostgreSQL schema defined in `10-database-postgresql.md`.
+> This document guides the Feature-Sliced Design implementation in the `/features/` directory.
 
 ---
 
 ## 1. Feature Modules Overview
 
-| Feature | Priority | Components | Hooks | Status |
-|---------|----------|------------|-------|--------|
-| **auth** | ⭐⭐⭐⭐⭐ | 2 | 2 | Core |
-| **devices** | ⭐⭐⭐⭐⭐ | 8 | 5 | Core |
-| **overview** | ⭐⭐⭐⭐⭐ | 4 | 2 | Core |
-| **map** | ⭐⭐⭐⭐ | 4 | 3 | Core |
-| **statistics** | ⭐⭐⭐⭐ | 4 | 2 | Core |
-| **firmware** | ⭐⭐⭐⭐ | 5 | 3 | Core |
-| **notifications** | ⭐⭐⭐ | 3 | 2 | Medium |
-| **users** | ⭐⭐⭐ | 4 | 3 | Medium |
-| **settings** | ⭐⭐⭐ | 3 | 1 | Medium |
-| **system-admin** | ⭐⭐ | 4 | 3 | Admin |
-| **simulator** | ⭐⭐ | 2 | 1 | Dev |
+| Feature | Priority | Complexity | Dependencies | Status |
+|---------|----------|------------|--------------|--------|
+| **auth** | P0 | Medium | Users Table | ✅ Core |
+| **dashboard** | P0 | High | All Tables | 🚧 In Progress |
+| **vehicles** | P0 | High | Devices, Customers | 📝 Planned |
+| **devices** | P0 | High | Firmware, Sessions | 📝 Planned |
+| **customers** | P1 | Medium | Users | 📝 Planned |
+| **trips** | P1 | High | Vehicles, Devices | 📝 Planned |
+| **maintenance** | P2 | Medium | Vehicles | 📝 Planned |
+| **geofences** | P2 | High | Vehicles | 📝 Planned |
+| **alerts** | P1 | Medium | All Tables | 📝 Planned |
 
 ---
 
-## 2. Auth Feature
+## 2. Vehicle Management (Fleet)
 
-### Components
+**Feature Name:** Vehicle Lifecycle Management
+**Namespace:** `features/vehicles`
 
-```
-features/auth/components/
-├── login-form.tsx          # Login form với validation
-└── logout-button.tsx       # Logout button với confirmation
-```
+**User Story:**
+As a Fleet Manager, I want to onboard new vehicles, assign tracking devices, and track insurance/registration expiry so that the fleet remains compliant and operational.
 
-### Login Form
+**UI Components Needed:**
+1.  **VehicleDataTable:**
+    -   Sortable columns: Plate #, VIN, Brand, Model, Year, Device ID, Status (Badge), Driver.
+    -   Actions: Edit, Delete, Unpair Device, View History.
+2.  **VehicleWizard (Create/Edit):**
+    -   Step 1: Basic Info (Brand, Model, Type, Fuel).
+    -   Step 2: Identifiers (VIN, Plate, Registration).
+    -   Step 3: Device Pairing (Select from available devices).
+    -   Step 4: Customer Assignment.
+3.  **AssignmentModal:** Searchable dropdown to link an available `device_id` from the `devices` table to the `vehicles` table.
+4.  **ExpiryWidget:** Dashboard widget showing vehicles with insurance expiring in < 30 days.
 
-```tsx
-// features/auth/components/login-form.tsx
-'use client';
+**Data Interactions:**
+-   **List:** `GET /vehicles` (Join `devices`, `customers` for display names).
+-   **Create:** `POST /vehicles` (Validate `plate_number` uniqueness).
+-   **Update:** `PUT /vehicles/:id` (Handle device swapping logic).
+-   **Available Devices:** `GET /devices?status=stopped&assigned=false` to populate dropdowns.
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useLogin } from '@/hooks/mutations/use-login';
-import { hashPassword } from '@/lib/utils/crypto';
-
-const loginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
-
-export function LoginForm() {
-  const router = useRouter();
-  const { mutate: login, isPending } = useLogin();
-
-  const form = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { username: '', password: '' },
-  });
-
-  const onSubmit = (data: LoginForm) => {
-    const hashedPassword = hashPassword(data.password);
-    login(
-      { username: data.username, password: hashedPassword },
-      {
-        onSuccess: () => router.push('/dashboard'),
-      }
-    );
-  };
-
-  return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <Input
-        placeholder="Username"
-        {...form.register('username')}
-        error={form.formState.errors.username?.message}
-      />
-      <Input
-        type="password"
-        placeholder="Password"
-        {...form.register('password')}
-        error={form.formState.errors.password?.message}
-      />
-      <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? 'Logging in...' : 'Login'}
-      </Button>
-    </form>
-  );
-}
-```
+**Advanced Logic:**
+-   **Device Swapping:** If a vehicle is assigned a new device, the system must prompt to unpair the old device or mark it as 'inactive'.
+-   **Status Derivation:** If an active record exists in the `maintenance` table, the vehicle status should automatically reflect 'Maintenance' in the UI.
 
 ---
 
-## 3. Devices Feature
+## 3. Device Management (IoT Hub)
 
-### Components
+**Feature Name:** Remote Device Configuration & Diagnostics
+**Namespace:** `features/devices`
 
-```
-features/devices/components/
-├── device-list.tsx                 # Main device list với DataTable
-├── device-filters.tsx              # Search, filter, sort controls
-├── device-card.tsx                 # Card view item
-├── device-create-modal.tsx         # Create device dialog
-├── device-edit-modal.tsx           # Edit device dialog
-├── device-list-skeleton.tsx        # Loading skeleton
-└── device-detail-modal/
-    ├── index.tsx                   # Modal container với tabs
-    ├── info-tab.tsx                # Device info tab
-    ├── sessions-tab.tsx            # Sessions history tab
-    ├── runtime-tab.tsx             # Runtime analytics tab
-    └── error-codes-tab/
-        ├── index.tsx               # Error codes list
-        └── error-item.tsx          # Single error item
-```
+**User Story:**
+As a Technician, I want to send remote commands to restart devices, update firmware, and view raw debug logs to resolve connectivity issues without physical access.
 
-### Hooks
+**UI Components Needed:**
+1.  **CommandConsole:** Terminal-like UI to send specific MQTT commands (`REBOOT`, `SET_INTERVAL`, `GET_CONFIG`).
+2.  **ConfigEditor:** JSON or Form-based editor for the `devices.config` JSONB column (e.g., `vibration_threshold`, `reporting_interval`).
+3.  **FirmwareManager:** List of available versions from `firmware` table with a "Flash to Device" action.
+4.  **DebugStream:** Real-time log viewer (WebSocket) subscribing to `device/+/logs`.
 
-```
-features/devices/hooks/
-├── use-device-list.ts              # Fetch device list
-├── use-device-detail.ts            # Fetch single device
-├── use-device-filters.ts           # Filter state management
-├── use-create-device.ts            # Create mutation
-└── use-update-device.ts            # Update mutation
-```
+**Data Interactions:**
+-   **Command:** `POST /devices/:id/command` (Backend proxies this to MQTT Broker).
+-   **Update Config:** `PATCH /devices/:id` (Updates DB and sends MQTT config update).
+-   **Firmware OTA:** `POST /firmware/update` (Creates `firmware_update_log` entry).
+-   **Audit:** Read `device_audit_logs` to show who changed configurations.
 
-### Device List
-
-```tsx
-// features/devices/components/device-list.tsx
-'use client';
-
-import { useState } from 'react';
-import { DataTable } from '@/components/common/data-table';
-import { DeviceFilters } from './device-filters';
-import { DeviceCreateModal } from './device-create-modal';
-import { DeviceDetailModal } from './device-detail-modal';
-import { useDeviceList } from '../hooks/use-device-list';
-import { useDeviceFilters } from '../hooks/use-device-filters';
-import { columns } from './columns';
-
-export function DeviceList() {
-  const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
-  const [showCreate, setShowCreate] = useState(false);
-
-  const { filters, setFilter, resetFilters } = useDeviceFilters();
-  const { data, isLoading, error } = useDeviceList(filters);
-
-  return (
-    <div className="space-y-4">
-      <DeviceFilters
-        {...filters}
-        onSearch={(v) => setFilter('search', v)}
-        onStatus={(v) => setFilter('status', v)}
-        onSort={(v) => setFilter('sortBy', v)}
-        onReset={resetFilters}
-        onAdd={() => setShowCreate(true)}
-      />
-
-      <DataTable
-        columns={columns}
-        data={data?.devices ?? []}
-        isLoading={isLoading}
-        onRowClick={(row) => setSelectedDevice(row.deviceId)}
-      />
-
-      <DeviceCreateModal
-        open={showCreate}
-        onClose={() => setShowCreate(false)}
-      />
-
-      <DeviceDetailModal
-        deviceId={selectedDevice}
-        open={!!selectedDevice}
-        onClose={() => setSelectedDevice(null)}
-      />
-    </div>
-  );
-}
-```
-
-### Device Filters Hook
-
-```tsx
-// features/devices/hooks/use-device-filters.ts
-import { useState, useCallback } from 'react';
-import { useDebounce } from '@/hooks/use-debounce';
-
-interface DeviceFilters {
-  search: string;
-  status: string;
-  sortBy: 'name' | 'status' | 'runtime' | 'lastSeen';
-  page: number;
-  limit: number;
-}
-
-export function useDeviceFilters() {
-  const [filters, setFilters] = useState<DeviceFilters>({
-    search: '',
-    status: '',
-    sortBy: 'name',
-    page: 1,
-    limit: 20,
-  });
-
-  const debouncedSearch = useDebounce(filters.search, 300);
-
-  const setFilter = useCallback(<K extends keyof DeviceFilters>(
-    key: K,
-    value: DeviceFilters[K]
-  ) => {
-    setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
-  }, []);
-
-  const resetFilters = useCallback(() => {
-    setFilters({
-      search: '',
-      status: '',
-      sortBy: 'name',
-      page: 1,
-      limit: 20,
-    });
-  }, []);
-
-  return {
-    filters: { ...filters, search: debouncedSearch },
-    rawSearch: filters.search,
-    setFilter,
-    resetFilters,
-  };
-}
-```
+**Advanced Logic:**
+-   **Optimistic UI:** When sending a command, show "Pending" status until the device acknowledges via the MQTT 'ack' topic.
+-   **Compatibility Check:** Prevent flashing firmware if `device.model` doesn't match `firmware.target_models`.
 
 ---
 
-## 4. Map Feature
+## 4. Customer Management (CRM)
 
-### Components
+**Feature Name:** B2B Customer Profiles
+**Namespace:** `features/customers`
 
-```
-features/map/components/
-├── device-map.tsx                  # Leaflet map container
-├── device-marker.tsx               # Device marker với status color
-├── device-popup.tsx                # Popup content
-└── map-controls.tsx                # Zoom, layer, filter controls
-```
+**User Story:**
+As an Admin, I want to group vehicles by Customer (Company) and manage contact details so I can generate billing reports and provide partitioned access.
 
-### Device Map
+**UI Components Needed:**
+1.  **CustomerProfile:** Header with Logo, Contact Info (`email`, `phone`, `tax_code`), and Map overview of their fleet.
+2.  **FleetTree:** Hierarchical view: Customer -> Groups/Departments -> Vehicles.
+3.  **UserAccessList:** Manage which `users` have access to this Customer's data (updates `user_device_access`).
 
-```tsx
-// features/map/components/device-map.tsx
-'use client';
+**Data Interactions:**
+-   **CRUD:** `customers` table.
+-   **Relations:** Link `vehicles.customer_id`.
+-   **Access Control:** Read/Write `user_device_access` table to grant permissions.
 
-import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
-import { DeviceMarker } from './device-marker';
-import { MapControls } from './map-controls';
-import { useDeviceLocations } from '../hooks/use-device-locations';
-import { useMapRealtime } from '../hooks/use-map-realtime';
-import { DEFAULT_CENTER, DEFAULT_ZOOM } from '../constants/map-config';
-import 'leaflet/dist/leaflet.css';
-
-export function DeviceMap() {
-  const { data: devices, isLoading } = useDeviceLocations();
-
-  // Subscribe to real-time location updates
-  useMapRealtime();
-
-  if (isLoading) {
-    return <div className="h-full animate-pulse bg-muted" />;
-  }
-
-  return (
-    <MapContainer
-      center={DEFAULT_CENTER}
-      zoom={DEFAULT_ZOOM}
-      className="h-full w-full"
-    >
-      <TileLayer
-        attribution='&copy; OpenStreetMap'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-
-      {devices?.map((device) => (
-        <DeviceMarker
-          key={device.deviceId}
-          device={device}
-        />
-      ))}
-
-      <MapControls />
-    </MapContainer>
-  );
-}
-```
-
-### Map Real-time Hook
-
-```tsx
-// features/map/hooks/use-map-realtime.ts
-import { useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { getSocket } from '@/lib/realtime/socket';
-
-export function useMapRealtime() {
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    const socket = getSocket();
-
-    socket.on('device.location.updated', (data) => {
-      queryClient.setQueryData(['devices', 'locations'], (old: any) => {
-        if (!old) return old;
-        return old.map((device: any) =>
-          device.deviceId === data.deviceId
-            ? { ...device, latitude: data.latitude, longitude: data.longitude }
-            : device
-        );
-      });
-    });
-
-    socket.on('device.status.changed', () => {
-      queryClient.invalidateQueries({ queryKey: ['devices', 'locations'] });
-    });
-
-    return () => {
-      socket.off('device.location.updated');
-      socket.off('device.status.changed');
-    };
-  }, [queryClient]);
-}
-```
+**Advanced Logic:**
+-   **Cascading Suspension:** Toggle switch to "Suspend Customer". Logic must ask: "Do you also want to disable all 50 associated vehicles?"
+-   **Storage:** `user_device_access` needs to be updated whenever a new vehicle is added to a Customer (if users have "All Customer Vehicles" permission).
 
 ---
 
-## 5. Overview Feature
+## 5. Trip Management & Replay
 
-### Components
+**Feature Name:** Historical Trip Analysis
+**Namespace:** `features/trips`
 
-```
-features/overview/components/
-├── stats-cards.tsx                 # Summary statistics
-├── device-status-chart.tsx         # Pie/donut chart
-├── activity-feed.tsx               # Recent activity list
-└── recent-alerts.tsx               # Alert notifications
-```
+**User Story:**
+As a Monitor, I want to replay a specific trip from last Tuesday to investigate a speeding complaint, seeing the exact path and speed at every point.
 
-### Stats Cards
+**UI Components Needed:**
+1.  **TripTimeline:** Horizontal or vertical list of `trips` for a selected day, showing Start Time, End Time, Distance, and Fuel Used.
+2.  **ReplayMap:** Dedicated map view with player controls (Play, Pause, 1x/2x/4x Speed, Scrubber).
+3.  **TelemetryChart:** Synchronized Line chart showing Speed/Fuel/RPM aligned with the map playback scrubber.
 
-```tsx
-// features/overview/components/stats-cards.tsx
-'use client';
+**Data Interactions:**
+-   **Trip List:** `GET /trips?vehicle_id=X&date=Y` (From PostgreSQL).
+-   **Path Data:** `GET /trips/:id/points` (Fetches high-frequency coordinate data from VictoriaMetrics).
+-   **Events:** Overlay `alerts` (harsh braking) on the map path.
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useDashboardStats } from '@/hooks/queries/use-dashboard-stats';
-import { IconDevices, IconRun, IconClock, IconAlertTriangle } from '@tabler/icons-react';
-import { formatDuration } from '@/lib/utils/format-date';
-
-export function StatsCards() {
-  const { data, isLoading } = useDashboardStats();
-
-  if (isLoading) {
-    return <StatsCardsSkeleton />;
-  }
-
-  const stats = [
-    {
-      title: 'Total Devices',
-      value: data?.devices.total ?? 0,
-      icon: IconDevices,
-      description: `${data?.devices.running ?? 0} running`,
-    },
-    {
-      title: 'Active Sessions',
-      value: data?.sessions.today ?? 0,
-      icon: IconRun,
-      description: 'Today',
-    },
-    {
-      title: 'Total Runtime',
-      value: formatDuration(data?.runtime.today ?? 0),
-      icon: IconClock,
-      description: 'Today',
-    },
-    {
-      title: 'Active Alerts',
-      value: data?.alerts.active ?? 0,
-      icon: IconAlertTriangle,
-      description: `${data?.alerts.resolved ?? 0} resolved`,
-    },
-  ];
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {stats.map((stat) => (
-        <Card key={stat.title}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-            <stat.icon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <p className="text-xs text-muted-foreground">{stat.description}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-```
+**Advanced Logic:**
+-   **Path Interpolation:** The frontend must interpolate intermediate points between GPS pings to create smooth marker movement during replay.
+-   **Segment Coloring:** Color the route line based on speed (Green < 50, Yellow < 80, Red > 100).
 
 ---
 
-## 6. Firmware Feature
+## 6. Maintenance Management
 
-### Components
+**Feature Name:** Preventive Maintenance Scheduler
+**Namespace:** `features/maintenance`
 
-```
-features/firmware/components/
-├── firmware-list.tsx               # Firmware versions list
-├── firmware-upload-modal.tsx       # Upload new firmware
-├── firmware-assign-modal.tsx       # Assign to devices
-├── firmware-device-list.tsx        # Devices per firmware
-└── firmware-card.tsx               # Firmware version card
-```
+**User Story:**
+As a Manager, I want to set up automatic maintenance schedules (e.g., Oil Change every 5000km) so the system notifies me when vehicles are due.
 
-### Firmware Upload
+**UI Components Needed:**
+1.  **MaintenanceCalendar:** Calendar view showing past services (green) and upcoming due dates (orange/red).
+2.  **ServiceRecordForm:** Form to log completed maintenance (`cost`, `service_provider`, `notes`).
+3.  **MileageForecaster:** Chart projecting when a vehicle will hit the next service mileage based on average daily usage.
 
-```tsx
-// features/firmware/components/firmware-upload-modal.tsx
-'use client';
+**Data Interactions:**
+-   **CRUD:** `maintenance` table.
+-   **Vehicle Update:** Completing a maintenance record should optionally update `vehicles.status` back to 'active'.
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useUploadFirmware } from '../hooks/use-upload-firmware';
-import { FileUpload } from '@/components/common/file-upload';
-
-const uploadSchema = z.object({
-  version: z.string().regex(/^\d+\.\d+\.\d+$/, 'Invalid version format (e.g., 1.0.0)'),
-  description: z.string().optional(),
-  file: z.instanceof(File).refine((f) => f.size <= 10 * 1024 * 1024, 'Max 10MB'),
-});
-
-type UploadForm = z.infer<typeof uploadSchema>;
-
-interface FirmwareUploadModalProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-export function FirmwareUploadModal({ open, onClose }: FirmwareUploadModalProps) {
-  const [file, setFile] = useState<File | null>(null);
-  const { mutate: upload, isPending } = useUploadFirmware();
-
-  const form = useForm<UploadForm>({
-    resolver: zodResolver(uploadSchema),
-  });
-
-  const onSubmit = (data: UploadForm) => {
-    const formData = new FormData();
-    formData.append('version', data.version);
-    formData.append('description', data.description ?? '');
-    formData.append('file', file!);
-
-    upload(formData, {
-      onSuccess: () => {
-        onClose();
-        form.reset();
-        setFile(null);
-      },
-    });
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Upload Firmware</DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <Input
-            placeholder="Version (e.g., 1.0.0)"
-            {...form.register('version')}
-            error={form.formState.errors.version?.message}
-          />
-
-          <Textarea
-            placeholder="Description (optional)"
-            {...form.register('description')}
-          />
-
-          <FileUpload
-            accept=".bin,.hex"
-            onChange={(f) => {
-              setFile(f);
-              form.setValue('file', f);
-            }}
-          />
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={isPending || !file}>
-              {isPending ? 'Uploading...' : 'Upload'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-```
+**Advanced Logic:**
+-   **Prediction Algo:** `Daily Avg Km = Total Km / Days Active`. `Days to Service = (Next Service Km - Current Km) / Daily Avg`.
+-   **Auto-Alert:** Frontend checks if `current_mileage > next_service_mileage` and highlights the row in Red.
 
 ---
 
-## 7. Notifications Feature
+## 7. Geofencing (Zones)
 
-### Components
+**Feature Name:** Geofence Visual Editor
+**Namespace:** `features/geofences`
 
-```
-features/notifications/components/
-├── notification-list.tsx           # Notification center
-├── notification-item.tsx           # Single notification
-└── notification-settings.tsx       # Notification preferences
-```
+**User Story:**
+As a Dispatcher, I want to draw a polygon around the "Main Warehouse" and get alerted whenever a truck enters or exits this zone.
 
-### Real-time Notifications Hook
+**UI Components Needed:**
+1.  **MapDrawTools:** Toolbar (Leaflet-Draw or similar) for drawing Circles, Polygons, and Rectangles on the map.
+2.  **ZoneManager:** Sidebar list of defined zones (`geofences` table) with toggle switches for "Active".
+3.  **VehicleBinder:** Multi-select interface to create records in `geofence_vehicles`.
 
-```tsx
-// hooks/realtime/use-notifications-realtime.ts
-import { useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { getSocket } from '@/lib/realtime/socket';
-import { useNotificationStore } from '@/lib/store/notification-store';
-import { toast } from 'sonner';
+**Data Interactions:**
+-   **Spatial Save:** Convert map shapes to GeoJSON for `geofences.coordinates` and calculated `radius_meters`.
+-   **Assignment:** Bulk insert/delete into `geofence_vehicles`.
 
-export function useNotificationsRealtime() {
-  const queryClient = useQueryClient();
-  const addNotification = useNotificationStore((s) => s.addNotification);
-
-  useEffect(() => {
-    const socket = getSocket();
-
-    socket.on('notification.received', (data) => {
-      // Add to store
-      addNotification(data);
-
-      // Show toast
-      toast(data.title, {
-        description: data.message,
-      });
-
-      // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-    });
-
-    return () => {
-      socket.off('notification.received');
-    };
-  }, [queryClient, addNotification]);
-}
-```
+**Advanced Logic:**
+-   **Validation:** Prevent self-intersecting polygons in the UI before submission.
+-   **Area Calculation:** Display the estimated area (sq meters/km) of the shape while drawing.
 
 ---
 
-## 8. System Admin Feature
+## 8. Alerts & Rules Engine
 
-### Components
+**Feature Name:** Configurable Alert System
+**Namespace:** `features/alerts`
 
-```
-features/system-admin/components/
-├── metrics-dashboard.tsx           # VictoriaMetrics queries
-├── logs-viewer.tsx                 # VictoriaLogs viewer
-├── system-health.tsx               # System health status
-└── database-table-manager.tsx      # Dynamic table CRUD
-```
+**User Story:**
+As an Admin, I want to configure rules (e.g., "Speed > 100km/h") and choose who receives the SMS/Email notification.
 
-### Metrics Dashboard
+**UI Components Needed:**
+1.  **AlertFeed:** Real-time list of triggered `alerts` with "Acknowledge" and "Resolve" actions.
+2.  **NotificationMatrix:** Grid view to toggle Alert Types vs. Channels (Push/Email/SMS) for the logged-in user or system-wide.
+3.  **IncidentReport:** Modal showing details of an alert: Map location, Speed, Threshold, and Driver at the time.
 
-```tsx
-// features/system-admin/components/metrics-dashboard.tsx
-'use client';
+**Data Interactions:**
+-   **Feed:** `GET /alerts` (polled or socket-pushed).
+-   **Action:** `PUT /alerts/:id/acknowledge` (Updates `acknowledged_by` and `acknowledged_at`).
+-   **Configuration:** Updates user preferences or system settings.
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useMetrics } from '../hooks/use-metrics';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-
-export function MetricsDashboard() {
-  const [query, setQuery] = useState('device_vibration{device_id="TRACKER_001"}[1h]');
-  const { data, isLoading, refetch } = useMetrics(query);
-
-  return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>PromQL Query</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Enter PromQL query..."
-            />
-            <Button onClick={() => refetch()}>Execute</Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Results</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="h-64 animate-pulse bg-muted" />
-          ) : data?.data?.result ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={formatMetricsData(data.data.result)}>
-                <XAxis dataKey="time" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="value" stroke="#8884d8" />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="text-muted-foreground">No data</p>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-```
+**Advanced Logic:**
+-   **Grouping:** The UI should group repeated alerts (e.g., 50 speeding alerts in 1 minute) into a single "Incident" to prevent list clutter.
 
 ---
 
-## 9. Page Structure
+## 9. System Administration
 
-### Dashboard Overview Page
+**Feature Name:** Global System Configuration
+**Namespace:** `features/admin`
 
-```tsx
-// app/dashboard/overview/page.tsx
-import { StatsCards } from '@/features/overview/components/stats-cards';
-import { DeviceStatusChart } from '@/features/overview/components/device-status-chart';
-import { ActivityFeed } from '@/features/overview/components/activity-feed';
-import { RecentAlerts } from '@/features/overview/components/recent-alerts';
+**User Story:**
+As a Super Admin, I want to manage system-wide settings (SMTP, SMS gateways, feature toggles) dynamically without redeploying the backend.
 
-export default function OverviewPage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
+**UI Components Needed:**
+1.  **SettingsEditor:** A dynamic form builder or JSON editor for `system_settings` table.
+2.  **FeatureToggles:** Boolean switches for enabling/disabling modules (e.g., "Enable Registration", "Maintenance Mode").
 
-      <StatsCards />
+**Data Interactions:**
+-   **Fetch:** `GET /admin/settings` (Returns grouped settings).
+-   **Update:** `PUT /admin/settings/:key` (Updates JSON value).
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <DeviceStatusChart />
-        <RecentAlerts />
-      </div>
+---
 
-      <ActivityFeed />
-    </div>
-  );
-}
-```
+## 10. Firmware Management
 
-### Device List Page
+**Feature Name:** OTA Firmware Operations
+**Namespace:** `features/firmware`
 
-```tsx
-// app/dashboard/device/page.tsx
-import { DeviceList } from '@/features/devices/components/device-list';
+**User Story:**
+As a Technician, I want to upload new firmware versions and deploy them to specific device groups so that I can patch bugs and add features remotely.
 
-export default function DevicePage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Devices</h1>
-      <DeviceList />
-    </div>
-  );
-}
-```
+**UI Components Needed:**
+1.  **FirmwareList:** Table displaying uploaded versions (`version`, `size`, `upload_date`, `device_count`).
+    *   Actions: "Activate", "Delete", "Assign to Devices".
+2.  **UploadModal:** Drag-and-drop zone for `.bin` files with version input fields.
+3.  **DeploymentDashboard:**
+    *   Real-time progress bars for ongoing updates.
+    *   Stats: Success vs. Failure rates.
+    *   List of devices currently updating.
+4.  **DeviceSelector:** Advanced filter to select target devices (e.g., "All devices with version < 1.2.0").
 
-### Map Page
+**Data Interactions:**
+-   **Upload:** `POST /firmware` (Multipart).
+-   **Assign:** `POST /firmware/:id/assign` (Triggers backend jobs).
+-   **Monitor:** `GET /firmware/:id/devices` (Polled for status updates).
 
-```tsx
-// app/dashboard/map/page.tsx
-import dynamic from 'next/dynamic';
+**Advanced Logic:**
+-   **Validation:** frontend checks file extension (`.bin`) and warns if version number format doesn't match SemVer.
+-   **Safety Check:** Require confirmation before deploying to >10 devices at once.
 
-const DeviceMap = dynamic(
-  () => import('@/features/map/components/device-map').then((m) => m.DeviceMap),
-  { ssr: false, loading: () => <div className="h-full animate-pulse bg-muted" /> }
-);
+---
 
-export default function MapPage() {
-  return (
-    <div className="h-[calc(100vh-4rem)]">
-      <DeviceMap />
-    </div>
-  );
-}
-```
+## 11. Advanced Map Tracking
+
+**Feature Name:** High-Performance Live Tracking
+**Namespace:** `features/map`
+
+**User Story:**
+As a Monitor, I want to see thousands of vehicles on a single map without lag, with clustered views for dense areas, and seamless interaction between the vehicle list and the map markers.
+
+**UI Components Needed:**
+1.  **ClusterMap:** Map component using `react-leaflet-cluster` to group nearby vehicles.
+    *   Behavior: Click cluster -> Zoom to bounds.
+    *   Styling: Color-coded clusters based on status (Red if any vehicle in cluster is Critical, else Green).
+2.  **LayerSwitcher:** Control to toggle between "Satellite", "Street", and "Traffic" layers.
+3.  **MapToolbar:** Floating controls for "Follow Mode" (auto-pan to selected vehicle), "Show Geofences", and "Heatmap Mode".
+4.  **SyncedList:** Vehicle list that highlights the row when a map marker is clicked, and flies to the marker when a row is clicked.
+
+**Advanced Logic:**
+-   **List-Map Sync:** maintain a `selectedVehicleId` in global state (Zustand). Both the List component and Map component subscribe to this.
+    -   *List Click:* Calls `map.flyTo(lat, lon)` and sets state.
+    -   *Marker Click:* Scrolls list to the specific row and sets state.
+-   **Throttling:** Limit map re-renders to 500ms even if high-frequency telemetry arrives.
+-   **Ghost Markers:** Show "Ghost" trail of the last 5 positions for the selected vehicle to indicate direction.
+
+---
+
+## 12. Real-time Architecture
+
+**Feature Name:** Live State Synchronization
+**Namespace:** `features/realtime`
+
+**User Story:**
+As a User, I expect the data on my screen (status, location, alerts) to update instantly without refreshing the page.
+
+**Architecture:**
+1.  **RealtimeProvider:** A global context provider wrapping the app.
+    -   Manages the single Socket.IO connection.
+    -   Handles authentication (sending JWT on connect).
+    -   Manages reconnection logic (exponential backoff).
+2.  **Subscription Logic (Rooms):**
+    -   **Global Room:** `user:{userId}` (Personal notifications).
+    -   **Fleet Room:** `fleet:{customer_id}` (Telemetry for all vehicles in a fleet).
+    -   **Device Room:** `device:{deviceId}` (Detailed debug logs, only joined when viewing Device Detail).
+3.  **Optimistic Updates:**
+    -   When toggling a switch (e.g., "Engine Lock"), immediately update UI state to "Pending...".
+    -   Revert if Socket.IO returns an error or timeout.
+
+**Data Interactions:**
+-   **Socket Events:**
+    -   `telemetry:update`: Batch of GPS/Status updates.
+    -   `alert:new`: Toast notification trigger.
+    -   `device:ack`: Acknowledgement of sent commands.
+
+

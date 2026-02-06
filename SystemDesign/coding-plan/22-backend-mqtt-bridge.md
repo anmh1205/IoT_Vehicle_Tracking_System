@@ -21,12 +21,24 @@
             │  PostgreSQL   │             │VictoriaMetrics│             │ VictoriaLogs  │
             │ (device state)│             │ (time-series) │             │   (events)    │
             └───────────────┘             └───────────────┘             └───────────────┘
-                    │
-                    ▼
-            ┌───────────────┐
-            │   Socket.IO   │──────▶ Real-time Dashboard
-            │  (Event Bus)  │
-            └───────────────┘
+```
+
+### 1.1 Code-based Strategy Pattern
+
+To support multiple device types (e.g., Teltonika, Concox, JSON) with high performance and type safety, the bridge uses a **Strategy Pattern**:
+
+1.  **Ingest**: Bridge receives payload on `v1/+/rawdata`.
+2.  **Identify**: Look up `device_id` to determine the protocol/model (e.g., via prefix or config).
+3.  **Select Strategy**: Instantiate the matching `IDeviceParser` (e.g., `TeltonikaParser`, `JsonParser`).
+4.  **Parse & Normalize**: The parser code transforms raw bytes/JSON -> Standard Internal Schema.
+5.  **Route**: Send normalized data to Storage.
+
+**Interface Definition:**
+```typescript
+interface IDeviceParser {
+  parse(payload: Buffer | unknown): ParsedData;
+  getCommand(type: CommandType, params: any): object;
+}
 ```
 
 ---
@@ -115,6 +127,11 @@ mqtt-bridge/
 ├── postgresql.client.ts            # PostgreSQL writer
 ├── victoriametrics.client.ts       # VictoriaMetrics writer
 ├── victorialogs.client.ts          # VictoriaLogs writer
+├── parsers/                        # Device Protocol Parsers
+│   ├── index.ts                    # Factory/Strategy Selector
+│   ├── interface.ts                # IDeviceParser interface
+│   ├── json.parser.ts              # Standard JSON parser
+│   └── teltonika.parser.ts         # Teltonika binary parser
 ├── handlers/
 │   ├── rawdata.handler.ts          # Process raw sensor data
 │   ├── status.handler.ts           # Process status updates
@@ -718,3 +735,41 @@ database_flush_duration_seconds
   "uptime": 86400
 }
 ```
+
+---
+
+## 10. OTA Hybrid Protocol
+
+### 10.1 HTTP Download Flow
+
+The OTA process uses a hybrid approach: MQTT for notification/coordination and HTTP for efficient binary data transfer. This aligns with the IVM26 reference architecture.
+
+1.  **Notification (Server -> Device)**
+    *   Topic: `v1/{device_id}/ota/notify`
+    *   Payload:
+        ```json
+        {
+          "version": "1.0.1",
+          "url": "http://api.domain.com/api/v1/firmware/fw_123/download",
+          "checksum": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 102400
+        }
+        ```
+
+2.  **Download (Device -> Server)**
+    *   Device connects to `url` via **HTTP GET**.
+    *   Server streams the binary file.
+    *   Device validates `checksum` and `size` after download.
+
+3.  **Status Reporting (Device -> Server)**
+    *   Topic: `v1/{device_id}/firmware`
+    *   Payload:
+        ```json
+        {
+          "status": "downloading", // or "installing", "success", "failed"
+          "progress": 50,          // percentage
+          "targetVersion": "1.0.1",
+          "error": "optional_error_message"
+        }
+        ```
+

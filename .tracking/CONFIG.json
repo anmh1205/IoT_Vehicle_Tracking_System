@@ -1,4 +1,5 @@
 {
+  "autonomy": "high",
   "projectRoot": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\IoT_Vehicle_Tracking_System",
   "structure": "flat",
   "prefix": "Tracking_",
