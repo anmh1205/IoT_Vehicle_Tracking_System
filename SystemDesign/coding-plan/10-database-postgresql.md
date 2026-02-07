@@ -1,6 +1,6 @@
-# Database Schema (PostgreSQL)
+# Database Schema (PostgreSQL) - IVM26 Pattern
 
-> Schema PostgreSQL cho IoT Vehicle Tracking System
+> Schema PostgreSQL cho IoT Vehicle Tracking System với Audit Trail và Correlation ID tracking
 
 ---
 
@@ -11,21 +11,42 @@
 │                    DATABASE SCHEMA                           │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│  Core Tables (11)          Feature Tables (8)               │
-│  ├── users                 ├── export_jobs                  │
-│  ├── devices               ├── export_audit_log             │
-│  ├── device_sessions       ├── fcm_tokens                   │
-│  ├── error_code_defs       ├── user_online_status           │
-│  ├── event_logs            ├── user_audit_logs              │
-│  ├── validation_errors     ├── device_audit_logs            │
-│  ├── firmware_logs         ├── firmware_audit_logs          │
-│  ├── user_sessions         └── firmware                     │
-│  ├── user_device_access                                      │
-│  ├── firmware                                                │
-│  └── firmware_update_log                                     │
+│  Core Tables (11)          Audit Tables (3)                 │
+│  ├── users                 ├── user_audit_logs              │
+│  ├── devices               ├── device_audit_logs            │
+│  ├── device_sessions       └── firmware_audit_logs          │
+│  ├── error_code_defs                                         │
+│  ├── event_logs            Feature Tables (8)               │
+│  ├── validation_errors     ├── export_jobs                  │
+│  ├── firmware_logs         ├── export_audit_log             │
+│  ├── user_sessions         ├── fcm_tokens                   │
+│  ├── user_device_access    ├── user_online_status           │
+│  ├── firmware              ├── system_settings              │
+│  └── firmware_update_log   └── notification_preferences     │
+│                                                              │
+│  Vehicle Tracking Tables (6)                                 │
+│  ├── vehicles              ├── geofences                    │
+│  ├── customers             ├── geofence_vehicles            │
+│  ├── trips                 ├── alerts                       │
+│  └── maintenance                                             │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 1.1 Key Patterns từ IVM26
+
+| Pattern | Mô tả |
+|---------|-------|
+| **Correlation ID** | Tracing across all event/audit tables |
+| **Audit Trail** | 3 bảng riêng: user, device, firmware audit |
+| **Error Resolution** | Workflow: active → acknowledged → resolved |
+| **Vietnamese i18n** | `name_vi` column trong error_code_definitions |
+| **Session Lifecycle** | Server-side vs device-side timestamps |
+| **JSONB Fields** | Flexible data: config, context, metadata, details |
+| **Soft Deletes** | `deleted_at` cho FCM tokens |
+| **Auto-update Triggers** | `updated_at` auto-update cho tất cả tables |
 
 ---
 

@@ -323,183 +323,375 @@ export function configureCors(app: Application): void {
 
 ---
 
-## 6. JWT Authentication
+## 6. JWT Authentication (IVM26 Pattern - Session-Based with Sliding Expiration)
 
-### 6.1 JWT Service
+> ⚠️ **Pattern từ IVM26:** Sử dụng **Session-based tokens** (stored in database) thay vì stateless JWT. Hỗ trợ **sliding expiration** để extend session khi user active.
+
+### 6.1 Auth Session Service (IVM26 Pattern)
 
 ```typescript
-// domain/auth/services/jwt.service.ts
-import jwt, { SignOptions, VerifyOptions } from 'jsonwebtoken';
-import { createLogger } from '../../../infrastructure/logger/winston';
+// domain/auth/services/auth-session.service.ts
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { addHours } from 'date-fns';
+import { UserRepository } from '../repositories/user.repository';
+import { UserSessionRepository } from '../repositories/user-session.repository';
+import { AuditService } from '../../audit/services/audit.service';
+import { createUnauthorizedError } from '@/shared/utils/errors.util';
+import { logger } from '@/infrastructure/logger';
 
-const logger = createLogger('jwt');
+const SESSION_EXTENSION_HOURS = 4; // Sliding window
 
-interface TokenPayload {
-  userId: string;
-  email: string;
-  role: 'admin' | 'user' | 'viewer';
+interface AuditContext {
+  ip: string;
+  userAgent?: string;
 }
 
-interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
+interface AuthenticatedUser {
+  id: number;
+  username: string;
+  fullName: string;
+  role: string;
+  deviceAccessMode: string;
+  sessionExpiresAt: Date;
 }
 
-export class JwtService {
-  private readonly accessSecret: string;
-  private readonly refreshSecret: string;
-  private readonly accessExpiresIn: string;
-  private readonly refreshExpiresIn: string;
+interface LoginResponse {
+  user: AuthenticatedUser;
+  session: { token: string; expiresAt: Date };
+}
 
-  constructor() {
-    this.accessSecret = process.env.JWT_SECRET!;
-    this.refreshSecret = process.env.JWT_REFRESH_SECRET || this.accessSecret;
-    this.accessExpiresIn = process.env.JWT_EXPIRES_IN || '15m';
-    this.refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
-  }
+export class AuthSessionService {
+  constructor(
+    private userRepo: UserRepository,
+    private userSessionRepo: UserSessionRepository,
+    private auditService?: AuditService
+  ) {}
 
-  generateTokenPair(payload: TokenPayload): TokenPair {
-    const accessToken = this.generateAccessToken(payload);
-    const refreshToken = this.generateRefreshToken(payload);
+  /**
+   * Validates session token and extends expiry (sliding expiration)
+   * Called on every authenticated request
+   */
+  async validateSessionToken(token: string): Promise<AuthenticatedUser | null> {
+    if (!token) return null;
 
-    return { accessToken, refreshToken };
-  }
+    // Find active session in database
+    const session = await this.userSessionRepo.findActiveSessionByToken(token);
+    if (!session) return null;
 
-  generateAccessToken(payload: TokenPayload): string {
-    const options: SignOptions = {
-      expiresIn: this.accessExpiresIn,
-      algorithm: 'HS256',
-    };
-
-    return jwt.sign(payload, this.accessSecret, options);
-  }
-
-  generateRefreshToken(payload: TokenPayload): string {
-    const options: SignOptions = {
-      expiresIn: this.refreshExpiresIn,
-      algorithm: 'HS256',
-    };
-
-    return jwt.sign({ userId: payload.userId }, this.refreshSecret, options);
-  }
-
-  verifyAccessToken(token: string): TokenPayload | null {
-    try {
-      const options: VerifyOptions = {
-        algorithms: ['HS256'],
-      };
-
-      return jwt.verify(token, this.accessSecret, options) as TokenPayload;
-    } catch (error) {
-      logger.warn('Invalid access token', { error: (error as Error).message });
+    // Check if session expired
+    if (new Date() > session.expires_at) {
+      await this.userSessionRepo.deactivateSession(token);
       return null;
     }
+
+    // Extend session expiry (sliding window)
+    const newExpiry = addHours(new Date(), SESSION_EXTENSION_HOURS);
+    await this.userSessionRepo.updateExpiry(token, newExpiry);
+
+    return {
+      id: session.user_id,
+      username: session.username,
+      fullName: session.full_name,
+      role: session.role,
+      deviceAccessMode: session.device_access_mode,
+      sessionExpiresAt: newExpiry,
+    };
   }
 
-  verifyRefreshToken(token: string): { userId: string } | null {
-    try {
-      const options: VerifyOptions = {
-        algorithms: ['HS256'],
-      };
+  /**
+   * Login user and create session
+   */
+  async loginUser(
+    username: string,
+    credential: string, // SHA-256 hashed password from client
+    auditCtx?: AuditContext
+  ): Promise<LoginResponse> {
+    const user = await this.userRepo.findByUsername(username.trim());
 
-      return jwt.verify(token, this.refreshSecret, options) as { userId: string };
-    } catch (error) {
-      logger.warn('Invalid refresh token', { error: (error as Error).message });
-      return null;
+    // Generic error to prevent username enumeration
+    if (!user) {
+      await this.auditService?.logLoginFailed(
+        auditCtx?.ip || 'unknown',
+        username,
+        'User not found'
+      );
+      throw createUnauthorizedError('Invalid username or password');
     }
+
+    // Check account status
+    if (user.status !== 'active') {
+      await this.auditService?.logLoginFailed(
+        auditCtx?.ip || 'unknown',
+        username,
+        'Account inactive'
+      );
+      throw createUnauthorizedError('User account is inactive');
+    }
+
+    // Verify password with bcrypt
+    const passwordMatches = await bcrypt.compare(credential, user.password_hash);
+    if (!passwordMatches) {
+      await this.auditService?.logLoginFailed(
+        auditCtx?.ip || 'unknown',
+        username,
+        'Wrong password'
+      );
+      throw createUnauthorizedError('Invalid username or password');
+    }
+
+    // Generate session token (secure random)
+    const sessionToken = crypto.randomBytes(64).toString('hex');
+    const expiresAt = addHours(new Date(), SESSION_EXTENSION_HOURS);
+
+    // Store session in database
+    await this.userSessionRepo.createSession({
+      userId: user.id,
+      sessionToken,
+      expiresAt,
+      ip: auditCtx?.ip,
+      userAgent: auditCtx?.userAgent,
+    });
+
+    // Audit log
+    await this.auditService?.logLoginSuccess({
+      userId: user.id,
+      username: user.username,
+      ip: auditCtx?.ip,
+      userAgent: auditCtx?.userAgent,
+    });
+
+    logger.info(`User ${username} logged in successfully`);
+
+    return {
+      user: {
+        id: user.id,
+        username: user.username,
+        fullName: user.full_name,
+        role: user.role,
+        deviceAccessMode: user.device_access_mode,
+        sessionExpiresAt: expiresAt,
+      },
+      session: {
+        token: sessionToken,
+        expiresAt,
+      },
+    };
+  }
+
+  /**
+   * Logout and invalidate session
+   */
+  async logoutSession(token: string, auditCtx?: AuditContext): Promise<boolean> {
+    const result = await this.userSessionRepo.deactivateSession(token);
+    if (result && auditCtx) {
+      await this.auditService?.logLogout(auditCtx);
+    }
+    return result;
+  }
+
+  /**
+   * Logout all sessions for a user (security: password change, etc.)
+   */
+  async logoutAllSessions(userId: number): Promise<void> {
+    await this.userSessionRepo.deactivateAllUserSessions(userId);
+    logger.info(`All sessions invalidated for user ${userId}`);
   }
 }
 ```
 
-### 6.2 Auth Middleware
+### 6.2 Auth Middleware (IVM26 Pattern)
 
 ```typescript
 // middleware/auth.middleware.ts
 import { Request, Response, NextFunction } from 'express';
-import { JwtService } from '../domain/auth/services/jwt.service';
+import { AuthSessionService } from '@/domain/auth/services/auth-session.service';
+import { asyncHandler } from '@/shared/utils/async-handler.util';
+import { createUnauthorizedError, createForbiddenError } from '@/shared/utils/errors.util';
 
-const jwtService = new JwtService();
+// Initialize services (dependency injection in production)
+const authSessionService = new AuthSessionService(
+  new UserRepository(),
+  new UserSessionRepository(),
+  new AuditService()
+);
 
 // Extend Express Request type
 declare global {
   namespace Express {
     interface Request {
       user?: {
-        userId: string;
-        email: string;
+        id: number;
+        username: string;
+        fullName: string;
         role: string;
+        deviceAccessMode: string;
+        sessionExpiresAt: Date;
       };
-      correlationId?: string;
     }
   }
 }
 
-export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
+/**
+ * Middleware: Attach user if token present (optional auth)
+ * Use for endpoints that work both with and without auth
+ */
+export const attachUserIfAvailable = asyncHandler(
+  async (req: Request, _res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({
-      status: 401,
-      error: 'Unauthorized',
-      message: 'No token provided',
-    });
-    return;
-  }
-
-  const token = authHeader.substring(7);
-  const payload = jwtService.verifyAccessToken(token);
-
-  if (!payload) {
-    res.status(401).json({
-      status: 401,
-      error: 'Unauthorized',
-      message: 'Invalid or expired token',
-    });
-    return;
-  }
-
-  req.user = payload;
-  next();
-}
-
-// Role-based authorization
-export function requireRole(...roles: string[]) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      res.status(401).json({
-        status: 401,
-        error: 'Unauthorized',
-        message: 'Authentication required',
-      });
-      return;
-    }
-
-    if (!roles.includes(req.user.role)) {
-      res.status(403).json({
-        status: 403,
-        error: 'Forbidden',
-        message: 'Insufficient permissions',
-      });
-      return;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const user = await authSessionService.validateSessionToken(token);
+      if (user) {
+        req.user = user;
+      }
     }
 
     next();
-  };
+  }
+);
+
+/**
+ * Middleware: Require authentication (throws if no user)
+ */
+export const requireAuth = asyncHandler(
+  async (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.user) {
+      throw createUnauthorizedError('Authentication required');
+    }
+    next();
+  }
+);
+
+/**
+ * Middleware: Require specific roles
+ */
+export function requireRoles(roles: string[]) {
+  return asyncHandler(async (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.user) {
+      throw createUnauthorizedError('Authentication required');
+    }
+
+    if (!roles.includes(req.user.role)) {
+      throw createForbiddenError(
+        `This action requires one of these roles: ${roles.join(', ')}`
+      );
+    }
+
+    next();
+  });
 }
 
-// Optional auth (for public endpoints that benefit from auth context)
-export function optionalAuth(req: Request, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
+/**
+ * Helper: Get audit context from request
+ */
+export function getAuditContext(req: Request) {
+  return {
+    ip: req.ip || req.headers['x-forwarded-for']?.toString() || 'unknown',
+    userAgent: req.headers['user-agent'],
+    userId: req.user?.id,
+    username: req.user?.username,
+  };
+}
+```
 
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    const payload = jwtService.verifyAccessToken(token);
-    if (payload) {
-      req.user = payload;
-    }
+### 6.3 Route Pattern (IVM26)
+
+```typescript
+// api/routes/auth.routes.ts
+import { Router } from 'express';
+import { asyncHandler, attachUserIfAvailable, requireAuth, requireRoles } from '@/middleware/auth';
+import { AuthController } from '../controllers/auth.controller';
+
+const router = Router();
+
+// Initialize controller with dependencies
+const authController = new AuthController(/* services */);
+
+// Apply optional auth to all routes first
+router.use(asyncHandler(attachUserIfAvailable));
+
+// Public routes
+router.post('/login', authController.login);
+router.post('/register', authController.register);
+
+// Protected routes
+router.get('/me', asyncHandler(requireAuth), authController.getCurrentUser);
+router.post('/logout', asyncHandler(requireAuth), authController.logout);
+router.put('/password', asyncHandler(requireAuth), authController.changePassword);
+
+// Admin routes
+router.get('/users', asyncHandler(requireRoles(['admin', 'root'])), authController.listUsers);
+router.post('/users', asyncHandler(requireRoles(['admin', 'root'])), authController.createUser);
+router.put('/users/:id', asyncHandler(requireRoles(['admin', 'root'])), authController.updateUser);
+router.delete('/users/:id', asyncHandler(requireRoles(['root'])), authController.deleteUser);
+
+export default router;
+```
+
+### 6.4 User Session Repository
+
+```typescript
+// domain/auth/repositories/user-session.repository.ts
+import { getPool } from '@/infrastructure/database/pool';
+
+interface CreateSessionInput {
+  userId: number;
+  sessionToken: string;
+  expiresAt: Date;
+  ip?: string;
+  userAgent?: string;
+}
+
+export class UserSessionRepository {
+  async createSession(input: CreateSessionInput): Promise<void> {
+    const pool = getPool();
+    await pool.query(
+      `INSERT INTO user_sessions (user_id, session_token, expires_at, ip_address, user_agent)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [input.userId, input.sessionToken, input.expiresAt, input.ip, input.userAgent]
+    );
   }
 
-  next();
+  async findActiveSessionByToken(token: string) {
+    const pool = getPool();
+    const result = await pool.query(
+      `SELECT us.*, u.username, u.full_name, u.role, u.device_access_mode
+       FROM user_sessions us
+       JOIN users u ON us.user_id = u.id
+       WHERE us.session_token = $1
+         AND us.is_active = true
+         AND us.expires_at > NOW()`,
+      [token]
+    );
+    return result.rows[0] || null;
+  }
+
+  async updateExpiry(token: string, newExpiry: Date): Promise<void> {
+    const pool = getPool();
+    await pool.query(
+      `UPDATE user_sessions SET expires_at = $1, updated_at = NOW() WHERE session_token = $2`,
+      [newExpiry, token]
+    );
+  }
+
+  async deactivateSession(token: string): Promise<boolean> {
+    const pool = getPool();
+    const result = await pool.query(
+      `UPDATE user_sessions SET is_active = false, updated_at = NOW() WHERE session_token = $1`,
+      [token]
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async deactivateAllUserSessions(userId: number): Promise<void> {
+    const pool = getPool();
+    await pool.query(
+      `UPDATE user_sessions SET is_active = false, updated_at = NOW() WHERE user_id = $1`,
+      [userId]
+    );
+  }
 }
 ```
 

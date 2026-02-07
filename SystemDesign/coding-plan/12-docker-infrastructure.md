@@ -152,24 +152,53 @@ services:
       - tracking-network
 
   # =============================================================================
-  # MQTT BROKER
+  # MQTT BROKER (EMQX với MQTTS Support)
   # =============================================================================
   emqx:
-    image: emqx/emqx:5.3.0
+    image: emqx/emqx:5.4.0
     container_name: tracking-emqx
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        # Auto-generate self-signed certificate if not exists
+        if [ ! -f /opt/emqx/etc/certs/emqx.key ]; then
+          mkdir -p /opt/emqx/etc/certs
+          openssl req -x509 -newkey rsa:2048 \
+            -keyout /opt/emqx/etc/certs/emqx.key \
+            -out /opt/emqx/etc/certs/emqx.crt \
+            -days 3650 -nodes \
+            -subj "/CN=emqx/O=VehicleTracking/C=VN" \
+            -addext "subjectAltName=DNS:localhost,DNS:emqx,IP:127.0.0.1"
+          chmod 600 /opt/emqx/etc/certs/emqx.key
+          chmod 644 /opt/emqx/etc/certs/emqx.crt
+          echo "✅ Generated self-signed TLS certificates"
+        fi
+        # Start EMQX
+        /opt/emqx/bin/emqx foreground
     environment:
       EMQX_NAME: tracking-emqx
       EMQX_HOST: 0.0.0.0
-      EMQX_LOADED_PLUGINS: "emqx_management,emqx_auth_username"
+      EMQX_ALLOW_ANONYMOUS: "false"
+      EMQX_AUTHENTICATION__1__MECHANISM: password_based
+      EMQX_AUTHENTICATION__1__BACKEND: built_in_database
+      EMQX_AUTHENTICATION__1__ENABLE: "true"
     volumes:
       - emqx-data:/opt/emqx/data
       - emqx-log:/opt/emqx/log
-      - ./docker/emqx/etc:/opt/emqx/etc
+      - ./docker/emqx/config:/opt/emqx/etc:ro
+      - ./docker/emqx/certs:/opt/emqx/etc/certs:rw
     ports:
-      - "1883:1883"     # MQTT
-      - "8083:8083"     # WebSocket
-      - "8084:8084"     # WSS
+      - "1883:1883"     # MQTT (non-TLS) - internal/dev
+      - "8883:8883"     # MQTTS (TLS) - production ⭐
+      - "8083:8083"     # WebSocket (WS)
+      - "8084:8084"     # WebSocket Secure (WSS) ⭐
       - "18083:18083"   # Dashboard
+    healthcheck:
+      test: ["CMD", "emqx", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
     networks:
       - tracking-network

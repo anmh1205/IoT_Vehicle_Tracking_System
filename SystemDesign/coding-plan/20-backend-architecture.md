@@ -346,32 +346,254 @@ Tracking_Backend/src/
 
 ---
 
-## 4. Middleware Chain
+## 4. Middleware Chain (IVM26 Pattern)
+
+> ⚠️ **Pattern từ IVM26:** Thứ tự middleware quan trọng cho security và performance
 
 ```typescript
-// index.ts - Middleware order
-app.use(sentryRequestHandler);      // 1. Sentry (first)
-app.use(helmetMiddleware);          // 2. Security headers
-app.use(compressionMiddleware);     // 3. Gzip/Brotli
-app.use(corsMiddleware);            // 4. CORS
-app.use(httpMetricsMiddleware);     // 5. Prometheus metrics
-app.use(express.json());            // 6. Body parser
-app.use(express.urlencoded());      // 7. URL encoded
-app.use(requestLogger);             // 8. Request logging
-app.use(rateLimitMiddleware);       // 9. Rate limiting
+// index.ts - Middleware order (IVM26 Pattern)
 
-// Routes
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/device', deviceRoutes);
-app.use('/api/v1/iot', iotRoutes);      // No auth
+// =============================================================================
+// 1. SENTRY (Must be first - captures all errors)
+// =============================================================================
+import { initSentry, sentryRequestHandler, sentryErrorHandler } from './config/sentry';
+initSentry();
+app.use(sentryRequestHandler);
+
+// =============================================================================
+// 2. SECURITY HEADERS (Helmet)
+// =============================================================================
+app.use(helmetMiddleware);
+
+// =============================================================================
+// 3. COMPRESSION (gzip/brotli)
+// =============================================================================
+app.use(compressionMiddleware);
+
+// =============================================================================
+// 4. CORS
+// =============================================================================
+app.use(corsMiddleware);
+
+// =============================================================================
+// 5. PROMETHEUS METRICS
+// =============================================================================
+app.use(httpMetricsMiddleware);
+
+// =============================================================================
+// 6. KEEP-ALIVE HEADERS (For IoT devices - persistent connections)
+// =============================================================================
+app.use((_req, res, next) => {
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Keep-Alive', 'timeout=65, max=1000');
+  res.setHeader('Cache-Control', 'no-cache');
+  next();
+});
+
+// =============================================================================
+// 7. BODY PARSING
+// =============================================================================
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// =============================================================================
+// 8. REQUEST TIMEOUT (30 seconds)
+// =============================================================================
+app.use((req, res, next) => {
+  const timeout = 30000;
+  const timer = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(408).json({ error: { code: 'REQUEST_TIMEOUT' } });
+    }
+  }, timeout);
+
+  res.on('finish', () => clearTimeout(timer));
+  res.on('close', () => clearTimeout(timer));
+  next();
+});
+
+// =============================================================================
+// 9. REQUEST LOGGING
+// =============================================================================
+app.use((req, _res, next) => {
+  logger.info(`${req.method} ${req.path} - ${req.ip}`);
+  next();
+});
+
+// =============================================================================
+// ROUTES (with selective rate limiting)
+// =============================================================================
+app.use('/api/v1/auth', authRateLimit, authRoutes);        // Strict rate limit
+app.use('/api/v1/device', deviceRoutes);                   // Normal rate limit
+app.use('/api/v1/iot', iotRoutes);                         // No rate limit (high frequency)
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/firmware', firmwareRoutes);
 app.use('/api/v1/exports', exportRoutes);
 app.use('/api/v1/system-admin', systemAdminRoutes);
 
-// Error handling (last)
+// Vehicle Tracking Extension Routes
+app.use('/api/v1/vehicles', vehicleRoutes);
+app.use('/api/v1/customers', customerRoutes);
+app.use('/api/v1/trips', tripRoutes);
+app.use('/api/v1/alerts', alertRoutes);
+app.use('/api/v1/geofences', geofenceRoutes);
+app.use('/api/v1/maintenance', maintenanceRoutes);
+
+// =============================================================================
+// ERROR HANDLING (Must be last)
+// =============================================================================
 app.use(errorHandler);
 app.use(sentryErrorHandler);
+```
+
+---
+
+## 4.1 Error Handling Pattern (IVM26)
+
+```typescript
+// shared/utils/errors.util.ts
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+    public details?: Record<string, unknown>
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+// Factory functions for common errors
+export const createValidationError = (message: string, details?: unknown) =>
+  new ApiError(400, message, { code: 'VALIDATION_ERROR', details });
+
+export const createUnauthorizedError = (message: string) =>
+  new ApiError(401, message, { code: 'UNAUTHORIZED' });
+
+export const createForbiddenError = (message: string) =>
+  new ApiError(403, message, { code: 'FORBIDDEN' });
+
+export const createNotFoundError = (message: string) =>
+  new ApiError(404, message, { code: 'NOT_FOUND' });
+
+export const createConflictError = (message: string) =>
+  new ApiError(409, message, { code: 'CONFLICT' });
+```
+
+```typescript
+// middleware/error-handler.middleware.ts
+app.use((error: unknown, req: Request, res: Response, _next: NextFunction) => {
+  // Handle known API errors
+  if (error instanceof ApiError) {
+    logger.warn(`API error (${error.status}): ${error.message}`);
+    return sendError(res, error, req.originalUrl);
+  }
+
+  // Handle unexpected errors
+  logger.error('Unhandled error:', error);
+  const internalErr = new ApiError(500, 'Internal server error', {
+    code: 'INTERNAL_SERVER_ERROR',
+    path: req.originalUrl
+  });
+  return sendError(res, internalErr, req.originalUrl);
+});
+```
+
+---
+
+## 4.2 Response Utilities (IVM26)
+
+```typescript
+// shared/utils/response.util.ts
+export const sendOk = (res: Response, data: unknown) => {
+  res.status(200).json({
+    success: true,
+    data,
+    timestamp: new Date().toISOString()
+  });
+};
+
+export const sendCreated = (res: Response, data: unknown) => {
+  res.status(201).json({
+    success: true,
+    data,
+    timestamp: new Date().toISOString()
+  });
+};
+
+export const sendError = (res: Response, error: ApiError, path: string) => {
+  res.status(error.status).json({
+    success: false,
+    error: {
+      code: error.details?.code || 'ERROR',
+      message: error.message,
+      status: error.status,
+      path,
+      details: error.details
+    },
+    timestamp: new Date().toISOString()
+  });
+};
+```
+
+---
+
+## 4.3 Async Handler Wrapper (IVM26)
+
+```typescript
+// shared/utils/async-handler.util.ts
+type AsyncRequestHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => Promise<void>;
+
+export const asyncHandler = (fn: AsyncRequestHandler) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+};
+
+// Usage in routes:
+router.get('/users', asyncHandler(async (req, res) => {
+  const users = await userService.getUsers();
+  sendOk(res, { users });
+}));
+```
+
+---
+
+## 4.4 Graceful Shutdown (IVM26)
+
+```typescript
+// index.ts - Production-ready shutdown
+process.on('SIGTERM', async () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+
+  // 1. Flush Sentry events
+  await flushSentry(2000);
+
+  // 2. Stop accepting new connections
+  server.close(() => logger.info('HTTP server closed'));
+
+  // 3. Close WebSocket server
+  await closeSocketServer();
+
+  // 4. Shutdown MQTT bridge
+  await shutdownMqttBridge();
+
+  // 5. Close database connections
+  await closePool();
+
+  logger.info('Graceful shutdown complete');
+  process.exit(0);
+});
+
+// Unhandled rejection handler
+process.on('unhandledRejection', (reason: unknown) => {
+  logger.error('Unhandled Promise Rejection:', reason);
+  captureException(reason);
+});
 ```
 
 ---
@@ -416,37 +638,159 @@ Flow:
 
 ---
 
-## 7. Environment Variables
+## 7. Environment Variables (IVM26 Pattern)
+
+> ⚠️ **Pattern từ IVM26:** Type-safe, validated, centralized config với fallback values
+
+```typescript
+// config/env.ts - Centralized Environment Configuration
+import 'dotenv/config';
+
+type EnvRecord = Record<string, string | undefined>;
+const rawEnv: EnvRecord = process.env;
+
+const fromEnv = (key: string): string | undefined => rawEnv[key];
+
+const toInt = (value: string | undefined, fallback: number): number => {
+  const parsed = value ? Number.parseInt(value, 10) : Number.NaN;
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+// Validates required env vars (throws in production, warns in dev)
+const requireEnv = (key: string, value: string | undefined): string => {
+  if (!value) {
+    const isProd = fromEnv('NODE_ENV') === 'production';
+    if (isProd) {
+      throw new Error(`❌ CRITICAL: Environment variable "${key}" is not set!`);
+    } else {
+      console.warn(`⚠️  WARNING: Environment variable "${key}" is not set.`);
+    }
+  }
+  return value ?? '';
+};
+
+// =============================================================================
+// APPLICATION CONFIG
+// =============================================================================
+export const appConfig = {
+  nodeEnv: fromEnv('NODE_ENV') ?? 'development',
+  port: toInt(fromEnv('PORT'), 3000),
+};
+
+// =============================================================================
+// DATABASE CONFIG
+// =============================================================================
+export const dbConfig = {
+  host: fromEnv('POSTGRESQL_HOST') ?? 'localhost',
+  port: toInt(fromEnv('POSTGRESQL_PORT'), 5432),
+  user: fromEnv('POSTGRESQL_USER') ?? 'postgres',
+  password: requireEnv('POSTGRESQL_PASSWORD', fromEnv('POSTGRESQL_PASSWORD')),
+  database: fromEnv('POSTGRESQL_DATABASE') ?? 'vehicle_tracking',
+  connectionLimit: toInt(fromEnv('DB_POOL_SIZE'), 50),
+};
+
+// =============================================================================
+// MQTT CONFIG (MQTTS Support)
+// =============================================================================
+export const mqttConfig = {
+  host: fromEnv('MQTT_HOST') ?? 'emqx',
+  port: toInt(fromEnv('MQTT_PORT'), 1883),
+  tlsPort: toInt(fromEnv('MQTT_TLS_PORT'), 8883),
+  useTls: fromEnv('MQTT_USE_TLS') === 'true',
+  username: fromEnv('MQTT_USERNAME') ?? 'mqtt_bridge',
+  password: requireEnv('MQTT_PASSWORD', fromEnv('MQTT_PASSWORD')),
+  rejectUnauthorized: fromEnv('MQTT_REJECT_UNAUTHORIZED') !== 'false',
+};
+
+// =============================================================================
+// VICTORIAMETRICS CONFIG
+// =============================================================================
+export const victoriaMetricsConfig = {
+  url: fromEnv('VICTORIAMETRICS_URL') ?? 'http://localhost:8428',
+  remoteWritePath: '/api/v1/import/prometheus',
+  queryPath: '/api/v1/query',
+};
+
+export const victoriaLogsConfig = {
+  url: fromEnv('VICTORIALOGS_URL') ?? 'http://localhost:9428',
+};
+
+// =============================================================================
+// JWT CONFIG
+// =============================================================================
+export const jwtConfig = {
+  secret: requireEnv('JWT_SECRET', fromEnv('JWT_SECRET')),
+  expiresIn: fromEnv('JWT_EXPIRES_IN') ?? '24h',
+  sessionExtensionHours: toInt(fromEnv('SESSION_EXTENSION_HOURS'), 4),
+};
+
+// =============================================================================
+// CORS CONFIG
+// =============================================================================
+export const corsConfig = {
+  origin: fromEnv('CORS_ORIGIN') ?? 'http://localhost:3002',
+};
+
+// =============================================================================
+// SENTRY CONFIG (Optional)
+// =============================================================================
+export const sentryConfig = {
+  dsn: fromEnv('SENTRY_DSN') ?? '',
+  enabled: !!fromEnv('SENTRY_DSN'),
+};
+```
+
+### .env.example
 
 ```bash
-# Server
+# =============================================================================
+# SERVER
+# =============================================================================
 PORT=3000
 NODE_ENV=development
 
-# PostgreSQL
+# =============================================================================
+# POSTGRESQL
+# =============================================================================
 POSTGRESQL_HOST=localhost
 POSTGRESQL_PORT=5432
 POSTGRESQL_DATABASE=vehicle_tracking
 POSTGRESQL_USER=postgres
 POSTGRESQL_PASSWORD=secret
+DB_POOL_SIZE=50
 
-# VictoriaMetrics
+# =============================================================================
+# VICTORIAMETRICS & VICTORIALOGS
+# =============================================================================
 VICTORIAMETRICS_URL=http://localhost:8428
 VICTORIALOGS_URL=http://localhost:9428
 
-# MQTT (EMQX)
-MQTT_BROKER_URL=mqtt://localhost:1883
-MQTT_USERNAME=backend
+# =============================================================================
+# MQTT (EMQX) - Supports MQTT and MQTTS
+# =============================================================================
+MQTT_HOST=emqx
+MQTT_PORT=1883
+MQTT_TLS_PORT=8883
+MQTT_USE_TLS=false
+MQTT_REJECT_UNAUTHORIZED=false
+MQTT_USERNAME=mqtt_bridge
 MQTT_PASSWORD=secret
 
+# =============================================================================
 # JWT
+# =============================================================================
 JWT_SECRET=your-secret-key
 JWT_EXPIRES_IN=24h
+SESSION_EXTENSION_HOURS=4
 
-# Sentry (optional)
-SENTRY_DSN=https://xxx@sentry.io/xxx
+# =============================================================================
+# SENTRY (Optional)
+# =============================================================================
+SENTRY_DSN=
 
+# =============================================================================
 # CORS
+# =============================================================================
 CORS_ORIGIN=http://localhost:3002
 ```
 

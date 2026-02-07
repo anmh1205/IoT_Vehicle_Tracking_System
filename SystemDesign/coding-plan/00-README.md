@@ -10,10 +10,11 @@ Before writing a single line of code, you **MUST** verify:
 
 1.  **Check Status:** Read `.tracking/PROGRESS.md` to see active phases.
 2.  **Check Tasks:** Read `.tracking/CURRENT_TASKS.md` to avoid conflicts.
-3.  **Read Rules:** Consult `60-agent-orchestration.md` for:
-    *   Git Branching (`feature/phase-N`)
-    *   Task ID Naming (`BE-001`, `FE-010`)
-    *   Error Handling (L1-L5 classification)
+3.  **Read Orchestration Rules:** Consult [60-agent-orchestration.md](./60-agent-orchestration.md) for:
+    *   Agent Teams vs Subagents (Section 1)
+    *   Delegate Mode & Setup (Section 2)
+    *   Use Cases & Patterns (Section 3-4)
+    *   Git Branching, Task ID, Error Handling (Section 6-9)
 4.  **Read Specs:** Never guess. Read the `SystemDesign/*.md` files listed below.
 
 ---
@@ -22,13 +23,13 @@ Before writing a single line of code, you **MUST** verify:
 
 **Goal:** Build a scalable IoT Vehicle Tracking System (Monorepo).
 
-| Layer | Tech Stack | Root Path |
-| :--- | :--- | :--- |
-| **Backend** | Express, TypeScript, DDD | `Tracking_Backend/` |
-| **Frontend** | Next.js 15, FSD, Shadcn | `Tracking_Frontend/` |
-| **IoT/Realtime** | MQTT (EMQX), Socket.IO | `Tracking_MqttBridge/` |
-| **Database** | PostgreSQL, VictoriaMetrics | `Tracking_PostgreSQL/`, `Tracking_VictoriaMetrics/` |
-| **Mobile** | Flutter (WebView Hybrid) | `Tracking_Mobile/` |
+| Layer            | Tech Stack                  | Root Path                                           |
+| :--------------- | :-------------------------- | :-------------------------------------------------- |
+| **Backend**      | Express, TypeScript, DDD    | `Tracking_Backend/`                                 |
+| **Frontend**     | Next.js 15, FSD, Shadcn     | `Tracking_Frontend/`                                |
+| **IoT/Realtime** | MQTT (EMQX), Socket.IO      | `Tracking_MqttBridge/`                              |
+| **Database**     | PostgreSQL, VictoriaMetrics | `Tracking_PostgreSQL/`, `Tracking_VictoriaMetrics/` |
+| **Mobile**       | Flutter (WebView Hybrid)    | `Tracking_Mobile/`                                  |
 
 ---
 
@@ -89,11 +90,13 @@ Before writing a single line of code, you **MUST** verify:
 1.  Read the "Specs" files listed above.
 2.  Create tasks in `.tracking/CURRENT_TASKS.md`.
 3.  Execute using the **[Execution Guide](./03-execution-guide.md)**.
+4.  For multi-module work: use **Agent Teams** (xem [60-agent-orchestration.md](./60-agent-orchestration.md) Section 3).
 
 **To Fix a Bug:**
-1.  Read `60-agent-orchestration.md` -> "Pattern C: The Investigator".
+1.  Read `60-agent-orchestration.md` → "Pattern C: The Investigator" (Section 4).
 2.  Use `Explore` to map the code.
 3.  Create task `BUG-XXX` in tracking.
+4.  For complex bugs: dùng **Competing Hypotheses** (Agent Teams UC2).
 
 ---
 

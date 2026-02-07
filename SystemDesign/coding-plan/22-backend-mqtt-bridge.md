@@ -214,54 +214,115 @@ main().catch((err) => {
 });
 ```
 
-### 5.2 MQTT Client
+### 5.2 MQTT Client (với TLS/MQTTS Support)
+
+> ⚠️ **Pattern từ IVM26:** Sử dụng dynamic protocol selection để hỗ trợ cả MQTT (dev) và MQTTS (prod)
 
 ```typescript
 // mqtt-bridge/mqtt.client.ts
-import mqtt, { MqttClient } from 'mqtt';
-import { env } from '@/config/env';
-import { logger } from '@/infrastructure/logger';
+import mqtt, { MqttClient, IClientOptions } from 'mqtt';
+import { env } from './config/env';
+import { logger } from './infrastructure/logger';
 
 let client: MqttClient | null = null;
 
+// =============================================================================
+// MQTT Configuration Interface
+// =============================================================================
+interface MqttConfig {
+  host: string;
+  port: number;           // Non-TLS port (1883)
+  tlsPort: number;        // TLS port (8883)
+  useTls: boolean;
+  username: string;
+  password: string;
+  rejectUnauthorized: boolean; // false for self-signed certs
+}
+
+const mqttConfig: MqttConfig = {
+  host: env.MQTT_HOST || 'emqx',
+  port: parseInt(env.MQTT_PORT || '1883'),
+  tlsPort: parseInt(env.MQTT_TLS_PORT || '8883'),
+  useTls: env.MQTT_USE_TLS === 'true',
+  username: env.MQTT_USERNAME || 'mqtt_bridge',
+  password: env.MQTT_PASSWORD || '',
+  rejectUnauthorized: env.MQTT_REJECT_UNAUTHORIZED !== 'false',
+};
+
+// =============================================================================
+// Connect to MQTT Broker (MQTT or MQTTS)
+// =============================================================================
 export async function connectMQTT(): Promise<MqttClient> {
   return new Promise((resolve, reject) => {
-    client = mqtt.connect(env.MQTT_BROKER_URL, {
-      username: env.MQTT_USERNAME,
-      password: env.MQTT_PASSWORD,
-      clientId: `mqtt-bridge-${process.pid}`,
+    const options: IClientOptions = {
+      host: mqttConfig.host,
+      port: mqttConfig.useTls ? mqttConfig.tlsPort : mqttConfig.port,
+      protocol: mqttConfig.useTls ? 'mqtts' : 'mqtt',
+      username: mqttConfig.username,
+      password: mqttConfig.password,
+      clientId: `mqtt-bridge-${process.pid}-${Date.now()}`,
       clean: true,
+      keepalive: 60,
       reconnectPeriod: 5000,
       connectTimeout: 30000,
-    });
+
+      // TLS options for self-signed certificates (development)
+      // In production with proper CA certs, set rejectUnauthorized: true
+      ...(mqttConfig.useTls && {
+        rejectUnauthorized: mqttConfig.rejectUnauthorized,
+        // For production with CA cert:
+        // ca: fs.readFileSync('/path/to/ca.crt'),
+      }),
+    };
+
+    const protocol = mqttConfig.useTls ? 'mqtts' : 'mqtt';
+    const port = mqttConfig.useTls ? mqttConfig.tlsPort : mqttConfig.port;
+
+    logger.info(`Connecting to MQTT broker: ${protocol}://${mqttConfig.host}:${port}`);
+
+    client = mqtt.connect(options);
 
     client.on('connect', () => {
-      logger.info('Connected to MQTT broker');
+      logger.info(`✅ Connected to MQTT broker (TLS: ${mqttConfig.useTls})`);
       resolve(client!);
     });
 
     client.on('error', (err) => {
-      logger.error('MQTT connection error:', err);
+      logger.error('❌ MQTT connection error:', err);
       reject(err);
     });
 
     client.on('reconnect', () => {
-      logger.warn('Reconnecting to MQTT broker...');
+      logger.warn('🔄 Reconnecting to MQTT broker...');
     });
 
     client.on('offline', () => {
-      logger.warn('MQTT client offline');
+      logger.warn('📴 MQTT client offline');
     });
   });
 }
 
+// =============================================================================
+// Disconnect from MQTT Broker
+// =============================================================================
 export async function disconnectMQTT(): Promise<void> {
   if (client) {
     await client.endAsync();
     client = null;
+    logger.info('Disconnected from MQTT broker');
   }
 }
 
+// =============================================================================
+// Get current MQTT client instance
+// =============================================================================
+export function getClient(): MqttClient | null {
+  return client;
+}
+
+// =============================================================================
+// Publish command to device
+// =============================================================================
 export function publishCommand(deviceId: string, command: object): void {
   if (client) {
     client.publish(
@@ -674,19 +735,41 @@ export const deviceStateCache = new DeviceStateCache();
 ## 7. Environment Variables
 
 ```bash
-# MQTT
-MQTT_BROKER_URL=mqtt://emqx:1883
-MQTT_USERNAME=backend
+# =============================================================================
+# MQTT BROKER (EMQX) - Supports both MQTT and MQTTS
+# =============================================================================
+# Host (container name trong Docker network)
+MQTT_HOST=emqx
+
+# Non-TLS port (internal/development)
+MQTT_PORT=1883
+
+# TLS port (production) - Port 8883
+MQTT_TLS_PORT=8883
+
+# Enable TLS (set to 'true' for production)
+MQTT_USE_TLS=false
+
+# For self-signed certificates in development
+# Set to 'false' to accept self-signed certs
+MQTT_REJECT_UNAUTHORIZED=false
+
+# Authentication
+MQTT_USERNAME=mqtt_bridge
 MQTT_PASSWORD=secret
 
+# =============================================================================
 # PostgreSQL
+# =============================================================================
 POSTGRESQL_HOST=postgres
 POSTGRESQL_PORT=5432
 POSTGRESQL_DATABASE=vehicle_tracking
 POSTGRESQL_USER=postgres
 POSTGRESQL_PASSWORD=secret
 
-# VictoriaMetrics
+# =============================================================================
+# VictoriaMetrics & VictoriaLogs
+# =============================================================================
 VICTORIAMETRICS_URL=http://victoriametrics:8428
 VICTORIALOGS_URL=http://victorialogs:9428
 ```

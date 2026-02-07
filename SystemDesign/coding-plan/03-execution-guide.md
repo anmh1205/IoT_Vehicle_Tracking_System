@@ -1,88 +1,113 @@
 # Execution Guide: IoT Vehicle Tracking System
 
 > **Protocol:** Agent-Driven Development with Human Oversight.
-> **Updated:** To support `Task` tool and specialized Sub-Agents.
+> **Updated:** 2026-02-07 — Hỗ trợ Agent Teams + Subagents.
 
 ---
 
 ## 1. Workflow Overview
 
-This project uses a **Multi-Agent** approach. You (the User) act as the **Product Owner**, while the Main Agent acts as the **Lead Engineer/Orchestrator**.
+Dự án sử dụng **Multi-Agent** approach. Bạn (User) là **Product Owner**, Main Agent là **Lead Engineer**.
 
 ### The Cycle
-1.  **Define:** User provides a high-level goal (e.g., "Implement the Geofence feature").
-2.  **Plan:** Main Agent (or `Plan` agent) analyzes `SystemDesign/` and proposes a plan.
-3.  **Delegate:** Main Agent uses `Task` to spawn `backend-specialist`, `frontend-specialist`, etc.
-4.  **Verify:** Main Agent (or `test-engineer`) verifies the result.
-5.  **Review:** User reviews the final output.
+
+```
+User (Goal) → Lead tạo team → Teammates execute parallel → Lead tổng hợp → User review
+```
+
+1. **Define:** User cung cấp high-level goal (ví dụ: "Implement Geofence feature")
+2. **Plan:** Lead phân tích `SystemDesign/` và đề xuất plan
+3. **Delegate:** Lead spawn teammates hoặc subagents tùy complexity
+4. **Execute:** Teammates/subagents thực hiện song song hoặc tuần tự
+5. **Verify:** QA teammate hoặc Lead verify kết quả
+6. **Review:** User review final output
 
 ---
 
-## 2. Using Specialized Agents
+## 2. Chọn Agent Teams hay Subagents?
 
-The Main Agent has access to the `Task` tool. Use this to offload complex work.
+| Tình huống                 | Dùng            | Lý do                    |
+| :------------------------- | :-------------- | :----------------------- |
+| Quick fix, single-file     | **Subagent**    | Không cần phối hợp       |
+| Research/exploration đơn   | **Subagent**    | Chỉ cần kết quả          |
+| Multi-module feature       | **Agent Teams** | Cần phối hợp cross-layer |
+| Debug competing hypotheses | **Agent Teams** | Cần tranh luận           |
+| Parallel code review       | **Agent Teams** | Nhiều lens khác nhau     |
+| Sequential pipeline        | **Subagent**    | Không cần giao tiếp P2P  |
 
-| Task Category | Recommended Agent |
-| :--- | :--- |
-| **New API / DB Schema** | `backend-specialist` or `database-architect` |
-| **New UI Page / Component** | `frontend-specialist` |
-| **Bug Investigation** | `Explore` (research) or `debugger` (fix) |
-| **Writing Tests** | `test-engineer` |
-| **CI/CD & Docker** | `devops-engineer` |
-| **Security Audit** | `security-auditor` |
-| **Codebase Research** | `Explore` |
-
-### How to Trigger
-Simply ask the Main Agent in natural language.
-*   *"Have the backend specialist implement the Auth API."*
-*   *"Run a security audit on the new endpoints."*
-*   *"Research how we handle MQTT messages using the Explore agent."*
+> 📖 Chi tiết về Agent Teams: xem [60-agent-orchestration.md](./60-agent-orchestration.md)
 
 ---
 
-## 3. Project Phases & Tracking
+## 3. Agent Recommendations
 
-We track progress in `.tracking/`.
+| Task Category               | Recommended Agent                              |
+| :-------------------------- | :--------------------------------------------- |
+| **New API / DB Schema**     | `backend-specialist` hoặc `database-architect` |
+| **New UI Page / Component** | `frontend-specialist`                          |
+| **Bug Investigation**       | `Explore` (research) hoặc `debugger` (fix)     |
+| **Writing Tests**           | `test-engineer`                                |
+| **CI/CD & Docker**          | `devops-engineer`                              |
+| **Security Audit**          | `security-auditor`                             |
+| **Codebase Research**       | `Explore`                                      |
 
-*   **`PROGRESS.md`**: High-level phase tracking (Foundation -> Backend -> Frontend...).
-*   **`CURRENT_TASKS.md`**: What is happening *right now*.
-
-### Phase Execution Matrix
-
-| Phase | Focus Area | Primary Agents | Plan Files |
-| :--- | :--- | :--- | :--- |
-| **1** | Database & Infra | `database-architect`, `devops-engineer` | `10-*.md`, `12-*.md` |
-| **2** | Backend Core | `backend-specialist` | `20-*.md`, `21-*.md` |
-| **3** | Realtime/MQTT | `backend-specialist` | `22-*.md` |
-| **4** | Frontend Core | `frontend-specialist` | `30-*.md`, `31-*.md` |
-| **5** | Advanced Features | `frontend-specialist`, `backend-specialist` | `32-*.md` |
-| **6** | Mobile | `mobile-developer` | `40-*.md` |
-| **7** | Deploy & Ops | `devops-engineer` | `50-*.md` |
+### Cách trigger
+- *"Have the backend specialist implement the Auth API."*
+- *"Run a security audit on the new endpoints."*
+- *"Tạo team 3 người review PR này: security, performance, test coverage."*
 
 ---
 
-## 4. Best Practices
+## 4. Phase Execution Matrix
+
+Tracking tại `.tracking/`. Xem [60-agent-orchestration.md](./60-agent-orchestration.md) Section 6 cho chi tiết.
+
+| Phase | Focus Area        | Primary Agents                 | Plan Files           | Deps      |
+| :---- | :---------------- | :----------------------------- | :------------------- | :-------- |
+| **1** | Database & Infra  | `database-architect`, `devops` | `10-*.md`, `12-*.md` | ✅ Độc lập |
+| **2** | Backend Core      | `backend-specialist`           | `20-*.md`, `21-*.md` | ⚠️ Phase 1 |
+| **3** | Realtime/MQTT     | `backend-specialist`           | `22-*.md`            | ⚠️ Phase 2 |
+| **4** | Frontend Core     | `frontend-specialist`          | `30-*.md`, `31-*.md` | ⚠️ Phase 2 |
+| **5** | Advanced Features | `frontend` + `backend`         | `32-*.md`            | ⚠️ Phase 4 |
+| **6** | Mobile            | `mobile-developer`             | `40-*.md`            | ⚠️ Phase 4 |
+| **7** | Deploy & Ops      | `devops-engineer`              | `50-*.md`            | ⚠️ All     |
+
+**Parallel opportunities:** Phase 3 + Phase 4 có thể chạy song song (cả hai phụ thuộc Phase 2, nhưng độc lập nhau). Dùng Agent Teams cho việc này.
+
+---
+
+## 5. Best Practices
 
 ### 📚 Read Before Write
-Always instruct agents to **read the relevant `SystemDesign/coding-plan/` files** before writing code. This ensures they follow the project's architectural standards.
+Luôn yêu cầu agents **đọc `SystemDesign/coding-plan/` files** trước khi code.
 
 ### ⚡ Parallel Execution
-The Main Agent can launch multiple sub-agents at once.
-*   *Example:* "Implement the Backend API for Vehicles AND the Frontend List Component in parallel."
+- Agent Teams cho multi-module: *"Backend API + Frontend Component + Tests — mỗi teammate 1 layer."*
+- Subagent cho single task: *"Research how MQTT messages are handled."*
 
 ### 🛡️ Verification
-After an agent completes a task, it is good practice to run a quick verification or test.
-*   *"Backend is done. Now run the tests to verify."*
+Sau khi teammate hoàn thành → chạy verification: *"Backend done. Run tests to verify."*
+
+### 🚀 Bắt đầu an toàn
+1. Bắt đầu với **team 2 người** cho research/review
+2. Scale lên 3-5 cho feature build khi đã quen
+3. Dùng **Delegate Mode** (`Shift+Tab`) cho parallel implementation
 
 ---
 
-## 5. Directory Structure Reference
+## 6. Reference
 
 ```
 SystemDesign/
-├── coding-plan/          # The Instructions (READ THIS)
+├── coding-plan/          # Instructions (READ THIS)
+│   ├── 00-README.md      # Entry point
+│   ├── 03-execution-guide.md  # This file
 │   ├── 10-database...
 │   ├── 20-backend...
+│   ├── 60-agent-orchestration.md  # Agent Teams handbook (SSOT)
 │   └── ...
 └── iot-project-template/ # Generic Reference
 ```
+
+
+
