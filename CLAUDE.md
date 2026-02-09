@@ -233,6 +233,27 @@ phases/phase-2-backend/2B-device-module.md
 2. Max 6 main files per session
 3. Log progress to `.tracking/` when context > 70%
 
+### Compaction Rules (BẮT BUỘC)
+
+Khi context bị compact (tự động hoặc `/compact`), **luôn giữ lại:**
+- Danh sách files đã sửa và đường dẫn đầy đủ
+- Task ID hiện tại và sub-phase đang thực hiện
+- Test commands đã sử dụng và kết quả pass/fail
+- Error messages đang được investigate (nếu có)
+- API contracts hoặc type signatures quan trọng đang dùng
+
+**Compact có hướng dẫn (khuyến nghị):**
+```
+/compact Giữ lại: task IDs, files đã sửa, test results, error messages
+```
+
+### Subagent Guidelines
+
+- **Foreground subagent** (mặc định): Chặn main conversation, dùng khi cần Q&A
+- **Background subagent** ("run in background"): Chạy song song, dùng cho research/test
+- **Nghiên cứu trước**: Luôn explore code hiện có trước khi implement
+- **Resume**: Có thể resume subagent với context cũ bằng "Continue that [task]"
+
 
 ## Reference Projects
 

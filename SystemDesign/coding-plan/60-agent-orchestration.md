@@ -850,4 +850,21 @@ Khi context đầy (>70%), agent **PHẢI**:
 | Max 6 files per session          | Open 20+ files            |
 | Output `head -20` khi test       | Output entire test result |
 
+---
 
+## 17. Changelog
+
+### 2026-02-09 — P0+P1 Best Practices Alignment
+
+**Dựa trên nghiên cứu tài liệu chính thức Anthropic (agent-teams, sub-agents, best-practices):**
+
+**P0 (Đã áp dụng):**
+- ✅ Thêm **Compaction Rules** + **Subagent Guidelines** vào `CLAUDE.md`
+- ✅ Đặt `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=50` trong `.claude/settings.json`
+- ✅ Thêm checkpoint **"Trước khi Implement (BẮT BUỘC)"** vào tất cả context templates
+- ✅ Bổ sung **Background chi tiết** cho context templates (DB tables, API endpoints, types, patterns)
+
+**P1 (Đã áp dụng):**
+- ✅ Cập nhật 4 agent files với Claude Code subagent fields (`permissionMode`, `maxTurns`)
+- ✅ Thêm **IVM26 Context Rules** vào từng agent (file scope, explore trước, output gọn)
+- ✅ Chuyển `code-archaeologist` sang **read-only** (model: sonnet, permissionMode: plan)

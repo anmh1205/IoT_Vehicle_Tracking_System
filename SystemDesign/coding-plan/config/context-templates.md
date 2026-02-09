@@ -33,8 +33,10 @@ Read: `phases/[phase-folder]/[sub-phase].md` (~XKB)
 2. Max 6 files chính per session
 3. Chỉ đọc full spec sections khi cần chi tiết (có link trong compact file)
 
-### Checkpoint (cho risky tasks)
-- [ ] **Generate plan TRƯỚC khi code** — outline approach, confirm với Lead nếu cần
+### Trước khi Implement (BẮT BUỘC)
+- [ ] **Explore code hiện có** trong file ownership paths — hiểu patterns đang dùng
+- [ ] **Generate approach outline** — xác nhận kiến trúc phù hợp trước khi viết
+- [ ] **Confirm với Lead** nếu thấy conflicts hoặc kiến trúc khác spec
 
 ### Verification
 - [ ] `npx tsc --noEmit 2>&1 | head -20` — no errors
@@ -55,10 +57,12 @@ Read: `phases/[phase-folder]/[sub-phase].md` (~XKB)
 ### Objective
 Implement authentication: login/logout, session tokens, auth middleware.
 
-### Background
-- **Project state:** Phase 1 done (PostgreSQL, Docker). Starting Phase 2 Backend.
+### Background (QUAN TRỌNG — Teammates KHÔNG có conversation history!)
+- **Project state:** Phase 1 done (PostgreSQL, Docker running). Starting Phase 2 Backend.
 - **Tech stack:** Express, TypeScript, Zod, PostgreSQL, Session-based auth
-- **Blockers/Notes:** Session tokens hashed with SHA-256, no JWT
+- **DB tables có sẵn:** `users` (id, username, password_hash, role), `user_sessions` (token_hash, user_id, expires_at)
+- **Patterns đang dùng:** Layered architecture (Controller → Service → Repository), Zod validation, `@/*` path alias
+- **Blockers/Notes:** Session tokens hashed với SHA-256, KHÔNG dùng JWT. Single session policy (login mới deactivate session cũ)
 
 ### Context File (BẮT BUỘC đọc trước)
 Read: `phases/phase-2-backend/2A-auth-module.md` (~4KB)
@@ -69,6 +73,10 @@ Read: `phases/phase-2-backend/2A-auth-module.md` (~4KB)
 - `Tracking_Backend/src/domain/auth/services/*.service.ts`
 - `Tracking_Backend/src/domain/auth/repositories/*.repository.ts`
 - `Tracking_Backend/src/middleware/auth.middleware.ts`
+
+### Trước khi Implement (BẮT BUỘC)
+- [ ] **Explore:** Xem existing files trong `Tracking_Backend/src/domain/auth/` (nếu có)
+- [ ] **Outline:** Tạo approach outline trước khi implement
 
 ### Context Rules
 1. Compact context có DB schema, API contract — không cần đọc 20-backend-architecture.md
@@ -96,10 +104,13 @@ Read: `phases/phase-2-backend/2A-auth-module.md` (~4KB)
 ### Objective
 Implement Device management UI: list, detail modal, CRUD, real-time updates.
 
-### Background
-- **Project state:** Phase 4A done (Auth context, Layout). Backend Phase 2B done (Device API ready).
-- **Tech stack:** Next.js 15, React 19, Tailwind, TanStack Query, Socket.IO client
-- **Blockers/Notes:** REST polling disabled khi WebSocket connected
+### Background (QUAN TRỌNG — Teammates KHÔNG có conversation history!)
+- **Project state:** Phase 4A done (Auth context, Layout shells). Backend Phase 2B done (Device API ready).
+- **Tech stack:** Next.js 15 (App Router), React 19, Tailwind CSS 4, TanStack Query, Socket.IO client
+- **API endpoints có sẵn:** `GET /api/v1/device/list`, `GET /api/v1/device/:id`, `POST/PUT/DELETE /api/v1/device`
+- **Types sẵn có:** Import từ `@/types/api/device.types.ts` (DeviceDTO, DeviceListResponse)
+- **Patterns đã thiết lập:** Feature-Sliced Architecture (`features/{name}/components,hooks,types`), Zustand (global state), TanStack Query (server state)
+- **Blockers/Notes:** REST polling disabled khi WebSocket connected. Token lưu trong memory (Zustand), KHÔNG localStorage
 
 ### Context File (BẮT BUỘC đọc trước)
 Read: `phases/phase-4-frontend/4B-device-ui.md` (~4KB)
@@ -109,6 +120,10 @@ Read: `phases/phase-4-frontend/4B-device-ui.md` (~4KB)
 - `Tracking_Frontend/components/devices/*.tsx`
 - `Tracking_Frontend/hooks/useDevices.ts`
 - `Tracking_Frontend/hooks/useDeviceRealtime.ts`
+
+### Trước khi Implement (BẮT BUỘC)
+- [ ] **Explore:** Xem existing components trong `Tracking_Frontend/features/` (patterns đang dùng)
+- [ ] **Outline:** Tạo component structure outline trước khi implement
 
 ### Context Rules
 1. Compact context có API contract từ BE Phase 2B — không cần đọc 21-backend-api-endpoints.md
@@ -136,16 +151,22 @@ Read: `phases/phase-4-frontend/4B-device-ui.md` (~4KB)
 ### Objective
 Implement standalone MQTT Bridge: EMQX subscriber, data processing, internal event publishing.
 
-### Background
-- **Project state:** Phase 1 done (EMQX, VictoriaMetrics running). Phase 2C IoT APIs ready to consume.
-- **Tech stack:** Standalone TypeScript service, MQTT.js, PostgreSQL pool, VictoriaMetrics HTTP API
-- **Blockers/Notes:** Dùng `clean: false` + stable `clientId` cho persistent sessions
+### Background (QUAN TRỌNG — Teammates KHÔNG có conversation history!)
+- **Project state:** Phase 1 done (EMQX broker port 1883, VictoriaMetrics port 8428 running). Phase 2A Auth done.
+- **Tech stack:** Standalone TypeScript service (KHÔNG phải NestJS), MQTT.js, PostgreSQL pool, VictoriaMetrics HTTP API
+- **Services đang chạy:** EMQX (1883), PostgreSQL (5432), VictoriaMetrics (8428), VictoriaLogs (9428)
+- **DB tables:** `devices` (device_id, status), `device_sessions` (session_id, device_id, start_ts, end_ts)
+- **Blockers/Notes:** Dùng `clean: false` + stable `clientId` cho persistent sessions. MQTT 5.x protocol
 
 ### Context File (BẮT BUỘC đọc trước)
 Read: `phases/phase-3-mqtt/3A-mqtt-bridge.md` (~4KB)
 
 ### File Ownership
 - `Tracking_MqttBridge/src/**/*`
+
+### Trước khi Implement (BẮT BUỘC)
+- [ ] **Explore:** Xem existing code trong `Tracking_MqttBridge/src/` (nếu có)
+- [ ] **Outline:** Tạo message flow outline trước khi implement
 
 ### Context Rules
 1. Compact context có MQTT topics, payload schema, circuit breaker pattern
