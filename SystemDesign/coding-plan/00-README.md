@@ -15,8 +15,9 @@ Before writing a single line of code, you **MUST** verify:
     *   Delegate Mode & Setup (Section 2)
     *   Use Cases & Patterns (Section 3-4)
     *   Git Branching, Task ID, Error Handling (Section 6-9)
-    *   **Leader Autonomy Protocol (Section 13)** ← Agent Lead PHẢI đọc
-    *   **Sub-Phase Breakdown (Section 14)** ← Task chia nhỏ với file ownership
+    *   **Leader Autonomy Protocol (Section 14)** ← Agent Lead PHẢI đọc
+    *   **Sub-Phase Breakdown (Section 15)** ← Task chia nhỏ với file ownership
+    *   **Context Management (Section 13)** ← Tránh context limit
 4.  **Read Specs:** Never guess. Read the `SystemDesign/*.md` files listed below.
 
 ---
@@ -45,19 +46,22 @@ Before writing a single line of code, you **MUST** verify:
     *   [11-database-victoriametrics.md](./11-database-victoriametrics.md) (Time-series)
     *   [12-docker-infrastructure.md](./12-docker-infrastructure.md) (Docker Compose)
 
-### 🟠 Phase 2: Backend Core → Sub-Phases 2A/2B/2C/2D
-> *Status: See PROGRESS.md* | *Sub-phases: See [60-agent-orchestration.md](./60-agent-orchestration.md) Section 14*
-*   **2A:** Auth Module (6 tasks) → **2B:** Device Module (6 tasks) → **2C:** Support Modules (5 tasks) → **2D:** Verification
+### 🟠 Phase 2: Backend Core → Sub-Phases 2A/2B/2C/2D/2E
+> *Status: See PROGRESS.md* | *Sub-phases: See [60-agent-orchestration.md](./60-agent-orchestration.md) Section 15*
+*   **2A:** Auth Module (6 tasks) → **2B:** Device Module (6 tasks) → **2C:** Support Modules (5 tasks) → **2D:** Verification → **2E:** Vehicle Tracking Core Domains (8 tasks)
 *   **Specs:**
     *   [20-backend-architecture.md](./20-backend-architecture.md) (DDD Setup)
-    *   [21-backend-api-endpoints.md](./21-backend-api-endpoints.md) (API Contract)
-    *   [23-backend-security.md](./23-backend-security.md) (Auth & Security)
+    *   [21-backend-api-endpoints.md](./21-backend-api-endpoints.md) (API Contract, plural REST URLs)
+    *   [23-backend-security.md](./23-backend-security.md) (Session-based Auth & Security)
+    *   [24-websocket-events.md](./24-websocket-events.md) (WebSocket Event Contract)
 
 ### 🟡 Phase 3: Real-time & IoT (High Throughput)
 > *Status: See PROGRESS.md*
+> **Deps:** Phase 1 + Phase 2A only. Can run parallel with Phase 2C/2D/2E and Phase 4A.
 *   **Agents:** `backend-specialist`
 *   **Specs:**
-    *   [22-backend-mqtt-bridge.md](./22-backend-mqtt-bridge.md) (Ingestion)
+    *   [22-backend-mqtt-bridge.md](./22-backend-mqtt-bridge.md) (Standalone Tracking_MqttBridge/)
+    *   [24-websocket-events.md](./24-websocket-events.md) (Event Contract)
 
 ### 🟢 Phase 4: Frontend Core → Sub-Phases 4A/4B/4C
 > *Status: See PROGRESS.md* | *Sub-phases: See [60-agent-orchestration.md](./60-agent-orchestration.md) Section 14*
@@ -67,7 +71,7 @@ Before writing a single line of code, you **MUST** verify:
     *   [31-frontend-features.md](./31-frontend-features.md) (Feature Specs)
 
 ### 🔵 Phase 5: Advanced Features → Sub-Phases 5A/5B
-> *Status: See PROGRESS.md* | *Sub-phases: See [60-agent-orchestration.md](./60-agent-orchestration.md) Section 14*
+> *Status: See PROGRESS.md* | *Sub-phases: See [60-agent-orchestration.md](./60-agent-orchestration.md) Section 15*
 *   **5A:** Map + Geofence (3 tasks) ∥ **5B:** Alerts + Maintenance (3 tasks) — **chạy song song**
 *   **Specs:**
     *   [32-frontend-implementation.md](./32-frontend-implementation.md) (Map, Alerts, etc.)
@@ -89,11 +93,12 @@ Before writing a single line of code, you **MUST** verify:
 ## 🛠️ Quick Actions for Agents
 
 **To Start a Phase (Agent Lead — Zero-Intervention Mode):**
-1.  Đọc **[60-agent-orchestration.md](./60-agent-orchestration.md) Section 13** (Leader Autonomy Protocol)
-2.  Đọc **Section 14** để biết sub-phases + file ownership
-3.  Đọc `.tracking/PROGRESS.md` để biết sub-phase nào tiếp theo
-4.  Tự động dispatch: spawn teammates → inject context → verify → next sub-phase
-5.  **CHỈ hỏi User khi:** architecture change, verify fail 3 lần, file conflict
+1.  Đọc **[60-agent-orchestration.md](./60-agent-orchestration.md) Section 14** (Leader Autonomy Protocol)
+2.  Đọc **Section 15** để biết sub-phases + file ownership
+3.  Đọc **Section 13** để tránh context limit (QUAN TRỌNG)
+4.  Đọc `.tracking/PROGRESS.md` để biết sub-phase nào tiếp theo
+5.  Tự động dispatch: spawn teammates → inject context → verify → next sub-phase
+6.  **CHỈ hỏi User khi:** architecture change, verify fail 3 lần, file conflict
 
 **Quick commands cho User:**
 ```

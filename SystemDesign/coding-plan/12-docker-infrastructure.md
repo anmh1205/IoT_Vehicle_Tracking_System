@@ -101,13 +101,13 @@ services:
     container_name: tracking-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: ${POSTGRES_DB:-vehicle_tracking}
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -131,7 +131,7 @@ services:
     volumes:
       - victoriametrics-data:/storage
     ports:
-      - "8428:8428"
+      - "127.0.0.1:8428:8428"
     restart: unless-stopped
     networks:
       - tracking-network
@@ -146,7 +146,7 @@ services:
     volumes:
       - victorialogs-data:/storage
     ports:
-      - "9428:9428"
+      - "127.0.0.1:9428:9428"
     restart: unless-stopped
     networks:
       - tracking-network
@@ -189,11 +189,11 @@ services:
       - ./docker/emqx/config:/opt/emqx/etc:ro
       - ./docker/emqx/certs:/opt/emqx/etc/certs:rw
     ports:
-      - "1883:1883"     # MQTT (non-TLS) - internal/dev
-      - "8883:8883"     # MQTTS (TLS) - production ⭐
-      - "8083:8083"     # WebSocket (WS)
-      - "8084:8084"     # WebSocket Secure (WSS) ⭐
-      - "18083:18083"   # Dashboard
+      - "127.0.0.1:1883:1883"     # MQTT (non-TLS) - internal/dev only
+      - "0.0.0.0:8883:8883"       # MQTTS (TLS) - production, devices connect here ⭐
+      - "127.0.0.1:8083:8083"     # WebSocket (WS) - internal only
+      - "0.0.0.0:8084:8084"       # WebSocket Secure (WSS) - production ⭐
+      - "127.0.0.1:18083:18083"   # Dashboard - admin only, NOT public - admin only, NOT public
     healthcheck:
       test: ["CMD", "emqx", "ping"]
       interval: 10s
@@ -202,6 +202,26 @@ services:
     restart: unless-stopped
     networks:
       - tracking-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2.0'
+
+# =============================================================================
+# EMQX ACL Configuration (C5 — CRITICAL)
+# =============================================================================
+# Configure EMQX Authorization rules in EMQX Dashboard or etc/emqx.conf:
+#
+# Device clients:  ALLOW publish  v1/{own_client_id}/#
+#                  DENY  publish  v1/{other_id}/#
+#                  DENY  subscribe v1/#
+#
+# Backend/Bridge:  ALLOW subscribe v1/#, $SYS/#
+#                  ALLOW publish  $SYS/internal/#
+#
+# See EMQX docs: https://www.emqx.io/docs/en/latest/access-control/authz/authz.html
+# =============================================================================
 
   # =============================================================================
   # BACKEND API
@@ -218,16 +238,16 @@ services:
       POSTGRESQL_PORT: 5432
       POSTGRESQL_DATABASE: ${POSTGRES_DB:-vehicle_tracking}
       POSTGRESQL_USER: ${POSTGRES_USER:-postgres}
-      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       VICTORIAMETRICS_URL: http://victoriametrics:8428
       VICTORIALOGS_URL: http://victorialogs:9428
       MQTT_BROKER_URL: mqtt://emqx:1883
       MQTT_USERNAME: ${MQTT_USERNAME:-backend}
-      MQTT_PASSWORD: ${MQTT_PASSWORD:-secret}
-      JWT_SECRET: ${JWT_SECRET:-your-secret-key}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:?MQTT_PASSWORD is required}
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3002}
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"   # Behind reverse proxy, not public
     depends_on:
       postgres:
         condition: service_healthy
@@ -238,6 +258,13 @@ services:
     restart: unless-stopped
     networks:
       - tracking-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
 
   # =============================================================================
   # MQTT BRIDGE (Standalone Worker)
@@ -254,12 +281,12 @@ services:
       POSTGRESQL_PORT: 5432
       POSTGRESQL_DATABASE: ${POSTGRES_DB:-vehicle_tracking}
       POSTGRESQL_USER: ${POSTGRES_USER:-postgres}
-      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       VICTORIAMETRICS_URL: http://victoriametrics:8428
       VICTORIALOGS_URL: http://victorialogs:9428
       MQTT_BROKER_URL: mqtt://emqx:1883
       MQTT_USERNAME: ${MQTT_USERNAME:-backend}
-      MQTT_PASSWORD: ${MQTT_PASSWORD:-secret}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:?MQTT_PASSWORD is required}
     depends_on:
       postgres:
         condition: service_healthy
@@ -270,6 +297,11 @@ services:
     restart: unless-stopped
     networks:
       - tracking-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
 
   # =============================================================================
   # FRONTEND
@@ -283,7 +315,7 @@ services:
       NEXT_PUBLIC_API_BASE_URL: ${API_BASE_URL:-http://localhost:3000/api/v1}
       NEXT_PUBLIC_WS_URL: ${WS_URL:-http://localhost:3000}
     ports:
-      - "3002:3000"
+      - "127.0.0.1:3002:3000"   # Behind reverse proxy, not public
     depends_on:
       - backend
     restart: unless-stopped
@@ -298,13 +330,13 @@ services:
     container_name: tracking-grafana
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?GRAFANA_PASSWORD is required}
       GF_INSTALL_PLUGINS: grafana-clock-panel
     volumes:
       - grafana-data:/var/lib/grafana
       - ./docker/grafana/provisioning:/etc/grafana/provisioning
     ports:
-      - "3001:3000"
+      - "127.0.0.1:3001:3000"
     restart: unless-stopped
     networks:
       - tracking-network
@@ -313,7 +345,7 @@ services:
   # REVERSE PROXY (Optional - Production)
   # =============================================================================
   nginx:
-    image: nginx:alpine
+    image: nginx:1.25-alpine   # Pin to specific version (L6)
     container_name: tracking-nginx
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -348,6 +380,11 @@ networks:
   tracking-network:
     driver: bridge
 ```
+
+> ⚠️ **Production:** Segment into separate networks:
+> - `tracking-public` (Frontend, NPM)
+> - `tracking-application` (Backend, MQTT Bridge, Frontend)
+> - `tracking-data` (PostgreSQL, VictoriaMetrics, VictoriaLogs, EMQX - internal: true)
 
 ---
 
@@ -502,15 +539,15 @@ http {
 # .env
 # PostgreSQL
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_secure_password
+POSTGRES_PASSWORD=              # REQUIRED - no default, set a strong password
 POSTGRES_DB=vehicle_tracking
 
 # MQTT
 MQTT_USERNAME=backend
-MQTT_PASSWORD=your_mqtt_password
+MQTT_PASSWORD=                  # REQUIRED - no default
 
-# JWT
-JWT_SECRET=your_jwt_secret_key_here
+# Session Auth (NOT JWT — database-backed tokens)
+SESSION_SECRET=                 # REQUIRED - min 32 chars, no default
 
 # CORS
 CORS_ORIGIN=http://localhost:3002
@@ -521,7 +558,7 @@ WS_URL=http://localhost:3000
 
 # Grafana
 GRAFANA_USER=admin
-GRAFANA_PASSWORD=admin
+GRAFANA_PASSWORD=               # REQUIRED - change in production, no default
 ```
 
 ---
@@ -616,13 +653,56 @@ docker exec tracking-victoriametrics vmrestore -src=fs:///backup
 
 ## 12. Production Checklist
 
-- [ ] Change all default passwords
+- [x] Secrets are REQUIRED (no defaults) - enforced via :? syntax
 - [ ] Enable SSL/TLS (nginx + Let's Encrypt)
 - [ ] Configure proper log rotation
 - [ ] Set up monitoring alerts
 - [ ] Configure backup schedule
 - [ ] Enable rate limiting
-- [ ] Set resource limits (memory, CPU)
-- [ ] Configure proper network policies
+- [ ] Set resource limits (memory, CPU) — see example below
+- [ ] Configure proper network policies (segment into public/application/data networks)
 - [ ] Enable health checks for all services
-- [ ] Set up CI/CD pipeline
+- [ ] Set up CI/CD pipeline (see `99-plan-review-and-improvements.md` Section 5.6)
+- [ ] Configure MQTT ACL rules (see EMQX ACL section above)
+- [ ] Bind data service ports to 127.0.0.1 (PostgreSQL, VictoriaMetrics, Grafana)
+
+### Resource Limits Example (H12)
+
+```yaml
+# Add to each service in docker-compose.yml
+services:
+  backend:
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+  postgres:
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2.0'
+  emqx:
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2.0'
+  mqtt-bridge:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+  victoriametrics:
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+```
+
+> ⚠️ Set limits to ~2x expected usage. Better to OOM-kill one container than take down the host.

@@ -13,3 +13,10 @@
 /iot-vehicle-tracking-system/frontend/.next/build
 /iot-vehicle-tracking-system/frontend/.next
 /iot-vehicle-tracking-system/frontend/node_modules
+
+# Infrastructure persistent data (Docker volumes)
+IoT_Vehicle_Tracking_System/Tracking_Data/
+
+# Environment variables
+*.env
+!.env.example

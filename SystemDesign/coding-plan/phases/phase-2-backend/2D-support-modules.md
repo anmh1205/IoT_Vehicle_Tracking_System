@@ -1,0 +1,86 @@
+# Sub-Phase 2D: Support Modules
+
+> **Context:** ~4KB | **Max Files:** 12 | **Est. Time:** 1 session
+
+## Summary
+Implement support modules: Dashboard stats, Firmware management, Export jobs, và System admin APIs.
+
+## Tasks
+| ID     | Description                   | Files                                                            |
+| ------ | ----------------------------- | ---------------------------------------------------------------- |
+| BE-030 | Dashboard controller + routes | `api/controllers/dashboard.controller.ts`, `dashboard.routes.ts` |
+| BE-031 | Dashboard stats service       | `domain/dashboard/services/dashboard-stats.service.ts`           |
+| BE-032 | Activity log service          | `domain/dashboard/services/activity-log.service.ts`              |
+| BE-033 | Firmware controller + routes  | `api/controllers/firmware.controller.ts`, `firmware.routes.ts`   |
+| BE-034 | Firmware services             | `domain/firmware/services/*.service.ts`                          |
+| BE-035 | Export controller + routes    | `api/controllers/export.controller.ts`, `export.routes.ts`       |
+| BE-036 | Export services               | `domain/export/services/*.service.ts`                            |
+| BE-037 | System admin controller       | `api/controllers/system-admin.controller.ts`                     |
+| BE-038 | Audit service + repository    | `domain/audit/services/audit.service.ts`                         |
+
+## Dashboard API Contract
+| Endpoint                         | Method | Response                                                |
+| -------------------------------- | ------ | ------------------------------------------------------- |
+| `GET /api/v1/dashboard/stats`    | GET    | `{ totalDevices, activeDevices, totalRuntime, alerts }` |
+| `GET /api/v1/dashboard/activity` | GET    | `{ events: Event[], pagination }`                       |
+| `GET /api/v1/dashboard/alerts`   | GET    | `{ alerts: Alert[], pagination }`                       |
+
+## Firmware API Contract
+| Endpoint                            | Method | Description                     |
+| ----------------------------------- | ------ | ------------------------------- |
+| `GET /api/v1/firmware`              | GET    | List firmware versions          |
+| `POST /api/v1/firmware`             | POST   | Upload new firmware (multipart) |
+| `GET /api/v1/firmware/:id`          | GET    | Firmware details                |
+| `DELETE /api/v1/firmware/:id`       | DELETE | Delete firmware                 |
+| `PUT /api/v1/firmware/:id/activate` | PUT    | Activate/deactivate             |
+| `POST /api/v1/firmware/:id/assign`  | POST   | Assign to devices               |
+
+## Export API Contract
+| Endpoint                           | Method | Description       |
+| ---------------------------------- | ------ | ----------------- |
+| `GET /api/v1/exports`              | GET    | List export jobs  |
+| `POST /api/v1/exports`             | POST   | Create export job |
+| `GET /api/v1/exports/:id`          | GET    | Job status        |
+| `GET /api/v1/exports/:id/download` | GET    | Download file     |
+
+## System Admin API Contract (Admin Only)
+| Endpoint                                | Method | Description           |
+| --------------------------------------- | ------ | --------------------- |
+| `GET /api/v1/system-admin/metrics`      | GET    | VictoriaMetrics query |
+| `GET /api/v1/system-admin/logs`         | GET    | VictoriaLogs query    |
+| `GET /api/v1/system-admin/audit/:table` | GET    | Query audit tables    |
+| `GET /api/v1/system-admin/health`       | GET    | System health check   |
+
+## Dashboard Response Types
+```typescript
+interface DashboardStats {
+  totalDevices: number;
+  activeDevices: number;       // current_status = 'running'
+  offlineDevices: number;      // current_status = 'disconnected'
+  totalRuntimeToday: number;   // seconds
+  totalRuntimeWeek: number;
+  alertsCount: number;
+}
+
+interface ActivityEvent {
+  id: number;
+  eventType: string;
+  deviceId: string;
+  message: string;
+  severity: string;
+  timestamp: string;
+}
+```
+
+## Dependencies
+- ✅ Phase 2A-2C done (auth, device, IoT modules)
+- ➡️ Phase 4 (Frontend) sẽ dùng APIs này
+
+## Verification
+- [ ] Dashboard stats: `GET /api/v1/dashboard/stats` returns stats
+- [ ] Firmware upload: multipart upload works
+- [ ] Export job: async job creation + progress tracking
+- [ ] Admin routes: 403 for non-admin users
+
+## Full Spec Reference
+- [20-backend-architecture.md#section-3.4-3.5](./../../20-backend-architecture.md) — Dashboard, Firmware domains

@@ -26,7 +26,7 @@
 │  └───────────────────────────┬─────────────────────────┘    │
 │                              ▼                               │
 │  ┌─────────────────────────────────────────────────────┐    │
-│  │ 4. Authentication - JWT validation                  │    │
+│  │ 4. Authentication - Session token validation          │    │
 │  └───────────────────────────┬─────────────────────────┘    │
 │                              ▼                               │
 │  ┌─────────────────────────────────────────────────────┐    │
@@ -51,14 +51,12 @@
     "express-rate-limit": "^8.2.1",
     "cors": "^2.8.5",
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
     "zod": "^3.23.8",
     "express-validator": "^7.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.6"
+    "@types/bcryptjs": "^2.4.6"
   }
 }
 ```
@@ -332,7 +330,7 @@ export function configureCors(app: Application): void {
 ```typescript
 // domain/auth/services/auth-session.service.ts
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
+import crypto, { createHash } from 'crypto';
 import { addHours } from 'date-fns';
 import { UserRepository } from '../repositories/user.repository';
 import { UserSessionRepository } from '../repositories/user-session.repository';
@@ -341,6 +339,14 @@ import { createUnauthorizedError } from '@/shared/utils/errors.util';
 import { logger } from '@/infrastructure/logger';
 
 const SESSION_EXTENSION_HOURS = 4; // Sliding window
+
+/**
+ * Hash a session token before storing or looking up in the database.
+ * Raw tokens are never persisted -- only SHA-256 digests.
+ */
+function hashToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
 
 interface AuditContext {
   ip: string;
@@ -375,19 +381,29 @@ export class AuthSessionService {
   async validateSessionToken(token: string): Promise<AuthenticatedUser | null> {
     if (!token) return null;
 
-    // Find active session in database
-    const session = await this.userSessionRepo.findActiveSessionByToken(token);
+    const hashedToken = hashToken(token);
+
+    // Find active session in database (lookup by hashed token)
+    const session = await this.userSessionRepo.findActiveSessionByToken(hashedToken);
     if (!session) return null;
 
     // Check if session expired
     if (new Date() > session.expires_at) {
-      await this.userSessionRepo.deactivateSession(token);
+      await this.userSessionRepo.deactivateSession(hashedToken);
+      return null;
+    }
+
+    // Check absolute session lifetime (prevents infinite sessions via sliding window)
+    const MAX_SESSION_LIFETIME_HOURS = 24;
+    const sessionAge = Date.now() - new Date(session.created_at).getTime();
+    if (sessionAge > MAX_SESSION_LIFETIME_HOURS * 60 * 60 * 1000) {
+      await this.userSessionRepo.deactivateSession(hashedToken);
       return null;
     }
 
     // Extend session expiry (sliding window)
     const newExpiry = addHours(new Date(), SESSION_EXTENSION_HOURS);
-    await this.userSessionRepo.updateExpiry(token, newExpiry);
+    await this.userSessionRepo.updateExpiry(hashedToken, newExpiry);
 
     return {
       id: session.user_id,
@@ -444,10 +460,10 @@ export class AuthSessionService {
     const sessionToken = crypto.randomBytes(64).toString('hex');
     const expiresAt = addHours(new Date(), SESSION_EXTENSION_HOURS);
 
-    // Store session in database
+    // Store hashed token in database (raw token is only returned to client)
     await this.userSessionRepo.createSession({
       userId: user.id,
-      sessionToken,
+      sessionToken: hashToken(sessionToken),
       expiresAt,
       ip: auditCtx?.ip,
       userAgent: auditCtx?.userAgent,
@@ -483,7 +499,7 @@ export class AuthSessionService {
    * Logout and invalidate session
    */
   async logoutSession(token: string, auditCtx?: AuditContext): Promise<boolean> {
-    const result = await this.userSessionRepo.deactivateSession(token);
+    const result = await this.userSessionRepo.deactivateSession(hashToken(token));
     if (result && auditCtx) {
       await this.auditService?.logLogout(auditCtx);
     }
@@ -581,6 +597,30 @@ export function requireRoles(roles: string[]) {
 
     next();
   });
+}
+
+/**
+ * Resource-level authorization: prevents IDOR attacks
+ */
+export function requireOwnership(
+  getResourceCustomerId: (req: Request) => Promise<string | null>
+): RequestHandler {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user!;
+      if (user.role === 'root' || user.role === 'admin') return next();
+      const resourceCustomerId = await getResourceCustomerId(req);
+      if (!resourceCustomerId || resourceCustomerId !== user.customer_id) {
+        return res.status(403).json({
+          error: 'FORBIDDEN',
+          message: 'You do not have access to this resource',
+        });
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 /**
@@ -874,6 +914,21 @@ export class SafeQueryBuilder {
       throw new Error(`Invalid table: ${table}`);
     }
 
+    // Whitelist allowed column names per table to prevent SQL injection
+    const ALLOWED_COLUMNS: Record<string, string[]> = {
+      devices: ['device_id', 'device_name', 'current_status', 'customer_id'],
+      users: ['username', 'email', 'role', 'customer_id'],
+      vehicles: ['plate_number', 'vin', 'customer_id'],
+    };
+
+    const tableColumns = ALLOWED_COLUMNS[table];
+    if (tableColumns) {
+      const invalidColumns = Object.keys(conditions).filter(col => !tableColumns.includes(col));
+      if (invalidColumns.length > 0) {
+        throw new ApiError(400, `Invalid filter columns: ${invalidColumns.join(', ')}`);
+      }
+    }
+
     const keys = Object.keys(conditions);
     const values = Object.values(conditions);
 
@@ -934,20 +989,20 @@ app.use('/api/v1/auth', authRateLimiter, authRoutes);
 app.use('/api/v1/iot', iotRateLimiter, iotRoutes);
 app.use('/api/v1', apiRateLimiter, authMiddleware, apiRoutes);
 
-// 10. Health/metrics (no auth)
+// 10. Health (no auth, but /metrics requires basic auth)
 app.use('/health', healthRoutes);
-app.use('/metrics', metricsRoutes);
+app.use('/metrics', basicAuthMiddleware, metricsRoutes); // H9: Protected from public access
 
 // 11. 404 handler
 app.use((req, res) => {
   res.status(404).json({ status: 404, error: 'Not Found' });
 });
 
-// 12. Error handler (LAST before Sentry)
-app.use(errorHandler);
-
-// 13. Sentry error handler (LAST)
+// 12. Sentry error handler (MUST be first error handler)
 app.use(Sentry.Handlers.errorHandler());
+
+// 13. Custom error handler (after Sentry captures the error)
+app.use(errorHandler);
 ```
 
 ---
@@ -955,11 +1010,8 @@ app.use(Sentry.Handlers.errorHandler());
 ## 11. Environment Variables
 
 ```bash
-# Security
-JWT_SECRET=your-super-secret-jwt-key-min-32-chars
-JWT_REFRESH_SECRET=your-refresh-secret-key
-JWT_EXPIRES_IN=15m
-JWT_REFRESH_EXPIRES_IN=7d
+# Note: Using database-backed session tokens (IVM26 pattern), NOT JWT.
+SESSION_SECRET=           # REQUIRED - min 32 chars, for session token generation
 
 # CORS
 CORS_ORIGIN=https://tracking.example.com
@@ -978,7 +1030,7 @@ REDIS_URL=redis://localhost:6379
 
 ### Pre-Deployment
 - [ ] All secrets in environment variables (not in code)
-- [ ] JWT secret is at least 32 characters
+- [ ] Session secret is at least 32 characters
 - [ ] HTTPS enforced in production
 - [ ] CORS configured for production domains only
 - [ ] Rate limiting enabled
@@ -994,8 +1046,8 @@ REDIS_URL=redis://localhost:6379
 - [ ] X-Content-Type-Options: nosniff
 
 ### Authentication
-- [ ] JWT expiration set (short-lived access tokens)
-- [ ] Refresh token rotation
+- [ ] Session max lifetime enforced (24h absolute)
+- [ ] Session sliding window configured (4h extension)
 - [ ] Secure password requirements
 - [ ] Account lockout after failed attempts
 - [ ] Session invalidation on logout

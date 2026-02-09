@@ -2,7 +2,11 @@
 
 > MQTT Bridge xử lý dữ liệu từ IoT devices qua EMQX broker
 >
-> ⚠️ **Kiến trúc:** MQTT Bridge là **standalone service** tại `mqtt-bridge/` (root level), KHÔNG nằm trong `backend/src/`
+> ⚠️ **Kiến trúc:** MQTT Bridge là **standalone service** tại `Tracking_MqttBridge/` (top-level folder), KHÔNG nằm trong `Tracking_Backend/src/`
+
+> ⚠️ **Import Note:** MQTT Bridge uses its OWN infrastructure files, not Backend's.
+> `@/` alias maps to `Tracking_MqttBridge/src/`, NOT `Tracking_Backend/src/`.
+> Logger, database pool, and config are self-contained within the Bridge.
 
 ---
 
@@ -60,6 +64,36 @@ v1/{device_id}/error        # Error reports
 v1/{device_id}/commands     # Commands to device
 v1/{device_id}/config       # Configuration updates
 v1/{device_id}/ota          # OTA firmware instructions
+```
+
+### 2.3 Internal Events (MQTT Bridge → Backend)
+
+> ⚠️ **Quyết định kiến trúc:** Dùng EMQX internal topics thay vì EventBus (in-process)
+> để MQTT Bridge có thể chạy standalone, tách biệt khỏi Backend process.
+> EMQX đã có sẵn trong stack — không cần thêm Redis.
+
+```
+internal/events/device/status      # Device online/offline/running/stopped
+internal/events/device/alert        # Vibration threshold, battery low, etc.
+internal/events/device/session      # Session start/end
+internal/events/device/data         # Real-time data summary (optional, QoS 0)
+```
+
+**QoS Strategy:**
+
+| Topic                            | QoS   | Lý do                                     |
+| -------------------------------- | ----- | ----------------------------------------- |
+| `internal/events/device/status`  | **1** | Quan trọng — user cần thấy online/offline |
+| `internal/events/device/alert`   | **1** | Business-critical — không được mất alert  |
+| `internal/events/device/session` | **1** | Session tracking cần chính xác            |
+| `internal/events/device/data`    | **0** | Tần suất cao, mất vài message OK          |
+
+**EMQX ACL Rules (thêm vào config):**
+
+```
+{allow, {user, "mqtt_bridge"}, publish, ["internal/events/#"]}.
+{allow, {user, "backend_service"}, subscribe, ["internal/events/#"]}.
+{deny, all, all, ["internal/#"]}.  % Block devices khỏi internal topics
 ```
 
 ---
@@ -146,7 +180,10 @@ mqtt-bridge/
 ├── types/
 │   └── payload.types.ts            # TypeScript types
 ├── constants/
-│   └── topics.ts                   # Topic constants
+│   ├── topics.ts                   # Device topic constants
+│   └── internal-events.ts          # Internal event topic constants + QoS
+├── publishers/
+│   └── internal-event.publisher.ts # Publish events to EMQX internal topics
 └── utils/
     ├── correlation.util.ts         # Request correlation
     └── retry.util.ts               # Retry logic
@@ -185,7 +222,13 @@ async function main() {
   // Handle messages
   client.on('message', async (topic, payload) => {
     const [, deviceId, type] = topic.split('/');
-    const data = JSON.parse(payload.toString());
+    let data: unknown;
+    try {
+      data = JSON.parse(payload.toString());
+    } catch {
+      logger.warn(`Malformed payload on ${topic}: ${payload.toString().slice(0, 200)}`);
+      return;
+    }
 
     switch (type) {
       case 'rawdata':
@@ -260,8 +303,8 @@ export async function connectMQTT(): Promise<MqttClient> {
       protocol: mqttConfig.useTls ? 'mqtts' : 'mqtt',
       username: mqttConfig.username,
       password: mqttConfig.password,
-      clientId: `mqtt-bridge-${process.pid}-${Date.now()}`,
-      clean: true,
+      clientId: 'mqtt-bridge-production',  // Stable ID for persistent sessions
+      clean: false,  // Persistent session: broker queues QoS 1 messages during restart
       keepalive: 60,
       reconnectPeriod: 5000,
       connectTimeout: 30000,
@@ -344,7 +387,7 @@ import { writeMetrics } from '../victoriametrics.client';
 import { writeLog } from '../victorialogs.client';
 import { batchService } from '../batch/database-batch.service';
 import { deviceStateCache } from '../cache/device-state.cache';
-import { eventBus } from '@/realtime/event-bus.util';
+import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { logger } from '@/infrastructure/logger';
 import { generateCorrelationId } from '../utils/correlation.util';
 
@@ -421,8 +464,8 @@ export async function handleRawData(
       await updateDeviceStatus(deviceId, newStatus);
       deviceStateCache.setStatus(deviceId, newStatus);
 
-      // Emit status change event
-      eventBus.emit('device.status.changed', {
+      // Publish status change via EMQX internal topic (QoS 1)
+      publishInternalEvent('device/status', {
         deviceId,
         status: newStatus,
         timestamp: new Date().toISOString(),
@@ -431,7 +474,8 @@ export async function handleRawData(
 
     // 8. Check for alerts
     if (data.data.vibration && data.data.vibration > device.vibration_threshold) {
-      eventBus.emit('device.alert.created', {
+      // Publish alert via EMQX internal topic (QoS 1)
+      publishInternalEvent('device/alert', {
         deviceId,
         type: 'high_vibration',
         value: data.data.vibration,
@@ -449,7 +493,59 @@ export async function handleRawData(
 }
 ```
 
-### 5.4 VictoriaMetrics Writer
+### 5.4 Internal Event Publisher (EMQX Internal Topics)
+
+> ⚠️ **Thay thế EventBus:** Module này publish events qua EMQX internal topics
+> để Backend (process riêng) có thể subscribe và đẩy tới Frontend qua Socket.IO.
+
+```typescript
+// mqtt-bridge/constants/internal-events.ts
+export const INTERNAL_TOPICS = {
+  DEVICE_STATUS: 'internal/events/device/status',
+  DEVICE_ALERT: 'internal/events/device/alert',
+  DEVICE_SESSION: 'internal/events/device/session',
+  DEVICE_DATA: 'internal/events/device/data',
+} as const;
+
+export const INTERNAL_QOS: Record<string, 0 | 1 | 2> = {
+  'device/status': 1,
+  'device/alert': 1,
+  'device/session': 1,
+  'device/data': 0,
+};
+```
+
+```typescript
+// mqtt-bridge/publishers/internal-event.publisher.ts
+import { getClient } from '../mqtt.client';
+import { INTERNAL_QOS } from '../constants/internal-events';
+import { logger } from '@/infrastructure/logger';
+
+type InternalEventType = 'device/status' | 'device/alert' | 'device/session' | 'device/data';
+
+export function publishInternalEvent(
+  eventType: InternalEventType,
+  payload: Record<string, unknown>
+): void {
+  const client = getClient();
+  if (!client) {
+    logger.warn(`Cannot publish internal event: MQTT client not connected`);
+    return;
+  }
+
+  const topic = `internal/events/${eventType}`;
+  const qos = INTERNAL_QOS[eventType] ?? 1;
+
+  client.publish(topic, JSON.stringify(payload), { qos }, (err) => {
+    if (err) {
+      logger.error(`Failed to publish internal event to ${topic}:`, err);
+    }
+  });
+}
+```
+
+### 5.5 VictoriaMetrics Writer
+
 
 ```typescript
 // mqtt-bridge/victoriametrics.client.ts
@@ -476,23 +572,26 @@ export async function writeMetrics(
 ): Promise<void> {
   const metrics: string[] = [];
 
+  // Sanitize deviceId to prevent metric label injection
+  const safeDeviceId = deviceId.replace(/[^A-Za-z0-9_-]/g, '_');
+
   if (data.vibration !== undefined) {
-    metrics.push(`device_vibration{device_id="${deviceId}"} ${data.vibration} ${timestamp}`);
+    metrics.push(`device_vibration{device_id="${safeDeviceId}"} ${data.vibration} ${timestamp}`);
   }
   if (data.battery_top !== undefined) {
-    metrics.push(`device_battery_top{device_id="${deviceId}"} ${data.battery_top} ${timestamp}`);
+    metrics.push(`device_battery_top{device_id="${safeDeviceId}"} ${data.battery_top} ${timestamp}`);
   }
   if (data.battery_bot !== undefined) {
-    metrics.push(`device_battery_bot{device_id="${deviceId}"} ${data.battery_bot} ${timestamp}`);
+    metrics.push(`device_battery_bot{device_id="${safeDeviceId}"} ${data.battery_bot} ${timestamp}`);
   }
   if (data.latitude !== undefined) {
-    metrics.push(`device_latitude{device_id="${deviceId}"} ${data.latitude} ${timestamp}`);
+    metrics.push(`device_latitude{device_id="${safeDeviceId}"} ${data.latitude} ${timestamp}`);
   }
   if (data.longitude !== undefined) {
-    metrics.push(`device_longitude{device_id="${deviceId}"} ${data.longitude} ${timestamp}`);
+    metrics.push(`device_longitude{device_id="${safeDeviceId}"} ${data.longitude} ${timestamp}`);
   }
   if (data.speed !== undefined) {
-    metrics.push(`device_speed{device_id="${deviceId}"} ${data.speed} ${timestamp}`);
+    metrics.push(`device_speed{device_id="${safeDeviceId}"} ${data.speed} ${timestamp}`);
   }
 
   if (metrics.length > 0) {
@@ -532,6 +631,9 @@ class DatabaseBatchService {
   private flushInterval: NodeJS.Timeout | null = null;
   private readonly BATCH_SIZE = 100;
   private readonly FLUSH_INTERVAL_MS = 1000;
+  private readonly MAX_BUFFER_SIZE = 10_000;
+  private consecutiveFailures = 0;
+  private readonly MAX_RETRIES = 3;
 
   constructor() {
     this.startFlushInterval();
@@ -553,6 +655,12 @@ class DatabaseBatchService {
 
   async flush(): Promise<void> {
     if (this.buffer.length === 0) return;
+
+    if (this.consecutiveFailures >= this.MAX_RETRIES) {
+      logger.error(`Circuit breaker open: ${this.consecutiveFailures} consecutive failures`);
+      this.buffer = []; // Drop to prevent OOM
+      return;
+    }
 
     const updates = [...this.buffer];
     this.buffer = [];
@@ -634,10 +742,15 @@ class DatabaseBatchService {
       }
 
       logger.debug(`Flushed ${updates.length} updates to database`);
+      this.consecutiveFailures = 0;
     } catch (error) {
       logger.error('Failed to flush batch updates:', error);
-      // Re-add failed updates to buffer for retry
-      this.buffer.unshift(...updates);
+      this.consecutiveFailures++;
+      if (this.buffer.length < this.MAX_BUFFER_SIZE) {
+        this.buffer.unshift(...updates);
+      } else {
+        logger.warn(`Buffer full (${this.MAX_BUFFER_SIZE}), dropping ${updates.length} updates`);
+      }
     }
   }
 

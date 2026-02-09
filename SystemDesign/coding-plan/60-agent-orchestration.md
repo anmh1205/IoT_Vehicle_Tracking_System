@@ -52,9 +52,9 @@
 | Role                  | Assignment      | Responsibility                                                            |
 | :-------------------- | :-------------- | :------------------------------------------------------------------------ |
 | **Team Lead**         | Session chính   | Delegate mode: spawn teammates, messaging, quản lý tasks. **KHÔNG code.** |
-| **Backend Teammate**  | Claude instance | `backend_v1/src/**/*`. API, services, repositories, business logic.       |
-| **Frontend Teammate** | Claude instance | `IVM26_Frontend/src/**/*`. UI, hooks, state.                              |
-| **MQTT/IoT Teammate** | Claude instance | MQTT Bridge, VictoriaMetrics integration.                                 |
+| **Backend Teammate**  | Claude instance | `Tracking_Backend/src/**/*`. API, services, repositories, business logic. |
+| **Frontend Teammate** | Claude instance | `Tracking_Frontend/src/**/*`. UI, hooks, state.                           |
+| **MQTT/IoT Teammate** | Claude instance | `Tracking_MqttBridge/src/**/*`. MQTT Bridge, VictoriaMetrics integration. |
 | **QA Teammate**       | Claude instance | Tests, verify fixes, quality gates.                                       |
 | **DevOps Teammate**   | Claude instance | Docker, CI/CD, deployment configs.                                        |
 | **Researcher**        | Claude instance | Codebase analysis, pattern discovery, documentation.                      |
@@ -221,12 +221,13 @@ Format: `[PREFIX]-[NUMBER]` (e.g., `BE-001`, `FE-102`)
 
 Mỗi teammate chỉ được làm việc trong scope được giao:
 
-| Teammate | ✅ Allowed                                 | ❌ Forbidden                       |
-| :------- | :---------------------------------------- | :-------------------------------- |
-| Backend  | `backend_v1/src/**/*`, backend tests      | `IVM26_Frontend/**/*`, DB schema  |
-| Frontend | `IVM26_Frontend/src/**/*`, frontend tests | `backend_v1/**/*` (trừ API types) |
-| DevOps   | Docker, CI/CD, infra configs              | Business logic                    |
-| Security | Read All, Security configs                | Write application code            |
+| Teammate    | ✅ Allowed                                         | ❌ Forbidden                             |
+| :---------- | :------------------------------------------------ | :-------------------------------------- |
+| Backend     | `Tracking_Backend/src/**/*`, backend tests        | `Tracking_Frontend/**/*`, DB schema     |
+| Frontend    | `Tracking_Frontend/src/**/*`, frontend tests      | `Tracking_Backend/**/*` (trừ API types) |
+| MQTT Bridge | `Tracking_MqttBridge/src/**/*`, MQTT Bridge tests |                                         |
+| DevOps      | Docker, CI/CD, infra configs                      | Business logic                          |
+| Security    | Read All, Security configs                        | Write application code                  |
 
 **Memory Isolation:**
 - Backend KHÔNG đọc Frontend UI code
@@ -280,12 +281,12 @@ Mỗi teammate chỉ được làm việc trong scope được giao:
 
 ## 10. Shared Types Protocol
 
-**Source of Truth:** Backend (`backend_v1/src/domain/*/types/`)
+**Source of Truth:** Backend (`Tracking_Backend/src/domain/*/types/`)
 
 ### Synchronization Flow
 1. Backend Teammate updates types (e.g., `UserDTO`)
 2. Backend Teammate logs change in `COMPLETED.md`
-3. Frontend Teammate reads `COMPLETED.md` và updates local types tại `IVM26_Frontend/src/types/api/`
+3. Frontend Teammate reads `COMPLETED.md` và updates local types tại `Tracking_Frontend/src/types/api/`
 
 ---
 
@@ -329,12 +330,112 @@ Mỗi teammate chỉ được làm việc trong scope được giao:
 
 ---
 
-## 13. 🤖 Leader Autonomy Protocol (Tự động điều phối)
+## 13. 🧠 Context Management & Recovery (QUAN TRỌNG)
+
+> ⚠️ **Bài học thực tế:** 3 parallel agents implement Phase 2 → tất cả đều chạm context limit và bị stop.
+> Section này giải quyết vấn đề đó.
+
+### 13.1 Tại sao Context bị đầy?
+
+Mỗi agent/teammate có **~200k token context window**. Context bị đầy khi:
+
+| Nguyên nhân                  | Tác động                                  | Giải pháp                         |
+| :--------------------------- | :---------------------------------------- | :-------------------------------- |
+| Đọc quá nhiều spec files     | Mỗi file 500-1000 lines → hết 30% context | Chỉ đọc section cần thiết         |
+| Print full output (npm, tsc) | 1 lần typecheck = 200+ lines              | Dùng `--silent`, redirect to file |
+| Quá nhiều file edits/session | Mỗi file read + edit = context tăng       | Max **6 files chính** per session |
+| Agent Teams x3 parallel      | Mỗi teammate poll task list + mailbox     | Dùng Subagent thay vì teammate    |
+
+### 13.2 Context Prevention Rules (BẮT BUỘC)
+
+**Mọi agent (Lead, Teammate, Subagent) PHẢI tuân thủ:**
+
+```markdown
+## CONTEXT RULES (Inject vào mỗi agent prompt)
+1. KHÔNG đọc toàn bộ file. Chỉ đọc section liên quan.
+   - ✅ "Read 20-backend-architecture.md Section 3.1 (Auth Services)"
+   - ❌ "Read 20-backend-architecture.md"
+2. KHÔNG print output dài.
+   - ✅ `npm install --silent`
+   - ✅ `npx tsc --noEmit 2>&1 | head -20`
+   - ❌ `npm install` (prints hundreds of lines)
+3. Max 6 files chính per session. Nếu cần hơn → chia session.
+4. Sau mỗi file edit, log 1 dòng summary, KHÔNG show full diff.
+5. Nếu cảm thấy context nặng → /compact trước khi tiếp tục.
+```
+
+### 13.3 Recovery khi Agent bị Stop (Context Limit Reached)
+
+```
+Agent bị stop "Context limit reached"
+       │
+       ▼
+  Option A: /compact → "Continue from where you stopped"
+       │    (Nén context, giữ summary, tiếp tục)
+       │
+       ▼
+  Option B: /clear → Session mới (KHUYÊN DÙNG)
+       │    "Check .tracking/COMPLETED.md for what's done.
+       │     Continue Sub-Phase 2A from task BE-003."
+       │
+       ▼
+  Option C: Agent đã hoàn thành phần lớn
+       │    → Verify manually → Mark done in .tracking/
+       │    → Chuyển sub-phase tiếp theo
+```
+
+### 13.4 Khi nào dùng Agent Teams vs Subagent vs Single (Cập nhật)
+
+> **Bài học:** Agent Teams tốt cho **review/debug**, nhưng **Subagent sequential** ổn định hơn cho **code generation**.
+
+| Task Type                           | Chiến lược                             | Lý do                                  |
+| :---------------------------------- | :------------------------------------- | :------------------------------------- |
+| **Implement 1 sub-phase** (6 files) | **Single agent** hoặc **Subagent**     | Context đủ, không overhead             |
+| **Implement 2 sub-phases độc lập**  | **2 Subagents** (không phải teammates) | Mỗi subagent context riêng, không poll |
+| **Code review PR**                  | **Agent Teams** (2-3 teammates)        | Cần tranh luận real-time               |
+| **Debug complex bug**               | **Agent Teams** (competing hypotheses) | Cần share findings P2P                 |
+| **Research/explore**                | **Agent Teams** hoặc **Subagent**      | Tùy complexity                         |
+| **Implement toàn bộ Phase**         | ❌ **KHÔNG BAO GIỜ 1 session**          | Context chắc chắn đầy                  |
+
+**Rule mới:**
+- 🔵 **Implement code → Subagent sequential** (1 sub-phase → /clear → next sub-phase)
+- 🔴 **Review/Debug → Agent Teams** (parallel OK vì tasks nhẹ context)
+
+### 13.5 Practical Workflow (Đã kiểm chứng)
+
+```
+# Session 1: Auth Module (Sub-Phase 2A)
+"Implement Sub-Phase 2A: Auth Module.
+ Read 20-backend-architecture.md Section 3.1 only.
+ Max 6 files. Do NOT run full typecheck."
+→ Agent xong → /clear
+
+# Session 2: Device Module (Sub-Phase 2B)
+"Check .tracking/COMPLETED.md. Auth is done.
+ Implement Sub-Phase 2B: Device Module.
+ Read 20-backend-architecture.md Section 3.2 only."
+→ Agent xong → /clear
+
+# Session 3: Support Modules (Sub-Phase 2C)
+"Check .tracking/COMPLETED.md. Auth + Device done.
+ Implement dashboard services only (BE-020)."
+→ Agent xong → /clear
+
+# Session 4: Verify toàn bộ
+"Run npm run typecheck and npm run lint on backend.
+ Fix any errors. Update .tracking/PROGRESS.md."
+```
+
+---
+
+## 14. 🤖 Leader Autonomy Protocol (Tự động điều phối)
 
 > **Mục tiêu:** Lead tự phân tích → phân công → monitor → tổng hợp mà KHÔNG cần User can thiệp.
 > User chỉ cần ra lệnh 1 lần (VD: "Implement Phase 2B"), Lead tự lo phần còn lại.
+>
+> ⚠️ **Context-Aware:** Lead PHẢI tuân thủ Section 13 — mỗi agent chỉ xử lý 1 sub-phase per session.
 
-### 13.1 Auto-Dispatch Loop (Lead thực hiện tự động)
+### 14.1 Auto-Dispatch Loop (Lead thực hiện tự động)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -342,8 +443,8 @@ Mỗi teammate chỉ được làm việc trong scope được giao:
 │                                                           │
 │  1. READ   → Đọc sub-phase spec + .tracking/PROGRESS.md  │
 │  2. PLAN   → Xác định sub-tasks + dependencies           │
-│  3. SPAWN  → Tạo teammates (max 3 parallel)              │
-│  4. INJECT → Gửi context cho mỗi teammate                │
+│  3. SPAWN  → Subagent (implement) hoặc Teammate (review) │
+│  4. INJECT → Context Injection + Context Rules (Sec 13)  │
 │  5. MONITOR→ Poll task status mỗi cycle                   │
 │  6. VERIFY → Chạy typecheck + lint sau mỗi sub-task      │
 │  7. MERGE  → Tổng hợp kết quả, update .tracking/         │
@@ -354,9 +455,9 @@ Mỗi teammate chỉ được làm việc trong scope được giao:
 └──────────────────────────────────────────────────────────┘
 ```
 
-### 13.2 Context Injection Template (Lead gửi cho mỗi Teammate)
+### 14.2 Context Injection Template (Lead gửi cho mỗi agent)
 
-Mỗi lần spawn teammate, Lead **BẮT BUỘC** gửi kèm context này:
+Mỗi lần spawn agent, Lead **BẮT BUỘC** gửi kèm context này:
 
 ```markdown
 ## Task Assignment
@@ -374,9 +475,14 @@ Mỗi lần spawn teammate, Lead **BẮT BUỘC** gửi kèm context này:
 - **Cần hoàn thành trước:** [VD: DB-001 đã done]
 - **Teammate khác đang chờ:** [VD: FE-101 cần types từ task này]
 
+## Context Rules (BẮT BUỘC — Section 13.2)
+- Chỉ đọc spec sections liên quan, KHÔNG đọc toàn bộ file
+- `npm install --silent`, `tsc --noEmit 2>&1 | head -20`
+- Max 6 files chính. Nếu hơn → /compact hoặc chia session
+
 ## Verification (Chạy sau khi xong)
-- [ ] `npm run typecheck`
-- [ ] `npm run lint`
+- [ ] `npx tsc --noEmit 2>&1 | head -20`
+- [ ] `npm run lint -- --quiet`
 - [ ] Test manual: [mô tả cụ thể]
 
 ## Reporting
@@ -384,7 +490,7 @@ Mỗi lần spawn teammate, Lead **BẮT BUỘC** gửi kèm context này:
 - Gửi message cho Lead qua Mailbox: "BE-001 DONE: [summary]"
 ```
 
-### 13.3 Decision Tree (Lead tự quyết định)
+### 14.3 Decision Tree (Lead tự quyết định)
 
 ```
 User nói: "Implement Phase X"
@@ -412,24 +518,25 @@ User nói: "Implement Phase X"
    └── KHÔNG → Dùng single agent, proceed bình thường
 ```
 
-### 13.4 Parallel vs Sequential (Lead tự quyết)
+### 14.4 Parallel vs Sequential (Lead tự quyết — Context-Aware)
 
-| Tình huống                    | Strategy                      | Ví dụ               |
-| :---------------------------- | :---------------------------- | :------------------ |
-| 2 sub-phases **độc lập**      | Parallel (2 teammates)        | 2A Auth + 2B Device |
-| Sub-phase B **phụ thuộc** A   | Sequential (A xong → B)       | 2A Auth → 2D Tests  |
-| Sub-phase cần **cross-layer** | Feature Factory (3 teammates) | BE + FE + Test      |
-| Bug fix trong 1 file          | Single subagent               | BUG-001 quick fix   |
+| Tình huống                         | Strategy                                     | Ví dụ                          |
+| :--------------------------------- | :------------------------------------------- | :----------------------------- |
+| **Implement** 2 sub-phases độc lập | **2 Subagents sequential** (KHÔNG teammates) | 2A → /clear → 2B               |
+| **Implement** sub-phase phụ thuộc  | Sequential, 1 agent per session              | 2A → verify → 2B               |
+| **Review** code                    | Agent Teams (2-3 teammates OK)               | Security + Performance + Tests |
+| **Debug** complex                  | Agent Teams (competing hypotheses)           | 2 teammates debate             |
+| Bug fix 1 file                     | Single subagent                              | BUG-001 quick fix              |
 
-### 13.5 Auto-Verification Gate
+### 14.5 Auto-Verification Gate
 
 Sau **mỗi sub-phase**, Lead tự động chạy:
-1. `npm run typecheck` (cả backend + frontend nếu cần)
-2. `npm run lint`
+1. `npx tsc --noEmit 2>&1 | head -30` (chỉ xem top errors)
+2. `npm run lint -- --quiet`
 3. Kiểm tra `.tracking/COMPLETED.md` đã được update
 4. Nếu FAIL → rollback + retry (max 2 lần) → FAIL lần 3 → **hỏi User**
 
-### 13.6 Khi nào Lead PHẢI hỏi User (Escalation Triggers)
+### 14.6 Khi nào Lead PHẢI hỏi User (Escalation Triggers)
 
 - 🔴 **Architecture change**: DB schema khác spec, API contract thay đổi
 - 🔴 **Verification fail 3 lần**: Không tự fix được
@@ -437,7 +544,7 @@ Sau **mỗi sub-phase**, Lead tự động chạy:
 - 🔴 **Conflict**: 2 teammates sửa cùng file
 - 🟡 **Ambiguous spec**: Plan file không rõ ràng, nhiều cách hiểu
 
-### 13.7 Sustained Loop (Tự động chuyển task)
+### 14.7 Sustained Loop (Tự động chuyển task — Context-Aware)
 
 ```
 Lead hoàn thành Sub-Phase 2A
@@ -447,14 +554,19 @@ Update .tracking/PROGRESS.md
 Update .tracking/COMPLETED.md
        │
        ▼
-Kiểm tra: còn sub-phase nào chưa done?
-├── CÓ  → Tự động bắt đầu sub-phase tiếp theo (quay lại 13.1)
+Context còn đủ? (< 70% used)
+├── CÓ  → Tiếp sub-phase tiếp theo (quay lại 14.1)
+└── KHÔNG → /compact hoặc /clear → Session mới → Tiếp tục
+       │
+       ▼
+Còn sub-phase chưa done?
+├── CÓ  → Tự động bắt đầu sub-phase tiếp theo
 └── KHÔNG → Phase hoàn thành → Báo cáo cho User
 ```
 
 ---
 
-## 14. 📋 Sub-Phase Breakdown (Task chia nhỏ)
+## 15. 📋 Sub-Phase Breakdown (Task chia nhỏ)
 
 > **Nguyên tắc:** Mỗi sub-phase ≤ 8 files chính, có verification point rõ ràng.
 > Thời gian mỗi sub-phase ≈ 1 agent session (tránh mất context).
@@ -478,7 +590,7 @@ Kiểm tra: còn sub-phase nào chưa done?
 | BE-006  | Auth types + helpers                      | `domain/auth/types/`, `domain/auth/helpers/`                      |
 
 **Deps:** Phase 1 done (DB exists)
-**Verify:** Login/logout API works, JWT validation passes
+**Verify:** Login/logout API works, session token validation passes
 
 #### Sub-Phase 2B: Device Module
 | Task ID | Mô tả                         | Files                                                                            |
@@ -516,14 +628,31 @@ Kiểm tra: còn sub-phase nào chưa done?
 **Deps:** 2A + 2B + 2C done
 **Agent:** QA Teammate hoặc Lead tự chạy
 
+#### Sub-Phase 2E: Vehicle Tracking Core Domains
+| Task ID | Description                       | Files                      |
+| :------ | :-------------------------------- | :------------------------- |
+| BE-040  | Vehicle controller + routes       | `domain/vehicle/`          |
+| BE-041  | Vehicle CRUD service              | `domain/vehicle/services/` |
+| BE-042  | Customer controller + services    | `domain/customer/`         |
+| BE-043  | Trip controller + services        | `domain/trip/`             |
+| BE-044  | Alert controller + services       | `domain/alert/`            |
+| BE-045  | Geofence controller + services    | `domain/geofence/`         |
+| BE-046  | Maintenance controller + services | `domain/maintenance/`      |
+| BE-047  | Notification service              | `domain/notification/`     |
+
+**Deps:** Phase 2A + 2B done
+**Parallel:** 2-3 teammates (vehicle+customer || trip+alert || geofence+maintenance)
+
 ---
 
 ### Phase 3: Realtime/MQTT (giữ nguyên — domain riêng biệt)
 
-| Sub  | Focus                         | Files chính                   | Agent                |
-| :--- | :---------------------------- | :---------------------------- | :------------------- |
-| 3    | MQTT Bridge + VictoriaMetrics | `22-*.md`, `mqtt-bridge/**/*` | `backend-specialist` |
+| Sub  | Focus                         | Files chính                       | Agent                |
+| :--- | :---------------------------- | :-------------------------------- | :------------------- |
+| 3    | MQTT Bridge + VictoriaMetrics | `22-*.md`, `Tracking_MqttBridge/` | `backend-specialist` |
 
+**Deps:** Phase 1 done + Phase 2A done (auth infrastructure for device token validation)
+**Note:** Phase 3 does NOT need Phase 2B-2E. Can run parallel with Phase 4A.
 **Parallel với Phase 4:** ✅ CÓ THỂ (độc lập)
 
 ---
@@ -623,4 +752,102 @@ Phase 2D (BE verify)  ║    ║    Phase 4C (Support UI)
 - Phase 3 (MQTT) ∥ Phase 4A-4C (Frontend) — **tiết kiệm nhiều thời gian nhất**
 - Phase 2C: dashboard ∥ firmware ∥ export — **3 teammates song song**
 - Phase 5A (Map) ∥ Phase 5B (Alerts) — **2 teammates song song**
+
+---
+
+## 16. Context Management Protocol (BẮT BUỘC)
+
+> ⚠️ **CRITICAL:** Section này định nghĩa cách agents đọc và sử dụng context để tránh bị đầy giữa chừng.
+
+### 16.1 Compact Context Files
+
+Thay vì đọc full spec files (20-40KB mỗi file), agents **PHẢI** sử dụng compact context files (~3-5KB):
+
+```
+coding-plan/phases/
+├── phase-1-foundation/
+│   ├── 1A-db-schema.md        # DB setup tasks
+│   └── 1B-docker-infra.md     # Docker setup tasks
+├── phase-2-backend/
+│   ├── 2A-auth-module.md      # Auth tasks with API contract
+│   ├── 2B-device-module.md    # Device tasks with WS events
+│   ├── 2C-iot-processing.md   # IoT data processing
+│   ├── 2D-support-modules.md  # Dashboard, Firmware, Export
+│   └── 2E-vehicle-tracking.md # Vehicle, Trip, Alert domains
+├── phase-3-mqtt/
+│   └── 3A-mqtt-bridge.md      # MQTT Bridge service
+├── phase-4-frontend/
+│   ├── 4A-foundation-auth.md  # FE setup + auth
+│   ├── 4B-device-ui.md        # Device UI with API contract
+│   └── 4C-support-pages.md    # Dashboard, Firmware UI
+└── phase-5-advanced/
+    ├── 5A-map-geofence.md     # Map + Geofence
+    └── 5B-alerts-trips-maintenance.md
+```
+
+### 16.2 Khi nào đọc file nào?
+
+| Tình huống            | Đọc                             | KHÔNG đọc                            |
+| --------------------- | ------------------------------- | ------------------------------------ |
+| Implement sub-phase X | `phases/phase-X/*.md`           | Full spec files                      |
+| Cần chi tiết API      | Link trong compact file         | Toàn bộ `20-backend-architecture.md` |
+| Debug issue           | Chỉ file liên quan              | Tất cả plan files                    |
+| FE cần BE contract    | Compact file đã có API contract | `21-backend-api-endpoints.md` full   |
+
+### 16.3 Context Injection cho Workers
+
+Leader spawn worker với prompt pattern:
+
+```markdown
+## Task Assignment: [Sub-Phase ID]
+
+### Context File (BẮT BUỘC đọc trước)
+Read: `phases/[phase-folder]/[sub-phase].md` (~XKB)
+
+### File Ownership (CHỈ đụng files này)
+- [list of files]
+
+### Context Rules
+1. ĐỌC compact context file trước, KHÔNG đọc full spec
+2. Max 6 files chính per session
+3. Chỉ đọc full spec sections khi cần chi tiết (có link trong compact file)
+```
+
+Chi tiết templates: `config/context-templates.md`
+
+### 16.4 Clear Conversion Protocol
+
+Khi context đầy (>70%), agent **PHẢI**:
+
+1. **Log progress:**
+   ```bash
+   # .tracking/COMPLETED.md
+   - [x] BE-001: Auth controller + routes
+   - [x] BE-002: Auth session service
+   - [/] BE-003: User management service (in progress)
+   ```
+
+2. **Ghi summary:**
+   ```bash
+   # .tracking/CURRENT_TASKS.md
+   Current: BE-003 (user-management.service.ts line 45)
+   Next: BE-004, BE-005
+   Blockers: None
+   ```
+
+3. **Clear và resume:**
+   - `/compact` hoặc `/clear`
+   - Session mới prompt: "Check `.tracking/`. Continue from BE-003."
+   - Đọc compact context file tương ứng
+
+### 16.5 Rules Tóm Tắt
+
+| DO ✅                             | DON'T ❌                   |
+| -------------------------------- | ------------------------- |
+| Read compact file (~3-5KB)       | Read full spec (20-40KB)  |
+| Follow links khi cần detail      | Read entire document      |
+| Log to `.tracking/` before clear | Lose progress on clear    |
+| Max 6 files per session          | Open 20+ files            |
+| Output `head -20` khi test       | Output entire test result |
+
 

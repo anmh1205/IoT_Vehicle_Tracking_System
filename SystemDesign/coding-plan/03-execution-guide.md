@@ -60,7 +60,8 @@ User (Goal) → Lead tạo team → Teammates execute parallel → Lead tổng h
 
 ## 4. Phase Execution Matrix (Sub-Phase Breakdown)
 
-Tracking tại `.tracking/`. Chi tiết từng sub-phase: xem [60-agent-orchestration.md](./60-agent-orchestration.md) **Section 14**.
+Tracking tại `.tracking/`. Chi tiết từng sub-phase: xem [60-agent-orchestration.md](./60-agent-orchestration.md) **Section 15**.
+**Context Management:** xem **Section 13** (QUAN TRỌNG — tránh context limit).
 
 | Sub-Phase | Focus                               | Agent                      | Deps      | Parallel?           |
 | :-------- | :---------------------------------- | :------------------------- | :-------- | :------------------ |
@@ -88,7 +89,7 @@ Tracking tại `.tracking/`. Chi tiết từng sub-phase: xem [60-agent-orchestr
 ## 5. 🤖 Leader Autonomy (Zero-Intervention Mode)
 
 > Khi User nói **"Implement Phase X"**, Lead tự lo toàn bộ mà không cần hỏi thêm.
-> Chi tiết: xem [60-agent-orchestration.md](./60-agent-orchestration.md) **Section 13**.
+> Chi tiết: xem [60-agent-orchestration.md](./60-agent-orchestration.md) **Section 14**.
 
 ### Quick Start cho User
 ```

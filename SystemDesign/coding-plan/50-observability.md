@@ -138,6 +138,43 @@ export const dbConnectionPoolSize = new Gauge({
   labelNames: ['state'], // idle, active, waiting
   registers: [metricsRegistry],
 });
+
+// ═══════════════════════════════════════════════════════════════
+// Security Metrics
+// ═══════════════════════════════════════════════════════════════
+export const authLoginFailedTotal = new Counter({
+  name: 'auth_login_failed_total',
+  help: 'Total number of failed login attempts',
+  labelNames: ['reason'], // 'invalid_password', 'user_not_found', 'account_locked'
+  registers: [metricsRegistry],
+});
+
+export const authSessionExpiredTotal = new Counter({
+  name: 'auth_session_expired_total',
+  help: 'Total number of expired session tokens',
+  registers: [metricsRegistry],
+});
+
+export const mqttAclDeniedTotal = new Counter({
+  name: 'mqtt_acl_denied_total',
+  help: 'Total number of MQTT ACL denials',
+  labelNames: ['device_id', 'topic'],
+  registers: [metricsRegistry],
+});
+
+export const rateLimitHitTotal = new Counter({
+  name: 'rate_limit_hit_total',
+  help: 'Total number of rate limit hits',
+  labelNames: ['endpoint'],
+  registers: [metricsRegistry],
+});
+
+export const httpForbiddenTotal = new Counter({
+  name: 'http_forbidden_total',
+  help: 'Total 403 Forbidden responses',
+  labelNames: ['path'],
+  registers: [metricsRegistry],
+});
 ```
 
 ### 2.4 HTTP Metrics Middleware
@@ -172,11 +209,24 @@ export function httpMetricsMiddleware(req: Request, res: Response, next: NextFun
 ```typescript
 // api/routes/metrics.routes.ts
 import { Router } from 'express';
+import express from 'express';
+import basicAuth from 'express-basic-auth';
 import { metricsRegistry } from '../../infrastructure/metrics/registry';
+import { env } from '../../config/env';
 
 const router = Router();
 
-router.get('/metrics', async (req, res) => {
+// Option 1: Bind to separate port (recommended for production)
+// Metrics server on port 9090 (not exposed via nginx)
+const metricsApp = express();
+metricsApp.get('/metrics', async (_req, res) => {
+  res.set('Content-Type', metricsRegistry.contentType);
+  res.end(await metricsRegistry.metrics());
+});
+metricsApp.listen(9090, '127.0.0.1'); // Only accessible from localhost/docker network
+
+// Option 2: Basic auth on main app (for simpler setups)
+router.get('/metrics', basicAuth({ users: { prometheus: env.METRICS_PASSWORD } }), async (req, res) => {
   res.set('Content-Type', metricsRegistry.contentType);
   res.end(await metricsRegistry.metrics());
 });
@@ -237,6 +287,8 @@ interface VictoriaLogsTransportOptions extends Transport.TransportStreamOptions 
 export class VictoriaLogsTransport extends Transport {
   private url: string;
   private buffer: any[] = [];
+  private readonly MAX_BUFFER_SIZE = 10_000;
+  private droppedCount = 0;
   private batchSize: number;
   private flushInterval: number;
   private timer: NodeJS.Timer | null = null;
@@ -259,6 +311,14 @@ export class VictoriaLogsTransport extends Transport {
       ...info.metadata,
     };
 
+    if (this.buffer.length >= this.MAX_BUFFER_SIZE) {
+      this.droppedCount++;
+      if (this.droppedCount % 1000 === 1) {
+        console.warn(`VictoriaLogs buffer full. Dropped ${this.droppedCount} entries total.`);
+      }
+      callback();
+      return; // Drop to prevent OOM
+    }
     this.buffer.push(logEntry);
 
     if (this.buffer.length >= this.batchSize) {
@@ -444,6 +504,15 @@ router.get('/health', async (req, res) => {
     if (!response.ok) throw new Error();
   } catch {
     status.checks.victoriametrics = 'error';
+    status.status = 'unhealthy';
+  }
+
+  // Check MQTT Bridge connectivity
+  try {
+    // Verify MQTT Bridge is running by checking its internal events topic
+    if (!mqttClient?.connected) throw new Error();
+  } catch {
+    status.checks.mqtt = 'error';
     status.status = 'unhealthy';
   }
 

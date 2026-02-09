@@ -4,39 +4,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-IoT Vehicle Tracking System - A full-stack IoT application for real-time vehicle tracking using GPS/OBD2 trackers, MQTT protocol, and real-time monitoring. The main application code is in `/iot-vehicle-tracking-system/`.
+IoT Vehicle Tracking System - A full-stack IoT application for real-time vehicle tracking using GPS/OBD2 trackers, MQTT protocol, and real-time monitoring. The project follows **IVM26 Pattern**: flat structure with `Tracking_` prefix naming and per-service Docker Compose.
+
+## Project Structure (IVM26 Pattern)
+
+```
+IoT_Vehicle_Tracking_System/           # Git root
+│
+├── Tracking_Backend/                  # Express + TypeScript API
+├── Tracking_Frontend/                 # Next.js 15 Web App
+├── Tracking_MqttBridge/               # MQTT Bridge (standalone service)
+├── Tracking_Mobile/                   # Flutter WebView (Phase 2)
+│
+├── Tracking_PostgreSQL/               # PostgreSQL + init/ SQL scripts
+├── Tracking_EMQX/                     # EMQX MQTT Broker + etc/ config
+├── Tracking_VictoriaMetrics/          # Time-series Database
+├── Tracking_VictoriaLogs/             # Logging Database
+├── Tracking_Grafana/                  # Monitoring Dashboards
+├── Tracking_NPM/                      # Nginx Proxy Manager
+│
+├── Tracking_Data/                     # Persistent runtime data (gitignored)
+├── shared-types/                      # Shared TypeScript types (tsconfig paths)
+├── SystemDesign/                      # System Design Docs & Coding Plans
+└── CLAUDE.md                          # This file
+```
+
+> **Principle:** Each service has its own `docker-compose.yml` and `docker-compose.uat.yml`. All services share the `tracking-network` Docker network.
 
 ## Common Commands
 
-All commands run from `/iot-vehicle-tracking-system/`:
+Commands run from **each service directory** individually:
+
+### Backend (`Tracking_Backend/`):
 
 ```bash
-# Install all dependencies (root, backend, frontend, mqtt-bridge)
-npm run install:all
-
-# Development - run both backend & frontend concurrently
-npm run dev
-
-# Individual services
-npm run dev:backend       # Backend on port 3000
-npm run dev:frontend      # Frontend on port 3002
-npm run dev:mqtt-bridge   # MQTT Bridge (standalone)
-
-# Build
-npm run build             # Build all
-npm run build:backend
-npm run build:frontend
-
-# Lint
-npm run lint              # Lint all
-npm run lint:backend
-npm run lint:frontend
-```
-
-### Backend-specific (`/iot-vehicle-tracking-system/backend/`):
-
-```bash
-npm run dev               # tsx watch mode
+npm install               # Install dependencies
+npm run dev               # tsx watch mode (port 3000)
 npm run test              # Run unit tests (Vitest)
 npm run test:watch        # Watch mode
 npm run test:cov          # Coverage report
@@ -44,9 +47,19 @@ npm run typecheck         # TypeScript check
 npm run verify            # lint + typecheck + test
 ```
 
-### MQTT Bridge (`/iot-vehicle-tracking-system/mqtt-bridge/`):
+### Frontend (`Tracking_Frontend/`):
 
 ```bash
+npm install               # Install dependencies
+npm run dev               # Next.js dev server (port 3002)
+npm run build             # Production build
+npm run lint              # ESLint check
+```
+
+### MQTT Bridge (`Tracking_MqttBridge/`):
+
+```bash
+npm install               # Install dependencies
 npm run dev               # tsx watch mode
 npm run build             # Build for production
 ```
@@ -54,16 +67,22 @@ npm run build             # Build for production
 ### Docker Infrastructure
 
 ```bash
-# Start only databases for local development
-docker-compose up -d postgres victoriametrics victorialogs emqx
+# Create shared network (first time only)
+docker network create tracking-network
 
-# Full stack with Docker
-docker-compose up -d --build
+# Start infrastructure services (from each folder)
+cd Tracking_PostgreSQL && docker-compose up -d && cd ..
+cd Tracking_EMQX && docker-compose up -d && cd ..
+cd Tracking_VictoriaMetrics && docker-compose up -d && cd ..
+cd Tracking_VictoriaLogs && docker-compose up -d && cd ..
+
+# Start application services with Docker
+cd Tracking_Backend && docker-compose up -d --build && cd ..
+cd Tracking_Frontend && docker-compose up -d --build && cd ..
+cd Tracking_MqttBridge && docker-compose up -d --build && cd ..
 
 # View logs
-docker-compose logs -f backend
-docker-compose logs -f mqtt-bridge
-docker-compose logs -f frontend
+cd Tracking_Backend && docker-compose logs -f
 ```
 
 ## Architecture
@@ -71,29 +90,29 @@ docker-compose logs -f frontend
 ```
 IoT Devices (ESP32 + GPS + OBD2)
          │
-         │ MQTT
+         │ MQTT (TLS in production)
          ▼
-    EMQX Broker (1883)
+    EMQX Broker (1883) ──── ACL per device
          │
          ▼
-   MQTT Bridge ────────► VictoriaMetrics (time-series)
-         │               VictoriaLogs (events/logs)
+   Tracking_MqttBridge ──► VictoriaMetrics (time-series)
+         │                  VictoriaLogs (events/logs)
          │
          ▼
-  Express Backend (3000) ──► PostgreSQL (users, vehicles, alerts)
+  Tracking_Backend (3000) ──► PostgreSQL (users, vehicles, alerts)
          │
          │ WebSocket (Socket.IO)
          ▼
-  Next.js Frontend (3002)
+  Tracking_Frontend (3002)
 ```
 
 ### Tech Stack
 
-- **Backend**: Express, TypeScript, Zod, PostgreSQL 16, Socket.IO 4.8, JWT
-- **MQTT Bridge**: Standalone service, MQTT 5.x, VictoriaMetrics client, VictoriaLogs client
+- **Backend**: Express, TypeScript, Zod, PostgreSQL 16, Socket.IO 4.8, Session-based auth (database-backed tokens)
+- **MQTT Bridge**: Standalone service (`Tracking_MqttBridge/`), MQTT 5.x, own logger/pool/config
 - **Time-series**: VictoriaMetrics (telemetry), VictoriaLogs (events/logging)
-- **Frontend**: Next.js 16, React 19, Tailwind CSS 4, Zustand, TanStack Query, Leaflet maps, ECharts
-- **Infrastructure**: Docker Compose, EMQX broker, Prometheus, Grafana
+- **Frontend**: Next.js 15, React 19, Tailwind CSS 4, Zustand, TanStack Query, Leaflet maps, ECharts
+- **Infrastructure**: Per-service Docker Compose, EMQX broker, Prometheus, Grafana
 
 ### Backend Patterns
 
@@ -101,15 +120,17 @@ IoT Devices (ESP32 + GPS + OBD2)
 - Layered architecture: Controllers → Services → Repositories
 - Path alias: `@/*` maps to `src/*`
 - Zod schemas for request/response validation
-- JWT authentication with middleware
+- Session-based authentication with database-backed tokens (SHA-256 hashed)
+- Request-ID correlation middleware on all requests
 
 ### Frontend Patterns (Feature-Sliced Architecture)
 
 - Next.js App Router with React Server Components
 - Feature modules: `features/{feature}/components,hooks,types,utils`
-- Global hooks: `hooks/queries/`, `hooks/mutations/`, `hooks/realtime/`
-- Zustand for global state, TanStack Query for server state
-- Socket.IO client for real-time telemetry updates
+- Feature hooks in `features/{name}/hooks/`, global `hooks/` only for cross-cutting
+- Zustand for global state (token in memory only, NOT persisted to localStorage)
+- TanStack Query for server state (polling disabled when WebSocket connected)
+- Socket.IO client for real-time telemetry (NO direct MQTT client in frontend)
 - Radix UI + shadcn/ui component patterns
 
 ### Data Strategy
@@ -130,7 +151,7 @@ IoT Devices (ESP32 + GPS + OBD2)
 
 ## Environment Setup
 
-Copy `.env.example` to `.env` and configure required variables before running. Key variables:
+Copy `.env.example` to `.env` in each service directory and configure required variables. Key variables:
 
 ```bash
 # PostgreSQL
@@ -138,7 +159,7 @@ POSTGRESQL_HOST=localhost
 POSTGRESQL_PORT=5432
 POSTGRESQL_DATABASE=vehicle_tracking
 POSTGRESQL_USER=postgres
-POSTGRESQL_PASSWORD=secret
+POSTGRESQL_PASSWORD=           # REQUIRED - no default
 
 # VictoriaMetrics & VictoriaLogs
 VICTORIAMETRICS_URL=http://localhost:8428
@@ -147,12 +168,14 @@ VICTORIALOGS_URL=http://localhost:9428
 # MQTT
 MQTT_BROKER_URL=mqtt://localhost:1883
 
-# JWT
-JWT_SECRET=your-secret-key
+# Session Auth (NOT JWT)
+SESSION_SECRET=                # REQUIRED - min 32 chars, no default
 
 # CORS
 CORS_ORIGIN=http://localhost:3002
 ```
+
+> **Security:** No default password fallbacks. All secrets are REQUIRED and fail loudly if missing.
 
 ## Documentation
 
@@ -163,20 +186,53 @@ Detailed system design documentation is in `/SystemDesign/`:
   - `01-rewrite-plan.md` - Master plan for project rewrite
   - `02-coding-standards.md` - Naming conventions from IVM26
   - `03-execution-guide.md` - AI agent execution guide
+  - `04-project-structure.md` - Project structure (IVM26 Pattern)
   - `10-database-postgresql.md` - PostgreSQL schema
   - `11-database-victoriametrics.md` - Time-series database
-  - `12-docker-infrastructure.md` - Docker setup
+  - `12-docker-infrastructure.md` - Docker setup (per-service)
   - `20-backend-architecture.md` - Backend structure (Express + DDD)
-  - `21-backend-api-endpoints.md` - REST API design
-  - `22-backend-mqtt-bridge.md` - MQTT Bridge (standalone service)
-  - `23-backend-security.md` - Security implementation
+  - `21-backend-api-endpoints.md` - REST API design (plural URLs)
+  - `22-backend-mqtt-bridge.md` - MQTT Bridge (standalone Tracking_MqttBridge/)
+  - `23-backend-security.md` - Security (session tokens, MQTT ACL)
+  - `24-websocket-events.md` - WebSocket event contract (Socket.IO)
   - `30-frontend-architecture.md` - Frontend structure (Feature-Sliced)
   - `31-frontend-features.md` - Feature specifications
   - `32-frontend-implementation.md` - Detailed frontend guide
   - `40-mobile-strategy.md` - Flutter WebView Hybrid
   - `50-observability.md` - Prometheus, logging, Sentry
+  - `60-agent-orchestration.md` - Agent orchestration & phasing
+  - `99-plan-review-and-improvements.md` - Multi-agent review results
 - `iot-vehicle-tracking-report/` - System design docs (Vietnamese)
 - `iot-project-template/` - Generic IoT project template
+
+## Agent Teams Context (Multi-Agent Work)
+
+For multi-agent orchestration, **use compact context files** instead of full spec files:
+
+```bash
+# Compact context files (~3-8KB each) - USE THESE
+phases/phase-1-foundation/1A-db-schema.md
+phases/phase-1-foundation/1B-docker-infra.md
+phases/phase-2-backend/2A-auth-module.md
+phases/phase-2-backend/2B-device-module.md
+...
+
+# Full spec files (20-40KB each) - AVOID reading entirely
+20-backend-architecture.md
+21-backend-api-endpoints.md
+...
+```
+
+**Key resources:**
+- Context templates: `SystemDesign/coding-plan/config/context-templates.md`
+- Agent orchestration: `SystemDesign/coding-plan/60-agent-orchestration.md`
+- Task tracking: `.tracking/` directory (COMPLETED.md, CURRENT_TASKS.md)
+
+**Rules:**
+1. Read compact context file FIRST before any implementation
+2. Max 6 main files per session
+3. Log progress to `.tracking/` when context > 70%
+
 
 ## Reference Projects
 

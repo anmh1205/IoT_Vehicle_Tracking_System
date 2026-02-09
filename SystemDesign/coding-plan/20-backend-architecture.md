@@ -244,35 +244,26 @@ Tracking_Backend/src/
 │       └── client.ts               # HTTP client
 │
 ├── middleware/                     # Express Middleware
-│   ├── auth.ts                     # JWT authentication
+│   ├── auth.ts                     # Session-based authentication
 │   ├── cors.ts                     # CORS configuration
 │   ├── security.ts                 # Helmet security
 │   ├── compression.ts              # Response compression
 │   ├── rate-limit.middleware.ts    # Rate limiting
 │   ├── metrics.ts                  # Prometheus metrics
+│   ├── request-id.middleware.ts   # Request correlation ID
 │   ├── cache.ts                    # Static asset caching
 │   └── error-handler.middleware.ts # Global error handler
 │
 ├── realtime/                       # WebSocket Server
 │   ├── socket-server.util.ts       # Socket.IO setup
 │   ├── socket-auth.middleware.ts   # WS authentication
-│   ├── event-bus.util.ts           # Internal pub/sub
+│   ├── event-bus.util.ts           # Internal pub/sub (backend-only events)
+│   ├── mqtt-event-listener.ts      # Subscribe EMQX internal topics → Socket.IO
 │   └── types.ts                    # Socket types
 │
-├── mqtt-bridge/                    # MQTT Integration (Standalone)
-│   ├── index.ts                    # Entry point
-│   ├── mqtt.client.ts              # MQTT client
-│   ├── handlers/
-│   │   └── rawdata.handler.ts      # Message handler
-│   ├── batch/
-│   │   └── database-batch.service.ts
-│   ├── cache/
-│   │   ├── device-state.cache.ts
-│   │   └── session-stats.cache.ts
-│   ├── validators/
-│   │   └── payload.validator.ts
-│   └── types/
-│       └── payload.types.ts
+│   # NOTE: MQTT Bridge is a STANDALONE service at Tracking_MqttBridge/
+│   # See 22-backend-mqtt-bridge.md for its architecture
+│   # It communicates with Backend via EMQX internal topics
 │
 ├── config/                         # Configuration
 │   ├── env.ts                      # Environment variables
@@ -298,51 +289,51 @@ Tracking_Backend/src/
 
 ### 3.1 Auth Domain
 
-| Service | Chức năng |
-|---------|-----------|
-| `auth-session.service` | Login, logout, validate token |
-| `auth-password.service` | Change password, reset password |
-| `user-management.service` | CRUD users (admin) |
-| `user-device-access.service` | Device access control per user |
+| Service                      | Chức năng                       |
+| ---------------------------- | ------------------------------- |
+| `auth-session.service`       | Login, logout, validate token   |
+| `auth-password.service`      | Change password, reset password |
+| `user-management.service`    | CRUD users (admin)              |
+| `user-device-access.service` | Device access control per user  |
 
 ### 3.2 Device Domain
 
-| Service | Chức năng |
-|---------|-----------|
-| `device-list.service` | List devices with filtering |
-| `device-details.service` | Device detail with stats |
-| `device-crud.service` | Create, update, delete devices |
-| `device-sessions.service` | Session history |
-| `device-runtime.service` | Runtime analytics |
-| `device-ingestion.service` | Process incoming data |
+| Service                    | Chức năng                      |
+| -------------------------- | ------------------------------ |
+| `device-list.service`      | List devices with filtering    |
+| `device-details.service`   | Device detail with stats       |
+| `device-crud.service`      | Create, update, delete devices |
+| `device-sessions.service`  | Session history                |
+| `device-runtime.service`   | Runtime analytics              |
+| `device-ingestion.service` | Process incoming data          |
 
 ### 3.3 IoT Domain
 
-| Service | Chức năng |
-|---------|-----------|
-| `iot-data-processing.service` | Process sensor data |
-| `iot-device-status.service` | Device online/offline status |
-| `session-tracking.service` | Session start/end tracking |
-| `heartbeat-tracking.service` | Heartbeat monitoring |
-| `unified-device-data.service` | Unified data retrieval |
+| Service                       | Chức năng                    |
+| ----------------------------- | ---------------------------- |
+| `iot-data-processing.service` | Process sensor data          |
+| `iot-device-status.service`   | Device online/offline status |
+| `session-tracking.service`    | Session start/end tracking   |
+| `heartbeat-tracking.service`  | Heartbeat monitoring         |
+| `unified-device-data.service` | Unified data retrieval       |
 
 ### 3.4 Dashboard Domain
 
-| Service | Chức năng |
-|---------|-----------|
+| Service                   | Chức năng              |
+| ------------------------- | ---------------------- |
 | `dashboard-stats.service` | Statistics aggregation |
-| `activity-log.service` | Activity feed |
-| `alerts.service` | Alert management |
+| `activity-log.service`    | Activity feed          |
+| `alerts.service`          | Alert management       |
 
 ### 3.5 Firmware Domain
 
-| Service | Chức năng |
-|---------|-----------|
-| `firmware-list.service` | List firmware versions |
-| `firmware-upload.service` | Upload firmware files |
-| `firmware-activate.service` | Activate/deactivate version |
-| `firmware-assignment.service` | Assign to devices |
-| `firmware-delete.service` | Safe deletion |
+| Service                       | Chức năng                   |
+| ----------------------------- | --------------------------- |
+| `firmware-list.service`       | List firmware versions      |
+| `firmware-upload.service`     | Upload firmware files       |
+| `firmware-activate.service`   | Activate/deactivate version |
+| `firmware-assignment.service` | Assign to devices           |
+| `firmware-delete.service`     | Safe deletion               |
 
 ---
 
@@ -393,8 +384,8 @@ app.use((_req, res, next) => {
 // =============================================================================
 // 7. BODY PARSING
 // =============================================================================
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '100kb' }));  // Default limit (route-specific overrides for firmware upload)
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 
 // =============================================================================
 // 8. REQUEST TIMEOUT (30 seconds)
@@ -421,10 +412,25 @@ app.use((req, _res, next) => {
 });
 
 // =============================================================================
+// 10. REQUEST ID (Correlation ID for distributed tracing)
+// =============================================================================
+app.use(requestIdMiddleware); // generates UUID, attaches to req.correlationId
+
+// =============================================================================
+// HEALTH CHECK (before auth middleware, before routes)
+// =============================================================================
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/ready', async (_req, res) => {
+  const dbOk = await checkPostgres();
+  const mqttOk = checkMqttConnection();
+  res.status(dbOk && mqttOk ? 200 : 503).json({ database: dbOk, mqtt: mqttOk });
+});
+
+// =============================================================================
 // ROUTES (with selective rate limiting)
 // =============================================================================
 app.use('/api/v1/auth', authRateLimit, authRoutes);        // Strict rate limit
-app.use('/api/v1/device', deviceRoutes);                   // Normal rate limit
+app.use('/api/v1/devices', deviceRoutes);                  // Normal rate limit
 app.use('/api/v1/iot', iotRoutes);                         // No rate limit (high frequency)
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/firmware', firmwareRoutes);
@@ -442,8 +448,8 @@ app.use('/api/v1/maintenance', maintenanceRoutes);
 // =============================================================================
 // ERROR HANDLING (Must be last)
 // =============================================================================
-app.use(errorHandler);
-app.use(sentryErrorHandler);
+app.use(sentryErrorHandler);  // Sentry MUST be first error handler
+app.use(errorHandler);        // Custom error handler SECOND
 ```
 
 ---
@@ -600,19 +606,22 @@ process.on('unhandledRejection', (reason: unknown) => {
 
 ## 5. Socket.IO Namespaces
 
-| Namespace | Auth | Description |
-|-----------|------|-------------|
-| `/dashboard` | Required | Dashboard updates |
-| `/devices` | Required | Device status changes |
-| `/firmware` | Required | Firmware assignments |
-| `/exports` | Required | Export job progress |
-| `/notifications` | Required | Push notifications |
-| `/mobile` | Required | Mobile app events |
-| `/iot` | **Public** | IoT device data |
+| Namespace        | Auth             | Description                  |
+| ---------------- | ---------------- | ---------------------------- |
+| `/dashboard`     | Required         | Dashboard updates            |
+| `/devices`       | Required         | Device status changes        |
+| `/firmware`      | Required         | Firmware assignments         |
+| `/exports`       | Required         | Export job progress          |
+| `/notifications` | Required         | Push notifications           |
+| `/mobile`        | Required         | Mobile app events            |
+| `/iot`           | **Device Token** | IoT device data (restricted) |
 
 ---
 
-## 6. MQTT Bridge
+## 6. MQTT Bridge ↔ Backend Communication
+
+> ⚠️ **Kiến trúc:** MQTT Bridge publish events qua **EMQX internal topics** (không dùng EventBus in-process).
+> Backend subscribe các topics này và đẩy tới Frontend qua Socket.IO.
 
 ```
 MQTT Topic: v1/{device_id}/rawdata
@@ -621,19 +630,79 @@ Flow:
 ┌─────────────┐     ┌─────────┐     ┌─────────────┐
 │ ESP32/STM32 │────▶│  EMQX   │────▶│ MQTT Bridge │
 └─────────────┘     └─────────┘     └──────┬──────┘
-                                           │
-                    ┌──────────────────────┼──────────────────────┐
-                    │                      │                      │
-                    ▼                      ▼                      ▼
-            ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
-            │  PostgreSQL   │     │VictoriaMetrics│     │ VictoriaLogs  │
-            │ (status, sess)│     │ (time-series) │     │   (events)    │
-            └───────────────┘     └───────────────┘     └───────────────┘
-                    │
-                    ▼
-            ┌───────────────┐
-            │  Socket.IO    │───▶ Dashboard real-time
-            └───────────────┘
+                         ▲                 │
+                         │          ┌──────┼──────────────────────┐
+                         │          │      │                      │
+                         │          ▼      ▼                      ▼
+                         │  ┌────────────┐ ┌───────────────┐ ┌───────────────┐
+                         │  │ PostgreSQL │ │VictoriaMetrics│ │ VictoriaLogs  │
+                         │  │(status,ses)│ │ (time-series) │ │   (events)    │
+                         │  └────────────┘ └───────────────┘ └───────────────┘
+                         │
+            internal/events/device/*
+            (publish via EMQX)
+                         │
+                  ┌──────┴──────┐
+                  │   Backend   │
+                  │ (subscriber)│
+                  └──────┬──────┘
+                         │
+                         ▼
+                  ┌───────────────┐
+                  │  Socket.IO    │───▶ Dashboard real-time
+                  └───────────────┘
+```
+
+### 6.1 Backend MQTT Event Listener
+
+```typescript
+// realtime/mqtt-event-listener.ts
+import mqtt from 'mqtt';
+import { mqttConfig } from '@/config/env';
+import { logger } from '@/infrastructure/logger';
+import type { Server as SocketServer } from 'socket.io';
+
+export function initMqttEventListener(io: SocketServer): void {
+  const client = mqtt.connect({
+    host: mqttConfig.host,
+    port: mqttConfig.useTls ? mqttConfig.tlsPort : mqttConfig.port,
+    protocol: mqttConfig.useTls ? 'mqtts' : 'mqtt',
+    username: 'backend_service',
+    password: mqttConfig.password,
+    clientId: `backend-listener-${process.pid}`,
+  });
+
+  client.on('connect', () => {
+    logger.info('✅ Backend connected to EMQX for internal events');
+    client.subscribe('internal/events/#', { qos: 1 });
+  });
+
+  client.on('message', (topic, payload) => {
+    const data = JSON.parse(payload.toString());
+    // topic: internal/events/device/status → eventType: device.status
+    const parts = topic.replace('internal/events/', '').split('/');
+    const eventType = parts.join('.');
+
+    switch (eventType) {
+      case 'device.status':
+        io.of('/devices').emit('status:update', data);
+        break;
+      case 'device.alert':
+        io.of('/dashboard').emit('alert:new', data);
+        break;
+      case 'device.session':
+        io.of('/devices').emit('session:update', data);
+        break;
+      case 'device.data':
+        io.of('/iot').emit('data:realtime', data);
+        break;
+    }
+  });
+
+  client.on('error', (err) => {
+    logger.error('MQTT event listener error:', err);
+  });
+}
 ```
 
 ---
@@ -716,12 +785,12 @@ export const victoriaLogsConfig = {
 };
 
 // =============================================================================
-// JWT CONFIG
+// SESSION CONFIG (Database-backed tokens, NOT JWT)
 // =============================================================================
-export const jwtConfig = {
-  secret: requireEnv('JWT_SECRET', fromEnv('JWT_SECRET')),
-  expiresIn: fromEnv('JWT_EXPIRES_IN') ?? '24h',
-  sessionExtensionHours: toInt(fromEnv('SESSION_EXTENSION_HOURS'), 4),
+export const sessionConfig = {
+  secret: requireEnv('SESSION_SECRET', fromEnv('SESSION_SECRET')),
+  maxLifetimeHours: toInt(fromEnv('SESSION_MAX_LIFETIME_HOURS'), 24),
+  slidingWindowHours: toInt(fromEnv('SESSION_EXTENSION_HOURS'), 4),
 };
 
 // =============================================================================
@@ -756,7 +825,7 @@ POSTGRESQL_HOST=localhost
 POSTGRESQL_PORT=5432
 POSTGRESQL_DATABASE=vehicle_tracking
 POSTGRESQL_USER=postgres
-POSTGRESQL_PASSWORD=secret
+POSTGRESQL_PASSWORD=           # REQUIRED - no default
 DB_POOL_SIZE=50
 
 # =============================================================================
@@ -774,13 +843,13 @@ MQTT_TLS_PORT=8883
 MQTT_USE_TLS=false
 MQTT_REJECT_UNAUTHORIZED=false
 MQTT_USERNAME=mqtt_bridge
-MQTT_PASSWORD=secret
+MQTT_PASSWORD=                 # REQUIRED - no default
 
 # =============================================================================
-# JWT
+# SESSION AUTH (Database-backed tokens, NOT JWT)
 # =============================================================================
-JWT_SECRET=your-secret-key
-JWT_EXPIRES_IN=24h
+SESSION_SECRET=                # REQUIRED - min 32 chars, no default
+SESSION_MAX_LIFETIME_HOURS=24
 SESSION_EXTENSION_HOURS=4
 
 # =============================================================================
@@ -845,8 +914,7 @@ CORS_ORIGIN=http://localhost:3002
     "lint": "eslint \"src/**/*.ts\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "npm run lint && npm run typecheck && npm run test",
-    "mqtt-bridge": "tsx src/mqtt-bridge/index.ts"
+    "verify": "npm run lint && npm run typecheck && npm run test"
   }
 }
 ```

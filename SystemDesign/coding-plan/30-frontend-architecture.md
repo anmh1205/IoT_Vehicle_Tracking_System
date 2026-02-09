@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-> Kiến trúc frontend với Next.js 16 + React 19 + Feature-Based Structure
+> Kiến trúc frontend với Next.js 15 + React 19 + Feature-Based Structure
 
 ---
 
@@ -194,6 +194,10 @@ frontend/src/
 │   │   ├── error-boundary.tsx
 │   │   ├── confirm-dialog.tsx
 │   │   └── page-header.tsx
+>
+> ⚠️ **IMPORTANT:** Loading states and `<QueryBoundary>` component must be implemented
+> in Phase 1, NOT deferred to Phase 9. Every data-fetching page needs proper
+> loading/error/empty states from day one.
 │   ├── forms/
 │   │   ├── form-field.tsx
 │   │   └── form-actions.tsx
@@ -346,6 +350,8 @@ export function useDevice(deviceId: string) {
 }
 
 export function useDevicePositions() {
+  const { isConnected } = useSocket();
+
   return useQuery({
     queryKey: ['devices', 'positions'],
     queryFn: async () => {
@@ -353,7 +359,7 @@ export function useDevicePositions() {
       return response.data;
     },
     staleTime: 5 * 1000, // 5 seconds for map
-    refetchInterval: 10 * 1000, // Refetch every 10 seconds
+    refetchInterval: isConnected ? false : 10 * 1000, // Disable polling when WebSocket connected
   });
 }
 ```
@@ -489,9 +495,8 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
-        sessionExpiresAt: state.sessionExpiresAt,
         isAuthenticated: state.isAuthenticated,
+        // token is NOT persisted - stays in memory only
       }),
     }
   )
@@ -673,17 +678,14 @@ let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    const token = useAuthStore.getState().token;
-
     socket = io(process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3000', {
       path: '/ws',
       transports: ['websocket'],
-      auth: {
-        token,
-      },
+      auth: (cb) => cb({ token: useAuthStore.getState().token }), // Fresh token on each connect/reconnect
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: Infinity,  // Never give up
+      reconnectionDelayMax: 30000,     // Max 30s between attempts
     });
 
     socket.on('connect', () => {
@@ -716,130 +718,22 @@ export function reconnectSocket(): void {
 }
 ```
 
-### 5.2 MQTT Client với WSS Support (IVM26 Pattern)
+### 5.2 MQTT in Frontend: REMOVED
 
 ```typescript
-// lib/mqtt/client.ts
-import mqtt, { MqttClient, IClientOptions } from 'mqtt';
-
-let client: MqttClient | null = null;
-
-interface MqttConfig {
-  host: string;
-  wsPort: number;      // Non-TLS WebSocket (8083)
-  wssPort: number;     // TLS WebSocket Secure (8084)
-  useTls: boolean;
-  username?: string;
-  password?: string;
-}
-
-const mqttConfig: MqttConfig = {
-  host: process.env.NEXT_PUBLIC_MQTT_HOST || 'localhost',
-  wsPort: parseInt(process.env.NEXT_PUBLIC_MQTT_WS_PORT || '8083'),
-  wssPort: parseInt(process.env.NEXT_PUBLIC_MQTT_WSS_PORT || '8084'),
-  useTls: process.env.NODE_ENV === 'production',
-  username: process.env.NEXT_PUBLIC_MQTT_USERNAME,
-  password: process.env.NEXT_PUBLIC_MQTT_PASSWORD,
-};
-
-export function connectMQTT(): MqttClient {
-  if (client?.connected) {
-    return client;
-  }
-
-  // Select protocol and port based on environment
-  const protocol = mqttConfig.useTls ? 'wss' : 'ws';
-  const port = mqttConfig.useTls ? mqttConfig.wssPort : mqttConfig.wsPort;
-  const brokerUrl = `${protocol}://${mqttConfig.host}:${port}/mqtt`;
-
-  console.log(`Connecting to MQTT: ${brokerUrl}`);
-
-  const options: IClientOptions = {
-    clientId: `web_${Math.random().toString(16).slice(2, 10)}`,
-    username: mqttConfig.username,
-    password: mqttConfig.password,
-    clean: true,
-    reconnectPeriod: 5000,
-    connectTimeout: 4000,
-    // For self-signed certs in development
-    rejectUnauthorized: mqttConfig.useTls,
-  };
-
-  client = mqtt.connect(brokerUrl, options);
-
-  client.on('connect', () => {
-    console.log('✅ MQTT connected');
-  });
-
-  client.on('error', (error) => {
-    console.error('❌ MQTT error:', error);
-  });
-
-  client.on('reconnect', () => {
-    console.log('🔄 MQTT reconnecting...');
-  });
-
-  client.on('offline', () => {
-    console.log('📴 MQTT offline');
-  });
-
-  return client;
-}
-
-export function disconnectMQTT(): void {
-  if (client) {
-    client.end();
-    client = null;
-  }
-}
-
-export function subscribeTopic(
-  topic: string,
-  callback: (message: unknown) => void
-): () => void {
-  const mqttClient = connectMQTT();
-
-  mqttClient.subscribe(topic, (err) => {
-    if (err) {
-      console.error('Subscribe error:', err);
-    } else {
-      console.log(`Subscribed to: ${topic}`);
-    }
-  });
-
-  const messageHandler = (receivedTopic: string, message: Buffer) => {
-    if (receivedTopic === topic || mqttTopicMatch(topic, receivedTopic)) {
-      try {
-        const data = JSON.parse(message.toString());
-        callback(data);
-      } catch (error) {
-        console.error('Parse error:', error);
-      }
-    }
-  };
-
-  mqttClient.on('message', messageHandler);
-
-  // Return unsubscribe function
-  return () => {
-    mqttClient.unsubscribe(topic);
-    mqttClient.off('message', messageHandler);
-  };
-}
-
-// Helper: Match MQTT wildcard topics
-function mqttTopicMatch(pattern: string, topic: string): boolean {
-  const patternParts = pattern.split('/');
-  const topicParts = topic.split('/');
-
-  for (let i = 0; i < patternParts.length; i++) {
-    if (patternParts[i] === '#') return true;
-    if (patternParts[i] === '+') continue;
-    if (patternParts[i] !== topicParts[i]) return false;
-  }
-
-  return patternParts.length === topicParts.length;
-}
+// ═══════════════════════════════════════════════════════════════════
+// ⚠️ REMOVED: MQTT Client in Frontend
+// ═══════════════════════════════════════════════════════════════════
+// The frontend does NOT connect directly to EMQX.
+// All real-time data is received via Socket.IO from the Backend.
+// The Backend subscribes to EMQX internal topics and relays to clients.
+//
+// Reasons:
+// 1. Exposing MQTT broker credentials in browser bundle is a security risk
+// 2. NEXT_PUBLIC_MQTT_* env vars must NOT exist in the frontend
+// 3. Socket.IO provides sufficient real-time capability with auth
+// 4. Single real-time channel simplifies client-side state management
+// ═══════════════════════════════════════════════════════════════════
 ```
 
 ### 5.3 Real-time Hook Pattern (IVM26)
@@ -1050,7 +944,7 @@ export const useSocket = () => useContext(SocketContext);
 ```json
 {
   "dependencies": {
-    "next": "^16.0.7",
+    "next": "^15.3.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "typescript": "5.7.2",
