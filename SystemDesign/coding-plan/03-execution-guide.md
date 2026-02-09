@@ -58,25 +58,61 @@ User (Goal) → Lead tạo team → Teammates execute parallel → Lead tổng h
 
 ---
 
-## 4. Phase Execution Matrix
+## 4. Phase Execution Matrix (Sub-Phase Breakdown)
 
-Tracking tại `.tracking/`. Xem [60-agent-orchestration.md](./60-agent-orchestration.md) Section 6 cho chi tiết.
+Tracking tại `.tracking/`. Chi tiết từng sub-phase: xem [60-agent-orchestration.md](./60-agent-orchestration.md) **Section 14**.
 
-| Phase | Focus Area        | Primary Agents                 | Plan Files           | Deps      |
-| :---- | :---------------- | :----------------------------- | :------------------- | :-------- |
-| **1** | Database & Infra  | `database-architect`, `devops` | `10-*.md`, `12-*.md` | ✅ Độc lập |
-| **2** | Backend Core      | `backend-specialist`           | `20-*.md`, `21-*.md` | ⚠️ Phase 1 |
-| **3** | Realtime/MQTT     | `backend-specialist`           | `22-*.md`            | ⚠️ Phase 2 |
-| **4** | Frontend Core     | `frontend-specialist`          | `30-*.md`, `31-*.md` | ⚠️ Phase 2 |
-| **5** | Advanced Features | `frontend` + `backend`         | `32-*.md`            | ⚠️ Phase 4 |
-| **6** | Mobile            | `mobile-developer`             | `40-*.md`            | ⚠️ Phase 4 |
-| **7** | Deploy & Ops      | `devops-engineer`              | `50-*.md`            | ⚠️ All     |
+| Sub-Phase | Focus                               | Agent                      | Deps      | Parallel?           |
+| :-------- | :---------------------------------- | :------------------------- | :-------- | :------------------ |
+| **1**     | DB Schema + Docker                  | `db-architect` + `devops`  | ✅ Độc lập | —                   |
+| **2A**    | Auth Module (6 tasks)               | `backend-specialist`       | Phase 1   | —                   |
+| **2B**    | Device Module (6 tasks)             | `backend-specialist`       | 2A        | —                   |
+| **2C**    | Dashboard/Firmware/Export (5 tasks) | `backend-specialist` ×2-3  | 2A + 2B   | ✅ Internal parallel |
+| **2D**    | Backend Verification                | QA / Lead                  | 2A-2C     | —                   |
+| **3**     | MQTT Bridge                         | `backend-specialist`       | Phase 2   | ✅ **∥ Phase 4**     |
+| **4A**    | Auth UI + Layout (5 tasks)          | `frontend-specialist`      | 2A        | ✅ **∥ Phase 3**     |
+| **4B**    | Device UI (5 tasks)                 | `frontend-specialist`      | 4A + 2B   | —                   |
+| **4C**    | Support Pages (4 tasks)             | `frontend-specialist` ×2-3 | 4A + 4B   | ✅ Internal parallel |
+| **5A**    | Map + Geofence (3 tasks)            | `frontend-specialist`      | 4B        | ✅ **∥ 5B**          |
+| **5B**    | Alerts + Maintenance (3 tasks)      | `frontend-specialist`      | 4A + 2C   | ✅ **∥ 5A**          |
+| **6**     | Mobile                              | `mobile-developer`         | Phase 4   | —                   |
+| **7**     | Deploy & Ops                        | `devops-engineer`          | All       | —                   |
 
-**Parallel opportunities:** Phase 3 + Phase 4 có thể chạy song song (cả hai phụ thuộc Phase 2, nhưng độc lập nhau). Dùng Agent Teams cho việc này.
+**Parallel opportunities (tiết kiệm thời gian nhất):**
+1. Phase 3 (MQTT) ∥ Phase 4A-4C (Frontend)
+2. Phase 2C internal: dashboard ∥ firmware ∥ export (3 teammates)
+3. Phase 5A (Map) ∥ Phase 5B (Alerts)
 
 ---
 
-## 5. Best Practices
+## 5. 🤖 Leader Autonomy (Zero-Intervention Mode)
+
+> Khi User nói **"Implement Phase X"**, Lead tự lo toàn bộ mà không cần hỏi thêm.
+> Chi tiết: xem [60-agent-orchestration.md](./60-agent-orchestration.md) **Section 13**.
+
+### Quick Start cho User
+```
+# Lệnh 1 lần — Lead tự điều phối phần còn lại:
+"Implement Phase 2"         → Lead tự chia 2A → 2B → 2C → 2D
+"Implement Phase 2A"        → Lead tự spawn + verify Auth Module
+"Implement Phase 3 + 4"     → Lead tự chạy parallel MQTT ∥ Frontend
+```
+
+### Lead tự động thực hiện:
+1. Đọc spec + `.tracking/` → Xác định sub-tasks
+2. Spawn teammates (max 3 parallel) với **Context Injection Template**
+3. Monitor progress → Verify (typecheck + lint)
+4. Update `.tracking/` → Chuyển sub-phase tiếp theo
+5. Lặp lại đến khi Phase hoàn thành → Báo cáo User
+
+### Lead hỏi User khi:
+- 🔴 Architecture change (DB/API contract khác spec)
+- 🔴 Verification fail 3 lần liên tục
+- 🔴 2 teammates conflict cùng file
+
+---
+
+## 6. Best Practices
 
 ### 📚 Read Before Write
 Luôn yêu cầu agents **đọc `SystemDesign/coding-plan/` files** trước khi code.
@@ -95,19 +131,20 @@ Sau khi teammate hoàn thành → chạy verification: *"Backend done. Run tests
 
 ---
 
-## 6. Reference
+## 7. Reference
 
 ```
 SystemDesign/
-├── coding-plan/          # Instructions (READ THIS)
-│   ├── 00-README.md      # Entry point
+├── coding-plan/
+│   ├── 00-README.md           # Entry point
 │   ├── 03-execution-guide.md  # This file
 │   ├── 10-database...
 │   ├── 20-backend...
-│   ├── 60-agent-orchestration.md  # Agent Teams handbook (SSOT)
+│   ├── 60-agent-orchestration.md  # Handbook (Sections 1-14)
+│   │   ├── Sections 1-12: Teams, Patterns, Safety, Git
+│   │   ├── Section 13: Leader Autonomy Protocol ← KEY
+│   │   └── Section 14: Sub-Phase Breakdown    ← KEY
 │   └── ...
-└── iot-project-template/ # Generic Reference
+└── iot-project-template/
 ```
-
-
 

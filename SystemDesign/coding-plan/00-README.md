@@ -15,6 +15,8 @@ Before writing a single line of code, you **MUST** verify:
     *   Delegate Mode & Setup (Section 2)
     *   Use Cases & Patterns (Section 3-4)
     *   Git Branching, Task ID, Error Handling (Section 6-9)
+    *   **Leader Autonomy Protocol (Section 13)** ← Agent Lead PHẢI đọc
+    *   **Sub-Phase Breakdown (Section 14)** ← Task chia nhỏ với file ownership
 4.  **Read Specs:** Never guess. Read the `SystemDesign/*.md` files listed below.
 
 ---
@@ -43,9 +45,9 @@ Before writing a single line of code, you **MUST** verify:
     *   [11-database-victoriametrics.md](./11-database-victoriametrics.md) (Time-series)
     *   [12-docker-infrastructure.md](./12-docker-infrastructure.md) (Docker Compose)
 
-### 🟠 Phase 2: Backend Core (API & Logic)
-> *Status: See PROGRESS.md*
-*   **Agents:** `backend-specialist`
+### 🟠 Phase 2: Backend Core → Sub-Phases 2A/2B/2C/2D
+> *Status: See PROGRESS.md* | *Sub-phases: See [60-agent-orchestration.md](./60-agent-orchestration.md) Section 14*
+*   **2A:** Auth Module (6 tasks) → **2B:** Device Module (6 tasks) → **2C:** Support Modules (5 tasks) → **2D:** Verification
 *   **Specs:**
     *   [20-backend-architecture.md](./20-backend-architecture.md) (DDD Setup)
     *   [21-backend-api-endpoints.md](./21-backend-api-endpoints.md) (API Contract)
@@ -57,16 +59,16 @@ Before writing a single line of code, you **MUST** verify:
 *   **Specs:**
     *   [22-backend-mqtt-bridge.md](./22-backend-mqtt-bridge.md) (Ingestion)
 
-### 🟢 Phase 4: Frontend Core (UI & Features)
-> *Status: See PROGRESS.md*
-*   **Agents:** `frontend-specialist`
+### 🟢 Phase 4: Frontend Core → Sub-Phases 4A/4B/4C
+> *Status: See PROGRESS.md* | *Sub-phases: See [60-agent-orchestration.md](./60-agent-orchestration.md) Section 14*
+*   **4A:** Auth UI + Layout (5 tasks) → **4B:** Device UI (5 tasks) → **4C:** Support Pages (4 tasks)
 *   **Specs:**
     *   [30-frontend-architecture.md](./30-frontend-architecture.md) (FSD Rules)
     *   [31-frontend-features.md](./31-frontend-features.md) (Feature Specs)
 
-### 🔵 Phase 5: Advanced Features
-> *Status: See PROGRESS.md*
-*   **Agents:** `frontend-specialist`, `backend-specialist`
+### 🔵 Phase 5: Advanced Features → Sub-Phases 5A/5B
+> *Status: See PROGRESS.md* | *Sub-phases: See [60-agent-orchestration.md](./60-agent-orchestration.md) Section 14*
+*   **5A:** Map + Geofence (3 tasks) ∥ **5B:** Alerts + Maintenance (3 tasks) — **chạy song song**
 *   **Specs:**
     *   [32-frontend-implementation.md](./32-frontend-implementation.md) (Map, Alerts, etc.)
 
@@ -86,11 +88,19 @@ Before writing a single line of code, you **MUST** verify:
 
 ## 🛠️ Quick Actions for Agents
 
-**To Start a Phase:**
-1.  Read the "Specs" files listed above.
-2.  Create tasks in `.tracking/CURRENT_TASKS.md`.
-3.  Execute using the **[Execution Guide](./03-execution-guide.md)**.
-4.  For multi-module work: use **Agent Teams** (xem [60-agent-orchestration.md](./60-agent-orchestration.md) Section 3).
+**To Start a Phase (Agent Lead — Zero-Intervention Mode):**
+1.  Đọc **[60-agent-orchestration.md](./60-agent-orchestration.md) Section 13** (Leader Autonomy Protocol)
+2.  Đọc **Section 14** để biết sub-phases + file ownership
+3.  Đọc `.tracking/PROGRESS.md` để biết sub-phase nào tiếp theo
+4.  Tự động dispatch: spawn teammates → inject context → verify → next sub-phase
+5.  **CHỈ hỏi User khi:** architecture change, verify fail 3 lần, file conflict
+
+**Quick commands cho User:**
+```
+"Implement Phase 2"         → Lead tự chia 2A → 2B → 2C → 2D
+"Implement Phase 2A"        → Lead tự spawn + verify Auth Module
+"Implement Phase 3 + 4"     → Lead tự chạy parallel MQTT ∥ Frontend
+```
 
 **To Fix a Bug:**
 1.  Read `60-agent-orchestration.md` → "Pattern C: The Investigator" (Section 4).

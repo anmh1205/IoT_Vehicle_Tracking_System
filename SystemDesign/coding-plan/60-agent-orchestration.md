@@ -326,3 +326,301 @@ Mỗi teammate chỉ được làm việc trong scope được giao:
 - Bắt đầu với **team 2** cho research/review tasks
 - Scale lên 3-5 cho multi-module features khi đã quen
 - **KHÔNG** dùng cho sequential tasks hoặc quick fixes — single agent đủ
+
+---
+
+## 13. 🤖 Leader Autonomy Protocol (Tự động điều phối)
+
+> **Mục tiêu:** Lead tự phân tích → phân công → monitor → tổng hợp mà KHÔNG cần User can thiệp.
+> User chỉ cần ra lệnh 1 lần (VD: "Implement Phase 2B"), Lead tự lo phần còn lại.
+
+### 13.1 Auto-Dispatch Loop (Lead thực hiện tự động)
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                LEADER AUTO-DISPATCH LOOP                  │
+│                                                           │
+│  1. READ   → Đọc sub-phase spec + .tracking/PROGRESS.md  │
+│  2. PLAN   → Xác định sub-tasks + dependencies           │
+│  3. SPAWN  → Tạo teammates (max 3 parallel)              │
+│  4. INJECT → Gửi context cho mỗi teammate                │
+│  5. MONITOR→ Poll task status mỗi cycle                   │
+│  6. VERIFY → Chạy typecheck + lint sau mỗi sub-task      │
+│  7. MERGE  → Tổng hợp kết quả, update .tracking/         │
+│  8. NEXT   → Chuyển sang sub-phase tiếp theo              │
+│                                                           │
+│  Repeat 1-8 cho đến khi Phase hoàn thành                 │
+│  → Báo cáo tổng hợp cho User                             │
+└──────────────────────────────────────────────────────────┘
+```
+
+### 13.2 Context Injection Template (Lead gửi cho mỗi Teammate)
+
+Mỗi lần spawn teammate, Lead **BẮT BUỘC** gửi kèm context này:
+
+```markdown
+## Task Assignment
+- **Sub-Phase:** [VD: 2A - Auth Module]
+- **Task ID:** [VD: BE-001]
+- **Objective:** [1-2 câu mô tả rõ ràng]
+
+## File Ownership (CHỈ đụng các files này)
+- [Danh sách files cụ thể]
+
+## Reference Specs (ĐỌC trước khi code)
+- [Link tới plan files cụ thể]
+
+## Dependencies
+- **Cần hoàn thành trước:** [VD: DB-001 đã done]
+- **Teammate khác đang chờ:** [VD: FE-101 cần types từ task này]
+
+## Verification (Chạy sau khi xong)
+- [ ] `npm run typecheck`
+- [ ] `npm run lint`
+- [ ] Test manual: [mô tả cụ thể]
+
+## Reporting
+- Update `.tracking/COMPLETED.md` khi xong
+- Gửi message cho Lead qua Mailbox: "BE-001 DONE: [summary]"
+```
+
+### 13.3 Decision Tree (Lead tự quyết định)
+
+```
+User nói: "Implement Phase X"
+       │
+       ▼
+   ┌─ Đọc spec của Phase X
+   │  Đọc .tracking/PROGRESS.md
+   │  Đọc .tracking/CURRENT_TASKS.md
+   │
+   ▼
+   Phase có sub-phases không?
+   ├── CÓ → Chọn sub-phase tiếp theo chưa done
+   │         │
+   │         ▼
+   │    Sub-phase có dependencies chưa done?
+   │    ├── CÓ  → Thực hiện dependency trước (Assembly Line)
+   │    └── KHÔNG → Tiếp tục
+   │         │
+   │         ▼
+   │    Sub-phase cần bao nhiêu files?
+   │    ├── ≤ 3 files → Dùng Subagent (tiết kiệm token)
+   │    ├── 4-8 files, cùng layer → Dùng 1 Teammate
+   │    └── > 8 files hoặc cross-layer → Dùng 2-3 Teammates
+   │
+   └── KHÔNG → Dùng single agent, proceed bình thường
+```
+
+### 13.4 Parallel vs Sequential (Lead tự quyết)
+
+| Tình huống                    | Strategy                      | Ví dụ               |
+| :---------------------------- | :---------------------------- | :------------------ |
+| 2 sub-phases **độc lập**      | Parallel (2 teammates)        | 2A Auth + 2B Device |
+| Sub-phase B **phụ thuộc** A   | Sequential (A xong → B)       | 2A Auth → 2D Tests  |
+| Sub-phase cần **cross-layer** | Feature Factory (3 teammates) | BE + FE + Test      |
+| Bug fix trong 1 file          | Single subagent               | BUG-001 quick fix   |
+
+### 13.5 Auto-Verification Gate
+
+Sau **mỗi sub-phase**, Lead tự động chạy:
+1. `npm run typecheck` (cả backend + frontend nếu cần)
+2. `npm run lint`
+3. Kiểm tra `.tracking/COMPLETED.md` đã được update
+4. Nếu FAIL → rollback + retry (max 2 lần) → FAIL lần 3 → **hỏi User**
+
+### 13.6 Khi nào Lead PHẢI hỏi User (Escalation Triggers)
+
+- 🔴 **Architecture change**: DB schema khác spec, API contract thay đổi
+- 🔴 **Verification fail 3 lần**: Không tự fix được
+- 🔴 **Scope creep**: Task cần thêm files ngoài ownership
+- 🔴 **Conflict**: 2 teammates sửa cùng file
+- 🟡 **Ambiguous spec**: Plan file không rõ ràng, nhiều cách hiểu
+
+### 13.7 Sustained Loop (Tự động chuyển task)
+
+```
+Lead hoàn thành Sub-Phase 2A
+       │
+       ▼
+Update .tracking/PROGRESS.md
+Update .tracking/COMPLETED.md
+       │
+       ▼
+Kiểm tra: còn sub-phase nào chưa done?
+├── CÓ  → Tự động bắt đầu sub-phase tiếp theo (quay lại 13.1)
+└── KHÔNG → Phase hoàn thành → Báo cáo cho User
+```
+
+---
+
+## 14. 📋 Sub-Phase Breakdown (Task chia nhỏ)
+
+> **Nguyên tắc:** Mỗi sub-phase ≤ 8 files chính, có verification point rõ ràng.
+> Thời gian mỗi sub-phase ≈ 1 agent session (tránh mất context).
+
+### Phase 1: Foundation (giữ nguyên — đã đủ nhỏ)
+
+| Sub  | Focus              | Files chính          | Agent                           |
+| :--- | :----------------- | :------------------- | :------------------------------ |
+| 1    | DB Schema + Docker | `10-*.md`, `12-*.md` | `database-architect` + `devops` |
+
+### Phase 2: Backend Core → 4 Sub-Phases
+
+#### Sub-Phase 2A: Auth Module
+| Task ID | Mô tả                                     | Files                                                             |
+| :------ | :---------------------------------------- | :---------------------------------------------------------------- |
+| BE-001  | Auth controller + routes                  | `api/controllers/auth.controller.ts`, `api/routes/auth.routes.ts` |
+| BE-002  | Auth service (login, logout, session)     | `domain/auth/services/auth.service.ts`                            |
+| BE-003  | User management service                   | `domain/auth/services/user-management.service.ts`                 |
+| BE-004  | User session repository                   | `domain/auth/repositories/user-session.repository.ts`             |
+| BE-005  | Auth middleware (requireAuth, attachUser) | `middleware/auth.middleware.ts`                                   |
+| BE-006  | Auth types + helpers                      | `domain/auth/types/`, `domain/auth/helpers/`                      |
+
+**Deps:** Phase 1 done (DB exists)
+**Verify:** Login/logout API works, JWT validation passes
+
+#### Sub-Phase 2B: Device Module
+| Task ID | Mô tả                         | Files                                                                            |
+| :------ | :---------------------------- | :------------------------------------------------------------------------------- |
+| BE-010  | Device controller + routes    | `api/controllers/device.controller.ts`                                           |
+| BE-011  | Device CRUD service           | `domain/device/services/device-crud.service.ts`                                  |
+| BE-012  | Device list + details service | `domain/device/services/device-list.service.ts`, `device-details.service.ts`     |
+| BE-013  | Device sessions + runtime     | `domain/device/services/device-sessions.service.ts`, `device-runtime.service.ts` |
+| BE-014  | Device repositories           | `domain/device/repositories/`                                                    |
+| BE-015  | Device types                  | `domain/device/types/`                                                           |
+
+**Deps:** 2A done (auth middleware needed)
+**Verify:** Device CRUD APIs work with auth
+
+#### Sub-Phase 2C: Support Modules (Dashboard, Firmware, Export, Admin)
+| Task ID | Mô tả                           | Files                |
+| :------ | :------------------------------ | :------------------- |
+| BE-020  | Dashboard controller + services | `domain/dashboard/`  |
+| BE-021  | Firmware controller + services  | `domain/firmware/`   |
+| BE-022  | Export controller + services    | `domain/export/`     |
+| BE-023  | Admin system settings           | `domain/admin/`      |
+| BE-024  | Error code management           | `domain/error-code/` |
+
+**Deps:** 2A done (auth), 2B done (device types)
+**Parallel:** CÓ THỂ chạy song song 2-3 teammates (dashboard + firmware + export)
+
+#### Sub-Phase 2D: Backend Integration Verification
+| Task ID | Mô tả                          | Files                    |
+| :------ | :----------------------------- | :----------------------- |
+| BE-030  | Typecheck toàn bộ backend      | —                        |
+| BE-031  | Lint + fix                     | —                        |
+| BE-032  | API smoke test (all endpoints) | Manual/Postman           |
+| BE-033  | Update .tracking/              | `.tracking/COMPLETED.md` |
+
+**Deps:** 2A + 2B + 2C done
+**Agent:** QA Teammate hoặc Lead tự chạy
+
+---
+
+### Phase 3: Realtime/MQTT (giữ nguyên — domain riêng biệt)
+
+| Sub  | Focus                         | Files chính                   | Agent                |
+| :--- | :---------------------------- | :---------------------------- | :------------------- |
+| 3    | MQTT Bridge + VictoriaMetrics | `22-*.md`, `mqtt-bridge/**/*` | `backend-specialist` |
+
+**Parallel với Phase 4:** ✅ CÓ THỂ (độc lập)
+
+---
+
+### Phase 4: Frontend Core → 3 Sub-Phases
+
+#### Sub-Phase 4A: Foundation + Auth UI
+| Task ID | Mô tả                           | Files                          |
+| :------ | :------------------------------ | :----------------------------- |
+| FE-001  | Layout shell (sidebar, header)  | `shared/layout/`               |
+| FE-002  | Login page + auth flow          | `app/login/`, `features/auth/` |
+| FE-003  | API client + HTTP lib           | `lib/api/`                     |
+| FE-004  | Theme + design tokens           | `app/globals.css`, `config/`   |
+| FE-005  | Route guards + protected routes | `middleware.ts`                |
+
+**Deps:** Phase 2A done (Auth API exists)
+**Verify:** Login works, layout renders, route protection works
+
+#### Sub-Phase 4B: Device Management UI
+| Task ID | Mô tả                                | Files                                         |
+| :------ | :----------------------------------- | :-------------------------------------------- |
+| FE-010  | Device list page                     | `features/devices/components/device-list.tsx` |
+| FE-011  | Device detail modal (tabs)           | `features/devices/components/device-detail/`  |
+| FE-012  | Device hooks (useDevices, useDevice) | `features/devices/hooks/`                     |
+| FE-013  | Dashboard overview page              | `features/dashboard/`                         |
+| FE-014  | Real-time connection (Socket.IO)     | `hooks/realtime/`                             |
+
+**Deps:** 4A done + Phase 2B done (Device API exists)
+**Verify:** Device list loads, detail modal opens, realtime updates work
+
+#### Sub-Phase 4C: Support Pages
+| Task ID | Mô tả                      | Files                     |
+| :------ | :------------------------- | :------------------------ |
+| FE-020  | Settings page (functional) | `app/dashboard/settings/` |
+| FE-021  | User management page       | `features/users/`         |
+| FE-022  | Notifications page         | `features/notifications/` |
+| FE-023  | System admin pages         | `features/admin/`         |
+
+**Deps:** 4A + 4B done
+**Parallel:** CÓ THỂ chạy 2-3 teammates (settings + users + notifications)
+
+---
+
+### Phase 5: Advanced Features → 2 Sub-Phases
+
+#### Sub-Phase 5A: Map + Geofence
+| Task ID | Mô tả                        | Files                 |
+| :------ | :--------------------------- | :-------------------- |
+| FE-030  | Map view (Leaflet, real GPS) | `features/map/`       |
+| FE-031  | Geofence CRUD + map editor   | `features/geofences/` |
+| FE-032  | Trip replay on map           | `features/trips/`     |
+
+**Deps:** Phase 4B done
+**Agent:** `frontend-specialist` (1 focused teammate)
+
+#### Sub-Phase 5B: Alerts + Maintenance + Firmware
+| Task ID | Mô tả                  | Files                   |
+| :------ | :--------------------- | :---------------------- |
+| FE-040  | Alert rules engine UI  | `features/alerts/`      |
+| FE-041  | Maintenance calendar   | `features/maintenance/` |
+| FE-042  | Firmware management UI | `features/firmware/`    |
+
+**Deps:** Phase 4A done + Phase 2C done (APIs exist)
+**Parallel với 5A:** ✅ CÓ THỂ (độc lập)
+
+---
+
+### Dependency Graph (Tổng quan)
+
+```
+Phase 1 (DB + Docker)
+    │
+    ▼
+Phase 2A (Auth) ──────────────────────┐
+    │                                  │
+    ▼                                  ▼
+Phase 2B (Device) ──┐            Phase 4A (Auth UI + Layout)
+    │                │                 │
+    ▼                ▼                 ▼
+Phase 2C (Support)  Phase 3 ║    Phase 4B (Device UI)
+    │               (MQTT)  ║         │
+    ▼                  ║    ║         ▼
+Phase 2D (BE verify)  ║    ║    Phase 4C (Support UI)
+                       ║    ║         │
+          ═════════════╝    ║         ▼
+          (Parallel OK)     ║    Phase 5A ║ Phase 5B
+                            ║    (Map)    ║ (Alerts)
+                            ║         ════╝ (Parallel OK)
+                            ▼
+                       Phase 6 (Mobile)
+                            │
+                            ▼
+                       Phase 7 (Deploy)
+```
+
+**Parallel opportunities chính:**
+- Phase 3 (MQTT) ∥ Phase 4A-4C (Frontend) — **tiết kiệm nhiều thời gian nhất**
+- Phase 2C: dashboard ∥ firmware ∥ export — **3 teammates song song**
+- Phase 5A (Map) ∥ Phase 5B (Alerts) — **2 teammates song song**
+
