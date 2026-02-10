@@ -1,0 +1,66 @@
+groups:
+  - name: tracking_backend_alerts
+    rules:
+      # High error rate: more than 5% of requests return 5xx over 5 minutes
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP 5xx error rate"
+          description: "More than 5% of requests are returning 5xx status codes over the last 5 minutes."
+
+      # Slow response time: p95 latency exceeds 2 seconds
+      - alert: SlowResponseTime
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
+          > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow API response time"
+          description: "95th percentile response time exceeds 2 seconds over the last 5 minutes."
+
+      # MQTT message backlog growing
+      - alert: MQTTBacklog
+        expr: |
+          rate(device_data_points_total[5m]) == 0
+          and
+          devices_online_total > 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No MQTT data points received"
+          description: "Devices are online but no data points have been received in the last 10 minutes."
+
+      # Database connection pool exhausted
+      - alert: DBConnectionPoolExhausted
+        expr: |
+          db_connection_pool_size{state="waiting"} > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection pool under pressure"
+          description: "More than 5 queries are waiting for a database connection."
+
+      # Devices going offline
+      - alert: DevicesOffline
+        expr: |
+          devices_online_total < 1
+          and
+          up{job="tracking-backend"} == 1
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No devices online"
+          description: "No devices have been online for the last 15 minutes while the backend is running."

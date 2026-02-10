@@ -645,7 +645,7 @@ services:
       - tracking-network
 
   victorialogs:
-    image: victoriametrics/victoria-logs:v1.0.0
+    image: victoriametrics/victoria-logs:v1.3.1-victorialogs
     container_name: tracking-victorialogs
     command:
       - "-retentionPeriod=7d"
@@ -1093,3 +1093,43 @@ rm iot-vehicle-tracking-system-backup/frontend/src/components/layout/simple-side
 | Real-time | Socket.IO 4.x |
 | Frontend | Next.js 16 + React 19 + Tailwind 4 |
 | Testing | Vitest (backend) + Playwright (E2E) |
+
+---
+
+## ⚠️ Frontend Implementation Rules (BẮT BUỘC)
+
+> **Thêm 2026-02-10** — Sau khi audit frontend, phát hiện agents không tuân thủ template IVM26. Các rules sau là BẮT BUỘC.
+
+### Rule F1: IVM26 Template Compliance
+- Frontend PHẢI follow UI pattern từ IVM26 reference (`next-shadcn-dashboard-starter`)
+- Reference path: `E:\anmh1205\IVM26\` hoặc backup: `iot-vehicle-tracking-system-backup/frontend/`
+- Layout: `SidebarProvider` + `AppSidebar` + `SidebarInset` (shadcn/ui sidebar)
+- Page wrapper: `PageContainer` với `ScrollArea`, `pageTitle`, `pageDescription`
+- Header: `SiteHeader` với `SidebarTrigger` + `Breadcrumbs` + `ThemeToggle` + `UserNav`
+
+### Rule F2: shadcn/ui Component Mandate
+- Dùng shadcn/ui components EXCLUSIVELY — KHÔNG hand-roll:
+  - ❌ Custom Dropdown → ✅ `Select` hoặc `DropdownMenu` từ shadcn/ui
+  - ❌ Custom Pagination → ✅ `DataTable` với built-in pagination
+  - ❌ Custom Modal → ✅ `Dialog` hoặc `Sheet` từ shadcn/ui
+  - ❌ Custom Skeleton → ✅ `Skeleton` từ shadcn/ui
+  - ❌ Custom Table → ✅ `DataTable` wrapper (TanStack Table + shadcn/ui Table)
+- Forms: `react-hook-form` + `zod` + shadcn/ui `Form` component
+
+### Rule F3: Zero Placeholder Policy
+- TUYỆT ĐỐI KHÔNG được viết trong code:
+  - "Coming Soon" / "Sắp ra mắt"
+  - "future update" / "cập nhật trong tương lai"
+  - "will be available" / "sẽ có trong phiên bản sau"
+  - "TODO" / "FIXME" (trong production code)
+  - Dashed-border empty state thay cho real functionality
+- Nếu API chưa có → vẫn PHẢI build đầy đủ UI + API service + hook, ghi chú vào `.tracking/`
+
+### Rule F4: Complete Feature Specification
+- Mỗi feature trong plan PHẢI có:
+  1. Exact component tree (không mô tả trừu tượng)
+  2. Exact DataTable columns (tên cột, field, sortable, render)
+  3. Exact form fields (tên, type, validation rule, required)
+  4. Exact API hooks (query key, endpoint, mutations)
+  5. Exact Zod schema
+  6. Exact error/loading/empty states

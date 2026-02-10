@@ -210,12 +210,103 @@ Tracking_MqttBridge/
 ```
 Tracking_Frontend/
 ├── src/
-│   ├── app/
+│   ├── app/                              # App Router (routing only)
+│   │   ├── layout.tsx
+│   │   ├── page.tsx                      # Redirect to /login or /dashboard
+│   │   ├── login/
+│   │   │   └── page.tsx
+│   │   └── dashboard/
+│   │       ├── layout.tsx                # SidebarProvider + AppSidebar + SidebarInset
+│   │       ├── page.tsx                  # Dashboard Overview
+│   │       ├── map/
+│   │       ├── vehicles/
+│   │       ├── devices/
+│   │       ├── customers/
+│   │       ├── trips/
+│   │       ├── alerts/
+│   │       ├── geofences/
+│   │       ├── maintenance/
+│   │       └── settings/
+│   │
 │   ├── components/
-│   ├── features/
-│   ├── hooks/
-│   ├── lib/
-│   └── types/
+│   │   ├── layout/                       # IVM26 Layout Components (BẮT BUỘC)
+│   │   │   ├── app-sidebar.tsx           # Collapsible sidebar (SidebarProvider pattern)
+│   │   │   ├── site-header.tsx           # SidebarTrigger + Breadcrumbs + ThemeToggle + UserNav
+│   │   │   ├── page-container.tsx        # Page wrapper: ScrollArea + Heading + content
+│   │   │   ├── breadcrumbs.tsx           # Dynamic breadcrumbs from route
+│   │   │   ├── nav-main.tsx              # Main navigation items
+│   │   │   ├── nav-user.tsx              # User avatar + dropdown (logout, settings)
+│   │   │   └── theme-toggle.tsx          # Light/Dark mode toggle
+│   │   │
+│   │   ├── ui/                           # shadcn/ui components — NEVER hand-rolled
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── form.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── select.tsx
+│   │   │   ├── sidebar.tsx
+│   │   │   ├── skeleton.tsx
+│   │   │   ├── table.tsx
+│   │   │   └── ...                       # All via `npx shadcn@latest add`
+│   │   │
+│   │   ├── common/                       # Shared business components
+│   │   │   ├── data-table.tsx            # TanStack Table + shadcn/ui Table wrapper
+│   │   │   ├── confirm-dialog.tsx        # Reusable confirmation dialog
+│   │   │   └── status-badge.tsx          # Status indicator badge
+│   │   │
+│   │   ├── providers/                    # React context providers
+│   │   └── icons.tsx                     # Lucide icons re-exports
+│   │
+│   ├── features/                         # Feature modules (IVM26 pattern)
+│   │   ├── auth/
+│   │   │   └── components/
+│   │   ├── dashboard/
+│   │   │   ├── components/
+│   │   │   └── hooks/
+│   │   ├── vehicles/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── types/
+│   │   │   └── utils/
+│   │   ├── devices/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── types/
+│   │   │   └── utils/
+│   │   ├── customers/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   └── types/
+│   │   ├── trips/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   └── types/
+│   │   ├── alerts/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   └── types/
+│   │   ├── geofences/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   └── types/
+│   │   ├── maintenance/
+│   │   │   ├── components/
+│   │   │   └── types/
+│   │   ├── map/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   └── types/
+│   │   └── settings/
+│   │       └── components/
+│   │
+│   ├── hooks/                            # Global hooks
+│   ├── lib/                              # Core utilities
+│   │   ├── api/                          # API client
+│   │   ├── store/                        # Zustand stores
+│   │   └── utils/                        # Utility functions
+│   ├── types/                            # Global TypeScript types
+│   └── config/                           # Configuration
 │
 ├── public/
 ├── e2e/
@@ -299,7 +390,8 @@ services:
       EMQX_HOST: 0.0.0.0
     volumes:
       - ../Tracking_Data/Tracking_EMQX:/opt/emqx/data
-      - ./etc:/opt/emqx/etc
+      # NOTE: Do NOT mount ./etc:/opt/emqx/etc — it overwrites all default configs.
+      # Use environment variables for EMQX configuration instead.
     ports:
       - "1883:1883"     # MQTT
       - "8083:8083"     # WebSocket
@@ -348,7 +440,7 @@ version: '3.8'
 
 services:
   victorialogs:
-    image: victoriametrics/victoria-logs:v1.0.0
+    image: victoriametrics/victoria-logs:v1.3.1-victorialogs
     container_name: tracking-victorialogs
     command:
       - "-retentionPeriod=7d"

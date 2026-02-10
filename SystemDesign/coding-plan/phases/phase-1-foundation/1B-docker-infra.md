@@ -21,7 +21,7 @@ Setup Docker Compose với tất cả services: PostgreSQL, EMQX (MQTT), Victori
 | postgres        | `postgres:16-alpine`                       | 5432              | `pg_isready`     |
 | emqx            | `emqx/emqx:5.3.0`                          | 1883, 8083, 18083 | TCP check        |
 | victoriametrics | `victoriametrics/victoria-metrics:v1.96.0` | 8428              | HTTP /health     |
-| victorialogs    | `victoriametrics/victoria-logs:v1.0.0`     | 9428              | HTTP /health     |
+| victorialogs    | `victoriametrics/victoria-logs:v1.3.1-victorialogs` | 9428              | HTTP /health     |
 | grafana         | `grafana/grafana:10.2.0`                   | 3001              | HTTP /api/health |
 
 ## Network Topology

@@ -1,0 +1,94 @@
+import type { Response, NextFunction } from 'express';
+import type { AuthenticatedRequest } from '@/shared/types/common.types';
+import { hashToken } from '@/shared/utils/crypto.util';
+import { createUnauthorizedError } from '@/shared/utils/errors.util';
+import { findByHashedToken, extendSession } from '@/domain/auth/repositories/user-session.repository';
+import { findById } from '@/domain/auth/repositories/user.repository';
+import { sessionConfig } from '@/config/env';
+
+const extractBearerToken = (req: AuthenticatedRequest): string | null => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  return authHeader.slice(7);
+};
+
+export const requireAuth = async (
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const token = extractBearerToken(req);
+    if (!token) {
+      throw createUnauthorizedError('Authentication required');
+    }
+
+    const hashedToken = hashToken(token);
+    const session = await findByHashedToken(hashedToken);
+
+    if (!session || !session.is_active) {
+      throw createUnauthorizedError('Invalid or expired session');
+    }
+
+    if (new Date(session.expires_at) < new Date()) {
+      throw createUnauthorizedError('Session has expired');
+    }
+
+    const user = await findById(session.user_id);
+    if (!user) {
+      throw createUnauthorizedError('User not found');
+    }
+
+    req.user = {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      deviceAccessMode: user.device_access_mode,
+    };
+
+    // Sliding window: extend session
+    await extendSession(session.id, sessionConfig.extensionHours);
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const attachUserIfAvailable = async (
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const token = extractBearerToken(req);
+    if (!token) {
+      next();
+      return;
+    }
+
+    const hashedToken = hashToken(token);
+    const session = await findByHashedToken(hashedToken);
+
+    if (!session || !session.is_active || new Date(session.expires_at) < new Date()) {
+      next();
+      return;
+    }
+
+    const user = await findById(session.user_id);
+    if (user) {
+      req.user = {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        deviceAccessMode: user.device_access_mode,
+      };
+      await extendSession(session.id, sessionConfig.extensionHours);
+    }
+
+    next();
+  } catch {
+    // Silently continue without user if lookup fails
+    next();
+  }
+};

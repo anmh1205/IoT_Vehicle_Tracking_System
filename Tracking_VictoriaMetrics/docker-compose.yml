@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.96.0
+    container_name: tracking-victoriametrics
+    command:
+      - "-retentionPeriod=30d"
+      - "-storageDataPath=/storage"
+      - "-httpListenAddr=:8428"
+      - "-search.latencyOffset=0s"
+    volumes:
+      - ../Tracking_Data/Tracking_VictoriaMetrics:/storage
+    ports:
+      - "127.0.0.1:8428:8428"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8428/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - tracking-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+
+networks:
+  tracking-network:
+    external: true

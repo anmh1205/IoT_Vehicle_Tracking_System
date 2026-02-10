@@ -73,6 +73,50 @@ src/features/{feature}/
     └── {feature}.types.ts              # device.types.ts
 ```
 
+### 1.3 Frontend Layout Components (IVM26 Pattern)
+
+> **BẮT BUỘC:** Các layout components PHẢI follow đúng pattern từ IVM26 reference project.
+
+#### Layout Components (from IVM26)
+```
+src/components/layout/
+├── app-sidebar.tsx         # Collapsible sidebar (SidebarProvider pattern)
+├── site-header.tsx         # Header: SidebarTrigger + Breadcrumbs + ThemeToggle + UserNav
+├── page-container.tsx      # Page wrapper: ScrollArea + Heading + content
+├── breadcrumbs.tsx         # Dynamic breadcrumbs from route
+├── nav-main.tsx            # Main navigation items
+├── nav-user.tsx            # User avatar + dropdown (logout, settings)
+└── theme-toggle.tsx        # Light/Dark mode toggle
+```
+
+#### UI Components (shadcn/ui — install via `npx shadcn@latest add`)
+| Category | Components | Install |
+|----------|-----------|---------|
+| Layout | `sidebar`, `scroll-area`, `breadcrumb`, `separator` | `npx shadcn@latest add sidebar scroll-area breadcrumb separator` |
+| Data | `table`, `badge`, `avatar` | `npx shadcn@latest add table badge avatar` |
+| Forms | `form`, `input`, `select`, `textarea`, `switch`, `checkbox`, `calendar`, `popover`, `command` | `npx shadcn@latest add form input select textarea switch checkbox calendar popover command` |
+| Feedback | `dialog`, `sheet`, `alert`, `alert-dialog`, `skeleton`, `tooltip`, `sonner` | `npx shadcn@latest add dialog sheet alert alert-dialog skeleton tooltip sonner` |
+| Navigation | `tabs`, `dropdown-menu` | `npx shadcn@latest add tabs dropdown-menu` |
+| Display | `card`, `accordion`, `collapsible`, `progress` | `npx shadcn@latest add card accordion collapsible progress` |
+
+#### DataTable Pattern (Custom wrapper over TanStack Table + shadcn/ui Table)
+```typescript
+// components/common/data-table.tsx
+// Wrapper component combining:
+// - @tanstack/react-table for logic (sorting, filtering, pagination)
+// - shadcn/ui Table for rendering
+// - Built-in search, column visibility, pagination controls
+
+// Usage pattern:
+<DataTable
+  columns={columns}           // ColumnDef[] from @tanstack/react-table
+  data={data}                 // T[]
+  searchKey="deviceName"      // Column to search
+  pagination                  // Enable pagination
+  pageSize={20}              // Items per page
+/>
+```
+
 #### Component Suffixes
 | Suffix | Usage | Example |
 |--------|-------|---------|

@@ -14,9 +14,13 @@
 /iot-vehicle-tracking-system/frontend/.next
 /iot-vehicle-tracking-system/frontend/node_modules
 
-# Infrastructure persistent data (Docker volumes)
-IoT_Vehicle_Tracking_System/Tracking_Data/
+# Docker persistent data (runtime volumes - never commit)
+Tracking_Data/
+
+# Docker volumes (per-service)
+**/docker-volumes/
 
 # Environment variables
 *.env
 !.env.example
+/Tracking_Backend/node_modules

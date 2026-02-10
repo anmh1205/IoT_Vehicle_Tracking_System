@@ -399,7 +399,7 @@ services:
     restart: unless-stopped
 
   victorialogs:
-    image: victoriametrics/victoria-logs:v1.0.0
+    image: victoriametrics/victoria-logs:v1.3.1-victorialogs
     container_name: victorialogs
     command:
       - "-retentionPeriod=7d"

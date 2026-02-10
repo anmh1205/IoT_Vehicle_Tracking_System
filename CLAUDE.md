@@ -151,6 +151,16 @@ IoT Devices (ESP32 + GPS + OBD2)
 
 ## Environment Setup
 
+### Default Credentials (Development)
+
+| Service | Username | Password | URL |
+|---------|----------|----------|-----|
+| **Web App** | `admin` | `Admin@2026` | http://localhost:3002 |
+| **EMQX Dashboard** | `admin` | `emqx_dev_2026` | http://localhost:18083 |
+| **PostgreSQL** | `postgres` | `tracking_dev_2026` | localhost:5432 |
+
+> **⚠️ CHANGE ALL PASSWORDS before deploying to production!**
+
 Copy `.env.example` to `.env` in each service directory and configure required variables. Key variables:
 
 ```bash

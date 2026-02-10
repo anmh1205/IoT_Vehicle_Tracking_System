@@ -1,0 +1,46 @@
+name: tracking_mobile
+description: IoT Vehicle Tracking System - Flutter WebView Hybrid App
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: '>=3.16.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # WebView
+  flutter_inappwebview: ^6.0.0
+
+  # State Management
+  flutter_riverpod: ^2.4.0
+
+  # Firebase
+  firebase_core: ^2.24.0
+  firebase_messaging: ^14.7.0
+
+  # Storage
+  shared_preferences: ^2.2.0
+  flutter_secure_storage: ^9.0.0
+
+  # Connectivity
+  connectivity_plus: ^5.0.0
+
+  # Notifications
+  flutter_local_notifications: ^16.0.0
+
+  # Background Tasks
+  workmanager: ^0.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/

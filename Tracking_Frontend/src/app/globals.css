@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --radius: 0.5rem;
+  --sidebar-width: 16rem;
+  --sidebar-collapsed-width: 4rem;
+  --font-sans: var(--font-inter);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0.024 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0.024 265);
+  --primary: oklch(0.511 0.186 255);
+  --primary-foreground: oklch(0.969 0.006 265);
+  --secondary: oklch(0.965 0.006 265);
+  --secondary-foreground: oklch(0.205 0.024 265);
+  --muted: oklch(0.965 0.006 265);
+  --muted-foreground: oklch(0.556 0.018 265);
+  --accent: oklch(0.965 0.006 265);
+  --accent-foreground: oklch(0.205 0.024 265);
+  --destructive: oklch(0.577 0.245 27);
+  --destructive-foreground: oklch(0.969 0.006 265);
+  --border: oklch(0.922 0.008 265);
+  --ring: oklch(0.511 0.186 255);
+}
+
+.dark {
+  --background: oklch(0.145 0.024 265);
+  --foreground: oklch(0.969 0.006 265);
+  --card: oklch(0.145 0.024 265);
+  --card-foreground: oklch(0.969 0.006 265);
+  --primary: oklch(0.601 0.186 255);
+  --primary-foreground: oklch(0.205 0.024 265);
+  --secondary: oklch(0.269 0.024 265);
+  --secondary-foreground: oklch(0.969 0.006 265);
+  --muted: oklch(0.269 0.024 265);
+  --muted-foreground: oklch(0.658 0.018 265);
+  --accent: oklch(0.269 0.024 265);
+  --accent-foreground: oklch(0.969 0.006 265);
+  --destructive: oklch(0.396 0.176 27);
+  --destructive-foreground: oklch(0.969 0.006 265);
+  --border: oklch(0.269 0.024 265);
+  --ring: oklch(0.488 0.186 255);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

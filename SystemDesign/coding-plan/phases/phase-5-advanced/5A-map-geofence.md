@@ -1,174 +1,436 @@
-# Sub-Phase 5A: Map & Geofence UI
+# Phase 5A — Map View & Geofence Management
 
-> **Context:** ~4KB | **Max Files:** 10 | **Est. Time:** 1 session
+> Live vehicle tracking map (Leaflet), geofence CRUD with map editor, real-time position updates.
+> FSD: `features/map/` and `features/geofences/`
 
-## Summary
-Implement Map view với real-time vehicle positions, geofence management (draw, edit, delete), và vehicle tracking overlay.
+---
 
-## Tasks
-| ID     | Description             | Files                                      |
-| ------ | ----------------------- | ------------------------------------------ |
-| FE-030 | Map page                | `app/(dashboard)/map/page.tsx`             |
-| FE-031 | Map component (Leaflet) | `components/map/map-container.tsx`         |
-| FE-032 | Vehicle markers         | `components/map/vehicle-marker.tsx`        |
-| FE-033 | Geofence layer          | `components/map/geofence-layer.tsx`        |
-| FE-034 | Geofence editor         | `components/map/geofence-editor.tsx`       |
-| FE-035 | Vehicle popup           | `components/map/vehicle-popup.tsx`         |
-| FE-036 | Map controls            | `components/map/map-controls.tsx`          |
-| FE-037 | Map hooks               | `hooks/useMap.ts`, `hooks/useGeofences.ts` |
+## CRITICAL RULES
 
-## Backend API Contract (Input từ BE Phase 2B, 2E)
-### Device Positions
-| Endpoint                        | Method | Response               |
-| ------------------------------- | ------ | ---------------------- |
-| `GET /api/v1/devices/positions` | GET    | `{ data: Position[] }` |
+```
+1. Map: Leaflet via react-leaflet (dynamic import, no SSR)
+2. Geofence editor: @geoman-io/leaflet-geoman-free (NOT react-leaflet-draw)
+3. Map page: FULL HEIGHT layout, NO PageContainer header — uses custom MapSidebar
+4. Geofence list page: PageContainer + DataTable (standard pattern)
+5. Geofence form: Split layout Dialog — form left 40%, map editor right 60%
+6. Clustering: leaflet.markercluster for performance
+7. Canvas renderer for 500+ markers
+8. Vietnamese labels
+```
 
-### Geofences
-| Endpoint                              | Method | Response                           |
-| ------------------------------------- | ------ | ---------------------------------- |
-| `GET /api/v1/geofences`               | GET    | `{ data: Geofence[], pagination }` |
-| `POST /api/v1/geofences`              | POST   | `{ data: Geofence }`               |
-| `PUT /api/v1/geofences/:id`           | PUT    | `{ data: Geofence }`               |
-| `DELETE /api/v1/geofences/:id`        | DELETE | `{ success: true }`                |
-| `POST /api/v1/geofences/:id/vehicles` | POST   | Assign vehicles                    |
+---
 
-## Type Definitions
+## Dependencies (install in this phase)
+
+```bash
+npm i react-leaflet leaflet @geoman-io/leaflet-geoman-free leaflet.markercluster
+npm i -D @types/leaflet @types/leaflet.markercluster
+```
+
+---
+
+## Task List
+
+| ID     | Description                | Files                                                                        |
+| ------ | -------------------------- | ---------------------------------------------------------------------------- |
+| FE-080 | Map types + store          | `features/map/types/`, `lib/stores/map-store.ts`                             |
+| FE-081 | Map page                   | `app/dashboard/map/page.tsx`                                                 |
+| FE-082 | MapView component          | `features/map/components/map-view.tsx`                                       |
+| FE-083 | VehicleMarker              | `features/map/components/vehicle-marker.tsx`                                 |
+| FE-084 | VehiclePopup               | `features/map/components/vehicle-popup.tsx`                                  |
+| FE-085 | GeofenceLayer              | `features/map/components/geofence-layer.tsx`                                 |
+| FE-086 | MapSidebar                 | `features/map/components/map-sidebar.tsx`                                    |
+| FE-087 | MapToolbar                 | `features/map/components/map-toolbar.tsx`                                    |
+| FE-088 | MapLayerSwitcher           | `features/map/components/map-layer-switcher.tsx`                             |
+| FE-089 | DeviceCluster              | `features/map/components/device-cluster.tsx`                                 |
+| FE-08A | MobileDeviceDrawer         | `features/map/components/mobile-device-drawer.tsx`                           |
+| FE-08B | SelectedDeviceCard         | `features/map/components/selected-device-card.tsx`                           |
+| FE-08C | Map hooks (3)              | `features/map/hooks/*.ts`                                                    |
+| FE-08D | Map API                    | `lib/api/map.ts`                                                             |
+| FE-090 | Geofence types             | `features/geofences/types/index.ts`                                          |
+| FE-091 | Geofence schema            | `lib/validations/geofence.schema.ts`                                         |
+| FE-092 | Geofence API               | `lib/api/geofences.ts`                                                       |
+| FE-093 | Geofence hooks (5)         | `features/geofences/hooks/*.ts`                                              |
+| FE-094 | Geofence list page         | `app/dashboard/geofences/page.tsx`                                           |
+| FE-095 | Geofence columns           | `features/geofences/components/geofence-columns.tsx`                         |
+| FE-096 | Geofence form + map editor | `features/geofences/components/geofence-form.tsx`, `geofence-map-editor.tsx` |
+| FE-097 | GeofenceVehicleBinder      | `features/geofences/components/geofence-vehicle-binder.tsx`                  |
+
+---
+
+## Backend API Contract
+
+```
+# Map Positions
+GET /api/v1/devices/positions    → Position[] (all online devices)
+
+# Geofences
+GET    /api/v1/geofences          ?page&limit&isActive&search
+GET    /api/v1/geofences/:id
+POST   /api/v1/geofences          { name, type, coordinates, radius?, isActive, vehicleIds }
+PUT    /api/v1/geofences/:id      { name, coordinates, radius?, isActive, vehicleIds }
+DELETE /api/v1/geofences/:id
+
+# Socket.IO events
+device:position → { deviceId, lat, lon, speed, heading, timestamp }
+geofence:enter  → { deviceId, geofenceId, geofenceName, timestamp }
+geofence:exit   → { deviceId, geofenceId, geofenceName, timestamp }
+```
+
+---
+
+## FE-080: Map Types + Zustand Store
+
 ```typescript
-interface Position {
-  id: string;       // deviceId
+// features/map/types/index.ts
+export interface DevicePosition {
+  deviceId: string;
+  deviceName: string;
+  vehiclePlate: string | null;
   lat: number;
   lon: number;
-  spd: number;      // speed
-  ts: number;       // timestamp (epoch)
-  s: string;        // status short ('r'=running, 's'=stopped, 'd'=disconnected)
+  speed: number;
+  heading: number;
+  status: 'running' | 'stopped' | 'disconnected';
+  timestamp: number;
 }
 
-interface Geofence {
+export interface Geofence {
   id: number;
   name: string;
-  geofenceType: 'circle' | 'polygon' | 'rectangle';
-  centerLatitude?: number;
-  centerLongitude?: number;
-  radiusMeters?: number;
-  coordinates?: { lat: number; lng: number }[] | null;  // For polygon
-  triggerOn: 'enter' | 'exit' | 'both';
+  type: 'circle' | 'polygon';
+  coordinates: [number, number][] | [number, number]; // polygon vertices or center
+  radius: number | null; // for circle
   isActive: boolean;
-  color: string;
-  vehicles: string[];  // vehicleIds assigned
+  vehicleIds: number[];
+  vehicleCount: number;
+  createdAt: string;
 }
 ```
 
-## WebSocket Events (real-time positions)
 ```typescript
-// Namespace: /devices
-socket.on('positions:batch', (positions: Position[]) => {
-  // Update all markers at once (batch update for performance)
-});
+// lib/stores/map-store.ts
+import { create } from 'zustand';
+import type { DevicePosition } from '@/features/map/types';
 
-// Namespace: /dashboard (geofence alerts)
-socket.on('geofence:triggered', (data: {
-  vehicleId: string;
-  geofenceId: number;
-  action: 'enter' | 'exit';
-  timestamp: string;
-}) => {
-  // Show geofence alert notification
-});
+interface MapState {
+  positions: Map<string, DevicePosition>;
+  selectedDeviceId: string | null;
+  followMode: boolean;
+  showGeofences: boolean;
+  updatePosition: (pos: DevicePosition) => void;
+  updateBatch: (positions: DevicePosition[]) => void;
+  selectDevice: (deviceId: string | null) => void;
+  toggleFollowMode: () => void;
+  toggleGeofences: () => void;
+}
+
+export const useMapStore = create<MapState>((set, get) => ({
+  positions: new Map(),
+  selectedDeviceId: null,
+  followMode: false,
+  showGeofences: true,
+
+  updatePosition: (pos) => set((s) => {
+    const next = new Map(s.positions);
+    next.set(pos.deviceId, pos);
+    return { positions: next };
+  }),
+
+  updateBatch: (positions) => set((s) => {
+    const next = new Map(s.positions);
+    for (const p of positions) next.set(p.deviceId, p);
+    return { positions: next };
+  }),
+
+  selectDevice: (deviceId) => set({ selectedDeviceId: deviceId }),
+  toggleFollowMode: () => set((s) => ({ followMode: !s.followMode })),
+  toggleGeofences: () => set((s) => ({ showGeofences: !s.showGeofences })),
+}));
 ```
 
-## Map Component Pattern
-```typescript
-// components/map/map-container.tsx
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+---
 
-export function VehicleMap() {
-  const positions = usePositions();  // Real-time positions
-  const geofences = useGeofences();
-  
+## FE-081: Map Page
+
+```tsx
+// app/dashboard/map/page.tsx
+'use client';
+
+import dynamic from 'next/dynamic';
+import { MapSidebar } from '@/features/map/components/map-sidebar';
+import { MapToolbar } from '@/features/map/components/map-toolbar';
+import { useMapRealtime } from '@/features/map/hooks/use-map-realtime';
+import { useDevicePositions } from '@/features/map/hooks/use-device-positions';
+
+const MapView = dynamic(() => import('@/features/map/components/map-view').then((m) => m.MapView), {
+  ssr: false,
+  loading: () => <div className="flex-1 bg-muted animate-pulse" />,
+});
+
+export default function MapPage() {
+  useDevicePositions(); // initial fetch
+  useMapRealtime();     // live updates
+
   return (
-    <MapContainer center={[21.0285, 105.8542]} zoom={13}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      
-      {/* Vehicle markers */}
-      {positions.map(pos => (
-        <VehicleMarker key={pos.id} position={pos} />
+    <div className="flex h-[calc(100vh-4rem)]">
+      <MapSidebar />
+      <div className="relative flex-1">
+        <MapView />
+        <MapToolbar />
+      </div>
+    </div>
+  );
+}
+```
+
+> ⚠️ NO PageContainer. Map page uses full-height flex layout.
+
+---
+
+## FE-082: MapView
+
+```tsx
+// features/map/components/map-view.tsx
+'use client';
+
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { useMapStore } from '@/lib/stores/map-store';
+import { VehicleMarker } from './vehicle-marker';
+import { GeofenceLayer } from './geofence-layer';
+import { MapLayerSwitcher } from './map-layer-switcher';
+import { useGeofences } from '@/features/geofences/hooks/use-geofences';
+import 'leaflet/dist/leaflet.css';
+
+const DEFAULT_CENTER: [number, number] = [10.762622, 106.660172]; // Ho Chi Minh
+const DEFAULT_ZOOM = 12;
+
+export function MapView() {
+  const positions = useMapStore((s) => s.positions);
+  const showGeofences = useMapStore((s) => s.showGeofences);
+  const { data: geofences } = useGeofences({ isActive: true });
+
+  return (
+    <MapContainer
+      center={DEFAULT_CENTER}
+      zoom={DEFAULT_ZOOM}
+      className="h-full w-full z-0"
+      preferCanvas={true}
+    >
+      <MapLayerSwitcher />
+
+      {Array.from(positions.values()).map((pos) => (
+        <VehicleMarker key={pos.deviceId} position={pos} />
       ))}
-      
-      {/* Geofence layers */}
-      {geofences.map(geo => (
-        <GeofenceLayer key={geo.id} geofence={geo} />
+
+      {showGeofences && geofences?.data?.map((gf: any) => (
+        <GeofenceLayer key={gf.id} geofence={gf} />
       ))}
-      
-      {/* Geofence draw controls (admin only) */}
-      <GeofenceEditor onSave={handleSaveGeofence} />
+
+      <FollowSelectedDevice />
     </MapContainer>
   );
 }
-```
 
-## Geofence Editor Pattern
-```typescript
-// Using react-leaflet-draw for geofence creation
-import { FeatureGroup } from 'react-leaflet';
-import { EditControl } from 'react-leaflet-draw';
+// Auto-pan to selected device
+function FollowSelectedDevice() {
+  const map = useMap();
+  const selectedId = useMapStore((s) => s.selectedDeviceId);
+  const followMode = useMapStore((s) => s.followMode);
+  const positions = useMapStore((s) => s.positions);
 
-function GeofenceEditor({ onSave }) {
-  const handleCreated = (e) => {
-    const { layerType, layer } = e;
-    
-    if (layerType === 'circle') {
-      const { lat, lng } = layer.getLatLng();
-      const radius = layer.getRadius();
-      onSave({ geofenceType: 'circle', centerLatitude: lat, centerLongitude: lng, radiusMeters: radius });
-    }
-    
-    if (layerType === 'polygon') {
-      const coordinates = layer.getLatLngs()[0].map(ll => ({ lat: ll.lat, lng: ll.lng }));
-      onSave({ geofenceType: 'polygon', coordinates });
-    }
-  };
-  
-  return (
-    <FeatureGroup>
-      <EditControl
-        position="topright"
-        draw={{ circle: true, polygon: true, rectangle: true, marker: false, polyline: false }}
-        onCreated={handleCreated}
-      />
-    </FeatureGroup>
-  );
+  if (followMode && selectedId) {
+    const pos = positions.get(selectedId);
+    if (pos) map.setView([pos.lat, pos.lon], map.getZoom());
+  }
+  return null;
 }
 ```
 
-## Performance Considerations
-```typescript
-// ⚠️ QUAN TRỌNG cho map performance:
-1. Batch position updates (không update từng marker riêng)
-2. Use clustering cho nhiều vehicles (Leaflet.markercluster)
-3. Debounce geofence check API calls
-4. Disable REST polling khi WebSocket connected
+---
 
-// Disable REST polling pattern:
-if (socket.connected) {
-  clearInterval(pollingInterval);
+## FE-083: VehicleMarker
+
+Custom `divIcon` with:
+- Color by status: running=green, stopped=amber, disconnected=red
+- Arrow rotated by `heading`
+- Click → `useMapStore.selectDevice(deviceId)` + show VehiclePopup
+
+---
+
+## FE-085: GeofenceLayer
+
+Renders Circle (for type=circle) or Polygon (for type=polygon) with:
+- Semi-transparent fill
+- Tooltip with geofence name
+- Blue stroke, dashed for inactive
+
+---
+
+## FE-086: MapSidebar
+
+Collapsible sidebar (w-80, hidden on mobile → use Sheet):
+- **Tab 1 "Phương tiện"**: Search input + scrollable list of DeviceListItems (status dot, name, plate, speed)
+- **Tab 2 "Geofences"**: List of geofences with active toggle
+- Click device → selectDevice + pan map
+- **SelectedDeviceCard**: When a device is selected, show detailed card at bottom (name, status, speed, lat/lon, link to device detail)
+
+---
+
+## FE-08A: MobileDeviceDrawer
+
+On mobile (responsive), MapSidebar becomes a Sheet (bottom drawer):
+- Drag handle
+- Compact device list
+- Selected device card expands in drawer
+
+---
+
+## FE-08C: Map Hooks
+
+```typescript
+// features/map/hooks/use-device-positions.ts
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { mapServices } from '@/lib/api/map';
+import { useMapStore } from '@/lib/stores/map-store';
+
+export function useDevicePositions() {
+  const updateBatch = useMapStore((s) => s.updateBatch);
+  const { data } = useQuery({
+    queryKey: ['device-positions'],
+    queryFn: mapServices.getPositions,
+    refetchInterval: 30_000, // fallback polling
+  });
+
+  useEffect(() => {
+    if (data?.data) updateBatch(data.data);
+  }, [data]);
 }
-socket.on('disconnect', () => {
-  pollingInterval = setInterval(fetchPositions, 5000);
+```
+
+```typescript
+// features/map/hooks/use-map-realtime.ts
+import { useEffect } from 'react';
+import { useSocket } from '@/components/providers/socket-provider';
+import { useMapStore } from '@/lib/stores/map-store';
+
+export function useMapRealtime() {
+  const socket = useSocket();
+  const updatePosition = useMapStore((s) => s.updatePosition);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('device:position', (data) => {
+      updatePosition({
+        deviceId: data.deviceId,
+        deviceName: data.deviceName || data.deviceId,
+        vehiclePlate: data.vehiclePlate || null,
+        lat: data.lat,
+        lon: data.lon,
+        speed: data.speed || 0,
+        heading: data.heading || 0,
+        status: data.status || 'running',
+        timestamp: Date.now(),
+      });
+    });
+    return () => { socket.off('device:position'); };
+  }, [socket, updatePosition]);
+}
+```
+
+---
+
+## FE-094: Geofence List Page
+
+Standard PageContainer + DataTable pattern:
+- pageTitle: "Geofences"
+- pageDescription: "Quản lý các vùng giám sát"
+- Columns: name (sortable), type (Badge: circle/polygon), vehicleCount, isActive (Switch inline toggle), createdAt, actions
+- GeofenceForm (split Dialog)
+- ConfirmDialog for delete
+
+---
+
+## FE-096: Geofence Form + Map Editor
+
+```
+Split Dialog (max-w-4xl):
+┌──────────────────┬──────────────────────────┐
+│  Form (40%)      │  Map Editor (60%)        │
+│  - name Input    │  Leaflet map with        │
+│  - type Select   │  @geoman-io/leaflet-     │
+│    (circle/poly) │  geoman-free             │
+│  - radius Input  │  Draw polygon/circle     │
+│    (if circle)   │  Edit existing shape     │
+│  - isActive      │                          │
+│    Switch        │  Shape → coordinates     │
+│  - Vehicle       │  auto-sync to form       │
+│    binder        │                          │
+│  ─────────       │                          │
+│  Cancel / Save   │                          │
+└──────────────────┴──────────────────────────┘
+```
+
+### GeofenceMapEditor
+```tsx
+// features/geofences/components/geofence-map-editor.tsx
+// Uses @geoman-io/leaflet-geoman-free
+// Props: type ('circle' | 'polygon'), initialCoordinates, initialRadius
+// Events: onChange(coordinates, radius?)
+// On mount: enable pm controls for selected type
+// On shape create: extract coordinates, call onChange
+// On shape edit: update coordinates, call onChange
+```
+
+### GeofenceVehicleBinder
+Multi-select combobox (shadcn Command) to select which vehicles this geofence applies to. Fetch vehicles with useQuery.
+
+---
+
+## FE-091: Geofence Schema
+
+```typescript
+// lib/validations/geofence.schema.ts
+import { z } from 'zod';
+
+export const geofenceSchema = z.object({
+  name: z.string().min(1, 'Tên geofence là bắt buộc').max(100),
+  type: z.enum(['circle', 'polygon'], { required_error: 'Chọn loại' }),
+  coordinates: z.any(), // validated programmatically from map
+  radius: z.coerce.number().min(50, 'Bán kính tối thiểu 50m').optional(),
+  isActive: z.boolean().default(true),
+  vehicleIds: z.array(z.number()).default([]),
 });
+
+export type GeofenceFormValues = z.infer<typeof geofenceSchema>;
 ```
 
-## Dependencies
-- ✅ Phase 4A-4B done (Auth, Device API)
-- ✅ Phase 2B, 2E done (Positions API, Geofence API)
-- ➡️ Phase 5B can run parallel
+---
 
-## Verification
-- [ ] Map loads với vehicle markers
-- [ ] Markers update real-time via WebSocket
-- [ ] Geofence draw: circle, polygon, rectangle
-- [ ] Geofence save: persists to backend
-- [ ] Geofence alerts: triggered on enter/exit
+## Performance Rules
 
-## Full Spec Reference
-- [30-frontend-architecture.md](./../../30-frontend-architecture.md) — Frontend architecture
-- [24-websocket-events.md](./../../24-websocket-events.md) — WebSocket event contract
+1. Use `preferCanvas={true}` on MapContainer for 500+ markers
+2. Use leaflet.markercluster for DeviceCluster
+3. Throttle `device:position` Socket events to 1 update/sec per device
+4. Use `useMemo` for marker icon generation
+5. Lazy load map component with `dynamic()` + `{ ssr: false }`
+
+---
+
+## Verification Checklist
+
+- [ ] Map page: full height, sidebar + map layout
+- [ ] Vehicle markers appear at correct positions with status colors
+- [ ] Click marker → popup with device info
+- [ ] Real-time: markers move as positions update
+- [ ] Follow mode: map pans to selected device
+- [ ] Layer switcher: OpenStreetMap / Satellite
+- [ ] Geofence layers: circles and polygons render on map
+- [ ] Geofence list page: DataTable with CRUD
+- [ ] Geofence form: split layout with map editor
+- [ ] Geofence draw: polygon and circle drawing with @geoman-io
+- [ ] Geofence vehicle binder: multi-select works
+- [ ] Mobile: sidebar becomes bottom drawer
+- [ ] Clustering works with many markers
+- [ ] All text Vietnamese

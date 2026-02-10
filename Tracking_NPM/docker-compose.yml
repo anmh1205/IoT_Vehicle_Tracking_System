@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: tracking-npm
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+    volumes:
+      - ../Tracking_Data/Tracking_NPM/data:/data
+      - ../Tracking_Data/Tracking_NPM/letsencrypt:/etc/letsencrypt
+    restart: unless-stopped
+    networks:
+      - tracking-network
+    profiles:
+      - production
+
+networks:
+  tracking-network:
+    external: true
