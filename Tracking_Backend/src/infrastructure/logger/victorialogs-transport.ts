@@ -111,7 +111,7 @@ export class VictoriaLogsTransport extends Transport {
   }
 
   private extractMeta(info: LogInfo): Record<string, unknown> {
-    const { level, message, timestamp, service, context, ...meta } = info as Record<string, unknown>;
+    const { level: _level, message: _message, timestamp: _timestamp, service: _service, context: _context, ...meta } = info as Record<string, unknown>;
     return meta;
   }
 }

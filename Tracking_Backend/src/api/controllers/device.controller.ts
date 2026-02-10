@@ -13,6 +13,18 @@ import * as deviceListService from '@/domain/device/services/device-list.service
 import * as deviceDetailsService from '@/domain/device/services/device-details.service';
 import * as deviceSessionsService from '@/domain/device/services/device-sessions.service';
 import * as deviceRuntimeService from '@/domain/device/services/device-runtime.service';
+import * as deviceTelemetryService from '@/domain/device/services/device-telemetry.service';
+import * as deviceCommandService from '@/domain/device/services/device-command.service';
+import * as deviceErrorService from '@/domain/device/services/device-error.service';
+
+const resolveDeviceId = async (rawId: string): Promise<string> => {
+  const parsed = Number.parseInt(rawId, 10);
+  if (!Number.isNaN(parsed)) {
+    const device = await deviceDetailsService.getDeviceDetail(parsed);
+    return device.deviceId;
+  }
+  return rawId;
+};
 
 export const listDevices = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const parsed = deviceListQuerySchema.safeParse(req.query);
@@ -70,28 +82,17 @@ export const deleteDevice = asyncHandler(async (req: AuthenticatedRequest, res: 
 });
 
 export const getDeviceSessions = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const id = Number.parseInt(req.params.id, 10);
-  if (Number.isNaN(id)) {
-    throw createValidationError('Invalid device ID');
-  }
-
-  // Look up the device to get device_id string from numeric id
-  const device = await deviceDetailsService.getDeviceDetail(id);
+  const deviceId = await resolveDeviceId(req.params.id);
   const page = req.query.page ? Number.parseInt(req.query.page as string, 10) : 1;
   const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 20;
 
-  const result = await deviceSessionsService.getDeviceSessions(device.deviceId, page, limit);
+  const result = await deviceSessionsService.getDeviceSessions(deviceId, page, limit);
   sendOk(res, result);
 });
 
 export const getRuntimeStats = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const id = Number.parseInt(req.params.id, 10);
-  if (Number.isNaN(id)) {
-    throw createValidationError('Invalid device ID');
-  }
-
-  const device = await deviceDetailsService.getDeviceDetail(id);
-  const stats = await deviceRuntimeService.getRuntimeStats(device.deviceId);
+  const deviceId = await resolveDeviceId(req.params.id);
+  const stats = await deviceRuntimeService.getRuntimeStats(deviceId);
   sendOk(res, stats);
 });
 
@@ -107,5 +108,110 @@ export const regenerateToken = asyncHandler(async (req: AuthenticatedRequest, re
   }
 
   const result = await deviceCrudService.regenerateToken(id);
+  sendOk(res, result);
+});
+
+export const getTelemetry = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const deviceId = await resolveDeviceId(req.params.id);
+  const metric = (req.query.metric as string | undefined) ?? 'vib';
+  const from = req.query.from as string | undefined;
+  const to = req.query.to as string | undefined;
+
+  const data = await deviceTelemetryService.getTelemetry(deviceId, { metric, from, to });
+  sendOk(res, data);
+});
+
+export const sendCommand = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const deviceId = await resolveDeviceId(req.params.id);
+  const command = req.body?.command as string | undefined;
+  const params = (req.body?.params as Record<string, unknown> | undefined) ?? {};
+
+  if (!command) {
+    throw createValidationError('Missing command');
+  }
+
+  const result = await deviceCommandService.sendCommand(deviceId, { command, params });
+  sendOk(res, result);
+});
+
+export const triggerOta = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const deviceId = await resolveDeviceId(req.params.id);
+  const firmwareVersion = req.body?.firmwareVersion as string | undefined;
+
+  if (!firmwareVersion) {
+    throw createValidationError('Missing firmwareVersion');
+  }
+
+  const result = await deviceCommandService.sendCommand(deviceId, {
+    command: 'OTA_UPDATE',
+    params: {
+      firmwareVersion,
+      force: !!req.body?.force,
+    },
+  });
+
+  res.status(202).json({
+    success: true,
+    data: {
+      jobId: `ota_${Date.now()}`,
+      status: 'pending',
+      targetVersion: firmwareVersion,
+      commandId: result.id,
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
+export const importDevices = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const rows = Array.isArray(req.body?.devices) ? req.body.devices : [];
+  if (rows.length === 0) {
+    throw createValidationError('devices array is required');
+  }
+
+  let imported = 0;
+  const errors: Array<{ row: number; error: string }> = [];
+
+  for (let index = 0; index < rows.length; index += 1) {
+    const row = rows[index] as Record<string, unknown>;
+    try {
+      const deviceId = String(row.deviceId ?? '').trim();
+      const deviceName = String(row.deviceName ?? '').trim();
+      if (!deviceId || !deviceName) {
+        throw new Error('Missing deviceId or deviceName');
+      }
+
+      await deviceCrudService.createDevice({
+        deviceId,
+        deviceName,
+        imei: row.imei ? String(row.imei) : undefined,
+      });
+      imported += 1;
+    } catch (error) {
+      errors.push({ row: index + 1, error: (error as Error).message });
+    }
+  }
+
+  sendOk(res, {
+    imported,
+    failed: errors.length,
+    errors,
+  });
+});
+
+export const getCommands = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const deviceId = await resolveDeviceId(req.params.id);
+  const page = req.query.page ? Number.parseInt(req.query.page as string, 10) : 1;
+  const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 20;
+
+  const result = await deviceCommandService.listCommands(deviceId, page, limit);
+  sendOk(res, result);
+});
+
+export const getErrors = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const deviceId = await resolveDeviceId(req.params.id);
+  const page = req.query.page ? Number.parseInt(req.query.page as string, 10) : 1;
+  const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 20;
+
+  const result = await deviceErrorService.listErrors(deviceId, page, limit);
   sendOk(res, result);
 });

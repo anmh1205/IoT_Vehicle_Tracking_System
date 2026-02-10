@@ -1,27 +1,10 @@
-import { apiClient } from './client';
-import type {
-  Geofence,
-  CreateGeofenceInput,
-  UpdateGeofenceInput,
-} from '@/types/geofence.types';
-import type { ApiResponse, PaginatedResponse } from '@/types';
+﻿import { apiClient, unwrap } from './client';
 
-export const geofencesApi = {
-  list: (params?: { page?: number; limit?: number }) =>
-    apiClient.get<ApiResponse<PaginatedResponse<Geofence>>>('/geofences', { params }),
-
-  getById: (id: number) =>
-    apiClient.get<ApiResponse<Geofence>>(`/geofences/${id}`),
-
-  create: (data: CreateGeofenceInput) =>
-    apiClient.post<ApiResponse<Geofence>>('/geofences', data),
-
-  update: (id: number, data: UpdateGeofenceInput) =>
-    apiClient.put<ApiResponse<Geofence>>(`/geofences/${id}`, data),
-
-  delete: (id: number) =>
-    apiClient.delete(`/geofences/${id}`),
-
-  assignVehicles: (id: number, vehicleIds: string[]) =>
-    apiClient.post(`/geofences/${id}/vehicles`, { vehicleIds }),
+export const geofenceServices = {
+  getList: (params?: Record<string, unknown>) => apiClient.get('/geofences', { params }).then((r) => unwrap<any>(r.data)),
+  getById: (id: number) => apiClient.get(`/geofences/${id}`).then((r) => unwrap<any>(r.data)),
+  create: (data: Record<string, unknown>) => apiClient.post('/geofences', data).then((r) => unwrap<any>(r.data)),
+  update: (id: number, data: Record<string, unknown>) => apiClient.put(`/geofences/${id}`, data).then((r) => unwrap<any>(r.data)),
+  delete: (id: number) => apiClient.delete(`/geofences/${id}`).then((r) => unwrap<any>(r.data)),
+  bindVehicles: (id: number, vehicleIds: number[]) => apiClient.post(`/geofences/${id}/vehicles`, { vehicleIds }).then((r) => unwrap<any>(r.data)),
 };

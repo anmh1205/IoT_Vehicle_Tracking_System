@@ -8,11 +8,13 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/', vehicleController.listVehicles);
+router.post('/import', vehicleController.importVehicles);
 router.get('/:id', vehicleController.getVehicle);
 router.post('/', vehicleController.createVehicle);
 router.put('/:id', vehicleController.updateVehicle);
 router.delete('/:id', vehicleController.deleteVehicle);
 router.put('/:id/assign-device', vehicleController.assignDevice);
 router.put('/:id/unassign-device', vehicleController.unassignDevice);
+router.put('/:id/device', vehicleController.setDeviceAssignment);
 
 export default router;

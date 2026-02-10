@@ -24,3 +24,4 @@ Tracking_Data/
 *.env
 !.env.example
 /Tracking_Backend/node_modules
+/Tracking_Backend/dist

@@ -12,13 +12,30 @@ const extractBearerToken = (req: AuthenticatedRequest): string | null => {
   return authHeader.slice(7);
 };
 
+const extractCookieToken = (req: AuthenticatedRequest): string | null => {
+  const rawCookie = req.headers.cookie;
+  if (!rawCookie) return null;
+
+  const cookiePair = rawCookie
+    .split(';')
+    .map((chunk) => chunk.trim())
+    .find((chunk) => chunk.startsWith('session_token='));
+
+  if (!cookiePair) return null;
+  const value = cookiePair.split('=').slice(1).join('=');
+  return value ? decodeURIComponent(value) : null;
+};
+
+const extractSessionToken = (req: AuthenticatedRequest): string | null =>
+  extractBearerToken(req) ?? extractCookieToken(req);
+
 export const requireAuth = async (
   req: AuthenticatedRequest,
   _res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const token = extractBearerToken(req);
+    const token = extractSessionToken(req);
     if (!token) {
       throw createUnauthorizedError('Authentication required');
     }
@@ -61,7 +78,7 @@ export const attachUserIfAvailable = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const token = extractBearerToken(req);
+    const token = extractSessionToken(req);
     if (!token) {
       next();
       return;

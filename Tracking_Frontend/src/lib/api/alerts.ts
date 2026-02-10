@@ -1,26 +1,11 @@
-import { apiClient } from './client';
-import type { Alert, CreateAlertInput, UpdateAlertInput, AlertListQuery } from '@/types/alert.types';
-import type { ApiResponse, PaginatedResponse } from '@/types';
+﻿import { apiClient, unwrap } from './client';
 
-export const alertsApi = {
-  list: (params?: AlertListQuery) =>
-    apiClient.get<ApiResponse<PaginatedResponse<Alert>>>('/alerts', { params }),
-
-  getById: (id: number) =>
-    apiClient.get<ApiResponse<Alert>>(`/alerts/${id}`),
-
-  create: (data: CreateAlertInput) =>
-    apiClient.post<ApiResponse<Alert>>('/alerts', data),
-
-  update: (id: number, data: UpdateAlertInput) =>
-    apiClient.put<ApiResponse<Alert>>(`/alerts/${id}`, data),
-
-  acknowledge: (id: number) =>
-    apiClient.patch<ApiResponse<Alert>>(`/alerts/${id}/acknowledge`),
-
-  resolve: (id: number, notes?: string) =>
-    apiClient.patch<ApiResponse<Alert>>(`/alerts/${id}/resolve`, { resolutionNotes: notes }),
-
-  dismiss: (id: number) =>
-    apiClient.patch<ApiResponse<Alert>>(`/alerts/${id}/dismiss`),
+export const alertServices = {
+  getList: (params?: Record<string, unknown>) => apiClient.get('/alerts', { params }).then((r) => unwrap<any>(r.data)),
+  getById: (id: number) => apiClient.get(`/alerts/${id}`).then((r) => unwrap<any>(r.data)),
+  create: (data: Record<string, unknown>) => apiClient.post('/alerts', data).then((r) => unwrap<any>(r.data)),
+  acknowledge: (id: number) => apiClient.put(`/alerts/${id}/acknowledge`).then((r) => unwrap<any>(r.data)),
+  resolve: (id: number, data?: Record<string, unknown>) => apiClient.put(`/alerts/${id}/resolve`, data ?? {}).then((r) => unwrap<any>(r.data)),
+  dismiss: (id: number) => apiClient.put(`/alerts/${id}/dismiss`).then((r) => unwrap<any>(r.data)),
+  delete: (id: number) => apiClient.delete(`/alerts/${id}`).then((r) => unwrap<any>(r.data)),
 };

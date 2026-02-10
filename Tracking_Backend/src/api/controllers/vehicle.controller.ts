@@ -92,3 +92,60 @@ export const unassignDevice = asyncHandler(async (req: AuthenticatedRequest, res
   const vehicle = await vehicleAssignmentService.unassignDevice(id);
   sendOk(res, vehicle);
 });
+
+export const setDeviceAssignment = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) {
+    throw createValidationError('Invalid vehicle ID');
+  }
+
+  const deviceId = (req.body?.deviceId as string | null | undefined) ?? null;
+  if (!deviceId) {
+    const vehicle = await vehicleAssignmentService.unassignDevice(id);
+    sendOk(res, vehicle);
+    return;
+  }
+
+  const vehicle = await vehicleAssignmentService.assignDevice(id, deviceId);
+  sendOk(res, vehicle);
+});
+
+export const importVehicles = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const rows = Array.isArray(req.body?.vehicles) ? req.body.vehicles : [];
+  if (rows.length === 0) {
+    throw createValidationError('vehicles array is required');
+  }
+
+  let imported = 0;
+  const errors: Array<{ row: number; error: string }> = [];
+
+  for (let index = 0; index < rows.length; index += 1) {
+    const row = rows[index] as Record<string, unknown>;
+    try {
+      const vehicleId = String(row.vehicleId ?? '').trim();
+      if (!vehicleId) {
+        throw new Error('Missing vehicleId');
+      }
+
+      await vehicleCrudService.createVehicle({
+        vehicleId,
+        plateNumber: row.plateNumber ? String(row.plateNumber) : undefined,
+        brand: row.brand ? String(row.brand) : undefined,
+        model: row.model ? String(row.model) : undefined,
+        year: row.year ? Number(row.year) : undefined,
+        customerId: row.customerId ? Number(row.customerId) : undefined,
+        deviceId: row.deviceId ? String(row.deviceId) : undefined,
+        notes: row.notes ? String(row.notes) : undefined,
+      });
+      imported += 1;
+    } catch (error) {
+      errors.push({ row: index + 1, error: (error as Error).message });
+    }
+  }
+
+  sendOk(res, {
+    imported,
+    failed: errors.length,
+    errors,
+  });
+});

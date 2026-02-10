@@ -1,4 +1,4 @@
-import type { Response, NextFunction } from 'express';
+import type { Response } from 'express';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { sendOk, sendCreated } from '@/shared/utils/response.util';
@@ -8,10 +8,36 @@ import {
   changePasswordSchema,
   createUserSchema,
   updateUserSchema,
+  updateProfileSchema,
+  updateNotificationSchema,
 } from '@/api/validators/auth.validator';
 import * as authSessionService from '@/domain/auth/services/auth-session.service';
 import * as authPasswordService from '@/domain/auth/services/auth-password.service';
 import * as userManagementService from '@/domain/auth/services/user-management.service';
+import * as userRepo from '@/domain/auth/repositories/user.repository';
+import { hashPassword } from '@/domain/auth/helpers/auth.helpers';
+import { appConfig, sessionConfig } from '@/config/env';
+
+const COOKIE_NAME = 'session_token';
+
+const extractTokenFromRequest = (req: AuthenticatedRequest): string | null => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.slice(7);
+  }
+
+  const rawCookie = req.headers.cookie;
+  if (!rawCookie) return null;
+
+  const cookiePair = rawCookie
+    .split(';')
+    .map((chunk) => chunk.trim())
+    .find((chunk) => chunk.startsWith(`${COOKIE_NAME}=`));
+
+  if (!cookiePair) return null;
+  const value = cookiePair.split('=').slice(1).join('=');
+  return value ? decodeURIComponent(value) : null;
+};
 
 export const login = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const parsed = loginSchema.safeParse(req.body);
@@ -20,17 +46,24 @@ export const login = asyncHandler(async (req: AuthenticatedRequest, res: Respons
   }
 
   const result = await authSessionService.login(parsed.data.username, parsed.data.password);
+  res.cookie(COOKIE_NAME, result.token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: appConfig.isProduction,
+    path: '/',
+    maxAge: sessionConfig.maxLifetimeHours * 60 * 60 * 1000,
+  });
   sendOk(res, result);
 });
 
 export const logout = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  const token = extractTokenFromRequest(req);
+  if (!token) {
     throw createUnauthorizedError('No token provided');
   }
 
-  const token = authHeader.slice(7);
   await authSessionService.logout(token);
+  res.clearCookie(COOKIE_NAME, { path: '/' });
   sendOk(res, { message: 'Logged out successfully' });
 });
 
@@ -39,8 +72,9 @@ export const getMe = asyncHandler(async (req: AuthenticatedRequest, res: Respons
     throw createUnauthorizedError('Not authenticated');
   }
 
+  const token = extractTokenFromRequest(req);
   const user = await authSessionService.getCurrentUser(req.user.id);
-  sendOk(res, user);
+  sendOk(res, { user, token });
 });
 
 export const changePassword = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
@@ -59,6 +93,62 @@ export const changePassword = asyncHandler(async (req: AuthenticatedRequest, res
     parsed.data.newPassword,
   );
   sendOk(res, { message: 'Password changed successfully' });
+});
+
+export const refresh = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user) {
+    throw createUnauthorizedError('Not authenticated');
+  }
+
+  const token = extractTokenFromRequest(req);
+  if (!token) {
+    throw createUnauthorizedError('No token provided');
+  }
+
+  const user = await authSessionService.getCurrentUser(req.user.id);
+  sendOk(res, { user, token });
+});
+
+export const updateProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user) {
+    throw createUnauthorizedError('Not authenticated');
+  }
+
+  const parsed = updateProfileSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw createValidationError('Invalid profile data', parsed.error.flatten().fieldErrors);
+  }
+
+  const user = await userManagementService.updateProfile(req.user.id, parsed.data);
+  sendOk(res, user);
+});
+
+export const updateNotifications = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user) {
+    throw createUnauthorizedError('Not authenticated');
+  }
+
+  const parsed = updateNotificationSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw createValidationError('Invalid notification settings', parsed.error.flatten().fieldErrors);
+  }
+
+  const user = await userManagementService.updateNotificationPreferences(req.user.id, parsed.data);
+  sendOk(res, user);
+});
+
+export const getNotificationSettings = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user) {
+    throw createUnauthorizedError('Not authenticated');
+  }
+
+  const user = await userRepo.findById(req.user.id);
+  const preferences = (user?.preferences as Record<string, unknown> | undefined)?.notifications ?? {
+    emailAlerts: true,
+    pushAlerts: true,
+    alertTypes: ['critical', 'high'],
+  };
+  sendOk(res, { preferences });
 });
 
 // --- User Management (Admin) ---
@@ -103,7 +193,7 @@ export const updateUser = asyncHandler(async (req: AuthenticatedRequest, res: Re
   sendOk(res, user);
 });
 
-export const deleteUser = asyncHandler(async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const deleteUser = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const id = Number.parseInt(req.params.id, 10);
   if (Number.isNaN(id)) {
     throw createValidationError('Invalid user ID');
@@ -111,4 +201,21 @@ export const deleteUser = asyncHandler(async (req: AuthenticatedRequest, res: Re
 
   await userManagementService.deleteUser(id);
   sendOk(res, { message: 'User deleted successfully' });
+});
+
+export const resetUserPassword = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) {
+    throw createValidationError('Invalid user ID');
+  }
+
+  const temporaryPassword = `Tmp${Math.random().toString(36).slice(2, 10)}!`;
+  const newHash = await hashPassword(temporaryPassword);
+  const updated = await userRepo.updatePassword(id, newHash);
+
+  if (!updated) {
+    throw createValidationError('Could not reset password');
+  }
+
+  sendOk(res, { temporaryPassword });
 });

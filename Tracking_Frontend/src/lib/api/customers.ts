@@ -1,20 +1,9 @@
-import { apiClient } from './client';
-import type { Customer, CreateCustomerInput, UpdateCustomerInput, CustomerListQuery } from '@/types/customer.types';
-import type { ApiResponse, PaginatedResponse } from '@/types';
+﻿import { apiClient, unwrap } from './client';
 
-export const customersApi = {
-  list: (params?: CustomerListQuery) =>
-    apiClient.get<ApiResponse<PaginatedResponse<Customer>>>('/customers', { params }),
-
-  getById: (id: number) =>
-    apiClient.get<ApiResponse<Customer>>(`/customers/${id}`),
-
-  create: (data: CreateCustomerInput) =>
-    apiClient.post<ApiResponse<Customer>>('/customers', data),
-
-  update: (id: number, data: UpdateCustomerInput) =>
-    apiClient.put<ApiResponse<Customer>>(`/customers/${id}`, data),
-
-  delete: (id: number) =>
-    apiClient.delete(`/customers/${id}`),
+export const customerServices = {
+  getList: (params?: Record<string, unknown>) => apiClient.get('/customers', { params }).then((r) => unwrap<any>(r.data)),
+  getById: (id: number) => apiClient.get(`/customers/${id}`).then((r) => unwrap<any>(r.data)),
+  create: (data: Record<string, unknown>) => apiClient.post('/customers', data).then((r) => unwrap<any>(r.data)),
+  update: (id: number, data: Record<string, unknown>) => apiClient.put(`/customers/${id}`, data).then((r) => unwrap<any>(r.data)),
+  delete: (id: number) => apiClient.delete(`/customers/${id}`).then((r) => unwrap<any>(r.data)),
 };

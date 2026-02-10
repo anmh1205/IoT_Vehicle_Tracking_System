@@ -21,31 +21,37 @@
 
 ## Task List
 
-| ID     | Description                         | Files                                                              |
-| ------ | ----------------------------------- | ------------------------------------------------------------------ |
-| FE-001 | Project init + dependencies         | `package.json`, `next.config.ts`, `tsconfig.json`                  |
-| FE-002 | shadcn/ui init + install components | `components/ui/*`                                                  |
-| FE-003 | Global styles + theme               | `app/globals.css`, `app/theme.css`                                 |
-| FE-004 | Root layout + providers             | `app/layout.tsx`, `components/providers/*`                         |
-| FE-005 | Auth store (Zustand)                | `lib/stores/auth-store.ts`                                         |
-| FE-006 | API client (Axios)                  | `lib/api/client.ts`, `lib/api/auth.ts`                             |
-| FE-007 | Auth middleware                     | `middleware.ts`                                                    |
-| FE-008 | Session guard component             | `components/auth/session-guard.tsx`                                |
-| FE-009 | Dashboard layout shell              | `app/dashboard/layout.tsx`                                         |
-| FE-010 | AppSidebar + nav config             | `components/layout/AppSidebar.tsx`, `config/nav-config.ts`         |
-| FE-011 | PageContainer                       | `components/layout/PageContainer.tsx`                              |
-| FE-012 | Breadcrumbs                         | `components/breadcrumbs.tsx`                                       |
-| FE-013 | ThemeSelector + ModeToggle          | `components/theme-selector.tsx`, `components/mode-toggle.tsx`      |
-| FE-014 | NavUser (user menu)                 | `components/nav-user.tsx`                                          |
-| FE-015 | KBar command palette                | `components/kbar/*`                                                |
-| FE-016 | Common: DataTable                   | `components/common/data-table.tsx`, `data-table-column-header.tsx` |
-| FE-017 | Common: ConfirmDialog               | `components/common/confirm-dialog.tsx`                             |
-| FE-018 | Common: EmptyState                  | `components/common/empty-state.tsx`                                |
-| FE-019 | Common: StatCard                    | `components/common/stat-card.tsx`                                  |
-| FE-020 | Common: ConnectionBanner            | `components/common/connection-banner.tsx`                          |
-| FE-021 | Login page                          | `app/login/page.tsx`, `features/auth/components/login-form.tsx`    |
-| FE-022 | Error pages                         | `app/error.tsx`, `app/not-found.tsx`, `app/global-error.tsx`       |
-| FE-023 | Root redirect                       | `app/page.tsx`                                                     |
+| ID     | Description                           | Files                                                                                                       |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| FE-001 | Project init + dependencies           | `package.json`, `next.config.ts`, `tsconfig.json`                                                           |
+| FE-002 | shadcn/ui init + install components   | `components/ui/*`                                                                                           |
+| FE-003 | Global styles + theme                 | `app/globals.css`, `app/theme.css`                                                                          |
+| FE-004 | Root layout + providers               | `app/layout.tsx`, `components/providers/*`                                                                  |
+| FE-005 | Auth store (Zustand)                  | `lib/stores/auth-store.ts`                                                                                  |
+| FE-006 | API client (Axios)                    | `lib/api/client.ts`, `lib/api/auth.ts`                                                                      |
+| FE-007 | Auth middleware                       | `middleware.ts`                                                                                             |
+| FE-008 | Session guard component               | `components/auth/session-guard.tsx`                                                                         |
+| FE-009 | Dashboard layout shell                | `app/dashboard/layout.tsx`                                                                                  |
+| FE-010 | AppSidebar + nav config               | `components/layout/AppSidebar.tsx`, `config/nav-config.ts`                                                  |
+| FE-011 | PageContainer                         | `components/layout/PageContainer.tsx`                                                                       |
+| FE-012 | Breadcrumbs                           | `components/breadcrumbs.tsx`                                                                                |
+| FE-013 | ThemeSelector + ModeToggle            | `components/theme-selector.tsx`, `components/mode-toggle.tsx`                                               |
+| FE-014 | NavUser (user menu)                   | `components/nav-user.tsx`                                                                                   |
+| FE-015 | KBar command palette                  | `components/kbar/*`                                                                                         |
+| FE-016 | Common: DataTable                     | `components/common/data-table.tsx`, `data-table-column-header.tsx`                                          |
+| FE-017 | Common: ConfirmDialog                 | `components/common/confirm-dialog.tsx`                                                                      |
+| FE-018 | Common: EmptyState                    | `components/common/empty-state.tsx`                                                                         |
+| FE-019 | Common: StatCard                      | `components/common/stat-card.tsx`                                                                           |
+| FE-020 | Common: ConnectionBanner              | `components/common/connection-banner.tsx`                                                                   |
+| FE-021 | Login page                            | `app/login/page.tsx`, `features/auth/components/login-form.tsx`                                             |
+| FE-022 | Error pages                           | `app/error.tsx`, `app/not-found.tsx`, `app/global-error.tsx`                                                |
+| FE-023 | Root redirect                         | `app/page.tsx`                                                                                              |
+| FE-024 | useRoleAccess hook (RBAC)             | `hooks/use-role-access.ts`                                                                                  |
+| FE-025 | useRealtimeSubscription hook          | `hooks/use-realtime-subscription.ts`                                                                        |
+| FE-026 | useDeviceStatusRealtime hook          | `hooks/use-device-status-realtime.ts`                                                                       |
+| FE-027 | Shared utilities                      | `lib/utils/query-invalidation.ts`, `lib/notification.ts`, `lib/utils/logger.ts`, `lib/utils/date/format.ts` |
+| FE-028 | API services (export + device-detail) | `lib/api/export.ts`, `lib/api/device-detail.ts`                                                             |
+| FE-029 | Realtime provider upgrade             | `components/providers/realtime-provider.tsx` — add joinDeviceRoom/leaveDeviceRoom                           |
 
 ---
 
@@ -842,6 +848,145 @@ src/
 │   └── utils.ts
 └── types/
     └── index.ts
+```
+
+---
+
+## FE-024: useRoleAccess
+
+```typescript
+// hooks/use-role-access.ts
+import { useAuthStore } from '@/lib/stores/auth-store';
+
+export function useRoleAccess() {
+  const user = useAuthStore((s) => s.user);
+  const role = user?.role ?? 'viewer';
+
+  return {
+    canViewSystemInfo: role === 'root' || role === 'admin',
+    canViewAllDevices: role !== 'viewer',
+    canEditDevice: role === 'root' || role === 'admin' || role === 'operator',
+    canManageUsers: role === 'root' || role === 'admin',
+    canManageFirmware: role === 'root' || role === 'admin',
+    canExportData: role !== 'viewer',
+    canAccessSystemAdmin: role === 'root' || role === 'admin',
+    canDeleteDevice: role === 'root' || role === 'admin',
+    role,
+    isRoot: role === 'root',
+    isAdmin: role === 'admin',
+  };
+}
+```
+
+---
+
+## FE-025: useRealtimeSubscription
+
+```typescript
+// hooks/use-realtime-subscription.ts
+import { useEffect, useRef } from 'react';
+import { useSocket } from '@/components/providers/socket-provider';
+
+interface UseRealtimeSubscriptionOptions<T> {
+  event: string;
+  enabled?: boolean;
+  handler: (payload: T) => void;
+}
+
+export function useRealtimeSubscription<T>({
+  event,
+  enabled = true,
+  handler,
+}: UseRealtimeSubscriptionOptions<T>) {
+  const socket = useSocket();
+  const handlerRef = useRef(handler);
+  handlerRef.current = handler;
+
+  useEffect(() => {
+    if (!socket || !enabled) return;
+    const listener = (payload: T) => handlerRef.current(payload);
+    socket.on(event, listener);
+    return () => { socket.off(event, listener); };
+  }, [socket, event, enabled]);
+}
+```
+
+---
+
+## FE-027: Shared Utilities
+
+### query-invalidation.ts
+
+```typescript
+// lib/utils/query-invalidation.ts
+import type { QueryClient } from '@tanstack/react-query';
+
+export const queryInvalidation = {
+  device: {
+    all: (qc: QueryClient, deviceId?: number) => {
+      qc.invalidateQueries({ queryKey: ['devices'] });
+      if (deviceId) qc.invalidateQueries({ queryKey: ['device', deviceId] });
+    },
+    detail: (qc: QueryClient, deviceId: number) => {
+      qc.invalidateQueries({ queryKey: ['device', deviceId] });
+      qc.invalidateQueries({ queryKey: ['device-detail', deviceId] });
+    },
+    sessions: (qc: QueryClient, deviceId: number) => {
+      qc.invalidateQueries({ queryKey: ['device-sessions', deviceId] });
+    },
+    errorCodes: (qc: QueryClient, deviceId: number) => {
+      qc.invalidateQueries({ queryKey: ['device-errors', deviceId] });
+    },
+  },
+  dashboard: {
+    all: (qc: QueryClient) => {
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  },
+  notifications: {
+    all: (qc: QueryClient) => {
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  },
+};
+```
+
+### notification-utils.ts
+
+```typescript
+// lib/notification.ts
+import { toast } from 'sonner';
+
+export const notificationUtils = {
+  success: (title: string, description?: string) =>
+    toast.success(title, { description }),
+  error: (title: string, description?: string) =>
+    toast.error(title, { description }),
+  warning: (title: string, description?: string) =>
+    toast.warning(title, { description }),
+  info: (title: string, description?: string) =>
+    toast.info(title, { description }),
+  promise: <T>(
+    promise: Promise<T>,
+    msgs: { loading: string; success: string; error: string }
+  ) => toast.promise(promise, msgs),
+};
+```
+
+### date/format.ts
+
+```typescript
+// lib/utils/date/format.ts
+export function formatTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h === 0) return `${m}m`;
+  return `${h}h ${m}m`;
+}
+
+export function formatDuration(ms: number): string {
+  return formatTime(Math.floor(ms / 1000));
+}
 ```
 
 ---

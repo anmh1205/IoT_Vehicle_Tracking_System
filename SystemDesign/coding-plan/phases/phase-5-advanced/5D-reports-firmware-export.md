@@ -21,39 +21,47 @@
 
 ## Task List
 
-| ID     | Description             | Files                                                         |
-| ------ | ----------------------- | ------------------------------------------------------------- |
-| FE-150 | Statistics page         | `app/dashboard/statistics/page.tsx`                           |
-| FE-151 | FleetUsageChart         | `features/statistics/components/fleet-usage-chart.tsx`        |
-| FE-152 | DeviceUptimeChart       | `features/statistics/components/device-uptime-chart.tsx`      |
-| FE-153 | AlertFrequencyChart     | `features/statistics/components/alert-frequency-chart.tsx`    |
-| FE-154 | TripSummaryChart        | `features/statistics/components/trip-summary-chart.tsx`       |
-| FE-155 | Statistics API + hooks  | `lib/api/statistics.ts`, `features/statistics/hooks/*.ts`     |
-| FE-156 | Report export (PDF/CSV) | `features/statistics/components/report-export.tsx`            |
-| FE-160 | Firmware types          | `features/firmware/types/index.ts`                            |
-| FE-161 | Firmware API            | `lib/api/firmware.ts`                                         |
-| FE-162 | Firmware hooks          | `features/firmware/hooks/*.ts`                                |
-| FE-163 | Firmware page           | `app/dashboard/firmware/page.tsx`                             |
-| FE-164 | Firmware columns        | `features/firmware/components/firmware-columns.tsx`           |
-| FE-165 | FirmwareUploadForm      | `features/firmware/components/firmware-upload-form.tsx`       |
-| FE-166 | FirmwareAssignDialog    | `features/firmware/components/firmware-assign-dialog.tsx`     |
-| FE-167 | FirmwareDeployDashboard | `features/firmware/components/firmware-deploy-dashboard.tsx`  |
-| FE-170 | Export types            | `features/exports/types/index.ts`                             |
-| FE-171 | Export API              | `lib/api/exports.ts`                                          |
-| FE-172 | Export hooks            | `features/exports/hooks/*.ts`                                 |
-| FE-173 | Export page             | `app/dashboard/exports/page.tsx`                              |
-| FE-174 | Export columns          | `features/exports/components/export-columns.tsx`              |
-| FE-175 | ExportForm              | `features/exports/components/export-form.tsx`                 |
-| FE-180 | System Status page      | `app/dashboard/system-status/page.tsx`                        |
-| FE-181 | ComponentHealthCard     | `features/system-status/components/component-health-card.tsx` |
-| FE-182 | System Status API       | `lib/api/system-status.ts`                                    |
-| FE-190 | Simulator page          | `app/dashboard/simulator/page.tsx`                            |
-| FE-191 | Simulator components    | `features/simulator/components/*.tsx`                         |
-| FE-195 | System Admin page       | `app/dashboard/system-admin/page.tsx`                         |
-| FE-196 | HealthDashboard         | `features/system-admin/components/health-dashboard.tsx`       |
-| FE-197 | MetricsQuery            | `features/system-admin/components/metrics-query.tsx`          |
-| FE-198 | LogsQuery               | `features/system-admin/components/logs-query.tsx`             |
-| FE-199 | AuditLogViewer          | `features/system-admin/components/audit-log-viewer.tsx`       |
+| ID     | Description              | Files                                                         |
+| ------ | ------------------------ | ------------------------------------------------------------- |
+| FE-150 | Statistics page          | `app/dashboard/statistics/page.tsx`                           |
+| FE-151 | FleetUsageChart          | `features/statistics/components/fleet-usage-chart.tsx`        |
+| FE-152 | DeviceUptimeChart        | `features/statistics/components/device-uptime-chart.tsx`      |
+| FE-153 | AlertFrequencyChart      | `features/statistics/components/alert-frequency-chart.tsx`    |
+| FE-154 | TripSummaryChart         | `features/statistics/components/trip-summary-chart.tsx`       |
+| FE-155 | Statistics API + hooks   | `lib/api/statistics.ts`, `features/statistics/hooks/*.ts`     |
+| FE-156 | Report export (PDF/CSV)  | `features/statistics/components/report-export.tsx`            |
+| FE-160 | Firmware types           | `features/firmware/types/index.ts`                            |
+| FE-161 | Firmware API             | `lib/api/firmware.ts`                                         |
+| FE-162 | Firmware hooks           | `features/firmware/hooks/*.ts`                                |
+| FE-163 | Firmware page            | `app/dashboard/firmware/page.tsx`                             |
+| FE-164 | Firmware columns         | `features/firmware/components/firmware-columns.tsx`           |
+| FE-165 | FirmwareUploadForm       | `features/firmware/components/firmware-upload-form.tsx`       |
+| FE-166 | FirmwareAssignDialog     | `features/firmware/components/firmware-assign-dialog.tsx`     |
+| FE-167 | FirmwareDeployDashboard  | `features/firmware/components/firmware-deploy-dashboard.tsx`  |
+| FE-170 | Export types             | `features/exports/types/index.ts`                             |
+| FE-171 | Export API               | `lib/api/exports.ts`                                          |
+| FE-172 | Export hooks             | `features/exports/hooks/*.ts`                                 |
+| FE-173 | Export page              | `app/dashboard/exports/page.tsx`                              |
+| FE-174 | Export columns           | `features/exports/components/export-columns.tsx`              |
+| FE-175 | ExportForm               | `features/exports/components/export-form.tsx`                 |
+| FE-180 | System Status page       | `app/dashboard/system-status/page.tsx`                        |
+| FE-181 | ComponentHealthCard      | `features/system-status/components/component-health-card.tsx` |
+| FE-182 | System Status API        | `lib/api/system-status.ts`                                    |
+| FE-183 | MetricCard (sparkline)   | `features/system-status/components/metric-card.tsx`           |
+| FE-184 | StatusProgress (CPU/mem) | `features/system-status/components/status-progress.tsx`       |
+| FE-185 | UptimeTimeline           | `features/system-status/components/uptime-timeline.tsx`       |
+| FE-186 | System Status hooks (3)  | `features/system-status/hooks/*.ts`                           |
+| FE-190 | Simulator page           | `app/dashboard/simulator/page.tsx`                            |
+| FE-191 | DeviceSelector           | `features/simulator/components/device-selector.tsx`           |
+| FE-192 | DataConfigurator         | `features/simulator/components/data-configurator.tsx`         |
+| FE-193 | SimulationControls       | `features/simulator/components/simulation-controls.tsx`       |
+| FE-194 | SimulationPreview        | `features/simulator/components/simulation-preview.tsx`        |
+| FE-195 | Simulator hooks + API    | `features/simulator/hooks/*.ts`, `lib/api/simulator.ts`       |
+| FE-195 | System Admin page        | `app/dashboard/system-admin/page.tsx`                         |
+| FE-196 | HealthDashboard          | `features/system-admin/components/health-dashboard.tsx`       |
+| FE-197 | MetricsQuery             | `features/system-admin/components/metrics-query.tsx`          |
+| FE-198 | LogsQuery                | `features/system-admin/components/logs-query.tsx`             |
+| FE-199 | AuditLogViewer           | `features/system-admin/components/audit-log-viewer.tsx`       |
 
 ---
 
@@ -250,25 +258,125 @@ export default function SystemStatusPage() {
 ### ComponentHealthCard
 Card showing: icon, component name, status Badge (healthy=green, degraded=amber, down=red), latency, uptime, connection count, last check timestamp.
 
+### FE-183: MetricCard (with sparkline)
+Compact card showing:
+- Metric label + current value (bold)
+- Mini recharts AreaChart sparkline (last 24 data points)
+- Trend arrow (↑/↓) based on last vs previous value
+- Used for: CPU Usage, Memory, Disk, Network I/O
+
+### FE-184: StatusProgress
+Circular progress ring (CSS `conic-gradient`):
+- Shows percentage (CPU, memory, disk utilization)
+- Color transitions: green < 60%, amber 60-80%, red > 80%
+- Center: percentage text
+- Below: label + absolute values (e.g., "3.2 GB / 8 GB")
+
+### FE-185: UptimeTimeline
+30-day horizontal bar:
+- Each day = colored segment (green=100%, amber=partial, red=down)
+- Tooltip on hover: date + uptime percentage + downtime duration
+- Overall uptime percentage displayed above
+
+### System Status Hooks
+
+```typescript
+// features/system-status/hooks/use-health-status.ts
+export function useHealthStatus() {
+  return useQuery({
+    queryKey: ['system-health'],
+    queryFn: () => apiClient.get('/health').then(r => r.data),
+    refetchInterval: 15_000,
+  });
+}
+
+// features/system-status/hooks/use-system-metrics.ts
+export function useSystemMetrics() {
+  return useQuery({
+    queryKey: ['system-metrics'],
+    queryFn: () => apiClient.get('/system/metrics').then(r => r.data),
+    refetchInterval: 30_000,
+  });
+}
+
+// features/system-status/hooks/use-uptime-history.ts
+export function useUptimeHistory(days = 30) {
+  return useQuery({
+    queryKey: ['uptime-history', days],
+    queryFn: () => apiClient.get(`/system/uptime?days=${days}`).then(r => r.data),
+  });
+}
+```
+
 ---
 
 ## SIMULATOR MODULE
 
 ### FE-190: Simulator Page
 
-PageContainer with 3 sections:
+PageContainer with 2-column layout:
 
-1. **DeviceSelector**: Select/Combobox to pick a device to simulate
-2. **DataConfigurator**: Form with sliders/inputs for:
-   - latitude (Input), longitude (Input)
-   - speed (Slider 0-200 km/h)
-   - vibration_rms (Slider 0-50)
-   - heading (Slider 0-360)
-   - interval (Select: 1s, 2s, 5s, 10s)
-3. **SimulatorControls**: Start/Stop/Pause buttons with state management
-4. **DataPreview**: Live DataTable showing last N sent data points (timestamp, lat, lon, speed, vibration)
+```
+SimulatorPage
+├── Left Panel (config, 40%)
+│   ├── DeviceSelector (Combobox, search + select device)
+│   ├── DataConfigurator
+│   │   ├── Location: lat/lon Inputs + "Pick on map" button
+│   │   ├── Speed: Slider 0-200 km/h + Input override 
+│   │   ├── Vibration RMS: Slider 0-50 + Input override
+│   │   ├── Heading: Slider 0-360° + compass preview
+│   │   ├── Interval: Select (1s, 2s, 5s, 10s)
+│   │   └── Presets: DropdownMenu ("Idle", "City Drive", "Highway", "Off-road")
+│   └── SimulationControls
+│       ├── Start (green) / Stop (red) / Pause (amber) buttons
+│       └── Running status badge + elapsed time
+└── Right Panel (preview, 60%)
+    └── SimulationPreview
+        ├── JSON preview of next payload
+        ├── Sent history DataTable (last 50 entries)
+        └── Mini map showing simulated position
+```
 
-API: Direct MQTT publish via backend endpoint or WebSocket emit.
+### Data Presets
+
+```typescript
+// features/simulator/constants/presets.ts
+export const SIMULATION_PRESETS = {
+  idle: { speed: 0, vibrationRms: 0.5, label: 'Idle' },
+  cityDrive: { speed: 40, vibrationRms: 5, label: 'City Drive' },
+  highway: { speed: 100, vibrationRms: 8, label: 'Highway' },
+  offroad: { speed: 25, vibrationRms: 25, label: 'Off-road' },
+};
+```
+
+### Simulator Hooks
+
+```typescript
+// features/simulator/hooks/use-simulator.ts
+export function useStartSimulation() {
+  return useMutation({
+    mutationFn: (data: SimulationConfig) => apiClient.post('/simulator/start', data).then(r => r.data),
+    onSuccess: () => toast.success('Simulation started'),
+  });
+}
+
+export function useStopSimulation() {
+  return useMutation({
+    mutationFn: () => apiClient.post('/simulator/stop').then(r => r.data),
+    onSuccess: () => toast.info('Simulation stopped'),
+  });
+}
+
+export function useSimulatorStatus() {
+  return useQuery({
+    queryKey: ['simulator-status'],
+    queryFn: () => apiClient.get('/simulator/status').then(r => r.data),
+    refetchInterval: 2_000,
+  });
+}
+```
+
+API: Direct MQTT publish via backend endpoint `POST /simulator/start` with config params.
 
 ---
 

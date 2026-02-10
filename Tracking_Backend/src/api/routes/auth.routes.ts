@@ -11,7 +11,10 @@ router.post('/login', authRateLimit, authController.login);
 // Protected routes
 router.post('/logout', requireAuth, authController.logout);
 router.get('/me', requireAuth, authController.getMe);
+router.post('/refresh', requireAuth, authController.refresh);
 router.post('/change-password', requireAuth, authController.changePassword);
+router.put('/profile', requireAuth, authController.updateProfile);
+router.put('/notifications', requireAuth, authController.updateNotifications);
 
 // User management (admin)
 router.get('/users', requireAuth, authController.listUsers);

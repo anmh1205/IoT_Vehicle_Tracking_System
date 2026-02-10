@@ -13,20 +13,20 @@ This frontend MUST follow the UI pattern from the IVM26 reference project (based
 
 ### 1.1 Required Pattern Elements
 
-| # | Element | Description | Source |
-|---|---------|-------------|--------|
-| 1 | **Layout Shell** | `SidebarProvider` + `AppSidebar` + `SidebarInset` | shadcn/ui sidebar |
-| 2 | **Header** | `SidebarTrigger` + `Separator` + `Breadcrumbs` + `ThemeSelector` + `ModeToggle` | IVM26 layout |
-| 3 | **Page Wrapper** | `PageContainer` with `ScrollArea`, `pageTitle`, `pageDescription`, `pageHeaderAction` | IVM26 layout |
-| 4 | **Data Tables** | `DataTable` wrapper (TanStack Table + shadcn/ui Table) with columns, sorting, filtering, pagination | IVM26 common |
-| 5 | **Forms** | shadcn/ui `Dialog` or `Sheet` + `Form` component (react-hook-form + zod) | shadcn/ui |
-| 6 | **Toasts** | `Sonner` toast library | sonner |
-| 7 | **Icons** | `lucide-react` (primary) + `@tabler/icons-react` (secondary) | IVM26 |
-| 8 | **State** | Zustand (global, NO persist) + TanStack Query (server) + nuqs (URL) | IVM26 |
-| 9 | **Charts** | `recharts` (same as IVM26) | IVM26 |
-| 10 | **Command Palette** | `kbar` or `cmdk` | IVM26 |
-| 11 | **Theme** | `next-themes` with `ThemeProvider` + `ThemeSelector` + `ModeToggle` | IVM26 |
-| 12 | **Top Loader** | `nextjs-toploader` with `color='var(--primary)'` | IVM26 |
+| #   | Element             | Description                                                                                         | Source            |
+| --- | ------------------- | --------------------------------------------------------------------------------------------------- | ----------------- |
+| 1   | **Layout Shell**    | `SidebarProvider` + `AppSidebar` + `SidebarInset`                                                   | shadcn/ui sidebar |
+| 2   | **Header**          | `SidebarTrigger` + `Separator` + `Breadcrumbs` + `ThemeSelector` + `ModeToggle`                     | IVM26 layout      |
+| 3   | **Page Wrapper**    | `PageContainer` with `ScrollArea`, `pageTitle`, `pageDescription`, `pageHeaderAction`               | IVM26 layout      |
+| 4   | **Data Tables**     | `DataTable` wrapper (TanStack Table + shadcn/ui Table) with columns, sorting, filtering, pagination | IVM26 common      |
+| 5   | **Forms**           | shadcn/ui `Dialog` or `Sheet` + `Form` component (react-hook-form + zod)                            | shadcn/ui         |
+| 6   | **Toasts**          | `Sonner` toast library                                                                              | sonner            |
+| 7   | **Icons**           | `lucide-react` (primary) + `@tabler/icons-react` (secondary)                                        | IVM26             |
+| 8   | **State**           | Zustand (global, NO persist) + TanStack Query (server) + nuqs (URL)                                 | IVM26             |
+| 9   | **Charts**          | `recharts` (same as IVM26)                                                                          | IVM26             |
+| 10  | **Command Palette** | `kbar` or `cmdk`                                                                                    | IVM26             |
+| 11  | **Theme**           | `next-themes` with `ThemeProvider` + `ThemeSelector` + `ModeToggle`                                 | IVM26             |
+| 12  | **Top Loader**      | `nextjs-toploader` with `color='var(--primary)'`                                                    | IVM26             |
 
 ### 1.2 PROHIBITION Rules (Agents MUST NOT)
 
@@ -295,14 +295,23 @@ Tracking_Frontend/src/
 │   │
 │   ├── map/
 │   │   ├── components/
-│   │   │   ├── live-map.tsx                # Main map with markers + geofences
-│   │   │   ├── vehicle-marker.tsx          # Custom vehicle icon marker
-│   │   │   ├── vehicle-popup.tsx           # Marker popup info
-│   │   │   ├── geofence-layer.tsx          # Render geofence shapes
-│   │   │   └── map-sidebar.tsx             # Vehicle list sidebar panel
+│   │   │   ├── tracking-map.tsx            # Main map with markers + clusters (16KB ref)
+│   │   │   ├── device-list-panel.tsx       # Sidebar device list panel (8KB ref)
+│   │   │   ├── device-list-item.tsx        # Single device in panel (6.5KB ref)
+│   │   │   ├── device-search.tsx           # Search input with debounce (1.7KB ref)
+│   │   │   ├── device-filter.tsx           # Desktop status filter (5.7KB ref)
+│   │   │   ├── device-filter-compact.tsx   # Mobile compact filter (5.6KB ref)
+│   │   │   ├── device-marker.tsx           # Custom device icon marker
+│   │   │   ├── device-cluster.tsx          # Marker clustering wrapper (1.9KB ref)
+│   │   │   ├── marker-icon.ts             # createDeviceMarkerIcon factory (6.5KB ref)
+│   │   │   ├── selected-device-card.tsx    # Floating card for selected device (9.5KB ref)
+│   │   │   ├── map-controls.tsx            # Zoom, layer, fullscreen controls (5.5KB ref)
+│   │   │   ├── map-layer-switcher.tsx      # Street / Satellite toggle (2.7KB ref)
+│   │   │   ├── mobile-device-drawer.tsx    # Mobile bottom sheet drawer (7.5KB ref)
+│   │   │   └── geofence-layer.tsx          # Render geofence shapes
 │   │   ├── hooks/
-│   │   │   ├── use-vehicle-positions.ts    # Real-time positions query
-│   │   │   └── use-map-realtime.ts         # Socket.IO position updates
+│   │   │   ├── use-device-positions.ts     # Real-time positions query
+│   │   │   └── use-map-realtime.ts         # Socket.IO position updates + throttling
 │   │   ├── constants/
 │   │   │   └── map-config.ts               # Tile URLs, default center, zoom levels
 │   │   └── types/
@@ -353,24 +362,71 @@ Tracking_Frontend/src/
 │   │   └── types/
 │   │       └── settings.types.ts
 │   │
-│   └── users/                              # Admin user management
+│   ├── users/                              # Admin user management
+│   │   ├── components/
+│   │   │   ├── user-columns.tsx
+│   │   │   ├── user-form.tsx
+│   │   │   └── user-role-select.tsx        # Role assignment select
+│   │   ├── hooks/
+│   │   │   ├── use-users.ts
+│   │   │   ├── use-create-user.ts
+│   │   │   ├── use-update-user.ts
+│   │   │   └── use-delete-user.ts
+│   │   └── types/
+│   │       └── user.types.ts
+│   │
+│   ├── system-status/                      # System health monitoring
+│   │   ├── components/
+│   │   │   ├── health-card.tsx             # Service health card with status
+│   │   │   ├── metric-card.tsx            # Metric with sparkline
+│   │   │   ├── status-progress.tsx        # Resource usage bars
+│   │   │   └── uptime-timeline.tsx        # 30-day uptime segments
+│   │   ├── hooks/
+│   │   │   ├── use-system-health-status.ts
+│   │   │   ├── use-system-metrics.ts
+│   │   │   └── use-system-uptime.ts
+│   │   └── types/
+│   │       └── system-status.types.ts
+│   │
+│   ├── simulator/                          # Device data simulator
+│   │   ├── components/
+│   │   │   ├── device-selector.tsx         # Select device for simulation
+│   │   │   ├── data-configurator.tsx       # Simulation parameters form
+│   │   │   ├── simulation-controls.tsx     # Start/pause/stop controls
+│   │   │   └── simulation-preview.tsx      # Live preview with map + chart
+│   │   ├── hooks/
+│   │   │   ├── use-start-simulation.ts
+│   │   │   ├── use-stop-simulation.ts
+│   │   │   ├── use-simulation-status.ts
+│   │   │   └── use-simulation-presets.ts
+│   │   └── types/
+│   │       └── simulator.types.ts
+│   │
+│   └── statistics/                         # Fleet statistics & reports
 │       ├── components/
-│       │   ├── user-columns.tsx
-│       │   ├── user-form.tsx
-│       │   └── user-role-select.tsx        # Role assignment select
+│       │   ├── statistics-summary.tsx      # Summary stats cards row
+│       │   ├── fleet-utilization-chart.tsx # recharts bar chart
+│       │   ├── device-uptime-chart.tsx     # recharts stacked bar chart
+│       │   ├── trip-summary-chart.tsx      # recharts area chart
+│       │   ├── alert-trend-chart.tsx       # recharts stacked bar chart
+│       │   └── date-range-filter.tsx       # Date range picker for all charts
 │       ├── hooks/
-│       │   ├── use-users.ts
-│       │   ├── use-create-user.ts
-│       │   ├── use-update-user.ts
-│       │   └── use-delete-user.ts
+│       │   ├── use-statistics-summary.ts
+│       │   ├── use-fleet-utilization.ts
+│       │   ├── use-device-uptime.ts
+│       │   ├── use-trip-summary.ts
+│       │   └── use-alert-trend.ts
 │       └── types/
-│           └── user.types.ts
+│           └── statistics.types.ts
 │
 ├── hooks/                                  # Global Hooks (cross-cutting only)
 │   ├── use-debounce.ts                     # Debounce value hook
 │   ├── use-mobile.ts                       # Mobile breakpoint detection
 │   ├── use-socket.ts                       # Socket.IO context consumer
-│   └── use-role-access.ts                  # Role-based access check
+│   ├── use-role-access.ts                  # Role-based access check (canViewSystemInfo, canEditDevice)
+│   ├── use-realtime-subscription.ts        # Generic Socket.IO event listener hook
+│   ├── use-breadcrumbs.ts                  # Dynamic breadcrumb generation
+│   └── use-device-status-realtime.ts       # Derive device status from socket events
 │
 ├── lib/
 │   ├── api/                                # API Client Layer
@@ -387,7 +443,11 @@ Tracking_Frontend/src/
 │   │   ├── users.ts                        # User management API
 │   │   ├── dashboard.ts                    # Dashboard stats API
 │   │   ├── exports.ts                      # Export jobs API
-│   │   └── notifications.ts               # Notification API
+│   │   ├── notifications.ts               # Notification API
+│   │   ├── system-status.ts               # System health/metrics API
+│   │   ├── simulator.ts                   # Simulator API
+│   │   ├── statistics.ts                  # Statistics & reports API
+│   │   └── system-admin.ts                # System admin logs/query/settings API
 │   │
 │   ├── store/                              # Zustand Stores
 │   │   ├── auth-store.ts                   # User + token (MEMORY ONLY, no persist)
@@ -429,36 +489,36 @@ Tracking_Frontend/src/
 
 ## 3. Tech Stack
 
-| Category | Technology | Version | Purpose |
-|----------|-----------|---------|---------|
-| **Framework** | Next.js | ^15.3.3 | App Router, RSC, Middleware |
-| **UI Library** | React | ^19.2.0 | Component rendering |
-| **Component Library** | shadcn/ui | latest | Radix UI + Tailwind components |
-| **Styling** | Tailwind CSS | ^4.0.0 | Utility-first CSS |
-| **State (Global)** | Zustand | ^5.0.2 | Auth, UI state (NO persist for auth) |
-| **State (Server)** | TanStack Query | ^5.90.5 | API caching, mutations |
-| **State (URL)** | nuqs | ^2.4.1 | URL query state (search, filters, tabs) |
-| **Tables** | TanStack Table | ^8.21.2 | Headless table logic |
-| **Forms** | react-hook-form | ^7.54.1 | Form state management |
-| **Form Resolvers** | @hookform/resolvers | ^5.2.1 | Zod integration |
-| **Validation** | zod | ^3.24.0 | Schema validation |
-| **HTTP Client** | Axios | ^1.7.9 | API requests + interceptors |
-| **Real-time** | Socket.IO Client | ^4.8.1 | WebSocket connection |
-| **Maps** | react-leaflet | ^5.0.0 | Map rendering |
-| **Map Core** | leaflet | ^1.9.4 | Map engine |
-| **Map Clustering** | react-leaflet-cluster | ^4.0.0 | Marker clustering |
-| **Map Drawing** | @geoman-io/leaflet-geoman-free | ^2.17.0 | Geofence drawing (replaces leaflet-draw) |
-| **Charts** | recharts | ^2.15.1 | Data visualization (NOT echarts) |
-| **Icons** | lucide-react | latest | Primary icon library |
-| **Icons (secondary)** | @tabler/icons-react | ^3.31.0 | Additional icons |
-| **Toast** | sonner | ^1.7.1 | Toast notifications |
-| **Theme** | next-themes | ^0.4.6 | Dark/light/system mode |
-| **Top Loader** | nextjs-toploader | ^3.7.15 | Page transition loader |
-| **Date** | date-fns | ^4.1.0 | Date formatting |
-| **Command Palette** | kbar | ^0.1.0-beta.45 | Keyboard-first navigation |
-| **CVA** | class-variance-authority | ^0.7.1 | Component variants |
-| **Merge** | tailwind-merge | ^3.0.2 | Tailwind class merging |
-| **clsx** | clsx | ^2.1.1 | Conditional classes |
+| Category              | Technology                     | Version        | Purpose                                  |
+| --------------------- | ------------------------------ | -------------- | ---------------------------------------- |
+| **Framework**         | Next.js                        | ^15.3.3        | App Router, RSC, Middleware              |
+| **UI Library**        | React                          | ^19.2.0        | Component rendering                      |
+| **Component Library** | shadcn/ui                      | latest         | Radix UI + Tailwind components           |
+| **Styling**           | Tailwind CSS                   | ^4.0.0         | Utility-first CSS                        |
+| **State (Global)**    | Zustand                        | ^5.0.2         | Auth, UI state (NO persist for auth)     |
+| **State (Server)**    | TanStack Query                 | ^5.90.5        | API caching, mutations                   |
+| **State (URL)**       | nuqs                           | ^2.4.1         | URL query state (search, filters, tabs)  |
+| **Tables**            | TanStack Table                 | ^8.21.2        | Headless table logic                     |
+| **Forms**             | react-hook-form                | ^7.54.1        | Form state management                    |
+| **Form Resolvers**    | @hookform/resolvers            | ^5.2.1         | Zod integration                          |
+| **Validation**        | zod                            | ^3.24.0        | Schema validation                        |
+| **HTTP Client**       | Axios                          | ^1.7.9         | API requests + interceptors              |
+| **Real-time**         | Socket.IO Client               | ^4.8.1         | WebSocket connection                     |
+| **Maps**              | react-leaflet                  | ^5.0.0         | Map rendering                            |
+| **Map Core**          | leaflet                        | ^1.9.4         | Map engine                               |
+| **Map Clustering**    | react-leaflet-cluster          | ^4.0.0         | Marker clustering                        |
+| **Map Drawing**       | @geoman-io/leaflet-geoman-free | ^2.17.0        | Geofence drawing (replaces leaflet-draw) |
+| **Charts**            | recharts                       | ^2.15.1        | Data visualization (NOT echarts)         |
+| **Icons**             | lucide-react                   | latest         | Primary icon library                     |
+| **Icons (secondary)** | @tabler/icons-react            | ^3.31.0        | Additional icons                         |
+| **Toast**             | sonner                         | ^1.7.1         | Toast notifications                      |
+| **Theme**             | next-themes                    | ^0.4.6         | Dark/light/system mode                   |
+| **Top Loader**        | nextjs-toploader               | ^3.7.15        | Page transition loader                   |
+| **Date**              | date-fns                       | ^4.1.0         | Date formatting                          |
+| **Command Palette**   | kbar                           | ^0.1.0-beta.45 | Keyboard-first navigation                |
+| **CVA**               | class-variance-authority       | ^0.7.1         | Component variants                       |
+| **Merge**             | tailwind-merge                 | ^3.0.2         | Tailwind class merging                   |
+| **clsx**              | clsx                           | ^2.1.1         | Conditional classes                      |
 
 ---
 
@@ -1969,18 +2029,18 @@ export function useDeviceRealtime() {
 
 ### 7.4 Socket Events Table
 
-| Event Name | Direction | Page(s) | Action |
-|------------|-----------|---------|--------|
-| `device.status.changed` | Server -> Client | Devices, Dashboard | invalidateQueries devices |
-| `device.location.updated` | Server -> Client | Map, Trips | setQueryData positions |
-| `alert.new` | Server -> Client | Alerts, Dashboard | toast + invalidateQueries alerts |
-| `alert.acknowledged` | Server -> Client | Alerts | invalidateQueries alerts |
-| `notification.new` | Server -> Client | All (header badge) | invalidateQueries notifications |
-| `trip.started` | Server -> Client | Trips, Map | invalidateQueries trips |
-| `trip.ended` | Server -> Client | Trips, Map | invalidateQueries trips |
-| `geofence.entered` | Server -> Client | Map, Alerts | toast + highlight geofence |
-| `geofence.exited` | Server -> Client | Map, Alerts | toast + unhighlight geofence |
-| `firmware.progress` | Server -> Client | Firmware | setQueryData firmware progress |
+| Event Name                | Direction        | Page(s)            | Action                           |
+| ------------------------- | ---------------- | ------------------ | -------------------------------- |
+| `device.status.changed`   | Server -> Client | Devices, Dashboard | invalidateQueries devices        |
+| `device.location.updated` | Server -> Client | Map, Trips         | setQueryData positions           |
+| `alert.new`               | Server -> Client | Alerts, Dashboard  | toast + invalidateQueries alerts |
+| `alert.acknowledged`      | Server -> Client | Alerts             | invalidateQueries alerts         |
+| `notification.new`        | Server -> Client | All (header badge) | invalidateQueries notifications  |
+| `trip.started`            | Server -> Client | Trips, Map         | invalidateQueries trips          |
+| `trip.ended`              | Server -> Client | Trips, Map         | invalidateQueries trips          |
+| `geofence.entered`        | Server -> Client | Map, Alerts        | toast + highlight geofence       |
+| `geofence.exited`         | Server -> Client | Map, Alerts        | toast + unhighlight geofence     |
+| `firmware.progress`       | Server -> Client | Firmware           | setQueryData firmware progress   |
 
 ---
 
@@ -2512,25 +2572,25 @@ export function LoginForm() {
 
 ## 10. Page List (Complete -- ALL Required)
 
-| # | Route | Page | Vietnamese Title | Status Requirement |
-|---|-------|------|------------------|--------------------|
-| 1 | `/login` | Login | Dang nhap | FULL: form + zod validation + error handling + redirect |
-| 2 | `/dashboard` | Overview | Tong quan | FULL: stat cards (recharts) + vehicle status chart + activity feed + alerts summary |
-| 3 | `/dashboard/devices` | Device Management | Thiet bi | FULL: DataTable + CRUD + detail sheet (telemetry, sessions, commands tabs) |
-| 4 | `/dashboard/vehicles` | Vehicle Management | Phuong tien | FULL: DataTable + CRUD + device assignment + status tracking |
-| 5 | `/dashboard/customers` | Customer Management | Khach hang | FULL: DataTable + CRUD + fleet overview per customer |
-| 6 | `/dashboard/trips` | Trip Management | Chuyen di | FULL: DataTable + filters (date range, vehicle, status) |
-| 7 | `/dashboard/trips/[id]` | Trip Detail + Replay | Chi tiet chuyen di | FULL: route map + telemetry chart + playback controls (play/pause/speed) |
-| 8 | `/dashboard/alerts` | Alert Management | Canh bao | FULL: DataTable + detail sheet + acknowledge/resolve actions + alert rules config |
-| 9 | `/dashboard/geofences` | Geofence Management | Vung dia ly | FULL: DataTable + map editor (Leaflet draw circle/polygon) + vehicle binding |
-| 10 | `/dashboard/maintenance` | Maintenance | Bao tri | FULL: DataTable + CRUD + calendar view of scheduled maintenance |
-| 11 | `/dashboard/map` | Live Tracking | Ban do | FULL: real-time GPS markers + clustering + geofence overlay + vehicle sidebar + flyTo |
-| 12 | `/dashboard/firmware` | Firmware OTA | Firmware | FULL: upload + list + activate/deactivate + assign to devices + progress tracking |
-| 13 | `/dashboard/exports` | Data Export | Xuat du lieu | FULL: create export job (date range, type, format) + list + download links |
-| 14 | `/dashboard/notifications` | Notifications | Thong bao | FULL: list + mark read/unread + filter (type, read status) + real-time badge |
-| 15 | `/dashboard/settings` | Settings | Cai dat | FULL: tabs (profile form, password form, notification prefs, appearance) |
-| 16 | `/dashboard/admin/users` | User Management | Nguoi dung | FULL: DataTable + CRUD + role assignment (user/admin/root) |
-| 17 | `/dashboard/admin/system` | System Admin | Quan tri he thong | FULL: system metrics cards + service health + recent logs viewer |
+| #   | Route                      | Page                 | Vietnamese Title   | Status Requirement                                                                    |
+| --- | -------------------------- | -------------------- | ------------------ | ------------------------------------------------------------------------------------- |
+| 1   | `/login`                   | Login                | Dang nhap          | FULL: form + zod validation + error handling + redirect                               |
+| 2   | `/dashboard`               | Overview             | Tong quan          | FULL: stat cards (recharts) + vehicle status chart + activity feed + alerts summary   |
+| 3   | `/dashboard/devices`       | Device Management    | Thiet bi           | FULL: DataTable + CRUD + detail sheet (telemetry, sessions, commands tabs)            |
+| 4   | `/dashboard/vehicles`      | Vehicle Management   | Phuong tien        | FULL: DataTable + CRUD + device assignment + status tracking                          |
+| 5   | `/dashboard/customers`     | Customer Management  | Khach hang         | FULL: DataTable + CRUD + fleet overview per customer                                  |
+| 6   | `/dashboard/trips`         | Trip Management      | Chuyen di          | FULL: DataTable + filters (date range, vehicle, status)                               |
+| 7   | `/dashboard/trips/[id]`    | Trip Detail + Replay | Chi tiet chuyen di | FULL: route map + telemetry chart + playback controls (play/pause/speed)              |
+| 8   | `/dashboard/alerts`        | Alert Management     | Canh bao           | FULL: DataTable + detail sheet + acknowledge/resolve actions + alert rules config     |
+| 9   | `/dashboard/geofences`     | Geofence Management  | Vung dia ly        | FULL: DataTable + map editor (Leaflet draw circle/polygon) + vehicle binding          |
+| 10  | `/dashboard/maintenance`   | Maintenance          | Bao tri            | FULL: DataTable + CRUD + calendar view of scheduled maintenance                       |
+| 11  | `/dashboard/map`           | Live Tracking        | Ban do             | FULL: real-time GPS markers + clustering + geofence overlay + vehicle sidebar + flyTo |
+| 12  | `/dashboard/firmware`      | Firmware OTA         | Firmware           | FULL: upload + list + activate/deactivate + assign to devices + progress tracking     |
+| 13  | `/dashboard/exports`       | Data Export          | Xuat du lieu       | FULL: create export job (date range, type, format) + list + download links            |
+| 14  | `/dashboard/notifications` | Notifications        | Thong bao          | FULL: list + mark read/unread + filter (type, read status) + real-time badge          |
+| 15  | `/dashboard/settings`      | Settings             | Cai dat            | FULL: tabs (profile form, password form, notification prefs, appearance)              |
+| 16  | `/dashboard/admin/users`   | User Management      | Nguoi dung         | FULL: DataTable + CRUD + role assignment (user/admin/root)                            |
+| 17  | `/dashboard/admin/system`  | System Admin         | Quan tri he thong  | FULL: system metrics cards + service health + recent logs viewer                      |
 
 > **ZERO PLACEHOLDER PAGES.** Every page above MUST be fully functional. No "Coming Soon", no "TODO", no "future phase".
 
@@ -2654,25 +2714,25 @@ NEXT_PUBLIC_MAP_TILE_URL=https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
 
 ## 13. Key Architectural Decisions
 
-| # | Decision | Choice | Rationale |
-|---|----------|--------|-----------|
-| 1 | Auth token storage | Memory (Zustand, NO persist) | XSS protection: token never in localStorage/sessionStorage. On refresh, restored via httpOnly cookie session check |
-| 2 | Cookie for middleware | httpOnly cookie set by backend | Route protection at edge (Next.js middleware) without exposing token to JS |
-| 3 | Real-time transport | Socket.IO only (no MQTT in browser) | Security: MQTT credentials must never appear in client bundle |
-| 4 | Chart library | recharts (NOT echarts) | Matches IVM26 reference. React-native integration. Smaller bundle than echarts |
-| 5 | URL state | nuqs (NOT useState for filters) | Shareable URLs, browser back/forward works, SSR-compatible, survives refresh |
-| 6 | HTTP client | Axios (NOT native fetch) | Interceptors for auth token injection, 401 handling, request/response transforms |
-| 7 | Table library | TanStack Table + shadcn/ui Table | Full control: sorting, filtering, pagination, column visibility. No opinionated UI |
-| 8 | Form library | react-hook-form + zod | Uncontrolled (performant), type-safe validation, zodResolver integration |
-| 9 | Layout pattern | IVM26 (SidebarProvider + AppSidebar + SidebarInset) | Consistent with reference project. Collapsible sidebar with cookie persistence |
-| 10 | Map rendering | react-leaflet with dynamic import | SSR-safe. Free tiles (OpenStreetMap). Extensible with clustering and drawing plugins |
-| 11 | Styling | Tailwind CSS 4 + shadcn/ui | Utility-first, CSS-native config (v4). shadcn provides accessible, unstyled Radix primitives |
-| 12 | Command palette | kbar | Keyboard-first navigation (Cmd+K). IVM26 pattern |
-| 13 | Icons | lucide-react (primary) + @tabler/icons-react (secondary) | Tree-shakeable. Consistent stroke width. Same as IVM26 |
-| 14 | Toast notifications | Sonner | Stacked toasts, richColors, promise toast support. Same as IVM26 |
-| 15 | Theme system | next-themes | System/light/dark modes. class strategy with disableTransitionOnChange |
-| 16 | Component installation | `npx shadcn@latest add <name>` | Components are copied into project (not imported from node_modules). Full control |
-| 17 | Geofence drawing | @geoman-io/leaflet-geoman-free | Replaces deprecated leaflet-draw. Circle + polygon drawing + editing |
-| 18 | Feature architecture | Feature-Sliced Design (features/) | Feature-scoped components, hooks, types. Prevents cross-feature coupling |
-| 19 | Barrel exports | Index files in features/*/components/ | Clean imports within features. No barrel exports at app/ level (avoid bundle bloat) |
-| 20 | Map marker clustering | react-leaflet-cluster | Mandatory when markers > 100. Performance: maintains 60fps on map interactions |
+| #   | Decision               | Choice                                                   | Rationale                                                                                                          |
+| --- | ---------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 1   | Auth token storage     | Memory (Zustand, NO persist)                             | XSS protection: token never in localStorage/sessionStorage. On refresh, restored via httpOnly cookie session check |
+| 2   | Cookie for middleware  | httpOnly cookie set by backend                           | Route protection at edge (Next.js middleware) without exposing token to JS                                         |
+| 3   | Real-time transport    | Socket.IO only (no MQTT in browser)                      | Security: MQTT credentials must never appear in client bundle                                                      |
+| 4   | Chart library          | recharts (NOT echarts)                                   | Matches IVM26 reference. React-native integration. Smaller bundle than echarts                                     |
+| 5   | URL state              | nuqs (NOT useState for filters)                          | Shareable URLs, browser back/forward works, SSR-compatible, survives refresh                                       |
+| 6   | HTTP client            | Axios (NOT native fetch)                                 | Interceptors for auth token injection, 401 handling, request/response transforms                                   |
+| 7   | Table library          | TanStack Table + shadcn/ui Table                         | Full control: sorting, filtering, pagination, column visibility. No opinionated UI                                 |
+| 8   | Form library           | react-hook-form + zod                                    | Uncontrolled (performant), type-safe validation, zodResolver integration                                           |
+| 9   | Layout pattern         | IVM26 (SidebarProvider + AppSidebar + SidebarInset)      | Consistent with reference project. Collapsible sidebar with cookie persistence                                     |
+| 10  | Map rendering          | react-leaflet with dynamic import                        | SSR-safe. Free tiles (OpenStreetMap). Extensible with clustering and drawing plugins                               |
+| 11  | Styling                | Tailwind CSS 4 + shadcn/ui                               | Utility-first, CSS-native config (v4). shadcn provides accessible, unstyled Radix primitives                       |
+| 12  | Command palette        | kbar                                                     | Keyboard-first navigation (Cmd+K). IVM26 pattern                                                                   |
+| 13  | Icons                  | lucide-react (primary) + @tabler/icons-react (secondary) | Tree-shakeable. Consistent stroke width. Same as IVM26                                                             |
+| 14  | Toast notifications    | Sonner                                                   | Stacked toasts, richColors, promise toast support. Same as IVM26                                                   |
+| 15  | Theme system           | next-themes                                              | System/light/dark modes. class strategy with disableTransitionOnChange                                             |
+| 16  | Component installation | `npx shadcn@latest add <name>`                           | Components are copied into project (not imported from node_modules). Full control                                  |
+| 17  | Geofence drawing       | @geoman-io/leaflet-geoman-free                           | Replaces deprecated leaflet-draw. Circle + polygon drawing + editing                                               |
+| 18  | Feature architecture   | Feature-Sliced Design (features/)                        | Feature-scoped components, hooks, types. Prevents cross-feature coupling                                           |
+| 19  | Barrel exports         | Index files in features/*/components/                    | Clean imports within features. No barrel exports at app/ level (avoid bundle bloat)                                |
+| 20  | Map marker clustering  | react-leaflet-cluster                                    | Mandatory when markers > 100. Performance: maintains 60fps on map interactions                                     |

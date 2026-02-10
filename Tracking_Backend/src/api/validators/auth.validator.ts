@@ -13,6 +13,18 @@ export const changePasswordSchema = z.object({
     .max(128, 'Password must not exceed 128 characters'),
 });
 
+export const updateProfileSchema = z.object({
+  fullName: z.string().min(1, 'Full name is required').max(100).optional(),
+  email: z.string().email('Invalid email format').nullable().optional(),
+  avatarUrl: z.string().url('Invalid URL format').nullable().optional(),
+});
+
+export const updateNotificationSchema = z.object({
+  emailAlerts: z.boolean().optional(),
+  pushAlerts: z.boolean().optional(),
+  alertTypes: z.array(z.string()).optional(),
+});
+
 export const createUserSchema = z.object({
   username: z
     .string()

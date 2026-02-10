@@ -1,23 +1,12 @@
-import { apiClient } from './client';
-import type { Trip, CreateTripInput, UpdateTripInput, TripListQuery } from '@/types/trip.types';
-import type { ApiResponse, PaginatedResponse } from '@/types';
+﻿import { apiClient, unwrap } from './client';
 
-export const tripsApi = {
-  list: (params?: TripListQuery) =>
-    apiClient.get<ApiResponse<PaginatedResponse<Trip>>>('/trips', { params }),
-
-  getById: (id: number) =>
-    apiClient.get<ApiResponse<Trip>>(`/trips/${id}`),
-
-  create: (data: CreateTripInput) =>
-    apiClient.post<ApiResponse<Trip>>('/trips', data),
-
-  update: (id: number, data: UpdateTripInput) =>
-    apiClient.put<ApiResponse<Trip>>(`/trips/${id}`, data),
-
-  startTrip: (id: number) =>
-    apiClient.patch<ApiResponse<Trip>>(`/trips/${id}/start`),
-
-  endTrip: (id: number) =>
-    apiClient.patch<ApiResponse<Trip>>(`/trips/${id}/end`),
+export const tripServices = {
+  getList: (params?: Record<string, unknown>) => apiClient.get('/trips', { params }).then((r) => unwrap<any>(r.data)),
+  getById: (id: number) => apiClient.get(`/trips/${id}`).then((r) => unwrap<any>(r.data)),
+  getTelemetry: (id: number) => apiClient.get(`/trips/${id}/telemetry`).then((r) => unwrap<any>(r.data)),
+  create: (data: Record<string, unknown>) => apiClient.post('/trips', data).then((r) => unwrap<any>(r.data)),
+  update: (id: number, data: Record<string, unknown>) => apiClient.put(`/trips/${id}`, data).then((r) => unwrap<any>(r.data)),
+  delete: (id: number) => apiClient.delete(`/trips/${id}`).then((r) => unwrap<any>(r.data)),
+  start: (id: number) => apiClient.put(`/trips/${id}/start`).then((r) => unwrap<any>(r.data)),
+  end: (id: number) => apiClient.put(`/trips/${id}/end`).then((r) => unwrap<any>(r.data)),
 };

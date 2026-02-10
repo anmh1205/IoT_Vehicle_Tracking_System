@@ -85,3 +85,33 @@ export const endTrip = asyncHandler(async (req: AuthenticatedRequest, res: Respo
   const trip = await tripCrudService.endTrip(id);
   sendOk(res, trip);
 });
+
+export const getTripTelemetry = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) {
+    throw createValidationError('Invalid trip ID');
+  }
+
+  const trip = await tripCrudService.getTripById(id);
+  const points = [];
+
+  if (trip.startLatitude !== null && trip.startLongitude !== null) {
+    points.push({
+      lat: trip.startLatitude,
+      lon: trip.startLongitude,
+      speed: 0,
+      timestamp: trip.actualStart ?? trip.plannedStart ?? trip.createdAt,
+    });
+  }
+
+  if (trip.endLatitude !== null && trip.endLongitude !== null) {
+    points.push({
+      lat: trip.endLatitude,
+      lon: trip.endLongitude,
+      speed: 0,
+      timestamp: trip.actualEnd ?? trip.plannedEnd ?? trip.updatedAt,
+    });
+  }
+
+  sendOk(res, { tripId: id, points, events: [] });
+});

@@ -8,24 +8,27 @@
 
 ## Feature Modules Overview
 
-| # | Feature | Route | Priority | Real-time |
-|---|---------|-------|----------|-----------|
-| 1 | auth | `/login` | P0 | No |
-| 2 | dashboard | `/dashboard` | P0 | Yes (`/dashboard` namespace) |
-| 3 | vehicles | `/vehicles` | P0 | No |
-| 4 | devices | `/devices` | P0 | Yes (`/devices` namespace) |
-| 5 | customers | `/customers` | P1 | No |
-| 6 | trips | `/trips`, `/trips/[id]` | P1 | No |
-| 7 | alerts | `/alerts` | P1 | Yes (`/dashboard` namespace) |
-| 8 | geofences | `/geofences` | P2 | No |
-| 9 | maintenance | `/maintenance` | P2 | No |
-| 10 | map | `/map` | P0 | Yes (`/devices` namespace) |
-| 11 | firmware | `/firmware` | P2 | Yes (`/firmware` namespace) |
-| 12 | exports | `/exports` | P2 | Yes (`/exports` namespace) |
-| 13 | notifications | `/notifications` | P1 | Yes (`/notifications` namespace) |
-| 14 | settings | `/settings` | P1 | No |
-| 15 | users | `/admin/users` | P1 | No |
-| 16 | admin | `/admin/system` | P2 | No |
+| #   | Feature       | Route                   | Priority | Real-time                        |
+| --- | ------------- | ----------------------- | -------- | -------------------------------- |
+| 1   | auth          | `/login`                | P0       | No                               |
+| 2   | dashboard     | `/dashboard`            | P0       | Yes (`/dashboard` namespace)     |
+| 3   | vehicles      | `/vehicles`             | P0       | No                               |
+| 4   | devices       | `/devices`              | P0       | Yes (`/devices` namespace)       |
+| 5   | customers     | `/customers`            | P1       | No                               |
+| 6   | trips         | `/trips`, `/trips/[id]` | P1       | No                               |
+| 7   | alerts        | `/alerts`               | P1       | Yes (`/dashboard` namespace)     |
+| 8   | geofences     | `/geofences`            | P2       | No                               |
+| 9   | maintenance   | `/maintenance`          | P2       | No                               |
+| 10  | map           | `/map`                  | P0       | Yes (`/devices` namespace)       |
+| 11  | firmware      | `/firmware`             | P2       | Yes (`/firmware` namespace)      |
+| 12  | exports       | `/exports`              | P2       | Yes (`/exports` namespace)       |
+| 13  | notifications | `/notifications`        | P1       | Yes (`/notifications` namespace) |
+| 14  | settings      | `/settings`             | P1       | No                               |
+| 15  | users         | `/admin/users`          | P1       | No                               |
+| 16  | admin         | `/admin/system`         | P2       | No                               |
+| 17  | system-status | `/system-status`        | P2       | Yes (polling 15s)                |
+| 18  | simulator     | `/simulator`            | P2       | Yes (Socket.IO)                  |
+| 19  | statistics    | `/statistics`           | P1       | No                               |
 
 ---
 
@@ -57,11 +60,11 @@ export const loginSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| POST | `/auth/login` | `{ username, password }` | `{ user, token, expiresAt }` |
-| POST | `/auth/logout` | - | `{ success: true }` |
-| GET | `/auth/me` | - | `{ user }` |
+| Method | Path           | Request                  | Response                     |
+| ------ | -------------- | ------------------------ | ---------------------------- |
+| POST   | `/auth/login`  | `{ username, password }` | `{ user, token, expiresAt }` |
+| POST   | `/auth/logout` | -                        | `{ success: true }`          |
+| GET    | `/auth/me`     | -                        | `{ user }`                   |
 
 ### Hooks
 
@@ -94,16 +97,16 @@ export const loginSchema = z.object({
 - Cards: Total Vehicles, Active Devices, Active Alerts (critical count), Trips Today
 
 **VehicleActivityChart** (`features/dashboard/components/vehicle-activity-chart.tsx`)
-- ECharts AreaChart showing vehicle activity over last 7 days
+- recharts AreaChart showing vehicle activity over last 7 days
 - X-axis: dates, Y-axis: active vehicle count
 - Tooltip with date and count
 
 **DeviceStatusChart** (`features/dashboard/components/device-status-chart.tsx`)
-- ECharts PieChart/DonutChart showing device distribution: running (green), stopped (gray), error (red), offline (yellow)
+- recharts PieChart/DonutChart showing device distribution: running (green), stopped (gray), error (red), offline (yellow)
 - Legend below chart with counts
 
 **AlertsSeverityChart** (`features/dashboard/components/alerts-severity-chart.tsx`)
-- ECharts BarChart showing alert count by severity over last 7 days
+- recharts BarChart showing alert count by severity over last 7 days
 - Stacked bars: critical (red), high (orange), medium (yellow), low (blue)
 
 **ActivityFeed** (`features/dashboard/components/activity-feed.tsx`)
@@ -117,13 +120,13 @@ export const loginSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/dashboard/stats` | - | `{ totalVehicles, activeDevices, activeAlerts, tripsToday, trends }` |
-| GET | `/dashboard/vehicle-activity` | `?days=7` | `{ data: [{ date, count }] }` |
-| GET | `/dashboard/device-status` | - | `{ running, stopped, error, offline }` |
-| GET | `/dashboard/alerts-summary` | `?days=7` | `{ data: [{ date, critical, high, medium, low }] }` |
-| GET | `/dashboard/activity-feed` | `?limit=20` | `{ data: [{ id, type, message, timestamp }] }` |
+| Method | Path                          | Request     | Response                                                             |
+| ------ | ----------------------------- | ----------- | -------------------------------------------------------------------- |
+| GET    | `/dashboard/stats`            | -           | `{ totalVehicles, activeDevices, activeAlerts, tripsToday, trends }` |
+| GET    | `/dashboard/vehicle-activity` | `?days=7`   | `{ data: [{ date, count }] }`                                        |
+| GET    | `/dashboard/device-status`    | -           | `{ running, stopped, error, offline }`                               |
+| GET    | `/dashboard/alerts-summary`   | `?days=7`   | `{ data: [{ date, critical, high, medium, low }] }`                  |
+| GET    | `/dashboard/activity-feed`    | `?limit=20` | `{ data: [{ id, type, message, timestamp }] }`                       |
 
 ### Hooks
 
@@ -190,13 +193,13 @@ export const vehicleSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/vehicles` | `?search&status&page&limit` | `{ vehicles: [...], pagination }` |
-| GET | `/vehicles/:id` | - | `{ vehicle }` |
-| POST | `/vehicles` | `VehicleFormValues` | `{ vehicle }` |
-| PUT | `/vehicles/:id` | `VehicleFormValues` | `{ vehicle }` |
-| DELETE | `/vehicles/:id` | - | `{ success }` |
+| Method | Path            | Request                     | Response                          |
+| ------ | --------------- | --------------------------- | --------------------------------- |
+| GET    | `/vehicles`     | `?search&status&page&limit` | `{ vehicles: [...], pagination }` |
+| GET    | `/vehicles/:id` | -                           | `{ vehicle }`                     |
+| POST   | `/vehicles`     | `VehicleFormValues`         | `{ vehicle }`                     |
+| PUT    | `/vehicles/:id` | `VehicleFormValues`         | `{ vehicle }`                     |
+| DELETE | `/vehicles/:id` | -                           | `{ success }`                     |
 
 ### Hooks
 
@@ -217,51 +220,162 @@ export const vehicleSchema = z.object({
 
 ## 4. Device Management (`features/devices`)
 
-**User Story:** As a technician, I want to manage IoT devices, send commands, view telemetry, and update firmware remotely.
+**User Story:** As a technician, I want to manage IoT devices, view comprehensive device details with real-time data, runtime charts, vibration analysis, session history, and configure device settings — all from a production-quality modal matching IVM26 standard.
 
-### UI Components
+### UI Components — Device List
 
 **DeviceColumns** (`features/devices/components/device-columns.tsx`)
-- Columns: `deviceId`, `deviceName`, `deviceType` (Badge), `imei`, `currentStatus` (Badge: running=green, stopped=gray, error=red, disconnected=yellow), vehicle plate (link or "-"), `lastSeenAt` (relative time), Actions dropdown (View, Edit, Delete)
+- Columns: `deviceId`, `deviceName`, `deviceType` (Badge), `imei`, `currentStatus` (Badge: running=green, stopped=gray, error=red, disconnected=yellow), vehicle plate (link or "—"), `lastSeenAt` (relative time), Actions dropdown (View, Edit, Delete)
+
+**DeviceCard** (`features/devices/components/device-card.tsx`)
+- Card display per device: status gradient background (green→emerald for running, gray for stopped, red for error, yellow for disconnected)
+- Info: deviceName, deviceId, status badge, runtime today, battery voltage
+- Click → opens DeviceDetailModal
+- Ref IVM26: `device-card.tsx` (6.5KB)
+
+**DeviceGrid** (`features/devices/components/device-grid.tsx`)
+- Responsive grid layout: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`
+- Toggle between DataTable and Grid view
+
+**DeviceStatsBar** (`features/devices/components/device-stats-bar.tsx`)
+- Summary bar above list: Tổng thiết bị | Đang chạy (green) | Dừng (gray) | Lỗi (red) | Mất kết nối (yellow)
 
 **DeviceForm** (`features/devices/components/device-form.tsx`)
-- Dialog with fields: `deviceId` (Input, disabled on edit), `deviceName` (Input), `deviceType` (Select: gps_tracker/obd2/hybrid), `imei` (Input), `simNumber` (Input), `firmwareVersion` (Input readonly), `config` (JSON editor textarea), `notes` (Textarea)
+- Dialog with fields: `deviceId` (Input, disabled on edit), `deviceName` (Input), `deviceType` (Select: gps_tracker/obd2/hybrid), `imei` (Input), `simNumber` (Input), `config` (JSON editor textarea), `notes` (Textarea)
 
-**DeviceDetailModal** (`features/devices/components/device-detail-modal.tsx`)
-- Sheet with Tabs component (5 tabs):
-  - **Tab "Thong tin":** All device fields displayed as label-value pairs
-  - **Tab "Telemetry":** Real-time ECharts line charts for speed, fuel level, RPM. Data from VictoriaMetrics via `GET /telemetry/history`
-  - **Tab "Phien":** DataTable of `device_sessions` (start, end, uptime, data points)
-  - **Tab "Lenh":** Terminal-like command console. Dropdown to select command (REBOOT, SET_INTERVAL, GET_CONFIG, LOCK_ENGINE, UNLOCK_ENGINE). Params input. Send button. Response log area showing command history with status badges (sent/received/executed/failed)
-  - **Tab "Loi":** DataTable of error logs from `event_logs` filtered by device
+**DeviceFilters** (`features/devices/components/device-filters.tsx`)
+- Status filter (Select: all/running/stopped/disconnected), search input, sort select, customer filter
+- Reset filters button when any filter active
 
-**DeviceSessionTable** (`features/devices/components/device-session-table.tsx`)
-- Columns: Session ID, Status, Start Time, End Time, Uptime, Data Points, Avg Vibration
+### UI Components — Device Detail Modal (IVM26 Pattern)
 
-**DeviceTelemetryTab** (`features/devices/components/device-telemetry-tab.tsx`)
-- Date range picker (last 1h / 6h / 24h / 7d / custom)
-- ECharts multi-line chart: speed, fuel, RPM on dual Y-axes
-- Auto-refresh toggle when viewing recent data
+> **CRITICAL**: Dùng `Dialog` (KHÔNG `Sheet`), kích thước 90vw × 90vh.
+> Tham khảo IVM26: `features/devices/components/device-detail-modal/`
 
-**DeviceCommandsTab** (`features/devices/components/device-commands-tab.tsx`)
-- Command selector (Select), params editor (JSON Input), Send button
-- Command history list with: command name, timestamp, status badge, response payload
-- Optimistic UI: show "Pending" immediately, update on Socket `command:ack`
+**DeviceDetailModal** — Thư mục `features/devices/components/device-detail-modal/`
+
+**Structure:**
+```
+device-detail-modal/
+├── index.tsx              ← Main Dialog component (23KB ref)
+├── modal-context.tsx      ← React Context provider for all data/handlers
+├── modal-container.tsx    ← Data fetching wrapper wrapping context
+├── overview-tab.tsx       ← Tab "Tổng quan" (11KB ref)
+├── sessions-tab.tsx       ← Tab "Phiên chạy" (13KB ref)
+├── error-codes-tab.tsx    ← Tab "Mã lỗi" (8KB ref)
+├── runtime-tab.tsx        ← Tab "Biểu đồ thời gian" (2KB ref)
+├── vibration-tab.tsx      ← Tab "Biểu đồ rung" (2KB ref) — RBAC: canViewSystemInfo
+├── settings-tab.tsx       ← Tab "Cài đặt" (16KB ref) — RBAC: canEditDevice
+├── session-vibration-chart-dialog.tsx ← Nested dialog for session detail (9KB ref)
+├── empty-state.tsx        ← Empty state component
+└── spec.tsx               ← Storybook/test spec
+```
+
+**index.tsx** — Main modal:
+- `Dialog` component with `DialogContent` set to `className="max-w-[90vw] max-h-[90vh]"`
+- Header: Status icon (gradient background), device name + status Badge, export DropdownMenu
+- Tabs (6): Tổng quan, Phiên chạy, Mã lỗi, Biểu đồ thời gian, Biểu đồ rung, Cài đặt
+- **Tab visibility (RBAC):**
+  - "Biểu đồ rung" — only if `canViewSystemInfo` (admin/root)
+  - "Cài đặt" — only if `canEditDevice` (admin/root/operator)
+- **Realtime subscriptions:**
+  - `device.status.changed` → update local state for instant UI + invalidate queries
+  - `device.sessions.updated` → invalidate session/detail queries
+
+**modal-context.tsx** — Context provider:
+```typescript
+interface DeviceDetailModalContextValue {
+  // Data
+  detail: DeviceDetail | null;
+  loading: boolean;
+  error: Error | null;
+  
+  // Sessions (paginated, load-more)
+  sessions: DeviceSession[];
+  sessionsLoading: boolean;
+  sessionsHasMore: boolean;
+  onSessionsLoadMore: () => void;
+  
+  // Error codes (paginated, filtered)
+  errorCodes: ErrorCode[];
+  errorCodesPagination: Pagination;
+  errorCodesStatus: string;
+  errorCodesType: string;
+  onErrorCodesPageChange: (page: number) => void;
+  onErrorCodesStatusChange: (status: string) => void;
+  onErrorCodesTypeChange: (type: string) => void;
+  
+  // Charts
+  runtimeChart: RuntimeChartData | null;
+  runtimeRange: '7d' | '30d' | '90d' | '1y';
+  onRuntimeRangeChange: (range: string) => void;
+  vibrationChart: VibrationChartData | null;
+  vibrationPeriod: '1h' | '6h' | '24h' | '7d';
+  onVibrationPeriodChange: (period: string) => void;
+  
+  // Actions
+  onUpdateNameId: (data: any) => Promise<void>;
+  onUpdateSettings: (data: any) => Promise<void>;
+  onDeleteDevice: (data: any) => Promise<void>;
+  
+  // Tab
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+```
+
+**overview-tab.tsx** — Tab "Tổng quan":
+- Device info grid: IMEI, firmware, customer, vehicle, created date, last seen
+- Runtime stats cards: today / week / month / quarter / year / total (runtime hours)
+- Realtime data section: current vibration, battery voltage, temperature
+
+**sessions-tab.tsx** — Tab "Phiên chạy":
+- Session cards list with infinite scroll (load more button)
+- Each card: start time, end time, duration, vibration stats (avg/max/rms)
+- Click card → opens `SessionVibrationChartDialog` showing vibration detail for that session
+
+**error-codes-tab.tsx** — Tab "Mã lỗi":
+- Filter bar: status (active/resolved), type (all/critical/warning)
+- DataTable with pagination: error code, name, description, count, last occurred, status Badge
+
+**runtime-tab.tsx** — Tab "Biểu đồ thời gian":
+- Range selector: 7d / 30d / 90d / 1y
+- recharts BarChart — runtime hours per day/week
+
+**vibration-tab.tsx** — Tab "Biểu đồ rung" (RBAC: canViewSystemInfo):
+- Period selector: 1h / 6h / 24h / 7d
+- recharts LineChart — vibration values over time + threshold dashed line
+
+**settings-tab.tsx** — Tab "Cài đặt" (RBAC: canEditDevice):
+- Name/ID form section (React Hook Form + Zod)
+- Settings form: request_interval, vibration_threshold, etc.
+- Danger zone: delete device (ConfirmDialog)
+
+**ExportModal** (`features/devices/components/export-modal.tsx`):
+- Nested Dialog for exporting device data
+- Fields: date range (DateRangePicker), export type (sessions/errors/telemetry), format (CSV/Excel)
+- Triggers `POST /exports` job
 
 ### Zod Schema (`lib/validations/device.schema.ts`)
 
 ```typescript
 export const deviceSchema = z.object({
-  deviceId: z.string().min(1, 'Ma thiet bi khong duoc de trong')
-    .max(50).regex(/^[A-Z0-9_]+$/, 'Chi cho phep ky tu in hoa, so va dau gach duoi'),
-  deviceName: z.string().min(1, 'Ten thiet bi khong duoc de trong').max(100),
+  deviceId: z.string().min(1, 'Mã thiết bị không được để trống')
+    .max(50).regex(/^[A-Z0-9_]+$/, 'Chỉ cho phép ký tự in hoa, số và dấu gạch dưới'),
+  deviceName: z.string().min(1, 'Tên thiết bị không được để trống').max(100),
   deviceType: z.enum(['gps_tracker', 'obd2', 'hybrid'], {
-    required_error: 'Vui long chon loai thiet bi',
+    required_error: 'Vui lòng chọn loại thiết bị',
   }),
   imei: z.string().max(20).optional(),
   simNumber: z.string().max(20).optional(),
   config: z.record(z.unknown()).optional(),
   notes: z.string().max(500).optional(),
+});
+
+export const deviceSettingsSchema = z.object({
+  deviceName: z.string().min(1).max(100),
+  requestInterval: z.coerce.number().min(1).max(3600),
+  vibrationThreshold: z.coerce.number().min(0).max(100),
 });
 
 export const commandSchema = z.object({
@@ -273,35 +387,52 @@ export const commandSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/device` | `?search&status&page&limit` | `{ devices: [...], pagination }` |
-| GET | `/device/:id` | - | `{ device }` |
-| POST | `/device` | `DeviceFormValues` | `{ device }` |
-| PUT | `/device/:id` | `DeviceFormValues` | `{ device }` |
-| DELETE | `/device/:id` | - | `{ success }` |
-| GET | `/device/:id/sessions` | `?page&limit` | `{ sessions: [...], pagination }` |
-| POST | `/devices/:id/command` | `{ command, params, timeout }` | `{ commandId, status }` |
-| GET | `/telemetry/history` | `?deviceId&from&to&fields` | `{ points: [...] }` |
+| Method | Path                          | Request                                      | Response                            |
+| ------ | ----------------------------- | -------------------------------------------- | ----------------------------------- |
+| GET    | `/device`                     | `?search&status&page&limit`                  | `{ devices: [...], pagination }`    |
+| GET    | `/device/:id`                 | -                                            | `{ device }`                        |
+| POST   | `/device`                     | `DeviceFormValues`                           | `{ device }`                        |
+| PUT    | `/device/:id`                 | `DeviceFormValues`                           | `{ device }`                        |
+| DELETE | `/device/:id`                 | -                                            | `{ success }`                       |
+| GET    | `/device/:id/sessions`        | `?page&limit`                                | `{ sessions: [...], pagination }`   |
+| GET    | `/device/:id/error-codes`     | `?status&type&page&limit`                    | `{ errorCodes: [...], pagination }` |
+| GET    | `/device/:id/runtime-chart`   | `?range=7d\|30d\|90d\|1y`                    | `{ data: [{ date, hours }] }`       |
+| GET    | `/device/:id/vibration-chart` | `?period=1h\|6h\|24h\|7d`                    | `{ data: [{ timestamp, value }] }`  |
+| PUT    | `/device/:id/settings`        | `{ requestInterval, vibrationThreshold }`    | `{ device }`                        |
+| POST   | `/devices/:id/command`        | `{ command, params, timeout }`               | `{ commandId, status }`             |
+| POST   | `/exports`                    | `{ entityType, deviceId, from, to, format }` | `{ export: { id, status } }`        |
 
 ### Hooks
 
-- `useDevices(filters)` -- `useQuery(['devices', filters])`
-- `useDeviceDetail(id)` -- `useQuery(['devices', id], { enabled: !!id })`
-- `useCreateDevice()` -- `useMutation`, invalidates `['devices']`
-- `useUpdateDevice()` -- `useMutation`, invalidates `['devices']` + `['devices', id]`
-- `useDeleteDevice()` -- `useMutation`, invalidates `['devices']`
-- `useDeviceSessions(deviceId, filters)` -- `useQuery(['device-sessions', deviceId, filters])`
-- `useSendCommand()` -- `useMutation` calling `POST /devices/:id/command`
-- `useTelemetryHistory(deviceId, from, to, fields)` -- `useQuery(['telemetry', deviceId, from, to])`
-- `useDeviceRealtime()` -- Socket `/devices` namespace. Listens to `device:status`, `device:position`. Updates query cache.
+- `useDevices(filters)` — `useQuery(['devices', filters])`
+- `useDeviceDetail(id)` — `useQuery(['device-detail', id], { enabled: !!id })`. Returns aggregate: device + runtime stats + realtime data
+- `useDeviceSessions(deviceId, page)` — `useQuery(['device-sessions', deviceId, page])`
+- `useDeviceErrorCodes(deviceId, { status, type, page })` — `useQuery(['device-errors', deviceId, ...filters])`
+- `useDeviceRuntimeChart(deviceId, range)` — `useQuery(['device-runtime-chart', deviceId, range])`
+- `useDeviceVibrationChart(deviceId, period)` — `useQuery(['device-vibration-chart', deviceId, period])`
+- `useCreateDevice()` — `useMutation`, invalidates `['devices']`
+- `useUpdateDevice()` — `useMutation`, invalidates `['devices']` + `['device-detail', id]`
+- `useUpdateDeviceSettings(deviceId)` — `useMutation`, invalidates `['device-detail', deviceId]`
+- `useDeleteDevice()` — `useMutation`, invalidates `['devices']`
+- `useSendCommand(deviceId)` — `useMutation` calling `POST /devices/:id/command`
+- `useCreateExport()` — `useMutation`, invalidates `['exports']`, toast "Đang tạo báo cáo..."
+- `useDeviceRealtime()` — Socket listener: `device:status` (update query cache optimistic), `device:position` (update coordinates)
+
+### Advanced Logic
+
+- **RBAC in modal tabs:** Use `useRoleAccess()` hook. Hide "Biểu đồ rung" tab if `!canViewSystemInfo`. Hide "Cài đặt" tab if `!canEditDevice`.
+- **Realtime subscriptions in modal:** When modal opens, subscribe `device.status.changed` and `device.sessions.updated`. On status event: merge into local state for instant feedback, then invalidate queries. On session event: invalidate session queries.
+- **Context provider pattern:** `modal-container.tsx` fetches all data, wraps children in `ModalContext.Provider`. Each tab consumes context via `useModalContext()`. This avoids prop drilling and duplicate queries.
+- **Infinite scroll sessions:** Use `useInfiniteQuery` or manual page tracking with "Tải thêm" button.
+- **Export dropdown menu:** In modal header, DropdownMenu with options: "Xuất toàn bộ", "Xuất phiên chạy", "Xuất mã lỗi" → opens ExportModal with pre-filled entity type.
 
 ### States
 
-- **Loading:** DataTable skeleton (5 rows)
-- **Empty:** Cpu icon + "Chua co thiet bi nao" + Button "Them thiet bi"
-- **Error:** Alert banner with retry
-- **Command pending:** Spinner + "Dang gui lenh..." badge
+- **Loading:** Skeleton cards for overview, skeleton table for sessions/errors, skeleton chart for charts
+- **Empty (sessions):** Clock icon + "Chưa có phiên chạy nào"
+- **Empty (errors):** CheckCircle icon + "Không có mã lỗi"
+- **Error:** Alert banner with retry button
+- **Command pending:** Spinner + "Đang gửi lệnh..." badge
 - **Command failed:** Red badge + error message
 
 ---
@@ -333,13 +464,13 @@ export const customerSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/customers` | `?search&status&page&limit` | `{ customers: [...], pagination }` |
-| GET | `/customers/:id` | - | `{ customer, vehicles: [...], users: [...] }` |
-| POST | `/customers` | `CustomerFormValues` | `{ customer }` |
-| PUT | `/customers/:id` | `CustomerFormValues` | `{ customer }` |
-| DELETE | `/customers/:id` | - | `{ success }` |
+| Method | Path             | Request                     | Response                                      |
+| ------ | ---------------- | --------------------------- | --------------------------------------------- |
+| GET    | `/customers`     | `?search&status&page&limit` | `{ customers: [...], pagination }`            |
+| GET    | `/customers/:id` | -                           | `{ customer, vehicles: [...], users: [...] }` |
+| POST   | `/customers`     | `CustomerFormValues`        | `{ customer }`                                |
+| PUT    | `/customers/:id` | `CustomerFormValues`        | `{ customer }`                                |
+| DELETE | `/customers/:id` | -                           | `{ success }`                                 |
 
 ### Hooks
 
@@ -375,7 +506,7 @@ export const customerSchema = z.object({
 
 **TripDetail** (`features/trips/components/trip-detail.tsx`) -- Full page `/trips/[id]`
 - **Route Map:** Leaflet map with Polyline. Segments color-coded by speed: green (<50 km/h), yellow (50-80), orange (80-100), red (>100). Start marker (green), end marker (red). Alert event markers (harsh braking, speeding) as warning icons.
-- **Telemetry Chart:** ECharts synced with map. Lines for speed, fuel, RPM. Brush selection syncs with map view.
+- **Telemetry Chart:** recharts synced with map. Lines for speed, fuel, RPM. Brush selection syncs with map view.
 - **Replay Controls:** Play/Pause button, speed selector (1x/2x/4x), progress scrubber slider, current position time display. Moving marker on map during playback.
 - **Trip Summary Card:** Distance, duration, avg speed, max speed, fuel consumption, idle time, alert count.
 
@@ -397,12 +528,12 @@ export const tripSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/trips` | `?vehicleId&status&from&to&page&limit` | `{ trips: [...], pagination }` |
-| GET | `/trips/:id` | - | `{ trip, summary }` |
-| POST | `/trips` | `TripFormValues` | `{ trip }` |
-| GET | `/trips/:id/telemetry` | `?resolution&fields` | `{ points: [...], events: [...] }` |
+| Method | Path                   | Request                                | Response                           |
+| ------ | ---------------------- | -------------------------------------- | ---------------------------------- |
+| GET    | `/trips`               | `?vehicleId&status&from&to&page&limit` | `{ trips: [...], pagination }`     |
+| GET    | `/trips/:id`           | -                                      | `{ trip, summary }`                |
+| POST   | `/trips`               | `TripFormValues`                       | `{ trip }`                         |
+| GET    | `/trips/:id/telemetry` | `?resolution&fields`                   | `{ points: [...], events: [...] }` |
 
 ### Hooks
 
@@ -458,13 +589,13 @@ export const alertResolveSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/alerts` | `?severity&status&type&vehicleId&from&to&page&limit` | `{ alerts: [...], pagination }` |
-| GET | `/alerts/:id` | - | `{ alert }` |
-| PUT | `/alerts/:id/acknowledge` | - | `{ alert }` |
-| PUT | `/alerts/:id/resolve` | `{ resolutionNotes }` | `{ alert }` |
-| PUT | `/alerts/:id/dismiss` | - | `{ alert }` |
+| Method | Path                      | Request                                              | Response                        |
+| ------ | ------------------------- | ---------------------------------------------------- | ------------------------------- |
+| GET    | `/alerts`                 | `?severity&status&type&vehicleId&from&to&page&limit` | `{ alerts: [...], pagination }` |
+| GET    | `/alerts/:id`             | -                                                    | `{ alert }`                     |
+| PUT    | `/alerts/:id/acknowledge` | -                                                    | `{ alert }`                     |
+| PUT    | `/alerts/:id/resolve`     | `{ resolutionNotes }`                                | `{ alert }`                     |
+| PUT    | `/alerts/:id/dismiss`     | -                                                    | `{ alert }`                     |
 
 ### Hooks
 
@@ -550,15 +681,15 @@ export const geofenceSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/geofences` | `?search&isActive&page&limit` | `{ geofences: [...], pagination }` |
-| GET | `/geofences/:id` | - | `{ geofence, vehicles: [...] }` |
-| POST | `/geofences` | `GeofenceFormValues` | `{ geofence }` |
-| PUT | `/geofences/:id` | `GeofenceFormValues` | `{ geofence }` |
-| DELETE | `/geofences/:id` | - | `{ success }` |
-| PUT | `/geofences/:id/toggle` | `{ isActive }` | `{ geofence }` |
-| PUT | `/geofences/:id/vehicles` | `{ vehicleIds: number[] }` | `{ success }` |
+| Method | Path                      | Request                       | Response                           |
+| ------ | ------------------------- | ----------------------------- | ---------------------------------- |
+| GET    | `/geofences`              | `?search&isActive&page&limit` | `{ geofences: [...], pagination }` |
+| GET    | `/geofences/:id`          | -                             | `{ geofence, vehicles: [...] }`    |
+| POST   | `/geofences`              | `GeofenceFormValues`          | `{ geofence }`                     |
+| PUT    | `/geofences/:id`          | `GeofenceFormValues`          | `{ geofence }`                     |
+| DELETE | `/geofences/:id`          | -                             | `{ success }`                      |
+| PUT    | `/geofences/:id/toggle`   | `{ isActive }`                | `{ geofence }`                     |
+| PUT    | `/geofences/:id/vehicles` | `{ vehicleIds: number[] }`    | `{ success }`                      |
 
 ### Hooks
 
@@ -601,7 +732,7 @@ export const geofenceSchema = z.object({
   - Red dots: overdue services
 - Click a date to see maintenance records for that day
 **MileageForecaster** (`features/maintenance/components/mileage-forecaster.tsx`)
-- ECharts line chart projecting when vehicle reaches next service mileage
+- recharts line chart projecting when vehicle reaches next service mileage
 - Based on: `Daily Avg Km = Total Km / Days Active`, `Days to Service = (nextServiceMileage - currentMileage) / dailyAvg`
 
 ### Zod Schema (`lib/validations/maintenance.schema.ts`)
@@ -626,14 +757,14 @@ export const maintenanceSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/maintenance` | `?vehicleId&status&from&to&page&limit` | `{ records: [...], pagination }` |
-| GET | `/maintenance/:id` | - | `{ record }` |
-| POST | `/maintenance` | `MaintenanceFormValues` | `{ record }` |
-| PUT | `/maintenance/:id` | `MaintenanceFormValues` | `{ record }` |
-| DELETE | `/maintenance/:id` | - | `{ success }` |
-| GET | `/stats/maintenance` | - | `{ overdue, dueSoon, upcoming, vehicles: [...] }` |
+| Method | Path                 | Request                                | Response                                          |
+| ------ | -------------------- | -------------------------------------- | ------------------------------------------------- |
+| GET    | `/maintenance`       | `?vehicleId&status&from&to&page&limit` | `{ records: [...], pagination }`                  |
+| GET    | `/maintenance/:id`   | -                                      | `{ record }`                                      |
+| POST   | `/maintenance`       | `MaintenanceFormValues`                | `{ record }`                                      |
+| PUT    | `/maintenance/:id`   | `MaintenanceFormValues`                | `{ record }`                                      |
+| DELETE | `/maintenance/:id`   | -                                      | `{ success }`                                     |
+| GET    | `/stats/maintenance` | -                                      | `{ overdue, dueSoon, upcoming, vehicles: [...] }` |
 
 ### Hooks
 
@@ -660,22 +791,82 @@ export const maintenanceSchema = z.object({
 
 ## 10. Map / Live Tracking (`features/map`)
 
-**User Story:** As a monitor, I want to see all vehicles on a real-time map with clustering, geofence overlays, and vehicle details.
+**User Story:** As a monitor, I want to see all vehicles on a real-time map with clustering, device panels, search, geofence overlays, and mobile-responsive drawer.
 
 ### UI Components
 
 **MapPage** -- Full-height layout (`h-[calc(100dvh-52px)]`) with sidebar + map. No PageContainer header (map is fullscreen).
 
-**MapView** (`components/map/map-view.tsx`)
+**TrackingMap** (`features/map/components/tracking-map.tsx`)
 - Leaflet MapContainer with TileLayer (OpenStreetMap)
 - Dynamic import with `{ ssr: false }`
-- Layer switcher: Street / Satellite toggle (TileLayer swap)
+- Contains: TileLayer, DeviceCluster, DeviceMarker[], MapControls, SelectedDeviceCard
+- Ref IVM26: `tracking-map.tsx` (16KB)
 
-**VehicleMarker** (`components/map/vehicle-marker.tsx`)
-- Custom `L.divIcon` with vehicle icon, rotated by heading
+**DeviceListPanel** (`features/map/components/device-list-panel.tsx`)
+- Sidebar left (320px width on desktop), contains:
+  - DeviceSearch (search input)
+  - DeviceFilter (status/type filter)
+  - DeviceListItem[] (scrollable list)
+- Click item → set selectedDeviceId + flyTo marker
+- Ref IVM26: `device-list-panel.tsx` (8KB)
+
+**DeviceListItem** (`features/map/components/device-list-item.tsx`)
+- Each device in panel: status color dot, name, status label, last seen time
+- Highlighted when selected
+- Ref IVM26: `device-list-item.tsx` (6.5KB)
+
+**DeviceSearch** (`features/map/components/device-search.tsx`)
+- Search input with debounce 300ms, filters device list panel
+- Ref IVM26: `device-search.tsx` (1.7KB)
+
+**DeviceFilter** (`features/map/components/device-filter.tsx`)
+- Filter by status: all/running/stopped/disconnected/error
+- Desktop: horizontal buttons row
+- Ref IVM26: `device-filter.tsx` (5.7KB)
+
+**DeviceFilterCompact** (`features/map/components/device-filter-compact.tsx`)
+- Mobile version: compact Select dropdown
+- Ref IVM26: `device-filter-compact.tsx` (5.6KB)
+
+**SelectedDeviceCard** (`features/map/components/selected-device-card.tsx`)
+- Floating card when a device marker is clicked
+- Shows: plate, speed, heading (compass), coordinates, last update, runtime
+- Buttons: "Xem chi tiết" (opens DeviceDetailModal), "Theo dõi" (follow mode)
+- Ref IVM26: `selected-device-card.tsx` (9.5KB)
+
+**DeviceCluster** (`features/map/components/device-cluster.tsx`)
+- `react-leaflet-cluster` wrapper
+- Custom cluster icon: count badge + color (red if any device in cluster has error, green otherwise)
+- Disabled at zoom >= 14
+- Ref IVM26: `device-cluster.tsx` (1.9KB)
+
+**DeviceMarker** (`features/map/components/device-marker.tsx`)
+- Custom `L.divIcon` with device icon, rotated by heading
 - Color by status: green (running), gray (stopped), red (error), yellow (offline)
-- Popup: vehicle plate, speed, last update time, "Xem chi tiet" link
-- Click: sets `selectedVehicleId` in Zustand map store
+- Popup: device name, status, last update time
+- Click: set `selectedDeviceId` in Zustand map store
+
+**MarkerIconFactory** (`features/map/components/marker-icon.ts`)
+- `createDeviceMarkerIcon(status, heading?)` → `L.DivIcon`
+- Status colors: running=#22c55e, stopped=#6b7280, error=#ef4444, disconnected=#eab308
+- SVG icon with rotation transform for heading
+- Ref IVM26: `marker-icon.ts` (6.5KB)
+
+**MapControls** (`features/map/components/map-controls.tsx`)
+- Floating top-right buttons: Zoom in/out, MapLayerSwitcher, Fullscreen toggle, Fit all bounds
+- Ref IVM26: `map-controls.tsx` (5.5KB)
+
+**MapLayerSwitcher** (`features/map/components/map-layer-switcher.tsx`)
+- Toggle between Street and Satellite tile layers
+- Ref IVM26: `map-layer-switcher.tsx` (2.7KB)
+
+**MobileDeviceDrawer** (`features/map/components/mobile-device-drawer.tsx`)
+- Bottom sheet for mobile screens (< md breakpoint)
+- Replaces sidebar on mobile
+- Contains: DeviceFilterCompact, DeviceSearch, DeviceListItem[], SelectedDeviceCard
+- Drag to expand/collapse
+- Ref IVM26: `mobile-device-drawer.tsx` (7.5KB)
 
 **GeofenceLayer** (`components/map/geofence-layer.tsx`)
 - Renders Circle and Polygon layers from geofence data
@@ -683,52 +874,66 @@ export const maintenanceSchema = z.object({
 - Tooltip with geofence name
 - Visibility toggled from sidebar
 
-**MapSidebar** (`components/map/map-sidebar.tsx`)
-- **Vehicle List Tab:** Searchable list of vehicles with status badge. Click to `flyTo` marker.
-- **Geofence Tab:** List with toggle switches for visibility on map.
-- **Selected Vehicle Card:** When a vehicle is selected, shows: plate, speed, heading (compass), coordinates, last update time, "Ghost trail" toggle, link to vehicle detail page.
-
-**MapToolbar** -- Floating buttons on map: Follow Mode (auto-pan to selected vehicle), Show/Hide Geofences, Fit All Bounds
-
 ### Zustand Map Store (`lib/store/map-store.ts`)
 
 ```typescript
 interface MapState {
-  selectedVehicleId: string | null;
+  selectedDeviceId: string | null;
   showGeofences: boolean;
   followMode: boolean;
-  setSelectedVehicle: (id: string | null) => void;
+  mapViewport: { center: [number, number]; zoom: number };
+
+  // Actions
+  setSelectedDevice: (id: string | null) => void;
   toggleGeofences: () => void;
   toggleFollowMode: () => void;
+  setMapViewport: (viewport: { center: [number, number]; zoom: number }) => void;
 }
 ```
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/devices/positions` | `?status` | `{ data: [{ id, lat, lon, spd, hdg, ts, s }] }` |
-| GET | `/geofences` | `?isActive=true` | `{ geofences: [...] }` |
+| Method | Path                 | Request          | Response                                        |
+| ------ | -------------------- | ---------------- | ----------------------------------------------- |
+| GET    | `/devices/positions` | `?status`        | `{ data: [{ id, lat, lon, spd, hdg, ts, s }] }` |
+| GET    | `/geofences`         | `?isActive=true` | `{ geofences: [...] }`                          |
 
 ### Hooks
 
-- `useDevicePositions()` -- `useQuery(['device-positions'])`, refetchInterval: 30000 (fallback polling). Disabled when Socket is connected.
-- `useMapRealtime()` -- Socket `/devices` namespace. On `device:position`: throttle updates to 500ms, update positions via `setQueryData(['device-positions'])`. On `device:status`: update status badge.
+- `useDevicePositions()` — `useQuery(['device-positions'])`, refetchInterval: 30000 (fallback polling). Disabled when Socket is connected.
+- `useMapRealtime()` — Socket listener: `device:position` (throttled 500ms), `device:status` (update badge)
 
 ### Advanced Logic
 
-- **List-Map Sync:** `selectedVehicleId` in Zustand. List click calls `map.flyTo(lat, lon, 16)`. Marker click scrolls sidebar list to row and highlights it.
-- **Clustering:** `react-leaflet-cluster`. Custom cluster icon: count badge + color (red if any vehicle in cluster has error, green otherwise). Disabled at zoom >= 14.
-- **Ghost Trail:** When vehicle is selected and ghost trail enabled, show last 5 positions as fading polyline with direction arrows.
+- **List-Map Sync:** `selectedDeviceId` in Zustand. Panel click calls `map.flyTo(lat, lon, 16)`. Marker click scrolls panel to item and highlights it.
+- **Clustering:** `react-leaflet-cluster`. Custom cluster icon: count badge + color. Disabled at zoom >= 14.
+- **Ghost Trail:** When device is selected and ghost trail enabled, show last 5 positions as fading polyline with direction arrows.
 - **Canvas Rendering:** For history trails > 1000 points, use `L.canvas()` renderer.
-- **Throttling:** Buffer incoming Socket events. Flush to React state at max 2Hz (every 500ms) to prevent UI thread blocking.
-- **Follow Mode:** When enabled, map auto-pans to selected vehicle on every position update.
+- **Throttling:** Buffer incoming Socket events in ref. Flush to React state at max 2Hz (every 500ms) via `setInterval`. Pattern:
+  ```typescript
+  const positionBufferRef = useRef(new Map<string, DevicePosition>());
+  useRealtimeSubscription({ event: 'device:position', handler: (p) => positionBufferRef.current.set(p.device_id, p) });
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (positionBufferRef.current.size === 0) return;
+      queryClient.setQueryData(['device-positions'], (old) => /* merge buffer */);
+      positionBufferRef.current.clear();
+    }, 500);
+    return () => clearInterval(interval);
+  }, [queryClient]);
+  ```
+- **Follow Mode:** When enabled, map auto-pans to selected device on every position update.
+- **Mobile responsive:** On screens < md, hide DeviceListPanel, show MobileDeviceDrawer instead.
+- **Marker Icon Factory:** Use `createDeviceMarkerIcon(status, heading?)` to create DivIcons. Icon includes SVG with `transform: rotate(${heading}deg)`.
 
 ### States
 
 - **Loading:** Map skeleton (gray rectangle) + sidebar skeleton
-- **Empty (no vehicles):** Map rendered but empty. Sidebar shows "Khong co phuong tien nao"
-- **Error (socket):** Floating banner "Mat ket noi real-time. Dang thu ket noi lai..."
+- **Empty (no devices):** Map rendered but empty. Panel shows "Không có thiết bị nào"
+- **Error (socket):** Floating banner "Mất kết nối real-time. Đang thử kết nối lại..."
+
+
+
 
 ---
 
@@ -765,15 +970,15 @@ export const firmwareAssignSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/firmware` | `?type&version` | `{ data: [...] }` |
-| GET | `/firmware/:id` | - | `{ firmware }` |
-| POST | `/firmware` | Multipart (file + version + description) | `{ firmware }` |
-| DELETE | `/firmware/:id` | - | `{ success }` |
-| PUT | `/firmware/:id/activate` | - | `{ firmware }` |
-| POST | `/firmware/:id/assign` | `{ deviceIds, strategy, batchSize }` | `{ jobId }` |
-| GET | `/firmware/:id/devices` | - | `{ devices: [{ deviceId, status, progress }] }` |
+| Method | Path                     | Request                                  | Response                                        |
+| ------ | ------------------------ | ---------------------------------------- | ----------------------------------------------- |
+| GET    | `/firmware`              | `?type&version`                          | `{ data: [...] }`                               |
+| GET    | `/firmware/:id`          | -                                        | `{ firmware }`                                  |
+| POST   | `/firmware`              | Multipart (file + version + description) | `{ firmware }`                                  |
+| DELETE | `/firmware/:id`          | -                                        | `{ success }`                                   |
+| PUT    | `/firmware/:id/activate` | -                                        | `{ firmware }`                                  |
+| POST   | `/firmware/:id/assign`   | `{ deviceIds, strategy, batchSize }`     | `{ jobId }`                                     |
+| GET    | `/firmware/:id/devices`  | -                                        | `{ devices: [{ deviceId, status, progress }] }` |
 
 ### Hooks
 
@@ -825,11 +1030,11 @@ export const exportSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/exports` | `?status&page&limit` | `{ exports: [...], pagination }` |
-| POST | `/exports` | `ExportFormValues` | `{ export: { id, status: 'pending' } }` |
-| GET | `/exports/:id/download` | - | Binary file stream |
+| Method | Path                    | Request              | Response                                |
+| ------ | ----------------------- | -------------------- | --------------------------------------- |
+| GET    | `/exports`              | `?status&page&limit` | `{ exports: [...], pagination }`        |
+| POST   | `/exports`              | `ExportFormValues`   | `{ export: { id, status: 'pending' } }` |
+| GET    | `/exports/:id/download` | -                    | Binary file stream                      |
 
 ### Hooks
 
@@ -858,11 +1063,11 @@ export const exportSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/notifications` | `?read&type&page&limit` | `{ notifications: [...], pagination, unreadCount }` |
-| PUT | `/notifications/:id/read` | - | `{ success }` |
-| PUT | `/notifications/read-all` | - | `{ success }` |
+| Method | Path                      | Request                 | Response                                            |
+| ------ | ------------------------- | ----------------------- | --------------------------------------------------- |
+| GET    | `/notifications`          | `?read&type&page&limit` | `{ notifications: [...], pagination, unreadCount }` |
+| PUT    | `/notifications/:id/read` | -                       | `{ success }`                                       |
+| PUT    | `/notifications/read-all` | -                       | `{ success }`                                       |
 
 ### Hooks
 
@@ -946,13 +1151,13 @@ export const notificationPrefsSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/auth/me` | - | `{ user }` |
-| PUT | `/users/profile` | `{ fullName, email, phone }` | `{ user }` |
-| PUT | `/auth/change-password` | `{ currentPassword, newPassword }` | `{ success }` |
-| GET | `/users/notification-settings` | - | `{ preferences }` |
-| PUT | `/users/notification-settings` | `NotificationPrefsValues` | `{ preferences }` |
+| Method | Path                           | Request                            | Response          |
+| ------ | ------------------------------ | ---------------------------------- | ----------------- |
+| GET    | `/auth/me`                     | -                                  | `{ user }`        |
+| PUT    | `/users/profile`               | `{ fullName, email, phone }`       | `{ user }`        |
+| PUT    | `/auth/change-password`        | `{ currentPassword, newPassword }` | `{ success }`     |
+| GET    | `/users/notification-settings` | -                                  | `{ preferences }` |
+| PUT    | `/users/notification-settings` | `NotificationPrefsValues`          | `{ preferences }` |
 
 ### Hooks
 
@@ -998,14 +1203,14 @@ export const userSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/users` | `?search&role&status&page&limit` | `{ users: [...], pagination }` |
-| GET | `/users/:id` | - | `{ user }` |
-| POST | `/users` | `UserFormValues` | `{ user }` |
-| PUT | `/users/:id` | `UserFormValues` | `{ user }` |
-| DELETE | `/users/:id` | - | `{ success }` |
-| POST | `/users/:id/reset-password` | - | `{ temporaryPassword }` |
+| Method | Path                        | Request                          | Response                       |
+| ------ | --------------------------- | -------------------------------- | ------------------------------ |
+| GET    | `/users`                    | `?search&role&status&page&limit` | `{ users: [...], pagination }` |
+| GET    | `/users/:id`                | -                                | `{ user }`                     |
+| POST   | `/users`                    | `UserFormValues`                 | `{ user }`                     |
+| PUT    | `/users/:id`                | `UserFormValues`                 | `{ user }`                     |
+| DELETE | `/users/:id`                | -                                | `{ success }`                  |
+| POST   | `/users/:id/reset-password` | -                                | `{ temporaryPassword }`        |
 
 ### Hooks
 
@@ -1030,29 +1235,55 @@ export const userSchema = z.object({
 
 ---
 
-## 16. System Admin (`features/admin`) -- Admin Only
+## 16. System Admin (`features/admin`) — Admin/Root Only
 
-**User Story:** As a system admin, I want to monitor system health, view metrics, and query logs.
+**User Story:** As a system admin, I want to monitor system health, view metrics, query logs with filters, and manage system settings — all in a comprehensive observability dashboard.
 
 ### UI Components
 
-**SystemHealthCards** -- Grid of cards showing service status:
-- Backend API: health endpoint status + response time
-- PostgreSQL: connection pool status
-- EMQX: broker status + connected devices count
-- VictoriaMetrics: ingestion rate + storage used
-- Each card: service name, status indicator (green dot / red dot), key metric
+**SystemAdminPage** — Layout with sub-navigation tabs: Health, Logs, Metrics, Settings
 
-**VictoriaMetricsViewer** (`features/admin/components/vm-query-viewer.tsx`)
-- Query input (Input), time range selector, Execute button
-- Results displayed as ECharts line chart or raw JSON table
-- Predefined query templates dropdown
+**SystemHealthCards** (`features/admin/components/system-health-cards.tsx`)
+- Grid of cards showing service status:
+  - Backend API: health endpoint status + response time
+  - PostgreSQL: connection pool status
+  - EMQX: broker status + connected devices count
+  - VictoriaMetrics: ingestion rate + storage used
+- Each card: service name, status indicator (green dot / red dot), key metric, latency ms
+- Auto-refresh every 30s
 
-**VictoriaLogsViewer** (`features/admin/components/vl-log-viewer.tsx`)
-- Search input with query syntax
-- Log entries displayed in monospace font, color-coded by severity
-- Time range filter, auto-refresh toggle (5s interval)
-- Click log entry to expand details (JSON context)
+**LogsViewer** (`features/admin/components/logs-viewer.tsx`)
+- **Table selector:** dropdown to choose log source: `event_logs`, `validation_errors`, `export_jobs`, `export_audit_log`, `error_code_definitions`
+- **Filter bar:** severity multi-select (info/warning/error/critical), time range picker, search input
+- **Log entries:** DataTable with columns: timestamp, severity (Badge), source, message (truncated)
+- **Expandable rows:** Click row to expand full JSON context in monospace font
+- **Auto-refresh toggle:** Checkbox + interval selector (5s/10s/30s)
+- **Export button:** Download filtered logs as CSV
+- Ref IVM26: `log-viewer.tsx` (15KB)
+
+**QueryBuilder** (`features/admin/components/query-builder.tsx`)
+- **Purpose:** Ad-hoc querying of any system table
+- **Filter conditions:** Array of `{ field, operator, value }` rows. Add/remove conditions dynamically
+- **Operators:** equals, not_equals, contains, greater_than, less_than, in, between
+- **Table selector:** Same tables as LogsViewer
+- **Execute button:** Runs query, shows results in DataTable below
+- **Preset queries dropdown:** Common queries (e.g., "All critical errors today", "Export jobs failed")
+
+```typescript
+interface FilterCondition {
+  field: string;
+  operator: 'eq' | 'neq' | 'contains' | 'gt' | 'lt' | 'in' | 'between';
+  value: string | number | string[];
+}
+```
+
+**MetricsExplorer** (`features/admin/components/metrics-explorer.tsx`)
+- **Query input:** PromQL-style input for VictoriaMetrics queries
+- **Time range selector:** 1h / 6h / 24h / 7d / custom DateRangePicker
+- **Preset queries dropdown:** Common metrics (CPU usage, memory, request rate, MQTT messages/sec)
+- **Result display:** Toggle between recharts LineChart and raw JSON table
+- **recharts chart:** ResponsiveContainer, XAxis (time), YAxis (value), Tooltip, Legend
+- **Multiple series support:** Each query result series gets a different color line
 
 **SystemSettingsEditor** (`features/admin/components/system-settings-editor.tsx`)
 - Key-value list from `system_settings` table
@@ -1061,27 +1292,205 @@ export const userSchema = z.object({
 
 ### API Endpoints
 
-| Method | Path | Request | Response |
-|--------|------|---------|----------|
-| GET | `/system-admin/health` | - | `{ services: [{ name, status, latency, details }] }` |
-| GET | `/system-admin/settings` | - | `{ settings: [{ key, value, description }] }` |
-| PUT | `/system-admin/settings/:key` | `{ value }` | `{ setting }` |
-| POST | `/victoria/query` | `{ query, start, end, step }` | `{ data: [...] }` |
-| POST | `/victoria/logs` | `{ query, start, end, limit }` | `{ logs: [...] }` |
+| Method | Path                          | Request                                     | Response                                             |
+| ------ | ----------------------------- | ------------------------------------------- | ---------------------------------------------------- |
+| GET    | `/system-admin/health`        | -                                           | `{ services: [{ name, status, latency, details }] }` |
+| GET    | `/system-admin/settings`      | -                                           | `{ settings: [{ key, value, description }] }`        |
+| PUT    | `/system-admin/settings/:key` | `{ value }`                                 | `{ setting }`                                        |
+| POST   | `/system-admin/query`         | `{ table, conditions[], page, limit }`      | `{ data: [...], pagination }`                        |
+| POST   | `/victoria/query`             | `{ query, start, end, step }`               | `{ data: [...] }`                                    |
+| POST   | `/victoria/logs`              | `{ query, start, end, limit }`              | `{ logs: [...] }`                                    |
+| GET    | `/system-admin/logs`          | `?table&severity&from&to&search&page&limit` | `{ logs: [...], pagination }`                        |
 
 ### Hooks
 
-- `useSystemHealth()` -- `useQuery(['system-health'])`, refetchInterval: 30000
-- `useSystemSettings()` -- `useQuery(['system-settings'])`
-- `useUpdateSystemSetting()` -- `useMutation`, invalidates `['system-settings']`
-- `useVMQuery()` -- `useMutation` (not cached, query is ad-hoc)
-- `useVLLogs(query, range)` -- `useQuery(['vl-logs', query, range])`, refetchInterval when auto-refresh enabled
+- `useSystemHealth()` — `useQuery(['system-health'])`, refetchInterval: 30000
+- `useSystemSettings()` — `useQuery(['system-settings'])`
+- `useUpdateSystemSetting()` — `useMutation`, invalidates `['system-settings']`
+- `useAdminLogs(table, filters)` — `useQuery(['admin-logs', table, filters])`, refetchInterval when auto-refresh enabled
+- `useAdminQuery()` — `useMutation` (ad-hoc query execution, returns result directly)
+- `useVMQuery()` — `useMutation` (not cached, query is ad-hoc)
+- `useVLLogs(query, range)` — `useQuery(['vl-logs', query, range])`, refetchInterval when auto-refresh enabled
+
+### Advanced Logic
+
+- **RBAC:** Page only accessible by admin/root. `useRoleAccess(['admin', 'root'])` hook returns redirect if insufficient role.
+- **Query Builder safety:** Limit results to 1000 rows. Show warning if query might be expensive.
+- **Logs auto-scroll:** When auto-refresh is enabled and new logs arrive, auto-scroll to bottom if user is at bottom; otherwise show "X new logs" badge.
+- **Metrics chart zoom:** User can drag to select time range on chart for zoom. Double-click to reset.
 
 ### States
 
 - **Loading:** Skeleton cards + skeleton list
 - **Error (service down):** Red status card with error message
-- **Forbidden:** Same as User Management
+- **Forbidden:** Redirect to `/dashboard` with toast "Bạn không có quyền truy cập"
+
+---
+
+## 17. System Status (`features/system-status`) — Admin/Root Only
+
+**User Story:** As an operator, I want to see a real-time dashboard of system health, service status, and key infrastructure metrics at a glance.
+
+### UI Components
+
+**SystemStatusPage** — Dashboard layout with health cards grid + metrics section
+
+**HealthCard** (`features/system-status/components/health-card.tsx`)
+- Card showing: service name, status (UP/DOWN/DEGRADED Badge), response time, uptime percentage
+- Color: green background (UP), red (DOWN), yellow (DEGRADED)
+- Services: Backend API, PostgreSQL, EMQX, VictoriaMetrics, Redis (if applicable)
+
+**MetricCard** (`features/system-status/components/metric-card.tsx`)
+- Card showing: metric name, current value, trend indicator (↑↓), sparkline mini-chart (recharts tiny LineChart)
+- Metrics: Active Devices, MQTT Messages/sec, API Requests/min, Error Rate, Avg Response Time
+
+**StatusProgress** (`features/system-status/components/status-progress.tsx`)
+- Progress bar showing: disk usage, memory usage, CPU usage (percent + colored bar)
+
+**UptimeTimeline** (`features/system-status/components/uptime-timeline.tsx`)
+- Horizontal bar per service showing uptime over last 30 days
+- Green segments = UP, red = DOWN, yellow = DEGRADED
+- Hover for timestamp details
+
+### API Endpoints
+
+| Method | Path              | Request    | Response                                                                   |
+| ------ | ----------------- | ---------- | -------------------------------------------------------------------------- |
+| GET    | `/system/health`  | -          | `{ services: [{ name, status, latency, uptime }] }`                        |
+| GET    | `/system/metrics` | -          | `{ metrics: { activeDevices, mqttRate, apiRate, errorRate, avgLatency } }` |
+| GET    | `/system/uptime`  | `?days=30` | `{ uptime: [{ service, segments: [{ from, to, status }] }] }`              |
+
+### Hooks
+
+- `useSystemHealthStatus()` — `useQuery(['system-health-status'])`, refetchInterval: 15000
+- `useSystemMetrics()` — `useQuery(['system-metrics'])`, refetchInterval: 10000
+- `useSystemUptime(days)` — `useQuery(['system-uptime', days])`
+
+### States
+
+- **Loading:** Skeleton grid (6 cards) + skeleton progress bars
+- **All healthy:** All cards green, "Hệ thống hoạt động bình thường" banner
+- **Degraded:** Yellow banner "Một số dịch vụ đang chậm"
+- **Error:** Red banner "Có dịch vụ đang gặp sự cố"
+
+---
+
+## 18. Simulator (`features/simulator`) — Admin/Root Only
+
+**User Story:** As a developer, I want to simulate device data (GPS coordinates, vibration, speed) to test the system without physical devices.
+
+### UI Components
+
+**SimulatorPage** — Layout with device selector + configuration + controls + preview
+
+**DeviceSelector** (`features/simulator/components/device-selector.tsx`)
+- Select existing device or create virtual device
+- Shows device status and current data
+- Multi-select for batch simulation
+
+**DataConfigurator** (`features/simulator/components/data-configurator.tsx`)
+- Form to configure simulation parameters:
+  - Route: draw route on mini Leaflet map (waypoints) or select preset route
+  - Speed range: min/max (km/h) with slider
+  - Vibration pattern: normal/rough/critical with threshold settings
+  - Data interval: how often to send data points (1s/5s/10s/30s)
+  - Duration: how long to run simulation
+
+**SimulationControls** (`features/simulator/components/simulation-controls.tsx`)
+- Start / Pause / Stop / Reset buttons
+- Status indicator: Idle / Running (with elapsed time) / Paused / Completed
+- Progress bar showing simulation progress
+
+**SimulationPreview** (`features/simulator/components/simulation-preview.tsx`)
+- Live preview showing:
+  - Mini map with simulated device moving along route
+  - Real-time data feed: current position, speed, vibration values
+  - recharts LineChart showing generated telemetry data in real-time
+
+### API Endpoints
+
+| Method | Path                 | Request                       | Response                            |
+| ------ | -------------------- | ----------------------------- | ----------------------------------- |
+| POST   | `/simulator/start`   | `{ deviceId, route, config }` | `{ sessionId, status }`             |
+| POST   | `/simulator/stop`    | `{ sessionId }`               | `{ status }`                        |
+| POST   | `/simulator/pause`   | `{ sessionId }`               | `{ status }`                        |
+| GET    | `/simulator/status`  | `?sessionId`                  | `{ status, elapsed, dataPoints }`   |
+| GET    | `/simulator/presets` | -                             | `{ routes: [...], configs: [...] }` |
+
+### Hooks
+
+- `useStartSimulation()` — `useMutation`, toast "Bắt đầu mô phỏng..."
+- `useStopSimulation()` — `useMutation`, toast "Dừng mô phỏng"
+- `usePauseSimulation()` — `useMutation`
+- `useSimulationStatus(sessionId)` — `useQuery(['sim-status', sessionId])`, refetchInterval: 2000 when running
+- `useSimulationPresets()` — `useQuery(['sim-presets'])`
+- `useSimulationRealtime(sessionId)` — Socket listener for simulated data preview
+
+### States
+
+- **Idle:** Configuration form shown, Start button active
+- **Running:** Controls show Pause/Stop, preview shows live data
+- **Paused:** Resume button replaces Start
+- **Completed:** Summary stats shown, "Chạy lại" button
+
+---
+
+## 19. Statistics & Reports (`features/statistics`)
+
+**User Story:** As a fleet manager, I want to view comprehensive statistics about fleet utilization, device uptime, trip summaries, and alert trends to make data-driven decisions.
+
+### UI Components
+
+**StatisticsPage** — Dashboard layout with summary cards + charts grid
+
+**StatisticsSummary** (`features/statistics/components/statistics-summary.tsx`)
+- Summary cards row: Total trips, Total distance (km), Average speed, Total runtime (hours), Alert count, Fleet utilization %
+
+**FleetUtilizationChart** (`features/statistics/components/fleet-utilization-chart.tsx`)
+- recharts BarChart: X-axis = vehicles/devices, Y-axis = utilization % (runtime/total time)
+- Color gradient: low utilization (gray) → high utilization (green)
+- Horizontal reference line at target utilization (e.g., 80%)
+
+**DeviceUptimeChart** (`features/statistics/components/device-uptime-chart.tsx`)
+- recharts BarChart: X-axis = devices, Y-axis = uptime hours per period
+- Stacked bars: running (green), stopped (gray), error (red)
+- Period selector: day/week/month
+
+**TripSummaryChart** (`features/statistics/components/trip-summary-chart.tsx`)
+- recharts AreaChart: trips per day over selected period
+- Tooltip: date, trip count, total distance
+
+**AlertTrendChart** (`features/statistics/components/alert-trend-chart.tsx`)
+- recharts StackedBarChart: alert count by severity per day
+- Colors: critical=red, high=orange, medium=yellow, low=blue
+
+**DateRangeFilter** (`features/statistics/components/date-range-filter.tsx`)
+- DateRangePicker affecting all charts on page
+- Presets: Last 7 days, Last 30 days, Last 90 days, This month, Custom
+
+### API Endpoints
+
+| Method | Path                            | Request                            | Response                                                      |
+| ------ | ------------------------------- | ---------------------------------- | ------------------------------------------------------------- |
+| GET    | `/statistics/summary`           | `?from&to`                         | `{ trips, distance, avgSpeed, runtime, alerts, utilization }` |
+| GET    | `/statistics/fleet-utilization` | `?from&to`                         | `{ data: [{ deviceId, name, utilization }] }`                 |
+| GET    | `/statistics/device-uptime`     | `?from&to&period=day\|week\|month` | `{ data: [{ deviceId, name, running, stopped, error }] }`     |
+| GET    | `/statistics/trip-summary`      | `?from&to`                         | `{ data: [{ date, count, distance }] }`                       |
+| GET    | `/statistics/alert-trend`       | `?from&to`                         | `{ data: [{ date, critical, high, medium, low }] }`           |
+
+### Hooks
+
+- `useStatisticsSummary(from, to)` — `useQuery(['stats-summary', from, to])`
+- `useFleetUtilization(from, to)` — `useQuery(['stats-fleet', from, to])`
+- `useDeviceUptime(from, to, period)` — `useQuery(['stats-uptime', from, to, period])`
+- `useTripSummary(from, to)` — `useQuery(['stats-trips', from, to])`
+- `useAlertTrend(from, to)` — `useQuery(['stats-alerts', from, to])`
+
+### States
+
+- **Loading:** Skeleton cards (6) + skeleton charts (4)
+- **Empty (no data in range):** BarChart3 icon + "Không có dữ liệu thống kê cho khoảng thời gian này"
+- **Error:** Alert banner with retry
 
 ---
 

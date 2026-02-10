@@ -57,7 +57,8 @@ app.use('/health', healthRoutes);
 // 10. Metrics endpoint (optional basic auth)
 app.use('/metrics', metricsRoutes);
 
-// 11. API routes
+// 11. API routes (v1 is canonical, /api kept as compatibility alias)
+app.use('/api/v1', routes);
 app.use('/api', routes);
 
 // 12. Sentry error handler (BEFORE main error handler)

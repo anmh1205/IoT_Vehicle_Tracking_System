@@ -1598,17 +1598,17 @@ export function use{Feature}Realtime() {
 
 ### 5.3 Events Table
 
-| Event | Pages | Cache Action | UI Action |
-|-------|-------|--------------|-----------|
-| `device.status.changed` | Devices, Dashboard, Map | `invalidateQueries(['devices'])`, `invalidateQueries(['dashboard-stats'])` | Update badge color |
-| `device.location.updated` | Map | `setQueryData(['device-locations'])` (optimistic, no re-fetch) | Move marker smoothly |
-| `alert.new` | Alerts, Dashboard | `invalidateQueries(['alerts'])`, `invalidateQueries(['dashboard-stats'])` | `toast.warning()` with alert title |
-| `alert.resolved` | Alerts | `invalidateQueries(['alerts'])` | None |
-| `notification.new` | All pages (header badge) | `invalidateQueries(['notifications'])` | Increment unread badge count |
-| `firmware.progress` | Firmware | `setQueryData(['firmware', deviceId])` progress field | Update progress bar |
-| `stats.updated` | Dashboard | `invalidateQueries(['dashboard-stats'])` | None |
-| `trip.started` | Trips, Map | `invalidateQueries(['trips'])` | None |
-| `trip.ended` | Trips | `invalidateQueries(['trips'])` | None |
+| Event                     | Pages                    | Cache Action                                                               | UI Action                          |
+| ------------------------- | ------------------------ | -------------------------------------------------------------------------- | ---------------------------------- |
+| `device.status.changed`   | Devices, Dashboard, Map  | `invalidateQueries(['devices'])`, `invalidateQueries(['dashboard-stats'])` | Update badge color                 |
+| `device.location.updated` | Map                      | `setQueryData(['device-locations'])` (optimistic, no re-fetch)             | Move marker smoothly               |
+| `alert.new`               | Alerts, Dashboard        | `invalidateQueries(['alerts'])`, `invalidateQueries(['dashboard-stats'])`  | `toast.warning()` with alert title |
+| `alert.resolved`          | Alerts                   | `invalidateQueries(['alerts'])`                                            | None                               |
+| `notification.new`        | All pages (header badge) | `invalidateQueries(['notifications'])`                                     | Increment unread badge count       |
+| `firmware.progress`       | Firmware                 | `setQueryData(['firmware', deviceId])` progress field                      | Update progress bar                |
+| `stats.updated`           | Dashboard                | `invalidateQueries(['dashboard-stats'])`                                   | None                               |
+| `trip.started`            | Trips, Map               | `invalidateQueries(['trips'])`                                             | None                               |
+| `trip.ended`              | Trips                    | `invalidateQueries(['trips'])`                                             | None                               |
 
 ### 5.4 Device Location Realtime Hook
 
@@ -1881,15 +1881,15 @@ apiClient.interceptors.response.use(
 
 Every data-loading component MUST show an appropriate loading state. No blank screens. No frozen UI.
 
-| Component Type | Loading Implementation |
-|---|---|
-| **DataTable** | Skeleton rows (5 rows, animated pulse). Use `isLoading` prop on `DataTable`. |
-| **StatCards** | Skeleton card with matching height. Use `Skeleton` from shadcn/ui. |
-| **Forms** | All inputs disabled. Submit button shows `Loader2` spinner. |
-| **Charts (ECharts)** | Gray rectangular skeleton with shimmer. Same dimensions as chart. |
-| **Map** | Full-area centered spinner with "Dang tai ban do..." text. |
-| **Detail Pages** | Full-page skeleton matching the layout structure. |
-| **Buttons (mutation)** | Show `Loader2` spinner, disable button, keep text visible. |
+| Component Type         | Loading Implementation                                                       |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| **DataTable**          | Skeleton rows (5 rows, animated pulse). Use `isLoading` prop on `DataTable`. |
+| **StatCards**          | Skeleton card with matching height. Use `Skeleton` from shadcn/ui.           |
+| **Forms**              | All inputs disabled. Submit button shows `Loader2` spinner.                  |
+| **Charts (recharts)**  | Gray rectangular skeleton with shimmer. Same dimensions as chart.            |
+| **Map**                | Full-area centered spinner with "Dang tai ban do..." text.                   |
+| **Detail Pages**       | Full-page skeleton matching the layout structure.                            |
+| **Buttons (mutation)** | Show `Loader2` spinner, disable button, keep text visible.                   |
 
 ```tsx
 // Example: Card loading skeleton
@@ -1925,18 +1925,18 @@ function ChartSkeleton({ height = 300 }: { height?: number }) {
 
 Every page and every list view MUST have a meaningful empty state. No blank tables. No empty white areas.
 
-| Page | Icon | Title | Description | Action |
-|------|------|-------|-------------|--------|
-| Vehicles | `Car` | Chua co phuong tien | Bat dau bang cach them phuong tien dau tien | Them phuong tien |
-| Devices | `Cpu` | Chua co thiet bi | Them thiet bi GPS/OBD2 de bat dau theo doi | Them thiet bi |
-| Customers | `Users` | Chua co khach hang | Them khach hang de quan ly doi xe | Them khach hang |
-| Alerts | `Bell` | Khong co canh bao | He thong dang hoat dong binh thuong | (none) |
-| Trips | `Route` | Chua co chuyen di | Cac chuyen di se tu dong ghi nhan khi xe di chuyen | (none) |
-| Geofences | `MapPin` | Chua co vung dia ly | Tao vung dia ly de nhan canh bao khi xe ra/vao | Tao vung |
-| Maintenance | `Wrench` | Chua co lich bao tri | Len lich bao tri dinh ky cho phuong tien | Them lich bao tri |
-| Firmware | `HardDrive` | Chua co firmware | Tai len phien ban firmware dau tien | Tai len |
-| Users | `UserPlus` | Chua co nguoi dung | Them nguoi dung de phan quyen truy cap | Them nguoi dung |
-| Notifications | `BellOff` | Khong co thong bao | Ban da doc tat ca thong bao | (none) |
+| Page          | Icon        | Title                | Description                                        | Action            |
+| ------------- | ----------- | -------------------- | -------------------------------------------------- | ----------------- |
+| Vehicles      | `Car`       | Chua co phuong tien  | Bat dau bang cach them phuong tien dau tien        | Them phuong tien  |
+| Devices       | `Cpu`       | Chua co thiet bi     | Them thiet bi GPS/OBD2 de bat dau theo doi         | Them thiet bi     |
+| Customers     | `Users`     | Chua co khach hang   | Them khach hang de quan ly doi xe                  | Them khach hang   |
+| Alerts        | `Bell`      | Khong co canh bao    | He thong dang hoat dong binh thuong                | (none)            |
+| Trips         | `Route`     | Chua co chuyen di    | Cac chuyen di se tu dong ghi nhan khi xe di chuyen | (none)            |
+| Geofences     | `MapPin`    | Chua co vung dia ly  | Tao vung dia ly de nhan canh bao khi xe ra/vao     | Tao vung          |
+| Maintenance   | `Wrench`    | Chua co lich bao tri | Len lich bao tri dinh ky cho phuong tien           | Them lich bao tri |
+| Firmware      | `HardDrive` | Chua co firmware     | Tai len phien ban firmware dau tien                | Tai len           |
+| Users         | `UserPlus`  | Chua co nguoi dung   | Them nguoi dung de phan quyen truy cap             | Them nguoi dung   |
+| Notifications | `BellOff`   | Khong co thong bao   | Ban da doc tat ca thong bao                        | (none)            |
 
 ```tsx
 // Usage example in a page:
@@ -2019,121 +2019,121 @@ export class ErrorBoundary extends Component<Props, State> {
 
 ### Phase 4A: Foundation + Auth (FE-001 to FE-007)
 
-| Step | Task | File(s) | Details |
-|------|------|---------|---------|
-| 1 | Install shadcn/ui components | `components/ui/` | button, input, dialog, table, card, badge, dropdown-menu, form, select, skeleton, toast, alert-dialog, tabs, sheet, slider, switch, tooltip, breadcrumb, separator, avatar, popover, calendar, checkbox, command |
-| 2 | Create page-container | `components/layout/page-container.tsx` | Title, description, breadcrumbs, header action slot |
-| 3 | Create app-sidebar | `components/layout/app-sidebar.tsx` | Navigation links, user info, collapsible, mobile responsive |
-| 4 | Create site-header | `components/layout/site-header.tsx` | Connection status, notification badge, user dropdown, theme toggle |
-| 5 | Create login page | `app/login/page.tsx` | Email + password form, Zod validation, error display, redirect on success |
-| 6 | Create auth store | `lib/store/auth-store.ts` | Zustand store: token (memory only), user profile, login/logout actions |
-| 7 | Create API client | `lib/api/client.ts` | Axios instance with auth interceptor, error interceptor (Section 6.1) |
-| 8 | Create middleware | `middleware.ts` | Route protection: redirect unauthenticated to /login, redirect authenticated from /login to /dashboard |
-| 9 | Create providers | `components/providers/` | QueryClientProvider (TanStack Query), ThemeProvider (next-themes), SocketProvider, Toaster (Sonner) |
-| 10 | Create shared components | `components/common/` | DataTable, EmptyState, ConfirmDialog, StatCard (as specified in Section 3) |
+| Step | Task                         | File(s)                                | Details                                                                                                                                                                                                          |
+| ---- | ---------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | Install shadcn/ui components | `components/ui/`                       | button, input, dialog, table, card, badge, dropdown-menu, form, select, skeleton, toast, alert-dialog, tabs, sheet, slider, switch, tooltip, breadcrumb, separator, avatar, popover, calendar, checkbox, command |
+| 2    | Create page-container        | `components/layout/page-container.tsx` | Title, description, breadcrumbs, header action slot                                                                                                                                                              |
+| 3    | Create app-sidebar           | `components/layout/app-sidebar.tsx`    | Navigation links, user info, collapsible, mobile responsive                                                                                                                                                      |
+| 4    | Create site-header           | `components/layout/site-header.tsx`    | Connection status, notification badge, user dropdown, theme toggle                                                                                                                                               |
+| 5    | Create login page            | `app/login/page.tsx`                   | Email + password form, Zod validation, error display, redirect on success                                                                                                                                        |
+| 6    | Create auth store            | `lib/store/auth-store.ts`              | Zustand store: token (memory only), user profile, login/logout actions                                                                                                                                           |
+| 7    | Create API client            | `lib/api/client.ts`                    | Axios instance with auth interceptor, error interceptor (Section 6.1)                                                                                                                                            |
+| 8    | Create middleware            | `middleware.ts`                        | Route protection: redirect unauthenticated to /login, redirect authenticated from /login to /dashboard                                                                                                           |
+| 9    | Create providers             | `components/providers/`                | QueryClientProvider (TanStack Query), ThemeProvider (next-themes), SocketProvider, Toaster (Sonner)                                                                                                              |
+| 10   | Create shared components     | `components/common/`                   | DataTable, EmptyState, ConfirmDialog, StatCard (as specified in Section 3)                                                                                                                                       |
 
 ### Phase 4B: Device UI (FE-010 to FE-017)
 
-| Step | Task | File(s) | Details |
-|------|------|---------|---------|
-| 1 | Device API service | `lib/api/devices.ts` | CRUD + sessions + telemetry + commands endpoints |
-| 2 | Device Zod schema | `lib/validations/device.schema.ts` | All device fields with Vietnamese error messages |
-| 3 | Device columns | `features/devices/components/device-columns.tsx` | Name, serial, status badge, customer, last seen, actions dropdown |
-| 4 | Device form | `features/devices/components/device-form.tsx` | Dialog with all fields, create/edit mode |
-| 5 | Device hooks | `features/devices/hooks/` | `use-devices.ts`, `use-device.ts`, `use-create-device.ts`, `use-update-device.ts`, `use-delete-device.ts` |
-| 6 | Device page | `app/(dashboard)/devices/page.tsx` | Full CRUD following Section 1.1 pattern |
-| 7 | Device detail page | `app/(dashboard)/devices/[id]/page.tsx` | Tabbed layout: Overview, Sessions, Telemetry, Errors, Commands |
-| 8 | Telemetry tab | `features/devices/components/telemetry-tab.tsx` | Real-time stat cards + ECharts history chart |
-| 9 | Sessions tab | `features/devices/components/sessions-tab.tsx` | DataTable of connection sessions with duration |
-| 10 | Device realtime hook | `features/devices/hooks/use-device-realtime.ts` | Status + telemetry socket events |
+| Step | Task                 | File(s)                                          | Details                                                                                                   |
+| ---- | -------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| 1    | Device API service   | `lib/api/devices.ts`                             | CRUD + sessions + telemetry + commands endpoints                                                          |
+| 2    | Device Zod schema    | `lib/validations/device.schema.ts`               | All device fields with Vietnamese error messages                                                          |
+| 3    | Device columns       | `features/devices/components/device-columns.tsx` | Name, serial, status badge, customer, last seen, actions dropdown                                         |
+| 4    | Device form          | `features/devices/components/device-form.tsx`    | Dialog with all fields, create/edit mode                                                                  |
+| 5    | Device hooks         | `features/devices/hooks/`                        | `use-devices.ts`, `use-device.ts`, `use-create-device.ts`, `use-update-device.ts`, `use-delete-device.ts` |
+| 6    | Device page          | `app/(dashboard)/devices/page.tsx`               | Full CRUD following Section 1.1 pattern                                                                   |
+| 7    | Device detail page   | `app/(dashboard)/devices/[id]/page.tsx`          | Tabbed layout: Overview, Sessions, Telemetry, Errors, Commands                                            |
+| 8    | Telemetry tab        | `features/devices/components/telemetry-tab.tsx`  | Real-time stat cards + recharts history chart                                                             |
+| 9    | Sessions tab         | `features/devices/components/sessions-tab.tsx`   | DataTable of connection sessions with duration                                                            |
+| 10   | Device realtime hook | `features/devices/hooks/use-device-realtime.ts`  | Status + telemetry socket events                                                                          |
 
 ### Phase 4C: Support Pages (FE-020 to FE-026)
 
-| Step | Task | File(s) | Details |
-|------|------|---------|---------|
-| 1 | Dashboard stat cards | `app/(dashboard)/dashboard/page.tsx` | 4 StatCards: Total vehicles, Active devices, Active alerts, Total trips. ALL from real API, no hardcoded values |
-| 2 | Dashboard charts | `features/dashboard/components/` | Activity chart (ECharts line), Device status pie, Alert trend bar. ALL from real API |
-| 3 | Dashboard activity feed | `features/dashboard/components/activity-feed.tsx` | Recent events list from API, with timestamps and icons |
-| 4 | Settings: Profile tab | `app/(dashboard)/settings/page.tsx` | Editable profile form, avatar upload, connected to `PUT /users/profile` |
-| 5 | Settings: Password tab | Same file | Password change dialog, current password verification, strength indicator |
-| 6 | Settings: Notifications tab | Same file | Toggle switches for email, telegram, SMS alerts, connected to API |
-| 7 | Settings: Appearance tab | Same file | Theme toggle (light/dark/system) via next-themes |
-| 8 | Firmware page | `app/(dashboard)/firmware/page.tsx` | DataTable + upload dialog + activate/deactivate + assign to devices + delete |
-| 9 | User management | `app/(dashboard)/users/page.tsx` | Full CRUD with role selection (admin/operator/viewer), reset password action |
-| 10 | Export page | `app/(dashboard)/exports/page.tsx` | Create export job (date range + type), list jobs with status, download completed |
+| Step | Task                        | File(s)                                           | Details                                                                                                         |
+| ---- | --------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 1    | Dashboard stat cards        | `app/(dashboard)/dashboard/page.tsx`              | 4 StatCards: Total vehicles, Active devices, Active alerts, Total trips. ALL from real API, no hardcoded values |
+| 2    | Dashboard charts            | `features/dashboard/components/`                  | Activity chart (recharts line), Device status pie, Alert trend bar. ALL from real API                           |
+| 3    | Dashboard activity feed     | `features/dashboard/components/activity-feed.tsx` | Recent events list from API, with timestamps and icons                                                          |
+| 4    | Settings: Profile tab       | `app/(dashboard)/settings/page.tsx`               | Editable profile form, avatar upload, connected to `PUT /users/profile`                                         |
+| 5    | Settings: Password tab      | Same file                                         | Password change dialog, current password verification, strength indicator                                       |
+| 6    | Settings: Notifications tab | Same file                                         | Toggle switches for email, telegram, SMS alerts, connected to API                                               |
+| 7    | Settings: Appearance tab    | Same file                                         | Theme toggle (light/dark/system) via next-themes                                                                |
+| 8    | Firmware page               | `app/(dashboard)/firmware/page.tsx`               | DataTable + upload dialog + activate/deactivate + assign to devices + delete                                    |
+| 9    | User management             | `app/(dashboard)/users/page.tsx`                  | Full CRUD with role selection (admin/operator/viewer), reset password action                                    |
+| 10   | Export page                 | `app/(dashboard)/exports/page.tsx`                | Create export job (date range + type), list jobs with status, download completed                                |
 
 ### Phase 4D: Vehicle + Customer (FE-030 to FE-037)
 
-| Step | Task | File(s) | Details |
-|------|------|---------|---------|
-| 1 | Vehicle API + schema | `lib/api/vehicles.ts`, `lib/validations/vehicle.schema.ts` | CRUD + device assignment + trip history |
-| 2 | Vehicle columns + form | `features/vehicles/components/` | Plate number, brand, type, customer, status badge, device assignment, actions |
-| 3 | Vehicle hooks | `features/vehicles/hooks/` | Full CRUD hooks following Section 1.4 |
-| 4 | Vehicle page | `app/(dashboard)/vehicles/page.tsx` | DataTable with search by plate number |
-| 5 | Vehicle detail page | `app/(dashboard)/vehicles/[id]/page.tsx` | Tabs: Overview (info + assigned device), Trip history (DataTable), Maintenance history |
-| 6 | Customer API + schema | `lib/api/customers.ts`, `lib/validations/customer.schema.ts` | CRUD + fleet overview |
-| 7 | Customer columns + form | `features/customers/components/` | Name, contact, vehicle count, status, actions |
-| 8 | Customer page | `app/(dashboard)/customers/page.tsx` | DataTable with search |
-| 9 | Customer detail page | `app/(dashboard)/customers/[id]/page.tsx` | Overview + fleet list (vehicles belonging to this customer) |
+| Step | Task                    | File(s)                                                      | Details                                                                                |
+| ---- | ----------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| 1    | Vehicle API + schema    | `lib/api/vehicles.ts`, `lib/validations/vehicle.schema.ts`   | CRUD + device assignment + trip history                                                |
+| 2    | Vehicle columns + form  | `features/vehicles/components/`                              | Plate number, brand, type, customer, status badge, device assignment, actions          |
+| 3    | Vehicle hooks           | `features/vehicles/hooks/`                                   | Full CRUD hooks following Section 1.4                                                  |
+| 4    | Vehicle page            | `app/(dashboard)/vehicles/page.tsx`                          | DataTable with search by plate number                                                  |
+| 5    | Vehicle detail page     | `app/(dashboard)/vehicles/[id]/page.tsx`                     | Tabs: Overview (info + assigned device), Trip history (DataTable), Maintenance history |
+| 6    | Customer API + schema   | `lib/api/customers.ts`, `lib/validations/customer.schema.ts` | CRUD + fleet overview                                                                  |
+| 7    | Customer columns + form | `features/customers/components/`                             | Name, contact, vehicle count, status, actions                                          |
+| 8    | Customer page           | `app/(dashboard)/customers/page.tsx`                         | DataTable with search                                                                  |
+| 9    | Customer detail page    | `app/(dashboard)/customers/[id]/page.tsx`                    | Overview + fleet list (vehicles belonging to this customer)                            |
 
 ### Phase 5A: Map + Geofence (FE-040 to FE-047)
 
-| Step | Task | File(s) | Details |
-|------|------|---------|---------|
-| 1 | Map dynamic import wrapper | `components/map/map-container.tsx` | SSR-safe `next/dynamic` with `ssr: false` (Section 4.1) |
-| 2 | Map view base | `components/map/map-view.tsx` | Leaflet MapContainer + TileLayer, HCMC default center |
-| 3 | Vehicle markers | `components/map/vehicle-marker.tsx` | Custom divIcon with real GPS data (Section 4.2) |
-| 4 | Device locations API | `lib/api/dashboard.ts` | `GET /api/v1/dashboard/device-locations` returning real positions from VictoriaMetrics |
-| 5 | Map page | `app/(dashboard)/map/page.tsx` | Full map with sidebar: vehicle list tab + geofence list tab |
-| 6 | Map sidebar | `features/map/components/map-sidebar.tsx` | Searchable list of vehicles with status indicators, click to center on map |
-| 7 | Geofence layers | `components/map/geofence-layer.tsx` | Render circles and polygons from API data |
-| 8 | Device locations realtime | `features/map/hooks/use-device-locations-realtime.ts` | Socket updates for marker positions (Section 5.4) |
-| 9 | Geofence management page | `app/(dashboard)/geofences/page.tsx` | DataTable with CRUD |
-| 10 | Geofence create/edit | `features/geofences/components/geofence-form.tsx` | Form with embedded Leaflet.Draw map editor (Section 4.3) |
-| 11 | Geofence detail page | `app/(dashboard)/geofences/[id]/page.tsx` | Map preview + assigned vehicles + violation history |
+| Step | Task                       | File(s)                                               | Details                                                                                |
+| ---- | -------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 1    | Map dynamic import wrapper | `components/map/map-container.tsx`                    | SSR-safe `next/dynamic` with `ssr: false` (Section 4.1)                                |
+| 2    | Map view base              | `components/map/map-view.tsx`                         | Leaflet MapContainer + TileLayer, HCMC default center                                  |
+| 3    | Vehicle markers            | `components/map/vehicle-marker.tsx`                   | Custom divIcon with real GPS data (Section 4.2)                                        |
+| 4    | Device locations API       | `lib/api/dashboard.ts`                                | `GET /api/v1/dashboard/device-locations` returning real positions from VictoriaMetrics |
+| 5    | Map page                   | `app/(dashboard)/map/page.tsx`                        | Full map with sidebar: vehicle list tab + geofence list tab                            |
+| 6    | Map sidebar                | `features/map/components/map-sidebar.tsx`             | Searchable list of vehicles with status indicators, click to center on map             |
+| 7    | Geofence layers            | `components/map/geofence-layer.tsx`                   | Render circles and polygons from API data                                              |
+| 8    | Device locations realtime  | `features/map/hooks/use-device-locations-realtime.ts` | Socket updates for marker positions (Section 5.4)                                      |
+| 9    | Geofence management page   | `app/(dashboard)/geofences/page.tsx`                  | DataTable with CRUD                                                                    |
+| 10   | Geofence create/edit       | `features/geofences/components/geofence-form.tsx`     | Form with embedded Leaflet.Draw map editor (Section 4.3)                               |
+| 11   | Geofence detail page       | `app/(dashboard)/geofences/[id]/page.tsx`             | Map preview + assigned vehicles + violation history                                    |
 
 ### Phase 5B: Alerts + Trips + Maintenance (FE-050 to FE-060)
 
-| Step | Task | File(s) | Details |
-|------|------|---------|---------|
-| 1 | Alert API + hooks | `lib/api/alerts.ts`, `features/alerts/hooks/` | List, acknowledge, resolve, detail |
-| 2 | Alert columns | `features/alerts/components/alert-columns.tsx` | Severity badge (critical=red, warning=yellow, info=blue), device, timestamp, status, actions |
-| 3 | Alert page | `app/(dashboard)/alerts/page.tsx` | DataTable + filter by severity/status + acknowledge/resolve mutations with toast feedback |
-| 4 | Alert detail dialog | `features/alerts/components/alert-detail.tsx` | Full alert info + device link + map location + resolution form |
-| 5 | Alert stream hook | `features/alerts/hooks/use-alert-stream.ts` | Real-time new alerts with toast (Section 5.5) |
-| 6 | Trip API + hooks | `lib/api/trips.ts`, `features/trips/hooks/` | List, detail, route points |
-| 7 | Trip page | `app/(dashboard)/trips/page.tsx` | DataTable with date range filter, vehicle filter |
-| 8 | Trip detail page | `app/(dashboard)/trips/[id]/page.tsx` | Split layout: trip info card (left) + route map with replay (right) |
-| 9 | Trip replay component | `components/map/trip-replay.tsx` | Speed-colored polyline + playback controls (Section 4.4) |
-| 10 | Maintenance API + hooks | `lib/api/maintenance.ts`, `features/maintenance/hooks/` | CRUD + forecast |
-| 11 | Maintenance page | `app/(dashboard)/maintenance/page.tsx` | DataTable view + calendar view toggle |
-| 12 | Maintenance form | `features/maintenance/components/maintenance-form.tsx` | Service type, date, odometer, cost, notes, vehicle select |
-| 13 | Maintenance calendar | `features/maintenance/components/maintenance-calendar.tsx` | Monthly calendar with scheduled maintenance dots |
+| Step | Task                    | File(s)                                                    | Details                                                                                      |
+| ---- | ----------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| 1    | Alert API + hooks       | `lib/api/alerts.ts`, `features/alerts/hooks/`              | List, acknowledge, resolve, detail                                                           |
+| 2    | Alert columns           | `features/alerts/components/alert-columns.tsx`             | Severity badge (critical=red, warning=yellow, info=blue), device, timestamp, status, actions |
+| 3    | Alert page              | `app/(dashboard)/alerts/page.tsx`                          | DataTable + filter by severity/status + acknowledge/resolve mutations with toast feedback    |
+| 4    | Alert detail dialog     | `features/alerts/components/alert-detail.tsx`              | Full alert info + device link + map location + resolution form                               |
+| 5    | Alert stream hook       | `features/alerts/hooks/use-alert-stream.ts`                | Real-time new alerts with toast (Section 5.5)                                                |
+| 6    | Trip API + hooks        | `lib/api/trips.ts`, `features/trips/hooks/`                | List, detail, route points                                                                   |
+| 7    | Trip page               | `app/(dashboard)/trips/page.tsx`                           | DataTable with date range filter, vehicle filter                                             |
+| 8    | Trip detail page        | `app/(dashboard)/trips/[id]/page.tsx`                      | Split layout: trip info card (left) + route map with replay (right)                          |
+| 9    | Trip replay component   | `components/map/trip-replay.tsx`                           | Speed-colored polyline + playback controls (Section 4.4)                                     |
+| 10   | Maintenance API + hooks | `lib/api/maintenance.ts`, `features/maintenance/hooks/`    | CRUD + forecast                                                                              |
+| 11   | Maintenance page        | `app/(dashboard)/maintenance/page.tsx`                     | DataTable view + calendar view toggle                                                        |
+| 12   | Maintenance form        | `features/maintenance/components/maintenance-form.tsx`     | Service type, date, odometer, cost, notes, vehicle select                                    |
+| 13   | Maintenance calendar    | `features/maintenance/components/maintenance-calendar.tsx` | Monthly calendar with scheduled maintenance dots                                             |
 
 ### Phase 5C: Real-time Integration (FE-070 to FE-075)
 
-| Step | Task | File(s) | Details |
-|------|------|---------|---------|
-| 1 | Socket provider | `components/providers/socket-provider.tsx` | Full implementation (Section 5.1) |
-| 2 | Add SocketProvider to layout | `app/(dashboard)/layout.tsx` | Wrap dashboard layout with SocketProvider inside QueryClientProvider |
-| 3 | Device locations realtime | `features/map/hooks/use-device-locations-realtime.ts` | Map marker updates (already defined in Phase 5A) |
-| 4 | Alert stream | `features/alerts/hooks/use-alert-stream.ts` | Toast on new alerts (already defined in Phase 5B) |
-| 5 | Dashboard stats realtime | `features/dashboard/hooks/use-dashboard-realtime.ts` | Invalidate stat queries on `stats.updated` |
-| 6 | Firmware progress | `features/firmware/hooks/use-firmware-realtime.ts` | Progress bar updates via `firmware.progress` |
-| 7 | Notification badge | `features/notifications/hooks/use-notification-realtime.ts` | Increment unread count on `notification.new`, show toast |
-| 8 | Connection status | `components/layout/connection-status.tsx` | Green/red indicator in header (Section 5.6) |
+| Step | Task                         | File(s)                                                     | Details                                                              |
+| ---- | ---------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------- |
+| 1    | Socket provider              | `components/providers/socket-provider.tsx`                  | Full implementation (Section 5.1)                                    |
+| 2    | Add SocketProvider to layout | `app/(dashboard)/layout.tsx`                                | Wrap dashboard layout with SocketProvider inside QueryClientProvider |
+| 3    | Device locations realtime    | `features/map/hooks/use-device-locations-realtime.ts`       | Map marker updates (already defined in Phase 5A)                     |
+| 4    | Alert stream                 | `features/alerts/hooks/use-alert-stream.ts`                 | Toast on new alerts (already defined in Phase 5B)                    |
+| 5    | Dashboard stats realtime     | `features/dashboard/hooks/use-dashboard-realtime.ts`        | Invalidate stat queries on `stats.updated`                           |
+| 6    | Firmware progress            | `features/firmware/hooks/use-firmware-realtime.ts`          | Progress bar updates via `firmware.progress`                         |
+| 7    | Notification badge           | `features/notifications/hooks/use-notification-realtime.ts` | Increment unread count on `notification.new`, show toast             |
+| 8    | Connection status            | `components/layout/connection-status.tsx`                   | Green/red indicator in header (Section 5.6)                          |
 
 ### Phase 5D: Reports + Notifications (FE-080 to FE-085)
 
-| Step | Task | File(s) | Details |
-|------|------|---------|---------|
-| 1 | Notification API + hooks | `lib/api/notifications.ts`, `features/notifications/hooks/` | List, mark read, mark all read, delete |
-| 2 | Notifications page | `app/(dashboard)/notifications/page.tsx` | List with read/unread filter, mark all read button, click to mark individual |
-| 3 | Notification dropdown | `components/layout/notification-dropdown.tsx` | Bell icon in header with unread count badge, dropdown with recent 5 notifications, "Xem tat ca" link |
-| 4 | System admin: Health | `app/(dashboard)/system-admin/page.tsx` | StatCards for each service status (PostgreSQL, EMQX, VictoriaMetrics, VictoriaLogs) |
-| 5 | System admin: Metrics | `app/(dashboard)/system-admin/metrics/page.tsx` | PromQL input + ECharts time-series chart + preset queries dropdown |
-| 6 | System admin: Logs | `app/(dashboard)/system-admin/logs/page.tsx` | LogsQL input + scrollable log list + severity filter + time range |
-| 7 | Violations page | `app/(dashboard)/violations/page.tsx` | DataTable of geofence violations with alert link, device link, map preview |
+| Step | Task                     | File(s)                                                     | Details                                                                                              |
+| ---- | ------------------------ | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 1    | Notification API + hooks | `lib/api/notifications.ts`, `features/notifications/hooks/` | List, mark read, mark all read, delete                                                               |
+| 2    | Notifications page       | `app/(dashboard)/notifications/page.tsx`                    | List with read/unread filter, mark all read button, click to mark individual                         |
+| 3    | Notification dropdown    | `components/layout/notification-dropdown.tsx`               | Bell icon in header with unread count badge, dropdown with recent 5 notifications, "Xem tat ca" link |
+| 4    | System admin: Health     | `app/(dashboard)/system-admin/page.tsx`                     | StatCards for each service status (PostgreSQL, EMQX, VictoriaMetrics, VictoriaLogs)                  |
+| 5    | System admin: Metrics    | `app/(dashboard)/system-admin/metrics/page.tsx`             | PromQL input + recharts time-series chart + preset queries dropdown                                  |
+| 6    | System admin: Logs       | `app/(dashboard)/system-admin/logs/page.tsx`                | LogsQL input + scrollable log list + severity filter + time range                                    |
+| 7    | Violations page          | `app/(dashboard)/violations/page.tsx`                       | DataTable of geofence violations with alert link, device link, map preview                           |
 
 ---
 
@@ -2489,25 +2489,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
 For EVERY page implemented, the agent MUST verify all of the following before marking the task as complete:
 
-| # | Check | Required |
-|---|-------|----------|
-| 1 | Uses `PageContainer` with `pageTitle` and `pageDescription` | YES |
-| 2 | Uses `DataTable` for all list/table views (not hand-rolled `<table>`) | YES |
-| 3 | Uses `Dialog` or `Sheet` from shadcn/ui for modals (not custom modal divs) | YES |
-| 4 | Uses `Form` + `FormField` from shadcn/ui for forms (not bare `<input>`) | YES |
-| 5 | Has a Zod validation schema in `lib/validations/` | YES |
-| 6 | Has TanStack Query hooks in `features/{name}/hooks/` (not raw fetch/axios) | YES |
-| 7 | Has loading state using `Skeleton` components | YES |
-| 8 | Has empty state using `EmptyState` component with icon + title + description + action | YES |
-| 9 | Has error handling via toast (Sonner) in all mutations | YES |
-| 10 | Has proper TypeScript types (no `any` in component props, no untyped API responses) | YES |
-| 11 | ZERO instances of "Coming Soon", "TODO", "placeholder", or deferred text | YES |
-| 12 | Connected to real API endpoints OR documented as pending in `.tracking/CURRENT_TASKS.md` | YES |
-| 13 | All user-facing text in Vietnamese (not English placeholders) | YES |
-| 14 | All mutations show loading spinner on submit button | YES |
-| 15 | Delete operations use `ConfirmDialog` with destructive variant | YES |
-| 16 | Form resets after successful create/update | YES |
-| 17 | No `console.log` in production code (only in socket/debug utilities) | YES |
+| #   | Check                                                                                    | Required |
+| --- | ---------------------------------------------------------------------------------------- | -------- |
+| 1   | Uses `PageContainer` with `pageTitle` and `pageDescription`                              | YES      |
+| 2   | Uses `DataTable` for all list/table views (not hand-rolled `<table>`)                    | YES      |
+| 3   | Uses `Dialog` or `Sheet` from shadcn/ui for modals (not custom modal divs)               | YES      |
+| 4   | Uses `Form` + `FormField` from shadcn/ui for forms (not bare `<input>`)                  | YES      |
+| 5   | Has a Zod validation schema in `lib/validations/`                                        | YES      |
+| 6   | Has TanStack Query hooks in `features/{name}/hooks/` (not raw fetch/axios)               | YES      |
+| 7   | Has loading state using `Skeleton` components                                            | YES      |
+| 8   | Has empty state using `EmptyState` component with icon + title + description + action    | YES      |
+| 9   | Has error handling via toast (Sonner) in all mutations                                   | YES      |
+| 10  | Has proper TypeScript types (no `any` in component props, no untyped API responses)      | YES      |
+| 11  | ZERO instances of "Coming Soon", "TODO", "placeholder", or deferred text                 | YES      |
+| 12  | Connected to real API endpoints OR documented as pending in `.tracking/CURRENT_TASKS.md` | YES      |
+| 13  | All user-facing text in Vietnamese (not English placeholders)                            | YES      |
+| 14  | All mutations show loading spinner on submit button                                      | YES      |
+| 15  | Delete operations use `ConfirmDialog` with destructive variant                           | YES      |
+| 16  | Form resets after successful create/update                                               | YES      |
+| 17  | No `console.log` in production code (only in socket/debug utilities)                     | YES      |
 
 ### Self-Check Command
 
@@ -2610,9 +2610,9 @@ Tracking_Frontend/
 ├── features/
 │   ├── dashboard/
 │   │   ├── components/
-│   │   │   ├── activity-chart.tsx        # ECharts line chart
-│   │   │   ├── device-status-chart.tsx   # ECharts pie chart
-│   │   │   ├── alert-trend-chart.tsx     # ECharts bar chart
+│   │   │   ├── activity-chart.tsx        # recharts line chart
+│   │   │   ├── device-status-chart.tsx   # recharts pie chart
+│   │   │   ├── alert-trend-chart.tsx     # recharts bar chart
 │   │   │   └── activity-feed.tsx         # Recent events list
 │   │   └── hooks/
 │   │       ├── use-dashboard-stats.ts    # Stats query
@@ -2786,53 +2786,53 @@ Tracking_Frontend/
 
 ### Required API Endpoints (by Phase)
 
-| Phase | Endpoint | Method | Priority |
-|-------|----------|--------|----------|
-| 4A | `POST /api/v1/auth/login` | POST | CRITICAL |
-| 4A | `POST /api/v1/auth/logout` | POST | CRITICAL |
-| 4A | `GET /api/v1/users/profile` | GET | CRITICAL |
-| 4B | `GET /api/v1/devices` | GET | CRITICAL |
-| 4B | `GET /api/v1/devices/:id` | GET | CRITICAL |
-| 4B | `POST /api/v1/devices` | POST | CRITICAL |
-| 4B | `PUT /api/v1/devices/:id` | PUT | CRITICAL |
-| 4B | `DELETE /api/v1/devices/:id` | DELETE | CRITICAL |
-| 4B | `GET /api/v1/devices/:id/sessions` | GET | HIGH |
-| 4B | `GET /api/v1/devices/:id/telemetry` | GET | HIGH |
-| 4C | `GET /api/v1/dashboard/stats` | GET | CRITICAL |
-| 4C | `GET /api/v1/dashboard/activity-chart` | GET | CRITICAL |
-| 4C | `GET /api/v1/dashboard/device-locations` | GET | CRITICAL |
-| 4C | `PUT /api/v1/users/profile` | PUT | HIGH |
-| 4C | `PUT /api/v1/auth/change-password` | PUT | HIGH |
-| 4C | `GET /api/v1/users/notification-settings` | GET | HIGH |
-| 4C | `PUT /api/v1/users/notification-settings` | PUT | HIGH |
-| 4C | `GET/POST/PUT/DELETE /api/v1/firmware/*` | ALL | HIGH |
-| 4C | `GET/POST/PUT/DELETE /api/v1/users` | ALL | HIGH |
-| 4D | `GET/POST/PUT/DELETE /api/v1/vehicles` | ALL | CRITICAL |
-| 4D | `GET/POST/PUT/DELETE /api/v1/customers` | ALL | CRITICAL |
-| 5A | `GET/POST/PUT/DELETE /api/v1/geofences` | ALL | HIGH |
-| 5B | `GET /api/v1/alerts` | GET | HIGH |
-| 5B | `PUT /api/v1/alerts/:id/acknowledge` | PUT | HIGH |
-| 5B | `PUT /api/v1/alerts/:id/resolve` | PUT | HIGH |
-| 5B | `GET /api/v1/trips` | GET | HIGH |
-| 5B | `GET /api/v1/trips/:id` | GET | HIGH |
-| 5B | `GET /api/v1/trips/:id/route` | GET | HIGH |
-| 5B | `GET/POST/PUT/DELETE /api/v1/maintenance` | ALL | HIGH |
-| 5D | `GET/PUT/DELETE /api/v1/notifications` | ALL | MEDIUM |
-| 5D | `PUT /api/v1/notifications/read-all` | PUT | MEDIUM |
-| 5D | `GET /api/v1/system-admin/health` | GET | MEDIUM |
-| 5D | `GET /api/v1/system-admin/metrics` | GET | MEDIUM |
-| 5D | `GET /api/v1/system-admin/logs` | GET | MEDIUM |
+| Phase | Endpoint                                  | Method | Priority |
+| ----- | ----------------------------------------- | ------ | -------- |
+| 4A    | `POST /api/v1/auth/login`                 | POST   | CRITICAL |
+| 4A    | `POST /api/v1/auth/logout`                | POST   | CRITICAL |
+| 4A    | `GET /api/v1/users/profile`               | GET    | CRITICAL |
+| 4B    | `GET /api/v1/devices`                     | GET    | CRITICAL |
+| 4B    | `GET /api/v1/devices/:id`                 | GET    | CRITICAL |
+| 4B    | `POST /api/v1/devices`                    | POST   | CRITICAL |
+| 4B    | `PUT /api/v1/devices/:id`                 | PUT    | CRITICAL |
+| 4B    | `DELETE /api/v1/devices/:id`              | DELETE | CRITICAL |
+| 4B    | `GET /api/v1/devices/:id/sessions`        | GET    | HIGH     |
+| 4B    | `GET /api/v1/devices/:id/telemetry`       | GET    | HIGH     |
+| 4C    | `GET /api/v1/dashboard/stats`             | GET    | CRITICAL |
+| 4C    | `GET /api/v1/dashboard/activity-chart`    | GET    | CRITICAL |
+| 4C    | `GET /api/v1/dashboard/device-locations`  | GET    | CRITICAL |
+| 4C    | `PUT /api/v1/users/profile`               | PUT    | HIGH     |
+| 4C    | `PUT /api/v1/auth/change-password`        | PUT    | HIGH     |
+| 4C    | `GET /api/v1/users/notification-settings` | GET    | HIGH     |
+| 4C    | `PUT /api/v1/users/notification-settings` | PUT    | HIGH     |
+| 4C    | `GET/POST/PUT/DELETE /api/v1/firmware/*`  | ALL    | HIGH     |
+| 4C    | `GET/POST/PUT/DELETE /api/v1/users`       | ALL    | HIGH     |
+| 4D    | `GET/POST/PUT/DELETE /api/v1/vehicles`    | ALL    | CRITICAL |
+| 4D    | `GET/POST/PUT/DELETE /api/v1/customers`   | ALL    | CRITICAL |
+| 5A    | `GET/POST/PUT/DELETE /api/v1/geofences`   | ALL    | HIGH     |
+| 5B    | `GET /api/v1/alerts`                      | GET    | HIGH     |
+| 5B    | `PUT /api/v1/alerts/:id/acknowledge`      | PUT    | HIGH     |
+| 5B    | `PUT /api/v1/alerts/:id/resolve`          | PUT    | HIGH     |
+| 5B    | `GET /api/v1/trips`                       | GET    | HIGH     |
+| 5B    | `GET /api/v1/trips/:id`                   | GET    | HIGH     |
+| 5B    | `GET /api/v1/trips/:id/route`             | GET    | HIGH     |
+| 5B    | `GET/POST/PUT/DELETE /api/v1/maintenance` | ALL    | HIGH     |
+| 5D    | `GET/PUT/DELETE /api/v1/notifications`    | ALL    | MEDIUM   |
+| 5D    | `PUT /api/v1/notifications/read-all`      | PUT    | MEDIUM   |
+| 5D    | `GET /api/v1/system-admin/health`         | GET    | MEDIUM   |
+| 5D    | `GET /api/v1/system-admin/metrics`        | GET    | MEDIUM   |
+| 5D    | `GET /api/v1/system-admin/logs`           | GET    | MEDIUM   |
 
 ### Required WebSocket Events
 
-| Event | Direction | Data Shape | Subscribed Pages |
-|-------|-----------|------------|------------------|
-| `device.location.updated` | Server -> Client | `DeviceLocation` | Map |
-| `device.status.changed` | Server -> Client | `{ deviceId, status }` | Devices, Map, Dashboard |
-| `alert.new` | Server -> Client | `Alert` | Alerts, Dashboard |
-| `alert.resolved` | Server -> Client | `{ alertId }` | Alerts |
-| `notification.new` | Server -> Client | `Notification` | All (header badge) |
-| `firmware.progress` | Server -> Client | `{ deviceId, progress, status }` | Firmware |
-| `stats.updated` | Server -> Client | `DashboardStats` | Dashboard |
-| `trip.started` | Server -> Client | `{ tripId, vehicleId }` | Trips, Map |
-| `trip.ended` | Server -> Client | `{ tripId }` | Trips |
+| Event                     | Direction        | Data Shape                       | Subscribed Pages        |
+| ------------------------- | ---------------- | -------------------------------- | ----------------------- |
+| `device.location.updated` | Server -> Client | `DeviceLocation`                 | Map                     |
+| `device.status.changed`   | Server -> Client | `{ deviceId, status }`           | Devices, Map, Dashboard |
+| `alert.new`               | Server -> Client | `Alert`                          | Alerts, Dashboard       |
+| `alert.resolved`          | Server -> Client | `{ alertId }`                    | Alerts                  |
+| `notification.new`        | Server -> Client | `Notification`                   | All (header badge)      |
+| `firmware.progress`       | Server -> Client | `{ deviceId, progress, status }` | Firmware                |
+| `stats.updated`           | Server -> Client | `DashboardStats`                 | Dashboard               |
+| `trip.started`            | Server -> Client | `{ tripId, vehicleId }`          | Trips, Map              |
+| `trip.ended`              | Server -> Client | `{ tripId }`                     | Trips                   |

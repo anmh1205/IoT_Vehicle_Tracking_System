@@ -1,31 +1,28 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { QueryProvider } from '@/providers/query-provider';
-import { AuthProvider } from '@/providers/auth-provider';
+import './theme.css';
+import { Providers } from '@/components/providers/providers';
+import { cookies } from 'next/headers';
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-});
+const inter = Inter({ subsets: ['latin', 'vietnamese'] });
 
 export const metadata: Metadata = {
-  title: 'Vehicle Tracking System',
-  description: 'IoT Vehicle Tracking & Monitoring Dashboard',
+  title: 'Hệ thống theo dõi phương tiện IoT',
+  description: 'Hệ thống giám sát phương tiện IoT',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const activeTheme = cookieStore.get('active_theme')?.value;
+
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <QueryProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </QueryProvider>
+    <html lang="vi" suppressHydrationWarning>
+      <body className={inter.className}>
+        <Providers activeTheme={activeTheme}>{children}</Providers>
       </body>
     </html>
   );
 }
+
+

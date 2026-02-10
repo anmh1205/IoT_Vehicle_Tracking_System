@@ -11,14 +11,24 @@ import tripRoutes from '@/api/routes/trip.routes';
 import alertRoutes from '@/api/routes/alert.routes';
 import geofenceRoutes from '@/api/routes/geofence.routes';
 import maintenanceRoutes from '@/api/routes/maintenance.routes';
+import usersRoutes from '@/api/routes/users.routes';
+import statisticsRoutes from '@/api/routes/statistics.routes';
+import notificationsRoutes from '@/api/routes/notifications.routes';
+import healthRoutes from '@/api/routes/health.routes';
+import iotRoutes from '@/api/routes/iot.routes';
+import telemetryRoutes from '@/api/routes/telemetry.routes';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
+router.use('/users', usersRoutes);
+router.use('/iot', iotRoutes);
+router.use('/device', deviceRoutes);
 router.use('/devices', deviceRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/firmware', firmwareRoutes);
 router.use('/exports', exportRoutes);
+router.use('/export', exportRoutes);
 router.use('/system-admin', systemAdminRoutes);
 router.use('/vehicles', vehicleRoutes);
 router.use('/customers', customerRoutes);
@@ -26,5 +36,10 @@ router.use('/trips', tripRoutes);
 router.use('/alerts', alertRoutes);
 router.use('/geofences', geofenceRoutes);
 router.use('/maintenance', maintenanceRoutes);
+router.use('/stats', statisticsRoutes);
+router.use('/statistics', statisticsRoutes);
+router.use('/telemetry', telemetryRoutes);
+router.use('/notifications', notificationsRoutes);
+router.use('/health', healthRoutes);
 
 export default router;

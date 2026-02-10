@@ -47,6 +47,12 @@ npm i -D @types/leaflet @types/leaflet.markercluster
 | FE-08B | SelectedDeviceCard         | `features/map/components/selected-device-card.tsx`                           |
 | FE-08C | Map hooks (3)              | `features/map/hooks/*.ts`                                                    |
 | FE-08D | Map API                    | `lib/api/map.ts`                                                             |
+| FE-08E | MarkerIconFactory          | `features/map/components/marker-icon.ts`                                     |
+| FE-08F | DeviceSearch               | `features/map/components/device-search.tsx`                                  |
+| FE-08G | DeviceFilter               | `features/map/components/device-filter.tsx`                                  |
+| FE-08H | DeviceFilterCompact        | `features/map/components/device-filter-compact.tsx`                          |
+| FE-08I | DeviceListItem             | `features/map/components/device-list-item.tsx`                               |
+| FE-08J | MapControls                | `features/map/components/map-controls.tsx`                                   |
 | FE-090 | Geofence types             | `features/geofences/types/index.ts`                                          |
 | FE-091 | Geofence schema            | `lib/validations/geofence.schema.ts`                                         |
 | FE-092 | Geofence API               | `lib/api/geofences.ts`                                                       |
@@ -118,11 +124,13 @@ interface MapState {
   selectedDeviceId: string | null;
   followMode: boolean;
   showGeofences: boolean;
+  mapViewport: { center: [number, number]; zoom: number };
   updatePosition: (pos: DevicePosition) => void;
   updateBatch: (positions: DevicePosition[]) => void;
   selectDevice: (deviceId: string | null) => void;
   toggleFollowMode: () => void;
   toggleGeofences: () => void;
+  setMapViewport: (viewport: { center: [number, number]; zoom: number }) => void;
 }
 
 export const useMapStore = create<MapState>((set, get) => ({
@@ -130,6 +138,7 @@ export const useMapStore = create<MapState>((set, get) => ({
   selectedDeviceId: null,
   followMode: false,
   showGeofences: true,
+  mapViewport: { center: [10.762622, 106.660172] as [number, number], zoom: 12 },
 
   updatePosition: (pos) => set((s) => {
     const next = new Map(s.positions);
@@ -146,6 +155,7 @@ export const useMapStore = create<MapState>((set, get) => ({
   selectDevice: (deviceId) => set({ selectedDeviceId: deviceId }),
   toggleFollowMode: () => set((s) => ({ followMode: !s.followMode })),
   toggleGeofences: () => set((s) => ({ showGeofences: !s.showGeofences })),
+  setMapViewport: (viewport) => set({ mapViewport: viewport }),
 }));
 ```
 
@@ -267,6 +277,72 @@ Renders Circle (for type=circle) or Polygon (for type=polygon) with:
 
 ---
 
+## FE-08E: MarkerIconFactory
+
+```typescript
+// features/map/components/marker-icon.ts
+import L from 'leaflet';
+
+const STATUS_COLORS = {
+  running: '#22c55e',
+  stopped: '#6b7280',
+  error: '#ef4444',
+  disconnected: '#eab308',
+} as const;
+
+export function createDeviceMarkerIcon(status: string, heading?: number): L.DivIcon {
+  const color = STATUS_COLORS[status as keyof typeof STATUS_COLORS] ?? STATUS_COLORS.disconnected;
+  return L.divIcon({
+    className: 'device-marker',
+    html: `<div style="transform: rotate(${heading ?? 0}deg)">
+      <svg viewBox="0 0 32 32" fill="${color}" width="32" height="32">
+        <path d="M16 2L6 28h20L16 2z"/>
+      </svg>
+    </div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+  });
+}
+```
+
+---
+
+## FE-08F: DeviceSearch
+
+Search input (shadcn Input + Search icon) that filters the device list panel in real-time. Uses `useMemo` to filter positions by `deviceName` or `vehiclePlate`. Debounced 300ms.
+
+---
+
+## FE-08G–08H: DeviceFilter / DeviceFilterCompact
+
+**DeviceFilter** (desktop): DropdownMenu with checkboxes for status (running, stopped, disconnected) and device type filters.
+
+**DeviceFilterCompact** (mobile): Same filters but rendered as horizontal pill/badge toggles for the bottom drawer.
+
+---
+
+## FE-08I: DeviceListItem
+
+Each device row in the sidebar list:
+- Status dot (color by status)
+- Device name (bold) + vehicle plate (muted)
+- Speed (km/h) on right side
+- Click → `useMapStore.selectDevice(deviceId)` + map flyTo
+- Active state highlight when selected
+
+---
+
+## FE-08J: MapControls
+
+Floating control panel (top-right of map):
+- Zoom in/out buttons
+- Fullscreen toggle
+- Fit all bounds (zoom to show all devices)
+- MapLayerSwitcher (street/satellite)
+- Follow mode toggle
+
+---
+
 ## FE-086: MapSidebar
 
 Collapsible sidebar (w-80, hidden on mobile → use Sheet):
@@ -318,24 +394,38 @@ import { useMapStore } from '@/lib/stores/map-store';
 export function useMapRealtime() {
   const socket = useSocket();
   const updatePosition = useMapStore((s) => s.updatePosition);
+  const positionBufferRef = useRef(new Map<string, any>());
 
+  // Buffer incoming events
+  useRealtimeSubscription<any>({
+    event: 'device:position',
+    handler: (payload) => {
+      positionBufferRef.current.set(payload.deviceId, payload);
+    },
+  });
+
+  // Flush buffer every 500ms (throttle)
   useEffect(() => {
-    if (!socket) return;
-    socket.on('device:position', (data) => {
-      updatePosition({
-        deviceId: data.deviceId,
-        deviceName: data.deviceName || data.deviceId,
-        vehiclePlate: data.vehiclePlate || null,
-        lat: data.lat,
-        lon: data.lon,
-        speed: data.speed || 0,
-        heading: data.heading || 0,
-        status: data.status || 'running',
-        timestamp: Date.now(),
+    const interval = setInterval(() => {
+      const buffer = positionBufferRef.current;
+      if (buffer.size === 0) return;
+      buffer.forEach((data) => {
+        updatePosition({
+          deviceId: data.deviceId,
+          deviceName: data.deviceName || data.deviceId,
+          vehiclePlate: data.vehiclePlate || null,
+          lat: data.lat,
+          lon: data.lon,
+          speed: data.speed || 0,
+          heading: data.heading || 0,
+          status: data.status || 'running',
+          timestamp: Date.now(),
+        });
       });
-    });
-    return () => { socket.off('device:position'); };
-  }, [socket, updatePosition]);
+      buffer.clear();
+    }, 500);
+    return () => clearInterval(interval);
+  }, [updatePosition]);
 }
 ```
 

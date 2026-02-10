@@ -20,27 +20,27 @@
 
 ## Task List
 
-| ID     | Description            | Files                                                         |
-| ------ | ---------------------- | ------------------------------------------------------------- |
-| FE-040 | Dashboard page         | `app/dashboard/page.tsx`                                      |
-| FE-041 | Dashboard hooks (5)    | `features/overview/hooks/*.ts`                                |
-| FE-042 | StatCards row          | `features/overview/components/stat-cards.tsx`                 |
-| FE-043 | VehicleStatusChart     | `features/overview/components/vehicle-status-chart.tsx`       |
-| FE-044 | ActivityChart          | `features/overview/components/activity-chart.tsx`             |
-| FE-045 | AlertsSeverityChart    | `features/overview/components/alerts-severity-chart.tsx`      |
-| FE-046 | ActivityFeed           | `features/overview/components/activity-feed.tsx`              |
-| FE-047 | QuickActions           | `features/overview/components/quick-actions.tsx`              |
-| FE-048 | Dashboard API          | `lib/api/dashboard.ts`                                        |
-| FE-049 | Dashboard real-time    | `features/overview/hooks/use-dashboard-realtime.ts`           |
-| FE-050 | Settings page          | `app/dashboard/settings/page.tsx`                             |
-| FE-051 | ProfileTab             | `features/settings/components/profile-tab.tsx`                |
-| FE-052 | PasswordTab            | `features/settings/components/password-tab.tsx`               |
-| FE-053 | NotificationsTab       | `features/settings/components/notifications-tab.tsx`          |
-| FE-054 | AppearanceTab          | `features/settings/components/appearance-tab.tsx`             |
-| FE-055 | Settings API + schemas | `lib/api/settings.ts`, `lib/validations/settings.schema.ts`   |
-| FE-056 | Users page             | `app/dashboard/users/page.tsx`                                |
-| FE-057 | User columns + form    | `features/users/components/user-columns.tsx`, `user-form.tsx` |
-| FE-058 | User hooks + API       | `features/users/hooks/*.ts`, `lib/api/users.ts`               |
+| ID     | Description                 | Files                                                         |
+| ------ | --------------------------- | ------------------------------------------------------------- |
+| FE-040 | Dashboard page              | `app/dashboard/page.tsx`                                      |
+| FE-041 | Dashboard hooks (5)         | `features/overview/hooks/*.ts`                                |
+| FE-042 | StatCards row (with trends) | `features/overview/components/stat-cards.tsx`                 |
+| FE-043 | DeviceActivityBarGraph      | `features/overview/components/device-activity-chart.tsx`      |
+| FE-044 | FleetRuntimeAreaGraph       | `features/overview/components/fleet-runtime-chart.tsx`        |
+| FE-045 | AlertsSeverityChart         | `features/overview/components/alerts-severity-chart.tsx`      |
+| FE-046 | ActivityFeed                | `features/overview/components/activity-feed.tsx`              |
+| FE-047 | QuickActions                | `features/overview/components/quick-actions.tsx`              |
+| FE-048 | Dashboard API               | `lib/api/dashboard.ts`                                        |
+| FE-049 | Dashboard real-time         | `features/overview/hooks/use-dashboard-realtime.ts`           |
+| FE-050 | Settings page               | `app/dashboard/settings/page.tsx`                             |
+| FE-051 | ProfileTab                  | `features/settings/components/profile-tab.tsx`                |
+| FE-052 | PasswordTab                 | `features/settings/components/password-tab.tsx`               |
+| FE-053 | NotificationsTab            | `features/settings/components/notifications-tab.tsx`          |
+| FE-054 | AppearanceTab               | `features/settings/components/appearance-tab.tsx`             |
+| FE-055 | Settings API + schemas      | `lib/api/settings.ts`, `lib/validations/settings.schema.ts`   |
+| FE-056 | Users page                  | `app/dashboard/users/page.tsx`                                |
+| FE-057 | User columns + form         | `features/users/components/user-columns.tsx`, `user-form.tsx` |
+| FE-058 | User hooks + API            | `features/users/hooks/*.ts`, `lib/api/users.ts`               |
 
 ---
 
@@ -48,8 +48,11 @@
 
 ```
 # Dashboard
-GET /api/v1/dashboard/stats     → { totalVehicles, activeVehicles, totalDevices, activeDevices, alertsCount, tripsToday }
-GET /api/v1/dashboard/activity  ?page&limit&eventType&severity → { data: Activity[], meta }
+GET /api/v1/dashboard/stats          → { totalVehicles, activeVehicles, totalDevices, activeDevices, alertsCount, tripsToday, trends: { vehicles: +2, devices: +5%, alerts: -12%, trips: +3 } }
+GET /api/v1/dashboard/activity       ?page&limit&eventType&severity → { data: Activity[], meta }
+GET /api/v1/dashboard/device-activity ?days=7 → { data: [{ date, running, idle, offline }] }
+GET /api/v1/dashboard/fleet-runtime   ?days=30 → { data: [{ date, runtime }] }
+GET /api/v1/dashboard/device-status   → { running, stopped, error, offline }
 
 # Settings
 GET  /api/v1/auth/me             → User profile
@@ -74,8 +77,9 @@ DELETE /api/v1/users/:id
 
 import { PageContainer } from '@/components/layout/PageContainer';
 import { StatCards } from '@/features/overview/components/stat-cards';
-import { VehicleStatusChart } from '@/features/overview/components/vehicle-status-chart';
-import { ActivityChart } from '@/features/overview/components/activity-chart';
+import { DeviceStatusChart } from '@/features/overview/components/device-status-chart';
+import { DeviceActivityChart } from '@/features/overview/components/device-activity-chart';
+import { FleetRuntimeChart } from '@/features/overview/components/fleet-runtime-chart';
 import { AlertsSeverityChart } from '@/features/overview/components/alerts-severity-chart';
 import { ActivityFeed } from '@/features/overview/components/activity-feed';
 import { QuickActions } from '@/features/overview/components/quick-actions';
@@ -91,11 +95,12 @@ export default function DashboardPage() {
       {/* Row 1: Stats */}
       <StatCards stats={stats} isLoading={isLoading} />
 
-      {/* Row 2: Charts (3 cols) */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <VehicleStatusChart />
-        <ActivityChart />
+      {/* Row 2: Charts (2x2 grid) */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <DeviceStatusChart />
+        <DeviceActivityChart />
         <AlertsSeverityChart />
+        <FleetRuntimeChart />
       </div>
 
       {/* Row 3: Activity + Quick Actions */}
@@ -126,10 +131,10 @@ interface Props {
 
 export function StatCards({ stats, isLoading }: Props) {
   const cards = [
-    { title: 'Phương tiện', value: stats?.totalVehicles ?? 0, subtitle: `${stats?.activeVehicles ?? 0} đang hoạt động`, icon: <Car className="h-5 w-5 text-muted-foreground" /> },
-    { title: 'Thiết bị', value: stats?.totalDevices ?? 0, subtitle: `${stats?.activeDevices ?? 0} online`, icon: <Cpu className="h-5 w-5 text-muted-foreground" /> },
-    { title: 'Cảnh báo', value: stats?.alertsCount ?? 0, subtitle: 'Chưa xử lý', icon: <Bell className="h-5 w-5 text-muted-foreground" /> },
-    { title: 'Chuyến đi hôm nay', value: stats?.tripsToday ?? 0, subtitle: 'Đang cập nhật', icon: <Route className="h-5 w-5 text-muted-foreground" /> },
+    { title: 'Phương tiện', value: stats?.totalVehicles ?? 0, subtitle: `${stats?.activeVehicles ?? 0} đang hoạt động`, icon: <Car className="h-5 w-5 text-muted-foreground" />, trend: stats?.trends?.vehicles },
+    { title: 'Thiết bị', value: stats?.totalDevices ?? 0, subtitle: `${stats?.activeDevices ?? 0} online`, icon: <Cpu className="h-5 w-5 text-muted-foreground" />, trend: stats?.trends?.devices },
+    { title: 'Cảnh báo', value: stats?.alertsCount ?? 0, subtitle: 'Chưa xử lý', icon: <Bell className="h-5 w-5 text-muted-foreground" />, trend: stats?.trends?.alerts },
+    { title: 'Chuyến đi hôm nay', value: stats?.tripsToday ?? 0, subtitle: 'Đang cập nhật', icon: <Route className="h-5 w-5 text-muted-foreground" />, trend: stats?.trends?.trips },
   ];
 
   return (
@@ -144,23 +149,68 @@ export function StatCards({ stats, isLoading }: Props) {
 
 ## FE-043–045: Charts
 
-### VehicleStatusChart (PieChart)
-- recharts PieChart trong Card: Active/Inactive/Maintenance
-- Colors: green-500, gray-400, amber-500
-- useQuery `['dashboard-vehicle-status']`
+### DeviceStatusChart (PieChart/Donut)
+- recharts PieChart trong Card: Running/Stopped/Error/Offline
+- Donut style: `innerRadius={60} outerRadius={80}`
+- Colors: running=#22c55e, stopped=#6b7280, error=#ef4444, offline=#eab308
+- Legend below with counts
+- useQuery `['dashboard-device-status']`
 - Skeleton khi loading
 
-### ActivityChart (AreaChart)
-- recharts AreaChart trong Card: 7-day trips + alerts overlay
-- XAxis: days, YAxis: count, Tooltip, Legend
-- useQuery `['dashboard-activity-chart']`
+### DeviceActivityChart (BarChart — Stacked)
+- recharts BarChart trong Card: 7-day stacked device activity
+- Data format: `[{ date: 'T2', running: 45, idle: 12, offline: 3 }]`
+- Stacked bars: running (green), idle (gray), offline (red)
+- XAxis: ngày trong tuần, YAxis: số thiết bị
+- useQuery `['dashboard-device-activity', 7]` → `GET /dashboard/device-activity?days=7`
 - Skeleton khi loading
 
-### AlertsSeverityChart (BarChart)
+### FleetRuntimeChart (AreaChart — 30 ngày)
+- recharts AreaChart trong Card: fleet runtime trend
+- Data format: `[{ date: '01/01', runtime: 12.5 }]`
+- Gradient fill, XAxis: dates, YAxis: hours
+- useQuery `['dashboard-fleet-runtime', 30]` → `GET /dashboard/fleet-runtime?days=30`
+- Skeleton khi loading
+
+### AlertsSeverityChart (BarChart — Stacked)
 - recharts BarChart trong Card: low/medium/high/critical stacked
 - Colors: blue-400, amber-400, orange-500, red-500
 - useQuery `['dashboard-alerts-summary']`
 - Skeleton khi loading
+
+### Dashboard Hooks
+
+```typescript
+// features/overview/hooks/use-dashboard-stats.ts
+export function useDashboardStats() {
+  return useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: () => apiClient.get('/dashboard/stats').then(r => r.data),
+    refetchInterval: 60_000,
+  });
+}
+
+export function useDeviceActivity(days = 7) {
+  return useQuery({
+    queryKey: ['dashboard-device-activity', days],
+    queryFn: () => apiClient.get(`/dashboard/device-activity?days=${days}`).then(r => r.data),
+  });
+}
+
+export function useDeviceStatusDistribution() {
+  return useQuery({
+    queryKey: ['dashboard-device-status'],
+    queryFn: () => apiClient.get('/dashboard/device-status').then(r => r.data),
+  });
+}
+
+export function useFleetRuntime(days = 30) {
+  return useQuery({
+    queryKey: ['dashboard-fleet-runtime', days],
+    queryFn: () => apiClient.get(`/dashboard/fleet-runtime?days=${days}`).then(r => r.data),
+  });
+}
+```
 
 ---
 

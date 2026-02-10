@@ -1,20 +1,12 @@
-import { apiClient } from './client';
-import type { Firmware } from '@/types/firmware.types';
-import type { ApiResponse, PaginatedResponse } from '@/types';
+﻿import { apiClient, unwrap } from './client';
 
-export const firmwareApi = {
-  list: (params?: { page?: number; limit?: number }) =>
-    apiClient.get<ApiResponse<PaginatedResponse<Firmware>>>('/firmware', { params }),
-  getById: (id: number) =>
-    apiClient.get<ApiResponse<Firmware>>(`/firmware/${id}`),
-  create: (data: FormData) =>
-    apiClient.post<ApiResponse<Firmware>>('/firmware', data, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
-  delete: (id: number) =>
-    apiClient.delete(`/firmware/${id}`),
-  activate: (id: number) =>
-    apiClient.put(`/firmware/${id}/activate`),
-  deactivate: (id: number) =>
-    apiClient.put(`/firmware/${id}/deactivate`),
+export const firmwareServices = {
+  getList: (params?: Record<string, unknown>) => apiClient.get('/firmware', { params }).then((r) => unwrap<any>(r.data)),
+  getById: (id: number) => apiClient.get(`/firmware/${id}`).then((r) => unwrap<any>(r.data)),
+  upload: (data: Record<string, unknown>) => apiClient.post('/firmware/upload', data).then((r) => unwrap<any>(r.data)),
+  create: (data: Record<string, unknown>) => apiClient.post('/firmware', data).then((r) => unwrap<any>(r.data)),
+  delete: (id: number) => apiClient.delete(`/firmware/${id}`).then((r) => unwrap<any>(r.data)),
+  deploy: (id: number, data: { deviceIds: string[]; strategy: 'rolling' | 'all_at_once' }) =>
+    apiClient.post(`/firmware/${id}/deploy`, data).then((r) => unwrap<any>(r.data)),
+  getDeployments: (id: number) => apiClient.get(`/firmware/${id}/deployments`).then((r) => unwrap<any>(r.data)),
 };

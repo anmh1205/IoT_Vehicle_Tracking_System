@@ -7,6 +7,7 @@ import * as firmwareListService from '@/domain/firmware/services/firmware-list.s
 import * as firmwareUploadService from '@/domain/firmware/services/firmware-upload.service';
 import * as firmwareActivateService from '@/domain/firmware/services/firmware-activate.service';
 import * as firmwareDeleteService from '@/domain/firmware/services/firmware-delete.service';
+import * as firmwareDeployService from '@/domain/firmware/services/firmware-deploy.service';
 
 export const listFirmware = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const query = {
@@ -46,6 +47,8 @@ export const createFirmware = asyncHandler(async (req: AuthenticatedRequest, res
   sendCreated(res, firmware);
 });
 
+export const uploadFirmware = createFirmware;
+
 export const deleteFirmware = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const id = Number.parseInt(req.params.id, 10);
   if (Number.isNaN(id)) {
@@ -74,4 +77,61 @@ export const deactivateFirmware = asyncHandler(async (req: AuthenticatedRequest,
 
   const firmware = await firmwareActivateService.deactivateFirmware(id);
   sendOk(res, firmware);
+});
+
+export const deployFirmware = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) {
+    throw createValidationError('Invalid firmware ID');
+  }
+
+  const deviceIds = Array.isArray(req.body?.deviceIds) ? req.body.deviceIds : [];
+  const strategy = req.body?.strategy as 'rolling' | 'all_at_once' | undefined;
+  const result = await firmwareDeployService.deployFirmware(id, { deviceIds, strategy });
+  sendOk(res, result);
+});
+
+export const assignFirmware = deployFirmware;
+
+export const getDeployments = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) {
+    throw createValidationError('Invalid firmware ID');
+  }
+
+  const deployments = await firmwareDeployService.getDeployments(id);
+  sendOk(res, deployments);
+});
+
+export const getAssignedDevices = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) {
+    throw createValidationError('Invalid firmware ID');
+  }
+
+  const deployments = await firmwareDeployService.getDeployments(id);
+  sendOk(res, {
+    devices: deployments.map((item) => ({
+      deviceId: item.deviceId,
+      status: item.status,
+      progress: item.status === 'success' ? 100 : item.status === 'in_progress' ? 50 : 0,
+      updatedAt: item.completedAt ?? item.startedAt,
+      errorMessage: item.errorMessage,
+    })),
+  });
+});
+
+export const downloadFirmware = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) {
+    throw createValidationError('Invalid firmware ID');
+  }
+
+  const firmware = await firmwareListService.getFirmwareById(id);
+  const filename = firmware.filename.endsWith('.bin') ? firmware.filename : `${firmware.filename}.bin`;
+  const content = Buffer.from(`firmware:${firmware.version}:${firmware.id}`, 'utf8');
+
+  res.setHeader('Content-Type', 'application/octet-stream');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.status(200).send(content);
 });

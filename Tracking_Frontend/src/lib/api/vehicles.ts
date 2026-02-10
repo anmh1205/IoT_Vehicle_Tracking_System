@@ -1,26 +1,11 @@
-import { apiClient } from './client';
-import type { Vehicle, CreateVehicleInput, UpdateVehicleInput, VehicleListQuery } from '@/types/vehicle.types';
-import type { ApiResponse, PaginatedResponse } from '@/types';
+﻿import { apiClient, unwrap } from './client';
 
-export const vehiclesApi = {
-  list: (params?: VehicleListQuery) =>
-    apiClient.get<ApiResponse<PaginatedResponse<Vehicle>>>('/vehicles', { params }),
-
-  getById: (id: number) =>
-    apiClient.get<ApiResponse<Vehicle>>(`/vehicles/${id}`),
-
-  create: (data: CreateVehicleInput) =>
-    apiClient.post<ApiResponse<Vehicle>>('/vehicles', data),
-
-  update: (id: number, data: UpdateVehicleInput) =>
-    apiClient.put<ApiResponse<Vehicle>>(`/vehicles/${id}`, data),
-
-  delete: (id: number) =>
-    apiClient.delete(`/vehicles/${id}`),
-
-  assignDevice: (id: number, deviceId: string) =>
-    apiClient.patch<ApiResponse<Vehicle>>(`/vehicles/${id}/assign-device`, { deviceId }),
-
-  unassignDevice: (id: number) =>
-    apiClient.patch<ApiResponse<Vehicle>>(`/vehicles/${id}/unassign-device`),
+export const vehicleServices = {
+  getList: (params?: Record<string, unknown>) => apiClient.get('/vehicles', { params }).then((r) => unwrap<any>(r.data)),
+  getById: (id: number) => apiClient.get(`/vehicles/${id}`).then((r) => unwrap<any>(r.data)),
+  create: (data: Record<string, unknown>) => apiClient.post('/vehicles', data).then((r) => unwrap<any>(r.data)),
+  update: (id: number, data: Record<string, unknown>) => apiClient.put(`/vehicles/${id}`, data).then((r) => unwrap<any>(r.data)),
+  delete: (id: number) => apiClient.delete(`/vehicles/${id}`).then((r) => unwrap<any>(r.data)),
+  assignDevice: (id: number, deviceId: string | null) =>
+    apiClient.put(`/vehicles/${id}/device`, { deviceId }).then((r) => unwrap<any>(r.data)),
 };

@@ -1,10 +1,17 @@
-import { apiClient } from './client';
-import type { DashboardStats, ActivityEvent } from '@/types/dashboard.types';
-import type { ApiResponse, PaginatedResponse } from '@/types';
+﻿import { apiClient, unwrap } from './client';
 
-export const dashboardApi = {
-  getStats: () =>
-    apiClient.get<ApiResponse<DashboardStats>>('/dashboard/stats'),
-  getActivity: (params?: { page?: number; limit?: number }) =>
-    apiClient.get<ApiResponse<PaginatedResponse<ActivityEvent>>>('/dashboard/activity', { params }),
+export interface DashboardStats {
+  totalDevices: number;
+  activeDevices: number;
+  offlineDevices: number;
+  alertsCount: number;
+  totalRuntimeToday: number;
+  totalRuntimeWeek: number;
+  sessionsToday: number;
+}
+
+export const dashboardServices = {
+  getStats: () => apiClient.get('/dashboard/stats').then((r) => unwrap<DashboardStats>(r.data)),
+  getActivity: (params?: Record<string, unknown>) =>
+    apiClient.get('/dashboard/activity', { params }).then((r) => unwrap<any>(r.data)),
 };

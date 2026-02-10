@@ -1,32 +1,37 @@
 import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import type { ApiEnvelope } from '@/types';
 
 export const apiClient = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: '/api/v1',
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 30000,
 });
 
-// Request interceptor: attach auth token
 apiClient.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Response interceptor: handle 401
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
-      window.location.href = '/login';
+  async (error) => {
+    if (error.response?.status === 401) {
+      useAuthStore.getState().clearAuth();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
 );
+
+export const unwrap = <T>(payload: ApiEnvelope<T> | T): T => {
+  if (payload && typeof payload === 'object' && 'success' in payload && 'data' in payload) {
+    return (payload as ApiEnvelope<T>).data;
+  }
+  return payload as T;
+};

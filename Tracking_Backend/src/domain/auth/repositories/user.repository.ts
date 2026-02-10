@@ -35,7 +35,7 @@ export const create = async (
 
 export const update = async (
   id: number,
-  fields: Partial<Pick<User, 'full_name' | 'role' | 'device_access_mode' | 'status' | 'email' | 'avatar_url'>>,
+  fields: Partial<Pick<User, 'full_name' | 'role' | 'device_access_mode' | 'status' | 'email' | 'avatar_url' | 'preferences'>>,
 ): Promise<User | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
@@ -64,6 +64,10 @@ export const update = async (
   if (fields.avatar_url !== undefined) {
     setClauses.push(`avatar_url = $${paramIndex++}`);
     values.push(fields.avatar_url);
+  }
+  if (fields.preferences !== undefined) {
+    setClauses.push(`preferences = $${paramIndex++}`);
+    values.push(JSON.stringify(fields.preferences));
   }
 
   if (setClauses.length === 0) return findById(id);

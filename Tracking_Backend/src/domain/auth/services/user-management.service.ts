@@ -85,3 +85,59 @@ export const deleteUser = async (id: number): Promise<void> => {
 
   logger.info(`User "${existing.username}" deleted`);
 };
+
+export const updateProfile = async (
+  userId: number,
+  input: { fullName?: string; email?: string | null; avatarUrl?: string | null },
+): Promise<UserPublic> => {
+  const existing = await userRepo.findById(userId);
+  if (!existing) {
+    throw createNotFoundError(`User with id ${userId} not found`);
+  }
+
+  const updated = await userRepo.update(userId, {
+    full_name: input.fullName,
+    email: input.email,
+    avatar_url: input.avatarUrl,
+  });
+
+  if (!updated) {
+    throw createNotFoundError(`User with id ${userId} not found`);
+  }
+
+  logger.info(`User "${updated.username}" updated profile`);
+  return sanitizeUser(updated);
+};
+
+export const updateNotificationPreferences = async (
+  userId: number,
+  input: { emailAlerts?: boolean; pushAlerts?: boolean; alertTypes?: string[] },
+): Promise<UserPublic> => {
+  const existing = await userRepo.findById(userId);
+  if (!existing) {
+    throw createNotFoundError(`User with id ${userId} not found`);
+  }
+
+  const nextPreferences = {
+    ...(existing.preferences ?? {}),
+    notifications: {
+      ...((existing.preferences as Record<string, unknown> | null)?.notifications as
+        | Record<string, unknown>
+        | undefined),
+      ...(input.emailAlerts !== undefined ? { emailAlerts: input.emailAlerts } : {}),
+      ...(input.pushAlerts !== undefined ? { pushAlerts: input.pushAlerts } : {}),
+      ...(input.alertTypes !== undefined ? { alertTypes: input.alertTypes } : {}),
+    },
+  };
+
+  const updated = await userRepo.update(userId, {
+    preferences: nextPreferences,
+  });
+
+  if (!updated) {
+    throw createNotFoundError(`User with id ${userId} not found`);
+  }
+
+  logger.info(`User "${updated.username}" updated notification preferences`);
+  return sanitizeUser(updated);
+};

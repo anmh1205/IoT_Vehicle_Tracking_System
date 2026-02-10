@@ -10,33 +10,44 @@
 ```
 1. Directory: features/devices/components/, features/devices/hooks/, features/devices/types/
 2. Page: PageContainer + DataTable pattern (from 4A)
-3. Detail: Sheet component (NOT Dialog) for device detail — 5 tabs
+3. Detail: Dialog component (KHÔNG Sheet) — 90vw × 90vh — 6 tabs
 4. Charts: recharts (KHÔNG ECharts)
 5. Icons: lucide-react
 6. ALL inline code patterns PHẢI follow CHÍNH XÁC
 7. Real-time: Socket.IO via useSocket() hook from providers
+8. RBAC: Tab visibility controlled by useRoleAccess()
+9. Context: DeviceDetailModal uses React Context provider pattern
 ```
 
 ---
 
 ## Task List
 
-| ID     | Description          | Files                                                  |
-| ------ | -------------------- | ------------------------------------------------------ |
-| FE-030 | Device types         | `features/devices/types/index.ts`                      |
-| FE-031 | Device Zod schema    | `lib/validations/device.schema.ts`                     |
-| FE-032 | Device API service   | `lib/api/devices.ts`                                   |
-| FE-033 | Device hooks (6)     | `features/devices/hooks/*.ts`                          |
-| FE-034 | Device page          | `app/dashboard/devices/page.tsx`                       |
-| FE-035 | Device columns       | `features/devices/components/device-columns.tsx`       |
-| FE-036 | Device form          | `features/devices/components/device-form.tsx`          |
-| FE-037 | Device detail sheet  | `features/devices/components/device-detail-sheet.tsx`  |
-| FE-038 | Device telemetry tab | `features/devices/components/device-telemetry-tab.tsx` |
-| FE-039 | Device sessions tab  | `features/devices/components/device-sessions-tab.tsx`  |
-| FE-03A | Device commands tab  | `features/devices/components/device-commands-tab.tsx`  |
-| FE-03B | Device errors tab    | `features/devices/components/device-errors-tab.tsx`    |
-| FE-03C | Real-time hook       | `features/devices/hooks/use-device-realtime.ts`        |
-| FE-03D | Device filters       | `features/devices/components/device-filters.tsx`       |
+| ID      | Description            | Files                                                                                |
+| ------- | ---------------------- | ------------------------------------------------------------------------------------ |
+| FE-030  | Device types           | `features/devices/types/index.ts`                                                    |
+| FE-031  | Device Zod schema      | `lib/validations/device.schema.ts`                                                   |
+| FE-032  | Device API service     | `lib/api/devices.ts`                                                                 |
+| FE-033  | Device hooks (10+)     | `features/devices/hooks/*.ts`                                                        |
+| FE-034  | Device page            | `app/dashboard/devices/page.tsx`                                                     |
+| FE-035  | Device columns         | `features/devices/components/device-columns.tsx`                                     |
+| FE-036  | Device form            | `features/devices/components/device-form.tsx`                                        |
+| FE-037  | Device detail modal    | `features/devices/components/device-detail-modal/index.tsx`                          |
+| FE-037B | Modal context provider | `features/devices/components/device-detail-modal/modal-context.tsx`                  |
+| FE-037C | Modal container        | `features/devices/components/device-detail-modal/modal-container.tsx`                |
+| FE-038  | Overview tab           | `features/devices/components/device-detail-modal/overview-tab.tsx`                   |
+| FE-038B | Sessions tab           | `features/devices/components/device-detail-modal/sessions-tab.tsx`                   |
+| FE-038C | Error codes tab        | `features/devices/components/device-detail-modal/error-codes-tab.tsx`                |
+| FE-038D | Runtime chart tab      | `features/devices/components/device-detail-modal/runtime-tab.tsx`                    |
+| FE-038E | Vibration chart tab    | `features/devices/components/device-detail-modal/vibration-tab.tsx`                  |
+| FE-038F | Settings tab           | `features/devices/components/device-detail-modal/settings-tab.tsx`                   |
+| FE-039  | Session chart dialog   | `features/devices/components/device-detail-modal/session-vibration-chart-dialog.tsx` |
+| FE-03A  | Export modal           | `features/devices/components/export-modal.tsx`                                       |
+| FE-03B  | Device card            | `features/devices/components/device-card.tsx`                                        |
+| FE-03C  | Device grid            | `features/devices/components/device-grid.tsx`                                        |
+| FE-03D  | Device stats bar       | `features/devices/components/device-stats-bar.tsx`                                   |
+| FE-03E  | Real-time hook         | `features/devices/hooks/use-device-realtime.ts`                                      |
+| FE-03F  | Device filters         | `features/devices/components/device-filters.tsx`                                     |
 
 ---
 
@@ -49,10 +60,14 @@ POST   /api/v1/devices                    { deviceId, deviceName, deviceType, im
 PUT    /api/v1/devices/:id                { deviceName, deviceType, ... }
 DELETE /api/v1/devices/:id
 GET    /api/v1/devices/:deviceId/sessions ?page&limit
-GET    /api/v1/devices/:deviceId/telemetry?metric&from&to
+GET    /api/v1/devices/:deviceId/error-codes ?status&type&page&limit
+GET    /api/v1/devices/:deviceId/runtime-chart ?range=7d|30d|90d|1y
+GET    /api/v1/devices/:deviceId/vibration-chart ?period=1h|6h|24h|7d
+PUT    /api/v1/devices/:deviceId/settings { requestInterval, vibrationThreshold }
 POST   /api/v1/devices/:deviceId/command  { command, params }
 GET    /api/v1/devices/:deviceId/commands ?page&limit
 GET    /api/v1/devices/:deviceId/errors   ?page&limit
+POST   /api/v1/exports                   { entityType, deviceId, from, to, format }
 ```
 
 ---
@@ -126,14 +141,27 @@ export interface DeviceFilters {
   customerId?: number;
 }
 
-export interface TelemetryPoint {
-  timestamp: string;
-  value: number;
+export interface RuntimeChartData {
+  data: { date: string; hours: number }[];
 }
 
-export interface TelemetryData {
-  metric: string;
-  data: TelemetryPoint[];
+export interface VibrationChartData {
+  data: { timestamp: string; rms: number; peak: number }[];
+}
+
+export interface ErrorCode {
+  code: string;
+  name: string;
+  description: string;
+  count: number;
+  lastOccurred: string;
+  type: 'critical' | 'warning' | 'info';
+}
+
+export interface DeviceSettings {
+  requestInterval: number;
+  alertThresholds: Record<string, number>;
+  firmwareVersion: string;
 }
 ```
 
@@ -194,8 +222,14 @@ export const deviceServices = {
   getSessions: (deviceId: string, params?: { page?: number; limit?: number }) =>
     apiClient.get(`/devices/${deviceId}/sessions`, { params }).then((r) => r.data),
 
-  getTelemetry: (deviceId: string, params: { metric: string; from: string; to: string }) =>
-    apiClient.get(`/devices/${deviceId}/telemetry`, { params }).then((r) => r.data),
+  getErrorCodes: (deviceId: string, params?: { page?: number; limit?: number; type?: string }) =>
+    apiClient.get(`/devices/${deviceId}/error-codes`, { params }).then((r) => r.data),
+
+  getRuntimeChart: (deviceId: string, params: { range: '7d' | '30d' | '90d' }) =>
+    apiClient.get(`/devices/${deviceId}/runtime-chart`, { params }).then((r) => r.data),
+
+  getVibrationChart: (deviceId: string, params: { period: '1h' | '6h' | '24h' | '7d' }) =>
+    apiClient.get(`/devices/${deviceId}/vibration-chart`, { params }).then((r) => r.data),
 
   sendCommand: (deviceId: string, data: { command: string; params?: Record<string, any> }) =>
     apiClient.post(`/devices/${deviceId}/command`, data).then((r) => r.data),
@@ -205,6 +239,15 @@ export const deviceServices = {
 
   getErrors: (deviceId: string, params?: { page?: number; limit?: number }) =>
     apiClient.get(`/devices/${deviceId}/errors`, { params }).then((r) => r.data),
+
+  getSettings: (deviceId: string) =>
+    apiClient.get(`/devices/${deviceId}/settings`).then((r) => r.data),
+
+  updateSettings: (deviceId: string, data: any) =>
+    apiClient.put(`/devices/${deviceId}/settings`, data).then((r) => r.data),
+
+  createExport: (data: { deviceId: string; format: string; dateRange: { from: string; to: string } }) =>
+    apiClient.post('/export', data).then((r) => r.data),
 };
 ```
 
@@ -289,6 +332,96 @@ export function useSendCommand(deviceId: string) {
 }
 ```
 
+```typescript
+// features/devices/hooks/use-device-sessions.ts
+import { useQuery } from '@tanstack/react-query';
+import { deviceServices } from '@/lib/api/devices';
+
+export function useDeviceSessions(deviceId: string | null, params?: { page?: number; limit?: number }) {
+  return useQuery({
+    queryKey: ['device-sessions', deviceId, params],
+    queryFn: () => deviceServices.getSessions(deviceId!, params),
+    enabled: !!deviceId,
+  });
+}
+```
+
+```typescript
+// features/devices/hooks/use-device-error-codes.ts
+import { useQuery } from '@tanstack/react-query';
+import { deviceServices } from '@/lib/api/devices';
+
+export function useDeviceErrorCodes(deviceId: string | null, params?: { page?: number; limit?: number; type?: string }) {
+  return useQuery({
+    queryKey: ['device-errors', deviceId, params],
+    queryFn: () => deviceServices.getErrorCodes(deviceId!, params),
+    enabled: !!deviceId,
+  });
+}
+```
+
+```typescript
+// features/devices/hooks/use-device-runtime-chart.ts
+import { useQuery } from '@tanstack/react-query';
+import { deviceServices } from '@/lib/api/devices';
+
+export function useDeviceRuntimeChart(deviceId: string | null, range: '7d' | '30d' | '90d' = '30d') {
+  return useQuery({
+    queryKey: ['device-runtime-chart', deviceId, range],
+    queryFn: () => deviceServices.getRuntimeChart(deviceId!, { range }),
+    enabled: !!deviceId,
+  });
+}
+```
+
+```typescript
+// features/devices/hooks/use-device-vibration-chart.ts
+import { useQuery } from '@tanstack/react-query';
+import { deviceServices } from '@/lib/api/devices';
+
+export function useDeviceVibrationChart(deviceId: string | null, period: '1h' | '6h' | '24h' | '7d' = '24h') {
+  return useQuery({
+    queryKey: ['device-vibration-chart', deviceId, period],
+    queryFn: () => deviceServices.getVibrationChart(deviceId!, { period }),
+    enabled: !!deviceId,
+  });
+}
+```
+
+```typescript
+// features/devices/hooks/use-update-device-settings.ts
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deviceServices } from '@/lib/api/devices';
+import { toast } from 'sonner';
+
+export function useUpdateDeviceSettings(deviceId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => deviceServices.updateSettings(deviceId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['device', deviceId] });
+      toast.success('Cài đặt đã được cập nhật');
+    },
+    onError: (e: any) => toast.error('Không thể cập nhật cài đặt', { description: e.message }),
+  });
+}
+```
+
+```typescript
+// features/devices/hooks/use-create-export.ts
+import { useMutation } from '@tanstack/react-query';
+import { deviceServices } from '@/lib/api/devices';
+import { toast } from 'sonner';
+
+export function useCreateExport() {
+  return useMutation({
+    mutationFn: deviceServices.createExport,
+    onSuccess: () => toast.success('Yêu cầu xuất dữ liệu đã được tạo'),
+    onError: (e: any) => toast.error('Không thể tạo yêu cầu xuất', { description: e.message }),
+  });
+}
+```
+
 ---
 
 ## FE-03C: Real-time Hook
@@ -360,7 +493,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Cpu } from 'lucide-react';
 import { getDeviceColumns } from '@/features/devices/components/device-columns';
 import { DeviceForm } from '@/features/devices/components/device-form';
-import { DeviceDetailSheet } from '@/features/devices/components/device-detail-sheet';
+import { DeviceDetailModal } from '@/features/devices/components/device-detail-modal';
 import { DeviceFilters } from '@/features/devices/components/device-filters';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { useDevices } from '@/features/devices/hooks/use-devices';
@@ -414,8 +547,8 @@ export default function DevicesPage() {
         defaultValues={editItem}
       />
 
-      <DeviceDetailSheet
-        device={viewItem}
+      <DeviceDetailModal
+        deviceId={viewItem?.deviceId ?? null}
         open={!!viewItem}
         onOpenChange={(v) => { if (!v) setViewItem(null); }}
       />
@@ -545,145 +678,260 @@ Follow pattern from `32-frontend-implementation.md` Section 1.3:
 
 ---
 
-## FE-037: Device Detail Sheet
+## FE-037: Device Detail Modal (Dialog, NOT Sheet)
+
+> **CRITICAL**: Dùng `Dialog` (KHÔNG `Sheet`), kích thước 90vw × 90vh.
+> Structure follows `device-detail-modal/` directory pattern from IVM26.
+
+### File Structure
+
+```
+features/devices/components/device-detail-modal/
+├── index.tsx              ← Main Dialog component
+├── modal-context.tsx      ← React Context provider for all data/handlers
+├── modal-container.tsx    ← Data fetching wrapper + context provider
+├── overview-tab.tsx       ← Tab "Tổng quan"
+├── sessions-tab.tsx       ← Tab "Phiên chạy"
+├── error-codes-tab.tsx    ← Tab "Mã lỗi"
+├── runtime-tab.tsx        ← Tab "Biểu đồ thời gian"
+├── vibration-tab.tsx      ← Tab "Biểu đồ rung" — RBAC: canViewSystemInfo
+├── settings-tab.tsx       ← Tab "Cài đặt" — RBAC: canEditDevice
+├── session-vibration-chart-dialog.tsx ← Nested dialog for session vibration detail
+└── empty-state.tsx        ← Empty state component
+```
+
+### FE-037B: Modal Context (`modal-context.tsx`)
+
+```typescript
+interface DeviceDetailModalContextValue {
+  // Data
+  detail: DeviceDetail | null;
+  loading: boolean;
+  error: Error | null;
+
+  // Sessions (paginated, infinite scroll)
+  sessions: DeviceSession[];
+  sessionsLoading: boolean;
+  sessionsHasMore: boolean;
+  onSessionsLoadMore: () => void;
+
+  // Error codes (paginated, filtered)
+  errorCodes: ErrorCode[];
+  errorCodesPagination: Pagination;
+  errorCodesStatus: string;
+  errorCodesType: string;
+  onErrorCodesPageChange: (page: number) => void;
+  onErrorCodesStatusChange: (status: string) => void;
+  onErrorCodesTypeChange: (type: string) => void;
+
+  // Charts
+  runtimeChart: RuntimeChartData | null;
+  runtimeRange: '7d' | '30d' | '90d' | '1y';
+  onRuntimeRangeChange: (range: string) => void;
+  vibrationChart: VibrationChartData | null;
+  vibrationPeriod: '1h' | '6h' | '24h' | '7d';
+  onVibrationPeriodChange: (period: string) => void;
+
+  // Actions
+  onUpdateSettings: (data: any) => Promise<void>;
+  onDeleteDevice: () => Promise<void>;
+
+  // Tab state
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+
+const ModalContext = createContext<DeviceDetailModalContextValue | null>(null);
+export const useModalContext = () => {
+  const ctx = useContext(ModalContext);
+  if (!ctx) throw new Error('useModalContext must be used inside ModalProvider');
+  return ctx;
+};
+```
+
+### FE-037C: Modal Container (`modal-container.tsx`)
 
 ```tsx
-// features/devices/components/device-detail-sheet.tsx
+// Fetches all data, subscribes to realtime, wraps children in ModalContext.Provider
+export function ModalContainer({ deviceId, children }: Props) {
+  const detail = useDeviceDetail(deviceId);
+  const sessions = useDeviceSessions(deviceId);
+  const errorCodes = useDeviceErrorCodes(deviceId, filters);
+  const runtimeChart = useDeviceRuntimeChart(deviceId, runtimeRange);
+  const vibrationChart = useDeviceVibrationChart(deviceId, vibrationPeriod);
+  const updateSettings = useUpdateDeviceSettings(deviceId);
+
+  // Realtime subscriptions
+  useRealtimeSubscription({
+    event: 'device.status.changed',
+    handler: (e) => { /* merge into local state; invalidate queries */ },
+  });
+  useRealtimeSubscription({
+    event: 'device.sessions.updated',
+    handler: () => { queryClient.invalidateQueries({ queryKey: ['device-sessions'] }); },
+  });
+
+  return <ModalContext.Provider value={contextValue}>{children}</ModalContext.Provider>;
+}
+```
+
+### FE-037: Main Dialog (`index.tsx`)
+
+```tsx
 'use client';
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { useDeviceDetail } from '../hooks/use-device-detail';
-import { Skeleton } from '@/components/ui/skeleton';
-import { DeviceTelemetryTab } from './device-telemetry-tab';
-import { DeviceSessionsTab } from './device-sessions-tab';
-import { DeviceCommandsTab } from './device-commands-tab';
-import { DeviceErrorsTab } from './device-errors-tab';
-import type { Device } from '../types';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
+import { useRoleAccess } from '@/hooks/use-role-access';
+import { ModalContainer } from './modal-container';
+import { useModalContext } from './modal-context';
+import { OverviewTab } from './overview-tab';
+import { SessionsTab } from './sessions-tab';
+import { ErrorCodesTab } from './error-codes-tab';
+import { RuntimeTab } from './runtime-tab';
+import { VibrationTab } from './vibration-tab';
+import { SettingsTab } from './settings-tab';
 
 interface Props {
-  device: Device | null;
+  deviceId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function DeviceDetailSheet({ device, open, onOpenChange }: Props) {
-  const { data: detail, isLoading } = useDeviceDetail(device?.deviceId ?? null);
-
+export function DeviceDetailModal({ deviceId, open, onOpenChange }: Props) {
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
-            {device?.deviceName}
-            {device && <Badge>{device.currentStatus}</Badge>}
-          </SheetTitle>
-        </SheetHeader>
-
-        {isLoading ? (
-          <div className="space-y-4 mt-4">
-            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
-          </div>
-        ) : (
-          <Tabs defaultValue="info" className="mt-4">
-            <TabsList className="w-full">
-              <TabsTrigger value="info">Thông tin</TabsTrigger>
-              <TabsTrigger value="telemetry">Telemetry</TabsTrigger>
-              <TabsTrigger value="sessions">Phiên</TabsTrigger>
-              <TabsTrigger value="commands">Lệnh</TabsTrigger>
-              <TabsTrigger value="errors">Lỗi</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="info">
-              {/* Info grid: deviceId, type, IMEI, firmware, vehicle, customer, runtime, last seen, coordinates */}
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <InfoRow label="Mã thiết bị" value={detail?.deviceId} />
-                <InfoRow label="Loại" value={detail?.deviceType} />
-                <InfoRow label="IMEI" value={detail?.imei} />
-                <InfoRow label="Firmware" value={detail?.firmwareVersion} />
-                <InfoRow label="Phương tiện" value={detail?.vehiclePlate} />
-                <InfoRow label="Khách hàng" value={detail?.customerName} />
-                <InfoRow label="Tổng runtime" value={formatRuntime(detail?.totalRuntimeSeconds)} />
-                <InfoRow label="Lỗi cuối" value={detail?.lastErrorCode ? `Code ${detail.lastErrorCode}` : 'Không'} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="telemetry">
-              <DeviceTelemetryTab deviceId={device?.deviceId ?? ''} />
-            </TabsContent>
-
-            <TabsContent value="sessions">
-              <DeviceSessionsTab deviceId={device?.deviceId ?? ''} />
-            </TabsContent>
-
-            <TabsContent value="commands">
-              <DeviceCommandsTab deviceId={device?.deviceId ?? ''} />
-            </TabsContent>
-
-            <TabsContent value="errors">
-              <DeviceErrorsTab deviceId={device?.deviceId ?? ''} />
-            </TabsContent>
-          </Tabs>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto">
+        {deviceId && (
+          <ModalContainer deviceId={deviceId}>
+            <ModalContent />
+          </ModalContainer>
         )}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: any }) {
+function ModalContent() {
+  const { detail, loading, activeTab, onTabChange } = useModalContext();
+  const { canViewSystemInfo, canEditDevice } = useRoleAccess();
+
+  if (loading) return <SkeletonGrid />;
+
   return (
-    <div>
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium">{value ?? '—'}</dd>
-    </div>
-  );
-}
+    <>
+      <DialogHeader>
+        <div className="flex items-center justify-between">
+          <DialogTitle className="flex items-center gap-2">
+            {/* Status icon with gradient bg */}
+            <div className={`h-8 w-8 rounded-full bg-gradient-to-br ${statusGradient}`} />
+            {detail?.deviceName}
+            <Badge>{statusLabel}</Badge>
+          </DialogTitle>
+          <ExportDropdown deviceId={detail?.deviceId} />
+        </div>
+      </DialogHeader>
 
-function formatRuntime(seconds?: number): string {
-  if (!seconds) return '0 giờ';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return `${h} giờ ${m} phút`;
+      <Tabs value={activeTab} onValueChange={onTabChange} className="mt-4">
+        <TabsList className="w-full">
+          <TabsTrigger value="overview">Tổng quan</TabsTrigger>
+          <TabsTrigger value="sessions">Phiên chạy</TabsTrigger>
+          <TabsTrigger value="errors">Mã lỗi</TabsTrigger>
+          <TabsTrigger value="runtime">Biểu đồ thời gian</TabsTrigger>
+          {canViewSystemInfo && <TabsTrigger value="vibration">Biểu đồ rung</TabsTrigger>}
+          {canEditDevice && <TabsTrigger value="settings">Cài đặt</TabsTrigger>}
+        </TabsList>
+
+        <TabsContent value="overview"><OverviewTab /></TabsContent>
+        <TabsContent value="sessions"><SessionsTab /></TabsContent>
+        <TabsContent value="errors"><ErrorCodesTab /></TabsContent>
+        <TabsContent value="runtime"><RuntimeTab /></TabsContent>
+        {canViewSystemInfo && <TabsContent value="vibration"><VibrationTab /></TabsContent>}
+        {canEditDevice && <TabsContent value="settings"><SettingsTab /></TabsContent>}
+      </Tabs>
+    </>
+  );
 }
 ```
 
 ---
 
-## FE-038: Telemetry Tab
+## FE-038: Overview Tab
 
-- DateRangePicker (from/to) with presets: 1h, 6h, 24h, 7d
-- Metric selector: vibration_rms, vibration_peak, temperature, battery_voltage
-- recharts LineChart (ResponsiveContainer, XAxis time, YAxis value, Tooltip, Legend)
-- useQuery + deviceServices.getTelemetry
-- Loading: Skeleton chart placeholder
-- Empty: "Không có dữ liệu telemetry trong khoảng thời gian này"
+- Device info grid (2 columns): IMEI, firmware, customer, vehicle, created date, last seen
+- Runtime stats cards: today / week / month / quarter / year / total (runtime hours)
+- Realtime data section: current vibration, battery voltage, temperature
+- All data consumed from `useModalContext()`
 
 ---
 
-## FE-039: Sessions Tab
+## FE-038B: Sessions Tab
 
-- DataTable (mini): startTime, endTime, duration (formatted), vibrationAvg, vibrationMax, status Badge
-- useQuery + deviceServices.getSessions
-- Pagination (server-side)
-
----
-
-## FE-03A: Commands Tab
-
-- Form (top): command Select (restart, configure, factory_reset, update_firmware, diagnostics) + params textarea (JSON) + Send Button
-- useSendCommand mutation
-- Command history DataTable: command, status Badge, sentAt, ackedAt, response
+- Session cards list with "Tải thêm" (load more) button pattern
+- Each card: start time, end time, duration, vibration stats (avg/max/rms)
+- Click card → opens `SessionVibrationChartDialog` (FE-039)
+- Empty: Clock icon + "Chưa có phiên chạy nào"
+- Data from `useModalContext().sessions`
 
 ---
 
-## FE-03B: Errors Tab
+## FE-038C: Error Codes Tab
 
-- DataTable (mini): errorCode, errorName, description, occurredAt, resolvedAt
-- Status: Badge (active / resolved)
-- useQuery + deviceServices.getErrors
+- Filter bar: status Select (active/resolved), type Select (all/critical/warning)
+- DataTable with server-side pagination: error code, name, description, count, last occurred, status Badge
+- Data from `useModalContext().errorCodes`
 
 ---
+
+## FE-038D: Runtime Chart Tab
+
+- Range selector buttons: 7d / 30d / 90d / 1y
+- recharts BarChart: X-axis = date, Y-axis = runtime hours
+- ResponsiveContainer, XAxis, YAxis, Tooltip, Bar
+- Data from `useModalContext().runtimeChart`
+
+---
+
+## FE-038E: Vibration Chart Tab (RBAC: canViewSystemInfo)
+
+- Period selector buttons: 1h / 6h / 24h / 7d
+- recharts LineChart: X-axis = timestamp, Y-axis = vibration value
+- Dashed reference line at threshold value
+- Data from `useModalContext().vibrationChart`
+
+---
+
+## FE-038F: Settings Tab (RBAC: canEditDevice)
+
+- Name/ID form section (React Hook Form + Zod `deviceSettingsSchema`)
+- Settings form: requestInterval (number), vibrationThreshold (number)
+- Save button with `useUpdateDeviceSettings` mutation
+- Danger zone: delete device with ConfirmDialog
+
+---
+
+## FE-039: Session Vibration Chart Dialog
+
+- Nested Dialog triggered from Sessions Tab card click
+- Shows recharts LineChart: vibration values over session duration
+- Session info header: duration, avg/max/rms stats
+- Close button returns to Sessions Tab
+
+---
+
+## FE-03A: Export Modal
+
+- Nested Dialog triggered from header export dropdown
+- Fields: date range (DateRangePicker), export type (sessions/errors/telemetry), format (CSV/Excel)
+- Submit triggers `POST /exports` job
+- Toast: "Đang tạo báo cáo..."
+
+
+
 
 ## FE-03D: Device Filters
 

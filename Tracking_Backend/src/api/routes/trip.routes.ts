@@ -9,6 +9,7 @@ router.use(requireAuth);
 
 router.get('/', tripController.listTrips);
 router.get('/:id', tripController.getTrip);
+router.get('/:id/telemetry', tripController.getTripTelemetry);
 router.post('/', tripController.createTrip);
 router.put('/:id', tripController.updateTrip);
 router.delete('/:id', tripController.deleteTrip);

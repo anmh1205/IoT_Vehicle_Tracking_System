@@ -18,6 +18,7 @@ Before writing a single line of code, you **MUST** verify:
 6. **Sub-plan là AUTHORITATIVE**: Agent ĐỌC sub-plan TRƯỚC (4A, 4B, etc.), sub-plan chứa inline code patterns đầy đủ — KHÔNG cần cross-reference file khác
 7. **Auth**: Zustand store (memory-only). KHÔNG localStorage, KHÔNG React Context. Cookie chỉ cho middleware
 8. **Charts**: recharts ONLY. KHÔNG ECharts
+9. **UI Enhancement Plans**: Xem `SystemDesign/enhance/` cho kế hoạch nâng cấp UI chi tiết dựa trên IVM26 reference
 9. **Geofence editor**: `@geoman-io/leaflet-geoman-free`. KHÔNG `react-leaflet-draw`
 10. **Icons**: lucide-react. KHÔNG `@tabler/icons-react`
 
