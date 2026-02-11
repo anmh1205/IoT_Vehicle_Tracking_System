@@ -1,14 +1,11 @@
 ﻿'use client';
-
 import L from 'leaflet';
 import { Marker, Popup } from 'react-leaflet';
-
 const STATUS_LABELS: Record<string, string> = {
   running: 'Đang chạy',
   stopped: 'Dừng',
   disconnected: 'Mất kết nối',
 };
-
 const makeIcon = (status: string) =>
   L.divIcon({
     className: 'vehicle-marker',
@@ -16,16 +13,27 @@ const makeIcon = (status: string) =>
     iconSize: [14, 14],
     iconAnchor: [7, 7],
   });
-
-export function VehicleMarker({ position, onSelect }: { position: any; onSelect: (id: string) => void }) {
+export const VehicleMarker = ({
+  position,
+  onSelect,
+}: {
+  position: any;
+  onSelect: (id: string) => void;
+}) => {
   return (
-    <Marker position={[position.lat, position.lon]} icon={makeIcon(position.status)} eventHandlers={{ click: () => onSelect(position.deviceId) }}>
+    <Marker
+      position={[position.lat, position.lon]}
+      icon={makeIcon(position.status)}
+      eventHandlers={{ click: () => onSelect(position.deviceId) }}
+    >
       <Popup>
         <div className="text-sm">
           <div className="font-medium">{position.deviceName}</div>
-          <div>{STATUS_LABELS[position.status] ?? position.status} - {position.speed} km/h</div>
+          <div>
+            {STATUS_LABELS[position.status] ?? position.status} - {position.speed} km/h
+          </div>
         </div>
       </Popup>
     </Marker>
   );
-}
+};

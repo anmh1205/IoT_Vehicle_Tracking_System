@@ -2,7 +2,11 @@ import { generateToken } from '@/shared/utils/crypto.util';
 import { createNotFoundError, createConflictError } from '@/shared/utils/errors.util';
 import * as deviceRepo from '@/domain/device/repositories/device.repository';
 import { logger } from '@/infrastructure/logger';
-import type { CreateDeviceInput, UpdateDeviceInput, DevicePublic } from '@/domain/device/types/device.types';
+import type {
+  CreateDeviceInput,
+  UpdateDeviceInput,
+  DevicePublic,
+} from '@/domain/device/types/device.types';
 import type { Device } from '@/domain/device/types/device.types';
 
 const sanitizeDevice = (device: Device): DevicePublic => ({
@@ -36,10 +40,7 @@ export const createDevice = async (
   };
 };
 
-export const updateDevice = async (
-  id: number,
-  input: UpdateDeviceInput,
-): Promise<DevicePublic> => {
+export const updateDevice = async (id: number, input: UpdateDeviceInput): Promise<DevicePublic> => {
   const existing = await deviceRepo.findById(id);
   if (!existing) {
     throw createNotFoundError(`Device with ID ${id} not found`);
@@ -64,9 +65,7 @@ export const deleteDevice = async (id: number): Promise<void> => {
   logger.info(`Device "${existing.device_id}" deleted successfully`);
 };
 
-export const regenerateToken = async (
-  id: number,
-): Promise<{ authToken: string }> => {
+export const regenerateToken = async (id: number): Promise<{ authToken: string }> => {
   const existing = await deviceRepo.findById(id);
   if (!existing) {
     throw createNotFoundError(`Device with ID ${id} not found`);

@@ -1,7 +1,6 @@
 ﻿import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-
-export default function NotFoundPage() {
+const NotFoundPage = () => {
   return (
     <div className="flex h-screen flex-col items-center justify-center gap-4">
       <h1 className="text-6xl font-bold">404</h1>
@@ -11,5 +10,5 @@ export default function NotFoundPage() {
       </Button>
     </div>
   );
-}
-
+};
+export default NotFoundPage;

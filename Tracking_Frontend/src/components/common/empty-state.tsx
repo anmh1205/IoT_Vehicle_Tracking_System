@@ -1,19 +1,20 @@
 ﻿import { Button } from '@/components/ui/button';
 import { InboxIcon } from 'lucide-react';
-
 interface EmptyStateProps {
   icon?: React.ReactNode;
   title?: string;
   description?: string;
-  action?: { label: string; onClick: () => void };
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
-
-export function EmptyState({
+export const EmptyState = ({
   icon,
   title = 'Không có dữ liệu',
   description,
   action,
-}: EmptyStateProps) {
+}: EmptyStateProps) => {
   return (
     <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
       <div className="text-muted-foreground">{icon || <InboxIcon className="h-10 w-10" />}</div>
@@ -26,5 +27,4 @@ export function EmptyState({
       )}
     </div>
   );
-}
-
+};

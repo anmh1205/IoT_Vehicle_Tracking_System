@@ -14,7 +14,7 @@ interface LogEntry {
 /**
  * Write a structured JSON log entry to VictoriaLogs via the jsonline endpoint.
  */
-export async function writeLog(entry: LogEntry): Promise<void> {
+export const writeLog = async (entry: LogEntry): Promise<void> => {
   try {
     const response = await fetch(INSERT_URL, {
       method: 'POST',
@@ -28,17 +28,17 @@ export async function writeLog(entry: LogEntry): Promise<void> {
   } catch (err) {
     logger.error({ err }, 'VictoriaLogs write error');
   }
-}
+};
 
 /**
  * Write a device event log entry.
  */
-export async function writeDeviceEvent(
+export const writeDeviceEvent = async (
   deviceId: string,
   eventType: string,
   message: string,
   extra: Record<string, unknown> = {},
-): Promise<void> {
+): Promise<void> => {
   await writeLog({
     _msg: message,
     _time: new Date().toISOString(),
@@ -47,4 +47,4 @@ export async function writeDeviceEvent(
     event_type: eventType,
     ...extra,
   });
-}
+};

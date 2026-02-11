@@ -76,7 +76,10 @@ export const assignDevice = asyncHandler(async (req: AuthenticatedRequest, res: 
 
   const parsed = assignDeviceSchema.safeParse(req.body);
   if (!parsed.success) {
-    throw createValidationError('Invalid device assignment data', parsed.error.flatten().fieldErrors);
+    throw createValidationError(
+      'Invalid device assignment data',
+      parsed.error.flatten().fieldErrors,
+    );
   }
 
   const vehicle = await vehicleAssignmentService.assignDevice(id, parsed.data.deviceId);
@@ -93,22 +96,24 @@ export const unassignDevice = asyncHandler(async (req: AuthenticatedRequest, res
   sendOk(res, vehicle);
 });
 
-export const setDeviceAssignment = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const id = Number.parseInt(req.params.id, 10);
-  if (Number.isNaN(id)) {
-    throw createValidationError('Invalid vehicle ID');
-  }
+export const setDeviceAssignment = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const id = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      throw createValidationError('Invalid vehicle ID');
+    }
 
-  const deviceId = (req.body?.deviceId as string | null | undefined) ?? null;
-  if (!deviceId) {
-    const vehicle = await vehicleAssignmentService.unassignDevice(id);
+    const deviceId = (req.body?.deviceId as string | null | undefined) ?? null;
+    if (!deviceId) {
+      const vehicle = await vehicleAssignmentService.unassignDevice(id);
+      sendOk(res, vehicle);
+      return;
+    }
+
+    const vehicle = await vehicleAssignmentService.assignDevice(id, deviceId);
     sendOk(res, vehicle);
-    return;
-  }
-
-  const vehicle = await vehicleAssignmentService.assignDevice(id, deviceId);
-  sendOk(res, vehicle);
-});
+  },
+);
 
 export const importVehicles = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const rows = Array.isArray(req.body?.vehicles) ? req.body.vehicles : [];

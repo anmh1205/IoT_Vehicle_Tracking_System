@@ -5,7 +5,10 @@ export const createTripSchema = z.object({
     .string()
     .min(2, 'Trip code must be at least 2 characters')
     .max(50, 'Trip code must not exceed 50 characters')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Trip code can only contain letters, numbers, dashes, and underscores'),
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      'Trip code can only contain letters, numbers, dashes, and underscores',
+    ),
   vehicleId: z.string().max(50).optional(),
   deviceId: z.string().max(50).optional(),
   driverName: z.string().max(200).optional(),

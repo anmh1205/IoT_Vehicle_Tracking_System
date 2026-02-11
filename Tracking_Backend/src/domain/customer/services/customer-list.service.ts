@@ -1,5 +1,9 @@
 import * as customerRepo from '@/domain/customer/repositories/customer.repository';
-import type { Customer, CustomerListQuery, CustomerPublic } from '@/domain/customer/types/customer.types';
+import type {
+  Customer,
+  CustomerListQuery,
+  CustomerPublic,
+} from '@/domain/customer/types/customer.types';
 
 const sanitizeCustomer = (c: Customer): CustomerPublic => ({
   id: c.id,
@@ -19,7 +23,10 @@ const sanitizeCustomer = (c: Customer): CustomerPublic => ({
 
 export const listCustomers = async (
   query: CustomerListQuery,
-): Promise<{ items: CustomerPublic[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> => {
+): Promise<{
+  items: CustomerPublic[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 

@@ -1,23 +1,29 @@
 import { findOne, findMany, insertOne, updateOne } from '@/infrastructure/database/queries';
-import type { ErrorCodeDefinition, CreateErrorCodeInput, UpdateErrorCodeInput } from '@/domain/error-code/types/error-code.types';
+import type {
+  ErrorCodeDefinition,
+  CreateErrorCodeInput,
+  UpdateErrorCodeInput,
+} from '@/domain/error-code/types/error-code.types';
 
 export const findAll = async (): Promise<ErrorCodeDefinition[]> =>
-  findMany<ErrorCodeDefinition>(
-    'SELECT * FROM error_code_definitions ORDER BY code ASC',
-  );
+  findMany<ErrorCodeDefinition>('SELECT * FROM error_code_definitions ORDER BY code ASC');
 
 export const findByCode = async (code: number): Promise<ErrorCodeDefinition | null> =>
-  findOne<ErrorCodeDefinition>(
-    'SELECT * FROM error_code_definitions WHERE code = $1',
-    [code],
-  );
+  findOne<ErrorCodeDefinition>('SELECT * FROM error_code_definitions WHERE code = $1', [code]);
 
 export const create = async (input: CreateErrorCodeInput): Promise<ErrorCodeDefinition> =>
   insertOne<ErrorCodeDefinition>(
     `INSERT INTO error_code_definitions (code, name, name_vi, description, category, severity, is_active, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW())
      RETURNING *`,
-    [input.code, input.name, input.nameVi, input.description ?? null, input.category, input.severity],
+    [
+      input.code,
+      input.name,
+      input.nameVi,
+      input.description ?? null,
+      input.category,
+      input.severity,
+    ],
   );
 
 export const update = async (

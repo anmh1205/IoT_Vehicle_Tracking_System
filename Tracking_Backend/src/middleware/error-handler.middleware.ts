@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { ApiError } from '@/shared/utils/errors.util';
+import { isApiError } from '@/shared/utils/errors.util';
 import { logger } from '@/infrastructure/logger';
 
 export const errorHandler = (
@@ -10,7 +10,7 @@ export const errorHandler = (
 ): void => {
   const correlationId = req.correlationId ?? 'unknown';
 
-  if (err instanceof ApiError) {
+  if (isApiError(err)) {
     logger.warn(`[${correlationId}] ${err.status} ${err.message}`, {
       path: req.path,
       method: req.method,

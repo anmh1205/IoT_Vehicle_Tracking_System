@@ -12,4 +12,3 @@ export const alertSchema = z.object({
 export const alertResolveSchema = z.object({
   resolutionNote: z.string().min(1).max(500),
 });
-

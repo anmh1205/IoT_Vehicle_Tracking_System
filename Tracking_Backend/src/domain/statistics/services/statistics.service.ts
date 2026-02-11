@@ -3,8 +3,13 @@ import {
   getDeviceUptime,
   getAlertFrequency,
   getTripSummary,
+  getSummaryTotals,
 } from '@/domain/statistics/repositories/statistics.repository';
-import type { StatisticsDateRange, StatisticsInterval } from '@/domain/statistics/types/statistics.types';
+import type {
+  StatisticsDateRange,
+  StatisticsInterval,
+  StatisticsSummary,
+} from '@/domain/statistics/types/statistics.types';
 import { createValidationError } from '@/shared/utils/errors.util';
 
 const DEFAULT_RANGE_DAYS = 30;
@@ -95,5 +100,26 @@ export const getTripSummaryStats = async (params: {
     totalTrips: data.map((item) => item.totalTrips),
     totalDistanceKm: data.map((item) => item.totalDistanceKm),
     avgDuration: data.map((item) => item.avgDurationMinutes),
+  };
+};
+
+export const getSummaryStats = async (params: {
+  from?: string;
+  to?: string;
+}): Promise<StatisticsSummary> => {
+  const range = parseRange(params.from, params.to);
+
+  const [totals, uptime] = await Promise.all([getSummaryTotals(range), getDeviceUptime(range)]);
+
+  const averageUptimePercent =
+    uptime.length > 0
+      ? uptime.reduce((sum, item) => sum + item.uptimePercent, 0) / uptime.length
+      : 0;
+
+  return {
+    totalRuntimeHours: Number(totals.totalRuntimeHours.toFixed(2)),
+    averageUptimePercent: Number(averageUptimePercent.toFixed(2)),
+    totalSessions: totals.totalSessions,
+    totalAlerts: totals.totalAlerts,
   };
 };

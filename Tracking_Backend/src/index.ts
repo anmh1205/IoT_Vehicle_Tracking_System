@@ -31,12 +31,14 @@ app.use(helmet());
 app.use(compression());
 
 // 4. CORS
-app.use(cors({
-  origin: corsConfig.origin,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
-}));
+app.use(
+  cors({
+    origin: corsConfig.origin,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+  }),
+);
 
 // 5. Body parsing
 app.use(express.json({ limit: '100kb' }));

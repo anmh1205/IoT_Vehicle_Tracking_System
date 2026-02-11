@@ -1,9 +1,7 @@
 ﻿'use client';
-
 import { NotificationDropdown } from './notification-dropdown';
 import { useRealtimeEvents } from '../hooks/use-realtime-events';
-
-export function NotificationCenter() {
+export const NotificationCenter = () => {
   useRealtimeEvents();
   return <NotificationDropdown />;
-}
+};

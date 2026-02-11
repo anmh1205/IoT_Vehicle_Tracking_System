@@ -2,7 +2,10 @@ import type { Response, NextFunction } from 'express';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { hashToken } from '@/shared/utils/crypto.util';
 import { createUnauthorizedError } from '@/shared/utils/errors.util';
-import { findByHashedToken, extendSession } from '@/domain/auth/repositories/user-session.repository';
+import {
+  findByHashedToken,
+  extendSession,
+} from '@/domain/auth/repositories/user-session.repository';
 import { findById } from '@/domain/auth/repositories/user.repository';
 import { sessionConfig } from '@/config/env';
 

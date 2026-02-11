@@ -33,8 +33,7 @@ export const sendCreated = <T>(res: Response, data: T): Response<SuccessResponse
     timestamp: new Date().toISOString(),
   });
 
-export const sendNoContent = (res: Response): Response =>
-  res.status(204).send();
+export const sendNoContent = (res: Response): Response => res.status(204).send();
 
 export const sendError = (res: Response, error: ApiError, path: string): Response<ErrorResponse> =>
   res.status(error.status).json({

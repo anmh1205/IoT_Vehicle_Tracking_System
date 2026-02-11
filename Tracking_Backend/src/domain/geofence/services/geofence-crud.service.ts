@@ -1,7 +1,12 @@
 import { createNotFoundError } from '@/shared/utils/errors.util';
 import * as geofenceRepo from '@/domain/geofence/repositories/geofence.repository';
 import { logger } from '@/infrastructure/logger';
-import type { Geofence, CreateGeofenceInput, UpdateGeofenceInput, GeofencePublic } from '@/domain/geofence/types/geofence.types';
+import type {
+  Geofence,
+  CreateGeofenceInput,
+  UpdateGeofenceInput,
+  GeofencePublic,
+} from '@/domain/geofence/types/geofence.types';
 
 const sanitizeGeofence = (g: Geofence): GeofencePublic => ({
   id: g.id,
@@ -31,13 +36,19 @@ export const getGeofenceById = async (id: number): Promise<GeofencePublic> => {
   return sanitizeGeofence(geofence);
 };
 
-export const createGeofence = async (input: CreateGeofenceInput, createdBy?: number): Promise<GeofencePublic> => {
+export const createGeofence = async (
+  input: CreateGeofenceInput,
+  createdBy?: number,
+): Promise<GeofencePublic> => {
   const geofence = await geofenceRepo.create(input, createdBy);
   logger.info(`Geofence "${input.name}" created successfully`);
   return sanitizeGeofence(geofence);
 };
 
-export const updateGeofence = async (id: number, input: UpdateGeofenceInput): Promise<GeofencePublic> => {
+export const updateGeofence = async (
+  id: number,
+  input: UpdateGeofenceInput,
+): Promise<GeofencePublic> => {
   const existing = await geofenceRepo.findById(id);
   if (!existing) {
     throw createNotFoundError(`Geofence with ID ${id} not found`);
@@ -62,7 +73,10 @@ export const deleteGeofence = async (id: number): Promise<void> => {
   logger.info(`Geofence "${existing.name}" deleted successfully`);
 };
 
-export const assignVehicleToGeofence = async (geofenceId: number, vehicleId: string): Promise<{ success: true }> => {
+export const assignVehicleToGeofence = async (
+  geofenceId: number,
+  vehicleId: string,
+): Promise<{ success: true }> => {
   const geofence = await geofenceRepo.findById(geofenceId);
   if (!geofence) {
     throw createNotFoundError(`Geofence with ID ${geofenceId} not found`);
@@ -73,7 +87,10 @@ export const assignVehicleToGeofence = async (geofenceId: number, vehicleId: str
   return { success: true };
 };
 
-export const unassignVehicleFromGeofence = async (geofenceId: number, vehicleId: string): Promise<{ success: true }> => {
+export const unassignVehicleFromGeofence = async (
+  geofenceId: number,
+  vehicleId: string,
+): Promise<{ success: true }> => {
   const geofence = await geofenceRepo.findById(geofenceId);
   if (!geofence) {
     throw createNotFoundError(`Geofence with ID ${geofenceId} not found`);

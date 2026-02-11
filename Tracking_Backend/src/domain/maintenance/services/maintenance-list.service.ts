@@ -1,5 +1,9 @@
 import * as maintenanceRepo from '@/domain/maintenance/repositories/maintenance.repository';
-import type { Maintenance, MaintenanceListQuery, MaintenancePublic } from '@/domain/maintenance/types/maintenance.types';
+import type {
+  Maintenance,
+  MaintenanceListQuery,
+  MaintenancePublic,
+} from '@/domain/maintenance/types/maintenance.types';
 
 const sanitizeMaintenance = (m: Maintenance): MaintenancePublic => ({
   id: m.id,
@@ -23,7 +27,10 @@ const sanitizeMaintenance = (m: Maintenance): MaintenancePublic => ({
 
 export const listMaintenance = async (
   query: MaintenanceListQuery,
-): Promise<{ items: MaintenancePublic[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> => {
+): Promise<{
+  items: MaintenancePublic[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 

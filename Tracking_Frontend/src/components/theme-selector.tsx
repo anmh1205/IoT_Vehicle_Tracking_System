@@ -1,5 +1,4 @@
 ﻿'use client';
-
 import { useThemeConfig } from '@/components/active-theme';
 import { Label } from '@/components/ui/label';
 import {
@@ -12,24 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
 const DEFAULT_THEMES = [
   { name: 'Mặc định', value: 'default' },
   { name: 'Xanh dương', value: 'blue' },
   { name: 'Xanh lá', value: 'green' },
   { name: 'Vàng cam', value: 'amber' },
 ];
-
 const SCALED_THEMES = [
   { name: 'Mặc định', value: 'default-scaled' },
   { name: 'Xanh dương', value: 'blue-scaled' },
 ];
-
 const MONO_THEMES = [{ name: 'Đơn sắc', value: 'mono-scaled' }];
-
-export function ThemeSelector() {
+export const ThemeSelector = () => {
   const { activeTheme, setActiveTheme } = useThemeConfig();
-
   return (
     <div className="flex items-center gap-2">
       <Label htmlFor="theme-selector" className="sr-only">
@@ -76,7 +70,4 @@ export function ThemeSelector() {
       </Select>
     </div>
   );
-}
-
-
-
+};

@@ -23,7 +23,12 @@ const metricsAuth = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Basic ')) {
       res.setHeader('WWW-Authenticate', 'Basic realm="Metrics"');
-      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+      res
+        .status(401)
+        .json({
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
+        });
       return;
     }
 
@@ -32,7 +37,9 @@ const metricsAuth = (req: Request, res: Response, next: NextFunction): void => {
     const [, pwd] = decoded.split(':');
 
     if (pwd !== password) {
-      res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Invalid credentials' } });
+      res
+        .status(403)
+        .json({ success: false, error: { code: 'FORBIDDEN', message: 'Invalid credentials' } });
       return;
     }
   }

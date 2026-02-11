@@ -1,5 +1,9 @@
 import * as vehicleRepo from '@/domain/vehicle/repositories/vehicle.repository';
-import type { Vehicle, VehicleListQuery, VehiclePublic } from '@/domain/vehicle/types/vehicle.types';
+import type {
+  Vehicle,
+  VehicleListQuery,
+  VehiclePublic,
+} from '@/domain/vehicle/types/vehicle.types';
 
 const sanitizeVehicle = (v: Vehicle): VehiclePublic => ({
   id: v.id,
@@ -29,7 +33,10 @@ const sanitizeVehicle = (v: Vehicle): VehiclePublic => ({
 
 export const listVehicles = async (
   query: VehicleListQuery,
-): Promise<{ items: VehiclePublic[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> => {
+): Promise<{
+  items: VehiclePublic[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 

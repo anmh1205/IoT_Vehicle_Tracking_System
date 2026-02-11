@@ -13,7 +13,10 @@ export const createGeofenceSchema = z.object({
   triggerOn: z.enum(['enter', 'exit', 'both']).optional(),
   notifyEmail: z.boolean().optional(),
   notifyPush: z.boolean().optional(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color').optional(),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color')
+    .optional(),
   description: z.string().max(500).optional(),
 });
 

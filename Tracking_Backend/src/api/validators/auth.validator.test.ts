@@ -27,4 +27,3 @@ describe('auth.validator', () => {
     expect(parsed.status).toBe('inactive');
   });
 });
-

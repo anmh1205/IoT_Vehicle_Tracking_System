@@ -16,10 +16,10 @@ const TOPIC_MAP: Record<InternalEventType, string> = {
  * Publish an internal event to EMQX for Backend consumption.
  * Uses QoS mapping: 1 for critical events, 0 for telemetry data.
  */
-export function publishInternalEvent(
+export const publishInternalEvent = (
   eventType: InternalEventType,
   payload: Record<string, unknown>,
-): void {
+): void => {
   const client = getClient();
   if (!client?.connected) {
     logger.warn(`Cannot publish internal event ${eventType}: MQTT not connected`);
@@ -42,4 +42,4 @@ export function publishInternalEvent(
       logger.error({ err, eventType }, 'Failed to publish internal event');
     }
   });
-}
+};

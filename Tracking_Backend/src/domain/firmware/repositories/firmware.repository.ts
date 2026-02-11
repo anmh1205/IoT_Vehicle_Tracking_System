@@ -1,6 +1,16 @@
 import { pool } from '@/infrastructure/database/pool';
-import { findOne, findMany, insertOne, updateOne, deleteOne } from '@/infrastructure/database/queries';
-import type { Firmware, CreateFirmwareInput, FirmwareListQuery } from '@/domain/firmware/types/firmware.types';
+import {
+  findOne,
+  findMany,
+  insertOne,
+  updateOne,
+  deleteOne,
+} from '@/infrastructure/database/queries';
+import type {
+  Firmware,
+  CreateFirmwareInput,
+  FirmwareListQuery,
+} from '@/domain/firmware/types/firmware.types';
 
 interface CountRow {
   count: string;

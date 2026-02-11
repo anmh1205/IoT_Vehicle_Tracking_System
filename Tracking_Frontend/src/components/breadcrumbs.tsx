@@ -10,11 +10,9 @@ import {
 import { useBreadcrumbs } from '@/hooks/use-breadcrumbs';
 import { Slash } from 'lucide-react';
 import { Fragment } from 'react';
-
-export function Breadcrumbs() {
+export const Breadcrumbs = () => {
   const items = useBreadcrumbs();
   if (items.length === 0) return null;
-
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -30,12 +28,10 @@ export function Breadcrumbs() {
                 <Slash />
               </BreadcrumbSeparator>
             )}
-            {index === items.length - 1 && (
-              <BreadcrumbPage>{item.title}</BreadcrumbPage>
-            )}
+            {index === items.length - 1 && <BreadcrumbPage>{item.title}</BreadcrumbPage>}
           </Fragment>
         ))}
       </BreadcrumbList>
     </Breadcrumb>
   );
-}
+};

@@ -5,7 +5,10 @@ export const createCustomerSchema = z.object({
     .string()
     .min(2, 'Customer code must be at least 2 characters')
     .max(50, 'Customer code must not exceed 50 characters')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Customer code can only contain letters, numbers, dashes, and underscores'),
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      'Customer code can only contain letters, numbers, dashes, and underscores',
+    ),
   name: z
     .string()
     .min(2, 'Name must be at least 2 characters')

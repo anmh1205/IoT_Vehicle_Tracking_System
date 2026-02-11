@@ -1,6 +1,13 @@
-﻿import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deviceServices } from '@/lib/api/devices';
-import { toast } from 'sonner';
+import { notificationUtils } from '@/lib/notification';
+import { queryInvalidation } from '@/lib/utils/query-invalidation';
+
+const getErrorMessage = (error: any): string =>
+  error?.response?.data?.error?.message ??
+  error?.response?.data?.message ??
+  error?.message ??
+  'Không thể gửi lệnh';
 
 export const useSendCommand = (deviceId: number | string) => {
   const queryClient = useQueryClient();
@@ -8,10 +15,11 @@ export const useSendCommand = (deviceId: number | string) => {
     mutationFn: (payload: { command: string; params?: Record<string, unknown> }) =>
       deviceServices.sendCommand(deviceId, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['device-commands', deviceId] });
-      toast.success('Da gui lenh');
+      queryInvalidation.device.commands(queryClient, deviceId);
+      notificationUtils.success('Đã gửi lệnh');
     },
-    onError: (error: any) => toast.error(error?.message ?? 'Không thể gửi lệnh'),
+    onError: (error: unknown) => {
+      notificationUtils.error('Gửi lệnh thất bại', getErrorMessage(error));
+    },
   });
 };
-

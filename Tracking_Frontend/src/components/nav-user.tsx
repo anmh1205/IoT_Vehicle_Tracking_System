@@ -1,5 +1,4 @@
 ﻿'use client';
-
 import { ChevronDown, LogOut, UserCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/auth-store';
@@ -20,15 +19,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-
-export function NavUser() {
+export const NavUser = () => {
   const { isMobile } = useSidebar();
   const router = useRouter();
   const { user, clearAuth } = useAuthStore();
-
   const displayName = user?.fullName || user?.username || 'Người dùng';
   const email = user?.email || user?.username || '';
-
   const handleLogout = async () => {
     try {
       await authServices.logout();
@@ -39,7 +35,6 @@ export function NavUser() {
       router.replace('/login');
     }
   };
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -109,5 +104,4 @@ export function NavUser() {
       </SidebarMenuItem>
     </SidebarMenu>
   );
-}
-
+};

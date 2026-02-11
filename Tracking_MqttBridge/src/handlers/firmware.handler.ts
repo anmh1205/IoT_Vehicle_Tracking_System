@@ -7,10 +7,10 @@ import { logger } from '../infrastructure/logger';
  * Handle firmware update progress on topic v1/{deviceId}/firmware.
  * Logs firmware update status to the firmware_update_log table.
  */
-export async function handleFirmware(
+export const handleFirmware = async (
   deviceIdFromTopic: string,
   message: Buffer,
-): Promise<void> {
+): Promise<void> => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(message.toString());
@@ -78,4 +78,4 @@ export async function handleFirmware(
     `v${payload.targetVersion} (${payload.progress ?? 0}%)` +
     (payload.error ? ` error=${payload.error}` : ''),
   );
-}
+};

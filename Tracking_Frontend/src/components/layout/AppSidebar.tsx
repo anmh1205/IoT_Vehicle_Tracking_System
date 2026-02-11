@@ -1,10 +1,5 @@
 ﻿'use client';
-
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Sidebar,
   SidebarContent,
@@ -26,12 +21,10 @@ import { ChevronRight, Car } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NavUser } from '@/components/nav-user';
-
-export default function AppSidebar() {
+const AppSidebar = () => {
   const pathname = usePathname();
   const mainItems = useFilteredNavItems(navConfig.main);
   const secondaryItems = useFilteredNavItems(navConfig.secondary);
-
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -120,5 +113,5 @@ export default function AppSidebar() {
       <SidebarRail />
     </Sidebar>
   );
-}
-
+};
+export default AppSidebar;

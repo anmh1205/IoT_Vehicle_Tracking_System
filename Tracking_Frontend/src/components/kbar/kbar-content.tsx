@@ -1,9 +1,7 @@
 import { KBarResults, useMatches } from 'kbar';
 import ResultItem from './result-item';
-
-export default function KBarContent() {
+const KBarContent = () => {
   const { results, rootActionId } = useMatches();
-
   return (
     <KBarResults
       items={results}
@@ -16,4 +14,5 @@ export default function KBarContent() {
       }
     />
   );
-}
+};
+export default KBarContent;

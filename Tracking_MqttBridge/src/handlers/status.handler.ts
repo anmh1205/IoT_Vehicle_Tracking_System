@@ -12,10 +12,10 @@ import { logger } from '../infrastructure/logger';
  * - running  -> Create or continue session, publish session event
  * - stopped  -> End current session, publish session event
  */
-export async function handleStatus(
+export const handleStatus = async (
   deviceIdFromTopic: string,
   message: Buffer,
-): Promise<void> {
+): Promise<void> => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(message.toString());
@@ -107,4 +107,4 @@ export async function handleStatus(
     previous_status: previousStatus,
     current_status: payload.status,
   });
-}
+};

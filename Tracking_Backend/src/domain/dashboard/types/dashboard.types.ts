@@ -27,3 +27,21 @@ export interface ActivityQuery {
   eventType?: string;
   severity?: string;
 }
+
+export interface DashboardDeviceActivityPoint {
+  label: string;
+  running: number;
+  idle: number;
+  offline: number;
+}
+
+export interface DashboardDeviceStatusPoint {
+  name: string;
+  value: number;
+  color?: string;
+}
+
+export interface DashboardFleetRuntimePoint {
+  label: string;
+  runtime: number;
+}

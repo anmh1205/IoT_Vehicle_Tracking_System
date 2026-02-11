@@ -1,5 +1,9 @@
 import * as firmwareRepo from '@/domain/firmware/repositories/firmware.repository';
-import type { Firmware, FirmwarePublic, FirmwareListQuery } from '@/domain/firmware/types/firmware.types';
+import type {
+  Firmware,
+  FirmwarePublic,
+  FirmwareListQuery,
+} from '@/domain/firmware/types/firmware.types';
 import { createNotFoundError } from '@/shared/utils/errors.util';
 
 const sanitizeFirmware = (fw: Firmware): FirmwarePublic => ({

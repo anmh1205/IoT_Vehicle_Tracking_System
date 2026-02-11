@@ -21,3 +21,20 @@ export const getActivity = asyncHandler(async (req: AuthenticatedRequest, res: R
   const result = await dashboardStatsService.getActivity(query);
   sendOk(res, result);
 });
+
+export const getDeviceActivity = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const days = req.query.days ? Number.parseInt(req.query.days as string, 10) : 7;
+  const items = await dashboardStatsService.getDeviceActivity(days);
+  sendOk(res, { items });
+});
+
+export const getDeviceStatus = asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
+  const items = await dashboardStatsService.getDeviceStatus();
+  sendOk(res, { items });
+});
+
+export const getFleetRuntime = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const days = req.query.days ? Number.parseInt(req.query.days as string, 10) : 30;
+  const items = await dashboardStatsService.getFleetRuntime(days);
+  sendOk(res, { items });
+});

@@ -10,7 +10,7 @@ const CLIENT_ID = 'mqtt-bridge-production';
  * Connect to EMQX broker with persistent session.
  * Supports both MQTT and MQTTS based on config.
  */
-export function connectMqtt(): Promise<MqttClient> {
+export const connectMqtt = (): Promise<MqttClient> => {
   return new Promise((resolve, reject) => {
     const protocol = mqttConfig.useTls ? 'mqtts' : 'mqtt';
     const port = mqttConfig.useTls ? mqttConfig.tlsPort : mqttConfig.port;
@@ -57,12 +57,12 @@ export function connectMqtt(): Promise<MqttClient> {
       logger.warn('MQTT client offline');
     });
   });
-}
+};
 
 /**
  * Disconnect MQTT client gracefully.
  */
-export function disconnectMqtt(): Promise<void> {
+export const disconnectMqtt = (): Promise<void> => {
   return new Promise((resolve) => {
     if (!client) {
       resolve();
@@ -74,24 +74,24 @@ export function disconnectMqtt(): Promise<void> {
       resolve();
     });
   });
-}
+};
 
 /**
  * Get the current MQTT client instance.
  */
-export function getClient(): MqttClient | null {
+export const getClient = (): MqttClient | null => {
   return client;
-}
+};
 
 /**
  * Publish a message to a device-specific topic.
  */
-export function publishToDevice(
+export const publishToDevice = (
   deviceId: string,
   topic: string,
   payload: Record<string, unknown>,
   qos: 0 | 1 | 2 = 1,
-): void {
+): void => {
   if (!client?.connected) {
     logger.warn(`Cannot publish to ${topic}: MQTT not connected`);
     return;
@@ -103,4 +103,4 @@ export function publishToDevice(
       logger.error({ err, topic: fullTopic }, 'Failed to publish to device');
     }
   });
-}
+};

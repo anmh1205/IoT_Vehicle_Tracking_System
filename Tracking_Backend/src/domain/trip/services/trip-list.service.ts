@@ -28,7 +28,10 @@ const sanitizeTrip = (t: Trip): TripPublic => ({
 
 export const listTrips = async (
   query: TripListQuery,
-): Promise<{ items: TripPublic[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> => {
+): Promise<{
+  items: TripPublic[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 

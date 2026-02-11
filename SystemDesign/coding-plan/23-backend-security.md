@@ -367,29 +367,27 @@ interface LoginResponse {
   session: { token: string; expiresAt: Date };
 }
 
-export class AuthSessionService {
-  constructor(
-    private userRepo: UserRepository,
-    private userSessionRepo: UserSessionRepository,
-    private auditService?: AuditService
-  ) {}
-
+export const createAuthSessionService = (
+  userRepo: UserRepository,
+  userSessionRepo: UserSessionRepository,
+  auditService?: AuditService
+) => {
   /**
    * Validates session token and extends expiry (sliding expiration)
    * Called on every authenticated request
    */
-  async validateSessionToken(token: string): Promise<AuthenticatedUser | null> {
+  const validateSessionToken = async (token: string): Promise<AuthenticatedUser | null> => {
     if (!token) return null;
 
     const hashedToken = hashToken(token);
 
     // Find active session in database (lookup by hashed token)
-    const session = await this.userSessionRepo.findActiveSessionByToken(hashedToken);
+    const session = await userSessionRepo.findActiveSessionByToken(hashedToken);
     if (!session) return null;
 
     // Check if session expired
     if (new Date() > session.expires_at) {
-      await this.userSessionRepo.deactivateSession(hashedToken);
+      await userSessionRepo.deactivateSession(hashedToken);
       return null;
     }
 
@@ -397,13 +395,13 @@ export class AuthSessionService {
     const MAX_SESSION_LIFETIME_HOURS = 24;
     const sessionAge = Date.now() - new Date(session.created_at).getTime();
     if (sessionAge > MAX_SESSION_LIFETIME_HOURS * 60 * 60 * 1000) {
-      await this.userSessionRepo.deactivateSession(hashedToken);
+      await userSessionRepo.deactivateSession(hashedToken);
       return null;
     }
 
     // Extend session expiry (sliding window)
     const newExpiry = addHours(new Date(), SESSION_EXTENSION_HOURS);
-    await this.userSessionRepo.updateExpiry(hashedToken, newExpiry);
+    await userSessionRepo.updateExpiry(hashedToken, newExpiry);
 
     return {
       id: session.user_id,
@@ -413,21 +411,21 @@ export class AuthSessionService {
       deviceAccessMode: session.device_access_mode,
       sessionExpiresAt: newExpiry,
     };
-  }
+  };
 
   /**
    * Login user and create session
    */
-  async loginUser(
+  const loginUser = async (
     username: string,
     credential: string, // SHA-256 hashed password from client
     auditCtx?: AuditContext
-  ): Promise<LoginResponse> {
-    const user = await this.userRepo.findByUsername(username.trim());
+  ): Promise<LoginResponse> => {
+    const user = await userRepo.findByUsername(username.trim());
 
     // Generic error to prevent username enumeration
     if (!user) {
-      await this.auditService?.logLoginFailed(
+      await auditService?.logLoginFailed(
         auditCtx?.ip || 'unknown',
         username,
         'User not found'
@@ -437,7 +435,7 @@ export class AuthSessionService {
 
     // Check account status
     if (user.status !== 'active') {
-      await this.auditService?.logLoginFailed(
+      await auditService?.logLoginFailed(
         auditCtx?.ip || 'unknown',
         username,
         'Account inactive'
@@ -448,7 +446,7 @@ export class AuthSessionService {
     // Verify password with bcrypt
     const passwordMatches = await bcrypt.compare(credential, user.password_hash);
     if (!passwordMatches) {
-      await this.auditService?.logLoginFailed(
+      await auditService?.logLoginFailed(
         auditCtx?.ip || 'unknown',
         username,
         'Wrong password'
@@ -461,7 +459,7 @@ export class AuthSessionService {
     const expiresAt = addHours(new Date(), SESSION_EXTENSION_HOURS);
 
     // Store hashed token in database (raw token is only returned to client)
-    await this.userSessionRepo.createSession({
+    await userSessionRepo.createSession({
       userId: user.id,
       sessionToken: hashToken(sessionToken),
       expiresAt,
@@ -470,7 +468,7 @@ export class AuthSessionService {
     });
 
     // Audit log
-    await this.auditService?.logLoginSuccess({
+    await auditService?.logLoginSuccess({
       userId: user.id,
       username: user.username,
       ip: auditCtx?.ip,
@@ -493,27 +491,34 @@ export class AuthSessionService {
         expiresAt,
       },
     };
-  }
+  };
 
   /**
    * Logout and invalidate session
    */
-  async logoutSession(token: string, auditCtx?: AuditContext): Promise<boolean> {
-    const result = await this.userSessionRepo.deactivateSession(hashToken(token));
+  const logoutSession = async (token: string, auditCtx?: AuditContext): Promise<boolean> => {
+    const result = await userSessionRepo.deactivateSession(hashToken(token));
     if (result && auditCtx) {
-      await this.auditService?.logLogout(auditCtx);
+      await auditService?.logLogout(auditCtx);
     }
     return result;
-  }
+  };
 
   /**
    * Logout all sessions for a user (security: password change, etc.)
    */
-  async logoutAllSessions(userId: number): Promise<void> {
-    await this.userSessionRepo.deactivateAllUserSessions(userId);
+  const logoutAllSessions = async (userId: number): Promise<void> => {
+    await userSessionRepo.deactivateAllUserSessions(userId);
     logger.info(`All sessions invalidated for user ${userId}`);
-  }
-}
+  };
+
+  return {
+    validateSessionToken,
+    loginUser,
+    logoutSession,
+    logoutAllSessions,
+  };
+};
 ```
 
 ### 6.2 Auth Middleware (IVM26 Pattern)
@@ -521,14 +526,15 @@ export class AuthSessionService {
 ```typescript
 // middleware/auth.middleware.ts
 import { Request, Response, NextFunction } from 'express';
-import { AuthSessionService } from '@/domain/auth/services/auth-session.service';
+import { createAuthSessionService } from '@/domain/auth/services/auth-session.service';
+import { createUserSessionRepository } from '@/domain/auth/repositories/user-session.repository';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { createUnauthorizedError, createForbiddenError } from '@/shared/utils/errors.util';
 
 // Initialize services (dependency injection in production)
-const authSessionService = new AuthSessionService(
+const authSessionService = createAuthSessionService(
   new UserRepository(),
-  new UserSessionRepository(),
+  createUserSessionRepository(),
   new AuditService()
 );
 
@@ -684,17 +690,17 @@ interface CreateSessionInput {
   userAgent?: string;
 }
 
-export class UserSessionRepository {
-  async createSession(input: CreateSessionInput): Promise<void> {
+export const createUserSessionRepository = () => {
+  const createSession = async (input: CreateSessionInput): Promise<void> => {
     const pool = getPool();
     await pool.query(
       `INSERT INTO user_sessions (user_id, session_token, expires_at, ip_address, user_agent)
        VALUES ($1, $2, $3, $4, $5)`,
       [input.userId, input.sessionToken, input.expiresAt, input.ip, input.userAgent]
     );
-  }
+  };
 
-  async findActiveSessionByToken(token: string) {
+  const findActiveSessionByToken = async (token: string) => {
     const pool = getPool();
     const result = await pool.query(
       `SELECT us.*, u.username, u.full_name, u.role, u.device_access_mode
@@ -706,33 +712,41 @@ export class UserSessionRepository {
       [token]
     );
     return result.rows[0] || null;
-  }
+  };
 
-  async updateExpiry(token: string, newExpiry: Date): Promise<void> {
+  const updateExpiry = async (token: string, newExpiry: Date): Promise<void> => {
     const pool = getPool();
     await pool.query(
       `UPDATE user_sessions SET expires_at = $1, updated_at = NOW() WHERE session_token = $2`,
       [newExpiry, token]
     );
-  }
+  };
 
-  async deactivateSession(token: string): Promise<boolean> {
+  const deactivateSession = async (token: string): Promise<boolean> => {
     const pool = getPool();
     const result = await pool.query(
       `UPDATE user_sessions SET is_active = false, updated_at = NOW() WHERE session_token = $1`,
       [token]
     );
     return (result.rowCount ?? 0) > 0;
-  }
+  };
 
-  async deactivateAllUserSessions(userId: number): Promise<void> {
+  const deactivateAllUserSessions = async (userId: number): Promise<void> => {
     const pool = getPool();
     await pool.query(
       `UPDATE user_sessions SET is_active = false, updated_at = NOW() WHERE user_id = $1`,
       [userId]
     );
-  }
-}
+  };
+
+  return {
+    createSession,
+    findActiveSessionByToken,
+    updateExpiry,
+    deactivateSession,
+    deactivateAllUserSessions,
+  };
+};
 ```
 
 ---
@@ -743,18 +757,18 @@ export class UserSessionRepository {
 // domain/auth/services/password.service.ts
 import bcrypt from 'bcryptjs';
 
-export class PasswordService {
-  private readonly saltRounds = 12;
+export const createPasswordService = () => {
+  const saltRounds = 12;
 
-  async hash(password: string): Promise<string> {
-    return bcrypt.hash(password, this.saltRounds);
-  }
+  const hash = async (password: string): Promise<string> => {
+    return bcrypt.hash(password, saltRounds);
+  };
 
-  async verify(password: string, hash: string): Promise<boolean> {
-    return bcrypt.compare(password, hash);
-  }
+  const verify = async (password: string, hashValue: string): Promise<boolean> => {
+    return bcrypt.compare(password, hashValue);
+  };
 
-  validateStrength(password: string): { valid: boolean; errors: string[] } {
+  const validateStrength = (password: string): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
     if (password.length < 8) {
@@ -780,8 +794,14 @@ export class PasswordService {
       valid: errors.length === 0,
       errors,
     };
-  }
-}
+  };
+
+  return {
+    hash,
+    verify,
+    validateStrength,
+  };
+};
 ```
 
 ---
@@ -887,8 +907,8 @@ export function validate(schema: ZodSchema, target: ValidationTarget = 'body') {
 import { Pool } from 'pg';
 
 // ALWAYS use parameterized queries
-export class SafeQueryBuilder {
-  static async findById(pool: Pool, table: string, id: string) {
+export const createSafeQueryBuilder = () => {
+  const findById = async (pool: Pool, table: string, id: string) => {
     // Whitelist allowed tables
     const allowedTables = ['users', 'devices', 'device_sessions'];
     if (!allowedTables.includes(table)) {
@@ -902,13 +922,13 @@ export class SafeQueryBuilder {
     );
 
     return result.rows[0];
-  }
+  };
 
-  static async search(
+  const search = async (
     pool: Pool,
     table: string,
     conditions: Record<string, any>
-  ) {
+  ) => {
     const allowedTables = ['devices', 'users'];
     if (!allowedTables.includes(table)) {
       throw new Error(`Invalid table: ${table}`);
@@ -942,8 +962,13 @@ export class SafeQueryBuilder {
     );
 
     return result.rows;
-  }
-}
+  };
+
+  return {
+    findById,
+    search,
+  };
+};
 ```
 
 ---

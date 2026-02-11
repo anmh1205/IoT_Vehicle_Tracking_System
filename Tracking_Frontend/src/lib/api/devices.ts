@@ -5,13 +5,19 @@ export interface DeviceFilters {
   limit?: number;
   status?: string;
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const deviceServices = {
-  getList: (params?: DeviceFilters) => apiClient.get('/devices', { params }).then((r) => unwrap<any>(r.data)),
-  getById: (id: number | string) => apiClient.get(`/devices/${id}`).then((r) => unwrap<any>(r.data)),
-  create: (data: Record<string, unknown>) => apiClient.post('/devices', data).then((r) => unwrap<any>(r.data)),
-  update: (id: number, data: Record<string, unknown>) => apiClient.put(`/devices/${id}`, data).then((r) => unwrap<any>(r.data)),
+  getList: (params?: DeviceFilters) =>
+    apiClient.get('/devices', { params }).then((r) => unwrap<any>(r.data)),
+  getById: (id: number | string) =>
+    apiClient.get(`/devices/${id}`).then((r) => unwrap<any>(r.data)),
+  create: (data: Record<string, unknown>) =>
+    apiClient.post('/devices', data).then((r) => unwrap<any>(r.data)),
+  update: (id: number, data: Record<string, unknown>) =>
+    apiClient.put(`/devices/${id}`, data).then((r) => unwrap<any>(r.data)),
   delete: (id: number) => apiClient.delete(`/devices/${id}`).then((r) => unwrap<any>(r.data)),
   getSessions: (id: number | string, params?: { page?: number; limit?: number }) =>
     apiClient.get(`/devices/${id}/sessions`, { params }).then((r) => unwrap<any>(r.data)),

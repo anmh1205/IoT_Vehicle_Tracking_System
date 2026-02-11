@@ -284,25 +284,42 @@ interface VictoriaLogsTransportOptions extends Transport.TransportStreamOptions 
   flushInterval?: number;
 }
 
-export class VictoriaLogsTransport extends Transport {
-  private url: string;
-  private buffer: any[] = [];
-  private readonly MAX_BUFFER_SIZE = 10_000;
-  private droppedCount = 0;
-  private batchSize: number;
-  private flushInterval: number;
-  private timer: NodeJS.Timer | null = null;
+export const createVictoriaLogsTransport = (opts: VictoriaLogsTransportOptions) => {
+  let buffer: any[] = [];
+  const MAX_BUFFER_SIZE = 10_000;
+  let droppedCount = 0;
+  const batchSize = opts.batchSize || 100;
+  const flushInterval = opts.flushInterval || 5000;
+  let timer: NodeJS.Timer | null = null;
+  const transport = new Transport(opts);
 
-  constructor(opts: VictoriaLogsTransportOptions) {
-    super(opts);
-    this.url = opts.url;
-    this.batchSize = opts.batchSize || 100;
-    this.flushInterval = opts.flushInterval || 5000;
-    this.startFlushTimer();
-  }
+  const flush = async () => {
+    if (buffer.length === 0) return;
 
-  log(info: any, callback: () => void) {
-    setImmediate(() => this.emit('logged', info));
+    const logs = buffer.splice(0, buffer.length);
+    const body = logs.map(log => JSON.stringify(log)).join('\n');
+
+    try {
+      await fetch(`${opts.url}/insert/jsonline`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+      });
+    } catch (error) {
+      console.error('Failed to send logs to VictoriaLogs:', error);
+      // Re-add logs to buffer for retry
+      buffer.unshift(...logs);
+    }
+  };
+
+  const startFlushTimer = () => {
+    timer = setInterval(() => {
+      void flush();
+    }, flushInterval);
+  };
+
+  (transport as any).log = (info: any, callback: () => void) => {
+    setImmediate(() => transport.emit('logged', info));
 
     const logEntry = {
       _time: new Date().toISOString(),
@@ -311,46 +328,31 @@ export class VictoriaLogsTransport extends Transport {
       ...info.metadata,
     };
 
-    if (this.buffer.length >= this.MAX_BUFFER_SIZE) {
-      this.droppedCount++;
-      if (this.droppedCount % 1000 === 1) {
-        console.warn(`VictoriaLogs buffer full. Dropped ${this.droppedCount} entries total.`);
+    if (buffer.length >= MAX_BUFFER_SIZE) {
+      droppedCount++;
+      if (droppedCount % 1000 === 1) {
+        console.warn(`VictoriaLogs buffer full. Dropped ${droppedCount} entries total.`);
       }
       callback();
       return; // Drop to prevent OOM
     }
-    this.buffer.push(logEntry);
+    buffer.push(logEntry);
 
-    if (this.buffer.length >= this.batchSize) {
-      this.flush();
+    if (buffer.length >= batchSize) {
+      void flush();
     }
 
     callback();
-  }
+  };
 
-  private startFlushTimer() {
-    this.timer = setInterval(() => this.flush(), this.flushInterval);
-  }
+  (transport as any).shutdown = async () => {
+    if (timer) clearInterval(timer);
+    await flush();
+  };
 
-  private async flush() {
-    if (this.buffer.length === 0) return;
-
-    const logs = this.buffer.splice(0, this.buffer.length);
-    const body = logs.map(log => JSON.stringify(log)).join('\n');
-
-    try {
-      await fetch(`${this.url}/insert/jsonline`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body,
-      });
-    } catch (error) {
-      console.error('Failed to send logs to VictoriaLogs:', error);
-      // Re-add logs to buffer for retry
-      this.buffer.unshift(...logs);
-    }
-  }
-}
+  startFlushTimer();
+  return transport;
+};
 ```
 
 ### 3.3 Request Logger Middleware

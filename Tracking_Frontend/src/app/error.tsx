@@ -1,14 +1,11 @@
 'use client';
-
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
-
-export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
+const ErrorPage = ({ error, reset }: { error: Error; reset: () => void }) => {
   useEffect(() => {
     console.error(error);
   }, [error]);
-
   return (
     <div className="flex h-[50vh] flex-col items-center justify-center gap-4">
       <AlertTriangle className="h-12 w-12 text-destructive" />
@@ -17,4 +14,5 @@ export default function ErrorPage({ error, reset }: { error: Error; reset: () =>
       <Button onClick={reset}>Thử lại</Button>
     </div>
   );
-}
+};
+export default ErrorPage;

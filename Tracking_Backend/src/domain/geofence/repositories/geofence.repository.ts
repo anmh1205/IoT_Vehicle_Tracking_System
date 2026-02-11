@@ -1,6 +1,18 @@
-import { findOne, findMany, insertOne, updateOne, deleteOne, executeQuery } from '@/infrastructure/database/queries';
+import {
+  findOne,
+  findMany,
+  insertOne,
+  updateOne,
+  deleteOne,
+  executeQuery,
+} from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
-import type { Geofence, GeofenceListQuery, CreateGeofenceInput, UpdateGeofenceInput } from '@/domain/geofence/types/geofence.types';
+import type {
+  Geofence,
+  GeofenceListQuery,
+  CreateGeofenceInput,
+  UpdateGeofenceInput,
+} from '@/domain/geofence/types/geofence.types';
 
 export const findAll = async (
   query: GeofenceListQuery,
@@ -69,10 +81,7 @@ export const create = async (input: CreateGeofenceInput, createdBy?: number): Pr
     ],
   );
 
-export const update = async (
-  id: number,
-  input: UpdateGeofenceInput,
-): Promise<Geofence | null> => {
+export const update = async (id: number, input: UpdateGeofenceInput): Promise<Geofence | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -151,12 +160,14 @@ export const assignVehicle = async (geofenceId: number, vehicleId: string): Prom
   );
 
 export const unassignVehicle = async (geofenceId: number, vehicleId: string): Promise<boolean> =>
-  deleteOne(
-    'DELETE FROM geofence_vehicles WHERE geofence_id = $1 AND vehicle_id = $2',
-    [geofenceId, vehicleId],
-  );
+  deleteOne('DELETE FROM geofence_vehicles WHERE geofence_id = $1 AND vehicle_id = $2', [
+    geofenceId,
+    vehicleId,
+  ]);
 
-export const findVehiclesByGeofenceId = async (geofenceId: number): Promise<{ vehicle_id: string }[]> =>
+export const findVehiclesByGeofenceId = async (
+  geofenceId: number,
+): Promise<{ vehicle_id: string }[]> =>
   findMany<{ vehicle_id: string }>(
     'SELECT vehicle_id FROM geofence_vehicles WHERE geofence_id = $1',
     [geofenceId],

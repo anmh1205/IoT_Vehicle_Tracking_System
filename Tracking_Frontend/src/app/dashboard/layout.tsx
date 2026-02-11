@@ -7,18 +7,15 @@ import { ThemeSelector } from '@/components/theme-selector';
 import { ModeToggle } from '@/components/mode-toggle';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import { NotificationCenter } from '@/features/notifications/components/notification-center';
+import { NotificationBell } from '@/components/layout/notification-bell';
 import { ConnectionBanner } from '@/components/common/connection-banner';
-
 export const metadata: Metadata = {
   title: 'Bảng điều khiển | Theo dõi phương tiện IoT',
   description: 'Bảng điều khiển hệ thống giám sát phương tiện',
 };
-
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get('sidebar_state')?.value !== 'false';
-
   return (
     <KBar>
       <SidebarProvider defaultOpen={defaultOpen}>
@@ -32,7 +29,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <Breadcrumbs />
             </div>
             <div className="flex items-center gap-2 px-4">
-              <NotificationCenter />
+              <NotificationBell />
               <ThemeSelector />
               <ModeToggle />
             </div>
@@ -42,6 +39,5 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </SidebarProvider>
     </KBar>
   );
-}
-
-
+};
+export default DashboardLayout;

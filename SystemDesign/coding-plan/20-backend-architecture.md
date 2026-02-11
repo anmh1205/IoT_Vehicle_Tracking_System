@@ -458,46 +458,57 @@ app.use(errorHandler);        // Custom error handler SECOND
 
 ```typescript
 // shared/utils/errors.util.ts
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-    public details?: Record<string, unknown>
-  ) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
+export type ApiError = Error & {
+  status: number;
+  details?: Record<string, unknown>;
+};
+
+export const createApiError = (
+  status: number,
+  message: string,
+  details?: Record<string, unknown>
+): ApiError => {
+  const error = new Error(message) as ApiError;
+  error.name = 'ApiError';
+  error.status = status;
+  error.details = details;
+  return error;
+};
+
+export const isApiError = (error: unknown): error is ApiError =>
+  error instanceof Error &&
+  (error as ApiError).name === 'ApiError' &&
+  typeof (error as ApiError).status === 'number';
 
 // Factory functions for common errors
 export const createValidationError = (message: string, details?: unknown) =>
-  new ApiError(400, message, { code: 'VALIDATION_ERROR', details });
+  createApiError(400, message, { code: 'VALIDATION_ERROR', details });
 
 export const createUnauthorizedError = (message: string) =>
-  new ApiError(401, message, { code: 'UNAUTHORIZED' });
+  createApiError(401, message, { code: 'UNAUTHORIZED' });
 
 export const createForbiddenError = (message: string) =>
-  new ApiError(403, message, { code: 'FORBIDDEN' });
+  createApiError(403, message, { code: 'FORBIDDEN' });
 
 export const createNotFoundError = (message: string) =>
-  new ApiError(404, message, { code: 'NOT_FOUND' });
+  createApiError(404, message, { code: 'NOT_FOUND' });
 
 export const createConflictError = (message: string) =>
-  new ApiError(409, message, { code: 'CONFLICT' });
+  createApiError(409, message, { code: 'CONFLICT' });
 ```
 
 ```typescript
 // middleware/error-handler.middleware.ts
 app.use((error: unknown, req: Request, res: Response, _next: NextFunction) => {
   // Handle known API errors
-  if (error instanceof ApiError) {
+  if (isApiError(error)) {
     logger.warn(`API error (${error.status}): ${error.message}`);
     return sendError(res, error, req.originalUrl);
   }
 
   // Handle unexpected errors
   logger.error('Unhandled error:', error);
-  const internalErr = new ApiError(500, 'Internal server error', {
+  const internalErr = createApiError(500, 'Internal server error', {
     code: 'INTERNAL_SERVER_ERROR',
     path: req.originalUrl
   });

@@ -33,7 +33,10 @@ export const deactivateAllForUser = async (userId: number): Promise<number> =>
     [userId],
   );
 
-export const extendSession = async (sessionId: number, extensionHours: number): Promise<boolean> => {
+export const extendSession = async (
+  sessionId: number,
+  extensionHours: number,
+): Promise<boolean> => {
   const count = await executeQuery(
     `UPDATE user_sessions
      SET expires_at = NOW() + INTERVAL '1 hour' * $1

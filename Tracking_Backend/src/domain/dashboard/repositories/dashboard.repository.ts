@@ -26,6 +26,24 @@ interface EventLogRow {
   server_timestamp: Date;
 }
 
+interface DeviceActivityRow {
+  label: string;
+  running: string;
+  idle: string;
+  offline: string;
+}
+
+interface DeviceStatusRow {
+  status_name: string;
+  count: string;
+  color: string;
+}
+
+interface FleetRuntimeRow {
+  label: string;
+  runtime_hours: string;
+}
+
 export const getDeviceStatusCounts = async (): Promise<Record<string, number>> => {
   const result = await pool.query<StatusCountRow>(
     'SELECT current_status, COUNT(*)::text as count FROM devices GROUP BY current_status',
@@ -115,4 +133,133 @@ export const getActivityEvents = async (
   );
 
   return { events, total };
+};
+
+export const getDeviceActivitySeries = async (days: number): Promise<DeviceActivityRow[]> => {
+  const safeDays = Math.max(1, Math.min(days, 90));
+  const fromDate = new Date(Date.now() - (safeDays - 1) * 24 * 60 * 60 * 1000);
+
+  const query = `
+    WITH series AS (
+      SELECT generate_series(
+        DATE_TRUNC('day', $1::timestamptz),
+        DATE_TRUNC('day', NOW()),
+        '1 day'::interval
+      ) AS bucket
+    ),
+    bucketed AS (
+      SELECT
+        DATE_TRUNC('day', server_timestamp) AS bucket,
+        COUNT(*) FILTER (
+          WHERE
+            LOWER(COALESCE(message, '')) LIKE '%offline%'
+            OR LOWER(COALESCE(message, '')) LIKE '%disconnect%'
+            OR LOWER(COALESCE(event_code, '')) = 'device_offline'
+        )::text AS offline,
+        COUNT(*) FILTER (
+          WHERE
+            LOWER(COALESCE(message, '')) LIKE '%idle%'
+            OR LOWER(COALESCE(message, '')) LIKE '%stop%'
+            OR LOWER(COALESCE(event_type, '')) IN ('session_end', 'stopped')
+        )::text AS idle,
+        COUNT(*) FILTER (
+          WHERE
+            NOT (
+              LOWER(COALESCE(message, '')) LIKE '%offline%'
+              OR LOWER(COALESCE(message, '')) LIKE '%disconnect%'
+              OR LOWER(COALESCE(event_code, '')) = 'device_offline'
+              OR LOWER(COALESCE(message, '')) LIKE '%idle%'
+              OR LOWER(COALESCE(message, '')) LIKE '%stop%'
+              OR LOWER(COALESCE(event_type, '')) IN ('session_end', 'stopped')
+            )
+        )::text AS running
+      FROM event_logs
+      WHERE server_timestamp >= DATE_TRUNC('day', $1::timestamptz)
+      GROUP BY bucket
+    )
+    SELECT
+      TO_CHAR(series.bucket, 'YYYY-MM-DD') AS label,
+      COALESCE(bucketed.running, '0') AS running,
+      COALESCE(bucketed.idle, '0') AS idle,
+      COALESCE(bucketed.offline, '0') AS offline
+    FROM series
+    LEFT JOIN bucketed ON bucketed.bucket = series.bucket
+    ORDER BY series.bucket ASC
+  `;
+
+  const result = await pool.query<DeviceActivityRow>(query, [fromDate.toISOString()]);
+  return result.rows;
+};
+
+export const getDeviceStatusDistribution = async (): Promise<DeviceStatusRow[]> => {
+  const query = `
+    WITH grouped AS (
+      SELECT LOWER(COALESCE(current_status, 'unknown')) AS status, COUNT(*)::text AS count
+      FROM devices
+      GROUP BY LOWER(COALESCE(current_status, 'unknown'))
+    )
+    SELECT
+      CASE
+        WHEN status = 'running' THEN 'Running'
+        WHEN status = 'stopped' THEN 'Stopped'
+        WHEN status = 'disconnected' THEN 'Offline'
+        WHEN status = 'error' THEN 'Error'
+        ELSE 'Unknown'
+      END AS status_name,
+      count,
+      CASE
+        WHEN status = 'running' THEN '#22c55e'
+        WHEN status = 'stopped' THEN '#64748b'
+        WHEN status = 'disconnected' THEN '#ef4444'
+        WHEN status = 'error' THEN '#f59e0b'
+        ELSE '#94a3b8'
+      END AS color
+    FROM grouped
+    ORDER BY status_name ASC
+  `;
+
+  const result = await pool.query<DeviceStatusRow>(query);
+  return result.rows;
+};
+
+export const getFleetRuntimeSeries = async (days: number): Promise<FleetRuntimeRow[]> => {
+  const safeDays = Math.max(1, Math.min(days, 180));
+  const fromDate = new Date(Date.now() - (safeDays - 1) * 24 * 60 * 60 * 1000);
+
+  const query = `
+    WITH series AS (
+      SELECT generate_series(
+        DATE_TRUNC('day', $1::timestamptz),
+        DATE_TRUNC('day', NOW()),
+        '1 day'::interval
+      ) AS bucket
+    ),
+    bucketed AS (
+      SELECT
+        DATE_TRUNC('day', COALESCE(server_session_start, created_at)) AS bucket,
+        COALESCE(SUM(
+          CASE
+            WHEN total_runtime_seconds IS NOT NULL THEN total_runtime_seconds
+            WHEN uptime IS NOT NULL THEN uptime
+            ELSE EXTRACT(
+              EPOCH FROM (
+                COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at)
+              )
+            )
+          END
+        ), 0)::text AS runtime_seconds
+      FROM device_sessions
+      WHERE COALESCE(server_session_start, created_at) >= DATE_TRUNC('day', $1::timestamptz)
+      GROUP BY bucket
+    )
+    SELECT
+      TO_CHAR(series.bucket, 'YYYY-MM-DD') AS label,
+      ROUND((COALESCE(bucketed.runtime_seconds, '0')::numeric / 3600.0), 2)::text AS runtime_hours
+    FROM series
+    LEFT JOIN bucketed ON bucketed.bucket = series.bucket
+    ORDER BY series.bucket ASC
+  `;
+
+  const result = await pool.query<FleetRuntimeRow>(query, [fromDate.toISOString()]);
+  return result.rows;
 };

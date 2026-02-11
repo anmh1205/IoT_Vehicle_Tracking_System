@@ -128,7 +128,9 @@ export const downloadFirmware = asyncHandler(async (req: AuthenticatedRequest, r
   }
 
   const firmware = await firmwareListService.getFirmwareById(id);
-  const filename = firmware.filename.endsWith('.bin') ? firmware.filename : `${firmware.filename}.bin`;
+  const filename = firmware.filename.endsWith('.bin')
+    ? firmware.filename
+    : `${firmware.filename}.bin`;
   const content = Buffer.from(`firmware:${firmware.version}:${firmware.id}`, 'utf8');
 
   res.setHeader('Content-Type', 'application/octet-stream');

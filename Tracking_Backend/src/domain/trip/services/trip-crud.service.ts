@@ -1,7 +1,16 @@
-import { createNotFoundError, createConflictError, createValidationError } from '@/shared/utils/errors.util';
+import {
+  createNotFoundError,
+  createConflictError,
+  createValidationError,
+} from '@/shared/utils/errors.util';
 import * as tripRepo from '@/domain/trip/repositories/trip.repository';
 import { logger } from '@/infrastructure/logger';
-import type { Trip, CreateTripInput, UpdateTripInput, TripPublic } from '@/domain/trip/types/trip.types';
+import type {
+  Trip,
+  CreateTripInput,
+  UpdateTripInput,
+  TripPublic,
+} from '@/domain/trip/types/trip.types';
 
 const sanitizeTrip = (t: Trip): TripPublic => ({
   id: t.id,
@@ -79,7 +88,9 @@ export const startTrip = async (id: number): Promise<TripPublic> => {
   }
 
   if (existing.status !== 'planned') {
-    throw createValidationError(`Trip can only be started from "planned" status, current status is "${existing.status}"`);
+    throw createValidationError(
+      `Trip can only be started from "planned" status, current status is "${existing.status}"`,
+    );
   }
 
   const updated = await tripRepo.startTrip(id);
@@ -98,7 +109,9 @@ export const endTrip = async (id: number): Promise<TripPublic> => {
   }
 
   if (existing.status !== 'in_progress') {
-    throw createValidationError(`Trip can only be ended from "in_progress" status, current status is "${existing.status}"`);
+    throw createValidationError(
+      `Trip can only be ended from "in_progress" status, current status is "${existing.status}"`,
+    );
   }
 
   const updated = await tripRepo.endTrip(id);

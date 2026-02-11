@@ -626,44 +626,26 @@ interface BatchUpdate {
   longitude?: number;
 }
 
-class DatabaseBatchService {
-  private buffer: BatchUpdate[] = [];
-  private flushInterval: NodeJS.Timeout | null = null;
-  private readonly BATCH_SIZE = 100;
-  private readonly FLUSH_INTERVAL_MS = 1000;
-  private readonly MAX_BUFFER_SIZE = 10_000;
-  private consecutiveFailures = 0;
-  private readonly MAX_RETRIES = 3;
+export const createDatabaseBatchService = () => {
+  let buffer: BatchUpdate[] = [];
+  let flushInterval: NodeJS.Timeout | null = null;
+  const BATCH_SIZE = 100;
+  const FLUSH_INTERVAL_MS = 1000;
+  const MAX_BUFFER_SIZE = 10_000;
+  let consecutiveFailures = 0;
+  const MAX_RETRIES = 3;
 
-  constructor() {
-    this.startFlushInterval();
-  }
+  const flush = async (): Promise<void> => {
+    if (buffer.length === 0) return;
 
-  private startFlushInterval(): void {
-    this.flushInterval = setInterval(() => {
-      this.flush();
-    }, this.FLUSH_INTERVAL_MS);
-  }
-
-  addUpdate(update: BatchUpdate): void {
-    this.buffer.push(update);
-
-    if (this.buffer.length >= this.BATCH_SIZE) {
-      this.flush();
-    }
-  }
-
-  async flush(): Promise<void> {
-    if (this.buffer.length === 0) return;
-
-    if (this.consecutiveFailures >= this.MAX_RETRIES) {
-      logger.error(`Circuit breaker open: ${this.consecutiveFailures} consecutive failures`);
-      this.buffer = []; // Drop to prevent OOM
+    if (consecutiveFailures >= MAX_RETRIES) {
+      logger.error(`Circuit breaker open: ${consecutiveFailures} consecutive failures`);
+      buffer = []; // Drop to prevent OOM
       return;
     }
 
-    const updates = [...this.buffer];
-    this.buffer = [];
+    const updates = [...buffer];
+    buffer = [];
 
     try {
       // Batch update devices
@@ -742,27 +724,48 @@ class DatabaseBatchService {
       }
 
       logger.debug(`Flushed ${updates.length} updates to database`);
-      this.consecutiveFailures = 0;
+      consecutiveFailures = 0;
     } catch (error) {
       logger.error('Failed to flush batch updates:', error);
-      this.consecutiveFailures++;
-      if (this.buffer.length < this.MAX_BUFFER_SIZE) {
-        this.buffer.unshift(...updates);
+      consecutiveFailures++;
+      if (buffer.length < MAX_BUFFER_SIZE) {
+        buffer.unshift(...updates);
       } else {
-        logger.warn(`Buffer full (${this.MAX_BUFFER_SIZE}), dropping ${updates.length} updates`);
+        logger.warn(`Buffer full (${MAX_BUFFER_SIZE}), dropping ${updates.length} updates`);
       }
     }
-  }
+  };
 
-  async shutdown(): Promise<void> {
-    if (this.flushInterval) {
-      clearInterval(this.flushInterval);
+  const startFlushInterval = (): void => {
+    flushInterval = setInterval(() => {
+      void flush();
+    }, FLUSH_INTERVAL_MS);
+  };
+
+  const addUpdate = (update: BatchUpdate): void => {
+    buffer.push(update);
+    if (buffer.length >= BATCH_SIZE) {
+      void flush();
     }
-    await this.flush();
-  }
-}
+  };
 
-export const batchService = new DatabaseBatchService();
+  const shutdown = async (): Promise<void> => {
+    if (flushInterval) {
+      clearInterval(flushInterval);
+    }
+    await flush();
+  };
+
+  startFlushInterval();
+
+  return {
+    addUpdate,
+    flush,
+    shutdown,
+  };
+};
+
+export const batchService = createDatabaseBatchService();
 ```
 
 ---
@@ -779,26 +782,36 @@ interface DeviceState {
   lastSeen: number;
 }
 
-class DeviceStateCache {
-  private cache: Map<string, DeviceState> = new Map();
+export const createDeviceStateCache = () => {
+  const cache: Map<string, DeviceState> = new Map();
 
-  getStatus(deviceId: string): string | null {
-    return this.cache.get(deviceId)?.status ?? null;
-  }
+  const getStatus = (deviceId: string): string | null => {
+    return cache.get(deviceId)?.status ?? null;
+  };
 
-  setStatus(deviceId: string, status: string): void {
-    const state = this.cache.get(deviceId) || {
+  const setStatus = (deviceId: string, status: string): void => {
+    const state = cache.get(deviceId) || {
       status: 'stopped',
       sessionId: null,
       lastSeen: Date.now(),
     };
     state.status = status;
     state.lastSeen = Date.now();
-    this.cache.set(deviceId, state);
-  }
+    cache.set(deviceId, state);
+  };
 
-  async getOrCreateSession(deviceId: string): Promise<{ id: number }> {
-    const state = this.cache.get(deviceId);
+  const updateSessionId = (deviceId: string, sessionId: number): void => {
+    const state = cache.get(deviceId) || {
+      status: 'running',
+      sessionId: null,
+      lastSeen: Date.now(),
+    };
+    state.sessionId = sessionId;
+    cache.set(deviceId, state);
+  };
+
+  const getOrCreateSession = async (deviceId: string): Promise<{ id: number }> => {
+    const state = cache.get(deviceId);
 
     if (state?.sessionId) {
       return { id: state.sessionId };
@@ -813,7 +826,7 @@ class DeviceStateCache {
     );
 
     if (existing.rows.length > 0) {
-      this.updateSessionId(deviceId, existing.rows[0].id);
+      updateSessionId(deviceId, existing.rows[0].id);
       return { id: existing.rows[0].id };
     }
 
@@ -825,22 +838,18 @@ class DeviceStateCache {
       [deviceId]
     );
 
-    this.updateSessionId(deviceId, result.rows[0].id);
+    updateSessionId(deviceId, result.rows[0].id);
     return { id: result.rows[0].id };
-  }
+  };
 
-  private updateSessionId(deviceId: string, sessionId: number): void {
-    const state = this.cache.get(deviceId) || {
-      status: 'running',
-      sessionId: null,
-      lastSeen: Date.now(),
-    };
-    state.sessionId = sessionId;
-    this.cache.set(deviceId, state);
-  }
-}
+  return {
+    getStatus,
+    setStatus,
+    getOrCreateSession,
+  };
+};
 
-export const deviceStateCache = new DeviceStateCache();
+export const deviceStateCache = createDeviceStateCache();
 ```
 
 ---

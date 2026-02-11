@@ -20,7 +20,7 @@ const SUBSCRIPTION_QOS: Record<string, 0 | 1> = {
  * Subscribe to all device topics on the MQTT client.
  * Returns a promise that resolves when all subscriptions are confirmed.
  */
-export function subscribeToDeviceTopics(client: MqttClient): Promise<void> {
+export const subscribeToDeviceTopics = (client: MqttClient): Promise<void> => {
   const topicMap: Record<string, { qos: 0 | 1 }> = {};
 
   for (const topic of Object.values(DEVICE_TOPICS)) {
@@ -44,4 +44,4 @@ export function subscribeToDeviceTopics(client: MqttClient): Promise<void> {
       resolve();
     });
   });
-}
+};

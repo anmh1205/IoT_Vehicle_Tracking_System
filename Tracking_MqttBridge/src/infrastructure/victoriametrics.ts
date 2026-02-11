@@ -7,19 +7,19 @@ const IMPORT_URL = `${victoriaMetricsConfig.url}/api/v1/import/prometheus`;
  * Sanitize a label value to prevent Prometheus label injection.
  * Removes characters that could break the line protocol format.
  */
-function sanitizeLabel(value: string): string {
+const sanitizeLabel = (value: string): string => {
   return value.replace(/[^a-zA-Z0-9_\-]/g, '_');
-}
+};
 
 /**
  * Write a single metric line to VictoriaMetrics in Prometheus exposition format.
  */
-export async function writeMetric(
+export const writeMetric = async (
   metricName: string,
   labels: Record<string, string>,
   value: number,
   timestampMs: number,
-): Promise<void> {
+): Promise<void> => {
   const sanitizedLabels = Object.entries(labels)
     .map(([k, v]) => `${sanitizeLabel(k)}="${sanitizeLabel(v)}"`)
     .join(',');
@@ -39,16 +39,16 @@ export async function writeMetric(
   } catch (err) {
     logger.error({ err }, 'VictoriaMetrics write error');
   }
-}
+};
 
 /**
  * Write multiple metrics for a device telemetry payload.
  */
-export async function writeDeviceTelemetry(
+export const writeDeviceTelemetry = async (
   deviceId: string,
   data: Record<string, number | undefined>,
   timestampMs: number,
-): Promise<void> {
+): Promise<void> => {
   const sanitizedDeviceId = sanitizeLabel(deviceId);
   const lines: string[] = [];
 
@@ -73,4 +73,4 @@ export async function writeDeviceTelemetry(
   } catch (err) {
     logger.error({ err }, 'VictoriaMetrics batch write error');
   }
-}
+};

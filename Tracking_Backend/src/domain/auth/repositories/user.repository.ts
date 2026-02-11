@@ -1,22 +1,20 @@
-import { findOne, findMany, insertOne, updateOne, deleteOne } from '@/infrastructure/database/queries';
+import {
+  findOne,
+  findMany,
+  insertOne,
+  updateOne,
+  deleteOne,
+} from '@/infrastructure/database/queries';
 import type { User } from '@/domain/auth/types/auth.types';
 
 export const findByUsername = async (username: string): Promise<User | null> =>
-  findOne<User>(
-    'SELECT * FROM users WHERE username = $1',
-    [username],
-  );
+  findOne<User>('SELECT * FROM users WHERE username = $1', [username]);
 
 export const findById = async (id: number): Promise<User | null> =>
-  findOne<User>(
-    'SELECT * FROM users WHERE id = $1',
-    [id],
-  );
+  findOne<User>('SELECT * FROM users WHERE id = $1', [id]);
 
 export const findAll = async (): Promise<User[]> =>
-  findMany<User>(
-    'SELECT * FROM users ORDER BY created_at DESC',
-  );
+  findMany<User>('SELECT * FROM users ORDER BY created_at DESC');
 
 export const create = async (
   username: string,
@@ -35,7 +33,18 @@ export const create = async (
 
 export const update = async (
   id: number,
-  fields: Partial<Pick<User, 'full_name' | 'role' | 'device_access_mode' | 'status' | 'email' | 'avatar_url' | 'preferences'>>,
+  fields: Partial<
+    Pick<
+      User,
+      | 'full_name'
+      | 'role'
+      | 'device_access_mode'
+      | 'status'
+      | 'email'
+      | 'avatar_url'
+      | 'preferences'
+    >
+  >,
 ): Promise<User | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];

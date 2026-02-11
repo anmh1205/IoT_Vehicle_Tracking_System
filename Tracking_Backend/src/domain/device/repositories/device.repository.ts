@@ -1,7 +1,19 @@
-import { findOne, findMany, insertOne, updateOne, deleteOne } from '@/infrastructure/database/queries';
+import {
+  findOne,
+  findMany,
+  insertOne,
+  updateOne,
+  deleteOne,
+} from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
 import { generateToken } from '@/shared/utils/crypto.util';
-import type { Device, DeviceListQuery, CreateDeviceInput, UpdateDeviceInput, DevicePosition } from '@/domain/device/types/device.types';
+import type {
+  Device,
+  DeviceListQuery,
+  CreateDeviceInput,
+  UpdateDeviceInput,
+  DevicePosition,
+} from '@/domain/device/types/device.types';
 
 const ALLOWED_SORT_COLUMNS: Record<string, string> = {
   deviceId: 'device_id',
@@ -54,16 +66,10 @@ export const findAll = async (
 };
 
 export const findById = async (id: number): Promise<Device | null> =>
-  findOne<Device>(
-    'SELECT * FROM devices WHERE id = $1',
-    [id],
-  );
+  findOne<Device>('SELECT * FROM devices WHERE id = $1', [id]);
 
 export const findByDeviceId = async (deviceId: string): Promise<Device | null> =>
-  findOne<Device>(
-    'SELECT * FROM devices WHERE device_id = $1',
-    [deviceId],
-  );
+  findOne<Device>('SELECT * FROM devices WHERE device_id = $1', [deviceId]);
 
 export const create = async (input: CreateDeviceInput): Promise<Device> => {
   const authToken = generateToken();
@@ -84,10 +90,7 @@ export const create = async (input: CreateDeviceInput): Promise<Device> => {
   );
 };
 
-export const update = async (
-  id: number,
-  input: UpdateDeviceInput,
-): Promise<Device | null> => {
+export const update = async (id: number, input: UpdateDeviceInput): Promise<Device | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -138,18 +141,53 @@ export const remove = async (id: number): Promise<boolean> =>
   deleteOne('DELETE FROM devices WHERE id = $1', [id]);
 
 export const findAllPositions = async (): Promise<DevicePosition[]> => {
-  const rows = await findMany<Device>(
-    `SELECT device_id, device_name, latitude, longitude, current_status, last_seen_at
-     FROM devices
-     WHERE latitude IS NOT NULL AND longitude IS NOT NULL`,
+  const result = await pool.query<{
+    device_id: string;
+    device_name: string;
+    latitude: number;
+    longitude: number;
+    current_status: string;
+    last_seen_at: Date | null;
+    speed: number | null;
+    heading: number | null;
+    battery: number | null;
+    vibration: number | null;
+    temperature: number | null;
+  }>(
+    `SELECT
+       d.device_id,
+       d.device_name,
+       d.latitude,
+       d.longitude,
+       d.current_status,
+       d.last_seen_at,
+       COALESCE(NULLIF(el.context->>'spd', '')::float8, 0) AS speed,
+       COALESCE(NULLIF(el.context->>'heading', '')::float8, 0) AS heading,
+       COALESCE(NULLIF(el.context->>'batt', '')::float8, 0) AS battery,
+       COALESCE(NULLIF(el.context->>'vib', '')::float8, 0) AS vibration,
+       COALESCE(NULLIF(el.context->>'temp', '')::float8, 0) AS temperature
+     FROM devices d
+     LEFT JOIN LATERAL (
+       SELECT context
+       FROM event_logs
+       WHERE device_id = d.device_id
+       ORDER BY server_timestamp DESC
+       LIMIT 1
+     ) el ON true
+     WHERE d.latitude IS NOT NULL AND d.longitude IS NOT NULL`,
   );
 
-  return rows.map((row) => ({
+  return result.rows.map((row) => ({
     deviceId: row.device_id,
     deviceName: row.device_name,
-    latitude: row.latitude!,
-    longitude: row.longitude!,
+    latitude: row.latitude,
+    longitude: row.longitude,
     currentStatus: row.current_status,
     lastSeenAt: row.last_seen_at?.toISOString() ?? null,
+    speed: row.speed ?? 0,
+    heading: row.heading ?? 0,
+    battery: row.battery ?? 0,
+    vibration: row.vibration ?? 0,
+    temperature: row.temperature ?? 0,
   }));
 };

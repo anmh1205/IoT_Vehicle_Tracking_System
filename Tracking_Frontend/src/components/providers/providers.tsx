@@ -1,5 +1,4 @@
 ﻿'use client';
-
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { QueryProvider } from './query-provider';
@@ -7,8 +6,13 @@ import { SocketProvider } from './socket-provider';
 import { SessionGuard } from '@/components/auth/session-guard';
 import { ActiveTheme } from '@/components/active-theme';
 import { TooltipProvider } from '@/components/ui/tooltip';
-
-export function Providers({ children, activeTheme }: { children: React.ReactNode; activeTheme?: string }) {
+export const Providers = ({
+  children,
+  activeTheme,
+}: {
+  children: React.ReactNode;
+  activeTheme?: string;
+}) => {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <ActiveTheme initialTheme={activeTheme}>
@@ -23,6 +27,4 @@ export function Providers({ children, activeTheme }: { children: React.ReactNode
       <Toaster richColors position="top-right" />
     </ThemeProvider>
   );
-}
-
-
+};

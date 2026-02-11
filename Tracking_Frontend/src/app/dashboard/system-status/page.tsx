@@ -1,53 +1,72 @@
-﻿'use client';
-
-import { useQuery } from '@tanstack/react-query';
+'use client';
+import { Activity, Database, HardDrive, MemoryStick, Server } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { healthServices } from '@/lib/api/system-status';
-import { Server, Radio, Database, BarChart3, Wifi } from 'lucide-react';
-
-const COMPONENTS = [
-  { key: 'backend', label: 'Backend API', icon: Server },
-  { key: 'mqtt', label: 'MQTT Bridge', icon: Radio },
-  { key: 'postgresql', label: 'PostgreSQL', icon: Database },
-  { key: 'victoriametrics', label: 'VictoriaMetrics', icon: BarChart3 },
-  { key: 'emqx', label: 'EMQX Broker', icon: Wifi },
-];
-
-const STATUS_LABELS: Record<string, string> = {
-  healthy: 'Khỏe mạnh',
-  up: 'Hoạt động',
-  down: 'Dừng',
-  unhealthy: 'Lỗi',
-};
-
-export default function SystemStatusPage() {
-  const health = useQuery({ queryKey: ['health-status'], queryFn: () => healthServices.getHealth(), refetchInterval: 30000 });
-
-  const components = health.data?.components ?? [];
-
+import { Card, CardContent } from '@/components/ui/card';
+import { useRoleAccess } from '@/hooks/use-role-access';
+import { HealthCard } from '@/features/system-status/components/health-card';
+import { MetricCard } from '@/features/system-status/components/metric-card';
+import { useSystemStatus } from '@/features/system-status/hooks/use-system-status';
+const SystemStatusPage = () => {
+  const access = useRoleAccess();
+  const { services, metrics } = useSystemStatus(access.canViewSystemInfo);
+  if (!access.canViewSystemInfo) {
+    return (
+      <PageContainer pageTitle="System status" pageDescription="Restricted area">
+        <Card>
+          <CardContent className="p-4 text-sm text-muted-foreground">
+            You do not have permission to access system health details.
+          </CardContent>
+        </Card>
+      </PageContainer>
+    );
+  }
   return (
-    <PageContainer pageTitle="Trạng thái hệ thống" pageDescription="Sức khỏe các thành phần hệ thống">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {COMPONENTS.map((item) => {
-          const data = components.find((x: any) => x.name === item.key) ?? null;
-          const Icon = item.icon;
-          const status = data?.status ?? (health.data?.database === 'up' ? 'healthy' : 'down');
-          return (
-            <Card key={item.key}>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-sm">{item.label}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-xl font-semibold">{STATUS_LABELS[status] ?? status}</div>
-                <div className="text-xs text-muted-foreground">Độ trễ: {data?.latency ?? '-'} ms</div>
-              </CardContent>
-            </Card>
-          );
-        })}
+    <PageContainer
+      pageTitle="System status"
+      pageDescription="Service health and infrastructure metrics"
+    >
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {services.map((service) => (
+          <HealthCard key={service.key} service={service} />
+        ))}
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          title="CPU usage"
+          value={metrics.cpuUsage}
+          icon={<Server className="h-4 w-4" />}
+          showProgress
+          unit="%"
+        />
+        <MetricCard
+          title="Memory usage"
+          value={metrics.memoryUsage}
+          icon={<MemoryStick className="h-4 w-4" />}
+          showProgress
+          unit="%"
+        />
+        <MetricCard
+          title="Disk usage"
+          value={metrics.diskUsage}
+          icon={<HardDrive className="h-4 w-4" />}
+          showProgress
+          unit="%"
+        />
+        <MetricCard
+          title="Connections"
+          value={metrics.activeConnections}
+          icon={<Activity className="h-4 w-4" />}
+        />
+      </div>
+
+      <Card>
+        <CardContent className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
+          <Database className="h-4 w-4" />
+          Metrics are refreshed every 30 seconds.
+        </CardContent>
+      </Card>
     </PageContainer>
   );
-}
-
+};
+export default SystemStatusPage;

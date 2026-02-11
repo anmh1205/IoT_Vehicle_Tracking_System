@@ -1,4 +1,10 @@
-import { findOne, findMany, insertOne, updateOne, deleteOne } from '@/infrastructure/database/queries';
+import {
+  findOne,
+  findMany,
+  insertOne,
+  updateOne,
+  deleteOne,
+} from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
 import type { Alert, AlertListQuery, CreateAlertInput } from '@/domain/alert/types/alert.types';
 
@@ -79,10 +85,7 @@ export const create = async (input: CreateAlertInput): Promise<Alert> =>
     ],
   );
 
-export const acknowledge = async (
-  id: number,
-  userId: number,
-): Promise<Alert | null> =>
+export const acknowledge = async (id: number, userId: number): Promise<Alert | null> =>
   updateOne<Alert>(
     `UPDATE alerts SET status = 'acknowledged', acknowledged_by = $1, acknowledged_at = NOW(), updated_at = NOW() WHERE id = $2 RETURNING *`,
     [userId, id],

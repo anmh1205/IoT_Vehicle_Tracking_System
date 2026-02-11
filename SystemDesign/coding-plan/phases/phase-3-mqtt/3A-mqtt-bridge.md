@@ -108,28 +108,32 @@ client.on('message', (topic, payload) => {
 ## Batch Writer Pattern
 ```typescript
 // ⚠️ CIRCUIT BREAKER - tránh buffer overflow
-class BatchWriter {
-  private buffer: DataPoint[] = [];
-  private readonly MAX_BUFFER_SIZE = 10_000;
-  private consecutiveFailures = 0;
-  private readonly MAX_RETRIES = 3;
-  
-  async flush() {
-    if (this.consecutiveFailures >= this.MAX_RETRIES) {
+const createBatchWriter = () => {
+  let buffer: DataPoint[] = [];
+  const MAX_BUFFER_SIZE = 10_000;
+  let consecutiveFailures = 0;
+  const MAX_RETRIES = 3;
+
+  const flush = async () => {
+    if (consecutiveFailures >= MAX_RETRIES) {
       logger.warn('Circuit breaker open, dropping data');
-      this.buffer = [];
+      buffer = [];
       return;
     }
-    
+
     try {
-      await this.writeBatch();
-      this.consecutiveFailures = 0;
+      await writeBatch();
+      consecutiveFailures = 0;
     } catch (error) {
-      this.consecutiveFailures++;
+      consecutiveFailures++;
       // Keep data in buffer up to MAX_BUFFER_SIZE
     }
-  }
-}
+  };
+
+  return {
+    flush,
+  };
+};
 ```
 
 ## Internal Event Publishing

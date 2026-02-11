@@ -17,6 +17,8 @@ import notificationsRoutes from '@/api/routes/notifications.routes';
 import healthRoutes from '@/api/routes/health.routes';
 import iotRoutes from '@/api/routes/iot.routes';
 import telemetryRoutes from '@/api/routes/telemetry.routes';
+import simulatorRoutes from '@/api/routes/simulator.routes';
+import systemRoutes from '@/api/routes/system.routes';
 
 const router = Router();
 
@@ -40,6 +42,8 @@ router.use('/stats', statisticsRoutes);
 router.use('/statistics', statisticsRoutes);
 router.use('/telemetry', telemetryRoutes);
 router.use('/notifications', notificationsRoutes);
+router.use('/simulator', simulatorRoutes);
+router.use('/system', systemRoutes);
 router.use('/health', healthRoutes);
 
 export default router;

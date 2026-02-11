@@ -123,33 +123,44 @@ export const updateProfile = asyncHandler(async (req: AuthenticatedRequest, res:
   sendOk(res, user);
 });
 
-export const updateNotifications = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  if (!req.user) {
-    throw createUnauthorizedError('Not authenticated');
-  }
+export const updateNotifications = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      throw createUnauthorizedError('Not authenticated');
+    }
 
-  const parsed = updateNotificationSchema.safeParse(req.body);
-  if (!parsed.success) {
-    throw createValidationError('Invalid notification settings', parsed.error.flatten().fieldErrors);
-  }
+    const parsed = updateNotificationSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw createValidationError(
+        'Invalid notification settings',
+        parsed.error.flatten().fieldErrors,
+      );
+    }
 
-  const user = await userManagementService.updateNotificationPreferences(req.user.id, parsed.data);
-  sendOk(res, user);
-});
+    const user = await userManagementService.updateNotificationPreferences(
+      req.user.id,
+      parsed.data,
+    );
+    sendOk(res, user);
+  },
+);
 
-export const getNotificationSettings = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  if (!req.user) {
-    throw createUnauthorizedError('Not authenticated');
-  }
+export const getNotificationSettings = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      throw createUnauthorizedError('Not authenticated');
+    }
 
-  const user = await userRepo.findById(req.user.id);
-  const preferences = (user?.preferences as Record<string, unknown> | undefined)?.notifications ?? {
-    emailAlerts: true,
-    pushAlerts: true,
-    alertTypes: ['critical', 'high'],
-  };
-  sendOk(res, { preferences });
-});
+    const user = await userRepo.findById(req.user.id);
+    const preferences = (user?.preferences as Record<string, unknown> | undefined)
+      ?.notifications ?? {
+      emailAlerts: true,
+      pushAlerts: true,
+      alertTypes: ['critical', 'high'],
+    };
+    sendOk(res, { preferences });
+  },
+);
 
 // --- User Management (Admin) ---
 

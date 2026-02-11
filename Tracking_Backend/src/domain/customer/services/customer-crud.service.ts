@@ -1,7 +1,12 @@
 import { createNotFoundError, createConflictError } from '@/shared/utils/errors.util';
 import * as customerRepo from '@/domain/customer/repositories/customer.repository';
 import { logger } from '@/infrastructure/logger';
-import type { Customer, CreateCustomerInput, UpdateCustomerInput, CustomerPublic } from '@/domain/customer/types/customer.types';
+import type {
+  Customer,
+  CreateCustomerInput,
+  UpdateCustomerInput,
+  CustomerPublic,
+} from '@/domain/customer/types/customer.types';
 
 const sanitizeCustomer = (c: Customer): CustomerPublic => ({
   id: c.id,
@@ -38,7 +43,10 @@ export const createCustomer = async (input: CreateCustomerInput): Promise<Custom
   return sanitizeCustomer(customer);
 };
 
-export const updateCustomer = async (id: number, input: UpdateCustomerInput): Promise<CustomerPublic> => {
+export const updateCustomer = async (
+  id: number,
+  input: UpdateCustomerInput,
+): Promise<CustomerPublic> => {
   const existing = await customerRepo.findById(id);
   if (!existing) {
     throw createNotFoundError(`Customer with ID ${id} not found`);

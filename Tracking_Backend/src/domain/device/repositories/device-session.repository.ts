@@ -2,10 +2,7 @@ import { findOne, findMany } from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
 import type { DeviceSession } from '@/domain/device/types/device.types';
 
-export const findByDeviceId = async (
-  deviceId: string,
-  limit = 20,
-): Promise<DeviceSession[]> =>
+export const findByDeviceId = async (deviceId: string, limit = 20): Promise<DeviceSession[]> =>
   findMany<DeviceSession>(
     'SELECT * FROM device_sessions WHERE device_id = $1 ORDER BY created_at DESC LIMIT $2',
     [deviceId, limit],
@@ -18,10 +15,7 @@ export const findCurrentSession = async (deviceId: string): Promise<DeviceSessio
   );
 
 export const findById = async (id: number): Promise<DeviceSession | null> =>
-  findOne<DeviceSession>(
-    'SELECT * FROM device_sessions WHERE id = $1',
-    [id],
-  );
+  findOne<DeviceSession>('SELECT * FROM device_sessions WHERE id = $1', [id]);
 
 export const getSessionStats = async (
   deviceId: string,

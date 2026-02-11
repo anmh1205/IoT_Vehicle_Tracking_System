@@ -1,14 +1,11 @@
 'use client';
-
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
-
-export default function GlobalError({ error, reset }: { error: Error; reset: () => void }) {
+const GlobalError = ({ error, reset }: { error: Error; reset: () => void }) => {
   useEffect(() => {
     console.error(error);
   }, [error]);
-
   return (
     <html lang="vi">
       <body>
@@ -21,4 +18,5 @@ export default function GlobalError({ error, reset }: { error: Error; reset: () 
       </body>
     </html>
   );
-}
+};
+export default GlobalError;

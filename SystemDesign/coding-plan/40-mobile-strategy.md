@@ -154,24 +154,22 @@ lib/
 
 ```dart
 // core/config/app_config.dart
-class AppConfig {
-  static const String webAppUrl = String.fromEnvironment(
-    'WEB_APP_URL',
-    defaultValue: 'https://tracking.example.com',
-  );
+const String webAppUrl = String.fromEnvironment(
+  'WEB_APP_URL',
+  defaultValue: 'https://tracking.example.com',
+);
 
-  static const String apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'https://api.tracking.example.com',
-  );
+const String apiBaseUrl = String.fromEnvironment(
+  'API_BASE_URL',
+  defaultValue: 'https://api.tracking.example.com',
+);
 
-  static const String wsUrl = String.fromEnvironment(
-    'WS_URL',
-    defaultValue: 'wss://api.tracking.example.com',
-  );
+const String wsUrl = String.fromEnvironment(
+  'WS_URL',
+  defaultValue: 'wss://api.tracking.example.com',
+);
 
-  static const bool isProduction = bool.fromEnvironment('PRODUCTION', defaultValue: false);
-}
+const bool isProduction = bool.fromEnvironment('PRODUCTION', defaultValue: false);
 ```
 
 ### 4.2 Main Entry Point
@@ -181,6 +179,15 @@ class AppConfig {
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+
+Widget buildVehicleTrackingApp() => MaterialApp(
+  title: 'Vehicle Tracking',
+  theme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+    useMaterial3: true,
+  ),
+  home: const SplashScreen(),
+);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -192,26 +199,8 @@ void main() async {
   await NotificationService.initialize();
 
   runApp(
-    const ProviderScope(
-      child: VehicleTrackingApp(),
-    ),
+    ProviderScope(child: buildVehicleTrackingApp()),
   );
-}
-
-class VehicleTrackingApp extends StatelessWidget {
-  const VehicleTrackingApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Vehicle Tracking',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const SplashScreen(),
-    );
-  }
 }
 ```
 
@@ -221,118 +210,92 @@ class VehicleTrackingApp extends StatelessWidget {
 // features/webview/webview_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class WebViewScreen extends ConsumerStatefulWidget {
-  const WebViewScreen({super.key});
+Future<Map<String, dynamic>> getDeviceInfo() async => {
+  'platform': Platform.isIOS ? 'ios' : 'android',
+  'version': await PackageInfo.fromPlatform().then((p) => p.version),
+  'fcmToken': await FirebaseMessaging.instance.getToken(),
+};
 
-  @override
-  ConsumerState<WebViewScreen> createState() => _WebViewScreenState();
+Future<void> injectAuthToken(InAppWebViewController? controller) async {
+  final token = await StorageService.getToken();
+  if (token != null) {
+    await controller?.evaluateJavascript(source: '''
+      window.localStorage.setItem('auth_token', '$token');
+      window.dispatchEvent(new CustomEvent('nativeTokenInjected'));
+    ''');
+  }
 }
 
-class _WebViewScreenState extends ConsumerState<WebViewScreen> {
-  InAppWebViewController? _webViewController;
-  bool _isLoading = true;
+Future<void> handleLogout(InAppWebViewController? controller) async {
+  await StorageService.clearAll();
+  await FirebaseMessaging.instance.deleteToken();
+  controller?.reload();
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            InAppWebView(
-              initialUrlRequest: URLRequest(
-                url: WebUri(AppConfig.webAppUrl),
-              ),
-              initialSettings: InAppWebViewSettings(
-                javaScriptEnabled: true,
-                useShouldOverrideUrlLoading: true,
-                mediaPlaybackRequiresUserGesture: false,
-                allowsInlineMediaPlayback: true,
-                // Cache settings
-                cacheEnabled: true,
-                clearCache: false,
-              ),
-              onWebViewCreated: (controller) {
-                _webViewController = controller;
-                _setupJSBridge(controller);
-              },
-              onLoadStart: (controller, url) {
-                setState(() => _isLoading = true);
-              },
-              onLoadStop: (controller, url) {
-                setState(() => _isLoading = false);
-                _injectAuthToken();
-              },
-              onReceivedError: (controller, request, error) {
-                _handleError(error);
-              },
+void setupJSBridge(InAppWebViewController controller) {
+  controller.addJavaScriptHandler(
+    handlerName: 'nativeBridge',
+    callback: (args) async {
+      final action = args[0] as String;
+      final data = args.length > 1 ? args[1] : null;
+
+      switch (action) {
+        case 'showNotification':
+          await NotificationService.showLocal(
+            title: data['title'],
+            body: data['body'],
+          );
+          break;
+        case 'saveToken':
+          await StorageService.saveToken(data['token']);
+          break;
+        case 'getDeviceInfo':
+          return await getDeviceInfo();
+        case 'logout':
+          await handleLogout(controller);
+          break;
+      }
+    },
+  );
+}
+
+Widget buildWebViewScreen(WidgetRef ref) {
+  final webViewController = useState<InAppWebViewController?>(null);
+  final isLoading = useState(true);
+
+  return Scaffold(
+    body: SafeArea(
+      child: Stack(
+        children: [
+          InAppWebView(
+            initialUrlRequest: URLRequest(url: WebUri(webAppUrl)),
+            initialSettings: InAppWebViewSettings(
+              javaScriptEnabled: true,
+              useShouldOverrideUrlLoading: true,
+              mediaPlaybackRequiresUserGesture: false,
+              allowsInlineMediaPlayback: true,
+              cacheEnabled: true,
+              clearCache: false,
             ),
-            if (_isLoading)
-              const Center(child: CircularProgressIndicator()),
-          ],
-        ),
+            onWebViewCreated: (controller) {
+              webViewController.value = controller;
+              setupJSBridge(controller);
+            },
+            onLoadStart: (_, __) => isLoading.value = true,
+            onLoadStop: (_, __) async {
+              isLoading.value = false;
+              await injectAuthToken(webViewController.value);
+            },
+            onReceivedError: (_, __, ___) => isLoading.value = false,
+          ),
+          if (isLoading.value) const Center(child: CircularProgressIndicator()),
+        ],
       ),
-    );
-  }
-
-  void _setupJSBridge(InAppWebViewController controller) {
-    // Add JavaScript handler for native calls
-    controller.addJavaScriptHandler(
-      handlerName: 'nativeBridge',
-      callback: (args) async {
-        final action = args[0] as String;
-        final data = args.length > 1 ? args[1] : null;
-
-        switch (action) {
-          case 'showNotification':
-            await NotificationService.showLocal(
-              title: data['title'],
-              body: data['body'],
-            );
-            break;
-          case 'saveToken':
-            await StorageService.saveToken(data['token']);
-            break;
-          case 'getDeviceInfo':
-            return await _getDeviceInfo();
-          case 'logout':
-            await _handleLogout();
-            break;
-        }
-      },
-    );
-  }
-
-  Future<void> _injectAuthToken() async {
-    final token = await StorageService.getToken();
-    if (token != null) {
-      await _webViewController?.evaluateJavascript(source: '''
-        window.localStorage.setItem('auth_token', '$token');
-        window.dispatchEvent(new CustomEvent('nativeTokenInjected'));
-      ''');
-    }
-  }
-
-  Future<Map<String, dynamic>> _getDeviceInfo() async {
-    return {
-      'platform': Platform.isIOS ? 'ios' : 'android',
-      'version': await PackageInfo.fromPlatform().then((p) => p.version),
-      'fcmToken': await FirebaseMessaging.instance.getToken(),
-    };
-  }
-
-  void _handleError(WebResourceError error) {
-    // Show offline page or retry button
-    setState(() => _isLoading = false);
-  }
-
-  Future<void> _handleLogout() async {
-    await StorageService.clearAll();
-    await FirebaseMessaging.instance.deleteToken();
-    // Navigate to login or refresh WebView
-    _webViewController?.reload();
-  }
+    ),
+  );
 }
 ```
 
@@ -354,31 +317,29 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
 /// - shareContent: { title, text, url? }
 /// - vibrate: { duration? }
 
-class JSBridge {
-  static const String injectScript = '''
-    window.NativeBridge = {
-      showNotification: (title, body, data) => {
-        return window.flutter_inappwebview.callHandler('nativeBridge', 'showNotification', { title, body, data });
-      },
-      saveToken: (token) => {
-        return window.flutter_inappwebview.callHandler('nativeBridge', 'saveToken', { token });
-      },
-      getDeviceInfo: () => {
-        return window.flutter_inappwebview.callHandler('nativeBridge', 'getDeviceInfo');
-      },
-      logout: () => {
-        return window.flutter_inappwebview.callHandler('nativeBridge', 'logout');
-      },
-      getCurrentLocation: () => {
-        return window.flutter_inappwebview.callHandler('nativeBridge', 'getCurrentLocation');
-      },
-      isNativeApp: () => true,
-    };
+const String injectBridgeScript = '''
+  window.NativeBridge = {
+    showNotification: (title, body, data) => {
+      return window.flutter_inappwebview.callHandler('nativeBridge', 'showNotification', { title, body, data });
+    },
+    saveToken: (token) => {
+      return window.flutter_inappwebview.callHandler('nativeBridge', 'saveToken', { token });
+    },
+    getDeviceInfo: () => {
+      return window.flutter_inappwebview.callHandler('nativeBridge', 'getDeviceInfo');
+    },
+    logout: () => {
+      return window.flutter_inappwebview.callHandler('nativeBridge', 'logout');
+    },
+    getCurrentLocation: () => {
+      return window.flutter_inappwebview.callHandler('nativeBridge', 'getCurrentLocation');
+    },
+    isNativeApp: () => true,
+  };
 
-    // Dispatch ready event
-    window.dispatchEvent(new CustomEvent('nativeBridgeReady'));
-  ''';
-}
+  // Dispatch ready event
+  window.dispatchEvent(new CustomEvent('nativeBridgeReady'));
+''';
 ```
 
 ---
@@ -392,110 +353,108 @@ class JSBridge {
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class FCMHandler {
-  static final FlutterLocalNotificationsPlugin _localNotifications =
-      FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin localNotifications =
+    FlutterLocalNotificationsPlugin();
 
-  static Future<void> initialize() async {
-    // Request permission
-    await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+Future<void> initializeFcmHandler() async {
+  // Request permission
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
 
-    // Get FCM token
-    final token = await FirebaseMessaging.instance.getToken();
-    print('FCM Token: $token');
+  // Get FCM token
+  final token = await FirebaseMessaging.instance.getToken();
+  print('FCM Token: $token');
 
-    // Send token to backend
-    await _registerToken(token);
+  // Send token to backend
+  await registerFcmToken(token);
 
-    // Handle foreground messages
-    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+  // Handle foreground messages
+  FirebaseMessaging.onMessage.listen(handleForegroundMessage);
 
-    // Handle background messages
-    FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
+  // Handle background messages
+  FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
-    // Handle notification tap
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
+  // Handle notification tap
+  FirebaseMessaging.onMessageOpenedApp.listen(handleNotificationTap);
 
-    // Initialize local notifications
-    await _initializeLocalNotifications();
-  }
+  // Initialize local notifications
+  await initializeLocalNotifications();
+}
 
-  static Future<void> _registerToken(String? token) async {
-    if (token == null) return;
+Future<void> registerFcmToken(String? token) async {
+  if (token == null) return;
 
-    final authToken = await StorageService.getToken();
-    if (authToken == null) return;
+  final authToken = await StorageService.getToken();
+  if (authToken == null) return;
 
-    await http.post(
-      Uri.parse('${AppConfig.apiBaseUrl}/api/v1/notifications/register'),
-      headers: {
-        'Authorization': 'Bearer $authToken',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'fcm_token': token,
-        'platform': Platform.isIOS ? 'ios' : 'android',
-      }),
-    );
-  }
+  await http.post(
+    Uri.parse('$apiBaseUrl/api/v1/notifications/register'),
+    headers: {
+      'Authorization': 'Bearer $authToken',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'fcm_token': token,
+      'platform': Platform.isIOS ? 'ios' : 'android',
+    }),
+  );
+}
 
-  static Future<void> _initializeLocalNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings();
+Future<void> initializeLocalNotifications() async {
+  const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const iosSettings = DarwinInitializationSettings();
 
-    await _localNotifications.initialize(
-      const InitializationSettings(
-        android: androidSettings,
-        iOS: iosSettings,
+  await localNotifications.initialize(
+    const InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    ),
+    onDidReceiveNotificationResponse: (response) {
+      // Handle notification tap
+      handleNotificationTap(RemoteMessage(data: {'payload': response.payload}));
+    },
+  );
+}
+
+Future<void> handleForegroundMessage(RemoteMessage message) async {
+  // Show local notification when app is in foreground
+  await localNotifications.show(
+    message.hashCode,
+    message.notification?.title,
+    message.notification?.body,
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'vehicle_tracking',
+        'Vehicle Tracking',
+        importance: Importance.high,
+        priority: Priority.high,
       ),
-      onDidReceiveNotificationResponse: (response) {
-        // Handle notification tap
-        _handleNotificationTap(RemoteMessage(data: {'payload': response.payload}));
-      },
-    );
-  }
+      iOS: DarwinNotificationDetails(),
+    ),
+    payload: jsonEncode(message.data),
+  );
+}
 
-  static Future<void> _handleForegroundMessage(RemoteMessage message) async {
-    // Show local notification when app is in foreground
-    await _localNotifications.show(
-      message.hashCode,
-      message.notification?.title,
-      message.notification?.body,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'vehicle_tracking',
-          'Vehicle Tracking',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      payload: jsonEncode(message.data),
-    );
-  }
+Future<void> handleNotificationTap(RemoteMessage message) async {
+  final data = message.data;
 
-  static Future<void> _handleNotificationTap(RemoteMessage message) async {
-    final data = message.data;
-
-    // Navigate to specific page based on notification type
-    if (data['type'] == 'alert') {
-      // Navigate to alerts page
-      final alertId = data['alert_id'];
-      // Use deep link or WebView navigation
-    } else if (data['type'] == 'device') {
-      // Navigate to device details
-      final deviceId = data['device_id'];
-    }
+  // Navigate to specific page based on notification type
+  if (data['type'] == 'alert') {
+    // Navigate to alerts page
+    final alertId = data['alert_id'];
+    // Use deep link or WebView navigation
+  } else if (data['type'] == 'device') {
+    // Navigate to device details
+    final deviceId = data['device_id'];
   }
 }
 
 // Background handler (top-level function)
 @pragma('vm:entry-point')
-Future<void> _handleBackgroundMessage(RemoteMessage message) async {
+Future<void> handleBackgroundMessage(RemoteMessage message) async {
   // Handle background message
   print('Background message: ${message.messageId}');
 }
@@ -518,11 +477,9 @@ final connectivityProvider = StreamProvider<bool>((ref) {
   });
 });
 
-class ConnectivityService {
-  static Future<bool> isOnline() async {
-    final result = await Connectivity().checkConnectivity();
-    return result != ConnectivityResult.none;
-  }
+Future<bool> isOnline() async {
+  final result = await Connectivity().checkConnectivity();
+  return result != ConnectivityResult.none;
 }
 ```
 
@@ -533,42 +490,40 @@ class ConnectivityService {
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-class OfflineCache {
-  static const String _cacheKey = 'offline_cache';
-  static const String _lastSyncKey = 'last_sync';
+const String cacheKey = 'offline_cache';
+const String lastSyncKey = 'last_sync';
 
-  static Future<void> cacheData(String key, dynamic data) async {
-    final prefs = await SharedPreferences.getInstance();
-    final cache = await _getCache(prefs);
+Future<Map<String, dynamic>> getCache(SharedPreferences prefs) async {
+  final cacheString = prefs.getString(cacheKey);
+  if (cacheString == null) return {};
+  return jsonDecode(cacheString) as Map<String, dynamic>;
+}
 
-    cache[key] = {
-      'data': data,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
+Future<void> cacheData(String key, dynamic data) async {
+  final prefs = await SharedPreferences.getInstance();
+  final cache = await getCache(prefs);
 
-    await prefs.setString(_cacheKey, jsonEncode(cache));
-  }
+  cache[key] = {
+    'data': data,
+    'timestamp': DateTime.now().toIso8601String(),
+  };
 
-  static Future<T?> getCachedData<T>(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    final cache = await _getCache(prefs);
+  await prefs.setString(cacheKey, jsonEncode(cache));
+}
 
-    final entry = cache[key];
-    if (entry == null) return null;
+Future<T?> getCachedData<T>(String key) async {
+  final prefs = await SharedPreferences.getInstance();
+  final cache = await getCache(prefs);
 
-    return entry['data'] as T;
-  }
+  final entry = cache[key];
+  if (entry == null) return null;
 
-  static Future<Map<String, dynamic>> _getCache(SharedPreferences prefs) async {
-    final cacheString = prefs.getString(_cacheKey);
-    if (cacheString == null) return {};
-    return jsonDecode(cacheString) as Map<String, dynamic>;
-  }
+  return entry['data'] as T;
+}
 
-  static Future<void> clearCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_cacheKey);
-  }
+Future<void> clearCache() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove(cacheKey);
 }
 ```
 

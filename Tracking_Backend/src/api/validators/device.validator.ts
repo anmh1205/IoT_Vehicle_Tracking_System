@@ -5,7 +5,10 @@ export const createDeviceSchema = z.object({
     .string()
     .min(3, 'Device ID must be at least 3 characters')
     .max(50, 'Device ID must not exceed 50 characters')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Device ID can only contain letters, numbers, dashes, and underscores'),
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      'Device ID can only contain letters, numbers, dashes, and underscores',
+    ),
   deviceName: z
     .string()
     .min(3, 'Device name must be at least 3 characters')

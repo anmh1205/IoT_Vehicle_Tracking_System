@@ -1,7 +1,12 @@
 import { createNotFoundError } from '@/shared/utils/errors.util';
 import * as deviceRepo from '@/domain/device/repositories/device.repository';
 import * as sessionRepo from '@/domain/device/repositories/device-session.repository';
-import type { Device, DeviceDetail, DeviceSession, DeviceSessionPublic } from '@/domain/device/types/device.types';
+import type {
+  Device,
+  DeviceDetail,
+  DeviceSession,
+  DeviceSessionPublic,
+} from '@/domain/device/types/device.types';
 
 const sanitizeSession = (session: DeviceSession): DeviceSessionPublic => ({
   id: session.id,

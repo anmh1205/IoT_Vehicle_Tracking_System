@@ -13,6 +13,7 @@ router.get('/audit', systemAdminController.queryAudit);
 router.get('/settings', systemAdminController.getSettings);
 router.put('/settings/:key', systemAdminController.updateSetting);
 router.get('/tables', systemAdminController.listTables);
+router.get('/tables/:table/columns', systemAdminController.listTableColumns);
 router.get('/tables/:table', systemAdminController.queryTable);
 
 export default router;

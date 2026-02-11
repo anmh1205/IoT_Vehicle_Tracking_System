@@ -1,6 +1,17 @@
-import { findOne, findMany, insertOne, updateOne, deleteOne } from '@/infrastructure/database/queries';
+import {
+  findOne,
+  findMany,
+  insertOne,
+  updateOne,
+  deleteOne,
+} from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
-import type { Trip, TripListQuery, CreateTripInput, UpdateTripInput } from '@/domain/trip/types/trip.types';
+import type {
+  Trip,
+  TripListQuery,
+  CreateTripInput,
+  UpdateTripInput,
+} from '@/domain/trip/types/trip.types';
 
 const ALLOWED_SORT_COLUMNS: Record<string, string> = {
   tripCode: 'trip_code',
@@ -10,9 +21,7 @@ const ALLOWED_SORT_COLUMNS: Record<string, string> = {
   createdAt: 'created_at',
 };
 
-export const findAll = async (
-  query: TripListQuery,
-): Promise<{ trips: Trip[]; total: number }> => {
+export const findAll = async (query: TripListQuery): Promise<{ trips: Trip[]; total: number }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
   const offset = (page - 1) * limit;
@@ -32,7 +41,9 @@ export const findAll = async (
   }
 
   if (query.search) {
-    conditions.push(`(trip_code ILIKE $${paramIndex} OR driver_name ILIKE $${paramIndex} OR start_location ILIKE $${paramIndex})`);
+    conditions.push(
+      `(trip_code ILIKE $${paramIndex} OR driver_name ILIKE $${paramIndex} OR start_location ILIKE $${paramIndex})`,
+    );
     params.push(`%${query.search}%`);
     paramIndex++;
   }
@@ -82,10 +93,7 @@ export const create = async (input: CreateTripInput): Promise<Trip> =>
     ],
   );
 
-export const update = async (
-  id: number,
-  input: UpdateTripInput,
-): Promise<Trip | null> => {
+export const update = async (id: number, input: UpdateTripInput): Promise<Trip | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;

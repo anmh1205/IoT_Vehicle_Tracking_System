@@ -26,7 +26,7 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const unwrap = <T>(payload: ApiEnvelope<T> | T): T => {

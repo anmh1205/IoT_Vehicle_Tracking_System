@@ -1,7 +1,12 @@
 import { createNotFoundError } from '@/shared/utils/errors.util';
 import * as maintenanceRepo from '@/domain/maintenance/repositories/maintenance.repository';
 import { logger } from '@/infrastructure/logger';
-import type { Maintenance, CreateMaintenanceInput, UpdateMaintenanceInput, MaintenancePublic } from '@/domain/maintenance/types/maintenance.types';
+import type {
+  Maintenance,
+  CreateMaintenanceInput,
+  UpdateMaintenanceInput,
+  MaintenancePublic,
+} from '@/domain/maintenance/types/maintenance.types';
 
 const sanitizeMaintenance = (m: Maintenance): MaintenancePublic => ({
   id: m.id,
@@ -31,13 +36,19 @@ export const getMaintenanceById = async (id: number): Promise<MaintenancePublic>
   return sanitizeMaintenance(record);
 };
 
-export const createMaintenance = async (input: CreateMaintenanceInput, createdBy?: number): Promise<MaintenancePublic> => {
+export const createMaintenance = async (
+  input: CreateMaintenanceInput,
+  createdBy?: number,
+): Promise<MaintenancePublic> => {
   const record = await maintenanceRepo.create(input, createdBy);
   logger.info(`Maintenance "${input.title}" created for vehicle "${input.vehicleId}"`);
   return sanitizeMaintenance(record);
 };
 
-export const updateMaintenance = async (id: number, input: UpdateMaintenanceInput): Promise<MaintenancePublic> => {
+export const updateMaintenance = async (
+  id: number,
+  input: UpdateMaintenanceInput,
+): Promise<MaintenancePublic> => {
   const existing = await maintenanceRepo.findById(id);
   if (!existing) {
     throw createNotFoundError(`Maintenance record with ID ${id} not found`);

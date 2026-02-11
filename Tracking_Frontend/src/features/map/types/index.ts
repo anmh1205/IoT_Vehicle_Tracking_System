@@ -1,4 +1,6 @@
-﻿export interface DevicePosition {
+export type DeviceMapStatus = 'running' | 'stopped' | 'error' | 'disconnected';
+
+export interface DevicePosition {
   deviceId: string;
   deviceName: string;
   vehiclePlate: string | null;
@@ -6,17 +8,16 @@
   lon: number;
   speed: number;
   heading: number;
-  status: 'running' | 'stopped' | 'disconnected';
+  status: DeviceMapStatus;
   timestamp: number;
+  battery?: number | null;
+  vibration?: number | null;
+  temperature?: number | null;
 }
 
-export interface GeofenceMapItem {
-  id: number;
-  name: string;
-  geofenceType: 'circle' | 'polygon' | 'rectangle';
-  centerLatitude?: number;
-  centerLongitude?: number;
-  radiusMeters?: number;
-  coordinates?: { lat: number; lng: number }[];
-  isActive: boolean;
+export type MapLayer = 'street' | 'satellite';
+
+export interface MapViewport {
+  center: [number, number];
+  zoom: number;
 }

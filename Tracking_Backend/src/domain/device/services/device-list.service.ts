@@ -1,5 +1,10 @@
 import * as deviceRepo from '@/domain/device/repositories/device.repository';
-import type { Device, DeviceListQuery, DevicePublic, DevicePosition } from '@/domain/device/types/device.types';
+import type {
+  Device,
+  DeviceListQuery,
+  DevicePublic,
+  DevicePosition,
+} from '@/domain/device/types/device.types';
 
 const sanitizeDevice = (device: Device): DevicePublic => ({
   id: device.id,

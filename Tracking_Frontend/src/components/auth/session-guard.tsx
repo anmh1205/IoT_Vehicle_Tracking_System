@@ -1,20 +1,16 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { authServices } from '@/lib/api/auth';
 import { Loader2 } from 'lucide-react';
-
-export function SessionGuard({ children }: { children: React.ReactNode }) {
+export const SessionGuard = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, setAuth, clearAuth, isLoading, setLoading } = useAuthStore();
   const [checked, setChecked] = useState(false);
-
   useEffect(() => {
     if (isAuthenticated) {
       setChecked(true);
       return;
     }
-
     authServices
       .getMe()
       .then((data) => {
@@ -38,7 +34,6 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
         setChecked(true);
       });
   }, [isAuthenticated, setAuth, clearAuth, setLoading]);
-
   if (!checked || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -46,6 +41,5 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
   return <>{children}</>;
-}
+};

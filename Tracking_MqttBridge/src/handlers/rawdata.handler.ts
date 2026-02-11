@@ -22,10 +22,10 @@ const VIBRATION_ALERT_THRESHOLD = 500;
  * 7. Check status change -> publish internal event
  * 8. Check alerts (vibration threshold) -> publish internal event
  */
-export async function handleRawData(
+export const handleRawData = async (
   deviceIdFromTopic: string,
   message: Buffer,
-): Promise<void> {
+): Promise<void> => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(message.toString());
@@ -150,4 +150,4 @@ export async function handleRawData(
       `ALERT: High vibration (${payload.data.vibration}) on device ${payload.device_id}`,
     );
   }
-}
+};

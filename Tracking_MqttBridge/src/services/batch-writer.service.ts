@@ -24,7 +24,7 @@ let isCircuitOpen = false;
  * Add an update to the batch buffer.
  * If the circuit breaker is open, data is dropped to prevent OOM.
  */
-export function addUpdate(update: DeviceUpdate): void {
+export const addUpdate = (update: DeviceUpdate): void => {
   if (isCircuitOpen) {
     logger.warn(`Circuit breaker OPEN: dropping update for ${update.deviceId}`);
     return;
@@ -35,12 +35,12 @@ export function addUpdate(update: DeviceUpdate): void {
   if (buffer.length >= MAX_BUFFER_SIZE) {
     flush();
   }
-}
+};
 
 /**
  * Flush buffered updates to PostgreSQL in a single batch.
  */
-async function flush(): Promise<void> {
+const flush = async (): Promise<void> => {
   if (buffer.length === 0) return;
 
   const batch = buffer.splice(0, buffer.length);
@@ -115,12 +115,12 @@ async function flush(): Promise<void> {
       );
     }
   }
-}
+};
 
 /**
  * Start the periodic flush timer.
  */
-export function startBatchWriter(): void {
+export const startBatchWriter = (): void => {
   if (flushTimer) return;
 
   flushTimer = setInterval(() => {
@@ -132,12 +132,12 @@ export function startBatchWriter(): void {
   logger.info(
     `Batch writer started (interval=${FLUSH_INTERVAL_MS}ms, maxBuffer=${MAX_BUFFER_SIZE})`,
   );
-}
+};
 
 /**
  * Stop the batch writer and flush remaining data.
  */
-export async function stopBatchWriter(): Promise<void> {
+export const stopBatchWriter = async (): Promise<void> => {
   if (flushTimer) {
     clearInterval(flushTimer);
     flushTimer = null;
@@ -145,4 +145,4 @@ export async function stopBatchWriter(): Promise<void> {
 
   await flush();
   logger.info('Batch writer stopped, remaining data flushed');
-}
+};

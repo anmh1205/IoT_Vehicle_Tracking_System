@@ -13,10 +13,10 @@ interface AuthenticatedDevice {
  * Devices store auth_token as SHA-256 hash in the database.
  * Returns device row if valid, null otherwise.
  */
-export async function verifyDeviceToken(
+export const verifyDeviceToken = async (
   deviceId: string,
   authToken: string,
-): Promise<AuthenticatedDevice | null> {
+): Promise<AuthenticatedDevice | null> => {
   try {
     const result = await pool.query<AuthenticatedDevice>(
       `SELECT id, device_id, vehicle_id, current_status
@@ -31,4 +31,4 @@ export async function verifyDeviceToken(
     logger.error({ err, deviceId }, 'Device auth verification failed');
     return null;
   }
-}
+};

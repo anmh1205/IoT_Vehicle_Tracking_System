@@ -32,7 +32,9 @@ export const getFleetUsage = async (
   const step = toSeriesStep(interval);
   const bucketExpr = toBucketExpression(interval);
 
-  const totalResult = await pool.query<{ total: string }>('SELECT COUNT(*)::text as total FROM vehicles');
+  const totalResult = await pool.query<{ total: string }>(
+    'SELECT COUNT(*)::text as total FROM vehicles',
+  );
   const totalVehicles = parseInt(totalResult.rows[0]?.total ?? '0', 10);
 
   const query = `
@@ -166,6 +168,12 @@ interface TripSummaryRow {
   avg_duration_minutes: string;
 }
 
+interface SummaryTotalsRow {
+  total_runtime_hours: string;
+  total_sessions: string;
+  total_alerts: string;
+}
+
 export const getTripSummary = async (
   range: StatisticsDateRange,
   interval: StatisticsInterval,
@@ -204,4 +212,47 @@ export const getTripSummary = async (
     totalDistanceKm: parseFloat(row.total_distance_km),
     avgDurationMinutes: Math.round(parseFloat(row.avg_duration_minutes) * 100) / 100,
   }));
+};
+
+export const getSummaryTotals = async (
+  range: StatisticsDateRange,
+): Promise<{ totalRuntimeHours: number; totalSessions: number; totalAlerts: number }> => {
+  const query = `
+    WITH session_stats AS (
+      SELECT
+        COALESCE(SUM(
+          CASE
+            WHEN total_runtime_seconds IS NOT NULL THEN total_runtime_seconds
+            WHEN uptime IS NOT NULL THEN uptime
+            ELSE EXTRACT(
+              EPOCH FROM (
+                COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at)
+              )
+            )
+          END
+        ), 0)::text AS total_runtime_seconds,
+        COUNT(*)::text AS total_sessions
+      FROM device_sessions
+      WHERE COALESCE(server_session_start, created_at) BETWEEN $1 AND $2
+    ),
+    alert_stats AS (
+      SELECT COUNT(*)::text AS total_alerts
+      FROM alerts
+      WHERE created_at BETWEEN $1 AND $2
+    )
+    SELECT
+      ROUND((COALESCE(session_stats.total_runtime_seconds, '0')::numeric / 3600.0), 2)::text AS total_runtime_hours,
+      COALESCE(session_stats.total_sessions, '0') AS total_sessions,
+      COALESCE(alert_stats.total_alerts, '0') AS total_alerts
+    FROM session_stats, alert_stats
+  `;
+
+  const result = await pool.query<SummaryTotalsRow>(query, [range.from, range.to]);
+  const row = result.rows[0];
+
+  return {
+    totalRuntimeHours: Number.parseFloat(row?.total_runtime_hours ?? '0') || 0,
+    totalSessions: Number.parseInt(row?.total_sessions ?? '0', 10) || 0,
+    totalAlerts: Number.parseInt(row?.total_alerts ?? '0', 10) || 0,
+  };
 };

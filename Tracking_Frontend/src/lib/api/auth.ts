@@ -24,12 +24,20 @@ export const authServices = {
   updatePassword: (data: { currentPassword: string; newPassword: string }) =>
     apiClient.post('/auth/change-password', data).then((r) => unwrap<{ message: string }>(r.data)),
 
-  updateNotifications: (data: { emailAlerts?: boolean; pushAlerts?: boolean; alertTypes?: string[] }) =>
-    apiClient.put('/auth/notifications', data).then((r) => unwrap<User>(r.data)),
+  updateNotifications: (data: {
+    emailAlerts?: boolean;
+    pushAlerts?: boolean;
+    alertTypes?: string[];
+  }) => apiClient.put('/auth/notifications', data).then((r) => unwrap<User>(r.data)),
 
   getNotificationSettings: () =>
-    apiClient.get('/users/notification-settings').then((r) => unwrap<{ preferences: Record<string, unknown> }>(r.data)),
+    apiClient
+      .get('/users/notification-settings')
+      .then((r) => unwrap<{ preferences: Record<string, unknown> }>(r.data)),
 
-  updateNotificationSettings: (data: { emailAlerts?: boolean; pushAlerts?: boolean; alertTypes?: string[] }) =>
-    apiClient.put('/users/notification-settings', data).then((r) => unwrap<User>(r.data)),
+  updateNotificationSettings: (data: {
+    emailAlerts?: boolean;
+    pushAlerts?: boolean;
+    alertTypes?: string[];
+  }) => apiClient.put('/users/notification-settings', data).then((r) => unwrap<User>(r.data)),
 };

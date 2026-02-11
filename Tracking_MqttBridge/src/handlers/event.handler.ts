@@ -19,10 +19,10 @@ const eventSchema = z.object({
  * 2. Log to VictoriaLogs
  * 3. Publish critical events to internal topic for Backend
  */
-export async function handleEvent(
+export const handleEvent = async (
   deviceIdFromTopic: string,
   message: Buffer,
-): Promise<void> {
+): Promise<void> => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(message.toString());
@@ -78,4 +78,4 @@ export async function handleEvent(
     { deviceId: payload.device_id, eventType: payload.event_type, code: payload.code },
     'Device event processed',
   );
-}
+};

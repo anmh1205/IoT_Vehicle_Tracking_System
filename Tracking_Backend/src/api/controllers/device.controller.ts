@@ -96,10 +96,12 @@ export const getRuntimeStats = asyncHandler(async (req: AuthenticatedRequest, re
   sendOk(res, stats);
 });
 
-export const getDevicePositions = asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
-  const positions = await deviceListService.getDevicePositions();
-  sendOk(res, positions);
-});
+export const getDevicePositions = asyncHandler(
+  async (_req: AuthenticatedRequest, res: Response) => {
+    const positions = await deviceListService.getDevicePositions();
+    sendOk(res, positions);
+  },
+);
 
 export const regenerateToken = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const id = Number.parseInt(req.params.id, 10);

@@ -226,75 +226,66 @@ interface FilterProps {
 // device.repository.ts
 import { pool } from '@/infrastructure/database';
 
-export class DeviceRepository {
+export const createDeviceRepository = () => {
   /**
    * Find device by device_id
    * @returns Device row or null if not found
    */
-  async findByDeviceId(deviceId: string): Promise<DeviceRow | null> {
+  const findByDeviceId = async (deviceId: string): Promise<DeviceRow | null> => {
     const result = await pool.query<DeviceRow>(
       'SELECT * FROM devices WHERE device_id = $1',
       [deviceId]
     );
     return result.rows.length > 0 ? result.rows[0] : null;
-  }
+  };
 
   /**
    * Get all devices with optional filtering
    */
-  async findAll(filter?: DeviceFilter): Promise<DeviceRow[]> {
+  const findAll = async (filter?: DeviceFilter): Promise<DeviceRow[]> => {
     const result = await pool.query<DeviceRow>(
       'SELECT * FROM devices WHERE ($1::text IS NULL OR current_status = $1)',
       [filter?.status ?? null]
     );
     return result.rows;
-  }
+  };
 
   /**
    * Create new device
    * @returns The new device ID
    */
-  async create(data: CreateDeviceDto): Promise<number> {
+  const create = async (data: CreateDeviceDto): Promise<number> => {
     const result = await pool.query<{ id: number }>(
       `INSERT INTO devices (device_id, device_name, auth_token)
        VALUES ($1, $2, $3) RETURNING id`,
       [data.deviceId, data.deviceName, data.authToken]
     );
     return result.rows[0].id;
-  }
-}
+  };
+
+  return {
+    findByDeviceId,
+    findAll,
+    create,
+  };
+};
 ```
 
 ### 3.2 Service Pattern (Backend)
 
 ```typescript
 // device-list.service.ts
-export class DeviceListService {
-  constructor(
-    private deviceRepo: DeviceRepository,
-    private sessionRepo: DeviceSessionRepository
-  ) {}
-
+export const createDeviceListService = (
+  deviceRepo: ReturnType<typeof createDeviceRepository>,
+  sessionRepo: DeviceSessionRepository
+) => {
   /**
    * Get device list with runtime statistics
    */
-  async getDeviceList(filter?: DeviceFilter): Promise<DeviceListItem[]> {
-    // 1. Get raw data from repository
-    const devices = await this.deviceRepo.findAll(filter);
-
-    // 2. Apply business logic
-    const enrichedDevices = await Promise.all(
-      devices.map(async (device) => {
-        const sessions = await this.sessionRepo.findByDeviceId(device.device_id);
-        return this.enrichWithRuntime(device, sessions);
-      })
-    );
-
-    // 3. Return transformed data
-    return enrichedDevices;
-  }
-
-  private enrichWithRuntime(device: DeviceRow, sessions: SessionRow[]): DeviceListItem {
+  const enrichWithRuntime = (
+    device: DeviceRow,
+    sessions: SessionRow[]
+  ): DeviceListItem => {
     const totalRuntime = sessions.reduce((sum, s) => sum + (s.uptime || 0), 0);
     return {
       deviceId: device.device_id,
@@ -302,8 +293,28 @@ export class DeviceListService {
       status: device.current_status,
       totalRuntime,
     };
-  }
-}
+  };
+
+  const getDeviceList = async (filter?: DeviceFilter): Promise<DeviceListItem[]> => {
+    // 1. Get raw data from repository
+    const devices = await deviceRepo.findAll(filter);
+
+    // 2. Apply business logic
+    const enrichedDevices = await Promise.all(
+      devices.map(async (device) => {
+        const sessions = await sessionRepo.findByDeviceId(device.device_id);
+        return enrichWithRuntime(device, sessions);
+      })
+    );
+
+    // 3. Return transformed data
+    return enrichedDevices;
+  };
+
+  return {
+    getDeviceList,
+  };
+};
 ```
 
 ### 3.3 Zod Validation (Backend)
@@ -356,9 +367,9 @@ import { deviceListQuerySchema, createDeviceSchema } from '@/api/validators/devi
 const router = Router();
 
 // Initialize dependencies
-const deviceRepo = new DeviceRepository();
+const deviceRepo = createDeviceRepository();
 const sessionRepo = new DeviceSessionRepository();
-const deviceListService = new DeviceListService(deviceRepo, sessionRepo);
+const deviceListService = createDeviceListService(deviceRepo, sessionRepo);
 const deviceController = new DeviceController(deviceListService);
 
 // Routes

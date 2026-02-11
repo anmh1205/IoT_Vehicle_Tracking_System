@@ -175,7 +175,8 @@ export function DataTable<TData, TValue>({
       {pagination && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Hiển thị {table.getRowModel().rows.length} / {table.getFilteredRowModel().rows.length} bản ghi
+            Hiển thị {table.getRowModel().rows.length} / {table.getFilteredRowModel().rows.length}{' '}
+            bản ghi
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -203,4 +204,3 @@ export function DataTable<TData, TValue>({
     </div>
   );
 }
-

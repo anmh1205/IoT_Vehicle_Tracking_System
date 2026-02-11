@@ -1,6 +1,17 @@
-import { findOne, findMany, insertOne, updateOne, deleteOne } from '@/infrastructure/database/queries';
+import {
+  findOne,
+  findMany,
+  insertOne,
+  updateOne,
+  deleteOne,
+} from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
-import type { Customer, CustomerListQuery, CreateCustomerInput, UpdateCustomerInput } from '@/domain/customer/types/customer.types';
+import type {
+  Customer,
+  CustomerListQuery,
+  CreateCustomerInput,
+  UpdateCustomerInput,
+} from '@/domain/customer/types/customer.types';
 
 export const findAll = async (
   query: CustomerListQuery,
@@ -24,7 +35,9 @@ export const findAll = async (
   }
 
   if (query.search) {
-    conditions.push(`(name ILIKE $${paramIndex} OR customer_code ILIKE $${paramIndex} OR email ILIKE $${paramIndex})`);
+    conditions.push(
+      `(name ILIKE $${paramIndex} OR customer_code ILIKE $${paramIndex} OR email ILIKE $${paramIndex})`,
+    );
     params.push(`%${query.search}%`);
     paramIndex++;
   }
@@ -69,10 +82,7 @@ export const create = async (input: CreateCustomerInput): Promise<Customer> =>
     ],
   );
 
-export const update = async (
-  id: number,
-  input: UpdateCustomerInput,
-): Promise<Customer | null> => {
+export const update = async (id: number, input: UpdateCustomerInput): Promise<Customer | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;

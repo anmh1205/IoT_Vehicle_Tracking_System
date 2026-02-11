@@ -44,6 +44,15 @@ export const getTripSummary = asyncHandler(async (req: AuthenticatedRequest, res
   sendOk(res, result);
 });
 
+export const getSummary = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const result = await statisticsService.getSummaryStats({
+    from: req.query.from as string | undefined,
+    to: req.query.to as string | undefined,
+  });
+
+  sendOk(res, result);
+});
+
 export const getFleetStats = asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
   const [distanceFuel, runtime, violations] = await Promise.all([
     pool.query(
@@ -94,17 +103,18 @@ export const getFleetStats = asyncHandler(async (_req: AuthenticatedRequest, res
   });
 });
 
-export const getMaintenanceStats = asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
-  const result = await pool.query(
-    `SELECT
+export const getMaintenanceStats = asyncHandler(
+  async (_req: AuthenticatedRequest, res: Response) => {
+    const result = await pool.query(
+      `SELECT
        COALESCE(SUM(CASE WHEN next_service_date < CURRENT_DATE AND status != 'completed' THEN 1 ELSE 0 END), 0)::int AS overdue,
        COALESCE(SUM(CASE WHEN next_service_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days' THEN 1 ELSE 0 END), 0)::int AS due_soon,
        COALESCE(SUM(CASE WHEN next_service_date > CURRENT_DATE + INTERVAL '7 days' THEN 1 ELSE 0 END), 0)::int AS upcoming
      FROM maintenance`,
-  );
+    );
 
-  const vehiclesResult = await pool.query(
-    `SELECT
+    const vehiclesResult = await pool.query(
+      `SELECT
        m.vehicle_id,
        v.plate_number AS plate,
        m.maintenance_type AS service_type,
@@ -119,18 +129,19 @@ export const getMaintenanceStats = asyncHandler(async (_req: AuthenticatedReques
      WHERE m.next_service_date IS NOT NULL
      ORDER BY m.next_service_date ASC
      LIMIT 50`,
-  );
+    );
 
-  sendOk(res, {
-    overdue: Number(result.rows[0]?.overdue ?? 0),
-    dueSoon: Number(result.rows[0]?.due_soon ?? 0),
-    upcoming: Number(result.rows[0]?.upcoming ?? 0),
-    vehicles: vehiclesResult.rows.map((row) => ({
-      vehicleId: row.vehicle_id,
-      plate: row.plate,
-      serviceType: row.service_type,
-      dueDate: row.due_date ? new Date(row.due_date).toISOString().slice(0, 10) : null,
-      status: row.status,
-    })),
-  });
-});
+    sendOk(res, {
+      overdue: Number(result.rows[0]?.overdue ?? 0),
+      dueSoon: Number(result.rows[0]?.due_soon ?? 0),
+      upcoming: Number(result.rows[0]?.upcoming ?? 0),
+      vehicles: vehiclesResult.rows.map((row) => ({
+        vehicleId: row.vehicle_id,
+        plate: row.plate,
+        serviceType: row.service_type,
+        dueDate: row.due_date ? new Date(row.due_date).toISOString().slice(0, 10) : null,
+        status: row.status,
+      })),
+    });
+  },
+);

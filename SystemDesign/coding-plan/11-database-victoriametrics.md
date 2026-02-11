@@ -277,17 +277,29 @@ avg by (device_id) (device_uptime)
 
 ```typescript
 // infrastructure/victoriametrics/repository.ts
-export class VictoriaMetricsRepository {
-  private baseUrl: string;
+export const createVictoriaMetricsRepository = () => {
+  const baseUrl = process.env.VICTORIAMETRICS_URL!;
 
-  constructor() {
-    this.baseUrl = process.env.VICTORIAMETRICS_URL!;
-  }
+  const parseResult = (result: any): any[] => {
+    if (result.status !== 'success') return [];
+    return result.data.result.flatMap((series: any) =>
+      series.values.map(([ts, val]: [number, string]) => ({
+        timestamp: ts * 1000,
+        value: parseFloat(val),
+      }))
+    );
+  };
 
-  async getDeviceVibrationHistory(
+  const parseScalar = (result: any): number | null => {
+    if (result.status !== 'success') return null;
+    const value = result.data.result[0]?.value?.[1];
+    return value ? parseFloat(value) : null;
+  };
+
+  const getDeviceVibrationHistory = async (
     deviceId: string,
     hours: number = 24
-  ): Promise<VibrationDataPoint[]> {
+  ): Promise<VibrationDataPoint[]> => {
     const end = Math.floor(Date.now() / 1000);
     const start = end - hours * 3600;
 
@@ -298,13 +310,13 @@ export class VictoriaMetricsRepository {
       '1m'
     );
 
-    return this.parseResult(result);
-  }
+    return parseResult(result);
+  };
 
-  async getDeviceLocationHistory(
+  const getDeviceLocationHistory = async (
     deviceId: string,
     hours: number = 1
-  ): Promise<LocationDataPoint[]> {
+  ): Promise<LocationDataPoint[]> => {
     const end = Math.floor(Date.now() / 1000);
     const start = end - hours * 3600;
 
@@ -313,10 +325,10 @@ export class VictoriaMetricsRepository {
       rangeQuery(`device_longitude{device_id="${deviceId}"}`, start, end, '10s'),
     ]);
 
-    return this.mergeLocationData(latResult, lonResult);
-  }
+    return mergeLocationData(latResult, lonResult);
+  };
 
-  async getDeviceStats(deviceId: string): Promise<DeviceStats> {
+  const getDeviceStats = async (deviceId: string): Promise<DeviceStats> => {
     const [avgVibration, maxSpeed, avgBattery] = await Promise.all([
       instantQuery(`avg_over_time(device_vibration{device_id="${deviceId}"}[24h])`),
       instantQuery(`max_over_time(device_speed{device_id="${deviceId}"}[24h])`),
@@ -324,45 +336,34 @@ export class VictoriaMetricsRepository {
     ]);
 
     return {
-      avgVibration: this.parseScalar(avgVibration),
-      maxSpeed: this.parseScalar(maxSpeed),
-      avgBattery: this.parseScalar(avgBattery),
+      avgVibration: parseScalar(avgVibration),
+      maxSpeed: parseScalar(maxSpeed),
+      avgBattery: parseScalar(avgBattery),
     };
-  }
+  };
 
-  private parseResult(result: any): any[] {
-    if (result.status !== 'success') return [];
-    return result.data.result.flatMap((series: any) =>
-      series.values.map(([ts, val]: [number, string]) => ({
-        timestamp: ts * 1000,
-        value: parseFloat(val),
-      }))
-    );
-  }
-
-  private parseScalar(result: any): number | null {
-    if (result.status !== 'success') return null;
-    const value = result.data.result[0]?.value?.[1];
-    return value ? parseFloat(value) : null;
-  }
-}
+  return {
+    baseUrl,
+    getDeviceVibrationHistory,
+    getDeviceLocationHistory,
+    getDeviceStats,
+  };
+};
 ```
 
 ### 6.2 Service Usage
 
 ```typescript
 // domain/device/services/device-runtime.service.ts
-export class DeviceRuntimeService {
-  constructor(
-    private vmRepo: VictoriaMetricsRepository,
-    private deviceRepo: DeviceRepository
-  ) {}
-
-  async getDeviceAnalytics(deviceId: string): Promise<DeviceAnalytics> {
+export const createDeviceRuntimeService = (
+  vmRepo: ReturnType<typeof createVictoriaMetricsRepository>,
+  deviceRepo: DeviceRepository
+) => {
+  const getDeviceAnalytics = async (deviceId: string): Promise<DeviceAnalytics> => {
     const [device, stats, vibrationHistory] = await Promise.all([
-      this.deviceRepo.findByDeviceId(deviceId),
-      this.vmRepo.getDeviceStats(deviceId),
-      this.vmRepo.getDeviceVibrationHistory(deviceId, 24),
+      deviceRepo.findByDeviceId(deviceId),
+      vmRepo.getDeviceStats(deviceId),
+      vmRepo.getDeviceVibrationHistory(deviceId, 24),
     ]);
 
     return {
@@ -373,8 +374,12 @@ export class DeviceRuntimeService {
         (p) => p.value > (device?.vibration_threshold ?? 1.0)
       ).length,
     };
-  }
-}
+  };
+
+  return {
+    getDeviceAnalytics,
+  };
+};
 ```
 
 ---

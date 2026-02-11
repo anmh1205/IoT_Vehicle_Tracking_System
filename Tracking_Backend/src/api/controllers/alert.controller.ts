@@ -64,7 +64,11 @@ export const resolveAlert = asyncHandler(async (req: AuthenticatedRequest, res: 
   }
 
   const userId = req.user!.id;
-  const alert = await alertCrudService.resolveAlert(id, userId, parsed.data.resolutionNotes ?? null);
+  const alert = await alertCrudService.resolveAlert(
+    id,
+    userId,
+    parsed.data.resolutionNotes ?? null,
+  );
   sendOk(res, alert);
 });
 

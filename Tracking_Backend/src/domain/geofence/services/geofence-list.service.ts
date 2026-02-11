@@ -1,5 +1,9 @@
 import * as geofenceRepo from '@/domain/geofence/repositories/geofence.repository';
-import type { Geofence, GeofenceListQuery, GeofencePublic } from '@/domain/geofence/types/geofence.types';
+import type {
+  Geofence,
+  GeofenceListQuery,
+  GeofencePublic,
+} from '@/domain/geofence/types/geofence.types';
 
 const sanitizeGeofence = (g: Geofence): GeofencePublic => ({
   id: g.id,
@@ -23,7 +27,10 @@ const sanitizeGeofence = (g: Geofence): GeofencePublic => ({
 
 export const listGeofences = async (
   query: GeofenceListQuery,
-): Promise<{ items: GeofencePublic[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> => {
+): Promise<{
+  items: GeofencePublic[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 

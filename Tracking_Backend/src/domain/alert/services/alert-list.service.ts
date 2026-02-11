@@ -28,7 +28,10 @@ const sanitizeAlert = (a: Alert): AlertPublic => ({
 
 export const listAlerts = async (
   query: AlertListQuery,
-): Promise<{ items: AlertPublic[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> => {
+): Promise<{
+  items: AlertPublic[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 

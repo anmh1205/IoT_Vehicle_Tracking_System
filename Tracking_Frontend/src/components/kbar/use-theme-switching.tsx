@@ -34,5 +34,3 @@ const useThemeSwitching = () => {
 };
 
 export default useThemeSwitching;
-
-

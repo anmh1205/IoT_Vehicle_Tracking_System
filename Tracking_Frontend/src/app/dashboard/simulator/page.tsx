@@ -1,76 +1,79 @@
-﻿'use client';
-
-import { useState } from 'react';
+'use client';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
-
-export default function SimulatorPage() {
-  const [running, setRunning] = useState(false);
-  const [deviceId, setDeviceId] = useState('SIM-001');
-  const [lat, setLat] = useState(10.762622);
-  const [lon, setLon] = useState(106.660172);
-  const [speed, setSpeed] = useState(30);
-  const [vibration, setVibration] = useState(5);
-  const [points, setPoints] = useState<any[]>([]);
-
-  const tick = () => {
-    const next = {
-      timestamp: new Date().toISOString(),
-      deviceId,
-      lat: Number((lat + (Math.random() - 0.5) * 0.001).toFixed(6)),
-      lon: Number((lon + (Math.random() - 0.5) * 0.001).toFixed(6)),
-      speed,
-      vibration,
-    };
-    setLat(next.lat);
-    setLon(next.lon);
-    setPoints((prev) => [next, ...prev].slice(0, 30));
-  };
-
+import { useRoleAccess } from '@/hooks/use-role-access';
+import { DeviceSelector } from '@/features/simulator/components/device-selector';
+import { DataConfigurator } from '@/features/simulator/components/data-configurator';
+import { SimulationControls } from '@/features/simulator/components/simulation-controls';
+import { SimulationPreview } from '@/features/simulator/components/simulation-preview';
+import { useSimulator } from '@/features/simulator/hooks/use-simulator';
+const SimulatorPage = () => {
+  const access = useRoleAccess();
+  const simulator = useSimulator();
+  if (!access.canAccessSystemAdmin) {
+    return (
+      <PageContainer pageTitle="Simulator" pageDescription="Restricted area">
+        <Card>
+          <CardContent className="p-4 text-sm text-muted-foreground">
+            You do not have permission to run device simulation.
+          </CardContent>
+        </Card>
+      </PageContainer>
+    );
+  }
   return (
-    <PageContainer pageTitle="Mô phỏng" pageDescription="Giả lập dữ liệu thiết bị cho demo và test">
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader><CardTitle>Chọn thiết bị</CardTitle></CardHeader>
-          <CardContent className="space-y-3"><Input value={deviceId} onChange={(e) => setDeviceId(e.target.value)} /></CardContent>
-        </Card>
+    <PageContainer
+      pageTitle="Simulator"
+      pageDescription="Generate synthetic telemetry for end-to-end testing"
+    >
+      <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Device selector</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DeviceSelector
+                value={simulator.state.selectedDeviceIds}
+                onChange={simulator.setSelectedDeviceIds}
+              />
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader><CardTitle>Cấu hình dữ liệu</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <Input type="number" value={lat} onChange={(e) => setLat(Number(e.target.value))} />
-            <Input type="number" value={lon} onChange={(e) => setLon(Number(e.target.value))} />
-            <div><div className="mb-2 text-xs">Tốc độ: {speed} km/h</div><Slider value={[speed]} min={0} max={200} step={1} onValueChange={(v) => setSpeed(v[0] ?? 0)} /></div>
-            <div><div className="mb-2 text-xs">Độ rung RMS: {vibration}</div><Slider value={[vibration]} min={0} max={50} step={1} onValueChange={(v) => setVibration(v[0] ?? 0)} /></div>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Data configurator</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DataConfigurator state={simulator.state} onChange={simulator.setConfig} />
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader><CardTitle>Điều khiển</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex gap-2">
-              <Button onClick={() => setRunning(true)} disabled={running}>Bắt đầu</Button>
-              <Button variant="outline" onClick={() => setRunning(false)} disabled={!running}>Dừng</Button>
-              <Button variant="outline" onClick={tick}>Tạo điểm</Button>
-            </div>
-            <div className="text-xs text-muted-foreground">{running ? 'Đang chạy...' : 'Đã dừng'}</div>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Simulation controls</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SimulationControls
+                intervalSec={simulator.state.intervalSec}
+                durationMin={simulator.state.durationMin}
+                running={simulator.running}
+                paused={simulator.paused}
+                statusLabel={simulator.statusLabel}
+                onIntervalChange={(value) => simulator.setConfig('intervalSec', value)}
+                onDurationChange={(value) => simulator.setConfig('durationMin', value)}
+                onStart={() => void simulator.start()}
+                onPause={simulator.pause}
+                onResume={simulator.resume}
+                onStop={() => void simulator.stop()}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        <SimulationPreview preview={simulator.preview} history={simulator.history} />
       </div>
-
-      <Card>
-        <CardHeader><CardTitle>Xem trước dữ liệu</CardTitle></CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          {points.map((point, index) => (
-            <div key={index} className="rounded border p-2">{point.timestamp} - ({point.lat}, {point.lon}) - tốc độ {point.speed} - rung {point.vibration}</div>
-          ))}
-        </CardContent>
-      </Card>
     </PageContainer>
   );
-}
-
-
+};
+export default SimulatorPage;

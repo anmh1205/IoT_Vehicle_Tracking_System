@@ -2,10 +2,9 @@ import { findOne, findMany, insertOne, updateOne } from '@/infrastructure/databa
 import type { ExportJob, CreateExportInput } from '@/domain/export/types/export.types';
 
 export const findAll = async (userId: number): Promise<ExportJob[]> =>
-  findMany<ExportJob>(
-    'SELECT * FROM export_jobs WHERE user_id = $1 ORDER BY created_at DESC',
-    [userId],
-  );
+  findMany<ExportJob>('SELECT * FROM export_jobs WHERE user_id = $1 ORDER BY created_at DESC', [
+    userId,
+  ]);
 
 export const findById = async (id: number): Promise<ExportJob | null> =>
   findOne<ExportJob>('SELECT * FROM export_jobs WHERE id = $1', [id]);
@@ -30,8 +29,8 @@ export const updateStatus = async (
     );
   }
 
-  return updateOne<ExportJob>(
-    `UPDATE export_jobs SET status = $1 WHERE id = $2 RETURNING *`,
-    [status, id],
-  );
+  return updateOne<ExportJob>(`UPDATE export_jobs SET status = $1 WHERE id = $2 RETURNING *`, [
+    status,
+    id,
+  ]);
 };

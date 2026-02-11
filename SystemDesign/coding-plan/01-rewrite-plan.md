@@ -1,91 +1,91 @@
-# Kế Hoạch Viết Lại IoT Vehicle Tracking System
+﻿# Káº¿ Hoáº¡ch Viáº¿t Láº¡i IoT Vehicle Tracking System
 
-> Kế hoạch chi tiết để viết lại hệ thống từ đầu, tận dụng code có thể tái sử dụng
-
----
-
-## 1. Đường Dẫn Quan Trọng
-
-```
-📁 E:\anmh1205\IoT_Vehicle_Tracking_System\
-│
-├── 📁 IoT_Vehicle_Tracking_System/           ← SUBFOLDER (ROOT FOR SERVICES)
-│   ├── 📁 Tracking_Backend/                  ← Express + TypeScript
-│   ├── 📁 Tracking_Frontend/                 ← Next.js (update)
-│   ├── 📁 Tracking_MqttBridge/               ← Standalone MQTT Bridge
-│   ├── 📁 Tracking_PostgreSQL/               ← PostgreSQL Infrastructure
-│   ├── 📁 Tracking_EMQX/                     ← MQTT Broker Infrastructure
-│   ├── 📁 Tracking_VictoriaMetrics/          ← Time-series DB
-│   ├── 📁 Tracking_VictoriaLogs/             ← Logging
-│   └── 📁 Tracking_Grafana/                  ← Visualization
-│
-├── 📁 SystemDesign/                          ← Documentation
-│   ├── coding-plan/                           ← Hướng dẫn implement
-│   └── iot-vehicle-tracking-report/           ← System design docs
-│
-└── 📁 IVM26/                                 ← Reference project
-    └── E:\anmh1205\IVM26\                     ← IVM26 patterns
-```
+> Káº¿ hoáº¡ch chi tiáº¿t Ä‘á»ƒ viáº¿t láº¡i há»‡ thá»‘ng tá»« Ä‘áº§u, táº­n dá»¥ng code cÃ³ thá»ƒ tÃ¡i sá»­ dá»¥ng
 
 ---
 
-## 2. Tổng Quan Viết Lại
+## 1. ÄÆ°á»ng Dáº«n Quan Trá»ng
 
-### 2.1 Lý Do Viết Lại
+```
+ðŸ“ E:\anmh1205\IoT_Vehicle_Tracking_System\
+â”‚
+â”œâ”€â”€ ðŸ“ IoT_Vehicle_Tracking_System/           â† SUBFOLDER (ROOT FOR SERVICES)
+â”‚   â”œâ”€â”€ ðŸ“ Tracking_Backend/                  â† Express + TypeScript
+â”‚   â”œâ”€â”€ ðŸ“ Tracking_Frontend/                 â† Next.js (update)
+â”‚   â”œâ”€â”€ ðŸ“ Tracking_MqttBridge/               â† Standalone MQTT Bridge
+â”‚   â”œâ”€â”€ ðŸ“ Tracking_PostgreSQL/               â† PostgreSQL Infrastructure
+â”‚   â”œâ”€â”€ ðŸ“ Tracking_EMQX/                     â† MQTT Broker Infrastructure
+â”‚   â”œâ”€â”€ ðŸ“ Tracking_VictoriaMetrics/          â† Time-series DB
+â”‚   â”œâ”€â”€ ðŸ“ Tracking_VictoriaLogs/             â† Logging
+â”‚   â””â”€â”€ ðŸ“ Tracking_Grafana/                  â† Visualization
+â”‚
+â”œâ”€â”€ ðŸ“ SystemDesign/                          â† Documentation
+â”‚   â”œâ”€â”€ coding-plan/                           â† HÆ°á»›ng dáº«n implement
+â”‚   â””â”€â”€ iot-vehicle-tracking-report/           â† System design docs
+â”‚
+â””â”€â”€ ðŸ“ IVM26/                                 â† Reference project
+    â””â”€â”€ E:\anmh1205\IVM26\                     â† IVM26 patterns
+```
 
-| Vấn đề code cũ | Giải pháp mới |
+---
+
+## 2. Tá»•ng Quan Viáº¿t Láº¡i
+
+### 2.1 LÃ½ Do Viáº¿t Láº¡i
+
+| Váº¥n Ä‘á» code cÅ© | Giáº£i phÃ¡p má»›i |
 |----------------|---------------|
-| NestJS (khác IVM26 pattern) | Express + Domain-Driven Design |
-| InfluxDB (chỉ có stub, không implement) | VictoriaMetrics (full implementation) |
-| Không có logging infrastructure | VictoriaLogs |
-| Không có observability | Prometheus + Grafana |
-| MQTT không tách riêng | Standalone MQTT Bridge |
-| Telemetry chỉ có mock data | Full implementation |
+| NestJS (khÃ¡c IVM26 pattern) | Express + Domain-Driven Design |
+| InfluxDB (chá»‰ cÃ³ stub, khÃ´ng implement) | VictoriaMetrics (full implementation) |
+| KhÃ´ng cÃ³ logging infrastructure | VictoriaLogs |
+| KhÃ´ng cÃ³ observability | Prometheus + Grafana |
+| MQTT khÃ´ng tÃ¡ch riÃªng | Standalone MQTT Bridge |
+| Telemetry chá»‰ cÃ³ mock data | Full implementation |
 
-### 2.2 Phạm Vi
+### 2.2 Pháº¡m Vi
 
-| Component | Action | Tỷ lệ tái sử dụng | Ghi chú |
+| Component | Action | Tá»· lá»‡ tÃ¡i sá»­ dá»¥ng | Ghi chÃº |
 |-----------|--------|-------------------|---------|
-| **Backend** | Viết lại 100% | 0% reuse (tham khảo logic) | NestJS → Express |
-| **MQTT Bridge** | Viết mới 100% | 0% reuse | Standalone service tại `mqtt-bridge/` |
-| **Frontend** | Viết lại ~80% | ~20% reuse (UI components) | Xem chi tiết ở Section 3.1 |
-| **Infrastructure** | Viết lại 100% | 0% reuse | VictoriaMetrics thay InfluxDB |
+| **Backend** | Viáº¿t láº¡i 100% | 0% reuse (tham kháº£o logic) | NestJS â†’ Express |
+| **MQTT Bridge** | Viáº¿t má»›i 100% | 0% reuse | Standalone service táº¡i `mqtt-bridge/` |
+| **Frontend** | Viáº¿t láº¡i ~80% | ~20% reuse (UI components) | Xem chi tiáº¿t á»Ÿ Section 3.1 |
+| **Infrastructure** | Viáº¿t láº¡i 100% | 0% reuse | VictoriaMetrics thay InfluxDB |
 
-> ⚠️ **Lưu ý quan trọng về Frontend:**
-> - UI Components (shadcn/ui): ✅ Copy 100% - Hoạt động tốt (~20% tổng frontend)
-> - Pages/Features: ⚠️ Cần viết lại ~80% - Nhiều tính năng là TODO/skeleton
-> - Chi tiết bugs và fixes: Xem `32-frontend-implementation.md`
+> âš ï¸ **LÆ°u Ã½ quan trá»ng vá» Frontend:**
+> - UI Components (shadcn/ui): âœ… Copy 100% - Hoáº¡t Ä‘á»™ng tá»‘t (~20% tá»•ng frontend)
+> - Pages/Features: âš ï¸ Cáº§n viáº¿t láº¡i ~80% - Nhiá»u tÃ­nh nÄƒng lÃ  TODO/skeleton
+> - Chi tiáº¿t bugs vÃ  fixes: Xem `32-frontend-implementation.md`
 
 ---
 
-## 3. Code Cũ Có Thể Tái Sử Dụng
+## 3. Code CÅ© CÃ³ Thá»ƒ TÃ¡i Sá»­ Dá»¥ng
 
-### 3.1 Frontend UI Components (COPY TRỰC TIẾP)
+### 3.1 Frontend UI Components (COPY TRá»°C TIáº¾P)
 
-**Nguồn:** `iot-vehicle-tracking-system-backup/frontend/src/components/ui/`
+**Nguá»“n:** `iot-vehicle-tracking-system-backup/frontend/src/components/ui/`
 
 ```
-✅ COPY NGUYÊN VẸN (19 files):
-├── button.tsx
-├── card.tsx
-├── input.tsx
-├── label.tsx
-├── select.tsx
-├── textarea.tsx
-├── dialog.tsx
-├── sheet.tsx
-├── dropdown-menu.tsx
-├── tooltip.tsx
-├── table.tsx
-├── badge.tsx
-├── switch.tsx
-├── avatar.tsx
-├── skeleton.tsx
-├── separator.tsx
-├── scroll-area.tsx
-├── collapsible.tsx
-├── toaster.tsx
-└── sidebar.tsx (shadcn sidebar component)
+âœ… COPY NGUYÃŠN Váº¸N (19 files):
+â”œâ”€â”€ button.tsx
+â”œâ”€â”€ card.tsx
+â”œâ”€â”€ input.tsx
+â”œâ”€â”€ label.tsx
+â”œâ”€â”€ select.tsx
+â”œâ”€â”€ textarea.tsx
+â”œâ”€â”€ dialog.tsx
+â”œâ”€â”€ sheet.tsx
+â”œâ”€â”€ dropdown-menu.tsx
+â”œâ”€â”€ tooltip.tsx
+â”œâ”€â”€ table.tsx
+â”œâ”€â”€ badge.tsx
+â”œâ”€â”€ switch.tsx
+â”œâ”€â”€ avatar.tsx
+â”œâ”€â”€ skeleton.tsx
+â”œâ”€â”€ separator.tsx
+â”œâ”€â”€ scroll-area.tsx
+â”œâ”€â”€ collapsible.tsx
+â”œâ”€â”€ toaster.tsx
+â””â”€â”€ sidebar.tsx (shadcn sidebar component)
 ```
 
 **Command copy:**
@@ -95,30 +95,30 @@ cp -r "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backu
       "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\frontend\src\components\ui"
 ```
 
-### 3.2 Map Components (COPY VÀ UPDATE)
+### 3.2 Map Components (COPY VÃ€ UPDATE)
 
-**Nguồn:** `iot-vehicle-tracking-system-backup/frontend/src/components/map/`
+**Nguá»“n:** `iot-vehicle-tracking-system-backup/frontend/src/components/map/`
 
 ```
-⚡ COPY VÀ UPDATE TYPES:
-├── vehicle-map.tsx       → Update props interface
-└── vehicle-trail-map.tsx → Update props interface
+âš¡ COPY VÃ€ UPDATE TYPES:
+â”œâ”€â”€ vehicle-map.tsx       â†’ Update props interface
+â””â”€â”€ vehicle-trail-map.tsx â†’ Update props interface
 ```
 
-### 3.3 Icons (COPY TRỰC TIẾP)
+### 3.3 Icons (COPY TRá»°C TIáº¾P)
 
-**Nguồn:** `iot-vehicle-tracking-system-backup/frontend/src/components/icons.tsx`
+**Nguá»“n:** `iot-vehicle-tracking-system-backup/frontend/src/components/icons.tsx`
 
 ```bash
 cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\frontend\src\components\icons.tsx" \
    "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\frontend\src\components\"
 ```
 
-### 3.4 Database Schema (CHUYỂN ĐỔI)
+### 3.4 Database Schema (CHUYá»‚N Äá»”I)
 
-**Nguồn:** `iot-vehicle-tracking-system-backup/backend/src/modules/*/entities/*.entity.ts`
+**Nguá»“n:** `iot-vehicle-tracking-system-backup/backend/src/modules/*/entities/*.entity.ts`
 
-| Entity cũ | File nguồn | Chuyển thành |
+| Entity cÅ© | File nguá»“n | Chuyá»ƒn thÃ nh |
 |-----------|------------|--------------|
 | User | `auth/entities/user.entity.ts` | `Tracking_PostgreSQL/init/01-users.sql` |
 | Vehicle | `vehicles/entities/vehicle.entity.ts` | `Tracking_PostgreSQL/init/02-vehicles.sql` |
@@ -130,11 +130,11 @@ cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\f
 | Geofence | `geofences/entities/geofence.entity.ts` | `Tracking_PostgreSQL/init/08-geofences.sql` |
 | Maintenance | `maintenance/entities/maintenance.entity.ts` | `Tracking_PostgreSQL/init/09-maintenance.sql` |
 
-### 3.5 Business Logic (THAM KHẢO PATTERNS)
+### 3.5 Business Logic (THAM KHáº¢O PATTERNS)
 
-**Nguồn:** `iot-vehicle-tracking-system-backup/backend/src/modules/*/`
+**Nguá»“n:** `iot-vehicle-tracking-system-backup/backend/src/modules/*/`
 
-| Service cũ | Patterns cần tham khảo |
+| Service cÅ© | Patterns cáº§n tham kháº£o |
 |------------|------------------------|
 | `auth.service.ts` | JWT generation, password hashing, refresh token |
 | `vehicles.service.ts` | CRUD pattern, pagination, search, duplicate check |
@@ -144,11 +144,11 @@ cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\f
 | `alerts.service.ts` | CRUD pattern, status management |
 | `dashboard.service.ts` | Aggregation queries, statistics |
 
-### 3.6 DTOs & Validation (THAM KHẢO)
+### 3.6 DTOs & Validation (THAM KHáº¢O)
 
-**Nguồn:** `iot-vehicle-tracking-system-backup/backend/src/modules/*/dto/*.dto.ts`
+**Nguá»“n:** `iot-vehicle-tracking-system-backup/backend/src/modules/*/dto/*.dto.ts`
 
-| DTO cũ (class-validator) | Chuyển thành (Zod) |
+| DTO cÅ© (class-validator) | Chuyá»ƒn thÃ nh (Zod) |
 |--------------------------|---------------------|
 | `auth.dto.ts` | `api/validators/auth.validator.ts` |
 | `vehicle.dto.ts` | `api/validators/vehicle.validator.ts` |
@@ -159,337 +159,337 @@ cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\f
 
 ---
 
-## 4. Cấu Trúc Project Mới
+## 4. Cáº¥u TrÃºc Project Má»›i
 
 ### 4.1 Folder Structure
 
 ```
 E:\anmh1205\IoT_Vehicle_Tracking_System\
-│
-├── IoT_Vehicle_Tracking_System\              # Root Subfolder
-│   │
-│   ├── Tracking_Backend/                     # Express + TypeScript
-│   │   ├── src/
-│   │   │   ├── index.ts                      # Entry point
-│   │   │
-│   │   ├── api/                          # API Layer
-│   │   │   ├── controllers/
-│   │   │   │   ├── auth.controller.ts
-│   │   │   │   ├── vehicle.controller.ts
-│   │   │   │   ├── device.controller.ts
-│   │   │   │   └── ...
-│   │   │   ├── routes/
-│   │   │   │   ├── index.ts
-│   │   │   │   ├── auth.routes.ts
-│   │   │   │   ├── vehicle.routes.ts
-│   │   │   │   └── ...
-│   │   │   ├── validators/               # Zod schemas
-│   │   │   │   ├── auth.validator.ts
-│   │   │   │   ├── vehicle.validator.ts
-│   │   │   │   └── ...
-│   │   │   └── openapi/
-│   │   │       └── swagger.ts
-│   │   │
-│   │   ├── domain/                       # Business Logic (DDD)
-│   │   │   ├── auth/
-│   │   │   │   ├── services/
-│   │   │   │   │   ├── auth-session.service.ts
-│   │   │   │   │   └── auth-password.service.ts
-│   │   │   │   ├── repositories/
-│   │   │   │   │   └── user.repository.ts
-│   │   │   │   └── types/
-│   │   │   │       └── auth.types.ts
-│   │   │   ├── vehicle/
-│   │   │   │   ├── services/
-│   │   │   │   ├── repositories/
-│   │   │   │   └── types/
-│   │   │   ├── device/
-│   │   │   ├── customer/
-│   │   │   ├── trip/
-│   │   │   ├── alert/
-│   │   │   ├── violation/
-│   │   │   ├── geofence/
-│   │   │   ├── maintenance/
-│   │   │   ├── dashboard/
-│   │   │   └── notification/
-│   │   │
-│   │   ├── infrastructure/               # External Services
-│   │   │   ├── database/
-│   │   │   │   ├── pool.ts               # PostgreSQL connection
-│   │   │   │   └── queries.ts            # Query helpers
-│   │   │   ├── victoriametrics/
-│   │   │   │   ├── client.ts             # Write client
-│   │   │   │   └── query.ts              # PromQL queries
-│   │   │   ├── victorialogs/
-│   │   │   │   └── client.ts             # Log client
-│   │   │   ├── metrics/
-│   │   │   │   ├── registry.ts           # Prometheus registry
-│   │   │   │   └── app-metrics.ts        # Application metrics
-│   │   │   └── logger/
-│   │   │       └── winston.ts
-│   │   │
-│   │   ├── middleware/
-│   │   │   ├── auth.middleware.ts
-│   │   │   ├── cors.middleware.ts
-│   │   │   ├── security.middleware.ts
-│   │   │   ├── rate-limit.middleware.ts
-│   │   │   ├── metrics.middleware.ts
-│   │   │   └── error-handler.middleware.ts
-│   │   │
-│   │   ├── realtime/                     # Socket.IO
-│   │   │   ├── socket-server.ts
-│   │   │   ├── socket-auth.ts
-│   │   │   ├── event-bus.ts
-│   │   │   └── types.ts
-│   │   │
-│   │   ├── config/
-│   │   │   ├── env.ts
-│   │   │   └── sentry.ts
-│   │   │
-│   │   └── shared/
-│   │       ├── constants/
-│   │       ├── utils/
-│   │       └── types/
-│   │
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── Dockerfile
-│
-├── mqtt-bridge/                          # Standalone MQTT Bridge
-│   ├── src/
-│   │   ├── index.ts                      # Entry point
-│   │   ├── mqtt.client.ts                # MQTT connection
-│   │   ├── handlers/
-│   │   │   ├── telemetry.handler.ts      # GPS, OBD2 data
-│   │   │   └── command.handler.ts        # Device commands
-│   │   ├── batch/
-│   │   │   └── database-batch.service.ts # Batch insert
-│   │   ├── cache/
-│   │   │   ├── device-state.cache.ts
-│   │   │   └── session-stats.cache.ts
-│   │   ├── infrastructure/
-│   │   │   ├── victoriametrics.ts
-│   │   │   ├── victorialogs.ts
-│   │   │   └── postgres.ts
-│   │   └── validators/
-│   │       └── payload.validator.ts
-│   │
-│   ├── package.json
-│   └── Dockerfile
-│
-├── frontend/                             # Next.js 16 (Feature-Sliced Architecture)
-│   ├── src/
-│   │   ├── app/                          # App Router (routing only)
-│   │   │   ├── layout.tsx
-│   │   │   ├── page.tsx
-│   │   │   ├── login/
-│   │   │   │   └── page.tsx
-│   │   │   └── dashboard/
-│   │   │       ├── layout.tsx
-│   │   │       ├── page.tsx              # Overview
-│   │   │       ├── map/
-│   │   │       │   └── page.tsx
-│   │   │       ├── vehicles/
-│   │   │       │   ├── page.tsx
-│   │   │       │   └── [id]/
-│   │   │       │       └── page.tsx
-│   │   │       ├── devices/
-│   │   │       │   ├── page.tsx
-│   │   │       │   └── [id]/
-│   │   │       │       └── page.tsx
-│   │   │       ├── customers/
-│   │   │       │   ├── page.tsx
-│   │   │       │   └── [id]/
-│   │   │       │       └── page.tsx
-│   │   │       ├── trips/
-│   │   │       │   └── page.tsx
-│   │   │       ├── alerts/
-│   │   │       │   └── page.tsx
-│   │   │       ├── violations/
-│   │   │       │   └── page.tsx
-│   │   │       ├── geofences/
-│   │   │       │   ├── page.tsx
-│   │   │       │   └── [id]/
-│   │   │       │       └── page.tsx
-│   │   │       ├── maintenance/
-│   │   │       │   ├── page.tsx
-│   │   │       │   └── [id]/
-│   │   │       │       └── page.tsx
-│   │   │       └── settings/
-│   │   │           └── page.tsx
-│   │   │
-│   │   ├── components/                   # Shared components
-│   │   │   ├── ui/                       # ✅ Copy từ backup (shadcn/ui)
-│   │   │   ├── common/                   # Common UI elements
-│   │   │   ├── forms/                    # Form components
-│   │   │   ├── layout/                   # Layout components
-│   │   │   │   ├── app-sidebar.tsx
-│   │   │   │   ├── header.tsx
-│   │   │   │   └── page-container.tsx
-│   │   │   ├── providers/                # React context providers
-│   │   │   ├── error/                    # Error boundaries
-│   │   │   └── icons.tsx                 # ✅ Copy từ backup
-│   │   │
-│   │   ├── features/                     # ⭐ Feature modules (IVM26 pattern)
-│   │   │   ├── auth/
-│   │   │   │   └── components/
-│   │   │   │       ├── login-form.tsx
-│   │   │   │       └── auth-guard.tsx
-│   │   │   ├── vehicles/
-│   │   │   │   ├── components/
-│   │   │   │   │   ├── vehicle-list.tsx
-│   │   │   │   │   ├── vehicle-card.tsx
-│   │   │   │   │   └── vehicle-detail-modal/
-│   │   │   │   ├── hooks/
-│   │   │   │   │   └── use-vehicle-filters.ts
-│   │   │   │   ├── types/
-│   │   │   │   │   └── vehicle.types.ts
-│   │   │   │   └── utils/
-│   │   │   ├── devices/
-│   │   │   │   ├── components/
-│   │   │   │   ├── hooks/
-│   │   │   │   ├── types/
-│   │   │   │   └── utils/
-│   │   │   ├── customers/
-│   │   │   │   ├── components/
-│   │   │   │   ├── hooks/
-│   │   │   │   └── types/
-│   │   │   ├── trips/
-│   │   │   │   ├── components/
-│   │   │   │   ├── hooks/
-│   │   │   │   └── types/
-│   │   │   ├── alerts/
-│   │   │   │   ├── components/
-│   │   │   │   ├── hooks/
-│   │   │   │   └── types/
-│   │   │   ├── violations/
-│   │   │   │   ├── components/
-│   │   │   │   └── types/
-│   │   │   ├── geofences/
-│   │   │   │   ├── components/
-│   │   │   │   ├── hooks/
-│   │   │   │   └── types/
-│   │   │   ├── maintenance/
-│   │   │   │   ├── components/
-│   │   │   │   └── types/
-│   │   │   ├── map/
-│   │   │   │   ├── components/           # ⚡ Move từ backup/components/map
-│   │   │   │   │   ├── vehicle-map.tsx
-│   │   │   │   │   └── vehicle-trail-map.tsx
-│   │   │   │   ├── hooks/
-│   │   │   │   │   └── use-map-tracking.ts
-│   │   │   │   ├── constants/
-│   │   │   │   └── types/
-│   │   │   ├── dashboard/
-│   │   │   │   ├── components/
-│   │   │   │   │   ├── stats-cards.tsx
-│   │   │   │   │   └── activity-feed.tsx
-│   │   │   │   └── hooks/
-│   │   │   └── settings/
-│   │   │       └── components/
-│   │   │
-│   │   ├── hooks/                        # Global hooks
-│   │   │   ├── queries/                  # React Query fetch hooks
-│   │   │   │   ├── use-vehicles-query.ts
-│   │   │   │   ├── use-devices-query.ts
-│   │   │   │   ├── use-alerts-query.ts
-│   │   │   │   └── index.ts
-│   │   │   ├── mutations/                # React Query mutation hooks
-│   │   │   │   ├── use-create-vehicle.ts
-│   │   │   │   ├── use-update-vehicle.ts
-│   │   │   │   └── index.ts
-│   │   │   └── realtime/                 # WebSocket/real-time hooks
-│   │   │       ├── use-socket.ts
-│   │   │       ├── use-device-telemetry.ts
-│   │   │       └── use-alerts-stream.ts
-│   │   │
-│   │   ├── lib/                          # Core utilities
-│   │   │   ├── api/                      # API client
-│   │   │   │   ├── client.ts             # HTTP client setup
-│   │   │   │   ├── endpoints.ts          # API endpoint definitions
-│   │   │   │   └── interceptors.ts       # Request/response interceptors
-│   │   │   ├── realtime/                 # Real-time connections
-│   │   │   │   ├── socket-client.ts      # Socket.IO client
-│   │   │   │   └── event-handlers.ts
-│   │   │   ├── store/                    # Zustand stores
-│   │   │   │   ├── auth.store.ts
-│   │   │   │   ├── ui.store.ts
-│   │   │   │   └── notifications.store.ts
-│   │   │   ├── constants/                # Global constants
-│   │   │   └── utils/                    # Utility functions
-│   │   │       ├── date.ts
-│   │   │       ├── format.ts
-│   │   │       └── validation.ts
-│   │   │
-│   │   ├── types/                        # Global TypeScript types
-│   │   │   ├── api.types.ts              # API response types
-│   │   │   ├── common.types.ts           # Common types
-│   │   │   └── index.ts
-│   │   │
-│   │   └── config/                       # Configuration
-│   │       ├── site.ts                   # Site metadata
-│   │       └── navigation.ts             # Navigation config
-│   │
-│   ├── e2e/                              # Playwright E2E tests
-│   ├── package.json
-│   └── Dockerfile
-│
-├── docker/
-│   ├── postgres/
-│   │   └── init/
-│   │       ├── 00-extensions.sql
-│   │       ├── 01-users.sql
-│   │       ├── 02-vehicles.sql
-│   │       ├── 03-devices.sql
-│   │       ├── 04-customers.sql
-│   │       ├── 05-trips.sql
-│   │       ├── 06-alerts.sql
-│   │       ├── 07-violations.sql
-│   │       ├── 08-geofences.sql
-│   │       ├── 09-maintenance.sql
-│   │       └── 10-seed-data.sql
-│   ├── prometheus/
-│   │   ├── prometheus.yml
-│   │   └── alerts.yml
-│   ├── grafana/
-│   │   └── provisioning/
-│   │       ├── datasources/
-│   │       └── dashboards/
-│   └── nginx/
-│       └── nginx.conf
-│
-├── docker-compose.yml
-├── docker-compose.dev.yml
-├── .env.example
-└── package.json                          # Root scripts
+â”‚
+â”œâ”€â”€ IoT_Vehicle_Tracking_System\              # Root Subfolder
+â”‚   â”‚
+â”‚   â”œâ”€â”€ Tracking_Backend/                     # Express + TypeScript
+â”‚   â”‚   â”œâ”€â”€ src/
+â”‚   â”‚   â”‚   â”œâ”€â”€ index.ts                      # Entry point
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ api/                          # API Layer
+â”‚   â”‚   â”‚   â”œâ”€â”€ controllers/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ auth.controller.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ vehicle.controller.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ device.controller.ts
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ ...
+â”‚   â”‚   â”‚   â”œâ”€â”€ routes/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ index.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ auth.routes.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ vehicle.routes.ts
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ ...
+â”‚   â”‚   â”‚   â”œâ”€â”€ validators/               # Zod schemas
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ auth.validator.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ vehicle.validator.ts
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ ...
+â”‚   â”‚   â”‚   â””â”€â”€ openapi/
+â”‚   â”‚   â”‚       â””â”€â”€ swagger.ts
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ domain/                       # Business Logic (DDD)
+â”‚   â”‚   â”‚   â”œâ”€â”€ auth/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ services/
+â”‚   â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ auth-session.service.ts
+â”‚   â”‚   â”‚   â”‚   â”‚   â””â”€â”€ auth-password.service.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ repositories/
+â”‚   â”‚   â”‚   â”‚   â”‚   â””â”€â”€ user.repository.ts
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ types/
+â”‚   â”‚   â”‚   â”‚       â””â”€â”€ auth.types.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ vehicle/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ services/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ repositories/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ types/
+â”‚   â”‚   â”‚   â”œâ”€â”€ device/
+â”‚   â”‚   â”‚   â”œâ”€â”€ customer/
+â”‚   â”‚   â”‚   â”œâ”€â”€ trip/
+â”‚   â”‚   â”‚   â”œâ”€â”€ alert/
+â”‚   â”‚   â”‚   â”œâ”€â”€ violation/
+â”‚   â”‚   â”‚   â”œâ”€â”€ geofence/
+â”‚   â”‚   â”‚   â”œâ”€â”€ maintenance/
+â”‚   â”‚   â”‚   â”œâ”€â”€ dashboard/
+â”‚   â”‚   â”‚   â””â”€â”€ notification/
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ infrastructure/               # External Services
+â”‚   â”‚   â”‚   â”œâ”€â”€ database/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ pool.ts               # PostgreSQL connection
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ queries.ts            # Query helpers
+â”‚   â”‚   â”‚   â”œâ”€â”€ victoriametrics/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ client.ts             # Write client
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ query.ts              # PromQL queries
+â”‚   â”‚   â”‚   â”œâ”€â”€ victorialogs/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ client.ts             # Log client
+â”‚   â”‚   â”‚   â”œâ”€â”€ metrics/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ registry.ts           # Prometheus registry
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ app-metrics.ts        # Application metrics
+â”‚   â”‚   â”‚   â””â”€â”€ logger/
+â”‚   â”‚   â”‚       â””â”€â”€ winston.ts
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ middleware/
+â”‚   â”‚   â”‚   â”œâ”€â”€ auth.middleware.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ cors.middleware.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ security.middleware.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ rate-limit.middleware.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ metrics.middleware.ts
+â”‚   â”‚   â”‚   â””â”€â”€ error-handler.middleware.ts
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ realtime/                     # Socket.IO
+â”‚   â”‚   â”‚   â”œâ”€â”€ socket-server.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ socket-auth.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ event-bus.ts
+â”‚   â”‚   â”‚   â””â”€â”€ types.ts
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ config/
+â”‚   â”‚   â”‚   â”œâ”€â”€ env.ts
+â”‚   â”‚   â”‚   â””â”€â”€ sentry.ts
+â”‚   â”‚   â”‚
+â”‚   â”‚   â””â”€â”€ shared/
+â”‚   â”‚       â”œâ”€â”€ constants/
+â”‚   â”‚       â”œâ”€â”€ utils/
+â”‚   â”‚       â””â”€â”€ types/
+â”‚   â”‚
+â”‚   â”œâ”€â”€ package.json
+â”‚   â”œâ”€â”€ tsconfig.json
+â”‚   â””â”€â”€ Dockerfile
+â”‚
+â”œâ”€â”€ mqtt-bridge/                          # Standalone MQTT Bridge
+â”‚   â”œâ”€â”€ src/
+â”‚   â”‚   â”œâ”€â”€ index.ts                      # Entry point
+â”‚   â”‚   â”œâ”€â”€ mqtt.client.ts                # MQTT connection
+â”‚   â”‚   â”œâ”€â”€ handlers/
+â”‚   â”‚   â”‚   â”œâ”€â”€ telemetry.handler.ts      # GPS, OBD2 data
+â”‚   â”‚   â”‚   â””â”€â”€ command.handler.ts        # Device commands
+â”‚   â”‚   â”œâ”€â”€ batch/
+â”‚   â”‚   â”‚   â””â”€â”€ database-batch.service.ts # Batch insert
+â”‚   â”‚   â”œâ”€â”€ cache/
+â”‚   â”‚   â”‚   â”œâ”€â”€ device-state.cache.ts
+â”‚   â”‚   â”‚   â””â”€â”€ session-stats.cache.ts
+â”‚   â”‚   â”œâ”€â”€ infrastructure/
+â”‚   â”‚   â”‚   â”œâ”€â”€ victoriametrics.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ victorialogs.ts
+â”‚   â”‚   â”‚   â””â”€â”€ postgres.ts
+â”‚   â”‚   â””â”€â”€ validators/
+â”‚   â”‚       â””â”€â”€ payload.validator.ts
+â”‚   â”‚
+â”‚   â”œâ”€â”€ package.json
+â”‚   â””â”€â”€ Dockerfile
+â”‚
+â”œâ”€â”€ frontend/                             # Next.js 16 (Feature-Sliced Architecture)
+â”‚   â”œâ”€â”€ src/
+â”‚   â”‚   â”œâ”€â”€ app/                          # App Router (routing only)
+â”‚   â”‚   â”‚   â”œâ”€â”€ layout.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ page.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ login/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚   â””â”€â”€ dashboard/
+â”‚   â”‚   â”‚       â”œâ”€â”€ layout.tsx
+â”‚   â”‚   â”‚       â”œâ”€â”€ page.tsx              # Overview
+â”‚   â”‚   â”‚       â”œâ”€â”€ map/
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”œâ”€â”€ vehicles/
+â”‚   â”‚   â”‚       â”‚   â”œâ”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ [id]/
+â”‚   â”‚   â”‚       â”‚       â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”œâ”€â”€ devices/
+â”‚   â”‚   â”‚       â”‚   â”œâ”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ [id]/
+â”‚   â”‚   â”‚       â”‚       â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”œâ”€â”€ customers/
+â”‚   â”‚   â”‚       â”‚   â”œâ”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ [id]/
+â”‚   â”‚   â”‚       â”‚       â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”œâ”€â”€ trips/
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”œâ”€â”€ alerts/
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”œâ”€â”€ violations/
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”œâ”€â”€ geofences/
+â”‚   â”‚   â”‚       â”‚   â”œâ”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ [id]/
+â”‚   â”‚   â”‚       â”‚       â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”œâ”€â”€ maintenance/
+â”‚   â”‚   â”‚       â”‚   â”œâ”€â”€ page.tsx
+â”‚   â”‚   â”‚       â”‚   â””â”€â”€ [id]/
+â”‚   â”‚   â”‚       â”‚       â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚       â””â”€â”€ settings/
+â”‚   â”‚   â”‚           â””â”€â”€ page.tsx
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ components/                   # Shared components
+â”‚   â”‚   â”‚   â”œâ”€â”€ ui/                       # âœ… Copy tá»« backup (shadcn/ui)
+â”‚   â”‚   â”‚   â”œâ”€â”€ common/                   # Common UI elements
+â”‚   â”‚   â”‚   â”œâ”€â”€ forms/                    # Form components
+â”‚   â”‚   â”‚   â”œâ”€â”€ layout/                   # Layout components
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ app-sidebar.tsx
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ header.tsx
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ page-container.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ providers/                # React context providers
+â”‚   â”‚   â”‚   â”œâ”€â”€ error/                    # Error boundaries
+â”‚   â”‚   â”‚   â””â”€â”€ icons.tsx                 # âœ… Copy tá»« backup
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ features/                     # â­ Feature modules (IVM26 pattern)
+â”‚   â”‚   â”‚   â”œâ”€â”€ auth/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ components/
+â”‚   â”‚   â”‚   â”‚       â”œâ”€â”€ login-form.tsx
+â”‚   â”‚   â”‚   â”‚       â””â”€â”€ auth-guard.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ vehicles/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ vehicle-list.tsx
+â”‚   â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ vehicle-card.tsx
+â”‚   â”‚   â”‚   â”‚   â”‚   â””â”€â”€ vehicle-detail-modal/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ hooks/
+â”‚   â”‚   â”‚   â”‚   â”‚   â””â”€â”€ use-vehicle-filters.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ types/
+â”‚   â”‚   â”‚   â”‚   â”‚   â””â”€â”€ vehicle.types.ts
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ utils/
+â”‚   â”‚   â”‚   â”œâ”€â”€ devices/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ hooks/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ types/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ utils/
+â”‚   â”‚   â”‚   â”œâ”€â”€ customers/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ hooks/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ types/
+â”‚   â”‚   â”‚   â”œâ”€â”€ trips/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ hooks/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ types/
+â”‚   â”‚   â”‚   â”œâ”€â”€ alerts/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ hooks/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ types/
+â”‚   â”‚   â”‚   â”œâ”€â”€ violations/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ types/
+â”‚   â”‚   â”‚   â”œâ”€â”€ geofences/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ hooks/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ types/
+â”‚   â”‚   â”‚   â”œâ”€â”€ maintenance/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ types/
+â”‚   â”‚   â”‚   â”œâ”€â”€ map/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ components/           # âš¡ Move tá»« backup/components/map
+â”‚   â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ vehicle-map.tsx
+â”‚   â”‚   â”‚   â”‚   â”‚   â””â”€â”€ vehicle-trail-map.tsx
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ hooks/
+â”‚   â”‚   â”‚   â”‚   â”‚   â””â”€â”€ use-map-tracking.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ constants/
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ types/
+â”‚   â”‚   â”‚   â”œâ”€â”€ dashboard/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ stats-cards.tsx
+â”‚   â”‚   â”‚   â”‚   â”‚   â””â”€â”€ activity-feed.tsx
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ hooks/
+â”‚   â”‚   â”‚   â””â”€â”€ settings/
+â”‚   â”‚   â”‚       â””â”€â”€ components/
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ hooks/                        # Global hooks
+â”‚   â”‚   â”‚   â”œâ”€â”€ queries/                  # React Query fetch hooks
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ use-vehicles-query.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ use-devices-query.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ use-alerts-query.ts
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ index.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ mutations/                # React Query mutation hooks
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ use-create-vehicle.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ use-update-vehicle.ts
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ index.ts
+â”‚   â”‚   â”‚   â””â”€â”€ realtime/                 # WebSocket/real-time hooks
+â”‚   â”‚   â”‚       â”œâ”€â”€ use-socket.ts
+â”‚   â”‚   â”‚       â”œâ”€â”€ use-device-telemetry.ts
+â”‚   â”‚   â”‚       â””â”€â”€ use-alerts-stream.ts
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ lib/                          # Core utilities
+â”‚   â”‚   â”‚   â”œâ”€â”€ api/                      # API client
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ client.ts             # HTTP client setup
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ endpoints.ts          # API endpoint definitions
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ interceptors.ts       # Request/response interceptors
+â”‚   â”‚   â”‚   â”œâ”€â”€ realtime/                 # Real-time connections
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ socket-client.ts      # Socket.IO client
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ event-handlers.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ store/                    # Zustand stores
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ auth.store.ts
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ ui.store.ts
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ notifications.store.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ constants/                # Global constants
+â”‚   â”‚   â”‚   â””â”€â”€ utils/                    # Utility functions
+â”‚   â”‚   â”‚       â”œâ”€â”€ date.ts
+â”‚   â”‚   â”‚       â”œâ”€â”€ format.ts
+â”‚   â”‚   â”‚       â””â”€â”€ validation.ts
+â”‚   â”‚   â”‚
+â”‚   â”‚   â”œâ”€â”€ types/                        # Global TypeScript types
+â”‚   â”‚   â”‚   â”œâ”€â”€ api.types.ts              # API response types
+â”‚   â”‚   â”‚   â”œâ”€â”€ common.types.ts           # Common types
+â”‚   â”‚   â”‚   â””â”€â”€ index.ts
+â”‚   â”‚   â”‚
+â”‚   â”‚   â””â”€â”€ config/                       # Configuration
+â”‚   â”‚       â”œâ”€â”€ site.ts                   # Site metadata
+â”‚   â”‚       â””â”€â”€ navigation.ts             # Navigation config
+â”‚   â”‚
+â”‚   â”œâ”€â”€ e2e/                              # Playwright E2E tests
+â”‚   â”œâ”€â”€ package.json
+â”‚   â””â”€â”€ Dockerfile
+â”‚
+â”œâ”€â”€ docker/
+â”‚   â”œâ”€â”€ postgres/
+â”‚   â”‚   â””â”€â”€ init/
+â”‚   â”‚       â”œâ”€â”€ 00-extensions.sql
+â”‚   â”‚       â”œâ”€â”€ 01-users.sql
+â”‚   â”‚       â”œâ”€â”€ 02-vehicles.sql
+â”‚   â”‚       â”œâ”€â”€ 03-devices.sql
+â”‚   â”‚       â”œâ”€â”€ 04-customers.sql
+â”‚   â”‚       â”œâ”€â”€ 05-trips.sql
+â”‚   â”‚       â”œâ”€â”€ 06-alerts.sql
+â”‚   â”‚       â”œâ”€â”€ 07-violations.sql
+â”‚   â”‚       â”œâ”€â”€ 08-geofences.sql
+â”‚   â”‚       â”œâ”€â”€ 09-maintenance.sql
+â”‚   â”‚       â””â”€â”€ 10-seed-data.sql
+â”‚   â”œâ”€â”€ prometheus/
+â”‚   â”‚   â”œâ”€â”€ prometheus.yml
+â”‚   â”‚   â””â”€â”€ alerts.yml
+â”‚   â”œâ”€â”€ grafana/
+â”‚   â”‚   â””â”€â”€ provisioning/
+â”‚   â”‚       â”œâ”€â”€ datasources/
+â”‚   â”‚       â””â”€â”€ dashboards/
+â”‚   â””â”€â”€ nginx/
+â”‚       â””â”€â”€ nginx.conf
+â”‚
+â”œâ”€â”€ docker-compose.yml
+â”œâ”€â”€ docker-compose.dev.yml
+â”œâ”€â”€ .env.example
+â””â”€â”€ package.json                          # Root scripts
 ```
 
 ---
 
-## 5. Phases Chi Tiết
+## 5. Phases Chi Tiáº¿t
 
-### Phase 1: Project Setup & Infrastructure (Tuần 1)
+### Phase 1: Project Setup & Infrastructure (Tuáº§n 1)
 
-#### 1.1 Tạo cấu trúc thư mục
+#### 1.1 Táº¡o cáº¥u trÃºc thÆ° má»¥c
 
 ```bash
-# Vào thư mục gốc
+# VÃ o thÆ° má»¥c gá»‘c
 cd "E:\anmh1205\IoT_Vehicle_Tracking_System"
 
-# Tạo subfolder chính
+# Táº¡o subfolder chÃ­nh
 mkdir -p IoT_Vehicle_Tracking_System
 cd IoT_Vehicle_Tracking_System
 
-# Tạo cấu trúc backend
+# Táº¡o cáº¥u trÃºc backend
 mkdir -p Tracking_Backend/src/{api/{controllers,routes,validators,openapi},domain/{auth,vehicle,device,customer,trip,alert,violation,geofence,maintenance,dashboard,notification}/{services,repositories,types},infrastructure/{database,victoriametrics,victorialogs,metrics,logger},middleware,realtime,config,shared/{constants,utils,types}}
 
-# Tạo cấu trúc mqtt-bridge
+# Táº¡o cáº¥u trÃºc mqtt-bridge
 mkdir -p Tracking_MqttBridge/src/{handlers,batch,cache,infrastructure,validators}
 
-# Tạo cấu trúc frontend
+# Táº¡o cáº¥u trÃºc frontend
 mkdir -p Tracking_Frontend/src/{app/{login,dashboard/{map,vehicles,devices,customers,trips,alerts,violations,geofences,maintenance,settings}},components/{ui,layout,map},hooks,lib/{api,store,utils},types}
 
-# Tạo cấu trúc docker infra
+# Táº¡o cáº¥u trÃºc docker infra
 mkdir -p Tracking_PostgreSQL/init
 mkdir -p Tracking_EMQX/etc
 mkdir -p Tracking_VictoriaMetrics/data
@@ -497,10 +497,10 @@ mkdir -p Tracking_VictoriaLogs/data
 mkdir -p Tracking_Grafana/provisioning/{datasources,dashboards}
 ```
 
-#### 1.2 Copy Frontend UI Components từ backup
+#### 1.2 Copy Frontend UI Components tá»« backup
 
 ```bash
-# Copy UI components (giữ nguyên)
+# Copy UI components (giá»¯ nguyÃªn)
 cp -r "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\frontend\src\components\ui\*" \
       "E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Frontend\src\components\ui\"
 
@@ -512,37 +512,33 @@ cp -r "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backu
 cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\frontend\src\components\icons.tsx" \
    "E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Frontend\src\components\"
 
-# Copy providers (sẽ update sau)
+# Copy providers (sáº½ update sau)
 cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\frontend\src\components\providers.tsx" \
    "E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Frontend\src\components\"
 ```
 
-#### 1.3 Chuyển đổi Entities sang SQL Migrations
+#### 1.3 Chuyá»ƒn Ä‘á»•i Entities sang SQL Migrations
 
-**Đọc từ:** `iot-vehicle-tracking-system-backup/backend/src/modules/*/entities/*.entity.ts`
+**Äá»c tá»«:** `iot-vehicle-tracking-system-backup/backend/src/modules/*/entities/*.entity.ts`
 
-**Ví dụ chuyển đổi Vehicle Entity:**
+**VÃ­ dá»¥ chuyá»ƒn Ä‘á»•i Vehicle Entity:**
 
 ```typescript
-// NGUỒN: iot-vehicle-tracking-system-backup/backend/src/modules/vehicles/entities/vehicle.entity.ts
-// ĐỌC FILE NÀY VÀ CHUYỂN THÀNH SQL:
+// NGUá»’N: iot-vehicle-tracking-system-backup/backend/src/modules/vehicles/entities/vehicle.entity.ts
+// Äá»ŒC FILE NÃ€Y VÃ€ CHUYá»‚N THÃ€NH SQL:
 
-@Entity('vehicles')
-export class Vehicle {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column({ name: 'vehicle_id', unique: true, length: 50 })
-    vehicleId: string;
+export const createVehicleEntityShape = () => ({
+    id: 0,
+    vehicleId: '',
     // ...
-}
+});
 ```
 
 ```sql
--- ĐÍCH: Tracking_PostgreSQL/init/02-vehicles.sql
+-- ÄÃCH: Tracking_PostgreSQL/init/02-vehicles.sql
 
 CREATE TYPE vehicle_status AS ENUM ('active', 'inactive', 'maintenance', 'retired');
--- ... (như cũ)
+-- ... (nhÆ° cÅ©)
 
 CREATE TABLE vehicles (
     id SERIAL PRIMARY KEY,
@@ -759,34 +755,34 @@ networks:
 
 ---
 
-### Phase 2: Backend Core (Tuần 2-3)
+### Phase 2: Backend Core (Tuáº§n 2-3)
 
-#### 2.1 Thứ tự implement domains
+#### 2.1 Thá»© tá»± implement domains
 
-| # | Domain | File tham khảo từ backup | Priority |
+| # | Domain | File tham kháº£o tá»« backup | Priority |
 |---|--------|--------------------------|----------|
-| 1 | `auth` | `modules/auth/auth.service.ts` | 🔴 Critical |
-| 2 | `vehicle` | `modules/vehicles/vehicles.service.ts` | 🔴 Critical |
-| 3 | `device` | `modules/devices/devices.service.ts` | 🔴 Critical |
-| 4 | `customer` | `modules/customers/customers.service.ts` | 🟡 High |
-| 5 | `trip` | `modules/trips/trips.service.ts` | 🟡 High |
-| 6 | `alert` | `modules/alerts/alerts.service.ts` | 🟡 High |
-| 7 | `violation` | `modules/violations/violations.service.ts` | 🟢 Medium |
-| 8 | `geofence` | `modules/geofences/geofences.service.ts` | 🟢 Medium |
-| 9 | `maintenance` | `modules/maintenance/maintenance.service.ts` | 🟢 Medium |
-| 10 | `dashboard` | `modules/dashboard/dashboard.service.ts` | 🟢 Medium |
-| 11 | `notification` | `modules/notifications/notifications.service.ts` | 🟢 Medium |
+| 1 | `auth` | `modules/auth/auth.service.ts` | ðŸ”´ Critical |
+| 2 | `vehicle` | `modules/vehicles/vehicles.service.ts` | ðŸ”´ Critical |
+| 3 | `device` | `modules/devices/devices.service.ts` | ðŸ”´ Critical |
+| 4 | `customer` | `modules/customers/customers.service.ts` | ðŸŸ¡ High |
+| 5 | `trip` | `modules/trips/trips.service.ts` | ðŸŸ¡ High |
+| 6 | `alert` | `modules/alerts/alerts.service.ts` | ðŸŸ¡ High |
+| 7 | `violation` | `modules/violations/violations.service.ts` | ðŸŸ¢ Medium |
+| 8 | `geofence` | `modules/geofences/geofences.service.ts` | ðŸŸ¢ Medium |
+| 9 | `maintenance` | `modules/maintenance/maintenance.service.ts` | ðŸŸ¢ Medium |
+| 10 | `dashboard` | `modules/dashboard/dashboard.service.ts` | ðŸŸ¢ Medium |
+| 11 | `notification` | `modules/notifications/notifications.service.ts` | ðŸŸ¢ Medium |
 
-#### 2.2 Hướng dẫn chuyển đổi Service
+#### 2.2 HÆ°á»›ng dáº«n chuyá»ƒn Ä‘á»•i Service
 
-**Đọc code cũ:**
+**Äá»c code cÅ©:**
 ```
 iot-vehicle-tracking-system-backup/backend/src/modules/vehicles/vehicles.service.ts
 ```
 
-**Chuyển đổi patterns:**
+**Chuyá»ƒn Ä‘á»•i patterns:**
 
-| NestJS (cũ) | Express (mới) |
+| NestJS (cÅ©) | Express (má»›i) |
 |-------------|---------------|
 | `@Injectable()` | Plain class |
 | `@InjectRepository(Vehicle)` | Constructor injection |
@@ -794,19 +790,16 @@ iot-vehicle-tracking-system-backup/backend/src/modules/vehicles/vehicles.service
 | `class-validator` DTOs | Zod schemas |
 | NestJS exceptions | Custom error classes |
 
-**Ví dụ chuyển đổi:**
+**VÃ­ dá»¥ chuyá»ƒn Ä‘á»•i:**
 
 ```typescript
-// CŨ: iot-vehicle-tracking-system-backup/backend/src/modules/vehicles/vehicles.service.ts
+// CÅ¨: iot-vehicle-tracking-system-backup/backend/src/modules/vehicles/vehicles.service.ts
 @Injectable()
-export class VehiclesService {
-    constructor(
-        @InjectRepository(Vehicle)
-        private readonly vehicleRepository: Repository<Vehicle>,
-    ) {}
-
-    async create(createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
-        const existing = await this.vehicleRepository.findOne({
+export const createVehiclesService = (
+    vehicleRepository: Repository<Vehicle>
+) => {
+    const create = async (createVehicleDto: CreateVehicleDto): Promise<Vehicle> => {
+        const existing = await vehicleRepository.findOne({
             where: [
                 { vehicleId: createVehicleDto.vehicleId },
                 { plateNumber: createVehicleDto.plateNumber },
@@ -817,24 +810,24 @@ export class VehiclesService {
             throw new ConflictException('Vehicle already exists');
         }
 
-        const vehicle = this.vehicleRepository.create(createVehicleDto);
-        return this.vehicleRepository.save(vehicle);
-    }
-}
+        const vehicle = vehicleRepository.create(createVehicleDto);
+        return vehicleRepository.save(vehicle);
+    };
+
+    return { create };
+};
 ```
 
 ```typescript
-// MỚI: Tracking_Backend/src/domain/vehicle/services/vehicle.service.ts
+// Má»šI: Tracking_Backend/src/domain/vehicle/services/vehicle.service.ts
 import { VehicleRepository } from '../repositories/vehicle.repository';
 import { CreateVehicleInput } from '../types/vehicle.types';
 import { ConflictError } from '../../../shared/errors';
 
-export class VehicleService {
-    constructor(private vehicleRepo: VehicleRepository) {}
-
-    async create(input: CreateVehicleInput) {
-        // THAM KHẢO LOGIC TỪ CODE CŨ
-        const existing = await this.vehicleRepo.findByVehicleIdOrPlate(
+export const createVehicleService = (vehicleRepo: VehicleRepository) => {
+    const create = async (input: CreateVehicleInput) => {
+        // THAM KHáº¢O LOGIC Tá»ª CODE CÅ¨
+        const existing = await vehicleRepo.findByVehicleIdOrPlate(
             input.vehicleId,
             input.plateNumber
         );
@@ -843,18 +836,20 @@ export class VehicleService {
             throw new ConflictError('Vehicle already exists');
         }
 
-        return this.vehicleRepo.create(input);
-    }
-}
+        return vehicleRepo.create(input);
+    };
+
+    return { create };
+};
 ```
 
 ```typescript
-// MỚI: Tracking_Backend/src/domain/vehicle/repositories/vehicle.repository.ts
+// Má»šI: Tracking_Backend/src/domain/vehicle/repositories/vehicle.repository.ts
 import { pool } from '../../../infrastructure/database/pool';
 import { CreateVehicleInput, Vehicle } from '../types/vehicle.types';
 
-export class VehicleRepository {
-    async findByVehicleIdOrPlate(vehicleId: string, plateNumber?: string): Promise<Vehicle | null> {
+export const createVehicleRepository = () => {
+    const findByVehicleIdOrPlate = async (vehicleId: string, plateNumber?: string): Promise<Vehicle | null> => {
         const result = await pool.query(
             `SELECT * FROM vehicles
              WHERE vehicle_id = $1 OR ($2 IS NOT NULL AND plate_number = $2)
@@ -862,9 +857,9 @@ export class VehicleRepository {
             [vehicleId, plateNumber]
         );
         return result.rows[0] || null;
-    }
+    };
 
-    async create(input: CreateVehicleInput): Promise<Vehicle> {
+    const create = async (input: CreateVehicleInput): Promise<Vehicle> => {
         const result = await pool.query(
             `INSERT INTO vehicles (vehicle_id, plate_number, brand, model, year, status)
              VALUES ($1, $2, $3, $4, $5, $6)
@@ -872,19 +867,24 @@ export class VehicleRepository {
             [input.vehicleId, input.plateNumber, input.brand, input.model, input.year, 'active']
         );
         return result.rows[0];
-    }
-}
+    };
+
+    return {
+        findByVehicleIdOrPlate,
+        create,
+    };
+};
 ```
 
 ---
 
-### Phase 3: MQTT Bridge & Telemetry (Tuần 4)
+### Phase 3: MQTT Bridge & Telemetry (Tuáº§n 4)
 
-#### 3.1 MQTT Bridge (MỚI HOÀN TOÀN)
+#### 3.1 MQTT Bridge (Má»šI HOÃ€N TOÃ€N)
 
-Code cũ **KHÔNG CÓ** MQTT implementation đúng. Cần viết mới 100%.
+Code cÅ© **KHÃ”NG CÃ“** MQTT implementation Ä‘Ãºng. Cáº§n viáº¿t má»›i 100%.
 
-**Tham khảo:** `E:\anmh1205\IVM26\IVM26_Backend\backend_v1\src\mqtt-bridge\`
+**Tham kháº£o:** `E:\anmh1205\IVM26\IVM26_Backend\backend_v1\src\mqtt-bridge\`
 
 ```typescript
 // mqtt-bridge/src/index.ts
@@ -938,12 +938,12 @@ export function buildTelemetryMetrics(deviceId: string, data: TelemetryData): st
 
 ---
 
-### Phase 4: Frontend Updates (Tuần 5)
+### Phase 4: Frontend Updates (Tuáº§n 5)
 
-#### 4.1 Files cần COPY từ backup
+#### 4.1 Files cáº§n COPY tá»« backup
 
 ```bash
-# UI Components (copy nguyên)
+# UI Components (copy nguyÃªn)
 cp -r iot-vehicle-tracking-system-backup/frontend/src/components/ui/* \
       IoT_Vehicle_Tracking_System/Tracking_Frontend/src/components/ui/
 
@@ -963,62 +963,62 @@ cp iot-vehicle-tracking-system-backup/frontend/src/app/dashboard/layout.tsx \
    IoT_Vehicle_Tracking_System/Tracking_Frontend/src/app/dashboard/
 ```
 
-#### 4.2 Files cần VIẾT LẠI
+#### 4.2 Files cáº§n VIáº¾T Láº I
 
-| File | Lý do |
+| File | LÃ½ do |
 |------|-------|
-| `lib/api/client.ts` | API client mới cho Express backend |
-| `types/*.ts` | Sync với backend types mới |
-| `hooks/use-*.ts` | TanStack Query hooks mới |
+| `lib/api/client.ts` | API client má»›i cho Express backend |
+| `types/*.ts` | Sync vá»›i backend types má»›i |
+| `hooks/use-*.ts` | TanStack Query hooks má»›i |
 | `lib/store/auth.store.ts` | Update auth flow |
 
-#### 4.3 Files cần REFACTOR
+#### 4.3 Files cáº§n REFACTOR
 
-| File | Thay đổi |
+| File | Thay Ä‘á»•i |
 |------|----------|
-| `components/layout/app-sidebar.tsx` | Giữ logic, update imports |
-| `app/dashboard/*/page.tsx` | Giữ UI, update API calls |
+| `components/layout/app-sidebar.tsx` | Giá»¯ logic, update imports |
+| `app/dashboard/*/page.tsx` | Giá»¯ UI, update API calls |
 
-#### 4.4 Files cần XÓA
+#### 4.4 Files cáº§n XÃ“A
 
 ```bash
-# Xóa duplicate sidebars
+# XÃ³a duplicate sidebars
 rm iot-vehicle-tracking-system-backup/frontend/src/components/layout/sidebar.tsx
 rm iot-vehicle-tracking-system-backup/frontend/src/components/layout/simple-sidebar.tsx
-# Chỉ giữ app-sidebar.tsx
+# Chá»‰ giá»¯ app-sidebar.tsx
 ```
 
 ---
 
-### Phase 5: Real-time & Socket.IO (Tuần 6)
+### Phase 5: Real-time & Socket.IO (Tuáº§n 6)
 
-**Tham khảo:**
+**Tham kháº£o:**
 - `iot-vehicle-tracking-system-backup/backend/src/gateway/realtime.gateway.ts`
 - `E:\anmh1205\IVM26\IVM26_Backend\backend_v1\src\realtime\`
 
 ---
 
-### Phase 6: Testing & Polish (Tuần 7-8)
+### Phase 6: Testing & Polish (Tuáº§n 7-8)
 
 ---
 
-## 6. Checklist Tổng Hợp
+## 6. Checklist Tá»•ng Há»£p
 
-### Phase 1: Setup ✅
-- [ ] Tạo cấu trúc thư mục mới (FLAT structure)
-- [ ] Copy UI components từ backup
-- [ ] Copy icons từ backup
-- [ ] Chuyển đổi entities → SQL migrations
-- [ ] Tạo docker-compose.yml
-- [ ] Tạo package.json cho Tracking_Backend, Tracking_MqttBridge, Tracking_Frontend
-- [ ] Test `docker-compose up` các service hạ tầng
+### Phase 1: Setup âœ…
+- [ ] Táº¡o cáº¥u trÃºc thÆ° má»¥c má»›i (FLAT structure)
+- [ ] Copy UI components tá»« backup
+- [ ] Copy icons tá»« backup
+- [ ] Chuyá»ƒn Ä‘á»•i entities â†’ SQL migrations
+- [ ] Táº¡o docker-compose.yml
+- [ ] Táº¡o package.json cho Tracking_Backend, Tracking_MqttBridge, Tracking_Frontend
+- [ ] Test `docker-compose up` cÃ¡c service háº¡ táº§ng
 
 ### Phase 2: Backend Core
 - [ ] Implement infrastructure/database (pool, queries)
 - [ ] Implement middleware (auth, cors, rate-limit, security)
-- [ ] Implement domain/auth (THAM KHẢO: `backup/modules/auth/auth.service.ts`)
-- [ ] Implement domain/vehicle (THAM KHẢO: `backup/modules/vehicles/vehicles.service.ts`)
-- [ ] Implement domain/device (THAM KHẢO: `backup/modules/devices/devices.service.ts`)
+- [ ] Implement domain/auth (THAM KHáº¢O: `backup/modules/auth/auth.service.ts`)
+- [ ] Implement domain/vehicle (THAM KHáº¢O: `backup/modules/vehicles/vehicles.service.ts`)
+- [ ] Implement domain/device (THAM KHáº¢O: `backup/modules/devices/devices.service.ts`)
 - [ ] Implement domain/customer
 - [ ] Implement domain/trip
 - [ ] Implement domain/alert
@@ -1027,32 +1027,32 @@ rm iot-vehicle-tracking-system-backup/frontend/src/components/layout/simple-side
 - [ ] Implement domain/maintenance
 - [ ] Implement domain/dashboard
 - [ ] Setup API routes
-- [ ] Test endpoints với Postman
+- [ ] Test endpoints vá»›i Postman
 
 ### Phase 3: MQTT Bridge & Telemetry
 - [ ] Implement mqtt-bridge/mqtt.client.ts
 - [ ] Implement handlers/telemetry.handler.ts
 - [ ] Implement infrastructure/victoriametrics
 - [ ] Implement infrastructure/victorialogs
-- [ ] Test MQTT → VictoriaMetrics pipeline
+- [ ] Test MQTT â†’ VictoriaMetrics pipeline
 
 ### Phase 4: Frontend Updates
-- [ ] Viết lại lib/api/client.ts
-- [ ] Viết lại types/ (sync với backend)
-- [ ] Viết lại hooks/
+- [ ] Viáº¿t láº¡i lib/api/client.ts
+- [ ] Viáº¿t láº¡i types/ (sync vá»›i backend)
+- [ ] Viáº¿t láº¡i hooks/
 - [ ] Refactor layout/app-sidebar.tsx
-- [ ] Xóa duplicate sidebars
-- [ ] Update tất cả pages
+- [ ] XÃ³a duplicate sidebars
+- [ ] Update táº¥t cáº£ pages
 
 ### Phase 5: Real-time & Socket.IO
 - [ ] Implement backend/realtime/socket-server.ts
 - [ ] Implement backend/realtime/event-bus.ts
-- [ ] Viết hooks/use-realtime.ts
+- [ ] Viáº¿t hooks/use-realtime.ts
 - [ ] Test real-time updates
 
 ### Phase 6: Testing & Polish
 - [ ] Unit tests (target 80%)
-- [ ] E2E tests với Playwright
+- [ ] E2E tests vá»›i Playwright
 - [ ] Security audit
 - [ ] Documentation
 
@@ -1060,11 +1060,11 @@ rm iot-vehicle-tracking-system-backup/frontend/src/components/layout/simple-side
 
 ## 7. Quick Reference
 
-### Đường dẫn quan trọng
+### ÄÆ°á»ng dáº«n quan trá»ng
 
-| Mục đích | Đường dẫn |
+| Má»¥c Ä‘Ã­ch | ÄÆ°á»ng dáº«n |
 |----------|-----------|
-| Code cũ (tham khảo) | `E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\` |
+| Code cÅ© (tham kháº£o) | `E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\` |
 | Project Root | `E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\` |
 | Project Backend | `E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Backend\` |
 | Project Frontend | `E:\anmh1205\IoT_Vehicle_Tracking_System\IoT_Vehicle_Tracking_System\Tracking_Frontend\` |
@@ -1073,17 +1073,17 @@ rm iot-vehicle-tracking-system-backup/frontend/src/components/layout/simple-side
 | System Design | `E:\anmh1205\IoT_Vehicle_Tracking_System\SystemDesign\` |
 | Coding Plan | `SystemDesign\coding-plan\` |
 
-### Files quan trọng từ backup cần đọc
+### Files quan trá»ng tá»« backup cáº§n Ä‘á»c
 
-| File | Nội dung cần lấy |
+| File | Ná»™i dung cáº§n láº¥y |
 |------|------------------|
 | `backup/backend/src/modules/auth/auth.service.ts` | JWT logic, password hashing |
 | `backup/backend/src/modules/vehicles/vehicles.service.ts` | CRUD, pagination, search |
 | `backup/backend/src/modules/*/entities/*.entity.ts` | Database schema |
 | `backup/backend/src/modules/*/dto/*.dto.ts` | Validation rules |
-| `backup/frontend/src/components/ui/*` | UI components (copy nguyên) |
+| `backup/frontend/src/components/ui/*` | UI components (copy nguyÃªn) |
 
-### Tech Stack mới
+### Tech Stack má»›i
 
 | Layer | Technology |
 |-------|------------|
@@ -1096,40 +1096,41 @@ rm iot-vehicle-tracking-system-backup/frontend/src/components/layout/simple-side
 
 ---
 
-## ⚠️ Frontend Implementation Rules (BẮT BUỘC)
+## âš ï¸ Frontend Implementation Rules (Báº®T BUá»˜C)
 
-> **Thêm 2026-02-10** — Sau khi audit frontend, phát hiện agents không tuân thủ template IVM26. Các rules sau là BẮT BUỘC.
+> **ThÃªm 2026-02-10** â€” Sau khi audit frontend, phÃ¡t hiá»‡n agents khÃ´ng tuÃ¢n thá»§ template IVM26. CÃ¡c rules sau lÃ  Báº®T BUá»˜C.
 
 ### Rule F1: IVM26 Template Compliance
-- Frontend PHẢI follow UI pattern từ IVM26 reference (`next-shadcn-dashboard-starter`)
-- Reference path: `E:\anmh1205\IVM26\` hoặc backup: `iot-vehicle-tracking-system-backup/frontend/`
+- Frontend PHáº¢I follow UI pattern tá»« IVM26 reference (`next-shadcn-dashboard-starter`)
+- Reference path: `E:\anmh1205\IVM26\` hoáº·c backup: `iot-vehicle-tracking-system-backup/frontend/`
 - Layout: `SidebarProvider` + `AppSidebar` + `SidebarInset` (shadcn/ui sidebar)
-- Page wrapper: `PageContainer` với `ScrollArea`, `pageTitle`, `pageDescription`
-- Header: `SiteHeader` với `SidebarTrigger` + `Breadcrumbs` + `ThemeToggle` + `UserNav`
+- Page wrapper: `PageContainer` vá»›i `ScrollArea`, `pageTitle`, `pageDescription`
+- Header: `SiteHeader` vá»›i `SidebarTrigger` + `Breadcrumbs` + `ThemeToggle` + `UserNav`
 
 ### Rule F2: shadcn/ui Component Mandate
-- Dùng shadcn/ui components EXCLUSIVELY — KHÔNG hand-roll:
-  - ❌ Custom Dropdown → ✅ `Select` hoặc `DropdownMenu` từ shadcn/ui
-  - ❌ Custom Pagination → ✅ `DataTable` với built-in pagination
-  - ❌ Custom Modal → ✅ `Dialog` hoặc `Sheet` từ shadcn/ui
-  - ❌ Custom Skeleton → ✅ `Skeleton` từ shadcn/ui
-  - ❌ Custom Table → ✅ `DataTable` wrapper (TanStack Table + shadcn/ui Table)
+- DÃ¹ng shadcn/ui components EXCLUSIVELY â€” KHÃ”NG hand-roll:
+  - âŒ Custom Dropdown â†’ âœ… `Select` hoáº·c `DropdownMenu` tá»« shadcn/ui
+  - âŒ Custom Pagination â†’ âœ… `DataTable` vá»›i built-in pagination
+  - âŒ Custom Modal â†’ âœ… `Dialog` hoáº·c `Sheet` tá»« shadcn/ui
+  - âŒ Custom Skeleton â†’ âœ… `Skeleton` tá»« shadcn/ui
+  - âŒ Custom Table â†’ âœ… `DataTable` wrapper (TanStack Table + shadcn/ui Table)
 - Forms: `react-hook-form` + `zod` + shadcn/ui `Form` component
 
 ### Rule F3: Zero Placeholder Policy
-- TUYỆT ĐỐI KHÔNG được viết trong code:
-  - "Coming Soon" / "Sắp ra mắt"
-  - "future update" / "cập nhật trong tương lai"
-  - "will be available" / "sẽ có trong phiên bản sau"
+- TUYá»†T Äá»I KHÃ”NG Ä‘Æ°á»£c viáº¿t trong code:
+  - "Coming Soon" / "Sáº¯p ra máº¯t"
+  - "future update" / "cáº­p nháº­t trong tÆ°Æ¡ng lai"
+  - "will be available" / "sáº½ cÃ³ trong phiÃªn báº£n sau"
   - "TODO" / "FIXME" (trong production code)
   - Dashed-border empty state thay cho real functionality
-- Nếu API chưa có → vẫn PHẢI build đầy đủ UI + API service + hook, ghi chú vào `.tracking/`
+- Náº¿u API chÆ°a cÃ³ â†’ váº«n PHáº¢I build Ä‘áº§y Ä‘á»§ UI + API service + hook, ghi chÃº vÃ o `.tracking/`
 
 ### Rule F4: Complete Feature Specification
-- Mỗi feature trong plan PHẢI có:
-  1. Exact component tree (không mô tả trừu tượng)
-  2. Exact DataTable columns (tên cột, field, sortable, render)
-  3. Exact form fields (tên, type, validation rule, required)
+- Má»—i feature trong plan PHáº¢I cÃ³:
+  1. Exact component tree (khÃ´ng mÃ´ táº£ trá»«u tÆ°á»£ng)
+  2. Exact DataTable columns (tÃªn cá»™t, field, sortable, render)
+  3. Exact form fields (tÃªn, type, validation rule, required)
   4. Exact API hooks (query key, endpoint, mutations)
   5. Exact Zod schema
   6. Exact error/loading/empty states
+

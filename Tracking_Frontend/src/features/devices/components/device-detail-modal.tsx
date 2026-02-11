@@ -1,3 +1,3 @@
-﻿'use client';
+'use client';
 
-export { DeviceDetailSheet as DeviceDetailModal } from './device-detail-sheet';
+export { DeviceDetailModalContainer as DeviceDetailModal } from './device-detail-modal/modal-container';

@@ -1,13 +1,10 @@
 ﻿'use client';
-
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
-
 type BreadcrumbItem = {
   title: string;
   link: string;
 };
-
 const routeMapping: Record<string, BreadcrumbItem[]> = {
   '/dashboard': [{ title: 'Tổng quan', link: '/dashboard' }],
   '/dashboard/map': [
@@ -75,15 +72,12 @@ const routeMapping: Record<string, BreadcrumbItem[]> = {
     { title: 'Quản trị hệ thống', link: '/dashboard/system-admin' },
   ],
 };
-
-export function useBreadcrumbs() {
+export const useBreadcrumbs = () => {
   const pathname = usePathname();
-
   const breadcrumbs = useMemo(() => {
     if (routeMapping[pathname]) {
       return routeMapping[pathname];
     }
-
     const segments = pathname.split('/').filter(Boolean);
     return segments.map((segment, index) => {
       const path = `/${segments.slice(0, index + 1).join('/')}`;
@@ -93,8 +87,5 @@ export function useBreadcrumbs() {
       };
     });
   }, [pathname]);
-
   return breadcrumbs;
-}
-
-
+};

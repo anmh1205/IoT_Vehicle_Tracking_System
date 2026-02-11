@@ -26,10 +26,10 @@ interface DeviceRow {
  * Validate device by checking device_id and comparing auth_token hash.
  * The devices table stores auth_token as SHA-256 hash.
  */
-export async function validateDevice(
+export const validateDevice = async (
   deviceId: string,
   authToken: string,
-): Promise<DeviceRow | null> {
+): Promise<DeviceRow | null> => {
   try {
     const result = await pool.query<DeviceRow>(
       `SELECT id, device_id, vehicle_id, current_status
@@ -44,15 +44,15 @@ export async function validateDevice(
     logger.error({ err, deviceId }, 'validateDevice failed');
     return null;
   }
-}
+};
 
 /**
  * Update device status and last_seen_at timestamp.
  */
-export async function updateDeviceStatus(
+export const updateDeviceStatus = async (
   deviceId: string,
   status: string,
-): Promise<void> {
+): Promise<void> => {
   try {
     await pool.query(
       `UPDATE devices
@@ -63,4 +63,4 @@ export async function updateDeviceStatus(
   } catch (err) {
     logger.error({ err, deviceId }, 'updateDeviceStatus failed');
   }
-}
+};

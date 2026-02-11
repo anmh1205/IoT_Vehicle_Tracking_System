@@ -82,6 +82,11 @@ export interface DevicePosition {
   longitude: number;
   currentStatus: string;
   lastSeenAt: string | null;
+  speed?: number;
+  heading?: number;
+  battery?: number;
+  vibration?: number;
+  temperature?: number;
 }
 
 export interface CreateDeviceInput {

@@ -76,7 +76,10 @@ export const assignVehicle = asyncHandler(async (req: AuthenticatedRequest, res:
 
   const parsed = assignVehicleToGeofenceSchema.safeParse(req.body);
   if (!parsed.success) {
-    throw createValidationError('Invalid vehicle assignment data', parsed.error.flatten().fieldErrors);
+    throw createValidationError(
+      'Invalid vehicle assignment data',
+      parsed.error.flatten().fieldErrors,
+    );
   }
 
   const result = await geofenceCrudService.assignVehicleToGeofence(id, parsed.data.vehicleId);

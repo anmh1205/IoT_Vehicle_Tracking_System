@@ -517,7 +517,7 @@ Tracking_Frontend/src/
 | **Date**              | date-fns                       | ^4.1.0         | Date formatting                          |
 | **Command Palette**   | kbar                           | ^0.1.0-beta.45 | Keyboard-first navigation                |
 | **CVA**               | class-variance-authority       | ^0.7.1         | Component variants                       |
-| **Merge**             | tailwind-merge                 | ^3.0.2         | Tailwind class merging                   |
+| **Merge**             | tailwind-merge                 | ^3.0.2         | Tailwind utility merging                 |
 | **clsx**              | clsx                           | ^2.1.1         | Conditional classes                      |
 
 ---
@@ -2730,7 +2730,7 @@ NEXT_PUBLIC_MAP_TILE_URL=https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
 | 12  | Command palette        | kbar                                                     | Keyboard-first navigation (Cmd+K). IVM26 pattern                                                                   |
 | 13  | Icons                  | lucide-react (primary) + @tabler/icons-react (secondary) | Tree-shakeable. Consistent stroke width. Same as IVM26                                                             |
 | 14  | Toast notifications    | Sonner                                                   | Stacked toasts, richColors, promise toast support. Same as IVM26                                                   |
-| 15  | Theme system           | next-themes                                              | System/light/dark modes. class strategy with disableTransitionOnChange                                             |
+| 15  | Theme system           | next-themes                                              | System/light/dark modes. attribute strategy with disableTransitionOnChange                                         |
 | 16  | Component installation | `npx shadcn@latest add <name>`                           | Components are copied into project (not imported from node_modules). Full control                                  |
 | 17  | Geofence drawing       | @geoman-io/leaflet-geoman-free                           | Replaces deprecated leaflet-draw. Circle + polygon drawing + editing                                               |
 | 18  | Feature architecture   | Feature-Sliced Design (features/)                        | Feature-scoped components, hooks, types. Prevents cross-feature coupling                                           |

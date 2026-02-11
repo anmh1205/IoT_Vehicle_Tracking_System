@@ -1,5 +1,4 @@
 ﻿'use client';
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,15 +13,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-
-export function LoginForm() {
+export const LoginForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
   const setAuth = useAuthStore((s) => s.setAuth);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
   const {
     register,
     handleSubmit,
@@ -32,7 +29,6 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
     defaultValues: { username: '', password: '', rememberMe: false },
   });
-
   const onSubmit = async (values: LoginFormValues) => {
     setErrorMessage(null);
     try {
@@ -52,7 +48,6 @@ export function LoginForm() {
       setErrorMessage('Thông tin đăng nhập không chính xác. Vui lòng thử lại.');
     }
   };
-
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
@@ -116,6 +111,4 @@ export function LoginForm() {
       </CardContent>
     </Card>
   );
-}
-
-
+};

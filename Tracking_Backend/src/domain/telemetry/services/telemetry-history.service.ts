@@ -11,10 +11,7 @@ const normalizeField = (field: string): string => {
   return field;
 };
 
-const readValue = (
-  source: Record<string, unknown> | null,
-  key: string,
-): number | string | null => {
+const readValue = (source: Record<string, unknown> | null, key: string): number | string | null => {
   if (!source) return null;
   const value = source[key];
   if (value === undefined || value === null) return null;

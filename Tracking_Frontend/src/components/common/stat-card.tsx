@@ -1,24 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-
 interface StatCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
   icon: React.ReactNode;
-  trend?: { value: string; positive: boolean };
+  trend?: {
+    value: string;
+    positive: boolean;
+  };
   isLoading?: boolean;
 }
-
-export function StatCard({
-  title,
-  value,
-  subtitle,
-  icon,
-  trend,
-  isLoading,
-}: StatCardProps) {
+export const StatCard = ({ title, value, subtitle, icon, trend, isLoading }: StatCardProps) => {
   if (isLoading) {
     return (
       <Card>
@@ -31,7 +25,6 @@ export function StatCard({
       </Card>
     );
   }
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -55,4 +48,4 @@ export function StatCard({
       </CardContent>
     </Card>
   );
-}
+};

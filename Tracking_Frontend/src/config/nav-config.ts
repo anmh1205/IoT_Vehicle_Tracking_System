@@ -64,5 +64,3 @@ export const navConfig: { main: NavItem[]; secondary: NavItem[] } = {
     { title: 'Quản trị hệ thống', url: '/dashboard/system-admin', icon: Activity },
   ],
 };
-
-

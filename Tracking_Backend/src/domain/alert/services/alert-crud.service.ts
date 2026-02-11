@@ -49,7 +49,9 @@ export const acknowledgeAlert = async (id: number, userId: number): Promise<Aler
   }
 
   if (existing.status !== 'active') {
-    throw createValidationError(`Alert can only be acknowledged from "active" status, current status is "${existing.status}"`);
+    throw createValidationError(
+      `Alert can only be acknowledged from "active" status, current status is "${existing.status}"`,
+    );
   }
 
   const updated = await alertRepo.acknowledge(id, userId);
@@ -61,14 +63,20 @@ export const acknowledgeAlert = async (id: number, userId: number): Promise<Aler
   return sanitizeAlert(updated);
 };
 
-export const resolveAlert = async (id: number, userId: number, resolutionNotes: string | null): Promise<AlertPublic> => {
+export const resolveAlert = async (
+  id: number,
+  userId: number,
+  resolutionNotes: string | null,
+): Promise<AlertPublic> => {
   const existing = await alertRepo.findById(id);
   if (!existing) {
     throw createNotFoundError(`Alert with ID ${id} not found`);
   }
 
   if (existing.status !== 'active' && existing.status !== 'acknowledged') {
-    throw createValidationError(`Alert can only be resolved from "active" or "acknowledged" status, current status is "${existing.status}"`);
+    throw createValidationError(
+      `Alert can only be resolved from "active" or "acknowledged" status, current status is "${existing.status}"`,
+    );
   }
 
   const updated = await alertRepo.resolve(id, userId, resolutionNotes);

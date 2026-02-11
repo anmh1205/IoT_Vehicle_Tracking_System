@@ -17,18 +17,12 @@ export const getSystemHealth = async (): Promise<HealthStatus> => {
   }
 };
 
-export const queryMetrics = async (
-  promql: string,
-  time?: string,
-): Promise<unknown> => {
+export const queryMetrics = async (promql: string, time?: string): Promise<unknown> => {
   const result = await vmRepo.query(promql, time);
   return result;
 };
 
-export const queryLogs = async (
-  logsql: string,
-  limit?: number,
-): Promise<unknown> => {
+export const queryLogs = async (logsql: string, limit?: number): Promise<unknown> => {
   const result = await vlRepo.query(logsql, limit);
   return result;
 };
@@ -72,10 +66,37 @@ export const listAvailableTables = async (): Promise<string[]> => {
   return result.rows.map((row) => row.table_name);
 };
 
+export const getTableColumns = async (
+  table: string,
+): Promise<Array<{ name: string; dataType: string; isNullable: boolean }>> => {
+  const safeTable = assertTable(table);
+  const result = await pool.query<{
+    column_name: string;
+    data_type: string;
+    is_nullable: string;
+  }>(
+    `SELECT column_name, data_type, is_nullable
+     FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND table_name = $1
+     ORDER BY ordinal_position ASC`,
+    [safeTable],
+  );
+
+  return result.rows.map((row) => ({
+    name: row.column_name,
+    dataType: row.data_type,
+    isNullable: row.is_nullable.toUpperCase() === 'YES',
+  }));
+};
+
 export const queryTable = async (
   table: string,
   params: { page?: number; limit?: number; search?: string; from?: string; to?: string },
-): Promise<{ items: Record<string, unknown>[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> => {
+): Promise<{
+  items: Record<string, unknown>[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}> => {
   const safeTable = assertTable(table);
   const page = params.page ?? 1;
   const limit = params.limit ?? 20;
@@ -136,7 +157,9 @@ export const queryTable = async (
   };
 };
 
-export const getSystemSettings = async (): Promise<Array<{ key: string; value: unknown; description: string | null }>> => {
+export const getSystemSettings = async (): Promise<
+  Array<{ key: string; value: unknown; description: string | null }>
+> => {
   const result = await pool.query<{
     key: string;
     value: unknown;

@@ -1961,7 +1961,8 @@ Every page and every list view MUST have a meaningful empty state. No blank tabl
 // components/error-boundary.tsx
 'use client';
 
-import { Component, ReactNode } from 'react';
+import { ReactNode } from 'react';
+import { ErrorBoundary as ReactErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 
@@ -1970,47 +1971,37 @@ interface Props {
   fallback?: ReactNode;
 }
 
-interface State {
-  hasError: boolean;
-  error?: Error;
-}
+const ErrorFallback = (
+  { error, resetErrorBoundary, fallback }: FallbackProps & { fallback?: ReactNode }
+) => (
+  fallback ?? (
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <AlertTriangle className="mb-4 h-12 w-12 text-destructive" />
+      <h2 className="mb-2 text-lg font-semibold">Da xay ra loi</h2>
+      <p className="mb-4 max-w-md text-sm text-muted-foreground">
+        {error?.message || 'Loi khong xac dinh'}
+      </p>
+      <Button
+        onClick={() => {
+          resetErrorBoundary();
+          window.location.reload();
+        }}
+      >
+        Thu lai
+      </Button>
+    </div>
+  )
+);
 
-export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        this.props.fallback ?? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <AlertTriangle className="mb-4 h-12 w-12 text-destructive" />
-            <h2 className="mb-2 text-lg font-semibold">Da xay ra loi</h2>
-            <p className="mb-4 max-w-md text-sm text-muted-foreground">
-              {this.state.error?.message || 'Loi khong xac dinh'}
-            </p>
-            <Button
-              onClick={() => {
-                this.setState({ hasError: false, error: undefined });
-                window.location.reload();
-              }}
-            >
-              Thu lai
-            </Button>
-          </div>
-        )
-      );
-    }
-
-    return this.props.children;
-  }
-}
+export const ErrorBoundary = ({ children, fallback }: Props) => (
+  <ReactErrorBoundary
+    fallbackRender={(fallbackProps) => (
+      <ErrorFallback {...fallbackProps} fallback={fallback} />
+    )}
+  >
+    {children}
+  </ReactErrorBoundary>
+);
 ```
 
 ---

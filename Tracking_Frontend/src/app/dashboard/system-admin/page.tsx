@@ -1,78 +1,54 @@
-﻿'use client';
-
+'use client';
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { ShieldAlert } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { systemAdminServices } from '@/lib/api/system-admin';
-import { VMQueryViewer } from '@/features/admin/components/vm-query-viewer';
-import { VLLogViewer } from '@/features/admin/components/vl-log-viewer';
-import { SystemSettingsEditor } from '@/features/admin/components/system-settings-editor';
-
-export default function SystemAdminPage() {
-  const [promql, setPromql] = useState('up');
-  const [logsql, setLogsql] = useState('*');
-  const [table, setTable] = useState('users');
-  const [search, setSearch] = useState('');
-
-  const metrics = useQuery({ queryKey: ['sys-metrics', promql], queryFn: () => systemAdminServices.metrics({ query: promql }) });
-  const logs = useQuery({ queryKey: ['sys-logs', logsql], queryFn: () => systemAdminServices.logs({ query: logsql, limit: 200 }) });
-  const tables = useQuery({ queryKey: ['sys-tables'], queryFn: () => systemAdminServices.listTables() });
-  const tableRows = useQuery({ queryKey: ['sys-table-rows', table, search], queryFn: () => systemAdminServices.queryTable(table, { limit: 50, search }) });
-
+import { useRoleAccess } from '@/hooks/use-role-access';
+import { LogsViewer } from '@/features/system-admin/components/logs-viewer';
+import { QueryBuilder } from '@/features/system-admin/components/query-builder';
+import { MetricsExplorer } from '@/features/system-admin/components/metrics-explorer';
+type AdminTab = 'logs' | 'query' | 'metrics';
+const SystemAdminPage = () => {
+  const access = useRoleAccess();
+  const [tab, setTab] = useState<AdminTab>('logs');
+  if (!access.canAccessSystemAdmin) {
+    return (
+      <PageContainer pageTitle="System admin" pageDescription="Restricted area">
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4 text-sm">
+            <ShieldAlert className="h-5 w-5 text-amber-500" />
+            You do not have permission to access this module.
+          </CardContent>
+        </Card>
+      </PageContainer>
+    );
+  }
   return (
-    <PageContainer pageTitle="Quản trị hệ thống" pageDescription="Công cụ quản trị hệ thống">
-      <Tabs defaultValue="health" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="health">Sức khỏe</TabsTrigger>
-          <TabsTrigger value="metrics">Chỉ số</TabsTrigger>
-          <TabsTrigger value="logs">Nhật ký</TabsTrigger>
-          <TabsTrigger value="tables">Bảng dữ liệu</TabsTrigger>
+    <PageContainer
+      pageTitle="System admin"
+      pageDescription="Logs viewer, query builder, and metrics explorer"
+    >
+      <Tabs value={tab} onValueChange={(value) => setTab(value as AdminTab)} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3 sm:w-auto">
+          <TabsTrigger value="logs">Logs</TabsTrigger>
+          <TabsTrigger value="query">Query builder</TabsTrigger>
+          <TabsTrigger value="metrics">Metrics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="health">
-          <Card>
-            <CardHeader><CardTitle>Tình trạng hệ thống</CardTitle></CardHeader>
-            <CardContent><pre className="overflow-auto text-xs">{JSON.stringify(metrics.data, null, 2)}</pre></CardContent>
-          </Card>
+        <TabsContent value="logs" className="space-y-0">
+          <LogsViewer />
         </TabsContent>
 
-        <TabsContent value="metrics">
-          <VMQueryViewer data={metrics.data} onRun={(query) => setPromql(query)} />
+        <TabsContent value="query" className="space-y-0">
+          <QueryBuilder />
         </TabsContent>
 
-        <TabsContent value="logs">
-          <VLLogViewer data={logs.data} onRun={(query) => setLogsql(query)} />
-        </TabsContent>
-
-        <TabsContent value="tables">
-          <Card>
-            <CardHeader><CardTitle>Trình duyệt bảng</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex gap-2">
-                <Select value={table} onValueChange={setTable}>
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue placeholder="Chọn bảng" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(tables.data ?? []).map((name) => (
-                      <SelectItem key={name} value={name}>
-                        {name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input placeholder="Tìm trong bảng" value={search} onChange={(e) => setSearch(e.target.value)} />
-              </div>
-              <SystemSettingsEditor rows={tableRows.data?.items ?? []} />
-            </CardContent>
-          </Card>
+        <TabsContent value="metrics" className="space-y-0">
+          <MetricsExplorer />
         </TabsContent>
       </Tabs>
     </PageContainer>
   );
-}
-
+};
+export default SystemAdminPage;

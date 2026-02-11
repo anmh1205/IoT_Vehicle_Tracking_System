@@ -1,6 +1,17 @@
-import { findOne, findMany, insertOne, updateOne, deleteOne } from '@/infrastructure/database/queries';
+import {
+  findOne,
+  findMany,
+  insertOne,
+  updateOne,
+  deleteOne,
+} from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
-import type { Maintenance, MaintenanceListQuery, CreateMaintenanceInput, UpdateMaintenanceInput } from '@/domain/maintenance/types/maintenance.types';
+import type {
+  Maintenance,
+  MaintenanceListQuery,
+  CreateMaintenanceInput,
+  UpdateMaintenanceInput,
+} from '@/domain/maintenance/types/maintenance.types';
 
 export const findAll = async (
   query: MaintenanceListQuery,
@@ -47,7 +58,10 @@ export const findAll = async (
 export const findById = async (id: number): Promise<Maintenance | null> =>
   findOne<Maintenance>('SELECT * FROM maintenance WHERE id = $1', [id]);
 
-export const create = async (input: CreateMaintenanceInput, createdBy?: number): Promise<Maintenance> =>
+export const create = async (
+  input: CreateMaintenanceInput,
+  createdBy?: number,
+): Promise<Maintenance> =>
   insertOne<Maintenance>(
     `INSERT INTO maintenance (vehicle_id, maintenance_type, title, description, scheduled_date, mileage_at_service, next_service_mileage, next_service_date, cost, service_provider, notes, created_by, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())

@@ -14,16 +14,16 @@ import './config/env';
 /**
  * Extract deviceId from a topic string like "v1/{deviceId}/rawdata".
  */
-function extractDeviceId(topic: string): string | null {
+const extractDeviceId = (topic: string): string | null => {
   const parts = topic.split('/');
   if (parts.length < 3 || parts[0] !== 'v1') return null;
   return parts[1] ?? null;
-}
+};
 
 /**
  * Route incoming MQTT messages to the appropriate handler based on topic suffix.
  */
-function routeMessage(topic: string, message: Buffer): void {
+const routeMessage = (topic: string, message: Buffer): void => {
   const deviceId = extractDeviceId(topic);
   if (!deviceId) {
     logger.warn({ topic }, 'Cannot extract deviceId from topic');
@@ -56,12 +56,12 @@ function routeMessage(topic: string, message: Buffer): void {
     default:
       logger.debug({ suffix, topic }, 'Unhandled topic suffix');
   }
-}
+};
 
 /**
  * Bootstrap the MQTT Bridge service.
  */
-async function main(): Promise<void> {
+const main = async (): Promise<void> => {
   logger.info('Starting MQTT Bridge service...');
 
   startBatchWriter();
@@ -75,12 +75,12 @@ async function main(): Promise<void> {
   });
 
   logger.info('MQTT Bridge service started successfully');
-}
+};
 
 /**
  * Graceful shutdown: disconnect MQTT, flush batches, close DB pool.
  */
-async function shutdown(signal: string): Promise<void> {
+const shutdown = async (signal: string): Promise<void> => {
   logger.info({ signal }, 'Shutting down gracefully...');
 
   try {
@@ -106,7 +106,7 @@ async function shutdown(signal: string): Promise<void> {
 
   logger.info('Shutdown complete');
   process.exit(0);
-}
+};
 
 process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));

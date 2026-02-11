@@ -1,16 +1,24 @@
-﻿import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deviceServices } from '@/lib/api/devices';
-import { toast } from 'sonner';
+import { notificationUtils } from '@/lib/notification';
+import { queryInvalidation } from '@/lib/utils/query-invalidation';
+
+const getErrorMessage = (error: any): string =>
+  error?.response?.data?.error?.message ??
+  error?.response?.data?.message ??
+  error?.message ??
+  'Không thể xóa thiết bị';
 
 export const useDeleteDevice = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => deviceServices.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['devices'] });
-      toast.success('Đã xóa thiết bị');
+    onSuccess: (_result, id) => {
+      queryInvalidation.device.all(queryClient, id);
+      notificationUtils.success('Đã xóa thiết bị');
     },
-    onError: (error: any) => toast.error(error?.message ?? 'Không thể xóa thiết bị'),
+    onError: (error: unknown) => {
+      notificationUtils.error('Xóa thiết bị thất bại', getErrorMessage(error));
+    },
   });
 };
-

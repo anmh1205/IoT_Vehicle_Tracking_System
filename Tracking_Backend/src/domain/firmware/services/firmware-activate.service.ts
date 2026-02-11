@@ -2,7 +2,15 @@ import * as firmwareRepo from '@/domain/firmware/repositories/firmware.repositor
 import type { FirmwarePublic } from '@/domain/firmware/types/firmware.types';
 import { createNotFoundError } from '@/shared/utils/errors.util';
 
-const toPublic = (fw: { id: number; version: string; filename: string; size: number; description: string | null; is_active: boolean; created_at: Date }): FirmwarePublic => ({
+const toPublic = (fw: {
+  id: number;
+  version: string;
+  filename: string;
+  size: number;
+  description: string | null;
+  is_active: boolean;
+  created_at: Date;
+}): FirmwarePublic => ({
   id: fw.id,
   version: fw.version,
   filename: fw.filename,

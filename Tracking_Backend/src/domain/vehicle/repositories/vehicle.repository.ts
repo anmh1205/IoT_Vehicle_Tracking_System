@@ -1,6 +1,17 @@
-import { findOne, findMany, insertOne, updateOne, deleteOne } from '@/infrastructure/database/queries';
+import {
+  findOne,
+  findMany,
+  insertOne,
+  updateOne,
+  deleteOne,
+} from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
-import type { Vehicle, VehicleListQuery, CreateVehicleInput, UpdateVehicleInput } from '@/domain/vehicle/types/vehicle.types';
+import type {
+  Vehicle,
+  VehicleListQuery,
+  CreateVehicleInput,
+  UpdateVehicleInput,
+} from '@/domain/vehicle/types/vehicle.types';
 
 const ALLOWED_SORT_COLUMNS: Record<string, string> = {
   vehicleId: 'vehicle_id',
@@ -32,7 +43,9 @@ export const findAll = async (
   }
 
   if (query.search) {
-    conditions.push(`(vehicle_id ILIKE $${paramIndex} OR plate_number ILIKE $${paramIndex} OR brand ILIKE $${paramIndex})`);
+    conditions.push(
+      `(vehicle_id ILIKE $${paramIndex} OR plate_number ILIKE $${paramIndex} OR brand ILIKE $${paramIndex})`,
+    );
     params.push(`%${query.search}%`);
     paramIndex++;
   }
@@ -91,10 +104,7 @@ export const create = async (input: CreateVehicleInput): Promise<Vehicle> =>
     ],
   );
 
-export const update = async (
-  id: number,
-  input: UpdateVehicleInput,
-): Promise<Vehicle | null> => {
+export const update = async (id: number, input: UpdateVehicleInput): Promise<Vehicle | null> => {
   const setClauses: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;

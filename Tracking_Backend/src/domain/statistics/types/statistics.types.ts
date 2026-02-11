@@ -32,3 +32,10 @@ export interface TripSummaryPoint {
   totalDistanceKm: number;
   avgDurationMinutes: number;
 }
+
+export interface StatisticsSummary {
+  totalRuntimeHours: number;
+  averageUptimePercent: number;
+  totalSessions: number;
+  totalAlerts: number;
+}

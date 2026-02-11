@@ -1,7 +1,12 @@
 import { createNotFoundError, createConflictError } from '@/shared/utils/errors.util';
 import * as vehicleRepo from '@/domain/vehicle/repositories/vehicle.repository';
 import { logger } from '@/infrastructure/logger';
-import type { Vehicle, CreateVehicleInput, UpdateVehicleInput, VehiclePublic } from '@/domain/vehicle/types/vehicle.types';
+import type {
+  Vehicle,
+  CreateVehicleInput,
+  UpdateVehicleInput,
+  VehiclePublic,
+} from '@/domain/vehicle/types/vehicle.types';
 
 const sanitizeVehicle = (v: Vehicle): VehiclePublic => ({
   id: v.id,
@@ -48,7 +53,10 @@ export const createVehicle = async (input: CreateVehicleInput): Promise<VehicleP
   return sanitizeVehicle(vehicle);
 };
 
-export const updateVehicle = async (id: number, input: UpdateVehicleInput): Promise<VehiclePublic> => {
+export const updateVehicle = async (
+  id: number,
+  input: UpdateVehicleInput,
+): Promise<VehiclePublic> => {
   const existing = await vehicleRepo.findById(id);
   if (!existing) {
     throw createNotFoundError(`Vehicle with ID ${id} not found`);

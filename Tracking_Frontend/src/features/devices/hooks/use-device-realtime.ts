@@ -1,24 +1,23 @@
-﻿'use client';
+'use client';
 
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useSocket } from '@/components/providers/socket-provider';
+import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
+import { queryInvalidation } from '@/lib/utils/query-invalidation';
 
 export const useDeviceRealtime = () => {
-  const socket = useSocket();
   const queryClient = useQueryClient();
+  const refresh = useCallback(() => {
+    queryInvalidation.device.list(queryClient);
+  }, [queryClient]);
 
-  useEffect(() => {
-    if (!socket) return;
+  useRealtimeSubscription({
+    event: 'device:status',
+    handler: refresh,
+  });
 
-    const refresh = () => queryClient.invalidateQueries({ queryKey: ['devices'] });
-
-    socket.on('device:status', refresh);
-    socket.on('device:position', refresh);
-
-    return () => {
-      socket.off('device:status', refresh);
-      socket.off('device:position', refresh);
-    };
-  }, [socket, queryClient]);
+  useRealtimeSubscription({
+    event: 'device:position',
+    handler: refresh,
+  });
 };

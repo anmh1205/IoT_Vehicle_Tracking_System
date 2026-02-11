@@ -1,15 +1,21 @@
 import * as dashboardRepo from '@/domain/dashboard/repositories/dashboard.repository';
-import type { DashboardStats, ActivityEvent, ActivityQuery } from '@/domain/dashboard/types/dashboard.types';
+import type {
+  DashboardStats,
+  ActivityEvent,
+  ActivityQuery,
+  DashboardDeviceActivityPoint,
+  DashboardDeviceStatusPoint,
+  DashboardFleetRuntimePoint,
+} from '@/domain/dashboard/types/dashboard.types';
 
 export const getStats = async (): Promise<DashboardStats> => {
-  const [statusCounts, runtimeToday, runtimeWeek, alertsCount, sessionsToday] =
-    await Promise.all([
-      dashboardRepo.getDeviceStatusCounts(),
-      dashboardRepo.getTotalRuntimeToday(),
-      dashboardRepo.getTotalRuntimeWeek(),
-      dashboardRepo.getActiveAlertsCount(),
-      dashboardRepo.getSessionsToday(),
-    ]);
+  const [statusCounts, runtimeToday, runtimeWeek, alertsCount, sessionsToday] = await Promise.all([
+    dashboardRepo.getDeviceStatusCounts(),
+    dashboardRepo.getTotalRuntimeToday(),
+    dashboardRepo.getTotalRuntimeWeek(),
+    dashboardRepo.getActiveAlertsCount(),
+    dashboardRepo.getSessionsToday(),
+  ]);
 
   return {
     totalDevices:
@@ -46,4 +52,31 @@ export const getActivity = async (
   }));
 
   return { events, total: result.total, page, limit };
+};
+
+export const getDeviceActivity = async (days: number): Promise<DashboardDeviceActivityPoint[]> => {
+  const rows = await dashboardRepo.getDeviceActivitySeries(days);
+  return rows.map((row) => ({
+    label: row.label,
+    running: Number.parseInt(row.running, 10) || 0,
+    idle: Number.parseInt(row.idle, 10) || 0,
+    offline: Number.parseInt(row.offline, 10) || 0,
+  }));
+};
+
+export const getDeviceStatus = async (): Promise<DashboardDeviceStatusPoint[]> => {
+  const rows = await dashboardRepo.getDeviceStatusDistribution();
+  return rows.map((row) => ({
+    name: row.status_name,
+    value: Number.parseInt(row.count, 10) || 0,
+    color: row.color,
+  }));
+};
+
+export const getFleetRuntime = async (days: number): Promise<DashboardFleetRuntimePoint[]> => {
+  const rows = await dashboardRepo.getFleetRuntimeSeries(days);
+  return rows.map((row) => ({
+    label: row.label,
+    runtime: Number.parseFloat(row.runtime_hours) || 0,
+  }));
 };

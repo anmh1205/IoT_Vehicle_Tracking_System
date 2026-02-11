@@ -5,7 +5,10 @@ export const createVehicleSchema = z.object({
     .string()
     .min(2, 'Vehicle ID must be at least 2 characters')
     .max(50, 'Vehicle ID must not exceed 50 characters')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Vehicle ID can only contain letters, numbers, dashes, and underscores'),
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      'Vehicle ID can only contain letters, numbers, dashes, and underscores',
+    ),
   plateNumber: z.string().max(20).optional(),
   deviceId: z.string().max(50).optional(),
   customerId: z.number().int().positive().optional(),
@@ -22,7 +25,10 @@ export const createVehicleSchema = z.object({
   registrationNumber: z.string().max(50).optional(),
   insuranceExpiry: z.string().datetime().optional(),
   iconType: z.string().max(50).optional(),
-  colorHex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color').optional(),
+  colorHex: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color')
+    .optional(),
   notes: z.string().max(500).optional(),
 });
 
