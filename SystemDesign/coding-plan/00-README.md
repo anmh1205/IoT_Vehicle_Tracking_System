@@ -141,6 +141,13 @@ mkdir Tracking_Frontend && cd Tracking_Frontend
 *   **Specs:**
     *   [40-mobile-strategy.md](./40-mobile-strategy.md)
 
+### 🟤 Phase 6B: Enhanced Features
+> *Agents:* multi-agent parallel team (8 agents)
+*   **Scope:** WebSocket/Realtime Server (Event Bus pattern, 5 namespaces), Docker per-service (Dockerfile + docker-compose.yml cho Backend và Frontend), Swagger API Docs (OpenAPI 3.0.3 tại `/api-docs`), publishEvent wiring (IoT → Alerts → Firmware), Validation Errors domain (SQL + CRUD), Driver Management (SQL + full CRUD + Frontend page), Fuel Analytics (summary, by-vehicle, trends + Frontend charts), ExcelJS Export (.xlsx generation)
+*   **New DB Tables:** `drivers` (`init/11-drivers.sql`), `validation_errors` (`init/10-validation-errors.sql`)
+*   **New Dependencies:** `exceljs@^4.4.0`, `swagger-ui-express@^5.0.1`
+*   **Details:** [70-implemented-features.md](./70-implemented-features.md)
+
 ### ⚪ Phase 7: Deployment (Ops)
 > *Status: See PROGRESS.md*
 *   **Agents:** `devops-engineer`

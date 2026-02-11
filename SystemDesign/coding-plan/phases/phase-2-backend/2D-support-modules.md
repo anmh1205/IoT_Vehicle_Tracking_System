@@ -17,6 +17,18 @@ Implement support modules: Dashboard stats, Firmware management, Export jobs, v√
 | BE-036 | Export services               | `domain/export/services/*.service.ts`                            |
 | BE-037 | System admin controller       | `api/controllers/system-admin.controller.ts`                     |
 | BE-038 | Audit service + repository    | `domain/audit/services/audit.service.ts`                         |
+| BE-039 | Driver controller + routes    | `api/controllers/driver.controller.ts`, `driver.routes.ts`       |
+| BE-040 | Driver services (CRUD+List)   | `domain/driver/services/driver-crud.service.ts`, `driver-list.service.ts` |
+| BE-041 | Driver repository + types     | `domain/driver/repositories/driver.repository.ts`, `types/driver.types.ts` |
+| BE-042 | Fuel analytics controller     | `api/controllers/fuel-analytics.controller.ts`, `fuel-analytics.routes.ts` |
+| BE-043 | Fuel analytics service+repo   | `domain/fuel-analytics/services/*.ts`, `repositories/*.ts`       |
+| BE-044 | Validation error domain       | `domain/validation-error/services/*.ts`, `repositories/*.ts`     |
+| BE-045 | Validation error API          | `api/controllers/validation-error.controller.ts`, `routes/*.ts`  |
+| BE-046 | Swagger OpenAPI spec          | `api/openapi/spec.ts` (OpenAPI 3.0.3, ~90 endpoints, 19 tags)   |
+| BE-047 | ExcelJS export service        | `domain/export/services/export-file.service.ts`                  |
+| BE-048 | WebSocket/Realtime server     | `infrastructure/realtime/*.ts` (6 files, Event Bus pattern)      |
+| BE-049 | publishEvent wiring           | Modify: `iot-ingestion`, `alert-crud`, `firmware-deploy`         |
+| BE-050 | Docker per-service            | `Dockerfile`, `docker-compose.yml`, `.dockerignore` per service  |
 
 ## Dashboard API Contract
 | Endpoint                         | Method | Response                                                |

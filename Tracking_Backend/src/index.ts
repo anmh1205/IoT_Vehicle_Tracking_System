@@ -13,11 +13,14 @@ import { generalRateLimit } from '@/middleware/rate-limit.middleware';
 import { httpMetricsMiddleware } from '@/middleware/metrics.middleware';
 import { sentryRequestHandler, sentryErrorHandler } from '@/middleware/sentry.middleware';
 import { errorHandler } from '@/middleware/error-handler.middleware';
+import swaggerUi from 'swagger-ui-express';
+import { spec } from '@/api/openapi/spec';
 import routes from '@/api/routes';
 import healthRoutes from '@/api/routes/health.routes';
 import metricsRoutes from '@/api/routes/metrics.routes';
 import { logger } from '@/infrastructure/logger';
 import { closePool } from '@/infrastructure/database/pool';
+import { registerRealtime, closeSocketServer, getRealtimeHealthSnapshot } from '@/infrastructure/realtime';
 
 const app = express();
 
@@ -56,10 +59,18 @@ app.use(generalRateLimit);
 // 9. Health check endpoints (no auth required)
 app.use('/health', healthRoutes);
 
+// 9b. WebSocket health endpoint
+app.get('/ws-health', (_req, res) => {
+  res.json(getRealtimeHealthSnapshot());
+});
+
 // 10. Metrics endpoint (optional basic auth)
 app.use('/metrics', metricsRoutes);
 
-// 11. API routes (v1 is canonical, /api kept as compatibility alias)
+// 11. Swagger API docs (no auth required)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
+
+// 12. API routes (v1 is canonical, /api kept as compatibility alias)
 app.use('/api/v1', routes);
 app.use('/api', routes);
 
@@ -74,11 +85,16 @@ const server = app.listen(appConfig.port, () => {
   logger.info(`Server started on port ${appConfig.port} (${appConfig.nodeEnv})`);
 });
 
+// 14. Attach WebSocket server to HTTP server
+registerRealtime(server);
+
 // Graceful shutdown
 const gracefulShutdown = (signal: string) => {
   logger.info(`${signal} received. Starting graceful shutdown...`);
   server.close(async () => {
     logger.info('HTTP server closed');
+    await closeSocketServer();
+    logger.info('WebSocket server closed');
     await closePool();
     logger.info('Database pool closed');
     process.exit(0);

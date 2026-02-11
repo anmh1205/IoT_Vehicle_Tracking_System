@@ -1,6 +1,7 @@
 import { createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
 import * as alertRepo from '@/domain/alert/repositories/alert.repository';
 import { logger } from '@/infrastructure/logger';
+import { publishEvent } from '@/infrastructure/realtime';
 import type { Alert, CreateAlertInput, AlertPublic } from '@/domain/alert/types/alert.types';
 
 const sanitizeAlert = (a: Alert): AlertPublic => ({
@@ -39,7 +40,29 @@ export const getAlertById = async (id: number): Promise<AlertPublic> => {
 export const createAlert = async (input: CreateAlertInput): Promise<AlertPublic> => {
   const alert = await alertRepo.create(input);
   logger.info(`Alert "${input.title}" created with severity "${input.severity}"`);
-  return sanitizeAlert(alert);
+
+  const result = sanitizeAlert(alert);
+
+  publishEvent('dashboard.alert.created', {
+    id: alert.id,
+    vehicle_id: alert.vehicle_id ? Number(alert.vehicle_id) : undefined,
+    device_id: alert.device_id ?? undefined,
+    alert_type: alert.alert_type,
+    severity: alert.severity,
+    title: alert.title,
+    message: alert.message ?? undefined,
+    latitude: alert.latitude ?? undefined,
+    longitude: alert.longitude ?? undefined,
+  });
+
+  publishEvent('dashboard.activity.created', {
+    id: alert.id,
+    type: 'alert',
+    message: `New ${alert.severity} alert: ${alert.title}`,
+    timestamp: alert.created_at.toISOString(),
+  });
+
+  return result;
 };
 
 export const acknowledgeAlert = async (id: number, userId: number): Promise<AlertPublic> => {

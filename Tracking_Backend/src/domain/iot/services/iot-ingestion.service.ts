@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { pool } from '@/infrastructure/database/pool';
 import { createNotFoundError, createUnauthorizedError } from '@/shared/utils/errors.util';
+import { publishEvent } from '@/infrastructure/realtime';
 import type { QueryResultRow } from 'pg';
 
 interface DeviceRow extends QueryResultRow {
@@ -75,6 +76,7 @@ export const ingestDeviceData = async (payload: IotPayload) => {
   );
 
   let sessionId = activeSessionResult.rows[0]?.id;
+  const isNewSession = !sessionId;
   if (!sessionId) {
     const createdSession = await pool.query<SessionRow>(
       `INSERT INTO device_sessions (
@@ -141,6 +143,33 @@ export const ingestDeviceData = async (payload: IotPayload) => {
       payload.data.err ?? null,
     ],
   );
+
+  // Publish realtime events after all DB writes succeed
+  publishEvent('device.status.changed', {
+    device_id: payload.deviceId,
+    status: 'running',
+    last_seen_at: serverTimestamp.toISOString(),
+  });
+
+  if (payload.data.lat != null && payload.data.lon != null) {
+    publishEvent('device.position.updated', {
+      device_id: payload.deviceId,
+      lat: payload.data.lat,
+      lon: payload.data.lon,
+      speed: payload.data.spd ?? 0,
+      heading: 0,
+      timestamp: deviceTimestamp.getTime(),
+      status: 'running',
+      battery: payload.data.batt ?? null,
+    });
+  }
+
+  if (isNewSession) {
+    publishEvent('device.session.started', {
+      device_id: payload.deviceId,
+      session_id: sessionId,
+    });
+  }
 
   return {
     accepted: true,

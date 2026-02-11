@@ -1,0 +1,58 @@
+'use client';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
+import type { ColumnDef } from '@tanstack/react-table';
+
+const DRIVER_STATUS_LABELS: Record<string, string> = {
+  active: 'Hoạt động',
+  inactive: 'Ngưng hoạt động',
+  suspended: 'Tạm ngưng',
+};
+
+const DRIVER_STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive'> = {
+  active: 'default',
+  inactive: 'secondary',
+  suspended: 'destructive',
+};
+
+export const getDriverColumns = (actions: {
+  onEdit: (row: any) => void;
+  onDelete: (row: any) => void;
+}): ColumnDef<any>[] => {
+  return [
+    {
+      accessorKey: 'driverCode',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Mã tài xế" />,
+    },
+    { accessorKey: 'fullName', header: 'Họ tên' },
+    { accessorKey: 'phone', header: 'Số điện thoại' },
+    { accessorKey: 'licenseNumber', header: 'Số GPLX' },
+    {
+      accessorKey: 'licenseType',
+      header: 'Hạng GPLX',
+    },
+    {
+      accessorKey: 'status',
+      header: 'Trạng thái',
+      cell: ({ row }) => (
+        <Badge variant={DRIVER_STATUS_VARIANT[row.original.status] ?? 'secondary'}>
+          {DRIVER_STATUS_LABELS[row.original.status] ?? row.original.status}
+        </Badge>
+      ),
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => (
+        <div className="flex gap-1">
+          <Button size="sm" variant="outline" onClick={() => actions.onEdit(row.original)}>
+            Sửa
+          </Button>
+          <Button size="sm" variant="destructive" onClick={() => actions.onDelete(row.original)}>
+            Xóa
+          </Button>
+        </div>
+      ),
+    },
+  ];
+};

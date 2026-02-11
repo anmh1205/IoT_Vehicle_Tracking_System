@@ -51,5 +51,8 @@ export const downloadExport = asyncHandler(async (req: AuthenticatedRequest, res
     throw createNotFoundError('Export file not found on disk');
   }
 
-  res.download(job.filePath);
+  const fileName = `${job.exportType}_export_${job.id}.xlsx`;
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+  res.download(job.filePath, fileName);
 });

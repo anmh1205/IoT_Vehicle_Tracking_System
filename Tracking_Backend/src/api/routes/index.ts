@@ -19,6 +19,9 @@ import iotRoutes from '@/api/routes/iot.routes';
 import telemetryRoutes from '@/api/routes/telemetry.routes';
 import simulatorRoutes from '@/api/routes/simulator.routes';
 import systemRoutes from '@/api/routes/system.routes';
+import validationErrorRoutes from '@/api/routes/validation-error.routes';
+import fuelAnalyticsRoutes from '@/api/routes/fuel-analytics.routes';
+import driverRoutes from '@/api/routes/driver.routes';
 
 const router = Router();
 
@@ -45,5 +48,8 @@ router.use('/notifications', notificationsRoutes);
 router.use('/simulator', simulatorRoutes);
 router.use('/system', systemRoutes);
 router.use('/health', healthRoutes);
+router.use('/validation-errors', validationErrorRoutes);
+router.use('/fuel-analytics', fuelAnalyticsRoutes);
+router.use('/drivers', driverRoutes);
 
 export default router;

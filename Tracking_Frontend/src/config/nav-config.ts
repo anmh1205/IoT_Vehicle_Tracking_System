@@ -16,6 +16,8 @@
   BarChart3,
   Play,
   AlertTriangle,
+  Fuel,
+  UserCheck,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -37,6 +39,7 @@ export const navConfig: { main: NavItem[]; secondary: NavItem[] } = {
         { title: 'Thiết bị', url: '/dashboard/devices', icon: Cpu },
         { title: 'Phương tiện', url: '/dashboard/vehicles', icon: Car },
         { title: 'Khách hàng', url: '/dashboard/customers', icon: Users },
+        { title: 'Tài xế', url: '/dashboard/drivers', icon: UserCheck },
       ],
     },
     {
@@ -53,6 +56,7 @@ export const navConfig: { main: NavItem[]; secondary: NavItem[] } = {
     },
     { title: 'Bảo trì', url: '/dashboard/maintenance', icon: Wrench },
     { title: 'Báo cáo', url: '/dashboard/statistics', icon: BarChart3 },
+    { title: 'Nhiên liệu', url: '/dashboard/fuel', icon: Fuel },
     { title: 'Phần mềm nhúng', url: '/dashboard/firmware', icon: HardDrive },
     { title: 'Xuất dữ liệu', url: '/dashboard/exports', icon: Download },
     { title: 'Mô phỏng', url: '/dashboard/simulator', icon: Play },

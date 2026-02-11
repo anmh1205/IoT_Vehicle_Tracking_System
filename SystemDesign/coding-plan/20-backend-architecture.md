@@ -59,9 +59,11 @@ Tracking_Backend/src/
 │   │   ├── auth.validator.ts
 │   │   ├── device.validator.ts
 │   │   ├── iot.validator.ts
-│   │   └── firmware.validator.ts
+│   │   ├── firmware.validator.ts
+│   │   ├── driver.validator.ts
+│   │   └── validation-error.validator.ts
 │   └── openapi/
-│       └── routes.ts
+│       └── spec.ts                       # OpenAPI 3.0.3 spec object
 │
 ├── domain/                         # Business Logic Layer
 │   ├── auth/
@@ -78,6 +80,29 @@ Tracking_Backend/src/
 │   │   │   └── auth.types.ts
 │   │   └── helpers/
 │   │       └── auth.helpers.ts
+│   │
+│   ├── driver/                            # Driver Management
+│   │   ├── services/
+│   │   │   ├── driver-crud.service.ts     # CRUD operations
+│   │   │   └── driver-list.service.ts     # Paginated listing
+│   │   ├── repositories/
+│   │   │   └── driver.repository.ts
+│   │   └── types/
+│   │       └── driver.types.ts
+│   ├── fuel-analytics/                    # Fuel consumption analytics
+│   │   ├── services/
+│   │   │   └── fuel-analytics.service.ts
+│   │   ├── repositories/
+│   │   │   └── fuel-analytics.repository.ts
+│   │   └── types/
+│   │       └── fuel-analytics.types.ts
+│   ├── validation-error/                  # IoT payload validation errors
+│   │   ├── services/
+│   │   │   └── validation-error.service.ts
+│   │   ├── repositories/
+│   │   │   └── validation-error.repository.ts
+│   │   └── types/
+│   │       └── validation-error.types.ts
 │   │
 │   ├── device/
 │   │   ├── services/
@@ -664,56 +689,68 @@ Flow:
                   └───────────────┘
 ```
 
-### 6.1 Backend MQTT Event Listener
+### 6.1 Event Bus Pattern (Node.js EventEmitter)
+
+> **Pattern:** Services gọi `publishEvent()` → Event Bus (EventEmitter) → Socket.IO broadcast.
+> KHÔNG dùng MQTT internal topics. Realtime nằm trong `infrastructure/realtime/`.
 
 ```typescript
-// realtime/mqtt-event-listener.ts
-import mqtt from 'mqtt';
-import { mqttConfig } from '@/config/env';
-import { logger } from '@/infrastructure/logger';
-import type { Server as SocketServer } from 'socket.io';
+// infrastructure/realtime/event-bus.util.ts
+import { EventEmitter } from 'events';
 
-export function initMqttEventListener(io: SocketServer): void {
-  const client = mqtt.connect({
-    host: mqttConfig.host,
-    port: mqttConfig.useTls ? mqttConfig.tlsPort : mqttConfig.port,
-    protocol: mqttConfig.useTls ? 'mqtts' : 'mqtt',
-    username: 'backend_service',
-    password: mqttConfig.password,
-    clientId: `backend-listener-${process.pid}`,
-  });
-
-  client.on('connect', () => {
-    logger.info('✅ Backend connected to EMQX for internal events');
-    client.subscribe('internal/events/#', { qos: 1 });
-  });
-
-  client.on('message', (topic, payload) => {
-    const data = JSON.parse(payload.toString());
-    // topic: internal/events/device/status → eventType: device.status
-    const parts = topic.replace('internal/events/', '').split('/');
-    const eventType = parts.join('.');
-
-    switch (eventType) {
-      case 'device.status':
-        io.of('/devices').emit('status:update', data);
-        break;
-      case 'device.alert':
-        io.of('/dashboard').emit('alert:new', data);
-        break;
-      case 'device.session':
-        io.of('/devices').emit('session:update', data);
-        break;
-      case 'device.data':
-        io.of('/iot').emit('data:realtime', data);
-        break;
-    }
-  });
-
-  client.on('error', (err) => {
-    logger.error('MQTT event listener error:', err);
-  });
+// Typed event map — 12 events
+interface RealtimeEventMap {
+  'device.status.changed': { device_id: string; status: string; last_seen_at: string };
+  'device.position.updated': { device_id: string; lat: number; lon: number; speed: number };
+  'device.session.started': { device_id: string; session_id: number };
+  'device.session.ended': { device_id: string; session_id: number };
+  'command.acknowledged': { device_id: string; command_id: string; status: string };
+  'dashboard.stats.updated': { onlineDevices: number; totalAlerts: number };
+  'dashboard.alert.created': { id: number; alert_type: string; severity: string; title: string };
+  'dashboard.activity.created': { id: number; type: string; message: string; timestamp: string };
+  'geofence.entered': { device_id: string; geofence_id: number };
+  'geofence.exited': { device_id: string; geofence_id: number };
+  'export.completed': { export_id: number; download_url: string };
+  'firmware.assignment.updated': { firmware_id: number; device_ids: number[]; status: string };
 }
+
+const bus = new EventEmitter();
+export const publishEvent = <K extends keyof RealtimeEventMap>(event: K, payload: RealtimeEventMap[K]) => {
+  bus.emit(event, payload);
+};
+export const subscribeEvent = <K extends keyof RealtimeEventMap>(event: K, handler: (payload: RealtimeEventMap[K]) => void) => {
+  bus.on(event, handler);
+};
+```
+
+```typescript
+// infrastructure/realtime/socket-server.util.ts
+// Event bridges: internal event → Socket.IO namespace + event name
+const registerEventBridges = (server: TypedIOServer): void => {
+  subscribeEvent('device.status.changed', (payload) => {
+    server.of('/devices').emit('device:status', payload);
+  });
+  subscribeEvent('dashboard.alert.created', (payload) => {
+    server.of('/dashboard').emit('alert:new', payload);
+    server.of('/notifications').emit('alert:new', payload); // dual-emit
+  });
+  // ... 13 bridges total (see 24-websocket-events.md Section 8.3)
+};
+```
+
+```typescript
+// Gọi từ domain services:
+import { publishEvent } from '@/infrastructure/realtime';
+
+// iot-ingestion.service.ts
+publishEvent('device.status.changed', { device_id, status, last_seen_at });
+publishEvent('device.position.updated', { device_id, lat, lon, speed, heading });
+
+// alert-crud.service.ts
+publishEvent('dashboard.alert.created', { id, vehicle_id: Number(alert.vehicle_id), ... });
+
+// firmware-deploy.service.ts
+publishEvent('firmware.assignment.updated', { firmware_id, device_ids, status });
 ```
 
 ---

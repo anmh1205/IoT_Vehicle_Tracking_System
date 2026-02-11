@@ -1,4 +1,5 @@
 import * as exportRepo from '@/domain/export/repositories/export.repository';
+import { processExport } from '@/domain/export/services/export-processing.service';
 import type {
   ExportJob,
   ExportJobPublic,
@@ -26,6 +27,10 @@ export const createExport = async (
   input: CreateExportInput,
 ): Promise<ExportJobPublic> => {
   const job = await exportRepo.create(userId, input);
+
+  // Trigger async processing (fire-and-forget)
+  void processExport(job);
+
   return sanitizeExportJob(job);
 };
 

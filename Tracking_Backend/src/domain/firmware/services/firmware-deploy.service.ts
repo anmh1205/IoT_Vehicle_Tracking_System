@@ -1,5 +1,6 @@
 import * as firmwareRepo from '@/domain/firmware/repositories/firmware.repository';
 import { createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
+import { publishEvent } from '@/infrastructure/realtime';
 
 export const deployFirmware = async (
   firmwareId: number,
@@ -15,6 +16,12 @@ export const deployFirmware = async (
   }
 
   const deployments = await firmwareRepo.createDeployments(firmwareId, input.deviceIds);
+
+  publishEvent('firmware.assignment.updated', {
+    firmware_id: firmwareId,
+    device_ids: deployments.map((d) => d.id),
+    status: 'pending',
+  });
 
   return {
     firmwareId,

@@ -30,6 +30,10 @@
 │  ├── trips                 ├── alerts                       │
 │  └── maintenance                                             │
 │                                                              │
+│  Additional Tables (2)                                       │
+│  ├── drivers               (init/11-drivers.sql)            │
+│  └── validation_errors     (init/10-validation-errors.sql)  │
+│                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 

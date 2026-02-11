@@ -10,33 +10,41 @@
 
 ## 1. Namespaces
 
-| Namespace        | Auth Required    | Purpose                     |
-| ---------------- | ---------------- | --------------------------- |
-| `/dashboard`     | Yes (Bearer)     | Dashboard real-time updates |
-| `/devices`       | Yes (Bearer)     | Device status changes       |
-| `/firmware`      | Yes (Bearer)     | Firmware assignment updates |
-| `/exports`       | Yes (Bearer)     | Export job progress         |
-| `/notifications` | Yes (Bearer)     | Push notifications          |
-| `/mobile`        | Yes (Bearer)     | Mobile app events           |
-| `/iot`           | Yes (Device Token) | IoT device data stream (restricted) |
+| Namespace        | Auth Required        | Purpose                     |
+| ---------------- | -------------------- | --------------------------- |
+| `/dashboard`     | Yes (Session Token)  | Dashboard real-time updates |
+| `/devices`       | Yes (Session Token)  | Device status + position    |
+| `/firmware`      | Yes (Session Token)  | Firmware assignment updates |
+| `/exports`       | Yes (Session Token)  | Export job completion        |
+| `/notifications` | Yes (Session Token)  | Push notifications + alerts |
 
-> ⚠️ **`/iot` namespace requires Device Token authentication**, NOT public access.
-> Only authenticated devices can emit/receive on this namespace.
+> ⚠️ **Auth dùng Session Token** (KHÔNG phải JWT Bearer). Token được extract theo thứ tự:
+> `socket.handshake.auth.token` → `socket.handshake.query.token` → `Authorization: Bearer` header.
+> Token được validate qua SHA-256 hash lookup trong bảng `user_sessions`.
+>
+> Các namespace `/mobile` và `/iot` là future work (Phase 6 và Phase 3).
 
 ---
 
 ## 2. Authentication
 
-### 2.1 User Namespaces (Bearer Token)
+### 2.1 User Namespaces (Session Token)
 
 ```typescript
-// Frontend connects with fresh token on each connect/reconnect
+// Frontend connects with session token (NOT JWT)
 const socket = io(`${SOCKET_URL}/devices`, {
   auth: (cb) => cb({ token: useAuthStore.getState().token }),
   reconnectionAttempts: Infinity,
   reconnectionDelayMax: 30000,
 });
 ```
+
+> **Backend middleware** (`socket-auth.middleware.ts`) extracts token theo thứ tự:
+> 1. `socket.handshake.auth.token`
+> 2. `socket.handshake.query.token`
+> 3. `Authorization: Bearer <token>` header
+>
+> Token được hash SHA-256, lookup trong bảng `user_sessions`, rồi load user từ `users`.
 
 ### 2.2 IoT Namespace (Device Token)
 
@@ -227,41 +235,81 @@ export function useDeviceRealtime(deviceId: string) {
 
 ## 8. Backend Emit Pattern
 
+> **Pattern:** Event Bus (Node.js EventEmitter) — KHÔNG dùng MQTT internal topics.
+> Services gọi `publishEvent()` → Event Bus → Socket.IO broadcast tới frontend.
+
+### 8.1 Event Bus (`infrastructure/realtime/event-bus.util.ts`)
+
 ```typescript
-// realtime/mqtt-event-listener.ts
-import { Server } from 'socket.io';
+// 12 typed events trong RealtimeEventMap
+import { publishEvent } from '@/infrastructure/realtime';
 
-export function setupMqttEventListener(io: Server, mqttClient: MqttClient): void {
-  // Subscribe to internal events from MQTT Bridge
-  mqttClient.subscribe('internal/events/#', { qos: 1 });
+// Gọi từ các service:
+publishEvent('device.status.changed', { device_id, status, last_seen_at });
+publishEvent('device.position.updated', { device_id, lat, lon, speed, heading });
+publishEvent('dashboard.alert.created', { id, vehicle_id, alert_type, severity, title });
+publishEvent('firmware.assignment.updated', { firmware_id, device_ids, status });
+```
 
-  mqttClient.on('message', (topic: string, payload: Buffer) => {
-    let data: unknown;
-    try {
-      data = JSON.parse(payload.toString());
-    } catch {
-      logger.warn(`Malformed internal event on ${topic}`);
-      return;
-    }
+### 8.2 Event Bridges (`infrastructure/realtime/socket-server.util.ts`)
 
-    const [, , , type] = topic.split('/'); // internal/events/device/{type}
-
-    switch (type) {
-      case 'status':
-        io.of('/devices').emit('device:status', data);
-        break;
-      case 'data':
-        const { deviceId, ...telemetry } = data as TelemetryEvent;
-        io.of('/devices').emit('device:position', data);
-        io.of('/iot').emit(`telemetry:${deviceId}`, telemetry);
-        break;
-      case 'alert':
-        io.of('/dashboard').emit('alert:new', data);
-        break;
-      case 'session':
-        io.of('/devices').emit('device:session', data);
-        break;
-    }
+```typescript
+// Internal event → Socket.IO namespace + event name
+const registerEventBridges = (server: TypedIOServer): void => {
+  subscribeEvent('device.status.changed', (payload) => {
+    server.of('/devices').emit('device:status', payload);
   });
-}
+
+  subscribeEvent('dashboard.alert.created', (payload) => {
+    server.of('/dashboard').emit('alert:new', payload);
+    server.of('/notifications').emit('alert:new', payload); // dual-emit
+  });
+
+  subscribeEvent('command.acknowledged', (payload) => {
+    server.of('/devices').to(`device:${payload.device_id}`).emit('command:ack', payload); // room-scoped
+  });
+  // ... 13 bridges total
+};
+```
+
+### 8.3 Full Event Bridge Map
+
+```
+Internal Event                  → Namespace        → Socket Event
+─────────────────────────────────────────────────────────────────────
+device.status.changed           → /devices         → device:status
+device.position.updated         → /devices         → device:position
+device.session.started          → /devices         → device:session_start
+device.session.ended            → /devices         → device:session_end
+command.acknowledged            → /devices (room)  → command:ack
+dashboard.stats.updated         → /dashboard       → stats:update
+dashboard.alert.created         → /dashboard       → alert:new
+dashboard.alert.created         → /notifications   → alert:new (dual)
+dashboard.activity.created      → /dashboard       → activity:new
+geofence.entered                → /notifications   → geofence:enter
+geofence.exited                 → /notifications   → geofence:exit
+export.completed                → /exports         → export:ready
+firmware.assignment.updated     → /firmware         → firmware:assignment
+```
+
+### 8.4 Device Room Handlers (`/devices` namespace)
+
+```typescript
+// Client join/leave device rooms cho scoped events (e.g. command:ack)
+socket.emit('device:join', { deviceId: 'DEV001' });   // Join room device:DEV001
+socket.emit('device:leave', { deviceId: 'DEV001' });  // Leave room
+```
+
+### 8.5 Socket.IO Server Config
+
+```typescript
+const server = new Server(httpServer, {
+  cors: { origin, credentials: true },
+  path: '/ws',
+  transports: ['websocket', 'polling'],
+  serveClient: false,
+  pingTimeout: 60_000,
+  pingInterval: 25_000,
+  connectTimeout: 45_000,
+});
 ```
