@@ -28,3 +28,8 @@ export {
   getRealtimeServer,
   closeSocketServer,
 } from './socket-server.util';
+
+export {
+  initMqttEventListener,
+  closeMqttEventListener,
+} from './mqtt-event-listener';

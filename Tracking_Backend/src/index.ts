@@ -20,7 +20,13 @@ import healthRoutes from '@/api/routes/health.routes';
 import metricsRoutes from '@/api/routes/metrics.routes';
 import { logger } from '@/infrastructure/logger';
 import { closePool } from '@/infrastructure/database/pool';
-import { registerRealtime, closeSocketServer, getRealtimeHealthSnapshot } from '@/infrastructure/realtime';
+import {
+  registerRealtime,
+  closeSocketServer,
+  getRealtimeHealthSnapshot,
+  initMqttEventListener,
+  closeMqttEventListener,
+} from '@/infrastructure/realtime';
 
 const app = express();
 
@@ -88,11 +94,16 @@ const server = app.listen(appConfig.port, () => {
 // 14. Attach WebSocket server to HTTP server
 registerRealtime(server);
 
+// 15. Start MQTT event listener (bridges MqttBridge internal events → Event Bus → Socket.IO)
+initMqttEventListener();
+
 // Graceful shutdown
 const gracefulShutdown = (signal: string) => {
   logger.info(`${signal} received. Starting graceful shutdown...`);
   server.close(async () => {
     logger.info('HTTP server closed');
+    await closeMqttEventListener();
+    logger.info('MQTT event listener closed');
     await closeSocketServer();
     logger.info('WebSocket server closed');
     await closePool();
