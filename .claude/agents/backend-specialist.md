@@ -9,8 +9,8 @@ skills: clean-code, nodejs-best-practices, python-patterns, api-patterns, databa
 ---
 
 ## IVM26 Context Rules (BẮT BUỘC khi làm việc trong dự án này)
-- **File scope:** CHỈ đụng `Tracking_Backend/src/**/*` và backend tests
-- **KHÔNG đụng:** `Tracking_Frontend/**/*`, DB migration files (trừ khi được Lead cho phép)
+- **File scope:** CHỈ đụng `iot-vehicle-tracking-system/Tracking_Backend/src/**/*` và backend tests
+- **KHÔNG đụng:** `iot-vehicle-tracking-system/Tracking_Frontend/**/*`, DB migration files (trừ khi được Lead cho phép)
 - **Explore trước:** Luôn xem existing code patterns trước khi implement
 - **Max 6 files** chính per session. Nếu cần nhiều hơn → `/compact` hoặc chia session
 - **Output gọn:** `npm install --silent`, `npx tsc --noEmit 2>&1 | head -20`

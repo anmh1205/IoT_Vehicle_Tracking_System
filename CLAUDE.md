@@ -11,21 +11,23 @@ IoT Vehicle Tracking System - A full-stack IoT application for real-time vehicle
 ```
 IoT_Vehicle_Tracking_System/           # Git root
 │
-├── Tracking_Backend/                  # Express + TypeScript API
-├── Tracking_Frontend/                 # Next.js 15 Web App
-├── Tracking_MqttBridge/               # MQTT Bridge (standalone service)
-├── Tracking_Mobile/                   # Flutter WebView (Phase 2)
+├── iot-vehicle-tracking-system/       # All services (IVM26 flat inside)
+│   ├── Tracking_Backend/              # Express + TypeScript API
+│   ├── Tracking_Frontend/             # Next.js 15 Web App
+│   ├── Tracking_MqttBridge/           # MQTT Bridge (standalone service)
+│   ├── Tracking_Mobile/               # Flutter WebView (Phase 2)
+│   │
+│   ├── Tracking_PostgreSQL/           # PostgreSQL + init/ SQL scripts
+│   ├── Tracking_EMQX/                 # EMQX MQTT Broker + etc/ config
+│   ├── Tracking_VictoriaMetrics/      # Time-series Database
+│   ├── Tracking_VictoriaLogs/         # Logging Database
+│   ├── Tracking_Grafana/              # Monitoring Dashboards
+│   ├── Tracking_NPM/                  # Nginx Proxy Manager
+│   │
+│   └── Tracking_Data/                 # Persistent runtime data (gitignored)
 │
-├── Tracking_PostgreSQL/               # PostgreSQL + init/ SQL scripts
-├── Tracking_EMQX/                     # EMQX MQTT Broker + etc/ config
-├── Tracking_VictoriaMetrics/          # Time-series Database
-├── Tracking_VictoriaLogs/             # Logging Database
-├── Tracking_Grafana/                  # Monitoring Dashboards
-├── Tracking_NPM/                      # Nginx Proxy Manager
-│
-├── Tracking_Data/                     # Persistent runtime data (gitignored)
-├── shared-types/                      # Shared TypeScript types (tsconfig paths)
 ├── SystemDesign/                      # System Design Docs & Coding Plans
+├── .claude/                           # Claude Code agents & config
 └── CLAUDE.md                          # This file
 ```
 
@@ -35,7 +37,7 @@ IoT_Vehicle_Tracking_System/           # Git root
 
 Commands run from **each service directory** individually:
 
-### Backend (`Tracking_Backend/`):
+### Backend (`iot-vehicle-tracking-system/Tracking_Backend/`):
 
 ```bash
 npm install               # Install dependencies
@@ -47,7 +49,7 @@ npm run typecheck         # TypeScript check
 npm run verify            # lint + typecheck + test
 ```
 
-### Frontend (`Tracking_Frontend/`):
+### Frontend (`iot-vehicle-tracking-system/Tracking_Frontend/`):
 
 ```bash
 npm install               # Install dependencies
@@ -56,7 +58,7 @@ npm run build             # Production build
 npm run lint              # ESLint check
 ```
 
-### MQTT Bridge (`Tracking_MqttBridge/`):
+### MQTT Bridge (`iot-vehicle-tracking-system/Tracking_MqttBridge/`):
 
 ```bash
 npm install               # Install dependencies
@@ -70,19 +72,19 @@ npm run build             # Build for production
 # Create shared network (first time only)
 docker network create tracking-network
 
-# Start infrastructure services (from each folder)
-cd Tracking_PostgreSQL && docker-compose up -d && cd ..
-cd Tracking_EMQX && docker-compose up -d && cd ..
-cd Tracking_VictoriaMetrics && docker-compose up -d && cd ..
-cd Tracking_VictoriaLogs && docker-compose up -d && cd ..
+# Start infrastructure services (from iot-vehicle-tracking-system/)
+cd iot-vehicle-tracking-system/Tracking_PostgreSQL && docker-compose up -d && cd ../..
+cd iot-vehicle-tracking-system/Tracking_EMQX && docker-compose up -d && cd ../..
+cd iot-vehicle-tracking-system/Tracking_VictoriaMetrics && docker-compose up -d && cd ../..
+cd iot-vehicle-tracking-system/Tracking_VictoriaLogs && docker-compose up -d && cd ../..
 
 # Start application services with Docker
-cd Tracking_Backend && docker-compose up -d --build && cd ..
-cd Tracking_Frontend && docker-compose up -d --build && cd ..
-cd Tracking_MqttBridge && docker-compose up -d --build && cd ..
+cd iot-vehicle-tracking-system/Tracking_Backend && docker-compose up -d --build && cd ../..
+cd iot-vehicle-tracking-system/Tracking_Frontend && docker-compose up -d --build && cd ../..
+cd iot-vehicle-tracking-system/Tracking_MqttBridge && docker-compose up -d --build && cd ../..
 
 # View logs
-cd Tracking_Backend && docker-compose logs -f
+cd iot-vehicle-tracking-system/Tracking_Backend && docker-compose logs -f
 ```
 
 ## Architecture

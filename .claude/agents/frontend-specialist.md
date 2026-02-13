@@ -9,8 +9,8 @@ skills: clean-code, react-best-practices, web-design-guidelines, tailwind-patter
 ---
 
 ## IVM26 Context Rules (BẮT BUỘC khi làm việc trong dự án này)
-- **File scope:** CHỈ đụng `Tracking_Frontend/src/**/*` và frontend tests
-- **KHÔNG đụng:** `Tracking_Backend/**/*` (trừ import types từ `@/types/api/`)
+- **File scope:** CHỈ đụng `iot-vehicle-tracking-system/Tracking_Frontend/src/**/*` và frontend tests
+- **KHÔNG đụng:** `iot-vehicle-tracking-system/Tracking_Backend/**/*` (trừ import types từ `@/types/api/`)
 - **Explore trước:** Luôn xem existing components/patterns trước khi implement
 - **Max 6 files** chính per session. Nếu cần nhiều hơn → `/compact` hoặc chia session
 - **API contract:** Đọc từ compact context files, KHÔNG đọc full `21-backend-api-endpoints.md`
