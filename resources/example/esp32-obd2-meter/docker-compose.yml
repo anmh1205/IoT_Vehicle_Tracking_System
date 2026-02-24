@@ -1,0 +1,46 @@
+version: "3.8"
+services:
+
+  image-build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: registry.gitlab.com/janoskut/esp32-obd2-meter:latest
+
+  build:
+    image: registry.gitlab.com/janoskut/esp32-obd2-meter:latest
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    user: "${UID:-1000}:${GID:-1000}"
+    entrypoint: |
+      /bin/bash -c "
+        source ./env.sh && \
+        rm -rf dependencies.lock build managed_components && \
+        idf.py fullclean build && \
+        rm -rf dependencies.lock build managed_components
+      "
+  check:
+    image: registry.gitlab.com/janoskut/esp32-obd2-meter:latest
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    user: "${UID:-1000}:${GID:-1000}"
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        source ./env.sh && \
+        rm -rf dependencies.lock build .build-clang .build-iwyu managed_components && \
+        ./check.sh "$$@" && \
+        rm -rf dependencies.lock build .build-clang .build-iwyu managed_components
+      - --
+
+  bash:
+    image: registry.gitlab.com/janoskut/esp32-obd2-meter:latest
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    user: "${UID:-1000}:${GID:-1000}"
+    entrypoint: ["/bin/bash"]
+    tty: true

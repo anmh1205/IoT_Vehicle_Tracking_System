@@ -26,7 +26,7 @@ IoT_Vehicle_Tracking_System/           # Git root
 │   │
 │   └── Tracking_Data/                 # Persistent runtime data (gitignored)
 │
-├── SystemDesign/                      # System Design Docs & Coding Plans
+├── resources/                         # Documentation, coding plans, references
 ├── .claude/                           # Claude Code agents & config
 └── CLAUDE.md                          # This file
 ```
@@ -191,9 +191,9 @@ CORS_ORIGIN=http://localhost:3002
 
 ## Documentation
 
-Detailed system design documentation is in `/SystemDesign/`:
+Detailed documentation is in `/resources/`:
 
-- `coding-plan/` - Implementation guides for AI agents
+- `cloud-coding-plan/` - Cloud system implementation guides for AI agents
   - `00-README.md` - Master index with multi-agent orchestration
   - `01-rewrite-plan.md` - Master plan for project rewrite
   - `02-coding-standards.md` - Naming conventions from IVM26
@@ -214,8 +214,14 @@ Detailed system design documentation is in `/SystemDesign/`:
   - `50-observability.md` - Prometheus, logging, Sentry
   - `60-agent-orchestration.md` - Agent orchestration & phasing
   - `99-plan-review-and-improvements.md` - Multi-agent review results
-- `iot-vehicle-tracking-report/` - System design docs (Vietnamese)
-- `iot-project-template/` - Generic IoT project template
+- `firmware-coding-plan/` - ESP32-S3 firmware coding plan (8A-8F sub-phases)
+- `enhance/` - Frontend UI enhancement plans (EH-0 to EH-5)
+- `design-reports/` - System design reports & original plans
+  - `iot-vehicle-tracking-report/` - System design docs (Vietnamese)
+  - `firmware-development-plan.md` - Firmware development plan
+  - `cloud-system-audit-report.md` - Cloud system audit
+- `example/` - Reference code (esp32-obd2-meter)
+- `template/` - Generic IoT project template
 
 ## Agent Teams Context (Multi-Agent Work)
 
@@ -236,8 +242,8 @@ phases/phase-2-backend/2B-device-module.md
 ```
 
 **Key resources:**
-- Context templates: `SystemDesign/coding-plan/config/context-templates.md`
-- Agent orchestration: `SystemDesign/coding-plan/60-agent-orchestration.md`
+- Context templates: `resources/cloud-coding-plan/config/context-templates.md`
+- Agent orchestration: `resources/cloud-coding-plan/60-agent-orchestration.md`
 - Task tracking: `.tracking/` directory (COMPLETED.md, CURRENT_TASKS.md)
 
 **Rules:**
@@ -272,4 +278,4 @@ Khi context bị compact (tự động hoặc `/compact`), **luôn giữ lại:*
 - IVM26: `E:\anmh1205\IVM26\` - Reference implementation patterns (optional, if available)
 - Backup: `iot-vehicle-tracking-system-backup/` - Old NestJS code (for reference only)
 
-> **Note:** Reference paths are optional. The project can be built without them using the documentation in SystemDesign/.
+> **Note:** Reference paths are optional. The project can be built without them using the documentation in `resources/`.

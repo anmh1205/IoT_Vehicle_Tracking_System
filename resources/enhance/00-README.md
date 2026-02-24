@@ -68,7 +68,7 @@ EH-0 (Shared Infra)
 
 ## 🔗 Liên kết với coding-plan gốc
 
-Plan này **bổ sung** cho `SystemDesign/coding-plan/` (Phase 4 + Phase 5):
-- Các lỗi trong plan gốc đã được fix trực tiếp trong coding-plan files
+Plan này **bổ sung** cho `resources/cloud-coding-plan/` (Phase 4 + Phase 5):
+- Các lỗi trong plan gốc đã được fix trực tiếp trong cloud-coding-plan files
 - Plan enhance này chứa **chi tiết implementation** mà plan gốc không có
 - Khi gen lại coding-plan, các fix đã nằm sẵn trong file gốc

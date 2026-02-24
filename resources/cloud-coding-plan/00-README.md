@@ -18,7 +18,7 @@ Before writing a single line of code, you **MUST** verify:
 6. **Sub-plan là AUTHORITATIVE**: Agent ĐỌC sub-plan TRƯỚC (4A, 4B, etc.), sub-plan chứa inline code patterns đầy đủ — KHÔNG cần cross-reference file khác
 7. **Auth**: Zustand store (memory-only). KHÔNG localStorage, KHÔNG React Context. Cookie chỉ cho middleware
 8. **Charts**: recharts ONLY. KHÔNG ECharts
-9. **UI Enhancement Plans**: Xem `SystemDesign/enhance/` cho kế hoạch nâng cấp UI chi tiết dựa trên IVM26 reference
+9. **UI Enhancement Plans**: Xem `resources/enhance/` cho kế hoạch nâng cấp UI chi tiết dựa trên IVM26 reference
 9. **Geofence editor**: `@geoman-io/leaflet-geoman-free`. KHÔNG `react-leaflet-draw`
 10. **Icons**: lucide-react. KHÔNG `@tabler/icons-react`
 
@@ -70,7 +70,7 @@ mkdir Tracking_Frontend && cd Tracking_Frontend
     *   **Leader Autonomy Protocol (Section 14)** ← Agent Lead PHẢI đọc
     *   **Sub-Phase Breakdown (Section 15)** ← Task chia nhỏ với file ownership
     *   **Context Management (Section 13)** ← Tránh context limit
-4.  **Read Specs:** Never guess. Read the `SystemDesign/*.md` files listed below.
+4.  **Read Specs:** Never guess. Read the `resources/cloud-coding-plan/*.md` files listed below.
 
 ---
 
@@ -147,6 +147,21 @@ mkdir Tracking_Frontend && cd Tracking_Frontend
 *   **New DB Tables:** `drivers` (`init/11-drivers.sql`), `validation_errors` (`init/10-validation-errors.sql`)
 *   **New Dependencies:** `exceljs@^4.4.0`, `swagger-ui-express@^5.0.1`
 *   **Details:** [70-implemented-features.md](./70-implemented-features.md)
+
+### 🔧 Firmware (ESP32-S3 Tracker)
+> *Status: See PROGRESS.md* | *Sub-plans: `../firmware-coding-plan/phases/firmware/`*
+*   **1A:** Foundation (9 tasks) → **2A:** BLE OBD2 (6 tasks) ∥ **2B:** Hardware Drivers (4 tasks) ∥ **2C:** Modem (3 tasks) → **3A:** Communication (3 tasks) → **4A:** Integration (4 tasks)
+*   **Platform:** ESP-IDF v5.4.x | ESP32-S3 | C
+*   **Separate Coding Plan:** [`firmware-coding-plan/`](../firmware-coding-plan/) — tách riêng khỏi cloud coding-plan
+*   **Sub-plans (AUTHORITATIVE):**
+    *   [1A-foundation.md](../firmware-coding-plan/phases/firmware/1A-foundation.md)
+    *   [2A-ble-obd2.md](../firmware-coding-plan/phases/firmware/2A-ble-obd2.md)
+    *   [2B-hardware-drivers.md](../firmware-coding-plan/phases/firmware/2B-hardware-drivers.md)
+    *   [2C-modem.md](../firmware-coding-plan/phases/firmware/2C-modem.md)
+    *   [3A-communication.md](../firmware-coding-plan/phases/firmware/3A-communication.md)
+    *   [4A-integration.md](../firmware-coding-plan/phases/firmware/4A-integration.md)
+*   **Reference Specs:** [00-firmware-architecture.md](../firmware-coding-plan/00-firmware-architecture.md), [firmware-development-plan.md](../design-reports/firmware-development-plan.md)
+*   **Reference Code:** [esp32-obd2-meter/](../example/esp32-obd2-meter/) (BLE OBD2 reference)
 
 ### ⚪ Phase 7: Deployment (Ops)
 > *Status: See PROGRESS.md*
