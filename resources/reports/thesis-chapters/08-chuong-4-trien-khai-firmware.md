@@ -1,8 +1,8 @@
-﻿### 4.1.2. Triển khai Firmware
+﻿### 4.2.3. Triển khai Firmware
 
 Phần này trình bày chi tiết quá trình triển khai phần mềm nhúng (firmware) cho thiết bị theo dõi xe IoT, bao gồm môi trường phát triển, cấu trúc mã nguồn, các module chức năng chính và lưu đồ thuật toán điều khiển toàn hệ thống.
 
-#### 4.1.2.1. Môi trường phát triển và công cụ
+#### 4.2.3.1. Môi trường phát triển và công cụ
 
 #### a) Framework và toolchain
 
@@ -54,7 +54,7 @@ CONFIG_BT_NIMBLE_ROLE_PERIPHERAL=n
 
 ---
 
-#### 4.1.2.2. Cấu trúc mã nguồn firmware
+#### 4.2.3.2. Cấu trúc mã nguồn firmware
 
 #### a) Tổ chức thư mục
 
@@ -136,7 +136,7 @@ Các tầng giao tiếp với nhau thông qua cơ chế message queue và semaph
 
 ---
 
-#### 4.1.2.3. Triển khai module BLE-OBD2
+#### 4.2.3.3. Triển khai module BLE-OBD2
 
 #### a) Tổng quan giao tiếp BLE với adapter OBD2
 
@@ -325,7 +325,7 @@ Khi không thể kết nối BLE với adapter OBD2 (timeout sau 10 giây, retry
 
 ---
 
-#### 4.1.2.4. Triển khai module modem MQTT
+#### 4.2.3.4. Triển khai module modem MQTT
 
 #### a) Khởi tạo và kiểm tra modem
 
@@ -517,7 +517,7 @@ void process_server_command(const char *payload)
 
 ---
 
-#### 4.1.2.5. Triển khai quản lý nguồn và chế độ ngủ
+#### 4.2.3.5. Triển khai quản lý nguồn và chế độ ngủ
 
 #### a) Đọc điện áp và điều khiển nguồn
 
@@ -624,7 +624,7 @@ Thời gian đánh thức modem phụ thuộc chế độ: từ sleep là 100-50
 
 ---
 
-#### 4.1.2.6. Lưu đồ thuật toán chính
+#### 4.2.3.6. Lưu đồ thuật toán chính
 
 #### a) Máy trạng thái (State Machine)
 

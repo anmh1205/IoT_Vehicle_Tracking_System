@@ -510,6 +510,12 @@ Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân 
 
 ---
 
+### 4.1.2. Triển khai firmware, cloud và giao diện điều khiển
+
+Các nội dung triển khai chi tiết ở tầng phần mềm được trình bày tại các mục 4.2.3 đến 4.2.7 để đồng bộ với luồng chế tạo, lắp ráp và vận hành hệ thống.
+
+---
+
 ## 4.2. Chế tạo và lắp ráp hệ thống – Manufacture and Assembly
 
 ### 4.2.1. Lắp ráp mạch điện tử (Electronics Assembly)

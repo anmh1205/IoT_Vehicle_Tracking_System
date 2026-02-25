@@ -1,10 +1,38 @@
 ﻿### 3.1.2. Phân tích và lựa chọn giải pháp Firmware
 
-Firmware là thành phần phần mềm nhúng chạy trực tiếp trên vi điều khiển ESP32-S3, đóng vai trò trung tâm trong việc điều phối toàn bộ hoạt động của thiết bị theo dõi. Việc lựa chọn giải pháp firmware cần đáp ứng các yêu cầu: xử lý đa nhiệm thời gian thực, quản lý năng lượng thông minh, giao tiếp đa giao thức (BLE, UART, MQTT), và khả năng hoạt động ổn định trong điều kiện mất kết nối. Framework ESP-IDF với FreeRTOS tích hợp được lựa chọn làm nền tảng phát triển nhờ khả năng quản lý đa nhiệm, hỗ trợ deep sleep, và hệ sinh thái driver phong phú cho ESP32-S3.
+#### 3.1.2.1. Đặt vấn đề cho giải pháp Firmware
+
+Firmware là thành phần phần mềm nhúng chạy trực tiếp trên vi điều khiển ESP32-S3, đóng vai trò điều phối toàn bộ hoạt động của thiết bị theo dõi. Bài toán thiết kế firmware cần giải quyết đồng thời các yêu cầu:
+
+- **Đa nhiệm thời gian thực**: thu thập cảm biến, điều khiển modem, truyền dữ liệu và xử lý cảnh báo phải chạy song song, độ trễ thấp.
+- **Quản lý năng lượng nghiêm ngặt**: chuyển trạng thái linh hoạt giữa active/sleep/deep sleep theo điều kiện vận hành xe.
+- **Giao tiếp đa giao thức**: BLE (OBD2), UART (modem), MQTT/HTTP (cloud), I2C/ADC/GPIO (ngoại vi phần cứng).
+- **Độ bền vận hành cao**: có cơ chế retry, fallback và phục hồi sau mất kết nối mạng hoặc lỗi ngoại vi.
+
+#### 3.1.2.2. So sánh các phương án nền tảng Firmware
+
+[Bảng 3.5A: So sánh các phương án nền tảng firmware]
+
+| Phương án | Mô tả | Ưu điểm | Hạn chế | Mức phù hợp |
+| --------- | ----- | ------- | ------- | ----------- |
+| **PA-FW1: Arduino Core + Superloop** | Vòng lặp chính tuần tự, xử lý tác vụ theo polling | Dễ bắt đầu, ít cấu hình | Khó mở rộng đa nhiệm thực sự, khó tối ưu deep sleep phức tạp, quản lý lỗi hạn chế | Trung bình |
+| **PA-FW2: ESP-IDF + FreeRTOS (Đã chọn)** | Kiến trúc task/event, driver chính thức Espressif | Đa nhiệm tốt, hỗ trợ power management sâu, tích hợp NimBLE/modem/UART/I2C ổn định | Độ phức tạp cao hơn Arduino | **Cao** |
+| **PA-FW3: Zephyr RTOS trên ESP32** | RTOS đa nền tảng, kiến trúc module hóa | Tính chuẩn hóa tốt, khả năng mở rộng dài hạn | Hệ sinh thái ESP32 chuyên biệt và tài liệu thực chiến BLE-OBD2/modem ít hơn ESP-IDF | Trung bình |
+
+#### 3.1.2.3. Chọn giải pháp Firmware
+
+Đồ án chọn **PA-FW2: ESP-IDF + FreeRTOS** làm nền tảng firmware chính.
+
+Lý do lựa chọn:
+
+- **Khớp yêu cầu đa nhiệm của hệ thống**: mô hình task/queue/event group phù hợp cho pipeline dữ liệu IoT.
+- **Tối ưu cho ESP32-S3**: driver và power feature chính thức giúp giảm rủi ro tích hợp phần cứng.
+- **Phù hợp bài toán năng lượng**: hỗ trợ deep sleep/wakeup và điều khiển peripheral theo trạng thái.
+- **Dễ kiểm soát chất lượng vận hành**: thuận lợi xây dựng state machine, retry strategy và fallback cho BLE/modem.
 
 ### 3.2.2. Giải pháp Firmware
 
-Firmware chịu trách nhiệm thu thập dữ liệu từ các cảm biến (IMU, GNSS, OBD2), quản lý nguồn điện, điều khiển giao tiếp mạng (4G/LTE), và truyền dữ liệu lên máy chủ thông qua giao thức MQTT. Phần này trình bày chi tiết kiến trúc firmware, các module chức năng chính, định dạng dữ liệu và máy trạng thái điều khiển thiết bị.
+Firmware chịu trách nhiệm thu thập dữ liệu từ các cảm biến (IMU, GNSS, OBD2), quản lý nguồn điện, điều khiển giao tiếp mạng (4G/LTE), và truyền dữ liệu lên máy chủ thông qua giao thức MQTT. Phần này trình bày chi tiết giải pháp triển khai theo phương án đã chọn ở mục 3.1.2.
 
 #### 3.2.2.1. Kiến trúc firmware và luồng hoạt động
 
@@ -683,3 +711,4 @@ Cấu hình được quản lý theo ba cơ chế:
 | GNSS                 | Hiệu chỉnh offset vị trí (nếu cần)                    | NVS     |
 
 Các giá trị hiệu chuẩn được lưu trữ trong NVS và được tải khi thiết bị khởi động, đảm bảo tính nhất quán của phép đo giữa các lần reset.
+

@@ -1,4 +1,4 @@
-﻿### 4.1.3. Triển khai hệ thống Cloud
+﻿### 4.2.4. Triển khai hệ thống Cloud
 
 Hệ thống Cloud là thành phần cốt lõi phía máy chủ, chịu trách nhiệm tiếp nhận dữ liệu từ thiết bị IoT, xử lý nghiệp vụ, lưu trữ, và cung cấp giao diện giám sát cho người quản lý. Phần này trình bày chi tiết quá trình triển khai toàn bộ hạ tầng cloud, bao gồm cấu hình Docker, dịch vụ MQTT Bridge, Backend API, Frontend Dashboard, và hệ thống giám sát (monitoring).
 
@@ -31,7 +31,7 @@ Thiết bị IoT (ESP32 + GPS + OBD2)
 
 ---
 
-#### 4.1.3.1. Cấu hình Docker và hạ tầng (Docker Infrastructure Setup)
+#### 4.2.4.1. Cấu hình Docker và hạ tầng (Docker Infrastructure Setup)
 
 ##### a) Mô hình triển khai per-service (IVM26 Pattern)
 
@@ -220,7 +220,7 @@ cd Tracking_Frontend && docker-compose up -d --build
 
 ---
 
-#### 4.1.3.2. Triển khai MQTT Bridge (MQTT Bridge Implementation)
+#### 4.2.4.2. Triển khai MQTT Bridge (MQTT Bridge Implementation)
 
 ##### a) Vai trò và kiến trúc
 
@@ -378,7 +378,7 @@ Dịch vụ MQTT Bridge không cần expose port ra bên ngoài vì nó chỉ gi
 
 ---
 
-#### 4.1.3.3. Triển khai Backend API (Backend API Implementation)
+#### 4.2.4.3. Triển khai Backend API (Backend API Implementation)
 
 ##### a) Lựa chọn công nghệ
 
@@ -658,7 +658,7 @@ Trường `traceId` chính là Request-ID được tạo bởi middleware, cho p
 
 ---
 
-### 4.1.4. Triển khai Frontend Dashboard (Frontend Dashboard Implementation)
+### 4.2.5. Triển khai Frontend Dashboard (Frontend Dashboard Implementation)
 
 ##### a) Lựa chọn công nghệ
 
@@ -855,7 +855,7 @@ Dockerfile sử dụng 3 giai đoạn: `deps` (cài đặt dependencies), `build
 
 ---
 
-### 4.1.5. Cấu hình giám sát hệ thống (Monitoring & Observability)
+### 4.2.6. Cấu hình giám sát hệ thống (Monitoring & Observability)
 
 ##### a) Tổng quan chiến lược giám sát
 
@@ -947,7 +947,7 @@ Cơ chế này cho phép đối chiếu (correlate) một request cụ thể t�
 
 ---
 
-### 4.1.6. Checklist hardening trước khi vận hành production
+### 4.2.7. Checklist hardening trước khi vận hành production
 
 Để chuyển hệ thống từ môi trường thử nghiệm sang môi trường vận hành thực tế, nhóm triển khai áp dụng checklist hardening theo các mức ưu tiên sau (tham chiếu từ bộ tài liệu cải tiến hệ thống):
 

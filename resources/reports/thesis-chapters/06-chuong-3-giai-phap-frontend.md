@@ -1,10 +1,38 @@
 ﻿### 3.1.4. Phân tích và lựa chọn công nghệ Frontend
 
-Giao diện người dùng (Frontend) đóng vai trò là lớp tương tác trực tiếp giữa người vận hành và toàn bộ hệ thống IoT giám sát phương tiện. Thông qua giao diện web, người dùng có thể theo dõi vị trí xe theo thời gian thực, quản lý phương tiện, nhận cảnh báo và phân tích dữ liệu telemetry. Việc lựa chọn công nghệ Frontend cần đáp ứng các yêu cầu: hiệu năng render cao, hỗ trợ dữ liệu thời gian thực, tích hợp bản đồ, và khả năng responsive trên nhiều thiết bị. Next.js 15 với React 19 được lựa chọn nhờ hỗ trợ Server Components, App Router, và hệ sinh thái React phong phú.
+#### 3.1.4.1. Đặt vấn đề cho giải pháp Frontend
+
+Giao diện người dùng (Frontend) là lớp tương tác trực tiếp giữa người vận hành và hệ thống IoT giám sát phương tiện. Bài toán thiết kế Frontend cần đáp ứng đồng thời các yêu cầu:
+
+- **Hiển thị thời gian thực ổn định**: bản đồ, trạng thái thiết bị và cảnh báo phải cập nhật liên tục với độ trễ thấp.
+- **Khả năng mở rộng theo tính năng nghiệp vụ**: quản lý xe, chuyến đi, geofence, cảnh báo, báo cáo cần dễ mở rộng.
+- **Hiệu năng và trải nghiệm người dùng**: tải trang nhanh, điều hướng mượt, responsive tốt trên desktop/mobile.
+- **Dễ triển khai production**: build và đóng gói Docker thuận lợi cho mô hình vận hành đa dịch vụ.
+
+#### 3.1.4.2. So sánh các phương án công nghệ Frontend
+
+[Bảng 3.23A: So sánh các phương án công nghệ frontend tổng thể]
+
+| Phương án | Mô tả stack | Ưu điểm | Hạn chế | Mức phù hợp |
+| --------- | ----------- | ------- | ------- | ----------- |
+| **PA-FE1: Vite + React CSR** | React + Vite + client-side routing | Build nhanh, cấu hình linh hoạt | SEO/first load kém hơn SSR, cần tự lắp ghép nhiều thành phần | Trung bình |
+| **PA-FE2: Nuxt (Vue)** | Vue + Nuxt SSR/SSG | SSR tốt, cấu trúc rõ | Khác hệ sinh thái React đang dùng ở dự án, chi phí chuyển đổi cao | Trung bình |
+| **PA-FE3: Next.js + React (Đã chọn)** | Next.js 15 + React 19 + App Router | SSR/RSC tốt, hệ sinh thái lớn, tối ưu production, tích hợp realtime thuận lợi | Độ phức tạp framework cao hơn CSR thuần | **Cao** |
+
+#### 3.1.4.3. Chọn giải pháp Frontend
+
+Đồ án chọn **PA-FE3: Next.js 15 + React 19** làm nền tảng frontend chính.
+
+Lý do lựa chọn:
+
+- **Phù hợp yêu cầu realtime + dashboard phức hợp**: kết hợp tốt giữa REST cache và WebSocket.
+- **Hiệu năng tải trang tốt**: App Router và khả năng render phía server cải thiện trải nghiệm ban đầu.
+- **Mở rộng tính năng thuận lợi**: dễ tổ chức theo module (Feature-Sliced Design).
+- **Sẵn sàng triển khai production**: hỗ trợ build/standalone output và đóng gói Docker rõ ràng.
 
 ### 3.2.4. Giải pháp Frontend
 
-Phần này trình bày các giải pháp thiết kế, lựa chọn công nghệ và kiến trúc ứng dụng web của hệ thống.
+Phần này trình bày các giải pháp thiết kế, lựa chọn công nghệ và kiến trúc ứng dụng web theo phương án đã chọn ở mục 3.1.4.
 
 #### 3.2.4.1. Lựa chọn công nghệ Frontend (Technology Selection)
 
@@ -413,3 +441,4 @@ Phương án này đáp ứng tất cả yêu cầu kỹ thuật đã đặt ra 
 ## Kết luận chương 3
 
 Chương này đã trình bày quá trình phân tích, đề xuất và lựa chọn giải pháp thiết kế cho toàn bộ hệ thống IoT giám sát phương tiện, bao gồm bốn tầng: phần cứng, firmware, backend/cloud và frontend. Mỗi tầng đã được phân tích các phương án thay thế với ma trận đánh giá trọng số, từ đó lựa chọn phương án tối ưu về hiệu năng, chi phí và khả năng mở rộng. Phương án thiết kế tổng thể đã được xác định rõ ràng, làm cơ sở cho việc triển khai chi tiết ở Chương 4.
+

@@ -2,9 +2,9 @@
 
 ---
 
-## PHỤ LỤC 1: BÁO CÁO TÀI CHÍNH - FINANCE REPORT
+# PHỤ LỤC 1: BÁO CÁO TÀI CHÍNH - FINANCE REPORT
 
-### 1.1. Bảng kê chi phí linh kiện (Bill of Materials - BOM)
+## 1.1. Bảng kê chi phí linh kiện (Bill of Materials - BOM)
 
 Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng trong thiết bị tracker IoT, bao gồm đơn giá và tổng chi phí ước tính. Giá tham khảo từ các sàn thương mại điện tử tại Việt Nam (Shopee, Lazada, Điện tử Nhật Việt) tính đến tháng 01/2026.
 
@@ -33,7 +33,7 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | 19 | Dây kết nối | Dây nối, header, jumper | 1 bộ | 20.000 | 20.000 | Dây kết nối nội bộ |
 | | | | | **Tổng cộng** | **1.121.000** | |
 
-### 1.2. Chi phí hạ tầng cloud (ước tính hàng tháng)
+## 1.2. Chi phí hạ tầng cloud (ước tính hàng tháng)
 
 [Bảng PL-1.2: Chi phí hạ tầng cloud]
 
@@ -45,7 +45,7 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | 4 | SSL Certificate | Let's Encrypt | 0 | Miễn phí, tự động gia hạn |
 | | | | **Tổng hàng tháng** | **395.000 - 595.000** |
 
-### 1.3. Tổng hợp chi phí dự án
+## 1.3. Tổng hợp chi phí dự án
 
 [Bảng PL-1.3: Tổng hợp chi phí dự án]
 
@@ -62,9 +62,9 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 
 ---
 
-## PHỤ LỤC 2: CÁC TIÊU CHUẨN THIẾT KẾ - STANDARDS
+# PHỤ LỤC 2: CÁC TIÊU CHUẨN THIẾT KẾ - STANDARDS
 
-### 2.1. Tiêu chuẩn OBD2 (SAE J1979 / ISO 15031-5)
+## 2.1. Tiêu chuẩn OBD2 (SAE J1979 / ISO 15031-5)
 
 **Mô tả:** On-Board Diagnostics II (OBD2) là tiêu chuẩn chẩn đoán xe được bắt buộc áp dụng cho tất cả các xe sản xuất từ năm 1996 (tại Mỹ) và 2001 (tại Châu Âu). Tiêu chuẩn này quy định giao diện vật lý (connector 16-pin), giao thức truyền thông, và các thông số chẩn đoán (PIDs - Parameter IDs).
 
@@ -91,7 +91,7 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | 0x2F | Fuel Tank Level Input | % | 01 |
 | 0x46 | Ambient Air Temperature | C | 01 |
 
-### 2.2. Tiêu chuẩn MQTT 5.0 (OASIS)
+## 2.2. Tiêu chuẩn MQTT 5.0 (OASIS)
 
 **Mô tả:** MQTT (Message Queuing Telemetry Transport) phiên bản 5.0 là tiêu chuẩn OASIS cho giao thức truyền thông IoT, được thiết kế cho các thiết bị có tài nguyên hạn chế và băng thông thấp.
 
@@ -116,7 +116,7 @@ devices/{device_id}/commands       # Lệnh điều khiển (QoS 1)
 devices/{device_id}/status         # Trạng thái online/offline (Retain)
 ```
 
-### 2.3. Bảo mật thông tin (ISO 27001 - tham khảo)
+## 2.3. Bảo mật thông tin (ISO 27001 - tham khảo)
 
 **Mô tả:** ISO 27001 là tiêu chuẩn quốc tế về hệ thống quản lý an toàn thông tin (ISMS). Dự án tham khảo các nguyên tắc của ISO 27001 để thiết kế các biện pháp bảo mật.
 
@@ -131,7 +131,7 @@ devices/{device_id}/status         # Trạng thái online/offline (Retain)
 | Authorization (Phân quyền) | RBAC (Role-Based Access Control); MQTT ACL per device |
 | Audit Trail (Nhật ký) | VictoriaLogs ghi nhật ký mọi thao tác; Request-ID correlation |
 
-### 2.4. Thiết kế REST API (RFC 7231 và best practices)
+## 2.4. Thiết kế REST API (RFC 7231 và best practices)
 
 **Các nguyên tắc REST API áp dụng:**
 
@@ -147,9 +147,9 @@ devices/{device_id}/status         # Trạng thái online/offline (Retain)
 
 ---
 
-## PHỤ LỤC 3: KẾ HOẠCH THỰC HIỆN - ASSIGNMENT AND TIMELINES
+# PHỤ LỤC 3: KẾ HOẠCH THỰC HIỆN - ASSIGNMENT AND TIMELINES
 
-### 3.1. Phân chia giai đoạn dự án
+## 3.1. Phân chia giai đoạn dự án
 
 Dự án được thực hiện trong 6 giai đoạn chính, tổng thời gian dự kiến 24 tuần (6 tháng), từ tháng 09/2025 đến tháng 02/2026.
 
@@ -167,7 +167,7 @@ Dự án được thực hiện trong 6 giai đoạn chính, tổng thời gian 
 
 > **Ghi chú:** Các giai đoạn có sự chồng chéo (overlap) có chủ đích để tối ưu hóa thời gian. Ví dụ, GĐ3 (hạ tầng cloud) bắt đầu trước khi GĐ2 (firmware) hoàn thành để có môi trường test sớm.
 
-### 3.2. Biểu đồ Gantt (Gantt Chart)
+## 3.2. Biểu đồ Gantt (Gantt Chart)
 
 ```
 Tuần:  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
@@ -182,7 +182,7 @@ GĐ7:                                                        [========]
        |--- Tháng 01 ---|--- Tháng 02 ---|
 ```
 
-### 3.3. Chi tiết công việc theo giai đoạn
+## 3.3. Chi tiết công việc theo giai đoạn
 
 **Giai đoạn 1 -- Nghiên cứu và thiết kế phần cứng (Tuần 1-4):**
 
@@ -239,9 +239,9 @@ GĐ7:                                                        [========]
 
 ---
 
-## PHỤ LỤC 4: TÀI LIỆU BỔ TRỢ - SUPPORTING MATERIALS
+# PHỤ LỤC 4: TÀI LIỆU BỔ TRỢ - SUPPORTING MATERIALS
 
-### 4.1. Mã nguồn dự án (Source Code Repository)
+## 4.1. Mã nguồn dự án (Source Code Repository)
 
 Toàn bộ mã nguồn của dự án được quản lý trên GitHub:
 
@@ -268,7 +268,7 @@ IoT_Vehicle_Tracking_System/
 └── CLAUDE.md                      # Project overview
 ```
 
-### 4.2. Tham chiếu cơ sở dữ liệu (Database Schema)
+## 4.2. Tham chiếu cơ sở dữ liệu (Database Schema)
 
 Schema PostgreSQL đầy đủ được lưu tại:
 
@@ -299,7 +299,7 @@ Schema PostgreSQL đầy đủ được lưu tại:
 | `vehicle_imu` | device_id, accel_x, accel_y, accel_z | Dữ liệu gia tốc |
 | `device_status` | device_id, battery_voltage, signal_strength | Trạng thái thiết bị |
 
-### 4.3. Tài liệu API (API Documentation)
+## 4.3. Tài liệu API (API Documentation)
 
 Tài liệu API đầy đủ được tạo tự động bằng Swagger/OpenAPI và có thể truy cập tại:
 
@@ -327,7 +327,7 @@ Tài liệu API đầy đủ được tạo tự động bằng Swagger/OpenAPI 
 | Trips | GET | `/api/v1/trips` | Danh sách hành trình |
 | Customers | GET | `/api/v1/customers` | Danh sách khách hàng |
 
-### 4.4. Tài liệu cấu hình môi trường (Environment Configuration)
+## 4.4. Tài liệu cấu hình môi trường (Environment Configuration)
 
 Mỗi dịch vụ yêu cầu file `.env` riêng. Mẫu cấu hình (`.env.example`) có sẵn trong mỗi thư mục dịch vụ.
 
@@ -348,7 +348,7 @@ Mỗi dịch vụ yêu cầu file `.env` riêng. Mẫu cấu hình (`.env.exampl
 
 > **Lưu ý bảo mật:** Tất cả mật khẩu và secret keys là BẮT BUỘC, không có giá trị mặc định. Hệ thống sẽ từ chối khởi động nếu thiếu bất kỳ biến nào.
 
-### 4.5. Hướng dẫn cài đặt và chạy hệ thống
+## 4.5. Hướng dẫn cài đặt và chạy hệ thống
 
 **Yêu cầu hệ thống:**
 

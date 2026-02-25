@@ -1,8 +1,8 @@
-﻿# PHẦN MỞ ĐẦU - BÌA VÀ PHẦN ĐẦU
+﻿**PHẦN MỞ ĐẦU - BÌA VÀ PHẦN ĐẦU**
 
 ---
 
-## NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN HƯỚNG DẪN
+**NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN HƯỚNG DẪN**
 
 | | |
 |---|---|
@@ -12,7 +12,7 @@
 | **Sinh viên thực hiện:** | [...] |
 | **Lớp:** | [...] |
 
-### NỘI DUNG NHẬN XÉT
+**NỘI DUNG NHẬN XÉT**
 
 **I. Nhận xét Đồ án tốt nghiệp:**
 
@@ -44,7 +44,7 @@
 
 ---
 
-## NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN PHẢN BIỆN
+**NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN PHẢN BIỆN**
 
 | | |
 |---|---|
@@ -54,7 +54,7 @@
 | **Sinh viên thực hiện:** | [...] |
 | **Lớp:** | [...] |
 
-### NỘI DUNG NHẬN XÉT
+**NỘI DUNG NHẬN XÉT**
 
 **I. Nhận xét Đồ án tốt nghiệp:**
 
@@ -91,7 +91,7 @@
 
 ---
 
-## BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP
+**BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP**
 
 **I. Thông tin chung**
 - Thời gian: từ ... giờ ... đến ... giờ ... ngày .../..../20...
@@ -117,7 +117,7 @@
 
 ---
 
-## GIẢI TRÌNH CÁC CHỈNH SỬA
+**GIẢI TRÌNH CÁC CHỈNH SỬA**
 
 *(Nếu có)*
 
@@ -129,7 +129,7 @@
 
 ---
 
-## TRANG BÌA
+**TRANG BÌA**
 
 | | |
 |---|---|
@@ -144,7 +144,7 @@
 
 ---
 
-## LỜI CAM ĐOAN
+# LỜI CAM ĐOAN
 
 Tôi xin cam đoan đồ án tốt nghiệp với đề tài **"Thiết kế và xây dựng hệ thống IoT giám sát phương tiện giao thông"** là công trình nghiên cứu của riêng tôi dưới sự hướng dẫn của [...].
 
@@ -159,7 +159,7 @@ Tôi xin chịu hoàn toàn trách nhiệm về nội dung đồ án tốt nghi�
 
 ---
 
-## TÓM TẮT ĐỒ ÁN TỐT NGHIỆP - ABSTRACT
+**TÓM TẮT ĐỒ ÁN TỐT NGHIỆP - ABSTRACT**
 
 **Đề tài:** Thiết kế và xây dựng hệ thống IoT giám sát phương tiện giao thông
 
@@ -205,7 +205,7 @@ The result is a complete end-to-end IoT vehicle tracking system, from hardware t
 
 ---
 
-## LỜI CẢM ƠN - ACKNOWLEDGEMENTS
+# LỜI CẢM ƠN - ACKNOWLEDGEMENTS
 
 Trước tiên, tôi xin gửi lời cảm ơn chân thành và sâu sắc nhất đến [...] -- người đã trực tiếp hướng dẫn, định hướng và tận tình hỗ trợ tôi trong suốt quá trình thực hiện đồ án tốt nghiệp này. Những góp ý chuyên môn và sự động viên của thầy/cô là nguồn động lực quan trọng giúp tôi hoàn thành đề tài.
 
@@ -224,7 +224,7 @@ Xin chân thành cảm ơn!
 
 ---
 
-## MỤC LỤC - TABLE OF CONTENT
+# MỤC LỤC - TABLE OF CONTENT
 
 <!-- MỤC LỤC được cập nhật theo cấu trúc chương thực tế -->
 
@@ -268,12 +268,15 @@ Xin chân thành cảm ơn!
 | **Chương 4** | **TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ - IMPLEMENTATION AND RESULTS** | ... |
 | 4.1 | Thiết kế chi tiết giải pháp -- Detailed design solution | ... |
 | 4.1.1 | Thiết kế chi tiết phần cứng | ... |
-| 4.1.2 | Triển khai Firmware | ... |
-| 4.1.3 | Triển khai hệ thống Cloud | ... |
-| 4.1.4 | Triển khai Frontend Dashboard | ... |
-| 4.1.5 | Cấu hình giám sát hệ thống | ... |
-| 4.1.6 | Checklist hardening trước khi vận hành production | ... |
+| 4.1.2 | Triển khai firmware, cloud và giao diện điều khiển | ... |
 | 4.2 | Chế tạo và lắp ráp hệ thống -- Manufacture and Assembly | ... |
+| 4.2.1 | Lắp ráp mạch điện tử | ... |
+| 4.2.2 | Lắp đặt trong xe | ... |
+| 4.2.3 | Triển khai Firmware | ... |
+| 4.2.4 | Triển khai hệ thống Cloud | ... |
+| 4.2.5 | Triển khai Frontend Dashboard | ... |
+| 4.2.6 | Cấu hình giám sát hệ thống | ... |
+| 4.2.7 | Checklist hardening trước khi vận hành production | ... |
 | 4.3 | Đo lường và kết quả -- Measurement and Result | ... |
 | **Chương 5** | **ĐÁNH GIÁ VÀ KHUYẾN NGHỊ - EVALUATION AND RECOMMENDATION** | ... |
 | 5.1 | Đánh giá hiệu năng | ... |
@@ -290,7 +293,7 @@ Xin chân thành cảm ơn!
 
 ---
 
-## DANH MỤC BẢNG - LIST OF TABLES
+# DANH MỤC BẢNG - LIST OF TABLES
 
 <!-- Danh mục bảng sẽ được cập nhật khi hoàn thành các chương nội dung -->
 
@@ -310,7 +313,7 @@ Xin chân thành cảm ơn!
 
 ---
 
-## DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF PICTURES AND GRAPHS
+# DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF PICTURES AND GRAPHS
 
 <!-- Danh mục hình ảnh sẽ được cập nhật khi hoàn thành các chương nội dung -->
 
@@ -339,7 +342,7 @@ Xin chân thành cảm ơn!
 
 ---
 
-## DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATION
+# DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATION
 
 | Từ viết tắt | Tiếng Anh | Tiếng Việt |
 |-------------|-----------|------------|

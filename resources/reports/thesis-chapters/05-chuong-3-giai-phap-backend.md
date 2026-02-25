@@ -1,10 +1,40 @@
 ﻿### 3.1.3. Phân tích và lựa chọn kiến trúc Cloud
 
-Hệ thống Backend/Cloud đóng vai trò là tầng xử lý trung tâm, chịu trách nhiệm tiếp nhận dữ liệu từ thiết bị IoT, lưu trữ, xử lý nghiệp vụ, và cung cấp giao diện lập trình ứng dụng (API) cho tầng Frontend. Các quyết định thiết kế được đưa trên yêu cầu về hiệu năng cao, độ trễ thấp, khả năng mở rộng và đảm bảo an toàn dữ liệu trong môi trường IoT với tần suất gửi dữ liệu lớn. Kiến trúc phân tầng kết hợp hướng sự kiện (event-driven) được lựa chọn vì phù hợp với đặc thù ứng dụng IoT cần xử lý luồng dữ liệu liên tục từ nhiều thiết bị đồng thời.
+#### 3.1.3.1. Đặt vấn đề cho kiến trúc Cloud
+
+Hệ thống Backend/Cloud là tầng trung tâm của toàn bộ giải pháp IoT, vì vậy cần giải quyết đồng thời các bài toán kỹ thuật sau:
+
+- **Tiếp nhận dữ liệu liên tục từ nhiều thiết bị**: telemetry gửi theo chu kỳ ngắn, có thể xuất hiện burst khi thiết bị reconnect.
+- **Cập nhật thời gian thực cho dashboard**: dữ liệu vị trí/trạng thái cần phản ánh gần như tức thời cho người vận hành.
+- **Lưu trữ dữ liệu hỗn hợp**: vừa có dữ liệu chuỗi thời gian (GPS, OBD2), vừa có dữ liệu quan hệ nghiệp vụ (xe, người dùng, cảnh báo, geofence).
+- **Chi phí và năng lực vận hành phù hợp đồ án**: ưu tiên self-hosted, dễ triển khai, dễ mở rộng theo từng dịch vụ.
+
+#### 3.1.3.2. So sánh các phương án kiến trúc Cloud
+
+[Bảng 3.15A: So sánh các phương án kiến trúc Cloud]
+
+| Phương án | Mô tả ngắn | Ưu điểm | Hạn chế | Mức phù hợp |
+| --------- | ---------- | ------- | ------- | ----------- |
+| **PA-A: Monolithic REST + 1 DB** | Thiết bị gửi HTTP trực tiếp vào API server, lưu chung một cơ sở dữ liệu | Triển khai ban đầu đơn giản | Không tối ưu cho telemetry tần suất cao, khó mở rộng realtime, tải dồn lên API | Trung bình |
+| **PA-B: Managed Cloud Native** | AWS IoT Core/Lambda + dịch vụ DB managed | Khả năng mở rộng cao, nhiều dịch vụ sẵn có | Chi phí vận hành cao, phụ thuộc nhà cung cấp, độ phức tạp hạ tầng vượt phạm vi đồ án | Trung bình |
+| **PA-C: Event-driven self-hosted** | MQTT Broker + MQTT Bridge + dual database + API/WebSocket | Phù hợp IoT realtime, tách tải tốt, mở rộng theo dịch vụ, chi phí tự chủ | Cần chuẩn hóa message flow và quản lý nhiều dịch vụ Docker | **Cao (Đã chọn)** |
+
+#### 3.1.3.3. Chọn giải pháp kiến trúc Cloud
+
+Đồ án chọn **PA-C: kiến trúc phân tầng kết hợp hướng sự kiện (event-driven)** với chuỗi xử lý:
+
+`Device -> EMQX -> MQTT Bridge -> PostgreSQL/VictoriaMetrics/VictoriaLogs -> Backend API -> Frontend`
+
+Lý do lựa chọn:
+
+- **Khớp bản chất dữ liệu IoT**: MQTT xử lý tốt mô hình pub/sub, giảm coupling giữa thiết bị và tầng ứng dụng.
+- **Tối ưu hiệu năng theo vai trò**: Bridge xử lý ingestion, API tập trung nghiệp vụ, database tách theo loại dữ liệu.
+- **Dễ scale theo chiều ngang**: có thể nhân bản riêng broker/bridge/api khi số thiết bị tăng.
+- **Phù hợp chi phí và phạm vi thực hiện**: self-hosted qua Docker Compose, không phụ thuộc nền tảng cloud thương mại.
 
 ### 3.2.3. Giải pháp Backend & Cloud
 
-Phần này trình bày chi tiết giải pháp thiết kế và triển khai hệ thống Backend/Cloud cho ứng dụng theo dõi phương tiện IoT.
+Phần này trình bày chi tiết giải pháp thiết kế và triển khai hệ thống Backend/Cloud theo phương án đã lựa chọn ở mục 3.1.3.
 
 #### 3.2.3.1. Kiến trúc tổng quan hệ thống Cloud (Cloud Architecture Overview)
 
@@ -177,6 +207,18 @@ MQTT Message --> Rules Engine --> Tạo Alert/Violation --> Lưu PostgreSQL
 Ngoài ra, hệ thống còn cấu hình các rule cho phát hiện vi phạm vùng địa lý (geofence violation) và cảnh báo thiết bị mất kết nối (device offline) khi thiết bị không gửi dữ liệu trong khoảng thời gian định trước.
 
 #### 3.2.3.3. Thiết kế cơ sở dữ liệu (Database Architecture Design)
+
+**Đặt vấn đề lưu trữ:** Dữ liệu hệ thống có hai đặc tính trái ngược: telemetry ghi rất nhanh theo thời gian thực và dữ liệu nghiệp vụ yêu cầu toàn vẹn quan hệ dài hạn. Một mô hình lưu trữ duy nhất thường tối ưu tốt cho một phía nhưng kém hiệu quả ở phía còn lại.
+
+[Bảng 3.18A: So sánh các phương án kiến trúc lưu trữ dữ liệu]
+
+| Phương án | Mô tả | Ưu điểm | Hạn chế | Mức phù hợp |
+| --------- | ----- | ------- | ------- | ----------- |
+| **PA-DB1: PostgreSQL duy nhất** | Dùng PostgreSQL cho cả nghiệp vụ và telemetry | Đơn giản vận hành | Ghi telemetry lớn dễ ảnh hưởng truy vấn nghiệp vụ, chi phí index/partition cao | Trung bình |
+| **PA-DB2: Time-series DB duy nhất** | Dùng CSDL chuỗi thời gian cho mọi loại dữ liệu | Tối ưu ghi dữ liệu cảm biến | Kém phù hợp dữ liệu quan hệ phức tạp, khó đảm bảo ràng buộc nghiệp vụ | Thấp |
+| **PA-DB3: Hybrid DB (Đã chọn)** | PostgreSQL + VictoriaMetrics + VictoriaLogs | Mỗi loại dữ liệu dùng đúng công cụ, cân bằng hiệu năng và khả năng truy vấn | Tăng số thành phần cần vận hành | **Cao** |
+
+**Kết luận lựa chọn:** Chọn **PA-DB3 (hybrid database)** để tách trách nhiệm dữ liệu, giữ ổn định cho nghiệp vụ và tối ưu luồng telemetry theo thời gian thực.
 
 ##### a) Chiến lược lưu trữ kép (Dual Database Strategy)
 
