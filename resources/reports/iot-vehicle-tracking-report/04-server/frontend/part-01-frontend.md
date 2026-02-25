@@ -42,19 +42,25 @@ Frontend là giao diện web/mobile để người dùng tương tác với hệ
 - **State Management**: Zustand (client), TanStack Query (server)
 - **Forms**: React Hook Form + Zod
 - **Bản đồ**: Leaflet + React Leaflet
-- **Charts**: Recharts, Chart.js
-- **Real-time**: Socket.io Client
-- **Icons**: Lucide React, Tabler Icons
+- **Charts**: Recharts
+- **Real-time**: Socket.IO Client v4.8
+- **Icons**: Lucide React
+- **Toasts**: Sonner
+- **URL State**: nuqs
+- **Keyboard UX**: cmdk + kbar
+- **Date**: date-fns + react-day-picker
+- **Geofence Drawing**: @geoman-io/leaflet-geoman-free
+- **Map Clustering**: react-leaflet-cluster + leaflet.markercluster
 
 ---
 
 ### XII.4 Kiến Trúc
 
 ```
-Frontend (Next.js)
-    ├─ HTTP/REST API ──→ Backend API Server (NestJS)
+Frontend (Next.js 16)
+    ├─ HTTP/REST API ──→ Backend API Server (Express + TypeScript)
     │                           ↓
-    │                    PostgreSQL + InfluxDB
+    │                    PostgreSQL + VictoriaMetrics
     │                           ↓
     └─ WebSocket ──→ Backend API Server ──→ EMQX MQTT Broker
                                                     ↓

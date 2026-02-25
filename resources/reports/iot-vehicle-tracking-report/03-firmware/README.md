@@ -12,6 +12,8 @@ Folder này chứa thiết kế firmware cho thiết bị tracker.
 - **part-06-configuration.md**: Configuration management và calibration
 - **part-07-vgate-icar-pro-esp-idf-reference/**: Tham khảo code ESP-IDF cho vgate iCar Pro (từ project esp32-obd2-meter)
   - Xem [`part-07-vgate-icar-pro-esp-idf-reference/README.md`](./part-07-vgate-icar-pro-esp-idf-reference/README.md) để biết danh sách đầy đủ
+- **part-08-ble-obd2-giao-thuc-ket-noi/**: Giao thức kết nối BLE OBD2 chi tiết (tiếng Việt, phù hợp báo cáo đồ án)
+  - Xem [`part-08-ble-obd2-giao-thuc-ket-noi/README.md`](./part-08-ble-obd2-giao-thuc-ket-noi/README.md) để biết danh sách đầy đủ
 
 ## Workflow
 

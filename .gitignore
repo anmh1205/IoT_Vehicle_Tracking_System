@@ -23,3 +23,9 @@
 # Environment variables
 *.env
 !.env.example
+
+# Large binary files (thesis/reports - store on Google Drive/OneDrive instead)
+*.docx
+*.pptx
+*.xlsx
+

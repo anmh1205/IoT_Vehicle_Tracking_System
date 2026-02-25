@@ -9,7 +9,7 @@
 1. **REST API**: Giao tiếp với frontend (web/mobile)
 2. **WebSocket**: Real-time updates (vị trí, cảnh báo) via Socket.IO
 3. **Business Logic**: Xử lý nghiệp vụ (quản lý xe, người dùng, cảnh báo)
-4. **Authentication/Authorization**: Xác thực JWT và phân quyền
+4. **Authentication/Authorization**: Xác thực Session-based (database-backed tokens, SHA-256 hashed) và phân quyền
 5. **Database Integration**: Kết nối PostgreSQL và VictoriaMetrics
 6. **MQTT Integration**: Gửi commands đến trackers qua EMQX
 
@@ -69,7 +69,8 @@ Backend Tech Stack:
 ├── Real-time:
 │   ├── Socket.IO 4.x (WebSocket)
 │   └── MQTT.js (EMQX integration)
-├── Authentication: JWT (jsonwebtoken + bcryptjs)
+├── Authentication: Session-based (database-backed tokens, SHA-256 hashed, bcryptjs cho password)
+│   └── Không dùng JWT — session tokens lưu trong bảng user_sessions PostgreSQL
 ├── Monitoring:
 │   ├── prom-client (Prometheus metrics)
 │   ├── VictoriaLogs (structured logging)
@@ -88,28 +89,13 @@ Backend Tech Stack:
 **Cấu Trúc Thư Mục:**
 
 ```
-backend/src/
+Tracking_Backend/src/
 ├── index.ts                    # Entry point
 ├── api/                        # API Layer
-│   ├── controllers/            # Request handlers
-│   │   ├── auth.controller.ts
-│   │   ├── device.controller.ts
-│   │   ├── dashboard.controller.ts
-│   │   ├── firmware.controller.ts
-│   │   ├── iot.controller.ts
-│   │   └── export.controller.ts
-│   ├── routes/                 # Route definitions
-│   │   ├── auth.routes.ts
-│   │   ├── device.routes.ts
-│   │   ├── iot.routes.ts
-│   │   └── index.ts
-│   ├── validators/             # Zod schemas
-│   │   ├── auth.validator.ts
-│   │   ├── device.validator.ts
-│   │   └── iot.validator.ts
+│   ├── routes/                 # Route definitions (flat, per-domain)
 │   └── openapi/                # Swagger specs
 │
-├── domain/                     # Business Logic (by feature)
+├── domain/                     # Business Logic (by feature — 20+ modules)
 │   ├── auth/
 │   │   ├── services/
 │   │   │   ├── auth-session.service.ts
@@ -121,109 +107,210 @@ backend/src/
 │   │
 │   ├── device/
 │   │   ├── services/
-│   │   │   ├── device-list.service.ts
 │   │   │   ├── device-crud.service.ts
-│   │   │   └── device-sessions.service.ts
+│   │   │   ├── device-list.service.ts
+│   │   │   ├── device-details.service.ts
+│   │   │   ├── device-command.service.ts
+│   │   │   ├── device-error.service.ts
+│   │   │   ├── device-runtime.service.ts
+│   │   │   ├── device-sessions.service.ts
+│   │   │   └── device-telemetry.service.ts
 │   │   ├── repositories/
 │   │   │   ├── device.repository.ts
 │   │   │   └── device-session.repository.ts
 │   │   └── types/
+│   │       └── device.types.ts
+│   │
+│   ├── vehicle/
+│   │   ├── services/
+│   │   │   ├── vehicle-crud.service.ts
+│   │   │   ├── vehicle-list.service.ts
+│   │   │   └── vehicle-assignment.service.ts
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── customer/
+│   │   ├── services/
+│   │   │   ├── customer-crud.service.ts
+│   │   │   └── customer-list.service.ts
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── driver/
+│   │   ├── services/
+│   │   │   ├── driver-crud.service.ts
+│   │   │   └── driver-list.service.ts
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── trip/
+│   │   ├── services/
+│   │   │   ├── trip-crud.service.ts
+│   │   │   └── trip-list.service.ts
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── alert/
+│   │   ├── services/
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── geofence/
+│   │   ├── services/
+│   │   │   ├── geofence-crud.service.ts
+│   │   │   └── geofence-list.service.ts
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── maintenance/
+│   │   ├── services/
+│   │   │   ├── maintenance-crud.service.ts
+│   │   │   └── maintenance-list.service.ts
+│   │   ├── repositories/
+│   │   └── types/
 │   │
 │   ├── iot/
-│   │   ├── services/
-│   │   │   ├── iot-data-processing.service.ts
-│   │   │   ├── session-tracking.service.ts
-│   │   │   └── heartbeat-tracking.service.ts
-│   │   └── types/
+│   │   └── services/
+│   │       └── iot-ingestion.service.ts
 │   │
 │   ├── dashboard/
 │   │   ├── services/
 │   │   │   └── dashboard-stats.service.ts
-│   │   └── repositories/
+│   │   ├── repositories/
+│   │   └── types/
 │   │
 │   ├── firmware/
 │   │   ├── services/
 │   │   │   ├── firmware-upload.service.ts
-│   │   │   └── firmware-assignment.service.ts
-│   │   └── repositories/
+│   │   │   ├── firmware-list.service.ts
+│   │   │   ├── firmware-activate.service.ts
+│   │   │   ├── firmware-deploy.service.ts
+│   │   │   └── firmware-delete.service.ts
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── export/
+│   │   ├── services/
+│   │   │   ├── export-job.service.ts
+│   │   │   ├── export-file.service.ts
+│   │   │   └── export-processing.service.ts
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── fuel-analytics/
+│   │   ├── services/
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── statistics/
+│   │   ├── services/
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── telemetry/
+│   │   └── services/
+│   │       └── telemetry-history.service.ts
 │   │
 │   ├── notification/
 │   │   └── services/
-│   │       └── hybrid-notification.service.ts
+│   │       └── notification.service.ts
 │   │
-│   └── audit/
-│       └── services/
-│           └── audit.service.ts
+│   ├── error-code/
+│   │   ├── services/
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── validation-error/
+│   │   ├── services/
+│   │   ├── repositories/
+│   │   └── types/
+│   │
+│   ├── simulator/
+│   │   ├── services/
+│   │   └── types/
+│   │
+│   ├── system/
+│   │   └── services/
+│   │       └── system-status.service.ts
+│   │
+│   └── system-admin/
+│       ├── services/
+│       └── repositories/
+│           ├── victoriametrics.repository.ts
+│           └── victorialogs.repository.ts
 │
 ├── infrastructure/             # External Services
 │   ├── database/
 │   │   ├── pool.ts             # PostgreSQL connection pool
 │   │   └── queries.ts          # Query helpers
-│   ├── victoriametrics/
-│   │   ├── client.ts           # VM write client
-│   │   └── query.ts            # PromQL queries
-│   ├── victorialogs/
-│   │   └── client.ts           # VL write client
-│   └── logger/
-│       └── winston.ts
+│   ├── logger/
+│   │   ├── index.ts
+│   │   ├── winston.ts
+│   │   └── victorialogs-transport.ts
+│   ├── metrics/
+│   │   ├── registry.ts         # Prometheus registry
+│   │   └── app-metrics.ts      # Custom app metrics
+│   └── realtime/
+│       ├── index.ts
+│       ├── socket-server.util.ts
+│       ├── socket-auth.middleware.ts
+│       ├── event-bus.util.ts
+│       ├── mqtt-event-listener.ts
+│       ├── health.ts
+│       └── types.ts
 │
 ├── middleware/                 # Express Middleware
-│   ├── auth.ts                 # JWT authentication
-│   ├── cors.ts
-│   ├── security.ts             # Helmet
-│   ├── rate-limit.ts
-│   ├── metrics.ts              # Prometheus
-│   └── error-handler.ts
-│
-├── realtime/                   # WebSocket Server
-│   ├── socket-server.ts        # Socket.IO setup
-│   ├── socket-auth.ts          # WS authentication
-│   └── event-bus.ts            # Internal pub/sub
-│
-├── mqtt-bridge/                # MQTT Integration (standalone capable)
-│   ├── index.ts
-│   ├── mqtt.client.ts
-│   ├── handlers/
-│   │   └── rawdata.handler.ts
-│   └── batch/
-│       └── database-batch.service.ts
-│
-├── config/                     # Configuration
-│   ├── env.ts                  # Environment variables
-│   └── sentry.ts
+│   ├── auth.middleware.ts      # Session-based authentication
+│   ├── error-handler.middleware.ts
+│   ├── rate-limit.middleware.ts
+│   ├── request-id.middleware.ts  # Request-ID correlation
+│   ├── metrics.middleware.ts     # Prometheus HTTP metrics
+│   └── sentry.middleware.ts      # Sentry error tracking
 │
 ├── shared/                     # Shared Utilities
-│   ├── constants/
-│   ├── utils/
-│   └── types/
+│   ├── types/
+│   │   └── common.types.ts
+│   └── utils/
+│       ├── async-handler.util.ts
+│       ├── crypto.util.ts
+│       ├── errors.util.ts
+│       └── response.util.ts
 │
 └── types/                      # Global TypeScript types
+    └── express.d.ts
 ```
+
+> **⚠️ Lưu ý:** MQTT Bridge đã được tách thành service **standalone** `Tracking_MqttBridge/` (không nằm trong Tracking_Backend/ nữa). Xem phần X.9.
 
 ---
 
 ### X.5 Domain Modules
 
-**Phase 1 (Core):**
+**Đã triển khai (20+ modules):**
 
 | Domain | Services | Description |
 |--------|----------|-------------|
-| **auth** | 4 | JWT login/logout, user CRUD, device access control |
-| **device** | 8 | Device CRUD, sessions, runtime tracking |
-| **iot** | 7 | Data ingestion, status tracking, heartbeat |
-| **dashboard** | 3 | Statistics, activity log, alerts |
-| **firmware** | 7 | OTA upload, assignment, activation |
-| **notification** | 1 | Hybrid FCM + Socket.IO notifications |
-| **audit** | 1 | Action logging |
-
-**Phase 2 (Optional - Rental Features):**
-
-| Domain | Services | Description |
-|--------|----------|-------------|
-| **customers** | 3 | Customer management, verification |
-| **bookings** | 4 | Booking workflow, pickup/return |
-| **payments** | 3 | Payment processing |
-| **contracts** | 2 | Rental contracts |
+| **auth** | 2 | Session-based login/logout, user CRUD, device access control |
+| **device** | 8 | Device CRUD, sessions, runtime, telemetry, commands, errors |
+| **vehicle** | 3 | Vehicle CRUD, list, assignment |
+| **customer** | 2 | Customer CRUD, list |
+| **driver** | 2 | Driver CRUD, list |
+| **trip** | 2 | Trip CRUD, list |
+| **geofence** | 2 | Geofence CRUD, list |
+| **maintenance** | 2 | Maintenance CRUD, list |
+| **iot** | 1 | IoT data ingestion |
+| **dashboard** | 1 | Dashboard statistics |
+| **firmware** | 5 | OTA upload, list, activate, deploy, delete |
+| **export** | 3 | Export job management, file generation, processing |
+| **fuel-analytics** | 1 | Fuel consumption analytics |
+| **statistics** | 1 | System-wide statistics |
+| **telemetry** | 1 | Telemetry history queries |
+| **notification** | 1 | Push notifications |
+| **error-code** | 1 | Error code definitions |
+| **validation-error** | 1 | MQTT payload validation errors |
+| **simulator** | 1 | Device simulator for testing |
+| **system** | 1 | System status |
+| **system-admin** | 1 | VictoriaMetrics + VictoriaLogs admin queries |
 
 ---
 
@@ -356,23 +443,23 @@ export async function queryDeviceLocation(deviceId: string, range: string) {
 
 ---
 
-### X.9 MQTT Bridge (Standalone)
+### X.9 MQTT Bridge (Standalone Service — `Tracking_MqttBridge/`)
 
-```typescript
-// mqtt-bridge/index.ts
-// Có thể chạy độc lập: npm run mqtt-bridge
+> **📌 Cập nhật:** MQTT Bridge đã được tách thành service **hoàn toàn độc lập** `Tracking_MqttBridge/` với `package.json`, `docker-compose.yml`, logger, pool, và config riêng. Không còn nằm trong `Tracking_Backend/`.
 
-import { connectMQTT } from './mqtt.client';
-import { handleRawData } from './handlers/rawdata.handler';
-
-const client = await connectMQTT();
-
-client.subscribe('v1/+/rawdata');
-
-client.on('message', async (topic, payload) => {
-  const deviceId = topic.split('/')[1];
-  await handleRawData(deviceId, JSON.parse(payload.toString()));
-});
+```
+iot-vehicle-tracking-system/
+├── Tracking_Backend/        # API Server (Express)
+├── Tracking_MqttBridge/     # MQTT Bridge (standalone)
+│   ├── src/
+│   │   ├── index.ts
+│   │   ├── mqtt.client.ts
+│   │   ├── handlers/
+│   │   └── ...
+│   ├── package.json
+│   ├── docker-compose.yml
+│   └── Dockerfile
+└── ...
 ```
 
 **Data Flow:**
@@ -400,15 +487,17 @@ app.use(sentryRequestHandler);      // 1. Sentry (error tracking)
 app.use(helmetMiddleware);          // 2. Security headers
 app.use(compressionMiddleware);     // 3. Gzip/Brotli
 app.use(corsMiddleware);            // 4. CORS
-app.use(httpMetricsMiddleware);     // 5. Prometheus metrics
-app.use(express.json());            // 6. Body parser
-app.use(requestLogger);             // 7. Request logging
-app.use(rateLimitMiddleware);       // 8. Rate limiting
+app.use(requestIdMiddleware);       // 5. Request-ID correlation (X-Request-ID)
+app.use(httpMetricsMiddleware);     // 6. Prometheus metrics
+app.use(express.json());            // 7. Body parser
+app.use(requestLogger);             // 8. Request logging
+app.use(rateLimitMiddleware);       // 9. Rate limiting
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/device', deviceRoutes);
 app.use('/api/v1/iot', iotRoutes);  // No auth for IoT endpoints
+// ... vehicle, customer, driver, trip, geofence, maintenance, etc.
 
 // Error handling (last)
 app.use(errorHandler);
@@ -419,32 +508,58 @@ app.use(sentryErrorHandler);
 
 ### X.11 Deployment
 
-**Docker Compose:**
+**Docker Compose (per-service pattern — IVM26):**
+
+> **📌 Cập nhật:** Mỗi service có `docker-compose.yml` riêng, không dùng monolithic compose. Tất cả share `tracking-network` (external).
 
 ```yaml
+# Tracking_Backend/docker-compose.yml
 version: "3.8"
 services:
-  api-server:
-    build: ./backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tracking-backend
     ports:
       - "3000:3000"
-    environment:
-      - POSTGRESQL_URL=postgresql://user:pass@postgres:5432/tracking
-      - VICTORIAMETRICS_URL=http://victoriametrics:8428
-      - VICTORIALOGS_URL=http://victorialogs:9428
-      - MQTT_BROKER=mqtt://emqx:1883
-    depends_on:
-      - postgres
-      - victoriametrics
-      - emqx
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - tracking-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
 
+networks:
+  tracking-network:
+    external: true
+```
+
+```yaml
+# Tracking_MqttBridge/docker-compose.yml (standalone service)
+version: "3.8"
+services:
   mqtt-bridge:
-    build: ./backend
-    command: npm run mqtt-bridge
-    environment:
-      - POSTGRESQL_URL=...
-      - VICTORIAMETRICS_URL=...
-      - MQTT_BROKER=...
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tracking-mqtt-bridge
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - tracking-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+networks:
+  tracking-network:
+    external: true
 ```
 
 ---
