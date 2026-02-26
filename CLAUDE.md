@@ -72,10 +72,10 @@ This ensures packages installed by `install.sh` (google-genai, pypdf, etc.) are 
 
 ## Documentation Management
 
-We keep all important docs in `./docs` folder and keep updating them, structure like below:
+We keep all important docs in `./resources/docs` folder and keep updating them, structure like below:
 
 ```
-./docs
+./resources/docs
 ├── project-overview-pdr.md
 ├── code-standards.md
 ├── codebase-summary.md

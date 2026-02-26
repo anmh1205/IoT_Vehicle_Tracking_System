@@ -3,7 +3,7 @@
 ### II.1 Đối Tượng Ứng Dụng
 
 - **Loại xe**: Ô tô con (xe 4 chỗ, sedan, SUV)
-- **Điện áp hệ thống**: 12 V DC (chuẩn xe con)
+- **Điện áp hệ thống**: hỗ trợ profile 12 V DC và profile 24 V DC (mỗi profile dùng bộ ngưỡng nguồn riêng)
 - **Ắc quy phổ thông**: 40–70 Ah (trung bình 45–60 Ah)
 
 ### II.2 Chức Năng Chính
@@ -28,7 +28,7 @@
 ### II.3 Giao Tiếp với Xe
 
 - **CAN-bus**: Có thể tích hợp để đọc trạng thái IGN, nhiên liệu, tốc độ (tùy chọn)
-- **Kết nối nguồn**: Trực tiếp từ ắc quy 12V (qua mạch bảo vệ)
+- **Kết nối nguồn**: Trực tiếp từ ắc quy 12V hoặc 24V (qua mạch bảo vệ)
 - **4G/LTE + GNSS**: SIM card, modem 4G **SIMCom A7600CE‑T** (tích hợp GPS/GNSS)
 
 ### II.4 Giới Hạn Scope

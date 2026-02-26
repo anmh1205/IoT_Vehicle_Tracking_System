@@ -2,21 +2,23 @@
 
 ### Tổng Quan
 
-**Power Path Management** chuyển đổi tự động giữa ắc quy (12V) và pin backup (3.7V) để đảm bảo hệ thống luôn có nguồn.
+**Power Path Management** chuyển đổi tự động giữa ắc quy (12V hoặc 24V) và pin backup (3.7V) để đảm bảo hệ thống luôn có nguồn.
 
 ### Yêu Cầu
 
-- Chuyển đổi tự động giữa ắc quy (12V) và pin backup (3.7V)
+- Chuyển đổi tự động giữa ắc quy (12V hoặc 24V) và pin backup (3.7V)
 - Điều khiển sạc pin theo trạng thái IGN
-- Low Voltage Disconnect (LVD) khi ắc quy < 12V
-- Hysteresis để tránh dao động (12.0V OFF → 12.2V ON)
+- Chạy theo profile nguồn độc lập 12V/24V để quyết định chuyển nguồn
+- Hysteresis theo profile:
+  - 12V: `Switch_OFF=12.0V` → `Switch_ON=12.2V`
+  - 24V: `Switch_OFF=24.0V` → `Switch_ON=24.4V`
 
 ### Giải Pháp: MOSFET + Diode OR
 
 #### Sơ Đồ Kết Nối
 
 ```
-Ắc Quy (12V) ── Buck (12V→5V) ──┬── Q1 (P-MOS) ──┬── 5V Rail
+Ắc Quy (12V/24V) ── Buck (12V/24V→5V) ──┬── Q1 (P-MOS) ──┬── 5V Rail
                                   │                │
                                   └── Gate Control │
                                                    │
@@ -71,6 +73,16 @@ D2 (Schottky) từ Boost ─┘
 - Đọc U_batt qua ADC để quyết định
 
 ### Logic Điều Khiển
+
+- Nếu `U_batt <= Switch_OFF` của profile đang chạy → chuyển sang pin backup
+- Nếu đang backup và `U_batt >= Switch_ON` → chuyển lại ắc quy
+- Charger chỉ bật khi `IGN=ON` và `U_batt >= IGN_ON` của profile
+- Nếu `U_batt <= LVD_cut` thì cưỡng bức backup và khóa sạc
+
+Bộ ngưỡng mặc định:
+
+- **12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
 
 Xem chi tiết trong file firmware: [`part-04-power-management-gpio.md`](../../03-firmware/part-04-power-management-gpio.md)
 

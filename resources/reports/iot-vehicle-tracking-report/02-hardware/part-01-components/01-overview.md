@@ -4,6 +4,15 @@
 
 ### Tổng Quan
 
+Hệ thống tracker sử dụng các thành phần chính.
+
+**Lưu ý nguồn 12V/24V:** Firmware triển khai 2 profile nguồn độc lập để điều khiển LVD/Power Path/Charger:
+
+- **12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+
+Đo U_batt sử dụng ADC với chia áp chung `R1=100k`, `R2=10k` cho cả 12V và 24V.
+
 Hệ thống tracker sử dụng các thành phần chính:
 
 - **IMU (LIS3DH)**: Phát hiện chuyển động, đánh thức ESP32 từ deep sleep
@@ -26,7 +35,7 @@ Hệ thống tracker sử dụng các thành phần chính:
 #### Power Management (Quản Lý Năng Lượng)
 
 - [`../part-02-power-management/01-overview.md`](../part-02-power-management/01-overview.md) - Tổng quan quản lý năng lượng
-- [`../part-02-power-management/02-buck-converter.md`](../part-02-power-management/02-buck-converter.md) - Buck Converter (12V→5V)
+- [`../part-02-power-management/02-buck-converter.md`](../part-02-power-management/02-buck-converter.md) - Buck Converter (12V/24V→5V)
 - [`../part-02-power-management/03-boost-converter.md`](../part-02-power-management/03-boost-converter.md) - Boost Converter (3.7V→5V)
 - [`../part-02-power-management/04-power-path-management.md`](../part-02-power-management/04-power-path-management.md) - Power Path Management
 - [`../part-02-power-management/05-low-voltage-disconnect.md`](../part-02-power-management/05-low-voltage-disconnect.md) - Low Voltage Disconnect (LVD)
@@ -125,7 +134,7 @@ Hệ thống tracker sử dụng các thành phần chính:
 │                                                             │
 │  ┌──────────────────────────────────────┐                │
 │  │    Power Management System            │                │
-│  │    - Buck (12V→5V)                    │                │
+│  │    - Buck (12V/24V→5V)                │                │
 │  │    - Boost (3.7V→5V)                  │                │
 │  │    - Power MUX                        │                │
 │  │    - Charger (IP2312)                 │                │
@@ -149,7 +158,7 @@ Hệ thống tracker sử dụng các thành phần chính:
     ┌──────┴──────────┐
     │                   │
   ┌─┴──┐          ┌───┴──┐
-  │12V │          │Pin   │
+  │Ắc quy│        │Pin   │
   │Accu│          │Backup│
   └────┘          └──────┘
 ```

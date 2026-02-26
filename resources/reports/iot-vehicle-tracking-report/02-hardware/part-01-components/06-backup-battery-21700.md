@@ -48,13 +48,13 @@
 
 #### 1. Cung Cấp Nguồn Backup
 
-- Khi ắc quy yếu (U_batt < 12 V), pin cấp nguồn cho toàn hệ thống
+- Khi ắc quy yếu (U_batt < ngưỡng cấu hình), pin cấp nguồn cho toàn hệ thống
 - Đảm bảo tracker tiếp tục hoạt động
 - Gửi cảnh báo khi chuyển sang pin
 
 #### 2. Được Sạc Khi Xe Chạy
 
-- Khi IGN ON và U_batt > 12 V → sạc pin
+- Khi IGN ON và U_batt > ngưỡng cấu hình → sạc pin
 - Dòng sạc: 3 A (module IP2312)
 - Thời gian sạc đầy: ~2 giờ (5000 mAh / 3 A)
 
@@ -158,9 +158,14 @@ Xem chi tiết trong file: [`06-charger-ip2312.md`](../part-02-power-management/
 
 #### Điều Kiện Sạc
 
-- **IGN ON** + **U_batt > 12 V** → Enable charger
+- **IGN ON** + **U_batt >= IGN_ON theo profile** → Enable charger
 - **IGN OFF** → Disable charger (bảo vệ ắc quy)
-- **U_batt < 12 V** → Disable charger (bảo vệ ắc quy)
+- **U_batt <= Switch_OFF theo profile** → Disable charger (bảo vệ ắc quy)
+
+Ngưỡng mặc định:
+
+- **Profile 12V**: `IGN_ON>=13.0V`, `Switch_OFF=12.0V`
+- **Profile 24V**: `IGN_ON>=26.0V`, `Switch_OFF=24.0V`
 
 #### Thời Gian Sạc
 
@@ -184,7 +189,7 @@ Pin 21700 ── Protection Board ──┬── Boost Converter (3.7V→5V)
 
 - **Polarity**: Đảm bảo cực dương/cực âm đúng
 - **Protection Board**: Luôn sử dụng protection board để bảo vệ pin
-- **Charging**: Chỉ sạc khi IGN ON và U_batt > 12 V
+- **Charging**: Chỉ sạc khi IGN ON và U_batt đạt `IGN_ON` theo profile (12V: `>=13.0V`, 24V: `>=26.0V`)
 
 ### Nơi Mua Hàng
 
@@ -242,5 +247,6 @@ Pin 21700 5000 mAh là lựa chọn phù hợp vì:
 **Lưu ý quan trọng:**
 
 - Luôn sử dụng protection board
-- Chỉ sạc khi IGN ON và U_batt > 12 V
+- Chỉ sạc khi IGN ON và U_batt đạt ngưỡng `IGN_ON` theo profile
+- Nếu U_batt giảm xuống `<= Switch_OFF` theo profile thì tắt sạc để bảo vệ ắc quy
 - Monitor trạng thái pin và gửi cảnh báo khi yếu

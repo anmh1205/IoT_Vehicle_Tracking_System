@@ -20,7 +20,7 @@ Thư mục này chứa tất cả các tài liệu về thiết kế phần cứ
 ├── part-02-power-management/              # Quản lý nguồn
 │   ├── README.md
 │   ├── 01-overview.md                # Tổng quan quản lý nguồn
-│   ├── 02-buck-converter.md          # Buck 12V→5V
+│   ├── 02-buck-converter.md          # Buck 12V/24V→5V
 │   ├── 03-boost-converter.md         # Boost 3.7V→5V
 │   ├── 04-power-path-management.md   # Power Path Management
 │   ├── 05-low-voltage-disconnect.md  # Low Voltage Disconnect
@@ -63,11 +63,18 @@ Hệ thống tracker sử dụng các thành phần phần cứng sau:
 
 ### Power Management
 
-1. **Buck Converter** (LM2596) - 12V → 5V
+1. **Buck Converter** (LM2596) - 12V/24V → 5V
 2. **Boost Converter** (MT3608) - 3.7V → 5V
 3. **Power Path Management** - Chuyển đổi giữa ắc quy và pin
-4. **Low Voltage Disconnect** - Bảo vệ ắc quy
-5. **Charger** (IP2312) - Sạc pin 21700
+4. **Low Voltage Disconnect** - Bảo vệ ắc quy theo profile 12V/24V
+5. **Charger** (IP2312) - Sạc pin 21700 theo ngưỡng profile
+
+**Profile nguồn mặc định:**
+
+- **12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+
+**Đo U_batt ADC (chung cho 12V/24V):** dùng chia áp `R1=100k`, `R2=10k` (tỷ lệ ~0.0909).
 
 ## Đọc Tài Liệu
 
@@ -95,7 +102,7 @@ Hệ thống tracker sử dụng các thành phần phần cứng sau:
 ### Giải Pháp Đề Xuất
 
 **Power Management:**
-- ✅ Buck: Module LM2596 (12V→5V, 3A)
+- ✅ Buck: Module LM2596 (12V/24V→5V, 3A)
 - ✅ Boost: Module MT3608 (3.7V→5V, 2A)
 - ✅ Power MUX: Relay Module 5V (đơn giản hơn MOSFET)
 - ✅ LVD: ADC ESP32 (software-based, không cần hardware)

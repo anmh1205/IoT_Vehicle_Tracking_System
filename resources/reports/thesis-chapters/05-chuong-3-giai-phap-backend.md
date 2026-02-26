@@ -2,7 +2,7 @@
 
 #### 3.1.3.1. Đặt vấn đề cho kiến trúc Cloud
 
-Hệ thống Backend/Cloud là tầng trung tâm của toàn bộ giải pháp IoT, vì vậy cần giải quyết đồng thời các bài toán kỹ thuật sau:
+Hệ thống Backend/Cloud là tầng điều phối trung tâm của toàn bộ giải pháp IoT. Vì vậy, thiết kế cần đồng thời giải quyết các bài toán kỹ thuật sau:
 
 - **Tiếp nhận dữ liệu liên tục từ nhiều thiết bị**: telemetry gửi theo chu kỳ ngắn, có thể xuất hiện burst khi thiết bị reconnect.
 - **Cập nhật thời gian thực cho dashboard**: dữ liệu vị trí/trạng thái cần phản ánh gần như tức thời cho người vận hành.
@@ -40,14 +40,14 @@ Phần này trình bày chi tiết giải pháp thiết kế và triển khai h�
 
 ##### a) Mô hình kiến trúc tổng thể
 
-Hệ thống Cloud được thiết kế theo mô hình kiến trúc phân tầng (layered architecture) kết hợp với kiến trúc hướng sự kiện (event-driven architecture), phù hợp với đặc thù của ứng dụng IoT cần xử lý luồng dữ liệu liên tục từ nhiều thiết bị đồng thời. Kiến trúc tổng thể bao gồm các tầng chính sau:
+Hệ thống Cloud áp dụng kiến trúc phân tầng (layered architecture) kết hợp kiến trúc hướng sự kiện (event-driven architecture) để xử lý luồng dữ liệu IoT liên tục từ nhiều thiết bị đồng thời. Kiến trúc tổng thể gồm các tầng chính sau:
 
 - **Tầng thu thập dữ liệu (Data Ingestion Layer)**: Tiếp nhận dữ liệu từ các thiết bị IoT thông qua giao thức MQTT, xử lý và phân phối đến các thành phần lưu trữ.
 - **Tầng lưu trữ dữ liệu (Data Storage Layer)**: Sử dụng chiến lược lưu trữ kép (dual database strategy) với cơ sở dữ liệu quan hệ và cơ sở dữ liệu chuỗi thời gian.
 - **Tầng xử lý nghiệp vụ (Business Logic Layer)**: API Server xử lý các yêu cầu từ Frontend, thực thi logic nghiệp vụ và quản lý trạng thái hệ thống.
 - **Tầng giao tiếp thời gian thực (Real-time Communication Layer)**: Cung cấp dữ liệu cập nhật trực tiếp đến người dùng thông qua giao thức WebSocket.
 
-![Hình 3.12 - Sơ đồ kiến trúc tổng quan hệ thống Cloud](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-12.png)
+![Hình 3.12 - Sơ đồ kiến trúc tổng quan hệ thống Cloud](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3–12.png)
 
 *Hình 3.12: Sơ đồ kiến trúc tổng quan hệ thống Cloud*
 
@@ -79,7 +79,7 @@ PostgreSQL   VictoriaMetrics  VictoriaLogs
 
 ##### b) Luồng dữ liệu chính trong hệ thống
 
-Luồng dữ liệu chính của hệ thống hoạt động theo trình tự sau:
+Luồng dữ liệu chính của hệ thống được tổ chức theo trình tự sau:
 
 1. **Thiết bị IoT** gửi dữ liệu telemetry (vị trí GPS, dữ liệu OBD2, trạng thái pin, dữ liệu cảm biến gia tốc) lên EMQX Broker thông qua giao thức MQTT 5.0 theo topic có cấu trúc `v1/{device_id}/rawdata`.
 2. **EMQX Broker** tiếp nhận và phân phối message đến các subscriber. Rules Engine của EMQX thực hiện lọc và phát hiện cảnh báo tại tầng broker.
@@ -116,7 +116,7 @@ Hệ thống áp dụng mô hình triển khai per-service Docker Compose theo c
 
 ##### a) Vai trò của MQTT Broker
 
-MQTT Broker là thành phần middleware trung tâm trong kiến trúc IoT, chịu trách nhiệm tiếp nhận message từ các publisher (thiết bị tracker) và phân phối đến các subscriber (MQTT Bridge, Backend). Broker hoạt động theo mô hình **Publish-Subscribe (Pub/Sub)**, cho phép giao tiếp bất đồng bộ giữa các thành phần trong hệ thống mà không cần biết địa chỉ cụ thể của nhau.
+MQTT Broker là thành phần middleware trung tâm trong kiến trúc IoT, chịu trách nhiệm tiếp nhận message từ các publisher (thiết bị tracker) và phân phối đến các subscriber (MQTT Bridge, Backend). Broker hoạt động theo mô hình **Publish-Subscribe (Pub/Sub)**, qua đó cho phép giao tiếp bất đồng bộ giữa các thành phần mà không cần biết địa chỉ cụ thể của nhau.
 
 Trong hệ thống theo dõi phương tiện, MQTT Broker xử lý luồng dữ liệu liên tục từ hàng chục đến hàng trăm thiết bị tracker, mỗi thiết bị gửi dữ liệu vị trí và telemetry với tần suất từ 1 đến 60 giây tùy chế độ hoạt động.
 
@@ -151,7 +151,7 @@ EMQX được lựa chọn làm MQTT Broker cho hệ thống với các lý do c
 
 ##### c) Cấu hình EMQX Rules Engine
 
-EMQX Rules Engine là SQL-based data processing engine cho phép xử lý, lọc và chuyển đổi MQTT message ngay tại broker. Hệ thống sử dụng Rules Engine để phát hiện các sự kiện quan trọng mà không cần chuyển toàn bộ dữ liệu về tầng ứng dụng.
+EMQX Rules Engine là SQL-based data processing engine, cho phép xử lý, lọc và chuyển đổi MQTT message ngay tại broker. Hệ thống dùng Rules Engine để phát hiện các sự kiện quan trọng mà không cần chuyển toàn bộ dữ liệu về tầng ứng dụng.
 
 **Các rule chính được cấu hình:**
 
@@ -224,13 +224,13 @@ Ngoài ra, hệ thống còn cấu hình các rule cho phát hiện vi phạm v�
 
 Hệ thống theo dõi phương tiện cần lưu trữ hai loại dữ liệu có đặc tính khác nhau căn bản:
 
-1. **Dữ liệu thô (Raw Telemetry Data)**: Bao gồm vị trí GPS, tốc độ, mức pin, dữ liệu OBD2, dữ liệu cảm biến gia tốc. Loại dữ liệu này có tần suất ghi rất cao (mỗi giây khi xe đang di chuyển), khối lượng lớn, nhưng chỉ cần lưu trữ trong thời gian ngắn (7-30 ngày) và chủ yếu phục vụ truy vấn theo chuỗi thời gian.
+1. **Dữ liệu thô (Raw Telemetry Data)**: Bao gồm vị trí GPS, tốc độ, mức pin, dữ liệu OBD2, dữ liệu cảm biến gia tốc. Loại dữ liệu này có tần suất ghi rất cao (mỗi giây khi xe đang di chuyển), khối lượng lớn, nhưng chỉ cần lưu trữ trong thời gian ngắn (7–30 ngày) và chủ yếu phục vụ truy vấn theo chuỗi thời gian.
 
-2. **Dữ liệu nghiệp vụ (Business Data)**: Bao gồm thông tin xe, khách hàng, chuyến đi, cảnh báo, vi phạm, lệnh điều khiển. Loại dữ liệu này có tần suất ghi thấp, khối lượng nhỏ, nhưng cần lưu trữ lâu dài (6-12 tháng trở lên) và yêu cầu tính toàn vẹn dữ liệu quan hệ (ACID).
+2. **Dữ liệu nghiệp vụ (Business Data)**: Bao gồm thông tin xe, khách hàng, chuyến đi, cảnh báo, vi phạm, lệnh điều khiển. Loại dữ liệu này có tần suất ghi thấp, khối lượng nhỏ, nhưng cần lưu trữ lâu dài (6–12 tháng trở lên) và yêu cầu tính toàn vẹn dữ liệu quan hệ (ACID).
 
 Do sự khác biệt cơ bản về đặc tính, hệ thống áp dụng chiến lược lưu trữ kép sử dụng ba cơ sở dữ liệu chuyên biệt:
 
-![Hình 3.13 - Sơ đồ chiến lược lưu trữ kép](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-13.png)
+![Hình 3.13 - Sơ đồ chiến lược lưu trữ kép](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3–13.png)
 
 *Hình 3.13: Sơ đồ chiến lược lưu trữ kép*
 
@@ -264,7 +264,7 @@ PostgreSQL    VictoriaMetrics  VictoriaLogs
 
 ##### b) Cơ sở dữ liệu PostgreSQL - Schema quan hệ
 
-PostgreSQL 16 được sử dụng để lưu trữ toàn bộ dữ liệu nghiệp vụ của hệ thống. Schema được thiết kế theo nguyên tắc chuẩn hóa đến dạng chuẩn thứ ba (3NF) và hỗ trợ soft delete cho các bảng quan trọng.
+PostgreSQL 16 lưu trữ toàn bộ dữ liệu nghiệp vụ của hệ thống. Schema được chuẩn hóa đến dạng chuẩn thứ ba (3NF) và hỗ trợ soft delete cho các bảng quan trọng.
 
 **Các nhóm bảng chính (Phase 1 - khoảng 20 bảng):**
 
@@ -286,7 +286,7 @@ PostgreSQL 16 được sử dụng để lưu trữ toàn bộ dữ liệu nghi�
 
 **Sơ đồ quan hệ chính (ER Diagram - rút gọn):**
 
-![Hình 3.14 - Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-14.png)
+![Hình 3.14 - Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3–14.png)
 
 *Hình 3.14: Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)*
 
@@ -353,7 +353,7 @@ API Server là tầng ứng dụng Backend cung cấp REST API, WebSocket và x�
 
 **Kết luận lựa chọn: Node.js + Express + TypeScript**
 
-Lý do lựa chọn: linh hoạt cao, nhẹ và nhanh phù hợp với đặc thù IoT, TypeScript đảm bảo an toàn kiểu dữ liệu, Zod validation kết hợp xác thực runtime với type inference, và dễ tổ chức code theo Domain-Driven Design.
+Lý do lựa chọn gồm: tính linh hoạt cao; đặc tính nhẹ và nhanh phù hợp với IoT; TypeScript giúp bảo đảm an toàn kiểu dữ liệu; Zod kết hợp xác thực runtime với type inference; và khả năng tổ chức code theo Domain-Driven Design.
 
 ##### b) Kiến trúc Domain-Driven Design (DDD)
 

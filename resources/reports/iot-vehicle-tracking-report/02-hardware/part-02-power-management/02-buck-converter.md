@@ -1,18 +1,18 @@
-## III.1.8 Mạch Buck DC-DC: 12V → 5V
-
+## III.1.8 Mạch Buck DC-DC: 12V/24V → 5V
 ### Tổng Quan
 
-**Buck Converter** giảm điện áp từ 12V (ắc quy xe) xuống 5V để cung cấp cho ESP32, modem, và charger.
+**Buck Converter** giảm điện áp từ 12V hoặc 24V (ắc quy xe) xuống 5V để cung cấp cho ESP32, modem, và charger.
 
 ### Yêu Cầu
 
 | Thông Số        | Giá Trị                               |
 | --------------- | ------------------------------------- |
-| **Input**       | 12 V DC (từ ắc quy xe)                |
-| **Output**      | 5 V                                   |
-| **Dòng tối đa** | ≥ 3.5 A (đủ cho tracker + sạc pin 3A) |
-| **Hiệu suất**   | >85%                                  |
-| **Ripple**      | <50 mV (peak-to-peak)                 |
+| **Input**       | 12 V DC hoặc 24 V DC (từ ắc quy xe)      |
+| **Output**      | 5 V                                      |
+| **Dòng tối đa** | ≥ 3.5 A (đủ cho tracker + sạc pin 3A)    |
+| **Hiệu suất**   | >85%                                     |
+| **Ripple**      | <50 mV (peak-to-peak)                    |
+| **Triển khai**  | Dùng chung một buck cho cả profile 12V/24V |
 
 ### Lý Do Chọn 5V
 
@@ -45,7 +45,7 @@
 ### Sơ Đồ Mạch
 
 ```
-12V Input ──┬── C1 (100µF, 50V) ──┬── LM2596 ──┬── L1 (100µH, 3-5A) ──┬── 5V Output
+12V/24V Input ──┬── C1 (100µF, 50V) ──┬── LM2596 ──┬── L1 (100µH, 3-5A) ──┬── 5V Output
             │                     │            │                      │
             └── GND               └── GND      └── D1 (1N5822) ───────┘
                                                       │
@@ -89,11 +89,19 @@
 
 ### Tính Toán
 
-#### 1. Duty Cycle
+#### 1. Duty Cycle theo profile điện áp vào
 
 ```
-D = Vout / Vin = 5V / 12V = 0.417 (41.7%)
+D = Vout / Vin
+
+Profile 12V:
+D_12 = 5V / 12V = 0.417 (41.7%)
+
+Profile 24V:
+D_24 = 5V / 24V = 0.208 (20.8%)
 ```
+
+Buck LM2596 cần vận hành ổn định ở cả 2 điểm làm việc 12V và 24V.
 
 #### 2. Ripple Current
 
@@ -167,7 +175,7 @@ P_loss = (1 - η) × P_out
 
 #### Trên Shopee/Lazada VN:
 
-- Tìm: "LM2596 module", "buck converter 12V 5V", "step down 12V 5V"
+- Tìm: "LM2596 module", "buck converter 12V 5V", "buck converter 24V 5V", "step down 12V 5V"
 - Giá: ~15,000–25,000 VNĐ (module)
 - Lưu ý: Chọn module có heat sink nếu công suất cao
 

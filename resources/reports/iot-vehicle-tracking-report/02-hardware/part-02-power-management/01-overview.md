@@ -6,7 +6,7 @@ Hệ thống quản lý nguồn bao gồm:
 
 1. **Low Voltage Disconnect (LVD)**: Bảo vệ ắc quy khỏi rút cạn
 2. **Power Path Management**: Chuyển đổi giữa ắc quy và pin backup
-3. **Buck Converter**: 12V → 5V (từ ắc quy)
+3. **Buck Converter**: 12V/24V → 5V (từ ắc quy)
 4. **Boost Converter**: 3.7V → 5V (từ pin)
 5. **Charger**: Sạc pin 21700 (IP2312)
 
@@ -14,17 +14,26 @@ Hệ thống quản lý nguồn bao gồm:
 
 #### Logic Chuyển Nguồn
 
-| Trạng Thái          | IGN | U_batt   | Nguồn Tracker | Sạc Pin  | Cảnh Báo |
-| ------------------- | --- | -------- | ------------- | -------- | -------- |
-| Xe chạy bình thường | ON  | > 12 V   | Ắc quy        | ✅ Có    | -        |
-| Xe đỗ bình thường   | OFF | > 12 V   | Ắc quy        | ❌ Không | -        |
-| Ắc quy yếu          | OFF | < 12 V   | Pin 21700     | ❌ Không | ✅ Có    |
-| Ắc quy phục hồi     | OFF | > 12.2 V | Ắc quy        | ❌ Không | ✅ Có    |
+Hệ thống triển khai **2 profile nguồn độc lập** để vận hành thực tế trên xe 12V và 24V:
+
+- **Profile 12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **Profile 24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+
+| Profile | Trạng Thái          | IGN | U_batt điều kiện | Nguồn Tracker | Sạc Pin  | Cảnh Báo |
+| ------- | ------------------- | --- | ---------------- | ------------- | -------- | -------- |
+| 12V     | Xe chạy bình thường | ON  | >= 13.0 V        | Ắc quy        | ✅ Có    | -        |
+| 12V     | Xe đỗ bình thường   | OFF | > 12.0 V         | Ắc quy        | ❌ Không | -        |
+| 12V     | Ắc quy yếu          | OFF | <= 12.0 V        | Pin 21700     | ❌ Không | ✅ Có    |
+| 12V     | Ắc quy phục hồi     | OFF | >= 12.2 V        | Ắc quy        | ❌ Không | ✅ Có    |
+| 24V     | Xe chạy bình thường | ON  | >= 26.0 V        | Ắc quy        | ✅ Có    | -        |
+| 24V     | Xe đỗ bình thường   | OFF | > 24.0 V         | Ắc quy        | ❌ Không | -        |
+| 24V     | Ắc quy yếu          | OFF | <= 24.0 V        | Pin 21700     | ❌ Không | ✅ Có    |
+| 24V     | Ắc quy phục hồi     | OFF | >= 24.4 V        | Ắc quy        | ❌ Không | ✅ Có    |
 
 #### Hysteresis
 
-- **12.0 V (OFF)**: Chuyển sang pin khi U_batt < 12.0 V
-- **12.2 V (ON)**: Chuyển lại ắc quy khi U_batt > 12.2 V
+- **Profile 12V**: OFF ở `12.0V` → ON lại ở `12.2V`
+- **Profile 24V**: OFF ở `24.0V` → ON lại ở `24.4V`
 - **Mục đích**: Tránh dao động khi điện áp gần ngưỡng
 
 ### Lý Do Thiết Kế
@@ -50,12 +59,12 @@ Hệ thống quản lý nguồn bao gồm:
 ┌─────────────────────────────────────────────────────────┐
 │                    NGUỒN ĐẦU VÀO                        │
 ├─────────────────────────────────────────────────────────┤
-│   Ắc Quy Xe (12V)          Pin 21700 (3.7V)            │
+│   Ắc Quy Xe (12V/24V)      Pin 21700 (3.7V)            │
 │         │                        │                      │
 │    ┌────▼────┐              ┌────▼────┐                │
 │    │ LM2596  │              │ MT3608  │                │
 │    │ Buck    │              │ Boost   │                │
-│    │12V→5V   │              │3.7V→5V  │                │
+│    │12V/24V→5V│             │3.7V→5V  │                │
 │    └────┬────┘              └────┬────┘                │
 │         │                        │                      │
 │         └────────┬───────────────┘                      │
@@ -95,7 +104,7 @@ Hệ thống quản lý nguồn bao gồm:
 
 Xem chi tiết trong các file:
 
-- [`02-buck-converter.md`](./02-buck-converter.md) - Buck 12V→5V
+- [`02-buck-converter.md`](./02-buck-converter.md) - Buck 12V/24V→5V
 - [`03-boost-converter.md`](./03-boost-converter.md) - Boost 3.7V→5V
 - [`04-power-path-management.md`](./04-power-path-management.md) - Power MUX
 - [`05-low-voltage-disconnect.md`](./05-low-voltage-disconnect.md) - LVD

@@ -10,14 +10,14 @@
 
 **Hành Động:**
 
-- Lấy nguồn trực tiếp từ ắc quy (U_batt > 12 V)
+- Lấy nguồn trực tiếp từ ắc quy khi `U_batt >= IGN_ON` theo profile (12V: `>=13.0V`, 24V: `>=26.0V`)
 - **Kết nối Bluetooth với OBD2 ELM327** (2–5 giây reconnect nếu đã paired)
 - Đọc IGN status từ OBD2 (xác nhận IGN ON)
 - Bật **GNSS + 4G** (modem A7600CE‑T) liên tục
 - Đọc dữ liệu OBD2 định kỳ (RPM, tốc độ, nhiên liệu) mỗi 5–30 giây
 - Gửi vị trí + dữ liệu OBD2 mỗi 5–30 giây
 - **Giữ kết nối Bluetooth** trong suốt thời gian IGN ON (không deep sleep)
-- **Sạc pin 21700** (nếu U_batt > 12 V)
+- **Sạc pin 21700** khi `U_batt >= IGN_ON` theo profile
 
 **Ước Lượng Dòng:** ~200–330 mA trung bình (bao gồm Bluetooth OBD2 + sạc pin)
 
@@ -41,7 +41,7 @@
 - ESP32 deep sleep, chỉ để timer + wakeup từ LIS3DH
 - Thức dậy mỗi 10–30 phút:
   - Kiểm tra U_batt (qua ADC)
-  - Nếu U_batt < 12 V: Chuyển sang pin + gửi cảnh báo
+  - Nếu `U_batt <= Switch_OFF` theo profile: Chuyển sang pin + gửi cảnh báo
   - Bật **GNSS + 4G** (A7600CE‑T)
   - Lấy vị trí
   - Gửi heartbeat (vị trí, pin, ắc quy, trạng thái nguồn)
@@ -92,33 +92,42 @@
 
 ### IV.2 Quản Lý Nguồn và Low Voltage Disconnect (LVD)
 
+**Kiến trúc profile nguồn (triển khai thực tế):**
+
+- **Profile 12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **Profile 24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+
 **Logic Chuyển Nguồn:**
 
 **Khi Xe Chạy (IGN ON):**
 
 - Tracker dùng nguồn trực tiếp từ ắc quy
-- Sạc pin 21700 (nếu U_batt > 12 V)
+- Sạc pin 21700 khi `U_batt >= IGN_ON` của profile
 - Dòng sạc: **3 A** (module IP2312)
 - Thời gian sạc đầy: ~2 giờ (pin 5,000 mAh)
 
 **Khi Xe Đỗ (IGN OFF):**
 
 - Tracker dùng ắc quy (không sạc pin)
-- Nếu U_batt < 12 V:
+- Nếu `U_batt <= Switch_OFF` của profile:
   - Chuyển sang pin 21700
   - Gửi cảnh báo "Ắc quy yếu - Chuyển sang pin backup"
-- Nếu U_batt > 12.2 V (phục hồi):
+- Nếu đang backup và `U_batt >= Switch_ON`:
   - Chuyển lại ắc quy
   - Gửi cảnh báo "Ắc quy phục hồi - Chuyển lại ắc quy"
 
 **Bảng Trạng Thái:**
 
-| IGN | U_batt   | Nguồn Tracker | Sạc Pin  | Cảnh Báo                 |
-| --- | -------- | ------------- | -------- | ------------------------ |
-| ON  | > 12 V   | Ắc quy        | ✅ Có    | -                        |
-| OFF | > 12 V   | Ắc quy        | ❌ Không | -                        |
-| OFF | < 12 V   | Pin 21700     | ❌ Không | ✅ Cảnh báo chuyển nguồn |
-| OFF | > 12.2 V | Ắc quy        | ❌ Không | ✅ Cảnh báo phục hồi     |
+| Profile | IGN | U_batt điều kiện | Nguồn Tracker | Sạc Pin  | Cảnh Báo                 |
+| ------- | --- | ---------------- | ------------- | -------- | ------------------------ |
+| 12V     | ON  | >= 13.0 V        | Ắc quy        | ✅ Có    | -                        |
+| 12V     | OFF | > 12.0 V         | Ắc quy        | ❌ Không | -                        |
+| 12V     | OFF | <= 12.0 V        | Pin 21700     | ❌ Không | ✅ Cảnh báo chuyển nguồn |
+| 12V     | OFF | >= 12.2 V        | Ắc quy        | ❌ Không | ✅ Cảnh báo phục hồi     |
+| 24V     | ON  | >= 26.0 V        | Ắc quy        | ✅ Có    | -                        |
+| 24V     | OFF | > 24.0 V         | Ắc quy        | ❌ Không | -                        |
+| 24V     | OFF | <= 24.0 V        | Pin 21700     | ❌ Không | ✅ Cảnh báo chuyển nguồn |
+| 24V     | OFF | >= 24.4 V        | Ắc quy        | ❌ Không | ✅ Cảnh báo phục hồi     |
 
 **Lợi Ích:**
 
@@ -131,7 +140,7 @@
 
 **Sạc Pin:**
 
-- Chỉ sạc khi IGN ON và U_batt > 12 V
+- Chỉ sạc khi `IGN ON` và `U_batt >= IGN_ON` theo profile
 - Dòng sạc: **3 A** (module IP2312)
 - Module IP2312 tự ngắt khi pin đầy (4.2V)
 - BMS/Protection board bảo vệ quá dòng xả, quá áp
@@ -139,11 +148,11 @@
 
 **Xả Pin:**
 
-- Khi ắc quy yếu (U_batt < 12 V), pin cấp nguồn cho toàn hệ thống
+- Khi ắc quy yếu (`U_batt <= Switch_OFF` theo profile), pin cấp nguồn cho toàn hệ thống
 - Dung lượng: 5000 mAh → đủ cho vài ngày hoạt động ở chế độ heartbeat
 
 **Cảnh Báo:**
 
-- Gửi cảnh báo khi chuyển sang pin (U_batt < 12 V)
+- Gửi cảnh báo khi chuyển sang pin (`U_batt <= Switch_OFF`)
 - Gửi cảnh báo khi pin yếu (< 3.2 V)
-- Gửi cảnh báo khi chuyển lại ắc quy (U_batt > 12.2 V)
+- Gửi cảnh báo khi chuyển lại ắc quy (`U_batt >= Switch_ON`)

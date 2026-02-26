@@ -4,21 +4,20 @@
 
 ### 2.1.1. Bối cảnh thực tế
 
-Trong bối cảnh ngành cho thuê ô tô và quản lý đội xe tại Việt Nam ngày càng phát triển, nhu cầu giám sát và theo dõi phương tiện theo thời gian thực trở thành yêu cầu thiết yếu đối với các doanh nghiệp vận tải. Theo thống kê của Bộ Giao thông Vận tải, số lượng phương tiện ô tô cá nhân và thương mại tăng trung bình 10-12% mỗi năm trong giai đoạn 2020-2025, kéo theo những thách thức lớn về quản lý, an ninh và tối ưu hóa vận hành [1].
-
+Trong bối cảnh ngành cho thuê ô tô và quản lý đội xe tại Việt Nam ngày càng phát triển, nhu cầu giám sát và theo dõi phương tiện theo thời gian thực đã trở thành yêu cầu thiết yếu đối với doanh nghiệp vận tải. Theo thống kê của Bộ Giao thông Vận tải, số lượng phương tiện ô tô cá nhân và thương mại tăng trung bình 10–12% mỗi năm trong giai đoạn 2020–2025, qua đó làm gia tăng các thách thức về quản lý, an ninh và tối ưu vận hành [1].
 Hiện nay, phần lớn các doanh nghiệp cho thuê xe và quản lý đội xe tại Việt Nam vẫn sử dụng các phương pháp giám sát thủ công hoặc bán tự động, dẫn đến nhiều bất cập:
 
 - **Giám sát thủ công**: Tài xế báo cáo vị trí qua điện thoại, không có dữ liệu liên tục, không thể xác minh chính xác hành trình. Phương pháp này phụ thuộc hoàn toàn vào yếu tố con người, dễ xảy ra sai sót và gian lận.
 - **Thiết bị GPS đơn giản**: Chỉ cung cấp tọa độ vị trí, không đọc được dữ liệu động cơ (tốc độ, vòng tua, nhiên liệu), không hỗ trợ phát hiện bất thường khi xe đậu. Thiếu khả năng tích hợp sâu với hệ thống quản lý.
-- **Giải pháp thương mại (fleet management)**: Chi phí cao (50-200 USD/thiết bị + phí dịch vụ hàng tháng), phụ thuộc vào nhà cung cấp nước ngoài, khó tùy biến theo nhu cầu cụ thể của doanh nghiệp Việt Nam.
+- **Giải pháp thương mại (fleet management)**: Chi phí cao (50–200 USD/thiết bị + phí dịch vụ hàng tháng), phụ thuộc vào nhà cung cấp nước ngoài, khó tùy biến theo nhu cầu cụ thể của doanh nghiệp Việt Nam.
 
 ### 2.1.2. Xác định vấn đề kỹ thuật
 
-Đề tài này tập trung giải quyết bài toán thiết kế và xây dựng một hệ thống IoT toàn diện cho việc giám sát phương tiện, bao gồm các vấn đề kỹ thuật cốt lõi sau:
+Từ bối cảnh thực tiễn nêu trên, đề tài tập trung giải quyết bài toán thiết kế và xây dựng một hệ thống IoT toàn diện cho giám sát phương tiện, với các vấn đề kỹ thuật cốt lõi sau:
 
 **Vấn đề 1: Quản lý năng lượng trong môi trường ô tô**
 
-Thiết bị tracker cần hoạt động liên tục 24/7 trong môi trường ô tô với nhiều ràng buộc về năng lượng. Khi xe tắt máy (IGN OFF), thiết bị lấy điện từ ắc quy 12V của xe. Nếu hoạt động liên tục (real-time tracking), thiết bị sẽ rút cạn ắc quy trong vài tuần, ảnh hưởng khả năng khởi động xe [2]. Đây là thách thức lớn nhất của các hệ thống GPS tracker hiện tại.
+Thiết bị tracker cần hoạt động liên tục 24/7 trong môi trường ô tô với nhiều ràng buộc về năng lượng. Khi xe tắt máy (IGN OFF), thiết bị lấy điện từ ắc quy 12V hoặc 24V của xe. Nếu hoạt động liên tục (real-time tracking), thiết bị sẽ rút cạn ắc quy trong vài tuần, ảnh hưởng khả năng khởi động xe [2]. Đây là thách thức lớn nhất của các hệ thống GPS tracker hiện tại.
 
 **Vấn đề 2: Giám sát khi xe đậu (Parking Mode)**
 
@@ -36,7 +35,7 @@ Hệ thống cần hỗ trợ nhiều phương tiện đồng thời, cập nh�
 
 Đề tài đặt ra các mục tiêu kỹ thuật cụ thể như sau:
 
-1. Thiết kế thiết bị tracker tích hợp GPS/GNSS và OBD2 dựa trên vi điều khiển ESP32-S3, tiêu thụ năng lượng tối thiểu khi xe đậu (dưới 15 muA trong chế độ deep sleep).
+1. Thiết kế thiết bị tracker tích hợp GPS/GNSS và OBD2 dựa trên vi điều khiển ESP32-S3, tiêu thụ năng lượng tối thiểu khi xe đậu (dưới 15 µA trong chế độ deep sleep).
 2. Xây dựng hệ thống quản lý năng lượng thông minh với pin dự phòng, cơ chế Low Voltage Disconnect (LVD) bảo vệ ắc quy xe.
 3. Thiết kế kiến trúc truyền thông sử dụng giao thức MQTT qua mạng 4G/LTE, hỗ trợ lưu trữ tạm (offline buffering) khi mất kết nối.
 4. Phát triển nền tảng đám mây (cloud platform) với khả năng mở rộng, bao gồm API server, cơ sở dữ liệu quan hệ và chuỗi thời gian (time-series), giao diện web theo dõi thời gian thực.
@@ -57,8 +56,8 @@ Internet of Things (IoT) là một mô hình công nghệ cho phép các thiết
 
 | Tiêu chí                     | Giám sát thủ công       | GPS Tracker đơn giản    | Fleet Management thương mại | Hệ thống đề xuất               |
 | ---------------------------- | ----------------------- | ----------------------- | --------------------------- | ------------------------------ |
-| Chi phí thiết bị             | Không                   | 500.000 - 1.500.000 VND | 1.000.000 - 5.000.000 VND   | 870.000 - 1.630.000 VND        |
-| Phí dịch vụ hàng tháng       | Không                   | 50.000 - 100.000 VND    | 200.000 - 500.000 VND       | Chi phí 4G SIM (~70.000 VND)   |
+| Chi phí thiết bị             | Không                   | 500.000–1.500.000 VND | 1.000.000–5.000.000 VND   | 870.000–1.630.000 VND        |
+| Phí dịch vụ hàng tháng       | Không                   | 50.000–100.000 VND    | 200.000–500.000 VND       | Chi phí 4G SIM (~70.000 VND)   |
 | Độ chính xác vị trí          | Thấp (báo cáo thủ công) | Trung bình (GPS)        | Cao (GPS + A-GPS)           | Cao (GNSS đa hệ thống)         |
 | Dữ liệu động cơ (OBD2)       | Không                   | Không                   | Có (tùy model)              | Có (BLE OBD2)                  |
 | Phát hiện bất thường khi đậu | Không                   | Hạn chế                 | Có                          | Có (IMU + deep sleep)          |
@@ -66,11 +65,11 @@ Internet of Things (IoT) là một mô hình công nghệ cho phép các thiết
 | Quản lý năng lượng           | Không áp dụng           | Cơ bản                  | Tốt                         | Tốt (đa chế độ + pin dự phòng) |
 | Tích hợp hệ thống            | Không                   | Hạn chế (API riêng)     | API do vendor               | API mở (REST + WebSocket)      |
 
-Qua bảng so sánh trên, có thể thấy giải pháp đề xuất kết hợp được ưu điểm của các hệ thống thương mại (độ chính xác cao, dữ liệu OBD2, phát hiện bất thường) với chi phí thấp hơn và khả năng tùy biến cao hơn, phù hợp với nhu cầu của doanh nghiệp cho thuê xe tại Việt Nam.
+Từ bảng so sánh trên có thể nhận thấy giải pháp đề xuất kết hợp được các ưu điểm của hệ thống thương mại (độ chính xác cao, hỗ trợ dữ liệu OBD2, khả năng phát hiện bất thường) đồng thời duy trì chi phí thấp hơn và mức tùy biến cao hơn. Vì vậy, phương án này phù hợp với nhu cầu của doanh nghiệp cho thuê xe tại Việt Nam.
 
 ### 2.2.3. So sánh giao thức truyền thông IoT
 
-Việc lựa chọn giao thức truyền thông là một quyết định kỹ thuật quan trọng, ảnh hưởng trực tiếp đến hiệu suất, độ tin cậy và mức tiêu thụ năng lượng của hệ thống [4].
+Việc lựa chọn giao thức truyền thông là một quyết định kỹ thuật trọng yếu vì tác động trực tiếp đến hiệu suất, độ tin cậy và mức tiêu thụ năng lượng của toàn hệ thống [4].
 
 [Bảng 2.2: So sánh các giao thức truyền thông IoT]
 
@@ -103,8 +102,8 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 | RAM                    | 512 KB SRAM + 8 MB PSRAM       | 256 KB SRAM              | 512 MB DRAM                      |
 | BLE                    | BLE 5.0 (tích hợp)             | Không (cần module ngoài) | BLE 5.0 (tích hợp)               |
 | Wi-Fi                  | 802.11 b/g/n (tích hợp)        | Không                    | 802.11 b/g/n (tích hợp)          |
-| Tiêu thụ deep sleep    | 10-15 muA                      | 1-2 muA                  | Không hỗ trợ deep sleep          |
-| Giá thành (VND)        | 80.000 - 150.000               | 150.000 - 300.000        | 400.000 - 600.000                |
+| Tiêu thụ deep sleep    | 10–15 µA                      | 1–2 µA                  | Không hỗ trợ deep sleep          |
+| Giá thành (VND)        | 80.000–150.000               | 150.000–300.000        | 400.000–600.000                |
 | Framework phát triển   | Arduino / ESP-IDF              | STM32CubeIDE / Mbed      | Linux / Python                   |
 | Cộng đồng hỗ trợ       | Rất lớn                        | Lớn                      | Rất lớn                          |
 | Độ phù hợp cho tracker | Cao                            | Trung bình               | Thấp                             |
@@ -112,9 +111,9 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 **Phân tích lựa chọn:** ESP32-S3 được lựa chọn làm vi điều khiển chính vì:
 
 - **BLE 5.0 tích hợp**: Kết nối trực tiếp với OBD2 adapter (vgate iCar Pro) mà không cần module BLE ngoài, giảm độ phức tạp phần cứng và chi phí.
-- **Chi phí thấp**: Rẻ hơn 30-50% so với STM32L4 với cùng khả năng xử lý, phù hợp với ngân sách đồ án.
+- **Chi phí thấp**: Rẻ hơn 30–50% so với STM32L4 với cùng khả năng xử lý, phù hợp với ngân sách đồ án.
 - **Hệ sinh thái phát triển phong phú**: Hỗ trợ ESP-IDF (chính thức) và Arduino framework, cộng đồng lớn, nhiều thư viện có sẵn cho MQTT, BLE, GNSS.
-- **Deep sleep 10-15 muA**: Mặc dù cao hơn STM32L4 (1-2 muA), mức này vẫn chấp nhận được cho ứng dụng tracker với pin dự phòng 5000mAh, cho phép hoạt động 2-3 tháng trong chế độ đậu xe.
+- **Deep sleep 10–15 µA**: Mặc dù cao hơn STM32L4 (1–2 µA), mức này vẫn chấp nhận được cho ứng dụng tracker với pin dự phòng 5000mAh, cho phép hoạt động 2–3 tháng trong chế độ đậu xe.
 
 ### 2.2.5. So sánh cơ sở dữ liệu
 
@@ -125,8 +124,8 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 | Dữ liệu quan hệ (users, vehicles)   | Rất tốt (PostgreSQL)           | Trung bình (MongoDB)                 | Tốt (PostgreSQL core)        |
 | Dữ liệu chuỗi thời gian (telemetry) | Rất tốt (VictoriaMetrics)      | Tốt (InfluxDB)                       | Tốt (TimescaleDB extension)  |
 | Hiệu suất ghi (write)               | Cao (VM: hàng triệu điểm/giây) | Cao (InfluxDB: hàng triệu điểm/giây) | Trung bình                   |
-| Nén dữ liệu                         | Rất tốt (VM: 10-70x nén)       | Tốt (InfluxDB: TSM)                  | Tốt (PostgreSQL compression) |
-| Tài nguyên tiêu thụ                 | Thấp (VM: 1-2 GB RAM)          | Cao (InfluxDB: 4+ GB RAM)            | Trung bình                   |
+| Nén dữ liệu                         | Rất tốt (VM: 10–70x nén)       | Tốt (InfluxDB: TSM)                  | Tốt (PostgreSQL compression) |
+| Tài nguyên tiêu thụ                 | Thấp (VM: 1–2 GB RAM)          | Cao (InfluxDB: 4+ GB RAM)            | Trung bình                   |
 | Ngôn ngữ truy vấn                   | SQL (PG) + MetricsQL (VM)      | MongoDB Query + Flux/InfluxQL        | SQL                          |
 | Tích hợp Grafana                    | Có (native)                    | Có                                   | Có                           |
 | Giấy phép                           | Apache 2.0                     | SSPL (MongoDB) + MIT (InfluxDB OSS)  | Apache 2.0 (Community)       |
@@ -135,10 +134,10 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 **Phân tích lựa chọn:** Sự kết hợp PostgreSQL + VictoriaMetrics được chọn vì:
 
 - **Phân tách trách nhiệm rõ ràng**: PostgreSQL xử lý dữ liệu quan hệ (người dùng, phương tiện, cảnh báo, geofence), VictoriaMetrics xử lý dữ liệu chuỗi thời gian (tọa độ GPS, dữ liệu OBD2, telemetry cảm biến). Mỗi hệ thống được tối ưu cho loại dữ liệu của mình.
-- **Hiệu suất và tài nguyên**: VictoriaMetrics có tỷ lệ nén dữ liệu rất cao (10-70x) và tiêu thụ ít RAM hơn InfluxDB, phù hợp với server có tài nguyên hạn chế.
+- **Hiệu suất và tài nguyên**: VictoriaMetrics có tỷ lệ nén dữ liệu rất cao (10–70x) và tiêu thụ ít RAM hơn InfluxDB, phù hợp với server có tài nguyên hạn chế.
 - **Tương thích Grafana**: Cả hai đều hỗ trợ Grafana native, cho phép xây dựng dashboard giám sát toàn diện mà không cần công cụ bổ sung.
 
-![Hình 2.1 - Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram](./assets/figures/02-chuong-2-phan-tich-hinh-2-1.png)
+![Hình 2.1 - Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram](./assets/figures/02-chuong-2-phan-tich-hinh-2–1.png)
 
 *Hình 2.1: Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram*
 
@@ -151,14 +150,14 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 
 **FC-01: Theo dõi vị trí thời gian thực**
-- Gửi vị trí GPS định kỳ (5-30 giây khi lái xe, 10-30 phút khi đậu xe)
+- Gửi vị trí GPS định kỳ (5–30 giây khi lái xe, 10–30 phút khi đậu xe)
 - Độ chính xác vị trí: dưới 5 mét trong điều kiện trời quang
 - Hỗ trợ đa hệ thống định vị (GPS, GLONASS, BeiDou)
 
 **FC-02: Đọc dữ liệu động cơ qua OBD2**
 - Kết nối BLE với OBD2 adapter (vgate iCar Pro)
 - Đọc trạng thái IGN (bật/tắt máy), RPM, tốc độ, nhiên liệu
-- Tần suất đọc: 1-5 giây khi xe chạy
+- Tần suất đọc: 1–5 giây khi xe chạy
 
 **FC-03: Phát hiện bất thường khi đậu xe**
 - IMU (LIS3DH) phát hiện chuyển động/rung bất thường
@@ -167,8 +166,8 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 
 **FC-04: Quản lý năng lượng thông minh**
 - Chuyển đổi giữa 3 chế độ: Lái xe (Active) - Đậu xe (Sleep) - Cảnh báo (Alert)
-- Pin dự phòng tự động tiếp quản khi ắc quy yếu (dưới 11.8V)
-- Low Voltage Disconnect bảo vệ ắc quy không bị rút cạn
+- Pin dự phòng tự động tiếp quản theo profile nguồn: hệ 12V tại ngưỡng Switch_OFF=12.0V, hệ 24V tại ngưỡng Switch_OFF=24.0V
+- Low Voltage Disconnect bảo vệ ắc quy không bị rút cạn: profile 12V dùng LVD_cut=11.5V, profile 24V dùng LVD_cut=23.0V
 
 **FC-05: Giao diện web giám sát**
 - Bản đồ thời gian thực (Leaflet) hiển thị vị trí tất cả phương tiện
@@ -206,7 +205,7 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 ### 2.3.3. Ràng buộc thiết kế
 
 **Ràng buộc phần cứng:**
-- Điện áp đầu vào: 12V DC từ ắc quy xe con (dao động 10.5V - 14.8V)
+- Điện áp đầu vào: 12V hoặc 24V DC từ ắc quy xe (dao động phụ thuộc cấu hình hệ thống điện)
 - Nhiệt độ hoạt động: -10 độ C đến 70 độ C (môi trường trong xe ô tô)
 - Rung động và sốc: Chịu được rung động liên tục khi xe vận hành trên đường xá
 - Kích thước: Đủ nhỏ để lắp đặt kín đáo trong xe (không lớn hơn 120x80x40 mm)
@@ -238,7 +237,7 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 
 ### 2.4.1. Xác định các bên liên quan
 
-Hệ thống IoT Vehicle Tracking System phục vụ nhiều nhóm đối tượng với các nhu cầu và mong đợi khác nhau. Việc phân tích yêu cầu từ các bên liên quan (stakeholders) giúp đảm bảo hệ thống được thiết kế toàn diện và đáp ứng nhu cầu thực tế.
+Hệ thống IoT Vehicle Tracking System phục vụ nhiều nhóm đối tượng với nhu cầu và kỳ vọng khác nhau. Vì vậy, việc phân tích yêu cầu từ các bên liên quan (stakeholders) là cơ sở để bảo đảm thiết kế có tính toàn diện và bám sát nhu cầu thực tiễn.
 
 ### 2.4.2. Ma trận yêu cầu các bên liên quan
 
@@ -256,7 +255,7 @@ Hệ thống IoT Vehicle Tracking System phục vụ nhiều nhóm đối tượ
 
 **Công ty cho thuê xe (Stakeholder chính)**
 
-Đây là nhóm đối tượng chính của hệ thống. Yêu cầu của họ tập trung vào ba khía cạnh:
+Đây là nhóm đối tượng trọng tâm của hệ thống. Các yêu cầu của nhóm này tập trung vào ba khía cạnh:
 
 1. *Giám sát và an ninh*: Theo dõi vị trí phương tiện 24/7, phát hiện và cảnh báo ngay khi có bất thường (xe bị di chuyển trái phép, vượt qua geofence, tốc độ vượt ngưỡng). Hệ thống cần gửi thông báo qua nhiều kênh (web dashboard, Telegram bot, email).
 
@@ -296,10 +295,10 @@ Yêu cầu của đội bảo trì hướng đến việc giảm thời gian và
 | Quản lý thiết bị từ xa |                |              |                    |                    | X           |
 | Chẩn đoán lỗi từ xa    | X              | X            |                    | X                  | X           |
 
-Ma trận truy xuất trên cho thấy các chức năng hệ thống (FC-01 đến FC-05) phủ hết các yêu cầu từ các bên liên quan chính. Chức năng FC-04 (Quản lý năng lượng) và FC-05 (Giao diện web) là hai chức năng được nhiều bên liên quan yêu cầu nhất, khẳng định tầm quan trọng của việc thiết kế hệ thống quản lý năng lượng thông minh và giao diện giám sát thân thiện.
+Ma trận truy xuất trên cho thấy các chức năng hệ thống (FC-01 đến FC-05) bao phủ toàn bộ yêu cầu của các bên liên quan chính. Trong đó, FC-04 (Quản lý năng lượng) và FC-05 (Giao diện web) là hai chức năng được nhắc đến nhiều nhất, qua đó khẳng định tầm quan trọng của thiết kế quản lý năng lượng thông minh và giao diện giám sát thân thiện.
 
 ---
 
 ## Kết luận chương 2
 
-Chương này đã phân tích chi tiết các vấn đề kỹ thuật cần giải quyết trong việc xây dựng hệ thống IoT giám sát phương tiện, bao gồm các thách thức về phần cứng, truyền thông, xử lý dữ liệu và kiến trúc hệ thống. Các giải pháp hiện có trên thị trường đã được khảo sát và so sánh, từ đó xác định được hướng tiếp cận phù hợp. Yêu cầu kỹ thuật và tiêu chuẩn thiết kế đã được thiết lập, cùng với ma trận truy xuất yêu cầu từ các bên liên quan. Các phân tích này làm nền tảng cho việc đề xuất giải pháp thiết kế ở Chương 3.
+Chương này đã hệ thống hóa các vấn đề kỹ thuật trọng yếu trong xây dựng hệ thống IoT giám sát phương tiện, bao quát từ phần cứng, truyền thông, xử lý dữ liệu đến kiến trúc hệ thống. Trên cơ sở khảo sát và đối sánh các giải pháp hiện có, chương đã xác lập hướng tiếp cận phù hợp, đồng thời cụ thể hóa yêu cầu kỹ thuật, ràng buộc thiết kế và ma trận truy xuất yêu cầu từ các bên liên quan. Các kết quả phân tích này là cơ sở trực tiếp để xây dựng và lựa chọn phương án thiết kế ở Chương 3.

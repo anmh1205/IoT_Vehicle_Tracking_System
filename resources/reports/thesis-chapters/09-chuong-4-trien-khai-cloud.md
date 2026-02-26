@@ -1,6 +1,6 @@
 ﻿### 4.2.4. Triển khai hệ thống Cloud
 
-Hệ thống Cloud là thành phần cốt lõi phía máy chủ, chịu trách nhiệm tiếp nhận dữ liệu từ thiết bị IoT, xử lý nghiệp vụ, lưu trữ, và cung cấp giao diện giám sát cho người quản lý. Phần này trình bày chi tiết quá trình triển khai toàn bộ hạ tầng cloud, bao gồm cấu hình Docker, dịch vụ MQTT Bridge, Backend API, Frontend Dashboard, và hệ thống giám sát (monitoring).
+Hệ thống Cloud là lớp lõi phía máy chủ, chịu trách nhiệm tiếp nhận dữ liệu từ thiết bị IoT, xử lý nghiệp vụ, lưu trữ và cung cấp giao diện giám sát cho người quản lý. Trên cơ sở phương án đã chọn ở Chương 3, phần này trình bày quá trình triển khai hạ tầng cloud gồm cấu hình Docker, dịch vụ MQTT Bridge, Backend API, Frontend Dashboard và hệ thống giám sát.
 
 Kiến trúc tổng thể của hệ thống cloud được mô tả như sau:
 
@@ -23,7 +23,7 @@ Thiết bị IoT (ESP32 + GPS + OBD2)
   Tracking_Frontend (port 3002)
 ```
 
-![Hình 4.15 - Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-15.png)
+![Hình 4.15 - Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–15.png)
 
 *Hình 4.15: Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu*
 
@@ -35,7 +35,7 @@ Thiết bị IoT (ESP32 + GPS + OBD2)
 
 ##### a) Mô hình triển khai per-service (IVM26 Pattern)
 
-Hệ thống áp dụng mô hình triển khai per-service Docker Compose theo quy ước IVM26, trong đó mỗi dịch vụ (service) có một file `docker-compose.yml` riêng biệt thay vì sử dụng một file monolithic duy nhất cho toàn bộ hệ thống. Cách tiếp cận này mang lại nhiều ưu điểm:
+Hệ thống áp dụng mô hình triển khai per-service Docker Compose theo quy ước IVM26. Theo đó, mỗi dịch vụ (service) có một file `docker-compose.yml` riêng thay vì dùng một file monolithic cho toàn bộ hệ thống. Cách tiếp cận này mang lại nhiều ưu điểm:
 
 - **Độc lập triển khai (Independent Deployment)**: Mỗi dịch vụ có thể được khởi động, dừng lại, hoặc cập nhật riêng rẽ mà không ảnh hưởng đến các dịch vụ khác. Điều này đặc biệt hữu ích trong quá trình phát triển và giai đoạn debug.
 - **Quản lý tài nguyên riêng biệt**: Mỗi dịch vụ được cấu hình giới hạn tài nguyên (CPU, memory) phù hợp với nhu cầu thực tế, tránh tình trạng một dịch vụ chiếm dụng tài nguyên của dịch vụ khác.
@@ -95,7 +95,7 @@ iot-vehicle-tracking-system/                  # Thư mục gốc của tất c�
     +-- grafana-data/
 ```
 
-![Hình 4.16 - Cấu trúc thư mục hệ thống theo quy ước IVM26](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-16.png)
+![Hình 4.16 - Cấu trúc thư mục hệ thống theo quy ước IVM26](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–16.png)
 
 *Hình 4.16: Cấu trúc thư mục hệ thống theo quy ước IVM26*
 
@@ -103,7 +103,7 @@ iot-vehicle-tracking-system/                  # Thư mục gốc của tất c�
 
 ##### b) Mạng chia sẻ (Shared Network)
 
-Tất cả các dịch vụ trong hệ thống giao tiếp với nhau thông qua một Docker network dùng chung có tên `tracking-network`. Mạng này được tạo một lần duy nhất và khai báo là `external` trong từng file `docker-compose.yml`, đảm bảo các container thuộc các file compose khác nhau vẫn có thể truy cập lẫn nhau thông qua tên container.
+Tất cả dịch vụ trong hệ thống giao tiếp với nhau qua một Docker network dùng chung có tên `tracking-network`. Mạng này được tạo một lần duy nhất và khai báo là `external` trong từng file `docker-compose.yml`. Nhờ đó, các container thuộc các file compose khác nhau vẫn có thể truy cập lẫn nhau thông qua tên container.
 
 ```bash
 # Tạo mạng chia sẻ (chỉ chạy một lần đầu tiên)
@@ -213,7 +213,7 @@ cd Tracking_Frontend && docker-compose up -d --build
 | VictoriaMetrics | tracking-victoria-metrics | 8428        | Dữ liệu chuỗi thời gian          |
 | VictoriaLogs    | tracking-victoria-logs    | 9428        | Nhật ký tập trung                |
 | Grafana         | tracking-grafana          | 3001        | Dashboard giám sát               |
-| MQTT Bridge     | tracking-mqtt-bridge      | --          | Cầu nối MQTT (không expose port) |
+| MQTT Bridge     | tracking-mqtt-bridge      | —          | Cầu nối MQTT (không expose port) |
 | Backend API     | tracking-backend          | 3000        | REST API và WebSocket            |
 | Frontend        | tracking-frontend         | 3002        | Giao diện web                    |
 | NPM             | tracking-npm              | 80, 443     | Reverse proxy                    |
@@ -224,7 +224,7 @@ cd Tracking_Frontend && docker-compose up -d --build
 
 ##### a) Vai trò và kiến trúc
 
-MQTT Bridge (`Tracking_MqttBridge/`) là một dịch vụ Node.js/TypeScript hoàn toàn độc lập, đóng vai trò làm cầu nối (bridge) giữa EMQX MQTT Broker và các hệ thống lưu trữ phía sau (PostgreSQL, VictoriaMetrics, VictoriaLogs). Dịch vụ này được tách riêng khỏi Backend API để đảm bảo nguyên tắc single responsibility và cho phép scale độc lập.
+MQTT Bridge (`Tracking_MqttBridge/`) là dịch vụ Node.js/TypeScript độc lập, đóng vai trò cầu nối (bridge) giữa EMQX MQTT Broker và các hệ thống lưu trữ phía sau (PostgreSQL, VictoriaMetrics, VictoriaLogs). Dịch vụ này được tách khỏi Backend API để bảo đảm nguyên tắc single responsibility và cho phép scale độc lập.
 
 Luồng dữ liệu xử lý của MQTT Bridge được mô tả như sau:
 
@@ -241,7 +241,7 @@ Thiết bị IoT (ESP32)
     -> Dashboard cập nhật real-time
 ```
 
-![Hình 4.17 - Luồng xử lý dữ liệu của MQTT Bridge](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-17.jpg)
+![Hình 4.17 - Luồng xử lý dữ liệu của MQTT Bridge](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–17.jpg)
 
 *Hình 4.17: Luồng xử lý dữ liệu của MQTT Bridge*
 
@@ -504,7 +504,7 @@ Tracking_Backend/src/
         +-- response.util.ts
 ```
 
-![Hình 4.18 - Cấu trúc thư mục Backend theo kiến trúc DDD](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-18.png)
+![Hình 4.18 - Cấu trúc thư mục Backend theo kiến trúc DDD](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–18.png)
 
 *Hình 4.18: Cấu trúc thư mục Backend theo kiến trúc DDD*
 
@@ -650,7 +650,7 @@ Tất cả các API endpoint đều trả về response theo cấu trúc thống
     "details": null,
     "traceId": "uuid-request-id"
   },
-  "timestamp": "2025-01-01T00:00:00.000Z"
+  "timestamp": "2025–01–01T00:00:00.000Z"
 }
 ```
 
@@ -736,7 +736,7 @@ Tracking_Frontend/src/
     +-- hooks/                        # Shared hooks
 ```
 
-![Hình 4.19 - Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-19.jpg)
+![Hình 4.19 - Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–19.jpg)
 
 *Hình 4.19: Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced*
 
@@ -749,7 +749,7 @@ Frontend Dashboard cung cấp các trang quản lý chính sau:
 **Trang tổng quan Dashboard (`/dashboard`):**
 Hiển thị các thẻ thống kê (stats cards) bao gồm tổng số xe, số chuyến đi trong ngày, số cảnh báo chưa xử lý, và số vi phạm. Ngoài ra còn hiển thị bảng cảnh báo gần đây, bản đồ mini với các xe đang hoạt động, danh sách chuyến đi gần đây, và biểu đồ thống kê (số chuyến đi theo ngày, cảnh báo theo loại).
 
-![Hình 4.20 - Giao diện trang Dashboard tổng quan](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-20.jpg)
+![Hình 4.20 - Giao diện trang Dashboard tổng quan](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–20.jpg)
 
 *Hình 4.20: Giao diện trang Dashboard tổng quan*
 
@@ -758,7 +758,7 @@ Hiển thị các thẻ thống kê (stats cards) bao gồm tổng số xe, số
 **Trang quản lý xe (`/dashboard/vehicles`):**
 Giao diện dạng bảng dữ liệu (data table) với các cột: biển số xe, hãng xe/model, trạng thái, thiết bị gắn kèm, lần cuối thấy, và các hành động. Hỗ trợ lọc theo trạng thái, loại xe, và tìm kiếm. Trang chi tiết xe hiển thị thông tin xe, vị trí hiện tại trên bản đồ, trạng thái thiết bị, cảnh báo đang hoạt động, chuyến đi gần đây, và lịch sử bảo trì.
 
-![Hình 4.21 - Giao diện trang quản lý xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-21.jpg)
+![Hình 4.21 - Giao diện trang quản lý xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–21.jpg)
 
 *Hình 4.21: Giao diện trang quản lý xe*
 
@@ -767,7 +767,7 @@ Giao diện dạng bảng dữ liệu (data table) với các cột: biển số
 **Trang bản đồ thời gian thực (`/dashboard/map`):**
 Hiển thị tất cả các xe trên bản đồ Leaflet với vị trí cập nhật thời gian thực thông qua WebSocket. Hỗ trợ: hiển thị marker cho từng xe với popup trạng thái, lọc theo xe hoặc trạng thái, hiển thị vùng địa lý (geofence), và phát lại hành trình (route replay).
 
-![Hình 4.22 - Giao diện bản đồ thời gian thực với vị trí các xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-22.jpg)
+![Hình 4.22 - Giao diện bản đồ thời gian thực với vị trí các xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–22.jpg)
 
 *Hình 4.22: Giao diện bản đồ thời gian thực với vị trí các xe*
 
@@ -776,7 +776,7 @@ Hiển thị tất cả các xe trên bản đồ Leaflet với vị trí cập 
 **Trang quản lý cảnh báo (`/dashboard/alerts`):**
 Bảng dữ liệu với badge mức độ nghiêm trọng (severity), hỗ trợ lọc theo loại, mức độ, xe, và khoảng thời gian. Các hành động hàng loạt: xác nhận (acknowledge) và giải quyết (resolve). Trang chi tiết cảnh báo hiển thị thông tin cảnh báo, vị trí trên bản đồ, xe và khách hàng liên quan.
 
-![Hình 4.23 - Giao diện trang quản lý cảnh báo](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-23.jpg)
+![Hình 4.23 - Giao diện trang quản lý cảnh báo](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–23.jpg)
 
 *Hình 4.23: Giao diện trang quản lý cảnh báo*
 
@@ -811,7 +811,7 @@ Frontend được triển khai theo 3 giai đoạn chính (Phase 4 là giai đo�
 
 ##### f) Cấu hình Docker cho Frontend
 
-Frontend sử dụng Dockerfile nhiều giai đoạn (multi-stage build) để tối ưu kích thước image:
+Frontend sử dụng Dockerfile nhiều giai đoạn (multi-stage build) để tối ưu kích thước image như sau:
 
 ```dockerfile
 # Tracking_Frontend/Dockerfile
@@ -859,7 +859,7 @@ Dockerfile sử dụng 3 giai đoạn: `deps` (cài đặt dependencies), `build
 
 ##### a) Tổng quan chiến lược giám sát
 
-Hệ thống giám sát được thiết kế theo mô hình "three pillars of observability" (ba trụ cột của quan sát được), bao gồm: metrics (chỉ số), logs (nhật ký), và traces (truy vết). Mỗi trụ cột sử dụng công cụ chuyên biệt phù hợp với đặc thù của hệ thống IoT.
+Hệ thống giám sát được thiết kế theo mô hình "three pillars of observability" (ba trụ cột của quan sát được), gồm: metrics (chỉ số), logs (nhật ký) và traces (truy vết). Mỗi trụ cột sử dụng công cụ chuyên biệt phù hợp với đặc thù hệ thống IoT.
 
 [Bảng 4.10: Ba trụ cột giám sát hệ thống]
 
@@ -874,8 +874,8 @@ Hệ thống giám sát được thiết kế theo mô hình "three pillars of o
 
 VictoriaMetrics đóng hai vai trò trong hệ thống:
 
-1. **Lưu trữ dữ liệu telemetry IoT**: Tọa độ GPS, tốc độ xe, vòng tua máy, nhiệt độ động cơ, mức nhiên liệu -- dữ liệu này đến từ MQTT Bridge.
-2. **Lưu trữ chỉ số hiệu năng hệ thống**: Số lượng request HTTP, thời gian xử lý (latency), số lượng kết nối WebSocket, số lượng message MQTT -- dữ liệu này đến từ các service thông qua thư viện `prom-client` (Prometheus client).
+1. **Lưu trữ dữ liệu telemetry IoT**: Tọa độ GPS, tốc độ xe, vòng tua máy, nhiệt độ động cơ, mức nhiên liệu — dữ liệu này đến từ MQTT Bridge.
+2. **Lưu trữ chỉ số hiệu năng hệ thống**: Số lượng request HTTP, thời gian xử lý (latency), số lượng kết nối WebSocket, số lượng message MQTT — dữ liệu này đến từ các service thông qua thư viện `prom-client` (Prometheus client).
 
 Backend sử dụng middleware `httpMetricsMiddleware` để tự động thu thập các chỉ số HTTP. VictoriaMetrics expose endpoint `/metrics` tương thích Prometheus để Grafana có thể truy vấn và hiển thị.
 
@@ -896,12 +896,12 @@ MQTT Bridge cũng có logger riêng, gửi log về VictoriaLogs với trường
 
 Grafana được sử dụng làm lớp trực quan hóa (visualization layer), kết nối tới cả VictoriaMetrics và VictoriaLogs để hiển thị các dashboard giám sát. Các dashboard chính bao gồm:
 
-- **System Overview**: Tổng quan trạng thái hệ thống -- số thiết bị online, số request/giây, phần trăm lỗi, mức sử dụng CPU và memory của các container.
-- **IoT Telemetry**: Dữ liệu từ các thiết bị IoT -- bản đồ nhiệt (heatmap) vị trí xe, biểu đồ tốc độ, biểu đồ mức nhiên liệu theo thời gian.
-- **MQTT Metrics**: Thống kê MQTT -- số lượng message/giây, số kết nối đang hoạt động, latency trung bình, tỷ lệ message thất bại.
-- **Application Performance**: Hiệu năng ứng dụng -- phân phối thời gian xử lý request (histogram), top endpoints chậm nhất, tỷ lệ lỗi theo endpoint.
+- **System Overview**: Tổng quan trạng thái hệ thống — số thiết bị online, số request/giây, phần trăm lỗi, mức sử dụng CPU và memory của các container.
+- **IoT Telemetry**: Dữ liệu từ các thiết bị IoT — bản đồ nhiệt (heatmap) vị trí xe, biểu đồ tốc độ, biểu đồ mức nhiên liệu theo thời gian.
+- **MQTT Metrics**: Thống kê MQTT — số lượng message/giây, số kết nối đang hoạt động, latency trung bình, tỷ lệ message thất bại.
+- **Application Performance**: Hiệu năng ứng dụng — phân phối thời gian xử lý request (histogram), top endpoints chậm nhất, tỷ lệ lỗi theo endpoint.
 
-![Hình 4.24 - Grafana dashboard hiển thị tổng quan hiệu năng hệ thống](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-24.png)
+![Hình 4.24 - Grafana dashboard hiển thị tổng quan hiệu năng hệ thống](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–24.png)
 
 *Hình 4.24: Grafana dashboard hiển thị tổng quan hiệu năng hệ thống*
 
@@ -917,7 +917,7 @@ EMQX cung cấp dashboard tích hợp (port 18083) cho phép giám sát trực t
 - **Rules Engine**: Trạng thái các rule xử lý dữ liệu
 - **ACL**: Cấu hình quyền truy cập cho từng thiết bị
 
-![Hình 4.25 - EMQX Dashboard hiển thị trạng thái kết nối thiết bị](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-25.png)
+![Hình 4.25 - EMQX Dashboard hiển thị trạng thái kết nối thiết bị](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–25.png)
 
 *Hình 4.25: EMQX Dashboard hiển thị trạng thái kết nối thiết bị*
 
@@ -970,9 +970,9 @@ Lộ trình thực hiện được chia làm 2 đợt: **Phase 1.5** (ưu tiên 
 
 ### Tóm tắt
 
-Hệ thống Cloud được triển khai thành công với kiến trúc microservices, trong đó mỗi dịch vụ được đóng gói trong container Docker độc lập và giao tiếp thông qua mạng chia sẻ `tracking-network`. Dịch vụ MQTT Bridge đóng vai trò cầu nối giữa thiết bị IoT và các hệ thống lưu trữ, Backend API cung cấp giao diện lập trình cho frontend và ứng dụng di động, và Frontend Dashboard cung cấp giao diện giám sát trực quan cho người quản lý đội xe.
+Hệ thống Cloud được triển khai theo kiến trúc microservices, trong đó mỗi dịch vụ được đóng gói trong container Docker độc lập và giao tiếp qua mạng chia sẻ `tracking-network`. Kết quả triển khai cho thấy MQTT Bridge thực hiện đúng vai trò cầu nối dữ liệu giữa thiết bị IoT và các hệ lưu trữ, đồng thời Backend API và Frontend Dashboard đáp ứng yêu cầu tích hợp, giám sát vận hành thời gian thực.
 
-Việc áp dụng mô hình per-service Docker Compose (IVM26 Pattern) giúp hệ thống dễ dàng bảo trì, mở rộng, và triển khai độc lập từng thành phần. Hệ thống giám sát toàn diện với VictoriaMetrics, VictoriaLogs, Grafana, và Sentry đảm bảo khả năng quan sát và phân tích sự cố trong môi trường vận hành thực tế.
+Mô hình per-service Docker Compose (IVM26 Pattern) giúp hệ thống dễ bảo trì, mở rộng và triển khai độc lập từng thành phần. Hệ thống giám sát với VictoriaMetrics, VictoriaLogs, Grafana và Sentry bảo đảm khả năng quan sát và phân tích sự cố trong môi trường vận hành thực tế.
 
 [Bảng 4.12: Tổng hợp công nghệ sử dụng trong hệ thống Cloud]
 

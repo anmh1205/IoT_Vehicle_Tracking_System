@@ -76,7 +76,9 @@
 
 **Fallback Strategy:**
 
-- **Phát hiện IGN**: Đo điện áp ắc quy (U_batt > 13V → IGN ON, < 12V → IGN OFF)
+- **Phát hiện IGN theo profile nguồn**:
+  - Profile 12V: `U_batt >= 13.0V → IGN ON`, `U_batt <= 12.0V → IGN OFF`
+  - Profile 24V: `U_batt >= 26.0V → IGN ON`, `U_batt <= 24.0V → IGN OFF`
 - **Độ chính xác**: Kém hơn OBD2 nhưng vẫn hoạt động
 - **Log lỗi**: Ghi lại lỗi kết nối OBD2 để debug
 

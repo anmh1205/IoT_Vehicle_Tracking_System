@@ -1,12 +1,12 @@
 ﻿### 4.2.3. Triển khai Firmware
 
-Phần này trình bày chi tiết quá trình triển khai phần mềm nhúng (firmware) cho thiết bị theo dõi xe IoT, bao gồm môi trường phát triển, cấu trúc mã nguồn, các module chức năng chính và lưu đồ thuật toán điều khiển toàn hệ thống.
+Phần này trình bày quá trình triển khai firmware cho thiết bị theo dõi xe IoT, từ nền tảng phát triển đến cơ chế vận hành. Nội dung bao gồm môi trường phát triển, cấu trúc mã nguồn, các module chức năng chính và lưu đồ thuật toán điều khiển toàn hệ thống.
 
 #### 4.2.3.1. Môi trường phát triển và công cụ
 
 #### a) Framework và toolchain
 
-Firmware được phát triển trên nền tảng ESP-IDF (Espressif IoT Development Framework) phiên bản 5.4, đây là bộ công cụ chính thức do Espressif cung cấp cho dòng vi điều khiển ESP32-S3. ESP-IDF cung cấp đầy đủ các thành phần cần thiết cho việc phát triển ứng dụng nhúng, bao gồm hệ điều hành thời gian thực FreeRTOS, thư viện ngoại vi (peripheral drivers), BLE stack (NimBLE), và hệ thống build dựa trên CMake.
+Firmware được phát triển trên nền tảng ESP-IDF (Espressif IoT Development Framework) phiên bản 5.4, là bộ công cụ chính thức do Espressif cung cấp cho dòng vi điều khiển ESP32-S3. ESP-IDF cung cấp đầy đủ các thành phần cần thiết để phát triển ứng dụng nhúng, bao gồm hệ điều hành thời gian thực FreeRTOS, thư viện ngoại vi (peripheral drivers), BLE stack (NimBLE) và hệ thống build dựa trên CMake.
 
 **Bảng 4.5: Công cụ phát triển firmware**
 
@@ -140,9 +140,9 @@ Các tầng giao tiếp với nhau thông qua cơ chế message queue và semaph
 
 #### a) Tổng quan giao tiếp BLE với adapter OBD2
 
-Module BLE-OBD2 chịu trách nhiệm thiết lập kết nối Bluetooth Low Energy với adapter vgate iCar Pro được cắm vào cổng OBD2 của xe. Qua kết nối này, firmware gửi các yêu cầu đọc dữ liệu theo chuẩn OBD2 (Mode 0x01 - Current Data) và phân tích phản hồi để trích xuất các thông số vận hành động cơ.
+Module BLE-OBD2 thiết lập kết nối Bluetooth Low Energy với adapter vgate iCar Pro tại cổng OBD2 để gửi yêu cầu đọc dữ liệu theo chuẩn OBD2 (Mode 0x01 - Current Data) và phân tích phản hồi, từ đó trích xuất các thông số vận hành động cơ.
 
-Quá trình giao tiếp BLE-OBD2 trải qua các giai đoạn: quét thiết bị (scan) -- kết nối (connect) -- khám phá dịch vụ GATT (service discovery) -- gửi lệnh OBD2 (write characteristic) -- nhận phản hồi (notification callback).
+Chu trình giao tiếp BLE-OBD2 gồm các giai đoạn: quét thiết bị (scan) — kết nối (connect) — khám phá dịch vụ GATT (service discovery) — gửi lệnh OBD2 (write characteristic) — nhận phản hồi (notification callback).
 
 #### b) Khởi tạo NimBLE stack
 
@@ -176,7 +176,7 @@ static void ble_task(void *param)
 
 #### c) Quy trình quét và kết nối thiết bị
 
-Firmware thực hiện quét BLE để tìm adapter OBD2 dựa trên tên thiết bị (chứa chuỗi "iCar") hoặc UUID dịch vụ. Khi phát hiện thiết bị phù hợp, firmware tiến hành kết nối và khám phá dịch vụ GATT để tìm characteristic dùng cho truyền/nhận dữ liệu.
+Firmware thực hiện quét BLE để tìm adapter OBD2 dựa trên tên thiết bị (chứa chuỗi "iCar") hoặc UUID dịch vụ. Khi phát hiện thiết bị phù hợp, hệ thống sẽ kết nối và khám phá dịch vụ GATT để xác định characteristic dùng cho truyền/nhận dữ liệu.
 
 ```c
 // Tham số quét BLE - chế độ thụ động (passive) để tiết kiệm năng lượng
@@ -221,11 +221,11 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg)
 }
 ```
 
-Để tối ưu thời gian kết nối lại sau khi thức dậy từ deep sleep, firmware lưu địa chỉ MAC của adapter OBD2 vào bộ nhớ flash. Khi thức dậy, firmware ưu tiên kết nối trực tiếp đến địa chỉ đã lưu thay vì quét lại từ đầu, giảm thời gian reconnect xuống còn 1-3 giây so với 3-10 giây khi quét mới.
+Để tối ưu thời gian kết nối lại sau khi thức dậy từ deep sleep, firmware lưu địa chỉ MAC của adapter OBD2 vào bộ nhớ flash. Khi thức dậy, firmware ưu tiên kết nối trực tiếp đến địa chỉ đã lưu thay vì quét lại từ đầu, giảm thời gian reconnect xuống còn 1–3 giây so với 3–10 giây khi quét mới.
 
 #### d) Gửi lệnh và phân tích phản hồi OBD2
 
-Giao thức OBD2 sử dụng định dạng lệnh ELM327 truyền qua BLE GATT characteristic. Mỗi lệnh có dạng `"MMPP\r"` trong đó `MM` là mode (01 cho dữ liệu hiện tại) và `PP` là PID (Parameter ID) cần đọc.
+Giao thức OBD2 sử dụng định dạng lệnh ELM327 truyền qua BLE GATT characteristic. Mỗi lệnh có dạng `"MMPP\r"`, trong đó `MM` là mode (01 cho dữ liệu hiện tại) và `PP` là PID (Parameter ID) cần đọc.
 
 ```c
 // Gửi lệnh OBD2 và đợi phản hồi
@@ -321,7 +321,7 @@ static int obd_conv_temperature(int32_t *value, uint8_t const *data, size_t len)
 
 #### f) Xử lý lỗi và fallback
 
-Khi không thể kết nối BLE với adapter OBD2 (timeout sau 10 giây, retry 2-3 lần), firmware chuyển sang chế độ fallback: sử dụng điện áp ắc quy đo qua ADC để ước lượng trạng thái khóa điện. Nếu U_batt > 13V, hệ thống suy ra IGN = ON; nếu U_batt < 12V thì IGN = OFF. Phương pháp này kém chính xác hơn OBD2 nhưng đảm bảo hệ thống vẫn hoạt động được khi mất kết nối BLE.
+Khi không thể kết nối BLE với adapter OBD2 (timeout sau 10 giây, retry 2–3 lần), firmware chuyển sang chế độ fallback và dùng điện áp ắc quy đo qua ADC để ước lượng trạng thái khóa điện. Tiêu chí theo profile cấu hình: profile 12V dùng IGN_ON>=13.0V và IGN_OFF<=12.0V; profile 24V dùng IGN_ON>=26.0V và IGN_OFF<=24.0V. Cách này kém chính xác hơn OBD2 nhưng vẫn bảo đảm hệ thống tiếp tục hoạt động khi mất kết nối BLE.
 
 ---
 
@@ -475,7 +475,7 @@ typedef struct {
 } gnss_data_t;
 ```
 
-Thời gian fix GNSS phụ thuộc vào trạng thái trước đó của modem: hot start (5-10 giây nếu modem chỉ ở chế độ sleep), warm start (20-30 giây nếu đã có dữ liệu almanac), và cold start (30-60 giây nếu reset hoàn toàn).
+Thời gian fix GNSS phụ thuộc vào trạng thái trước đó của modem: hot start (5–10 giây nếu modem chỉ ở chế độ sleep), warm start (20–30 giây nếu đã có dữ liệu almanac), và cold start (30–60 giây nếu reset hoàn toàn).
 
 #### d) Xử lý lệnh điều khiển từ xa
 
@@ -540,29 +540,31 @@ void power_management_task(void *param)
         float u_batt = read_battery_voltage();
         bool ign_on  = get_ignition_status();
         bool lvd_ok  = gpio_get_level(LVD_STATUS);
+        float switch_off = cfg.power_profile_24v ? 24.0f : 12.0f;
+        float switch_on  = cfg.power_profile_24v ? 24.4f : 12.2f;
 
         if (ign_on) {
             // IGN ON: dùng nguồn ắc quy, bật sạc pin dự phòng
             gpio_set_level(POWER_MUX_SEL, 0);   // Chọn ắc quy
             gpio_set_level(CHARGER_EN, 1);       // Bật sạc
-        } else if (u_batt < 12.0f) {
-            // Điện áp thấp: chuyển sang pin dự phòng
+        } else if (u_batt <= switch_off) {
+            // Điện áp thấp: chuyển sang pin dự phòng theo profile
             gpio_set_level(POWER_MUX_SEL, 1);   // Chọn pin dự phòng
             gpio_set_level(CHARGER_EN, 0);       // Tắt sạc
             send_low_battery_alert(u_batt);
-        } else if (u_batt > 12.2f) {
-            // Điện áp phục hồi: quay lại ắc quy
+        } else if (u_batt >= switch_on) {
+            // Điện áp phục hồi: quay lại ắc quy theo profile
             gpio_set_level(POWER_MUX_SEL, 0);   // Chọn ắc quy
             gpio_set_level(CHARGER_EN, 0);       // Tắt sạc (IGN OFF)
         }
-        // Giữ nguyên trạng thái nếu trong vùng trễ (12.0V - 12.2V)
+        // Giữ nguyên trạng thái nếu trong vùng trễ của profile (12V: 12.0-12.2V; 24V: 24.0-24.4V)
 
         vTaskDelay(pdMS_TO_TICKS(5000));  // Kiểm tra mỗi 5 giây
     }
 }
 ```
 
-Ngưỡng điện áp sử dụng cơ chế trễ (hysteresis) với hai ngưỡng 12.0V và 12.2V để tránh hiện tượng chuyển đổi liên tục khi điện áp dao động quanh một ngưỡng duy nhất.
+Ngưỡng điện áp sử dụng cơ chế trễ (hysteresis) theo profile cấu hình để tránh hiện tượng chuyển đổi liên tục khi điện áp dao động quanh ngưỡng: profile 12V dùng 12.0V (OFF) và 12.2V (ON), profile 24V dùng 24.0V (OFF) và 24.4V (ON). Ngưỡng suy luận trạng thái động cơ cũng được tách profile: IGN_ON >= 13.0V và IGN_OFF <= 12.0V (12V), hoặc IGN_ON >= 26.0V và IGN_OFF <= 24.0V (24V).
 
 #### b) Chế độ ngủ và đánh thức
 
@@ -573,7 +575,7 @@ Firmware sử dụng hai chế độ ngủ của ESP32-S3 tùy theo tình huốn
 | Chế độ | Dòng tiêu thụ | Thời gian thức dậy | BLE | Điều kiện sử dụng |
 |---|---|---|---|---|
 | Light sleep | ~0.8 mA | < 1 ms | Giữ active | IGN ON, đợi dữ liệu giữa các chu kỳ |
-| Deep sleep | ~10 uA | ~100 ms | Mất kết nối | IGN OFF, chế độ đỗ xe |
+| Deep sleep | ~10 µA | ~100 ms | Mất kết nối | IGN OFF, chế độ đỗ xe |
 
 Trước khi vào deep sleep, firmware thực hiện trình tự tắt các ngoại vi để tiết kiệm năng lượng tối đa:
 
@@ -616,11 +618,11 @@ Khi thức dậy từ deep sleep, firmware đọc nguyên nhân đánh thức v�
 
 Modem A7600CE-T hỗ trợ nhiều chế độ ngủ với mức tiêu thụ khác nhau:
 
-- **UART sleep** (`AT+CSCLK=1`): Modem tự động ngủ khi không có dữ liệu UART, tiêu thụ 1-5 mA, đánh thức bằng bất kỳ ký tự UART nào.
+- **UART sleep** (`AT+CSCLK=1`): Modem tự động ngủ khi không có dữ liệu UART, tiêu thụ 1–5 mA, đánh thức bằng bất kỳ ký tự UART nào.
 - **Minimum functionality** (`AT+CFUN=0`): Tắt RF, giữ UART, tiêu thụ < 1 mA, đánh thức bằng lệnh AT hoặc GPIO.
 - **Flight mode** (`AT+CFUN=4`): Tắt RF nhưng giữ chức năng khác, phù hợp cho heartbeat ngắn.
 
-Thời gian đánh thức modem phụ thuộc chế độ: từ sleep là 100-500 ms, từ minimum functionality là 1-3 giây, và kết nối lại 4G mất thêm 5-15 giây.
+Thời gian đánh thức modem phụ thuộc chế độ: từ sleep là 100–500 ms, từ minimum functionality là 1–3 giây, và kết nối lại 4G mất thêm 5–15 giây.
 
 ---
 
@@ -628,7 +630,7 @@ Thời gian đánh thức modem phụ thuộc chế độ: từ sleep là 100-50
 
 #### a) Máy trạng thái (State Machine)
 
-Toàn bộ logic điều khiển firmware được tổ chức theo mô hình máy trạng thái (Finite State Machine - FSM) với bảy trạng thái chính:
+Toàn bộ logic điều khiển firmware được tổ chức theo mô hình máy trạng thái (Finite State Machine - FSM), gồm bảy trạng thái chính:
 
 **Bảng 4.10: Các trạng thái của firmware**
 
@@ -802,7 +804,7 @@ Mỗi gói dữ liệu telemetry gửi lên server có cấu trúc JSON bao gồ
 
 ```json
 {
-  "timestamp": "2024-01-01T12:00:00Z",
+  "timestamp": "2024–01–01T12:00:00Z",
   "device_id": "TRACKER_001",
   "vehicle_id": "VEHICLE_001",
   "location": {
@@ -833,7 +835,7 @@ Mỗi gói dữ liệu telemetry gửi lên server có cấu trúc JSON bao gồ
 }
 ```
 
-Dữ liệu được gửi định kỳ mỗi 10-30 giây trong chế độ lái xe và mỗi 15 phút trong chế độ heartbeat (đỗ xe). Tần suất gửi có thể được điều chỉnh từ xa thông qua lệnh `update_config` từ server.
+Dữ liệu được gửi định kỳ mỗi 10–30 giây trong chế độ lái xe và mỗi 15 phút trong chế độ heartbeat (đỗ xe). Tần suất gửi có thể được điều chỉnh từ xa thông qua lệnh `update_config` từ server.
 
 ---
 

@@ -51,7 +51,7 @@
 
 #### 1. Sạc Pin 21700
 
-- Dòng sạc: 3 A (khi IGN ON, U_batt > 12V)
+- Dòng sạc: 3 A (khi IGN ON và U_batt đạt ngưỡng IGN_ON theo profile)
 - Điện áp sạc: 4.2 V (Li-ion standard)
 - Thời gian sạc đầy: ~2 giờ (5000 mAh / 3A)
 
@@ -85,9 +85,14 @@ ESP32 GPIO ── R (10kΩ) ── IP2312 EN Pin
 
 ### Điều Kiện Sạc
 
-- **IGN ON** + **U_batt > 12 V** → Enable charger
+- **IGN ON** + **U_batt >= IGN_ON theo profile** → Enable charger
 - **IGN OFF** → Disable charger (bảo vệ ắc quy)
-- **U_batt < 12 V** → Disable charger (bảo vệ ắc quy)
+- **U_batt <= Switch_OFF theo profile** → Disable charger (bảo vệ ắc quy)
+
+Ngưỡng mặc định:
+
+- **Profile 12V**: `IGN_ON>=13.0V`, `Switch_OFF=12.0V`
+- **Profile 24V**: `IGN_ON>=26.0V`, `Switch_OFF=24.0V`
 
 ### Mạch Bảo Vệ Pin (Protection Board)
 
@@ -182,5 +187,6 @@ IP2312 là lựa chọn phù hợp vì:
 **Lưu ý quan trọng:**
 
 - Luôn sử dụng protection board cho pin
-- Chỉ sạc khi IGN ON và U_batt > 12V
+- Chỉ sạc khi IGN ON và U_batt đạt ngưỡng `IGN_ON` của profile (12V: `>=13.0V`, 24V: `>=26.0V`)
+- Nếu U_batt giảm xuống `<= Switch_OFF` (12V: `12.0V`, 24V: `24.0V`) thì tắt sạc để bảo vệ ắc quy
 - Monitor trạng thái sạc và gửi cảnh báo khi cần

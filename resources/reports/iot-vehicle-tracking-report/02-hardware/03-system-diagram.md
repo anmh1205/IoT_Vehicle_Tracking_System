@@ -33,7 +33,7 @@ Sơ đồ khối mô tả kiến trúc tổng thể của hệ thống tracker, 
 │                       │                                  │
 │  ┌────────────────────┴─────────────────┐                │
 │  │    Power Management System            │                │
-│  │    - Buck (12V→5V)                    │                │
+│  │    - Buck (12V/24V→5V)                │                │
 │  │    - Boost (3.7V→5V)                  │                │
 │  │    - Power MUX                        │                │
 │  │    - Charger (IP2312)                 │                │
@@ -57,10 +57,17 @@ Sơ đồ khối mô tả kiến trúc tổng thể của hệ thống tracker, 
     ┌──────┴──────────┐
     │                   │
   ┌─┴──┐          ┌───┴──┐
-  │12V │          │Pin   │
+  │Ắc quy│        │Pin   │
   │Accu│          │Backup│
   └────┘          └──────┘
 ```
+
+### Profile Nguồn 12V/24V
+
+- **Profile 12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **Profile 24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+
+ESP32 đọc U_batt qua ADC (divider 100k/10k), chọn profile và áp dụng đúng bộ ngưỡng tương ứng.
 
 ### Luồng Dữ Liệu
 

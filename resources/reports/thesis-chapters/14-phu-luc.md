@@ -6,7 +6,7 @@
 
 ## 1.1. Bảng kê chi phí linh kiện (Bill of Materials - BOM)
 
-Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng trong thiết bị tracker IoT, bao gồm đơn giá và tổng chi phí ước tính. Giá tham khảo từ các sàn thương mại điện tử tại Việt Nam (Shopee, Lazada, Điện tử Nhật Việt) tính đến tháng 01/2026.
+Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng trong thiết bị tracker IoT, bao gồm đơn giá và tổng chi phí ước tính. Mức giá được tham khảo từ các sàn thương mại điện tử tại Việt Nam (Shopee, Lazada, Điện tử Nhật Việt) đến tháng 01/2026.
 
 [Bảng PL-1.1: Bảng kê chi phí linh kiện (BOM)]
 
@@ -18,16 +18,16 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | 4 | Cảm biến gia tốc | LIS3DH (breakout board) | 1 | 45.000 | 45.000 | IMU 3 trục, phát hiện chuyển động |
 | 5 | Pin dự phòng | 21700 Li-ion 5000mAh | 1 | 80.000 | 80.000 | Samsung/LG cell |
 | 6 | IC sạc pin | IP2312 module | 1 | 25.000 | 25.000 | Sạc 3A, CC/CV |
-| 7 | Buck converter | MP1584 module (12V->5V) | 1 | 15.000 | 15.000 | Giảm áp từ ắc quy xe |
+| 7 | Buck converter | MP1584 module (12V/24V->5V) | 1 | 15.000 | 15.000 | Giảm áp từ ắc quy xe |
 | 8 | Boost converter | MT3608 module (3.7V->5V) | 1 | 12.000 | 12.000 | Tăng áp từ pin dự phòng |
-| 9 | LDO 3.3V | AMS1117-3.3 | 2 | 3.000 | 6.000 | Cấp nguồn cho ESP32-S3 và LIS3DH |
+| 9 | LDO 3.3V | AMS1117–3.3 | 2 | 3.000 | 6.000 | Cấp nguồn cho ESP32-S3 và LIS3DH |
 | 10 | MOSFET nguồn | AO3401 (P-ch) + AO3400 (N-ch) | 4 | 5.000 | 20.000 | Power path và LVD |
 | 11 | Op-amp comparator | LM393 | 1 | 8.000 | 8.000 | Cho mạch Low Voltage Disconnect |
 | 12 | Anten GPS | Anten gốm GNSS 25x25mm | 1 | 25.000 | 25.000 | Anten GPS/GLONASS/BeiDou |
 | 13 | Anten 4G | Anten FPC 4G LTE | 1 | 20.000 | 20.000 | Anten mạng di động |
 | 14 | SIM tray + SIM | Nano SIM holder + SIM 4G | 1 | 15.000 | 15.000 | SIM data 4G |
-| 15 | Connector OBD2 | Jack OBD2 16-pin male | 1 | 35.000 | 35.000 | Kết nối nguồn 12V từ xe |
-| 16 | Tụ điện, điện trở | Linh kiện thụ động (combo) | 1 bộ | 30.000 | 30.000 | Tụ lọc, điện trở chia áp, LED |
+| 15 | Connector OBD2 | Jack OBD2 16-pin male | 1 | 35.000 | 35.000 | Kết nối nguồn ắc quy xe (12V hoặc 24V) |
+| 16 | Tụ điện, điện trở | Linh kiện thụ động (combo) | 1 bộ | 30.000 | 30.000 | Tụ lọc, điện trở chia áp ADC (R1=100k, R2=10k), LED |
 | 17 | PCB / Perfboard | PCB prototype 7x9cm | 2 | 10.000 | 20.000 | Bo mạch prototype |
 | 18 | Hộp đựng | Hộp nhựa ABS 120x80x40mm | 1 | 25.000 | 25.000 | Vỏ bảo vệ thiết bị |
 | 19 | Dây kết nối | Dây nối, header, jumper | 1 bộ | 20.000 | 20.000 | Dây kết nối nội bộ |
@@ -39,11 +39,11 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 
 | STT | Hạng mục | Thông số | Chi phí hàng tháng (VND) | Ghi chú |
 |-----|----------|----------|--------------------------|---------|
-| 1 | VPS Server | 4 vCPU, 8GB RAM, 100GB SSD | 300.000 - 500.000 | DigitalOcean / Vultr / Viettel IDC |
+| 1 | VPS Server | 4 vCPU, 8GB RAM, 100GB SSD | 300.000–500.000 | DigitalOcean / Vultr / Viettel IDC |
 | 2 | SIM 4G data | Gói cước data IoT | 70.000 | Mỗi thiết bị 1 SIM |
 | 3 | Tên miền | Domain .com | 25.000 | ~300.000 VND/năm |
 | 4 | SSL Certificate | Let's Encrypt | 0 | Miễn phí, tự động gia hạn |
-| | | | **Tổng hàng tháng** | **395.000 - 595.000** |
+| | | | **Tổng hàng tháng** | **395.000–595.000** |
 
 ## 1.3. Tổng hợp chi phí dự án
 
@@ -53,18 +53,18 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 |----------|---------------|---------|
 | Phần cứng (1 bộ tracker) | 1.121.000 | Theo BOM ở bảng PL-1.1 |
 | Phần mềm (licenses) | 0 | Toàn bộ mã nguồn mở |
-| Hạ tầng cloud (3 tháng dev + 3 tháng test) | 2.370.000 - 3.570.000 | 6 tháng x chi phí hàng tháng |
+| Hạ tầng cloud (3 tháng dev + 3 tháng test) | 2.370.000–3.570.000 | 6 tháng x chi phí hàng tháng |
 | SIM 4G (6 tháng) | 420.000 | 70.000 x 6 tháng |
 | Công cụ phát triển (khác) | 200.000 | USB-UART, breadboard, dây đo |
-| **Tổng chi phí dự án** | **4.111.000 - 5.311.000** | |
+| **Tổng chi phí dự án** | **4.111.000–5.311.000** | |
 
-> **Nhận xét:** Tổng chi phí dự án dưới 6.000.000 VND, trong đó chi phí phần cứng cho mỗi bộ tracker chỉ khoảng 1.121.000 VND -- thấp hơn đáng kể so với các giải pháp thương mại tương đương (2.000.000 - 5.000.000 VND/thiết bị). Khi sản xuất số lượng lớn (>50 bộ), chi phí linh kiện có thể giảm 15-25% nhờ mua sỉ.
+> **Nhận xét:** Tổng chi phí dự án dưới 6.000.000 VND, trong đó chi phí phần cứng cho mỗi bộ tracker chỉ khoảng 1.121.000 VND — thấp hơn đáng kể so với các giải pháp thương mại tương đương (2.000.000–5.000.000 VND/thiết bị). Khi sản xuất số lượng lớn (>50 bộ), chi phí linh kiện có thể giảm 15–25% nhờ mua sỉ.
 
 ---
 
 # PHỤ LỤC 2: CÁC TIÊU CHUẨN THIẾT KẾ - STANDARDS
 
-## 2.1. Tiêu chuẩn OBD2 (SAE J1979 / ISO 15031-5)
+## 2.1. Tiêu chuẩn OBD2 (SAE J1979 / ISO 15031–5)
 
 **Mô tả:** On-Board Diagnostics II (OBD2) là tiêu chuẩn chẩn đoán xe được bắt buộc áp dụng cho tất cả các xe sản xuất từ năm 1996 (tại Mỹ) và 2001 (tại Châu Âu). Tiêu chuẩn này quy định giao diện vật lý (connector 16-pin), giao thức truyền thông, và các thông số chẩn đoán (PIDs - Parameter IDs).
 
@@ -72,16 +72,16 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 
 | Chuẩn cụ thể | Nội dung | Áp dụng |
 |-------------|----------|---------|
-| SAE J1979 | Định nghĩa các Diagnostic Test Modes (Mode 01-0A) | Đọc dữ liệu động cơ: RPM, tốc độ, nhiệt độ, nhiên liệu |
-| ISO 15031-5 | Định nghĩa PIDs và định dạng dữ liệu | Phân tích (parsing) bản tin OBD2 response |
-| ISO 15765-2 | Transport protocol cho CAN bus (ISO-TP) | Xử lý multi-frame response (VIN, DTC list) |
-| ISO 15765-4 | Emissions-related OBD via CAN | Giao tiếp CAN qua OBD2 adapter BLE |
+| SAE J1979 | Định nghĩa các Diagnostic Test Modes (Mode 01–0A) | Đọc dữ liệu động cơ: RPM, tốc độ, nhiệt độ, nhiên liệu |
+| ISO 15031–5 | Định nghĩa PIDs và định dạng dữ liệu | Phân tích (parsing) bản tin OBD2 response |
+| ISO 15765–2 | Transport protocol cho CAN bus (ISO-TP) | Xử lý multi-frame response (VIN, DTC list) |
+| ISO 15765–4 | Emissions-related OBD via CAN | Giao tiếp CAN qua OBD2 adapter BLE |
 
 **Các OBD2 PIDs sử dụng trong dự án:**
 
 | PID (hex) | Mô tả | Đơn vị | Mode |
 |-----------|-------|--------|------|
-| 0x00 | Supported PIDs [01-20] | Bitmask | 01 |
+| 0x00 | Supported PIDs [01–20] | Bitmask | 01 |
 | 0x04 | Calculated Engine Load | % | 01 |
 | 0x05 | Engine Coolant Temperature | C | 01 |
 | 0x0C | Engine RPM | rpm | 01 |
@@ -151,19 +151,19 @@ devices/{device_id}/status         # Trạng thái online/offline (Retain)
 
 ## 3.1. Phân chia giai đoạn dự án
 
-Dự án được thực hiện trong 6 giai đoạn chính, tổng thời gian dự kiến 24 tuần (6 tháng), từ tháng 09/2025 đến tháng 02/2026.
+Dự án được triển khai theo 7 giai đoạn chính, với tổng thời gian dự kiến 24 tuần (6 tháng), từ tháng 09/2025 đến tháng 02/2026.
 
 [Bảng PL-3.1: Phân chia giai đoạn và thời gian thực hiện]
 
 | Giai đoạn | Nội dung chính | Thời gian | Kết quả đầu ra |
 |-----------|---------------|-----------|----------------|
-| **GĐ1** | Nghiên cứu và thiết kế phần cứng | Tuần 1-4 (4 tuần) | Sơ đồ mạch, BOM, PCB layout |
-| **GĐ2** | Phát triển firmware | Tuần 3-10 (8 tuần) | Firmware ESP-IDF hoàn chỉnh |
-| **GĐ3** | Xây dựng hạ tầng cloud | Tuần 5-8 (4 tuần) | Docker infrastructure, EMQX, databases |
-| **GĐ4** | Phát triển backend API | Tuần 7-14 (8 tuần) | REST API, MQTT Bridge, WebSocket |
-| **GĐ5** | Phát triển frontend | Tuần 11-18 (8 tuần) | Web dashboard, bản đồ, biểu đồ |
-| **GĐ6** | Tích hợp và kiểm thử | Tuần 17-22 (6 tuần) | Hệ thống tích hợp, báo cáo kiểm thử |
-| **GĐ7** | Viết báo cáo và bảo vệ | Tuần 21-24 (4 tuần) | Báo cáo đồ án, slide thuyết trình |
+| **GĐ1** | Nghiên cứu và thiết kế phần cứng | Tuần 1–4 (4 tuần) | Sơ đồ mạch, BOM, PCB layout |
+| **GĐ2** | Phát triển firmware | Tuần 3–10 (8 tuần) | Firmware ESP-IDF hoàn chỉnh |
+| **GĐ3** | Xây dựng hạ tầng cloud | Tuần 5–8 (4 tuần) | Docker infrastructure, EMQX, databases |
+| **GĐ4** | Phát triển backend API | Tuần 7–14 (8 tuần) | REST API, MQTT Bridge, WebSocket |
+| **GĐ5** | Phát triển frontend | Tuần 11–18 (8 tuần) | Web dashboard, bản đồ, biểu đồ |
+| **GĐ6** | Tích hợp và kiểm thử | Tuần 17–22 (6 tuần) | Hệ thống tích hợp, báo cáo kiểm thử |
+| **GĐ7** | Viết báo cáo và bảo vệ | Tuần 21–24 (4 tuần) | Báo cáo đồ án, slide thuyết trình |
 
 > **Ghi chú:** Các giai đoạn có sự chồng chéo (overlap) có chủ đích để tối ưu hóa thời gian. Ví dụ, GĐ3 (hạ tầng cloud) bắt đầu trước khi GĐ2 (firmware) hoàn thành để có môi trường test sớm.
 
@@ -184,7 +184,7 @@ GĐ7:                                                        [========]
 
 ## 3.3. Chi tiết công việc theo giai đoạn
 
-**Giai đoạn 1 -- Nghiên cứu và thiết kế phần cứng (Tuần 1-4):**
+**Giai đoạn 1 — Nghiên cứu và thiết kế phần cứng (Tuần 1–4):**
 
 | Tuần | Công việc | Sản phẩm |
 |------|-----------|----------|
@@ -193,16 +193,16 @@ GĐ7:                                                        [========]
 | 3 | Thiết kế PCB / làm mạch prototype | PCB layout / Perfboard |
 | 4 | Lắp ráp và kiểm tra cơ bản | Prototype hoạt động |
 
-**Giai đoạn 2 -- Phát triển firmware (Tuần 3-10):**
+**Giai đoạn 2 — Phát triển firmware (Tuần 3–10):**
 
 | Tuần | Công việc | Sản phẩm |
 |------|-----------|----------|
-| 3-4 | Setup ESP-IDF, GPIO, UART modem | Giao tiếp modem cơ bản |
-| 5-6 | Module BLE OBD2, phân tích bản tin | Đọc dữ liệu OBD2 |
-| 7-8 | Module MQTT, offline buffering | Truyền dữ liệu lên broker |
-| 9-10 | Quản lý năng lượng, IMU, tích hợp | Firmware hoàn chỉnh |
+| 3–4 | Setup ESP-IDF, GPIO, UART modem | Giao tiếp modem cơ bản |
+| 5–6 | Module BLE OBD2, phân tích bản tin | Đọc dữ liệu OBD2 |
+| 7–8 | Module MQTT, offline buffering | Truyền dữ liệu lên broker |
+| 9–10 | Quản lý năng lượng, IMU, tích hợp | Firmware hoàn chỉnh |
 
-**Giai đoạn 3 -- Hạ tầng cloud (Tuần 5-8):**
+**Giai đoạn 3 — Hạ tầng cloud (Tuần 5–8):**
 
 | Tuần | Công việc | Sản phẩm |
 |------|-----------|----------|
@@ -211,31 +211,31 @@ GĐ7:                                                        [========]
 | 7 | MQTT Bridge service | Dữ liệu từ EMQX đến DB |
 | 8 | Grafana, monitoring, backup | Dashboard giám sát |
 
-**Giai đoạn 4 -- Backend API (Tuần 7-14):**
+**Giai đoạn 4 — Backend API (Tuần 7–14):**
 
 | Tuần | Công việc | Sản phẩm |
 |------|-----------|----------|
-| 7-8 | Project setup, auth module | Đăng nhập, session |
-| 9-10 | Vehicles, devices, customers domain | CRUD API |
-| 11-12 | Telemetry, alerts, geofences domain | Dữ liệu thời gian thực |
-| 13-14 | WebSocket, commands, testing | API hoàn chỉnh |
+| 7–8 | Project setup, auth module | Đăng nhập, session |
+| 9–10 | Vehicles, devices, customers domain | CRUD API |
+| 11–12 | Telemetry, alerts, geofences domain | Dữ liệu thời gian thực |
+| 13–14 | WebSocket, commands, testing | API hoàn chỉnh |
 
-**Giai đoạn 5 -- Frontend (Tuần 11-18):**
-
-| Tuần | Công việc | Sản phẩm |
-|------|-----------|----------|
-| 11-12 | Project setup, layout, auth pages | Khung ứng dụng |
-| 13-14 | Dashboard, bản đồ Leaflet | Trang chủ, bản đồ |
-| 15-16 | Vehicle management, alerts, geofences | Các trang quản lý |
-| 17-18 | ECharts, WebSocket, polish | Giao diện hoàn chỉnh |
-
-**Giai đoạn 6 -- Tích hợp và kiểm thử (Tuần 17-22):**
+**Giai đoạn 5 — Frontend (Tuần 11–18):**
 
 | Tuần | Công việc | Sản phẩm |
 |------|-----------|----------|
-| 17-18 | Tích hợp firmware - cloud | Hệ thống end-to-end |
-| 19-20 | Kiểm thử chức năng, hiệu năng | Báo cáo kiểm thử |
-| 21-22 | Sửa lỗi, tối ưu, triển khai UAT | Hệ thống ổn định |
+| 11–12 | Project setup, layout, auth pages | Khung ứng dụng |
+| 13–14 | Dashboard, bản đồ Leaflet | Trang chủ, bản đồ |
+| 15–16 | Vehicle management, alerts, geofences | Các trang quản lý |
+| 17–18 | ECharts, WebSocket, polish | Giao diện hoàn chỉnh |
+
+**Giai đoạn 6 — Tích hợp và kiểm thử (Tuần 17–22):**
+
+| Tuần | Công việc | Sản phẩm |
+|------|-----------|----------|
+| 17–18 | Tích hợp firmware - cloud | Hệ thống end-to-end |
+| 19–20 | Kiểm thử chức năng, hiệu năng | Báo cáo kiểm thử |
+| 21–22 | Sửa lỗi, tối ưu, triển khai UAT | Hệ thống ổn định |
 
 ---
 
@@ -403,11 +403,11 @@ npm run dev
 | Dịch vụ | URL | Tài khoản mặc định |
 |---------|-----|---------------------|
 | Frontend Web | http://localhost:3002 | admin / Admin@2026 |
-| Backend API | http://localhost:3000 | -- |
-| Swagger Docs | http://localhost:3000/api-docs | -- |
+| Backend API | http://localhost:3000 | — |
+| Swagger Docs | http://localhost:3000/api-docs | — |
 | EMQX Dashboard | http://localhost:18083 | admin / emqx_dev_2026 |
 | Grafana | http://localhost:3001 | admin / admin |
-| VictoriaMetrics | http://localhost:8428 | -- |
+| VictoriaMetrics | http://localhost:8428 | — |
 
 ---
 

@@ -34,10 +34,10 @@ Your role is to analyze user requirements, delegate tasks to appropriate sub-age
 
 ## Documentation
 
-Keep all important docs in `./docs` folder:
+Keep all important docs in `./resources/docs` folder:
 
 ```
-./docs
+./resources/docs
 ├── project-overview-pdr.md
 ├── code-standards.md
 ├── codebase-summary.md
@@ -51,7 +51,7 @@ Reference external instruction files in `opencode.json`:
 
 ```json
 {
-  "instructions": ["docs/*.md", ".opencode/agents/*.md"]
+  "instructions": ["resources/docs/*.md", ".opencode/agents/*.md"]
 }
 ```
 

@@ -10,8 +10,7 @@ Thư mục này chứa các file chi tiết về hệ thống quản lý nguồn
    - Logic chuyển nguồn
    - Kiến trúc tổng thể
 
-2. **[02-buck-converter.md](./02-buck-converter.md)** - Buck Converter 12V→5V
-
+2. **[02-buck-converter.md](./02-buck-converter.md)** - Buck Converter 12V/24V→5V
    - IC LM2596
    - Sơ đồ mạch
    - Linh kiện phụ trợ
@@ -75,11 +74,18 @@ part-02-power-management/
 
 ### Giải Pháp Đề Xuất
 
-1. **Buck Converter**: Module LM2596 (12V→5V, 3A)
+1. **Buck Converter**: Module LM2596 (12V/24V→5V, 3A)
 2. **Boost Converter**: Module MT3608 (3.7V→5V, 2A)
 3. **Power Path**: Relay Module 5V (đơn giản hơn MOSFET)
-4. **LVD**: ADC ESP32 (software-based, không cần hardware)
-5. **Charger**: Module IP2312 (3A, Type-C)
+4. **LVD**: ADC ESP32 (software-based, không cần hardware), chạy profile 12V/24V
+5. **Charger**: Module IP2312 (3A, Type-C), bật/tắt theo ngưỡng profile
+
+**Profile mặc định bắt buộc:**
+
+- **12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+
+**ADC divider dùng chung 12V/24V:** `R1=100k`, `R2=10k` (tỷ lệ ~0.0909).
 
 ### Lý Do
 

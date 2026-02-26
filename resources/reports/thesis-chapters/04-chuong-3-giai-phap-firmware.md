@@ -2,7 +2,7 @@
 
 #### 3.1.2.1. Đặt vấn đề cho giải pháp Firmware
 
-Firmware là thành phần phần mềm nhúng chạy trực tiếp trên vi điều khiển ESP32-S3, đóng vai trò điều phối toàn bộ hoạt động của thiết bị theo dõi. Bài toán thiết kế firmware cần giải quyết đồng thời các yêu cầu:
+Firmware là lớp phần mềm nhúng chạy trực tiếp trên vi điều khiển ESP32-S3 và giữ vai trò điều phối toàn bộ hoạt động của thiết bị theo dõi. Do firmware là điểm hội tụ giữa phần cứng, truyền thông và nghiệp vụ, bài toán thiết kế phải đồng thời thỏa mãn các yêu cầu sau:
 
 - **Đa nhiệm thời gian thực**: thu thập cảm biến, điều khiển modem, truyền dữ liệu và xử lý cảnh báo phải chạy song song, độ trễ thấp.
 - **Quản lý năng lượng nghiêm ngặt**: chuyển trạng thái linh hoạt giữa active/sleep/deep sleep theo điều kiện vận hành xe.
@@ -21,7 +21,7 @@ Firmware là thành phần phần mềm nhúng chạy trực tiếp trên vi đi
 
 #### 3.1.2.3. Chọn giải pháp Firmware
 
-Đồ án chọn **PA-FW2: ESP-IDF + FreeRTOS** làm nền tảng firmware chính.
+Từ kết quả so sánh, đồ án chọn **PA-FW2: ESP-IDF + FreeRTOS** làm nền tảng firmware chính.
 
 Lý do lựa chọn:
 
@@ -32,13 +32,13 @@ Lý do lựa chọn:
 
 ### 3.2.2. Giải pháp Firmware
 
-Firmware chịu trách nhiệm thu thập dữ liệu từ các cảm biến (IMU, GNSS, OBD2), quản lý nguồn điện, điều khiển giao tiếp mạng (4G/LTE), và truyền dữ liệu lên máy chủ thông qua giao thức MQTT. Phần này trình bày chi tiết giải pháp triển khai theo phương án đã chọn ở mục 3.1.2.
+Firmware chịu trách nhiệm thu thập dữ liệu từ các cảm biến (IMU, GNSS, OBD2), quản lý nguồn điện, điều khiển giao tiếp mạng (4G/LTE) và truyền dữ liệu lên máy chủ qua giao thức MQTT. Trên cơ sở phương án đã chọn ở mục 3.1.2, phần này trình bày chi tiết giải pháp triển khai.
 
 #### 3.2.2.1. Kiến trúc firmware và luồng hoạt động
 
 ##### a) Kiến trúc phân lớp (Layered Architecture)
 
-Firmware được thiết kế theo mô hình phân lớp (layered architecture) gồm bốn tầng chính, đảm bảo tính module hóa và dễ bảo trì:
+Firmware được thiết kế theo mô hình phân lớp (layered architecture) gồm bốn tầng chính để bảo đảm tính module hóa và khả năng bảo trì:
 
 | Tầng   | Tên tầng                         | Chức năng chính                                                                                          |
 | ------ | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -47,9 +47,9 @@ Firmware được thiết kế theo mô hình phân lớp (layered architecture)
 | Tầng 3 | Application Layer                | Logic xử lý chế độ lái xe, đỗ xe, cảnh báo; xử lý sự kiện và alert                                       |
 | Tầng 4 | Communication Layer              | Giao tiếp MQTT/HTTP, mã hóa dữ liệu, xử lý lệnh điều khiển từ máy chủ                                    |
 
-Tầng HAL cung cấp giao diện trừu tượng cho phần cứng, cho phép các tầng trên truy cập cảm biến và ngoại vi mà không phụ thuộc trực tiếp vào thanh ghi phần cứng. Tầng Power Management quản lý trạng thái năng lượng của toàn bộ hệ thống. Tầng Application chứa logic nghiệp vụ chính, xử lý chuyển đổi giữa các chế độ hoạt động. Tầng Communication đảm nhận việc đóng gói và truyền dữ liệu lên máy chủ.
+Tầng HAL trừu tượng hóa truy cập phần cứng để các tầng trên làm việc với cảm biến và ngoại vi mà không phụ thuộc trực tiếp vào thanh ghi. Tầng Power Management quản lý trạng thái năng lượng toàn hệ thống. Tầng Application xử lý logic nghiệp vụ và chuyển đổi chế độ hoạt động. Tầng Communication đảm nhận đóng gói và truyền dữ liệu lên máy chủ.
 
-![Hình 3.5 - Sơ đồ kiến trúc phân lớp của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-5.svg)
+![Hình 3.5 - Sơ đồ kiến trúc phân lớp của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–5.svg)
 
 *Hình 3.5: Sơ đồ kiến trúc phân lớp của firmware*
 
@@ -98,7 +98,7 @@ void app_main(void) {
 }
 ```
 
-![Hình 3.6 - Sơ đồ tương tác giữa các FreeRTOS task](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-6.svg)
+![Hình 3.6 - Sơ đồ tương tác giữa các FreeRTOS task](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–6.svg)
 
 *Hình 3.6: Sơ đồ tương tác giữa các FreeRTOS task*
 
@@ -106,11 +106,11 @@ void app_main(void) {
 
 ##### c) Luồng hoạt động cơ bản
 
-Luồng hoạt động tổng thể của firmware diễn ra theo trình tự sau:
+Luồng hoạt động tổng thể của firmware được tổ chức theo trình tự sau:
 
 1. **Khởi tạo ngoại vi**: Cấu hình và khởi động các peripheral gồm IMU (LIS3DH qua I2C), modem LTE/GNSS (qua UART), ADC (đọc điện áp), và BLE stack (NimBLE).
 
-2. **Đọc trạng thái IGN và điện áp ắc quy**: Hệ thống ưu tiên kết nối OBD2 qua BLE để đọc trạng thái động cơ (IGN) trực tiếp từ ECU xe. Trường hợp không kết nối được OBD2, hệ thống sử dụng phương án dự phòng (fallback) bằng cách đo điện áp ắc quy qua ADC: nếu U_batt > 13V, xác định động cơ đang hoạt động (IGN ON); nếu U_batt < 12V, xác định động cơ đã tắt (IGN OFF).
+2. **Đọc trạng thái IGN và điện áp ắc quy**: Hệ thống ưu tiên đọc trạng thái động cơ (IGN) trực tiếp từ ECU qua OBD2 BLE. Nếu không kết nối được OBD2, hệ thống fallback sang đo điện áp ắc quy qua ADC theo profile: profile 12V dùng IGN_ON >= 13.0V và IGN_OFF <= 12.0V; profile 24V dùng IGN_ON >= 26.0V và IGN_OFF <= 24.0V.
 
 3. **Quyết định chế độ hoạt động**: Dựa trên trạng thái IGN và dữ liệu cảm biến, firmware chuyển sang chế độ phù hợp (lái xe, đỗ xe, hoặc cảnh báo).
 
@@ -121,7 +121,7 @@ Luồng hoạt động tổng thể của firmware diễn ra theo trình tự sa
 
 5. **Xử lý sau tác vụ**: Nếu IGN ON, giữ kết nối BLE và không deep sleep. Nếu IGN OFF, ngắt BLE và chuyển sang deep sleep để tiết kiệm năng lượng.
 
-![Hình 3.7 - Lưu đồ thuật toán luồng hoạt động chính của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-7.png)
+![Hình 3.7 - Lưu đồ thuật toán luồng hoạt động chính của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–7.png)
 
 *Hình 3.7: Lưu đồ thuật toán luồng hoạt động chính của firmware*
 
@@ -131,7 +131,7 @@ Luồng hoạt động tổng thể của firmware diễn ra theo trình tự sa
 
 ##### a) Tổng quan giao tiếp BLE OBD2
 
-Module giao tiếp Bluetooth Low Energy (BLE) OBD2 cho phép thiết bị theo dõi kết nối không dây với adapter vgate iCar Pro -- một thiết bị OBD2 hỗ trợ BLE được cắm trực tiếp vào cổng chẩn đoán OBD-II của xe. Firmware sử dụng NimBLE stack (tích hợp trong ESP-IDF) để thực hiện giao tiếp BLE theo chuẩn GATT (Generic Attribute Profile).
+Module giao tiếp Bluetooth Low Energy (BLE) OBD2 cho phép thiết bị theo dõi kết nối không dây với adapter vgate iCar Pro — thiết bị OBD2 hỗ trợ BLE, được cắm trực tiếp vào cổng chẩn đoán OBD-II của xe. Firmware sử dụng NimBLE stack (tích hợp trong ESP-IDF) để triển khai giao tiếp BLE theo chuẩn GATT (Generic Attribute Profile).
 
 Kiến trúc module BLE OBD2 được tổ chức theo bốn tầng:
 
@@ -167,25 +167,25 @@ Kiến trúc module BLE OBD2 được tổ chức theo bốn tầng:
 
 Quy trình kết nối BLE với adapter OBD2 diễn ra theo các bước sau:
 
-1. **Kiểm tra địa chỉ BLE đã lưu**: Đọc địa chỉ MAC của vgate iCar Pro từ bộ nhớ flash (NVS). Nếu đã có địa chỉ, chuyển trực tiếp sang bước kết nối (reconnect nhanh trong 1-3 giây).
+1. **Kiểm tra địa chỉ BLE đã lưu**: Đọc địa chỉ MAC của vgate iCar Pro từ bộ nhớ flash (NVS). Nếu đã có địa chỉ, chuyển trực tiếp sang bước kết nối (reconnect nhanh trong 1–3 giây).
 
 2. **Quét tìm thiết bị (Scan)**: Nếu chưa có địa chỉ, thực hiện BLE scan để tìm adapter. Quá trình scan lọc thiết bị theo tên (device name) hoặc service UUID đặc trưng của OBD2 adapter.
 
 3. **Kết nối GATT**: Thiết lập kết nối BLE với adapter, thực hiện GATT service discovery để tìm các characteristic cần thiết (TX và RX characteristic).
 
 4. **Gửi lệnh khởi tạo ELM327**: Gửi chuỗi lệnh khởi tạo giao thức ELM327 qua BLE GATT write:
-   - `ATZ` -- Reset adapter
-   - `ATE0` -- Tắt echo
-   - `ATL0` -- Tắt line feed
-   - `ATS0` -- Tắt khoảng trắng
-   - `ATSP0` -- Tự động phát hiện giao thức OBD2
+   - `ATZ` — Reset adapter
+   - `ATE0` — Tắt echo
+   - `ATL0` — Tắt line feed
+   - `ATS0` — Tắt khoảng trắng
+   - `ATSP0` — Tự động phát hiện giao thức OBD2
 
 5. **Đọc dữ liệu OBD2**: Gửi các lệnh PID (Parameter ID) để đọc thông số xe:
-   - `010C` -- RPM động cơ
-   - `010D` -- Tốc độ xe
-   - `0105` -- Nhiệt độ nước làm mát
-   - `012F` -- Mức nhiên liệu
-   - `AT IGN` -- Trạng thái động cơ (ignition)
+   - `010C` — RPM động cơ
+   - `010D` — Tốc độ xe
+   - `0105` — Nhiệt độ nước làm mát
+   - `012F` — Mức nhiên liệu
+   - `AT IGN` — Trạng thái động cơ (ignition)
 
 ```c
 /* Quy trình kết nối và đọc dữ liệu OBD2 */
@@ -222,7 +222,7 @@ void ble_obd2_task(void *param) {
 }
 ```
 
-![Hình 3.8 - Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-8.jpg)
+![Hình 3.8 - Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–8.jpg)
 
 *Hình 3.8: Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2*
 
@@ -232,13 +232,13 @@ void ble_obd2_task(void *param) {
 
 Việc kết nối BLE OBD2 được tối ưu hóa theo từng chế độ hoạt động của thiết bị để tiết kiệm năng lượng:
 
-**Chế độ lái xe (IGN ON)**: ESP32-S3 duy trì kết nối BLE liên tục với OBD2 adapter. Dữ liệu OBD2 được đọc định kỳ (mỗi 5-10 giây). Hệ thống chỉ sử dụng light sleep (giữ BLE active) thay vì deep sleep.
+**Chế độ lái xe (IGN ON)**: ESP32-S3 duy trì kết nối BLE liên tục với OBD2 adapter. Dữ liệu OBD2 được đọc định kỳ (mỗi 5–10 giây). Hệ thống chỉ sử dụng light sleep (giữ BLE active) thay vì deep sleep.
 
 **Chế độ đỗ xe (IGN OFF)**: Không kết nối OBD2 adapter. Trạng thái IGN đã được xác nhận trước khi chuyển sang deep sleep. Việc không kết nối BLE khi đỗ xe giúp tiết kiệm đáng kể thời gian wake-up và năng lượng tiêu thụ.
 
 **Chế độ cảnh báo (Motion Detected)**: Kết nối OBD2 là tùy chọn. Hệ thống có thể chỉ sử dụng IMU và GPS để xác nhận chuyển động mà không cần dữ liệu OBD2.
 
-Đặc biệt, khi ESP32-S3 chuyển sang deep sleep, kết nối BLE bị ngắt hoàn toàn. Mỗi lần wake-up, firmware cần thực hiện reconnect với adapter. Nhờ có việc lưu địa chỉ MAC vào flash, thời gian reconnect chỉ mất khoảng 1-3 giây, nhanh hơn đáng kể so với pairing lần đầu (3-10 giây).
+Đặc biệt, khi ESP32-S3 chuyển sang deep sleep, kết nối BLE bị ngắt hoàn toàn. Mỗi lần wake-up, firmware cần thực hiện reconnect với adapter. Nhờ có việc lưu địa chỉ MAC vào flash, thời gian reconnect chỉ mất khoảng 1–3 giây, nhanh hơn đáng kể so với pairing lần đầu (3–10 giây).
 
 ##### d) Xử lý lỗi và cơ chế dự phòng (Fallback)
 
@@ -246,11 +246,11 @@ Module BLE OBD2 được thiết kế với nhiều lớp xử lý lỗi:
 
 | Tình huống lỗi              | Xử lý                                           | Thời gian timeout |
 | --------------------------- | ----------------------------------------------- | ----------------- |
-| Không kết nối được adapter  | Retry 2-3 lần với delay 2 giây, sau đó fallback | 10 giây           |
-| Mất kết nối giữa chừng      | Reconnect 2-3 lần, nếu thất bại thì fallback    | 5 giây mỗi lần    |
-| Adapter không phản hồi lệnh | Retry 1-2 lần, nếu thất bại thì fallback        | 5 giây            |
+| Không kết nối được adapter  | Retry 2–3 lần với delay 2 giây, sau đó fallback | 10 giây           |
+| Mất kết nối giữa chừng      | Reconnect 2–3 lần, nếu thất bại thì fallback    | 5 giây mỗi lần    |
+| Adapter không phản hồi lệnh | Retry 1–2 lần, nếu thất bại thì fallback        | 5 giây            |
 
-**Cơ chế dự phòng (Fallback)**: Khi không thể giao tiếp với OBD2 adapter, hệ thống chuyển sang phát hiện trạng thái động cơ bằng phương pháp đo điện áp ắc quy. Phương pháp này có độ chính xác thấp hơn OBD2 nhưng vẫn đảm bảo hệ thống hoạt động liên tục. Tiêu chí phân biệt: U_batt > 13V tương ứng với động cơ đang chạy (máy phát điện nạp), U_batt < 12V tương ứng với động cơ đã tắt.
+**Cơ chế dự phòng (Fallback)**: Khi không thể giao tiếp với OBD2 adapter, hệ thống chuyển sang phát hiện trạng thái động cơ bằng phương pháp đo điện áp ắc quy. Phương pháp này có độ chính xác thấp hơn OBD2 nhưng vẫn đảm bảo hệ thống hoạt động liên tục. Tiêu chí phân biệt theo profile: profile 12V dùng IGN_ON>=13.0V và IGN_OFF<=12.0V; profile 24V dùng IGN_ON>=26.0V và IGN_OFF<=24.0V.
 
 Mọi lỗi kết nối OBD2 đều được ghi lại vào log để phục vụ việc giám sát và khắc phục sự cố từ xa.
 
@@ -271,7 +271,7 @@ Quy trình khởi tạo modem diễn ra theo bốn bước tuần tự:
 | 3    | `AT+CREG?` | `+CREG: 0,1`      | Kiểm tra đăng ký mạng thành công |
 | 4    | `AT+CSQ`   | `+CSQ: 20,99`     | Đọc cường độ tín hiệu (RSSI)     |
 
-Trường hợp modem không phản hồi, firmware thực hiện reset phần cứng bằng cách điều khiển chân PWRKEY (GPIO25): kéo LOW rồi HIGH trong 1-2 giây, sau đó đợi modem khởi động lại (10-30 giây). Nếu SIM chưa sẵn sàng hoặc chưa đăng ký mạng, hệ thống đợi và retry (quá trình đăng ký mạng có thể mất 30-60 giây).
+Trường hợp modem không phản hồi, firmware thực hiện reset phần cứng bằng cách điều khiển chân PWRKEY (GPIO25): kéo LOW rồi HIGH trong 1–2 giây, sau đó đợi modem khởi động lại (10–30 giây). Nếu SIM chưa sẵn sàng hoặc chưa đăng ký mạng, hệ thống đợi và retry (quá trình đăng ký mạng có thể mất 30–60 giây).
 
 ##### c) Điều khiển kết nối 4G/LTE
 
@@ -311,11 +311,11 @@ Thời gian để GNSS fix được vị trí phụ thuộc vào trạng thái t
 
 | Loại khởi động | Điều kiện                                                | Thời gian fix |
 | -------------- | -------------------------------------------------------- | ------------- |
-| Hot start      | Modem chỉ ở chế độ sleep, dữ liệu ephemeris còn hiệu lực | 5-10 giây     |
-| Warm start     | Có dữ liệu almanac từ lần trước                          | 20-30 giây    |
-| Cold start     | Reset hoàn toàn, không có dữ liệu trước                  | 30-60 giây    |
+| Hot start      | Modem chỉ ở chế độ sleep, dữ liệu ephemeris còn hiệu lực | 5–10 giây     |
+| Warm start     | Có dữ liệu almanac từ lần trước                          | 20–30 giây    |
+| Cold start     | Reset hoàn toàn, không có dữ liệu trước                  | 30–60 giây    |
 
-![Hình 3.9 - Lưu đồ thuật toán điều khiển modem theo chế độ hoạt động](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-9.png)
+![Hình 3.9 - Lưu đồ thuật toán điều khiển modem theo chế độ hoạt động](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–9.png)
 
 *Hình 3.9: Lưu đồ thuật toán điều khiển modem theo chế độ hoạt động*
 
@@ -327,7 +327,7 @@ Modem A7600CE-T hỗ trợ hai chế độ ngủ để tiết kiệm năng lư�
 
 | Chế độ              | Lệnh AT      | Dòng tiêu thụ | Đặc điểm                                                          |
 | ------------------- | ------------ | ------------- | ----------------------------------------------------------------- |
-| Sleep (CSCLK)       | `AT+CSCLK=1` | 1-5 mA        | Tự động ngủ khi UART không hoạt động, đánh thức bằng dữ liệu UART |
+| Sleep (CSCLK)       | `AT+CSCLK=1` | 1–5 mA        | Tự động ngủ khi UART không hoạt động, đánh thức bằng dữ liệu UART |
 | Deep Sleep (CFUN=0) | `AT+CFUN=0`  | < 1 mA        | Tắt RF, giữ UART, đánh thức bằng lệnh AT hoặc GPIO                |
 
 Trước khi ESP32-S3 vào deep sleep, firmware đưa modem vào chế độ sleep (`AT+CSCLK=1` hoặc `AT+CFUN=0`) và lưu trạng thái modem. Khi ESP32-S3 wake-up, firmware đánh thức modem bằng cách gửi ký tự bất kỳ trên UART, sau đó khôi phục kết nối 4G (`AT+CFUN=1`, `AT+CGACT=1,1`).
@@ -336,7 +336,7 @@ Trước khi ESP32-S3 vào deep sleep, firmware đưa modem vào chế độ sle
 
 | Lỗi                  | Phương án xử lý                                                         |
 | -------------------- | ----------------------------------------------------------------------- |
-| Modem không phản hồi | Timeout 5 giây -> reset GPIO PWRKEY -> đợi 10-30 giây -> retry khởi tạo |
+| Modem không phản hồi | Timeout 5 giây -> reset GPIO PWRKEY -> đợi 10–30 giây -> retry khởi tạo |
 | Mất kết nối 4G       | Kiểm tra `AT+CREG?` và `AT+CGACT?` -> deactivate/reactivate PDP context |
 | GNSS không fix       | Timeout 60 giây -> tắt/bật lại GNSS -> gửi dữ liệu không có GPS nếu cần |
 | Modem quá nhiệt      | Phát hiện qua phản hồi bất thường -> đưa vào sleep mode tạm thời        |
@@ -365,8 +365,8 @@ Module quản lý nguồn sử dụng các chân GPIO của ESP32-S3 để đi�
 
 Hệ thống sử dụng mạch Power MUX dựa trên hai MOSFET (Q1 và Q2) để chuyển đổi nguồn cấp giữa ắc quy xe và pin dự phòng 21700. Firmware điều khiển qua chân GPIO18 (POWER_MUX_SEL):
 
-- **GPIO18 = LOW (0)**: Dùng nguồn ắc quy xe (Q1 ON, Q2 OFF) -- chế độ mặc định khi IGN ON.
-- **GPIO18 = HIGH (1)**: Dùng pin dự phòng (Q1 OFF, Q2 ON) -- khi điện áp ắc quy quá thấp.
+- **GPIO18 = LOW (0)**: Dùng nguồn ắc quy xe (Q1 ON, Q2 OFF) — chế độ mặc định khi IGN ON.
+- **GPIO18 = HIGH (1)**: Dùng pin dự phòng (Q1 OFF, Q2 ON) — khi điện áp ắc quy quá thấp.
 
 Logic điều khiển power path được thực hiện trong task giám sát nguồn:
 
@@ -392,7 +392,7 @@ void power_monitor_task(void *param) {
 }
 ```
 
-![Hình 3.10 - Lưu đồ thuật toán điều khiển power path](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-10.png)
+![Hình 3.10 - Lưu đồ thuật toán điều khiển power path](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–10.png)
 
 *Hình 3.10: Lưu đồ thuật toán điều khiển power path*
 
@@ -404,15 +404,15 @@ IC sạc IP2312 được điều khiển qua chân GPIO5 (CHARGER_EN). Logic s�
 
 | Điều kiện              | Trạng thái charger    | Lý do                                               |
 | ---------------------- | --------------------- | --------------------------------------------------- |
-| IGN ON và U_batt > 12V | Enable (GPIO5 = HIGH) | Máy phát điện đang nạp, có thể sạc pin dự phòng     |
+| IGN ON và U_batt vượt ngưỡng profile (ví dụ > 12V cho hệ 12V) | Enable (GPIO5 = HIGH) | Máy phát điện đang nạp, có thể sạc pin dự phòng     |
 | IGN OFF                | Disable (GPIO5 = LOW) | Bảo vệ ắc quy không bị hao pin khi xe tắt máy       |
-| U_batt < 12V           | Disable (GPIO5 = LOW) | Ắc quy yếu, không đủ năng lượng để sạc pin dự phòng |
+| U_batt dưới ngưỡng profile (ví dụ < 12V cho hệ 12V) | Disable (GPIO5 = LOW) | Ắc quy yếu, không đủ năng lượng để sạc pin dự phòng |
 
 ##### d) Giám sát điện áp và LVD
 
-Firmware đọc điện áp ắc quy qua kênh ADC 12-bit (GPIO4) với bộ chia áp để đưa điện áp 12V về dải đo của ADC (0-3.3V). Giá trị ADC được chuyển đổi sang điện áp thực thông qua công thức hiệu chuẩn (calibration).
+Firmware đọc điện áp ắc quy qua kênh ADC 12-bit (GPIO4) với bộ chia áp để đưa điện áp ắc quy 12V hoặc 24V về dải đo của ADC (0–3.3V). Giá trị ADC được chuyển đổi sang điện áp thực thông qua công thức hiệu chuẩn (calibration).
 
-Ngoài ra, hệ thống có thêm kênh giám sát LVD độc lập sử dụng comparator LM393 (GPIO19). Đây là kênh dự phòng cho ADC, cho phép kiểm tra nhanh trạng thái nguồn với cơ chế trễ (hysteresis): ngưỡng cắt là 12.0V, ngưỡng phục hồi là 12.2V. Comparator tự xử lý hysteresis ở mức phần cứng, tránh hiện tượng dao động (oscillation) quanh ngưỡng.
+Ngoài ra, hệ thống có thêm kênh giám sát LVD độc lập sử dụng comparator LM393 (GPIO19). Đây là kênh dự phòng cho ADC, cho phép kiểm tra nhanh trạng thái nguồn với cơ chế trễ (hysteresis): profile 12V dùng Switch_OFF=12.0V, Switch_ON=12.2V; profile 24V dùng Switch_OFF=24.0V, Switch_ON=24.4V. Comparator tự xử lý hysteresis ở mức phần cứng, tránh hiện tượng dao động (oscillation) quanh ngưỡng.
 
 ##### e) Các chế độ quản lý nguồn
 
@@ -420,8 +420,8 @@ Firmware hỗ trợ ba chế độ năng lượng chính:
 
 | Chế độ           | Trạng thái ESP32 | Trạng thái modem    | Trạng thái BLE | Dòng tiêu thụ |
 | ---------------- | ---------------- | ------------------- | -------------- | ------------- |
-| Normal (Driving) | Active           | 4G + GNSS active    | Connected      | 150-250 mA    |
-| Light Sleep      | Light sleep      | Sleep (CSCLK)       | Giữ kết nối    | 10-20 mA      |
+| Normal (Driving) | Active           | 4G + GNSS active    | Connected      | 150–250 mA    |
+| Light Sleep      | Light sleep      | Sleep (CSCLK)       | Giữ kết nối    | 10–20 mA      |
 | Deep Sleep       | Deep sleep       | Deep sleep (CFUN=0) | Ngắt kết nối   | < 2 mA        |
 
 Chuyển đổi giữa các chế độ dựa trên trạng thái IGN và dữ liệu cảm biến, được điều phối bởi máy trạng thái chính (trình bày tại mục 3.2.2.5).
@@ -438,7 +438,7 @@ Chứa toàn bộ dữ liệu hoạt động của xe, gửi định kỳ khi xe
 
 ```json
 {
-  "timestamp": "2024-01-01T12:00:00Z",
+  "timestamp": "2024–01–01T12:00:00Z",
   "device_id": "TRACKER_001",
   "vehicle_id": "VEHICLE_001",
   "location": {
@@ -475,7 +475,7 @@ Gửi ngay khi phát hiện sự kiện bất thường:
 
 ```json
 {
-  "timestamp": "2024-01-01T12:00:00Z",
+  "timestamp": "2024–01–01T12:00:00Z",
   "device_id": "TRACKER_001",
   "vehicle_id": "VEHICLE_001",
   "alert_type": "motion_detected",
@@ -494,7 +494,7 @@ Gửi định kỳ khi xe đang đỗ để xác nhận thiết bị còn hoạt
 
 ```json
 {
-  "timestamp": "2024-01-01T12:00:00Z",
+  "timestamp": "2024–01–01T12:00:00Z",
   "device_id": "TRACKER_001",
   "type": "heartbeat",
   "location": {
@@ -531,7 +531,7 @@ Các lệnh điều khiển từ máy chủ bao gồm:
 
 ##### c) Cơ chế lưu trữ dữ liệu ngoại tuyến (Offline Buffering)
 
-Khi thiết bị mất kết nối mạng (mất sóng 4G, modem lỗi), dữ liệu telemetry được lưu tạm vào bộ nhớ flash của ESP32-S3. Hệ thống sử dụng vùng nhớ SPIFFS hoặc LittleFS làm bộ đệm vòng (circular buffer) với dung lượng dự trữ cho khoảng 500-1000 bản ghi telemetry.
+Khi thiết bị mất kết nối mạng (mất sóng 4G, modem lỗi), dữ liệu telemetry được lưu tạm vào bộ nhớ flash của ESP32-S3. Hệ thống sử dụng vùng nhớ SPIFFS hoặc LittleFS làm bộ đệm vòng (circular buffer), với dung lượng dự trữ cho khoảng 500–1000 bản ghi telemetry.
 
 Khi kết nối mạng được khôi phục, firmware tự động gửi lần lượt các bản ghi đã lưu theo thứ tự thời gian (FIFO - First In, First Out). Sau khi gửi thành công (nhận được ACK từ MQTT broker), các bản ghi đã gửi được xóa khỏi flash.
 
@@ -559,7 +559,7 @@ void flush_offline_buffer(void) {
 
 ##### d) Máy trạng thái thiết bị (Device State Machine)
 
-Máy trạng thái là cơ chế điều phối trung tâm của firmware, quyết định hành vi của thiết bị tại mọi thời điểm. Hệ thống định nghĩa bảy trạng thái chính:
+Máy trạng thái là cơ chế điều phối trung tâm của firmware, quyết định hành vi thiết bị tại từng thời điểm vận hành. Hệ thống định nghĩa bảy trạng thái chính:
 
 | Trạng thái | Mã  | Mô tả                                              |
 | ---------- | --- | -------------------------------------------------- |
@@ -586,7 +586,7 @@ Máy trạng thái là cơ chế điều phối trung tâm của firmware, quy�
 | HEARTBEAT           | Gửi heartbeat xong               | SLEEP                |
 | SLEEP               | Timer wake-up hoặc IMU interrupt | CHECK_IGN            |
 
-![Hình 3.11 - Sơ đồ máy trạng thái của thiết bị theo dõi](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-11.svg)
+![Hình 3.11 - Sơ đồ máy trạng thái của thiết bị theo dõi](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–11.svg)
 
 *Hình 3.11: Sơ đồ máy trạng thái của thiết bị theo dõi*
 
@@ -667,13 +667,13 @@ void state_machine_task(void *param) {
 }
 ```
 
-**Lưu trạng thái qua deep sleep**: Trước khi vào deep sleep, firmware lưu trạng thái hiện tại vào vùng nhớ RTC (RTC memory) -- vùng nhớ đặc biệt của ESP32-S3 được giữ nguyên nội dung trong suốt quá trình deep sleep. Khi wake-up, firmware đọc trạng thái từ RTC memory để biết chế độ hoạt động trước đó và xử lý phù hợp.
+**Lưu trạng thái qua deep sleep**: Trước khi vào deep sleep, firmware lưu trạng thái hiện tại vào vùng nhớ RTC (RTC memory) — vùng nhớ đặc biệt của ESP32-S3 được giữ nguyên nội dung trong suốt quá trình deep sleep. Khi wake-up, firmware đọc trạng thái từ RTC memory để biết chế độ hoạt động trước đó và xử lý phù hợp.
 
 #### 3.2.2.6. Cấu hình hệ thống
 
 ##### a) Cấu trúc dữ liệu cấu hình
 
-Toàn bộ cấu hình của thiết bị được lưu trữ trong bộ nhớ flash (NVS -- Non-Volatile Storage) của ESP32-S3 dưới dạng cấu trúc dữ liệu cố định:
+Toàn bộ cấu hình của thiết bị được lưu trữ trong bộ nhớ flash (NVS — Non-Volatile Storage) của ESP32-S3 dưới dạng cấu trúc dữ liệu cố định:
 
 ```c
 typedef struct {
@@ -685,8 +685,11 @@ typedef struct {
     uint16_t heartbeat_interval;     /* Chu kỳ gửi heartbeat (giây) */
     uint16_t tracking_interval;      /* Chu kỳ gửi telemetry (giây) */
     char     obd2_ble_address[18];   /* Địa chỉ MAC của OBD2 adapter */
-    float    lvd_threshold;          /* Ngưỡng cắt điện áp (12.0V) */
-    float    lvd_hysteresis;         /* Ngưỡng phục hồi điện áp (12.2V) */
+    float    lvd_cut;                /* Ngưỡng cắt bảo vệ sâu: 11.5V (12V) hoặc 23.0V (24V) */
+    float    switch_off;             /* Ngưỡng chuyển sang pin backup: 12.0V (12V) hoặc 24.0V (24V) */
+    float    switch_on;              /* Ngưỡng quay lại ắc quy: 12.2V (12V) hoặc 24.4V (24V) */
+    float    ign_on_threshold;       /* Ngưỡng suy luận IGN ON: >=13.0V (12V) hoặc >=26.0V (24V) */
+    float    ign_off_threshold;      /* Ngưỡng suy luận IGN OFF: <=12.0V (12V) hoặc <=24.0V (24V) */
 } config_t;
 ```
 
@@ -694,7 +697,7 @@ typedef struct {
 
 Cấu hình được quản lý theo ba cơ chế:
 
-**Cấu hình mặc định (Default Configuration)**: Được định nghĩa trong mã nguồn firmware, áp dụng khi thiết bị khởi động lần đầu hoặc khi NVS bị xóa. Bao gồm các giá trị an toàn như `heartbeat_interval = 900` (15 phút), `tracking_interval = 10` (10 giây), `lvd_threshold = 12.0`.
+**Cấu hình mặc định (Default Configuration)**: Được định nghĩa trong mã nguồn firmware, áp dụng khi thiết bị khởi động lần đầu hoặc khi NVS bị xóa. Bao gồm các giá trị an toàn như `heartbeat_interval = 900` (15 phút), `tracking_interval = 10` (10 giây), và profile nguồn kép: profile 12V (`lvd_cut=11.5`, `switch_off=12.0`, `switch_on=12.2`, `ign_on_threshold=13.0`, `ign_off_threshold=12.0`) hoặc profile 24V (`lvd_cut=23.0`, `switch_off=24.0`, `switch_on=24.4`, `ign_on_threshold=26.0`, `ign_off_threshold=24.0`).
 
 **Cấu hình lưu trữ (Persistent Configuration)**: Lưu trong NVS, được tải khi thiết bị khởi động. Các thay đổi cấu hình từ máy chủ được lưu vào NVS để giữ nguyên sau khi reset hoặc mất điện.
 

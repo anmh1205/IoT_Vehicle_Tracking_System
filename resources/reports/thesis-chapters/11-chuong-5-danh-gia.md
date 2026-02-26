@@ -2,7 +2,7 @@
 
 ## 5.1. Đánh giá hiệu năng
 
-Chương này trình bày kết quả đánh giá toàn diện hệ thống IoT Vehicle Tracking System trên các khía cạnh: hiệu năng kỹ thuật, kinh tế - môi trường, rủi ro và các khuyến nghị cho tương lai. Việc đánh giá được thực hiện dựa trên các tiêu chí cụ thể, có thể đo lường, nhằm cung cấp cái nhìn khách quan về chất lượng và khả năng ứng dụng thực tế của hệ thống.
+Chương này trình bày kết quả đánh giá toàn diện hệ thống IoT Vehicle Tracking System trên các khía cạnh: hiệu năng kỹ thuật, hiệu quả kinh tế - môi trường, rủi ro và khuyến nghị phát triển. Việc đánh giá dựa trên các tiêu chí cụ thể, có thể đo lường, nhằm cung cấp cái nhìn khách quan về chất lượng và khả năng ứng dụng thực tiễn của hệ thống.
 
 ### 5.1.1. Đánh giá hiệu năng phần cứng
 
@@ -10,30 +10,30 @@ Hệ thống phần cứng được đánh giá trên ba khía cạnh chính: qu
 
 **Quản lý năng lượng:**
 
-Hệ thống quản lý năng lượng đa chế độ hoạt động ổn định trong các kịch bản thử nghiệm. Mạch buck converter chuyển đổi từ nguồn 12V ắc quy xe xuống 3.3V cấp cho ESP32-S3 với hiệu suất chuyển đổi đạt trên 90%, giảm thiểu tổn thất nhiệt. Mạch Low Voltage Disconnect (LVD) bảo vệ ắc quy xe hiệu quả, tự động ngắt khi điện áp ắc quy giảm dưới ngưỡng 11.5V, tránh tình trạng cạn ắc quy. Pin dự phòng 21700 (5000mAh) cho phép thiết bị hoạt động độc lập trong khoảng 48-72 giờ ở chế độ cảnh báo và 2-3 tháng ở chế độ deep sleep.
+Hệ thống quản lý năng lượng đa chế độ vận hành ổn định trong các kịch bản thử nghiệm. Mạch buck converter đầu vào 12V/24V (dải 7–40V) hạ áp xuống 5V rồi qua LDO 3.3V cho ESP32-S3, đạt hiệu suất tổng trên 90% ở điều kiện thử nghiệm profile 12V. Mạch Low Voltage Disconnect (LVD) và logic chuyển nguồn được chuẩn hóa theo hai profile: 12V (LVD_cut=11.5V, Switch_OFF=12.0V, Switch_ON=12.2V, IGN_ON>=13.0V, IGN_OFF<=12.0V) và 24V (LVD_cut=23.0V, Switch_OFF=24.0V, Switch_ON=24.4V, IGN_ON>=26.0V, IGN_OFF<=24.0V). Pin dự phòng 21700 (5000mAh) duy trì hoạt động độc lập khoảng 48–72 giờ ở chế độ cảnh báo và 2–3 tháng ở chế độ deep sleep.
 
 [Bảng 5.1: Đánh giá hiệu năng quản lý năng lượng]
 
 | Tiêu chí | Giá trị thiết kế | Giá trị thực tế | Đánh giá |
 |---|---|---|---|
-| Dòng tiêu thụ deep sleep | < 15 μA | 10-15 μA | Đạt yêu cầu |
-| Dòng tiêu thụ driving mode | < 250 mA | 180-220 mA | Tốt |
-| Thời gian hoạt động pin dự phòng (alert mode) | > 24 giờ | 48-72 giờ | Vượt yêu cầu |
-| Hiệu suất buck converter | > 85% | 90-93% | Tốt |
-| Ngưỡng LVD | 11.5V | 11.5V (+/- 0.1V) | Chính xác |
-| Thời gian chuyển chế độ (parking -> alert) | < 500 ms | 200-400 ms | Tốt |
+| Dòng tiêu thụ deep sleep | < 15 μA | 10–15 μA | Đạt yêu cầu |
+| Dòng tiêu thụ driving mode | < 250 mA | 180–220 mA | Tốt |
+| Thời gian hoạt động pin dự phòng (alert mode) | > 24 giờ | 48–72 giờ | Vượt yêu cầu |
+| Hiệu suất buck converter | > 85% | 90–93% | Tốt |
+| Ngưỡng LVD | Profile 12V: 11.5V; Profile 24V: 23.0V | 11.5V (± 0.1V) trên profile 12V | Chính xác (12V) |
+| Thời gian chuyển chế độ (parking -> alert) | < 500 ms | 200–400 ms | Tốt |
 
 **Kết nối BLE OBD2:**
 
-Kết nối BLE với adapter vgate iCar Pro hoạt động ổn định sau khi thiết lập ban đầu. Thời gian kết nối BLE khi thiết bị wake up từ deep sleep dao động trong khoảng 1-3 giây, phụ thuộc vào trạng thái của adapter. Các thông số OBD2 (RPM, tốc độ, nhiệt độ nước, mức nhiên liệu) được đọc thành công với độ chính xác cao, sai số dưới 2% so với đồng hồ taplo xe.
+Kết nối BLE với adapter vgate iCar Pro hoạt động ổn định sau khi thiết lập ban đầu. Thời gian kết nối BLE khi thiết bị đánh thức từ deep sleep dao động trong khoảng 1–3 giây, phụ thuộc trạng thái adapter. Các thông số OBD2 (RPM, tốc độ, nhiệt độ nước, mức nhiên liệu) được đọc thành công với độ chính xác cao, sai số dưới 2% so với đồng hồ táp-lô xe.
 
 **Độ chính xác GPS/GNSS:**
 
-Module GNSS tích hợp trong modem SIMCom A7600CE-T cung cấp độ chính xác vị trí đạt mức chấp nhận được cho ứng dụng tracking xe. Sai số vị trí trung bình khoảng 2.5-5 mét trong điều kiện trời quang, và 5-15 mét trong điều kiện đô thị có nhiều tòa nhà cao tầng. Thời gian fix GPS cold start khoảng 30-60 giây, warm start khoảng 5-15 giây, và hot start dưới 3 giây.
+Module GNSS tích hợp trong modem SIMCom A7600CE-T cung cấp độ chính xác vị trí đạt mức chấp nhận được cho ứng dụng tracking xe. Sai số vị trí trung bình khoảng 2.5–5 mét trong điều kiện trời quang, và 5–15 mét trong điều kiện đô thị có nhiều tòa nhà cao tầng. Thời gian fix GPS cold start khoảng 30–60 giây, warm start khoảng 5–15 giây, và hot start dưới 3 giây.
 
 ### 5.1.2. Đánh giá hiệu năng firmware
 
-Firmware xây dựng trên nền tảng ESP-IDF với hệ điều hành thời gian thực FreeRTOS được đánh giá trên các khía cạnh: khả năng đa nhiệm, máy trạng thái, và cơ chế lưu trữ tạm.
+Firmware xây dựng trên nền tảng ESP-IDF với hệ điều hành thời gian thực FreeRTOS được đánh giá theo các khía cạnh: khả năng đa nhiệm, máy trạng thái và cơ chế lưu trữ tạm.
 
 **Đa nhiệm FreeRTOS:**
 
@@ -45,24 +45,24 @@ Máy trạng thái ba chế độ (Driving, Parking, Alert) hoạt động chín
 
 **Lưu trữ tạm (Offline Buffering):**
 
-Cơ chế lưu trữ tạm trên bộ nhớ flash của ESP32-S3 hoạt động hiệu quả khi mất kết nối 4G. Dữ liệu telemetry được lưu vào flash theo cấu trúc FIFO, đồng bộ lại server khi kết nối được phục hồi. Hệ thống có thể lưu trữ khoảng 500-1000 bản ghi telemetry offline, đủ cho 4-8 giờ mất kết nối ở tần suất gửi 30 giây/lần.
+Cơ chế lưu trữ tạm trên bộ nhớ flash của ESP32-S3 hoạt động hiệu quả khi mất kết nối 4G. Dữ liệu telemetry được lưu vào flash theo cấu trúc FIFO, đồng bộ lại server khi kết nối được phục hồi. Hệ thống có thể lưu trữ khoảng 500–1000 bản ghi telemetry offline, đủ cho 4–8 giờ mất kết nối ở tần suất gửi 30 giây/lần.
 
 [Bảng 5.2: Đánh giá hiệu năng firmware]
 
 | Tiêu chí | Giá trị thiết kế | Giá trị thực tế | Đánh giá |
 |---|---|---|---|
-| Số task FreeRTOS đồng thời | 5-7 task | 6 task | Đạt yêu cầu |
-| Thời gian chuyển trạng thái | < 500 ms | 200-400 ms | Tốt |
+| Số task FreeRTOS đồng thời | 5–7 task | 6 task | Đạt yêu cầu |
+| Thời gian chuyển trạng thái | < 500 ms | 200–400 ms | Tốt |
 | Dung lượng offline buffer | > 500 bản ghi | ~1000 bản ghi | Vượt yêu cầu |
-| Tỷ lệ gửi thành công MQTT (QoS 1) | > 99% | 99.2-99.8% | Tốt |
-| Thời gian đọc 1 PID OBD2 | < 200 ms | 100-150 ms | Tốt |
-| Thời gian kết nối BLE sau wake-up | < 5 giây | 1-3 giây | Tốt |
+| Tỷ lệ gửi thành công MQTT (QoS 1) | > 99% | 99.2–99.8% | Tốt |
+| Thời gian đọc 1 PID OBD2 | < 200 ms | 100–150 ms | Tốt |
+| Thời gian kết nối BLE sau wake-up | < 5 giây | 1–3 giây | Tốt |
 
 ### 5.1.3. Đánh giá hiệu năng hệ thống đám mây (Cloud)
 
 **API Server (Tracking_Backend):**
 
-API server xây dựng trên Express.js với TypeScript xử lý các request đồng thời hiệu quả. Trong điều kiện thử nghiệm với 50-100 thiết bị gửi dữ liệu đồng thời, thời gian phản hồi trung bình của các API endpoint dao động từ 20-80 ms cho các truy vấn đơn giản và 100-300 ms cho các truy vấn phức tạp có join nhiều bảng. Hệ thống sử dụng connection pooling cho PostgreSQL, giúp tối ưu hóa việc sử dụng kết nối cơ sở dữ liệu.
+API server xây dựng trên Express.js với TypeScript xử lý các request đồng thời hiệu quả. Trong điều kiện thử nghiệm với 50–100 thiết bị gửi dữ liệu đồng thời, thời gian phản hồi trung bình của các API endpoint dao động từ 20–80 ms cho các truy vấn đơn giản và 100–300 ms cho các truy vấn phức tạp có join nhiều bảng. Hệ thống sử dụng connection pooling cho PostgreSQL, giúp tối ưu hóa việc sử dụng kết nối cơ sở dữ liệu.
 
 **MQTT Broker (EMQX):**
 
@@ -78,18 +78,18 @@ PostgreSQL 16 lưu trữ dữ liệu quan hệ (người dùng, xe, khách hàng
 
 ### 5.1.4. Đánh giá hiệu năng giao diện người dùng (Frontend)
 
-Giao diện web xây dựng trên Next.js 15 với React 19 cung cấp trải nghiệm người dùng mượt mà. Dashboard hiển thị thông tin tổng quan đội xe với thời gian tải trang dưới 2 giây (First Contentful Paint). Bản đồ Leaflet cập nhật vị trí xe trơn tru khi nhận dữ liệu WebSocket, không bị giật lag khi hiển thị 50-100 xe đồng thời. Biểu đồ ECharts hiển thị dữ liệu telemetry (tốc độ, RPM, nhiệt độ) trực quan, hỗ trợ zoom và pan mượt mà.
+Giao diện web xây dựng trên Next.js 15 với React 19 cung cấp trải nghiệm người dùng mượt mà. Dashboard hiển thị thông tin tổng quan đội xe với thời gian tải trang dưới 2 giây (First Contentful Paint). Bản đồ Leaflet cập nhật vị trí xe trơn tru khi nhận dữ liệu WebSocket, không bị giật lag khi hiển thị 50–100 xe đồng thời. Biểu đồ ECharts hiển thị dữ liệu telemetry (tốc độ, RPM, nhiệt độ) trực quan, hỗ trợ zoom và pan mượt mà.
 
 [Bảng 5.3: Đánh giá hiệu năng tổng hợp hệ thống đám mây]
 
 | Thành phần | Tiêu chí | Giá trị đo được | Đánh giá |
 |---|---|---|---|
-| API Server | Thời gian phản hồi trung bình | 20-80 ms (đơn giản), 100-300 ms (phức tạp) | Tốt |
-| API Server | Số request đồng thời | 100-500 req/s | Đạt yêu cầu |
+| API Server | Thời gian phản hồi trung bình | 20–80 ms (đơn giản), 100–300 ms (phức tạp) | Tốt |
+| API Server | Số request đồng thời | 100–500 req/s | Đạt yêu cầu |
 | MQTT Broker | Độ trễ xử lý message | < 50 ms | Tốt |
 | WebSocket | Độ trễ end-to-end | < 2 giây | Đạt yêu cầu |
 | Frontend | First Contentful Paint | < 2 giây | Tốt |
-| Frontend | Số xe hiển thị đồng thời | 50-100 xe | Đạt yêu cầu |
+| Frontend | Số xe hiển thị đồng thời | 50–100 xe | Đạt yêu cầu |
 | PostgreSQL | Thời gian truy vấn có index | < 50 ms | Tốt |
 | VictoriaMetrics | Tốc độ ghi time-series | > 10.000 samples/s | Tốt |
 
@@ -99,20 +99,20 @@ Giao diện web xây dựng trên Next.js 15 với React 19 cung cấp trải ng
 
 ### 5.2.1. Phân tích chi phí phần cứng
 
-Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính toán dựa trên giá linh kiện mua lẻ tại thị trường Việt Nam. Mức giá này có thể giảm 20-30% khi mua số lượng lớn (> 100 bộ).
+Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính toán dựa trên giá linh kiện mua lẻ tại thị trường Việt Nam. Mức giá này có thể giảm 20–30% khi mua số lượng lớn (> 100 bộ).
 
 [Bảng 5.4: Chi phí BOM thiết bị tracker]
 
 | Linh kiện | Vai trò | Giá (VND) |
 |---|---|---|
-| ESP32-S3-WROOM-1 module | Vi điều khiển chính | 80.000 - 150.000 |
-| SIMCom A7600CE-T module | Modem 4G + GPS/GNSS | 250.000 - 450.000 |
-| vgate iCar Pro BLE | Adapter OBD2 BLE | 250.000 - 500.000 |
-| LIS3DH breakout board | Cảm biến gia tốc (IMU) | 30.000 - 50.000 |
-| Pin 21700 (1 cell, 5000mAh) | Pin dự phòng | 80.000 - 120.000 |
-| Mạch sạc IP2312 + boost/buck converter | Quản lý năng lượng | 50.000 - 100.000 |
-| PCB, vỏ hộp, dây cáp, linh kiện phụ | Cơ khí và kết nối | 130.000 - 260.000 |
-| **Tổng cộng** | | **870.000 - 1.630.000** |
+| ESP32-S3-WROOM-1 module | Vi điều khiển chính | 80.000–150.000 |
+| SIMCom A7600CE-T module | Modem 4G + GPS/GNSS | 250.000–450.000 |
+| vgate iCar Pro BLE | Adapter OBD2 BLE | 250.000–500.000 |
+| LIS3DH breakout board | Cảm biến gia tốc (IMU) | 30.000–50.000 |
+| Pin 21700 (1 cell, 5000mAh) | Pin dự phòng | 80.000–120.000 |
+| Mạch sạc IP2312 + boost/buck converter | Quản lý năng lượng | 50.000–100.000 |
+| PCB, vỏ hộp, dây cáp, linh kiện phụ | Cơ khí và kết nối | 130.000–260.000 |
+| **Tổng cộng** | | **870.000–1.630.000** |
 
 So sánh với các giải pháp thương mại trên thị trường cho thấy lợi thế chi phí rõ rệt của hệ thống đề xuất:
 
@@ -120,24 +120,24 @@ So sánh với các giải pháp thương mại trên thị trường cho thấy
 
 | Giải pháp | Chi phí thiết bị | Phí dịch vụ hàng tháng | Tổng chi phí năm đầu | Khả năng tùy biến |
 |---|---|---|---|---|
-| Hệ thống đề xuất | 870.000 - 1.630.000 VND | ~70.000 VND (SIM 4G) | 1.710.000 - 2.470.000 VND | Cao (mã nguồn mở) |
-| GPS Tracker đơn giản (Việt Nam) | 500.000 - 1.500.000 VND | 50.000 - 100.000 VND | 1.100.000 - 2.700.000 VND | Thấp |
-| Fleet Management thương mại (quốc tế) | 5.000.000 - 12.500.000 VND (~$200-500 USD) | 500.000 - 1.250.000 VND (~$20-50 USD/tháng) | 11.000.000 - 27.500.000 VND | Thấp (phụ thuộc vendor) |
-| iTracking / Vietmap Tracking | 2.000.000 - 4.000.000 VND | 100.000 - 300.000 VND | 3.200.000 - 7.600.000 VND | Trung bình |
+| Hệ thống đề xuất | 870.000–1.630.000 VND | ~70.000 VND (SIM 4G) | 1.710.000–2.470.000 VND | Cao (mã nguồn mở) |
+| GPS Tracker đơn giản (Việt Nam) | 500.000–1.500.000 VND | 50.000–100.000 VND | 1.100.000–2.700.000 VND | Thấp |
+| Fleet Management thương mại (quốc tế) | 5.000.000–12.500.000 VND (~$200–500 USD) | 500.000–1.250.000 VND (~$20–50 USD/tháng) | 11.000.000–27.500.000 VND | Thấp (phụ thuộc vendor) |
+| iTracking / Vietmap Tracking | 2.000.000–4.000.000 VND | 100.000–300.000 VND | 3.200.000–7.600.000 VND | Trung bình |
 
-Như vậy, chi phí tổng thể của hệ thống đề xuất chỉ bằng khoảng 10-20% so với giải pháp fleet management thương mại quốc tế, và tương đương hoặc thấp hơn so với giải pháp GPS tracker đơn giản nhưng cung cấp nhiều tính năng hơn (OBD2, cảnh báo thông minh, quản lý năng lượng).
+Như vậy, chi phí tổng thể của hệ thống đề xuất chỉ bằng khoảng 10–20% so với giải pháp fleet management thương mại quốc tế, và tương đương hoặc thấp hơn so với giải pháp GPS tracker đơn giản nhưng cung cấp nhiều tính năng hơn (OBD2, cảnh báo thông minh, quản lý năng lượng).
 
 ### 5.2.2. Phân tích chi phí hạ tầng đám mây
 
-Chi phí vận hành hạ tầng đám mây phụ thuộc vào quy mô đội xe và mức độ sử dụng. Đối với doanh nghiệp nhỏ (10-50 xe), toàn bộ hệ thống có thể chạy trên một máy chủ ảo (VPS) duy nhất.
+Chi phí vận hành hạ tầng đám mây phụ thuộc vào quy mô đội xe và mức độ sử dụng. Đối với doanh nghiệp nhỏ (10–50 xe), toàn bộ hệ thống có thể chạy trên một máy chủ ảo (VPS) duy nhất.
 
 [Bảng 5.6: Chi phí hạ tầng đám mây theo quy mô]
 
 | Quy mô đội xe | Cấu hình VPS | Chi phí VPS/tháng | Chi phí SIM 4G/tháng (tổng) | Tổng chi phí vận hành/tháng |
 |---|---|---|---|---|
-| 10-30 xe | 2 vCPU, 4GB RAM, 80GB SSD | ~250.000 VND (~$10 USD) | 700.000 - 2.100.000 VND | 950.000 - 2.350.000 VND |
-| 30-100 xe | 4 vCPU, 8GB RAM, 160GB SSD | ~500.000 VND (~$20 USD) | 2.100.000 - 7.000.000 VND | 2.600.000 - 7.500.000 VND |
-| 100-500 xe | Kubernetes cluster (3 node) | ~2.500.000 VND (~$100 USD) | 7.000.000 - 35.000.000 VND | 9.500.000 - 37.500.000 VND |
+| 10–30 xe | 2 vCPU, 4GB RAM, 80GB SSD | ~250.000 VND (~$10 USD) | 700.000–2.100.000 VND | 950.000–2.350.000 VND |
+| 30–100 xe | 4 vCPU, 8GB RAM, 160GB SSD | ~500.000 VND (~$20 USD) | 2.100.000–7.000.000 VND | 2.600.000–7.500.000 VND |
+| 100–500 xe | Kubernetes cluster (3 node) | ~2.500.000 VND (~$100 USD) | 7.000.000–35.000.000 VND | 9.500.000–37.500.000 VND |
 
 ### 5.2.3. Lợi thế từ công nghệ mã nguồn mở
 
@@ -150,13 +150,13 @@ Toàn bộ technology stack của hệ thống sử dụng các công nghệ mã
 - **VictoriaMetrics**: Cơ sở dữ liệu time-series miễn phí, hiệu suất vượt trội
 - **ESP-IDF + FreeRTOS**: Framework firmware miễn phí, hỗ trợ chính thức từ Espressif
 
-So với việc sử dụng các giải pháp thương mại (AWS IoT Core, Azure IoT Hub, hoặc các nền tảng fleet management SaaS), chi phí bản quyền và dịch vụ có thể lên tới 500.000 - 5.000.000 VND/tháng tùy quy mô, trong khi hệ thống đề xuất chỉ cần chi phí VPS cơ bản.
+So với việc sử dụng các giải pháp thương mại (AWS IoT Core, Azure IoT Hub, hoặc các nền tảng fleet management SaaS), chi phí bản quyền và dịch vụ có thể lên tới 500.000–5.000.000 VND/tháng tùy quy mô, trong khi hệ thống đề xuất chỉ cần chi phí VPS cơ bản.
 
 ### 5.2.4. Đánh giá tác động môi trường
 
 Hệ thống được thiết kế với ý thức tối ưu hóa tiêu thụ năng lượng, góp phần giảm tác động môi trường:
 
-- **Tiêu thụ điện thấp**: Chế độ deep sleep 10-15 μA khi xe đậu giúp giảm điện năng tiêu thụ từ ắc quy xe, giảm tần suất sạc ắc quy và kéo dài tuổi thọ ắc quy.
+- **Tiêu thụ điện thấp**: Chế độ deep sleep 10–15 μA khi xe đậu giúp giảm điện năng tiêu thụ từ ắc quy xe, giảm tần suất sạc ắc quy và kéo dài tuổi thọ ắc quy.
 - **Pin dự phòng giảm phụ thuộc ắc quy xe**: Khi xe đậu lâu ngày, thiết bị chuyển sang sử dụng pin dự phòng 21700, tránh rút điện từ ắc quy xe, bảo vệ ắc quy và giảm lượng khí thải từ việc sạc ắc quy.
 - **Giảm số lần đi kiểm tra xe trực tiếp**: Nhờ khả năng giám sát từ xa, người quản lý không cần lái xe đến vị trí xe để kiểm tra, giảm lượng khí thải CO2 từ các chuyến đi không cần thiết.
 - **Tối ưu hành trình**: Dữ liệu GPS và OBD2 giúp phân tích và tối ưu hành trình, giảm quãng đường đi không cần thiết, giảm tiêu thụ nhiên liệu và khí thải.
@@ -167,16 +167,16 @@ Hệ thống được thiết kế với ý thức tối ưu hóa tiêu thụ n�
 
 ### 5.3.1. Ma trận rủi ro
 
-Để đánh giá toàn diện các rủi ro của hệ thống, đồ án sử dụng ma trận xác suất - tác động (Probability-Impact Matrix) với 5 mức độ. Các rủi ro được xác định dựa trên phân tích kỹ thuật và kinh nghiệm triển khai thực tế.
+Để đánh giá toàn diện rủi ro của hệ thống, đồ án sử dụng ma trận xác suất - tác động (Probability-Impact Matrix) gồm 5 mức độ. Các rủi ro được xác định dựa trên phân tích kỹ thuật và kinh nghiệm triển khai thực tế.
 
 [Bảng 5.7: Thang đo xác suất và tác động]
 
 | Mức độ | Xác suất | Tác động |
 |---|---|---|
 | 1 - Rất thấp | < 5% | Ảnh hưởng không đáng kể, hệ thống vẫn hoạt động bình thường |
-| 2 - Thấp | 5-15% | Ảnh hưởng nhỏ, có thể khắc phục nhanh |
-| 3 - Trung bình | 15-30% | Ảnh hưởng vừa phải, cần xử lý trong thời gian ngắn |
-| 4 - Cao | 30-50% | Ảnh hưởng lớn, có thể làm gián đoạn dịch vụ |
+| 2 - Thấp | 5–15% | Ảnh hưởng nhỏ, có thể khắc phục nhanh |
+| 3 - Trung bình | 15–30% | Ảnh hưởng vừa phải, cần xử lý trong thời gian ngắn |
+| 4 - Cao | 30–50% | Ảnh hưởng lớn, có thể làm gián đoạn dịch vụ |
 | 5 - Rất cao | > 50% | Ảnh hưởng nghiêm trọng, có thể làm tê liệt hệ thống |
 
 [Bảng 5.8: Ma trận đánh giá rủi ro và biện pháp giảm thiểu]
@@ -189,14 +189,14 @@ Hệ thống được thiết kế với ý thức tối ưu hóa tiêu thụ n�
 | R4 | Tấn công bảo mật (giả mạo thiết bị, chiếm quyền truy cập) | 3 - Trung bình | 5 - Rất cao | **Cao** | Session-based auth với SHA-256, MQTT ACL per device, HTTPS/TLS, Zod input validation, rate limiting | Đã triển khai cơ bản |
 | R5 | Mất dữ liệu trong thời gian mất kết nối mạng kéo dài | 3 - Trung bình | 4 - Cao | **Cao** | Flash storage buffer (~1000 bản ghi), cơ chế retry với exponential backoff, QoS 1 đảm bảo delivery | Đã triển khai |
 | R6 | Hư hỏng phần cứng do nhiệt độ cực đoan (xe đỗ ngoài nắng) | 2 - Thấp | 4 - Cao | **Trung bình** | ESP32-S3 hoạt động -40 đến 85°C, thiết kế tản nhiệt, đặt thiết bị trong vị trí mát, cảnh báo nhiệt độ | Thiết kế có tính đến |
-| R7 | Cạn ắc quy xe do thiết bị hoạt động liên tục | 2 - Thấp | 5 - Rất cao | **Cao** | Mạch LVD tự động ngắt tại 11.5V, deep sleep 10-15 μA, pin dự phòng 21700 | Đã triển khai |
+| R7 | Cạn ắc quy xe do thiết bị hoạt động liên tục | 2 - Thấp | 5 - Rất cao | **Cao** | Mạch LVD + switch profile: 12V (LVD_cut=11.5V, OFF=12.0V, ON=12.2V), 24V (LVD_cut=23.0V, OFF=24.0V, ON=24.4V), deep sleep 10–15 μA, pin dự phòng 21700 | Đã triển khai |
 | R8 | Lỗi firmware gây treo hệ thống (firmware hang) | 3 - Trung bình | 4 - Cao | **Cao** | Watchdog timer (cần triển khai), FreeRTOS task monitoring, OTA update từ xa | Triển khai một phần |
 
 ### 5.3.2. Phân tích chi tiết các rủi ro chính
 
 **Rủi ro R1 - Mất sóng 4G tại khu vực nông thôn:**
 
-Đây là rủi ro có xác suất cao nhất trong thực tế vận hành tại Việt Nam, đặc biệt khi xe di chuyển qua các tuyến đường liên tỉnh hoặc vùng núi. Hệ thống đã được thiết kế với cơ chế offline buffering: khi mất kết nối 4G, dữ liệu telemetry (GPS, OBD2) được lưu vào bộ nhớ flash của ESP32-S3 theo cấu trúc FIFO. Khi kết nối được phục hồi, dữ liệu được gửi lên server theo thứ tự thời gian, đảm bảo không mất dữ liệu hành trình. Với dung lượng buffer khoảng 1000 bản ghi, hệ thống có thể hoạt động offline liên tục 4-8 giờ mà không mất dữ liệu.
+Đây là rủi ro có xác suất cao nhất trong thực tế vận hành tại Việt Nam, đặc biệt khi xe di chuyển qua các tuyến đường liên tỉnh hoặc vùng núi. Hệ thống đã được thiết kế với cơ chế offline buffering: khi mất kết nối 4G, dữ liệu telemetry (GPS, OBD2) được lưu vào bộ nhớ flash của ESP32-S3 theo cấu trúc FIFO. Khi kết nối được phục hồi, dữ liệu được gửi lên server theo thứ tự thời gian, đảm bảo không mất dữ liệu hành trình. Với dung lượng buffer khoảng 1000 bản ghi, hệ thống có thể hoạt động offline liên tục 4–8 giờ mà không mất dữ liệu.
 
 **Rủi ro R4 - Tấn công bảo mật:**
 
@@ -204,7 +204,7 @@ Bảo mật là rủi ro có tác động nghiêm trọng nhất. Hệ thống �
 
 **Rủi ro R7 - Cạn ắc quy xe:**
 
-Đây là rủi ro có tác động nghiêm trọng nhất đối với trải nghiệm người dùng cuối -- xe không khởi động được sẽ gây bất tiện lớn cho khách thuê xe. Hệ thống đã có nhiều cơ chế bảo vệ: mạch LVD tự động ngắt tại 11.5V (trước khi ắc quy cạn đến mức không khởi động được ở khoảng 11.0V), chế độ deep sleep chỉ tiêu thụ 10-15 μA (tương đương dòng tự phát của ắc quy), và pin dự phòng 21700 cho phép hoạt động độc lập khi mạch LVD ngắt nguồn từ ắc quy.
+Đây là rủi ro có tác động nghiêm trọng nhất đối với trải nghiệm người dùng cuối — xe không khởi động được sẽ gây bất tiện lớn cho khách thuê xe. Hệ thống đã có nhiều cơ chế bảo vệ: profile 12V ngắt LVD tại 11.5V, profile 24V ngắt LVD tại 23.0V; cơ chế chuyển nguồn có hysteresis (12V: OFF 12.0V/ON 12.2V, 24V: OFF 24.0V/ON 24.4V); chế độ deep sleep chỉ tiêu thụ 10–15 μA; và pin dự phòng 21700 cho phép hoạt động độc lập khi mạch LVD ngắt nguồn từ ắc quy.
 
 ### 5.3.3. Tổng hợp mức độ rủi ro
 
@@ -218,7 +218,7 @@ Bảo mật là rủi ro có tác động nghiêm trọng nhất. Hệ thống �
 | Firmware | 1 (R8) | 1 | 0 | 0 |
 | **Tổng cộng** | **8** | **5** | **3** | **0** |
 
-Kết quả cho thấy 5/8 rủi ro ở mức cao, nhưng phần lớn đã có biện pháp giảm thiểu được triển khai hoặc có phương án xử lý. Các rủi ro cần ưu tiên xử lý tiếp là R4 (bảo mật nâng cao) và R8 (watchdog timer và OTA update).
+Kết quả cho thấy 5/8 rủi ro ở mức cao; tuy nhiên, phần lớn đã có biện pháp giảm thiểu được triển khai hoặc đã có phương án xử lý. Các rủi ro cần ưu tiên xử lý tiếp theo là R4 (bảo mật nâng cao) và R8 (watchdog timer và OTA update).
 
 ---
 
@@ -265,7 +265,7 @@ Với khả năng xử lý của ESP32-S3 (dual-core Xtensa LX7, 240 MHz, 8MB PS
 
 - **Phát hiện bất thường tại thiết bị**: Thay vì gửi toàn bộ dữ liệu thô lên cloud để phân tích, thiết bị có thể chạy mô hình ML nhẹ (TensorFlow Lite Micro) để phát hiện bất thường ngay tại chỗ. Chỉ gửi cảnh báo khi phát hiện bất thường, giảm lượng dữ liệu truyền và tiết kiệm băng thông 4G.
 - **Phân loại hành vi lái xe tại thiết bị**: Sử dụng dữ liệu IMU và OBD2 để phân loại hành vi lái xe (bình thường, hung hãn, mệt mỏi) ngay trên ESP32-S3, gửi kết quả phân loại thay vì dữ liệu thô.
-- **Nén dữ liệu thông minh**: Sử dụng thuật toán nén dữ liệu trên thiết bị, chỉ gửi dữ liệu khi có thay đổi đáng kể (dead reckoning), giảm 50-70% lượng dữ liệu truyền.
+- **Nén dữ liệu thông minh**: Sử dụng thuật toán nén dữ liệu trên thiết bị, chỉ gửi dữ liệu khi có thay đổi đáng kể (dead reckoning), giảm 50–70% lượng dữ liệu truyền.
 
 ### 5.4.5. Triển khai sản xuất (Production Deployment)
 
@@ -283,7 +283,7 @@ Phiên bản phần cứng hiện tại sử dụng module rời (breakout board
 - **Thiết kế PCB tùy chỉnh**: Thiết kế PCB 4 lớp (4-layer) tích hợp toàn bộ thành phần (ESP32-S3, mạch nạp, mạch nguồn, đầu nối SIM, đầu nối antenna) trên một board duy nhất. Giảm kích thước xuống khoảng 60x40 mm, phù hợp để lắp đặt trong xe.
 - **Antenna tích hợp**: Sử dụng antenna ceramic cho GPS/GNSS và antenna PCB cho 4G/LTE, giảm số dây cáp và tăng độ tin cậy.
 - **Vỏ hộp công nghiệp**: Thiết kế vỏ hộp nhựa ABS chống nước (IP65), chịu nhiệt, với đầu nối OBD2 tích hợp và đầu nối nguồn 12V.
-- **Chi phí sản xuất hàng loạt**: Khi sản xuất từ 500 bộ trở lên, chi phí BOM có thể giảm xuống còn 500.000 - 800.000 VND/bộ nhờ mua linh kiện số lượng lớn và tối ưu hóa thiết kế PCB.
+- **Chi phí sản xuất hàng loạt**: Khi sản xuất từ 500 bộ trở lên, chi phí BOM có thể giảm xuống còn 500.000–800.000 VND/bộ nhờ mua linh kiện số lượng lớn và tối ưu hóa thiết kế PCB.
 
 ### 5.4.7. Tóm tắt lộ trình phát triển
 
@@ -291,15 +291,15 @@ Phiên bản phần cứng hiện tại sử dụng module rời (breakout board
 
 | Giai đoạn | Thời gian | Nội dung chính | Ưu tiên |
 |---|---|---|---|
-| Phase 1.5 - Bảo mật | 1-2 tháng | TLS cho MQTT, device certificate, watchdog timer, security logging | Cao |
-| Phase 2 - Mở rộng tính năng | 2-4 tháng | Bookings, payments, damage reports, reviews, mobile app | Cao |
-| Phase 2.5 - Tối ưu hóa | 1-2 tháng | Redis caching, query optimization, connection pooling, health checks | Trung bình |
-| Phase 3 - AI/ML | 3-6 tháng | Driving behavior analysis, predictive maintenance, anomaly detection | Trung bình |
-| Phase 4 - Production | 2-3 tháng | Kubernetes, CI/CD, monitoring, TLS everywhere | Cao |
-| Phase 5 - Hardware v2 | 4-6 tháng | Custom PCB, vỏ hộp công nghiệp, sản xuất hàng loạt | Thấp (tùy nhu cầu) |
+| Phase 1.5 - Bảo mật | 1–2 tháng | TLS cho MQTT, device certificate, watchdog timer, security logging | Cao |
+| Phase 2 - Mở rộng tính năng | 2–4 tháng | Bookings, payments, damage reports, reviews, mobile app | Cao |
+| Phase 2.5 - Tối ưu hóa | 1–2 tháng | Redis caching, query optimization, connection pooling, health checks | Trung bình |
+| Phase 3 - AI/ML | 3–6 tháng | Driving behavior analysis, predictive maintenance, anomaly detection | Trung bình |
+| Phase 4 - Production | 2–3 tháng | Kubernetes, CI/CD, monitoring, TLS everywhere | Cao |
+| Phase 5 - Hardware v2 | 4–6 tháng | Custom PCB, vỏ hộp công nghiệp, sản xuất hàng loạt | Thấp (tùy nhu cầu) |
 
 ---
 
 ## Kết luận chương 5
 
-Hệ thống IoT Vehicle Tracking System đã đạt được các mục tiêu kỹ thuật đề ra: thiết bị tracker hoạt động ổn định với quản lý năng lượng thông minh, firmware FreeRTOS đa nhiệm hiệu quả, hệ thống đám mây xử lý dữ liệu thời gian thực với độ trễ chấp nhận được, và giao diện web trực quan dễ sử dụng. Về mặt kinh tế, chi phí BOM 870.000 - 1.630.000 VND và chi phí vận hành thấp (chi phí VPS + SIM 4G) tạo lợi thế cạnh tranh lớn so với các giải pháp thương mại. Các rủi ro chính đã được nhận diện và có biện pháp giảm thiểu phù hợp. Lộ trình phát triển 5 giai đoạn được đề xuất để mở rộng hệ thống từ prototype sang sản phẩm thương mại hoàn chỉnh.
+Tổng hợp kết quả đánh giá cho thấy hệ thống IoT Vehicle Tracking System nhìn chung đạt các mục tiêu kỹ thuật cốt lõi: thiết bị tracker vận hành ổn định với cơ chế quản lý năng lượng phù hợp, firmware FreeRTOS đa nhiệm hoạt động hiệu quả, hạ tầng đám mây xử lý dữ liệu thời gian thực trong ngưỡng độ trễ chấp nhận được và giao diện web đáp ứng nhu cầu khai thác vận hành. Về kinh tế, mức chi phí BOM 870.000–1.630.000 VND cùng chi phí vận hành thấp (VPS + SIM 4G) tạo lợi thế cạnh tranh rõ rệt so với giải pháp thương mại cùng phân khúc. Các rủi ro trọng yếu cũng đã được nhận diện kèm biện pháp giảm thiểu tương ứng, qua đó hình thành cơ sở khả thi cho lộ trình 5 giai đoạn chuyển từ prototype sang sản phẩm thương mại.

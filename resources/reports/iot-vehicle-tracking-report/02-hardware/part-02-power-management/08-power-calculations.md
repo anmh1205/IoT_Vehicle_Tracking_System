@@ -73,7 +73,7 @@
 
 ### VI.3 Thời Gian Hoạt Động từ Pin 21700 (Backup Mode)
 
-**Khi ắc quy < 12V, tracker chuyển sang pin:**
+**Khi ắc quy thấp hơn ngưỡng `Switch_OFF` theo profile, tracker chuyển sang pin:**
 
 #### Trường Hợp 1: Heartbeat 15 Phút (Chế Độ Đỗ Xe)
 
@@ -140,7 +140,7 @@ Giả sử đỗ **20 giờ/ngày**:
 
 → Với dòng sạc 3A, pin sẽ được sạc đầy nhanh chóng (2 giờ) → đảm bảo pin luôn đầy khi cần backup.
 
-**Khi Ắc Quy Yếu (< 12V):**
+**Khi Ắc Quy Yếu (`U_batt <= Switch_OFF` theo profile):**
 
 - Tracker chuyển sang pin
 - Pin đã được sạc đầy từ các lần chạy trước

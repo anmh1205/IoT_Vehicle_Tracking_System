@@ -169,13 +169,13 @@ Tôi xin chịu hoàn toàn trách nhiệm về nội dung đồ án tốt nghi�
 
 ---
 
-Trong bối cảnh ngành dịch vụ cho thuê xe tự lái phát triển mạnh mẽ tại Việt Nam, nhu cầu giám sát và quản lý phương tiện từ xa trở thành yếu tố then chốt đối với các doanh nghiệp vận tải. Đồ án tốt nghiệp này trình bày quá trình thiết kế và xây dựng một hệ thống IoT hoàn chỉnh cho phép giám sát phương tiện giao thông theo thời gian thực, tích hợp đa dạng cảm biến và giao thức truyền thông hiện đại.
+Trong bối cảnh dịch vụ cho thuê xe tự lái tại Việt Nam tăng trưởng nhanh, nhu cầu giám sát và quản lý phương tiện từ xa đã trở thành yêu cầu trọng yếu đối với doanh nghiệp vận tải. Đồ án này trình bày quá trình thiết kế và xây dựng một hệ thống IoT hoàn chỉnh, cho phép giám sát phương tiện theo thời gian thực, đồng thời tích hợp nhiều cảm biến và giao thức truyền thông hiện đại.
 
-Về phần cứng, hệ thống sử dụng vi điều khiển ESP32-S3 làm đơn vị xử lý trung tâm, kết hợp với modem SIMCom A7600CE-T tích hợp GPS/GNSS để định vị vệ tinh và truyền dữ liệu qua mạng di động 4G LTE. Thiết bị đọc dữ liệu chẩn đoán động cơ OBD2 thông qua adapter vgate iCar Pro sử dụng giao thức Bluetooth Low Energy (BLE), đồng thời tích hợp cảm biến gia tốc IMU LIS3DH để phát hiện va chạm và phân tích hành vi lái xe. Hệ thống quản lý nguồn bao gồm mạch buck/boost converter, bộ sạc pin dự phòng 21700, và cơ chế ngắt điện áp thấp (LVD) nhằm đảm bảo hoạt động liên tục ngay cả khi xe tắt máy.
+Về phần cứng, hệ thống dùng ESP32-S3 làm trung tâm xử lý, kết hợp modem SIMCom A7600CE-T (GPS/GNSS + 4G LTE) để định vị và truyền dữ liệu. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng thời dùng IMU LIS3DH để phát hiện va chạm và phân tích hành vi lái xe. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng 21700 và cơ chế ngắt điện áp thấp (LVD), bảo đảm thiết bị vẫn hoạt động khi xe tắt máy.
 
-Về phần mềm, dữ liệu từ thiết bị IoT được truyền về máy chủ thông qua giao thức MQTT 5.0 sử dụng EMQX broker với hỗ trợ ACL phân quyền theo thiết bị. Dịch vụ MQTT Bridge tiếp nhận và phân luồng dữ liệu đến các hệ thống lưu trữ chuyên biệt: PostgreSQL cho dữ liệu quan hệ (thông tin phương tiện, người dùng, cảnh báo, hàng rào địa lý), VictoriaMetrics cho dữ liệu chuỗi thời gian (tọa độ GPS, thông số OBD2, dữ liệu cảm biến), và VictoriaLogs cho nhật ký sự kiện hệ thống. API server được xây dựng trên nền tảng Express.js với TypeScript, tuân theo kiến trúc Domain-Driven Design (DDD) với xác thực phiên dựa trên token lưu trong cơ sở dữ liệu.
+Về phần mềm, dữ liệu từ thiết bị IoT được truyền về máy chủ bằng MQTT 5.0 qua EMQX và phân quyền theo ACL từng thiết bị. MQTT Bridge tiếp nhận, rồi phân luồng dữ liệu đến các hệ lưu trữ chuyên biệt: PostgreSQL cho dữ liệu quan hệ (phương tiện, người dùng, cảnh báo, hàng rào địa lý), VictoriaMetrics cho dữ liệu chuỗi thời gian (tọa độ GPS, thông số OBD2, dữ liệu cảm biến), và VictoriaLogs cho nhật ký sự kiện. API server xây dựng bằng Express.js + TypeScript, theo kiến trúc DDD, với cơ chế xác thực phiên dựa trên token lưu trong cơ sở dữ liệu.
 
-Giao diện web được phát triển bằng Next.js 15 và React 19, cung cấp bảng điều khiển thời gian thực với bản đồ Leaflet, biểu đồ ECharts, và kết nối WebSocket qua Socket.IO để cập nhật vị trí và trạng thái phương tiện tức thời. Toàn bộ hệ thống được đóng gói và triển khai bằng Docker, đảm bảo tính nhất quán giữa môi trường phát triển và vận hành.
+Giao diện web được phát triển bằng Next.js 15 và React 19, cung cấp bảng điều khiển thời gian thực với bản đồ Leaflet, biểu đồ ECharts và kết nối WebSocket qua Socket.IO để cập nhật tức thời vị trí, trạng thái phương tiện. Toàn bộ hệ thống được đóng gói và triển khai bằng Docker nhằm bảo đảm tính nhất quán giữa môi trường phát triển và môi trường vận hành.
 
 Kết quả đạt được là một hệ thống IoT giám sát phương tiện hoàn chỉnh từ phần cứng đến phần mềm, có khả năng theo dõi vị trí thời gian thực, đọc dữ liệu chẩn đoán OBD2, thiết lập hàng rào địa lý, cảnh báo tự động, và hỗ trợ quản lý đội xe cho dịch vụ cho thuê xe tự lái.
 
@@ -207,7 +207,7 @@ The result is a complete end-to-end IoT vehicle tracking system, from hardware t
 
 # LỜI CẢM ƠN - ACKNOWLEDGEMENTS
 
-Trước tiên, tôi xin gửi lời cảm ơn chân thành và sâu sắc nhất đến [...] -- người đã trực tiếp hướng dẫn, định hướng và tận tình hỗ trợ tôi trong suốt quá trình thực hiện đồ án tốt nghiệp này. Những góp ý chuyên môn và sự động viên của thầy/cô là nguồn động lực quan trọng giúp tôi hoàn thành đề tài.
+Trước tiên, tôi xin gửi lời cảm ơn chân thành và sâu sắc nhất đến [...] — người đã trực tiếp hướng dẫn, định hướng và tận tình hỗ trợ tôi trong suốt quá trình thực hiện đồ án tốt nghiệp này. Những góp ý chuyên môn và sự động viên của thầy/cô là nguồn động lực quan trọng giúp tôi hoàn thành đề tài.
 
 Tôi xin trân trọng cảm ơn quý thầy cô trong Khoa [...], Trường [...] đã truyền đạt những kiến thức nền tảng vững chắc trong suốt quá trình học tập, tạo điều kiện thuận lợi để tôi có thể áp dụng vào thực tiễn thông qua đồ án này.
 
@@ -224,7 +224,7 @@ Xin chân thành cảm ơn!
 
 ---
 
-# MỤC LỤC - TABLE OF CONTENT
+# MỤC LỤC - TABLE OF CONTENTS
 
 <!-- MỤC LỤC được cập nhật theo cấu trúc chương thực tế -->
 
@@ -242,34 +242,34 @@ Xin chân thành cảm ơn!
 | | DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ | ... |
 | | DANH MỤC TỪ VIẾT TẮT | ... |
 | **Chương 1** | **GIỚI THIỆU DỰ ÁN - SUMMARY** | ... |
-| 1.1 | Đặt vấn đề / Bối cảnh của dự án -- Problem definition and Background | ... |
+| 1.1 | Đặt vấn đề / Bối cảnh của dự án — Problem definition and Background | ... |
 | 1.2 | Mục tiêu và phạm vi của dự án | ... |
 | 1.3 | Các tiêu chí cần đạt được của dự án | ... |
 | 1.4 | Phương pháp tiếp cận thiết kế kỹ thuật | ... |
 | 1.5 | Kết quả và khuyến nghị | ... |
 | **Chương 2** | **PHÂN TÍCH VẤN ĐỀ KỸ THUẬT** | ... |
-| 2.1 | Mô tả vấn đề -- Problem statement | ... |
-| 2.2 | Bối cảnh và cơ sở kỹ thuật -- Background and Technical reviews | ... |
-| 2.3 | Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế -- Design criteria and Constraints | ... |
-| 2.4 | Yêu cầu từ các bên liên quan -- Constituent's requirements | ... |
+| 2.1 | Mô tả vấn đề — Problem statement | ... |
+| 2.2 | Bối cảnh và cơ sở kỹ thuật — Background and Technical reviews | ... |
+| 2.3 | Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế — Design criteria and Constraints | ... |
+| 2.4 | Yêu cầu từ các bên liên quan — Constituent's requirements | ... |
 | **Chương 3** | **CÁC GIẢI PHÁP THIẾT KẾ - DESIGN SOLUTIONS** | ... |
-| 3.1 | Phân tích tổng hợp -- General analysis | ... |
+| 3.1 | Phân tích tổng hợp — General analysis | ... |
 | 3.1.1 | Phân tích và lựa chọn phần cứng | ... |
 | 3.1.2 | Phân tích và lựa chọn giải pháp firmware | ... |
 | 3.1.3 | Phân tích và lựa chọn kiến trúc Cloud | ... |
 | 3.1.4 | Phân tích và lựa chọn công nghệ Frontend | ... |
-| 3.2 | Đề xuất các giải pháp -- Proposed multiple solutions | ... |
+| 3.2 | Đề xuất các giải pháp — Proposed multiple solutions | ... |
 | 3.2.1 | Giải pháp phần cứng | ... |
 | 3.2.2 | Giải pháp firmware | ... |
 | 3.2.3 | Giải pháp Backend & Cloud | ... |
 | 3.2.4 | Giải pháp Frontend | ... |
-| 3.3 | Phân tích, đánh giá và lựa chọn phương án khả thi -- Analysis, Evaluation and Selection | ... |
-| 3.4 | Tối ưu phương án thiết kế -- The optimal solution | ... |
+| 3.3 | Phân tích, đánh giá và lựa chọn phương án khả thi — Analysis, Evaluation and Selection | ... |
+| 3.4 | Tối ưu phương án thiết kế — The optimal solution | ... |
 | **Chương 4** | **TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ - IMPLEMENTATION AND RESULTS** | ... |
-| 4.1 | Thiết kế chi tiết giải pháp -- Detailed design solution | ... |
+| 4.1 | Thiết kế chi tiết giải pháp — Detailed design solution | ... |
 | 4.1.1 | Thiết kế chi tiết phần cứng | ... |
 | 4.1.2 | Triển khai firmware, cloud và giao diện điều khiển | ... |
-| 4.2 | Chế tạo và lắp ráp hệ thống -- Manufacture and Assembly | ... |
+| 4.2 | Chế tạo và lắp ráp hệ thống — Manufacture and Assembly | ... |
 | 4.2.1 | Lắp ráp mạch điện tử | ... |
 | 4.2.2 | Lắp đặt trong xe | ... |
 | 4.2.3 | Triển khai Firmware | ... |
@@ -277,17 +277,17 @@ Xin chân thành cảm ơn!
 | 4.2.5 | Triển khai Frontend Dashboard | ... |
 | 4.2.6 | Cấu hình giám sát hệ thống | ... |
 | 4.2.7 | Checklist hardening trước khi vận hành production | ... |
-| 4.3 | Đo lường và kết quả -- Measurement and Result | ... |
+| 4.3 | Đo lường và kết quả — Measurement and Result | ... |
 | **Chương 5** | **ĐÁNH GIÁ VÀ KHUYẾN NGHỊ - EVALUATION AND RECOMMENDATION** | ... |
 | 5.1 | Đánh giá hiệu năng | ... |
 | 5.2 | Đánh giá kinh tế và môi trường | ... |
 | 5.3 | Đánh giá rủi ro và biện pháp giảm thiểu | ... |
 | 5.4 | Khuyến nghị cho tương lai | ... |
 | **Chương 6** | **PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM - REFLECTION AND CASE-STUDIES** | ... |
-| 6.1 | Ứng dụng kiến thức kỹ thuật -- Earlier course work | ... |
-| 6.2 | Giải quyết các vấn đề kỹ thuật phức tạp -- Complex engineering problems | ... |
-| 6.3 | Tác động đạo đức và xã hội -- Ethical and Social impacts | ... |
-| 6.4 | Tổng kết và bài học kinh nghiệm -- General reflection and case-studies | ... |
+| 6.1 | Ứng dụng kiến thức kỹ thuật — Earlier course work | ... |
+| 6.2 | Giải quyết các vấn đề kỹ thuật phức tạp — Complex engineering problems | ... |
+| 6.3 | Tác động đạo đức và xã hội — Ethical and Social impacts | ... |
+| 6.4 | Tổng kết và bài học kinh nghiệm — General reflection and case-studies | ... |
 | | TÀI LIỆU TRÍCH DẪN - REFERENCES | ... |
 | | PHỤ LỤC - APPENDICES | ... |
 
@@ -342,7 +342,7 @@ Xin chân thành cảm ơn!
 
 ---
 
-# DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATION
+# DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATIONS
 
 | Từ viết tắt | Tiếng Anh | Tiếng Việt |
 |-------------|-----------|------------|

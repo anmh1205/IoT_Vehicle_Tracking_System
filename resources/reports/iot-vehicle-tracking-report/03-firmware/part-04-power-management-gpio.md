@@ -27,18 +27,18 @@ void select_backup_power() {
 **Flowchart:**
 
 ```
-Đọc U_batt (ADC)
+Đọc U_batt (ADC) + load thresholds theo profile (12V/24V)
   │
-  ├─ IGN = ON?
+  ├─ IGN = ON và U_batt >= IGN_ON?
   │   └─ YES → select_battery_power()
   │             DONE
   │
-  └─ NO → U_batt < 12.0 V?
+  └─ NO → U_batt <= Switch_OFF?
            ├─ YES → select_backup_power()
            │         Gửi cảnh báo
            │         DONE
            │
-           └─ NO → U_batt > 12.2 V?
+           └─ NO → U_batt >= Switch_ON?
                     ├─ YES → select_battery_power()
                     │         Gửi cảnh báo phục hồi
                     │         DONE
@@ -46,6 +46,11 @@ void select_backup_power() {
                     └─ NO → Giữ nguyên trạng thái
                               DONE
 ```
+
+**Bộ ngưỡng mặc định theo profile:**
+
+- **12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
 
 #### V.6.2 Điều Khiển Charger (IP2312)
 
@@ -71,17 +76,22 @@ void disable_charger() {
 
 **Điều Kiện Sạc:**
 
-- **IGN ON** + **U_batt > 12 V** → Enable charger
+- **IGN ON** + **U_batt >= IGN_ON (theo profile)** → Enable charger
 - **IGN OFF** → Disable charger (bảo vệ ắc quy)
-- **U_batt < 12 V** → Disable charger (bảo vệ ắc quy)
+- **U_batt <= Switch_OFF (theo profile)** → Disable charger (bảo vệ ắc quy)
+
+Mặc định:
+
+- **Profile 12V**: bật sạc khi `U_batt >= 13.0V`
+- **Profile 24V**: bật sạc khi `U_batt >= 26.0V`
 
 #### V.6.3 Đọc Trạng Thái LVD
 
 **GPIO Mapping:**
 
 - **GPIO19**: LVD_STATUS (đọc từ comparator LM393)
-  - HIGH (1): U_batt > 12 V
-  - LOW (0): U_batt < 12 V
+  - HIGH (1): U_batt > Switch_OFF theo profile
+  - LOW (0): U_batt <= Switch_OFF theo profile
 
 **Đọc Trạng Thái:**
 
@@ -95,7 +105,28 @@ bool read_lvd_status() {
 
 - **Backup cho ADC**: Nếu ADC lỗi, có thể dùng LVD status
 - **Fast check**: Đọc nhanh trạng thái nguồn
-- **Hysteresis**: Comparator tự xử lý hysteresis (12.0V → 12.2V)
+- **Hysteresis**: Comparator tự xử lý theo profile (12V: 12.0V → 12.2V, 24V: 24.0V → 24.4V)
+
+### V.6.4 Đo U_batt bằng ADC cho cả 12V/24V
+
+**Mạch chia áp thống nhất:**
+
+- `R1 = 100kΩ` (từ U_batt xuống nút ADC)
+- `R2 = 10kΩ` (từ nút ADC xuống GND)
+- Tỷ lệ: `R2/(R1+R2) = 10k/110k = 0.0909`
+
+**Công thức firmware:**
+
+```c
+float v_adc = (adc_raw / 4095.0f) * 3.3f;
+float u_batt = v_adc * 11.0f;
+```
+
+**Ví dụ chuyển đổi:**
+
+- `U_batt=12.0V` → `V_adc≈1.091V` → `ADC≈1354`
+- `U_batt=24.0V` → `V_adc≈2.182V` → `ADC≈2708`
+- `U_batt=26.0V` → `V_adc≈2.364V` (vẫn trong dải ADC 3.3V)
 
 ### V.7 GPIO Mapping và Configuration
 

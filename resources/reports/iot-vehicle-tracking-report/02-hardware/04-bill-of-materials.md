@@ -15,10 +15,10 @@ Danh sách vật liệu (Bill of Materials - BOM) cho hệ thống tracker, bao 
 | 5   | 21700 Li-ion 5000mAh            | Cái      | 1   | 100,000–200,000    | Loại có protection board                   |
 | 6   | Module sạc IP2312 (3A)          | Cái      | 1   | 20,000–40,000      | IP2312 charger module Type-C, 3A            |
 | 7   | BMS/Protection Board 1S         | Cái      | 1   | 10,000–20,000      | BMS 1S 3A hoặc DW01+MOSFET                 |
-| 8   | Buck DC-DC (12→5V, 3A)          | Cái      | 1   | 15,000–25,000      | LM2596 module (khuyến nghị)                 |
+| 8   | Buck DC-DC (12/24→5V, 3A)       | Cái      | 1   | 15,000–25,000      | LM2596 module (khuyến nghị)                 |
 | 9   | Boost DC-DC (3.7→5V, 2A)        | Cái      | 1   | 10,000–15,000      | MT3608 module (khuyến nghị)                 |
 | 10  | Relay Module 5V 1-channel       | Cái      | 1   | 5,000–10,000       | Điều khiển chuyển nguồn (Power MUX)        |
-| 11  | Resistor (10kΩ, 2.2kΩ, etc.)    | Gói      | 1   | 5,000–10,000       | Voltage divider, pull-up/down              |
+| 11  | Resistor (100kΩ, 10kΩ, etc.)    | Gói      | 1   | 5,000–10,000       | Voltage divider ADC 12V/24V, pull-up/down  |
 | 12  | Capacitor (100µF, 220µF, etc.)  | Gói      | 1   | 5,000–10,000       | Decoupling, filtering                      |
 | 13  | Diode (Schottky 1N5822)         | Cái      | 2   | 2,000–5,000        | Diode OR backup                            |
 | 14  | Connector (Terminal, Header)    | Gói      | 1   | 10,000–20,000      | Kết nối dây, header pin                    |
@@ -104,7 +104,7 @@ Danh sách vật liệu (Bill of Materials - BOM) cho hệ thống tracker, bao 
 
 #### Nhóm 4: Power Management
 
-- Buck converter LM2596 (12V→5V)
+- Buck converter LM2596 (12V/24V→5V)
 - Boost converter MT3608 (3.7V→5V)
 - Relay module 5V
 

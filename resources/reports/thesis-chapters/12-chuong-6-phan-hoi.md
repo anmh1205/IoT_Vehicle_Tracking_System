@@ -2,7 +2,7 @@
 
 ## 6.1. Ứng dụng kiến thức kỹ thuật – Earlier course work
 
-Dự án "IoT Vehicle Tracking System" là kết quả tổng hợp của nhiều môn học và lĩnh vực kiến thức được tích lũy trong suốt quá trình học tập tại trường. Mỗi tầng (layer) của hệ thống -- từ phần cứng, firmware, backend, đến frontend -- đều đòi hỏi việc áp dụng các kiến thức nền tảng đã được đào tạo. Phần này trình bày chi tiết cách các môn học đã được ứng dụng vào thực tế dự án.
+Dự án "IoT Vehicle Tracking System" là kết quả tích hợp kiến thức từ nhiều học phần và lĩnh vực đã tích lũy trong quá trình học tập. Mỗi tầng của hệ thống — từ phần cứng, firmware, backend đến frontend — đều yêu cầu vận dụng trực tiếp kiến thức nền tảng. Phần này trình bày cách các học phần được chuyển hóa thành quyết định kỹ thuật trong thực tiễn dự án.
 
 ### 6.1.1. Vi xử lý và Vi điều khiển
 
@@ -27,7 +27,7 @@ Kiến thức mạng máy tính là nền tảng cho toàn bộ lớp truyền t
 Kiến thức cơ sở dữ liệu được áp dụng trong việc thiết kế và tối ưu hóa hệ thống lưu trữ:
 
 - **Thiết kế cơ sở dữ liệu quan hệ (PostgreSQL)**: Áp dụng các nguyên tắc chuẩn hóa (normalization), thiết kế bảng (table design), khóa chính/khóa ngoại (primary/foreign keys), và ràng buộc toàn vẹn (integrity constraints) để xây dựng schema cho hệ thống quản lý phương tiện, người dùng, cảnh báo, và geofences.
-- **Cơ sở dữ liệu chuỗi thời gian (VictoriaMetrics)**: Mở rộng kiến thức từ cơ sở dữ liệu truyền thống sang cơ sở dữ liệu chuyên biệt cho dữ liệu time-series -- hiểu về cách tổ chức dữ liệu theo thời gian, chiến lược nén (compression), và chính sách lưu trữ (retention policy).
+- **Cơ sở dữ liệu chuỗi thời gian (VictoriaMetrics)**: Mở rộng kiến thức từ cơ sở dữ liệu truyền thống sang cơ sở dữ liệu chuyên biệt cho dữ liệu time-series — hiểu về cách tổ chức dữ liệu theo thời gian, chiến lược nén (compression), và chính sách lưu trữ (retention policy).
 - **Tối ưu hóa SQL**: Sử dụng chỉ mục (indexing), truy vấn tối ưu (query optimization), và phân tích kế hoạch thực thi (EXPLAIN ANALYZE) để đảm bảo hiệu suất truy vấn đáp ứng yêu cầu dưới 200ms cho p95 request.
 
 ### 6.1.4. Lập trình hướng đối tượng
@@ -42,7 +42,7 @@ Các nguyên tắc lập trình hướng đối tượng (OOP) được áp dụ
 
 Kiến thức điện tử là nền tảng cho việc thiết kế phần cứng của thiết bị tracker:
 
-- **Thiết kế mạch quản lý nguồn**: Áp dụng kiến thức về mạch buck converter (giảm áp 12V xuống 3.3V/5V), boost converter (tăng áp từ pin 3.7V lên 5V), và power path management để thiết kế hệ thống cấp nguồn đa đầu vào (ắc quy xe + pin dự phòng).
+- **Thiết kế mạch quản lý nguồn**: Áp dụng kiến thức về mạch buck converter (giảm áp ắc quy xe 12V hoặc 24V xuống 3.3V/5V), boost converter (tăng áp từ pin 3.7V lên 5V), và power path management để thiết kế hệ thống cấp nguồn đa đầu vào (ắc quy xe + pin dự phòng).
 - **Đọc giá trị ADC**: Sử dụng kiến thức về bộ chuyển đổi tương tự - số (ADC) để đọc điện áp ắc quy xe thông qua mạch chia áp (voltage divider), tính toán độ phân giải và sai số.
 - **Giao tiếp cảm biến**: Áp dụng kiến thức về giao diện SPI/I2C để giao tiếp với cảm biến gia tốc LIS3DH, cấu hình các thanh ghi điều khiển, đọc dữ liệu gia tốc 3 trục, và thiết lập ngắt (interrupt) cho phát hiện chuyển động.
 
@@ -59,7 +59,7 @@ Các phương pháp và công cụ kỹ thuật phần mềm được áp dụng
 
 ## 6.2. Giải quyết các vấn đề kỹ thuật phức tạp – Complex engineering problems
 
-Trong quá trình thực hiện dự án, nhóm phát triển đã đối mặt và giải quyết thành công nhiều vấn đề kỹ thuật phức tạp. Phần này trình bày chi tiết bốn vấn đề lớn nhất và cách tiếp cận giải quyết.
+Trong quá trình thực hiện dự án, nhóm phát triển đã đối mặt và giải quyết nhiều vấn đề kỹ thuật phức tạp. Phần này trình bày bốn vấn đề tiêu biểu nhất cùng cách tiếp cận xử lý.
 
 ### 6.2.1. Vấn đề 1: Phân tích bản tin OBD2 đa khung qua BLE
 
@@ -68,12 +68,12 @@ Trong quá trình thực hiện dự án, nhóm phát triển đã đối mặt 
 Việc kết nối và giao tiếp với OBD2 adapter vgate iCar Pro qua Bluetooth Low Energy (BLE) là một trong những thách thức kỹ thuật lớn nhất của dự án. Vấn đề cụ thể bao gồm:
 
 - Giao thức BLE của vgate iCar Pro không có tài liệu chính thức công khai. Thông tin giao tiếp (UUID dịch vụ, characteristic, định dạng bản tin) phải được khảo sát ngược (reverse engineering) từ các ứng dụng mã nguồn mở và bản ghi Bluetooth.
-- Bản tin OBD2 có thể trải dài nhiều khung dữ liệu BLE (multi-frame response), đặc biệt với các lệnh như đọc mã lỗi DTC (Mode 03) hoặc dữ liệu động cơ nhiều PID. Việc ghép nối các khung dữ liệu cần tuân theo ISO 15765-2 (ISO-TP), một giao thức không được tài liệu OBD2 phổ thông đề cập chi tiết.
+- Bản tin OBD2 có thể trải dài nhiều khung dữ liệu BLE (multi-frame response), đặc biệt với các lệnh như đọc mã lỗi DTC (Mode 03) hoặc dữ liệu động cơ nhiều PID. Việc ghép nối các khung dữ liệu cần tuân theo ISO 15765–2 (ISO-TP), một giao thức không được tài liệu OBD2 phổ thông đề cập chi tiết.
 - Các nguồn tài liệu trực tuyến thường mâu thuẫn nhau về cách xử lý multi-frame: một số hướng dẫn chỉ áp dụng cho ELM327 (chip interpreter), không tương thích trực tiếp với vgate iCar Pro sử dụng chip STN1110.
 
 **Cách giải quyết:**
 
-1. *Nghiên cứu và khảo sát*: Phân tích mã nguồn của các dự án mã nguồn mở tương tự (esp32-obd2-meter, python-OBD), nghiên cứu tài liệu ISO 15765-2, và sử dụng ứng dụng nRF Connect để bắt và phân tích các bản tin BLE giữa điện thoại và vgate iCar Pro.
+1. *Nghiên cứu và khảo sát*: Phân tích mã nguồn của các dự án mã nguồn mở tương tự (esp32-obd2-meter, python-OBD), nghiên cứu tài liệu ISO 15765–2, và sử dụng ứng dụng nRF Connect để bắt và phân tích các bản tin BLE giữa điện thoại và vgate iCar Pro.
 2. *Thiết kế lớp trừu tượng*: Xây dựng module phân tích OBD2 với khả năng xử lý cả bản tin đơn khung (single-frame) và đa khung (multi-frame), bao gồm Flow Control frames và Consecutive Frames theo chuẩn ISO-TP.
 3. *Kiểm thử lặp đi lặp lại*: Tạo bộ test với các PID OBD2 phổ biến (Mode 01: RPM, Speed, Coolant Temp, Fuel Level) và các lệnh multi-frame (Mode 03: DTC, Mode 09: VIN) để đảm bảo tính chính xác.
 
@@ -92,7 +92,7 @@ Hệ thống cần xử lý luồng dữ liệu telemetry liên tục từ nhi�
 
 1. *MQTT Bridge Service độc lập*: Thiết kế dịch vụ Tracking_MqttBridge làm trung gian giữa EMQX broker và các hệ thống lưu trữ. Bridge service subscribe các topic telemetry và phân luồng dữ liệu đến VictoriaMetrics và PostgreSQL thông qua các queue nội bộ.
 2. *Offline buffering trên thiết bị*: Hiện thực cơ chế lưu trữ dữ liệu vào SPIFFS/LittleFS trên ESP32-S3 khi mất kết nối MQTT, với cơ chế FIFO (First-In-First-Out) và giới hạn dung lượng. Khi kết nối phục hồi, dữ liệu được gửi lần lượt với rate limiting để tránh quá tải server.
-3. *QoS phân tầng*: Áp dụng QoS 0 cho dữ liệu vị trí GPS tần suất cao (5-30 giây), QoS 1 cho cảnh báo và sự kiện quan trọng, đảm bảo cân bằng giữa hiệu suất và độ tin cậy.
+3. *QoS phân tầng*: Áp dụng QoS 0 cho dữ liệu vị trí GPS tần suất cao (5–30 giây), QoS 1 cho cảnh báo và sự kiện quan trọng, đảm bảo cân bằng giữa hiệu suất và độ tin cậy.
 
 **Bài học rút ra:** Thiết kế đường ống dữ liệu cần xem xét tất cả các trường hợp thất bại (mất mạng, server quá tải, dữ liệu bất đồng bộ) từ giai đoạn thiết kế, không để đến giai đoạn tích hợp mới xử lý.
 
@@ -101,14 +101,14 @@ Hệ thống cần xử lý luồng dữ liệu telemetry liên tục từ nhi�
 **Mô tả vấn đề:**
 
 Hệ thống phần cứng phải hoạt động với hai nguồn năng lượng có đặc tính rất khác nhau:
-- Ắc quy xe 12V DC (dao động 10.5V - 14.8V tùy trạng thái sạc và tải), là nguồn chính khi xe hoạt động.
+- Ắc quy xe 12V hoặc 24V DC (dao động tùy trạng thái sạc và tải), là nguồn chính khi xe hoạt động.
 - Pin dự phòng 21700 Li-ion 3.7V (dao động 2.8V - 4.2V), là nguồn dùng khi ắc quy xe bị ngắt hoặc điện áp quá thấp.
 - Việc chuyển đổi giữa hai nguồn phải diễn ra liền mạch (seamless switching), không được gây mất điện cho MCU, tránh reset hoặc mất dữ liệu.
 
 **Cách giải quyết:**
 
-1. *Power path management*: Thiết kế mạch power path sử dụng MOSFET và diode Schottky để tự động chuyển đổi giữa nguồn ắc quy xe và pin dự phòng. Khi điện áp ắc quy xe trên ngưỡng LVD (11.5V), hệ thống lấy điện từ ắc quy; khi dưới ngưỡng, mạch tự động chuyển sang pin dự phòng.
-2. *Low Voltage Disconnect (LVD)*: Hiện thực mạch LVD sử dụng op-amp comparator và MOSFET để ngắt tải khỏi ắc quy xe khi điện áp tụt dưới 11.5V, bảo vệ ắc quy không bị rút cạn quá mức và đảm bảo xe vẫn khởi động được.
+1. *Power path management*: Thiết kế mạch power path sử dụng MOSFET và diode Schottky để tự động chuyển đổi giữa nguồn ắc quy xe và pin dự phòng theo profile kép 12V/24V. Hệ thống dùng ngưỡng Switch_OFF/Switch_ON riêng cho từng profile: 12V (12.0V/12.2V), 24V (24.0V/24.4V).
+2. *Low Voltage Disconnect (LVD)*: Hiện thực mạch LVD sử dụng op-amp comparator và MOSFET để ngắt tải khỏi ắc quy xe tại ngưỡng cắt sâu theo profile: 11.5V (12V) hoặc 23.0V (24V), bảo vệ ắc quy không bị rút cạn quá mức và đảm bảo xe vẫn khởi động được.
 3. *Bộ sạc pin dự phòng*: Tích hợp IC sạc IP2312 để sạc pin 21700 từ nguồn xe khi xe đang chạy, đảm bảo pin dự phòng luôn ở trạng thái sẵn sàng.
 4. *Giám sát điện áp bằng firmware*: Đọc điện áp ắc quy và pin dự phòng liên tục qua ADC, gửi thông tin về server để giám sát trạng thái năng lượng từ xa, cảnh báo khi pin yếu.
 
@@ -138,7 +138,7 @@ Hệ thống cần xử lý dữ liệu từ nhiều thiết bị đồng thời
 
 ### 6.3.1. Quyền riêng tư và bảo vệ dữ liệu cá nhân
 
-Hệ thống theo dõi phương tiện liên tục thu thập dữ liệu vị trí GPS, hành trình, và thói quen sử dụng xe của người lái -- đây là các dữ liệu nhạy cảm về quyền riêng tư (privacy). Việc phát triển và triển khai hệ thống này đặt ra nhiều vấn đề đạo đức cần được xem xét nghiêm túc.
+Hệ thống theo dõi phương tiện liên tục thu thập dữ liệu vị trí GPS, hành trình và thói quen sử dụng xe của người lái — đây đều là dữ liệu nhạy cảm liên quan đến quyền riêng tư (privacy). Việc phát triển và triển khai hệ thống vì vậy đặt ra các vấn đề đạo đức cần được xem xét nghiêm túc.
 
 **Các biện pháp bảo vệ quyền riêng tư đã được áp dụng:**
 
@@ -193,16 +193,11 @@ Hệ thống IoT giám sát phương tiện mang lại nhiều tác động tíc
 
 ### 6.4.1. Tầm quan trọng của thiết kế kiến trúc trước khi lập trình
 
-Một trong những bài học quan trọng nhất từ dự án này là giá trị của việc đầu tư thời gian vào thiết kế kiến trúc hệ thống trước khi bắt tay vào lập trình. Ban đầu, nhóm phát triển có xu hướng "nhảy thẳng vào code" -- bắt đầu lập trình các module riêng lẻ mà chưa có cái nhìn tổng thể về cách chúng tương tác với nhau.
+Một trong những bài học quan trọng nhất của dự án là phải ưu tiên thiết kế kiến trúc hệ thống trước khi lập trình. Ở giai đoạn đầu, nhóm từng có xu hướng triển khai nhanh từng mô-đun khi chưa có mô hình tương tác tổng thể.
 
-Sau khi gặp nhiều vấn đề về tích hợp (interface mismatch, data format inconsistency, circular dependencies), nhóm đã dừng lại và đầu tư thời gian để:
+Khi phát sinh các lỗi tích hợp (interface mismatch, data format inconsistency, circular dependencies), nhóm chuyển sang cách tiếp cận có kỷ luật hơn: xác lập sơ đồ kiến trúc và luồng dữ liệu, chốt API contracts trước hiện thực, hoàn thiện database schema bằng ER diagram trước khi tạo bảng, và chuẩn hóa kế hoạch Docker networking/port mapping.
 
-- Vẽ sơ đồ kiến trúc tổng thể (system architecture diagram) với các luồng dữ liệu rõ ràng.
-- Định nghĩa các API contracts (request/response format) trước khi hiện thực.
-- Thiết kế cơ sở dữ liệu (database schema) với ER diagram đầy đủ trước khi tạo bảng.
-- Lập kế hoạch triển khai Docker với mạng chia sẻ và port mapping rõ ràng.
-
-Việc này giúp giảm đáng kể thời gian sửa lỗi tích hợp và làm lại (rework) trong giai đoạn sau.
+Cách làm này giúp giảm đáng kể thời gian sửa lỗi tích hợp và khối lượng làm lại ở các giai đoạn sau.
 
 ### 6.4.2. Độ phức tạp của hệ thống IoT toàn diện
 
@@ -219,7 +214,7 @@ Mỗi tầng đòi hỏi kỹ năng chuyên môn khác nhau, và việc tích h�
 
 ### 6.4.3. Sức mạnh của hệ sinh thái mã nguồn mở
 
-Dự án sử dụng hoàn toàn các công nghệ mã nguồn mở, chứng minh rằng các giải pháp mã nguồn mở đã đủ trưởng thành để xây dựng hệ thống IoT cấp sản xuất:
+Dự án sử dụng hoàn toàn công nghệ mã nguồn mở, qua đó cho thấy các giải pháp này đã đủ trưởng thành để xây dựng hệ thống IoT ở mức sẵn sàng sản xuất:
 
 - **ESP-IDF** (Espressif): Framework chính thức cho ESP32-S3, cung cấp API đầy đủ cho Wi-Fi, BLE, GPIO, UART, và các ngoại vi khác. Tài liệu phong phú và cộng đồng hỗ trợ lớn.
 - **Express.js + TypeScript**: Framework web nhẹ, linh hoạt, với hệ sinh thái middleware phong phú. TypeScript bổ sung hệ thống kiểu giúp giảm lỗi runtime.
@@ -233,28 +228,28 @@ Chi phí giấy phép phần mềm cho toàn bộ hệ thống là 0 VND, cho ph
 
 ### 6.4.4. Kiểm thử ở mọi tầng là bắt buộc
 
-Dự án khẳng định tầm quan trọng của việc kiểm thử ở mọi tầng của hệ thống:
+Dự án khẳng định rằng kiểm thử ở mọi tầng của hệ thống là yêu cầu bắt buộc:
 
 - **Unit tests**: Kiểm thử các hàm xử lý dữ liệu, phân tích bản tin OBD2, tính toán năng lượng trong firmware và backend.
-- **Integration tests**: Kiểm thử giao tiếp giữa các dịch vụ -- MQTT Bridge nhận dữ liệu từ EMQX và ghi vào VictoriaMetrics, Backend API đọc/ghi PostgreSQL.
+- **Integration tests**: Kiểm thử giao tiếp giữa các dịch vụ — MQTT Bridge nhận dữ liệu từ EMQX và ghi vào VictoriaMetrics, Backend API đọc/ghi PostgreSQL.
 - **End-to-end tests**: Mô phỏng toàn bộ luồng dữ liệu từ thiết bị giả lập (simulated device) đến giao diện web, kiểm tra tính đúng đắn của dữ liệu hiển thị trên dashboard.
 
-Các lỗi được phát hiện trong giai đoạn kiểm thử sớm (unit test) có chi phí sửa chữa thấp hơn 10-100 lần so với lỗi được phát hiện trong giai đoạn tích hợp hoặc triển khai sản xuất [1].
+Các lỗi được phát hiện trong giai đoạn kiểm thử sớm (unit test) có chi phí sửa chữa thấp hơn 10–100 lần so với lỗi được phát hiện trong giai đoạn tích hợp hoặc triển khai sản xuất [1].
 
 ### 6.4.5. Tổng kết cá nhân
 
-Dự án "IoT Vehicle Tracking System" là một trải nghiệm học tập toàn diện, giúp tổng hợp và áp dụng các kiến thức đã học vào một sản phẩm thực tế có giá trị ứng dụng. Quá trình thực hiện dự án đã rèn luyện kỹ năng tư duy hệ thống (systems thinking), khả năng giải quyết vấn đề phức tạp, và kỹ năng làm việc độc lập với các công nghệ mới.
+Dự án "IoT Vehicle Tracking System" là một trải nghiệm học tập toàn diện, cho phép tổng hợp và áp dụng kiến thức đã học vào một sản phẩm thực tế có giá trị ứng dụng. Quá trình triển khai dự án đã rèn luyện tư duy hệ thống (systems thinking), năng lực giải quyết vấn đề phức tạp và khả năng làm việc độc lập với các công nghệ mới.
 
-Những bài học rút ra từ dự án này -- về thiết kế kiến trúc, quản lý năng lượng IoT, bảo mật hệ thống, và phát triển full-stack -- là những kinh nghiệm quý báu có thể áp dụng trực tiếp vào công việc chuyên môn trong tương lai.
+Những bài học rút ra từ dự án này — về thiết kế kiến trúc, quản lý năng lượng IoT, bảo mật hệ thống, và phát triển full-stack — là những kinh nghiệm quý báu có thể áp dụng trực tiếp vào công việc chuyên môn trong tương lai.
 
 ---
 
 ## Kết luận chương 6
 
-Chương này đã trình bày quá trình ứng dụng các kiến thức kỹ thuật đa lĩnh vực vào việc xây dựng hệ thống IoT Vehicle Tracking System, đồng thời phân tích các vấn đề kỹ thuật phức tạp đã được giải quyết trong quá trình phát triển. Bên cạnh đó, các tác động đạo đức và xã hội của hệ thống giám sát phương tiện cũng được đánh giá khách quan, nhấn mạnh sự cân bằng giữa lợi ích quản lý và quyền riêng tư người dùng. Những bài học kinh nghiệm rút ra từ dự án -- từ thiết kế kiến trúc, tích hợp hệ thống đa tầng, đến vai trò của hệ sinh thái mã nguồn mở -- là nền tảng quý giá cho việc phát triển các hệ thống IoT tương tự trong tương lai.
+Chương này đã tổng hợp quá trình vận dụng kiến thức kỹ thuật liên ngành vào xây dựng hệ thống IoT Vehicle Tracking System, đồng thời phân tích các vấn đề kỹ thuật phức tạp đã được xử lý trong quá trình phát triển. Bên cạnh đó, chương cũng đánh giá các tác động đạo đức và xã hội của hệ thống giám sát phương tiện theo hướng cân bằng giữa hiệu quả quản trị và quyền riêng tư người dùng. Các bài học kinh nghiệm rút ra — từ thiết kế kiến trúc, tích hợp hệ thống đa tầng đến khai thác hệ sinh thái mã nguồn mở — tạo nền tảng cho các hướng phát triển hệ thống IoT tương tự trong giai đoạn tiếp theo.
 
 ---
 
 ## Tài liệu tham khảo Chương 6
 
-[1] B. Boehm and V. R. Basili, "Software Defect Reduction Top 10 List," *IEEE Computer*, vol. 34, no. 1, pp. 135-137, 2001.
+[1] B. Boehm and V. R. Basili, "Software Defect Reduction Top 10 List," *IEEE Computer*, vol. 34, no. 1, pp. 135–137, 2001.
