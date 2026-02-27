@@ -1,0 +1,96 @@
+name: Frontend UAT Deploy
+
+on:
+  push:
+    branches: [uat]
+    paths:
+      - 'iot-vehicle-tracking-system/Tracking_Frontend/**'
+
+jobs:
+  quality-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: iot-vehicle-tracking-system/Tracking_Frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: iot-vehicle-tracking-system/Tracking_Frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: iot-vehicle-tracking-system/Tracking_Frontend
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/tracking-frontend:uat
+            ${{ secrets.DOCKERHUB_USERNAME }}/tracking-frontend:latest
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+            NEXT_PUBLIC_WS_URL=${{ secrets.NEXT_PUBLIC_WS_URL }}
+            NEXT_PUBLIC_WS_PATH=${{ secrets.NEXT_PUBLIC_WS_PATH }}
+            NEXT_PUBLIC_MQTT_HOST=${{ secrets.NEXT_PUBLIC_MQTT_HOST }}
+            NEXT_PUBLIC_MQTT_WS_PORT=${{ secrets.NEXT_PUBLIC_MQTT_WS_PORT }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-compose
+          path: iot-vehicle-tracking-system/Tracking_Frontend/docker-compose.uat.yml
+
+  deploy-uat:
+    needs: quality-and-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-compose
+
+      - name: SCP compose file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: docker-compose.uat.yml
+          target: /opt/tracking/Tracking_Frontend/
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DOCKERHUB_USERNAME
+          script: |
+            cd /opt/tracking/Tracking_Frontend
+            export DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME
+            docker compose -f docker-compose.uat.yml pull
+            docker compose -f docker-compose.uat.yml up -d
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
+      - name: Discord Notification
+        if: always()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          title: "Frontend UAT Deploy"
+          status: ${{ job.status }}
