@@ -1,4 +1,5 @@
 import type { TypedSocket } from './types';
+import { isUserRole } from '@/shared/types/common.types';
 import { hashToken } from '@/shared/utils/crypto.util';
 import { findByHashedToken } from '@/domain/auth/repositories/user-session.repository';
 import { findById } from '@/domain/auth/repositories/user.repository';
@@ -52,6 +53,11 @@ export const socketAuthMiddleware = async (
     const user = await findById(session.user_id);
     if (!user) {
       next(new Error('User not found'));
+      return;
+    }
+
+    if (!isUserRole(user.role)) {
+      next(new Error('Invalid user role'));
       return;
     }
 

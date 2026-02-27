@@ -68,9 +68,9 @@ export const ErrorCodesTab = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả mức độ</SelectItem>
-            <SelectItem value="critical">Critical</SelectItem>
-            <SelectItem value="warning">Warning</SelectItem>
-            <SelectItem value="info">Info</SelectItem>
+            <SelectItem value="critical">Nghiêm trọng</SelectItem>
+            <SelectItem value="warning">Cảnh báo</SelectItem>
+            <SelectItem value="info">Thông tin</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -84,7 +84,7 @@ export const ErrorCodesTab = () => {
               <TableHead>Mô tả</TableHead>
               <TableHead>Mức độ</TableHead>
               <TableHead>Phát sinh</TableHead>
-              <TableHead>Resolved</TableHead>
+              <TableHead>Đã xử lý</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -107,7 +107,11 @@ export const ErrorCodesTab = () => {
                             : 'outline'
                       }
                     >
-                      {type}
+                      {type === 'critical'
+                        ? 'Nghiêm trọng'
+                        : type === 'warning'
+                          ? 'Cảnh báo'
+                          : 'Thông tin'}
                     </Badge>
                   </TableCell>
                   <TableCell>{formatDateTime(item.occurredAt)}</TableCell>

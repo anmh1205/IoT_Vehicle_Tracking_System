@@ -17,8 +17,8 @@ class ConnectivityService {
 
   /// Stream that emits `true` when online, `false` when offline.
   static Stream<bool> get onConnectivityChanged {
-    return _connectivity.onConnectivityChanged.map((results) {
-      final online = results.any((r) => r != ConnectivityResult.none);
+    return _connectivity.onConnectivityChanged.map((result) {
+      final online = result != ConnectivityResult.none;
       Log.debug('Connectivity changed: online=$online');
       return online;
     });
@@ -26,7 +26,7 @@ class ConnectivityService {
 
   /// One-shot check of current connectivity.
   static Future<bool> checkNow() async {
-    final results = await _connectivity.checkConnectivity();
-    return results.any((r) => r != ConnectivityResult.none);
+    final result = await _connectivity.checkConnectivity();
+    return result != ConnectivityResult.none;
   }
 }

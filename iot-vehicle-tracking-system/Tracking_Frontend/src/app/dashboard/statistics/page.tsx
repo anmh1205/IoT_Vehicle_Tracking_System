@@ -4,8 +4,8 @@ import { StatisticsOverview } from '@/features/statistics/components/statistics-
 const StatisticsPage = () => {
   return (
     <PageContainer
-      pageTitle="Statistics"
-      pageDescription="Fleet utilization, uptime trends, and operational summaries"
+      pageTitle="Thống kê"
+      pageDescription="Mức sử dụng đội xe, xu hướng uptime và tổng hợp vận hành"
     >
       <StatisticsOverview />
     </PageContainer>

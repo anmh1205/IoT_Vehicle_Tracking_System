@@ -13,18 +13,18 @@ export const SimulationPreview = ({
     <div className="space-y-3">
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Next payload preview</CardTitle>
+          <CardTitle className="text-sm">Xem trước payload tiếp theo</CardTitle>
         </CardHeader>
         <CardContent>
           <pre className="rounded bg-muted p-3 text-xs">
-            {preview ? JSON.stringify(preview, null, 2) : 'No payload yet'}
+            {preview ? JSON.stringify(preview, null, 2) : 'Chưa có payload'}
           </pre>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Sent history</CardTitle>
+          <CardTitle className="text-sm">Lịch sử đã gửi</CardTitle>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[300px] pr-2">
@@ -38,7 +38,7 @@ export const SimulationPreview = ({
                 </pre>
               ))}
               {history.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No payload sent yet.</p>
+                <p className="text-sm text-muted-foreground">Chưa gửi payload nào.</p>
               ) : null}
             </div>
           </ScrollArea>

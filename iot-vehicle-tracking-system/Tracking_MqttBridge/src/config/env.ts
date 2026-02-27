@@ -31,8 +31,12 @@ export const mqttConfig = {
   host: fromEnv('MQTT_HOST') ?? 'localhost',
   port: toInt(fromEnv('MQTT_PORT'), 1883),
   tlsPort: toInt(fromEnv('MQTT_TLS_PORT'), 8883),
-  useTls: toBool(fromEnv('MQTT_USE_TLS'), false),
-  rejectUnauthorized: toBool(fromEnv('MQTT_REJECT_UNAUTHORIZED'), false),
+  useTls: appConfig.isProduction
+    ? fromEnv('MQTT_USE_TLS') !== 'false'
+    : toBool(fromEnv('MQTT_USE_TLS'), false),
+  rejectUnauthorized: appConfig.isProduction
+    ? fromEnv('MQTT_REJECT_UNAUTHORIZED') !== 'false'
+    : toBool(fromEnv('MQTT_REJECT_UNAUTHORIZED'), false),
   username: fromEnv('MQTT_USERNAME') ?? 'mqtt_bridge',
   password: requireEnv('MQTT_PASSWORD', fromEnv('MQTT_PASSWORD')),
 } as const;

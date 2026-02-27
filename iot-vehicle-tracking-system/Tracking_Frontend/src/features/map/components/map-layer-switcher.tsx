@@ -6,8 +6,8 @@ const LAYERS: Array<{
   value: MapLayer;
   label: string;
 }> = [
-  { value: 'street', label: 'Street' },
-  { value: 'satellite', label: 'Satellite' },
+  { value: 'street', label: 'Đường phố' },
+  { value: 'satellite', label: 'Vệ tinh' },
 ];
 export const MapLayerSwitcher = () => {
   const layer = useMapStore((state) => state.mapLayer);

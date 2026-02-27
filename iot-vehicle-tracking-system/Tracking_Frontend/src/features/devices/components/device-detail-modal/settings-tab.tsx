@@ -49,7 +49,7 @@ export const SettingsTab = () => {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Device settings</CardTitle>
+          <CardTitle className="text-base">Cài đặt thiết bị</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -59,7 +59,7 @@ export const SettingsTab = () => {
                 name="deviceName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Device name</FormLabel>
+                    <FormLabel>Tên thiết bị</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -73,7 +73,7 @@ export const SettingsTab = () => {
                   name="requestInterval"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Request interval (s)</FormLabel>
+                      <FormLabel>Chu kỳ gửi (giây)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -90,7 +90,7 @@ export const SettingsTab = () => {
                   name="vibrationThreshold"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Vibration threshold</FormLabel>
+                      <FormLabel>Ngưỡng rung</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -103,7 +103,7 @@ export const SettingsTab = () => {
                   )}
                 />
               </div>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit">Lưu thay đổi</Button>
             </form>
           </Form>
         </CardContent>
@@ -111,14 +111,14 @@ export const SettingsTab = () => {
 
       <Card className="border-rose-200">
         <CardHeader>
-          <CardTitle className="text-base text-rose-700">Danger zone</CardTitle>
+          <CardTitle className="text-base text-rose-700">Vùng nguy hiểm</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Deleting this device removes it from the realtime dashboard.
+            Xóa thiết bị này sẽ loại nó khỏi bảng điều khiển thời gian thực.
           </p>
           <Button variant="destructive" onClick={() => void onDeleteDevice()}>
-            Delete device
+            Xóa thiết bị
           </Button>
         </CardContent>
       </Card>

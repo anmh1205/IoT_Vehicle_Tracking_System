@@ -26,7 +26,7 @@ export const LogsFilter = ({
         }
       >
         <SelectTrigger className="w-[160px]">
-          <SelectValue placeholder="Log level" />
+          <SelectValue placeholder="Mức log" />
         </SelectTrigger>
         <SelectContent>
           {LOG_LEVELS.map((option) => (
@@ -42,7 +42,7 @@ export const LogsFilter = ({
         <Input
           value={value.search}
           onChange={(event) => onChange({ ...value, page: 1, search: event.target.value })}
-          placeholder="Search logs..."
+          placeholder="Tìm nhật ký..."
           className="pl-8"
         />
       </div>

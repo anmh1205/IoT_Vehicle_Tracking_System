@@ -11,8 +11,8 @@ export const OverviewTab = () => {
       <div className="grid gap-3 md:grid-cols-4">
         <DeviceStatCard title="Tổng runtime" value={formatDuration(runtime?.totalRuntime ?? 0)} />
         <DeviceStatCard title="Tổng phiên" value={runtime?.totalSessions ?? 0} />
-        <DeviceStatCard title="Avg vibration" value={(runtime?.avgVibration ?? 0).toFixed(2)} />
-        <DeviceStatCard title="Data points" value={runtime?.totalDataPoints ?? 0} />
+        <DeviceStatCard title="Rung động trung bình" value={(runtime?.avgVibration ?? 0).toFixed(2)} />
+        <DeviceStatCard title="Số điểm dữ liệu" value={runtime?.totalDataPoints ?? 0} />
       </div>
 
       <Card>
@@ -21,7 +21,7 @@ export const OverviewTab = () => {
         </CardHeader>
         <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <p className="text-xs text-muted-foreground">Device ID</p>
+            <p className="text-xs text-muted-foreground">ID thiết bị</p>
             <p className="font-medium">{device?.deviceId ?? '-'}</p>
           </div>
           <div>
@@ -47,11 +47,11 @@ export const OverviewTab = () => {
             <p className="font-medium">{device?.firmwareVersion ?? '-'}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Request interval</p>
+            <p className="text-xs text-muted-foreground">Chu kỳ gửi dữ liệu</p>
             <p className="font-medium">{device?.requestInterval ?? 60}s</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Vibration threshold</p>
+            <p className="text-xs text-muted-foreground">Ngưỡng rung động</p>
             <p className="font-medium">{device?.vibrationThreshold ?? 0}</p>
           </div>
         </CardContent>
@@ -59,7 +59,7 @@ export const OverviewTab = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Realtime snapshot</CardTitle>
+          <CardTitle className="text-base">Ảnh chụp thời gian thực</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 text-sm sm:grid-cols-3">
           <div>

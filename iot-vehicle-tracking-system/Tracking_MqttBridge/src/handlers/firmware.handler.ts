@@ -2,6 +2,7 @@ import { firmwareStatusSchema } from '../validators/payload.validator';
 import { pool } from '../infrastructure/database';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { logger } from '../infrastructure/logger';
+import { verifyDeviceToken } from '../services/device-auth.service';
 
 /**
  * Handle firmware update progress on topic v1/{deviceId}/firmware.
@@ -34,6 +35,12 @@ export const handleFirmware = async (
     logger.warn(
       `Device ID mismatch: topic=${deviceIdFromTopic}, payload=${payload.device_id}`,
     );
+    return;
+  }
+
+  const device = await verifyDeviceToken(payload.device_id, payload.auth_token);
+  if (!device) {
+    logger.warn(`Auth failed for device ${payload.device_id}`);
     return;
   }
 

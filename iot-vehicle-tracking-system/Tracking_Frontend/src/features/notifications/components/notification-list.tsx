@@ -85,13 +85,13 @@ export const NotificationList = ({
 
         {filtered.length === 0 ? (
           <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-            No notification match current filters.
+Không có thông báo phù hợp với bộ lọc hiện tại.
           </p>
         ) : null}
 
         <div className="flex justify-end">
           <Button variant="outline" size="sm" onClick={() => onRefresh?.()}>
-            Refresh
+Làm mới
           </Button>
         </div>
       </CardContent>

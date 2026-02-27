@@ -2,9 +2,11 @@ import { z } from 'zod';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { logger } from '../infrastructure/logger';
+import { verifyDeviceToken } from '../services/device-auth.service';
 
 const eventSchema = z.object({
   device_id: z.string().min(1),
+  auth_token: z.string().min(1),
   event_type: z.enum(['error', 'warning', 'info']),
   code: z.number().int().optional(),
   message: z.string().optional(),
@@ -47,6 +49,12 @@ export const handleEvent = async (
       { topic: deviceIdFromTopic, payload: payload.device_id },
       'Device ID mismatch in event',
     );
+    return;
+  }
+
+  const device = await verifyDeviceToken(payload.device_id, payload.auth_token);
+  if (!device) {
+    logger.warn(`Auth failed for device ${payload.device_id}`);
     return;
   }
 

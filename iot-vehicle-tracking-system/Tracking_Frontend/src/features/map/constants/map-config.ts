@@ -14,12 +14,12 @@ export const MAP_LAYER_CONFIG: Record<
   }
 > = {
   street: {
-    label: 'Street',
+    label: 'Đường phố',
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; OpenStreetMap contributors',
   },
   satellite: {
-    label: 'Satellite',
+    label: 'Vệ tinh',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution: 'Tiles &copy; Esri',
   },
@@ -33,10 +33,10 @@ export const MAP_STATUS_COLORS: Record<DeviceMapStatus, string> = {
 };
 
 export const MAP_STATUS_LABELS: Record<DeviceMapStatus, string> = {
-  running: 'Running',
-  stopped: 'Stopped',
-  error: 'Error',
-  disconnected: 'Disconnected',
+  running: 'Đang chạy',
+  stopped: 'Đã dừng',
+  error: 'Lỗi',
+  disconnected: 'Mất kết nối',
 };
 
 export const MAP_REALTIME_THROTTLE_MS = 500;

@@ -66,19 +66,19 @@ const normalizeStatus = (raw: any): SimulatorStatusPayload => ({
 });
 const validateBeforeStart = (state: SimulatorState): string | null => {
   if (state.selectedDeviceIds.length === 0) {
-    return 'Please select at least one device.';
+    return 'Vui lòng chọn ít nhất một thiết bị.';
   }
   if (state.speedMin > state.speedMax) {
-    return 'Speed min must be less than or equal to speed max.';
+    return 'Tốc độ tối thiểu phải nhỏ hơn hoặc bằng tốc độ tối đa.';
   }
   if (state.vibrationMin > state.vibrationMax) {
-    return 'Vibration min must be less than or equal to vibration max.';
+    return 'Rung động tối thiểu phải nhỏ hơn hoặc bằng rung động tối đa.';
   }
   if (state.batteryMin > state.batteryMax) {
-    return 'Battery min must be less than or equal to battery max.';
+    return 'Pin tối thiểu phải nhỏ hơn hoặc bằng pin tối đa.';
   }
   if (!Number.isFinite(state.lat) || !Number.isFinite(state.lon)) {
-    return 'Latitude and longitude must be valid numbers.';
+    return 'Vĩ độ và kinh độ phải là số hợp lệ.';
   }
   return null;
 };
@@ -125,15 +125,15 @@ export const useSimulator = () => {
     onSuccess: (status) => {
       applyStatus(status);
       void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
-      notificationUtils.success('Simulation started');
+      notificationUtils.success('Đã bắt đầu mô phỏng');
     },
     onError: (error: any) => {
       notificationUtils.error(
-        'Failed to start simulation',
+        'Không thể bắt đầu mô phỏng',
         error?.response?.data?.error?.message ??
           error?.response?.data?.message ??
           error?.message ??
-          'Unknown error',
+          'Lỗi không xác định',
       );
     },
   });
@@ -142,15 +142,15 @@ export const useSimulator = () => {
     onSuccess: (status) => {
       applyStatus(status);
       void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
-      notificationUtils.info('Simulation stopped');
+      notificationUtils.info('Đã dừng mô phỏng');
     },
     onError: (error: any) => {
       notificationUtils.error(
-        'Failed to stop simulation',
+        'Không thể dừng mô phỏng',
         error?.response?.data?.error?.message ??
           error?.response?.data?.message ??
           error?.message ??
-          'Unknown error',
+          'Lỗi không xác định',
       );
     },
   });
@@ -170,15 +170,15 @@ export const useSimulator = () => {
     onSuccess: (status) => {
       applyStatus(status);
       void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
-      notificationUtils.info('Simulation paused');
+      notificationUtils.info('Đã tạm dừng mô phỏng');
     },
     onError: (error: any) => {
       notificationUtils.error(
-        'Failed to pause simulation',
+        'Không thể tạm dừng mô phỏng',
         error?.response?.data?.error?.message ??
           error?.response?.data?.message ??
           error?.message ??
-          'Unknown error',
+          'Lỗi không xác định',
       );
     },
   });
@@ -188,15 +188,15 @@ export const useSimulator = () => {
     onSuccess: (status) => {
       applyStatus(status);
       void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
-      notificationUtils.info('Simulation resumed');
+      notificationUtils.info('Đã tiếp tục mô phỏng');
     },
     onError: (error: any) => {
       notificationUtils.error(
-        'Failed to resume simulation',
+        'Không thể tiếp tục mô phỏng',
         error?.response?.data?.error?.message ??
           error?.response?.data?.message ??
           error?.message ??
-          'Unknown error',
+          'Lỗi không xác định',
       );
     },
   });
@@ -214,9 +214,9 @@ export const useSimulator = () => {
   };
   const statusLabel = useMemo(() => {
     if (!running) {
-      return 'Stopped';
+      return 'Đã dừng';
     }
-    return paused ? 'Preview Paused' : 'Running';
+    return paused ? 'Đã tạm dừng (xem trước)' : 'Đang chạy';
   }, [paused, running]);
   return {
     state,

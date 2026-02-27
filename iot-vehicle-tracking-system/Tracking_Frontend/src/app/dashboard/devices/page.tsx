@@ -35,12 +35,12 @@ const DevicesPage = () => {
   const rows = devicesQuery.data?.items ?? [];
   return (
     <PageContainer
-      pageTitle="Thiet bi"
-      pageDescription="Quan ly thiet bi IoT"
+      pageTitle="Thiết bị"
+      pageDescription="Quản lý thiết bị IoT"
       pageHeaderAction={
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Them thiet bi
+          Thêm thiết bị
         </Button>
       }
     >
@@ -58,11 +58,11 @@ const DevicesPage = () => {
           <TabsList className="hidden sm:grid sm:grid-cols-2">
             <TabsTrigger value="table">
               <Table2 className="mr-2 h-4 w-4" />
-              Bang du lieu
+              Bảng dữ liệu
             </TabsTrigger>
             <TabsTrigger value="cards">
               <LayoutGrid className="mr-2 h-4 w-4" />
-              Card view
+              Chế độ thẻ
             </TabsTrigger>
           </TabsList>
           <div className="hidden sm:block">
@@ -84,8 +84,8 @@ const DevicesPage = () => {
             data={rows}
             isLoading={devicesQuery.isLoading}
             emptyIcon={<Cpu className="h-10 w-10" />}
-            emptyTitle="Chua co thiet bi"
-            emptyAction={{ label: 'Them thiet bi', onClick: () => setCreateOpen(true) }}
+            emptyTitle="Chưa có thiết bị"
+            emptyAction={{ label: 'Thêm thiết bị', onClick: () => setCreateOpen(true) }}
           />
         </TabsContent>
 
@@ -131,9 +131,9 @@ const DevicesPage = () => {
             onSuccess: () => setDeleteDevice(null),
           });
         }}
-        title="Xoa thiet bi"
-        description={`Ban co chac muon xoa ${deleteDevice?.deviceName ?? ''}?`}
-        confirmLabel="Xoa"
+        title="Xóa thiết bị"
+        description={`Bạn có chắc muốn xóa ${deleteDevice?.deviceName ?? ''}?`}
+        confirmLabel="Xóa"
         variant="destructive"
         isPending={deleteMutation.isPending}
       />

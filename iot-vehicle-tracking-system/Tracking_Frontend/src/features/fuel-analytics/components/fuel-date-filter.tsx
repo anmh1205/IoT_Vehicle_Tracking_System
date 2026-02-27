@@ -41,12 +41,12 @@ export const FuelDateFilter = ({
       />
       <Select value={interval} onValueChange={(v) => onIntervalChange(v as typeof interval)}>
         <SelectTrigger className="w-[170px]">
-          <SelectValue placeholder="Interval" />
+          <SelectValue placeholder="Khoảng thời gian" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="day">By day</SelectItem>
-          <SelectItem value="week">By week</SelectItem>
-          <SelectItem value="month">By month</SelectItem>
+          <SelectItem value="day">Theo ngày</SelectItem>
+          <SelectItem value="week">Theo tuần</SelectItem>
+          <SelectItem value="month">Theo tháng</SelectItem>
         </SelectContent>
       </Select>
     </div>

@@ -74,7 +74,7 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
           className="h-8"
         >
           <Waypoints className="mr-1 h-4 w-4" />
-          Follow
+Theo dõi
         </Button>
         <Button
           size="sm"
@@ -83,7 +83,7 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
           className="h-8"
         >
           <Layers2 className="mr-1 h-4 w-4" />
-          Geofence
+Vùng địa lý
         </Button>
       </div>
     </div>

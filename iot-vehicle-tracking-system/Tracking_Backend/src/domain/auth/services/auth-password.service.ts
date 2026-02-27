@@ -1,6 +1,7 @@
 import { createUnauthorizedError, createValidationError } from '@/shared/utils/errors.util';
 import { hashPassword, verifyPassword } from '@/domain/auth/helpers/auth.helpers';
 import * as userRepo from '@/domain/auth/repositories/user.repository';
+import * as userSessionRepo from '@/domain/auth/repositories/user-session.repository';
 import { logger } from '@/infrastructure/logger';
 
 export const changePassword = async (
@@ -24,6 +25,7 @@ export const changePassword = async (
 
   const newHash = await hashPassword(newPassword);
   await userRepo.updatePassword(user.id, newHash);
+  await userSessionRepo.deactivateAllForUser(user.id);
 
   logger.info(`Password changed for user "${user.username}"`);
 };

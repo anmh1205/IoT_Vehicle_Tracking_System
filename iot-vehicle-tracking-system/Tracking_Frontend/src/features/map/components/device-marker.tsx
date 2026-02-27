@@ -20,10 +20,10 @@ export const DeviceMarker = ({
         <div className="space-y-1 text-sm">
           <p className="font-semibold">{position.deviceName}</p>
           <p className="text-xs text-muted-foreground">ID: {position.deviceId}</p>
-          <p>Status: {MAP_STATUS_LABELS[position.status]}</p>
-          <p>Speed: {position.speed} km/h</p>
+          <p>Trạng thái: {MAP_STATUS_LABELS[position.status]}</p>
+          <p>Tốc độ: {position.speed} km/h</p>
           <p>
-            Lat/Lon: {position.lat.toFixed(5)}, {position.lon.toFixed(5)}
+            Vĩ độ/Kinh độ: {position.lat.toFixed(5)}, {position.lon.toFixed(5)}
           </p>
         </div>
       </Popup>

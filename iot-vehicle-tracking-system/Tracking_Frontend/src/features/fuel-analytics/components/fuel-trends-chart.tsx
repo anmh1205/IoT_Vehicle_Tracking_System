@@ -40,14 +40,14 @@ export const FuelTrendsChart = ({ data, isLoading }: FuelTrendsChartProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Fuel Consumption Trends</CardTitle>
+        <CardTitle className="text-base">Xu hướng tiêu thụ nhiên liệu</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : chartData.length === 0 ? (
           <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
-            No trend data available for selected period
+Không có dữ liệu xu hướng cho khoảng thời gian đã chọn
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
@@ -62,7 +62,7 @@ export const FuelTrendsChart = ({ data, isLoading }: FuelTrendsChartProps) => {
                 yAxisId="left"
                 type="monotone"
                 dataKey="fuelUsed"
-                name="Fuel Used (L)"
+                name="Nhiên liệu đã dùng (L)"
                 stroke="#3b82f6"
                 fill="#3b82f6"
                 fillOpacity={0.15}

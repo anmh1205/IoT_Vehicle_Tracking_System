@@ -11,7 +11,7 @@ export const StatCards = ({ stats, isLoading }: { stats: any; isLoading?: boolea
         isLoading={isLoading}
       />
       <StatCard
-        title="Thiết bị online"
+        title="Thiết bị trực tuyến"
         value={stats?.activeDevices ?? 0}
         icon={<Cpu className="h-4 w-4" />}
         isLoading={isLoading}
@@ -23,7 +23,7 @@ export const StatCards = ({ stats, isLoading }: { stats: any; isLoading?: boolea
         isLoading={isLoading}
       />
       <StatCard
-        title="Session hom nay"
+        title="Phiên hôm nay"
         value={stats?.sessionsToday ?? 0}
         icon={<Route className="h-4 w-4" />}
         isLoading={isLoading}

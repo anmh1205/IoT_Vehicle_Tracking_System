@@ -12,11 +12,11 @@ const FILTER_OPTIONS: Array<{
   value: 'all' | DeviceMapStatus;
   label: string;
 }> = [
-  { value: 'all', label: 'All' },
-  { value: 'running', label: 'Running' },
-  { value: 'stopped', label: 'Stopped' },
-  { value: 'error', label: 'Error' },
-  { value: 'disconnected', label: 'Disconnected' },
+  { value: 'all', label: 'Tất cả' },
+  { value: 'running', label: 'Đang chạy' },
+  { value: 'stopped', label: 'Đã dừng' },
+  { value: 'error', label: 'Lỗi' },
+  { value: 'disconnected', label: 'Mất kết nối' },
 ];
 export const DeviceFilterCompact = ({
   value,
@@ -25,7 +25,7 @@ export const DeviceFilterCompact = ({
   value: 'all' | DeviceMapStatus;
   onChange: (value: 'all' | DeviceMapStatus) => void;
 }) => {
-  const label = FILTER_OPTIONS.find((item) => item.value === value)?.label ?? 'All';
+  const label = FILTER_OPTIONS.find((item) => item.value === value)?.label ?? 'Tất cả';
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

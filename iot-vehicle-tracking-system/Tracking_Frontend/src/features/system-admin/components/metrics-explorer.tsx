@@ -16,10 +16,10 @@ import { LineChartView } from './chart-views/line-chart-view';
 import { TableView } from './chart-views/table-view';
 type ViewMode = 'chart' | 'table';
 const TIME_OPTIONS = [
-  { value: '1h', label: 'Last 1 hour' },
-  { value: '6h', label: 'Last 6 hours' },
-  { value: '24h', label: 'Last 24 hours' },
-  { value: '7d', label: 'Last 7 days' },
+  { value: '1h', label: '1 giờ gần nhất' },
+  { value: '6h', label: '6 giờ gần nhất' },
+  { value: '24h', label: '24 giờ gần nhất' },
+  { value: '7d', label: '7 ngày gần nhất' },
 ];
 export const MetricsExplorer = () => {
   const [draftQuery, setDraftQuery] = useState('up');
@@ -36,20 +36,20 @@ export const MetricsExplorer = () => {
     <div className="space-y-3">
       <Card>
         <CardHeader>
-          <CardTitle>Metrics explorer</CardTitle>
+          <CardTitle>Khám phá chỉ số</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Textarea
             value={draftQuery}
             onChange={(event) => setDraftQuery(event.target.value)}
-            placeholder="Enter PromQL query"
+            placeholder="Nhập truy vấn PromQL"
             className="min-h-[90px]"
           />
 
           <div className="flex flex-wrap items-center gap-2">
             <Select value={draftTime} onValueChange={setDraftTime}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Time range" />
+                <SelectValue placeholder="Khoảng thời gian" />
               </SelectTrigger>
               <SelectContent>
                 {TIME_OPTIONS.map((option) => (
@@ -68,7 +68,7 @@ export const MetricsExplorer = () => {
               disabled={!draftQuery.trim()}
             >
               <Play className="mr-2 h-4 w-4" />
-              Execute
+Chạy
             </Button>
 
             <div className="ml-auto flex gap-2">
@@ -77,14 +77,14 @@ export const MetricsExplorer = () => {
                 size="sm"
                 onClick={() => setViewMode('chart')}
               >
-                Chart
+Biểu đồ
               </Button>
               <Button
                 variant={viewMode === 'table' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('table')}
               >
-                Table
+Bảng
               </Button>
             </div>
           </div>

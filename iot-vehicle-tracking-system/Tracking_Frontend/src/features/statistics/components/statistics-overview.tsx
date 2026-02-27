@@ -63,12 +63,12 @@ export const StatisticsOverview = () => {
         />
         <Select value={interval} onValueChange={(value) => setInterval(value as typeof interval)}>
           <SelectTrigger className="w-[170px]">
-            <SelectValue placeholder="Interval" />
+            <SelectValue placeholder="Khoảng thời gian" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="day">By day</SelectItem>
-            <SelectItem value="week">By week</SelectItem>
-            <SelectItem value="month">By month</SelectItem>
+            <SelectItem value="day">Theo ngày</SelectItem>
+            <SelectItem value="week">Theo tuần</SelectItem>
+            <SelectItem value="month">Theo tháng</SelectItem>
           </SelectContent>
         </Select>
         <Button
@@ -82,14 +82,14 @@ export const StatisticsOverview = () => {
           }
         >
           <Download className="mr-2 h-4 w-4" />
-          Export report
+          Xuất báo cáo
         </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Total runtime</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Tổng thời gian hoạt động</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold">{summaryQuery.data?.totalRuntimeHours ?? 0}h</p>
@@ -97,7 +97,7 @@ export const StatisticsOverview = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Average uptime</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Thời gian hoạt động trung bình</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold">
@@ -107,7 +107,7 @@ export const StatisticsOverview = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Total sessions</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Tổng phiên</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold">{summaryQuery.data?.totalSessions ?? 0}</p>
@@ -115,7 +115,7 @@ export const StatisticsOverview = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Total alerts</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Tổng cảnh báo</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold">{summaryQuery.data?.totalAlerts ?? 0}</p>

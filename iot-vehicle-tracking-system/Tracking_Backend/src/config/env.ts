@@ -35,6 +35,11 @@ export const dbConfig = {
 export const mqttConfig = {
   host: fromEnv('MQTT_HOST') ?? 'localhost',
   port: toInt(fromEnv('MQTT_PORT'), 1883),
+  tlsPort: toInt(fromEnv('MQTT_TLS_PORT'), 8883),
+  useTls: appConfig.isProduction
+    ? fromEnv('MQTT_USE_TLS') !== 'false'
+    : fromEnv('MQTT_USE_TLS') === 'true',
+  rejectUnauthorized: fromEnv('MQTT_REJECT_UNAUTHORIZED') !== 'false',
   username: fromEnv('MQTT_USERNAME') ?? 'backend',
   password: requireEnv('MQTT_PASSWORD', fromEnv('MQTT_PASSWORD')),
 } as const;

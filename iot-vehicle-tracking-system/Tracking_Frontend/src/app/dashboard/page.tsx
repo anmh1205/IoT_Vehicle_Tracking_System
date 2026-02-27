@@ -31,7 +31,7 @@ const DashboardPage = () => {
     [activityQuery.data],
   );
   return (
-    <PageContainer pageTitle="Tong quan" pageDescription="Dashboard he thong theo doi phuong tien">
+    <PageContainer pageTitle="Tổng quan" pageDescription="Bảng điều khiển theo dõi phương tiện">
       <OverviewStats stats={statsQuery.data} isLoading={statsQuery.isLoading} />
 
       <div className="grid gap-4 lg:grid-cols-2">

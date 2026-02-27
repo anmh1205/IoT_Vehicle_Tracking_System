@@ -21,6 +21,7 @@ export const rawDataSchema = z.object({
 
 export const statusSchema = z.object({
   device_id: z.string().min(1),
+  auth_token: z.string().min(1),
   status: z.enum(['running', 'stopped']),
   session_id: z.number().int().positive().optional(),
   timestamp: z.number().positive(),
@@ -28,6 +29,7 @@ export const statusSchema = z.object({
 
 export const firmwareStatusSchema = z.object({
   device_id: z.string().min(1),
+  auth_token: z.string().min(1),
   status: z.enum(['downloading', 'installing', 'success', 'failed']),
   progress: z.number().min(0).max(100).optional(),
   targetVersion: z.string().min(1),

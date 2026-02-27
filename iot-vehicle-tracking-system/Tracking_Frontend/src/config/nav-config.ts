@@ -57,7 +57,7 @@ export const navConfig: { main: NavItem[]; secondary: NavItem[] } = {
     { title: 'Bảo trì', url: '/dashboard/maintenance', icon: Wrench },
     { title: 'Báo cáo', url: '/dashboard/statistics', icon: BarChart3 },
     { title: 'Nhiên liệu', url: '/dashboard/fuel', icon: Fuel },
-    { title: 'Phần mềm nhúng', url: '/dashboard/firmware', icon: HardDrive },
+    { title: 'Firmware', url: '/dashboard/firmware', icon: HardDrive },
     { title: 'Xuất dữ liệu', url: '/dashboard/exports', icon: Download },
     { title: 'Mô phỏng', url: '/dashboard/simulator', icon: Play },
   ],

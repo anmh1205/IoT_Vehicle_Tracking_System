@@ -14,11 +14,11 @@ const SystemAdminPage = () => {
   const [tab, setTab] = useState<AdminTab>('logs');
   if (!access.canAccessSystemAdmin) {
     return (
-      <PageContainer pageTitle="System admin" pageDescription="Restricted area">
+      <PageContainer pageTitle="Quản trị hệ thống" pageDescription="Khu vực hạn chế">
         <Card>
           <CardContent className="flex items-center gap-3 p-4 text-sm">
             <ShieldAlert className="h-5 w-5 text-amber-500" />
-            You do not have permission to access this module.
+            Bạn không có quyền truy cập phân hệ này.
           </CardContent>
         </Card>
       </PageContainer>
@@ -26,14 +26,14 @@ const SystemAdminPage = () => {
   }
   return (
     <PageContainer
-      pageTitle="System admin"
-      pageDescription="Logs viewer, query builder, and metrics explorer"
+      pageTitle="Quản trị hệ thống"
+      pageDescription="Trình xem nhật ký, công cụ truy vấn và khám phá chỉ số"
     >
       <Tabs value={tab} onValueChange={(value) => setTab(value as AdminTab)} className="space-y-4">
         <TabsList className="grid w-full grid-cols-3 sm:w-auto">
-          <TabsTrigger value="logs">Logs</TabsTrigger>
-          <TabsTrigger value="query">Query builder</TabsTrigger>
-          <TabsTrigger value="metrics">Metrics</TabsTrigger>
+          <TabsTrigger value="logs">Nhật ký</TabsTrigger>
+          <TabsTrigger value="query">Truy vấn</TabsTrigger>
+          <TabsTrigger value="metrics">Chỉ số</TabsTrigger>
         </TabsList>
 
         <TabsContent value="logs" className="space-y-0">

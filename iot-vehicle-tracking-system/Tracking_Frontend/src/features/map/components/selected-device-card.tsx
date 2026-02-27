@@ -8,10 +8,10 @@ export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Selected device</CardTitle>
+          <CardTitle className="text-sm">Thiết bị đã chọn</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Select a marker to inspect telemetry details.
+Chọn một điểm đánh dấu để xem chi tiết telemetry.
         </CardContent>
       </Card>
     );
@@ -23,14 +23,14 @@ export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }
       </CardHeader>
       <CardContent className="space-y-1 text-xs">
         <p>ID: {device.deviceId}</p>
-        <p>Plate: {device.vehiclePlate ?? '-'}</p>
-        <p>Status: {MAP_STATUS_LABELS[device.status]}</p>
-        <p>Speed: {device.speed} km/h</p>
-        <p>Heading: {device.heading}°</p>
+        <p>Biển số: {device.vehiclePlate ?? '-'}</p>
+        <p>Trạng thái: {MAP_STATUS_LABELS[device.status]}</p>
+        <p>Tốc độ: {device.speed} km/h</p>
+        <p>Hướng: {device.heading}°</p>
         <p>
-          Lat/Lon: {device.lat.toFixed(5)}, {device.lon.toFixed(5)}
+          Vĩ độ/Kinh độ: {device.lat.toFixed(5)}, {device.lon.toFixed(5)}
         </p>
-        <p>Updated: {formatDateTime(device.timestamp)}</p>
+        <p>Cập nhật: {formatDateTime(device.timestamp)}</p>
       </CardContent>
     </Card>
   );

@@ -28,7 +28,7 @@ export const RecentAlerts = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4" />
-          Recent alerts
+Cảnh báo gần đây
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -45,11 +45,11 @@ export const RecentAlerts = ({
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-medium">{alert.eventType}</p>
                   <Badge variant={getSeverityVariant(alert.severity)}>
-                    {alert.severity ?? 'info'}
+                    {alert.severity ?? 'thông tin'}
                   </Badge>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {alert.message || alert.deviceId || 'No message'}
+                  {alert.message || alert.deviceId || 'Không có nội dung'}
                 </p>
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   {formatRelative(alert.serverTimestamp)}
@@ -58,7 +58,7 @@ export const RecentAlerts = ({
             ))}
             {alerts.length === 0 ? (
               <p className="rounded-lg border border-dashed p-3 text-center text-sm text-muted-foreground">
-                No recent alerts.
+Chưa có cảnh báo gần đây.
               </p>
             ) : null}
           </div>

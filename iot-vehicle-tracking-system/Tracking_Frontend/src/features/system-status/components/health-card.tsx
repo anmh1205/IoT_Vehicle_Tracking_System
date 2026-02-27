@@ -10,8 +10,8 @@ export const HealthCard = ({ service }: { service: ServiceHealthItem }) => {
         <StatusBadge status={service.status} />
       </CardHeader>
       <CardContent className="space-y-1 text-xs text-muted-foreground">
-        <p>Key: {service.key}</p>
-        {service.latencyMs ? <p>Latency: {service.latencyMs}ms</p> : null}
+        <p>Khóa: {service.key}</p>
+        {service.latencyMs ? <p>Độ trễ: {service.latencyMs}ms</p> : null}
         {service.error ? <p className="text-rose-600">{service.error}</p> : null}
       </CardContent>
     </Card>

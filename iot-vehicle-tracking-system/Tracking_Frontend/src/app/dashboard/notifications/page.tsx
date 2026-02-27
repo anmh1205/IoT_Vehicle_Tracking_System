@@ -27,8 +27,8 @@ const NotificationsPage = () => {
   }, [notificationsQuery.data]);
   return (
     <PageContainer
-      pageTitle="Notifications"
-      pageDescription="Filter notifications, review stats, and mark all read"
+      pageTitle="Thông báo"
+      pageDescription="Lọc thông báo, xem thống kê và đánh dấu đã đọc"
       pageHeaderAction={
         <Button
           onClick={() => markAllRead.mutate()}
@@ -36,7 +36,7 @@ const NotificationsPage = () => {
           variant="outline"
         >
           <CheckCheck className="mr-2 h-4 w-4" />
-          Mark all read
+          Đánh dấu tất cả đã đọc
         </Button>
       }
     >

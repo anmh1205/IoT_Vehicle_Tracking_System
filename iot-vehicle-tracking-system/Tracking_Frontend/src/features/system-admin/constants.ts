@@ -11,10 +11,10 @@ export const SYSTEM_TABLES = [
 ] as const;
 
 export const LOG_LEVELS: Array<{ value: LogLevel | 'all'; label: string }> = [
-  { value: 'all', label: 'All' },
-  { value: 'error', label: 'Error' },
-  { value: 'warn', label: 'Warning' },
-  { value: 'info', label: 'Info' },
+  { value: 'all', label: 'Tất cả' },
+  { value: 'error', label: 'Lỗi' },
+  { value: 'warn', label: 'Cảnh báo' },
+  { value: 'info', label: 'Thông tin' },
   { value: 'debug', label: 'Debug' },
 ];
 

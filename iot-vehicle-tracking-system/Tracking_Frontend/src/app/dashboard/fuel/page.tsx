@@ -5,8 +5,8 @@ import { FuelAnalyticsPage } from '@/features/fuel-analytics/components/fuel-ana
 const FuelPage = () => {
   return (
     <PageContainer
-      pageTitle="Fuel Analytics"
-      pageDescription="Fuel consumption, cost analysis, and efficiency trends"
+      pageTitle="Phân tích nhiên liệu"
+      pageDescription="Tiêu thụ nhiên liệu, phân tích chi phí và xu hướng hiệu suất"
     >
       <FuelAnalyticsPage />
     </PageContainer>

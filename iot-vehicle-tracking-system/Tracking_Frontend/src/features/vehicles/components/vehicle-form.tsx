@@ -71,7 +71,7 @@ export const VehicleForm = ({
             onChange={(e) => setForm((s) => ({ ...s, model: e.target.value }))}
           />
           <Input
-            placeholder="Nam san xuat"
+            placeholder="Năm sản xuất"
             value={form.year}
             onChange={(e) => setForm((s) => ({ ...s, year: e.target.value }))}
           />

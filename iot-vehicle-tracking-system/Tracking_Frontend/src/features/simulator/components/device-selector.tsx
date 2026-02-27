@@ -37,7 +37,7 @@ export const DeviceSelector = ({
       <Input
         value={search}
         onChange={(event) => setSearch(event.target.value)}
-        placeholder="Search device..."
+        placeholder="Tìm thiết bị..."
       />
       <ScrollArea className="h-[220px] rounded-lg border p-2">
         <div className="space-y-2">
@@ -58,7 +58,7 @@ export const DeviceSelector = ({
             );
           })}
           {devices.length === 0 ? (
-            <p className="px-2 py-3 text-sm text-muted-foreground">No device found.</p>
+            <p className="px-2 py-3 text-sm text-muted-foreground">Không tìm thấy thiết bị.</p>
           ) : null}
         </div>
       </ScrollArea>

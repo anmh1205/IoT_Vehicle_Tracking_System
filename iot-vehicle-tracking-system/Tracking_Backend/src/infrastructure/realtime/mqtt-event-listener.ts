@@ -29,7 +29,9 @@ interface InternalEnvelope {
 let client: mqtt.MqttClient | null = null;
 
 export const initMqttEventListener = (): void => {
-  const brokerUrl = `mqtt://${mqttConfig.host}:${mqttConfig.port}`;
+  const protocol = mqttConfig.useTls ? 'mqtts' : 'mqtt';
+  const port = mqttConfig.useTls ? mqttConfig.tlsPort : mqttConfig.port;
+  const brokerUrl = `${protocol}://${mqttConfig.host}:${port}`;
 
   client = mqtt.connect(brokerUrl, {
     username: mqttConfig.username,
@@ -37,6 +39,7 @@ export const initMqttEventListener = (): void => {
     clientId: `backend-listener-${process.pid}`,
     reconnectPeriod: 5000,
     clean: true,
+    rejectUnauthorized: mqttConfig.rejectUnauthorized,
   });
 
   client.on('connect', () => {
@@ -131,7 +134,11 @@ export const initMqttEventListener = (): void => {
 export const closeMqttEventListener = async (): Promise<void> => {
   if (!client) return;
   log.info('Closing MQTT event listener...');
-  await client.endAsync();
+
+  await new Promise<void>((resolve) => {
+    client?.end(false, {}, () => resolve());
+  });
+
   client = null;
   log.info('MQTT event listener closed');
 };

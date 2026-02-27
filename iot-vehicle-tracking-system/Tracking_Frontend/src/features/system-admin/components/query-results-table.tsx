@@ -40,7 +40,7 @@ export const QueryResultsTable = ({
       data={rows}
       isLoading={isLoading}
       pageSize={20}
-      emptyMessage="Run a query to show results."
+      emptyMessage="Chạy truy vấn để xem kết quả."
     />
   );
 };

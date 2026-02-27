@@ -8,7 +8,7 @@
 ## Overview
 - Date: 2026-02-26
 - Priority: P1
-- Status: pending
+- Status: completed
 - Goal: ổn định auth/session boundary SSR-CSR, giảm logout sai, vá open redirect nội bộ.
 
 ## Key Insights
@@ -56,11 +56,11 @@
 6. Viết test cho redirect validation, refresh race, RBAC route gating.
 
 ## Todo list
-- [ ] Chốt boundary cho token/session access.
-- [ ] Implement refresh-first 401 flow.
-- [ ] Validate login redirect internal path.
-- [ ] Đồng bộ RBAC guard across dashboard pages.
-- [ ] Bổ sung tests cho auth/session regressions.
+- [x] Chốt boundary cho token/session access.
+- [x] Implement refresh-first 401 flow.
+- [x] Validate login redirect internal path.
+- [x] Đồng bộ RBAC guard across dashboard pages.
+- [x] Bổ sung tests cho auth/session regressions.
 
 ## Success Criteria
 - 401 không logout ngay khi refresh còn hợp lệ.

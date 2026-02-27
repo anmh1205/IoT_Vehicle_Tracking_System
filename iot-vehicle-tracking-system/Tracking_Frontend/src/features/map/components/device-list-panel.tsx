@@ -56,7 +56,7 @@ export const DeviceListPanel = () => {
           ))}
           {filteredDevices.length === 0 ? (
             <p className="rounded-lg border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">
-              No device match current filters.
+Không có thiết bị phù hợp với bộ lọc hiện tại.
             </p>
           ) : null}
         </div>

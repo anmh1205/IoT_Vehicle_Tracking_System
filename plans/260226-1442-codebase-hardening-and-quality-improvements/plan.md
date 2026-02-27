@@ -1,7 +1,7 @@
 ---
 title: "Codebase hardening and quality improvements"
 description: "Kế hoạch 5 pha để xử lý lỗ hổng bảo mật, ổn định realtime và nâng chất lượng maintainability toàn stack."
-status: pending
+status: completed
 priority: P1
 effort: 13d
 branch: feature/coding
@@ -17,11 +17,11 @@ Mục tiêu: xử lý findings đã có, không mở rộng scope, ưu tiên ris
 
 | Phase | File | Focus | Status | Effort |
 |---|---|---|---|---|
-| 01 | [Critical security fixes](./phase-01-critical-security-fixes.md) | AuthZ backend, password flow, metrics exposure | pending | 3d |
-| 02 | [Auth and session hardening](./phase-02-auth-and-session-hardening.md) | Frontend token boundary, refresh flow, redirect safety, RBAC page guard | pending | 3d |
-| 03 | [Realtime and MQTT reliability](./phase-03-realtime-and-mqtt-reliability.md) | MQTT listener shutdown/TLS, bridge auth parity, event-path reliability | pending | 3d |
-| 04 | [Mobile and infra config hardening](./phase-04-mobile-and-infra-config-hardening.md) | Flutter defaults, notification service duplication, EMQX/docker hygiene | pending | 2d |
-| 05 | [Type safety and maintainability](./phase-05-type-safety-and-maintainability.md) | `any` hotspots, image policy, guardrails, consistency | pending | 2d |
+| 01 | [Critical security fixes](./phase-01-critical-security-fixes.md) | AuthZ backend, password flow, metrics exposure | completed | 3d |
+| 02 | [Auth and session hardening](./phase-02-auth-and-session-hardening.md) | Frontend token boundary, refresh flow, redirect safety, RBAC page guard | completed | 3d |
+| 03 | [Realtime and MQTT reliability](./phase-03-realtime-and-mqtt-reliability.md) | MQTT listener shutdown/TLS, bridge auth parity, event-path reliability | completed | 3d |
+| 04 | [Mobile and infra config hardening](./phase-04-mobile-and-infra-config-hardening.md) | Flutter defaults, notification service duplication, EMQX/docker hygiene | completed | 2d |
+| 05 | [Type safety and maintainability](./phase-05-type-safety-and-maintainability.md) | `any` hotspots, image policy, guardrails, consistency | completed | 2d |
 
 ## Dependency order
 

@@ -4,17 +4,17 @@ import { Bell, Download, Map, Plus, Settings } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 const ACTIONS = [
-  { href: '/dashboard/map', label: 'Open map', icon: Map },
-  { href: '/dashboard/devices', label: 'Add device', icon: Plus },
-  { href: '/dashboard/alerts', label: 'View alerts', icon: Bell },
-  { href: '/dashboard/exports', label: 'Export data', icon: Download },
-  { href: '/dashboard/settings', label: 'System settings', icon: Settings },
+  { href: '/dashboard/map', label: 'Mở bản đồ', icon: Map },
+  { href: '/dashboard/devices', label: 'Thêm thiết bị', icon: Plus },
+  { href: '/dashboard/alerts', label: 'Xem cảnh báo', icon: Bell },
+  { href: '/dashboard/exports', label: 'Xuất dữ liệu', icon: Download },
+  { href: '/dashboard/settings', label: 'Cài đặt hệ thống', icon: Settings },
 ];
 export const QuickActions = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Quick actions</CardTitle>
+        <CardTitle>Thao tác nhanh</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">
         {ACTIONS.map((action) => {

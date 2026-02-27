@@ -23,7 +23,7 @@ export const DeviceUptimeChart = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Device uptime trend</CardTitle>
+        <CardTitle>Xu hướng uptime thiết bị</CardTitle>
       </CardHeader>
       <CardContent className="h-[320px]">
         {isLoading ? (

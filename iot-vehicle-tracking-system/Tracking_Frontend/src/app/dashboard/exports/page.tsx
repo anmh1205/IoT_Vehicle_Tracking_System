@@ -1,5 +1,6 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { ShieldAlert } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
@@ -24,6 +25,8 @@ import { exportServices } from '@/lib/api/exports';
 import { useCreateExport } from '@/hooks/mutations/use-create-export';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { queryInvalidation } from '@/lib/utils/query-invalidation';
+import { useRoleAccess } from '@/hooks/use-role-access';
+import { Card, CardContent } from '@/components/ui/card';
 import type { ColumnDef } from '@tanstack/react-table';
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Đang chờ',
@@ -127,6 +130,7 @@ const ExportForm = ({
   );
 };
 const ExportsPage = () => {
+  const access = useRoleAccess();
   const [open, setOpen] = useState(false);
   const [progressMap, setProgressMap] = useState<Record<number, number>>({});
   const queryClient = useQueryClient();
@@ -152,7 +156,30 @@ const ExportsPage = () => {
     event: 'export:ready',
     handler: onReady,
   });
-  const rows = exportsQuery.data?.items ?? [];
+
+  const rows = useMemo(() => exportsQuery.data?.items ?? [], [exportsQuery.data?.items]);
+
+  const activeJobIds = useMemo(() => {
+    const ids = rows
+      .filter((row: any) => row.status === 'pending' || row.status === 'processing')
+      .map((row: any) => Number(row.id))
+      .filter((id: number) => Number.isFinite(id) && id > 0);
+    return new Set(ids);
+  }, [rows]);
+
+  if (!access.canExportData) {
+    return (
+      <PageContainer pageTitle="Xuất dữ liệu" pageDescription="Khu vực hạn chế">
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4 text-sm">
+            <ShieldAlert className="h-5 w-5 text-amber-500" />
+            Bạn không có quyền truy cập phân hệ này.
+          </CardContent>
+        </Card>
+      </PageContainer>
+    );
+  }
+
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: 'exportType',
@@ -167,11 +194,16 @@ const ExportsPage = () => {
     {
       id: 'progress',
       header: 'Tiến độ',
-      cell: ({ row }) => (
-        <Progress
-          value={progressMap[row.original.id] ?? (row.original.status === 'completed' ? 100 : 0)}
-        />
-      ),
+      cell: ({ row }) => {
+        const rowId = Number(row.original.id);
+        const progress =
+          Number.isFinite(rowId) && activeJobIds.has(rowId)
+            ? (progressMap[rowId] ?? (row.original.status === 'completed' ? 100 : 0))
+            : row.original.status === 'completed'
+              ? 100
+              : 0;
+        return <Progress value={progress} />;
+      },
     },
     { accessorKey: 'createdAt', header: 'Thời điểm tạo' },
     {

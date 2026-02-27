@@ -25,7 +25,7 @@ export const DeviceListItem = ({
         <span className="text-xs text-muted-foreground">{device.speed} km/h</span>
       </div>
       <p className="text-xs text-muted-foreground">{device.deviceId}</p>
-      <p className="mt-1 text-xs">Status: {MAP_STATUS_LABELS[device.status]}</p>
+      <p className="mt-1 text-xs">Trạng thái: {MAP_STATUS_LABELS[device.status]}</p>
     </button>
   );
 };

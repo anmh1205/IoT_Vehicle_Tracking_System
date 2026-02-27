@@ -2,7 +2,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:tracking_mobile/core/services/notification_service.dart';
 import 'package:tracking_mobile/core/services/storage_service.dart';
 import 'package:tracking_mobile/core/utils/logger.dart';
-import 'package:tracking_mobile/features/notifications/local_notification_service.dart';
 
 /// Top-level handler for background FCM messages (must be top-level function).
 @pragma('vm:entry-point')
@@ -43,7 +42,7 @@ class FCMHandler {
       final token = await _messaging.getToken();
       if (token != null) {
         await StorageService.instance.saveFcmToken(token);
-        Log.info('FCM token obtained: ${token.substring(0, 12)}...');
+        Log.info('FCM token obtained successfully');
       }
 
       // Listen for token refresh

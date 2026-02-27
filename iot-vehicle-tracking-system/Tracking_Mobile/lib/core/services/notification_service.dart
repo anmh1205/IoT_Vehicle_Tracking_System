@@ -1,12 +1,11 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tracking_mobile/core/utils/logger.dart';
+import 'package:tracking_mobile/features/notifications/local_notification_service.dart';
 
 /// Convenience wrapper for showing local notifications from anywhere.
 class NotificationService {
   const NotificationService._();
 
-  static final FlutterLocalNotificationsPlugin _plugin =
-      FlutterLocalNotificationsPlugin();
 
   static const _androidChannel = AndroidNotificationDetails(
     'tracking_default',
@@ -32,7 +31,7 @@ class NotificationService {
     int id = 0,
   }) async {
     try {
-      await _plugin.show(id, title, body, _notificationDetails);
+      await LocalNotificationService.plugin.show(id, title, body, _notificationDetails);
     } catch (e) {
       Log.error('Failed to show notification: $e');
     }

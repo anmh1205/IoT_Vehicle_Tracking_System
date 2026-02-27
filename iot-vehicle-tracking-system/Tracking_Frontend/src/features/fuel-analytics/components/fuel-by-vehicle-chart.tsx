@@ -34,14 +34,14 @@ export const FuelByVehicleChart = ({ data, isLoading }: FuelByVehicleChartProps)
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Fuel by Vehicle</CardTitle>
+        <CardTitle className="text-base">Nhiên liệu theo phương tiện</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : chartData.length === 0 ? (
           <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
-            No fuel data available for selected period
+Không có dữ liệu nhiên liệu cho khoảng thời gian đã chọn
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
@@ -52,8 +52,8 @@ export const FuelByVehicleChart = ({ data, isLoading }: FuelByVehicleChartProps)
               <YAxis yAxisId="right" orientation="right" fontSize={12} />
               <Tooltip />
               <Legend />
-              <Bar yAxisId="left" dataKey="fuel" name="Fuel (L)" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              <Bar yAxisId="right" dataKey="distance" name="Distance (km)" fill="#22c55e" radius={[4, 4, 0, 0]} />
+              <Bar yAxisId="left" dataKey="fuel" name="Nhiên liệu (L)" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              <Bar yAxisId="right" dataKey="distance" name="Quãng đường (km)" fill="#22c55e" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}

@@ -48,13 +48,13 @@ export const MobileDeviceDrawer = () => {
         onClick={() => setOpen(true)}
       >
         <List className="mr-2 h-4 w-4" />
-        Devices ({filteredDevices.length})
+        Thiết bị ({filteredDevices.length})
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="bottom" className="h-[72vh] rounded-t-2xl">
           <SheetHeader className="px-0 pb-2">
-            <SheetTitle>Map devices</SheetTitle>
+            <SheetTitle>Thiết bị trên bản đồ</SheetTitle>
           </SheetHeader>
           <div className="space-y-3">
             <div className="flex items-center gap-2">

@@ -1,7 +1,8 @@
 ﻿'use client';
 import { useEffect, useState } from 'react';
+import type { User } from '@/lib/stores/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { Plus, ShieldAlert } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
@@ -22,9 +23,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { userServices } from '@/lib/api/users';
+import {
+  userServices,
+  type CreateUserInput,
+  type UpdateUserInput,
+} from '@/lib/api/users';
+import { useRoleAccess } from '@/hooks/use-role-access';
+import { Card, CardContent } from '@/components/ui/card';
 import type { ColumnDef } from '@tanstack/react-table';
-const ROLE_LABELS: Record<string, string> = {
+const ROLE_LABELS: Record<User['role'], string> = {
+  root: 'Root',
   admin: 'Quản trị viên',
   manager: 'Quản lý',
   operator: 'Điều hành',
@@ -35,6 +43,17 @@ const STATUS_LABELS: Record<string, string> = {
   inactive: 'Ngưng hoạt động',
   suspended: 'Tạm khóa',
 };
+type UserRole = NonNullable<CreateUserInput['role']>;
+type UserStatus = NonNullable<UpdateUserInput['status']>;
+type UserFormState = {
+  username: string;
+  password: string;
+  fullName: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+};
+
 const UserForm = ({
   open,
   onOpenChange,
@@ -42,10 +61,10 @@ const UserForm = ({
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  defaultValues?: any;
+  defaultValues?: Partial<User> & { status?: UserStatus };
 }) => {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<UserFormState>({
     username: '',
     password: '',
     fullName: '',
@@ -76,14 +95,31 @@ const UserForm = ({
     });
   }, [defaultValues, open]);
   const createMutation = useMutation({
-    mutationFn: () => userServices.create(form),
+    mutationFn: () =>
+      userServices.create({
+        username: form.username,
+        password: form.password,
+        fullName: form.fullName,
+        role: form.role,
+        email: form.email || undefined,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       onOpenChange(false);
     },
   });
   const updateMutation = useMutation({
-    mutationFn: () => userServices.update(defaultValues.id, form),
+    mutationFn: () => {
+      if (!defaultValues?.id) {
+        throw new Error('Missing user id for update');
+      }
+      return userServices.update(defaultValues.id, {
+        fullName: form.fullName,
+        role: form.role,
+        status: form.status,
+        email: form.email || null,
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       onOpenChange(false);
@@ -122,7 +158,7 @@ const UserForm = ({
           />
           <Select
             value={form.role}
-            onValueChange={(value) => setForm((s) => ({ ...s, role: value }))}
+            onValueChange={(value: UserRole) => setForm((s) => ({ ...s, role: value }))}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Chọn vai trò" />
@@ -136,7 +172,7 @@ const UserForm = ({
           </Select>
           <Select
             value={form.status}
-            onValueChange={(value) => setForm((s) => ({ ...s, status: value }))}
+            onValueChange={(value: UserStatus) => setForm((s) => ({ ...s, status: value }))}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Chọn trạng thái" />
@@ -163,9 +199,10 @@ const UserForm = ({
   );
 };
 const UsersPage = () => {
+  const access = useRoleAccess();
   const [open, setOpen] = useState(false);
-  const [editItem, setEditItem] = useState<any | null>(null);
-  const [deleteItem, setDeleteItem] = useState<any | null>(null);
+  const [editItem, setEditItem] = useState<(User & { status?: UserStatus }) | null>(null);
+  const [deleteItem, setDeleteItem] = useState<User | null>(null);
   const queryClient = useQueryClient();
   const users = useQuery({
     queryKey: ['users'],
@@ -178,7 +215,7 @@ const UsersPage = () => {
       setDeleteItem(null);
     },
   });
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<User>[] = [
     {
       accessorKey: 'username',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Tên đăng nhập" />,
@@ -193,7 +230,8 @@ const UsersPage = () => {
     {
       accessorKey: 'status',
       header: 'Trạng thái',
-      cell: ({ row }) => STATUS_LABELS[row.original.status] ?? row.original.status,
+      cell: ({ row }) =>
+        row.original.status ? STATUS_LABELS[row.original.status] ?? row.original.status : '-',
     },
     {
       id: 'actions',
@@ -217,6 +255,20 @@ const UsersPage = () => {
     },
   ];
   const rows = users.data ?? [];
+
+  if (!access.canManageUsers) {
+    return (
+      <PageContainer pageTitle="Người dùng" pageDescription="Khu vực hạn chế">
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4 text-sm">
+            <ShieldAlert className="h-5 w-5 text-amber-500" />
+            Bạn không có quyền truy cập phân hệ này.
+          </CardContent>
+        </Card>
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer
       pageTitle="Người dùng"

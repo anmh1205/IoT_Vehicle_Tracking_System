@@ -21,7 +21,7 @@ export const AreaGraph = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Fleet runtime trend (30 days)</CardTitle>
+        <CardTitle>Xu hướng thời gian hoạt động đội xe (30 ngày)</CardTitle>
       </CardHeader>
       <CardContent className="h-[320px]">
         {isLoading ? (

@@ -24,9 +24,9 @@ export const TableView = ({ series }: { series: MetricSeries[] }) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Series</TableHead>
-              <TableHead>Timestamp</TableHead>
-              <TableHead>Value</TableHead>
+              <TableHead>Chuỗi</TableHead>
+              <TableHead>Thời điểm</TableHead>
+              <TableHead>Giá trị</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -40,7 +40,7 @@ export const TableView = ({ series }: { series: MetricSeries[] }) => {
             {rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="h-20 text-center text-sm text-muted-foreground">
-                  No metric rows.
+Không có dòng dữ liệu chỉ số.
                 </TableCell>
               </TableRow>
             ) : null}

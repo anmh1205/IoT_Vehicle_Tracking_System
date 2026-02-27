@@ -9,7 +9,7 @@
 ## Overview
 - Date: 2026-02-26
 - Priority: P2
-- Status: pending
+- Status: completed
 - Goal: giảm debt kiểu dữ liệu và chuẩn hóa maintainability guardrails sau hardening.
 
 ## Key Insights
@@ -50,11 +50,11 @@
 6. Rà soát trùng lặp helper/types sau khi chuẩn hóa.
 
 ## Todo list
-- [ ] Chốt danh sách `any` ưu tiên cao.
-- [ ] Refactor types cho API/hooks critical.
-- [ ] Siết `next/image` remotePatterns.
-- [ ] Thiết lập guardrails lint/type cho vùng nhạy cảm.
-- [ ] Dọn duplicate type/helper.
+- [x] Chốt danh sách `any` ưu tiên cao.
+- [x] Refactor types cho API/hooks critical.
+- [x] Siết `next/image` remotePatterns.
+- [x] Thiết lập guardrails lint/type cho vùng nhạy cảm.
+- [x] Dọn duplicate type/helper.
 
 ## Success Criteria
 - `any` giảm rõ rệt ở auth/session + telemetry flows.

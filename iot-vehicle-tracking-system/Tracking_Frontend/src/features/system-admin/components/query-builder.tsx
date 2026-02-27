@@ -73,13 +73,13 @@ export const QueryBuilder = () => {
     <div className="space-y-3">
       <div className="grid gap-3 rounded-lg border p-3 md:grid-cols-2 lg:grid-cols-5">
         <div className="space-y-1">
-          <p className="text-xs text-muted-foreground">Table</p>
+          <p className="text-xs text-muted-foreground">Bảng</p>
           <Select
             value={draft.table}
             onValueChange={(value) => setDraft((prev) => ({ ...prev, table: value }))}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select table" />
+              <SelectValue placeholder="Chọn bảng" />
             </SelectTrigger>
             <SelectContent>
               {(tablesQuery.data ?? []).map((table) => (
@@ -92,26 +92,26 @@ export const QueryBuilder = () => {
         </div>
 
         <div className="space-y-1">
-          <p className="text-xs text-muted-foreground">Search</p>
+          <p className="text-xs text-muted-foreground">Tìm kiếm</p>
           <Input
             value={draft.search}
             onChange={(event) => setDraft((prev) => ({ ...prev, search: event.target.value }))}
-            placeholder="Keyword..."
+            placeholder="Từ khóa..."
           />
         </div>
 
         <div className="space-y-1">
-          <p className="text-xs text-muted-foreground">Sort column</p>
+          <p className="text-xs text-muted-foreground">Cột sắp xếp</p>
           <Input
             value={draft.sortColumn}
             onChange={(event) => setDraft((prev) => ({ ...prev, sortColumn: event.target.value }))}
             list="query-builder-columns"
-            placeholder={currentColumns[0] ?? 'column_name'}
+            placeholder={currentColumns[0] ?? 'tên_cột'}
           />
         </div>
 
         <div className="space-y-1">
-          <p className="text-xs text-muted-foreground">Direction</p>
+          <p className="text-xs text-muted-foreground">Chiều sắp xếp</p>
           <Select
             value={draft.sortDirection}
             onValueChange={(value) =>
@@ -125,14 +125,14 @@ export const QueryBuilder = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="asc">Ascending</SelectItem>
-              <SelectItem value="desc">Descending</SelectItem>
+              <SelectItem value="asc">Tăng dần</SelectItem>
+              <SelectItem value="desc">Giảm dần</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-1">
-          <p className="text-xs text-muted-foreground">Limit</p>
+          <p className="text-xs text-muted-foreground">Giới hạn</p>
           <Input
             type="number"
             value={draft.limit}
@@ -148,10 +148,10 @@ export const QueryBuilder = () => {
 
       <div className="space-y-2 rounded-lg border p-3">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium">Filter conditions</p>
+          <p className="text-sm font-medium">Điều kiện lọc</p>
           <Button size="sm" variant="outline" onClick={addCondition}>
             <Plus className="mr-1 h-4 w-4" />
-            Add filter
+Thêm điều kiện
           </Button>
         </div>
 
@@ -163,7 +163,7 @@ export const QueryBuilder = () => {
                 updateCondition(index, { ...condition, column: event.target.value })
               }
               list="query-builder-columns"
-              placeholder="column"
+              placeholder="tên_cột"
             />
             <Select
               value={condition.operator}
@@ -190,7 +190,7 @@ export const QueryBuilder = () => {
               onChange={(event) =>
                 updateCondition(index, { ...condition, value: event.target.value })
               }
-              placeholder="value"
+              placeholder="giá trị"
             />
             <Button size="icon" variant="ghost" onClick={() => removeCondition(index)}>
               <Trash2 className="h-4 w-4" />
@@ -200,7 +200,7 @@ export const QueryBuilder = () => {
 
         {draft.filters.length === 0 ? (
           <p className="text-xs text-muted-foreground">
-            No filters. Query returns full table slice.
+Chưa có điều kiện lọc. Truy vấn sẽ trả về toàn bộ dữ liệu theo giới hạn.
           </p>
         ) : null}
       </div>
@@ -208,7 +208,7 @@ export const QueryBuilder = () => {
       <div className="flex justify-end">
         <Button onClick={() => setQueryState(draft)}>
           <Play className="mr-2 h-4 w-4" />
-          Execute query
+Chạy truy vấn
         </Button>
       </div>
 

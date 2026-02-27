@@ -16,7 +16,7 @@ export const FleetUtilizationChart = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Fleet utilization</CardTitle>
+        <CardTitle>Mức sử dụng đội xe</CardTitle>
       </CardHeader>
       <CardContent className="h-[320px]">
         {isLoading ? (

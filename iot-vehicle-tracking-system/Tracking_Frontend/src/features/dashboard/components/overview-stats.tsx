@@ -37,42 +37,42 @@ export const OverviewStats = ({
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        title="Total devices"
+        title="Tổng thiết bị"
         value={totalDevices}
         icon={<Car className="h-4 w-4 text-muted-foreground" />}
-        trend={{ value: `${activeRate.toFixed(1)}% online`, positive: activeRate >= 70 }}
+        trend={{ value: `${activeRate.toFixed(1)}% trực tuyến`, positive: activeRate >= 70 }}
         isLoading={isLoading}
       />
       <StatCard
-        title="Running devices"
+        title="Thiết bị đang chạy"
         value={activeDevices}
         icon={<Cpu className="h-4 w-4 text-muted-foreground" />}
         trend={{ value: `${activeRate.toFixed(1)}%`, positive: activeRate >= 60 }}
         isLoading={isLoading}
       />
       <StatCard
-        title="Active alerts"
+        title="Cảnh báo đang hoạt động"
         value={alertsCount}
         icon={<Bell className="h-4 w-4 text-muted-foreground" />}
-        trend={{ value: `${offlineRate.toFixed(1)}% offline`, positive: false }}
+        trend={{ value: `${offlineRate.toFixed(1)}% ngoại tuyến`, positive: false }}
         isLoading={isLoading}
       />
       <StatCard
-        title="Trips today"
+        title="Chuyến đi hôm nay"
         value={sessionsToday}
         icon={<Route className="h-4 w-4 text-muted-foreground" />}
-        trend={{ value: `${sessionTrend.toFixed(1)}% fleet`, positive: sessionTrend >= 20 }}
-        subtitle={`${runtimeToday.toFixed(1)}h today / ${runtimeWeek.toFixed(1)}h week`}
+        trend={{ value: `${sessionTrend.toFixed(1)}% đội xe`, positive: sessionTrend >= 20 }}
+        subtitle={`${runtimeToday.toFixed(1)}h hôm nay / ${runtimeWeek.toFixed(1)}h tuần`}
         isLoading={isLoading}
       />
 
       {!isLoading ? (
         <div className="col-span-full flex flex-wrap gap-4 rounded-lg border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
           <span>
-            Runtime trend: <Trend value={runtimeTrend - 14} />
+            Xu hướng runtime: <Trend value={runtimeTrend - 14} />
           </span>
           <span>
-            Session trend: <Trend value={sessionTrend - 10} />
+            Xu hướng phiên: <Trend value={sessionTrend - 10} />
           </span>
         </div>
       ) : null}

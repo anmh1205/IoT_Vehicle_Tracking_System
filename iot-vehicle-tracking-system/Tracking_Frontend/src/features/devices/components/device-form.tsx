@@ -23,8 +23,8 @@ import { Button } from '@/components/ui/button';
 import { useCreateDevice } from '../hooks/use-create-device';
 import { useUpdateDevice } from '../hooks/use-update-device';
 const schema = z.object({
-  deviceId: z.string().min(1, 'Required'),
-  deviceName: z.string().min(1, 'Required'),
+  deviceId: z.string().min(1, 'Bắt buộc'),
+  deviceName: z.string().min(1, 'Bắt buộc'),
   imei: z.string().optional(),
   requestInterval: z.number().min(10).max(3600),
   vibrationThreshold: z.number().min(0).max(1000),
@@ -85,7 +85,7 @@ export const DeviceForm = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{defaultValues?.id ? 'Update device' : 'Create device'}</DialogTitle>
+          <DialogTitle>{defaultValues?.id ? 'Cập nhật thiết bị' : 'Tạo thiết bị'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -107,7 +107,7 @@ export const DeviceForm = ({
               name="deviceName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Device name</FormLabel>
+                  <FormLabel>Tên thiết bị</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -121,7 +121,7 @@ export const DeviceForm = ({
                 name="requestInterval"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Request interval (s)</FormLabel>
+                    <FormLabel>Chu kỳ gửi (giây)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -138,7 +138,7 @@ export const DeviceForm = ({
                 name="vibrationThreshold"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vibration threshold</FormLabel>
+                    <FormLabel>Ngưỡng rung</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -167,10 +167,10 @@ export const DeviceForm = ({
 
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                Cancel
+                Hủy
               </Button>
               <Button type="submit" disabled={pending}>
-                {defaultValues?.id ? 'Save' : 'Create'}
+                {defaultValues?.id ? 'Lưu' : 'Tạo'}
               </Button>
             </DialogFooter>
           </form>

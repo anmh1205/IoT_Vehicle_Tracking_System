@@ -1,7 +1,8 @@
 import type { Response, NextFunction } from 'express';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
+import { isUserRole } from '@/shared/types/common.types';
 import { hashToken } from '@/shared/utils/crypto.util';
-import { createUnauthorizedError } from '@/shared/utils/errors.util';
+import { createUnauthorizedError, createForbiddenError } from '@/shared/utils/errors.util';
 import {
   findByHashedToken,
   extendSession,
@@ -32,6 +33,26 @@ const extractCookieToken = (req: AuthenticatedRequest): string | null => {
 const extractSessionToken = (req: AuthenticatedRequest): string | null =>
   extractBearerToken(req) ?? extractCookieToken(req);
 
+const ADMIN_ROLES = new Set(['root', 'admin']);
+
+export const requireAdminRole = (
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction,
+): void => {
+  if (!req.user) {
+    next(createUnauthorizedError('Authentication required'));
+    return;
+  }
+
+  if (!ADMIN_ROLES.has(req.user.role)) {
+    next(createForbiddenError('Admin access required'));
+    return;
+  }
+
+  next();
+};
+
 export const requireAuth = async (
   req: AuthenticatedRequest,
   _res: Response,
@@ -57,6 +78,10 @@ export const requireAuth = async (
     const user = await findById(session.user_id);
     if (!user) {
       throw createUnauthorizedError('User not found');
+    }
+
+    if (!isUserRole(user.role)) {
+      throw createUnauthorizedError('Invalid user role');
     }
 
     req.user = {
@@ -96,7 +121,7 @@ export const attachUserIfAvailable = async (
     }
 
     const user = await findById(session.user_id);
-    if (user) {
+    if (user && isUserRole(user.role)) {
       req.user = {
         id: user.id,
         username: user.username,

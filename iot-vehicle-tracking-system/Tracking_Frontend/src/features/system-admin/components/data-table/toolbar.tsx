@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 export function DataTableToolbar<TData>({
   table,
   searchKey,
-  searchPlaceholder = 'Search...',
+  searchPlaceholder = 'Tìm kiếm...',
 }: {
   table: Table<TData>;
   searchKey?: string;
@@ -34,7 +34,7 @@ export function DataTableToolbar<TData>({
           className="h-8 px-2"
         >
           <X className="mr-1 h-4 w-4" />
-          Reset
+Đặt lại
         </Button>
       ) : null}
     </div>

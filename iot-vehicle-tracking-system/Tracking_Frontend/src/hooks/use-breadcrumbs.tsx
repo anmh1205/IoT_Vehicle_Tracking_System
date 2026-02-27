@@ -49,7 +49,7 @@ const routeMapping: Record<string, BreadcrumbItem[]> = {
   ],
   '/dashboard/firmware': [
     { title: 'Tổng quan', link: '/dashboard' },
-    { title: 'Phần mềm nhúng', link: '/dashboard/firmware' },
+    { title: 'Firmware', link: '/dashboard/firmware' },
   ],
   '/dashboard/exports': [
     { title: 'Tổng quan', link: '/dashboard' },

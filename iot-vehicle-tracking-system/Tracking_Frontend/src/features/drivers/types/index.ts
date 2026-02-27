@@ -30,4 +30,4 @@ export interface CreateDriverInput {
   notes?: string;
 }
 
-export interface UpdateDriverInput extends Partial<CreateDriverInput> {}
+export type UpdateDriverInput = Partial<CreateDriverInput>;

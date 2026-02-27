@@ -8,7 +8,7 @@
 ## Overview
 - Date: 2026-02-26
 - Priority: P1
-- Status: pending
+- Status: completed
 - Goal: đóng các lỗ hổng security impact cao, ít thay đổi nhất.
 
 ## Key Insights
@@ -49,11 +49,11 @@
 6. Add audit/security notes vào docs vận hành.
 
 ## Todo list
-- [ ] Chốt role matrix tối thiểu cho admin/user-manager.
-- [ ] Thêm guard đồng nhất cho auth/users routes.
-- [ ] Loại bỏ plaintext temp password khỏi API response.
-- [ ] Cài fail-closed logic cho metrics in production.
-- [ ] Bổ sung test security regression.
+- [x] Chốt role matrix tối thiểu cho admin/user-manager.
+- [x] Thêm guard đồng nhất cho auth/users routes.
+- [x] Loại bỏ plaintext temp password khỏi API response.
+- [x] Cài fail-closed logic cho metrics in production.
+- [x] Bổ sung test security regression.
 
 ## Success Criteria
 - Tất cả admin-sensitive routes trả 401/403 đúng khi thiếu quyền.

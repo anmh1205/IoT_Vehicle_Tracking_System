@@ -12,14 +12,15 @@ services:
       EMQX_AUTHENTICATION__1__BACKEND: built_in_database
       EMQX_AUTHENTICATION__1__ENABLE: "true"
       EMQX_DASHBOARD__DEFAULT_PASSWORD: ${EMQX_DASHBOARD__DEFAULT_PASSWORD:?EMQX_DASHBOARD__DEFAULT_PASSWORD is required}
+      EMQX_NODE__COOKIE: ${EMQX_NODE__COOKIE:?EMQX_NODE__COOKIE is required}
     volumes:
       - emqx-data:/opt/emqx/data
       - emqx-log:/opt/emqx/log
     ports:
       - "127.0.0.1:1883:1883"     # MQTT (non-TLS) - internal/dev only
-      - "0.0.0.0:8883:8883"       # MQTTS (TLS) - production
+      - "127.0.0.1:8883:8883"     # MQTTS (TLS) - expose via reverse proxy
       - "127.0.0.1:8083:8083"     # WebSocket (WS) - internal only
-      - "0.0.0.0:8084:8084"       # WebSocket Secure (WSS) - production
+      - "127.0.0.1:8084:8084"     # WebSocket Secure (WSS) - expose via reverse proxy
       - "127.0.0.1:18083:18083"   # Dashboard - admin only
     healthcheck:
       test: ["CMD", "emqx", "ping"]

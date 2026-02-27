@@ -39,7 +39,7 @@ export const SimulationControls = ({
     <div className="space-y-3">
       <div className="grid gap-2 sm:grid-cols-2">
         <div className="space-y-1">
-          <p className="text-xs text-muted-foreground">Interval</p>
+          <p className="text-xs text-muted-foreground">Chu kỳ</p>
           <Select
             value={String(intervalSec)}
             onValueChange={(value) => onIntervalChange(Number(value))}
@@ -58,7 +58,7 @@ export const SimulationControls = ({
         </div>
 
         <div className="space-y-1">
-          <p className="text-xs text-muted-foreground">Duration</p>
+          <p className="text-xs text-muted-foreground">Thời lượng</p>
           <Select
             value={String(durationMin)}
             onValueChange={(value) => onDurationChange(Number(value))}
@@ -69,7 +69,7 @@ export const SimulationControls = ({
             <SelectContent>
               {DURATION_OPTIONS.map((option) => (
                 <SelectItem key={option} value={String(option)}>
-                  {option} min
+                  {option} phút
                 </SelectItem>
               ))}
             </SelectContent>
@@ -80,25 +80,25 @@ export const SimulationControls = ({
       <div className="flex flex-wrap items-center gap-2">
         <Button onClick={onStart} disabled={running}>
           <Play className="mr-2 h-4 w-4" />
-          Start
+Bắt đầu
         </Button>
         {running && !paused ? (
           <Button variant="outline" onClick={onPause}>
             <Pause className="mr-2 h-4 w-4" />
-            Pause
+Tạm dừng
           </Button>
         ) : null}
         {running && paused ? (
           <Button variant="outline" onClick={onResume}>
             <TimerReset className="mr-2 h-4 w-4" />
-            Resume
+Tiếp tục
           </Button>
         ) : null}
         <Button variant="destructive" onClick={onStop} disabled={!running}>
           <Square className="mr-2 h-4 w-4" />
-          Stop
+Dừng
         </Button>
-        <span className="text-xs text-muted-foreground">Status: {statusLabel}</span>
+        <span className="text-xs text-muted-foreground">Trạng thái: {statusLabel}</span>
       </div>
     </div>
   );

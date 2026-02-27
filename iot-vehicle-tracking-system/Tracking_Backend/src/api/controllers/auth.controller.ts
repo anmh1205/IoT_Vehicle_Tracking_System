@@ -15,7 +15,9 @@ import * as authSessionService from '@/domain/auth/services/auth-session.service
 import * as authPasswordService from '@/domain/auth/services/auth-password.service';
 import * as userManagementService from '@/domain/auth/services/user-management.service';
 import * as userRepo from '@/domain/auth/repositories/user.repository';
+import * as userSessionRepo from '@/domain/auth/repositories/user-session.repository';
 import { hashPassword } from '@/domain/auth/helpers/auth.helpers';
+import { randomBytes } from 'crypto';
 import { appConfig, sessionConfig } from '@/config/env';
 
 const COOKIE_NAME = 'session_token';
@@ -220,13 +222,15 @@ export const resetUserPassword = asyncHandler(async (req: AuthenticatedRequest, 
     throw createValidationError('Invalid user ID');
   }
 
-  const temporaryPassword = `Tmp${Math.random().toString(36).slice(2, 10)}!`;
+  const temporaryPassword = `Tmp${randomBytes(12).toString('base64url')}!`;
   const newHash = await hashPassword(temporaryPassword);
   const updated = await userRepo.updatePassword(id, newHash);
 
   if (!updated) {
     throw createValidationError('Could not reset password');
   }
+
+  await userSessionRepo.deactivateAllForUser(id);
 
   sendOk(res, { temporaryPassword });
 });

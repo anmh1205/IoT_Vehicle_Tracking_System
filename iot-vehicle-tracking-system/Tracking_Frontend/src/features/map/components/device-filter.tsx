@@ -17,14 +17,14 @@ export const DeviceFilter = ({
   return (
     <Select value={value} onValueChange={(next) => onChange(next as 'all' | DeviceMapStatus)}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Status" />
+        <SelectValue placeholder="Trạng thái" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">All status</SelectItem>
-        <SelectItem value="running">Running</SelectItem>
-        <SelectItem value="stopped">Stopped</SelectItem>
-        <SelectItem value="error">Error</SelectItem>
-        <SelectItem value="disconnected">Disconnected</SelectItem>
+        <SelectItem value="all">Tất cả trạng thái</SelectItem>
+        <SelectItem value="running">Đang chạy</SelectItem>
+        <SelectItem value="stopped">Đã dừng</SelectItem>
+        <SelectItem value="error">Lỗi</SelectItem>
+        <SelectItem value="disconnected">Mất kết nối</SelectItem>
       </SelectContent>
     </Select>
   );

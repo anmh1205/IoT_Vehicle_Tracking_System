@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import { ShieldAlert } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
@@ -16,6 +17,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { firmwareServices } from '@/lib/api/firmware';
 import { useSocket } from '@/components/providers/socket-provider';
+import { useRoleAccess } from '@/hooks/use-role-access';
+import { Card, CardContent } from '@/components/ui/card';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -53,7 +56,7 @@ const UploadDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Tải lên phần mềm nhúng</DialogTitle>
+          <DialogTitle>Tải lên firmware</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <Input
@@ -93,6 +96,7 @@ const UploadDialog = ({
   );
 };
 const FirmwarePage = () => {
+  const access = useRoleAccess();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const firmware = useQuery({
@@ -126,7 +130,7 @@ const FirmwarePage = () => {
     const onProgress = (payload: any) =>
       toast.info(`Phần mềm nhúng ${payload.deviceId}: ${payload.progress}%`);
     const onComplete = (payload: any) => {
-      toast.success(`Hoàn tất cập nhật phần mềm nhúng: ${payload.deviceId}`);
+      toast.success(`Hoàn tất cập nhật firmware: ${payload.deviceId}`);
       queryClient.invalidateQueries({ queryKey: ['firmware-deployments-summary'] });
     };
     socket.on('firmware:progress', onProgress);
@@ -137,6 +141,20 @@ const FirmwarePage = () => {
     };
   }, [socket, queryClient]);
   const rows = firmware.data?.firmwares ?? firmware.data?.items ?? [];
+
+  if (!access.canManageFirmware) {
+    return (
+      <PageContainer pageTitle="Firmware" pageDescription="Khu vực hạn chế">
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4 text-sm">
+            <ShieldAlert className="h-5 w-5 text-amber-500" />
+            Bạn không có quyền truy cập phân hệ này.
+          </CardContent>
+        </Card>
+      </PageContainer>
+    );
+  }
+
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: 'version',
@@ -169,15 +187,15 @@ const FirmwarePage = () => {
   ];
   return (
     <PageContainer
-      pageTitle="Phần mềm nhúng"
-      pageDescription="Quản lý tệp phần mềm nhúng"
-      pageHeaderAction={<Button onClick={() => setOpen(true)}>Tải lên phần mềm nhúng</Button>}
+      pageTitle="Firmware"
+      pageDescription="Quản lý tệp firmware"
+      pageHeaderAction={<Button onClick={() => setOpen(true)}>Tải lên firmware</Button>}
     >
       <DataTable
         columns={columns}
         data={rows}
         searchKey="version"
-        searchPlaceholder="Tìm phần mềm nhúng..."
+        searchPlaceholder="Tìm firmware..."
         isLoading={firmware.isLoading}
       />
 

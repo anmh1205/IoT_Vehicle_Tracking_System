@@ -66,7 +66,7 @@ const formatLabel = (value: string) => {
   if (Number.isNaN(date.getTime())) {
     return value;
   }
-  return new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(date);
+  return new Intl.DateTimeFormat('vi-VN', { weekday: 'short' }).format(date);
 };
 const groupEventsByDay = (events: DashboardEvent[], days: number) => {
   const bucket = new Map<string, DeviceActivityPoint>();
@@ -116,7 +116,7 @@ const groupRuntimeByDay = (events: DashboardEvent[], days: number) => {
     bucket.set(dateKey, (bucket.get(dateKey) ?? 0) + 1.5);
   }
   return Array.from(bucket.entries()).map(([dateKey, runtime]) => ({
-    label: new Intl.DateTimeFormat('en-US', { month: '2-digit', day: '2-digit' }).format(
+    label: new Intl.DateTimeFormat('vi-VN', { month: '2-digit', day: '2-digit' }).format(
       new Date(dateKey),
     ),
     runtime: Number(runtime.toFixed(1)),
@@ -196,9 +196,9 @@ export const useDeviceStatusDistribution = () => {
       const offline = Number(stats.offlineDevices ?? 0);
       const stopped = Math.max(0, Number(stats.totalDevices ?? 0) - active - offline);
       return [
-        { name: 'Running', value: active, color: '#22c55e' },
-        { name: 'Stopped', value: stopped, color: '#64748b' },
-        { name: 'Offline', value: offline, color: '#ef4444' },
+        { name: 'Đang chạy', value: active, color: '#22c55e' },
+        { name: 'Đã dừng', value: stopped, color: '#64748b' },
+        { name: 'Ngoại tuyến', value: offline, color: '#ef4444' },
       ];
     },
   });

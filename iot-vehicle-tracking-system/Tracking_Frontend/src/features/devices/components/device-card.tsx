@@ -28,7 +28,7 @@ export const DeviceCard = ({ device, onClick }: DeviceCardProps) => {
       <CardContent className="space-y-2 text-sm">
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded border bg-muted/40 p-2">
-            <p className="text-xs text-muted-foreground">Runtime</p>
+            <p className="text-xs text-muted-foreground">Thời gian hoạt động</p>
             <p className="font-semibold">{getDeviceRuntimeHours(device)}h</p>
           </div>
           <div className="rounded border bg-muted/40 p-2">
@@ -39,18 +39,18 @@ export const DeviceCard = ({ device, onClick }: DeviceCardProps) => {
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1">
             <Cpu className="h-3.5 w-3.5" />
-            {device.imei ?? 'No IMEI'}
+            {device.imei ?? 'Không có IMEI'}
           </span>
           <span className="inline-flex items-center gap-1">
             <Radio className="h-3.5 w-3.5" />
-            {device.lastSeenAt ? 'Online' : 'Offline'}
+            {device.lastSeenAt ? 'Trực tuyến' : 'Ngoại tuyến'}
           </span>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Gauge className="h-3.5 w-3.5" />
-          Request interval: {device.requestInterval ?? 60}s
+          Chu kỳ gửi: {device.requestInterval ?? 60} giây
           <Waves className="ml-2 h-3.5 w-3.5" />
-          Vib threshold: {device.vibrationThreshold ?? 0}
+          Ngưỡng rung: {device.vibrationThreshold ?? 0}
         </div>
       </CardContent>
     </Card>

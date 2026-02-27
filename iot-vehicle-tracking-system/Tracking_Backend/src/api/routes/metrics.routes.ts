@@ -12,36 +12,39 @@ const router = Router();
 const metricsAuth = (req: Request, res: Response, next: NextFunction): void => {
   const password = observabilityConfig.metricsPassword;
 
-  // No auth required in dev when password is not configured
-  if (!password && !appConfig.isProduction) {
+  if (!password) {
+    if (appConfig.isProduction) {
+      res.status(503).json({
+        success: false,
+        error: { code: 'METRICS_NOT_CONFIGURED', message: 'METRICS_PASSWORD is required in production' },
+      });
+      return;
+    }
+
+    // No auth required in development when password is not configured
     next();
     return;
   }
 
-  // If password is configured, require basic auth
-  if (password) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Basic ')) {
-      res.setHeader('WWW-Authenticate', 'Basic realm="Metrics"');
-      res
-        .status(401)
-        .json({
-          success: false,
-          error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
-        });
-      return;
-    }
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Basic ')) {
+    res.setHeader('WWW-Authenticate', 'Basic realm="Metrics"');
+    res.status(401).json({
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
+    });
+    return;
+  }
 
-    const encoded = authHeader.slice(6);
-    const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
-    const [, pwd] = decoded.split(':');
+  const encoded = authHeader.slice(6);
+  const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
+  const [, pwd] = decoded.split(':');
 
-    if (pwd !== password) {
-      res
-        .status(403)
-        .json({ success: false, error: { code: 'FORBIDDEN', message: 'Invalid credentials' } });
-      return;
-    }
+  if (pwd !== password) {
+    res
+      .status(403)
+      .json({ success: false, error: { code: 'FORBIDDEN', message: 'Invalid credentials' } });
+    return;
   }
 
   next();

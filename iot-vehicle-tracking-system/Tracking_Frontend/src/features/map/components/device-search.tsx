@@ -14,7 +14,7 @@ export const DeviceSearch = ({
       <Input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Search device..."
+        placeholder="Tìm thiết bị..."
         className="pl-8"
       />
     </div>

@@ -8,7 +8,7 @@
 ## Overview
 - Date: 2026-02-26
 - Priority: P1
-- Status: pending
+- Status: completed
 - Goal: sửa reliability bug MQTT, đồng bộ device-auth và TLS policy giữa listener/bridge.
 
 ## Key Insights
@@ -52,11 +52,11 @@
 6. Thêm observability fields: auth_fail_count, reconnect_count, graceful_shutdown_duration.
 
 ## Todo list
-- [ ] Sửa bug undefined `endAsync` và bảo đảm graceful shutdown.
-- [ ] Đồng bộ TLS config parse/apply với secure defaults.
-- [ ] Áp device auth check cho status/event/firmware handlers.
-- [ ] Viết integration tests cho ingest auth parity.
-- [ ] Bổ sung metrics/log cho reliability.
+- [x] Sửa bug undefined `endAsync` và bảo đảm graceful shutdown.
+- [x] Đồng bộ TLS config parse/apply với secure defaults.
+- [x] Áp device auth check cho status/event/firmware handlers.
+- [x] Viết integration tests cho ingest auth parity.
+- [x] Bổ sung metrics/log cho reliability.
 
 ## Success Criteria
 - Service shutdown sạch, không throw unhandled errors.

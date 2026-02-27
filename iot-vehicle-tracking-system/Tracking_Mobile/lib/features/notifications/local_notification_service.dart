@@ -7,9 +7,9 @@ import 'package:tracking_mobile/core/utils/logger.dart';
 ///
 /// Called once at app startup from [main.dart].
 class LocalNotificationService {
-  const LocalNotificationService._();
+  LocalNotificationService._();
 
-  static final FlutterLocalNotificationsPlugin _plugin =
+  static final FlutterLocalNotificationsPlugin plugin =
       FlutterLocalNotificationsPlugin();
 
   static Future<void> init() async {
@@ -30,7 +30,7 @@ class LocalNotificationService {
       iOS: iosSettings,
     );
 
-    await _plugin.initialize(
+    await plugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: _onNotificationTap,
     );
@@ -52,7 +52,7 @@ class LocalNotificationService {
     );
 
     final androidPlugin =
-        _plugin.resolvePlatformSpecificImplementation<
+        plugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >();
 

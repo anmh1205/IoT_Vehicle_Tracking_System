@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth } from '@/middleware/auth.middleware';
+import { requireAuth, requireAdminRole } from '@/middleware/auth.middleware';
 import { authRateLimit } from '@/middleware/rate-limit.middleware';
 import * as authController from '@/api/controllers/auth.controller';
 
@@ -17,10 +17,10 @@ router.put('/profile', requireAuth, authController.updateProfile);
 router.put('/notifications', requireAuth, authController.updateNotifications);
 
 // User management (admin)
-router.get('/users', requireAuth, authController.listUsers);
-router.get('/users/:id', requireAuth, authController.getUserById);
-router.post('/users', requireAuth, authController.createUser);
-router.patch('/users/:id', requireAuth, authController.updateUser);
-router.delete('/users/:id', requireAuth, authController.deleteUser);
+router.get('/users', requireAuth, requireAdminRole, authController.listUsers);
+router.get('/users/:id', requireAuth, requireAdminRole, authController.getUserById);
+router.post('/users', requireAuth, requireAdminRole, authController.createUser);
+router.patch('/users/:id', requireAuth, requireAdminRole, authController.updateUser);
+router.delete('/users/:id', requireAuth, requireAdminRole, authController.deleteUser);
 
 export default router;

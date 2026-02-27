@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
   return (
     <div className="flex items-center justify-between border-t px-3 py-2">
-      <p className="text-xs text-muted-foreground">Rows: {table.getRowModel().rows.length}</p>
+      <p className="text-xs text-muted-foreground">Số dòng: {table.getRowModel().rows.length}</p>
       <div className="flex items-center gap-2">
         <Button
           size="icon"
@@ -19,7 +19,7 @@ export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <span className="text-xs">
-          Page {table.getState().pagination.pageIndex + 1} / {table.getPageCount() || 1}
+          Trang {table.getState().pagination.pageIndex + 1} / {table.getPageCount() || 1}
         </span>
         <Button
           size="icon"

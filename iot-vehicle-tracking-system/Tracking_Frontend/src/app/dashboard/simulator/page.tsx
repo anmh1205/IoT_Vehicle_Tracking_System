@@ -12,10 +12,10 @@ const SimulatorPage = () => {
   const simulator = useSimulator();
   if (!access.canAccessSystemAdmin) {
     return (
-      <PageContainer pageTitle="Simulator" pageDescription="Restricted area">
+      <PageContainer pageTitle="Trình mô phỏng" pageDescription="Khu vực hạn chế">
         <Card>
           <CardContent className="p-4 text-sm text-muted-foreground">
-            You do not have permission to run device simulation.
+            Bạn không có quyền chạy mô phỏng thiết bị.
           </CardContent>
         </Card>
       </PageContainer>
@@ -23,14 +23,14 @@ const SimulatorPage = () => {
   }
   return (
     <PageContainer
-      pageTitle="Simulator"
-      pageDescription="Generate synthetic telemetry for end-to-end testing"
+      pageTitle="Trình mô phỏng"
+      pageDescription="Tạo dữ liệu telemetry giả lập cho kiểm thử end-to-end"
     >
       <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Device selector</CardTitle>
+              <CardTitle className="text-base">Chọn thiết bị</CardTitle>
             </CardHeader>
             <CardContent>
               <DeviceSelector
@@ -42,7 +42,7 @@ const SimulatorPage = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Data configurator</CardTitle>
+              <CardTitle className="text-base">Cấu hình dữ liệu</CardTitle>
             </CardHeader>
             <CardContent>
               <DataConfigurator state={simulator.state} onChange={simulator.setConfig} />
@@ -51,7 +51,7 @@ const SimulatorPage = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Simulation controls</CardTitle>
+              <CardTitle className="text-base">Điều khiển mô phỏng</CardTitle>
             </CardHeader>
             <CardContent>
               <SimulationControls

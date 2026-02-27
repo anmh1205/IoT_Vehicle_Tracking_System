@@ -8,7 +8,7 @@
 ## Overview
 - Date: 2026-02-26
 - Priority: P1
-- Status: pending
+- Status: completed
 - Goal: harden defaults và runtime config cho mobile + hạ tầng docker/EMQX/monitoring.
 
 ## Key Insights
@@ -60,12 +60,12 @@
 6. Align Grafana datasource UID và dashboard references; thêm smoke check.
 
 ## Todo list
-- [ ] Enforce secure mobile config defaults.
-- [ ] Unify notification service ownership.
-- [ ] Externalize EMQX secrets và hạn chế port exposure.
-- [ ] Pin image tags (không dùng `latest`).
-- [ ] Declare/validate `tracking-network` dependency.
-- [ ] Fix Grafana datasource UID alignment.
+- [x] Enforce secure mobile config defaults.
+- [x] Unify notification service ownership.
+- [x] Externalize EMQX secrets và hạn chế port exposure.
+- [x] Pin image tags (không dùng `latest`).
+- [x] Declare/validate `tracking-network` dependency.
+- [x] Fix Grafana datasource UID alignment.
 
 ## Success Criteria
 - Mobile không tự rơi về `http/ws` khi thiếu defines.

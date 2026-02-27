@@ -48,7 +48,7 @@ export const SessionsTab = () => {
               <p>{formatDuration(session.uptime ?? 0)}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Avg vibration</p>
+              <p className="text-xs text-muted-foreground">Rung động trung bình</p>
               <p>{session.avgVibration?.toFixed(2) ?? '-'}</p>
             </div>
           </CardContent>

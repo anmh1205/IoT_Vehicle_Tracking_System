@@ -32,7 +32,7 @@ export function DataTable<TData>({
   searchKey,
   searchPlaceholder,
   toolbar,
-  emptyMessage = 'No data found.',
+  emptyMessage = 'Không tìm thấy dữ liệu.',
 }: {
   columns: ColumnDef<TData, any>[];
   data: TData[];

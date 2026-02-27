@@ -30,12 +30,12 @@ export const LogsViewer = () => {
     () => [
       {
         accessorKey: 'timestamp',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Timestamp" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Thời điểm" />,
         cell: ({ row }) => formatDateTime(row.original.timestamp),
       },
       {
         accessorKey: 'level',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Level" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Mức" />,
         cell: ({ row }) => (
           <Badge variant={LOG_VARIANTS[row.original.level] ?? 'outline'}>
             {row.original.level}
@@ -44,11 +44,11 @@ export const LogsViewer = () => {
       },
       {
         accessorKey: 'source',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Source" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Nguồn" />,
       },
       {
         accessorKey: 'message',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Message" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Nội dung" />,
         cell: ({ row }) => (
           <p className="max-w-[680px] truncate" title={row.original.message}>
             {row.original.message}
@@ -66,7 +66,7 @@ export const LogsViewer = () => {
         data={logsQuery.data?.items ?? []}
         isLoading={logsQuery.isLoading}
         pageSize={filters.limit}
-        emptyMessage="No logs match current filters."
+        emptyMessage="Không có nhật ký phù hợp với bộ lọc hiện tại."
       />
     </div>
   );

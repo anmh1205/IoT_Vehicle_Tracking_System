@@ -1,5 +1,6 @@
 import { statusSchema } from '../validators/payload.validator';
 import { updateDeviceStatus } from '../infrastructure/database';
+import { verifyDeviceToken } from '../services/device-auth.service';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { getStatus, setStatus, getOrCreateSession, clearSession } from '../cache/device-state.cache';
@@ -39,6 +40,12 @@ export const handleStatus = async (
     logger.warn(
       `Device ID mismatch: topic=${deviceIdFromTopic}, payload=${payload.device_id}`,
     );
+    return;
+  }
+
+  const device = await verifyDeviceToken(payload.device_id, payload.auth_token);
+  if (!device) {
+    logger.warn(`Auth failed for device ${payload.device_id}`);
     return;
   }
 

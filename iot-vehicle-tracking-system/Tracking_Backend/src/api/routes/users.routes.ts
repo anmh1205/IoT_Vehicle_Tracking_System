@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth } from '@/middleware/auth.middleware';
+import { requireAuth, requireAdminRole } from '@/middleware/auth.middleware';
 import * as authController from '@/api/controllers/auth.controller';
 
 const router = Router();
@@ -10,11 +10,11 @@ router.put('/profile', authController.updateProfile);
 router.get('/notification-settings', authController.getNotificationSettings);
 router.put('/notification-settings', authController.updateNotifications);
 
-router.get('/', authController.listUsers);
-router.get('/:id', authController.getUserById);
-router.post('/', authController.createUser);
-router.patch('/:id', authController.updateUser);
-router.delete('/:id', authController.deleteUser);
-router.post('/:id/reset-password', authController.resetUserPassword);
+router.get('/', requireAdminRole, authController.listUsers);
+router.get('/:id', requireAdminRole, authController.getUserById);
+router.post('/', requireAdminRole, authController.createUser);
+router.patch('/:id', requireAdminRole, authController.updateUser);
+router.delete('/:id', requireAdminRole, authController.deleteUser);
+router.post('/:id/reset-password', requireAdminRole, authController.resetUserPassword);
 
 export default router;

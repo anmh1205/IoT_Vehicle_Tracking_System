@@ -29,17 +29,17 @@ export const DeviceStatsBar = ({ devices }: { devices: Device[] }) => {
       <StatItem icon={<Activity className="h-4 w-4" />} label="Tổng thiết bị" value={total} />
       <StatItem
         icon={<Radio className="h-4 w-4 text-emerald-600" />}
-        label="Online"
+        label="Trực tuyến"
         value={online}
       />
       <StatItem
         icon={<PlugZap className="h-4 w-4 text-amber-600" />}
-        label="Stopped"
+        label="Đã dừng"
         value={stopped}
       />
       <StatItem
         icon={<CircleOff className="h-4 w-4 text-rose-600" />}
-        label="Disconnected"
+        label="Mất kết nối"
         value={disconnected}
       />
     </div>

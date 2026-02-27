@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -188,16 +186,9 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
   }
 
   String _friendlyError(WebResourceErrorType? type) {
-    return switch (type) {
-      WebResourceErrorType.HOST_LOOKUP ||
-      WebResourceErrorType.CANNOT_FIND_HOST =>
-        'Cannot reach the server. Check your connection.',
-      WebResourceErrorType.TIMEOUT ||
-      WebResourceErrorType.TIMED_OUT =>
-        'Connection timed out. Please try again.',
-      WebResourceErrorType.NOT_CONNECTED_TO_INTERNET =>
-        'No internet connection.',
-      _ => 'Something went wrong. Please try again.',
-    };
+    if (type == WebResourceErrorType.NOT_CONNECTED_TO_INTERNET) {
+      return 'No internet connection.';
+    }
+    return 'Something went wrong. Please try again.';
   }
 }

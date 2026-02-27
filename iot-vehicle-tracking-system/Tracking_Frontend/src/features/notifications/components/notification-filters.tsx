@@ -26,7 +26,7 @@ export const NotificationFilters = ({
       <Input
         value={value.search}
         onChange={(event) => onChange({ ...value, search: event.target.value })}
-        placeholder="Search notifications..."
+        placeholder="Tìm thông báo..."
         className="min-w-[220px] flex-1 sm:flex-none"
       />
 
@@ -37,13 +37,13 @@ export const NotificationFilters = ({
         }
       >
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Type" />
+          <SelectValue placeholder="Loại" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All types</SelectItem>
-          <SelectItem value="alert">Alert</SelectItem>
-          <SelectItem value="system">System</SelectItem>
-          <SelectItem value="export">Export</SelectItem>
+          <SelectItem value="all">Tất cả loại</SelectItem>
+          <SelectItem value="alert">Cảnh báo</SelectItem>
+          <SelectItem value="system">Hệ thống</SelectItem>
+          <SelectItem value="export">Xuất dữ liệu</SelectItem>
           <SelectItem value="firmware">Firmware</SelectItem>
           <SelectItem value="geofence">Geofence</SelectItem>
         </SelectContent>
@@ -59,12 +59,12 @@ export const NotificationFilters = ({
         }
       >
         <SelectTrigger className="w-[150px]">
-          <SelectValue placeholder="Read status" />
+          <SelectValue placeholder="Trạng thái đọc" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All</SelectItem>
-          <SelectItem value="read">Read</SelectItem>
-          <SelectItem value="unread">Unread</SelectItem>
+          <SelectItem value="all">Tất cả</SelectItem>
+          <SelectItem value="read">Đã đọc</SelectItem>
+          <SelectItem value="unread">Chưa đọc</SelectItem>
         </SelectContent>
       </Select>
 

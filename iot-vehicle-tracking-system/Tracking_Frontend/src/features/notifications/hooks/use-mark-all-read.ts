@@ -7,12 +7,12 @@ export const useMarkAllRead = () => {
     mutationFn: () => notificationServices.markAllRead(),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      notificationUtils.success('Marked all notifications as read');
+      notificationUtils.success('Đã đánh dấu tất cả thông báo là đã đọc');
     },
     onError: (error: any) => {
       notificationUtils.error(
-        'Failed to mark notifications',
-        error?.response?.data?.message ?? error?.message ?? 'Unknown error',
+        'Không thể đánh dấu thông báo',
+        error?.response?.data?.message ?? error?.message ?? 'Lỗi không xác định',
       );
     },
   });
