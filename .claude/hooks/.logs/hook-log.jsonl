@@ -524,3 +524,4 @@
 {"ts":"2026-03-02T07:50:53.221Z","hook":"scout-block","tool":"Glob","dur":8,"status":"block","exit":2,"error":""}
 {"ts":"2026-03-02T16:03:50.817Z","hook":"scout-block","tool":"Glob","dur":7,"status":"ok","exit":0,"error":""}
 {"ts":"2026-03-02T16:04:37.365Z","hook":"scout-block","tool":"Bash","dur":7,"status":"ok","exit":0,"error":""}
+{"ts":"2026-03-03T06:50:54.612Z","hook":"scout-block","tool":"Glob","dur":78,"status":"block","exit":2,"error":""}
