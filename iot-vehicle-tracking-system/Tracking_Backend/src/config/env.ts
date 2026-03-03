@@ -18,7 +18,7 @@ const requireEnv = (key: string, value: string | undefined): string => {
 };
 
 export const appConfig = {
-  port: toInt(fromEnv('PORT'), 3000),
+  port: toInt(fromEnv('PORT'), 4000),
   nodeEnv: fromEnv('NODE_ENV') ?? 'development',
   isProduction: fromEnv('NODE_ENV') === 'production',
 } as const;
@@ -59,7 +59,7 @@ export const sessionConfig = {
 } as const;
 
 export const corsConfig = {
-  origin: fromEnv('CORS_ORIGIN') ?? 'http://localhost:3002',
+  origin: fromEnv('CORS_ORIGIN') ?? 'http://localhost:4002',
 } as const;
 
 export const observabilityConfig = {

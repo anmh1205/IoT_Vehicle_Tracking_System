@@ -112,7 +112,7 @@
 - Đủ cho xử lý AT commands, MQTT, OBD2
 
 #### 3. Nhiều UART
-- 3 cổng UART → đủ cho modem A7600CE‑T và các thiết bị khác
+- 3 cổng UART → đủ cho modem A7670C, GNSS NEO-M8N và các thiết bị khác
 - Hỗ trợ tốc độ cao: lên đến 5 Mbps
 
 #### 4. Hỗ Trợ External Wakeup
@@ -163,9 +163,9 @@
 - Xử lý lỗi kết nối và reconnect
 
 #### 4. Điều Khiển UART với Modem
-- Gửi/nhận AT commands với A7600CE‑T
+- Gửi/nhận AT commands với A7670C
 - Quản lý kết nối 4G/LTE
-- Điều khiển GNSS/GPS
+- Nhận dữ liệu GNSS từ NEO-M8N qua UART riêng
 
 #### 5. Đo Điện Áp Ắc Quy
 - ADC đọc điện áp ắc quy

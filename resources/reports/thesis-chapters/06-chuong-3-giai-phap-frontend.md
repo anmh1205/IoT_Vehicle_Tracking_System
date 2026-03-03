@@ -407,7 +407,7 @@ Dựa trên phân tích các giải pháp đề xuất cho từng tầng hệ th
 | Tầng hệ thống        | Phương án được chọn     | Lý do chính                              |
 | -------------------- | ----------------------- | ---------------------------------------- |
 | Vi điều khiển        | ESP32-S3                | BLE 5.0 tích hợp, dual-core, hỗ trợ AI   |
-| Modem 4G/GNSS        | SIMCom A7600CE-T        | GNSS tích hợp, MQTT built-in, giá tốt    |
+| LTE + GNSS           | SIMCom A7670C + u-blox NEO-M8N | Kiến trúc tách rời, dễ mở rộng, ổn định |
 | OBD2 Adapter         | vgate iCar Pro (BLE)    | Không cần dây, tương thích rộng          |
 | Cảm biến IMU         | LIS3DH                  | Siêu tiết kiệm điện, wake-on-motion      |
 | MQTT Broker          | EMQX                    | Rules Engine, ACL per device, clustering |
@@ -429,7 +429,7 @@ Từ kết quả phân tích và đánh giá ở mục 3.3, phương án thiết
 
 **Kiến trúc phân tầng:**
 
-- **Tầng thiết bị (Device Layer):** ESP32-S3 + A7600CE-T + vgate iCar Pro + LIS3DH, quản lý nguồn thông minh với pin dự phòng 21700
+- **Tầng thiết bị (Device Layer):** ESP32-S3 + A7670C + NEO-M8N + vgate iCar Pro + LIS3DH, quản lý nguồn thông minh với pin dự phòng 21700
 - **Tầng truyền thông (Communication Layer):** MQTT 5.0 qua 4G LTE, QoS 1, offline buffering
 - **Tầng xử lý (Processing Layer):** MQTT Bridge --> dual-write PostgreSQL + VictoriaMetrics, Express.js API (DDD)
 - **Tầng trình bày (Presentation Layer):** Next.js 15, Leaflet maps, Socket.IO real-time, ECharts

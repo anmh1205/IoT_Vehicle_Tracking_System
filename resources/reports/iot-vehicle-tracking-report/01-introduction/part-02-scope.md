@@ -29,7 +29,7 @@
 
 - **CAN-bus**: Có thể tích hợp để đọc trạng thái IGN, nhiên liệu, tốc độ (tùy chọn)
 - **Kết nối nguồn**: Trực tiếp từ ắc quy 12V hoặc 24V (qua mạch bảo vệ)
-- **4G/LTE + GNSS**: SIM card, modem 4G **SIMCom A7600CE‑T** (tích hợp GPS/GNSS)
+- **4G/LTE + GNSS**: SIM card + modem LTE **SIMCom A7670C** + module GNSS **u-blox NEO-M8N** (kiến trúc tách rời)
 
 ### II.4 Giới Hạn Scope
 

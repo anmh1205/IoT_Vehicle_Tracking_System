@@ -8,6 +8,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -60,18 +62,28 @@ export const ExportModal = ({ open, onOpenChange, deviceId }: ExportModalProps) 
             </SelectContent>
           </Select>
           <div className="grid gap-2 sm:grid-cols-2">
-            <input
-              type="date"
-              className="rounded border px-3 py-2 text-sm"
-              value={from}
-              onChange={(event) => setFrom(event.target.value)}
-            />
-            <input
-              type="date"
-              className="rounded border px-3 py-2 text-sm"
-              value={to}
-              onChange={(event) => setTo(event.target.value)}
-            />
+            <div className="space-y-1">
+              <Label htmlFor="device-export-from-date" className="text-xs text-muted-foreground">
+                Từ ngày
+              </Label>
+              <Input
+                id="device-export-from-date"
+                type="date"
+                value={from}
+                onChange={(event) => setFrom(event.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="device-export-to-date" className="text-xs text-muted-foreground">
+                Đến ngày
+              </Label>
+              <Input
+                id="device-export-to-date"
+                type="date"
+                value={to}
+                onChange={(event) => setTo(event.target.value)}
+              />
+            </div>
           </div>
         </div>
         <DialogFooter>

@@ -168,7 +168,7 @@ Trong kiến trúc tổng thể của hệ thống, Vgate iCar Pro là **nguồn
   GPS Module ──UART────►│   ├── GPS Lat/Lon           │──MQTT──► Cloud Server
                         │   └── IMU Acceleration      │
   LIS3DH IMU ──I2C────►│                             │
-                        │  SIMCom A7600 Modem ────4G──┘
+                        │  SIMCom A7670C Modem ───4G──┘
                         └─────────────────────────────┘
 ```
 

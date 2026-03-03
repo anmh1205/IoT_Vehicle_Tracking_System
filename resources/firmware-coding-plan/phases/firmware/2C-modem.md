@@ -1,190 +1,231 @@
-# Sub-Phase 2C: Modem SIMCom A7600CE-T
+# Sub-Phase 2C: LTE (A7670C) + GNSS (NEO-M8N)
 
-> **Context:** ~5KB | **Max Files:** 8 | **Est. Time:** 1-2 sessions
+> **Context:** target architecture planning only | **Scope:** docs/plan update | **Canonical path:** `iot-vehicle-tracking-firmware/`
 
 ## Summary
-Implement AT command engine, LTE connection control, và GNSS positioning cho modem SIMCom A7600CE-T. Tất cả viết mới. Giao tiếp qua UART (GPIO16=TX, GPIO17=RX, 115200 baud).
+
+Sub-phase này mô tả kế hoạch refactor firmware từ mô hình **modem tích hợp GNSS** sang mô hình **hai module tách rời**:
+
+- **SIMCom A7670C** cho LTE / PDP / PPP / MQTT transport
+- **u-blox NEO-M8N** cho GNSS / NMEA / UBX
+
+Đợt hiện tại chỉ cập nhật **kế hoạch**. Chưa sửa source firmware.
+
+## Current Baseline Gap
+
+Source hiện tại vẫn đang ở kiến trúc cũ:
+
+- `iot-vehicle-tracking-system/Tracking_Firmware/main/src/modem_gnss.c` dùng `AT+CGNSPWR`, `AT+CGNSINF`
+- `iot-vehicle-tracking-system/Tracking_Firmware/main/inc/pin_map.h` chưa có UART GNSS riêng
+- `iot-vehicle-tracking-system/Tracking_Firmware/main/src/state_machine.c` còn coupling lifecycle LTE + GNSS
+
+Mục tiêu của sub-phase này là định nghĩa rõ hướng refactor để chuyển sang kiến trúc A7670C + NEO-M8N.
 
 ## Tasks
-| ID     | Description                          | Files                                              |
-| ------ | ------------------------------------ | -------------------------------------------------- |
-| FW-030 | AT command engine (send/receive)     | `main/inc/modem_at.h`, `main/src/modem_at.c`       |
-| FW-031 | LTE connection control               | `main/inc/modem_lte.h`, `main/src/modem_lte.c`     |
-| FW-032 | GNSS positioning control             | `main/inc/modem_gnss.h`, `main/src/modem_gnss.c`   |
+
+| ID | Description | Target files |
+|----|-------------|--------------|
+| FW-030 | AT command engine cho modem LTE | `main/inc/modem_at.h`, `main/src/modem_at.c` |
+| FW-031 | LTE control cho A7670C | `main/inc/modem_lte.h`, `main/src/modem_lte.c` |
+| FW-032 | GNSS device + parser cho NEO-M8N | `main/inc/gnss_device.h`, `main/src/gnss_device.c`, `main/inc/gnss_parser.h`, `main/src/gnss_parser.c` |
+| FW-033 | Tách state machine lifecycle giữa LTE và GNSS | `main/src/state_machine.c`, `main/inc/pin_map.h` |
+
+---
 
 ## 1. AT Command Engine (`modem_at.c`)
 
 | Item | Detail |
 |------|--------|
-| UART | GPIO16=TX, GPIO17=RX, 115200 baud, 8N1 |
-| Pattern | Send command -> wait response -> parse (OK/ERROR/URC) |
-| Serialization | xQueue to prevent concurrent access |
-| Timeout | Configurable per command (default 5s) |
+| Scope | Chỉ phục vụ modem LTE A7670C |
+| Transport | UART modem riêng |
+| Pattern | Send command -> wait response -> parse OK/ERROR/URC |
+| Serialization | Mutex / queue để chống concurrent access |
+| Timeout | Configurable per command |
 
-### API
+### API intent
+
 ```c
 esp_err_t modem_at_init(void);
 void      modem_at_deinit(void);
-
-// Send AT command and wait for response
-// Returns ESP_OK if response contains `expect` string
 esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32_t timeout_ms);
-
-// Send AT command and expect specific response
 esp_err_t modem_at_send_expect(const char *cmd, const char *expect, uint32_t timeout_ms);
-
-// Register URC (Unsolicited Result Code) callback
-typedef void (*modem_urc_cb_t)(const char *urc_line);
-void modem_at_register_urc(const char *prefix, modem_urc_cb_t cb);
 ```
 
-### Implementation Notes
-```c
-// UART event task pattern:
-// 1. uart_driver_install() with RX buffer 1024 bytes
-// 2. uart_pattern_queue_reset() for "\r\n" detection
-// 3. xQueueSend() to serialize AT commands
-// 4. Response parsing: scan for "OK", "ERROR", "+CME ERROR"
-//
-// URC handling:
-// - "+CPIN:", "+CREG:", "+CSQ:" — status updates
-// - "+CGNSINF:" — GNSS data (if using URC mode)
-//
-// Thread safety:
-// - xSemaphore for AT command serialization
-// - Only one AT command at a time
-```
+### Important rule
+
+- AT engine này **không** còn là nơi đọc vị trí GNSS target
+- Không dùng flow `AT+CGNSPWR`, `AT+CGNSINF` như kiến trúc chuẩn mới
+- Mọi GNSS data sẽ đi qua UART GNSS riêng
+
+---
 
 ## 2. LTE Control (`modem_lte.c`)
 
-### State Machine
-| State | AT Sequence |
-|-------|-------------|
-| Init | AT -> CPIN? -> CREG? -> CSQ |
-| Connect | CNMP=38 -> CGDCONT -> CGACT=1 |
-| Disconnect | CGACT=0 |
-| Sleep | CSCLK=1 or CFUN=0 |
-| Power | GPIO25 PWRKEY toggle (1s pulse) |
+### Responsibilities
 
-### API
+- Power on / reset A7670C
+- SIM readiness check
+- Network registration (`CEREG` / `CREG`)
+- PDP activation
+- Sleep / wakeup / PSM orchestration
+- Expose LTE connection state cho application layer
+
+### State outline
+
+| State | LTE sequence |
+|-------|--------------|
+| Init | `AT` -> `CPIN?` -> `CEREG?` -> `CSQ` |
+| Connect | `CGDCONT` -> `CGACT=1` |
+| Disconnect | `CGACT=0` |
+| Sleep | `CSCLK`, `CFUN`, hoặc PSM policy |
+| Power | `PWRKEY`, `RESET`, `EN` |
+
+### API intent
+
 ```c
-esp_err_t modem_lte_init(void);       // Power on + AT init sequence
-esp_err_t modem_lte_connect(void);    // Activate PDP context
-esp_err_t modem_lte_disconnect(void); // Deactivate PDP context
-esp_err_t modem_lte_sleep(void);      // Enter low-power mode
-esp_err_t modem_lte_wakeup(void);     // Exit low-power mode
-int       modem_lte_get_rssi(void);   // Signal strength (dBm)
+esp_err_t modem_lte_init(void);
+esp_err_t modem_lte_connect(void);
+esp_err_t modem_lte_disconnect(void);
+esp_err_t modem_lte_sleep(void);
+esp_err_t modem_lte_wakeup(void);
+int       modem_lte_get_rssi(void);
 bool      modem_lte_is_connected(void);
 ```
 
-### AT Init Sequence (Detail)
+### Notes
+
+- A7670C chỉ lo **cellular stack**
+- MQTT có thể chạy qua AT MQTT hoặc qua PPP + `esp_modem` tùy quyết định implementation phase sau
+- Lifecycle LTE phải độc lập với GNSS
+
+---
+
+## 3. GNSS Device (`gnss_device.c`) + Parser (`gnss_parser.c`)
+
+### Responsibilities
+
+#### `gnss_device.c`
+- Quản lý UART GNSS riêng cho NEO-M8N
+- Bật/tắt nguồn GNSS qua rail riêng
+- Đọc stream NMEA hoặc gửi UBX config tối thiểu
+
+#### `gnss_parser.c`
+- Parse NMEA (`GGA`, `RMC`, `VTG` tối thiểu)
+- Xuất `latitude`, `longitude`, `speed`, `course`, `satellites`, `fix_valid`
+- Che giấu chi tiết parse khỏi state machine
+
+### API intent
+
 ```c
-// 1. Power on: GPIO25 PWRKEY pulse 1s
-// 2. Wait for "RDY" or "AT" echo (timeout 10s)
-// 3. AT             -> OK (basic check)
-// 4. ATE0           -> OK (echo off)
-// 5. AT+CPIN?       -> +CPIN: READY (SIM check)
-// 6. AT+CREG?       -> +CREG: 0,1 (network registered)
-//                   -> Retry up to 30s if +CREG: 0,2 (searching)
-// 7. AT+CSQ         -> +CSQ: xx,yy (signal quality)
-//                   -> xx < 10: weak signal warning
-// 8. AT+CNMP=38     -> OK (prefer LTE)
-// 9. AT+CGDCONT=1,"IP","internet" -> OK (APN config)
-//    APN may vary by carrier
-```
-
-### PDP Context Activation
-```c
-// AT+CGACT=1,1     -> OK (activate PDP context)
-// AT+CGPADDR=1     -> +CGPADDR: 1,"x.x.x.x" (verify IP)
-//
-// For MQTT via PPP:
-// Use esp_modem component for PPP over UART
-// esp_modem_new_dev() -> esp_modem_set_mode(ESP_MODEM_MODE_DATA)
-// This gives TCP/IP stack access for esp_mqtt_client
-```
-
-## 3. GNSS Control (`modem_gnss.c`)
-
-| Item | Detail |
-|------|--------|
-| Power on | `AT+CGNSPWR=1` |
-| Read | `AT+CGNSINF` -> parse lat, lon, speed, course, satellites |
-| Power off | `AT+CGNSPWR=0` |
-| Fix timeout | 60s -> fallback (send data without GPS) |
-
-### API
-```c
-esp_err_t modem_gnss_power_on(void);
-esp_err_t modem_gnss_power_off(void);
-bool      modem_gnss_has_fix(void);
-
 typedef struct {
     double   latitude;
     double   longitude;
     float    speed_kmh;
     float    course_deg;
     uint8_t  satellites;
-    uint64_t timestamp_ms;   // Unix milliseconds from GNSS
+    uint64_t timestamp_ms;
     bool     fix_valid;
 } gnss_data_t;
 
-esp_err_t modem_gnss_get_location(gnss_data_t *data);
+esp_err_t gnss_device_init(void);
+esp_err_t gnss_device_power_on(void);
+esp_err_t gnss_device_power_off(void);
+esp_err_t gnss_device_read(gnss_data_t *data);
+bool      gnss_device_has_fix(void);
 ```
 
-### CGNSINF Response Parsing
-```c
-// AT+CGNSINF
-// Response: +CGNSINF: run,fix,utc,lat,lon,alt,speed,course,fixmode,
-//           reserved,HDOP,PDOP,VDOP,reserved,satGPS,satGLONASS,reserved,C/N0
-//
-// Example:
-// +CGNSINF: 1,1,20240101120000.000,21.028511,105.804817,10.0,60.0,180.0,
-//           2,,1.2,1.5,1.0,,8,4,,35
-//
-// Parse fields:
-//   [0] run status (1=on)
-//   [1] fix status (1=valid)
-//   [2] UTC datetime
-//   [3] latitude (decimal degrees)
-//   [4] longitude (decimal degrees)
-//   [5] altitude (meters)
-//   [6] speed (km/h, over ground)
-//   [7] course (degrees, 0-360)
-//   [14] GPS satellites in view
-//   [15] GLONASS satellites in view
-```
+### Accepted target inputs
 
-### GNSS Timing Strategy
-```c
-// Cold start: ~60s -> accept sending data without GPS
-// Warm start: ~15s (GNSS was recently active)
-// Hot start:  ~1s  (wakeup from light sleep)
-//
-// Strategy:
-// 1. Power on GNSS
-// 2. Poll AT+CGNSINF every 2s
-// 3. If fix_valid after 60s timeout -> send data with lat=0, lon=0
-// 4. Save last known position in RTC memory for comparison
-```
+- NMEA stream từ UART GNSS riêng
+- Optional UBX config để:
+  - đổi baud rate
+  - giới hạn số sentence cần parse
+  - tối ưu throughput
 
-## Dependencies
-- ✅ Phase 1A done (pin_map.h, util.h)
-- ✅ Phase 2B recommended (power_mgr for modem_power_on/off)
-- ⚠️ Independent from Phase 2A (BLE OBD2)
-- ➡️ Phase 3A (MQTT) needs LTE connected + PPP for TCP/IP
-- ➡️ Phase 3A (Data Formatter) needs `gnss_data_t`
+### Explicit non-goals
 
-## Verification
-- [ ] `idf.py build` — compiles without errors
-- [ ] AT engine: `AT` -> `OK` response received via UART
-- [ ] SIM detected: `AT+CPIN?` -> `+CPIN: READY`
-- [ ] Network registered: `AT+CREG?` -> `+CREG: 0,1`
-- [ ] PDP activated: `AT+CGACT=1,1` -> IP address assigned
-- [ ] GNSS fix: `AT+CGNSINF` returns valid lat/lon after <60s
-- [ ] PPP mode: `esp_modem` provides TCP/IP stack
-- [ ] Sleep/wakeup cycle: modem enters/exits low-power correctly
+- Không đọc GNSS bằng `AT+CGNSINF`
+- Không giữ abstraction kiểu modem_gnss tích hợp như baseline cũ
 
-## Full Spec Reference
-- [00-firmware-architecture.md](../../00-firmware-architecture.md) — Section 4 (GPIO Pin Map)
-- [firmware-development-plan.md](../../../../design-reports/firmware-development-plan.md) — Phase 3
+---
+
+## 4. State Machine Decoupling (`state_machine.c`)
+
+### Current problem
+
+State machine baseline đang còn coupling:
+- bật LTE thì bật luôn GNSS theo logic modem tích hợp
+- tắt GNSS kéo theo assumption cùng vòng đời modem
+
+### Target behavior
+
+#### DRIVING
+- BLE active
+- LTE active
+- GNSS active
+- Publish telemetry định kỳ
+
+#### PARKED
+- BLE disconnect
+- LTE sleep hoặc disconnect
+- GNSS off hoặc policy-based wake only
+- IMU interrupt + timer wakeup config
+
+#### ALARM
+- Wake LTE để gửi event
+- Wake GNSS nếu cần lấy vị trí mới
+- Không bắt buộc GNSS và LTE luôn gắn cứng cùng một call path
+
+#### HEARTBEAT
+- Wake LTE
+- Wake GNSS nếu cần fresh fix
+- Publish xong -> đưa từng module về low power theo policy
+
+---
+
+## 5. Pin Map Planning Impact (`pin_map.h`)
+
+Sub-phase này yêu cầu pin map tách tín hiệu logic:
+
+| Logical signal | Purpose |
+|----------------|---------|
+| `MODEM_UART_TX`, `MODEM_UART_RX` | UART cho A7670C |
+| `MODEM_PWRKEY`, `MODEM_RESET`, `MODEM_EN` | Điều khiển modem |
+| `GNSS_UART_TX`, `GNSS_UART_RX` | UART cho NEO-M8N |
+| `GNSS_EN` | Nguồn GNSS |
+| `GNSS_PPS` | PPS optional |
+
+> Số GPIO cụ thể sẽ được chốt ở đợt refactor code/PCB. Plan này ưu tiên tách **logical ownership** trước.
+
+---
+
+## 6. Verification (for implementation phase later)
+
+- [ ] `idf.py build` compile sạch sau khi refactor
+- [ ] A7670C: `AT` / SIM / network / PDP hoạt động ổn định
+- [ ] GNSS UART riêng nhận được NMEA từ NEO-M8N
+- [ ] Parser xuất đúng `lat/lon/speed/course/satellites`
+- [ ] Không còn phụ thuộc `AT+CGNSPWR`, `AT+CGNSINF` trong flow target
+- [ ] State machine có thể bật/tắt LTE và GNSS độc lập theo state
+- [ ] Docs/path active đều dùng `iot-vehicle-tracking-firmware/`
+
+---
+
+## 7. Risks
+
+| Risk | Mitigation |
+|------|------------|
+| Refactor lớn hơn dự kiến do baseline coupling cao | Tách thành 2 bước: interface split -> state integration |
+| Parser NMEA sinh edge cases | Bắt đầu với tập câu tối thiểu và validation chặt |
+| Power policy không nhất quán giữa LTE/GNSS | Giao ownership rõ cho power manager |
+| Team nhìn docs tưởng code đã refactor xong | Luôn giữ mục `Current Baseline Gap` |
+
+---
+
+## 8. Conclusion
+
+Sub-phase 2C đã được chuẩn hóa lại để phản ánh đúng hướng phát triển firmware:
+
+- **không còn mô tả A7600CE-T là target hiện tại**
+- **không còn coi GNSS là tính năng của modem LTE**
+- **tách rõ modem task và GNSS task** trong kế hoạch refactor tiếp theo

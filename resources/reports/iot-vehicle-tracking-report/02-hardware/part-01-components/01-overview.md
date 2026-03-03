@@ -1,26 +1,24 @@
 ## PHẦN III: LỰA CHỌN GIẢI PHÁP PHẦN CỨNG
 
-> **Lưu ý:** Tài liệu này đã được tách thành các file chi tiết. Xem các file con để biết thêm chi tiết.
+> **Lưu ý:** Tài liệu này tóm tắt kiến trúc phần cứng hiện tại ở mức hệ thống. Các file con mô tả chi tiết từng thành phần.
 
 ### Tổng Quan
 
-Hệ thống tracker sử dụng các thành phần chính.
+Hệ thống tracker hiện được chuẩn hóa theo kiến trúc **tách riêng LTE và GNSS**:
 
-**Lưu ý nguồn 12V/24V:** Firmware triển khai 2 profile nguồn độc lập để điều khiển LVD/Power Path/Charger:
+- **LTE:** SIMCom A7670C
+- **GNSS:** u-blox NEO-M8N
+- **MCU trung tâm:** ESP32-S3
+- **OBD2:** vgate iCar Pro qua BLE
+- **IMU:** LIS3DH cho motion detection
+- **Nguồn dự phòng:** pin 21700 + power path management
+
+**Lưu ý nguồn 12V/24V:** firmware dùng 2 profile nguồn để điều khiển LVD/Power Path/Charger:
 
 - **12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
 - **24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
 
-Đo U_batt sử dụng ADC với chia áp chung `R1=100k`, `R2=10k` cho cả 12V và 24V.
-
-Hệ thống tracker sử dụng các thành phần chính:
-
-- **IMU (LIS3DH)**: Phát hiện chuyển động, đánh thức ESP32 từ deep sleep
-- **MCU (ESP32-S3)**: Vi điều khiển chính, xử lý logic, quản lý năng lượng
-- **OBD2 BLE Adapter (vgate iCar Pro)**: Đọc dữ liệu xe qua BLE
-- **Modem 4G + GNSS (SIMCom A7600CE-T)**: Truyền dữ liệu và định vị GPS
-- **Pin Backup (21700 5000mAh)**: Nguồn dự phòng khi ắc quy yếu
-- **Power Management**: Buck/Boost converters, Power Path Management, Charger
+Đo U_batt dùng ADC với chia áp `R1=100k`, `R2=10k` cho cả profile 12V và 24V.
 
 ### Các File Chi Tiết
 
@@ -28,18 +26,20 @@ Hệ thống tracker sử dụng các thành phần chính:
 
 - [`02-imu-lis3dh.md`](./02-imu-lis3dh.md) - Cảm biến IMU LIS3DH
 - [`03-mcu-esp32-s3.md`](./03-mcu-esp32-s3.md) - MCU ESP32-S3
-- [`04-obd2-ble-adapter.md`](./04-obd2-ble-adapter.md) - OBD2 BLE Adapter (vgate iCar Pro)
-- [`05-modem-a7600ce-t.md`](./05-modem-a7600ce-t.md) - Modem 4G + GNSS (SIMCom A7600CE-T)
-- [`06-backup-battery-21700.md`](./06-backup-battery-21700.md) - Pin Backup 21700
+- [`04-obd2-ble-adapter.md`](./04-obd2-ble-adapter.md) - OBD2 BLE Adapter vgate iCar Pro
+- [`05-lte-modem-a7670c.md`](./05-lte-modem-a7670c.md) - Modem LTE SIMCom A7670C
+- [`06-backup-battery-21700.md`](./06-backup-battery-21700.md) - Pin backup 21700
+
+> **Ghi chú:** GNSS NEO-M8N chưa có file component riêng trong folder này. Vai trò GNSS được mô tả tại sơ đồ hệ thống, BOM, và phần firmware modem/GNSS.
 
 #### Power Management (Quản Lý Năng Lượng)
 
-- [`../part-02-power-management/01-overview.md`](../part-02-power-management/01-overview.md) - Tổng quan quản lý năng lượng
-- [`../part-02-power-management/02-buck-converter.md`](../part-02-power-management/02-buck-converter.md) - Buck Converter (12V/24V→5V)
-- [`../part-02-power-management/03-boost-converter.md`](../part-02-power-management/03-boost-converter.md) - Boost Converter (3.7V→5V)
-- [`../part-02-power-management/04-power-path-management.md`](../part-02-power-management/04-power-path-management.md) - Power Path Management
-- [`../part-02-power-management/05-low-voltage-disconnect.md`](../part-02-power-management/05-low-voltage-disconnect.md) - Low Voltage Disconnect (LVD)
-- [`../part-02-power-management/06-charger-ip2312.md`](../part-02-power-management/06-charger-ip2312.md) - Charger IP2312
+- [`../part-02-power-management/01-overview.md`](../part-02-power-management/01-overview.md)
+- [`../part-02-power-management/02-buck-converter.md`](../part-02-power-management/02-buck-converter.md)
+- [`../part-02-power-management/03-boost-converter.md`](../part-02-power-management/03-boost-converter.md)
+- [`../part-02-power-management/04-power-path-management.md`](../part-02-power-management/04-power-path-management.md)
+- [`../part-02-power-management/05-low-voltage-disconnect.md`](../part-02-power-management/05-low-voltage-disconnect.md)
+- [`../part-02-power-management/06-charger-ip2312.md`](../part-02-power-management/06-charger-ip2312.md)
 
 #### System Design
 
@@ -54,52 +54,55 @@ Hệ thống tracker sử dụng các thành phần chính:
 
 > **Chi tiết:** Xem [`02-imu-lis3dh.md`](./02-imu-lis3dh.md)
 
-**Lý Do Chọn:**
-
-- Hỗ trợ motion detection sẵn (không cần ESP32 canh liên tục)
-- Tiêu thụ cực thấp (μA), phù hợp cho hệ thống battery-powered
-- Phổ biến, giá thành hợp lý, nhiều thư viện hỗ trợ
+**Lý do chọn:**
+- Motion detection tiêu thụ thấp
+- Có interrupt để đánh thức ESP32 từ deep sleep
+- Phổ biến, giá hợp lý, dễ tích hợp I2C
 
 #### III.1.2 MCU: **ESP32-S3**
 
 > **Chi tiết:** Xem [`03-mcu-esp32-s3.md`](./03-mcu-esp32-s3.md)
 
-**Lý Do Chọn:**
-
-- Hỗ trợ BLE 5.0: Kết nối trực tiếp với OBD2 adapter vgate iCar Pro
-- Dễ phát triển: Arduino/ESP-IDF, cộng đồng lớn → phù hợp đồ án
-- Chi phí thấp: Rẻ hơn 30–50% so với STM32L4
-- Tiêu thụ chấp nhận được: 10–15 μA deep sleep → đủ cho 2–3 tháng với pin backup
+**Lý do chọn:**
+- Hỗ trợ BLE 5.0 cho OBD2 adapter
+- Có đủ tài nguyên để tách BLE, LTE, GNSS và power management
+- Dễ phát triển với ESP-IDF, phù hợp đồ án
 
 #### III.1.3 OBD2 BLE Adapter: **vgate iCar Pro**
 
 > **Chi tiết:** Xem [`04-obd2-ble-adapter.md`](./04-obd2-ble-adapter.md)
 
-**Lý Do Chọn:**
+**Lý do chọn:**
+- BLE ổn định, phổ biến trên thị trường
+- Đọc IGN, RPM, tốc độ, nhiên liệu từ ECU
+- Phù hợp mô hình tracker không cần dây OBD2 trực tiếp vào ESP32
 
-- BLE 4.0, tương thích với ESP32-S3 BLE 5.0
-- Đọc dữ liệu OBD2 chính xác (IGN, RPM, tốc độ, nhiên liệu)
-- Giá thành hợp lý, phổ biến trên thị trường
+#### III.1.4 Modem LTE: **SIMCom A7670C**
 
-#### III.1.4 Modem 4G + GNSS: **SIMCom A7600CE-T**
+> **Chi tiết:** Xem [`05-lte-modem-a7670c.md`](./05-lte-modem-a7670c.md)
 
-> **Chi tiết:** Xem [`05-modem-a7600ce-t.md`](./05-modem-a7600ce-t.md)
+**Lý do chọn:**
+- LTE Cat-1 đủ cho telemetry và MQTT/HTTP
+- Không tích hợp GNSS, phù hợp kiến trúc tách rời rõ ràng
+- Hỗ trợ AT commands quen thuộc cho phần modem
 
-**Lý Do Chọn:**
+#### III.1.5 Module GNSS: **u-blox NEO-M8N**
 
-- Tích hợp 4G/LTE + GNSS trong một module
-- Hỗ trợ UART, dễ tích hợp với ESP32-S3
-- Giá thành hợp lý, phù hợp cho đồ án
+> **Chi tiết tích hợp:** Xem [`../03-system-diagram.md`](../03-system-diagram.md) và [`../../03-firmware/part-03-modem-simcom.md`](../../03-firmware/part-03-modem-simcom.md)
 
-#### III.1.5 Pin Backup: **21700 Li-ion 5000mAh**
+**Lý do chọn:**
+- Chuyên biệt cho GNSS, không phụ thuộc lifecycle của modem LTE
+- Hỗ trợ nhiều chòm sao vệ tinh
+- Phù hợp refactor firmware sang UART GNSS riêng
+
+#### III.1.6 Pin Backup: **21700 Li-ion 5000mAh**
 
 > **Chi tiết:** Xem [`06-backup-battery-21700.md`](./06-backup-battery-21700.md)
 
-**Lý Do Chọn:**
-
-- Dung lượng lớn (5000mAh), đủ cho 2–3 tháng hoạt động
-- Kích thước hợp lý, dễ lắp đặt
-- Có protection board, an toàn
+**Lý do chọn:**
+- Dung lượng đủ lớn cho chế độ backup
+- Kích thước hợp lý cho prototype
+- Dễ kết hợp với mạch sạc IP2312
 
 ---
 
@@ -107,61 +110,15 @@ Hệ thống tracker sử dụng các thành phần chính:
 
 > **Chi tiết:** Xem [`../03-system-diagram.md`](../03-system-diagram.md)
 
-**Tóm tắt:**
+**Tóm tắt kiến trúc:**
 
+```text
+LIS3DH (I2C) ─┐
+vgate iCar ───┼─→ ESP32-S3 ─→ A7670C (UART1) ─→ Cellular/MQTT
+NEO-M8N ──────┘            └→ NEO-M8N (UART2) ─→ GNSS/NMEA
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    HỆ THỐNG TRACKER                    │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ┌──────────────────────────────────────┐                │
-│  │  ESP32-S3 (Vi Điều Khiển)            │                │
-│  │  - Xử lý logic                       │                │
-│  │  - Deep sleep management            │                │
-│  │  - ADC (đo U_batt)                   │                │
-│  │  - BLE 5.0 (OBD2)                    │                │
-│  └──────────────────────────────────────┘                │
-│     │      │        │          │          │               │
-│     I2C    BLE      UART       GPIO       ADC             │
-│     │      │        │          │          │               │
-│  ┌──┴──┐ ┌─┴──┐ ┌───┴──────────┐  ┌──┴──────┐          │
-│  │LIS3DH│ │OBD2│ │A7600CE‑T     │  │LVD      │          │
-│  │(IMU) │ │BLE │ │(4G + GNSS)   │  │Control  │          │
-│  └──────┘ │vgate│ └───────┘  └─────────┘                 │
-│           │iCar│                                            │
-│           │Pro │                                            │
-│           └────┘                                            │
-│                                                             │
-│  ┌──────────────────────────────────────┐                │
-│  │    Power Management System            │                │
-│  │    - Buck (12V/24V→5V)                │                │
-│  │    - Boost (3.7V→5V)                  │                │
-│  │    - Power MUX                        │                │
-│  │    - Charger (IP2312)                 │                │
-│  └───────┬──────────────────────┬───────┘                │
-│          │                      │                        │
-│    Sạc Pin               Logic Power                      │
-│          │                      │                        │
-│  ┌───────┴────────┐      ┌──────┴──────┐                 │
-│  │  BMS + Pin     │      │  Logic Reg  │                 │
-│  │  1×21700 5Ah   │      │  (3.3V)     │                 │
-│  └────────────────┘      └─────────────┘                 │
-│                                                         │
-└──────────┼───────────────────────────────────────────────┘
-           │
-    ┌──────┴──────┐
-    │  Power MUX  │
-    │  (Relay/    │
-    │  MOSFET)    │
-    └──────┬──────┘
-           │
-    ┌──────┴──────────┐
-    │                   │
-  ┌─┴──┐          ┌───┴──┐
-  │Ắc quy│        │Pin   │
-  │Accu│          │Backup│
-  └────┘          └──────┘
-```
+
+Kiến trúc mới tránh nhầm lẫn với thiết kế modem tích hợp GNSS của giai đoạn trước.
 
 ---
 
@@ -171,19 +128,14 @@ Hệ thống tracker sử dụng các thành phần chính:
 
 **Tóm tắt:**
 
-| STT | Thành Phần                  | Đơn Vị   | SL  | Ghi Chú                              |
-| --- | --------------------------- | -------- | --- | ------------------------------------ |
-| 1   | ESP32-S3 DevKit             | Cái      | 1   | ESP32-S3-DevKitC-1 hoặc DevKitM-1    |
-| 2   | LIS3DH                      | Cái      | 1   | Breakout board hoặc IC riêng         |
-| 3   | OBD2 BLE (vgate iCar Pro)   | Cái      | 1   | BLE 4.0, tương thích với ESP32-S3    |
-| 4   | Modem 4G + GNSS (A7600CE‑T) | Cái      | 1   | Kèm LTE antenna + GNSS antenna + SIM |
-| 5   | 21700 Li-ion 5000mAh        | Cái      | 1   | Loại có protection board             |
-| 6   | Module sạc IP2312 (3A)      | Cái      | 1   | IP2312 charger module Type-C, 3A     |
-| 7   | BMS/Protection Board 1S     | Cái      | 1   | BMS 1S 3A hoặc DW01+MOSFET           |
-| 8   | Buck DC-DC (12→5V, 3A)      | Cái      | 1   | LM2596 module (khuyến nghị)          |
-| 9   | Boost DC-DC (3.7→5V, 2A)    | Cái      | 1   | MT3608 module (khuyến nghị)          |
-| 10  | Relay Module 5V             | Cái      | 1   | Power MUX (khuyến nghị)              |
-| 11  | R, C, diode, connector, PCB | Assorted | -   | Mạch phụ trợ                         |
+| STT | Thành Phần | Đơn Vị | SL | Ghi Chú |
+| --- | ---------- | ------ | -- | ------- |
+| 1 | ESP32-S3 DevKit | Cái | 1 | MCU chính |
+| 2 | LIS3DH | Cái | 1 | IMU |
+| 3 | OBD2 BLE (vgate iCar Pro) | Cái | 1 | Đọc dữ liệu ECU |
+| 4 | LTE modem A7670C | Cái | 1 | Kèm LTE antenna + SIM |
+| 5 | GNSS module NEO-M8N | Cái | 1 | Kèm antenna GNSS |
+| 6 | 21700 Li-ion 5000mAh | Cái | 1 | Pin backup |
+| 7 | Mạch nguồn + linh kiện phụ | Assorted | - | Buck/Boost/LVD/charger |
 
-**Tổng chi phí ước tính: 870,000–1,630,000 VNĐ**
-
+**Tổng chi phí ước tính: 905,000–1,615,000 VNĐ**

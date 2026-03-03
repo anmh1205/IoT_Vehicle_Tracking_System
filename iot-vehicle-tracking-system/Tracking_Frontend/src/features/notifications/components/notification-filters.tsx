@@ -1,5 +1,6 @@
 'use client';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -68,18 +69,30 @@ export const NotificationFilters = ({
         </SelectContent>
       </Select>
 
-      <Input
-        type="date"
-        value={value.from ?? ''}
-        onChange={(event) => onChange({ ...value, from: event.target.value || undefined })}
-        className="w-[170px]"
-      />
-      <Input
-        type="date"
-        value={value.to ?? ''}
-        onChange={(event) => onChange({ ...value, to: event.target.value || undefined })}
-        className="w-[170px]"
-      />
+      <div className="space-y-1">
+        <Label htmlFor="notification-from-date" className="text-xs text-muted-foreground">
+          Từ ngày
+        </Label>
+        <Input
+          id="notification-from-date"
+          type="date"
+          value={value.from ?? ''}
+          onChange={(event) => onChange({ ...value, from: event.target.value || undefined })}
+          className="w-[170px]"
+        />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="notification-to-date" className="text-xs text-muted-foreground">
+          Đến ngày
+        </Label>
+        <Input
+          id="notification-to-date"
+          type="date"
+          value={value.to ?? ''}
+          onChange={(event) => onChange({ ...value, to: event.target.value || undefined })}
+          className="w-[170px]"
+        />
+      </div>
     </div>
   );
 };

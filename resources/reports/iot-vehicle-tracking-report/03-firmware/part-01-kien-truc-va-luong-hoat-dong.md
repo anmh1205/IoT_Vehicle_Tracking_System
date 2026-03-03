@@ -2,14 +2,14 @@
 
 ### V.1 Kiến Trúc
 
-- **Layer 1 – Hardware Abstraction**: driver LIS3DH, **GNSS qua modem A7600 (AT commands)**, modem LTE, ADC, GPIO, **BLE (OBD2 vgate iCar Pro)**
+- **Layer 1 – Hardware Abstraction**: driver LIS3DH, **GNSS module riêng (NEO-M8N qua UART)**, modem LTE A7670C, ADC, GPIO, **BLE (OBD2 vgate iCar Pro)**
 - **Layer 2 – Power Management**: sleep, wakeup, LVD
 - **Layer 3 – Application**: logic chế độ lái/đỗ/cảnh báo, xử lý alert
 - **Layer 4 – Communication**: MQTT/HTTP, mã hóa dữ liệu, xử lý lệnh từ server
 
 ### V.2 Luồng Hoạt Động Cơ Bản
 
-1. Khởi tạo peripheral (IMU, modem LTE/GNSS, ADC, BLE)
+1. Khởi tạo peripheral (IMU, modem LTE A7670C, GNSS NEO-M8N, ADC, BLE)
 2. Đọc trạng thái IGN + U_batt:
    - **Ưu tiên**: Kết nối OBD2 BLE → đọc IGN từ ECU
    - **Fallback**: Đo điện áp ắc quy nếu không kết nối được OBD2
@@ -28,7 +28,7 @@
 - **Đọc IMU, lọc nhiễu, xác nhận chuyển động**
 - **Đo U_batt và điều khiển LVD**
 - **Quản lý kết nối BLE OBD2** (kết nối/reconnect/fallback)
-- **Bật/tắt GNSS trên modem và đọc vị trí qua AT commands**
+- **Bật/tắt module GNSS riêng và đọc vị trí qua UART/NMEA parser**
 - **Gửi dữ liệu lên server (MQTT/HTTP)**
 - **Lưu trạng thái để sau sleep dậy vẫn biết chế độ trước đó**
 

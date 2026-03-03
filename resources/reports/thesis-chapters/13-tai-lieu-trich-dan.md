@@ -120,6 +120,36 @@
 
 [52] Texas Instruments, "Power Management for IoT Devices," Application Report SLVAE57, 2020. [Online]. Available: https://www.ti.com/lit/an/slvae57/slvae57.pdf. [Accessed: Sep. 15, 2025].
 
+[53] STMicroelectronics, "STM32L476RE Product Page," 2026. [Online]. Available: https://www.st.com/en/microcontrollers-microprocessors/stm32l476re.html. [Accessed: Mar. 02, 2026].
+
+[54] STMicroelectronics, "STM32L476xx Datasheet," DS10198 Rev 11, Jul. 2024. [Online]. Available: https://www.st.com/resource/en/datasheet/stm32l476re.pdf. [Accessed: Mar. 02, 2026].
+
+[55] Nordic Semiconductor, "nRF52840 Product Specification v1.2," [Online]. Available: https://docs.nordicsemi.com/bundle/nRF52840_PS_v1.2/resource/nRF52840_PS_v1.2.pdf. [Accessed: Mar. 02, 2026].
+
+[56] Nordic Semiconductor, "nRF52840 Product Page," 2026. [Online]. Available: https://www.nordicsemi.com/Products/nRF52840/Modules. [Accessed: Mar. 02, 2026].
+
+[57] Nordic Semiconductor, "nRF52840 Documentation Hub," 2026. [Online]. Available: https://docs.nordicsemi.com/category/nrf52840-category. [Accessed: Mar. 02, 2026].
+
+[58] SIMCom Wireless Solutions, "A7670X Series Product Page," 2026. [Online]. Available: https://cn.simcom.com/product/A7670X.html. [Accessed: Mar. 02, 2026].
+
+[59] Quectel Wireless Solutions, "EC200U Series Product Page," 2026. [Online]. Available: https://www.quectel.com/product/lte-ec200u-series. [Accessed: Mar. 02, 2026].
+
+[60] SIMCom Wireless Solutions, "SIM7600CE Product Page," 2026. [Online]. Available: https://cn.simcom.com/product/SIM7600CE.html. [Accessed: Mar. 02, 2026].
+
+[61] Quectel Wireless Solutions, "Quectel EC200U Series LTE Standard Specification," Version 1.4, 2024. [Online]. Available: https://developer.quectel.com/en/wp-content/uploads/sites/2/2024/11/Quectel_EC200U_Series_LTE_Standard_Specification_V1.4.pdf. [Accessed: Mar. 02, 2026].
+
+[62] u-blox, "NEO-M8 Data Sheet," UBX-15031086, [Online]. Available: https://www.u-blox.com/sites/default/files/NEO-M8-FW3_DataSheet_UBX-15031086.pdf. [Accessed: Mar. 02, 2026].
+
+[63] u-blox, "NEO-M8 Series Product Page," 2026. [Online]. Available: https://www.u-blox.com/en/product/neo-m8-series. [Accessed: Mar. 02, 2026].
+
+[64] vgate, "Vgate iCar Pro BLE Product Page," 2026. [Online]. Available: https://vgatemall.com/products-detail/i-9/. [Accessed: Mar. 02, 2026].
+
+[65] Texas Instruments, "TPS2115A Product Page," 2026. [Online]. Available: https://www.ti.com/product/TPS2115A. [Accessed: Mar. 02, 2026].
+
+[66] Infineon Technologies, "IRLML6402 Product Page," 2026. [Online]. Available: https://www.infineon.com/part/IRLML6402. [Accessed: Mar. 02, 2026].
+
+[67] SONGLE Relay, "SRD-05VDC-SL-C Relay Datasheet," datasheet mirror. [Online]. Available: https://www.alldatasheet.com/html-pdf/1132639/SONGLERELAY/SRD-05VDC-SL-C/1713/2/SRD-05VDC-SL-C.html. [Accessed: Mar. 02, 2026].
+
 ---
 
 <!-- Ghi chú: Tất cả tài liệu trực tuyến đã được truy cập và kiểm tra tính khả dụng trong thời gian thực hiện đồ án (tháng 09/2025 - tháng 02/2026). Định dạng trích dẫn tuân theo chuẩn IEEE. -->

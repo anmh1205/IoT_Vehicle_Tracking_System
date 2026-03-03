@@ -226,7 +226,7 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 | Tiêu chuẩn                | Mô tả                   | Áp dụng trong hệ thống             |
 | ------------------------- | ----------------------- | ---------------------------------- |
 | IEEE 802.15.1 (Bluetooth) | Chuẩn BLE 4.0/5.0       | Kết nối OBD2 adapter               |
-| 3GPP LTE Cat-1            | Chuẩn 4G/LTE            | Truyền dữ liệu qua modem A7600CE-T |
+| 3GPP LTE Cat-1            | Chuẩn 4G/LTE            | Truyền dữ liệu qua modem A7670C |
 | NMEA 0183                 | Chuẩn dữ liệu GPS       | Phân tích tọa độ từ module GNSS    |
 | SAE J1979 (OBD2)          | Chuẩn chẩn đoán động cơ | Đọc dữ liệu qua OBD2 BLE adapter   |
 | MQTT v5.0 (OASIS)         | Giao thức IoT messaging | Truyền dữ liệu thiết bị - server   |

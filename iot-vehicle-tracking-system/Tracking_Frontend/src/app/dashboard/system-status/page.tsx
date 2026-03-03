@@ -25,7 +25,7 @@ const SystemStatusPage = () => {
       pageTitle="Trạng thái hệ thống"
       pageDescription="Tình trạng dịch vụ và chỉ số hạ tầng"
     >
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {services.map((service) => (
           <HealthCard key={service.key} service={service} />
         ))}

@@ -11,7 +11,7 @@ interface EmptyStateProps {
 }
 export const EmptyState = ({
   icon,
-  title = 'Không có dữ liệu',
+  title = 'Chưa có dữ liệu',
   description,
   action,
 }: EmptyStateProps) => {

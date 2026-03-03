@@ -1,9 +1,11 @@
 ﻿'use client';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CalendarClock, CircleCheckBig, CircleOff, Wrench } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { StatCard } from '@/components/common/stat-card';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import { Button } from '@/components/ui/button';
 import { maintenanceServices } from '@/lib/api/maintenance';
@@ -74,8 +76,42 @@ const MaintenancePage = () => {
     },
   ];
   const rows = maint.data?.items ?? maint.data?.data?.items ?? [];
+  const stats = {
+    total: rows.length,
+    scheduled: rows.filter((row: any) => row.status === 'scheduled').length,
+    inProgress: rows.filter((row: any) => row.status === 'in_progress').length,
+    completed: rows.filter((row: any) => row.status === 'completed').length,
+  };
+
   return (
     <PageContainer pageTitle="Bảo trì" pageDescription="Quản lý lịch bảo trì phương tiện">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Tổng lịch bảo trì"
+          value={stats.total}
+          icon={<Wrench className="h-4 w-4" />}
+          isLoading={maint.isLoading}
+        />
+        <StatCard
+          title="Đã lên lịch"
+          value={stats.scheduled}
+          icon={<CalendarClock className="h-4 w-4" />}
+          isLoading={maint.isLoading}
+        />
+        <StatCard
+          title="Đang xử lý"
+          value={stats.inProgress}
+          icon={<CircleOff className="h-4 w-4" />}
+          isLoading={maint.isLoading}
+        />
+        <StatCard
+          title="Hoàn tất"
+          value={stats.completed}
+          icon={<CircleCheckBig className="h-4 w-4" />}
+          isLoading={maint.isLoading}
+        />
+      </div>
+
       <Tabs defaultValue="list" className="space-y-4">
         <TabsList>
           <TabsTrigger value="list">Danh sách</TabsTrigger>

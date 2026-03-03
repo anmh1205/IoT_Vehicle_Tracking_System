@@ -31,7 +31,7 @@ const resolveAllowedOrigins = (): string[] | boolean => {
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
 
-  if (values.length === 0) return ['http://localhost:3002'];
+  if (values.length === 0) return ['http://localhost:4002'];
   if (values.includes('*')) return true;
   return values;
 };

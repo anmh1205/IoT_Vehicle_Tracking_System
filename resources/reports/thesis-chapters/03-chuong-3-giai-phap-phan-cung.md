@@ -1,6 +1,6 @@
 ﻿# CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ – DESIGN SOLUTIONS
 
-Chương này trình bày quá trình phân tích, đề xuất và lựa chọn các giải pháp thiết kế cho hệ thống IoT giám sát phương tiện. Nội dung được tổ chức theo bốn tầng chính: (1) phần cứng thiết bị tracker, (2) firmware nhúng trên vi điều khiển, (3) hệ thống backend và cloud, và (4) giao diện người dùng frontend. Ở mỗi tầng, các phương án thay thế được so sánh bằng ma trận trọng số để đánh giá ưu nhược điểm, từ đó lựa chọn phương án tối ưu theo tiêu chí hiệu năng, chi phí và khả năng mở rộng.
+Chương này trình bày quá trình phân tích, đề xuất và lựa chọn các giải pháp thiết kế cho hệ thống IoT giám sát phương tiện. Nội dung được tổ chức theo bốn tầng chính: (1) phần cứng thiết bị tracker, (2) firmware nhúng trên vi điều khiển, (3) hệ thống backend và cloud, và (4) giao diện người dùng frontend. Ở mỗi tầng, các phương án thay thế được so sánh theo yêu cầu kỹ thuật, thông số chính và tác động tích hợp thực tế, từ đó lựa chọn phương án tối ưu theo tiêu chí hiệu năng, chi phí và khả năng mở rộng.
 
 ## 3.1. Phân tích tổng hợp – General analysis
 
@@ -34,8 +34,8 @@ Hệ thống tracker được tổ chức theo kiến trúc module với năm kh
 | I2C     BLE     UART      GPIO      ADC       |
 |                                               |                                    |                                |          |  |         |
 | +-----+ +----+ +--------+ +------+ +--------+ |
-|                                               | LIS3D                              |                                | OBD2     |  | A7600CE |  | Power |  | Voltage |  |
-|                                               | H IMU                              |                                | BLE      |  | -T 4G+  |  | MUX   |  | Divider |  |
+|                                               | LIS3D                              |                                | OBD2     |  | A7670C+ |  | Power |  | Voltage |  |
+|                                               | H IMU                              |                                | BLE      |  | NEO-M8N |  | MUX   |  | Divider |  |
 |                                               |                                    |                                | vgat     |  | GNSS    |  |       |  |         |  |
 | +-----+                                       | e                                  | +--------+ +------+ +--------+ |
 | +----+                                        |
@@ -65,7 +65,7 @@ Hệ thống tracker được tổ chức theo kiến trúc module với năm kh
 
 Hệ thống vận hành theo ba chế độ chính: (1) chế độ lái xe — khi động cơ bật (IGN ON), các module cần thiết được kích hoạt; (2) chế độ đỗ xe — khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ IMU LIS3DH duy trì giám sát chuyển động; (3) chế độ cảnh báo — khi IMU ghi nhận chuyển động bất thường, hệ thống tự đánh thức và gửi cảnh báo qua 4G.
 
-Luồng dữ liệu được tổ chức theo ba nhánh: OBD2 (RPM, tốc độ, nhiên liệu) đọc qua BLE từ adapter vgate iCar Pro; vị trí lấy từ GNSS tích hợp trong modem A7600CE-T; và dữ liệu chuyển động thu từ IMU LIS3DH qua I2C. ESP32-S3 tổng hợp, đóng gói và truyền toàn bộ dữ liệu lên máy chủ qua MQTT trên kết nối 4G/LTE.
+Luồng dữ liệu được tổ chức theo ba nhánh: OBD2 (RPM, tốc độ, nhiên liệu) đọc qua BLE từ adapter vgate iCar Pro; vị trí lấy từ module GNSS NEO-M8N qua UART riêng; và dữ liệu chuyển động thu từ IMU LIS3DH qua I2C. ESP32-S3 tổng hợp, đóng gói và truyền toàn bộ dữ liệu lên máy chủ qua MQTT trên kết nối 4G/LTE của modem A7670C.
 
 #### 3.1.1.2. Phân tích và lựa chọn vi điều khiển (MCU)
 
@@ -73,124 +73,124 @@ Việc lựa chọn vi điều khiển (MCU) là quyết định thiết kế qu
 
 ##### a) Các ứng viên
 
-**ESP32-S3** là vi điều khiển dual-core Xtensa LX7 hoạt động ở tần số 240 MHz, tích hợp sẵn WiFi 802.11 b/g/n và Bluetooth Low Energy (BLE) 5.0. Module này có 512 KB SRAM, 4–16 MB Flash, 3 cổng UART, 2 cổng I2C, ADC 12-bit với 20 kênh, và hỗ trợ external wakeup từ deep sleep với dòng tiêu thụ 10–15 µA [1].
+**ESP32-S3** là vi điều khiển dual-core Xtensa LX7 hoạt động tới 240 MHz, tích hợp sẵn WiFi 802.11 b/g/n và Bluetooth LE 5.0 [19]. Thiết bị có 512 KB SRAM on-chip, dùng flash ngoài, hỗ trợ nhiều giao tiếp ngoại vi (UART/I2C/SPI/ADC) và dòng deep-sleep mức µA tùy cấu hình [19], [20].
 
-**STM32L4** là dòng vi điều khiển siêu tiết kiệm năng lượng của STMicroelectronics, sử dụng nhân ARM Cortex-M4 hoạt động ở 80 MHz. Dòng này nổi tiếng với mức tiêu thụ cực thấp ở chế độ STOP2 (1–3 µA), tuy nhiên không tích hợp sẵn module truyền thông không dây [2].
+**STM32L4** (đại diện bởi STM32L476 trong so sánh) là dòng MCU low-power của ST, dùng nhân ARM Cortex-M4 tới 80 MHz và không tích hợp BLE/Wi-Fi [53], [54]. Dòng này nổi bật với các mức dòng ngủ sâu rất thấp theo cấu hình nguồn (shutdown/standby/STOP2) [53].
 
-**nRF52840** là vi điều khiển của Nordic Semiconductor với nhân ARM Cortex-M4 ở 64 MHz, tích hợp BLE 5.0 và 802.15.4. Module này có dòng deep sleep 1.5 µA nhưng bị hạn chế về số lượng UART (chỉ 2 cổng) và tài nguyên tính toán [3].
+**nRF52840** là MCU của Nordic với nhân ARM Cortex-M4F 64 MHz, hỗ trợ Bluetooth LE 5.x và 802.15.4 [55], [56]. Thiết bị có 1 MB Flash, 256 KB RAM, hỗ trợ UART/UARTE và dòng System OFF mức dưới µA tùy điều kiện cấu hình [55], [56].
 
-##### b) Bảng đánh giá đa tiêu chí
+##### b) Đối chiếu yêu cầu thiết kế với thông số phần cứng
 
-Để lựa chọn MCU phù hợp, nhóm áp dụng phương pháp đánh giá đa tiêu chí có trọng số (weighted scoring matrix). Các tiêu chí và trọng số được xác lập trên cơ sở yêu cầu kỹ thuật cụ thể của hệ thống tracker.
+Thay vì chấm điểm tổng quát, Bảng 3.1 đối chiếu trực tiếp các ràng buộc kỹ thuật của tracker với thông số và tác động tích hợp của từng MCU.
 
-[Bảng 3.1: Ma trận đánh giá lựa chọn vi điều khiển]
+[Bảng 3.1: Đối chiếu yêu cầu kỹ thuật khi lựa chọn vi điều khiển]
 
-| STT           | Tiêu chí             | Trọng số | ESP32-S3 | STM32L4  | nRF52840 |
-| ------------- | -------------------- | -------- | -------- | -------- | -------- |
-| 1             | BLE tích hợp         | 0.20     | 10       | 3        | 10       |
-| 2             | Số lượng UART (>= 3) | 0.15     | 10       | 10       | 5        |
-| 3             | Tiêu thụ deep sleep  | 0.15     | 7        | 10       | 9        |
-| 4             | Độ dễ phát triển     | 0.15     | 10       | 5        | 7        |
-| 5             | Chi phí              | 0.10     | 9        | 6        | 7        |
-| 6             | Cộng đồng hỗ trợ     | 0.10     | 10       | 8        | 7        |
-| 7             | RAM và Flash         | 0.10     | 9        | 7        | 8        |
-| 8             | ADC 12-bit           | 0.05     | 9        | 9        | 8        |
-| **Tổng điểm** | **1.00**             | **9.20** | **6.75** | **7.65** |
+| Yêu cầu của tracker | ESP32-S3 | STM32L4 | nRF52840 |
+| ------------------- | -------- | ------- | -------- |
+| Kết nối OBD2 BLE với vgate iCar Pro | BLE 5.0 tích hợp, tương thích ngược BLE 4.0 | Không tích hợp BLE, phải thêm module ngoài | BLE 5.0 tích hợp |
+| Topology UART của hệ thống | 3 UART controllers (đủ cho modem + GNSS + debug) [19], [20] | Nhiều serial instance trong dòng STM32L476 (USART/UART/LPUART), đủ cho topology yêu cầu [53], [54] | UARTE/UART thường dùng 2 instance, dễ thiếu 1 cổng nếu giữ debug UART riêng [55], [56] |
+| Tài nguyên xử lý cho OBD2 + modem + IMU | Dual-core 240 MHz, 512 KB SRAM [19] | Cortex-M4 tới 80 MHz, 128 KB SRAM trên STM32L476RE [54] | Cortex-M4F 64 MHz, 256 KB RAM [55], [56] |
+| Dòng ngủ sâu/siêu thấp công suất | Deep-sleep mức µA tùy cấu hình RTC/IO [19], [20] | STOP2 cỡ 1.1 µA (theo điều kiện datasheet), standby/shutdown cỡ nA [53], [54] | System OFF mức dưới µA tùy RAM retention/GPIO [55] |
+| Framework triển khai | Arduino IDE + ESP-IDF [47] | STM32Cube/HAL [53] | nRF Connect SDK [57] |
+| Phần cứng bổ sung để đạt đủ chức năng | Không cần thêm radio BLE | Cần thêm BLE module nếu vẫn giữ OBD2 BLE (STM32L476 không tích hợp BLE) [53], [54] | Không cần BLE module, nhưng cần xử lý bài toán thiếu serial cho debug |
+| Chi phí dev board/prototype | ~100.000–200.000 VND (mặt bằng BOM dự án) | ~150.000–300.000 VND (mặt bằng BOM dự án) | Thường cao hơn ESP32-S3 và ít phổ biến hơn trong bối cảnh dự án |
+| Tác động tới sơ đồ hiện tại | Giữ nguyên sơ đồ BLE + modem UART + GNSS UART | Tăng phần cứng BLE ngoài và công đoạn bring-up | Có thể phải chuyển debug sang USB/SWO để nhường UART cho chức năng chính |
 
-Ghi chú: Điểm đánh giá theo thang 1–10, trong đó 10 là tốt nhất.
+##### c) Phân tích các delta quan trọng
 
-##### c) Phân tích chi tiết các tiêu chí
+**BLE tích hợp:** Đây là ràng buộc cứng vì tracker dùng adapter OBD2 vgate iCar Pro theo chuẩn BLE 4.0. ESP32-S3 và nRF52840 đều đáp ứng trực tiếp bằng BLE 5.0 tích hợp, trong khi STM32L4 phải bổ sung thêm module BLE ngoài. Việc thêm module ngoài không chỉ tăng BOM mà còn tăng thêm một miền nguồn và một bước bring-up phần cứng.
 
-**BLE tích hợp (trọng số 0.20):** Đây là tiêu chí quan trọng nhất vì hệ thống cần kết nối BLE với adapter OBD2 vgate iCar Pro (BLE 4.0). ESP32-S3 tích hợp sẵn BLE 5.0, tương thích ngược với BLE 4.0, cho phép kết nối trực tiếp không cần module ngoài. STM32L4 không có BLE tích hợp, cần thêm module ngoài như STM32WB hoặc HM-10, làm tăng chi phí và độ phức tạp. nRF52840 có BLE 5.0 nhưng bị hạn chế về UART.
+**Ngân sách UART:** Kiến trúc mục tiêu cần ít nhất 3 luồng serial riêng: UART cho modem A7670C, UART cho GNSS NEO-M8N và UART/log debug. ESP32-S3 đáp ứng đúng topology này với 3 UART. STM32L4 cũng có thể đáp ứng nếu chọn đúng biến thể, nhưng đổi lại phải thêm BLE ngoài. nRF52840 chỉ có 2 UART nên muốn giữ OBD2 BLE + modem + GNSS sẽ phải hy sinh cổng debug riêng hoặc đổi sang phương án debug phức tạp hơn.
 
-**Số lượng UART (trọng số 0.15):** Hệ thống cần ít nhất 3 cổng UART — một cho modem A7600CE-T, một cho debug/log, và một dự phòng. ESP32-S3 và STM32L4 đều có 3 cổng UART trở lên, trong khi nRF52840 chỉ có 2 cổng, không đủ cho yêu cầu hệ thống.
+**Tiêu thụ deep sleep:** STM32L4 và nRF52840 có lợi thế rõ ràng về dòng ngủ sâu theo tài liệu hãng. Tuy nhiên chênh lệch giữa nhóm ESP32-S3 và STM32L4 không quyết định toàn bộ thời lượng pin, vì tracker vẫn chịu tải chính từ modem LTE, GNSS và các chu kỳ wake-up định kỳ. Trong bài toán heartbeat 20–35 ngày với pin 5000 mAh, chênh lệch này có ý nghĩa nhưng không đủ để bù cho việc tăng độ phức tạp tích hợp [19], [53], [54], [55].
 
-**Tiêu thụ deep sleep (trọng số 0.15):** STM32L4 dẫn đầu với 1–3 µA ở chế độ STOP2, thấp hơn ESP32-S3 (10–15 µA) khoảng 3–5 lần. Tuy nhiên, sự chênh lệch này không ảnh hưởng đáng kể đến thời gian hoạt động tổng thể khi sử dụng pin 5000 mAh. Với dòng trung bình 7 mA ở chế độ heartbeat, sự khác biệt về dòng deep sleep chỉ tạo ra chênh lệch khoảng 2–3 ngày trong tổng thời gian hoạt động 20–35 ngày.
-
-**Độ dễ phát triển (trọng số 0.15):** ESP32-S3 hỗ trợ cả Arduino IDE và ESP-IDF framework, có cộng đồng phát triển lớn với hàng nghìn ví dụ code sẵn có. STM32L4 yêu cầu kiến thức sâu về HAL và CubeMX, thời gian phát triển lâu hơn đáng kể. nRF52840 sử dụng nRF Connect SDK, ít tài liệu tiếng Việt và cộng đồng nhỏ hơn.
+**Độ phức tạp triển khai:** ESP32-S3 có lợi thế thực tế vì vừa có BLE sẵn, vừa có ESP-IDF/Arduino IDE, phù hợp cho firmware phải đồng thời xử lý BLE OBD2, AT command modem, I2C IMU và deep sleep. STM32L4 mạnh về low power nhưng kéo theo thêm công việc tích hợp BLE. nRF52840 phù hợp nếu hệ thống ưu tiên radio BLE là chính, nhưng lại không khớp tốt với topology serial hiện tại của tracker.
 
 ##### d) Kết luận lựa chọn
 
-Trên cơ sở kết quả đánh giá đa tiêu chí, **ESP32-S3** được chọn làm vi điều khiển chính cho hệ thống tracker với tổng điểm 9.20/10. Quyết định này dựa trên các lý do sau:
+Trên cơ sở đối chiếu trực tiếp các yêu cầu của hệ thống, **ESP32-S3** được chọn làm vi điều khiển chính cho tracker. Quyết định này dựa trên các điểm chốt sau:
 
-- BLE 5.0 tích hợp cho phép kết nối trực tiếp với OBD2 adapter mà không cần module ngoài.
-- Đủ tài nguyên xử lý (dual-core 240 MHz, 512 KB SRAM) để vận hành đồng thời các tác vụ OBD2, modem, và IMU.
-- Thời gian phát triển ngắn nhờ vào hệ sinh thái phát triển phong phú.
-- Chi phí thấp hơn STM32L4 khoảng 30–50% (100.000–200.000 VND so với 150.000–300.000 VND).
-- Tiêu thụ deep sleep 10–15 µA là chấp nhận được cho ứng dụng tracker với pin backup 5000 mAh.
+- Đáp ứng trọn vẹn kiến trúc hiện tại: 1 kết nối BLE cho OBD2, 2 UART chức năng cho A7670C và NEO-M8N, cùng 1 đường debug riêng.
+- BLE 5.0 tích hợp giúp bỏ hẳn module BLE ngoài, giảm BOM và giảm công đoạn bring-up.
+- Tài nguyên xử lý 240 MHz dual-core và 512 KB SRAM đủ để chạy đồng thời BLE, modem, IMU và state machine.
+- Chi phí prototype thấp hơn STM32L4 khoảng 30–50% theo mặt bằng linh kiện đang dùng trong đồ án.
+- Dòng deep-sleep của ESP32-S3 cao hơn STM32L4 theo tài liệu hãng, nhưng vẫn nằm trong giới hạn chấp nhận được của bài toán pin backup 5000 mAh khi xét toàn bộ duty-cycle của modem, GNSS và các chu kỳ wake-up [19], [53], [54].
 
 [Bảng 3.2: Thông số kỹ thuật ESP32-S3 được chọn]
 
-| Thông số         | Giá trị                                    |
-| ---------------- | ------------------------------------------ |
-| CPU              | Dual-core Xtensa LX7 @ 240 MHz             |
-| RAM              | 512 KB SRAM                                |
-| Flash            | 4–16 MB (tùy variant)                      |
-| Bluetooth        | BLE 5.0 (tương thích BLE 4.0)              |
-| WiFi             | 802.11 b/g/n (không sử dụng trong tracker) |
-| UART             | 3 cổng                                     |
-| I2C              | 2 cổng                                     |
-| ADC              | 12-bit, 20 kênh                            |
-| GPIO             | 45 chân                                    |
-| Deep sleep       | 10–15 µA (với external wakeup)             |
-| Active (BLE)     | 20–40 mA                                   |
-| Module cụ thể    | ESP32-S3-WROOM-1                           |
-| Board phát triển | ESP32-S3-DevKitC-1                         |
+| Thông số | Giá trị |
+| -------- | ------- |
+| CPU | Dual-core Xtensa LX7, tối đa 240 MHz [19] |
+| RAM on-chip | 512 KB SRAM [19] |
+| Flash | Flash ngoài (module dev board thường 4–16 MB) [19], [20] |
+| Bluetooth | Bluetooth LE 5.0, tương thích ngược BLE 4.0 cho OBD2 adapter [19] |
+| WiFi | 802.11 b/g/n (không dùng trong luồng chính của tracker) [19] |
+| UART | 3 UART controllers [19], [20] |
+| I2C | 2 I2C controllers [19], [20] |
+| ADC | SAR ADC 12-bit, tối đa 20 kênh (theo package) [19] |
+| GPIO | Tối đa 45 GPIO (theo package) [19] |
+| Dòng deep-sleep | Mức µA tùy cấu hình RTC domain và IO [19], [20] |
+| Module cụ thể | ESP32-S3-WROOM-1 |
+| Board phát triển | ESP32-S3-DevKitC-1 |
 
 #### 3.1.1.3. Phân tích và lựa chọn modem truyền thông
 
-Modem truyền thông đóng vai trò then chốt trong hệ thống, đảm nhận hai chức năng: (1) kết nối mạng di động 4G/LTE để truyền dữ liệu về máy chủ, và (2) định vị GNSS để xác định vị trí xe. Việc tích hợp cả hai chức năng trong một module giúp giảm chi phí, diện tích bo mạch và độ phức tạp thiết kế.
+Modem truyền thông đóng vai trò then chốt trong hệ thống, đảm nhận hai chức năng: (1) kết nối mạng di động 4G/LTE để truyền dữ liệu về máy chủ, và (2) định vị GNSS để xác định vị trí xe. Trong kiến trúc hiện tại, nhóm ưu tiên phương án **tách rời LTE và GNSS** để giảm coupling, dễ bảo trì firmware và linh hoạt thay thế phần cứng.
 
 ##### a) Các ứng viên
 
-Ba module được đưa vào đánh giá là SIMCom A7600CE-T, Quectel EC200U-CN, và SIMCom SIM7600CE-T.
+Ba phương án được đưa vào đánh giá là **SIMCom A7670C + u-blox NEO-M8N**, **Quectel EC200U-CN + NEO-M8N**, và **SIMCom SIM7600CE-T** (modem tích hợp GNSS).
 
-**SIMCom A7600CE-T** là module LTE Cat-4 với GNSS tích hợp, hỗ trợ đa băng tần LTE FDD (B1, B3, B5, B7, B8, B20), LTE TDD (B38, B40, B41), WCDMA và GSM. Module hỗ trợ giao tiếp UART, có MQTT/HTTP client tích hợp, và có thể điều khiển bằng lệnh AT chuẩn 3GPP TS 27.007 [4].
+**SIMCom A7670C + u-blox NEO-M8N** là phương án tách rời: A7670C phụ trách LTE/AT command, NEO-M8N phụ trách GNSS/NMEA. Theo trang sản phẩm chính thức của SIMCom, A7670C nằm trong nhóm LTE Cat-1 và dùng nguồn 3.4–4.2 V; GNSS của hệ thống vì vậy được tách sang NEO-M8N riêng [58], [62].
 
-**Quectel EC200U-CN** là module LTE Cat-1 của Quectel, hỗ trợ tốc độ dữ liệu thấp hơn (uplink 5 Mbps, downlink 10 Mbps) nhưng tiêu thụ năng lượng thấp hơn. Module cũng có GNSS tích hợp nhưng giá thành tương đương A7600CE-T [5].
+**Quectel EC200U-CN + NEO-M8N** có topology gần giống phương án A7670C + NEO-M8N. Tuy nhiên dòng EC200U được hãng mô tả là Cat-1 bis, GNSS là tính năng tùy chọn theo variant/cấu hình và I/O logic có ràng buộc riêng, nên mức độ thuận tay với baseline tài liệu hiện tại thấp hơn phương án A7670C [59], [61].
 
-**SIMCom SIM7600CE-T** là module LTE Cat-4 cao cấp hơn, hỗ trợ đa băng tần rộng hơn và có giao tiếp USB bên cạnh UART. Tuy nhiên giá thành cao hơn đáng kể và tiêu thụ nhiều năng lượng hơn [6].
+**SIMCom SIM7600CE-T** là phương án tích hợp GNSS trong modem, dễ đi dây hơn nhưng coupling cao hơn và kém linh hoạt khi cần tách luồng LTE/GNSS [60].
 
-##### b) Bảng đánh giá đa tiêu chí
+##### b) Đối chiếu kiến trúc LTE/GNSS theo ràng buộc tích hợp
 
-[Bảng 3.3: Ma trận đánh giá lựa chọn modem truyền thông]
+Vấn đề cốt lõi của tracker không chỉ là modem có lên mạng được hay không, mà là kiến trúc LTE/GNSS đó tác động thế nào tới sơ đồ UART, power profile và khả năng refactor firmware. Bảng 3.3 dưới đây đối chiếu trực tiếp các delta này.
 
-| STT           | Tiêu chí            | Trọng số | A7600CE-T | EC200U-CN | SIM7600CE-T |
-| ------------- | ------------------- | -------- | --------- | --------- | ----------- |
-| 1             | GNSS tích hợp       | 0.20     | 10        | 9         | 10          |
-| 2             | Hỗ trợ MQTT/HTTP    | 0.15     | 10        | 9         | 10          |
-| 3             | Tiêu thụ năng lượng | 0.15     | 8         | 9         | 6           |
-| 4             | Giao tiếp UART      | 0.15     | 10        | 10        | 10          |
-| 5             | Chi phí             | 0.15     | 9         | 8         | 5           |
-| 6             | Tài liệu và hỗ trợ  | 0.10     | 9         | 8         | 9           |
-| 7             | Khả dụng tại VN     | 0.10     | 9         | 7         | 8           |
-| **Tổng điểm** | **1.00**            | **9.35** | **8.65**  | **8.15**  |
+[Bảng 3.3: Đối chiếu các phương án LTE/GNSS theo tác động tích hợp]
+
+| Yêu cầu / delta tích hợp | A7670C + NEO-M8N | EC200U-CN + NEO-M8N | SIM7600CE-T |
+| ------------------------ | ---------------- | -------------------- | ----------- |
+| Số module phần cứng | 2 module: A7670C (LTE) + NEO-M8N (GNSS) [58], [62] | 2 module: EC200U-CN (LTE) + NEO-M8N (GNSS) [59], [61] | 1 module tích hợp LTE + GNSS (SIM7600CE family) [60] |
+| LTE category / tốc độ | Cat-1, tối đa 10 Mbps DL / 5 Mbps UL [58] | Cat-1, tối đa 10 Mbps DL / 5 Mbps UL [59], [61] | Cat-4, tối đa 150 Mbps DL / 50 Mbps UL [60] |
+| GNSS tích hợp trong modem | Không tích hợp GNSS trên A7670C, cần GNSS ngoài [58], [62] | GNSS tùy chọn theo variant/cấu hình dòng EC200U [59], [61] | Có GNSS tích hợp trong module [60] |
+| Điện áp cấp nguồn modem | 3.4–4.2 V (typ. 3.8 V) [58] | 3.3–4.3 V (typ. 3.8 V) [61] | 3.4–4.2 V (typ. 3.8 V) [60] |
+| Đường dữ liệu vị trí trong kiến trúc đề tài | NMEA/UBX từ NEO-M8N qua UART riêng [62], [63] | NMEA/UBX từ NEO-M8N qua UART riêng [62], [63] | GNSS AT tích hợp trong cùng modem [60] |
+| Bật/tắt LTE và GNSS độc lập | Có, do tách 2 module/2 rail nguồn | Có, nếu triển khai tách tương tự A7670C+NEO-M8N | Không tách hoàn toàn do GNSS đi cùng modem |
+| Tác động khi reset modem LTE | Có thể reset modem và giữ logic GNSS riêng | Tương tự phương án tách nếu GNSS dùng module riêng | Reset modem thường kéo theo gián đoạn GNSS |
+| Mức coupling firmware | Thấp, tách rõ `modem_lte` và `gnss` | Thấp, nhưng phải đổi tập lệnh modem | Cao hơn do LTE/GNSS chung module |
+| Tác động tới BOM prototype | Bộ modem + GNSS đang chốt 330.000–500.000 VND (BOM dự án) | Chưa phải cấu hình BOM chính của repo | Có thể ít module hơn nhưng giảm linh hoạt tách LTE/GNSS |
 
 ##### c) Kết luận lựa chọn
 
-**SIMCom A7600CE-T** được lựa chọn làm modem truyền thông chính với tổng điểm 9.35/10. Các ưu điểm nổi bật bao gồm:
+**SIMCom A7670C + u-blox NEO-M8N** được lựa chọn làm kiến trúc truyền thông chính vì các lý do sau:
 
-- GNSS tích hợp hỗ trợ GPS, GLONASS, BeiDou và Galileo với độ chính xác 3–5 m, không cần module GPS riêng.
-- Giao tiếp qua UART với lệnh AT đơn giản, dễ tích hợp với ESP32-S3 chỉ với 3 chân kết nối (TX, RX, PWRKEY).
-- MQTT client tích hợp sẵn, cho phép gửi dữ liệu trực tiếp lên broker EMQX mà không cần thư viện MQTT riêng trên ESP32.
-- Tiêu thụ hợp lý: 50–100 mA khi active (4G + GNSS), dưới 1 mA khi sleep.
-- Có thể bật/tắt bằng GPIO (PWRKEY) để tiết kiệm năng lượng khi không cần sử dụng.
-- Giá thành hợp lý (300.000–500.000 VND kèm antenna), phù hợp với ngân sách đồ án.
+- Giữ đúng mục tiêu tách LTE và GNSS thành hai miền phần cứng độc lập, từ đó giảm coupling trong firmware.
+- Cần đúng 2 UART chức năng, khớp với sơ đồ ESP32-S3 đang dành riêng UART cho modem và GNSS.
+- Cho phép bật/tắt, reset và tối ưu nguồn cho LTE và GNSS theo từng trạng thái vận hành thay vì buộc đi cùng nhau.
+- Phù hợp trực tiếp với hướng refactor firmware từ mô hình `modem_gnss` sang `modem_lte` + `gnss`.
+- Nằm trong cấu hình BOM prototype đã được chốt cho đồ án, nên thuận lợi hơn cho việc viết tài liệu và triển khai từng bước.
 
-[Bảng 3.4: Thông số kỹ thuật SIMCom A7600CE-T]
+[Bảng 3.4: Thông số kỹ thuật phương án A7670C + NEO-M8N]
 
-| Thông số          | Giá trị                                          |
-| ----------------- | ------------------------------------------------ |
-| Loại              | LTE Cat-4 Module                                 |
-| Băng tần LTE      | FDD: B1, B3, B5, B7, B8, B20; TDD: B38, B40, B41 |
-| GNSS              | GPS, GLONASS, BeiDou, Galileo                    |
-| Giao tiếp         | UART (115200–921600 baud)                        |
-| Hỗ trợ giao thức  | MQTT, HTTP, TCP/UDP                              |
-| Tiêu thụ active   | 50–100 mA                                        |
-| Tiêu thụ sleep    | < 1 mA                                           |
-| Điện áp hoạt động | 3.3V hoặc 5V                                     |
-| GNSS cold start   | 30–60 giây                                       |
-| GNSS hot start    | 5–10 giây                                        |
+| Thông số | Giá trị |
+| -------- | ------- |
+| Kiến trúc | A7670C (LTE) + NEO-M8N (GNSS) tách rời 2 module [58], [62] |
+| LTE category / tốc độ | Cat-1, tối đa 10 Mbps downlink / 5 Mbps uplink [58] |
+| GNSS | NEO-M8N là bộ thu GNSS chuyên dụng; hỗ trợ GPS/GLONASS/Galileo/BeiDou/QZSS/SBAS, tối đa 3 GNSS đồng thời [62], [63] |
+| GNSS tích hợp trong modem | Không; A7670C không phải modem GNSS tích hợp [58] |
+| Giao tiếp với MCU | 1 UART cho A7670C + 1 UART riêng cho NEO-M8N [62] |
+| Giao thức dữ liệu | GNSS dùng NMEA/UBX; modem là kênh LTE để mang MQTT/HTTP/TCP/UDP ở tầng ứng dụng [63] |
+| Điện áp modem | 3.4–4.2 V, điển hình 3.8 V [58] |
+| Điện áp GNSS | 2.7–3.6 V [62] |
+| GNSS cold start (TTFF) | 26 s [62] |
+| GNSS hot start (TTFF) | 1 s [62] |
+| Ý nghĩa tích hợp | Có thể bật/tắt riêng LTE và GNSS để tối ưu nguồn và giảm coupling firmware |
+| Giới hạn cần ghi rõ | A7670 family có variant khác, nhưng trong đề tài chỉ chốt A7670C LTE-only để tránh nhầm với bản có GNSS [58] |
 
 ## 3.2. Đề xuất các giải pháp – Proposed multiple solutions
 
@@ -202,26 +202,30 @@ Ba module được đưa vào đánh giá là SIMCom A7600CE-T, Quectel EC200U-C
 
 Thu thập dữ liệu từ ECU xe qua cổng OBD2 (On-Board Diagnostics II) là một yêu cầu cốt lõi của thiết kế tracker. Có hai hướng tiếp cận chính: sử dụng adapter OBD2 có dây (wired ELM327 qua UART) hoặc adapter OBD2 không dây (BLE ELM327). Nhóm lựa chọn kết nối không dây qua BLE dựa trên các lý do sau:
 
-[Bảng 3.5: So sánh phương pháp kết nối OBD2]
+[Bảng 3.5: So sánh phương pháp kết nối OBD2 theo thông số triển khai]
 
-| Tiêu chí             | OBD2 có dây (UART)                    | OBD2 không dây (BLE)                        |
-| -------------------- | ------------------------------------- | ------------------------------------------- |
-| Lắp đặt              | Cần chạy dây từ OBD2 port đến tracker | Không cần dây, linh hoạt vị trí đặt tracker |
-| Bảo mật              | Tracker dễ bị phát hiện theo dây      | Tracker có thể giấu ở vị trí khác           |
-| Bảo trì              | Khó bảo trì (dây nối cố định)         | Dễ bảo trì (chỉ rút adapter)                |
-| Tiêu thụ             | ~10–30 mA (UART luôn bật)             | ~5–15 mA (BLE chỉ bật khi cần)              |
-| Độ phức tạp firmware | Cần thêm UART driver                  | Cần BLE GATT client                         |
-| Khả năng mở rộng     | Hạn chế bởi dây nối                   | Có thể di chuyển adapter sang xe khác       |
+| Tiêu chí kỹ thuật | OBD2 có dây (ELM327 UART) | OBD2 không dây (BLE ELM327 / vgate iCar Pro) |
+| ----------------- | ------------------------- | --------------------------------------------- |
+| Kết nối vật lý tracker ↔ OBD2 | Cần dây kéo cố định từ cổng OBD2 đến tracker | Không cần dây giữa tracker và cổng OBD2 |
+| Giao thức tới MCU | UART TTL | BLE 4.0 GATT; vgate iCar Pro là bản Bluetooth 4.0 BLE [29], [64] |
+| Tài nguyên MCU tiêu tốn | Chiếm thêm 1 UART phần cứng trong lúc kết nối | Tận dụng BLE tích hợp của ESP32-S3, giữ UART cho modem/GNSS/debug |
+| Giao thức OBD-II hỗ trợ | Phụ thuộc adapter ELM327 cụ thể | Vgate công bố hỗ trợ J1850 PWM/VPW, ISO9141-2, ISO14230-4, ISO15765-4 CAN, SAE J1939 CAN [64] |
+| Hành vi sleep của adapter | Phụ thuộc adapter có dây cụ thể | Vendor công bố tự sleep sau khoảng 30 phút khi xe tắt máy [64] |
+| Hành vi wake | Phụ thuộc adapter và đường cấp nguồn | Vendor quảng bá tự khởi động khi ignition ON; cần hiểu là hành vi phụ thuộc xe [64] |
+| Dòng tiêu thụ adapter | Phụ thuộc adapter; không dùng 1 số cứng nếu không có datasheet đúng mẫu | Trang hãng được kiểm tra không công bố dòng active/standby, nên không chốt số mA trong luận văn [64] |
+| Hành vi khi MCU deep sleep | UART không duy trì truyền dữ liệu khi MCU ngủ sâu | BLE link cũng không duy trì qua deep sleep; cần reconnect sau wake |
+| Tác động lắp đặt thực địa | Tracker thường bị ràng buộc gần cổng OBD2 | Tracker có thể đặt lệch vị trí OBD2 trong cabin nếu vẫn trong vùng BLE |
+| Bảo trì/thay adapter giữa các xe | Cần tháo dây liên quan đến tracker | Chỉ cần rút/cắm adapter và cấu hình lại kết nối nếu cần |
 
-**Kết luận:** Phương pháp kết nối BLE được lựa chọn vì cho phép tách rời vật lý giữa tracker và adapter OBD2, tăng tính linh hoạt trong lắp đặt và bảo mật chống trộm.
+**Kết luận:** Phương pháp BLE được chọn vì phù hợp hơn với kiến trúc hiện tại của tracker: tận dụng BLE tích hợp của ESP32-S3, không chiếm thêm UART phần cứng, giảm ràng buộc đi dây, đồng thời vgate iCar Pro đã có công bố rõ về BLE 4.0, auto-sleep và danh sách giao thức OBD-II. Với các mục hãng không công bố (như dòng active/standby), luận văn nên ghi rõ là chưa có số liệu chính thức thay vì điền giá trị ước lượng.
 
 ##### b) Lựa chọn adapter OBD2 BLE: vgate iCar Pro
 
 **vgate iCar Pro** là adapter OBD2 sử dụng Bluetooth Low Energy (BLE) 4.0, tương thích với BLE 5.0 của ESP32-S3. Adapter này được chọn dựa trên các tiêu chí sau:
 
 - **Tương thích giao thức:** Hỗ trợ tập lệnh ELM327 qua BLE GATT characteristics, cho phép đọc đa dạng dữ liệu từ ECU bao gồm trạng thái động cơ (IGN), số vòng quay (RPM), tốc độ xe, mức nhiên liệu, nhiệt độ động cơ, và mã lỗi chẩn đoán (DTC) [7].
-- **Khả năng kết nối:** BLE 4.0 tương thích ngược với BLE 5.0 của ESP32-S3. Thời gian kết nối lại sau deep sleep chỉ mất 1–3 giây nếu đã paired trước đó. Khoảng cách kết nối 10–30 m đủ cho mọi bố trí trong xe.
-- **Tiêu thụ năng lượng:** 5–15 mA khi active, thấp hơn đáng kể so với Bluetooth Classic (10–30 mA).
+- **Khả năng kết nối:** BLE 4.0 của adapter tương thích ngược với BLE 5.0 của ESP32-S3 [19], [64]. Vendor cũng công bố cơ chế tự sleep sau khoảng 30 phút khi xe tắt máy và tự khởi động lại theo ignition, phù hợp cho kịch bản tracker trên xe [64].
+- **Tiêu thụ năng lượng:** Ở thời điểm rà soát nguồn, trang hãng được kiểm tra không công bố dòng active/standby chính thức cho vgate iCar Pro BLE [64]. Vì vậy luận văn không nên điền số mA cứng cho adapter này nếu chưa có datasheet chính thức đúng mẫu.
 - **Phổ biến và giá hợp lý:** Dễ mua trên thị trường Việt Nam với giá 150.000–300.000 VND.
 
 ![Hình 3.2 - Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3–2.png)
@@ -337,8 +341,9 @@ Hệ thống quản lý nguồn là khối phức tạp nhất trong thiết k�
 | +------------+------------+               |
 |                                           |                |  |          |
 | +--v--+   +----v-----+  +---v---+         |
-|                                           | LDO            |  | Modem    |  | IP2312  |  |
-|                                           | 5->3.3         |  | A7600    |  | Charger |  |
+|                                           | LDO            |  | LTE/GNSS |  | IP2312  |  |
+|                                           | 5->3.3         |  | A7670C + |  | Charger |  |
+|                                           |                |  | NEO-M8N  |  |         |  |
 | +--+--+   +----------+  +---+---+         |
 |                                           |                |  |
 | +--v--+                  +--v--+          |
@@ -362,9 +367,9 @@ Mạch buck converter có nhiệm vụ giảm điện áp từ ắc quy xe (12V 
 | Tần số chuyển mạch | 150 kHz               |
 | Package            | TO-220–5              |
 
-Điện áp 5V được chọn làm bus nguồn chung vì phù hợp với đầu vào LDO 3.3V (cấp cho ESP32), mức hoạt động của modem A7600CE-T và đầu vào của mạch sạc IP2312. Dùng chung một bus 5V giúp đơn giản thiết kế và giảm số lượng converter cần triển khai.
+Điện áp 5V được chọn làm bus nguồn chung vì phù hợp với đầu vào LDO 3.3V (cấp cho ESP32), mức hoạt động của modem A7670C, module GNSS NEO-M8N và đầu vào của mạch sạc IP2312. Dùng chung một bus 5V giúp đơn giản thiết kế và giảm số lượng converter cần triển khai.
 
-Dòng ra 3A của LM2596 đáp ứng tải toàn hệ thống, gồm ESP32-S3 (80–120 mA), modem A7600CE-T (50–150 mA) và mạch phụ trợ (10–20 mA). Dòng sạc 3A qua IP2312 chỉ xuất hiện khi xe chạy nên không đồng thời với toàn bộ tải trong mọi thời điểm.
+Dòng ra 3A của LM2596 đáp ứng tải toàn hệ thống, gồm ESP32-S3 (80–120 mA), modem A7670C, module GNSS NEO-M8N và mạch phụ trợ (10–20 mA). Dòng sạc 3A qua IP2312 chỉ xuất hiện khi xe chạy nên không đồng thời với toàn bộ tải trong mọi thời điểm.
 
 Duty cycle của mạch được tính: D = Vout/Vin = 5/12 = 0.417 (41.7%). Tổn hao công suất: P_loss = (1–0.85) x 5V x 3A = 2.25W, cần xem xét tản nhiệt khi hoạt động ở công suất cao.
 
@@ -393,20 +398,22 @@ Module MT3608 sẵn có (giá 10.000–15.000 VND) được khuyến nghị sử
 
 Hệ thống cần tự động chuyển đổi giữa hai nguồn cấp: ắc quy xe (qua buck converter) và pin backup (qua boost converter). Ba phương án được đánh giá:
 
-[Bảng 3.10: So sánh các phương án Power Path Management]
+[Bảng 3.10: So sánh các phương án Power Path Management theo thông số]
 
-| Tiêu chí        | MOSFET (P-MOS)               | IC chuyên dụng (TPS2115A) | Relay Module                |
-| --------------- | ---------------------------- | ------------------------- | --------------------------- |
-| Độ phức tạp     | Trung bình (cần gate driver) | Thấp (tự động)            | Thấp (đơn giản)             |
-| Chi phí         | 10.000–15.000 VND            | 50.000–80.000 VND         | 5.000–10.000 VND            |
-| Tổn hao         | Thấp (Rds ~0.2 Ohm)          | Rất thấp (~100 mV)        | Không đáng kể (tiếp xúc cơ) |
-| Tiêu thụ        | Không đáng kể                | Không đáng kể             | ~70 mA (cuộn hút)           |
-| Khả dụng tại VN | Tốt                          | Khó mua                   | Rất tốt                     |
-| Điều khiển      | Firmware (GPIO)              | Tự động                   | Firmware (GPIO)             |
+| Tiêu chí kỹ thuật | MOSFET (P-MOS rời, ví dụ IRLML6402) | IC chuyên dụng (TPS2115A) | Relay Module 5V (Songle-class) |
+| ----------------- | ------------------------------------ | ------------------------- | ------------------------------ |
+| Nguyên lý chuyển nguồn | OR-ing bán dẫn, điều khiển gate | Power mux tích hợp, chọn nguồn tự động/thủ công [65] | Chuyển mạch cơ qua tiếp điểm NO/NC |
+| Thông số điện đại diện | IRLML6402: VDS -20 V, ID -3.7 A, RDS(on) 65 mΩ max @ VGS=-4.5 V [66] | Dải đầu vào 2.8–5.5 V, RON điển hình 84 mΩ mỗi nhánh [65] | Relay Songle 5 V điển hình: công suất cuộn hút ~0.36 W, tiếp điểm 10 A @ 250 VAC / 30 VDC [67] |
+| Sụt áp đường nguồn | Phụ thuộc RDS(on) và cách điều khiển gate; có thể thấp nếu chọn đúng part | Thấp nhờ RON cỡ mΩ và mạch chuyển tích hợp [65] | Gần 0 V trên tiếp điểm khi đóng, nhưng là đóng cắt cơ |
+| Dòng tự tiêu hao khi giữ trạng thái | Rất thấp | Rất thấp | Khoảng 72 mA tại 5 V nếu suy ra từ cuộn hút 0.36 W [67] |
+| Mức độ linh kiện phụ trợ | Cần mạch gate, chống dòng ngược, bảo đảm fail-safe | Ít linh kiện ngoài nhất | Cần transistor driver + diode dập nếu không dùng module tích hợp |
+| Độ phức tạp firmware | Trung bình | Thấp | Thấp |
+| Hành vi fail-safe khi MCU mất điều khiển | Phụ thuộc thiết kế gate mặc định | Theo chính sách ưu tiên nguồn của IC [65] | Có thể chọn NO/NC để mặc định chuyển sang pin backup |
+| Khả dụng trong bối cảnh prototype | Tốt nhưng đòi hỏi thiết kế cẩn thận | Tốt về kỹ thuật nhưng chi phí cao hơn | Rất tốt, dễ mua và dễ thay thế |
 
-**Giải pháp được chọn: Relay Module 5V.** Trong phạm vi đồ án, tiêu chí đơn giản và dễ triển khai được ưu tiên. Relay module 1 kênh 5V (giá 5.000–10.000 VND) được điều khiển trực tiếp từ GPIO của ESP32-S3: GPIO HIGH bật relay (dùng ắc quy), GPIO LOW tắt relay (dùng pin backup). Relay có tiếp kết nối NO (Normally Open) cho ngõ ra buck và NC (Normally Closed) cho ngõ ra boost, bảo đảm rằng khi mất điều khiển, hệ thống tự động chuyển sang pin backup [12].
+**Giải pháp được chọn: Relay Module 5V.** Lý do chọn không phải vì hiệu suất điện tốt nhất, mà vì phù hợp mục tiêu prototype của đồ án: dễ mua, chi phí thấp, dễ kiểm thử bằng GPIO và dễ quan sát trạng thái chuyển nguồn ngoài thực tế. So với TPS2115A hay MOSFET rời, relay bất lợi ở hao cuộn hút và bản chất đóng cắt cơ, nhưng lại dễ triển khai hơn trong giai đoạn nguyên mẫu. Với cấu hình NO cho đường ắc quy và NC cho đường pin backup, hệ thống vẫn có đường cấp nguồn dự phòng khi MCU reset hoặc mất điều khiển [12], [67].
 
-Ngoài relay, hai diode Schottky 1N5822 được mắc theo cấu hình Diode-OR làm mạch dự phòng: nếu relay bị lỗi, diode vẫn đảm bảo hệ thống có nguồn cấp (với tổn hao thêm ~0.4V).
+Ngoài relay, hai diode Schottky 1N5822 được mắc theo cấu hình Diode-OR làm mạch dự phòng. Phương án này đảm bảo khi relay lỗi cơ hoặc không đóng đúng trạng thái, tracker vẫn giữ được nguồn cấp liên tục (đổi lại tăng sụt áp khoảng ~0.4V trên nhánh diode).
 
 ##### d) Giám sát điện áp và ngắt điện áp thấp (LVD)
 
@@ -508,7 +515,7 @@ Kết quả tính toán cho thấy pin 5000 mAh đủ khả năng duy trì hoạ
 | 1   | ESP32-S3 DevKit (DevKitC-1)    | Cái    | 1   | 100.000–200.000  | Module ESP32-S3-WROOM-1              |
 | 2   | LIS3DH breakout board          | Cái    | 1   | 20.000–50.000    | Cảm biến gia tốc 3 trục              |
 | 3   | vgate iCar Pro (OBD2 BLE)      | Cái    | 1   | 150.000–300.000  | BLE 4.0, ELM327 compatible           |
-| 4   | SIMCom A7600CE-T module        | Cái    | 1   | 300.000–500.000  | Kèm LTE antenna + GNSS antenna + SIM |
+| 4   | SIMCom A7670C + u-blox NEO-M8N | Bộ     | 1   | 330.000–500.000  | Modem LTE + module GNSS tách rời + anten |
 | 5   | Pin 21700 Li-ion 5000mAh       | Cái    | 1   | 100.000–200.000  | Loại có protection board             |
 | 6   | Module sạc IP2312 (3A)         | Cái    | 1   | 20.000–40.000    | Type-C, dòng sạc 3A                  |
 | 7   | BMS/Protection Board 1S        | Cái    | 1   | 10.000–20.000    | BMS 1S 3A hoặc DW01+MOSFET           |

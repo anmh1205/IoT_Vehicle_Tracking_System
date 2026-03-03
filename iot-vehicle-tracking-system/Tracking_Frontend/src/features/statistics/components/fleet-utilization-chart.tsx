@@ -1,6 +1,7 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/common/empty-state';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 export const FleetUtilizationChart = ({
   data,
@@ -21,6 +22,13 @@ export const FleetUtilizationChart = ({
       <CardContent className="h-[320px]">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
+        ) : data.length === 0 ? (
+          <div className="flex h-full items-center justify-center">
+            <EmptyState
+              title="Chưa có dữ liệu"
+              description="Không có dữ liệu mức sử dụng đội xe cho khoảng thời gian đã chọn"
+            />
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>

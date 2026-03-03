@@ -87,7 +87,7 @@ firmware/
 │   │   ├── obd2_pids.c
 │   │   └── include/obd2_parser.h
 │   │
-│   ├── modem_driver/           # Điều khiển modem A7600CE-T
+│   ├── modem_driver/           # Điều khiển modem A7670C (LTE)
 │   │   ├── modem_at.c          # Xử lý lệnh AT
 │   │   ├── modem_mqtt.c        # MQTT qua modem
 │   │   ├── modem_gnss.c        # GNSS qua modem
@@ -125,8 +125,8 @@ Các tầng giao tiếp với nhau thông qua cơ chế message queue và semaph
 | 2 | IGN_IN | Input | Đọc trạng thái khóa điện (hoặc qua OBD2) |
 | 4 | U_BATT_ADC | Input | Đọc điện áp ắc quy (ADC 12-bit) |
 | 5 | CHARGER_EN | Output | Điều khiển IC sạc IP2312 |
-| 16 | MODEM_UART_TX | Output | UART TX đến modem A7600CE-T |
-| 17 | MODEM_UART_RX | Input | UART RX từ modem A7600CE-T |
+| 16 | MODEM_UART_TX | Output | UART TX đến modem A7670C |
+| 17 | MODEM_UART_RX | Input | UART RX từ modem A7670C |
 | 18 | POWER_MUX_SEL | Output | Chọn nguồn cấp (ắc quy/pin dự phòng) |
 | 19 | LVD_STATUS | Input | Trạng thái từ comparator LM393 |
 | 21 | LIS3DH_INT | Input | Ngắt từ cảm biến gia tốc IMU |
@@ -329,10 +329,10 @@ Khi không thể kết nối BLE với adapter OBD2 (timeout sau 10 giây, retry
 
 #### a) Khởi tạo và kiểm tra modem
 
-Module modem quản lý toàn bộ giao tiếp với modem SIMCom A7600CE-T thông qua giao tiếp UART và tập lệnh AT. Quy trình khởi tạo bao gồm kiểm tra phản hồi modem, trạng thái SIM, đăng ký mạng và chất lượng tín hiệu.
+Module modem quản lý toàn bộ giao tiếp với modem SIMCom A7670C thông qua giao tiếp UART và tập lệnh AT. Quy trình khởi tạo bao gồm kiểm tra phản hồi modem, trạng thái SIM, đăng ký mạng và chất lượng tín hiệu.
 
 ```c
-// Trình tự khởi tạo modem A7600CE-T
+// Trình tự khởi tạo modem A7670C
 int modem_init(modem_ctx_t *ctx)
 {
     // Bước 1: Kiểm tra modem phản hồi
@@ -373,7 +373,7 @@ int modem_init(modem_ctx_t *ctx)
 
 #### b) Kết nối và gửi dữ liệu MQTT
 
-Firmware sử dụng MQTT client tích hợp trong modem A7600CE-T thông qua tập lệnh AT+CMQTT. Quy trình kết nối và gửi dữ liệu bao gồm: khởi tạo dịch vụ MQTT, kết nối đến broker, đăng ký topic nhận lệnh, và gửi dữ liệu telemetry định kỳ.
+Firmware sử dụng AT command trên modem A7670C để thiết lập kết nối dữ liệu và gửi telemetry MQTT về broker. Quy trình bao gồm khởi tạo kết nối mạng, kết nối broker, đăng ký topic nhận lệnh, và gửi dữ liệu telemetry định kỳ.
 
 ```c
 // Kết nối MQTT thông qua modem
@@ -439,7 +439,7 @@ int modem_mqtt_publish(modem_ctx_t *ctx, const char *topic,
 
 #### c) Đọc dữ liệu GNSS
 
-Module GNSS tích hợp trong modem A7600CE-T được điều khiển thông qua lệnh AT. Firmware bật GNSS, đợi fix vị trí, và đọc tọa độ định kỳ.
+Module GNSS NEO-M8N được điều khiển độc lập qua UART. Firmware bật GNSS, đợi fix vị trí, parse bản tin NMEA, và đọc tọa độ định kỳ.
 
 ```c
 // Bật và đọc dữ liệu GNSS từ modem
@@ -616,7 +616,7 @@ Khi thức dậy từ deep sleep, firmware đọc nguyên nhân đánh thức v�
 
 #### c) Quản lý nguồn modem theo chế độ
 
-Modem A7600CE-T hỗ trợ nhiều chế độ ngủ với mức tiêu thụ khác nhau:
+Modem A7670C hỗ trợ nhiều chế độ ngủ với mức tiêu thụ khác nhau:
 
 - **UART sleep** (`AT+CSCLK=1`): Modem tự động ngủ khi không có dữ liệu UART, tiêu thụ 1–5 mA, đánh thức bằng bất kỳ ký tự UART nào.
 - **Minimum functionality** (`AT+CFUN=0`): Tắt RF, giữ UART, tiêu thụ < 1 mA, đánh thức bằng lệnh AT hoặc GPIO.

@@ -1,6 +1,7 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/common/empty-state';
 import {
   Area,
   AreaChart,
@@ -28,6 +29,13 @@ export const DeviceUptimeChart = ({
       <CardContent className="h-[320px]">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
+        ) : data.length === 0 ? (
+          <div className="flex h-full items-center justify-center">
+            <EmptyState
+              title="Chưa có dữ liệu"
+              description="Không có dữ liệu uptime thiết bị cho khoảng thời gian đã chọn"
+            />
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>

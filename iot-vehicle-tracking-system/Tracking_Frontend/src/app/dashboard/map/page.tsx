@@ -15,15 +15,17 @@ const MapPage = () => {
   useDevicePositions();
   useMapRealtime();
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
-      <div className="hidden md:block">
-        <DeviceListPanel />
+    <section aria-label="Bản đồ theo dõi" className="h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="flex h-full">
+        <div className="hidden md:block md:w-[320px] md:border-r">
+          <DeviceListPanel />
+        </div>
+        <div className="relative min-w-0 flex-1">
+          <TrackingMap />
+          <MobileDeviceDrawer />
+        </div>
       </div>
-      <div className="relative flex-1">
-        <TrackingMap />
-        <MobileDeviceDrawer />
-      </div>
-    </div>
+    </section>
   );
 };
 export default MapPage;

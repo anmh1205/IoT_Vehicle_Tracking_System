@@ -1,9 +1,10 @@
 'use client';
 import { useCallback, useMemo, useState } from 'react';
-import { ShieldAlert } from 'lucide-react';
+import { CircleCheckBig, CircleDashed, FileDown, ShieldAlert } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { StatCard } from '@/components/common/stat-card';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import {
   Dialog,
@@ -13,6 +14,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -92,18 +95,28 @@ const ExportForm = ({
               <SelectItem value="pdf">PDF</SelectItem>
             </SelectContent>
           </Select>
-          <input
-            type="date"
-            className="w-full rounded border p-2 text-sm"
-            value={form.from}
-            onChange={(event) => setForm((state) => ({ ...state, from: event.target.value }))}
-          />
-          <input
-            type="date"
-            className="w-full rounded border p-2 text-sm"
-            value={form.to}
-            onChange={(event) => setForm((state) => ({ ...state, to: event.target.value }))}
-          />
+          <div className="space-y-1">
+            <Label htmlFor="export-form-from-date" className="text-xs text-muted-foreground">
+              Từ ngày
+            </Label>
+            <Input
+              id="export-form-from-date"
+              type="date"
+              value={form.from}
+              onChange={(event) => setForm((state) => ({ ...state, from: event.target.value }))}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="export-form-to-date" className="text-xs text-muted-foreground">
+              Đến ngày
+            </Label>
+            <Input
+              id="export-form-to-date"
+              type="date"
+              value={form.to}
+              onChange={(event) => setForm((state) => ({ ...state, to: event.target.value }))}
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -167,6 +180,18 @@ const ExportsPage = () => {
     return new Set(ids);
   }, [rows]);
 
+  const stats = useMemo(() => {
+    const pending = rows.filter((row: any) => row.status === 'pending').length;
+    const processing = rows.filter((row: any) => row.status === 'processing').length;
+    const completed = rows.filter((row: any) => row.status === 'completed').length;
+    return {
+      total: rows.length,
+      pending,
+      processing,
+      completed,
+    };
+  }, [rows]);
+
   if (!access.canExportData) {
     return (
       <PageContainer pageTitle="Xuất dữ liệu" pageDescription="Khu vực hạn chế">
@@ -225,6 +250,33 @@ const ExportsPage = () => {
       pageDescription="Xuất dữ liệu và theo dõi tiến độ"
       pageHeaderAction={<Button onClick={() => setOpen(true)}>Tạo yêu cầu xuất</Button>}
     >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Tổng yêu cầu"
+          value={stats.total}
+          icon={<FileDown className="h-4 w-4" />}
+          isLoading={exportsQuery.isLoading}
+        />
+        <StatCard
+          title="Đang chờ"
+          value={stats.pending}
+          icon={<CircleDashed className="h-4 w-4" />}
+          isLoading={exportsQuery.isLoading}
+        />
+        <StatCard
+          title="Đang xử lý"
+          value={stats.processing}
+          icon={<CircleDashed className="h-4 w-4" />}
+          isLoading={exportsQuery.isLoading}
+        />
+        <StatCard
+          title="Hoàn tất"
+          value={stats.completed}
+          icon={<CircleCheckBig className="h-4 w-4" />}
+          isLoading={exportsQuery.isLoading}
+        />
+      </div>
+
       <DataTable
         columns={columns}
         data={rows}

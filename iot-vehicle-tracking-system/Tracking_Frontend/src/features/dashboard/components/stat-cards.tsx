@@ -1,9 +1,10 @@
 ﻿'use client';
 import { Car, Cpu, Bell, Route } from 'lucide-react';
 import { StatCard } from '@/components/common/stat-card';
+
 export const StatCards = ({ stats, isLoading }: { stats: any; isLoading?: boolean }) => {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
         title="Phương tiện"
         value={stats?.totalDevices ?? 0}

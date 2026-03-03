@@ -1,9 +1,10 @@
 ﻿'use client';
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { CarFront, CircleOff, Plus, Wrench, Zap } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { StatCard } from '@/components/common/stat-card';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { vehicleServices } from '@/lib/api/vehicles';
@@ -56,6 +57,13 @@ const VehiclesPage = () => {
     },
   });
   const rows = vehicles.data?.items ?? vehicles.data?.data?.items ?? [];
+  const stats = {
+    total: rows.length,
+    active: rows.filter((row: any) => row.status === 'active').length,
+    maintenance: rows.filter((row: any) => row.status === 'maintenance').length,
+    inactive: rows.filter((row: any) => row.status === 'inactive').length,
+  };
+
   return (
     <PageContainer
       pageTitle="Phương tiện"
@@ -72,6 +80,33 @@ const VehiclesPage = () => {
         </Button>
       }
     >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Tổng phương tiện"
+          value={stats.total}
+          icon={<CarFront className="h-4 w-4" />}
+          isLoading={vehicles.isLoading}
+        />
+        <StatCard
+          title="Đang hoạt động"
+          value={stats.active}
+          icon={<Zap className="h-4 w-4" />}
+          isLoading={vehicles.isLoading}
+        />
+        <StatCard
+          title="Đang bảo trì"
+          value={stats.maintenance}
+          icon={<Wrench className="h-4 w-4" />}
+          isLoading={vehicles.isLoading}
+        />
+        <StatCard
+          title="Ngưng hoạt động"
+          value={stats.inactive}
+          icon={<CircleOff className="h-4 w-4" />}
+          isLoading={vehicles.isLoading}
+        />
+      </div>
+
       <DataTable
         columns={getVehicleColumns({
           onEdit: (row) => {

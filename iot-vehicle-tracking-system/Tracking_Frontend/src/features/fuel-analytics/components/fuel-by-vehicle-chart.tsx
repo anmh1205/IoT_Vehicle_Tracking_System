@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/common/empty-state';
 import type { VehicleFuelData } from '@/features/fuel-analytics/types';
 
 interface FuelByVehicleChartProps {
@@ -40,8 +41,11 @@ export const FuelByVehicleChart = ({ data, isLoading }: FuelByVehicleChartProps)
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : chartData.length === 0 ? (
-          <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
-Không có dữ liệu nhiên liệu cho khoảng thời gian đã chọn
+          <div className="flex h-[300px] items-center justify-center">
+            <EmptyState
+              title="Chưa có dữ liệu"
+              description="Không có dữ liệu nhiên liệu cho khoảng thời gian đã chọn"
+            />
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>

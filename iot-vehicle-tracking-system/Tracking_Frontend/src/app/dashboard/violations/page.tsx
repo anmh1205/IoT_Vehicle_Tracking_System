@@ -5,7 +5,7 @@ import { DataTable } from '@/components/common/data-table';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import { alertServices } from '@/lib/api/alerts';
 import { StatCard } from '@/components/common/stat-card';
-import { AlertTriangle, Gauge, Car } from 'lucide-react';
+import { AlertTriangle, Gauge, Car, CircleOff } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
 const VIOLATION_TYPES = ['speeding', 'harsh_braking', 'idle_too_long'];
 const STATUS_LABELS: Record<string, string> = {
@@ -34,6 +34,7 @@ const ViolationsPage = () => {
     total: rows.length,
     speeding: rows.filter((r: any) => r.alertType === 'speeding').length,
     harsh: rows.filter((r: any) => r.alertType === 'harsh_braking').length,
+    idle: rows.filter((r: any) => r.alertType === 'idle_too_long').length,
   };
   const columns: ColumnDef<any>[] = [
     {
@@ -59,7 +60,7 @@ const ViolationsPage = () => {
   ];
   return (
     <PageContainer pageTitle="Vi phạm" pageDescription="Lịch sử vi phạm vận hành">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Tổng vi phạm"
           value={stats.total}
@@ -76,6 +77,12 @@ const ViolationsPage = () => {
           title="Phanh gấp"
           value={stats.harsh}
           icon={<Car className="h-4 w-4" />}
+          isLoading={alerts.isLoading}
+        />
+        <StatCard
+          title="Dừng quá lâu"
+          value={stats.idle}
+          icon={<CircleOff className="h-4 w-4" />}
           isLoading={alerts.isLoading}
         />
       </div>

@@ -1,9 +1,10 @@
 ﻿'use client';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { Plus, UserRound, UserRoundCheck, UserRoundX, Mail } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { StatCard } from '@/components/common/stat-card';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import {
@@ -14,7 +15,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { customerServices } from '@/lib/api/customers';
 import type { ColumnDef } from '@tanstack/react-table';
 const CustomerForm = ({
@@ -125,16 +128,26 @@ const CustomersPage = () => {
     { accessorKey: 'email', header: 'Email' },
     {
       accessorKey: 'isActive',
-      header: 'Hoat dong',
-      cell: ({ row }) => (
-        <input
-          type="checkbox"
-          checked={!!row.original.isActive}
-          onChange={() =>
-            updateMutation.mutate({ id: row.original.id, isActive: !row.original.isActive })
-          }
-        />
-      ),
+      header: 'Hoạt động',
+      cell: ({ row }) => {
+        const id = `customer-active-${row.original.id}`;
+        const label = `${row.original.name ?? 'khách hàng'} đang hoạt động`;
+        return (
+          <div className="flex items-center justify-center">
+            <Checkbox
+              id={id}
+              aria-label={label}
+              checked={!!row.original.isActive}
+              onCheckedChange={() =>
+                updateMutation.mutate({ id: row.original.id, isActive: !row.original.isActive })
+              }
+            />
+            <Label htmlFor={id} className="sr-only">
+              {label}
+            </Label>
+          </div>
+        );
+      },
     },
     {
       id: 'actions',
@@ -158,6 +171,13 @@ const CustomersPage = () => {
     },
   ];
   const rows = customers.data?.items ?? customers.data?.data?.items ?? [];
+  const stats = {
+    total: rows.length,
+    active: rows.filter((row: any) => !!row.isActive).length,
+    inactive: rows.filter((row: any) => !row.isActive).length,
+    withEmail: rows.filter((row: any) => Boolean(row.email)).length,
+  };
+
   return (
     <PageContainer
       pageTitle="Khách hàng"
@@ -174,6 +194,33 @@ const CustomersPage = () => {
         </Button>
       }
     >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Tổng khách hàng"
+          value={stats.total}
+          icon={<UserRound className="h-4 w-4" />}
+          isLoading={customers.isLoading}
+        />
+        <StatCard
+          title="Đang hoạt động"
+          value={stats.active}
+          icon={<UserRoundCheck className="h-4 w-4" />}
+          isLoading={customers.isLoading}
+        />
+        <StatCard
+          title="Ngưng hoạt động"
+          value={stats.inactive}
+          icon={<UserRoundX className="h-4 w-4" />}
+          isLoading={customers.isLoading}
+        />
+        <StatCard
+          title="Có email"
+          value={stats.withEmail}
+          icon={<Mail className="h-4 w-4" />}
+          isLoading={customers.isLoading}
+        />
+      </div>
+
       <DataTable
         columns={columns}
         data={rows}

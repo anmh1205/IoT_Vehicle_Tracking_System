@@ -1,6 +1,7 @@
 import { format as formatDate, formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 const DEFAULT_DATE_PATTERN = 'dd/MM/yyyy HH:mm';
+const VI_NUMBER_FORMATTER = new Intl.NumberFormat('vi-VN');
 const parseDate = (value: string | number | Date | null | undefined): Date | null => {
   if (value === null || value === undefined) {
     return null;
@@ -33,6 +34,16 @@ export const formatDuration = (totalSeconds: number | null | undefined): string 
 };
 export const formatTime = (totalSeconds: number | null | undefined): string => {
   return formatDuration(totalSeconds);
+};
+export const formatNumber = (value: number | string | null | undefined): string => {
+  if (value === null || value === undefined || value === '') {
+    return '0';
+  }
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return String(value);
+  }
+  return VI_NUMBER_FORMATTER.format(numericValue);
 };
 export const formatRelative = (value: string | number | Date | null | undefined): string => {
   const date = parseDate(value);

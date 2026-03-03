@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/common/empty-state';
 import { notificationServices } from '@/lib/api/notifications';
 import { NotificationRow } from './notification-item';
 import type { NotificationItem } from '@/features/notifications/types';
@@ -84,14 +85,18 @@ export const NotificationList = ({
         ))}
 
         {filtered.length === 0 ? (
-          <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-Không có thông báo phù hợp với bộ lọc hiện tại.
-          </p>
+          <div className="rounded-lg border border-dashed">
+            <EmptyState
+              title="Chưa có dữ liệu"
+              description="Không có kết quả phù hợp bộ lọc"
+              action={onRefresh ? { label: 'Thử lại', onClick: onRefresh } : undefined}
+            />
+          </div>
         ) : null}
 
         <div className="flex justify-end">
           <Button variant="outline" size="sm" onClick={() => onRefresh?.()}>
-Làm mới
+            Thử lại
           </Button>
         </div>
       </CardContent>

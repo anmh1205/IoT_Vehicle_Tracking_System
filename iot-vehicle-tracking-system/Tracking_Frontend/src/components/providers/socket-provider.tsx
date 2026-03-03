@@ -21,7 +21,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     setStatus('connecting');
-    const s = io(process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001', {
+    const s = io(process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:4001', {
       auth: { token },
       transports: ['websocket'],
       reconnection: true,

@@ -96,7 +96,7 @@ Dòng tiêu thụ năng lượng là chỉ tiêu cốt lõi của thiết bị t
 
 **Phân tích kết quả:**
 
-- Dòng tiêu thụ trong chế độ Active (~350 mA) phù hợp với tính toán thiết kế tại Chương 3, trong đó module A7600CE-T chiếm khoảng 200–250 mA (khi truyền dữ liệu 4G), ESP32-S3 chiếm khoảng 60–80 mA, và các linh kiện phụ trợ chiếm khoảng 20–30 mA.
+- Dòng tiêu thụ trong chế độ Active (~350 mA) phù hợp với tính toán thiết kế tại Chương 3, trong đó modem A7670C chiếm khoảng 200–250 mA (khi truyền dữ liệu 4G), ESP32-S3 chiếm khoảng 60–80 mA, module GNSS NEO-M8N và linh kiện phụ trợ chiếm khoảng 20–30 mA.
 - Dòng tiêu thụ trong chế độ Deep Sleep (~0.5 mA) đạt yêu cầu thiết kế (< 500 µA), chủ yếu do cảm biến IMU LIS3DH ở chế độ hoạt động độc lập (consumption ~6 µA) và mạch RTC của ESP32-S3 (~10 µA). Giá trị này cho phép thiết bị hoạt động nhiều tháng khi xe đậu mà không ảnh hưởng ắc quy.
 - Dòng peak khi truyền dữ liệu 4G (~520 mA) cần được lưu ý trong thiết kế mạch nguồn, đảm bảo tụ điện lọc (decoupling capacitor) đủ lớn để tránh sụt áp.
 
@@ -139,7 +139,7 @@ Thiết bị được đặt trong tủ nhiệt để kiểm tra khả năng ho�
 
 > Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
 
-**Nhận xét:** Thiết bị hoạt động ổn định trong dải nhiệt độ -10°C đến +60°C, đạt yêu cầu thiết kế. Tại nhiệt độ 70°C, module 4G A7600CE-T bắt đầu biểu hiện không ổn định (mất kết nối ngắt quãng), phù hợp với thông số kỹ thuật của nhà sản xuất SIMCom (nhiệt độ hoạt động -40°C đến +85°C, nhưng khuyến nghị <= 70°C cho hoạt động liên tục) [1].
+**Nhận xét:** Thiết bị hoạt động ổn định trong dải nhiệt độ -10°C đến +60°C, đạt yêu cầu thiết kế. Tại nhiệt độ 70°C, modem 4G A7670C bắt đầu biểu hiện không ổn định (mất kết nối ngắt quãng), phù hợp với thông số kỹ thuật của nhà sản xuất SIMCom (nhiệt độ hoạt động -40°C đến +85°C, nhưng khuyến nghị <= 70°C cho hoạt động liên tục) [1].
 
 #### 4.3.2.4. Kiểm thử tương thích OBD2
 
@@ -213,7 +213,7 @@ Thời gian phản hồi cho mỗi lệnh OBD2 PID được đo từ lúc gửi 
 
 #### 4.3.3.3. Thời gian bắt vệ tinh GPS (GPS Fix Time)
 
-Thời gian bắt vệ tinh (Time to First Fix - TTFF) được đo trên module GNSS tích hợp trong modem A7600CE-T trong ba kịch bản khác nhau.
+Thời gian bắt vệ tinh (Time to First Fix - TTFF) được đo trên module GNSS NEO-M8N trong ba kịch bản khác nhau.
 
 [Bảng 4.21: Thời gian bắt vệ tinh GPS (TTFF)]
 
@@ -240,7 +240,7 @@ Phép đo độ chính xác được thực hiện bằng cách đặt thiết b
 | 3 | Trong phố (urban canyon) | ~5.8 mét | ~15 mét [cần đo thực tế] | ~10 mét [cần đo thực tế] |
 | 4 | Bãi đỗ xe có mái che | ~8.5 mét [cần đo thực tế] | ~20 mét [cần đo thực tế] | ~15 mét [cần đo thực tế] |
 
-**Nhận xét:** Độ chính xác vị trí GPS đạt ~2–3 mét trong điều kiện ngoài trời thoáng, vượt mục tiêu thiết kế (< 5 mét). Module GNSS tích hợp trong A7600CE-T hỗ trợ đa hệ thống (GPS + GLONASS + BeiDou), giúp tăng số vệ tinh khả dụng và cải thiện độ chính xác, đặc biệt trong môi trường đô thị [3].
+**Nhận xét:** Độ chính xác vị trí GPS đạt ~2–3 mét trong điều kiện ngoài trời thoáng, vượt mục tiêu thiết kế (< 5 mét). Module GNSS NEO-M8N hỗ trợ đa hệ thống (GPS + GLONASS + BeiDou), giúp tăng số vệ tinh khả dụng và cải thiện độ chính xác, đặc biệt trong môi trường đô thị [3].
 
 #### 4.3.3.4. Độ trễ truyền dữ liệu MQTT
 
@@ -510,7 +510,7 @@ Phần này tổng hợp tất cả kết quả đo lường và so sánh với 
 | 6 | Thời gian thức dậy từ deep sleep | < 3 giây | ~2 giây | Đạt | Bao gồm init cơ bản |
 | 7 | Độ chính xác GPS | < 5 mét | ~2–3 mét (ngoài trời) | Đạt | GNSS đa hệ thống |
 
-> (*) **Ghi chú về dòng tiêu thụ Active Mode:** Chỉ tiêu thiết kế ban đầu là < 250 mA dựa trên ước tính lý thuyết. Trên thực tế, module 4G A7600CE-T tiêu thụ cao hơn dự kiến khi truyền dữ liệu liên tục (~200–250 mA). Tuy nhiên, giá trị 350 mA vẫn chấp nhận được vì: (1) Khi xe đang chạy, nguồn cấp từ xe (12V hoặc 24V) đủ cung cấp; (2) Pin dự phòng vẫn đảm bảo >= 4 giờ tracking.
+> (*) **Ghi chú về dòng tiêu thụ Active Mode:** Chỉ tiêu thiết kế ban đầu là < 250 mA dựa trên ước tính lý thuyết. Trên thực tế, modem 4G A7670C tiêu thụ cao hơn dự kiến khi truyền dữ liệu liên tục (~200–250 mA). Tuy nhiên, giá trị 350 mA vẫn chấp nhận được vì: (1) Khi xe đang chạy, nguồn cấp từ xe (12V hoặc 24V) đủ cung cấp; (2) Pin dự phòng vẫn đảm bảo >= 4 giờ tracking.
 
 #### 4.3.6.2. Tổng hợp chỉ tiêu firmware
 
@@ -558,7 +558,7 @@ Phần này tổng hợp tất cả kết quả đo lường và so sánh với 
 
 | STT | Tiêu chí | Mục tiêu | Kết quả đạt được | Trạng thái |
 |-----|----------|----------|-------------------|------------|
-| 1 | Độ chính xác GPS | < 5 mét | ~2–3 mét (A7600CE-T GNSS) | Đạt |
+| 1 | Độ chính xác GPS | < 5 mét | ~2–3 mét (NEO-M8N GNSS) | Đạt |
 | 2 | Chu kỳ cập nhật dữ liệu | <= 10 giây | 5 giây (cấu hình được) | Đạt |
 | 3 | Thời lượng pin dự phòng | >= 4 giờ | ~4–5 giờ (tracking mode) [cần đo thực tế] | Đạt |
 | 4 | Độ trễ end-to-end | < 3 giây | ~1–2 giây | Đạt |

@@ -1,19 +1,22 @@
 # Firmware Architecture — IoT Vehicle Tracker
 
 > **Platform:** ESP-IDF v5.4.x | **MCU:** ESP32-S3 | **Language:** C
-> **Reference:** `resources/example/esp32-obd2-meter/` — BLE OBD2 meter (NimBLE + LVGL)
-> **Backend Integration:** `Tracking_MqttBridge` (TypeScript) + `Tracking_Backend` (DDD) + EMQX broker
+> **Canonical firmware path:** `iot-vehicle-tracking-firmware/`
+> **Legacy baseline path:** `iot-vehicle-tracking-system/Tracking_Firmware/` (reference only)
 
 ---
 
 ## 1. Overview
 
-Firmware cho thiết bi tracker GPS/OBD2 lap tren xe, giao tiep voi cloud qua MQTT over 4G/LTE.
+Firmware cho thiết bị tracker GPS/OBD2 lắp trên xe, giao tiếp với cloud qua MQTT over 4G/LTE.
+
+Kiến trúc mục tiêu hiện tại dùng **hai module tách rời**:
 
 | Function | Hardware | Interface |
 |----------|----------|-----------|
 | OBD2 (IGN, RPM, Speed, Fuel, Temp) | vgate iCar Pro | BLE (NimBLE) |
-| GPS + 4G | SIMCom A7600CE-T | UART AT commands |
+| LTE connectivity | SIMCom A7670C | UART modem AT / PPP |
+| GNSS positioning | u-blox NEO-M8N | UART GNSS riêng (NMEA / UBX) |
 | Motion detection | LIS3DH IMU | I2C |
 | Power management | Power MUX, IP2312, LVD | GPIO + ADC |
 | Telemetry | EMQX broker | MQTT over PPP |
@@ -24,19 +27,20 @@ Firmware cho thiết bi tracker GPS/OBD2 lap tren xe, giao tiep voi cloud qua MQ
 
 ## 2. Layered Architecture
 
-```
+```text
 +---------------------------------------------------+
 |  Layer 4 - Communication                          |
-|  mqtt_client . data_formatter . command_handler    |
+|  mqtt_client . data_formatter . command_handler   |
 +---------------------------------------------------+
 |  Layer 3 - Application                            |
-|  state_machine . alert_engine . data_aggregator    |
+|  state_machine . alert_engine . data_aggregator   |
 +---------------------------------------------------+
 |  Layer 2 - Power Management                       |
-|  power_mgr . sleep_manager                         |
+|  power_mgr . sleep_manager                        |
 +---------------------------------------------------+
 |  Layer 1 - Hardware Abstraction (Drivers)         |
-|  ble_obd . modem_at . imu_lis3dh . adc . gpio     |
+|  ble_obd . modem_at . modem_lte . gnss_device     |
+|  gnss_parser . imu_lis3dh . adc . gpio            |
 +---------------------------------------------------+
 ```
 
@@ -44,27 +48,28 @@ Firmware cho thiết bi tracker GPS/OBD2 lap tren xe, giao tiep voi cloud qua MQ
 
 | Layer | Responsibility | FreeRTOS Tasks |
 |-------|---------------|----------------|
-| **L1 - Drivers** | Raw hardware I/O, register access, interrupt handling | ISR handlers only |
-| **L2 - Power** | Battery monitoring, charger control, sleep coordination | `power_task` (periodic) |
-| **L3 - Application** | State transitions, data aggregation, alert logic | `state_task` (main loop) |
-| **L4 - Communication** | MQTT pub/sub, JSON formatting, command parsing | `mqtt_task`, `cmd_task` |
+| **L1 - Drivers** | Raw hardware I/O, UART/I2C/GPIO, parser interfaces | ISR handlers + driver tasks |
+| **L2 - Power** | Battery monitor, charger control, LTE/GNSS power gating | `power_task` |
+| **L3 - Application** | State transitions, aggregation, alert logic | `state_task` |
+| **L4 - Communication** | MQTT, payload formatting, command parsing | `mqtt_task`, `cmd_task` |
 
 ### Inter-Layer Rules
-- **L1 -> L2:** Driver APIs return `esp_err_t`, power layer calls driver APIs
-- **L2 -> L3:** Power events (low battery, charger state) via FreeRTOS event groups
-- **L3 -> L4:** State machine pushes telemetry data via xQueue to MQTT task
-- **L4 -> L3:** Server commands dispatched back to state machine via xQueue
-- **NO cross-layer calls** (L1 never calls L3 directly)
+
+- **L1 -> L2:** drivers expose APIs, power layer controls rails and sleep policies
+- **L2 -> L3:** power events via queue / event group
+- **L3 -> L4:** telemetry pushed to communication layer
+- **L4 -> L3:** remote commands dispatched back to state machine
+- **No hidden LTE/GNSS coupling** inside a single modem-GNSS abstraction
 
 ---
 
-## 3. Project Structure
+## 3. Project Structure (Canonical)
 
-```
-iot-vehicle-tracking-system/Tracking_Firmware/
+```text
+iot-vehicle-tracking-firmware/
 |-- CMakeLists.txt
 |-- sdkconfig.defaults
-|-- partitions.csv                  # OTA-ready (factory + ota_0 + ota_1)
+|-- partitions.csv
 |
 |-- main/
 |   |-- CMakeLists.txt
@@ -72,221 +77,149 @@ iot-vehicle-tracking-system/Tracking_Firmware/
 |   |-- main.c
 |   |
 |   |-- inc/
-|   |   |-- app_config.h            # config_t struct + NVS
-|   |   |-- app_state.h             # State machine enums + rtc_context_t
-|   |   |-- pin_map.h               # GPIO definitions
-|   |   |-- util.h                  # ESP_NULL_CHECK, ARRAY_SIZE
-|   |   |
-|   |   |-- ble_init.h              # BLE stack init
-|   |   |-- ble_mgr.h               # BLE manager (NimBLE wrapper)
-|   |   |-- ble_obd.h               # BLE OBD2 protocol
-|   |   |-- ble_util.h              # BLE address helper
-|   |   |-- obd.h                   # PID config types
-|   |   |
-|   |   |-- modem_at.h              # AT command engine
-|   |   |-- modem_lte.h             # 4G/LTE control
-|   |   |-- modem_gnss.h            # GNSS control
-|   |   |
-|   |   |-- imu_lis3dh.h            # IMU driver
-|   |   |-- power_mgr.h             # Power management
-|   |   |-- adc_reader.h            # ADC (U_batt)
-|   |   |
-|   |   |-- mqtt_client.h           # MQTT publish/subscribe
-|   |   |-- data_formatter.h        # JSON payload builder
-|   |   |-- command_handler.h       # Server command processor
-|   |   +-- nvs_config.h            # NVS config read/write
+|   |   |-- app_config.h
+|   |   |-- app_state.h
+|   |   |-- pin_map.h
+|   |   |-- util.h
+|   |   |-- ble_init.h
+|   |   |-- ble_mgr.h
+|   |   |-- ble_obd.h
+|   |   |-- ble_util.h
+|   |   |-- obd.h
+|   |   |-- modem_at.h
+|   |   |-- modem_lte.h
+|   |   |-- gnss_device.h
+|   |   |-- gnss_parser.h
+|   |   |-- imu_lis3dh.h
+|   |   |-- power_mgr.h
+|   |   |-- adc_reader.h
+|   |   |-- mqtt_client.h
+|   |   |-- data_formatter.h
+|   |   |-- command_handler.h
+|   |   +-- nvs_config.h
 |   |
-|   +-- src/                        # Implementation files
-|       |-- ble_init.c              # <- Copy from reference (84 LOC)
-|       |-- ble_mgr.c               # <- Adapt from reference (648 LOC)
-|       |-- ble_obd.c               # <- Adapt from reference (289 LOC)
-|       |-- ble_util.c              # <- Copy from reference (25 LOC)
-|       |-- modem_at.c              # New
-|       |-- modem_lte.c             # New
-|       |-- modem_gnss.c            # New
-|       |-- imu_lis3dh.c            # New
-|       |-- power_mgr.c             # New
-|       |-- adc_reader.c            # New
-|       |-- mqtt_client.c           # New (ESP-IDF component)
-|       |-- data_formatter.c        # New
-|       |-- command_handler.c       # New
-|       |-- state_machine.c         # New
-|       |-- nvs_config.c            # <- Adapt from reference (100 LOC)
-|       +-- util.c                  # New
+|   +-- src/
+|       |-- ble_init.c
+|       |-- ble_mgr.c
+|       |-- ble_obd.c
+|       |-- ble_util.c
+|       |-- modem_at.c
+|       |-- modem_lte.c
+|       |-- gnss_device.c
+|       |-- gnss_parser.c
+|       |-- imu_lis3dh.c
+|       |-- power_mgr.c
+|       |-- adc_reader.c
+|       |-- mqtt_client.c
+|       |-- data_formatter.c
+|       |-- command_handler.c
+|       |-- state_machine.c
+|       |-- nvs_config.c
+|       +-- util.c
 |
-+-- components/                     # 3rd-party (if needed)
++-- plans/
 ```
+
+> `iot-vehicle-tracking-system/Tracking_Firmware/` chỉ còn là path baseline để đối chiếu current implementation gap.
 
 ---
 
-## 4. GPIO Pin Map
+## 4. GPIO / Signal Map (Logical Target)
 
-| GPIO | Name | Direction | Description |
-|------|------|-----------|-------------|
-| 2 | `IGN_IN` | Input | IGN GPIO fallback |
-| 4 | `U_BATT_ADC` | Input | ADC battery voltage |
-| 5 | `CHARGER_EN` | Output | Enable IP2312 charger |
-| 16 | `MODEM_TX` | Output | UART TX -> modem |
-| 17 | `MODEM_RX` | Input | UART RX <- modem |
-| 18 | `POWER_MUX_SEL` | Output | Power source select |
-| 19 | `LVD_STATUS` | Input | LVD output |
-| 21 | `LIS3DH_INT` | Input | IMU interrupt (wakeup) |
-| 22 | `LIS3DH_SDA` | I/O | I2C data |
-| 23 | `LIS3DH_SCL` | I/O | I2C clock |
-| 25 | `MODEM_PWRKEY` | Output | Modem power key |
+> Không chốt cứng mọi GPIO trong plan này. Mục tiêu ở đây là **tách tín hiệu logic** cho LTE và GNSS để tránh lặp lại kiến trúc modem tích hợp GNSS.
 
----
+| Signal Group | Logical Signal | Purpose |
+|--------------|----------------|---------|
+| LTE | `MODEM_UART_TX`, `MODEM_UART_RX` | UART cho A7670C |
+| LTE | `MODEM_PWRKEY`, `MODEM_RESET`, `MODEM_EN` | Power/reset/control |
+| LTE | `MODEM_STATUS`, `MODEM_RI` | Status / wake |
+| GNSS | `GNSS_UART_TX`, `GNSS_UART_RX` | UART riêng cho NEO-M8N |
+| GNSS | `GNSS_EN` | Nguồn GNSS riêng |
+| GNSS | `GNSS_PPS` | PPS optional |
+| POWER | `U_BATT_ADC`, `CHARGER_EN`, `POWER_MUX_SEL`, `LVD_STATUS` | Battery + charger |
+| SENSOR | `IGN_IN`, `LIS3DH_INT`, `LIS3DH_SDA`, `LIS3DH_SCL` | IGN + IMU |
 
-## 5. State Machine
+### Recommended split
 
-```
-                    +------+
-                    | INIT |
-                    +--+---+
-                       |
-                       v
-                 +-----+------+
-            +--->| CHECK_IGN  |<---+
-            |    +-----+------+    |
-            |      |       |       |
-            |  IGN ON   IGN OFF    |
-            |      |       |       |
-            |      v       v       |
-            | +--------+ +--------+|
-            | |DRIVING | |PARKED  ||
-            | +----+---+ +--+--+--+|
-            |      |     IMU|  |   |
-            |  IGN OFF     v  Timer|
-            |      |  +-------+  | |
-            |      |  | ALARM |  | |
-            |      |  +---+---+  | |
-            |      |      |      | |
-            |      v      v      v |
-            |    +-----------+     |
-            |    | HEARTBEAT |     |
-            |    +-----+-----+    |
-            |          |           |
-            |          v           |
-            |      +-------+      |
-            +------+ SLEEP +------+
-                   +-------+
-```
-
-### State Descriptions
-
-| State | Active Peripherals | Power Profile | Publish Interval |
-|-------|-------------------|---------------|-----------------|
-| **INIT** | All initializing | High (~400mA) | None |
-| **CHECK_IGN** | BLE or ADC | Medium (~200mA) | None |
-| **DRIVING** | BLE + LTE + GNSS | High (~400mA) | 5-30s (rawdata QoS 0) |
-| **PARKED** | IMU interrupt only | Transition to SLEEP | 1x status (QoS 1) |
-| **ALARM** | LTE + GNSS | High (~400mA) | 5s (event QoS 1) |
-| **HEARTBEAT** | LTE + GNSS briefly | Medium (~200mA) | 1x rawdata (QoS 0) |
-| **SLEEP** | None (deep sleep) | Ultra-low (<5mA) | None |
+- **UART1** -> A7670C
+- **UART2** -> NEO-M8N
+- BLE giữ độc lập với modem/GNSS path
 
 ---
 
-## 6. MQTT Integration (Must Match Tracking_MqttBridge)
+## 5. Current Gap vs Target
 
-### Topics & QoS
+### Current baseline code reality
 
-| Topic | Direction | QoS | When |
-|-------|-----------|-----|------|
-| `v1/{device_id}/rawdata` | -> Server | 0 | Every 5-30s (DRIVING), 15-30min (HEARTBEAT) |
-| `v1/{device_id}/status` | -> Server | 1 | DRIVING<->PARKED transition |
-| `v1/{device_id}/events` | -> Server | 1 | Errors, warnings, alerts |
-| `v1/{device_id}/firmware` | -> Server | 1 | OTA progress (future) |
-| `v1/{device_id}/commands` | <- Server | 1 | Remote commands |
+Các file source hiện tại ở legacy baseline path cho thấy firmware vẫn đang ở mô hình cũ:
 
-### RawData Payload (MUST match `payload.validator.ts` Zod schema)
+| Baseline file | Current state | Gap |
+|---------------|---------------|-----|
+| `iot-vehicle-tracking-system/Tracking_Firmware/main/src/modem_gnss.c` | Dùng `AT+CGNSPWR`, `AT+CGNSINF` | GNSS vẫn bị giả định là tính năng của modem |
+| `iot-vehicle-tracking-system/Tracking_Firmware/main/inc/pin_map.h` | Chưa có UART GNSS riêng | Chưa phản ánh kiến trúc NEO-M8N |
+| `iot-vehicle-tracking-system/Tracking_Firmware/main/src/state_machine.c` | LTE connect/disconnect gắn với lifecycle GNSS | Chưa tách state control hai module |
 
-```json
-{
-  "device_id": "TRACKER_001",
-  "auth_token": "device-secret-token",
-  "timestamp": 1704067200000,
-  "uptime": 3600,
-  "data": {
-    "vibration": 120,
-    "battery_top": 12.5,
-    "battery_bot": 3.8,
-    "latitude": 21.028511,
-    "longitude": 105.804817,
-    "speed": 60.0,
-    "course": 180.0,
-    "satellites": 8,
-    "ignition": true,
-    "error_code": 0
-  }
-}
+### Target direction
+
+- Bỏ flow GNSS qua AT modem tích hợp
+- Chuyển sang `gnss_device` + `gnss_parser`
+- LTE và GNSS có thể bật/tắt độc lập theo state
+- State machine điều phối hai module như hai dependency riêng
+
+---
+
+## 6. State Machine Intent
+
+```text
+INIT
+  -> CHECK_IGN
+      -> DRIVING    (BLE + LTE + GNSS active)
+      -> PARKED     (BLE off, LTE low-power, GNSS policy-based)
+      -> ALARM      (wake LTE + GNSS if needed)
+      -> HEARTBEAT  (wake LTE, optionally wake GNSS for fresh fix)
+      -> SLEEP
 ```
 
-### Validation Rules (bridge rejects if invalid)
-- `device_id`, `auth_token`: string, min 1 char
-- `latitude`: -90 to 90, `longitude`: -180 to 180
-- `speed` >= 0, `course`: 0 to 360, `satellites` >= 0
+### State expectations
 
-### Field Mapping
+| State | Active Peripherals | Notes |
+|-------|-------------------|-------|
+| `INIT` | core drivers | bring-up |
+| `CHECK_IGN` | BLE or ADC | detect vehicle state |
+| `DRIVING` | BLE + LTE + GNSS | full telemetry |
+| `PARKED` | IMU + minimal power | LTE/GNSS reduced independently |
+| `ALARM` | LTE + optional GNSS | alert first, refine position if needed |
+| `HEARTBEAT` | LTE + optional GNSS | wake on timer |
+| `SLEEP` | wake sources only | deep sleep |
+
+---
+
+## 7. Data Source Mapping
 
 | Field | Source | Notes |
 |-------|--------|-------|
 | `device_id` | NVS config | |
-| `auth_token` | NVS config | Bridge validates via DB |
+| `auth_token` | NVS config | |
 | `timestamp` | GNSS time or boot time | Unix ms |
 | `uptime` | `esp_timer_get_time()` | ms from boot |
-| `vibration` | IMU LIS3DH | Composite acceleration (bridge threshold = 500) |
-| `battery_top` | ADC GPIO4 | Vehicle battery (V) |
-| `battery_bot` | ADC/GPIO | Backup battery (V) |
-| `latitude/longitude` | GNSS `AT+CGNSINF` | |
-| `speed` | GNSS (priority) or OBD2 0x0D | km/h |
-| `course` | GNSS | 0-360 deg |
-| `satellites` | GNSS | |
-| `ignition` | OBD2 RPM>0 (priority) or U_batt>13V | boolean |
-| `error_code` | App logic | 0 = OK |
+| `vibration` | IMU LIS3DH | |
+| `battery_top` | ADC | vehicle battery |
+| `battery_bot` | ADC/GPIO | backup battery |
+| `latitude/longitude` | NEO-M8N parser output | target path, not modem AT |
+| `speed` | GNSS priority or OBD2 speed | |
+| `course` | GNSS parser | |
+| `satellites` | GNSS parser | |
+| `ignition` | OBD2 RPM or U_batt threshold | |
+| `error_code` | app logic | |
 
 ---
 
-## 7. NVS Config Structure
-
-```c
-typedef struct {
-    char     device_id[32];
-    char     auth_token[64];
-    char     mqtt_host[64];
-    uint16_t mqtt_port;             // default: 1883
-    char     mqtt_username[32];
-    char     mqtt_password[64];
-    uint16_t heartbeat_interval_s;  // default: 900
-    uint16_t tracking_interval_s;   // default: 10
-    char     obd2_ble_address[18];  // "AA:BB:CC:DD:EE:FF"
-    float    lvd_threshold_v;       // default: 12.0
-    float    lvd_hysteresis_v;      // default: 12.2
-} config_t;
-```
-
-## 8. RTC Memory (persists across deep sleep)
-
-```c
-typedef struct {
-    app_state_t last_state;
-    uint32_t    boot_count;
-    uint32_t    last_heartbeat_ts;
-    uint8_t     ble_mac[6];         // vgate MAC cache
-    bool        ign_last_known;
-    float       last_battery_v;
-} rtc_context_t;
-
-RTC_DATA_ATTR static rtc_context_t rtc_ctx;
-```
-
----
-
-## 9. ESP-IDF Dependencies
+## 8. ESP-IDF Dependencies
 
 | Component | Source | Purpose |
 |-----------|--------|---------|
 | `bt` (NimBLE) | ESP-IDF | BLE client |
-| `esp_modem` | ESP-IDF component | PPP over UART |
+| `esp_modem` | ESP-IDF component | PPP over UART for LTE |
 | `mqtt` | ESP-IDF | MQTT client |
 | `nvs_flash` | ESP-IDF | Config storage |
 | `cJSON` | ESP-IDF | JSON formatting |
@@ -295,75 +228,35 @@ RTC_DATA_ATTR static rtc_context_t rtc_ctx;
 
 ---
 
-## 10. sdkconfig.defaults
-
-```ini
-# BLE (NimBLE only, central role)
-CONFIG_BT_ENABLED=y
-CONFIG_BT_NIMBLE_ENABLED=y
-CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
-CONFIG_BT_NIMBLE_ROLE_CENTRAL=y
-CONFIG_BT_NIMBLE_ROLE_PERIPHERAL=n
-CONFIG_BT_NIMBLE_ROLE_BROADCASTER=n
-CONFIG_BT_NIMBLE_ROLE_OBSERVER=y
-
-# UART (console on UART0, modem on UART1)
-CONFIG_ESP_CONSOLE_UART_NUM=0
-
-# Power Management
-CONFIG_PM_ENABLE=y
-CONFIG_FREERTOS_USE_TICKLESS_IDLE=y
-
-# Partition (OTA-ready)
-CONFIG_PARTITION_TABLE_CUSTOM=y
-CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
-```
-
----
-
-## 11. OBD2 PIDs
-
-| PID | Name | Bytes | Conversion | Purpose |
-|-----|------|-------|------------|---------|
-| 0x0C | RPM | 2 | (A*256+B)/4 | Detect IGN (RPM>0) |
-| 0x0D | Speed | 1 | A km/h | Telemetry |
-| 0x05 | Coolant Temp | 1 | A-40 C | Telemetry |
-| 0x2F | Fuel Level | 1 | A*100/255 % | Telemetry |
-| 0x04 | Engine Load | 1 | A*100/255 % | Telemetry |
-
----
-
-## 12. Risk Matrix
+## 9. Risk Matrix
 
 | Risk | Probability | Mitigation |
 |------|-------------|------------|
-| vgate iCar Pro incompatible | Medium | Test early in Phase 2A; fallback U_batt |
-| A7600 AT instability | Low | Retry + modem hard reset |
-| GNSS cold start slow (60s) | High | Accept sending data without GPS if timeout |
-| Deep sleep current too high | Medium | Audit GPIO state + properly shutdown peripherals |
-| NVS wear | Low | RTC memory for temp data; limit write frequency |
-| Stack overflow | Medium | Monitor `uxTaskGetStackHighWaterMark()` |
+| Legacy assumptions leak into new code | High | Keep `current gap vs target` explicit |
+| GNSS parser complexity rises | Medium | Start with limited NMEA set |
+| LTE/GNSS power control becomes inconsistent | Medium | Define ownership in power layer |
+| Path divergence between legacy and canonical firmware roots | Medium | Continue active work only in canonical path |
+| Deep sleep current too high | Medium | Audit rail control and peripheral shutdown |
 
 ---
 
-## 13. Execution Phases
-
-> See compact sub-phase files in `phases/` for implementation details.
+## 10. Execution Phases
 
 | Phase | Sub-Phase | Description | Dependencies |
 |-------|-----------|-------------|--------------|
-| Phase 1A | Foundation | Project skeleton, toolchain, pin map, NVS config, utilities | None |
-| Phase 2A | BLE OBD2 | Adapt from reference: BLE init, manager, OBD2 protocol | 1A |
-| Phase 2B | Hardware Drivers | ADC reader, IMU LIS3DH, power manager | 1A |
-| Phase 2C | Modem | AT engine, LTE control, GNSS control | 1A |
+| Phase 1A | Foundation | project skeleton, config, logical signal map | None |
+| Phase 2A | BLE OBD2 | BLE init, manager, OBD2 protocol | 1A |
+| Phase 2B | Hardware Drivers | ADC, IMU, power manager | 1A |
+| Phase 2C | LTE + GNSS split | modem AT/LTE + GNSS UART/parser | 1A |
 | Phase 3A | Communication | MQTT client, data formatter, command handler | 2B, 2C |
-| Phase 4A | Integration | State machine, main loop, full cycle testing | 2A, 3A |
+| Phase 4A | Integration | state machine, full-cycle behavior | 2A, 3A |
 
-> Phase 2A, 2B, 2C can run in parallel (BLE, drivers, modem are independent).
+> Phase 2A, 2B, 2C vẫn có thể chạy song song, nhưng 2C phải bám kiến trúc A7670C + NEO-M8N.
 
 ---
 
-## Full Spec Reference
-- [firmware-development-plan.md](../design-reports/firmware-development-plan.md) — Original development plan (Vietnamese)
-- [esp32-obd2-meter/](../example/esp32-obd2-meter/) — Reference BLE OBD2 project
-- [22-backend-mqtt-bridge.md](../cloud-coding-plan/22-backend-mqtt-bridge.md) — MQTT Bridge payload contract
+## 11. Final Notes
+
+- Tài liệu này đã chuẩn hóa kiến trúc và project path theo `iot-vehicle-tracking-firmware/`
+- `Tracking_Firmware/` chỉ còn được nhắc đến như baseline gap reference
+- Chưa có thay đổi source firmware trong scope hiện tại

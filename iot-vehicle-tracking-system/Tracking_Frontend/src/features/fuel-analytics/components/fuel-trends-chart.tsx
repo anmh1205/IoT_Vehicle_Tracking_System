@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/common/empty-state';
 import type { FuelTrend } from '@/features/fuel-analytics/types';
 
 interface FuelTrendsChartProps {
@@ -23,7 +24,7 @@ interface FuelTrendsChartProps {
 const formatDateLabel = (dateStr: string): string => {
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return dateStr;
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(date);
+  return new Intl.DateTimeFormat('vi-VN', { month: 'short', day: 'numeric' }).format(date);
 };
 
 export const FuelTrendsChart = ({ data, isLoading }: FuelTrendsChartProps) => {
@@ -46,8 +47,11 @@ export const FuelTrendsChart = ({ data, isLoading }: FuelTrendsChartProps) => {
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : chartData.length === 0 ? (
-          <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
-Không có dữ liệu xu hướng cho khoảng thời gian đã chọn
+          <div className="flex h-[300px] items-center justify-center">
+            <EmptyState
+              title="Chưa có dữ liệu"
+              description="Không có dữ liệu xu hướng cho khoảng thời gian đã chọn"
+            />
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>

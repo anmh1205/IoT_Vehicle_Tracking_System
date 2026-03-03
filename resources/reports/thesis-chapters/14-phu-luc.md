@@ -13,7 +13,7 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | STT | Linh kiện | Model / Thông số | Số lượng | Đơn giá (VND) | Thành tiền (VND) | Ghi chú |
 |-----|-----------|-------------------|----------|---------------|-------------------|---------|
 | 1 | Vi điều khiển | ESP32-S3-WROOM-1 (N16R8) | 1 | 120.000 | 120.000 | MCU chính, 16MB Flash, 8MB PSRAM |
-| 2 | Modem 4G/GNSS | SIMCom A7600CE-T | 1 | 250.000 | 250.000 | Tích hợp 4G LTE Cat-1 và GPS/GNSS |
+| 2 | LTE + GNSS | SIMCom A7670C + u-blox NEO-M8N | 1 bộ | 330.000 | 330.000 | Kiến trúc tách rời 4G LTE và GPS/GNSS |
 | 3 | OBD2 Adapter | vgate iCar Pro BLE | 1 | 350.000 | 350.000 | Bluetooth Low Energy OBD2 |
 | 4 | Cảm biến gia tốc | LIS3DH (breakout board) | 1 | 45.000 | 45.000 | IMU 3 trục, phát hiện chuyển động |
 | 5 | Pin dự phòng | 21700 Li-ion 5000mAh | 1 | 80.000 | 80.000 | Samsung/LG cell |

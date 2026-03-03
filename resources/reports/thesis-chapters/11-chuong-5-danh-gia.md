@@ -29,7 +29,7 @@ Kết nối BLE với adapter vgate iCar Pro hoạt động ổn định sau khi
 
 **Độ chính xác GPS/GNSS:**
 
-Module GNSS tích hợp trong modem SIMCom A7600CE-T cung cấp độ chính xác vị trí đạt mức chấp nhận được cho ứng dụng tracking xe. Sai số vị trí trung bình khoảng 2.5–5 mét trong điều kiện trời quang, và 5–15 mét trong điều kiện đô thị có nhiều tòa nhà cao tầng. Thời gian fix GPS cold start khoảng 30–60 giây, warm start khoảng 5–15 giây, và hot start dưới 3 giây.
+Module GNSS u-blox NEO-M8N cung cấp độ chính xác vị trí đạt mức chấp nhận được cho ứng dụng tracking xe. Sai số vị trí trung bình khoảng 2.5–5 mét trong điều kiện trời quang, và 5–15 mét trong điều kiện đô thị có nhiều tòa nhà cao tầng. Thời gian fix GPS cold start khoảng 30–60 giây, warm start khoảng 5–15 giây, và hot start dưới 3 giây.
 
 ### 5.1.2. Đánh giá hiệu năng firmware
 
@@ -106,7 +106,7 @@ Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính t
 | Linh kiện | Vai trò | Giá (VND) |
 |---|---|---|
 | ESP32-S3-WROOM-1 module | Vi điều khiển chính | 80.000–150.000 |
-| SIMCom A7600CE-T module | Modem 4G + GPS/GNSS | 250.000–450.000 |
+| SIMCom A7670C + u-blox NEO-M8N | Modem LTE + GNSS tách rời | 330.000–500.000 |
 | vgate iCar Pro BLE | Adapter OBD2 BLE | 250.000–500.000 |
 | LIS3DH breakout board | Cảm biến gia tốc (IMU) | 30.000–50.000 |
 | Pin 21700 (1 cell, 5000mAh) | Pin dự phòng | 80.000–120.000 |

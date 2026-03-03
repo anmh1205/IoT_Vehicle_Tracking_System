@@ -14,7 +14,7 @@
 
 | Phần liên quan | Mô tả |
 |---------------|-------|
-| `part-02-bluetooth-obd2.md` | Chiến lược kết nối BLE OBD2 tổng quan (high-level) |
+| `part-02-ble-obd2.md` | Chiến lược kết nối BLE OBD2 tổng quan (high-level) |
 | `part-07-vgate-icar-pro-esp-idf-reference/` | Code reference tiếng Anh từ project esp32-obd2-meter |
 | `part-01-kien-truc-va-luong-hoat-dong.md` | Kiến trúc firmware tổng thể và luồng hoạt động |
 | `part-05-data-format-state-machine.md` | Định dạng dữ liệu và state machine firmware |

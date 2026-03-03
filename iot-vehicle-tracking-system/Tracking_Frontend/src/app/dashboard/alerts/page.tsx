@@ -1,9 +1,13 @@
 ﻿'use client';
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertTriangle, CircleCheckBig, CircleDashed, ShieldAlert } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { StatCard } from '@/components/common/stat-card';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { alertServices } from '@/lib/api/alerts';
 import { getAlertColumns } from '@/features/alerts/components/alert-columns';
 import { AlertFilters } from '@/features/alerts/components/alert-filters';
@@ -34,6 +38,18 @@ const AlertsPage = () => {
       return true;
     });
   }, [alerts.data, severity, status]);
+
+  const stats = useMemo(() => {
+    const pending = rows.filter((item: any) => item.status === 'active').length;
+    const acknowledged = rows.filter((item: any) => item.status === 'acknowledged').length;
+    const critical = rows.filter((item: any) => item.severity === 'critical').length;
+    return {
+      total: rows.length,
+      pending,
+      acknowledged,
+      critical,
+    };
+  }, [rows]);
   return (
     <PageContainer
       pageTitle="Cảnh báo"
@@ -52,29 +68,73 @@ const AlertsPage = () => {
         </div>
       }
     >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Tổng cảnh báo"
+          value={stats.total}
+          icon={<AlertTriangle className="h-4 w-4" />}
+          isLoading={alerts.isLoading}
+        />
+        <StatCard
+          title="Chưa xử lý"
+          value={stats.pending}
+          icon={<CircleDashed className="h-4 w-4" />}
+          isLoading={alerts.isLoading}
+        />
+        <StatCard
+          title="Đã xác nhận"
+          value={stats.acknowledged}
+          icon={<CircleCheckBig className="h-4 w-4" />}
+          isLoading={alerts.isLoading}
+        />
+        <StatCard
+          title="Mức nghiêm trọng"
+          value={stats.critical}
+          icon={<ShieldAlert className="h-4 w-4" />}
+          isLoading={alerts.isLoading}
+          trend={{
+            value: `${stats.total > 0 ? ((stats.critical / stats.total) * 100).toFixed(1) : '0.0'}% tổng cảnh báo`,
+            positive: false,
+          }}
+        />
+      </div>
+
       <DataTable
         columns={[
           {
             id: 'select',
             header: () => (
-              <input
-                type="checkbox"
-                onChange={(e) => setSelected(e.target.checked ? rows.map((a: any) => a.id) : [])}
-              />
+              <div className="flex items-center justify-center">
+                <Checkbox
+                  id="alerts-select-all"
+                  aria-label="Chọn tất cả cảnh báo"
+                  checked={rows.length > 0 && selected.length === rows.length}
+                  onCheckedChange={(checked) =>
+                    setSelected(checked ? rows.map((a: any) => a.id) : [])
+                  }
+                />
+              </div>
             ),
-            cell: ({ row }: any) => (
-              <input
-                type="checkbox"
-                checked={selected.includes(row.original.id)}
-                onChange={(e) =>
-                  setSelected((s) =>
-                    e.target.checked
-                      ? [...s, row.original.id]
-                      : s.filter((id) => id !== row.original.id),
-                  )
-                }
-              />
-            ),
+            cell: ({ row }: any) => {
+              const id = `alerts-select-${row.original.id}`;
+              return (
+                <div className="flex items-center justify-center">
+                  <Checkbox
+                    id={id}
+                    aria-label={`Chọn cảnh báo ${row.original.title}`}
+                    checked={selected.includes(row.original.id)}
+                    onCheckedChange={(checked) =>
+                      setSelected((s) =>
+                        checked ? [...s, row.original.id] : s.filter((item) => item !== row.original.id),
+                      )
+                    }
+                  />
+                  <Label htmlFor={id} className="sr-only">
+                    Chọn cảnh báo {row.original.title}
+                  </Label>
+                </div>
+              );
+            },
           },
           ...getAlertColumns({
             onAck: (id) => ackMutation.mutate(id),

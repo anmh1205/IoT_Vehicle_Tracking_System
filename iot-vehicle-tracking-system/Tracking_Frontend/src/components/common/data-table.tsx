@@ -57,7 +57,7 @@ export function DataTable<TData, TValue>({
   pagination = true,
   pageSize = 10,
   emptyIcon,
-  emptyTitle = 'Không có dữ liệu',
+  emptyTitle = 'Chưa có dữ liệu',
   emptyDescription,
   emptyAction,
   toolbar,
@@ -82,10 +82,11 @@ export function DataTable<TData, TValue>({
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-3" role="status" aria-live="polite" aria-label="Đang tải dữ liệu bảng">
         {Array.from({ length: 5 }).map((_, i) => (
           <Skeleton key={i} className="h-12 w-full" />
         ))}
+        <p className="sr-only">Đang tải…</p>
       </div>
     );
   }

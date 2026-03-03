@@ -1,9 +1,10 @@
 ﻿'use client';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { CircleCheckBig, CircleOff, MapPinned, Plus, Radar } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { StatCard } from '@/components/common/stat-card';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { geofenceServices } from '@/lib/api/geofences';
@@ -70,6 +71,13 @@ const GeofencesPage = () => {
   });
   const rows = geofences.data?.items ?? geofences.data?.data?.items ?? [];
   const vehicleRows = vehicles.data?.items ?? vehicles.data?.data?.items ?? [];
+  const stats = {
+    total: rows.length,
+    active: rows.filter((row: any) => !!row.isActive).length,
+    inactive: rows.filter((row: any) => !row.isActive).length,
+    totalVehiclesBound: rows.reduce((sum: number, row: any) => sum + (row.vehicleIds?.length ?? 0), 0),
+  };
+
   return (
     <PageContainer
       pageTitle="Vùng giám sát"
@@ -81,6 +89,33 @@ const GeofencesPage = () => {
         </Button>
       }
     >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Tổng vùng giám sát"
+          value={stats.total}
+          icon={<MapPinned className="h-4 w-4" />}
+          isLoading={geofences.isLoading}
+        />
+        <StatCard
+          title="Đang hoạt động"
+          value={stats.active}
+          icon={<CircleCheckBig className="h-4 w-4" />}
+          isLoading={geofences.isLoading}
+        />
+        <StatCard
+          title="Ngưng hoạt động"
+          value={stats.inactive}
+          icon={<CircleOff className="h-4 w-4" />}
+          isLoading={geofences.isLoading}
+        />
+        <StatCard
+          title="Xe đã gán"
+          value={stats.totalVehiclesBound}
+          icon={<Radar className="h-4 w-4" />}
+          isLoading={geofences.isLoading}
+        />
+      </div>
+
       <DataTable
         columns={getGeofenceColumns({
           onEdit: (row) => {

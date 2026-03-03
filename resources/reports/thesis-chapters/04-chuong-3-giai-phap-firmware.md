@@ -42,7 +42,7 @@ Firmware được thiết kế theo mô hình phân lớp (layered architecture)
 
 | Tầng   | Tên tầng                         | Chức năng chính                                                                                          |
 | ------ | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Tầng 1 | Hardware Abstraction Layer (HAL) | Driver LIS3DH (IMU), GNSS qua modem A7600 (AT commands), modem LTE, ADC, GPIO, BLE (OBD2 vgate iCar Pro) |
+| Tầng 1 | Hardware Abstraction Layer (HAL) | Driver LIS3DH (IMU), modem LTE A7670C, module GNSS NEO-M8N (UART/NMEA), ADC, GPIO, BLE (OBD2 vgate iCar Pro) |
 | Tầng 2 | Power Management Layer           | Quản lý chế độ ngủ (sleep/deep sleep), đánh thức (wakeup), cắt nguồn khi điện áp thấp (LVD)              |
 | Tầng 3 | Application Layer                | Logic xử lý chế độ lái xe, đỗ xe, cảnh báo; xử lý sự kiện và alert                                       |
 | Tầng 4 | Communication Layer              | Giao tiếp MQTT/HTTP, mã hóa dữ liệu, xử lý lệnh điều khiển từ máy chủ                                    |
@@ -64,7 +64,7 @@ Firmware sử dụng hệ điều hành thời gian thực FreeRTOS (tích hợp
 | `power_monitor_task` | Cao (5)        | Giám sát điện áp ắc quy, điều khiển power path, phát hiện LVD   |
 | `modem_control_task` | Cao (4)        | Điều khiển modem SIMCom qua AT commands, quản lý kết nối 4G/LTE |
 | `ble_obd2_task`      | Trung bình (3) | Kết nối BLE với OBD2 adapter, đọc dữ liệu xe                    |
-| `gnss_task`          | Trung bình (3) | Đọc dữ liệu vị trí GPS/GNSS từ modem                            |
+| `gnss_task`          | Trung bình (3) | Đọc dữ liệu vị trí GPS/GNSS từ module NEO-M8N qua UART          |
 | `mqtt_publish_task`  | Trung bình (2) | Đóng gói và gửi dữ liệu telemetry qua MQTT                      |
 | `state_machine_task` | Thấp (1)       | Điều phối chuyển đổi trạng thái toàn hệ thống                   |
 
@@ -108,7 +108,7 @@ void app_main(void) {
 
 Luồng hoạt động tổng thể của firmware được tổ chức theo trình tự sau:
 
-1. **Khởi tạo ngoại vi**: Cấu hình và khởi động các peripheral gồm IMU (LIS3DH qua I2C), modem LTE/GNSS (qua UART), ADC (đọc điện áp), và BLE stack (NimBLE).
+1. **Khởi tạo ngoại vi**: Cấu hình và khởi động các peripheral gồm IMU (LIS3DH qua I2C), modem LTE A7670C (UART), module GNSS NEO-M8N (UART), ADC (đọc điện áp), và BLE stack (NimBLE).
 
 2. **Đọc trạng thái IGN và điện áp ắc quy**: Hệ thống ưu tiên đọc trạng thái động cơ (IGN) trực tiếp từ ECU qua OBD2 BLE. Nếu không kết nối được OBD2, hệ thống fallback sang đo điện áp ắc quy qua ADC theo profile: profile 12V dùng IGN_ON >= 13.0V và IGN_OFF <= 12.0V; profile 24V dùng IGN_ON >= 26.0V và IGN_OFF <= 24.0V.
 
@@ -256,9 +256,9 @@ Mọi lỗi kết nối OBD2 đều được ghi lại vào log để phục v�
 
 #### 3.2.2.3. Module điều khiển modem SIMCom
 
-##### a) Tổng quan modem A7600CE-T
+##### a) Tổng quan modem A7670C + GNSS NEO-M8N
 
-Module modem SIMCom A7600CE-T là thành phần giao tiếp mạng chính của thiết bị, cung cấp kết nối 4G/LTE và chức năng định vị GNSS (GPS + GLONASS + BeiDou). Modem được điều khiển bởi ESP32-S3 thông qua giao tiếp UART bằng tập lệnh AT (AT commands). Việc điều khiển modem được tổ chức thành một máy trạng thái (state machine) độc lập, đảm bảo quy trình khởi tạo, kết nối mạng và gửi dữ liệu diễn ra có hệ thống và có khả năng phục hồi từ lỗi.
+Trong kiến trúc hiện tại, modem SIMCom A7670C là thành phần giao tiếp mạng chính của thiết bị, cung cấp kết nối 4G/LTE. Chức năng định vị GNSS (GPS + GLONASS + BeiDou) được tách sang module NEO-M8N và xử lý qua UART/NMEA parser riêng. Modem được điều khiển bởi ESP32-S3 thông qua tập lệnh AT (AT commands), đảm bảo quy trình khởi tạo, kết nối mạng và gửi dữ liệu diễn ra có hệ thống và có khả năng phục hồi từ lỗi.
 
 ##### b) Quy trình khởi tạo modem
 
@@ -291,29 +291,23 @@ Khi không cần gửi dữ liệu (chế độ đỗ xe), firmware đóng PDP c
 
 ##### d) Điều khiển GNSS/GPS
 
-Modem A7600CE-T tích hợp module GNSS hỗ trợ đồng thời GPS, GLONASS và BeiDou, cho phép định vị có độ chính xác cao mà không cần module GPS riêng biệt. Firmware điều khiển GNSS thông qua các lệnh AT:
+Trong kiến trúc hiện tại, modem A7670C đảm nhiệm kết nối 4G/LTE, còn định vị GNSS được tách sang module NEO-M8N. Firmware điều khiển A7670C bằng AT commands cho phần cellular, trong khi dữ liệu GNSS được đọc từ NEO-M8N qua UART/NMEA parser:
 
-**Bật GNSS**: `AT+CGNSPWR=1`
+**Bật GNSS (NEO-M8N)**: cấp nguồn cho module GNSS và khởi tạo UART reader.
 
-**Đọc vị trí**: `AT+CGNSINF` trả về chuỗi dữ liệu dạng:
+**Đọc vị trí**: đọc và parse bản tin NMEA (ví dụ `GGA`, `RMC`, `VTG`) từ NEO-M8N để lấy tọa độ, vận tốc và trạng thái fix.
 
-```
-+CGNSINF: <run>,<fix>,<datetime>,<lat>,<lon>,<alt>,<speed>,<course>,
-          <fix_mode>,<reserved>,<hdop>,<pdop>,<vdop>,<reserved>,
-          <GPS_Sat>,<GLONASS_Sat>,<BeiDou_Sat>
-```
+Trong đó các trường quan trọng gồm: trạng thái fix, `lat`/`lon` (tọa độ thập phân), `alt` (độ cao, mét), `speed` (tốc độ, km/h), số vệ tinh khả dụng.
 
-Trong đó các trường quan trọng gồm: `fix` (1 = đã định vị), `lat`/`lon` (tọa độ thập phân), `alt` (độ cao, mét), `speed` (tốc độ, km/h), `GPS_Sat` (số vệ tinh GPS).
-
-**Tắt GNSS**: `AT+CGNSPWR=0`
+**Tắt GNSS**: ngắt nguồn GNSS hoặc đưa module vào chế độ tiết kiệm năng lượng theo cấu hình.
 
 Thời gian để GNSS fix được vị trí phụ thuộc vào trạng thái trước đó:
 
-| Loại khởi động | Điều kiện                                                | Thời gian fix |
-| -------------- | -------------------------------------------------------- | ------------- |
-| Hot start      | Modem chỉ ở chế độ sleep, dữ liệu ephemeris còn hiệu lực | 5–10 giây     |
-| Warm start     | Có dữ liệu almanac từ lần trước                          | 20–30 giây    |
-| Cold start     | Reset hoàn toàn, không có dữ liệu trước                  | 30–60 giây    |
+| Loại khởi động | Điều kiện | Thời gian fix |
+| -------------- | --------- | ------------- |
+| Hot start      | Module vừa hoạt động trước đó, còn dữ liệu hỗ trợ | 1–5 giây |
+| Warm start     | Còn một phần dữ liệu hỗ trợ | 5–20 giây |
+| Cold start     | Khởi động mới hoàn toàn | 20–60 giây |
 
 ![Hình 3.9 - Lưu đồ thuật toán điều khiển modem theo chế độ hoạt động](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–9.png)
 
@@ -323,7 +317,7 @@ Thời gian để GNSS fix được vị trí phụ thuộc vào trạng thái t
 
 ##### e) Chế độ ngủ của modem
 
-Modem A7600CE-T hỗ trợ hai chế độ ngủ để tiết kiệm năng lượng:
+Modem A7670C hỗ trợ các chế độ tiết kiệm năng lượng cho phần LTE, trong khi NEO-M8N được bật/tắt độc lập theo nhu cầu định vị:
 
 | Chế độ              | Lệnh AT      | Dòng tiêu thụ | Đặc điểm                                                          |
 | ------------------- | ------------ | ------------- | ----------------------------------------------------------------- |

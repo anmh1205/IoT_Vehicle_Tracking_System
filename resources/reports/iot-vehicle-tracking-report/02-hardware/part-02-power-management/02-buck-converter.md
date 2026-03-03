@@ -17,7 +17,7 @@
 ### Lý Do Chọn 5V
 
 - **ESP32**: Cần 3.3V (qua LDO từ 5V)
-- **Modem A7600CE-T**: Logic power 3.3V hoặc 5V
+- **A7670C + NEO-M8N**: Tạo rail 3.8V cho modem LTE và 3.3V cho GNSS/logic qua tầng nguồn phía sau
 - **Charger IP2312**: Input 5V
 - **Đơn giản hóa**: Chỉ cần 1 buck converter 5V → không cần nhiều converter
 

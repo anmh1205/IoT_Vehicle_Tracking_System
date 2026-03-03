@@ -1,9 +1,10 @@
 ﻿'use client';
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { CircleCheckBig, CirclePlay, CircleX, Plus, Route } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { StatCard } from '@/components/common/stat-card';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { tripServices } from '@/lib/api/trips';
@@ -49,6 +50,13 @@ const TripsPage = () => {
     },
   });
   const rows = trips.data?.items ?? trips.data?.data?.items ?? [];
+  const stats = {
+    total: rows.length,
+    inProgress: rows.filter((row: any) => row.status === 'in_progress' || row.status === 'started').length,
+    completed: rows.filter((row: any) => row.status === 'completed' || row.status === 'ended').length,
+    cancelled: rows.filter((row: any) => row.status === 'cancelled').length,
+  };
+
   return (
     <PageContainer
       pageTitle="Chuyến đi"
@@ -65,6 +73,33 @@ const TripsPage = () => {
         </Button>
       }
     >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Tổng chuyến đi"
+          value={stats.total}
+          icon={<Route className="h-4 w-4" />}
+          isLoading={trips.isLoading}
+        />
+        <StatCard
+          title="Đang diễn ra"
+          value={stats.inProgress}
+          icon={<CirclePlay className="h-4 w-4" />}
+          isLoading={trips.isLoading}
+        />
+        <StatCard
+          title="Hoàn tất"
+          value={stats.completed}
+          icon={<CircleCheckBig className="h-4 w-4" />}
+          isLoading={trips.isLoading}
+        />
+        <StatCard
+          title="Đã hủy"
+          value={stats.cancelled}
+          icon={<CircleX className="h-4 w-4" />}
+          isLoading={trips.isLoading}
+        />
+      </div>
+
       <DataTable
         columns={getTripColumns({
           onEdit: (row) => {

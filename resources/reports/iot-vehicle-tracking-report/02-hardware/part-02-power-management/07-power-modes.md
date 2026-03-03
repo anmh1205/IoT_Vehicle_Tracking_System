@@ -13,7 +13,7 @@
 - Lấy nguồn trực tiếp từ ắc quy khi `U_batt >= IGN_ON` theo profile (12V: `>=13.0V`, 24V: `>=26.0V`)
 - **Kết nối Bluetooth với OBD2 ELM327** (2–5 giây reconnect nếu đã paired)
 - Đọc IGN status từ OBD2 (xác nhận IGN ON)
-- Bật **GNSS + 4G** (modem A7600CE‑T) liên tục
+- Bật **A7670C (LTE)** và **NEO-M8N (GNSS)** liên tục
 - Đọc dữ liệu OBD2 định kỳ (RPM, tốc độ, nhiên liệu) mỗi 5–30 giây
 - Gửi vị trí + dữ liệu OBD2 mỗi 5–30 giây
 - **Giữ kết nối Bluetooth** trong suốt thời gian IGN ON (không deep sleep)
@@ -42,7 +42,7 @@
 - Thức dậy mỗi 10–30 phút:
   - Kiểm tra U_batt (qua ADC)
   - Nếu `U_batt <= Switch_OFF` theo profile: Chuyển sang pin + gửi cảnh báo
-  - Bật **GNSS + 4G** (A7600CE‑T)
+  - Bật **A7670C (LTE)** và **NEO-M8N (GNSS)** khi cần heartbeat
   - Lấy vị trí
   - Gửi heartbeat (vị trí, pin, ắc quy, trạng thái nguồn)
   - **Không kết nối OBD2** (tiết kiệm thời gian và năng lượng)
@@ -76,7 +76,7 @@
 **Hành Động:**
 
 - ESP32 thức dậy ngay (từ deep sleep)
-- Bật **GNSS + 4G** ngay (A7600CE‑T)
+- Bật **A7670C (LTE)** và **NEO-M8N (GNSS)** ngay
 - Gửi cảnh báo ưu tiên (rung, kéo, cẩu xe)
 - Chuyển sang track liên tục (gần giống chế độ 1)
 - **Có thể kết nối Bluetooth OBD2** (tùy chọn):

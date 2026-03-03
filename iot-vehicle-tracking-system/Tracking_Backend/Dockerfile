@@ -15,7 +15,7 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/tsconfig.json ./
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 backend
 USER backend
-EXPOSE 3000
+EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --spider http://localhost:3000/health || exit 1
+  CMD wget --spider http://localhost:4000/health || exit 1
 CMD ["node", "-r", "tsconfig-paths/register", "dist/index.js"]
