@@ -5,6 +5,7 @@ import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { getStatus, setStatus, getOrCreateSession } from '../cache/device-state.cache';
 import { addUpdate } from '../services/batch-writer.service';
+import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
 
 const VIBRATION_ALERT_THRESHOLD = 500;
@@ -118,7 +119,23 @@ export const handleRawData = async (
     timestamp: timestampMs,
   });
 
-  // 7. Check status change
+  // 7. Check geofences (fire-and-forget, non-blocking)
+  if (
+    payload.data.latitude !== undefined &&
+    payload.data.longitude !== undefined &&
+    device.vehicle_id
+  ) {
+    checkGeofences(
+      payload.device_id,
+      device.vehicle_id,
+      payload.data.latitude,
+      payload.data.longitude,
+    ).catch((err) => {
+      logger.error({ err, deviceId: payload.device_id }, 'Geofence check failed');
+    });
+  }
+
+  // 8. Check status change
   const previousState = getStatus(payload.device_id);
   const previousStatus = previousState?.status;
 

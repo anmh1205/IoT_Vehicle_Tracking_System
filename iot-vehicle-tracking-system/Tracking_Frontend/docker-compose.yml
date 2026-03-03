@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     container_name: tracking-frontend
     ports:
-      - '4002:4002'
+      - '0.0.0.0:4002:4002'
     env_file: .env
     restart: unless-stopped
     networks:

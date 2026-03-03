@@ -2,6 +2,7 @@ import mqtt from 'mqtt';
 import { mqttConfig } from '@/config/env';
 import { createLogger } from '@/infrastructure/logger';
 import { publishEvent } from './event-bus.util';
+import { handleIgnitionEvent } from '@/domain/trip/services/trip-auto.service';
 
 const log = createLogger('mqtt-listener');
 
@@ -116,6 +117,20 @@ export const initMqttEventListener = (): void => {
           longitude: (data.longitude as number) ?? undefined,
         });
         break;
+
+      case 'ignition': {
+        // Auto-manage trips based on ignition state (on/off)
+        const ignitionState = data.state as string;
+        const vehicleId = data.vehicle_id as string | undefined;
+        if (vehicleId && (ignitionState === 'on' || ignitionState === 'off')) {
+          void handleIgnitionEvent({
+            device_id: data.device_id,
+            vehicle_id: vehicleId,
+            state: ignitionState,
+          });
+        }
+        break;
+      }
 
       default:
         log.debug(`Unknown internal event type: ${eventType} on ${topic}`);

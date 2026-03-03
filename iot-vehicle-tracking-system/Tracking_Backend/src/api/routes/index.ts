@@ -22,6 +22,8 @@ import systemRoutes from '@/api/routes/system.routes';
 import validationErrorRoutes from '@/api/routes/validation-error.routes';
 import fuelAnalyticsRoutes from '@/api/routes/fuel-analytics.routes';
 import driverRoutes from '@/api/routes/driver.routes';
+import violationRoutes from '@/api/routes/violation.routes';
+import auditLogRoutes from '@/api/routes/audit-log.routes';
 
 const router = Router();
 
@@ -51,5 +53,7 @@ router.use('/health', healthRoutes);
 router.use('/validation-errors', validationErrorRoutes);
 router.use('/fuel-analytics', fuelAnalyticsRoutes);
 router.use('/drivers', driverRoutes);
+router.use('/violations', violationRoutes);
+router.use('/audit-logs', auditLogRoutes);
 
 export default router;

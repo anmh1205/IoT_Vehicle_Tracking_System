@@ -11,7 +11,10 @@ export const pool = new Pool({
   max: 20,
 });
 
-export const query = (text: string, params?: unknown[]) => pool.query(text, params);
+export const query = <T extends object = Record<string, unknown>>(
+  text: string,
+  params?: unknown[],
+) => pool.query<T>(text, params);
 
 export const closePool = () => pool.end();
 

@@ -25,6 +25,7 @@ export const errorHandler = (
         status: err.status,
         path: req.path,
         details: err.details,
+        traceId: correlationId,
       },
       timestamp: new Date().toISOString(),
     });
@@ -44,6 +45,7 @@ export const errorHandler = (
       message: 'An unexpected error occurred',
       status: 500,
       path: req.path,
+      traceId: correlationId,
     },
     timestamp: new Date().toISOString(),
   });

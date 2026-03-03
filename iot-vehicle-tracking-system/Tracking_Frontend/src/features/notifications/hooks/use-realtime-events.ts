@@ -1,15 +1,31 @@
 'use client';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { notificationUtils } from '@/lib/notification';
 import { queryInvalidation } from '@/lib/utils/query-invalidation';
+import {
+  requestNotificationPermission,
+  showAlertNotification,
+} from '@/lib/utils/browser-notification';
 export const useRealtimeEvents = () => {
   const queryClient = useQueryClient();
+
+  // Request browser notification permission on mount
+  useEffect(() => {
+    void requestNotificationPermission();
+  }, []);
+
   const onAlert = useCallback(
     (payload: any) => {
       queryInvalidation.notifications.all(queryClient);
       void queryClient.invalidateQueries({ queryKey: ['alerts'] });
+      // Also invalidate violations query since violations derive from alerts
+      void queryClient.invalidateQueries({ queryKey: ['violations'] });
+
+      // Show browser desktop notification when tab is not focused
+      showAlertNotification(payload);
+
       if (payload?.severity === 'critical') {
         notificationUtils.error(payload?.title ?? 'Cảnh báo mức nghiêm trọng');
         return;

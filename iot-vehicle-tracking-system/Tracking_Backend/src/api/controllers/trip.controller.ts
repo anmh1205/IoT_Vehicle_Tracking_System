@@ -87,11 +87,23 @@ export const endTrip = asyncHandler(async (req: AuthenticatedRequest, res: Respo
   sendOk(res, trip);
 });
 
+/** Map user-facing interval values to VictoriaMetrics step strings */
+const ALLOWED_INTERVALS: Record<string, string> = {
+  '15s': '15s',
+  '1m': '1m',
+  '5m': '5m',
+  '10m': '10m',
+};
+
 export const getTripTelemetry = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const id = Number.parseInt(req.params.id, 10);
   if (Number.isNaN(id)) {
     throw createValidationError('Invalid trip ID');
   }
+
+  // Parse interval query param, default to '15s'
+  const intervalParam = typeof req.query.interval === 'string' ? req.query.interval : '15s';
+  const step = ALLOWED_INTERVALS[intervalParam] ?? '15s';
 
   const trip = await tripCrudService.getTripById(id);
 
@@ -112,8 +124,8 @@ export const getTripTelemetry = asyncHandler(async (req: AuthenticatedRequest, r
   const start = new Date(startTime);
   const end = endTime ? new Date(endTime) : new Date();
 
-  const waypoints = await getWaypoints(trip.deviceId, start, end);
+  const waypoints = await getWaypoints(trip.deviceId, start, end, step);
   const summary = waypoints.length > 0 ? computeRouteSummary(waypoints, start, end) : null;
 
-  sendOk(res, { tripId: id, points: waypoints, summary });
+  sendOk(res, { tripId: id, interval: intervalParam, points: waypoints, summary });
 });

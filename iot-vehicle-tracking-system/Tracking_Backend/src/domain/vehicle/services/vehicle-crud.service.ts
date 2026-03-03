@@ -1,6 +1,7 @@
 import { createNotFoundError, createConflictError } from '@/shared/utils/errors.util';
 import * as vehicleRepo from '@/domain/vehicle/repositories/vehicle.repository';
 import { logger } from '@/infrastructure/logger';
+import * as auditLog from '@/domain/audit/services/audit-log.service';
 import type {
   Vehicle,
   CreateVehicleInput,
@@ -50,6 +51,14 @@ export const createVehicle = async (input: CreateVehicleInput): Promise<VehicleP
 
   const vehicle = await vehicleRepo.create(input);
   logger.info(`Vehicle "${input.vehicleId}" created successfully`);
+
+  void auditLog.record({
+    userId: 0,
+    action: 'create',
+    entityType: 'vehicle',
+    entityId: String(vehicle.id),
+  });
+
   return sanitizeVehicle(vehicle);
 };
 
@@ -68,6 +77,14 @@ export const updateVehicle = async (
   }
 
   logger.info(`Vehicle "${existing.vehicle_id}" updated successfully`);
+
+  void auditLog.record({
+    userId: 0,
+    action: 'update',
+    entityType: 'vehicle',
+    entityId: String(id),
+  });
+
   return sanitizeVehicle(updated);
 };
 
@@ -79,4 +96,11 @@ export const deleteVehicle = async (id: number): Promise<void> => {
 
   await vehicleRepo.remove(id);
   logger.info(`Vehicle "${existing.vehicle_id}" deleted successfully`);
+
+  void auditLog.record({
+    userId: 0,
+    action: 'delete',
+    entityType: 'vehicle',
+    entityId: String(id),
+  });
 };

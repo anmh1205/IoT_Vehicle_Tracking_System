@@ -10,6 +10,7 @@ router.use(requireAuth);
 router.get('/', vehicleController.listVehicles);
 router.post('/import', vehicleController.importVehicles);
 router.get('/:id', vehicleController.getVehicle);
+router.get('/:id/status', vehicleController.getVehicleStatus);
 router.post('/', vehicleController.createVehicle);
 router.put('/:id', vehicleController.updateVehicle);
 router.delete('/:id', vehicleController.deleteVehicle);

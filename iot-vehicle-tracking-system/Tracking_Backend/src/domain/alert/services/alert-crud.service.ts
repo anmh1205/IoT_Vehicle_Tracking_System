@@ -2,6 +2,7 @@ import { createNotFoundError, createValidationError } from '@/shared/utils/error
 import * as alertRepo from '@/domain/alert/repositories/alert.repository';
 import { logger } from '@/infrastructure/logger';
 import { publishEvent } from '@/infrastructure/realtime';
+import * as auditLog from '@/domain/audit/services/audit-log.service';
 import type { Alert, CreateAlertInput, AlertPublic } from '@/domain/alert/types/alert.types';
 
 const sanitizeAlert = (a: Alert): AlertPublic => ({
@@ -83,6 +84,14 @@ export const acknowledgeAlert = async (id: number, userId: number): Promise<Aler
   }
 
   logger.info(`Alert ${id} acknowledged by user ${userId}`);
+
+  void auditLog.record({
+    userId,
+    action: 'acknowledge',
+    entityType: 'alert',
+    entityId: String(id),
+  });
+
   return sanitizeAlert(updated);
 };
 
@@ -108,6 +117,14 @@ export const resolveAlert = async (
   }
 
   logger.info(`Alert ${id} resolved by user ${userId}`);
+
+  void auditLog.record({
+    userId,
+    action: 'resolve',
+    entityType: 'alert',
+    entityId: String(id),
+  });
+
   return sanitizeAlert(updated);
 };
 

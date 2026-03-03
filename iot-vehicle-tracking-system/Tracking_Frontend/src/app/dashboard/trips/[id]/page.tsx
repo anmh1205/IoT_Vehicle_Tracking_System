@@ -4,9 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { tripServices } from '@/lib/api/trips';
 import { TripDetail } from '@/features/trips/components/trip-detail';
 import { TripReplayControls } from '@/features/trips/components/trip-replay-controls';
+import { useTripLiveTracking } from '@/features/trips/hooks/use-trip-live-tracking';
 
 const SPEED_MS: Record<string, number> = { '1x': 500, '2x': 250, '4x': 125 };
 
@@ -29,16 +31,21 @@ const TripDetailPage = ({
   const [playing, setPlaying] = useState(false);
   const [cursor, setCursor] = useState(0);
   const [speed, setSpeed] = useState<'1x' | '2x' | '4x'>('1x');
+  const [interval, setInterval_] = useState<string>('15s');
   const tripQuery = useQuery({
     queryKey: ['trip-detail', tripId],
     queryFn: () => tripServices.getById(tripId),
   });
+  const isInProgress = tripQuery.data?.status === 'in_progress';
   const telemetryQuery = useQuery({
-    queryKey: ['trip-telemetry', tripId],
-    queryFn: () => tripServices.getTelemetry(tripId),
-    // Auto-refetch for in_progress trips
-    refetchInterval: tripQuery.data?.status === 'in_progress' ? 10000 : false,
+    queryKey: ['trip-telemetry', tripId, interval],
+    queryFn: () => tripServices.getTelemetry(tripId, { interval }),
+    // Fallback polling only when WebSocket is unavailable
+    refetchInterval: isInProgress ? 30000 : false,
   });
+
+  // Real-time GPS updates via WebSocket — replaces frequent polling for active trips
+  useTripLiveTracking(tripId, isInProgress);
   const points = useMemo(() => telemetryQuery.data?.points ?? [], [telemetryQuery.data?.points]);
   const summary = telemetryQuery.data?.summary;
   const moving = useMemo(
@@ -80,6 +87,17 @@ const TripDetailPage = ({
           <span className="text-muted-foreground text-sm">{tripQuery.data.driverName}</span>
         )}
         <span className="text-muted-foreground text-sm">{points.length} điểm GPS</span>
+        <Select value={interval} onValueChange={setInterval_}>
+          <SelectTrigger className="ml-auto w-[120px]">
+            <SelectValue placeholder="Độ phân giải" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="15s">15 giây</SelectItem>
+            <SelectItem value="1m">1 phút</SelectItem>
+            <SelectItem value="5m">5 phút</SelectItem>
+            <SelectItem value="10m">10 phút</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

@@ -12,6 +12,7 @@ import {
 import * as vehicleCrudService from '@/domain/vehicle/services/vehicle-crud.service';
 import * as vehicleListService from '@/domain/vehicle/services/vehicle-list.service';
 import * as vehicleAssignmentService from '@/domain/vehicle/services/vehicle-assignment.service';
+import * as vehicleStatusService from '@/domain/vehicle/services/vehicle-status.service';
 
 export const listVehicles = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const parsed = vehicleListQuerySchema.safeParse(req.query);
@@ -153,4 +154,14 @@ export const importVehicles = asyncHandler(async (req: AuthenticatedRequest, res
     failed: errors.length,
     errors,
   });
+});
+
+export const getVehicleStatus = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) {
+    throw createValidationError('Invalid vehicle ID');
+  }
+
+  const status = await vehicleStatusService.getVehicleStatus(id);
+  sendOk(res, status);
 });
