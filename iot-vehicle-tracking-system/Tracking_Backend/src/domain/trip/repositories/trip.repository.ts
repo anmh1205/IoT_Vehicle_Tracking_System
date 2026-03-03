@@ -158,5 +158,30 @@ export const endTrip = async (id: number): Promise<Trip | null> =>
     [id],
   );
 
+/** End trip with computed route stats from VictoriaMetrics waypoints */
+export const endTripWithStats = async (
+  id: number,
+  stats: {
+    distanceKm: number;
+    startLatitude: number | null;
+    startLongitude: number | null;
+    endLatitude: number | null;
+    endLongitude: number | null;
+  },
+): Promise<Trip | null> =>
+  updateOne<Trip>(
+    `UPDATE trips SET
+       actual_end = NOW(),
+       status = 'completed',
+       distance_km = $2,
+       start_latitude = COALESCE($3, start_latitude),
+       start_longitude = COALESCE($4, start_longitude),
+       end_latitude = COALESCE($5, end_latitude),
+       end_longitude = COALESCE($6, end_longitude),
+       updated_at = NOW()
+     WHERE id = $1 RETURNING *`,
+    [id, stats.distanceKm, stats.startLatitude, stats.startLongitude, stats.endLatitude, stats.endLongitude],
+  );
+
 export const remove = async (id: number): Promise<boolean> =>
   deleteOne('DELETE FROM trips WHERE id = $1', [id]);

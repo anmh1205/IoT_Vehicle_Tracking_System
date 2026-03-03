@@ -10,6 +10,7 @@ import {
 } from '@/api/validators/trip.validator';
 import * as tripCrudService from '@/domain/trip/services/trip-crud.service';
 import * as tripListService from '@/domain/trip/services/trip-list.service';
+import { getWaypoints, computeRouteSummary } from '@/domain/trip/services/trip-waypoints.service';
 
 export const listTrips = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const parsed = tripListQuerySchema.safeParse(req.query);
@@ -93,25 +94,26 @@ export const getTripTelemetry = asyncHandler(async (req: AuthenticatedRequest, r
   }
 
   const trip = await tripCrudService.getTripById(id);
-  const points = [];
 
-  if (trip.startLatitude !== null && trip.startLongitude !== null) {
-    points.push({
-      lat: trip.startLatitude,
-      lon: trip.startLongitude,
-      speed: 0,
-      timestamp: trip.actualStart ?? trip.plannedStart ?? trip.createdAt,
-    });
+  // Need device_id and time range to query waypoints from VictoriaMetrics
+  if (!trip.deviceId) {
+    sendOk(res, { tripId: id, points: [], summary: null });
+    return;
   }
 
-  if (trip.endLatitude !== null && trip.endLongitude !== null) {
-    points.push({
-      lat: trip.endLatitude,
-      lon: trip.endLongitude,
-      speed: 0,
-      timestamp: trip.actualEnd ?? trip.plannedEnd ?? trip.updatedAt,
-    });
+  const startTime = trip.actualStart ?? trip.plannedStart;
+  const endTime = trip.actualEnd ?? (trip.status === 'in_progress' ? new Date().toISOString() : trip.plannedEnd);
+
+  if (!startTime) {
+    sendOk(res, { tripId: id, points: [], summary: null });
+    return;
   }
 
-  sendOk(res, { tripId: id, points, events: [] });
+  const start = new Date(startTime);
+  const end = endTime ? new Date(endTime) : new Date();
+
+  const waypoints = await getWaypoints(trip.deviceId, start, end);
+  const summary = waypoints.length > 0 ? computeRouteSummary(waypoints, start, end) : null;
+
+  sendOk(res, { tripId: id, points: waypoints, summary });
 });

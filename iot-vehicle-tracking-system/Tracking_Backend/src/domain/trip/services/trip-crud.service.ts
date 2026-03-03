@@ -4,6 +4,7 @@ import {
   createValidationError,
 } from '@/shared/utils/errors.util';
 import * as tripRepo from '@/domain/trip/repositories/trip.repository';
+import { getWaypoints, computeRouteSummary } from '@/domain/trip/services/trip-waypoints.service';
 import { logger } from '@/infrastructure/logger';
 import type {
   Trip,
@@ -114,7 +115,33 @@ export const endTrip = async (id: number): Promise<TripPublic> => {
     );
   }
 
-  const updated = await tripRepo.endTrip(id);
+  // Try to compute route stats from VictoriaMetrics waypoints
+  let updated: Trip | null = null;
+
+  if (existing.device_id && existing.actual_start) {
+    try {
+      const waypoints = await getWaypoints(existing.device_id, existing.actual_start, new Date());
+      if (waypoints.length > 0) {
+        const summary = computeRouteSummary(waypoints, existing.actual_start, new Date());
+        updated = await tripRepo.endTripWithStats(id, {
+          distanceKm: summary.distanceKm,
+          startLatitude: summary.startLat,
+          startLongitude: summary.startLon,
+          endLatitude: summary.endLat,
+          endLongitude: summary.endLon,
+        });
+        logger.info(`Trip "${existing.trip_code}" ended with stats: ${summary.distanceKm}km, ${summary.durationMinutes}min`);
+      }
+    } catch (err) {
+      logger.warn(`Failed to compute route stats for trip "${existing.trip_code}", ending without stats: ${err}`);
+    }
+  }
+
+  // Fallback: end without stats if VM query failed or no device/waypoints
+  if (!updated) {
+    updated = await tripRepo.endTrip(id);
+  }
+
   if (!updated) {
     throw createNotFoundError(`Trip with ID ${id} not found`);
   }
