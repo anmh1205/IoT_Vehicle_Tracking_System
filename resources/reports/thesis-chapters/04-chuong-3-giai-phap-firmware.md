@@ -679,7 +679,6 @@ typedef struct {
     uint16_t heartbeat_interval;     /* Chu kỳ gửi heartbeat (giây) */
     uint16_t tracking_interval;      /* Chu kỳ gửi telemetry (giây) */
     char     obd2_ble_address[18];   /* Địa chỉ MAC của OBD2 adapter */
-    float    lvd_cut;                /* Ngưỡng cắt bảo vệ sâu: 11.5V (12V) hoặc 23.0V (24V) */
     float    switch_off;             /* Ngưỡng chuyển sang pin backup: 12.0V (12V) hoặc 24.0V (24V) */
     float    switch_on;              /* Ngưỡng quay lại ắc quy: 12.2V (12V) hoặc 24.4V (24V) */
     float    ign_on_threshold;       /* Ngưỡng suy luận IGN ON: >=13.0V (12V) hoặc >=26.0V (24V) */
@@ -691,7 +690,7 @@ typedef struct {
 
 Cấu hình được quản lý theo ba cơ chế:
 
-**Cấu hình mặc định (Default Configuration)**: Được định nghĩa trong mã nguồn firmware, áp dụng khi thiết bị khởi động lần đầu hoặc khi NVS bị xóa. Bao gồm các giá trị an toàn như `heartbeat_interval = 900` (15 phút), `tracking_interval = 10` (10 giây), và profile nguồn kép: profile 12V (`lvd_cut=11.5`, `switch_off=12.0`, `switch_on=12.2`, `ign_on_threshold=13.0`, `ign_off_threshold=12.0`) hoặc profile 24V (`lvd_cut=23.0`, `switch_off=24.0`, `switch_on=24.4`, `ign_on_threshold=26.0`, `ign_off_threshold=24.0`).
+**Cấu hình mặc định (Default Configuration)**: Được định nghĩa trong mã nguồn firmware, áp dụng khi thiết bị khởi động lần đầu hoặc khi NVS bị xóa. Bao gồm các giá trị an toàn như `heartbeat_interval = 900` (15 phút), `tracking_interval = 10` (10 giây), và profile nguồn kép: profile 12V (`switch_off=12.0`, `switch_on=12.2`, `ign_on_threshold=13.0`, `ign_off_threshold=12.0`) hoặc profile 24V (`switch_off=24.0`, `switch_on=24.4`, `ign_on_threshold=26.0`, `ign_off_threshold=24.0`).
 
 **Cấu hình lưu trữ (Persistent Configuration)**: Lưu trong NVS, được tải khi thiết bị khởi động. Các thay đổi cấu hình từ máy chủ được lưu vào NVS để giữ nguyên sau khi reset hoặc mất điện.
 

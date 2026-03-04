@@ -77,12 +77,11 @@ D2 (Schottky) từ Boost ─┘
 - Nếu `U_batt <= Switch_OFF` của profile đang chạy → chuyển sang pin backup
 - Nếu đang backup và `U_batt >= Switch_ON` → chuyển lại ắc quy
 - Charger chỉ bật khi `IGN=ON` và `U_batt >= IGN_ON` của profile
-- Nếu `U_batt <= LVD_cut` thì cưỡng bức backup và khóa sạc
 
 Bộ ngưỡng mặc định:
 
-- **12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
-- **24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+- **12V**: `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **24V**: `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
 
 Xem chi tiết trong file firmware: [`part-04-power-management-gpio.md`](../../03-firmware/part-04-power-management-gpio.md)
 

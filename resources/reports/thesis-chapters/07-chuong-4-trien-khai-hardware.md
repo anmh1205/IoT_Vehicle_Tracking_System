@@ -117,8 +117,8 @@ U_batt = 24.0V -> V_adc = 2.18V -> ADC_value ~ 2711
 ```
 
 Giá trị ADC đọc được sẽ được chuyển đổi ngược thành điện áp ắc quy trong firmware. Logic chuyển nguồn/hysteresis và nhận diện IGN sử dụng profile cấu hình:
-- Profile 12V: LVD_cut=11.5V, Switch_OFF=12.0V, Switch_ON=12.2V, IGN_ON>=13.0V, IGN_OFF<=12.0V
-- Profile 24V: LVD_cut=23.0V, Switch_OFF=24.0V, Switch_ON=24.4V, IGN_ON>=26.0V, IGN_OFF<=24.0V
+- Profile 12V: Switch_OFF=12.0V, Switch_ON=12.2V, IGN_ON>=13.0V, IGN_OFF<=12.0V
+- Profile 24V: Switch_OFF=24.0V, Switch_ON=24.4V, IGN_ON>=26.0V, IGN_OFF<=24.0V
 
 ![Hình 4.3 - Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–3.png)
 

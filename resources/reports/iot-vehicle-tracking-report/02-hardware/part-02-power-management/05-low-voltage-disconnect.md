@@ -2,15 +2,15 @@
 
 ### Tổng Quan
 
-**Low Voltage Disconnect (LVD)** bảo vệ ắc quy khỏi rút cạn quá mức bằng cách tự động chuyển sang pin backup khi điện áp ắc quy thấp.
+**Low Voltage Disconnect (LVD)** tự động chuyển sang pin backup khi điện áp ắc quy thấp, bảo vệ ắc quy khỏi rút cạn quá mức.
 
 ### Nguyên Lý
 
 - **Giám sát điện áp ắc quy**: Qua ADC ESP32 hoặc comparator hardware
 - **Kiến trúc profile nguồn**: firmware chạy theo 2 profile độc lập (12V và 24V), không dùng chung một bộ ngưỡng
 - **Bộ ngưỡng mặc định (bắt buộc)**:
-  - **Profile 12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
-  - **Profile 24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+  - **Profile 12V**: `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+  - **Profile 24V**: `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
 - **Hysteresis**: Tránh dao động khi điện áp gần ngưỡng
 
 ### Logic Chuyển Nguồn
@@ -82,7 +82,6 @@ typedef enum {
 } power_profile_t;
 
 typedef struct {
-    float lvd_cut;
     float switch_off;
     float switch_on;
     float ign_on;
@@ -90,7 +89,6 @@ typedef struct {
 } power_thresholds_t;
 
 static const power_thresholds_t TH_12V = {
-    .lvd_cut = 11.5f,
     .switch_off = 12.0f,
     .switch_on = 12.2f,
     .ign_on = 13.0f,
@@ -98,7 +96,6 @@ static const power_thresholds_t TH_12V = {
 };
 
 static const power_thresholds_t TH_24V = {
-    .lvd_cut = 23.0f,
     .switch_off = 24.0f,
     .switch_on = 24.4f,
     .ign_on = 26.0f,

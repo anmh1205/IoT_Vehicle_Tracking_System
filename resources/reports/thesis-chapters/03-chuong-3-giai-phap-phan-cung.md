@@ -436,8 +436,8 @@ ADC_value = (2.18 / 3.3) x 4095 ~ 2711
 
 Logic chuyển nguồn sử dụng cơ chế hysteresis theo profile cấu hình để tránh dao động khi điện áp gần ngưỡng:
 
-- **Profile 12V:** LVD_cut=11.5V, Switch_OFF=12.0V, Switch_ON=12.2V
-- **Profile 24V:** LVD_cut=23.0V, Switch_OFF=24.0V, Switch_ON=24.4V
+- **Profile 12V:** Switch_OFF=12.0V, Switch_ON=12.2V
+- **Profile 24V:** Switch_OFF=24.0V, Switch_ON=24.4V
 
 [Bảng 3.11: Bảng trạng thái chuyển nguồn và cảnh báo]
 

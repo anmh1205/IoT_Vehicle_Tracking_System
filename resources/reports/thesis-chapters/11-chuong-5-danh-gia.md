@@ -10,7 +10,7 @@ Hệ thống phần cứng được đánh giá trên ba khía cạnh chính: qu
 
 **Quản lý năng lượng:**
 
-Hệ thống quản lý năng lượng đa chế độ vận hành ổn định trong các kịch bản thử nghiệm. Mạch buck converter đầu vào 12V/24V (dải 7–40V) hạ áp xuống 5V rồi qua LDO 3.3V cho ESP32-S3, đạt hiệu suất tổng trên 90% ở điều kiện thử nghiệm profile 12V. Mạch Low Voltage Disconnect (LVD) và logic chuyển nguồn được chuẩn hóa theo hai profile: 12V (LVD_cut=11.5V, Switch_OFF=12.0V, Switch_ON=12.2V, IGN_ON>=13.0V, IGN_OFF<=12.0V) và 24V (LVD_cut=23.0V, Switch_OFF=24.0V, Switch_ON=24.4V, IGN_ON>=26.0V, IGN_OFF<=24.0V). Pin dự phòng 21700 (5000mAh) duy trì hoạt động độc lập khoảng 48–72 giờ ở chế độ cảnh báo và 2–3 tháng ở chế độ deep sleep.
+Hệ thống quản lý năng lượng đa chế độ vận hành ổn định trong các kịch bản thử nghiệm. Mạch buck converter đầu vào 12V/24V (dải 7–40V) hạ áp xuống 5V rồi qua LDO 3.3V cho ESP32-S3, đạt hiệu suất tổng trên 90% ở điều kiện thử nghiệm profile 12V. Mạch Low Voltage Disconnect (LVD) và logic chuyển nguồn được chuẩn hóa theo hai profile: 12V (Switch_OFF=12.0V, Switch_ON=12.2V, IGN_ON>=13.0V, IGN_OFF<=12.0V) và 24V (Switch_OFF=24.0V, Switch_ON=24.4V, IGN_ON>=26.0V, IGN_OFF<=24.0V). Pin dự phòng 21700 (5000mAh) duy trì hoạt động độc lập khoảng 48–72 giờ ở chế độ cảnh báo và 2–3 tháng ở chế độ deep sleep.
 
 [Bảng 5.1: Đánh giá hiệu năng quản lý năng lượng]
 

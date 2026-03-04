@@ -15,8 +15,8 @@ Hệ thống tracker hiện được chuẩn hóa theo kiến trúc **tách riê
 
 **Lưu ý nguồn 12V/24V:** firmware dùng 2 profile nguồn để điều khiển LVD/Power Path/Charger:
 
-- **12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
-- **24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+- **12V**: `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **24V**: `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
 
 Đo U_batt dùng ADC với chia áp `R1=100k`, `R2=10k` cho cả profile 12V và 24V.
 

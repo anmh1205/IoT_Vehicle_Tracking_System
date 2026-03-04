@@ -120,7 +120,7 @@ Dự án đặt ra các tiêu chí cụ thể (success criteria) cho từng tầ
 | 2   | Tiêu thụ điện chế độ hoạt động            | < 250 mA (trung bình)    |
 | 3   | Thời gian thức dậy từ deep sleep          | < 3 giây                 |
 | 4   | Thời lượng pin dự phòng (21700, 5000 mAh) | > 24 giờ chế độ cảnh báo |
-| 5   | Điện áp ngắt bảo vệ ắc quy (LVD)          | Profile 12V: LVD_cut=11.5V, OFF=12.0V, ON=12.2V; Profile 24V: LVD_cut=23.0V, OFF=24.0V, ON=24.4V |
+| 5   | Ngưỡng chuyển nguồn bảo vệ ắc quy          | Profile 12V: OFF=12.0V, ON=12.2V; Profile 24V: OFF=24.0V, ON=24.4V |
 | 6   | Nhiệt độ hoạt động                        | -10 C đến +60 C          |
 
 [Bảng 1.2: Tiêu chí phần cứng]
@@ -241,7 +241,7 @@ Một trong những điểm thiết kế trọng tâm của dự án là chiến
 - Tiếp tục theo dõi liên tục cho đến khi được xác nhận an toàn
 - Sử dụng pin dự phòng nếu nguồn chính bị cắt
 
-Hệ thống còn bao gồm mạch Low Voltage Disconnect (LVD) để tự động tách tải khỏi ắc quy xe khi điện áp tụt xuống dưới ngưỡng an toàn theo profile: 12V dùng LVD_cut=11.5V, Switch_OFF=12.0V, Switch_ON=12.2V; 24V dùng LVD_cut=23.0V, Switch_OFF=24.0V, Switch_ON=24.4V, bảo vệ ắc quy không bị rút cạn quá mức [7].
+Hệ thống còn bao gồm mạch Low Voltage Disconnect (LVD) để tự động chuyển sang nguồn dự phòng khi điện áp ắc quy tụt xuống dưới ngưỡng an toàn theo profile: 12V dùng Switch_OFF=12.0V, Switch_ON=12.2V; 24V dùng Switch_OFF=24.0V, Switch_ON=24.4V, bảo vệ ắc quy không bị rút cạn quá mức [7].
 
 ![Hình 1.4 - Sơ đồ chuyển đổi giữa các chế độ năng lượng](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–4.png)
 

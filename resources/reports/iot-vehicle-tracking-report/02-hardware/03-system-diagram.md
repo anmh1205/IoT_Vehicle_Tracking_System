@@ -50,8 +50,8 @@ Sơ đồ khối dưới đây mô tả **kiến trúc phần cứng mục tiêu
 
 ### Profile Nguồn 12V/24V
 
-- **Profile 12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
-- **Profile 24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+- **Profile 12V**: `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **Profile 24V**: `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
 
 ESP32 đọc U_batt qua ADC (divider `100k/10k`) để chọn profile và áp dụng đúng ngưỡng điều khiển nguồn.
 

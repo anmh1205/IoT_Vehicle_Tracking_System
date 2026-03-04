@@ -76,8 +76,8 @@ Thiết kế hiện tại dùng kiến trúc tách riêng LTE và GNSS:
 
 **Profile nguồn mặc định:**
 
-- **12V**: `LVD_cut=11.5V`, `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
-- **24V**: `LVD_cut=23.0V`, `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
+- **12V**: `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
+- **24V**: `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
 
 **Đo U_batt ADC:** dùng chia áp `R1=100k`, `R2=10k` (tỷ lệ ~0.0909) cho cả profile 12V/24V.
 

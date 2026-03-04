@@ -167,7 +167,7 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 **FC-04: Quản lý năng lượng thông minh**
 - Chuyển đổi giữa 3 chế độ: Lái xe (Active) - Đậu xe (Sleep) - Cảnh báo (Alert)
 - Pin dự phòng tự động tiếp quản theo profile nguồn: hệ 12V tại ngưỡng Switch_OFF=12.0V, hệ 24V tại ngưỡng Switch_OFF=24.0V
-- Low Voltage Disconnect bảo vệ ắc quy không bị rút cạn: profile 12V dùng LVD_cut=11.5V, profile 24V dùng LVD_cut=23.0V
+- Low Voltage Disconnect bảo vệ ắc quy không bị rút cạn: profile 12V dùng Switch_OFF=12.0V, profile 24V dùng Switch_OFF=24.0V, tự động chuyển sang pin backup
 
 **FC-05: Giao diện web giám sát**
 - Bản đồ thời gian thực (Leaflet) hiển thị vị trí tất cả phương tiện
