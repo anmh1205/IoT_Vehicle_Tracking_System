@@ -1,0 +1,27 @@
+services:
+  backend:
+    image: ${DOCKERHUB_USERNAME}/tracking-backend:uat
+    container_name: tracking-backend
+    ports:
+      - '4000:4000'
+    env_file: .env
+    restart: always
+    networks:
+      - tracking-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  tracking-network:
+    external: true

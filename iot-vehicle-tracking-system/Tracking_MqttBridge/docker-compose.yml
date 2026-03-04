@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  mqtt-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tracking-mqtt-bridge
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - tracking-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+networks:
+  tracking-network:
+    external: true

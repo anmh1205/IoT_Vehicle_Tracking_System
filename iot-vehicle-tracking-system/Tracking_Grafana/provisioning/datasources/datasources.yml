@@ -1,0 +1,16 @@
+apiVersion: 1
+
+datasources:
+  - name: VictoriaMetrics
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://tracking-victoriametrics:8428
+    isDefault: true
+    editable: true
+
+  - name: VictoriaLogs
+    type: loki
+    access: proxy
+    url: http://tracking-victorialogs:9428
+    editable: true

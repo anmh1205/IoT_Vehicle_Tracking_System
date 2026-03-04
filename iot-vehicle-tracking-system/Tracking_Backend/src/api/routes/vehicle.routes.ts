@@ -1,0 +1,21 @@
+import { Router } from 'express';
+import { requireAuth } from '@/middleware/auth.middleware';
+import * as vehicleController from '@/api/controllers/vehicle.controller';
+
+const router = Router();
+
+// All vehicle routes require authentication
+router.use(requireAuth);
+
+router.get('/', vehicleController.listVehicles);
+router.post('/import', vehicleController.importVehicles);
+router.get('/:id', vehicleController.getVehicle);
+router.get('/:id/status', vehicleController.getVehicleStatus);
+router.post('/', vehicleController.createVehicle);
+router.put('/:id', vehicleController.updateVehicle);
+router.delete('/:id', vehicleController.deleteVehicle);
+router.put('/:id/assign-device', vehicleController.assignDevice);
+router.put('/:id/unassign-device', vehicleController.unassignDevice);
+router.put('/:id/device', vehicleController.setDeviceAssignment);
+
+export default router;

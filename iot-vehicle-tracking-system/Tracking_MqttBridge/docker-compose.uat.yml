@@ -1,0 +1,25 @@
+services:
+  mqtt-bridge:
+    image: ${DOCKERHUB_USERNAME}/tracking-mqtt-bridge:uat
+    container_name: tracking-mqtt-bridge
+    env_file: .env
+    restart: always
+    networks:
+      - tracking-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  tracking-network:
+    external: true

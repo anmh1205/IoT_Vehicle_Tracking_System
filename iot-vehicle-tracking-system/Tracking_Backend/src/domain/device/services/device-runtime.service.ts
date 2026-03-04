@@ -1,0 +1,38 @@
+import { createNotFoundError } from '@/shared/utils/errors.util';
+import * as deviceRepo from '@/domain/device/repositories/device.repository';
+import * as sessionRepo from '@/domain/device/repositories/device-session.repository';
+import type {
+  RuntimeStats,
+  DeviceSession,
+  DeviceSessionPublic,
+} from '@/domain/device/types/device.types';
+
+const sanitizeSession = (session: DeviceSession): DeviceSessionPublic => ({
+  id: session.id,
+  status: session.status,
+  serverSessionStart: session.server_session_start?.toISOString() ?? null,
+  serverSessionEnd: session.server_session_end?.toISOString() ?? null,
+  uptime: session.uptime,
+  avgVibration: session.avg_vibration,
+  dataPointsCount: session.data_points_count,
+});
+
+export const getRuntimeStats = async (deviceId: string): Promise<RuntimeStats> => {
+  const device = await deviceRepo.findByDeviceId(deviceId);
+  if (!device) {
+    throw createNotFoundError(`Device "${deviceId}" not found`);
+  }
+
+  const stats = await sessionRepo.getSessionStats(deviceId);
+  const recentSessions = await sessionRepo.findByDeviceId(deviceId, 1);
+  const lastSession = recentSessions.length > 0 ? sanitizeSession(recentSessions[0]) : null;
+
+  return {
+    totalRuntime: device.total_runtime_seconds,
+    totalSessions: stats.totalSessions,
+    avgSessionDuration: stats.avgUptime,
+    avgVibration: stats.avgVibration,
+    totalDataPoints: stats.totalDataPoints,
+    lastSession,
+  };
+};

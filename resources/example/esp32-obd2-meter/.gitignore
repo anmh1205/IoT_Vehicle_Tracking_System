@@ -1,0 +1,11 @@
+build
+dependencies.lock
+managed_components
+sdkconfig.old
+
+# clang-check
+.build-clang
+.build-iwyu
+
+# vscode
+.vscode/settings.json

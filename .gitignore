@@ -8,3 +8,24 @@
 # **/.env
 # **/.env.local
 # **/.env.*.local
+
+# Build artifacts and dependencies (all services)
+**/node_modules/
+**/dist/
+**/.next/
+
+# Docker persistent data (runtime volumes - never commit)
+**/Tracking_Data/
+
+# Docker volumes (per-service)
+**/docker-volumes/
+
+# Environment variables
+*.env
+!.env.example
+
+# Large binary files (thesis/reports - store on Google Drive/OneDrive instead)
+*.docx
+*.pptx
+*.xlsx
+

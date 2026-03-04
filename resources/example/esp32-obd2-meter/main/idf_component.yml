@@ -1,0 +1,6 @@
+dependencies:
+  idf:
+    version: '>=4.1.0'
+  lvgl/lvgl: 9.2.2
+  janos/waveshare_lcd_128_round_touch:
+    path: ../bsp/waveshare_lcd_128_round_touch

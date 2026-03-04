@@ -1,0 +1,149 @@
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { formatDateTime } from '@/lib/utils/date/format';
+import { useDeviceDetailModal } from './modal-context';
+import { DeviceDetailEmptyState } from './empty-state';
+const getType = (errorCode: number): 'critical' | 'warning' | 'info' => {
+  if (errorCode >= 500) return 'critical';
+  if (errorCode >= 200) return 'warning';
+  return 'info';
+};
+export const ErrorCodesTab = () => {
+  const {
+    errorCodes,
+    errorCodesPage,
+    errorCodesTotal,
+    errorCodesStatus,
+    errorCodesType,
+    onErrorCodesPageChange,
+    onErrorCodesStatusChange,
+    onErrorCodesTypeChange,
+  } = useDeviceDetailModal();
+  if (errorCodes.length === 0) {
+    return (
+      <DeviceDetailEmptyState
+        title="Không có mã lỗi"
+        description="Thiết bị chưa ghi nhận mã lỗi trong giai đoạn hiện tại."
+      />
+    );
+  }
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        <Select
+          value={errorCodesStatus}
+          onValueChange={(value) => onErrorCodesStatusChange(value as any)}
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Trạng thái lỗi" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tất cả</SelectItem>
+            <SelectItem value="active">Đang hoạt động</SelectItem>
+            <SelectItem value="resolved">Đã xử lý</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={errorCodesType}
+          onValueChange={(value) => onErrorCodesTypeChange(value as any)}
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Mức độ lỗi" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tất cả mức độ</SelectItem>
+            <SelectItem value="critical">Nghiêm trọng</SelectItem>
+            <SelectItem value="warning">Cảnh báo</SelectItem>
+            <SelectItem value="info">Thông tin</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="rounded border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Mã</TableHead>
+              <TableHead>Tên lỗi</TableHead>
+              <TableHead>Mô tả</TableHead>
+              <TableHead>Mức độ</TableHead>
+              <TableHead>Phát sinh</TableHead>
+              <TableHead>Đã xử lý</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {errorCodes.map((item) => {
+              const type = getType(item.errorCode);
+              return (
+                <TableRow key={item.id}>
+                  <TableCell>{item.errorCode}</TableCell>
+                  <TableCell>{item.errorName}</TableCell>
+                  <TableCell className="max-w-[220px] truncate">
+                    {item.description || '-'}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        type === 'critical'
+                          ? 'destructive'
+                          : type === 'warning'
+                            ? 'secondary'
+                            : 'outline'
+                      }
+                    >
+                      {type === 'critical'
+                        ? 'Nghiêm trọng'
+                        : type === 'warning'
+                          ? 'Cảnh báo'
+                          : 'Thông tin'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{formatDateTime(item.occurredAt)}</TableCell>
+                  <TableCell>{item.resolvedAt ? formatDateTime(item.resolvedAt) : '-'}</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">Tổng lỗi: {errorCodesTotal}</p>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={errorCodesPage <= 1}
+            onClick={() => onErrorCodesPageChange(errorCodesPage - 1)}
+          >
+            Trang trước
+          </Button>
+          <span className="text-xs">Trang {errorCodesPage}</span>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onErrorCodesPageChange(errorCodesPage + 1)}
+          >
+            Trang sau
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};

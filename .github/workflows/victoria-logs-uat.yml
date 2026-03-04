@@ -1,0 +1,44 @@
+name: VictoriaLogs UAT Deploy
+
+on:
+  push:
+    branches: [uat]
+    paths:
+      - 'iot-vehicle-tracking-system/Tracking_VictoriaLogs/**'
+
+jobs:
+  deploy-uat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SCP config files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "iot-vehicle-tracking-system/Tracking_VictoriaLogs/"
+          target: /opt/tracking/
+          strip_components: 1
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/tracking/Tracking_VictoriaLogs
+            docker compose pull
+            docker compose up -d
+
+      - name: Discord Notification
+        if: always()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          title: "VictoriaLogs UAT Deploy"
+          status: ${{ job.status }}

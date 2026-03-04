@@ -1,0 +1,17 @@
+stages:
+  - ci
+
+build:
+  stage: ci
+  image: $CI_REGISTRY_IMAGE:latest
+  script:
+    - source ./env.sh
+    - idf.py fullclean build
+
+check:
+  stage: ci
+  image: $CI_REGISTRY_IMAGE:latest
+  script:
+    - git config --global --add safe.directory "$CI_PROJECT_DIR"
+    - source ./env.sh
+    - ./check.sh all
