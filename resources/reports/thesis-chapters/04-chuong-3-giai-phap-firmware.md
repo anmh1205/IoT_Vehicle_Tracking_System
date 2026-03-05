@@ -42,7 +42,7 @@ Firmware được thiết kế theo mô hình phân lớp (layered architecture)
 
 | Tầng   | Tên tầng                         | Chức năng chính                                                                                          |
 | ------ | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Tầng 1 | Hardware Abstraction Layer (HAL) | Driver LIS3DH (IMU), modem LTE A7670C, module GNSS NEO-M8N (UART/NMEA), ADC, GPIO, BLE (OBD2 vgate iCar Pro) |
+| Tầng 1 | Hardware Abstraction Layer (HAL) | Driver LIS3DH (IMU), modem LTE + GNSS SIMCom SIM7600CE-T (AT + NMEA stream), ADC, GPIO, BLE (OBD2 vgate iCar Pro) |
 | Tầng 2 | Power Management Layer           | Quản lý chế độ ngủ (sleep/deep sleep), đánh thức (wakeup), cắt nguồn khi điện áp thấp (LVD)              |
 | Tầng 3 | Application Layer                | Logic xử lý chế độ lái xe, đỗ xe, cảnh báo; xử lý sự kiện và alert                                       |
 | Tầng 4 | Communication Layer              | Giao tiếp MQTT/HTTP, mã hóa dữ liệu, xử lý lệnh điều khiển từ máy chủ                                    |
@@ -62,9 +62,9 @@ Firmware sử dụng hệ điều hành thời gian thực FreeRTOS (tích hợp
 | Task                 | Độ ưu tiên     | Chức năng                                                       |
 | -------------------- | -------------- | --------------------------------------------------------------- |
 | `power_monitor_task` | Cao (5)        | Giám sát điện áp ắc quy, điều khiển power path, phát hiện LVD   |
-| `modem_control_task` | Cao (4)        | Điều khiển modem SIMCom qua AT commands, quản lý kết nối 4G/LTE |
+| `modem_control_task` | Cao (4)        | Điều khiển SIMCom SIM7600CE-T qua AT commands, quản lý kết nối LTE + GNSS |
 | `ble_obd2_task`      | Trung bình (3) | Kết nối BLE với OBD2 adapter, đọc dữ liệu xe                    |
-| `gnss_task`          | Trung bình (3) | Đọc dữ liệu vị trí GPS/GNSS từ module NEO-M8N qua UART          |
+| `gnss_task`          | Trung bình (3) | Đọc dữ liệu GNSS qua `AT+CGNSTST` trên SIM7600CE-T             |
 | `mqtt_publish_task`  | Trung bình (2) | Đóng gói và gửi dữ liệu telemetry qua MQTT                      |
 | `state_machine_task` | Thấp (1)       | Điều phối chuyển đổi trạng thái toàn hệ thống                   |
 
@@ -108,7 +108,7 @@ void app_main(void) {
 
 Luồng hoạt động tổng thể của firmware được tổ chức theo trình tự sau:
 
-1. **Khởi tạo ngoại vi**: Cấu hình và khởi động các peripheral gồm IMU (LIS3DH qua I2C), modem LTE A7670C (UART), module GNSS NEO-M8N (UART), ADC (đọc điện áp), và BLE stack (NimBLE).
+1. **Khởi tạo ngoại vi**: Cấu hình và khởi động các peripheral gồm IMU (LIS3DH qua I2C), modem LTE + GNSS SIMCom SIM7600CE-T (UART1 + AT/NMEA), ADC (đọc điện áp), và BLE stack (NimBLE).
 
 2. **Đọc trạng thái IGN và điện áp ắc quy**: Hệ thống ưu tiên đọc trạng thái động cơ (IGN) trực tiếp từ ECU qua OBD2 BLE. Nếu không kết nối được OBD2, hệ thống fallback sang đo điện áp ắc quy qua ADC theo profile: profile 12V dùng IGN_ON >= 13.0V và IGN_OFF <= 12.0V; profile 24V dùng IGN_ON >= 26.0V và IGN_OFF <= 24.0V.
 
@@ -256,10 +256,9 @@ Mọi lỗi kết nối OBD2 đều được ghi lại vào log để phục v�
 
 #### 3.2.2.3. Module điều khiển modem SIMCom
 
-##### a) Tổng quan modem A7670C + GNSS NEO-M8N
+##### a) Tổng quan SIMCom SIM7600CE-T
 
-Trong kiến trúc hiện tại, modem SIMCom A7670C là thành phần giao tiếp mạng chính của thiết bị, cung cấp kết nối 4G/LTE. Chức năng định vị GNSS (GPS + GLONASS + BeiDou) được tách sang module NEO-M8N và xử lý qua UART/NMEA parser riêng. Modem được điều khiển bởi ESP32-S3 thông qua tập lệnh AT (AT commands), đảm bảo quy trình khởi tạo, kết nối mạng và gửi dữ liệu diễn ra có hệ thống và có khả năng phục hồi từ lỗi.
-
+SIMCom SIM7600CE-T (LTE Cat-4 + GNSS tích hợp) là module truyền thông của hệ thống. Module tích hợp mạng LTE và định vị GNSS, truyền dữ liệu qua UART1 bằng tập lệnh AT và stream NMEA qua `AT+CGNSTST`. Firmware điều khiển SIM7600CE-T để khởi tạo mạng, kiểm tra `+CEREG` trước khi bật PDP, và sử dụng Auto mode (`AT+CNMP=2`) với APN mặc định `internet`.
 ##### b) Quy trình khởi tạo modem
 
 Quy trình khởi tạo modem diễn ra theo bốn bước tuần tự:
@@ -268,7 +267,7 @@ Quy trình khởi tạo modem diễn ra theo bốn bước tuần tự:
 | ---- | ---------- | ----------------- | -------------------------------- |
 | 1    | `AT`       | `OK`              | Kiểm tra modem còn phản hồi      |
 | 2    | `AT+CPIN?` | `+CPIN: READY`    | Kiểm tra SIM card đã sẵn sàng    |
-| 3    | `AT+CREG?` | `+CREG: 0,1`      | Kiểm tra đăng ký mạng thành công |
+| 3    | `AT+CEREG?` | `+CEREG: 0,1`      | Kiểm tra đăng ký mạng thành công |
 | 4    | `AT+CSQ`   | `+CSQ: 20,99`     | Đọc cường độ tín hiệu (RSSI)     |
 
 Trường hợp modem không phản hồi, firmware thực hiện reset phần cứng bằng cách điều khiển chân PWRKEY (GPIO25): kéo LOW rồi HIGH trong 1–2 giây, sau đó đợi modem khởi động lại (10–30 giây). Nếu SIM chưa sẵn sàng hoặc chưa đăng ký mạng, hệ thống đợi và retry (quá trình đăng ký mạng có thể mất 30–60 giây).
@@ -277,7 +276,7 @@ Trường hợp modem không phản hồi, firmware thực hiện reset phần c
 
 **Bật kết nối 4G:**
 
-Quy trình bật kết nối 4G/LTE gồm các bước: thiết lập chế độ mạng (`AT+CNMP=38` cho LTE only), kích hoạt PDP context (`AT+CGACT=1,1`), và cấu hình APN của nhà mạng (`AT+CGDCONT=1,"IP","internet"`).
+Quy trình bật kết nối 4G/LTE gồm các bước: đảm bảo `+CEREG` trả về `1` trước khi gọi `AT+CGACT=1,1`, sử dụng Auto mode (`AT+CNMP=2`), và cấu hình APN `AT+CGDCONT=1,"IP","internet"` mặc định. Điều này giữ cho module có thể chuyển giữa LTE/UMTS/GSM mà không cần thay đổi chế độ riêng biệt.
 
 **Tắt kết nối 4G:**
 
@@ -291,15 +290,11 @@ Khi không cần gửi dữ liệu (chế độ đỗ xe), firmware đóng PDP c
 
 ##### d) Điều khiển GNSS/GPS
 
-Trong kiến trúc hiện tại, modem A7670C đảm nhiệm kết nối 4G/LTE, còn định vị GNSS được tách sang module NEO-M8N. Firmware điều khiển A7670C bằng AT commands cho phần cellular, trong khi dữ liệu GNSS được đọc từ NEO-M8N qua UART/NMEA parser:
+SIMCom SIM7600CE-T cung cấp GNSS tích hợp. Firmware bật GNSS qua `AT+CGNSPWR=1`, đọc fix bằng `AT+CGNSINF`, và chỉ dùng `AT+CGNSTST=1` khi cần stream NMEA.
 
-**Bật GNSS (NEO-M8N)**: cấp nguồn cho module GNSS và khởi tạo UART reader.
+**Đọc vị trí**: đọc và parse NMEA (GGA/RMC/VTG) từ `AT+CGNSTST` để thu tọa độ `lat`/`lon`, độ cao `alt`, tốc độ `speed`, và số vệ tinh khả dụng.
 
-**Đọc vị trí**: đọc và parse bản tin NMEA (ví dụ `GGA`, `RMC`, `VTG`) từ NEO-M8N để lấy tọa độ, vận tốc và trạng thái fix.
-
-Trong đó các trường quan trọng gồm: trạng thái fix, `lat`/`lon` (tọa độ thập phân), `alt` (độ cao, mét), `speed` (tốc độ, km/h), số vệ tinh khả dụng.
-
-**Tắt GNSS**: ngắt nguồn GNSS hoặc đưa module vào chế độ tiết kiệm năng lượng theo cấu hình.
+**Tắt GNSS**: dùng `AT+CGNSPWR=0` hoặc `AT+CGNSTST=0` khi không cần fix để tiết kiệm năng lượng.
 
 Thời gian để GNSS fix được vị trí phụ thuộc vào trạng thái trước đó:
 
@@ -317,12 +312,12 @@ Thời gian để GNSS fix được vị trí phụ thuộc vào trạng thái t
 
 ##### e) Chế độ ngủ của modem
 
-Modem A7670C hỗ trợ các chế độ tiết kiệm năng lượng cho phần LTE, trong khi NEO-M8N được bật/tắt độc lập theo nhu cầu định vị:
+SIMCom SIM7600CE-T hỗ trợ chế độ tiết kiệm năng lượng cho cả LTE và GNSS tích hợp. Firmware sử dụng `AT+CSCLK=1` để bật sleep mode và `AT+CFUN=0` khi cần deep sleep toàn bộ module.
 
 | Chế độ              | Lệnh AT      | Dòng tiêu thụ | Đặc điểm                                                          |
 | ------------------- | ------------ | ------------- | ----------------------------------------------------------------- |
-| Sleep (CSCLK)       | `AT+CSCLK=1` | 1–5 mA        | Tự động ngủ khi UART không hoạt động, đánh thức bằng dữ liệu UART |
-| Deep Sleep (CFUN=0) | `AT+CFUN=0`  | < 1 mA        | Tắt RF, giữ UART, đánh thức bằng lệnh AT hoặc GPIO                |
+| Sleep (CSCLK)       | `AT+CSCLK=1` | 1–5 mA        | Tự động ngủ khi UART không hoạt động, GNSS vẫn có thể được bật khi cần |
+| Deep Sleep (CFUN=0) | `AT+CFUN=0`  | < 1 mA        | Tắt RF/TX, GNSS tắt hoàn toàn, đánh thức bằng lệnh AT hoặc GPIO    |
 
 Trước khi ESP32-S3 vào deep sleep, firmware đưa modem vào chế độ sleep (`AT+CSCLK=1` hoặc `AT+CFUN=0`) và lưu trạng thái modem. Khi ESP32-S3 wake-up, firmware đánh thức modem bằng cách gửi ký tự bất kỳ trên UART, sau đó khôi phục kết nối 4G (`AT+CFUN=1`, `AT+CGACT=1,1`).
 
@@ -331,7 +326,7 @@ Trước khi ESP32-S3 vào deep sleep, firmware đưa modem vào chế độ sle
 | Lỗi                  | Phương án xử lý                                                         |
 | -------------------- | ----------------------------------------------------------------------- |
 | Modem không phản hồi | Timeout 5 giây -> reset GPIO PWRKEY -> đợi 10–30 giây -> retry khởi tạo |
-| Mất kết nối 4G       | Kiểm tra `AT+CREG?` và `AT+CGACT?` -> deactivate/reactivate PDP context |
+| Mất kết nối 4G       | Kiểm tra `AT+CEREG?` và `AT+CGACT?` -> deactivate/reactivate PDP context |
 | GNSS không fix       | Timeout 60 giây -> tắt/bật lại GNSS -> gửi dữ liệu không có GPS nếu cần |
 | Modem quá nhiệt      | Phát hiện qua phản hồi bất thường -> đưa vào sleep mode tạm thời        |
 

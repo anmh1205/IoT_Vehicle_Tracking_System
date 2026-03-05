@@ -28,7 +28,7 @@
 
 - ESP32-WROOM-32 (active): ~80–120 mA
 - Bluetooth Classic (OBD2): ~30–50 mA
-- A7670C (LTE active) + NEO-M8N (GNSS active): ~80–150 mA (mức hệ thống tham chiếu)
+- SIM7600CE-T (LTE + GNSS tích hợp hoạt động cùng lúc): ~80–150 mA (mức hệ thống tham chiếu)
 - LIS3DH (IMU): ~0.1 mA
 - Mạch phụ trợ: ~10–20 mA
 - **Sạc pin 3A**: 3000 mA (từ ắc quy, qua module IP2312)

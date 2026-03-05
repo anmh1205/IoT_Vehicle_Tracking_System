@@ -16,6 +16,8 @@ _This note is derived from `repomix-output.xml` generated at the root of the rep
 - Tables across alerts, customers, devices, drivers, exports, geofences, maintenance, maps, system-status, trips, vehicles, and violations now reuse the DataTable wrapper and maintain a consistent empty/loading state that describes what data is expected and how to fetch it.
 
 ## Supporting flows
+
+- **Firmware + hardware alignment:** The latest firmware revision now targets the SIMCom SIM7600CE-T LTE+GNSS modem (auto-mode `AT+CNMP=2`, APN `internet`, GNSS via `AT+CGNSINF`/`AT+CGNSTST`), simplifying the architecture by removing the legacy A7670C + u-blox NEO-M8N split while keeping the existing UART pin mapping on ESP32-S3.
 - Backend and frontend each expose UAT-specific Docker Compose overrides plus Next.js middleware entry points (`Tracking_Frontend/next.config.ts`) that connect user sessions to the auth layer.
 - Shared utility modules cover alerts (`components/ui/alert`), API clients, telemetry formatters, and auth state management (`src/lib/stores/auth-store.ts`). Localization changes continue to remain inside `Tracking_Frontend/src/**` and do not require backend or env updates.
 

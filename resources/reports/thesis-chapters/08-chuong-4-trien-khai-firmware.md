@@ -87,7 +87,7 @@ firmware/
 │   │   ├── obd2_pids.c
 │   │   └── include/obd2_parser.h
 │   │
-│   ├── modem_driver/           # Điều khiển modem A7670C (LTE)
+│   ├── modem_driver/           # Điều khiển modem SIMCom SIM7600CE-T (LTE + GNSS)
 │   │   ├── modem_at.c          # Xử lý lệnh AT
 │   │   ├── modem_mqtt.c        # MQTT qua modem
 │   │   ├── modem_gnss.c        # GNSS qua modem
@@ -125,8 +125,8 @@ Các tầng giao tiếp với nhau thông qua cơ chế message queue và semaph
 | 2 | IGN_IN | Input | Đọc trạng thái khóa điện (hoặc qua OBD2) |
 | 4 | U_BATT_ADC | Input | Đọc điện áp ắc quy (ADC 12-bit) |
 | 5 | CHARGER_EN | Output | Điều khiển IC sạc IP2312 |
-| 16 | MODEM_UART_TX | Output | UART TX đến modem A7670C |
-| 17 | MODEM_UART_RX | Input | UART RX từ modem A7670C |
+| 16 | MODEM_UART_TX | Output | UART TX đến module SIMCom SIM7600CE-T |
+| 17 | MODEM_UART_RX | Input | UART RX từ module SIMCom SIM7600CE-T |
 | 18 | POWER_MUX_SEL | Output | Chọn nguồn cấp (ắc quy/pin dự phòng) |
 | 19 | LVD_STATUS | Input | Trạng thái từ comparator LM393 |
 | 21 | LIS3DH_INT | Input | Ngắt từ cảm biến gia tốc IMU |
@@ -329,13 +329,13 @@ Khi không thể kết nối BLE với adapter OBD2 (timeout sau 10 giây, retry
 
 #### a) Khởi tạo và kiểm tra modem
 
-Module modem quản lý toàn bộ giao tiếp với modem SIMCom A7670C thông qua giao tiếp UART và tập lệnh AT. Quy trình khởi tạo bao gồm kiểm tra phản hồi modem, trạng thái SIM, đăng ký mạng và chất lượng tín hiệu.
+Module modem quản lý toàn bộ giao tiếp với SIMCom SIM7600CE-T (LTE + GNSS tích hợp) thông qua UART1 và tập lệnh AT. Quy trình khởi tạo bao gồm kiểm tra phản hồi, CEREG trước CGACT, APN `internet`, và tế nhị kiểm tra trạng thái GNSS bằng `AT+CGNSPWR`/`AT+CGNSTST` để đảm bảo fix trước khi publish.
 
 ```c
-// Trình tự khởi tạo modem A7670C
+// Trình tự khởi tạo SIMCom SIM7600CE-T
 int modem_init(modem_ctx_t *ctx)
 {
-    // Bước 1: Kiểm tra modem phản hồi
+    // Bước 1: Kiểm tra module phản hồi
     if (modem_send_at(ctx, "AT", "OK", 5000) != 0) {
         // Modem không phản hồi - reset bằng GPIO PWRKEY
         gpio_set_level(MODEM_PWRKEY, 0);
@@ -354,7 +354,7 @@ int modem_init(modem_ctx_t *ctx)
 
     // Bước 3: Đợi đăng ký mạng (tối đa 60 giây)
     for (int i = 0; i < 12; i++) {
-        if (modem_send_at(ctx, "AT+CREG?", "+CREG: 0,1", 5000) == 0) {
+        if (modem_send_at(ctx, "AT+CEREG?", "+CEREG: 0,1", 5000) == 0) {
             break;  // Đã đăng ký mạng
         }
         vTaskDelay(pdMS_TO_TICKS(5000));
@@ -373,7 +373,7 @@ int modem_init(modem_ctx_t *ctx)
 
 #### b) Kết nối và gửi dữ liệu MQTT
 
-Firmware sử dụng AT command trên modem A7670C để thiết lập kết nối dữ liệu và gửi telemetry MQTT về broker. Quy trình bao gồm khởi tạo kết nối mạng, kết nối broker, đăng ký topic nhận lệnh, và gửi dữ liệu telemetry định kỳ.
+Firmware sử dụng AT command trên SIMCom SIM7600CE-T để thiết lập kết nối dữ liệu và gửi telemetry MQTT về broker. Quy trình bao gồm khởi tạo mạng (CEREG kiểm tra trước CGACT), kết nối broker, đăng ký topic, và gửi dữ liệu telemetry định kỳ.
 
 ```c
 // Kết nối MQTT thông qua modem
@@ -439,25 +439,24 @@ int modem_mqtt_publish(modem_ctx_t *ctx, const char *topic,
 
 #### c) Đọc dữ liệu GNSS
 
-Module GNSS NEO-M8N được điều khiển độc lập qua UART. Firmware bật GNSS, đợi fix vị trí, parse bản tin NMEA, và đọc tọa độ định kỳ.
-
+SIMCom SIM7600CE-T cung cấp GNSS tích hợp. Firmware bật GNSS qua `AT+CGNSPWR=1`, đọc fix bằng `AT+CGNSINF`, và chỉ dùng `AT+CGNSTST=1` khi cần stream NMEA.
 ```c
 // Bật và đọc dữ liệu GNSS từ modem
 int modem_gnss_read(modem_ctx_t *ctx, gnss_data_t *gnss)
 {
     // Bật nguồn GNSS (nếu chưa bật)
-    modem_send_at(ctx, "AT+CGNSSPWR=1", "OK", 3000);
+    modem_send_at(ctx, "AT+CGNSPWR=1", "OK", 3000);
 
     // Đọc thông tin GNSS
-    // Phản hồi: +CGNSSINFO: <mode>,<sat_gps>,<sat_glo>,<sat_bds>,
+    // Phản hồi: +CGNSINF: <GNSS run>,<fix>,<UTC>,<lat>,<lon>,...
     //           <lat>,<N/S>,<lon>,<E/W>,<date>,<time>,<alt>,
     //           <speed>,<course>,<hdop>,<vdop>
     char response[256];
-    if (modem_send_at_get_response(ctx, "AT+CGNSSINFO",
+    if (modem_send_at_get_response(ctx, "AT+CGNSINF",
                                     response, sizeof(response),
                                     3000) == 0) {
         // Phân tích phản hồi
-        gnss_parse_cgnssinfo(response, gnss);
+        gnss_parse_cgnsinf(response, gnss);
         return 0;
     }
     return -1;  // Chưa có fix
@@ -587,7 +586,7 @@ void enter_deep_sleep(uint32_t sleep_duration_sec)
     ble_obd_disconnect();
 
     // 2. Tắt GNSS
-    modem_send_at(&modem_ctx, "AT+CGNSSPWR=0", "OK", 3000);
+    modem_send_at(&modem_ctx, "AT+CGNSPWR=0", "OK", 3000);
 
     // 3. Tắt 4G và đưa modem vào chế độ ngủ
     modem_send_at(&modem_ctx, "AT+CGACT=0,1", "OK", 5000);
@@ -616,10 +615,10 @@ Khi thức dậy từ deep sleep, firmware đọc nguyên nhân đánh thức v�
 
 #### c) Quản lý nguồn modem theo chế độ
 
-Modem A7670C hỗ trợ nhiều chế độ ngủ với mức tiêu thụ khác nhau:
+SIMCom SIM7600CE-T hỗ trợ nhiều chế độ ngủ với mức tiêu thụ khác nhau:
 
-- **UART sleep** (`AT+CSCLK=1`): Modem tự động ngủ khi không có dữ liệu UART, tiêu thụ 1–5 mA, đánh thức bằng bất kỳ ký tự UART nào.
-- **Minimum functionality** (`AT+CFUN=0`): Tắt RF, giữ UART, tiêu thụ < 1 mA, đánh thức bằng lệnh AT hoặc GPIO.
+- **UART sleep** (`AT+CSCLK=1`): Module tự động ngủ khi không có dữ liệu UART, tiêu thụ 1–5 mA, GNSS vẫn có thể được bật theo policy.
+- **Minimum functionality** (`AT+CFUN=0`): Tắt RF và GNSS, tiêu thụ < 1 mA, đánh thức bằng lệnh AT hoặc GPIO.
 - **Flight mode** (`AT+CFUN=4`): Tắt RF nhưng giữ chức năng khác, phù hợp cho heartbeat ngắn.
 
 Thời gian đánh thức modem phụ thuộc chế độ: từ sleep là 100–500 ms, từ minimum functionality là 1–3 giây, và kết nối lại 4G mất thêm 5–15 giây.

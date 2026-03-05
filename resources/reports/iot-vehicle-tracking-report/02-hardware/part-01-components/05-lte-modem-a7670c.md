@@ -1,138 +1,129 @@
-## III.1.4 Module LTE: SIMCom A7670C
+## III.1.4 Module LTE + GNSS: SIMCom SIM7600CE-T
 
 ### Tổng Quan
 
-**SIMCom A7670C** là modem **LTE Cat-1 thuần túy**, được chọn cho vai trò kết nối cellular của tracker.
+**SIM7600CE-T** là giải pháp LTE Cat-4 cùng GNSS tích hợp (GPS + GLONASS + BeiDou) do SIMCom cung cấp. Phiên bản CE-T được chọn vì:
 
-> **Điểm quan trọng:** A7670C **không tích hợp GNSS**. Toàn bộ dữ liệu vị trí trong kiến trúc hiện tại đến từ **u-blox NEO-M8N** qua UART riêng.
+- Hỗ trợ LTE và fallback 3G/2G, đáp ứng được vùng phủ Việt Nam
+- GNSS tích hợp đủ độ chính xác (~2.5m CEP) nên không cần module GNSS riêng
+- Giao tiếp chính vẫn là UART, phù hợp pin mapping hiện tại
 
-Thiết kế phần cứng hiện tại vì vậy dùng mô hình:
-
-- **A7670C** → LTE / MQTT / HTTP / PPP
-- **NEO-M8N** → GNSS / NMEA / UBX
+> **Lưu ý:** Pin mapping và rail điện áp không đổi so với bản thiết kế mục tiêu dành cho ESP32-S3 và LTE modem cũ. Firmware mới chỉ nhắm mục tiêu SIM7600CE-T (không có nhánh runtime cho A7670C + NEO-M8N).
 
 ### Đặc Tính Kỹ Thuật Chính
 
 | Thông số | Giá trị |
 | -------- | ------- |
-| Loại | LTE Cat-1 module |
-| Cellular | LTE + GSM fallback |
-| GNSS tích hợp | **Không có** |
+| Loại | LTE Cat-4 + GNSS tích hợp |
+| Cellular | LTE, UMTS, GSM (Auto mode) |
+| GNSS tích hợp | GPS/GLONASS/BeiDou hoàn chỉnh |
 | Giao tiếp chính | UART, USB, SIM |
-| Điện áp hoạt động | 3.4V–4.2V (typ. 3.8V) |
-| Nhiệt độ | -40°C đến +85°C |
-| Ứng dụng phù hợp | Telematics, IoT tracker, telemetry |
+| Điện áp rail | 3.4V–4.2V (3.8V rail modem) |
+| Nhiệt độ | -30°C đến +75°C |
+| Ứng dụng phù hợp | Telematics, tracker tích hợp LTE + GNSS |
 
 ### Vai Trò Trong Hệ Thống
 
-Trong tracker, A7670C đảm nhiệm:
+SIM7600CE-T đảm nhiệm cả hai vai trò:
 
-1. Đăng ký mạng cellular
-2. Thiết lập PDP context
-3. Thực hiện MQTT/HTTP/TLS
-4. Truyền telemetry từ ESP32-S3 lên backend
-5. Hỗ trợ sleep/PSM để tối ưu năng lượng
+1. Kết nối LTE/CATM1 đến MQTT/HTTP Broker
+2. Cung cấp dữ liệu GNSS bằng AT commands tích hợp
+3. Quản lý sleep/PSM để tiết kiệm tổng năng lượng
+4. Cung cấp trạng thái mạng via `+CEREG` và `+CGACT`
+5. Thực hiện xử lý SSL/TLS, MQTT, OTA (nếu cần)
 
-A7670C **không** đảm nhiệm:
+### Luồng AT Command Định Danh Mục Tiêu
 
-- đọc dữ liệu GNSS
-- parse toạ độ
-- quản lý NMEA
-- giữ GNSS fix khi LTE sleep
+1. **Khởi động và kiểm tra trạng thái:**
 
-Các phần này thuộc về **NEO-M8N**.
+   ```
+   AT
+   → OK
+   AT+CPIN?
+   → +CPIN: READY
+   AT+CNMP=2
+   → OK  ; module để Auto mode LTE/GSM/UMTS
+   ```
 
-### Lý Do Chọn A7670C
+2. **Thiết lập APN (mặc định `internet`):**
 
-#### 1. Phù hợp kiến trúc tách LTE và GNSS
+   ```
+   AT+CGDCONT=1,"IP","internet"
+   → OK
+   ```
 
-- Giảm coupling giữa modem và định vị
-- Dễ bật/tắt riêng LTE hoặc GNSS theo từng state
-- Giúp firmware refactor rõ ràng hơn
+3. **Kiểm tra đăng ký mạng (CEREG trước CGACT):**
 
-#### 2. Đủ năng lực cho telemetry
+   ```
+   AT+CEREG?
+   → +CEREG: 0,1  ; đã đăng ký LTE
+   ```
 
-- LTE Cat-1 phù hợp bài toán tracker
-- Băng thông đủ cho MQTT/rawdata/alerts
-- Hỗ trợ AT commands quen thuộc
+4. **Kích hoạt PDP Context:**
 
-#### 3. Dễ tích hợp với ESP32-S3
+   ```
+   AT+CGACT=1,1
+   → OK
+   AT+CGACT?
+   → +CGACT: 1,1
+   ```
 
-- Giao tiếp UART đơn giản
-- Tài liệu, ví dụ và quy trình bring-up rõ ràng
-- Phù hợp prototype và kế hoạch firmware hiện tại
+> **Quy tắc:** luôn đọc `+CEREG` trước khi gọi `AT+CGACT` để đảm bảo mạng đã đăng ký. Nếu `CEREG` vẫn `0`, giữ retry không gọi `CGACT`.
 
-#### 4. Tối ưu năng lượng tốt hơn thiết kế tích hợp cũ
+5. **Kích hoạt GNSS tích hợp:**
 
-- Có thể cho modem sleep/PSM trong lúc GNSS vẫn chạy độc lập nếu cần
-- Tránh để modem mang luôn overhead GNSS khi không cần truyền dữ liệu
+   ```
+   AT+CGNSPWR=1
+   → OK
+   AT+CGNSINF
+   → +CGNSINF: 1,1,20260305120000.000,10.1234,106.1234,...
+   AT+CGNSTST=1
+   → +CGNSTST: $GNGGA,....  ; stream NMEA cho parser
+   ```
 
-### Kết Nối Mục Tiêu Với ESP32-S3
+6. **Xử lý mạng/MQTT:** sau khi `CGACT` active, thực hiện `AT+CMQTTSTART`, `AT+CMQTTCONNECT`, etc.
 
-#### UART và điều khiển nguồn
+7. **Sleep/PSM:**
 
-| Tín hiệu A7670C | Vai trò | ESP32-S3 mục tiêu |
-| --------------- | ------- | ----------------- |
-| UART_TX | Dữ liệu từ modem | GPIO17 (UART1 RX) |
-| UART_RX | Dữ liệu tới modem | GPIO18 (UART1 TX) |
+   ```
+   AT+CSCLK=1        ; UART power save
+   AT+CPSMS=1,,,,"00100000","00000101"  ; PSM cycled
+   AT+CGNSPWR=0      ; tắt GNSS khi cần
+   ```
+
+### Kết Nối Vật Lý Với ESP32-S3
+
+| Tín hiệu SIM7600CE-T | Vai trò | ESP32-S3 mục tiêu |
+| -------------------- | ------- | ----------------- |
+| UART_TX | Dữ liệu → ESP32 | GPIO17 (UART1 RX) |
+| UART_RX | Dữ liệu từ ESP32 | GPIO18 (UART1 TX) |
 | PWRKEY | Bật/tắt modem | GPIO4 |
 | RESET | Reset phần cứng | GPIO5 |
 | RI / STATUS | Wake/status | GPIO6/GPIO7 |
 | EN (nguồn modem) | Enable rail 3.8V | GPIO14 |
 
-> Pin mapping trên là **mục tiêu kiến trúc** cho tài liệu/plan. Firmware source hiện tại chưa phản ánh đầy đủ mapping này.
+### Tích hợp GNSS
 
-### Quan Hệ Với NEO-M8N
+- Module cung cấp NMEA qua `AT+CGNSTST=1` cho firmware, driver chỉ cần nối read / parse tương tự như NEO-M8N.
+- Tự động điều chỉnh tần suất fix: dùng `AT+CGNSTST=1` để stream NMEA rồi throttle luồng GGA/RMC theo nhu cầu (1–5 Hz) thay vì giữ toàn bộ data.
+- Không cần UART GNSS riêng nên phần pin map vẫn giữ như mô hình cũ.
 
-A7670C được dùng cùng **NEO-M8N** theo kiến trúc hai module:
+### Lịch Sử: Từ A7670C + NEO-M8N sang SIM7600CE-T
 
-| Module | Nhiệm vụ | Giao tiếp với ESP32-S3 |
-| ------ | -------- | ---------------------- |
-| A7670C | LTE, MQTT, HTTP, PPP | UART1 |
-| NEO-M8N | GNSS, NMEA, vị trí | UART2 |
+Trước đây tài liệu mô tả kiến trúc hai module để giảm coupling. Giờ đây chúng ta chuyển sang SIM7600CE-T vì:
 
-Điều này cho phép:
+- Giảm độ phức tạp phần cứng (chỉ 1 module)
+- Không cần đồng bộ UART GNSS phụ
+- Giảm chi phí board layout và LDO riêng cho NEO-M8N
 
-- reset modem mà không làm mất logic GNSS độc lập
-- refactor firmware thành `modem_lte` và `gnss` rõ ràng hơn
-- tránh dùng các lệnh GNSS của modem tích hợp cũ
-
-### So Sánh Với A7600CE-T
-
-| Tiêu chí | A7600CE-T | A7670C + NEO-M8N |
-| -------- | --------- | ---------------- |
-| LTE | Có | Có |
-| GNSS | Tích hợp trong modem | Tách thành module riêng |
-| Firmware GNSS | AT command modem | UART GNSS riêng |
-| Coupling | Cao | Thấp hơn |
-| Khả năng quản lý nguồn | Chung modem + GNSS | Tách riêng LTE/GNSS |
-
-### Tác Động Tới Firmware
-
-Thiết kế này kéo theo các thay đổi trong firmware plan:
-
-- bỏ giả định `AT+CGNSPWR`, `AT+CGNSINF` là luồng GNSS chính
-- bổ sung UART GNSS riêng cho NEO-M8N
-- tách lifecycle LTE connect/disconnect khỏi GNSS tracking
-- tách task/parser cho NMEA/UBX
-
-### Current Gap vs Target
-
-Tài liệu phần cứng đã chuẩn hóa theo A7670C + NEO-M8N, nhưng baseline code hiện tại còn gap:
-
-- `iot-vehicle-tracking-system/Tracking_Firmware/main/src/modem_gnss.c` vẫn dùng `AT+CGNSPWR` / `AT+CGNSINF`
-- `iot-vehicle-tracking-system/Tracking_Firmware/main/inc/pin_map.h` chưa có UART GNSS riêng
-- `iot-vehicle-tracking-system/Tracking_Firmware/main/src/state_machine.c` còn coupling LTE và GNSS
-
-Đợt hiện tại chỉ cập nhật **docs + plans**; source firmware sẽ được sửa ở đợt refactor riêng.
+**Lưu ý lịch sử:** A7670C + NEO-M8N chỉ còn được giữ lại khi mô tả baseline cũ; không có nhánh runtime cho cấu hình này.
 
 ### Kết Luận
 
-A7670C là lựa chọn phù hợp cho **đường truyền cellular** của hệ thống vì:
+SIM7600CE-T là mục tiêu runtime duy nhất cho tracker:
 
-- đáp ứng tốt nhu cầu LTE telemetry
-- dễ tích hợp với ESP32-S3
-- phù hợp kiến trúc tách LTE/GNSS
-- hỗ trợ kế hoạch refactor firmware về mô hình hai module
-
-Phần định vị không còn thuộc về modem này mà được chuyển sang **NEO-M8N**.
+- `Auto mode` network (CNMP=2) + APN `internet`
+- `CEREG` kiểm tra trước `CGACT`
+- GNSS tích hợp via `AT+CGNSPWR` / `AT+CGNSINF`
+- Pin mapping và nguồn rail giống thiết kế trước nên firmware chỉ cần cập nhật driver modem và GNSS parser
+- Kiến trúc mới tránh ghi đè thêm module GNSS riêng mà vẫn giữ khả năng debug GNSS qua `CGNSINF`/`CGNSTST`

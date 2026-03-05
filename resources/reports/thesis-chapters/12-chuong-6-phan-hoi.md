@@ -10,7 +10,7 @@ Kiến thức về vi xử lý và vi điều khiển đóng vai trò cốt lõi
 
 - **Lập trình ESP32-S3**: Áp dụng kiến thức về kiến trúc Xtensa LX7 dual-core, thanh ghi, bộ nhớ và tập lệnh để lập trình firmware trên nền tảng ESP-IDF. Việc hiểu rõ kiến trúc phần cứng của MCU giúp tối ưu hóa hiệu suất và tiêu thụ năng lượng.
 - **FreeRTOS đa nhiệm (multitasking)**: Sử dụng kiến thức về hệ điều hành thời gian thực để thiết kế các task đồng thời: task đọc dữ liệu OBD2 qua BLE, task gửi dữ liệu MQTT qua modem UART, task đọc cảm biến IMU, và task quản lý năng lượng. Việc phân chia task và quản lý mutex/semaphore là kỹ năng trực tiếp từ môn Vi xử lý nâng cao.
-- **Giao tiếp ngoại vi GPIO/ADC/UART/I2C/SPI**: Cấu hình và sử dụng các giao diện ngoại vi để giao tiếp với modem A7670C (UART), module GNSS NEO-M8N (UART), cảm biến LIS3DH (SPI/I2C), đọc điện áp ắc quy (ADC), và điều khiển relay nguồn (GPIO). Đây là những kỹ năng cơ bản được rèn luyện trong các bài thực hành vi điều khiển.
+- **Giao tiếp ngoại vi GPIO/ADC/UART/I2C/SPI**: Cấu hình và sử dụng các giao diện ngoại vi để giao tiếp với modem SIM7600CE-T (UART, tích hợp LTE + GNSS), cảm biến LIS3DH (SPI/I2C), đọc điện áp ắc quy (ADC), và điều khiển relay nguồn (GPIO). Đây là những kỹ năng cơ bản được rèn luyện trong các bài thực hành vi điều khiển.
 
 ### 6.1.2. Mạng máy tính và IoT
 

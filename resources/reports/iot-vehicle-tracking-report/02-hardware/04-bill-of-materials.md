@@ -2,12 +2,7 @@
 
 ### Tổng Quan
 
-BOM dưới đây phản ánh **kiến trúc phần cứng hiện tại** của tracker sau khi tách riêng:
-
-- **LTE:** SIMCom A7670C
-- **GNSS:** u-blox NEO-M8N
-
-Thiết kế này thay thế cấu trúc cũ dùng modem tích hợp GNSS.
+BOM dưới đây phản ánh **kiến trúc phần cứng mục tiêu** hiện đang triển khai: **SIMCom SIM7600CE-T** (LTE Cat-4 + GNSS tích hợp). Một module duy nhất chịu trách nhiệm cả đường truyền cellular và định vị, giúp giảm đường dẫn tín hiệu, bo mạch và chi phí cáp anten. Giao tiếp với ESP32-S3 giữ nguyên chân UART1/RESET/EN/PWRKEY/RI, nên phần firmware chỉ cần tập trung vào driver SIM7600CE-T.
 
 ### BOM Chi Tiết
 
@@ -16,50 +11,48 @@ Thiết kế này thay thế cấu trúc cũ dùng modem tích hợp GNSS.
 | 1 | ESP32-S3 DevKit | Cái | 1 | 100,000–200,000 | ESP32-S3-DevKitC-1 hoặc DevKitM-1 |
 | 2 | LIS3DH | Cái | 1 | 20,000–50,000 | Breakout board hoặc IC riêng |
 | 3 | OBD2 BLE (vgate iCar Pro) | Cái | 1 | 150,000–300,000 | BLE 4.0, đọc dữ liệu ECU |
-| 4 | LTE modem A7670C | Cái | 1 | 170,000–220,000 | Kèm LTE antenna + SIM |
-| 5 | GNSS module NEO-M8N | Cái | 1 | 150,000–300,000 | Kèm antenna GNSS |
-| 6 | 21700 Li-ion 5000mAh | Cái | 1 | 100,000–200,000 | Loại có protection board |
-| 7 | Module sạc IP2312 (3A) | Cái | 1 | 20,000–40,000 | Charger Type-C |
-| 8 | BMS/Protection Board 1S | Cái | 1 | 10,000–20,000 | BMS 1S 3A hoặc DW01+MOSFET |
-| 9 | Buck DC-DC (12/24→5V, 3A) | Cái | 1 | 15,000–25,000 | LM2596 module |
-| 10 | Boost DC-DC (3.7→5V, 2A) | Cái | 1 | 10,000–15,000 | MT3608 module |
-| 11 | Relay module 5V / mạch Power MUX | Cái | 1 | 5,000–15,000 | Chuyển nguồn ắc quy ↔ pin backup |
-| 12 | Resistor, capacitor, diode, connector | Gói | 1 | 20,000–40,000 | Mạch phụ trợ nguồn + ADC |
-| 13 | PCB (nếu tự thiết kế) | Cái | 1 | 50,000–100,000 | PCB 2 lớp |
-| 14 | Vỏ bảo vệ (tùy chọn) | Cái | 1 | 50,000–100,000 | Prototype hoặc lắp thực địa |
-| 15 | Dây nối, cáp, linh kiện phụ trợ khác | Gói | 1 | 35,000–60,000 | Fuse, LED, dây điện |
+| 4 | LTE + GNSS module SIMCom SIM7600CE-T | Cái | 1 | 170,000–220,000 | Kèm LTE/GNSS antenna + SIM |
+| 5 | 21700 Li-ion 5000mAh | Cái | 1 | 100,000–200,000 | Loại có protection board |
+| 6 | Module sạc IP2312 (3A) | Cái | 1 | 20,000–40,000 | Charger Type-C |
+| 7 | BMS/Protection Board 1S | Cái | 1 | 10,000–20,000 | BMS 1S 3A hoặc DW01+MOSFET |
+| 8 | Buck DC-DC (12/24→5V, 3A) | Cái | 1 | 15,000–25,000 | LM2596 module |
+| 9 | Boost DC-DC (3.7→5V, 2A) | Cái | 1 | 10,000–15,000 | MT3608 module |
+| 10 | Relay module 5V / mạch Power MUX | Cái | 1 | 5,000–15,000 | Chuyển nguồn ắc quy ↔ pin backup |
+| 11 | Resistor, capacitor, diode, connector | Gói | 1 | 20,000–40,000 | Mạch phụ trợ nguồn + ADC |
+| 12 | PCB (nếu tự thiết kế) | Cái | 1 | 50,000–100,000 | PCB 2 lớp |
+| 13 | Vỏ bảo vệ (tùy chọn) | Cái | 1 | 50,000–100,000 | Prototype hoặc lắp thực địa |
+| 14 | Dây nối, cáp, linh kiện phụ trợ khác | Gói | 1 | 35,000–60,000 | Fuse, LED, dây điện |
 
 ### Tổng Chi Phí Ước Tính
 
 | Hạng Mục | Chi Phí (VNĐ) |
 | -------- | ------------- |
-| **Thành phần chính** | 690,000–1,270,000 |
+| **Thành phần chính** | 720,000–1,310,000 |
 | **Power management** | 60,000–115,000 |
 | **Linh kiện phụ trợ** | 55,000–100,000 |
 | **PCB (nếu tự thiết kế)** | 50,000–100,000 |
 | **Vỏ bảo vệ (tùy chọn)** | 50,000–100,000 |
-| **Tổng cộng** | **905,000–1,615,000** |
+| **Tổng cộng** | **935,000–1,625,000** |
 
 ### Lưu Ý
 
-#### 1. Kiến Trúc Tách LTE/GNSS
+#### 1. Kiến Trúc hiện tại (SIM7600CE-T)
 
-- A7670C chỉ xử lý **kết nối cellular**
-- NEO-M8N chỉ xử lý **định vị GNSS**
-- Cần thêm một UART riêng và một đường nguồn riêng cho GNSS
-- Đổi lại, có thể bật/tắt độc lập LTE và GNSS theo trạng thái hoạt động
+- Module SIM7600CE-T đóng vai trò cả **cellular** và **GNSS**, giúp loại bỏ cần UART GNSS riêng và rail 3.3V cho NEO-M8N. Chỉ cần rail 3.8V + logic hiện có.
+- Module chạy ở chế độ **Auto mode** (`AT+CNMP=2`), APN mặc định là `internet`, nên firmware không cần xử lý nhiều cấu hình carrier.
+- Pin mapping giữ nguyên như kiến trúc trước (UART1, PWRKEY, RESET, EN, RI) nên thiết kế phần cứng không thay đổi nhiều.
 
-#### 2. So Với Thiết Kế Cũ
+#### 2. So sánh với thiết kế cũ (baseline)
 
-- Thiết kế cũ dùng modem 4G/GNSS tích hợp trong một module duy nhất
-- Thiết kế mới tăng số module nhưng giảm coupling giữa modem và GNSS
-- BOM mới thay 1 dòng tích hợp bằng 2 dòng độc lập: **A7670C + NEO-M8N**
+- Trước đây BOM gồm hai dòng riêng biệt: **SIMCom A7670C** (LTE) và **u-blox NEO-M8N** (GNSS). Kiến trúc đó vẫn được đề cập khi mô tả lịch sử hoặc bối cảnh baseline.
+- Việc chuyển sang SIM7600CE-T giảm đường dây UART, LDO, và độ phức tạp layout, đồng thời giữ được khả năng debug GNSS qua `AT+CGNSTST`/`AT+CGNSINF`.
+- Nếu cần so sánh chi phí: A7670C + NEO-M8N ≈ 320,000–520,000 VNĐ, trong khi SIM7600CE-T đơn lẻ khoảng 170,000–220,000 VNĐ.
 
 #### 3. Nơi Mua Hàng
 
 **Trên Shopee/Lazada:**
-- Tìm theo từ khóa: `A7670C`, `NEO-M8N`, `ESP32-S3`, `LIS3DH`, `IP2312`
-- So sánh giá, review, và ảnh thực tế
+- Tìm theo từ khóa: `SIM7600CE-T`, `ESP32-S3`, `LIS3DH`, `IP2312`
+- So sánh giá, review, ảnh thực tế
 
 **Cửa hàng linh kiện:**
 - Chipdientu.com.vn
@@ -75,8 +68,7 @@ Thiết kế này thay thế cấu trúc cũ dùng modem tích hợp GNSS.
 
 #### Nhóm 2: Giao Tiếp và Định Vị
 - OBD2 BLE adapter (vgate iCar Pro)
-- LTE modem A7670C
-- GNSS module NEO-M8N
+- SIMCom SIM7600CE-T
 - SIM card (data plan)
 
 #### Nhóm 3: Nguồn và Pin
@@ -91,6 +83,6 @@ Thiết kế này thay thế cấu trúc cũ dùng modem tích hợp GNSS.
 
 ### Kết Luận
 
-**Tổng chi phí ước tính: 905,000–1,615,000 VNĐ**
+**Tổng chi phí ước tính: 935,000–1,625,000 VNĐ**.
 
-BOM hiện tại đã phản ánh đúng kiến trúc mục tiêu **A7670C (LTE) + NEO-M8N (GNSS)** và loại bỏ mô tả thiết kế hiện tại theo modem GNSS tích hợp.
+Kiến trúc hiện tại tập trung vào module SIM7600CE-T (LTE + GNSS) duy nhất. Các tham chiếu đến **A7670C (LTE)** và **NEO-M8N (GNSS)** chỉ còn xuất hiện khi so sánh lịch sử và mô tả baseline cũ.

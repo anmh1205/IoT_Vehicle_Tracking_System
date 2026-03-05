@@ -13,8 +13,7 @@ Firmware điều khiển thiết bị tracker lắp trên xe với kiến trúc 
 | Chức năng | Phần cứng | Giao tiếp |
 |-----------|-----------|-----------|
 | Đọc OBD2 (IGN, RPM, tốc độ, nhiên liệu, nhiệt độ) | vgate iCar Pro | BLE (NimBLE) |
-| Kết nối 4G/LTE | SIMCom A7670C | UART modem AT / PPP |
-| Định vị GNSS | u-blox NEO-M8N | UART GNSS riêng (NMEA / UBX) |
+| Kết nối 4G/LTE + GNSS | SIMCom SIM7600CE-T | UART AT (LTE + GNSS via AT commands) |
 | Phát hiện rung/chuyển động | LIS3DH IMU | I2C |
 | Quản lý nguồn | Power MUX, IP2312, LVD | GPIO + ADC |
 | Gửi telemetry | EMQX broker | MQTT over PPP |
@@ -53,24 +52,20 @@ Firmware điều khiển thiết bị tracker lắp trên xe với kiến trúc 
 
 ### 3.1 Target architecture (mục tiêu docs/plan)
 
-Firmware sẽ tách rõ 2 đường phần cứng độc lập:
+Firmware runtime nhắm **một module SIM7600CE-T duy nhất** cho cả LTE và GNSS:
 
-1. **LTE path — A7670C**
-   - Khởi tạo modem
-   - Đăng ký mạng
-   - Thiết lập PDP / PPP
-   - MQTT / HTTP / TLS
-   - Sleep / PSM cho modem
+1. **SIM7600CE-T LTE + GNSS path**
+   - Khởi tạo module thông qua AT command
+   - Đặt Auto mode (`AT+CNMP=2`)
+   - Thiết lập APN mặc định `internet` qua `AT+CGDCONT=1,"IP","internet"`
+   - Poll `AT+CEREG?` (bounded retry) trước khi gọi `AT+CGACT=1,1`
+   - Thiết lập PDP context và MQTT/HTTP/TLS
+   - Sleep / PSM và GNSS power control (`+CPSMS`, `+CGNSPWR`)
+   - Stream GNSS data qua `AT+CGNSTST`
 
-2. **GNSS path — NEO-M8N**
-   - Bật nguồn GNSS độc lập
-   - Đọc NMEA / UBX qua UART riêng
-   - Parse lat/lon/speed/course/satellites
-   - Quản lý warm start / hot start / timeout
-
-3. **State machine**
-   - Điều phối LTE và GNSS theo state
-   - Không giả định GNSS là một tính năng nằm trong modem LTE
+2. **State machine**
+   - Điều phối lifecycle LTE + GNSS theo state
+   - Giữ pin mapping hiện tại, không thêm UART GNSS riêng
 
 ### 3.2 Current gap (baseline code hiện tại)
 
@@ -136,12 +131,11 @@ iot-vehicle-tracking-firmware/
 
 | Nhóm | Tín hiệu logic | Mục đích |
 |------|----------------|----------|
-| LTE | `MODEM_UART_TX`, `MODEM_UART_RX` | UART cho A7670C |
-| LTE | `MODEM_PWRKEY`, `MODEM_RESET`, `MODEM_EN` | Bật/tắt/reset modem |
-| LTE | `MODEM_STATUS`, `MODEM_RI` | Wake / status |
-| GNSS | `GNSS_UART_TX`, `GNSS_UART_RX` | UART riêng cho NEO-M8N |
-| GNSS | `GNSS_EN` | Cấp nguồn độc lập cho GNSS |
-| GNSS | `GNSS_PPS` | Pulse-per-second (optional) |
+| LTE | `MODEM_UART_TX`, `MODEM_UART_RX` | UART cho SIM7600CE-T (LTE + GNSS tích hợp) |
+| LTE | `MODEM_PWRKEY`, `MODEM_RESET`, `MODEM_EN` | Bật/tắt/reset module |
+| LTE | `MODEM_STATUS`, `MODEM_RI` | Wake / trạng thái mạng |
+| GNSS | `SIM7600_AT_CGNSPWR`, `SIM7600_AT_CGNSINF`, `SIM7600_AT_CGNSTST` | Kiểm soát GNSS tích hợp qua AT command |
+| GNSS | `SIM7600_AT_CSCLK`, `SIM7600_AT_CPSMS` | GNSS/PSM power save vừa LTE vừa vị trí |
 | Power | `U_BATT_ADC`, `CHARGER_EN`, `POWER_MUX_SEL`, `LVD_STATUS` | Quản lý nguồn |
 | Sensors | `IGN_IN`, `LIS3DH_INT`, `LIS3DH_SDA`, `LIS3DH_SCL` | IGN + IMU |
 
@@ -167,22 +161,22 @@ iot-vehicle-tracking-firmware/
 
 ### Phase 3 — LTE + GNSS Refactor
 
-#### 3.1 A7670C LTE path
-- `modem_at.c`: AT command engine
-- `modem_lte.c`: init, register, PDP, sleep, wakeup
-- `esp_modem` cho PPP khi cần TCP/IP stack
+#### 3.1 SIM7600CE-T LTE + GNSS driver
+- `modem_at.c`: unified AT command engine targeting SIM7600CE-T
+- `modem_lte.c`: init, register, PDP, sleep/wakeup; GNSS power control nằm ở `modem_gnss.c` qua `AT+CGNSPWR`
+- `esp_modem` chỉ dùng khi cần fallback PPP hoặc diagnostic tasks
+- `gnss_parser.c`: reuses `AT+CGNSTST` stream for GGA/RMC
 
-#### 3.2 NEO-M8N GNSS path
-- UART GNSS riêng
-- Đọc NMEA stream (`GGA`, `RMC`, `VTG`, ...)
-- Có thể thêm UBX config để tăng baud / tối ưu output
-- Parse `latitude`, `longitude`, `speed`, `course`, `satellites`
+#### 3.2 Baseline reference — A7670C + NEO-M8N (historical)
+- Document the previous split path for comparison and migration notes
+- UART GNSS module replaced by integrated stream in SIM7600CE-T
+- Legacy state lifecycle separated LTE vs GNSS, kept here only for context
 
 #### 3.3 Decoupling state lifecycle
-- Không còn `modem_gnss` kiểu modem tích hợp
-- DRIVING: LTE active + GNSS active
-- PARKED: LTE sleep/off, GNSS off hoặc wake theo policy
-- HEARTBEAT/ALARM: bật lại từng module theo nhu cầu
+- Target: single module handles LTE + GNSS via SIM7600CE-T
+- DRIVING: SIM7600CE-T active (LTE + GNSS stream)
+- PARKED: SIM7600CE-T sleep/PSM with GNSS off until heartbeat
+- HEARTBEAT/ALARM: wake SIM7600CE-T for short bursts, GNSS on-demand
 
 ### Phase 4 — MQTT & Communication
 - MQTT client
@@ -213,7 +207,7 @@ iot-vehicle-tracking-firmware/
 | `vibration` | IMU LIS3DH | |
 | `battery_top` | ADC | Ắc quy xe |
 | `battery_bot` | ADC/GPIO | Pin backup |
-| `latitude/longitude` | GNSS parser từ NEO-M8N | Không dùng `AT+CGNSINF` ở target |
+| `latitude/longitude` | GNSS parser từ SIMCom SIM7600CE-T (`AT+CGNSINF`; `AT+CGNSTST` khi cần stream NMEA) | Khớp runtime hiện tại |
 | `speed` | GNSS (ưu tiên) hoặc OBD2 0x0D | |
 | `course` | GNSS parser | |
 | `satellites` | GNSS parser | |
@@ -231,7 +225,7 @@ iot-vehicle-tracking-firmware/
 
 ### 8.2 Content consistency (target)
 - [ ] Không dùng A7600CE-T như kiến trúc hiện tại trong core plans/docs
-- [ ] Không dùng `AT+CGNSPWR` / `AT+CGNSINF` như luồng GNSS target
+- [x] Luồng GNSS target dùng `AT+CGNSPWR` / `AT+CGNSINF` (và `AT+CGNSTST` khi cần stream NMEA)
 - [ ] Không dùng path cũ cho workflow active mới
 
 ### 8.3 Reality check
@@ -256,6 +250,6 @@ iot-vehicle-tracking-firmware/
 
 Plan này đã chuẩn hóa firmware development theo hướng:
 
-- **A7670C (LTE)** tách khỏi **NEO-M8N (GNSS)**
+- **Runtime target:** SIMCom SIM7600CE-T (LTE + GNSS tích hợp), trong khi **A7670C + NEO-M8N** chỉ được giữ lại như baseline lịch sử để so sánh
 - **`iot-vehicle-tracking-firmware/`** là firmware path canonical
 - Tài liệu phản ánh đúng **target architecture**, đồng thời giữ rõ **baseline gap** so với source hiện tại

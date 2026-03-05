@@ -18,7 +18,7 @@
 ### 💻 03. Firmware (Phần mềm)
 - [PHẦN V.1: KIẾN TRÚC VÀ LUỒNG HOẠT ĐỘNG](./03-firmware/part-01-kien-truc-va-luong-hoat-dong.md)
 - [PHẦN V.2: BLE OBD2](./03-firmware/part-02-ble-obd2.md)
-- [PHẦN V.3: LTE A7670C + GNSS NEO-M8N](./03-firmware/part-03-modem-simcom.md)
+- [PHẦN V.3: LTE + GNSS SIM7600CE-T](./03-firmware/part-03-modem-simcom.md)
 - [PHẦN V.4: POWER MANAGEMENT VÀ GPIO](./03-firmware/part-04-power-management-gpio.md)
 - [PHẦN V.5: DATA FORMAT VÀ STATE MACHINE](./03-firmware/part-05-data-format-state-machine.md)
 - [PHẦN V.6: CONFIGURATION MANAGEMENT](./03-firmware/part-06-configuration.md)

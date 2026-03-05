@@ -27,7 +27,7 @@ Hệ thống Backend/Cloud là tầng điều phối trung tâm của toàn bộ
 
 Lý do lựa chọn:
 
-- **Khớp bản chất dữ liệu IoT**: MQTT xử lý tốt mô hình pub/sub, giảm coupling giữa thiết bị và tầng ứng dụng.
+- **Khớp bản chất dữ liệu IoT**: MQTT xử lý tốt mô hình pub/sub, giảm mức phụ thuộc trực tiếp giữa thiết bị và tầng ứng dụng.
 - **Tối ưu hiệu năng theo vai trò**: Bridge xử lý ingestion, API tập trung nghiệp vụ, database tách theo loại dữ liệu.
 - **Dễ scale theo chiều ngang**: có thể nhân bản riêng broker/bridge/api khi số thiết bị tăng.
 - **Phù hợp chi phí và phạm vi thực hiện**: self-hosted qua Docker Compose, không phụ thuộc nền tảng cloud thương mại.

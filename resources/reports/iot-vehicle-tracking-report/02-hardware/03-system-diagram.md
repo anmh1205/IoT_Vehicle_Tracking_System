@@ -2,13 +2,9 @@
 
 ### Tổng Quan
 
-Sơ đồ khối dưới đây mô tả **kiến trúc phần cứng mục tiêu hiện tại** của tracker sau khi tách riêng LTE và GNSS:
+Sơ đồ khối này phản ánh **kiến trúc phần cứng mục tiêu** hiện tại của tracker, xoay quanh một mô-đun duy nhất: **SIMCom SIM7600CE-T** đảm nhiệm LTE + GNSS tích hợp, kết nối trực tiếp với **ESP32-S3**. Pin mapping giữa ESP32-S3 và modem (UART, RESET, PWRKEY, EN, RI) giữ nguyên như mục tiêu trước đó, nên firmware chỉ cần cập nhật driver modem thay vì bổ sung UART mới.
 
-- **LTE:** SIMCom A7670C
-- **GNSS:** u-blox NEO-M8N
-- **MCU trung tâm:** ESP32-S3
-
-> **Lưu ý:** Báo cáo phần cứng mô tả kiến trúc đích. Firmware hiện tại vẫn còn khoảng cách triển khai và chưa tách hoàn toàn LTE/GNSS trong source code.
+> **Lưu ý:** Module SIM7600CE-T chạy ở chế độ mạng `Auto mode` (`AT+CNMP=2`) và APN mặc định là `internet`. Tài liệu chỉ mô tả runtime cho SIM7600CE-T; A7670C + NEO-M8N chỉ còn được đề cập trong phần lịch sử baseline.
 
 ### Sơ Đồ Khối Chi Tiết
 
@@ -26,21 +22,20 @@ Sơ đồ khối dưới đây mô tả **kiến trúc phần cứng mục tiêu
 │  │ - BLE central cho OBD2                       │                   │
 │  └──────────────────────────────────────────────┘                   │
 │      │           │             │               │          │         │
-│      │ I2C       │ BLE         │ UART1         │ UART2    │ GPIO/ADC│
+│      │ I2C       │ BLE         │ UART1         │ GPIO/ADC │         │
 │      │           │             │               │          │         │
-│  ┌───┴───┐   ┌───┴────┐   ┌────┴─────┐   ┌─────┴────┐  ┌──┴──────┐ │
-│  │LIS3DH │   │vgate   │   │A7670C    │   │NEO-M8N   │  │Power     │ │
-│  │IMU    │   │iCar Pro│   │LTE modem │   │GNSS      │  │Control   │ │
-│  └───────┘   └────────┘   └──────────┘   └──────────┘  └─────────┘ │
+│  ┌───┴───┐   ┌───┴────┐   ┌────┴─────┐        ┌──────────┐        │
+│  │LIS3DH │   │vgate   │   │SIM7600CE-T│        │Power     │        │
+│  │IMU    │   │iCar Pro│   │(LTE + GNSS)│        │Control   │        │
+│  └───────┘   └────────┘   └──────────┘        └──────────┘        │
 │                                                                     │
 │  ┌───────────────────────────────────────────────────────────────┐   │
 │  │ Power Management System                                       │   │
 │  │ - Buck 12V/24V → 5V                                           │   │
-│  │ - Boost 3.7V → 5V                                              │   │
-│  │ - Power MUX                                                    │   │
-│  │ - Charger IP2312                                               │   │
-│  │ - LDO 3.8V cho A7670C                                          │   │
-│  │ - LDO 3.3V cho NEO-M8N                                         │   │
+│  │ - Boost 3.7V → 5V                                             │   │
+│  │ - Power MUX                                                   │   │
+│  │ - Charger IP2312                                              │   │
+│  │ - LDO 3.8V cho SIM7600CE-T                                    │   │
 │  └───────────────┬───────────────────────────────┬───────────────┘   │
 │                  │                               │                   │
 │            Ắc quy xe 12V/24V                Pin backup 21700         │
@@ -53,7 +48,7 @@ Sơ đồ khối dưới đây mô tả **kiến trúc phần cứng mục tiêu
 - **Profile 12V**: `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
 - **Profile 24V**: `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
 
-ESP32 đọc U_batt qua ADC (divider `100k/10k`) để chọn profile và áp dụng đúng ngưỡng điều khiển nguồn.
+ESP32 đọc U_batt qua ADC (divider `100k/10k`) để chọn profile và điều khiển Power MUX.
 
 ### Luồng Dữ Liệu
 
@@ -61,36 +56,39 @@ ESP32 đọc U_batt qua ADC (divider `100k/10k`) để chọn profile và áp d�
 
 ```text
 OBD2 (BLE) ─┐
-            ├─→ ESP32-S3 ─→ Gộp dữ liệu ─→ A7670C (LTE) ─→ Server (MQTT)
-NEO-M8N ────┘
-     ↑
-     └─ Vị trí GNSS qua UART2
+            ├─→ ESP32-S3 ─→ Gộp dữ liệu ─→ SIM7600CE-T (LTE + GNSS) ─→ MQTT broker
+                                                  ↑
+                                                  └─ GNSS NMEA qua AT+CGNSTST
 ```
 
 #### 2. Khi Đỗ Xe (IGN OFF)
 
 ```text
 LIS3DH ─→ Interrupt ─→ ESP32 wake up
-                      ├─→ Bật NEO-M8N nếu cần lấy vị trí
-                      └─→ Wake A7670C để gửi heartbeat/cảnh báo
+                      ├─→ Wake SIM7600CE-T, bật LTE + GNSS nếu cần
+                      └─→ Gửi heartbeat rồi đưa SIM7600CE-T về chế độ sleep/PSM
 ```
 
 #### 3. Quản Lý Nguồn
 
 ```text
-ADC ─→ Đọc U_batt ─→ Logic nguồn ─→ Power MUX / Charger / LTE EN / GNSS EN
+ADC ─→ Đọc U_batt ─→ Logic nguồn ─→ Power MUX / Charger / LTE EN
 ```
 
-### Ý Nghĩa Kiến Trúc Tách Rời
+### Ý Nghĩa Kiến Trúc Một Module
 
-- A7670C chỉ tập trung cho **cellular + MQTT/HTTP**
-- NEO-M8N chỉ tập trung cho **GNSS/NMEA**
-- Có thể tắt riêng GNSS hoặc LTE theo chế độ hoạt động
-- Giảm nhầm lẫn so với kiến trúc modem tích hợp GNSS trước đây
+- SIM7600CE-T xử lý cả **cellular** và **GNSS** nên không cần UART GNSS phụ
+- Có thể đặt module vào **Auto mode** để mạng tự chuyển giữa LTE/UMTS/GSM
+- APN mặc định `internet`, nếu cần điều chỉnh chỉ thay đổi `AT+CGDCONT`
+- Firmware tập trung vào một driver duy nhất, giảm độ phức tạp pin/GPIO
 
 ### Kết Nối Vật Lý
 
-Chi tiết pin/GPIO mục tiêu và khoảng cách với firmware hiện tại được mô tả trong:
+Chi tiết pin/GPIO mô tả trong:
 
 - [`../03-firmware/part-03-modem-simcom.md`](../03-firmware/part-03-modem-simcom.md)
 - [`../03-firmware/part-04-power-management-gpio.md`](../03-firmware/part-04-power-management-gpio.md)
+
+### Lịch Sử Baseline
+
+Các tài liệu cũ mô tả **A7670C + NEO-M8N** để minh họa kiến trúc trước đây. Trong báo cáo hiện tại, những tên tuổi đó chỉ tồn tại ở phần lịch sử và không có nhánh runtime riêng.

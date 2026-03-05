@@ -14,7 +14,7 @@ Thư mục này chứa tài liệu thiết kế phần cứng cho hệ thống I
 │   ├── 02-imu-lis3dh.md                    # Cảm biến IMU LIS3DH
 │   ├── 03-mcu-esp32-s3.md                  # Vi điều khiển ESP32-S3
 │   ├── 04-obd2-ble-adapter.md              # OBD2 BLE Adapter
-│   ├── 05-lte-modem-a7670c.md              # Modem LTE A7670C
+│   ├── 05-lte-modem-a7670c.md              # LTE + GNSS SIM7600CE-T (tên file legacy)
 │   └── 06-backup-battery-21700.md          # Pin dự phòng
 │
 ├── part-02-power-management/               # Quản lý nguồn
@@ -34,14 +34,14 @@ Thư mục này chứa tài liệu thiết kế phần cứng cho hệ thống I
 
 ## Tổng Quan
 
-Thiết kế hiện tại dùng kiến trúc tách riêng LTE và GNSS:
+Thiết kế hiện tại xoay quanh **SIMCom SIM7600CE-T** (LTE + GNSS tích hợp) kết nối trực tiếp với ESP32-S3 qua UART1. Toàn bộ dữ liệu GNSS và LTE được xử lý bởi một module duy nhất, nên firmware và PCB chỉ cần tập trung vào SIM7600CE-T thay vì kết hợp riêng LTE và GNSS.
 
 ### Thành Phần Chính
 
 1. **ESP32-S3** - Vi điều khiển chính
    - Xử lý logic, deep sleep, điều phối state machine
    - Giao tiếp BLE với OBD2 adapter
-   - Giao tiếp UART riêng với modem LTE và module GNSS
+   - Giao tiếp UART1 với SIM7600CE-T (AT command + NMEA stream)
    - Đo điện áp ắc quy qua ADC
 
 2. **LIS3DH** - Cảm biến IMU
@@ -52,19 +52,18 @@ Thiết kế hiện tại dùng kiến trúc tách riêng LTE và GNSS:
    - Đọc IGN, RPM, tốc độ và dữ liệu ECU
    - Kết nối BLE với ESP32-S3
 
-4. **SIMCom A7670C** - Modem LTE
-   - Kết nối mạng cellular
-   - Thực hiện MQTT/HTTP và truyền dữ liệu
-   - Không tích hợp GNSS
+4. **SIMCom SIM7600CE-T** - Modem LTE + GNSS
+   - Kết nối mạng cellular LTE/3G/2G Auto mode (`AT+CNMP=2`)
+   - Cung cấp GNSS qua `AT+CGNSPWR` / `AT+CGNSTST`
+   - Thực hiện MQTT/HTTP, SSL/TLS, OTA (nếu cần)
 
-5. **u-blox NEO-M8N** - Module GNSS
-   - Thu tín hiệu vệ tinh GPS/GNSS
-   - Cung cấp vị trí qua UART riêng
-   - Hoạt động độc lập với modem LTE
-
-6. **Pin 21700 5000mAh** - Pin dự phòng
+5. **Pin 21700 5000mAh** - Pin dự phòng
    - Cấp nguồn khi ắc quy yếu hoặc bị ngắt
    - Được sạc qua mạch IP2312 khi xe hoạt động
+
+6. **Power path + charger** - Buck/Boost/LVD/MUX/IP2312
+   - Bảo vệ ắc quy, chuyển nguồn sang pin backup
+   - Sạc pin 21700 bằng module IP2312 khi xe chạy
 
 ### Power Management
 
@@ -114,10 +113,10 @@ Thiết kế hiện tại dùng kiến trúc tách riêng LTE và GNSS:
 - ✅ Charger: IP2312 (3A, Type-C)
 
 **Lý do:**
-- Tách LTE và GNSS giúp thiết kế rõ ràng hơn
-- Có thể tắt riêng GNSS hoặc LTE theo chế độ hoạt động
-- Dễ kiểm soát tiêu thụ điện khi xe đỗ
-- Phù hợp lộ trình refactor firmware về kiến trúc hai module
+- SIMCom SIM7600CE-T tích hợp LTE + GNSS giúp giảm số linh kiện và đơn giản hóa PCB
+- Một module duy nhất với Auto mode `AT+CNMP=2`, APN mặc định `internet`, và luồng GNSS qua UART giữ cho firmware dễ điều phối
+- Kiểm tra `AT+CEREG?` trước `AT+CGACT=1,1` giúp attach ổn định trước khi kích hoạt PDP context
+- Điều khiển power profile tập trung quanh SIM7600CE-T giúp tối ưu dòng khi DRIVING, PARKED và SLEEP
 
 ### Tổng Chi Phí
 
@@ -133,6 +132,6 @@ Xem chi tiết trong [`04-bill-of-materials.md`](./04-bill-of-materials.md).
 
 ## Cập Nhật
 
-- **2026-03**: Chuẩn hóa kiến trúc phần cứng sang A7670C (LTE) + NEO-M8N (GNSS)
+- **2026-03**: Chuẩn hóa kiến trúc phần cứng sang SIMCom SIM7600CE-T (LTE + GNSS tích hợp); A7670C + NEO-M8N chỉ còn là baseline lịch sử để so sánh
 - **2026-03**: Đổi tên file modem phần cứng sang `05-lte-modem-a7670c.md`
 - **2024-12**: Tách file lớn thành các file nhỏ

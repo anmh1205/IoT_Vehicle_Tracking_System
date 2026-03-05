@@ -6,7 +6,7 @@ Folder này chứa thiết kế firmware cho thiết bị tracker.
 
 - **part-01-kien-truc-va-luong-hoat-dong.md**: Kiến trúc firmware, luồng hoạt động cơ bản, và các điểm chính trong code
 - **part-02-ble-obd2.md**: Chiến lược kết nối BLE OBD2 (vgate iCar Pro), xử lý lỗi, và tối ưu hóa
-- **part-03-modem-simcom.md**: Quản lý **A7670C (LTE)** và **NEO-M8N (GNSS)** theo kiến trúc tách rời, deep sleep, và điều khiển theo chế độ
+- **part-03-modem-simcom.md**: Quản lý modem **SIMCom SIM7600CE-T** (LTE + GNSS tích hợp) theo dòng lệnh AT, sleep/PSM, và chế độ hoạt động
 - **part-04-power-management-gpio.md**: Power Path Management Control, GPIO mapping và configuration
 - **part-05-data-format-state-machine.md**: Data format (MQTT), protocol, và state machine chi tiết
 - **part-06-configuration.md**: Configuration management và calibration
@@ -18,16 +18,17 @@ Folder này chứa thiết kế firmware cho thiết bị tracker.
 ## Workflow
 
 Sau khi đã chốt phần cứng (folder `02-hardware/`), thiết kế firmware dựa trên:
-- Các component đã chọn (**ESP32-S3, LIS3DH, A7670C, NEO-M8N, vgate iCar Pro BLE**)
+- Các component đã chọn (**ESP32-S3, LIS3DH, SIMCom SIM7600CE-T (LTE + GNSS tích hợp), vgate iCar Pro BLE**)
 - Chiến lược quản lý năng lượng (3 chế độ)
 - Yêu cầu từ scope (part-02)
 
 ## Current Gap vs Target Architecture
 
 ### Target architecture (docs)
-- **LTE path**: A7670C qua UART riêng cho modem AT/MQTT/PPP
-- **GNSS path**: NEO-M8N qua UART riêng, đọc NMEA/UBX
-- LTE và GNSS tách lifecycle để bật/tắt độc lập theo state
+- **SIMCom SIM7600CE-T** xử lý cả LTE và GNSS qua UART1 (AT command + GNSS stream)
+- **LTE/GNSS lifecycle** tách theo state nhưng không giả định GNSS tách rời module
+- **Attach + PDP flow** sử dụng APN mặc định `internet` (qua `AT+CGDCONT=1,"IP","internet"`), kiểm tra `AT+CEREG?` (bounded retry) trước khi gửi `AT+CGACT=1,1`, và chỉ ra lệnh GNSS stream sau khi mạng sẵn sàng
+- Firmware cố định Auto mode `AT+CNMP=2` và giữ pin mapping hiện tại, không thêm UART GNSS riêng
 
 ### Current firmware baseline (code reality)
 - `iot-vehicle-tracking-system/Tracking_Firmware/main/src/modem_gnss.c`: vẫn dùng `AT+CGNSPWR` và `AT+CGNSINF` (mô hình GNSS tích hợp modem)

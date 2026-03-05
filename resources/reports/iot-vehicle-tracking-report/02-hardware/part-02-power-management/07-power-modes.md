@@ -13,9 +13,9 @@
 - Lấy nguồn trực tiếp từ ắc quy khi `U_batt >= IGN_ON` theo profile (12V: `>=13.0V`, 24V: `>=26.0V`)
 - **Kết nối Bluetooth với OBD2 ELM327** (2–5 giây reconnect nếu đã paired)
 - Đọc IGN status từ OBD2 (xác nhận IGN ON)
-- Bật **A7670C (LTE)** và **NEO-M8N (GNSS)** liên tục
+- Bật **SIM7600CE-T** (LTE + GNSS) liên tục, GNSS sử dụng `AT+CGNSPWR=1`, `AT+CGNSTST=1`
 - Đọc dữ liệu OBD2 định kỳ (RPM, tốc độ, nhiên liệu) mỗi 5–30 giây
-- Gửi vị trí + dữ liệu OBD2 mỗi 5–30 giây
+- Gửi vị trí + dữ liệu OBD2 mỗi 5–30 giây qua MQTT/HTTP
 - **Giữ kết nối Bluetooth** trong suốt thời gian IGN ON (không deep sleep)
 - **Sạc pin 21700** khi `U_batt >= IGN_ON` theo profile
 
@@ -39,15 +39,13 @@
 - Lấy nguồn từ ắc quy (không sạc pin)
 - **Ngắt kết nối Bluetooth OBD2** (không cần khi đỗ)
 - ESP32 deep sleep, chỉ để timer + wakeup từ LIS3DH
-- Thức dậy mỗi 10–30 phút:
+- Sử dụng SIM7600CE-T ở chế độ sleep/PSM (`AT+CSCLK=1`, `AT+CPSMS=1,...`)
+- Wake up mỗi 10–30 phút:
   - Kiểm tra U_batt (qua ADC)
   - Nếu `U_batt <= Switch_OFF` theo profile: Chuyển sang pin + gửi cảnh báo
-  - Bật **A7670C (LTE)** và **NEO-M8N (GNSS)** khi cần heartbeat
-  - Lấy vị trí
-  - Gửi heartbeat (vị trí, pin, ắc quy, trạng thái nguồn)
+  - Bật SIM7600CE-T (GNSS `AT+CGNSPWR=1`, đọc fix, `AT+CGNSTST=1`), gửi heartbeat, rồi tắt GNSS lại
   - **Không kết nối OBD2** (tiết kiệm thời gian và năng lượng)
-  - Tắt **GNSS + 4G**
-  - Quay lại deep sleep
+  - Tắt LTE/GNSS → đưa SIM7600CE-T lại chế độ sleep + ESP32 deep sleep
 
 **Ước Lượng Dòng:** ~2–3 mA trung bình (từ ắc quy)
 
@@ -58,7 +56,7 @@
 3. **IMU đủ để phát hiện chuyển động**: LIS3DH có thể phát hiện rung, kéo, cẩu xe mà không cần OBD2
 4. **Tiết kiệm năng lượng**: Không cần Bluetooth (~30–50 mA) → tiết kiệm ~7,000 lần năng lượng
 5. **Tiết kiệm thời gian**: Không cần reconnect Bluetooth (2–5 giây) → wake up nhanh hơn
-6. **Đơn giản hóa logic**: Không cần quản lý kết nối Bluetooth khi đỗ
+6. **Đơn giản hóa logic**: Chỉ cần một driver SIM7600CE-T cho GNSS + LTE
 
 **Lưu Ý:**
 
@@ -76,19 +74,19 @@
 **Hành Động:**
 
 - ESP32 thức dậy ngay (từ deep sleep)
-- Bật **A7670C (LTE)** và **NEO-M8N (GNSS)** ngay
+- Bật **SIM7600CE-T** (GNSS + LTE) ngay
 - Gửi cảnh báo ưu tiên (rung, kéo, cẩu xe)
 - Chuyển sang track liên tục (gần giống chế độ 1)
 - **Có thể kết nối Bluetooth OBD2** (tùy chọn):
   - Nếu cần xác nhận IGN status (xe có đang chạy không?)
-  - Hoặc chỉ dùng IMU + GPS để phát hiện chuyển động → đơn giản hơn
+  - Hoặc chỉ dùng IMU + GNSS tích hợp để phát hiện chuyển động → đơn giản hơn
 - Duy trì thêm 2–4 giờ hoặc cho đến khi xác nhận
 
 **Lưu Ý:**
 
 - IMU đã phát hiện chuyển động → không nhất thiết cần OBD2
 - Có thể kết nối OBD2 để xác nhận IGN status (nếu cần)
-- Hoặc chỉ dùng IMU + GPS → đơn giản và tiết kiệm năng lượng hơn
+- Hoặc chỉ dùng IMU + GNSS → đơn giản và tiết kiệm năng lượng hơn
 
 ### IV.2 Quản Lý Nguồn và Low Voltage Disconnect (LVD)
 
@@ -102,7 +100,7 @@
 **Khi Xe Chạy (IGN ON):**
 
 - Tracker dùng nguồn trực tiếp từ ắc quy
-- Sạc pin 21700 khi `U_batt >= IGN_ON` của profile
+- Sạc pin 21700 khi `U_batt >= IGN_ON` theo profile
 - Dòng sạc: **3 A** (module IP2312)
 - Thời gian sạc đầy: ~2 giờ (pin 5,000 mAh)
 

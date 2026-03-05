@@ -66,7 +66,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 **Phạm vi phần cứng:**
 
 - Thiết bị tracker IoT sử dụng vi điều khiển ESP32-S3
-- Modem LTE SIMCom A7670C + module GNSS u-blox NEO-M8N (kiến trúc tách rời định vị và truyền dữ liệu 4G/LTE)
+- Modem LTE + GNSS tích hợp SIMCom SIM7600CE-T
 - Adapter OBD2 BLE vgate iCar Pro (đọc dữ liệu chẩn đoán xe qua Bluetooth)
 - Cảm biến gia tốc LIS3DH (IMU) để phát hiện chuyển động và rung
 - Pin dự phòng 21700 với mạch sạc và bảo vệ
@@ -88,7 +88,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 - Express.js API server với kiến trúc Domain-Driven Design
 - Next.js 15 frontend với bản đồ thời gian thực (Leaflet), biểu đồ (ECharts)
 
-**Giới hạn phạm vi (out of scope):**
+**Giới hạn phạm vi nghiên cứu:**
 
 - Không xử lý OBD-II diagnostics phức tạp (chỉ đọc các thông số cơ bản)
 - Không phát hiện va chạm (IMU chỉ dùng cho phát hiện chuyển động/rung)
@@ -99,7 +99,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 
 | Tầng (Layer)   | Công nghệ chính                                     | Phạm vi                         |
 | -------------- | --------------------------------------------------- | ------------------------------- |
-| Phần cứng      | ESP32-S3, A7670C, NEO-M8N, vgate iCar Pro, LIS3DH   | Thiết kế và chế tạo prototype   |
+| Phần cứng      | ESP32-S3, SIM7600CE-T, vgate iCar Pro, LIS3DH       | Thiết kế và chế tạo prototype   |
 | Firmware       | ESP-IDF, FreeRTOS, MQTT 5.0                         | Lập trình nhúng đầy đủ          |
 | MQTT Broker    | EMQX 5.x                                            | Cấu hình và triển khai          |
 | Backend        | Express.js, TypeScript, PostgreSQL, VictoriaMetrics | Phát triển API và xử lý dữ liệu |
@@ -256,7 +256,7 @@ Hệ thống còn bao gồm mạch Low Voltage Disconnect (LVD) để tự độ
 | Thành phần                    | Công nghệ               | Phiên bản | Vai trò                          |
 | ----------------------------- | ----------------------- | --------- | -------------------------------- |
 | Vi điều khiển                 | ESP32-S3                | —        | MCU chính, xử lý và điều khiển   |
-| LTE + GNSS                    | SIMCom A7670C + u-blox NEO-M8N | —        | Truyền dữ liệu 4G và định vị GPS |
+| LTE + GNSS                    | SIMCom SIM7600CE-T              | —        | Truyền dữ liệu 4G và định vị GPS |
 | OBD2 Adapter                  | vgate iCar Pro          | BLE 4.0   | Đọc dữ liệu chẩn đoán xe         |
 | Cảm biến gia tốc              | LIS3DH                  | —        | Phát hiện chuyển động và rung    |
 | Pin dự phòng                  | 21700 Li-ion            | 5000 mAh  | Nguồn điện dự phòng              |
@@ -283,7 +283,7 @@ Hệ thống còn bao gồm mạch Low Voltage Disconnect (LVD) để tự độ
 Dự án đã đạt được các kết quả chính sau:
 
 **Về phần cứng:**
-- Thiết kế thành công prototype thiết bị tracker IoT sử dụng ESP32-S3 làm vi điều khiển trung tâm, tích hợp modem LTE SIMCom A7670C + module GNSS u-blox NEO-M8N, adapter OBD2 BLE vgate iCar Pro, cảm biến gia tốc LIS3DH, và pin dự phòng 21700.
+- Thiết kế thành công prototype thiết bị tracker IoT sử dụng ESP32-S3 làm vi điều khiển trung tâm, tích hợp modem SIMCom SIM7600CE-T (LTE + GNSS), adapter OBD2 BLE vgate iCar Pro, cảm biến gia tốc LIS3DH và pin dự phòng 21700.
 - Hệ thống quản lý năng lượng đa chế độ hoạt động hiệu quả, với mức tiêu thụ điện ngủ sâu đạt yêu cầu (< 500 µA), đảm bảo không làm cạn ắc quy xe trong quá trình sử dụng bình thường.
 - Mạch Low Voltage Disconnect (LVD) bảo vệ ắc quy xe hiệu quả, tự động ngắt khi điện áp tụt dưới ngưỡng an toàn.
 
@@ -308,7 +308,7 @@ Trên cơ sở các kết quả đã đạt được và các giới hạn hiệ
 
 2. **Tăng cường bảo mật**: Triển khai TLS/SSL cho kết nối MQTT trong môi trường production, áp dụng MQTT ACL chi tiết hơn, và bổ sung cơ chế mã hóa dữ liệu end-to-end giữa thiết bị và server.
 
-3. **Tối ưu hóa hiệu năng**: Nghiên cứu và áp dụng các kỹ thuật nén dữ liệu telemetry (delta encoding, protobuf) để giảm băng thông 4G, đặc biệt khi vận hành đội xe lớn (> 500 xe).
+3. **Tối ưu hóa hiệu năng**: Nghiên cứu và áp dụng các kỹ thuật nén dữ liệu telemetry (mã hóa sai khác, protobuf) để giảm băng thông 4G, đặc biệt khi vận hành đội xe lớn (> 500 xe).
 
 4. **Tích hợp trí tuệ nhân tạo**: Áp dụng các mô hình machine learning để phân tích hành vi lái xe (driving behavior analysis), dự đoán bảo trì (predictive maintenance), và phát hiện bất thường (anomaly detection) từ dữ liệu telemetry.
 

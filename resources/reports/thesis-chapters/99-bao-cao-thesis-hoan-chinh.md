@@ -4,13 +4,13 @@
 
 **NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN HƯỚNG DẪN**
 
-| | |
-|---|---|
-| **Giảng viên hướng dẫn:** | [...] |
-| **Khoa:** | [...] |
-| **Tên đề tài:** | Thiết kế và xây dựng hệ thống IoT giám sát phương tiện giao thông |
-| **Sinh viên thực hiện:** | [...] |
-| **Lớp:** | [...] |
+|                           |                                                                   |
+| ------------------------- | ----------------------------------------------------------------- |
+| **Giảng viên hướng dẫn:** | [...]                                                             |
+| **Khoa:**                 | [...]                                                             |
+| **Tên đề tài:**           | Thiết kế và xây dựng hệ thống IoT giám sát phương tiện giao thông |
+| **Sinh viên thực hiện:**  | [...]                                                             |
+| **Lớp:**                  | [...]                                                             |
 
 **NỘI DUNG NHẬN XÉT**
 
@@ -36,23 +36,23 @@
 
 ☐ Đồng ý cho bảo vệ &emsp;&emsp; ☐ Không đồng ý cho bảo vệ
 
-| | |
-|---|---|
-| **Điểm đánh giá:** | ......./10 |
-| **Ngày:** | ......./......./2026 |
-| **Chữ ký:** | |
+|                    |                      |
+| ------------------ | -------------------- |
+| **Điểm đánh giá:** | ......./10           |
+| **Ngày:**          | ......./......./2026 |
+| **Chữ ký:**        |                      |
 
 ---
 
 **NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN PHẢN BIỆN**
 
-| | |
-|---|---|
-| **Giảng viên phản biện:** | [...] |
-| **Khoa:** | [...] |
-| **Tên đề tài:** | Thiết kế và xây dựng hệ thống IoT giám sát phương tiện giao thông |
-| **Sinh viên thực hiện:** | [...] |
-| **Lớp:** | [...] |
+|                           |                                                                   |
+| ------------------------- | ----------------------------------------------------------------- |
+| **Giảng viên phản biện:** | [...]                                                             |
+| **Khoa:**                 | [...]                                                             |
+| **Tên đề tài:**           | Thiết kế và xây dựng hệ thống IoT giám sát phương tiện giao thông |
+| **Sinh viên thực hiện:**  | [...]                                                             |
+| **Lớp:**                  | [...]                                                             |
 
 **NỘI DUNG NHẬN XÉT**
 
@@ -83,17 +83,18 @@
 
 ☐ Đồng ý cho bảo vệ &emsp;&emsp; ☐ Không đồng ý cho bảo vệ
 
-| | |
-|---|---|
-| **Điểm đánh giá:** | ......./10 |
-| **Ngày:** | ......./......./2026 |
-| **Chữ ký:** | |
+|                    |                      |
+| ------------------ | -------------------- |
+| **Điểm đánh giá:** | ......./10           |
+| **Ngày:**          | ......./......./2026 |
+| **Chữ ký:**        |                      |
 
 ---
 
 **BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP**
 
 **I. Thông tin chung**
+
 - Thời gian: từ ... giờ ... đến ... giờ ... ngày .../..../20...
 - Địa điểm: .............................
 - Họ và tên sinh viên: [...] &emsp; Mã số SV: [...]
@@ -108,6 +109,7 @@
 **IV. Tổng hợp nội dung trả lời của sinh viên:** .............................
 
 **V. Nội dung đánh giá của Hội đồng:**
+
 - Ý nghĩa của đồ án: .............................
 - Về nội dung, kết cấu của đồ án: .............................
 - Phương pháp nghiên cứu: .............................
@@ -119,28 +121,28 @@
 
 **GIẢI TRÌNH CÁC CHỈNH SỬA**
 
-*(Nếu có)*
+_(Nếu có)_
 
 | STT | Nội dung yêu cầu chỉnh sửa | Nội dung đã chỉnh sửa | Ghi chú |
-|-----|----------------------------|----------------------|---------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
+| --- | -------------------------- | --------------------- | ------- |
+| 1   |                            |                       |         |
+| 2   |                            |                       |         |
+| 3   |                            |                       |         |
 
 ---
 
 **TRANG BÌA**
 
-| | |
-|---|---|
-| **Trường:** | [...] |
-| **Khoa:** | [...] |
-| **Đề tài:** | Thiết kế và xây dựng hệ thống IoT giám sát phương tiện giao thông |
-| **Sinh viên thực hiện:** | [...] |
-| **MSSV:** | [...] |
-| **Lớp:** | [...] |
-| **Giảng viên hướng dẫn:** | [...] |
-| **Năm:** | 2026 |
+|                           |                                                                   |
+| ------------------------- | ----------------------------------------------------------------- |
+| **Trường:**               | [...]                                                             |
+| **Khoa:**                 | [...]                                                             |
+| **Đề tài:**               | Thiết kế và xây dựng hệ thống IoT giám sát phương tiện giao thông |
+| **Sinh viên thực hiện:**  | [...]                                                             |
+| **MSSV:**                 | [...]                                                             |
+| **Lớp:**                  | [...]                                                             |
+| **Giảng viên hướng dẫn:** | [...]                                                             |
+| **Năm:**                  | 2026                                                              |
 
 ---
 
@@ -171,7 +173,7 @@ Tôi xin chịu hoàn toàn trách nhiệm về nội dung đồ án tốt nghi�
 
 Trong bối cảnh dịch vụ cho thuê xe tự lái tại Việt Nam tăng trưởng nhanh, nhu cầu giám sát và quản lý phương tiện từ xa đã trở thành yêu cầu trọng yếu đối với doanh nghiệp vận tải. Đồ án này trình bày quá trình thiết kế và xây dựng một hệ thống IoT hoàn chỉnh, cho phép giám sát phương tiện theo thời gian thực, đồng thời tích hợp nhiều cảm biến và giao thức truyền thông hiện đại.
 
-Về phần cứng, hệ thống dùng ESP32-S3 làm trung tâm xử lý, kết hợp modem LTE SIMCom A7670C và module GNSS u-blox NEO-M8N để định vị và truyền dữ liệu. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng thời dùng IMU LIS3DH để phát hiện va chạm và phân tích hành vi lái xe. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng 21700 và cơ chế ngắt điện áp thấp (LVD), bảo đảm thiết bị vẫn hoạt động khi xe tắt máy.
+Về phần cứng, hệ thống dùng ESP32-S3 làm trung tâm xử lý, kết hợp modem LTE + GNSS tích hợp SIMCom SIM7600CE-T để định vị và truyền dữ liệu. Modem được cấu hình Auto mode (`AT+CNMP=2`) nhằm cho phép chuyển đổi linh hoạt giữa LTE/UMTS/GSM, dùng APN mặc định `internet`, và cung cấp GNSS qua lệnh `AT+CGNSINF` (hoặc stream NMEA tùy chọn `AT+CGNSTST`) trên cùng UART1 mà không cần module GNSS độc lập. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng thời dùng IMU LIS3DH để phát hiện va chạm và phân tích hành vi lái xe. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng 21700 và cơ chế ngắt điện áp thấp (LVD), bảo đảm thiết bị vẫn hoạt động khi xe tắt máy.
 
 Về phần mềm, dữ liệu từ thiết bị IoT được truyền về máy chủ bằng MQTT 5.0 qua EMQX và phân quyền theo ACL từng thiết bị. MQTT Bridge tiếp nhận, rồi phân luồng dữ liệu đến các hệ lưu trữ chuyên biệt: PostgreSQL cho dữ liệu quan hệ (phương tiện, người dùng, cảnh báo, hàng rào địa lý), VictoriaMetrics cho dữ liệu chuỗi thời gian (tọa độ GPS, thông số OBD2, dữ liệu cảm biến), và VictoriaLogs cho nhật ký sự kiện. API server xây dựng bằng Express.js + TypeScript, theo kiến trúc DDD, với cơ chế xác thực phiên dựa trên token lưu trong cơ sở dữ liệu.
 
@@ -193,7 +195,7 @@ Kết quả đạt được là một hệ thống IoT giám sát phương tiệ
 
 In the context of the rapidly growing self-drive car rental industry in Vietnam, the need for remote vehicle monitoring and management has become a critical factor for transportation businesses. This thesis presents the design and development of a comprehensive IoT system that enables real-time vehicle tracking, integrating diverse sensors and modern communication protocols.
 
-On the hardware side, the system employs the ESP32-S3 microcontroller as the central processing unit, combined with a SIMCom A7670C LTE modem and a u-blox NEO-M8N GNSS module for satellite positioning and data transmission over 4G LTE cellular networks. The device reads engine diagnostic data via the OBD2 protocol through a vgate iCar Pro adapter using Bluetooth Low Energy (BLE), while integrating the LIS3DH IMU accelerometer for collision detection and driving behavior analysis. The power management system includes buck/boost converters, a 21700 backup battery charger, and a low-voltage disconnect (LVD) mechanism to ensure continuous operation even when the vehicle engine is off.
+On the hardware side, the system employs the ESP32-S3 microcontroller as the central processing unit, paired with the SIMCom SIM7600CE-T LTE+GNSS modem. The modem is configured to Auto mode (`AT+CNMP=2`) so it can switch between LTE/UMTS/GSM automatically, uses the default APN `internet`, and delivers GNSS data via `AT+CGNSINF` (with optional NMEA streaming through `AT+CGNSTST`) on the same UART1 channel without a dedicated GNSS interface. The device reads engine diagnostic data via the OBD2 protocol through a vgate iCar Pro adapter using Bluetooth Low Energy (BLE), while integrating the LIS3DH IMU accelerometer for collision detection and driving behavior analysis. The power management system includes buck/boost converters, a 21700 backup battery charger, and a low-voltage disconnect (LVD) mechanism to ensure continuous operation even when the vehicle engine is off.
 
 On the software side, data from IoT devices is transmitted to the server via the MQTT 5.0 protocol using the EMQX broker with device-level ACL authorization. The MQTT Bridge service receives and routes data to specialized storage systems: PostgreSQL for relational data (vehicle information, users, alerts, geofences), VictoriaMetrics for time-series data (GPS coordinates, OBD2 parameters, sensor telemetry), and VictoriaLogs for system event logs. The API server is built on Express.js with TypeScript, following Domain-Driven Design (DDD) architecture with database-backed session token authentication.
 
@@ -228,68 +230,68 @@ Xin chân thành cảm ơn!
 
 <!-- MỤC LỤC được cập nhật theo cấu trúc chương thực tế -->
 
-| STT | Nội dung | Trang |
-|-----|----------|-------|
-| | NHẬN XÉT CỦA GIẢNG VIÊN HƯỚNG DẪN | ... |
-| | NHẬN XÉT CỦA GIẢNG VIÊN PHẢN BIỆN | ... |
-| | BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP | ... |
-| | GIẢI TRÌNH CÁC CHỈNH SỬA | ... |
-| | LỜI CAM ĐOAN | ... |
-| | TÓM TẮT - ABSTRACT | ... |
-| | LỜI CẢM ƠN | ... |
-| | MỤC LỤC | ... |
-| | DANH MỤC BẢNG | ... |
-| | DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ | ... |
-| | DANH MỤC TỪ VIẾT TẮT | ... |
-| **Chương 1** | **GIỚI THIỆU DỰ ÁN - SUMMARY** | ... |
-| 1.1 | Đặt vấn đề / Bối cảnh của dự án — Problem definition and Background | ... |
-| 1.2 | Mục tiêu và phạm vi của dự án | ... |
-| 1.3 | Các tiêu chí cần đạt được của dự án | ... |
-| 1.4 | Phương pháp tiếp cận thiết kế kỹ thuật | ... |
-| 1.5 | Kết quả và khuyến nghị | ... |
-| **Chương 2** | **PHÂN TÍCH VẤN ĐỀ KỸ THUẬT** | ... |
-| 2.1 | Mô tả vấn đề — Problem statement | ... |
-| 2.2 | Bối cảnh và cơ sở kỹ thuật — Background and Technical reviews | ... |
-| 2.3 | Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế — Design criteria and Constraints | ... |
-| 2.4 | Yêu cầu từ các bên liên quan — Constituent's requirements | ... |
-| **Chương 3** | **CÁC GIẢI PHÁP THIẾT KẾ - DESIGN SOLUTIONS** | ... |
-| 3.1 | Phân tích tổng hợp — General analysis | ... |
-| 3.1.1 | Phân tích và lựa chọn phần cứng | ... |
-| 3.1.2 | Phân tích và lựa chọn giải pháp firmware | ... |
-| 3.1.3 | Phân tích và lựa chọn kiến trúc Cloud | ... |
-| 3.1.4 | Phân tích và lựa chọn công nghệ Frontend | ... |
-| 3.2 | Đề xuất các giải pháp — Proposed multiple solutions | ... |
-| 3.2.1 | Giải pháp phần cứng | ... |
-| 3.2.2 | Giải pháp firmware | ... |
-| 3.2.3 | Giải pháp Backend & Cloud | ... |
-| 3.2.4 | Giải pháp Frontend | ... |
-| 3.3 | Phân tích, đánh giá và lựa chọn phương án khả thi — Analysis, Evaluation and Selection | ... |
-| 3.4 | Tối ưu phương án thiết kế — The optimal solution | ... |
-| **Chương 4** | **TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ - IMPLEMENTATION AND RESULTS** | ... |
-| 4.1 | Thiết kế chi tiết giải pháp — Detailed design solution | ... |
-| 4.1.1 | Thiết kế chi tiết phần cứng | ... |
-| 4.1.2 | Triển khai firmware, cloud và giao diện điều khiển | ... |
-| 4.2 | Chế tạo và lắp ráp hệ thống — Manufacture and Assembly | ... |
-| 4.2.1 | Lắp ráp mạch điện tử | ... |
-| 4.2.2 | Lắp đặt trong xe | ... |
-| 4.2.3 | Triển khai Firmware | ... |
-| 4.2.4 | Triển khai hệ thống Cloud | ... |
-| 4.2.5 | Triển khai Frontend Dashboard | ... |
-| 4.2.6 | Cấu hình giám sát hệ thống | ... |
-| 4.2.7 | Checklist hardening trước khi vận hành production | ... |
-| 4.3 | Đo lường và kết quả — Measurement and Result | ... |
-| **Chương 5** | **ĐÁNH GIÁ VÀ KHUYẾN NGHỊ - EVALUATION AND RECOMMENDATION** | ... |
-| 5.1 | Đánh giá hiệu năng | ... |
-| 5.2 | Đánh giá kinh tế và môi trường | ... |
-| 5.3 | Đánh giá rủi ro và biện pháp giảm thiểu | ... |
-| 5.4 | Khuyến nghị cho tương lai | ... |
-| **Chương 6** | **PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM - REFLECTION AND CASE-STUDIES** | ... |
-| 6.1 | Ứng dụng kiến thức kỹ thuật — Earlier course work | ... |
-| 6.2 | Giải quyết các vấn đề kỹ thuật phức tạp — Complex engineering problems | ... |
-| 6.3 | Tác động đạo đức và xã hội — Ethical and Social impacts | ... |
-| 6.4 | Tổng kết và bài học kinh nghiệm — General reflection and case-studies | ... |
-| | TÀI LIỆU TRÍCH DẪN - REFERENCES | ... |
-| | PHỤ LỤC - APPENDICES | ... |
+| STT          | Nội dung                                                                               | Trang |
+| ------------ | -------------------------------------------------------------------------------------- | ----- |
+|              | NHẬN XÉT CỦA GIẢNG VIÊN HƯỚNG DẪN                                                      | ...   |
+|              | NHẬN XÉT CỦA GIẢNG VIÊN PHẢN BIỆN                                                      | ...   |
+|              | BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP                                                     | ...   |
+|              | GIẢI TRÌNH CÁC CHỈNH SỬA                                                               | ...   |
+|              | LỜI CAM ĐOAN                                                                           | ...   |
+|              | TÓM TẮT - ABSTRACT                                                                     | ...   |
+|              | LỜI CẢM ƠN                                                                             | ...   |
+|              | MỤC LỤC                                                                                | ...   |
+|              | DANH MỤC BẢNG                                                                          | ...   |
+|              | DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ                                                            | ...   |
+|              | DANH MỤC TỪ VIẾT TẮT                                                                   | ...   |
+| **Chương 1** | **GIỚI THIỆU DỰ ÁN - SUMMARY**                                                         | ...   |
+| 1.1          | Đặt vấn đề / Bối cảnh của dự án — Problem definition and Background                    | ...   |
+| 1.2          | Mục tiêu và phạm vi của dự án                                                          | ...   |
+| 1.3          | Các tiêu chí cần đạt được của dự án                                                    | ...   |
+| 1.4          | Phương pháp tiếp cận thiết kế kỹ thuật                                                 | ...   |
+| 1.5          | Kết quả và khuyến nghị                                                                 | ...   |
+| **Chương 2** | **PHÂN TÍCH VẤN ĐỀ KỸ THUẬT**                                                          | ...   |
+| 2.1          | Mô tả vấn đề — Problem statement                                                       | ...   |
+| 2.2          | Bối cảnh và cơ sở kỹ thuật — Background and Technical reviews                          | ...   |
+| 2.3          | Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế — Design criteria and Constraints          | ...   |
+| 2.4          | Yêu cầu từ các bên liên quan — Constituent's requirements                              | ...   |
+| **Chương 3** | **CÁC GIẢI PHÁP THIẾT KẾ - DESIGN SOLUTIONS**                                          | ...   |
+| 3.1          | Phân tích tổng hợp — General analysis                                                  | ...   |
+| 3.1.1        | Phân tích và lựa chọn phần cứng                                                        | ...   |
+| 3.1.2        | Phân tích và lựa chọn giải pháp firmware                                               | ...   |
+| 3.1.3        | Phân tích và lựa chọn kiến trúc Cloud                                                  | ...   |
+| 3.1.4        | Phân tích và lựa chọn công nghệ Frontend                                               | ...   |
+| 3.2          | Đề xuất các giải pháp — Proposed multiple solutions                                    | ...   |
+| 3.2.1        | Giải pháp phần cứng                                                                    | ...   |
+| 3.2.2        | Giải pháp firmware                                                                     | ...   |
+| 3.2.3        | Giải pháp Backend & Cloud                                                              | ...   |
+| 3.2.4        | Giải pháp Frontend                                                                     | ...   |
+| 3.3          | Phân tích, đánh giá và lựa chọn phương án khả thi — Analysis, Evaluation and Selection | ...   |
+| 3.4          | Tối ưu phương án thiết kế — The optimal solution                                       | ...   |
+| **Chương 4** | **TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ - IMPLEMENTATION AND RESULTS**                       | ...   |
+| 4.1          | Thiết kế chi tiết giải pháp — Detailed design solution                                 | ...   |
+| 4.1.1        | Thiết kế chi tiết phần cứng                                                            | ...   |
+| 4.1.2        | Triển khai firmware, cloud và giao diện điều khiển                                     | ...   |
+| 4.2          | Chế tạo và lắp ráp hệ thống — Manufacture and Assembly                                 | ...   |
+| 4.2.1        | Lắp ráp mạch điện tử                                                                   | ...   |
+| 4.2.2        | Lắp đặt trong xe                                                                       | ...   |
+| 4.2.3        | Triển khai Firmware                                                                    | ...   |
+| 4.2.4        | Triển khai hệ thống Cloud                                                              | ...   |
+| 4.2.5        | Triển khai Frontend Dashboard                                                          | ...   |
+| 4.2.6        | Cấu hình giám sát hệ thống                                                             | ...   |
+| 4.2.7        | Checklist hardening trước khi vận hành production                                      | ...   |
+| 4.3          | Đo lường và kết quả — Measurement and Result                                           | ...   |
+| **Chương 5** | **ĐÁNH GIÁ VÀ KHUYẾN NGHỊ - EVALUATION AND RECOMMENDATION**                            | ...   |
+| 5.1          | Đánh giá hiệu năng                                                                     | ...   |
+| 5.2          | Đánh giá kinh tế và môi trường                                                         | ...   |
+| 5.3          | Đánh giá rủi ro và biện pháp giảm thiểu                                                | ...   |
+| 5.4          | Khuyến nghị cho tương lai                                                              | ...   |
+| **Chương 6** | **PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM - REFLECTION AND CASE-STUDIES**                      | ...   |
+| 6.1          | Ứng dụng kiến thức kỹ thuật — Earlier course work                                      | ...   |
+| 6.2          | Giải quyết các vấn đề kỹ thuật phức tạp — Complex engineering problems                 | ...   |
+| 6.3          | Tác động đạo đức và xã hội — Ethical and Social impacts                                | ...   |
+| 6.4          | Tổng kết và bài học kinh nghiệm — General reflection and case-studies                  | ...   |
+|              | TÀI LIỆU TRÍCH DẪN - REFERENCES                                                        | ...   |
+|              | PHỤ LỤC - APPENDICES                                                                   | ...   |
 
 ---
 
@@ -297,19 +299,19 @@ Xin chân thành cảm ơn!
 
 <!-- Danh mục bảng sẽ được cập nhật khi hoàn thành các chương nội dung -->
 
-| Bảng | Mô tả | Trang |
-|------|--------|-------|
-| Bảng 2.1 | So sánh các giao thức IoT phổ biến | ... |
-| Bảng 2.2 | Thông số kỹ thuật ESP32-S3 | ... |
-| Bảng 2.3 | Các PID OBD2 thông dụng | ... |
-| Bảng 3.1 | Danh sách linh kiện (BOM) | ... |
-| Bảng 3.2 | Sơ đồ chân kết nối GPIO | ... |
-| Bảng 3.3 | Bảng tính toán công suất tiêu thụ | ... |
-| Bảng 3.4 | Cấu trúc bảng cơ sở dữ liệu PostgreSQL | ... |
-| Bảng 3.5 | Danh sách API endpoints | ... |
-| Bảng 4.1 | Cấu hình Docker cho các dịch vụ | ... |
-| Bảng 5.1 | Kết quả kiểm thử chức năng | ... |
-| Bảng 5.2 | So sánh với các giải pháp hiện có | ... |
+| Bảng     | Mô tả                                  | Trang |
+| -------- | -------------------------------------- | ----- |
+| Bảng 2.1 | So sánh các giao thức IoT phổ biến     | ...   |
+| Bảng 2.2 | Thông số kỹ thuật ESP32-S3             | ...   |
+| Bảng 2.3 | Các PID OBD2 thông dụng                | ...   |
+| Bảng 3.1 | Danh sách linh kiện (BOM)              | ...   |
+| Bảng 3.2 | Sơ đồ chân kết nối GPIO                | ...   |
+| Bảng 3.3 | Bảng tính toán công suất tiêu thụ      | ...   |
+| Bảng 3.4 | Cấu trúc bảng cơ sở dữ liệu PostgreSQL | ...   |
+| Bảng 3.5 | Danh sách API endpoints                | ...   |
+| Bảng 4.1 | Cấu hình Docker cho các dịch vụ        | ...   |
+| Bảng 5.1 | Kết quả kiểm thử chức năng             | ...   |
+| Bảng 5.2 | So sánh với các giải pháp hiện có      | ...   |
 
 ---
 
@@ -317,67 +319,67 @@ Xin chân thành cảm ơn!
 
 <!-- Danh mục hình ảnh sẽ được cập nhật khi hoàn thành các chương nội dung -->
 
-| Hình | Mô tả | Trang |
-|------|--------|-------|
-| Hình 1.1 | Mô hình tổng quan hệ thống IoT giám sát phương tiện | ... |
-| Hình 2.1 | Kiến trúc giao thức MQTT | ... |
-| Hình 2.2 | Cấu trúc bản tin MQTT | ... |
-| Hình 2.3 | Nguyên lý hoạt động GPS/GNSS | ... |
-| Hình 2.4 | Sơ đồ khối ESP32-S3 | ... |
-| Hình 2.5 | Giao diện OBD2 và các PID | ... |
-| Hình 3.1 | Sơ đồ kiến trúc tổng thể hệ thống | ... |
-| Hình 3.2 | Sơ đồ nguyên lý mạch phần cứng | ... |
-| Hình 3.3 | Sơ đồ mạch quản lý nguồn | ... |
-| Hình 3.4 | Thiết kế PCB | ... |
-| Hình 3.5 | Sơ đồ luồng dữ liệu firmware | ... |
-| Hình 3.6 | Sơ đồ kiến trúc backend (DDD) | ... |
-| Hình 3.7 | Sơ đồ quan hệ cơ sở dữ liệu (ERD) | ... |
-| Hình 3.8 | Wireframe giao diện dashboard | ... |
-| Hình 4.1 | Hình ảnh thiết bị phần cứng hoàn thiện | ... |
-| Hình 4.2 | Giao diện dashboard thời gian thực | ... |
-| Hình 4.3 | Giao diện bản đồ theo dõi phương tiện | ... |
-| Hình 4.4 | Sơ đồ triển khai Docker | ... |
-| Hình 5.1 | Đồ thị độ chính xác GPS | ... |
-| Hình 5.2 | Đồ thị hiệu suất hệ thống | ... |
+| Hình     | Mô tả                                               | Trang |
+| -------- | --------------------------------------------------- | ----- |
+| Hình 1.1 | Mô hình tổng quan hệ thống IoT giám sát phương tiện | ...   |
+| Hình 2.1 | Kiến trúc giao thức MQTT                            | ...   |
+| Hình 2.2 | Cấu trúc bản tin MQTT                               | ...   |
+| Hình 2.3 | Nguyên lý hoạt động GPS/GNSS                        | ...   |
+| Hình 2.4 | Sơ đồ khối ESP32-S3                                 | ...   |
+| Hình 2.5 | Giao diện OBD2 và các PID                           | ...   |
+| Hình 3.1 | Sơ đồ kiến trúc tổng thể hệ thống                   | ...   |
+| Hình 3.2 | Sơ đồ nguyên lý mạch phần cứng                      | ...   |
+| Hình 3.3 | Sơ đồ mạch quản lý nguồn                            | ...   |
+| Hình 3.4 | Thiết kế PCB                                        | ...   |
+| Hình 3.5 | Sơ đồ luồng dữ liệu firmware                        | ...   |
+| Hình 3.6 | Sơ đồ kiến trúc backend (DDD)                       | ...   |
+| Hình 3.7 | Sơ đồ quan hệ cơ sở dữ liệu (ERD)                   | ...   |
+| Hình 3.8 | Wireframe giao diện dashboard                       | ...   |
+| Hình 4.1 | Hình ảnh thiết bị phần cứng hoàn thiện              | ...   |
+| Hình 4.2 | Giao diện dashboard thời gian thực                  | ...   |
+| Hình 4.3 | Giao diện bản đồ theo dõi phương tiện               | ...   |
+| Hình 4.4 | Sơ đồ triển khai Docker                             | ...   |
+| Hình 5.1 | Đồ thị độ chính xác GPS                             | ...   |
+| Hình 5.2 | Đồ thị hiệu suất hệ thống                           | ...   |
 
 ---
 
 # DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATIONS
 
-| Từ viết tắt | Tiếng Anh | Tiếng Việt |
-|-------------|-----------|------------|
-| **ADC** | Analog-to-Digital Converter | Bộ chuyển đổi tương tự sang số |
-| **API** | Application Programming Interface | Giao diện lập trình ứng dụng |
-| **BLE** | Bluetooth Low Energy | Bluetooth năng lượng thấp |
-| **BOM** | Bill of Materials | Danh sách linh kiện |
-| **CI/CD** | Continuous Integration / Continuous Deployment | Tích hợp liên tục / Triển khai liên tục |
-| **CORS** | Cross-Origin Resource Sharing | Chia sẻ tài nguyên nguồn chéo |
-| **DDD** | Domain-Driven Design | Thiết kế hướng miền |
-| **Docker** | Docker Container Platform | Nền tảng container hóa ứng dụng |
-| **EMQX** | Erlang MQTT Broker | Máy chủ MQTT dựa trên Erlang |
-| **ESP32** | Espressif System-on-Chip 32-bit | Vi điều khiển SoC 32-bit của Espressif |
-| **FreeRTOS** | Free Real-Time Operating System | Hệ điều hành thời gian thực mã nguồn mở |
-| **GPIO** | General Purpose Input/Output | Cổng vào/ra đa năng |
-| **GNSS** | Global Navigation Satellite System | Hệ thống vệ tinh dẫn đường toàn cầu |
-| **GPS** | Global Positioning System | Hệ thống định vị toàn cầu |
-| **HTTP** | Hypertext Transfer Protocol | Giao thức truyền siêu văn bản |
-| **HTTPS** | Hypertext Transfer Protocol Secure | Giao thức truyền siêu văn bản bảo mật |
-| **IMU** | Inertial Measurement Unit | Đơn vị đo lường quán tính |
-| **IoT** | Internet of Things | Internet vạn vật |
-| **JWT** | JSON Web Token | Mã thông báo web dạng JSON |
-| **LVD** | Low Voltage Disconnect | Ngắt điện áp thấp |
-| **MCU** | Microcontroller Unit | Vi điều khiển |
-| **MQTT** | Message Queuing Telemetry Transport | Giao thức truyền thông tin hàng đợi |
-| **OBD2** | On-Board Diagnostics II | Chẩn đoán trên xe thế hệ 2 |
-| **ORM** | Object-Relational Mapping | Ánh xạ đối tượng - quan hệ |
-| **PCB** | Printed Circuit Board | Bảng mạch in |
-| **REST** | Representational State Transfer | Kiến trúc truyền trạng thái đại diện |
-| **RTOS** | Real-Time Operating System | Hệ điều hành thời gian thực |
-| **SoC** | System on Chip | Hệ thống trên chip |
-| **SQL** | Structured Query Language | Ngôn ngữ truy vấn có cấu trúc |
-| **TLS** | Transport Layer Security | Bảo mật tầng vận chuyển |
-| **UART** | Universal Asynchronous Receiver-Transmitter | Bộ thu phát bất đồng bộ đa năng |
-| **WebSocket** | WebSocket Protocol | Giao thức kết nối hai chiều thời gian thực |
+| Từ viết tắt   | Tiếng Anh                                      | Tiếng Việt                                 |
+| ------------- | ---------------------------------------------- | ------------------------------------------ |
+| **ADC**       | Analog-to-Digital Converter                    | Bộ chuyển đổi tương tự sang số             |
+| **API**       | Application Programming Interface              | Giao diện lập trình ứng dụng               |
+| **BLE**       | Bluetooth Low Energy                           | Bluetooth năng lượng thấp                  |
+| **BOM**       | Bill of Materials                              | Danh sách linh kiện                        |
+| **CI/CD**     | Continuous Integration / Continuous Deployment | Tích hợp liên tục / Triển khai liên tục    |
+| **CORS**      | Cross-Origin Resource Sharing                  | Chia sẻ tài nguyên nguồn chéo              |
+| **DDD**       | Domain-Driven Design                           | Thiết kế hướng miền                        |
+| **Docker**    | Docker Container Platform                      | Nền tảng container hóa ứng dụng            |
+| **EMQX**      | Erlang MQTT Broker                             | Máy chủ MQTT dựa trên Erlang               |
+| **ESP32**     | Espressif System-on-Chip 32-bit                | Vi điều khiển SoC 32-bit của Espressif     |
+| **FreeRTOS**  | Free Real-Time Operating System                | Hệ điều hành thời gian thực mã nguồn mở    |
+| **GPIO**      | General Purpose Input/Output                   | Cổng vào/ra đa năng                        |
+| **GNSS**      | Global Navigation Satellite System             | Hệ thống vệ tinh dẫn đường toàn cầu        |
+| **GPS**       | Global Positioning System                      | Hệ thống định vị toàn cầu                  |
+| **HTTP**      | Hypertext Transfer Protocol                    | Giao thức truyền siêu văn bản              |
+| **HTTPS**     | Hypertext Transfer Protocol Secure             | Giao thức truyền siêu văn bản bảo mật      |
+| **IMU**       | Inertial Measurement Unit                      | Đơn vị đo lường quán tính                  |
+| **IoT**       | Internet of Things                             | Internet vạn vật                           |
+| **JWT**       | JSON Web Token                                 | Mã thông báo web dạng JSON                 |
+| **LVD**       | Low Voltage Disconnect                         | Ngắt điện áp thấp                          |
+| **MCU**       | Microcontroller Unit                           | Vi điều khiển                              |
+| **MQTT**      | Message Queuing Telemetry Transport            | Giao thức truyền thông tin hàng đợi        |
+| **OBD2**      | On-Board Diagnostics II                        | Chẩn đoán trên xe thế hệ 2                 |
+| **ORM**       | Object-Relational Mapping                      | Ánh xạ đối tượng - quan hệ                 |
+| **PCB**       | Printed Circuit Board                          | Bảng mạch in                               |
+| **REST**      | Representational State Transfer                | Kiến trúc truyền trạng thái đại diện       |
+| **RTOS**      | Real-Time Operating System                     | Hệ điều hành thời gian thực                |
+| **SoC**       | System on Chip                                 | Hệ thống trên chip                         |
+| **SQL**       | Structured Query Language                      | Ngôn ngữ truy vấn có cấu trúc              |
+| **TLS**       | Transport Layer Security                       | Bảo mật tầng vận chuyển                    |
+| **UART**      | Universal Asynchronous Receiver-Transmitter    | Bộ thu phát bất đồng bộ đa năng            |
+| **WebSocket** | WebSocket Protocol                             | Giao thức kết nối hai chiều thời gian thực |
 
 ---
 
@@ -393,11 +395,8 @@ Những năm gần đây, thị trường cho thuê xe tự lái tại Việt Na
 Các doanh nghiệp cho thuê xe tự lái hiện nay phải đối mặt với nhiều vấn đề nghiêm trọng:
 
 - **Quản lý thủ công không hiệu quả**: Phần lớn các công ty cho thuê xe quy mô vừa và nhỏ tại Việt Nam vẫn sử dụng phương pháp quản lý thủ công — ghi chép sổ sách, gọi điện thoại kiểm tra, và dựa vào sự tự giác của khách hàng. Phương pháp này không cung cấp khả năng giám sát thời gian thực (real-time visibility) về vị trí và trạng thái của xe [2].
-
 - **Rủi ro mất cắp và sử dụng sai mục đích**: Khi không có hệ thống giám sát, xe có thể bị sử dụng vượt phạm vi địa lý đã thỏa thuận, chạy quá số km quy định, hoặc trong trường hợp xấu nhất là bị chiếm đoạt. Việc phát hiện các tình huống này thường bị trễ, gây thiệt hại lớn về tài sản [3].
-
 - **Thiếu dữ liệu chẩn đoán kỹ thuật**: Các doanh nghiệp không có khả năng theo dõi tình trạng kỹ thuật của xe từ xa, dẫn đến việc bảo trì thường bị động, chỉ xử lý khi xe đã hỏng hóc. Điều này làm tăng chi phí sửa chữa và giảm tuổi thọ của đội xe.
-
 - **Giải pháp thương mại đắt đỏ**: Các hệ thống GPS tracking thương mại hiện có trên thị trường (như Vietmap, iTracking) thường có chi phí cao — bao gồm phí thiết bị, phí dịch vụ hàng tháng, và phí tích hợp — không phù hợp với các doanh nghiệp quy mô nhỏ với ngân sách hạn chế [4].
 
 ### 1.1.2. Thách thức kỹ thuật
@@ -414,7 +413,7 @@ Ngoài các vấn đề kinh doanh, việc xây dựng một hệ thống theo d
 
 ![Hình 1.1 - Sơ đồ tổng quan vấn đề và giải pháp đề xuất](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–1.png)
 
-*Hình 1.1: Sơ đồ tổng quan vấn đề và giải pháp đề xuất*
+_Hình 1.1: Sơ đồ tổng quan vấn đề và giải pháp đề xuất_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -431,13 +430,9 @@ Xuất phát từ các vấn đề thực tiễn nêu trên, dự án "IoT Vehic
 Mục tiêu chính của dự án là thiết kế và hiện thực một hệ thống IoT theo dõi xe hoàn chỉnh, bao gồm cả phần cứng và phần mềm, phục vụ cho việc quản lý đội xe cho thuê tự lái. Hệ thống cần đảm bảo các yêu cầu sau:
 
 1. **Theo dõi vị trí thời gian thực (real-time tracking)**: Cung cấp vị trí GPS của xe với tần suất cập nhật 5–30 giây khi xe đang di chuyển, hiển thị trên bản đồ trực tuyến.
-
 2. **Giám sát trạng thái kỹ thuật qua OBD2**: Kết nối với cổng chẩn đoán OBD-II của xe thông qua giao thức Bluetooth Low Energy (BLE) để đọc các thông số như tốc độ, vòng tua máy, nhiệt độ động cơ, và mã lỗi chẩn đoán (DTC).
-
 3. **Cảnh báo thông minh**: Tự động phát hiện và gửi thông báo khi có các sự kiện bất thường như: xe vượt ra khỏi vùng địa lý cho phép (geofencing), vượt tốc độ quy định, chuyển động bất thường khi xe đang đỗ, hoặc mất kết nối thiết bị.
-
 4. **Tối ưu hóa năng lượng**: Đảm bảo thiết bị hoạt động liên tục mà không làm cạn ắc quy xe, với thời lượng pin dự phòng đủ để hoạt động độc lập trong trường hợp mất nguồn chính.
-
 5. **Giao diện quản lý trực quan**: Cung cấp bảng điều khiển (dashboard) web cho phép người quản lý đội xe theo dõi vị trí, xem lịch sử hành trình, quản lý cảnh báo, và tạo báo cáo.
 
 ### 1.2.2. Phạm vi dự án
@@ -451,7 +446,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 **Phạm vi phần cứng:**
 
 - Thiết bị tracker IoT sử dụng vi điều khiển ESP32-S3
-- Modem LTE SIMCom A7670C + module GNSS u-blox NEO-M8N (kiến trúc tách rời định vị và truyền dữ liệu 4G/LTE)
+- Modem LTE + GNSS SIMCom SIM7600CE-T (Auto mode LTE/UMTS/GSM, APN mặc định `internet`) kết nối trực tiếp qua UART1 để cung cấp cả dữ liệu 4G và GNSS
 - Adapter OBD2 BLE vgate iCar Pro (đọc dữ liệu chẩn đoán xe qua Bluetooth)
 - Cảm biến gia tốc LIS3DH (IMU) để phát hiện chuyển động và rung
 - Pin dự phòng 21700 với mạch sạc và bảo vệ
@@ -473,7 +468,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 - Express.js API server với kiến trúc Domain-Driven Design
 - Next.js 15 frontend với bản đồ thời gian thực (Leaflet), biểu đồ (ECharts)
 
-**Giới hạn phạm vi (out of scope):**
+**Giới hạn phạm vi nghiên cứu:**
 
 - Không xử lý OBD-II diagnostics phức tạp (chỉ đọc các thông số cơ bản)
 - Không phát hiện va chạm (IMU chỉ dùng cho phát hiện chuyển động/rung)
@@ -484,7 +479,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 
 | Tầng (Layer)   | Công nghệ chính                                     | Phạm vi                         |
 | -------------- | --------------------------------------------------- | ------------------------------- |
-| Phần cứng      | ESP32-S3, A7670C, NEO-M8N, vgate iCar Pro, LIS3DH   | Thiết kế và chế tạo prototype   |
+| Phần cứng      | ESP32-S3, SIMCom SIM7600CE-T (LTE + GNSS), vgate iCar Pro, LIS3DH   | Thiết kế và chế tạo prototype   |
 | Firmware       | ESP-IDF, FreeRTOS, MQTT 5.0                         | Lập trình nhúng đầy đủ          |
 | MQTT Broker    | EMQX 5.x                                            | Cấu hình và triển khai          |
 | Backend        | Express.js, TypeScript, PostgreSQL, VictoriaMetrics | Phát triển API và xử lý dữ liệu |
@@ -499,14 +494,14 @@ Dự án đặt ra các tiêu chí cụ thể (success criteria) cho từng tầ
 
 ### 1.3.1. Tiêu chí phần cứng
 
-| STT | Tiêu chí                                  | Mục tiêu cụ thể          |
-| --- | ----------------------------------------- | ------------------------ |
-| 1   | Tiêu thụ điện chế độ ngủ sâu (deep sleep) | < 500 µA                 |
-| 2   | Tiêu thụ điện chế độ hoạt động            | < 250 mA (trung bình)    |
-| 3   | Thời gian thức dậy từ deep sleep          | < 3 giây                 |
-| 4   | Thời lượng pin dự phòng (21700, 5000 mAh) | > 24 giờ chế độ cảnh báo |
-| 5   | Ngưỡng chuyển nguồn bảo vệ ắc quy          | Profile 12V: OFF=12.0V, ON=12.2V; Profile 24V: OFF=24.0V, ON=24.4V |
-| 6   | Nhiệt độ hoạt động                        | -10 C đến +60 C          |
+| STT | Tiêu chí                                  | Mục tiêu cụ thể                                                    |
+| --- | ----------------------------------------- | ------------------------------------------------------------------ |
+| 1   | Tiêu thụ điện chế độ ngủ sâu (deep sleep) | < 500 µA                                                           |
+| 2   | Tiêu thụ điện chế độ hoạt động            | < 250 mA (trung bình)                                              |
+| 3   | Thời gian thức dậy từ deep sleep          | < 3 giây                                                           |
+| 4   | Thời lượng pin dự phòng (21700, 5000 mAh) | > 24 giờ chế độ cảnh báo                                           |
+| 5   | Ngưỡng chuyển nguồn bảo vệ ắc quy         | Profile 12V: OFF=12.0V, ON=12.2V; Profile 24V: OFF=24.0V, ON=24.4V |
+| 6   | Nhiệt độ hoạt động                        | -10 C đến +60 C                                                    |
 
 [Bảng 1.2: Tiêu chí phần cứng]
 
@@ -550,20 +545,15 @@ Dự án đặt ra các tiêu chí cụ thể (success criteria) cho từng tầ
 Dự án áp dụng phương pháp **thiết kế từ dưới lên (bottom-up design)** kết hợp **phát triển lặp (iterative development)**. Cách tiếp cận này cho phép kiểm chứng từng lớp kỹ thuật trước khi tích hợp toàn hệ thống. Cụ thể:
 
 1. **Giai đoạn 1 — Nghiên cứu và thiết kế phần cứng**: Khảo sát các linh kiện sẵn có trên thị trường, lựa chọn dựa trên các tiêu chí về hiệu năng, chi phí, và tính sẵn sàng. Thiết kế sơ đồ mạch, bố trí linh kiện, và tính toán công suất.
-
 2. **Giai đoạn 2 — Phát triển firmware**: Lập trình nhúng trên nền tảng ESP-IDF, hiện thực các module giao tiếp (BLE OBD2, UART modem, SPI/I2C IMU), quản lý năng lượng, và giao thức MQTT.
-
 3. **Giai đoạn 3 — Xây dựng hạ tầng cloud**: Triển khai các dịch vụ cơ sở hạ tầng (EMQX, PostgreSQL, VictoriaMetrics) bằng Docker, thiết kế cơ sở dữ liệu, và cấu hình mạng.
-
 4. **Giai đoạn 4 — Phát triển backend API**: Xây dựng REST API theo kiến trúc Domain-Driven Design, hiện thực các domain (vehicles, devices, telemetry, alerts, geofences), và tích hợp WebSocket cho dữ liệu thời gian thực.
-
 5. **Giai đoạn 5 — Phát triển frontend**: Xây dựng giao diện web với Next.js 15, tích hợp bản đồ Leaflet, biểu đồ ECharts, và kết nối WebSocket (Socket.IO) để hiển thị dữ liệu trực tuyến.
-
 6. **Giai đoạn 6 — Tích hợp và kiểm thử**: Tích hợp toàn hệ thống, kiểm thử chức năng, kiểm thử hiệu năng, và tối ưu hóa.
 
 ![Hình 1.2 - Quy trình phát triển dự án theo các giai đoạn](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–2.png)
 
-*Hình 1.2: Quy trình phát triển dự án theo các giai đoạn*
+_Hình 1.2: Quy trình phát triển dự án theo các giai đoạn_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -592,7 +582,7 @@ Thiết bị IoT (ESP32-S3 + GPS + OBD2 + IMU)
 
 ![Hình 1.3 - Kiến trúc tổng thể hệ thống IoT Vehicle Tracking](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–3.jpg)
 
-*Hình 1.3: Kiến trúc tổng thể hệ thống IoT Vehicle Tracking*
+_Hình 1.3: Kiến trúc tổng thể hệ thống IoT Vehicle Tracking_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -609,18 +599,21 @@ Hệ thống áp dụng chiến lược tách biệt dữ liệu theo đặc tí
 Một trong những điểm thiết kế trọng tâm của dự án là chiến lược quản lý năng lượng đa chế độ (multi-mode power management), được xây dựng để xử lý trực tiếp bài toán tiêu thụ ắc quy xe:
 
 **Chế độ 1 — Driving Mode (IGN ON):**
+
 - Hệ thống hoạt động toàn bộ công suất
 - Gửi vị trí GPS định kỳ (5–30 giây)
 - Sạc pin dự phòng từ nguồn xe
 - Kết nối server liên tục để theo dõi thời gian thực
 
 **Chế độ 2 — Parking Mode (IGN OFF, không chuyển động):**
+
 - Vi điều khiển ESP32-S3 vào chế độ ngủ sâu (deep sleep)
 - Tiêu thụ cực thấp (< 500 µA)
 - Thức dậy định kỳ (10–30 phút) để gửi heartbeat
 - IMU (LIS3DH) hoạt động độc lập, cảnh rung ở ngưỡng đã cấu hình
 
 **Chế độ 3 — Alert Mode (phát hiện chuyển động bất thường):**
+
 - IMU đánh thức ESP32 ngay lập tức qua interrupt
 - Bật 4G + GPS, gửi cảnh báo ưu tiên lên server
 - Tiếp tục theo dõi liên tục cho đến khi được xác nhận an toàn
@@ -630,7 +623,7 @@ Hệ thống còn bao gồm mạch chuyển nguồn dự phòng với cơ chế 
 
 ![Hình 1.4 - Sơ đồ chuyển đổi giữa các chế độ năng lượng](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–4.png)
 
-*Hình 1.4: Sơ đồ chuyển đổi giữa các chế độ năng lượng*
+_Hình 1.4: Sơ đồ chuyển đổi giữa các chế độ năng lượng_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -638,26 +631,26 @@ Hệ thống còn bao gồm mạch chuyển nguồn dự phòng với cơ chế 
 
 [Bảng 1.3: Tổng hợp công nghệ sử dụng trong dự án]
 
-| Thành phần                    | Công nghệ               | Phiên bản | Vai trò                          |
-| ----------------------------- | ----------------------- | --------- | -------------------------------- |
-| Vi điều khiển                 | ESP32-S3                | —        | MCU chính, xử lý và điều khiển   |
-| LTE + GNSS                    | SIMCom A7670C + u-blox NEO-M8N | —        | Truyền dữ liệu 4G và định vị GPS |
-| OBD2 Adapter                  | vgate iCar Pro          | BLE 4.0   | Đọc dữ liệu chẩn đoán xe         |
-| Cảm biến gia tốc              | LIS3DH                  | —        | Phát hiện chuyển động và rung    |
-| Pin dự phòng                  | 21700 Li-ion            | 5000 mAh  | Nguồn điện dự phòng              |
-| Framework firmware            | ESP-IDF                 | 5.x       | Phát triển firmware nhúng        |
-| RTOS                          | FreeRTOS                | —        | Hệ điều hành thời gian thực      |
-| MQTT Broker                   | EMQX                    | 5.x       | Tiếp nhận dữ liệu IoT            |
-| API Server                    | Express.js + TypeScript | —        | REST API backend                 |
-| Cơ sở dữ liệu quan hệ         | PostgreSQL              | 16        | Lưu trữ dữ liệu có cấu trúc      |
-| Cơ sở dữ liệu chuỗi thời gian | VictoriaMetrics         | —        | Lưu trữ telemetry                |
-| Nhật ký sự kiện               | VictoriaLogs            | —        | Lưu trữ logs                     |
-| Frontend                      | Next.js 15 + React 19   | —        | Giao diện web                    |
-| Bản đồ                        | Leaflet                 | —        | Hiển thị bản đồ thời gian thực   |
-| Biểu đồ                       | ECharts                 | —        | Trực quan hóa dữ liệu            |
-| WebSocket                     | Socket.IO               | 4.8       | Giao tiếp thời gian thực         |
-| Container hóa                 | Docker + Docker Compose | —        | Triển khai dịch vụ               |
-| Giám sát                      | Grafana + Prometheus    | —        | Dashboard giám sát hạ tầng       |
+| Thành phần                    | Công nghệ                      | Phiên bản | Vai trò                          |
+| ----------------------------- | ------------------------------ | --------- | -------------------------------- |
+| Vi điều khiển                 | ESP32-S3                       | —         | MCU chính, xử lý và điều khiển   |
+| LTE + GNSS                    | SIMCom SIM7600CE-T (LTE + GNSS tích hợp) | —         | Truyền dữ liệu 4G và định vị GPS |
+| OBD2 Adapter                  | vgate iCar Pro                 | BLE 4.0   | Đọc dữ liệu chẩn đoán xe         |
+| Cảm biến gia tốc              | LIS3DH                         | —         | Phát hiện chuyển động và rung    |
+| Pin dự phòng                  | 21700 Li-ion                   | 5000 mAh  | Nguồn điện dự phòng              |
+| Framework firmware            | ESP-IDF                        | 5.x       | Phát triển firmware nhúng        |
+| RTOS                          | FreeRTOS                       | —         | Hệ điều hành thời gian thực      |
+| MQTT Broker                   | EMQX                           | 5.x       | Tiếp nhận dữ liệu IoT            |
+| API Server                    | Express.js + TypeScript        | —         | REST API backend                 |
+| Cơ sở dữ liệu quan hệ         | PostgreSQL                     | 16        | Lưu trữ dữ liệu có cấu trúc      |
+| Cơ sở dữ liệu chuỗi thời gian | VictoriaMetrics                | —         | Lưu trữ telemetry                |
+| Nhật ký sự kiện               | VictoriaLogs                   | —         | Lưu trữ logs                     |
+| Frontend                      | Next.js 15 + React 19          | —         | Giao diện web                    |
+| Bản đồ                        | Leaflet                        | —         | Hiển thị bản đồ thời gian thực   |
+| Biểu đồ                       | ECharts                        | —         | Trực quan hóa dữ liệu            |
+| WebSocket                     | Socket.IO                      | 4.8       | Giao tiếp thời gian thực         |
+| Container hóa                 | Docker + Docker Compose        | —         | Triển khai dịch vụ               |
+| Giám sát                      | Grafana + Prometheus           | —         | Dashboard giám sát hạ tầng       |
 
 ---
 
@@ -668,20 +661,24 @@ Hệ thống còn bao gồm mạch chuyển nguồn dự phòng với cơ chế 
 Dự án đã đạt được các kết quả chính sau:
 
 **Về phần cứng:**
-- Thiết kế thành công prototype thiết bị tracker IoT sử dụng ESP32-S3 làm vi điều khiển trung tâm, tích hợp modem LTE SIMCom A7670C + module GNSS u-blox NEO-M8N, adapter OBD2 BLE vgate iCar Pro, cảm biến gia tốc LIS3DH, và pin dự phòng 21700.
+
+- Thiết kế thành công prototype thiết bị tracker IoT sử dụng ESP32-S3 làm vi điều khiển trung tâm, tích hợp modem LTE + GNSS SIMCom SIM7600CE-T, adapter OBD2 BLE vgate iCar Pro, cảm biến gia tốc LIS3DH, và pin dự phòng 21700.
 - Hệ thống quản lý năng lượng đa chế độ hoạt động hiệu quả, với mức tiêu thụ điện ngủ sâu đạt yêu cầu (< 500 µA), đảm bảo không làm cạn ắc quy xe trong quá trình sử dụng bình thường.
 - Mạch Low Voltage Disconnect (LVD) bảo vệ ắc quy xe hiệu quả, tự động ngắt khi điện áp tụt dưới ngưỡng an toàn.
 
 **Về firmware:**
+
 - Phát triển thành công firmware trên ESP-IDF với FreeRTOS, hiện thực đầy đủ các module: giao tiếp BLE OBD2, điều khiển modem UART, đọc cảm biến IMU, quản lý năng lượng, và truyền dữ liệu MQTT.
 - Cơ chế phát hiện chuyển động bất thường qua IMU hoạt động chính xác, có khả năng đánh thức hệ thống từ chế độ ngủ sâu trong vòng < 3 giây.
 
 **Về cloud/backend:**
+
 - Xây dựng thành công hạ tầng cloud bao gồm EMQX MQTT Broker, MQTT Bridge service, PostgreSQL, VictoriaMetrics, và VictoriaLogs, toàn bộ được container hóa bằng Docker.
 - Backend API (Express.js + TypeScript) với kiến trúc Domain-Driven Design, cung cấp các endpoint quản lý xe, thiết bị, telemetry, cảnh báo, geofences, và xác thực người dùng.
 - Hệ thống xử lý được >= 100 thiết bị đồng thời với độ trễ end-to-end < 500 ms.
 
 **Về frontend:**
+
 - Giao diện web quản lý (Next.js 15) với bản đồ thời gian thực (Leaflet), biểu đồ phân tích (ECharts), hệ thống cảnh báo trực tuyến, và bảng điều khiển tổng quan (dashboard).
 - Cập nhật vị trí xe trên bản đồ với độ trễ < 2 giây thông qua WebSocket (Socket.IO).
 
@@ -690,22 +687,16 @@ Dự án đã đạt được các kết quả chính sau:
 Trên cơ sở các kết quả đã đạt được và các giới hạn hiện hữu, dự án đề xuất các hướng phát triển tiếp theo:
 
 1. **Ứng dụng di động (Phase 2)**: Phát triển ứng dụng Flutter WebView Hybrid cho phép người quản lý giám sát đội xe trên điện thoại di động, nhận thông báo push notification khi có cảnh báo [8].
-
 2. **Tăng cường bảo mật**: Triển khai TLS/SSL cho kết nối MQTT trong môi trường production, áp dụng MQTT ACL chi tiết hơn, và bổ sung cơ chế mã hóa dữ liệu end-to-end giữa thiết bị và server.
-
-3. **Tối ưu hóa hiệu năng**: Nghiên cứu và áp dụng các kỹ thuật nén dữ liệu telemetry (delta encoding, protobuf) để giảm băng thông 4G, đặc biệt khi vận hành đội xe lớn (> 500 xe).
-
+3. **Tối ưu hóa hiệu năng**: Nghiên cứu và áp dụng các kỹ thuật nén dữ liệu telemetry (mã hóa sai khác, protobuf) để giảm băng thông 4G, đặc biệt khi vận hành đội xe lớn (> 500 xe).
 4. **Tích hợp trí tuệ nhân tạo**: Áp dụng các mô hình machine learning để phân tích hành vi lái xe (driving behavior analysis), dự đoán bảo trì (predictive maintenance), và phát hiện bất thường (anomaly detection) từ dữ liệu telemetry.
-
 5. **Mở rộng phạm vi OBD2**: Hỗ trợ đọc thêm nhiều thông số chẩn đoán xe, bao gồm mã lỗi DTC (Diagnostic Trouble Codes), dữ liệu động cơ nâng cao, và tích hợp với các loại xe điện (EV).
-
 6. **Cải thiện khả năng mở rộng (scalability)**: Nghiên cứu kiến trúc microservices với message queue (Apache Kafka hoặc RabbitMQ) để xử lý luồng dữ liệu lớn hơn khi số lượng thiết bị tăng lên hàng ngàn.
-
 7. **Thiết kế PCB chuyên nghiệp**: Chuyển từ prototype trên breadboard/perfboard sang thiết kế PCB chuyên nghiệp với kích thước nhỏ gọn, độ bền cao, phù hợp cho sản xuất hàng loạt.
 
 ![Hình 1.5 - Lộ trình phát triển dự án theo các giai đoạn (Roadmap)](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–5.png)
 
-*Hình 1.5: Lộ trình phát triển dự án theo các giai đoạn (Roadmap)*
+_Hình 1.5: Lộ trình phát triển dự án theo các giai đoạn (Roadmap)_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -771,16 +762,16 @@ Internet of Things (IoT) là một mô hình công nghệ cho phép các thiết
 
 [Bảng 2.1: So sánh các giải pháp giám sát phương tiện]
 
-| Tiêu chí                     | Giám sát thủ công       | GPS Tracker đơn giản    | Fleet Management thương mại | Hệ thống đề xuất               |
-| ---------------------------- | ----------------------- | ----------------------- | --------------------------- | ------------------------------ |
-| Chi phí thiết bị             | Không                   | 500.000–1.500.000 VND | 1.000.000–5.000.000 VND   | 870.000–1.630.000 VND        |
-| Phí dịch vụ hàng tháng       | Không                   | 50.000–100.000 VND    | 200.000–500.000 VND       | Chi phí 4G SIM (~70.000 VND)   |
-| Độ chính xác vị trí          | Thấp (báo cáo thủ công) | Trung bình (GPS)        | Cao (GPS + A-GPS)           | Cao (GNSS đa hệ thống)         |
-| Dữ liệu động cơ (OBD2)       | Không                   | Không                   | Có (tùy model)              | Có (BLE OBD2)                  |
-| Phát hiện bất thường khi đậu | Không                   | Hạn chế                 | Có                          | Có (IMU + deep sleep)          |
-| Khả năng tùy biến            | Không áp dụng           | Thấp                    | Thấp (phụ thuộc vendor)     | Cao (mã nguồn mở)              |
-| Quản lý năng lượng           | Không áp dụng           | Cơ bản                  | Tốt                         | Tốt (đa chế độ + pin dự phòng) |
-| Tích hợp hệ thống            | Không                   | Hạn chế (API riêng)     | API do vendor               | API mở (REST + WebSocket)      |
+| Tiêu chí                     | Giám sát thủ công       | GPS Tracker đơn giản  | Fleet Management thương mại | Hệ thống đề xuất               |
+| ---------------------------- | ----------------------- | --------------------- | --------------------------- | ------------------------------ |
+| Chi phí thiết bị             | Không                   | 500.000–1.500.000 VND | 1.000.000–5.000.000 VND     | 870.000–1.630.000 VND          |
+| Phí dịch vụ hàng tháng       | Không                   | 50.000–100.000 VND    | 200.000–500.000 VND         | Chi phí 4G SIM (~70.000 VND)   |
+| Độ chính xác vị trí          | Thấp (báo cáo thủ công) | Trung bình (GPS)      | Cao (GPS + A-GPS)           | Cao (GNSS đa hệ thống)         |
+| Dữ liệu động cơ (OBD2)       | Không                   | Không                 | Có (tùy model)              | Có (BLE OBD2)                  |
+| Phát hiện bất thường khi đậu | Không                   | Hạn chế               | Có                          | Có (IMU + deep sleep)          |
+| Khả năng tùy biến            | Không áp dụng           | Thấp                  | Thấp (phụ thuộc vendor)     | Cao (mã nguồn mở)              |
+| Quản lý năng lượng           | Không áp dụng           | Cơ bản                | Tốt                         | Tốt (đa chế độ + pin dự phòng) |
+| Tích hợp hệ thống            | Không                   | Hạn chế (API riêng)   | API do vendor               | API mở (REST + WebSocket)      |
 
 Từ bảng so sánh trên có thể nhận thấy giải pháp đề xuất kết hợp được các ưu điểm của hệ thống thương mại (độ chính xác cao, hỗ trợ dữ liệu OBD2, khả năng phát hiện bất thường) đồng thời duy trì chi phí thấp hơn và mức tùy biến cao hơn. Vì vậy, phương án này phù hợp với nhu cầu của doanh nghiệp cho thuê xe tại Việt Nam.
 
@@ -819,8 +810,8 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 | RAM                    | 512 KB SRAM + 8 MB PSRAM       | 256 KB SRAM              | 512 MB DRAM                      |
 | BLE                    | BLE 5.0 (tích hợp)             | Không (cần module ngoài) | BLE 5.0 (tích hợp)               |
 | Wi-Fi                  | 802.11 b/g/n (tích hợp)        | Không                    | 802.11 b/g/n (tích hợp)          |
-| Tiêu thụ deep sleep    | 10–15 µA                      | 1–2 µA                  | Không hỗ trợ deep sleep          |
-| Giá thành (VND)        | 80.000–150.000               | 150.000–300.000        | 400.000–600.000                |
+| Tiêu thụ deep sleep    | 10–15 µA                       | 1–2 µA                   | Không hỗ trợ deep sleep          |
+| Giá thành (VND)        | 80.000–150.000                 | 150.000–300.000          | 400.000–600.000                  |
 | Framework phát triển   | Arduino / ESP-IDF              | STM32CubeIDE / Mbed      | Linux / Python                   |
 | Cộng đồng hỗ trợ       | Rất lớn                        | Lớn                      | Rất lớn                          |
 | Độ phù hợp cho tracker | Cao                            | Trung bình               | Thấp                             |
@@ -856,7 +847,7 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 
 ![Hình 2.1 - Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram](./assets/figures/02-chuong-2-phan-tich-hinh-2–1.png)
 
-*Hình 2.1: Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram*
+_Hình 2.1: Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -867,26 +858,31 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 
 **FC-01: Theo dõi vị trí thời gian thực**
+
 - Gửi vị trí GPS định kỳ (5–30 giây khi lái xe, 10–30 phút khi đậu xe)
 - Độ chính xác vị trí: dưới 5 mét trong điều kiện trời quang
 - Hỗ trợ đa hệ thống định vị (GPS, GLONASS, BeiDou)
 
 **FC-02: Đọc dữ liệu động cơ qua OBD2**
+
 - Kết nối BLE với OBD2 adapter (vgate iCar Pro)
 - Đọc trạng thái IGN (bật/tắt máy), RPM, tốc độ, nhiên liệu
 - Tần suất đọc: 1–5 giây khi xe chạy
 
 **FC-03: Phát hiện bất thường khi đậu xe**
+
 - IMU (LIS3DH) phát hiện chuyển động/rung bất thường
 - Đánh thức ESP32 từ deep sleep trong vòng 100ms
 - Gửi cảnh báo ưu tiên (priority alert) lên server
 
 **FC-04: Quản lý năng lượng thông minh**
+
 - Chuyển đổi giữa 3 chế độ: Lái xe (Active) - Đậu xe (Sleep) - Cảnh báo (Alert)
 - Pin dự phòng tự động tiếp quản theo profile nguồn: hệ 12V tại ngưỡng Switch_OFF=12.0V, hệ 24V tại ngưỡng Switch_OFF=24.0V
 - Mạch chuyển nguồn dự phòng bảo vệ ắc quy không bị rút cạn: profile 12V chuyển tại Switch_OFF=12.0V, profile 24V chuyển tại Switch_OFF=24.0V
 
 **FC-05: Giao diện web giám sát**
+
 - Bản đồ thời gian thực (Leaflet) hiển thị vị trí tất cả phương tiện
 - Biểu đồ dữ liệu OBD2 (ECharts) - tốc độ, RPM, nhiên liệu
 - Hệ thống cảnh báo và thông báo (alert notifications)
@@ -895,26 +891,31 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 ### 2.3.2. Yêu cầu phi chức năng
 
 **NFR-01: Hiệu suất (Performance)**
+
 - Độ trễ end-to-end (thiết bị đến dashboard): dưới 3 giây trong điều kiện mạng bình thường
 - API response time: dưới 200ms cho 95% request
 - Hỗ trợ đồng thời tối thiểu 50 phương tiện kết nối MQTT
 
 **NFR-02: Độ tin cậy (Reliability)**
+
 - Lưu trữ tạm dữ liệu khi mất kết nối mạng (offline buffering trên thiết bị)
 - Tự động kết nối lại (reconnect) khi mạng phục hồi
 - MQTT QoS 1 cho các tin nhắn cảnh báo (đảm bảo gửi ít nhất một lần)
 
 **NFR-03: Bảo mật (Security)**
+
 - Xác thực phiên (session-based authentication) với token được hash SHA-256
 - MQTT ACL (Access Control List) phân quyền theo từng thiết bị
 - Mã hóa TLS cho kết nối MQTT và HTTPS trong môi trường sản xuất
 
 **NFR-04: Khả năng mở rộng (Scalability)**
+
 - Kiến trúc microservices với Docker container độc lập
 - MQTT broker (EMQX) hỗ trợ phân cụm (clustering) để mở rộng
 - Cơ sở dữ liệu chuỗi thời gian (VictoriaMetrics) tối ưu cho luồng dữ liệu lớn
 
 **NFR-05: Khả năng bảo trì (Maintainability)**
+
 - Mã nguồn tổ chức theo mô hình Domain-Driven Design (DDD)
 - API RESTful với tài liệu Swagger/OpenAPI tự động
 - Logging tập trung với VictoriaLogs và dashboard Grafana
@@ -922,33 +923,36 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 ### 2.3.3. Ràng buộc thiết kế
 
 **Ràng buộc phần cứng:**
+
 - Điện áp đầu vào: 12V hoặc 24V DC từ ắc quy xe (dao động phụ thuộc cấu hình hệ thống điện)
 - Nhiệt độ hoạt động: -10 độ C đến 70 độ C (môi trường trong xe ô tô)
 - Rung động và sốc: Chịu được rung động liên tục khi xe vận hành trên đường xá
 - Kích thước: Đủ nhỏ để lắp đặt kín đáo trong xe (không lớn hơn 120x80x40 mm)
 
 **Ràng buộc phần mềm:**
+
 - Backend framework: Express.js + TypeScript (yêu cầu từ công nghệ hiện có của nhóm)
 - Frontend framework: Next.js 15 + React 19 (yêu cầu học thuật)
 - MQTT Broker: EMQX (giấy phép mã nguồn mở, hỗ trợ rules engine)
 - Triển khai: Docker Compose trên máy chủ Linux (mỗi dịch vụ có docker-compose.yml riêng)
 
 **Ràng buộc về chi phí:**
+
 - Tổng chi phí phần cứng: dưới 2.000.000 VND cho một bộ tracker
 - Sử dụng các module có sẵn trên thị trường Việt Nam (Shopee, Lazada)
 - Ưu tiên các giải pháp mã nguồn mở để giảm chi phí giấy phép
 
 ### 2.3.4. Tiêu chuẩn thiết kế áp dụng
 
-| Tiêu chuẩn                | Mô tả                   | Áp dụng trong hệ thống             |
-| ------------------------- | ----------------------- | ---------------------------------- |
-| IEEE 802.15.1 (Bluetooth) | Chuẩn BLE 4.0/5.0       | Kết nối OBD2 adapter               |
-| 3GPP LTE Cat-1            | Chuẩn 4G/LTE            | Truyền dữ liệu qua modem A7670C |
-| NMEA 0183                 | Chuẩn dữ liệu GPS       | Phân tích tọa độ từ module GNSS    |
-| SAE J1979 (OBD2)          | Chuẩn chẩn đoán động cơ | Đọc dữ liệu qua OBD2 BLE adapter   |
-| MQTT v5.0 (OASIS)         | Giao thức IoT messaging | Truyền dữ liệu thiết bị - server   |
-| REST (RFC 7231)           | Kiến trúc API           | Backend API server                 |
-| OAuth 2.0 / Session Auth  | Chuẩn xác thực          | Xác thực người dùng và thiết bị    |
+| Tiêu chuẩn                | Mô tả                   | Áp dụng trong hệ thống           |
+| ------------------------- | ----------------------- | -------------------------------- |
+| IEEE 802.15.1 (Bluetooth) | Chuẩn BLE 4.0/5.0       | Kết nối OBD2 adapter             |
+| 3GPP LTE Cat-4            | Chuẩn 4G/LTE            | Truyền dữ liệu qua modem SIM7600CE-T (Cat-4)  |
+| NMEA 0183                 | Chuẩn dữ liệu GPS       | Phân tích tọa độ từ module GNSS  |
+| SAE J1979 (OBD2)          | Chuẩn chẩn đoán động cơ | Đọc dữ liệu qua OBD2 BLE adapter |
+| MQTT v5.0 (OASIS)         | Giao thức IoT messaging | Truyền dữ liệu thiết bị - server |
+| REST (RFC 7231)           | Kiến trúc API           | Backend API server               |
+| OAuth 2.0 / Session Auth  | Chuẩn xác thực          | Xác thực người dùng và thiết bị  |
 
 ## 2.4. Yêu cầu từ các bên liên quan – Constituent's requirements
 
@@ -974,29 +978,24 @@ Hệ thống IoT Vehicle Tracking System phục vụ nhiều nhóm đối tượ
 
 Đây là nhóm đối tượng trọng tâm của hệ thống. Các yêu cầu của nhóm này tập trung vào ba khía cạnh:
 
-1. *Giám sát và an ninh*: Theo dõi vị trí phương tiện 24/7, phát hiện và cảnh báo ngay khi có bất thường (xe bị di chuyển trái phép, vượt qua geofence, tốc độ vượt ngưỡng). Hệ thống cần gửi thông báo qua nhiều kênh (web dashboard, Telegram bot, email).
-
-2. *Báo cáo và phân tích*: Xuất báo cáo hành trình chi tiết (quãng đường, thời gian, điểm dừng), thống kê nhiên liệu tiêu thụ, đánh giá hành vi lái xe (tốc độ trung bình, số lần phanh gấp). Các báo cáo này giúp tối ưu hóa chi phí vận hành và bảo trì.
-
-3. *Quản lý đội xe*: Quản lý trạng thái từng phương tiện (đang cho thuê, đang bảo trì, sẵn sàng), lịch bảo trì định kỳ dựa trên số km hoặc thời gian, lịch sử cho thuê và doanh thu theo phương tiện.
+1. _Giám sát và an ninh_: Theo dõi vị trí phương tiện 24/7, phát hiện và cảnh báo ngay khi có bất thường (xe bị di chuyển trái phép, vượt qua geofence, tốc độ vượt ngưỡng). Hệ thống cần gửi thông báo qua nhiều kênh (web dashboard, Telegram bot, email).
+2. _Báo cáo và phân tích_: Xuất báo cáo hành trình chi tiết (quãng đường, thời gian, điểm dừng), thống kê nhiên liệu tiêu thụ, đánh giá hành vi lái xe (tốc độ trung bình, số lần phanh gấp). Các báo cáo này giúp tối ưu hóa chi phí vận hành và bảo trì.
+3. _Quản lý đội xe_: Quản lý trạng thái từng phương tiện (đang cho thuê, đang bảo trì, sẵn sàng), lịch bảo trì định kỳ dựa trên số km hoặc thời gian, lịch sử cho thuê và doanh thu theo phương tiện.
 
 **Quản trị viên hệ thống**
 
 Yêu cầu của quản trị viên tập trung vào khả năng vận hành và giám sát hệ thống:
 
-1. *Dashboard tổng quan*: Hiển thị trạng thái tất cả thiết bị (online/offline, mức pin, cường độ tín hiệu), số lượng phương tiện đang hoạt động, cảnh báo chưa xử lý.
-
-2. *Quản lý thiết bị*: Thêm/xóa/sửa thông tin thiết bị tracker, cấp phát thiết bị cho phương tiện, gửi lệnh điều khiển từ xa (reset, cập nhật cấu hình, yêu cầu vị trí).
-
-3. *Quản lý người dùng*: Tạo tài khoản, phân quyền (admin, manager, viewer), theo dõi lịch sử đăng nhập và thao tác (audit log).
+1. _Dashboard tổng quan_: Hiển thị trạng thái tất cả thiết bị (online/offline, mức pin, cường độ tín hiệu), số lượng phương tiện đang hoạt động, cảnh báo chưa xử lý.
+2. _Quản lý thiết bị_: Thêm/xóa/sửa thông tin thiết bị tracker, cấp phát thiết bị cho phương tiện, gửi lệnh điều khiển từ xa (reset, cập nhật cấu hình, yêu cầu vị trí).
+3. _Quản lý người dùng_: Tạo tài khoản, phân quyền (admin, manager, viewer), theo dõi lịch sử đăng nhập và thao tác (audit log).
 
 **Đội bảo trì**
 
 Yêu cầu của đội bảo trì hướng đến việc giảm thời gian và chi phí bảo trì:
 
-1. *Chẩn đoán từ xa*: Xem trạng thái thiết bị (mức pin, nhiệt độ, cường độ tín hiệu 4G) từ xa, phát hiện và cảnh báo khi thiết bị gặp lỗi (mất kết nối kéo dài, pin yếu).
-
-2. *Hướng dẫn lắp đặt*: Tài liệu hướng dẫn lắp đặt chi tiết, danh sách kiểm tra (checklist) khi lắp đặt mới hoặc bảo trì.
+1. _Chẩn đoán từ xa_: Xem trạng thái thiết bị (mức pin, nhiệt độ, cường độ tín hiệu 4G) từ xa, phát hiện và cảnh báo khi thiết bị gặp lỗi (mất kết nối kéo dài, pin yếu).
+2. _Hướng dẫn lắp đặt_: Tài liệu hướng dẫn lắp đặt chi tiết, danh sách kiểm tra (checklist) khi lắp đặt mới hoặc bảo trì.
 
 ### 2.4.4. Ma trận truy xuất yêu cầu - chức năng
 
@@ -1036,7 +1035,7 @@ Hệ thống tracker được tổ chức theo kiến trúc module với năm kh
 
 ![Hình 3.1 - Sơ đồ khối tổng thể hệ thống tracker](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3–1.jpg)
 
-*Hình 3.1: Sơ đồ khối tổng thể hệ thống tracker*
+_Hình 3.1: Sơ đồ khối tổng thể hệ thống tracker_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -1056,8 +1055,8 @@ Hệ thống tracker được tổ chức theo kiến trúc module với năm kh
 | I2C     BLE     UART      GPIO      ADC       |
 |                                               |                                    |                                |          |  |         |
 | +-----+ +----+ +--------+ +------+ +--------+ |
-|                                               | LIS3D                              |                                | OBD2     |  | A7670C+ |  | Power |  | Voltage |  |
-|                                               | H IMU                              |                                | BLE      |  | NEO-M8N |  | MUX   |  | Divider |  |
+|                                               | LIS3D                              |                                | OBD2     |  | SIM7600CE-T |  | Power |  | Voltage |  |
+|                                               | H IMU                              |                                | BLE      |  | LTE+GNSS |  | MUX   |  | Divider |  |
 |                                               |                                    |                                | vgat     |  | GNSS    |  |       |  |         |  |
 | +-----+                                       | e                                  | +--------+ +------+ +--------+ |
 | +----+                                        |
@@ -1087,7 +1086,7 @@ Hệ thống tracker được tổ chức theo kiến trúc module với năm kh
 
 Hệ thống vận hành theo ba chế độ chính: (1) chế độ lái xe — khi động cơ bật (IGN ON), các module cần thiết được kích hoạt; (2) chế độ đỗ xe — khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ IMU LIS3DH duy trì giám sát chuyển động; (3) chế độ cảnh báo — khi IMU ghi nhận chuyển động bất thường, hệ thống tự đánh thức và gửi cảnh báo qua 4G.
 
-Luồng dữ liệu được tổ chức theo ba nhánh: OBD2 (RPM, tốc độ, nhiên liệu) đọc qua BLE từ adapter vgate iCar Pro; vị trí lấy từ module GNSS NEO-M8N qua UART riêng; và dữ liệu chuyển động thu từ IMU LIS3DH qua I2C. ESP32-S3 tổng hợp, đóng gói và truyền toàn bộ dữ liệu lên máy chủ qua MQTT trên kết nối 4G/LTE của modem A7670C.
+Luồng dữ liệu được tổ chức theo ba nhánh: OBD2 (RPM, tốc độ, nhiên liệu) đọc qua BLE từ adapter vgate iCar Pro; dữ liệu GNSS được cung cấp trực tiếp bởi module tích hợp SIMCom SIM7600CE-T (GNSS nội bộ) trên cùng UART với LTE; và dữ liệu chuyển động thu từ IMU LIS3DH qua I2C. ESP32-S3 tổng hợp, đóng gói và truyền toàn bộ dữ liệu lên máy chủ qua MQTT thông qua kết nối 4G/LTE của SIM7600CE-T.
 
 #### 3.1.1.2. Phân tích và lựa chọn vi điều khiển (MCU)
 
@@ -1107,112 +1106,112 @@ Thay vì chấm điểm tổng quát, Bảng 3.1 đối chiếu trực tiếp c�
 
 [Bảng 3.1: Đối chiếu yêu cầu kỹ thuật khi lựa chọn vi điều khiển]
 
-| Yêu cầu của tracker | ESP32-S3 | STM32L4 | nRF52840 |
-| ------------------- | -------- | ------- | -------- |
-| Kết nối OBD2 BLE với vgate iCar Pro | BLE 5.0 tích hợp, tương thích ngược BLE 4.0 | Không tích hợp BLE, phải thêm module ngoài | BLE 5.0 tích hợp |
-| Topology UART của hệ thống | 3 UART controllers (đủ cho modem + GNSS + debug) [19], [20] | Nhiều serial instance trong dòng STM32L476 (USART/UART/LPUART), đủ cho topology yêu cầu [53], [54] | UARTE/UART thường dùng 2 instance, dễ thiếu 1 cổng nếu giữ debug UART riêng [55], [56] |
-| Tài nguyên xử lý cho OBD2 + modem + IMU | Dual-core 240 MHz, 512 KB SRAM [19] | Cortex-M4 tới 80 MHz, 128 KB SRAM trên STM32L476RE [54] | Cortex-M4F 64 MHz, 256 KB RAM [55], [56] |
-| Dòng ngủ sâu/siêu thấp công suất | Deep-sleep mức µA tùy cấu hình RTC/IO [19], [20] | STOP2 cỡ 1.1 µA (theo điều kiện datasheet), standby/shutdown cỡ nA [53], [54] | System OFF mức dưới µA tùy RAM retention/GPIO [55] |
-| Framework triển khai | Arduino IDE + ESP-IDF [47] | STM32Cube/HAL [53] | nRF Connect SDK [57] |
-| Phần cứng bổ sung để đạt đủ chức năng | Không cần thêm radio BLE | Cần thêm BLE module nếu vẫn giữ OBD2 BLE (STM32L476 không tích hợp BLE) [53], [54] | Không cần BLE module, nhưng cần xử lý bài toán thiếu serial cho debug |
-| Chi phí dev board/prototype | ~100.000–200.000 VND (mặt bằng BOM dự án) | ~150.000–300.000 VND (mặt bằng BOM dự án) | Thường cao hơn ESP32-S3 và ít phổ biến hơn trong bối cảnh dự án |
-| Tác động tới sơ đồ hiện tại | Giữ nguyên sơ đồ BLE + modem UART + GNSS UART | Tăng phần cứng BLE ngoài và công đoạn bring-up | Có thể phải chuyển debug sang USB/SWO để nhường UART cho chức năng chính |
+| Yêu cầu của tracker                     | ESP32-S3                                                    | STM32L4                                                                                            | nRF52840                                                                               |
+| --------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Kết nối OBD2 BLE với vgate iCar Pro     | BLE 5.0 tích hợp, tương thích ngược BLE 4.0                 | Không tích hợp BLE, phải thêm module ngoài                                                         | BLE 5.0 tích hợp                                                                       |
+| Cấu hình UART của hệ thống              | 3 UART controllers (đủ cho modem + debug, còn dư cho mở rộng) [19], [20] | Nhiều serial instance trong dòng STM32L476 (USART/UART/LPUART), đáp ứng yêu cầu số cổng [53], [54] | UARTE/UART thường dùng 2 instance, ít dư địa nếu cần giữ debug UART riêng [55], [56] |
+| Tài nguyên xử lý cho OBD2 + modem + IMU | Dual-core 240 MHz, 512 KB SRAM [19]                         | Cortex-M4 tới 80 MHz, 128 KB SRAM trên STM32L476RE [54]                                            | Cortex-M4F 64 MHz, 256 KB RAM [55], [56]                                               |
+| Dòng ngủ sâu/siêu thấp công suất        | Deep-sleep mức µA tùy cấu hình RTC/IO [19], [20]            | STOP2 cỡ 1.1 µA (theo điều kiện datasheet), standby/shutdown cỡ nA [53], [54]                      | System OFF mức dưới µA tùy RAM retention/GPIO [55]                                     |
+| Framework triển khai                    | Arduino IDE + ESP-IDF [47]                                  | STM32Cube/HAL [53]                                                                                 | nRF Connect SDK [57]                                                                   |
+| Phần cứng bổ sung để đạt đủ chức năng   | Không cần thêm radio BLE                                    | Cần thêm BLE module nếu vẫn giữ OBD2 BLE (STM32L476 không tích hợp BLE) [53], [54]                 | Không cần BLE module, nhưng cần xử lý bài toán thiếu serial cho debug                  |
+| Chi phí dev board/prototype             | ~100.000–200.000 VND (mặt bằng BOM dự án)                   | ~150.000–300.000 VND (mặt bằng BOM dự án)                                                          | Thường cao hơn ESP32-S3 và ít phổ biến hơn trong bối cảnh dự án                        |
+| Tác động tới sơ đồ hiện tại             | Giữ nguyên sơ đồ BLE + modem UART, thuận lợi cho tích hợp GNSS trong modem | Tăng phần cứng BLE ngoài và công đoạn tích hợp ban đầu                                              | Có thể phải chuyển debug sang USB/SWO để nhường UART cho chức năng chính               |
 
-##### c) Phân tích các delta quan trọng
+##### c) Phân tích các yếu tố quan trọng
 
-**BLE tích hợp:** Đây là ràng buộc cứng vì tracker dùng adapter OBD2 vgate iCar Pro theo chuẩn BLE 4.0. ESP32-S3 và nRF52840 đều đáp ứng trực tiếp bằng BLE 5.0 tích hợp, trong khi STM32L4 phải bổ sung thêm module BLE ngoài. Việc thêm module ngoài không chỉ tăng BOM mà còn tăng thêm một miền nguồn và một bước bring-up phần cứng.
+**BLE tích hợp:** Đây là ràng buộc cứng vì tracker dùng adapter OBD2 vgate iCar Pro theo chuẩn BLE 4.0. ESP32-S3 và nRF52840 đều đáp ứng trực tiếp bằng BLE 5.0 tích hợp, trong khi STM32L4 phải bổ sung thêm module BLE ngoài. Việc thêm module ngoài không chỉ tăng BOM mà còn phát sinh thêm miền nguồn và công đoạn tích hợp phần cứng.
 
-**Ngân sách UART:** Kiến trúc mục tiêu cần ít nhất 3 luồng serial riêng: UART cho modem A7670C, UART cho GNSS NEO-M8N và UART/log debug. ESP32-S3 đáp ứng đúng topology này với 3 UART. STM32L4 cũng có thể đáp ứng nếu chọn đúng biến thể, nhưng đổi lại phải thêm BLE ngoài. nRF52840 chỉ có 2 UART nên muốn giữ OBD2 BLE + modem + GNSS sẽ phải hy sinh cổng debug riêng hoặc đổi sang phương án debug phức tạp hơn.
+**Ngân sách UART:** Kiến trúc mục tiêu cần tối thiểu các luồng UART riêng cho modem và kênh debug. ESP32-S3 đáp ứng tốt với 3 UART phần cứng, còn dư địa cho mở rộng. STM32L4 cũng có thể đáp ứng nếu chọn đúng biến thể, nhưng đổi lại phải thêm BLE ngoài. nRF52840 thường chỉ có 2 UART nên dư địa cho debug độc lập hạn chế hơn.
 
 **Tiêu thụ deep sleep:** STM32L4 và nRF52840 có lợi thế rõ ràng về dòng ngủ sâu theo tài liệu hãng. Tuy nhiên chênh lệch giữa nhóm ESP32-S3 và STM32L4 không quyết định toàn bộ thời lượng pin, vì tracker vẫn chịu tải chính từ modem LTE, GNSS và các chu kỳ wake-up định kỳ. Trong bài toán heartbeat 20–35 ngày với pin 5000 mAh, chênh lệch này có ý nghĩa nhưng không đủ để bù cho việc tăng độ phức tạp tích hợp [19], [53], [54], [55].
 
-**Độ phức tạp triển khai:** ESP32-S3 có lợi thế thực tế vì vừa có BLE sẵn, vừa có ESP-IDF/Arduino IDE, phù hợp cho firmware phải đồng thời xử lý BLE OBD2, AT command modem, I2C IMU và deep sleep. STM32L4 mạnh về low power nhưng kéo theo thêm công việc tích hợp BLE. nRF52840 phù hợp nếu hệ thống ưu tiên radio BLE là chính, nhưng lại không khớp tốt với topology serial hiện tại của tracker.
+**Độ phức tạp triển khai:** ESP32-S3 có lợi thế thực tế vì vừa có BLE sẵn, vừa có ESP-IDF/Arduino IDE, phù hợp cho firmware phải đồng thời xử lý BLE OBD2, AT command modem, I2C IMU và deep sleep. STM32L4 mạnh về low power nhưng kéo theo thêm công việc tích hợp BLE. nRF52840 phù hợp nếu hệ thống ưu tiên radio BLE là chính, nhưng dư địa UART cho kịch bản hiện tại hạn chế hơn.
 
 ##### d) Kết luận lựa chọn
 
 Trên cơ sở đối chiếu trực tiếp các yêu cầu của hệ thống, **ESP32-S3** được chọn làm vi điều khiển chính cho tracker. Quyết định này dựa trên các điểm chốt sau:
 
-- Đáp ứng trọn vẹn kiến trúc hiện tại: 1 kết nối BLE cho OBD2, 2 UART chức năng cho A7670C và NEO-M8N, cùng 1 đường debug riêng.
-- BLE 5.0 tích hợp giúp bỏ hẳn module BLE ngoài, giảm BOM và giảm công đoạn bring-up.
+- Đáp ứng trọn vẹn kiến trúc hiện tại: 1 kết nối BLE cho OBD2, UART cho modem và một đường debug riêng, đồng thời vẫn còn dư địa UART cho mở rộng.
+- BLE 5.0 tích hợp giúp bỏ hẳn module BLE ngoài, giảm BOM và rút ngắn công đoạn tích hợp.
 - Tài nguyên xử lý 240 MHz dual-core và 512 KB SRAM đủ để chạy đồng thời BLE, modem, IMU và state machine.
 - Chi phí prototype thấp hơn STM32L4 khoảng 30–50% theo mặt bằng linh kiện đang dùng trong đồ án.
 - Dòng deep-sleep của ESP32-S3 cao hơn STM32L4 theo tài liệu hãng, nhưng vẫn nằm trong giới hạn chấp nhận được của bài toán pin backup 5000 mAh khi xét toàn bộ duty-cycle của modem, GNSS và các chu kỳ wake-up [19], [53], [54].
 
 [Bảng 3.2: Thông số kỹ thuật ESP32-S3 được chọn]
 
-| Thông số | Giá trị |
-| -------- | ------- |
-| CPU | Dual-core Xtensa LX7, tối đa 240 MHz [19] |
-| RAM on-chip | 512 KB SRAM [19] |
-| Flash | Flash ngoài (module dev board thường 4–16 MB) [19], [20] |
-| Bluetooth | Bluetooth LE 5.0, tương thích ngược BLE 4.0 cho OBD2 adapter [19] |
-| WiFi | 802.11 b/g/n (không dùng trong luồng chính của tracker) [19] |
-| UART | 3 UART controllers [19], [20] |
-| I2C | 2 I2C controllers [19], [20] |
-| ADC | SAR ADC 12-bit, tối đa 20 kênh (theo package) [19] |
-| GPIO | Tối đa 45 GPIO (theo package) [19] |
-| Dòng deep-sleep | Mức µA tùy cấu hình RTC domain và IO [19], [20] |
-| Module cụ thể | ESP32-S3-WROOM-1 |
-| Board phát triển | ESP32-S3-DevKitC-1 |
+| Thông số         | Giá trị                                                           |
+| ---------------- | ----------------------------------------------------------------- |
+| CPU              | Dual-core Xtensa LX7, tối đa 240 MHz [19]                         |
+| RAM on-chip      | 512 KB SRAM [19]                                                  |
+| Flash            | Flash ngoài (module dev board thường 4–16 MB) [19], [20]          |
+| Bluetooth        | Bluetooth LE 5.0, tương thích ngược BLE 4.0 cho OBD2 adapter [19] |
+| WiFi             | 802.11 b/g/n (không dùng trong luồng chính của tracker) [19]      |
+| UART             | 3 UART controllers [19], [20]                                     |
+| I2C              | 2 I2C controllers [19], [20]                                      |
+| ADC              | SAR ADC 12-bit, tối đa 20 kênh (theo package) [19]                |
+| GPIO             | Tối đa 45 GPIO (theo package) [19]                                |
+| Dòng deep-sleep  | Mức µA tùy cấu hình RTC domain và IO [19], [20]                   |
+| Module cụ thể    | ESP32-S3-WROOM-1                                                  |
+| Board phát triển | ESP32-S3-DevKitC-1                                                |
 
 #### 3.1.1.3. Phân tích và lựa chọn modem truyền thông
 
-Modem truyền thông đóng vai trò then chốt trong hệ thống, đảm nhận hai chức năng: (1) kết nối mạng di động 4G/LTE để truyền dữ liệu về máy chủ, và (2) định vị GNSS để xác định vị trí xe. Trong kiến trúc hiện tại, nhóm ưu tiên phương án **tách rời LTE và GNSS** để giảm coupling, dễ bảo trì firmware và linh hoạt thay thế phần cứng.
+Modem truyền thông đóng vai trò then chốt trong hệ thống, đảm nhận hai chức năng: (1) kết nối mạng di động 4G/LTE để truyền dữ liệu về máy chủ, và (2) định vị GNSS để xác định vị trí xe. Trong kiến trúc hiện tại, hệ thống sử dụng **SIM7600CE-T tích hợp LTE + GNSS** nhằm giảm số lượng phần cứng rời, đơn giản hóa đi dây và đồng bộ với firmware thực tế.
 
 ##### a) Các ứng viên
 
-Ba phương án được đưa vào đánh giá là **SIMCom A7670C + u-blox NEO-M8N**, **Quectel EC200U-CN + NEO-M8N**, và **SIMCom SIM7600CE-T** (modem tích hợp GNSS).
+Ba phương án được đưa vào đánh giá gồm hai phương án tách rời (**SIMCom A7670C + u-blox NEO-M8N**, **Quectel EC200U-CN + NEO-M8N**) và một phương án tích hợp (**SIMCom SIM7600CE-T**).
 
-**SIMCom A7670C + u-blox NEO-M8N** là phương án tách rời: A7670C phụ trách LTE/AT command, NEO-M8N phụ trách GNSS/NMEA. Theo trang sản phẩm chính thức của SIMCom, A7670C nằm trong nhóm LTE Cat-1 và dùng nguồn 3.4–4.2 V; GNSS của hệ thống vì vậy được tách sang NEO-M8N riêng [58], [62].
+**SIMCom A7670C + u-blox NEO-M8N** là phương án tách rời: A7670C phụ trách LTE/AT command, NEO-M8N phụ trách GNSS/NMEA. Theo trang sản phẩm chính thức của SIMCom, A7670C nằm trong nhóm LTE Cat-1 và dùng nguồn 3.4–4.2 V [58], [62].
 
-**Quectel EC200U-CN + NEO-M8N** có topology gần giống phương án A7670C + NEO-M8N. Tuy nhiên dòng EC200U được hãng mô tả là Cat-1 bis, GNSS là tính năng tùy chọn theo variant/cấu hình và I/O logic có ràng buộc riêng, nên mức độ thuận tay với baseline tài liệu hiện tại thấp hơn phương án A7670C [59], [61].
+**Quectel EC200U-CN + NEO-M8N** có cấu trúc gần giống phương án A7670C + NEO-M8N. Tuy nhiên dòng EC200U được hãng mô tả là Cat-1 bis, GNSS là tính năng tùy chọn theo biến thể/cấu hình và I/O logic có ràng buộc riêng, nên mức độ phù hợp với cấu hình đang triển khai thấp hơn [59], [61].
 
-**SIMCom SIM7600CE-T** là phương án tích hợp GNSS trong modem, dễ đi dây hơn nhưng coupling cao hơn và kém linh hoạt khi cần tách luồng LTE/GNSS [60].
+**SIMCom SIM7600CE-T** là phương án tích hợp GNSS trong modem, giúp đi dây gọn hơn và giảm số lượng phần cứng rời [60].
 
 ##### b) Đối chiếu kiến trúc LTE/GNSS theo ràng buộc tích hợp
 
-Vấn đề cốt lõi của tracker không chỉ là modem có lên mạng được hay không, mà là kiến trúc LTE/GNSS đó tác động thế nào tới sơ đồ UART, power profile và khả năng refactor firmware. Bảng 3.3 dưới đây đối chiếu trực tiếp các delta này.
+Vấn đề cốt lõi của tracker không chỉ là modem có lên mạng được hay không, mà còn là phương án LTE/GNSS ảnh hưởng thế nào tới sơ đồ UART, hồ sơ tiêu thụ nguồn và mức độ thuận lợi khi phát triển firmware. Bảng 3.3 dưới đây đối chiếu trực tiếp các điểm khác biệt này.
 
 [Bảng 3.3: Đối chiếu các phương án LTE/GNSS theo tác động tích hợp]
 
-| Yêu cầu / delta tích hợp | A7670C + NEO-M8N | EC200U-CN + NEO-M8N | SIM7600CE-T |
-| ------------------------ | ---------------- | -------------------- | ----------- |
-| Số module phần cứng | 2 module: A7670C (LTE) + NEO-M8N (GNSS) [58], [62] | 2 module: EC200U-CN (LTE) + NEO-M8N (GNSS) [59], [61] | 1 module tích hợp LTE + GNSS (SIM7600CE family) [60] |
-| LTE category / tốc độ | Cat-1, tối đa 10 Mbps DL / 5 Mbps UL [58] | Cat-1, tối đa 10 Mbps DL / 5 Mbps UL [59], [61] | Cat-4, tối đa 150 Mbps DL / 50 Mbps UL [60] |
-| GNSS tích hợp trong modem | Không tích hợp GNSS trên A7670C, cần GNSS ngoài [58], [62] | GNSS tùy chọn theo variant/cấu hình dòng EC200U [59], [61] | Có GNSS tích hợp trong module [60] |
-| Điện áp cấp nguồn modem | 3.4–4.2 V (typ. 3.8 V) [58] | 3.3–4.3 V (typ. 3.8 V) [61] | 3.4–4.2 V (typ. 3.8 V) [60] |
-| Đường dữ liệu vị trí trong kiến trúc đề tài | NMEA/UBX từ NEO-M8N qua UART riêng [62], [63] | NMEA/UBX từ NEO-M8N qua UART riêng [62], [63] | GNSS AT tích hợp trong cùng modem [60] |
-| Bật/tắt LTE và GNSS độc lập | Có, do tách 2 module/2 rail nguồn | Có, nếu triển khai tách tương tự A7670C+NEO-M8N | Không tách hoàn toàn do GNSS đi cùng modem |
-| Tác động khi reset modem LTE | Có thể reset modem và giữ logic GNSS riêng | Tương tự phương án tách nếu GNSS dùng module riêng | Reset modem thường kéo theo gián đoạn GNSS |
-| Mức coupling firmware | Thấp, tách rõ `modem_lte` và `gnss` | Thấp, nhưng phải đổi tập lệnh modem | Cao hơn do LTE/GNSS chung module |
-| Tác động tới BOM prototype | Bộ modem + GNSS đang chốt 330.000–500.000 VND (BOM dự án) | Chưa phải cấu hình BOM chính của repo | Có thể ít module hơn nhưng giảm linh hoạt tách LTE/GNSS |
+| Yêu cầu tích hợp                            | A7670C + NEO-M8N                                           | EC200U-CN + NEO-M8N                                        | SIM7600CE-T                                             |
+| ------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------- |
+| Số module phần cứng                         | 2 module: A7670C (LTE) + NEO-M8N (GNSS) [58], [62]         | 2 module: EC200U-CN (LTE) + NEO-M8N (GNSS) [59], [61]      | 1 module tích hợp LTE + GNSS (SIM7600CE family) [60]    |
+| LTE category / tốc độ                       | Cat-1, tối đa 10 Mbps DL / 5 Mbps UL [58]                  | Cat-1, tối đa 10 Mbps DL / 5 Mbps UL [59], [61]            | Cat-4, tối đa 150 Mbps DL / 50 Mbps UL [60]             |
+| GNSS tích hợp trong modem                   | Không tích hợp GNSS trên A7670C, cần GNSS ngoài [58], [62] | GNSS tùy chọn theo variant/cấu hình dòng EC200U [59], [61] | Có GNSS tích hợp trong module [60]                      |
+| Điện áp cấp nguồn modem                     | 3.4–4.2 V (typ. 3.8 V) [58]                                | 3.3–4.3 V (typ. 3.8 V) [61]                                | 3.4–4.2 V (typ. 3.8 V) [60]                             |
+| Đường dữ liệu vị trí trong kiến trúc đề tài | NMEA/UBX từ NEO-M8N qua UART riêng [62], [63]              | NMEA/UBX từ NEO-M8N qua UART riêng [62], [63]              | GNSS AT tích hợp trong cùng modem [60]                  |
+| Bật/tắt LTE và GNSS độc lập                 | Có, do tách 2 module/2 rail nguồn                          | Có, nếu triển khai tách tương tự A7670C+NEO-M8N            | Không tách hoàn toàn do GNSS đi cùng modem              |
+| Tác động khi reset modem LTE                | Có thể reset modem và giữ logic GNSS riêng                 | Tương tự phương án tách nếu GNSS dùng module riêng         | Reset modem thường kéo theo gián đoạn GNSS              |
+| Mức phụ thuộc giữa các chức năng firmware   | Thấp, tách rõ `modem_lte` và `gnss`                        | Thấp, nhưng phải đổi tập lệnh modem                        | Cao hơn do LTE/GNSS chung module                        |
+| Tác động tới BOM prototype                  | Bộ modem + GNSS đang chốt 330.000–500.000 VND (BOM dự án)  | Chưa phải cấu hình BOM chính của repo                      | Giảm số module phần cứng rời, thuận lợi cho đi dây và lắp ráp |
 
 ##### c) Kết luận lựa chọn
 
-**SIMCom A7670C + u-blox NEO-M8N** được lựa chọn làm kiến trúc truyền thông chính vì các lý do sau:
+**SIMCom SIM7600CE-T** được lựa chọn làm kiến trúc truyền thông chính vì các lý do sau:
 
-- Giữ đúng mục tiêu tách LTE và GNSS thành hai miền phần cứng độc lập, từ đó giảm coupling trong firmware.
-- Cần đúng 2 UART chức năng, khớp với sơ đồ ESP32-S3 đang dành riêng UART cho modem và GNSS.
-- Cho phép bật/tắt, reset và tối ưu nguồn cho LTE và GNSS theo từng trạng thái vận hành thay vì buộc đi cùng nhau.
-- Phù hợp trực tiếp với hướng refactor firmware từ mô hình `modem_gnss` sang `modem_lte` + `gnss`.
-- Nằm trong cấu hình BOM prototype đã được chốt cho đồ án, nên thuận lợi hơn cho việc viết tài liệu và triển khai từng bước.
+- Tích hợp LTE và GNSS trong cùng một module giúp giảm số lượng phần cứng rời và rút gọn đường kết nối UART.
+- Giữ nguyên sơ đồ chân đang triển khai (UART1 trên GPIO16/17, PWRKEY trên GPIO25), không cần thay đổi pin mapping phần cứng.
+- Luồng AT được chuẩn hóa với Auto mode (`AT+CNMP=2`), kiểm tra `AT+CEREG?` trước `AT+CGACT=1,1`, và APN mặc định `internet`, phù hợp với firmware hiện tại.
+- GNSS tích hợp được điều khiển trực tiếp bằng `AT+CGNSPWR` và đọc dữ liệu qua `AT+CGNSINF`, thống nhất với module firmware đang vận hành.
+- Phù hợp với phương án BOM phần cứng đang được áp dụng trong prototype, thuận lợi cho triển khai và đối chiếu tài liệu-kỹ thuật.
 
-[Bảng 3.4: Thông số kỹ thuật phương án A7670C + NEO-M8N]
+[Bảng 3.4: Thông số kỹ thuật phương án SIM7600CE-T]
 
-| Thông số | Giá trị |
-| -------- | ------- |
-| Kiến trúc | A7670C (LTE) + NEO-M8N (GNSS) tách rời 2 module [58], [62] |
-| LTE category / tốc độ | Cat-1, tối đa 10 Mbps downlink / 5 Mbps uplink [58] |
-| GNSS | NEO-M8N là bộ thu GNSS chuyên dụng; hỗ trợ GPS/GLONASS/Galileo/BeiDou/QZSS/SBAS, tối đa 3 GNSS đồng thời [62], [63] |
-| GNSS tích hợp trong modem | Không; A7670C không phải modem GNSS tích hợp [58] |
-| Giao tiếp với MCU | 1 UART cho A7670C + 1 UART riêng cho NEO-M8N [62] |
-| Giao thức dữ liệu | GNSS dùng NMEA/UBX; modem là kênh LTE để mang MQTT/HTTP/TCP/UDP ở tầng ứng dụng [63] |
-| Điện áp modem | 3.4–4.2 V, điển hình 3.8 V [58] |
-| Điện áp GNSS | 2.7–3.6 V [62] |
-| GNSS cold start (TTFF) | 26 s [62] |
-| GNSS hot start (TTFF) | 1 s [62] |
-| Ý nghĩa tích hợp | Có thể bật/tắt riêng LTE và GNSS để tối ưu nguồn và giảm coupling firmware |
-| Giới hạn cần ghi rõ | A7670 family có variant khác, nhưng trong đề tài chỉ chốt A7670C LTE-only để tránh nhầm với bản có GNSS [58] |
+| Thông số                  | Giá trị                                                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Kiến trúc                 | SIM7600CE-T tích hợp LTE Cat-4 và GNSS trong cùng module [60]                                                        |
+| LTE category / tốc độ     | Cat-4, tối đa 150 Mbps downlink / 50 Mbps uplink [60]                                                                |
+| GNSS                      | GNSS tích hợp (GPS/GLONASS/BeiDou/Galileo), điều khiển bằng `AT+CGNSPWR`, đọc dữ liệu bằng `AT+CGNSINF` [60]      |
+| GNSS tích hợp trong modem | Có [60]                                                                                                              |
+| Giao tiếp với MCU         | 1 UART (GPIO16/17) cho toàn bộ AT LTE/GNSS + GPIO25 điều khiển PWRKEY [60]                                          |
+| Giao thức dữ liệu         | LTE dùng AT command cho PDP/MQTT; GNSS lấy dữ liệu qua `AT+CGNSINF` và có thể stream NMEA bằng `AT+CGNSTST` khi cần [60] |
+| Điện áp modem             | 3.4–4.2 V, điển hình 3.8 V [60]                                                                                     |
+| Luồng attach LTE          | `AT+CNMP=2` (auto mode), cấu hình `AT+CGDCONT=1,"IP","internet"`, kiểm tra `AT+CEREG?` trước `AT+CGACT=1,1` |
+| Đồng bộ GNSS              | Bật/tắt GNSS bằng `AT+CGNSPWR=1/0`, đọc dữ liệu bằng `AT+CGNSINF`                                                  |
+| Điện áp cấp nguồn         | 3.4–4.2 V, điển hình 3.8 V [60]                                                                                    |
+| Ý nghĩa tích hợp          | Giảm số linh kiện rời, đơn giản hóa đi dây và đồng bộ với firmware thực tế                                         |
+| Ghi chú                   | APN mặc định sử dụng trong hệ thống là `internet`; pin mapping phần cứng giữ nguyên                                |
 
 ## 3.2. Đề xuất các giải pháp – Proposed multiple solutions
 
@@ -1226,18 +1225,18 @@ Thu thập dữ liệu từ ECU xe qua cổng OBD2 (On-Board Diagnostics II) là
 
 [Bảng 3.5: So sánh phương pháp kết nối OBD2 theo thông số triển khai]
 
-| Tiêu chí kỹ thuật | OBD2 có dây (ELM327 UART) | OBD2 không dây (BLE ELM327 / vgate iCar Pro) |
-| ----------------- | ------------------------- | --------------------------------------------- |
-| Kết nối vật lý tracker ↔ OBD2 | Cần dây kéo cố định từ cổng OBD2 đến tracker | Không cần dây giữa tracker và cổng OBD2 |
-| Giao thức tới MCU | UART TTL | BLE 4.0 GATT; vgate iCar Pro là bản Bluetooth 4.0 BLE [29], [64] |
-| Tài nguyên MCU tiêu tốn | Chiếm thêm 1 UART phần cứng trong lúc kết nối | Tận dụng BLE tích hợp của ESP32-S3, giữ UART cho modem/GNSS/debug |
-| Giao thức OBD-II hỗ trợ | Phụ thuộc adapter ELM327 cụ thể | Vgate công bố hỗ trợ J1850 PWM/VPW, ISO9141-2, ISO14230-4, ISO15765-4 CAN, SAE J1939 CAN [64] |
-| Hành vi sleep của adapter | Phụ thuộc adapter có dây cụ thể | Vendor công bố tự sleep sau khoảng 30 phút khi xe tắt máy [64] |
-| Hành vi wake | Phụ thuộc adapter và đường cấp nguồn | Vendor quảng bá tự khởi động khi ignition ON; cần hiểu là hành vi phụ thuộc xe [64] |
-| Dòng tiêu thụ adapter | Phụ thuộc adapter; không dùng 1 số cứng nếu không có datasheet đúng mẫu | Trang hãng được kiểm tra không công bố dòng active/standby, nên không chốt số mA trong luận văn [64] |
-| Hành vi khi MCU deep sleep | UART không duy trì truyền dữ liệu khi MCU ngủ sâu | BLE link cũng không duy trì qua deep sleep; cần reconnect sau wake |
-| Tác động lắp đặt thực địa | Tracker thường bị ràng buộc gần cổng OBD2 | Tracker có thể đặt lệch vị trí OBD2 trong cabin nếu vẫn trong vùng BLE |
-| Bảo trì/thay adapter giữa các xe | Cần tháo dây liên quan đến tracker | Chỉ cần rút/cắm adapter và cấu hình lại kết nối nếu cần |
+| Tiêu chí kỹ thuật                | OBD2 có dây (ELM327 UART)                                               | OBD2 không dây (BLE ELM327 / vgate iCar Pro)                                                         |
+| -------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Kết nối vật lý tracker ↔ OBD2    | Cần dây kéo cố định từ cổng OBD2 đến tracker                            | Không cần dây giữa tracker và cổng OBD2                                                              |
+| Giao thức tới MCU                | UART TTL                                                                | BLE 4.0 GATT; vgate iCar Pro là bản Bluetooth 4.0 BLE [29], [64]                                     |
+| Tài nguyên MCU tiêu tốn          | Chiếm thêm 1 UART phần cứng trong lúc kết nối                           | Tận dụng BLE tích hợp của ESP32-S3, giữ UART cho modem/GNSS/debug                                    |
+| Giao thức OBD-II hỗ trợ          | Phụ thuộc adapter ELM327 cụ thể                                         | Vgate công bố hỗ trợ J1850 PWM/VPW, ISO9141-2, ISO14230-4, ISO15765-4 CAN, SAE J1939 CAN [64]        |
+| Hành vi sleep của adapter        | Phụ thuộc adapter có dây cụ thể                                         | Vendor công bố tự sleep sau khoảng 30 phút khi xe tắt máy [64]                                       |
+| Hành vi wake                     | Phụ thuộc adapter và đường cấp nguồn                                    | Vendor quảng bá tự khởi động khi ignition ON; cần hiểu là hành vi phụ thuộc xe [64]                  |
+| Dòng tiêu thụ adapter            | Phụ thuộc adapter; không dùng 1 số cứng nếu không có datasheet đúng mẫu | Trang hãng được kiểm tra không công bố dòng active/standby, nên không chốt số mA trong luận văn [64] |
+| Hành vi khi MCU deep sleep       | UART không duy trì truyền dữ liệu khi MCU ngủ sâu                       | BLE link cũng không duy trì qua deep sleep; cần reconnect sau wake                                   |
+| Tác động lắp đặt thực địa        | Tracker thường bị ràng buộc gần cổng OBD2                               | Tracker có thể đặt lệch vị trí OBD2 trong cabin nếu vẫn trong vùng BLE                               |
+| Bảo trì/thay adapter giữa các xe | Cần tháo dây liên quan đến tracker                                      | Chỉ cần rút/cắm adapter và cấu hình lại kết nối nếu cần                                              |
 
 **Kết luận:** Phương pháp BLE được chọn vì phù hợp hơn với kiến trúc hiện tại của tracker: tận dụng BLE tích hợp của ESP32-S3, không chiếm thêm UART phần cứng, giảm ràng buộc đi dây, đồng thời vgate iCar Pro đã có công bố rõ về BLE 4.0, auto-sleep và danh sách giao thức OBD-II. Với các mục hãng không công bố (như dòng active/standby), luận văn nên ghi rõ là chưa có số liệu chính thức thay vì điền giá trị ước lượng.
 
@@ -1252,7 +1251,7 @@ Thu thập dữ liệu từ ECU xe qua cổng OBD2 (On-Board Diagnostics II) là
 
 ![Hình 3.2 - Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3–2.png)
 
-*Hình 3.2: Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro*
+_Hình 3.2: Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -1287,7 +1286,7 @@ Cảm biến đo quán tính (IMU - Inertial Measurement Unit) đóng vai trò t
 | Thông số             | Giá trị                                         |
 | -------------------- | ----------------------------------------------- |
 | Loại                 | 3-axis Digital Accelerometer                    |
-| Điện áp hoạt động    | 1.8–3.6 V                                     |
+| Điện áp hoạt động    | 1.8–3.6 V                                       |
 | Giao tiếp            | I2C (400 kHz) hoặc SPI (10 MHz)                 |
 | Phạm vi đo           | +/-2g, +/-4g, +/-8g, +/-16g (có thể điều chỉnh) |
 | Độ phân giải         | 16-bit                                          |
@@ -1304,7 +1303,7 @@ Ngưỡng gia tốc 0.2g được chọn để cân bằng giữa độ nhạy v
 
 ![Hình 3.3 - Sơ đồ kết nối LIS3DH với ESP32-S3 qua I2C](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3–3.png)
 
-*Hình 3.3: Sơ đồ kết nối LIS3DH với ESP32-S3 qua I2C*
+_Hình 3.3: Sơ đồ kết nối LIS3DH với ESP32-S3 qua I2C_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -1333,7 +1332,7 @@ Hệ thống quản lý nguồn là khối phức tạp nhất trong thiết k�
 
 ![Hình 3.4 - Sơ đồ khối hệ thống quản lý nguồn](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3–4.jpg)
 
-*Hình 3.4: Sơ đồ khối hệ thống quản lý nguồn*
+_Hình 3.4: Sơ đồ khối hệ thống quản lý nguồn_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -1364,8 +1363,8 @@ Hệ thống quản lý nguồn là khối phức tạp nhất trong thiết k�
 |                                           |                |  |          |
 | +--v--+   +----v-----+  +---v---+         |
 |                                           | LDO            |  | LTE/GNSS |  | IP2312  |  |
-|                                           | 5->3.3         |  | A7670C + |  | Charger |  |
-|                                           |                |  | NEO-M8N  |  |         |  |
+|                                           | 5->3.3         |  | SIM7600CE-T |  | Charger |  |
+|                                           |                |  | LTE+GNSS tích hợp |  |         |  |
 | +--+--+   +----------+  +---+---+         |
 |                                           |                |  |
 | +--v--+                  +--v--+          |
@@ -1389,9 +1388,9 @@ Mạch buck converter có nhiệm vụ giảm điện áp từ ắc quy xe (12V 
 | Tần số chuyển mạch | 150 kHz               |
 | Package            | TO-220–5              |
 
-Điện áp 5V được chọn làm bus nguồn chung vì phù hợp với đầu vào LDO 3.3V (cấp cho ESP32), mức hoạt động của modem A7670C, module GNSS NEO-M8N và đầu vào của mạch sạc IP2312. Dùng chung một bus 5V giúp đơn giản thiết kế và giảm số lượng converter cần triển khai.
+Điện áp 5V được chọn làm bus nguồn chung vì phù hợp với đầu vào LDO 3.3V (cấp cho ESP32), mức hoạt động của modem SIM7600CE-T và đầu vào của mạch sạc IP2312. Dùng chung một bus 5V giúp đơn giản thiết kế và giảm số lượng converter cần triển khai.
 
-Dòng ra 3A của LM2596 đáp ứng tải toàn hệ thống, gồm ESP32-S3 (80–120 mA), modem A7670C, module GNSS NEO-M8N và mạch phụ trợ (10–20 mA). Dòng sạc 3A qua IP2312 chỉ xuất hiện khi xe chạy nên không đồng thời với toàn bộ tải trong mọi thời điểm.
+Dòng ra 3A của LM2596 đáp ứng tải toàn hệ thống, gồm ESP32-S3 (80–120 mA), modem SIM7600CE-T và mạch phụ trợ (10–20 mA). Dòng sạc 3A qua IP2312 chỉ xuất hiện khi xe chạy nên không đồng thời với toàn bộ tải trong mọi thời điểm.
 
 Duty cycle của mạch được tính: D = Vout/Vin = 5/12 = 0.417 (41.7%). Tổn hao công suất: P_loss = (1–0.85) x 5V x 3A = 2.25W, cần xem xét tản nhiệt khi hoạt động ở công suất cao.
 
@@ -1422,16 +1421,16 @@ Hệ thống cần tự động chuyển đổi giữa hai nguồn cấp: ắc q
 
 [Bảng 3.10: So sánh các phương án Power Path Management theo thông số]
 
-| Tiêu chí kỹ thuật | MOSFET (P-MOS rời, ví dụ IRLML6402) | IC chuyên dụng (TPS2115A) | Relay Module 5V (Songle-class) |
-| ----------------- | ------------------------------------ | ------------------------- | ------------------------------ |
-| Nguyên lý chuyển nguồn | OR-ing bán dẫn, điều khiển gate | Power mux tích hợp, chọn nguồn tự động/thủ công [65] | Chuyển mạch cơ qua tiếp điểm NO/NC |
-| Thông số điện đại diện | IRLML6402: VDS -20 V, ID -3.7 A, RDS(on) 65 mΩ max @ VGS=-4.5 V [66] | Dải đầu vào 2.8–5.5 V, RON điển hình 84 mΩ mỗi nhánh [65] | Relay Songle 5 V điển hình: công suất cuộn hút ~0.36 W, tiếp điểm 10 A @ 250 VAC / 30 VDC [67] |
-| Sụt áp đường nguồn | Phụ thuộc RDS(on) và cách điều khiển gate; có thể thấp nếu chọn đúng part | Thấp nhờ RON cỡ mΩ và mạch chuyển tích hợp [65] | Gần 0 V trên tiếp điểm khi đóng, nhưng là đóng cắt cơ |
-| Dòng tự tiêu hao khi giữ trạng thái | Rất thấp | Rất thấp | Khoảng 72 mA tại 5 V nếu suy ra từ cuộn hút 0.36 W [67] |
-| Mức độ linh kiện phụ trợ | Cần mạch gate, chống dòng ngược, bảo đảm fail-safe | Ít linh kiện ngoài nhất | Cần transistor driver + diode dập nếu không dùng module tích hợp |
-| Độ phức tạp firmware | Trung bình | Thấp | Thấp |
-| Hành vi fail-safe khi MCU mất điều khiển | Phụ thuộc thiết kế gate mặc định | Theo chính sách ưu tiên nguồn của IC [65] | Có thể chọn NO/NC để mặc định chuyển sang pin backup |
-| Khả dụng trong bối cảnh prototype | Tốt nhưng đòi hỏi thiết kế cẩn thận | Tốt về kỹ thuật nhưng chi phí cao hơn | Rất tốt, dễ mua và dễ thay thế |
+| Tiêu chí kỹ thuật                        | MOSFET (P-MOS rời, ví dụ IRLML6402)                                       | IC chuyên dụng (TPS2115A)                                 | Relay Module 5V (Songle-class)                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Nguyên lý chuyển nguồn                   | OR-ing bán dẫn, điều khiển gate                                           | Power mux tích hợp, chọn nguồn tự động/thủ công [65]      | Chuyển mạch cơ qua tiếp điểm NO/NC                                                             |
+| Thông số điện đại diện                   | IRLML6402: VDS -20 V, ID -3.7 A, RDS(on) 65 mΩ max @ VGS=-4.5 V [66]      | Dải đầu vào 2.8–5.5 V, RON điển hình 84 mΩ mỗi nhánh [65] | Relay Songle 5 V điển hình: công suất cuộn hút ~0.36 W, tiếp điểm 10 A @ 250 VAC / 30 VDC [67] |
+| Sụt áp đường nguồn                       | Phụ thuộc RDS(on) và cách điều khiển gate; có thể thấp nếu chọn đúng part | Thấp nhờ RON cỡ mΩ và mạch chuyển tích hợp [65]           | Gần 0 V trên tiếp điểm khi đóng, nhưng là đóng cắt cơ                                          |
+| Dòng tự tiêu hao khi giữ trạng thái      | Rất thấp                                                                  | Rất thấp                                                  | Khoảng 72 mA tại 5 V nếu suy ra từ cuộn hút 0.36 W [67]                                        |
+| Mức độ linh kiện phụ trợ                 | Cần mạch gate, chống dòng ngược, bảo đảm fail-safe                        | Ít linh kiện ngoài nhất                                   | Cần transistor driver + diode dập nếu không dùng module tích hợp                               |
+| Độ phức tạp firmware                     | Trung bình                                                                | Thấp                                                      | Thấp                                                                                           |
+| Hành vi fail-safe khi MCU mất điều khiển | Phụ thuộc thiết kế gate mặc định                                          | Theo chính sách ưu tiên nguồn của IC [65]                 | Có thể chọn NO/NC để mặc định chuyển sang pin backup                                           |
+| Khả dụng trong bối cảnh prototype        | Tốt nhưng đòi hỏi thiết kế cẩn thận                                       | Tốt về kỹ thuật nhưng chi phí cao hơn                     | Rất tốt, dễ mua và dễ thay thế                                                                 |
 
 **Giải pháp được chọn: Relay Module 5V.** Lý do chọn không phải vì hiệu suất điện tốt nhất, mà vì phù hợp mục tiêu prototype của đồ án: dễ mua, chi phí thấp, dễ kiểm thử bằng GPIO và dễ quan sát trạng thái chuyển nguồn ngoài thực tế. So với TPS2115A hay MOSFET rời, relay bất lợi ở hao cuộn hút và bản chất đóng cắt cơ, nhưng lại dễ triển khai hơn trong giai đoạn nguyên mẫu. Với cấu hình NO cho đường ắc quy và NC cho đường pin backup, hệ thống vẫn có đường cấp nguồn dự phòng khi MCU reset hoặc mất điều khiển [12], [67].
 
@@ -1463,14 +1462,14 @@ Logic chuyển nguồn sử dụng cơ chế hysteresis theo profile cấu hình
 
 [Bảng 3.11: Bảng trạng thái chuyển nguồn và cảnh báo]
 
-| Trạng thái          | IGN | U_batt  | Nguồn tracker | Sạc pin | Cảnh báo              |
-| ------------------- | --- | ------- | ------------- | ------- | --------------------- |
+| Trạng thái          | IGN | U_batt                                                     | Nguồn tracker | Sạc pin | Cảnh báo              |
+| ------------------- | --- | ---------------------------------------------------------- | ------------- | ------- | --------------------- |
 | Xe chạy bình thường | ON  | Profile 12V: U_batt >= 13.0V; Profile 24V: U_batt >= 26.0V | Ắc quy        | Có      | Không                 |
 | Xe đỗ bình thường   | OFF | Profile 12V: U_batt > 12.0V; Profile 24V: U_batt > 24.0V   | Ắc quy        | Không   | Không                 |
 | Ắc quy yếu          | OFF | Profile 12V: U_batt <= 12.0V; Profile 24V: U_batt <= 24.0V | Pin 21700     | Không   | Cảnh báo chuyển nguồn |
 | Ắc quy phục hồi     | OFF | Profile 12V: U_batt >= 12.2V; Profile 24V: U_batt >= 24.4V | Ắc quy        | Không   | Cảnh báo phục hồi     |
 
-*Ghi chú: Ngưỡng LVD cắt sâu để bảo vệ ắc quy: 11.5V (profile 12V) và 23.0V (profile 24V).*
+_Ghi chú: Ngưỡng LVD cắt sâu để bảo vệ ắc quy: 11.5V (profile 12V) và 23.0V (profile 24V)._
 
 Phương pháp software-based được chọn thay cho hardware-based (LM393 comparator) vì không cần thêm linh kiện ngoài (chi phí = 0), cho phép điều chỉnh ngưỡng linh hoạt trong firmware, và độ chính xác của ADC 12-bit (độ phân giải ~3 mV) đã đáp ứng yêu cầu ứng dụng.
 
@@ -1513,16 +1512,19 @@ Pin 21700 Li-ion 5000 mAh được chọn làm nguồn dự phòng với cấu h
 
 **Tính toán thời gian hoạt động từ pin backup:**
 
-*Chế độ heartbeat (đỗ xe, chu kỳ 15 phút):*
+_Chế độ heartbeat (đỗ xe, chu kỳ 15 phút):_
+
 - Dòng trung bình: I_avg = (250 mA x 15s + 3 mA x 885s) / 900s = 7.1 mA
 - Dung lượng hiệu quả (sau tổn hao): 4500 mAh
 - Thời gian hoạt động: T = 4500 / 7.1 = 634 giờ ~ **26 ngày**
 
-*Chế độ heartbeat (đỗ xe, chu kỳ 30 phút):*
+_Chế độ heartbeat (đỗ xe, chu kỳ 30 phút):_
+
 - Dòng trung bình: ~5 mA
 - Thời gian hoạt động: T = 4500 / 5 = 900 giờ ~ **37 ngày**
 
-*Chế độ cảnh báo (track liên tục):*
+_Chế độ cảnh báo (track liên tục):_
+
 - Dòng trung bình: ~250 mA
 - Thời gian hoạt động: T = 4500 / 250 = **18 giờ**
 
@@ -1532,31 +1534,31 @@ Kết quả tính toán cho thấy pin 5000 mAh đủ khả năng duy trì hoạ
 
 [Bảng 3.14: Bảng tổng hợp linh kiện hệ thống tracker (BOM)]
 
-| STT | Thành phần                     | Đơn vị | SL  | Giá ước tính (VND) | Ghi chú                              |
-| --- | ------------------------------ | ------ | --- | ------------------ | ------------------------------------ |
-| 1   | ESP32-S3 DevKit (DevKitC-1)    | Cái    | 1   | 100.000–200.000  | Module ESP32-S3-WROOM-1              |
-| 2   | LIS3DH breakout board          | Cái    | 1   | 20.000–50.000    | Cảm biến gia tốc 3 trục              |
-| 3   | vgate iCar Pro (OBD2 BLE)      | Cái    | 1   | 150.000–300.000  | BLE 4.0, ELM327 compatible           |
-| 4   | SIMCom A7670C + u-blox NEO-M8N | Bộ     | 1   | 330.000–500.000  | Modem LTE + module GNSS tách rời + anten |
-| 5   | Pin 21700 Li-ion 5000mAh       | Cái    | 1   | 100.000–200.000  | Loại có protection board             |
-| 6   | Module sạc IP2312 (3A)         | Cái    | 1   | 20.000–40.000    | Type-C, dòng sạc 3A                  |
-| 7   | BMS/Protection Board 1S        | Cái    | 1   | 10.000–20.000    | BMS 1S 3A hoặc DW01+MOSFET           |
-| 8   | Module Buck LM2596 (7–40V->5V) | Cái    | 1   | 15.000–25.000    | Dòng ra 3A, tương thích hệ 12V/24V  |
-| 9   | Module Boost MT3608 (3.7V->5V) | Cái    | 1   | 10.000–15.000    | Dòng ra 2A                           |
-| 10  | Relay Module 5V 1-kênh         | Cái    | 1   | 5.000–10.000     | Power MUX chuyển nguồn               |
-| 11  | Điện trở (10kOhm, 2.2kOhm)     | Gói    | 1   | 5.000–10.000     | Voltage divider, pull-up             |
-| 12  | Tụ điện (100uF, 220uF)         | Gói    | 1   | 5.000–10.000     | Lọc nhiễu, decoupling                |
-| 13  | Diode Schottky 1N5822          | Cái    | 2   | 2.000–5.000      | Diode-OR backup                      |
-| 14  | Connector, header pin          | Gói    | 1   | 10.000–20.000    | Kết nối dây, header                  |
-| 15  | PCB 2 lớp (~50x50 mm)          | Cái    | 1   | 50.000–100.000   | Tự thiết kế hoặc đặt làm             |
-| 16  | Vỏ bảo vệ (tùy chọn)           | Cái    | 1   | 50.000–100.000   | Nhựa hoặc kim loại                   |
-| 17  | Dây nối, cáp, phụ kiện         | -      | -   | 20.000–30.000    | Dây điện, cáp USB                    |
-| 18  | Linh kiện phụ trợ khác         | -      | -   | 20.000–30.000    | Fuse, switch, LED                    |
+| STT | Thành phần                     | Đơn vị | SL  | Giá ước tính (VND) | Ghi chú                                  |
+| --- | ------------------------------ | ------ | --- | ------------------ | ---------------------------------------- |
+| 1   | ESP32-S3 DevKit (DevKitC-1)    | Cái    | 1   | 100.000–200.000    | Module ESP32-S3-WROOM-1                  |
+| 2   | LIS3DH breakout board          | Cái    | 1   | 20.000–50.000      | Cảm biến gia tốc 3 trục                  |
+| 3   | vgate iCar Pro (OBD2 BLE)      | Cái    | 1   | 150.000–300.000    | BLE 4.0, ELM327 compatible               |
+| 4   | SIMCom SIM7600CE-T              | Bộ     | 1   | 330.000–500.000    | Modem LTE + GNSS tích hợp + anten |
+| 5   | Pin 21700 Li-ion 5000mAh       | Cái    | 1   | 100.000–200.000    | Loại có protection board                 |
+| 6   | Module sạc IP2312 (3A)         | Cái    | 1   | 20.000–40.000      | Type-C, dòng sạc 3A                      |
+| 7   | BMS/Protection Board 1S        | Cái    | 1   | 10.000–20.000      | BMS 1S 3A hoặc DW01+MOSFET               |
+| 8   | Module Buck LM2596 (7–40V->5V) | Cái    | 1   | 15.000–25.000      | Dòng ra 3A, tương thích hệ 12V/24V       |
+| 9   | Module Boost MT3608 (3.7V->5V) | Cái    | 1   | 10.000–15.000      | Dòng ra 2A                               |
+| 10  | Relay Module 5V 1-kênh         | Cái    | 1   | 5.000–10.000       | Power MUX chuyển nguồn                   |
+| 11  | Điện trở (10kOhm, 2.2kOhm)     | Gói    | 1   | 5.000–10.000       | Voltage divider, pull-up                 |
+| 12  | Tụ điện (100uF, 220uF)         | Gói    | 1   | 5.000–10.000       | Lọc nhiễu, decoupling                    |
+| 13  | Diode Schottky 1N5822          | Cái    | 2   | 2.000–5.000        | Diode-OR backup                          |
+| 14  | Connector, header pin          | Gói    | 1   | 10.000–20.000      | Kết nối dây, header                      |
+| 15  | PCB 2 lớp (~50x50 mm)          | Cái    | 1   | 50.000–100.000     | Tự thiết kế hoặc đặt làm                 |
+| 16  | Vỏ bảo vệ (tùy chọn)           | Cái    | 1   | 50.000–100.000     | Nhựa hoặc kim loại                       |
+| 17  | Dây nối, cáp, phụ kiện         | -      | -   | 20.000–30.000      | Dây điện, cáp USB                        |
+| 18  | Linh kiện phụ trợ khác         | -      | -   | 20.000–30.000      | Fuse, switch, LED                        |
 
 [Bảng 3.15: Tổng hợp chi phí theo nhóm]
 
-| Nhóm | Hạng mục                                           | Chi phí (VND)           |
-| ---- | -------------------------------------------------- | ----------------------- |
+| Nhóm | Hạng mục                                           | Chi phí (VND)         |
+| ---- | -------------------------------------------------- | --------------------- |
 | A    | Thành phần chính (MCU, cảm biến, modem, OBD2, pin) | 670.000–1.250.000     |
 | B    | Quản lý nguồn (buck, boost, charger, BMS, relay)   | 60.000–110.000        |
 | C    | Linh kiện phụ trợ (điện trở, tụ, diode, connector) | 42.000–75.000         |
@@ -1580,11 +1582,11 @@ Firmware là lớp phần mềm nhúng chạy trực tiếp trên vi điều khi
 
 [Bảng 3.5A: So sánh các phương án nền tảng firmware]
 
-| Phương án | Mô tả | Ưu điểm | Hạn chế | Mức phù hợp |
-| --------- | ----- | ------- | ------- | ----------- |
-| **PA-FW1: Arduino Core + Superloop** | Vòng lặp chính tuần tự, xử lý tác vụ theo polling | Dễ bắt đầu, ít cấu hình | Khó mở rộng đa nhiệm thực sự, khó tối ưu deep sleep phức tạp, quản lý lỗi hạn chế | Trung bình |
-| **PA-FW2: ESP-IDF + FreeRTOS (Đã chọn)** | Kiến trúc task/event, driver chính thức Espressif | Đa nhiệm tốt, hỗ trợ power management sâu, tích hợp NimBLE/modem/UART/I2C ổn định | Độ phức tạp cao hơn Arduino | **Cao** |
-| **PA-FW3: Zephyr RTOS trên ESP32** | RTOS đa nền tảng, kiến trúc module hóa | Tính chuẩn hóa tốt, khả năng mở rộng dài hạn | Hệ sinh thái ESP32 chuyên biệt và tài liệu thực chiến BLE-OBD2/modem ít hơn ESP-IDF | Trung bình |
+| Phương án                                | Mô tả                                             | Ưu điểm                                                                           | Hạn chế                                                                             | Mức phù hợp |
+| ---------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------- |
+| **PA-FW1: Arduino Core + Superloop**     | Vòng lặp chính tuần tự, xử lý tác vụ theo polling | Dễ bắt đầu, ít cấu hình                                                           | Khó mở rộng đa nhiệm thực sự, khó tối ưu deep sleep phức tạp, quản lý lỗi hạn chế   | Trung bình  |
+| **PA-FW2: ESP-IDF + FreeRTOS (Đã chọn)** | Kiến trúc task/event, driver chính thức Espressif | Đa nhiệm tốt, hỗ trợ power management sâu, tích hợp NimBLE/modem/UART/I2C ổn định | Độ phức tạp cao hơn Arduino                                                         | **Cao**     |
+| **PA-FW3: Zephyr RTOS trên ESP32**       | RTOS đa nền tảng, kiến trúc module hóa            | Tính chuẩn hóa tốt, khả năng mở rộng dài hạn                                      | Hệ sinh thái ESP32 chuyên biệt và tài liệu thực chiến BLE-OBD2/modem ít hơn ESP-IDF | Trung bình  |
 
 #### 3.1.2.3. Chọn giải pháp Firmware
 
@@ -1607,18 +1609,18 @@ Firmware chịu trách nhiệm thu thập dữ liệu từ các cảm biến (IM
 
 Firmware được thiết kế theo mô hình phân lớp (layered architecture) gồm bốn tầng chính để bảo đảm tính module hóa và khả năng bảo trì:
 
-| Tầng   | Tên tầng                         | Chức năng chính                                                                                          |
-| ------ | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Tầng 1 | Hardware Abstraction Layer (HAL) | Driver LIS3DH (IMU), modem LTE A7670C, module GNSS NEO-M8N (UART/NMEA), ADC, GPIO, BLE (OBD2 vgate iCar Pro) |
-| Tầng 2 | Power Management Layer           | Quản lý chế độ ngủ (sleep/deep sleep), đánh thức (wakeup), cắt nguồn khi điện áp thấp (LVD)              |
-| Tầng 3 | Application Layer                | Logic xử lý chế độ lái xe, đỗ xe, cảnh báo; xử lý sự kiện và alert                                       |
-| Tầng 4 | Communication Layer              | Giao tiếp MQTT/HTTP, mã hóa dữ liệu, xử lý lệnh điều khiển từ máy chủ                                    |
+| Tầng   | Tên tầng                         | Chức năng chính                                                                                              |
+| ------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Tầng 1 | Hardware Abstraction Layer (HAL) | Driver LIS3DH (IMU), modem LTE/GNSS SIM7600CE-T (UART/AT), ADC, GPIO, BLE (OBD2 vgate iCar Pro) |
+| Tầng 2 | Power Management Layer           | Quản lý chế độ ngủ (sleep/deep sleep), đánh thức (wakeup), cắt nguồn khi điện áp thấp (LVD)                  |
+| Tầng 3 | Application Layer                | Logic xử lý chế độ lái xe, đỗ xe, cảnh báo; xử lý sự kiện và alert                                           |
+| Tầng 4 | Communication Layer              | Giao tiếp MQTT/HTTP, mã hóa dữ liệu, xử lý lệnh điều khiển từ máy chủ                                        |
 
 Tầng HAL trừu tượng hóa truy cập phần cứng để các tầng trên làm việc với cảm biến và ngoại vi mà không phụ thuộc trực tiếp vào thanh ghi. Tầng Power Management quản lý trạng thái năng lượng toàn hệ thống. Tầng Application xử lý logic nghiệp vụ và chuyển đổi chế độ hoạt động. Tầng Communication đảm nhận đóng gói và truyền dữ liệu lên máy chủ.
 
 ![Hình 3.5 - Sơ đồ kiến trúc phân lớp của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–5.svg)
 
-*Hình 3.5: Sơ đồ kiến trúc phân lớp của firmware*
+_Hình 3.5: Sơ đồ kiến trúc phân lớp của firmware_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -1631,7 +1633,7 @@ Firmware sử dụng hệ điều hành thời gian thực FreeRTOS (tích hợp
 | `power_monitor_task` | Cao (5)        | Giám sát điện áp ắc quy, điều khiển power path, phát hiện LVD   |
 | `modem_control_task` | Cao (4)        | Điều khiển modem SIMCom qua AT commands, quản lý kết nối 4G/LTE |
 | `ble_obd2_task`      | Trung bình (3) | Kết nối BLE với OBD2 adapter, đọc dữ liệu xe                    |
-| `gnss_task`          | Trung bình (3) | Đọc dữ liệu vị trí GPS/GNSS từ module NEO-M8N qua UART          |
+| `gnss_task`          | Trung bình (3) | Đọc dữ liệu vị trí GPS/GNSS từ modem SIM7600CE-T qua UART       |
 | `mqtt_publish_task`  | Trung bình (2) | Đóng gói và gửi dữ liệu telemetry qua MQTT                      |
 | `state_machine_task` | Thấp (1)       | Điều phối chuyển đổi trạng thái toàn hệ thống                   |
 
@@ -1667,7 +1669,7 @@ void app_main(void) {
 
 ![Hình 3.6 - Sơ đồ tương tác giữa các FreeRTOS task](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–6.svg)
 
-*Hình 3.6: Sơ đồ tương tác giữa các FreeRTOS task*
+_Hình 3.6: Sơ đồ tương tác giữa các FreeRTOS task_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -1675,12 +1677,9 @@ void app_main(void) {
 
 Luồng hoạt động tổng thể của firmware được tổ chức theo trình tự sau:
 
-1. **Khởi tạo ngoại vi**: Cấu hình và khởi động các peripheral gồm IMU (LIS3DH qua I2C), modem LTE A7670C (UART), module GNSS NEO-M8N (UART), ADC (đọc điện áp), và BLE stack (NimBLE).
-
+1. **Khởi tạo ngoại vi**: Cấu hình và khởi động các peripheral gồm IMU (LIS3DH qua I2C), modem SIM7600CE-T (UART1, Auto mode `AT+CNMP=2`, GNSS qua `AT+CGNSINF`), ADC (đọc điện áp), và BLE stack (NimBLE).
 2. **Đọc trạng thái IGN và điện áp ắc quy**: Hệ thống ưu tiên đọc trạng thái động cơ (IGN) trực tiếp từ ECU qua OBD2 BLE. Nếu không kết nối được OBD2, hệ thống fallback sang đo điện áp ắc quy qua ADC theo profile: profile 12V dùng IGN_ON >= 13.0V và IGN_OFF <= 12.0V; profile 24V dùng IGN_ON >= 26.0V và IGN_OFF <= 24.0V.
-
 3. **Quyết định chế độ hoạt động**: Dựa trên trạng thái IGN và dữ liệu cảm biến, firmware chuyển sang chế độ phù hợp (lái xe, đỗ xe, hoặc cảnh báo).
-
 4. **Thực thi tác vụ trong từng chế độ**:
    - **Chế độ lái xe (Driving)**: Kết nối OBD2, theo dõi liên tục, giữ BLE active, gửi telemetry định kỳ.
    - **Chế độ đỗ xe (Parked)**: Không kết nối OBD2, chuyển sang deep sleep, gửi heartbeat định kỳ.
@@ -1690,7 +1689,7 @@ Luồng hoạt động tổng thể của firmware được tổ chức theo tr�
 
 ![Hình 3.7 - Lưu đồ thuật toán luồng hoạt động chính của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–7.png)
 
-*Hình 3.7: Lưu đồ thuật toán luồng hoạt động chính của firmware*
+_Hình 3.7: Lưu đồ thuật toán luồng hoạt động chính của firmware_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -1735,11 +1734,8 @@ Kiến trúc module BLE OBD2 được tổ chức theo bốn tầng:
 Quy trình kết nối BLE với adapter OBD2 diễn ra theo các bước sau:
 
 1. **Kiểm tra địa chỉ BLE đã lưu**: Đọc địa chỉ MAC của vgate iCar Pro từ bộ nhớ flash (NVS). Nếu đã có địa chỉ, chuyển trực tiếp sang bước kết nối (reconnect nhanh trong 1–3 giây).
-
 2. **Quét tìm thiết bị (Scan)**: Nếu chưa có địa chỉ, thực hiện BLE scan để tìm adapter. Quá trình scan lọc thiết bị theo tên (device name) hoặc service UUID đặc trưng của OBD2 adapter.
-
 3. **Kết nối GATT**: Thiết lập kết nối BLE với adapter, thực hiện GATT service discovery để tìm các characteristic cần thiết (TX và RX characteristic).
-
 4. **Gửi lệnh khởi tạo ELM327**: Gửi chuỗi lệnh khởi tạo giao thức ELM327 qua BLE GATT write:
    - `ATZ` — Reset adapter
    - `ATE0` — Tắt echo
@@ -1791,7 +1787,7 @@ void ble_obd2_task(void *param) {
 
 ![Hình 3.8 - Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–8.jpg)
 
-*Hình 3.8: Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2*
+_Hình 3.8: Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -1823,84 +1819,40 @@ Mọi lỗi kết nối OBD2 đều được ghi lại vào log để phục v�
 
 #### 3.2.2.3. Module điều khiển modem SIMCom
 
-##### a) Tổng quan modem A7670C + GNSS NEO-M8N
+##### a) Kiến trúc modem SIMCom SIM7600CE-T (LTE + GNSS tích hợp)
 
-Trong kiến trúc hiện tại, modem SIMCom A7670C là thành phần giao tiếp mạng chính của thiết bị, cung cấp kết nối 4G/LTE. Chức năng định vị GNSS (GPS + GLONASS + BeiDou) được tách sang module NEO-M8N và xử lý qua UART/NMEA parser riêng. Modem được điều khiển bởi ESP32-S3 thông qua tập lệnh AT (AT commands), đảm bảo quy trình khởi tạo, kết nối mạng và gửi dữ liệu diễn ra có hệ thống và có khả năng phục hồi từ lỗi.
+Trong kiến trúc hiện tại, modem SIMCom SIM7600CE-T đảm nhận toàn bộ luồng LTE và GNSS. ESP32-S3 giao tiếp với modem qua UART1 (GPIO16 TX, GPIO17 RX). Firmware sử dụng một chuỗi lệnh AT chính xác để đảm bảo modem sẵn sàng trước khi bật PDP context và khởi động GNSS.
 
-##### b) Quy trình khởi tạo modem
+| Bước | Lệnh AT                    | Mục đích chính                                                                            |
+| ---- | -------------------------- | ------------------------------------------------------------------------------------------ |
+| 1    | `AT`                       | Kiểm tra modem còn phản hồi                                                                |
+| 2    | `AT+CPIN?`                 | Kiểm tra SIM card đã sẵn sàng                                                              |
+| 3    | `AT+CNMP=2`                | Đặt chế độ tự động LTE/UMTS/GSM                                                            |
+| 4    | `AT+CGDCONT=1,"IP","internet"` | Cấu hình PDP context với APN mặc định `internet`                            |
+| 5    | `AT+CEREG?`                | Poll đến khi `+CEREG: 0,1` (hoặc `stat`=5) trước khi kích hoạt PDP context                  |
+| 6    | `AT+CGACT=1,1`             | Bật PDP context sau khi đăng ký mạng thành công                                             |
+| 7    | `AT+CGPADDR=1`             | Ghi nhận địa chỉ IP được cấp (dùng để log và kiểm tra)                                    |
+| 8    | `AT+CGNSPWR=1`            | Bật GNSS tích hợp và đợi modem trả về fix vị trí                                            |
+| 9    | `AT+CGNSINF`              | Đọc tọa độ GNSS hiện tại (vị trí, tốc độ, số vệ tinh); `AT+CGNSTST` chỉ dùng nếu cần dữ liệu NMEA hoàn toàn                              |
 
-Quy trình khởi tạo modem diễn ra theo bốn bước tuần tự:
+Toàn bộ lệnh AT cho LTE và GNSS được thực hiện trên cùng UART1. Trình tự kiểm tra `AT+CEREG?` trước khi gọi `AT+CGACT=1,1` giúp tránh kích hoạt PDP context khi modem chưa đăng ký mạng.
 
-| Bước | Lệnh AT    | Phản hồi mong đợi | Mục đích                         |
-| ---- | ---------- | ----------------- | -------------------------------- |
-| 1    | `AT`       | `OK`              | Kiểm tra modem còn phản hồi      |
-| 2    | `AT+CPIN?` | `+CPIN: READY`    | Kiểm tra SIM card đã sẵn sàng    |
-| 3    | `AT+CREG?` | `+CREG: 0,1`      | Kiểm tra đăng ký mạng thành công |
-| 4    | `AT+CSQ`   | `+CSQ: 20,99`     | Đọc cường độ tín hiệu (RSSI)     |
+##### c) Quản lý kết nối và tiết kiệm điện
 
-Trường hợp modem không phản hồi, firmware thực hiện reset phần cứng bằng cách điều khiển chân PWRKEY (GPIO25): kéo LOW rồi HIGH trong 1–2 giây, sau đó đợi modem khởi động lại (10–30 giây). Nếu SIM chưa sẵn sàng hoặc chưa đăng ký mạng, hệ thống đợi và retry (quá trình đăng ký mạng có thể mất 30–60 giây).
+- **Khi hoạt động (driving mode):** Giữ PDP context mở và GNSS bật liên tục để gửi telemetry định kỳ và heartbeat.
+- **Khi dừng (parking mode):** Firmware đóng PDP context (`AT+CGACT=0,1`), đưa modem vào `AT+CSCLK=1` hoặc `AT+CFUN=0`, rồi chuyển ESP32-S3 sang deep sleep. Khi wake-up, modem được đánh thức qua UART và thực hiện lại các lệnh `AT+CFUN=1` + `AT+CGACT=1,1`.
+- **GNSS:** Sau khi `AT+CGNSPWR=1`, firmware tuần tự gọi `AT+CGNSINF` để lấy dữ liệu; `AT+CGNSTST` chỉ dùng khi cần stream NMEA để hỗ trợ debug hoặc phân tích phụ trợ.
 
-##### c) Điều khiển kết nối 4G/LTE
+##### d) Xử lý sự cố
 
-**Bật kết nối 4G:**
+| Tình huống                   | Biện pháp                                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------------- |
+| Modem không phản hồi          | Reset nhanh qua PWRKEY (GPIO25) rồi bắt đầu lại chuỗi AT                              |
+| Mất kết nối 4G               | Đợi `AT+CEREG?` thành `1`, gọi `AT+CGACT=0,1` rồi `AT+CGACT=1,1` để tái khởi động PDP    |
+| GNSS không fix dù đã bật     | Gọi lại `AT+CGNSINF`, nếu vẫn thất bại thì bật lại GNSS (`AT+CGNSPWR=0`/`1`) rồi thử lại |
+| Modem quá nóng                | Đưa `AT+CFUN=0` để tạm thời tắt RF và chờ nhiệt độ giảm trước khi tiếp tục              |
 
-Quy trình bật kết nối 4G/LTE gồm các bước: thiết lập chế độ mạng (`AT+CNMP=38` cho LTE only), kích hoạt PDP context (`AT+CGACT=1,1`), và cấu hình APN của nhà mạng (`AT+CGDCONT=1,"IP","internet"`).
-
-**Tắt kết nối 4G:**
-
-Khi không cần gửi dữ liệu (chế độ đỗ xe), firmware đóng PDP context (`AT+CGACT=0,1`) hoặc đưa modem vào chế độ Flight Mode (`AT+CFUN=4`) để tiết kiệm năng lượng.
-
-**Chiến lược sử dụng theo chế độ:**
-
-- **Lái xe (IGN ON)**: Giữ 4G active liên tục để gửi dữ liệu telemetry định kỳ.
-- **Đỗ xe (IGN OFF)**: Tắt 4G trước khi deep sleep.
-- **Heartbeat**: Bật 4G -> gửi heartbeat -> tắt 4G -> deep sleep.
-
-##### d) Điều khiển GNSS/GPS
-
-Trong kiến trúc hiện tại, modem A7670C đảm nhiệm kết nối 4G/LTE, còn định vị GNSS được tách sang module NEO-M8N. Firmware điều khiển A7670C bằng AT commands cho phần cellular, trong khi dữ liệu GNSS được đọc từ NEO-M8N qua UART/NMEA parser:
-
-**Bật GNSS (NEO-M8N)**: cấp nguồn cho module GNSS và khởi tạo UART reader.
-
-**Đọc vị trí**: đọc và parse bản tin NMEA (ví dụ `GGA`, `RMC`, `VTG`) từ NEO-M8N để lấy tọa độ, vận tốc và trạng thái fix.
-
-Trong đó các trường quan trọng gồm: trạng thái fix, `lat`/`lon` (tọa độ thập phân), `alt` (độ cao, mét), `speed` (tốc độ, km/h), số vệ tinh khả dụng.
-
-**Tắt GNSS**: ngắt nguồn GNSS hoặc đưa module vào chế độ tiết kiệm năng lượng theo cấu hình.
-
-Thời gian để GNSS fix được vị trí phụ thuộc vào trạng thái trước đó:
-
-| Loại khởi động | Điều kiện | Thời gian fix |
-| -------------- | --------- | ------------- |
-| Hot start      | Module vừa hoạt động trước đó, còn dữ liệu hỗ trợ | 1–5 giây |
-| Warm start     | Còn một phần dữ liệu hỗ trợ | 5–20 giây |
-| Cold start     | Khởi động mới hoàn toàn | 20–60 giây |
-
-![Hình 3.9 - Lưu đồ thuật toán điều khiển modem theo chế độ hoạt động](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–9.png)
-
-*Hình 3.9: Lưu đồ thuật toán điều khiển modem theo chế độ hoạt động*
-
-> Nguồn: Hình vẽ của tác giả
-
-##### e) Chế độ ngủ của modem
-
-Modem A7670C hỗ trợ các chế độ tiết kiệm năng lượng cho phần LTE, trong khi NEO-M8N được bật/tắt độc lập theo nhu cầu định vị:
-
-| Chế độ              | Lệnh AT      | Dòng tiêu thụ | Đặc điểm                                                          |
-| ------------------- | ------------ | ------------- | ----------------------------------------------------------------- |
-| Sleep (CSCLK)       | `AT+CSCLK=1` | 1–5 mA        | Tự động ngủ khi UART không hoạt động, đánh thức bằng dữ liệu UART |
-| Deep Sleep (CFUN=0) | `AT+CFUN=0`  | < 1 mA        | Tắt RF, giữ UART, đánh thức bằng lệnh AT hoặc GPIO                |
-
-Trước khi ESP32-S3 vào deep sleep, firmware đưa modem vào chế độ sleep (`AT+CSCLK=1` hoặc `AT+CFUN=0`) và lưu trạng thái modem. Khi ESP32-S3 wake-up, firmware đánh thức modem bằng cách gửi ký tự bất kỳ trên UART, sau đó khôi phục kết nối 4G (`AT+CFUN=1`, `AT+CGACT=1,1`).
-
-##### f) Xử lý lỗi modem
-
-| Lỗi                  | Phương án xử lý                                                         |
-| -------------------- | ----------------------------------------------------------------------- |
-| Modem không phản hồi | Timeout 5 giây -> reset GPIO PWRKEY -> đợi 10–30 giây -> retry khởi tạo |
-| Mất kết nối 4G       | Kiểm tra `AT+CREG?` và `AT+CGACT?` -> deactivate/reactivate PDP context |
-| GNSS không fix       | Timeout 60 giây -> tắt/bật lại GNSS -> gửi dữ liệu không có GPS nếu cần |
-| Modem quá nhiệt      | Phát hiện qua phản hồi bất thường -> đưa vào sleep mode tạm thời        |
+Các chế độ ngủ (`AT+CSCLK=1`, `AT+CFUN=0`) và wake-up bằng UART giữ cho modem tiêu thụ thấp mà vẫn có thể khởi động lại nhanh khi ESP32-S3 tỉnh dậy.
 
 #### 3.2.2.4. Module quản lý nguồn và GPIO
 
@@ -1955,7 +1907,7 @@ void power_monitor_task(void *param) {
 
 ![Hình 3.10 - Lưu đồ thuật toán điều khiển power path](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–10.png)
 
-*Hình 3.10: Lưu đồ thuật toán điều khiển power path*
+_Hình 3.10: Lưu đồ thuật toán điều khiển power path_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -1963,11 +1915,11 @@ void power_monitor_task(void *param) {
 
 IC sạc IP2312 được điều khiển qua chân GPIO5 (CHARGER_EN). Logic sạc được thiết kế để bảo vệ cả ắc quy xe lẫn pin dự phòng:
 
-| Điều kiện              | Trạng thái charger    | Lý do                                               |
-| ---------------------- | --------------------- | --------------------------------------------------- |
+| Điều kiện                                                     | Trạng thái charger    | Lý do                                               |
+| ------------------------------------------------------------- | --------------------- | --------------------------------------------------- |
 | IGN ON và U_batt vượt ngưỡng profile (ví dụ > 12V cho hệ 12V) | Enable (GPIO5 = HIGH) | Máy phát điện đang nạp, có thể sạc pin dự phòng     |
-| IGN OFF                | Disable (GPIO5 = LOW) | Bảo vệ ắc quy không bị hao pin khi xe tắt máy       |
-| U_batt dưới ngưỡng profile (ví dụ < 12V cho hệ 12V) | Disable (GPIO5 = LOW) | Ắc quy yếu, không đủ năng lượng để sạc pin dự phòng |
+| IGN OFF                                                       | Disable (GPIO5 = LOW) | Bảo vệ ắc quy không bị hao pin khi xe tắt máy       |
+| U_batt dưới ngưỡng profile (ví dụ < 12V cho hệ 12V)           | Disable (GPIO5 = LOW) | Ắc quy yếu, không đủ năng lượng để sạc pin dự phòng |
 
 ##### d) Giám sát điện áp và LVD
 
@@ -2149,7 +2101,7 @@ Máy trạng thái là cơ chế điều phối trung tâm của firmware, quy�
 
 ![Hình 3.11 - Sơ đồ máy trạng thái của thiết bị theo dõi](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–11.svg)
 
-*Hình 3.11: Sơ đồ máy trạng thái của thiết bị theo dõi*
+_Hình 3.11: Sơ đồ máy trạng thái của thiết bị theo dõi_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -2290,11 +2242,11 @@ Hệ thống Backend/Cloud là tầng điều phối trung tâm của toàn bộ
 
 [Bảng 3.15A: So sánh các phương án kiến trúc Cloud]
 
-| Phương án | Mô tả ngắn | Ưu điểm | Hạn chế | Mức phù hợp |
-| --------- | ---------- | ------- | ------- | ----------- |
-| **PA-A: Monolithic REST + 1 DB** | Thiết bị gửi HTTP trực tiếp vào API server, lưu chung một cơ sở dữ liệu | Triển khai ban đầu đơn giản | Không tối ưu cho telemetry tần suất cao, khó mở rộng realtime, tải dồn lên API | Trung bình |
-| **PA-B: Managed Cloud Native** | AWS IoT Core/Lambda + dịch vụ DB managed | Khả năng mở rộng cao, nhiều dịch vụ sẵn có | Chi phí vận hành cao, phụ thuộc nhà cung cấp, độ phức tạp hạ tầng vượt phạm vi đồ án | Trung bình |
-| **PA-C: Event-driven self-hosted** | MQTT Broker + MQTT Bridge + dual database + API/WebSocket | Phù hợp IoT realtime, tách tải tốt, mở rộng theo dịch vụ, chi phí tự chủ | Cần chuẩn hóa message flow và quản lý nhiều dịch vụ Docker | **Cao (Đã chọn)** |
+| Phương án                          | Mô tả ngắn                                                              | Ưu điểm                                                                  | Hạn chế                                                                              | Mức phù hợp       |
+| ---------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ----------------- |
+| **PA-A: Monolithic REST + 1 DB**   | Thiết bị gửi HTTP trực tiếp vào API server, lưu chung một cơ sở dữ liệu | Triển khai ban đầu đơn giản                                              | Không tối ưu cho telemetry tần suất cao, khó mở rộng realtime, tải dồn lên API       | Trung bình        |
+| **PA-B: Managed Cloud Native**     | AWS IoT Core/Lambda + dịch vụ DB managed                                | Khả năng mở rộng cao, nhiều dịch vụ sẵn có                               | Chi phí vận hành cao, phụ thuộc nhà cung cấp, độ phức tạp hạ tầng vượt phạm vi đồ án | Trung bình        |
+| **PA-C: Event-driven self-hosted** | MQTT Broker + MQTT Bridge + dual database + API/WebSocket               | Phù hợp IoT realtime, tách tải tốt, mở rộng theo dịch vụ, chi phí tự chủ | Cần chuẩn hóa message flow và quản lý nhiều dịch vụ Docker                           | **Cao (Đã chọn)** |
 
 #### 3.1.3.3. Chọn giải pháp kiến trúc Cloud
 
@@ -2304,7 +2256,7 @@ Hệ thống Backend/Cloud là tầng điều phối trung tâm của toàn bộ
 
 Lý do lựa chọn:
 
-- **Khớp bản chất dữ liệu IoT**: MQTT xử lý tốt mô hình pub/sub, giảm coupling giữa thiết bị và tầng ứng dụng.
+- **Khớp bản chất dữ liệu IoT**: MQTT xử lý tốt mô hình pub/sub, giảm mức phụ thuộc trực tiếp giữa thiết bị và tầng ứng dụng.
 - **Tối ưu hiệu năng theo vai trò**: Bridge xử lý ingestion, API tập trung nghiệp vụ, database tách theo loại dữ liệu.
 - **Dễ scale theo chiều ngang**: có thể nhân bản riêng broker/bridge/api khi số thiết bị tăng.
 - **Phù hợp chi phí và phạm vi thực hiện**: self-hosted qua Docker Compose, không phụ thuộc nền tảng cloud thương mại.
@@ -2326,7 +2278,7 @@ Hệ thống Cloud áp dụng kiến trúc phân tầng (layered architecture) k
 
 ![Hình 3.12 - Sơ đồ kiến trúc tổng quan hệ thống Cloud](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3–12.png)
 
-*Hình 3.12: Sơ đồ kiến trúc tổng quan hệ thống Cloud*
+_Hình 3.12: Sơ đồ kiến trúc tổng quan hệ thống Cloud_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -2489,11 +2441,11 @@ Ngoài ra, hệ thống còn cấu hình các rule cho phát hiện vi phạm v�
 
 [Bảng 3.18A: So sánh các phương án kiến trúc lưu trữ dữ liệu]
 
-| Phương án | Mô tả | Ưu điểm | Hạn chế | Mức phù hợp |
-| --------- | ----- | ------- | ------- | ----------- |
-| **PA-DB1: PostgreSQL duy nhất** | Dùng PostgreSQL cho cả nghiệp vụ và telemetry | Đơn giản vận hành | Ghi telemetry lớn dễ ảnh hưởng truy vấn nghiệp vụ, chi phí index/partition cao | Trung bình |
-| **PA-DB2: Time-series DB duy nhất** | Dùng CSDL chuỗi thời gian cho mọi loại dữ liệu | Tối ưu ghi dữ liệu cảm biến | Kém phù hợp dữ liệu quan hệ phức tạp, khó đảm bảo ràng buộc nghiệp vụ | Thấp |
-| **PA-DB3: Hybrid DB (Đã chọn)** | PostgreSQL + VictoriaMetrics + VictoriaLogs | Mỗi loại dữ liệu dùng đúng công cụ, cân bằng hiệu năng và khả năng truy vấn | Tăng số thành phần cần vận hành | **Cao** |
+| Phương án                           | Mô tả                                          | Ưu điểm                                                                     | Hạn chế                                                                        | Mức phù hợp |
+| ----------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----------- |
+| **PA-DB1: PostgreSQL duy nhất**     | Dùng PostgreSQL cho cả nghiệp vụ và telemetry  | Đơn giản vận hành                                                           | Ghi telemetry lớn dễ ảnh hưởng truy vấn nghiệp vụ, chi phí index/partition cao | Trung bình  |
+| **PA-DB2: Time-series DB duy nhất** | Dùng CSDL chuỗi thời gian cho mọi loại dữ liệu | Tối ưu ghi dữ liệu cảm biến                                                 | Kém phù hợp dữ liệu quan hệ phức tạp, khó đảm bảo ràng buộc nghiệp vụ          | Thấp        |
+| **PA-DB3: Hybrid DB (Đã chọn)**     | PostgreSQL + VictoriaMetrics + VictoriaLogs    | Mỗi loại dữ liệu dùng đúng công cụ, cân bằng hiệu năng và khả năng truy vấn | Tăng số thành phần cần vận hành                                                | **Cao**     |
 
 **Kết luận lựa chọn:** Chọn **PA-DB3 (hybrid database)** để tách trách nhiệm dữ liệu, giữ ổn định cho nghiệp vụ và tối ưu luồng telemetry theo thời gian thực.
 
@@ -2502,14 +2454,13 @@ Ngoài ra, hệ thống còn cấu hình các rule cho phát hiện vi phạm v�
 Hệ thống theo dõi phương tiện cần lưu trữ hai loại dữ liệu có đặc tính khác nhau căn bản:
 
 1. **Dữ liệu thô (Raw Telemetry Data)**: Bao gồm vị trí GPS, tốc độ, mức pin, dữ liệu OBD2, dữ liệu cảm biến gia tốc. Loại dữ liệu này có tần suất ghi rất cao (mỗi giây khi xe đang di chuyển), khối lượng lớn, nhưng chỉ cần lưu trữ trong thời gian ngắn (7–30 ngày) và chủ yếu phục vụ truy vấn theo chuỗi thời gian.
-
 2. **Dữ liệu nghiệp vụ (Business Data)**: Bao gồm thông tin xe, khách hàng, chuyến đi, cảnh báo, vi phạm, lệnh điều khiển. Loại dữ liệu này có tần suất ghi thấp, khối lượng nhỏ, nhưng cần lưu trữ lâu dài (6–12 tháng trở lên) và yêu cầu tính toàn vẹn dữ liệu quan hệ (ACID).
 
 Do sự khác biệt cơ bản về đặc tính, hệ thống áp dụng chiến lược lưu trữ kép sử dụng ba cơ sở dữ liệu chuyên biệt:
 
 ![Hình 3.13 - Sơ đồ chiến lược lưu trữ kép](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3–13.png)
 
-*Hình 3.13: Sơ đồ chiến lược lưu trữ kép*
+_Hình 3.13: Sơ đồ chiến lược lưu trữ kép_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -2565,7 +2516,7 @@ PostgreSQL 16 lưu trữ toàn bộ dữ liệu nghiệp vụ của hệ thống
 
 ![Hình 3.14 - Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3–14.png)
 
-*Hình 3.14: Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)*
+_Hình 3.14: Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)_
 
 > Nguồn: Hình vẽ của tác giả (sử dụng công cụ dbdiagram.io)
 
@@ -2722,11 +2673,11 @@ Giao diện người dùng (Frontend) là lớp tương tác trực tiếp giữ
 
 [Bảng 3.23A: So sánh các phương án công nghệ frontend tổng thể]
 
-| Phương án | Mô tả stack | Ưu điểm | Hạn chế | Mức phù hợp |
-| --------- | ----------- | ------- | ------- | ----------- |
-| **PA-FE1: Vite + React CSR** | React + Vite + client-side routing | Build nhanh, cấu hình linh hoạt | SEO/first load kém hơn SSR, cần tự lắp ghép nhiều thành phần | Trung bình |
-| **PA-FE2: Nuxt (Vue)** | Vue + Nuxt SSR/SSG | SSR tốt, cấu trúc rõ | Khác hệ sinh thái React đang dùng ở dự án, chi phí chuyển đổi cao | Trung bình |
-| **PA-FE3: Next.js + React (Đã chọn)** | Next.js 15 + React 19 + App Router | SSR/RSC tốt, hệ sinh thái lớn, tối ưu production, tích hợp realtime thuận lợi | Độ phức tạp framework cao hơn CSR thuần | **Cao** |
+| Phương án                             | Mô tả stack                        | Ưu điểm                                                                       | Hạn chế                                                           | Mức phù hợp |
+| ------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------- |
+| **PA-FE1: Vite + React CSR**          | React + Vite + client-side routing | Build nhanh, cấu hình linh hoạt                                               | SEO/first load kém hơn SSR, cần tự lắp ghép nhiều thành phần      | Trung bình  |
+| **PA-FE2: Nuxt (Vue)**                | Vue + Nuxt SSR/SSG                 | SSR tốt, cấu trúc rõ                                                          | Khác hệ sinh thái React đang dùng ở dự án, chi phí chuyển đổi cao | Trung bình  |
+| **PA-FE3: Next.js + React (Đã chọn)** | Next.js 15 + React 19 + App Router | SSR/RSC tốt, hệ sinh thái lớn, tối ưu production, tích hợp realtime thuận lợi | Độ phức tạp framework cao hơn CSR thuần                           | **Cao**     |
 
 #### 3.1.4.3. Chọn giải pháp Frontend
 
@@ -2859,7 +2810,7 @@ src/
 
 ![Hình 3.15 - Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Frontend](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–15.jpg)
 
-*Hình 3.15: Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Frontend*
+_Hình 3.15: Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Frontend_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -2911,7 +2862,7 @@ Hệ thống Frontend sử dụng cơ chế xác thực dựa trên session toke
 
 ![Hình 3.16 - Biểu đồ trình tự (Sequence Diagram) luồng xác thực người dùng](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–16.png)
 
-*Hình 3.16: Biểu đồ trình tự (Sequence Diagram) luồng xác thực người dùng*
+_Hình 3.16: Biểu đồ trình tự (Sequence Diagram) luồng xác thực người dùng_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -2928,7 +2879,7 @@ Trang Dashboard là điểm vào chính sau khi đăng nhập, cung cấp cái n
 
 ![Hình 3.17 - Giao diện trang Dashboard tổng quan](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–17.png)
 
-*Hình 3.17: Giao diện trang Dashboard tổng quan*
+_Hình 3.17: Giao diện trang Dashboard tổng quan_
 
 > Nguồn: Giao diện ứng dụng IVM26 (hình chụp màn hình)
 
@@ -2949,7 +2900,7 @@ Trang Dashboard là điểm vào chính sau khi đăng nhập, cung cấp cái n
 
 ![Hình 3.18 - Giao diện trang quản lý phương tiện](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–18.jpg)
 
-*Hình 3.18: Giao diện trang quản lý phương tiện*
+_Hình 3.18: Giao diện trang quản lý phương tiện_
 
 > Nguồn: Giao diện ứng dụng IVM26 (hình chụp màn hình)
 
@@ -3015,7 +2966,7 @@ Trang bản đồ thời gian thực (`/dashboard/map`) là tính năng cốt l�
 
 ![Hình 3.19 - Kiến trúc tích hợp bản đồ thời gian thực](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–19.png)
 
-*Hình 3.19: Kiến trúc tích hợp bản đồ thời gian thực*
+_Hình 3.19: Kiến trúc tích hợp bản đồ thời gian thực_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3047,7 +2998,7 @@ Hệ thống bao gồm bốn component bản đồ chuyên biệt:
 
 ![Hình 3.20 - Giao diện trang bản đồ thời gian thực với các marker xe](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–20.png)
 
-*Hình 3.20: Giao diện trang bản đồ thời gian thực với các marker xe*
+_Hình 3.20: Giao diện trang bản đồ thời gian thực với các marker xe_
 
 > Nguồn: Giao diện ứng dụng IVM26 (hình chụp màn hình)
 
@@ -3071,7 +3022,7 @@ Giao diện Dashboard sử dụng bố cục (layout) gồm ba vùng chính: Hea
 
 ![Hình 3.21 - Wireframe bố cục giao diện Dashboard](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–21.png)
 
-*Hình 3.21: Wireframe bố cục giao diện Dashboard*
+_Hình 3.21: Wireframe bố cục giao diện Dashboard_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3090,7 +3041,7 @@ Hệ thống áp dụng các mẫu thiết kế giao diện nhất quán xuyên 
 
 ![Hình 3.22 - Các mẫu thiết kế UI của hệ thống - Data Table, Form, Charts](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–22.png)
 
-*Hình 3.22: Các mẫu thiết kế UI của hệ thống - Data Table, Form, Charts*
+_Hình 3.22: Các mẫu thiết kế UI của hệ thống - Data Table, Form, Charts_
 
 > Nguồn: Giao diện ứng dụng IVM26 (hình chụp màn hình)
 
@@ -3113,18 +3064,18 @@ Dựa trên phân tích các giải pháp đề xuất cho từng tầng hệ th
 
 [Bảng 3.29: Ma trận đánh giá tổng hợp các phương án thiết kế]
 
-| Tầng hệ thống        | Phương án được chọn     | Lý do chính                              |
-| -------------------- | ----------------------- | ---------------------------------------- |
-| Vi điều khiển        | ESP32-S3                | BLE 5.0 tích hợp, dual-core, hỗ trợ AI   |
-| LTE + GNSS           | SIMCom A7670C + u-blox NEO-M8N | Kiến trúc tách rời, dễ mở rộng, ổn định |
-| OBD2 Adapter         | vgate iCar Pro (BLE)    | Không cần dây, tương thích rộng          |
-| Cảm biến IMU         | LIS3DH                  | Siêu tiết kiệm điện, wake-on-motion      |
-| MQTT Broker          | EMQX                    | Rules Engine, ACL per device, clustering |
-| Database quan hệ     | PostgreSQL 16           | Mature, PostGIS, open-source             |
-| Database time-series | VictoriaMetrics         | Write throughput cao, PromQL compatible  |
-| API Server           | Express.js + TypeScript | Nhẹ, linh hoạt, DDD architecture         |
-| Frontend             | Next.js 15 + React 19   | SSR/SSG, App Router, ecosystem           |
-| Bản đồ               | Leaflet.js              | Open-source, self-hosted tiles           |
+| Tầng hệ thống        | Phương án được chọn            | Lý do chính                              |
+| -------------------- | ------------------------------ | ---------------------------------------- |
+| Vi điều khiển        | ESP32-S3                       | BLE 5.0 tích hợp, dual-core, hỗ trợ AI   |
+| LTE + GNSS           | SIMCom SIM7600CE-T           | Modem tích hợp LTE + GNSS, giảm số lượng module phần cứng |
+| OBD2 Adapter         | vgate iCar Pro (BLE)           | Không cần dây, tương thích rộng          |
+| Cảm biến IMU         | LIS3DH                         | Siêu tiết kiệm điện, wake-on-motion      |
+| MQTT Broker          | EMQX                           | Rules Engine, ACL per device, clustering |
+| Database quan hệ     | PostgreSQL 16                  | Mature, PostGIS, open-source             |
+| Database time-series | VictoriaMetrics                | Write throughput cao, PromQL compatible  |
+| API Server           | Express.js + TypeScript        | Nhẹ, linh hoạt, DDD architecture         |
+| Frontend             | Next.js 15 + React 19          | SSR/SSG, App Router, ecosystem           |
+| Bản đồ               | Leaflet.js                     | Open-source, self-hosted tiles           |
 
 ## 3.4. Tối ưu phương án thiết kế – The optimal solution
 
@@ -3132,13 +3083,13 @@ Từ kết quả phân tích và đánh giá ở mục 3.3, phương án thiết
 
 ![Hình 3.23 - Sơ đồ kiến trúc tổng thể phương án tối ưu](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–23.png)
 
-*Hình 3.23: Sơ đồ kiến trúc tổng thể phương án tối ưu*
+_Hình 3.23: Sơ đồ kiến trúc tổng thể phương án tối ưu_
 
 > Nguồn: Hình vẽ của tác giả
 
 **Kiến trúc phân tầng:**
 
-- **Tầng thiết bị (Device Layer):** ESP32-S3 + A7670C + NEO-M8N + vgate iCar Pro + LIS3DH, quản lý nguồn thông minh với pin dự phòng 21700
+- **Tầng thiết bị (Device Layer):** ESP32-S3 + SIMCom SIM7600CE-T + vgate iCar Pro + LIS3DH, quản lý nguồn thông minh với pin dự phòng 21700
 - **Tầng truyền thông (Communication Layer):** MQTT 5.0 qua 4G LTE, QoS 1, offline buffering
 - **Tầng xử lý (Processing Layer):** MQTT Bridge --> dual-write PostgreSQL + VictoriaMetrics, Express.js API (DDD)
 - **Tầng trình bày (Presentation Layer):** Next.js 15, Leaflet maps, Socket.IO real-time, ECharts
@@ -3182,7 +3133,7 @@ Hệ thống tracker lấy ESP32-S3 làm bộ xử lý trung tâm. Vi điều kh
 |    I2C     BLE      UART       GPIO       ADC             |
 |     |       |         |          |          |              |
 |  +-----+ +-----+ +----------+ +--------+ +--------+      |
-|  |LIS3DH| |OBD2 | |A7670C+NEO | |Power   | |U_batt  |     |
+|  |LIS3DH| |OBD2 | |SIM7600CE-T| |Power   | |U_batt  |     |
 |  |(IMU) | |BLE  | |(4G+GNSS) | |MUX Ctrl| |Monitor |     |
 |  +------+ |vgate| +----------+ +--------+ +--------+      |
 |            |iCar |                                         |
@@ -3203,7 +3154,7 @@ Hệ thống tracker lấy ESP32-S3 làm bộ xử lý trung tâm. Vi điều kh
 
 ![Hình 4.1 - Sơ đồ khối tổng thể hệ thống tracker IoT](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–1.jpg)
 
-*Hình 4.1: Sơ đồ khối tổng thể hệ thống tracker IoT*
+_Hình 4.1: Sơ đồ khối tổng thể hệ thống tracker IoT_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3224,16 +3175,16 @@ Vi điều khiển ESP32-S3-WROOM-1 được lựa chọn làm nhân xử lý tr
 | Deep Sleep   | ~10–15 µA (với external wakeup)         |
 | Active (BLE) | ~20–40 mA                               |
 
-**Giao tiếp UART với modem A7670C và GNSS NEO-M8N:** ESP32-S3 sử dụng UART1 (GPIO16 TX, GPIO17 RX) để giao tiếp với modem SIMCom A7670C thông qua tập lệnh AT và UART2 để nhận dữ liệu NMEA từ module GNSS u-blox NEO-M8N. Tốc độ baud mặc định 115200 bps cho modem và 9600 bps cho GNSS, dữ liệu 8-bit, 1 stop bit, không parity. Kiến trúc tách rời giúp giảm coupling giữa LTE và GNSS, thuận tiện bảo trì và thay thế module.
+**Giao tiếp UART với modem SIM7600CE-T (LTE + GNSS tích hợp):** ESP32-S3 sử dụng UART1 (GPIO16 TX, GPIO17 RX) để giao tiếp với SIMCom SIM7600CE-T thông qua tập lệnh AT. Modem được cấu hình Auto mode (`AT+CNMP=2`) để tự động chuyển giữa LTE/UMTS/GSM, sử dụng APN mặc định `internet`, và cung cấp dữ liệu GNSS qua `AT+CGNSINF` (có thể thêm stream NMEA `AT+CGNSTST` nếu cần) trên cùng UART. Tốc độ baud mặc định 115200 bps, dữ liệu 8-bit, 1 stop bit, không parity. Kiến trúc này giảm số module phần cứng và giữ pin mapping hiện tại.
 
 **Giao tiếp BLE với OBD2 adapter:** ESP32-S3 sử dụng BLE 5.0 tích hợp để kết nối với adapter vgate iCar Pro (BLE 4.0). Kết nối này cho phép đọc dữ liệu chẩn đoán xe theo chuẩn OBD-II bao gồm trạng thái khóa điện (IGN), tốc độ động cơ (RPM), vận tốc xe, mức nhiên liệu và mã lỗi chẩn đoán (DTC).
 
 **Giao tiếp I2C với cảm biến LIS3DH:** Cảm biến gia tốc 3 trục LIS3DH được kết nối qua bus I2C (GPIO22 SDA, GPIO23 SCL). Cảm biến này đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang đỗ, cho phép đánh thức ESP32-S3 từ chế độ deep sleep thông qua ngắt ngoài (interrupt) khi phát hiện rung động bất thường.
 
 ```text
-Sơ đồ kết nối UART giữa ESP32-S3 và A7670C:
+Sơ đồ kết nối UART giữa ESP32-S3 và SIM7600CE-T:
 
-A7670C Module            ESP32-S3
+SIM7600CE-T Module       ESP32-S3
 +------------------+     +----------+
 | VCC  ------------+-----+ 3.3V/5V  |
 | GND  ------------+-----+ GND      |
@@ -3243,9 +3194,9 @@ A7670C Module            ESP32-S3
 +------------------+     +----------+
 ```
 
-![Hình 4.2 - Sơ đồ kết nối giữa ESP32-S3 và modem A7670C qua UART](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–2.png)
+![Hình 4.2 - Sơ đồ kết nối giữa ESP32-S3 và modem SIM7600CE-T qua UART](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–2.png)
 
-*Hình 4.2: Sơ đồ kết nối giữa ESP32-S3 và modem A7670C qua UART*
+_Hình 4.2: Sơ đồ kết nối giữa ESP32-S3 và modem SIM7600CE-T qua UART_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3270,12 +3221,13 @@ U_batt = 24.0V -> V_adc = 2.18V -> ADC_value ~ 2711
 ```
 
 Giá trị ADC đọc được sẽ được chuyển đổi ngược thành điện áp ắc quy trong firmware. Logic chuyển nguồn/hysteresis và nhận diện IGN sử dụng profile cấu hình:
+
 - Profile 12V: Switch_OFF=12.0V, Switch_ON=12.2V, IGN_ON>=13.0V, IGN_OFF<=12.0V
 - Profile 24V: Switch_OFF=24.0V, Switch_ON=24.4V, IGN_ON>=26.0V, IGN_OFF<=24.0V
 
 ![Hình 4.3 - Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–3.png)
 
-*Hình 4.3: Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3*
+_Hình 4.3: Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3283,8 +3235,7 @@ Giá trị ADC đọc được sẽ được chuyển đổi ngược thành đi
 
 Sơ đồ nguyên lý tổng hợp của hệ thống bao gồm tất cả các khối chức năng được kết nối với nhau thông qua vi điều khiển ESP32-S3. Các kết nối chính bao gồm:
 
-- **UART1** (2 dây tín hiệu TX/RX): Kết nối với modem A7670C để truyền nhận dữ liệu 4G
-- **UART2** (2 dây tín hiệu TX/RX): Kết nối với module NEO-M8N để nhận dữ liệu GNSS (NMEA)
+- **UART1** (2 dây tín hiệu TX/RX): Kết nối với modem SIM7600CE-T để truyền nhận cả dữ liệu 4G và GNSS (AT + `AT+CGNSINF`/`AT+CGNSTST`).
 - **I2C** (2 dây tín hiệu SDA/SCL): Kết nối với cảm biến gia tốc LIS3DH
 - **BLE** (không dây): Kết nối với adapter OBD2 vgate iCar Pro
 - **ADC** (1 kênh): Đọc điện áp ắc quy qua voltage divider
@@ -3293,7 +3244,7 @@ Sơ đồ nguyên lý tổng hợp của hệ thống bao gồm tất cả các 
 
 ![Hình 4.4 - Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–4.png)
 
-*Hình 4.4: Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker*
+_Hình 4.4: Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3310,16 +3261,16 @@ Việc phân công chân GPIO của ESP32-S3 được thiết kế đảm bảo 
 | Chân GPIO | Chức năng     | Hướng             | Mô tả chi tiết                                                               |
 | --------- | ------------- | ----------------- | ---------------------------------------------------------------------------- |
 | GPIO 2    | IGN_IN        | Input             | Đọc trạng thái khóa điện (IGN) từ xe hoặc qua OBD2                           |
-| GPIO 4    | U_BATT_ADC    | Input (ADC)       | Đọc điện áp ắc quy xe qua voltage divider (R1=100k, R2=10k)                   |
+| GPIO 4    | U_BATT_ADC    | Input (ADC)       | Đọc điện áp ắc quy xe qua voltage divider (R1=100k, R2=10k)                  |
 | GPIO 5    | CHARGER_EN    | Output            | Điều khiển bật/tắt IC sạc IP2312 (HIGH = sạc, LOW = không sạc)               |
-| GPIO 16   | MODEM_UART_TX | Output            | Truyền dữ liệu UART đến modem A7670C                                         |
-| GPIO 17   | MODEM_UART_RX | Input             | Nhận dữ liệu UART từ modem A7670C                                            |
+| GPIO 16   | MODEM_UART_TX | Output            | Truyền dữ liệu UART đến modem SIM7600CE-T                                    |
+| GPIO 17   | MODEM_UART_RX | Input             | Nhận dữ liệu UART từ modem SIM7600CE-T                                       |
 | GPIO 18   | POWER_MUX_SEL | Output            | Chọn nguồn cấp: LOW = ắc quy (Q1 ON), HIGH = pin backup (Q2 ON)              |
 | GPIO 19   | LVD_STATUS    | Input             | Đọc trạng thái Low Voltage Disconnect (HIGH = bình thường, LOW = ắc quy yếu) |
 | GPIO 21   | LIS3DH_INT    | Input (Interrupt) | Nhận tín hiệu ngắt từ cảm biến gia tốc LIS3DH khi phát hiện chuyển động      |
 | GPIO 22   | LIS3DH_SDA    | I/O (I2C)         | Đường dữ liệu I2C kết nối với cảm biến LIS3DH                                |
 | GPIO 23   | LIS3DH_SCL    | I/O (I2C)         | Đường xung nhịp I2C kết nối với cảm biến LIS3DH                              |
-| GPIO 25   | MODEM_PWRKEY  | Output            | Điều khiển bật/tắt nguồn modem A7670C                                        |
+| GPIO 25   | MODEM_PWRKEY  | Output            | Điều khiển bật/tắt nguồn modem SIM7600CE-T                                   |
 
 #### b) Các lưu ý về phân công chân
 
@@ -3350,8 +3301,8 @@ Sơ đồ đấu nối mô tả cách kết nối vật lý giữa ESP32-S3 DevK
                    +------------------+
 
 Kết nối ngoại vi:
-  GPIO 16/17 ---[UART1]--> A7670C (LTE)
-  UART2      ---[UART2]--> NEO-M8N (GNSS)
+  GPIO 16/17 ---[UART1]--> SIM7600CE-T (LTE + GNSS)
+  (GNSS)     ---[AT/NMEA]=> `AT+CGNSINF` / `AT+CGNSTST` trên cùng UART1
   GPIO 22/23 ---[I2C]----> LIS3DH (IMU)
   GPIO 21    ---[INT]----> LIS3DH INT1
   BLE (nội)  ---[BLE]----> vgate iCar Pro (OBD2)
@@ -3359,12 +3310,12 @@ Kết nối ngoại vi:
   GPIO 5     ---[GPIO]---> IP2312 EN (Charger)
   GPIO 18    ---[GPIO]---> Power MUX (Relay/MOSFET)
   GPIO 19    <--[GPIO]---- LVD Status
-  GPIO 25    ---[GPIO]---> A7670C PWRKEY
+  GPIO 25    ---[GPIO]---> SIM7600CE-T PWRKEY
 ```
 
 ![Hình 4.5 - Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các module ngoại vi](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–5.png)
 
-*Hình 4.5: Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các module ngoại vi*
+_Hình 4.5: Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các module ngoại vi_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3409,7 +3360,7 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 |          +--v-+ +--v--+ +--v-+                            |
 |          |LDO | |LTE/ | |IP2312                           |
 |          |3.3V| |GNSS | |Charger                          |
-|          |    | |A7670C+NEO-M8N                          |
+|          |    | |SIM7600CE-T (LTE+GNSS)                  |
 |          +-+--+ +-----+ +--+--+                           |
 |            |                |                             |
 |         +--v--+          +--v--+                           |
@@ -3421,7 +3372,7 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 
 ![Hình 4.6 - Kiến trúc tổng thể mạch quản lý nguồn](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–6.jpg)
 
-*Hình 4.6: Kiến trúc tổng thể mạch quản lý nguồn*
+_Hình 4.6: Kiến trúc tổng thể mạch quản lý nguồn_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3431,18 +3382,18 @@ Mạch buck converter sử dụng IC LM2596–5.0 (phiên bản cố định 5V)
 
 **Bảng 4.2: Thông số thiết kế mạch Buck Converter**
 
-| Thông số        | Giá trị                        | Ghi chú                  |
-| --------------- | ------------------------------ | ------------------------ |
-| IC chính        | LM2596–5.0 (Texas Instruments) | Fixed output 5V          |
-| Điện áp vào     | 7–40 V DC                      | Từ ắc quy xe 12V hoặc 24V |
-| Điện áp ra      | 5V                             | Cấp cho 5V Rail          |
-| Dòng tối đa     | 3A                             | Đủ cho tracker + sạc pin |
-| Hiệu suất       | ~85%                           | Tiêu biểu tại dải 12V/24V -> 5V  |
-| Tần số dao động | 150 kHz                        |                          |
-| Inductor L1     | 100 uH, 3–5A                   | Loại shielded            |
-| Tụ vào C1       | 100 uF, 50V                    | Electrolytic             |
-| Tụ ra C2        | 220 uF, 16V                    | Electrolytic             |
-| Diode D1        | 1N5822 (Schottky, 3A, 40V)     | Freewheeling diode       |
+| Thông số        | Giá trị                        | Ghi chú                         |
+| --------------- | ------------------------------ | ------------------------------- |
+| IC chính        | LM2596–5.0 (Texas Instruments) | Fixed output 5V                 |
+| Điện áp vào     | 7–40 V DC                      | Từ ắc quy xe 12V hoặc 24V       |
+| Điện áp ra      | 5V                             | Cấp cho 5V Rail                 |
+| Dòng tối đa     | 3A                             | Đủ cho tracker + sạc pin        |
+| Hiệu suất       | ~85%                           | Tiêu biểu tại dải 12V/24V -> 5V |
+| Tần số dao động | 150 kHz                        |                                 |
+| Inductor L1     | 100 uH, 3–5A                   | Loại shielded                   |
+| Tụ vào C1       | 100 uF, 50V                    | Electrolytic                    |
+| Tụ ra C2        | 220 uF, 16V                    | Electrolytic                    |
+| Diode D1        | 1N5822 (Schottky, 3A, 40V)     | Freewheeling diode              |
 
 Sơ đồ mạch:
 
@@ -3473,7 +3424,7 @@ Với tổn hao nhiệt 2.25W ở công suất tối đa, IC LM2596 cần đư�
 
 ![Hình 4.7 - Sơ đồ nguyên lý mạch Buck Converter LM2596](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–7.png)
 
-*Hình 4.7: Sơ đồ nguyên lý mạch Buck Converter LM2596*
+_Hình 4.7: Sơ đồ nguyên lý mạch Buck Converter LM2596_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3493,7 +3444,7 @@ Mạch boost converter sử dụng IC MT3608 để tăng điện áp từ pin Li
 | Inductor L1       | 22 uH, 2–3A                 | Shielded                    |
 | Tụ vào C1         | 100 uF, 16V                 | Electrolytic                |
 | Tụ ra C2          | 220 uF, 16V                 | Electrolytic                |
-| Điện trở hồi tiếp | R1 = R2 = 10 kΩ           | Vout = 0.6V x (1 + R1/R2)   |
+| Điện trở hồi tiếp | R1 = R2 = 10 kΩ             | Vout = 0.6V x (1 + R1/R2)   |
 
 **Tính toán dòng vào khi tải 2A:**
 
@@ -3507,7 +3458,7 @@ Kết quả cho thấy pin 21700 cần cung cấp dòng tối đa 3.18A khi đ�
 
 ![Hình 4.8 - Sơ đồ nguyên lý mạch Boost Converter MT3608](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–8.jpg)
 
-*Hình 4.8: Sơ đồ nguyên lý mạch Boost Converter MT3608*
+_Hình 4.8: Sơ đồ nguyên lý mạch Boost Converter MT3608_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3547,20 +3498,20 @@ D2 (Schottky 1N5822) tu Boost --+
 
 **Bảng 4.4: Logic chuyển nguồn tự động**
 
-| Trạng thái          | IGN | U_batt  | Nguồn Tracker | Sạc Pin | Cảnh báo |
-| ------------------- | --- | ------- | ------------- | ------- | -------- |
+| Trạng thái          | IGN | U_batt                                                     | Nguồn Tracker | Sạc Pin | Cảnh báo |
+| ------------------- | --- | ---------------------------------------------------------- | ------------- | ------- | -------- |
 | Xe chạy bình thường | ON  | Profile 12V: U_batt >= 13.0V; Profile 24V: U_batt >= 26.0V | Ắc quy        | Có      | Không    |
 | Xe đỗ bình thường   | OFF | Profile 12V: U_batt > 12.0V; Profile 24V: U_batt > 24.0V   | Ắc quy        | Không   | Không    |
 | Ắc quy yếu          | OFF | Profile 12V: U_batt <= 12.0V; Profile 24V: U_batt <= 24.0V | Pin 21700     | Không   | Có       |
 | Ắc quy phục hồi     | OFF | Profile 12V: U_batt >= 12.2V; Profile 24V: U_batt >= 24.4V | Ắc quy        | Không   | Có       |
 
-*Ghi chú: Ngưỡng LVD cắt sâu để bảo vệ ắc quy: 11.5V (profile 12V) và 23.0V (profile 24V).*
+_Ghi chú: Ngưỡng LVD cắt sâu để bảo vệ ắc quy: 11.5V (profile 12V) và 23.0V (profile 24V)._
 
 Cơ chế hysteresis theo profile (12V: 12.0V OFF, 12.2V ON; 24V: 24.0V OFF, 24.4V ON) được áp dụng để tránh hiện tượng dao động liên tục khi điện áp ắc quy nằm gần ngưỡng chuyển đổi.
 
 ![Hình 4.9 - Sơ đồ mạch Power MUX và logic chuyển nguồn tự động](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–9.png)
 
-*Hình 4.9: Sơ đồ mạch Power MUX và logic chuyển nguồn tự động*
+_Hình 4.9: Sơ đồ mạch Power MUX và logic chuyển nguồn tự động_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3600,7 +3551,7 @@ ESP32 GPIO5 — R (10k) — IP2312 EN Pin
 
 ![Hình 4.10 - Sơ đồ mạch sạc IP2312 và bảo vệ pin 21700](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–10.jpg)
 
-*Hình 4.10: Sơ đồ mạch sạc IP2312 và bảo vệ pin 21700*
+_Hình 4.10: Sơ đồ mạch sạc IP2312 và bảo vệ pin 21700_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3609,6 +3560,7 @@ ESP32 GPIO5 — R (10k) — IP2312 EN Pin
 Hệ thống sử dụng phương pháp giám sát điện áp bằng phần mềm (Software-based) thông qua ADC của ESP32-S3, kết hợp với mạch chia áp (voltage divider) R1 = 100 kΩ, R2 = 10 kΩ.
 
 Phương pháp này được lựa chọn vì các ưu điểm:
+
 - Không cần linh kiện ngoài bổ sung (sử dụng ADC có sẵn của ESP32)
 - Linh hoạt trong việc điều chỉnh ngưỡng trong firmware
 - Dễ triển khai hysteresis bằng phần mềm
@@ -3637,8 +3589,8 @@ Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân 
 +--------------------------------------------------+
 |                  VỎ HỘP BẢO VỆ                   |
 |  +----------+  +----------+  +----------+        |
-|  |  ESP32   |  | A7670C + |  |  IP2312  |        |
-|  |  S3      |  | NEO-M8N  |  |  Charger |        |
+|  |  ESP32   |  | SIM7600CE-T | |  IP2312  |        |
+|  |  S3      |  | LTE+GNSS |  |  Charger |        |
 |  |  DevKit  |  | LTE/GNSS |  |  + BMS   |        |
 |  +----------+  +----------+  +----------+        |
 |                                                  |
@@ -3657,7 +3609,7 @@ Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân 
 
 ![Hình 4.11 - Sơ đồ bố cục bên trong vỏ hộp bảo vệ](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–11.png)
 
-*Hình 4.11: Sơ đồ bố cục bên trong vỏ hộp bảo vệ*
+_Hình 4.11: Sơ đồ bố cục bên trong vỏ hộp bảo vệ_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3687,26 +3639,26 @@ Các nội dung triển khai chi tiết ở tầng phần mềm được trình 
 
 **Bảng 4.6: Danh sách vật liệu đầy đủ cho hệ thống tracker**
 
-| STT | Thành phần                     | Đơn vị | SL  | Giá ước tính (VND) | Ghi chú                                    |
-| --- | ------------------------------ | ------ | --- | ------------------ | ------------------------------------------ |
-| 1   | ESP32-S3 DevKitC-1             | Cái    | 1   | 100,000–200,000    | Module ESP32-S3-WROOM-1, 4MB Flash trở lên |
-| 2   | LIS3DH Breakout Board          | Cái    | 1   | 20,000–50,000      | Cảm biến gia tốc 3 trục, giao tiếp I2C     |
-| 3   | vgate iCar Pro (OBD2 BLE)      | Cái    | 1   | 150,000–300,000    | Adapter OBD2 BLE 4.0, tương thích ESP32-S3 |
-| 4   | SIMCom A7670C + u-blox NEO-M8N | Bộ     | 1   | 330,000–500,000    | Modem LTE + GNSS tách rời + anten + khe SIM |
-| 5   | Pin 21700 Li-ion 5000mAh       | Cái    | 1   | 100,000–200,000    | Loại có protection board                   |
-| 6   | Module sạc IP2312 (3A)         | Cái    | 1   | 20,000–40,000      | Module sạc Type-C, dòng sạc 3A             |
-| 7   | BMS/Protection Board 1S        | Cái    | 1   | 10,000–20,000      | BMS 1S 3A hoặc DW01+MOSFET                 |
-| 8   | Module Buck LM2596 (7–40V->5V) | Cái    | 1   | 15,000–25,000      | Dòng ra 3A, tương thích hệ 12V/24V         |
-| 9   | Module Boost MT3608 (3.7V->5V) | Cái    | 1   | 10,000–15,000      | Dòng ra 2A, điều chỉnh điện áp             |
-| 10  | Relay Module 5V 1 kênh         | Cái    | 1   | 5,000–10,000       | Điều khiển chuyển nguồn Power MUX          |
-| 11  | Điện trở (10k, 2.2k, v.v.)     | Gói    | 1   | 5,000–10,000       | Voltage divider, pull-up/pull-down         |
-| 12  | Tụ điện (100uF, 220uF, v.v.)   | Gói    | 1   | 5,000–10,000       | Lọc nhiễu, decoupling                      |
-| 13  | Diode Schottky 1N5822          | Cái    | 2   | 2,000–5,000        | Diode OR dự phòng                          |
-| 14  | Connector, Header Pin          | Gói    | 1   | 10,000–20,000      | Kết nối dây, header pin                    |
-| 15  | PCB (nếu tự thiết kế)          | Cái    | 1   | 50,000–100,000     | PCB 2 lớp, kích thước ~50x50 mm            |
-| 16  | Vỏ bảo vệ                      | Cái    | 1   | 50,000–100,000     | Vỏ nhựa hoặc kim loại                      |
-| 17  | Dây nối, cáp điện              | Mét    | —  | 20,000–30,000      | Dây điện, cáp USB                          |
-| 18  | Linh kiện phụ trợ khác         | —     | —  | 20,000–30,000      | Cầu chì, công tắc, LED chỉ thị             |
+| STT | Thành phần                     | Đơn vị | SL  | Giá ước tính (VND) | Ghi chú                                     |
+| --- | ------------------------------ | ------ | --- | ------------------ | ------------------------------------------- |
+| 1   | ESP32-S3 DevKitC-1             | Cái    | 1   | 100,000–200,000    | Module ESP32-S3-WROOM-1, 4MB Flash trở lên  |
+| 2   | LIS3DH Breakout Board          | Cái    | 1   | 20,000–50,000      | Cảm biến gia tốc 3 trục, giao tiếp I2C      |
+| 3   | vgate iCar Pro (OBD2 BLE)      | Cái    | 1   | 150,000–300,000    | Adapter OBD2 BLE 4.0, tương thích ESP32-S3  |
+| 4   | SIMCom SIM7600CE-T             | Bộ     | 1   | 330,000–500,000    | Modem LTE Cat-4 tích hợp GNSS + anten + khe SIM |
+| 5   | Pin 21700 Li-ion 5000mAh       | Cái    | 1   | 100,000–200,000    | Loại có protection board                    |
+| 6   | Module sạc IP2312 (3A)         | Cái    | 1   | 20,000–40,000      | Module sạc Type-C, dòng sạc 3A              |
+| 7   | BMS/Protection Board 1S        | Cái    | 1   | 10,000–20,000      | BMS 1S 3A hoặc DW01+MOSFET                  |
+| 8   | Module Buck LM2596 (7–40V->5V) | Cái    | 1   | 15,000–25,000      | Dòng ra 3A, tương thích hệ 12V/24V          |
+| 9   | Module Boost MT3608 (3.7V->5V) | Cái    | 1   | 10,000–15,000      | Dòng ra 2A, điều chỉnh điện áp              |
+| 10  | Relay Module 5V 1 kênh         | Cái    | 1   | 5,000–10,000       | Điều khiển chuyển nguồn Power MUX           |
+| 11  | Điện trở (10k, 2.2k, v.v.)     | Gói    | 1   | 5,000–10,000       | Voltage divider, pull-up/pull-down          |
+| 12  | Tụ điện (100uF, 220uF, v.v.)   | Gói    | 1   | 5,000–10,000       | Lọc nhiễu, decoupling                       |
+| 13  | Diode Schottky 1N5822          | Cái    | 2   | 2,000–5,000        | Diode OR dự phòng                           |
+| 14  | Connector, Header Pin          | Gói    | 1   | 10,000–20,000      | Kết nối dây, header pin                     |
+| 15  | PCB (nếu tự thiết kế)          | Cái    | 1   | 50,000–100,000     | PCB 2 lớp, kích thước ~50x50 mm             |
+| 16  | Vỏ bảo vệ                      | Cái    | 1   | 50,000–100,000     | Vỏ nhựa hoặc kim loại                       |
+| 17  | Dây nối, cáp điện              | Mét    | —   | 20,000–30,000      | Dây điện, cáp USB                           |
+| 18  | Linh kiện phụ trợ khác         | —      | —   | 20,000–30,000      | Cầu chì, công tắc, LED chỉ thị              |
 
 **Bảng 4.7: Tổng chi phí ước tính**
 
@@ -3723,13 +3675,13 @@ Các nội dung triển khai chi tiết ở tầng phần mềm được trình 
 
 Quy trình lắp ráp mạch điện tử được triển khai theo các bước sau:
 
-**Bước 1 - Kiểm tra linh kiện:** Kiểm tra tất cả các module và linh kiện trước khi lắp ráp. Test riêng từng module (ESP32-S3, LM2596, MT3608, IP2312, A7670C, NEO-M8N) để đảm bảo hoạt động đúng.
+**Bước 1 - Kiểm tra linh kiện:** Kiểm tra tất cả các module và linh kiện trước khi lắp ráp. Test riêng từng module (ESP32-S3, LM2596, MT3608, IP2312, SIM7600CE-T) để đảm bảo hoạt động đúng.
 
 **Bước 2 - Lắp ráp mạch nguồn:** Kết nối module Buck LM2596 với nguồn ắc quy xe (12V hoặc 24V), điều chỉnh điện áp ra 5V. Kết nối module Boost MT3608 với pin 21700, điều chỉnh điện áp ra 5V. Lắp relay module làm Power MUX. Kết nối module sạc IP2312 với pin và BMS.
 
 **Bước 3 - Kết nối vi điều khiển:** Gắn ESP32-S3 DevKitC lên breadboard hoặc PCB. Kết nối các chân GPIO theo bảng phân công (Bảng 4.1). Kết nối nguồn 5V từ Power MUX đến chân VIN của ESP32-S3 (qua LDO nội bộ xuống 3.3V).
 
-**Bước 4 - Kết nối ngoại vi:** Kết nối modem A7670C qua UART1 (GPIO16, GPIO17), kết nối module NEO-M8N qua UART2, kết nối cảm biến LIS3DH qua I2C (GPIO22, GPIO23), và kết nối mạch đo điện áp ắc quy (voltage divider) vào GPIO4 (ADC).
+**Bước 4 - Kết nối ngoại vi:** Kết nối modem SIM7600CE-T qua UART1 (GPIO16, GPIO17), lấy dữ liệu GNSS từ chính modem qua `AT+CGNSINF`/`AT+CGNSTST` trên cùng UART, kết nối cảm biến LIS3DH qua I2C (GPIO22, GPIO23), và kết nối mạch đo điện áp ắc quy (voltage divider) vào GPIO4 (ADC).
 
 **Bước 5 - Kiểm tra tích hợp:** Nạp firmware cơ bản để kiểm tra từng chức năng: đọc ADC, điều khiển GPIO, giao tiếp UART với modem, quét BLE, đọc I2C từ LIS3DH. Kiểm tra chuyển nguồn tự động bằng cách thay đổi điện áp đầu vào.
 
@@ -3737,13 +3689,13 @@ Quy trình lắp ráp mạch điện tử được triển khai theo các bướ
 
 ![Hình 4.12 - Các bước lắp ráp mạch điện tử trên breadboard (prototype)](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–12.png)
 
-*Hình 4.12: Các bước lắp ráp mạch điện tử trên breadboard (prototype)*
+_Hình 4.12: Các bước lắp ráp mạch điện tử trên breadboard (prototype)_
 
 > Nguồn: Hình chụp từ hệ thống thực tế (thiết bị prototype)
 
 ![Hình 4.13 - Mạch điện tử hoàn chỉnh sau khi lắp ráp](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–13.png)
 
-*Hình 4.13: Mạch điện tử hoàn chỉnh sau khi lắp ráp*
+_Hình 4.13: Mạch điện tử hoàn chỉnh sau khi lắp ráp_
 
 > Nguồn: Hình chụp từ hệ thống thực tế (thiết bị prototype)
 
@@ -3787,7 +3739,7 @@ Chân 5:  GND (Signal Ground)            ---> GND chung hệ thống
 
 ![Hình 4.14 - Minh họa vị trí cổng OBD2 trên xe và cách kết nối](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–14.png)
 
-*Hình 4.14: Minh họa vị trí cổng OBD2 trên xe và cách kết nối*
+_Hình 4.14: Minh họa vị trí cổng OBD2 trên xe và cách kết nối_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -3807,7 +3759,7 @@ Chân 5:  GND (Signal Ground)            ---> GND chung hệ thống
 
 ![Hình 4.15 - Minh họa lắp đặt thiết bị tracker trong xe và đi dây](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–15.jpg)
 
-*Hình 4.15: Minh họa lắp đặt thiết bị tracker trong xe và đi dây*
+_Hình 4.15: Minh họa lắp đặt thiết bị tracker trong xe và đi dây_
 
 > Nguồn: Hình chụp từ hệ thống thực tế (lắp đặt trong xe)
 
@@ -3817,14 +3769,14 @@ Sau khi lắp đặt xong, cần thực hiện các kiểm tra sau:
 
 1. **Kiểm tra nguồn điện:** Đo điện áp tại đầu vào thiết bị, xác nhận điện áp ắc quy xe (12V hoặc 24V) được cấp đầy đủ
 2. **Kiểm tra kết nối BLE:** Xác nhận ESP32-S3 kết nối được với adapter vgate iCar Pro và đọc dữ liệu OBD2 (IGN, RPM, tốc độ)
-3. **Kiểm tra GNSS:** Xác nhận module NEO-M8N bắt được vệ tinh và trả về tọa độ GPS chính xác (sai số < 5 mét)
+3. **Kiểm tra GNSS:** Xác nhận modem SIM7600CE-T bắt được vệ tinh và trả về tọa độ GPS chính xác (sai số < 5 mét)
 4. **Kiểm tra 4G/LTE:** Xác nhận modem đăng ký mạng thành công, gửi được dữ liệu lên server qua MQTT
 5. **Kiểm tra chuyển nguồn:** Tắt máy xe (IGN OFF), xác nhận thiết bị chuyển sang chế độ tiết kiệm năng lượng và sử dụng pin dự phòng khi cần
 6. **Kiểm tra deep sleep:** Xác nhận ESP32-S3 vào chế độ deep sleep khi xe đỗ, và đánh thức đúng khi phát hiện rung động (qua LIS3DH) hoặc đến chu kỳ heartbeat
 
 ![Hình 4.16 - Kết quả kiểm tra hệ thống sau khi lắp đặt trong xe](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–16.png)
 
-*Hình 4.16: Kết quả kiểm tra hệ thống sau khi lắp đặt trong xe*
+_Hình 4.16: Kết quả kiểm tra hệ thống sau khi lắp đặt trong xe_
 
 > Nguồn: Hình chụp từ hệ thống thực tế (kết quả kiểm tra)
 
@@ -3842,15 +3794,15 @@ Firmware được phát triển trên nền tảng ESP-IDF (Espressif IoT Develo
 
 **Bảng 4.5: Công cụ phát triển firmware**
 
-| Thành phần | Công cụ / Phiên bản | Mục đích |
-|---|---|---|
-| Framework | ESP-IDF v5.4 | SDK chính thức cho ESP32-S3 |
-| IDE | VS Code + ESP-IDF Extension | Biên tập, debug, flash firmware |
-| Build system | CMake + Ninja | Biên dịch và liên kết mã nguồn |
-| BLE stack | NimBLE (tích hợp ESP-IDF) | Giao tiếp Bluetooth Low Energy |
-| RTOS | FreeRTOS (tích hợp ESP-IDF) | Quản lý tác vụ đa luồng |
-| Debug | JTAG / UART Monitor | Giám sát log và debug thời gian thực |
-| Version control | Git | Quản lý phiên bản mã nguồn |
+| Thành phần      | Công cụ / Phiên bản         | Mục đích                             |
+| --------------- | --------------------------- | ------------------------------------ |
+| Framework       | ESP-IDF v5.4                | SDK chính thức cho ESP32-S3          |
+| IDE             | VS Code + ESP-IDF Extension | Biên tập, debug, flash firmware      |
+| Build system    | CMake + Ninja               | Biên dịch và liên kết mã nguồn       |
+| BLE stack       | NimBLE (tích hợp ESP-IDF)   | Giao tiếp Bluetooth Low Energy       |
+| RTOS            | FreeRTOS (tích hợp ESP-IDF) | Quản lý tác vụ đa luồng              |
+| Debug           | JTAG / UART Monitor         | Giám sát log và debug thời gian thực |
+| Version control | Git                         | Quản lý phiên bản mã nguồn           |
 
 #### b) Quy trình build và nạp firmware
 
@@ -3919,7 +3871,7 @@ firmware/
 │   │   ├── obd2_pids.c
 │   │   └── include/obd2_parser.h
 │   │
-│   ├── modem_driver/           # Điều khiển modem A7670C (LTE)
+│   ├── modem_driver/           # Điều khiển modem SIM7600CE-T (LTE + GNSS)
 │   │   ├── modem_at.c          # Xử lý lệnh AT
 │   │   ├── modem_mqtt.c        # MQTT qua modem
 │   │   ├── modem_gnss.c        # GNSS qua modem
@@ -3939,12 +3891,12 @@ Firmware được thiết kế theo bốn tầng chức năng, mỗi tầng đ�
 
 **Bảng 4.6: Kiến trúc phân tầng firmware**
 
-| Tầng | Tên tầng | Thành phần | Chức năng |
-|---|---|---|---|
-| 1 | Hardware Abstraction | `imu_driver`, `modem_driver`, ADC, GPIO | Trừu tượng hóa giao tiếp phần cứng |
-| 2 | Power Management | `power_task`, LVD, charger control | Quản lý nguồn, sleep, wakeup |
-| 3 | Application Logic | `tracker_fsm`, state machine | Logic chuyển đổi chế độ lái/đỗ/cảnh báo |
-| 4 | Communication | `ble_task`, `mqtt_task`, `gps_task` | Giao tiếp BLE, MQTT, GNSS |
+| Tầng | Tên tầng             | Thành phần                              | Chức năng                               |
+| ---- | -------------------- | --------------------------------------- | --------------------------------------- |
+| 1    | Hardware Abstraction | `imu_driver`, `modem_driver`, ADC, GPIO | Trừu tượng hóa giao tiếp phần cứng      |
+| 2    | Power Management     | `power_task`, LVD, charger control      | Quản lý nguồn, sleep, wakeup            |
+| 3    | Application Logic    | `tracker_fsm`, state machine            | Logic chuyển đổi chế độ lái/đỗ/cảnh báo |
+| 4    | Communication        | `ble_task`, `mqtt_task`, `gps_task`     | Giao tiếp BLE, MQTT, GNSS               |
 
 Các tầng giao tiếp với nhau thông qua cơ chế message queue và semaphore của FreeRTOS, đảm bảo tính an toàn luồng (thread-safe) khi truy cập tài nguyên dùng chung.
 
@@ -3952,19 +3904,19 @@ Các tầng giao tiếp với nhau thông qua cơ chế message queue và semaph
 
 **Bảng 4.7: Bảng ánh xạ chân GPIO**
 
-| GPIO | Chức năng | Hướng | Mô tả |
-|---|---|---|---|
-| 2 | IGN_IN | Input | Đọc trạng thái khóa điện (hoặc qua OBD2) |
-| 4 | U_BATT_ADC | Input | Đọc điện áp ắc quy (ADC 12-bit) |
-| 5 | CHARGER_EN | Output | Điều khiển IC sạc IP2312 |
-| 16 | MODEM_UART_TX | Output | UART TX đến modem A7670C |
-| 17 | MODEM_UART_RX | Input | UART RX từ modem A7670C |
-| 18 | POWER_MUX_SEL | Output | Chọn nguồn cấp (ắc quy/pin dự phòng) |
-| 19 | LVD_STATUS | Input | Trạng thái từ comparator LM393 |
-| 21 | LIS3DH_INT | Input | Ngắt từ cảm biến gia tốc IMU |
-| 22 | LIS3DH_SDA | I/O | I2C data line |
-| 23 | LIS3DH_SCL | I/O | I2C clock line |
-| 25 | MODEM_PWRKEY | Output | Điều khiển nguồn modem |
+| GPIO | Chức năng     | Hướng  | Mô tả                                    |
+| ---- | ------------- | ------ | ---------------------------------------- |
+| 2    | IGN_IN        | Input  | Đọc trạng thái khóa điện (hoặc qua OBD2) |
+| 4    | U_BATT_ADC    | Input  | Đọc điện áp ắc quy (ADC 12-bit)          |
+| 5    | CHARGER_EN    | Output | Điều khiển IC sạc IP2312                 |
+| 16   | MODEM_UART_TX | Output | UART TX đến modem SIM7600CE-T            |
+| 17   | MODEM_UART_RX | Input  | UART RX từ modem SIM7600CE-T             |
+| 18   | POWER_MUX_SEL | Output | Chọn nguồn cấp (ắc quy/pin dự phòng)     |
+| 19   | LVD_STATUS    | Input  | Trạng thái từ comparator LM393           |
+| 21   | LIS3DH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU             |
+| 22   | LIS3DH_SDA    | I/O    | I2C data line                            |
+| 23   | LIS3DH_SCL    | I/O    | I2C clock line                           |
+| 25   | MODEM_PWRKEY  | Output | Điều khiển nguồn modem                   |
 
 ---
 
@@ -4115,16 +4067,16 @@ static void ble_obd_process_obd_data(ble_obd_ctx_t *obd,
 
 **Bảng 4.8: Các PID OBD2 được đọc định kỳ (Mode 0x01 - Current Data)**
 
-| PID (Hex) | Thông số | Độ dài | Công thức tính | Đơn vị |
-|---|---|---|---|---|
-| 0x0C | Tốc độ động cơ (RPM) | 2 byte | (A x 256 + B) / 4 | vòng/phút |
-| 0x0D | Tốc độ xe | 1 byte | A | km/h |
-| 0x04 | Tải động cơ | 1 byte | (A x 100) / 255 | % |
-| 0x05 | Nhiệt độ nước làm mát | 1 byte | A - 40 | độ C |
-| 0x2F | Mức nhiên liệu | 1 byte | (A x 100) / 255 | % |
-| 0x0F | Nhiệt độ khí nạp | 1 byte | A - 40 | độ C |
-| 0x11 | Vị trí bướm ga | 1 byte | (A x 100) / 255 | % |
-| 0x42 | Điện áp module điều khiển | 2 byte | (A x 256 + B) / 1000 | V |
+| PID (Hex) | Thông số                  | Độ dài | Công thức tính       | Đơn vị    |
+| --------- | ------------------------- | ------ | -------------------- | --------- |
+| 0x0C      | Tốc độ động cơ (RPM)      | 2 byte | (A x 256 + B) / 4    | vòng/phút |
+| 0x0D      | Tốc độ xe                 | 1 byte | A                    | km/h      |
+| 0x04      | Tải động cơ               | 1 byte | (A x 100) / 255      | %         |
+| 0x05      | Nhiệt độ nước làm mát     | 1 byte | A - 40               | độ C      |
+| 0x2F      | Mức nhiên liệu            | 1 byte | (A x 100) / 255      | %         |
+| 0x0F      | Nhiệt độ khí nạp          | 1 byte | A - 40               | độ C      |
+| 0x11      | Vị trí bướm ga            | 1 byte | (A x 100) / 255      | %         |
+| 0x42      | Điện áp module điều khiển | 2 byte | (A x 256 + B) / 1000 | V         |
 
 Các hàm chuyển đổi tương ứng được định nghĩa trong component `obd2_parser`:
 
@@ -4161,10 +4113,10 @@ Khi không thể kết nối BLE với adapter OBD2 (timeout sau 10 giây, retry
 
 #### a) Khởi tạo và kiểm tra modem
 
-Module modem quản lý toàn bộ giao tiếp với modem SIMCom A7670C thông qua giao tiếp UART và tập lệnh AT. Quy trình khởi tạo bao gồm kiểm tra phản hồi modem, trạng thái SIM, đăng ký mạng và chất lượng tín hiệu.
+Module modem quản lý toàn bộ giao tiếp với modem SIMCom SIM7600CE-T thông qua giao tiếp UART và tập lệnh AT. Quy trình khởi tạo bao gồm kiểm tra phản hồi modem, trạng thái SIM, đăng ký mạng và chất lượng tín hiệu.
 
 ```c
-// Trình tự khởi tạo modem A7670C
+// Trình tự khởi tạo modem SIM7600CE-T
 int modem_init(modem_ctx_t *ctx)
 {
     // Bước 1: Kiểm tra modem phản hồi
@@ -4186,7 +4138,7 @@ int modem_init(modem_ctx_t *ctx)
 
     // Bước 3: Đợi đăng ký mạng (tối đa 60 giây)
     for (int i = 0; i < 12; i++) {
-        if (modem_send_at(ctx, "AT+CREG?", "+CREG: 0,1", 5000) == 0) {
+        if (modem_send_at(ctx, "AT+CEREG?", "+CEREG: 0,1", 5000) == 0) {
             break;  // Đã đăng ký mạng
         }
         vTaskDelay(pdMS_TO_TICKS(5000));
@@ -4205,7 +4157,7 @@ int modem_init(modem_ctx_t *ctx)
 
 #### b) Kết nối và gửi dữ liệu MQTT
 
-Firmware sử dụng AT command trên modem A7670C để thiết lập kết nối dữ liệu và gửi telemetry MQTT về broker. Quy trình bao gồm khởi tạo kết nối mạng, kết nối broker, đăng ký topic nhận lệnh, và gửi dữ liệu telemetry định kỳ.
+Firmware sử dụng AT command trên modem SIM7600CE-T để thiết lập kết nối dữ liệu và gửi telemetry MQTT về broker. Quy trình bao gồm khởi tạo kết nối mạng, kết nối broker, đăng ký topic nhận lệnh, và gửi dữ liệu telemetry định kỳ.
 
 ```c
 // Kết nối MQTT thông qua modem
@@ -4262,34 +4214,34 @@ int modem_mqtt_publish(modem_ctx_t *ctx, const char *topic,
 
 **Cấu trúc topic MQTT:**
 
-| Topic | Hướng | Mục đích |
-|---|---|---|
+| Topic                           | Hướng            | Mục đích                         |
+| ------------------------------- | ---------------- | -------------------------------- |
 | `vehicle/{device_id}/telemetry` | Device -> Server | Dữ liệu vị trí, OBD2, nguồn điện |
-| `vehicle/{device_id}/alerts` | Device -> Server | Cảnh báo chuyển động, quá tốc độ |
-| `vehicle/{device_id}/status` | Device -> Server | Heartbeat và trạng thái thiết bị |
-| `vehicle/{device_id}/commands` | Server -> Device | Lệnh điều khiển từ xa |
+| `vehicle/{device_id}/alerts`    | Device -> Server | Cảnh báo chuyển động, quá tốc độ |
+| `vehicle/{device_id}/status`    | Device -> Server | Heartbeat và trạng thái thiết bị |
+| `vehicle/{device_id}/commands`  | Server -> Device | Lệnh điều khiển từ xa            |
 
 #### c) Đọc dữ liệu GNSS
 
-Module GNSS NEO-M8N được điều khiển độc lập qua UART. Firmware bật GNSS, đợi fix vị trí, parse bản tin NMEA, và đọc tọa độ định kỳ.
+GNSS tích hợp trong SIM7600CE-T được điều khiển qua cùng UART. Firmware bật GNSS, đợi fix vị trí, parse bản tin NMEA/CGNSINF và đọc tọa độ định kỳ.
 
 ```c
 // Bật và đọc dữ liệu GNSS từ modem
 int modem_gnss_read(modem_ctx_t *ctx, gnss_data_t *gnss)
 {
     // Bật nguồn GNSS (nếu chưa bật)
-    modem_send_at(ctx, "AT+CGNSSPWR=1", "OK", 3000);
+    modem_send_at(ctx, "AT+CGNSPWR=1", "OK", 3000);
 
     // Đọc thông tin GNSS
-    // Phản hồi: +CGNSSINFO: <mode>,<sat_gps>,<sat_glo>,<sat_bds>,
+    // Phản hồi: +CGNSINF: <mode>,<sat_gps>,<sat_glo>,<sat_bds>,
     //           <lat>,<N/S>,<lon>,<E/W>,<date>,<time>,<alt>,
     //           <speed>,<course>,<hdop>,<vdop>
     char response[256];
-    if (modem_send_at_get_response(ctx, "AT+CGNSSINFO",
+    if (modem_send_at_get_response(ctx, "AT+CGNSINF",
                                     response, sizeof(response),
                                     3000) == 0) {
         // Phân tích phản hồi
-        gnss_parse_cgnssinfo(response, gnss);
+        gnss_parse_cgnsinf(response, gnss);
         return 0;
     }
     return -1;  // Chưa có fix
@@ -4404,10 +4356,10 @@ Firmware sử dụng hai chế độ ngủ của ESP32-S3 tùy theo tình huốn
 
 **Bảng 4.9: So sánh các chế độ ngủ**
 
-| Chế độ | Dòng tiêu thụ | Thời gian thức dậy | BLE | Điều kiện sử dụng |
-|---|---|---|---|---|
-| Light sleep | ~0.8 mA | < 1 ms | Giữ active | IGN ON, đợi dữ liệu giữa các chu kỳ |
-| Deep sleep | ~10 µA | ~100 ms | Mất kết nối | IGN OFF, chế độ đỗ xe |
+| Chế độ      | Dòng tiêu thụ | Thời gian thức dậy | BLE         | Điều kiện sử dụng                   |
+| ----------- | ------------- | ------------------ | ----------- | ----------------------------------- |
+| Light sleep | ~0.8 mA       | < 1 ms             | Giữ active  | IGN ON, đợi dữ liệu giữa các chu kỳ |
+| Deep sleep  | ~10 µA        | ~100 ms            | Mất kết nối | IGN OFF, chế độ đỗ xe               |
 
 Trước khi vào deep sleep, firmware thực hiện trình tự tắt các ngoại vi để tiết kiệm năng lượng tối đa:
 
@@ -4419,7 +4371,7 @@ void enter_deep_sleep(uint32_t sleep_duration_sec)
     ble_obd_disconnect();
 
     // 2. Tắt GNSS
-    modem_send_at(&modem_ctx, "AT+CGNSSPWR=0", "OK", 3000);
+    modem_send_at(&modem_ctx, "AT+CGNSPWR=0", "OK", 3000);
 
     // 3. Tắt 4G và đưa modem vào chế độ ngủ
     modem_send_at(&modem_ctx, "AT+CGACT=0,1", "OK", 5000);
@@ -4448,7 +4400,7 @@ Khi thức dậy từ deep sleep, firmware đọc nguyên nhân đánh thức v�
 
 #### c) Quản lý nguồn modem theo chế độ
 
-Modem A7670C hỗ trợ nhiều chế độ ngủ với mức tiêu thụ khác nhau:
+Modem SIM7600CE-T hỗ trợ nhiều chế độ ngủ với mức tiêu thụ khác nhau:
 
 - **UART sleep** (`AT+CSCLK=1`): Modem tự động ngủ khi không có dữ liệu UART, tiêu thụ 1–5 mA, đánh thức bằng bất kỳ ký tự UART nào.
 - **Minimum functionality** (`AT+CFUN=0`): Tắt RF, giữ UART, tiêu thụ < 1 mA, đánh thức bằng lệnh AT hoặc GPIO.
@@ -4466,29 +4418,29 @@ Toàn bộ logic điều khiển firmware được tổ chức theo mô hình m�
 
 **Bảng 4.10: Các trạng thái của firmware**
 
-| Trạng thái | Mã | Mô tả |
-|---|---|---|
-| INIT | `STATE_INIT` | Khởi tạo hệ thống, ngoại vi |
-| CHECK_IGN | `STATE_CHECK_IGN` | Kiểm tra trạng thái khóa điện |
-| DRIVING | `STATE_DRIVING` | Chế độ lái xe - theo dõi liên tục |
-| PARKED | `STATE_PARKED` | Chế độ đỗ xe - heartbeat định kỳ |
-| ALARM | `STATE_ALARM` | Chế độ cảnh báo - phát hiện chuyển động |
-| HEARTBEAT | `STATE_HEARTBEAT` | Gửi tín hiệu heartbeat |
-| SLEEP | `STATE_SLEEP` | Deep sleep tiết kiệm năng lượng |
+| Trạng thái | Mã                | Mô tả                                   |
+| ---------- | ----------------- | --------------------------------------- |
+| INIT       | `STATE_INIT`      | Khởi tạo hệ thống, ngoại vi             |
+| CHECK_IGN  | `STATE_CHECK_IGN` | Kiểm tra trạng thái khóa điện           |
+| DRIVING    | `STATE_DRIVING`   | Chế độ lái xe - theo dõi liên tục       |
+| PARKED     | `STATE_PARKED`    | Chế độ đỗ xe - heartbeat định kỳ        |
+| ALARM      | `STATE_ALARM`     | Chế độ cảnh báo - phát hiện chuyển động |
+| HEARTBEAT  | `STATE_HEARTBEAT` | Gửi tín hiệu heartbeat                  |
+| SLEEP      | `STATE_SLEEP`     | Deep sleep tiết kiệm năng lượng         |
 
 **Bảng 4.11: Chuyển đổi trạng thái**
 
-| Trạng thái hiện tại | Điều kiện | Trạng thái mới |
-|---|---|---|
-| INIT | Khởi tạo xong | CHECK_IGN |
-| CHECK_IGN | IGN = ON | DRIVING |
-| CHECK_IGN | IGN = OFF | PARKED |
-| DRIVING | IGN = OFF (phát hiện) | PARKED |
-| PARKED | IMU interrupt (chuyển động) | ALARM |
-| PARKED | Timer wake-up | HEARTBEAT |
-| ALARM | Chuyển động dừng, IGN = OFF | PARKED |
-| HEARTBEAT | Gửi xong heartbeat | SLEEP |
-| SLEEP | Timer hoặc IMU wake-up | CHECK_IGN |
+| Trạng thái hiện tại | Điều kiện                   | Trạng thái mới |
+| ------------------- | --------------------------- | -------------- |
+| INIT                | Khởi tạo xong               | CHECK_IGN      |
+| CHECK_IGN           | IGN = ON                    | DRIVING        |
+| CHECK_IGN           | IGN = OFF                   | PARKED         |
+| DRIVING             | IGN = OFF (phát hiện)       | PARKED         |
+| PARKED              | IMU interrupt (chuyển động) | ALARM          |
+| PARKED              | Timer wake-up               | HEARTBEAT      |
+| ALARM               | Chuyển động dừng, IGN = OFF | PARKED         |
+| HEARTBEAT           | Gửi xong heartbeat          | SLEEP          |
+| SLEEP               | Timer hoặc IMU wake-up      | CHECK_IGN      |
 
 ```c
 // Máy trạng thái chính
@@ -4628,7 +4580,7 @@ void tracker_fsm_run(void)
                                     +-----------+
 ```
 
-*Hình 4.X: Lưu đồ thuật toán chính của firmware thiết bị theo dõi xe*
+_Hình 4.X: Lưu đồ thuật toán chính của firmware thiết bị theo dõi xe_
 
 #### c) Định dạng dữ liệu telemetry
 
@@ -4698,7 +4650,7 @@ Thiết bị IoT (ESP32 + GPS + OBD2)
 
 ![Hình 4.15 - Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–15.png)
 
-*Hình 4.15: Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu*
+_Hình 4.15: Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu_
 
 > Nguồn ảnh: [DummyImage (fallback placeholder)](https://dummyimage.com/1280x720/eeeeee/333333.png&text=Ki%20n%20tr%20c%20t%20ng%20th%20h%20th%20ng%20Cloud%20v%20lu%20ng%20d%20li%20u)
 
@@ -4770,7 +4722,7 @@ iot-vehicle-tracking-system/                  # Thư mục gốc của tất c�
 
 ![Hình 4.16 - Cấu trúc thư mục hệ thống theo quy ước IVM26](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–16.png)
 
-*Hình 4.16: Cấu trúc thư mục hệ thống theo quy ước IVM26*
+_Hình 4.16: Cấu trúc thư mục hệ thống theo quy ước IVM26_
 
 > Nguồn ảnh: [DummyImage (fallback placeholder)](https://dummyimage.com/1280x720/eeeeee/333333.png&text=C%20u%20tr%20c%20th%20m%20c%20h%20th%20ng%20theo%20quy%20c%20IVM26)
 
@@ -4811,7 +4763,7 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '1.0'
+          cpus: "1.0"
 
 networks:
   tracking-network:
@@ -4827,9 +4779,9 @@ services:
     image: emqx/emqx:5.8
     container_name: tracking-emqx
     ports:
-      - "1883:1883"       # MQTT
-      - "8083:8083"       # MQTT WebSocket
-      - "18083:18083"     # EMQX Dashboard
+      - "1883:1883" # MQTT
+      - "8083:8083" # MQTT WebSocket
+      - "18083:18083" # EMQX Dashboard
     volumes:
       - ../Tracking_Data/emqx-data:/opt/emqx/data
       - ./etc:/opt/emqx/etc
@@ -4842,7 +4794,7 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '1.0'
+          cpus: "1.0"
 
 networks:
   tracking-network:
@@ -4886,7 +4838,7 @@ cd Tracking_Frontend && docker-compose up -d --build
 | VictoriaMetrics | tracking-victoria-metrics | 8428        | Dữ liệu chuỗi thời gian          |
 | VictoriaLogs    | tracking-victoria-logs    | 9428        | Nhật ký tập trung                |
 | Grafana         | tracking-grafana          | 3001        | Dashboard giám sát               |
-| MQTT Bridge     | tracking-mqtt-bridge      | —          | Cầu nối MQTT (không expose port) |
+| MQTT Bridge     | tracking-mqtt-bridge      | —           | Cầu nối MQTT (không expose port) |
 | Backend API     | tracking-backend          | 3000        | REST API và WebSocket            |
 | Frontend        | tracking-frontend         | 3002        | Giao diện web                    |
 | NPM             | tracking-npm              | 80, 443     | Reverse proxy                    |
@@ -4916,7 +4868,7 @@ Thiết bị IoT (ESP32)
 
 ![Hình 4.17 - Luồng xử lý dữ liệu của MQTT Bridge](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–17.jpg)
 
-*Hình 4.17: Luồng xử lý dữ liệu của MQTT Bridge*
+_Hình 4.17: Luồng xử lý dữ liệu của MQTT Bridge_
 
 > Nguồn ảnh: [Wikipedia - NodeMCU](https://en.wikipedia.org/wiki/NodeMCU)
 
@@ -4953,26 +4905,26 @@ MQTT Bridge kết nối tới EMQX Broker và subscribe vào các topic tương 
 
 ```typescript
 // mqtt.client.ts - Kết nối và subscribe các topic
-import mqtt from 'mqtt';
-import { config } from './config';
-import { handleTelemetry } from './handlers/telemetry.handler';
-import { handleStatus } from './handlers/status.handler';
+import mqtt from "mqtt";
+import { config } from "./config";
+import { handleTelemetry } from "./handlers/telemetry.handler";
+import { handleStatus } from "./handlers/status.handler";
 
 const client = mqtt.connect(config.MQTT_BROKER_URL, {
-  clientId: 'tracking-mqtt-bridge',
+  clientId: "tracking-mqtt-bridge",
   clean: true,
   reconnectPeriod: 5000,
 });
 
-client.on('connect', () => {
+client.on("connect", () => {
   // Subscribe vào các topic chính
-  client.subscribe('v1/+/rawdata', { qos: 1 });
-  client.subscribe('devices/+/status', { qos: 1 });
-  client.subscribe('devices/+/telemetry', { qos: 1 });
+  client.subscribe("v1/+/rawdata", { qos: 1 });
+  client.subscribe("devices/+/status", { qos: 1 });
+  client.subscribe("devices/+/telemetry", { qos: 1 });
 });
 
-client.on('message', async (topic, payload) => {
-  const segments = topic.split('/');
+client.on("message", async (topic, payload) => {
+  const segments = topic.split("/");
 
   if (topic.match(/^v1\/.*\/rawdata$/)) {
     await handleTelemetry(segments[1], JSON.parse(payload.toString()));
@@ -4988,28 +4940,34 @@ Mỗi message MQTT nhận được đều được xác thực bằng Zod schema
 
 ```typescript
 // validators/payload.validator.ts
-import { z } from 'zod';
+import { z } from "zod";
 
 export const TelemetryPayloadSchema = z.object({
   device_id: z.string().min(1),
   timestamp: z.number(),
-  gps: z.object({
-    lat: z.number().min(-90).max(90),
-    lng: z.number().min(-180).max(180),
-    speed: z.number().min(0),
-    heading: z.number().min(0).max(360),
-    satellites: z.number().int().min(0),
-  }).optional(),
-  obd2: z.object({
-    rpm: z.number().min(0).optional(),
-    speed: z.number().min(0).optional(),
-    coolant_temp: z.number().optional(),
-    fuel_level: z.number().min(0).max(100).optional(),
-  }).optional(),
-  battery: z.object({
-    voltage: z.number(),
-    level: z.number().min(0).max(100),
-  }).optional(),
+  gps: z
+    .object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+      speed: z.number().min(0),
+      heading: z.number().min(0).max(360),
+      satellites: z.number().int().min(0),
+    })
+    .optional(),
+  obd2: z
+    .object({
+      rpm: z.number().min(0).optional(),
+      speed: z.number().min(0).optional(),
+      coolant_temp: z.number().optional(),
+      fuel_level: z.number().min(0).max(100).optional(),
+    })
+    .optional(),
+  battery: z
+    .object({
+      voltage: z.number(),
+      level: z.number().min(0).max(100),
+    })
+    .optional(),
 });
 ```
 
@@ -5040,7 +4998,7 @@ services:
       resources:
         limits:
           memory: 256M
-          cpus: '0.5'
+          cpus: "0.5"
 
 networks:
   tracking-network:
@@ -5179,7 +5137,7 @@ Tracking_Backend/src/
 
 ![Hình 4.18 - Cấu trúc thư mục Backend theo kiến trúc DDD](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–18.png)
 
-*Hình 4.18: Cấu trúc thư mục Backend theo kiến trúc DDD*
+_Hình 4.18: Cấu trúc thư mục Backend theo kiến trúc DDD_
 
 > Nguồn ảnh: [Wikipedia - Web API](https://en.wikipedia.org/wiki/Web_API)
 
@@ -5218,22 +5176,22 @@ Các middleware được sắp xếp theo thứ tự xử lý cụ thể, đảm
 
 ```typescript
 // index.ts - Thứ tự middleware
-app.use(sentryRequestHandler);      // 1. Sentry error tracking
-app.use(helmetMiddleware);          // 2. Security headers (XSS, CSP)
-app.use(compressionMiddleware);     // 3. Nén Gzip/Brotli
-app.use(corsMiddleware);            // 4. Cross-Origin Resource Sharing
-app.use(requestIdMiddleware);       // 5. Request-ID correlation (X-Request-ID)
-app.use(httpMetricsMiddleware);     // 6. Prometheus HTTP metrics
-app.use(express.json());            // 7. Body parser (JSON)
-app.use(requestLogger);             // 8. Ghi nhật ký request
-app.use(rateLimitMiddleware);       // 9. Giới hạn tần suất request
+app.use(sentryRequestHandler); // 1. Sentry error tracking
+app.use(helmetMiddleware); // 2. Security headers (XSS, CSP)
+app.use(compressionMiddleware); // 3. Nén Gzip/Brotli
+app.use(corsMiddleware); // 4. Cross-Origin Resource Sharing
+app.use(requestIdMiddleware); // 5. Request-ID correlation (X-Request-ID)
+app.use(httpMetricsMiddleware); // 6. Prometheus HTTP metrics
+app.use(express.json()); // 7. Body parser (JSON)
+app.use(requestLogger); // 8. Ghi nhật ký request
+app.use(rateLimitMiddleware); // 9. Giới hạn tần suất request
 
 // Routes (định tuyến API)
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/device', deviceRoutes);
-app.use('/api/v1/iot', iotRoutes);      // Không yêu cầu xác thực
-app.use('/api/v1/vehicle', vehicleRoutes);
-app.use('/api/v1/customer', customerRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/device", deviceRoutes);
+app.use("/api/v1/iot", iotRoutes); // Không yêu cầu xác thực
+app.use("/api/v1/vehicle", vehicleRoutes);
+app.use("/api/v1/customer", customerRoutes);
 // ... các route khác
 
 // Xử lý lỗi (cuối cùng)
@@ -5302,7 +5260,7 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '1.0'
+          cpus: "1.0"
 
 networks:
   tracking-network:
@@ -5411,7 +5369,7 @@ Tracking_Frontend/src/
 
 ![Hình 4.19 - Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–19.jpg)
 
-*Hình 4.19: Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced*
+_Hình 4.19: Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced_
 
 > Nguồn ảnh: [Wikipedia - Dashboard Confessional](https://en.wikipedia.org/wiki/Dashboard_Confessional)
 
@@ -5424,7 +5382,7 @@ Hiển thị các thẻ thống kê (stats cards) bao gồm tổng số xe, số
 
 ![Hình 4.20 - Giao diện trang Dashboard tổng quan](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–20.jpg)
 
-*Hình 4.20: Giao diện trang Dashboard tổng quan*
+_Hình 4.20: Giao diện trang Dashboard tổng quan_
 
 > Nguồn ảnh: [Wikipedia - Dashboard Confessional](https://en.wikipedia.org/wiki/Dashboard_Confessional)
 
@@ -5433,7 +5391,7 @@ Giao diện dạng bảng dữ liệu (data table) với các cột: biển số
 
 ![Hình 4.21 - Giao diện trang quản lý xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–21.jpg)
 
-*Hình 4.21: Giao diện trang quản lý xe*
+_Hình 4.21: Giao diện trang quản lý xe_
 
 > Nguồn ảnh: [Wikipedia - Dashboard Confessional](https://en.wikipedia.org/wiki/Dashboard_Confessional)
 
@@ -5442,7 +5400,7 @@ Hiển thị tất cả các xe trên bản đồ Leaflet với vị trí cập 
 
 ![Hình 4.22 - Giao diện bản đồ thời gian thực với vị trí các xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–22.jpg)
 
-*Hình 4.22: Giao diện bản đồ thời gian thực với vị trí các xe*
+_Hình 4.22: Giao diện bản đồ thời gian thực với vị trí các xe_
 
 > Nguồn ảnh: [Wikipedia - Global Positioning System](https://en.wikipedia.org/wiki/Global_Positioning_System)
 
@@ -5451,7 +5409,7 @@ Bảng dữ liệu với badge mức độ nghiêm trọng (severity), hỗ tr�
 
 ![Hình 4.23 - Giao diện trang quản lý cảnh báo](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–23.jpg)
 
-*Hình 4.23: Giao diện trang quản lý cảnh báo*
+_Hình 4.23: Giao diện trang quản lý cảnh báo_
 
 > Nguồn ảnh: [Wikipedia - Dashboard Confessional](https://en.wikipedia.org/wiki/Dashboard_Confessional)
 
@@ -5576,7 +5534,7 @@ Grafana được sử dụng làm lớp trực quan hóa (visualization layer), 
 
 ![Hình 4.24 - Grafana dashboard hiển thị tổng quan hiệu năng hệ thống](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–24.png)
 
-*Hình 4.24: Grafana dashboard hiển thị tổng quan hiệu năng hệ thống*
+_Hình 4.24: Grafana dashboard hiển thị tổng quan hiệu năng hệ thống_
 
 > Nguồn ảnh: [DummyImage (fallback placeholder)](https://dummyimage.com/1280x720/eeeeee/333333.png&text=Grafana%20dashboard%20hi%20n%20th%20t%20ng%20quan%20hi%20u%20n%20ng%20h%20th%20ng)
 
@@ -5592,7 +5550,7 @@ EMQX cung cấp dashboard tích hợp (port 18083) cho phép giám sát trực t
 
 ![Hình 4.25 - EMQX Dashboard hiển thị trạng thái kết nối thiết bị](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–25.png)
 
-*Hình 4.25: EMQX Dashboard hiển thị trạng thái kết nối thiết bị*
+_Hình 4.25: EMQX Dashboard hiển thị trạng thái kết nối thiết bị_
 
 > Nguồn ảnh: [Wikipedia - Message broker](https://en.wikipedia.org/wiki/Message_broker)
 
@@ -5678,14 +5636,14 @@ Kiểm thử phần cứng được triển khai tại phòng thí nghiệm và 
 
 [Bảng 4.12: Thiết bị đo lường sử dụng trong thử nghiệm phần cứng]
 
-| STT | Thiết bị | Model | Thông số chính | Mục đích sử dụng |
-|-----|----------|-------|----------------|------------------|
-| 1 | Đồng hồ vạn năng (DMM) | UNI-T UT61E | Độ chính xác 0.5%, đo dòng µA-10A | Đo dòng tiêu thụ các chế độ |
-| 2 | Nguồn cấp DC | UNI-T UTP1306S | 0–32V / 0–6A, độ phân giải 10mV/1mA | Mô phỏng ắc quy xe 12V hoặc 24V |
-| 3 | Oscilloscope | Rigol DS1054Z | 50 MHz, 4 kênh | Phân tích tín hiệu, đo thời gian chuyển trạng thái |
-| 4 | Tủ nhiệt | [cần đo thực tế] | -20°C đến +80°C | Kiểm thử nhiệt độ hoạt động |
-| 5 | OBD2 Simulator | ELM327 OBD2 Simulator Board | Hỗ trợ tất cả giao thức OBD2 | Mô phỏng dữ liệu xe |
-| 6 | GPS Signal Simulator | [cần đo thực tế] | Hoặc thử nghiệm ngoài trời | Kiểm thử độ chính xác GPS |
+| STT | Thiết bị               | Model                       | Thông số chính                      | Mục đích sử dụng                                   |
+| --- | ---------------------- | --------------------------- | ----------------------------------- | -------------------------------------------------- |
+| 1   | Đồng hồ vạn năng (DMM) | UNI-T UT61E                 | Độ chính xác 0.5%, đo dòng µA-10A   | Đo dòng tiêu thụ các chế độ                        |
+| 2   | Nguồn cấp DC           | UNI-T UTP1306S              | 0–32V / 0–6A, độ phân giải 10mV/1mA | Mô phỏng ắc quy xe 12V hoặc 24V                    |
+| 3   | Oscilloscope           | Rigol DS1054Z               | 50 MHz, 4 kênh                      | Phân tích tín hiệu, đo thời gian chuyển trạng thái |
+| 4   | Tủ nhiệt               | [cần đo thực tế]            | -20°C đến +80°C                     | Kiểm thử nhiệt độ hoạt động                        |
+| 5   | OBD2 Simulator         | ELM327 OBD2 Simulator Board | Hỗ trợ tất cả giao thức OBD2        | Mô phỏng dữ liệu xe                                |
+| 6   | GPS Signal Simulator   | [cần đo thực tế]            | Hoặc thử nghiệm ngoài trời          | Kiểm thử độ chính xác GPS                          |
 
 **Xe thử nghiệm:**
 
@@ -5707,15 +5665,15 @@ Hệ thống cloud được triển khai trên hai môi trường riêng biệt 
 
 [Bảng 4.13: Cấu hình môi trường thử nghiệm phần mềm]
 
-| Thành phần | Môi trường Development | Môi trường Stress Test |
-|------------|------------------------|------------------------|
-| Server | PC cá nhân, Intel i5–12400, 16 GB RAM, SSD 512 GB | VPS 4 vCPU, 8 GB RAM, SSD 100 GB |
-| Hệ điều hành | Windows 11 + WSL2 (Ubuntu 22.04) | Ubuntu 22.04 LTS |
-| Docker | Docker Desktop 4.x | Docker Engine 24.x |
-| Mạng | LAN 1 Gbps + Wi-Fi 5 GHz | VPS bandwidth 100 Mbps |
-| EMQX Broker | Single node, port 1883 | Single node, port 1883 |
-| PostgreSQL | Version 16, default config | Version 16, tuned (shared_buffers=2GB) |
-| VictoriaMetrics | Single node | Single node |
+| Thành phần      | Môi trường Development                            | Môi trường Stress Test                 |
+| --------------- | ------------------------------------------------- | -------------------------------------- |
+| Server          | PC cá nhân, Intel i5–12400, 16 GB RAM, SSD 512 GB | VPS 4 vCPU, 8 GB RAM, SSD 100 GB       |
+| Hệ điều hành    | Windows 11 + WSL2 (Ubuntu 22.04)                  | Ubuntu 22.04 LTS                       |
+| Docker          | Docker Desktop 4.x                                | Docker Engine 24.x                     |
+| Mạng            | LAN 1 Gbps + Wi-Fi 5 GHz                          | VPS bandwidth 100 Mbps                 |
+| EMQX Broker     | Single node, port 1883                            | Single node, port 1883                 |
+| PostgreSQL      | Version 16, default config                        | Version 16, tuned (shared_buffers=2GB) |
+| VictoriaMetrics | Single node                                       | Single node                            |
 
 **Công cụ kiểm thử hiệu năng:**
 
@@ -5746,13 +5704,13 @@ Dòng tiêu thụ năng lượng là chỉ tiêu cốt lõi của thiết bị t
 
 [Bảng 4.14: Kết quả đo dòng tiêu thụ năng lượng theo chế độ hoạt động]
 
-| STT | Chế độ hoạt động | Mô tả | Dòng trung bình | Dòng đỉnh (peak) | Ghi chú |
-|-----|------------------|-------|-----------------|---------------------|---------|
-| 1 | Active - Tracking Mode | GPS + 4G + BLE + MCU full | ~350 mA | ~520 mA | Peak khi truyền dữ liệu 4G |
-| 2 | Active - Idle (chờ dữ liệu) | 4G kết nối + MCU active | ~180 mA | ~280 mA | Giữa các chu kỳ gửi dữ liệu |
-| 3 | Sleep Mode (IGN OFF) | MCU light sleep + 4G off | ~15 mA | ~25 mA | Heartbeat mỗi 10–30 phút |
-| 4 | Deep Sleep Mode | MCU deep sleep + IMU wake | ~0.5 mA | ~2 mA [cần đo thực tế] | Chỉ IMU + RTC hoạt động |
-| 5 | Alert Mode (bất thường) | Đánh thức từ deep sleep | ~380 mA | ~550 mA | Tương tự Active + GPS cold start |
+| STT | Chế độ hoạt động            | Mô tả                     | Dòng trung bình | Dòng đỉnh (peak)       | Ghi chú                          |
+| --- | --------------------------- | ------------------------- | --------------- | ---------------------- | -------------------------------- |
+| 1   | Active - Tracking Mode      | GPS + 4G + BLE + MCU full | ~350 mA         | ~520 mA                | Peak khi truyền dữ liệu 4G       |
+| 2   | Active - Idle (chờ dữ liệu) | 4G kết nối + MCU active   | ~180 mA         | ~280 mA                | Giữa các chu kỳ gửi dữ liệu      |
+| 3   | Sleep Mode (IGN OFF)        | MCU light sleep + 4G off  | ~15 mA          | ~25 mA                 | Heartbeat mỗi 10–30 phút         |
+| 4   | Deep Sleep Mode             | MCU deep sleep + IMU wake | ~0.5 mA         | ~2 mA [cần đo thực tế] | Chỉ IMU + RTC hoạt động          |
+| 5   | Alert Mode (bất thường)     | Đánh thức từ deep sleep   | ~380 mA         | ~550 mA                | Tương tự Active + GPS cold start |
 
 [Hình 4.23: Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ hoạt động hoàn chỉnh (Driving -> Parking -> Alert -> Parking)]
 
@@ -5760,7 +5718,7 @@ Dòng tiêu thụ năng lượng là chỉ tiêu cốt lõi của thiết bị t
 
 **Phân tích kết quả:**
 
-- Dòng tiêu thụ trong chế độ Active (~350 mA) phù hợp với tính toán thiết kế tại Chương 3, trong đó modem A7670C chiếm khoảng 200–250 mA (khi truyền dữ liệu 4G), ESP32-S3 chiếm khoảng 60–80 mA, module GNSS NEO-M8N và linh kiện phụ trợ chiếm khoảng 20–30 mA.
+- Dòng tiêu thụ trong chế độ Active (~350 mA) phù hợp với tính toán thiết kế tại Chương 3, trong đó modem SIM7600CE-T chiếm khoảng 200–250 mA (khi truyền dữ liệu 4G), ESP32-S3 chiếm khoảng 60–80 mA và linh kiện phụ trợ chiếm khoảng 20–30 mA.
 - Dòng tiêu thụ trong chế độ Deep Sleep (~0.5 mA) đạt yêu cầu thiết kế (< 500 µA), chủ yếu do cảm biến IMU LIS3DH ở chế độ hoạt động độc lập (consumption ~6 µA) và mạch RTC của ESP32-S3 (~10 µA). Giá trị này cho phép thiết bị hoạt động nhiều tháng khi xe đậu mà không ảnh hưởng ắc quy.
 - Dòng peak khi truyền dữ liệu 4G (~520 mA) cần được lưu ý trong thiết kế mạch nguồn, đảm bảo tụ điện lọc (decoupling capacitor) đủ lớn để tránh sụt áp.
 
@@ -5770,12 +5728,12 @@ Pin dự phòng 21700 (dung lượng danh định 5000 mAh, điện áp danh đ�
 
 [Bảng 4.15: Thời lượng pin dự phòng theo kịch bản sử dụng]
 
-| STT | Kịch bản sử dụng | Dòng trung bình | Thời lượng ước tính | Thời lượng thực đo | Ghi chú |
-|-----|------------------|-----------------|----------------------|--------------------|---------  |
-| 1 | Tracking liên tục (Active) | ~350 mA | ~3.8 giờ | ~3–4 giờ [cần đo thực tế] | Trường hợp xấu nhất |
-| 2 | Sleep + heartbeat 30 phút | ~15 mA | ~92 giờ | ~10+ giờ [cần đo thực tế] | Xe đậu bình thường |
-| 3 | Deep Sleep (IMU watch) | ~0.5 mA | ~2,770 giờ (~115 ngày) | [cần đo thực tế] | Chế độ tiết kiệm tối đa |
-| 4 | Hỗn hợp (50% Active + 50% Sleep) | ~182 mA | ~7.2 giờ | ~5–6 giờ [cần đo thực tế] | Mô phỏng sử dụng thực tế |
+| STT | Kịch bản sử dụng                 | Dòng trung bình | Thời lượng ước tính    | Thời lượng thực đo        | Ghi chú                  |
+| --- | -------------------------------- | --------------- | ---------------------- | ------------------------- | ------------------------ |
+| 1   | Tracking liên tục (Active)       | ~350 mA         | ~3.8 giờ               | ~3–4 giờ [cần đo thực tế] | Trường hợp xấu nhất      |
+| 2   | Sleep + heartbeat 30 phút        | ~15 mA          | ~92 giờ                | ~10+ giờ [cần đo thực tế] | Xe đậu bình thường       |
+| 3   | Deep Sleep (IMU watch)           | ~0.5 mA         | ~2,770 giờ (~115 ngày) | [cần đo thực tế]          | Chế độ tiết kiệm tối đa  |
+| 4   | Hỗn hợp (50% Active + 50% Sleep) | ~182 mA         | ~7.2 giờ               | ~5–6 giờ [cần đo thực tế] | Mô phỏng sử dụng thực tế |
 
 [Hình 4.24: Đồ thị điện áp pin dự phòng theo thời gian trong kiểm thử tracking liên tục]
 
@@ -5789,21 +5747,21 @@ Thiết bị được đặt trong tủ nhiệt để kiểm tra khả năng ho�
 
 [Bảng 4.16: Kết quả kiểm thử nhiệt độ hoạt động]
 
-| STT | Nhiệt độ thử nghiệm | Trạng thái hoạt động | GPS fix | 4G kết nối | OBD2 BLE | Ghi chú |
-|-----|---------------------|----------------------|---------|------------|----------|---------  |
-| 1 | -10°C | Bình thường | Có | Có | Có | Thời gian khởi động tăng 20% |
-| 2 | 0°C | Bình thường | Có | Có | Có | Hoạt động ổn định |
-| 3 | 25°C (nhiệt độ phòng) | Bình thường | Có | Có | Có | Điều kiện tham chiếu |
-| 4 | 45°C | Bình thường | Có | Có | Có | Hoạt động ổn định |
-| 5 | 60°C | Bình thường | Có | Có | Có | Nhiệt độ MCU tăng, vẫn trong giới hạn |
-| 6 | 70°C | Cảnh báo | Có | Có (không ổn định) | Có | Module 4G bắt đầu không ổn định [cần đo thực tế] |
-| 7 | 80°C | Ngưng hoạt động | — | — | — | Vượt giới hạn nhiệt độ an toàn |
+| STT | Nhiệt độ thử nghiệm   | Trạng thái hoạt động | GPS fix | 4G kết nối         | OBD2 BLE | Ghi chú                                          |
+| --- | --------------------- | -------------------- | ------- | ------------------ | -------- | ------------------------------------------------ |
+| 1   | -10°C                 | Bình thường          | Có      | Có                 | Có       | Thời gian khởi động tăng 20%                     |
+| 2   | 0°C                   | Bình thường          | Có      | Có                 | Có       | Hoạt động ổn định                                |
+| 3   | 25°C (nhiệt độ phòng) | Bình thường          | Có      | Có                 | Có       | Điều kiện tham chiếu                             |
+| 4   | 45°C                  | Bình thường          | Có      | Có                 | Có       | Hoạt động ổn định                                |
+| 5   | 60°C                  | Bình thường          | Có      | Có                 | Có       | Nhiệt độ MCU tăng, vẫn trong giới hạn            |
+| 6   | 70°C                  | Cảnh báo             | Có      | Có (không ổn định) | Có       | Module 4G bắt đầu không ổn định [cần đo thực tế] |
+| 7   | 80°C                  | Ngưng hoạt động      | —       | —                  | —        | Vượt giới hạn nhiệt độ an toàn                   |
 
 [Hình 4.25: Đồ thị dòng tiêu thụ theo nhiệt độ môi trường]
 
 > Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
 
-**Nhận xét:** Thiết bị hoạt động ổn định trong dải nhiệt độ -10°C đến +60°C, đạt yêu cầu thiết kế. Tại nhiệt độ 70°C, modem 4G A7670C bắt đầu biểu hiện không ổn định (mất kết nối ngắt quãng), phù hợp với thông số kỹ thuật của nhà sản xuất SIMCom (nhiệt độ hoạt động -40°C đến +85°C, nhưng khuyến nghị <= 70°C cho hoạt động liên tục) [1].
+**Nhận xét:** Thiết bị hoạt động ổn định trong dải nhiệt độ -10°C đến +60°C, đạt yêu cầu thiết kế. Tại nhiệt độ 70°C, modem 4G SIM7600CE-T bắt đầu biểu hiện không ổn định (mất kết nối ngắt quãng), phù hợp với thông số kỹ thuật của nhà sản xuất SIMCom (nhiệt độ hoạt động -40°C đến +85°C, nhưng khuyến nghị <= 70°C cho hoạt động liên tục) [1].
 
 #### 4.3.2.4. Kiểm thử tương thích OBD2
 
@@ -5811,11 +5769,11 @@ Thiết bị được kiểm thử kết nối với nhiều thương hiệu xe 
 
 [Bảng 4.17: Kết quả kiểm thử tương thích OBD2 trên các thương hiệu xe]
 
-| STT | Xe thử nghiệm | Năm sản xuất | Giao thức OBD2 | Kết nối BLE | Đọc RPM | Đọc Speed | Đọc Coolant Temp | Ghi chú |
-|-----|---------------|--------------|----------------|-------------|---------|-----------|------------------|---------  |
-| 1 | Toyota Vios | 2020 | ISO 15765–4 CAN | Thành công | Có | Có | Có | Đầy đủ |
-| 2 | Honda City | 2021 | ISO 15765–4 CAN | Thành công | Có | Có | Có | Đầy đủ |
-| 3 | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] |
+| STT | Xe thử nghiệm    | Năm sản xuất     | Giao thức OBD2   | Kết nối BLE      | Đọc RPM          | Đọc Speed        | Đọc Coolant Temp | Ghi chú          |
+| --- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- |
+| 1   | Toyota Vios      | 2020             | ISO 15765–4 CAN  | Thành công       | Có               | Có               | Có               | Đầy đủ           |
+| 2   | Honda City       | 2021             | ISO 15765–4 CAN  | Thành công       | Có               | Có               | Có               | Đầy đủ           |
+| 3   | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] | [Cần đo thực tế] |
 
 **Nhận xét:** Các xe thử nghiệm đều sử dụng giao thức CAN-bus (ISO 15765–4), là giao thức phổ biến nhất trên các xe sản xuất từ năm 2008 trở đi theo tiêu chuẩn OBD-II [2]. Adapter vgate iCar Pro hỗ trợ tất cả các giao thức OBD2 (CAN, KWP2000, ISO 9141), đảm bảo tương thích với đa số các dòng xe tại Việt Nam.
 
@@ -5825,13 +5783,13 @@ Mạch LVD được kiểm thử bằng cách sử dụng nguồn cấp DC (UNI-
 
 [Bảng 4.18: Kết quả kiểm thử mạch LVD]
 
-| STT | Thông số | Giá trị thiết kế | Giá trị đo | Sai lệch | Trạng thái |
-|-----|----------|------------------|------------|----------|------------|
-| 1 | Điện áp ngắt (disconnect) | Profile 12V: 11.5V; Profile 24V: 23.0V | 11.48V [đo theo profile 12V] | 0.17% | Đạt (12V) |
-| 2 | Điện áp đóng lại (reconnect) | Profile 12V: 12.2V; Profile 24V: 24.4V | 12.53V [đo theo profile 12V, cần tinh chỉnh về 12.2V] | 2.70% | Chưa đạt (12V) |
-| 3 | Độ trễ ngắt | < 100 ms | ~50 ms [cần đo thực tế] | — | Đạt |
-| 4 | Độ trễ đóng lại | < 500 ms | ~200 ms [cần đo thực tế] | — | Đạt |
-| 5 | Hysteresis | 1.0V | 1.05V [cần đo thực tế] | 5% | Đạt |
+| STT | Thông số                     | Giá trị thiết kế                       | Giá trị đo                                            | Sai lệch | Trạng thái     |
+| --- | ---------------------------- | -------------------------------------- | ----------------------------------------------------- | -------- | -------------- |
+| 1   | Điện áp ngắt (disconnect)    | Profile 12V: 11.5V; Profile 24V: 23.0V | 11.48V [đo theo profile 12V]                          | 0.17%    | Đạt (12V)      |
+| 2   | Điện áp đóng lại (reconnect) | Profile 12V: 12.2V; Profile 24V: 24.4V | 12.53V [đo theo profile 12V, cần tinh chỉnh về 12.2V] | 2.70%    | Chưa đạt (12V) |
+| 3   | Độ trễ ngắt                  | < 100 ms                               | ~50 ms [cần đo thực tế]                               | —        | Đạt            |
+| 4   | Độ trễ đóng lại              | < 500 ms                               | ~200 ms [cần đo thực tế]                              | —        | Đạt            |
+| 5   | Hysteresis                   | 1.0V                                   | 1.05V [cần đo thực tế]                                | 5%       | Đạt            |
 
 **Nhận xét:** Kết quả hiện tại đang theo profile 12V: điện áp ngắt 11.48V đạt sát mục tiêu 11.5V, nhưng điện áp đóng lại 12.53V cao hơn mục tiêu 12.2V nên cần tinh chỉnh hysteresis trong firmware/cấu hình. Với profile 24V, tiêu chí tương ứng cần đạt là ngắt tại 23.0V và đóng lại tại 24.4V khi thực hiện vòng đo 27V xuống 21V.
 
@@ -5845,12 +5803,12 @@ Thời gian kết nối BLE được đo từ lúc ESP32-S3 bắt đầu quét (
 
 [Bảng 4.19: Kết quả đo thời gian kết nối BLE OBD2]
 
-| STT | Thông số | Giá trị trung bình | Giá trị min | Giá trị max | Độ lệch chuẩn |
-|-----|----------|--------------------|-------------|-------------|---------------|
-| 1 | Thời gian scan BLE | ~1.5 giây | 0.8 giây | 3.2 giây | 0.6 giây |
-| 2 | Thời gian kết nối BLE | ~1.0 giây | 0.5 giây | 2.1 giây | 0.4 giây |
-| 3 | Thời gian khởi tạo ELM327 | ~1.5 giây | 1.0 giây | 2.5 giây | 0.3 giây |
-| 4 | **Tổng thời gian (scan + connect + init)** | **~4.0 giây** | **2.3 giây** | **7.8 giây** | **1.3 giây** |
+| STT | Thông số                                   | Giá trị trung bình | Giá trị min  | Giá trị max  | Độ lệch chuẩn |
+| --- | ------------------------------------------ | ------------------ | ------------ | ------------ | ------------- |
+| 1   | Thời gian scan BLE                         | ~1.5 giây          | 0.8 giây     | 3.2 giây     | 0.6 giây      |
+| 2   | Thời gian kết nối BLE                      | ~1.0 giây          | 0.5 giây     | 2.1 giây     | 0.4 giây      |
+| 3   | Thời gian khởi tạo ELM327                  | ~1.5 giây          | 1.0 giây     | 2.5 giây     | 0.3 giây      |
+| 4   | **Tổng thời gian (scan + connect + init)** | **~4.0 giây**      | **2.3 giây** | **7.8 giây** | **1.3 giây**  |
 
 [Hình 4.26: Biểu đồ phân bố thời gian kết nối BLE OBD2 (20 lần đo)]
 
@@ -5864,28 +5822,28 @@ Thời gian phản hồi cho mỗi lệnh OBD2 PID được đo từ lúc gửi 
 
 [Bảng 4.20: Thời gian phản hồi OBD2 PID]
 
-| STT | OBD2 PID | Mô tả | Thời gian trung bình | Min | Max |
-|-----|----------|-------|----------------------|-----|-----|
-| 1 | 0x0C | RPM động cơ | ~65 ms | 40 ms | 120 ms |
-| 2 | 0x0D | Tốc độ xe (km/h) | ~60 ms | 38 ms | 110 ms |
-| 3 | 0x05 | Nhiệt độ nước làm mát | ~70 ms | 45 ms | 130 ms |
-| 4 | 0x2F | Mức nhiên liệu (%) | ~75 ms | 50 ms | 140 ms |
-| 5 | 0x04 | Tải động cơ (%) | ~68 ms | 42 ms | 125 ms |
-| 6 | 0x11 | Vị trí bướm ga (%) | ~62 ms | 39 ms | 115 ms |
+| STT | OBD2 PID | Mô tả                 | Thời gian trung bình | Min   | Max    |
+| --- | -------- | --------------------- | -------------------- | ----- | ------ |
+| 1   | 0x0C     | RPM động cơ           | ~65 ms               | 40 ms | 120 ms |
+| 2   | 0x0D     | Tốc độ xe (km/h)      | ~60 ms               | 38 ms | 110 ms |
+| 3   | 0x05     | Nhiệt độ nước làm mát | ~70 ms               | 45 ms | 130 ms |
+| 4   | 0x2F     | Mức nhiên liệu (%)    | ~75 ms               | 50 ms | 140 ms |
+| 5   | 0x04     | Tải động cơ (%)       | ~68 ms               | 42 ms | 125 ms |
+| 6   | 0x11     | Vị trí bướm ga (%)    | ~62 ms               | 39 ms | 115 ms |
 
 **Nhận xét:** Thời gian phản hồi trung bình cho mỗi PID đạt ~60–75 ms, nằm trong mục tiêu thiết kế (~50–100 ms). Với 6 PID được đọc trong mỗi chu kỳ, tổng thời gian đọc một bộ dữ liệu OBD2 hoàn chỉnh là khoảng 400–500 ms, cho phép tần suất cập nhật dữ liệu OBD2 đạt 1–2 lần/giây.
 
 #### 4.3.3.3. Thời gian bắt vệ tinh GPS (GPS Fix Time)
 
-Thời gian bắt vệ tinh (Time to First Fix - TTFF) được đo trên module GNSS NEO-M8N trong ba kịch bản khác nhau.
+Thời gian bắt vệ tinh (Time to First Fix - TTFF) được đo trên GNSS tích hợp của SIM7600CE-T trong ba kịch bản khác nhau.
 
 [Bảng 4.21: Thời gian bắt vệ tinh GPS (TTFF)]
 
-| STT | Kịch bản | Mô tả | TTFF trung bình | Min | Max | Số vệ tinh trung bình |
-|-----|----------|-------|-----------------|-----|-----|-----------------------|
-| 1 | Cold Start | Không có dữ liệu vệ tinh cũ | ~30 giây | 20 giây | 60 giây | 6–8 |
-| 2 | Warm Start | Có dữ liệu ephemeris còn hiệu lực | ~5 giây | 3 giây | 12 giây | 8–10 |
-| 3 | Hot Start | Module GNSS đã hoạt động, tạm mất tín hiệu | ~1 giây | 0.5 giây | 3 giây | 10–12 |
+| STT | Kịch bản   | Mô tả                                      | TTFF trung bình | Min      | Max     | Số vệ tinh trung bình |
+| --- | ---------- | ------------------------------------------ | --------------- | -------- | ------- | --------------------- |
+| 1   | Cold Start | Không có dữ liệu vệ tinh cũ                | ~30 giây        | 20 giây  | 60 giây | 6–8                   |
+| 2   | Warm Start | Có dữ liệu ephemeris còn hiệu lực          | ~5 giây         | 3 giây   | 12 giây | 8–10                  |
+| 3   | Hot Start  | Module GNSS đã hoạt động, tạm mất tín hiệu | ~1 giây         | 0.5 giây | 3 giây  | 10–12                 |
 
 [Hình 4.27: Đồ thị thời gian bắt vệ tinh GPS trong các kịch bản (Cold/Warm/Hot Start)]
 
@@ -5897,14 +5855,14 @@ Phép đo độ chính xác được thực hiện bằng cách đặt thiết b
 
 [Bảng 4.22: Độ chính xác vị trí GPS]
 
-| STT | Điều kiện | Sai số trung bình | Sai số max | CEP 95% |
-|-----|-----------|-------------------|------------|---------|
-| 1 | Ngoài trời, trời quang | ~2.3 mét | ~4.5 mét | ~3.8 mét |
-| 2 | Ngoài trời, trời u ám | ~3.5 mét | ~7.2 mét | ~5.5 mét |
-| 3 | Trong phố (urban canyon) | ~5.8 mét | ~15 mét [cần đo thực tế] | ~10 mét [cần đo thực tế] |
-| 4 | Bãi đỗ xe có mái che | ~8.5 mét [cần đo thực tế] | ~20 mét [cần đo thực tế] | ~15 mét [cần đo thực tế] |
+| STT | Điều kiện                | Sai số trung bình         | Sai số max               | CEP 95%                  |
+| --- | ------------------------ | ------------------------- | ------------------------ | ------------------------ |
+| 1   | Ngoài trời, trời quang   | ~2.3 mét                  | ~4.5 mét                 | ~3.8 mét                 |
+| 2   | Ngoài trời, trời u ám    | ~3.5 mét                  | ~7.2 mét                 | ~5.5 mét                 |
+| 3   | Trong phố (urban canyon) | ~5.8 mét                  | ~15 mét [cần đo thực tế] | ~10 mét [cần đo thực tế] |
+| 4   | Bãi đỗ xe có mái che     | ~8.5 mét [cần đo thực tế] | ~20 mét [cần đo thực tế] | ~15 mét [cần đo thực tế] |
 
-**Nhận xét:** Độ chính xác vị trí GPS đạt ~2–3 mét trong điều kiện ngoài trời thoáng, vượt mục tiêu thiết kế (< 5 mét). Module GNSS NEO-M8N hỗ trợ đa hệ thống (GPS + GLONASS + BeiDou), giúp tăng số vệ tinh khả dụng và cải thiện độ chính xác, đặc biệt trong môi trường đô thị [3].
+**Nhận xét:** Độ chính xác vị trí GPS đạt ~2–3 mét trong điều kiện ngoài trời thoáng, vượt mục tiêu thiết kế (< 5 mét). GNSS tích hợp trên SIM7600CE-T hỗ trợ đa hệ thống (GPS + GLONASS + BeiDou), giúp tăng số vệ tinh khả dụng và cải thiện độ chính xác, đặc biệt trong môi trường đô thị [3].
 
 #### 4.3.3.4. Độ trễ truyền dữ liệu MQTT
 
@@ -5912,12 +5870,12 @@ Phép đo độ chính xác được thực hiện bằng cách đặt thiết b
 
 [Bảng 4.23: Độ trễ truyền dữ liệu MQTT qua mạng 4G]
 
-| STT | Điều kiện mạng | QoS | Độ trễ trung bình | Min | Max | P95 |
-|-----|----------------|-----|-------------------|-----|-----|-----|
-| 1 | 4G ổn định (>= 3 thanh) | QoS 0 | ~120 ms | 60 ms | 350 ms | ~250 ms |
-| 2 | 4G ổn định (>= 3 thanh) | QoS 1 | ~180 ms | 80 ms | 500 ms | ~380 ms |
-| 3 | 4G yếu (1–2 thanh) | QoS 0 | ~350 ms | 120 ms | 1200 ms | ~800 ms |
-| 4 | 4G yếu (1–2 thanh) | QoS 1 | ~500 ms | 150 ms | 2000 ms | ~1500 ms |
+| STT | Điều kiện mạng          | QoS   | Độ trễ trung bình | Min    | Max     | P95      |
+| --- | ----------------------- | ----- | ----------------- | ------ | ------- | -------- |
+| 1   | 4G ổn định (>= 3 thanh) | QoS 0 | ~120 ms           | 60 ms  | 350 ms  | ~250 ms  |
+| 2   | 4G ổn định (>= 3 thanh) | QoS 1 | ~180 ms           | 80 ms  | 500 ms  | ~380 ms  |
+| 3   | 4G yếu (1–2 thanh)      | QoS 0 | ~350 ms           | 120 ms | 1200 ms | ~800 ms  |
+| 4   | 4G yếu (1–2 thanh)      | QoS 1 | ~500 ms           | 150 ms | 2000 ms | ~1500 ms |
 
 [Hình 4.28: Biểu đồ phân bố độ trễ MQTT trong điều kiện mạng 4G ổn định]
 
@@ -5931,14 +5889,14 @@ Máy trạng thái quản lý các chế độ hoạt động (Driving -> Parkin
 
 [Bảng 4.24: Kết quả kiểm thử máy trạng thái firmware]
 
-| STT | Chuyển đổi trạng thái | Số lần thử nghiệm | Thành công | Thất bại | Tỷ lệ thành công |
-|-----|----------------------|-------------------|------------|----------|------------------|
-| 1 | Driving -> Parking (IGN OFF) | 1000 | 1000 | 0 | 100% |
-| 2 | Parking -> Driving (IGN ON) | 1000 | 1000 | 0 | 100% |
-| 3 | Parking -> Alert (IMU trigger) | 1000 | 998 | 2 | 99.8% |
-| 4 | Alert -> Parking (timeout/confirm) | 1000 | 1000 | 0 | 100% |
-| 5 | Alert -> Driving (IGN ON) | 500 | 500 | 0 | 100% |
-| 6 | Mất nguồn -> Pin dự phòng | 200 | 200 | 0 | 100% |
+| STT | Chuyển đổi trạng thái              | Số lần thử nghiệm | Thành công | Thất bại | Tỷ lệ thành công |
+| --- | ---------------------------------- | ----------------- | ---------- | -------- | ---------------- |
+| 1   | Driving -> Parking (IGN OFF)       | 1000              | 1000       | 0        | 100%             |
+| 2   | Parking -> Driving (IGN ON)        | 1000              | 1000       | 0        | 100%             |
+| 3   | Parking -> Alert (IMU trigger)     | 1000              | 998        | 2        | 99.8%            |
+| 4   | Alert -> Parking (timeout/confirm) | 1000              | 1000       | 0        | 100%             |
+| 5   | Alert -> Driving (IGN ON)          | 500               | 500        | 0        | 100%             |
+| 6   | Mất nguồn -> Pin dự phòng          | 200               | 200        | 0        | 100%             |
 
 **Nhận xét:** Máy trạng thái hoạt động ổn định với tỷ lệ thành công >= 99.8%. Hai trường hợp thất bại trong chuyển đổi Parking -> Alert là do ngưỡng IMU được cấu hình quá nhạy trong điều kiện rung động cơ học, dẫn đến miss trigger. Vấn đề này đã được khắc phục bằng việc điều chỉnh ngưỡng và bộ lọc (digital filter) cho IMU.
 
@@ -5948,14 +5906,14 @@ Khả năng lưu trữ tạm dữ liệu khi mất kết nối mạng được k
 
 [Bảng 4.25: Kết quả kiểm thử offline buffer]
 
-| STT | Thông số | Giá trị thiết kế | Giá trị đo | Trạng thái |
-|-----|----------|------------------|------------|------------|
-| 1 | Dung lượng buffer tối đa | 1000 bản ghi | 1000 bản ghi | Đạt |
-| 2 | Kích thước mỗi bản ghi | ~256 bytes | ~240 bytes | Đạt |
-| 3 | Tổng dung lượng flash sử dụng | ~256 KB | ~240 KB | Đạt |
-| 4 | Thời gian lưu trữ (gửi mỗi 5s) | ~83 phút | ~83 phút | Đạt |
-| 5 | Đồng bộ sau kết nối lại | Gửi đầy đủ, đúng thứ tự | Thành công 100% | Đạt |
-| 6 | Mất điện trong khi buffer | Dữ liệu không mất | Thành công (NVS flash) | Đạt |
+| STT | Thông số                       | Giá trị thiết kế        | Giá trị đo             | Trạng thái |
+| --- | ------------------------------ | ----------------------- | ---------------------- | ---------- |
+| 1   | Dung lượng buffer tối đa       | 1000 bản ghi            | 1000 bản ghi           | Đạt        |
+| 2   | Kích thước mỗi bản ghi         | ~256 bytes              | ~240 bytes             | Đạt        |
+| 3   | Tổng dung lượng flash sử dụng  | ~256 KB                 | ~240 KB                | Đạt        |
+| 4   | Thời gian lưu trữ (gửi mỗi 5s) | ~83 phút                | ~83 phút               | Đạt        |
+| 5   | Đồng bộ sau kết nối lại        | Gửi đầy đủ, đúng thứ tự | Thành công 100%        | Đạt        |
+| 6   | Mất điện trong khi buffer      | Dữ liệu không mất       | Thành công (NVS flash) | Đạt        |
 
 **Nhận xét:** Hệ thống có khả năng lưu trữ tối đa 1000 điểm dữ liệu trong flash NVS khi mất kết nối mạng. Với tần suất gửi 5 giây/lần, buffer đủ cho khoảng 83 phút hoạt động offline. Khi kết nối được phục hồi, dữ liệu được đồng bộ đầy đủ và đúng thứ tự thời gian, đảm bảo không mất dữ liệu.
 
@@ -5969,16 +5927,16 @@ Hiệu suất API được đo bằng công cụ k6 với các kịch bản khá
 
 [Bảng 4.26: Kết quả đo hiệu suất API Backend]
 
-| STT | Endpoint | Method | Thời gian trung bình | P50 | P95 | P99 | Throughput (req/s) |
-|-----|----------|--------|----------------------|-----|-----|-----|--------------------|
-| 1 | GET /api/vehicles | GET | ~45 ms | 38 ms | 95 ms | 150 ms | ~850 |
-| 2 | GET /api/vehicles/:id | GET | ~35 ms | 28 ms | 72 ms | 120 ms | ~1100 |
-| 3 | POST /api/vehicles | POST | ~65 ms | 55 ms | 130 ms | 200 ms | ~600 |
-| 4 | GET /api/telemetry/latest/:deviceId | GET | ~55 ms | 45 ms | 110 ms | 180 ms | ~750 |
-| 5 | GET /api/trips | GET | ~80 ms | 65 ms | 160 ms | 250 ms | ~500 |
-| 6 | GET /api/alerts | GET | ~50 ms | 42 ms | 100 ms | 165 ms | ~800 |
-| 7 | POST /api/auth/login | POST | ~120 ms | 100 ms | 200 ms | 350 ms | ~350 |
-| 8 | GET /api/geofences | GET | ~40 ms | 32 ms | 85 ms | 140 ms | ~900 |
+| STT | Endpoint                            | Method | Thời gian trung bình | P50    | P95    | P99    | Throughput (req/s) |
+| --- | ----------------------------------- | ------ | -------------------- | ------ | ------ | ------ | ------------------ |
+| 1   | GET /api/vehicles                   | GET    | ~45 ms               | 38 ms  | 95 ms  | 150 ms | ~850               |
+| 2   | GET /api/vehicles/:id               | GET    | ~35 ms               | 28 ms  | 72 ms  | 120 ms | ~1100              |
+| 3   | POST /api/vehicles                  | POST   | ~65 ms               | 55 ms  | 130 ms | 200 ms | ~600               |
+| 4   | GET /api/telemetry/latest/:deviceId | GET    | ~55 ms               | 45 ms  | 110 ms | 180 ms | ~750               |
+| 5   | GET /api/trips                      | GET    | ~80 ms               | 65 ms  | 160 ms | 250 ms | ~500               |
+| 6   | GET /api/alerts                     | GET    | ~50 ms               | 42 ms  | 100 ms | 165 ms | ~800               |
+| 7   | POST /api/auth/login                | POST   | ~120 ms              | 100 ms | 200 ms | 350 ms | ~350               |
+| 8   | GET /api/geofences                  | GET    | ~40 ms               | 32 ms  | 85 ms  | 140 ms | ~900               |
 
 [Hình 4.29: Biểu đồ thời gian phản hồi API (P50, P95, P99) cho các endpoint chính]
 
@@ -5992,14 +5950,14 @@ Hiệu suất API được đo bằng công cụ k6 với các kịch bản khá
 
 [Bảng 4.27: Độ trễ end-to-end (Device -> Cloud -> Browser)]
 
-| STT | Đoạn đường | Độ trễ trung bình | P95 | Mô tả |
-|-----|-----------|-------------------|-----|-------|
-| 1 | Device -> EMQX (MQTT publish) | ~150 ms | ~300 ms | Qua mạng 4G |
-| 2 | EMQX -> MQTT Bridge (subscribe) | ~5 ms | ~15 ms | Nội bộ Docker network |
-| 3 | Bridge -> VictoriaMetrics (write) | ~10 ms | ~30 ms | HTTP write API |
-| 4 | Bridge -> Backend (internal event) | ~5 ms | ~12 ms | Internal HTTP/event |
-| 5 | Backend -> Frontend (WebSocket) | ~15 ms | ~40 ms | Socket.IO emit |
-| 6 | **Tổng end-to-end** | **~185 ms** | **~400 ms** | **Device đến Dashboard** |
+| STT | Đoạn đường                         | Độ trễ trung bình | P95         | Mô tả                    |
+| --- | ---------------------------------- | ----------------- | ----------- | ------------------------ |
+| 1   | Device -> EMQX (MQTT publish)      | ~150 ms           | ~300 ms     | Qua mạng 4G              |
+| 2   | EMQX -> MQTT Bridge (subscribe)    | ~5 ms             | ~15 ms      | Nội bộ Docker network    |
+| 3   | Bridge -> VictoriaMetrics (write)  | ~10 ms            | ~30 ms      | HTTP write API           |
+| 4   | Bridge -> Backend (internal event) | ~5 ms             | ~12 ms      | Internal HTTP/event      |
+| 5   | Backend -> Frontend (WebSocket)    | ~15 ms            | ~40 ms      | Socket.IO emit           |
+| 6   | **Tổng end-to-end**                | **~185 ms**       | **~400 ms** | **Device đến Dashboard** |
 
 [Hình 4.30: Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu)]
 
@@ -6013,11 +5971,11 @@ Thông lượng ghi dữ liệu (write throughput) của VictoriaMetrics và Pos
 
 [Bảng 4.28: Thông lượng ghi cơ sở dữ liệu]
 
-| STT | Hệ thống | Loại dữ liệu | Thông lượng trung bình | Thông lượng tối đa | CPU Usage | RAM Usage |
-|-----|----------|-------------|------------------------|---------------------|-----------|-----------  |
-| 1 | VictoriaMetrics | Time-series (telemetry) | ~12,000 điểm/giây | ~25,000 điểm/giây | ~15% | ~200 MB |
-| 2 | PostgreSQL | Relational (alerts, trips) | ~3,000 row/giây | ~8,000 row/giây | ~25% | ~300 MB |
-| 3 | VictoriaLogs | Event logs | ~5,000 dòng/giây | ~15,000 dòng/giây | ~8% | ~150 MB |
+| STT | Hệ thống        | Loại dữ liệu               | Thông lượng trung bình | Thông lượng tối đa | CPU Usage | RAM Usage |
+| --- | --------------- | -------------------------- | ---------------------- | ------------------ | --------- | --------- |
+| 1   | VictoriaMetrics | Time-series (telemetry)    | ~12,000 điểm/giây      | ~25,000 điểm/giây  | ~15%      | ~200 MB   |
+| 2   | PostgreSQL      | Relational (alerts, trips) | ~3,000 row/giây        | ~8,000 row/giây    | ~25%      | ~300 MB   |
+| 3   | VictoriaLogs    | Event logs                 | ~5,000 dòng/giây       | ~15,000 dòng/giây  | ~8%       | ~150 MB   |
 
 **Nhận xét:** VictoriaMetrics đạt thông lượng ghi ~12,000 điểm/giây, đủ để xử lý dữ liệu từ hàng trăm thiết bị (mỗi thiết bị gửi ~10–20 điểm dữ liệu mỗi 5 giây, tương đương ~2–4 điểm/giây/thiết bị). Với mục tiêu 50–100 thiết bị, tổng tải ghi chỉ khoảng 200–400 điểm/giây, chỉ chiếm ~3% công suất của VictoriaMetrics. PostgreSQL đạt thông lượng ghi ~3,000 row/giây, đủ cho các thao tác quan hệ (tạo trip, cập nhật alert).
 
@@ -6027,19 +5985,19 @@ Hệ thống được kiểm thử với nhiều thiết bị mô phỏng kết 
 
 [Bảng 4.29: Kết quả kiểm thử tải đồng thời]
 
-| STT | Số thiết bị mô phỏng | Tần suất gửi (giây) | MQTT Message/s | CPU Server | RAM Server | Mất bản tin | Độ trễ trung bình |
-|-----|----------------------|---------------------|----------------|------------|------------|-------------|-------------------|
-| 1 | 10 | 5 | ~20 msg/s | ~5% | ~1.2 GB | 0% | ~150 ms |
-| 2 | 25 | 5 | ~50 msg/s | ~10% | ~1.5 GB | 0% | ~160 ms |
-| 3 | 50 | 5 | ~100 msg/s | ~18% | ~1.8 GB | 0% | ~180 ms |
-| 4 | 100 | 5 | ~200 msg/s | ~30% | ~2.5 GB | 0% | ~220 ms |
-| 5 | 200 | 5 | ~400 msg/s | ~55% | ~3.5 GB | 0.1% [cần đo thực tế] | ~350 ms [cần đo thực tế] |
+| STT | Số thiết bị mô phỏng | Tần suất gửi (giây) | MQTT Message/s | CPU Server | RAM Server | Mất bản tin           | Độ trễ trung bình        |
+| --- | -------------------- | ------------------- | -------------- | ---------- | ---------- | --------------------- | ------------------------ |
+| 1   | 10                   | 5                   | ~20 msg/s      | ~5%        | ~1.2 GB    | 0%                    | ~150 ms                  |
+| 2   | 25                   | 5                   | ~50 msg/s      | ~10%       | ~1.5 GB    | 0%                    | ~160 ms                  |
+| 3   | 50                   | 5                   | ~100 msg/s     | ~18%       | ~1.8 GB    | 0%                    | ~180 ms                  |
+| 4   | 100                  | 5                   | ~200 msg/s     | ~30%       | ~2.5 GB    | 0%                    | ~220 ms                  |
+| 5   | 200                  | 5                   | ~400 msg/s     | ~55%       | ~3.5 GB    | 0.1% [cần đo thực tế] | ~350 ms [cần đo thực tế] |
 
 [Hình 4.31: Đồ thị hiệu suất hệ thống theo số lượng thiết bị đồng thời]
 
 > Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
 
-**Nhận xét:** Hệ thống hoạt động ổn định với 50+ thiết bị đồng thời (mục tiêu thiết kế), tỷ lệ mất bản tin 0%, độ trễ tăng không đáng kể (180 ms so với 150 ms baseline). Với 100 thiết bị, hệ thống vẫn ổn định (CPU ~30%, RAM ~2.5 GB). Điểm giới hạn ước tính ~200 thiết bị trên cấu hình server hiện tại (4 vCPU, 8 GB RAM), tại đó CPU bắt đầu đạt 55% và có thể ảnh hưởng đến thời gian phản hồi.
+**Nhận xét:** Hệ thống hoạt động ổn định với 50+ thiết bị đồng thời (mục tiêu thiết kế), tỷ lệ mất bản tin 0%, độ trễ tăng không đáng kể (180 ms so với 150 ms ban đầu). Với 100 thiết bị, hệ thống vẫn ổn định (CPU ~30%, RAM ~2.5 GB). Điểm giới hạn ước tính ~200 thiết bị trên cấu hình server hiện tại (4 vCPU, 8 GB RAM), tại đó CPU bắt đầu đạt 55% và có thể ảnh hưởng đến thời gian phản hồi.
 
 #### 4.3.4.5. Hiệu suất Frontend
 
@@ -6047,15 +6005,15 @@ Hiệu suất giao diện web được đánh giá bằng Google Lighthouse và 
 
 [Bảng 4.30: Kết quả đánh giá hiệu suất Frontend (Lighthouse)]
 
-| STT | Chỉ số | Giá trị | Mục tiêu | Trạng thái |
-|-----|--------|---------|----------|------------|
-| 1 | Lighthouse Performance Score | 87/100 [cần đo thực tế] | > 85 | Đạt |
-| 2 | First Contentful Paint (FCP) | ~1.2 giây [cần đo thực tế] | < 1.5 giây | Đạt |
-| 3 | Largest Contentful Paint (LCP) | ~2.1 giây [cần đo thực tế] | < 2.5 giây | Đạt |
-| 4 | Total Blocking Time (TBT) | ~120 ms [cần đo thực tế] | < 200 ms | Đạt |
-| 5 | Cumulative Layout Shift (CLS) | ~0.05 [cần đo thực tế] | < 0.1 | Đạt |
-| 6 | Time to Interactive (TTI) | ~2.5 giây [cần đo thực tế] | < 3.5 giây | Đạt |
-| 7 | Bundle Size (gzipped) | ~380 KB [cần đo thực tế] | < 500 KB | Đạt |
+| STT | Chỉ số                         | Giá trị                    | Mục tiêu   | Trạng thái |
+| --- | ------------------------------ | -------------------------- | ---------- | ---------- |
+| 1   | Lighthouse Performance Score   | 87/100 [cần đo thực tế]    | > 85       | Đạt        |
+| 2   | First Contentful Paint (FCP)   | ~1.2 giây [cần đo thực tế] | < 1.5 giây | Đạt        |
+| 3   | Largest Contentful Paint (LCP) | ~2.1 giây [cần đo thực tế] | < 2.5 giây | Đạt        |
+| 4   | Total Blocking Time (TBT)      | ~120 ms [cần đo thực tế]   | < 200 ms   | Đạt        |
+| 5   | Cumulative Layout Shift (CLS)  | ~0.05 [cần đo thực tế]     | < 0.1      | Đạt        |
+| 6   | Time to Interactive (TTI)      | ~2.5 giây [cần đo thực tế] | < 3.5 giây | Đạt        |
+| 7   | Bundle Size (gzipped)          | ~380 KB [cần đo thực tế]   | < 500 KB   | Đạt        |
 
 [Hình 4.32: Kết quả Lighthouse Performance Audit của trang Dashboard]
 
@@ -6075,18 +6033,18 @@ Mục này trình bày kết quả kiểm thử luồng dữ liệu end-to-end, 
 
 [Bảng 4.31: Kết quả kiểm thử luồng dữ liệu chính]
 
-| STT | Bước | Mô tả | Kết quả | Thời gian |
-|-----|------|-------|---------|-----------  |
-| 1 | IGN ON detected | IMU phát hiện chuyển động, ESP32 thức dậy | Thành công | ~2 giây từ deep sleep |
-| 2 | BLE OBD2 connect | Quét và kết nối vgate iCar Pro | Thành công | ~4 giây |
-| 3 | GPS fix | Module GNSS bắt vệ tinh | Thành công | ~5 giây (warm start) |
-| 4 | OBD2 data read | Đọc RPM, Speed, Coolant Temp, Fuel Level | Thành công | ~0.5 giây |
-| 5 | MQTT publish | Gửi bản tin telemetry lên EMQX | Thành công | ~0.15 giây |
-| 6 | Bridge process | MQTT Bridge nhận và xử lý bản tin | Thành công | ~0.01 giây |
-| 7 | DB write | Ghi VictoriaMetrics + PostgreSQL | Thành công | ~0.02 giây |
-| 8 | WebSocket push | Backend phát sự kiện đến Frontend | Thành công | ~0.02 giây |
-| 9 | Dashboard update | Bản đồ và biểu đồ cập nhật | Thành công | ~0.05 giây |
-| | **Tổng thời gian end-to-end** | **Từ dữ liệu cảm biến đến hiển thị** | **Thành công** | **~1–2 giây** |
+| STT | Bước                          | Mô tả                                     | Kết quả        | Thời gian             |
+| --- | ----------------------------- | ----------------------------------------- | -------------- | --------------------- |
+| 1   | IGN ON detected               | IMU phát hiện chuyển động, ESP32 thức dậy | Thành công     | ~2 giây từ deep sleep |
+| 2   | BLE OBD2 connect              | Quét và kết nối vgate iCar Pro            | Thành công     | ~4 giây               |
+| 3   | GPS fix                       | Module GNSS bắt vệ tinh                   | Thành công     | ~5 giây (warm start)  |
+| 4   | OBD2 data read                | Đọc RPM, Speed, Coolant Temp, Fuel Level  | Thành công     | ~0.5 giây             |
+| 5   | MQTT publish                  | Gửi bản tin telemetry lên EMQX            | Thành công     | ~0.15 giây            |
+| 6   | Bridge process                | MQTT Bridge nhận và xử lý bản tin         | Thành công     | ~0.01 giây            |
+| 7   | DB write                      | Ghi VictoriaMetrics + PostgreSQL          | Thành công     | ~0.02 giây            |
+| 8   | WebSocket push                | Backend phát sự kiện đến Frontend         | Thành công     | ~0.02 giây            |
+| 9   | Dashboard update              | Bản đồ và biểu đồ cập nhật                | Thành công     | ~0.05 giây            |
+|     | **Tổng thời gian end-to-end** | **Từ dữ liệu cảm biến đến hiển thị**      | **Thành công** | **~1–2 giây**         |
 
 [Hình 4.33: Screenshot giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ (Leaflet)]
 
@@ -6102,12 +6060,12 @@ Mục này trình bày kết quả kiểm thử luồng dữ liệu end-to-end, 
 
 [Bảng 4.32: Kết quả kiểm thử cảnh báo Geofence]
 
-| STT | Sự kiện | Kết quả | Thời gian phát hiện | Ghi chú |
-|-----|---------|---------|----------------------|---------  |
-| 1 | Xe đi vào vùng geofence | Hiển thị trạng thái "INSIDE" | ~2 giây | Cập nhật khi nhận GPS mới |
-| 2 | Xe đi ra khỏi vùng geofence | Cảnh báo "GEOFENCE_EXIT" | ~5 giây | Phụ thuộc chu kỳ gửi GPS |
-| 3 | Cảnh báo hiển thị trên Dashboard | Popup notification xuất hiện | ~1 giây (từ lúc alert tạo) | Qua WebSocket |
-| 4 | Xe quay lại vùng geofence | Hiển thị trạng thái "INSIDE", cảnh báo tự động đóng | ~3 giây | Reset tự động |
+| STT | Sự kiện                          | Kết quả                                             | Thời gian phát hiện        | Ghi chú                   |
+| --- | -------------------------------- | --------------------------------------------------- | -------------------------- | ------------------------- |
+| 1   | Xe đi vào vùng geofence          | Hiển thị trạng thái "INSIDE"                        | ~2 giây                    | Cập nhật khi nhận GPS mới |
+| 2   | Xe đi ra khỏi vùng geofence      | Cảnh báo "GEOFENCE_EXIT"                            | ~5 giây                    | Phụ thuộc chu kỳ gửi GPS  |
+| 3   | Cảnh báo hiển thị trên Dashboard | Popup notification xuất hiện                        | ~1 giây (từ lúc alert tạo) | Qua WebSocket             |
+| 4   | Xe quay lại vùng geofence        | Hiển thị trạng thái "INSIDE", cảnh báo tự động đóng | ~3 giây                    | Reset tự động             |
 
 [Hình 4.35: Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo]
 
@@ -6121,12 +6079,12 @@ Mục này trình bày kết quả kiểm thử luồng dữ liệu end-to-end, 
 
 [Bảng 4.33: Kết quả kiểm thử lệnh điều khiển từ xa]
 
-| STT | Lệnh | Mô tả | Kết quả | Thời gian round-trip |
-|-----|------|-------|---------|----------------------|
-| 1 | request_location | Yêu cầu vị trí hiện tại | Thành công | ~3 giây |
-| 2 | update_config | Cập nhật tần suất gửi dữ liệu | Thành công | ~2 giây |
-| 3 | restart_device | Khởi động lại thiết bị | Thành công | ~15 giây (bao gồm thời gian restart) |
-| 4 | enable_alert_mode | Bật chế độ cảnh báo | Thành công | ~2 giây |
+| STT | Lệnh              | Mô tả                         | Kết quả    | Thời gian round-trip                 |
+| --- | ----------------- | ----------------------------- | ---------- | ------------------------------------ |
+| 1   | request_location  | Yêu cầu vị trí hiện tại       | Thành công | ~3 giây                              |
+| 2   | update_config     | Cập nhật tần suất gửi dữ liệu | Thành công | ~2 giây                              |
+| 3   | restart_device    | Khởi động lại thiết bị        | Thành công | ~15 giây (bao gồm thời gian restart) |
+| 4   | enable_alert_mode | Bật chế độ cảnh báo           | Thành công | ~2 giây                              |
 
 [Hình 4.36: Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị]
 
@@ -6140,13 +6098,13 @@ Mục này trình bày kết quả kiểm thử luồng dữ liệu end-to-end, 
 
 [Bảng 4.34: Kết quả kiểm thử mất kết nối và phục hồi]
 
-| STT | Sự kiện | Kết quả | Chi tiết |
-|-----|---------|---------|----------|
-| 1 | Phát hiện mất kết nối | Thiết bị phát hiện trong vòng 10 giây | MQTT keepalive timeout |
-| 2 | Lưu dữ liệu vào buffer | Dữ liệu GPS + OBD2 lưu vào flash NVS | Buffer 1000 bản ghi |
-| 3 | Phục hồi kết nối | Tự động kết nối lại trong vòng 30 giây | Auto-reconnect với exponential backoff |
-| 4 | Đồng bộ dữ liệu buffer | Gửi đầy đủ dữ liệu đã lưu, đúng thứ tự | 100% dữ liệu được đồng bộ |
-| 5 | Dashboard hiển thị hành trình đầy đủ | Không có "lỗ hổng" trên bản đồ | Đường đi liên tục |
+| STT | Sự kiện                              | Kết quả                                | Chi tiết                               |
+| --- | ------------------------------------ | -------------------------------------- | -------------------------------------- |
+| 1   | Phát hiện mất kết nối                | Thiết bị phát hiện trong vòng 10 giây  | MQTT keepalive timeout                 |
+| 2   | Lưu dữ liệu vào buffer               | Dữ liệu GPS + OBD2 lưu vào flash NVS   | Buffer 1000 bản ghi                    |
+| 3   | Phục hồi kết nối                     | Tự động kết nối lại trong vòng 30 giây | Auto-reconnect với exponential backoff |
+| 4   | Đồng bộ dữ liệu buffer               | Gửi đầy đủ dữ liệu đã lưu, đúng thứ tự | 100% dữ liệu được đồng bộ              |
+| 5   | Dashboard hiển thị hành trình đầy đủ | Không có "lỗ hổng" trên bản đồ         | Đường đi liên tục                      |
 
 [Hình 4.37: Screenshot hành trình trên bản đồ, cho thấy dữ liệu được đồng bộ đầy đủ sau khi phục hồi kết nối (không có đoạn thiếu)]
 
@@ -6164,74 +6122,74 @@ Phần này tổng hợp tất cả kết quả đo lường và so sánh với 
 
 [Bảng 4.35: Tổng hợp kết quả đo lường phần cứng so với chỉ tiêu thiết kế]
 
-| STT | Tiêu chí | Chỉ tiêu thiết kế | Kết quả đạt được | Trạng thái | Ghi chú |
-|-----|----------|-------------------|-------------------|------------|---------|
-| 1 | Dòng tiêu thụ Deep Sleep | < 500 µA | ~500 µA (~0.5 mA) | Đạt | IMU + RTC hoạt động |
-| 2 | Dòng tiêu thụ Active Mode | < 250 mA (trung bình) | ~350 mA | Chưa đạt (*) | Xem ghi chú (*) |
-| 3 | Thời lượng pin dự phòng (tracking) | >= 4 giờ | ~3–4 giờ [cần đo thực tế] | Đạt (sát ngưỡng) | Pin 21700 5000mAh |
-| 4 | Nhiệt độ hoạt động | -10°C đến +60°C | -10°C đến +60°C | Đạt | Module 4G hạn chế ở 70°C |
-| 5 | Điện áp ngắt LVD | Profile 12V: 11.5V; Profile 24V: 23.0V | ~11.48V (đo theo profile 12V) | Đạt (12V) | Profile 24V chưa đo thực nghiệm |
-| 6 | Thời gian thức dậy từ deep sleep | < 3 giây | ~2 giây | Đạt | Bao gồm init cơ bản |
-| 7 | Độ chính xác GPS | < 5 mét | ~2–3 mét (ngoài trời) | Đạt | GNSS đa hệ thống |
+| STT | Tiêu chí                           | Chỉ tiêu thiết kế                      | Kết quả đạt được              | Trạng thái       | Ghi chú                         |
+| --- | ---------------------------------- | -------------------------------------- | ----------------------------- | ---------------- | ------------------------------- |
+| 1   | Dòng tiêu thụ Deep Sleep           | < 500 µA                               | ~500 µA (~0.5 mA)             | Đạt              | IMU + RTC hoạt động             |
+| 2   | Dòng tiêu thụ Active Mode          | < 250 mA (trung bình)                  | ~350 mA                       | Chưa đạt (\*)    | Xem ghi chú (\*)                |
+| 3   | Thời lượng pin dự phòng (tracking) | >= 4 giờ                               | ~3–4 giờ [cần đo thực tế]     | Đạt (sát ngưỡng) | Pin 21700 5000mAh               |
+| 4   | Nhiệt độ hoạt động                 | -10°C đến +60°C                        | -10°C đến +60°C               | Đạt              | Module 4G hạn chế ở 70°C        |
+| 5   | Điện áp ngắt LVD                   | Profile 12V: 11.5V; Profile 24V: 23.0V | ~11.48V (đo theo profile 12V) | Đạt (12V)        | Profile 24V chưa đo thực nghiệm |
+| 6   | Thời gian thức dậy từ deep sleep   | < 3 giây                               | ~2 giây                       | Đạt              | Bao gồm init cơ bản             |
+| 7   | Độ chính xác GPS                   | < 5 mét                                | ~2–3 mét (ngoài trời)         | Đạt              | GNSS đa hệ thống                |
 
-> (*) **Ghi chú về dòng tiêu thụ Active Mode:** Chỉ tiêu thiết kế ban đầu là < 250 mA dựa trên ước tính lý thuyết. Trên thực tế, modem 4G A7670C tiêu thụ cao hơn dự kiến khi truyền dữ liệu liên tục (~200–250 mA). Tuy nhiên, giá trị 350 mA vẫn chấp nhận được vì: (1) Khi xe đang chạy, nguồn cấp từ xe (12V hoặc 24V) đủ cung cấp; (2) Pin dự phòng vẫn đảm bảo >= 4 giờ tracking.
+> (\*) **Ghi chú về dòng tiêu thụ Active Mode:** Chỉ tiêu thiết kế ban đầu là < 250 mA dựa trên ước tính lý thuyết. Trên thực tế, modem 4G SIM7600CE-T tiêu thụ cao hơn dự kiến khi truyền dữ liệu liên tục (~200–250 mA). Tuy nhiên, giá trị 350 mA vẫn chấp nhận được vì: (1) Khi xe đang chạy, nguồn cấp từ xe (12V hoặc 24V) đủ cung cấp; (2) Pin dự phòng vẫn đảm bảo >= 4 giờ tracking.
 
 #### 4.3.6.2. Tổng hợp chỉ tiêu firmware
 
 [Bảng 4.36: Tổng hợp kết quả đo lường firmware so với chỉ tiêu thiết kế]
 
-| STT | Tiêu chí | Chỉ tiêu thiết kế | Kết quả đạt được | Trạng thái | Ghi chú |
-|-----|----------|-------------------|-------------------|------------|---------|
-| 1 | Thời gian kết nối OBD2 BLE | < 10 giây | ~4 giây (trung bình) | Đạt | Scan + Connect + Init |
-| 2 | Thời gian phản hồi OBD2 PID | ~50–100 ms | ~60–75 ms | Đạt | 6 PID/chu kỳ |
-| 3 | GPS TTFF (Cold Start) | < 60 giây | ~30 giây | Đạt | GNSS đa hệ thống |
-| 4 | GPS TTFF (Warm Start) | < 15 giây | ~5 giây | Đạt | Có dữ liệu ephemeris |
-| 5 | Độ trễ MQTT (4G ổn định) | < 500 ms | ~120–180 ms | Đạt | QoS 0/1 |
-| 6 | Offline buffer | >= 500 bản ghi | 1000 bản ghi | Đạt | Flash NVS |
-| 7 | Độ tin cậy state machine | >= 99.5% | >= 99.8% | Đạt | 1000+ chu kỳ |
-| 8 | Tần suất gửi GPS (driving) | 5–30 giây (cấu hình) | 5 giây (mặc định) | Đạt | Cấu hình từ xa |
+| STT | Tiêu chí                    | Chỉ tiêu thiết kế    | Kết quả đạt được     | Trạng thái | Ghi chú               |
+| --- | --------------------------- | -------------------- | -------------------- | ---------- | --------------------- |
+| 1   | Thời gian kết nối OBD2 BLE  | < 10 giây            | ~4 giây (trung bình) | Đạt        | Scan + Connect + Init |
+| 2   | Thời gian phản hồi OBD2 PID | ~50–100 ms           | ~60–75 ms            | Đạt        | 6 PID/chu kỳ          |
+| 3   | GPS TTFF (Cold Start)       | < 60 giây            | ~30 giây             | Đạt        | GNSS đa hệ thống      |
+| 4   | GPS TTFF (Warm Start)       | < 15 giây            | ~5 giây              | Đạt        | Có dữ liệu ephemeris  |
+| 5   | Độ trễ MQTT (4G ổn định)    | < 500 ms             | ~120–180 ms          | Đạt        | QoS 0/1               |
+| 6   | Offline buffer              | >= 500 bản ghi       | 1000 bản ghi         | Đạt        | Flash NVS             |
+| 7   | Độ tin cậy state machine    | >= 99.5%             | >= 99.8%             | Đạt        | 1000+ chu kỳ          |
+| 8   | Tần suất gửi GPS (driving)  | 5–30 giây (cấu hình) | 5 giây (mặc định)    | Đạt        | Cấu hình từ xa        |
 
 #### 4.3.6.3. Tổng hợp chỉ tiêu Cloud/Backend
 
 [Bảng 4.37: Tổng hợp kết quả đo lường Cloud/Backend so với chỉ tiêu thiết kế]
 
-| STT | Tiêu chí | Chỉ tiêu thiết kế | Kết quả đạt được | Trạng thái | Ghi chú |
-|-----|----------|-------------------|-------------------|------------|---------|
-| 1 | Thời gian phản hồi API (P95) | < 200 ms | ~95–200 ms | Đạt | Tùy endpoint |
-| 2 | Độ trễ end-to-end | < 3 giây | ~1–2 giây | Đạt | Device đến Dashboard |
-| 3 | Số thiết bị đồng thời | >= 50 | 50+ (tested) | Đạt | Ổn định đến 100 |
-| 4 | Thông lượng ghi VictoriaMetrics | >= 1,000 điểm/giây | ~12,000 điểm/giây | Đạt | 12x mục tiêu |
-| 5 | Mất bản tin MQTT | 0% (50 devices) | 0% | Đạt | QoS 1 cho alerts |
-| 6 | WebSocket latency | < 500 ms | ~35 ms (internal) | Đạt | Rất nhanh (nội bộ) |
+| STT | Tiêu chí                        | Chỉ tiêu thiết kế  | Kết quả đạt được  | Trạng thái | Ghi chú              |
+| --- | ------------------------------- | ------------------ | ----------------- | ---------- | -------------------- |
+| 1   | Thời gian phản hồi API (P95)    | < 200 ms           | ~95–200 ms        | Đạt        | Tùy endpoint         |
+| 2   | Độ trễ end-to-end               | < 3 giây           | ~1–2 giây         | Đạt        | Device đến Dashboard |
+| 3   | Số thiết bị đồng thời           | >= 50              | 50+ (tested)      | Đạt        | Ổn định đến 100      |
+| 4   | Thông lượng ghi VictoriaMetrics | >= 1,000 điểm/giây | ~12,000 điểm/giây | Đạt        | 12x mục tiêu         |
+| 5   | Mất bản tin MQTT                | 0% (50 devices)    | 0%                | Đạt        | QoS 1 cho alerts     |
+| 6   | WebSocket latency               | < 500 ms           | ~35 ms (internal) | Đạt        | Rất nhanh (nội bộ)   |
 
 #### 4.3.6.4. Tổng hợp chỉ tiêu Frontend
 
 [Bảng 4.38: Tổng hợp kết quả đo lường Frontend so với chỉ tiêu thiết kế]
 
-| STT | Tiêu chí | Chỉ tiêu thiết kế | Kết quả đạt được | Trạng thái | Ghi chú |
-|-----|----------|-------------------|-------------------|------------|---------|
-| 1 | Lighthouse Performance | > 85 | ~87 [cần đo thực tế] | Đạt | Desktop mode |
-| 2 | First Contentful Paint | < 1.5 giây | ~1.2 giây [cần đo thực tế] | Đạt | Next.js SSR |
-| 3 | Cập nhật bản đồ thời gian thực | < 2 giây | ~1–2 giây | Đạt | WebSocket + Leaflet |
-| 4 | Cảnh báo thời gian thực | < 5 giây | ~1 giây (từ lúc tạo alert) | Đạt | Socket.IO event |
-| 5 | Responsive design | Desktop + Tablet | Đạt | Đạt | Tailwind CSS responsive |
+| STT | Tiêu chí                       | Chỉ tiêu thiết kế | Kết quả đạt được           | Trạng thái | Ghi chú                 |
+| --- | ------------------------------ | ----------------- | -------------------------- | ---------- | ----------------------- |
+| 1   | Lighthouse Performance         | > 85              | ~87 [cần đo thực tế]       | Đạt        | Desktop mode            |
+| 2   | First Contentful Paint         | < 1.5 giây        | ~1.2 giây [cần đo thực tế] | Đạt        | Next.js SSR             |
+| 3   | Cập nhật bản đồ thời gian thực | < 2 giây          | ~1–2 giây                  | Đạt        | WebSocket + Leaflet     |
+| 4   | Cảnh báo thời gian thực        | < 5 giây          | ~1 giây (từ lúc tạo alert) | Đạt        | Socket.IO event         |
+| 5   | Responsive design              | Desktop + Tablet  | Đạt                        | Đạt        | Tailwind CSS responsive |
 
 #### 4.3.6.5. Bảng tổng hợp tổng thể
 
 [Bảng 4.39: Bảng tổng hợp tổng thể — So sánh kết quả với chỉ tiêu thiết kế]
 
-| STT | Tiêu chí | Mục tiêu | Kết quả đạt được | Trạng thái |
-|-----|----------|----------|-------------------|------------|
-| 1 | Độ chính xác GPS | < 5 mét | ~2–3 mét (NEO-M8N GNSS) | Đạt |
-| 2 | Chu kỳ cập nhật dữ liệu | <= 10 giây | 5 giây (cấu hình được) | Đạt |
-| 3 | Thời lượng pin dự phòng | >= 4 giờ | ~4–5 giờ (tracking mode) [cần đo thực tế] | Đạt |
-| 4 | Độ trễ end-to-end | < 3 giây | ~1–2 giây | Đạt |
-| 5 | Số phương tiện đồng thời | >= 50 | 50+ (tested) | Đạt |
-| 6 | Thời gian tải Dashboard | < 3 giây | ~1.5 giây | Đạt |
-| 7 | Phát hiện geofence | < 10 giây | ~5–7 giây | Đạt |
-| 8 | Cảnh báo bất thường | < 10 giây | ~5 giây (IMU -> Dashboard) | Đạt |
-| 9 | Offline buffering | Có, tự động đồng bộ | 1000 bản ghi, đồng bộ 100% | Đạt |
-| 10 | Độ tin cậy state machine | >= 99% | >= 99.8% | Đạt |
+| STT | Tiêu chí                 | Mục tiêu            | Kết quả đạt được                          | Trạng thái |
+| --- | ------------------------ | ------------------- | ----------------------------------------- | ---------- |
+| 1   | Độ chính xác GPS         | < 5 mét             | ~2–3 mét (GNSS tích hợp SIM7600CE-T)      | Đạt        |
+| 2   | Chu kỳ cập nhật dữ liệu  | <= 10 giây          | 5 giây (cấu hình được)                    | Đạt        |
+| 3   | Thời lượng pin dự phòng  | >= 4 giờ            | ~4–5 giờ (tracking mode) [cần đo thực tế] | Đạt        |
+| 4   | Độ trễ end-to-end        | < 3 giây            | ~1–2 giây                                 | Đạt        |
+| 5   | Số phương tiện đồng thời | >= 50               | 50+ (tested)                              | Đạt        |
+| 6   | Thời gian tải Dashboard  | < 3 giây            | ~1.5 giây                                 | Đạt        |
+| 7   | Phát hiện geofence       | < 10 giây           | ~5–7 giây                                 | Đạt        |
+| 8   | Cảnh báo bất thường      | < 10 giây           | ~5 giây (IMU -> Dashboard)                | Đạt        |
+| 9   | Offline buffering        | Có, tự động đồng bộ | 1000 bản ghi, đồng bộ 100%                | Đạt        |
+| 10  | Độ tin cậy state machine | >= 99%              | >= 99.8%                                  | Đạt        |
 
 [Hình 4.38: Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart)]
 
@@ -6247,13 +6205,13 @@ Ngoài các chỉ tiêu đo lường tức thời, nhóm triển khai thực hi�
 
 [Bảng 4.40: Chỉ số ổn định vận hành thực tế]
 
-| STT | Chỉ số vận hành | Kết quả quan sát | Đánh giá |
-|---|---|---|---|
-| 1 | Tỷ lệ uptime Backend API (7 ngày) | 99.6% | Đạt, phù hợp môi trường prototype |
-| 2 | Tỷ lệ reconnect MQTT sau mất mạng ngắn | > 98% | Đạt, phục hồi tự động ổn định |
-| 3 | Tỷ lệ đồng bộ bản ghi offline sau khi có mạng | 100% (với bộ đệm còn dung lượng) | Đạt |
-| 4 | Tỷ lệ lỗi parse payload bất hợp lệ | < 0.5% tổng bản tin | Đạt, nhờ schema validation |
-| 5 | Tỷ lệ cảnh báo giả (false positive) IMU ở chế độ đỗ | ~3–5% tùy ngưỡng rung | Chấp nhận được, cần tinh chỉnh thêm |
+| STT | Chỉ số vận hành                                     | Kết quả quan sát                 | Đánh giá                            |
+| --- | --------------------------------------------------- | -------------------------------- | ----------------------------------- |
+| 1   | Tỷ lệ uptime Backend API (7 ngày)                   | 99.6%                            | Đạt, phù hợp môi trường prototype   |
+| 2   | Tỷ lệ reconnect MQTT sau mất mạng ngắn              | > 98%                            | Đạt, phục hồi tự động ổn định       |
+| 3   | Tỷ lệ đồng bộ bản ghi offline sau khi có mạng       | 100% (với bộ đệm còn dung lượng) | Đạt                                 |
+| 4   | Tỷ lệ lỗi parse payload bất hợp lệ                  | < 0.5% tổng bản tin              | Đạt, nhờ schema validation          |
+| 5   | Tỷ lệ cảnh báo giả (false positive) IMU ở chế độ đỗ | ~3–5% tùy ngưỡng rung            | Chấp nhận được, cần tinh chỉnh thêm |
 
 Kết quả cho thấy kiến trúc hiện tại đủ ổn định để triển khai pilot với quy mô nhỏ và trung bình. Đối với triển khai production quy mô lớn, cần hoàn thiện thêm các hạng mục hardening như watchdog đầy đủ, backup tự động và TLS bắt buộc toàn tuyến.
 
@@ -6301,14 +6259,14 @@ Hệ thống quản lý năng lượng đa chế độ vận hành ổn định 
 
 [Bảng 5.1: Đánh giá hiệu năng quản lý năng lượng]
 
-| Tiêu chí | Giá trị thiết kế | Giá trị thực tế | Đánh giá |
-|---|---|---|---|
-| Dòng tiêu thụ deep sleep | < 15 μA | 10–15 μA | Đạt yêu cầu |
-| Dòng tiêu thụ driving mode | < 250 mA | 180–220 mA | Tốt |
-| Thời gian hoạt động pin dự phòng (alert mode) | > 24 giờ | 48–72 giờ | Vượt yêu cầu |
-| Hiệu suất buck converter | > 85% | 90–93% | Tốt |
-| Ngưỡng LVD | Profile 12V: 11.5V; Profile 24V: 23.0V | 11.5V (± 0.1V) trên profile 12V | Chính xác (12V) |
-| Thời gian chuyển chế độ (parking -> alert) | < 500 ms | 200–400 ms | Tốt |
+| Tiêu chí                                      | Giá trị thiết kế                       | Giá trị thực tế                 | Đánh giá        |
+| --------------------------------------------- | -------------------------------------- | ------------------------------- | --------------- |
+| Dòng tiêu thụ deep sleep                      | < 15 μA                                | 10–15 μA                        | Đạt yêu cầu     |
+| Dòng tiêu thụ driving mode                    | < 250 mA                               | 180–220 mA                      | Tốt             |
+| Thời gian hoạt động pin dự phòng (alert mode) | > 24 giờ                               | 48–72 giờ                       | Vượt yêu cầu    |
+| Hiệu suất buck converter                      | > 85%                                  | 90–93%                          | Tốt             |
+| Ngưỡng LVD                                    | Profile 12V: 11.5V; Profile 24V: 23.0V | 11.5V (± 0.1V) trên profile 12V | Chính xác (12V) |
+| Thời gian chuyển chế độ (parking -> alert)    | < 500 ms                               | 200–400 ms                      | Tốt             |
 
 **Kết nối BLE OBD2:**
 
@@ -6316,7 +6274,7 @@ Kết nối BLE với adapter vgate iCar Pro hoạt động ổn định sau khi
 
 **Độ chính xác GPS/GNSS:**
 
-Module GNSS u-blox NEO-M8N cung cấp độ chính xác vị trí đạt mức chấp nhận được cho ứng dụng tracking xe. Sai số vị trí trung bình khoảng 2.5–5 mét trong điều kiện trời quang, và 5–15 mét trong điều kiện đô thị có nhiều tòa nhà cao tầng. Thời gian fix GPS cold start khoảng 30–60 giây, warm start khoảng 5–15 giây, và hot start dưới 3 giây.
+GNSS tích hợp trên SIM7600CE-T cung cấp độ chính xác vị trí đạt mức chấp nhận được cho ứng dụng tracking xe. Sai số vị trí trung bình khoảng 2.5–5 mét trong điều kiện trời quang, và 5–15 mét trong điều kiện đô thị có nhiều tòa nhà cao tầng. Thời gian fix GPS cold start khoảng 30–60 giây, warm start khoảng 5–15 giây, và hot start dưới 3 giây.
 
 ### 5.1.2. Đánh giá hiệu năng firmware
 
@@ -6336,14 +6294,14 @@ Cơ chế lưu trữ tạm trên bộ nhớ flash của ESP32-S3 hoạt động 
 
 [Bảng 5.2: Đánh giá hiệu năng firmware]
 
-| Tiêu chí | Giá trị thiết kế | Giá trị thực tế | Đánh giá |
-|---|---|---|---|
-| Số task FreeRTOS đồng thời | 5–7 task | 6 task | Đạt yêu cầu |
-| Thời gian chuyển trạng thái | < 500 ms | 200–400 ms | Tốt |
-| Dung lượng offline buffer | > 500 bản ghi | ~1000 bản ghi | Vượt yêu cầu |
-| Tỷ lệ gửi thành công MQTT (QoS 1) | > 99% | 99.2–99.8% | Tốt |
-| Thời gian đọc 1 PID OBD2 | < 200 ms | 100–150 ms | Tốt |
-| Thời gian kết nối BLE sau wake-up | < 5 giây | 1–3 giây | Tốt |
+| Tiêu chí                          | Giá trị thiết kế | Giá trị thực tế | Đánh giá     |
+| --------------------------------- | ---------------- | --------------- | ------------ |
+| Số task FreeRTOS đồng thời        | 5–7 task         | 6 task          | Đạt yêu cầu  |
+| Thời gian chuyển trạng thái       | < 500 ms         | 200–400 ms      | Tốt          |
+| Dung lượng offline buffer         | > 500 bản ghi    | ~1000 bản ghi   | Vượt yêu cầu |
+| Tỷ lệ gửi thành công MQTT (QoS 1) | > 99%            | 99.2–99.8%      | Tốt          |
+| Thời gian đọc 1 PID OBD2          | < 200 ms         | 100–150 ms      | Tốt          |
+| Thời gian kết nối BLE sau wake-up | < 5 giây         | 1–3 giây        | Tốt          |
 
 ### 5.1.3. Đánh giá hiệu năng hệ thống đám mây (Cloud)
 
@@ -6369,16 +6327,16 @@ Giao diện web xây dựng trên Next.js 15 với React 19 cung cấp trải ng
 
 [Bảng 5.3: Đánh giá hiệu năng tổng hợp hệ thống đám mây]
 
-| Thành phần | Tiêu chí | Giá trị đo được | Đánh giá |
-|---|---|---|---|
-| API Server | Thời gian phản hồi trung bình | 20–80 ms (đơn giản), 100–300 ms (phức tạp) | Tốt |
-| API Server | Số request đồng thời | 100–500 req/s | Đạt yêu cầu |
-| MQTT Broker | Độ trễ xử lý message | < 50 ms | Tốt |
-| WebSocket | Độ trễ end-to-end | < 2 giây | Đạt yêu cầu |
-| Frontend | First Contentful Paint | < 2 giây | Tốt |
-| Frontend | Số xe hiển thị đồng thời | 50–100 xe | Đạt yêu cầu |
-| PostgreSQL | Thời gian truy vấn có index | < 50 ms | Tốt |
-| VictoriaMetrics | Tốc độ ghi time-series | > 10.000 samples/s | Tốt |
+| Thành phần      | Tiêu chí                      | Giá trị đo được                            | Đánh giá    |
+| --------------- | ----------------------------- | ------------------------------------------ | ----------- |
+| API Server      | Thời gian phản hồi trung bình | 20–80 ms (đơn giản), 100–300 ms (phức tạp) | Tốt         |
+| API Server      | Số request đồng thời          | 100–500 req/s                              | Đạt yêu cầu |
+| MQTT Broker     | Độ trễ xử lý message          | < 50 ms                                    | Tốt         |
+| WebSocket       | Độ trễ end-to-end             | < 2 giây                                   | Đạt yêu cầu |
+| Frontend        | First Contentful Paint        | < 2 giây                                   | Tốt         |
+| Frontend        | Số xe hiển thị đồng thời      | 50–100 xe                                  | Đạt yêu cầu |
+| PostgreSQL      | Thời gian truy vấn có index   | < 50 ms                                    | Tốt         |
+| VictoriaMetrics | Tốc độ ghi time-series        | > 10.000 samples/s                         | Tốt         |
 
 ---
 
@@ -6390,27 +6348,27 @@ Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính t
 
 [Bảng 5.4: Chi phí BOM thiết bị tracker]
 
-| Linh kiện | Vai trò | Giá (VND) |
-|---|---|---|
-| ESP32-S3-WROOM-1 module | Vi điều khiển chính | 80.000–150.000 |
-| SIMCom A7670C + u-blox NEO-M8N | Modem LTE + GNSS tách rời | 330.000–500.000 |
-| vgate iCar Pro BLE | Adapter OBD2 BLE | 250.000–500.000 |
-| LIS3DH breakout board | Cảm biến gia tốc (IMU) | 30.000–50.000 |
-| Pin 21700 (1 cell, 5000mAh) | Pin dự phòng | 80.000–120.000 |
-| Mạch sạc IP2312 + boost/buck converter | Quản lý năng lượng | 50.000–100.000 |
-| PCB, vỏ hộp, dây cáp, linh kiện phụ | Cơ khí và kết nối | 130.000–260.000 |
-| **Tổng cộng** | | **870.000–1.630.000** |
+| Linh kiện                              | Vai trò                   | Giá (VND)             |
+| -------------------------------------- | ------------------------- | --------------------- |
+| ESP32-S3-WROOM-1 module                | Vi điều khiển chính       | 80.000–150.000        |
+| SIMCom SIM7600CE-T                     | Modem LTE + GNSS tích hợp | 330.000–500.000       |
+| vgate iCar Pro BLE                     | Adapter OBD2 BLE          | 250.000–500.000       |
+| LIS3DH breakout board                  | Cảm biến gia tốc (IMU)    | 30.000–50.000         |
+| Pin 21700 (1 cell, 5000mAh)            | Pin dự phòng              | 80.000–120.000        |
+| Mạch sạc IP2312 + boost/buck converter | Quản lý năng lượng        | 50.000–100.000        |
+| PCB, vỏ hộp, dây cáp, linh kiện phụ    | Cơ khí và kết nối         | 130.000–260.000       |
+| **Tổng cộng**                          |                           | **870.000–1.630.000** |
 
 So sánh với các giải pháp thương mại trên thị trường cho thấy lợi thế chi phí rõ rệt của hệ thống đề xuất:
 
 [Bảng 5.5: So sánh chi phí với giải pháp thương mại]
 
-| Giải pháp | Chi phí thiết bị | Phí dịch vụ hàng tháng | Tổng chi phí năm đầu | Khả năng tùy biến |
-|---|---|---|---|---|
-| Hệ thống đề xuất | 870.000–1.630.000 VND | ~70.000 VND (SIM 4G) | 1.710.000–2.470.000 VND | Cao (mã nguồn mở) |
-| GPS Tracker đơn giản (Việt Nam) | 500.000–1.500.000 VND | 50.000–100.000 VND | 1.100.000–2.700.000 VND | Thấp |
-| Fleet Management thương mại (quốc tế) | 5.000.000–12.500.000 VND (~$200–500 USD) | 500.000–1.250.000 VND (~$20–50 USD/tháng) | 11.000.000–27.500.000 VND | Thấp (phụ thuộc vendor) |
-| iTracking / Vietmap Tracking | 2.000.000–4.000.000 VND | 100.000–300.000 VND | 3.200.000–7.600.000 VND | Trung bình |
+| Giải pháp                             | Chi phí thiết bị                         | Phí dịch vụ hàng tháng                    | Tổng chi phí năm đầu      | Khả năng tùy biến       |
+| ------------------------------------- | ---------------------------------------- | ----------------------------------------- | ------------------------- | ----------------------- | --- |
+| Hệ thống đề xuất                      | 870.000–1.630.000 VND                    | ~70.000 VND (SIM 4G)                      | 1.710.000–2.470.000 VND   | Cao (mã nguồn mở)       |
+| GPS Tracker đơn giản (Việt Nam)       | 500.000–1.500.000 VND                    | 50.000–100.000 VND                        | 1.100.000–2.700.000 VND   | Thấp                    |
+| Fleet Management thương mại (quốc tế) | 5.000.000–12.500.000 VND (~$200–500 USD) | 500.000–1.250.000 VND (~$20–50 USD/tháng) | 11.000.000–27.500.000 VND | Thấp (phụ thuộc vendor) |     |
+| iTracking / Vietmap Tracking          | 2.000.000–4.000.000 VND                  | 100.000–300.000 VND                       | 3.200.000–7.600.000 VND   | Trung bình              |
 
 Như vậy, chi phí tổng thể của hệ thống đề xuất chỉ bằng khoảng 10–20% so với giải pháp fleet management thương mại quốc tế, và tương đương hoặc thấp hơn so với giải pháp GPS tracker đơn giản nhưng cung cấp nhiều tính năng hơn (OBD2, cảnh báo thông minh, quản lý năng lượng).
 
@@ -6420,11 +6378,11 @@ Chi phí vận hành hạ tầng đám mây phụ thuộc vào quy mô đội xe
 
 [Bảng 5.6: Chi phí hạ tầng đám mây theo quy mô]
 
-| Quy mô đội xe | Cấu hình VPS | Chi phí VPS/tháng | Chi phí SIM 4G/tháng (tổng) | Tổng chi phí vận hành/tháng |
-|---|---|---|---|---|
-| 10–30 xe | 2 vCPU, 4GB RAM, 80GB SSD | ~250.000 VND (~$10 USD) | 700.000–2.100.000 VND | 950.000–2.350.000 VND |
-| 30–100 xe | 4 vCPU, 8GB RAM, 160GB SSD | ~500.000 VND (~$20 USD) | 2.100.000–7.000.000 VND | 2.600.000–7.500.000 VND |
-| 100–500 xe | Kubernetes cluster (3 node) | ~2.500.000 VND (~$100 USD) | 7.000.000–35.000.000 VND | 9.500.000–37.500.000 VND |
+| Quy mô đội xe | Cấu hình VPS                | Chi phí VPS/tháng          | Chi phí SIM 4G/tháng (tổng) | Tổng chi phí vận hành/tháng |
+| ------------- | --------------------------- | -------------------------- | --------------------------- | --------------------------- |
+| 10–30 xe      | 2 vCPU, 4GB RAM, 80GB SSD   | ~250.000 VND (~$10 USD)    | 700.000–2.100.000 VND       | 950.000–2.350.000 VND       |
+| 30–100 xe     | 4 vCPU, 8GB RAM, 160GB SSD  | ~500.000 VND (~$20 USD)    | 2.100.000–7.000.000 VND     | 2.600.000–7.500.000 VND     |
+| 100–500 xe    | Kubernetes cluster (3 node) | ~2.500.000 VND (~$100 USD) | 7.000.000–35.000.000 VND    | 9.500.000–37.500.000 VND    |
 
 ### 5.2.3. Lợi thế từ công nghệ mã nguồn mở
 
@@ -6458,26 +6416,26 @@ Hệ thống được thiết kế với ý thức tối ưu hóa tiêu thụ n�
 
 [Bảng 5.7: Thang đo xác suất và tác động]
 
-| Mức độ | Xác suất | Tác động |
-|---|---|---|
-| 1 - Rất thấp | < 5% | Ảnh hưởng không đáng kể, hệ thống vẫn hoạt động bình thường |
-| 2 - Thấp | 5–15% | Ảnh hưởng nhỏ, có thể khắc phục nhanh |
-| 3 - Trung bình | 15–30% | Ảnh hưởng vừa phải, cần xử lý trong thời gian ngắn |
-| 4 - Cao | 30–50% | Ảnh hưởng lớn, có thể làm gián đoạn dịch vụ |
-| 5 - Rất cao | > 50% | Ảnh hưởng nghiêm trọng, có thể làm tê liệt hệ thống |
+| Mức độ         | Xác suất | Tác động                                                    |
+| -------------- | -------- | ----------------------------------------------------------- |
+| 1 - Rất thấp   | < 5%     | Ảnh hưởng không đáng kể, hệ thống vẫn hoạt động bình thường |
+| 2 - Thấp       | 5–15%    | Ảnh hưởng nhỏ, có thể khắc phục nhanh                       |
+| 3 - Trung bình | 15–30%   | Ảnh hưởng vừa phải, cần xử lý trong thời gian ngắn          |
+| 4 - Cao        | 30–50%   | Ảnh hưởng lớn, có thể làm gián đoạn dịch vụ                 |
+| 5 - Rất cao    | > 50%    | Ảnh hưởng nghiêm trọng, có thể làm tê liệt hệ thống         |
 
 [Bảng 5.8: Ma trận đánh giá rủi ro và biện pháp giảm thiểu]
 
-| ID | Rủi ro | Xác suất | Tác động | Mức độ rủi ro | Biện pháp giảm thiểu | Trạng thái |
-|---|---|---|---|---|---|---|
-| R1 | Mất sóng 4G/LTE tại khu vực nông thôn, vùng sâu | 4 - Cao | 3 - Trung bình | **Cao** | Offline buffering trên flash, tự động đồng bộ khi có sóng, GPS cache vị trí cuối | Đã triển khai |
-| R2 | Không tương thích BLE OBD2 với một số dòng xe | 2 - Thấp | 3 - Trung bình | **Trung bình** | Sử dụng vgate iCar Pro (tương thích rộng), hỗ trợ nhiều giao thức OBD2 (ISO 15765, ISO 14230, J1850) | Đã giảm thiểu |
-| R3 | Quá tải MQTT broker khi số lượng thiết bị tăng cao | 2 - Thấp | 4 - Cao | **Trung bình** | EMQX hỗ trợ clustering, có thể mở rộng theo chiều ngang, Rules Engine phân tải xử lý | Có phương án |
-| R4 | Tấn công bảo mật (giả mạo thiết bị, chiếm quyền truy cập) | 3 - Trung bình | 5 - Rất cao | **Cao** | Session-based auth với SHA-256, MQTT ACL per device, HTTPS/TLS, Zod input validation, rate limiting | Đã triển khai cơ bản |
-| R5 | Mất dữ liệu trong thời gian mất kết nối mạng kéo dài | 3 - Trung bình | 4 - Cao | **Cao** | Flash storage buffer (~1000 bản ghi), cơ chế retry với exponential backoff, QoS 1 đảm bảo delivery | Đã triển khai |
-| R6 | Hư hỏng phần cứng do nhiệt độ cực đoan (xe đỗ ngoài nắng) | 2 - Thấp | 4 - Cao | **Trung bình** | ESP32-S3 hoạt động -40 đến 85°C, thiết kế tản nhiệt, đặt thiết bị trong vị trí mát, cảnh báo nhiệt độ | Thiết kế có tính đến |
-| R7 | Cạn ắc quy xe do thiết bị hoạt động liên tục | 2 - Thấp | 5 - Rất cao | **Cao** | Mạch switch profile chuyển sang pin dự phòng: 12V (OFF=12.0V, ON=12.2V), 24V (OFF=24.0V, ON=24.4V), deep sleep 10–15 μA, pin dự phòng 21700 | Đã triển khai |
-| R8 | Lỗi firmware gây treo hệ thống (firmware hang) | 3 - Trung bình | 4 - Cao | **Cao** | Watchdog timer (cần triển khai), FreeRTOS task monitoring, OTA update từ xa | Triển khai một phần |
+| ID  | Rủi ro                                                    | Xác suất       | Tác động       | Mức độ rủi ro  | Biện pháp giảm thiểu                                                                                                                        | Trạng thái           |
+| --- | --------------------------------------------------------- | -------------- | -------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| R1  | Mất sóng 4G/LTE tại khu vực nông thôn, vùng sâu           | 4 - Cao        | 3 - Trung bình | **Cao**        | Offline buffering trên flash, tự động đồng bộ khi có sóng, GPS cache vị trí cuối                                                            | Đã triển khai        |
+| R2  | Không tương thích BLE OBD2 với một số dòng xe             | 2 - Thấp       | 3 - Trung bình | **Trung bình** | Sử dụng vgate iCar Pro (tương thích rộng), hỗ trợ nhiều giao thức OBD2 (ISO 15765, ISO 14230, J1850)                                        | Đã giảm thiểu        |
+| R3  | Quá tải MQTT broker khi số lượng thiết bị tăng cao        | 2 - Thấp       | 4 - Cao        | **Trung bình** | EMQX hỗ trợ clustering, có thể mở rộng theo chiều ngang, Rules Engine phân tải xử lý                                                        | Có phương án         |
+| R4  | Tấn công bảo mật (giả mạo thiết bị, chiếm quyền truy cập) | 3 - Trung bình | 5 - Rất cao    | **Cao**        | Session-based auth với SHA-256, MQTT ACL per device, HTTPS/TLS, Zod input validation, rate limiting                                         | Đã triển khai cơ bản |
+| R5  | Mất dữ liệu trong thời gian mất kết nối mạng kéo dài      | 3 - Trung bình | 4 - Cao        | **Cao**        | Flash storage buffer (~1000 bản ghi), cơ chế retry với exponential backoff, QoS 1 đảm bảo delivery                                          | Đã triển khai        |
+| R6  | Hư hỏng phần cứng do nhiệt độ cực đoan (xe đỗ ngoài nắng) | 2 - Thấp       | 4 - Cao        | **Trung bình** | ESP32-S3 hoạt động -40 đến 85°C, thiết kế tản nhiệt, đặt thiết bị trong vị trí mát, cảnh báo nhiệt độ                                       | Thiết kế có tính đến |
+| R7  | Cạn ắc quy xe do thiết bị hoạt động liên tục              | 2 - Thấp       | 5 - Rất cao    | **Cao**        | Mạch switch profile chuyển sang pin dự phòng: 12V (OFF=12.0V, ON=12.2V), 24V (OFF=24.0V, ON=24.4V), deep sleep 10–15 μA, pin dự phòng 21700 | Đã triển khai        |
+| R8  | Lỗi firmware gây treo hệ thống (firmware hang)            | 3 - Trung bình | 4 - Cao        | **Cao**        | Watchdog timer (cần triển khai), FreeRTOS task monitoring, OTA update từ xa                                                                 | Triển khai một phần  |
 
 ### 5.3.2. Phân tích chi tiết các rủi ro chính
 
@@ -6497,13 +6455,13 @@ Bảo mật là rủi ro có tác động nghiêm trọng nhất. Hệ thống �
 
 [Bảng 5.9: Tổng hợp mức độ rủi ro theo phân loại]
 
-| Phân loại | Số rủi ro | Mức cao | Mức trung bình | Mức thấp |
-|---|---|---|---|---|
-| Kết nối và truyền thông | 3 (R1, R3, R5) | 2 | 1 | 0 |
-| Bảo mật | 1 (R4) | 1 | 0 | 0 |
-| Phần cứng | 3 (R2, R6, R7) | 1 | 2 | 0 |
-| Firmware | 1 (R8) | 1 | 0 | 0 |
-| **Tổng cộng** | **8** | **5** | **3** | **0** |
+| Phân loại               | Số rủi ro      | Mức cao | Mức trung bình | Mức thấp |
+| ----------------------- | -------------- | ------- | -------------- | -------- |
+| Kết nối và truyền thông | 3 (R1, R3, R5) | 2       | 1              | 0        |
+| Bảo mật                 | 1 (R4)         | 1       | 0              | 0        |
+| Phần cứng               | 3 (R2, R6, R7) | 1       | 2              | 0        |
+| Firmware                | 1 (R8)         | 1       | 0              | 0        |
+| **Tổng cộng**           | **8**          | **5**   | **3**          | **0**    |
 
 Kết quả cho thấy 5/8 rủi ro ở mức cao; tuy nhiên, phần lớn đã có biện pháp giảm thiểu được triển khai hoặc đã có phương án xử lý. Các rủi ro cần ưu tiên xử lý tiếp theo là R4 (bảo mật nâng cao) và R8 (watchdog timer và OTA update).
 
@@ -6576,14 +6534,14 @@ Phiên bản phần cứng hiện tại sử dụng module rời (breakout board
 
 [Bảng 5.10: Lộ trình phát triển khuyến nghị]
 
-| Giai đoạn | Thời gian | Nội dung chính | Ưu tiên |
-|---|---|---|---|
-| Phase 1.5 - Bảo mật | 1–2 tháng | TLS cho MQTT, device certificate, watchdog timer, security logging | Cao |
-| Phase 2 - Mở rộng tính năng | 2–4 tháng | Bookings, payments, damage reports, reviews, mobile app | Cao |
-| Phase 2.5 - Tối ưu hóa | 1–2 tháng | Redis caching, query optimization, connection pooling, health checks | Trung bình |
-| Phase 3 - AI/ML | 3–6 tháng | Driving behavior analysis, predictive maintenance, anomaly detection | Trung bình |
-| Phase 4 - Production | 2–3 tháng | Kubernetes, CI/CD, monitoring, TLS everywhere | Cao |
-| Phase 5 - Hardware v2 | 4–6 tháng | Custom PCB, vỏ hộp công nghiệp, sản xuất hàng loạt | Thấp (tùy nhu cầu) |
+| Giai đoạn                   | Thời gian | Nội dung chính                                                       | Ưu tiên            |
+| --------------------------- | --------- | -------------------------------------------------------------------- | ------------------ |
+| Phase 1.5 - Bảo mật         | 1–2 tháng | TLS cho MQTT, device certificate, watchdog timer, security logging   | Cao                |
+| Phase 2 - Mở rộng tính năng | 2–4 tháng | Bookings, payments, damage reports, reviews, mobile app              | Cao                |
+| Phase 2.5 - Tối ưu hóa      | 1–2 tháng | Redis caching, query optimization, connection pooling, health checks | Trung bình         |
+| Phase 3 - AI/ML             | 3–6 tháng | Driving behavior analysis, predictive maintenance, anomaly detection | Trung bình         |
+| Phase 4 - Production        | 2–3 tháng | Kubernetes, CI/CD, monitoring, TLS everywhere                        | Cao                |
+| Phase 5 - Hardware v2       | 4–6 tháng | Custom PCB, vỏ hộp công nghiệp, sản xuất hàng loạt                   | Thấp (tùy nhu cầu) |
 
 ---
 
@@ -6603,7 +6561,7 @@ Kiến thức về vi xử lý và vi điều khiển đóng vai trò cốt lõi
 
 - **Lập trình ESP32-S3**: Áp dụng kiến thức về kiến trúc Xtensa LX7 dual-core, thanh ghi, bộ nhớ và tập lệnh để lập trình firmware trên nền tảng ESP-IDF. Việc hiểu rõ kiến trúc phần cứng của MCU giúp tối ưu hóa hiệu suất và tiêu thụ năng lượng.
 - **FreeRTOS đa nhiệm (multitasking)**: Sử dụng kiến thức về hệ điều hành thời gian thực để thiết kế các task đồng thời: task đọc dữ liệu OBD2 qua BLE, task gửi dữ liệu MQTT qua modem UART, task đọc cảm biến IMU, và task quản lý năng lượng. Việc phân chia task và quản lý mutex/semaphore là kỹ năng trực tiếp từ môn Vi xử lý nâng cao.
-- **Giao tiếp ngoại vi GPIO/ADC/UART/I2C/SPI**: Cấu hình và sử dụng các giao diện ngoại vi để giao tiếp với modem A7670C (UART), module GNSS NEO-M8N (UART), cảm biến LIS3DH (SPI/I2C), đọc điện áp ắc quy (ADC), và điều khiển relay nguồn (GPIO). Đây là những kỹ năng cơ bản được rèn luyện trong các bài thực hành vi điều khiển.
+- **Giao tiếp ngoại vi GPIO/ADC/UART/I2C/SPI**: Cấu hình và sử dụng các giao diện ngoại vi để giao tiếp với modem SIM7600CE-T (UART, tích hợp LTE + GNSS), cảm biến LIS3DH (SPI/I2C), đọc điện áp ắc quy (ADC), và điều khiển relay nguồn (GPIO). Đây là những kỹ năng cơ bản được rèn luyện trong các bài thực hành vi điều khiển.
 
 ### 6.1.2. Mạng máy tính và IoT
 
@@ -6666,9 +6624,9 @@ Việc kết nối và giao tiếp với OBD2 adapter vgate iCar Pro qua Bluetoo
 
 **Cách giải quyết:**
 
-1. *Nghiên cứu và khảo sát*: Phân tích mã nguồn của các dự án mã nguồn mở tương tự (esp32-obd2-meter, python-OBD), nghiên cứu tài liệu ISO 15765–2, và sử dụng ứng dụng nRF Connect để bắt và phân tích các bản tin BLE giữa điện thoại và vgate iCar Pro.
-2. *Thiết kế lớp trừu tượng*: Xây dựng module phân tích OBD2 với khả năng xử lý cả bản tin đơn khung (single-frame) và đa khung (multi-frame), bao gồm Flow Control frames và Consecutive Frames theo chuẩn ISO-TP.
-3. *Kiểm thử lặp đi lặp lại*: Tạo bộ test với các PID OBD2 phổ biến (Mode 01: RPM, Speed, Coolant Temp, Fuel Level) và các lệnh multi-frame (Mode 03: DTC, Mode 09: VIN) để đảm bảo tính chính xác.
+1. _Nghiên cứu và khảo sát_: Phân tích mã nguồn của các dự án mã nguồn mở tương tự (esp32-obd2-meter, python-OBD), nghiên cứu tài liệu ISO 15765–2, và sử dụng ứng dụng nRF Connect để bắt và phân tích các bản tin BLE giữa điện thoại và vgate iCar Pro.
+2. _Thiết kế lớp trừu tượng_: Xây dựng module phân tích OBD2 với khả năng xử lý cả bản tin đơn khung (single-frame) và đa khung (multi-frame), bao gồm Flow Control frames và Consecutive Frames theo chuẩn ISO-TP.
+3. _Kiểm thử lặp đi lặp lại_: Tạo bộ test với các PID OBD2 phổ biến (Mode 01: RPM, Speed, Coolant Temp, Fuel Level) và các lệnh multi-frame (Mode 03: DTC, Mode 09: VIN) để đảm bảo tính chính xác.
 
 **Bài học rút ra:** Khi làm việc với thiết bị bên thứ ba không có tài liệu rõ ràng, việc kết hợp reverse engineering, tham khảo nhiều nguồn, và kiểm thử kỹ lưỡng là phương pháp hiệu quả nhất.
 
@@ -6677,15 +6635,16 @@ Việc kết nối và giao tiếp với OBD2 adapter vgate iCar Pro qua Bluetoo
 **Mô tả vấn đề:**
 
 Hệ thống cần xử lý luồng dữ liệu telemetry liên tục từ nhiều thiết bị IoT (GPS, OBD2, IMU) với các yêu cầu:
+
 - Dữ liệu phải được ghi đồng thời vào hai hệ thống lưu trữ khác nhau: VictoriaMetrics (time-series) và PostgreSQL (relational), tạo ra bài toán ghi kép (dual-write).
 - Khi mất kết nối mạng 4G, thiết bị phải lưu trữ dữ liệu tạm thời (offline buffering) và đồng bộ lại khi kết nối phục hồi, đảm bảo không mất dữ liệu.
 - MQTT QoS cần được cấu hình phù hợp cho từng loại dữ liệu: QoS 0 cho telemetry tần suất cao (chấp nhận mất một vài điểm dữ liệu), QoS 1 cho cảnh báo và lệnh điều khiển (đảm bảo gửi ít nhất một lần).
 
 **Cách giải quyết:**
 
-1. *MQTT Bridge Service độc lập*: Thiết kế dịch vụ Tracking_MqttBridge làm trung gian giữa EMQX broker và các hệ thống lưu trữ. Bridge service subscribe các topic telemetry và phân luồng dữ liệu đến VictoriaMetrics và PostgreSQL thông qua các queue nội bộ.
-2. *Offline buffering trên thiết bị*: Hiện thực cơ chế lưu trữ dữ liệu vào SPIFFS/LittleFS trên ESP32-S3 khi mất kết nối MQTT, với cơ chế FIFO (First-In-First-Out) và giới hạn dung lượng. Khi kết nối phục hồi, dữ liệu được gửi lần lượt với rate limiting để tránh quá tải server.
-3. *QoS phân tầng*: Áp dụng QoS 0 cho dữ liệu vị trí GPS tần suất cao (5–30 giây), QoS 1 cho cảnh báo và sự kiện quan trọng, đảm bảo cân bằng giữa hiệu suất và độ tin cậy.
+1. _MQTT Bridge Service độc lập_: Thiết kế dịch vụ Tracking_MqttBridge làm trung gian giữa EMQX broker và các hệ thống lưu trữ. Bridge service subscribe các topic telemetry và phân luồng dữ liệu đến VictoriaMetrics và PostgreSQL thông qua các queue nội bộ.
+2. _Offline buffering trên thiết bị_: Hiện thực cơ chế lưu trữ dữ liệu vào SPIFFS/LittleFS trên ESP32-S3 khi mất kết nối MQTT, với cơ chế FIFO (First-In-First-Out) và giới hạn dung lượng. Khi kết nối phục hồi, dữ liệu được gửi lần lượt với rate limiting để tránh quá tải server.
+3. _QoS phân tầng_: Áp dụng QoS 0 cho dữ liệu vị trí GPS tần suất cao (5–30 giây), QoS 1 cho cảnh báo và sự kiện quan trọng, đảm bảo cân bằng giữa hiệu suất và độ tin cậy.
 
 **Bài học rút ra:** Thiết kế đường ống dữ liệu cần xem xét tất cả các trường hợp thất bại (mất mạng, server quá tải, dữ liệu bất đồng bộ) từ giai đoạn thiết kế, không để đến giai đoạn tích hợp mới xử lý.
 
@@ -6694,16 +6653,17 @@ Hệ thống cần xử lý luồng dữ liệu telemetry liên tục từ nhi�
 **Mô tả vấn đề:**
 
 Hệ thống phần cứng phải hoạt động với hai nguồn năng lượng có đặc tính rất khác nhau:
+
 - Ắc quy xe 12V hoặc 24V DC (dao động tùy trạng thái sạc và tải), là nguồn chính khi xe hoạt động.
 - Pin dự phòng 21700 Li-ion 3.7V (dao động 2.8V - 4.2V), là nguồn dùng khi ắc quy xe bị ngắt hoặc điện áp quá thấp.
 - Việc chuyển đổi giữa hai nguồn phải diễn ra liền mạch (seamless switching), không được gây mất điện cho MCU, tránh reset hoặc mất dữ liệu.
 
 **Cách giải quyết:**
 
-1. *Power path management*: Thiết kế mạch power path sử dụng MOSFET và diode Schottky để tự động chuyển đổi giữa nguồn ắc quy xe và pin dự phòng theo profile kép 12V/24V. Hệ thống dùng ngưỡng Switch_OFF/Switch_ON riêng cho từng profile: 12V (12.0V/12.2V), 24V (24.0V/24.4V).
-2. *Low Voltage Disconnect (LVD)*: Hiện thực mạch LVD sử dụng op-amp comparator và MOSFET để ngắt tải khỏi ắc quy xe tại ngưỡng cắt sâu theo profile: 11.5V (12V) hoặc 23.0V (24V), bảo vệ ắc quy không bị rút cạn quá mức và đảm bảo xe vẫn khởi động được.
-3. *Bộ sạc pin dự phòng*: Tích hợp IC sạc IP2312 để sạc pin 21700 từ nguồn xe khi xe đang chạy, đảm bảo pin dự phòng luôn ở trạng thái sẵn sàng.
-4. *Giám sát điện áp bằng firmware*: Đọc điện áp ắc quy và pin dự phòng liên tục qua ADC, gửi thông tin về server để giám sát trạng thái năng lượng từ xa, cảnh báo khi pin yếu.
+1. _Power path management_: Thiết kế mạch power path sử dụng MOSFET và diode Schottky để tự động chuyển đổi giữa nguồn ắc quy xe và pin dự phòng theo profile kép 12V/24V. Hệ thống dùng ngưỡng Switch_OFF/Switch_ON riêng cho từng profile: 12V (12.0V/12.2V), 24V (24.0V/24.4V).
+2. _Low Voltage Disconnect (LVD)_: Hiện thực mạch LVD sử dụng op-amp comparator và MOSFET để ngắt tải khỏi ắc quy xe tại ngưỡng cắt sâu theo profile: 11.5V (12V) hoặc 23.0V (24V), bảo vệ ắc quy không bị rút cạn quá mức và đảm bảo xe vẫn khởi động được.
+3. _Bộ sạc pin dự phòng_: Tích hợp IC sạc IP2312 để sạc pin 21700 từ nguồn xe khi xe đang chạy, đảm bảo pin dự phòng luôn ở trạng thái sẵn sàng.
+4. _Giám sát điện áp bằng firmware_: Đọc điện áp ắc quy và pin dự phòng liên tục qua ADC, gửi thông tin về server để giám sát trạng thái năng lượng từ xa, cảnh báo khi pin yếu.
 
 **Bài học rút ra:** Thiết kế hệ thống năng lượng cho IoT trong môi trường ô tô cần xem xét toàn diện: điện áp dao động, chuyển đổi nguồn liền mạch, bảo vệ ắc quy, và giám sát từ xa. Mỗi yếu tố ảnh hưởng trực tiếp đến độ tin cậy của toàn hệ thống.
 
@@ -6712,16 +6672,17 @@ Hệ thống phần cứng phải hoạt động với hai nguồn năng lượn
 **Mô tả vấn đề:**
 
 Hệ thống cần xử lý dữ liệu từ nhiều thiết bị đồng thời, cung cấp giao diện thời gian thực cho nhiều người dùng, và đảm bảo bảo mật:
+
 - Mỗi thiết bị có MQTT topic riêng (e.g., `devices/{device_id}/telemetry`), cần có ACL phân quyền để thiết bị chỉ được publish/subscribe trên topic của mình.
 - Nhiều người dùng có thể xem cùng một xe trên dashboard, tạo ra nhiều kết nối WebSocket đồng thời cần được quản lý.
 - Session management phải an toàn (token hash SHA-256 lưu trong database) nhưng không gây bottle-neck khi số lượng request lớn.
 
 **Cách giải quyết:**
 
-1. *MQTT ACL per device*: Cấu hình EMQX ACL rules để mỗi thiết bị chỉ được publish lên topic của mình, ngăn chặn việc giả mạo dữ liệu từ thiết bị khác. Sử dụng EMQX built-in authentication với username/password riêng cho từng thiết bị.
-2. *WebSocket room-based architecture*: Sử dụng Socket.IO rooms để nhóm các client theo vehicle_id. Khi có dữ liệu telemetry mới cho một xe, server chỉ broadcast đến room tương ứng, giảm tải truyền dữ liệu không cần thiết.
-3. *Session-based authentication*: Sử dụng database-backed session tokens (SHA-256 hashed) thay vì JWT để có khả năng thu hồi phiên (session revocation) ngay lập tức. Kết hợp với Redis cache (dự kiến Phase 2) để giảm tải truy vấn database cho việc xác thực.
-4. *Per-service Docker Compose*: Mỗi dịch vụ (Backend, Frontend, MQTT Bridge, PostgreSQL, EMQX, VictoriaMetrics) có docker-compose.yml riêng, chia sẻ mạng `tracking-network`. Kiến trúc này cho phép mở rộng (scale) từng dịch vụ độc lập theo nhu cầu.
+1. _MQTT ACL per device_: Cấu hình EMQX ACL rules để mỗi thiết bị chỉ được publish lên topic của mình, ngăn chặn việc giả mạo dữ liệu từ thiết bị khác. Sử dụng EMQX built-in authentication với username/password riêng cho từng thiết bị.
+2. _WebSocket room-based architecture_: Sử dụng Socket.IO rooms để nhóm các client theo vehicle_id. Khi có dữ liệu telemetry mới cho một xe, server chỉ broadcast đến room tương ứng, giảm tải truyền dữ liệu không cần thiết.
+3. _Session-based authentication_: Sử dụng database-backed session tokens (SHA-256 hashed) thay vì JWT để có khả năng thu hồi phiên (session revocation) ngay lập tức. Kết hợp với Redis cache (dự kiến Phase 2) để giảm tải truy vấn database cho việc xác thực.
+4. _Per-service Docker Compose_: Mỗi dịch vụ (Backend, Frontend, MQTT Bridge, PostgreSQL, EMQX, VictoriaMetrics) có docker-compose.yml riêng, chia sẻ mạng `tracking-network`. Kiến trúc này cho phép mở rộng (scale) từng dịch vụ độc lập theo nhu cầu.
 
 **Bài học rút ra:** Kiến trúc đám mây cho IoT cần được thiết kế từ đầu với khả năng mở rộng theo chiều ngang (horizontal scaling). Việc tách biệt các dịch vụ (separation of concerns) và sử dụng per-device ACL là nền tảng cho bảo mật và quản lý đội xe quy mô lớn.
 
@@ -6735,15 +6696,16 @@ Hệ thống theo dõi phương tiện liên tục thu thập dữ liệu vị t
 
 **Các biện pháp bảo vệ quyền riêng tư đã được áp dụng:**
 
-| STT | Biện pháp | Mô tả chi tiết |
-|-----|-----------|----------------|
-| 1 | Mã hóa dữ liệu truyền tải | Dữ liệu MQTT được mã hóa TLS trong môi trường production, ngăn chặn nghe lén (eavesdropping) trên đường truyền |
-| 2 | Phân quyền truy cập (RBAC) | Hệ thống phân quyền theo vai trò (admin, manager, viewer), chỉ những người có quyền mới xem được dữ liệu cụ thể |
-| 3 | Chính sách lưu trữ dữ liệu | Dữ liệu telemetry được lưu trữ có thời hạn (retention policy), tự động xóa sau 90 ngày để giảm rủi ro lộ lọt dữ liệu |
-| 4 | Session-based authentication | Token xác thực được hash SHA-256, lưu trữ trong database, có khả năng thu hồi ngay lập tức khi cần |
-| 5 | MQTT ACL per device | Mỗi thiết bị chỉ truy cập được dữ liệu của mình, ngăn chặn truy cập trái phép dữ liệu thiết bị khác |
+| STT | Biện pháp                    | Mô tả chi tiết                                                                                                       |
+| --- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 1   | Mã hóa dữ liệu truyền tải    | Dữ liệu MQTT được mã hóa TLS trong môi trường production, ngăn chặn nghe lén (eavesdropping) trên đường truyền       |
+| 2   | Phân quyền truy cập (RBAC)   | Hệ thống phân quyền theo vai trò (admin, manager, viewer), chỉ những người có quyền mới xem được dữ liệu cụ thể      |
+| 3   | Chính sách lưu trữ dữ liệu   | Dữ liệu telemetry được lưu trữ có thời hạn (retention policy), tự động xóa sau 90 ngày để giảm rủi ro lộ lọt dữ liệu |
+| 4   | Session-based authentication | Token xác thực được hash SHA-256, lưu trữ trong database, có khả năng thu hồi ngay lập tức khi cần                   |
+| 5   | MQTT ACL per device          | Mỗi thiết bị chỉ truy cập được dữ liệu của mình, ngăn chặn truy cập trái phép dữ liệu thiết bị khác                  |
 
 **Khuyến nghị bổ sung (chưa hiện thực):**
+
 - Thông báo rõ ràng cho người thuê xe về việc xe được giám sát (transparency).
 - Cho phép người thuê xe xem dữ liệu của mình (data access rights).
 - Tuân thủ Luật An toàn thông tin mạng Việt Nam (Luật số 24/2018/QH14) và các quy định về bảo vệ dữ liệu cá nhân.
@@ -6763,14 +6725,17 @@ Việc truy cập hệ thống OBD2 của xe đặt ra câu hỏi về an toàn 
 Hệ thống IoT giám sát phương tiện mang lại nhiều tác động tích cực cho xã hội:
 
 **Hỗ trợ doanh nghiệp nhỏ và vừa:**
+
 - Cung cấp giải pháp quản lý đội xe với chi phí hợp lý (dưới 2.000.000 VND/thiết bị, chi phí 4G khoảng 70.000 VND/tháng), giúp các doanh nghiệp cho thuê xe nhỏ có thể tiếp cận công nghệ giám sát mà trước đây chỉ dành cho các công ty lớn.
 - Giảm thiệt hại do mất trộm, sử dụng sai mục đích, và hư hỏng thiết bị nhờ phát hiện sớm.
 
 **Giảm tai nạn giao thông:**
+
 - Giám sát tốc độ và hành vi lái xe (phanh gấp, tăng tốc đột ngột) giúp nhận diện và cảnh báo các hành vi lái xe nguy hiểm.
 - Cảnh báo geofencing giúp đảm bảo xe hoạt động trong phạm vi an toàn đã thỏa thuận.
 
 **Tối ưu hóa nhiên liệu và giảm phát thải:**
+
 - Phân tích dữ liệu OBD2 (tiêu hao nhiên liệu, RPM, tốc độ) giúp đánh giá hiệu suất sử dụng nhiên liệu.
 - Dữ liệu hành trình giúp tối ưu hóa tuyến đường, giảm quãng đường chạy không tải, giảm phát thải CO2.
 
@@ -6796,12 +6761,12 @@ Cách làm này giúp giảm đáng kể thời gian sửa lỗi tích hợp và
 
 Dự án cho thấy độ phức tạp của một hệ thống IoT toàn diện (end-to-end) vượt xa so với một ứng dụng web thông thường. Hệ thống bao gồm bốn tầng công nghệ hoàn toàn khác nhau:
 
-| Tầng | Ngôn ngữ / Công nghệ | Thách thức chính |
-|------|----------------------|-----------------|
-| Phần cứng | Thiết kế mạch, PCB layout | Nhiều lỗi, khó debug, cần oscilloscope |
-| Firmware | C/C++ (ESP-IDF), FreeRTOS | Quản lý bộ nhớ, timing, concurrency |
-| Backend | TypeScript (Express.js) | Thiết kế API, xử lý dữ liệu lớn, bảo mật |
-| Frontend | TypeScript (Next.js, React) | State management, real-time updates, UX |
+| Tầng      | Ngôn ngữ / Công nghệ        | Thách thức chính                         |
+| --------- | --------------------------- | ---------------------------------------- |
+| Phần cứng | Thiết kế mạch, PCB layout   | Nhiều lỗi, khó debug, cần oscilloscope   |
+| Firmware  | C/C++ (ESP-IDF), FreeRTOS   | Quản lý bộ nhớ, timing, concurrency      |
+| Backend   | TypeScript (Express.js)     | Thiết kế API, xử lý dữ liệu lớn, bảo mật |
+| Frontend  | TypeScript (Next.js, React) | State management, real-time updates, UX  |
 
 Mỗi tầng đòi hỏi kỹ năng chuyên môn khác nhau, và việc tích hợp giữa các tầng là nơi xuất hiện nhiều lỗi nhất. Bài học rút ra là: khi làm việc với hệ thống đa tầng, cần có các bài kiểm thử tích hợp (integration tests) sớm, không đợi đến khi toàn bộ các tầng hoàn thành mới kiểm thử.
 
@@ -6845,7 +6810,7 @@ Chương này đã tổng hợp quá trình vận dụng kiến thức kỹ thu�
 
 ## Tài liệu tham khảo Chương 6
 
-[1] B. Boehm and V. R. Basili, "Software Defect Reduction Top 10 List," *IEEE Computer*, vol. 34, no. 1, pp. 135–137, 2001.
+[1] B. Boehm and V. R. Basili, "Software Defect Reduction Top 10 List," _IEEE Computer_, vol. 34, no. 1, pp. 135–137, 2001.
 
 ﻿# TÀI LIỆU TRÍCH DẪN - REFERENCES
 
@@ -6855,7 +6820,7 @@ Chương này đã tổng hợp quá trình vận dụng kiến thức kỹ thu�
 
 [1] Bộ Giao thông Vận tải, "Báo cáo thống kê phương tiện giao thông đường bộ Việt Nam giai đoạn 2020–2025," Hà Nội, 2024.
 
-[2] Nguyễn Văn A và Trần Thị B, "Ứng dụng Internet vạn vật trong giám sát và quản lý phương tiện giao thông tại Việt Nam," *Tạp chí Khoa học và Công nghệ*, tập 58, số 3, trang 45–52, 2023.
+[2] Nguyễn Văn A và Trần Thị B, "Ứng dụng Internet vạn vật trong giám sát và quản lý phương tiện giao thông tại Việt Nam," _Tạp chí Khoa học và Công nghệ_, tập 58, số 3, trang 45–52, 2023.
 
 [3] Lê Minh C, "Thiết kế hệ thống định vị và theo dõi phương tiện sử dụng GPS và mạng di động," Luận văn thạc sĩ, Đại học Bách Khoa TP. Hồ Chí Minh, 2022.
 
@@ -6865,33 +6830,33 @@ Chương này đã tổng hợp quá trình vận dụng kiến thức kỹ thu�
 
 ## [B] Tài liệu tiếng Anh (Books & Papers)
 
-[5] A. Al-Fuqaha, M. Guizani, M. Mohammadi, M. Aledhari, and M. Ayyash, "Internet of Things: A Survey on Enabling Technologies, Protocols, and Applications," *IEEE Communications Surveys & Tutorials*, vol. 17, no. 4, pp. 2347–2376, Fourth Quarter 2015.
+[5] A. Al-Fuqaha, M. Guizani, M. Mohammadi, M. Aledhari, and M. Ayyash, "Internet of Things: A Survey on Enabling Technologies, Protocols, and Applications," _IEEE Communications Surveys & Tutorials_, vol. 17, no. 4, pp. 2347–2376, Fourth Quarter 2015.
 
-[6] N. Naik, "Choice of Effective Messaging Protocols for IoT Systems: MQTT, CoAP, AMQP and HTTP," in *Proc. 2017 IEEE International Systems Engineering Symposium (ISSE)*, Vienna, Austria, 2017, pp. 1–7.
+[6] N. Naik, "Choice of Effective Messaging Protocols for IoT Systems: MQTT, CoAP, AMQP and HTTP," in _Proc. 2017 IEEE International Systems Engineering Symposium (ISSE)_, Vienna, Austria, 2017, pp. 1–7.
 
-[7] M. Quigley, R. Johnson, and P. Sharma, "Power Management Strategies for IoT Vehicle Tracking Devices," *IEEE Internet of Things Journal*, vol. 8, no. 15, pp. 12045–12058, Aug. 2021.
+[7] M. Quigley, R. Johnson, and P. Sharma, "Power Management Strategies for IoT Vehicle Tracking Devices," _IEEE Internet of Things Journal_, vol. 8, no. 15, pp. 12045–12058, Aug. 2021.
 
-[8] M. A. Al-Khedher, "Hybrid GPS-GSM Localization of Automobile Tracking System," *International Journal of Computer Science and Information Technology (IJCSIT)*, vol. 3, no. 6, pp. 75–85, Dec. 2011.
+[8] M. A. Al-Khedher, "Hybrid GPS-GSM Localization of Automobile Tracking System," _International Journal of Computer Science and Information Technology (IJCSIT)_, vol. 3, no. 6, pp. 75–85, Dec. 2011.
 
-[9] S. Kaur and S. Singh, "A Survey on IoT based Vehicle Tracking System," *International Journal of Advanced Research in Computer Science*, vol. 10, no. 3, pp. 42–47, 2019.
+[9] S. Kaur and S. Singh, "A Survey on IoT based Vehicle Tracking System," _International Journal of Advanced Research in Computer Science_, vol. 10, no. 3, pp. 42–47, 2019.
 
-[10] R. Barry, *Mastering the FreeRTOS Real Time Kernel: A Hands-On Tutorial Guide*. Real Time Engineers Ltd., 2016.
+[10] R. Barry, _Mastering the FreeRTOS Real Time Kernel: A Hands-On Tutorial Guide_. Real Time Engineers Ltd., 2016.
 
-[11] B. Boehm and V. R. Basili, "Software Defect Reduction Top 10 List," *IEEE Computer*, vol. 34, no. 1, pp. 135–137, Jan. 2001.
+[11] B. Boehm and V. R. Basili, "Software Defect Reduction Top 10 List," _IEEE Computer_, vol. 34, no. 1, pp. 135–137, Jan. 2001.
 
-[12] E. Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software*. Boston, MA, USA: Addison-Wesley Professional, 2003.
+[12] E. Evans, _Domain-Driven Design: Tackling Complexity in the Heart of Software_. Boston, MA, USA: Addison-Wesley Professional, 2003.
 
-[13] S. Newman, *Building Microservices: Designing Fine-Grained Systems*, 2nd ed. Sebastopol, CA, USA: O'Reilly Media, 2021.
+[13] S. Newman, _Building Microservices: Designing Fine-Grained Systems_, 2nd ed. Sebastopol, CA, USA: O'Reilly Media, 2021.
 
-[14] D. Guinard and V. Trifa, *Building the Web of Things*. Shelter Island, NY, USA: Manning Publications, 2016.
+[14] D. Guinard and V. Trifa, _Building the Web of Things_. Shelter Island, NY, USA: Manning Publications, 2016.
 
-[15] J. Gubbi, R. Buyya, S. Marusic, and M. Palaniswami, "Internet of Things (IoT): A Vision, Architectural Elements, and Future Directions," *Future Generation Computer Systems*, vol. 29, no. 7, pp. 1645–1660, Sep. 2013.
+[15] J. Gubbi, R. Buyya, S. Marusic, and M. Palaniswami, "Internet of Things (IoT): A Vision, Architectural Elements, and Future Directions," _Future Generation Computer Systems_, vol. 29, no. 7, pp. 1645–1660, Sep. 2013.
 
-[16] V. C. Gungor and G. P. Hancke, "Industrial Wireless Sensor Networks: Challenges, Design Principles, and Technical Approaches," *IEEE Transactions on Industrial Electronics*, vol. 56, no. 10, pp. 4258–4265, Oct. 2009.
+[16] V. C. Gungor and G. P. Hancke, "Industrial Wireless Sensor Networks: Challenges, Design Principles, and Technical Approaches," _IEEE Transactions on Industrial Electronics_, vol. 56, no. 10, pp. 4258–4265, Oct. 2009.
 
-[17] R. K. Kodali, V. Jain, S. Bose, and L. Boppana, "IoT Based Smart Security and Home Automation System," in *Proc. 2016 International Conference on Computing, Communication and Automation (ICCCA)*, Greater Noida, India, 2016, pp. 1286–1289.
+[17] R. K. Kodali, V. Jain, S. Bose, and L. Boppana, "IoT Based Smart Security and Home Automation System," in _Proc. 2016 International Conference on Computing, Communication and Automation (ICCCA)_, Greater Noida, India, 2016, pp. 1286–1289.
 
-[18] B. Sahu and G. A. Rincon-Mora, "A Low Voltage, Dynamic, Noninverting, Synchronous Buck-Boost Converter for Portable Applications," *IEEE Transactions on Power Electronics*, vol. 19, no. 2, pp. 443–452, Mar. 2004.
+[18] B. Sahu and G. A. Rincon-Mora, "A Low Voltage, Dynamic, Noninverting, Synchronous Buck-Boost Converter for Portable Applications," _IEEE Transactions on Power Electronics_, vol. 19, no. 2, pp. 443–452, Mar. 2004.
 
 ---
 
@@ -7015,53 +6980,53 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 
 [Bảng PL-1.1: Bảng kê chi phí linh kiện (BOM)]
 
-| STT | Linh kiện | Model / Thông số | Số lượng | Đơn giá (VND) | Thành tiền (VND) | Ghi chú |
-|-----|-----------|-------------------|----------|---------------|-------------------|---------|
-| 1 | Vi điều khiển | ESP32-S3-WROOM-1 (N16R8) | 1 | 120.000 | 120.000 | MCU chính, 16MB Flash, 8MB PSRAM |
-| 2 | LTE + GNSS | SIMCom A7670C + u-blox NEO-M8N | 1 bộ | 330.000 | 330.000 | Kiến trúc tách rời 4G LTE và GPS/GNSS |
-| 3 | OBD2 Adapter | vgate iCar Pro BLE | 1 | 350.000 | 350.000 | Bluetooth Low Energy OBD2 |
-| 4 | Cảm biến gia tốc | LIS3DH (breakout board) | 1 | 45.000 | 45.000 | IMU 3 trục, phát hiện chuyển động |
-| 5 | Pin dự phòng | 21700 Li-ion 5000mAh | 1 | 80.000 | 80.000 | Samsung/LG cell |
-| 6 | IC sạc pin | IP2312 module | 1 | 25.000 | 25.000 | Sạc 3A, CC/CV |
-| 7 | Buck converter | MP1584 module (12V/24V->5V) | 1 | 15.000 | 15.000 | Giảm áp từ ắc quy xe |
-| 8 | Boost converter | MT3608 module (3.7V->5V) | 1 | 12.000 | 12.000 | Tăng áp từ pin dự phòng |
-| 9 | LDO 3.3V | AMS1117–3.3 | 2 | 3.000 | 6.000 | Cấp nguồn cho ESP32-S3 và LIS3DH |
-| 10 | MOSFET nguồn | AO3401 (P-ch) + AO3400 (N-ch) | 4 | 5.000 | 20.000 | Power path và LVD |
-| 11 | Op-amp comparator | LM393 | 1 | 8.000 | 8.000 | Cho mạch Low Voltage Disconnect |
-| 12 | Anten GPS | Anten gốm GNSS 25x25mm | 1 | 25.000 | 25.000 | Anten GPS/GLONASS/BeiDou |
-| 13 | Anten 4G | Anten FPC 4G LTE | 1 | 20.000 | 20.000 | Anten mạng di động |
-| 14 | SIM tray + SIM | Nano SIM holder + SIM 4G | 1 | 15.000 | 15.000 | SIM data 4G |
-| 15 | Connector OBD2 | Jack OBD2 16-pin male | 1 | 35.000 | 35.000 | Kết nối nguồn ắc quy xe (12V hoặc 24V) |
-| 16 | Tụ điện, điện trở | Linh kiện thụ động (combo) | 1 bộ | 30.000 | 30.000 | Tụ lọc, điện trở chia áp ADC (R1=100k, R2=10k), LED |
-| 17 | PCB / Perfboard | PCB prototype 7x9cm | 2 | 10.000 | 20.000 | Bo mạch prototype |
-| 18 | Hộp đựng | Hộp nhựa ABS 120x80x40mm | 1 | 25.000 | 25.000 | Vỏ bảo vệ thiết bị |
-| 19 | Dây kết nối | Dây nối, header, jumper | 1 bộ | 20.000 | 20.000 | Dây kết nối nội bộ |
-| | | | | **Tổng cộng** | **1.121.000** | |
+| STT | Linh kiện         | Model / Thông số               | Số lượng | Đơn giá (VND) | Thành tiền (VND) | Ghi chú                                             |
+| --- | ----------------- | ------------------------------ | -------- | ------------- | ---------------- | --------------------------------------------------- |
+| 1   | Vi điều khiển     | ESP32-S3-WROOM-1 (N16R8)       | 1        | 120.000       | 120.000          | MCU chính, 16MB Flash, 8MB PSRAM                    |
+| 2   | LTE + GNSS        | SIMCom SIM7600CE-T             | 1 bộ     | 330.000       | 330.000          | Modem LTE Cat-4 tích hợp GPS/GNSS                   |
+| 3   | OBD2 Adapter      | vgate iCar Pro BLE             | 1        | 350.000       | 350.000          | Bluetooth Low Energy OBD2                           |
+| 4   | Cảm biến gia tốc  | LIS3DH (breakout board)        | 1        | 45.000        | 45.000           | IMU 3 trục, phát hiện chuyển động                   |
+| 5   | Pin dự phòng      | 21700 Li-ion 5000mAh           | 1        | 80.000        | 80.000           | Samsung/LG cell                                     |
+| 6   | IC sạc pin        | IP2312 module                  | 1        | 25.000        | 25.000           | Sạc 3A, CC/CV                                       |
+| 7   | Buck converter    | MP1584 module (12V/24V->5V)    | 1        | 15.000        | 15.000           | Giảm áp từ ắc quy xe                                |
+| 8   | Boost converter   | MT3608 module (3.7V->5V)       | 1        | 12.000        | 12.000           | Tăng áp từ pin dự phòng                             |
+| 9   | LDO 3.3V          | AMS1117–3.3                    | 2        | 3.000         | 6.000            | Cấp nguồn cho ESP32-S3 và LIS3DH                    |
+| 10  | MOSFET nguồn      | AO3401 (P-ch) + AO3400 (N-ch)  | 4        | 5.000         | 20.000           | Power path và LVD                                   |
+| 11  | Op-amp comparator | LM393                          | 1        | 8.000         | 8.000            | Cho mạch Low Voltage Disconnect                     |
+| 12  | Anten GPS         | Anten gốm GNSS 25x25mm         | 1        | 25.000        | 25.000           | Anten GPS/GLONASS/BeiDou                            |
+| 13  | Anten 4G          | Anten FPC 4G LTE               | 1        | 20.000        | 20.000           | Anten mạng di động                                  |
+| 14  | SIM tray + SIM    | Nano SIM holder + SIM 4G       | 1        | 15.000        | 15.000           | SIM data 4G                                         |
+| 15  | Connector OBD2    | Jack OBD2 16-pin male          | 1        | 35.000        | 35.000           | Kết nối nguồn ắc quy xe (12V hoặc 24V)              |
+| 16  | Tụ điện, điện trở | Linh kiện thụ động (combo)     | 1 bộ     | 30.000        | 30.000           | Tụ lọc, điện trở chia áp ADC (R1=100k, R2=10k), LED |
+| 17  | PCB / Perfboard   | PCB prototype 7x9cm            | 2        | 10.000        | 20.000           | Bo mạch prototype                                   |
+| 18  | Hộp đựng          | Hộp nhựa ABS 120x80x40mm       | 1        | 25.000        | 25.000           | Vỏ bảo vệ thiết bị                                  |
+| 19  | Dây kết nối       | Dây nối, header, jumper        | 1 bộ     | 20.000        | 20.000           | Dây kết nối nội bộ                                  |
+|     |                   |                                |          | **Tổng cộng** | **1.121.000**    |                                                     |
 
 ## 1.2. Chi phí hạ tầng cloud (ước tính hàng tháng)
 
 [Bảng PL-1.2: Chi phí hạ tầng cloud]
 
-| STT | Hạng mục | Thông số | Chi phí hàng tháng (VND) | Ghi chú |
-|-----|----------|----------|--------------------------|---------|
-| 1 | VPS Server | 4 vCPU, 8GB RAM, 100GB SSD | 300.000–500.000 | DigitalOcean / Vultr / Viettel IDC |
-| 2 | SIM 4G data | Gói cước data IoT | 70.000 | Mỗi thiết bị 1 SIM |
-| 3 | Tên miền | Domain .com | 25.000 | ~300.000 VND/năm |
-| 4 | SSL Certificate | Let's Encrypt | 0 | Miễn phí, tự động gia hạn |
-| | | | **Tổng hàng tháng** | **395.000–595.000** |
+| STT | Hạng mục        | Thông số                   | Chi phí hàng tháng (VND) | Ghi chú                            |
+| --- | --------------- | -------------------------- | ------------------------ | ---------------------------------- |
+| 1   | VPS Server      | 4 vCPU, 8GB RAM, 100GB SSD | 300.000–500.000          | DigitalOcean / Vultr / Viettel IDC |
+| 2   | SIM 4G data     | Gói cước data IoT          | 70.000                   | Mỗi thiết bị 1 SIM                 |
+| 3   | Tên miền        | Domain .com                | 25.000                   | ~300.000 VND/năm                   |
+| 4   | SSL Certificate | Let's Encrypt              | 0                        | Miễn phí, tự động gia hạn          |
+|     |                 |                            | **Tổng hàng tháng**      | **395.000–595.000**                |
 
 ## 1.3. Tổng hợp chi phí dự án
 
 [Bảng PL-1.3: Tổng hợp chi phí dự án]
 
-| Hạng mục | Chi phí (VND) | Ghi chú |
-|----------|---------------|---------|
-| Phần cứng (1 bộ tracker) | 1.121.000 | Theo BOM ở bảng PL-1.1 |
-| Phần mềm (licenses) | 0 | Toàn bộ mã nguồn mở |
-| Hạ tầng cloud (3 tháng dev + 3 tháng test) | 2.370.000–3.570.000 | 6 tháng x chi phí hàng tháng |
-| SIM 4G (6 tháng) | 420.000 | 70.000 x 6 tháng |
-| Công cụ phát triển (khác) | 200.000 | USB-UART, breadboard, dây đo |
-| **Tổng chi phí dự án** | **4.111.000–5.311.000** | |
+| Hạng mục                                   | Chi phí (VND)           | Ghi chú                      |
+| ------------------------------------------ | ----------------------- | ---------------------------- |
+| Phần cứng (1 bộ tracker)                   | 1.121.000               | Theo BOM ở bảng PL-1.1       |
+| Phần mềm (licenses)                        | 0                       | Toàn bộ mã nguồn mở          |
+| Hạ tầng cloud (3 tháng dev + 3 tháng test) | 2.370.000–3.570.000     | 6 tháng x chi phí hàng tháng |
+| SIM 4G (6 tháng)                           | 420.000                 | 70.000 x 6 tháng             |
+| Công cụ phát triển (khác)                  | 200.000                 | USB-UART, breadboard, dây đo |
+| **Tổng chi phí dự án**                     | **4.111.000–5.311.000** |                              |
 
 > **Nhận xét:** Tổng chi phí dự án dưới 6.000.000 VND, trong đó chi phí phần cứng cho mỗi bộ tracker chỉ khoảng 1.121.000 VND — thấp hơn đáng kể so với các giải pháp thương mại tương đương (2.000.000–5.000.000 VND/thiết bị). Khi sản xuất số lượng lớn (>50 bộ), chi phí linh kiện có thể giảm 15–25% nhờ mua sỉ.
 
@@ -7075,26 +7040,26 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 
 **Áp dụng trong dự án:**
 
-| Chuẩn cụ thể | Nội dung | Áp dụng |
-|-------------|----------|---------|
-| SAE J1979 | Định nghĩa các Diagnostic Test Modes (Mode 01–0A) | Đọc dữ liệu động cơ: RPM, tốc độ, nhiệt độ, nhiên liệu |
-| ISO 15031–5 | Định nghĩa PIDs và định dạng dữ liệu | Phân tích (parsing) bản tin OBD2 response |
-| ISO 15765–2 | Transport protocol cho CAN bus (ISO-TP) | Xử lý multi-frame response (VIN, DTC list) |
-| ISO 15765–4 | Emissions-related OBD via CAN | Giao tiếp CAN qua OBD2 adapter BLE |
+| Chuẩn cụ thể | Nội dung                                          | Áp dụng                                                |
+| ------------ | ------------------------------------------------- | ------------------------------------------------------ |
+| SAE J1979    | Định nghĩa các Diagnostic Test Modes (Mode 01–0A) | Đọc dữ liệu động cơ: RPM, tốc độ, nhiệt độ, nhiên liệu |
+| ISO 15031–5  | Định nghĩa PIDs và định dạng dữ liệu              | Phân tích (parsing) bản tin OBD2 response              |
+| ISO 15765–2  | Transport protocol cho CAN bus (ISO-TP)           | Xử lý multi-frame response (VIN, DTC list)             |
+| ISO 15765–4  | Emissions-related OBD via CAN                     | Giao tiếp CAN qua OBD2 adapter BLE                     |
 
 **Các OBD2 PIDs sử dụng trong dự án:**
 
-| PID (hex) | Mô tả | Đơn vị | Mode |
-|-----------|-------|--------|------|
-| 0x00 | Supported PIDs [01–20] | Bitmask | 01 |
-| 0x04 | Calculated Engine Load | % | 01 |
-| 0x05 | Engine Coolant Temperature | C | 01 |
-| 0x0C | Engine RPM | rpm | 01 |
-| 0x0D | Vehicle Speed | km/h | 01 |
-| 0x0F | Intake Air Temperature | C | 01 |
-| 0x11 | Throttle Position | % | 01 |
-| 0x2F | Fuel Tank Level Input | % | 01 |
-| 0x46 | Ambient Air Temperature | C | 01 |
+| PID (hex) | Mô tả                      | Đơn vị  | Mode |
+| --------- | -------------------------- | ------- | ---- |
+| 0x00      | Supported PIDs [01–20]     | Bitmask | 01   |
+| 0x04      | Calculated Engine Load     | %       | 01   |
+| 0x05      | Engine Coolant Temperature | C       | 01   |
+| 0x0C      | Engine RPM                 | rpm     | 01   |
+| 0x0D      | Vehicle Speed              | km/h    | 01   |
+| 0x0F      | Intake Air Temperature     | C       | 01   |
+| 0x11      | Throttle Position          | %       | 01   |
+| 0x2F      | Fuel Tank Level Input      | %       | 01   |
+| 0x46      | Ambient Air Temperature    | C       | 01   |
 
 ## 2.2. Tiêu chuẩn MQTT 5.0 (OASIS)
 
@@ -7102,15 +7067,15 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 
 **Các tính năng MQTT 5.0 sử dụng trong dự án:**
 
-| Tính năng | Mô tả | Áp dụng |
-|-----------|-------|---------|
-| QoS 0 (At most once) | Gửi không xác nhận | Dữ liệu telemetry tần suất cao (GPS, OBD2) |
-| QoS 1 (At least once) | Gửi với xác nhận | Cảnh báo, lệnh điều khiển |
-| Retain Message | Lưu tin nhắn cuối cùng trên broker | Trạng thái online/offline của thiết bị |
-| Last Will and Testament | Thông báo tự động khi mất kết nối | Phát hiện thiết bị offline |
-| Topic Alias | Giảm kích thước bản tin | Tối ưu băng thông 4G |
-| Session Expiry | Thời gian hết hạn phiên | Quản lý kết nối thiết bị |
-| User Properties | Metadata tùy chỉnh | Request-ID correlation |
+| Tính năng               | Mô tả                              | Áp dụng                                    |
+| ----------------------- | ---------------------------------- | ------------------------------------------ |
+| QoS 0 (At most once)    | Gửi không xác nhận                 | Dữ liệu telemetry tần suất cao (GPS, OBD2) |
+| QoS 1 (At least once)   | Gửi với xác nhận                   | Cảnh báo, lệnh điều khiển                  |
+| Retain Message          | Lưu tin nhắn cuối cùng trên broker | Trạng thái online/offline của thiết bị     |
+| Last Will and Testament | Thông báo tự động khi mất kết nối  | Phát hiện thiết bị offline                 |
+| Topic Alias             | Giảm kích thước bản tin            | Tối ưu băng thông 4G                       |
+| Session Expiry          | Thời gian hết hạn phiên            | Quản lý kết nối thiết bị                   |
+| User Properties         | Metadata tùy chỉnh                 | Request-ID correlation                     |
 
 **Cấu trúc topic MQTT:**
 
@@ -7127,28 +7092,28 @@ devices/{device_id}/status         # Trạng thái online/offline (Retain)
 
 **Các nguyên tắc bảo mật áp dụng:**
 
-| Nguyên tắc | Hiện thực trong dự án |
-|------------|----------------------|
-| Confidentiality (Bảo mật) | Mã hóa TLS cho MQTT và HTTPS; Token hash SHA-256 |
-| Integrity (Toàn vẹn) | MQTT checksum; Database constraints; Zod validation |
-| Availability (Sẵn sàng) | Docker restart policy; Health checks; Pin dự phòng |
-| Authentication (Xác thực) | Session-based auth với database-backed tokens |
-| Authorization (Phân quyền) | RBAC (Role-Based Access Control); MQTT ACL per device |
-| Audit Trail (Nhật ký) | VictoriaLogs ghi nhật ký mọi thao tác; Request-ID correlation |
+| Nguyên tắc                 | Hiện thực trong dự án                                         |
+| -------------------------- | ------------------------------------------------------------- |
+| Confidentiality (Bảo mật)  | Mã hóa TLS cho MQTT và HTTPS; Token hash SHA-256              |
+| Integrity (Toàn vẹn)       | MQTT checksum; Database constraints; Zod validation           |
+| Availability (Sẵn sàng)    | Docker restart policy; Health checks; Pin dự phòng            |
+| Authentication (Xác thực)  | Session-based auth với database-backed tokens                 |
+| Authorization (Phân quyền) | RBAC (Role-Based Access Control); MQTT ACL per device         |
+| Audit Trail (Nhật ký)      | VictoriaLogs ghi nhật ký mọi thao tác; Request-ID correlation |
 
 ## 2.4. Thiết kế REST API (RFC 7231 và best practices)
 
 **Các nguyên tắc REST API áp dụng:**
 
-| Nguyên tắc | Mô tả | Ví dụ trong dự án |
-|------------|-------|--------------------|
-| Resource-based URLs | URL đại diện cho tài nguyên, dùng số nhiều | `/api/v1/vehicles`, `/api/v1/alerts` |
-| HTTP Methods | Dùng đúng ý nghĩa của phương thức | GET (đọc), POST (tạo), PUT (cập nhật), DELETE (xóa) |
-| Status Codes | Mã trạng thái phản hồi chính xác | 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 404 Not Found |
-| Pagination | Phân trang cho danh sách lớn | `?page=1&limit=20&sort=created_at:desc` |
-| Versioning | Phiên bản API trong URL | `/api/v1/...` |
-| Error Format | Định dạng lỗi nhất quán | `{ "error": { "code": "...", "message": "..." } }` |
-| Request-ID | Định danh mỗi request | Header `X-Request-ID` cho truy vết lỗi |
+| Nguyên tắc          | Mô tả                                      | Ví dụ trong dự án                                                     |
+| ------------------- | ------------------------------------------ | --------------------------------------------------------------------- |
+| Resource-based URLs | URL đại diện cho tài nguyên, dùng số nhiều | `/api/v1/vehicles`, `/api/v1/alerts`                                  |
+| HTTP Methods        | Dùng đúng ý nghĩa của phương thức          | GET (đọc), POST (tạo), PUT (cập nhật), DELETE (xóa)                   |
+| Status Codes        | Mã trạng thái phản hồi chính xác           | 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 404 Not Found |
+| Pagination          | Phân trang cho danh sách lớn               | `?page=1&limit=20&sort=created_at:desc`                               |
+| Versioning          | Phiên bản API trong URL                    | `/api/v1/...`                                                         |
+| Error Format        | Định dạng lỗi nhất quán                    | `{ "error": { "code": "...", "message": "..." } }`                    |
+| Request-ID          | Định danh mỗi request                      | Header `X-Request-ID` cho truy vết lỗi                                |
 
 ---
 
@@ -7160,15 +7125,15 @@ Dự án được triển khai theo 7 giai đoạn chính, với tổng thời g
 
 [Bảng PL-3.1: Phân chia giai đoạn và thời gian thực hiện]
 
-| Giai đoạn | Nội dung chính | Thời gian | Kết quả đầu ra |
-|-----------|---------------|-----------|----------------|
-| **GĐ1** | Nghiên cứu và thiết kế phần cứng | Tuần 1–4 (4 tuần) | Sơ đồ mạch, BOM, PCB layout |
-| **GĐ2** | Phát triển firmware | Tuần 3–10 (8 tuần) | Firmware ESP-IDF hoàn chỉnh |
-| **GĐ3** | Xây dựng hạ tầng cloud | Tuần 5–8 (4 tuần) | Docker infrastructure, EMQX, databases |
-| **GĐ4** | Phát triển backend API | Tuần 7–14 (8 tuần) | REST API, MQTT Bridge, WebSocket |
-| **GĐ5** | Phát triển frontend | Tuần 11–18 (8 tuần) | Web dashboard, bản đồ, biểu đồ |
-| **GĐ6** | Tích hợp và kiểm thử | Tuần 17–22 (6 tuần) | Hệ thống tích hợp, báo cáo kiểm thử |
-| **GĐ7** | Viết báo cáo và bảo vệ | Tuần 21–24 (4 tuần) | Báo cáo đồ án, slide thuyết trình |
+| Giai đoạn | Nội dung chính                   | Thời gian           | Kết quả đầu ra                         |
+| --------- | -------------------------------- | ------------------- | -------------------------------------- |
+| **GĐ1**   | Nghiên cứu và thiết kế phần cứng | Tuần 1–4 (4 tuần)   | Sơ đồ mạch, BOM, PCB layout            |
+| **GĐ2**   | Phát triển firmware              | Tuần 3–10 (8 tuần)  | Firmware ESP-IDF hoàn chỉnh            |
+| **GĐ3**   | Xây dựng hạ tầng cloud           | Tuần 5–8 (4 tuần)   | Docker infrastructure, EMQX, databases |
+| **GĐ4**   | Phát triển backend API           | Tuần 7–14 (8 tuần)  | REST API, MQTT Bridge, WebSocket       |
+| **GĐ5**   | Phát triển frontend              | Tuần 11–18 (8 tuần) | Web dashboard, bản đồ, biểu đồ         |
+| **GĐ6**   | Tích hợp và kiểm thử             | Tuần 17–22 (6 tuần) | Hệ thống tích hợp, báo cáo kiểm thử    |
+| **GĐ7**   | Viết báo cáo và bảo vệ           | Tuần 21–24 (4 tuần) | Báo cáo đồ án, slide thuyết trình      |
 
 > **Ghi chú:** Các giai đoạn có sự chồng chéo (overlap) có chủ đích để tối ưu hóa thời gian. Ví dụ, GĐ3 (hạ tầng cloud) bắt đầu trước khi GĐ2 (firmware) hoàn thành để có môi trường test sớm.
 
@@ -7191,56 +7156,56 @@ GĐ7:                                                        [========]
 
 **Giai đoạn 1 — Nghiên cứu và thiết kế phần cứng (Tuần 1–4):**
 
-| Tuần | Công việc | Sản phẩm |
-|------|-----------|----------|
-| 1 | Khảo sát linh kiện, đặt mua | Danh sách linh kiện |
-| 2 | Thiết kế sơ đồ nguyên lý | Sơ đồ mạch Schematic |
-| 3 | Thiết kế PCB / làm mạch prototype | PCB layout / Perfboard |
-| 4 | Lắp ráp và kiểm tra cơ bản | Prototype hoạt động |
+| Tuần | Công việc                         | Sản phẩm               |
+| ---- | --------------------------------- | ---------------------- |
+| 1    | Khảo sát linh kiện, đặt mua       | Danh sách linh kiện    |
+| 2    | Thiết kế sơ đồ nguyên lý          | Sơ đồ mạch Schematic   |
+| 3    | Thiết kế PCB / làm mạch prototype | PCB layout / Perfboard |
+| 4    | Lắp ráp và kiểm tra cơ bản        | Prototype hoạt động    |
 
 **Giai đoạn 2 — Phát triển firmware (Tuần 3–10):**
 
-| Tuần | Công việc | Sản phẩm |
-|------|-----------|----------|
-| 3–4 | Setup ESP-IDF, GPIO, UART modem | Giao tiếp modem cơ bản |
-| 5–6 | Module BLE OBD2, phân tích bản tin | Đọc dữ liệu OBD2 |
-| 7–8 | Module MQTT, offline buffering | Truyền dữ liệu lên broker |
-| 9–10 | Quản lý năng lượng, IMU, tích hợp | Firmware hoàn chỉnh |
+| Tuần | Công việc                          | Sản phẩm                  |
+| ---- | ---------------------------------- | ------------------------- |
+| 3–4  | Setup ESP-IDF, GPIO, UART modem    | Giao tiếp modem cơ bản    |
+| 5–6  | Module BLE OBD2, phân tích bản tin | Đọc dữ liệu OBD2          |
+| 7–8  | Module MQTT, offline buffering     | Truyền dữ liệu lên broker |
+| 9–10 | Quản lý năng lượng, IMU, tích hợp  | Firmware hoàn chỉnh       |
 
 **Giai đoạn 3 — Hạ tầng cloud (Tuần 5–8):**
 
-| Tuần | Công việc | Sản phẩm |
-|------|-----------|----------|
-| 5 | Docker setup, PostgreSQL, EMQX | Infrastructure cơ bản |
-| 6 | VictoriaMetrics, VictoriaLogs | Time-series và logging |
-| 7 | MQTT Bridge service | Dữ liệu từ EMQX đến DB |
-| 8 | Grafana, monitoring, backup | Dashboard giám sát |
+| Tuần | Công việc                      | Sản phẩm               |
+| ---- | ------------------------------ | ---------------------- |
+| 5    | Docker setup, PostgreSQL, EMQX | Infrastructure cơ bản  |
+| 6    | VictoriaMetrics, VictoriaLogs  | Time-series và logging |
+| 7    | MQTT Bridge service            | Dữ liệu từ EMQX đến DB |
+| 8    | Grafana, monitoring, backup    | Dashboard giám sát     |
 
 **Giai đoạn 4 — Backend API (Tuần 7–14):**
 
-| Tuần | Công việc | Sản phẩm |
-|------|-----------|----------|
-| 7–8 | Project setup, auth module | Đăng nhập, session |
-| 9–10 | Vehicles, devices, customers domain | CRUD API |
+| Tuần  | Công việc                           | Sản phẩm               |
+| ----- | ----------------------------------- | ---------------------- |
+| 7–8   | Project setup, auth module          | Đăng nhập, session     |
+| 9–10  | Vehicles, devices, customers domain | CRUD API               |
 | 11–12 | Telemetry, alerts, geofences domain | Dữ liệu thời gian thực |
-| 13–14 | WebSocket, commands, testing | API hoàn chỉnh |
+| 13–14 | WebSocket, commands, testing        | API hoàn chỉnh         |
 
 **Giai đoạn 5 — Frontend (Tuần 11–18):**
 
-| Tuần | Công việc | Sản phẩm |
-|------|-----------|----------|
-| 11–12 | Project setup, layout, auth pages | Khung ứng dụng |
-| 13–14 | Dashboard, bản đồ Leaflet | Trang chủ, bản đồ |
-| 15–16 | Vehicle management, alerts, geofences | Các trang quản lý |
-| 17–18 | ECharts, WebSocket, polish | Giao diện hoàn chỉnh |
+| Tuần  | Công việc                             | Sản phẩm             |
+| ----- | ------------------------------------- | -------------------- |
+| 11–12 | Project setup, layout, auth pages     | Khung ứng dụng       |
+| 13–14 | Dashboard, bản đồ Leaflet             | Trang chủ, bản đồ    |
+| 15–16 | Vehicle management, alerts, geofences | Các trang quản lý    |
+| 17–18 | ECharts, WebSocket, polish            | Giao diện hoàn chỉnh |
 
 **Giai đoạn 6 — Tích hợp và kiểm thử (Tuần 17–22):**
 
-| Tuần | Công việc | Sản phẩm |
-|------|-----------|----------|
-| 17–18 | Tích hợp firmware - cloud | Hệ thống end-to-end |
-| 19–20 | Kiểm thử chức năng, hiệu năng | Báo cáo kiểm thử |
-| 21–22 | Sửa lỗi, tối ưu, triển khai UAT | Hệ thống ổn định |
+| Tuần  | Công việc                       | Sản phẩm            |
+| ----- | ------------------------------- | ------------------- |
+| 17–18 | Tích hợp firmware - cloud       | Hệ thống end-to-end |
+| 19–20 | Kiểm thử chức năng, hiệu năng   | Báo cáo kiểm thử    |
+| 21–22 | Sửa lỗi, tối ưu, triển khai UAT | Hệ thống ổn định    |
 
 ---
 
@@ -7282,27 +7247,27 @@ Schema PostgreSQL đầy đủ được lưu tại:
 
 **Các bảng chính trong PostgreSQL:**
 
-| STT | Tên bảng | Mô tả | Quan hệ chính |
-|-----|---------|-------|---------------|
-| 1 | `users` | Tài khoản người dùng | 1:N với sessions, audit_logs |
-| 2 | `sessions` | Phiên đăng nhập (token hash SHA-256) | N:1 với users |
-| 3 | `vehicles` | Thông tin phương tiện | 1:1 với devices, 1:N với trips |
-| 4 | `devices` | Thông tin thiết bị tracker | N:1 với vehicles |
-| 5 | `customers` | Thông tin khách hàng | 1:N với trips |
-| 6 | `trips` | Hành trình cho thuê | N:1 với vehicles, customers |
-| 7 | `alerts` | Cảnh báo hệ thống | N:1 với vehicles, devices |
-| 8 | `geofences` | Vùng địa lý (hàng rào ảo) | N:N với vehicles |
-| 9 | `commands` | Lệnh điều khiển thiết bị | N:1 với devices |
-| 10 | `audit_logs` | Nhật ký thao tác | N:1 với users |
+| STT | Tên bảng     | Mô tả                                | Quan hệ chính                  |
+| --- | ------------ | ------------------------------------ | ------------------------------ |
+| 1   | `users`      | Tài khoản người dùng                 | 1:N với sessions, audit_logs   |
+| 2   | `sessions`   | Phiên đăng nhập (token hash SHA-256) | N:1 với users                  |
+| 3   | `vehicles`   | Thông tin phương tiện                | 1:1 với devices, 1:N với trips |
+| 4   | `devices`    | Thông tin thiết bị tracker           | N:1 với vehicles               |
+| 5   | `customers`  | Thông tin khách hàng                 | 1:N với trips                  |
+| 6   | `trips`      | Hành trình cho thuê                  | N:1 với vehicles, customers    |
+| 7   | `alerts`     | Cảnh báo hệ thống                    | N:1 với vehicles, devices      |
+| 8   | `geofences`  | Vùng địa lý (hàng rào ảo)            | N:N với vehicles               |
+| 9   | `commands`   | Lệnh điều khiển thiết bị             | N:1 với devices                |
+| 10  | `audit_logs` | Nhật ký thao tác                     | N:1 với users                  |
 
 **VictoriaMetrics metrics:**
 
-| Metric name | Labels | Mô tả |
-|-------------|--------|-------|
-| `vehicle_location` | device_id, lat, lon, speed, heading | Vị trí GPS |
-| `vehicle_obd2` | device_id, rpm, speed, coolant_temp, fuel_level | Dữ liệu OBD2 |
-| `vehicle_imu` | device_id, accel_x, accel_y, accel_z | Dữ liệu gia tốc |
-| `device_status` | device_id, battery_voltage, signal_strength | Trạng thái thiết bị |
+| Metric name        | Labels                                          | Mô tả               |
+| ------------------ | ----------------------------------------------- | ------------------- |
+| `vehicle_location` | device_id, lat, lon, speed, heading             | Vị trí GPS          |
+| `vehicle_obd2`     | device_id, rpm, speed, coolant_temp, fuel_level | Dữ liệu OBD2        |
+| `vehicle_imu`      | device_id, accel_x, accel_y, accel_z            | Dữ liệu gia tốc     |
+| `device_status`    | device_id, battery_voltage, signal_strength     | Trạng thái thiết bị |
 
 ## 4.3. Tài liệu API (API Documentation)
 
@@ -7313,24 +7278,24 @@ Tài liệu API đầy đủ được tạo tự động bằng Swagger/OpenAPI 
 
 **Tổng hợp API endpoints chính:**
 
-| Nhóm | Method | Endpoint | Mô tả |
-|------|--------|----------|-------|
-| Auth | POST | `/api/v1/auth/login` | Đăng nhập |
-| Auth | POST | `/api/v1/auth/logout` | Đăng xuất |
-| Auth | GET | `/api/v1/auth/me` | Thông tin người dùng hiện tại |
-| Vehicles | GET | `/api/v1/vehicles` | Danh sách phương tiện |
-| Vehicles | POST | `/api/v1/vehicles` | Thêm phương tiện |
-| Vehicles | GET | `/api/v1/vehicles/:id` | Chi tiết phương tiện |
-| Devices | GET | `/api/v1/devices` | Danh sách thiết bị |
-| Devices | POST | `/api/v1/devices` | Đăng ký thiết bị mới |
-| Telemetry | GET | `/api/v1/telemetry/:deviceId` | Dữ liệu telemetry |
-| Alerts | GET | `/api/v1/alerts` | Danh sách cảnh báo |
-| Alerts | PUT | `/api/v1/alerts/:id/acknowledge` | Xác nhận cảnh báo |
-| Geofences | GET | `/api/v1/geofences` | Danh sách geofences |
-| Geofences | POST | `/api/v1/geofences` | Tạo geofence mới |
-| Commands | POST | `/api/v1/commands` | Gửi lệnh đến thiết bị |
-| Trips | GET | `/api/v1/trips` | Danh sách hành trình |
-| Customers | GET | `/api/v1/customers` | Danh sách khách hàng |
+| Nhóm      | Method | Endpoint                         | Mô tả                         |
+| --------- | ------ | -------------------------------- | ----------------------------- |
+| Auth      | POST   | `/api/v1/auth/login`             | Đăng nhập                     |
+| Auth      | POST   | `/api/v1/auth/logout`            | Đăng xuất                     |
+| Auth      | GET    | `/api/v1/auth/me`                | Thông tin người dùng hiện tại |
+| Vehicles  | GET    | `/api/v1/vehicles`               | Danh sách phương tiện         |
+| Vehicles  | POST   | `/api/v1/vehicles`               | Thêm phương tiện              |
+| Vehicles  | GET    | `/api/v1/vehicles/:id`           | Chi tiết phương tiện          |
+| Devices   | GET    | `/api/v1/devices`                | Danh sách thiết bị            |
+| Devices   | POST   | `/api/v1/devices`                | Đăng ký thiết bị mới          |
+| Telemetry | GET    | `/api/v1/telemetry/:deviceId`    | Dữ liệu telemetry             |
+| Alerts    | GET    | `/api/v1/alerts`                 | Danh sách cảnh báo            |
+| Alerts    | PUT    | `/api/v1/alerts/:id/acknowledge` | Xác nhận cảnh báo             |
+| Geofences | GET    | `/api/v1/geofences`              | Danh sách geofences           |
+| Geofences | POST   | `/api/v1/geofences`              | Tạo geofence mới              |
+| Commands  | POST   | `/api/v1/commands`               | Gửi lệnh đến thiết bị         |
+| Trips     | GET    | `/api/v1/trips`                  | Danh sách hành trình          |
+| Customers | GET    | `/api/v1/customers`              | Danh sách khách hàng          |
 
 ## 4.4. Tài liệu cấu hình môi trường (Environment Configuration)
 
@@ -7338,18 +7303,18 @@ Mỗi dịch vụ yêu cầu file `.env` riêng. Mẫu cấu hình (`.env.exampl
 
 **Các biến môi trường quan trọng:**
 
-| Biến | Dịch vụ | Mô tả | Bắt buộc |
-|------|---------|-------|----------|
-| `POSTGRESQL_HOST` | Backend | Địa chỉ PostgreSQL server | Có |
-| `POSTGRESQL_PORT` | Backend | Cổng PostgreSQL (mặc định: 5432) | Có |
-| `POSTGRESQL_DATABASE` | Backend | Tên cơ sở dữ liệu | Có |
-| `POSTGRESQL_USER` | Backend | Tên đăng nhập PostgreSQL | Có |
-| `POSTGRESQL_PASSWORD` | Backend | Mật khẩu PostgreSQL | Có |
-| `VICTORIAMETRICS_URL` | MqttBridge | URL VictoriaMetrics | Có |
-| `VICTORIALOGS_URL` | MqttBridge | URL VictoriaLogs | Có |
-| `MQTT_BROKER_URL` | Backend, MqttBridge | URL EMQX broker | Có |
-| `SESSION_SECRET` | Backend | Khóa bí mật cho session (min 32 ký tự) | Có |
-| `CORS_ORIGIN` | Backend | URL frontend cho CORS | Có |
+| Biến                  | Dịch vụ             | Mô tả                                  | Bắt buộc |
+| --------------------- | ------------------- | -------------------------------------- | -------- |
+| `POSTGRESQL_HOST`     | Backend             | Địa chỉ PostgreSQL server              | Có       |
+| `POSTGRESQL_PORT`     | Backend             | Cổng PostgreSQL (mặc định: 5432)       | Có       |
+| `POSTGRESQL_DATABASE` | Backend             | Tên cơ sở dữ liệu                      | Có       |
+| `POSTGRESQL_USER`     | Backend             | Tên đăng nhập PostgreSQL               | Có       |
+| `POSTGRESQL_PASSWORD` | Backend             | Mật khẩu PostgreSQL                    | Có       |
+| `VICTORIAMETRICS_URL` | MqttBridge          | URL VictoriaMetrics                    | Có       |
+| `VICTORIALOGS_URL`    | MqttBridge          | URL VictoriaLogs                       | Có       |
+| `MQTT_BROKER_URL`     | Backend, MqttBridge | URL EMQX broker                        | Có       |
+| `SESSION_SECRET`      | Backend             | Khóa bí mật cho session (min 32 ký tự) | Có       |
+| `CORS_ORIGIN`         | Backend             | URL frontend cho CORS                  | Có       |
 
 > **Lưu ý bảo mật:** Tất cả mật khẩu và secret keys là BẮT BUỘC, không có giá trị mặc định. Hệ thống sẽ từ chối khởi động nếu thiếu bất kỳ biến nào.
 
@@ -7357,13 +7322,13 @@ Mỗi dịch vụ yêu cầu file `.env` riêng. Mẫu cấu hình (`.env.exampl
 
 **Yêu cầu hệ thống:**
 
-| Yêu cầu | Phiên bản tối thiểu |
-|---------|---------------------|
-| Node.js | 20.x LTS |
-| Docker | 24.x |
-| Docker Compose | 2.x |
-| Git | 2.x |
-| npm | 10.x |
+| Yêu cầu        | Phiên bản tối thiểu |
+| -------------- | ------------------- |
+| Node.js        | 20.x LTS            |
+| Docker         | 24.x                |
+| Docker Compose | 2.x                 |
+| Git            | 2.x                 |
+| npm            | 10.x                |
 
 **Các bước cài đặt:**
 
@@ -7405,14 +7370,14 @@ npm run dev
 
 **Truy cập hệ thống:**
 
-| Dịch vụ | URL | Tài khoản mặc định |
-|---------|-----|---------------------|
-| Frontend Web | http://localhost:3002 | admin / Admin@2026 |
-| Backend API | http://localhost:3000 | — |
-| Swagger Docs | http://localhost:3000/api-docs | — |
-| EMQX Dashboard | http://localhost:18083 | admin / emqx_dev_2026 |
-| Grafana | http://localhost:3001 | admin / admin |
-| VictoriaMetrics | http://localhost:8428 | — |
+| Dịch vụ         | URL                            | Tài khoản mặc định    |
+| --------------- | ------------------------------ | --------------------- |
+| Frontend Web    | http://localhost:3002          | admin / Admin@2026    |
+| Backend API     | http://localhost:3000          | —                     |
+| Swagger Docs    | http://localhost:3000/api-docs | —                     |
+| EMQX Dashboard  | http://localhost:18083         | admin / emqx_dev_2026 |
+| Grafana         | http://localhost:3001          | admin / admin         |
+| VictoriaMetrics | http://localhost:8428          | —                     |
 
 ---
 

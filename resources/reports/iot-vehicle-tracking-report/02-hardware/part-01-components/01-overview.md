@@ -4,14 +4,13 @@
 
 ### Tổng Quan
 
-Hệ thống tracker hiện được chuẩn hóa theo kiến trúc **tách riêng LTE và GNSS**:
+Tracker hiện nhắm vào kiến trúc một module duy nhất: **SIMCom SIM7600CE-T** cung cấp cả **LTE Cat-4** và **GNSS tích hợp** (GPS + GLONASS + BeiDou). Mạch phần cứng vẫn giữ ESP32-S3, BLE OBD2, IMU LIS3DH và nguồn pin backup, nhưng luồng GNSS/4G chỉ đi qua SIM7600CE-T nên firmware chỉ cần một driver AT command.
 
-- **LTE:** SIMCom A7670C
-- **GNSS:** u-blox NEO-M8N
+- **LTE + GNSS:** SIMCom SIM7600CE-T (Auto mode LTE/UMTS/GSM, APN mặc định `internet`)
 - **MCU trung tâm:** ESP32-S3
 - **OBD2:** vgate iCar Pro qua BLE
-- **IMU:** LIS3DH cho motion detection
-- **Nguồn dự phòng:** pin 21700 + power path management
+- **IMU:** LIS3DH cho motion detection và wake
+- **Nguồn dự phòng:** pin 21700 + mạch Buck/Boost/LVD/MUX/IP2312
 
 **Lưu ý nguồn 12V/24V:** firmware dùng 2 profile nguồn để điều khiển LVD/Power Path/Charger:
 
@@ -27,10 +26,10 @@ Hệ thống tracker hiện được chuẩn hóa theo kiến trúc **tách riê
 - [`02-imu-lis3dh.md`](./02-imu-lis3dh.md) - Cảm biến IMU LIS3DH
 - [`03-mcu-esp32-s3.md`](./03-mcu-esp32-s3.md) - MCU ESP32-S3
 - [`04-obd2-ble-adapter.md`](./04-obd2-ble-adapter.md) - OBD2 BLE Adapter vgate iCar Pro
-- [`05-lte-modem-a7670c.md`](./05-lte-modem-a7670c.md) - Modem LTE SIMCom A7670C
+- [`05-lte-modem-a7670c.md`](./05-lte-modem-a7670c.md) - Modem LTE + GNSS SIMCom SIM7600CE-T
 - [`06-backup-battery-21700.md`](./06-backup-battery-21700.md) - Pin backup 21700
 
-> **Ghi chú:** GNSS NEO-M8N chưa có file component riêng trong folder này. Vai trò GNSS được mô tả tại sơ đồ hệ thống, BOM, và phần firmware modem/GNSS.
+> **Ghi chú:** GNSS đã tích hợp trực tiếp trong SIM7600CE-T. Tài liệu runtime hiện tại không dùng module GNSS rời.
 
 #### Power Management (Quản Lý Năng Lượng)
 
@@ -77,25 +76,16 @@ Hệ thống tracker hiện được chuẩn hóa theo kiến trúc **tách riê
 - Đọc IGN, RPM, tốc độ, nhiên liệu từ ECU
 - Phù hợp mô hình tracker không cần dây OBD2 trực tiếp vào ESP32
 
-#### III.1.4 Modem LTE: **SIMCom A7670C**
+#### III.1.4 Modem LTE + GNSS: **SIMCom SIM7600CE-T**
 
 > **Chi tiết:** Xem [`05-lte-modem-a7670c.md`](./05-lte-modem-a7670c.md)
 
 **Lý do chọn:**
-- LTE Cat-1 đủ cho telemetry và MQTT/HTTP
-- Không tích hợp GNSS, phù hợp kiến trúc tách rời rõ ràng
-- Hỗ trợ AT commands quen thuộc cho phần modem
+- Hỗ trợ LTE Cat-4, fallback 3G/2G và GNSS tích hợp giúp giảm phần cứng vận hành
+- Chỉ cần một driver AT command trên UART1 cho cả LTE và GNSS
+- Auto mode `AT+CNMP=2`, APN mặc định `internet` và `AT+CEREG?` trước `AT+CGACT=1,1` đảm bảo attach ổn định
 
-#### III.1.5 Module GNSS: **u-blox NEO-M8N**
-
-> **Chi tiết tích hợp:** Xem [`../03-system-diagram.md`](../03-system-diagram.md) và [`../../03-firmware/part-03-modem-simcom.md`](../../03-firmware/part-03-modem-simcom.md)
-
-**Lý do chọn:**
-- Chuyên biệt cho GNSS, không phụ thuộc lifecycle của modem LTE
-- Hỗ trợ nhiều chòm sao vệ tinh
-- Phù hợp refactor firmware sang UART GNSS riêng
-
-#### III.1.6 Pin Backup: **21700 Li-ion 5000mAh**
+#### III.1.5 Pin Backup: **21700 Li-ion 5000mAh**
 
 > **Chi tiết:** Xem [`06-backup-battery-21700.md`](./06-backup-battery-21700.md)
 
@@ -114,11 +104,11 @@ Hệ thống tracker hiện được chuẩn hóa theo kiến trúc **tách riê
 
 ```text
 LIS3DH (I2C) ─┐
-vgate iCar ───┼─→ ESP32-S3 ─→ A7670C (UART1) ─→ Cellular/MQTT
-NEO-M8N ──────┘            └→ NEO-M8N (UART2) ─→ GNSS/NMEA
+vgate iCar ───┼─→ ESP32-S3 ─→ SIMCom SIM7600CE-T ─→ Cellular & GNSS
+               └──────────────────────┘
 ```
 
-Kiến trúc mới tránh nhầm lẫn với thiết kế modem tích hợp GNSS của giai đoạn trước.
+Kiến trúc runtime hiện tại chỉ dùng SIM7600CE-T (LTE Cat-4 + GNSS tích hợp); các tham chiếu đến A7670C + NEO-M8N chỉ giữ lại trong phần lịch sử baseline để minh họa sự chuyển đổi.
 
 ---
 
@@ -133,8 +123,7 @@ Kiến trúc mới tránh nhầm lẫn với thiết kế modem tích hợp GNSS
 | 1 | ESP32-S3 DevKit | Cái | 1 | MCU chính |
 | 2 | LIS3DH | Cái | 1 | IMU |
 | 3 | OBD2 BLE (vgate iCar Pro) | Cái | 1 | Đọc dữ liệu ECU |
-| 4 | LTE modem A7670C | Cái | 1 | Kèm LTE antenna + SIM |
-| 5 | GNSS module NEO-M8N | Cái | 1 | Kèm antenna GNSS |
+| 4 | LTE + GNSS module SIMCom SIM7600CE-T | Cái | 1 | Kèm LTE/GNSS antenna + SIM |
 | 6 | 21700 Li-ion 5000mAh | Cái | 1 | Pin backup |
 | 7 | Mạch nguồn + linh kiện phụ | Assorted | - | Buck/Boost/LVD/charger |
 

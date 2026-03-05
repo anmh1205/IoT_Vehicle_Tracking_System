@@ -29,7 +29,7 @@ Hệ thống tracker lấy ESP32-S3 làm bộ xử lý trung tâm. Vi điều kh
 |    I2C     BLE      UART       GPIO       ADC             |
 |     |       |         |          |          |              |
 |  +-----+ +-----+ +----------+ +--------+ +--------+      |
-|  |LIS3DH| |OBD2 | |A7670C+NEO | |Power   | |U_batt  |     |
+|  |LIS3DH| |OBD2 | |SIM7600CE-T | |Power   | |U_batt  |     |
 |  |(IMU) | |BLE  | |(4G+GNSS) | |MUX Ctrl| |Monitor |     |
 |  +------+ |vgate| +----------+ +--------+ +--------+      |
 |            |iCar |                                         |
@@ -71,28 +71,27 @@ Vi điều khiển ESP32-S3-WROOM-1 được lựa chọn làm nhân xử lý tr
 | Deep Sleep   | ~10–15 µA (với external wakeup)         |
 | Active (BLE) | ~20–40 mA                               |
 
-**Giao tiếp UART với modem A7670C và GNSS NEO-M8N:** ESP32-S3 sử dụng UART1 (GPIO16 TX, GPIO17 RX) để giao tiếp với modem SIMCom A7670C thông qua tập lệnh AT và UART2 để nhận dữ liệu NMEA từ module GNSS u-blox NEO-M8N. Tốc độ baud mặc định 115200 bps cho modem và 9600 bps cho GNSS, dữ liệu 8-bit, 1 stop bit, không parity. Kiến trúc tách rời giúp giảm coupling giữa LTE và GNSS, thuận tiện bảo trì và thay thế module.
-
+**Giao tiếp UART với modem SIMCom SIM7600CE-T:** ESP32-S3 sử dụng UART1 (GPIO16 TX, GPIO17 RX) để giao tiếp với module SIM7600CE-T, gửi AT commands (CEREG trước CGACT) và đọc GNSS/NMEA qua `AT+CGNSTST`. Baud mặc định 115200 bps, 8-bit, 1 stop, no parity. GNSS ON/OFF được điều khiển qua `AT+CGNSPWR`.
 **Giao tiếp BLE với OBD2 adapter:** ESP32-S3 sử dụng BLE 5.0 tích hợp để kết nối với adapter vgate iCar Pro (BLE 4.0). Kết nối này cho phép đọc dữ liệu chẩn đoán xe theo chuẩn OBD-II bao gồm trạng thái khóa điện (IGN), tốc độ động cơ (RPM), vận tốc xe, mức nhiên liệu và mã lỗi chẩn đoán (DTC).
 
 **Giao tiếp I2C với cảm biến LIS3DH:** Cảm biến gia tốc 3 trục LIS3DH được kết nối qua bus I2C (GPIO22 SDA, GPIO23 SCL). Cảm biến này đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang đỗ, cho phép đánh thức ESP32-S3 từ chế độ deep sleep thông qua ngắt ngoài (interrupt) khi phát hiện rung động bất thường.
 
 ```text
-Sơ đồ kết nối UART giữa ESP32-S3 và A7670C:
+Sơ đồ kết nối UART giữa ESP32-S3 và SIMCom SIM7600CE-T:
 
-A7670C Module            ESP32-S3
-+------------------+     +----------+
-| VCC  ------------+-----+ 3.3V/5V  |
-| GND  ------------+-----+ GND      |
-| UART_TX ---------+-----+ GPIO17   | (UART RX)
-| UART_RX ---------+-----+ GPIO16   | (UART TX)
-| PWRKEY ----------+-----+ GPIO25   | (Power Control)
-+------------------+     +----------+
+SIM7600CE-T Module       ESP32-S3
++------------------+    +----------+
+| VCC  ------------+----+ 3.3V/5V  |
+| GND  ------------+----+ GND      |
+| UART_TX ---------+----+ GPIO17   | (UART RX)
+| UART_RX ---------+----+ GPIO16   | (UART TX)
+| PWRKEY ----------+----+ GPIO25   | (Power Control)
++------------------+    +----------+
 ```
 
-![Hình 4.2 - Sơ đồ kết nối giữa ESP32-S3 và modem A7670C qua UART](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–2.png)
+![Hình 4.2 - Sơ đồ kết nối giữa ESP32-S3 và SIMCom SIM7600CE-T qua UART](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–2.png)
 
-*Hình 4.2: Sơ đồ kết nối giữa ESP32-S3 và modem A7670C qua UART*
+*Hình 4.2: Sơ đồ kết nối giữa ESP32-S3 và modem SIMCom SIM7600CE-T qua UART*
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -130,8 +129,7 @@ Giá trị ADC đọc được sẽ được chuyển đổi ngược thành đi
 
 Sơ đồ nguyên lý tổng hợp của hệ thống bao gồm tất cả các khối chức năng được kết nối với nhau thông qua vi điều khiển ESP32-S3. Các kết nối chính bao gồm:
 
-- **UART1** (2 dây tín hiệu TX/RX): Kết nối với modem A7670C để truyền nhận dữ liệu 4G
-- **UART2** (2 dây tín hiệu TX/RX): Kết nối với module NEO-M8N để nhận dữ liệu GNSS (NMEA)
+- **UART1** (2 dây tín hiệu TX/RX): Kết nối với SIMCom SIM7600CE-T để truyền nhận dữ liệu 4G và GNSS tích hợp qua AT/NMEA
 - **I2C** (2 dây tín hiệu SDA/SCL): Kết nối với cảm biến gia tốc LIS3DH
 - **BLE** (không dây): Kết nối với adapter OBD2 vgate iCar Pro
 - **ADC** (1 kênh): Đọc điện áp ắc quy qua voltage divider
@@ -159,14 +157,14 @@ Việc phân công chân GPIO của ESP32-S3 được thiết kế đảm bảo 
 | GPIO 2    | IGN_IN        | Input             | Đọc trạng thái khóa điện (IGN) từ xe hoặc qua OBD2                           |
 | GPIO 4    | U_BATT_ADC    | Input (ADC)       | Đọc điện áp ắc quy xe qua voltage divider (R1=100k, R2=10k)                   |
 | GPIO 5    | CHARGER_EN    | Output            | Điều khiển bật/tắt IC sạc IP2312 (HIGH = sạc, LOW = không sạc)               |
-| GPIO 16   | MODEM_UART_TX | Output            | Truyền dữ liệu UART đến modem A7670C                                         |
-| GPIO 17   | MODEM_UART_RX | Input             | Nhận dữ liệu UART từ modem A7670C                                            |
+| GPIO 16   | MODEM_UART_TX | Output            | Truyền dữ liệu UART đến module SIM7600CE-T                                    |
+| GPIO 17   | MODEM_UART_RX | Input             | Nhận dữ liệu UART từ module SIM7600CE-T                                      |
 | GPIO 18   | POWER_MUX_SEL | Output            | Chọn nguồn cấp: LOW = ắc quy (Q1 ON), HIGH = pin backup (Q2 ON)              |
 | GPIO 19   | LVD_STATUS    | Input             | Đọc trạng thái Low Voltage Disconnect (HIGH = bình thường, LOW = ắc quy yếu) |
 | GPIO 21   | LIS3DH_INT    | Input (Interrupt) | Nhận tín hiệu ngắt từ cảm biến gia tốc LIS3DH khi phát hiện chuyển động      |
 | GPIO 22   | LIS3DH_SDA    | I/O (I2C)         | Đường dữ liệu I2C kết nối với cảm biến LIS3DH                                |
 | GPIO 23   | LIS3DH_SCL    | I/O (I2C)         | Đường xung nhịp I2C kết nối với cảm biến LIS3DH                              |
-| GPIO 25   | MODEM_PWRKEY  | Output            | Điều khiển bật/tắt nguồn modem A7670C                                        |
+| GPIO 25   | MODEM_PWRKEY  | Output            | Điều khiển bật/tắt nguồn modem SIMCom SIM7600CE-T (LTE + GNSS tích hợp)      |
 
 #### b) Các lưu ý về phân công chân
 
@@ -197,8 +195,7 @@ Sơ đồ đấu nối mô tả cách kết nối vật lý giữa ESP32-S3 DevK
                    +------------------+
 
 Kết nối ngoại vi:
-  GPIO 16/17 ---[UART1]--> A7670C (LTE)
-  UART2      ---[UART2]--> NEO-M8N (GNSS)
+  GPIO 16/17 ---[UART1]--> SIMCom SIM7600CE-T (LTE + GNSS)
   GPIO 22/23 ---[I2C]----> LIS3DH (IMU)
   GPIO 21    ---[INT]----> LIS3DH INT1
   BLE (nội)  ---[BLE]----> vgate iCar Pro (OBD2)
@@ -206,7 +203,7 @@ Kết nối ngoại vi:
   GPIO 5     ---[GPIO]---> IP2312 EN (Charger)
   GPIO 18    ---[GPIO]---> Power MUX (Relay/MOSFET)
   GPIO 19    <--[GPIO]---- LVD Status
-  GPIO 25    ---[GPIO]---> A7670C PWRKEY
+  GPIO 25    ---[GPIO]---> SIM7600CE-T PWRKEY
 ```
 
 ![Hình 4.5 - Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các module ngoại vi](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–5.png)
@@ -256,7 +253,7 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 |          +--v-+ +--v--+ +--v-+                            |
 |          |LDO | |LTE/ | |IP2312                           |
 |          |3.3V| |GNSS | |Charger                          |
-|          |    | |A7670C+NEO-M8N                          |
+|          |    | |SIM7600CE-T                              |
 |          +-+--+ +-----+ +--+--+                           |
 |            |                |                             |
 |         +--v--+          +--v--+                           |
@@ -484,9 +481,9 @@ Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân 
 +--------------------------------------------------+
 |                  VỎ HỘP BẢO VỆ                   |
 |  +----------+  +----------+  +----------+        |
-|  |  ESP32   |  | A7670C + |  |  IP2312  |        |
-|  |  S3      |  | NEO-M8N  |  |  Charger |        |
-|  |  DevKit  |  | LTE/GNSS |  |  + BMS   |        |
+|  |  ESP32   |  | SIM7600CE-T |  |  IP2312  |        |
+|  |  S3      |  | LTE/GNSS    |  |  Charger |        |
+|  |  DevKit  |  | tích hợp     |  |  + BMS   |        |
 |  +----------+  +----------+  +----------+        |
 |                                                  |
 |  +----------+  +----------+  +----------+        |
@@ -539,7 +536,7 @@ Các nội dung triển khai chi tiết ở tầng phần mềm được trình 
 | 1   | ESP32-S3 DevKitC-1             | Cái    | 1   | 100,000–200,000    | Module ESP32-S3-WROOM-1, 4MB Flash trở lên |
 | 2   | LIS3DH Breakout Board          | Cái    | 1   | 20,000–50,000      | Cảm biến gia tốc 3 trục, giao tiếp I2C     |
 | 3   | vgate iCar Pro (OBD2 BLE)      | Cái    | 1   | 150,000–300,000    | Adapter OBD2 BLE 4.0, tương thích ESP32-S3 |
-| 4   | SIMCom A7670C + u-blox NEO-M8N | Bộ     | 1   | 330,000–500,000    | Modem LTE + GNSS tách rời + anten + khe SIM |
+| 4   | SIMCom SIM7600CE-T | Cái    | 1   | 330,000–500,000    | Modem LTE Cat-4 + GNSS tích hợp, anten và khe SIM |
 | 5   | Pin 21700 Li-ion 5000mAh       | Cái    | 1   | 100,000–200,000    | Loại có protection board                   |
 | 6   | Module sạc IP2312 (3A)         | Cái    | 1   | 20,000–40,000      | Module sạc Type-C, dòng sạc 3A             |
 | 7   | BMS/Protection Board 1S        | Cái    | 1   | 10,000–20,000      | BMS 1S 3A hoặc DW01+MOSFET                 |
@@ -570,13 +567,13 @@ Các nội dung triển khai chi tiết ở tầng phần mềm được trình 
 
 Quy trình lắp ráp mạch điện tử được triển khai theo các bước sau:
 
-**Bước 1 - Kiểm tra linh kiện:** Kiểm tra tất cả các module và linh kiện trước khi lắp ráp. Test riêng từng module (ESP32-S3, LM2596, MT3608, IP2312, A7670C, NEO-M8N) để đảm bảo hoạt động đúng.
+**Bước 1 - Kiểm tra linh kiện:** Kiểm tra tất cả các module và linh kiện trước khi lắp ráp. Test riêng từng module (ESP32-S3, LM2596, MT3608, IP2312, SIM7600CE-T) để đảm bảo hoạt động đúng.
 
 **Bước 2 - Lắp ráp mạch nguồn:** Kết nối module Buck LM2596 với nguồn ắc quy xe (12V hoặc 24V), điều chỉnh điện áp ra 5V. Kết nối module Boost MT3608 với pin 21700, điều chỉnh điện áp ra 5V. Lắp relay module làm Power MUX. Kết nối module sạc IP2312 với pin và BMS.
 
 **Bước 3 - Kết nối vi điều khiển:** Gắn ESP32-S3 DevKitC lên breadboard hoặc PCB. Kết nối các chân GPIO theo bảng phân công (Bảng 4.1). Kết nối nguồn 5V từ Power MUX đến chân VIN của ESP32-S3 (qua LDO nội bộ xuống 3.3V).
 
-**Bước 4 - Kết nối ngoại vi:** Kết nối modem A7670C qua UART1 (GPIO16, GPIO17), kết nối module NEO-M8N qua UART2, kết nối cảm biến LIS3DH qua I2C (GPIO22, GPIO23), và kết nối mạch đo điện áp ắc quy (voltage divider) vào GPIO4 (ADC).
+**Bước 4 - Kết nối ngoại vi:** Kết nối modem SIM7600CE-T qua UART1 (GPIO16, GPIO17) và điều khiển PWRKEY qua GPIO25, kết nối cảm biến LIS3DH qua I2C (GPIO22, GPIO23), và kết nối mạch đo điện áp ắc quy (voltage divider) vào GPIO4 (ADC).
 
 **Bước 5 - Kiểm tra tích hợp:** Nạp firmware cơ bản để kiểm tra từng chức năng: đọc ADC, điều khiển GPIO, giao tiếp UART với modem, quét BLE, đọc I2C từ LIS3DH. Kiểm tra chuyển nguồn tự động bằng cách thay đổi điện áp đầu vào.
 
@@ -664,7 +661,7 @@ Sau khi lắp đặt xong, cần thực hiện các kiểm tra sau:
 
 1. **Kiểm tra nguồn điện:** Đo điện áp tại đầu vào thiết bị, xác nhận điện áp ắc quy xe (12V hoặc 24V) được cấp đầy đủ
 2. **Kiểm tra kết nối BLE:** Xác nhận ESP32-S3 kết nối được với adapter vgate iCar Pro và đọc dữ liệu OBD2 (IGN, RPM, tốc độ)
-3. **Kiểm tra GNSS:** Xác nhận module NEO-M8N bắt được vệ tinh và trả về tọa độ GPS chính xác (sai số < 5 mét)
+3. **Kiểm tra GNSS:** Xác nhận GNSS tích hợp trên SIM7600CE-T bắt được vệ tinh và trả về tọa độ GPS chính xác (sai số < 5 mét)
 4. **Kiểm tra 4G/LTE:** Xác nhận modem đăng ký mạng thành công, gửi được dữ liệu lên server qua MQTT
 5. **Kiểm tra chuyển nguồn:** Tắt máy xe (IGN OFF), xác nhận thiết bị chuyển sang chế độ tiết kiệm năng lượng và sử dụng pin dự phòng khi cần
 6. **Kiểm tra deep sleep:** Xác nhận ESP32-S3 vào chế độ deep sleep khi xe đỗ, và đánh thức đúng khi phát hiện rung động (qua LIS3DH) hoặc đến chu kỳ heartbeat
