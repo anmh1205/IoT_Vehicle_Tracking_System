@@ -15,7 +15,7 @@ Thư mục này chứa tài liệu thiết kế phần cứng cho hệ thống I
 │   ├── 03-mcu-esp32-s3.md                  # Vi điều khiển ESP32-S3
 │   ├── 04-obd2-ble-adapter.md              # OBD2 BLE Adapter
 │   ├── 05-lte-modem-a7670c.md              # LTE + GNSS SIM7600CE-T (tên file legacy)
-│   └── 06-backup-battery-21700.md          # Pin dự phòng
+│   └── 06-backup-battery-21700.md          # Pin dự phòng 18650 1S (tên file legacy)
 │
 ├── part-02-power-management/               # Quản lý nguồn
 │   ├── README.md
@@ -29,7 +29,8 @@ Thư mục này chứa tài liệu thiết kế phần cứng cho hệ thống I
 │   └── 08-power-calculations.md
 │
 ├── 03-system-diagram.md                    # Sơ đồ khối hệ thống
-└── 04-bill-of-materials.md                 # Danh sách vật liệu (BOM)
+├── 04-bill-of-materials.md                 # Danh sách vật liệu (BOM)
+└── 05-pinout-connection-matrix.md          # Ma trận kết nối chân (pinout)
 ```
 
 ## Tổng Quan
@@ -41,7 +42,7 @@ Thiết kế hiện tại xoay quanh **SIMCom SIM7600CE-T** (LTE + GNSS tích h�
 1. **ESP32-S3** - Vi điều khiển chính
    - Xử lý logic, deep sleep, điều phối state machine
    - Giao tiếp BLE với OBD2 adapter
-   - Giao tiếp UART1 với SIM7600CE-T (AT command + NMEA stream)
+   - Giao tiếp UART1 với SIM7600CE-T (AT command; GNSS runtime qua `AT+CGNSINF`)
    - Đo điện áp ắc quy qua ADC
 
 2. **LIS3DH** - Cảm biến IMU
@@ -54,16 +55,16 @@ Thiết kế hiện tại xoay quanh **SIMCom SIM7600CE-T** (LTE + GNSS tích h�
 
 4. **SIMCom SIM7600CE-T** - Modem LTE + GNSS
    - Kết nối mạng cellular LTE/3G/2G Auto mode (`AT+CNMP=2`)
-   - Cung cấp GNSS qua `AT+CGNSPWR` / `AT+CGNSTST`
+   - Runtime hiện tại lấy vị trí GNSS qua `AT+CGNSPWR` / `AT+CGNSINF` (`AT+CGNSTST` chỉ dùng cho debug nếu bật)
    - Thực hiện MQTT/HTTP, SSL/TLS, OTA (nếu cần)
 
-5. **Pin 21700 5000mAh** - Pin dự phòng
+5. **Pin 18650 Li-ion 1S** - Pin dự phòng
    - Cấp nguồn khi ắc quy yếu hoặc bị ngắt
    - Được sạc qua mạch IP2312 khi xe hoạt động
 
 6. **Power path + charger** - Buck/Boost/LVD/MUX/IP2312
    - Bảo vệ ắc quy, chuyển nguồn sang pin backup
-   - Sạc pin 21700 bằng module IP2312 khi xe chạy
+   - Sạc pin 18650 1S bằng module IP2312 khi xe chạy
 
 ### Power Management
 
@@ -71,7 +72,7 @@ Thiết kế hiện tại xoay quanh **SIMCom SIM7600CE-T** (LTE + GNSS tích h�
 2. **Boost Converter** (MT3608) - 3.7V → 5V
 3. **Power Path Management** - Chuyển đổi giữa ắc quy và pin backup
 4. **Low Voltage Disconnect** - Bảo vệ ắc quy theo profile 12V/24V
-5. **Charger** (IP2312) - Sạc pin 21700
+5. **Charger** (IP2312) - Sạc pin 18650 1S
 
 **Profile nguồn mặc định:**
 
@@ -94,6 +95,7 @@ Thiết kế hiện tại xoay quanh **SIMCom SIM7600CE-T** (LTE + GNSS tích h�
 1. Đọc chi tiết từng component trong [`part-01-components/`](./part-01-components/)
 2. Xem sơ đồ khối trong [`03-system-diagram.md`](./03-system-diagram.md)
 3. Tham khảo BOM trong [`04-bill-of-materials.md`](./04-bill-of-materials.md)
+4. Đối chiếu pinout tại [`05-pinout-connection-matrix.md`](./05-pinout-connection-matrix.md)
 
 ### Cho Người Làm Firmware
 
@@ -120,7 +122,7 @@ Thiết kế hiện tại xoay quanh **SIMCom SIM7600CE-T** (LTE + GNSS tích h�
 
 ### Tổng Chi Phí
 
-**Ước tính: 905,000–1,615,000 VNĐ**
+**Ước tính: 935,000–1,625,000 VNĐ**
 
 Xem chi tiết trong [`04-bill-of-materials.md`](./04-bill-of-materials.md).
 

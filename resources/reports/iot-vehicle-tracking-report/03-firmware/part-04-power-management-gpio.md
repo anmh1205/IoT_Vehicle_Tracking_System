@@ -26,26 +26,7 @@ void select_backup_power() {
 
 **Flowchart:**
 
-```
-Đọc U_batt (ADC) + load thresholds theo profile (12V/24V)
-  │
-  ├─ IGN = ON và U_batt >= IGN_ON?
-  │   └─ YES → select_battery_power()
-  │             DONE
-  │
-  └─ NO → U_batt <= Switch_OFF?
-           ├─ YES → select_backup_power()
-           │         Gửi cảnh báo
-           │         DONE
-           │
-           └─ NO → U_batt >= Switch_ON?
-                    ├─ YES → select_battery_power()
-                    │         Gửi cảnh báo phục hồi
-                    │         DONE
-                    │
-                    └─ NO → Giữ nguyên trạng thái
-                              DONE
-```
+![03-firmware-part-04-power-management-gpio-01](../../thesis-chapters/assets/figures/03-firmware-part-04-power-management-gpio-01.png)
 
 **Bộ ngưỡng mặc định theo profile:**
 
@@ -90,14 +71,14 @@ Mặc định:
 **GPIO Mapping:**
 
 - **GPIO19**: LVD_STATUS (đọc từ comparator LM393)
-  - HIGH (1): U_batt > Switch_OFF theo profile
-  - LOW (0): U_batt <= Switch_OFF theo profile
+  - HIGH (1): firmware xem là trạng thái low-voltage (`power_is_low_voltage()` trả `true`)
+  - LOW (0): firmware xem là không low-voltage
 
 **Đọc Trạng Thái:**
 
 ```c
 bool read_lvd_status() {
-    return gpio_get_level(LVD_STATUS);
+    return gpio_get_level(LVD_STATUS) == 1;  // HIGH = low-voltage theo firmware hiện tại
 }
 ```
 
@@ -148,7 +129,7 @@ float u_batt = v_adc * 11.0f;
 
 **Lưu Ý:**
 
-- **GPIO 34–39**: Chỉ input, không có pull-up/pull-down
-- **ADC**: GPIO 0–15, 25–27 (12-bit)
-- **Deep Sleep Wake-up**: EXT0 (GPIO 0–31), EXT1 (GPIO 32–39)
+- Khả năng input/output và pull-up/pull-down phụ thuộc từng GPIO cụ thể theo datasheet ESP32-S3.
+- ADC sử dụng cấu hình runtime hiện tại tại `GPIO4` (`PIN_U_BATT_ADC`).
+- Deep Sleep Wake-up: tham chiếu theo cấu hình wakeup thực tế trong firmware và giới hạn của ESP32-S3 datasheet.
 

@@ -1,8 +1,8 @@
-## III.1.9 Mạch Sạc và Bảo Vệ Pin 21700: IP2312
+## III.1.9 Mạch Sạc và Bảo Vệ Pin 18650 1S: IP2312
 
 ### Tổng Quan
 
-**IP2312** là IC sạc Li-ion với dòng sạc cao (3A), được sử dụng để sạc pin 21700 khi xe chạy.
+**IP2312** là IC sạc Li-ion với dòng sạc cao (3A), được sử dụng để sạc pin 18650 1S khi xe chạy.
 
 ### Đặc Tính Kỹ Thuật
 
@@ -49,7 +49,7 @@
 
 ### Chức Năng
 
-#### 1. Sạc Pin 21700
+#### 1. Sạc Pin 18650 1S
 
 - Dòng sạc: 3 A (khi IGN ON và U_batt đạt ngưỡng IGN_ON theo profile)
 - Điện áp sạc: 4.2 V (Li-ion standard)
@@ -70,13 +70,7 @@
 
 #### Sơ Đồ Kết Nối
 
-```
-5V từ Buck ──┬── IP2312 Module ──┬── Protection Board ──┬── Pin 21700
-             │                   │                      │
-             └── GND             └── GND                └── GND
-
-ESP32 GPIO ── R (10kΩ) ── IP2312 EN Pin
-```
+![part-02-power-management-06-charger-ip2312-01](../../../thesis-chapters/assets/figures/part-02-power-management-06-charger-ip2312-01.png)
 
 #### Điều Khiển từ ESP32
 
@@ -114,7 +108,7 @@ Ngưỡng mặc định:
    - Tự động ngắt khi ngắn mạch
 
 4. **Dòng xả tối đa**
-   - 3A (phù hợp với pin 21700)
+   - 3A (phù hợp với pin 18650 1S)
    - Đủ cho tracker + modem
 
 #### Lựa Chọn Protection Board

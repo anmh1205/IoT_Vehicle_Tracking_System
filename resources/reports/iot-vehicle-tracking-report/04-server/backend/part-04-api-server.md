@@ -15,15 +15,7 @@
 
 **Kiến Trúc:**
 
-```
-Frontend (Web/Mobile)
-    │
-    ├─ REST API ──→ API Server ──→ PostgreSQL
-    │                    │
-    └─ WebSocket ──→ Socket.IO ──→ VictoriaMetrics
-                         │
-                         └─ MQTT Bridge ──→ EMQX ──→ Trackers
-```
+![backend-part-04-api-server-01](../../../thesis-chapters/assets/figures/backend-part-04-api-server-01.png)
 
 ---
 
@@ -464,18 +456,7 @@ iot-vehicle-tracking-system/
 
 **Data Flow:**
 
-```
-IoT Device (ESP32)
-    → MQTT: v1/{device_id}/rawdata
-    → EMQX Broker
-    → MQTT Bridge
-        ├── Validate payload (Zod)
-        ├── Write to VictoriaMetrics (time-series)
-        ├── Write to VictoriaLogs (events)
-        ├── Update PostgreSQL (device status, sessions)
-        └── Emit event to Socket.IO (real-time)
-    → Dashboard updates
-```
+![backend-part-04-api-server-02](../../../thesis-chapters/assets/figures/backend-part-04-api-server-02.png)
 
 ---
 
@@ -583,21 +564,7 @@ networks:
 
 **Tech Stack Hoàn Chỉnh:**
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    BACKEND ARCHITECTURE                      │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  Frontend ──→ Express API Server ──→ PostgreSQL             │
-│      │              │                                        │
-│      │              ├──→ VictoriaMetrics (time-series)      │
-│      │              │                                        │
-│      └─→ Socket.IO ─┼──→ VictoriaLogs (logging)             │
-│                     │                                        │
-│                     └──→ MQTT Bridge ──→ EMQX ──→ Devices   │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
+![backend-part-04-api-server-03](../../../thesis-chapters/assets/figures/backend-part-04-api-server-03.png)
 
 **Ưu điểm:**
 

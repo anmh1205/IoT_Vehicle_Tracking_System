@@ -1,0 +1,14 @@
+graph TD
+    Bridge["MQTT Bridge"]
+    subgraph PG["PostgreSQL (Quan hệ)"]
+        PG1["Vehicles, Customers<br>Trips, Alerts<br>Violations, Commands<br>Geofences"]
+    end
+    subgraph VM["VictoriaMetrics (Chuỗi thời gian)<br>Lưu trữ: 30d"]
+        VM1["Vị trí GPS, Tốc độ<br>Mức pin, OBD2 metrics<br>Dữ liệu IMU"]
+    end
+    subgraph VL["VictoriaLogs (Nhật ký)<br>Lưu trữ: 7d"]
+        VL1["Sự kiện thiết bị<br>Nhật ký lỗi<br>Phiên làm việc<br>Message MQTT<br>Nhật ký kiểm toán"]
+    end
+    Bridge --> PG
+    Bridge --> VM
+    Bridge --> VL

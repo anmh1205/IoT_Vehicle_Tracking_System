@@ -5,11 +5,7 @@
 **MQTT Broker** là middleware trung tâm nhận messages từ các publisher (tracker) và phân phối đến subscribers (backend). Nó hoạt động theo mô hình **publish-subscribe (Pub/Sub)**.
 
 **Diagram:**
-```
-Tracker 1 ──┐
-Tracker 2 ──┤─→ MQTT Broker ──→ Backend Adapter ──→ PostgreSQL + InfluxDB
-Tracker 3 ──┘
-```
+![backend-part-01-mqtt-broker-01](../../../thesis-chapters/assets/figures/backend-part-01-mqtt-broker-01.png)
 
 ### VII.2 So Sánh Các MQTT Broker
 

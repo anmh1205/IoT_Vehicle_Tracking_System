@@ -1,0 +1,32 @@
+graph TD
+    users -->|1..* owner| vehicles
+    users -->|1..* verified_by| customers
+    users -->|1..*| notifications
+    customers -->|1..*| trips
+    customers -.->|"1..* [Phase 2]"| bookings
+    customers -.->|"1..* [Phase 2]"| reviews
+
+    vehicles -->|1..1| devices
+    vehicles -->|1..*| trips
+    vehicles -->|1..*| alerts
+    vehicles -->|1..*| maintenance_records
+    vehicles -.->|"1..* [Phase 2]"| bookings
+    vehicles -.->|"1..* [Phase 2]"| damage_reports
+    vehicles -.->|"1..* [Phase 2]"| reviews
+    vehicles <-->|"*..*  via vehicle_geofences"| geofences
+
+    bookings -.->|"1..1 [Phase 2]"| rental_contracts
+    bookings -.->|"1..* [Phase 2]"| payments
+    bookings -.->|"1..1 [Phase 2]"| trips
+    bookings -.->|"1..* [Phase 2]"| alerts
+    bookings -.->|"1..* [Phase 2]"| damage_reports
+    bookings -.->|"1..1 [Phase 2]"| reviews
+
+    trips -->|1..*| trip_events
+    trips -->|1..*| stops
+    trips -->|1..*| violations
+
+    devices -->|1..*| commands
+    devices -->|1..*| device_configurations
+    devices -->|1..*| device_status_history
+    devices -->|1..*| connection_logs

@@ -4,19 +4,7 @@
 
 **Dashboard Layout:**
 
-```
-┌─────────────────────────────────────────────────┐
-│ Header (Breadcrumbs, User Nav, Theme Toggle)   │
-├──────────┬──────────────────────────────────────┤
-│          │                                      │
-│ Sidebar  │  Main Content Area                   │
-│ (Nav)    │  - Page Header                      │
-│          │  - Filters/Search                   │
-│          │  - Data Table/Cards                 │
-│          │  - Pagination                       │
-│          │                                      │
-└──────────┴──────────────────────────────────────┘
-```
+![part-02-frontend-design-05-ui-patterns-01](../../../../thesis-chapters/assets/figures/part-02-frontend-design-05-ui-patterns-01.png)
 
 **Sidebar Features:**
 - Collapsible (icon-only mode)

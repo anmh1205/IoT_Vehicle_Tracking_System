@@ -1,0 +1,7 @@
+graph LR
+    MSG["MQTT Message"] --> RE["Rules Engine"]
+    RE --> AV["Tạo Alert / Violation"]
+    AV --> PG["Lưu PostgreSQL"]
+    AV --> NOTIF["Gửi thông báo"]
+    NOTIF --> TG["Telegram Bot"]
+    NOTIF --> EM["Email"]

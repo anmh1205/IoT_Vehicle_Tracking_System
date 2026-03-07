@@ -29,7 +29,7 @@ Thư mục này mô tả các thành phần phần cứng chính của tracker t
    - Kết nối AT command qua UART1, không có UART GNSS riêng
    - Luồng attach dùng CEREG trước CGACT, APN mặc định `internet`
 
-6. **[06-backup-battery-21700.md](./06-backup-battery-21700.md)** - Pin dự phòng 21700
+6. **[06-backup-battery-21700.md](./06-backup-battery-21700.md)** - Pin dự phòng 18650 1S
    - Dung lượng và thời gian hoạt động
    - Mạch bảo vệ pin
    - Chiến lược sạc/xả

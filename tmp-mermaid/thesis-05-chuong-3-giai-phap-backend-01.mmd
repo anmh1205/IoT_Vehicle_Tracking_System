@@ -1,0 +1,17 @@
+graph TD
+    Device["Thiết bị IoT<br>(ESP32 + GPS + OBD2)"]
+    EMQX["EMQX Broker<br>(ACL per device)"]
+    Bridge["Tracking_MqttBridge<br>(Node.js standalone)"]
+    PG["PostgreSQL<br>(Relational)"]
+    VM["VictoriaMetrics<br>(Time-Series)"]
+    VL["VictoriaLogs<br>(Event Logs)"]
+    API["Tracking_Backend<br>(Express.js API - Port 3000)"]
+    FE["Tracking_Frontend<br>(Next.js - Port 3002)"]
+
+    Device -->|"MQTT (Port 1883)"| EMQX
+    EMQX --> Bridge
+    Bridge --> PG
+    Bridge --> VM
+    Bridge --> VL
+    PG --> API
+    API -->|"WebSocket (Socket.IO)"| FE

@@ -2,7 +2,7 @@
 
 ### Tổng Quan
 
-BOM dưới đây phản ánh **kiến trúc phần cứng mục tiêu** hiện đang triển khai: **SIMCom SIM7600CE-T** (LTE Cat-4 + GNSS tích hợp). Một module duy nhất chịu trách nhiệm cả đường truyền cellular và định vị, giúp giảm đường dẫn tín hiệu, bo mạch và chi phí cáp anten. Giao tiếp với ESP32-S3 giữ nguyên chân UART1/RESET/EN/PWRKEY/RI, nên phần firmware chỉ cần tập trung vào driver SIM7600CE-T.
+BOM dưới đây phản ánh **kiến trúc phần cứng mục tiêu** hiện đang triển khai: **SIMCom SIM7600CE-T** (LTE Cat-4 + GNSS tích hợp). Một module duy nhất chịu trách nhiệm cả đường truyền cellular và định vị, giúp giảm đường dẫn tín hiệu, bo mạch và chi phí cáp anten. Theo runtime hiện tại, các tín hiệu bắt buộc là UART1 + PWRKEY; các net RESET/EN/RI vẫn giữ trong sơ đồ phần cứng để tham chiếu thiết kế.
 
 ### BOM Chi Tiết
 
@@ -12,7 +12,7 @@ BOM dưới đây phản ánh **kiến trúc phần cứng mục tiêu** hiện 
 | 2 | LIS3DH | Cái | 1 | 20,000–50,000 | Breakout board hoặc IC riêng |
 | 3 | OBD2 BLE (vgate iCar Pro) | Cái | 1 | 150,000–300,000 | BLE 4.0, đọc dữ liệu ECU |
 | 4 | LTE + GNSS module SIMCom SIM7600CE-T | Cái | 1 | 170,000–220,000 | Kèm LTE/GNSS antenna + SIM |
-| 5 | 21700 Li-ion 5000mAh | Cái | 1 | 100,000–200,000 | Loại có protection board |
+| 5 | 18650 Li-ion 1S (dung lượng theo cell chọn) | Cái | 1 | 60,000–180,000 | Cell 18650 + protection board 1S |
 | 6 | Module sạc IP2312 (3A) | Cái | 1 | 20,000–40,000 | Charger Type-C |
 | 7 | BMS/Protection Board 1S | Cái | 1 | 10,000–20,000 | BMS 1S 3A hoặc DW01+MOSFET |
 | 8 | Buck DC-DC (12/24→5V, 3A) | Cái | 1 | 15,000–25,000 | LM2596 module |
@@ -40,12 +40,12 @@ BOM dưới đây phản ánh **kiến trúc phần cứng mục tiêu** hiện 
 
 - Module SIM7600CE-T đóng vai trò cả **cellular** và **GNSS**, giúp loại bỏ cần UART GNSS riêng và rail 3.3V cho NEO-M8N. Chỉ cần rail 3.8V + logic hiện có.
 - Module chạy ở chế độ **Auto mode** (`AT+CNMP=2`), APN mặc định là `internet`, nên firmware không cần xử lý nhiều cấu hình carrier.
-- Pin mapping giữ nguyên như kiến trúc trước (UART1, PWRKEY, RESET, EN, RI) nên thiết kế phần cứng không thay đổi nhiều.
+- Pin map phần cứng vẫn giữ các net UART1/PWRKEY/RESET/EN/RI, nhưng runtime hiện tại chốt UART1 + PWRKEY là bắt buộc.
 
 #### 2. So sánh với thiết kế cũ (baseline)
 
 - Trước đây BOM gồm hai dòng riêng biệt: **SIMCom A7670C** (LTE) và **u-blox NEO-M8N** (GNSS). Kiến trúc đó vẫn được đề cập khi mô tả lịch sử hoặc bối cảnh baseline.
-- Việc chuyển sang SIM7600CE-T giảm đường dây UART, LDO, và độ phức tạp layout, đồng thời giữ được khả năng debug GNSS qua `AT+CGNSTST`/`AT+CGNSINF`.
+- Việc chuyển sang SIM7600CE-T giảm đường dây UART, LDO, và độ phức tạp layout; runtime lấy fix GNSS qua `AT+CGNSINF`, còn `AT+CGNSTST` giữ vai trò debug NMEA khi cần.
 - Nếu cần so sánh chi phí: A7670C + NEO-M8N ≈ 320,000–520,000 VNĐ, trong khi SIM7600CE-T đơn lẻ khoảng 170,000–220,000 VNĐ.
 
 #### 3. Nơi Mua Hàng
@@ -72,7 +72,7 @@ BOM dưới đây phản ánh **kiến trúc phần cứng mục tiêu** hiện 
 - SIM card (data plan)
 
 #### Nhóm 3: Nguồn và Pin
-- Pin 21700 5000mAh
+- Pin 18650 Li-ion 1S
 - Protection board 1S
 - Charger IP2312
 

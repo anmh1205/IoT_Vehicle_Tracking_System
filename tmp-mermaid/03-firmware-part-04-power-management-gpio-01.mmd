@@ -1,0 +1,8 @@
+graph TD
+    A[Đọc U_batt qua ADC<br>Load thresholds theo profile 12V/24V] --> B{IGN = ON<br>và U_batt >= IGN_ON?}
+    B -->|YES| C[select_battery_power<br>DONE]
+    B -->|NO| D{U_batt <= Switch_OFF?}
+    D -->|YES| E[select_backup_power<br>Gửi cảnh báo<br>DONE]
+    D -->|NO| F{U_batt >= Switch_ON?}
+    F -->|YES| G[select_battery_power<br>Gửi cảnh báo phục hồi<br>DONE]
+    F -->|NO| H[Giữ nguyên trạng thái<br>DONE]

@@ -1,0 +1,7 @@
+graph LR
+    ESP32["ESP32"] -->|"ASCII cmd"| BLETX["BLE TX"]
+    BLETX -->|"OBD-II"| ELM["ELM327"]
+    ELM -->|"OBD-II"| ECU["ECU xe"]
+    ECU -->|"OBD-II"| ELM
+    ELM -->|"OBD-II"| BLERX["BLE RX"]
+    BLERX -->|"ASCII rsp"| ESP32

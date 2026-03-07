@@ -29,3 +29,4 @@
 *.pptx
 *.xlsx
 
+/iot-vehicle-tracking-firmware/build

@@ -77,9 +77,10 @@ SIM7600CE-T đảm nhiệm cả hai vai trò:
    → OK
    AT+CGNSINF
    → +CGNSINF: 1,1,20260305120000.000,10.1234,106.1234,...
-   AT+CGNSTST=1
-   → +CGNSTST: $GNGGA,....  ; stream NMEA cho parser
    ```
+
+   - Runtime hiện tại đọc fix qua `CGNSINF`.
+   - `CGNSTST` giữ ở mức tùy chọn debug/stream nếu cần quan sát NMEA trực tiếp.
 
 6. **Xử lý mạng/MQTT:** sau khi `CGACT` active, thực hiện `AT+CMQTTSTART`, `AT+CMQTTCONNECT`, etc.
 
@@ -87,25 +88,27 @@ SIM7600CE-T đảm nhiệm cả hai vai trò:
 
    ```
    AT+CSCLK=1        ; UART power save
-   AT+CPSMS=1,,,,"00100000","00000101"  ; PSM cycled
    AT+CGNSPWR=0      ; tắt GNSS khi cần
    ```
+
+   - `CPSMS` giữ ở mức tùy chọn tối ưu, chưa là luồng runtime mặc định trong firmware hiện tại.
 
 ### Kết Nối Vật Lý Với ESP32-S3
 
 | Tín hiệu SIM7600CE-T | Vai trò | ESP32-S3 mục tiêu |
 | -------------------- | ------- | ----------------- |
 | UART_TX | Dữ liệu → ESP32 | GPIO17 (UART1 RX) |
-| UART_RX | Dữ liệu từ ESP32 | GPIO18 (UART1 TX) |
-| PWRKEY | Bật/tắt modem | GPIO4 |
-| RESET | Reset phần cứng | GPIO5 |
-| RI / STATUS | Wake/status | GPIO6/GPIO7 |
-| EN (nguồn modem) | Enable rail 3.8V | GPIO14 |
+| UART_RX | Dữ liệu từ ESP32 | GPIO16 (UART1 TX) |
+| PWRKEY | Bật/tắt modem | GPIO25 |
+| RESET | Reset phần cứng | Theo net `SIMCOM-RESET` trên sơ đồ (chưa thấy macro firmware riêng) |
+| RI / STATUS | Wake/status | Theo net `SIMCOM-RI/STATUS` trên sơ đồ (chưa thấy macro firmware riêng) |
+| EN (nguồn modem) | Enable rail 3.8V | Theo net `VBAT-EN` trên sơ đồ (firmware hiện dùng `PIN_POWER_MUX_SEL` cho mux nguồn) |
 
 ### Tích hợp GNSS
 
-- Module cung cấp NMEA qua `AT+CGNSTST=1` cho firmware, driver chỉ cần nối read / parse tương tự như NEO-M8N.
-- Tự động điều chỉnh tần suất fix: dùng `AT+CGNSTST=1` để stream NMEA rồi throttle luồng GGA/RMC theo nhu cầu (1–5 Hz) thay vì giữ toàn bộ data.
+- Runtime hiện tại đọc fix GNSS qua `AT+CGNSINF`.
+- Có thể điều chỉnh chu kỳ đọc `CGNSINF` (ví dụ 1–5 giây) để cân bằng độ mịn dữ liệu và năng lượng.
+- `AT+CGNSTST` có thể dùng như luồng debug NMEA khi cần quan sát thô trực tiếp.
 - Không cần UART GNSS riêng nên phần pin map vẫn giữ như mô hình cũ.
 
 ### Lịch Sử: Từ A7670C + NEO-M8N sang SIM7600CE-T

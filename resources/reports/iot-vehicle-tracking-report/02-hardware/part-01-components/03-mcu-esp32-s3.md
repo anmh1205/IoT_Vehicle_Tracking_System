@@ -165,7 +165,7 @@
 #### 4. Điều Khiển UART với Modem
 - Gửi/nhận AT commands với SIM7600CE-T
 - Quản lý kết nối 4G/LTE và GNSS tích hợp
-- Nhận dữ liệu GNSS qua `AT+CGNSTST`
+- Runtime lấy fix GNSS qua `AT+CGNSINF`; `AT+CGNSTST` chỉ dùng cho debug NMEA khi cần
 
 #### 5. Đo Điện Áp Ắc Quy
 - ADC đọc điện áp ắc quy

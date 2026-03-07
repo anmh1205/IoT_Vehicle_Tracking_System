@@ -2,46 +2,13 @@
 
 ### Tổng Quan
 
-Sơ đồ khối này phản ánh **kiến trúc phần cứng mục tiêu** hiện tại của tracker, xoay quanh một mô-đun duy nhất: **SIMCom SIM7600CE-T** đảm nhiệm LTE + GNSS tích hợp, kết nối trực tiếp với **ESP32-S3**. Pin mapping giữa ESP32-S3 và modem (UART, RESET, PWRKEY, EN, RI) giữ nguyên như mục tiêu trước đó, nên firmware chỉ cần cập nhật driver modem thay vì bổ sung UART mới.
+Sơ đồ khối này phản ánh **kiến trúc phần cứng mục tiêu** hiện tại của tracker, xoay quanh một mô-đun duy nhất: **SIMCom SIM7600CE-T** đảm nhiệm LTE + GNSS tích hợp, kết nối trực tiếp với **ESP32-S3**. Ở runtime hiện tại, các tín hiệu bắt buộc đã được chốt ở mức firmware là UART (`GPIO16/17`) và PWRKEY (`GPIO25`); các net RESET/CTS/RTS/RI/EN vẫn được giữ trong sơ đồ phần cứng để tham chiếu thiết kế.
 
 > **Lưu ý:** Module SIM7600CE-T chạy ở chế độ mạng `Auto mode` (`AT+CNMP=2`) và APN mặc định là `internet`. Tài liệu chỉ mô tả runtime cho SIM7600CE-T; A7670C + NEO-M8N chỉ còn được đề cập trong phần lịch sử baseline.
 
 ### Sơ Đồ Khối Chi Tiết
 
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│                          HỆ THỐNG TRACKER                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌──────────────────────────────────────────────┐                   │
-│  │ ESP32-S3                                     │                   │
-│  │ - Xử lý logic                                │                   │
-│  │ - State machine                              │                   │
-│  │ - Deep sleep management                      │                   │
-│  │ - ADC đo U_batt                              │                   │
-│  │ - BLE central cho OBD2                       │                   │
-│  └──────────────────────────────────────────────┘                   │
-│      │           │             │               │          │         │
-│      │ I2C       │ BLE         │ UART1         │ GPIO/ADC │         │
-│      │           │             │               │          │         │
-│  ┌───┴───┐   ┌───┴────┐   ┌────┴─────┐        ┌──────────┐        │
-│  │LIS3DH │   │vgate   │   │SIM7600CE-T│        │Power     │        │
-│  │IMU    │   │iCar Pro│   │(LTE + GNSS)│        │Control   │        │
-│  └───────┘   └────────┘   └──────────┘        └──────────┘        │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐   │
-│  │ Power Management System                                       │   │
-│  │ - Buck 12V/24V → 5V                                           │   │
-│  │ - Boost 3.7V → 5V                                             │   │
-│  │ - Power MUX                                                   │   │
-│  │ - Charger IP2312                                              │   │
-│  │ - LDO 3.8V cho SIM7600CE-T                                    │   │
-│  └───────────────┬───────────────────────────────┬───────────────┘   │
-│                  │                               │                   │
-│            Ắc quy xe 12V/24V                Pin backup 21700         │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![02-hardware-03-system-diagram-01](../../thesis-chapters/assets/figures/02-hardware-03-system-diagram-01.png)
 
 ### Profile Nguồn 12V/24V
 
@@ -54,26 +21,15 @@ ESP32 đọc U_batt qua ADC (divider `100k/10k`) để chọn profile và điề
 
 #### 1. Khi Lái Xe (IGN ON)
 
-```text
-OBD2 (BLE) ─┐
-            ├─→ ESP32-S3 ─→ Gộp dữ liệu ─→ SIM7600CE-T (LTE + GNSS) ─→ MQTT broker
-                                                  ↑
-                                                  └─ GNSS NMEA qua AT+CGNSTST
-```
+![02-hardware-03-system-diagram-02](../../thesis-chapters/assets/figures/02-hardware-03-system-diagram-02.png)
 
 #### 2. Khi Đỗ Xe (IGN OFF)
 
-```text
-LIS3DH ─→ Interrupt ─→ ESP32 wake up
-                      ├─→ Wake SIM7600CE-T, bật LTE + GNSS nếu cần
-                      └─→ Gửi heartbeat rồi đưa SIM7600CE-T về chế độ sleep/PSM
-```
+![02-hardware-03-system-diagram-03](../../thesis-chapters/assets/figures/02-hardware-03-system-diagram-03.png)
 
 #### 3. Quản Lý Nguồn
 
-```text
-ADC ─→ Đọc U_batt ─→ Logic nguồn ─→ Power MUX / Charger / LTE EN
-```
+![02-hardware-03-system-diagram-04](../../thesis-chapters/assets/figures/02-hardware-03-system-diagram-04.png)
 
 ### Ý Nghĩa Kiến Trúc Một Module
 
@@ -81,6 +37,7 @@ ADC ─→ Đọc U_batt ─→ Logic nguồn ─→ Power MUX / Charger / LTE E
 - Có thể đặt module vào **Auto mode** để mạng tự chuyển giữa LTE/UMTS/GSM
 - APN mặc định `internet`, nếu cần điều chỉnh chỉ thay đổi `AT+CGDCONT`
 - Firmware tập trung vào một driver duy nhất, giảm độ phức tạp pin/GPIO
+- Theo firmware source-of-truth hiện tại: UART modem dùng `GPIO16/17`, PWRKEY dùng `GPIO25`, LVD status đọc tại `GPIO19`, ADC U_batt tại `GPIO4`
 
 ### Kết Nối Vật Lý
 

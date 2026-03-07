@@ -1,0 +1,15 @@
+graph TD
+    subgraph Layout["Dashboard Layout"]
+        Header["Header<br>(Breadcrumbs, User Nav, Theme Toggle)"]
+        subgraph Body["Body"]
+            Sidebar["Sidebar (Nav)"]
+            subgraph Main["Main Content Area"]
+                PageHeader["Page Header"]
+                Filters["Filters / Search"]
+                DataArea["Data Table / Cards"]
+                Pagination["Pagination"]
+            end
+        end
+    end
+    Header --> Body
+    Sidebar --- Main

@@ -4,38 +4,7 @@
 
 Quy trình kết nối BLE giữa ESP32-S3 (Central) và Vgate iCar Pro (Peripheral) gồm **6 bước tuần tự**. Mỗi bước phải hoàn thành trước khi chuyển sang bước tiếp theo.
 
-```
-┌─────────────┐                                    ┌─────────────────┐
-│  ESP32-S3   │                                    │  Vgate iCar Pro │
-│  (Central)  │                                    │  (Peripheral)   │
-└──────┬──────┘                                    └────────┬────────┘
-       │                                                    │
-       │  Bước 1: Khởi tạo BLE Stack (NimBLE)              │
-       │──────────────────────────►                         │
-       │                                                    │
-       │  Bước 2: Quét tìm thiết bị (Scan)                 │
-       │─────────────────────────────────────────────────►  │
-       │                          ◄── Advertisement ─────── │
-       │                          (Service UUID: 0x18F0)    │
-       │                                                    │
-       │  Bước 3: Thiết lập kết nối (Connect)               │
-       │─────────────────────────────────────────────────►  │
-       │                          ◄── Connection Complete ── │
-       │                                                    │
-       │  Bước 4: Khám phá dịch vụ (Discover GATT)         │
-       │─────────────────────────────────────────────────►  │
-       │  ◄── Service 0x18F0, TX 0x2AF1, RX 0x2AF0 ─────── │
-       │                                                    │
-       │  Bước 5: Bật Notify trên RX (Enable CCCD)          │
-       │─────────────────────────────────────────────────►  │
-       │                  Ghi CCCD = 0x0100                 │
-       │                                                    │
-       │  Bước 6: Gửi/Nhận lệnh OBD2                        │
-       │── Write TX: "010C\r" ──────────────────────────►   │
-       │                       ◄── Notify RX: "41 0C ..." ──│
-       │                       ◄── Notify RX: ">\r" ────────│
-       │                                                    │
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-03-quy-trinh-ket-noi-ble-01](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-03-quy-trinh-ket-noi-ble-01.png)
 
 ---
 
@@ -47,21 +16,7 @@ Trước khi sử dụng BLE, cần khởi tạo stack NimBLE trên ESP32-S3. Ni
 
 ### Luồng khởi tạo
 
-```
-app_main()
-    │
-    ├── nimble_port_init()              ← Khởi tạo NimBLE controller + host
-    │
-    ├── Cấu hình callbacks:
-    │   ├── ble_hs_cfg.reset_cb         ← Gọi khi stack bị reset
-    │   ├── ble_hs_cfg.sync_cb          ← Gọi khi stack sẵn sàng (đồng bộ xong)
-    │   └── ble_hs_cfg.store_status_cb  ← Quản lý lưu trữ bonding
-    │
-    ├── ble_store_config_init()         ← Khởi tạo NVS storage cho BLE
-    │
-    └── xTaskCreate(ble_task, ...)      ← Tạo FreeRTOS task chạy NimBLE event loop
-        └── nimble_port_run()           ← Blocking: xử lý sự kiện BLE liên tục
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-03-quy-trinh-ket-noi-ble-02](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-03-quy-trinh-ket-noi-ble-02.png)
 
 ### Code minh họa
 
@@ -239,34 +194,7 @@ Sau khi kết nối BLE thành công, ESP32 cần **khám phá** (discover) cấ
 
 ### Luồng khám phá
 
-```
-ESP32                                     Vgate
-  │                                          │
-  │── Discover All Services ──────────────►  │
-  │  (ble_gattc_disc_all_svcs)               │
-  │                                          │
-  │  ◄── Service: UUID=0x18F0 ──────────────│
-  │       Start Handle: 0x0001               │
-  │       End Handle: 0x000F                 │
-  │                                          │
-  │── Discover Characteristics ───────────►  │
-  │  (ble_gattc_disc_all_chrs)               │
-  │                                          │
-  │  ◄── Char 1: UUID=0x2AF1 (TX) ─────────│
-  │       Handle: 0x0003                     │
-  │       Properties: Write                  │
-  │                                          │
-  │  ◄── Char 2: UUID=0x2AF0 (RX) ─────────│
-  │       Handle: 0x0005                     │
-  │       Properties: Notify                 │
-  │                                          │
-  │── Discover Descriptors ───────────────►  │
-  │  (ble_gattc_disc_all_dscs)               │
-  │                                          │
-  │  ◄── Desc: UUID=0x2902 (CCCD) ─────────│
-  │       Handle: 0x0006                     │
-  │                                          │
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-03-quy-trinh-ket-noi-ble-03](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-03-quy-trinh-ket-noi-ble-03.png)
 
 ### Kết quả cần tìm
 
@@ -390,20 +318,7 @@ int ble_obd_rxtx(ble_obd_ctx_t *obd, uint8_t mode, uint8_t pid,
 
 Giao tiếp BLE là **bất đồng bộ** (asynchronous): gửi lệnh tại một thời điểm, nhận phản hồi tại thời điểm khác qua callback. Để tạo giao diện **đồng bộ** (synchronous) cho tầng ứng dụng, firmware sử dụng **FreeRTOS Binary Semaphore**:
 
-```
-OBD Task                    Notify Callback
-    │                              │
-    │── Gửi "010C\r" ──►          │
-    │                              │
-    │── SemaphoreTake() ──►        │  (Block, chờ phản hồi)
-    │   ┊                          │
-    │   ┊  ◄── Nhận "41 0C ..."   │
-    │   ┊                          │
-    │   ┊  ◄── Nhận ">\r"         │
-    │   ┊      SemaphoreGive() ───►│  (Giải phóng)
-    │   ┊                          │
-    │◄──┘ (Tiếp tục xử lý)        │
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-03-quy-trinh-ket-noi-ble-04](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-03-quy-trinh-ket-noi-ble-04.png)
 
 ### Ví dụ hoàn chỉnh: Đọc RPM
 
@@ -426,51 +341,7 @@ if (status == 0) {
 
 ## 3.8. Sơ đồ trạng thái tổng thể (State Machine)
 
-```
-                    ┌──────────────┐
-                    │  UNINIT      │
-                    │  (Chưa init) │
-                    └──────┬───────┘
-                           │ ble_init_stack()
-                           ▼
-                    ┌──────────────┐
-                    │  IDLE        │
-                    │  (Chờ sync)  │
-                    └──────┬───────┘
-                           │ sync_cb()
-                           ▼
-                    ┌──────────────┐
-         ┌─────────│  SCANNING    │◄──────────────────┐
-         │ timeout │  (Đang quét) │                    │
-         │         └──────┬───────┘                    │
-         │                │ Tìm thấy UUID 0x18F0       │
-         ▼                ▼                            │
-  ┌──────────┐    ┌──────────────┐                     │
-  │  ERROR   │◄───│  CONNECTING  │                     │
-  │          │fail│  (Đang nối)  │                     │
-  └──────────┘    └──────┬───────┘                     │
-                         │ success                     │
-                         ▼                             │
-                  ┌──────────────┐                     │
-                  │  DISCOVERING │                     │
-                  │  (Khám phá)  │                     │
-                  └──────┬───────┘                     │
-                         │ Tìm đủ TX + RX + CCCD       │
-                         ▼                             │
-                  ┌──────────────┐                     │
-                  │  SUBSCRIBING │                     │
-                  │  (Bật Notify)│                     │
-                  └──────┬───────┘                     │
-                         │ CCCD = 0x0100               │
-                         ▼                             │
-                  ┌──────────────┐     disconnect      │
-                  │  CONNECTED   │─────────────────────┘
-                  │  (Sẵn sàng)  │  (auto-reconnect)
-                  └──────┬───────┘
-                         │
-                    Gửi/Nhận OBD2
-                    (Bước 6 lặp lại)
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-03-quy-trinh-ket-noi-ble-05](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-03-quy-trinh-ket-noi-ble-05.png)
 
 ---
 

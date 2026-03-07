@@ -1,0 +1,12 @@
+stateDiagram-v2
+    [*] --> UNINIT : Chưa init
+    UNINIT --> IDLE : ble_init_stack()
+    IDLE --> SCANNING : sync_cb()
+    SCANNING --> CONNECTING : Tìm thấy UUID 0x18F0
+    SCANNING --> ERROR : timeout
+    CONNECTING --> ERROR : fail
+    CONNECTING --> DISCOVERING : success
+    DISCOVERING --> SUBSCRIBING : Tìm đủ TX + RX + CCCD
+    SUBSCRIBING --> CONNECTED : CCCD = 0x0100
+    CONNECTED --> SCANNING : disconnect (auto-reconnect)
+    note right of CONNECTED : Gửi/Nhận OBD2<br>(Bước 6 lặp lại)

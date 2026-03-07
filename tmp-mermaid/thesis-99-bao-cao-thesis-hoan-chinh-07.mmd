@@ -1,0 +1,24 @@
+graph TD
+    subgraph Tracker["HỆ THỐNG TRACKER"]
+        ESP32["ESP32-S3 (Vi Điều Khiển Trung Tâm)<br>- CPU: Dual-core Xtensa LX7 240MHz<br>- RAM: 512 KB SRAM<br>- Flash: 4–16 MB<br>- BLE 5.0 tích hợp<br>- ADC 12-bit, 20 kênh"]
+        LIS3DH["LIS3DH (IMU)<br>(I2C)"]
+        OBD2["OBD2 BLE<br>vgate iCar Pro<br>(BLE)"]
+        SIM7600["SIM7600CE-T<br>(4G+GNSS)<br>(UART)"]
+        PowerCtrl["Power MUX Ctrl<br>(GPIO)"]
+        UBatt["U_batt Monitor<br>(ADC)"]
+        subgraph PowerMgmt["Hệ thống quản lý nguồn"]
+            Buck["Buck LM2596<br>7–40V→5V"]
+            Boost["Boost MT3608<br>3.7V→5V"]
+            Charger["IP2312 Charger<br>+ BMS"]
+        end
+    end
+    AcQuy["Ắc quy xe 12V/24V"]
+    PinBackup["Pin 21700 3.7V 5Ah"]
+
+    AcQuy --> Buck
+    PinBackup --> Boost
+    ESP32 --- LIS3DH
+    ESP32 --- OBD2
+    ESP32 --- SIM7600
+    ESP32 --- PowerCtrl
+    ESP32 --- UBatt

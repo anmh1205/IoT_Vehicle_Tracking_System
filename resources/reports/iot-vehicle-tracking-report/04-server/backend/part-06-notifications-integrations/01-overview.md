@@ -19,16 +19,7 @@ Hệ thống hỗ trợ gửi thông báo và cảnh báo qua **2 kênh chính**
 
 **Kiến Trúc:**
 
-```
-Alert/Violation Created
-    ↓
-Notification Service
-    ├─ Check Preferences
-    ├─ Filter (type, severity, vehicle)
-    └─ Send via Channels:
-        ├─ Telegram Bot
-        └─ Email (SMTP)
-```
+![part-06-notifications-integrations-01-overview-01](../../../../thesis-chapters/assets/figures/part-06-notifications-integrations-01-overview-01.png)
 
 ---
 

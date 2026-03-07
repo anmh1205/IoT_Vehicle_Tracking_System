@@ -169,18 +169,7 @@ Dự án được triển khai theo 7 giai đoạn chính, với tổng thời g
 
 ## 3.2. Biểu đồ Gantt (Gantt Chart)
 
-```
-Tuần:  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
-GĐ1:  [========]
-GĐ2:        [====================]
-GĐ3:              [========]
-GĐ4:                    [====================]
-GĐ5:                                [====================]
-GĐ6:                                               [===============]
-GĐ7:                                                        [========]
-       |--- Tháng 09 ---|--- Tháng 10 ---|--- Tháng 11 ---|--- Tháng 12 ---|
-       |--- Tháng 01 ---|--- Tháng 02 ---|
-```
+![thesis-14-phu-luc-01](assets/figures/thesis-14-phu-luc-01.png)
 
 ## 3.3. Chi tiết công việc theo giai đoạn
 

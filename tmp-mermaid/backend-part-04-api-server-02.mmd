@@ -1,0 +1,10 @@
+graph TD
+    ESP[IoT Device ESP32]
+    ESP -->|"MQTT: v1/device_id/rawdata"| EMQX[EMQX Broker]
+    EMQX --> MB[MQTT Bridge]
+    MB -->|Validate payload Zod| MB
+    MB -->|Write time-series| VM[(VictoriaMetrics)]
+    MB -->|Write events| VL[(VictoriaLogs)]
+    MB -->|Update status/sessions| PG[(PostgreSQL)]
+    MB -->|Emit real-time event| SIO[Socket.IO]
+    SIO --> DASH[Dashboard updates]

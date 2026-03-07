@@ -8,7 +8,7 @@ Hệ thống quản lý nguồn bao gồm:
 2. **Power Path Management**: Chuyển đổi giữa ắc quy và pin backup
 3. **Buck Converter**: 12V/24V → 5V (từ ắc quy)
 4. **Boost Converter**: 3.7V → 5V (từ pin)
-5. **Charger**: Sạc pin 21700 (IP2312)
+5. **Charger**: Sạc pin 18650 1S (IP2312)
 
 ### Nguyên Lý Hoạt Động
 
@@ -23,11 +23,11 @@ Hệ thống triển khai **2 profile nguồn độc lập** để vận hành t
 | ------- | ------------------- | --- | ---------------- | ------------- | -------- | -------- |
 | 12V     | Xe chạy bình thường | ON  | >= 13.0 V        | Ắc quy        | ✅ Có    | -        |
 | 12V     | Xe đỗ bình thường   | OFF | > 12.0 V         | Ắc quy        | ❌ Không | -        |
-| 12V     | Ắc quy yếu          | OFF | <= 12.0 V        | Pin 21700     | ❌ Không | ✅ Có    |
+| 12V     | Ắc quy yếu          | OFF | <= 12.0 V        | Pin 18650 1S     | ❌ Không | ✅ Có    |
 | 12V     | Ắc quy phục hồi     | OFF | >= 12.2 V        | Ắc quy        | ❌ Không | ✅ Có    |
 | 24V     | Xe chạy bình thường | ON  | >= 26.0 V        | Ắc quy        | ✅ Có    | -        |
 | 24V     | Xe đỗ bình thường   | OFF | > 24.0 V         | Ắc quy        | ❌ Không | -        |
-| 24V     | Ắc quy yếu          | OFF | <= 24.0 V        | Pin 21700     | ❌ Không | ✅ Có    |
+| 24V     | Ắc quy yếu          | OFF | <= 24.0 V        | Pin 18650 1S     | ❌ Không | ✅ Có    |
 | 24V     | Ắc quy phục hồi     | OFF | >= 24.4 V        | Ắc quy        | ❌ Không | ✅ Có    |
 
 #### Hysteresis
@@ -55,50 +55,7 @@ Hệ thống triển khai **2 profile nguồn độc lập** để vận hành t
 
 ### Kiến Trúc Tổng Thể
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    NGUỒN ĐẦU VÀO                        │
-├─────────────────────────────────────────────────────────┤
-│   Ắc Quy Xe (12V/24V)      Pin 21700 (3.7V)            │
-│         │                        │                      │
-│    ┌────▼────┐              ┌────▼────┐                │
-│    │ LM2596  │              │ MT3608  │                │
-│    │ Buck    │              │ Boost   │                │
-│    │12V/24V→5V│             │3.7V→5V  │                │
-│    └────┬────┘              └────┬────┘                │
-│         │                        │                      │
-│         └────────┬───────────────┘                      │
-│                  │                                      │
-│         ┌────────▼────────┐                            │
-│         │ Power MUX      │                            │
-│         │ (MOSFET/Relay) │                            │
-│         └────────┬────────┘                            │
-│                  │                                      │
-│         ┌────────▼────────┐                            │
-│         │  5V Rail        │                            │
-│         └────────┬────────┘                            │
-│                  │                                      │
-│    ┌─────────────┼─────────────┐                      │
-│    │             │             │                      │
-│ ┌──▼──┐    ┌─────▼─────┐  ┌───▼───┐                   │
-│ │LDO  │    │  Modem    │  │IP2312 │                   │
-│ │5→3.3│    │SIM7600CE-T│  │Charger│                   │
-│ └──┬──┘    └───────────┘  └───┬───┘                   │
-│    │                           │                        │
-│ ┌──▼──┐                    ┌──▼──┐                    │
-│ │ESP32│                    │Pin  │                    │
-│ └─────┘                    └─────┘                    │
-│                                                         │
-│ ┌──────────────────────────────────────┐               │
-│ │  Điều Khiển (ESP32 GPIO + ADC)      │               │
-│ │  - Đọc IGN (GPIO hoặc OBD2)         │               │
-│ │  - Đọc U_batt (ADC)                 │               │
-│ │  - Điều khiển Power MUX             │               │
-│ │  - Điều khiển Charger EN            │               │
-│ │  - Đọc LVD Status (ADC)             │               │
-│ └──────────────────────────────────────┘               │
-└─────────────────────────────────────────────────────────┘
-```
+![part-02-power-management-01-overview-01](../../../thesis-chapters/assets/figures/part-02-power-management-01-overview-01.png)
 
 ### Các Thành Phần
 

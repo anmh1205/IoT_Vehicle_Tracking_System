@@ -1,0 +1,7 @@
+graph LR
+    BUCK["Buck Output"] --> RNO["Relay NO"]
+    RNO --> RAIL["5V Rail"]
+    BUCK --> RCOM["Relay COM"]
+    RCOM --> RAIL
+    BOOST["Boost Output"] --> RNC["Relay NC"]
+    RNC --> RAIL

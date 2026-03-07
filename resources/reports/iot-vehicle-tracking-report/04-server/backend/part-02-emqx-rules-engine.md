@@ -143,23 +143,11 @@ WHERE payload.power.backup_battery < 3.5
 
 **Workflow:**
 
-```
-MQTT Message → Rules Engine → Create Alert/Violation → Save to PostgreSQL
-                                    ↓
-                            Send Notifications
-                                    ├─ Telegram Bot
-                                    └─ Email
-```
+![backend-part-02-emqx-rules-engine-01](../../../thesis-chapters/assets/figures/backend-part-02-emqx-rules-engine-01.png)
 
 **[Phase 2] Workflow:**
 
-```
-MQTT Message → Rules Engine → Check Booking Status → Create Alert/Violation → Save to PostgreSQL
-                                    ↓
-                            Send Notifications
-                                    ├─ Telegram Bot
-                                    └─ Email
-```
+![backend-part-02-emqx-rules-engine-02](../../../thesis-chapters/assets/figures/backend-part-02-emqx-rules-engine-02.png)
 
 **Integration với Notifications:**
 

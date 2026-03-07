@@ -140,29 +140,7 @@ static void obd_task(void *arg)
 
 ### Sơ đồ trạng thái reconnect
 
-```
-    ┌────────────────┐
-    │  CONNECTED     │──── Mất kết nối ────┐
-    │  (Đang đọc OBD)│                      │
-    └────────┬───────┘                      ▼
-             │                     ┌────────────────┐
-             │                     │  DISCONNECTED  │
-             │                     │  (Callback)    │
-             │                     └────────┬───────┘
-             │                              │ return true
-             │                              ▼
-             │                     ┌────────────────┐
-             │                     │  SCANNING      │
-             │    Kết nối lại      │  (Quét lại)    │
-             │◄────────────────────┤  Timeout: 30s  │
-             │                     └────────┬───────┘
-             │                              │ Không tìm thấy
-             │                              ▼
-             │                     ┌────────────────┐
-             │                     │  RETRY WAIT    │
-             │                     │  (Chờ 2 giây)  │──► Quay lại SCANNING
-             │                     └────────────────┘
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-05-xu-ly-loi-va-toi-uu-01](../../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-05-xu-ly-loi-va-toi-uu-01.png)
 
 ---
 
@@ -368,51 +346,7 @@ static const struct ble_gap_conn_params optimized_params = {
 
 ### Sơ đồ luồng hoàn chỉnh
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                    KHỞI ĐỘNG HỆ THỐNG                           │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  1. nimble_port_init() + xTaskCreate(ble_task)                   │
-│                          │                                       │
-│  2. Chờ sync_cb()        │                                       │
-│                          ▼                                       │
-│  3. Load NVS addr ─── Có? ─── ble_gap_connect(saved_addr)       │
-│                    │                          │                   │
-│                   Không                    Thành công?            │
-│                    │                    ┌─────┴─────┐            │
-│                    ▼                    │           Không         │
-│  4. ble_gap_disc_start()               │            │            │
-│     Filter: UUID 0x18F0                │            ▼            │
-│                    │                   │     Quay lại bước 4     │
-│              Tìm thấy?                 │                         │
-│                    │                   │                         │
-│                    ▼                   ▼                         │
-│  5. ble_gap_connect()                                            │
-│                    │                                             │
-│                    ▼                                             │
-│  6. Discover Service 0x18F0 + Chars TX/RX                        │
-│                    │                                             │
-│                    ▼                                             │
-│  7. Enable CCCD (0x0100) trên RX char                            │
-│                    │                                             │
-│                    ▼                                             │
-│  8. Save MAC to NVS (nếu lần đầu)                               │
-│                    │                                             │
-│                    ▼                                             │
-│  9. AT init: ATZ → ATE0 → ATL0 → ATS0 → ATH0 → ATSP0           │
-│                    │                                             │
-│                    ▼                                             │
-│  10. Gửi 0100\r → kiểm tra PID supported                        │
-│                    │                                             │
-│                    ▼                                             │
-│  11. Polling loop: đọc PID ở tần suất 2-5 Hz                    │
-│      ┌─── RPM ─── Speed ─── Temp ─── Fuel ───┐                 │
-│      │                                         │                 │
-│      └──── Gửi qua MQTT → Cloud Server ────────┘                │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-05-xu-ly-loi-va-toi-uu-02](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-05-xu-ly-loi-va-toi-uu-02.png)
 
 ---
 

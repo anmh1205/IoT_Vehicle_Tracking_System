@@ -1,0 +1,30 @@
+graph TD
+    subgraph CaoTacDong["Tác động CAO"]
+        CBE01["C-BE-01<br>(RBAC)"]
+        CIN02["C-IN-02<br>(MQTT Auth)"]
+        CBE02["C-BE-02<br>(IoT Endpoint)"]
+        CBE04["C-BE-04<br>(Token)"]
+        CIN01["C-IN-01<br>(MQTT TLS)"]
+        CFE01["C-FE-01<br>(SSRF)"]
+    end
+    subgraph TBTacDong["Tác động TRUNG BÌNH"]
+        CBE03["C-BE-03<br>(Random)"]
+        CIN06["C-IN-06<br>(Schema)"]
+        HBE06["H-BE-06<br>(Phiên)"]
+    end
+
+    subgraph XacSuatThap["Xác suất: Thấp"]
+        CBE01
+        CBE04
+        CBE03
+    end
+    subgraph XacSuatTB["Xác suất: Trung bình"]
+        CIN02
+        CIN01
+        CIN06
+    end
+    subgraph XacSuatCao["Xác suất: Cao"]
+        CBE02
+        CFE01
+        HBE06
+    end

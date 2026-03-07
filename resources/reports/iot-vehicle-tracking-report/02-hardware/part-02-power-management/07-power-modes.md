@@ -13,11 +13,11 @@
 - Lấy nguồn trực tiếp từ ắc quy khi `U_batt >= IGN_ON` theo profile (12V: `>=13.0V`, 24V: `>=26.0V`)
 - **Kết nối Bluetooth với OBD2 ELM327** (2–5 giây reconnect nếu đã paired)
 - Đọc IGN status từ OBD2 (xác nhận IGN ON)
-- Bật **SIM7600CE-T** (LTE + GNSS) liên tục, GNSS sử dụng `AT+CGNSPWR=1`, `AT+CGNSTST=1`
+- Bật **SIM7600CE-T** (LTE + GNSS) liên tục, GNSS runtime dùng `AT+CGNSPWR=1` và đọc fix qua `AT+CGNSINF`
 - Đọc dữ liệu OBD2 định kỳ (RPM, tốc độ, nhiên liệu) mỗi 5–30 giây
 - Gửi vị trí + dữ liệu OBD2 mỗi 5–30 giây qua MQTT/HTTP
 - **Giữ kết nối Bluetooth** trong suốt thời gian IGN ON (không deep sleep)
-- **Sạc pin 21700** khi `U_batt >= IGN_ON` theo profile
+- **Sạc pin 18650 1S** khi `U_batt >= IGN_ON` theo profile
 
 **Ước Lượng Dòng:** ~200–330 mA trung bình (bao gồm Bluetooth OBD2 + sạc pin)
 
@@ -39,11 +39,11 @@
 - Lấy nguồn từ ắc quy (không sạc pin)
 - **Ngắt kết nối Bluetooth OBD2** (không cần khi đỗ)
 - ESP32 deep sleep, chỉ để timer + wakeup từ LIS3DH
-- Sử dụng SIM7600CE-T ở chế độ sleep/PSM (`AT+CSCLK=1`, `AT+CPSMS=1,...`)
+- Sử dụng SIM7600CE-T ở chế độ sleep với `AT+CSCLK=1`; PSM (`AT+CPSMS`) giữ ở mức tùy chọn tối ưu, chưa là luồng runtime mặc định
 - Wake up mỗi 10–30 phút:
   - Kiểm tra U_batt (qua ADC)
   - Nếu `U_batt <= Switch_OFF` theo profile: Chuyển sang pin + gửi cảnh báo
-  - Bật SIM7600CE-T (GNSS `AT+CGNSPWR=1`, đọc fix, `AT+CGNSTST=1`), gửi heartbeat, rồi tắt GNSS lại
+  - Bật SIM7600CE-T (GNSS `AT+CGNSPWR=1`, đọc fix qua `AT+CGNSINF`), gửi heartbeat, rồi tắt GNSS lại
   - **Không kết nối OBD2** (tiết kiệm thời gian và năng lượng)
   - Tắt LTE/GNSS → đưa SIM7600CE-T lại chế độ sleep + ESP32 deep sleep
 
@@ -100,7 +100,7 @@
 **Khi Xe Chạy (IGN ON):**
 
 - Tracker dùng nguồn trực tiếp từ ắc quy
-- Sạc pin 21700 khi `U_batt >= IGN_ON` theo profile
+- Sạc pin 18650 1S khi `U_batt >= IGN_ON` theo profile
 - Dòng sạc: **3 A** (module IP2312)
 - Thời gian sạc đầy: ~2 giờ (pin 5,000 mAh)
 
@@ -108,7 +108,7 @@
 
 - Tracker dùng ắc quy (không sạc pin)
 - Nếu `U_batt <= Switch_OFF` của profile:
-  - Chuyển sang pin 21700
+  - Chuyển sang pin 18650 1S
   - Gửi cảnh báo "Ắc quy yếu - Chuyển sang pin backup"
 - Nếu đang backup và `U_batt >= Switch_ON`:
   - Chuyển lại ắc quy
@@ -120,11 +120,11 @@
 | ------- | --- | ---------------- | ------------- | -------- | ------------------------ |
 | 12V     | ON  | >= 13.0 V        | Ắc quy        | ✅ Có    | -                        |
 | 12V     | OFF | > 12.0 V         | Ắc quy        | ❌ Không | -                        |
-| 12V     | OFF | <= 12.0 V        | Pin 21700     | ❌ Không | ✅ Cảnh báo chuyển nguồn |
+| 12V     | OFF | <= 12.0 V        | Pin 18650 1S     | ❌ Không | ✅ Cảnh báo chuyển nguồn |
 | 12V     | OFF | >= 12.2 V        | Ắc quy        | ❌ Không | ✅ Cảnh báo phục hồi     |
 | 24V     | ON  | >= 26.0 V        | Ắc quy        | ✅ Có    | -                        |
 | 24V     | OFF | > 24.0 V         | Ắc quy        | ❌ Không | -                        |
-| 24V     | OFF | <= 24.0 V        | Pin 21700     | ❌ Không | ✅ Cảnh báo chuyển nguồn |
+| 24V     | OFF | <= 24.0 V        | Pin 18650 1S     | ❌ Không | ✅ Cảnh báo chuyển nguồn |
 | 24V     | OFF | >= 24.4 V        | Ắc quy        | ❌ Không | ✅ Cảnh báo phục hồi     |
 
 **Lợi Ích:**
@@ -134,7 +134,7 @@
 - Tự động chuyển nguồn khi ắc quy yếu
 - Cảnh báo kịp thời để người dùng biết trạng thái
 
-### IV.3 Quản Lý Pin Dự Phòng 21700
+### IV.3 Quản Lý Pin Dự Phòng 18650 1S
 
 **Sạc Pin:**
 

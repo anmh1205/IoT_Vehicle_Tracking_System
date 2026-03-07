@@ -1,0 +1,9 @@
+graph TD
+    subgraph GATTServer["GATT Server (Vgate iCar Pro)"]
+        subgraph Service["Service 0x18F0 — OBD2 Service"]
+            TX["TX Characteristic 0x2AF1<br>Property: Write<br>Mục đích: Gửi lệnh OBD2"]
+            subgraph RXGroup["RX Characteristic 0x2AF0<br>Property: Notify<br>Mục đích: Nhận phản hồi"]
+                CCCD["CCCD Descriptor 0x2902<br>Ghi 0x0100 = ON"]
+            end
+        end
+    end

@@ -1,0 +1,8 @@
+graph TD
+    AV[Alert/Violation Created]
+    AV --> NS[Notification Service]
+    NS --> CP[Check Preferences]
+    NS --> FL["Filter (type, severity, vehicle)"]
+    NS --> CH[Send via Channels]
+    CH --> TG[Telegram Bot]
+    CH --> EM[Email SMTP]

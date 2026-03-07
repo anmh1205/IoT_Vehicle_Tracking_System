@@ -19,11 +19,11 @@
 | ------- | ------------------- | --- | ---------------- | ------------- | -------- | -------- |
 | 12V     | Xe chạy bình thường | ON  | >= 13.0 V        | Ắc quy        | ✅ Có    | -        |
 | 12V     | Xe đỗ bình thường   | OFF | > 12.0 V         | Ắc quy        | ❌ Không | -        |
-| 12V     | Ắc quy yếu          | OFF | <= 12.0 V        | Pin 21700     | ❌ Không | ✅ Có    |
+| 12V     | Ắc quy yếu          | OFF | <= 12.0 V        | Pin 18650 1S     | ❌ Không | ✅ Có    |
 | 12V     | Ắc quy phục hồi     | OFF | >= 12.2 V        | Ắc quy        | ❌ Không | ✅ Có    |
 | 24V     | Xe chạy bình thường | ON  | >= 26.0 V        | Ắc quy        | ✅ Có    | -        |
 | 24V     | Xe đỗ bình thường   | OFF | > 24.0 V         | Ắc quy        | ❌ Không | -        |
-| 24V     | Ắc quy yếu          | OFF | <= 24.0 V        | Pin 21700     | ❌ Không | ✅ Có    |
+| 24V     | Ắc quy yếu          | OFF | <= 24.0 V        | Pin 18650 1S     | ❌ Không | ✅ Có    |
 | 24V     | Ắc quy phục hồi     | OFF | >= 24.4 V        | Ắc quy        | ❌ Không | ✅ Có    |
 
 ### Giải Pháp 1: Software-based (ADC ESP32) - Khuyến nghị
@@ -42,10 +42,7 @@
 
 #### Sơ Đồ Kết Nối
 
-```
-U_batt (12V/24V) ── Voltage Divider ── ADC ESP32
-                (R1=100k, R2=10k)
-```
+![part-02-power-management-05-low-voltage-disconnect-01](../../../thesis-chapters/assets/figures/part-02-power-management-05-low-voltage-disconnect-01.png)
 
 #### Tính Toán Voltage Divider (chuẩn cho cả 12V và 24V)
 
@@ -149,13 +146,7 @@ void check_lvd(power_profile_t profile) {
 
 #### Sơ Đồ
 
-```
-U_batt ── Voltage Divider (R1=100k, R2=10k) ── LM393 (-)
-                                                       │
-Reference (switchable theo profile 12V/24V) ───────── LM393 (+)
-                                                       │
-                                                       └── GPIO ESP32
-```
+![part-02-power-management-05-low-voltage-disconnect-02](../../../thesis-chapters/assets/figures/part-02-power-management-05-low-voltage-disconnect-02.png)
 
 #### Tính Toán
 

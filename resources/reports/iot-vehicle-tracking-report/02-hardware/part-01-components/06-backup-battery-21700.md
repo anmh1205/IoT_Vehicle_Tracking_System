@@ -1,14 +1,14 @@
-## III.1.6 Pin Dự Phòng: 21700 Li-ion 5000 mAh
+## III.1.6 Pin Dự Phòng: Li-ion 18650 5000 mAh (1S)
 
 ### Tổng Quan
 
-**21700 Li-ion** là pin dự phòng được sử dụng để cung cấp nguồn cho tracker khi ắc quy xe yếu, đảm bảo hệ thống tiếp tục hoạt động.
+**Pin Li-ion 18650 (cấu hình 1S)** là pin dự phòng được sử dụng để cung cấp nguồn cho tracker khi ắc quy xe yếu, đảm bảo hệ thống tiếp tục hoạt động.
 
 ### Đặc Tính Kỹ Thuật
 
 | Thông Số            | Giá Trị                                     |
 | ------------------- | ------------------------------------------- |
-| **Loại**            | Li-ion 21700                                |
+| **Loại**            | Li-ion 18650 (1S)                              |
 | **Dung lượng**      | 5000 mAh @ 3.7 V                            |
 | **Năng lượng**      | ~18.5 Wh (5000 mAh × 3.7 V)                 |
 | **Cấu hình**        | 1 cell đơn                                  |
@@ -18,7 +18,7 @@
 | **Số chu kỳ**       | 500–1000 chu kỳ (80% capacity)              |
 | **Giá**             | ~100,000–200,000 VNĐ (kèm protection board) |
 
-### Lý Do Chọn 21700 5000 mAh
+### Lý Do Chọn Pin 18650 5000 mAh (1S)
 
 #### 1. Đơn Giản
 
@@ -34,7 +34,7 @@
 
 #### 3. Phổ Biến
 
-- Cell 21700 phổ biến, giá tốt
+- Cell 18650 phổ biến, giá tốt
 - Dễ mua trên Shopee, Lazada
 - Nhiều thương hiệu: Samsung, LG, Panasonic, etc.
 
@@ -83,7 +83,7 @@
 - Tiêu thụ trung bình: 1.67 mAh / 20 phút = 0.0835 mAh/phút = 5.01 mAh/giờ
 - Thời gian hoạt động: 5000 mAh / 5.01 mAh/giờ = **~998 giờ = ~41 ngày**
 
-**Kết luận:** Pin 5000 mAh đủ cho ~40 ngày hoạt động ở chế độ heartbeat.
+**Kết luận:** Với mô hình lý tưởng, pin 5000 mAh có thể đạt gần ~40 ngày ở chế độ heartbeat; thời gian thực tế phụ thuộc cấu hình sleep, tổn hao mạch và điều kiện vận hành.
 
 #### Chế Độ Cảnh Báo (Motion Detected)
 
@@ -118,7 +118,7 @@
    - Tự động ngắt khi ngắn mạch
 
 4. **Dòng xả tối đa**
-   - 3 A (phù hợp với pin 21700)
+   - 3 A (phù hợp với pin 18650 1S)
    - Đủ cho tracker + modem
 
 #### Lựa Chọn Protection Board
@@ -179,11 +179,7 @@ Ngưỡng mặc định:
 
 #### Sơ Đồ Kết Nối
 
-```
-Pin 21700 ── Protection Board ──┬── Boost Converter (3.7V→5V)
-                                 │
-                                 └── Charger (IP2312) ← 5V từ Buck
-```
+![part-01-components-06-backup-battery-21700-01](../../../thesis-chapters/assets/figures/part-01-components-06-backup-battery-21700-01.png)
 
 #### Lưu Ý
 
@@ -195,7 +191,7 @@ Pin 21700 ── Protection Board ──┬── Boost Converter (3.7V→5V)
 
 #### Trên Shopee/Lazada VN:
 
-- Tìm: "21700 5000mAh", "Li-ion 21700", "pin 21700"
+- Tìm: "pin 18650 5000mAh", "Li-ion 18650", "pin 18650 1S"
 - Giá: ~100,000–200,000 VNĐ (kèm protection board)
 - Lưu ý: Chọn pin chính hãng (Samsung, LG, Panasonic) hoặc clone chất lượng tốt
 
@@ -230,13 +226,13 @@ Pin 21700 ── Protection Board ──┬── Boost Converter (3.7V→5V)
 
 ### Tài Liệu Tham Khảo
 
-- **Datasheet**: Samsung 21700, LG 21700, Panasonic 21700
+- **Datasheet cell**: Samsung/LG/Panasonic 18650 Li-ion
 - **Protection IC**: DW01 Datasheet
 - **Charging**: Li-ion Charging Guide
 
 ### Kết Luận
 
-Pin 21700 5000 mAh là lựa chọn phù hợp vì:
+Pin Li-ion 18650 5000 mAh (1S) là lựa chọn phù hợp vì:
 
 - ✅ Đơn giản (1 cell đơn)
 - ✅ Dung lượng đủ (~40 ngày heartbeat)

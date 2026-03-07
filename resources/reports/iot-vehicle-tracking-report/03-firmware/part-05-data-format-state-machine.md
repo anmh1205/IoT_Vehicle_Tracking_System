@@ -155,19 +155,7 @@ vehicle/{device_id}/commands
 
 **State Transition:**
 
-```
-INIT → CHECK_IGN
-  │
-  ├─ IGN ON → DRIVING
-  │   │
-  │   └─ IGN OFF → PARKED
-  │
-  ├─ IGN OFF → PARKED
-  │   │
-  │   └─ Motion → ALARM
-  │
-  └─ Timer/IMU → HEARTBEAT → SLEEP
-```
+![03-firmware-part-05-data-format-state-machine-01](../../thesis-chapters/assets/figures/03-firmware-part-05-data-format-state-machine-01.png)
 
 **Điều Kiện Chuyển State:**
 

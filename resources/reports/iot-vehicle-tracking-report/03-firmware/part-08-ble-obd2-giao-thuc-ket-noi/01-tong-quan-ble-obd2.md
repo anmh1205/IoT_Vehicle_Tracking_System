@@ -19,7 +19,7 @@ Bluetooth Low Energy (BLE), còn gọi là Bluetooth Smart, là phiên bản ti�
 
 ### Lý do chọn BLE cho hệ thống
 
-1. **Tiết kiệm năng lượng**: Thiết bị tracker chạy pin backup 21700, cần tiêu thụ ít năng lượng nhất có thể
+1. **Tiết kiệm năng lượng**: Thiết bị tracker chạy pin backup 18650 1S, cần tiêu thụ ít năng lượng nhất có thể
 2. **Tương thích đa nền tảng**: BLE hoạt động trên cả iOS và Android mà không cần chứng nhận MFi
 3. **Tốc độ kết nối nhanh**: Kết nối trong vài trăm mili-giây, phù hợp khi xe khởi động
 4. **ESP32-S3 hỗ trợ native**: Chip ESP32-S3 tích hợp sẵn BLE 5.0 (tương thích ngược BLE 4.0)
@@ -28,35 +28,7 @@ Bluetooth Low Energy (BLE), còn gọi là Bluetooth Smart, là phiên bản ti�
 
 GATT là giao thức cốt lõi của BLE, tổ chức dữ liệu theo cấu trúc phân cấp:
 
-```
-┌─────────────────────────────────────────┐
-│              GATT Server                │
-│         (Vgate iCar Pro)                │
-│                                         │
-│  ┌───────────────────────────────────┐  │
-│  │         Service (0x18F0)          │  │
-│  │         "OBD2 Service"            │  │
-│  │                                   │  │
-│  │  ┌─────────────────────────────┐  │  │
-│  │  │  TX Characteristic (0x2AF1) │  │  │
-│  │  │  Property: Write            │  │  │
-│  │  │  Mục đích: Gửi lệnh OBD2   │  │  │
-│  │  └─────────────────────────────┘  │  │
-│  │                                   │  │
-│  │  ┌─────────────────────────────┐  │  │
-│  │  │  RX Characteristic (0x2AF0) │  │  │
-│  │  │  Property: Notify           │  │  │
-│  │  │  Mục đích: Nhận phản hồi    │  │  │
-│  │  │                             │  │  │
-│  │  │  ┌───────────────────────┐  │  │  │
-│  │  │  │  CCCD Descriptor      │  │  │  │
-│  │  │  │  (0x2902)             │  │  │  │
-│  │  │  │  Ghi 0x0100 = ON      │  │  │  │
-│  │  │  └───────────────────────┘  │  │  │
-│  │  └─────────────────────────────┘  │  │
-│  └───────────────────────────────────┘  │
-└─────────────────────────────────────────┘
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-01-tong-quan-ble-obd2-01](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-01-tong-quan-ble-obd2-01.png)
 
 **Giải thích:**
 - **Service**: Nhóm logic chứa các characteristic liên quan. Mỗi service có một UUID duy nhất
@@ -123,13 +95,7 @@ Ví dụ: 01 0C  →  Mode 01 (dữ liệu hiện tại), PID 0C (tốc độ đ
 
 Vgate iCar Pro là adapter OBD2 sử dụng BLE 4.0 được sản xuất bởi Vgate (Trung Quốc). Thiết bị này đóng vai trò **cầu nối** giữa cổng OBD2 của xe và ESP32-S3 qua kênh BLE:
 
-```
-┌──────────┐        OBD-II        ┌──────────────┐       BLE 4.0      ┌──────────┐
-│   ECU    │◄─────────────────────│ Vgate iCar   │◄────────────────────│  ESP32   │
-│  (Xe)    │   CAN/KWP/J1850     │   Pro BLE    │  GATT Service      │   S3     │
-│          │                      │  (ELM327)    │  UUID: 0x18F0      │          │
-└──────────┘                      └──────────────┘                     └──────────┘
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-01-tong-quan-ble-obd2-02](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-01-tong-quan-ble-obd2-02.png)
 
 ### Lý do chọn Vgate iCar Pro
 
@@ -159,18 +125,7 @@ Vgate iCar Pro là adapter OBD2 sử dụng BLE 4.0 được sản xuất bởi 
 
 Trong kiến trúc tổng thể của hệ thống, Vgate iCar Pro là **nguồn dữ liệu OBD2** cung cấp thông tin động cơ cho ESP32-S3:
 
-```
-                        ┌─────────────────────────────┐
-                        │      ESP32-S3 Tracker        │
-                        │                             │
-  Vgate iCar Pro ──BLE──► BLE OBD2 Task              │
-                        │   ├── RPM, Speed, Fuel      │
-  GPS Module ──UART────►│   ├── GPS Lat/Lon           │──MQTT──► Cloud Server
-                        │   └── IMU Acceleration      │
-  LIS3DH IMU ──I2C────►│                             │
-                        │  SIMCom SIM7600CE-T Modem ───4G──┘
-                        └─────────────────────────────┘
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-01-tong-quan-ble-obd2-03](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-01-tong-quan-ble-obd2-03.png)
 
 Dữ liệu OBD2 được kết hợp với GPS và IMU tạo thành **gói telemetry** hoàn chỉnh, truyền lên cloud qua MQTT.
 

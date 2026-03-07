@@ -57,16 +57,7 @@
 
 #### Sơ Đồ Kết Nối
 
-```
-LIS3DH Breakout Board          ESP32-S3
-┌─────────────────┐           ┌──────────┐
-│ VCC  ───────────┼───────────┤ 3.3V     │
-│ GND  ───────────┼───────────┤ GND      │
-│ SDA  ───────────┼───────────┤ GPIO22   │ (I2C Data)
-│ SCL  ───────────┼───────────┤ GPIO23   │ (I2C Clock)
-│ INT1 ───────────┼───────────┤ GPIO21   │ (Interrupt)
-└─────────────────┘           └──────────┘
-```
+![part-01-components-02-imu-lis3dh-01](../../../thesis-chapters/assets/figures/part-01-components-02-imu-lis3dh-01.png)
 
 #### Cấu Hình I2C
 

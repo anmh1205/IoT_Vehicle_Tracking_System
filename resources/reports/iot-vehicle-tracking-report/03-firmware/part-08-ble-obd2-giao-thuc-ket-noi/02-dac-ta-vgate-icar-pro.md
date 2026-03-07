@@ -63,26 +63,7 @@ Một số phiên bản Vgate iCar Pro (hoặc iCar3) sử dụng bộ UUID 128-
 
 ### Sơ đồ GATT Profile chi tiết
 
-```
-Vgate iCar Pro (GATT Server)
-│
-└── Service: OBD2 Service (UUID: 0x18F0)
-    │
-    ├── Characteristic: TX (UUID: 0x2AF1)
-    │   ├── Properties: Write, Write Without Response
-    │   ├── Value: [lệnh OBD2 dạng ASCII]
-    │   └── Mục đích: ESP32 GỬI lệnh đến Vgate
-    │       Ví dụ: "010C\r" (đọc RPM)
-    │
-    └── Characteristic: RX (UUID: 0x2AF0)
-        ├── Properties: Notify
-        ├── Value: [phản hồi OBD2 dạng ASCII]
-        ├── Descriptor: CCCD (UUID: 0x2902)
-        │   └── Giá trị: 0x0100 = Bật Notify
-        │                 0x0000 = Tắt Notify
-        └── Mục đích: Vgate GỬI phản hồi về ESP32
-            Ví dụ: "41 0C 1F 40\r" (RPM = 2000)
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-02-dac-ta-vgate-icar-pro-01](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-02-dac-ta-vgate-icar-pro-01.png)
 
 ### Giải thích thuộc tính Characteristic
 

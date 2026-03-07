@@ -328,24 +328,7 @@ Hệ thống đã áp dụng nhiều thực hành bảo mật tốt:
 
 ## 8. Ma Trận Đánh Giá Rủi Ro
 
-```
-Tác động
-  ^
-  |  C-BE-01    C-IN-02         C-BE-02
-  |  (RBAC)     (MQTT Auth)     (IoT Endpoint)
-  |
-Cao|─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-  |  C-BE-04    C-IN-01         C-FE-01
-  |  (Token)    (MQTT TLS)      (SSRF)
-  |
-TB |─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-  |  C-BE-03    C-IN-06         H-BE-06
-  |  (Random)   (Schema)        (Phiên)
-  |
-Thấp|─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-  +──────────┬──────────┬──────────┬──────────>
-           Thấp     Trung bình    Cao    Khả năng xảy ra
-```
+![cloud-system-audit-report-01](thesis-chapters/assets/figures/cloud-system-audit-report-01.png)
 
 ---
 

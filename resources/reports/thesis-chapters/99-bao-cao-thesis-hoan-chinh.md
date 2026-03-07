@@ -1039,50 +1039,7 @@ _Hình 3.1: Sơ đồ khối tổng thể hệ thống tracker_
 
 > Nguồn: Hình vẽ của tác giả
 
-```
-+-----------------------------------------------------------+
-| HỆ THỐNG TRACKER                              |
-| --------------------------------------------- |
-|                                               |
-| +------------------------------------+        |
-|                                               | ESP32-S3 (Vi Điều Khiển Trung Tâm) |                                |
-|                                               | - Xử lý logic điều khiển           |                                |
-|                                               | - Quản lý deep sleep               |                                |
-|                                               | - ADC đo điện áp ắc quy            |                                |
-|                                               | - BLE 5.0 kết nối OBD2             |                                |
-| +------------------------------------+        |
-|                                               |                                    |                                |          |  |         |
-| I2C     BLE     UART      GPIO      ADC       |
-|                                               |                                    |                                |          |  |         |
-| +-----+ +----+ +--------+ +------+ +--------+ |
-|                                               | LIS3D                              |                                | OBD2     |  | SIM7600CE-T |  | Power |  | Voltage |  |
-|                                               | H IMU                              |                                | BLE      |  | LTE+GNSS |  | MUX   |  | Divider |  |
-|                                               |                                    |                                | vgat     |  | GNSS    |  |       |  |         |  |
-| +-----+                                       | e                                  | +--------+ +------+ +--------+ |
-| +----+                                        |
-|                                               |
-| +------------------------------------+        |
-|                                               | Hệ thống quản lý nguồn             |                                |
-|                                               | - Buck LM2596 (7–40V -> 5V, tương thích 12V/24V) |                                |
-|                                               | - Boost MT3608 (3.7V -> 5V)        |                                |
-|                                               | - Power MUX (Relay/MOSFET)         |                                |
-|                                               | - Charger IP2312 (sạc pin)         |                                |
-| +------------------+-----------------+        |
-|                                               |                                    |
-| +-----------+-----------+                     |
-|                                               |                                    |                                |
-| +------+-------+       +------+------+        |
-|                                               | BMS + Pin                          |                                | LDO 3.3V |  |
-|                                               | 1x21700 5Ah                        |                                | (Logic)  |  |
-| +---------------+       +------------+        |
-|                                               |
-+-----------------------------------------------------------+
-          |                              |
-   +------+------+               +------+------+
-   |   Ắc quy    |               |  Pin backup |
-   |   xe 12V/24V|               |  21700      |
-   +-------------+               +-------------+
-```
+![thesis-99-bao-cao-thesis-hoan-chinh-01](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-01.png)
 
 Hệ thống vận hành theo ba chế độ chính: (1) chế độ lái xe — khi động cơ bật (IGN ON), các module cần thiết được kích hoạt; (2) chế độ đỗ xe — khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ IMU LIS3DH duy trì giám sát chuyển động; (3) chế độ cảnh báo — khi IMU ghi nhận chuyển động bất thường, hệ thống tự đánh thức và gửi cảnh báo qua 4G.
 
@@ -1307,16 +1264,7 @@ _Hình 3.3: Sơ đồ kết nối LIS3DH với ESP32-S3 qua I2C_
 
 > Nguồn: Hình vẽ của tác giả
 
-```
-LIS3DH Breakout Board          ESP32-S3
-+------------------+           +----------+
-| VCC  ------------+-----------| 3.3V     |
-| GND  ------------+-----------| GND      |
-| SDA  ------------+-----------| GPIO22   | (I2C Data)
-| SCL  ------------+-----------| GPIO23   | (I2C Clock)
-| INT1 ------------+-----------| GPIO21   | (Interrupt -> Wakeup)
-+------------------+           +----------+
-```
+![thesis-99-bao-cao-thesis-hoan-chinh-02](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-02.png)
 
 Cấu hình I2C sử dụng địa chỉ 0x18 (khi SDO = LOW), tốc độ 400 kHz (Fast Mode), với điện trở kéo lên (pull-up) 4.7 kΩ đã có sẵn trên breakout board.
 
@@ -1336,42 +1284,7 @@ _Hình 3.4: Sơ đồ khối hệ thống quản lý nguồn_
 
 > Nguồn: Hình vẽ của tác giả
 
-```
-+-----------------------------------------------------------+
-| NGUỒN ĐẦU VÀO                             |
-| ----------------------------------------- |
-| Ắc Quy Xe (12V/24V)      Pin 21700 (3.7V) |
-|                                           |                |  |
-| +----v----+              +----v----+      |
-|                                           | LM2596         |  | MT3608   |  |
-|                                           | Buck           |  | Boost    |  |
-|                                           | 7–40V->5V      |  | 3.7V->5V |  |
-| +----+----+              +----+----+      |
-|                                           |                |  |
-| +--------+---------------+                |
-|                                           |                |
-| +--------v--------+                       |
-|                                           | Power MUX      |  |
-|                                           | (Relay/MOSFET) |  |
-| +--------+--------+                       |
-|                                           |                |
-| +--------v--------+                       |
-|                                           | 5V Rail        |  |
-| +--------+--------+                       |
-|                                           |                |
-| +------------+------------+               |
-|                                           |                |  |          |
-| +--v--+   +----v-----+  +---v---+         |
-|                                           | LDO            |  | LTE/GNSS |  | IP2312  |  |
-|                                           | 5->3.3         |  | SIM7600CE-T |  | Charger |  |
-|                                           |                |  | LTE+GNSS tích hợp |  |         |  |
-| +--+--+   +----------+  +---+---+         |
-|                                           |                |  |
-| +--v--+                  +--v--+          |
-|                                           | ESP32          |  | Pin      |  |
-| +-----+                  +-----+          |
-+-----------------------------------------------------------+
-```
+![thesis-99-bao-cao-thesis-hoan-chinh-03](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-03.png)
 
 ##### a) Mạch buck converter (đầu vào 12V/24V sang 5V)
 
@@ -2282,29 +2195,7 @@ _Hình 3.12: Sơ đồ kiến trúc tổng quan hệ thống Cloud_
 
 > Nguồn: Hình vẽ của tác giả
 
-```
-Thiết bị IoT (ESP32 + GPS + OBD2)
-         |
-         | MQTT (Port 1883)
-         v
-    EMQX Broker ──────── ACL per device
-         |
-         v
-   Tracking_MqttBridge (Node.js standalone)
-         |
-    ┌────┴─────────────────────┐
-    |            |              |
-    v            v              v
-PostgreSQL   VictoriaMetrics  VictoriaLogs
-(Relational) (Time-Series)   (Event Logs)
-    |
-    v
-  Tracking_Backend (Express.js API - Port 3000)
-         |
-         | WebSocket (Socket.IO)
-         v
-  Tracking_Frontend (Next.js - Port 3002)
-```
+![thesis-99-bao-cao-thesis-hoan-chinh-04](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-04.png)
 
 ##### b) Luồng dữ liệu chính trong hệ thống
 
@@ -2824,27 +2715,7 @@ _Hình 3.15: Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Fro
 
 Luồng dữ liệu trong ứng dụng Frontend tuân theo mô hình một chiều (unidirectional data flow), đồng thời kết hợp ba nguồn dữ liệu chính:
 
-```
-                   +-------------------+
-                   |   Next.js Pages   |
-                   |   (App Router)    |
-                   +--------+----------+
-                            |
-              +-------------+-------------+
-              |             |             |
-     +--------v---+  +-----v------+  +---v-----------+
-     | TanStack   |  | Zustand    |  | Socket.IO     |
-     | Query      |  | Store      |  | Client        |
-     | (REST API) |  | (Client)   |  | (Real-time)   |
-     +--------+---+  +-----+------+  +---+-----------+
-              |             |             |
-              +-------------+-------------+
-                            |
-                   +--------v----------+
-                   |  Backend API      |
-                   |  (Express 3000)   |
-                   +-------------------+
-```
+![thesis-99-bao-cao-thesis-hoan-chinh-05](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-05.png)
 
 1. **REST API (TanStack Query):** Dữ liệu CRUD (danh sách xe, chuyến đi, cảnh báo) được lấy từ Backend qua HTTP và cache bởi TanStack Query với cơ chế stale-while-revalidate.
 2. **Client State (Zustand):** Trạng thái giao diện như phiên đăng nhập, trạng thái sidebar, theme được quản lý tại client mà không cần gọi API.
@@ -2930,39 +2801,7 @@ Trang quản lý chuyến đi cung cấp lịch sử và chi tiết từng chuy�
 
 Trang bản đồ thời gian thực (`/dashboard/map`) là tính năng cốt lõi của hệ thống giám sát phương tiện. Kiến trúc tích hợp bản đồ bao gồm ba lớp chính:
 
-```
-+------------------------------------------+
-|         React Leaflet Map Layer          |
-|  +------------------------------------+  |
-|  |  Tile Layer (OpenStreetMap tiles)   |  |
-|  +------------------------------------+  |
-|  |  Vehicle Markers Layer              |  |
-|  |  (real-time position updates)       |  |
-|  +------------------------------------+  |
-|  |  Geofence Overlay Layer             |  |
-|  |  (polygon/circle visualization)     |  |
-|  +------------------------------------+  |
-|  |  Route Polyline Layer               |  |
-|  |  (trip route replay)               |  |
-|  +------------------------------------+  |
-+------------------------------------------+
-         |                    ^
-         | subscribe          | location events
-         v                    |
-+------------------------------------------+
-|      Socket.IO Client (WebSocket)        |
-|  - Connect with namespace /dashboard     |
-|  - Subscribe vehicle location events     |
-|  - Receive position data in real-time    |
-+------------------------------------------+
-         |
-         v
-+------------------------------------------+
-|      Backend API Server (Express)        |
-|  - Receive telemetry from MQTT Bridge    |
-|  - Broadcast via Socket.IO              |
-+------------------------------------------+
-```
+![thesis-99-bao-cao-thesis-hoan-chinh-06](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-06.png)
 
 ![Hình 3.19 - Kiến trúc tích hợp bản đồ thời gian thực](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–19.png)
 
@@ -3116,41 +2955,7 @@ Chương này trình bày chi tiết quá trình hiện thực phần cứng c�
 
 Hệ thống tracker lấy ESP32-S3 làm bộ xử lý trung tâm. Vi điều khiển này giao tiếp UART với modem 4G/GNSS, BLE với OBD2, I2C với cảm biến gia tốc và ADC để giám sát điện áp ắc quy. Toàn bộ hệ thống được cấp nguồn từ mạch quản lý nguồn thông minh, có khả năng tự động chuyển đổi giữa ắc quy xe và pin dự phòng.
 
-```text
-+-----------------------------------------------------------+
-|                    HỆ THỐNG TRACKER                       |
-+-----------------------------------------------------------+
-|                                                           |
-|  +--------------------------------------+                 |
-|  |  ESP32-S3 (Vi Điều Khiển Trung Tâm)  |                 |
-|  |  - CPU: Dual-core Xtensa LX7 240MHz  |                 |
-|  |  - RAM: 512 KB SRAM                   |                 |
-|  |  - Flash: 4–16 MB                     |                 |
-|  |  - BLE 5.0 tích hợp                   |                 |
-|  |  - ADC 12-bit, 20 kênh               |                 |
-|  +--------------------------------------+                 |
-|     |       |         |          |          |              |
-|    I2C     BLE      UART       GPIO       ADC             |
-|     |       |         |          |          |              |
-|  +-----+ +-----+ +----------+ +--------+ +--------+      |
-|  |LIS3DH| |OBD2 | |SIM7600CE-T| |Power   | |U_batt  |     |
-|  |(IMU) | |BLE  | |(4G+GNSS) | |MUX Ctrl| |Monitor |     |
-|  +------+ |vgate| +----------+ +--------+ +--------+      |
-|            |iCar |                                         |
-|            |Pro  |                                         |
-|            +-----+                                         |
-|                                                           |
-|  +---------------------------------------------+          |
-|  |    Hệ thống quản lý nguồn                    |          |
-|  |    - Buck LM2596 (7–40V -> 5V, tương thích 12V/24V) |          |
-|  |    - Boost MT3608 (3.7V -> 5V)              |          |
-|  |    - Power MUX (MOSFET/Relay)               |          |
-|  |    - Charger IP2312 (sạc pin 21700)         |          |
-|  +---------------------------------------------+          |
-|          |                        |                        |
-|     Ắc quy xe 12V/24V      Pin 21700 3.7V 5Ah             |
-+-----------------------------------------------------------+
-```
+![thesis-99-bao-cao-thesis-hoan-chinh-07](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-07.png)
 
 ![Hình 4.1 - Sơ đồ khối tổng thể hệ thống tracker IoT](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–1.jpg)
 
@@ -3181,18 +2986,7 @@ Vi điều khiển ESP32-S3-WROOM-1 được lựa chọn làm nhân xử lý tr
 
 **Giao tiếp I2C với cảm biến LIS3DH:** Cảm biến gia tốc 3 trục LIS3DH được kết nối qua bus I2C (GPIO22 SDA, GPIO23 SCL). Cảm biến này đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang đỗ, cho phép đánh thức ESP32-S3 từ chế độ deep sleep thông qua ngắt ngoài (interrupt) khi phát hiện rung động bất thường.
 
-```text
-Sơ đồ kết nối UART giữa ESP32-S3 và SIM7600CE-T:
-
-SIM7600CE-T Module       ESP32-S3
-+------------------+     +----------+
-| VCC  ------------+-----+ 3.3V/5V  |
-| GND  ------------+-----+ GND      |
-| UART_TX ---------+-----+ GPIO17   | (UART RX)
-| UART_RX ---------+-----+ GPIO16   | (UART TX)
-| PWRKEY ----------+-----+ GPIO25   | (Power Control)
-+------------------+     +----------+
-```
+![thesis-99-bao-cao-thesis-hoan-chinh-08](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-08.png)
 
 ![Hình 4.2 - Sơ đồ kết nối giữa ESP32-S3 và modem SIM7600CE-T qua UART](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–2.png)
 
@@ -3333,42 +3127,7 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 4. **Mạch sạc pin IP2312:** Sạc pin Li-ion 21700 khi xe hoạt động
 5. **Mạch giám sát điện áp LVD:** Giám sát điện áp ắc quy để quyết định chuyển nguồn
 
-```text
-+-----------------------------------------------------------+
-|                  KIẾN TRÚC NGUỒN                          |
-+-----------------------------------------------------------+
-|                                                           |
-|  Ắc Quy Xe (12V/24V)        Pin 21700 (3.7V, 5Ah)        |
-|       |                           |                       |
-|  +----v----+                +----v----+                   |
-|  | LM2596  |                | MT3608  |                   |
-|  | Buck    |                | Boost   |                   |
-|  | 7–40V->5V|               | 3.7V->5V|                   |
-|  +----+----+                +----+----+                   |
-|       |                          |                        |
-|       +----------+---------------+                        |
-|                  |                                        |
-|         +--------v--------+                               |
-|         |   Power MUX     |                               |
-|         | (Relay/MOSFET)  |                               |
-|         +--------+--------+                               |
-|                  |                                        |
-|         +--------v--------+                               |
-|         |    5V Rail       |                               |
-|         +---+------+------+---+                           |
-|             |      |      |   |                           |
-|          +--v-+ +--v--+ +--v-+                            |
-|          |LDO | |LTE/ | |IP2312                           |
-|          |3.3V| |GNSS | |Charger                          |
-|          |    | |SIM7600CE-T (LTE+GNSS)                  |
-|          +-+--+ +-----+ +--+--+                           |
-|            |                |                             |
-|         +--v--+          +--v--+                           |
-|         |ESP32|          | Pin |                           |
-|         +-----+          |21700|                           |
-|                          +-----+                          |
-+-----------------------------------------------------------+
-```
+![thesis-99-bao-cao-thesis-hoan-chinh-09](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-09.png)
 
 ![Hình 4.6 - Kiến trúc tổng thể mạch quản lý nguồn](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–6.jpg)
 

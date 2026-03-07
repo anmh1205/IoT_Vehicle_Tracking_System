@@ -7,7 +7,7 @@
 - ESP32 (vi điều khiển chính)
 - Modem 4G + GPS (tracking)
 - Mạch LVD (bảo vệ ắc quy)
-- Pin 3×21700 (backup power)
+- Pin 18650 1S (backup power)
 
 **Backend:**
 - EMQX (MQTT broker + rules engine)

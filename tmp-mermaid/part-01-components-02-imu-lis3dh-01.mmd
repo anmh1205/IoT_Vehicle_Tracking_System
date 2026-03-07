@@ -1,0 +1,22 @@
+graph LR
+    subgraph LIS["LIS3DH Breakout Board"]
+        VCC["VCC"]
+        GND1["GND"]
+        SDA["SDA"]
+        SCL["SCL"]
+        INT1["INT1"]
+    end
+
+    subgraph ESP["ESP32-S3"]
+        V33["3.3V"]
+        GND2["GND"]
+        G22["GPIO22 (I2C Data)"]
+        G23["GPIO23 (I2C Clock)"]
+        G21["GPIO21 (Interrupt)"]
+    end
+
+    VCC --- V33
+    GND1 --- GND2
+    SDA --- G22
+    SCL --- G23
+    INT1 --- G21

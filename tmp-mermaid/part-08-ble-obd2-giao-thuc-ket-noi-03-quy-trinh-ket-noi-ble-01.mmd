@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant ESP as ESP32-S3 (Central)
+    participant VG as Vgate iCar Pro (Peripheral)
+
+    Note over ESP: Bước 1: Khởi tạo BLE Stack (NimBLE)
+    ESP->>ESP: nimble_port_init()
+
+    Note over ESP,VG: Bước 2: Quét tìm thiết bị (Scan)
+    ESP->>VG: Scan request
+    VG-->>ESP: Advertisement (Service UUID: 0x18F0)
+
+    Note over ESP,VG: Bước 3: Thiết lập kết nối (Connect)
+    ESP->>VG: Connect request
+    VG-->>ESP: Connection Complete
+
+    Note over ESP,VG: Bước 4: Khám phá dịch vụ (Discover GATT)
+    ESP->>VG: Discover Services/Characteristics
+    VG-->>ESP: Service 0x18F0, TX 0x2AF1, RX 0x2AF0
+
+    Note over ESP,VG: Bước 5: Bật Notify trên RX (Enable CCCD)
+    ESP->>VG: Ghi CCCD = 0x0100
+
+    Note over ESP,VG: Bước 6: Gửi/Nhận lệnh OBD2
+    ESP->>VG: Write TX: "010C\r"
+    VG-->>ESP: Notify RX: "41 0C ..."
+    VG-->>ESP: Notify RX: ">\r"

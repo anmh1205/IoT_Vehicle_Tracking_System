@@ -2,7 +2,7 @@
 
 ### VI.1 Thông Số Pin và Sạc
 
-**Pin 21700:**
+**Pin 18650 1S:**
 
 - Dung lượng: **5,000 mAh @ 3.7 V** (≈ 18.5 Wh)
 - Điện áp: 3.0–4.2 V (nominal 3.7 V)
@@ -26,7 +26,7 @@
 
 **Thành phần tiêu thụ:**
 
-- ESP32-WROOM-32 (active): ~80–120 mA
+- ESP32-S3 (active): ~80–120 mA
 - Bluetooth Classic (OBD2): ~30–50 mA
 - SIM7600CE-T (LTE + GNSS tích hợp hoạt động cùng lúc): ~80–150 mA (mức hệ thống tham chiếu)
 - LIS3DH (IMU): ~0.1 mA
@@ -71,7 +71,7 @@
 - Dòng tiêu thụ: ~200–320 mA
 - Hoạt động liên tục 2–4 giờ
 
-### VI.3 Thời Gian Hoạt Động từ Pin 21700 (Backup Mode)
+### VI.3 Thời Gian Hoạt Động từ Pin 18650 1S (Backup Mode)
 
 **Khi ắc quy thấp hơn ngưỡng `Switch_OFF` theo profile, tracker chuyển sang pin:**
 

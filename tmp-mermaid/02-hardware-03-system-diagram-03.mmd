@@ -1,0 +1,11 @@
+graph LR
+    LIS["LIS3DH"]
+    INT["Interrupt"]
+    WAKE["ESP32 wake up"]
+    SIM["Wake SIM7600CE-T<br>bật LTE + GNSS nếu cần"]
+    HB["Gửi heartbeat rồi đưa<br>SIM7600CE-T về sleep (CSCLK)<br>PSM chỉ bật khi có cấu hình tối ưu riêng"]
+
+    LIS --> INT
+    INT --> WAKE
+    WAKE --> SIM
+    WAKE --> HB

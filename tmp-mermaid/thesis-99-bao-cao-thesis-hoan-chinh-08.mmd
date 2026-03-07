@@ -1,0 +1,8 @@
+graph TD
+    SIM["SIM7600CE-T Module"]
+    ESP32["ESP32-S3"]
+    SIM -->|"VCC → 3.3V/5V"| ESP32
+    SIM -->|"GND → GND"| ESP32
+    SIM -->|"UART_TX → GPIO17 (UART RX)"| ESP32
+    SIM -->|"UART_RX → GPIO16 (UART TX)"| ESP32
+    SIM -->|"PWRKEY → GPIO25 (Power Control)"| ESP32

@@ -1,0 +1,16 @@
+graph LR
+    users -->|"1:N [Chủ sở hữu xe]"| vehicles
+    users -->|"1:N [Người xác minh]"| customers
+    users -->|"1:N [Người nhận thông báo]"| notifications
+    vehicles -->|"1:1 [Thiết bị gắn với xe]"| devices
+    vehicles -->|"1:N [Chuyến đi của xe]"| trips
+    vehicles -->|"1:N [Cảnh báo của xe]"| alerts
+    vehicles -->|"1:N [Bảo trì xe]"| maintenance_records
+    vehicles -->|"N:N [Liên kết qua vehicle_geofences]"| geofences
+    customers -->|"1:N [Chuyến đi của khách hàng]"| trips
+    trips -->|"1:N [Sự kiện trong chuyến đi]"| trip_events
+    trips -->|"1:N [Điểm dừng trong chuyến đi]"| stops
+    trips -->|"1:N [Vi phạm trong chuyến đi]"| violations
+    devices -->|"1:N [Lệnh gửi đến thiết bị]"| commands
+    devices -->|"1:N [Lịch sử trạng thái]"| device_status_history
+    devices -->|"1:N [Nhật ký kết nối]"| connection_logs

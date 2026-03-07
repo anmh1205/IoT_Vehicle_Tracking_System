@@ -739,61 +739,7 @@ void tracker_fsm_run(void)
 
 #### b) Lưu đồ thuật toán tổng thể
 
-```
-                    +-----------+
-                    |   START   |
-                    +-----+-----+
-                          |
-                          v
-                  +-------+--------+
-                  | Khởi tạo:      |
-                  | IMU, Modem,    |
-                  | ADC, BLE, GPIO |
-                  +-------+--------+
-                          |
-                          v
-              +-----------+-----------+
-              | Đọc trạng thái IGN    |
-              | (OBD2 BLE hoặc ADC)  |
-              +-----------+-----------+
-                          |
-               +----------+----------+
-               |                     |
-           IGN = ON              IGN = OFF
-               |                     |
-               v                     v
-     +---------+---------+   +-------+--------+
-     | Chế độ LÁI XE     |   | Chế độ ĐỖ XE   |
-     | - Kết nối BLE     |   | - Ngắt BLE     |
-     | - Bật GNSS        |   | - Gửi heartbeat|
-     | - Đọc OBD2        |   | - Deep sleep   |
-     | - Đọc GPS, IMU    |   +-------+--------+
-     | - Gửi MQTT        |           |
-     +---------+---------+   +-------+--------+
-               |             | IMU interrupt?  |
-           IGN OFF?          +---+--------+----+
-               |                 |        |
-               v               YES       NO
-     +---------+---------+      |         |
-     | Chuyển sang ĐỖ XE |      v         v
-     +-------------------+ +----+----+ +--+-------+
-                           | ALARM   | | Timer    |
-                           | Cảnh báo| | wake-up? |
-                           | GPS+MQTT| +--+-------+
-                           +----+----+    |
-                                |        YES
-                            Hết động      |
-                                |         v
-                                v    +----+------+
-                           +----+---+| HEARTBEAT |
-                           | PARKED || Gửi status|
-                           +--------++----+------+
-                                          |
-                                          v
-                                    +-----+-----+
-                                    | DEEP SLEEP|
-                                    +-----------+
-```
+![thesis-08-chuong-4-trien-khai-firmware-01](assets/figures/thesis-08-chuong-4-trien-khai-firmware-01.png)
 
 *Hình 4.X: Lưu đồ thuật toán chính của firmware thiết bị theo dõi xe*
 

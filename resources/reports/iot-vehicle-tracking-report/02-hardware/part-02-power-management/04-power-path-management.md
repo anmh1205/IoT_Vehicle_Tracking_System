@@ -17,19 +17,7 @@
 
 #### Sơ Đồ Kết Nối
 
-```
-Ắc Quy (12V/24V) ── Buck (12V/24V→5V) ──┬── Q1 (P-MOS) ──┬── 5V Rail
-                                  │                │
-                                  └── Gate Control │
-                                                   │
-Pin (3.7V) ─── Boost (3.7V→5V) ──┬── Q2 (P-MOS) ──┘
-                                  │
-                                  └── Gate Control
-
-Diode OR Backup:
-D1 (Schottky) từ Buck ──┬── 5V Rail
-D2 (Schottky) từ Boost ─┘
-```
+![part-02-power-management-04-power-path-management-01](../../../thesis-chapters/assets/figures/part-02-power-management-04-power-path-management-01.png)
 
 ### Thành Phần
 
@@ -147,13 +135,7 @@ Xem chi tiết trong file firmware: [`part-04-power-management-gpio.md`](../../0
 
 **Sơ đồ:**
 
-```
-Buck Output ──┬── Relay NO ──┬── 5V Rail
-               │              │
-               └── Relay COM ─┘
-
-Boost Output ──┬── Relay NC ──┘
-```
+![part-02-power-management-04-power-path-management-02](../../../thesis-chapters/assets/figures/part-02-power-management-04-power-path-management-02.png)
 
 **Điều khiển:**
 

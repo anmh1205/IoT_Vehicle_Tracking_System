@@ -53,29 +53,7 @@ Hệ thống Cloud áp dụng kiến trúc phân tầng (layered architecture) k
 
 > Nguồn: Hình vẽ của tác giả
 
-```
-Thiết bị IoT (ESP32 + GPS + OBD2)
-         |
-         | MQTT (Port 1883)
-         v
-    EMQX Broker ──────── ACL per device
-         |
-         v
-   Tracking_MqttBridge (Node.js standalone)
-         |
-    ┌────┴─────────────────────┐
-    |            |              |
-    v            v              v
-PostgreSQL   VictoriaMetrics  VictoriaLogs
-(Relational) (Time-Series)   (Event Logs)
-    |
-    v
-  Tracking_Backend (Express.js API - Port 3000)
-         |
-         | WebSocket (Socket.IO)
-         v
-  Tracking_Frontend (Next.js - Port 3002)
-```
+![thesis-05-chuong-3-giai-phap-backend-01](assets/figures/thesis-05-chuong-3-giai-phap-backend-01.png)
 
 ##### b) Luồng dữ liệu chính trong hệ thống
 
@@ -196,13 +174,7 @@ WHERE payload.power.backup_battery < 3.5
 
 **Luồng xử lý cảnh báo:**
 
-```
-MQTT Message --> Rules Engine --> Tạo Alert/Violation --> Lưu PostgreSQL
-                                        |
-                                Gửi thông báo
-                                   |         |
-                             Telegram Bot   Email
-```
+![thesis-05-chuong-3-giai-phap-backend-02](assets/figures/thesis-05-chuong-3-giai-phap-backend-02.png)
 
 Ngoài ra, hệ thống còn cấu hình các rule cho phát hiện vi phạm vùng địa lý (geofence violation) và cảnh báo thiết bị mất kết nối (device offline) khi thiết bị không gửi dữ liệu trong khoảng thời gian định trước.
 
@@ -236,23 +208,7 @@ Do sự khác biệt cơ bản về đặc tính, hệ thống áp dụng chiế
 
 > Nguồn: Hình vẽ của tác giả
 
-```
-               MQTT Bridge
-                   |
-    ┌──────────────┼──────────────┬──────────────┐
-    |              |              |              |
-    v              v              v              v
-PostgreSQL    VictoriaMetrics  VictoriaLogs
-(Quan hệ)     (Chuỗi thời gian) (Nhật ký)
-|             |                |
-| Vehicles    | Vị trí GPS     | Sự kiện thiết bị
-| Customers   | Tốc độ         | Nhật ký lỗi
-| Trips       | Mức pin        | Phiên làm việc
-| Alerts      | OBD2 metrics   | Message MQTT
-| Violations  | Dữ liệu IMU   | Nhật ký kiểm toán
-| Commands    |                |
-| Geofences   | Lưu trữ: 30d  | Lưu trữ: 7d
-```
+![thesis-05-chuong-3-giai-phap-backend-03](assets/figures/thesis-05-chuong-3-giai-phap-backend-03.png)
 
 [Bảng 3.18: So sánh các cơ sở dữ liệu trong hệ thống]
 
@@ -292,23 +248,7 @@ PostgreSQL 16 lưu trữ toàn bộ dữ liệu nghiệp vụ của hệ thống
 
 > Nguồn: Hình vẽ của tác giả (sử dụng công cụ dbdiagram.io)
 
-```
-users (1) ──< (N) vehicles           [Chủ sở hữu xe]
-users (1) ──< (N) customers          [Người xác minh]
-users (1) ──< (N) notifications      [Người nhận thông báo]
-vehicles (1) ──< (1) devices         [Thiết bị gắn với xe]
-vehicles (1) ──< (N) trips           [Chuyến đi của xe]
-vehicles (1) ──< (N) alerts          [Cảnh báo của xe]
-vehicles (1) ──< (N) maintenance_records [Bảo trì xe]
-vehicles (N) ──< (N) geofences       [Liên kết qua vehicle_geofences]
-customers (1) ──< (N) trips          [Chuyến đi của khách hàng]
-trips (1) ──< (N) trip_events        [Sự kiện trong chuyến đi]
-trips (1) ──< (N) stops              [Điểm dừng trong chuyến đi]
-trips (1) ──< (N) violations         [Vi phạm trong chuyến đi]
-devices (1) ──< (N) commands         [Lệnh gửi đến thiết bị]
-devices (1) ──< (N) device_status_history [Lịch sử trạng thái]
-devices (1) ──< (N) connection_logs  [Nhật ký kết nối]
-```
+![thesis-05-chuong-3-giai-phap-backend-04](assets/figures/thesis-05-chuong-3-giai-phap-backend-04.png)
 
 Schema được thiết kế với khả năng mở rộng, các khóa ngoại và chỉ mục (index) đã được chuẩn bị sẵn để tích hợp thêm các bảng Phase 2 bao gồm: bookings (đặt xe), rental_contracts (hợp đồng thuê), payments (thanh toán), damage_reports (báo cáo hư hỏng) và reviews (đánh giá).
 

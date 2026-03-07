@@ -1,0 +1,13 @@
+graph LR
+    UBATT["U_batt"]
+    DIVIDER["Voltage Divider<br>(R1=100k, R2=10k)"]
+    LM393N["LM393 (-)"]
+    REF["Reference<br>(switchable theo profile 12V/24V)"]
+    LM393P["LM393 (+)"]
+    GPIO["GPIO ESP32"]
+
+    UBATT --> DIVIDER --> LM393N
+    REF --> LM393P
+    LM393N --- LM393_OUT((" "))
+    LM393P --- LM393_OUT
+    LM393_OUT --> GPIO

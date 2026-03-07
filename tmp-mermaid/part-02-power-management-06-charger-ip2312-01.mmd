@@ -1,0 +1,18 @@
+graph LR
+    BUCK["5V từ Buck"]
+    IP["IP2312 Module"]
+    PROT["Protection Board"]
+    PIN["Pin 18650 1S"]
+    GND["GND"]
+    GPIO["ESP32 GPIO"]
+    R["R (10kΩ)"]
+    EN["IP2312 EN Pin"]
+
+    BUCK --> IP
+    IP --> PROT
+    PROT --> PIN
+    BUCK --- GND
+    IP --- GND
+    PROT --- GND
+    PIN --- GND
+    GPIO --> R --> EN

@@ -1,0 +1,25 @@
+graph TD
+    subgraph Power["NGUỒN ĐẦU VÀO"]
+        AcQuy["Ắc Quy Xe (12V/24V)"]
+        Pin["Pin 21700 (3.7V)"]
+    end
+    Buck["LM2596 Buck<br>7–40V→5V"]
+    Boost["MT3608 Boost<br>3.7V→5V"]
+    PowerMUX["Power MUX<br>(Relay/MOSFET)"]
+    Rail5V["5V Rail"]
+    LDO["LDO 5→3.3V"]
+    SIM["LTE/GNSS<br>SIM7600CE-T<br>(LTE+GNSS tích hợp)"]
+    Charger["IP2312 Charger"]
+    ESP32["ESP32"]
+    Pin21700["Pin"]
+
+    AcQuy --> Buck
+    Pin --> Boost
+    Buck --> PowerMUX
+    Boost --> PowerMUX
+    PowerMUX --> Rail5V
+    Rail5V --> LDO
+    Rail5V --> SIM
+    Rail5V --> Charger
+    LDO --> ESP32
+    Charger --> Pin21700

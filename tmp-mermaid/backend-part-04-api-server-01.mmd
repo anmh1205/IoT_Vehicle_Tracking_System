@@ -1,0 +1,9 @@
+graph TD
+    FE[Frontend Web/Mobile]
+    FE -->|REST API| API[API Server]
+    FE -->|WebSocket| SIO[Socket.IO]
+    API --> PG[(PostgreSQL)]
+    SIO --> VM[(VictoriaMetrics)]
+    SIO --> MB[MQTT Bridge]
+    MB --> EMQX[EMQX]
+    EMQX --> TR[Trackers]

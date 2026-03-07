@@ -31,44 +31,7 @@ Hệ thống tracker cần lưu **hai loại dữ liệu**:
 
 > **📌 Cập nhật**: Đã chuyển từ InfluxDB sang VictoriaMetrics + VictoriaLogs theo kiến trúc IVM26.
 
-```
-┌──────────────────────────────────────┐
-│       Tracker (Xe)                   │
-│   ESP32 + 4G Modem                   │
-└──────────────┬───────────────────────┘
-               │ MQTT
-               ▼
-         ┌───────────┐
-         │   EMQX    │
-         │  Broker   │
-         └─────┬─────┘
-               │
-               ▼
-         ┌───────────┐
-         │MQTT Bridge│
-         └─────┬─────┘
-               │
-    ┌──────────┼──────────┬──────────────┐
-    │          │          │              │
-    ▼          ▼          ▼              ▼
-┌──────────┐ ┌────────────────┐ ┌──────────────┐
-│PostgreSQL│ │VictoriaMetrics │ │VictoriaLogs  │
-│(Relational)│ │ (Time-Series) │ │ (Logging)    │
-├──────────┤ ├────────────────┤ ├──────────────┤
-│ Vehicles │ │ GPS Locations  │ │ Device Events│
-│ Customers│ │ Speed data     │ │ Error Logs   │
-│ Trips    │ │ Battery levels │ │ Session Logs │
-│ Alerts   │ │ OBD2 metrics   │ │ MQTT Messages│
-│ Violations│ │ IMU data      │ │ Audit Trail  │
-│ Commands │ │                │ │              │
-│ History  │ │ Retention: 30d │ │ Retention: 7d│
-│          │ │                │ │              │
-│ [Phase 2]│ │                │ │              │
-│ Bookings │ │                │ │              │
-│ Contracts│ │                │ │              │
-│ Payments │ │                │ │              │
-└──────────┘ └────────────────┘ └──────────────┘
-```
+![part-03-database-01-overview-01](../../../../thesis-chapters/assets/figures/part-03-database-01-overview-01.png)
 
 ### IX.2.1 Lý Do Chọn VictoriaMetrics + VictoriaLogs
 

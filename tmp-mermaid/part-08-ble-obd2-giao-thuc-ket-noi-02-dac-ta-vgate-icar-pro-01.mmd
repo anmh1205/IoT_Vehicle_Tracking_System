@@ -1,0 +1,9 @@
+graph TD
+    subgraph GATTServer["Vgate iCar Pro (GATT Server)"]
+        subgraph Service["Service: OBD2 Service (UUID: 0x18F0)"]
+            TX["Characteristic: TX (UUID: 0x2AF1)<br>Properties: Write, Write Without Response<br>Value: lệnh OBD2 dạng ASCII<br>Mục đích: ESP32 GỬI lệnh đến Vgate<br>Ví dụ: '010C\\r' (đọc RPM)"]
+            subgraph RXGroup["Characteristic: RX (UUID: 0x2AF0)<br>Properties: Notify<br>Value: phản hồi OBD2 dạng ASCII<br>Mục đích: Vgate GỬI phản hồi về ESP32<br>Ví dụ: '41 0C 1F 40\\r' (RPM = 2000)"]
+                CCCD["Descriptor: CCCD (UUID: 0x2902)<br>0x0100 = Bật Notify<br>0x0000 = Tắt Notify"]
+            end
+        end
+    end

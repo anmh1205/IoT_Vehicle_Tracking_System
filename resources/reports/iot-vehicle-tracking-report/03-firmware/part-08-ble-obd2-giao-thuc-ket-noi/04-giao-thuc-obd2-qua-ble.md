@@ -4,12 +4,7 @@
 
 Giao tiếp OBD2 qua BLE sử dụng **text-based protocol** (giao thức dạng văn bản ASCII). Lệnh được gửi dưới dạng chuỗi ký tự hex, phản hồi cũng là chuỗi hex có khoảng trắng phân tách.
 
-```
-Luồng dữ liệu:
-
-ESP32 ──[ASCII cmd]──► BLE TX ──► ELM327 ──[OBD-II]──► ECU xe
-ESP32 ◄──[ASCII rsp]── BLE RX ◄── ELM327 ◄──[OBD-II]── ECU xe
-```
+![part-08-ble-obd2-giao-thuc-ket-noi-04-giao-thuc-obd2-qua-ble-01](../../../thesis-chapters/assets/figures/part-08-ble-obd2-giao-thuc-ket-noi-04-giao-thuc-obd2-qua-ble-01.png)
 
 ### Quy ước ký tự đặc biệt
 
@@ -98,21 +93,23 @@ Trong đó:
 Yêu cầu:  "010C\r"          (Đọc RPM)
 Phản hồi: "41 0C 1F 40\r\n" (Dữ liệu RPM)
            ">\r"             (Prompt — sẵn sàng)
+```
 
-Phân tích phản hồi "41 0C 1F 40":
-  ┌────┬────┬────┬────┐
-  │ 41 │ 0C │ 1F │ 40 │
-  └──┬─┴──┬─┴──┬─┴──┬─┘
-     │    │    │    └── Byte B = 0x40 = 64
-     │    │    └─────── Byte A = 0x1F = 31
-     │    └──────────── PID = 0x0C (RPM) ← echo
-     └───────────────── Mode = 0x41 (= 0x01 + 0x40) ← xác nhận
+Phân tích phản hồi `"41 0C 1F 40"`:
 
-  RPM = (A × 256 + B) / 4
-      = (31 × 256 + 64) / 4
-      = (7936 + 64) / 4
-      = 8000 / 4
-      = 2000 vòng/phút
+| Byte | Giá trị | Ý nghĩa |
+|------|---------|---------|
+| `41` | 0x41 | Mode = 0x41 (= 0x01 + 0x40) ← xác nhận |
+| `0C` | 0x0C | PID = 0x0C (RPM) ← echo |
+| `1F` | 0x1F = 31 | Byte A |
+| `40` | 0x40 = 64 | Byte B |
+
+```
+RPM = (A × 256 + B) / 4
+    = (31 × 256 + 64) / 4
+    = (7936 + 64) / 4
+    = 8000 / 4
+    = 2000 vòng/phút
 ```
 
 ### Các loại phản hồi đặc biệt

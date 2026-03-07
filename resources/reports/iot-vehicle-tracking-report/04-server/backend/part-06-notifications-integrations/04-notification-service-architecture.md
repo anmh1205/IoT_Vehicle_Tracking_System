@@ -24,17 +24,7 @@ notifications/
 
 **Flow:**
 
-```
-Alert/Violation Created
-    ↓
-Check Notification Preferences
-    ↓
-Filter by alert_type, severity, vehicle_ids
-    ↓
-Send via enabled channels:
-    ├─ Telegram (if enabled)
-    └─ Email (if enabled)
-```
+![part-06-notifications-integrations-04-notification-service-a-01](../../../../thesis-chapters/assets/figures/part-06-notifications-integrations-04-notification-service-a-01.png)
 
 **Implementation:**
 

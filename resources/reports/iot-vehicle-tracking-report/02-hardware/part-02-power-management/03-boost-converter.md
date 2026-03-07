@@ -2,13 +2,13 @@
 
 ### Tổng Quan
 
-**Boost Converter** tăng điện áp từ 3.7V (pin 21700) lên 5V để cung cấp cho hệ thống khi ắc quy yếu.
+**Boost Converter** tăng điện áp từ 3.7V (pin 18650 1S) lên 5V để cung cấp cho hệ thống khi ắc quy yếu.
 
 ### Yêu Cầu
 
 | Thông Số        | Giá Trị                             |
 | --------------- | ----------------------------------- |
-| **Input**       | 3.0–4.2 V (từ pin 21700)            |
+| **Input**       | 3.0–4.2 V (từ pin 18650 1S)            |
 | **Output**      | 5 V                                 |
 | **Dòng tối đa** | ≥ 2 A (đủ cho tracker khi dùng pin) |
 | **Hiệu suất**   | >85%                                |
@@ -16,7 +16,7 @@
 
 ### Lý Do Cần Boost
 
-- **Pin 21700**: 3.0–4.2 V (nominal 3.7 V)
+- **Pin 18650 1S**: 3.0–4.2 V (nominal 3.7 V)
 - **Hệ thống cần**: 5 V (ESP32, modem, charger)
 - **Giải pháp**: Boost converter 3.7V → 5V
 

@@ -56,16 +56,7 @@ Frontend là giao diện web/mobile để người dùng tương tác với hệ
 
 ### XII.4 Kiến Trúc
 
-```
-Frontend (Next.js 16)
-    ├─ HTTP/REST API ──→ Backend API Server (Express + TypeScript)
-    │                           ↓
-    │                    PostgreSQL + VictoriaMetrics
-    │                           ↓
-    └─ WebSocket ──→ Backend API Server ──→ EMQX MQTT Broker
-                                                    ↓
-                                            IoT Trackers
-```
+![frontend-part-01-frontend-01](../../../thesis-chapters/assets/figures/frontend-part-01-frontend-01.png)
 
 ---
 

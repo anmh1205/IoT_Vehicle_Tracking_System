@@ -1,0 +1,32 @@
+stateDiagram-v2
+    [*] --> START
+    START --> KhoiTao : Bắt đầu
+
+    KhoiTao : Khởi tạo<br>IMU, Modem, ADC, BLE, GPIO
+
+    KhoiTao --> DocIGN
+    DocIGN : Đọc trạng thái IGN<br>(OBD2 BLE hoặc ADC)
+
+    DocIGN --> CheDo_LaiXe : IGN = ON
+    DocIGN --> CheDo_DoXe : IGN = OFF
+
+    CheDo_LaiXe : Chế độ LÁI XE<br>- Kết nối BLE<br>- Bật GNSS<br>- Đọc OBD2<br>- Đọc GPS, IMU<br>- Gửi MQTT
+
+    CheDo_DoXe : Chế độ ĐỖ XE<br>- Ngắt BLE<br>- Gửi heartbeat<br>- Deep sleep
+
+    CheDo_LaiXe --> Chuyen_DoXe : IGN OFF
+    Chuyen_DoXe : Chuyển sang ĐỖ XE
+    Chuyen_DoXe --> CheDo_DoXe
+
+    CheDo_DoXe --> ALARM : IMU interrupt = YES
+    CheDo_DoXe --> HEARTBEAT : Timer wake-up = YES
+
+    ALARM : ALARM<br>Cảnh báo<br>GPS + MQTT
+
+    ALARM --> CheDo_DoXe : Hết chuyển động
+
+    HEARTBEAT : HEARTBEAT<br>Gửi status
+
+    HEARTBEAT --> DEEP_SLEEP
+    DEEP_SLEEP : DEEP SLEEP
+    DEEP_SLEEP --> DocIGN : Timer / IMU wake-up
