@@ -124,10 +124,10 @@ Các tầng giao tiếp với nhau thông qua cơ chế message queue và semaph
 |---|---|---|---|
 | 2 | IGN_IN | Input | Đọc trạng thái khóa điện (hoặc qua OBD2) |
 | 4 | U_BATT_ADC | Input | Đọc điện áp ắc quy (ADC 12-bit) |
-| 5 | CHARGER_EN | Output | Điều khiển IC sạc IP2312 |
+| 5 | CHARGER_EN | Output | Điều khiển IC sạc TP4056 |
 | 16 | MODEM_UART_TX | Output | UART TX đến module SIMCom SIM7600CE-T |
 | 17 | MODEM_UART_RX | Input | UART RX từ module SIMCom SIM7600CE-T |
-| 18 | POWER_MUX_SEL | Output | Chọn nguồn cấp (ắc quy/pin dự phòng) |
+| 18 | POWER_PATH_EN | Output | Chọn nguồn cấp (ắc quy/pin dự phòng) |
 | 19 | LVD_STATUS | Input | Trạng thái từ comparator LM393 |
 | 21 | LIS3DH_INT | Input | Ngắt từ cảm biến gia tốc IMU |
 | 22 | LIS3DH_SDA | I/O | I2C data line |
@@ -520,7 +520,7 @@ void process_server_command(const char *payload)
 
 #### a) Đọc điện áp và điều khiển nguồn
 
-Module quản lý nguồn thực hiện đọc điện áp ắc quy qua ADC, điều khiển chọn nguồn cấp (ắc quy hoặc pin dự phòng) qua MOSFET Power MUX, và điều khiển IC sạc IP2312.
+Module quản lý nguồn thực hiện đọc điện áp ắc quy qua ADC, điều khiển power path (Diode-OR + EN) giữa nhánh chính và nhánh backup, đồng thời điều khiển IC sạc TP4056.
 
 ```c
 // Đọc điện áp ắc quy qua ADC (12-bit, chia áp)
@@ -544,16 +544,16 @@ void power_management_task(void *param)
 
         if (ign_on) {
             // IGN ON: dùng nguồn ắc quy, bật sạc pin dự phòng
-            gpio_set_level(POWER_MUX_SEL, 0);   // Chọn ắc quy
+            gpio_set_level(POWER_PATH_EN, 0);   // Chọn ắc quy
             gpio_set_level(CHARGER_EN, 1);       // Bật sạc
         } else if (u_batt <= switch_off) {
             // Điện áp thấp: chuyển sang pin dự phòng theo profile
-            gpio_set_level(POWER_MUX_SEL, 1);   // Chọn pin dự phòng
+            gpio_set_level(POWER_PATH_EN, 1);   // Chọn pin dự phòng
             gpio_set_level(CHARGER_EN, 0);       // Tắt sạc
             send_low_battery_alert(u_batt);
         } else if (u_batt >= switch_on) {
             // Điện áp phục hồi: quay lại ắc quy theo profile
-            gpio_set_level(POWER_MUX_SEL, 0);   // Chọn ắc quy
+            gpio_set_level(POWER_PATH_EN, 0);   // Chọn ắc quy
             gpio_set_level(CHARGER_EN, 0);       // Tắt sạc (IGN OFF)
         }
         // Giữ nguyên trạng thái nếu trong vùng trễ của profile (12V: 12.0-12.2V; 24V: 24.0-24.4V)

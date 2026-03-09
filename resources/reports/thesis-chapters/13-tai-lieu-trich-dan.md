@@ -52,9 +52,9 @@
 
 [20] Espressif Systems, "ESP32-S3 Technical Reference Manual," Version 1.1, 2023. [Online]. Available: https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf
 
-[21] SIMCom Wireless Solutions, "SIM7600 Series AT Command Manual," Version 1.06, 2023. [Online]. Available: https://www.simcom.com/product/A7600CE-T.html
+[21] SIMCom Wireless Solutions, "SIM7600 Series AT Command Manual," Version 1.06, 2023. [Online]. Available: https://www.simcom.com/product/SIM7600CE-T.html
 
-[22] SIMCom Wireless Solutions, "A7600CE-T Module Hardware Design Guide," Version 1.02, 2022.
+[22] SIMCom Wireless Solutions, "SIM7600CE-T Module Hardware Design Guide," Version 1.02, 2022.
 
 [23] STMicroelectronics, "LIS3DH - MEMS Digital Output Motion Sensor Ultra-Low-Power High-Performance 3-Axis 'Nano' Accelerometer Datasheet," DocID 17530, Rev. 3, 2021. [Online]. Available: https://www.st.com/resource/en/datasheet/lis3dh.pdf
 

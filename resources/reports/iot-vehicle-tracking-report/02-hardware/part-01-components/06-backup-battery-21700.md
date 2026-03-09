@@ -1,5 +1,7 @@
 ## III.1.6 Pin Dự Phòng: Li-ion 18650 5000 mAh (1S)
 
+> **Lưu ý:** Tên file chứa `21700` là legacy filename để giữ liên kết cũ. Nội dung runtime hiện tại dùng pin **18650 1S**.
+
 ### Tổng Quan
 
 **Pin Li-ion 18650 (cấu hình 1S)** là pin dự phòng được sử dụng để cung cấp nguồn cho tracker khi ắc quy xe yếu, đảm bảo hệ thống tiếp tục hoạt động.
@@ -14,7 +16,7 @@
 | **Cấu hình**        | 1 cell đơn                                  |
 | **Điện áp**         | 3.0–4.2 V (nominal 3.7 V)                   |
 | **Dòng xả tối đa**  | 3–5 A (tùy cell)                            |
-| **Dòng sạc tối đa** | 3 A (khuyến nghị)                           |
+| **Dòng sạc**        | Theo cấu hình TP4056 (PROG), khuyến nghị theo cell |
 | **Số chu kỳ**       | 500–1000 chu kỳ (80% capacity)              |
 | **Giá**             | ~100,000–200,000 VNĐ (kèm protection board) |
 
@@ -28,8 +30,8 @@
 
 #### 2. Dung Lượng Đủ
 
-- 5000 mAh → đủ cho vài ngày hoạt động ở chế độ heartbeat
-- Với heartbeat 10–30 phút, có thể hoạt động 3–5 ngày
+- 5000 mAh → đủ cho chế độ backup heartbeat trong nhiều ngày đến vài tuần
+- Với heartbeat 10–30 phút, thời gian hoạt động phụ thuộc duty cycle thực tế và cấu hình sleep
 - Đủ cho backup khi ắc quy yếu
 
 #### 3. Phổ Biến
@@ -55,8 +57,8 @@
 #### 2. Được Sạc Khi Xe Chạy
 
 - Khi IGN ON và U_batt > ngưỡng cấu hình → sạc pin
-- Dòng sạc: 3 A (module IP2312)
-- Thời gian sạc đầy: ~2 giờ (5000 mAh / 3 A)
+- Dòng sạc: theo cấu hình TP4056 (điện trở PROG, chọn theo cell)
+- Thời gian sạc đầy: phụ thuộc cấu hình TP4056 (PROG), trạng thái pin và nhiệt độ module
 
 #### 3. Không Sạc Khi Xe Đỗ
 
@@ -143,17 +145,17 @@
 
 ### Sạc Pin
 
-#### Module Sạc IP2312
+#### Module Sạc TP4056 (tên file sạc giữ legacy)
 
 Xem chi tiết trong file: [`06-charger-ip2312.md`](../part-02-power-management/06-charger-ip2312.md)
 
 **Tóm tắt:**
 
-- **IC**: IP2312 (Injoinic)
-- **Dòng sạc**: 3 A (3000 mA)
+- **IC**: TP4056
+- **Dòng sạc**: theo điện trở PROG của module
 - **Điện áp vào**: 5 V (từ buck converter)
 - **Điện áp ra**: 4.2 V (Li-ion standard)
-- **Hiệu suất**: ~85–90%
+- **Chế độ sạc**: CC/CV
 - **Tự ngắt khi đầy**: ✅
 
 #### Điều Kiện Sạc
@@ -170,10 +172,10 @@ Ngưỡng mặc định:
 #### Thời Gian Sạc
 
 - Dung lượng: 5000 mAh
-- Dòng sạc: 3 A
-- Thời gian sạc đầy: 5000 mAh / 3 A = **~1.67 giờ = ~100 phút**
+- Dòng sạc: theo cấu hình TP4056 thực tế
+- Thời gian sạc đầy: phụ thuộc dòng cấu hình, dung lượng cell và nhiệt độ
 
-**Lưu ý:** Thời gian thực tế có thể lâu hơn do hiệu suất sạc và dòng sạc giảm dần khi gần đầy.
+**Lưu ý:** TP4056 là mạch sạc tuyến tính, cần kiểm tra nhiệt trên module khi sạc dòng cao.
 
 ### Kết Nối
 
@@ -228,7 +230,7 @@ Ngưỡng mặc định:
 
 - **Datasheet cell**: Samsung/LG/Panasonic 18650 Li-ion
 - **Protection IC**: DW01 Datasheet
-- **Charging**: Li-ion Charging Guide
+- **Charging**: TP4056 Datasheet / Li-ion Charging Guide
 
 ### Kết Luận
 

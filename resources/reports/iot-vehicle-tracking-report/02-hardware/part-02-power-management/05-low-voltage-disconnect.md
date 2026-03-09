@@ -2,7 +2,7 @@
 
 ### Tổng Quan
 
-**Low Voltage Disconnect (LVD)** tự động chuyển sang pin backup khi điện áp ắc quy thấp, bảo vệ ắc quy khỏi rút cạn quá mức.
+**Low Voltage Disconnect (LVD)** hiện triển khai comparator LM393 đọc divider 100k/10k và firmware `power_is_low_voltage()` (GPIO19). Khi output comparator HIGH (low-voltage), firmware cắt EN MP2482 và diode OR cho phép SX1308 + pin backup giữ tải, tránh tiêu thụ xe.
 
 ### Nguyên Lý
 

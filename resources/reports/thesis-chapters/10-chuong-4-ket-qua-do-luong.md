@@ -163,13 +163,13 @@ Mạch LVD được kiểm thử bằng cách sử dụng nguồn cấp DC (UNI-
 
 | STT | Thông số | Giá trị thiết kế | Giá trị đo | Sai lệch | Trạng thái |
 |-----|----------|------------------|------------|----------|------------|
-| 1 | Điện áp ngắt (disconnect) | Profile 12V: 11.5V; Profile 24V: 23.0V | 11.48V [đo theo profile 12V] | 0.17% | Đạt (12V) |
+| 1 | Điện áp ngắt (disconnect) | Profile 12V: 12.0V; Profile 24V: 24.0V | 11.48V [đo theo profile 12V] | 4.33% | Chưa đạt (12V) |
 | 2 | Điện áp đóng lại (reconnect) | Profile 12V: 12.2V; Profile 24V: 24.4V | 12.53V [đo theo profile 12V, cần tinh chỉnh về 12.2V] | 2.70% | Chưa đạt (12V) |
 | 3 | Độ trễ ngắt | < 100 ms | ~50 ms [cần đo thực tế] | — | Đạt |
 | 4 | Độ trễ đóng lại | < 500 ms | ~200 ms [cần đo thực tế] | — | Đạt |
 | 5 | Hysteresis | 1.0V | 1.05V [cần đo thực tế] | 5% | Đạt |
 
-**Nhận xét:** Kết quả hiện tại đang theo profile 12V: điện áp ngắt 11.48V đạt sát mục tiêu 11.5V, nhưng điện áp đóng lại 12.53V cao hơn mục tiêu 12.2V nên cần tinh chỉnh hysteresis trong firmware/cấu hình. Với profile 24V, tiêu chí tương ứng cần đạt là ngắt tại 23.0V và đóng lại tại 24.4V khi thực hiện vòng đo 27V xuống 21V.
+**Nhận xét:** Theo baseline hiện tại, ngưỡng runtime cần đạt là OFF=12.0V/ON=12.2V (profile 12V) và OFF=24.0V/ON=24.4V (profile 24V). Kết quả đo profile 12V hiện tại cho thấy điểm ngắt 11.48V và điểm đóng lại 12.53V đều lệch mục tiêu, cần tinh chỉnh hysteresis trong firmware/cấu hình. Với profile 24V, tiêu chí tương ứng cần đạt là ngắt tại 24.0V và đóng lại tại 24.4V khi thực hiện vòng đo 27V xuống 21V.
 
 ---
 
@@ -506,7 +506,7 @@ Phần này tổng hợp tất cả kết quả đo lường và so sánh với 
 | 2 | Dòng tiêu thụ Active Mode | < 250 mA (trung bình) | ~350 mA | Chưa đạt (*) | Xem ghi chú (*) |
 | 3 | Thời lượng pin dự phòng (tracking) | >= 4 giờ | ~3–4 giờ [cần đo thực tế] | Đạt (sát ngưỡng) | Pin 21700 5000mAh |
 | 4 | Nhiệt độ hoạt động | -10°C đến +60°C | -10°C đến +60°C | Đạt | Module 4G hạn chế ở 70°C |
-| 5 | Điện áp ngắt LVD | Profile 12V: 11.5V; Profile 24V: 23.0V | ~11.48V (đo theo profile 12V) | Đạt (12V) | Profile 24V chưa đo thực nghiệm |
+| 5 | Điện áp ngắt LVD | Profile 12V: 12.0V; Profile 24V: 24.0V | ~11.48V (đo theo profile 12V) | Chưa đạt (12V) | Profile 24V chưa đo thực nghiệm |
 | 6 | Thời gian thức dậy từ deep sleep | < 3 giây | ~2 giây | Đạt | Bao gồm init cơ bản |
 | 7 | Độ chính xác GPS | < 5 mét | ~2–3 mét (ngoài trời) | Đạt | GNSS đa hệ thống |
 

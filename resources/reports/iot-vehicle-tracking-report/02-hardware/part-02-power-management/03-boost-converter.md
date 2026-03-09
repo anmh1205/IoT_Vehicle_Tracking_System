@@ -1,160 +1,61 @@
-## III.1.8 Mạch Boost DC-DC: 3.7V → 5V
+## III.1.8 Mạch Boost DC-DC: 3.0–4.2V → 5V (SX1308)
 
 ### Tổng Quan
 
-**Boost Converter** tăng điện áp từ 3.7V (pin 18650 1S) lên 5V để cung cấp cho hệ thống khi ắc quy yếu.
+Boost converter dùng để giữ 5V bus khi ắc quy xe bị ngắt, tận dụng pin 18650 1S. Thiết kế runtime hiện tại dựa vào **SX1308** (input 3.0–4.4V, output 5V ±4%, 2A), sau đó đưa qua **diode OR** để hòa cùng MP2482.
 
 ### Yêu Cầu
 
-| Thông Số        | Giá Trị                             |
-| --------------- | ----------------------------------- |
-| **Input**       | 3.0–4.2 V (từ pin 18650 1S)            |
-| **Output**      | 5 V                                 |
-| **Dòng tối đa** | ≥ 2 A (đủ cho tracker khi dùng pin) |
-| **Hiệu suất**   | >85%                                |
-| **Ripple**      | <50 mV (peak-to-peak)               |
+| Thông Số        | Giá Trị                            |
+| --------------- | ---------------------------------- |
+| **Input**       | 3.0–4.2 V (pin 18650 1S)           |
+| **Output**      | 5 V ±4%                            |
+| **Dòng tối đa** | ≥ 2.5 A (đảm bảo đủ cho ESP32 + modem)
+| **Hiệu suất**   | > 90% ở dải hoạt động                |
+| **Điều khiển**  | Enable pin (GPIO) để bật khi cần    |
 
-### Lý Do Cần Boost
+### Lý do cần boost
 
-- **Pin 18650 1S**: 3.0–4.2 V (nominal 3.7 V)
-- **Hệ thống cần**: 5 V (ESP32, modem, charger)
-- **Giải pháp**: Boost converter 3.7V → 5V
+- Pin 18650 1S có điện áp 3.0–4.2V, không đủ cho ESP32 + modem nên cần nâng lên 5V.
+- Trạng thái low-voltage ắc quy yêu cầu pin backup tự chuyển nguồn mà không dùng relay/MOSFET; SX1308 + diode OR đáp ứng được.
+- Firmware chỉ bật boost khi GPIO18 tắt MP2482 và siêu tụ, diode OR đảm bảo 5V bus không chạm nhau.
 
-### Lựa Chọn IC: MT3608
+### Lựa chọn IC: SX1308
 
-#### Đặc Tính
+- Input rộng 2.5–5.5 V, phù hợp với pin 18650 1S.
+- Đầu ra 5V, dòng tối đa 2.5 A đủ cho tải.
+- Enable pin cho phép MCU (qua diode OR logic) kiểm soát trạng thái.
+- Có protections (overcurrent, thermal) trên module phổ thông.
 
-| Thông Số      | Giá Trị                    |
-| ------------- | -------------------------- |
-| **IC**        | MT3608 (Step-Up Converter) |
-| **Input**     | 2–24 V                     |
-| **Output**    | 5–28 V (adjustable) @ 2 A  |
-| **Hiệu suất** | ~85%                       |
-| **Package**   | SOT23-6 hoặc SOP-8         |
-| **Giá IC**    | ~3,000–8,000 VNĐ           |
-
-#### Lý Do Chọn MT3608
-
-- ✅ **Phổ biến ở VN**: IC và linh kiện dễ mua
-- ✅ **Thiết kế PCB**: Có thể tích hợp vào PCB tự vẽ
-- ✅ **Giá rẻ**: IC ~3,000–8,000 VNĐ + linh kiện ~15,000 VNĐ
-- ✅ **Đủ công suất**: 2A đủ cho tracker khi dùng pin
-- ✅ **Kích thước nhỏ**: Package SOT23-6 → rất nhỏ gọn
-
-### Sơ Đồ Mạch
+### Mạch tham chiếu
 
 ```
-3.7V Input ──┬── C1 (100µF, 16V) ──┬── MT3608 ──┬── L1 (22µH, 2-3A) ──┬── 5V Output
-             │                     │            │                     │
-             └── GND               └── GND      └── D1 (Schottky) ────┘
-                                                      │
-                                                      └── C2 (220µF, 16V) ── GND
-                                                      │
-                                                      └── R1, R2 (10kΩ) ── Feedback
+18650 1S ──┬── C_INPUT (100µF, 10V) ──┬── SX1308 ──┬── L (22µH, 2–3A) ──┬── 5V bus (qua diode OR)
+           │                            │            │                    │
+           └── GND                      │            └── D_SW (Schottky) ─┘
+                                        │
+                                        └── C_OUTPUT (220µF, 10V)
 ```
 
-### Linh Kiện Phụ Trợ
+- **Enable**: Module bật khi MP2482 bị tắt, diode OR cho phép 5V từ SX1308 hòa vào bus.
+- **Diode**: Schottky bảo vệ đầu ra, tránh hồi dòng.
 
-#### 1. Inductor (L1)
+### Linh kiện phụ trợ
 
-- **Giá trị**: 22 µH
-- **Dòng tối đa**: 2–3 A
-- **Loại**: Shielded inductor
-- **Giá**: ~8,000–12,000 VNĐ
+1. **Inductor (22 µH, 3A)**: Shielded, chịu dòng 2.5 A liên tục.
+2. **Output capacitor**: 220 µF low-ESR + 10 µF ceramic.
+3. **Input capacitor**: 100 µF/10 V.
+4. **Diode Schottky (1N5819)**: Kết nối 5V output với bus MP2482.
 
-#### 2. Input Capacitor (C1)
+### Tính toán
 
-- **Giá trị**: 100 µF, 16 V
-- **Loại**: Electrolytic
-- **Mục đích**: Lọc nhiễu input
-- **Giá**: ~2,000 VNĐ
+- **Duty cycle**: D = 1 - (Vin / Vout) ≈ 1 - (3.7 / 5) ≈ 0.26.
+- **Input current**: Iin ≈ Iout × (Vout / Vin) / η ≈ 2 A × (5 / 3.7) / 0.9 ≈ 3 A.
+- **Power dissipation**: P_loss ≈ (1 - η) × P_out ≈ 0.1 × (5 V × 2 A) = 1 W → module cần tản nhiệt nhẹ.
 
-#### 3. Output Capacitor (C2)
+### Khuyến nghị module
 
-- **Giá trị**: 220 µF, 16 V
-- **Loại**: Electrolytic
-- **Mục đích**: Lọc ripple
-- **Giá**: ~3,000 VNĐ
+- Module SX1308 hoặc board tương đương có EN pin để firmware có thể bật/tắt khi chuyển sang pin backup.
+- Diode OR 2× Schottky nối đầu ra SX1308 và MP2482 để không xảy ra loop giữa 2 converter.
 
-#### 4. Feedback Resistors (R1, R2)
-
-- **R1, R2**: 10 kΩ (cho 5V output)
-- **Công thức**: Vout = 0.6V × (1 + R1/R2)
-- **Giá**: ~1,000 VNĐ
-
-### Tính Toán
-
-#### 1. Duty Cycle
-
-```
-D = 1 - (Vin / Vout)
-  = 1 - (3.7V / 5V)
-  = 0.26 (26%)
-```
-
-#### 2. Output Current vs Input Current
-
-```
-Iin = Iout × (Vout / Vin) / η
-    = 2A × (5V / 3.7V) / 0.85
-    = 3.18 A
-
-→ Pin cần cung cấp 3.18A khi output 2A
-```
-
-### Module vs IC Rời
-
-#### Option 1: Module MT3608 (Khuyến nghị cho đồ án)
-
-**Ưu điểm:**
-
-- ✅ Dễ mua trên Shopee/Lazada
-- ✅ Đã có sẵn linh kiện phụ trợ
-- ✅ Dễ test và debug
-- ✅ Giá: ~10,000–15,000 VNĐ
-
-**Nhược điểm:**
-
-- ⚠️ Kích thước lớn hơn
-
-#### Option 2: IC Rời + Linh Kiện
-
-**Ưu điểm:**
-
-- ✅ Kích thước nhỏ hơn (SOT23-6)
-- ✅ Chuyên nghiệp hơn
-
-**Nhược điểm:**
-
-- ⚠️ Cần thiết kế PCB
-
-**Khuyến nghị:** Dùng module cho đồ án.
-
-### Nơi Mua Hàng
-
-#### Trên Shopee/Lazada VN:
-
-- Tìm: "MT3608 module", "boost converter 3.7V 5V", "step up 3.7V 5V"
-- Giá: ~10,000–15,000 VNĐ (module)
-
-#### IC Rời:
-
-- Tìm: "MT3608 IC", "MT3608 boost"
-- Giá: ~3,000–8,000 VNĐ (IC)
-
-### Tài Liệu Tham Khảo
-
-- **Datasheet**: MT3608 Datasheet
-- **Application Note**: MT3608 Design Guide
-
-### Kết Luận
-
-MT3608 là lựa chọn phù hợp vì:
-
-- ✅ Phổ biến, dễ mua
-- ✅ Giá rẻ
-- ✅ Đủ công suất (2A)
-- ✅ Kích thước nhỏ
-- ✅ Phù hợp với yêu cầu đồ án
-
-**Khuyến nghị:** Dùng module MT3608 cho đồ án.
+> **Ghi chú legacy:** Tài liệu cũ nói MT3608; phiên bản runtime hiện tại dùng SX1308 và diode OR.

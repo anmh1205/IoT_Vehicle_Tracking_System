@@ -17,9 +17,9 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | 3 | OBD2 Adapter | vgate iCar Pro BLE | 1 | 350.000 | 350.000 | Bluetooth Low Energy OBD2 |
 | 4 | Cảm biến gia tốc | LIS3DH (breakout board) | 1 | 45.000 | 45.000 | IMU 3 trục, phát hiện chuyển động |
 | 5 | Pin dự phòng | 21700 Li-ion 5000mAh | 1 | 80.000 | 80.000 | Samsung/LG cell |
-| 6 | IC sạc pin | IP2312 module | 1 | 25.000 | 25.000 | Sạc 3A, CC/CV |
-| 7 | Buck converter | MP1584 module (12V/24V->5V) | 1 | 15.000 | 15.000 | Giảm áp từ ắc quy xe |
-| 8 | Boost converter | MT3608 module (3.7V->5V) | 1 | 12.000 | 12.000 | Tăng áp từ pin dự phòng |
+| 6 | IC sạc pin | TP4056 module | 1 | 25.000 | 25.000 | Sạc 3A, CC/CV |
+| 7 | Buck converter | MP2482 module (12V/24V->5V) | 1 | 15.000 | 15.000 | Giảm áp từ ắc quy xe |
+| 8 | Boost converter | SX1308 module (3.7V->5V) | 1 | 12.000 | 12.000 | Tăng áp từ pin dự phòng |
 | 9 | LDO 3.3V | AMS1117–3.3 | 2 | 3.000 | 6.000 | Cấp nguồn cho ESP32-S3 và LIS3DH |
 | 10 | MOSFET nguồn | AO3401 (P-ch) + AO3400 (N-ch) | 4 | 5.000 | 20.000 | Power path và LVD |
 | 11 | Op-amp comparator | LM393 | 1 | 8.000 | 8.000 | Cho mạch Low Voltage Disconnect |

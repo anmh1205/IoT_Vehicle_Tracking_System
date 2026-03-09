@@ -20,7 +20,7 @@ Hệ thống quản lý năng lượng đa chế độ vận hành ổn định 
 | Dòng tiêu thụ driving mode | < 250 mA | 180–220 mA | Tốt |
 | Thời gian hoạt động pin dự phòng (alert mode) | > 24 giờ | 48–72 giờ | Vượt yêu cầu |
 | Hiệu suất buck converter | > 85% | 90–93% | Tốt |
-| Ngưỡng LVD | Profile 12V: 11.5V; Profile 24V: 23.0V | 11.5V (± 0.1V) trên profile 12V | Chính xác (12V) |
+| Ngưỡng LVD | Profile 12V: 12.0V; Profile 24V: 24.0V | 11.5V (± 0.1V) trên profile 12V | Chưa đạt (12V) |
 | Thời gian chuyển chế độ (parking -> alert) | < 500 ms | 200–400 ms | Tốt |
 
 **Kết nối BLE OBD2:**
@@ -110,7 +110,7 @@ Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính t
 | vgate iCar Pro BLE | Adapter OBD2 BLE | 250.000–500.000 |
 | LIS3DH breakout board | Cảm biến gia tốc (IMU) | 30.000–50.000 |
 | Pin 21700 (1 cell, 5000mAh) | Pin dự phòng | 80.000–120.000 |
-| Mạch sạc IP2312 + boost/buck converter | Quản lý năng lượng | 50.000–100.000 |
+| Mạch sạc TP4056 + MP2482/SX1308 + diode-OR | Quản lý năng lượng | 50.000–100.000 |
 | PCB, vỏ hộp, dây cáp, linh kiện phụ | Cơ khí và kết nối | 130.000–260.000 |
 | **Tổng cộng** | | **870.000–1.630.000** |
 
@@ -189,7 +189,7 @@ Hệ thống được thiết kế với ý thức tối ưu hóa tiêu thụ n�
 | R4 | Tấn công bảo mật (giả mạo thiết bị, chiếm quyền truy cập) | 3 - Trung bình | 5 - Rất cao | **Cao** | Session-based auth với SHA-256, MQTT ACL per device, HTTPS/TLS, Zod input validation, rate limiting | Đã triển khai cơ bản |
 | R5 | Mất dữ liệu trong thời gian mất kết nối mạng kéo dài | 3 - Trung bình | 4 - Cao | **Cao** | Flash storage buffer (~1000 bản ghi), cơ chế retry với exponential backoff, QoS 1 đảm bảo delivery | Đã triển khai |
 | R6 | Hư hỏng phần cứng do nhiệt độ cực đoan (xe đỗ ngoài nắng) | 2 - Thấp | 4 - Cao | **Trung bình** | ESP32-S3 hoạt động -40 đến 85°C, thiết kế tản nhiệt, đặt thiết bị trong vị trí mát, cảnh báo nhiệt độ | Thiết kế có tính đến |
-| R7 | Cạn ắc quy xe do thiết bị hoạt động liên tục | 2 - Thấp | 5 - Rất cao | **Cao** | Mạch LVD + switch profile: 12V (LVD_cut=11.5V, OFF=12.0V, ON=12.2V), 24V (LVD_cut=23.0V, OFF=24.0V, ON=24.4V), deep sleep 10–15 μA, pin dự phòng 21700 | Đã triển khai |
+| R7 | Cạn ắc quy xe do thiết bị hoạt động liên tục | 2 - Thấp | 5 - Rất cao | **Cao** | Mạch LVD + switch profile: 12V (OFF=12.0V, ON=12.2V), 24V (OFF=24.0V, ON=24.4V), deep sleep 10–15 μA, pin dự phòng 21700 | Đã triển khai |
 | R8 | Lỗi firmware gây treo hệ thống (firmware hang) | 3 - Trung bình | 4 - Cao | **Cao** | Watchdog timer (cần triển khai), FreeRTOS task monitoring, OTA update từ xa | Triển khai một phần |
 
 ### 5.3.2. Phân tích chi tiết các rủi ro chính
@@ -204,7 +204,7 @@ Bảo mật là rủi ro có tác động nghiêm trọng nhất. Hệ thống �
 
 **Rủi ro R7 - Cạn ắc quy xe:**
 
-Đây là rủi ro có tác động nghiêm trọng nhất đối với trải nghiệm người dùng cuối — xe không khởi động được sẽ gây bất tiện lớn cho khách thuê xe. Hệ thống đã có nhiều cơ chế bảo vệ: profile 12V ngắt LVD tại 11.5V, profile 24V ngắt LVD tại 23.0V; cơ chế chuyển nguồn có hysteresis (12V: OFF 12.0V/ON 12.2V, 24V: OFF 24.0V/ON 24.4V); chế độ deep sleep chỉ tiêu thụ 10–15 μA; và pin dự phòng 21700 cho phép hoạt động độc lập khi mạch LVD ngắt nguồn từ ắc quy.
+Đây là rủi ro có tác động nghiêm trọng nhất đối với trải nghiệm người dùng cuối — xe không khởi động được sẽ gây bất tiện lớn cho khách thuê xe. Hệ thống đã có nhiều cơ chế bảo vệ: profile 12V ngắt theo OFF=12.0V, profile 24V ngắt theo OFF=24.0V; cơ chế chuyển nguồn có hysteresis (12V: OFF 12.0V/ON 12.2V, 24V: OFF 24.0V/ON 24.4V); chế độ deep sleep chỉ tiêu thụ 10–15 μA; và pin dự phòng 21700 cho phép hoạt động độc lập khi LVD kích hoạt chuyển sang nhánh backup.
 
 ### 5.3.3. Tổng hợp mức độ rủi ro
 

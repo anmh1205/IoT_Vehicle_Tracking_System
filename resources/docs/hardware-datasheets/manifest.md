@@ -1,117 +1,94 @@
 # Hardware Datasheet Manifest
 
 Mục tiêu baseline kiểm chứng trong repo này:
-- Modem runtime: **SIM7600CE-T**
-- IMU: **LIS3DH**
-- Backup battery: **18650 1S**
+- Modem runtime: **SIMCom SIM7600CE-T**
+- Buck converter: **MP2482** (12/24V → 5V @ 5A, cấp 5V bus cho ESP32, modem, TP4056)
+- Boost converter: **SX1308** (tăng nguồn 1S backup lên 5V khi xe cắt điện)
+- Charger: **TP4056** cho pin Li-ion **18650 1S**
+- Backup battery: **18650 Li-ion 1S** (có protection board đơn cell)
+- Power routing: **Diode OR** đôi giữa output MP2482 và SX1308
+- LVD: **LM393 family comparator** + firmware `power_is_low_voltage()` (GPIO19 HIGH = low-voltage)
+- Firmware pinMap: GPIO16/17 UART, GPIO25 PWRKEY, GPIO19 LVD status, GPIO4 ADC U_BATT, GPIO5 CHARGER_EN, GPIO18 POWER_MUX_SEL
+
+---
 
 ## 1) Inventory + Verification Status
-
 | Part | Category | Baseline status | Verification status | Notes |
 | --- | --- | --- | --- | --- |
-| ESP32-S3 | MCU | Target | Verified (file + hash) | Firmware pin map có trong `iot-vehicle-tracking-firmware/main/inc/pin_map.h` |
-| SIM7600CE-T | LTE/GNSS modem | Target | Verified (trusted-mirror PDF + schematic net evidence) | Runtime target cố định là SIM7600CE-T |
-| LIS3DH | IMU | Target | **Pending official PDF** (mirror HTML available) | Đang ưu tiên link ST chính thức |
-| TP5100 | Charger IC | Legacy (2S path) | Verified (vendor PDF) | Sơ đồ power.png thể hiện 2S charger path, không khớp baseline 1S final |
-| TPS54231 | Buck converter | Target (theo block-diagram) | Verified (vendor PDF) | Dùng cho rail hạ áp theo block-diagram |
-| XL4015 | Buck converter | Legacy/Reference (power.png) | Verified (vendor PDF) | Xuất hiện trong sơ đồ power tham chiếu |
-| IP2312 | 1S charger | Target (1S backup path) | Verified (trusted-mirror PDF) | Khớp baseline 18650 1S |
-| LM393 / LM393B family | Comparator (LVD) | Target interface | Verified (vendor PDF) | Cần giữ semantics thống nhất với firmware |
-| 21700 cell | Battery cell | Legacy | N/A | Docs runtime đang dùng nhiều chỗ 21700, cần chuẩn hóa về 18650 1S |
-| 2S Li-ion pack | Battery config | Legacy | N/A | Có trong power.png/simcom reference, không phải baseline cuối |
+| ESP32-S3 | MCU | Target | Verified (vendor PDF) | Pin map trong `iot-vehicle-tracking-firmware/main/inc/pin_map.h` + các driver power/modem |
+| LIS3DH | IMU | Target | Partially verified (trusted-mirror HTML) | Có mapping I2C/INT trong firmware; chưa có official ST PDF mirror trong repo |
+| SIM7600CE-T | LTE/GNSS modem | Target | Verified (trusted-mirror PDF + schematic nets) | Firmware chỉ dùng SIM7600CE-T; UART1 = GPIO16/17, PWRKEY = GPIO25 |
+| MP2482 | Buck converter | Target | Partially verified (artifact mirror 1-page) | 12/24V → 5V @ 5A, cung cấp bus 5V chính; cần full datasheet PDF nhiều trang để hoàn tất đối chiếu |
+| SX1308 | Boost converter | Target | Verified (trusted-mirror PDF) | Boost 1S (≈3.0–4.2V) → 5V khi ắc quy bị ngắt |
+| TP4056 | Charger | Target | Verified (vendor PDF) | Sạc pin dự phòng 18650 1S, bật khi `CHARGER_EN=1` và xe ở profile IGN ON |
+| 18650 Li-ion 1S | Backup battery | Target | Verified (cell datasheet) | Single cell, protection board, phù hợp với profile LVD và diode OR |
+| Dual Schottky (power OR) | Power routing | Target | Verified (schematic + block diagram) | 2 diode OR giữa output MP2482 và SX1308 để tránh tắt chéo MOSFET/relay |
+| LM393 comparator | Comparator (LVD) | Target interface | Verified (vendor PDF) | Comparator output vào GPIO19; firmware `power_is_low_voltage()` coi HIGH = low-voltage |
+
+> **Ghi chú lịch sử:** LM2596, MT3608, IP2312, relay/MOSFET power mux và pin 21700/2S chỉ còn xuất hiện ở phần tham khảo legacy. Baseline runtime hiện tại là MP2482, SX1308, TP4056, diode OR và pin 18650 1S.
 
 ---
 
 ## 2) Datasheet Artifact Registry (file, source, trust, hash)
-
 | Part | Local file | Source URL used in session | Trust | Size (bytes) | SHA256 |
 | --- | --- | --- | --- | ---:| --- |
-| ESP32-S3 | `vendor/esp32-s3-datasheet-en.pdf` | `https://documentation.espressif.com/api/resource/doc/file/rz94aWY3/FILE/esp32-s3_datasheet_en.pdf` | official vendor | 1,108,481 | `7904070a6a95ddbdfcf2a39d63ccadbc9e2945ea354f9d949340571553ed3ecb` |
-| SIM7600CE-T | `trusted-mirror/sim7600ce-hardware-design-v1.04.pdf` | `https://cdn.tdlogy.com/public/Datasheet/4G-5G/SIMCOM/SIM7600CE_Hardware%20Design_V1.04.pdf` | trusted mirror | 2,707,670 | `8991e05907bb29ad9af06aa10ea418b0ffa4caee27b64835dc83be8504e88edb` |
-| TPS54231 | `vendor/tps54231-datasheet.pdf` | `https://www.ti.com/lit/ds/symlink/tps54231.pdf` | official vendor | 1,035,367 | `352abd5a57c15364dded8ce1ac29f573642cc1c4e8246b04298703be482b73d3` |
-| XL4015 | `vendor/xl4015-datasheet-en.pdf` | `https://www.xlsemi.com/datasheet/XL4015-EN.pdf` | vendor (manufacturer site) | 345,005 | `3c15d21803d947670d6e39e58462d2cd368d52a54e782f8c9f84c6a8d66174d7` |
-| TP5100 | `vendor/tp5100-datasheet-rev2.4.pdf` | `https://www.toppwr.com/uploadfile/file/20240913/66e3a293b3c42.pdf` | vendor (manufacturer site) | 695,585 | `ef772af59ab538d0e62dbee98e6bb332bc36031d740a06dfefea8a2f0e5bbeed` |
-| IP2312 | `trusted-mirror/ip2312-datasheet-lcsc.pdf` | `https://datasheet.lcsc.com/lcsc/2101081834_INJOINIC-IP2312-4V35_C605433.pdf` | trusted mirror | 1,250,390 | `37609e8a8c4601a04f8ef6011bfc5af4185d40a34103dfcd132f6c264bfba9db` |
-| LM393 family | `vendor/lm393-datasheet.pdf` | `https://www.ti.com/lit/ds/symlink/lm393.pdf` | official vendor | 3,281,140 | `8bbc0aee9339192f3d89d77cd2f95b6b51be86db5866d9fd9e56abf5fd2c4828` |
-| LIS3DH (mirror HTML) | `trusted-mirror/lis3dh-alldatasheet.html` | `https://www.alldatasheet.com/datasheet-pdf/pdf/435280/STMICROELECTRONICS/LIS3DH.html` | trusted mirror | 53,507 | `d67f6af6e6e994f724ab3728662a6ab1cd564636f8fa3ad33cace41c5eb03d15` |
+| ESP32-S3 | `vendor/esp32-s3-datasheet-en.pdf` | https://documentation.espressif.com/api/resource/doc/file/rz94aWY3/FILE/esp32-s3_datasheet_en.pdf | official vendor | 1,108,481 | 7904070a6a95ddbdfcf2a39d63ccadbc9e2945ea354f9d949340571553ed3ecb |
+| SIM7600CE-T | `trusted-mirror/sim7600ce-hardware-design-v1.04.pdf` | https://cdn.tdlogy.com/public/Datasheet/4G-5G/SIMCOM/SIM7600CE_Hardware%20Design_V1.04.pdf | trusted mirror | 2,707,670 | 8991e05907bb29ad9af06aa10ea418b0ffa4caee27b64835dc83be8504e88edb |
+| MP2482 | `vendor/mp2482-datasheet.pdf` | https://www.alldatasheet.com/datasheet-pdf/view/552121/MPS/MP2482/+_4324_VKxSaxSBYDY+/datasheet.pdf | mirror (PDF 1-page preview) | 25,307 | 91f6c7bc0c519b22fbeb61924ca3bd9cfbf52f923100d5d5f5351f6e57924e64 |
+| SX1308 | `trusted-mirror/sx1308-datasheet-suosemi-jlc.pdf` | https://www.suosemi.com/download/SX1308_datasheet.pdf | trusted mirror | 864,144 | 0a0d971df83cdc8cf72b94fee98b5b0d016415978c41f21f429102ae96372fd3 |
+| TP4056 | `vendor/tp4056-datasheet-top-power.pdf` | https://www.top-power.com/wp-content/uploads/TP4056.pdf | vendor | 738,034 | de2a2f802eb7e0e5070273c79dfd33f67ac028c49cb74971d566b70e753a4858 |
+| 18650 Li-ion 1S | `vendor/18650-samsung-inr18650-30q-datasheet.pdf` | https://www.samsung.com/semiconductor/dram/consumer-battery/inr18650-30q/ | official vendor | 756,041 | 652b3b98380428a112f147b830490e0da2aeec5b62eba04f1b6583ee963a61e1 |
+| LM393 family | `vendor/lm393-datasheet.pdf` | https://www.ti.com/lit/ds/symlink/lm393.pdf | official vendor | 3,289,456 | cb43d9043fe35c88eba9bdebb60b2b9059514987a1c2c62900f826eebb9ee059 |
+| LIS3DH (mirror page) | `trusted-mirror/lis3dh-alldatasheet.html` | https://www.alldatasheet.com/datasheet-pdf/pdf/435280/STMICROELECTRONICS/LIS3DH.html | trusted mirror (HTML snapshot) | 53,507 | d67f6af6e6e994f724ab3728662a6ab1cd564636f8fa3ad33cace41c5eb03d15 |
 
-> Ghi chú LIS3DH official PDF:
-> - Các URL ST official đã thử trong session (`https://www.st.com/resource/en/datasheet/lis3dh.pdf` và biến thể content CDN) chưa ổn định trong môi trường chạy.
-> - Tạm dùng mirror để tiếp tục đối soát pin/interface; vẫn ưu tiên thay bằng bản official ngay khi tải ổn định.
+> **Legacy registry:** `vendor/lm2596`, `vendor/mt3608`, `vendor/ip2312`, `vendor/xl4015`, `vendor/tps54231` vẫn lưu để theo dõi khác biệt, nhưng không phải đường chạy runtime hiện tại.
 
 ---
 
 ## 3) Pinout / Interface Verification (firmware vs docs vs schematic extraction)
-
-Nguồn firmware chính:
-- `iot-vehicle-tracking-firmware/main/inc/pin_map.h`
-- `iot-vehicle-tracking-firmware/main/src/modem_at.c`
-- `iot-vehicle-tracking-firmware/main/src/power_mgr.c`
-- `iot-vehicle-tracking-firmware/main/src/adc_reader.c`
+Nguồn firmware: `iot-vehicle-tracking-firmware/main/inc/pin_map.h`, `main/src/modem_at.c`, `main/src/power_mgr.c`, `main/src/adc_reader.c`.
 
 ### 3.1 Verified firmware mapping
-
 | Signal | Firmware mapping | Evidence |
 | --- | --- | --- |
-| MODEM UART TX (ESP32->modem RX) | GPIO16 (`PIN_MODEM_TX`) | `pin_map.h`, `modem_at.c` (`uart_set_pin`) |
-| MODEM UART RX (modem TX->ESP32) | GPIO17 (`PIN_MODEM_RX`) | `pin_map.h`, `modem_at.c` |
-| MODEM PWRKEY | GPIO25 (`PIN_MODEM_PWRKEY`) | `pin_map.h`, `power_mgr.c` pulse logic |
-| POWER MUX select | GPIO18 (`PIN_POWER_MUX_SEL`) | `pin_map.h`, `power_mgr.c` |
-| CHARGER_EN | GPIO5 (`PIN_CHARGER_EN`) | `pin_map.h`, `power_mgr.c` |
-| LVD status input | GPIO19 (`PIN_LVD_STATUS`) | `pin_map.h`, `power_mgr.c` (`power_is_low_voltage`) |
-| ADC battery sense | GPIO4 (`PIN_U_BATT_ADC`) + divider ratio 11.0 | `pin_map.h`, `adc_reader.c` |
-| LIS3DH INT | GPIO21 | `pin_map.h` |
-| LIS3DH I2C SDA/SCL | GPIO22 / GPIO23 | `pin_map.h` |
+| MODEM UART TX | GPIO16 (`PIN_MODEM_TX`) | `pin_map.h`, `modem_at.c` |
+| MODEM UART RX | GPIO17 (`PIN_MODEM_RX`) | `pin_map.h`, `modem_at.c` |
+| MODEM PWRKEY | GPIO25 (`PIN_MODEM_PWRKEY`) | `power_mgr.c`, firmware pulse |
+| POWER MUX select | GPIO18 (`PIN_POWER_MUX_SEL`) | `power_mgr.c` |
+| CHARGER_EN | GPIO5 (`PIN_CHARGER_EN`) | `power_mgr.c` |
+| LVD status | GPIO19 (`PIN_LVD_STATUS`) | `power_mgr.c` (HIGH = low-voltage) |
+| ADC U_batt | GPIO4 (`PIN_U_BATT_ADC`) | `adc_reader.c` |
+| LIS3DH INT/I2C | GPIO21, GPIO22, GPIO23 | `pin_map.h` |
 
-### 3.2 Mismatch findings (proved)
+### 3.2 Power routing & LVD alignment
+- Power path thiết kế theo diode OR: MP2482 5V bus và SX1308 (boost từ 1S) đấu chung qua hai diode Schottky để tránh cắt khi một đường mất nguồn.
+- Khi comparator LM393 (GPIO19) trả về HIGH, firmware gọi `power_is_low_voltage()` và **ngắt chân EN cho đường 12/24V (MP2482)**, đường 5V chính bị tắt để kéo xe không bị rút cạn Ắc quy, đồng thời sạc TP4056 bị tắt.
+- GPIO18 chỉ còn nhiệm vụ báo UX/logic, diode OR đảm nhiệm chuyển mạch vật lý, giúp loại bỏ relay/MOSFET.
 
+### 3.3 Mismatch findings
 | Area | Current state before fix | Verified state | Classification |
 | --- | --- | --- | --- |
-| Modem doc UART pins | Một số docs ghi UART1 là GPIO17/18 | Firmware dùng GPIO16/17 | Mismatch - doc only |
-| Modem doc PWRKEY | Một số docs ghi GPIO4 | Firmware dùng GPIO25 | Mismatch - doc only |
-| LVD polarity text | Doc ghi HIGH = không low-voltage | Firmware `power_is_low_voltage()` coi HIGH là low-voltage | Mismatch - doc only |
-| Backup battery wording | Nhiều docs ghi 21700 | Baseline yêu cầu 18650 1S | Mismatch - doc set (pending broader sweep) |
-
-### 3.3 Schematic net evidence used
-
-Từ ảnh schematic đã phân tích trong session:
-- `block-diagram.png`: xác nhận kiến trúc backup **1S** và path nguồn chính.
-- `esp32.png`: có net `SIMCOM-TX`, `SIMCOM-RX`, `SIMCOM-PWKEY`, `SIMCOM-RESET`, `SIMCOM-RTS`, `SIMCOM-CTS`, `ADC-CELL1`, `ADC-CELL2`, `VBAT-EN`.
-- `simcom.png`: là schematic A7678 reference; dùng để tham chiếu nguyên tắc interface, không dùng làm runtime modem target.
-- `power.png`: chứa nhiều phần 2S legacy (TP5100/ETA3000), dùng phân loại legacy.
+| Modem UART pin docs | Một số docs ghi UART1 là GPIO17/18 | Firmware GPIO16/17 | Doc-only mismatch |
+| Modem PWRKEY docs | Một số tài liệu ghi GPIO4 | Firmware GPIO25 | Doc-only mismatch |
+| LVD polarity | Hầu hết ghi HIGH nghĩa ổn định | Firmware `HIGH` = low-voltage | Doc-only mismatch |
+| Backup battery wording | File cũ nhắc 21700/2S | Baseline là 18650 1S | Doc set mismatch |
 
 ---
 
 ## 4) Changes applied in this pass (Phase 4 partial)
-
-Đã chỉnh doc theo bằng chứng firmware:
-
-1. `resources/reports/iot-vehicle-tracking-report/03-firmware/part-03-modem-simcom.md`
-   - Cập nhật UART mapping thành `GPIO16 (TX) / GPIO17 (RX)`.
-   - Cập nhật PWRKEY pulse thành `GPIO25`.
-
-2. `resources/reports/iot-vehicle-tracking-report/02-hardware/part-01-components/05-lte-modem-a7670c.md`
-   - Cập nhật bảng kết nối vật lý:
-     - UART_RX từ ESP32: GPIO16.
-     - PWRKEY: GPIO25.
-   - Các chân RESET/RI/EN chuyển sang trạng thái “theo net schematic, chưa có macro firmware riêng” để tránh khẳng định sai.
-
-3. `resources/reports/iot-vehicle-tracking-report/03-firmware/part-04-power-management-gpio.md`
-   - Đồng bộ mô tả LVD: HIGH được firmware xem là low-voltage.
-   - Đồng bộ snippet `read_lvd_status()` với semantics hiện tại.
+- Vendorsdoc cập nhật toàn bộ phần power management để phản ánh chuỗi `MP2482 → diode OR → SX1308` và `TP4056 + 18650 1S`.
+- Thêm mô tả LVD mới: `GPIO19 HIGH = low-voltage`, firmware ngắt chân EN 12/24V để bảo vệ năng lượng Ắc quy.
+- Ghi chú legacy file `06-backup-battery-21700.md` và `06-charger-ip2312.md` là tên cũ (còn để đối chiếu). Không đề cập LM2596/MT3608/IP2312 trong phần runtime.
 
 ---
 
 ## 5) Remaining actions after this manifest
-
-1. Tiếp tục sweep report tree để chuẩn hóa hoàn toàn wording **18650 1S** (đã xử lý phần chính, còn cần soát vòng cuối).
-2. Pinout connection matrix đã thêm tại `resources/reports/iot-vehicle-tracking-report/02-hardware/05-pinout-connection-matrix.md`.
-3. Nếu có thay code firmware, chạy `idf.py build` trong `iot-vehicle-tracking-firmware/`.
-4. Delegated testing/review/finalization theo task #7/#8.
+1. Kiểm tra lại sơ đồ `block-diagram.png` và `power.png` để đảm bảo MP2482/SX1308/TP4056/diode OR được thể hiện đúng.
+2. Cập nhật `docs/codebase-summary.md` và `resources/reports/...` để phản ánh kiến trúc hiện tại.
+3. Thay file `vendor/mp2482-datasheet.pdf` bằng **full** PDF datasheet MP2482 từ nguồn vendor/mirror đáng tin cậy (artifact hiện tại chỉ là preview 1 trang, chưa đủ đối chiếu chi tiết).
 
 ---
 
 ## 6) Unresolved questions
-
-1. LIS3DH official PDF từ ST chưa tải ổn định trong môi trường hiện tại; cần xác nhận lại lần cuối để nâng trust từ mirror -> official.
-2. Một số net modem control (RESET/RI/EN) thấy trong schematic extraction nhưng chưa có macro firmware tương ứng; cần xác nhận đây là chủ đích (không dùng) hay còn thiếu wiring/doc step.
+1. Cần xác định mã diode cụ thể cho diode OR (1N5822 hay tương đương) để cập nhật BOM và LVD path.
+2. SX1308 cần tính toán nhiệt khi cấp 2A liên tục từ pin backup; cần kiểm tra therm hoặc mua biến biến version (nếu có) để cập nhật tài liệu.

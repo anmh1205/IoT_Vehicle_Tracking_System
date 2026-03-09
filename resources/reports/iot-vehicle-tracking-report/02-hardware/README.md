@@ -60,19 +60,21 @@ Thiết kế hiện tại xoay quanh **SIMCom SIM7600CE-T** (LTE + GNSS tích h�
 
 5. **Pin 18650 Li-ion 1S** - Pin dự phòng
    - Cấp nguồn khi ắc quy yếu hoặc bị ngắt
-   - Được sạc qua mạch IP2312 khi xe hoạt động
+   - Sạc bằng TP4056 1S khi IGN ON và U_batt cao hơn ngưỡng profile
 
-6. **Power path + charger** - Buck/Boost/LVD/MUX/IP2312
-   - Bảo vệ ắc quy, chuyển nguồn sang pin backup
-   - Sạc pin 18650 1S bằng module IP2312 khi xe chạy
+6. **Power path + charger** - MP2482/SX1308/Diode OR/TP4056/LM393
+   - MP2482 tạo 5V bus chính, SX1308 boost pin 1S, diode OR hợp hai nguồn, LM393 xác định low-voltage và firmware cắt EN
+   - TP4056 chỉ sạc pin 18650 1S khi xe chạy và `CHARGER_EN=1`
 
 ### Power Management
 
-1. **Buck Converter** (LM2596) - 12V/24V → 5V
-2. **Boost Converter** (MT3608) - 3.7V → 5V
-3. **Power Path Management** - Chuyển đổi giữa ắc quy và pin backup
-4. **Low Voltage Disconnect** - Bảo vệ ắc quy theo profile 12V/24V
-5. **Charger** (IP2312) - Sạc pin 18650 1S
+1. **Buck Converter** (MP2482) - 12V/24V → 5V @ 5A để tạo 5V bus chính cho ESP32, SIM7600CE-T và TP4056.
+2. **Downconverters**: XL1509 hạ 5V xuống 3.3V cho ESP32-S3, TPS54231 hạ 5V xuống ~4V cho SIM7600CE-T logic/bus 4V.
+3. **Boost Converter** (SX1308) - Nâng điện áp từ pin 18650 1S (3.0–4.2V) lên 5V khi xe bị ngắt, kết hợp diode OR để đồng bộ với 5V bus.
+4. **Power Routing** - Diode OR (2×Schottky) nối MP2482 và SX1308, GPIO18 chỉ điều khiển EN MP2482 để tránh sử dụng relay/MOSFET.
+5. **Low Voltage Disconnect** - Comparator LM393 + firmware (GPIO19) phát hiện HIGH = low-voltage, ngắt EN đường 12/24V để không rút cạn ắc quy.
+6. **Charger** (TP4056) - Sạc pin 18650 1S khi `CHARGER_EN=1`, IGN ON và U_batt vượt ngưỡng profile.
+
 
 **Profile nguồn mặc định:**
 
@@ -108,17 +110,20 @@ Thiết kế hiện tại xoay quanh **SIMCom SIM7600CE-T** (LTE + GNSS tích h�
 ### Giải Pháp Đề Xuất
 
 **Power Management:**
-- ✅ Buck: LM2596 (12V/24V→5V, 3A)
-- ✅ Boost: MT3608 (3.7V→5V, 2A)
-- ✅ Power MUX: Relay module 5V hoặc MOSFET tùy PCB
-- ✅ LVD: ADC ESP32 + logic firmware
-- ✅ Charger: IP2312 (3A, Type-C)
+- ✅ Buck: MP2482 (12V/24V→5V @ 5A) cùng EN pin được điều khiển bởi GPIO18 và LM393 để ưu tiên nguồn xe hoặc pin backup
+- ✅ Boost: SX1308 (1S → 5V) + diode OR để nâng pin 18650 1S lên bus 5V khi EN MP2482 bị tắt
+- ✅ Power Routing: Diode OR đôi (Schottky) thay relay/MOSFET, kích hoạt qua EN/CHARGER GPIO và comparator LM393
+- ✅ Low Voltage Disconnect: LM393 + firmware `power_is_low_voltage()` (GPIO19 HIGH = low-voltage) cắt EN MP2482 và giữ pin backup
+- ✅ Charger: TP4056 module (GPIO5) sạc pin 18650 1S khi IGN ON + U_batt đạt ngưỡng profile
+- ✅ Downconverters: XL1509 (5V → 3.3V) cho ESP32-S3, TPS54231 (5V → ~4V) cho SIM7600CE-T logic/bus 4V
 
 **Lý do:**
-- SIMCom SIM7600CE-T tích hợp LTE + GNSS giúp giảm số linh kiện và đơn giản hóa PCB
-- Một module duy nhất với Auto mode `AT+CNMP=2`, APN mặc định `internet`, và luồng GNSS qua UART giữ cho firmware dễ điều phối
-- Kiểm tra `AT+CEREG?` trước `AT+CGACT=1,1` giúp attach ổn định trước khi kích hoạt PDP context
-- Điều khiển power profile tập trung quanh SIM7600CE-T giúp tối ưu dòng khi DRIVING, PARKED và SLEEP
+- MP2482 + SX1308 + diode OR là path runtime đã chứng minh trên firmware và schematic
+- GPIO18/CHARGER_EN/LM393 phối hợp đảm bảo không rút cạn ắc quy khi hiển thị low-voltage
+- TP4056 là module sạc 1S phổ biến; dòng sạc phụ thuộc cấu hình PROG và điều kiện nhiệt, tự ngắt khi pin đầy
+- XL1509/TPS54231 giữ rail logic ổn định cho MCU và modem sau khi tạo bus 5V
+
+> **Ghi chú legacy:** Tài liệu cũ đề cập LM2596, MT3608, IP2312, relay/MOSFET hoặc pin 21700/2S chỉ để so sánh lịch sử; không phải kiến trúc runtime hiện tại.
 
 ### Tổng Chi Phí
 

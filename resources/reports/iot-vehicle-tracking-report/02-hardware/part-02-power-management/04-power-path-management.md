@@ -13,7 +13,7 @@
   - 12V: `Switch_OFF=12.0V` → `Switch_ON=12.2V`
   - 24V: `Switch_OFF=24.0V` → `Switch_ON=24.4V`
 
-### Giải Pháp: MOSFET + Diode OR
+### Giải Pháp: Diode OR + EN MP2482
 
 #### Sơ Đồ Kết Nối
 
@@ -21,44 +21,37 @@
 
 ### Thành Phần
 
-#### 1. MOSFET (Q1, Q2)
+#### 1. Diode OR (D1, D2)
 
-- **Loại**: IRF9540N (P-MOSFET)
-- **Vds**: -100V
-- **Id**: -19A
-- **Rds(on)**: ~0.2Ω
-- **Giá**: ~5,000–10,000 VNĐ/cái
+- **Loại**: 2 x Schottky (ví dụ 1N5822 hoặc tương đương) để OR đầu ra MP2482 và SX1308
+- **Mục đích**: Hợp nhất 5V bus, tự động chuyển nguồn mà không cần MOSFET/relay
+- **Giá**: ~2,000–5,000 VNĐ/cặp
 
-#### 2. Diode OR (D1, D2)
+#### 2. EN MP2482 (GPIO18)
 
-- **Loại**: 1N5822 (Schottky Diode, 3A, 40V)
-- **Mục đích**: Backup nếu MOSFET lỗi
-- **Giá**: ~2,000–5,000 VNĐ/cái
-
-#### 3. Gate Driver (Q3, Q4)
-
-- **Loại**: 2N7002 (N-MOSFET) hoặc transistor
-- **Mục đích**: Điều khiển gate P-MOS từ ESP32 GPIO
-- **Giá**: ~1,500 VNĐ/cái
+- **Chức năng**: GPIO18 bật/tắt chân EN của MP2482 để ưu tiên nguồn xe
+- **Tương tác**: Khi GPIO18 LOW (chế độ bình thường), MP2482 cung cấp 5V; khi HIGH, MP2482 tắt, SX1308 qua diode OR cấp 5V từ pin backup
+- **Thiết kế**: Pull-down/logic tương ứng trong `power_mgr.c`
 
 ### Nguyên Lý Hoạt Động
 
 #### 1. Ưu Tiên Ắc Quy
 
-- **Mặc định**: Q1 ON, Q2 OFF → dùng ắc quy
-- **Khi ắc quy yếu**: Q1 OFF, Q2 ON → chuyển sang pin
-- **Khi ắc quy phục hồi**: Q1 ON, Q2 OFF → chuyển lại ắc quy
+- **Mặc định**: GPIO18 kéo EN MP2482 về mức bật → MP2482 cấp 5V bus
+- **Khi ắc quy yếu**: firmware tắt EN MP2482 → SX1308 + diode OR cấp 5V từ pin backup
+- **Khi ắc quy phục hồi**: firmware bật lại EN MP2482 → quay về nguồn ắc quy
 
 #### 2. Diode OR Backup
 
-- Nếu MOSFET lỗi, diode OR vẫn cung cấp nguồn
-- Tổn hao cao hơn (diode drop ~0.4V) nhưng an toàn hơn
+- Hai diode Schottky tự động chọn nguồn 5V khả dụng cao hơn giữa MP2482 và SX1308
+- Không cần relay/MOSFET power mux chuyên dụng, giảm điểm lỗi cơ khí
+- Tổn hao có thật (diode drop), nhưng đơn giản và dễ kiểm chứng trong đồ án
 
 #### 3. Điều Khiển từ ESP32
 
-- GPIO điều khiển gate Q1, Q2
-- Logic trong firmware ESP32
-- Đọc U_batt qua ADC để quyết định
+- ESP32 đọc U_batt (GPIO4 ADC) và LVD_STATUS (GPIO19)
+- GPIO18 điều khiển EN MP2482 theo profile 12V/24V
+- GPIO5 điều khiển TP4056 để chỉ sạc khi điều kiện nguồn cho phép
 
 ### Logic Điều Khiển
 
@@ -75,21 +68,19 @@ Xem chi tiết trong file firmware: [`part-04-power-management-gpio.md`](../../0
 
 ### So Sánh với Giải Pháp Khác
 
-#### Option 1: MOSFET (Hiện tại)
+#### Option 1: Diode OR + EN MP2482 (Hiện tại)
 
 **Ưu điểm:**
 
-- ✅ Dễ mua ở VN
-- ✅ Giá rẻ (~10,000–15,000 VNĐ)
-- ✅ Đơn giản, dễ hiểu
-- ✅ Linh hoạt (điều khiển bằng firmware)
+- ✅ Mạch đơn giản, không cần gate driver chuyên dụng
+- ✅ Dễ mua linh kiện Schottky ở VN
+- ✅ Tương thích trực tiếp với logic firmware hiện có (GPIO18 + LM393)
+- ✅ Dễ kiểm chứng bằng đo điện áp trên bus 5V
 
 **Nhược điểm:**
 
-- ⚠️ Cần firmware điều khiển
-- ⚠️ Tổn hao (Rds(on) ~0.2Ω)
-- ⚠️ Cần gate driver
-
+- ⚠️ Có sụt áp trên diode OR
+- ⚠️ Cần chọn diode đủ dòng để tránh quá nhiệt
 #### Option 2: Power Path Management IC (TPS2115A)
 
 **Ưu điểm:**
@@ -104,62 +95,60 @@ Xem chi tiết trong file firmware: [`part-04-power-management-gpio.md`](../../0
 - ⚠️ Dòng tối đa 1.5A (có thể cần 2 IC song song)
 - ⚠️ Khó mua ở VN
 
-**Kết luận:** MOSFET phù hợp hơn cho đồ án (giá rẻ, dễ mua).
+**Kết luận:** Diode OR + EN MP2482 phù hợp hơn cho baseline runtime hiện tại.
 
-#### Option 3: Relay Module
+#### Option 3: Relay Module (Legacy)
 
 **Ưu điểm:**
 
-- ✅ Đơn giản, dễ sử dụng
-- ✅ Module sẵn có (~5,000 VNĐ)
-- ✅ Không cần gate driver
+- ✅ Dễ thử nghiệm nhanh ở mức prototype
 
 **Nhược điểm:**
 
 - ⚠️ Tiêu thụ dòng khi ON (~70 mA)
 - ⚠️ Có tiếng kêu (click)
 - ⚠️ Tuổi thọ hạn chế (số lần chuyển)
+- ⚠️ Không phù hợp baseline runtime hiện tại
 
-**Kết luận:** Có thể dùng relay cho đồ án (đơn giản hơn MOSFET).
+**Kết luận:** Chỉ giữ để tham chiếu lịch sử, không dùng trong kiến trúc active.
 
 ### Khuyến Nghị cho Đồ Án
 
-#### Giải Pháp Đề Xuất: Relay Module
+#### Giải Pháp Đề Xuất: Diode OR + EN MP2482
 
 **Lý do:**
 
-- Đơn giản hơn MOSFET (không cần gate driver)
-- Module sẵn có, dễ mua
-- Giá rẻ (~5,000 VNĐ)
-- Đủ cho yêu cầu đồ án
+- Diode OR đơn giản, không cần MOSFET/relay gate driver
+- GPIO18 chỉ điều khiển EN MP2482, diodes tự phân luồng giữa MP2482 và SX1308
+- CPU bảo vệ ắc quy bằng comparator LM393 + firmware `power_is_low_voltage()` cắt EN 12/24V
 
 **Sơ đồ:**
 
-![part-02-power-management-04-power-path-management-02](../../../thesis-chapters/assets/figures/part-02-power-management-04-power-path-management-02.png)
+![part-02-power-management-04-power-path-management-01](../../../thesis-chapters/assets/figures/part-02-power-management-04-power-path-management-01.png)
 
 **Điều khiển:**
 
-- GPIO HIGH → Relay ON → dùng ắc quy
-- GPIO LOW → Relay OFF → dùng pin
+- GPIO18 LOW → EN MP2482 bật → dùng nguồn xe
+- GPIO18 HIGH → EN MP2482 tắt → diode OR cho phép SX1308 (pin backup) cung cấp 5V
 
 ### Nơi Mua Hàng
 
 #### Trên Shopee/Lazada VN:
 
-- Tìm: "relay 5V module", "relay 1 channel", "MOSFET module"
-- Giá: ~5,000–15,000 VNĐ
+- Tìm: "schottky diode 1N5822", "diode OR power", "MP2482 module"
+- Giá: ~2,000–15,000 VNĐ tùy module/linh kiện
 
 ### Tài Liệu Tham Khảo
 
-- **MOSFET**: IRF9540N Datasheet
-- **Power Path IC**: TPS2115A Datasheet
-- **Relay**: Relay Module Datasheet
+- **MP2482**: MP2482 Datasheet
+- **Diode OR**: 1N5822 (hoặc diode Schottky tương đương) Datasheet
+- **Power Path IC**: TPS2115A Datasheet (chỉ tham chiếu so sánh)
 
 ### Kết Luận
 
 **Khuyến nghị cho đồ án:**
 
-- ✅ Dùng **Relay Module** (đơn giản, dễ mua)
-- ⚠️ Hoặc **MOSFET** nếu muốn chuyên nghiệp hơn
+- ✅ Dùng **Diode OR + EN MP2482** cho baseline hiện tại
+- ⚠️ TPS2115A chỉ là phương án thay thế khi cần IC power mux chuyên dụng
 
-**Lưu ý:** Cả hai đều phù hợp, chọn dựa trên độ phức tạp muốn chấp nhận.
+**Lưu ý:** Relay/MOSFET chỉ còn trong phần so sánh lịch sử, không phải kiến trúc runtime active.

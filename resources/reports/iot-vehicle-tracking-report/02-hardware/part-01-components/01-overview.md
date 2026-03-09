@@ -10,7 +10,7 @@ Tracker hiện nhắm vào kiến trúc một module duy nhất: **SIMCom SIM760
 - **MCU trung tâm:** ESP32-S3
 - **OBD2:** vgate iCar Pro qua BLE
 - **IMU:** LIS3DH cho motion detection và wake
-- **Nguồn dự phòng:** pin 18650 1S + mạch Buck/Boost/LVD/MUX/IP2312
+- **Nguồn dự phòng:** pin 18650 1S + mạch Buck/Boost/LVD/MP2482/SX1308/TP4056
 
 **Lưu ý nguồn 12V/24V:** firmware dùng 2 profile nguồn để điều khiển LVD/Power Path/Charger:
 
@@ -26,8 +26,8 @@ Tracker hiện nhắm vào kiến trúc một module duy nhất: **SIMCom SIM760
 - [`02-imu-lis3dh.md`](./02-imu-lis3dh.md) - Cảm biến IMU LIS3DH
 - [`03-mcu-esp32-s3.md`](./03-mcu-esp32-s3.md) - MCU ESP32-S3
 - [`04-obd2-ble-adapter.md`](./04-obd2-ble-adapter.md) - OBD2 BLE Adapter vgate iCar Pro
-- [`05-lte-modem-a7670c.md`](./05-lte-modem-a7670c.md) - Modem LTE + GNSS SIMCom SIM7600CE-T
-- [`06-backup-battery-21700.md`](./06-backup-battery-21700.md) - Pin backup 18650 1S
+- [`05-lte-modem-a7670c.md`](./05-lte-modem-a7670c.md) - Modem LTE + GNSS SIMCom SIM7600CE-T (tên file legacy, runtime là SIM7600CE-T)
+- [`06-backup-battery-21700.md`](./06-backup-battery-21700.md) - Pin backup **18650 1S** (tên file legacy, baseline runtime là 1 cell)
 
 > **Ghi chú:** GNSS đã tích hợp trực tiếp trong SIM7600CE-T. Tài liệu runtime hiện tại không dùng module GNSS rời.
 
@@ -93,7 +93,7 @@ Tracker hiện nhắm vào kiến trúc một module duy nhất: **SIMCom SIM760
 **Lý do chọn:**
 - Cấu hình đúng baseline 18650 1S hiện tại
 - Dễ thay cell theo nhu cầu dung lượng thực tế
-- Dễ kết hợp với mạch sạc IP2312
+- Dễ kết hợp với mạch sạc TP4056
 
 ---
 

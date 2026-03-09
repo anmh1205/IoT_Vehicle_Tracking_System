@@ -7,18 +7,17 @@
 - Dung lượng: **5,000 mAh @ 3.7 V** (≈ 18.5 Wh)
 - Điện áp: 3.0–4.2 V (nominal 3.7 V)
 
-**Sạc Pin (Module IP2312):**
+**Sạc Pin (Module TP4056):**
 
-- Dòng sạc: **3 A** (3000 mA)
-- Hiệu suất sạc: ~85–90% (tổn hao nhiệt, mạch sạc)
-- Thời gian sạc lý thuyết: T = 5,000 mAh / 3,000 mA ≈ **1.67 giờ**
-- Thời gian sạc thực tế (với hiệu suất 85%): T = 1.67 / 0.85 ≈ 1.96 giờ ≈ **2 giờ**
+- Dòng sạc: theo cấu hình điện trở PROG của module
+- Sạc theo chu trình CC/CV, tự giảm dòng khi tiến gần ngưỡng đầy
+- Thời gian sạc: phụ thuộc dòng cấu hình, dung lượng pin và điều kiện nhiệt
 
 **Lưu ý:**
 
 - Thời gian sạc có thể thay đổi tùy trạng thái pin (pin cạn sẽ sạc nhanh hơn ở giai đoạn đầu, chậm lại khi gần đầy)
-- Với dòng sạc 3A, pin sẽ được sạc đầy nhanh hơn ~3 lần so với sạc 1A
-- Phù hợp khi xe chạy ngắn (1–2 giờ) vẫn có thể sạc đầy pin
+- Dòng sạc phụ thuộc cấu hình PROG và điều kiện nhiệt của module TP4056
+- Cần chọn dòng sạc phù hợp để cân bằng thời gian sạc và nhiệt độ mạch
 
 ### VI.2 Tiêu Thụ Năng Lượng Theo Chế Độ
 
@@ -31,19 +30,19 @@
 - SIM7600CE-T (LTE + GNSS tích hợp hoạt động cùng lúc): ~80–150 mA (mức hệ thống tham chiếu)
 - LIS3DH (IMU): ~0.1 mA
 - Mạch phụ trợ: ~10–20 mA
-- **Sạc pin 3A**: 3000 mA (từ ắc quy, qua module IP2312)
+- **Sạc pin**: theo dòng cấu hình TP4056 (từ ắc quy qua bus 5V)
 
 **Tổng tiêu thụ từ ắc quy:**
 
 - Tracker: ~200–320 mA
-- Sạc pin: 3000 mA
-- **Tổng: ~3,200–3,320 mA**
+- Sạc pin: theo cấu hình TP4056
+- **Tổng**: phụ thuộc dòng sạc cấu hình + tải tracker
 
 **Gửi vị trí mỗi 5–30 giây:**
 
 - Dòng trung bình tracker: ~250 mA
-- Dòng sạc: 3000 mA
-- **Tổng: ~3,250 mA**
+- Dòng sạc: theo cấu hình TP4056
+- **Tổng**: phụ thuộc dòng sạc cấu hình tại thời điểm gửi dữ liệu
 
 #### Chế Độ 2: Đỗ Xe (IGN OFF, Heartbeat)
 
@@ -113,10 +112,10 @@
 Giả sử xe chạy **4 giờ/ngày**:
 
 - Tiêu thụ tracker: 250 mA × 4h = **1,000 mAh**
-- Sạc pin: 3,000 mA × 4h = **12,000 mAh** (vào pin, nhưng pin chỉ 5,000 mAh → sạc đầy sau ~2h)
-- **Tổng tiêu thụ từ ắc quy: ~13,000 mAh/ngày** (nếu sạc liên tục 4h)
+- Sạc pin: phụ thuộc cấu hình TP4056 và thời gian xe chạy
+- **Tổng tiêu thụ từ ắc quy**: phụ thuộc dòng sạc cấu hình + tải tracker
 
-**Lưu ý:** Với dòng sạc 3A, pin 5,000 mAh sẽ đầy sau ~2 giờ. Nếu xe chạy 4h, pin sẽ đầy trong 2h đầu, sau đó module IP2312 tự ngắt → tiêu thụ thực tế thấp hơn.
+**Lưu ý:** Với TP4056, dòng sạc thực tế bị chi phối bởi cấu hình PROG và nhiệt độ module. Khi pin đầy, mạch sẽ giảm dòng và kết thúc sạc.
 
 **Khi Xe Đỗ (IGN OFF):**
 
@@ -133,12 +132,12 @@ Giả sử đỗ **20 giờ/ngày**:
 
 **Cân Bằng Pin:**
 
-- **Sạc vào pin khi chạy:** Pin đầy sau ~2 giờ (với dòng 3A)
-- **Nếu xe chạy 4h/ngày:** Pin đầy trong 2h đầu, sau đó tự ngắt → không tiêu thụ thêm
+- **Sạc vào pin khi chạy:** phụ thuộc dòng cấu hình TP4056 (PROG) và điều kiện nhiệt
+- **Nếu xe chạy 4h/ngày:** khả năng pin đầy phụ thuộc dòng sạc cấu hình và trạng thái pin ban đầu
 - **Tiêu thụ từ pin khi đỗ:** 140 mAh/ngày (nếu dùng pin)
-- **Dư thừa:** Pin luôn được sạc đầy sau mỗi lần chạy xe
+- **Cân bằng thực tế:** cần đo dòng sạc thực tế theo module TP4056 đang dùng để xác nhận mức dư/thiếu
 
-→ Với dòng sạc 3A, pin sẽ được sạc đầy nhanh chóng (2 giờ) → đảm bảo pin luôn đầy khi cần backup.
+→ Với TP4056, không giả định một dòng cố định; cần hiệu chuẩn theo PROG + nhiệt độ để kết luận thời gian sạc chính xác.
 
 **Khi Ắc Quy Yếu (`U_batt <= Switch_OFF` theo profile):**
 
@@ -156,16 +155,16 @@ Giả sử ắc quy 45–60 Ah, chỉ dành **50% dung lượng an toàn** cho t
 
 **Tiêu thụ từ ắc quy:**
 
-- Khi chạy: ~3,250 mA (250 mA tracker + 3,000 mA sạc pin)
-  - Nếu sạc liên tục 4h: 3,250 mA × 4h = 13,000 mAh
-  - Thực tế: Pin đầy sau 2h → tiêu thụ = 250 × 4h + 3,000 × 2h = **7,000 mAh/ngày**
+- Khi chạy: tổng dòng từ ắc quy = dòng tracker (~250 mA trung bình tham chiếu) + dòng sạc TP4056 theo cấu hình thực tế
+- Nếu sạc hoạt động liên tục trong 4h: tiêu thụ/ngày = (I_tracker + I_charge_cfg) × 4h
+- Nếu pin gần đầy trong khi chạy: dòng sạc sẽ giảm dần (CC/CV) nên tiêu thụ thực tế thấp hơn công thức dòng hằng
 - Khi đỗ: ~140 mAh/ngày
-- **Trung bình: ~7,140 mAh/ngày** (nếu xe chạy 4h/ngày)
+- **Trung bình/ngày:** phụ thuộc mạnh vào `I_charge_cfg` và thời gian pin ở pha CV
 
 **Thời gian hoạt động:**
 
-- 45 Ah: 22,000 / 7,140 ≈ **3.1 ngày** (nếu chỉ chạy)
-- 60 Ah: 30,000 / 7,140 ≈ **4.2 ngày** (nếu chỉ chạy)
+- 45 Ah và 60 Ah chỉ tính chính xác khi đã đo `I_charge_cfg` thực tế của module TP4056
+- Công thức tổng quát: `T (ngày) = Dung_lượng_an_toàn (mAh) / Tiêu_thụ_trung_bình_mỗi_ngày (mAh/ngày)`
 
 **Thực tế:**
 
@@ -178,10 +177,10 @@ Giả sử ắc quy 45–60 Ah, chỉ dành **50% dung lượng an toàn** cho t
 | Thông Số                                           | Giá Trị                                |
 | -------------------------------------------------- | -------------------------------------- |
 | **Dung lượng pin**                                 | 5,000 mAh                              |
-| **Thời gian sạc (3A)**                             | ~2 giờ (thực tế)                       |
-| **Thời gian hoạt động từ pin (heartbeat 15 phút)** | ~20–25 ngày                            |
-| **Thời gian hoạt động từ pin (heartbeat 30 phút)** | ~30–35 ngày                            |
-| **Thời gian hoạt động từ pin (track liên tục)**    | ~15–18 giờ                             |
-| **Tiêu thụ khi chạy (có sạc pin 3A)**              | ~7,000 mAh/ngày từ ắc quy (xe chạy 4h) |
-| **Tiêu thụ khi đỗ (heartbeat)**                    | ~140 mAh/ngày từ ắc quy                |
-| **Cân bằng sạc/tiêu thụ**                          | Dư thừa ~3,860 mAh/ngày khi chạy 4h    |
+| **Thời gian sạc (TP4056)**                         | Phụ thuộc PROG + nhiệt + trạng thái pin |
+| **Thời gian hoạt động từ pin (heartbeat 15 phút)** | ~20–25 ngày (ước tính)                  |
+| **Thời gian hoạt động từ pin (heartbeat 30 phút)** | ~30–35 ngày (ước tính)                  |
+| **Thời gian hoạt động từ pin (track liên tục)**    | ~15–18 giờ (ước tính)                   |
+| **Tiêu thụ khi chạy (có sạc pin)**                 | = (I_tracker + I_charge_cfg) × thời gian chạy |
+| **Tiêu thụ khi đỗ (heartbeat)**                    | ~140 mAh/ngày từ ắc quy                 |
+| **Cân bằng sạc/tiêu thụ**                          | Cần đo `I_charge_cfg` thực tế để kết luận |

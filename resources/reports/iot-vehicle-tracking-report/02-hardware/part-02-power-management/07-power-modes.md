@@ -101,7 +101,7 @@
 
 - Tracker dùng nguồn trực tiếp từ ắc quy
 - Sạc pin 18650 1S khi `U_batt >= IGN_ON` theo profile
-- Dòng sạc: **3 A** (module IP2312)
+- Dòng sạc: theo cấu hình TP4056 (PROG resistor)
 - Thời gian sạc đầy: ~2 giờ (pin 5,000 mAh)
 
 **Khi Xe Đỗ (IGN OFF):**
@@ -139,10 +139,10 @@
 **Sạc Pin:**
 
 - Chỉ sạc khi `IGN ON` và `U_batt >= IGN_ON` theo profile
-- Dòng sạc: **3 A** (module IP2312)
-- Module IP2312 tự ngắt khi pin đầy (4.2V)
+- Dòng sạc: theo cấu hình TP4056 (PROG resistor)
+- TP4056 tự kết thúc sạc khi pin đạt ngưỡng 4.2V theo chu trình CC/CV
 - BMS/Protection board bảo vệ quá dòng xả, quá áp
-- Thời gian sạc đầy: ~2 giờ (nhanh hơn 3 lần so với sạc 1A)
+- Thời gian sạc đầy: phụ thuộc dòng cấu hình và điều kiện nhiệt của module
 
 **Xả Pin:**
 

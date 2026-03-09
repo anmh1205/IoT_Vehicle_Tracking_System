@@ -15,7 +15,7 @@ Sơ đồ khối này phản ánh **kiến trúc phần cứng mục tiêu** hi�
 - **Profile 12V**: `Switch_OFF=12.0V`, `Switch_ON=12.2V`, `IGN_ON>=13.0V`, `IGN_OFF<=12.0V`
 - **Profile 24V**: `Switch_OFF=24.0V`, `Switch_ON=24.4V`, `IGN_ON>=26.0V`, `IGN_OFF<=24.0V`
 
-ESP32 đọc U_batt qua ADC (divider `100k/10k`) để chọn profile và điều khiển Power MUX.
+ESP32 đọc U_batt qua ADC (divider `100k/10k`) để chọn profile và điều khiển power routing diode OR.
 
 ### Luồng Dữ Liệu
 

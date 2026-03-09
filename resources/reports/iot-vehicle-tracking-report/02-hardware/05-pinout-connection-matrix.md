@@ -5,7 +5,7 @@
 > Nguồn đối soát:
 > - Firmware source-of-truth: `iot-vehicle-tracking-firmware/main/inc/pin_map.h`, `main/src/modem_at.c`, `main/src/power_mgr.c`, `main/src/adc_reader.c`
 > - Schematic assets: `resources/reports/thesis-chapters/assets/schematic/esp32.png`, `simcom.png`, `block-diagram.png`
-> - Datasheet: ESP32-S3 v2.1, SIM7600CE Hardware Design v1.04, LM393 datasheet, IP2312 datasheet
+> - Datasheet: ESP32-S3 v2.1, SIM7600CE Hardware Design v1.04, LM393 datasheet, TP4056 datasheet
 
 ### III.3.1 Matrix
 
@@ -21,8 +21,8 @@
 | `VBAT-EN` (modem rail enable) | *(firmware hiện dùng `PIN_POWER_MUX_SEL` cho chọn nguồn tổng)* | SIM7600CE VBAT rail control path | Output control (board-level) | Power path control domain | Theo mạch nguồn | Bật/tắt rail theo logic nguồn tổng | SIM7600CE HD v1.04 p.16 (VBAT pins), block-diagram/power schematic | **Partially verified (board-level net, chưa có macro EN riêng)** |
 | `LVD_STATUS` | GPIO19 (`PIN_LVD_STATUS`) | Comparator output (LM393 family) | Input to ESP32 | 3.3V digital read | Theo mạch comparator + hysteresis | Firmware coi HIGH là low-voltage (`power_is_low_voltage()==true`) | ESP32-S3 DS v2.1 p.27, p.79; LM393 DS (open-collector output, ref p.17); firmware `power_mgr.c` | **Verified (code + electrical semantics)** |
 | `U_BATT_ADC` | GPIO4 (`PIN_U_BATT_ADC`, ADC) | Divider node R1/R2 từ ắc quy | Analog input | ADC domain 0–3.3V (qua chia áp) | Chia áp `R1=100k`, `R2=10k` | Công thức firmware: `u_batt = v_adc * 11.0f` | ESP32-S3 DS v2.1 p.27 (ADC1_CH3), p.79; firmware `adc_reader.c` | **Verified (code + docs)** |
-| `POWER_MUX_SEL` | GPIO18 (`PIN_POWER_MUX_SEL`) | Power mux gate/relay control | Output | 3.3V control | Theo mạch MUX | LOW: nguồn ắc quy, HIGH: nguồn backup (theo firmware hiện tại) | ESP32-S3 DS v2.1 p.27, p.79; firmware `power_mgr.c` | **Verified (code + docs)** |
-| `CHARGER_EN` | GPIO5 (`PIN_CHARGER_EN`) | Enable chân module sạc (IP2312 path) | Output | 3.3V control | Theo mạch enable | HIGH bật sạc, LOW tắt sạc | ESP32-S3 DS v2.1 p.27, p.79; IP2312 DS (VIN/BAT/ICHG pins p.1); firmware `power_mgr.c` | **Verified (code + docs)** |
+| `POWER_MUX_SEL` | GPIO18 (`PIN_POWER_MUX_SEL`) | Kiểm soát EN của MP2482 để ưu tiên nguồn xe qua diode OR | Output | 3.3V control | GPIO18 bật/tắt MP2482 EN; diode OR (2 x Schottky) tự động chọn nguồn giữa MP2482 và SX1308 | LOW: MP2482 bật (dùng xe), HIGH: MP2482 tắt để SX1308 (pin backup) cấp qua diode | ESP32-S3 DS v2.1 p.27, p.79; `power_mgr.c`; MP2482 datasheet (EN pin) | **Verified (code + docs)** |
+| `CHARGER_EN` | GPIO5 (`PIN_CHARGER_EN`) | Điều khiển charger TP4056 cho pin 18650 1S | Output | 3.3V control | Theo mạch enable TP4056 | HIGH bật sạc pin 1S (TP4056), LOW tắt | ESP32-S3 DS v2.1 p.27, p.79; TP4056 datasheet (EN, PROG, STAT pins p.1); firmware `power_mgr.c` | **Verified (code + docs)** |
 | `LIS3DH_INT` | GPIO21 (`PIN_LIS3DH_INT`) | LIS3DH INT | Input interrupt | 3.3V IO | Theo config INT của LIS3DH | Wake từ deep sleep khi motion | ESP32-S3 DS v2.1 p.27, p.79; LIS3DH datasheet (pending official ST PDF in repo) | **Verified in code + schematic, datasheet source pending official PDF** |
 | `LIS3DH_SDA` | GPIO22 (`PIN_LIS3DH_SDA`) | LIS3DH SDA | Bidirectional (I2C) | 3.3V I2C | External pull-up theo bus I2C | I2C data | ESP32-S3 DS v2.1 (GPIO matrix/I2C capable pins); LIS3DH datasheet | **Verified in code + schematic** |
 | `LIS3DH_SCL` | GPIO23 (`PIN_LIS3DH_SCL`) | LIS3DH SCL | Output (I2C clock) | 3.3V I2C | External pull-up theo bus I2C | I2C clock | ESP32-S3 DS v2.1; LIS3DH datasheet | **Verified in code + schematic** |

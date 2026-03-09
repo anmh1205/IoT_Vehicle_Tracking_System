@@ -168,13 +168,13 @@
 - Runtime lấy fix GNSS qua `AT+CGNSINF`; `AT+CGNSTST` chỉ dùng cho debug NMEA khi cần
 
 #### 5. Đo Điện Áp Ắc Quy
-- ADC đọc điện áp ắc quy
-- Quyết định chuyển nguồn (ắc quy ↔ pin)
+- ADC đọc điện áp ắc quy (divider 100k/10k dùng chung cho 12V/24V)
+- Quyết định chuyển nguồn thông qua diode OR và EN MP2482
 
 #### 6. Điều Khiển Mạch LVD
-- GPIO điều khiển relay/MOSFET
-- Chuyển nguồn tự động
-- Điều khiển charger (IP2312)
+- GPIO19 đọc comparator LM393, HIGH nghĩa low-voltage và firmware cắt EN 12/24V
+- Khi LVD kích hoạt, diode OR chuyển sang SX1308 + pin backup
+- GPIO5 điều khiển charger TP4056 cho pin 18650 1S
 
 #### 7. Quản Lý Deep Sleep
 - Deep sleep khi đỗ xe

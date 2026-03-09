@@ -13,11 +13,11 @@ BOM dưới đây phản ánh **kiến trúc phần cứng mục tiêu** hiện 
 | 3 | OBD2 BLE (vgate iCar Pro) | Cái | 1 | 150,000–300,000 | BLE 4.0, đọc dữ liệu ECU |
 | 4 | LTE + GNSS module SIMCom SIM7600CE-T | Cái | 1 | 170,000–220,000 | Kèm LTE/GNSS antenna + SIM |
 | 5 | 18650 Li-ion 1S (dung lượng theo cell chọn) | Cái | 1 | 60,000–180,000 | Cell 18650 + protection board 1S |
-| 6 | Module sạc IP2312 (3A) | Cái | 1 | 20,000–40,000 | Charger Type-C |
+| 6 | Module sạc TP4056 (1S, dòng theo PROG) | Cái | 1 | 20,000–40,000 | Charger 1S Type-C |
 | 7 | BMS/Protection Board 1S | Cái | 1 | 10,000–20,000 | BMS 1S 3A hoặc DW01+MOSFET |
-| 8 | Buck DC-DC (12/24→5V, 3A) | Cái | 1 | 15,000–25,000 | LM2596 module |
-| 9 | Boost DC-DC (3.7→5V, 2A) | Cái | 1 | 10,000–15,000 | MT3608 module |
-| 10 | Relay module 5V / mạch Power MUX | Cái | 1 | 5,000–15,000 | Chuyển nguồn ắc quy ↔ pin backup |
+| 8 | Buck DC-DC (12/24→5V, 5A) | Cái | 1 | 25,000–40,000 | MP2482 module hoặc board custom |
+| 9 | Boost DC-DC (3.0–4.2→5V, ≥2A) | Cái | 1 | 15,000–25,000 | SX1308 module + diode OR |
+| 10 | Diode OR (2 x Schottky) | Cái | 1 | 2,000–5,000 | Đảm bảo không có MOSFET/relay trong giới hạn điện áp |
 | 11 | Resistor, capacitor, diode, connector | Gói | 1 | 20,000–40,000 | Mạch phụ trợ nguồn + ADC |
 | 12 | PCB (nếu tự thiết kế) | Cái | 1 | 50,000–100,000 | PCB 2 lớp |
 | 13 | Vỏ bảo vệ (tùy chọn) | Cái | 1 | 50,000–100,000 | Prototype hoặc lắp thực địa |
@@ -51,7 +51,7 @@ BOM dưới đây phản ánh **kiến trúc phần cứng mục tiêu** hiện 
 #### 3. Nơi Mua Hàng
 
 **Trên Shopee/Lazada:**
-- Tìm theo từ khóa: `SIM7600CE-T`, `ESP32-S3`, `LIS3DH`, `IP2312`
+- Tìm theo từ khóa: `SIM7600CE-T`, `ESP32-S3`, `LIS3DH`, `TP4056`
 - So sánh giá, review, ảnh thực tế
 
 **Cửa hàng linh kiện:**
@@ -74,12 +74,12 @@ BOM dưới đây phản ánh **kiến trúc phần cứng mục tiêu** hiện 
 #### Nhóm 3: Nguồn và Pin
 - Pin 18650 Li-ion 1S
 - Protection board 1S
-- Charger IP2312
+- Charger TP4056
 
 #### Nhóm 4: Power Management
-- Buck converter LM2596
-- Boost converter MT3608
-- Power MUX / relay / MOSFET path
+- Buck converter MP2482
+- Boost converter SX1308 + diode OR
+- Power routing via diode OR (không dùng relay/MOSFET)
 
 ### Kết Luận
 

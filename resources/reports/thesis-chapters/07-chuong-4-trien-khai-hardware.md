@@ -38,10 +38,10 @@ Hệ thống tracker lấy ESP32-S3 làm bộ xử lý trung tâm. Vi điều kh
 |                                                           |
 |  +---------------------------------------------+          |
 |  |    Hệ thống quản lý nguồn                    |          |
-|  |    - Buck LM2596 (7–40V -> 5V, tương thích 12V/24V) |          |
-|  |    - Boost MT3608 (3.7V -> 5V)              |          |
-|  |    - Power MUX (MOSFET/Relay)               |          |
-|  |    - Charger IP2312 (sạc pin 21700)         |          |
+|  |    - Buck MP2482 (7–40V -> 5V, tương thích 12V/24V) |          |
+|  |    - Boost SX1308 (3.7V -> 5V)              |          |
+|  |    - Power Path (Diode-OR + EN)             |          |
+|  |    - Charger TP4056 (sạc pin 21700)         |          |
 |  +---------------------------------------------+          |
 |          |                        |                        |
 |     Ắc quy xe 12V/24V      Pin 21700 3.7V 5Ah             |
@@ -133,7 +133,7 @@ Sơ đồ nguyên lý tổng hợp của hệ thống bao gồm tất cả các 
 - **I2C** (2 dây tín hiệu SDA/SCL): Kết nối với cảm biến gia tốc LIS3DH
 - **BLE** (không dây): Kết nối với adapter OBD2 vgate iCar Pro
 - **ADC** (1 kênh): Đọc điện áp ắc quy qua voltage divider
-- **GPIO** (3 chân output): Điều khiển Power MUX, Charger EN, Modem PWRKEY
+- **GPIO** (3 chân output): Điều khiển Power Path EN, Charger EN, Modem PWRKEY
 - **GPIO** (2 chân input): Đọc trạng thái LVD, ngắt từ IMU
 
 ![Hình 4.4 - Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–4.png)
@@ -156,11 +156,11 @@ Việc phân công chân GPIO của ESP32-S3 được thiết kế đảm bảo 
 | --------- | ------------- | ----------------- | ---------------------------------------------------------------------------- |
 | GPIO 2    | IGN_IN        | Input             | Đọc trạng thái khóa điện (IGN) từ xe hoặc qua OBD2                           |
 | GPIO 4    | U_BATT_ADC    | Input (ADC)       | Đọc điện áp ắc quy xe qua voltage divider (R1=100k, R2=10k)                   |
-| GPIO 5    | CHARGER_EN    | Output            | Điều khiển bật/tắt IC sạc IP2312 (HIGH = sạc, LOW = không sạc)               |
+| GPIO 5    | CHARGER_EN    | Output            | Điều khiển bật/tắt IC sạc TP4056 (HIGH = sạc, LOW = không sạc)               |
 | GPIO 16   | MODEM_UART_TX | Output            | Truyền dữ liệu UART đến module SIM7600CE-T                                    |
 | GPIO 17   | MODEM_UART_RX | Input             | Nhận dữ liệu UART từ module SIM7600CE-T                                      |
-| GPIO 18   | POWER_MUX_SEL | Output            | Chọn nguồn cấp: LOW = ắc quy (Q1 ON), HIGH = pin backup (Q2 ON)              |
-| GPIO 19   | LVD_STATUS    | Input             | Đọc trạng thái Low Voltage Disconnect (HIGH = bình thường, LOW = ắc quy yếu) |
+| GPIO 18   | POWER_PATH_EN | Output            | Điều phối nhánh nguồn runtime (LOW = ưu tiên MP2482, HIGH = ưu tiên SX1308)  |
+| GPIO 19   | LVD_STATUS    | Input             | Đọc trạng thái Low Voltage Disconnect (HIGH = low-voltage, LOW = bình thường) |
 | GPIO 21   | LIS3DH_INT    | Input (Interrupt) | Nhận tín hiệu ngắt từ cảm biến gia tốc LIS3DH khi phát hiện chuyển động      |
 | GPIO 22   | LIS3DH_SDA    | I/O (I2C)         | Đường dữ liệu I2C kết nối với cảm biến LIS3DH                                |
 | GPIO 23   | LIS3DH_SCL    | I/O (I2C)         | Đường xung nhịp I2C kết nối với cảm biến LIS3DH                              |
@@ -187,7 +187,7 @@ Sơ đồ đấu nối mô tả cách kết nối vật lý giữa ESP32-S3 DevK
            GPIO  5 |* CHARGER_EN     *| GPIO 21 (LIS3DH_INT)
                    |*                *|
            GPIO 16 |* MODEM_TX       *| GPIO 19 (LVD_STATUS)
-           GPIO 17 |* MODEM_RX       *| GPIO 18 (POWER_MUX_SEL)
+           GPIO 17 |* MODEM_RX       *| GPIO 18 (POWER_PATH_EN)
                    |*                *|
            GPIO 25 |* MODEM_PWRKEY   *|
                    |*                *|
@@ -200,9 +200,9 @@ Kết nối ngoại vi:
   GPIO 21    ---[INT]----> LIS3DH INT1
   BLE (nội)  ---[BLE]----> vgate iCar Pro (OBD2)
   GPIO 4     ---[ADC]----> Voltage Divider (R1=100k, R2=10k) <--- U_batt
-  GPIO 5     ---[GPIO]---> IP2312 EN (Charger)
-  GPIO 18    ---[GPIO]---> Power MUX (Relay/MOSFET)
-  GPIO 19    <--[GPIO]---- LVD Status
+  GPIO 5     ---[GPIO]---> TP4056 EN (Charger)
+  GPIO 18    ---[GPIO]---> Power Path EN (Diode-OR runtime)
+  GPIO 19    <--[GPIO]---- LVD Status (HIGH = low-voltage)
   GPIO 25    ---[GPIO]---> SIM7600CE-T PWRKEY
 ```
 
@@ -220,10 +220,10 @@ Kết nối ngoại vi:
 
 Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tracker, bảo đảm thiết bị hoạt động liên tục ngay cả khi ắc quy xe yếu hoặc mất điện. Kiến trúc nguồn gồm năm khối chức năng chính:
 
-1. **Mạch giảm áp Buck (LM2596):** Chuyển đổi điện áp ắc quy xe (12V hoặc 24V) xuống 5V
-2. **Mạch tăng áp Boost (MT3608):** Chuyển đổi 3.7V từ pin dự phòng lên 5V
-3. **Bộ chuyển mạch nguồn Power MUX:** Tự động chuyển đổi giữa hai nguồn cấp
-4. **Mạch sạc pin IP2312:** Sạc pin Li-ion 21700 khi xe hoạt động
+1. **Mạch giảm áp Buck (MP2482):** Chuyển đổi điện áp ắc quy xe (12V hoặc 24V) xuống 5V
+2. **Mạch tăng áp Boost (SX1308):** Chuyển đổi 3.7V từ pin dự phòng lên 5V
+3. **Đường nguồn Power Path (Diode-OR + EN):** Duy trì cấp nguồn liên tục giữa hai nhánh
+4. **Mạch sạc pin TP4056:** Sạc pin Li-ion 21700 khi xe hoạt động
 5. **Mạch giám sát điện áp LVD:** Giám sát điện áp ắc quy để quyết định chuyển nguồn
 
 ```text
@@ -234,7 +234,7 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 |  Ắc Quy Xe (12V/24V)        Pin 21700 (3.7V, 5Ah)        |
 |       |                           |                       |
 |  +----v----+                +----v----+                   |
-|  | LM2596  |                | MT3608  |                   |
+|  | MP2482  |                | SX1308  |                   |
 |  | Buck    |                | Boost   |                   |
 |  | 7–40V->5V|               | 3.7V->5V|                   |
 |  +----+----+                +----+----+                   |
@@ -242,8 +242,8 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 |       +----------+---------------+                        |
 |                  |                                        |
 |         +--------v--------+                               |
-|         |   Power MUX     |                               |
-|         | (Relay/MOSFET)  |                               |
+|         |   Power Path    |                               |
+|         | (Diode-OR + EN) |                               |
 |         +--------+--------+                               |
 |                  |                                        |
 |         +--------v--------+                               |
@@ -251,7 +251,7 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 |         +---+------+------+---+                           |
 |             |      |      |   |                           |
 |          +--v-+ +--v--+ +--v-+                            |
-|          |LDO | |LTE/ | |IP2312                           |
+|          |LDO | |LTE/ | |TP4056                           |
 |          |3.3V| |GNSS | |Charger                          |
 |          |    | |SIM7600CE-T                              |
 |          +-+--+ +-----+ +--+--+                           |
@@ -271,13 +271,13 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 
 #### b) Mạch giảm áp Buck Converter (12V/24V -> 5V)
 
-Mạch buck converter sử dụng IC LM2596–5.0 (phiên bản cố định 5V) để chuyển đổi điện áp từ ắc quy xe 12V hoặc 24V xuống 5V cấp cho toàn bộ hệ thống. Các thông số thiết kế:
+Mạch buck converter sử dụng IC MP2482–5.0 (phiên bản cố định 5V) để chuyển đổi điện áp từ ắc quy xe 12V hoặc 24V xuống 5V cấp cho toàn bộ hệ thống. Các thông số thiết kế:
 
 **Bảng 4.2: Thông số thiết kế mạch Buck Converter**
 
 | Thông số        | Giá trị                        | Ghi chú                  |
 | --------------- | ------------------------------ | ------------------------ |
-| IC chính        | LM2596–5.0 (Texas Instruments) | Fixed output 5V          |
+| IC chính        | MP2482–5.0 (Texas Instruments) | Fixed output 5V          |
 | Điện áp vào     | 7–40 V DC                      | Từ ắc quy xe 12V hoặc 24V |
 | Điện áp ra      | 5V                             | Cấp cho 5V Rail          |
 | Dòng tối đa     | 3A                             | Đủ cho tracker + sạc pin |
@@ -291,7 +291,7 @@ Mạch buck converter sử dụng IC LM2596–5.0 (phiên bản cố định 5V)
 Sơ đồ mạch:
 
 ```text
-Vin (12V/24V) --+-- C1 (100uF/50V) --+-- LM2596 --+-- L1 (100uH) --+-- 5V Output
+Vin (12V/24V) --+-- C1 (100uF/50V) --+-- MP2482 --+-- L1 (100uH) --+-- 5V Output
             |                     |             |                 |
             +-- GND               +-- GND       +-- D1 (1N5822)--+
                                                      |
@@ -313,23 +313,23 @@ P_loss = (1 - hiệu_suất) x P_out
        = 0.15 x 15W = 2.25W
 ```
 
-Với tổn hao nhiệt 2.25W ở công suất tối đa, IC LM2596 cần được gắn tản nhiệt (heatsink) để đảm bảo nhiệt độ hoạt động trong giới hạn cho phép.
+Với tổn hao nhiệt 2.25W ở công suất tối đa, IC MP2482 cần được gắn tản nhiệt (heatsink) để đảm bảo nhiệt độ hoạt động trong giới hạn cho phép.
 
-![Hình 4.7 - Sơ đồ nguyên lý mạch Buck Converter LM2596](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–7.png)
+![Hình 4.7 - Sơ đồ nguyên lý mạch Buck Converter MP2482](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–7.png)
 
-*Hình 4.7: Sơ đồ nguyên lý mạch Buck Converter LM2596*
+*Hình 4.7: Sơ đồ nguyên lý mạch Buck Converter MP2482*
 
 > Nguồn: Hình vẽ của tác giả
 
 #### c) Mạch tăng áp Boost Converter (3.7V -> 5V)
 
-Mạch boost converter sử dụng IC MT3608 để tăng điện áp từ pin Li-ion 21700 (3.0–4.2V, danh định 3.7V) lên 5V, cung cấp nguồn dự phòng khi ắc quy xe yếu.
+Mạch boost converter sử dụng IC SX1308 để tăng điện áp từ pin Li-ion 21700 (3.0–4.2V, danh định 3.7V) lên 5V, cung cấp nguồn dự phòng khi ắc quy xe yếu.
 
 **Bảng 4.3: Thông số thiết kế mạch Boost Converter**
 
 | Thông số          | Giá trị                     | Ghi chú                     |
 | ----------------- | --------------------------- | --------------------------- |
-| IC chính          | MT3608 (Step-Up Converter)  | Adjustable output           |
+| IC chính          | SX1308 (Step-Up Converter)  | Adjustable output           |
 | Điện áp vào       | 2–24V (thực tế 3.0–4.2V)    | Từ pin 21700                |
 | Điện áp ra        | 5V (điều chỉnh bằng R1, R2) | Cấp cho 5V Rail             |
 | Dòng tối đa       | 2A                          | Đủ cho tracker khi dùng pin |
@@ -349,45 +349,29 @@ I_in = I_out x (V_out / V_in) / hiệu_suất
 
 Kết quả cho thấy pin 21700 cần cung cấp dòng tối đa 3.18A khi đầu ra tải 2A. Với dung lượng 5000 mAh và khả năng xả dòng cao, mức dòng này vẫn nằm trong phạm vi hoạt động an toàn.
 
-![Hình 4.8 - Sơ đồ nguyên lý mạch Boost Converter MT3608](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–8.jpg)
+![Hình 4.8 - Sơ đồ nguyên lý mạch Boost Converter SX1308](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–8.jpg)
 
-*Hình 4.8: Sơ đồ nguyên lý mạch Boost Converter MT3608*
+*Hình 4.8: Sơ đồ nguyên lý mạch Boost Converter SX1308*
 
 > Nguồn: Hình vẽ của tác giả
 
-#### d) Mạch chuyển mạch nguồn Power MUX
+#### d) Mạch chuyển mạch nguồn Power Path (Diode-OR + EN)
 
-Bộ chuyển mạch nguồn (Power MUX) có nhiệm vụ tự động chuyển đổi giữa nguồn ắc quy và nguồn pin dự phòng dựa trên điện áp ắc quy. Hệ thống hỗ trợ hai phương án thiết kế:
-
-**Phương án 1 - Relay Module (khuyến nghị cho đồ án):**
+Đường nguồn runtime sử dụng kiến trúc **Diode-OR + EN** để duy trì cấp nguồn liên tục giữa nhánh chính và nhánh dự phòng, đồng thời cho phép firmware điều phối sạc/chuyển trạng thái theo profile 12V/24V.
 
 ```text
-Buck Output (5V từ ắc quy) --+-- Relay NO --+-- 5V Rail
-                              |              |
-                              +-- Relay COM--+
-                                             |
-Boost Output (5V từ pin)  ------- Relay NC --+
+Buck 5V (MP2482)  --|<|--+
+                     D1   |
+                          +---- 5V Rail ----> tải hệ thống
+                     D2   |
+Boost 5V (SX1308)  --|<|--+
+
+GPIO18/GPIO5 dùng để điều phối enable path (power path + charger EN) theo logic firmware.
 ```
 
-- GPIO HIGH -> Relay ON -> sử dụng nguồn từ ắc quy (qua Buck)
-- GPIO LOW -> Relay OFF -> sử dụng nguồn từ pin dự phòng (qua Boost)
-- Ưu điểm: Đơn giản, dễ mua, giá rẻ (~5,000 VND), không cần gate driver
-
-**Phương án 2 - MOSFET P-channel (chuyên nghiệp hơn):**
-
-```text
-Buck Output --+-- Q1 (P-MOS IRF9540N) --+-- 5V Rail
-              |                          |
-              +-- Gate Control (GPIO18)  |
-                                         |
-Boost Output --+-- Q2 (P-MOS IRF9540N) --+
-               |
-               +-- Gate Control (GPIO18 đảo)
-
-Điện trở bảo vệ:
-D1 (Schottky 1N5822) tu Buck  --+-- 5V Rail (Diode OR backup)
-D2 (Schottky 1N5822) tu Boost --+
-```
+- D1, D2 dùng diode Schottky để OR hai nguồn 5V, tránh backfeed giữa hai nhánh.
+- Khi U_batt thấp hơn ngưỡng Switch_OFF, firmware ưu tiên nhánh backup (SX1308) và tắt sạc.
+- Khi U_batt phục hồi vượt Switch_ON, firmware ưu tiên nhánh chính (MP2482) và cho phép sạc TP4056 theo điều kiện IGN.
 
 **Bảng 4.4: Logic chuyển nguồn tự động**
 
@@ -398,25 +382,25 @@ D2 (Schottky 1N5822) tu Boost --+
 | Ắc quy yếu          | OFF | Profile 12V: U_batt <= 12.0V; Profile 24V: U_batt <= 24.0V | Pin 21700     | Không   | Có       |
 | Ắc quy phục hồi     | OFF | Profile 12V: U_batt >= 12.2V; Profile 24V: U_batt >= 24.4V | Ắc quy        | Không   | Có       |
 
-*Ghi chú: Ngưỡng LVD cắt sâu để bảo vệ ắc quy: 11.5V (profile 12V) và 23.0V (profile 24V).*
+*Ghi chú: Ngưỡng LVD profile dùng cho runtime: OFF=12.0V/ON=12.2V (12V), OFF=24.0V/ON=24.4V (24V).*
 
 Cơ chế hysteresis theo profile (12V: 12.0V OFF, 12.2V ON; 24V: 24.0V OFF, 24.4V ON) được áp dụng để tránh hiện tượng dao động liên tục khi điện áp ắc quy nằm gần ngưỡng chuyển đổi.
 
-![Hình 4.9 - Sơ đồ mạch Power MUX và logic chuyển nguồn tự động](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–9.png)
+![Hình 4.9 - Sơ đồ mạch Power Path và logic chuyển nguồn tự động](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–9.png)
 
-*Hình 4.9: Sơ đồ mạch Power MUX và logic chuyển nguồn tự động*
+*Hình 4.9: Sơ đồ mạch Power Path và logic chuyển nguồn tự động*
 
 > Nguồn: Hình vẽ của tác giả
 
-#### e) Mạch sạc pin IP2312
+#### e) Mạch sạc pin TP4056
 
-IC sạc IP2312 (Injoinic) được sử dụng để sạc pin Li-ion 21700 khi xe đang hoạt động. Module sạc nhận nguồn 5V từ bus nguồn chính (qua Buck converter) và sạc pin với dòng tối đa 3A.
+IC sạc TP4056 (Injoinic) được sử dụng để sạc pin Li-ion 21700 khi xe đang hoạt động. Module sạc nhận nguồn 5V từ bus nguồn chính (qua Buck converter) và sạc pin với dòng tối đa 3A.
 
-**Bảng 4.5: Thông số mạch sạc IP2312**
+**Bảng 4.5: Thông số mạch sạc TP4056**
 
 | Thông số          | Giá trị                                         |
 | ----------------- | ----------------------------------------------- |
-| IC sạc            | IP2312 (Injoinic)                               |
+| IC sạc            | TP4056 (Injoinic)                               |
 | Điện áp vào       | 4.5–5.5V (từ 5V Rail)                           |
 | Điện áp sạc       | 4.2V (chuẩn Li-ion)                             |
 | Dòng sạc tối đa   | 3A (có thể điều chỉnh)                          |
@@ -427,11 +411,11 @@ IC sạc IP2312 (Injoinic) được sử dụng để sạc pin Li-ion 21700 khi
 Sơ đồ kết nối:
 
 ```text
-5V Rail --+-- IP2312 Module --+-- BMS/Protection Board --+-- Pin 21700
+5V Rail --+-- TP4056 Module --+-- BMS/Protection Board --+-- Pin 21700
           |                   |                           |
           +-- GND             +-- GND                     +-- GND
 
-ESP32 GPIO5 — R (10k) — IP2312 EN Pin
+ESP32 GPIO5 — R (10k) — TP4056 EN Pin
 ```
 
 **Điều kiện sạc được điều khiển bởi firmware:**
@@ -442,9 +426,9 @@ ESP32 GPIO5 — R (10k) — IP2312 EN Pin
 
 **Bảo vệ pin:** Board bảo vệ BMS 1S 3A được sử dụng kèm với pin 21700, cung cấp các chức năng bảo vệ quá xả (< 2.5V), quá sạc (> 4.25V), ngắn mạch và giới hạn dòng xả tối đa 3A.
 
-![Hình 4.10 - Sơ đồ mạch sạc IP2312 và bảo vệ pin 21700](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–10.jpg)
+![Hình 4.10 - Sơ đồ mạch sạc TP4056 và bảo vệ pin 21700](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–10.jpg)
 
-*Hình 4.10: Sơ đồ mạch sạc IP2312 và bảo vệ pin 21700*
+*Hình 4.10: Sơ đồ mạch sạc TP4056 và bảo vệ pin 21700*
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -469,7 +453,7 @@ Ngoài ra, hệ thống cũng hỗ trợ tùy chọn bổ sung một comparator 
 Vỏ hộp bảo vệ cần đáp ứng các yêu cầu sau:
 
 - **Kích thước nhỏ gọn:** Phù hợp lắp đặt dưới táp-lô hoặc gần cổng OBD2, kích thước tối đa khoảng 100 x 70 x 35 mm
-- **Tản nhiệt:** Đảm bảo thông gió cho các IC công suất (LM2596, MT3608) với tổn hao nhiệt tổng cộng có thể lên đến 3–4W
+- **Tản nhiệt:** Đảm bảo thông gió cho các IC công suất (MP2482, SX1308) với tổn hao nhiệt tổng cộng có thể lên đến 3–4W
 - **Bảo vệ:** Chống bụi, chống nước cơ bản (IP54 hoặc tương đương) cho môi trường bên trong xe
 - **Tiếp cận anten:** Bố trí vị trí phù hợp cho anten 4G/LTE, anten GNSS và anten BLE để đảm bảo chất lượng thu phát tín hiệu
 
@@ -481,14 +465,14 @@ Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân 
 +--------------------------------------------------+
 |                  VỎ HỘP BẢO VỆ                   |
 |  +----------+  +----------+  +----------+        |
-|  |  ESP32   |  | SIM7600CE-T |  |  IP2312  |        |
+|  |  ESP32   |  | SIM7600CE-T |  |  TP4056  |        |
 |  |  S3      |  | LTE/GNSS    |  |  Charger |        |
 |  |  DevKit  |  | tích hợp     |  |  + BMS   |        |
 |  +----------+  +----------+  +----------+        |
 |                                                  |
 |  +----------+  +----------+  +----------+        |
-|  |  LM2596  |  |  MT3608  |  |  Relay   |        |
-|  |  Buck    |  |  Boost   |  |  Module  |        |
+|  |  MP2482  |  |  SX1308  |  | Diode-OR |        |
+|  |  Buck    |  |  Boost   |  | + EN     |        |
 |  +----------+  +----------+  +----------+        |
 |                                                  |
 |  +----------------------------------------------+|
@@ -507,7 +491,7 @@ Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân 
 
 #### c) Các lưu ý thiết kế
 
-**Tản nhiệt:** Các module công suất (LM2596, MT3608) được bố trí tại vị trí thông thoáng, tách khỏi cảm biến nhiệt độ; khe thông gió đặt ở mặt bên và mặt dưới vỏ hộp. IC LM2596 được gắn heatsink khi vận hành công suất cao.
+**Tản nhiệt:** Các module công suất (MP2482, SX1308) được bố trí tại vị trí thông thoáng, tách khỏi cảm biến nhiệt độ; khe thông gió đặt ở mặt bên và mặt dưới vỏ hộp. IC MP2482 được gắn heatsink khi vận hành công suất cao.
 
 **Anten:** Anten 4G/LTE và GNSS đặt ở mặt trên vỏ hộp, hướng lên trên để tối ưu thu sóng. Anten BLE (tích hợp trong ESP32-S3) hướng về cổng OBD2 để rút ngắn khoảng cách kết nối với adapter vgate iCar Pro. Các anten cách nhau tối thiểu 30 mm nhằm giảm nhiễu tương hỗ.
 
@@ -538,11 +522,11 @@ Các nội dung triển khai chi tiết ở tầng phần mềm được trình 
 | 3   | vgate iCar Pro (OBD2 BLE)      | Cái    | 1   | 150,000–300,000    | Adapter OBD2 BLE 4.0, tương thích ESP32-S3 |
 | 4   | SIMCom SIM7600CE-T | Cái    | 1   | 330,000–500,000    | Modem LTE Cat-4 + GNSS tích hợp, anten và khe SIM |
 | 5   | Pin 21700 Li-ion 5000mAh       | Cái    | 1   | 100,000–200,000    | Loại có protection board                   |
-| 6   | Module sạc IP2312 (3A)         | Cái    | 1   | 20,000–40,000      | Module sạc Type-C, dòng sạc 3A             |
+| 6   | Module sạc TP4056 (3A)         | Cái    | 1   | 20,000–40,000      | Module sạc Type-C, dòng sạc 3A             |
 | 7   | BMS/Protection Board 1S        | Cái    | 1   | 10,000–20,000      | BMS 1S 3A hoặc DW01+MOSFET                 |
-| 8   | Module Buck LM2596 (7–40V->5V) | Cái    | 1   | 15,000–25,000      | Dòng ra 3A, tương thích hệ 12V/24V         |
-| 9   | Module Boost MT3608 (3.7V->5V) | Cái    | 1   | 10,000–15,000      | Dòng ra 2A, điều chỉnh điện áp             |
-| 10  | Relay Module 5V 1 kênh         | Cái    | 1   | 5,000–10,000       | Điều khiển chuyển nguồn Power MUX          |
+| 8   | Module Buck MP2482 (7–40V->5V) | Cái    | 1   | 15,000–25,000      | Dòng ra 3A, tương thích hệ 12V/24V         |
+| 9   | Module Boost SX1308 (3.7V->5V) | Cái    | 1   | 10,000–15,000      | Dòng ra 2A, điều chỉnh điện áp             |
+| 10  | Nhánh Diode-OR + EN path       | Bộ     | 1   | 5,000–15,000       | Điều phối chuyển nguồn runtime             |
 | 11  | Điện trở (10k, 2.2k, v.v.)     | Gói    | 1   | 5,000–10,000       | Voltage divider, pull-up/pull-down         |
 | 12  | Tụ điện (100uF, 220uF, v.v.)   | Gói    | 1   | 5,000–10,000       | Lọc nhiễu, decoupling                      |
 | 13  | Diode Schottky 1N5822          | Cái    | 2   | 2,000–5,000        | Diode OR dự phòng                          |
@@ -567,11 +551,11 @@ Các nội dung triển khai chi tiết ở tầng phần mềm được trình 
 
 Quy trình lắp ráp mạch điện tử được triển khai theo các bước sau:
 
-**Bước 1 - Kiểm tra linh kiện:** Kiểm tra tất cả các module và linh kiện trước khi lắp ráp. Test riêng từng module (ESP32-S3, LM2596, MT3608, IP2312, SIM7600CE-T) để đảm bảo hoạt động đúng.
+**Bước 1 - Kiểm tra linh kiện:** Kiểm tra tất cả các module và linh kiện trước khi lắp ráp. Test riêng từng module (ESP32-S3, MP2482, SX1308, TP4056, SIM7600CE-T) để đảm bảo hoạt động đúng.
 
-**Bước 2 - Lắp ráp mạch nguồn:** Kết nối module Buck LM2596 với nguồn ắc quy xe (12V hoặc 24V), điều chỉnh điện áp ra 5V. Kết nối module Boost MT3608 với pin 21700, điều chỉnh điện áp ra 5V. Lắp relay module làm Power MUX. Kết nối module sạc IP2312 với pin và BMS.
+**Bước 2 - Lắp ráp mạch nguồn:** Kết nối Buck MP2482 với nguồn ắc quy xe (12V hoặc 24V), điều chỉnh điện áp ra 5V. Kết nối Boost SX1308 với pin 21700, điều chỉnh điện áp ra 5V. Lắp đường Diode-OR (2x Schottky 1N5822) và nhánh EN điều phối nguồn. Kết nối module sạc TP4056 với pin và BMS.
 
-**Bước 3 - Kết nối vi điều khiển:** Gắn ESP32-S3 DevKitC lên breadboard hoặc PCB. Kết nối các chân GPIO theo bảng phân công (Bảng 4.1). Kết nối nguồn 5V từ Power MUX đến chân VIN của ESP32-S3 (qua LDO nội bộ xuống 3.3V).
+**Bước 3 - Kết nối vi điều khiển:** Gắn ESP32-S3 DevKitC lên breadboard hoặc PCB. Kết nối các chân GPIO theo bảng phân công (Bảng 4.1). Kết nối nguồn 5V từ Power Path đến chân VIN của ESP32-S3 (qua LDO nội bộ xuống 3.3V).
 
 **Bước 4 - Kết nối ngoại vi:** Kết nối modem SIM7600CE-T qua UART1 (GPIO16, GPIO17) và điều khiển PWRKEY qua GPIO25, kết nối cảm biến LIS3DH qua I2C (GPIO22, GPIO23), và kết nối mạch đo điện áp ắc quy (voltage divider) vào GPIO4 (ADC).
 
@@ -597,7 +581,7 @@ Sau khi lắp ráp, hệ thống cần được kiểm tra và hiệu chuẩn:
 
 - **Hiệu chuẩn ADC:** So sánh giá trị điện áp đọc từ ADC với giá trị đo từ đồng hồ vạn năng (multimeter). Điều chỉnh hệ số hiệu chỉnh trong firmware nếu cần.
 - **Kiểm tra chuyển nguồn:** Mô phỏng tình huống ắc quy yếu theo profile cấu hình (ví dụ hệ 12V giảm từ 12V xuống dưới 12V), xác nhận hệ thống tự động chuyển sang pin dự phòng.
-- **Kiểm tra sạc pin:** Xác nhận IC sạc IP2312 hoạt động đúng: sạc khi IGN ON, ngừng sạc khi IGN OFF hoặc U_batt thấp.
+- **Kiểm tra sạc pin:** Xác nhận IC sạc TP4056 hoạt động đúng: sạc khi IGN ON, ngừng sạc khi IGN OFF hoặc U_batt thấp.
 - **Kiểm tra giao tiếp:** Xác nhận modem phản hồi lệnh AT qua UART, cảm biến LIS3DH trả về dữ liệu qua I2C, kết nối BLE với OBD2 adapter thành công.
 
 ---
@@ -619,7 +603,7 @@ Cổng OBD2 (16 chân) cung cấp cả nguồn điện và giao tiếp chẩn đ
 ```text
 Cổng OBD2 (16 chân):
 
-Chân 16: Nguồn Battery Power (+12V hoặc +24V tùy hệ xe) ---> Đầu vào mạch Buck LM2596
+Chân 16: Nguồn Battery Power (+12V hoặc +24V tùy hệ xe) ---> Đầu vào mạch Buck MP2482
 Chân 4:  GND (Chassis Ground)           ---> GND chung hệ thống
 Chân 5:  GND (Signal Ground)            ---> GND chung hệ thống
 

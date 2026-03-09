@@ -10,7 +10,7 @@ Kiến thức về vi xử lý và vi điều khiển đóng vai trò cốt lõi
 
 - **Lập trình ESP32-S3**: Áp dụng kiến thức về kiến trúc Xtensa LX7 dual-core, thanh ghi, bộ nhớ và tập lệnh để lập trình firmware trên nền tảng ESP-IDF. Việc hiểu rõ kiến trúc phần cứng của MCU giúp tối ưu hóa hiệu suất và tiêu thụ năng lượng.
 - **FreeRTOS đa nhiệm (multitasking)**: Sử dụng kiến thức về hệ điều hành thời gian thực để thiết kế các task đồng thời: task đọc dữ liệu OBD2 qua BLE, task gửi dữ liệu MQTT qua modem UART, task đọc cảm biến IMU, và task quản lý năng lượng. Việc phân chia task và quản lý mutex/semaphore là kỹ năng trực tiếp từ môn Vi xử lý nâng cao.
-- **Giao tiếp ngoại vi GPIO/ADC/UART/I2C/SPI**: Cấu hình và sử dụng các giao diện ngoại vi để giao tiếp với modem SIM7600CE-T (UART, tích hợp LTE + GNSS), cảm biến LIS3DH (SPI/I2C), đọc điện áp ắc quy (ADC), và điều khiển relay nguồn (GPIO). Đây là những kỹ năng cơ bản được rèn luyện trong các bài thực hành vi điều khiển.
+- **Giao tiếp ngoại vi GPIO/ADC/UART/I2C/SPI**: Cấu hình và sử dụng các giao diện ngoại vi để giao tiếp với modem SIM7600CE-T (UART, tích hợp LTE + GNSS), cảm biến LIS3DH (SPI/I2C), đọc điện áp ắc quy (ADC), và điều phối power path theo kiến trúc diode-OR + EN (GPIO). Đây là những kỹ năng cơ bản được rèn luyện trong các bài thực hành vi điều khiển.
 
 ### 6.1.2. Mạng máy tính và IoT
 
@@ -107,10 +107,10 @@ Hệ thống phần cứng phải hoạt động với hai nguồn năng lượn
 
 **Cách giải quyết:**
 
-1. *Power path management*: Thiết kế mạch power path sử dụng MOSFET và diode Schottky để tự động chuyển đổi giữa nguồn ắc quy xe và pin dự phòng theo profile kép 12V/24V. Hệ thống dùng ngưỡng Switch_OFF/Switch_ON riêng cho từng profile: 12V (12.0V/12.2V), 24V (24.0V/24.4V).
-2. *Low Voltage Disconnect (LVD)*: Hiện thực mạch LVD sử dụng op-amp comparator và MOSFET để ngắt tải khỏi ắc quy xe tại ngưỡng cắt sâu theo profile: 11.5V (12V) hoặc 23.0V (24V), bảo vệ ắc quy không bị rút cạn quá mức và đảm bảo xe vẫn khởi động được.
-3. *Bộ sạc pin dự phòng*: Tích hợp IC sạc IP2312 để sạc pin 21700 từ nguồn xe khi xe đang chạy, đảm bảo pin dự phòng luôn ở trạng thái sẵn sàng.
-4. *Giám sát điện áp bằng firmware*: Đọc điện áp ắc quy và pin dự phòng liên tục qua ADC, gửi thông tin về server để giám sát trạng thái năng lượng từ xa, cảnh báo khi pin yếu.
+1. *Power path management*: Thiết kế đường power path theo kiến trúc diode-OR + EN để tự động duy trì nguồn giữa ắc quy xe và pin dự phòng theo profile kép 12V/24V. Hệ thống dùng ngưỡng Switch_OFF/Switch_ON: 12V (12.0V/12.2V), 24V (24.0V/24.4V).
+2. *Low Voltage Disconnect (LVD)*: Hiện thực LVD theo profile runtime OFF/ON để bảo vệ ắc quy khỏi rút cạn và đảm bảo xe vẫn khởi động được; đồng thời dùng comparator LM393 làm kênh trạng thái nhanh về GPIO19 (HIGH = low-voltage).
+3. *Bộ sạc pin dự phòng*: Tích hợp IC sạc TP4056 để sạc pin 21700 từ bus 5V khi xe đang chạy, đảm bảo pin dự phòng luôn ở trạng thái sẵn sàng.
+4. *Giám sát điện áp bằng firmware*: Đọc điện áp ắc quy và pin dự phòng liên tục qua ADC, kết hợp trạng thái GPIO19 để giám sát năng lượng từ xa, cảnh báo sớm và điều phối chuyển nguồn.
 
 **Bài học rút ra:** Thiết kế hệ thống năng lượng cho IoT trong môi trường ô tô cần xem xét toàn diện: điện áp dao động, chuyển đổi nguồn liền mạch, bảo vệ ắc quy, và giám sát từ xa. Mỗi yếu tố ảnh hưởng trực tiếp đến độ tin cậy của toàn hệ thống.
 

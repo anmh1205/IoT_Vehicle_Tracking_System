@@ -340,8 +340,8 @@ Module quản lý nguồn sử dụng các chân GPIO của ESP32-S3 để đi�
 | ---- | ------------- | ------ | ----------------------------------------- |
 | 2    | IGN_IN        | Input  | Đọc trạng thái động cơ (GPIO hoặc OBD2)   |
 | 4    | U_BATT_ADC    | Input  | Đọc điện áp ắc quy (ADC 12-bit)           |
-| 5    | CHARGER_EN    | Output | Điều khiển IC sạc IP2312                  |
-| 18   | POWER_MUX_SEL | Output | Chọn nguồn cấp (ắc quy hoặc pin dự phòng) |
+| 5    | CHARGER_EN    | Output | Điều khiển IC sạc TP4056                  |
+| 18   | POWER_PATH_EN | Output | Chọn nguồn cấp (ắc quy hoặc pin dự phòng) |
 | 19   | LVD_STATUS    | Input  | Đọc trạng thái LVD từ comparator LM393    |
 | 21   | LIS3DH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU              |
 | 22   | LIS3DH_SDA    | I/O    | Đường dữ liệu I2C                         |
@@ -350,12 +350,12 @@ Module quản lý nguồn sử dụng các chân GPIO của ESP32-S3 để đi�
 | 17   | MODEM_UART_RX | Input  | UART RX từ modem                          |
 | 25   | MODEM_PWRKEY  | Output | Điều khiển nguồn modem                    |
 
-##### b) Điều khiển Power Path (MOSFET Power MUX)
+##### b) Điều khiển Power Path (Diode-OR + EN)
 
-Hệ thống sử dụng mạch Power MUX dựa trên hai MOSFET (Q1 và Q2) để chuyển đổi nguồn cấp giữa ắc quy xe và pin dự phòng 21700. Firmware điều khiển qua chân GPIO18 (POWER_MUX_SEL):
+Hệ thống sử dụng mạch Power Path dựa trên diode-OR giữa nhánh chính MP2482 và nhánh backup SX1308 để duy trì nguồn liên tục. Firmware điều khiển qua chân GPIO18 (POWER_PATH_EN) để ưu tiên nhánh nguồn phù hợp theo profile điện áp:
 
-- **GPIO18 = LOW (0)**: Dùng nguồn ắc quy xe (Q1 ON, Q2 OFF) — chế độ mặc định khi IGN ON.
-- **GPIO18 = HIGH (1)**: Dùng pin dự phòng (Q1 OFF, Q2 ON) — khi điện áp ắc quy quá thấp.
+- **GPIO18 = LOW (0)**: Ưu tiên nhánh chính (MP2482) — chế độ mặc định khi IGN ON.
+- **GPIO18 = HIGH (1)**: Giảm/khóa nhánh chính và cho phép nhánh backup (SX1308) qua diode-OR khi điện áp ắc quy thấp.
 
 Logic điều khiển power path được thực hiện trong task giám sát nguồn:
 
@@ -365,15 +365,18 @@ void power_monitor_task(void *param) {
         float u_batt = adc_read_battery_voltage();
         bool ign_on = check_ignition_status();
 
+        float switch_off = cfg.power_profile_24v ? 24.0f : 12.0f;
+        float switch_on  = cfg.power_profile_24v ? 24.4f : 12.2f;
+
         if (ign_on) {
-            select_battery_power();     /* Luôn dùng ắc quy khi IGN ON */
-            enable_charger();           /* Sạc pin dự phòng */
-        } else if (u_batt < LVD_THRESHOLD) {
-            select_backup_power();      /* Chuyển sang pin dự phòng */
-            disable_charger();          /* Tắt sạc để bảo vệ ắc quy */
+            gpio_set_level(POWER_PATH_EN, 0);     /* Ưu tiên nhánh chính */
+            enable_charger();                      /* Sạc pin dự phòng */
+        } else if (u_batt <= switch_off) {
+            gpio_set_level(POWER_PATH_EN, 1);     /* Chuyển sang nhánh backup */
+            disable_charger();                     /* Tắt sạc để bảo vệ ắc quy */
             xEventGroupSetBits(system_event_group, EVT_LOW_BATTERY);
-        } else if (u_batt > LVD_HYSTERESIS) {
-            select_battery_power();     /* Phục hồi dùng ắc quy */
+        } else if (u_batt >= switch_on) {
+            gpio_set_level(POWER_PATH_EN, 0);     /* Quay lại nhánh chính */
         }
 
         vTaskDelay(pdMS_TO_TICKS(5000));
@@ -387,9 +390,9 @@ void power_monitor_task(void *param) {
 
 > Nguồn: Hình vẽ của tác giả
 
-##### c) Điều khiển IC sạc (IP2312)
+##### c) Điều khiển IC sạc (TP4056)
 
-IC sạc IP2312 được điều khiển qua chân GPIO5 (CHARGER_EN). Logic sạc được thiết kế để bảo vệ cả ắc quy xe lẫn pin dự phòng:
+IC sạc TP4056 được điều khiển qua chân GPIO5 (CHARGER_EN). Logic sạc được thiết kế để bảo vệ cả ắc quy xe lẫn pin dự phòng:
 
 | Điều kiện              | Trạng thái charger    | Lý do                                               |
 | ---------------------- | --------------------- | --------------------------------------------------- |

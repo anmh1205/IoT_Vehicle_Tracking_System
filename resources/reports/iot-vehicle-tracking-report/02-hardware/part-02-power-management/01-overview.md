@@ -2,13 +2,14 @@
 
 ### Tổng Quan
 
-Hệ thống quản lý nguồn bao gồm:
+Hệ thống quản lý nguồn hiện tại gồm:
 
-1. **Low Voltage Disconnect (LVD)**: Bảo vệ ắc quy khỏi rút cạn
-2. **Power Path Management**: Chuyển đổi giữa ắc quy và pin backup
-3. **Buck Converter**: 12V/24V → 5V (từ ắc quy)
-4. **Boost Converter**: 3.7V → 5V (từ pin)
-5. **Charger**: Sạc pin 18650 1S (IP2312)
+1. **Low Voltage Disconnect (LVD)**: Comparator LM393 + firmware `power_is_low_voltage()` (GPIO19) ngắt EN đường 12/24V khi volt ắc quy thấp.
+2. **Power Routing**: Diode OR (2×Schottky) giữa MP2482 bus 5V và SX1308 boost từ pin 18650 1S; GPIO18 chỉ điều khiển EN MP2482.
+3. **Buck Converter**: MP2482 chuyển 12V/24V xuống 5V @ 5A để cấp nguồn cho ESP32-S3, SIM7600CE-T, TP4056.
+4. **Boost Converter**: SX1308 nâng pin 18650 1S (3.0–4.2V) lên 5V khi xe cắt.
+5. **Charger**: TP4056 sạc pin 18650 1S theo IGN profile.
+6. **Downconverters bổ trợ**: XL1509 hạ 5V xuống 3.3V cho ESP32-S3, TPS54231 xuống ~4V cho SIM7600CE-T logic.
 
 ### Nguyên Lý Hoạt Động
 

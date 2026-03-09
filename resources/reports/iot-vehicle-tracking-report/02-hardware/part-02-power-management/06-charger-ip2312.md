@@ -1,59 +1,61 @@
-## III.1.9 Mạch Sạc và Bảo Vệ Pin 18650 1S: IP2312
+## III.1.9 Mạch Sạc và Bảo Vệ Pin 18650 1S: TP4056
+
+> **Lưu ý:** Tên file chứa `ip2312` là legacy filename để giữ liên kết cũ. Nội dung runtime hiện tại dùng **TP4056**.
 
 ### Tổng Quan
 
-**IP2312** là IC sạc Li-ion với dòng sạc cao (3A), được sử dụng để sạc pin 18650 1S khi xe chạy.
+**TP4056** là IC sạc Li-ion 1S phổ thông, được sử dụng để sạc pin 18650 1S theo profile IGN trong hệ thống hiện tại.
 
 ### Đặc Tính Kỹ Thuật
 
 | Thông Số        | Giá Trị                                                         |
 | --------------- | --------------------------------------------------------------- |
-| **IC**          | IP2312 (Injoinic)                                               |
-| **Dòng sạc**    | 3 A (3000 mA) - có thể điều chỉnh                               |
-| **Điện áp vào** | 4.5–5.5 V (USB Type-C hoặc 5V từ buck)                          |
-| **Điện áp ra**  | 4.2 V (Li-ion standard)                                         |
-| **Hiệu suất**   | ~85–90%                                                         |
-| **Package**     | QFN-16 hoặc SOP-16                                              |
-| **Tính năng**   | Tự ngắt khi đầy, bảo vệ quá dòng, quá nhiệt, reverse protection |
+| **IC**          | TP4056 (Top Power / các bản tương thích phổ biến)              |
+| **Dòng sạc**    | Thiết lập bởi điện trở PROG (thực tế module cần chọn theo tải) |
+| **Điện áp vào** | 4.5–5.5 V (USB Type-C hoặc 5V từ buck)                         |
+| **Điện áp ra**  | 4.2 V (Li-ion standard)                                        |
+| **Hiệu suất**   | Phụ thuộc chênh áp và dòng sạc (mạch sạc tuyến tính)           |
+| **Package**     | SOP-8 (IC), module thương mại có layout tích hợp               |
+| **Tính năng**   | CC/CV, tự ngắt khi đầy, bảo vệ nhiệt nội                        |
 
-### Lý Do Chọn IP2312
+### Lý Do Chọn TP4056
 
-#### 1. Dòng Sạc Cao (3A)
+#### 1. Dễ tích hợp cho pin 1S
 
-- Sạc pin 5000 mAh nhanh hơn (~2 giờ thay vì 6 giờ với 1A)
-- Phù hợp với yêu cầu sạc nhanh
+- Chuẩn sạc CC/CV 4.2V cho cell Li-ion 1S
+- Dễ ghép với bus 5V từ MP2482 và điều khiển qua `CHARGER_EN`
 
 #### 2. Phổ Biến ở Việt Nam
 
 - Dễ mua trên Shopee, Lazada
-- Module sẵn có, không cần thiết kế PCB riêng
+- Module TP4056 sẵn có (ready-made board) nên không cần thiết kế PCB riêng
 - Giá hợp lý (~20,000–40,000 VNĐ)
 
 #### 3. Module Sẵn Có
 
 - Không cần thiết kế PCB riêng
-- Tiết kiệm thời gian
+- Tiết kiệm thời gian thử nghiệm
 - Dễ test và debug
 
-#### 4. Type-C
+#### 4. Type-C (hoặc micro-USB)
 
-- Dễ sử dụng, hiện đại
-- Có thể sạc bằng USB Type-C (nếu cần)
+- Dễ dùng, phù hợp với board ESP32-S3 có USB-C
+- Có thể sạc bằng cổng USB Type-C hoặc micro-USB tùy module
 
-#### 5. Tích Hợp Bảo Vệ
+#### 5. Tính Năng Bảo Vệ (TP4056)
 
-- Bảo vệ quá dòng sạc
-- Bảo vệ quá nhiệt
-- Reverse protection (bảo vệ khi cắm ngược)
-- Tự ngắt khi pin đầy (4.2V)
+- Điều khiển sạc theo chu trình CC/CV
+- Bảo vệ nhiệt nội bộ (thermal regulation)
+- Tự giảm dòng khi chip nóng
+- Tự kết thúc sạc khi pin đạt ngưỡng
 
 ### Chức Năng
 
 #### 1. Sạc Pin 18650 1S
 
-- Dòng sạc: 3 A (khi IGN ON và U_batt đạt ngưỡng IGN_ON theo profile)
+- Dòng sạc: theo cấu hình PROG của module TP4056 (chọn mức phù hợp cell 18650 1S)
 - Điện áp sạc: 4.2 V (Li-ion standard)
-- Thời gian sạc đầy: ~2 giờ (5000 mAh / 3A)
+- Thời gian sạc đầy: phụ thuộc cấu hình dòng sạc thực tế và trạng thái pin
 
 #### 2. Tự Ngắt Khi Đầy
 
@@ -62,9 +64,9 @@
 
 #### 3. Bảo Vệ
 
-- **Quá dòng sạc**: Tự động giảm dòng nếu quá nhiệt
-- **Quá nhiệt**: Tự động ngắt sạc nếu nhiệt độ cao
-- **Reverse protection**: Bảo vệ khi cắm ngược
+- **Quá nhiệt**: Tự giảm dòng khi nhiệt độ chip tăng
+- **Kết thúc sạc**: Tự chuyển trạng thái khi pin đầy
+- **Bảo vệ hệ thống**: Kết hợp protection board 1S để bảo vệ quá xả/quá dòng
 
 ### Kết Nối
 
@@ -136,23 +138,26 @@ Ngưỡng mặc định:
 #### Thời Gian Sạc Lý Thuyết
 
 ```
-Thời gian = Dung lượng / Dòng sạc
-          = 5000 mAh / 3000 mA
-          = 1.67 giờ
-          = ~100 phút
+Thời gian ≈ Dung lượng / Dòng sạc cấu hình (PROG)
+```
+
+Ví dụ nếu cấu hình dòng 1A cho cell 5000mAh:
+
+```
+Thời gian lý thuyết ≈ 5000 / 1000 = 5 giờ
 ```
 
 #### Thời Gian Sạc Thực Tế
 
-- **Hiệu suất sạc**: ~85–90% → thời gian thực tế lâu hơn
-- **Dòng sạc giảm dần**: Khi gần đầy, dòng sạc giảm → thời gian lâu hơn
-- **Ước tính thực tế**: ~2–2.5 giờ
+- **Dòng sạc giảm dần** khi vào pha CV
+- **Nhiệt độ module** làm thay đổi dòng hiệu dụng
+- **Ước tính thực tế**: luôn cao hơn thời gian lý thuyết
 
 ### Nơi Mua Hàng
 
 #### Trên Shopee/Lazada VN:
 
-- Tìm: "IP2312 charger module", "sạc pin 1S 3A Type-C", "Li-ion charger 3A"
+- Tìm: "TP4056 charger module", "sạc pin 1S Type-C", "Li-ion charger TP4056"
 - Giá: ~20,000–40,000 VNĐ (module)
 - Lưu ý: Chọn module có protection board tích hợp
 
@@ -164,18 +169,18 @@ Thời gian = Dung lượng / Dòng sạc
 
 ### Tài Liệu Tham Khảo
 
-- **Datasheet**: IP2312 Datasheet (Injoinic)
-- **Application Note**: IP2312 Design Guide
+- **Datasheet**: TP4056 Datasheet (Top Power / bản tương thích dùng trong module)
+- **Application Note**: TP4056 Design Guide
 - **Protection IC**: DW01 Datasheet
 
 ### Kết Luận
 
-IP2312 là lựa chọn phù hợp vì:
+TP4056 là lựa chọn phù hợp vì:
 
-- ✅ Dòng sạc cao (3A) → sạc nhanh
+- ✅ Chuẩn sạc CC/CV cho pin 1S
 - ✅ Phổ biến ở VN → dễ mua
 - ✅ Module sẵn có → tiết kiệm thời gian
-- ✅ Tích hợp bảo vệ → an toàn
+- ✅ Có bảo vệ nhiệt nội để vận hành ổn định
 - ✅ Phù hợp với yêu cầu đồ án
 
 **Lưu ý quan trọng:**
