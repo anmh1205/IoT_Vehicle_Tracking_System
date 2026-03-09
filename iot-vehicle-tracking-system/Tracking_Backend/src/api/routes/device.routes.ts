@@ -19,6 +19,7 @@ router.get('/:id/runtime', deviceController.getRuntimeStats);
 router.get('/:id/telemetry', deviceController.getTelemetry);
 router.post('/:id/command', deviceController.sendCommand);
 router.post('/:id/ota', deviceController.triggerOta);
+router.post('/:id/ota/rollback', deviceController.rollbackOta);
 router.get('/:id/commands', deviceController.getCommands);
 router.get('/:id/errors', deviceController.getErrors);
 router.post('/:id/regenerate-token', deviceController.regenerateToken);

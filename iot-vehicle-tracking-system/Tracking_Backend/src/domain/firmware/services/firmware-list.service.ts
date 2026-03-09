@@ -10,6 +10,7 @@ const sanitizeFirmware = (fw: Firmware): FirmwarePublic => ({
   id: fw.id,
   version: fw.version,
   filename: fw.filename,
+  filePath: fw.file_path,
   size: fw.size,
   description: fw.description,
   isActive: fw.is_active,

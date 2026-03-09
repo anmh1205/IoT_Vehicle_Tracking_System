@@ -30,8 +30,21 @@ export const statusSchema = z.object({
 export const firmwareStatusSchema = z.object({
   device_id: z.string().min(1),
   auth_token: z.string().min(1),
-  status: z.enum(['downloading', 'installing', 'success', 'failed']),
+  jobId: z.string().min(1),
+  status: z.enum([
+    'assigned',
+    'downloading',
+    'verifying',
+    'installing',
+    'rebooting',
+    'confirming',
+    'success',
+    'failed',
+    'rolled_back',
+  ]),
   progress: z.number().min(0).max(100).optional(),
   targetVersion: z.string().min(1),
+  currentVersion: z.string().min(1),
+  partition: z.string().min(1).optional(),
   error: z.string().optional(),
 });

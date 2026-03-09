@@ -1,8 +1,12 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
 import type { Response } from 'express';
+import { firmwareConfig } from '@/config/env';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { sendOk, sendCreated } from '@/shared/utils/response.util';
-import { createValidationError } from '@/shared/utils/errors.util';
+import { createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
 import * as firmwareListService from '@/domain/firmware/services/firmware-list.service';
 import * as firmwareUploadService from '@/domain/firmware/services/firmware-upload.service';
 import * as firmwareActivateService from '@/domain/firmware/services/firmware-activate.service';
@@ -31,15 +35,20 @@ export const getFirmware = asyncHandler(async (req: AuthenticatedRequest, res: R
 });
 
 export const createFirmware = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const { version, filename, size, sha256, description } = req.body;
+  const { version, filename, filePath, size, sha256, description } = req.body;
 
   if (!version || !filename || !size || !sha256) {
     throw createValidationError('Missing required fields: version, filename, size, sha256');
   }
 
+  const resolvedFilePath = filePath
+    ? String(filePath)
+    : path.join(firmwareConfig.storagePath, String(filename));
+
   const firmware = await firmwareUploadService.createFirmware({
     version,
     filename,
+    filePath: resolvedFilePath,
     size,
     sha256,
     description,
@@ -112,9 +121,13 @@ export const getAssignedDevices = asyncHandler(async (req: AuthenticatedRequest,
   const deployments = await firmwareDeployService.getDeployments(id);
   sendOk(res, {
     devices: deployments.map((item) => ({
+      jobId: item.jobId,
       deviceId: item.deviceId,
       status: item.status,
-      progress: item.status === 'success' ? 100 : item.status === 'in_progress' ? 50 : 0,
+      progress: item.progress ?? 0,
+      targetVersion: item.targetVersion,
+      currentVersion: item.currentVersion,
+      partition: item.partition,
       updatedAt: item.completedAt ?? item.startedAt,
       errorMessage: item.errorMessage,
     })),
@@ -131,9 +144,32 @@ export const downloadFirmware = asyncHandler(async (req: AuthenticatedRequest, r
   const filename = firmware.filename.endsWith('.bin')
     ? firmware.filename
     : `${firmware.filename}.bin`;
-  const content = Buffer.from(`firmware:${firmware.version}:${firmware.id}`, 'utf8');
+  const resolvedPath = path.resolve(firmware.filePath);
 
+  if (!fs.existsSync(resolvedPath)) {
+    throw createNotFoundError('Firmware artifact not found on storage');
+  }
+
+  const stat = fs.statSync(resolvedPath);
   res.setHeader('Content-Type', 'application/octet-stream');
+  res.setHeader('Content-Length', stat.size.toString());
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-  res.status(200).send(content);
+
+  const stream = fs.createReadStream(resolvedPath);
+  stream.on('error', () => {
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        error: {
+          code: 'STREAM_ERROR',
+          message: 'Failed to stream firmware artifact',
+          status: 500,
+          path: req.path,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    }
+  });
+
+  stream.pipe(res);
 });

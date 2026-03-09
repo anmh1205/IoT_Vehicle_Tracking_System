@@ -1,14 +1,15 @@
 import { Router } from 'express';
-import { requireAuth } from '@/middleware/auth.middleware';
+import { requireAuth, attachUserIfAvailable } from '@/middleware/auth.middleware';
 import * as firmwareController from '@/api/controllers/firmware.controller';
 
 const router = Router();
+
+router.get('/:id/download', attachUserIfAvailable, firmwareController.downloadFirmware);
 
 router.use(requireAuth);
 
 router.get('/', firmwareController.listFirmware);
 router.get('/:id', firmwareController.getFirmware);
-router.get('/:id/download', firmwareController.downloadFirmware);
 router.get('/:id/devices', firmwareController.getAssignedDevices);
 router.post('/', firmwareController.createFirmware);
 router.post('/upload', firmwareController.uploadFirmware);

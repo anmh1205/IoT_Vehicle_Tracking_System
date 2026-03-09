@@ -26,8 +26,21 @@ export interface StatusPayload {
 
 export interface FirmwareStatusPayload {
   device_id: string;
-  status: 'downloading' | 'installing' | 'success' | 'failed';
+  auth_token: string;
+  jobId: string;
+  status:
+    | 'assigned'
+    | 'downloading'
+    | 'verifying'
+    | 'installing'
+    | 'rebooting'
+    | 'confirming'
+    | 'success'
+    | 'failed'
+    | 'rolled_back';
   progress?: number;
   targetVersion: string;
+  currentVersion: string;
+  partition?: string;
   error?: string;
 }

@@ -9,6 +9,8 @@ services:
       - '0.0.0.0:4000:4000'
     env_file: .env
     restart: unless-stopped
+    volumes:
+      - ../Tracking_Data/Tracking_Backend/firmware:/app/firmware
     networks:
       - tracking-network
     deploy:

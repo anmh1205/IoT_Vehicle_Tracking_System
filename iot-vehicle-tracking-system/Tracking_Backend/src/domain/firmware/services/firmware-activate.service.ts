@@ -6,6 +6,7 @@ const toPublic = (fw: {
   id: number;
   version: string;
   filename: string;
+  file_path: string;
   size: number;
   description: string | null;
   is_active: boolean;
@@ -14,6 +15,7 @@ const toPublic = (fw: {
   id: fw.id,
   version: fw.version,
   filename: fw.filename,
+  filePath: fw.file_path,
   size: fw.size,
   description: fw.description,
   isActive: fw.is_active,

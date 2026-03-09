@@ -7,8 +7,6 @@
 #include "esp_event.h"
 #include "esp_log.h"
 
-#include "esp_mqtt_client.h"
-
 #include "util.h"
 
 #define MQTT_TOPIC_MAX_LEN 96

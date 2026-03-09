@@ -4,9 +4,11 @@
 #include "freertos/task.h"
 
 #include "esp_log.h"
+#include "esp_ota_ops.h"
 #include "esp_sleep.h"
 
 #include "nvs_config.h"
+#include "util.h"
 
 static const char *TAG = "TRACKER_MAIN";
 
@@ -17,6 +19,18 @@ void app_main(void) {
 
     config_t config = {0};
     ESP_ERROR_CHECK(nvs_config_load(&config));
+
+    const esp_partition_t *running = esp_ota_get_running_partition();
+    const esp_partition_t *boot = esp_ota_get_boot_partition();
+    if (running != NULL && boot != NULL && running != boot) {
+        ESP_LOGW(TAG, "Running partition differs from boot partition");
+    }
+
+    if (running != NULL && !util_string_empty(running->label)) {
+        util_copy_string(g_rtc_context.ota_partition,
+                         sizeof(g_rtc_context.ota_partition),
+                         running->label);
+    }
 
     g_rtc_context.boot_count += 1;
 

@@ -13,6 +13,7 @@
 #include "host/ble_hs.h"
 #include "host/ble_store.h"
 #include "nimble/nimble_port.h"
+#include "nimble/nimble_port_freertos.h"
 
 #include "util.h"
 

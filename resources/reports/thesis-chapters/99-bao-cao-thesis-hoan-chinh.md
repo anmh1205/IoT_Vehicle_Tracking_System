@@ -173,7 +173,7 @@ Tôi xin chịu hoàn toàn trách nhiệm về nội dung đồ án tốt nghi�
 
 Trong bối cảnh dịch vụ cho thuê xe tự lái tại Việt Nam tăng trưởng nhanh, nhu cầu giám sát và quản lý phương tiện từ xa đã trở thành yêu cầu trọng yếu đối với doanh nghiệp vận tải. Đồ án này trình bày quá trình thiết kế và xây dựng một hệ thống IoT hoàn chỉnh, cho phép giám sát phương tiện theo thời gian thực, đồng thời tích hợp nhiều cảm biến và giao thức truyền thông hiện đại.
 
-Về phần cứng, hệ thống dùng ESP32-S3 làm trung tâm xử lý, kết hợp modem LTE + GNSS tích hợp SIMCom SIM7600CE-T để định vị và truyền dữ liệu. Modem được cấu hình Auto mode (`AT+CNMP=2`) nhằm cho phép chuyển đổi linh hoạt giữa LTE/UMTS/GSM, dùng APN mặc định `internet`, và cung cấp GNSS qua lệnh `AT+CGNSINF` (hoặc stream NMEA tùy chọn `AT+CGNSTST`) trên cùng UART1 mà không cần module GNSS độc lập. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng thời dùng IMU LIS3DH để phát hiện va chạm và phân tích hành vi lái xe. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng 21700 và cơ chế ngắt điện áp thấp (LVD), bảo đảm thiết bị vẫn hoạt động khi xe tắt máy.
+Về phần cứng, hệ thống dùng ESP32-S3 làm trung tâm xử lý, kết hợp modem LTE + GNSS tích hợp SIMCom SIM7600CE-T để định vị và truyền dữ liệu. Modem được cấu hình Auto mode (`AT+CNMP=2`) nhằm cho phép chuyển đổi linh hoạt giữa LTE/UMTS/GSM, dùng APN mặc định `internet`, và cung cấp GNSS qua lệnh `AT+CGNSINF` (hoặc stream NMEA tùy chọn `AT+CGNSTST`) trên cùng UART1 mà không cần module GNSS độc lập. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng thời dùng IMU LIS3DH để phát hiện va chạm và phân tích hành vi lái xe. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng 18650 1S và cơ chế ngắt điện áp thấp (LVD), bảo đảm thiết bị vẫn hoạt động khi xe tắt máy.
 
 Về phần mềm, dữ liệu từ thiết bị IoT được truyền về máy chủ bằng MQTT 5.0 qua EMQX và phân quyền theo ACL từng thiết bị. MQTT Bridge tiếp nhận, rồi phân luồng dữ liệu đến các hệ lưu trữ chuyên biệt: PostgreSQL cho dữ liệu quan hệ (phương tiện, người dùng, cảnh báo, hàng rào địa lý), VictoriaMetrics cho dữ liệu chuỗi thời gian (tọa độ GPS, thông số OBD2, dữ liệu cảm biến), và VictoriaLogs cho nhật ký sự kiện. API server xây dựng bằng Express.js + TypeScript, theo kiến trúc DDD, với cơ chế xác thực phiên dựa trên token lưu trong cơ sở dữ liệu.
 
@@ -195,7 +195,7 @@ Kết quả đạt được là một hệ thống IoT giám sát phương tiệ
 
 In the context of the rapidly growing self-drive car rental industry in Vietnam, the need for remote vehicle monitoring and management has become a critical factor for transportation businesses. This thesis presents the design and development of a comprehensive IoT system that enables real-time vehicle tracking, integrating diverse sensors and modern communication protocols.
 
-On the hardware side, the system employs the ESP32-S3 microcontroller as the central processing unit, paired with the SIMCom SIM7600CE-T LTE+GNSS modem. The modem is configured to Auto mode (`AT+CNMP=2`) so it can switch between LTE/UMTS/GSM automatically, uses the default APN `internet`, and delivers GNSS data via `AT+CGNSINF` (with optional NMEA streaming through `AT+CGNSTST`) on the same UART1 channel without a dedicated GNSS interface. The device reads engine diagnostic data via the OBD2 protocol through a vgate iCar Pro adapter using Bluetooth Low Energy (BLE), while integrating the LIS3DH IMU accelerometer for collision detection and driving behavior analysis. The power management system includes buck/boost converters, a 21700 backup battery charger, and a low-voltage disconnect (LVD) mechanism to ensure continuous operation even when the vehicle engine is off.
+On the hardware side, the system employs the ESP32-S3 microcontroller as the central processing unit, paired with the SIMCom SIM7600CE-T LTE+GNSS modem. The modem is configured to Auto mode (`AT+CNMP=2`) so it can switch between LTE/UMTS/GSM automatically, uses the default APN `internet`, and delivers GNSS data via `AT+CGNSINF` (with optional NMEA streaming through `AT+CGNSTST`) on the same UART1 channel without a dedicated GNSS interface. The device reads engine diagnostic data via the OBD2 protocol through a vgate iCar Pro adapter using Bluetooth Low Energy (BLE), while integrating the LIS3DH IMU accelerometer for collision detection and driving behavior analysis. The power management system includes buck/boost converters, a 18650 1S backup battery charger, and a low-voltage disconnect (LVD) mechanism to ensure continuous operation even when the vehicle engine is off.
 
 On the software side, data from IoT devices is transmitted to the server via the MQTT 5.0 protocol using the EMQX broker with device-level ACL authorization. The MQTT Bridge service receives and routes data to specialized storage systems: PostgreSQL for relational data (vehicle information, users, alerts, geofences), VictoriaMetrics for time-series data (GPS coordinates, OBD2 parameters, sensor telemetry), and VictoriaLogs for system event logs. The API server is built on Express.js with TypeScript, following Domain-Driven Design (DDD) architecture with database-backed session token authentication.
 
@@ -449,7 +449,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 - Modem LTE + GNSS SIMCom SIM7600CE-T (Auto mode LTE/UMTS/GSM, APN mặc định `internet`) kết nối trực tiếp qua UART1 để cung cấp cả dữ liệu 4G và GNSS
 - Adapter OBD2 BLE vgate iCar Pro (đọc dữ liệu chẩn đoán xe qua Bluetooth)
 - Cảm biến gia tốc LIS3DH (IMU) để phát hiện chuyển động và rung
-- Pin dự phòng 21700 với mạch sạc và bảo vệ
+- Pin dự phòng 18650 1S với mạch sạc và bảo vệ
 
 **Phạm vi firmware:**
 
@@ -499,7 +499,7 @@ Dự án đặt ra các tiêu chí cụ thể (success criteria) cho từng tầ
 | 1   | Tiêu thụ điện chế độ ngủ sâu (deep sleep) | < 500 µA                                                           |
 | 2   | Tiêu thụ điện chế độ hoạt động            | < 250 mA (trung bình)                                              |
 | 3   | Thời gian thức dậy từ deep sleep          | < 3 giây                                                           |
-| 4   | Thời lượng pin dự phòng (21700, 5000 mAh) | > 24 giờ chế độ cảnh báo                                           |
+| 4   | Thời lượng pin dự phòng (18650 1S) | > 24 giờ chế độ cảnh báo                                           |
 | 5   | Ngưỡng chuyển nguồn bảo vệ ắc quy         | Profile 12V: OFF=12.0V, ON=12.2V; Profile 24V: OFF=24.0V, ON=24.4V |
 | 6   | Nhiệt độ hoạt động                        | -10 C đến +60 C                                                    |
 
@@ -637,7 +637,7 @@ _Hình 1.4: Sơ đồ chuyển đổi giữa các chế độ năng lượng_
 | LTE + GNSS                    | SIMCom SIM7600CE-T (LTE + GNSS tích hợp) | —         | Truyền dữ liệu 4G và định vị GPS |
 | OBD2 Adapter                  | vgate iCar Pro                 | BLE 4.0   | Đọc dữ liệu chẩn đoán xe         |
 | Cảm biến gia tốc              | LIS3DH                         | —         | Phát hiện chuyển động và rung    |
-| Pin dự phòng                  | 21700 Li-ion                   | 5000 mAh  | Nguồn điện dự phòng              |
+| Pin dự phòng                  | 18650 1S Li-ion                   | 5000 mAh  | Nguồn điện dự phòng              |
 | Framework firmware            | ESP-IDF                        | 5.x       | Phát triển firmware nhúng        |
 | RTOS                          | FreeRTOS                       | —         | Hệ điều hành thời gian thực      |
 | MQTT Broker                   | EMQX                           | 5.x       | Tiếp nhận dữ liệu IoT            |
@@ -662,7 +662,7 @@ Dự án đã đạt được các kết quả chính sau:
 
 **Về phần cứng:**
 
-- Thiết kế thành công prototype thiết bị tracker IoT sử dụng ESP32-S3 làm vi điều khiển trung tâm, tích hợp modem LTE + GNSS SIMCom SIM7600CE-T, adapter OBD2 BLE vgate iCar Pro, cảm biến gia tốc LIS3DH, và pin dự phòng 21700.
+- Thiết kế thành công prototype thiết bị tracker IoT sử dụng ESP32-S3 làm vi điều khiển trung tâm, tích hợp modem LTE + GNSS SIMCom SIM7600CE-T, adapter OBD2 BLE vgate iCar Pro, cảm biến gia tốc LIS3DH, và pin dự phòng 18650 1S.
 - Hệ thống quản lý năng lượng đa chế độ hoạt động hiệu quả, với mức tiêu thụ điện ngủ sâu đạt yêu cầu (< 500 µA), đảm bảo không làm cạn ắc quy xe trong quá trình sử dụng bình thường.
 - Mạch Low Voltage Disconnect (LVD) bảo vệ ắc quy xe hiệu quả, tự động ngắt khi điện áp tụt dưới ngưỡng an toàn.
 
@@ -1080,7 +1080,7 @@ Thay vì chấm điểm tổng quát, Bảng 3.1 đối chiếu trực tiếp c�
 
 **Ngân sách UART:** Kiến trúc mục tiêu cần tối thiểu các luồng UART riêng cho modem và kênh debug. ESP32-S3 đáp ứng tốt với 3 UART phần cứng, còn dư địa cho mở rộng. STM32L4 cũng có thể đáp ứng nếu chọn đúng biến thể, nhưng đổi lại phải thêm BLE ngoài. nRF52840 thường chỉ có 2 UART nên dư địa cho debug độc lập hạn chế hơn.
 
-**Tiêu thụ deep sleep:** STM32L4 và nRF52840 có lợi thế rõ ràng về dòng ngủ sâu theo tài liệu hãng. Tuy nhiên chênh lệch giữa nhóm ESP32-S3 và STM32L4 không quyết định toàn bộ thời lượng pin, vì tracker vẫn chịu tải chính từ modem LTE, GNSS và các chu kỳ wake-up định kỳ. Trong bài toán heartbeat 20–35 ngày với pin 5000 mAh, chênh lệch này có ý nghĩa nhưng không đủ để bù cho việc tăng độ phức tạp tích hợp [19], [53], [54], [55].
+**Tiêu thụ deep sleep:** STM32L4 và nRF52840 có lợi thế rõ ràng về dòng ngủ sâu theo tài liệu hãng. Tuy nhiên chênh lệch giữa nhóm ESP32-S3 và STM32L4 không quyết định toàn bộ thời lượng pin, vì tracker vẫn chịu tải chính từ modem LTE, GNSS và các chu kỳ wake-up định kỳ. Trong bài toán heartbeat 20–35 ngày với pin 1S, chênh lệch này có ý nghĩa nhưng không đủ để bù cho việc tăng độ phức tạp tích hợp [19], [53], [54], [55].
 
 **Độ phức tạp triển khai:** ESP32-S3 có lợi thế thực tế vì vừa có BLE sẵn, vừa có ESP-IDF/Arduino IDE, phù hợp cho firmware phải đồng thời xử lý BLE OBD2, AT command modem, I2C IMU và deep sleep. STM32L4 mạnh về low power nhưng kéo theo thêm công việc tích hợp BLE. nRF52840 phù hợp nếu hệ thống ưu tiên radio BLE là chính, nhưng dư địa UART cho kịch bản hiện tại hạn chế hơn.
 
@@ -1092,7 +1092,7 @@ Trên cơ sở đối chiếu trực tiếp các yêu cầu của hệ thống, 
 - BLE 5.0 tích hợp giúp bỏ hẳn module BLE ngoài, giảm BOM và rút ngắn công đoạn tích hợp.
 - Tài nguyên xử lý 240 MHz dual-core và 512 KB SRAM đủ để chạy đồng thời BLE, modem, IMU và state machine.
 - Chi phí prototype thấp hơn STM32L4 khoảng 30–50% theo mặt bằng linh kiện đang dùng trong đồ án.
-- Dòng deep-sleep của ESP32-S3 cao hơn STM32L4 theo tài liệu hãng, nhưng vẫn nằm trong giới hạn chấp nhận được của bài toán pin backup 5000 mAh khi xét toàn bộ duty-cycle của modem, GNSS và các chu kỳ wake-up [19], [53], [54].
+- Dòng deep-sleep của ESP32-S3 cao hơn STM32L4 theo tài liệu hãng, nhưng vẫn nằm trong giới hạn chấp nhận được của bài toán pin backup khi xét toàn bộ duty-cycle của modem, GNSS và các chu kỳ wake-up [19], [53], [54].
 
 [Bảng 3.2: Thông số kỹ thuật ESP32-S3 được chọn]
 
@@ -1318,7 +1318,7 @@ Do modem SIM7600CE-T làm việc trên miền nguồn thấp áp, hệ thống b
 
 ##### d) Boost 5V từ pin dự phòng (SX1308) và Power Path
 
-Khi ắc quy xe yếu, nguồn dự phòng lấy từ pin 21700 (1S, danh định ~3.7V). Khối **SX1308** tăng áp lên 5V để duy trì cấp nguồn cho hệ thống.
+Khi ắc quy xe yếu, nguồn dự phòng lấy từ pin 18650 1S (danh định ~3.7V). Khối **SX1308** tăng áp lên 5V để duy trì cấp nguồn cho hệ thống.
 
 [Bảng 3.11: Thông số khối Boost 5V dự phòng]
 
@@ -1341,32 +1341,32 @@ LVD dùng ngưỡng profile kép theo firmware:
 | ------------------- | --- | ---------------------------------------------------------- | ------------- | ------- | --------------------- |
 | Xe chạy bình thường | ON  | Profile 12V: U_batt >= 13.0V; Profile 24V: U_batt >= 26.0V | Ắc quy        | Có      | Không                 |
 | Xe đỗ bình thường   | OFF | Profile 12V: U_batt > 12.0V; Profile 24V: U_batt > 24.0V   | Ắc quy        | Không   | Không                 |
-| Ắc quy yếu          | OFF | Profile 12V: U_batt <= 12.0V; Profile 24V: U_batt <= 24.0V | Pin 21700     | Không   | Cảnh báo chuyển nguồn |
+| Ắc quy yếu          | OFF | Profile 12V: U_batt <= 12.0V; Profile 24V: U_batt <= 24.0V | Pin 18650 1S     | Không   | Cảnh báo chuyển nguồn |
 | Ắc quy phục hồi     | OFF | Profile 12V: U_batt >= 12.2V; Profile 24V: U_batt >= 24.4V | Ắc quy        | Không   | Cảnh báo phục hồi     |
 
 Ngoài kênh ADC, tín hiệu trạng thái LVD từ comparator LM393 được đưa về **GPIO19 (LVD_STATUS)** để giám sát nhanh. Quy ước runtime: **GPIO19 HIGH = low-voltage**, **GPIO19 LOW = bình thường**.
 
 ##### f) Mạch sạc pin 1S (TP4056)
 
-Khối sạc dùng **TP4056**, nhận **5V từ nhánh MP2482** và sạc pin 21700 theo chuẩn **4.2V/1S**.
+Khối sạc dùng **TP4056**, nhận **5V từ nhánh MP2482** và sạc pin 18650 1S theo chuẩn **4.2V/1S**.
 
 [Bảng 3.13: Thông số khối sạc pin]
 
 | Khối    | IC     | Input        | Output | Tải       |
 | ------- | ------ | ------------ | ------ | --------- |
-| Sạc pin | TP4056 | 5V từ MP2482 | 4.2V   | Pin 21700 |
+| Sạc pin | TP4056 | 5V từ MP2482 | 4.2V   | Pin 18650 1S |
 
 Dòng sạc TP4056 được thiết lập theo điện trở PROG và giới hạn nhiệt của mạch, vì vậy không dùng một giá trị dòng cố định cho mọi điều kiện vận hành.
 
-##### g) Pin dự phòng 21700 Li-ion
+##### g) Pin dự phòng 18650 1S Li-ion
 
-Pin 21700 Li-ion 5000 mAh được chọn làm nguồn dự phòng với cấu hình 1 cell đơn giản.
+Pin 18650 1S Li-ion được chọn làm nguồn dự phòng với cấu hình 1 cell đơn giản.
 
-[Bảng 3.14: Thông số kỹ thuật pin dự phòng 21700]
+[Bảng 3.14: Thông số kỹ thuật pin dự phòng 18650 1S]
 
 | Thông số        | Giá trị                        |
 | --------------- | ------------------------------ |
-| Loại            | Li-ion 21700                   |
+| Loại            | Li-ion 18650 1S                   |
 | Dung lượng      | 5000 mAh @ 3.7V                |
 | Năng lượng      | ~18.5 Wh                       |
 | Điện áp         | 3.0–4.2V (nominal 3.7V)        |
@@ -1390,7 +1390,7 @@ _Chế độ cảnh báo (track liên tục):_
 - Dòng trung bình: ~250 mA
 - Thời gian hoạt động: T = 4500 / 250 = **18 giờ**
 
-Kết quả tính toán cho thấy pin 5000 mAh đủ khả năng duy trì hoạt động tracker từ 20–35 ngày ở chế độ heartbeat, đủ thời gian để người dùng xử lý tình trạng ắc quy yếu [14].
+Kết quả tính toán cho thấy pin 1S đủ khả năng duy trì hoạt động tracker từ 20–35 ngày ở chế độ heartbeat, đủ thời gian để người dùng xử lý tình trạng ắc quy yếu [14].
 
 #### 3.2.1.4. Bảng tổng hợp linh kiện (Bill of Materials)
 
@@ -1402,15 +1402,15 @@ Kết quả tính toán cho thấy pin 5000 mAh đủ khả năng duy trì hoạ
 | 2   | LIS3DH breakout board          | Cái    | 1   | 20.000–50.000      | Cảm biến gia tốc 3 trục                  |
 | 3   | vgate iCar Pro (OBD2 BLE)      | Cái    | 1   | 150.000–300.000    | BLE 4.0, ELM327 compatible               |
 | 4   | SIMCom SIM7600CE-T               | Bộ     | 1   | 330.000–500.000    | Modem LTE + GNSS tích hợp + anten       |
-| 5   | Pin 21700 Li-ion 5000mAh       | Cái    | 1   | 100.000–200.000    | Loại có protection board                |
+| 5   | Pin 18650 1S Li-ion 5000mAh       | Cái    | 1   | 100.000–200.000    | Loại có protection board                |
 | 6   | Module sạc TP4056 (1S)         | Cái    | 1   | 20.000–40.000      | Input 5V, output 4.2V, dòng theo PROG   |
 | 7   | Module Buck XL1509 3.3E        | Cái    | 1   | 15.000–30.000      | 12–24V -> 3.3V cấp ESP32-S3             |
 | 8   | Module Buck MP2482 (12–24V->5V)| Cái    | 1   | 15.000–30.000      | Bus 5V chính                             |
 | 9   | Module Buck TPS54231 (~4V)     | Cái    | 1   | 20.000–40.000      | 12–24V -> ~4V cấp modem SIM7600CE-T       |
-| 10  | Module Boost SX1308 (3.7V->5V) | Cái    | 1   | 10.000–20.000      | Backup từ pin 21700                      |
+| 10  | Module Boost SX1308 (3.7V->5V) | Cái    | 1   | 10.000–20.000      | Backup từ pin 18650 1S                      |
 | 11  | Comparator LM393               | Cái    | 1   | 5.000–15.000       | Giám sát LVD (GPIO19)                    |
 | 12  | Diode Schottky 1N5822          | Cái    | 2   | 2.000–5.000        | Diode-OR power path                      |
-| 13  | BMS/Protection Board 1S        | Cái    | 1   | 10.000–20.000      | Bảo vệ pin 21700                         |
+| 13  | BMS/Protection Board 1S        | Cái    | 1   | 10.000–20.000      | Bảo vệ pin 18650 1S                         |
 | 14  | Điện trở (10kOhm, 2.2kOhm)     | Gói    | 1   | 5.000–10.000       | Voltage divider, pull-up                 |
 | 15  | Tụ điện (100uF, 220uF)         | Gói    | 1   | 5.000–10.000       | Lọc nhiễu, decoupling                    |
 | 16  | Connector, header pin          | Gói    | 1   | 10.000–20.000      | Kết nối dây, header                      |
@@ -2879,7 +2879,7 @@ _Hình 3.23: Sơ đồ kiến trúc tổng thể phương án tối ưu_
 
 **Kiến trúc phân tầng:**
 
-- **Tầng thiết bị (Device Layer):** ESP32-S3 + SIMCom SIM7600CE-T + vgate iCar Pro + LIS3DH, quản lý nguồn thông minh với pin dự phòng 21700
+- **Tầng thiết bị (Device Layer):** ESP32-S3 + SIMCom SIM7600CE-T + vgate iCar Pro + LIS3DH, quản lý nguồn thông minh với pin dự phòng 18650 1S
 - **Tầng truyền thông (Communication Layer):** MQTT 5.0 qua 4G LTE, QoS 1, offline buffering
 - **Tầng xử lý (Processing Layer):** MQTT Bridge --> dual-write PostgreSQL + VictoriaMetrics, Express.js API (DDD)
 - **Tầng trình bày (Presentation Layer):** Next.js 15, Leaflet maps, Socket.IO real-time, ECharts
@@ -3075,7 +3075,7 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 1. **Buck 3.3V (XL1509 3.3E):** Chuyển đổi 12V/24V xuống 3.3V cấp ESP32-S3
 2. **Buck 5V (MP2482):** Chuyển đổi 12V/24V xuống 5V bus chính
 3. **Buck ~4V (TPS54231):** Chuyển đổi 12V/24V xuống ~4V cấp modem SIM7600CE-T
-4. **Boost 5V (SX1308):** Tăng áp từ pin 21700 (~3.7V) lên 5V dự phòng
+4. **Boost 5V (SX1308):** Tăng áp từ pin 18650 1S (~3.7V) lên 5V dự phòng
 5. **Power path Diode-OR + điều khiển EN:** Tự động duy trì nguồn liên tục giữa nhánh chính và nhánh backup
 6. **Mạch sạc TP4056 + LVD (LM393/ADC):** Sạc pin 1S và giám sát ngưỡng điện áp bảo vệ ắc quy
 
@@ -3119,7 +3119,7 @@ Khối buck modem dùng **TPS54231** để hạ 12V/24V xuống khoảng 4V cấ
 
 #### e) Boost 5V dự phòng và Power Path
 
-Khối boost dùng **SX1308** để nâng áp từ pin 21700 (~3.7V) lên 5V khi chạy nguồn dự phòng.
+Khối boost dùng **SX1308** để nâng áp từ pin 18650 1S (~3.7V) lên 5V khi chạy nguồn dự phòng.
 
 **Bảng 4.5: Khối Boost 5V dự phòng**
 
@@ -3135,18 +3135,18 @@ Power path runtime được triển khai theo **diode OR** giữa nhánh 5V chí
 | ------------------- | --- | ---------------------------------------------------------- | ------------- | ------- | -------- |
 | Xe chạy bình thường | ON  | Profile 12V: U_batt >= 13.0V; Profile 24V: U_batt >= 26.0V | Ắc quy        | Có      | Không    |
 | Xe đỗ bình thường   | OFF | Profile 12V: U_batt > 12.0V; Profile 24V: U_batt > 24.0V   | Ắc quy        | Không   | Không    |
-| Ắc quy yếu          | OFF | Profile 12V: U_batt <= 12.0V; Profile 24V: U_batt <= 24.0V | Pin 21700     | Không   | Có       |
+| Ắc quy yếu          | OFF | Profile 12V: U_batt <= 12.0V; Profile 24V: U_batt <= 24.0V | Pin 18650 1S     | Không   | Có       |
 | Ắc quy phục hồi     | OFF | Profile 12V: U_batt >= 12.2V; Profile 24V: U_batt >= 24.4V | Ắc quy        | Không   | Có       |
 
 #### f) Mạch sạc pin TP4056
 
-Khối sạc pin dùng **TP4056**, nhận **5V từ MP2482** và sạc pin 21700 ở mức 4.2V (1S).
+Khối sạc pin dùng **TP4056**, nhận **5V từ MP2482** và sạc pin 18650 1S ở mức 4.2V (1S).
 
 **Bảng 4.7: Khối sạc TP4056**
 
 | Khối    | IC     | Input        | Output | Tải       |
 | ------- | ------ | ------------ | ------ | --------- |
-| Sạc pin | TP4056 | 5V từ MP2482 | 4.2V   | Pin 21700 |
+| Sạc pin | TP4056 | 5V từ MP2482 | 4.2V   | Pin 18650 1S |
 
 Dòng sạc của TP4056 được xác lập theo điện trở PROG và giới hạn nhiệt, không cố định một giá trị trong mọi điều kiện.
 
@@ -3197,7 +3197,7 @@ Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân 
 |  +----------+  +----------+  +----------+        |
 |                                                  |
 |  +----------------------------------------------+|
-|  |  Pin 21700 + Giá đỡ pin                      ||
+|  |  Pin 18650 1S + Giá đỡ pin                      ||
 |  +----------------------------------------------+|
 |                                                  |
 |  [Anten 4G/LTE]  [Anten GNSS]  [Cổng OBD2]     |
@@ -3242,15 +3242,15 @@ Các nội dung triển khai chi tiết ở tầng phần mềm được trình 
 | 2   | LIS3DH Breakout Board          | Cái    | 1   | 20,000–50,000      | Cảm biến gia tốc 3 trục, giao tiếp I2C      |
 | 3   | vgate iCar Pro (OBD2 BLE)      | Cái    | 1   | 150,000–300,000    | Adapter OBD2 BLE 4.0, tương thích ESP32-S3  |
 | 4   | SIMCom SIM7600CE-T             | Bộ     | 1   | 330,000–500,000    | Modem LTE Cat-4 tích hợp GNSS + anten + khe SIM |
-| 5   | Pin 21700 Li-ion 5000mAh       | Cái    | 1   | 100,000–200,000    | Loại có protection board                    |
+| 5   | Pin 18650 1S Li-ion 5000mAh       | Cái    | 1   | 100,000–200,000    | Loại có protection board                    |
 | 6   | Module sạc TP4056 (1S)         | Cái    | 1   | 20,000–40,000      | Input 5V từ MP2482, output 4.2V, dòng theo PROG |
 | 7   | Module Buck XL1509 3.3E        | Cái    | 1   | 15,000–30,000      | 12–24V -> 3.3V cho ESP32-S3                 |
 | 8   | Module Buck MP2482 (12–24V->5V)| Cái    | 1   | 15,000–30,000      | Bus 5V chính                                |
 | 9   | Module Buck TPS54231 (~4V)     | Cái    | 1   | 20,000–40,000      | 12–24V -> ~4V cấp modem SIM7600CE-T           |
-| 10  | Module Boost SX1308 (3.7V->5V) | Cái    | 1   | 10,000–20,000      | Backup từ pin 21700                         |
+| 10  | Module Boost SX1308 (3.7V->5V) | Cái    | 1   | 10,000–20,000      | Backup từ pin 18650 1S                         |
 | 11  | Comparator LM393               | Cái    | 1   | 5,000–15,000       | Giám sát LVD (GPIO19)                       |
 | 12  | Diode Schottky 1N5822          | Cái    | 2   | 2,000–5,000        | Diode OR dự phòng                           |
-| 13  | BMS/Protection Board 1S        | Cái    | 1   | 10,000–20,000      | Bảo vệ pin 21700                            |
+| 13  | BMS/Protection Board 1S        | Cái    | 1   | 10,000–20,000      | Bảo vệ pin 18650 1S                            |
 | 14  | Điện trở (10k, 2.2k, v.v.)     | Gói    | 1   | 5,000–10,000       | Voltage divider, pull-up/pull-down          |
 | 15  | Tụ điện (100uF, 220uF, v.v.)   | Gói    | 1   | 5,000–10,000       | Lọc nhiễu, decoupling                       |
 | 16  | Connector, Header Pin          | Gói    | 1   | 10,000–20,000      | Kết nối dây, header pin                     |
@@ -3276,7 +3276,7 @@ Quy trình lắp ráp mạch điện tử được triển khai theo các bướ
 
 **Bước 1 - Kiểm tra linh kiện:** Kiểm tra tất cả các module và linh kiện trước khi lắp ráp. Test riêng từng module (ESP32-S3, XL1509 3.3E, MP2482, TPS54231, SX1308, TP4056, SIM7600CE-T, LM393) để đảm bảo hoạt động đúng.
 
-**Bước 2 - Lắp ráp mạch nguồn:** Kết nối MP2482 với nguồn ắc quy xe (12V hoặc 24V) để tạo bus 5V. Kết nối XL1509 3.3E cấp riêng ESP32-S3. Kết nối TPS54231 tạo rail ~4V cho modem SIM7600CE-T. Kết nối SX1308 với pin 21700 để tạo 5V backup. Ghép diode OR giữa nhánh 5V chính và nhánh 5V backup. Kết nối TP4056 (input 5V từ MP2482) với pin và BMS.
+**Bước 2 - Lắp ráp mạch nguồn:** Kết nối MP2482 với nguồn ắc quy xe (12V hoặc 24V) để tạo bus 5V. Kết nối XL1509 3.3E cấp riêng ESP32-S3. Kết nối TPS54231 tạo rail ~4V cho modem SIM7600CE-T. Kết nối SX1308 với pin 18650 1S để tạo 5V backup. Ghép diode OR giữa nhánh 5V chính và nhánh 5V backup. Kết nối TP4056 (input 5V từ MP2482) với pin và BMS.
 
 **Bước 3 - Kết nối vi điều khiển:** Gắn ESP32-S3 DevKitC lên breadboard hoặc PCB. Kết nối các chân GPIO theo bảng phân công (Bảng 4.1). Kết nối nguồn theo từng rail chức năng (3.3V logic, ~4V modem, 5V bus/backup).
 
@@ -5323,7 +5323,7 @@ Dòng tiêu thụ năng lượng là chỉ tiêu cốt lõi của thiết bị t
 
 #### 4.3.2.2. Thời lượng pin dự phòng
 
-Pin dự phòng 21700 (dung lượng danh định 5000 mAh, điện áp danh định 3.7V) được kiểm thử trên các kịch bản sử dụng khác nhau. Thời lượng thực tế được ước tính theo công thức: T = (C x V_pin x eta) / P_tieu_thu, trong đó eta là hiệu suất chuyển đổi của mạch boost converter (~85–90%).
+Pin dự phòng 18650 1S (dung lượng danh định 5000 mAh, điện áp danh định 3.7V) được kiểm thử trên các kịch bản sử dụng khác nhau. Thời lượng thực tế được ước tính theo công thức: T = (C x V_pin x eta) / P_tieu_thu, trong đó eta là hiệu suất chuyển đổi của mạch boost converter (~85–90%).
 
 [Bảng 4.15: Thời lượng pin dự phòng theo kịch bản sử dụng]
 
@@ -5725,7 +5725,7 @@ Phần này tổng hợp tất cả kết quả đo lường và so sánh với 
 | --- | ---------------------------------- | -------------------------------------- | ----------------------------- | ---------------- | ------------------------------- |
 | 1   | Dòng tiêu thụ Deep Sleep           | < 500 µA                               | ~500 µA (~0.5 mA)             | Đạt              | IMU + RTC hoạt động             |
 | 2   | Dòng tiêu thụ Active Mode          | < 250 mA (trung bình)                  | ~350 mA                       | Chưa đạt (\*)    | Xem ghi chú (\*)                |
-| 3   | Thời lượng pin dự phòng (tracking) | >= 4 giờ                               | ~3–4 giờ [cần đo thực tế]     | Đạt (sát ngưỡng) | Pin 21700 5000mAh               |
+| 3   | Thời lượng pin dự phòng (tracking) | >= 4 giờ                               | ~3–4 giờ [cần đo thực tế]     | Đạt (sát ngưỡng) | Pin 18650 1S 5000mAh               |
 | 4   | Nhiệt độ hoạt động                 | -10°C đến +60°C                        | -10°C đến +60°C               | Đạt              | Module 4G hạn chế ở 70°C        |
 | 5   | Điện áp ngắt LVD                   | Profile 12V: 12.0V; Profile 24V: 24.0V | ~11.48V (đo theo profile 12V) | Chưa đạt (12V)   | Profile 24V chưa đo thực nghiệm |
 | 6   | Thời gian thức dậy từ deep sleep   | < 3 giây                               | ~2 giây                       | Đạt              | Bao gồm init cơ bản             |
@@ -5854,7 +5854,7 @@ Hệ thống phần cứng được đánh giá trên ba khía cạnh chính: qu
 
 **Quản lý năng lượng:**
 
-Hệ thống quản lý năng lượng đa chế độ vận hành ổn định trong các kịch bản thử nghiệm. Mạch buck converter đầu vào 12V/24V (dải 7–40V) hạ áp xuống 5V rồi qua LDO 3.3V cho ESP32-S3, đạt hiệu suất tổng trên 90% ở điều kiện thử nghiệm profile 12V. Logic chuyển nguồn dự phòng được chuẩn hóa theo hai profile: 12V (Switch_OFF=12.0V, Switch_ON=12.2V, IGN_ON>=13.0V, IGN_OFF<=12.0V) và 24V (Switch_OFF=24.0V, Switch_ON=24.4V, IGN_ON>=26.0V, IGN_OFF<=24.0V). Pin dự phòng 21700 (5000mAh) duy trì hoạt động độc lập khoảng 48–72 giờ ở chế độ cảnh báo và 2–3 tháng ở chế độ deep sleep.
+Hệ thống quản lý năng lượng đa chế độ vận hành ổn định trong các kịch bản thử nghiệm. Mạch buck converter đầu vào 12V/24V (dải 7–40V) hạ áp xuống 5V rồi qua LDO 3.3V cho ESP32-S3, đạt hiệu suất tổng trên 90% ở điều kiện thử nghiệm profile 12V. Logic chuyển nguồn dự phòng được chuẩn hóa theo hai profile: 12V (Switch_OFF=12.0V, Switch_ON=12.2V, IGN_ON>=13.0V, IGN_OFF<=12.0V) và 24V (Switch_OFF=24.0V, Switch_ON=24.4V, IGN_ON>=26.0V, IGN_OFF<=24.0V). Pin dự phòng 18650 1S (5000mAh) duy trì hoạt động độc lập khoảng 48–72 giờ ở chế độ cảnh báo và 2–3 tháng ở chế độ deep sleep.
 
 [Bảng 5.1: Đánh giá hiệu năng quản lý năng lượng]
 
@@ -5953,7 +5953,7 @@ Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính t
 | SIMCom SIM7600CE-T                     | Modem LTE + GNSS tích hợp | 330.000–500.000       |
 | vgate iCar Pro BLE                     | Adapter OBD2 BLE          | 250.000–500.000       |
 | LIS3DH breakout board                  | Cảm biến gia tốc (IMU)    | 30.000–50.000         |
-| Pin 21700 (1 cell, 5000mAh)            | Pin dự phòng              | 80.000–120.000        |
+| Pin 18650 1S (1 cell, 5000mAh)            | Pin dự phòng              | 80.000–120.000        |
 | Mạch sạc TP4056 + boost/buck converter | Quản lý năng lượng        | 50.000–100.000        |
 | PCB, vỏ hộp, dây cáp, linh kiện phụ    | Cơ khí và kết nối         | 130.000–260.000       |
 | **Tổng cộng**                          |                           | **870.000–1.630.000** |
@@ -6001,7 +6001,7 @@ So với việc sử dụng các giải pháp thương mại (AWS IoT Core, Azur
 Hệ thống được thiết kế với ý thức tối ưu hóa tiêu thụ năng lượng, góp phần giảm tác động môi trường:
 
 - **Tiêu thụ điện thấp**: Chế độ deep sleep 10–15 μA khi xe đậu giúp giảm điện năng tiêu thụ từ ắc quy xe, giảm tần suất sạc ắc quy và kéo dài tuổi thọ ắc quy.
-- **Pin dự phòng giảm phụ thuộc ắc quy xe**: Khi xe đậu lâu ngày, thiết bị chuyển sang sử dụng pin dự phòng 21700, tránh rút điện từ ắc quy xe, bảo vệ ắc quy và giảm lượng khí thải từ việc sạc ắc quy.
+- **Pin dự phòng giảm phụ thuộc ắc quy xe**: Khi xe đậu lâu ngày, thiết bị chuyển sang sử dụng pin dự phòng 18650 1S, tránh rút điện từ ắc quy xe, bảo vệ ắc quy và giảm lượng khí thải từ việc sạc ắc quy.
 - **Giảm số lần đi kiểm tra xe trực tiếp**: Nhờ khả năng giám sát từ xa, người quản lý không cần lái xe đến vị trí xe để kiểm tra, giảm lượng khí thải CO2 từ các chuyến đi không cần thiết.
 - **Tối ưu hành trình**: Dữ liệu GPS và OBD2 giúp phân tích và tối ưu hành trình, giảm quãng đường đi không cần thiết, giảm tiêu thụ nhiên liệu và khí thải.
 
@@ -6033,7 +6033,7 @@ Hệ thống được thiết kế với ý thức tối ưu hóa tiêu thụ n�
 | R4  | Tấn công bảo mật (giả mạo thiết bị, chiếm quyền truy cập) | 3 - Trung bình | 5 - Rất cao    | **Cao**        | Session-based auth với SHA-256, MQTT ACL per device, HTTPS/TLS, Zod input validation, rate limiting                                         | Đã triển khai cơ bản |
 | R5  | Mất dữ liệu trong thời gian mất kết nối mạng kéo dài      | 3 - Trung bình | 4 - Cao        | **Cao**        | Flash storage buffer (~1000 bản ghi), cơ chế retry với exponential backoff, QoS 1 đảm bảo delivery                                          | Đã triển khai        |
 | R6  | Hư hỏng phần cứng do nhiệt độ cực đoan (xe đỗ ngoài nắng) | 2 - Thấp       | 4 - Cao        | **Trung bình** | ESP32-S3 hoạt động -40 đến 85°C, thiết kế tản nhiệt, đặt thiết bị trong vị trí mát, cảnh báo nhiệt độ                                       | Thiết kế có tính đến |
-| R7  | Cạn ắc quy xe do thiết bị hoạt động liên tục              | 2 - Thấp       | 5 - Rất cao    | **Cao**        | Mạch switch profile chuyển sang pin dự phòng: 12V (OFF=12.0V, ON=12.2V), 24V (OFF=24.0V, ON=24.4V), deep sleep 10–15 μA, pin dự phòng 21700 | Đã triển khai        |
+| R7  | Cạn ắc quy xe do thiết bị hoạt động liên tục              | 2 - Thấp       | 5 - Rất cao    | **Cao**        | Mạch switch profile chuyển sang pin dự phòng: 12V (OFF=12.0V, ON=12.2V), 24V (OFF=24.0V, ON=24.4V), deep sleep 10–15 μA, pin dự phòng 18650 1S | Đã triển khai        |
 | R8  | Lỗi firmware gây treo hệ thống (firmware hang)            | 3 - Trung bình | 4 - Cao        | **Cao**        | Watchdog timer (cần triển khai), FreeRTOS task monitoring, OTA update từ xa                                                                 | Triển khai một phần  |
 
 ### 5.3.2. Phân tích chi tiết các rủi ro chính
@@ -6048,7 +6048,7 @@ Bảo mật là rủi ro có tác động nghiêm trọng nhất. Hệ thống �
 
 **Rủi ro R7 - Cạn ắc quy xe:**
 
-Đây là rủi ro có tác động nghiêm trọng nhất đối với trải nghiệm người dùng cuối — xe không khởi động được sẽ gây bất tiện lớn cho khách thuê xe. Hệ thống đã có nhiều cơ chế bảo vệ: ngưỡng LVD profile 12V tại OFF=12.0V/ON=12.2V, profile 24V tại OFF=24.0V/ON=24.4V; cơ chế chuyển nguồn có hysteresis; chế độ deep sleep chỉ tiêu thụ 10–15 μA; và pin dự phòng 21700 cho phép hoạt động độc lập khi mạch LVD ngắt nguồn từ ắc quy.
+Đây là rủi ro có tác động nghiêm trọng nhất đối với trải nghiệm người dùng cuối — xe không khởi động được sẽ gây bất tiện lớn cho khách thuê xe. Hệ thống đã có nhiều cơ chế bảo vệ: ngưỡng LVD profile 12V tại OFF=12.0V/ON=12.2V, profile 24V tại OFF=24.0V/ON=24.4V; cơ chế chuyển nguồn có hysteresis; chế độ deep sleep chỉ tiêu thụ 10–15 μA; và pin dự phòng 18650 1S cho phép hoạt động độc lập khi mạch LVD ngắt nguồn từ ắc quy.
 
 ### 5.3.3. Tổng hợp mức độ rủi ro
 
@@ -6254,14 +6254,14 @@ Hệ thống cần xử lý luồng dữ liệu telemetry liên tục từ nhi�
 Hệ thống phần cứng phải hoạt động với hai nguồn năng lượng có đặc tính rất khác nhau:
 
 - Ắc quy xe 12V hoặc 24V DC (dao động tùy trạng thái sạc và tải), là nguồn chính khi xe hoạt động.
-- Pin dự phòng 21700 Li-ion 3.7V (dao động 2.8V - 4.2V), là nguồn dùng khi ắc quy xe bị ngắt hoặc điện áp quá thấp.
+- Pin dự phòng 18650 1S Li-ion 3.7V (dao động 2.8V - 4.2V), là nguồn dùng khi ắc quy xe bị ngắt hoặc điện áp quá thấp.
 - Việc chuyển đổi giữa hai nguồn phải diễn ra liền mạch (seamless switching), không được gây mất điện cho MCU, tránh reset hoặc mất dữ liệu.
 
 **Cách giải quyết:**
 
 1. _Power path management_: Thiết kế mạch power path dùng diode OR giữa MP2482 (5V chính) và SX1308 (5V backup), kết hợp GPIO18 để điều khiển nhánh nguồn theo profile 12V/24V.
 2. _Low Voltage Disconnect (LVD)_: Hiện thực LVD bằng comparator LM393 kết hợp ADC firmware, dùng ngưỡng profile: 12V (OFF=12.0V, ON=12.2V) và 24V (OFF=24.0V, ON=24.4V), bảo vệ ắc quy không bị rút cạn quá mức.
-3. _Bộ sạc pin dự phòng_: Tích hợp IC sạc TP4056 (input 5V từ MP2482, output 4.2V) để sạc pin 21700 khi điều kiện nguồn cho phép.
+3. _Bộ sạc pin dự phòng_: Tích hợp IC sạc TP4056 (input 5V từ MP2482, output 4.2V) để sạc pin 18650 1S khi điều kiện nguồn cho phép.
 4. _Giám sát điện áp bằng firmware_: Đọc điện áp ắc quy và pin dự phòng liên tục qua ADC, kết hợp trạng thái GPIO19 (HIGH = low-voltage) để gửi cảnh báo sớm và điều phối chuyển nguồn.
 
 **Bài học rút ra:** Thiết kế hệ thống năng lượng cho IoT trong môi trường ô tô cần xem xét toàn diện: điện áp dao động, chuyển đổi nguồn liền mạch, bảo vệ ắc quy, và giám sát từ xa. Mỗi yếu tố ảnh hưởng trực tiếp đến độ tin cậy của toàn hệ thống.
@@ -6585,7 +6585,7 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | 2   | LTE + GNSS        | SIMCom SIM7600CE-T             | 1 bộ     | 330.000       | 330.000          | Modem LTE Cat-4 tích hợp GPS/GNSS                   |
 | 3   | OBD2 Adapter      | vgate iCar Pro BLE             | 1        | 350.000       | 350.000          | Bluetooth Low Energy OBD2                           |
 | 4   | Cảm biến gia tốc  | LIS3DH (breakout board)        | 1        | 45.000        | 45.000           | IMU 3 trục, phát hiện chuyển động                   |
-| 5   | Pin dự phòng      | 21700 Li-ion 5000mAh           | 1        | 80.000        | 80.000           | Samsung/LG cell                                     |
+| 5   | Pin dự phòng      | 18650 1S Li-ion 5000mAh           | 1        | 80.000        | 80.000           | Samsung/LG cell                                     |
 | 6   | IC sạc pin        | TP4056 module                  | 1        | 25.000        | 25.000           | Sạc 1S, input 5V từ MP2482, dòng theo PROG          |
 | 7   | Buck 3.3V         | XL1509 3.3E module             | 1        | 18.000        | 18.000           | 12–24V -> 3.3V cấp ESP32-S3                         |
 | 8   | Buck 5V           | MP2482 module (12V/24V->5V)    | 1        | 15.000        | 15.000           | Tạo bus 5V chính                                    |
