@@ -1,1 +1,124 @@
-<svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width: 787.922px; background-color: white;" viewBox="0 0 787.921875 775.5" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:Segoe UI,Noto Sans,Arial,sans-serif;font-size:20px;fill:#172534;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#eef5ff;}#my-svg .error-text{fill:#110a00;stroke:#110a00;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#35566f;stroke:#35566f;}#my-svg .marker.cross{stroke:#35566f;}#my-svg svg{font-family:Segoe UI,Noto Sans,Arial,sans-serif;font-size:20px;}#my-svg p{margin:0;}#my-svg .label{font-family:Segoe UI,Noto Sans,Arial,sans-serif;color:#172534;}#my-svg .cluster-label text{fill:#110a00;}#my-svg .cluster-label span{color:#110a00;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#172534;color:#172534;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#f8fbff;stroke:#35566f;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#35566f!important;stroke-width:0;stroke:#35566f;}#my-svg .arrowheadPath{fill:#0b0b0b;}#my-svg .edgePath .path{stroke:#35566f;stroke-width:2.0px;}#my-svg .flowchart-link{stroke:#35566f;fill:none;}#my-svg .edgeLabel{background-color:#ffffff;text-align:center;}#my-svg .edgeLabel p{background-color:#ffffff;}#my-svg .edgeLabel rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#my-svg .cluster rect{fill:#f2f7ff;stroke:#8ca4b8;stroke-width:1px;}#my-svg .cluster text{fill:#110a00;}#my-svg .cluster span{color:#110a00;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Segoe UI,Noto Sans,Arial,sans-serif;font-size:12px;background:#eef5ff;border:1px solid hsl(215.2941176471, 60%, 86.6666666667%);border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#172534;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:#ffffff;text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:#ffffff;padding:2px;}#my-svg .icon-shape rect,#my-svg .image-shape rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg :root{--mermaid-font-family:Segoe UI,Noto Sans,Arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g class="root" transform="translate(0, 0)"><g class="clusters"><g class="cluster" id="Bench" data-look="classic"><rect style="" x="8" y="8" width="771.921875" height="759.5"/><g class="cluster-label" transform="translate(293.9609375, 8)"><foreignObject width="200" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Mặt bằng prototype sau lắp ráp</p></span></div></foreignObject></g></g></g><g class="edgePaths"><path d="M278.922,136.322L295.589,129.852C312.255,123.381,345.589,110.441,371.005,103.97C396.422,97.5,413.922,97.5,422.672,97.5L431.422,97.5" id="L_MCU_Uart_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_MCU_Uart_0" data-points="W3sieCI6Mjc4LjkyMTg3NSwieSI6MTM2LjMyMjE5MTMzMDcyMTU4fSx7IngiOjM3OC45MjE4NzUsInkiOjk3LjV9LHsieCI6NDM1LjQyMTg3NSwieSI6OTcuNX1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M278.922,202.678L295.589,209.148C312.255,215.619,345.589,228.559,374.858,235.03C404.128,241.5,429.333,241.5,441.936,241.5L454.539,241.5" id="L_MCU_Imu_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_MCU_Imu_0" data-points="W3sieCI6Mjc4LjkyMTg3NSwieSI6MjAyLjY3NzgwODY2OTI3ODQyfSx7IngiOjM3OC45MjE4NzUsInkiOjI0MS41fSx7IngiOjQ1OC41MzkwNjI1LCJ5IjoyNDEuNX1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M315.148,370.5L325.777,370.5C336.406,370.5,357.664,370.5,377.855,370.5C398.047,370.5,417.172,370.5,426.734,370.5L436.297,370.5" id="L_Buck_Vin_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Buck_Vin_0" data-points="W3sieCI6MzE1LjE0ODQzNzUsInkiOjM3MC41fSx7IngiOjM3OC45MjE4NzUsInkiOjM3MC41fSx7IngiOjQ0MC4yOTY4NzUsInkiOjM3MC41fV0=" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M302.211,499.5L314.996,499.5C327.781,499.5,353.352,499.5,384.356,505.361C415.361,511.222,451.8,522.945,470.02,528.806L488.239,534.667" id="L_Charge_Cell_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Charge_Cell_0" data-points="W3sieCI6MzAyLjIxMDkzNzUsInkiOjQ5OS41fSx7IngiOjM3OC45MjE4NzUsInkiOjQ5OS41fSx7IngiOjQ5Mi4wNDY4NzUsInkiOjUzNS44OTE4MzI5MTc3MDU4fV0=" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M322.422,628.5L331.839,628.5C341.255,628.5,360.089,628.5,387.725,622.639C415.361,616.778,451.8,605.055,470.02,599.194L488.239,593.333" id="L_Boost_Cell_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Boost_Cell_0" data-points="W3sieCI6MzIyLjQyMTg3NSwieSI6NjI4LjV9LHsieCI6Mzc4LjkyMTg3NSwieSI6NjI4LjV9LHsieCI6NDkyLjA0Njg3NSwieSI6NTkyLjEwODE2NzA4MjI5NDJ9XQ==" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_MCU_Uart_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_MCU_Imu_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_Buck_Vin_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_Charge_Cell_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_Boost_Cell_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="flowchart-MCU-0" transform="translate(193.4609375, 169.5)"><rect class="basic label-container" style="" x="-85.4609375" y="-37" width="170.921875" height="74"/><g class="label" style="" transform="translate(-41.4609375, -15)"><rect/><foreignObject width="82.921875" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>ESP32-S3</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Uart-6" transform="translate(579.421875, 97.5)"><rect class="basic label-container" style="" x="-144" y="-52" width="288" height="104"/><g class="label" style="" transform="translate(-100, -30)"><rect/><foreignObject width="200" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Header UART / USB debug</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Imu-7" transform="translate(579.421875, 241.5)"><rect class="basic label-container" style="" x="-120.8828125" y="-37" width="241.765625" height="74"/><g class="label" style="" transform="translate(-76.8828125, -15)"><rect/><foreignObject width="153.765625" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Header I2C / IMU</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Buck-3" transform="translate(193.4609375, 370.5)"><rect class="basic label-container" style="" x="-121.6875" y="-37" width="243.375" height="74"/><g class="label" style="" transform="translate(-77.6875, -15)"><rect/><foreignObject width="155.375" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>MP2482 / XL1509</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Vin-8" transform="translate(579.421875, 370.5)"><rect class="basic label-container" style="" x="-139.125" y="-37" width="278.25" height="74"/><g class="label" style="" transform="translate(-95.125, -15)"><rect/><foreignObject width="190.25" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Nguồn vào 12V / 24V</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Charge-2" transform="translate(193.4609375, 499.5)"><rect class="basic label-container" style="" x="-108.75" y="-37" width="217.5" height="74"/><g class="label" style="" transform="translate(-64.75, -15)"><rect/><foreignObject width="129.5" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>TP4056 + BMS</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Cell-5" transform="translate(579.421875, 564)"><rect class="basic label-container" style="" x="-87.375" y="-37" width="174.75" height="74"/><g class="label" style="" transform="translate(-43.375, -15)"><rect/><foreignObject width="86.75" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Pin 21700</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Boost-4" transform="translate(193.4609375, 628.5)"><rect class="basic label-container" style="" x="-128.9609375" y="-37" width="257.921875" height="74"/><g class="label" style="" transform="translate(-84.9609375, -15)"><rect/><foreignObject width="169.921875" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>SX1308 / diode-OR</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Modem-1" transform="translate(579.421875, 693)"><rect class="basic label-container" style="" x="-140.3515625" y="-37" width="280.703125" height="74"/><g class="label" style="" transform="translate(-96.3515625, -15)"><rect/><foreignObject width="192.703125" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>SIM7600CE-T + anten</p></span></div></foreignObject></g></g></g></g></g></g></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="rgba(18, 32, 51, 0.14)"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#0f766e"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <style>
+    text {
+      fill: #122033;
+      font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+    }
+    .title { font-size: 40px; font-weight: 750; letter-spacing: -0.02em; }
+    .subtitle { font-size: 22px; fill: #52637a; }
+    .section-title { font-size: 24px; font-weight: 700; }
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+    .body { font-size: 20px; }
+    .small { font-size: 18px; fill: #52637a; }
+    .tiny { font-size: 15px; fill: #52637a; }
+    .chip { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metric { font-size: 42px; font-weight: 760; }
+    .mono { font-family: "Consolas", "Courier New", monospace; font-size: 18px; }
+    .sidebar { fill: #f8fafc; font-size: 18px; font-weight: 600; }
+  </style>
+  <rect width="100%" height="100%" fill="#f4f7fb"/>
+  <rect x="32" y="32" width="1536" height="936" rx="30" fill="none" stroke="rgba(15, 118, 110, 0.12)" stroke-width="2"/>
+  <rect x="56" y="56" width="1488" height="888" rx="28" fill="rgba(255, 255, 255, 0.45)" stroke="none"/>
+  <text x="84" y="106" class="title">Sơ đồ bố trí module sau khi lắp ráp</text>
+  <text x="84" y="142" class="subtitle">Bố trí lại prototype sau lắp ráp theo đúng các cụm controller, RF, nguồn chính, nhánh sạc và pin backup.</text>
+  
+      
+  <rect x="110" y="214" width="1380" height="700" rx="30" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="3" />
+  <rect x="134" y="196" width="220" height="34" rx="17" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="244" y="219" class="chip" text-anchor="middle" fill="#fff">Bố trí module sau khi lắp ráp</text>
+  <text x="138" y="248" class="small" text-anchor="start" fill="#122033"><tspan x="138" dy="0">Mô tả lại cách xếp các module trên prototype thực tế để giữ tách biệt RF, nguồn xung và các đầu nối kiểm thử.</tspan></text>
+
+      <rect x="180" y="296" width="1240" height="540" rx="34" fill="#fbfdff" stroke="rgba(15, 118, 110, 0.12)" stroke-width="2" />
+      
+    <rect x="246" y="332" width="300" height="146" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="246" y="332" width="300" height="12" rx="26" fill="#1d4ed8" stroke="none"/>
+    <rect x="264" y="352" width="110" height="34" rx="17" fill="rgba(29, 78, 216, 0.88)" stroke="rgba(29, 78, 216, 0.88)" stroke-width="2" /><text x="319" y="375" class="chip" text-anchor="middle" fill="#fff">controller</text>
+    <text x="396" y="396" class="card-title" text-anchor="middle" fill="#122033"><tspan x="396" dy="0">ESP32-S3 DevKitC</tspan></text>
+    <text x="396" y="440" class="body" text-anchor="middle" fill="#122033"><tspan x="396" dy="0">Khối điều khiển trung tâm</tspan></text>
+  
+      
+    <rect x="640" y="316" width="338" height="176" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="640" y="316" width="338" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    <rect x="658" y="336" width="90" height="34" rx="17" fill="rgba(15, 118, 110, 0.88)" stroke="rgba(15, 118, 110, 0.88)" stroke-width="2" /><text x="703" y="359" class="chip" text-anchor="middle" fill="#fff">rf</text>
+    <text x="809" y="380" class="card-title" text-anchor="middle" fill="#122033"><tspan x="809" dy="0">SIM7600CE-T + anten</tspan></text>
+    <text x="809" y="424" class="body" text-anchor="middle" fill="#122033"><tspan x="809" dy="0">Tách khỏi nguồn xung để giảm</tspan><tspan x="809" dy="24">nhiễu</tspan><tspan x="809" dy="24">Gần mép hộp cho đường anten</tspan><tspan x="809" dy="24">ngắn</tspan></text>
+  
+      
+    <rect x="1080" y="336" width="248" height="140" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1080" y="336" width="248" height="12" rx="26" fill="#64748b" stroke="none"/>
+    <rect x="1098" y="356" width="90" height="34" rx="17" fill="rgba(100, 116, 139, 0.88)" stroke="rgba(100, 116, 139, 0.88)" stroke-width="2" /><text x="1143" y="379" class="chip" text-anchor="middle" fill="#fff">debug</text>
+    <text x="1204" y="400" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1204" dy="0">Header UART / USB</tspan></text>
+    <text x="1204" y="444" class="body" text-anchor="middle" fill="#122033"><tspan x="1204" dy="0">Điểm debug và nạp</tspan><tspan x="1204" dy="24">firmware</tspan></text>
+  
+      
+    <rect x="234" y="574" width="300" height="160" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="234" y="574" width="300" height="12" rx="26" fill="#c97a10" stroke="none"/>
+    <rect x="252" y="594" width="110" height="34" rx="17" fill="rgba(201, 122, 16, 0.88)" stroke="rgba(201, 122, 16, 0.88)" stroke-width="2" /><text x="307" y="617" class="chip" text-anchor="middle" fill="#fff">main power</text>
+    <text x="384" y="638" class="card-title" text-anchor="middle" fill="#122033"><tspan x="384" dy="0">MP2482 / XL1509</tspan></text>
+    <text x="384" y="682" class="body" text-anchor="middle" fill="#122033"><tspan x="384" dy="0">Nguồn chính 5V và 3.3V</tspan></text>
+  
+      
+    <rect x="610" y="586" width="228" height="148" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="610" y="586" width="228" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    <rect x="628" y="606" width="90" height="34" rx="17" fill="rgba(217, 72, 95, 0.88)" stroke="rgba(217, 72, 95, 0.88)" stroke-width="2" /><text x="673" y="629" class="chip" text-anchor="middle" fill="#fff">charger</text>
+    <text x="724" y="650" class="card-title" text-anchor="middle" fill="#122033"><tspan x="724" dy="0">TP4056 + BMS</tspan></text>
+    <text x="724" y="694" class="body" text-anchor="middle" fill="#122033"><tspan x="724" dy="0">Nhánh sạc pin</tspan></text>
+  
+      
+    <rect x="900" y="586" width="226" height="148" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="900" y="586" width="226" height="12" rx="26" fill="#6d4fe0" stroke="none"/>
+    <rect x="918" y="606" width="90" height="34" rx="17" fill="rgba(109, 79, 224, 0.88)" stroke="rgba(109, 79, 224, 0.88)" stroke-width="2" /><text x="963" y="629" class="chip" text-anchor="middle" fill="#fff">backup</text>
+    <text x="1013" y="650" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1013" dy="0">SX1308 +</tspan><tspan x="1013" dy="30">diode-OR</tspan></text>
+    <text x="1013" y="722" class="body" text-anchor="middle" fill="#122033"><tspan x="1013" dy="0">Nhánh backup 5V</tspan></text>
+  
+      
+    <rect x="1176" y="580" width="192" height="156" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1176" y="580" width="192" height="12" rx="26" fill="#0f9d76" stroke="none"/>
+    <rect x="1194" y="600" width="90" height="34" rx="17" fill="rgba(15, 157, 118, 0.88)" stroke="rgba(15, 157, 118, 0.88)" stroke-width="2" /><text x="1239" y="623" class="chip" text-anchor="middle" fill="#fff">cell</text>
+    <text x="1272" y="644" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1272" dy="0">Pin 21700</tspan></text>
+    <text x="1272" y="688" class="body" text-anchor="middle" fill="#122033"><tspan x="1272" dy="0">Nguồn dự phòng</tspan></text>
+  
+      
+    <rect x="610" y="760" width="370" height="86" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="610" y="760" width="370" height="12" rx="26" fill="#64748b" stroke="none"/>
+    <rect x="628" y="780" width="90" height="34" rx="17" fill="rgba(100, 116, 139, 0.88)" stroke="rgba(100, 116, 139, 0.88)" stroke-width="2" /><text x="673" y="803" class="chip" text-anchor="middle" fill="#fff">io</text>
+    <text x="795" y="824" class="card-title" text-anchor="middle" fill="#122033"><tspan x="795" dy="0">Các đầu nối: nguồn vào</tspan><tspan x="795" dy="30">12V/24V, I2C/IMU, LTE/GNSS</tspan></text>
+    
+  
+      
+    <line x1="546" y1="404" x2="640" y2="404" stroke="#1d4ed8" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="978" y1="404" x2="1080" y2="404" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="390" y1="478" x2="390" y2="574" stroke="#c97a10" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="734" y1="492" x2="724" y2="586" stroke="#d9485f" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="978" y1="492" x2="1014" y2="586" stroke="#6d4fe0" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="1126" y1="660" x2="1176" y2="658" stroke="#0f9d76" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+    
+</svg>

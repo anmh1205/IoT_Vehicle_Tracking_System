@@ -662,28 +662,6 @@ const appendixGantt = `gantt
     Viết báo cáo và bảo vệ         :a8, 2026-01-19, 28d
 `;
 
-export const mermaidDiagrams = [
-  { name: "03-chuong-3-giai-phap-phan-cung-hinh-3-2.svg", code: bleObdSequence },
-  { name: "03-chuong-3-giai-phap-phan-cung-hinh-3-3.svg", code: lis3dhWiring },
-  { name: "04-chuong-3-giai-phap-firmware-hinh-3-5.svg", code: firmwareLayers },
-  { name: "04-chuong-3-giai-phap-firmware-hinh-3-6.svg", code: taskInteraction },
-  { name: "04-chuong-3-giai-phap-firmware-hinh-3-7.svg", code: firmwareMainFlow },
-  { name: "04-chuong-3-giai-phap-firmware-hinh-3-8.svg", code: bleObdFlow },
-  { name: "04-chuong-3-giai-phap-firmware-hinh-3-9.svg", code: modemControlFlow },
-  { name: "04-chuong-3-giai-phap-firmware-hinh-3-10.svg", code: powerPathFlow },
-  { name: "04-chuong-3-giai-phap-firmware-hinh-3-11.svg", code: deviceState },
-  { name: "05-chuong-3-giai-phap-backend-hinh-3-14.svg", code: dbErd },
-  { name: "thesis-05-chuong-3-giai-phap-backend-01.svg", code: dataArchitecture },
-  { name: "thesis-05-chuong-3-giai-phap-backend-02.svg", code: backendAlertFlow },
-  { name: "thesis-05-chuong-3-giai-phap-backend-03.svg", code: dataArchitecture },
-  { name: "thesis-05-chuong-3-giai-phap-backend-04.svg", code: dbErd },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-2.svg", code: uartModemWiring },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-3.svg", code: voltageDivider },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-5.svg", code: wiringOverview },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-13.svg", code: prototypeLayout },
-  { name: "thesis-08-chuong-4-trien-khai-firmware-01.svg", code: firmwareImplementationFlow },
-  { name: "thesis-99-bao-cao-thesis-hoan-chinh-04.svg", code: dataArchitecture },
-  { name: "thesis-99-bao-cao-thesis-hoan-chinh-05.svg", code: queryStoreFlow },
-  { name: "thesis-99-bao-cao-thesis-hoan-chinh-06.svg", code: mapLayerBreakdown },
-  { name: "thesis-14-phu-luc-01.svg", code: appendixGantt },
-];
+// All report figures now render from custom SVG generators in generate-thesis-report-figures-v2.mjs.
+// Keep the Mermaid source snippets above as reference only; they are no longer exported for rendering.
+export const mermaidDiagrams = [];

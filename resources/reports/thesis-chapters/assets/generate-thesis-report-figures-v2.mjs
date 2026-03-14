@@ -174,6 +174,46 @@ const component = ({ x, y, w, h, title, body = [], accent = c.navy, fill = c.sur
   `;
 };
 
+const diamond = (x, y, w, h, { fill = c.surface, stroke = c.line, shadow = false, strokeWidth = 3 } = {}) => {
+  const points = [
+    [x + w / 2, y],
+    [x + w, y + h / 2],
+    [x + w / 2, y + h],
+    [x, y + h / 2],
+  ]
+    .map(([px, py]) => `${px},${py}`)
+    .join(" ");
+  return `<polygon points="${points}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" ${shadow ? 'filter="url(#shadow)"' : ""}/>`;
+};
+
+const decision = ({ x, y, w, h, title, accent = c.amber, tag = "" }) => {
+  const textLines = wrapText(title, Math.max(10, Math.floor(w / 12)));
+  const chipWidth = Math.min(Math.max(tag.length * 10 + 24, 92), w - 30);
+  return `
+    ${diamond(x, y, w, h, { fill: mix(accent, 0.1), stroke: mix(accent, 0.42), shadow: false })}
+    ${tag ? chip(x + (w - chipWidth) / 2, y + 12, chipWidth, tag, accent) : ""}
+    ${textBlock(x + w / 2, y + (tag ? 76 : 60), textLines, { cls: "body", anchor: "middle", lineHeight: 24, maxChars: Math.max(10, Math.floor(w / 12)) })}
+  `;
+};
+
+const entityCard = ({ x, y, w, h, title, fields, accent = c.navy, tag = "entity" }) => {
+  const rows = fields.slice(0, Math.floor((h - 92) / 28));
+  return `
+    ${box(x, y, w, h, { fill: c.surface, stroke: mix(accent, 0.24), rx: 24, shadow: false, strokeWidth: 3 })}
+    <rect x="${x}" y="${y}" width="${w}" height="56" rx="24" fill="${mix(accent, 0.14)}" stroke="none"/>
+    ${chip(x + 18, y + 12, Math.min(Math.max(tag.length * 10 + 26, 96), w - 36), tag, accent)}
+    ${textBlock(x + w / 2, y + 92, title, { cls: "card-title", anchor: "middle", maxChars: Math.max(12, Math.floor(w / 12)), lineHeight: 28 })}
+    ${rows
+      .map(
+        (field, index) => `
+          <line x1="${x + 18}" y1="${y + 124 + index * 28}" x2="${x + w - 18}" y2="${y + 124 + index * 28}" stroke="${mix(accent, 0.12)}" stroke-width="2"/>
+          ${textBlock(x + 28, y + 144 + index * 28, field, { cls: "small", maxChars: Math.max(18, Math.floor((w - 56) / 9)), lineHeight: 20 })}
+        `
+      )
+      .join("")}
+  `;
+};
+
 const group = ({ x, y, w, h, title, accent, subtitle = "" }) => `
   ${box(x, y, w, h, { fill: c.surface, stroke: mix(accent, 0.28), rx: 30, shadow: false, strokeWidth: 3 })}
   ${chip(x + 24, y - 18, Math.min(220, Math.max(110, title.length * 12)), title, accent)}
@@ -1205,6 +1245,573 @@ const optimizedArchitectureFigure = (title, subtitle) =>
     `
   );
 
+const bleObdSequenceFigure = (title, subtitle) => {
+  const actors = [
+    { x: 320, label: "ESP32-S3 tracker", accent: c.navy },
+    { x: 1280, label: "vgate iCar Pro", accent: c.teal },
+  ];
+  const message = (y, fromIndex, toIndex, label, accent = c.slate, dashed = false) => `
+    <line x1="${actors[fromIndex].x}" y1="${y}" x2="${actors[toIndex].x}" y2="${y}" stroke="${accent}" stroke-width="4" ${dashed ? 'stroke-dasharray="10 10"' : ""} marker-end="url(#arrow-slate)"/>
+    ${note((actors[fromIndex].x + actors[toIndex].x) / 2 - Math.min(Math.max(label.length * 5, 60), 130), y - 34, label, Math.min(Math.max(label.length * 10, 120), 260), c.surface, mix(accent, 0.22))}
+  `;
+  return svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.teal },
+    `
+      ${box(90, 198, 1420, 724, { fill: c.surface, stroke: mix(c.teal, 0.18), rx: 34, shadow: false })}
+      ${actors
+        .map(
+          (actor) => `
+            ${component({ x: actor.x - 160, y: 238, w: 320, h: 102, title: actor.label, body: [], accent: actor.accent, tag: "actor" })}
+            <line x1="${actor.x}" y1="340" x2="${actor.x}" y2="860" stroke="${mix(actor.accent, 0.6)}" stroke-width="3" stroke-dasharray="12 12"/>
+          `
+        )
+        .join("")}
+      ${message(404, 0, 1, "BLE scan, lọc tên hoặc service UUID", c.navy)}
+      ${message(488, 0, 1, "Connect + GATT discovery", c.navy)}
+      ${message(572, 0, 1, "Khởi tạo ELM327: ATZ, ATE0, ATL0, ATS0, ATSP0", c.navy)}
+      ${group({ x: 228, y: 638, w: 1144, h: 184, title: "Chu kỳ đọc khi IGN ON", accent: c.amber, subtitle: "Thiết bị duy trì kênh BLE, gửi PID động cơ và nhận phản hồi OBD2." })}
+      ${message(726, 0, 1, "010C, 010D, 0105, 012F, AT IGN", c.amber)}
+      ${message(796, 1, 0, "41 0C, 41 0D và dữ liệu phản hồi", c.teal, true)}
+      ${note(146, 848, "Nếu timeout 2-3 lần, fallback sang đo U_batt qua ADC để suy ra IGN.", 452, "#fff7d6", mix(c.amber, 0.32))}
+    `
+  );
+};
+
+const lis3dhI2CFigure = (title, subtitle) => {
+  const leftRows = [
+    { title: "GPIO48 / I2C SCL", noteText: "Bus clock 400 kHz", y: 324, accent: c.navy },
+    { title: "GPIO47 / I2C SDA", noteText: "Địa chỉ 0x18", y: 418, accent: c.navy },
+    { title: "GPIO21 / INT1", noteText: "Wake-up từ deep sleep", y: 512, accent: c.amber },
+    { title: "3.3V rail", noteText: "Nguồn logic", y: 606, accent: c.emerald },
+    { title: "GND", noteText: "Mass chung", y: 700, accent: c.slate },
+  ];
+  const rightRows = [
+    { title: "LIS3DH SCL", y: 324, accent: c.teal },
+    { title: "LIS3DH SDA", y: 418, accent: c.teal },
+    { title: "INT1", y: 512, accent: c.amber },
+    { title: "VDD 3.3V", y: 606, accent: c.emerald },
+    { title: "GND", y: 700, accent: c.slate },
+  ];
+  return svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.teal },
+    `
+      ${group({ x: 94, y: 220, w: 602, h: 612, title: "ESP32-S3", accent: c.navy, subtitle: "Pin mapping bám theo firmware hiện tại và sơ đồ phần cứng thực tế." })}
+      ${group({ x: 904, y: 220, w: 602, h: 612, title: "LIS3DH", accent: c.teal, subtitle: "Cảm biến gia tốc 3 trục dùng cho motion detection khi xe đỗ." })}
+      ${leftRows
+        .map(
+          (row) => `
+            ${softBox(132, row.y, 520, 68, { fill: c.surfaceSoft, stroke: mix(row.accent, 0.18), rx: 20 })}
+            ${textBlock(168, row.y + 30, row.title, { cls: "body", maxChars: 30 })}
+            ${textBlock(168, row.y + 54, row.noteText, { cls: "tiny", maxChars: 42, lineHeight: 18 })}
+          `
+        )
+        .join("")}
+      ${rightRows
+        .map(
+          (row) => `
+            ${softBox(948, row.y, 514, 68, { fill: c.surfaceSoft, stroke: mix(row.accent, 0.18), rx: 20 })}
+            ${textBlock(1205, row.y + 42, row.title, { cls: "body", anchor: "middle", maxChars: 26 })}
+          `
+        )
+        .join("")}
+      ${leftRows
+        .map((row, index) => edge({ x1: 652, y1: row.y + 34, x2: 948, y2: rightRows[index].y + 34, color: row.accent, label: index < 2 ? row.noteText : "", labelX: 724, labelY: row.y - 10, marker: "arrow-slate" }))
+        .join("")}
+      ${note(548, 260, "Pull-up 10 kΩ trên hai net IMU-SCL và IMU-SDA", 500, c.surface, mix(c.teal, 0.24))}
+      ${note(548, 770, "INT2 được chừa lại cho mở rộng về sau và chưa dùng trong firmware hiện tại.", 500, "#fff7d6", mix(c.amber, 0.3))}
+    `
+  );
+};
+
+const firmwareLayersFigureCustom = (title, subtitle) => {
+  const layers = [
+    ["Lớp ứng dụng", ["State machine", "Cảnh báo, geofence, policy"], c.navy, "layer 1"],
+    ["Lớp quản lý nguồn", ["Xác định IGN", "Điều phối power path, charger"], c.amber, "layer 2"],
+    ["Lớp giao tiếp và telemetry", ["BLE OBD2, GNSS, MQTT", "Đóng gói payload JSON"], c.teal, "layer 3"],
+    ["Lớp runtime FreeRTOS", ["Task, queue, timer, event group"], c.violet, "layer 4"],
+    ["Lớp HAL và driver", ["GPIO, UART, I2C, ADC, deep sleep"], c.emerald, "layer 5"],
+    ["Phần cứng", ["ESP32-S3, SIM7600CE-T, LIS3DH, adapter BLE OBD2"], c.slate, "hw"],
+  ];
+  return svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.violet },
+    `
+      ${box(198, 206, 1204, 650, { fill: c.surface, stroke: mix(c.violet, 0.18), rx: 34, shadow: false })}
+      ${layers
+        .map(([layerTitle, body, accent, tag], index) => component({ x: 332, y: 252 + index * 96, w: 936, h: 80, title: layerTitle, body, accent, tag }))
+        .join("")}
+      ${layers
+        .slice(0, -1)
+        .map(([, , accent], index) => edge({ x1: 800, y1: 332 + index * 96, x2: 800, y2: 348 + index * 96, color: accent, marker: "arrow-slate" }))
+        .join("")}
+      ${note(252, 878, "Thiết kế được tổ chức theo hướng tách biệt nghiệp vụ, truyền thông và truy cập phần cứng để dễ kiểm thử và bảo trì.", 1096, c.surfaceSoft, mix(c.violet, 0.18))}
+    `
+  );
+};
+
+const taskInteractionFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.teal },
+    `
+      ${group({ x: 96, y: 224, w: 1408, h: 618, title: "Tương tác giữa các FreeRTOS task", accent: c.teal, subtitle: "Các task thu thập dữ liệu đưa message vào queue trung tâm; power_task điều phối chế độ hoạt động." })}
+      ${component({ x: 614, y: 444, w: 372, h: 150, title: "telemetry_queue", body: ["Hàng đợi gom GPS, OBD2, IMU và trạng thái nguồn trước khi truyền."], accent: c.teal, tag: "queue" })}
+      ${component({ x: 170, y: 314, w: 250, h: 126, title: "ISR + IMU wake-up", body: ["Đánh thức hệ thống từ interrupt và báo sự kiện rung."], accent: c.amber, tag: "event" })}
+      ${component({ x: 170, y: 574, w: 250, h: 136, title: "power_task", body: ["Quyết định driving, parked, heartbeat, alarm và sleep."], accent: c.navy, tag: "core" })}
+      ${component({ x: 500, y: 284, w: 218, h: 126, title: "sensor_task", body: ["ADC, IMU, nguồn"], accent: c.emerald, tag: "producer" })}
+      ${component({ x: 846, y: 284, w: 218, h: 126, title: "gnss_task", body: ["Đọc GNSS từ modem"], accent: c.violet, tag: "producer" })}
+      ${component({ x: 1088, y: 284, w: 230, h: 126, title: "obd_task", body: ["PID OBD2 qua BLE"], accent: c.amber, tag: "producer" })}
+      ${component({ x: 1086, y: 510, w: 236, h: 136, title: "mqtt_task", body: ["Đóng gói và publish lên EMQX"], accent: c.rose, tag: "consumer" })}
+      ${component({ x: 1180, y: 702, w: 232, h: 108, title: "EMQX Broker", body: ["MQTT uplink"], accent: c.rose, tag: "broker" })}
+      ${component({ x: 430, y: 702, w: 260, h: 108, title: "command_task", body: ["Nhận lệnh điều khiển"], accent: c.slate, tag: "control" })}
+      ${edge({ x1: 420, y1: 380, x2: 614, y2: 474, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 718, y1: 348, x2: 718, y2: 444, color: c.emerald, marker: "arrow-slate" })}
+      ${edge({ x1: 956, y1: 410, x2: 930, y2: 444, color: c.violet, marker: "arrow-slate" })}
+      ${edge({ x1: 1088, y1: 380, x2: 986, y2: 474, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 986, y1: 520, x2: 1086, y2: 578, color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 1182, y1: 646, x2: 1296, y2: 702, color: c.rose, marker: "arrow-slate" })}
+      ${edge({ x1: 420, y1: 642, x2: 500, y2: 348, color: c.navy, label: "wake / sleep", labelX: 338, labelY: 480, marker: "arrow-slate" })}
+      ${edge({ x1: 420, y1: 642, x2: 846, y2: 348, color: c.navy, label: "mode switch", labelX: 618, labelY: 408, marker: "arrow-slate" })}
+      ${edge({ x1: 420, y1: 642, x2: 1086, y2: 578, color: c.navy, label: "publish gate", labelX: 742, labelY: 620, marker: "arrow-slate" })}
+      ${edge({ x1: 690, y1: 756, x2: 1086, y2: 578, color: c.slate, label: "command publish", labelX: 842, labelY: 706, marker: "arrow-slate" })}
+    `
+  );
+
+const firmwareMainFlowFigure = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.navy },
+    `
+      ${group({ x: 80, y: 196, w: 1440, h: 724, title: "Luồng hoạt động chính của firmware", accent: c.navy, subtitle: "Firmware khởi tạo ngoại vi, xác định nguồn IGN rồi chuyển giữa driving, parked và alarm." })}
+      ${component({ x: 584, y: 242, w: 432, h: 122, title: "Khởi động firmware và khởi tạo ngoại vi", body: ["IMU, modem, ADC, BLE, queue và các task FreeRTOS"], accent: c.navy, tag: "start" })}
+      ${component({ x: 190, y: 454, w: 286, h: 136, title: "Đọc IGN từ ECU qua BLE OBD2", body: ["Ưu tiên nguồn tín hiệu chuẩn khi adapter OBD2 phản hồi ổn định."], accent: c.teal, tag: "source" })}
+      ${component({ x: 1124, y: 454, w: 286, h: 136, title: "Fallback sang ADC 12V / 24V", body: ["Suy ra trạng thái máy dựa trên profile điện áp cấu hình."], accent: c.amber, tag: "source" })}
+      ${decision({ x: 604, y: 438, w: 392, h: 164, title: "Đọc được IGN từ OBD2?", accent: c.violet, tag: "decision" })}
+      ${component({ x: 570, y: 646, w: 460, h: 118, title: "Hợp nhất kết quả CHECK_IGN", body: ["Chuẩn hóa IGN ON / OFF trước khi chọn mode hoạt động."], accent: c.violet, tag: "check_ign" })}
+      ${decision({ x: 612, y: 804, w: 360, h: 132, title: "IGN ON?", accent: c.emerald, tag: "decision" })}
+      ${component({ x: 142, y: 760, w: 300, h: 140, title: "DRIVING", body: ["BLE OBD2, GNSS và LTE hoạt động đầy đủ để theo dõi liên tục."], accent: c.navy, tag: "mode" })}
+      ${decision({ x: 1080, y: 758, w: 300, h: 146, title: "IMU phát hiện rung?", accent: c.amber, tag: "decision" })}
+      ${component({ x: 960, y: 908, w: 250, h: 84, title: "PARKED", body: ["Heartbeat rồi deep sleep"], accent: c.emerald, tag: "mode" })}
+      ${component({ x: 1260, y: 908, w: 250, h: 84, title: "ALARM", body: ["Wake modem và gửi alert ưu tiên"], accent: c.rose, tag: "mode" })}
+      ${polyEdge({ points: [[800, 364], [800, 438]], color: c.navy, marker: "arrow-slate" })}
+      ${edge({ x1: 604, y1: 520, x2: 476, y2: 522, color: c.teal, label: "Có", labelX: 520, labelY: 482, marker: "arrow-slate" })}
+      ${edge({ x1: 996, y1: 520, x2: 1124, y2: 522, color: c.amber, label: "Không", labelX: 1040, labelY: 482, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[334, 590], [334, 620], [800, 620], [800, 646]], color: c.teal, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1268, 590], [1268, 620], [800, 620], [800, 646]], color: c.amber, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[800, 764], [800, 804]], color: c.violet, marker: "arrow-slate" })}
+      ${edge({ x1: 612, y1: 870, x2: 442, y2: 830, color: c.navy, label: "Có", labelX: 560, labelY: 910, marker: "arrow-slate" })}
+      ${edge({ x1: 972, y1: 870, x2: 1080, y2: 830, color: c.emerald, label: "Không", labelX: 1020, labelY: 914, marker: "arrow-slate" })}
+      ${edge({ x1: 1230, y1: 832, x2: 1086, y2: 950, color: c.emerald, label: "Không", labelX: 1110, labelY: 884, marker: "arrow-slate" })}
+      ${edge({ x1: 1380, y1: 832, x2: 1360, y2: 908, color: c.rose, label: "Có", labelX: 1404, labelY: 876, marker: "arrow-slate" })}
+      ${note(166, 908, "Khi hết chu kỳ driving, firmware quay lại CHECK_IGN để quyết định tiếp.", 470, c.surfaceSoft, mix(c.navy, 0.18))}
+    `
+  );
+
+const bleObdFlowFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.teal },
+    `
+      ${group({ x: 92, y: 204, w: 1416, h: 708, title: "Thuật toán kết nối và đọc dữ liệu BLE OBD2", accent: c.teal, subtitle: "Bám theo chiến lược reconnect nhanh, scan khi cần và fallback ADC nếu OBD2 mất phản hồi." })}
+      ${component({ x: 580, y: 248, w: 440, h: 118, title: "Khởi động module BLE OBD2", body: ["Load MAC đã lưu, chuẩn bị stack BLE và bộ lệnh ELM327"], accent: c.teal, tag: "start" })}
+      ${decision({ x: 616, y: 398, w: 368, h: 140, title: "Đã lưu địa chỉ BLE của adapter?", accent: c.violet, tag: "decision" })}
+      ${component({ x: 182, y: 590, w: 320, h: 138, title: "Reconnect nhanh tới vgate iCar Pro", body: ["Dùng MAC trong NVS để giảm thời gian ghép nối."], accent: c.navy, tag: "path A" })}
+      ${component({ x: 1098, y: 560, w: 320, h: 168, title: "Scan BLE và chọn adapter phù hợp", body: ["Lọc theo tên hoặc service UUID, sau đó lưu MAC vào NVS cho các lần sau."], accent: c.amber, tag: "path B" })}
+      ${component({ x: 572, y: 602, w: 456, h: 118, title: "GATT discovery và khởi tạo ELM327", body: ["Tìm TX / RX characteristic, gửi ATZ, ATE0, ATL0, ATS0, ATSP0"], accent: c.teal, tag: "setup" })}
+      ${decision({ x: 616, y: 760, w: 368, h: 132, title: "Đang ở chế độ lái xe?", accent: c.emerald, tag: "decision" })}
+      ${component({ x: 120, y: 788, w: 350, h: 150, title: "Gửi PID và parse phản hồi", body: ["010C, 010D, 0105, 012F, AT IGN", "Đưa telemetry vào queue"], accent: c.navy, tag: "loop" })}
+      ${decision({ x: 494, y: 792, w: 250, h: 144, title: "Timeout 2-3 lần?", accent: c.amber, tag: "decision" })}
+      ${component({ x: 782, y: 810, w: 326, h: 126, title: "Fallback xác định IGN bằng ADC", body: ["Duy trì nhận biết trạng thái động cơ khi OBD2 không ổn định."], accent: c.amber, tag: "fallback" })}
+      ${component({ x: 1192, y: 794, w: 260, h: 142, title: "Ngắt BLE và deep sleep", body: ["Giải phóng kết nối khi thiết bị chuyển sang parked."], accent: c.emerald, tag: "sleep" })}
+      ${polyEdge({ points: [[800, 366], [800, 398]], color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 616, y1: 468, x2: 502, y2: 658, color: c.navy, label: "Có", labelX: 542, labelY: 520, marker: "arrow-slate" })}
+      ${edge({ x1: 984, y1: 468, x2: 1098, y2: 644, color: c.amber, label: "Không", labelX: 1048, labelY: 540, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[342, 728], [342, 748], [800, 748], [800, 602]], color: c.navy, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1258, 728], [1258, 748], [1028, 748], [1028, 662]], color: c.amber, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[800, 720], [800, 760]], color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 616, y1: 826, x2: 470, y2: 862, color: c.navy, label: "Có", labelX: 568, labelY: 882, marker: "arrow-slate" })}
+      ${edge({ x1: 984, y1: 826, x2: 1192, y2: 862, color: c.emerald, label: "Không", labelX: 1092, labelY: 882, marker: "arrow-slate" })}
+      ${edge({ x1: 470, y1: 870, x2: 494, y2: 864, color: c.navy, marker: "arrow-slate" })}
+      ${edge({ x1: 744, y1: 864, x2: 782, y2: 872, color: c.amber, label: "Có", labelX: 754, labelY: 818, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[470, 920], [470, 956], [800, 956], [800, 892]], color: c.teal, label: "Không, tiếp tục vòng lặp", labelX: 600, labelY: 960, marker: "arrow-slate" })}
+    `
+  );
+
+const modemControlFlowFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.amber },
+    `
+      ${group({ x: 94, y: 210, w: 1412, h: 700, title: "Thuật toán điều khiển modem theo chế độ hoạt động", accent: c.amber, subtitle: "Firmware kiểm tra phản hồi AT, trạng thái mạng rồi chọn cấu hình modem phù hợp với driving, heartbeat hoặc parked." })}
+      ${component({ x: 544, y: 246, w: 512, h: 118, title: "Wake modem hoặc cold start", body: ["AT -> CPIN -> CEREG -> CSQ", "Kiểm tra sẵn sàng của SIM và đăng ký mạng"], accent: c.amber, tag: "start" })}
+      ${decision({ x: 618, y: 404, w: 364, h: 132, title: "Modem phản hồi?", accent: c.rose, tag: "decision" })}
+      ${component({ x: 180, y: 562, w: 320, h: 140, title: "Reset PWRKEY và đợi 10-30 giây", body: ["Lặp lại chuỗi AT sau khi modem hồi phục."], accent: c.rose, tag: "recovery" })}
+      ${decision({ x: 618, y: 572, w: 364, h: 132, title: "Đã đăng ký mạng?", accent: c.violet, tag: "decision" })}
+      ${component({ x: 184, y: 742, w: 316, h: 126, title: "Đợi và retry CEREG / CPIN", body: ["Tiếp tục vòng polling cho đến khi có sóng."], accent: c.violet, tag: "retry" })}
+      ${decision({ x: 616, y: 760, w: 368, h: 136, title: "Chế độ hoạt động hiện tại?", accent: c.teal, tag: "mode" })}
+      ${component({ x: 1088, y: 542, w: 330, h: 148, title: "DRIVING", body: ["Giữ LTE active", "Bật GNSS, đọc CGNSINF / CGNSTST", "Publish telemetry MQTT"], accent: c.navy, tag: "mode" })}
+      ${component({ x: 1062, y: 724, w: 356, h: 126, title: "HEARTBEAT", body: ["Bật LTE, gửi heartbeat rồi tắt PDP trước khi ngủ"], accent: c.emerald, tag: "mode" })}
+      ${component({ x: 1052, y: 872, w: 376, h: 94, title: "PARKED / SLEEP PREP", body: ["AT+CGACT=0,1 hoặc AT+CFUN=4, sau đó AT+CSCLK=1"], accent: c.slate, tag: "mode" })}
+      ${polyEdge({ points: [[800, 364], [800, 404]], color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 618, y1: 470, x2: 500, y2: 622, color: c.rose, label: "Không", labelX: 566, labelY: 528, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[340, 702], [340, 724], [618, 724], [618, 470]], color: c.rose, marker: "arrow-slate" })}
+      ${edge({ x1: 982, y1: 470, x2: 982, y2: 572, color: c.amber, label: "Có", labelX: 1002, labelY: 520, marker: "arrow-slate" })}
+      ${edge({ x1: 618, y1: 638, x2: 500, y2: 794, color: c.violet, label: "Chưa", labelX: 566, labelY: 694, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[342, 868], [342, 896], [800, 896], [800, 704]], color: c.violet, marker: "arrow-slate" })}
+      ${edge({ x1: 982, y1: 638, x2: 982, y2: 760, color: c.teal, label: "Rồi", labelX: 1004, labelY: 690, marker: "arrow-slate" })}
+      ${edge({ x1: 984, y1: 806, x2: 1088, y2: 616, color: c.navy, label: "Lái xe", labelX: 1028, labelY: 716, marker: "arrow-slate" })}
+      ${edge({ x1: 984, y1: 828, x2: 1062, y2: 786, color: c.emerald, label: "Heartbeat", labelX: 1034, labelY: 840, marker: "arrow-slate" })}
+      ${edge({ x1: 984, y1: 856, x2: 1052, y2: 918, color: c.slate, label: "Đỗ xe", labelX: 1018, labelY: 916, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1244, 690], [1244, 872]], color: c.amber, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1240, 850], [1240, 872]], color: c.emerald, marker: "arrow-slate" })}
+    `
+  );
+
+const powerPathFlowFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.emerald },
+    `
+      ${group({ x: 94, y: 210, w: 1412, h: 700, title: "Thuật toán điều khiển power path", accent: c.emerald, subtitle: "Firmware cân bằng giữa bus chính MP2482 và bus backup SX1308 dựa trên IGN, ADC và cờ LVD." })}
+      ${component({ x: 520, y: 250, w: 560, h: 110, title: "Đọc U_batt, IGN và cờ LVD_STATUS", body: ["ADC GPIO4 kết hợp LM393 để ra quyết định chuyển nguồn."], accent: c.emerald, tag: "sense" })}
+      ${decision({ x: 610, y: 398, w: 380, h: 136, title: "IGN ON?", accent: c.navy, tag: "decision" })}
+      ${component({ x: 170, y: 578, w: 340, h: 152, title: "Ưu tiên nhánh chính MP2482", body: ["GPIO18 = LOW", "GPIO5 = HIGH để cho phép sạc TP4056"], accent: c.navy, tag: "main" })}
+      ${decision({ x: 608, y: 576, w: 384, h: 140, title: "U_batt <= Switch_OFF?", accent: c.rose, tag: "decision" })}
+      ${component({ x: 1090, y: 562, w: 330, h: 176, title: "Chuyển sang nhánh backup SX1308", body: ["GPIO18 = HIGH", "GPIO5 = LOW để bảo vệ ắc quy", "Set low battery / alert nếu cần"], accent: c.rose, tag: "backup" })}
+      ${decision({ x: 604, y: 774, w: 392, h: 132, title: "U_batt >= Switch_ON?", accent: c.violet, tag: "decision" })}
+      ${component({ x: 168, y: 796, w: 344, h: 124, title: "Quay lại nhánh chính", body: ["GPIO18 = LOW", "GPIO5 = LOW nếu đang parking"], accent: c.violet, tag: "recover" })}
+      ${component({ x: 1094, y: 794, w: 324, h: 126, title: "Giữ trạng thái trước đó", body: ["Tránh rung nguồn khi điện áp nằm trong vùng hysteresis."], accent: c.slate, tag: "hold" })}
+      ${component({ x: 582, y: 922, w: 436, h: 70, title: "Delay 5 giây rồi lặp", body: [], accent: c.emerald, tag: "loop" })}
+      ${polyEdge({ points: [[800, 360], [800, 398]], color: c.emerald, marker: "arrow-slate" })}
+      ${edge({ x1: 610, y1: 466, x2: 510, y2: 652, color: c.navy, label: "Có", labelX: 564, labelY: 530, marker: "arrow-slate" })}
+      ${edge({ x1: 990, y1: 466, x2: 990, y2: 576, color: c.emerald, label: "Không", labelX: 1010, labelY: 522, marker: "arrow-slate" })}
+      ${edge({ x1: 992, y1: 648, x2: 1090, y2: 650, color: c.rose, label: "Có", labelX: 1034, labelY: 608, marker: "arrow-slate" })}
+      ${edge({ x1: 608, y1: 648, x2: 608, y2: 774, color: c.violet, label: "Không", labelX: 562, labelY: 718, marker: "arrow-slate" })}
+      ${edge({ x1: 604, y1: 840, x2: 512, y2: 858, color: c.violet, label: "Có", labelX: 560, labelY: 884, marker: "arrow-slate" })}
+      ${edge({ x1: 996, y1: 840, x2: 1094, y2: 858, color: c.slate, label: "Không", labelX: 1040, labelY: 884, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[340, 920], [340, 956], [800, 956], [800, 922]], color: c.emerald, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1258, 920], [1258, 956], [800, 956], [800, 922]], color: c.emerald, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[340, 730], [340, 756], [800, 756], [800, 922]], color: c.navy, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1256, 738], [1256, 760], [800, 760], [800, 922]], color: c.rose, marker: "arrow-slate" })}
+    `
+  );
+
+const deviceStateMachineFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.violet },
+    `
+      ${group({ x: 88, y: 210, w: 1424, h: 706, title: "Máy trạng thái của thiết bị theo dõi", accent: c.violet, subtitle: "Bảy trạng thái chính điều phối toàn bộ hành vi firmware từ lúc khởi tạo cho tới deep sleep." })}
+      ${component({ x: 640, y: 256, w: 320, h: 106, title: "INIT", body: ["Khởi tạo ngoại vi"], accent: c.navy, tag: "state" })}
+      ${component({ x: 640, y: 412, w: 320, h: 118, title: "CHECK_IGN", body: ["Ưu tiên OBD2, fallback ADC"], accent: c.violet, tag: "state" })}
+      ${component({ x: 154, y: 620, w: 316, h: 118, title: "DRIVING", body: ["Theo dõi liên tục, publish telemetry"], accent: c.navy, tag: "state" })}
+      ${component({ x: 642, y: 620, w: 316, h: 118, title: "PARKED", body: ["Ngắt BLE, chờ heartbeat hoặc motion"], accent: c.emerald, tag: "state" })}
+      ${component({ x: 1130, y: 620, w: 316, h: 118, title: "ALARM", body: ["Wake modem, gửi motion alert"], accent: c.rose, tag: "state" })}
+      ${component({ x: 430, y: 804, w: 316, h: 114, title: "HEARTBEAT", body: ["Gửi heartbeat định kỳ"], accent: c.teal, tag: "state" })}
+      ${component({ x: 860, y: 804, w: 316, h: 114, title: "SLEEP", body: ["Deep sleep, chờ timer hoặc IMU"], accent: c.slate, tag: "state" })}
+      ${edge({ x1: 800, y1: 362, x2: 800, y2: 412, color: c.violet, label: "Khởi tạo hoàn tất", labelX: 900, labelY: 390, marker: "arrow-slate" })}
+      ${edge({ x1: 640, y1: 488, x2: 470, y2: 654, color: c.navy, label: "IGN = ON", labelX: 560, labelY: 540, marker: "arrow-slate" })}
+      ${edge({ x1: 800, y1: 530, x2: 800, y2: 620, color: c.emerald, label: "IGN = OFF", labelX: 880, labelY: 566, marker: "arrow-slate" })}
+      ${edge({ x1: 470, y1: 680, x2: 642, y2: 680, color: c.emerald, label: "Phát hiện IGN OFF", labelX: 520, labelY: 638, marker: "arrow-slate" })}
+      ${edge({ x1: 958, y1: 680, x2: 1130, y2: 680, color: c.rose, label: "IMU interrupt", labelX: 1016, labelY: 626, marker: "arrow-slate" })}
+      ${edge({ x1: 760, y1: 738, x2: 588, y2: 804, color: c.teal, label: "Timer wake-up", labelX: 638, labelY: 766, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1288, 620], [1288, 540], [640, 540], [470, 620]], color: c.navy, label: "IGN = ON", labelX: 1186, labelY: 522, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1130, 700], [1058, 700], [1058, 680], [958, 680]], color: c.emerald, label: "Motion dừng, IGN OFF", labelX: 1046, labelY: 738, marker: "arrow-slate" })}
+      ${edge({ x1: 746, y1: 860, x2: 860, y2: 860, color: c.teal, label: "Gửi xong", labelX: 760, labelY: 824, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1176, 860], [1320, 860], [1320, 470], [960, 470]], color: c.slate, marker: "arrow-slate" })}
+      ${note(1228, 654, "Timer hoặc IMU interrupt", 232, c.surface, mix(c.slate, 0.24))}
+    `
+  );
+
+const backendAlertFlowFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.rose },
+    `
+      ${group({ x: 90, y: 220, w: 280, h: 560, title: "Nguồn sự kiện", accent: c.navy, subtitle: "EMQX tiếp nhận telemetry và các event cảnh báo thô." })}
+      ${group({ x: 410, y: 220, w: 360, h: 560, title: "MQTT Bridge", accent: c.teal, subtitle: "Validate, enrich và quyết định tuyến xử lý." })}
+      ${group({ x: 810, y: 220, w: 700, h: 560, title: "Đích xử lý", accent: c.rose, subtitle: "Lưu log, ghi alert nghiệp vụ và đẩy realtime ra dashboard." })}
+      ${component({ x: 118, y: 342, w: 224, h: 132, title: "EMQX Rules Engine", body: ["motion, speed, low_battery, offline"], accent: c.navy, tag: "broker" })}
+      ${component({ x: 118, y: 548, w: 224, h: 132, title: "Payload sự kiện", body: ["device_id, severity, vị trí, timestamp"], accent: c.navy, tag: "payload" })}
+      ${component({ x: 446, y: 300, w: 288, h: 122, title: "1. Parse và phân loại", body: ["Nhận message, xác định loại alert và context liên quan"], accent: c.teal, tag: "step" })}
+      ${component({ x: 446, y: 468, w: 288, h: 122, title: "2. Validate + enrich", body: ["Chuẩn hóa schema, gắn vehicle_id, geofence hoặc mức ưu tiên"], accent: c.teal, tag: "step" })}
+      ${component({ x: 446, y: 636, w: 288, h: 122, title: "3. Fan-out", body: ["Song song ghi log, alert nghiệp vụ và Socket.IO"], accent: c.teal, tag: "step" })}
+      ${component({ x: 858, y: 312, w: 180, h: 118, title: "VictoriaLogs", body: ["Audit, debug, truy vết"], accent: c.rose, tag: "logs" })}
+      ${component({ x: 1070, y: 312, w: 196, h: 118, title: "PostgreSQL", body: ["Alerts, trạng thái xử lý"], accent: c.rose, tag: "sql" })}
+      ${component({ x: 1298, y: 312, w: 164, h: 118, title: "Socket.IO", body: ["Kênh realtime"], accent: c.amber, tag: "push" })}
+      ${component({ x: 1018, y: 562, w: 320, h: 156, title: "Dashboard Web", body: ["Toast, badge, lịch sử alert và luồng xử lý theo thời gian thực"], accent: c.amber, tag: "ui" })}
+      ${edge({ x1: 342, y1: 408, x2: 446, y2: 360, color: c.navy, marker: "arrow-slate" })}
+      ${edge({ x1: 590, y1: 422, x2: 590, y2: 468, color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 590, y1: 590, x2: 590, y2: 636, color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 734, y1: 682, x2: 858, y2: 370, color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 734, y1: 696, x2: 1070, y2: 370, color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 734, y1: 710, x2: 1298, y2: 370, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 1380, y1: 430, x2: 1224, y2: 562, color: c.amber, label: "push alert", labelX: 1334, labelY: 506, marker: "arrow-slate" })}
+    `
+  );
+
+const dbErdFigureCustom = (title, subtitle) => {
+  const relations = [
+    { from: [284, 380], to: [640, 380], label: "1 - N", color: c.navy, x: 436, y: 338 },
+    { from: [916, 380], to: [1116, 380], label: "1 - 1", color: c.violet, x: 1006, y: 338 },
+    { from: [800, 498], to: [800, 600], label: "1 - N", color: c.teal, x: 840, y: 544 },
+    { from: [284, 704], to: [640, 704], label: "1 - N", color: c.rose, x: 434, y: 664 },
+    { from: [960, 704], to: [1320, 704], label: "N - N", color: c.amber, x: 1126, y: 664 },
+    { from: [1200, 492], to: [1200, 600], label: "1 - N", color: c.slate, x: 1242, y: 548 },
+  ];
+  return svgDoc(
+    1600,
+    1080,
+    { title, subtitle, accent: c.violet },
+    `
+      ${entityCard({ x: 110, y: 248, w: 250, h: 190, title: "USERS", fields: ["PK id", "email", "role"], accent: c.navy })}
+      ${entityCard({ x: 470, y: 248, w: 330, h: 250, title: "VEHICLES", fields: ["PK id", "license_plate", "status", "FK owner_id -> USERS"], accent: c.teal })}
+      ${entityCard({ x: 860, y: 248, w: 250, h: 190, title: "DEVICES", fields: ["PK id", "serial", "modem_imei", "FK vehicle_id -> VEHICLES"], accent: c.violet })}
+      ${entityCard({ x: 1120, y: 248, w: 314, h: 190, title: "DEVICE_CONFIGURATIONS", fields: ["PK/FK device_id", "power_profile", "mqtt_topic"], accent: c.amber })}
+      ${entityCard({ x: 470, y: 566, w: 330, h: 220, title: "TRIPS", fields: ["PK id", "FK vehicle_id -> VEHICLES", "start_time", "end_time"], accent: c.teal })}
+      ${entityCard({ x: 820, y: 566, w: 280, h: 190, title: "TRIP_EVENTS", fields: ["PK id", "FK trip_id -> TRIPS", "event_type"], accent: c.navy })}
+      ${entityCard({ x: 110, y: 566, w: 250, h: 190, title: "ALERTS", fields: ["PK id", "FK vehicle_id -> VEHICLES", "severity"], accent: c.rose })}
+      ${entityCard({ x: 1120, y: 566, w: 320, h: 190, title: "GEOFENCES", fields: ["PK id", "name", "geometry"], accent: c.amber })}
+      ${entityCard({ x: 1210, y: 810, w: 230, h: 164, title: "COMMANDS", fields: ["PK id", "FK device_id -> DEVICES", "command_type"], accent: c.slate })}
+      ${relations.map((relation) => edge({ x1: relation.from[0], y1: relation.from[1], x2: relation.to[0], y2: relation.to[1], color: relation.color, label: relation.label, labelX: relation.x, labelY: relation.y, marker: "arrow-slate" })).join("")}
+      ${note(108, 820, "ERD được rút gọn theo các bảng cốt lõi dùng trong hệ thống hiện tại; các bảng phase 2 chưa được đưa vào để giữ sơ đồ dễ đọc.", 920, c.surfaceSoft, mix(c.violet, 0.18))}
+    `
+  );
+};
+
+const uartModemFigureCustom = (title, subtitle) => {
+  const leftPins = [
+    ["GPIO16", "UART1 TX", 338, c.navy],
+    ["GPIO17", "UART1 RX", 434, c.navy],
+    ["GPIO26", "PWRKEY", 530, c.amber],
+    ["RTS / CTS", "dự phòng", 626, c.slate],
+  ];
+  const rightPins = [
+    ["SIMCOM-RX", 338, c.teal],
+    ["SIMCOM-TX", 434, c.teal],
+    ["SIMCOM-PWRKEY", 530, c.amber],
+    ["RTS / CTS", 626, c.slate],
+  ];
+  return svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.teal },
+    `
+      ${group({ x: 106, y: 230, w: 560, h: 560, title: "ESP32-S3", accent: c.navy, subtitle: "UART1 và các chân điều khiển modem được chốt đúng với pin_map.h." })}
+      ${group({ x: 934, y: 230, w: 560, h: 560, title: "SIM7600CE-T", accent: c.teal, subtitle: "Modem 4G/GNSS dùng UART1 và PWRKEY riêng, cấp nguồn từ rail khoảng 4V." })}
+      ${leftPins
+        .map(
+          ([pin, label, y, accent]) => `
+            ${softBox(146, y, 476, 68, { fill: c.surfaceSoft, stroke: mix(accent, 0.2), rx: 20 })}
+            ${textBlock(178, y + 28, pin, { cls: "body", maxChars: 16 })}
+            ${textBlock(178, y + 52, label, { cls: "tiny", maxChars: 28 })}
+          `
+        )
+        .join("")}
+      ${rightPins
+        .map(
+          ([label, y, accent]) => `
+            ${softBox(978, y, 470, 68, { fill: c.surfaceSoft, stroke: mix(accent, 0.2), rx: 20 })}
+            ${textBlock(1213, y + 42, label, { cls: "body", anchor: "middle", maxChars: 24 })}
+          `
+        )
+        .join("")}
+      ${edge({ x1: 622, y1: 372, x2: 978, y2: 372, color: c.navy, label: "TX -> RX", labelX: 742, labelY: 334, marker: "arrow-slate" })}
+      ${edge({ x1: 978, y1: 468, x2: 622, y2: 468, color: c.teal, label: "RX <- TX", labelX: 852, labelY: 430, marker: "arrow-slate" })}
+      ${edge({ x1: 622, y1: 564, x2: 978, y2: 564, color: c.amber, label: "GPIO26 điều khiển PWRKEY", labelX: 732, labelY: 526, marker: "arrow-slate" })}
+      ${edge({ x1: 622, y1: 660, x2: 978, y2: 660, color: c.slate, dashed: true, label: "Đường RTS / CTS để mở rộng", labelX: 736, labelY: 708, marker: "arrow-slate" })}
+      ${component({ x: 1168, y: 806, w: 240, h: 116, title: "Rail modem ~4V", body: ["TPS54231 cấp nguồn VBAT cho modem"], accent: c.emerald, tag: "power" })}
+      ${edge({ x1: 1288, y1: 806, x2: 1288, y2: 702, color: c.emerald, marker: "arrow-slate" })}
+    `
+  );
+};
+
+const voltageDividerFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.amber },
+    `
+      ${group({ x: 96, y: 236, w: 1408, h: 600, title: "Mạch chia áp đo điện áp ắc quy", accent: c.amber, subtitle: "Chuỗi phần cứng chuẩn hóa cho cả hệ 12V và 24V, đưa điện áp về dải ADC1 của ESP32-S3." })}
+      ${component({ x: 126, y: 422, w: 260, h: 156, title: "Ắc quy xe", body: ["12V hoặc 24V danh định"], accent: c.rose, tag: "input" })}
+      ${component({ x: 464, y: 402, w: 240, h: 196, title: "R1 = 100 kΩ", body: ["Điện trở nhánh trên", "Giảm áp để bảo vệ ADC"], accent: c.amber, tag: "resistor" })}
+      ${component({ x: 792, y: 404, w: 304, h: 192, title: "Nút chia áp", body: ["V_adc = U_batt x 0.0909", "Tín hiệu analog trước khi vào ADC"], accent: c.teal, tag: "sense" })}
+      ${component({ x: 1182, y: 410, w: 250, h: 180, title: "GPIO4 / ADC1", body: ["ESP32-S3 đọc điện áp và suy ra IGN, LVD theo profile"], accent: c.navy, tag: "adc" })}
+      ${component({ x: 792, y: 666, w: 304, h: 110, title: "R2 = 10 kΩ xuống GND", body: ["Hoàn tất bộ chia áp"], accent: c.slate, tag: "resistor" })}
+      ${edge({ x1: 386, y1: 500, x2: 464, y2: 500, color: c.rose, marker: "arrow-slate" })}
+      ${edge({ x1: 704, y1: 500, x2: 792, y2: 500, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 1096, y1: 500, x2: 1182, y2: 500, color: c.teal, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[944, 596], [944, 666]], color: c.slate, marker: "arrow-slate" })}
+      ${textBlock(946, 650, "GND", { cls: "small", anchor: "middle" })}
+      ${note(310, 820, "Firmware dùng cùng bộ chia áp cho cả hai profile 12V và 24V; các ngưỡng Switch_OFF, Switch_ON, IGN_ON và IGN_OFF được hiệu chỉnh trong cấu hình.", 980, c.surfaceSoft, mix(c.amber, 0.18))}
+    `
+  );
+
+const wiringOverviewFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.navy },
+    `
+      ${group({ x: 76, y: 214, w: 1448, h: 704, title: "Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các module ngoại vi", accent: c.navy, subtitle: "Pin mapping được chuẩn hóa theo firmware hiện tại: GPIO47/48 cho I2C, GPIO26 cho PWRKEY, GPIO19 nhận LVD_STATUS và GPIO4 đo U_batt." })}
+      ${component({ x: 610, y: 452, w: 380, h: 150, title: "ESP32-S3 DevKitC", body: ["Trung tâm điều phối tracker, quản lý power path, BLE OBD2, modem và cảm biến."], accent: c.navy, tag: "mcu" })}
+      ${component({ x: 154, y: 316, w: 274, h: 140, title: "Voltage divider", body: ["GPIO4 / ADC", "Đo U_batt"], accent: c.amber, tag: "adc" })}
+      ${component({ x: 148, y: 608, w: 286, h: 160, title: "GPIO điều khiển nguồn", body: ["GPIO5 CHARGER_EN", "GPIO18 POWER_PATH_EN", "GPIO19 LVD_STATUS"], accent: c.rose, tag: "power" })}
+      ${component({ x: 1134, y: 286, w: 284, h: 176, title: "SIM7600CE-T", body: ["UART1 GPIO16 / GPIO17", "PWRKEY GPIO26", "Rail modem ~4V"], accent: c.teal, tag: "modem" })}
+      ${component({ x: 1134, y: 500, w: 284, h: 154, title: "LIS3DH", body: ["I2C GPIO47 / GPIO48", "INT1 GPIO21"], accent: c.emerald, tag: "imu" })}
+      ${component({ x: 1134, y: 706, w: 284, h: 134, title: "vgate iCar Pro", body: ["BLE OBD-II", "Nguồn từ cổng OBD2"], accent: c.violet, tag: "obd2" })}
+      ${component({ x: 592, y: 720, w: 416, h: 118, title: "State machine / log / MQTT", body: ["Lớp runtime và telemetry dùng chung các ngoại vi trên."], accent: c.slate, tag: "runtime" })}
+      ${edge({ x1: 428, y1: 386, x2: 610, y2: 500, color: c.amber, label: "GPIO4 / ADC", labelX: 484, labelY: 418, marker: "arrow-slate" })}
+      ${edge({ x1: 434, y1: 688, x2: 610, y2: 560, color: c.rose, label: "GPIO5, 18, 19", labelX: 492, labelY: 646, marker: "arrow-slate" })}
+      ${edge({ x1: 990, y1: 500, x2: 1134, y2: 374, color: c.teal, label: "UART1 + PWRKEY", labelX: 1054, labelY: 414, marker: "arrow-slate" })}
+      ${edge({ x1: 990, y1: 544, x2: 1134, y2: 576, color: c.emerald, label: "I2C + INT1", labelX: 1054, labelY: 548, marker: "arrow-slate" })}
+      ${edge({ x1: 990, y1: 580, x2: 1134, y2: 772, color: c.violet, label: "BLE link", labelX: 1056, labelY: 668, marker: "arrow-slate" })}
+      ${edge({ x1: 800, y1: 602, x2: 800, y2: 720, color: c.slate, marker: "arrow-slate" })}
+    `
+  );
+
+const prototypeLayoutFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.teal },
+    `
+      ${group({ x: 110, y: 214, w: 1380, h: 700, title: "Bố trí module sau khi lắp ráp", accent: c.teal, subtitle: "Mô tả lại cách xếp các module trên prototype thực tế để giữ tách biệt RF, nguồn xung và các đầu nối kiểm thử." })}
+      ${softBox(180, 296, 1240, 540, { fill: "#fbfdff", stroke: mix(c.teal, 0.12), rx: 34 })}
+      ${component({ x: 246, y: 332, w: 300, h: 146, title: "ESP32-S3 DevKitC", body: ["Khối điều khiển trung tâm"], accent: c.navy, tag: "controller" })}
+      ${component({ x: 640, y: 316, w: 338, h: 176, title: "SIM7600CE-T + anten", body: ["Tách khỏi nguồn xung để giảm nhiễu", "Gần mép hộp cho đường anten ngắn"], accent: c.teal, tag: "rf" })}
+      ${component({ x: 1080, y: 336, w: 248, h: 140, title: "Header UART / USB", body: ["Điểm debug và nạp firmware"], accent: c.slate, tag: "debug" })}
+      ${component({ x: 234, y: 574, w: 300, h: 160, title: "MP2482 / XL1509", body: ["Nguồn chính 5V và 3.3V"], accent: c.amber, tag: "main power" })}
+      ${component({ x: 610, y: 586, w: 228, h: 148, title: "TP4056 + BMS", body: ["Nhánh sạc pin"], accent: c.rose, tag: "charger" })}
+      ${component({ x: 900, y: 586, w: 226, h: 148, title: "SX1308 + diode-OR", body: ["Nhánh backup 5V"], accent: c.violet, tag: "backup" })}
+      ${component({ x: 1176, y: 580, w: 192, h: 156, title: "Pin 21700", body: ["Nguồn dự phòng"], accent: c.emerald, tag: "cell" })}
+      ${component({ x: 610, y: 760, w: 370, h: 86, title: "Các đầu nối: nguồn vào 12V/24V, I2C/IMU, LTE/GNSS", body: [], accent: c.slate, tag: "io" })}
+      ${edge({ x1: 546, y1: 404, x2: 640, y2: 404, color: c.navy, marker: "arrow-slate" })}
+      ${edge({ x1: 978, y1: 404, x2: 1080, y2: 404, color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 390, y1: 478, x2: 390, y2: 574, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 734, y1: 492, x2: 724, y2: 586, color: c.rose, marker: "arrow-slate" })}
+      ${edge({ x1: 978, y1: 492, x2: 1014, y2: 586, color: c.violet, marker: "arrow-slate" })}
+      ${edge({ x1: 1126, y1: 660, x2: 1176, y2: 658, color: c.emerald, marker: "arrow-slate" })}
+    `
+  );
+
+const firmwareImplementationFlowFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.violet },
+    `
+      ${group({ x: 90, y: 214, w: 1420, h: 700, title: "Lưu đồ thuật toán chính của firmware", accent: c.violet, subtitle: "Biểu diễn bám theo mã trạng thái STATE_INIT -> STATE_CHECK_IGN -> các mode vận hành -> STATE_SLEEP." })}
+      ${component({ x: 150, y: 310, w: 278, h: 126, title: "STATE_INIT", body: ["Khởi tạo driver", "Load cấu hình từ flash"], accent: c.navy, tag: "state" })}
+      ${component({ x: 500, y: 310, w: 324, h: 126, title: "STATE_CHECK_IGN", body: ["Ưu tiên OBD2, fallback ADC"], accent: c.violet, tag: "state" })}
+      ${decision({ x: 900, y: 304, w: 286, h: 140, title: "IGN ON?", accent: c.emerald, tag: "decision" })}
+      ${component({ x: 1230, y: 242, w: 228, h: 136, title: "STATE_DRIVING", body: ["OBD2 + GNSS + MQTT"], accent: c.navy, tag: "state" })}
+      ${component({ x: 164, y: 610, w: 286, h: 126, title: "STATE_PARKED", body: ["Ngắt BLE, chờ timer hoặc IMU"], accent: c.emerald, tag: "state" })}
+      ${decision({ x: 512, y: 600, w: 286, h: 140, title: "Motion detected?", accent: c.amber, tag: "decision" })}
+      ${component({ x: 884, y: 608, w: 250, h: 126, title: "STATE_ALERT", body: ["Wake modem, gửi motion alert"], accent: c.rose, tag: "state" })}
+      ${component({ x: 1210, y: 608, w: 250, h: 126, title: "STATE_HEARTBEAT", body: ["Gửi heartbeat định kỳ"], accent: c.teal, tag: "state" })}
+      ${component({ x: 692, y: 812, w: 286, h: 110, title: "STATE_SLEEP", body: ["Deep sleep theo policy"], accent: c.slate, tag: "state" })}
+      ${edge({ x1: 428, y1: 372, x2: 500, y2: 372, color: c.navy, marker: "arrow-slate" })}
+      ${edge({ x1: 824, y1: 372, x2: 900, y2: 372, color: c.violet, marker: "arrow-slate" })}
+      ${edge({ x1: 1186, y1: 372, x2: 1230, y2: 310, color: c.navy, label: "Có", labelX: 1200, labelY: 326, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1042, 444], [1042, 520], [306, 520], [306, 610]], color: c.emerald, label: "Không", labelX: 1080, labelY: 488, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1344, 378], [1344, 560], [306, 560], [306, 610]], color: c.emerald, label: "IGN OFF", labelX: 1196, labelY: 526, marker: "arrow-slate" })}
+      ${edge({ x1: 450, y1: 674, x2: 512, y2: 670, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 798, y1: 670, x2: 884, y2: 670, color: c.rose, label: "Có", labelX: 812, labelY: 628, marker: "arrow-slate" })}
+      ${edge({ x1: 798, y1: 694, x2: 1210, y2: 670, color: c.teal, label: "Không / timer wake-up", labelX: 972, labelY: 742, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1008, 734], [1008, 572], [450, 572], [450, 674]], color: c.rose, marker: "arrow-slate" })}
+      ${note(674, 540, "Alert xong -> PARKED", 216, c.surface, mix(c.rose, 0.24))}
+      ${edge({ x1: 1210, y1: 734, x2: 978, y2: 866, color: c.teal, label: "Gửi xong", labelX: 1120, labelY: 786, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[692, 866], [600, 866], [600, 436]], color: c.slate, label: "Wake-up -> CHECK_IGN", labelX: 470, labelY: 852, marker: "arrow-slate" })}
+    `
+  );
+
+const queryStoreFlowFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.violet },
+    `
+      ${group({ x: 96, y: 248, w: 1408, h: 536, title: "Luồng dữ liệu một chiều trong frontend", accent: c.violet, subtitle: "UI kết hợp TanStack Query cho dữ liệu lịch sử, Zustand cho client state và Socket.IO cho dữ liệu realtime." })}
+      ${component({ x: 130, y: 372, w: 240, h: 150, title: "Trang Next.js", body: ["Map, dashboard, vehicle list và alert pages"], accent: c.navy, tag: "ui" })}
+      ${component({ x: 458, y: 302, w: 256, h: 150, title: "TanStack Query", body: ["CRUD và dữ liệu lịch sử", "Cache stale-while-revalidate"], accent: c.violet, tag: "query" })}
+      ${component({ x: 458, y: 558, w: 256, h: 150, title: "Zustand Store", body: ["Session token, sidebar, theme, realtime state"], accent: c.teal, tag: "store" })}
+      ${component({ x: 812, y: 372, w: 258, h: 150, title: "Backend API", body: ["REST API và Socket.IO gateway"], accent: c.amber, tag: "api" })}
+      ${component({ x: 1172, y: 288, w: 236, h: 134, title: "PostgreSQL", body: ["Dữ liệu nghiệp vụ"], accent: c.rose, tag: "sql" })}
+      ${component({ x: 1172, y: 466, w: 236, h: 134, title: "VictoriaMetrics", body: ["Telemetry lịch sử"], accent: c.rose, tag: "tsdb" })}
+      ${component({ x: 1172, y: 644, w: 236, h: 134, title: "Socket.IO realtime", body: ["Vị trí xe và sự kiện sống"], accent: c.emerald, tag: "realtime" })}
+      ${edge({ x1: 370, y1: 412, x2: 458, y2: 380, color: c.violet, label: "REST query", labelX: 390, labelY: 360, marker: "arrow-slate" })}
+      ${edge({ x1: 370, y1: 484, x2: 458, y2: 632, color: c.teal, label: "client state", labelX: 390, labelY: 580, marker: "arrow-slate" })}
+      ${edge({ x1: 714, y1: 380, x2: 812, y2: 430, color: c.violet, marker: "arrow-slate" })}
+      ${edge({ x1: 714, y1: 632, x2: 812, y2: 486, color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 1070, y1: 410, x2: 1172, y2: 356, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 1070, y1: 446, x2: 1172, y2: 534, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 1172, y1: 710, x2: 714, y2: 632, color: c.emerald, label: "event push", labelX: 964, labelY: 748, marker: "arrow-slate" })}
+      ${note(182, 818, "Khi Socket.IO hoạt động ổn định, frontend tắt polling của Query để tránh trùng lặp dữ liệu realtime.", 1234, c.surfaceSoft, mix(c.violet, 0.18))}
+    `
+  );
+
+const ganttPlanFigureCustom = (title, subtitle) => {
+  const weeks = Array.from({ length: 24 }, (_, index) => index + 1);
+  const phases = [
+    ["GĐ1", "Nghiên cứu và thiết kế phần cứng", 1, 4, c.navy],
+    ["GĐ2", "Phát triển firmware", 3, 10, c.teal],
+    ["GĐ3", "Xây dựng hạ tầng cloud", 5, 8, c.amber],
+    ["GĐ4", "Phát triển backend API", 7, 14, c.rose],
+    ["GĐ5", "Phát triển frontend", 11, 18, c.violet],
+    ["GĐ6", "Tích hợp và kiểm thử", 17, 22, c.emerald],
+    ["GĐ7", "Viết báo cáo và bảo vệ", 21, 24, c.slate],
+  ];
+  const chartX = 380;
+  const chartY = 296;
+  const weekWidth = 42;
+  return svgDoc(
+    1600,
+    980,
+    { title, subtitle, accent: c.teal },
+    `
+      ${box(94, 204, 1412, 684, { fill: c.surface, stroke: mix(c.teal, 0.16), rx: 34, shadow: false })}
+      ${textBlock(130, 272, "Giai đoạn", { cls: "section-title" })}
+      ${weeks
+        .map(
+          (week, index) => `
+            ${softBox(chartX + index * weekWidth, 248, weekWidth - 4, 44, { fill: c.surfaceSoft, stroke: mix(c.line, 0.8), rx: 12 })}
+            ${textBlock(chartX + index * weekWidth + (weekWidth - 4) / 2, 276, `T${week}`, { cls: "tiny", anchor: "middle" })}
+            <line x1="${chartX + index * weekWidth + 19}" y1="296" x2="${chartX + index * weekWidth + 19}" y2="844" stroke="${mix(c.line, 0.6)}" stroke-width="2"/>
+          `
+        )
+        .join("")}
+      ${phases
+        .map(([code, label, start, end, accent], index) => {
+          const y = chartY + index * 76;
+          const barX = chartX + (start - 1) * weekWidth + 2;
+          const barW = (end - start + 1) * weekWidth - 8;
+          return `
+            ${softBox(124, y, 228, 54, { fill: c.surfaceSoft, stroke: mix(accent, 0.18), rx: 18 })}
+            ${textBlock(156, y + 24, `${code} - ${label}`, { cls: "body", maxChars: 34 })}
+            ${textBlock(156, y + 46, `Tuần ${start}-${end}`, { cls: "tiny", maxChars: 16 })}
+            ${box(barX, y + 6, barW, 42, { fill: mix(accent, 0.14), stroke: accent, rx: 18, shadow: false, strokeWidth: 3 })}
+            ${chip(barX + 12, y + 10, Math.min(110, barW - 24), code, accent)}
+          `;
+        })
+        .join("")}
+      ${note(120, 846, "Các giai đoạn được bố trí chồng chéo có chủ đích để rút ngắn tổng tiến độ xuống 24 tuần, đúng với kế hoạch trong phụ lục.", 1340, c.surfaceSoft, mix(c.teal, 0.16))}
+    `
+  );
+};
+
 const output = [
   ["01-chuong-1-gioi-thieu-hinh-1-1.svg", problemSolutionFigure("Sơ đồ tổng quan vấn đề và giải pháp đề xuất", "Đối chiếu giữa mô hình quản lý thủ công và phương án tracker IoT tự động.")],
   ["01-chuong-1-gioi-thieu-hinh-1-2.svg", twoRowStageFigure("Quy trình phát triển dự án theo các giai đoạn", "Sáu giai đoạn được gom thành hai pha để tăng độ dễ đọc trên trang báo cáo.", {
@@ -1235,9 +1842,23 @@ const output = [
   })],
   ["02-chuong-2-phan-tich-hinh-2-1.svg", dataArchitectureFigure("Kiến trúc dữ liệu của hệ thống", "Phân tách dữ liệu quan hệ, chuỗi thời gian và nhật ký theo đúng chiến lược lưu trữ.")],
   ["03-chuong-3-giai-phap-phan-cung-hinh-3-1.svg", trackerBlockFigure("Sơ đồ khối tracker", "Bám theo schematic và pin mapping firmware hiện tại với nhãn tiếng Việt đầy đủ.")],
+  ["03-chuong-3-giai-phap-phan-cung-hinh-3-2.svg", bleObdSequenceFigure("Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro", "Luồng kết nối BLE OBD2 được dàn lại theo dạng sequence SVG để đọc rõ từng bước ghép nối và truy vấn PID.")],
+  ["03-chuong-3-giai-phap-phan-cung-hinh-3-3.svg", lis3dhI2CFigure("Sơ đồ kết nối LIS3DH với ESP32-S3 qua I2C", "Thể hiện lại pin mapping I2C, nguồn 3.3V và chân INT1 đánh thức ESP32-S3.")],
   ["03-chuong-3-giai-phap-phan-cung-hinh-3-4.svg", powerManagementFigure("Sơ đồ khối hệ thống quản lý nguồn", "Thể hiện đầy đủ rail 5V, 3.3V, ~4V, pin backup và logic chuyển nguồn.")],
+  ["04-chuong-3-giai-phap-firmware-hinh-3-5.svg", firmwareLayersFigureCustom("Sơ đồ kiến trúc phân lớp của firmware", "Chuyển sang bố cục phân lớp SVG rộng ngang để tránh hình cao hẹp và bám đúng các tầng phần mềm đang triển khai.")],
+  ["04-chuong-3-giai-phap-firmware-hinh-3-6.svg", taskInteractionFigureCustom("Sơ đồ tương tác giữa các FreeRTOS task", "Minh họa lại queue trung tâm, các task producer và power_task điều phối chế độ hoạt động.")],
+  ["04-chuong-3-giai-phap-firmware-hinh-3-7.svg", firmwareMainFlowFigure("Lưu đồ thuật toán luồng hoạt động chính của firmware", "Luồng quyết định giữa nguồn IGN từ OBD2, fallback ADC và ba mode driving, parked, alarm.")],
+  ["04-chuong-3-giai-phap-firmware-hinh-3-8.svg", bleObdFlowFigureCustom("Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2", "Dàn lại các nhánh reconnect, scan BLE, GATT discovery, truy vấn PID và fallback ADC trong cùng một flow rộng ngang.")],
+  ["04-chuong-3-giai-phap-firmware-hinh-3-9.svg", modemControlFlowFigureCustom("Lưu đồ thuật toán điều khiển modem theo chế độ hoạt động", "Biểu diễn các bước wake modem, đăng ký mạng và ba nhánh driving, heartbeat, parked bằng SVG custom.")],
+  ["04-chuong-3-giai-phap-firmware-hinh-3-10.svg", powerPathFlowFigureCustom("Lưu đồ thuật toán điều khiển power path", "Bám đúng các ngưỡng Switch_OFF, Switch_ON, logic GPIO18 và GPIO5 trong firmware quản lý nguồn.")],
+  ["04-chuong-3-giai-phap-firmware-hinh-3-11.svg", deviceStateMachineFigureCustom("Sơ đồ máy trạng thái của thiết bị theo dõi", "Cập nhật lại đủ bảy trạng thái INIT, CHECK_IGN, DRIVING, PARKED, ALARM, HEARTBEAT và SLEEP theo text chuẩn.")],
   ["05-chuong-3-giai-phap-backend-hinh-3-12.svg", systemArchitectureFigure("Kiến trúc tổng quan hệ thống Cloud", "Kiến trúc phân tầng kết hợp event-driven cho luồng dữ liệu IoT liên tục.")],
   ["05-chuong-3-giai-phap-backend-hinh-3-13.svg", dataArchitectureFigure("Chiến lược lưu trữ kép của hệ thống", "Mỗi loại dữ liệu được ghi vào đúng kho chuyên biệt để tối ưu vận hành và truy vấn.")],
+  ["05-chuong-3-giai-phap-backend-hinh-3-14.svg", dbErdFigureCustom("Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)", "ERD rút gọn được vẽ lại thành card SVG để đọc rõ bảng, khóa chính và các quan hệ cốt lõi.")],
+  ["thesis-05-chuong-3-giai-phap-backend-01.svg", dataArchitectureFigure("Luồng dữ liệu chi tiết từ thiết bị đến dashboard", "Phân rã thêm luồng đi từ tracker qua MQTT Bridge, Backend và các kho dữ liệu đến dashboard.")],
+  ["thesis-05-chuong-3-giai-phap-backend-02.svg", backendAlertFlowFigureCustom("Luồng xử lý cảnh báo trong hệ thống", "Làm rõ đường đi của alert từ EMQX qua MQTT Bridge, PostgreSQL, VictoriaLogs và Socket.IO.")],
+  ["thesis-05-chuong-3-giai-phap-backend-03.svg", dataArchitectureFigure("Luồng lưu trữ kép và truy vấn dữ liệu của hệ thống", "Thống nhất cùng ngôn ngữ SVG UML với sơ đồ lưu trữ kép của chương backend.")],
+  ["thesis-05-chuong-3-giai-phap-backend-04.svg", dbErdFigureCustom("Sơ đồ quan hệ cơ sở dữ liệu rút gọn", "Phiên bản bổ sung của ERD dùng cùng nguồn SVG custom để tránh layout chồng chéo.")],
   ["06-chuong-3-giai-phap-frontend-hinh-3-15.svg", featureFrontendFigure("Kiến trúc Feature-Sliced Design của ứng dụng Frontend", "Sơ đồ package UML mô tả rõ vai trò app/, features/, components/ và lib/.")],
   ["06-chuong-3-giai-phap-frontend-hinh-3-16.svg", sequenceAuthFigure("Biểu đồ trình tự luồng xác thực người dùng", "Sequence diagram thể hiện quá trình login, tạo session và bảo vệ route.")],
   ["06-chuong-3-giai-phap-frontend-hinh-3-17.svg", dashboardFigure("Giao diện trang Dashboard tổng quan", "Wireframe sáng, dùng tiếng Việt có dấu và các khối UI dễ đọc.")],
@@ -1248,6 +1869,9 @@ const output = [
   ["06-chuong-3-giai-phap-frontend-hinh-3-22.svg", uiPatternsFigure("Các mẫu thiết kế UI của hệ thống", "Tổng hợp pattern cho data table, form và chart trong cùng một ngôn ngữ thị giác.")],
   ["06-chuong-3-giai-phap-frontend-hinh-3-23.svg", optimizedArchitectureFigure("Sơ đồ kiến trúc tổng thể phương án tối ưu", "Phương án tối ưu hóa luồng dữ liệu giữa thiết bị, backend, frontend và quan trắc.")],
   ["07-chuong-4-trien-khai-hardware-hinh-4-1.svg", trackerBlockFigure("Sơ đồ khối tổng thể hệ thống tracker IoT", "Phiên bản triển khai thực tế của tracker với pin mapping đã chuẩn hóa.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-2.svg", uartModemFigureCustom("Sơ đồ kết nối giữa ESP32-S3 và modem SIMCom SIM7600CE-T qua UART", "Tách rõ hai đầu UART1, PWRKEY và nhánh nguồn modem để tránh sơ đồ bị chồng chữ.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-3.svg", voltageDividerFigureCustom("Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3", "Chuẩn hóa lại tỷ lệ chia áp, nhánh R1/R2 và đường đi vào ADC của ESP32-S3.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-5.svg", wiringOverviewFigureCustom("Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các module ngoại vi", "Sinh lại hoàn toàn bằng SVG custom theo pin mapping firmware hiện tại, thay cho layout Mermaid cũ.")],
   ["07-chuong-4-trien-khai-hardware-hinh-4-7.svg", buckConverterFigure("Sơ đồ nguyên lý mạch Buck Converter MP2482", "Minh họa lại luồng nguồn 12V / 24V sang bus 5V chính với các linh kiện then chốt.")],
   ["07-chuong-4-trien-khai-hardware-hinh-4-8.svg", boostConverterFigure("Sơ đồ nguyên lý mạch Boost Converter SX1308", "Chuỗi dự phòng từ pin 21700 qua BMS, boost và diode Schottky để duy trì bus 5V backup.")],
   ["07-chuong-4-trien-khai-hardware-hinh-4-9.svg", powerMuxFigureCustom("Sơ đồ mạch Power Path và logic chuyển nguồn tự động", "Ghép lại logic chọn nhánh chính hoặc backup, bám đúng tín hiệu ADC, LVD_STATUS, GPIO18 và GPIO5.")],
@@ -1265,6 +1889,7 @@ const output = [
       { title: "Bước 6", body: ["Đóng vỏ và hoàn thiện anten"], accent: c.violet, tag: "step 6" },
     ],
   })],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-13.svg", prototypeLayoutFigureCustom("Sơ đồ bố trí module sau khi lắp ráp", "Bố trí lại prototype sau lắp ráp theo đúng các cụm controller, RF, nguồn chính, nhánh sạc và pin backup.")],
   ["07-chuong-4-trien-khai-hardware-hinh-4-14.svg", obdPlacementFigure("Minh họa vị trí cổng OBD2 trên xe và cách kết nối", "Làm rõ việc adapter OBD2 cắm trực tiếp vào cổng xe, còn tracker giao tiếp BLE không dây và đặt linh hoạt trong cabin.")],
   ["07-chuong-4-trien-khai-hardware-hinh-4-15.svg", vehicleInstallFigure("Minh họa lắp đặt thiết bị tracker trong xe và đi dây", "Bố cục trực quan hơn cho vị trí tracker, anten và đường kết nối chính khi lắp đặt trong xe.")],
   ["07-chuong-4-trien-khai-hardware-hinh-4-16.svg", twoRowStageFigure("Checklist kiểm tra hệ thống sau khi lắp đặt trong xe", "Checklist sau lắp đặt được chia hai cụm kiểm tra để tránh layout quá hẹp và giúp đọc nhanh hơn.", {
@@ -1280,6 +1905,7 @@ const output = [
     ],
   })],
   ["07-chuong-4-trien-khai-hardware-hinh-4-6.svg", powerManagementFigure("Kiến trúc tổng thể mạch quản lý nguồn", "Nhấn mạnh power path, pin dự phòng và rail cấp riêng cho modem.")],
+  ["thesis-08-chuong-4-trien-khai-firmware-01.svg", firmwareImplementationFlowFigureCustom("Lưu đồ thuật toán chính của firmware thiết bị theo dõi xe", "Bản SVG custom bám theo các state trong code thực thi: INIT, CHECK_IGN, DRIVING, PARKED, ALERT, HEARTBEAT và SLEEP.")],
   ["09-chuong-4-trien-khai-cloud-hinh-4-15.svg", systemArchitectureFigure("Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu", "Sơ đồ triển khai thực tế giữa EMQX, MQTT Bridge, Backend và các lớp lưu trữ.")],
   ["09-chuong-4-trien-khai-cloud-hinh-4-16.svg", ivmStructureFigure("Cấu trúc thư mục hệ thống theo quy ước IVM26", "Các dịch vụ Docker được tách độc lập và dùng chung dữ liệu runtime.")],
   ["09-chuong-4-trien-khai-cloud-hinh-4-17.svg", mqttBridgeFlowFigure("Luồng xử lý dữ liệu của MQTT Bridge", "Activity / component diagram cho subscribe, validate, fan-out và realtime.")],
@@ -1294,6 +1920,10 @@ const output = [
   ["10-chuong-4-ket-qua-do-luong-hinh-4-20.svg", labSetupFigure("Bố trí thiết bị đo lường trong phòng thí nghiệm", "Sơ đồ bench test cho nguồn DC, DMM, tracker, OBD2 simulator và máy thu log.")],
   ["10-chuong-4-ket-qua-do-luong-hinh-4-21.svg", vehicleInstallFigure("Thiết bị tracker được lắp đặt trên xe thử nghiệm", "Minh họa vị trí tracker, cổng OBD2, anten và tuyến đi dây chính.")],
   ["10-chuong-4-ket-qua-do-luong-hinh-4-22.svg", testEnvironmentFigure("Sơ đồ môi trường thử nghiệm tổng thể", "Liên kết giữa bench phần cứng, cloud test stack, công cụ tải và dashboard.")],
+  ["thesis-99-bao-cao-thesis-hoan-chinh-04.svg", dataArchitectureFigure("Luồng dữ liệu chi tiết từ thiết bị đến dashboard", "Phiên bản phụ lục của luồng dữ liệu tổng thể, dùng cùng renderer SVG custom để giữ hình đồng nhất.")],
+  ["thesis-99-bao-cao-thesis-hoan-chinh-05.svg", queryStoreFlowFigureCustom("Luồng dữ liệu một chiều giữa Next.js, Query, Zustand và Backend", "Tách rõ ba nguồn dữ liệu chính của frontend: REST API, client state và realtime Socket.IO.")],
+  ["thesis-99-bao-cao-thesis-hoan-chinh-06.svg", mapIntegrationFigure("Phân rã lớp bản đồ React Leaflet và kênh Socket.IO", "Biểu diễn lại tầng server, store, map, sidebar và marker bằng cùng phong cách SVG UML sáng.")],
+  ["thesis-14-phu-luc-01.svg", ganttPlanFigureCustom("Biểu đồ Gantt kế hoạch thực hiện dự án", "Kế hoạch 24 tuần được chuyển sang SVG custom rộng ngang, giữ rõ phần overlap giữa bảy giai đoạn chính.")],
 ];
 
 const charts = [
