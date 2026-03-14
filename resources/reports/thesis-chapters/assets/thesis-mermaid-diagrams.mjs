@@ -218,20 +218,32 @@ const vehicleInstall = `flowchart LR
     Cabin --> Telemetry["Luồng telemetry<br/>GPS, OBD2, cảnh báo"]
 `;
 
-const projectPhases = `flowchart LR
-    A["Giai đoạn 1<br/>Nghiên cứu và thiết kế phần cứng"] --> B["Giai đoạn 2<br/>Phát triển firmware ESP-IDF"]
-    B --> C["Giai đoạn 3<br/>Triển khai hạ tầng cloud"]
-    C --> D["Giai đoạn 4<br/>Xây dựng backend API"]
-    D --> E["Giai đoạn 5<br/>Phát triển frontend dashboard"]
-    E --> F["Giai đoạn 6<br/>Tích hợp và kiểm thử"]
+const projectPhases = `flowchart TB
+    subgraph R1["Ba giai đoạn nền tảng"]
+        direction LR
+        A["Giai đoạn 1<br/>Nghiên cứu và thiết kế phần cứng"] --> B["Giai đoạn 2<br/>Phát triển firmware ESP-IDF"]
+        B --> C["Giai đoạn 3<br/>Triển khai hạ tầng cloud"]
+    end
+    subgraph R2["Ba giai đoạn hoàn thiện hệ thống"]
+        direction LR
+        D["Giai đoạn 4<br/>Xây dựng backend API"] --> E["Giai đoạn 5<br/>Phát triển frontend dashboard"]
+        E --> F["Giai đoạn 6<br/>Tích hợp và kiểm thử"]
+    end
+    C --> D
 `;
 
-const roadmapPlan = `flowchart LR
-    P1["Mốc 1<br/>Prototype hoàn chỉnh"] --> P2["Mốc 2<br/>Pilot trong xe thử nghiệm"]
-    P2 --> P3["Mốc 3<br/>Ổn định hóa cloud và dashboard"]
-    P3 --> P4["Mốc 4<br/>Ứng dụng di động và thông báo đẩy"]
-    P4 --> P5["Mốc 5<br/>PCB chuyên dụng và tối ưu sản xuất"]
-    P5 --> P6["Mốc 6<br/>Mở rộng AI, bảo mật và scale-out"]
+const roadmapPlan = `flowchart TB
+    subgraph M1["Các mốc hoàn thiện prototype"]
+        direction LR
+        P1["Mốc 1<br/>Prototype hoàn chỉnh"] --> P2["Mốc 2<br/>Pilot trong xe thử nghiệm"]
+        P2 --> P3["Mốc 3<br/>Ổn định hóa cloud và dashboard"]
+    end
+    subgraph M2["Các mốc mở rộng sản phẩm"]
+        direction LR
+        P4["Mốc 4<br/>Ứng dụng di động và thông báo đẩy"] --> P5["Mốc 5<br/>PCB chuyên dụng và tối ưu sản xuất"]
+        P5 --> P6["Mốc 6<br/>Mở rộng AI, bảo mật và scale-out"]
+    end
+    P3 --> P4
 `;
 
 const bleObdSequence = `sequenceDiagram
@@ -469,18 +481,18 @@ const wiringOverview = `flowchart LR
     MCU --> Note["Log / MQTT / state machine"]
 `;
 
-const buckStage = `flowchart LR
+const buckStage = `flowchart TB
     Vin["Ắc quy xe 12V hoặc 24V"] --> Fuse["Cầu chì đầu vào"]
     Fuse --> Mp["MP2482-5.0<br/>buck 5V / 3A"]
-    Mp --> L1["Cuộn cảm 100 uH"]
-    L1 --> Bus["Bus 5V chính"]
-    Mp --> D1["Diode Schottky 1N5822"]
-    D1 --> Bus
     Cin["C1 100 uF / 50V"] --> Mp
+    Mp --> L1["Cuộn cảm 100 uH"]
+    Mp --> D1["Diode Schottky 1N5822"]
+    L1 --> Bus["Bus 5V chính"]
+    D1 --> Bus
     Bus --> Cout["C2 220 uF / 16V"]
 `;
 
-const boostStage = `flowchart LR
+const boostStage = `flowchart TB
     Cell["Pin 21700 3.0-4.2V"] --> Bms["BMS 1S"]
     Bms --> Boost["SX1308<br/>boost lên 5V"]
     Boost --> D1["Diode Schottky"]
@@ -488,23 +500,30 @@ const boostStage = `flowchart LR
     Bus --> Load["Cấp runtime khi mất nguồn chính"]
 `;
 
-const powerMux = `flowchart LR
-    Main["MP2482 5V"] --> D1["D1 Schottky"]
-    Backup["SX1308 5V backup"] --> D2["D2 Schottky"]
-    D1 --> Bus["Bus 5V runtime"]
-    D2 --> Bus
-    Lvd["GPIO19 LVD_STATUS"] --> Fsm["ESP32 Power FSM"]
-    Adc["GPIO4 ADC"] --> Fsm
+const powerMux = `flowchart TB
+    subgraph Sense["Khối giám sát và điều phối"]
+        direction LR
+        Lvd["GPIO19 LVD_STATUS"] --> Fsm["ESP32 Power FSM"]
+        Adc["GPIO4 ADC"] --> Fsm
+    end
+    subgraph Path["Hai nhánh cấp nguồn runtime"]
+        direction LR
+        Main["MP2482 5V"] --> D1["D1 Schottky"] --> Bus["Bus 5V runtime"]
+        Backup["SX1308 5V backup"] --> D2["D2 Schottky"] --> Bus
+    end
     Fsm --> En["GPIO18 POWER_PATH_EN"]
-    En --> Main
+    En -. ưu tiên nhánh chính .-> Main
     Fsm --> Charge["GPIO5 CHARGER_EN"]
+    Charge -. bật hoặc tắt sạc .-> Backup
     Bus --> Rails["XL1509 3.3V và TPS54231 ~4V"]
 `;
 
-const chargerChain = `flowchart LR
-    Bus["Bus 5V từ MP2482"] --> Tp["TP4056<br/>mạch sạc Li-ion"]
-    En["GPIO5 CHARGER_EN"] --> Tp
-    Tp --> Bms["BMS 1S / protection"]
+const chargerChain = `flowchart TB
+    subgraph Charge["Chuỗi sạc pin và cấp dự phòng"]
+        direction LR
+        Bus["Bus 5V từ MP2482"] --> Tp["TP4056<br/>mạch sạc Li-ion"] --> Bms["BMS 1S / protection"]
+    end
+    En["GPIO5 CHARGER_EN"] -. bật hoặc tắt sạc .-> Tp
     Bms --> Cell["Pin 21700 5000 mAh"]
     Cell --> Boost["SX1308 backup"]
     Boost --> Runtime["Nguồn dự phòng cho tracker"]
@@ -512,27 +531,41 @@ const chargerChain = `flowchart LR
 
 const enclosureLayout = `flowchart TB
     subgraph Box["Vỏ hộp tracker 100 x 70 x 35 mm"]
-        Top1["ESP32-S3 DevKit"]
-        Top2["SIM7600CE-T + rail ~4V"]
-        Top3["TP4056 + BMS"]
-        Mid1["MP2482 + XL1509"]
-        Mid2["SX1308 + diode-OR"]
-        Mid3["Pin 21700 + giá đỡ"]
-        Low1["Anten 4G/LTE"]
-        Low2["Anten GNSS"]
-        Low3["Cổng OBD2 / USB debug / khe SIM"]
+        direction LR
+        subgraph Ctrl["Khối điều khiển và RF"]
+            direction TB
+            Top1["ESP32-S3 DevKit"]
+            Top2["SIM7600CE-T + rail ~4V"]
+            Low1["Anten 4G/LTE"]
+            Low2["Anten GNSS"]
+        end
+        subgraph Power["Khối nguồn và đầu nối"]
+            direction TB
+            Top3["TP4056 + BMS"]
+            Mid1["MP2482 + XL1509"]
+            Mid2["SX1308 + diode-OR"]
+            Mid3["Pin 21700 + giá đỡ"]
+            Low3["Cổng OBD2 / USB debug / khe SIM"]
+        end
     end
-    Top1 --> Low1
-    Top2 --> Low2
+    Top2 --> Top1
+    Top1 -. anten LTE .-> Low1
+    Top2 -. anten GNSS .-> Low2
     Top3 --> Mid3
 `;
 
-const assemblyFlow = `flowchart LR
-    A["Bước 1<br/>Kiểm tra linh kiện"] --> B["Bước 2<br/>Lắp nhánh nguồn"]
-    B --> C["Bước 3<br/>Gắn ESP32-S3 và đi dây GPIO"]
-    C --> D["Bước 4<br/>Kết nối modem, IMU và ADC"]
-    D --> E["Bước 5<br/>Nạp firmware test tích hợp"]
-    E --> F["Bước 6<br/>Đóng vỏ và hoàn thiện anten"]
+const assemblyFlow = `flowchart TB
+    subgraph S1["Chuẩn bị và tích hợp điện"]
+        direction LR
+        A["Bước 1<br/>Kiểm tra linh kiện"] --> B["Bước 2<br/>Lắp nhánh nguồn"]
+        B --> C["Bước 3<br/>Gắn ESP32-S3 và đi dây GPIO"]
+    end
+    subgraph S2["Kết nối, test và hoàn thiện"]
+        direction LR
+        D["Bước 4<br/>Kết nối modem, IMU và ADC"] --> E["Bước 5<br/>Nạp firmware test tích hợp"]
+        E --> F["Bước 6<br/>Đóng vỏ và hoàn thiện anten"]
+    end
+    C --> D
 `;
 
 const prototypeLayout = `flowchart TB
@@ -554,35 +587,42 @@ const prototypeLayout = `flowchart TB
     Boost --> Cell
 `;
 
-const obdPlacement = `flowchart LR
+const obdPlacement = `flowchart TB
     subgraph Cabin["Khoang lái / khu vực táp-lô"]
-        Port["Cổng OBD2 dưới táp-lô"]
-        Dongle["vgate iCar Pro<br/>BLE dongle cắm trực tiếp"]
+        direction LR
+        Port["Cổng OBD2 dưới táp-lô"] --> Dongle["vgate iCar Pro<br/>BLE dongle cắm trực tiếp"]
     end
-    Port --> Dongle
-    Dongle --> Tracker["Tracker đặt trong cabin<br/>hoặc gần hộp cầu chì"]
-    Tracker --> Note["BLE không dây nên tracker<br/>không cần cắm cố định vào cổng OBD2"]
+    Dongle -. BLE không dây .-> Tracker["Tracker đặt trong cabin<br/>hoặc gần hộp cầu chì"]
+    Tracker --> Note["Không cần cắm tracker cố định<br/>trực tiếp vào cổng OBD2"]
 `;
 
-const vehicleInstallation = `flowchart LR
+const vehicleInstallation = `flowchart TB
     subgraph Car["Khoang lắp đặt trong xe"]
+        direction TB
         Tracker["Tracker dưới táp-lô"]
         Gps["Anten GNSS gần kính trước"]
         Lte["Anten 4G/LTE tránh nguồn xung"]
-        Ble["BLE tới vgate iCar Pro"]
+        Ble["vgate iCar Pro<br/>kênh BLE OBD2"]
         Obd["Cổng OBD2"]
     end
     Tracker --> Gps
     Tracker --> Lte
+    Tracker -. BLE .-> Ble
     Ble --> Obd
 `;
 
 const installChecklist = `flowchart TB
-    P1["Nguồn điện đầu vào<br/>đạt 12V hoặc 24V"] --> P2["BLE OBD2<br/>đọc IGN, RPM, tốc độ"]
-    P2 --> P3["GNSS<br/>fix vị trí ổn định"]
-    P3 --> P4["4G / LTE<br/>đăng ký mạng và gửi MQTT"]
-    P4 --> P5["Power path<br/>chuyển nguồn không reset"]
-    P5 --> P6["IMU wake-up và deep sleep<br/>hoạt động đúng chu kỳ"]
+    subgraph C1["Kiểm tra kết nối và định vị"]
+        direction LR
+        P1["Nguồn điện đầu vào<br/>đạt 12V hoặc 24V"] --> P2["BLE OBD2<br/>đọc IGN, RPM, tốc độ"]
+        P2 --> P3["GNSS<br/>fix vị trí ổn định"]
+    end
+    subgraph C2["Kiểm tra truyền thông và năng lượng"]
+        direction LR
+        P4["4G / LTE<br/>đăng ký mạng và gửi MQTT"] --> P5["Power path<br/>chuyển nguồn không reset"]
+        P5 --> P6["IMU wake-up và deep sleep<br/>hoạt động đúng chu kỳ"]
+    end
+    P3 --> P4
 `;
 
 const firmwareImplementationFlow = `flowchart TB
@@ -623,16 +663,8 @@ const appendixGantt = `gantt
 `;
 
 export const mermaidDiagrams = [
-  { name: "01-chuong-1-gioi-thieu-hinh-1-2.svg", code: projectPhases },
-  { name: "01-chuong-1-gioi-thieu-hinh-1-1.svg", code: problemSolution },
-  { name: "01-chuong-1-gioi-thieu-hinh-1-3.svg", code: systemArchitecture },
-  { name: "01-chuong-1-gioi-thieu-hinh-1-4.svg", code: powerModes },
-  { name: "01-chuong-1-gioi-thieu-hinh-1-5.svg", code: roadmapPlan },
-  { name: "02-chuong-2-phan-tich-hinh-2-1.svg", code: dataArchitecture },
-  { name: "03-chuong-3-giai-phap-phan-cung-hinh-3-1.svg", code: trackerBlock },
   { name: "03-chuong-3-giai-phap-phan-cung-hinh-3-2.svg", code: bleObdSequence },
   { name: "03-chuong-3-giai-phap-phan-cung-hinh-3-3.svg", code: lis3dhWiring },
-  { name: "03-chuong-3-giai-phap-phan-cung-hinh-3-4.svg", code: powerManagement },
   { name: "04-chuong-3-giai-phap-firmware-hinh-3-5.svg", code: firmwareLayers },
   { name: "04-chuong-3-giai-phap-firmware-hinh-3-6.svg", code: taskInteraction },
   { name: "04-chuong-3-giai-phap-firmware-hinh-3-7.svg", code: firmwareMainFlow },
@@ -640,43 +672,18 @@ export const mermaidDiagrams = [
   { name: "04-chuong-3-giai-phap-firmware-hinh-3-9.svg", code: modemControlFlow },
   { name: "04-chuong-3-giai-phap-firmware-hinh-3-10.svg", code: powerPathFlow },
   { name: "04-chuong-3-giai-phap-firmware-hinh-3-11.svg", code: deviceState },
-  { name: "05-chuong-3-giai-phap-backend-hinh-3-12.svg", code: systemArchitecture },
-  { name: "05-chuong-3-giai-phap-backend-hinh-3-13.svg", code: dataArchitecture },
   { name: "05-chuong-3-giai-phap-backend-hinh-3-14.svg", code: dbErd },
   { name: "thesis-05-chuong-3-giai-phap-backend-01.svg", code: dataArchitecture },
   { name: "thesis-05-chuong-3-giai-phap-backend-02.svg", code: backendAlertFlow },
   { name: "thesis-05-chuong-3-giai-phap-backend-03.svg", code: dataArchitecture },
   { name: "thesis-05-chuong-3-giai-phap-backend-04.svg", code: dbErd },
-  { name: "06-chuong-3-giai-phap-frontend-hinh-3-15.svg", code: frontendFsd },
-  { name: "06-chuong-3-giai-phap-frontend-hinh-3-16.svg", code: authSequence },
-  { name: "06-chuong-3-giai-phap-frontend-hinh-3-19.svg", code: mapIntegration },
-  { name: "06-chuong-3-giai-phap-frontend-hinh-3-23.svg", code: optimizedArchitecture },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-1.svg", code: trackerBlock },
   { name: "07-chuong-4-trien-khai-hardware-hinh-4-2.svg", code: uartModemWiring },
   { name: "07-chuong-4-trien-khai-hardware-hinh-4-3.svg", code: voltageDivider },
   { name: "07-chuong-4-trien-khai-hardware-hinh-4-5.svg", code: wiringOverview },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-6.svg", code: powerManagement },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-7.svg", code: buckStage },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-8.svg", code: boostStage },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-9.svg", code: powerMux },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-10.svg", code: chargerChain },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-11.svg", code: enclosureLayout },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-12.svg", code: assemblyFlow },
   { name: "07-chuong-4-trien-khai-hardware-hinh-4-13.svg", code: prototypeLayout },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-14.svg", code: obdPlacement },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-15.svg", code: vehicleInstallation },
-  { name: "07-chuong-4-trien-khai-hardware-hinh-4-16.svg", code: installChecklist },
-  { name: "09-chuong-4-trien-khai-cloud-hinh-4-15.svg", code: systemArchitecture },
-  { name: "09-chuong-4-trien-khai-cloud-hinh-4-16.svg", code: ivmStructure },
-  { name: "09-chuong-4-trien-khai-cloud-hinh-4-17.svg", code: mqttBridgeFlow },
-  { name: "09-chuong-4-trien-khai-cloud-hinh-4-18.svg", code: backendFolder },
-  { name: "09-chuong-4-trien-khai-cloud-hinh-4-19.svg", code: frontendFolder },
   { name: "thesis-08-chuong-4-trien-khai-firmware-01.svg", code: firmwareImplementationFlow },
   { name: "thesis-99-bao-cao-thesis-hoan-chinh-04.svg", code: dataArchitecture },
   { name: "thesis-99-bao-cao-thesis-hoan-chinh-05.svg", code: queryStoreFlow },
   { name: "thesis-99-bao-cao-thesis-hoan-chinh-06.svg", code: mapLayerBreakdown },
-  { name: "10-chuong-4-ket-qua-do-luong-hinh-4-20.svg", code: labSetup },
-  { name: "10-chuong-4-ket-qua-do-luong-hinh-4-21.svg", code: vehicleInstall },
-  { name: "10-chuong-4-ket-qua-do-luong-hinh-4-22.svg", code: testEnvironment },
   { name: "thesis-14-phu-luc-01.svg", code: appendixGantt },
 ];

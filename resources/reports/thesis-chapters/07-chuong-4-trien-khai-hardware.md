@@ -87,7 +87,7 @@ Sơ đồ nguyên lý tổng hợp của hệ thống bao gồm tất cả các 
 - **GPIO** (3 chân output): Điều khiển Power Path EN, Charger EN, Modem PWRKEY
 - **GPIO** (2 chân input): Đọc trạng thái LVD, ngắt từ IMU
 
-![Hình 4.4 - Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-4.png)
+![Hình 4.4 - Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-4.svg)
 
 *Hình 4.4: Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker*
 

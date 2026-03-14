@@ -1,6 +1,0 @@
-flowchart LR
-    Cell["Pin 21700 3.0-4.2V"] --> Bms["BMS 1S"]
-    Bms --> Boost["SX1308<br/>boost lên 5V"]
-    Boost --> D1["Diode Schottky"]
-    D1 --> Bus["Bus 5V backup"]
-    Bus --> Load["Cấp runtime khi mất nguồn chính"]

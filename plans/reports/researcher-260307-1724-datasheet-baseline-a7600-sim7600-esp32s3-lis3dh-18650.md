@@ -28,7 +28,7 @@ Kết luận ngắn: baseline hiện tại hợp lý hơn nếu chuẩn hóa the
 
 | Hạng mục | Giá trị thực tế cần baseline | Nguồn | Độ tin cậy |
 |---|---|---|---|
-| Modem UART IO level | **SIM7600CE UART = 1.8V** (không phải 3.3V trực tiếp) | Trích local `tmp-SIM7600CE_Hardware_Design_V1.04.txt` | Cao (nhưng là mirror/local copy) |
+| Modem UART IO level | **SIM7600CE UART = 1.8V** (không phải 3.3V trực tiếp) | Trích local `resources/docs/hardware-datasheets/extracted-text/sim7600ce-hardware-design-v1.04.txt` | Cao (nhưng là mirror/local copy) |
 | PWRKEY ON timing | Kéo thấp **100–500 ms** để power on | Trích local Table 8 | Cao |
 | PWRKEY OFF timing | Kéo thấp **>= 2.5 s** để power off | Trích local Table 9 | Cao |
 | RESET timing | Xung thấp **50–500 ms** | Trích local Table 10 | Cao |
@@ -39,7 +39,7 @@ Kết luận ngắn: baseline hiện tại hợp lý hơn nếu chuẩn hóa the
 
 ### Trích đoạn chứng cứ local (repo)
 
-File: `E:/anmh1205/IoT_Vehicle_Tracking_System/tmp-SIM7600CE_Hardware_Design_V1.04.txt`
+File: `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/docs/hardware-datasheets/extracted-text/sim7600ce-hardware-design-v1.04.txt`
 
 ```text
 The SIM7600CE UART is 1.8V voltage interface.

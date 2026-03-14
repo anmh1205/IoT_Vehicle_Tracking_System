@@ -27,3 +27,10 @@
 |--------|--------|
 | **`example/`** | Reference code — `esp32-obd2-meter/` (ESP-IDF BLE OBD2 firmware) |
 | **`template/`** | Generic IoT project template (reusable starter kit) |
+| **`docs/hardware-datasheets/extracted-text/`** | Text extracts từ datasheet để grep/tra cứu nhanh, không để ở root |
+
+## Temp / Build Policy
+
+- Không để `tmp*` ở root repo.
+- Artifact quan trọng phải đặt vào đúng domain trong `resources/`.
+- Scratch/cache/build output phải xoá sau khi dùng, hoặc chỉ giữ khi user yêu cầu rõ.

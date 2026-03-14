@@ -1,6 +1,0 @@
-flowchart TB
-    P1["Nguồn điện đầu vào<br/>đạt 12V hoặc 24V"] --> P2["BLE OBD2<br/>đọc IGN, RPM, tốc độ"]
-    P2 --> P3["GNSS<br/>fix vị trí ổn định"]
-    P3 --> P4["4G / LTE<br/>đăng ký mạng và gửi MQTT"]
-    P4 --> P5["Power path<br/>chuyển nguồn không reset"]
-    P5 --> P6["IMU wake-up và deep sleep<br/>hoạt động đúng chu kỳ"]

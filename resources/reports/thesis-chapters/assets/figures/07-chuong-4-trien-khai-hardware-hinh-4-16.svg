@@ -1,1 +1,105 @@
-<svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width: 304px; background-color: white;" viewBox="0 0 304 1200" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:Segoe UI,Noto Sans,Arial,sans-serif;font-size:20px;fill:#172534;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#eef5ff;}#my-svg .error-text{fill:#110a00;stroke:#110a00;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#35566f;stroke:#35566f;}#my-svg .marker.cross{stroke:#35566f;}#my-svg svg{font-family:Segoe UI,Noto Sans,Arial,sans-serif;font-size:20px;}#my-svg p{margin:0;}#my-svg .label{font-family:Segoe UI,Noto Sans,Arial,sans-serif;color:#172534;}#my-svg .cluster-label text{fill:#110a00;}#my-svg .cluster-label span{color:#110a00;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#172534;color:#172534;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#f8fbff;stroke:#35566f;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#35566f!important;stroke-width:0;stroke:#35566f;}#my-svg .arrowheadPath{fill:#0b0b0b;}#my-svg .edgePath .path{stroke:#35566f;stroke-width:2.0px;}#my-svg .flowchart-link{stroke:#35566f;fill:none;}#my-svg .edgeLabel{background-color:#ffffff;text-align:center;}#my-svg .edgeLabel p{background-color:#ffffff;}#my-svg .edgeLabel rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#my-svg .cluster rect{fill:#f2f7ff;stroke:#8ca4b8;stroke-width:1px;}#my-svg .cluster text{fill:#110a00;}#my-svg .cluster span{color:#110a00;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Segoe UI,Noto Sans,Arial,sans-serif;font-size:12px;background:#eef5ff;border:1px solid hsl(215.2941176471, 60%, 86.6666666667%);border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#172534;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:#ffffff;text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:#ffffff;padding:2px;}#my-svg .icon-shape rect,#my-svg .image-shape rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg :root{--mermaid-font-family:Segoe UI,Noto Sans,Arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M152,112L152,119.333C152,126.667,152,141.333,152,155.333C152,169.333,152,182.667,152,189.333L152,196" id="L_P1_P2_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P1_P2_0" data-points="W3sieCI6MTUyLCJ5IjoxMTJ9LHsieCI6MTUyLCJ5IjoxNTZ9LHsieCI6MTUyLCJ5IjoyMDB9XQ==" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M152,304L152,311.333C152,318.667,152,333.333,152,347.333C152,361.333,152,374.667,152,381.333L152,388" id="L_P2_P3_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P2_P3_0" data-points="W3sieCI6MTUyLCJ5IjozMDR9LHsieCI6MTUyLCJ5IjozNDh9LHsieCI6MTUyLCJ5IjozOTJ9XQ==" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M152,496L152,503.333C152,510.667,152,525.333,152,539.333C152,553.333,152,566.667,152,573.333L152,580" id="L_P3_P4_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P3_P4_0" data-points="W3sieCI6MTUyLCJ5Ijo0OTZ9LHsieCI6MTUyLCJ5Ijo1NDB9LHsieCI6MTUyLCJ5Ijo1ODR9XQ==" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M152,718L152,725.333C152,732.667,152,747.333,152,761.333C152,775.333,152,788.667,152,795.333L152,802" id="L_P4_P5_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P4_P5_0" data-points="W3sieCI6MTUyLCJ5Ijo3MTh9LHsieCI6MTUyLCJ5Ijo3NjJ9LHsieCI6MTUyLCJ5Ijo4MDZ9XQ==" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M152,940L152,947.333C152,954.667,152,969.333,152,983.333C152,997.333,152,1010.667,152,1017.333L152,1024" id="L_P5_P6_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P5_P6_0" data-points="W3sieCI6MTUyLCJ5Ijo5NDB9LHsieCI6MTUyLCJ5Ijo5ODR9LHsieCI6MTUyLCJ5IjoxMDI4fV0=" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_P1_P2_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_P2_P3_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_P3_P4_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_P4_P5_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_P5_P6_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="flowchart-P1-0" transform="translate(152, 60)"><rect class="basic label-container" style="" x="-134.34375" y="-52" width="268.6875" height="104"/><g class="label" style="" transform="translate(-90.34375, -30)"><rect/><foreignObject width="180.6875" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Nguồn điện đầu vào<br />đạt 12V hoặc 24V</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-P2-1" transform="translate(152, 252)"><rect class="basic label-container" style="" x="-138.84375" y="-52" width="277.6875" height="104"/><g class="label" style="" transform="translate(-94.84375, -30)"><rect/><foreignObject width="189.6875" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>BLE OBD2<br />đọc IGN, RPM, tốc độ</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-P3-3" transform="translate(152, 444)"><rect class="basic label-container" style="" x="-112.75" y="-52" width="225.5" height="104"/><g class="label" style="" transform="translate(-68.75, -30)"><rect/><foreignObject width="137.5" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>GNSS<br />fix vị trí ổn định</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-P4-5" transform="translate(152, 651)"><rect class="basic label-container" style="" x="-144" y="-67" width="288" height="134"/><g class="label" style="" transform="translate(-100, -45)"><rect/><foreignObject width="200" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>4G / LTE<br />đăng ký mạng và gửi MQTT</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-P5-7" transform="translate(152, 873)"><rect class="basic label-container" style="" x="-144" y="-67" width="288" height="134"/><g class="label" style="" transform="translate(-100, -45)"><rect/><foreignObject width="200" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Power path<br />chuyển nguồn không reset</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-P6-9" transform="translate(152, 1110)"><rect class="basic label-container" style="" x="-144" y="-82" width="288" height="164"/><g class="label" style="" transform="translate(-100, -60)"><rect/><foreignObject width="200" height="120"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>IMU wake-up và deep sleep<br />hoạt động đúng chu kỳ</p></span></div></foreignObject></g></g></g></g></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="rgba(18, 32, 51, 0.14)"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <style>
+    text {
+      fill: #122033;
+      font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+    }
+    .title { font-size: 40px; font-weight: 750; letter-spacing: -0.02em; }
+    .subtitle { font-size: 22px; fill: #52637a; }
+    .section-title { font-size: 24px; font-weight: 700; }
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+    .body { font-size: 20px; }
+    .small { font-size: 18px; fill: #52637a; }
+    .tiny { font-size: 15px; fill: #52637a; }
+    .chip { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metric { font-size: 42px; font-weight: 760; }
+    .mono { font-family: "Consolas", "Courier New", monospace; font-size: 18px; }
+    .sidebar { fill: #f8fafc; font-size: 18px; font-weight: 600; }
+  </style>
+  <rect width="100%" height="100%" fill="#f4f7fb"/>
+  <rect x="32" y="32" width="1536" height="936" rx="30" fill="none" stroke="rgba(29, 78, 216, 0.12)" stroke-width="2"/>
+  <rect x="56" y="56" width="1488" height="888" rx="28" fill="rgba(255, 255, 255, 0.45)" stroke="none"/>
+  <text x="84" y="106" class="title">Checklist kiểm tra hệ thống sau khi lắp đặt trong xe</text>
+  <text x="84" y="142" class="subtitle">Checklist sau lắp đặt được chia hai cụm kiểm tra để tránh layout quá hẹp và giúp đọc nhanh hơn.</text>
+  
+      
+  <rect x="94" y="236" width="1412" height="246" rx="30" fill="#ffffff" stroke="rgba(29, 78, 216, 0.28)" stroke-width="3" />
+  <rect x="118" y="218" width="220" height="34" rx="17" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="228" y="241" class="chip" text-anchor="middle" fill="#fff">Kiểm tra kết nối và định vị</text>
+  <text x="122" y="270" class="small" text-anchor="start" fill="#122033"><tspan x="122" dy="0">Ba bước đầu giữ nhịp triển khai hoặc kiểm tra trước khi chuyển sang pha kế tiếp.</tspan></text>
+
+      
+  <rect x="94" y="552" width="1412" height="246" rx="30" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="3" />
+  <rect x="118" y="534" width="220" height="34" rx="17" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="228" y="557" class="chip" text-anchor="middle" fill="#fff">Kiểm tra truyền thông và năng lượng</text>
+  <text x="122" y="586" class="small" text-anchor="start" fill="#122033"><tspan x="122" dy="0">Ba bước cuối chốt vòng thực thi, đánh giá và hoàn thiện hệ thống.</tspan></text>
+
+      
+    <rect x="138" y="304" width="280" height="128" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="138" y="304" width="280" height="12" rx="26" fill="#1d4ed8" stroke="none"/>
+    <rect x="156" y="324" width="90" height="34" rx="17" fill="rgba(29, 78, 216, 0.88)" stroke="rgba(29, 78, 216, 0.88)" stroke-width="2" /><text x="201" y="347" class="chip" text-anchor="middle" fill="#fff">check 1</text>
+    <text x="278" y="368" class="card-title" text-anchor="middle" fill="#122033"><tspan x="278" dy="0">Bước 1</tspan></text>
+    <text x="278" y="412" class="body" text-anchor="middle" fill="#122033"><tspan x="278" dy="0">Nguồn điện đầu vào đạt</tspan><tspan x="278" dy="24">12V hoặc 24V</tspan></text>
+  
+    <rect x="560" y="304" width="280" height="128" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="560" y="304" width="280" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    <rect x="578" y="324" width="90" height="34" rx="17" fill="rgba(15, 118, 110, 0.88)" stroke="rgba(15, 118, 110, 0.88)" stroke-width="2" /><text x="623" y="347" class="chip" text-anchor="middle" fill="#fff">check 2</text>
+    <text x="700" y="368" class="card-title" text-anchor="middle" fill="#122033"><tspan x="700" dy="0">Bước 2</tspan></text>
+    <text x="700" y="412" class="body" text-anchor="middle" fill="#122033"><tspan x="700" dy="0">BLE OBD2 đọc IGN, RPM,</tspan><tspan x="700" dy="24">tốc độ</tspan></text>
+  
+    <rect x="982" y="304" width="280" height="128" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="982" y="304" width="280" height="12" rx="26" fill="#c97a10" stroke="none"/>
+    <rect x="1000" y="324" width="90" height="34" rx="17" fill="rgba(201, 122, 16, 0.88)" stroke="rgba(201, 122, 16, 0.88)" stroke-width="2" /><text x="1045" y="347" class="chip" text-anchor="middle" fill="#fff">check 3</text>
+    <text x="1122" y="368" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1122" dy="0">Bước 3</tspan></text>
+    <text x="1122" y="412" class="body" text-anchor="middle" fill="#122033"><tspan x="1122" dy="0">GNSS fix vị trí ổn định</tspan></text>
+  
+    <rect x="138" y="620" width="280" height="128" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="138" y="620" width="280" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    <rect x="156" y="640" width="90" height="34" rx="17" fill="rgba(217, 72, 95, 0.88)" stroke="rgba(217, 72, 95, 0.88)" stroke-width="2" /><text x="201" y="663" class="chip" text-anchor="middle" fill="#fff">check 4</text>
+    <text x="278" y="684" class="card-title" text-anchor="middle" fill="#122033"><tspan x="278" dy="0">Bước 4</tspan></text>
+    <text x="278" y="728" class="body" text-anchor="middle" fill="#122033"><tspan x="278" dy="0">4G / LTE đăng ký mạng và</tspan><tspan x="278" dy="24">gửi MQTT</tspan></text>
+  
+    <rect x="560" y="620" width="280" height="128" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="560" y="620" width="280" height="12" rx="26" fill="#0f9d76" stroke="none"/>
+    <rect x="578" y="640" width="90" height="34" rx="17" fill="rgba(15, 157, 118, 0.88)" stroke="rgba(15, 157, 118, 0.88)" stroke-width="2" /><text x="623" y="663" class="chip" text-anchor="middle" fill="#fff">check 5</text>
+    <text x="700" y="684" class="card-title" text-anchor="middle" fill="#122033"><tspan x="700" dy="0">Bước 5</tspan></text>
+    <text x="700" y="728" class="body" text-anchor="middle" fill="#122033"><tspan x="700" dy="0">Power path chuyển nguồn</tspan><tspan x="700" dy="24">không reset</tspan></text>
+  
+    <rect x="982" y="620" width="280" height="128" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="982" y="620" width="280" height="12" rx="26" fill="#6d4fe0" stroke="none"/>
+    <rect x="1000" y="640" width="90" height="34" rx="17" fill="rgba(109, 79, 224, 0.88)" stroke="rgba(109, 79, 224, 0.88)" stroke-width="2" /><text x="1045" y="663" class="chip" text-anchor="middle" fill="#fff">check 6</text>
+    <text x="1122" y="684" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1122" dy="0">Bước 6</tspan></text>
+    <text x="1122" y="728" class="body" text-anchor="middle" fill="#122033"><tspan x="1122" dy="0">IMU wake-up và deep sleep</tspan><tspan x="1122" dy="24">hoạt động đúng chu kỳ</tspan></text>
+  
+      
+    <line x1="418" y1="368" x2="560" y2="368" stroke="#1d4ed8" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="840" y1="368" x2="982" y2="368" stroke="#1d4ed8" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <polyline points="1122,368 1236,368 1236,684 982,684" fill="none" stroke="#0f766e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow-slate)"/>
+    <rect x="1130" y="492" width="120" height="54" rx="18" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="2" /><text x="1190" y="525" class="small" text-anchor="middle" fill="#122033"><tspan x="1190" dy="0">chuyển pha</tspan></text>
+  
+      
+    <line x1="418" y1="684" x2="560" y2="684" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="840" y1="684" x2="982" y2="684" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+    
+</svg>

@@ -1,6 +1,0 @@
-flowchart LR
-    Parking["Chế độ đỗ xe<br/>Deep sleep + IMU canh rung"] -->|Bật máy| Driving["Chế độ lái xe<br/>4G + GNSS + OBD2 hoạt động"]
-    Driving -->|Tắt máy| Parking
-    Parking -->|IMU phát hiện rung| Alert["Chế độ cảnh báo<br/>Wake modem và gửi alert"]
-    Alert -->|Hoàn tất hoặc timeout| Parking
-    Alert -->|Xe tiếp tục chạy| Driving

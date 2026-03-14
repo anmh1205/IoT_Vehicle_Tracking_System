@@ -1,1 +1,141 @@
-<svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width: 1891.61px; background-color: white;" viewBox="0 0 1891.609375 256.5" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:Segoe UI,Noto Sans,Arial,sans-serif;font-size:20px;fill:#172534;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#eef5ff;}#my-svg .error-text{fill:#110a00;stroke:#110a00;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#35566f;stroke:#35566f;}#my-svg .marker.cross{stroke:#35566f;}#my-svg svg{font-family:Segoe UI,Noto Sans,Arial,sans-serif;font-size:20px;}#my-svg p{margin:0;}#my-svg .label{font-family:Segoe UI,Noto Sans,Arial,sans-serif;color:#172534;}#my-svg .cluster-label text{fill:#110a00;}#my-svg .cluster-label span{color:#110a00;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#172534;color:#172534;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#f8fbff;stroke:#35566f;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#35566f!important;stroke-width:0;stroke:#35566f;}#my-svg .arrowheadPath{fill:#0b0b0b;}#my-svg .edgePath .path{stroke:#35566f;stroke-width:2.0px;}#my-svg .flowchart-link{stroke:#35566f;fill:none;}#my-svg .edgeLabel{background-color:#ffffff;text-align:center;}#my-svg .edgeLabel p{background-color:#ffffff;}#my-svg .edgeLabel rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#my-svg .cluster rect{fill:#f2f7ff;stroke:#8ca4b8;stroke-width:1px;}#my-svg .cluster text{fill:#110a00;}#my-svg .cluster span{color:#110a00;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Segoe UI,Noto Sans,Arial,sans-serif;font-size:12px;background:#eef5ff;border:1px solid hsl(215.2941176471, 60%, 86.6666666667%);border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#172534;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:#ffffff;text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:#ffffff;padding:2px;}#my-svg .icon-shape rect,#my-svg .image-shape rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg :root{--mermaid-font-family:Segoe UI,Noto Sans,Arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M296,60L303.333,60C310.667,60,325.333,60,339.333,60C353.333,60,366.667,60,373.333,60L380,60" id="L_Vin_Fuse_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Vin_Fuse_0" data-points="W3sieCI6Mjk2LCJ5Ijo2MH0seyJ4IjozNDAsInkiOjYwfSx7IngiOjM4NCwieSI6NjB9XQ==" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M612.469,60L619.802,60C627.135,60,641.802,60,655.86,62.998C669.918,65.995,683.366,71.991,690.091,74.988L696.815,77.986" id="L_Fuse_Mp_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Fuse_Mp_0" data-points="W3sieCI6NjEyLjQ2ODc1LCJ5Ijo2MH0seyJ4Ijo2NTYuNDY4NzUsInkiOjYwfSx7IngiOjcwMC40Njg3NSwieSI6NzkuNjE0Njg2ODI1MDU0fV0=" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M901.844,74.395L909.177,70.746C916.51,67.097,931.177,59.798,948.703,56.149C966.229,52.5,986.615,52.5,996.807,52.5L1007,52.5" id="L_Mp_L1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Mp_L1_0" data-points="W3sieCI6OTAxLjg0Mzc1LCJ5Ijo3NC4zOTU0NjQzNjI4NTA5N30seyJ4Ijo5NDUuODQzNzUsInkiOjUyLjV9LHsieCI6MTAxMSwieSI6NTIuNX1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M1256.688,52.5L1267.547,52.5C1278.406,52.5,1300.125,52.5,1322.114,58.036C1344.102,63.573,1366.361,74.646,1377.49,80.182L1388.619,85.718" id="L_L1_Bus_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L1_Bus_0" data-points="W3sieCI6MTI1Ni42ODc1LCJ5Ijo1Mi41fSx7IngiOjEzMjEuODQzNzUsInkiOjUyLjV9LHsieCI6MTM5Mi4yMDA3Mzc4NDcyMjIyLCJ5Ijo4Ny41fV0=" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M901.844,174.605L909.177,178.254C916.51,181.903,931.177,189.202,945.177,192.851C959.177,196.5,972.51,196.5,979.177,196.5L985.844,196.5" id="L_Mp_D1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Mp_D1_0" data-points="W3sieCI6OTAxLjg0Mzc1LCJ5IjoxNzQuNjA0NTM1NjM3MTQ5fSx7IngiOjk0NS44NDM3NSwieSI6MTk2LjV9LHsieCI6OTg5Ljg0Mzc1LCJ5IjoxOTYuNX1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M1277.844,196.5L1285.177,196.5C1292.51,196.5,1307.177,196.5,1325.64,190.964C1344.102,185.427,1366.361,174.354,1377.49,168.818L1388.619,163.282" id="L_D1_Bus_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_D1_Bus_0" data-points="W3sieCI6MTI3Ny44NDM3NSwieSI6MTk2LjV9LHsieCI6MTMyMS44NDM3NSwieSI6MTk2LjV9LHsieCI6MTM5Mi4yMDA3Mzc4NDcyMjIyLCJ5IjoxNjEuNX1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M612.383,189L619.73,189C627.078,189,641.773,189,655.846,186.002C669.918,183.005,683.366,177.009,690.091,174.012L696.815,171.014" id="L_Cin_Mp_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Cin_Mp_0" data-points="W3sieCI6NjEyLjM4MjgxMjUsInkiOjE4OX0seyJ4Ijo2NTYuNDY4NzUsInkiOjE4OX0seyJ4Ijo3MDAuNDY4NzUsInkiOjE2OS4zODUzMTMxNzQ5NDYwMn1d" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M1567.313,124.5L1574.646,124.5C1581.979,124.5,1596.646,124.5,1610.646,124.5C1624.646,124.5,1637.979,124.5,1644.646,124.5L1651.313,124.5" id="L_Bus_Cout_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Bus_Cout_0" data-points="W3sieCI6MTU2Ny4zMTI1LCJ5IjoxMjQuNX0seyJ4IjoxNjExLjMxMjUsInkiOjEyNC41fSx7IngiOjE2NTUuMzEyNSwieSI6MTI0LjV9XQ==" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_Vin_Fuse_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_Fuse_Mp_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_Mp_L1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_L1_Bus_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_Mp_D1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_D1_Bus_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_Cin_Mp_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_Bus_Cout_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="flowchart-Vin-0" transform="translate(152, 60)"><rect class="basic label-container" style="" x="-144" y="-52" width="288" height="104"/><g class="label" style="" transform="translate(-100, -30)"><rect/><foreignObject width="200" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Ắc quy xe 12V hoặc 24V</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Fuse-1" transform="translate(498.234375, 60)"><rect class="basic label-container" style="" x="-114.234375" y="-37" width="228.46875" height="74"/><g class="label" style="" transform="translate(-70.234375, -15)"><rect/><foreignObject width="140.46875" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Cầu chì đầu vào</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Mp-3" transform="translate(801.15625, 124.5)"><rect class="basic label-container" style="" x="-100.6875" y="-52" width="201.375" height="104"/><g class="label" style="" transform="translate(-56.6875, -30)"><rect/><foreignObject width="113.375" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>MP2482-5.0<br />buck 5V / 3A</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-L1-5" transform="translate(1133.84375, 52.5)"><rect class="basic label-container" style="" x="-122.84375" y="-37" width="245.6875" height="74"/><g class="label" style="" transform="translate(-78.84375, -15)"><rect/><foreignObject width="157.6875" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Cuộn cảm 100 uH</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Bus-7" transform="translate(1466.578125, 124.5)"><rect class="basic label-container" style="" x="-100.734375" y="-37" width="201.46875" height="74"/><g class="label" style="" transform="translate(-56.734375, -15)"><rect/><foreignObject width="113.46875" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Bus 5V chính</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-D1-9" transform="translate(1133.84375, 196.5)"><rect class="basic label-container" style="" x="-144" y="-52" width="288" height="104"/><g class="label" style="" transform="translate(-100, -30)"><rect/><foreignObject width="200" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Diode Schottky 1N5822</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Cin-12" transform="translate(498.234375, 189)"><rect class="basic label-container" style="" x="-114.1484375" y="-37" width="228.296875" height="74"/><g class="label" style="" transform="translate(-70.1484375, -15)"><rect/><foreignObject width="140.296875" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>C1 100 uF / 50V</p></span></div></foreignObject></g></g><g class="node default" id="flowchart-Cout-15" transform="translate(1769.4609375, 124.5)"><rect class="basic label-container" style="" x="-114.1484375" y="-37" width="228.296875" height="74"/><g class="label" style="" transform="translate(-70.1484375, -15)"><rect/><foreignObject width="140.296875" height="30"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>C2 220 uF / 16V</p></span></div></foreignObject></g></g></g></g></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="rgba(18, 32, 51, 0.14)"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <style>
+    text {
+      fill: #122033;
+      font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+    }
+    .title { font-size: 40px; font-weight: 750; letter-spacing: -0.02em; }
+    .subtitle { font-size: 22px; fill: #52637a; }
+    .section-title { font-size: 24px; font-weight: 700; }
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+    .body { font-size: 20px; }
+    .small { font-size: 18px; fill: #52637a; }
+    .tiny { font-size: 15px; fill: #52637a; }
+    .chip { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metric { font-size: 42px; font-weight: 760; }
+    .mono { font-family: "Consolas", "Courier New", monospace; font-size: 18px; }
+    .sidebar { fill: #f8fafc; font-size: 18px; font-weight: 600; }
+  </style>
+  <rect width="100%" height="100%" fill="#f4f7fb"/>
+  <rect x="32" y="32" width="1536" height="936" rx="30" fill="none" stroke="rgba(29, 78, 216, 0.12)" stroke-width="2"/>
+  <rect x="56" y="56" width="1488" height="888" rx="28" fill="rgba(255, 255, 255, 0.45)" stroke="none"/>
+  <text x="84" y="106" class="title">Sơ đồ nguyên lý mạch Buck Converter MP2482</text>
+  <text x="84" y="142" class="subtitle">Minh họa lại luồng nguồn 12V / 24V sang bus 5V chính với các linh kiện then chốt.</text>
+  
+      
+  <rect x="90" y="242" width="300" height="522" rx="30" fill="#ffffff" stroke="rgba(29, 78, 216, 0.28)" stroke-width="3" />
+  <rect x="114" y="224" width="110" height="34" rx="17" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="169" y="247" class="chip" text-anchor="middle" fill="#fff">Nguồn vào</text>
+  <text x="118" y="276" class="small" text-anchor="start" fill="#122033"><tspan x="118" dy="0">Nhánh lấy điện từ ắc quy</tspan><tspan x="118" dy="22">xe qua cầu chì và tụ lọc</tspan><tspan x="118" dy="22">đầu vào.</tspan></text>
+
+      
+  <rect x="432" y="242" width="350" height="522" rx="30" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="3" />
+  <rect x="456" y="224" width="220" height="34" rx="17" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="566" y="247" class="chip" text-anchor="middle" fill="#fff">Khối chuyển đổi buck</text>
+  <text x="460" y="276" class="small" text-anchor="start" fill="#122033"><tspan x="460" dy="0">MP2482 tạo bus 5V chính từ</tspan><tspan x="460" dy="22">nguồn 12V hoặc 24V.</tspan></text>
+
+      
+  <rect x="824" y="242" width="686" height="522" rx="30" fill="#ffffff" stroke="rgba(201, 122, 16, 0.28)" stroke-width="3" />
+  <rect x="848" y="224" width="168" height="34" rx="17" fill="#c97a10" stroke="#c97a10" stroke-width="2" /><text x="932" y="247" class="chip" text-anchor="middle" fill="#fff">Khối đầu ra 5V</text>
+  <text x="852" y="276" class="small" text-anchor="start" fill="#122033"><tspan x="852" dy="0">Cuộn cảm, diode và tụ đầu ra phối hợp để giữ rail 5V ổn định.</tspan></text>
+
+      
+    <rect x="124" y="332" width="232" height="124" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="124" y="332" width="232" height="12" rx="26" fill="#1d4ed8" stroke="none"/>
+    <rect x="142" y="352" width="90" height="34" rx="17" fill="rgba(29, 78, 216, 0.88)" stroke="rgba(29, 78, 216, 0.88)" stroke-width="2" /><text x="187" y="375" class="chip" text-anchor="middle" fill="#fff">vin</text>
+    <text x="240" y="396" class="card-title" text-anchor="middle" fill="#122033"><tspan x="240" dy="0">Ắc quy xe</tspan></text>
+    <text x="240" y="440" class="body" text-anchor="middle" fill="#122033"><tspan x="240" dy="0">Nguồn 12V hoặc 24V</tspan></text>
+  
+      
+    <rect x="124" y="534" width="232" height="124" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="124" y="534" width="232" height="12" rx="26" fill="#1d4ed8" stroke="none"/>
+    <rect x="142" y="554" width="90" height="34" rx="17" fill="rgba(29, 78, 216, 0.88)" stroke="rgba(29, 78, 216, 0.88)" stroke-width="2" /><text x="187" y="577" class="chip" text-anchor="middle" fill="#fff">fuse</text>
+    <text x="240" y="598" class="card-title" text-anchor="middle" fill="#122033"><tspan x="240" dy="0">Cầu chì đầu vào</tspan></text>
+    <text x="240" y="642" class="body" text-anchor="middle" fill="#122033"><tspan x="240" dy="0">Bảo vệ khi có sự cố</tspan><tspan x="240" dy="24">quá dòng</tspan></text>
+  
+      
+    <rect x="474" y="332" width="266" height="124" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="474" y="332" width="266" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    <rect x="492" y="352" width="90" height="34" rx="17" fill="rgba(15, 118, 110, 0.88)" stroke="rgba(15, 118, 110, 0.88)" stroke-width="2" /><text x="537" y="375" class="chip" text-anchor="middle" fill="#fff">filter</text>
+    <text x="607" y="396" class="card-title" text-anchor="middle" fill="#122033"><tspan x="607" dy="0">Tụ lọc C1</tspan></text>
+    <text x="607" y="440" class="body" text-anchor="middle" fill="#122033"><tspan x="607" dy="0">100 uF / 50V</tspan><tspan x="607" dy="24">Giảm nhiễu đầu vào</tspan></text>
+  
+      
+    <rect x="474" y="534" width="266" height="146" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="474" y="534" width="266" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    <rect x="492" y="554" width="90" height="34" rx="17" fill="rgba(15, 118, 110, 0.88)" stroke="rgba(15, 118, 110, 0.88)" stroke-width="2" /><text x="537" y="577" class="chip" text-anchor="middle" fill="#fff">buck</text>
+    <text x="607" y="598" class="card-title" text-anchor="middle" fill="#122033"><tspan x="607" dy="0">MP2482-5.0</tspan></text>
+    <text x="607" y="642" class="body" text-anchor="middle" fill="#122033"><tspan x="607" dy="0">Buck 5V / 3A</tspan><tspan x="607" dy="24">Rail nguồn chính cho</tspan><tspan x="607" dy="24">tracker</tspan></text>
+  
+      
+    <rect x="874" y="318" width="196" height="124" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="874" y="318" width="196" height="12" rx="26" fill="#c97a10" stroke="none"/>
+    <rect x="892" y="338" width="90" height="34" rx="17" fill="rgba(201, 122, 16, 0.88)" stroke="rgba(201, 122, 16, 0.88)" stroke-width="2" /><text x="937" y="361" class="chip" text-anchor="middle" fill="#fff">L</text>
+    <text x="972" y="382" class="card-title" text-anchor="middle" fill="#122033"><tspan x="972" dy="0">Cuộn cảm</tspan></text>
+    <text x="972" y="426" class="body" text-anchor="middle" fill="#122033"><tspan x="972" dy="0">100 uH</tspan></text>
+  
+      
+    <rect x="874" y="536" width="196" height="124" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="874" y="536" width="196" height="12" rx="26" fill="#c97a10" stroke="none"/>
+    <rect x="892" y="556" width="90" height="34" rx="17" fill="rgba(201, 122, 16, 0.88)" stroke="rgba(201, 122, 16, 0.88)" stroke-width="2" /><text x="937" y="579" class="chip" text-anchor="middle" fill="#fff">D</text>
+    <text x="972" y="600" class="card-title" text-anchor="middle" fill="#122033"><tspan x="972" dy="0">Diode Schottky</tspan></text>
+    <text x="972" y="644" class="body" text-anchor="middle" fill="#122033"><tspan x="972" dy="0">1N5822</tspan></text>
+  
+      
+    <rect x="1120" y="430" width="188" height="138" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1120" y="430" width="188" height="12" rx="26" fill="#0f9d76" stroke="none"/>
+    <rect x="1138" y="450" width="90" height="34" rx="17" fill="rgba(15, 157, 118, 0.88)" stroke="rgba(15, 157, 118, 0.88)" stroke-width="2" /><text x="1183" y="473" class="chip" text-anchor="middle" fill="#fff">bus</text>
+    <text x="1214" y="494" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1214" dy="0">Bus 5V chính</tspan></text>
+    <text x="1214" y="538" class="body" text-anchor="middle" fill="#122033"><tspan x="1214" dy="0">Nguồn runtime cho</tspan><tspan x="1214" dy="24">các rail chức năng</tspan></text>
+  
+      
+    <rect x="1358" y="430" width="118" height="138" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1358" y="430" width="118" height="12" rx="26" fill="#0f9d76" stroke="none"/>
+    <rect x="1376" y="450" width="82" height="34" rx="17" fill="rgba(15, 157, 118, 0.88)" stroke="rgba(15, 157, 118, 0.88)" stroke-width="2" /><text x="1417" y="473" class="chip" text-anchor="middle" fill="#fff">cap</text>
+    <text x="1417" y="494" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1417" dy="0">C2</tspan></text>
+    <text x="1417" y="538" class="body" text-anchor="middle" fill="#122033"><tspan x="1417" dy="0">220 uF / 16V</tspan></text>
+  
+      
+    <line x1="240" y1="456" x2="240" y2="534" stroke="#1d4ed8" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="356" y1="596" x2="474" y2="606" stroke="#1d4ed8" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="607" y1="456" x2="607" y2="534" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="740" y1="606" x2="874" y2="598" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="740" y1="606" x2="874" y2="380" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="730" y="438" width="108" height="54" rx="18" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="2" /><text x="784" y="471" class="small" text-anchor="middle" fill="#122033"><tspan x="784" dy="0">xung buck</tspan></text>
+  
+      
+    <line x1="1070" y1="380" x2="1120" y2="484" stroke="#c97a10" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="1070" y1="598" x2="1120" y2="514" stroke="#c97a10" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="1308" y1="500" x2="1358" y2="500" stroke="#0f9d76" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+    
+</svg>

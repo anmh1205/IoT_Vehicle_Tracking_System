@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1180">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <style>
+      text { font-family: Arial, sans-serif; fill: #0f172a; }
+      .title { font-size: 34px; font-weight: 700; }
+      .subtitle { font-size: 20px; fill: #475569; }
+      .label { font-size: 24px; font-weight: 700; }
+      .small { font-size: 18px; fill: #334155; }
+      .box { fill: #f8fafc; stroke: #0f172a; stroke-width: 2.5; rx: 18; ry: 18; }
+      .status { fill: #eff6ff; stroke: #2563eb; }
+      .action { fill: #eef2ff; stroke: #4f46e5; }
+      .success { fill: #ecfdf5; stroke: #059669; }
+      .warn { fill: #fff7ed; stroke: #ea580c; }
+      .note { fill: #fefce8; stroke: #ca8a04; }
+      .arrow { stroke: #334155; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 10 8; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="1180" fill="#ffffff"/>
+  <text x="700" y="54" text-anchor="middle" class="title">Luồng thực thi OTA bên trong firmware</text>
+  <text x="700" y="88" text-anchor="middle" class="subtitle">Các bước chính hiện thực trong command_handler.c, state_machine.c và util.c</text>
+
+  <rect x="450" y="120" width="500" height="84" class="box action"/>
+  <text x="700" y="171" text-anchor="middle" class="label">Nhận lệnh ota_update từ MQTT</text>
+
+  <rect x="450" y="248" width="500" height="96" class="box"/>
+  <text x="700" y="290" text-anchor="middle" class="label">Kiểm tra tham số OTA</text>
+  <text x="700" y="319" text-anchor="middle" class="small">jobId, version, url, size, sha256, force, confirmTimeoutSec</text>
+
+  <rect x="450" y="388" width="500" height="84" class="box status"/>
+  <text x="700" y="439" text-anchor="middle" class="label">Phát trạng thái: assigned</text>
+
+  <rect x="450" y="516" width="500" height="106" class="box action"/>
+  <text x="700" y="559" text-anchor="middle" class="label">Tải firmware qua HTTPS và ghi OTA</text>
+  <text x="700" y="588" text-anchor="middle" class="small">stream từng chunk xuống OTA partition kế tiếp</text>
+
+  <rect x="450" y="666" width="500" height="106" class="box action"/>
+  <text x="700" y="709" text-anchor="middle" class="label">Kiểm tra image và đổi boot partition</text>
+  <text x="700" y="738" text-anchor="middle" class="small">đối chiếu SHA-256, gọi esp_ota_set_boot_partition()</text>
+
+  <rect x="450" y="816" width="500" height="84" class="box status"/>
+  <text x="700" y="867" text-anchor="middle" class="label">Phát payload trạng thái rồi reboot</text>
+
+  <rect x="450" y="944" width="500" height="90" class="box action"/>
+  <text x="700" y="984" text-anchor="middle" class="label">Khởi động partition mới và phát confirming</text>
+  <text x="700" y="1013" text-anchor="middle" class="small">RTC context giữ jobId, version, previousVersion và partition</text>
+
+  <rect x="450" y="1072" width="500" height="78" class="box success"/>
+  <text x="700" y="1121" text-anchor="middle" class="label">Đánh dấu app hợp lệ và phát success</text>
+
+  <path d="M 700 204 L 700 248" class="arrow"/>
+  <path d="M 700 344 L 700 388" class="arrow"/>
+  <path d="M 700 472 L 700 516" class="arrow"/>
+  <path d="M 700 622 L 700 666" class="arrow"/>
+  <path d="M 700 772 L 700 816" class="arrow"/>
+  <path d="M 700 900 L 700 944" class="arrow"/>
+  <path d="M 700 1034 L 700 1072" class="arrow"/>
+
+  <rect x="980" y="540" width="300" height="120" class="box warn"/>
+  <text x="1130" y="585" text-anchor="middle" class="label">Nhánh lỗi</text>
+  <text x="1130" y="614" text-anchor="middle" class="small">lỗi tải file, sai hash,</text>
+  <text x="1130" y="641" text-anchor="middle" class="small">hoặc lỗi boot/xác nhận</text>
+  <path d="M 950 719 C 1060 719, 1040 640, 980 640" class="arrow dash"/>
+  <text x="1080" y="707" text-anchor="middle" class="small">phát failed</text>
+
+  <rect x="100" y="904" width="260" height="96" class="box warn"/>
+  <text x="230" y="946" text-anchor="middle" class="label">Rollback thủ công</text>
+  <text x="230" y="974" text-anchor="middle" class="small">manual_rollback / ota_rollback</text>
+
+  <rect x="80" y="1044" width="300" height="96" class="box success"/>
+  <text x="230" y="1086" text-anchor="middle" class="label">Chuyển lại partition trước đó</text>
+  <text x="230" y="1115" text-anchor="middle" class="small">reboot và phát rolled_back</text>
+
+  <path d="M 450 989 C 360 989, 360 952, 360 952" class="arrow dash"/>
+  <path d="M 230 1000 L 230 1044" class="arrow"/>
+
+  <rect x="990" y="938" width="290" height="170" class="box note"/>
+  <text x="1135" y="980" text-anchor="middle" class="label">Các trạng thái OTA hiển thị</text>
+  <text x="1135" y="1012" text-anchor="middle" class="small">assigned</text>
+  <text x="1135" y="1038" text-anchor="middle" class="small">rebooting</text>
+  <text x="1135" y="1064" text-anchor="middle" class="small">confirming</text>
+  <text x="1135" y="1090" text-anchor="middle" class="small">success / failed / rolled_back</text>
+</svg>

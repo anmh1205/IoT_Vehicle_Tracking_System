@@ -1,9 +1,0 @@
-flowchart TB
-    Root["Tracking_Backend / src"] --> Core["core/<br/>interface, type, schema"]
-    Root --> Modules["modules/<br/>auth, device, telemetry, vehicle"]
-    Root --> Middleware["middleware/<br/>auth, rate-limit, metrics"]
-    Root --> Shared["shared/<br/>utils, response, helper"]
-    Root --> Entry["entrypoints<br/>routes, index, Socket.IO"]
-    Modules --> Shared
-    Entry --> Modules
-    Entry --> Middleware

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 980" width="1600" height="980">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#334155"/>
+    </marker>
+    <style><![CDATA[
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #0f172a; }
+      .title { font-size: 36px; font-weight: 700; }
+      .subtitle { font-size: 19px; fill: #475569; }
+      .card-title { font-size: 24px; font-weight: 700; }
+      .body { font-size: 18px; fill: #334155; }
+      .small { font-size: 16px; fill: #475569; }
+      .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 24; ry: 24; }
+      .controller { fill: #eef2ff; stroke: #4f46e5; }
+      .power { fill: #ecfeff; stroke: #0891b2; }
+      .measure { fill: #fefce8; stroke: #ca8a04; }
+      .modem { fill: #fff7ed; stroke: #ea580c; }
+      .ble { fill: #f5f3ff; stroke: #7c3aed; }
+      .sensor { fill: #ecfdf5; stroke: #16a34a; }
+      .note { fill: #f8fafc; stroke: #cbd5e1; }
+      .chip { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; rx: 14; ry: 14; }
+      .chip-text { font-size: 15px; font-weight: 600; fill: #334155; }
+      .arrow { stroke: #334155; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 10 8; }
+    ]]></style>
+  </defs>
+
+  <rect width="1600" height="980" fill="#f8fafc"/>
+  <rect x="40" y="40" width="1520" height="900" rx="28" fill="#ffffff" stroke="#dbeafe" stroke-width="2"/>
+
+  <text x="800" y="88" text-anchor="middle" class="title">Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker</text>
+  <text x="800" y="122" text-anchor="middle" class="subtitle">Tổng hợp các kết nối UART, BLE, I2C, ADC và GPIO điều khiển nguồn theo pin mapping firmware hiện tại</text>
+
+  <rect x="80" y="170" width="380" height="220" class="card power"/>
+  <text x="270" y="218" text-anchor="middle" class="card-title">Khối nguồn runtime</text>
+  <text x="270" y="254" text-anchor="middle" class="body">5V runtime, 3.3V logic, rail ~4V modem</text>
+  <text x="270" y="286" text-anchor="middle" class="body">Điều phối charger, power path và trạng thái LVD</text>
+  <text x="270" y="320" text-anchor="middle" class="small">Khối này gom các tín hiệu GPIO điều khiển nguồn của firmware</text>
+
+  <rect x="100" y="470" width="340" height="150" class="card measure"/>
+  <text x="270" y="516" text-anchor="middle" class="card-title">Voltage divider U_batt</text>
+  <text x="270" y="550" text-anchor="middle" class="body">R1 = 100 kΩ, R2 = 10 kΩ</text>
+  <text x="270" y="576" text-anchor="middle" class="body">Cấp tín hiệu đo điện áp về ADC</text>
+
+  <rect x="590" y="254" width="420" height="250" class="card controller"/>
+  <text x="800" y="310" text-anchor="middle" class="card-title">ESP32-S3-WROOM-1</text>
+  <text x="800" y="348" text-anchor="middle" class="body">Trung tâm xử lý của hệ thống tracker</text>
+  <text x="800" y="374" text-anchor="middle" class="body">Đọc ADC, giao tiếp UART/BLE/I2C và thực thi state machine nguồn</text>
+
+  <rect x="1160" y="150" width="320" height="156" class="card modem"/>
+  <text x="1320" y="200" text-anchor="middle" class="card-title">SIM7600CE-T</text>
+  <text x="1320" y="234" text-anchor="middle" class="body">LTE + GNSS tích hợp</text>
+  <text x="1320" y="260" text-anchor="middle" class="small">UART1 và PWRKEY do ESP32-S3 điều khiển</text>
+
+  <rect x="1160" y="400" width="320" height="134" class="card ble"/>
+  <text x="1320" y="448" text-anchor="middle" class="card-title">vgate iCar Pro</text>
+  <text x="1320" y="482" text-anchor="middle" class="body">Adapter OBD-II giao tiếp BLE</text>
+  <text x="1320" y="508" text-anchor="middle" class="small">Đường dữ liệu OBD2 được truyền không dây</text>
+
+  <rect x="1160" y="620" width="320" height="160" class="card sensor"/>
+  <text x="1320" y="670" text-anchor="middle" class="card-title">LIS3DH</text>
+  <text x="1320" y="704" text-anchor="middle" class="body">I2C tại GPIO47/48</text>
+  <text x="1320" y="730" text-anchor="middle" class="body">INT1 tại GPIO21 để đánh thức từ deep sleep</text>
+
+  <path d="M460 256 L590 334" class="arrow"/>
+  <path d="M440 546 L590 458" class="arrow"/>
+  <path d="M1010 334 L1160 224" class="arrow"/>
+  <path d="M1010 370 L1160 270" class="arrow dash"/>
+  <path d="M1010 394 L1160 468" class="arrow dash"/>
+  <path d="M1010 458 L1160 698" class="arrow"/>
+
+  <rect x="500" y="300" width="120" height="34" class="chip"/>
+  <text x="560" y="322" text-anchor="middle" class="chip-text">GPIO power</text>
+
+  <rect x="494" y="516" width="108" height="34" class="chip"/>
+  <text x="548" y="538" text-anchor="middle" class="chip-text">GPIO4 ADC</text>
+
+  <rect x="1028" y="286" width="104" height="34" class="chip"/>
+  <text x="1080" y="308" text-anchor="middle" class="chip-text">UART1</text>
+
+  <rect x="1018" y="372" width="132" height="34" class="chip"/>
+  <text x="1084" y="394" text-anchor="middle" class="chip-text">GPIO26 PWRKEY</text>
+
+  <rect x="1028" y="420" width="88" height="34" class="chip"/>
+  <text x="1072" y="442" text-anchor="middle" class="chip-text">BLE</text>
+
+  <rect x="1028" y="604" width="128" height="34" class="chip"/>
+  <text x="1092" y="626" text-anchor="middle" class="chip-text">I2C + INT1</text>
+
+  <rect x="80" y="830" width="1400" height="86" class="card note"/>
+  <text x="780" y="870" text-anchor="middle" class="body">GPIO16/17 dùng cho UART1, GPIO26 cho PWRKEY, GPIO47/48 cho I2C, GPIO21 nhận INT1, GPIO4 đọc ADC; GPIO5, GPIO18, GPIO19 thuộc nhóm điều phối nguồn.</text>
+  <text x="780" y="896" text-anchor="middle" class="small">Sơ đồ đã rút gọn theo đúng nội dung mô tả tại mục 4.1.1.d và bảng phân công chân GPIO.</text>
+</svg>

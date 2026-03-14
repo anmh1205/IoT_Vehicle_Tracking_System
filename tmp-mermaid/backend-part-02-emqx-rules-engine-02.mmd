@@ -1,8 +1,0 @@
-graph TD
-    M[MQTT Message] --> R[Rules Engine]
-    R --> BS[Check Booking Status]
-    BS --> C[Create Alert/Violation]
-    C --> DB[(Save to PostgreSQL)]
-    C --> N[Send Notifications]
-    N --> TG[Telegram Bot]
-    N --> EM[Email]

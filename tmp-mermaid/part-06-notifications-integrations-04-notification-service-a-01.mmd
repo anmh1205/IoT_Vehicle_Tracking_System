@@ -1,7 +1,0 @@
-graph TD
-    AV[Alert/Violation Created]
-    AV --> CP[Check Notification Preferences]
-    CP --> FL["Filter by alert_type, severity, vehicle_ids"]
-    FL --> CH[Send via enabled channels]
-    CH --> TG[Telegram - if enabled]
-    CH --> EM[Email - if enabled]

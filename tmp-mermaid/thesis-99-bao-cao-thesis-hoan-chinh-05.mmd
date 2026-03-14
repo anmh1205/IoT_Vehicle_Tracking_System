@@ -1,9 +1,0 @@
-flowchart LR
-    UI["Trang Next.js"] --> Query["TanStack Query<br/>dữ liệu lịch sử"]
-    UI --> Store["Zustand Store<br/>state realtime"]
-    Query --> Api["Backend API"]
-    Api --> Pg["PostgreSQL"]
-    Api --> Vm["VictoriaMetrics"]
-    Socket["Socket.IO"] --> Store
-    Store --> Map["Map / Sidebar / Chart"]
-    Query --> Map

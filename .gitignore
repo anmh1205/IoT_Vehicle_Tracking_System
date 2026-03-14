@@ -29,5 +29,8 @@
 *.pptx
 *.xlsx
 
+# Root-level scratch artifacts should never stay in the repo
+/tmp*
+
 /iot-vehicle-tracking-firmware/build
 /.agents

@@ -1,9 +1,0 @@
-flowchart TB
-    Root["Tracking_Frontend / src"] --> App["app/<br/>layout, page, dashboard, map"]
-    Root --> Components["components/<br/>ui, layout, forms, charts"]
-    Root --> Features["features/<br/>vehicles, alerts, trips"]
-    Root --> Lib["lib/<br/>api, realtime, store, utils"]
-    Root --> Types["types/<br/>kiểu dữ liệu dùng chung"]
-    App --> Features
-    Features --> Components
-    Features --> Lib

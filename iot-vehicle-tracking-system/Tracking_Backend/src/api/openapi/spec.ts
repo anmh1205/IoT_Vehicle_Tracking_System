@@ -340,7 +340,20 @@ export const spec = {
         tags: ['Devices'],
         summary: 'Trigger OTA update for device',
         parameters: [idParam],
-        requestBody: jsonBody({ firmwareId: { type: 'string' } }),
+        requestBody: jsonBody({
+          firmwareVersion: { type: 'string' },
+          force: { type: 'boolean' },
+          confirmTimeoutSec: { type: 'integer', minimum: 1 },
+        }),
+        responses: crud(),
+      },
+    },
+    '/devices/{id}/ota/rollback': {
+      post: {
+        tags: ['Devices'],
+        summary: 'Trigger OTA rollback for device',
+        parameters: [idParam],
+        requestBody: jsonBody({ reason: { type: 'string' } }),
         responses: crud(),
       },
     },

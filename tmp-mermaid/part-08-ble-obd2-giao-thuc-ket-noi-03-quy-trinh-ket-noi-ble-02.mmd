@@ -1,6 +1,0 @@
-graph TD
-    A[app_main] --> B["nimble_port_init()<br>Khởi tạo NimBLE controller + host"]
-    B --> C["Cấu hình callbacks<br>ble_hs_cfg.reset_cb<br>ble_hs_cfg.sync_cb<br>ble_hs_cfg.store_status_cb"]
-    C --> D["ble_store_config_init()<br>Khởi tạo NVS storage cho BLE"]
-    D --> E["xTaskCreate(ble_task, ...)<br>Tạo FreeRTOS task chạy NimBLE event loop"]
-    E --> F["nimble_port_run()<br>Blocking: xử lý sự kiện BLE liên tục"]

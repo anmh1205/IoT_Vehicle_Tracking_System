@@ -1,8 +1,0 @@
-flowchart LR
-    subgraph Cabin["Khoang lái / khu vực táp-lô"]
-        Port["Cổng OBD2 dưới táp-lô"]
-        Dongle["vgate iCar Pro<br/>BLE dongle cắm trực tiếp"]
-    end
-    Port --> Dongle
-    Dongle --> Tracker["Tracker đặt trong cabin<br/>hoặc gần hộp cầu chì"]
-    Tracker --> Note["BLE không dây nên tracker<br/>không cần cắm cố định vào cổng OBD2"]

@@ -1,14 +1,14 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { mermaidDiagrams } from "./thesis-mermaid-diagrams.mjs";
 
 const outDir = join(process.cwd(), "resources", "reports", "thesis-chapters", "assets", "figures");
 const mermaidConfigPath = join(process.cwd(), "resources", "reports", "thesis-chapters", "assets", "mermaid-thesis-config.json");
-const mermaidTempDir = join(process.cwd(), "tmp-mermaid");
+const mermaidTempDir = mkdtempSync(join(tmpdir(), "ivts-thesis-mermaid-"));
 const npxBin = process.platform === "win32" ? "npx.cmd" : "npx";
 mkdirSync(outDir, { recursive: true });
-mkdirSync(mermaidTempDir, { recursive: true });
 
 const findCachedMermaidCli = () => {
   const cacheRoots = [
@@ -767,6 +767,215 @@ const testEnvironmentFigure = (title, subtitle) =>
     `
   );
 
+const twoRowStageFigure = (title, subtitle, { topTitle, bottomTitle, items, accent = c.navy }) => {
+  const positions = [
+    { x: 138, y: 304 },
+    { x: 560, y: 304 },
+    { x: 982, y: 304 },
+    { x: 138, y: 620 },
+    { x: 560, y: 620 },
+    { x: 982, y: 620 },
+  ];
+
+  return svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent },
+    `
+      ${group({ x: 94, y: 236, w: 1412, h: 246, title: topTitle, accent, subtitle: "Ba bước đầu giữ nhịp triển khai hoặc kiểm tra trước khi chuyển sang pha kế tiếp." })}
+      ${group({ x: 94, y: 552, w: 1412, h: 246, title: bottomTitle, accent: c.teal, subtitle: "Ba bước cuối chốt vòng thực thi, đánh giá và hoàn thiện hệ thống." })}
+      ${items
+        .map((item, index) =>
+          component({
+            x: positions[index].x,
+            y: positions[index].y,
+            w: 280,
+            h: 128,
+            title: item.title,
+            body: item.body ?? [],
+            accent: item.accent ?? accent,
+            tag: item.tag ?? "step",
+          })
+        )
+        .join("")}
+      ${edge({ x1: 418, y1: 368, x2: 560, y2: 368, color: accent, marker: "arrow-slate" })}
+      ${edge({ x1: 840, y1: 368, x2: 982, y2: 368, color: accent, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1122, 368], [1236, 368], [1236, 684], [982, 684]], color: c.teal, label: "chuyển pha", labelX: 1190, labelY: 514, marker: "arrow-slate" })}
+      ${edge({ x1: 418, y1: 684, x2: 560, y2: 684, color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 840, y1: 684, x2: 982, y2: 684, color: c.teal, marker: "arrow-slate" })}
+    `
+  );
+};
+
+const buckConverterFigure = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.navy },
+    `
+      ${group({ x: 90, y: 242, w: 300, h: 522, title: "Nguồn vào", accent: c.navy, subtitle: "Nhánh lấy điện từ ắc quy xe qua cầu chì và tụ lọc đầu vào." })}
+      ${group({ x: 432, y: 242, w: 350, h: 522, title: "Khối chuyển đổi buck", accent: c.teal, subtitle: "MP2482 tạo bus 5V chính từ nguồn 12V hoặc 24V." })}
+      ${group({ x: 824, y: 242, w: 686, h: 522, title: "Khối đầu ra 5V", accent: c.amber, subtitle: "Cuộn cảm, diode và tụ đầu ra phối hợp để giữ rail 5V ổn định." })}
+      ${component({ x: 124, y: 332, w: 232, h: 124, title: "Ắc quy xe", body: ["Nguồn 12V hoặc 24V"], accent: c.navy, tag: "vin" })}
+      ${component({ x: 124, y: 534, w: 232, h: 124, title: "Cầu chì đầu vào", body: ["Bảo vệ khi có sự cố quá dòng"], accent: c.navy, tag: "fuse" })}
+      ${component({ x: 474, y: 332, w: 266, h: 124, title: "Tụ lọc C1", body: ["100 uF / 50V", "Giảm nhiễu đầu vào"], accent: c.teal, tag: "filter" })}
+      ${component({ x: 474, y: 534, w: 266, h: 146, title: "MP2482-5.0", body: ["Buck 5V / 3A", "Rail nguồn chính cho tracker"], accent: c.teal, tag: "buck" })}
+      ${component({ x: 874, y: 318, w: 196, h: 124, title: "Cuộn cảm", body: ["100 uH"], accent: c.amber, tag: "L" })}
+      ${component({ x: 874, y: 536, w: 196, h: 124, title: "Diode Schottky", body: ["1N5822"], accent: c.amber, tag: "D" })}
+      ${component({ x: 1120, y: 430, w: 188, h: 138, title: "Bus 5V chính", body: ["Nguồn runtime cho các rail chức năng"], accent: c.emerald, tag: "bus" })}
+      ${component({ x: 1358, y: 430, w: 118, h: 138, title: "C2", body: ["220 uF / 16V"], accent: c.emerald, tag: "cap" })}
+      ${edge({ x1: 240, y1: 456, x2: 240, y2: 534, color: c.navy, marker: "arrow-slate" })}
+      ${edge({ x1: 356, y1: 596, x2: 474, y2: 606, color: c.navy, marker: "arrow-slate" })}
+      ${edge({ x1: 607, y1: 456, x2: 607, y2: 534, color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 740, y1: 606, x2: 874, y2: 598, color: c.teal, marker: "arrow-slate" })}
+      ${edge({ x1: 740, y1: 606, x2: 874, y2: 380, color: c.teal, label: "xung buck", labelX: 784, labelY: 460, marker: "arrow-slate" })}
+      ${edge({ x1: 1070, y1: 380, x2: 1120, y2: 484, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 1070, y1: 598, x2: 1120, y2: 514, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 1308, y1: 500, x2: 1358, y2: 500, color: c.emerald, marker: "arrow-slate" })}
+    `
+  );
+
+const boostConverterFigure = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.violet },
+    `
+      ${group({ x: 108, y: 258, w: 1384, h: 506, title: "Chuỗi nguồn dự phòng", accent: c.violet, subtitle: "Pin 21700 cấp qua BMS và boost converter để duy trì bus 5V backup khi nguồn chính mất." })}
+      ${[
+        ["Pin 21700", ["Điện áp 3.0V đến 4.2V"], c.violet, "cell"],
+        ["BMS 1S", ["Bảo vệ quá xả, quá sạc và ngắn mạch"], c.navy, "bms"],
+        ["SX1308", ["Boost lên 5V cho nhánh dự phòng"], c.teal, "boost"],
+        ["Diode Schottky", ["Cách ly với bus 5V chính"], c.amber, "diode"],
+        ["Bus 5V backup", ["Nguồn runtime khi xe mất điện đầu vào"], c.emerald, "bus"],
+        ["Tải runtime", ["Giữ tracker hoạt động để gửi heartbeat hoặc cảnh báo"], c.rose, "load"],
+      ]
+        .map(([heading, body, accentColor, tag], index) =>
+          component({
+            x: 138 + index * 230,
+            y: 444,
+            w: 198,
+            h: 132,
+            title: heading,
+            body,
+            accent: accentColor,
+            tag,
+          })
+        )
+        .join("")}
+      ${[0, 1, 2, 3, 4]
+        .map((index) => edge({ x1: 336 + index * 230, y1: 510, x2: 368 + index * 230, y2: 510, color: c.violet, marker: "arrow-slate" }))
+        .join("")}
+    `
+  );
+
+const powerMuxFigureCustom = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.teal },
+    `
+      ${group({ x: 92, y: 228, w: 388, h: 596, title: "Hai nhánh nguồn", accent: c.navy, subtitle: "Nguồn chính từ MP2482 và nguồn backup từ SX1308 hội tụ qua diode-OR." })}
+      ${group({ x: 520, y: 228, w: 370, h: 596, title: "ESP32 Power FSM", accent: c.teal, subtitle: "Firmware đọc LVD + ADC rồi quyết định chọn nhánh nguồn và trạng thái sạc." })}
+      ${group({ x: 930, y: 228, w: 578, h: 596, title: "Bus runtime và rail chức năng", accent: c.amber, subtitle: "Bus 5V runtime cấp về rail 3.3V và ~4V cho toàn hệ thống." })}
+      ${component({ x: 132, y: 320, w: 308, h: 128, title: "MP2482 5V", body: ["Nhánh nguồn chính khi ắc quy xe còn đủ áp"], accent: c.navy, tag: "main" })}
+      ${component({ x: 132, y: 544, w: 308, h: 128, title: "SX1308 5V backup", body: ["Nhánh dự phòng từ pin 21700"], accent: c.violet, tag: "backup" })}
+      ${component({ x: 560, y: 304, w: 290, h: 138, title: "Đầu vào giám sát", body: ["GPIO19 LVD_STATUS", "GPIO4 ADC", "Ngưỡng profile 12V / 24V"], accent: c.teal, tag: "sense" })}
+      ${component({ x: 560, y: 526, w: 290, h: 158, title: "Điều khiển FSM", body: ["GPIO18 POWER_PATH_EN chọn nhánh runtime", "GPIO5 CHARGER_EN bật hoặc tắt sạc"], accent: c.teal, tag: "control" })}
+      ${component({ x: 970, y: 430, w: 218, h: 148, title: "D1 + D2 Schottky", body: ["Diode-OR cách ly hai nhánh"], accent: c.amber, tag: "or" })}
+      ${component({ x: 1230, y: 430, w: 238, h: 148, title: "Bus 5V runtime", body: ["Không reset khi chuyển nguồn"], accent: c.emerald, tag: "bus" })}
+      ${component({ x: 1100, y: 648, w: 498, h: 126, title: "Rail đầu ra", body: ["XL1509 3.3V cho ESP32-S3, LIS3DH", "TPS54231 ~4V cho SIM7600CE-T"], accent: c.rose, tag: "rails" })}
+      ${edge({ x1: 440, y1: 384, x2: 560, y2: 372, color: c.navy, marker: "arrow-slate" })}
+      ${edge({ x1: 440, y1: 608, x2: 560, y2: 604, color: c.violet, marker: "arrow-slate" })}
+      ${edge({ x1: 850, y1: 372, x2: 970, y2: 476, color: c.teal, label: "LVD + ADC", labelX: 872, labelY: 414, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[850, 604], [930, 604], [930, 522], [970, 522]], color: c.teal, label: "GPIO18 / GPIO5", labelX: 882, labelY: 566, marker: "arrow-slate" })}
+      ${edge({ x1: 1188, y1: 504, x2: 1230, y2: 504, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 1348, y1: 578, x2: 1348, y2: 648, color: c.emerald, marker: "arrow-slate" })}
+    `
+  );
+
+const chargerBackupFigure = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.rose },
+    `
+      ${group({ x: 110, y: 258, w: 1380, h: 510, title: "Chuỗi sạc và dự phòng năng lượng", accent: c.rose, subtitle: "Bus 5V từ nhánh chính sạc pin 21700 qua TP4056 và BMS; pin này lại nuôi nhánh backup SX1308." })}
+      ${[
+        ["Bus 5V từ MP2482", ["Nguồn sạc khi xe đang hoạt động"], c.navy, "bus"],
+        ["TP4056", ["Mạch sạc Li-ion"], c.rose, "charge"],
+        ["BMS 1S", ["Bảo vệ pin và giới hạn dòng"], c.amber, "bms"],
+        ["Pin 21700", ["Dung lượng 5000 mAh"], c.violet, "cell"],
+        ["SX1308 backup", ["Tạo nhánh 5V dự phòng"], c.teal, "boost"],
+        ["Nguồn dự phòng", ["Cấp cho tracker khi mất nguồn chính"], c.emerald, "runtime"],
+      ]
+        .map(([heading, body, accentColor, tag], index) =>
+          component({
+            x: 142 + index * 220,
+            y: 442,
+            w: 188,
+            h: 136,
+            title: heading,
+            body,
+            accent: accentColor,
+            tag,
+          })
+        )
+        .join("")}
+      ${note(344, 338, "GPIO5 CHARGER_EN bật hoặc tắt mạch sạc TP4056", 330, c.surfaceSoft, mix(c.rose, 0.26))}
+      ${edge({ x1: 330, y1: 510, x2: 362, y2: 510, color: c.navy, marker: "arrow-slate" })}
+      ${[1, 2, 3, 4]
+        .map((index) => edge({ x1: 330 + index * 220, y1: 510, x2: 362 + index * 220, y2: 510, color: c.rose, marker: "arrow-slate" }))
+        .join("")}
+      ${edge({ x1: 508, y1: 392, x2: 472, y2: 442, color: c.rose, marker: "arrow-slate" })}
+    `
+  );
+
+const enclosureLayoutFigure = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.amber },
+    `
+      ${group({ x: 88, y: 224, w: 1424, h: 618, title: "Bố cục bên trong vỏ hộp tracker 100 x 70 x 35 mm", accent: c.amber, subtitle: "Phân vùng modem, anten và khối nguồn để giảm nhiễu chéo và thuận tiện đi dây." })}
+      ${component({ x: 152, y: 318, w: 286, h: 136, title: "ESP32-S3 DevKit", body: ["Khối điều khiển trung tâm"], accent: c.navy, tag: "controller" })}
+      ${component({ x: 152, y: 516, w: 286, h: 136, title: "TP4056 + BMS", body: ["Nhánh sạc và bảo vệ pin"], accent: c.rose, tag: "charger" })}
+      ${component({ x: 508, y: 318, w: 300, h: 136, title: "SIM7600CE-T + rail ~4V", body: ["Tách khỏi khối nguồn xung để giảm EMI"], accent: c.teal, tag: "modem" })}
+      ${component({ x: 508, y: 516, w: 300, h: 136, title: "Pin 21700 + giá đỡ", body: ["Khối dự phòng ở trung tâm trọng lượng"], accent: c.violet, tag: "battery" })}
+      ${component({ x: 878, y: 318, w: 274, h: 136, title: "MP2482 + XL1509", body: ["Nguồn 5V chính và 3.3V"], accent: c.amber, tag: "power" })}
+      ${component({ x: 878, y: 516, w: 274, h: 136, title: "SX1308 + diode-OR", body: ["Nhánh backup và power path"], accent: c.emerald, tag: "backup" })}
+      ${component({ x: 1222, y: 318, w: 216, h: 118, title: "Anten 4G/LTE", body: ["Đặt thoáng, tránh che chắn"], accent: c.navy, tag: "rf" })}
+      ${component({ x: 1222, y: 482, w: 216, h: 118, title: "Anten GNSS", body: ["Ưu tiên gần mặt thoáng"], accent: c.teal, tag: "gnss" })}
+      ${component({ x: 1222, y: 646, w: 216, h: 118, title: "OBD2 / USB / khe SIM", body: ["Tập trung đầu nối để dễ thao tác"], accent: c.rose, tag: "io" })}
+      ${polyEdge({ points: [[438, 386], [508, 386]], color: c.navy, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[438, 584], [508, 584]], color: c.rose, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[808, 386], [878, 386]], color: c.teal, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[808, 584], [878, 584]], color: c.violet, marker: "arrow-slate" })}
+      ${edge({ x1: 1152, y1: 386, x2: 1222, y2: 376, color: c.amber, marker: "arrow-slate" })}
+      ${edge({ x1: 1152, y1: 584, x2: 1222, y2: 542, color: c.emerald, marker: "arrow-slate" })}
+    `
+  );
+
+const obdPlacementFigure = (title, subtitle) =>
+  svgDoc(
+    1600,
+    1000,
+    { title, subtitle, accent: c.amber },
+    `
+      ${group({ x: 118, y: 234, w: 520, h: 590, title: "Khu vực táp-lô / chân lái", accent: c.amber, subtitle: "Cổng OBD2 nằm dưới táp-lô; vgate iCar Pro cắm trực tiếp để lấy dữ liệu động cơ." })}
+      ${group({ x: 822, y: 234, w: 662, h: 590, title: "Vị trí tracker", accent: c.teal, subtitle: "Tracker đặt trong cabin hoặc gần hộp cầu chì và giao tiếp BLE không dây với adapter OBD2." })}
+      ${component({ x: 166, y: 372, w: 424, h: 140, title: "Cổng OBD2 dưới táp-lô", body: ["Cấp nguồn xe tại chân 16 và mass tại chân 4 / 5"], accent: c.amber, tag: "port" })}
+      ${component({ x: 166, y: 586, w: 424, h: 140, title: "vgate iCar Pro", body: ["BLE dongle cắm trực tiếp", "Đọc dữ liệu OBD2 và trạng thái IGN"], accent: c.violet, tag: "dongle" })}
+      ${component({ x: 872, y: 404, w: 260, h: 146, title: "Tracker trong cabin", body: ["Không cần cắm cố định vào cổng OBD2"], accent: c.teal, tag: "tracker" })}
+      ${component({ x: 1182, y: 404, w: 252, h: 146, title: "Gần hộp cầu chì", body: ["Thuận tiện lấy nguồn và đi dây"], accent: c.navy, tag: "mount" })}
+      ${component({ x: 912, y: 618, w: 472, h: 130, title: "Kết luận lắp đặt", body: ["BLE không dây giúp tracker tách khỏi cổng OBD2.", "Thiết bị vẫn lấy nguồn riêng từ hệ xe và bố trí linh hoạt hơn."], accent: c.emerald, tag: "note" })}
+      ${edge({ x1: 378, y1: 512, x2: 378, y2: 586, color: c.amber, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[590, 656], [760, 656], [872, 476]], color: c.violet, label: "BLE", labelX: 720, labelY: 612, marker: "arrow-slate" })}
+      ${edge({ x1: 1132, y1: 476, x2: 1182, y2: 476, color: c.teal, marker: "arrow-slate" })}
+      ${polyEdge({ points: [[1002, 550], [1002, 618]], color: c.emerald, marker: "arrow-slate" })}
+    `
+  );
+
 const lighthouseFigure = (title, subtitle) =>
   svgDoc(
     1600,
@@ -998,8 +1207,32 @@ const optimizedArchitectureFigure = (title, subtitle) =>
 
 const output = [
   ["01-chuong-1-gioi-thieu-hinh-1-1.svg", problemSolutionFigure("Sơ đồ tổng quan vấn đề và giải pháp đề xuất", "Đối chiếu giữa mô hình quản lý thủ công và phương án tracker IoT tự động.")],
+  ["01-chuong-1-gioi-thieu-hinh-1-2.svg", twoRowStageFigure("Quy trình phát triển dự án theo các giai đoạn", "Sáu giai đoạn được gom thành hai pha để tăng độ dễ đọc trên trang báo cáo.", {
+    topTitle: "Ba giai đoạn nền tảng",
+    bottomTitle: "Ba giai đoạn hoàn thiện hệ thống",
+    items: [
+      { title: "Giai đoạn 1", body: ["Nghiên cứu và thiết kế phần cứng"], accent: c.navy, tag: "phase 1" },
+      { title: "Giai đoạn 2", body: ["Phát triển firmware ESP-IDF"], accent: c.teal, tag: "phase 2" },
+      { title: "Giai đoạn 3", body: ["Triển khai hạ tầng cloud"], accent: c.amber, tag: "phase 3" },
+      { title: "Giai đoạn 4", body: ["Xây dựng backend API"], accent: c.rose, tag: "phase 4" },
+      { title: "Giai đoạn 5", body: ["Phát triển frontend dashboard"], accent: c.emerald, tag: "phase 5" },
+      { title: "Giai đoạn 6", body: ["Tích hợp và kiểm thử"], accent: c.violet, tag: "phase 6" },
+    ],
+  })],
   ["01-chuong-1-gioi-thieu-hinh-1-3.svg", systemArchitectureFigure("Kiến trúc tổng thể hệ thống IoT Vehicle Tracking", "Sơ đồ component UML mô tả luồng dữ liệu từ thiết bị đến dashboard và lớp lưu trữ.")],
   ["01-chuong-1-gioi-thieu-hinh-1-4.svg", powerModeFigure("Sơ đồ chuyển đổi giữa các chế độ năng lượng", "Thiết bị chuyển giữa lái xe, đỗ xe và cảnh báo theo trạng thái IGN và dữ liệu IMU.")],
+  ["01-chuong-1-gioi-thieu-hinh-1-5.svg", twoRowStageFigure("Lộ trình phát triển dự án theo các giai đoạn", "Roadmap được tách làm hai cụm mốc để giữ hình cân trang và dễ theo dõi hơn.", {
+    topTitle: "Các mốc hoàn thiện prototype",
+    bottomTitle: "Các mốc mở rộng sản phẩm",
+    items: [
+      { title: "Mốc 1", body: ["Prototype hoàn chỉnh"], accent: c.navy, tag: "m1" },
+      { title: "Mốc 2", body: ["Pilot trong xe thử nghiệm"], accent: c.teal, tag: "m2" },
+      { title: "Mốc 3", body: ["Ổn định hóa cloud và dashboard"], accent: c.amber, tag: "m3" },
+      { title: "Mốc 4", body: ["Ứng dụng di động và thông báo đẩy"], accent: c.rose, tag: "m4" },
+      { title: "Mốc 5", body: ["PCB chuyên dụng và tối ưu sản xuất"], accent: c.emerald, tag: "m5" },
+      { title: "Mốc 6", body: ["Mở rộng AI, bảo mật và scale-out"], accent: c.violet, tag: "m6" },
+    ],
+  })],
   ["02-chuong-2-phan-tich-hinh-2-1.svg", dataArchitectureFigure("Kiến trúc dữ liệu của hệ thống", "Phân tách dữ liệu quan hệ, chuỗi thời gian và nhật ký theo đúng chiến lược lưu trữ.")],
   ["03-chuong-3-giai-phap-phan-cung-hinh-3-1.svg", trackerBlockFigure("Sơ đồ khối tracker", "Bám theo schematic và pin mapping firmware hiện tại với nhãn tiếng Việt đầy đủ.")],
   ["03-chuong-3-giai-phap-phan-cung-hinh-3-4.svg", powerManagementFigure("Sơ đồ khối hệ thống quản lý nguồn", "Thể hiện đầy đủ rail 5V, 3.3V, ~4V, pin backup và logic chuyển nguồn.")],
@@ -1015,6 +1248,37 @@ const output = [
   ["06-chuong-3-giai-phap-frontend-hinh-3-22.svg", uiPatternsFigure("Các mẫu thiết kế UI của hệ thống", "Tổng hợp pattern cho data table, form và chart trong cùng một ngôn ngữ thị giác.")],
   ["06-chuong-3-giai-phap-frontend-hinh-3-23.svg", optimizedArchitectureFigure("Sơ đồ kiến trúc tổng thể phương án tối ưu", "Phương án tối ưu hóa luồng dữ liệu giữa thiết bị, backend, frontend và quan trắc.")],
   ["07-chuong-4-trien-khai-hardware-hinh-4-1.svg", trackerBlockFigure("Sơ đồ khối tổng thể hệ thống tracker IoT", "Phiên bản triển khai thực tế của tracker với pin mapping đã chuẩn hóa.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-7.svg", buckConverterFigure("Sơ đồ nguyên lý mạch Buck Converter MP2482", "Minh họa lại luồng nguồn 12V / 24V sang bus 5V chính với các linh kiện then chốt.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-8.svg", boostConverterFigure("Sơ đồ nguyên lý mạch Boost Converter SX1308", "Chuỗi dự phòng từ pin 21700 qua BMS, boost và diode Schottky để duy trì bus 5V backup.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-9.svg", powerMuxFigureCustom("Sơ đồ mạch Power Path và logic chuyển nguồn tự động", "Ghép lại logic chọn nhánh chính hoặc backup, bám đúng tín hiệu ADC, LVD_STATUS, GPIO18 và GPIO5.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-10.svg", chargerBackupFigure("Sơ đồ mạch sạc TP4056 và bảo vệ pin 21700", "Thể hiện rõ chuỗi sạc pin và mối liên hệ giữa TP4056, BMS, pin 21700 và nhánh backup SX1308.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-11.svg", enclosureLayoutFigure("Sơ đồ bố cục bên trong vỏ hộp bảo vệ", "Bố cục lại các khối trong vỏ để nhấn mạnh nguyên tắc tách RF, nguồn xung và đầu nối.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-12.svg", twoRowStageFigure("Quy trình lắp ráp prototype phần cứng", "Sáu bước lắp ráp được tách thành hai pha để tăng độ rõ và tránh hình quá dài.", {
+    topTitle: "Chuẩn bị và tích hợp điện",
+    bottomTitle: "Kết nối, test và hoàn thiện",
+    items: [
+      { title: "Bước 1", body: ["Kiểm tra linh kiện"], accent: c.navy, tag: "step 1" },
+      { title: "Bước 2", body: ["Lắp nhánh nguồn"], accent: c.teal, tag: "step 2" },
+      { title: "Bước 3", body: ["Gắn ESP32-S3 và đi dây GPIO"], accent: c.amber, tag: "step 3" },
+      { title: "Bước 4", body: ["Kết nối modem, IMU và ADC"], accent: c.rose, tag: "step 4" },
+      { title: "Bước 5", body: ["Nạp firmware test tích hợp"], accent: c.emerald, tag: "step 5" },
+      { title: "Bước 6", body: ["Đóng vỏ và hoàn thiện anten"], accent: c.violet, tag: "step 6" },
+    ],
+  })],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-14.svg", obdPlacementFigure("Minh họa vị trí cổng OBD2 trên xe và cách kết nối", "Làm rõ việc adapter OBD2 cắm trực tiếp vào cổng xe, còn tracker giao tiếp BLE không dây và đặt linh hoạt trong cabin.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-15.svg", vehicleInstallFigure("Minh họa lắp đặt thiết bị tracker trong xe và đi dây", "Bố cục trực quan hơn cho vị trí tracker, anten và đường kết nối chính khi lắp đặt trong xe.")],
+  ["07-chuong-4-trien-khai-hardware-hinh-4-16.svg", twoRowStageFigure("Checklist kiểm tra hệ thống sau khi lắp đặt trong xe", "Checklist sau lắp đặt được chia hai cụm kiểm tra để tránh layout quá hẹp và giúp đọc nhanh hơn.", {
+    topTitle: "Kiểm tra kết nối và định vị",
+    bottomTitle: "Kiểm tra truyền thông và năng lượng",
+    items: [
+      { title: "Bước 1", body: ["Nguồn điện đầu vào đạt 12V hoặc 24V"], accent: c.navy, tag: "check 1" },
+      { title: "Bước 2", body: ["BLE OBD2 đọc IGN, RPM, tốc độ"], accent: c.teal, tag: "check 2" },
+      { title: "Bước 3", body: ["GNSS fix vị trí ổn định"], accent: c.amber, tag: "check 3" },
+      { title: "Bước 4", body: ["4G / LTE đăng ký mạng và gửi MQTT"], accent: c.rose, tag: "check 4" },
+      { title: "Bước 5", body: ["Power path chuyển nguồn không reset"], accent: c.emerald, tag: "check 5" },
+      { title: "Bước 6", body: ["IMU wake-up và deep sleep hoạt động đúng chu kỳ"], accent: c.violet, tag: "check 6" },
+    ],
+  })],
   ["07-chuong-4-trien-khai-hardware-hinh-4-6.svg", powerManagementFigure("Kiến trúc tổng thể mạch quản lý nguồn", "Nhấn mạnh power path, pin dự phòng và rail cấp riêng cho modem.")],
   ["09-chuong-4-trien-khai-cloud-hinh-4-15.svg", systemArchitectureFigure("Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu", "Sơ đồ triển khai thực tế giữa EMQX, MQTT Bridge, Backend và các lớp lưu trữ.")],
   ["09-chuong-4-trien-khai-cloud-hinh-4-16.svg", ivmStructureFigure("Cấu trúc thư mục hệ thống theo quy ước IVM26", "Các dịch vụ Docker được tách độc lập và dùng chung dữ liệu runtime.")],
@@ -1051,16 +1315,20 @@ const charts = [
   ["10-chuong-4-ket-qua-do-luong-hinh-4-38.svg", radarChart("Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được", "Tổng hợp nhanh các nhóm chỉ tiêu chính của hệ thống tracker IoT.")],
 ];
 
-for (const [name, content] of [...output, ...charts]) {
-  writeFileSync(join(outDir, name), content, "utf8");
-}
+try {
+  for (const [name, content] of [...output, ...charts]) {
+    writeFileSync(join(outDir, name), content, "utf8");
+  }
 
-for (const { name, code } of mermaidDiagrams) {
-  const sourcePath = join(mermaidTempDir, name.replace(/\.svg$/u, ".mmd"));
-  writeFileSync(sourcePath, code, "utf8");
-  if (skipMermaidRender) continue;
-  const outputPath = join(outDir, name);
-  const args = ["-i", sourcePath, "-o", outputPath, "-c", mermaidConfigPath, "-b", "white", "-w", "1600", "-H", "900", "-q"];
-  if (mermaidCliPath) execFileSync(process.execPath, [mermaidCliPath, ...args], { stdio: "pipe" });
-  else execFileSync(npxBin, ["-y", "@mermaid-js/mermaid-cli", ...args], { stdio: "pipe", shell: process.platform === "win32" });
+  for (const { name, code } of mermaidDiagrams) {
+    const sourcePath = join(mermaidTempDir, name.replace(/\.svg$/u, ".mmd"));
+    writeFileSync(sourcePath, code, "utf8");
+    if (skipMermaidRender) continue;
+    const outputPath = join(outDir, name);
+    const args = ["-i", sourcePath, "-o", outputPath, "-c", mermaidConfigPath, "-b", "white", "-w", "1600", "-H", "900", "-q"];
+    if (mermaidCliPath) execFileSync(process.execPath, [mermaidCliPath, ...args], { stdio: "pipe" });
+    else execFileSync(npxBin, ["-y", "@mermaid-js/mermaid-cli", ...args], { stdio: "pipe", shell: process.platform === "win32" });
+  }
+} finally {
+  rmSync(mermaidTempDir, { recursive: true, force: true });
 }

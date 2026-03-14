@@ -1,8 +1,0 @@
-graph TD
-    LIS3DH["LIS3DH Breakout Board"]
-    ESP32["ESP32-S3"]
-    LIS3DH -->|"VCC → 3.3V"| ESP32
-    LIS3DH -->|"GND → GND"| ESP32
-    LIS3DH -->|"SDA → GPIO22 (I2C Data)"| ESP32
-    LIS3DH -->|"SCL → GPIO23 (I2C Clock)"| ESP32
-    LIS3DH -->|"INT1 → GPIO21 (Interrupt→Wakeup)"| ESP32

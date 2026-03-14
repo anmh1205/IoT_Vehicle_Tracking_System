@@ -1,7 +1,0 @@
-flowchart LR
-    Broker["EMQX Rules Engine"] --> Parse["Phát hiện event<br/>motion, speed, low battery"]
-    Parse --> Bridge["MQTT Bridge<br/>validate và enrich payload"]
-    Bridge --> Logs["VictoriaLogs<br/>lưu log sự kiện"]
-    Bridge --> Pg["PostgreSQL<br/>ghi alert và trạng thái"]
-    Bridge --> Socket["Socket.IO<br/>đẩy cảnh báo realtime"]
-    Socket --> Dashboard["Dashboard Web<br/>toast, badge, lịch sử"]

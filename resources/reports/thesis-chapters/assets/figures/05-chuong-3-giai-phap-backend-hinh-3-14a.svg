@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 960" width="1600" height="960">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#334155"/>
+    </marker>
+    <style><![CDATA[
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #0f172a; }
+      .title { font-size: 36px; font-weight: 700; }
+      .subtitle { font-size: 19px; fill: #475569; }
+      .section { font-size: 22px; font-weight: 700; fill: #1e293b; }
+      .card-title { font-size: 24px; font-weight: 700; }
+      .body { font-size: 18px; fill: #334155; }
+      .small { font-size: 16px; fill: #475569; }
+      .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 24; ry: 24; }
+      .blue { fill: #eff6ff; stroke: #2563eb; }
+      .cyan { fill: #ecfeff; stroke: #0891b2; }
+      .violet { fill: #f5f3ff; stroke: #7c3aed; }
+      .amber { fill: #fff7ed; stroke: #ea580c; }
+      .green { fill: #ecfdf5; stroke: #16a34a; }
+      .note { fill: #f8fafc; stroke: #cbd5e1; }
+      .arrow { stroke: #334155; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+      .divider { stroke: #cbd5e1; stroke-width: 2; }
+    ]]></style>
+  </defs>
+
+  <rect width="1600" height="960" fill="#f8fafc"/>
+  <rect x="40" y="40" width="1520" height="880" rx="28" fill="#ffffff" stroke="#dbeafe" stroke-width="2"/>
+
+  <text x="800" y="88" text-anchor="middle" class="title">Luồng điều phối OTA giữa Backend, EMQX, thiết bị và MQTT Bridge</text>
+  <text x="800" y="122" text-anchor="middle" class="subtitle">Backend phát tác vụ OTA và URL tải; trạng thái chi tiết của firmware được thu qua MQTT Bridge để lưu log chuẩn</text>
+
+  <text x="110" y="178" class="section">Luồng gán OTA xuống thiết bị</text>
+  <line x1="110" y1="192" x2="1490" y2="192" class="divider"/>
+
+  <rect x="90" y="240" width="220" height="118" class="card note"/>
+  <text x="200" y="286" text-anchor="middle" class="card-title">1. Dashboard quản trị</text>
+  <text x="200" y="318" text-anchor="middle" class="body">Chọn thiết bị và</text>
+  <text x="200" y="342" text-anchor="middle" class="body">phiên bản firmware</text>
+
+  <rect x="360" y="220" width="300" height="158" class="card blue"/>
+  <text x="510" y="268" text-anchor="middle" class="card-title">2. Backend API</text>
+  <text x="510" y="304" text-anchor="middle" class="body">Tạo OTA assignment, ánh xạ</text>
+  <text x="510" y="328" text-anchor="middle" class="body">firmware version và URL tải HTTPS</text>
+  <text x="510" y="352" text-anchor="middle" class="small">Đồng thời phát assignment/update cho dashboard</text>
+
+  <rect x="720" y="240" width="230" height="118" class="card cyan"/>
+  <text x="835" y="286" text-anchor="middle" class="card-title">3. EMQX broker</text>
+  <text x="835" y="318" text-anchor="middle" class="body">Chuyển lệnh `ota_update`</text>
+  <text x="835" y="342" text-anchor="middle" class="body">đến topic commands</text>
+
+  <rect x="1010" y="220" width="320" height="158" class="card violet"/>
+  <text x="1170" y="268" text-anchor="middle" class="card-title">4. Firmware thiết bị</text>
+  <text x="1170" y="304" text-anchor="middle" class="body">Nhận lệnh OTA, tải file qua HTTPS,</text>
+  <text x="1170" y="328" text-anchor="middle" class="body">kiểm tra checksum, reboot và confirm</text>
+  <text x="1170" y="352" text-anchor="middle" class="small">Thiết bị là nơi thực thi cập nhật thực tế</text>
+
+  <path d="M310 299 L360 299" class="arrow"/>
+  <path d="M660 299 L720 299" class="arrow"/>
+  <path d="M950 299 L1010 299" class="arrow"/>
+
+  <text x="110" y="456" class="section">Luồng trạng thái OTA quay về hệ thống</text>
+  <line x1="110" y1="470" x2="1490" y2="470" class="divider"/>
+
+  <rect x="120" y="520" width="320" height="148" class="card violet"/>
+  <text x="280" y="566" text-anchor="middle" class="card-title">5. Thiết bị publish trạng thái</text>
+  <text x="280" y="602" text-anchor="middle" class="body">`assigned`, `downloading`, `rebooting`,</text>
+  <text x="280" y="626" text-anchor="middle" class="body">`success`, `failed` theo topic firmware</text>
+  <text x="280" y="650" text-anchor="middle" class="small">Topic: `v1/{device_id}/firmware`</text>
+
+  <rect x="520" y="544" width="230" height="100" class="card cyan"/>
+  <text x="635" y="586" text-anchor="middle" class="card-title">6. EMQX broker</text>
+  <text x="635" y="618" text-anchor="middle" class="body">Route status cho subscriber</text>
+
+  <rect x="820" y="506" width="320" height="176" class="card amber"/>
+  <text x="980" y="554" text-anchor="middle" class="card-title">7. MQTT Bridge</text>
+  <text x="980" y="590" text-anchor="middle" class="body">Xác thực payload OTA, chuẩn hóa trạng thái,</text>
+  <text x="980" y="614" text-anchor="middle" class="body">gắn thời gian và đồng bộ metadata phục vụ truy vết</text>
+  <text x="980" y="638" text-anchor="middle" class="small">Đây là nguồn log chuẩn cho quá trình OTA</text>
+
+  <rect x="1190" y="520" width="170" height="122" class="card green"/>
+  <text x="1275" y="566" text-anchor="middle" class="card-title">8. PostgreSQL</text>
+  <text x="1275" y="598" text-anchor="middle" class="body">`firmware_update_log`</text>
+
+  <rect x="1390" y="520" width="140" height="122" class="card amber"/>
+  <text x="1460" y="566" text-anchor="middle" class="card-title">9. VictoriaLogs</text>
+  <text x="1460" y="598" text-anchor="middle" class="body">Audit OTA</text>
+
+  <path d="M440 594 L520 594" class="arrow"/>
+  <path d="M750 594 L820 594" class="arrow"/>
+  <path d="M1140 566 L1190 566" class="arrow"/>
+  <path d="M1140 614 L1390 614" class="arrow"/>
+
+  <rect x="90" y="748" width="1420" height="112" class="card note"/>
+  <text x="122" y="790" class="card-title">Ghi chú triển khai</text>
+  <text x="122" y="824" class="body">Namespace `/firmware` của Socket.IO chủ yếu phát sự kiện gán hoặc cập nhật tác vụ OTA cho giao diện quản trị.</text>
+  <text x="122" y="850" class="body">Trạng thái chi tiết của firmware đi theo MQTT và được MQTT Bridge lưu vào `firmware_update_log` cùng VictoriaLogs để phục vụ truy vết.</text>
+</svg>

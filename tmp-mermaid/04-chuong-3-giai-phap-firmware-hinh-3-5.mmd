@@ -1,5 +1,0 @@
-flowchart TB
-    App["Lớp ứng dụng<br/>state machine, policy nguồn, cảnh báo"] --> Core["Lớp nghiệp vụ<br/>telemetry, OBD2, GNSS, MQTT"]
-    Core --> Runtime["Lớp runtime<br/>FreeRTOS task, queue, timer"]
-    Runtime --> HAL["Lớp HAL<br/>GPIO, UART, I2C, ADC, deep sleep"]
-    HAL --> HW["ESP32-S3 và ngoại vi<br/>SIM7600CE-T, LIS3DH, BLE OBD2"]
