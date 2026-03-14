@@ -1,0 +1,19 @@
+flowchart LR
+    subgraph MCU["ESP32-S3"]
+        TX["GPIO16<br/>UART1 TX"]
+        RX["GPIO17<br/>UART1 RX"]
+        PWR["GPIO26<br/>PWRKEY"]
+        FLOW["RTS / CTS<br/>dự phòng"]
+    end
+    subgraph MODEM["SIM7600CE-T"]
+        MRX["SIMCOM-RX"]
+        MTX["SIMCOM-TX"]
+        MPW["SIMCOM-PWRKEY"]
+        MFL["RTS / CTS"]
+        MV["VBAT 3.4-4.2V"]
+    end
+    TX -->|TX -> RX| MRX
+    RX -->|RX <- TX| MTX
+    PWR --> MPW
+    FLOW -.-> MFL
+    Rail["TPS54231<br/>rail modem ~4V"] --> MV

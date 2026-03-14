@@ -11,10 +11,25 @@ interface DeviceCardProps {
   onClick?: (device: Device) => void;
 }
 export const DeviceCard = ({ device, onClick }: DeviceCardProps) => {
+  const interactive = typeof onClick === 'function';
+
   return (
     <Card
-      className={`${DEVICE_ANIMATIONS.hoverLift} ${DEVICE_SHADOWS.soft} cursor-pointer`}
-      onClick={() => onClick?.(device)}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={interactive ? `Mở chi tiết thiết bị ${device.deviceName}` : undefined}
+      className={`${DEVICE_ANIMATIONS.hoverLift} ${DEVICE_SHADOWS.soft} ${interactive ? 'cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none' : ''}`}
+      onClick={interactive ? () => onClick(device) : undefined}
+      onKeyDown={
+        interactive
+          ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onClick(device);
+              }
+            }
+          : undefined
+      }
     >
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">

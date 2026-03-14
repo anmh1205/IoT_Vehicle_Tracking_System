@@ -1,0 +1,7 @@
+flowchart LR
+    Bus["Bus 5V từ MP2482"] --> Tp["TP4056<br/>mạch sạc Li-ion"]
+    En["GPIO5 CHARGER_EN"] --> Tp
+    Tp --> Bms["BMS 1S / protection"]
+    Bms --> Cell["Pin 21700 5000 mAh"]
+    Cell --> Boost["SX1308 backup"]
+    Boost --> Runtime["Nguồn dự phòng cho tracker"]

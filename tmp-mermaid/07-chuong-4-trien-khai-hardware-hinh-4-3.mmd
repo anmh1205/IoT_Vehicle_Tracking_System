@@ -1,0 +1,7 @@
+flowchart LR
+    Batt["Ắc quy xe<br/>12V hoặc 24V"] --> R1["R1 = 100 kΩ"]
+    R1 --> Node["Nút chia áp<br/>V_adc = U_batt x 0.0909"]
+    Node --> ADC["GPIO4 ADC1<br/>ESP32-S3"]
+    Node --> R2["R2 = 10 kΩ"]
+    R2 --> GND["GND"]
+    ADC --> Profile["Firmware quy đổi ngưỡng<br/>IGN và LVD theo profile"]

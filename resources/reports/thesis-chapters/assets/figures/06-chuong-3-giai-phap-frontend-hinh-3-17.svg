@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="rgba(18, 32, 51, 0.14)"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <style>
+    text {
+      fill: #122033;
+      font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+    }
+    .title { font-size: 40px; font-weight: 750; letter-spacing: -0.02em; }
+    .subtitle { font-size: 22px; fill: #52637a; }
+    .section-title { font-size: 24px; font-weight: 700; }
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+    .body { font-size: 20px; }
+    .small { font-size: 18px; fill: #52637a; }
+    .tiny { font-size: 15px; fill: #52637a; }
+    .chip { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metric { font-size: 42px; font-weight: 760; }
+    .mono { font-family: "Consolas", "Courier New", monospace; font-size: 18px; }
+    .sidebar { fill: #f8fafc; font-size: 18px; font-weight: 600; }
+  </style>
+  <rect width="100%" height="100%" fill="#f4f7fb"/>
+  <rect x="32" y="32" width="1536" height="936" rx="30" fill="none" stroke="rgba(29, 78, 216, 0.12)" stroke-width="2"/>
+  <rect x="56" y="56" width="1488" height="888" rx="28" fill="rgba(255, 255, 255, 0.45)" stroke="none"/>
+  <text x="84" y="106" class="title">Giao diện trang Dashboard tổng quan</text>
+  <text x="84" y="142" class="subtitle">Wireframe sáng, dùng tiếng Việt có dấu và các khối UI dễ đọc.</text>
+  
+      <rect x="72" y="178" width="1456" height="742" rx="34" fill="#f8fbff" stroke="rgba(29, 78, 216, 0.18)" stroke-width="2" />
+      <rect x="100" y="214" width="228" height="672" rx="28" fill="#0f172a" stroke="#0f172a" stroke-width="2" />
+      <text x="138" y="262" class="section-title" text-anchor="start" fill="#f8fafc"><tspan x="138" dy="0">Bảng điều</tspan><tspan x="138" dy="28">khiển</tspan></text>
+      <rect x="126" y="308" width="176" height="50" rx="16" fill="#1e293b" stroke="rgba(29, 78, 216, 0.6)" stroke-width="2" /><text x="214" y="340" class="sidebar" text-anchor="middle" fill="#f8fafc"><tspan x="214" dy="0">Tổng quan</tspan></text><rect x="126" y="378" width="176" height="50" rx="16" fill="#0f172a" stroke="#0f172a" stroke-width="2" /><text x="214" y="410" class="sidebar" text-anchor="middle" fill="#f8fafc"><tspan x="214" dy="0">Phương tiện</tspan></text><rect x="126" y="448" width="176" height="50" rx="16" fill="#0f172a" stroke="#0f172a" stroke-width="2" /><text x="214" y="480" class="sidebar" text-anchor="middle" fill="#f8fafc"><tspan x="214" dy="0">Bản đồ</tspan></text><rect x="126" y="518" width="176" height="50" rx="16" fill="#0f172a" stroke="#0f172a" stroke-width="2" /><text x="214" y="550" class="sidebar" text-anchor="middle" fill="#f8fafc"><tspan x="214" dy="0">Cảnh báo</tspan></text><rect x="126" y="588" width="176" height="50" rx="16" fill="#0f172a" stroke="#0f172a" stroke-width="2" /><text x="214" y="620" class="sidebar" text-anchor="middle" fill="#f8fafc"><tspan x="214" dy="0">Báo cáo</tspan></text><rect x="126" y="658" width="176" height="50" rx="16" fill="#0f172a" stroke="#0f172a" stroke-width="2" /><text x="214" y="690" class="sidebar" text-anchor="middle" fill="#f8fafc"><tspan x="214" dy="0">Cấu hình</tspan></text>
+      <rect x="354" y="214" width="1148" height="86" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" />
+      <rect x="382" y="236" width="188" height="54" rx="18" fill="#eef4ff" stroke="rgba(29, 78, 216, 0.18)" stroke-width="2" /><text x="476" y="269" class="small" text-anchor="middle" fill="#122033"><tspan x="476" dy="0">Bộ lọc phương tiện</tspan></text>
+      <rect x="590" y="236" width="188" height="54" rx="18" fill="#eef4ff" stroke="rgba(29, 78, 216, 0.18)" stroke-width="2" /><text x="684" y="269" class="small" text-anchor="middle" fill="#122033"><tspan x="684" dy="0">Khoảng thời gian</tspan></text>
+      <rect x="1290" y="236" width="164" height="34" rx="17" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="1372" y="259" class="chip" text-anchor="middle" fill="#fff">Đồng bộ trực tiếp</text>
+      
+      
+  <rect x="370" y="334" width="250" height="142" rx="24" fill="#ffffff" stroke="rgba(29, 78, 216, 0.26)" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="370" y="334" width="250" height="10" rx="24" fill="#1d4ed8" stroke="none"/>
+  <text x="398" y="384" class="small" text-anchor="start" fill="#122033"><tspan x="398" dy="0">Tổng số xe</tspan></text>
+  <text x="398" y="446" class="metric">124</text>
+  <rect x="524" y="430" width="72" height="34" rx="17" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="560" y="453" class="chip" text-anchor="middle" fill="#fff">+12%</text>
+
+      
+  <rect x="646" y="334" width="250" height="142" rx="24" fill="#ffffff" stroke="rgba(15, 157, 118, 0.26)" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="646" y="334" width="250" height="10" rx="24" fill="#0f9d76" stroke="none"/>
+  <text x="674" y="384" class="small" text-anchor="start" fill="#122033"><tspan x="674" dy="0">Đang hoạt động</tspan></text>
+  <text x="674" y="446" class="metric">38</text>
+  <rect x="800" y="430" width="72" height="34" rx="17" fill="#0f9d76" stroke="#0f9d76" stroke-width="2" /><text x="836" y="453" class="chip" text-anchor="middle" fill="#fff">+4</text>
+
+      
+  <rect x="922" y="334" width="250" height="142" rx="24" fill="#ffffff" stroke="rgba(201, 122, 16, 0.26)" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="922" y="334" width="250" height="10" rx="24" fill="#c97a10" stroke="none"/>
+  <text x="950" y="384" class="small" text-anchor="start" fill="#122033"><tspan x="950" dy="0">Cảnh báo mở</tspan></text>
+  <text x="950" y="446" class="metric">7</text>
+  <rect x="1076" y="430" width="72" height="34" rx="17" fill="#c97a10" stroke="#c97a10" stroke-width="2" /><text x="1112" y="453" class="chip" text-anchor="middle" fill="#fff">P95</text>
+
+      
+  <rect x="1198" y="334" width="250" height="142" rx="24" fill="#ffffff" stroke="rgba(15, 118, 110, 0.26)" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="1198" y="334" width="250" height="10" rx="24" fill="#0f766e" stroke="none"/>
+  <text x="1226" y="384" class="small" text-anchor="start" fill="#122033"><tspan x="1226" dy="0">Chuyến hôm nay</tspan></text>
+  <text x="1226" y="446" class="metric">59</text>
+  <rect x="1352" y="430" width="72" height="34" rx="17" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="1388" y="453" class="chip" text-anchor="middle" fill="#fff">ổn định</text>
+
+      <rect x="370" y="520" width="732" height="322" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+      <text x="398" y="566" class="card-title" text-anchor="start" fill="#122033"><tspan x="398" dy="0">Bản đồ mini đội xe</tspan></text>
+      <text x="398" y="596" class="small" text-anchor="start" fill="#122033"><tspan x="398" dy="0">Theo dõi xe đang hoạt động và vị trí phát sinh cảnh</tspan><tspan x="398" dy="28">báo gần nhất.</tspan></text>
+      <polyline points="418,780 510,700 610,730 714,648 820,666 934,612 1034,648" fill="none" stroke="#1d4ed8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="486" cy="724" r="16" fill="#1d4ed8"/><text x="486" y="760" class="small" text-anchor="middle">V001</text><circle cx="714" cy="648" r="16" fill="#d9485f"/><text x="714" y="684" class="small" text-anchor="middle">V014</text><circle cx="934" cy="612" r="16" fill="#0f9d76"/><text x="934" y="648" class="small" text-anchor="middle">V032</text>
+      <rect x="1134" y="520" width="368" height="150" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+      <text x="1162" y="562" class="card-title" text-anchor="start" fill="#122033"><tspan x="1162" dy="0">Telemetry thời gian thực</tspan></text>
+      <polyline points="1168,632 1218,616 1270,574 1324,592 1376,544 1432,524" fill="none" stroke="#0f766e" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline points="1168,646 1218,662 1270,624 1324,610 1376,622 1432,584" fill="none" stroke="#c97a10" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="1134" y="692" width="368" height="150" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+      <text x="1162" y="734" class="card-title" text-anchor="start" fill="#122033"><tspan x="1162" dy="0">Cảnh báo gần đây</tspan></text>
+      <rect x="1162" y="760" width="312" height="18" rx="9" fill="#eef4ff" stroke="rgba(217, 72, 95, 0.2)" stroke-width="2" /><text x="1176" y="774" class="tiny" text-anchor="start" fill="#122033"><tspan x="1176" dy="0">Rời geofence</tspan></text><rect x="1388" y="746" width="86" height="34" rx="17" fill="#d9485f" stroke="#d9485f" stroke-width="2" /><text x="1431" y="769" class="chip" text-anchor="middle" fill="#fff">Cao</text><rect x="1162" y="784" width="312" height="18" rx="9" fill="#eef4ff" stroke="rgba(201, 122, 16, 0.2)" stroke-width="2" /><text x="1176" y="798" class="tiny" text-anchor="start" fill="#122033"><tspan x="1176" dy="0">Quá tốc độ</tspan></text><rect x="1388" y="770" width="86" height="34" rx="17" fill="#c97a10" stroke="#c97a10" stroke-width="2" /><text x="1431" y="793" class="chip" text-anchor="middle" fill="#fff">Trung bình</text><rect x="1162" y="808" width="312" height="18" rx="9" fill="#eef4ff" stroke="rgba(15, 118, 110, 0.2)" stroke-width="2" /><text x="1176" y="822" class="tiny" text-anchor="start" fill="#122033"><tspan x="1176" dy="0">Pin dự phòng yếu</tspan></text><rect x="1388" y="794" width="86" height="34" rx="17" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="1431" y="817" class="chip" text-anchor="middle" fill="#fff">Mới</text>
+    
+    
+</svg>

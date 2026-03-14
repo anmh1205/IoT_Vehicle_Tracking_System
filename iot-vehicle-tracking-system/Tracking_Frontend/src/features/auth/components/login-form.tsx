@@ -71,7 +71,9 @@ export const LoginForm = () => {
             <Label htmlFor="username">Tên đăng nhập</Label>
             <Input id="username" placeholder="Nhập tên đăng nhập" {...register('username')} />
             {errors.username && (
-              <p className="text-sm text-destructive">{errors.username.message}</p>
+              <p role="alert" aria-live="polite" className="text-sm text-destructive">
+                {errors.username.message}
+              </p>
             )}
           </div>
           <div className="space-y-2">
@@ -86,14 +88,16 @@ export const LoginForm = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
-                className="absolute right-2 top-2.5 text-muted-foreground"
+                className="absolute right-1 top-1 inline-flex h-11 w-11 items-center justify-center text-muted-foreground sm:right-2 sm:top-2.5 sm:h-auto sm:w-auto"
                 aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
             {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
+              <p role="alert" aria-live="polite" className="text-sm text-destructive">
+                {errors.password.message}
+              </p>
             )}
           </div>
           <div className="flex items-center justify-between">

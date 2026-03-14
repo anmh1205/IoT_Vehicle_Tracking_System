@@ -1,0 +1,6 @@
+flowchart LR
+    Bench["Bench test phần cứng<br/>nguồn DC, DMM, tracker"] --> Network["Mạng 4G hoặc Wi-Fi"]
+    Vehicle["Xe thử nghiệm<br/>OBD2 và hành trình thực tế"] --> Network
+    Network --> Cloud["Cloud test stack<br/>EMQX, Bridge, Backend"]
+    Cloud --> Dashboard["Dashboard Web<br/>và Grafana"]
+    Dashboard --> Result["Log, metric<br/>và kết quả đo"]

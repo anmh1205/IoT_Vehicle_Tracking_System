@@ -1,0 +1,9 @@
+flowchart LR
+    Vin["Ắc quy xe 12V hoặc 24V"] --> Fuse["Cầu chì đầu vào"]
+    Fuse --> Mp["MP2482-5.0<br/>buck 5V / 3A"]
+    Mp --> L1["Cuộn cảm 100 uH"]
+    L1 --> Bus["Bus 5V chính"]
+    Mp --> D1["Diode Schottky 1N5822"]
+    D1 --> Bus
+    Cin["C1 100 uF / 50V"] --> Mp
+    Bus --> Cout["C2 220 uF / 16V"]

@@ -1,0 +1,14 @@
+sequenceDiagram
+    actor U as Người dùng
+    participant F as Frontend Next.js
+    participant B as Backend API
+    participant P as PostgreSQL
+    participant S as Zustand Store
+    U->>F: Nhập email và mật khẩu
+    F->>B: POST /api/v1/auth/login
+    B->>P: Tra cứu user và session
+    P-->>B: Hash, vai trò, trạng thái
+    B-->>F: Session token và hồ sơ
+    F->>S: Lưu token trong bộ nhớ
+    F->>B: GET /dashboard
+    B-->>F: Dữ liệu trang và quyền truy cập

@@ -148,7 +148,7 @@ src/
  +-- types/                        # Global TypeScript types
 ```
 
-![Hình 3.15 - Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Frontend](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–15.jpg)
+![Hình 3.15 - Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Frontend](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-15.svg)
 
 *Hình 3.15: Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Frontend*
 
@@ -200,7 +200,7 @@ Hệ thống Frontend sử dụng cơ chế xác thực dựa trên session toke
 4. **AuthGuard:** Component `AuthGuard` bao bọc toàn bộ khu vực `/dashboard/*`, tự động chuyển hướng về trang đăng nhập nếu chưa xác thực hoặc token hết hạn.
 5. **Auto-refresh:** Khi token sắp hết hạn, hệ thống tự động yêu cầu Backend cấp token mới mà không cần người dùng đăng nhập lại.
 
-![Hình 3.16 - Biểu đồ trình tự (Sequence Diagram) luồng xác thực người dùng](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–16.png)
+![Hình 3.16 - Biểu đồ trình tự (Sequence Diagram) luồng xác thực người dùng](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-16.svg)
 
 *Hình 3.16: Biểu đồ trình tự (Sequence Diagram) luồng xác thực người dùng*
 
@@ -217,11 +217,11 @@ Trang Dashboard là điểm vào chính sau khi đăng nhập, cung cấp cái n
 - **Bảng cảnh báo gần đây:** Danh sách 10 cảnh báo mới nhất với badge mức độ nghiêm trọng (low, medium, high, critical).
 - **Biểu đồ thống kê:** Biểu đồ số chuyến đi theo ngày và phân loại cảnh báo theo loại.
 
-![Hình 3.17 - Giao diện trang Dashboard tổng quan](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–17.png)
+![Hình 3.17 - Giao diện trang Dashboard tổng quan](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-17.svg)
 
 *Hình 3.17: Giao diện trang Dashboard tổng quan*
 
-> Nguồn: Giao diện ứng dụng IVM26 (hình chụp màn hình)
+> Nguồn: Hình dựng từ thiết kế giao diện và luồng nghiệp vụ của tác giả
 
 ##### b) Quản lý phương tiện (Vehicle Management)
 
@@ -238,11 +238,11 @@ Trang Dashboard là điểm vào chính sau khi đăng nhập, cung cấp cái n
 
 **Trang chi tiết (`/dashboard/vehicles/[id]`):** Hiển thị thông tin đầy đủ của phương tiện bao gồm thông tin cơ bản, vị trí hiện tại trên bản đồ, trạng thái thiết bị IoT, các cảnh báo đang hoạt động, lịch sử chuyến đi và lịch sử bảo trì.
 
-![Hình 3.18 - Giao diện trang quản lý phương tiện](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–18.jpg)
+![Hình 3.18 - Giao diện trang quản lý phương tiện](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-18.svg)
 
 *Hình 3.18: Giao diện trang quản lý phương tiện*
 
-> Nguồn: Giao diện ứng dụng IVM26 (hình chụp màn hình)
+> Nguồn: Hình dựng từ thiết kế giao diện và luồng nghiệp vụ của tác giả
 
 ##### c) Quản lý chuyến đi, cảnh báo và vùng địa lý
 
@@ -304,7 +304,7 @@ Trang bản đồ thời gian thực (`/dashboard/map`) là tính năng cốt l�
 +------------------------------------------+
 ```
 
-![Hình 3.19 - Kiến trúc tích hợp bản đồ thời gian thực](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–19.png)
+![Hình 3.19 - Kiến trúc tích hợp bản đồ thời gian thực](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-19.svg)
 
 *Hình 3.19: Kiến trúc tích hợp bản đồ thời gian thực*
 
@@ -336,11 +336,11 @@ Hệ thống bao gồm bốn component bản đồ chuyên biệt:
 | GeofenceMap | `components/map/geofence-map.tsx` | Vẽ và chỉnh sửa vùng địa lý (polygon, circle, rectangle)                   |
 | MarkerPopup | `components/map/marker-popup.tsx` | Popup hiển thị thông tin xe khi click marker (biển số, tốc độ, trạng thái) |
 
-![Hình 3.20 - Giao diện trang bản đồ thời gian thực với các marker xe](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–20.png)
+![Hình 3.20 - Giao diện trang bản đồ thời gian thực với các marker xe](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-20.svg)
 
 *Hình 3.20: Giao diện trang bản đồ thời gian thực với các marker xe*
 
-> Nguồn: Giao diện ứng dụng IVM26 (hình chụp màn hình)
+> Nguồn: Hình dựng từ thiết kế giao diện và luồng nghiệp vụ của tác giả
 
 #### 3.2.4.5. Thiết kế responsive và trải nghiệm người dùng (Responsive Design & UX)
 
@@ -360,7 +360,7 @@ Hệ thống áp dụng chiến lược Mobile-First với ba mức breakpoint c
 
 Giao diện Dashboard sử dụng bố cục (layout) gồm ba vùng chính: Header (breadcrumbs, search, user menu, theme toggle), Sidebar (navigation menu), và Main Content Area (page content, filters, data tables).
 
-![Hình 3.21 - Wireframe bố cục giao diện Dashboard](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–21.png)
+![Hình 3.21 - Wireframe bố cục giao diện Dashboard](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-21.svg)
 
 *Hình 3.21: Wireframe bố cục giao diện Dashboard*
 
@@ -379,11 +379,11 @@ Hệ thống áp dụng các mẫu thiết kế giao diện nhất quán xuyên 
 - **Bản đồ (Maps):** Custom markers với màu theo trạng thái, popup thông tin, drawing tools cho geofence.
 - **Biểu đồ (Charts):** ECharts/Recharts cho telemetry, line chart tốc độ, gauge chart RPM, area chart nhiên liệu/nhiệt độ.
 
-![Hình 3.22 - Các mẫu thiết kế UI của hệ thống - Data Table, Form, Charts](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–22.png)
+![Hình 3.22 - Các mẫu thiết kế UI của hệ thống - Data Table, Form, Charts](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-22.svg)
 
 *Hình 3.22: Các mẫu thiết kế UI của hệ thống - Data Table, Form, Charts*
 
-> Nguồn: Giao diện ứng dụng IVM26 (hình chụp màn hình)
+> Nguồn: Hình dựng từ thiết kế giao diện và luồng nghiệp vụ của tác giả
 
 ##### e) Tối ưu trải nghiệm người dùng
 
@@ -421,7 +421,7 @@ Dựa trên phân tích các giải pháp đề xuất cho từng tầng hệ th
 
 Từ kết quả phân tích và đánh giá ở mục 3.3, phương án thiết kế tối ưu cho hệ thống IoT giám sát phương tiện được tổng hợp như sau:
 
-![Hình 3.23 - Sơ đồ kiến trúc tổng thể phương án tối ưu](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3–23.png)
+![Hình 3.23 - Sơ đồ kiến trúc tổng thể phương án tối ưu](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-23.svg)
 
 *Hình 3.23: Sơ đồ kiến trúc tổng thể phương án tối ưu*
 
@@ -441,4 +441,6 @@ Phương án này đáp ứng các yêu cầu kỹ thuật đã đặt ra ở Ch
 ## Kết luận chương 3
 
 Chương này đã trình bày có hệ thống quá trình phân tích, đề xuất và lựa chọn phương án thiết kế cho toàn bộ hệ thống IoT giám sát phương tiện trên bốn tầng: phần cứng, firmware, backend/cloud và frontend. Thông qua ma trận đánh giá trọng số ở từng tầng, phương án tối ưu được xác lập theo các tiêu chí hiệu năng, chi phí và khả năng mở rộng. Kết quả lựa chọn tạo cơ sở kỹ thuật nhất quán cho giai đoạn triển khai chi tiết tại Chương 4.
+
+
 

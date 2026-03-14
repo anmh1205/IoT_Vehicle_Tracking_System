@@ -1,0 +1,16 @@
+flowchart TB
+    A["Đọc U_batt, IGN và cờ LVD"] --> B{"IGN ON?"}
+    B -->|Có| C["GPIO18 = LOW<br/>ưu tiên nhánh chính MP2482"]
+    C --> D["GPIO5 = HIGH<br/>cho phép sạc TP4056"]
+    B -->|Không| E{"U_batt <= Switch_OFF?"}
+    E -->|Có| F["GPIO18 = HIGH<br/>ưu tiên nhánh backup SX1308"]
+    F --> G["GPIO5 = LOW<br/>tắt sạc để bảo vệ ắc quy"]
+    G --> H["Set cờ low battery / alert"]
+    E -->|Không| I{"U_batt >= Switch_ON?"}
+    I -->|Có| J["GPIO18 = LOW<br/>quay lại nhánh chính"]
+    J --> K["GPIO5 = LOW nếu đang parking"]
+    I -->|Không| L["Giữ trạng thái trước đó"]
+    D --> M["Delay 5 giây rồi lặp"]
+    H --> M
+    K --> M
+    L --> M

@@ -1,0 +1,33 @@
+{
+  "theme": "base",
+  "fontFamily": "Segoe UI, Noto Sans, Arial, sans-serif",
+  "themeVariables": {
+    "primaryColor": "#f5f3ff",
+    "primaryBorderColor": "#a78bfa",
+    "primaryTextColor": "#1f2937",
+    "lineColor": "#333333",
+    "clusterBkg": "#faf5ff",
+    "clusterBorder": "#c4b5fd",
+    "secondaryColor": "#ffffff",
+    "tertiaryColor": "#ffffff",
+    "fontSize": "18px"
+  },
+  "flowchart": {
+    "htmlLabels": true,
+    "curve": "basis",
+    "nodeSpacing": 45,
+    "rankSpacing": 70,
+    "padding": 18,
+    "useMaxWidth": true
+  },
+  "sequence": {
+    "diagramMarginX": 50,
+    "diagramMarginY": 30,
+    "actorMargin": 70,
+    "messageMargin": 50,
+    "width": 220,
+    "height": 80,
+    "boxMargin": 16,
+    "boxTextMargin": 12
+  }
+}

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="rgba(18, 32, 51, 0.14)"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#0f766e"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <style>
+    text {
+      fill: #122033;
+      font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+    }
+    .title { font-size: 40px; font-weight: 750; letter-spacing: -0.02em; }
+    .subtitle { font-size: 22px; fill: #52637a; }
+    .section-title { font-size: 24px; font-weight: 700; }
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+    .body { font-size: 20px; }
+    .small { font-size: 18px; fill: #52637a; }
+    .tiny { font-size: 15px; fill: #52637a; }
+    .chip { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metric { font-size: 42px; font-weight: 760; }
+    .mono { font-family: "Consolas", "Courier New", monospace; font-size: 18px; }
+    .sidebar { fill: #f8fafc; font-size: 18px; font-weight: 600; }
+  </style>
+  <rect width="100%" height="100%" fill="#f4f7fb"/>
+  <rect x="32" y="32" width="1536" height="936" rx="30" fill="none" stroke="rgba(15, 118, 110, 0.12)" stroke-width="2"/>
+  <rect x="56" y="56" width="1488" height="888" rx="28" fill="rgba(255, 255, 255, 0.45)" stroke="none"/>
+  <text x="84" y="106" class="title">Bố trí thiết bị đo lường trong phòng thí nghiệm</text>
+  <text x="84" y="142" class="subtitle">Sơ đồ bench test cho nguồn DC, DMM, tracker, OBD2 simulator và máy thu log.</text>
+  
+      
+  <rect x="110" y="230" width="1380" height="640" rx="30" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="3" />
+  <rect x="134" y="212" width="144" height="34" rx="17" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="206" y="235" class="chip" text-anchor="middle" fill="#fff">Bàn đo lường</text>
+  <text x="138" y="264" class="small" text-anchor="start" fill="#122033"><tspan x="138" dy="0">Các thiết bị được bố trí để đo dòng, điện áp, log hệ thống và mô phỏng OBD2.</tspan></text>
+
+      
+    <rect x="180" y="320" width="250" height="144" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="180" y="320" width="250" height="12" rx="26" fill="#1d4ed8" stroke="none"/>
+    <rect x="198" y="340" width="90" height="34" rx="17" fill="rgba(29, 78, 216, 0.88)" stroke="rgba(29, 78, 216, 0.88)" stroke-width="2" /><text x="243" y="363" class="chip" text-anchor="middle" fill="#fff">bench</text>
+    <text x="305" y="384" class="card-title" text-anchor="middle" fill="#122033"><tspan x="305" dy="0">Nguồn DC 12V /</tspan><tspan x="305" dy="30">24V</tspan></text>
+    <text x="305" y="456" class="body" text-anchor="middle" fill="#122033"><tspan x="305" dy="0">Cấp đầu vào cho</tspan><tspan x="305" dy="24">tracker</tspan></text>
+  
+    <rect x="510" y="320" width="250" height="144" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="510" y="320" width="250" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    <rect x="528" y="340" width="90" height="34" rx="17" fill="rgba(217, 72, 95, 0.88)" stroke="rgba(217, 72, 95, 0.88)" stroke-width="2" /><text x="573" y="363" class="chip" text-anchor="middle" fill="#fff">bench</text>
+    <text x="635" y="384" class="card-title" text-anchor="middle" fill="#122033"><tspan x="635" dy="0">Đồng hồ DMM</tspan></text>
+    <text x="635" y="428" class="body" text-anchor="middle" fill="#122033"><tspan x="635" dy="0">Đo dòng tiêu thụ</tspan></text>
+  
+    <rect x="840" y="320" width="250" height="144" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="840" y="320" width="250" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    <rect x="858" y="340" width="90" height="34" rx="17" fill="rgba(15, 118, 110, 0.88)" stroke="rgba(15, 118, 110, 0.88)" stroke-width="2" /><text x="903" y="363" class="chip" text-anchor="middle" fill="#fff">bench</text>
+    <text x="965" y="384" class="card-title" text-anchor="middle" fill="#122033"><tspan x="965" dy="0">Tracker prototype</tspan></text>
+    <text x="965" y="428" class="body" text-anchor="middle" fill="#122033"><tspan x="965" dy="0">Thiết bị cần kiểm thử</tspan></text>
+  
+    <rect x="1170" y="320" width="250" height="144" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1170" y="320" width="250" height="12" rx="26" fill="#6d4fe0" stroke="none"/>
+    <rect x="1188" y="340" width="90" height="34" rx="17" fill="rgba(109, 79, 224, 0.88)" stroke="rgba(109, 79, 224, 0.88)" stroke-width="2" /><text x="1233" y="363" class="chip" text-anchor="middle" fill="#fff">bench</text>
+    <text x="1295" y="384" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1295" dy="0">OBD2 simulator</tspan></text>
+    <text x="1295" y="428" class="body" text-anchor="middle" fill="#122033"><tspan x="1295" dy="0">Sinh khung dữ liệu</tspan><tspan x="1295" dy="24">động cơ</tspan></text>
+  
+    <rect x="510" y="580" width="250" height="144" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="510" y="580" width="250" height="12" rx="26" fill="#c97a10" stroke="none"/>
+    <rect x="528" y="600" width="90" height="34" rx="17" fill="rgba(201, 122, 16, 0.88)" stroke="rgba(201, 122, 16, 0.88)" stroke-width="2" /><text x="573" y="623" class="chip" text-anchor="middle" fill="#fff">bench</text>
+    <text x="635" y="644" class="card-title" text-anchor="middle" fill="#122033"><tspan x="635" dy="0">Laptop thu log</tspan></text>
+    <text x="635" y="688" class="body" text-anchor="middle" fill="#122033"><tspan x="635" dy="0">Serial, MQTT, Grafana</tspan></text>
+  
+    <rect x="840" y="580" width="250" height="144" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="840" y="580" width="250" height="12" rx="26" fill="#0f9d76" stroke="none"/>
+    <rect x="858" y="600" width="90" height="34" rx="17" fill="rgba(15, 157, 118, 0.88)" stroke="rgba(15, 157, 118, 0.88)" stroke-width="2" /><text x="903" y="623" class="chip" text-anchor="middle" fill="#fff">bench</text>
+    <text x="965" y="644" class="card-title" text-anchor="middle" fill="#122033"><tspan x="965" dy="0">Oscilloscope</tspan></text>
+    <text x="965" y="688" class="body" text-anchor="middle" fill="#122033"><tspan x="965" dy="0">Quan sát xung và rail</tspan><tspan x="965" dy="24">nguồn</tspan></text>
+  
+      
+    <line x1="430" y1="392" x2="510" y2="392" stroke="#1d4ed8" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="376" y="330" width="108" height="54" rx="18" fill="#ffffff" stroke="rgba(29, 78, 216, 0.28)" stroke-width="2" /><text x="430" y="363" class="small" text-anchor="middle" fill="#122033"><tspan x="430" dy="0">nguồn vào</tspan></text>
+  
+      
+    <line x1="760" y1="392" x2="840" y2="392" stroke="#d9485f" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="716" y="330" width="88" height="54" rx="18" fill="#ffffff" stroke="rgba(217, 72, 95, 0.28)" stroke-width="2" /><text x="760" y="363" class="small" text-anchor="middle" fill="#122033"><tspan x="760" dy="0">đo dòng</tspan></text>
+  
+      
+    <line x1="1090" y1="392" x2="1170" y2="392" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="1030" y="330" width="120" height="54" rx="18" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="2" /><text x="1090" y="363" class="small" text-anchor="middle" fill="#122033"><tspan x="1090" dy="0">khung OBD2</tspan></text>
+  
+      
+    <line x1="636" y1="580" x2="840" y2="580" stroke="#c97a10" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="646" y="520" width="88" height="54" rx="18" fill="#ffffff" stroke="rgba(201, 122, 16, 0.28)" stroke-width="2" /><text x="690" y="553" class="small" text-anchor="middle" fill="#122033"><tspan x="690" dy="0">thu log</tspan></text>
+  
+      
+    <line x1="965" y1="580" x2="965" y2="464" stroke="#0f9d76" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="958" y="504" width="88" height="54" rx="18" fill="#ffffff" stroke="rgba(15, 157, 118, 0.28)" stroke-width="2" /><text x="1002" y="537" class="small" text-anchor="middle" fill="#122033"><tspan x="1002" dy="0">đo rail</tspan></text>
+  
+    
+</svg>

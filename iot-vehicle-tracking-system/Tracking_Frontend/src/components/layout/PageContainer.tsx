@@ -50,6 +50,6 @@ export const PageContainer = ({
     return <div className={cn('flex flex-1 flex-col', className)}>{content}</div>;
   }
   return (
-    <ScrollArea className={cn('h-[calc(100vh-4rem)] w-full', className)}>{content}</ScrollArea>
+    <ScrollArea className={cn('h-[calc(100dvh-4rem)] w-full', className)}>{content}</ScrollArea>
   );
 };

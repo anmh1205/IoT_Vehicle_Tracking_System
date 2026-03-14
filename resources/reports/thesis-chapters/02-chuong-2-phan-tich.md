@@ -137,7 +137,7 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 - **Hiệu suất và tài nguyên**: VictoriaMetrics có tỷ lệ nén dữ liệu rất cao (10–70x) và tiêu thụ ít RAM hơn InfluxDB, phù hợp với server có tài nguyên hạn chế.
 - **Tương thích Grafana**: Cả hai đều hỗ trợ Grafana native, cho phép xây dựng dashboard giám sát toàn diện mà không cần công cụ bổ sung.
 
-![Hình 2.1 - Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram](./assets/figures/02-chuong-2-phan-tich-hinh-2–1.png)
+![Hình 2.1 - Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram](./assets/figures/02-chuong-2-phan-tich-hinh-2-1.svg)
 
 *Hình 2.1: Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram*
 

@@ -1,14 +1,10 @@
-graph TD
-    Bridge["MQTT Bridge"]
-    subgraph PG["PostgreSQL (Quan hệ)"]
-        PG1["Vehicles, Customers<br>Trips, Alerts<br>Violations, Commands<br>Geofences"]
-    end
-    subgraph VM["VictoriaMetrics (Chuỗi thời gian)<br>Lưu trữ: 30d"]
-        VM1["Vị trí GPS, Tốc độ<br>Mức pin, OBD2 metrics<br>Dữ liệu IMU"]
-    end
-    subgraph VL["VictoriaLogs (Nhật ký)<br>Lưu trữ: 7d"]
-        VL1["Sự kiện thiết bị<br>Nhật ký lỗi<br>Phiên làm việc<br>Message MQTT<br>Nhật ký kiểm toán"]
-    end
-    Bridge --> PG
-    Bridge --> VM
-    Bridge --> VL
+flowchart LR
+    Tracker["Thiết bị tracker<br/>GPS, OBD2, nguồn"] --> Bridge["MQTT Bridge<br/>chuẩn hóa payload"]
+    Frontend["Frontend và API<br/>truy vấn nghiệp vụ"] --> Backend["Backend API<br/>đọc theo use case"]
+    Bridge --> PG["PostgreSQL<br/>xe, người dùng, cảnh báo"]
+    Bridge --> VM["VictoriaMetrics<br/>telemetry thời gian thực"]
+    Bridge --> VL["VictoriaLogs<br/>log kết nối"]
+    Backend --> PG
+    Backend --> Dashboard["Dashboard Web<br/>và mobile shell"]
+    VM --> Dashboard
+    VL --> Dashboard

@@ -2,7 +2,7 @@
 
 ### Tổng Quan
 
-Sơ đồ khối này phản ánh **kiến trúc phần cứng mục tiêu** hiện tại của tracker, xoay quanh một mô-đun duy nhất: **SIMCom SIM7600CE-T** đảm nhiệm LTE + GNSS tích hợp, kết nối trực tiếp với **ESP32-S3**. Ở runtime hiện tại, các tín hiệu bắt buộc đã được chốt ở mức firmware là UART (`GPIO16/17`) và PWRKEY (`GPIO25`); các net RESET/CTS/RTS/RI/EN vẫn được giữ trong sơ đồ phần cứng để tham chiếu thiết kế.
+Sơ đồ khối này phản ánh **kiến trúc phần cứng mục tiêu** hiện tại của tracker, xoay quanh một mô-đun duy nhất: **SIMCom SIM7600CE-T** đảm nhiệm LTE + GNSS tích hợp, kết nối trực tiếp với **ESP32-S3**. Ở runtime hiện tại, các tín hiệu bắt buộc đã được chốt ở mức firmware là UART (`GPIO16/17`) và PWRKEY (`GPIO26`); các net RESET/CTS/RTS/RI/EN vẫn được giữ trong sơ đồ phần cứng để tham chiếu thiết kế.
 
 > **Lưu ý:** Module SIM7600CE-T chạy ở chế độ mạng `Auto mode` (`AT+CNMP=2`) và APN mặc định là `internet`. Tài liệu chỉ mô tả runtime cho SIM7600CE-T; A7670C + NEO-M8N chỉ còn được đề cập trong phần lịch sử baseline.
 
@@ -37,7 +37,7 @@ ESP32 đọc U_batt qua ADC (divider `100k/10k`) để chọn profile và điề
 - Có thể đặt module vào **Auto mode** để mạng tự chuyển giữa LTE/UMTS/GSM
 - APN mặc định `internet`, nếu cần điều chỉnh chỉ thay đổi `AT+CGDCONT`
 - Firmware tập trung vào một driver duy nhất, giảm độ phức tạp pin/GPIO
-- Theo firmware source-of-truth hiện tại: UART modem dùng `GPIO16/17`, PWRKEY dùng `GPIO25`, LVD status đọc tại `GPIO19`, ADC U_batt tại `GPIO4`
+- Theo firmware source-of-truth hiện tại: UART modem dùng `GPIO16/17`, PWRKEY dùng `GPIO26`, LVD status đọc tại `GPIO19`, ADC U_batt tại `GPIO4`
 
 ### Kết Nối Vật Lý
 

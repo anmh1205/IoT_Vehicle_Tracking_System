@@ -121,11 +121,11 @@ float u_batt = v_adc * 11.0f;
 | 18   | POWER_MUX_SEL    | Output | Điều khiển EN MP2482            |
 | 19   | LVD_STATUS       | Input  | Đọc trạng thái LVD              |
 | 21   | LIS3DH_INT       | Input  | Interrupt từ IMU                |
-| 22   | LIS3DH_SDA (I2C) | I/O    | I2C data                        |
-| 23   | LIS3DH_SCL (I2C) | I/O    | I2C clock                       |
+| 47   | LIS3DH_SDA (I2C) | I/O    | I2C data                        |
+| 48   | LIS3DH_SCL (I2C) | I/O    | I2C clock                       |
 | 16   | MODEM_UART_TX    | Output | UART TX đến modem               |
 | 17   | MODEM_UART_RX    | Input  | UART RX từ modem                |
-| 25   | MODEM_PWRKEY     | Output | Điều khiển power modem          |
+| 26   | MODEM_PWRKEY     | Output | Điều khiển power modem          |
 
 **Lưu Ý:**
 

@@ -130,9 +130,9 @@ Các tầng giao tiếp với nhau thông qua cơ chế message queue và semaph
 | 18 | POWER_PATH_EN | Output | Chọn nguồn cấp (ắc quy/pin dự phòng) |
 | 19 | LVD_STATUS | Input | Trạng thái từ comparator LM393 |
 | 21 | LIS3DH_INT | Input | Ngắt từ cảm biến gia tốc IMU |
-| 22 | LIS3DH_SDA | I/O | I2C data line |
-| 23 | LIS3DH_SCL | I/O | I2C clock line |
-| 25 | MODEM_PWRKEY | Output | Điều khiển nguồn modem |
+| 47 | LIS3DH_SDA | I/O | I2C data line |
+| 48 | LIS3DH_SCL | I/O | I2C clock line |
+| 26 | MODEM_PWRKEY | Output | Điều khiển nguồn modem |
 
 ---
 
@@ -739,9 +739,9 @@ void tracker_fsm_run(void)
 
 #### b) Lưu đồ thuật toán tổng thể
 
-![thesis-08-chuong-4-trien-khai-firmware-01](assets/figures/thesis-08-chuong-4-trien-khai-firmware-01.png)
+![thesis-08-chuong-4-trien-khai-firmware-01](assets/figures/thesis-08-chuong-4-trien-khai-firmware-01.svg)
 
-*Hình 4.X: Lưu đồ thuật toán chính của firmware thiết bị theo dõi xe*
+*Hình 4.17: Lưu đồ thuật toán chính của firmware thiết bị theo dõi xe*
 
 #### c) Định dạng dữ liệu telemetry
 

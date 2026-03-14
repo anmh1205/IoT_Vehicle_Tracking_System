@@ -15,7 +15,7 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | 1 | Vi điều khiển | ESP32-S3-WROOM-1 (N16R8) | 1 | 120.000 | 120.000 | MCU chính, 16MB Flash, 8MB PSRAM |
 | 2 | LTE + GNSS | SIMCom SIM7600CE-T | 1 bộ | 330.000 | 330.000 | Modem LTE Cat-4 tích hợp GPS/GNSS |
 | 3 | OBD2 Adapter | vgate iCar Pro BLE | 1 | 350.000 | 350.000 | Bluetooth Low Energy OBD2 |
-| 4 | Cảm biến gia tốc | LIS3DH (breakout board) | 1 | 45.000 | 45.000 | IMU 3 trục, phát hiện chuyển động |
+| 4 | Cảm biến gia tốc | Module LIS3DH | 1 | 45.000 | 45.000 | IMU 3 trục, phát hiện chuyển động |
 | 5 | Pin dự phòng | 21700 Li-ion 5000mAh | 1 | 80.000 | 80.000 | Samsung/LG cell |
 | 6 | IC sạc pin | TP4056 module | 1 | 25.000 | 25.000 | Sạc 3A, CC/CV |
 | 7 | Buck converter | MP2482 module (12V/24V->5V) | 1 | 15.000 | 15.000 | Giảm áp từ ắc quy xe |
@@ -169,7 +169,7 @@ Dự án được triển khai theo 7 giai đoạn chính, với tổng thời g
 
 ## 3.2. Biểu đồ Gantt (Gantt Chart)
 
-![thesis-14-phu-luc-01](assets/figures/thesis-14-phu-luc-01.png)
+![thesis-14-phu-luc-01](assets/figures/thesis-14-phu-luc-01.svg)
 
 ## 3.3. Chi tiết công việc theo giai đoạn
 

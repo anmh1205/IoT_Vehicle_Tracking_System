@@ -1,0 +1,12 @@
+flowchart LR
+    Device["Thiết bị tracker<br/>ESP32-S3 + SIM7600CE-T"] --> EMQX["EMQX Broker"]
+    EMQX --> Bridge["MQTT Bridge"]
+    Bridge --> Backend["Backend API"]
+    Backend --> Query["TanStack Query<br/>dữ liệu lịch sử"]
+    Backend --> Store["Zustand + Socket.IO<br/>state realtime"]
+    Bridge --> Metrics["VictoriaMetrics"]
+    Bridge --> Logs["VictoriaLogs"]
+    Query --> Dashboard["Dashboard Next.js"]
+    Store --> Dashboard
+    Metrics --> Ops["Grafana và quan trắc"]
+    Logs --> Ops

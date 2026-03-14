@@ -39,7 +39,7 @@ export const NotificationDropdown = () => {
           <NotificationBadge onClick={() => setOpen((v) => !v)} />
         </div>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-96 p-0">
+      <PopoverContent align="end" className="w-[min(92vw,24rem)] p-0">
         <div className="flex items-center justify-between border-b p-3">
           <div className="text-sm font-semibold">Thông báo</div>
           <Button variant="ghost" size="sm" onClick={() => markAllMutation.mutate()}>

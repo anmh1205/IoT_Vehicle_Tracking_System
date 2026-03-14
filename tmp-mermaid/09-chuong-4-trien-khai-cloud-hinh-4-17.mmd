@@ -1,0 +1,8 @@
+flowchart LR
+    EMQX["EMQX Broker<br/>topic telemetry, alert"] --> Parse["1. Parse topic<br/>và payload JSON"]
+    Parse --> Validate["2. Validate schema<br/>chuẩn hóa timestamp"]
+    Validate --> Fanout["3. Fan-out<br/>ghi nhiều đích"]
+    Fanout --> VM["VictoriaMetrics<br/>GPS, OBD2, sensor"]
+    Fanout --> VL["VictoriaLogs<br/>log và audit"]
+    Fanout --> PG["PostgreSQL<br/>runtime, alert"]
+    Fanout --> Socket["Socket.IO<br/>đẩy realtime"]

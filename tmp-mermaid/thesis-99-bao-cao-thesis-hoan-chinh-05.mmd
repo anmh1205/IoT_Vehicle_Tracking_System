@@ -1,12 +1,9 @@
-graph TD
-    Pages["Next.js Pages<br>(App Router)"]
-    TQ["TanStack Query<br>(REST API)"]
-    Zustand["Zustand Store<br>(Client)"]
-    SocketIO["Socket.IO Client<br>(Real-time)"]
-    Backend["Backend API<br>(Express 3000)"]
-
-    Pages --> TQ
-    Pages --> Zustand
-    Pages --> SocketIO
-    TQ --> Backend
-    SocketIO --> Backend
+flowchart LR
+    UI["Trang Next.js"] --> Query["TanStack Query<br/>dữ liệu lịch sử"]
+    UI --> Store["Zustand Store<br/>state realtime"]
+    Query --> Api["Backend API"]
+    Api --> Pg["PostgreSQL"]
+    Api --> Vm["VictoriaMetrics"]
+    Socket["Socket.IO"] --> Store
+    Store --> Map["Map / Sidebar / Chart"]
+    Query --> Map

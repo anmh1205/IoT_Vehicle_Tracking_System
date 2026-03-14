@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="rgba(18, 32, 51, 0.14)"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#c97a10"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <style>
+    text {
+      fill: #122033;
+      font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+    }
+    .title { font-size: 40px; font-weight: 750; letter-spacing: -0.02em; }
+    .subtitle { font-size: 22px; fill: #52637a; }
+    .section-title { font-size: 24px; font-weight: 700; }
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+    .body { font-size: 20px; }
+    .small { font-size: 18px; fill: #52637a; }
+    .tiny { font-size: 15px; fill: #52637a; }
+    .chip { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metric { font-size: 42px; font-weight: 760; }
+    .mono { font-family: "Consolas", "Courier New", monospace; font-size: 18px; }
+    .sidebar { fill: #f8fafc; font-size: 18px; font-weight: 600; }
+  </style>
+  <rect width="100%" height="100%" fill="#f4f7fb"/>
+  <rect x="32" y="32" width="1536" height="936" rx="30" fill="none" stroke="rgba(201, 122, 16, 0.12)" stroke-width="2"/>
+  <rect x="56" y="56" width="1488" height="888" rx="28" fill="rgba(255, 255, 255, 0.45)" stroke="none"/>
+  <text x="84" y="106" class="title">Biểu đồ thời gian phản hồi API</text>
+  <text x="84" y="142" class="subtitle">P50, P95 và P99 cho các endpoint chính của backend.</text>
+  
+    <rect x="122" y="190" width="1336" height="640" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <text x="150" y="232" class="card-title" text-anchor="start" fill="#122033"><tspan x="150" dy="0">P50 / P95 / P99 của API backend</tspan></text>
+    <text x="150" y="262" class="small" text-anchor="start" fill="#122033"><tspan x="150" dy="0">Các endpoint đọc dữ liệu duy trì P95 dưới 200 ms; login cao hơn do bước xác</tspan><tspan x="150" dy="22">thực mật khẩu.</tspan></text>
+    <line x1="150" y1="750" x2="1430" y2="750" stroke="rgba(203, 213, 225, 0.88)" stroke-width="2" stroke-dasharray="10 10"/><text x="134" y="757" class="small" text-anchor="end" fill="#122033"><tspan x="134" dy="0">0</tspan></text><line x1="150" y1="623.6842105263158" x2="1430" y2="623.6842105263158" stroke="rgba(203, 213, 225, 0.88)" stroke-width="2" stroke-dasharray="10 10"/><text x="134" y="630.6842105263158" class="small" text-anchor="end" fill="#122033"><tspan x="134" dy="0">100</tspan></text><line x1="150" y1="497.36842105263156" x2="1430" y2="497.36842105263156" stroke="rgba(203, 213, 225, 0.88)" stroke-width="2" stroke-dasharray="10 10"/><text x="134" y="504.36842105263156" class="small" text-anchor="end" fill="#122033"><tspan x="134" dy="0">200</tspan></text><line x1="150" y1="371.05263157894734" x2="1430" y2="371.05263157894734" stroke="rgba(203, 213, 225, 0.88)" stroke-width="2" stroke-dasharray="10 10"/><text x="134" y="378.05263157894734" class="small" text-anchor="end" fill="#122033"><tspan x="134" dy="0">300</tspan></text>
+    <text x="278" y="784" class="small" text-anchor="middle" fill="#122033"><tspan x="278" dy="0">Vehicles</tspan></text><text x="534" y="784" class="small" text-anchor="middle" fill="#122033"><tspan x="534" dy="0">Vehicle by</tspan><tspan x="534" dy="20">ID</tspan></text><text x="790" y="784" class="small" text-anchor="middle" fill="#122033"><tspan x="790" dy="0">Telemetry</tspan></text><text x="1046" y="784" class="small" text-anchor="middle" fill="#122033"><tspan x="1046" dy="0">Alerts</tspan></text><text x="1302" y="784" class="small" text-anchor="middle" fill="#122033"><tspan x="1302" dy="0">Auth</tspan></text>
+    <rect x="168" y="702" width="34" height="48" rx="12" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="185" y="692" class="tiny" text-anchor="middle">38</text><rect x="424" y="714.6315789473684" width="34" height="35.36842105263156" rx="12" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="441" y="704.6315789473684" class="tiny" text-anchor="middle">28</text><rect x="680" y="693.1578947368421" width="34" height="56.84210526315792" rx="12" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="697" y="683.1578947368421" class="tiny" text-anchor="middle">45</text><rect x="936" y="696.9473684210526" width="34" height="53.0526315789474" rx="12" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="953" y="686.9473684210526" class="tiny" text-anchor="middle">42</text><rect x="1192" y="623.6842105263158" width="34" height="126.31578947368416" rx="12" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="1209" y="613.6842105263158" class="tiny" text-anchor="middle">100</text><rect x="210" y="630" width="34" height="120" rx="12" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="227" y="620" class="tiny" text-anchor="middle">95</text><rect x="466" y="659.0526315789474" width="34" height="90.9473684210526" rx="12" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="483" y="649.0526315789474" class="tiny" text-anchor="middle">72</text><rect x="722" y="611.0526315789474" width="34" height="138.9473684210526" rx="12" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="739" y="601.0526315789474" class="tiny" text-anchor="middle">110</text><rect x="978" y="623.6842105263158" width="34" height="126.31578947368416" rx="12" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="995" y="613.6842105263158" class="tiny" text-anchor="middle">100</text><rect x="1234" y="497.36842105263156" width="34" height="252.63157894736844" rx="12" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="1251" y="487.36842105263156" class="tiny" text-anchor="middle">200</text><rect x="252" y="560.5263157894736" width="34" height="189.47368421052636" rx="12" fill="#c97a10" stroke="#c97a10" stroke-width="2" /><text x="269" y="550.5263157894736" class="tiny" text-anchor="middle">150</text><rect x="508" y="598.421052631579" width="34" height="151.57894736842104" rx="12" fill="#c97a10" stroke="#c97a10" stroke-width="2" /><text x="525" y="588.421052631579" class="tiny" text-anchor="middle">120</text><rect x="764" y="522.6315789473684" width="34" height="227.36842105263156" rx="12" fill="#c97a10" stroke="#c97a10" stroke-width="2" /><text x="781" y="512.6315789473684" class="tiny" text-anchor="middle">180</text><rect x="1020" y="541.578947368421" width="34" height="208.42105263157896" rx="12" fill="#c97a10" stroke="#c97a10" stroke-width="2" /><text x="1037" y="531.578947368421" class="tiny" text-anchor="middle">165</text><rect x="1276" y="307.89473684210526" width="34" height="442.10526315789474" rx="12" fill="#c97a10" stroke="#c97a10" stroke-width="2" /><text x="1293" y="297.89473684210526" class="tiny" text-anchor="middle">350</text>
+    <rect x="150" y="814" width="164" height="34" rx="17" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="232" y="837" class="chip" text-anchor="middle" fill="#fff">P50</text><rect x="340" y="814" width="164" height="34" rx="17" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="422" y="837" class="chip" text-anchor="middle" fill="#fff">P95</text><rect x="530" y="814" width="164" height="34" rx="17" fill="#c97a10" stroke="#c97a10" stroke-width="2" /><text x="612" y="837" class="chip" text-anchor="middle" fill="#fff">P99</text>
+  
+</svg>

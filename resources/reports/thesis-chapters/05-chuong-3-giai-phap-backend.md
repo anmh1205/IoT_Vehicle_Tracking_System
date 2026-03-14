@@ -47,13 +47,13 @@ Hệ thống Cloud áp dụng kiến trúc phân tầng (layered architecture) k
 - **Tầng xử lý nghiệp vụ (Business Logic Layer)**: API Server xử lý các yêu cầu từ Frontend, thực thi logic nghiệp vụ và quản lý trạng thái hệ thống.
 - **Tầng giao tiếp thời gian thực (Real-time Communication Layer)**: Cung cấp dữ liệu cập nhật trực tiếp đến người dùng thông qua giao thức WebSocket.
 
-![Hình 3.12 - Sơ đồ kiến trúc tổng quan hệ thống Cloud](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3–12.png)
+![Hình 3.12 - Sơ đồ kiến trúc tổng quan hệ thống Cloud](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-12.svg)
 
 *Hình 3.12: Sơ đồ kiến trúc tổng quan hệ thống Cloud*
 
 > Nguồn: Hình vẽ của tác giả
 
-![thesis-05-chuong-3-giai-phap-backend-01](assets/figures/thesis-05-chuong-3-giai-phap-backend-01.png)
+![thesis-05-chuong-3-giai-phap-backend-01](assets/figures/thesis-05-chuong-3-giai-phap-backend-01.svg)
 
 ##### b) Luồng dữ liệu chính trong hệ thống
 
@@ -174,7 +174,7 @@ WHERE payload.power.backup_battery < 3.5
 
 **Luồng xử lý cảnh báo:**
 
-![thesis-05-chuong-3-giai-phap-backend-02](assets/figures/thesis-05-chuong-3-giai-phap-backend-02.png)
+![thesis-05-chuong-3-giai-phap-backend-02](assets/figures/thesis-05-chuong-3-giai-phap-backend-02.svg)
 
 Ngoài ra, hệ thống còn cấu hình các rule cho phát hiện vi phạm vùng địa lý (geofence violation) và cảnh báo thiết bị mất kết nối (device offline) khi thiết bị không gửi dữ liệu trong khoảng thời gian định trước.
 
@@ -202,13 +202,13 @@ Hệ thống theo dõi phương tiện cần lưu trữ hai loại dữ liệu c
 
 Do sự khác biệt cơ bản về đặc tính, hệ thống áp dụng chiến lược lưu trữ kép sử dụng ba cơ sở dữ liệu chuyên biệt:
 
-![Hình 3.13 - Sơ đồ chiến lược lưu trữ kép](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3–13.png)
+![Hình 3.13 - Sơ đồ chiến lược lưu trữ kép](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-13.svg)
 
 *Hình 3.13: Sơ đồ chiến lược lưu trữ kép*
 
 > Nguồn: Hình vẽ của tác giả
 
-![thesis-05-chuong-3-giai-phap-backend-03](assets/figures/thesis-05-chuong-3-giai-phap-backend-03.png)
+![thesis-05-chuong-3-giai-phap-backend-03](assets/figures/thesis-05-chuong-3-giai-phap-backend-03.svg)
 
 [Bảng 3.18: So sánh các cơ sở dữ liệu trong hệ thống]
 
@@ -242,13 +242,13 @@ PostgreSQL 16 lưu trữ toàn bộ dữ liệu nghiệp vụ của hệ thống
 
 **Sơ đồ quan hệ chính (ER Diagram - rút gọn):**
 
-![Hình 3.14 - Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3–14.png)
+![Hình 3.14 - Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-14.svg)
 
 *Hình 3.14: Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)*
 
-> Nguồn: Hình vẽ của tác giả (sử dụng công cụ dbdiagram.io)
+> Nguồn: Hình dựng của tác giả từ schema quan hệ rút gọn của hệ thống
 
-![thesis-05-chuong-3-giai-phap-backend-04](assets/figures/thesis-05-chuong-3-giai-phap-backend-04.png)
+![thesis-05-chuong-3-giai-phap-backend-04](assets/figures/thesis-05-chuong-3-giai-phap-backend-04.svg)
 
 Schema được thiết kế với khả năng mở rộng, các khóa ngoại và chỉ mục (index) đã được chuẩn bị sẵn để tích hợp thêm các bảng Phase 2 bao gồm: bookings (đặt xe), rental_contracts (hợp đồng thuê), payments (thanh toán), damage_reports (báo cáo hư hỏng) và reviews (đánh giá).
 

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="rgba(18, 32, 51, 0.14)"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#0f766e"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <style>
+    text {
+      fill: #122033;
+      font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+    }
+    .title { font-size: 40px; font-weight: 750; letter-spacing: -0.02em; }
+    .subtitle { font-size: 22px; fill: #52637a; }
+    .section-title { font-size: 24px; font-weight: 700; }
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+    .body { font-size: 20px; }
+    .small { font-size: 18px; fill: #52637a; }
+    .tiny { font-size: 15px; fill: #52637a; }
+    .chip { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metric { font-size: 42px; font-weight: 760; }
+    .mono { font-family: "Consolas", "Courier New", monospace; font-size: 18px; }
+    .sidebar { fill: #f8fafc; font-size: 18px; font-weight: 600; }
+  </style>
+  <rect width="100%" height="100%" fill="#f4f7fb"/>
+  <rect x="32" y="32" width="1536" height="936" rx="30" fill="none" stroke="rgba(15, 118, 110, 0.12)" stroke-width="2"/>
+  <rect x="56" y="56" width="1488" height="888" rx="28" fill="rgba(255, 255, 255, 0.45)" stroke="none"/>
+  <text x="84" y="106" class="title">Luồng xử lý dữ liệu của MQTT Bridge</text>
+  <text x="84" y="142" class="subtitle">Activity / component diagram cho subscribe, validate, fan-out và realtime.</text>
+  
+      
+  <rect x="100" y="224" width="300" height="602" rx="30" fill="#ffffff" stroke="rgba(29, 78, 216, 0.28)" stroke-width="3" />
+  <rect x="124" y="206" width="110" height="34" rx="17" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="179" y="229" class="chip" text-anchor="middle" fill="#fff">Nguồn vào</text>
+  <text x="128" y="258" class="small" text-anchor="start" fill="#122033"><tspan x="128" dy="0">EMQX đẩy message theo</tspan><tspan x="128" dy="22">topic telemetry và</tspan><tspan x="128" dy="22">alert.</tspan></text>
+
+      
+  <rect x="436" y="224" width="372" height="602" rx="30" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="3" />
+  <rect x="460" y="206" width="132" height="34" rx="17" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="526" y="229" class="chip" text-anchor="middle" fill="#fff">MQTT Bridge</text>
+  <text x="464" y="258" class="small" text-anchor="start" fill="#122033"><tspan x="464" dy="0">Chuỗi xử lý tuần tự trước khi</tspan><tspan x="464" dy="22">fan-out.</tspan></text>
+
+      
+  <rect x="844" y="224" width="660" height="602" rx="30" fill="#ffffff" stroke="rgba(217, 72, 95, 0.28)" stroke-width="3" />
+  <rect x="868" y="206" width="110" height="34" rx="17" fill="#d9485f" stroke="#d9485f" stroke-width="2" /><text x="923" y="229" class="chip" text-anchor="middle" fill="#fff">Đích đến</text>
+  <text x="872" y="258" class="small" text-anchor="start" fill="#122033"><tspan x="872" dy="0">Dữ liệu được ghi đúng kho và đồng bộ ra giao diện.</tspan></text>
+
+      
+    <rect x="126" y="336" width="248" height="150" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="126" y="336" width="248" height="12" rx="26" fill="#1d4ed8" stroke="none"/>
+    <rect x="144" y="356" width="90" height="34" rx="17" fill="rgba(29, 78, 216, 0.88)" stroke="rgba(29, 78, 216, 0.88)" stroke-width="2" /><text x="189" y="379" class="chip" text-anchor="middle" fill="#fff">ingest</text>
+    <text x="250" y="400" class="card-title" text-anchor="middle" fill="#122033"><tspan x="250" dy="0">EMQX Broker</tspan></text>
+    <text x="250" y="444" class="body" text-anchor="middle" fill="#122033"><tspan x="250" dy="0">Topic telemetry,</tspan><tspan x="250" dy="24">alerts, command</tspan></text>
+  
+      
+    <rect x="126" y="554" width="248" height="140" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="126" y="554" width="248" height="12" rx="26" fill="#1d4ed8" stroke="none"/>
+    <rect x="144" y="574" width="90" height="34" rx="17" fill="rgba(29, 78, 216, 0.88)" stroke="rgba(29, 78, 216, 0.88)" stroke-width="2" /><text x="189" y="597" class="chip" text-anchor="middle" fill="#fff">payload</text>
+    <text x="250" y="618" class="card-title" text-anchor="middle" fill="#122033"><tspan x="250" dy="0">Payload JSON</tspan></text>
+    <text x="250" y="662" class="body" text-anchor="middle" fill="#122033"><tspan x="250" dy="0">device_id, GPS, OBD2,</tspan><tspan x="250" dy="24">nguồn, alert</tspan></text>
+  
+      
+    <rect x="466" y="286" width="312" height="126" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="466" y="286" width="312" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    <rect x="484" y="306" width="90" height="34" rx="17" fill="rgba(15, 118, 110, 0.88)" stroke="rgba(15, 118, 110, 0.88)" stroke-width="2" /><text x="529" y="329" class="chip" text-anchor="middle" fill="#fff">step</text>
+    <text x="622" y="350" class="card-title" text-anchor="middle" fill="#122033"><tspan x="622" dy="0">1. Subscribe và parse</tspan></text>
+    <text x="622" y="394" class="body" text-anchor="middle" fill="#122033"><tspan x="622" dy="0">Nhận message, giải nén và</tspan><tspan x="622" dy="24">chuẩn hóa topic</tspan></text>
+  
+      
+    <rect x="466" y="442" width="312" height="126" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="466" y="442" width="312" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    <rect x="484" y="462" width="90" height="34" rx="17" fill="rgba(15, 118, 110, 0.88)" stroke="rgba(15, 118, 110, 0.88)" stroke-width="2" /><text x="529" y="485" class="chip" text-anchor="middle" fill="#fff">step</text>
+    <text x="622" y="506" class="card-title" text-anchor="middle" fill="#122033"><tspan x="622" dy="0">2. Validate schema Zod</tspan></text>
+    <text x="622" y="550" class="body" text-anchor="middle" fill="#122033"><tspan x="622" dy="0">Loại bỏ payload lỗi, gắn</tspan><tspan x="622" dy="24">timestamp chuẩn</tspan></text>
+  
+      
+    <rect x="466" y="598" width="312" height="126" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="466" y="598" width="312" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    <rect x="484" y="618" width="90" height="34" rx="17" fill="rgba(15, 118, 110, 0.88)" stroke="rgba(15, 118, 110, 0.88)" stroke-width="2" /><text x="529" y="641" class="chip" text-anchor="middle" fill="#fff">step</text>
+    <text x="622" y="662" class="card-title" text-anchor="middle" fill="#122033"><tspan x="622" dy="0">3. Fan-out và phát sự</tspan><tspan x="622" dy="30">kiện</tspan></text>
+    <text x="622" y="734" class="body" text-anchor="middle" fill="#122033"><tspan x="622" dy="0">Ghi song song vào kho dữ</tspan><tspan x="622" dy="24">liệu, gửi Socket.IO</tspan></text>
+  
+      
+    <rect x="884" y="280" width="184" height="126" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="884" y="280" width="184" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    <rect x="902" y="300" width="90" height="34" rx="17" fill="rgba(217, 72, 95, 0.88)" stroke="rgba(217, 72, 95, 0.88)" stroke-width="2" /><text x="947" y="323" class="chip" text-anchor="middle" fill="#fff">tsdb</text>
+    <text x="976" y="344" class="card-title" text-anchor="middle" fill="#122033"><tspan x="976" dy="0">VictoriaMetrics</tspan></text>
+    <text x="976" y="388" class="body" text-anchor="middle" fill="#122033"><tspan x="976" dy="0">GPS, tốc độ, OBD2</tspan></text>
+  
+      
+    <rect x="1096" y="280" width="184" height="126" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1096" y="280" width="184" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    <rect x="1114" y="300" width="90" height="34" rx="17" fill="rgba(217, 72, 95, 0.88)" stroke="rgba(217, 72, 95, 0.88)" stroke-width="2" /><text x="1159" y="323" class="chip" text-anchor="middle" fill="#fff">logs</text>
+    <text x="1188" y="344" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1188" dy="0">VictoriaLogs</tspan></text>
+    <text x="1188" y="388" class="body" text-anchor="middle" fill="#122033"><tspan x="1188" dy="0">Log kết nối, lỗi,</tspan><tspan x="1188" dy="24">audit</tspan></text>
+  
+      
+    <rect x="1308" y="280" width="168" height="126" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1308" y="280" width="168" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    <rect x="1326" y="300" width="90" height="34" rx="17" fill="rgba(217, 72, 95, 0.88)" stroke="rgba(217, 72, 95, 0.88)" stroke-width="2" /><text x="1371" y="323" class="chip" text-anchor="middle" fill="#fff">sql</text>
+    <text x="1392" y="344" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1392" dy="0">PostgreSQL</tspan></text>
+    <text x="1392" y="388" class="body" text-anchor="middle" fill="#122033"><tspan x="1392" dy="0">Runtime, session,</tspan><tspan x="1392" dy="24">alert</tspan></text>
+  
+      
+    <rect x="996" y="560" width="366" height="160" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="996" y="560" width="366" height="12" rx="26" fill="#c97a10" stroke="none"/>
+    <rect x="1014" y="580" width="90" height="34" rx="17" fill="rgba(201, 122, 16, 0.88)" stroke="rgba(201, 122, 16, 0.88)" stroke-width="2" /><text x="1059" y="603" class="chip" text-anchor="middle" fill="#fff">realtime</text>
+    <text x="1179" y="624" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1179" dy="0">Socket.IO / Dashboard</tspan></text>
+    <text x="1179" y="668" class="body" text-anchor="middle" fill="#122033"><tspan x="1179" dy="0">Đẩy sự kiện realtime cho trang</tspan><tspan x="1179" dy="24">tổng quan, bản đồ và cảnh báo.</tspan></text>
+  
+      
+    <line x1="374" y1="410" x2="466" y2="348" stroke="#1d4ed8" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="622" y1="412" x2="622" y2="442" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="622" y1="568" x2="622" y2="598" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="778" y1="650" x2="884" y2="344" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="778" y1="662" x2="1096" y2="344" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="778" y1="674" x2="1308" y2="344" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+      
+    <line x1="778" y1="694" x2="996" y2="640" stroke="#c97a10" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    
+  
+    
+</svg>

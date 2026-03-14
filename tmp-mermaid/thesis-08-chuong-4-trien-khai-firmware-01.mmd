@@ -1,32 +1,11 @@
-stateDiagram-v2
-    [*] --> START
-    START --> KhoiTao : Bắt đầu
-
-    KhoiTao : Khởi tạo<br>IMU, Modem, ADC, BLE, GPIO
-
-    KhoiTao --> DocIGN
-    DocIGN : Đọc trạng thái IGN<br>(OBD2 BLE hoặc ADC)
-
-    DocIGN --> CheDo_LaiXe : IGN = ON
-    DocIGN --> CheDo_DoXe : IGN = OFF
-
-    CheDo_LaiXe : Chế độ LÁI XE<br>- Kết nối BLE<br>- Bật GNSS<br>- Đọc OBD2<br>- Đọc GPS, IMU<br>- Gửi MQTT
-
-    CheDo_DoXe : Chế độ ĐỖ XE<br>- Ngắt BLE<br>- Gửi heartbeat<br>- Deep sleep
-
-    CheDo_LaiXe --> Chuyen_DoXe : IGN OFF
-    Chuyen_DoXe : Chuyển sang ĐỖ XE
-    Chuyen_DoXe --> CheDo_DoXe
-
-    CheDo_DoXe --> ALARM : IMU interrupt = YES
-    CheDo_DoXe --> HEARTBEAT : Timer wake-up = YES
-
-    ALARM : ALARM<br>Cảnh báo<br>GPS + MQTT
-
-    ALARM --> CheDo_DoXe : Hết chuyển động
-
-    HEARTBEAT : HEARTBEAT<br>Gửi status
-
-    HEARTBEAT --> DEEP_SLEEP
-    DEEP_SLEEP : DEEP SLEEP
-    DEEP_SLEEP --> DocIGN : Timer / IMU wake-up
+flowchart TB
+    A["STATE_INIT<br/>khởi tạo driver và load cấu hình"] --> B["STATE_CHECK_IGN<br/>ưu tiên OBD2 rồi fallback ADC"]
+    B --> C{"IGN ON?"}
+    C -->|Có| D["STATE_DRIVING<br/>OBD2 + GNSS + MQTT"]
+    C -->|Không| E{"Có cảnh báo rung?"}
+    E -->|Có| F["STATE_ALERT<br/>wake modem và gửi cảnh báo"]
+    E -->|Không| G["STATE_HEARTBEAT<br/>gửi heartbeat định kỳ"]
+    D --> H["STATE_SLEEP<br/>deep sleep theo policy"]
+    F --> H
+    G --> H
+    H --> B

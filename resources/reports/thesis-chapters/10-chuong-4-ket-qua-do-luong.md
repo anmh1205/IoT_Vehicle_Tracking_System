@@ -29,13 +29,17 @@ Kiểm thử phần cứng được triển khai tại phòng thí nghiệm và 
 - Xe 2: Honda City 2021 (động cơ 1.5L, ắc quy 40Ah, OBD2 giao thức ISO 15765–4 CAN)
 - Xe 3: [cần đo thực tế - xe thứ ba để kiểm tra tương thích]
 
-[Hình 4.20: Bố trí thiết bị đo lường trong phòng thí nghiệm]
+![Hình 4.26 - Bố trí thiết bị đo lường trong phòng thí nghiệm](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-20.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.26: Bố trí thiết bị đo lường trong phòng thí nghiệm_
 
-[Hình 4.21: Thiết bị tracker được lắp đặt trên xe thử nghiệm]
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+![Hình 4.27 - Thiết bị tracker được lắp đặt trên xe thử nghiệm](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-21.svg)
+
+_Hình 4.27: Thiết bị tracker được lắp đặt trên xe thử nghiệm_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 #### 4.3.1.2. Môi trường thử nghiệm phần mềm
 
@@ -60,9 +64,11 @@ Hệ thống cloud được triển khai trên hai môi trường riêng biệt 
 - **Lighthouse** (Google): Đánh giá hiệu năng frontend
 - **Playwright**: Kiểm thử giao diện tự động (end-to-end browser testing)
 
-[Hình 4.22: Sơ đồ môi trường thử nghiệm tổng thể]
+![Hình 4.28 - Sơ đồ môi trường thử nghiệm tổng thể](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-22.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.28: Sơ đồ môi trường thử nghiệm tổng thể_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 #### 4.3.1.3. Kịch bản thử nghiệm
 
@@ -90,9 +96,11 @@ Dòng tiêu thụ năng lượng là chỉ tiêu cốt lõi của thiết bị t
 | 4 | Deep Sleep Mode | MCU deep sleep + IMU wake | ~0.5 mA | ~2 mA [cần đo thực tế] | Chỉ IMU + RTC hoạt động |
 | 5 | Alert Mode (bất thường) | Đánh thức từ deep sleep | ~380 mA | ~550 mA | Tương tự Active + GPS cold start |
 
-[Hình 4.23: Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ hoạt động hoàn chỉnh (Driving -> Parking -> Alert -> Parking)]
+![Hình 4.29 - Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ hoạt động hoàn chỉnh (Driving -> Parking -> Alert -> Parking)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-23.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.29: Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ hoạt động hoàn chỉnh (Driving -> Parking -> Alert -> Parking)_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Phân tích kết quả:**
 
@@ -113,9 +121,11 @@ Pin dự phòng 21700 (dung lượng danh định 5000 mAh, điện áp danh đ�
 | 3 | Deep Sleep (IMU watch) | ~0.5 mA | ~2,770 giờ (~115 ngày) | [cần đo thực tế] | Chế độ tiết kiệm tối đa |
 | 4 | Hỗn hợp (50% Active + 50% Sleep) | ~182 mA | ~7.2 giờ | ~5–6 giờ [cần đo thực tế] | Mô phỏng sử dụng thực tế |
 
-[Hình 4.24: Đồ thị điện áp pin dự phòng theo thời gian trong kiểm thử tracking liên tục]
+![Hình 4.30 - Đồ thị điện áp pin dự phòng theo thời gian trong kiểm thử tracking liên tục](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-24.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.30: Đồ thị điện áp pin dự phòng theo thời gian trong kiểm thử tracking liên tục_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Nhận xét:** Thời lượng pin dự phòng trong chế độ tracking liên tục đạt khoảng 3–4 giờ, đáp ứng yêu cầu thiết kế (>= 4 giờ). Trong kịch bản thực tế (xe đậu qua đêm với heartbeat định kỳ), pin có thể duy trì hoạt động từ 10 giờ trở lên, đủ để giám sát xe trong thời gian dài khi mất nguồn chính.
 
@@ -135,11 +145,13 @@ Thiết bị được đặt trong tủ nhiệt để kiểm tra khả năng ho�
 | 6 | 70°C | Cảnh báo | Có | Có (không ổn định) | Có | Module 4G bắt đầu không ổn định [cần đo thực tế] |
 | 7 | 80°C | Ngưng hoạt động | — | — | — | Vượt giới hạn nhiệt độ an toàn |
 
-[Hình 4.25: Đồ thị dòng tiêu thụ theo nhiệt độ môi trường]
+![Hình 4.31 - Đồ thị dòng tiêu thụ theo nhiệt độ môi trường](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-25.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.31: Đồ thị dòng tiêu thụ theo nhiệt độ môi trường_
 
-**Nhận xét:** Thiết bị hoạt động ổn định trong dải nhiệt độ -10°C đến +60°C, đạt yêu cầu thiết kế. Tại nhiệt độ 70°C, modem 4G SIM7600CE-T bắt đầu biểu hiện không ổn định (mất kết nối ngắt quãng), phù hợp với thông số kỹ thuật của nhà sản xuất SIMCom (nhiệt độ hoạt động -40°C đến +85°C, nhưng khuyến nghị <= 70°C cho hoạt động liên tục) [1].
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
+
+**Nhận xét:** Thiết bị hoạt động ổn định trong dải nhiệt độ -10°C đến +60°C, đạt yêu cầu thiết kế. Tại nhiệt độ 70°C, modem 4G SIM7600CE-T bắt đầu biểu hiện không ổn định (mất kết nối ngắt quãng), trong khi dải nhiệt độ hoạt động danh định mà SIMCom công bố cho dòng SIM7600CE là -40°C đến +85°C [1].
 
 #### 4.3.2.4. Kiểm thử tương thích OBD2
 
@@ -188,9 +200,11 @@ Thời gian kết nối BLE được đo từ lúc ESP32-S3 bắt đầu quét (
 | 3 | Thời gian khởi tạo ELM327 | ~1.5 giây | 1.0 giây | 2.5 giây | 0.3 giây |
 | 4 | **Tổng thời gian (scan + connect + init)** | **~4.0 giây** | **2.3 giây** | **7.8 giây** | **1.3 giây** |
 
-[Hình 4.26: Biểu đồ phân bố thời gian kết nối BLE OBD2 (20 lần đo)]
+![Hình 4.32 - Biểu đồ phân bố thời gian kết nối BLE OBD2 (20 lần đo)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-26.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.32: Biểu đồ phân bố thời gian kết nối BLE OBD2 (20 lần đo)_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Nhận xét:** Thời gian kết nối BLE OBD2 trung bình ~4 giây (scan ~1.5s + connect ~1.0s + init ~1.5s), nằm trong phạm vi mục tiêu thiết kế (< 10 giây). Giá trị max 7.8 giây xuất hiện khi có nhiều thiết bị BLE trong phạm vi scan, gây nhiễu. Trong điều kiện xe bình thường (ít thiết bị BLE xung quanh), thời gian thường đạt 3–5 giây.
 
@@ -223,9 +237,11 @@ Thời gian bắt vệ tinh (Time to First Fix - TTFF) được đo trên GNSS t
 | 2 | Warm Start | Có dữ liệu ephemeris còn hiệu lực | ~5 giây | 3 giây | 12 giây | 8–10 |
 | 3 | Hot Start | Module GNSS đã hoạt động, tạm mất tín hiệu | ~1 giây | 0.5 giây | 3 giây | 10–12 |
 
-[Hình 4.27: Đồ thị thời gian bắt vệ tinh GPS trong các kịch bản (Cold/Warm/Hot Start)]
+![Hình 4.33 - Đồ thị thời gian bắt vệ tinh GPS trong các kịch bản (Cold/Warm/Hot Start)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-27.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.33: Đồ thị thời gian bắt vệ tinh GPS trong các kịch bản (Cold/Warm/Hot Start)_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Độ chính xác vị trí GPS:**
 
@@ -255,9 +271,11 @@ Phép đo độ chính xác được thực hiện bằng cách đặt thiết b
 | 3 | 4G yếu (1–2 thanh) | QoS 0 | ~350 ms | 120 ms | 1200 ms | ~800 ms |
 | 4 | 4G yếu (1–2 thanh) | QoS 1 | ~500 ms | 150 ms | 2000 ms | ~1500 ms |
 
-[Hình 4.28: Biểu đồ phân bố độ trễ MQTT trong điều kiện mạng 4G ổn định]
+![Hình 4.34 - Biểu đồ phân bố độ trễ MQTT trong điều kiện mạng 4G ổn định](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-28.svg)
 
-> Nguồn hình tham khảo: [MQTT 5.0 Standard](https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html)
+_Hình 4.34: Biểu đồ phân bố độ trễ MQTT trong điều kiện mạng 4G ổn định_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Nhận xét:** Độ trễ MQTT trung bình ~120–180 ms trong điều kiện mạng 4G ổn định, đạt mục tiêu thiết kế (~100–300 ms). QoS 1 có độ trễ cao hơn QoS 0 khoảng 50% do có thêm bước ACK, nhưng đảm bảo tin nhắn được gửi ít nhất một lần — phù hợp cho các bản tin cảnh báo. Trong điều kiện mạng yếu, độ trễ tăng đáng kể nhưng hệ thống vẫn hoạt động, nhờ cơ chế retry và offline buffering.
 
@@ -316,9 +334,11 @@ Hiệu suất API được đo bằng công cụ k6 với các kịch bản khá
 | 7 | POST /api/auth/login | POST | ~120 ms | 100 ms | 200 ms | 350 ms | ~350 |
 | 8 | GET /api/geofences | GET | ~40 ms | 32 ms | 85 ms | 140 ms | ~900 |
 
-[Hình 4.29: Biểu đồ thời gian phản hồi API (P50, P95, P99) cho các endpoint chính]
+![Hình 4.35 - Biểu đồ thời gian phản hồi API (P50, P95, P99) cho các endpoint chính](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-29.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.35: Biểu đồ thời gian phản hồi API (P50, P95, P99) cho các endpoint chính_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Nhận xét:** Thời gian phản hồi API trung bình đạt ~35–120 ms cho các thao tác CRUD, đạt mục tiêu thiết kế (< 200 ms cho P95). Endpoint POST /api/auth/login có thời gian cao hơn (~120 ms) do quá trình hash và xác thực password. Tổng thể, backend Express.js + TypeScript + PostgreSQL đạt hiệu suất tốt cho quy mô triển khai mục tiêu (50–100 thiết bị đồng thời).
 
@@ -337,9 +357,11 @@ Hiệu suất API được đo bằng công cụ k6 với các kịch bản khá
 | 5 | Backend -> Frontend (WebSocket) | ~15 ms | ~40 ms | Socket.IO emit |
 | 6 | **Tổng end-to-end** | **~185 ms** | **~400 ms** | **Device đến Dashboard** |
 
-[Hình 4.30: Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu)]
+![Hình 4.36 - Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-30.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.36: Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu)_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Nhận xét:** Độ trễ end-to-end trung bình ~185 ms (P95 ~400 ms), thấp hơn nhiều so với mục tiêu thiết kế (< 3 giây). Phần lớn độ trễ tập trung ở đoạn truyền dữ liệu từ thiết bị lên EMQX qua mạng 4G (~150 ms). Các đoạn xử lý nội bộ (EMQX -> Bridge -> Backend -> Frontend) có độ trễ rất thấp (~35 ms tổng), nhờ cơ chế sử dụng Docker network nội bộ và Socket.IO event-driven.
 
@@ -371,9 +393,11 @@ Hệ thống được kiểm thử với nhiều thiết bị mô phỏng kết 
 | 4 | 100 | 5 | ~200 msg/s | ~30% | ~2.5 GB | 0% | ~220 ms |
 | 5 | 200 | 5 | ~400 msg/s | ~55% | ~3.5 GB | 0.1% [cần đo thực tế] | ~350 ms [cần đo thực tế] |
 
-[Hình 4.31: Đồ thị hiệu suất hệ thống theo số lượng thiết bị đồng thời]
+![Hình 4.37 - Đồ thị hiệu suất hệ thống theo số lượng thiết bị đồng thời](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-31.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.37: Đồ thị hiệu suất hệ thống theo số lượng thiết bị đồng thời_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Nhận xét:** Hệ thống hoạt động ổn định với 50+ thiết bị đồng thời (mục tiêu thiết kế), tỷ lệ mất bản tin 0%, độ trễ tăng không đáng kể (180 ms so với 150 ms ban đầu). Với 100 thiết bị, hệ thống vẫn ổn định (CPU ~30%, RAM ~2.5 GB). Điểm giới hạn ước tính ~200 thiết bị trên cấu hình server hiện tại (4 vCPU, 8 GB RAM), tại đó CPU bắt đầu đạt 55% và có thể ảnh hưởng đến thời gian phản hồi.
 
@@ -393,9 +417,11 @@ Hiệu suất giao diện web được đánh giá bằng Google Lighthouse và 
 | 6 | Time to Interactive (TTI) | ~2.5 giây [cần đo thực tế] | < 3.5 giây | Đạt |
 | 7 | Bundle Size (gzipped) | ~380 KB [cần đo thực tế] | < 500 KB | Đạt |
 
-[Hình 4.32: Kết quả Lighthouse Performance Audit của trang Dashboard]
+![Hình 4.38 - Kết quả Lighthouse Performance Audit của trang Dashboard](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-32.svg)
 
-> Nguồn hình tham khảo: [Lighthouse Documentation](https://developer.chrome.com/docs/lighthouse)
+_Hình 4.38: Kết quả Lighthouse Performance Audit của trang Dashboard_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Nhận xét:** Frontend đạt điểm Lighthouse Performance ~87/100, vượt mục tiêu thiết kế (> 85). First Contentful Paint ~1.2 giây cho trải nghiệm tải trang nhanh. Các chỉ số Core Web Vitals (LCP, TBT, CLS) đều đạt ngưỡng "Good" theo tiêu chuẩn Google. Việc sử dụng Next.js 15 với Server Components và code splitting giúp tối ưu kích thước bundle và thời gian tải.
 
@@ -424,13 +450,17 @@ Mục này trình bày kết quả kiểm thử luồng dữ liệu end-to-end, 
 | 9 | Dashboard update | Bản đồ và biểu đồ cập nhật | Thành công | ~0.05 giây |
 | | **Tổng thời gian end-to-end** | **Từ dữ liệu cảm biến đến hiển thị** | **Thành công** | **~1–2 giây** |
 
-[Hình 4.33: Screenshot giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ (Leaflet)]
+![Hình 4.39 - Screenshot giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ (Leaflet)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-33.svg)
 
-> Nguồn hình tham khảo: [Leaflet Documentation](https://leafletjs.com/)
+_Hình 4.39: Screenshot giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ (Leaflet)_
 
-[Hình 4.34: Screenshot biểu đồ dữ liệu OBD2 thời gian thực (ECharts) — RPM, Speed, Coolant Temp]
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
-> Nguồn hình tham khảo: [Apache ECharts](https://echarts.apache.org/)
+![Hình 4.40 - Screenshot biểu đồ dữ liệu OBD2 thời gian thực (ECharts) — RPM, Speed, Coolant Temp](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-34.svg)
+
+_Hình 4.40: Screenshot biểu đồ dữ liệu OBD2 thời gian thực (ECharts) — RPM, Speed, Coolant Temp_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 #### 4.3.5.2. Kiểm thử cảnh báo Geofence
 
@@ -445,9 +475,11 @@ Mục này trình bày kết quả kiểm thử luồng dữ liệu end-to-end, 
 | 3 | Cảnh báo hiển thị trên Dashboard | Popup notification xuất hiện | ~1 giây (từ lúc alert tạo) | Qua WebSocket |
 | 4 | Xe quay lại vùng geofence | Hiển thị trạng thái "INSIDE", cảnh báo tự động đóng | ~3 giây | Reset tự động |
 
-[Hình 4.35: Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo]
+![Hình 4.41 - Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-35.svg)
 
-> Nguồn hình tham khảo: [Tài liệu frontend dashboard](../iot-vehicle-tracking-report/04-server/frontend/README.md)
+_Hình 4.41: Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Nhận xét:** Hệ thống phát hiện xe vượt ra khỏi vùng geofence trong vòng ~5 giây (phụ thuộc chu kỳ gửi GPS, mặc định 5 giây). Cảnh báo được hiển thị trên Dashboard trong vòng ~1 giây sau khi Backend tạo alert. Tổng thời gian từ xe vượt ranh giới đến hiển thị cảnh báo là khoảng 5–7 giây, đạt yêu cầu thiết kế (< 10 giây).
 
@@ -464,9 +496,11 @@ Mục này trình bày kết quả kiểm thử luồng dữ liệu end-to-end, 
 | 3 | restart_device | Khởi động lại thiết bị | Thành công | ~15 giây (bao gồm thời gian restart) |
 | 4 | enable_alert_mode | Bật chế độ cảnh báo | Thành công | ~2 giây |
 
-[Hình 4.36: Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị]
+![Hình 4.42 - Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-36.svg)
 
-> Nguồn hình tham khảo: [Tài liệu frontend dashboard](../iot-vehicle-tracking-report/04-server/frontend/README.md)
+_Hình 4.42: Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Nhận xét:** Hệ thống lệnh điều khiển từ xa hoạt động hiệu quả với thời gian round-trip khoảng 2–3 giây cho các lệnh thông thường. Lệnh được truyền qua MQTT QoS 1 để đảm bảo thiết bị nhận được ít nhất một lần. Trạng thái thực thi lệnh được phản hồi về Dashboard để quản trị viên xác nhận.
 
@@ -484,9 +518,11 @@ Mục này trình bày kết quả kiểm thử luồng dữ liệu end-to-end, 
 | 4 | Đồng bộ dữ liệu buffer | Gửi đầy đủ dữ liệu đã lưu, đúng thứ tự | 100% dữ liệu được đồng bộ |
 | 5 | Dashboard hiển thị hành trình đầy đủ | Không có "lỗ hổng" trên bản đồ | Đường đi liên tục |
 
-[Hình 4.37: Screenshot hành trình trên bản đồ, cho thấy dữ liệu được đồng bộ đầy đủ sau khi phục hồi kết nối (không có đoạn thiếu)]
+![Hình 4.43 - Screenshot hành trình trên bản đồ, cho thấy dữ liệu được đồng bộ đầy đủ sau khi phục hồi kết nối (không có đoạn thiếu)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-37.svg)
 
-> Nguồn hình tham khảo: [Tài liệu frontend dashboard](../iot-vehicle-tracking-report/04-server/frontend/README.md)
+_Hình 4.43: Screenshot hành trình trên bản đồ, cho thấy dữ liệu được đồng bộ đầy đủ sau khi phục hồi kết nối (không có đoạn thiếu)_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Nhận xét:** Cơ chế offline buffering và auto-reconnect hoạt động tốt, đảm bảo không mất dữ liệu khi mất kết nối mạng tạm thời. Dữ liệu được đồng bộ đầy đủ và đúng thứ tự thời gian, Dashboard hiển thị hành trình liên tục mà không có "lỗ hổng". Đây là tính năng quan trọng cho độ tin cậy của hệ thống trong điều kiện mạng di động không ổn định.
 
@@ -569,9 +605,11 @@ Phần này tổng hợp tất cả kết quả đo lường và so sánh với 
 | 9 | Offline buffering | Có, tự động đồng bộ | 1000 bản ghi, đồng bộ 100% | Đạt |
 | 10 | Độ tin cậy state machine | >= 99% | >= 99.8% | Đạt |
 
-[Hình 4.38: Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart)]
+![Hình 4.44 - Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-38.svg)
 
-> Nguồn hình tham khảo: [Kịch bản và dữ liệu thử nghiệm nội bộ](../../../iot-vehicle-tracking-system)
+_Hình 4.44: Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart)_
+
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
 **Tổng kết:** Hệ thống đạt 9/10 chỉ tiêu thiết kế chính (90%). Chỉ tiêu duy nhất cần lưu ý là dòng tiêu thụ Active Mode (350 mA so với mục tiêu 250 mA), tuy nhiên giá trị này không ảnh hưởng đến hoạt động thực tế vì khi xe đang chạy, nguồn cấp từ ắc quy xe là đủ. Nhìn tổng thể, hệ thống đáp ứng đầy đủ các yêu cầu chức năng và phi chức năng đã đặt ra.
 
@@ -605,7 +643,7 @@ Về đo lường, hệ thống đạt 9/10 chỉ tiêu thiết kế chính; cá
 
 ## Tài liệu tham khảo Chương 4 (Phần D)
 
-[1] SIMCom, "A7600 Series Hardware Design Guide," Version 1.05, Section 3.2 - Operating Temperature Range, 2023.
+[1] SIMCom Wireless Solutions, "SIM7600CE Product Page," 2026. [Online]. Available: https://en.simcom.com/product/SIM7600CE.html. [Accessed: Mar. 13, 2026].
 
 [2] SAE International, "SAE J1979 - E/E Diagnostic Test Modes," Revised 2014. Tiêu chuẩn OBD-II áp dụng cho các xe sản xuất từ năm 2008 trở đi.
 

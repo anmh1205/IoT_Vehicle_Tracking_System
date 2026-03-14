@@ -1,0 +1,16 @@
+flowchart TB
+    A["Bắt đầu module BLE OBD2"] --> B{"Đã lưu địa chỉ BLE?"}
+    B -->|Có| C["Reconnect nhanh tới vgate iCar Pro"]
+    B -->|Không| D["Scan BLE và lọc theo tên<br/>hoặc service UUID"]
+    D --> E["Chọn adapter phù hợp<br/>và lưu MAC vào NVS"]
+    C --> F["GATT discovery<br/>tìm TX / RX characteristic"]
+    E --> F
+    F --> G["Khởi tạo ELM327<br/>ATZ, ATE0, ATL0, ATS0, ATSP0"]
+    G --> H{"Đang ở chế độ lái xe?"}
+    H -->|Có| I["Gửi PID 010C, 010D, 0105, 012F,<br/>AT IGN và parse phản hồi"]
+    I --> J["Đẩy telemetry vào queue"]
+    J --> H
+    H -->|Không| K["Ngắt BLE và trả quyền cho deep sleep"]
+    I --> L{"Timeout 2-3 lần?"}
+    L -->|Có| M["Fallback xác định IGN<br/>qua điện áp ắc quy ADC"]
+    L -->|Không| J

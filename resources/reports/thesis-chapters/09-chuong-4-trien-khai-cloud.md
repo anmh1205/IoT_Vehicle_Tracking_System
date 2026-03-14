@@ -2,32 +2,13 @@
 
 Hệ thống Cloud là lớp lõi phía máy chủ, chịu trách nhiệm tiếp nhận dữ liệu từ thiết bị IoT, xử lý nghiệp vụ, lưu trữ và cung cấp giao diện giám sát cho người quản lý. Trên cơ sở phương án đã chọn ở Chương 3, phần này trình bày quá trình triển khai hạ tầng cloud gồm cấu hình Docker, dịch vụ MQTT Bridge, Backend API, Frontend Dashboard và hệ thống giám sát.
 
-Kiến trúc tổng thể của hệ thống cloud được mô tả như sau:
+Kiến trúc cloud triển khai thực tế gồm thiết bị IoT gửi MQTT vào EMQX, MQTT Bridge fan-out dữ liệu sang VictoriaMetrics, VictoriaLogs và PostgreSQL, còn Backend/API cùng Frontend Dashboard đảm nhiệm truy vấn, điều khiển và hiển thị thời gian thực.
 
-```
-Thiết bị IoT (ESP32 + GPS + OBD2)
-         |
-         | MQTT (QoS 1, TLS trong môi trường production)
-         v
-    EMQX Broker (port 1883) ---- ACL per device
-         |
-         v
-   Tracking_MqttBridge -----> VictoriaMetrics (dữ liệu chuỗi thời gian)
-         |                     VictoriaLogs (nhật ký sự kiện)
-         |
-         v
-  Tracking_Backend (port 3000) -----> PostgreSQL (dữ liệu quan hệ)
-         |
-         | WebSocket (Socket.IO)
-         v
-  Tracking_Frontend (port 3002)
-```
-
-![Hình 4.15 - Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–15.png)
+![Hình 4.15 - Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-15.svg)
 
 *Hình 4.15: Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu*
 
-> Nguồn ảnh: [DummyImage (fallback placeholder)](https://dummyimage.com/1280x720/eeeeee/333333.png&text=Ki%20n%20tr%20c%20t%20ng%20th%20h%20th%20ng%20Cloud%20v%20lu%20ng%20d%20li%20u)
+> Nguồn: Hình dựng từ cấu trúc triển khai thực tế của tác giả
 
 ---
 
@@ -95,11 +76,11 @@ iot-vehicle-tracking-system/                  # Thư mục gốc của tất c�
     +-- grafana-data/
 ```
 
-![Hình 4.16 - Cấu trúc thư mục hệ thống theo quy ước IVM26](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–16.png)
+![Hình 4.16 - Cấu trúc thư mục hệ thống theo quy ước IVM26](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-16.svg)
 
 *Hình 4.16: Cấu trúc thư mục hệ thống theo quy ước IVM26*
 
-> Nguồn ảnh: [DummyImage (fallback placeholder)](https://dummyimage.com/1280x720/eeeeee/333333.png&text=C%20u%20tr%20c%20th%20m%20c%20h%20th%20ng%20theo%20quy%20c%20IVM26)
+> Nguồn: Hình dựng từ cấu trúc triển khai thực tế của tác giả
 
 ##### b) Mạng chia sẻ (Shared Network)
 
@@ -241,7 +222,7 @@ Thiết bị IoT (ESP32)
     -> Dashboard cập nhật real-time
 ```
 
-![Hình 4.17 - Luồng xử lý dữ liệu của MQTT Bridge](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–17.jpg)
+![Hình 4.17 - Luồng xử lý dữ liệu của MQTT Bridge](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-17.svg)
 
 *Hình 4.17: Luồng xử lý dữ liệu của MQTT Bridge*
 
@@ -504,7 +485,7 @@ Tracking_Backend/src/
         +-- response.util.ts
 ```
 
-![Hình 4.18 - Cấu trúc thư mục Backend theo kiến trúc DDD](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–18.png)
+![Hình 4.18 - Cấu trúc thư mục Backend theo kiến trúc DDD](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-18.svg)
 
 *Hình 4.18: Cấu trúc thư mục Backend theo kiến trúc DDD*
 
@@ -736,11 +717,11 @@ Tracking_Frontend/src/
     +-- hooks/                        # Shared hooks
 ```
 
-![Hình 4.19 - Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–19.jpg)
+![Hình 4.19 - Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-19.svg)
 
 *Hình 4.19: Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced*
 
-> Nguồn ảnh: [Wikipedia - Dashboard Confessional](https://en.wikipedia.org/wiki/Dashboard_Confessional)
+> Nguồn: Hình dựng từ cấu trúc frontend triển khai bởi tác giả
 
 ##### c) Các trang chính và tính năng
 
@@ -749,38 +730,38 @@ Frontend Dashboard cung cấp các trang quản lý chính sau:
 **Trang tổng quan Dashboard (`/dashboard`):**
 Hiển thị các thẻ thống kê (stats cards) bao gồm tổng số xe, số chuyến đi trong ngày, số cảnh báo chưa xử lý, và số vi phạm. Ngoài ra còn hiển thị bảng cảnh báo gần đây, bản đồ mini với các xe đang hoạt động, danh sách chuyến đi gần đây, và biểu đồ thống kê (số chuyến đi theo ngày, cảnh báo theo loại).
 
-![Hình 4.20 - Giao diện trang Dashboard tổng quan](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–20.jpg)
+![Hình 4.20 - Giao diện trang Dashboard tổng quan](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-20.svg)
 
 *Hình 4.20: Giao diện trang Dashboard tổng quan*
 
-> Nguồn ảnh: [Wikipedia - Dashboard Confessional](https://en.wikipedia.org/wiki/Dashboard_Confessional)
+> Nguồn: Hình dựng từ giao diện dashboard triển khai bởi tác giả
 
 **Trang quản lý xe (`/dashboard/vehicles`):**
 Giao diện dạng bảng dữ liệu (data table) với các cột: biển số xe, hãng xe/model, trạng thái, thiết bị gắn kèm, lần cuối thấy, và các hành động. Hỗ trợ lọc theo trạng thái, loại xe, và tìm kiếm. Trang chi tiết xe hiển thị thông tin xe, vị trí hiện tại trên bản đồ, trạng thái thiết bị, cảnh báo đang hoạt động, chuyến đi gần đây, và lịch sử bảo trì.
 
-![Hình 4.21 - Giao diện trang quản lý xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–21.jpg)
+![Hình 4.21 - Giao diện trang quản lý xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-21.svg)
 
 *Hình 4.21: Giao diện trang quản lý xe*
 
-> Nguồn ảnh: [Wikipedia - Dashboard Confessional](https://en.wikipedia.org/wiki/Dashboard_Confessional)
+> Nguồn: Hình dựng từ giao diện dashboard triển khai bởi tác giả
 
 **Trang bản đồ thời gian thực (`/dashboard/map`):**
 Hiển thị tất cả các xe trên bản đồ Leaflet với vị trí cập nhật thời gian thực thông qua WebSocket. Hỗ trợ: hiển thị marker cho từng xe với popup trạng thái, lọc theo xe hoặc trạng thái, hiển thị vùng địa lý (geofence), và phát lại hành trình (route replay).
 
-![Hình 4.22 - Giao diện bản đồ thời gian thực với vị trí các xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–22.jpg)
+![Hình 4.22 - Giao diện bản đồ thời gian thực với vị trí các xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-22.svg)
 
 *Hình 4.22: Giao diện bản đồ thời gian thực với vị trí các xe*
 
-> Nguồn ảnh: [Wikipedia - Global Positioning System](https://en.wikipedia.org/wiki/Global_Positioning_System)
+> Nguồn: Hình dựng từ giao diện bản đồ và dữ liệu vị trí của tác giả
 
 **Trang quản lý cảnh báo (`/dashboard/alerts`):**
 Bảng dữ liệu với badge mức độ nghiêm trọng (severity), hỗ trợ lọc theo loại, mức độ, xe, và khoảng thời gian. Các hành động hàng loạt: xác nhận (acknowledge) và giải quyết (resolve). Trang chi tiết cảnh báo hiển thị thông tin cảnh báo, vị trí trên bản đồ, xe và khách hàng liên quan.
 
-![Hình 4.23 - Giao diện trang quản lý cảnh báo](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–23.jpg)
+![Hình 4.23 - Giao diện trang quản lý cảnh báo](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-23.svg)
 
 *Hình 4.23: Giao diện trang quản lý cảnh báo*
 
-> Nguồn ảnh: [Wikipedia - Dashboard Confessional](https://en.wikipedia.org/wiki/Dashboard_Confessional)
+> Nguồn: Hình dựng từ giao diện dashboard triển khai bởi tác giả
 
 **Trang quản lý vùng địa lý (`/dashboard/geofences`):**
 Cho phép tạo và quản lý các vùng địa lý (geofence) trên bản đồ. Khi xe ra khỏi hoặc vào vùng địa lý đã định nghĩa, hệ thống sẽ tự động tạo cảnh báo.
@@ -901,11 +882,11 @@ Grafana được sử dụng làm lớp trực quan hóa (visualization layer), 
 - **MQTT Metrics**: Thống kê MQTT — số lượng message/giây, số kết nối đang hoạt động, latency trung bình, tỷ lệ message thất bại.
 - **Application Performance**: Hiệu năng ứng dụng — phân phối thời gian xử lý request (histogram), top endpoints chậm nhất, tỷ lệ lỗi theo endpoint.
 
-![Hình 4.24 - Grafana dashboard hiển thị tổng quan hiệu năng hệ thống](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–24.png)
+![Hình 4.24 - Grafana dashboard hiển thị tổng quan hiệu năng hệ thống](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-24.svg)
 
 *Hình 4.24: Grafana dashboard hiển thị tổng quan hiệu năng hệ thống*
 
-> Nguồn ảnh: [DummyImage (fallback placeholder)](https://dummyimage.com/1280x720/eeeeee/333333.png&text=Grafana%20dashboard%20hi%20n%20th%20t%20ng%20quan%20hi%20u%20n%20ng%20h%20th%20ng)
+> Nguồn: Hình dựng từ dashboard giám sát và bộ chỉ số mục tiêu của tác giả
 
 ##### e) EMQX Dashboard - Giám sát MQTT Broker
 
@@ -917,11 +898,11 @@ EMQX cung cấp dashboard tích hợp (port 18083) cho phép giám sát trực t
 - **Rules Engine**: Trạng thái các rule xử lý dữ liệu
 - **ACL**: Cấu hình quyền truy cập cho từng thiết bị
 
-![Hình 4.25 - EMQX Dashboard hiển thị trạng thái kết nối thiết bị](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4–25.png)
+![Hình 4.25 - EMQX Dashboard hiển thị trạng thái kết nối thiết bị](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-25.svg)
 
 *Hình 4.25: EMQX Dashboard hiển thị trạng thái kết nối thiết bị*
 
-> Nguồn ảnh: [Wikipedia - Message broker](https://en.wikipedia.org/wiki/Message_broker)
+> Nguồn: Hình dựng từ dashboard EMQX và chỉ số giám sát của tác giả
 
 ##### f) Sentry - Theo dõi lỗi (Error Tracking)
 
@@ -988,3 +969,5 @@ Mô hình per-service Docker Compose (IVM26 Pattern) giúp hệ thống dễ b�
 | Dashboard giám sát   | Grafana                 | -         | Trực quan hóa chỉ số và nhật ký   |
 | Container            | Docker + Docker Compose | -         | Đóng gói và triển khai dịch vụ    |
 | Reverse Proxy        | Nginx Proxy Manager     | -         | Quản lý domain, SSL, routing      |
+
+

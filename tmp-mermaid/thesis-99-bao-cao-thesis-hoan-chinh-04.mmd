@@ -1,17 +1,10 @@
-graph TD
-    Device["Thiết bị IoT<br>(ESP32 + GPS + OBD2)"]
-    EMQX["EMQX Broker<br>(ACL per device)"]
-    Bridge["Tracking_MqttBridge<br>(Node.js standalone)"]
-    PG["PostgreSQL<br>(Relational)"]
-    VM["VictoriaMetrics<br>(Time-Series)"]
-    VL["VictoriaLogs<br>(Event Logs)"]
-    API["Tracking_Backend<br>(Express.js API - Port 3000)"]
-    FE["Tracking_Frontend<br>(Next.js - Port 3002)"]
-
-    Device -->|"MQTT (Port 1883)"| EMQX
-    EMQX --> Bridge
-    Bridge --> PG
-    Bridge --> VM
-    Bridge --> VL
-    PG --> API
-    API -->|"WebSocket (Socket.IO)"| FE
+flowchart LR
+    Tracker["Thiết bị tracker<br/>GPS, OBD2, nguồn"] --> Bridge["MQTT Bridge<br/>chuẩn hóa payload"]
+    Frontend["Frontend và API<br/>truy vấn nghiệp vụ"] --> Backend["Backend API<br/>đọc theo use case"]
+    Bridge --> PG["PostgreSQL<br/>xe, người dùng, cảnh báo"]
+    Bridge --> VM["VictoriaMetrics<br/>telemetry thời gian thực"]
+    Bridge --> VL["VictoriaLogs<br/>log kết nối"]
+    Backend --> PG
+    Backend --> Dashboard["Dashboard Web<br/>và mobile shell"]
+    VM --> Dashboard
+    VL --> Dashboard

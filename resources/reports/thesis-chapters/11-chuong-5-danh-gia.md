@@ -108,7 +108,7 @@ Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính t
 | ESP32-S3-WROOM-1 module | Vi điều khiển chính | 80.000–150.000 |
 | SIMCom SIM7600CE-T             | Modem LTE + GNSS tích hợp | 330.000–500.000 |
 | vgate iCar Pro BLE | Adapter OBD2 BLE | 250.000–500.000 |
-| LIS3DH breakout board | Cảm biến gia tốc (IMU) | 30.000–50.000 |
+| Module cảm biến LIS3DH | Cảm biến gia tốc (IMU) | 30.000–50.000 |
 | Pin 21700 (1 cell, 5000mAh) | Pin dự phòng | 80.000–120.000 |
 | Mạch sạc TP4056 + MP2482/SX1308 + diode-OR | Quản lý năng lượng | 50.000–100.000 |
 | PCB, vỏ hộp, dây cáp, linh kiện phụ | Cơ khí và kết nối | 130.000–260.000 |
@@ -278,7 +278,7 @@ Với khả năng xử lý của ESP32-S3 (dual-core Xtensa LX7, 240 MHz, 8MB PS
 
 ### 5.4.6. Phần cứng phiên bản 2 (Hardware v2)
 
-Phiên bản phần cứng hiện tại sử dụng module rời (breakout boards) và breadboard/perfboard, phù hợp cho giai đoạn prototype và thử nghiệm. Để tiến tới sản xuất hàng loạt, cần cải tiến phần cứng:
+Phiên bản phần cứng hiện tại sử dụng các module rời và board prototype (breadboard/perfboard), phù hợp cho giai đoạn thử nghiệm và đối chiếu schematic. Để tiến tới sản xuất hàng loạt, cần cải tiến phần cứng:
 
 - **Thiết kế PCB tùy chỉnh**: Thiết kế PCB 4 lớp (4-layer) tích hợp toàn bộ thành phần (ESP32-S3, mạch nạp, mạch nguồn, đầu nối SIM, đầu nối antenna) trên một board duy nhất. Giảm kích thước xuống khoảng 60x40 mm, phù hợp để lắp đặt trong xe.
 - **Antenna tích hợp**: Sử dụng antenna ceramic cho GPS/GNSS và antenna PCB cho 4G/LTE, giảm số dây cáp và tăng độ tin cậy.

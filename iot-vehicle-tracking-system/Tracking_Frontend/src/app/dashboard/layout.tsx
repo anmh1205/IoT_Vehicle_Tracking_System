@@ -28,13 +28,17 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
               <Separator orientation="vertical" className="mr-2 h-4" />
               <Breadcrumbs />
             </div>
-            <div className="flex items-center gap-2 px-4">
+            <div className="flex items-center gap-1.5 px-3 sm:gap-2 sm:px-4">
               <NotificationBell />
-              <ThemeSelector />
+              <div className="hidden lg:block">
+                <ThemeSelector />
+              </div>
               <ModeToggle />
             </div>
           </header>
-          {children}
+          <div id="main-content" className="flex-1">
+            {children}
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </KBar>

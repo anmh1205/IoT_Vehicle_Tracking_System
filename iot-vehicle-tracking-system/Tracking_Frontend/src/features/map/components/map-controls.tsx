@@ -52,17 +52,41 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
       <MapLayerSwitcher />
 
       <div className="grid gap-1 rounded-md border bg-background/90 p-1 backdrop-blur">
-        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => map.zoomIn()}>
-          <Plus className="h-4 w-4" />
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-11 w-11 sm:h-8 sm:w-8"
+          onClick={() => map.zoomIn()}
+          aria-label="Phóng to bản đồ"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
-        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => map.zoomOut()}>
-          <Minus className="h-4 w-4" />
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-11 w-11 sm:h-8 sm:w-8"
+          onClick={() => map.zoomOut()}
+          aria-label="Thu nhỏ bản đồ"
+        >
+          <Minus className="h-4 w-4" aria-hidden="true" />
         </Button>
-        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={fitAllBounds}>
-          <ScanSearch className="h-4 w-4" />
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-11 w-11 sm:h-8 sm:w-8"
+          onClick={fitAllBounds}
+          aria-label="Hiển thị toàn bộ thiết bị"
+        >
+          <ScanSearch className="h-4 w-4" aria-hidden="true" />
         </Button>
-        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={flyToSelected}>
-          <Crosshair className="h-4 w-4" />
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-11 w-11 sm:h-8 sm:w-8"
+          onClick={flyToSelected}
+          aria-label="Di chuyển đến thiết bị đã chọn"
+        >
+          <Crosshair className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
 
@@ -71,18 +95,20 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
           size="sm"
           variant={followMode ? 'default' : 'outline'}
           onClick={toggleFollowMode}
-          className="h-8"
+          className="h-11 sm:h-8"
+          aria-pressed={followMode}
         >
-          <Waypoints className="mr-1 h-4 w-4" />
+          <Waypoints className="mr-1 h-4 w-4" aria-hidden="true" />
 Theo dõi
         </Button>
         <Button
           size="sm"
           variant={showGeofences ? 'default' : 'outline'}
           onClick={toggleGeofences}
-          className="h-8"
+          className="h-11 sm:h-8"
+          aria-pressed={showGeofences}
         >
-          <Layers2 className="mr-1 h-4 w-4" />
+          <Layers2 className="mr-1 h-4 w-4" aria-hidden="true" />
 Vùng địa lý
         </Button>
       </div>

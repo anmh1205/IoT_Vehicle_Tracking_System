@@ -1,0 +1,6 @@
+flowchart LR
+    Server["Backend API<br/>Socket.IO"] --> Store["Zustand realtime store"]
+    Store --> Map["React Leaflet Map"]
+    Store --> Sidebar["Sidebar thông tin xe"]
+    Map --> Visual["Marker và route replay"]
+    Sidebar --> Visual

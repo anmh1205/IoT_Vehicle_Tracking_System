@@ -1,0 +1,12 @@
+flowchart LR
+    OBD["vgate iCar Pro<br/>BLE OBD2"] --> Tracker["Thiết bị tracker<br/>ESP32-S3 + SIM7600CE-T"]
+    Tracker --> EMQX["EMQX Broker"]
+    EMQX --> Bridge["MQTT Bridge<br/>validate + fan-out"]
+    Bridge --> Backend["Backend API<br/>Socket.IO"]
+    Bridge --> Metrics["VictoriaMetrics<br/>telemetry"]
+    Bridge --> Logs["VictoriaLogs<br/>nhật ký"]
+    Backend --> Postgres["PostgreSQL<br/>nghiệp vụ"]
+    Backend --> Web["Dashboard Web<br/>Next.js"]
+    Backend --> Mobile["Mobile Shell<br/>Flutter WebView"]
+    Metrics --> Grafana["Grafana<br/>quan trắc"]
+    Logs --> Grafana

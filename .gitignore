@@ -30,3 +30,4 @@
 *.xlsx
 
 /iot-vehicle-tracking-firmware/build
+/.agents

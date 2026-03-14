@@ -1,0 +1,16 @@
+flowchart TB
+    A["Khởi động firmware"] --> B["Khởi tạo IMU, modem, ADC, BLE,<br/>queue và các task FreeRTOS"]
+    B --> C{"Đọc được IGN từ OBD2?"}
+    C -->|Có| D["Dùng IGN từ ECU qua BLE OBD2"]
+    C -->|Không| E["Fallback sang điện áp ắc quy ADC<br/>theo profile 12V hoặc 24V"]
+    D --> F{"IGN ON?"}
+    E --> F
+    F -->|Có| G["Chế độ lái xe<br/>BLE OBD2 + GNSS + 4G hoạt động"]
+    F -->|Không| H{"IMU phát hiện rung?"}
+    H -->|Không| I["Chế độ đỗ xe<br/>gửi heartbeat rồi deep sleep"]
+    H -->|Có| J["Chế độ cảnh báo<br/>wake modem và gửi alert ưu tiên"]
+    G --> K{"Kết thúc chu kỳ?"}
+    J --> K
+    I --> K
+    K -->|IGN còn ON| G
+    K -->|IGN OFF| I

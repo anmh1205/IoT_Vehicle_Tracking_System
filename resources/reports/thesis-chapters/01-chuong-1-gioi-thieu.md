@@ -27,7 +27,7 @@ Ngoài các vấn đề kinh doanh, việc xây dựng một hệ thống theo d
 
 **Thứ tư, xử lý dữ liệu thời gian thực.** Với một đội xe gồm hàng chục đến hàng trăm xe, hệ thống backend cần xử lý luồng dữ liệu telemetry lớn (vị trí GPS, dữ liệu OBD2, trạng thái cảm biến) với độ trễ thấp, đồng thời cung cấp giao diện giám sát trực quan cho người quản lý.
 
-![Hình 1.1 - Sơ đồ tổng quan vấn đề và giải pháp đề xuất](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–1.png)
+![Hình 1.1 - Sơ đồ tổng quan vấn đề và giải pháp đề xuất](./assets/figures/01-chuong-1-gioi-thieu-hinh-1-1.svg)
 
 *Hình 1.1: Sơ đồ tổng quan vấn đề và giải pháp đề xuất*
 
@@ -176,7 +176,7 @@ Dự án áp dụng phương pháp **thiết kế từ dưới lên (bottom-up d
 
 6. **Giai đoạn 6 — Tích hợp và kiểm thử**: Tích hợp toàn hệ thống, kiểm thử chức năng, kiểm thử hiệu năng, và tối ưu hóa.
 
-![Hình 1.2 - Quy trình phát triển dự án theo các giai đoạn](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–2.png)
+![Hình 1.2 - Quy trình phát triển dự án theo các giai đoạn](./assets/figures/01-chuong-1-gioi-thieu-hinh-1-2.svg)
 
 *Hình 1.2: Quy trình phát triển dự án theo các giai đoạn*
 
@@ -184,28 +184,9 @@ Dự án áp dụng phương pháp **thiết kế từ dưới lên (bottom-up d
 
 ### 1.4.2. Kiến trúc hệ thống
 
-Hệ thống được thiết kế theo kiến trúc phân tầng (layered architecture) nhằm tách biệt rõ vai trò của từng lớp chức năng và giảm phụ thuộc chéo khi tích hợp. Các tầng chính bao gồm:
+Hệ thống được thiết kế theo kiến trúc phân tầng (layered architecture) nhằm tách biệt rõ vai trò của từng lớp chức năng và giảm phụ thuộc chéo khi tích hợp. Kiến trúc triển khai thực tế gồm lớp thiết bị tracker (ESP32-S3, SIM7600CE-T, LIS3DH, vgate iCar Pro) kết nối MQTT lên EMQX; MQTT Bridge tiếp nhận và fan-out dữ liệu sang VictoriaMetrics, VictoriaLogs và Backend API; lớp ứng dụng phía trên phục vụ dashboard web Next.js, shell Flutter và hệ quan trắc Grafana.
 
-```
-Thiết bị IoT (ESP32-S3 + GPS + OBD2 + IMU)
-         |
-         | MQTT 5.0 (TLS trong môi trường production)
-         v
-    EMQX Broker (Port 1883) ---- ACL per device
-         |
-         v
-   MQTT Bridge Service ----> VictoriaMetrics (dữ liệu chuỗi thời gian)
-         |                   VictoriaLogs (nhật ký sự kiện)
-         |
-         v
-  Backend API (Port 3000) ----> PostgreSQL (dữ liệu quan hệ)
-         |
-         | WebSocket (Socket.IO)
-         v
-  Frontend Web (Port 3002)
-```
-
-![Hình 1.3 - Kiến trúc tổng thể hệ thống IoT Vehicle Tracking](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–3.jpg)
+![Hình 1.3 - Kiến trúc tổng thể hệ thống IoT Vehicle Tracking](./assets/figures/01-chuong-1-gioi-thieu-hinh-1-3.svg)
 
 *Hình 1.3: Kiến trúc tổng thể hệ thống IoT Vehicle Tracking*
 
@@ -243,7 +224,7 @@ Một trong những điểm thiết kế trọng tâm của dự án là chiến
 
 Hệ thống còn bao gồm mạch Low Voltage Disconnect (LVD) để tự động chuyển sang nguồn dự phòng khi điện áp ắc quy tụt xuống dưới ngưỡng an toàn theo profile: 12V dùng Switch_OFF=12.0V, Switch_ON=12.2V; 24V dùng Switch_OFF=24.0V, Switch_ON=24.4V, bảo vệ ắc quy không bị rút cạn quá mức [7].
 
-![Hình 1.4 - Sơ đồ chuyển đổi giữa các chế độ năng lượng](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–4.png)
+![Hình 1.4 - Sơ đồ chuyển đổi giữa các chế độ năng lượng](./assets/figures/01-chuong-1-gioi-thieu-hinh-1-4.svg)
 
 *Hình 1.4: Sơ đồ chuyển đổi giữa các chế độ năng lượng*
 
@@ -318,7 +299,7 @@ Trên cơ sở các kết quả đã đạt được và các giới hạn hiệ
 
 7. **Thiết kế PCB chuyên nghiệp**: Chuyển từ prototype trên breadboard/perfboard sang thiết kế PCB chuyên nghiệp với kích thước nhỏ gọn, độ bền cao, phù hợp cho sản xuất hàng loạt.
 
-![Hình 1.5 - Lộ trình phát triển dự án theo các giai đoạn (Roadmap)](./assets/figures/01-chuong-1-gioi-thieu-hinh-1–5.png)
+![Hình 1.5 - Lộ trình phát triển dự án theo các giai đoạn (Roadmap)](./assets/figures/01-chuong-1-gioi-thieu-hinh-1-5.svg)
 
 *Hình 1.5: Lộ trình phát triển dự án theo các giai đoạn (Roadmap)*
 

@@ -49,7 +49,7 @@ Firmware được thiết kế theo mô hình phân lớp (layered architecture)
 
 Tầng HAL trừu tượng hóa truy cập phần cứng để các tầng trên làm việc với cảm biến và ngoại vi mà không phụ thuộc trực tiếp vào thanh ghi. Tầng Power Management quản lý trạng thái năng lượng toàn hệ thống. Tầng Application xử lý logic nghiệp vụ và chuyển đổi chế độ hoạt động. Tầng Communication đảm nhận đóng gói và truyền dữ liệu lên máy chủ.
 
-![Hình 3.5 - Sơ đồ kiến trúc phân lớp của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–5.svg)
+![Hình 3.5 - Sơ đồ kiến trúc phân lớp của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-5.svg)
 
 *Hình 3.5: Sơ đồ kiến trúc phân lớp của firmware*
 
@@ -98,7 +98,7 @@ void app_main(void) {
 }
 ```
 
-![Hình 3.6 - Sơ đồ tương tác giữa các FreeRTOS task](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–6.svg)
+![Hình 3.6 - Sơ đồ tương tác giữa các FreeRTOS task](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-6.svg)
 
 *Hình 3.6: Sơ đồ tương tác giữa các FreeRTOS task*
 
@@ -121,7 +121,7 @@ Luồng hoạt động tổng thể của firmware được tổ chức theo tr�
 
 5. **Xử lý sau tác vụ**: Nếu IGN ON, giữ kết nối BLE và không deep sleep. Nếu IGN OFF, ngắt BLE và chuyển sang deep sleep để tiết kiệm năng lượng.
 
-![Hình 3.7 - Lưu đồ thuật toán luồng hoạt động chính của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–7.png)
+![Hình 3.7 - Lưu đồ thuật toán luồng hoạt động chính của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-7.svg)
 
 *Hình 3.7: Lưu đồ thuật toán luồng hoạt động chính của firmware*
 
@@ -133,35 +133,7 @@ Luồng hoạt động tổng thể của firmware được tổ chức theo tr�
 
 Module giao tiếp Bluetooth Low Energy (BLE) OBD2 cho phép thiết bị theo dõi kết nối không dây với adapter vgate iCar Pro — thiết bị OBD2 hỗ trợ BLE, được cắm trực tiếp vào cổng chẩn đoán OBD-II của xe. Firmware sử dụng NimBLE stack (tích hợp trong ESP-IDF) để triển khai giao tiếp BLE theo chuẩn GATT (Generic Attribute Profile).
 
-Kiến trúc module BLE OBD2 được tổ chức theo bốn tầng:
-
-```
-+-------------------------------------------+
-|         Application Layer                 |
-|  (main.c - OBD task, xử lý dữ liệu)     |
-+-------------------+-----------------------+
-                    |
-+-------------------v-----------------------+
-|         OBD Protocol Layer                |
-|  (ble_obd.c - xử lý giao thức OBD2)     |
-|  - Phân tích phản hồi OBD                |
-|  - Chuyển đổi dữ liệu PID              |
-|  - Gửi lệnh OBD2 (ELM327 compatible)    |
-+-------------------+-----------------------+
-                    |
-+-------------------v-----------------------+
-|         BLE Manager Layer                 |
-|  (ble_mgr.c - quản lý GATT)             |
-|  - Tìm kiếm thiết bị (discovery)        |
-|  - Khám phá service/characteristic       |
-|  - Đọc/ghi/thông báo GATT               |
-+-------------------+-----------------------+
-                    |
-+-------------------v-----------------------+
-|         BLE Stack Layer                   |
-|  (NimBLE - khởi tạo và quản lý stack)    |
-+-------------------------------------------+
-```
+Kiến trúc module BLE OBD2 được tổ chức theo bốn tầng logic: `Application Layer` (task nghiệp vụ trong `main.c`), `OBD Protocol Layer` (`ble_obd.c`), `BLE Manager Layer` (`ble_mgr.c`) và `BLE Stack Layer` (NimBLE). Cách tách lớp này giúp firmware cô lập xử lý PID OBD2 khỏi phần GATT/BLE thuần túy, thuận lợi cho debug và mở rộng.
 
 ##### b) Quy trình kết nối BLE OBD2
 
@@ -222,7 +194,7 @@ void ble_obd2_task(void *param) {
 }
 ```
 
-![Hình 3.8 - Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–8.jpg)
+![Hình 3.8 - Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-8.svg)
 
 *Hình 3.8: Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2*
 
@@ -270,7 +242,7 @@ Quy trình khởi tạo modem diễn ra theo bốn bước tuần tự:
 | 3    | `AT+CEREG?` | `+CEREG: 0,1`      | Kiểm tra đăng ký mạng thành công |
 | 4    | `AT+CSQ`   | `+CSQ: 20,99`     | Đọc cường độ tín hiệu (RSSI)     |
 
-Trường hợp modem không phản hồi, firmware thực hiện reset phần cứng bằng cách điều khiển chân PWRKEY (GPIO25): kéo LOW rồi HIGH trong 1–2 giây, sau đó đợi modem khởi động lại (10–30 giây). Nếu SIM chưa sẵn sàng hoặc chưa đăng ký mạng, hệ thống đợi và retry (quá trình đăng ký mạng có thể mất 30–60 giây).
+Trường hợp modem không phản hồi, firmware thực hiện reset phần cứng bằng cách điều khiển chân PWRKEY (GPIO26): kéo LOW rồi HIGH trong 1–2 giây, sau đó đợi modem khởi động lại (10–30 giây). Nếu SIM chưa sẵn sàng hoặc chưa đăng ký mạng, hệ thống đợi và retry (quá trình đăng ký mạng có thể mất 30–60 giây).
 
 ##### c) Điều khiển kết nối 4G/LTE
 
@@ -304,7 +276,7 @@ Thời gian để GNSS fix được vị trí phụ thuộc vào trạng thái t
 | Warm start     | Còn một phần dữ liệu hỗ trợ | 5–20 giây |
 | Cold start     | Khởi động mới hoàn toàn | 20–60 giây |
 
-![Hình 3.9 - Lưu đồ thuật toán điều khiển modem theo chế độ hoạt động](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–9.png)
+![Hình 3.9 - Lưu đồ thuật toán điều khiển modem theo chế độ hoạt động](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-9.svg)
 
 *Hình 3.9: Lưu đồ thuật toán điều khiển modem theo chế độ hoạt động*
 
@@ -344,11 +316,11 @@ Module quản lý nguồn sử dụng các chân GPIO của ESP32-S3 để đi�
 | 18   | POWER_PATH_EN | Output | Chọn nguồn cấp (ắc quy hoặc pin dự phòng) |
 | 19   | LVD_STATUS    | Input  | Đọc trạng thái LVD từ comparator LM393    |
 | 21   | LIS3DH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU              |
-| 22   | LIS3DH_SDA    | I/O    | Đường dữ liệu I2C                         |
-| 23   | LIS3DH_SCL    | I/O    | Đường clock I2C                           |
+| 47   | LIS3DH_SDA    | I/O    | Đường dữ liệu I2C                         |
+| 48   | LIS3DH_SCL    | I/O    | Đường clock I2C                           |
 | 16   | MODEM_UART_TX | Output | UART TX đến modem                         |
 | 17   | MODEM_UART_RX | Input  | UART RX từ modem                          |
-| 25   | MODEM_PWRKEY  | Output | Điều khiển nguồn modem                    |
+| 26   | MODEM_PWRKEY  | Output | Điều khiển nguồn modem                    |
 
 ##### b) Điều khiển Power Path (Diode-OR + EN)
 
@@ -384,7 +356,7 @@ void power_monitor_task(void *param) {
 }
 ```
 
-![Hình 3.10 - Lưu đồ thuật toán điều khiển power path](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–10.png)
+![Hình 3.10 - Lưu đồ thuật toán điều khiển power path](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-10.svg)
 
 *Hình 3.10: Lưu đồ thuật toán điều khiển power path*
 
@@ -578,7 +550,7 @@ Máy trạng thái là cơ chế điều phối trung tâm của firmware, quy�
 | HEARTBEAT           | Gửi heartbeat xong               | SLEEP                |
 | SLEEP               | Timer wake-up hoặc IMU interrupt | CHECK_IGN            |
 
-![Hình 3.11 - Sơ đồ máy trạng thái của thiết bị theo dõi](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3–11.svg)
+![Hình 3.11 - Sơ đồ máy trạng thái của thiết bị theo dõi](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-11.svg)
 
 *Hình 3.11: Sơ đồ máy trạng thái của thiết bị theo dõi*
 

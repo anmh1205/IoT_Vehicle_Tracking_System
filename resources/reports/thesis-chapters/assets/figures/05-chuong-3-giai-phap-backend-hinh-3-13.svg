@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="rgba(18, 32, 51, 0.14)"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#d9485f"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <style>
+    text {
+      fill: #122033;
+      font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+    }
+    .title { font-size: 40px; font-weight: 750; letter-spacing: -0.02em; }
+    .subtitle { font-size: 22px; fill: #52637a; }
+    .section-title { font-size: 24px; font-weight: 700; }
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+    .body { font-size: 20px; }
+    .small { font-size: 18px; fill: #52637a; }
+    .tiny { font-size: 15px; fill: #52637a; }
+    .chip { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metric { font-size: 42px; font-weight: 760; }
+    .mono { font-family: "Consolas", "Courier New", monospace; font-size: 18px; }
+    .sidebar { fill: #f8fafc; font-size: 18px; font-weight: 600; }
+  </style>
+  <rect width="100%" height="100%" fill="#f4f7fb"/>
+  <rect x="32" y="32" width="1536" height="936" rx="30" fill="none" stroke="rgba(217, 72, 95, 0.12)" stroke-width="2"/>
+  <rect x="56" y="56" width="1488" height="888" rx="28" fill="rgba(255, 255, 255, 0.45)" stroke="none"/>
+  <text x="84" y="106" class="title">Chiến lược lưu trữ kép của hệ thống</text>
+  <text x="84" y="142" class="subtitle">Mỗi loại dữ liệu được ghi vào đúng kho chuyên biệt để tối ưu vận hành và truy vấn.</text>
+  
+      
+  <rect x="82" y="220" width="300" height="608" rx="30" fill="#ffffff" stroke="rgba(29, 78, 216, 0.28)" stroke-width="3" />
+  <rect x="106" y="202" width="156" height="34" rx="17" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="2" /><text x="184" y="225" class="chip" text-anchor="middle" fill="#fff">Nguồn dữ liệu</text>
+  <text x="110" y="254" class="small" text-anchor="start" fill="#122033"><tspan x="110" dy="0">Dữ liệu thô phát sinh</tspan><tspan x="110" dy="22">theo ngữ cảnh vận hành</tspan><tspan x="110" dy="22">của xe.</tspan></text>
+
+      
+  <rect x="426" y="220" width="262" height="608" rx="30" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="3" />
+  <rect x="450" y="202" width="180" height="34" rx="17" fill="#0f766e" stroke="#0f766e" stroke-width="2" /><text x="540" y="225" class="chip" text-anchor="middle" fill="#fff">Gateway dữ liệu</text>
+  <text x="454" y="254" class="small" text-anchor="start" fill="#122033"><tspan x="454" dy="0">Chuẩn hóa payload và</tspan><tspan x="454" dy="22">định tuyến đúng loại</tspan><tspan x="454" dy="22">kho lưu trữ.</tspan></text>
+
+      
+  <rect x="726" y="220" width="788" height="608" rx="30" fill="#ffffff" stroke="rgba(217, 72, 95, 0.28)" stroke-width="3" />
+  <rect x="750" y="202" width="220" height="34" rx="17" fill="#d9485f" stroke="#d9485f" stroke-width="2" /><text x="860" y="225" class="chip" text-anchor="middle" fill="#fff">Kho dữ liệu chuyên biệt</text>
+  <text x="754" y="254" class="small" text-anchor="start" fill="#122033"><tspan x="754" dy="0">Mỗi loại dữ liệu dùng đúng công cụ để cân bằng tốc độ và khả năng truy</tspan><tspan x="754" dy="22">vấn.</tspan></text>
+
+      
+    <rect x="108" y="286" width="248" height="160" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="108" y="286" width="248" height="12" rx="26" fill="#1d4ed8" stroke="none"/>
+    <rect x="126" y="306" width="99" height="34" rx="17" fill="rgba(29, 78, 216, 0.88)" stroke="rgba(29, 78, 216, 0.88)" stroke-width="2" /><text x="175.5" y="329" class="chip" text-anchor="middle" fill="#fff">telemetry</text>
+    <text x="232" y="350" class="card-title" text-anchor="middle" fill="#122033"><tspan x="232" dy="0">Thiết bị tracker</tspan></text>
+    <text x="232" y="394" class="body" text-anchor="middle" fill="#122033"><tspan x="232" dy="0">GPS, OBD2, điện áp,</tspan><tspan x="232" dy="24">trạng thái nguồn</tspan><tspan x="232" dy="24">Dữ liệu gửi định kỳ</tspan><tspan x="232" dy="24">qua MQTT</tspan></text>
+  
+      
+    <rect x="108" y="496" width="248" height="148" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="108" y="496" width="248" height="12" rx="26" fill="#c97a10" stroke="none"/>
+    <rect x="126" y="516" width="90" height="34" rx="17" fill="rgba(201, 122, 16, 0.88)" stroke="rgba(201, 122, 16, 0.88)" stroke-width="2" /><text x="171" y="539" class="chip" text-anchor="middle" fill="#fff">query</text>
+    <text x="232" y="560" class="card-title" text-anchor="middle" fill="#122033"><tspan x="232" dy="0">Frontend và API</tspan></text>
+    <text x="232" y="604" class="body" text-anchor="middle" fill="#122033"><tspan x="232" dy="0">CRUD xe, chuyến đi,</tspan><tspan x="232" dy="24">cảnh báo</tspan><tspan x="232" dy="24">Truy vấn dữ liệu lịch</tspan><tspan x="232" dy="24">sử</tspan></text>
+  
+      
+    <rect x="452" y="324" width="210" height="160" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="452" y="324" width="210" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    <rect x="470" y="344" width="90" height="34" rx="17" fill="rgba(15, 118, 110, 0.88)" stroke="rgba(15, 118, 110, 0.88)" stroke-width="2" /><text x="515" y="367" class="chip" text-anchor="middle" fill="#fff">router</text>
+    <text x="557" y="388" class="card-title" text-anchor="middle" fill="#122033"><tspan x="557" dy="0">MQTT Bridge</tspan></text>
+    <text x="557" y="432" class="body" text-anchor="middle" fill="#122033"><tspan x="557" dy="0">Xác thực schema</tspan><tspan x="557" dy="24">Phân loại dữ liệu</tspan><tspan x="557" dy="24">Ghi song song vào</tspan><tspan x="557" dy="24">nhiều kho</tspan></text>
+  
+      
+    <rect x="452" y="546" width="210" height="136" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="452" y="546" width="210" height="12" rx="26" fill="#c97a10" stroke="none"/>
+    <rect x="470" y="566" width="90" height="34" rx="17" fill="rgba(201, 122, 16, 0.88)" stroke="rgba(201, 122, 16, 0.88)" stroke-width="2" /><text x="515" y="589" class="chip" text-anchor="middle" fill="#fff">service</text>
+    <text x="557" y="610" class="card-title" text-anchor="middle" fill="#122033"><tspan x="557" dy="0">Backend API</tspan></text>
+    <text x="557" y="654" class="body" text-anchor="middle" fill="#122033"><tspan x="557" dy="0">Truy xuất theo use</tspan><tspan x="557" dy="24">case</tspan><tspan x="557" dy="24">Tổng hợp dữ liệu</tspan><tspan x="557" dy="24">trả frontend</tspan></text>
+  
+      
+    <rect x="760" y="270" width="220" height="168" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="760" y="270" width="220" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    <rect x="778" y="290" width="90" height="34" rx="17" fill="rgba(217, 72, 95, 0.88)" stroke="rgba(217, 72, 95, 0.88)" stroke-width="2" /><text x="823" y="313" class="chip" text-anchor="middle" fill="#fff">quan hệ</text>
+    <text x="870" y="334" class="card-title" text-anchor="middle" fill="#122033"><tspan x="870" dy="0">PostgreSQL</tspan></text>
+    <text x="870" y="378" class="body" text-anchor="middle" fill="#122033"><tspan x="870" dy="0">Người dùng</tspan><tspan x="870" dy="24">Phương tiện</tspan><tspan x="870" dy="24">Khách hàng</tspan><tspan x="870" dy="24">Cảnh báo và điều</tspan><tspan x="870" dy="24">khiển</tspan></text>
+  
+      
+    <rect x="1010" y="270" width="220" height="168" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1010" y="270" width="220" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    <rect x="1028" y="290" width="121" height="34" rx="17" fill="rgba(217, 72, 95, 0.88)" stroke="rgba(217, 72, 95, 0.88)" stroke-width="2" /><text x="1088.5" y="313" class="chip" text-anchor="middle" fill="#fff">time-series</text>
+    <text x="1120" y="334" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1120" dy="0">VictoriaMetrics</tspan></text>
+    <text x="1120" y="378" class="body" text-anchor="middle" fill="#122033"><tspan x="1120" dy="0">Vị trí GPS</tspan><tspan x="1120" dy="24">RPM, tốc độ, nhiệt</tspan><tspan x="1120" dy="24">độ</tspan><tspan x="1120" dy="24">Dữ liệu cảm biến</tspan><tspan x="1120" dy="24">theo chuỗi thời gian</tspan></text>
+  
+      
+    <rect x="1260" y="270" width="220" height="168" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1260" y="270" width="220" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    <rect x="1278" y="290" width="90" height="34" rx="17" fill="rgba(217, 72, 95, 0.88)" stroke="rgba(217, 72, 95, 0.88)" stroke-width="2" /><text x="1323" y="313" class="chip" text-anchor="middle" fill="#fff">logs</text>
+    <text x="1370" y="334" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1370" dy="0">VictoriaLogs</tspan></text>
+    <text x="1370" y="378" class="body" text-anchor="middle" fill="#122033"><tspan x="1370" dy="0">Kết nối</tspan><tspan x="1370" dy="24">Lỗi thiết bị</tspan><tspan x="1370" dy="24">Audit trail và log</tspan><tspan x="1370" dy="24">bridge</tspan></text>
+  
+      
+    <rect x="888" y="520" width="462" height="168" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="888" y="520" width="462" height="12" rx="26" fill="#0f9d76" stroke="none"/>
+    <rect x="906" y="540" width="99" height="34" rx="17" fill="rgba(15, 157, 118, 0.88)" stroke="rgba(15, 157, 118, 0.88)" stroke-width="2" /><text x="955.5" y="563" class="chip" text-anchor="middle" fill="#fff">analytics</text>
+    <text x="1119" y="584" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1119" dy="0">Lớp khai thác dữ liệu</tspan></text>
+    <text x="1119" y="628" class="body" text-anchor="middle" fill="#122033"><tspan x="1119" dy="0">REST API truy xuất PostgreSQL cho dữ liệu</tspan><tspan x="1119" dy="24">nghiệp vụ.</tspan><tspan x="1119" dy="24">PromQL/Grafana khai thác VictoriaMetrics</tspan><tspan x="1119" dy="24">cho dashboard theo thời gian.</tspan><tspan x="1119" dy="24">LogsQL hỗ trợ điều tra sự cố và đối soát</tspan><tspan x="1119" dy="24">sự kiện.</tspan></text>
+  
+      
+    <line x1="356" y1="366" x2="452" y2="404" stroke="#1d4ed8" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="294" y="308" width="156" height="54" rx="18" fill="#ffffff" stroke="rgba(29, 78, 216, 0.28)" stroke-width="2" /><text x="372" y="341" class="small" text-anchor="middle" fill="#122033"><tspan x="372" dy="0">MQTT raw data</tspan></text>
+  
+      
+    <line x1="356" y1="570" x2="452" y2="614" stroke="#c97a10" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="312" y="578" width="120" height="54" rx="18" fill="#ffffff" stroke="rgba(201, 122, 16, 0.28)" stroke-width="2" /><text x="372" y="611" class="small" text-anchor="middle" fill="#122033"><tspan x="372" dy="0">REST query</tspan></text>
+  
+      
+    <line x1="662" y1="400" x2="760" y2="354" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="590" y="308" width="180" height="54" rx="18" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="2" /><text x="680" y="341" class="small" text-anchor="middle" fill="#122033"><tspan x="680" dy="0">dữ liệu quan hệ</tspan></text>
+  
+      
+    <line x1="662" y1="430" x2="1010" y2="354" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="738" y="356" width="108" height="54" rx="18" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="2" /><text x="792" y="389" class="small" text-anchor="middle" fill="#122033"><tspan x="792" dy="0">telemetry</tspan></text>
+  
+      
+    <line x1="662" y1="460" x2="1260" y2="354" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="954" y="392" width="132" height="54" rx="18" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="2" /><text x="1020" y="425" class="small" text-anchor="middle" fill="#122033"><tspan x="1020" dy="0">log sự kiện</tspan></text>
+  
+      
+    <line x1="662" y1="614" x2="888" y2="604" stroke="#c97a10" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="678" y="552" width="120" height="54" rx="18" fill="#ffffff" stroke="rgba(201, 122, 16, 0.28)" stroke-width="2" /><text x="738" y="585" class="small" text-anchor="middle" fill="#122033"><tspan x="738" dy="0">read model</tspan></text>
+  
+      
+    <line x1="870" y1="438" x2="1030" y2="520" stroke="#d9485f" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="880" y="454" width="88" height="54" rx="18" fill="#ffffff" stroke="rgba(217, 72, 95, 0.28)" stroke-width="2" /><text x="924" y="487" class="small" text-anchor="middle" fill="#122033"><tspan x="924" dy="0">PromQL</tspan></text>
+  
+      
+    <line x1="1370" y1="438" x2="1210" y2="520" stroke="#d9485f" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="1240" y="454" width="88" height="54" rx="18" fill="#ffffff" stroke="rgba(217, 72, 95, 0.28)" stroke-width="2" /><text x="1284" y="487" class="small" text-anchor="middle" fill="#122033"><tspan x="1284" dy="0">LogsQL</tspan></text>
+  
+    
+</svg>

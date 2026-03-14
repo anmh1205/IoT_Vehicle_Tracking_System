@@ -1,13 +1,10 @@
-graph TD
-    subgraph Map["React Leaflet Map Layer"]
-        TileLayer["Tile Layer<br>(OpenStreetMap tiles)"]
-        Markers["Vehicle Markers Layer<br>(real-time position updates)"]
-        Geofence["Geofence Overlay Layer<br>(polygon/circle visualization)"]
-        Route["Route Polyline Layer<br>(trip route replay)"]
-    end
-    SocketClient["Socket.IO Client (WebSocket)<br>- Connect with namespace /dashboard<br>- Subscribe vehicle location events<br>- Receive position data in real-time"]
-    BackendAPI["Backend API Server (Express)<br>- Receive telemetry from MQTT Bridge<br>- Broadcast via Socket.IO"]
-
-    Map -->|subscribe| SocketClient
-    SocketClient -->|location events| Map
-    SocketClient --> BackendAPI
+flowchart TB
+    Root["Trang bản đồ React Leaflet"] --> Tile["Tile layer nền"]
+    Root --> Marker["Marker xe theo thời gian thực"]
+    Root --> Route["Route replay / polyline"]
+    Root --> Fence["Geofence overlay"]
+    Root --> Side["Sidebar trạng thái xe"]
+    Socket["Socket.IO"] --> Marker
+    Socket --> Side
+    Query["TanStack Query"] --> Route
+    Query --> Fence

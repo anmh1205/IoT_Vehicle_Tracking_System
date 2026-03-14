@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="rgba(18, 32, 51, 0.14)"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <style>
+    text {
+      fill: #122033;
+      font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+    }
+    .title { font-size: 40px; font-weight: 750; letter-spacing: -0.02em; }
+    .subtitle { font-size: 22px; fill: #52637a; }
+    .section-title { font-size: 24px; font-weight: 700; }
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+    .body { font-size: 20px; }
+    .small { font-size: 18px; fill: #52637a; }
+    .tiny { font-size: 15px; fill: #52637a; }
+    .chip { font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metric { font-size: 42px; font-weight: 760; }
+    .mono { font-family: "Consolas", "Courier New", monospace; font-size: 18px; }
+    .sidebar { fill: #f8fafc; font-size: 18px; font-weight: 600; }
+  </style>
+  <rect width="100%" height="100%" fill="#f4f7fb"/>
+  <rect x="32" y="32" width="1536" height="936" rx="30" fill="none" stroke="rgba(29, 78, 216, 0.12)" stroke-width="2"/>
+  <rect x="56" y="56" width="1488" height="888" rx="28" fill="rgba(255, 255, 255, 0.45)" stroke="none"/>
+  <text x="84" y="106" class="title">Sơ đồ khối tổng thể hệ thống tracker IoT</text>
+  <text x="84" y="142" class="subtitle">Phiên bản triển khai thực tế của tracker với pin mapping đã chuẩn hóa.</text>
+  
+      
+    <rect x="528" y="244" width="546" height="248" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="528" y="244" width="546" height="12" rx="26" fill="#1d4ed8" stroke="none"/>
+    <rect x="546" y="264" width="110" height="34" rx="17" fill="rgba(29, 78, 216, 0.88)" stroke="rgba(29, 78, 216, 0.88)" stroke-width="2" /><text x="601" y="287" class="chip" text-anchor="middle" fill="#fff">controller</text>
+    <text x="801" y="308" class="card-title" text-anchor="middle" fill="#122033"><tspan x="801" dy="0">ESP32-S3 điều phối hệ thống</tspan></text>
+    <text x="801" y="352" class="body" text-anchor="middle" fill="#122033"><tspan x="801" dy="0">BLE OBD2, tổng hợp telemetry và quản lý trạng</tspan><tspan x="801" dy="24">thái nguồn.</tspan><tspan x="801" dy="24">ADC GPIO4 | CHARGER_EN GPIO5 | POWER_PATH_EN</tspan><tspan x="801" dy="24">GPIO18</tspan><tspan x="801" dy="24">LVD_STATUS GPIO19 | PWRKEY GPIO26 | UART1</tspan><tspan x="801" dy="24">GPIO16/17</tspan></text>
+  
+      
+    <rect x="92" y="246" width="340" height="170" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="92" y="246" width="340" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    <rect x="110" y="266" width="90" height="34" rx="17" fill="rgba(217, 72, 95, 0.88)" stroke="rgba(217, 72, 95, 0.88)" stroke-width="2" /><text x="155" y="289" class="chip" text-anchor="middle" fill="#fff">sense</text>
+    <text x="262" y="310" class="card-title" text-anchor="middle" fill="#122033"><tspan x="262" dy="0">Voltage divider + ADC</tspan></text>
+    <text x="262" y="354" class="body" text-anchor="middle" fill="#122033"><tspan x="262" dy="0">R1 = 100 kΩ | R2 = 10 kΩ</tspan><tspan x="262" dy="24">Đo điện áp ắc quy hệ 12V / 24V</tspan><tspan x="262" dy="24">Cung cấp dữ liệu profile</tspan><tspan x="262" dy="24">chuyển nguồn</tspan></text>
+  
+      
+    <rect x="92" y="474" width="340" height="186" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="92" y="474" width="340" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    <rect x="110" y="494" width="90" height="34" rx="17" fill="rgba(15, 118, 110, 0.88)" stroke="rgba(15, 118, 110, 0.88)" stroke-width="2" /><text x="155" y="517" class="chip" text-anchor="middle" fill="#fff">power</text>
+    <text x="262" y="538" class="card-title" text-anchor="middle" fill="#122033"><tspan x="262" dy="0">Power control + status</tspan></text>
+    <text x="262" y="582" class="body" text-anchor="middle" fill="#122033"><tspan x="262" dy="0">GPIO5 bật/tắt sạc TP4056</tspan><tspan x="262" dy="24">GPIO18 chọn nhánh nguồn</tspan><tspan x="262" dy="24">runtime</tspan><tspan x="262" dy="24">GPIO19 đọc Low Voltage</tspan><tspan x="262" dy="24">Disconnect</tspan><tspan x="262" dy="24">GPIO26 điều khiển modem PWRKEY</tspan></text>
+  
+      
+    <rect x="1172" y="212" width="332" height="168" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1172" y="212" width="332" height="12" rx="26" fill="#c97a10" stroke="none"/>
+    <rect x="1190" y="232" width="90" height="34" rx="17" fill="rgba(201, 122, 16, 0.88)" stroke="rgba(201, 122, 16, 0.88)" stroke-width="2" /><text x="1235" y="255" class="chip" text-anchor="middle" fill="#fff">sensor</text>
+    <text x="1338" y="276" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1338" dy="0">LIS3DH IMU</tspan></text>
+    <text x="1338" y="320" class="body" text-anchor="middle" fill="#122033"><tspan x="1338" dy="0">I2C: GPIO47 / GPIO48</tspan><tspan x="1338" dy="24">INT1: GPIO21 đánh thức deep</tspan><tspan x="1338" dy="24">sleep</tspan><tspan x="1338" dy="24">Theo dõi rung động khi xe đỗ</tspan></text>
+  
+      
+    <rect x="1172" y="440" width="332" height="168" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1172" y="440" width="332" height="12" rx="26" fill="#6d4fe0" stroke="none"/>
+    <rect x="1190" y="460" width="90" height="34" rx="17" fill="rgba(109, 79, 224, 0.88)" stroke="rgba(109, 79, 224, 0.88)" stroke-width="2" /><text x="1235" y="483" class="chip" text-anchor="middle" fill="#fff">ble</text>
+    <text x="1338" y="504" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1338" dy="0">vgate iCar Pro</tspan></text>
+    <text x="1338" y="548" class="body" text-anchor="middle" fill="#122033"><tspan x="1338" dy="0">BLE 4.0 OBD-II adapter</tspan><tspan x="1338" dy="24">RPM, tốc độ, nhiên liệu, DTC</tspan><tspan x="1338" dy="24">IGN và trạng thái động cơ</tspan></text>
+  
+      
+    <rect x="1172" y="668" width="332" height="168" rx="26" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="1172" y="668" width="332" height="12" rx="26" fill="#1d4ed8" stroke="none"/>
+    <rect x="1190" y="688" width="90" height="34" rx="17" fill="rgba(29, 78, 216, 0.88)" stroke="rgba(29, 78, 216, 0.88)" stroke-width="2" /><text x="1235" y="711" class="chip" text-anchor="middle" fill="#fff">modem</text>
+    <text x="1338" y="732" class="card-title" text-anchor="middle" fill="#122033"><tspan x="1338" dy="0">SIM7600CE-T</tspan></text>
+    <text x="1338" y="776" class="body" text-anchor="middle" fill="#122033"><tspan x="1338" dy="0">LTE Cat-4 + GNSS tích hợp</tspan><tspan x="1338" dy="24">UART1: TX GPIO16 | RX GPIO17</tspan><tspan x="1338" dy="24">PWRKEY GPIO26, GNSS cùng một</tspan><tspan x="1338" dy="24">UART</tspan></text>
+  
+      
+  <rect x="92" y="730" width="982" height="150" rx="30" fill="#ffffff" stroke="rgba(15, 157, 118, 0.28)" stroke-width="3" />
+  <rect x="116" y="712" width="220" height="34" rx="17" fill="#0f9d76" stroke="#0f9d76" stroke-width="2" /><text x="226" y="735" class="chip" text-anchor="middle" fill="#fff">Chuỗi nguồn runtime</text>
+  <text x="120" y="764" class="small" text-anchor="start" fill="#122033"><tspan x="120" dy="0">Các rail nguồn được tách riêng để giảm nhiễu và tăng ổn định khi modem phát.</tspan></text>
+
+      
+    <rect x="132" y="776" width="166" height="74" rx="26" fill="#eef4ff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="132" y="776" width="166" height="12" rx="26" fill="#d9485f" stroke="none"/>
+    
+    <text x="215" y="818" class="card-title" text-anchor="middle" fill="#122033"><tspan x="215" dy="0">Ắc quy xe 12V</tspan><tspan x="215" dy="30">/ 24V</tspan></text>
+    
+  
+      
+    <rect x="324" y="776" width="160" height="74" rx="26" fill="#eef4ff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="324" y="776" width="160" height="12" rx="26" fill="#0f766e" stroke="none"/>
+    
+    <text x="404" y="818" class="card-title" text-anchor="middle" fill="#122033"><tspan x="404" dy="0">MP2482 -&gt; 5V</tspan><tspan x="404" dy="30">bus</tspan></text>
+    
+  
+      
+    <rect x="510" y="776" width="160" height="74" rx="26" fill="#eef4ff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="510" y="776" width="160" height="12" rx="26" fill="#0f9d76" stroke="none"/>
+    
+    <text x="590" y="818" class="card-title" text-anchor="middle" fill="#122033"><tspan x="590" dy="0">XL1509 -&gt; 3.3V</tspan></text>
+    
+  
+      
+    <rect x="696" y="776" width="160" height="74" rx="26" fill="#eef4ff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="696" y="776" width="160" height="12" rx="26" fill="#c97a10" stroke="none"/>
+    
+    <text x="776" y="818" class="card-title" text-anchor="middle" fill="#122033"><tspan x="776" dy="0">TPS54231 -&gt;</tspan><tspan x="776" dy="30">~4V</tspan></text>
+    
+  
+      
+    <rect x="882" y="776" width="152" height="74" rx="26" fill="#eef4ff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="882" y="776" width="152" height="12" rx="26" fill="#6d4fe0" stroke="none"/>
+    
+    <text x="958" y="818" class="card-title" text-anchor="middle" fill="#122033"><tspan x="958" dy="0">TP4056 + 21700</tspan><tspan x="958" dy="30">+ SX1308</tspan></text>
+    
+  
+      
+    <line x1="432" y1="332" x2="528" y2="332" stroke="#d9485f" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="402" y="272" width="88" height="54" rx="18" fill="#ffffff" stroke="rgba(217, 72, 95, 0.28)" stroke-width="2" /><text x="446" y="305" class="small" text-anchor="middle" fill="#122033"><tspan x="446" dy="0">ADC</tspan></text>
+  
+      
+    <line x1="432" y1="566" x2="528" y2="428" stroke="#0f766e" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="344" y="448" width="180" height="54" rx="18" fill="#ffffff" stroke="rgba(15, 118, 110, 0.28)" stroke-width="2" /><text x="434" y="481" class="small" text-anchor="middle" fill="#122033"><tspan x="434" dy="0">GPIO điều khiển</tspan></text>
+  
+      
+    <line x1="1074" y1="344" x2="1172" y2="296" stroke="#c97a10" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="1026" y="272" width="120" height="54" rx="18" fill="#ffffff" stroke="rgba(201, 122, 16, 0.28)" stroke-width="2" /><text x="1086" y="305" class="small" text-anchor="middle" fill="#122033"><tspan x="1086" dy="0">I2C + INT1</tspan></text>
+  
+      
+    <line x1="1074" y1="428" x2="1172" y2="516" stroke="#6d4fe0" stroke-width="4"  marker-end="url(#arrow-slate)"/>
+    <rect x="1032" y="450" width="120" height="54" rx="18" fill="#ffffff" stroke="rgba(109, 79, 224, 0.28)" stroke-width="2" /><text x="1092" y="483" class="small" text-anchor="middle" fill="#122033"><tspan x="1092" dy="0">BLE OBD-II</tspan></text>
+  
+      
+    <line x1="974" y1="492" x2="1172" y2="752" stroke="#1d4ed8" stroke-width="4"  marker-end="url(#arrow)"/>
+    <rect x="948" y="612" width="168" height="54" rx="18" fill="#ffffff" stroke="rgba(29, 78, 216, 0.28)" stroke-width="2" /><text x="1032" y="645" class="small" text-anchor="middle" fill="#122033"><tspan x="1032" dy="0">UART1 + PWRKEY</tspan></text>
+  
+      
+    <polyline points="298,813 324,813 484,813 510,813 670,813 696,813 856,813 882,813" fill="none" stroke="#0f9d76" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow-slate)"/>
+    <rect x="442" y="722" width="180" height="54" rx="18" fill="#ffffff" stroke="rgba(15, 157, 118, 0.28)" stroke-width="2" /><text x="532" y="755" class="small" text-anchor="middle" fill="#122033"><tspan x="532" dy="0">chuỗi cấp nguồn</tspan></text>
+  
+    
+</svg>

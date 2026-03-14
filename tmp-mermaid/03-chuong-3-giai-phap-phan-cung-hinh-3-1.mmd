@@ -1,0 +1,10 @@
+flowchart LR
+    Sense["Chia áp + ADC<br/>đo ắc quy 12V hoặc 24V"] --> MCU["ESP32-S3<br/>điều phối tracker"]
+    Power["Điều khiển nguồn<br/>GPIO5, GPIO18, GPIO19, GPIO26"] --> MCU
+    MCU --> IMU["LIS3DH IMU<br/>I2C GPIO47 và GPIO48<br/>INT1 GPIO21"]
+    MCU --> OBD["vgate iCar Pro<br/>BLE OBD2"]
+    MCU --> Modem["SIM7600CE-T<br/>UART1 GPIO16 và GPIO17<br/>PWRKEY GPIO26"]
+    Battery["Ắc quy xe<br/>12V hoặc 24V"] --> Buck["MP2482 5V"]
+    Buck --> Logic["XL1509 3.3V<br/>ESP32-S3, LIS3DH"]
+    Buck --> Rail4V["TPS54231 ~4V<br/>SIM7600CE-T"]
+    Buck --> Backup["TP4056 + pin 21700 + SX1308"]

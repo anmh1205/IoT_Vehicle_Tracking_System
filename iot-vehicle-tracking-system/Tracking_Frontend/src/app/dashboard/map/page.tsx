@@ -15,7 +15,7 @@ const MapPage = () => {
   useDevicePositions();
   useMapRealtime();
   return (
-    <section aria-label="Bản đồ theo dõi" className="h-[calc(100vh-4rem)] overflow-hidden">
+    <section aria-label="Bản đồ theo dõi" className="h-[calc(100dvh-4rem)] overflow-hidden">
       <div className="flex h-full">
         <div className="hidden md:block md:w-[320px] md:border-r">
           <DeviceListPanel />

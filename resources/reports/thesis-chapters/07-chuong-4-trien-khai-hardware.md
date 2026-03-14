@@ -10,49 +10,13 @@ Chương này trình bày chi tiết quá trình hiện thực phần cứng c�
 
 #### a) Kiến trúc tổng thể
 
-Hệ thống tracker lấy ESP32-S3 làm bộ xử lý trung tâm. Vi điều khiển này giao tiếp UART với modem 4G/GNSS, BLE với OBD2, I2C với cảm biến gia tốc và ADC để giám sát điện áp ắc quy. Toàn bộ hệ thống được cấp nguồn từ mạch quản lý nguồn thông minh, có khả năng tự động chuyển đổi giữa ắc quy xe và pin dự phòng.
+Hệ thống tracker lấy ESP32-S3 làm bộ xử lý trung tâm. Vi điều khiển này giao tiếp `UART1` với modem 4G/GNSS, `BLE` với adapter OBD2, `I2C` với cảm biến gia tốc trên `GPIO47/48`, và `ADC` để giám sát điện áp ắc quy. Toàn bộ hệ thống được cấp nguồn từ mạch quản lý nguồn có tách rail `3.3V` cho ESP32-S3, rail khoảng `4V` cho modem SIM7600CE-T và nhánh `5V` backup từ pin dự phòng `21700`.
 
-```text
-+-----------------------------------------------------------+
-|                    HỆ THỐNG TRACKER                       |
-+-----------------------------------------------------------+
-|                                                           |
-|  +--------------------------------------+                 |
-|  |  ESP32-S3 (Vi Điều Khiển Trung Tâm)  |                 |
-|  |  - CPU: Dual-core Xtensa LX7 240MHz  |                 |
-|  |  - RAM: 512 KB SRAM                   |                 |
-|  |  - Flash: 4–16 MB                     |                 |
-|  |  - BLE 5.0 tích hợp                   |                 |
-|  |  - ADC 12-bit, 20 kênh               |                 |
-|  +--------------------------------------+                 |
-|     |       |         |          |          |              |
-|    I2C     BLE      UART       GPIO       ADC             |
-|     |       |         |          |          |              |
-|  +-----+ +-----+ +----------+ +--------+ +--------+      |
-|  |LIS3DH| |OBD2 | |SIM7600CE-T | |Power   | |U_batt  |     |
-|  |(IMU) | |BLE  | |(4G+GNSS) | |MUX Ctrl| |Monitor |     |
-|  +------+ |vgate| +----------+ +--------+ +--------+      |
-|            |iCar |                                         |
-|            |Pro  |                                         |
-|            +-----+                                         |
-|                                                           |
-|  +---------------------------------------------+          |
-|  |    Hệ thống quản lý nguồn                    |          |
-|  |    - Buck MP2482 (7–40V -> 5V, tương thích 12V/24V) |          |
-|  |    - Boost SX1308 (3.7V -> 5V)              |          |
-|  |    - Power Path (Diode-OR + EN)             |          |
-|  |    - Charger TP4056 (sạc pin 21700)         |          |
-|  +---------------------------------------------+          |
-|          |                        |                        |
-|     Ắc quy xe 12V/24V      Pin 21700 3.7V 5Ah             |
-+-----------------------------------------------------------+
-```
-
-![Hình 4.1 - Sơ đồ khối tổng thể hệ thống tracker IoT](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–1.jpg)
+![Hình 4.1 - Sơ đồ khối tổng thể hệ thống tracker IoT](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-1.svg)
 
 *Hình 4.1: Sơ đồ khối tổng thể hệ thống tracker IoT*
 
-> Nguồn: Hình vẽ của tác giả
+> Nguồn: Hình dựng từ schematic phần cứng của tác giả
 
 #### b) Khối vi điều khiển và giao tiếp
 
@@ -74,26 +38,13 @@ Vi điều khiển ESP32-S3-WROOM-1 được lựa chọn làm nhân xử lý tr
 **Giao tiếp UART với modem SIMCom SIM7600CE-T:** ESP32-S3 sử dụng UART1 (GPIO16 TX, GPIO17 RX) để giao tiếp với module SIM7600CE-T, gửi AT commands (CEREG trước CGACT) và đọc GNSS/NMEA qua `AT+CGNSTST`. Baud mặc định 115200 bps, 8-bit, 1 stop, no parity. GNSS ON/OFF được điều khiển qua `AT+CGNSPWR`.
 **Giao tiếp BLE với OBD2 adapter:** ESP32-S3 sử dụng BLE 5.0 tích hợp để kết nối với adapter vgate iCar Pro (BLE 4.0). Kết nối này cho phép đọc dữ liệu chẩn đoán xe theo chuẩn OBD-II bao gồm trạng thái khóa điện (IGN), tốc độ động cơ (RPM), vận tốc xe, mức nhiên liệu và mã lỗi chẩn đoán (DTC).
 
-**Giao tiếp I2C với cảm biến LIS3DH:** Cảm biến gia tốc 3 trục LIS3DH được kết nối qua bus I2C (GPIO22 SDA, GPIO23 SCL). Cảm biến này đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang đỗ, cho phép đánh thức ESP32-S3 từ chế độ deep sleep thông qua ngắt ngoài (interrupt) khi phát hiện rung động bất thường.
+**Giao tiếp I2C với cảm biến LIS3DH:** Cảm biến gia tốc 3 trục LIS3DH được kết nối qua bus I2C (`GPIO47` SDA, `GPIO48` SCL). Cảm biến này đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang đỗ, cho phép đánh thức ESP32-S3 từ chế độ deep sleep thông qua ngắt ngoài `INT1` tại `GPIO21`.
 
-```text
-Sơ đồ kết nối UART giữa ESP32-S3 và SIMCom SIM7600CE-T:
-
-SIM7600CE-T Module       ESP32-S3
-+------------------+    +----------+
-| VCC  ------------+----+ 3.3V/5V  |
-| GND  ------------+----+ GND      |
-| UART_TX ---------+----+ GPIO17   | (UART RX)
-| UART_RX ---------+----+ GPIO16   | (UART TX)
-| PWRKEY ----------+----+ GPIO25   | (Power Control)
-+------------------+    +----------+
-```
-
-![Hình 4.2 - Sơ đồ kết nối giữa ESP32-S3 và SIMCom SIM7600CE-T qua UART](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–2.png)
+![Hình 4.2 - Sơ đồ kết nối giữa ESP32-S3 và SIMCom SIM7600CE-T qua UART](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-2.svg)
 
 *Hình 4.2: Sơ đồ kết nối giữa ESP32-S3 và modem SIMCom SIM7600CE-T qua UART*
 
-> Nguồn: Hình vẽ của tác giả
+> Nguồn: Hình dựng từ schematic phần cứng của tác giả
 
 #### c) Khối đo điện áp ắc quy
 
@@ -119,7 +70,7 @@ Giá trị ADC đọc được sẽ được chuyển đổi ngược thành đi
 - Profile 12V: Switch_OFF=12.0V, Switch_ON=12.2V, IGN_ON>=13.0V, IGN_OFF<=12.0V
 - Profile 24V: Switch_OFF=24.0V, Switch_ON=24.4V, IGN_ON>=26.0V, IGN_OFF<=24.0V
 
-![Hình 4.3 - Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–3.png)
+![Hình 4.3 - Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-3.svg)
 
 *Hình 4.3: Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3*
 
@@ -136,7 +87,7 @@ Sơ đồ nguyên lý tổng hợp của hệ thống bao gồm tất cả các 
 - **GPIO** (3 chân output): Điều khiển Power Path EN, Charger EN, Modem PWRKEY
 - **GPIO** (2 chân input): Đọc trạng thái LVD, ngắt từ IMU
 
-![Hình 4.4 - Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–4.png)
+![Hình 4.4 - Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-4.png)
 
 *Hình 4.4: Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker*
 
@@ -162,9 +113,9 @@ Việc phân công chân GPIO của ESP32-S3 được thiết kế đảm bảo 
 | GPIO 18   | POWER_PATH_EN | Output            | Điều phối nhánh nguồn runtime (LOW = ưu tiên MP2482, HIGH = ưu tiên SX1308)  |
 | GPIO 19   | LVD_STATUS    | Input             | Đọc trạng thái Low Voltage Disconnect (HIGH = low-voltage, LOW = bình thường) |
 | GPIO 21   | LIS3DH_INT    | Input (Interrupt) | Nhận tín hiệu ngắt từ cảm biến gia tốc LIS3DH khi phát hiện chuyển động      |
-| GPIO 22   | LIS3DH_SDA    | I/O (I2C)         | Đường dữ liệu I2C kết nối với cảm biến LIS3DH                                |
-| GPIO 23   | LIS3DH_SCL    | I/O (I2C)         | Đường xung nhịp I2C kết nối với cảm biến LIS3DH                              |
-| GPIO 25   | MODEM_PWRKEY  | Output            | Điều khiển bật/tắt nguồn modem SIMCom SIM7600CE-T (LTE + GNSS tích hợp)      |
+| GPIO 47   | LIS3DH_SDA    | I/O (I2C)         | Đường dữ liệu I2C kết nối với cảm biến LIS3DH                                |
+| GPIO 48   | LIS3DH_SCL    | I/O (I2C)         | Đường xung nhịp I2C kết nối với cảm biến LIS3DH                              |
+| GPIO 26   | MODEM_PWRKEY  | Output            | Điều khiển bật/tắt nguồn modem SIMCom SIM7600CE-T (LTE + GNSS tích hợp)      |
 
 #### b) Các lưu ý về phân công chân
 
@@ -176,41 +127,13 @@ Việc phân công chân GPIO cần tuân thủ một số ràng buộc kỹ thu
 
 #### c) Sơ đồ đấu nối tổng thể
 
-Sơ đồ đấu nối mô tả cách kết nối vật lý giữa ESP32-S3 DevKitC và các module ngoại vi trên breadboard hoặc PCB:
+Sơ đồ đấu nối mô tả cách kết nối vật lý giữa ESP32-S3 DevKitC và các module ngoại vi trên breadboard hoặc PCB. Hình 4.5 đã được chuẩn hóa theo pin mapping firmware hiện tại, trong đó `GPIO47/48` dành cho I2C IMU, `GPIO26` điều khiển `PWRKEY`, `GPIO19` nhận `LVD_STATUS`, và `GPIO4` đo `U_batt`.
 
-```text
-                    ESP32-S3 DevKitC-1
-                   +------------------+
-              3.3V |*                *| GND
-           GPIO  2 |* IGN_IN         *| GPIO 23 (I2C SCL -> LIS3DH)
-           GPIO  4 |* U_BATT_ADC     *| GPIO 22 (I2C SDA -> LIS3DH)
-           GPIO  5 |* CHARGER_EN     *| GPIO 21 (LIS3DH_INT)
-                   |*                *|
-           GPIO 16 |* MODEM_TX       *| GPIO 19 (LVD_STATUS)
-           GPIO 17 |* MODEM_RX       *| GPIO 18 (POWER_PATH_EN)
-                   |*                *|
-           GPIO 25 |* MODEM_PWRKEY   *|
-                   |*                *|
-               5V  |*                *| GND
-                   +------------------+
-
-Kết nối ngoại vi:
-  GPIO 16/17 ---[UART1]--> SIMCom SIM7600CE-T (LTE + GNSS)
-  GPIO 22/23 ---[I2C]----> LIS3DH (IMU)
-  GPIO 21    ---[INT]----> LIS3DH INT1
-  BLE (nội)  ---[BLE]----> vgate iCar Pro (OBD2)
-  GPIO 4     ---[ADC]----> Voltage Divider (R1=100k, R2=10k) <--- U_batt
-  GPIO 5     ---[GPIO]---> TP4056 EN (Charger)
-  GPIO 18    ---[GPIO]---> Power Path EN (Diode-OR runtime)
-  GPIO 19    <--[GPIO]---- LVD Status (HIGH = low-voltage)
-  GPIO 25    ---[GPIO]---> SIM7600CE-T PWRKEY
-```
-
-![Hình 4.5 - Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các module ngoại vi](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–5.png)
+![Hình 4.5 - Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các module ngoại vi](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-5.svg)
 
 *Hình 4.5: Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các module ngoại vi*
 
-> Nguồn: Hình vẽ của tác giả
+> Nguồn: Hình dựng minh họa bởi tác giả, bám theo schematic và `pin_map.h`
 
 ---
 
@@ -218,56 +141,13 @@ Kết nối ngoại vi:
 
 #### a) Tổng quan kiến trúc nguồn
 
-Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tracker, bảo đảm thiết bị hoạt động liên tục ngay cả khi ắc quy xe yếu hoặc mất điện. Kiến trúc nguồn gồm năm khối chức năng chính:
+Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tracker, bảo đảm thiết bị hoạt động liên tục ngay cả khi ắc quy xe yếu hoặc mất điện. Kiến trúc nguồn hiện tại gồm sáu khối chính: `MP2482` tạo bus `5V`, `XL1509 3.3E` cấp riêng cho ESP32-S3, `TPS54231` tạo rail khoảng `4V` cho SIM7600CE-T, `SX1308` tạo `5V backup` từ pin `21700`, nhánh sạc `TP4056 + BMS 1S`, và khối giám sát nguồn `ADC + LM393`.
 
-1. **Mạch giảm áp Buck (MP2482):** Chuyển đổi điện áp ắc quy xe (12V hoặc 24V) xuống 5V
-2. **Mạch tăng áp Boost (SX1308):** Chuyển đổi 3.7V từ pin dự phòng lên 5V
-3. **Đường nguồn Power Path (Diode-OR + EN):** Duy trì cấp nguồn liên tục giữa hai nhánh
-4. **Mạch sạc pin TP4056:** Sạc pin Li-ion 21700 khi xe hoạt động
-5. **Mạch giám sát điện áp LVD:** Giám sát điện áp ắc quy để quyết định chuyển nguồn
-
-```text
-+-----------------------------------------------------------+
-|                  KIẾN TRÚC NGUỒN                          |
-+-----------------------------------------------------------+
-|                                                           |
-|  Ắc Quy Xe (12V/24V)        Pin 21700 (3.7V, 5Ah)        |
-|       |                           |                       |
-|  +----v----+                +----v----+                   |
-|  | MP2482  |                | SX1308  |                   |
-|  | Buck    |                | Boost   |                   |
-|  | 7–40V->5V|               | 3.7V->5V|                   |
-|  +----+----+                +----+----+                   |
-|       |                          |                        |
-|       +----------+---------------+                        |
-|                  |                                        |
-|         +--------v--------+                               |
-|         |   Power Path    |                               |
-|         | (Diode-OR + EN) |                               |
-|         +--------+--------+                               |
-|                  |                                        |
-|         +--------v--------+                               |
-|         |    5V Rail       |                               |
-|         +---+------+------+---+                           |
-|             |      |      |   |                           |
-|          +--v-+ +--v--+ +--v-+                            |
-|          |LDO | |LTE/ | |TP4056                           |
-|          |3.3V| |GNSS | |Charger                          |
-|          |    | |SIM7600CE-T                              |
-|          +-+--+ +-----+ +--+--+                           |
-|            |                |                             |
-|         +--v--+          +--v--+                           |
-|         |ESP32|          | Pin |                           |
-|         +-----+          |21700|                           |
-|                          +-----+                          |
-+-----------------------------------------------------------+
-```
-
-![Hình 4.6 - Kiến trúc tổng thể mạch quản lý nguồn](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–6.jpg)
+![Hình 4.6 - Kiến trúc tổng thể mạch quản lý nguồn](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-6.svg)
 
 *Hình 4.6: Kiến trúc tổng thể mạch quản lý nguồn*
 
-> Nguồn: Hình vẽ của tác giả
+> Nguồn: Hình dựng minh họa bởi tác giả, bám theo `block-diagram.png` và schematic nguồn
 
 #### b) Mạch giảm áp Buck Converter (12V/24V -> 5V)
 
@@ -288,15 +168,7 @@ Mạch buck converter sử dụng IC MP2482–5.0 (phiên bản cố định 5V)
 | Tụ ra C2        | 220 uF, 16V                    | Electrolytic             |
 | Diode D1        | 1N5822 (Schottky, 3A, 40V)     | Freewheeling diode       |
 
-Sơ đồ mạch:
-
-```text
-Vin (12V/24V) --+-- C1 (100uF/50V) --+-- MP2482 --+-- L1 (100uH) --+-- 5V Output
-            |                     |             |                 |
-            +-- GND               +-- GND       +-- D1 (1N5822)--+
-                                                     |
-                                                     +-- C2 (220uF/16V) — GND
-```
+Sơ đồ nguyên lý chi tiết của nhánh buck được thể hiện tại Hình 4.7, trong đó `MP2482`, cuộn cảm `100 uH`, diode Schottky `1N5822` và các tụ lọc vào/ra được bố trí theo đúng cấu hình nguồn đang dùng trên prototype.
 
 **Tính toán chu kỳ nhiệm vụ (Duty Cycle):**
 
@@ -315,7 +187,7 @@ P_loss = (1 - hiệu_suất) x P_out
 
 Với tổn hao nhiệt 2.25W ở công suất tối đa, IC MP2482 cần được gắn tản nhiệt (heatsink) để đảm bảo nhiệt độ hoạt động trong giới hạn cho phép.
 
-![Hình 4.7 - Sơ đồ nguyên lý mạch Buck Converter MP2482](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–7.png)
+![Hình 4.7 - Sơ đồ nguyên lý mạch Buck Converter MP2482](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-7.svg)
 
 *Hình 4.7: Sơ đồ nguyên lý mạch Buck Converter MP2482*
 
@@ -349,7 +221,7 @@ I_in = I_out x (V_out / V_in) / hiệu_suất
 
 Kết quả cho thấy pin 21700 cần cung cấp dòng tối đa 3.18A khi đầu ra tải 2A. Với dung lượng 5000 mAh và khả năng xả dòng cao, mức dòng này vẫn nằm trong phạm vi hoạt động an toàn.
 
-![Hình 4.8 - Sơ đồ nguyên lý mạch Boost Converter SX1308](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–8.jpg)
+![Hình 4.8 - Sơ đồ nguyên lý mạch Boost Converter SX1308](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-8.svg)
 
 *Hình 4.8: Sơ đồ nguyên lý mạch Boost Converter SX1308*
 
@@ -357,17 +229,7 @@ Kết quả cho thấy pin 21700 cần cung cấp dòng tối đa 3.18A khi đ�
 
 #### d) Mạch chuyển mạch nguồn Power Path (Diode-OR + EN)
 
-Đường nguồn runtime sử dụng kiến trúc **Diode-OR + EN** để duy trì cấp nguồn liên tục giữa nhánh chính và nhánh dự phòng, đồng thời cho phép firmware điều phối sạc/chuyển trạng thái theo profile 12V/24V.
-
-```text
-Buck 5V (MP2482)  --|<|--+
-                     D1   |
-                          +---- 5V Rail ----> tải hệ thống
-                     D2   |
-Boost 5V (SX1308)  --|<|--+
-
-GPIO18/GPIO5 dùng để điều phối enable path (power path + charger EN) theo logic firmware.
-```
+Đường nguồn runtime sử dụng kiến trúc **Diode-OR + EN** để duy trì cấp nguồn liên tục giữa nhánh chính và nhánh dự phòng, đồng thời cho phép firmware điều phối sạc và chuyển trạng thái theo profile 12V/24V. `GPIO18` chọn power-path, `GPIO5` bật/tắt sạc, còn hai nhánh `MP2482` và `SX1308` cùng hội tụ về bus nguồn trước khi cấp ra các rail chức năng.
 
 - D1, D2 dùng diode Schottky để OR hai nguồn 5V, tránh backfeed giữa hai nhánh.
 - Khi U_batt thấp hơn ngưỡng Switch_OFF, firmware ưu tiên nhánh backup (SX1308) và tắt sạc.
@@ -386,11 +248,11 @@ GPIO18/GPIO5 dùng để điều phối enable path (power path + charger EN) th
 
 Cơ chế hysteresis theo profile (12V: 12.0V OFF, 12.2V ON; 24V: 24.0V OFF, 24.4V ON) được áp dụng để tránh hiện tượng dao động liên tục khi điện áp ắc quy nằm gần ngưỡng chuyển đổi.
 
-![Hình 4.9 - Sơ đồ mạch Power Path và logic chuyển nguồn tự động](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–9.png)
+![Hình 4.9 - Sơ đồ mạch Power Path và logic chuyển nguồn tự động](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-9.svg)
 
 *Hình 4.9: Sơ đồ mạch Power Path và logic chuyển nguồn tự động*
 
-> Nguồn: Hình vẽ của tác giả
+> Nguồn: Hình dựng minh họa bởi tác giả
 
 #### e) Mạch sạc pin TP4056
 
@@ -408,15 +270,7 @@ IC sạc TP4056 (Injoinic) được sử dụng để sạc pin Li-ion 21700 khi
 | Bảo vệ            | Quá dòng, quá nhiệt, ngược cực, tự ngắt khi đầy |
 | Thời gian sạc đầy | ~2–2.5 giờ (pin 5000 mAh)                       |
 
-Sơ đồ kết nối:
-
-```text
-5V Rail --+-- TP4056 Module --+-- BMS/Protection Board --+-- Pin 21700
-          |                   |                           |
-          +-- GND             +-- GND                     +-- GND
-
-ESP32 GPIO5 — R (10k) — TP4056 EN Pin
-```
+Sơ đồ kết nối được chuẩn hóa theo luồng `5V bus -> TP4056 -> BMS 1S -> pin 21700`, trong đó `GPIO5` điều khiển chân enable của khối sạc qua điện trở hạn dòng để chỉ bật sạc ở các trạng thái nguồn hợp lệ.
 
 **Điều kiện sạc được điều khiển bởi firmware:**
 
@@ -426,23 +280,20 @@ ESP32 GPIO5 — R (10k) — TP4056 EN Pin
 
 **Bảo vệ pin:** Board bảo vệ BMS 1S 3A được sử dụng kèm với pin 21700, cung cấp các chức năng bảo vệ quá xả (< 2.5V), quá sạc (> 4.25V), ngắn mạch và giới hạn dòng xả tối đa 3A.
 
-![Hình 4.10 - Sơ đồ mạch sạc TP4056 và bảo vệ pin 21700](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–10.jpg)
+![Hình 4.10 - Sơ đồ mạch sạc TP4056 và bảo vệ pin 21700](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-10.svg)
 
 *Hình 4.10: Sơ đồ mạch sạc TP4056 và bảo vệ pin 21700*
 
-> Nguồn: Hình vẽ của tác giả
+> Nguồn: Hình dựng minh họa bởi tác giả
 
 #### f) Mạch giám sát điện áp Low Voltage Disconnect (LVD)
 
-Hệ thống sử dụng phương pháp giám sát điện áp bằng phần mềm (Software-based) thông qua ADC của ESP32-S3, kết hợp với mạch chia áp (voltage divider) R1 = 100 kΩ, R2 = 10 kΩ.
+Hệ thống sử dụng phương pháp giám sát điện áp kết hợp giữa `ADC ESP32-S3` và `comparator LM393`. ADC đọc giá trị analog qua cầu phân áp `R1 = 100 kΩ`, `R2 = 10 kΩ`, còn `LM393` đưa cờ trạng thái `LVD_STATUS` về `GPIO19` để firmware phản ứng nhanh khi điện áp tụt xuống dưới ngưỡng profile.
 
-Phương pháp này được lựa chọn vì các ưu điểm:
-- Không cần linh kiện ngoài bổ sung (sử dụng ADC có sẵn của ESP32)
-- Linh hoạt trong việc điều chỉnh ngưỡng trong firmware
-- Dễ triển khai hysteresis bằng phần mềm
-- Đủ độ chính xác cho ứng dụng này (ADC 12-bit)
-
-Ngoài ra, hệ thống cũng hỗ trợ tùy chọn bổ sung một comparator LM393 (hardware-based) kết nối với GPIO19 để cung cấp kiểm tra nhanh trạng thái nguồn như một lớp dự phòng (backup) cho ADC.
+Tổ hợp này được lựa chọn vì các ưu điểm:
+- Vẫn giữ được số đo điện áp liên tục để phân loại profile 12V/24V và tính hysteresis
+- Có tín hiệu trạng thái tức thời để phục vụ state machine khi low-voltage xuất hiện
+- Tận dụng được cả phần cứng hiện có trong schematic lẫn logic ngưỡng trong firmware
 
 ---
 
@@ -459,35 +310,13 @@ Vỏ hộp bảo vệ cần đáp ứng các yêu cầu sau:
 
 #### b) Bố cục bên trong
 
-Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân vùng chức năng:
+Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân vùng chức năng, ưu tiên tách khu vực modem và anten khỏi khối nguồn xung, đồng thời chừa không gian riêng cho pin `21700`, mạch sạc `TP4056 + BMS` và các đầu nối `OBD2 / USB debug / khe SIM`.
 
-```text
-+--------------------------------------------------+
-|                  VỎ HỘP BẢO VỆ                   |
-|  +----------+  +----------+  +----------+        |
-|  |  ESP32   |  | SIM7600CE-T |  |  TP4056  |        |
-|  |  S3      |  | LTE/GNSS    |  |  Charger |        |
-|  |  DevKit  |  | tích hợp     |  |  + BMS   |        |
-|  +----------+  +----------+  +----------+        |
-|                                                  |
-|  +----------+  +----------+  +----------+        |
-|  |  MP2482  |  |  SX1308  |  | Diode-OR |        |
-|  |  Buck    |  |  Boost   |  | + EN     |        |
-|  +----------+  +----------+  +----------+        |
-|                                                  |
-|  +----------------------------------------------+|
-|  |  Pin 21700 + Giá đỡ pin                      ||
-|  +----------------------------------------------+|
-|                                                  |
-|  [Anten 4G/LTE]  [Anten GNSS]  [Cổng OBD2]     |
-+--------------------------------------------------+
-```
-
-![Hình 4.11 - Sơ đồ bố cục bên trong vỏ hộp bảo vệ](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–11.png)
+![Hình 4.11 - Sơ đồ bố cục bên trong vỏ hộp bảo vệ](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-11.svg)
 
 *Hình 4.11: Sơ đồ bố cục bên trong vỏ hộp bảo vệ*
 
-> Nguồn: Hình vẽ của tác giả
+> Nguồn: Hình dựng minh họa bởi tác giả
 
 #### c) Các lưu ý thiết kế
 
@@ -518,7 +347,7 @@ Các nội dung triển khai chi tiết ở tầng phần mềm được trình 
 | STT | Thành phần                     | Đơn vị | SL  | Giá ước tính (VND) | Ghi chú                                    |
 | --- | ------------------------------ | ------ | --- | ------------------ | ------------------------------------------ |
 | 1   | ESP32-S3 DevKitC-1             | Cái    | 1   | 100,000–200,000    | Module ESP32-S3-WROOM-1, 4MB Flash trở lên |
-| 2   | LIS3DH Breakout Board          | Cái    | 1   | 20,000–50,000      | Cảm biến gia tốc 3 trục, giao tiếp I2C     |
+| 2   | Module cảm biến LIS3DH         | Cái    | 1   | 20,000–50,000      | Cảm biến gia tốc 3 trục, giao tiếp I2C     |
 | 3   | vgate iCar Pro (OBD2 BLE)      | Cái    | 1   | 150,000–300,000    | Adapter OBD2 BLE 4.0, tương thích ESP32-S3 |
 | 4   | SIMCom SIM7600CE-T | Cái    | 1   | 330,000–500,000    | Modem LTE Cat-4 + GNSS tích hợp, anten và khe SIM |
 | 5   | Pin 21700 Li-ion 5000mAh       | Cái    | 1   | 100,000–200,000    | Loại có protection board                   |
@@ -557,23 +386,23 @@ Quy trình lắp ráp mạch điện tử được triển khai theo các bướ
 
 **Bước 3 - Kết nối vi điều khiển:** Gắn ESP32-S3 DevKitC lên breadboard hoặc PCB. Kết nối các chân GPIO theo bảng phân công (Bảng 4.1). Kết nối nguồn 5V từ Power Path đến chân VIN của ESP32-S3 (qua LDO nội bộ xuống 3.3V).
 
-**Bước 4 - Kết nối ngoại vi:** Kết nối modem SIM7600CE-T qua UART1 (GPIO16, GPIO17) và điều khiển PWRKEY qua GPIO25, kết nối cảm biến LIS3DH qua I2C (GPIO22, GPIO23), và kết nối mạch đo điện áp ắc quy (voltage divider) vào GPIO4 (ADC).
+**Bước 4 - Kết nối ngoại vi:** Kết nối modem SIM7600CE-T qua UART1 (GPIO16, GPIO17) và điều khiển PWRKEY qua GPIO26, kết nối cảm biến LIS3DH qua I2C (GPIO47, GPIO48), và kết nối mạch đo điện áp ắc quy (voltage divider) vào GPIO4 (ADC).
 
 **Bước 5 - Kiểm tra tích hợp:** Nạp firmware cơ bản để kiểm tra từng chức năng: đọc ADC, điều khiển GPIO, giao tiếp UART với modem, quét BLE, đọc I2C từ LIS3DH. Kiểm tra chuyển nguồn tự động bằng cách thay đổi điện áp đầu vào.
 
 **Bước 6 - Lắp ráp vào vỏ:** Định vị các module bên trong vỏ hộp theo bố cục đã thiết kế. Cố định bằng ốc vít hoặc keo nhiệt. Kết nối anten 4G/LTE và GNSS. Đóng nắp vỏ hộp và kiểm tra tổng thể.
 
-![Hình 4.12 - Các bước lắp ráp mạch điện tử trên breadboard (prototype)](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–12.png)
+![Hình 4.12 - Quy trình lắp ráp prototype phần cứng](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-12.svg)
 
-*Hình 4.12: Các bước lắp ráp mạch điện tử trên breadboard (prototype)*
+*Hình 4.12: Quy trình lắp ráp prototype phần cứng*
 
-> Nguồn: Hình chụp từ hệ thống thực tế (thiết bị prototype)
+> Nguồn: Hình dựng minh họa bởi tác giả, bám theo quy trình lắp ráp thực tế
 
-![Hình 4.13 - Mạch điện tử hoàn chỉnh sau khi lắp ráp](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–13.png)
+![Hình 4.13 - Sơ đồ bố trí module sau khi lắp ráp](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-13.svg)
 
-*Hình 4.13: Mạch điện tử hoàn chỉnh sau khi lắp ráp*
+*Hình 4.13: Sơ đồ bố trí module sau khi lắp ráp*
 
-> Nguồn: Hình chụp từ hệ thống thực tế (thiết bị prototype)
+> Nguồn: Hình dựng minh họa bởi tác giả, bám theo bố cục prototype
 
 #### c) Kiểm tra và hiệu chuẩn
 
@@ -598,22 +427,11 @@ Thiết bị tracker được lắp đặt tại một trong các vị trí sau 
 
 #### b) Kết nối với cổng OBD2
 
-Cổng OBD2 (16 chân) cung cấp cả nguồn điện và giao tiếp chẩn đoán:
-
-```text
-Cổng OBD2 (16 chân):
-
-Chân 16: Nguồn Battery Power (+12V hoặc +24V tùy hệ xe) ---> Đầu vào mạch Buck MP2482
-Chân 4:  GND (Chassis Ground)           ---> GND chung hệ thống
-Chân 5:  GND (Signal Ground)            ---> GND chung hệ thống
-
-(Kết nối OBD2 Data thông qua BLE với adapter vgate iCar Pro
- cắm trực tiếp vào cổng OBD2 của xe)
-```
+Cổng OBD2 (16 chân) cung cấp cả nguồn điện và giao tiếp chẩn đoán. Trong cấu hình hiện tại, tracker chỉ lấy `Battery Power` ở chân `16` và mass tại chân `4/5`, còn dữ liệu OBD2 đi qua adapter `vgate iCar Pro` cắm trực tiếp vào cổng xe rồi truyền không dây về ESP32-S3 qua BLE.
 
 **Lưu ý:** Adapter vgate iCar Pro được cắm trực tiếp vào cổng OBD2 của xe. ESP32-S3 giao tiếp với adapter này qua BLE, không cần kết nối dây vật lý cho phần dữ liệu OBD2. Chỉ có nguồn điện từ ắc quy xe (12V hoặc 24V) và GND được lấy từ cổng OBD2 thông qua dây nối riêng.
 
-![Hình 4.14 - Minh họa vị trí cổng OBD2 trên xe và cách kết nối](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–14.png)
+![Hình 4.14 - Minh họa vị trí cổng OBD2 trên xe và cách kết nối](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-14.svg)
 
 *Hình 4.14: Minh họa vị trí cổng OBD2 trên xe và cách kết nối*
 
@@ -633,11 +451,11 @@ Chân 5:  GND (Signal Ground)            ---> GND chung hệ thống
 - **Chống nhiễu EMI:** Dây tín hiệu UART (từ ESP32 đến modem) được sử dụng loại cáp xoắn đôi (twisted pair) hoặc cáp có bọc chống nhiễu. Dây nguồn và dây tín hiệu được đi riêng, không chạy song song để giảm nhiễu điện từ từ hệ thống điện của xe.
 - **Chống ẩm:** Các mối nối điện được bọc bằng keo nhiệt hoặc ống co nhiệt (heat shrink tube) để chống ẩm và chống oxy hóa trong môi trường xe.
 
-![Hình 4.15 - Minh họa lắp đặt thiết bị tracker trong xe và đi dây](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–15.jpg)
+![Hình 4.15 - Minh họa lắp đặt thiết bị tracker trong xe và đi dây](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-15.svg)
 
 *Hình 4.15: Minh họa lắp đặt thiết bị tracker trong xe và đi dây*
 
-> Nguồn: Hình chụp từ hệ thống thực tế (lắp đặt trong xe)
+> Nguồn: Hình dựng minh họa bởi tác giả, bám theo phương án lắp đặt đề xuất
 
 #### e) Kiểm tra sau lắp đặt
 
@@ -650,11 +468,11 @@ Sau khi lắp đặt xong, cần thực hiện các kiểm tra sau:
 5. **Kiểm tra chuyển nguồn:** Tắt máy xe (IGN OFF), xác nhận thiết bị chuyển sang chế độ tiết kiệm năng lượng và sử dụng pin dự phòng khi cần
 6. **Kiểm tra deep sleep:** Xác nhận ESP32-S3 vào chế độ deep sleep khi xe đỗ, và đánh thức đúng khi phát hiện rung động (qua LIS3DH) hoặc đến chu kỳ heartbeat
 
-![Hình 4.16 - Kết quả kiểm tra hệ thống sau khi lắp đặt trong xe](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4–16.png)
+![Hình 4.16 - Checklist kiểm tra hệ thống sau khi lắp đặt trong xe](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-16.svg)
 
-*Hình 4.16: Kết quả kiểm tra hệ thống sau khi lắp đặt trong xe*
+*Hình 4.16: Checklist kiểm tra hệ thống sau khi lắp đặt trong xe*
 
-> Nguồn: Hình chụp từ hệ thống thực tế (kết quả kiểm tra)
+> Nguồn: Hình dựng minh họa bởi tác giả, bám theo quy trình kiểm tra sau lắp đặt
 
 ---
 

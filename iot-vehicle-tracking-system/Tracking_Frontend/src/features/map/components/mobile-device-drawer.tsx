@@ -44,7 +44,7 @@ export const MobileDeviceDrawer = () => {
     <>
       <Button
         size="sm"
-        className="absolute left-3 top-3 z-[900] md:hidden"
+        className="absolute left-3 top-3 z-[900] h-11 md:hidden"
         onClick={() => setOpen(true)}
       >
         <List className="mr-2 h-4 w-4" />

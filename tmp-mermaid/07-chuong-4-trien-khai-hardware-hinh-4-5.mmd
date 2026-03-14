@@ -1,0 +1,7 @@
+flowchart LR
+    Batt["Voltage divider<br/>GPIO4 ADC"] --> MCU["ESP32-S3"]
+    Power["GPIO5 CHARGER_EN<br/>GPIO18 POWER_PATH_EN<br/>GPIO19 LVD_STATUS"] --> MCU
+    MCU --> Sim["SIM7600CE-T<br/>UART1 GPIO16 / GPIO17<br/>PWRKEY GPIO26"]
+    MCU --> Imu["LIS3DH<br/>GPIO47 / GPIO48<br/>INT1 GPIO21"]
+    MCU --> Obd["vgate iCar Pro<br/>BLE OBD-II"]
+    MCU --> Note["Log / MQTT / state machine"]

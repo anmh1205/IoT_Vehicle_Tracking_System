@@ -11,7 +11,7 @@ SIM7600CE-T là lựa chọn runtime duy nhất cho tracker: **LTE Cat-4** + **G
 3. `AT+CNMP=2` → bật **Auto mode** để module tự chọn giữa LTE / UMTS / GSM.
 4. `AT+CMEE=2` → bật báo lỗi chi tiết (hữu ích cho debugging).
 5. `AT+CSQ` / `AT+COPS?` → kiểm tra chất lượng và nhà mạng.
-6. Nếu không phản hồi → reset qua PWRKEY pulse (GPIO25) và chờ ~10–30 giây để boot lại.
+6. Nếu không phản hồi → reset qua PWRKEY pulse (GPIO26) và chờ ~10–30 giây để boot lại.
 
 > `Auto mode` giữ firmware đơn giản: không cần xử lý riêng các band, module sẽ đăng ký mạng khả dụng mà vẫn hỗ trợ fallback GSM.
 
