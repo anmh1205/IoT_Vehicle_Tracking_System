@@ -1,16 +1,33 @@
 'use client';
+
 import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/lib/stores/auth-store';
-import { authServices } from '@/lib/api/auth';
+import { usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { authServices } from '@/lib/api/auth';
+import { useAuthStore } from '@/lib/stores/auth-store';
+
 export const SessionGuard = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, setAuth, clearAuth, isLoading, setLoading } = useAuthStore();
   const [checked, setChecked] = useState(false);
+  const pathname = usePathname();
+  const isPublicLandingRoute = pathname === '/';
+
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isPublicLandingRoute) {
+      setLoading(false);
       setChecked(true);
       return;
     }
+
+    if (isAuthenticated) {
+      setLoading(false);
+      setChecked(true);
+      return;
+    }
+
+    setChecked(false);
+    setLoading(true);
+
     authServices
       .getMe()
       .then((data) => {
@@ -33,7 +50,12 @@ export const SessionGuard = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         setChecked(true);
       });
-  }, [isAuthenticated, setAuth, clearAuth, setLoading]);
+  }, [clearAuth, isAuthenticated, isPublicLandingRoute, setAuth, setLoading]);
+
+  if (isPublicLandingRoute) {
+    return <>{children}</>;
+  }
+
   if (!checked || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -41,5 +63,6 @@ export const SessionGuard = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
+
   return <>{children}</>;
 };
