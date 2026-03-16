@@ -18,11 +18,11 @@ Hệ thống tracker được tổ chức theo kiến trúc module với năm kh
 
 > Nguồn: Hình dựng từ schematic phần cứng của tác giả
 
-![Hình 3.1a - Trích sơ đồ nguyên lý tổng thể của tracker](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-01.png)
+![Hình 3.1a - Phân rã chi tiết các khối chức năng của tracker](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-01.svg)
 
-*Hình 3.1a: Trích sơ đồ nguyên lý tổng thể của tracker*
+*Hình 3.1a: Phân rã chi tiết các khối chức năng của tracker*
 
-> Nguồn: Trích schematic phần cứng do tác giả thiết kế
+> Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
 Hệ thống vận hành theo ba chế độ chính: (1) chế độ lái xe — khi động cơ bật (IGN ON), các module cần thiết được kích hoạt; (2) chế độ đỗ xe — khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ IMU LIS3DH duy trì giám sát chuyển động; (3) chế độ cảnh báo — khi IMU ghi nhận chuyển động bất thường, hệ thống tự đánh thức và gửi cảnh báo qua 4G.
 
@@ -150,11 +150,11 @@ Vấn đề cốt lõi của tracker không chỉ là modem có lên mạng đư
 | Đồng bộ GNSS | Bật GNSS bằng `AT+CGNSPWR=1` và đọc dữ liệu bằng `AT+CGNSINF`; `AT+CGNSTST` chỉ dùng khi cần stream NMEA để debug |
 | Ý nghĩa tích hợp | Giảm số module phần cứng, thống nhất luồng AT trên một UART và loại bỏ nhu cầu UART riêng cho GNSS |
 
-![Hình 3.2a - Trích schematic khối SIM7600CE-T và các chân điều khiển](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-08.png)
+![Hình 3.2a - Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-08.svg)
 
-*Hình 3.2a: Trích schematic khối SIM7600CE-T và các chân điều khiển*
+*Hình 3.2a: Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3*
 
-> Nguồn: Trích schematic phần cứng do tác giả thiết kế
+> Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
 ## 3.2. Đề xuất các giải pháp – Proposed multiple solutions
 
@@ -250,11 +250,11 @@ Ngưỡng gia tốc 0.2g được chọn để cân bằng giữa độ nhạy v
 
 > Nguồn: Hình dựng từ schematic phần cứng của tác giả
 
-![Hình 3.3a - Trích schematic khối IMU LIS3DH](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-02.png)
+![Hình 3.3a - Sơ đồ chi tiết chân kết nối LIS3DH với ESP32-S3](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-02.svg)
 
-*Hình 3.3a: Trích schematic khối IMU LIS3DH*
+*Hình 3.3a: Sơ đồ chi tiết chân kết nối LIS3DH với ESP32-S3*
 
-> Nguồn: Trích schematic phần cứng do tác giả thiết kế
+> Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
 Cấu hình I2C sử dụng địa chỉ `0x18`, tốc độ `400 kHz`, với hai điện trở kéo lên `10 kΩ` trên các net `IMU-SCL` và `IMU-SDA`. Ở runtime hiện tại, bus I2C được ánh xạ về `GPIO48` (SCL) và `GPIO47` (SDA), chân `INT1` đi vào `GPIO21` để đánh thức ESP32-S3, còn `INT2` được giữ lại cho mở rộng sau này.
 
@@ -274,11 +274,11 @@ Hệ thống quản lý nguồn là khối phức tạp nhất trong thiết k�
 
 > Nguồn: Hình dựng từ schematic phần cứng của tác giả
 
-![Hình 3.4a - Trích schematic khối nguồn và phân phối điện áp](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-03.png)
+![Hình 3.4a - Kiến trúc nguồn và phân phối điện áp trong hệ thống](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-03.svg)
 
-*Hình 3.4a: Trích schematic khối nguồn và phân phối điện áp*
+*Hình 3.4a: Kiến trúc nguồn và phân phối điện áp trong hệ thống*
 
-> Nguồn: Trích schematic phần cứng do tác giả thiết kế
+> Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
 Khác với revision minh họa cũ chỉ dùng bus 5V chung, kiến trúc phần cứng hiện tại tách riêng `XL1509 3.3E` cho tải logic của ESP32-S3, `TPS54231` cho rail modem khoảng `4V`, `MP2482` cho bus 5V chính, `SX1308` cho nhánh 5V backup từ pin `21700`, và `TP4056` cho nhánh sạc 1 cell.
 

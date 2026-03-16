@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 
 import type { Response } from 'express';
 import { firmwareConfig } from '@/config/env';
@@ -12,6 +13,28 @@ import * as firmwareUploadService from '@/domain/firmware/services/firmware-uplo
 import * as firmwareActivateService from '@/domain/firmware/services/firmware-activate.service';
 import * as firmwareDeleteService from '@/domain/firmware/services/firmware-delete.service';
 import * as firmwareDeployService from '@/domain/firmware/services/firmware-deploy.service';
+
+type FirmwareUploadRequest = AuthenticatedRequest & {
+  file?: Express.Multer.File;
+};
+
+const computeSha256 = async (filePath: string): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = fs.createReadStream(filePath);
+
+    stream.on('data', (chunk) => hash.update(chunk));
+    stream.on('end', () => resolve(hash.digest('hex')));
+    stream.on('error', reject);
+  });
+
+const removeArtifactIfExists = async (filePath: string | undefined) => {
+  if (!filePath || !fs.existsSync(filePath)) {
+    return;
+  }
+
+  await fs.promises.unlink(filePath);
+};
 
 export const listFirmware = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const query = {
@@ -56,7 +79,40 @@ export const createFirmware = asyncHandler(async (req: AuthenticatedRequest, res
   sendCreated(res, firmware);
 });
 
-export const uploadFirmware = createFirmware;
+export const uploadFirmware = asyncHandler(async (req: FirmwareUploadRequest, res: Response) => {
+  const version = String(req.body?.version ?? '').trim();
+  const description =
+    req.body?.description !== undefined ? String(req.body.description).trim() : undefined;
+  const file = req.file;
+
+  if (!version) {
+    await removeArtifactIfExists(file?.path);
+    throw createValidationError('Missing required field: version');
+  }
+
+  if (!file) {
+    throw createValidationError('Missing required field: file');
+  }
+
+  const resolvedFilePath = path.resolve(file.path);
+  const filename = String(file.originalname || file.filename);
+  const sha256 = await computeSha256(resolvedFilePath);
+
+  try {
+    const firmware = await firmwareUploadService.createFirmware({
+      version,
+      filename,
+      filePath: resolvedFilePath,
+      size: file.size,
+      sha256,
+      description,
+    });
+    sendCreated(res, firmware);
+  } catch (error) {
+    await removeArtifactIfExists(resolvedFilePath);
+    throw error;
+  }
+});
 
 export const deleteFirmware = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const id = Number.parseInt(req.params.id, 10);

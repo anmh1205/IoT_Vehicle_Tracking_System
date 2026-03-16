@@ -1,4 +1,5 @@
 'use client';
+
 import { useMemo, useState } from 'react';
 import { Download, TimerReset, TrendingUp, Gauge, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,9 +51,10 @@ export const StatisticsOverview = () => {
       })),
     [uptimeQuery.data],
   );
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-2">
+      <div className="flex flex-col gap-3 rounded-xl border bg-muted/20 p-4 lg:flex-row lg:flex-wrap lg:items-end">
         <div className="space-y-1">
           <Label htmlFor="statistics-from-date" className="text-xs text-muted-foreground">
             Từ ngày
@@ -62,7 +64,7 @@ export const StatisticsOverview = () => {
             type="date"
             value={from}
             onChange={(event) => setFrom(event.target.value)}
-            className="w-[170px]"
+            className="w-full sm:w-[170px]"
           />
         </div>
         <div className="space-y-1">
@@ -74,13 +76,13 @@ export const StatisticsOverview = () => {
             type="date"
             value={to}
             onChange={(event) => setTo(event.target.value)}
-            className="w-[170px]"
+            className="w-full sm:w-[170px]"
           />
         </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Khoảng thời gian</Label>
           <Select value={interval} onValueChange={(value) => setInterval(value as typeof interval)}>
-            <SelectTrigger className="w-[170px]">
+            <SelectTrigger className="w-full sm:w-[170px]">
               <SelectValue placeholder="Khoảng thời gian" />
             </SelectTrigger>
             <SelectContent>
@@ -91,7 +93,7 @@ export const StatisticsOverview = () => {
           </Select>
         </div>
         <Button
-          className="ml-auto"
+          className="w-full lg:ml-auto lg:w-auto"
           variant="outline"
           onClick={() =>
             exportMutation.mutate({
@@ -113,7 +115,7 @@ export const StatisticsOverview = () => {
           isLoading={summaryQuery.isLoading}
         />
         <StatCard
-          title="Thời gian hoạt động trung bình"
+          title="Uptime trung bình"
           value={`${formatNumber(summaryQuery.data?.averageUptimePercent ?? 0)}%`}
           icon={<TrendingUp className="h-4 w-4" />}
           isLoading={summaryQuery.isLoading}

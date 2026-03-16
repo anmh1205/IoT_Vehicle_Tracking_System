@@ -58,7 +58,7 @@ export const SessionGuard = ({ children }: { children: React.ReactNode }) => {
 
   if (!checked || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex min-h-[100dvh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );

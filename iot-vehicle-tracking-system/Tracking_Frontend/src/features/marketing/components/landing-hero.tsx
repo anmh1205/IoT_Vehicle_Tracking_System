@@ -106,7 +106,7 @@ export const LandingHero = () => {
           <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/80 p-3 shadow-[0_30px_120px_rgba(2,6,23,0.7)] backdrop-blur">
             <Image
               src="/landing/hero-command-center.svg"
-              alt="Minh hoạ trung tâm điều hành theo dõi đội xe theo thời gian thực"
+              alt="Minh họa trung tâm điều hành theo dõi đội xe theo thời gian thực"
               width={960}
               height={760}
               className="h-auto w-full rounded-[1.4rem]"

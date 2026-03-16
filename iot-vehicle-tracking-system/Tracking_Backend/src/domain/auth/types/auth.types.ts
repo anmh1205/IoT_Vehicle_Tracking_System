@@ -62,6 +62,14 @@ export interface UpdateUserInput {
   avatarUrl?: string | null;
 }
 
+export interface UserListQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: string;
+  status?: string;
+}
+
 export interface ChangePasswordInput {
   currentPassword: string;
   newPassword: string;

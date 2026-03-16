@@ -109,7 +109,7 @@ export const flowSteps: FlowStep[] = [
   {
     icon: Activity,
     title: 'Backend và rule xử lý',
-    description: 'Chuẩn hoá dữ liệu, phát cảnh báo và duy trì phiên vận hành.',
+    description: 'Chuẩn hóa dữ liệu, phát cảnh báo và duy trì phiên vận hành.',
   },
   {
     icon: Smartphone,
@@ -119,6 +119,6 @@ export const flowSteps: FlowStep[] = [
   {
     icon: ChartColumnIncreasing,
     title: 'Observability và báo cáo',
-    description: 'System status, metrics và exports giúp nhìn thấy sức khoẻ toàn hệ thống.',
+    description: 'System status, metrics và exports giúp nhìn thấy sức khỏe toàn hệ thống.',
   },
 ];

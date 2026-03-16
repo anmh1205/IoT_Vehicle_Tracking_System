@@ -1,645 +1,931 @@
-const problemSolution = `flowchart LR
-    A["Quản lý thủ công<br/>gọi điện, giấy tờ"] --> B["Chậm biết vị trí xe<br/>và sự cố vận hành"]
-    B --> C["Thiếu cảnh báo tức thời<br/>quyết định chậm"]
-    C --> D["Thiết bị tracker IoT<br/>GPS + OBD2 + IMU + 4G"]
-    D --> E["Cloud và lưu trữ<br/>EMQX, Bridge, Backend"]
-    E --> F["Dashboard giám sát<br/>bản đồ, cảnh báo, báo cáo"]
+﻿const problemSolution = `flowchart LR
+    subgraph Current["Bài toán hiện tại"]
+        C1["Quản lý đội xe thủ công"]
+        C2["Theo dõi vị trí chậm"]
+        C3["Xử lý sự cố trễ"]
+        C1 --> C2 --> C3
+    end
+    subgraph Proposed["Giải pháp đề xuất"]
+        P1["Thiết bị tracker IoT\nGPS + OBD2 + IMU + 4G"]
+        P2["Cloud xử lý dữ liệu\nEMQX + Bridge + Backend"]
+        P3["Dashboard giám sát\nBản đồ + Cảnh báo + Báo cáo"]
+        P1 --> P2 --> P3
+    end
+    C3 ----> P1
 `;
 
-const systemArchitecture = `flowchart LR
-    OBD["vgate iCar Pro<br/>BLE OBD2"] --> Tracker["Thiết bị tracker<br/>ESP32-S3 + SIM7600CE-T"]
-    Tracker --> EMQX["EMQX Broker"]
-    EMQX --> Bridge["MQTT Bridge<br/>validate + fan-out"]
-    Bridge --> Backend["Backend API<br/>Socket.IO"]
-    Bridge --> Metrics["VictoriaMetrics<br/>telemetry"]
-    Bridge --> Logs["VictoriaLogs<br/>nhật ký"]
-    Backend --> Postgres["PostgreSQL<br/>nghiệp vụ"]
-    Backend --> Web["Dashboard Web<br/>Next.js"]
-    Backend --> Mobile["Mobile Shell<br/>Flutter WebView"]
-    Metrics --> Grafana["Grafana<br/>quan trắc"]
-    Logs --> Grafana
+const projectPhases = `flowchart LR
+    S["Khởi động dự án"] --> P1["Giai đoạn 1\nPhân tích yêu cầu"]
+    P1 --> P2["Giai đoạn 2\nThiết kế phần cứng"]
+    P2 --> P3["Giai đoạn 3\nPhát triển firmware"]
+    P3 --> P4["Giai đoạn 4\nTriển khai cloud"]
+    P4 --> P5["Giai đoạn 5\nXây dựng frontend"]
+    P5 --> P6["Giai đoạn 6\nTích hợp và kiểm thử"]
 `;
 
-const powerModes = `flowchart LR
-    Parking["Chế độ đỗ xe<br/>Deep sleep + IMU canh rung"] -->|Bật máy| Driving["Chế độ lái xe<br/>4G + GNSS + OBD2 hoạt động"]
-    Driving -->|Tắt máy| Parking
-    Parking -->|IMU phát hiện rung| Alert["Chế độ cảnh báo<br/>Wake modem và gửi alert"]
-    Alert -->|Hoàn tất hoặc timeout| Parking
-    Alert -->|Xe tiếp tục chạy| Driving
+const systemArchitecture = `flowchart TB
+    subgraph Vehicle["Thiết bị trên xe"]
+        OBD["OBD2 BLE Adapter"]
+        Tracker["Tracker\nESP32-S3 + SIM7600CE-T"]
+        OBD --> Tracker
+    end
+
+    subgraph Cloud["Tầng cloud"]
+        EMQX["EMQX Broker"]
+        Bridge["MQTT Bridge"]
+        API["Backend API\nSocket.IO"]
+        PG["PostgreSQL"]
+        VM["VictoriaMetrics"]
+        VL["VictoriaLogs"]
+        EMQX --> Bridge
+        Bridge --> API
+        Bridge --> VM
+        Bridge --> VL
+        API --> PG
+    end
+
+    subgraph Client["Tầng hiển thị"]
+        Web["Dashboard Next.js"]
+        Mobile["Mobile Shell"]
+        Grafana["Grafana"]
+    end
+
+    Tracker ----> EMQX
+    API ----> Web
+    API ----> Mobile
+    VM ----> Grafana
+    VL ----> Grafana
 `;
 
-const dataArchitecture = `flowchart LR
-    Tracker["Thiết bị tracker<br/>GPS, OBD2, nguồn"] --> Bridge["MQTT Bridge<br/>chuẩn hóa payload"]
-    Frontend["Frontend và API<br/>truy vấn nghiệp vụ"] --> Backend["Backend API<br/>đọc theo use case"]
-    Bridge --> PG["PostgreSQL<br/>xe, người dùng, cảnh báo"]
-    Bridge --> VM["VictoriaMetrics<br/>telemetry thời gian thực"]
-    Bridge --> VL["VictoriaLogs<br/>log kết nối"]
-    Backend --> PG
-    Backend --> Dashboard["Dashboard Web<br/>và mobile shell"]
-    VM --> Dashboard
-    VL --> Dashboard
-`;
+const powerModes = `stateDiagram-v2
+    direction LR
+    [*] --> Parking
+    state "Parking\nDeep sleep" as Parking
+    state "Driving\n4G + GNSS + OBD2" as Driving
+    state "Alert\nWake modem" as Alert
 
-const trackerBlock = `flowchart LR
-    Sense["Chia áp + ADC<br/>đo ắc quy 12V hoặc 24V"] --> MCU["ESP32-S3<br/>điều phối tracker"]
-    Power["Điều khiển nguồn<br/>GPIO5, GPIO18, GPIO19, GPIO26"] --> MCU
-    MCU --> IMU["LIS3DH IMU<br/>I2C GPIO47 và GPIO48<br/>INT1 GPIO21"]
-    MCU --> OBD["vgate iCar Pro<br/>BLE OBD2"]
-    MCU --> Modem["SIM7600CE-T<br/>UART1 GPIO16 và GPIO17<br/>PWRKEY GPIO26"]
-    Battery["Ắc quy xe<br/>12V hoặc 24V"] --> Buck["MP2482 5V"]
-    Buck --> Logic["XL1509 3.3V<br/>ESP32-S3, LIS3DH"]
-    Buck --> Rail4V["TPS54231 ~4V<br/>SIM7600CE-T"]
-    Buck --> Backup["TP4056 + pin 21700 + SX1308"]
-`;
-
-const powerManagement = `flowchart LR
-    Battery["Ắc quy xe<br/>12V hoặc 24V"] --> Buck["MP2482<br/>Buck 5V"]
-    Buck --> Logic["XL1509 3.3V<br/>ESP32-S3, LIS3DH"]
-    Buck --> Modem["TPS54231 ~4V<br/>SIM7600CE-T"]
-    Buck --> Charger["TP4056<br/>Sạc pin dự phòng"]
-    Charger --> Backup["BMS 1S + pin 21700"]
-    Backup --> Boost["SX1308<br/>Boost 5V backup"]
-    Battery --> Monitor["LM393 + ADC<br/>Giám sát LVD"]
-    Monitor --> FSM["ESP32 FSM nguồn<br/>GPIO18, GPIO19, GPIO5"]
-    Boost --> FSM
-    FSM --> Logic
-    FSM --> Modem
-`;
-
-const firmwareLayers = `flowchart TB
-    App["Lớp ứng dụng<br/>state machine, policy nguồn, cảnh báo"] --> Core["Lớp nghiệp vụ<br/>telemetry, OBD2, GNSS, MQTT"]
-    Core --> Runtime["Lớp runtime<br/>FreeRTOS task, queue, timer"]
-    Runtime --> HAL["Lớp HAL<br/>GPIO, UART, I2C, ADC, deep sleep"]
-    HAL --> HW["ESP32-S3 và ngoại vi<br/>SIM7600CE-T, LIS3DH, BLE OBD2"]
-`;
-
-const taskInteraction = `flowchart LR
-    ISR["ISR và IMU<br/>đánh thức hệ thống"] --> Power["power_task<br/>điều phối trạng thái"]
-    OBD["obd_task"] --> Queue["telemetry_queue"]
-    GPS["gnss_task"] --> Queue
-    Sensor["sensor_task"] --> Queue
-    Queue --> MQTT["mqtt_task"]
-    MQTT --> Broker["EMQX Broker"]
-    Command["command_task"] --> MQTT
-    Power --> GPS
-    Power --> MQTT
-    Power --> Command
-`;
-
-const deviceState = `stateDiagram-v2
-    [*] --> Boot
-    state "Khởi động" as Boot
-    state "Lái xe" as Driving
-    state "Đỗ xe" as Parking
-    state "Cảnh báo" as Alert
-    Boot --> Driving: IGN ON
-    Boot --> Parking: IGN OFF
-    Driving --> Parking: Tắt máy
-    Parking --> Driving: Bật máy
-    Parking --> Alert: IMU phát hiện rung
-    Alert --> Parking: Gửi alert xong
+    Parking --> Driving: IGN ON
+    Driving --> Parking: IGN OFF
+    Parking --> Alert: IMU rung
+    Alert --> Parking: Hoàn tất
     Alert --> Driving: Xe tiếp tục chạy
 `;
 
-const frontendFsd = `flowchart TB
-    Root["Tracking_Frontend / src"] --> App["app/<br/>router, layout, dashboard, map"]
-    Root --> Features["features/<br/>vehicles, alerts, trips"]
-    Root --> Components["components/<br/>ui, forms, layout, charts"]
-    Root --> Lib["lib/<br/>api, realtime, store, utils"]
-    Root --> Support["hooks + types<br/>hook dùng chung, kiểu toàn cục"]
-    App --> Features
-    Features --> Components
-    Features --> Lib
-    Lib --> Support
+const roadmapPlan = `flowchart LR
+    A["Prototype"] --> B["Pilot trên xe thật"]
+    B --> C["Ổn định cloud + dashboard"]
+    C --> D["Mở rộng mobile + cảnh báo đẩy"]
+    D --> E["PCB chuyên dụng"]
+    E --> F["Scale-out + bảo mật nâng cao"]
 `;
 
-const authSequence = `sequenceDiagram
-    actor U as Người dùng
-    participant F as Frontend Next.js
-    participant B as Backend API
-    participant P as PostgreSQL
-    participant S as Zustand Store
-    U->>F: Nhập email và mật khẩu
-    F->>B: POST /api/v1/auth/login
-    B->>P: Tra cứu user và session
-    P-->>B: Hash, vai trò, trạng thái
-    B-->>F: Session token và hồ sơ
-    F->>S: Lưu token trong bộ nhớ
-    F->>B: GET /dashboard
-    B-->>F: Dữ liệu trang và quyền truy cập
+const dataArchitecture = `flowchart LR
+    Device["Tracker"] --> Bridge["MQTT Bridge"]
+    Bridge --> PG["PostgreSQL\nNghiệp vụ"]
+    Bridge --> VM["VictoriaMetrics\nTelemetry"]
+    Bridge --> VL["VictoriaLogs\nAudit log"]
+    API["Backend API"] --> PG
+    API --> VM
+    Dashboard["Dashboard"] --> API
+    Dashboard --> Socket["Socket.IO"]
+    Socket --> Bridge
 `;
 
-const mapIntegration = `flowchart LR
-    Server["Backend API<br/>Socket.IO"] --> Store["Zustand realtime store"]
-    Store --> Map["React Leaflet Map"]
-    Store --> Sidebar["Sidebar thông tin xe"]
-    Map --> Visual["Marker và route replay"]
-    Sidebar --> Visual
-`;
-
-const optimizedArchitecture = `flowchart LR
-    Device["Thiết bị tracker<br/>ESP32-S3 + SIM7600CE-T"] --> EMQX["EMQX Broker"]
-    EMQX --> Bridge["MQTT Bridge"]
-    Bridge --> Backend["Backend API"]
-    Backend --> Query["TanStack Query<br/>dữ liệu lịch sử"]
-    Backend --> Store["Zustand + Socket.IO<br/>state realtime"]
-    Bridge --> Metrics["VictoriaMetrics"]
-    Bridge --> Logs["VictoriaLogs"]
-    Query --> Dashboard["Dashboard Next.js"]
-    Store --> Dashboard
-    Metrics --> Ops["Grafana và quan trắc"]
-    Logs --> Ops
-`;
-
-const ivmStructure = `flowchart TB
-    Root["iot-vehicle-tracking-system/"] --> Backend["Tracking_Backend<br/>Express + TypeScript"]
-    Root --> Frontend["Tracking_Frontend<br/>Next.js Dashboard"]
-    Root --> Bridge["Tracking_MqttBridge<br/>dịch vụ fan-out"]
-    Root --> Broker["Tracking_EMQX<br/>broker MQTT"]
-    Root --> Database["Tracking_PostgreSQL<br/>cơ sở dữ liệu quan hệ"]
-    Root --> Metrics["Tracking_VictoriaMetrics<br/>time-series"]
-    Root --> Logs["Tracking_VictoriaLogs<br/>kho log tập trung"]
-    Root --> Grafana["Tracking_Grafana<br/>dashboard quan trắc"]
-    Root --> Data["Tracking_Data<br/>volumes runtime"]
-`;
-
-const mqttBridgeFlow = `flowchart LR
-    EMQX["EMQX Broker<br/>topic telemetry, alert"] --> Parse["1. Parse topic<br/>và payload JSON"]
-    Parse --> Validate["2. Validate schema<br/>chuẩn hóa timestamp"]
-    Validate --> Fanout["3. Fan-out<br/>ghi nhiều đích"]
-    Fanout --> VM["VictoriaMetrics<br/>GPS, OBD2, sensor"]
-    Fanout --> VL["VictoriaLogs<br/>log và audit"]
-    Fanout --> PG["PostgreSQL<br/>runtime, alert"]
-    Fanout --> Socket["Socket.IO<br/>đẩy realtime"]
-`;
-
-const backendFolder = `flowchart TB
-    Root["Tracking_Backend / src"] --> Core["core/<br/>interface, type, schema"]
-    Root --> Modules["modules/<br/>auth, device, telemetry, vehicle"]
-    Root --> Middleware["middleware/<br/>auth, rate-limit, metrics"]
-    Root --> Shared["shared/<br/>utils, response, helper"]
-    Root --> Entry["entrypoints<br/>routes, index, Socket.IO"]
-    Modules --> Shared
-    Entry --> Modules
-    Entry --> Middleware
-`;
-
-const frontendFolder = `flowchart TB
-    Root["Tracking_Frontend / src"] --> App["app/<br/>layout, page, dashboard, map"]
-    Root --> Components["components/<br/>ui, layout, forms, charts"]
-    Root --> Features["features/<br/>vehicles, alerts, trips"]
-    Root --> Lib["lib/<br/>api, realtime, store, utils"]
-    Root --> Types["types/<br/>kiểu dữ liệu dùng chung"]
-    App --> Features
-    Features --> Components
-    Features --> Lib
-`;
-
-const testEnvironment = `flowchart LR
-    Bench["Bench test phần cứng<br/>nguồn DC, DMM, tracker"] --> Network["Mạng 4G hoặc Wi-Fi"]
-    Vehicle["Xe thử nghiệm<br/>OBD2 và hành trình thực tế"] --> Network
-    Network --> Cloud["Cloud test stack<br/>EMQX, Bridge, Backend"]
-    Cloud --> Dashboard["Dashboard Web<br/>và Grafana"]
-    Dashboard --> Result["Log, metric<br/>và kết quả đo"]
-`;
-
-const labSetup = `flowchart LR
-    Supply["Nguồn DC 12V hoặc 24V"] --> Tracker["Tracker prototype"]
-    DMM["Đồng hồ DMM"] --> Tracker
-    OBD["OBD2 simulator"] --> Tracker
-    Scope["Oscilloscope"] --> Tracker
-    Tracker --> Laptop["Laptop thu log"]
-`;
-
-const vehicleInstall = `flowchart LR
-    OBD["Cổng OBD2"] --> Cabin["Tracker trong cabin"]
-    Cabin --> Antenna["Anten LTE và GNSS"]
-    Cabin --> Note["Lưu ý lắp đặt<br/>cố định, tránh rung và ẩm"]
-    Cabin --> Telemetry["Luồng telemetry<br/>GPS, OBD2, cảnh báo"]
-`;
-
-const projectPhases = `flowchart TB
-    subgraph R1["Ba giai đoạn nền tảng"]
-        direction LR
-        A["Giai đoạn 1<br/>Nghiên cứu và thiết kế phần cứng"] --> B["Giai đoạn 2<br/>Phát triển firmware ESP-IDF"]
-        B --> C["Giai đoạn 3<br/>Triển khai hạ tầng cloud"]
+const trackerBlock = `flowchart LR
+    subgraph Input["Nguồn vào"]
+        Batt["Ắc quy 12V/24V"]
+        Buck["Buck 5V"]
+        Backup["Pin dự phòng + Boost"]
+        Batt --> Buck
+        Batt --> Backup
     end
-    subgraph R2["Ba giai đoạn hoàn thiện hệ thống"]
-        direction LR
-        D["Giai đoạn 4<br/>Xây dựng backend API"] --> E["Giai đoạn 5<br/>Phát triển frontend dashboard"]
-        E --> F["Giai đoạn 6<br/>Tích hợp và kiểm thử"]
-    end
-    C --> D
-`;
 
-const roadmapPlan = `flowchart TB
-    subgraph M1["Các mốc hoàn thiện prototype"]
-        direction LR
-        P1["Mốc 1<br/>Prototype hoàn chỉnh"] --> P2["Mốc 2<br/>Pilot trong xe thử nghiệm"]
-        P2 --> P3["Mốc 3<br/>Ổn định hóa cloud và dashboard"]
+    subgraph Core["Khối điều khiển"]
+        MCU["ESP32-S3"]
+        PM["Power FSM"]
+        PM --> MCU
     end
-    subgraph M2["Các mốc mở rộng sản phẩm"]
-        direction LR
-        P4["Mốc 4<br/>Ứng dụng di động và thông báo đẩy"] --> P5["Mốc 5<br/>PCB chuyên dụng và tối ưu sản xuất"]
-        P5 --> P6["Mốc 6<br/>Mở rộng AI, bảo mật và scale-out"]
+
+    subgraph IO["Ngoại vi"]
+        Modem["SIM7600CE-T"]
+        IMU["LIS3DH"]
+        OBD["BLE OBD2"]
     end
-    P3 --> P4
+
+    Buck ----> MCU
+    Backup ----> MCU
+    MCU ----> Modem
+    MCU ----> IMU
+    MCU ----> OBD
 `;
 
 const bleObdSequence = `sequenceDiagram
-    participant ESP as ESP32-S3 tracker
+    participant ESP as ESP32-S3
     participant OBD as vgate iCar Pro
-    ESP->>OBD: BLE scan<br/>lọc tên hoặc service UUID
-    ESP->>OBD: Connect + GATT discovery
-    ESP->>OBD: ATZ / ATE0 / ATL0 / ATS0 / ATSP0
-    loop Chu kỳ đọc khi IGN ON
-        ESP->>OBD: 010C / 010D / 0105 / 012F / AT IGN
-        OBD-->>ESP: 41 0C / 41 0D / dữ liệu phản hồi
+
+    ESP->>OBD: BLE scan + connect
+    ESP->>OBD: GATT discovery
+    ESP->>OBD: Init ELM327 (ATZ, ATE0, ATSP0)
+    loop Khi IGN ON
+        ESP->>OBD: Đọc PID 010C / 010D / 0105
+        OBD-->>ESP: Trả telemetry
     end
-    Note over ESP: Nếu timeout 2-3 lần,<br/>fallback sang đọc U_batt qua ADC
 `;
 
 const lis3dhWiring = `flowchart LR
     subgraph MCU["ESP32-S3"]
-        SCL["GPIO48<br/>I2C SCL"]
-        SDA["GPIO47<br/>I2C SDA"]
-        INT["GPIO21<br/>INT1 wake-up"]
-        VCC["3.3V rail"]
+        SCL["GPIO48 - SCL"]
+        SDA["GPIO47 - SDA"]
+        INT["GPIO21 - INT1"]
+        VCC["3.3V"]
         GND["GND"]
     end
+
     subgraph IMU["LIS3DH"]
-        ISCL["SCL"]
-        ISDA["SDA"]
-        IINT["INT1"]
-        IVDD["VDD 3.3V"]
+        I2CSCL["SCL"]
+        I2CSDA["SDA"]
+        I2CINT["INT1"]
+        IVCC["VDD"]
         IGND["GND"]
     end
-    SCL -->|I2C 400 kHz| ISCL
-    SDA -->|Địa chỉ 0x18| ISDA
-    INT -->|Đánh thức MCU| IINT
-    VCC --> IVDD
+
+    SCL ----> I2CSCL
+    SDA ----> I2CSDA
+    INT ----> I2CINT
+    VCC --> IVCC
     GND --> IGND
 `;
 
-const firmwareMainFlow = `flowchart TB
-    A["Khởi động firmware"] --> B["Khởi tạo IMU, modem, ADC, BLE,<br/>queue và các task FreeRTOS"]
-    B --> C{"Đọc được IGN từ OBD2?"}
-    C -->|Có| D["Dùng IGN từ ECU qua BLE OBD2"]
-    C -->|Không| E["Fallback sang điện áp ắc quy ADC<br/>theo profile 12V hoặc 24V"]
-    D --> F{"IGN ON?"}
-    E --> F
-    F -->|Có| G["Chế độ lái xe<br/>BLE OBD2 + GNSS + 4G hoạt động"]
-    F -->|Không| H{"IMU phát hiện rung?"}
-    H -->|Không| I["Chế độ đỗ xe<br/>gửi heartbeat rồi deep sleep"]
-    H -->|Có| J["Chế độ cảnh báo<br/>wake modem và gửi alert ưu tiên"]
-    G --> K{"Kết thúc chu kỳ?"}
-    J --> K
-    I --> K
-    K -->|IGN còn ON| G
-    K -->|IGN OFF| I
+const powerManagement = `block-beta
+    columns 4
+    Vin["Nguồn xe 12V/24V"]
+    Buck["MP2482 5V"]
+    Rail33["Rail 3.3V"]
+    Rail4["Rail 4V modem"]
+    Charge["TP4056"]
+    Cell["Pin 21700"]
+    Boost["SX1308"]
+    Fsm["Power FSM"]
+
+    Vin --> Buck
+    Buck --> Rail33
+    Buck --> Rail4
+    Buck --> Charge
+    Charge --> Cell
+    Cell --> Boost
+    Boost --> Fsm
+    Fsm --> Rail33
+    Fsm --> Rail4
 `;
 
-const bleObdFlow = `flowchart TB
-    A["Bắt đầu module BLE OBD2"] --> B{"Đã lưu địa chỉ BLE?"}
-    B -->|Có| C["Reconnect nhanh tới vgate iCar Pro"]
-    B -->|Không| D["Scan BLE và lọc theo tên<br/>hoặc service UUID"]
-    D --> E["Chọn adapter phù hợp<br/>và lưu MAC vào NVS"]
-    C --> F["GATT discovery<br/>tìm TX / RX characteristic"]
-    E --> F
-    F --> G["Khởi tạo ELM327<br/>ATZ, ATE0, ATL0, ATS0, ATSP0"]
-    G --> H{"Đang ở chế độ lái xe?"}
-    H -->|Có| I["Gửi PID 010C, 010D, 0105, 012F,<br/>AT IGN và parse phản hồi"]
-    I --> J["Đẩy telemetry vào queue"]
-    J --> H
-    H -->|Không| K["Ngắt BLE và trả quyền cho deep sleep"]
-    I --> L{"Timeout 2-3 lần?"}
-    L -->|Có| M["Fallback xác định IGN<br/>qua điện áp ắc quy ADC"]
-    L -->|Không| J
+const firmwareLayers = `flowchart TB
+    A["Application Layer\nPolicy + State machine"]
+    B["Domain Layer\nTelemetry + Alert + OBD2"]
+    C["Runtime Layer\nFreeRTOS Task/Queue/Timer"]
+    D["HAL Layer\nGPIO/UART/I2C/ADC"]
+    E["Hardware\nESP32-S3 + SIM7600 + LIS3DH"]
+
+    A --> B --> C --> D --> E
 `;
 
-const modemControlFlow = `flowchart TB
-    A["Wake modem hoặc khởi tạo cold start"] --> B["AT -> CPIN -> CEREG -> CSQ"]
-    B --> C{"Modem phản hồi?"}
-    C -->|Không| D["Reset PWRKEY GPIO26<br/>và đợi 10-30 giây"]
-    D --> B
-    C -->|Có| E{"Đã đăng ký mạng?"}
-    E -->|Chưa| F["Đợi và retry CEREG / CPIN"]
-    F --> B
-    E -->|Rồi| G{"Chế độ hoạt động hiện tại?"}
-    G -->|Lái xe| H["Giữ LTE active, bật GNSS,<br/>đọc CGNSINF hoặc CGNSTST"]
-    G -->|Heartbeat| I["Bật LTE, gửi heartbeat,<br/>tắt PDP rồi về sleep"]
-    G -->|Đỗ xe| J["AT+CGACT=0,1 hoặc AT+CFUN=4<br/>sau đó AT+CSCLK=1"]
-    H --> K["Gửi telemetry MQTT"]
-    I --> J
-    K --> J
+const taskInteraction = `flowchart LR
+    IMU["IMU ISR"] --> PowerTask["power_task"]
+    OBDTask["obd_task"] --> Queue["telemetry_queue"]
+    GNSSTask["gnss_task"] --> Queue
+    SensorTask["sensor_task"] --> Queue
+    Queue --> MQTTTask["mqtt_task"]
+    MQTTTask --> Broker["EMQX"]
+    CmdTask["command_task"] --> MQTTTask
+    PowerTask --> OBDTask
+    PowerTask --> GNSSTask
+    PowerTask --> CmdTask
 `;
 
-const powerPathFlow = `flowchart TB
-    A["Đọc U_batt, IGN và cờ LVD"] --> B{"IGN ON?"}
-    B -->|Có| C["GPIO18 = LOW<br/>ưu tiên nhánh chính MP2482"]
-    C --> D["GPIO5 = HIGH<br/>cho phép sạc TP4056"]
-    B -->|Không| E{"U_batt <= Switch_OFF?"}
-    E -->|Có| F["GPIO18 = HIGH<br/>ưu tiên nhánh backup SX1308"]
-    F --> G["GPIO5 = LOW<br/>tắt sạc để bảo vệ ắc quy"]
-    G --> H["Set cờ low battery / alert"]
-    E -->|Không| I{"U_batt >= Switch_ON?"}
-    I -->|Có| J["GPIO18 = LOW<br/>quay lại nhánh chính"]
-    J --> K["GPIO5 = LOW nếu đang parking"]
-    I -->|Không| L["Giữ trạng thái trước đó"]
-    D --> M["Delay 5 giây rồi lặp"]
-    H --> M
-    K --> M
-    L --> M
+const firmwareMainFlow = `stateDiagram-v2
+    direction LR
+    [*] --> Init
+    Init --> CheckIGN
+    CheckIGN --> Driving: IGN ON
+    CheckIGN --> Idle: IGN OFF
+    Idle --> Alert: Có rung
+    Idle --> Sleep: Không rung
+    Driving --> Sleep
+    Alert --> Sleep
+    Sleep --> CheckIGN
 `;
 
-const backendAlertFlow = `flowchart LR
-    Broker["EMQX Rules Engine"] --> Parse["Phát hiện event<br/>motion, speed, low battery"]
-    Parse --> Bridge["MQTT Bridge<br/>validate và enrich payload"]
-    Bridge --> Logs["VictoriaLogs<br/>lưu log sự kiện"]
-    Bridge --> Pg["PostgreSQL<br/>ghi alert và trạng thái"]
-    Bridge --> Socket["Socket.IO<br/>đẩy cảnh báo realtime"]
-    Socket --> Dashboard["Dashboard Web<br/>toast, badge, lịch sử"]
+const bleObdFlow = `sequenceDiagram
+    participant FW as BLE task
+    participant OBD as Adapter OBD2
+    participant ADC as ADC fallback
+
+    alt MAC đã lưu
+        FW->>OBD: Reconnect nhanh
+    else Chưa lưu MAC
+        FW->>OBD: Scan + Pair
+    end
+
+    loop Chu kỳ lái xe
+        FW->>OBD: Đọc PID + IGN
+        OBD-->>FW: Telemetry
+    end
+
+    alt Timeout nhiều lần
+        FW->>ADC: Fallback xác định IGN
+    else Kết thúc phiên
+        FW->>OBD: Ngắt BLE
+    end
+`;
+
+const modemControlFlow = `sequenceDiagram
+    participant FW as Modem task
+    participant SIM as SIM7600CE-T
+
+    FW->>SIM: Wake modem
+    FW->>SIM: AT + CPIN + CEREG + CSQ
+
+    alt Không phản hồi
+        FW->>SIM: Reset PWRKEY và thử lại
+    else Chưa vào mạng
+        FW->>SIM: Retry đăng ký mạng
+    else Driving
+        FW->>SIM: Bật LTE/GNSS + gửi telemetry
+    else Parking
+        FW->>SIM: Giảm công suất + sleep
+    end
+`;
+
+const powerPathFlow = `stateDiagram-v2
+    direction LR
+    [*] --> Sample
+    Sample --> IgnCheck
+    IgnCheck --> Main: IGN ON
+    IgnCheck --> VoltCheck: IGN OFF
+    VoltCheck --> Backup: U_batt thấp
+    VoltCheck --> Recover: U_batt đủ
+    Recover --> Main: >= Switch_ON
+    Recover --> Hold: Chưa đổi ngưỡng
+    Main --> Sample
+    Backup --> Sample
+    Hold --> Sample
+`;
+
+const deviceState = `stateDiagram-v2
+    [*] --> Boot
+    Boot --> Driving: IGN ON
+    Boot --> Parking: IGN OFF
+    Parking --> Alert: IMU rung
+    Alert --> Parking: Xử lý xong
+    Alert --> Driving: Xe tiếp tục chạy
+    Driving --> Parking: Tắt máy
+`;
+
+const cloudArchitecture = `flowchart TB
+    Device["Tracker Device"] --> EMQX["EMQX Broker"]
+    EMQX --> Bridge["MQTT Bridge"]
+    Bridge --> API["Backend API"]
+    Bridge --> VM["VictoriaMetrics"]
+    Bridge --> VL["VictoriaLogs"]
+    API --> PG["PostgreSQL"]
+    API --> Socket["Socket.IO"]
+    Socket --> Dashboard["Web Dashboard"]
+`;
+
+const deviceToDashboardFlow = `sequenceDiagram
+    participant Device as Tracker
+    participant Broker as EMQX
+    participant Bridge as MQTT Bridge
+    participant API as Backend API
+    participant Dash as Dashboard
+
+    Device->>Broker: Publish telemetry
+    Broker->>Bridge: Forward topic
+    Bridge->>API: Push normalized event
+    Bridge->>Bridge: Persist metric/log
+    API-->>Dash: Realtime update (Socket.IO)
+`;
+
+const dualStorageStrategy = `flowchart LR
+    Bridge["MQTT Bridge"]
+
+    subgraph Hot["Hot Path - realtime"]
+        VM["VictoriaMetrics"]
+        WS["Socket.IO"]
+    end
+
+    subgraph Durable["Durable Path - nghiệp vụ"]
+        PG["PostgreSQL"]
+        API["Backend API"]
+    end
+
+    Bridge ----> VM
+    Bridge ----> WS
+    Bridge ----> PG
+    API ----> PG
 `;
 
 const dbErd = `erDiagram
-    USERS ||--o{ VEHICLES : quan_ly
-    VEHICLES ||--o{ DEVICES : gan_tracker
-    DEVICES ||--|| DEVICE_CONFIGURATIONS : cau_hinh
-    VEHICLES ||--o{ TRIPS : phat_sinh
-    TRIPS ||--o{ TRIP_EVENTS : gom
-    VEHICLES ||--o{ ALERTS : sinh_ra
-    VEHICLES }o--o{ GEOFENCES : gan_vung
-    DEVICES ||--o{ COMMANDS : nhan_lenh
+    USERS ||--o{ VEHICLES : quản_lý
+    VEHICLES ||--o{ DEVICES : gắn
+    VEHICLES ||--o{ TRIPS : phát_sinh
+    TRIPS ||--o{ TRIP_EVENTS : gồm
+    VEHICLES ||--o{ ALERTS : tạo_ra
+    DEVICES ||--o{ COMMANDS : nhận
 
     USERS {
-        uuid id
-        string email
-        string role
+      uuid id
+      string email
+      string role
     }
     VEHICLES {
-        uuid id
-        string license_plate
-        string status
+      uuid id
+      string license_plate
+      string status
     }
     DEVICES {
-        uuid id
-        string serial
-        string modem_imei
+      uuid id
+      string serial
+      string imei
     }
-    DEVICE_CONFIGURATIONS {
-        uuid device_id
-        string power_profile
-        string mqtt_topic
-    }
-    TRIPS {
-        uuid id
-        uuid vehicle_id
-        timestamp start_time
-        timestamp end_time
-    }
-    TRIP_EVENTS {
-        uuid id
-        uuid trip_id
-        string event_type
-    }
-    ALERTS {
-        uuid id
-        uuid vehicle_id
-        string severity
-    }
-    GEOFENCES {
-        uuid id
-        string name
-        string geometry
-    }
-    COMMANDS {
-        uuid id
-        uuid device_id
-        string command_type
-    }
+`;
+
+const otaOrchestrationFlow = `sequenceDiagram
+    actor Admin as Dashboard Admin
+    participant API as Backend API
+    participant DB as PostgreSQL
+    participant Bridge as MQTT Bridge
+    participant Broker as EMQX
+    participant Device as Tracker
+
+    Admin->>API: POST /devices/:id/ota
+    API->>DB: Create OTA assignment
+    API->>Bridge: Publish ota.assign
+    Bridge->>Broker: devices/{id}/ota/assign
+    Broker-->>Device: Deliver command
+    Device->>Broker: ota.progress
+    Broker->>Bridge: Forward progress
+    Bridge->>DB: Persist status
+    API-->>Admin: Push realtime status
+`;
+
+const frontendFsd = `mindmap
+  root((Tracking Frontend))
+    app
+      router
+      dashboard
+      map
+    features
+      vehicles
+      alerts
+      trips
+    components
+      ui
+      forms
+      charts
+    lib
+      api
+      realtime
+      store
+      utils
 `;
 
 const queryStoreFlow = `flowchart LR
-    UI["Trang Next.js"] --> Query["TanStack Query<br/>dữ liệu lịch sử"]
-    UI --> Store["Zustand Store<br/>state realtime"]
-    Query --> Api["Backend API"]
-    Api --> Pg["PostgreSQL"]
-    Api --> Vm["VictoriaMetrics"]
+    UI["Next.js Pages"] --> Query["TanStack Query"]
+    UI --> Store["Zustand Store"]
+    Query --> API["Backend API"]
+    API --> PG["PostgreSQL"]
+    API --> VM["VictoriaMetrics"]
     Socket["Socket.IO"] --> Store
-    Store --> Map["Map / Sidebar / Chart"]
-    Query --> Map
+    Query --> View["Map / Table / Chart"]
+    Store --> View
 `;
 
-const mapLayerBreakdown = `flowchart TB
-    Root["Trang bản đồ React Leaflet"] --> Tile["Tile layer nền"]
-    Root --> Marker["Marker xe theo thời gian thực"]
-    Root --> Route["Route replay / polyline"]
-    Root --> Fence["Geofence overlay"]
-    Root --> Side["Sidebar trạng thái xe"]
-    Socket["Socket.IO"] --> Marker
-    Socket --> Side
-    Query["TanStack Query"] --> Route
-    Query --> Fence
+const authSequence = `sequenceDiagram
+    actor User
+    participant FE as Frontend
+    participant BE as Backend API
+    participant DB as PostgreSQL
+    participant Store as Zustand
+
+    User->>FE: Nhập email + mật khẩu
+    FE->>BE: POST /auth/login
+    BE->>DB: Kiểm tra tài khoản
+    DB-->>BE: User + role
+    BE-->>FE: Access token
+    FE->>Store: Lưu session
+`;
+
+const mapIntegration = `flowchart LR
+    API["Backend API"] --> Socket["Socket.IO"]
+    Socket --> Store["Zustand Realtime Store"]
+    Store --> Map["React Leaflet"]
+    Store --> Sidebar["Sidebar thông tin xe"]
+    Map --> Marker["Marker + Route"]
+    Sidebar --> Marker
+`;
+
+const mapLayerBreakdown = `block-beta
+    columns 2
+    Root["Trang Map"]
+    Tile["Tile Layer"]
+    Marker["Marker Layer"]
+    Route["Route Replay"]
+    Fence["Geofence Layer"]
+    Side["Sidebar"]
+    Socket["Socket.IO"]
+    Query["TanStack Query"]
+
+    Root --> Tile
+    Root --> Marker
+    Root --> Route
+    Root --> Fence
+    Root --> Side
+    Socket --> Marker
+    Query --> Route
+`;
+
+const dashboardLayout = `block-beta
+    columns 4
+    Header["Header: filter | sync | profile"]
+    Sidebar["Sidebar: danh sách xe"]
+    Map["Map panel"]
+    Widget["Widget panel"]
+    Alert["Alert feed"]
+
+    Header --> Sidebar
+    Header --> Map
+    Header --> Widget
+    Sidebar --> Map
+    Widget --> Alert
+`;
+
+const vehicleManagementLayout = `block-beta
+    columns 4
+    Header["Header: search + action"]
+    Table["Data table phương tiện"]
+    Filter["Filter trạng thái"]
+    Form["Form thêm/sửa xe"]
+    Detail["Detail panel"]
+
+    Header --> Filter
+    Filter --> Table
+    Table --> Detail
+    Header --> Form
+`;
+
+const realtimeMapLayout = `block-beta
+    columns 4
+    Header["Header map"]
+    Fleet["Fleet list"]
+    Map["Leaflet map"]
+    Timeline["Timeline route"]
+    Stats["Realtime stats"]
+
+    Header --> Fleet
+    Header --> Map
+    Fleet --> Map
+    Map --> Timeline
+    Map --> Stats
+`;
+
+const dashboardWireframe = `flowchart TB
+    H["Header"]
+    subgraph Body["Main area"]
+        direction LR
+        L["Left: Vehicle list"]
+        M["Center: Map"]
+        R["Right: Metrics + Alerts"]
+    end
+    H --> L
+    H --> M
+    H --> R
+`;
+
+const uiPatterns = `mindmap
+  root((UI Design System))
+    Data Table
+      sorting
+      pagination
+      inline status
+    Form
+      validation
+      feedback
+      role-based action
+    Chart
+      line
+      bar
+      radar
+`;
+
+const optimizedArchitecture = `flowchart LR
+    Device["Tracker"] --> EMQX["EMQX"]
+    EMQX --> Bridge["MQTT Bridge"]
+    Bridge --> API["Backend API"]
+    API --> Query["TanStack Query"]
+    API --> Store["Realtime Store"]
+    Query --> Dashboard["Dashboard"]
+    Store --> Dashboard
+    Bridge --> Obs["Metrics + Logs"]
+`;
+
+const ivmStructure = `mindmap
+  root((iot-vehicle-tracking-system))
+    backend
+      api
+      modules
+      middleware
+    frontend
+      app
+      features
+      components
+    mqtt-bridge
+      parser
+      publisher
+    infra
+      emqx
+      postgres
+      grafana
+`;
+
+const mqttBridgeFlow = `sequenceDiagram
+    participant EMQX
+    participant Bridge
+    participant PG as PostgreSQL
+    participant VM as VictoriaMetrics
+    participant VL as VictoriaLogs
+    participant WS as Socket.IO
+
+    EMQX->>Bridge: telemetry/alert topic
+    Bridge->>Bridge: validate + normalize payload
+    Bridge->>PG: write business event
+    Bridge->>VM: write telemetry metric
+    Bridge->>VL: write audit log
+    Bridge->>WS: push realtime event
+`;
+
+const backendFolder = `mindmap
+  root((Tracking Backend))
+    src
+      core
+      modules
+      middleware
+      shared
+      routes
+    tests
+      unit
+      integration
+`;
+
+const frontendFolder = `mindmap
+  root((Tracking Frontend))
+    src
+      app
+      features
+      components
+      lib
+      hooks
+      types
+`;
+
+const alertManagementLayout = `block-beta
+    columns 4
+    Header["Header: filter severity"]
+    List["Danh sách cảnh báo"]
+    Map["Map highlight geofence"]
+    Detail["Alert detail"]
+    History["History timeline"]
+
+    Header --> List
+    List --> Detail
+    Detail --> Map
+    Detail --> History
+`;
+
+const observabilityLayout = `flowchart LR
+    Bridge["MQTT Bridge"] --> VM["VictoriaMetrics"]
+    Bridge --> VL["VictoriaLogs"]
+    VM --> Grafana["Grafana Dashboard"]
+    VL --> Grafana
+    Grafana --> Ops["DevOps / Monitoring"]
+`;
+
+const emqxDashboardLayout = `flowchart LR
+    Device["Device clients"] --> EMQX["EMQX Broker"]
+    EMQX --> Metric["Connection metrics"]
+    EMQX --> Topic["Topic throughput"]
+    EMQX --> Health["Broker health"]
+    Metric --> UI["EMQX Dashboard"]
+    Topic --> UI
+    Health --> UI
+`;
+
+const labSetup = `block-beta
+    columns 3
+    Supply["Nguồn DC"]
+    Tracker["Tracker prototype"]
+    OBD["OBD2 simulator"]
+    DMM["Đồng hồ đo"]
+    Scope["Oscilloscope"]
+    Laptop["Laptop thu log"]
+
+    Supply --> Tracker
+    OBD --> Tracker
+    DMM --> Tracker
+    Scope --> Tracker
+    Tracker --> Laptop
+`;
+
+const vehicleInstall = `flowchart TB
+    OBD["Cổng OBD2"] --> Dongle["vgate iCar Pro"]
+    Dongle -. BLE .-> Tracker["Tracker trong cabin"]
+    Tracker --> LTE["Anten LTE"]
+    Tracker --> GNSS["Anten GNSS"]
+`;
+
+const testEnvironment = `flowchart LR
+    Bench["Bench test phần cứng"] --> Network["4G/Wi-Fi test network"]
+    Vehicle["Xe thử nghiệm"] --> Network
+    Network --> Cloud["EMQX + Bridge + Backend"]
+    Cloud --> Dashboard["Dashboard + Grafana"]
+    Dashboard --> Report["Kết quả đo + log"]
+`;
+
+const currentCycleChart = `xychart-beta
+    title "Dòng tiêu thụ theo chu kỳ hoạt động"
+    x-axis ["Drive0", "Drive5", "Idle10", "Sleep20", "Deep25", "Alert32", "Park40"]
+    y-axis "mA" 0 --> 450
+    line [350, 360, 180, 15, 1, 380, 15]
+`;
+
+const backupVoltageChart = `xychart-beta
+    title "Điện áp pin dự phòng theo thời gian"
+    x-axis ["0h", "0.5h", "1h", "2h", "3h", "3.5h", "4h"]
+    y-axis "V" 3.0 --> 4.3
+    line [4.20, 4.05, 3.92, 3.78, 3.62, 3.45, 3.28]
+`;
+
+const temperatureCurrentChart = `xychart-beta
+    title "Dòng tiêu thụ theo nhiệt độ môi trường"
+    x-axis ["-10", "0", "25", "45", "60", "70"]
+    y-axis "mA" 280 --> 430
+    line [330, 338, 350, 355, 362, 410]
+`;
+
+const bleConnectDistChart = `xychart-beta
+    title "Phân bố thời gian kết nối BLE OBD2"
+    x-axis ["2-3s", "3-4s", "4-5s", "5-6s", "6-8s"]
+    y-axis "Số lần" 0 --> 8
+    bar [2, 7, 6, 3, 2]
+`;
+
+const gpsFixChart = `xychart-beta
+    title "Thời gian bắt vệ tinh GPS"
+    x-axis ["Cold-Min", "Cold-Avg", "Cold-Max", "Warm-Min", "Warm-Avg", "Warm-Max", "Hot-Min", "Hot-Avg", "Hot-Max"]
+    y-axis "Giây" 0 --> 65
+    bar [20, 30, 60, 3, 5, 12, 1, 2, 3]
+`;
+
+const mqttLatencyChart = `xychart-beta
+    title "Phân bố độ trễ MQTT"
+    x-axis ["4G-QoS0", "4G-QoS1", "Weak-QoS0", "Weak-QoS1"]
+    y-axis "ms" 0 --> 1600
+    bar [120, 180, 350, 500]
+    bar [250, 380, 800, 1500]
+`;
+
+const apiLatencyChart = `xychart-beta
+    title "P50/P95/P99 thời gian phản hồi API"
+    x-axis ["Vehicles", "VehicleById", "Telemetry", "Alerts", "Auth"]
+    y-axis "ms" 0 --> 380
+    bar [38, 28, 45, 42, 100]
+    bar [95, 72, 110, 100, 200]
+    bar [150, 120, 180, 165, 350]
+`;
+
+const e2eLatencyChart = `xychart-beta
+    title "Độ trễ end-to-end"
+    x-axis ["Uplink", "EMQX-Bridge", "Bridge-VM", "Bridge-API", "WebSocket", "Total"]
+    y-axis "ms" 0 --> 420
+    bar [150, 5, 10, 5, 15, 185]
+    bar [300, 15, 30, 12, 40, 400]
+`;
+
+const scalePerformanceChart = `xychart-beta
+    title "Hiệu suất theo số lượng thiết bị đồng thời"
+    x-axis ["10", "25", "50", "100", "200"]
+    y-axis "Mức tải" 0 --> 60
+    bar [5, 10, 18, 30, 55]
+    bar [12, 15, 18, 25, 35]
+    bar [15, 16, 18, 22, 35]
+`;
+
+const lighthouseChart = `xychart-beta
+    title "Lighthouse Performance Audit"
+    x-axis ["Performance", "Accessibility", "BestPractices", "SEO"]
+    y-axis "Score" 0 --> 100
+    bar [91, 94, 96, 92]
+`;
+
+const obdRealtimeLayout = `flowchart LR
+    Stream["Socket realtime stream"] --> Panel["OBD2 chart panel"]
+    Panel --> RPM["RPM"]
+    Panel --> Speed["Speed"]
+    Panel --> Coolant["Coolant Temp"]
+    Filter["Time range filter"] --> Panel
+`;
+
+const geofenceLayout = `flowchart TB
+    Map["Leaflet map"] --> Fence["Geofence polygon"]
+    Vehicle["Vehicle marker"] --> Fence
+    Fence --> Alert["Alert trigger"]
+    Alert --> List["Danh sách cảnh báo"]
+`;
+
+const remoteCommandLayout = `flowchart LR
+    User["Operator"] --> UI["Command UI"]
+    UI --> API["Backend API"]
+    API --> Bridge["MQTT Bridge"]
+    Bridge --> Device["Tracker"]
+    Device --> Ack["ACK/Result"]
+    Ack --> UI
+`;
+
+const routeRecoveryLayout = `flowchart TB
+    Loss["Mất kết nối tạm thời"] --> Buffer["Thiết bị lưu đệm local"]
+    Buffer --> Recover["Khôi phục mạng"]
+    Recover --> Replay["Bridge nhận replay"]
+    Replay --> Map["Map cập nhật đầy đủ hành trình"]
+`;
+
+const designRadar = `radar-beta
+    title "So sánh chỉ tiêu thiết kế và kết quả đạt được"
+    axis GPS,Do_tre,Do_on_dinh,Tieu_thu,UX,Bao_mat
+    curve straight
+    "Thiết kế" [90,85,88,80,82,84]
+    "Thực tế" [88,80,86,78,79,81]
+`;
+
+const hardwareElectricalOverview = `flowchart LR
+    ADC["Voltage divider -> GPIO4"] --> MCU["ESP32-S3"]
+    PWR["GPIO5/18/19"] --> MCU
+    MCU --> Modem["SIM7600CE-T\nUART1"]
+    MCU --> IMU["LIS3DH\nI2C"]
+    MCU --> OBD["BLE OBD2"]
+    MCU --> Logic["State machine"]
 `;
 
 const uartModemWiring = `flowchart LR
-    subgraph MCU["ESP32-S3"]
-        TX["GPIO16<br/>UART1 TX"]
-        RX["GPIO17<br/>UART1 RX"]
-        PWR["GPIO26<br/>PWRKEY"]
-        FLOW["RTS / CTS<br/>dự phòng"]
-    end
-    subgraph MODEM["SIM7600CE-T"]
-        MRX["SIMCOM-RX"]
-        MTX["SIMCOM-TX"]
-        MPW["SIMCOM-PWRKEY"]
-        MFL["RTS / CTS"]
-        MV["VBAT 3.4-4.2V"]
-    end
-    TX -->|TX -> RX| MRX
-    RX -->|RX <- TX| MTX
-    PWR --> MPW
-    FLOW -.-> MFL
-    Rail["TPS54231<br/>rail modem ~4V"] --> MV
+    TX["GPIO16 TX"] --> RXM["SIM RX"]
+    RX["GPIO17 RX"] --> TXM["SIM TX"]
+    PWRKEY["GPIO26 PWRKEY"] --> SIMPWR["SIM PWRKEY"]
+    V4["Rail 4V"] --> VBAT["SIM VBAT"]
 `;
 
 const voltageDivider = `flowchart LR
-    Batt["Ắc quy xe<br/>12V hoặc 24V"] --> R1["R1 = 100 kΩ"]
-    R1 --> Node["Nút chia áp<br/>V_adc = U_batt x 0.0909"]
-    Node --> ADC["GPIO4 ADC1<br/>ESP32-S3"]
-    Node --> R2["R2 = 10 kΩ"]
+    UBatt["Ắc quy xe"] --> R1["R1 100kΩ"]
+    R1 --> Node["Nút chia áp"]
+    Node --> ADC["GPIO4 ADC"]
+    Node --> R2["R2 10kΩ"]
     R2 --> GND["GND"]
-    ADC --> Profile["Firmware quy đổi ngưỡng<br/>IGN và LVD theo profile"]
+    ADC --> Rule["Firmware xác định IGN/LVD"]
 `;
 
-const wiringOverview = `flowchart LR
-    Batt["Voltage divider<br/>GPIO4 ADC"] --> MCU["ESP32-S3"]
-    Power["GPIO5 CHARGER_EN<br/>GPIO18 POWER_PATH_EN<br/>GPIO19 LVD_STATUS"] --> MCU
-    MCU --> Sim["SIM7600CE-T<br/>UART1 GPIO16 / GPIO17<br/>PWRKEY GPIO26"]
-    MCU --> Imu["LIS3DH<br/>GPIO47 / GPIO48<br/>INT1 GPIO21"]
-    MCU --> Obd["vgate iCar Pro<br/>BLE OBD-II"]
-    MCU --> Note["Log / MQTT / state machine"]
+const wiringOverview = `flowchart TB
+    MCU["ESP32-S3"]
+    Power["Nguồn vào + power path"]
+    Modem["SIM7600CE-T"]
+    IMU["LIS3DH"]
+    OBD["BLE OBD2"]
+
+    Power --> MCU
+    MCU --> Modem
+    MCU --> IMU
+    MCU --> OBD
 `;
 
-const buckStage = `flowchart TB
-    Vin["Ắc quy xe 12V hoặc 24V"] --> Fuse["Cầu chì đầu vào"]
-    Fuse --> Mp["MP2482-5.0<br/>buck 5V / 3A"]
-    Cin["C1 100 uF / 50V"] --> Mp
-    Mp --> L1["Cuộn cảm 100 uH"]
-    Mp --> D1["Diode Schottky 1N5822"]
-    L1 --> Bus["Bus 5V chính"]
-    D1 --> Bus
-    Bus --> Cout["C2 220 uF / 16V"]
+const buckStage = `flowchart LR
+    Vin["Ắc quy"] --> Fuse["Cầu chì"]
+    Fuse --> Buck["MP2482 Buck 5V"]
+    Buck --> L["Cuộn cảm"]
+    L --> Vout["Bus 5V"]
+    Buck --> D["Schottky diode"]
+    D --> Vout
 `;
 
-const boostStage = `flowchart TB
-    Cell["Pin 21700 3.0-4.2V"] --> Bms["BMS 1S"]
-    Bms --> Boost["SX1308<br/>boost lên 5V"]
-    Boost --> D1["Diode Schottky"]
-    D1 --> Bus["Bus 5V backup"]
-    Bus --> Load["Cấp runtime khi mất nguồn chính"]
+const boostStage = `flowchart LR
+    Cell["Pin 21700"] --> BMS["BMS 1S"]
+    BMS --> Boost["SX1308 Boost 5V"]
+    Boost --> D["Schottky diode"]
+    D --> Runtime["Bus runtime 5V"]
 `;
 
 const powerMux = `flowchart TB
-    subgraph Sense["Khối giám sát và điều phối"]
-        direction LR
-        Lvd["GPIO19 LVD_STATUS"] --> Fsm["ESP32 Power FSM"]
-        Adc["GPIO4 ADC"] --> Fsm
-    end
-    subgraph Path["Hai nhánh cấp nguồn runtime"]
-        direction LR
-        Main["MP2482 5V"] --> D1["D1 Schottky"] --> Bus["Bus 5V runtime"]
-        Backup["SX1308 5V backup"] --> D2["D2 Schottky"] --> Bus
-    end
-    Fsm --> En["GPIO18 POWER_PATH_EN"]
-    En -. ưu tiên nhánh chính .-> Main
-    Fsm --> Charge["GPIO5 CHARGER_EN"]
-    Charge -. bật hoặc tắt sạc .-> Backup
-    Bus --> Rails["XL1509 3.3V và TPS54231 ~4V"]
+    Main["Nhánh chính 5V"] --> ORing["Diode OR"]
+    Backup["Nhánh backup 5V"] --> ORing
+    ORing --> Load["Rail runtime"]
+    FSM["Power FSM"] -. điều khiển .-> Main
+    FSM -. điều khiển .-> Backup
 `;
 
 const chargerChain = `flowchart TB
-    subgraph Charge["Chuỗi sạc pin và cấp dự phòng"]
-        direction LR
-        Bus["Bus 5V từ MP2482"] --> Tp["TP4056<br/>mạch sạc Li-ion"] --> Bms["BMS 1S / protection"]
-    end
-    En["GPIO5 CHARGER_EN"] -. bật hoặc tắt sạc .-> Tp
-    Bms --> Cell["Pin 21700 5000 mAh"]
-    Cell --> Boost["SX1308 backup"]
-    Boost --> Runtime["Nguồn dự phòng cho tracker"]
+    Bus5V["Bus 5V"] --> TP4056["TP4056"]
+    TP4056 --> BMS["BMS"]
+    BMS --> Cell["Pin 21700"]
+    Cell --> Boost["SX1308"]
+    Boost --> Runtime["Nguồn dự phòng"]
 `;
 
-const enclosureLayout = `flowchart TB
-    subgraph Box["Vỏ hộp tracker 100 x 70 x 35 mm"]
-        direction LR
-        subgraph Ctrl["Khối điều khiển và RF"]
-            direction TB
-            Top1["ESP32-S3 DevKit"]
-            Top2["SIM7600CE-T + rail ~4V"]
-            Low1["Anten 4G/LTE"]
-            Low2["Anten GNSS"]
-        end
-        subgraph Power["Khối nguồn và đầu nối"]
-            direction TB
-            Top3["TP4056 + BMS"]
-            Mid1["MP2482 + XL1509"]
-            Mid2["SX1308 + diode-OR"]
-            Mid3["Pin 21700 + giá đỡ"]
-            Low3["Cổng OBD2 / USB debug / khe SIM"]
-        end
-    end
-    Top2 --> Top1
-    Top1 -. anten LTE .-> Low1
-    Top2 -. anten GNSS .-> Low2
-    Top3 --> Mid3
+const enclosureLayout = `block-beta
+    columns 3
+    MCU["ESP32-S3"]
+    MODEM["SIM7600 + anten"]
+    POWER["Buck/Boost/Charge"]
+    CELL["Pin 21700"]
+    OBD["OBD2 / BLE"]
+    PORT["USB debug"]
+
+    POWER --> MCU
+    POWER --> MODEM
+    POWER --> CELL
+    MCU --> OBD
+    MCU --> PORT
 `;
 
-const assemblyFlow = `flowchart TB
-    subgraph S1["Chuẩn bị và tích hợp điện"]
-        direction LR
-        A["Bước 1<br/>Kiểm tra linh kiện"] --> B["Bước 2<br/>Lắp nhánh nguồn"]
-        B --> C["Bước 3<br/>Gắn ESP32-S3 và đi dây GPIO"]
-    end
-    subgraph S2["Kết nối, test và hoàn thiện"]
-        direction LR
-        D["Bước 4<br/>Kết nối modem, IMU và ADC"] --> E["Bước 5<br/>Nạp firmware test tích hợp"]
-        E --> F["Bước 6<br/>Đóng vỏ và hoàn thiện anten"]
-    end
-    C --> D
+const assemblyFlow = `flowchart LR
+    A["B1: Kiểm tra linh kiện"] --> B["B2: Lắp nhánh nguồn"]
+    B --> C["B3: Gắn ESP32-S3"]
+    C --> D["B4: Đấu modem + IMU + ADC"]
+    D --> E["B5: Nạp firmware test"]
+    E --> F["B6: Đóng vỏ"]
 `;
 
-const prototypeLayout = `flowchart TB
-    subgraph Bench["Mặt bằng prototype sau lắp ráp"]
-        MCU["ESP32-S3"]
-        Modem["SIM7600CE-T + anten"]
-        Charge["TP4056 + BMS"]
-        Buck["MP2482 / XL1509"]
-        Boost["SX1308 / diode-OR"]
-        Cell["Pin 21700"]
-        Uart["Header UART / USB debug"]
-        Imu["Header I2C / IMU"]
-        Vin["Nguồn vào 12V / 24V"]
-    end
-    MCU --> Uart
-    MCU --> Imu
-    Buck --> Vin
+const prototypeLayout = `block-beta
+    columns 3
+    Vin["Nguồn vào"]
+    Buck["MP2482/XL1509"]
+    MCU["ESP32-S3"]
+    Modem["SIM7600"]
+    IMU["LIS3DH"]
+    Charge["TP4056+BMS"]
+    Cell["Pin 21700"]
+
+    Vin --> Buck
+    Buck --> MCU
+    MCU --> Modem
+    MCU --> IMU
+    Buck --> Charge
     Charge --> Cell
-    Boost --> Cell
 `;
 
 const obdPlacement = `flowchart TB
-    subgraph Cabin["Khoang lái / khu vực táp-lô"]
-        direction LR
-        Port["Cổng OBD2 dưới táp-lô"] --> Dongle["vgate iCar Pro<br/>BLE dongle cắm trực tiếp"]
-    end
-    Dongle -. BLE không dây .-> Tracker["Tracker đặt trong cabin<br/>hoặc gần hộp cầu chì"]
-    Tracker --> Note["Không cần cắm tracker cố định<br/>trực tiếp vào cổng OBD2"]
+    Port["Cổng OBD2 dưới taplo"] --> Dongle["vgate iCar Pro"]
+    Dongle -. BLE .-> Tracker["Tracker trong cabin"]
+    Tracker --> Note["Không cần cắm tracker trực tiếp OBD2"]
 `;
 
 const vehicleInstallation = `flowchart TB
-    subgraph Car["Khoang lắp đặt trong xe"]
-        direction TB
-        Tracker["Tracker dưới táp-lô"]
-        Gps["Anten GNSS gần kính trước"]
-        Lte["Anten 4G/LTE tránh nguồn xung"]
-        Ble["vgate iCar Pro<br/>kênh BLE OBD2"]
-        Obd["Cổng OBD2"]
-    end
-    Tracker --> Gps
-    Tracker --> Lte
-    Tracker -. BLE .-> Ble
-    Ble --> Obd
+    Tracker["Tracker dưới taplo"] --> LTE["Anten LTE"]
+    Tracker --> GNSS["Anten GNSS"]
+    Tracker -. BLE .-> OBD["OBD2 adapter"]
+    OBD --> Port["Cổng OBD2"]
 `;
 
-const installChecklist = `flowchart TB
-    subgraph C1["Kiểm tra kết nối và định vị"]
-        direction LR
-        P1["Nguồn điện đầu vào<br/>đạt 12V hoặc 24V"] --> P2["BLE OBD2<br/>đọc IGN, RPM, tốc độ"]
-        P2 --> P3["GNSS<br/>fix vị trí ổn định"]
-    end
-    subgraph C2["Kiểm tra truyền thông và năng lượng"]
-        direction LR
-        P4["4G / LTE<br/>đăng ký mạng và gửi MQTT"] --> P5["Power path<br/>chuyển nguồn không reset"]
-        P5 --> P6["IMU wake-up và deep sleep<br/>hoạt động đúng chu kỳ"]
-    end
-    P3 --> P4
+const installChecklist = `flowchart LR
+    C1["Kiểm tra nguồn 12V/24V"] --> C2["Kiểm tra BLE OBD2"]
+    C2 --> C3["Kiểm tra GNSS fix"]
+    C3 --> C4["Kiểm tra LTE/MQTT"]
+    C4 --> C5["Kiểm tra power path"]
+    C5 --> C6["Kiểm tra IMU wake/sleep"]
 `;
 
-const firmwareImplementationFlow = `flowchart TB
-    A["STATE_INIT<br/>khởi tạo driver và load cấu hình"] --> B["STATE_CHECK_IGN<br/>ưu tiên OBD2 rồi fallback ADC"]
-    B --> C{"IGN ON?"}
-    C -->|Có| D["STATE_DRIVING<br/>OBD2 + GNSS + MQTT"]
-    C -->|Không| E{"Có cảnh báo rung?"}
-    E -->|Có| F["STATE_ALERT<br/>wake modem và gửi cảnh báo"]
-    E -->|Không| G["STATE_HEARTBEAT<br/>gửi heartbeat định kỳ"]
-    D --> H["STATE_SLEEP<br/>deep sleep theo policy"]
-    F --> H
-    G --> H
-    H --> B
+const firmwareImplementationFlow = `stateDiagram-v2
+    [*] --> INIT
+    INIT --> CHECK_IGN
+    CHECK_IGN --> DRIVING: IGN ON
+    CHECK_IGN --> IDLE: IGN OFF
+    IDLE --> ALERT: có rung
+    IDLE --> HEARTBEAT: không rung
+    DRIVING --> SLEEP
+    ALERT --> SLEEP
+    HEARTBEAT --> SLEEP
+    SLEEP --> CHECK_IGN
+`;
+
+const otaLifecycleFlow = `stateDiagram-v2
+    [*] --> Assigned
+    Assigned --> Downloading
+    Downloading --> Rebooting: image OK
+    Downloading --> Failed: lỗi tải/hash
+    Rebooting --> Confirming
+    Confirming --> Success: app hợp lệ
+    Confirming --> RolledBack: lỗi xác nhận
+    Success --> [*]
+    Failed --> [*]
+    RolledBack --> [*]
 `;
 
 const appendixGantt = `gantt
-    title Kế hoạch triển khai dự án trong 24 tuần
+    title Kế hoạch thực hiện dự án (24 tuần)
     dateFormat  YYYY-MM-DD
     axisFormat  %d/%m
 
@@ -647,21 +933,126 @@ const appendixGantt = `gantt
     Nghiên cứu và thiết kế         :a1, 2025-09-01, 28d
 
     section Firmware
-    Setup nền tảng và driver       :a2, 2025-09-15, 21d
-    BLE OBD2 và quản lý nguồn      :a3, after a2, 35d
+    Setup driver nền tảng          :a2, 2025-09-15, 21d
+    BLE OBD2 và power FSM          :a3, after a2, 35d
 
     section Cloud và Backend
-    Triển khai EMQX, DB, Docker    :a4, 2025-09-29, 28d
-    Backend API và MQTT Bridge     :a5, 2025-10-13, 42d
+    EMQX + DB + Docker             :a4, 2025-09-29, 28d
+    Backend API + MQTT Bridge      :a5, 2025-10-13, 42d
 
     section Frontend
-    Dashboard, bản đồ, cảnh báo    :a6, 2025-11-10, 42d
+    Dashboard + bản đồ + cảnh báo  :a6, 2025-11-10, 42d
 
     section Tích hợp
-    Tích hợp và kiểm thử hệ thống  :a7, 2025-12-22, 42d
-    Viết báo cáo và bảo vệ         :a8, 2026-01-19, 28d
+    Tích hợp hệ thống              :a7, 2025-12-22, 42d
+    Viết báo cáo                   :a8, 2026-01-19, 28d
 `;
 
-// All report figures now render from custom SVG generators in generate-thesis-report-figures-v2.mjs.
-// Keep the Mermaid source snippets above as reference only; they are no longer exported for rendering.
-export const mermaidDiagrams = [];
+export const diagramByFileName = {
+    "01-chuong-1-gioi-thieu-hinh-1-1.svg": problemSolution,
+    "01-chuong-1-gioi-thieu-hinh-1-2.svg": projectPhases,
+    "01-chuong-1-gioi-thieu-hinh-1-3.svg": systemArchitecture,
+    "01-chuong-1-gioi-thieu-hinh-1-4.svg": powerModes,
+    "01-chuong-1-gioi-thieu-hinh-1-5.svg": roadmapPlan,
+
+    "02-chuong-2-phan-tich-hinh-2-1.svg": dataArchitecture,
+
+    "03-chuong-3-giai-phap-phan-cung-hinh-3-1.svg": trackerBlock,
+    "03-chuong-3-giai-phap-phan-cung-hinh-3-2.svg": bleObdSequence,
+    "03-chuong-3-giai-phap-phan-cung-hinh-3-3.svg": lis3dhWiring,
+    "03-chuong-3-giai-phap-phan-cung-hinh-3-4.svg": powerManagement,
+
+    "04-chuong-3-giai-phap-firmware-hinh-3-5.svg": firmwareLayers,
+    "04-chuong-3-giai-phap-firmware-hinh-3-6.svg": taskInteraction,
+    "04-chuong-3-giai-phap-firmware-hinh-3-7.svg": firmwareMainFlow,
+    "04-chuong-3-giai-phap-firmware-hinh-3-8.svg": bleObdFlow,
+    "04-chuong-3-giai-phap-firmware-hinh-3-9.svg": modemControlFlow,
+    "04-chuong-3-giai-phap-firmware-hinh-3-10.svg": powerPathFlow,
+    "04-chuong-3-giai-phap-firmware-hinh-3-11.svg": deviceState,
+
+    "05-chuong-3-giai-phap-backend-hinh-3-12.svg": cloudArchitecture,
+    "05-chuong-3-giai-phap-backend-hinh-3-13.svg": dualStorageStrategy,
+    "05-chuong-3-giai-phap-backend-hinh-3-14.svg": dbErd,
+    "05-chuong-3-giai-phap-backend-hinh-3-14a.svg": otaOrchestrationFlow,
+
+    "06-chuong-3-giai-phap-frontend-hinh-3-15.svg": frontendFsd,
+    "06-chuong-3-giai-phap-frontend-hinh-3-16.svg": authSequence,
+    "06-chuong-3-giai-phap-frontend-hinh-3-17.svg": dashboardLayout,
+    "06-chuong-3-giai-phap-frontend-hinh-3-18.svg": vehicleManagementLayout,
+    "06-chuong-3-giai-phap-frontend-hinh-3-19.svg": mapIntegration,
+    "06-chuong-3-giai-phap-frontend-hinh-3-20.svg": realtimeMapLayout,
+    "06-chuong-3-giai-phap-frontend-hinh-3-21.svg": dashboardWireframe,
+    "06-chuong-3-giai-phap-frontend-hinh-3-22.svg": uiPatterns,
+    "06-chuong-3-giai-phap-frontend-hinh-3-23.svg": optimizedArchitecture,
+
+    "07-chuong-4-trien-khai-hardware-hinh-4-1.svg": trackerBlock,
+    "07-chuong-4-trien-khai-hardware-hinh-4-2.svg": uartModemWiring,
+    "07-chuong-4-trien-khai-hardware-hinh-4-3.svg": voltageDivider,
+    "07-chuong-4-trien-khai-hardware-hinh-4-4.svg": wiringOverview,
+    "07-chuong-4-trien-khai-hardware-hinh-4-5.svg": hardwareElectricalOverview,
+    "07-chuong-4-trien-khai-hardware-hinh-4-6.svg": powerManagement,
+    "07-chuong-4-trien-khai-hardware-hinh-4-7.svg": buckStage,
+    "07-chuong-4-trien-khai-hardware-hinh-4-8.svg": boostStage,
+    "07-chuong-4-trien-khai-hardware-hinh-4-9.svg": powerMux,
+    "07-chuong-4-trien-khai-hardware-hinh-4-10.svg": chargerChain,
+    "07-chuong-4-trien-khai-hardware-hinh-4-11.svg": enclosureLayout,
+    "07-chuong-4-trien-khai-hardware-hinh-4-12.svg": assemblyFlow,
+    "07-chuong-4-trien-khai-hardware-hinh-4-13.svg": prototypeLayout,
+    "07-chuong-4-trien-khai-hardware-hinh-4-14.svg": obdPlacement,
+    "07-chuong-4-trien-khai-hardware-hinh-4-15.svg": vehicleInstallation,
+    "07-chuong-4-trien-khai-hardware-hinh-4-16.svg": installChecklist,
+
+    "09-chuong-4-trien-khai-cloud-hinh-4-15.svg": cloudArchitecture,
+    "09-chuong-4-trien-khai-cloud-hinh-4-16.svg": ivmStructure,
+    "09-chuong-4-trien-khai-cloud-hinh-4-17.svg": mqttBridgeFlow,
+    "09-chuong-4-trien-khai-cloud-hinh-4-18.svg": backendFolder,
+    "09-chuong-4-trien-khai-cloud-hinh-4-19.svg": frontendFolder,
+    "09-chuong-4-trien-khai-cloud-hinh-4-20.svg": dashboardLayout,
+    "09-chuong-4-trien-khai-cloud-hinh-4-21.svg": vehicleManagementLayout,
+    "09-chuong-4-trien-khai-cloud-hinh-4-22.svg": realtimeMapLayout,
+    "09-chuong-4-trien-khai-cloud-hinh-4-23.svg": alertManagementLayout,
+    "09-chuong-4-trien-khai-cloud-hinh-4-24.svg": observabilityLayout,
+    "09-chuong-4-trien-khai-cloud-hinh-4-25.svg": emqxDashboardLayout,
+
+    "10-chuong-4-ket-qua-do-luong-hinh-4-20.svg": labSetup,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-21.svg": vehicleInstall,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-22.svg": testEnvironment,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-23.svg": currentCycleChart,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-24.svg": backupVoltageChart,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-25.svg": temperatureCurrentChart,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-26.svg": bleConnectDistChart,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-27.svg": gpsFixChart,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-28.svg": mqttLatencyChart,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-29.svg": apiLatencyChart,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-30.svg": e2eLatencyChart,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-31.svg": scalePerformanceChart,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-32.svg": lighthouseChart,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-33.svg": realtimeMapLayout,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-34.svg": obdRealtimeLayout,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-35.svg": geofenceLayout,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-36.svg": remoteCommandLayout,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-37.svg": routeRecoveryLayout,
+    "10-chuong-4-ket-qua-do-luong-hinh-4-38.svg": designRadar,
+
+    "thesis-05-chuong-3-giai-phap-backend-01.svg": deviceToDashboardFlow,
+    "thesis-05-chuong-3-giai-phap-backend-02.svg": dualStorageStrategy,
+    "thesis-05-chuong-3-giai-phap-backend-03.svg": dbErd,
+    "thesis-05-chuong-3-giai-phap-backend-04.svg": otaOrchestrationFlow,
+
+    "thesis-08-chuong-4-trien-khai-firmware-01.svg": firmwareImplementationFlow,
+    "thesis-08-chuong-4-trien-khai-firmware-02.svg": otaLifecycleFlow,
+
+    "thesis-14-phu-luc-01.svg": appendixGantt,
+
+    "thesis-99-bao-cao-thesis-hoan-chinh-01.svg": trackerBlock,
+    "thesis-99-bao-cao-thesis-hoan-chinh-02.svg": lis3dhWiring,
+    "thesis-99-bao-cao-thesis-hoan-chinh-03.svg": powerManagement,
+    "thesis-99-bao-cao-thesis-hoan-chinh-04.svg": deviceToDashboardFlow,
+    "thesis-99-bao-cao-thesis-hoan-chinh-05.svg": queryStoreFlow,
+    "thesis-99-bao-cao-thesis-hoan-chinh-06.svg": mapLayerBreakdown,
+    "thesis-99-bao-cao-thesis-hoan-chinh-07.svg": prototypeLayout,
+    "thesis-99-bao-cao-thesis-hoan-chinh-08.svg": uartModemWiring,
+    "thesis-99-bao-cao-thesis-hoan-chinh-09.svg": powerMux,
+};
+
+export const mermaidDiagrams = Object.entries(diagramByFileName).map(([name, code]) => ({ name, code }));

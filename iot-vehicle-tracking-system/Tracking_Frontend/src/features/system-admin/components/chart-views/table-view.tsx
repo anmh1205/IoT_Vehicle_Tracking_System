@@ -1,4 +1,5 @@
 'use client';
+
 import { format } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -10,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { MetricSeries } from '@/features/system-admin/types';
+
 export const TableView = ({ series }: { series: MetricSeries[] }) => {
   const rows = series.flatMap((item) =>
     item.points.map((point) => ({
@@ -18,6 +20,7 @@ export const TableView = ({ series }: { series: MetricSeries[] }) => {
       value: point.value,
     })),
   );
+
   return (
     <Card>
       <CardContent className="max-h-[380px] overflow-auto p-0">
@@ -40,7 +43,7 @@ export const TableView = ({ series }: { series: MetricSeries[] }) => {
             {rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="h-20 text-center text-sm text-muted-foreground">
-Không có dòng dữ liệu chỉ số.
+                  Không có dòng dữ liệu chỉ số.
                 </TableCell>
               </TableRow>
             ) : null}

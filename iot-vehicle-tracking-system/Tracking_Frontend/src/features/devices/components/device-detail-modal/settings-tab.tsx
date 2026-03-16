@@ -1,8 +1,11 @@
 'use client';
-import { useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -12,17 +15,20 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDeviceDetailModal } from './modal-context';
+
 const schema = z.object({
   deviceName: z.string().min(1),
   requestInterval: z.number().min(10).max(3600),
   vibrationThreshold: z.number().min(0).max(1000),
 });
+
 type SettingsFormValues = z.infer<typeof schema>;
+
 export const SettingsTab = () => {
   const { device, onUpdateNameId, onUpdateSettings, onDeleteDevice } = useDeviceDetailModal();
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -31,6 +37,7 @@ export const SettingsTab = () => {
       vibrationThreshold: device?.vibrationThreshold ?? 0,
     },
   });
+
   useEffect(() => {
     form.reset({
       deviceName: device?.deviceName ?? '',
@@ -38,6 +45,7 @@ export const SettingsTab = () => {
       vibrationThreshold: device?.vibrationThreshold ?? 0,
     });
   }, [device, form]);
+
   const onSubmit = async (values: SettingsFormValues) => {
     await onUpdateNameId({ deviceName: values.deviceName });
     await onUpdateSettings({
@@ -45,6 +53,7 @@ export const SettingsTab = () => {
       vibrationThreshold: values.vibrationThreshold,
     });
   };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -61,22 +70,24 @@ export const SettingsTab = () => {
                   <FormItem>
                     <FormLabel>Tên thiết bị</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} autoComplete="off" spellCheck={false} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="requestInterval"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Chu kỳ gửi (giây)</FormLabel>
+                      <FormLabel>Chu kỳ gửi dữ liệu (giây)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
+                          inputMode="numeric"
                           value={field.value}
                           onChange={(event) => field.onChange(Number(event.target.value))}
                         />
@@ -94,6 +105,7 @@ export const SettingsTab = () => {
                       <FormControl>
                         <Input
                           type="number"
+                          inputMode="numeric"
                           value={field.value}
                           onChange={(event) => field.onChange(Number(event.target.value))}
                         />
@@ -103,7 +115,10 @@ export const SettingsTab = () => {
                   )}
                 />
               </div>
-              <Button type="submit">Lưu thay đổi</Button>
+
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+              </Button>
             </form>
           </Form>
         </CardContent>
@@ -115,10 +130,21 @@ export const SettingsTab = () => {
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Xóa thiết bị này sẽ loại nó khỏi bảng điều khiển thời gian thực.
+            Xóa thiết bị sẽ loại nó khỏi bảng điều khiển và dừng các luồng thao tác trong giao diện.
           </p>
-          <Button variant="destructive" onClick={() => void onDeleteDevice()}>
-            Xóa thiết bị
+          <Button
+            variant="destructive"
+            disabled={isDeleting}
+            onClick={async () => {
+              setIsDeleting(true);
+              try {
+                await onDeleteDevice();
+              } finally {
+                setIsDeleting(false);
+              }
+            }}
+          >
+            {isDeleting ? 'Đang xóa...' : 'Xóa thiết bị'}
           </Button>
         </CardContent>
       </Card>

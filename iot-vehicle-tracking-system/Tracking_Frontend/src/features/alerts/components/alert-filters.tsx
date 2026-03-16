@@ -1,4 +1,7 @@
-﻿'use client';
+'use client';
+
+import { RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -6,22 +9,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
 export const AlertFilters = ({
   severity,
   status,
   onChange,
+  onReset,
 }: {
   severity?: string;
   status?: string;
   onChange: (next: { severity?: string; status?: string }) => void;
+  onReset?: () => void;
 }) => {
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       <Select
         value={severity ?? 'all'}
-        onValueChange={(v) => onChange({ severity: v === 'all' ? undefined : v, status })}
+        onValueChange={(value) => onChange({ severity: value === 'all' ? undefined : value, status })}
       >
-        <SelectTrigger className="w-40">
+        <SelectTrigger className="w-full sm:w-44">
           <SelectValue placeholder="Mức độ" />
         </SelectTrigger>
         <SelectContent>
@@ -34,9 +40,9 @@ export const AlertFilters = ({
       </Select>
       <Select
         value={status ?? 'all'}
-        onValueChange={(v) => onChange({ severity, status: v === 'all' ? undefined : v })}
+        onValueChange={(value) => onChange({ severity, status: value === 'all' ? undefined : value })}
       >
-        <SelectTrigger className="w-40">
+        <SelectTrigger className="w-full sm:w-44">
           <SelectValue placeholder="Trạng thái" />
         </SelectTrigger>
         <SelectContent>
@@ -46,6 +52,10 @@ export const AlertFilters = ({
           <SelectItem value="resolved">Đã giải quyết</SelectItem>
         </SelectContent>
       </Select>
+      <Button type="button" variant="outline" onClick={() => onReset?.()}>
+        <RotateCcw className="mr-2 h-4 w-4" />
+        Đặt lại
+      </Button>
     </div>
   );
 };

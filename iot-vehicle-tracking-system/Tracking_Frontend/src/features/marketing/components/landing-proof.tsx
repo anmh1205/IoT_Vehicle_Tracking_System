@@ -42,7 +42,7 @@ export const LandingProof = () => {
               <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950">
                 <Image
                   src="/landing/operations-surface.svg"
-                  alt="Minh hoạ bề mặt điều hành gồm map, activity, system status và cảnh báo"
+                  alt="Minh họa bề mặt điều hành gồm map, activity, system status và cảnh báo"
                   width={840}
                   height={720}
                   className="h-auto w-full"
@@ -70,7 +70,7 @@ export const LandingProof = () => {
                 </div>
                 <Image
                   src="/landing/mobile-alerts.svg"
-                  alt="Minh hoạ màn hình mobile nhận cảnh báo và trạng thái geofence"
+                  alt="Minh họa màn hình mobile nhận cảnh báo và trạng thái geofence"
                   width={720}
                   height={640}
                   className="h-auto w-full rounded-[1.25rem] border border-white/10"

@@ -49,3 +49,11 @@ export const updateUserSchema = z.object({
   email: z.string().email('Invalid email format').nullable().optional(),
   avatarUrl: z.string().url('Invalid URL format').nullable().optional(),
 });
+
+export const userListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  search: z.string().max(100).optional(),
+  role: z.enum(['admin', 'manager', 'operator', 'viewer']).optional(),
+  status: z.enum(['active', 'inactive', 'suspended']).optional(),
+});

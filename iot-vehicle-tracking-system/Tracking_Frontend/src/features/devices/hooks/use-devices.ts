@@ -36,18 +36,26 @@ const toDevice = (raw: any): Device => ({
 const toDeviceListResult = (payload: any): DeviceListResult => {
   const items = Array.isArray(payload?.items)
     ? payload.items
-    : Array.isArray(payload?.data?.items)
-      ? payload.data.items
-      : Array.isArray(payload)
-        ? payload
-        : [];
+    : Array.isArray(payload?.devices)
+      ? payload.devices
+      : Array.isArray(payload?.data?.items)
+        ? payload.data.items
+      : Array.isArray(payload?.data?.devices)
+        ? payload.data.devices
+        : Array.isArray(payload)
+          ? payload
+          : [];
 
-  const pagination = payload?.pagination ??
+  const total = Number(payload?.total ?? payload?.data?.total ?? items.length);
+  const page = Number(payload?.page ?? payload?.data?.page ?? 1);
+  const limit = Number(payload?.limit ?? payload?.data?.limit ?? (items.length || 20));
+  const pagination =
+    payload?.pagination ??
     payload?.data?.pagination ?? {
-      page: 1,
-      limit: items.length || 20,
-      total: items.length,
-      totalPages: 1,
+      page,
+      limit,
+      total,
+      totalPages: Math.max(Math.ceil(total / Math.max(limit, 1)), 1),
     };
 
   return {

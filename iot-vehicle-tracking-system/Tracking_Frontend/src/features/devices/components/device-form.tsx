@@ -34,10 +34,12 @@ export const DeviceForm = ({
   open,
   onOpenChange,
   defaultValues,
+  onCreateSuccess,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultValues?: any;
+  onCreateSuccess?: () => void;
 }) => {
   const createMutation = useCreateDevice();
   const updateMutation = useUpdateDevice();
@@ -78,7 +80,12 @@ export const DeviceForm = ({
       );
       return;
     }
-    createMutation.mutate(values, { onSuccess: () => onOpenChange(false) });
+    createMutation.mutate(values, {
+      onSuccess: () => {
+        onCreateSuccess?.();
+        onOpenChange(false);
+      },
+    });
   };
   const pending = createMutation.isPending || updateMutation.isPending;
   return (

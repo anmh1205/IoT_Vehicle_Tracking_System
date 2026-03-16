@@ -22,7 +22,7 @@ export interface ResetPasswordResult {
 
 export const userServices = {
   getList: (params?: Record<string, unknown>) =>
-    apiClient.get('/users', { params }).then((r) => unwrap<User[]>(r.data)),
+    apiClient.get('/users', { params }).then((r) => unwrap<any>(r.data)),
   getById: (id: number) => apiClient.get(`/users/${id}`).then((r) => unwrap<User>(r.data)),
   create: (data: CreateUserInput) => apiClient.post('/users', data).then((r) => unwrap<User>(r.data)),
   update: (id: number, data: UpdateUserInput) =>

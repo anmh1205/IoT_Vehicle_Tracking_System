@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { dashboardServices } from '@/lib/api/dashboard';
 import { apiClient, unwrap } from '@/lib/api/client';
+import { formatLocalDateKey, parseDateKeyAsLocal } from '@/lib/utils';
+
 export interface DashboardEvent {
   id: string | number;
   eventType: string;
@@ -9,6 +11,7 @@ export interface DashboardEvent {
   deviceId?: string | null;
   serverTimestamp?: string;
 }
+
 export interface DashboardOverviewStats {
   totalDevices: number;
   activeDevices: number;
@@ -18,21 +21,25 @@ export interface DashboardOverviewStats {
   totalRuntimeWeek: number;
   sessionsToday: number;
 }
+
 export interface DeviceActivityPoint {
   label: string;
   running: number;
   idle: number;
   offline: number;
 }
+
 export interface PieStatusPoint {
   name: string;
   value: number;
   color: string;
 }
+
 export interface FleetRuntimePoint {
   label: string;
   runtime: number;
 }
+
 const normalizeStats = (raw: any): DashboardOverviewStats => ({
   totalDevices: Number(raw?.totalDevices ?? raw?.total_devices ?? 0),
   activeDevices: Number(raw?.activeDevices ?? raw?.active_devices ?? 0),
@@ -42,6 +49,7 @@ const normalizeStats = (raw: any): DashboardOverviewStats => ({
   totalRuntimeWeek: Number(raw?.totalRuntimeWeek ?? raw?.total_runtime_week ?? 0),
   sessionsToday: Number(raw?.sessionsToday ?? raw?.sessions_today ?? 0),
 });
+
 const normalizeEvents = (payload: any): DashboardEvent[] => {
   const events = Array.isArray(payload?.events)
     ? payload.events
@@ -52,6 +60,7 @@ const normalizeEvents = (payload: any): DashboardEvent[] => {
         : Array.isArray(payload?.data?.items)
           ? payload.data.items
           : [];
+
   return events.map((event: any, index: number) => ({
     id: event?.id ?? `${event?.serverTimestamp ?? index}-${event?.eventType ?? 'event'}`,
     eventType: String(event?.eventType ?? event?.event_type ?? 'event'),
@@ -61,20 +70,23 @@ const normalizeEvents = (payload: any): DashboardEvent[] => {
     serverTimestamp: event?.serverTimestamp ?? event?.server_timestamp ?? new Date().toISOString(),
   }));
 };
+
 const formatLabel = (value: string) => {
-  const date = new Date(value);
+  const date = parseDateKeyAsLocal(value);
   if (Number.isNaN(date.getTime())) {
     return value;
   }
   return new Intl.DateTimeFormat('vi-VN', { weekday: 'short' }).format(date);
 };
+
 const groupEventsByDay = (events: DashboardEvent[], days: number) => {
   const bucket = new Map<string, DeviceActivityPoint>();
   const now = new Date();
+
   for (let index = days - 1; index >= 0; index -= 1) {
     const date = new Date(now);
     date.setDate(now.getDate() - index);
-    const key = date.toISOString().slice(0, 10);
+    const key = formatLocalDateKey(date);
     bucket.set(key, {
       label: formatLabel(key),
       running: 0,
@@ -82,12 +94,19 @@ const groupEventsByDay = (events: DashboardEvent[], days: number) => {
       offline: 0,
     });
   }
+
   for (const event of events) {
-    const dateKey = String(event.serverTimestamp ?? '').slice(0, 10);
+    const eventDate = new Date(String(event.serverTimestamp ?? ''));
+    if (Number.isNaN(eventDate.getTime())) {
+      continue;
+    }
+
+    const dateKey = formatLocalDateKey(eventDate);
     const current = bucket.get(dateKey);
     if (!current) {
       continue;
     }
+
     const message = `${event.eventType} ${event.message ?? ''}`.toLowerCase();
     if (message.includes('offline') || message.includes('disconnect')) {
       current.offline += 1;
@@ -97,31 +116,43 @@ const groupEventsByDay = (events: DashboardEvent[], days: number) => {
       current.running += 1;
     }
   }
+
   return Array.from(bucket.values());
 };
+
 const groupRuntimeByDay = (events: DashboardEvent[], days: number) => {
   const bucket = new Map<string, number>();
   const now = new Date();
+
   for (let index = days - 1; index >= 0; index -= 1) {
     const date = new Date(now);
     date.setDate(now.getDate() - index);
-    const key = date.toISOString().slice(0, 10);
+    const key = formatLocalDateKey(date);
     bucket.set(key, 0);
   }
+
   for (const event of events) {
-    const dateKey = String(event.serverTimestamp ?? '').slice(0, 10);
+    const eventDate = new Date(String(event.serverTimestamp ?? ''));
+    if (Number.isNaN(eventDate.getTime())) {
+      continue;
+    }
+
+    const dateKey = formatLocalDateKey(eventDate);
     if (!bucket.has(dateKey)) {
       continue;
     }
+
     bucket.set(dateKey, (bucket.get(dateKey) ?? 0) + 1.5);
   }
+
   return Array.from(bucket.entries()).map(([dateKey, runtime]) => ({
     label: new Intl.DateTimeFormat('vi-VN', { month: '2-digit', day: '2-digit' }).format(
-      new Date(dateKey),
+      parseDateKeyAsLocal(dateKey),
     ),
     runtime: Number(runtime.toFixed(1)),
   }));
 };
+
 export const useDashboardStats = () => {
   return useQuery({
     queryKey: ['dashboard', 'stats'],
@@ -129,14 +160,15 @@ export const useDashboardStats = () => {
     refetchInterval: 60000,
   });
 };
+
 export const useDashboardActivity = (limit = 20) => {
   return useQuery({
     queryKey: ['dashboard', 'activity', limit],
-    queryFn: () =>
-      dashboardServices.getActivity({ limit }).then((payload) => normalizeEvents(payload)),
+    queryFn: () => dashboardServices.getActivity({ limit }).then((payload) => normalizeEvents(payload)),
     refetchInterval: 30000,
   });
 };
+
 export const useDeviceActivity = (days = 7) => {
   return useQuery({
     queryKey: ['dashboard', 'device-activity', days],
@@ -151,6 +183,7 @@ export const useDeviceActivity = (days = 7) => {
           : Array.isArray(payload)
             ? payload
             : [];
+
         if (rows.length > 0) {
           return rows.map((row: any) => ({
             label: String(row?.label ?? row?.date ?? '-'),
@@ -162,14 +195,17 @@ export const useDeviceActivity = (days = 7) => {
       } catch {
         // Fallback below when endpoint is unavailable.
       }
+
       const activityPayload = await dashboardServices.getActivity({ limit: 300 });
       const events = normalizeEvents(activityPayload);
       return groupEventsByDay(events, days);
     },
   });
 };
+
 export const useDeviceStatusDistribution = () => {
   const statsQuery = useDashboardStats();
+
   return useQuery({
     queryKey: ['dashboard', 'device-status'],
     queryFn: async (): Promise<PieStatusPoint[]> => {
@@ -181,9 +217,10 @@ export const useDeviceStatusDistribution = () => {
           : Array.isArray(payload)
             ? payload
             : [];
+
         if (rows.length > 0) {
           return rows.map((row: any, index: number) => ({
-            name: String(row?.name ?? row?.status ?? `Status ${index + 1}`),
+            name: String(row?.name ?? row?.status ?? `Trạng thái ${index + 1}`),
             value: Number(row?.value ?? row?.count ?? 0),
             color: row?.color ?? ['#22c55e', '#64748b', '#ef4444', '#f59e0b'][index % 4],
           }));
@@ -191,10 +228,12 @@ export const useDeviceStatusDistribution = () => {
       } catch {
         // Fallback below when endpoint is unavailable.
       }
+
       const stats = statsQuery.data ?? normalizeStats({});
       const active = Number(stats.activeDevices ?? 0);
       const offline = Number(stats.offlineDevices ?? 0);
       const stopped = Math.max(0, Number(stats.totalDevices ?? 0) - active - offline);
+
       return [
         { name: 'Đang chạy', value: active, color: '#22c55e' },
         { name: 'Đã dừng', value: stopped, color: '#64748b' },
@@ -203,6 +242,7 @@ export const useDeviceStatusDistribution = () => {
     },
   });
 };
+
 export const useFleetRuntime = (days = 30) => {
   return useQuery({
     queryKey: ['dashboard', 'fleet-runtime', days],
@@ -217,6 +257,7 @@ export const useFleetRuntime = (days = 30) => {
           : Array.isArray(payload)
             ? payload
             : [];
+
         if (rows.length > 0) {
           return rows.map((row: any) => ({
             label: String(row?.label ?? row?.date ?? '-'),
@@ -226,6 +267,7 @@ export const useFleetRuntime = (days = 30) => {
       } catch {
         // Fallback below when endpoint is unavailable.
       }
+
       const activityPayload = await dashboardServices.getActivity({ limit: 500 });
       const events = normalizeEvents(activityPayload);
       return groupRuntimeByDay(events, days);
