@@ -17,10 +17,10 @@
   },
   "flowchart": {
     "defaultRenderer": "elk",
-    "curve": "basis",
+    "curve": "linear",
     "htmlLabels": false,
-    "nodeSpacing": 120,
-    "rankSpacing": 160,
+    "nodeSpacing": 200,
+    "rankSpacing": 240,
     "padding": 28,
     "wrappingWidth": 220,
     "useMaxWidth": false

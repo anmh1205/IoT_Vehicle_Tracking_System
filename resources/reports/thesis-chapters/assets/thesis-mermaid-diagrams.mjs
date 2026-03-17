@@ -156,26 +156,36 @@ const lis3dhWiring = `flowchart LR
     GND --> IGND
 `;
 
-const powerManagement = `block-beta
-    columns 4
+const powerManagement = `flowchart LR
     Vin["Nguồn xe 12V/24V"]
-    Buck["MP2482 5V"]
-    Rail33["Rail 3.3V"]
-    Rail4["Rail 4V modem"]
-    Charge["TP4056"]
-    Cell["Pin 21700"]
-    Boost["SX1308"]
-    Fsm["Power FSM"]
+    Buck["MP2482 Buck 5V"]
 
-    Vin --> Buck
-    Buck --> Rail33
-    Buck --> Rail4
-    Buck --> Charge
-    Charge --> Cell
-    Cell --> Boost
-    Boost --> Fsm
-    Fsm --> Rail33
-    Fsm --> Rail4
+    subgraph MainRail["Nhánh nguồn chính"]
+        direction TB
+        Rail33["Rail 3.3V\\nMCU + IMU"]
+        Rail4["Rail ~4V\\nModem LTE"]
+    end
+
+    subgraph BackupRail["Nhánh nguồn dự phòng"]
+        direction LR
+        Charge["TP4056 Sạc pin"]
+        Cell["Pin 21700"]
+        Boost["SX1308 Boost 5V"]
+        BackupBus["Bus backup 5V"]
+    end
+
+    Fsm["Power FSM\\nGPIO5 / GPIO18 / GPIO19"]
+
+    Vin ----> Buck
+    Buck ----> Rail33
+    Buck ----> Rail4
+    Buck ----> Charge
+    Charge ----> Cell
+    Cell ----> Boost
+    Boost ----> BackupBus
+
+    Fsm -. điều khiển .-> Buck
+    Fsm -. ưu tiên nguồn .-> BackupBus
 `;
 
 const firmwareLayers = `flowchart TB
@@ -835,20 +845,30 @@ const chargerChain = `flowchart TB
     Boost --> Runtime["Nguồn dự phòng"]
 `;
 
-const enclosureLayout = `block-beta
-    columns 3
-    MCU["ESP32-S3"]
-    MODEM["SIM7600 + anten"]
-    POWER["Buck/Boost/Charge"]
-    CELL["Pin 21700"]
-    OBD["OBD2 / BLE"]
-    PORT["USB debug"]
+const enclosureLayout = `flowchart LR
+    subgraph PowerZone["Khoang nguồn"]
+        direction TB
+        POWER["Buck / Boost / Charge"]
+        CELL["Pin 21700"]
+        POWER ----> CELL
+    end
 
-    POWER --> MCU
-    POWER --> MODEM
-    POWER --> CELL
-    MCU --> OBD
-    MCU --> PORT
+    subgraph CoreZone["Khoang xử lý + RF"]
+        direction TB
+        MCU["ESP32-S3"]
+        MODEM["SIM7600 + anten"]
+    end
+
+    subgraph IOZone["Khoang cổng kết nối"]
+        direction TB
+        OBD["OBD2 / BLE"]
+        PORT["USB debug"]
+    end
+
+    POWER ----> MCU
+    POWER ----> MODEM
+    MCU ----> OBD
+    MCU ----> PORT
 `;
 
 const assemblyFlow = `flowchart LR
@@ -859,22 +879,32 @@ const assemblyFlow = `flowchart LR
     E --> F["B6: Đóng vỏ"]
 `;
 
-const prototypeLayout = `block-beta
-    columns 3
-    Vin["Nguồn vào"]
-    Buck["MP2482/XL1509"]
-    MCU["ESP32-S3"]
-    Modem["SIM7600"]
-    IMU["LIS3DH"]
-    Charge["TP4056+BMS"]
-    Cell["Pin 21700"]
+const prototypeLayout = `flowchart LR
+    subgraph InputStage["Đầu vào năng lượng"]
+        direction LR
+        Vin["Nguồn vào 12V/24V"]
+        Buck["MP2482 / XL1509"]
+        Vin ----> Buck
+    end
 
-    Vin --> Buck
-    Buck --> MCU
-    MCU --> Modem
-    MCU --> IMU
-    Buck --> Charge
-    Charge --> Cell
+    subgraph ControlStage["Khối điều khiển"]
+        direction TB
+        MCU["ESP32-S3"]
+        IMU["LIS3DH"]
+        Modem["SIM7600"]
+    end
+
+    subgraph BackupStage["Khối sạc dự phòng"]
+        direction LR
+        Charge["TP4056 + BMS"]
+        Cell["Pin 21700"]
+        Charge ----> Cell
+    end
+
+    Buck ----> MCU
+    MCU ----> IMU
+    MCU ----> Modem
+    Buck ----> Charge
 `;
 
 const obdPlacement = `flowchart TB
