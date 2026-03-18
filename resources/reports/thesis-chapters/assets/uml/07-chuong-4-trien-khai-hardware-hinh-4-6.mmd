@@ -26,5 +26,5 @@ flowchart LR
     Cell ----> Boost
     Boost ----> BackupBus
 
-    Fsm -. điều khiển .-> Buck
-    Fsm -. ưu tiên nguồn .-> BackupBus
+    Fsm -.->|điều khiển| Buck
+    Fsm -.->|ưu tiên nguồn| BackupBus
