@@ -15,6 +15,18 @@ const npxBin = process.platform === "win32" ? "npx.cmd" : "npx";
 mkdirSync(figuresDir, { recursive: true });
 
 const imageExtension = /\.(svg|png|jpg|jpeg|webp)$/iu;
+const renderSizeByFileName = {
+  "06-chuong-3-giai-phap-frontend-hinh-3-17.svg": { width: 3200, height: 1900 },
+  "06-chuong-3-giai-phap-frontend-hinh-3-18.svg": { width: 3200, height: 1900 },
+  "06-chuong-3-giai-phap-frontend-hinh-3-20.svg": { width: 3400, height: 2100 },
+  "09-chuong-4-trien-khai-cloud-hinh-4-20.svg": { width: 3200, height: 1900 },
+  "09-chuong-4-trien-khai-cloud-hinh-4-21.svg": { width: 3200, height: 1900 },
+  "09-chuong-4-trien-khai-cloud-hinh-4-22.svg": { width: 3400, height: 2100 },
+  "09-chuong-4-trien-khai-cloud-hinh-4-23.svg": { width: 3200, height: 1900 },
+  "10-chuong-4-ket-qua-do-luong-hinh-4-20.svg": { width: 3200, height: 1900 },
+  "10-chuong-4-ket-qua-do-luong-hinh-4-33.svg": { width: 3400, height: 2100 },
+  "thesis-99-bao-cao-thesis-hoan-chinh-06.svg": { width: 3200, height: 2000 },
+};
 
 const findCachedMermaidCli = () => {
   const cacheRoots = [
@@ -36,7 +48,8 @@ const findCachedMermaidCli = () => {
 
 const mermaidCliPath = findCachedMermaidCli();
 
-const getRenderSize = (code) => {
+const getRenderSize = (figureName, code) => {
+  if (renderSizeByFileName[figureName]) return renderSizeByFileName[figureName];
   const source = code.trimStart();
   if (source.startsWith("sequenceDiagram")) return { width: 2600, height: 1600 };
   if (source.startsWith("stateDiagram")) return { width: 2400, height: 1500 };
@@ -44,9 +57,9 @@ const getRenderSize = (code) => {
   if (source.startsWith("gantt")) return { width: 2400, height: 1400 };
   if (source.startsWith("xychart-beta")) return { width: 2300, height: 1300 };
   if (source.startsWith("radar-beta")) return { width: 2200, height: 1400 };
-  if (source.startsWith("block-beta")) return { width: 2300, height: 1500 };
+  if (source.startsWith("block-beta")) return { width: 3000, height: 1900 };
   if (source.startsWith("erDiagram")) return { width: 2400, height: 1600 };
-  return { width: 2300, height: 1500 };
+  return { width: 2600, height: 1700 };
 };
 
 const collectReferencedFigureNames = () => {
@@ -119,7 +132,7 @@ purgeExistingFigureAssets();
 try {
   for (const figureName of figureNames) {
     const code = diagramByFileName[figureName];
-    const { width, height } = getRenderSize(code);
+    const { width, height } = getRenderSize(figureName, code);
     const sourcePath = join(mermaidTempDir, figureName.replace(/\.[^.]+$/u, ".mmd"));
     const outputPath = join(figuresDir, figureName);
 

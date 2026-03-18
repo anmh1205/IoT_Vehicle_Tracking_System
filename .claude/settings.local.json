@@ -4,5 +4,8 @@
     "deny": [],
     "defaultMode": "bypassPermissions"
   },
-  "outputStyle": "Explanatory"
+  "outputStyle": "Explanatory",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
 }

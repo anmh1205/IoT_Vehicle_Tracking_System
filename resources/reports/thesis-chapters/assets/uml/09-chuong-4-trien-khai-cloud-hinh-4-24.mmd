@@ -1,0 +1,6 @@
+flowchart LR
+    Bridge["MQTT Bridge"] --> VM["VictoriaMetrics"]
+    Bridge --> VL["VictoriaLogs"]
+    VM --> Grafana["Grafana Dashboard"]
+    VL --> Grafana
+    Grafana --> Ops["DevOps / Monitoring"]

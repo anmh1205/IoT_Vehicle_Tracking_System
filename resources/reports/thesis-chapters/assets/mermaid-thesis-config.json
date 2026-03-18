@@ -19,10 +19,10 @@
     "defaultRenderer": "elk",
     "curve": "linear",
     "htmlLabels": false,
-    "nodeSpacing": 200,
-    "rankSpacing": 240,
+    "nodeSpacing": 240,
+    "rankSpacing": 280,
     "padding": 28,
-    "wrappingWidth": 220,
+    "wrappingWidth": 260,
     "useMaxWidth": false
   },
   "sequence": {

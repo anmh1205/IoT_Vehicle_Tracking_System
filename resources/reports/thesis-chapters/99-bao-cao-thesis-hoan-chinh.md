@@ -317,30 +317,96 @@ Xin chân thành cảm ơn!
 
 # DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF PICTURES AND GRAPHS
 
-<!-- Danh mục hình ảnh sẽ được cập nhật khi hoàn thành các chương nội dung -->
-
 | Hình     | Mô tả                                               | Trang |
 | -------- | --------------------------------------------------- | ----- |
-| Hình 1.1 | Mô hình tổng quan hệ thống IoT giám sát phương tiện | ...   |
-| Hình 2.1 | Kiến trúc giao thức MQTT                            | ...   |
-| Hình 2.2 | Cấu trúc bản tin MQTT                               | ...   |
-| Hình 2.3 | Nguyên lý hoạt động GPS/GNSS                        | ...   |
-| Hình 2.4 | Sơ đồ khối ESP32-S3                                 | ...   |
-| Hình 2.5 | Giao diện OBD2 và các PID                           | ...   |
-| Hình 3.1 | Sơ đồ kiến trúc tổng thể hệ thống                   | ...   |
-| Hình 3.2 | Sơ đồ nguyên lý mạch phần cứng                      | ...   |
-| Hình 3.3 | Sơ đồ mạch quản lý nguồn                            | ...   |
-| Hình 3.4 | Thiết kế PCB                                        | ...   |
-| Hình 3.5 | Sơ đồ luồng dữ liệu firmware                        | ...   |
-| Hình 3.6 | Sơ đồ kiến trúc backend (DDD)                       | ...   |
-| Hình 3.7 | Sơ đồ quan hệ cơ sở dữ liệu (ERD)                   | ...   |
-| Hình 3.8 | Wireframe giao diện dashboard                       | ...   |
-| Hình 4.1 | Hình ảnh thiết bị phần cứng hoàn thiện              | ...   |
-| Hình 4.2 | Giao diện dashboard thời gian thực                  | ...   |
-| Hình 4.3 | Giao diện bản đồ theo dõi phương tiện               | ...   |
-| Hình 4.4 | Sơ đồ triển khai Docker                             | ...   |
-| Hình 5.1 | Đồ thị độ chính xác GPS                             | ...   |
-| Hình 5.2 | Đồ thị hiệu suất hệ thống                           | ...   |
+| Hình 1.1 | Sơ đồ tổng quan vấn đề và giải pháp đề xuất | ...   |
+| Hình 1.2 | Quy trình phát triển dự án theo các giai đoạn | ...   |
+| Hình 1.3 | Kiến trúc tổng thể hệ thống IoT Vehicle Tracking | ...   |
+| Hình 1.4 | Sơ đồ chuyển đổi giữa các chế độ năng lượng | ...   |
+| Hình 1.5 | Lộ trình phát triển dự án theo các giai đoạn (Roadmap) | ...   |
+| Hình 2.1 | Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram | ...   |
+| Hình 3.1 | Sơ đồ khối tổng thể hệ thống tracker | ...   |
+| Hình 3.1a | Phân rã chi tiết các khối chức năng của tracker | ...   |
+| Hình 3.2 | Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro | ...   |
+| Hình 3.3 | Sơ đồ kết nối LIS3DH với ESP32-S3 qua I2C | ...   |
+| Hình 3.3a | Sơ đồ chi tiết chân kết nối LIS3DH với ESP32-S3 | ...   |
+| Hình 3.4 | Sơ đồ khối hệ thống quản lý nguồn | ...   |
+| Hình 3.4a | Kiến trúc nguồn và phân phối điện áp trong hệ thống | ...   |
+| Hình 3.5 | Sơ đồ kiến trúc phân lớp của firmware | ...   |
+| Hình 3.6 | Sơ đồ tương tác giữa các FreeRTOS task | ...   |
+| Hình 3.7 | Lưu đồ thuật toán luồng hoạt động chính của firmware | ...   |
+| Hình 3.8 | Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2 | ...   |
+| Hình 3.9 | Lưu đồ điều phối modem SIM7600CE-T theo trạng thái mạng và chế độ vận hành | ...   |
+| Hình 3.10 | Lưu đồ thuật toán điều khiển power path | ...   |
+| Hình 3.11 | Sơ đồ máy trạng thái của thiết bị theo dõi | ...   |
+| Hình 3.12 | Sơ đồ kiến trúc tổng quan hệ thống Cloud | ...   |
+| Hình 3.12a | Luồng dữ liệu chi tiết từ thiết bị đến dashboard | ...   |
+| Hình 3.13 | Sơ đồ chiến lược lưu trữ kép | ...   |
+| Hình 3.14 | Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram) | ...   |
+| Hình 3.14a | Luồng điều phối OTA giữa Backend, EMQX, thiết bị và MQTT Bridge | ...   |
+| Hình 3.15 | Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Frontend | ...   |
+| Hình 3.15a | Luồng dữ liệu một chiều giữa Next.js, Query, Zustand và Backend | ...   |
+| Hình 3.16 | Biểu đồ trình tự (Sequence Diagram) luồng xác thực người dùng | ...   |
+| Hình 3.17 | Giao diện trang Dashboard tổng quan | ...   |
+| Hình 3.18 | Giao diện trang quản lý phương tiện | ...   |
+| Hình 3.19 | Kiến trúc tích hợp bản đồ thời gian thực | ...   |
+| Hình 3.19a | Phân rã lớp bản đồ React Leaflet và kênh Socket.IO | ...   |
+| Hình 3.20 | Giao diện trang bản đồ thời gian thực với các marker xe | ...   |
+| Hình 3.21 | Wireframe bố cục giao diện Dashboard | ...   |
+| Hình 3.22 | Các mẫu thiết kế UI của hệ thống - Data Table, Form, Charts | ...   |
+| Hình 3.23 | Sơ đồ kiến trúc tổng thể phương án tối ưu | ...   |
+| Hình 4.1 | Sơ đồ khối tổng thể hệ thống tracker IoT | ...   |
+| Hình 4.1a | Bố trí chi tiết các khối phần cứng trong tracker | ...   |
+| Hình 4.2 | Sơ đồ kết nối giữa ESP32-S3 và modem SIM7600CE-T qua UART | ...   |
+| Hình 4.2a | Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3 | ...   |
+| Hình 4.3 | Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3 | ...   |
+| Hình 4.4 | Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker | ...   |
+| Hình 4.5 | Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần cứng tích hợp | ...   |
+| Hình 4.6 | Kiến trúc tổng thể mạch quản lý nguồn | ...   |
+| Hình 4.6a | Kiến trúc power path giữa nguồn xe và pin dự phòng | ...   |
+| Hình 4.7 | Kiến trúc nhánh buck 5V chính dùng MP2482 | ...   |
+| Hình 4.8 | Kiến trúc nhánh nguồn dự phòng 5V từ pin 21700 qua SX1308 | ...   |
+| Hình 4.9 | Sơ đồ power path runtime giữa nhánh chính và nhánh backup | ...   |
+| Hình 4.10 | Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng | ...   |
+| Hình 4.11 | Sơ đồ bố cục bên trong vỏ hộp bảo vệ | ...   |
+| Hình 4.12 | Quy trình lắp ráp phần cứng trên PCB | ...   |
+| Hình 4.13 | Sơ đồ bố trí linh kiện sau khi lắp ráp | ...   |
+| Hình 4.14 | Minh họa vị trí cổng OBD2 trên xe và cách kết nối | ...   |
+| Hình 4.15 | Minh họa lắp đặt thiết bị tracker trong xe và đi dây | ...   |
+| Hình 4.16 | Checklist kiểm tra hệ thống sau khi lắp đặt trong xe | ...   |
+| Hình 4.16a | Chuỗi bước OTA trên firmware từ nhận lệnh đến xác nhận sau reboot | ...   |
+| Hình 4.17 | Lưu đồ thuật toán chính của firmware thiết bị theo dõi xe | ...   |
+| Hình 4.18 | Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu | ...   |
+| Hình 4.19 | Cấu trúc thư mục hệ thống theo quy ước IVM26 | ...   |
+| Hình 4.20 | Luồng xử lý dữ liệu của MQTT Bridge | ...   |
+| Hình 4.21 | Cấu trúc thư mục Backend theo kiến trúc DDD | ...   |
+| Hình 4.22 | Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced | ...   |
+| Hình 4.23 | Giao diện trang Dashboard tổng quan | ...   |
+| Hình 4.24 | Giao diện trang quản lý xe | ...   |
+| Hình 4.25 | Giao diện bản đồ thời gian thực với vị trí các xe | ...   |
+| Hình 4.26 | Giao diện trang quản lý cảnh báo | ...   |
+| Hình 4.27 | Grafana dashboard hiển thị tổng quan hiệu năng hệ thống | ...   |
+| Hình 4.28 | EMQX Dashboard hiển thị trạng thái kết nối thiết bị | ...   |
+| Hình 4.29 | Bố trí thiết bị đo lường trong phòng thí nghiệm | ...   |
+| Hình 4.30 | Thiết bị tracker được lắp đặt trên xe thử nghiệm | ...   |
+| Hình 4.31 | Sơ đồ môi trường thử nghiệm tổng thể | ...   |
+| Hình 4.32 | Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ hoạt động hoàn chỉnh (Driving -> Parking -> Alert -> Parking) | ...   |
+| Hình 4.33 | Đồ thị điện áp pin dự phòng theo thời gian trong kiểm thử tracking liên tục | ...   |
+| Hình 4.34 | Đồ thị dòng tiêu thụ theo nhiệt độ môi trường | ...   |
+| Hình 4.35 | Biểu đồ phân bố thời gian kết nối BLE OBD2 (20 lần đo) | ...   |
+| Hình 4.36 | Đồ thị thời gian bắt vệ tinh GPS trong các kịch bản (Cold/Warm/Hot Start) | ...   |
+| Hình 4.37 | Biểu đồ phân bố độ trễ MQTT trong điều kiện mạng 4G ổn định | ...   |
+| Hình 4.38 | Biểu đồ thời gian phản hồi API (P50, P95, P99) cho các endpoint chính | ...   |
+| Hình 4.39 | Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu) | ...   |
+| Hình 4.40 | Đồ thị hiệu suất hệ thống theo số lượng thiết bị đồng thời | ...   |
+| Hình 4.41 | Kết quả Lighthouse Performance Audit của trang Dashboard | ...   |
+| Hình 4.42 | Screenshot giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ (Leaflet) | ...   |
+| Hình 4.43 | Screenshot biểu đồ dữ liệu OBD2 thời gian thực (ECharts) - RPM, Speed, Coolant Temp | ...   |
+| Hình 4.44 | Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo | ...   |
+| Hình 4.45 | Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị | ...   |
+| Hình 4.46 | Screenshot hành trình trên bản đồ, thể hiện giai đoạn gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối | ...   |
+| Hình 4.47 | Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart) | ...   |
+| Hình PL-3.1 | Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần) | ...   |
 
 ---
 
@@ -1021,7 +1087,7 @@ _Hình 3.1: Sơ đồ khối tổng thể hệ thống tracker_
 
 > Nguồn: Hình vẽ của tác giả
 
-![Hình 3.1a - Phân rã chi tiết các khối chức năng của tracker](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-01.svg)
+![Hình 3.1a - Phân rã chi tiết các khối chức năng của tracker](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-01.svg)
 
 _Hình 3.1a: Phân rã chi tiết các khối chức năng của tracker_
 
@@ -1250,7 +1316,7 @@ _Hình 3.3: Sơ đồ kết nối LIS3DH với ESP32-S3 qua I2C_
 
 > Nguồn: Hình vẽ của tác giả
 
-![Hình 3.3a - Sơ đồ chi tiết chân kết nối LIS3DH với ESP32-S3](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-02.svg)
+![Hình 3.3a - Sơ đồ chi tiết chân kết nối LIS3DH với ESP32-S3](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-02.svg)
 
 _Hình 3.3a: Sơ đồ chi tiết chân kết nối LIS3DH với ESP32-S3_
 
@@ -1274,7 +1340,7 @@ _Hình 3.4: Sơ đồ khối hệ thống quản lý nguồn_
 
 > Nguồn: Hình vẽ của tác giả
 
-![Hình 3.4a - Kiến trúc nguồn và phân phối điện áp trong hệ thống](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-03.svg)
+![Hình 3.4a - Kiến trúc nguồn và phân phối điện áp trong hệ thống](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-03.svg)
 
 _Hình 3.4a: Kiến trúc nguồn và phân phối điện áp trong hệ thống_
 
@@ -1670,6 +1736,12 @@ Toàn bộ lệnh AT cho LTE và GNSS được thực hiện trên cùng UART1. 
 | Modem quá nóng           | Đưa `AT+CFUN=0` để tạm thời tắt RF và chờ nhiệt độ giảm trước khi tiếp tục               |
 
 Các chế độ ngủ (`AT+CSCLK=1`, `AT+CFUN=0`) và wake-up bằng UART giữ cho modem tiêu thụ thấp mà vẫn có thể khởi động lại nhanh khi ESP32-S3 tỉnh dậy.
+
+![Hình 3.9 - Lưu đồ điều phối modem SIM7600CE-T theo trạng thái mạng và chế độ vận hành](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-9.svg)
+
+_Hình 3.9: Lưu đồ điều phối modem SIM7600CE-T theo trạng thái mạng và chế độ vận hành_
+
+> Nguồn: Hình vẽ của tác giả
 
 #### 3.2.2.4. Module quản lý nguồn và GPIO
 
@@ -2081,7 +2153,7 @@ _Hình 3.12: Sơ đồ kiến trúc tổng quan hệ thống Cloud_
 
 > Nguồn: Hình vẽ của tác giả
 
-![Hình 3.12a - Luồng dữ liệu chi tiết từ thiết bị đến dashboard](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-04.svg)
+![Hình 3.12a - Luồng dữ liệu chi tiết từ thiết bị đến dashboard](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-04.svg)
 
 _Hình 3.12a: Luồng dữ liệu chi tiết từ thiết bị đến dashboard_
 
@@ -2612,7 +2684,7 @@ _Hình 3.15: Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Fro
 
 Luồng dữ liệu trong ứng dụng Frontend tuân theo mô hình một chiều (unidirectional data flow), đồng thời kết hợp ba nguồn dữ liệu chính:
 
-![Hình 3.15a - Luồng dữ liệu một chiều giữa Next.js, Query, Zustand và Backend](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-05.svg)
+![Hình 3.15a - Luồng dữ liệu một chiều giữa Next.js, Query, Zustand và Backend](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-05.svg)
 
 _Hình 3.15a: Luồng dữ liệu một chiều giữa Next.js, Query, Zustand và Backend_
 
@@ -2702,7 +2774,7 @@ Trang quản lý chuyến đi cung cấp lịch sử và chi tiết từng chuy�
 
 Trang bản đồ thời gian thực (`/dashboard/map`) là tính năng cốt lõi của hệ thống giám sát phương tiện. Kiến trúc tích hợp bản đồ bao gồm ba lớp chính:
 
-![Hình 3.19a - Phân rã lớp bản đồ React Leaflet và kênh Socket.IO](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-06.svg)
+![Hình 3.19a - Phân rã lớp bản đồ React Leaflet và kênh Socket.IO](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-06.svg)
 
 _Hình 3.19a: Phân rã lớp bản đồ React Leaflet và kênh Socket.IO_
 
@@ -2860,7 +2932,7 @@ Chương này trình bày quá trình triển khai giải pháp từ thiết k�
 
 Hệ thống tracker sử dụng ESP32-S3 làm bộ xử lý trung tâm. Vi điều khiển này giao tiếp UART với modem 4G/GNSS, BLE với OBD2, I2C với cảm biến gia tốc và ADC để giám sát điện áp ắc quy. Toàn bộ hệ thống được cấp nguồn bởi mạch quản lý năng lượng thông minh, có khả năng tự động chuyển đổi giữa ắc quy xe và pin dự phòng.
 
-![Hình 4.1a - Bố trí chi tiết các khối phần cứng trong tracker](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-07.svg)
+![Hình 4.1a - Bố trí chi tiết các khối phần cứng trong tracker](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-07.svg)
 
 _Hình 4.1a: Bố trí chi tiết các khối phần cứng trong tracker_
 
@@ -2895,7 +2967,7 @@ Vi điều khiển ESP32-S3-WROOM-1 được lựa chọn làm nhân xử lý tr
 
 **Giao tiếp I2C với cảm biến LIS3DH:** Cảm biến gia tốc 3 trục LIS3DH được kết nối qua bus I2C (GPIO47 SDA, GPIO48 SCL). Cảm biến này đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang đỗ, cho phép đánh thức ESP32-S3 từ chế độ deep sleep thông qua ngắt ngoài (interrupt) khi phát hiện rung động bất thường.
 
-![Hình 4.2a - Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-08.svg)
+![Hình 4.2a - Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-08.svg)
 
 _Hình 4.2a: Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3_
 
@@ -3012,7 +3084,7 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 5. **Power path Diode-OR + điều khiển EN:** Tự động duy trì nguồn liên tục giữa nhánh chính và nhánh backup
 6. **Mạch sạc TP4056 + LVD (LM393/ADC):** Sạc pin 1S và giám sát ngưỡng điện áp bảo vệ ắc quy
 
-![Hình 4.6a - Kiến trúc power path giữa nguồn xe và pin dự phòng](assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-09.svg)
+![Hình 4.6a - Kiến trúc power path giữa nguồn xe và pin dự phòng](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-09.svg)
 
 _Hình 4.6a: Kiến trúc power path giữa nguồn xe và pin dự phòng_
 
@@ -3044,6 +3116,12 @@ Khối buck 5V dùng **MP2482** tạo bus 5V chính từ 12V/24V.
 | ------- | ------ | ------ | ------ | ------------ |
 | Buck 5V | MP2482 | 12–24V | 5V     | Bus 5V chính |
 
+![Hình 4.7 - Kiến trúc nhánh buck 5V chính dùng MP2482](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-7.svg)
+
+_Hình 4.7: Kiến trúc nhánh buck 5V chính dùng MP2482_
+
+> Nguồn: Hình vẽ của tác giả
+
 #### d) Buck 3.8V/4V cho modem (TPS54231)
 
 Khối buck modem dùng **TPS54231** để hạ 12V/24V xuống khoảng 4V cấp cho SIM7600CE-T.
@@ -3064,6 +3142,12 @@ Khối boost dùng **SX1308** để nâng áp từ pin 21700 1S (~3.7V) lên 5V 
 | -------- | ------ | ------------- | ------ | ------------- |
 | Boost 5V | SX1308 | Battery ~3.7V | 5V     | Backup từ pin |
 
+![Hình 4.8 - Kiến trúc nhánh nguồn dự phòng 5V từ pin 21700 qua SX1308](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-8.svg)
+
+_Hình 4.8: Kiến trúc nhánh nguồn dự phòng 5V từ pin 21700 qua SX1308_
+
+> Nguồn: Hình vẽ của tác giả
+
 Power path runtime được triển khai theo **diode OR** giữa nhánh 5V chính (MP2482) và nhánh 5V backup (SX1308), phối hợp điều khiển GPIO để đảm bảo chuyển nguồn liên tục.
 
 **Bảng 4.6: Logic chuyển nguồn tự động**
@@ -3075,6 +3159,12 @@ Power path runtime được triển khai theo **diode OR** giữa nhánh 5V chí
 | Ắc quy yếu          | OFF | Profile 12V: U_batt <= 12.0V; Profile 24V: U_batt <= 24.0V | Pin 21700 1S  | Không   | Có       |
 | Ắc quy phục hồi     | OFF | Profile 12V: U_batt >= 12.2V; Profile 24V: U_batt >= 24.4V | Ắc quy        | Không   | Có       |
 
+![Hình 4.9 - Sơ đồ power path runtime giữa nhánh chính và nhánh backup](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-9.svg)
+
+_Hình 4.9: Sơ đồ power path runtime giữa nhánh chính và nhánh backup_
+
+> Nguồn: Hình vẽ của tác giả
+
 #### f) Mạch sạc pin TP4056
 
 Khối sạc pin dùng **TP4056**, nhận **5V từ MP2482** và sạc pin 21700 1S ở mức 4.2V (1S).
@@ -3084,6 +3174,12 @@ Khối sạc pin dùng **TP4056**, nhận **5V từ MP2482** và sạc pin 21700
 | Khối    | IC     | Input        | Output | Tải          |
 | ------- | ------ | ------------ | ------ | ------------ |
 | Sạc pin | TP4056 | 5V từ MP2482 | 4.2V   | Pin 21700 1S |
+
+![Hình 4.10 - Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-10.svg)
+
+_Hình 4.10: Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng_
+
+> Nguồn: Hình vẽ của tác giả
 
 Dòng sạc của TP4056 được xác lập theo điện trở PROG và giới hạn nhiệt, không cố định một giá trị trong mọi điều kiện.
 
@@ -6557,6 +6653,12 @@ GĐ7:                                                        [========]
        |--- Tháng 09 ---|--- Tháng 10 ---|--- Tháng 11 ---|--- Tháng 12 ---|
        |--- Tháng 01 ---|--- Tháng 02 ---|
 ```
+
+![Hình PL-3.1 - Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần)](./assets/figures/thesis-14-phu-luc-01.svg)
+
+_Hình PL-3.1: Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần)_
+
+> Nguồn: Hình vẽ của tác giả
 
 ## 3.3. Chi tiết công việc theo giai đoạn
 

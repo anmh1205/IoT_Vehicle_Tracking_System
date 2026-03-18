@@ -1,0 +1,5 @@
+flowchart LR
+    Cell["Pin 21700"] --> BMS["BMS 1S"]
+    BMS --> Boost["SX1308 Boost 5V"]
+    Boost --> D["Schottky diode"]
+    D --> Runtime["Bus runtime 5V"]

@@ -1,0 +1,11 @@
+stateDiagram-v2
+    [*] --> INIT
+    INIT --> CHECK_IGN
+    CHECK_IGN --> DRIVING: IGN ON
+    CHECK_IGN --> IDLE: IGN OFF
+    IDLE --> ALERT: có rung
+    IDLE --> HEARTBEAT: không rung
+    DRIVING --> SLEEP
+    ALERT --> SLEEP
+    HEARTBEAT --> SLEEP
+    SLEEP --> CHECK_IGN

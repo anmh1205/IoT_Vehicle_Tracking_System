@@ -1,0 +1,22 @@
+gantt
+    title Kế hoạch thực hiện dự án (24 tuần)
+    dateFormat  YYYY-MM-DD
+    axisFormat  %d/%m
+
+    section Phần cứng
+    Nghiên cứu và thiết kế         :a1, 2025-09-01, 28d
+
+    section Firmware
+    Setup driver nền tảng          :a2, 2025-09-15, 21d
+    BLE OBD2 và power FSM          :a3, after a2, 35d
+
+    section Cloud và Backend
+    EMQX + DB + Docker             :a4, 2025-09-29, 28d
+    Backend API + MQTT Bridge      :a5, 2025-10-13, 42d
+
+    section Frontend
+    Dashboard + bản đồ + cảnh báo  :a6, 2025-11-10, 42d
+
+    section Tích hợp
+    Tích hợp hệ thống              :a7, 2025-12-22, 42d
+    Viết báo cáo                   :a8, 2026-01-19, 28d

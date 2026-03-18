@@ -1,0 +1,5 @@
+flowchart TB
+    Tracker["Tracker dưới taplo"] --> LTE["Anten LTE"]
+    Tracker --> GNSS["Anten GNSS"]
+    Tracker -. BLE .-> OBD["OBD2 adapter"]
+    OBD --> Port["Cổng OBD2"]

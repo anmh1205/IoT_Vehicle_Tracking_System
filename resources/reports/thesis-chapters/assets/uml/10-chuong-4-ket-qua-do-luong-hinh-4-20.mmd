@@ -1,0 +1,13 @@
+flowchart LR
+    Supply["Nguon DC"]
+    OBD["OBD2 simulator"]
+    DMM["Dong ho do"]
+    Scope["Oscilloscope"]
+    Tracker["Tracker prototype"]
+    Laptop["Laptop thu log"]
+
+    Supply --> Tracker
+    OBD --> Tracker
+    DMM --> Tracker
+    Scope --> Tracker
+    Tracker --> Laptop

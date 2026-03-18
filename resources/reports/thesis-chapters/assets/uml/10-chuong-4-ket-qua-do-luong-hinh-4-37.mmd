@@ -1,0 +1,5 @@
+flowchart TB
+    Loss["Mất kết nối tạm thời"] --> Buffer["Thiết bị lưu đệm local"]
+    Buffer --> Recover["Khôi phục mạng"]
+    Recover --> Replay["Bridge nhận replay"]
+    Replay --> Map["Map cập nhật đầy đủ hành trình"]

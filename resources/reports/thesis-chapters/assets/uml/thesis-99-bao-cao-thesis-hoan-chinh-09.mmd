@@ -1,0 +1,6 @@
+flowchart TB
+    Main["Nhánh chính 5V"] --> ORing["Diode OR"]
+    Backup["Nhánh backup 5V"] --> ORing
+    ORing --> Load["Rail runtime"]
+    FSM["Power FSM"] -. điều khiển .-> Main
+    FSM -. điều khiển .-> Backup

@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant FW as BLE task
+    participant OBD as Adapter OBD2
+    participant ADC as ADC fallback
+
+    alt MAC đã lưu
+        FW->>OBD: Reconnect nhanh
+    else Chưa lưu MAC
+        FW->>OBD: Scan + Pair
+    end
+
+    loop Chu kỳ lái xe
+        FW->>OBD: Đọc PID + IGN
+        OBD-->>FW: Telemetry
+    end
+
+    alt Timeout nhiều lần
+        FW->>ADC: Fallback xác định IGN
+    else Kết thúc phiên
+        FW->>OBD: Ngắt BLE
+    end
