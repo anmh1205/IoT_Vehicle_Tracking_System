@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iot-vts.local/diagram-pack-v2/manifest.schema.json",
+  "title": "Diagram Pack Manifest",
+  "type": "object",
+  "required": ["schemaVersion", "pack", "renderProfile", "visualGate", "paths", "entries"],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0" },
+    "pack": {
+      "type": "object",
+      "required": [
+        "id",
+        "version",
+        "status",
+        "releaseCadence",
+        "artifactRetentionDays",
+        "releasePolicy",
+        "rollbackSlaMinutes"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "status": { "type": "string", "enum": ["candidate", "active", "deprecated"] },
+        "releaseCadence": { "type": "string", "enum": ["sprint", "chapter", "tag"] },
+        "artifactRetentionDays": { "type": "integer", "minimum": 1 },
+        "releasePolicy": { "type": "string", "minLength": 1 },
+        "rollbackSlaMinutes": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "renderProfile": {
+      "type": "object",
+      "required": [
+        "engine",
+        "cliPackage",
+        "cliVersion",
+        "configPath",
+        "background",
+        "defaultWidth",
+        "defaultHeight"
+      ],
+      "properties": {
+        "engine": { "type": "string", "enum": ["mermaid", "plantuml", "hybrid"] },
+        "cliPackage": { "type": "string", "minLength": 1 },
+        "cliVersion": { "type": "string", "minLength": 1 },
+        "configPath": { "type": "string", "minLength": 1 },
+        "background": { "type": "string", "minLength": 1 },
+        "defaultWidth": { "type": "integer", "minimum": 1 },
+        "defaultHeight": { "type": "integer", "minimum": 1 },
+        "sequenceWidth": { "type": "integer", "minimum": 1 },
+        "sequenceHeight": { "type": "integer", "minimum": 1 },
+        "stateWidth": { "type": "integer", "minimum": 1 },
+        "stateHeight": { "type": "integer", "minimum": 1 },
+        "mindmapWidth": { "type": "integer", "minimum": 1 },
+        "mindmapHeight": { "type": "integer", "minimum": 1 },
+        "ganttWidth": { "type": "integer", "minimum": 1 },
+        "ganttHeight": { "type": "integer", "minimum": 1 },
+        "xychartWidth": { "type": "integer", "minimum": 1 },
+        "xychartHeight": { "type": "integer", "minimum": 1 },
+        "radarWidth": { "type": "integer", "minimum": 1 },
+        "radarHeight": { "type": "integer", "minimum": 1 },
+        "blockWidth": { "type": "integer", "minimum": 1 },
+        "blockHeight": { "type": "integer", "minimum": 1 },
+        "erWidth": { "type": "integer", "minimum": 1 },
+        "erHeight": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "visualGate": {
+      "type": "object",
+      "required": ["warningPercent", "blockPercent"],
+      "properties": {
+        "warningPercent": { "type": "number", "minimum": 0 },
+        "blockPercent": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "paths": {
+      "type": "object",
+      "required": [
+        "sourceRoot",
+        "buildSvgRoot",
+        "buildPngRoot",
+        "buildPdfRoot",
+        "baselinePngRoot",
+        "qaReportPath",
+        "releaseLogPath"
+      ],
+      "properties": {
+        "sourceRoot": { "type": "string", "minLength": 1 },
+        "buildSvgRoot": { "type": "string", "minLength": 1 },
+        "buildPngRoot": { "type": "string", "minLength": 1 },
+        "buildPdfRoot": { "type": "string", "minLength": 1 },
+        "baselinePngRoot": { "type": "string", "minLength": 1 },
+        "qaReportPath": { "type": "string", "minLength": 1 },
+        "releaseLogPath": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "source", "outputs", "tags"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "type": { "type": "string", "enum": ["mermaid", "plantuml"] },
+          "source": { "type": "string", "minLength": 1 },
+          "outputs": {
+            "type": "object",
+            "required": ["svg", "png", "pdf"],
+            "properties": {
+              "svg": { "type": "string", "pattern": "\\.svg$" },
+              "png": { "type": "string", "pattern": "\\.png$" },
+              "pdf": { "type": "string", "pattern": "\\.pdf$" }
+            },
+            "additionalProperties": false
+          },
+          "tags": {
+            "type": "object",
+            "required": ["status"],
+            "properties": {
+              "status": { "type": "string", "enum": ["candidate", "active", "deprecated"] }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

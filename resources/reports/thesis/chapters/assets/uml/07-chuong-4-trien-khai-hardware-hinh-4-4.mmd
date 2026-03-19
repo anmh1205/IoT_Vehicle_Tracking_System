@@ -1,0 +1,11 @@
+flowchart TB
+    MCU["ESP32-S3"]
+    Power["Nguồn vào + power path"]
+    Modem["SIM7600CE-T"]
+    IMU["LIS3DH"]
+    OBD["BLE OBD2"]
+
+    Power --> MCU
+    MCU --> Modem
+    MCU --> IMU
+    MCU --> OBD

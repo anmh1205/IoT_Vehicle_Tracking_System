@@ -4,8 +4,11 @@
 
 # JS/TS
 node_modules
+resources/reports/diagram-reference-packs/**/node_modules
 dist
 build
+!resources/reports/diagram-reference-packs/**/build
+!resources/reports/diagram-reference-packs/**/build/**
 .next
 .nuxt
 

@@ -1,0 +1,23 @@
+erDiagram
+    USERS ||--o{ VEHICLES : quản_lý
+    VEHICLES ||--o{ DEVICES : gắn
+    VEHICLES ||--o{ TRIPS : phát_sinh
+    TRIPS ||--o{ TRIP_EVENTS : gồm
+    VEHICLES ||--o{ ALERTS : tạo_ra
+    DEVICES ||--o{ COMMANDS : nhận
+
+    USERS {
+      uuid id
+      string email
+      string role
+    }
+    VEHICLES {
+      uuid id
+      string license_plate
+      string status
+    }
+    DEVICES {
+      uuid id
+      string serial
+      string imei
+    }

@@ -1,0 +1,22 @@
+flowchart TB
+    Root["Trang Map"]
+
+    subgraph Visual["Map rendering layers"]
+        direction LR
+        Tile["Tile layer"]
+        Marker["Marker layer"]
+        Route["Route replay"]
+        Fence["Geofence layer"]
+    end
+
+    Sidebar["Sidebar"]
+    Socket["Socket.IO"]
+    Query["TanStack Query"]
+
+    Root --> Tile
+    Root --> Marker
+    Root --> Route
+    Root --> Fence
+    Root --> Sidebar
+    Socket --> Marker
+    Query --> Route

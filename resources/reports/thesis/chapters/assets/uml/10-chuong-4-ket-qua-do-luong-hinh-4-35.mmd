@@ -1,0 +1,5 @@
+flowchart TB
+    Map["Leaflet map"] --> Fence["Geofence polygon"]
+    Vehicle["Vehicle marker"] --> Fence
+    Fence --> Alert["Alert trigger"]
+    Alert --> List["Danh sách cảnh báo"]

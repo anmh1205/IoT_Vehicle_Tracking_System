@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant EMQX
+    participant Bridge
+    participant PG as PostgreSQL
+    participant VM as VictoriaMetrics
+    participant VL as VictoriaLogs
+    participant WS as Socket.IO
+
+    EMQX->>Bridge: telemetry/alert topic
+    Bridge->>Bridge: validate + normalize payload
+    Bridge->>PG: write business event
+    Bridge->>VM: write telemetry metric
+    Bridge->>VL: write audit log
+    Bridge->>WS: push realtime event

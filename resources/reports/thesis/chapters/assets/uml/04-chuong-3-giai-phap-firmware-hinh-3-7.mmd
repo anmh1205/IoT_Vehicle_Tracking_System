@@ -1,0 +1,11 @@
+stateDiagram-v2
+    direction LR
+    [*] --> Init
+    Init --> CheckIGN
+    CheckIGN --> Driving: IGN ON
+    CheckIGN --> Idle: IGN OFF
+    Idle --> Alert: Có rung
+    Idle --> Sleep: Không rung
+    Driving --> Sleep
+    Alert --> Sleep
+    Sleep --> CheckIGN
