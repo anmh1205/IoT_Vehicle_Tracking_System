@@ -1,9 +1,0 @@
-flowchart LR
-    Device["Tracker"] --> EMQX["EMQX"]
-    EMQX --> Bridge["MQTT Bridge"]
-    Bridge --> API["Backend API"]
-    API --> Query["TanStack Query"]
-    API --> Store["Realtime Store"]
-    Query --> Dashboard["Dashboard"]
-    Store --> Dashboard
-    Bridge --> Obs["Metrics + Logs"]

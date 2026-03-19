@@ -3,8 +3,9 @@
 - `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260319-0054-diagram-reference-pack-redesign/research/researcher-02-report.md`
 - `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260319-0054-diagram-reference-pack-redesign/scout/scout-01-thesis-diagram-assets-and-pipeline.md`
 - Protected legacy pipeline:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/generate-thesis-report-figures.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/thesis-mermaid-diagrams.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/thesis-mermaid-diagrams.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/figures/*`
 
 # 2. Overview
 - Priority: P2
@@ -44,15 +45,16 @@
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/diagram-reference-packs/diagram-pack-v2/qa/gates/release-log.jsonl`
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/docs/project-changelog.md` (khi rollout thật)
 - Files explicitly unchanged in pilot:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/generate-thesis-report-figures.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/thesis-mermaid-diagrams.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/figures/*`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/thesis-mermaid-diagrams.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/figures/*`
 
 # 7. Implementation Steps
 1. Định nghĩa rollout waves + entry/exit criteria mỗi wave.
 2. Định nghĩa toggle contract `DIAGRAM_PACK_REF`.
 3. Định nghĩa runbook rollback chi tiết (trigger, steps, owner, SLA).
-4. Định nghĩa canary sample chapters để validate trước full adoption.
+4. Định nghĩa canary sample diagrams hoặc figure groups để validate trước full adoption.
 5. Định nghĩa acceptance sign-off trước khi promote default.
 
 # 8. Todo list
@@ -67,8 +69,8 @@
 - Có minh chứng chất lượng trước khi đổi default.
 
 # 10. Risk Assessment
-- Risk: thiếu đồng bộ version giữa chapter outputs.
-- Mitigation: pin theo `pack-id@version`, cấm “latest”.
+- Risk: thiếu đồng bộ version giữa markdown thesis và diagram outputs.
+- Mitigation: pin theo `pack-id@version`, cấm `latest`.
 - Risk: rollback chậm do thiếu artifact.
 - Mitigation: giữ artifact releases + release log bắt buộc; mô phỏng rollback định kỳ để giữ SLA <= 15 phút.
 
@@ -84,4 +86,4 @@
 
 ## Unresolved questions
 - Có cần dual-publish (pack cũ + pack mới) trong một giai đoạn cố định không?
-- SLA rollback tối đa team chấp nhận là bao nhiêu phút?
+- Config toggle sẽ nằm ở đâu để ít chạm nhất vào pipeline hiện hành?

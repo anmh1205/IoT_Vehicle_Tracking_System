@@ -2,7 +2,7 @@
 
 - Ngày: 2026-03-19 00:54:35 (Asia/Saigon)
 - Work context: `E:/anmh1205/IoT_Vehicle_Tracking_System`
-- Mục tiêu: nghiên cứu quy trình cho **reference pack mới** không ảnh hưởng pipeline hiện tại (`resources/reports/thesis-chapters/assets/uml` + `figures`) và vẫn cho phép chuyển đổi an toàn.
+- Mục tiêu: nghiên cứu quy trình cho **reference pack mới** không ảnh hưởng pipeline hiện tại dưới `resources/reports/thesis/final/assets/` và vẫn cho phép chuyển đổi an toàn.
 
 ## 1) Cấu trúc thư mục đề xuất (parallel pack)
 Giữ nguyên pack cũ. Thêm pack mới dưới root mới `resources/reports/diagram-reference-packs/`.
@@ -34,16 +34,16 @@ resources/reports/diagram-reference-packs/
 ```
 
 - `pack-id` = `diagram-pack-v2` (độc lập).
-- `manifest.yaml` map 1-1: `source.mmd -> outputs(svg,png,pdf)` và semantic tags (`chapter`, `status`, `owner`, `rev`).
-- `build/` và `baselines/` là tách bạch với `resources/reports/thesis-chapters/assets/figures` hiện tại, nên không đụng ảnh đang dùng.
-- Pipeline mới ghi ra `resources/reports/diagram-reference-packs/<pack-id>/build/<format>/` ; consumer hiện hành vẫn đọc nguồn cũ.
+- `manifest.yaml` map 1-1: `source.mmd -> outputs(svg,png,pdf)` và semantic tags (`source_ref`, `status`, `owner`, `rev`).
+- `build/` và `baselines/` tách bạch với `resources/reports/thesis/final/assets/figures` hiện tại, nên không đụng ảnh đang dùng.
+- Pipeline mới ghi ra `resources/reports/diagram-reference-packs/<pack-id>/build/<format>/`; consumer hiện hành vẫn đọc nguồn cũ.
 
 ## 2) Naming + versioning (chuẩn hóa, dễ rollback)
 - Đặt quy tắc version theo **SemVer** tại manifest: `major.minor.patch`.
   - `major`: thay đổi API output map (schema/format bắt buộc).
   - `minor`: thêm/chỉnh sửa sơ đồ không đổi contract cơ bản.
   - `patch`: chỉnh sửa nội dung/visual có thể đánh giá lại QA.
-- Mỗi file diagram đặt theo quy tắc: `<chapter>-<figure-id>.<ext>` giữ nguyên để giảm merge conflict. Ví dụ: `09-chuong-4-trien-khai-cloud-hinh-4-20.mmd`.
+- Mỗi file diagram giữ prefix figure hiện hành trong `thesis/final/assets` để giảm churn. Ví dụ: `09-chuong-4-trien-khai-cloud-hinh-4-20.mmd` hoặc `thesis-99-bao-cao-thesis-hoan-chinh-01.mmd`.
 - Tên artifact CI: `diagram-pack-v2-<version>-<format>-<gitsha>-<date>`.
 - Bổ sung `x-metadata` trong manifest:
   - `mermaid_version`, `cli_version`, `layout_profile`, `render_profile`, `checksum sha256`, `status=active|candidate|deprecated`.
@@ -92,7 +92,7 @@ resources/reports/diagram-reference-packs/
 7) Baseline checksum/metadata đổi đúng scope.
 
 ## 6) Kế hoạch nhận diện & adoption không đụng pack hiện tại
-- Bước 1: thiết lập pack mới (`diagram-pack-v2`) + script render riêng, không sửa `thesis-mermaid-diagrams.mjs`/`generate-thesis-report-figures.mjs` hiện hành.
+- Bước 1: thiết lập pack mới (`diagram-pack-v2`) + script render riêng, không sửa `resources/reports/thesis/final/assets/thesis-mermaid-diagrams.mjs` hoặc `generate-thesis-report-figures.mjs` hiện hành.
 - Bước 2: CI chạy song song kiểm tra pack mới và giữ pack cũ làm baseline.
 - Bước 3: tạo bản xem trước trong PR (artifact + diff report), chỉ reviewer có quyền bật `consume_pack: v2`.
 - Bước 4: sau 1-2 vòng nghiệm thu, chuyển consumer bằng biến cấu hình duy nhất (`DIAGRAM_PACK_REF=diagram-pack-v2@x.y.z`).
@@ -105,10 +105,10 @@ resources/reports/diagram-reference-packs/
 - Dọn dẹp sau rollback: remove các artifacts/nhánh thử nghiệm, khôi phục biến cấu hình môi trường về pack cũ.
 
 ## 8) Unresolved questions
-- Có bắt buộc chuyển toàn bộ consumer sang `PDF` hay chỉ một phần (ví dụ luận văn/chapter export only)?
+- Có bắt buộc chuyển toàn bộ consumer sang `PDF` hay chỉ một phần (ví dụ luận văn/final export only)?
 - Có cần baseline snapshot theo commit đầu vào hay theo pack release hash không?
 - Ngưỡng chấp nhận visual diff (%) nên cố định hay điều chỉnh theo nhóm diagram?
-- Có chấp nhận thay đổi layout profile (VD `LR/TB`) theo chapter hay buộc global cho toàn pack?
+- Có chấp nhận thay đổi layout profile (VD `LR/TB`) theo section group trong single-file thesis hay buộc global cho toàn pack?
 
 ## Sources (trích dẫn)
 - [Mermaid CLI (official)](https://github.com/mermaid-js/mermaid-cli)

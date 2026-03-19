@@ -2,7 +2,8 @@
 - `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260319-0054-diagram-reference-pack-redesign/plan.md`
 - `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260319-0054-diagram-reference-pack-redesign/research/researcher-02-report.md`
 - `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260319-0054-diagram-reference-pack-redesign/scout/scout-01-thesis-diagram-assets-and-pipeline.md`
-- Existing assets root: `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/`
+- Current thesis source artifact: `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`
+- Existing assets root: `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/`
 
 # 2. Overview
 - Priority: P1
@@ -40,15 +41,16 @@
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/diagram-reference-packs/diagram-pack-v2/style/mermaid-theme.json`
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/diagram-reference-packs/diagram-pack-v2/qa/gates/manifest.schema.json`
 - Files not to touch in pilot:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/generate-thesis-report-figures.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/thesis-mermaid-diagrams.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/figures/*`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/thesis-mermaid-diagrams.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/figures/*`
 
 # 7. Implementation Steps
 1. Chốt pack root path và pack-id cố định cho pilot.
 2. Thiết kế thư mục chuẩn cho source/build/qa/baselines.
 3. Thiết kế schema manifest tối thiểu + metadata bắt buộc.
-4. Định nghĩa naming convention file diagram theo chapter/figure-id.
+4. Định nghĩa naming convention file diagram theo prefix hiện có trong single-file thesis (`01-...` hoặc `thesis-...`) + figure-id.
 5. Chốt SemVer policy + lifecycle status.
 
 # 8. Todo list
@@ -77,5 +79,5 @@
 - Chuyển contract folder + manifest sang Phase 03 để thiết kế pipeline publish và quality gates.
 
 ## Unresolved questions
-- Có cần giữ compatibility với naming hiện tại của thesis chapters 100% không?
+- Có cần giữ compatibility 100% với prefix figure hiện tại trong `thesis/final/assets` không?
 - Pack-id sẽ cố định `diagram-pack-v2` hay theo issue/release?

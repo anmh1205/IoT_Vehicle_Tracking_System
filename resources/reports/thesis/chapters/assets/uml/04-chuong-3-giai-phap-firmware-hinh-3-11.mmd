@@ -1,8 +1,0 @@
-stateDiagram-v2
-    [*] --> Boot
-    Boot --> Driving: Bật IGN
-    Boot --> Parking: Tắt IGN
-    Parking --> Alert: IMU rung
-    Alert --> Parking: Xử lý xong
-    Alert --> Driving: Xe tiếp tục chạy
-    Driving --> Parking: Tắt máy

@@ -46,9 +46,10 @@
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/docs/project-changelog.md` (khi có triển khai thật)
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/docs/development-roadmap.md` (khi có triển khai thật)
 - Files frozen during pilot:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/generate-thesis-report-figures.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/thesis-mermaid-diagrams.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/figures/*`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/thesis-mermaid-diagrams.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/figures/*`
 
 # 7. Implementation Steps
 1. Tạo checklist tổng hợp và map mỗi mục vào phase owner.
@@ -87,5 +88,5 @@
 - Bàn giao plan package cho main agent để vào luồng implement/test/review.
 
 ## Unresolved questions
-- Người duyệt cuối cho promote pack mới là ai?
+- Người duyệt cuối cho promote pack mới ngoài Lead + QA có cần thêm owner học thuật không?
 - Có cần gate bổ sung cho font license/compliance trước publish không?

@@ -1,7 +1,0 @@
-flowchart LR
-    User["Operator"] --> UI["Command UI"]
-    UI --> API["Backend API"]
-    API --> Bridge["MQTT Bridge"]
-    Bridge --> Device["Tracker"]
-    Device --> Ack["ACK/Result"]
-    Ack --> UI

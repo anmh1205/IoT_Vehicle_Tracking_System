@@ -1,6 +1,6 @@
 ---
 title: "Diagram Reference Pack Redesign Plan"
-description: "Plan to build a parallel, high-quality diagram reference pack for thesis/technical docs without touching current production assets."
+description: "Plan to build a parallel, high-quality diagram reference pack for thesis/technical docs without touching current production assets under resources/reports/thesis/final/assets."
 status: pending
 priority: P2
 effort: 16h
@@ -13,10 +13,12 @@ created: 2026-03-19
 
 ## Scope guardrails (pilot bắt buộc)
 - Pilot chỉ làm reference pack song song, không thay pack đang dùng.
+- Thesis hiện chỉ giữ một file hoàn chỉnh; mọi mapping/validation phải bám `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`, không giả định source layout `chapters/`.
+- Không ghi đè bừa nội dung đã có trong `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/diagram-reference-packs/`; mọi rollout phải xem đây là vùng artifact song song cần được bảo toàn.
 - Không sửa trực tiếp trong pilot:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/generate-thesis-report-figures.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/thesis-mermaid-diagrams.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/figures/*`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/thesis-mermaid-diagrams.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/figures/*`
 
 ## Final stack shortlist
 - Khuyến nghị chính (validated): Hybrid Mermaid v11 + PlantUML + manifest/schema + visual diff gate.
@@ -34,7 +36,8 @@ created: 2026-03-19
 
 ## Main dependencies
 - Inputs: researcher reports + scout report trong cùng plan folder.
-- Existing assets contract: `resources/reports/thesis-chapters/assets/uml/*.mmd` và `.../figures/*.svg`.
+- Current thesis source artifact: `resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`.
+- Existing assets contract: `resources/reports/thesis/final/assets/uml/*.mmd` và `resources/reports/thesis/final/assets/figures/*.svg`.
 - CI capabilities: `.github/workflows/` hiện chưa có pipeline chuyên render/QA diagram pack.
 - Team agreement: tiêu chí quality gate, ngưỡng visual diff, policy release/rollback.
 

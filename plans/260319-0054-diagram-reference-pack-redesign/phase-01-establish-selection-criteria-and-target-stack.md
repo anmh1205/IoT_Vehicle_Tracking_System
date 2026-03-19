@@ -44,9 +44,10 @@
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260319-0054-diagram-reference-pack-redesign/phase-01-establish-selection-criteria-and-target-stack.md`
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260319-0054-diagram-reference-pack-redesign/phase-05-execution-checklist-and-governance.md` (tham chiếu checklist)
 - Files explicitly protected in pilot:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/generate-thesis-report-figures.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/thesis-mermaid-diagrams.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/figures/*`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/thesis-mermaid-diagrams.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/figures/*`
 
 # 7. Implementation Steps
 1. Tổng hợp tiêu chí từ 2 researcher reports.
@@ -70,7 +71,7 @@
 - Risk: tranh luận tool kéo dài, chậm phase sau.
 - Mitigation: dùng weighted matrix, deadline quyết định 1 phiên.
 - Risk: chọn stack quá nặng cho pilot.
-- Mitigation: giữ MVP Mermaid-first, PlantUML chỉ bật theo nhu cầu UML phức tạp.
+- Mitigation: giữ pilot hybrid nhưng giới hạn rõ loại UML/layout bắt buộc trong wave đầu; hoãn integration không critical.
 
 # 11. Security Considerations
 - Ưu tiên `securityLevel: strict` cho Mermaid config.
@@ -81,5 +82,5 @@
 - Bàn giao output stack decision sang Phase 02 để thiết kế pack structure/versioning.
 
 ## Unresolved questions
-- Pilot có cần bắt buộc hỗ trợ PlantUML ngay từ đầu không?
+- PlantUML coverage tối thiểu ở pilot cần đến mức activity/class/sequence hay full UML set?
 - Có cần policy cho draw.io file trong PR (allowed/blocked/review-only)?

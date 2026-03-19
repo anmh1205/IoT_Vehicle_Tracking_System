@@ -2,7 +2,8 @@
 - `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260319-0054-diagram-reference-pack-redesign/plan.md`
 - `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260319-0054-diagram-reference-pack-redesign/research/researcher-02-report.md`
 - Workflow root: `E:/anmh1205/IoT_Vehicle_Tracking_System/.github/workflows/`
-- Existing thesis assets: `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/`
+- Current thesis source artifact: `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`
+- Existing thesis assets: `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/`
 
 # 2. Overview
 - Priority: P1
@@ -49,9 +50,10 @@
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/.github/workflows/diagram-pack-release.yml`
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/diagram-reference-packs/diagram-pack-v2/qa/gates/report.jsonl` (artifact output)
 - Files explicitly out-of-scope pilot:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/generate-thesis-report-figures.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/thesis-mermaid-diagrams.mjs`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/figures/*`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/thesis-mermaid-diagrams.mjs`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis/final/assets/figures/*`
 
 # 7. Implementation Steps
 1. Định nghĩa contract report (fields: file, version, checksum, diff score, status).
@@ -86,5 +88,5 @@
 - Đưa policy gate sang Phase 04 để gắn với rollout/rollback decision points.
 
 ## Unresolved questions
-- Threshold block visual diff nên bắt đầu từ bao nhiêu (% pixel)?
-- Release artifacts giữ bao lâu để cân bằng chi phí và truy vết?
+- Có cần publish thêm artifact preview bundle để reviewer đối chiếu nhanh trước khi promote không?
+- Có cần gate bổ sung cho font license/compliance trước publish không?
