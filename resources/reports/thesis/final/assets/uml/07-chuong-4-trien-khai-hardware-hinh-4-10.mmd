@@ -1,6 +1,6 @@
 flowchart TB
     Bus5V["Bus 5V"] --> TP4056["TP4056"]
     TP4056 --> BMS["BMS"]
-    BMS --> Cell["Pin 21700"]
+    BMS --> Cell["Pin 18650"]
     Cell --> Boost["SX1308"]
     Boost --> Runtime["Nguồn dự phòng"]

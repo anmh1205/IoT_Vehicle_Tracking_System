@@ -8,9 +8,9 @@ Quy uoc:
 - Sau khi sua, render lai bang lenh:
 
 ```bash
-node resources/reports/thesis-chapters/assets/generate-thesis-report-figures.mjs
+node resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs
 ```
 
 Luu y:
-- `resources/reports/thesis-chapters/assets/thesis-mermaid-diagrams.mjs` chi con la loader doc cac file trong thu muc nay.
+- `resources/reports/thesis/final/assets/thesis-mermaid-diagrams.mjs` la loader doc cac file trong thu muc nay.
 - Mot so hinh co render size override trong generator de tranh de text va mui ten.

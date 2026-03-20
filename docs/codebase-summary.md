@@ -20,7 +20,10 @@ _This note is derived from `repomix-output.xml` generated at the root of the rep
 - Backend and frontend each expose UAT-specific Docker Compose overrides plus Next.js middleware entry points (`Tracking_Frontend/next.config.ts`) that connect user sessions to the auth layer.
 - The frontend middleware now distinguishes between the public marketing shell (`/`, `/landing/*`) and protected operational routes (`/dashboard/*`), while `public/landing/*` holds local illustration assets for the marketing layer.
 - Shared utility modules cover alerts (`components/ui/alert`), API clients, telemetry formatters, and auth state management (`src/lib/stores/auth-store.ts`). Localization changes continue to remain inside `Tracking_Frontend/src/**` and do not require backend or env updates.
+- **Thesis baseline sync:** `resources/reports/thesis/final/` is the canonical source set for the thesis markdown, Mermaid diagrams, and exported SVG figures. The thesis figure generator path was corrected so figure output resolves against the current thesis asset layout in this workspace.
+- **Diagram artifact pipeline pilot:** `resources/reports/diagram-reference-packs/diagram-pack-v2` is now an independent Node-based reference pack with `manifest.yaml`, `src/mermaid/*`, `src/plantuml/*`, `style/*`, `baselines/*`, `qa/gates/*`, `build/assets/*`, and `build/release/*` directories. Its package scripts drive validation, build, QA, and release packaging for documentation diagrams without changing app runtime modules.
+- GitHub Actions workflows `.github/workflows/diagram-pack-ci.yml` and `.github/workflows/diagram-pack-release.yml` now execute the pack lifecycle and fail artifact uploads when expected outputs are missing, including the exported asset set.
 
 ## Documentation direction
 1. Track new public UI and dashboard UI changes in `docs/project-overview-pdr.md`, `docs/system-architecture.md`, `docs/project-changelog.md`, and `docs/development-roadmap.md`.
-2. Refresh this summary whenever we reorganize the frontend component tree or add new shared utilities.
+2. Refresh this summary whenever we reorganize the frontend component tree, add new shared utilities, or evolve the independent diagram artifact pipeline.

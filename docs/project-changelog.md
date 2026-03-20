@@ -1,5 +1,19 @@
 # Project Changelog
 
+## 2026-03-20
+### Thesis Baseline Sync (Completed)
+- Synced the final thesis markdown sources, Mermaid sources, and exported SVG figures under `resources/reports/thesis/`.
+- Fixed the thesis figure generator path resolution so figure output matches the current thesis asset layout in this workspace.
+- Scope stayed limited to thesis source and asset baseline alignment; no runtime application modules changed.
+
+### Diagram Reference Pack V2 Pilot (Completed)
+- Added the independent pilot pack under `resources/reports/diagram-reference-packs/diagram-pack-v2` with a manifest-driven structure, Mermaid and PlantUML source entries, style assets, baselines, QA gates, and release build outputs.
+- Added a dedicated asset export under `resources/reports/diagram-reference-packs/diagram-pack-v2/build/assets/` and included that asset set in the release artifact.
+- Added Node-based pack lifecycle scripts in `resources/reports/diagram-reference-packs/diagram-pack-v2/scripts/` and npm commands `pack:validate`, `pack:build`, `pack:qa`, and `pack:release` in the pack `package.json`.
+- Added hardened CI/release workflows in `.github/workflows/diagram-pack-ci.yml` and `.github/workflows/diagram-pack-release.yml`, including `actions/upload-artifact@v4` guards with `if-no-files-found: error`.
+- Fixed Ajv 2020 schema handling, Windows PlantUML path handling, PlantUML PDF fallback via SVG->PDF, empty-artifact gating, and workflow artifact upload hardening.
+- Final local validation and independent tester validation passed for validate, build, QA, and release flows without changing runtime application architecture.
+
 ## 2026-03-15
 ### Public Landing Page Rollout (Completed)
 - Replaced the root redirect with a public landing page in `Tracking_Frontend/src/app/page.tsx`.

@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { diagramByFileName } from "./thesis-mermaid-diagrams.mjs";
 
 const projectRoot = process.cwd();
-const chaptersDir = join(projectRoot, "resources", "reports", "thesis-chapters");
+const chaptersDir = join(projectRoot, "resources", "reports", "thesis", "final");
 const assetsDir = join(chaptersDir, "assets");
 const figuresDir = join(assetsDir, "figures");
 const mermaidConfigPath = join(assetsDir, "mermaid-thesis-config.json");
