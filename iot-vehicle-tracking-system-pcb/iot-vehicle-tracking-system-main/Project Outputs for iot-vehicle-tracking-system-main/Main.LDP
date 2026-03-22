@@ -1,0 +1,3 @@
+Layer Pairs Export File for PCB: E:\1. Phenikaa University\AML\0. Project\12. DATN\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-pcb\iot-vehicle-tracking-system-main\Main.PcbDoc
+LayersSetName=Top_Bot_Thru_Holes|DrillFile=main-roundholes.txt|DrillLayers=gtl,gbl
+LayersSetName=Top_Bot_Slot_Holes|DrillFile=main-slotholes.txt|DrillLayers=gtl,gbl
