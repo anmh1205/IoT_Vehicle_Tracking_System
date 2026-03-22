@@ -52,7 +52,7 @@ export const DeviceFilters = ({
       </Select>
 
       <Select
-        value={`${filters.sortBy ?? 'updatedAt'}:${filters.sortOrder ?? 'desc'}`}
+        value={`${filters.sortBy ?? 'createdAt'}:${filters.sortOrder ?? 'desc'}`}
         onValueChange={(value) => {
           const [sortBy, sortOrder] = value.split(':');
           onChange({
@@ -67,7 +67,7 @@ export const DeviceFilters = ({
           <SelectValue placeholder="Sắp xếp" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="updatedAt:desc">Mới cập nhật</SelectItem>
+          <SelectItem value="createdAt:desc">Mới cập nhật</SelectItem>
           <SelectItem value="deviceName:asc">Tên A-Z</SelectItem>
           <SelectItem value="deviceName:desc">Tên Z-A</SelectItem>
           <SelectItem value="currentStatus:asc">Trạng thái</SelectItem>

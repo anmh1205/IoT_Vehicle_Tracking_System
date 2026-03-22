@@ -29,7 +29,7 @@ export const DeviceFilterCompact = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="h-11">
           <Funnel className="mr-2 h-4 w-4" />
           {label}
         </Button>

@@ -5,7 +5,8 @@ import {
   updateOne,
   deleteOne,
 } from '@/infrastructure/database/queries';
-import type { User } from '@/domain/auth/types/auth.types';
+import { pool } from '@/infrastructure/database/pool';
+import type { User, UserListQuery } from '@/domain/auth/types/auth.types';
 
 export const findByUsername = async (username: string): Promise<User | null> =>
   findOne<User>('SELECT * FROM users WHERE username = $1', [username]);
@@ -15,6 +16,47 @@ export const findById = async (id: number): Promise<User | null> =>
 
 export const findAll = async (): Promise<User[]> =>
   findMany<User>('SELECT * FROM users ORDER BY created_at DESC');
+
+export const findManyPaged = async (
+  query: UserListQuery,
+): Promise<{ users: User[]; total: number }> => {
+  const page = query.page ?? 1;
+  const limit = query.limit ?? 20;
+  const offset = (page - 1) * limit;
+
+  const conditions: string[] = [];
+  const params: unknown[] = [];
+  let paramIndex = 1;
+
+  if (query.role) {
+    conditions.push(`role = $${paramIndex++}`);
+    params.push(query.role);
+  }
+
+  if (query.status) {
+    conditions.push(`status = $${paramIndex++}`);
+    params.push(query.status);
+  }
+
+  if (query.search) {
+    conditions.push(
+      `(username ILIKE $${paramIndex} OR full_name ILIKE $${paramIndex} OR COALESCE(email, '') ILIKE $${paramIndex})`,
+    );
+    params.push(`%${query.search}%`);
+    paramIndex += 1;
+  }
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const countResult = await pool.query(`SELECT COUNT(*) AS total FROM users ${whereClause}`, params);
+  const total = Number.parseInt(String(countResult.rows[0]?.total ?? 0), 10);
+
+  const users = await findMany<User>(
+    `SELECT * FROM users ${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+    [...params, limit, offset],
+  );
+
+  return { users, total };
+};
 
 export const create = async (
   username: string,

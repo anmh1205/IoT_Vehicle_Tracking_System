@@ -9,9 +9,46 @@ export interface DeviceFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
+const normalizeDeviceList = (payload: any) => {
+  const items = payload?.items ?? payload?.devices ?? payload?.data?.items ?? payload?.data?.devices ?? [];
+  const total = Number(
+    payload?.pagination?.total ??
+      payload?.data?.pagination?.total ??
+      payload?.total ??
+      payload?.data?.total ??
+      items.length,
+  );
+  const page = Number(
+    payload?.pagination?.page ??
+      payload?.data?.pagination?.page ??
+      payload?.page ??
+      payload?.data?.page ??
+      1,
+  );
+  const limit = Number(
+    payload?.pagination?.limit ??
+      payload?.data?.pagination?.limit ??
+      payload?.limit ??
+      payload?.data?.limit ??
+      (items.length || 20),
+  );
+
+  return {
+    items,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages:
+        Number(payload?.pagination?.totalPages ?? payload?.pagination?.total_pages ?? payload?.data?.pagination?.totalPages ?? payload?.data?.pagination?.total_pages) ||
+        Math.max(Math.ceil(total / Math.max(limit, 1)), 1),
+    },
+  };
+};
+
 export const deviceServices = {
   getList: (params?: DeviceFilters) =>
-    apiClient.get('/devices', { params }).then((r) => unwrap<any>(r.data)),
+    apiClient.get('/devices', { params }).then((r) => normalizeDeviceList(unwrap<any>(r.data))),
   getById: (id: number | string) =>
     apiClient.get(`/devices/${id}`).then((r) => unwrap<any>(r.data)),
   create: (data: Record<string, unknown>) =>

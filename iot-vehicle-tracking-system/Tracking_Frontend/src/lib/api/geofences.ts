@@ -9,6 +9,8 @@ export const geofenceServices = {
   update: (id: number, data: Record<string, unknown>) =>
     apiClient.put(`/geofences/${id}`, data).then((r) => unwrap<any>(r.data)),
   delete: (id: number) => apiClient.delete(`/geofences/${id}`).then((r) => unwrap<any>(r.data)),
-  bindVehicles: (id: number, vehicleIds: number[]) =>
-    apiClient.post(`/geofences/${id}/vehicles`, { vehicleIds }).then((r) => unwrap<any>(r.data)),
+  assignVehicle: (id: number, vehicleId: string) =>
+    apiClient.post(`/geofences/${id}/vehicles`, { vehicleId }).then((r) => unwrap<any>(r.data)),
+  unassignVehicle: (id: number, vehicleId: string) =>
+    apiClient.delete(`/geofences/${id}/vehicles/${vehicleId}`).then((r) => unwrap<any>(r.data)),
 };

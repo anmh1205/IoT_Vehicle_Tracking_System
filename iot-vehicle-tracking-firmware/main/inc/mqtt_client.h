@@ -4,6 +4,7 @@
 
 #include "app_config.h"
 #include "esp_err.h"
+#include_next "mqtt_client.h"
 
 typedef void (*mqtt_command_cb_t)(const char *topic, const char *payload);
 

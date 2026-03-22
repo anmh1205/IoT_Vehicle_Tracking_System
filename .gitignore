@@ -29,3 +29,13 @@
 *.pptx
 *.xlsx
 
+# Root-level scratch artifacts should never stay in the repo
+/tmp*
+
+/iot-vehicle-tracking-firmware/build
+/.agents
+/iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/History
+/iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/Project Logs for iot-vehicle-tracking-system-main
+/iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/Library/IP5310/History
+/iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/__Previews
+/iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/Library/SIM7600CE/SIM7600CE/History

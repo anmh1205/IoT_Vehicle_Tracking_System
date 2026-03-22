@@ -67,3 +67,8 @@ export const observabilityConfig = {
   metricsPassword: fromEnv('METRICS_PASSWORD'),
   logLevel: fromEnv('LOG_LEVEL') ?? 'info',
 } as const;
+
+export const firmwareConfig = {
+  storagePath: fromEnv('FIRMWARE_STORAGE_PATH') ?? '/app/firmware',
+  publicBaseUrl: fromEnv('FIRMWARE_PUBLIC_BASE_URL') ?? null,
+} as const;

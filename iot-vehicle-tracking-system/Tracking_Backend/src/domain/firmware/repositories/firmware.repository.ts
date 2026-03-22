@@ -10,22 +10,13 @@ import type {
   Firmware,
   CreateFirmwareInput,
   FirmwareListQuery,
+  FirmwareDeploymentRow,
 } from '@/domain/firmware/types/firmware.types';
 
 interface CountRow {
   count: string;
 }
 
-interface FirmwareDeploymentRow {
-  id: number;
-  firmware_id: number;
-  device_id: string;
-  status: string;
-  started_at: Date | null;
-  completed_at: Date | null;
-  error_message: string | null;
-  created_at: Date;
-}
 
 export const findAll = async (
   query: FirmwareListQuery,
@@ -67,10 +58,17 @@ export const findByVersion = async (version: string): Promise<Firmware | null> =
 
 export const create = async (input: CreateFirmwareInput): Promise<Firmware> =>
   insertOne<Firmware>(
-    `INSERT INTO firmware (version, filename, size, sha256, description, is_active, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, false, NOW(), NOW())
+    `INSERT INTO firmware (version, filename, file_path, size, sha256, description, is_active, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, false, NOW(), NOW())
      RETURNING *`,
-    [input.version, input.filename, input.size, input.sha256, input.description ?? null],
+    [
+      input.version,
+      input.filename,
+      input.filePath ?? input.filename,
+      input.size,
+      input.sha256,
+      input.description ?? null,
+    ],
   );
 
 export const update = async (
@@ -88,6 +86,10 @@ export const update = async (
   if (data.filename !== undefined) {
     setClauses.push(`filename = $${paramIndex++}`);
     values.push(data.filename);
+  }
+  if (data.filePath !== undefined) {
+    setClauses.push(`file_path = $${paramIndex++}`);
+    values.push(data.filePath);
   }
   if (data.size !== undefined) {
     setClauses.push(`size = $${paramIndex++}`);
@@ -131,6 +133,7 @@ export const deactivate = async (id: number): Promise<Firmware | null> =>
 export const createDeployments = async (
   firmwareId: number,
   deviceIds: string[],
+  targetVersion: string,
 ): Promise<FirmwareDeploymentRow[]> => {
   if (deviceIds.length === 0) return [];
 
@@ -139,12 +142,24 @@ export const createDeployments = async (
   let paramIndex = 1;
 
   for (const deviceId of deviceIds) {
-    rowsSql.push(`($${paramIndex++}, $${paramIndex++}, 'started', NOW())`);
-    values.push(deviceId, firmwareId);
+    const jobId = `ota_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    rowsSql.push(
+      `($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, 'assigned', 0, $${paramIndex++}, NOW(), NOW())`,
+    );
+    values.push(jobId, deviceId, firmwareId, targetVersion);
   }
 
   return findMany<FirmwareDeploymentRow>(
-    `INSERT INTO firmware_update_log (device_id, firmware_id, status, started_at)
+    `INSERT INTO firmware_update_log (
+      job_id,
+      device_id,
+      firmware_id,
+      status,
+      progress,
+      target_version,
+      started_at,
+      updated_at
+    )
      VALUES ${rowsSql.join(', ')}
      RETURNING *`,
     values,
@@ -160,3 +175,32 @@ export const findDeploymentsByFirmwareId = async (
      ORDER BY created_at DESC`,
     [firmwareId],
   );
+
+export const listLatestDeploymentsByDevice = async (
+  deviceId: string,
+  page: number,
+  limit: number,
+): Promise<{ items: FirmwareDeploymentRow[]; total: number }> => {
+  const offset = (page - 1) * limit;
+
+  const totalResult = await pool.query<{ count: string }>(
+    `SELECT COUNT(*)::text as count
+     FROM firmware_update_log
+     WHERE device_id = $1`,
+    [deviceId],
+  );
+
+  const items = await findMany<FirmwareDeploymentRow>(
+    `SELECT *
+     FROM firmware_update_log
+     WHERE device_id = $1
+     ORDER BY created_at DESC
+     LIMIT $2 OFFSET $3`,
+    [deviceId, limit, offset],
+  );
+
+  return {
+    items,
+    total: parseInt(totalResult.rows[0].count, 10),
+  };
+};

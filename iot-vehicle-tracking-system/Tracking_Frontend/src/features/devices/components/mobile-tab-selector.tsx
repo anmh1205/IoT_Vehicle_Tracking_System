@@ -4,7 +4,7 @@ export const MobileTabSelector = () => {
   return (
     <TabsList className="grid w-full grid-cols-2 sm:hidden">
       <TabsTrigger value="table">Bảng</TabsTrigger>
-      <TabsTrigger value="cards">Cards</TabsTrigger>
+      <TabsTrigger value="cards">Thẻ</TabsTrigger>
     </TabsList>
   );
 };

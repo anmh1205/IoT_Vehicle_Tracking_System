@@ -1,0 +1,9 @@
+flowchart TB
+    Device["Tracker Device"] --> EMQX["EMQX Broker"]
+    EMQX --> Bridge["MQTT Bridge"]
+    Bridge --> API["Backend API"]
+    Bridge --> VM["VictoriaMetrics"]
+    Bridge --> VL["VictoriaLogs"]
+    API --> PG["PostgreSQL"]
+    API --> Socket["Socket.IO"]
+    Socket --> Dashboard["Web Dashboard"]

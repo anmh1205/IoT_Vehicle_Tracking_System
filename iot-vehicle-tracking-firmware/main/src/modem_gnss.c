@@ -86,23 +86,33 @@ esp_err_t modem_gnss_get_location(gnss_data_t *data) {
 
     char *fields[20] = {0};
     size_t field_count = 0;
-    char *save_ptr = NULL;
-    char *token = strtok_r(line, ",", &save_ptr);
-    while (token != NULL && field_count < ARRAY_SIZE(fields)) {
-        fields[field_count++] = token;
-        token = strtok_r(NULL, ",", &save_ptr);
+    char *cursor = line;
+
+    while (field_count < ARRAY_SIZE(fields)) {
+        fields[field_count++] = cursor;
+
+        char *comma = strchr(cursor, ',');
+        if (comma == NULL) {
+            break;
+        }
+
+        *comma = '\0';
+        cursor = comma + 1;
     }
 
-    ESP_RETURN_ON_FALSE(field_count >= 16, ESP_FAIL, TAG, "CGNSINF response too short");
+    ESP_RETURN_ON_FALSE(field_count >= 5, ESP_FAIL, TAG, "CGNSINF response too short");
 
     memset(data, 0, sizeof(*data));
-    data->fix_valid = atoi(fields[1]) == 1;
-    data->latitude = atof(fields[3]);
-    data->longitude = atof(fields[4]);
-    data->speed_kmh = (float)atof(fields[6]);
-    data->course_deg = (float)atof(fields[7]);
-    data->satellites = (uint8_t)(atoi(fields[14]) + atoi(fields[15]));
-    data->timestamp_ms = modem_gnss_parse_timestamp(fields[2]);
+    data->fix_valid = field_count > 1 && fields[1] != NULL && atoi(fields[1]) == 1;
+    data->latitude = field_count > 3 && fields[3] != NULL ? atof(fields[3]) : 0.0;
+    data->longitude = field_count > 4 && fields[4] != NULL ? atof(fields[4]) : 0.0;
+    data->speed_kmh = field_count > 6 && fields[6] != NULL ? (float)atof(fields[6]) : 0.0f;
+    data->course_deg = field_count > 7 && fields[7] != NULL ? (float)atof(fields[7]) : 0.0f;
+
+    int sat_gps = field_count > 14 && fields[14] != NULL ? atoi(fields[14]) : 0;
+    int sat_glonass = field_count > 15 && fields[15] != NULL ? atoi(fields[15]) : 0;
+    data->satellites = (uint8_t)(sat_gps + sat_glonass);
+    data->timestamp_ms = field_count > 2 && fields[2] != NULL ? modem_gnss_parse_timestamp(fields[2]) : util_uptime_ms();
 
     if (!data->fix_valid) {
         data->latitude = 0.0;

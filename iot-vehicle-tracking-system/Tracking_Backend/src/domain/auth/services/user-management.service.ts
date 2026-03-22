@@ -7,11 +7,32 @@ import { hashPassword, sanitizeUser } from '@/domain/auth/helpers/auth.helpers';
 import * as userRepo from '@/domain/auth/repositories/user.repository';
 import * as sessionRepo from '@/domain/auth/repositories/user-session.repository';
 import { logger } from '@/infrastructure/logger';
-import type { UserPublic, CreateUserInput, UpdateUserInput } from '@/domain/auth/types/auth.types';
+import type {
+  UserPublic,
+  CreateUserInput,
+  UpdateUserInput,
+  UserListQuery,
+} from '@/domain/auth/types/auth.types';
 
-export const listUsers = async (): Promise<UserPublic[]> => {
-  const users = await userRepo.findAll();
-  return users.map(sanitizeUser);
+export const listUsers = async (
+  query: UserListQuery,
+): Promise<{
+  items: UserPublic[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}> => {
+  const page = query.page ?? 1;
+  const limit = query.limit ?? 20;
+  const result = await userRepo.findManyPaged(query);
+
+  return {
+    items: result.users.map(sanitizeUser),
+    pagination: {
+      page,
+      limit,
+      total: result.total,
+      totalPages: Math.ceil(result.total / limit),
+    },
+  };
 };
 
 export const getUserById = async (id: number): Promise<UserPublic> => {

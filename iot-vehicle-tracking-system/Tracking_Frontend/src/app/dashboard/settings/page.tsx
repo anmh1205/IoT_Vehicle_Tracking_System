@@ -1,33 +1,93 @@
-﻿'use client';
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { PageContainer } from '@/components/layout/PageContainer';
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { PageContainer } from '@/components/layout/PageContainer';
 import { authServices } from '@/lib/api/auth';
-import { ProfileForm } from '@/features/settings/components/profile-form';
-import { PasswordForm } from '@/features/settings/components/password-form';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import { NotificationPrefs } from '@/features/settings/components/notification-prefs';
+import { PasswordForm } from '@/features/settings/components/password-form';
+import { ProfileForm } from '@/features/settings/components/profile-form';
 import { ThemeSelector } from '@/features/settings/components/theme-selector';
+
 const SettingsPage = () => {
-  const [profile, setProfile] = useState({ fullName: '', email: '' });
+  const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
+  const token = useAuthStore((state) => state.token);
+  const setAuth = useAuthStore((state) => state.setAuth);
   const [notifications, setNotifications] = useState({ emailAlerts: true, pushAlerts: true });
-  const profileMutation = useMutation({
-    mutationFn: (payload: { fullName?: string; email?: string }) =>
-      authServices.updateProfile(payload),
-    onSuccess: (_data, vars) =>
-      setProfile({ fullName: vars.fullName ?? '', email: vars.email ?? '' }),
+  const [profileStatus, setProfileStatus] = useState<string | null>(null);
+  const [passwordStatus, setPasswordStatus] = useState<string | null>(null);
+  const [notificationStatus, setNotificationStatus] = useState<string | null>(null);
+
+  const notificationSettings = useQuery({
+    queryKey: ['auth', 'notification-settings'],
+    queryFn: () => authServices.getNotificationSettings(),
   });
+
+  useEffect(() => {
+    const preferences = notificationSettings.data?.preferences as
+      | { emailAlerts?: boolean; pushAlerts?: boolean }
+      | undefined;
+    setNotifications({
+      emailAlerts: preferences?.emailAlerts ?? true,
+      pushAlerts: preferences?.pushAlerts ?? true,
+    });
+  }, [notificationSettings.data]);
+
+  const profileDefaults = useMemo(
+    () => ({
+      fullName: user?.fullName ?? '',
+      email: user?.email ?? '',
+    }),
+    [user?.email, user?.fullName],
+  );
+
+  const profileMutation = useMutation({
+    mutationFn: (payload: { fullName?: string; email?: string }) => authServices.updateProfile(payload),
+    onMutate: () => setProfileStatus(null),
+    onSuccess: (updatedUser) => {
+      setAuth(
+        {
+          ...updatedUser,
+          isActive: updatedUser.status ? updatedUser.status === 'active' : true,
+        },
+        token,
+      );
+      setProfileStatus('Thông tin tài khoản đã được cập nhật.');
+    },
+    onError: () => {
+      setProfileStatus('Không thể cập nhật hồ sơ. Vui lòng thử lại.');
+    },
+  });
+
   const passwordMutation = useMutation({
     mutationFn: (payload: { currentPassword: string; newPassword: string }) =>
       authServices.updatePassword(payload),
+    onMutate: () => setPasswordStatus(null),
+    onSuccess: () => {
+      setPasswordStatus('Mật khẩu đã được thay đổi.');
+    },
+    onError: () => {
+      setPasswordStatus('Không thể đổi mật khẩu. Vui lòng kiểm tra lại thông tin.');
+    },
   });
-  const notifMutation = useMutation({
+
+  const notificationMutation = useMutation({
     mutationFn: (payload: { emailAlerts: boolean; pushAlerts: boolean }) =>
-      authServices.updateNotifications(payload),
-    onSuccess: () => {},
+      authServices.updateNotificationSettings(payload),
+    onMutate: () => setNotificationStatus(null),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auth', 'notification-settings'] });
+      setNotificationStatus('Tùy chọn thông báo đã được lưu.');
+    },
+    onError: () => {
+      setNotificationStatus('Không thể lưu tùy chọn thông báo. Vui lòng thử lại.');
+    },
   });
+
   return (
     <PageContainer pageTitle="Cài đặt" pageDescription="Tùy chỉnh tài khoản và hệ thống">
       <Tabs defaultValue="profile" className="space-y-4">
@@ -42,12 +102,14 @@ const SettingsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Thông tin cá nhân</CardTitle>
+              <CardDescription>Thông tin này được dùng trong hồ sơ và khu vực quản trị.</CardDescription>
             </CardHeader>
             <CardContent>
               <ProfileForm
-                defaultValues={profile}
+                defaultValues={profileDefaults}
                 onSubmit={(payload) => profileMutation.mutate(payload)}
                 isPending={profileMutation.isPending}
+                statusMessage={profileStatus}
               />
             </CardContent>
           </Card>
@@ -57,11 +119,15 @@ const SettingsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Đổi mật khẩu</CardTitle>
+              <CardDescription>
+                Dùng mật khẩu đủ mạnh để bảo vệ phiên làm việc và quyền quản trị.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <PasswordForm
                 onSubmit={(payload) => passwordMutation.mutate(payload)}
                 isPending={passwordMutation.isPending}
+                statusMessage={passwordStatus}
               />
             </CardContent>
           </Card>
@@ -71,10 +137,19 @@ const SettingsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Tùy chọn thông báo</CardTitle>
+              <CardDescription>
+                Chọn kênh cảnh báo phù hợp với vai trò điều phối và theo dõi sự cố.
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <NotificationPrefs value={notifications} onChange={setNotifications} />
-              <Button onClick={() => notifMutation.mutate(notifications)}>Lưu thông báo</Button>
+            <CardContent className="space-y-4">
+              <NotificationPrefs
+                value={notifications}
+                onChange={setNotifications}
+                isLoading={notificationSettings.isLoading}
+                statusMessage={notificationStatus}
+                isPending={notificationMutation.isPending}
+                onSubmit={() => notificationMutation.mutate(notifications)}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -83,6 +158,9 @@ const SettingsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Giao diện</CardTitle>
+              <CardDescription>
+                Điều chỉnh giao diện hiển thị để phù hợp môi trường vận hành của bạn.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ThemeSelector />
@@ -93,4 +171,5 @@ const SettingsPage = () => {
     </PageContainer>
   );
 };
+
 export default SettingsPage;

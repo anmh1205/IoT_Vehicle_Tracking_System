@@ -2,19 +2,24 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient, unwrap } from '@/lib/api/client';
 import { statisticsServices } from '@/lib/api/statistics';
+import { toLocalDateInputValue } from '@/lib/utils';
+
 export interface StatisticsParams {
   from: string;
   to: string;
   interval: 'day' | 'week' | 'month';
 }
+
 export interface StatisticsSummary {
   totalRuntimeHours: number;
   averageUptimePercent: number;
   totalSessions: number;
   totalAlerts: number;
 }
-const defaultFrom = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-const defaultTo = new Date().toISOString().slice(0, 10);
+
+const defaultFrom = toLocalDateInputValue(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
+const defaultTo = toLocalDateInputValue(new Date());
+
 export const useStatisticsParams = (): StatisticsParams => {
   return useMemo(
     () => ({
@@ -25,12 +30,14 @@ export const useStatisticsParams = (): StatisticsParams => {
     [],
   );
 };
+
 const normalizeSummary = (payload: any): StatisticsSummary => ({
   totalRuntimeHours: Number(payload?.totalRuntimeHours ?? payload?.totalRuntime ?? 0),
   averageUptimePercent: Number(payload?.averageUptimePercent ?? payload?.avgUptime ?? 0),
   totalSessions: Number(payload?.totalSessions ?? payload?.sessions ?? 0),
   totalAlerts: Number(payload?.totalAlerts ?? payload?.alerts ?? 0),
 });
+
 export const useStatisticsSummary = (params: StatisticsParams) => {
   const requestParams: Record<string, unknown> = { ...params };
   return useQuery<StatisticsSummary>({
@@ -78,6 +85,7 @@ export const useStatisticsSummary = (params: StatisticsParams) => {
     },
   });
 };
+
 export const useFleetUtilization = (params: StatisticsParams) => {
   const requestParams: Record<string, unknown> = { ...params };
   return useQuery({
@@ -85,6 +93,7 @@ export const useFleetUtilization = (params: StatisticsParams) => {
     queryFn: () => statisticsServices.getFleetUsage(requestParams),
   });
 };
+
 export const useDeviceUptime = (params: StatisticsParams) => {
   const requestParams: Record<string, unknown> = { ...params };
   return useQuery({

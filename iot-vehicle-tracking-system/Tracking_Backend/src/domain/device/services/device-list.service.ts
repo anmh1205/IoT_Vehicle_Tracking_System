@@ -22,14 +22,30 @@ const sanitizeDevice = (device: Device): DevicePublic => ({
 
 export const listDevices = async (
   query: DeviceListQuery,
-): Promise<{ devices: DevicePublic[]; total: number; page: number; limit: number }> => {
+): Promise<{
+  items: DevicePublic[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+  devices: DevicePublic[];
+  total: number;
+  page: number;
+  limit: number;
+}> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
   const result = await deviceRepo.findAll(query);
+  const items = result.devices.map(sanitizeDevice);
+  const pagination = {
+    page,
+    limit,
+    total: result.total,
+    totalPages: Math.ceil(result.total / limit),
+  };
 
   return {
-    devices: result.devices.map(sanitizeDevice),
+    items,
+    pagination,
+    devices: items,
     total: result.total,
     page,
     limit,

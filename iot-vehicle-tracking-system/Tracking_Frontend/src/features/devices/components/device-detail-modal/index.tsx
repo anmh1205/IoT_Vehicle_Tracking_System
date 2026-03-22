@@ -1,9 +1,9 @@
 'use client';
+
 import { useState } from 'react';
 import { Download, MoreVertical, RefreshCw } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,32 +11,39 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRoleAccess } from '@/hooks/use-role-access';
-import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-constants';
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
+import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-constants';
+import { ErrorBox } from '@/features/devices/components/error-box';
 import { ExportModal } from '@/features/devices/components/export-modal';
 import { DeviceDetailSkeleton } from '@/features/devices/components/device-skeletons';
-import { ErrorBox } from '@/features/devices/components/error-box';
 import { DeviceDetailModalProvider, useDeviceDetailModal } from './modal-context';
-import { OverviewTab } from './overview-tab';
-import { SessionsTab } from './sessions-tab';
 import { ErrorCodesTab } from './error-codes-tab';
+import { OverviewTab } from './overview-tab';
 import { RuntimeTab } from './runtime-tab';
-import { VibrationTab } from './vibration-tab';
+import { SessionsTab } from './sessions-tab';
 import { SettingsTab } from './settings-tab';
+import { VibrationTab } from './vibration-tab';
+
 const DeviceDetailModalContent = () => {
   const [exportOpen, setExportOpen] = useState(false);
-  const { device, loading, error, activeTab, onTabChange, openExportModal } =
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { device, loading, error, activeTab, onTabChange, onRefresh, openExportModal } =
     useDeviceDetailModal();
   const access = useRoleAccess();
+
   if (loading) {
     return <DeviceDetailSkeleton />;
   }
+
   if (error) {
     return <ErrorBox description={error.message} />;
   }
+
   const vibrationTabVisible = access.canViewSystemInfo;
   const settingsTabVisible = access.canEditDevice;
+
   return (
     <div className="space-y-4">
       <DialogHeader className="border-b pb-4">
@@ -52,7 +59,7 @@ const DeviceDetailModalContent = () => {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="outline">
+              <Button size="icon" variant="outline" aria-label="Thao tác thiết bị">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -71,9 +78,19 @@ const DeviceDetailModalContent = () => {
                 Xuất theo khoảng thời gian
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onTabChange('overview')}>
+              <DropdownMenuItem
+                disabled={isRefreshing}
+                onClick={async () => {
+                  setIsRefreshing(true);
+                  try {
+                    await onRefresh();
+                  } finally {
+                    setIsRefreshing(false);
+                  }
+                }}
+              >
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Làm mới
+                {isRefreshing ? 'Đang làm mới...' : 'Làm mới dữ liệu'}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -122,6 +139,7 @@ const DeviceDetailModalContent = () => {
     </div>
   );
 };
+
 export const DeviceDetailModal = ({
   open,
   onOpenChange,

@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 #include "sdkconfig.h"
 
 #include "esp_log.h"
@@ -19,8 +22,40 @@ static const char *TAG = "MODEM_LTE";
 static bool s_lte_initialized = false;
 static bool s_lte_connected = false;
 
+#define MODEM_LTE_CEREG_MAX_RETRY 20
+#define MODEM_LTE_CEREG_POLL_INTERVAL_MS 1000
+
 static esp_err_t modem_lte_send_simple(const char *cmd, const char *expect, uint32_t timeout_ms) {
     return modem_at_send_expect(cmd, expect, timeout_ms);
+}
+
+static bool modem_lte_cereg_registered(const char *response) {
+    char *marker = strstr(response, "+CEREG:");
+    if (marker == NULL) {
+        return false;
+    }
+
+    int n = 0;
+    int stat = 0;
+    if (sscanf(marker, "+CEREG: %d,%d", &n, &stat) == 2) {
+        return stat == 1 || stat == 5;
+    }
+
+    return false;
+}
+
+static esp_err_t modem_lte_wait_cereg_registered(void) {
+    char response[256] = {0};
+
+    for (int attempt = 0; attempt < MODEM_LTE_CEREG_MAX_RETRY; ++attempt) {
+        if (modem_at_send("AT+CEREG?\r", response, sizeof(response), 5000) == ESP_OK &&
+            modem_lte_cereg_registered(response)) {
+            return ESP_OK;
+        }
+        vTaskDelay(pdMS_TO_TICKS(MODEM_LTE_CEREG_POLL_INTERVAL_MS));
+    }
+
+    return ESP_ERR_TIMEOUT;
 }
 
 esp_err_t modem_lte_init(void) {
@@ -37,10 +72,10 @@ esp_err_t modem_lte_init(void) {
                         ESP_FAIL,
                         TAG,
                         "SIM not ready");
-    ESP_RETURN_ON_FALSE(modem_lte_send_simple("AT+CNMP=38\r", "OK", 5000) == ESP_OK,
+    ESP_RETURN_ON_FALSE(modem_lte_send_simple("AT+CNMP=2\r", "OK", 5000) == ESP_OK,
                         ESP_FAIL,
                         TAG,
-                        "LTE mode set failed");
+                        "Auto network mode set failed");
 
     char pdp_cmd[96] = {0};
     snprintf(pdp_cmd, sizeof(pdp_cmd), "AT+CGDCONT=1,\"IP\",\"%s\"\r", CONFIG_TRACKER_MODEM_APN);
@@ -59,10 +94,10 @@ esp_err_t modem_lte_connect(void) {
         return ESP_OK;
     }
 
-    ESP_RETURN_ON_FALSE(modem_lte_send_simple("AT+CREG?\r", "+CREG:", 10000) == ESP_OK,
+    ESP_RETURN_ON_FALSE(modem_lte_wait_cereg_registered() == ESP_OK,
                         ESP_FAIL,
                         TAG,
-                        "Network registration failed");
+                        "LTE domain registration timeout");
     ESP_RETURN_ON_FALSE(modem_lte_send_simple("AT+CGACT=1,1\r", "OK", 15000) == ESP_OK,
                         ESP_FAIL,
                         TAG,

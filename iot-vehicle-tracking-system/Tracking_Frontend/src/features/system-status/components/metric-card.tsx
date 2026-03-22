@@ -10,13 +10,26 @@ export const MetricCard = ({
   icon,
   showProgress = false,
   unit = '',
+  unavailableText,
 }: {
   title: string;
-  value: number;
+  value?: number | null;
   icon: ReactNode;
   showProgress?: boolean;
   unit?: string;
+  unavailableText?: string | null;
 }) => {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return (
+      <StatCard
+        title={title}
+        value="--"
+        subtitle={unavailableText ?? 'Chưa có dữ liệu telemetry'}
+        icon={icon}
+      />
+    );
+  }
+
   return (
     <StatCard
       title={title}

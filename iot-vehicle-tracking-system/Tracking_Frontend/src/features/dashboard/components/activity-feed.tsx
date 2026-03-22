@@ -1,10 +1,12 @@
 'use client';
+
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { formatRelative } from '@/lib/utils/date/format';
 import type { DashboardEvent } from '@/features/dashboard/hooks/use-dashboard-stats';
+import { formatRelative } from '@/lib/utils/date/format';
+
 export const ActivityFeed = ({
   events,
   isLoading,
@@ -43,7 +45,7 @@ export const ActivityFeed = ({
               ))}
               {events.length === 0 ? (
                 <p className="rounded-lg border border-dashed p-3 text-center text-sm text-muted-foreground">
-Chưa có hoạt động gần đây.
+                  Chưa có hoạt động gần đây.
                 </p>
               ) : null}
             </div>

@@ -1,7 +1,11 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions",
     "allow": [],
-    "deny": []
+    "deny": [],
+    "defaultMode": "bypassPermissions"
+  },
+  "outputStyle": "Explanatory",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   }
 }

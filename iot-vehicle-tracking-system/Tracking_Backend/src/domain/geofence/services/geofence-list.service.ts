@@ -21,6 +21,7 @@ const sanitizeGeofence = (g: Geofence): GeofencePublic => ({
   color: g.color,
   displayHidden: g.display_hidden,
   createdBy: g.created_by,
+  vehicleIds: [],
   createdAt: g.created_at.toISOString(),
   updatedAt: g.updated_at.toISOString(),
 });
@@ -35,9 +36,18 @@ export const listGeofences = async (
   const limit = query.limit ?? 20;
 
   const result = await geofenceRepo.findAll(query);
+  const items = await Promise.all(
+    result.geofences.map(async (geofence) => {
+      const vehicleIds = await geofenceRepo.findVehiclesByGeofenceId(geofence.id);
+      return {
+        ...sanitizeGeofence(geofence),
+        vehicleIds: vehicleIds.map((row) => row.vehicle_id),
+      };
+    }),
+  );
 
   return {
-    items: result.geofences.map(sanitizeGeofence),
+    items,
     pagination: {
       page,
       limit,

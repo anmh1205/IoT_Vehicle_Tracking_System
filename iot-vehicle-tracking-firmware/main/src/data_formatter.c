@@ -107,9 +107,14 @@ char *data_format_firmware(const config_t *cfg, const firmware_status_t *status)
 
     cJSON_AddStringToObject(root, "device_id", cfg->device_id);
     cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
+    cJSON_AddStringToObject(root, "jobId", status->job_id);
     cJSON_AddStringToObject(root, "status", status->status);
     cJSON_AddNumberToObject(root, "progress", status->progress);
     cJSON_AddStringToObject(root, "targetVersion", status->target_version);
+    cJSON_AddStringToObject(root, "currentVersion", status->current_version);
+    if (!util_string_empty(status->partition)) {
+        cJSON_AddStringToObject(root, "partition", status->partition);
+    }
     if (!util_string_empty(status->error)) {
         cJSON_AddStringToObject(root, "error", status->error);
     }

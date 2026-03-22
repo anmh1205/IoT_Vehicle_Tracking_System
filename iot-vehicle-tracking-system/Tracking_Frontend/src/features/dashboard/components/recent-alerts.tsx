@@ -1,10 +1,12 @@
 'use client';
+
 import { AlertTriangle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatRelative } from '@/lib/utils/date/format';
 import type { DashboardEvent } from '@/features/dashboard/hooks/use-dashboard-stats';
+import { formatRelative } from '@/lib/utils/date/format';
+
 const getSeverityVariant = (
   severity?: string,
 ): 'default' | 'secondary' | 'destructive' | 'outline' => {
@@ -16,6 +18,7 @@ const getSeverityVariant = (
   }
   return 'outline';
 };
+
 export const RecentAlerts = ({
   alerts,
   isLoading,
@@ -28,7 +31,7 @@ export const RecentAlerts = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4" />
-Cảnh báo gần đây
+          Cảnh báo gần đây
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -58,7 +61,7 @@ Cảnh báo gần đây
             ))}
             {alerts.length === 0 ? (
               <p className="rounded-lg border border-dashed p-3 text-center text-sm text-muted-foreground">
-Chưa có cảnh báo gần đây.
+                Chưa có cảnh báo gần đây.
               </p>
             ) : null}
           </div>

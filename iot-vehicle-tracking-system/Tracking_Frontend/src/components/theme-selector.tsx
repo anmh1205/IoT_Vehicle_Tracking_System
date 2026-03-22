@@ -32,7 +32,7 @@ export const ThemeSelector = () => {
       <Select value={activeTheme} onValueChange={setActiveTheme}>
         <SelectTrigger
           id="theme-selector"
-          className="justify-start min-w-[220px] *:data-[slot=select-value]:min-w-[120px]"
+          className="justify-start w-[140px] sm:min-w-[220px] sm:w-auto *:data-[slot=select-value]:min-w-[80px] sm:*:data-[slot=select-value]:min-w-[120px]"
         >
           <span className="text-muted-foreground hidden sm:block whitespace-nowrap">
             Chọn giao diện:

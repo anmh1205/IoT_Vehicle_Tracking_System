@@ -28,7 +28,18 @@ export const updateGeofenceSchema = createGeofenceSchema.partial().extend({
 export const geofenceListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
-  isActive: z.coerce.boolean().optional(),
+  isActive: z.preprocess((value) => {
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
+    if (value === true || value === 'true' || value === 1 || value === '1') {
+      return true;
+    }
+    if (value === false || value === 'false' || value === 0 || value === '0') {
+      return false;
+    }
+    return value;
+  }, z.boolean().optional()),
   geofenceType: z.enum(['circle', 'polygon', 'rectangle']).optional(),
   search: z.string().max(100).optional(),
 });

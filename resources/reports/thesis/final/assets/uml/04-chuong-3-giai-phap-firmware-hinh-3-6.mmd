@@ -1,0 +1,11 @@
+flowchart LR
+    IMU["IMU ISR"] --> PowerTask["power_task"]
+    OBDTask["obd_task"] --> Queue["telemetry_queue"]
+    GNSSTask["gnss_task"] --> Queue
+    SensorTask["sensor_task"] --> Queue
+    Queue --> MQTTTask["mqtt_task"]
+    MQTTTask --> Broker["EMQX"]
+    CmdTask["command_task"] --> MQTTTask
+    PowerTask --> OBDTask
+    PowerTask --> GNSSTask
+    PowerTask --> CmdTask

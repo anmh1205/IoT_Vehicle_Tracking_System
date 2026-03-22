@@ -1,4 +1,5 @@
 'use client';
+
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRoleAccess } from '@/hooks/use-role-access';
@@ -7,9 +8,11 @@ import { DataConfigurator } from '@/features/simulator/components/data-configura
 import { SimulationControls } from '@/features/simulator/components/simulation-controls';
 import { SimulationPreview } from '@/features/simulator/components/simulation-preview';
 import { useSimulator } from '@/features/simulator/hooks/use-simulator';
+
 const SimulatorPage = () => {
   const access = useRoleAccess();
   const simulator = useSimulator();
+
   if (!access.canAccessSystemAdmin) {
     return (
       <PageContainer pageTitle="Trình mô phỏng" pageDescription="Khu vực hạn chế">
@@ -21,12 +24,24 @@ const SimulatorPage = () => {
       </PageContainer>
     );
   }
+
   return (
     <PageContainer
       pageTitle="Trình mô phỏng"
-      pageDescription="Tạo dữ liệu telemetry giả lập cho kiểm thử end-to-end"
+      pageDescription="Tạo telemetry giả lập để kiểm thử end-to-end, kiểm tra dashboard và mô phỏng hành vi thiết bị"
     >
-      <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Hướng dẫn nhanh</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+          <p>1. Chọn thiết bị hoặc một nhóm thiết bị cần phát dữ liệu giả lập.</p>
+          <p>2. Cấu hình biên độ cảm biến, vị trí và chu kỳ phát để mô phỏng đúng kịch bản kiểm thử.</p>
+          <p>3. Theo dõi preview, lịch sử đã gửi và trạng thái chạy ở panel bên phải.</p>
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-4">
           <Card>
             <CardHeader>
@@ -76,4 +91,5 @@ const SimulatorPage = () => {
     </PageContainer>
   );
 };
+
 export default SimulatorPage;

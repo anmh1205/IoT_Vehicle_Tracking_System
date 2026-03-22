@@ -1,8 +1,10 @@
 'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { DeviceActivityPoint } from '@/features/dashboard/hooks/use-dashboard-stats';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
 export const BarGraph = ({
   data,
   isLoading,
@@ -13,11 +15,15 @@ export const BarGraph = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Device activity (7 days)</CardTitle>
+        <CardTitle>Hoạt động thiết bị trong 7 ngày</CardTitle>
       </CardHeader>
       <CardContent className="h-[320px]">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
+        ) : data.length === 0 ? (
+          <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+            Chưa có dữ liệu hoạt động để hiển thị.
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>

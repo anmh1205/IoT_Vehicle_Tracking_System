@@ -1,9 +1,14 @@
 import { LoginForm } from '@/features/auth/components/login-form';
+
 const LoginPage = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
+    <main
+      id="main-content"
+      className="safe-px safe-py flex min-h-[100dvh] items-center justify-center bg-muted/50"
+    >
       <LoginForm />
-    </div>
+    </main>
   );
 };
+
 export default LoginPage;

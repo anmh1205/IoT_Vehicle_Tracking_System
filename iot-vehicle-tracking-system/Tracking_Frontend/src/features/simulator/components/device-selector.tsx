@@ -43,18 +43,20 @@ export const DeviceSelector = ({
         <div className="space-y-2">
           {devices.map((device) => {
             const checked = value.includes(device.deviceId);
+            const checkboxId = `sim-device-${device.id}`;
             return (
-              <label
-                key={device.id}
-                className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 hover:bg-muted"
-              >
+              <div key={device.id} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-muted">
                 <Checkbox
+                  id={checkboxId}
                   checked={checked}
                   onCheckedChange={(next) => toggle(device.deviceId, Boolean(next))}
+                  aria-label={`Chọn thiết bị ${device.deviceName}`}
                 />
-                <span className="text-sm">{device.deviceName}</span>
-                <span className="text-xs text-muted-foreground">{device.deviceId}</span>
-              </label>
+                <label htmlFor={checkboxId} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2">
+                  <span className="truncate text-sm">{device.deviceName}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{device.deviceId}</span>
+                </label>
+              </div>
             );
           })}
           {devices.length === 0 ? (

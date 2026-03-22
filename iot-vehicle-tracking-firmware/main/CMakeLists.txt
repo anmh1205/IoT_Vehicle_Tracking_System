@@ -25,6 +25,9 @@ idf_component_register(
         esp_adc
         esp_event
         esp_netif
+        esp_http_client
+        app_update
+        mbedtls
         json
         mqtt
         nvs_flash
