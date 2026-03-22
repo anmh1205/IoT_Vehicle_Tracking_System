@@ -7,6 +7,8 @@
 #include "esp_err.h"
 #include "esp_log.h"
 
+#include "app_config.h"
+
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define MIN_VALUE(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_VALUE(a, b) ((a) > (b) ? (a) : (b))
@@ -50,3 +52,10 @@ uint64_t util_uptime_ms(void);
 float util_clamp_float(float value, float min_value, float max_value);
 int util_clamp_int(int value, int min_value, int max_value);
 bool util_string_empty(const char *value);
+
+esp_err_t util_ota_apply_update(const config_t *cfg,
+                                const char *current_version,
+                                const ota_command_t *cmd,
+                                firmware_status_t *out_status);
+esp_err_t util_ota_trigger_manual_rollback(firmware_status_t *out_status);
+

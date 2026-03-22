@@ -9,6 +9,7 @@
 #include "driver/gpio.h"
 
 #include "esp_log.h"
+#include "esp_ota_ops.h"
 #include "esp_sleep.h"
 #include "esp_system.h"
 
@@ -41,6 +42,10 @@ RTC_DATA_ATTR rtc_context_t g_rtc_context = {
 
 static const char *TAG = "STATE_MACHINE";
 
+#ifndef CONFIG_APP_PROJECT_VER
+#define CONFIG_APP_PROJECT_VER "unknown"
+#endif
+
 static config_t s_config;
 static telemetry_t s_telemetry;
 static ble_obd_ctx_t *s_ble_ctx = NULL;
@@ -49,6 +54,8 @@ static uint64_t s_alarm_enter_ms = 0;
 static uint32_t s_session_id = 1;
 static bool s_status_running = false;
 static bool s_mqtt_started = false;
+static bool s_ota_confirm_checked = false;
+static char s_current_version[TRACKER_TARGET_VERSION_MAX_LEN] = CONFIG_APP_PROJECT_VER;
 
 int obd_convert_rpm(int32_t *value, const uint8_t *data, size_t len) {
     if (value == NULL || data == NULL || len < 2) {
@@ -174,18 +181,39 @@ static void state_machine_publish_event(const char *event_type, int code, const 
     cJSON_free(payload);
 }
 
-static void state_machine_publish_firmware_status(const char *status, uint8_t progress, const char *version) {
-    firmware_status_t firmware = {0};
-    util_copy_string(firmware.status, sizeof(firmware.status), status);
-    firmware.progress = progress;
-    util_copy_string(firmware.target_version, sizeof(firmware.target_version), version);
+static void state_machine_publish_firmware_payload(const firmware_status_t *firmware) {
+    if (firmware == NULL) {
+        return;
+    }
 
-    char *payload = data_format_firmware(&s_config, &firmware);
+    char *payload = data_format_firmware(&s_config, firmware);
     if (payload == NULL) {
         return;
     }
     tracker_mqtt_publish_firmware(payload);
     cJSON_free(payload);
+}
+
+static void state_machine_publish_firmware_status(const char *status,
+                                                  uint8_t progress,
+                                                  const char *version,
+                                                  const char *job_id,
+                                                  const char *partition,
+                                                  const char *error) {
+    firmware_status_t firmware = {0};
+    util_copy_string(firmware.status, sizeof(firmware.status), status);
+    firmware.progress = progress;
+    util_copy_string(firmware.job_id, sizeof(firmware.job_id), job_id);
+    util_copy_string(firmware.target_version, sizeof(firmware.target_version), version);
+    util_copy_string(firmware.current_version, sizeof(firmware.current_version), s_current_version);
+    if (!util_string_empty(partition)) {
+        util_copy_string(firmware.partition, sizeof(firmware.partition), partition);
+    }
+    if (!util_string_empty(error)) {
+        util_copy_string(firmware.error, sizeof(firmware.error), error);
+    }
+
+    state_machine_publish_firmware_payload(&firmware);
 }
 
 static void state_machine_try_connect_ble(void) {
@@ -226,6 +254,108 @@ static void state_machine_try_connect_network(void) {
     }
 }
 
+static void state_machine_try_confirm_running_firmware(void) {
+    if (s_ota_confirm_checked) {
+        return;
+    }
+
+    s_ota_confirm_checked = true;
+    const esp_partition_t *running = esp_ota_get_running_partition();
+    if (running != NULL && !util_string_empty(running->label)) {
+        util_copy_string(g_rtc_context.ota_partition,
+                         sizeof(g_rtc_context.ota_partition),
+                         running->label);
+    }
+
+    if (!g_rtc_context.ota_pending_confirm) {
+        return;
+    }
+
+    state_machine_publish_firmware_status("confirming",
+                                          99,
+                                          g_rtc_context.ota_target_version,
+                                          g_rtc_context.ota_job_id,
+                                          g_rtc_context.ota_partition,
+                                          "");
+
+    if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
+        g_rtc_context.ota_pending_confirm = false;
+        util_copy_string(s_current_version, sizeof(s_current_version), g_rtc_context.ota_target_version);
+        state_machine_publish_firmware_status("success",
+                                              100,
+                                              g_rtc_context.ota_target_version,
+                                              g_rtc_context.ota_job_id,
+                                              g_rtc_context.ota_partition,
+                                              "");
+    } else {
+        state_machine_publish_firmware_status("failed",
+                                              100,
+                                              g_rtc_context.ota_target_version,
+                                              g_rtc_context.ota_job_id,
+                                              g_rtc_context.ota_partition,
+                                              "confirm_failed");
+    }
+}
+
+static void state_machine_process_ota_command(command_action_t action) {
+    if (action != COMMAND_ACTION_OTA_UPDATE && action != COMMAND_ACTION_OTA_ROLLBACK) {
+        return;
+    }
+
+    ota_command_t cmd = {0};
+    if (!command_handler_take_ota_command(&cmd)) {
+        return;
+    }
+
+    if (action == COMMAND_ACTION_OTA_ROLLBACK || cmd.rollback_pending) {
+        firmware_status_t rollback = {0};
+        util_copy_string(rollback.job_id, sizeof(rollback.job_id), g_rtc_context.ota_job_id);
+        util_copy_string(rollback.target_version, sizeof(rollback.target_version), g_rtc_context.ota_previous_version);
+        util_copy_string(rollback.current_version, sizeof(rollback.current_version), s_current_version);
+
+        if (util_ota_trigger_manual_rollback(&rollback) == ESP_OK) {
+            g_rtc_context.ota_pending_confirm = false;
+            state_machine_publish_firmware_payload(&rollback);
+            esp_restart();
+        } else {
+            state_machine_publish_firmware_status("failed",
+                                                  100,
+                                                  g_rtc_context.ota_previous_version,
+                                                  g_rtc_context.ota_job_id,
+                                                  g_rtc_context.ota_partition,
+                                                  "manual_rollback_failed");
+        }
+        return;
+    }
+
+    firmware_status_t report = {0};
+    util_copy_string(report.job_id, sizeof(report.job_id), cmd.job_id);
+    util_copy_string(report.target_version, sizeof(report.target_version), cmd.version);
+    util_copy_string(report.current_version, sizeof(report.current_version), s_current_version);
+
+    state_machine_publish_firmware_status("assigned", 0, cmd.version, cmd.job_id, "", "");
+
+    if (util_ota_apply_update(&s_config, s_current_version, &cmd, &report) == ESP_OK) {
+        util_copy_string(g_rtc_context.ota_job_id, sizeof(g_rtc_context.ota_job_id), cmd.job_id);
+        util_copy_string(g_rtc_context.ota_target_version,
+                         sizeof(g_rtc_context.ota_target_version),
+                         cmd.version);
+        util_copy_string(g_rtc_context.ota_previous_version,
+                         sizeof(g_rtc_context.ota_previous_version),
+                         s_current_version);
+        util_copy_string(g_rtc_context.ota_partition,
+                         sizeof(g_rtc_context.ota_partition),
+                         report.partition);
+        g_rtc_context.ota_pending_confirm = true;
+        g_rtc_context.ota_confirm_timeout_sec = cmd.confirm_timeout_sec;
+
+        state_machine_publish_firmware_payload(&report);
+        esp_restart();
+    } else {
+        state_machine_publish_firmware_payload(&report);
+    }
+}
+
 static void state_machine_prepare_sleep(void) {
     g_rtc_context.last_state = APP_STATE_SLEEP;
     g_rtc_context.ign_last_known = s_telemetry.ignition;
@@ -257,6 +387,10 @@ esp_err_t state_machine_init(const config_t *config) {
     memset(&s_telemetry, 0, sizeof(s_telemetry));
     s_config = *config;
 
+    if (!util_string_empty(CONFIG_APP_PROJECT_VER)) {
+        util_copy_string(s_current_version, sizeof(s_current_version), CONFIG_APP_PROJECT_VER);
+    }
+
     ESP_RETURN_ON_FALSE(adc_reader_init() == ESP_OK, ESP_FAIL, TAG, "adc_reader_init failed");
     ESP_RETURN_ON_FALSE(imu_init() == ESP_OK, ESP_FAIL, TAG, "imu_init failed");
     ESP_RETURN_ON_FALSE(power_mgr_init() == ESP_OK, ESP_FAIL, TAG, "power_mgr_init failed");
@@ -268,7 +402,8 @@ esp_err_t state_machine_init(const config_t *config) {
         command_handler_init(&s_config);
     }
 
-    state_machine_publish_firmware_status("success", 100, "phase-4A");
+    state_machine_try_confirm_running_firmware();
+    state_machine_publish_firmware_status("success", 100, s_current_version, "", "", "");
     return ESP_OK;
 }
 
@@ -303,6 +438,7 @@ app_state_t state_machine_run(app_state_t current_state) {
             if (action == COMMAND_ACTION_REBOOT) {
                 esp_restart();
             }
+            state_machine_process_ota_command(action);
 
             if (!s_telemetry.ignition || !command_handler_is_tracking_enabled()) {
                 state_machine_publish_status("stopped");
@@ -321,6 +457,7 @@ app_state_t state_machine_run(app_state_t current_state) {
         case APP_STATE_ALARM: {
             state_machine_try_connect_network();
             state_machine_refresh_telemetry(true, false);
+            state_machine_process_ota_command(command_handler_consume_action());
 
             if (s_alarm_enter_ms == 0) {
                 s_alarm_enter_ms = util_uptime_ms();
@@ -349,6 +486,7 @@ app_state_t state_machine_run(app_state_t current_state) {
             state_machine_try_connect_network();
             state_machine_refresh_telemetry(true, false);
             state_machine_publish_rawdata();
+            state_machine_process_ota_command(command_handler_consume_action());
             return APP_STATE_SLEEP;
 
         case APP_STATE_SLEEP:

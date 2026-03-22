@@ -10,6 +10,7 @@ const sanitizeFirmware = (fw: Firmware): FirmwarePublic => ({
   id: fw.id,
   version: fw.version,
   filename: fw.filename,
+  filePath: fw.file_path,
   size: fw.size,
   description: fw.description,
   isActive: fw.is_active,
@@ -18,14 +19,30 @@ const sanitizeFirmware = (fw: Firmware): FirmwarePublic => ({
 
 export const listFirmware = async (
   query: FirmwareListQuery,
-): Promise<{ firmwares: FirmwarePublic[]; total: number; page: number; limit: number }> => {
+): Promise<{
+  items: FirmwarePublic[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+  firmwares: FirmwarePublic[];
+  total: number;
+  page: number;
+  limit: number;
+}> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
 
   const result = await firmwareRepo.findAll(query);
+  const items = result.firmwares.map(sanitizeFirmware);
+  const pagination = {
+    page,
+    limit,
+    total: result.total,
+    totalPages: Math.ceil(result.total / limit),
+  };
 
   return {
-    firmwares: result.firmwares.map(sanitizeFirmware),
+    items,
+    pagination,
+    firmwares: items,
     total: result.total,
     page,
     limit,

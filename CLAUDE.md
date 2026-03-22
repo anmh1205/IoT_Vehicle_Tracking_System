@@ -85,4 +85,12 @@ We keep all important docs in `./resources/docs` folder and keep updating them, 
 └── project-roadmap.md
 ```
 
+## Temporary Artifacts
+
+- Never create `tmp*` files or folders in the repository root.
+- Important generated or extracted artifacts must live under the matching domain inside `./resources/`.
+- Hardware extracts go to `./resources/docs/hardware-datasheets/extracted-text/`.
+- Thesis/report assets go to `./resources/reports/thesis-chapters/assets/`.
+- Disposable scratch/build/cache outputs must use the system temp directory or be deleted after the task finishes.
+
 **IMPORTANT:** *MUST READ* and *MUST COMPLY* all *INSTRUCTIONS* in project `./CLAUDE.md`, especially *WORKFLOWS* section is *CRITICALLY IMPORTANT*, this rule is *MANDATORY. NON-NEGOTIABLE. NO EXCEPTIONS. MUST REMEMBER AT ALL TIMES!!!*

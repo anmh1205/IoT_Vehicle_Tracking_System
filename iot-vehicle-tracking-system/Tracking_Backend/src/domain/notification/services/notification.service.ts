@@ -22,12 +22,21 @@ interface NotificationItem {
 }
 
 const readStateByUser = new Map<number, Set<number>>();
+const hiddenStateByUser = new Map<number, Set<number>>();
 
 const getUserReadState = (userId: number): Set<number> => {
   const existing = readStateByUser.get(userId);
   if (existing) return existing;
   const created = new Set<number>();
   readStateByUser.set(userId, created);
+  return created;
+};
+
+const getUserHiddenState = (userId: number): Set<number> => {
+  const existing = hiddenStateByUser.get(userId);
+  if (existing) return existing;
+  const created = new Set<number>();
+  hiddenStateByUser.set(userId, created);
   return created;
 };
 
@@ -126,6 +135,7 @@ export const listNotifications = async (
   const limit = params.limit ?? 20;
   const offset = (page - 1) * limit;
   const readState = getUserReadState(userId);
+  const hiddenState = getUserHiddenState(userId);
   const { where, values } = buildWhereClause({
     type: params.type,
     search: params.search,
@@ -133,54 +143,33 @@ export const listNotifications = async (
     to: params.to,
   });
 
-  const countRows = await findMany<{ total: string }>(
-    `SELECT COUNT(*)::text AS total FROM alerts ${where}`,
+  const rows = await findMany<AlertNotificationRow>(
+    `SELECT id, alert_type, title, message, created_at
+     FROM alerts ${where}
+     ORDER BY created_at DESC`,
     values,
   );
-  const total = Number.parseInt(countRows[0]?.total ?? '0', 10);
 
-  const mapRowToItem = (row: AlertNotificationRow): NotificationItem => ({
-    id: row.id,
-    type: toNotificationType(row.alert_type),
-    title: row.title,
-    message: row.message ?? '',
-    isRead: readState.has(row.id),
-    referenceId: row.id,
-    referenceType: 'alert',
-    createdAt: row.created_at.toISOString(),
-  });
+  const items = rows
+    .map<NotificationItem>((row) => ({
+      id: row.id,
+      type: toNotificationType(row.alert_type),
+      title: row.title,
+      message: row.message ?? '',
+      isRead: readState.has(row.id),
+      referenceId: row.id,
+      referenceType: 'alert',
+      createdAt: row.created_at.toISOString(),
+    }))
+    .filter((item) => !hiddenState.has(item.id))
+    .filter((item) => (params.isRead === undefined ? true : item.isRead === params.isRead));
 
-  let items: NotificationItem[] = [];
-  let effectiveTotal = total;
-
-  if (params.isRead === undefined) {
-    const rows = await findMany<AlertNotificationRow>(
-      `SELECT id, alert_type, title, message, created_at
-       FROM alerts ${where}
-       ORDER BY created_at DESC
-       LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
-      [...values, limit, offset],
-    );
-    items = rows.map(mapRowToItem);
-  } else {
-    const rows = await findMany<AlertNotificationRow>(
-      `SELECT id, alert_type, title, message, created_at
-       FROM alerts ${where}
-       ORDER BY created_at DESC`,
-      values,
-    );
-    const filtered = rows.map(mapRowToItem).filter((item) => item.isRead === params.isRead);
-    effectiveTotal = filtered.length;
-    items = filtered.slice(offset, offset + limit);
-  }
-
-  const ids = await findMany<{ id: number }>(`SELECT id FROM alerts ${where}`, values);
-  const unreadCount = ids.reduce((count, row) => (readState.has(row.id) ? count : count + 1), 0);
+  const unreadCount = items.reduce((count, item) => (item.isRead ? count : count + 1), 0);
 
   return {
-    items,
+    items: items.slice(offset, offset + limit),
     unreadCount,
-    total: effectiveTotal,
+    total: items.length,
     page,
     limit,
   };
@@ -199,8 +188,8 @@ export const markAllRead = async (userId: number): Promise<void> => {
 };
 
 export const deleteNotification = async (userId: number, id: number): Promise<void> => {
-  // Soft delete behavior for notification center: treat as read and hidden by id.
   getUserReadState(userId).add(id);
+  getUserHiddenState(userId).add(id);
 };
 
 export const getNotificationStats = async (
@@ -214,6 +203,7 @@ export const getNotificationStats = async (
     'SELECT id, alert_type FROM alerts',
   );
   const readState = getUserReadState(userId);
+  const hiddenState = getUserHiddenState(userId);
 
   const byType: Record<NotificationType, number> = {
     alert: 0,
@@ -225,6 +215,9 @@ export const getNotificationStats = async (
 
   let unreadCount = 0;
   for (const row of rows) {
+    if (hiddenState.has(row.id)) {
+      continue;
+    }
     const type = toNotificationType(row.alert_type);
     byType[type] += 1;
     if (!readState.has(row.id)) {
@@ -233,7 +226,7 @@ export const getNotificationStats = async (
   }
 
   return {
-    total: rows.length,
+    total: Object.values(byType).reduce((sum, count) => sum + count, 0),
     unreadCount,
     byType,
   };

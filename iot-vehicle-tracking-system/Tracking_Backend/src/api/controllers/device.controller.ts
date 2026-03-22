@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import { firmwareConfig } from '@/config/env';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { sendOk, sendCreated } from '@/shared/utils/response.util';
@@ -16,6 +17,7 @@ import * as deviceRuntimeService from '@/domain/device/services/device-runtime.s
 import * as deviceTelemetryService from '@/domain/device/services/device-telemetry.service';
 import * as deviceCommandService from '@/domain/device/services/device-command.service';
 import * as deviceErrorService from '@/domain/device/services/device-error.service';
+import * as firmwareRepo from '@/domain/firmware/repositories/firmware.repository';
 
 const resolveDeviceId = async (rawId: string): Promise<string> => {
   const parsed = Number.parseInt(rawId, 10);
@@ -139,25 +141,67 @@ export const sendCommand = asyncHandler(async (req: AuthenticatedRequest, res: R
 export const triggerOta = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const deviceId = await resolveDeviceId(req.params.id);
   const firmwareVersion = req.body?.firmwareVersion as string | undefined;
+  const force = !!req.body?.force;
+  const confirmTimeoutSecRaw = Number(req.body?.confirmTimeoutSec);
 
   if (!firmwareVersion) {
     throw createValidationError('Missing firmwareVersion');
   }
 
+  const confirmTimeoutSec = Number.isFinite(confirmTimeoutSecRaw) && confirmTimeoutSecRaw > 0
+    ? Math.floor(confirmTimeoutSecRaw)
+    : 180;
+
+  const firmware = await firmwareRepo.findByVersion(firmwareVersion);
+  if (!firmware) {
+    throw createValidationError(`Firmware version ${firmwareVersion} not found`);
+  }
+
+  const publicBaseUrl = firmwareConfig.publicBaseUrl?.replace(/\/$/, '') ?? '';
+  if (!publicBaseUrl) {
+    throw createValidationError('FIRMWARE_PUBLIC_BASE_URL is not configured for OTA download');
+  }
+
+  const jobId = `ota_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const result = await deviceCommandService.sendCommand(deviceId, {
-    command: 'OTA_UPDATE',
+    command: 'ota_update',
     params: {
-      firmwareVersion,
-      force: !!req.body?.force,
+      jobId,
+      version: firmware.version,
+      url: `${publicBaseUrl}/api/v1/firmware/${firmware.id}/download`,
+      size: firmware.size,
+      sha256: firmware.sha256,
+      force,
+      confirmTimeoutSec,
     },
   });
 
   res.status(202).json({
     success: true,
     data: {
-      jobId: `ota_${Date.now()}`,
-      status: 'pending',
+      jobId,
+      status: 'assigned',
       targetVersion: firmwareVersion,
+      commandId: result.id,
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
+export const rollbackOta = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const deviceId = await resolveDeviceId(req.params.id);
+
+  const result = await deviceCommandService.sendCommand(deviceId, {
+    command: 'manual_rollback',
+    params: {
+      reason: req.body?.reason ?? 'manual_api',
+    },
+  });
+
+  res.status(202).json({
+    success: true,
+    data: {
+      status: 'rolled_back',
       commandId: result.id,
     },
     timestamp: new Date().toISOString(),

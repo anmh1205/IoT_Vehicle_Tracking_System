@@ -1,0 +1,6 @@
+flowchart LR
+    Stream["Socket realtime stream"] --> Panel["OBD2 chart panel"]
+    Panel --> RPM["RPM"]
+    Panel --> Speed["Speed"]
+    Panel --> Coolant["Coolant Temp"]
+    Filter["Time range filter"] --> Panel

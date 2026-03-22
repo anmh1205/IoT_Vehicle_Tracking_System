@@ -1,5 +1,6 @@
-﻿'use client';
-import { useMemo, useState } from 'react';
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CircleCheckBig, CircleDashed, ShieldAlert } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
@@ -9,61 +10,95 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { alertServices } from '@/lib/api/alerts';
+import { notificationUtils } from '@/lib/notification';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { getAlertColumns } from '@/features/alerts/components/alert-columns';
 import { AlertFilters } from '@/features/alerts/components/alert-filters';
 import { AlertDetailModal } from '@/features/alerts/components/alert-detail-modal';
+
+const PAGE_SIZE = 50;
+
 const AlertsPage = () => {
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<number[]>([]);
   const [detail, setDetail] = useState<any | null>(null);
   const [severity, setSeverity] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<string | undefined>(undefined);
+  const [page, setPage] = useState(1);
+
   const alerts = useQuery({
-    queryKey: ['alerts'],
-    queryFn: () => alertServices.getList({ limit: 200 }),
+    queryKey: ['alerts', { severity, status, page, limit: PAGE_SIZE }],
+    queryFn: () =>
+      alertServices.getList({
+        page,
+        limit: PAGE_SIZE,
+        severity,
+        status,
+      }),
   });
   const ackMutation = useMutation({
     mutationFn: (id: number) => alertServices.acknowledge(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
+    onError: (error: unknown) => {
+      notificationUtils.error(
+        'Xác nhận cảnh báo thất bại',
+        getApiErrorMessage(error, 'Không thể cập nhật trạng thái cảnh báo.'),
+      );
+    },
   });
   const resolveMutation = useMutation({
     mutationFn: (id: number) => alertServices.resolve(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
+    onError: (error: unknown) => {
+      notificationUtils.error(
+        'Đóng cảnh báo thất bại',
+        getApiErrorMessage(error, 'Không thể đóng cảnh báo.'),
+      );
+    },
   });
-  const rows = useMemo(() => {
-    const list = alerts.data?.items ?? alerts.data?.data?.items ?? [];
-    return list.filter((item: any) => {
-      if (severity && item.severity !== severity) return false;
-      if (status && item.status !== status) return false;
-      return true;
-    });
-  }, [alerts.data, severity, status]);
+
+  const rows = useMemo(() => alerts.data?.items ?? alerts.data?.data?.items ?? [], [alerts.data]);
+  const pagination = alerts.data?.pagination ?? {
+    page,
+    limit: PAGE_SIZE,
+    total: rows.length,
+    totalPages: 1,
+  };
+
+  useEffect(() => {
+    setSelected((current) => current.filter((id) => rows.some((row: any) => row.id === id)));
+  }, [rows]);
 
   const stats = useMemo(() => {
     const pending = rows.filter((item: any) => item.status === 'active').length;
     const acknowledged = rows.filter((item: any) => item.status === 'acknowledged').length;
     const critical = rows.filter((item: any) => item.severity === 'critical').length;
     return {
-      total: rows.length,
+      total: pagination.total,
       pending,
       acknowledged,
       critical,
     };
-  }, [rows]);
+  }, [pagination.total, rows]);
+
   return (
     <PageContainer
       pageTitle="Cảnh báo"
-      pageDescription="Quản lý cảnh báo hệ thống"
+      pageDescription="Quản lý cảnh báo hệ thống theo mức độ và trạng thái xử lý"
       pageHeaderAction={
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
+            disabled={selected.length === 0 || ackMutation.isPending}
             onClick={() => selected.forEach((id) => ackMutation.mutate(id))}
           >
-            Xác nhận tất cả
+            Xác nhận đã chọn
           </Button>
-          <Button onClick={() => selected.forEach((id) => resolveMutation.mutate(id))}>
-            Giải quyết tất cả
+          <Button
+            disabled={selected.length === 0 || resolveMutation.isPending}
+            onClick={() => selected.forEach((id) => resolveMutation.mutate(id))}
+          >
+            Giải quyết đã chọn
           </Button>
         </div>
       }
@@ -110,7 +145,7 @@ const AlertsPage = () => {
                   aria-label="Chọn tất cả cảnh báo"
                   checked={rows.length > 0 && selected.length === rows.length}
                   onCheckedChange={(checked) =>
-                    setSelected(checked ? rows.map((a: any) => a.id) : [])
+                    setSelected(checked ? rows.map((alert: any) => alert.id) : [])
                   }
                 />
               </div>
@@ -124,8 +159,10 @@ const AlertsPage = () => {
                     aria-label={`Chọn cảnh báo ${row.original.title}`}
                     checked={selected.includes(row.original.id)}
                     onCheckedChange={(checked) =>
-                      setSelected((s) =>
-                        checked ? [...s, row.original.id] : s.filter((item) => item !== row.original.id),
+                      setSelected((current) =>
+                        checked
+                          ? [...current, row.original.id]
+                          : current.filter((item) => item !== row.original.id),
                       )
                     }
                   />
@@ -151,19 +188,50 @@ const AlertsPage = () => {
             severity={severity}
             status={status}
             onChange={(next) => {
+              setPage(1);
               setSeverity(next.severity);
               setStatus(next.status);
+            }}
+            onReset={() => {
+              setPage(1);
+              setSeverity(undefined);
+              setStatus(undefined);
             }}
           />
         }
       />
 
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs text-muted-foreground">
+          Trang {pagination.page} / {pagination.totalPages || 1} · {pagination.total} cảnh báo
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((current) => current - 1)}
+            disabled={pagination.page <= 1 || alerts.isFetching}
+          >
+            Trang trước
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((current) => current + 1)}
+            disabled={pagination.page >= (pagination.totalPages || 1) || alerts.isFetching}
+          >
+            Trang sau
+          </Button>
+        </div>
+      </div>
+
       <AlertDetailModal
         open={!!detail}
-        onOpenChange={(v) => !v && setDetail(null)}
+        onOpenChange={(value) => !value && setDetail(null)}
         alert={detail}
       />
     </PageContainer>
   );
 };
+
 export default AlertsPage;

@@ -1,0 +1,17 @@
+flowchart LR
+    subgraph Current["Bài toán hiện tại"]
+        C1["Quản lý đội xe thủ công"]
+        C2["Theo dõi vị trí chậm"]
+        C3["Xử lý sự cố trễ"]
+        C1 --> C2 --> C3
+    end
+    subgraph Proposed["Giải pháp đề xuất"]
+        P1["Thiết bị tracker IoT
+GPS + OBD2 + IMU + 4G"]
+        P2["Cloud xử lý dữ liệu
+EMQX + Bridge + Backend"]
+        P3["Dashboard giám sát
+Bản đồ + Cảnh báo + Báo cáo"]
+        P1 --> P2 --> P3
+    end
+    C3 ----> P1

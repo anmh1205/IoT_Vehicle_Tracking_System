@@ -34,7 +34,7 @@ export function DataTableToolbar<TData>({
           className="h-8 px-2"
         >
           <X className="mr-1 h-4 w-4" />
-Đặt lại
+          Đặt lại
         </Button>
       ) : null}
     </div>

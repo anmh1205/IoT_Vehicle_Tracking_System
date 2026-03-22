@@ -33,6 +33,17 @@ const DevicesPage = () => {
   const deleteMutation = useDeleteDevice();
   useDeviceRealtime();
   const rows = devicesQuery.data?.items ?? [];
+
+  const resetDeviceListView = () => {
+    setViewMode('table');
+    setFilters({
+      page: 1,
+      limit: filters.limit ?? 20,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+    });
+  };
+
   return (
     <PageContainer
       pageTitle="Thiết bị"
@@ -98,7 +109,11 @@ const DevicesPage = () => {
         </TabsContent>
       </Tabs>
 
-      <DeviceCreateModal open={createOpen} onOpenChange={setCreateOpen} />
+      <DeviceCreateModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreateSuccess={resetDeviceListView}
+      />
 
       <DeviceEditModal
         open={!!editDevice}

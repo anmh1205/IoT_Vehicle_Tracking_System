@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 import { Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,13 +15,22 @@ import {
 import { useSystemMetrics } from '@/features/system-admin/hooks/use-system-admin';
 import { LineChartView } from './chart-views/line-chart-view';
 import { TableView } from './chart-views/table-view';
+
 type ViewMode = 'chart' | 'table';
+
 const TIME_OPTIONS = [
   { value: '1h', label: '1 giờ gần nhất' },
   { value: '6h', label: '6 giờ gần nhất' },
   { value: '24h', label: '24 giờ gần nhất' },
   { value: '7d', label: '7 ngày gần nhất' },
 ];
+
+const QUERY_PRESETS = [
+  { label: 'Availability', query: 'up' },
+  { label: 'CPU', query: 'process_cpu_seconds_total' },
+  { label: 'Memory', query: 'process_resident_memory_bytes' },
+];
+
 export const MetricsExplorer = () => {
   const [draftQuery, setDraftQuery] = useState('up');
   const [draftTime, setDraftTime] = useState('1h');
@@ -32,23 +42,41 @@ export const MetricsExplorer = () => {
     time: submittedTime,
     enabled: submittedQuery.trim().length > 0,
   });
+
   return (
     <div className="space-y-3">
       <Card>
         <CardHeader>
           <CardTitle>Khám phá chỉ số</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Chạy nhanh các truy vấn PromQL phổ biến hoặc nhập truy vấn riêng để kiểm tra vận hành.
+          </p>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {QUERY_PRESETS.map((preset) => (
+              <Button
+                key={preset.label}
+                type="button"
+                variant={draftQuery === preset.query ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={() => setDraftQuery(preset.query)}
+              >
+                {preset.label}
+              </Button>
+            ))}
+          </div>
+
           <Textarea
             value={draftQuery}
             onChange={(event) => setDraftQuery(event.target.value)}
             placeholder="Nhập truy vấn PromQL"
-            className="min-h-[90px]"
+            className="min-h-[110px]"
           />
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid gap-3 lg:grid-cols-[220px_auto_auto]">
             <Select value={draftTime} onValueChange={setDraftTime}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Khoảng thời gian" />
               </SelectTrigger>
               <SelectContent>
@@ -68,25 +96,31 @@ export const MetricsExplorer = () => {
               disabled={!draftQuery.trim()}
             >
               <Play className="mr-2 h-4 w-4" />
-Chạy
+              Chạy
             </Button>
 
-            <div className="ml-auto flex gap-2">
+            <div className="flex gap-2">
               <Button
                 variant={viewMode === 'chart' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('chart')}
               >
-Biểu đồ
+                Biểu đồ
               </Button>
               <Button
                 variant={viewMode === 'table' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('table')}
               >
-Bảng
+                Bảng
               </Button>
             </div>
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            {metricsQuery.isFetching
+              ? 'Đang tải dữ liệu chỉ số...'
+              : `Truy vấn hiện tại: ${submittedQuery} · ${submittedTime}`}
           </div>
         </CardContent>
       </Card>

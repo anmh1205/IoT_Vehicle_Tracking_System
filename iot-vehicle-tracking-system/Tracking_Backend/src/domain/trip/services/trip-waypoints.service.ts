@@ -1,5 +1,4 @@
 import { queryRange } from '@/domain/system-admin/repositories/victoriametrics.repository';
-import type { VmRangeValue } from '@/domain/system-admin/repositories/victoriametrics.repository';
 
 /** A single GPS waypoint along the trip route */
 export interface TripWaypoint {

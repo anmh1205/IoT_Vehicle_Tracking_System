@@ -1,0 +1,4605 @@
+CONFIDENTIAL FILE SIM7600CE _Hardware Design_V1.04 SIMCOM
+
+Document Title
+
+SIM7600CE _Hardware Design
+
+Smart Machine Smart Decision
+
+Version
+
+1.04
+
+Date
+
+2016-11-17
+
+Status
+
+Released
+
+Document Control ID
+
+SIM7600CE _ Hardware Design_V1.04
+
+FILE General Notes L SIMCom offers this information as a service to its customers to support the application and IA engineering efforts that use the products designed by SIMCom. The information provided is based
+on the requirements specifically from the customers. SIMCom has not undertaken any independent
+T search for additional relevant information, including any information that may be in the customer's
+possession. Furthermore, the system validation of the product designed by SIMCom within a larger
+N electronic system remains the responsibility of the customer or the customer's system integrator. E All specifications supplied herein are subject to change without notice. ID Copyright
+This document contains the proprietary technical information which is the property of SIMCom
+F Limited, copying of this document, giving it to others, the using or communication of the contents N thereof are forbidden without the official authority by SIMCom. Offenders are liable to the
+payment of the damages. All rights are reserved in the event of grant of a patent or the registration
+CO of a utility model or design. All specifications supplied herein are subject to change without notice
+
+Copyright © SIMCom Wireless Solutions Co., Ltd. 2016
+
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Contents
+
+Smart Machine Smart Decision
+
+Contents .............................................................................................................................................3
+
+Table Index ........................................................................................................................................5
+
+Figure Index ......................................................................................................................................7
+
+Revision History................................................................................................................................8
+E 1 Introduction................................................................................................................................9 1.1 Product Outline .....................................................................................................................9 IL 1.2 Hardware Interface Overview .............................................................................................10 1.3 Hardware Block Diagram....................................................................................................11 F 1.4 Functional Overview ...........................................................................................................12
+L 2 Package Information................................................................................................................14 IA 2.1 Pin Assignment Overview...................................................................................................14
+2.2 Pin Description....................................................................................................................16
+T 2.3 Mechanical Information ......................................................................................................20
+2.4 Footprint Recommendation.................................................................................................21
+N 3 Interface Application ...............................................................................................................22 E 3.1 Power Supply ......................................................................................................................22
+3.1.1 Power Supply Design Guide ........................................................................................23
+ID 3.1.2 Recommended Power Supply Circuit ..........................................................................24
+3.1.3 Voltage Monitor............................................................................................................24
+F 3.2 Power on/Power off/Reset Function....................................................................................25 N 3.2.1 Power on.......................................................................................................................25
+3.2.2 Power off ......................................................................................................................26
+O 3.2.3 Reset Function ..............................................................................................................27 C 3.3 UART Interface ...................................................................................................................28
+
+3.3.1 UART Design Guide ....................................................................................................28
+
+3.3.2 RI and DTR Behavior...................................................................................................29
+3.4 USB Interface......................................................................................................................30
+M 3.5 USIM Interface....................................................................................................................31
+3.5.1 USIM Application Guide..............................................................................................31
+O 3.6 PCM Interface .....................................................................................................................34 C3.6.1 PCM timing ..................................................................................................................34
+3.6.2 PCM Application Guide ...............................................................................................36
+IM3.7 SD Interface ........................................................................................................................36 S 3.8 I2C Interface........................................................................................................................37
+3.9 SDIO Interface ....................................................................................................................38
+
+3.10 SPI Interface ....................................................................................................................38
+
+3.11 Network status .................................................................................................................38
+
+3.12 Flight Mode Control ........................................................................................................39
+
+3.13 Other interface .................................................................................................................40
+
+3.13.1 Sink Current Source ..................................................................................................40
+
+3.13.2 ADC ..........................................................................................................................41
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+3.13.3 LDO ..........................................................................................................................41
+4 RF Specifications......................................................................................................................42 4.1 GSM/CDMA 1X/UMTS/LTE RF Specifications................................................................42 4.2 GSM/CDMA 1X /UMTS/LTE Antenna Design Guide .......................................................44 4.3 GNSS ..................................................................................................................................45 4.3.1 GNSS Technical specification ......................................................................................45 4.3.2 GNSS Application Guide .............................................................................................46
+5 Electrical Specifications...........................................................................................................48
+E 5.1 Absolute maximum ratings .................................................................................................48 IL 5.2 Operating conditions ...........................................................................................................48
+5.3 Operating Mode ..................................................................................................................49
+F 5.3.1 Operating Mode Definition ..........................................................................................49
+5.3.2 Sleep mode ...................................................................................................................50
+L 5.3.3 Minimum functionality mode and Flight mode............................................................50 IA 5.4 Current Consumption ..........................................................................................................51
+5.5 ESD Notes...........................................................................................................................52
+T 6 SMT Production Guide ...........................................................................................................53 N 6.1 Top and Bottom View of SIM7600CE ................................................................................53
+6.2 Label Information................................................................................................................54
+E 6.3 Typical SMT Reflow Profile ...............................................................................................55 ID 6.4 Moisture Sensitivity Level (MSL) ......................................................................................55
+6.5 Stencil Foil Design Recommendation .................................................................................56
+F 7 Packaging..................................................................................................................................57 N Appendix ..........................................................................................................................................59
+A. Reference Design......................................................................................................................59
+O B. Coding Schemes and Maximum Net Data Rates over Air Interface.........................................60 C C. Related Documents ...................................................................................................................63
+D. Terms and Abbreviations..........................................................................................................65
+SIMCOM E. Safety Caution...........................................................................................................................67
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+Table Index
+Table 1: SIM7600CE series frequency bands ...................................................................................................... 9 Table 2: General features ................................................................................................................................... 12 Table 3: Pin definition........................................................................................................................................ 15 Table 4: IO parameters definition....................................................................................................................... 16 Table 5: Pin description...................................................................................................................................... 16 Table 6: VBAT pins electronic characteristic ..................................................................................................... 22
+E Table 7: Recommended Zener diode list ............................................................................................................ 23
+Table 8: Power on timing and electronic characteristic...................................................................................... 26
+IL Table 9: Power off timing and electronic characteristic ..................................................................................... 27
+Table 10: RESET pin electronic characteristic................................................................................................... 28
+F Table 11: USIM electronic characteristic in 1.8V mode (USIM_VDD=1.8V)................................................... 31 L Table 12: USIM electronic characteristic 3.0V mode (USIM_VDD=2.95V) .................................................... 31
+Table 13: Amphenol USIM socket pin description ............................................................................................ 33
+IA Table 14: PCM format........................................................................................................................................ 34
+Table 15: PCM timing parameters ..................................................................................................................... 35
+T Table 16: MMC/SD electronic characteristic (SD_DATA0-SD_DATA3SD_CLK and SD_CMD) * ............ 36 N Table 17: NETLIGHT pin status........................................................................................................................ 39
+Table 18: FLIGHTMODE pin status.................................................................................................................. 39
+E Table 19: Sink current electronic characteristic ................................................................................................. 40 ID Table 20: ADC1 and ADC2 electronic characteristics ....................................................................................... 41
+Table 21: Electronic characteristic ..................................................................................................................... 41
+F Table 22: Conducted transmission power .......................................................................................................... 42
+Table 23: Operating frequencies ........................................................................................................................ 42
+N Table 24: E-UTRA operating bands ................................................................................................................... 43
+Table 25: Conducted receive sensitivity............................................................................................................. 43
+CO Table 26: Reference sensitivity (QPSK) ............................................................................................................ 43
+Table 27: Trace loss ........................................................................................................................................... 44 Table 28: Recommended TVS ........................................................................................................................... 45 Table 29: Absolute maximum ratings................................................................................................................. 48 Table 30: Recommended operating ratings ........................................................................................................ 48
+M Table 31: 1.8V Digital I/O characteristics*........................................................................................................ 48 O Table 32: Operating temperature........................................................................................................................ 49
+Table 33: Operating mode Definition................................................................................................................. 49
+CTable 34: Current consumption on VBAT Pins (VBAT=3.8V) .......................................................................... 51
+Table 35: The ESD performance measurement table (Temperature: 25, Humidity: 45%) ............................. 52
+IMTable 36: The description of label information .................................................................................................. 54 S Table 37: Moisture Sensitivity Level and Floor Life ......................................................................................... 55
+Table 38: Tray size ............................................................................................................................................. 58 Table 39: Small Carton size ............................................................................................................................... 58 Table 40: Big Carton size................................................................................................................................... 58 Table 41: Coding Schemes and Maximum Net Data Rates over Air Interface................................................... 60 Table 42: Related Documents ............................................................................................................................ 63 Table 43: Terms and Abbreviations.................................................................................................................... 65
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision Table 44: Safety Caution.................................................................................................................................... 67
+CONFIDENTIAL FILE SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+Figure Index
+Figure 1: SIM7600CE block diagram ................................................................................................................ 11 Figure 2: Pin assignment overview .................................................................................................................... 14 Figure 3: Dimensions (Unit: mm) ...................................................................................................................... 20 Figure 4: Footprint recommendation (Unit: mm)............................................................................................... 21 Figure 5: VBAT voltage drop during burst emission (GSM/GPRS) .................................................................. 22 Figure 6: Power supply application circuit......................................................................................................... 23
+E Figure 7: Linear regulator reference circuit ....................................................................................................... 24
+Figure 8: Switching mode power supply reference circuit ................................................................................. 24
+IL Figure 9: Reference power on/off circuit ........................................................................................................... 25
+Figure 10: Power on timing sequence ................................................................................................................ 25
+F Figure 11: Power off timing sequence................................................................................................................ 26 L Figure 12: Reference reset circuit ...................................................................................................................... 27
+Figure 13: UART full modem ............................................................................................................................ 28
+IA Figure 14: UART null modem ........................................................................................................................... 28
+Figure 15: Reference circuit of level shift.......................................................................................................... 29
+T Figure 16: RI behaviourSMS and URC report ........................................................................................... 29 N Figure 17: RI behaviourvoice call .............................................................................................................. 30
+Figure 18: USB reference circuit ....................................................................................................................... 30
+E Figure 19: USIM interface reference circuit ...................................................................................................... 32 ID Figure 20: Amphenol SIM card socket .............................................................................................................. 33
+Figure 21: PCM_SYNC timing.......................................................................................................................... 34
+F Figure 22: EXT codec to module timing............................................................................................................ 34
+Figure 23: Module to EXT codec timing ........................................................................................................... 35
+N Figure 24: Audio codec reference circuit ........................................................................................................... 36
+Figure 25: SD reference circuit .......................................................................................................................... 37
+CO Figure 26: I2C reference circuit ......................................................................................................................... 37
+Figure 27: NETLIGHT reference circuit............................................................................................................ 38 Figure 28: Flight mode switch reference circuit................................................................................................. 39 Figure 29: ISINK reference circuit..................................................................................................................... 40 Figure 30: Antenna matching circuit (MAIN_ANT).......................................................................................... 44
+M Figure 31: Antenna matching circuit (AUX_ANT)............................................................................................ 45 O Figure 32: Active antenna circuit ....................................................................................................................... 46
+Figure 33: Passive antenna circuit (Default) ...................................................................................................... 47
+CFigure 34: Top and bottom view of SIM7600CE ............................................................................................... 53
+Figure 35: Label information ............................................................................................................................. 54
+IMFigure 36: The ramp-soak-spike reflow profile of SIM7600CE ........................................................................ 55 S Figure 37: packaging diagram............................................................................................................................ 57
+Figure 38: Tray drawing..................................................................................................................................... 57 Figure 39: Small carton drawing........................................................................................................................ 58 Figure 40: Big carton drawing ........................................................................................................................... 58 Figure 41: Reference design .............................................................................................................................. 59
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+Revision History
+
+Data 2016-07-06 2016-07-27 2016-09-26 2016-10-25 2016-11-17
+
+Version 1.00 1.01 1.02 1.03 1.04
+
+Description of change
+
+Author
+
+E Original
+
+Ma Honggang Teng Lili
+
+IL Change the document name;
+Update figure 3 and figure 4;
+F Update table 20, change the ADC input voltage range;
+Correct the description in of USB_VBUS figure 41;
+
+Ma Honggang
+
+IAL Update the input range of USB_VBUS;
+Update the ADC input range in figure 41;
+
+Ma Honggang
+
+NT Change the recommended thickness of stencil foil to E 0.15mm;
+
+Ma Honggang
+
+FID Update the table 8 and table 9; CON Change the serial resistor of UISM circuit to 22ohm;
+
+Ma Honggang
+
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+1 Introduction
+
+Smart Machine Smart Decision
+
+This document describes the electronic specifications, RF specifications, interfaces, mechanical
+
+characteristics and testing results of the SIMCom SIM7600CE module. With the help of this
+
+document and other SIM7600CE software application notes/user guides, users can understand and
+
+use SIM7600CE module to design and develop applications quickly.
+
+E 1.1 Product Outline
+
+IL Aimed at the global market, the SIM7600CE module support GSM, TD-SCDMA, CDMA, F WCDMA , TDD-LTE and FDD-LTE. Users can choose the module according to the wireless
+network configuration. The supported radio frequency bands are described in the following table.
+IAL Table 1: SIM7600CE frequency bands
+
+T Standard
+
+Frequency
+
+N GSM E CDMA2000/ EVDO ID WCDMA NF TD-SCDMA CO LTE-FDD
+
+EGSM 900MHz DCS1800MHz BC0 BAND1 BAND8 TD-SCDMA 1.9G TD- SCDMA 2G LTE-FDD B1 LTE-FDD B3
+
+Module SIM7600CE
+        
+
+LTE-FDD B8
+
+
+
+M LTE-TDD CO Category
+GNSS
+
+LTE TDD B38 LTE TDD B39 LTE TDD B40 LTE TDD B41
+
+    CAT4 
+
+SIMWith a small physical dimension of 30*30*2.9 mm and with the functions integrated, the
+
+SIM7600CE module can meet almost any space requirement in users' applications, such as smart
+
+phone, PDA, industrial handheld, machine-to-machine and vehicle application, etc.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+1.2 Hardware Interface Overview
+
+Smart Machine Smart Decision
+
+The interfaces are described in detail in the next chapters include:
+
+ Power Supply
+
+ USB Interface
+
+ UART Interface  MMC/SD Interface  SDIO Interface  USIM Interface  GPIO  ADC  LDO Power Output  Current Sink Source  PCM Interface  SPI Interface  I2C Interface
+
+CONFIDENTIAL FILE
+
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+1.3 Hardware Block Diagram
+
+The block diagram of the SIM7600CE module is shown in the figure below.
+GNSS Antenna
+
+Main Antenna AUX Antenna
+
+GSM/CDMA 1X/UMTS/ LTE
+RF FEM
+
+UMTS/LTE RF FEM
+
+RX TX
+RF GSM/CDMA 1X /UMTS/LTE PA
+
+RF TDD-LTE PA
+VBAT
+
+GNSS
+E RF IL Qualcomm F Chip L RF
+Transceiver
+IA { System Power NT XO E 19.2MHz
+
+DDR NAND Flash
+Baseband
+Power Management
+
+CONFID Figure 1: SIM7600CE block diagram
+
+SMT Interface
+
+USIM UART SDIO
+MMC/SD
+
+I2C
+
+USB
+
+PCM
+
+GPIOs Interrupt
+
+ADC LDO
+
+Status LED
+
+SPI
+
+Sink Current Source
+
+Power On Reset
+VBAT
+
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+1.4 Functional Overview
+
+Table 2: General features
+
+Feature Power supply Power saving Radio frequency bands
+Transmitting power
+Data Transmission Throughput
+Antenna
+OM GNSS IMC SMS S USIM interface
+
+Implementation Single supply voltage 3.44.2V Current in sleep mode : <5mA Please refer to the table 1 GSM/GPRS power class:
+--EGSM900: 4 (2W) --DCS1800: 1 (1W)
+L EDGE power class:: --EGSM900: E2 (0.5W) IA --DCS1800: E1 (0.4W) CDMA 1X power class: 3 (0.25W)
+T UMTS power class: N --WCDMA :3 (0.25W)
+--EVDO: 3 (0.25W):
+E --TD-SCDMA: 2 (0.25W)
+LTE power class: 3 (0.25W)
+ID GPRS multi-slot class 12 F EDGE multi-slot class 12
+UMTS R99 speed: 384 kbps DL/UL
+N HSPA+: 5.76 Mbps(UL), 42 Mbps(DL)
+TD-HSDPA/HSUPA: 2.2 Mbps(UL), 2.8 Mbps(DL)
+O CDMA EVDO:Rev-0,Rev-A, Rev-B CLTE CAT 4 150 Mbps (DL)
+LTE CAT 4 50 Mbps (UL)
+GSM/UMTS/LTE main antenna. UMTS/LTE auxiliary antenna GNSS antenna
+GNSS engine (GPS,GLONASS and BD) Protocol: NMEA
+MT, MO, CB, Text and PDU mode SMS storage: USIM card or ME(default) Transmission of SMS alternatively over CS or PS.
+Support identity card: 1.8V/ 3V
+
+FILE
+
+USIM application toolkit Phonebook management
+
+Support SAT class 3, GSM 11.14 Release 98 Support USAT Support phonebook types: DC,MC,RC,SM,ME,FD,ON,LD,EN
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+Audio feature
+
+Support PCM interface Only support PCM master mode and short frame sync, 16-bit linear data formats
+
+A full modem serial port by default
+
+Baud rate: 300bps to 4Mbps(default:115200bps)
+
+Autobauding baud rate: 9600,19200,38400,57600,115200bps
+
+UART interface
+ILE MMC/SD
+SDIO
+
+Can be used as the AT commands or data stream channel Support RTS/CTS hardware handshake Multiplex ability according to GSM 07.10 Multiplexer Protocol Support MMC and SD cards with 2.95 V on SD port Support SDIO with 1.8 V only on SDIO port
+
+F USB
+
+USB 2.0 high speed interface
+
+L Firmware upgrade
+
+Firmware upgrade over USB interface
+
+IA Physical characteristics
+
+Size:30*30*2.9m Weight:5.7 g
+
+NT Temperature range
+
+Normal operation temperature: -30°C to +80°C Extended operation temperature: -40°C to +85°C* Storage temperature -45°C to +90°C
+
+E *Note: Module is able to make and receive voice calls, data calls, SMS and make
+GPRS/UMTS/HSPA+/LTE traffic in -40 ~ +85. The performance will be reduced slightly
+ID from the 3GPP specifications if the temperature is outside the normal operating temperature CONF range and still within the extreme operating temperature range.
+
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+2 Package Information
+
+2.1 Pin Assignment Overview
+All functions of the SIM7600CE will be provided through 87 pads that will be connected to the
+E customers' platform. The following Figure is a high-level view of the pin assignment of the CONFIDENTIAL FIL SIM7600CE.
+
+SIMCOM
+
+Figure 2: Pin assignment overview
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Table 3: Pin definition
+
+Smart Machine Smart Decision
+
+Pin No. Pin name
+
+1
+
+GND
+
+3
+
+PWRKEY
+
+5
+
+GND
+
+7
+
+SPI_MISO
+
+9
+
+SPI_CS
+
+11
+
+USB_VBUS
+
+13
+
+USB_DP
+
+15
+
+VDD_1V8
+
+17
+
+USIM_DATA
+
+19
+
+USIM_CLK
+
+21
+
+SD_CMD
+
+23
+
+SD_DATA1
+
+25
+
+SD_DATA3
+
+27
+
+SDIO_DATA1
+
+29
+
+SDIO_CMD
+
+31
+
+SDIO_DATA3
+
+33
+
+GPIO3
+
+35
+
+HSIC_STROBE
+
+37
+
+GND
+
+39
+
+VBAT
+
+41
+
+GND
+
+43
+
+GND
+
+45
+
+ISINK
+
+M 47
+
+ADC1
+
+49
+
+STATUS
+
+O 51
+
+NETLIGHT
+
+C 53
+
+USIM_DET
+
+IM55
+
+SCL
+
+S 57
+
+GND
+
+59
+
+AUX_ANT
+
+61
+
+GND
+
+63
+
+VBAT
+
+65
+
+GND
+
+67
+
+CTS
+
+Pin No. Pin name
+
+2
+
+GND
+
+4
+
+RESET
+
+6
+
+SPI_CLK
+
+8
+
+SPI_MOSI
+
+E 10
+
+GND
+
+IL 12
+
+USB_DN
+
+14
+
+GND
+
+F 16
+
+USB_ID
+
+L 18
+
+USIM_RST
+
+20
+
+USIM_VDD
+
+IA 22
+
+SD_DATA0
+
+T 24
+
+SD_DATA2
+
+N 26
+
+SD_CLK
+
+28
+
+SDIO_DATA2
+
+E 30
+
+SDIO_DATA0
+
+ID 32
+
+SDIO_CLK
+
+F34
+
+GPIO6
+
+36
+
+HSIC_DATA
+
+N38
+
+VBAT
+
+O 40
+
+GND
+
+C 42
+
+NC (RESERVED)
+
+44
+
+VDD_EXT
+
+46
+
+ADC2
+
+48
+
+SD_DET
+
+50
+
+GPIO43*
+
+52
+
+GPIO41
+
+54
+
+FLIGHTMODE
+
+56
+
+SDA
+
+58
+
+GND
+
+60
+
+GND
+
+62
+
+VBAT
+
+64
+
+GND
+
+66
+
+RTS
+
+68
+
+RXD
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+69
+
+RI
+
+Smart Machine Smart Decision
+
+70
+
+DCD
+
+71
+
+TXD
+
+72
+
+DTR
+
+73
+
+PCM_OUT
+
+74
+
+PCM_IN
+
+75
+
+PCM_SYNC
+
+76
+
+PCM_CLK
+
+77
+
+GND
+
+78
+
+GND
+
+79
+
+GNSS_ANT
+
+80
+
+GND
+
+81
+
+GND
+
+82
+
+MAIN_ANT
+
+E 83
+
+COEX1*
+
+84
+
+COEX2
+
+IL 85
+
+BOOT_CFG0*
+
+86
+
+COEX3*
+
+F 87
+
+GPIO77
+
+NOTE: Before the normal power up, GPIO43COEX1, COEX3 and BOOT_CFG0
+L cannot be pulled up.
+
+IA 2.2 Pin Description
+
+NT Table 4: IO parameters definition
+
+E Pin type ID PI
+PO
+F AI
+AIO
+N I/O O DI C DO
+
+Description Power input Power output Analog input Analog input/output Bidirectional input /output Digital input Digital output
+
+DOH
+
+Digital output with high level
+
+DOL PU
+M PD
+
+Digital output with low level Pull up Pull down
+
+O Table 5: Pin description
+
+C Pin name IMPower supply S VBAT
+
+Pin No.
+38,39, 62,63
+
+Default status
+PI
+
+Description
+Power supply, voltage range: 3.44.2V.
+
+Comment
+
+VDD_EXT
+
+44
+
+LDO power output for other
+
+external circuits with Max
+
+150mA current output. Its
+
+PO
+
+output voltage is 0V by default. The voltage can be
+
+If unused, keep it open.
+
+configured to 2.8V by AT
+
+command.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+VDD_1V8
+
+15
+
+GND
+
+1,2,5, 10,14,37 ,40,41,4 3,57,58, 60,61,64 ,65,77,7 8,80,81
+
+System Control
+
+PWRKEY
+
+3
+
+RESET
+
+4
+
+SD interface
+
+SD_CMD
+
+21
+
+SD_DATA0 22 SD_DATA1 23 SD_DATA2 24
+
+SD_DATA3 25
+
+SD_CLK
+
+26
+
+USIM interface
+
+USIM_DATA 17
+
+Smart Machine Smart Decision
+
+1.8V SMPS output with Max If unused, keep it
+
+PO
+
+50mA current output for external circuit, such as level
+
+open.
+
+shift circuit.
+
+Ground
+
+FILE DI,PU
+
+System power on/off control input, active low.
+
+IAL DI, PU
+
+System reset control input, active low.
+
+The high voltage is
+0.8V;
+RESET has been pulled up to 1.8V via 40Kohm resistor internally.
+
+T DO
+
+SDIO command
+
+N I/O
+
+E I/O
+
+SDIO data
+
+I/O
+
+ID I/O
+
+DO
+
+SDIO clock
+
+If unused, keep them open.
+
+CONF I/O,PU
+
+USIM Card data I/O, which has been pulled up via a 100KR resistor to USIM_VDD internally. Do not pull it up or
+
+down externally.
+
+USIM_RST 18
+M USIM_CLK 19 SIMCO USIM_VDD 20
+
+DO DO
+PO
+
+SPI interface
+
+SPI_CLK
+
+6
+
+DO
+
+SPI_MISO
+
+7
+
+DI
+
+SPI_MOSI
+
+8
+
+DO
+
+SPI_CS
+
+9
+
+DO
+
+USIM Reset USIM clock
+
+All lines of USIM interface should be protected against ESD.
+
+Power output for USIM card, its output Voltage depends on USIM card type automatically. Its output current is up to 50mA.
+
+SPI clock output SPI master in/slave out data SPI master out/slave in data SPI chip-select output
+
+Only support SPI master mode. If unused, please keep them open.
+
+USB
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+USB_VBUS 11
+
+DI,PD
+
+Smart Machine Smart Decision
+Valid USB detection input with 3.0~5.25V detection voltage
+
+USB_DN
+
+12
+
+I/O
+
+Negative line of the differential, bi-directional USB signal.
+
+USB_DP
+
+13
+
+USB_ID
+
+16
+
+UART interface
+
+RTS
+
+66
+
+CTS
+
+67
+
+RXD
+
+68
+
+RI
+
+69
+
+DCD
+
+70
+
+TXD
+
+71
+
+DTR
+
+72
+
+I2C interface
+
+SCL
+
+55
+
+SDA
+
+56
+
+SDIO interface
+
+SDIO_DATA1 27
+
+SDIO_DATA2 28
+
+SDIO_CMD 29
+
+SDIO_DATA0 30
+
+SDIO_DATA3 31
+
+SDIO_CLK 32
+
+HSIC interface
+
+HSIC_STROB E
+
+35
+
+M HSIC_DATA 36
+
+O PCM interface
+
+PCM_OUT 73
+
+C PCM_IN
+
+74
+
+IMPCM_SYNC 75
+
+PCM_CLK
+
+76
+
+S GPIO
+
+NETLIGHT 51
+
+FLIGHTMODE 54
+
+STATUS
+
+49
+
+I/O
+
+Positive line of the differential, bi-directional USB signal.
+
+DI
+
+High-speed USB ID input
+
+E DOH IL DI,PU
+DI,PU
+F DOH L DOH
+DOH
+IA DI,PU
+
+Request to send Clear to Send Receive Data Ring Indicator Carrier detects Transmit Data DTE get ready
+
+NT DO
+
+I2C clock output
+
+E I/O
+
+I2C data input/output
+
+FID I/O
+
+SDIO data1
+
+I/O
+
+SDIO data2
+
+N DO
+
+SDIO command
+
+I/O
+
+SDIO data0
+
+CO I/O
+
+SDIO data3
+
+Keep it open.
+If unused, keep them open.
+If unused, keep open, or else pull them up via 4.7K resistors to 1.8V.
+For WLAN solution
+
+DO
+
+SDIO clock
+
+DO
+
+HSIC strobe wakeup
+
+I/O
+
+HSIC data
+
+Reserved
+
+DO
+
+PCM data output.
+
+DI
+
+PCM data input.
+
+If unused, please keep
+
+DO
+
+PCM data frame sync signal. them open.
+
+DO
+
+PCM data bit clock.
+
+DO DI,PU DO
+
+LED control output as network status indication.
+Flight Mode control input. High level(or open): Normal Mode Low level: Flight Mode
+Operating status output.
+
+If unused, keep them open. DO NOT PULL UP GPIO43 DURING NORMAL POWER UP!
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+High level: Power on and firmware ready Low level: Power off
+
+GPIO41
+
+52
+
+IO
+
+GPIO
+
+GPIO43
+
+50
+
+IO
+
+GPIO
+
+GPIO3
+
+33
+
+GPIO6
+
+34
+
+SD_DET
+
+48
+
+USIM_DET 53
+
+GPIO77
+
+87
+
+RF interface
+
+MAIN _ANT 82
+
+GNSS_ANT 79
+
+AUX_ANT 59
+
+Other interface
+
+ISINK
+
+45
+
+ADC1
+
+47
+
+ADC2
+
+46
+
+COEX1
+
+83
+
+COEX2
+
+84
+
+M COEX3
+
+86
+
+CO BOOT_CFG0 85
+
+SIMNC
+
+42
+
+IO
+
+GPIO
+
+IO
+
+GPIO
+
+E Default: GPIO
+
+Optional: SD card detecting
+
+IL IO
+
+input.
+
+H: SD card is removed
+
+F L: SD card is inserted
+
+Default: GPIO
+
+Optional: USIM card detecting
+
+L IO
+
+input.
+
+IA H: USIM is removed
+
+L: USIM is inserted
+
+IO
+
+GPIO
+
+NT AIO
+
+MAIN antenna soldering pad
+
+E AI
+
+GNSS antenna soldering pad
+
+ID AI
+
+Auxiliary antenna soldering pad
+
+F PI
+
+Ground-referenced current sink.
+
+N AI
+
+Analog-digital converter input If unused, please keep
+
+1
+
+them open.
+
+CO AI
+
+Analog-digital converter input 2
+
+I/O
+
+If unused, keep them
+
+open.
+
+I/O
+
+RF synchronizing between
+
+DO NOT PULL UP
+
+Wi-Fi and LTE.
+
+COEX1 AND COEX2
+
+I/O
+
+DURING NORMAL
+
+POWER UP!
+
+DI,PD
+
+Boot configuration input. Module will be forced into USB download mode by connect 85 pin to VDD_1V8 during power up.
+
+Do place 2 test points for debug. DO NOT PULL UP BOOT_CFG0 DURING NORMAL POWER UP!
+
+No connection.
+
+Keep it open
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+2.3 Mechanical Information
+
+The following figure shows the package outline drawing of SIM7600CE.
+
+SIMCOM
+
+CONFIDENTIAL FILE
+Figure 3: Dimensions (Unit: mm)
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+2.4 Footprint Recommendation
+
+Smart Machine Smart Decision
+
+CONFIDENTIAL FILE
+Figure 4: Footprint recommendation (Unit: mm)
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+3 Interface Application
+
+3.1 Power Supply
+
+The power supply pins of SIM7600CE include 4 pins (pin 62&63, pin 38&39) named VBAT.
+E The 4 VBAT pads supply the power to RF and baseband circuits directly. On VBAT pads, the ripple IL current up to 2A typically, due to GSM/GPRS emission burst (every 4.615ms), may cause voltage
+drop. So the power supply for these pads must be able to provide sufficient current up to more than
+F 2A in order to avoid the voltage drop is more than 300mV.
+The following figure shows the VBAT voltage ripple wave at the maximum power transmit phase.
+
+IAL 577us T IVBAT EN VBAT
+
+4.615ms
+
+Burst:2A Max:300mV
+
+ID Figure 5: VBAT voltage drop during burst emission (GSM/GPRS) F Note: The test condition: The voltage of power supply for VBAT is 3.8V, Cd=100 µF tantalum N capacitor (ESR=0.7) and Cf=100nF (Please refer to Figure 6--Application circuit). CO Table 6: VBAT pins electronic characteristic
+
+Symbol
+
+Description
+
+VBAT
+M IVBAT(peak)
+IVBAT(average)
+O IVBAT(sleep) SIMC IVBAT(power-off)
+
+Module power voltage Module power peak current in normal mode. Module power average current in normal mode Power supply current in sleep mode Module power current in power off mode.
+
+Min.
+3.4 -
+
+Typ.
+3.8 2
+
+Max.
+4.2 -
+
+Unit
+V A
+
+Please refer to the table 34
+
+-
+
+-
+
+20
+
+uA
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+3.1.1 Power Supply Design Guide
+
+Make sure that the voltage on the VBAT pins will never drop below 3.4V, even during a transmit
+
+burst, when current consumption may rise up to 2A. If the voltage drops below 3.4V, the RF
+
+performance may be affected.
+Note: If the power supply for VBAT pins can support up to 2A, using a total of more than 300uF
+E capacitors is recommended, or else users must using a total of 1000uF capacitors typically, in IL order to avoid the voltage drop is more than 300mV.
+Some multi-layer ceramic chip (MLCC) capacitors (0.1/1uF) with low ESR in high frequency band
+F can be used for EMC.
+These capacitors should be put as close as possible to VBAT pads. Also, users should keep VBAT
+L trace on circuit board wider than 2 mm to minimize PCB trace impedance. The following figure IA shows the recommended circuit.
+
+T VBAT 62
+VBAT 63
+N GND 61
+GND 64
+E MODULE VBAT 38 ID VBAT 39 GND 37 F GND 40
+
+Cc
+
+Cb
+
+1uF 100uF
+
+FB101 Ca 100uF
+
+VBAT
+5.1V 500mW
+
+Cf 100nF
+
+Ce 100uF
+
+Cd 100uF
+
+ON Figure 6: Power supply application circuit C In addition, in order to guard for over voltage protection, it is suggested to use a zener diode with
+
+5.1V reverse zener voltage and more than 500mW power dissipation.
+
+M Table 7: Recommended Zener diode list
+
+O No. Manufacturer Part Number
+
+C 1
+
+On semi
+
+MMSZ5231BT1G
+
+2
+
+Prisemi
+
+PZ3D4V2H
+
+IM3
+
+Vishay
+
+MMSZ4689-V
+
+S4
+
+Crownpo
+
+CDZ55C5V1SM
+
+Power dissipation 500mW 500mW 500mW 500mW
+
+Package SOD123 SOD323 SOD123 0805
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+3.1.2 Recommended Power Supply Circuit
+
+Smart Machine Smart Decision
+
+It is recommended that a switching mode power supply or a linear regulator power supply is used.
+
+It is important to make sure that all the components used in the power supply circuit can resist a
+
+peak current up to 2A.
+
+The following figure shows the linear regulator reference circuit with 5V input and 3.8V output.
+
+DC INPUT
+FILE FUSE
+
++ C101
+100uF
+
+C102 1uF
+
+U101 MIC29302
+
+2 Vin
+
+Vout 4
+
+GND
+
+1 On/Off
+
+FB 5
+
+PWR_CTRL
+
+3
+
+VBAT
+
+R101 100K
+R102 47K
+
++ R103 C103 C104
+470R 330uF 100nF
+
+IAL Figure 7: Linear regulator reference circuit
+
+T If there is a big voltage difference between input and output for VBAT power supply, or the N efficiency is extremely important, then a switching mode power supply will be preferable. The
+following figure shows the switching mode power supply reference circuit.
+
+E DC INPUT FID FUSE
+
+U101 LM2596- ADJ
+
+1 Vin
+
+Vout 2
+
++ C101 C102
+
+5 On/Off
+
+100uF
+
+1uF PWR_CTRL
+
+3
+
+GND
+
+FB 4
+
+L101
+
+100uH R101
+
+D102
+
+2.2K
+
+MBR360
+
++ C103
+330uF
+
+FB101 VBAT 270 ohm@100Mhz C104
+100nF
+
+CON R102 1K
+
+Figure 8: Switching mode power supply reference circuit
+Note: The Switching Mode power supply solution for VBAT must be chosen carefully against
+M Electro Magnetic Interference and ripple current from depraving RF performance. CO 3.1.3 Voltage Monitor IMTo monitor the VBAT voltage, the AT command "AT+CBC" can be used. S For monitoring the VBAT voltage outside or within a special range, the AT command
+"AT+CVALARM" can be used to enable the under-voltage warning function. If users need to power off SIM7600CE, when the VBAT voltage is out of a range, the AT command "AT+CPMVT" can be used to enable under-voltage power-off function. Note: Under-voltage warning function and under-voltage power-off function are disabled by default. For more information about these AT commands, please refer to Document [1].
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+3.2 Power on/Power off/Reset Function
+
+Smart Machine Smart Decision
+
+3.2.1 Power on
+
+SIM7600CE can be powered on by pulling the PWRKEY pin down to ground.
+
+The PWRKEY pin has been pulled up with a diode to 1.8V internally, so it does not need to be
+
+pulled up externally. It is strongly recommended to put a100nF capacitor, an ESD protection diode, close to the PWRKEY pin as it would strongly enhance the ESD performance of PWRKEY pin.
+E Please refer to the following figure for the recommended reference circuit.
+
+FIL The high voltage of PWRKEY is 0.8V 1.8V
+
+L Turn on / off IA impulse
+T 4.7K
+
+100nF
+47K
+
+PWRKEY 100
+
+Power On / off logic
+MODULE
+
+IDEN Figure 9: Reference power on/off circuit F Note: Module could be automatically power on by connecting PWRKEY pin to ground via 0R
+resistor directly.
+CON The power-on scenarios are illustrated in the following figure.
+
+VBAT
+M PWRKEY
+(Input)
+OSTATUS
+(Output)
+SIMCUART Port USB Port
+
+Ton
+Ton(status) Ton(uart) Undefined Ton(usb) Undefined
+
+Active Active
+
+Figure 10: Power on timing sequence
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Table 8: Power on timing and electronic characteristic
+
+Smart Machine Smart Decision
+
+Symbol
+
+Parameter
+
+Min. Typ. Max. Unit
+
+The time of active low level impulse of PWRKEY
+
+Ton
+
+pin to power on module
+
+100 500 -
+
+ms
+
+The time from power-on issue to STATUS pin
+
+12 13 -
+
+Ton(status) Ton(uart)
+E Ton(usb) IL VIH
+VIL
+
+s output high level(indicating power up ready )
+
+The time from power-on issue to UART port ready 11 12 -
+
+s
+
+The time from power-on issue to USB port ready 11 12 -
+
+s
+
+Input high level voltage on PWRKEY pin
+
+0.6 0.8 1.8 V
+
+Input low level voltage on PWRKEY pin
+
+-0.3 0
+
+0.5 V
+
+L F 3.2.2 Power off IA The following methods can be used to power off SIM7600CE. T  Method 1: Power off SIM7600CE by pulling the PWRKEY pin down to ground. N  Method 2: Power off SIM7600CE by AT command "AT+CPOF".
+ Method 3: over-voltage or under-voltage automatic power off. The voltage range can be set by
+E AT command "AT+CPMVT". ID  Method 4: over-temperature or under-temperature automatic power off. F Note: If the temperature is outside the range of -30~+80, some warning will be reported via AT N port. If the temperature is outside the range of -40~+85, SIM7600CE will be powered off
+automatically.
+CO For details about "AT+CPOF" and "AT+CPMVT", please refer to Document [1].
+
+These procedures will make modules disconnect from the network and allow the software to enter a
+
+safe state, and save data before module be powered off completely. The power off scenario by pulling down the PWRKEY pin is illustrated in the following figure.
+
+M PWRKEY
+
+Toff
+
+O( Input)
+
+Toff-on Ton
+
+STATUS
+C (Output)
+
+Toff(status)
+
+IM Toff(uart)
+
+S UART Port
+
+Active
+
+Undefined
+
+Toff(usb)
+
+USB Port
+
+Active
+
+Undefined
+
+Figure 11: Power off timing sequence
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+Table 9: Power off timing and electronic characteristic
+
+Symbol Parameter
+
+Time value Unit
+Min. Typ. Max.
+
+The active low level time pulse on PWRKEY pin to
+
+Toff
+
+power off module
+
+2.5 -- -- s
+
+E The time from power-off issue to STATUS pin output low
+
+IL Toff(status)
+
+level(indicating power off )*
+
+25
+
+26 -
+
+s
+
+Toff(uart)
+
+The time from power-off issue to UART port off
+
+14
+
+15 -
+
+s
+
+F Toff(usb)
+
+The time from power-off issue to USB port off
+
+27
+
+28 -
+
+s
+
+Toff-on
+
+The buffer time from power-off issue to power-on issue 0
+
+-
+
+-
+
+s
+
+L *Note: The STATUS pin can be used to detect whether module is powered on or not. When
+
+IA module has been powered on and firmware goes ready, STATUS will be high level, or else
+
+STATUS will still low level.
+
+ENT 3.2.3 Reset Function ID SIM7600CE can be reset by pulling the RESET pin down to ground.
+Note: This function is only used as an emergency reset, when AT command "AT+CPOF" and
+F the PWRKEY pin all have lost efficacy. N The RESET pin has been pulled up with a 40K resistor to 1.8V internally, so it does not need to
+be pulled up externally. It is strongly recommended to put a100nF capacitor and an ESD protection
+O diode close to the RESET pin. Please refer to the following figure for the recommended reference C circuit.
+
+OM Reset Impulse SIMC 4.7K
+
+47K
+
+Treset
+
+1.8V
+40K RESET 100
+
+Reset Logic
+
+100nF
+
+MODULE
+
+Figure 12: Reference reset circuit
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Table 10: RESET pin electronic characteristic
+
+Smart Machine Smart Decision
+
+Symbol
+
+Description
+
+Min. Typ. Max. Unit
+
+The active low level time impulse on RESET pin to
+
+Treset
+
+reset module
+
+50
+
+100 500 ms
+
+VIH
+
+Input high level voltage
+
+1.17 1.8 2.1 V
+
+VIL
+
+Input low level voltage
+
+-0.3 0
+
+0.8 V
+
+ILE 3.3 UART Interface F SIM7600CE provides a 7-wire UART (universal asynchronous serial transmission) interface as L DCE (Data Communication Equipment). AT commands and data transmission can be performed
+through UART interface.
+
+TIA 3.3.1 UART Design Guide
+
+N The following figures show the reference design.
+
+E MODULE ( DCE)
+
+CONFID UART
+
+TXD RXD RTS CTS DTR DCD RI
+
+HOST ( DTE)
+TXD RXD RTS CTS UART DTR DCD RING
+
+Figure 13: UART full modem
+
+MMODULE ( DCE)
+
+SIMCO UART
+
+TXD RXD RTS CTS DTR DCD RI
+
+Wake up host
+
+HOST ( DTE)
+TXD RXD RTS CTS UART DTR DCD RING Interrupt
+
+Figure 14: UART null modem
+
+The SIM7600CE UART is 1.8V voltage interface. If user's UART application circuit is 3.3V voltage interface, the level shifter circuits should be used for voltage matching. The
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+TXB0108RGYR provided by Texas Instruments is recommended. The following figure shows the voltage matching reference design.
+
+VDD_1V8 or External 1V8
+
+3.3V
+
+MODULE
+
+100nF
+
+TXB0108RGYR
+
+VCCA VCCB
+
+OE
+
+GND
+
+100nF
+
+TXD RXD RTS
+E CTS
+DTR
+IL DCD RI
+F UART port
+
+A1 A2 A3 A4 A5 A6 A7 47K A8
+
+B1
+
+B2
+
+B3
+
+B4
+
+B5
+
+B6
+
+B7
+
+B8
+
+47K
+
+TXD_3.3V RXD_3.3V RTS_3.3V CTS_3.3V DTR_3.3V DCD_3.3V RI_3.3V
+
+L Figure 15: Reference circuit of level shift IA To comply with RS-232-C protocol, the RS-232-C level shifter chip should be used to connect T SIM7600CE to the RS-232-C interface, for example SP3238ECA, etc.
+Note: SIM7600CE supports the following baud rates: 300, 600, 1200, 2400, 4800, 9600, 19200,
+N 38400, 57600, 115200, 230400, 460800, 921600, 3200000, 3686400, 4000000bps. The default E band rate is 115200bps. ID 3.3.2 RI and DTR Behavior F The RI pin can be used to interrupt output signal to inform the host controller such as application
+CPU.
+N Normally RI will keep high level until certain conditions such as receiving SMS, or a URC report O coming, and then it will change to low level. It will stay low until the host controller clears the C interrupted event with "AT+CRIRS" AT command.
+
+RI
+
+Idle
+
+HIGH
+M LOW
+
+CORI
+
+Idle
+
+HIGH
+
+SIM LOW
+
+Receiving SMS and any URC report coming. AT+CFGRI=1
+Receiving SMS . AT+CFGRI=0
+
+Clear by AT+CRIRS Clear by AT+CRIRS
+
+Figure 16: RI behaviourSMS and URC report
+
+Normally RI will be kept at a high level until a voice call, then it will output periodic rectangular
+
+wave with 5900ms low level and 100ms high level. It will output this kind of periodic rectangular
+
+wave until the call is answered or hung up.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+RI HIGH
+
+5900ms
+
+100ms
+
+Smart Machine Smart Decision
+
+LOW Idle
+
+Ring
+
+Establish
+
+Hang up
+
+Idle
+
+the call
+
+the call
+
+E Figure 17: RI behaviourvoice call IL Note: For more details of AT commands about UART, please refer to document [1] and [22]. F DTR pin can be used to wake SIM7600CE from sleep. When SIM7600CE enters sleep mode, L pulling down DTR can wake SIM7600CE.
+
+TIA 3.4 USB Interface
+
+EN The SIM7600CE contains a USB interface compliant with the USB2.0 specification as a peripheral,
+but the USB charging function is not supported.
+ID SIM7600CE can be used as a USB device. SIM7600CE supports the USB suspend and resume
+mechanism which can reduce power consumption. If there is no data transmission on the USB bus,
+F SIM7600CE will enter suspend mode automatically, and will be resumed by some events such as N voice call, receiving SMS, etc.
+
+O MODULE C USB_VBUS
+
+HOST
+0
+VBUS
+
+M USB
+
+USB_DN
+USB_DP GND
+USB_ID
+
+D-
+D+
+GND
+D3 D1 D2
+
+USB
+
+CO Figure 18: USB reference circuit IMBecause of the high bit rate on USB bus, more attention should be paid to the influence of the S junction capacitance of the ESD component on USB data lines. Typically, the capacitance should
+
+be less than 1pF. It is recommended to use an ESD protection component such as ESD9L5.0ST5G
+
+provided by On Semiconductor (www.onsemi.com ).
+
+D3 is suggested to select the diode with anti-ESD and voltage surge function, or customer could
+
+add a ZENER diode for surge clamping. The recommend diodes please refer to table 7.
+
+NoteThe USB_DN and USB_DP nets must be traced by 90Ohm+/-10% differential impedance.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+3.5 USIM Interface
+
+Smart Machine Smart Decision
+
+SIM7600CE supports both 1.8V and 3.0V USIM Cards. Table 11: USIM electronic characteristic in 1.8V mode (USIM_VDD=1.8V)
+
+Symbol Parameter
+
+Min.
+
+USIM_
+E VDD
+
+LDO power output voltage 1.75
+
+IL VIH
+
+High-level input voltage 0.65*USIM_VDD
+
+F VIL
+
+Low-level input voltage -0.3
+
+L VOH
+
+High-level output voltage USIM_VDD -0.45
+
+IA VOL
+
+Low-level output voltage 0
+
+Typ. Max.
+
+Unit
+
+1.8 1.95
+
+V
+
+-
+
+USIM_VDD +0.3 V
+
+0
+
+0.35*USIM_VDD V
+
+-
+
+USIM_VDD
+
+V
+
+0
+
+0.45
+
+V
+
+T Table 12: USIM electronic characteristic 3.0V mode (USIM_VDD=2.95V)
+
+N Symbol Parameter
+
+Min.
+
+E USIM_
+VDD
+
+LDO power output voltage 2.75
+
+ID VIH
+
+High-level input voltage 0.65*USIM_VDD
+
+F VIL
+
+Low-level input voltage -0.3
+
+N VOH
+
+High-level output voltage USIM_VDD -0.45
+
+CO VOL
+
+Low-level output voltage 0
+
+Typ. Max.
+
+Unit
+
+2.95 3.05
+
+V
+
+-
+
+USIM_VDD +0.3 V
+
+0
+
+0.25*USIM_VDD V
+
+-
+
+USIM_VDD
+
+V
+
+0
+
+0.45
+
+V
+
+3.5.1 USIM Application Guide
+It is recommended to use an ESD protection component such as ESDA6V1W5 produced by ST
+M (www.st.com ) or SMF15C produced by ON SEMI (www.onsemi.com ). Note that the USIM
+peripheral circuit should be close to the USIM card socket. The following figure shows the 6-pin
+SIMCO SIM card holder reference circuit.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+100nF
+
+USIM Socket
+
+USIM_VDD
+
+USIM_RST
+
+22
+
+VCC GND RST VPP
+
+USIM_CLK
+
+22
+
+CLK I/O
+
+Module
+
+E USIM_DATA
+
+22
+
+C707 10M006 512 TVS
+
+22pF_NM 22pF_NM 22pF_NM
+
+L FIL Figure 19: USIM interface reference circuit TIA Note: USIM_DATA has been pulled up with a 100K resistor to USIM_VDD in module. A N 100nF capacitor on USIM_VDD is used to reduce interference. For more details of AT E commands about USIM, please refer to document [1].USIM_CLK is very important signal, the
+rise time and fall time of USIM_CLK should be less than 40ns, otherwise the USIM card might
+CONFID not be initialized correctly.
+
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Recommended USIM Card Holder
+
+Smart Machine Smart Decision
+
+It is recommended to use the 6-pin USIM socket such as C707 10M006 512 produced by Amphenol. User can visit http://www.amphenol.com for more information about the holder.
+
+FIDENTIAL FILE Figure 20: Amphenol SIM card socket CON Table 13: Amphenol USIM socket pin description
+
+Pin
+
+Signal
+
+C1
+
+USIM_VDD
+
+C2
+
+USIM_RST
+
+M C3
+
+USIM_CLK
+
+C5
+
+GND
+
+O C6
+
+VPP
+
+SIMC C7
+
+USIM_DATA
+
+Description USIM Card Power supply. USIM Card Reset. USIM Card Clock. Connect to GND.
+USIM Card data I/O.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+3.6 PCM Interface
+
+Smart Machine Smart Decision
+
+SIM7600CE provides a PCM interface for external codec, which can be used in master mode with short sync and 16 bits linear format.
+
+Note: Only S2-106YK support PCM audio functionS2-106XK can not support PCM audio
+
+function.
+E Table 14: PCM format
+
+IL Characteristics
+
+Specification
+
+F Line Interface Format
+
+Linear(Fixed)
+
+Data length
+
+16bits(Fixed)
+
+L PCM Clock/Sync Source
+
+Master Mode(Fixed)
+
+IA PCM Clock Rate
+
+2048 KHz (Fixed)
+
+PCM Sync Format
+
+Short sync(Fixed)
+
+T Data Ordering
+
+MSB
+
+N Note: For more details about PCM AT commands, please refer to document [1].
+
+E 3.6.1 PCM timing
+
+CONFID SIM7600CE supports 2.048 MHz PCM data and sync timing for 16 bits linear format codec.
+
+SIMCOM
+
+Figure 21: PCM_SYNC timing
+
+Figure 22: EXT codec to module timing
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+ILE Figure 23: Module to EXT codec timing F Table 15: PCM timing parameters
+
+L Parameter Description
+
+Min. Typ. Max. Unit
+
+IA T(sync)
+
+PCM_SYNC cycle time
+
+­
+
+125 ­
+
+s
+
+T(synch) PCM_SYNC high level time
+
+­
+
+488 ­
+
+ns
+
+T T(syncl) PCM_SYNC low level time
+
+­
+
+124.5 ­
+
+s
+
+N T(clk)
+
+PCM_CLK cycle time
+
+­
+
+488 ­
+
+ns
+
+E T(clkh)
+
+PCM_CLK high level time
+
+­
+
+244 ­
+
+ns
+
+T(clkl)
+
+PCM_CLK low level time
+
+­
+
+244 ­
+
+ns
+
+ID PCM_SYNC setup time high before falling edge
+
+T(susync)
+
+­
+
+122 ­
+
+ns
+
+of PCM_CLK
+
+NF T(hsync)
+
+PCM_SYNC hold time after falling edge of PCM_CLK
+
+­
+
+366 ­
+
+ns
+
+CO T(sudin)
+
+PCM_IN setup time before falling edge of PCM_CLK
+
+60 ­
+
+­
+
+ns
+
+PCM_IN hold time after falling edge of
+
+T(hdin)
+
+60 ­
+
+­
+
+ns
+
+PCM_CLK
+
+T(pdout)
+SIMCOM T(zdout)
+
+Delay from PCM_CLK rising to PCM_OUT valid ­ Delay from PCM_CLK falling to PCM_OUT
+­ HIGH-Z
+
+­ ­
+
+60 60
+
+ns ns
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+3.6.2 PCM Application Guide
+
+Smart Machine Smart Decision
+
+The following figure shows the external codec reference design.
+VDD_1V8
+
+3.3V 3.8V VDD_1V8
+
+VDDA
+
+2.2K
+
+2.2K
+
+ILE MODULE
+
+PCM_IN
+PCM_OUT PCM_SYNC PCM_CLK
+
+F SCL
+SDA
+L 33pF
+
+VDDSPK VDDD
+
+ADCOUT DACIN FS BCLK
+MCLK
+
+MICBIAS
+MIC+ MIC-
+
+SCLK
+
+MOUT
+
+SDIO
+
+NAU8810
+
+1.3K
+
+1uF 1uF
+1.3K 47uF 47uF
+
+MIC
+
+SPK
+
+TIA Figure 24: Audio codec reference circuit
+
+N 3.7 SD Interface
+
+E SIM7600CE provides a 4-bit SD/MMC interface with clock rate up to 200 MHz, The voltage of ID MMC/SD interface is 2.95V, which is compatible with SDIO Card Specification (version 3.0) and F Secure Digital (Physical Layer Specification, version 3.0).It supports up to 32GB SD cards. N Table 16: MMC/SD electronic characteristic (SD_DATA0-SD_DATA3  SD_CLK and
+SD_CMD) *
+
+CO Symbol
+
+Parameter
+
+Min.
+
+Typ. Max.
+
+Unit
+
+VDD_SD
+
+LDO power output voltage**
+
+2.75
+
+2.85
+
+3.05
+
+V
+
+M VIH
+
+High-level input voltage 0.65·VDD_EXT -
+
+VDD_EXT+0.3 V
+
+VIL
+
+Low-level input voltage -0.3
+
+0
+
+0.25·VDD_EXT V
+
+O VOH
+
+High-level output voltage VDD_EXT-0.4 2.85
+
+VDD_EXT
+
+V
+
+C VOL
+
+Low-level output voltage 0
+
+0
+
+0.45
+
+V
+
+IMNote: S *Be different from SD_DATA0-SD_DATA3SD_CLK and SD_CMDSD_DET is 1.8V
+
+operation voltage.
+
+Customer should provide VDD_SD for SD card and the current should more than 350mA. ESD/EMI components should be arranged beside SD card socket. Refer to the following application circuit.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+VDD_SD
+
+Smart Machine Smart Decision
+SD Card
+
+Module
+
+SD_CMD SD_DATA3 SD_DATA2 SD_DATA1 SD_DATA0
+SD_CLK
+
+VCC CMD D3 D2
+D1 D0
+CLK
+
+GND GND
+
+TVS TVS TVS TVS TVS TVS 100nF 4.7uF
+
+L Figure 25: SD reference circuit IA SD card layout guide lines:
+ Protect other sensitive signals/circuits from SD card signals.
+T  Protect SD card signals from noisy signals (clocks, SMPS, etc.).
+ Up to 200 MHz clock rate, 50  nominal, ±10% trace impedance
+N  CLK to DATA/CMD length matching < 1 mm E  15­24  termination resistor on clock lines near module
+ Total routing length < 50 mm recommended
+ID  Routing distance from module clock pin to termination resistor < 5 mm
+ Spacing to all other signals = 2x line width
+F  Bus capacitance < 15 pF CON 3.8 I2C Interface
+
+FILE
+
+SIM7600CE provides a I2C interface compatible with I2C specification, version 5.0, with clock
+
+rate up to 400 kbps. Its operation voltage is 1.8V.
+M The following figure shows the I2C bus reference design. O VDD_1V8
+
+C 2.2K IM SCL S SDA
+
+2.2K
+
+SCL SDA
+
+GND
+Module
+
+GND
+Module
+
+Figure 26: I2C reference circuit
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+NoteSDA and SCL do not have pull-up resistors in module. So, 2 external pull up resistors are needed in application circuit.
+"AT+CRIIC and AT+CWIIC" AT commands could be used to read/write register values of the I2C peripheral devices. For more details about AT commands please refer to document [1].
+
+3.9 SDIO Interface
+ILE SIM7600CE provides a 4 bit 1.8V SDIO interface for WLAN solution.
+The default WLAN IC is QCA9377, and the application need software support.
+F This part do not support now, need for future develop. L 3.10 SPI Interface IA SIM7600CE provides a SPI interface as a master only. Its operation voltage is 1.8V, and its clock T rate is up to 26 MHz. N NoteFor more details of the AT commands about the SPI, please refer to document [1]. E 3.11 Network status ID The NETLIGHT pin is used to control Network Status LED, its reference circuit is shown in the F following figure.
+CON VBAT
+
+MModule SIMCO NETLIGHT
+
+R
+4.7K 47K
+
+Figure 27: NETLIGHT reference circuit Note: The value of the resistor named "R" depends on the LED characteristic.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Table 17: NETLIGHT pin status
+
+Smart Machine Smart Decision
+
+NETLIGHT pin status
+
+Module status
+
+Always On
+
+Searching Network/Call Connect
+
+200ms ON, 200ms OFF
+
+Data Transmit
+
+800ms ON, 800ms OFF
+
+Registered network
+
+OFF
+
+Power off / Sleep
+
+Note: NETLIGHT output low level as "OFF", and high level as "ON".
+E 3.12 Flight Mode Control FIL The FLIGHTMODE pin can be used to control SIM7600CE to enter or exit the Flight mode. In
+Flight mode, the RF circuit is closed to prevent interference with other equipments and minimize
+L current consumption. Bidirectional ESD protection component is suggested to add on
+FLIGHTMODE pin, its reference circuit is shown in the following figure.
+IA 1.8V NT4.7K
+
+IDE FLIGHTMODE
+
+Switch
+
+CONF Module
+
+4.7K
+
+Figure 28: Flight mode switch reference circuit
+
+M Table 18: FLIGHTMODE pin status
+
+O FLIGHTMODE pin status C Input Low Level SIMInput High Level
+
+Module operation Flight Mode: RF is closed AT+CFUN=0: RF is closed AT+CFUN=1:RF is working
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+3.13 Other interface
+
+3.13.1 Sink Current Source
+
+The ISINK pin is VBAT tolerant and intended to drive some passive devices, such as LCD backlight and white LED, etc. Its output current can be up to 40mA and be set by the AT command
+E "AT+ CLEDITST".
+
+IL Table 19: Sink current electronic characteristic
+
+F Symbol
+
+Description
+
+Min.
+
+Typ.
+
+Max.
+
+Unit
+
+L VISINK
+
+Voltage tolerant
+
+0.5
+
+-
+
+VBAT
+
+V
+
+IA IISINK
+
+Current tolerant
+
+0
+
+-
+
+40
+
+mA
+
+T ISINK is a ground-referenced current sink. The following figure shows its reference circuit. N VBAT
+
+IDE ISINK pin is VBAT
+tolerant-suitable for driving
+NF white LEDs
+
++ Passive device
+-
+ISINK
+
+CO MODULE
+
+Current Controls
+M Figure 29: ISINK reference circuit O Note: The sinking current can be adjusted to meet the design requirement through the AT C command "AT+ CLEDITST =<0>, <value>".The "value" ranges from 0 to 8, on behalf of the SIMcurrent from 0mA to 40mA by 5mA step.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+3.13.2 ADC
+
+SIM7600CE has 2 dedicated ADC pins named ADC1 and ADC2.They are available for digitizing
+
+analog signals such as battery voltage and so on. These electronic specifications are shown in the
+
+following table. Table 20: ADC1 and ADC2 electronic characteristics
+
+ILE Characteristics
+Resolution
+F Conversion time
+Input Range
+
+Min.
+
+Typ.
+
+Max.
+
+Unit
+
+­
+
+15
+
+­
+
+Bits
+
+­
+
+442
+
+­
+
+ms
+
+0.1
+
+1.7
+
+V
+
+L Input serial resistance
+
+1
+
+­
+
+­
+
+M
+
+IA Note: "AT+CADC" and "AT+CADC2" can be used to read the voltage of the ADC1 and ADC2
+pins, for more details, please refer to document [1].
+
+NT 3.13.3 LDO E SIM7600CE has a LDO power output, named VDD_EXT. its output voltage is 0V by default, ID Users can switch the LDO on or off by the AT command "AT+CVAUXS" and configure its output
+voltage by the AT command "AT+CVAUXV".
+
+NF Table 21: Electronic characteristic
+
+O Symbol C VVDD_EXT
+
+Description Output voltage
+
+Min.
+
+Typ.
+
+Max.
+
+Unit
+
+1.7
+
+2.95
+
+3.05
+
+V
+
+IO
+
+Output current
+
+-
+
+-
+
+150
+
+mA
+
+SIMCOM NoteFor more details of AT commands about VDD_EXT, please refer to document [1].
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+4 RF Specifications
+
+Smart Machine Smart Decision
+
+4.1 GSM/CDMA 1X/UMTS/LTE RF Specifications
+
+Table 22: Conducted transmission power
+
+Frequency
+E EGSM900 IL DCS1800
+EGSM900 (8-PSK)
+F DCS1800 (8-PSK)
+WCDMA B1
+L WCDMA B8
+CDMA BC0
+IA TDSCDMA 1900
+TDSCDMA 2000
+T LTE-FDD B1
+LTE-FDD B3
+N LTE-FDD B8 E LTE-TDD B38
+LTE-TDD B39
+ID LTE-TDD B40
+LTE-TDD B41
+
+Power 33dBm ±2dB 30dBm ±2dB 27dBm ±3dB 26dBm +3/-4dB 24dBm +1/-3dB 24dBm + 1/-3dB 24dBm + 1/-3dB 24dBm + 1/-3dB 24dBm + 1/-3dB 23dBm +/-2.7dB 23dBm +/-2.7dB 23dBm +/-2.7dB 23dBm +/-2.7dB 23dBm +/-2.7dB 23dBm +/-2.7dB 23dBm +/-2.7dB
+
+NF Table 23: Operating frequencies
+
+O Frequency C EGSM900
+
+Receiving 925960MHz
+
+Min. 5dBm ± 5dB 0dBm ± 5dB 5dBm ± 5dB 0dBm ±5dB <-50dBm <-50dBm <-50dBm <-50dBm <-50dBm <-40dBm <-40dBm <-40dBm <-40dBm <-40dBm <-40dBm <-40dBm
+Transmission 880915 MHz
+
+DCS1800
+
+18051880 MHz
+
+17101785 MHz
+
+WCDMA B1 WCDMA B8
+M TDSCDMA 1.9G
+TDSCDMA 2G
+
+21102170 MHz 925960 MHz 18801920 MHz 20102025 MHz
+
+19201980 MHz 880915 MHz 18801920 MHz 20102025 MHz
+
+O CDMA BC0
+
+869894 MHz
+
+824849 MHz
+
+C The LTE Operating frequencies are shown in the following table 24.
+
+Note: Operating frequencies of LTE TDD B41 for the SIM7600CE is 100MHz BW, 25552655 MHz
+
+IMGPS
+
+1574.4 1576.44 MHz
+
+-
+
+S GLONASS
+
+1598 1606 MHz
+
+-
+
+BD
+
+1559 1563 MHz
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Table 24: E-UTRA operating bands
+
+Smart Machine Smart Decision
+
+E-UTRA
+
+Duplex
+
+Uplink (UL) operating band Downlink(DL) operating band
+
+operating band
+
+Mode
+
+1
+
+1920 ~1980 MHz
+
+2110 ~2170 MHz
+
+FDD
+
+3
+
+1710 ~1785 MHz
+
+1805 ~1880 MHz
+
+FDD
+
+8
+
+880 ~915 MHz
+
+925 ~960 MHz
+
+38
+
+2570 ~2620 MHz
+
+2570 ~2620 MHz
+
+E 39
+
+1880 ~1920 MHz
+
+1880 ~1920 MHz
+
+IL 40
+
+2300 ~2400 MHz
+
+2300 ~2400 MHz
+
+41
+
+2496 ~2690 MHz
+
+2496 ~2690 MHz
+
+FDD TDD TDD TDD TDD
+
+L F Table 25: Conducted receive sensitivity
+
+IA Frequency T EGSM900 N DCS1800
+WCDMA 2100
+E WCDMA 900 ID TDSCDMA 1900
+TDSCDMA 2000
+F CDMA BC0 N LTE FDD/TDD
+
+Receive sensitivity(Typical) < -109dBm < -109dBm < -110dBm < -110dBm < -110dBm < -110dBm < -110dBm See table 26.
+
+CO Table 26: Reference sensitivity (QPSK)
+
+Receive sensitivity(MAX) 3GPP 3GPP 3GPP 3GPP 3GPP 3GPP 3GPP 3GPP
+
+E-UTRA band
+M 1 O 3 C 8
+38
+IM39 S40
+
+3GPP standard
+
+1.4 MHz 3MHz
+
+-
+
+-
+
+-101.7
+
+-98.7
+
+-102.2
+
+-99.2
+
+-
+
+-
+
+-
+
+-
+
+-
+
+-
+
+41
+
+-
+
+-
+
+5MHz -100 -97 -97 -100 -100 -100 -99
+
+10MHz -97 -94 -94 -97 -97 -97 -96
+
+Test value 10 MHz -101 -99 -102 -101 -101.5 -101 -101
+
+3GPP standard
+
+15 MHz 20 MHz
+
+-95.2
+
+-94
+
+-92.2
+
+-91
+
+-95.2
+
+-94
+
+-95.2
+
+-94
+
+-95.2
+
+-94
+
+-94.2
+
+-93
+
+Duplex
+FDD FDD FDD TDD TDD TDD TDD
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+4.2 GSM/CDMA 1X /UMTS/LTE Antenna Design Guide
+
+Users should connect antennas to SIM7600CE's antenna pads through micro-strip line or other
+
+types of RF trace and the trace impedance must be controlled in 50. SIMCom recommends that
+
+the total insertion loss between the antenna pads and antennas should meet the following requirements:
+ILE Table 27: Trace loss
+
+F Frequency
+700MHz-960MHz
+L 1710MHz-2170MHz IA 2300MHz-2650MHz
+
+Loss <0.5dB <0.9dB <1.2dB
+
+T To facilitate the antenna tuning and certification test, a RF connector and an antenna matching
+circuit should be added. The following figure is the recommended circuit.
+
+FIDEN MAIN_ANT 82 N GND 41
+
+RF connector
+
+CO MODULE
+
+Matching circuit
+
+R1 C1
+
+R2 C2
+
+MAIN ANT D1
+
+MFigure 30: Antenna matching circuit (MAIN_ANT) CO In above figure, the components R1, C1, C2 and R2 are used for antenna matching, the values of
+components can only be achieved after the antenna tuning and usually provided by antenna vendor.
+IMBy default, the R1, R2 are 0 resistors, and the C1, C2 are reserved for tuning. The component S D1 is a TVS for ESD protection, and it is optional for users according to application environment.
+The RF test connector is used for the conducted RF performance test, and should be placed as close as to the module's MAIN_ANT pin. The traces impedance between SIM7600CE and antenna must be controlled in 50.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision Diversity antenna
+
+Matching circuit
+
+AUX_ANT 59
+
+R3
+
+R4
+
+GND 58
+
+C3
+
+C4
+
+D2
+
+MODULE
+
+FILE Figure 31: Antenna matching circuit (AUX_ANT) L In above figure, R3, C3, C4 and R4 are used for auxiliary antenna matching. By default, the R3, R4 IA are 0resistors, and the C3, C4 are reserved for tuning. D2 is a TVS for ESD protection, and it is
+optional for users according to application environment.
+T Two TVS are recommended in the table below. N Table 28: Recommended TVS
+
+E Package ID 0201
+0402
+
+Part Number LXES03AAA1-154 LXES15AAA1-153
+
+Vender Murata Murata
+
+NF NoteSIMCom suggests the LTE auxiliary antenna to be kept on, since there are many high
+bands in the designing of TDD-LTE, such as band38, band40 and band41. Because of the high
+O insert loss of the RF cable and layout lines, the receiver sensitivity of these bands above will have C risk to meet the authentication without the diversity antenna. For more details about auxiliary
+
+antenna design notice, please refer to document [25].
+
+M 4.3 GNSS CO SIM7600CE merges GNSS (GPS/GLONASS/BD) satellite and network information to provide a
+high-availability solution that offers industry-leading accuracy and performance. This solution
+IMperforms well, even in very challenging environmental conditions where conventional GNSS S receivers fail, and provides a platform to enable wireless operators to address both location-based
+services and emergency mandates.
+
+4.3.1 GNSS Technical specification
+
+ Tracking sensitivity: -159 dBmGPS/-158 dBmGLONASS/TBD (BD)  Cold-start sensitivity: -148 dBm
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+ Accuracy (Open Sky): 2.5m (CEP50)
+
+ TTFF (Open Sky) : Hot start <1s, Cold start<35s
+
+ Receiver Type: 16-channel, C/A Code
+
+ GPS L1 Frequency: 1575.42±1.023MHz
+
+ GLONASS: 1597.5~1605.8 MHz
+
+ BD: 1559.05~1563.14 MHz
+
+ Update rate: Default 1 Hz  GNSS data format: NMEA-0183
+E  GNSS Current consumption : 100mA (GSM/CDMA 1X/UMTS/LTE Sleep ,in total on VBAT pins)
+IL  GNSS antenna: Passive/Active antenna F Note: If the antenna is active type, the power should be given by main board because there is no
+power supply on the GPS antenna pad. If the antenna is passive, it is suggested that the external
+L LNA should be used. IA 4.3.2 GNSS Application Guide T Users can adopt an active antenna or a passive antenna to SIM7600CE. If using a passive antenna, N an external LNA is a must to get better performance. The following figures are the reference E circuits.
+
+CONFID GND 80
+
+VDD 10 ohm GNSS Active ANT
+
+47nH
+
+Matching circuit
+
+C1
+
+C2 33pF
+
+GNSS_ANT
+
+79
+
+GND
+SIMCOMMODULE
+
+78
+
+L1
+
+L2
+
+Figure 32: Active antenna circuit
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+V_LNA
+
+Smart Machine Smart Decision GNSS Passive ANT
+
+GND GNSS_ANT
+GND
+
+80 79
+78
+
+LNA L3
+
+SAW
+
+Matching circuit C1
+
+L1
+
+L2
+
+MODULE
+ILE Figure 33: Passive antenna circuit (Default) F In above figures, the components C1, L1 and L2 are used for antenna matching. Usually, the values
+of the components can only be achieved after antenna tuning and usually provided by antenna
+L vendor. C2 is used for DC blocking. L3 is the matching component of the external LNA, and the IA value of L3 is determined by the LNA characteristic and PCB layout. Both VDD of active antenna
+and V_LNA need external power supplies which should be considered according to active antenna
+T and LNA characteristic. LDO/DCDC is recommended to get lower current consuming by shutting
+down active antennas and LNA when GNSS is not working.
+N GNSS can be tested by NMEA port. NMEA sentences can be obtained through UART or USB E automatically. NMEA sentences include GSV, GGA, RMC, GSA, and VTG. Before using GNSS,
+user should configure SIM7600CE in proper operating mode by AT command. Please refer to
+ID related documents for details. SIM7600CE can also get position location information through AT
+directly.
+F Note: GNSS is closed by default and can be started by AT+CGPS. The AT command has two N parameters, the first is on/off, and the second is GNSS mode. Default mode is standalone mode.
+AGPS mode needs more support from the mobile telecommunication network. Please refer to
+CO document [24] for more details.
+
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+5 Electrical Specifications
+
+5.1 Absolute maximum ratings
+
+Absolute maximum rating for digital and analog pins of SIM7600CE are listed in the following
+E table: IL Table 29: Absolute maximum ratings
+
+L F Parameter
+
+Min.
+
+Typ.
+
+Max.
+
+Unit
+
+IA Voltage at VBAT
+
+-0.5
+
+-
+
+6.0
+
+V
+
+Voltage at USB_VBUS
+
+-0.5
+
+-
+
+5.85
+
+V
+
+Voltage at digital pins
+T (RESET,SPI,Keypad,GPIO,I2C,UART,PCM)
+
+-0.3
+
+-
+
+2.1
+
+V
+
+N Voltage at digital pins (SD,USIM)
+
+-0.3
+
+-
+
+3.05
+
+V
+
+Voltage at PWRKEY
+
+-0.3
+
+-
+
+1.8
+
+IDE 5.2 Operating conditions
+
+NF Table 30: Recommended operating ratings
+
+CO Parameter
+
+Min.
+
+Typ.
+
+Max.
+
+Unit
+
+Voltage at VBAT
+
+3.4
+
+3.8
+
+4.2
+
+V
+
+Voltage at USB_VBUS
+
+M Table 31: 1.8V Digital I/O characteristics*
+
+O Parameter C VIH
+VIL
+SIMVOH
+
+Description High-level input voltage Low-level input voltage High-level output voltage
+
+3.0
+Min. 1.17 -0.3 1.35
+
+5.0
+Typ. 1.8 0 -
+
+5.25
+
+V
+
+Max.
+
+Unit
+
+2.1
+
+V
+
+0.63
+
+V
+
+1.8
+
+V
+
+VOL
+
+Low-level output voltage
+
+0
+
+-
+
+0.45
+
+V
+
+IOH
+
+High-level output current(no pull down resistor)
+
+-
+
+2
+
+-
+
+mA
+
+Low-level output current(no pull
+
+IOL
+
+up resistor)
+
+-
+
+-2
+
+-
+
+mA
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+IIH
+
+Input high leakage current (no pull down resistor)
+
+-
+
+Smart Machine Smart Decision
+
+-
+
+1
+
+uA
+
+IIL
+
+Input low leakage current(no pull up resistor)
+
+-1
+
+-
+
+-
+
+uA
+
+*Note: These parameters are for digital interface pins, such as SPI, GPIOs (NETLIGHT,
+
+FLIGHTMODE, STATUS, USIM_DET, SD_DET), SDIO, I2C, UART, PCM, COEXn, and
+
+BOOT_CFG0.
+
+E The operating temperature of SIM7600CE is listed in the following table.
+
+IL Table 32: Operating temperature
+
+F Parameter
+
+Min.
+
+Typ.
+
+Max.
+
+Unit
+
+L Normal operation temperature
+
+-30
+
+25
+
+80
+
+
+
+Extended operation temperature*
+
+-40
+
+25
+
+85
+
+
+
+IA Storage temperature
+
+-45
+
+25
+
++90
+
+
+
+T *Note: Module is able to make and receive voice calls, data calls, SMS and make GSM/CDMA
+1X/UMTX/LTE traffic in -40 ~ +85. The performance will be reduced slightly from the
+
+N 3GPP specifications if the temperature is outside the normal operating temperature range and
+
+E still within the extreme operating temperature range.
+
+ID 5.3 Operating Mode
+
+F 5.3.1 Operating Mode Definition N The table below summarizes the various operating modes of SIM7600CE product. CO Table 33: Operating mode Definition
+
+Normal operation
+
+Mode
+M GSM/CDMA 1X
+/UMTS/LTE Sleep
+O GSM/CDMA 1X C/UMTS/LTE Idle IMGSM/CDMA 1X S /UMTS/LTE Talk
+GPRS/EDGE/ UMTS/LTE Standby
+GPRS/EDGE/ UMTS/LTE Data transmission
+
+Function In this case, the current consumption of module will be reduced to the minimal level and the module can still receive paging message and SMS. Software is active. Module is registered to the network, and the module is ready to communicate. Connection between two subscribers is in progress. In this case, the power consumption depends on network settings such as DTX off/on, FR/EFR/HR, hopping sequences, and antenna. Module is ready for data transmission, but no data is currently sent or received. In this case, power consumption depends on network settings. There is data transmission in progress. In this case, power consumption is related to network settings (e.g. power control level); uplink/downlink data rates, etc.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+Minimum functionality mode
+
+AT command "AT+CFUN=0" AT+CSCLK=1 can be used to set the module to a minimum functionality mode without removing the power supply. In this mode, the RF part of the module will not work and the USIM card will not be accessible, but the serial port and USB port are still accessible. The power consumption in this mode is lower than normal mode.
+
+E Flight mode IAL FIL Power off
+
+AT command "AT+CFUN=4" or pulling down the FLIGHTMODE pin can be used to set the module to flight mode without removing the power supply. In this mode, the RF part of the module will not work, but the serial port and USB port are still accessible. The power consumption in this mode is lower than normal mode.
+Module will go into power off mode by sending the AT command "AT+CPOF" or pull down the PWRKEY pin, normally. In this mode the power management unit shuts down the power supply, and software is not active. The serial port and USB are is not accessible.
+
+T 5.3.2 Sleep mode EN In sleep mode, the current consumption of module will be reduced to the minimal level, and
+module can still receive paging message and SMS.
+ID Several hardware and software conditions must be satisfied together in order to let SIM7600CE
+enter into sleep mode:
+F 1. UART condition
+2. USB condition
+N 3. Software condition O Note: Before designing, pay attention to how to realize sleeping/waking function and refer to C Document [26] for more details.
+
+5.3.3 Minimum functionality mode and Flight mode
+Minimum functionality mode ceases a majority function of module, thus minimizing the power
+M consumption. This mode is set by the AT command which provides a choice of the functionality O levels. C  AT+CFUN=0: Minimum functionality
+ AT+CFUN=1: Full functionality (Default)
+SIM AT+CFUN=4: Flight mode If SIM7600CE has been set to minimum functionality mode, the RF function and USIM card function will be closed. In this case, the serial port and USB are still accessible, but RF function and USIM card will be unavailable. If SIM7600CE has been set to flight mode, the RF function will be closed. In this case, the serial port and USB are still accessible, but RF function will be unavailable. When SIM7600CE is in minimum functionality or flight mode, it can return to full functionality by
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+the AT command "AT+CFUN=1".
+
+Smart Machine Smart Decision
+
+5.4 Current Consumption
+
+The current consumption is listed in the table below.
+
+Table 34: Current consumption on VBAT Pins (VBAT=3.8V)
+
+E GNSS IL GNSS supply current F (AT+CFUN=0,with USB connection)
+GSM sleep/idle mode
+L GSM/GPRS supply current
+(GNSS offwithout USB connection)
+IA UMTS sleep/idle mode T WCDMA supply current
+(GNSS offwithout USB connection)
+N TD-SCDMA supply current E (GNSS offwithout USB connection)
+EVDO supply current
+ID (GNSS offwithout USB connection)
+LTE sleep/idle mode
+F LTE supply current N (GNSS offwithout USB connection)
+GSM Talk
+O EGSM900 C DCS1800
+
+@ -140dBmTracking Typical:72mA
+Sleep mode@ BS_PA_MFRMS=2 Typical: 2.8mA Idle mode@ BS_PA_MFRMS=2 Typical: 18mA
+Sleep mode @DRX=9 Typical: 3.3mA Idle mode @DRX=9 Typical: 17.5mA Sleep mode Typical: 2.3mA Idle mode Typical: 17.5mA Sleep mode Typical: 2.0mA Idle mode : 17.8mA
+Sleep mode Typical: 4.6mA Idle mode Typical: 17.5mA
+@power level #5 Typical: 220mA @power level #5 Typical: 162mA
+
+UMTS Talk
+
+WCDMA B1
+WCDMA B8
+M TD-SCDMA 1900
+TD-SCDMA 2000
+O CDMA BC0
+GPRS
+C EGSM900( 1 Rx,4 Tx )
+DCS1800( 1 Rx,4 Tx )
+IMEGSM900( 3Rx, 2 Tx ) S DCS1800( 3Rx, 2 Tx )
+EDGE
+
+@Power 24dBm Typical: 540mA
+
+@Power 24dBm @Power 24dBm @Power 24dBm @Power 24dBm
+
+Typical: 385mA Typical: 118mA Typical: 117mA Typical: 400mA
+
+@power level #5 Typical: 230mA @power level #0 Typical: 195mA @power level #5 Typical: 370mA @power level #0 Typical: 275mA
+
+EGSM900( 1 Rx,4 Tx )
+
+@power level #8 Typical: 400mA
+
+DCS1800( 1 Rx,4 Tx )
+
+@power level #2 Typical: 300mA
+
+EGSM900( 3Rx, 2 Tx )
+
+@power level #8 Typical: 320mA
+
+DCS1800( 3Rx, 2 Tx )
+
+@power level #2 Typical: 230mA
+
+HSDPA data
+
+WCDMA B1
+
+@Power 24dBm Typical: 478mA
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+WCDMA B8
+
+@Power 24dBm Typical: 430mA
+
+TD-SCDMA data
+
+TDSCDMA 1900
+
+@Power 24dBm Typical: 141mA
+
+TDSCDMA 2000
+
+@Power 24dBm Typical: 150mA
+
+EVDO data
+
+BC0
+
+@Power 24dBm Typical: 490mA
+
+LTE data
+
+LTE-FDD B1
+ILE LTE-FDD B3 F LTE-FDD B8 L LTE-TDD B38 TIA LTE-TDD B39 N LTE-TDD B40 IDE LTE-TDD B41
+
+@5Mbps @10Mbps @20Mbps
+@5Mbps @10Mbps @20Mbps
+@5Mbps @10Mbps
+@5Mbps @10Mbps @20Mbps
+@5Mbps @10Mbps @20Mbps
+@5Mbps @10Mbps @20Mbps
+@5Mbps @10Mbps @20Mbps
+
+22.3dBm 22.4dBm 22.4dBm
+22.2dBm 22.1dBm 22.1dBm
+22.8dBm 22.8dBm
+21.8dBm 21.8dBm 21.8dBm
+21.8dBm 21.8dBm 21.8dBm
+21.5dBm 21.7dBm 21.7dBm
+21.6dBm 21.7dBm 21.7dBm
+
+Typical: 577mA Typical: 590mA Typical: 630mA
+Typical: 479mA Typical: 498mA Typical: 530mA
+Typical: 644mA Typical: 646mA
+Typical: 370mA Typical: 380mA Typical: 403mA
+Typical: 270mA Typical: 280mA Typical: 305mA
+Typical: 407mA Typical: 416mA Typical: 444mA
+Typical: 390mA Typical: 396mA Typical: 420mA
+
+NF 5.5 ESD Notes CO SIM7600CE is sensitive to ESD in the process of storage, transporting, and assembling. When
+
+SIM7600CE is mounted on the users' mother board, the ESD components should be placed beside
+
+the connectors which human body mayt touch, such as USIM card holder, audio jacks, switches, keys, etc. The following table shows the SIM7600CE ESD measurement performance without any
+M external ESD component.
+
+O Table 35: The ESD performance measurement table (Temperature: 25, Humidity: 45%)
+
+C Part
+VBAT,GND
+IMAntenna port S USB
+
+Contact discharge +/-6K +/-5K +/-4K
+
+Air discharge +/-12K +/-10K +/-8K
+
+UART
+
++/-3K
+
++/-6K
+
+Other PADs
+
++/-3K
+
++/-6K
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+6 SMT Production Guide
+6.1 Top and Bottom View of SIM7600CE
+CONFIDENTIAL FILE Figure 34: Top and bottom view of SIM7600CE SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+6.2 Label Information
+
+Smart Machine Smart Decision
+
+IDENTIAL FILE Figure 35: Label information
+
+NF Table 36: The description of label information
+
+CO No.
+
+Description
+
+A
+
+LOGO
+
+B
+
+No.1 Pin
+
+M C
+
+Project name
+
+O D
+
+Product code
+
+C E
+
+Serial number
+
+F
+
+International mobile equipment identity
+
+SIMG
+
+QR code
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+6.3 Typical SMT Reflow Profile
+
+Smart Machine Smart Decision
+
+SIMCom provides a typical soldering profile. Therefore the soldering profile shown below is only a generic recommendation and should be adjusted to the specific application and manufacturing constraints.
+
+ENTIAL FILE Figure 36: The ramp-soak-spike reflow profile of SIM7600CE ID Note: For more details about secondary SMT, please refer to the document [21]. NF 6.4 Moisture Sensitivity Level (MSL) O SIM7600CE is qualified to Moisture Sensitivity Level (MSL) 3 in accordance with JEDEC C J-STD-033. If the prescribed time limit is exceeded, users should bake modules for 192 hours in
+
+drying equipment (<5% RH) at 40+5/-0°C, or 72 hours at 85+5/-5°C. Note that plastic tray is not
+
+heat-resistant, and only can be baked at 45° C.
+M Table 37: Moisture Sensitivity Level and Floor Life
+
+O Moisture Sensitivity Level Floor Life (out of bag) at factory ambient30°C/60% RH or as
+
+C (MSL)
+
+stated
+
+1
+
+Unlimited at 30/85% RH
+
+IM2
+
+1 year
+
+S 2a
+
+4 weeks
+
+3
+
+168 hours
+
+4
+
+72 hours
+
+5
+
+48 hours
+
+5a
+
+24 hours
+
+6
+
+Mandatory bake before use. After bake, it must be reflowed within the
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+time limit specified on the label. NOTE: IPC / JEDEC J-STD-033 standard must be followed for production and storage.
+6.5 Stencil Foil Design Recommendation
+CONFIDENTIAL FILE The recommended thickness of stencil foil is more than 0.15mm. SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+7 Packaging
+
+SIM7600CE module support tray packaging.
+
+Module tray drawing
+
+CONFIDENTIAL FILE Figure 37: packaging diagram
+
+SIMCOM
+
+Figure 38: Tray drawing
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Table 38: Tray size
+Length±3mm 242.0
+Small carton drawing
+
+Width±3mm 161.0
+
+Smart Machine Smart Decision
+Number 15
+
+NTIAL FILE Figure 39: Small carton drawing E Table 39: Small Carton size
+
+ID Length±10mm Width±10mm
+
+F 270
+
+180
+
+CON Big carton drawing
+
+Height±10mm 120
+
+Number 15*20=300
+
+SIMCOM
+
+Figure 40: Big carton drawing
+
+Table 40: Big Carton size
+
+Length±10mm Width±10mm
+
+380
+
+280
+
+SIM7600CE_ Hardware Design_V1.04
+
+Height±10mm 280
+
+Number 300*4=1200
+2016-11-17
+
+Smart Machine Smart Decision
+
+Appendix
+
+A. Reference Design
+
+Refer to < SIM7600 Reference Design V1.X.pdf > for the details. E Main Antenna
+
+IL TVS
+LXES15AAA1-153
+L F Power supply IA VBAT
+
+R102 0R
+NC C106
+
+C101 100uF
+
+C102 100uF
+
+82 MAIN_ANT
+
+NC
+
+C107
+
+57 GND
+
+58 GND 60 GND
+
+62 VBAT
+
+63 VBAT
+
+C103 1uF
+
+61 GND
+
+64 GND
+
+T R103 4.7K
+
+3 POWERKEY
+
+Turn on/off impulse
+
+R104 47K
+
+SIM7600Cx EN Resetimpulse
+UART_TXD
+ID UART_RXD
+UART_CTS UART_RTS
+UART_RI
+F UART_DCD
+UART_DTR
+CON SIM_DATA
+
+SIM_CLK SIM_RST SIM_VDD
+C109 220nF
+
+4 RESET
+
+71 68 67 66 69 70 72
+17 19 18 20
+TVS ESDA6V1W5
+23 24 26 25
+
+TXD RXD CTS RTS RI DCD DTR USIM_DATA USIM_CLK USIM_RST USIM_VDD
+SD_DATA1 SD_DATA2 SD_CLK SD_DATA3
+
+GNSS Antenna
+
+GNSS_ANT 79 GND 77 GND 78 GND 80
+AUX_ANT 59
+GND 41
+
+L101 NC
+
+C108 33pF
+
+L102 NC
+Div Antenna
+
+R101 0R
+
+C104 NC
+
+C105 NC
+
+NETLIGHT 51
+
+R106 10K
+
+R107 10K
+
+R105
+300R
+Network LED Status
+
+VBAT Power supply
+
+FLIGHTMODE
+USB_VBUS USB_DN USB_DP
+
+54
+
+RF ON/OFF
+
+11
+
+USB_VBUS
+
+12
+
+USB_DN
+
+13
+
+USB_DP
+
+If USB interface is used Connect USB_VBUS to 3.0V-5.25V
+
+SDIO_DATA1 27 SDIO_DATA2 28
+SDIO_CMD 29 SDIO_DATA0 30 SDIO_DATA3 31
+SDIO_CLK 32 GPIO3 33 GPIO6 34
+HSIC_STROBE 35 HSIC_DATA 36 GPIO77 87
+PCM_IN 74 PCM_SYNC 75
+PCM_OUT 73
+
+Audio CODEC Chip or
+DSP
+
+22 SD_DATA0
+
+PCM_CLK 76
+
+21 SD_CMD
+
+VDD_EXT
+SIMCOM LDO Output:1.75-3.05V
+
+44 VDD_EXT
+49 STATUS 52 GPIO41 53 USIM_DET 50 GPIO43 48 SD1_DET
+1 GND 2 GND 5 GND 10 GND 14 GND 37 GND 40 GND 43 GND 65 GND 81 GND
+
+SPI_CLK 6 SPI_MISO 7
+SPI_MOSI 8 SPI_CS 9 ISINK 45
+
+SCL SDA
+
+55 56
+
+ADC1 47
+
+ADC2 46
+
+VBAT 38 VBAT 39
+
+VDD_1V8 15 USB_ID 16 NC 42
+
+LCD Display
+
+I2C_SCL I2C_SDA
+ADC Input range:0.1~1.7V
+
+C111 100uF
+
+C112 100uF
+
+VBAT Power supply
+C113 100nF
+
+BOOT_CFG0 85
+
+Test Points
+
+83 COEX1
+
+84 COEX2
+
+86 COEX3
+
+Figure 41: Reference design
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+B. Coding Schemes and Maximum Net Data Rates over Air Interface
+
+Table 41: Coding Schemes and Maximum Net Data Rates over Air Interface
+
+Multislot definition(GPRS/EDGE)
+Slot class
+E 1 IL 2
+3
+F 4
+5
+L 6
+7
+IA 8
+9
+T 10
+11
+N 12 E GPRS coding scheme
+CS 1 = 9.05 kb/s / time slot
+ID CS 2 = 13.4 kb/s / time slot F CS 3 = 15.6 kb/s / time slot
+CS 4 = 21.4 kb/s / time slot
+N EDGE coding scheme O MCS 1 = 8.8 kb/s/ time slot C MCS 2 = 11.2 kb/s/ time slot
+
+DL slot number
+
+UL slot number
+
+1
+
+1
+
+2
+
+1
+
+2
+
+2
+
+3
+
+1
+
+2
+
+2
+
+3
+
+2
+
+3
+
+3
+
+4
+
+1
+
+3
+
+2
+
+4
+
+2
+
+4
+
+3
+
+4
+
+4
+
+Max data rata4 slots
+
+36.2 kb/s
+
+53.6 kb/s
+
+62.4 kb/s
+
+85.6 kb/s
+
+Max data rata4 slots
+
+35.2 kb/s
+
+44.8 kb/s
+
+Active slot number
+2 3 3 4 4 4 4 5 5 5 5 5
+Modulation type
+GMSK
+GMSK
+GMSK
+GMSK
+Modulation type
+GMSK
+GMSK
+
+MCS 3 = 14.8 kb/s/ time slot MCS 4 = 17.6 kb/s/ time slot MCS 5 = 22.4 kb/s/ time slot
+M MCS 6 = 29.6 kb/s/ time slot O MCS 7 = 44.8 kb/s/ time slot C MCS 8 = 54.4 kb/s/ time slot
+MCS 9 = 59.2 kb/s/ time slot
+IMHSDPA device category S Category 1
+Category 2
+
+59.2 kb/s 70.4 kb/s 89.6 kb/s 118.4 kb/s 179.2 kb/s 217.6 kb/s 236.8 kb/s Max data ratepeak 1.2Mbps 1.2Mbps
+
+GMSK GMSK 8PSK 8PSK 8PSK 8PSK 8PSK Modulation type 16QAM,QPSK 16QAM,QPSK
+
+Category 3
+
+1.8Mbps
+
+16QAM,QPSK
+
+Category 4
+
+1.8Mbps
+
+16QAM,QPSK
+
+Category 5
+
+3.6Mbps
+
+16QAM,QPSK
+
+Category 6
+
+3.6Mbps
+
+16QAM,QPSK
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Category 7 Category 8 Category 9 Category 10 Category 11 Category 12 Category 13 Category 14 Category 15 Category 16 Category 17 Category 18 Category 19 Category 20 Category 21 Category 22 Category 23 Category 24 HSUPA device category Category 1 Category 2 Category 3 Category 4 Category 5 Category 6 LTE-FDD device category (Downlink)
+M Category 1 O Category 2 C Category 3 SIMCategory 4
+LTE-FDD device category (Uplink) Category 1 Category 2 Category 3
+
+Smart Machine Smart Decision
+
+7.2Mbps
+
+16QAM,QPSK
+
+7.2Mbps
+
+16QAM,QPSK
+
+10.2Mbps
+
+16QAM,QPSK
+
+14.4Mbps
+
+16QAM,QPSK
+
+0.9Mbps
+
+QPSK
+
+1.8Mbps
+
+QPSK
+
+17.6Mbps
+E 21.1Mbps IL 23.4Mbps
+28Mbps
+F 23.4Mbps
+28Mbps
+L 35.5Mbps IA 42Mbps
+23.4Mbps
+T 28Mbps N 35.5Mbps E 42.2Mbps
+Max data ratepeak
+ID 0.96Mbps F 1.92Mbps
+1.92Mbps
+N 3.84Mbps O3.84Mbps C5.76Mbps
+
+64QAM 64QAM 16QAM 16QAM 64QAM 64QAM 64QAM 64QAM 16QAM 16QAM 64QAM 64QAM Modulation type QPSK QPSK QPSK QPSK QPSK QPSK
+
+Max data ratepeak
+
+Modulation type
+
+10Mbps 50Mbps 100Mbps 150Mbps
+
+QPSK/16QAM/64QA M QPSK/16QAM/64QA M QPSK/16QAM/64QA M QPSK/16QAM/64QA M
+
+Max data ratepeak
+
+Modulation type
+
+5Mbps 25Mbps 50Mbps
+
+QPSK/16QAM QPSK/16QAM QPSK/16QAM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Category 4
+
+50Mbps
+
+Smart Machine Smart Decision QPSK/16QAM
+
+CONFIDENTIAL FILE SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+C. Related Documents
+
+Table 42: Related Documents
+
+NO. [1] [2] [3] [4] [5]
+[6]
+[7] [8] [9] [10]
+
+Title SIM7X00 Series_AT
+E Command Manual_V1.xx
+ITU-T Draft new
+IL recommendationV.25ter
+GSM 07.07
+F GSM 07.10 IAL GSM 07.05 T GSM 11.14 EN GSM 11.11 ID GSM 03.38 NF GSM 11.10 CO 3GPP TS 51.010-1
+
+Description
+AT Command Manual
+Serial asynchronous automatic dialing and control
+Digital cellular telecommunications (Phase 2+); AT command set for GSM Mobile Equipment (ME) Support GSM 07.10 multiplexing protocol Digital cellular telecommunications (Phase 2+); Use of Data Terminal Equipment ­ Data Circuit terminating Equipment (DTE ­ DCE) interface for Short Message Service (SMS) and Cell Broadcast Service (CBS) Digital cellular telecommunications system (Phase 2+); Specification of the SIM Application Toolkit for the Subscriber Identity Module ­ Mobile Equipment (SIM ­ ME) interface Digital cellular telecommunications system (Phase 2+); Specification of the Subscriber Identity Module ­ Mobile Equipment (SIM ­ ME) interface Digital cellular telecommunications system (Phase 2+); Alphabets and language-specific information Digital cellular telecommunications system (Phase 2)  Mobile Station (MS) conformance specification Part 1: Conformance specification
+Digital cellular telecommunications system (Release 5);
+Mobile Station (MS) conformance specification
+
+[11] 3GPP TS 34.124 [12] 3GPP TS 34.121
+OM [13] 3GPP TS 34.123-1 C [14] 3GPP TS 34.123-3 SIM[15] EN 301 908-02 V2.2.1
+[16] EN 301 489-24 V1.2.1
+
+Electromagnetic Compatibility (EMC) for mobile terminals
+and ancillary equipment.
+Electromagnetic Compatibility (EMC) for mobile terminals and ancillary equipment.
+Technical Specification Group Radio Access Network; Terminal conformance specification; Radio transmission and reception (FDD)
+User Equipment (UE) conformance specification; Part 3: Abstract Test Suites.
+Electromagnetic compatibility and Radio spectrum Matters (ERM); Base Stations (BS) and User Equipment (UE) for IMT-2000. Third Generation cellular networks; Part 2: Harmonized EN for IMT-2000, CDMA Direct Spread (UTRA FDD) (UE) covering essential requirements of article 3.2 of the R&TTE Directive
+Electromagnetic compatibility and Radio Spectrum Matters (ERM); Electromagnetic Compatibility (EMC) standard for radio equipment and services; Part 24: Specific conditions for IMT-2000 CDMA Direct Spread (UTRA) for Mobile and portable (UE) radio and ancillary equipment
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+[17] IEC/EN60950-1(2001)
+
+Safety of information technology equipment (2000)
+
+[18] 3GPP TS 51.010-1
+
+Digital cellular telecommunications system (Release 5); Mobile Station (MS) conformance specification
+
+[19] GCF-CC V3.23.1
+
+Global Certification Forum - Certification Criteria
+
+Directive of the European Parliament and of the Council of
+
+[20] 2002/95/EC
+
+27 January 2003 on the restriction of the use of certain hazardous substances in electrical and electronic equipment
+
+[21] [22]
+[23] [24] [25] [26]
+
+Module
+E secondary-SMT-UGD-V1.xx
+SIM7X00
+IL Series_UART_Application
+Note_V1.xx
+F SIM7X00 Series_USB
+AUDIO_Application
+L Note_V1.xx IA SIM7X00
+Series_GPS_Application Note_V1.xx
+T Antenna design guidelines for N diversity receiver system
+SIM7X00 Series_Sleep Mode_
+CONFIDE Application Note_V1.xx
+
+(RoHS) Module secondary SMT Guidelines
+This document describes how to use UART interface of SIMCom modules.
+USB AUDIO Application Note GPS Application Note
+Antenna design guidelines for diversity receiver system Sleep Mode Application Note
+
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+D. Terms and Abbreviations
+
+Table 43: Terms and Abbreviations
+
+Abbreviation ADC ARP BER BD BTS CS CSD CTS DAC DRX DSP DTE DTR DTX EFR EGSM EMC ESD ETS EVDO FCC FD FDMA FR
+
+Description Analog-to-Digital Converter
+E Antenna Reference Point
+Bit Error Rate
+IL Base Transceiver Station F Coding Scheme
+Circuit Switched Data
+L Clear to Send IA Digital-to-Analog Converter
+Discontinuous Reception
+T Digital Signal Processor
+Data Terminal Equipment (typically computer, terminal, printer)
+N Data Terminal Ready
+Discontinuous Transmission
+E Enhanced Full Rate ID Enhanced GSM
+Electromagnetic Compatibility
+F Electrostatic Discharge
+European Telecommunication Standard
+N Evolution Data Only
+Federal Communications Commission (U.S.)
+O SIM fix dialing phonebook C Frequency Division Multiple Access
+Full Rate
+
+GMSK
+
+Gaussian Minimum Shift Keying
+
+GNSS GPRS
+M GPS
+GSM
+O HR C HSPA
+I2C
+IMIMEI
+LTE
+S MO
+
+Global Navigation Satellite System General Packet Radio Service Global Positioning System Global Standard for Mobile Communications Half Rate High Speed Packet Access Inter-Integrated Circuit International Mobile Equipment Identity Long Term Evolution Mobile Originated
+
+MS
+
+Mobile Station (GSM engine), also referred to as TE
+
+MT
+
+Mobile Terminated
+
+NMEA
+
+National Marine Electronics Association
+
+PAP
+
+Password Authentication Protocol
+
+PBCCH
+
+Packet Switched Broadcast Control Channel
+
+PCB
+
+Printed Circuit Board
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+PCS RF RMS RTC SIM SMS SPI SMPS TDMA TE TX UART VSWR SM NC EDGE HSDPA HSUPA ZIF WCDMA VCTCXO USIM UMTS UART
+
+Smart Machine Smart Decision
+Personal Communication System, also referred to as GSM 1900 Radio Frequency Root Mean Square (value) Real Time Clock Subscriber Identification Module Short Message Service serial peripheral interface Switched-mode power supply Time Division Multiple Access
+E Terminal Equipment, also referred to as DTE IL Transmit Direction
+Universal Asynchronous Receiver & Transmitter
+F Voltage Standing Wave Ratio
+SIM phonebook
+L Not connect
+Enhanced data rates for GSM evolution
+IA High Speed Downlink Packet Access
+High Speed Uplink Packet Access
+T Zero intermediate frequency
+Wideband Code Division Multiple Access
+N Voltage control temperature-compensated crystal oscillator E Universal subscriber identity module
+Universal mobile telecommunications system
+CONFID Universal asynchronous receiver transmitter
+
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+
+E. Safety Caution
+
+Table 44: Safety Caution
+
+Marks
+
+Requirements
+When in a hospital or other health care facility, observe the restrictions about the use
+E of mobiles. Switch the cellular terminal or mobile off, medical equipment may be IL sensitive and not operate normally due to RF energy interference.
+Switch off the cellular terminal or mobile before boarding an aircraft. Make sure it is
+F switched off. The operation of wireless appliances in an aircraft is forbidden to
+prevent interference with communication systems. Forgetting to think much of these
+L instructions may impact the flight safety, or offend local legal action, or both. IA Do not operate the cellular terminal or mobile in the presence of flammable gases or
+fumes. Switch off the cellular terminal when you are near petrol stations, fuel depots,
+T chemical plants or where blasting operations are in progress. Operation of any N electrical equipment in potentially explosive atmospheres can constitute a safety
+hazard.
+E Your cellular terminal or mobile receives and transmits radio frequency energy while ID switched on. RF interference can occur if it is used close to TV sets, radios,
+computers or other electric equipment.
+F Road safety comes first! Do not use a hand-held cellular terminal or mobile when
+driving a vehicle, unless it is securely mounted in a holder for hands free operation.
+N Before making a call with a hand-held terminal or mobile, park the vehicle. O GSM cellular terminals or mobiles operate over radio frequency signals and cellular C networks and cannot be guaranteed to connect in all conditions, especially with a
+mobile fee or an invalid SIM card. While you are in this condition and need emergent
+
+help, please remember to use emergency calls. In order to make or receive calls, the cellular terminal or mobile must be switched on and in a service area with adequate
+Mcellular signal strength.
+Some networks do not allow for emergency call if certain network services or phone
+Ofeatures are in use (e.g. lock functions, fixed dialing etc.). You may have to deactivate those features before you can make an emergency call.
+C Also, some networks require that a valid SIM card be properly inserted in the cellular SIM terminal or mobile.
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+Smart Machine Smart Decision
+Contact us: Shanghai SIMCom Wireless Solutions Ltd.
+Add: SIM Technology Building, No.633, Jinzhong Road, Changning District, Shanghai P.R. China 200335 Tel+86 21 3235 3300 Fax+86 21 3235 3020
+CONFIDENTIAL FILE URLwww.simcomm2m.com
+SIMCOM
+
+SIM7600CE_ Hardware Design_V1.04
+
+2016-11-17
+
+

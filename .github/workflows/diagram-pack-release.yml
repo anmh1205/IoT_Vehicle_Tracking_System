@@ -1,0 +1,65 @@
+name: Diagram Pack Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      pack_ref:
+        description: 'Pack reference (example: diagram-pack-v2@0.1.0)'
+        required: true
+        default: 'diagram-pack-v2@0.1.0'
+  push:
+    branches: [main]
+    paths:
+      - 'resources/reports/diagram-reference-packs/**'
+      - '.github/workflows/diagram-pack-release.yml'
+
+jobs:
+  release-pack:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: resources/reports/diagram-reference-packs/diagram-pack-v2
+    permissions:
+      contents: read
+    env:
+      DIAGRAM_PACK_REF: ${{ inputs.pack_ref || 'diagram-pack-v2@0.1.0' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: resources/reports/diagram-reference-packs/diagram-pack-v2/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate before release
+        run: npm run pack:validate
+
+      - name: Build outputs
+        run: npm run pack:build
+
+      - name: Run QA gates
+        run: npm run pack:qa
+
+      - name: Create release artifact
+        run: npm run pack:release
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagram-pack-release-${{ github.sha }}
+          path: |
+            resources/reports/diagram-reference-packs/diagram-pack-v2/build/release
+            resources/reports/diagram-reference-packs/diagram-pack-v2/qa/gates/release-summary.json
+            resources/reports/diagram-reference-packs/diagram-pack-v2/qa/gates/release-log.jsonl
+          retention-days: 90
+
+      - name: Emit selected pack ref
+        run: |
+          echo "Selected DIAGRAM_PACK_REF=${DIAGRAM_PACK_REF}"
+          echo "Release requires Tech Lead + QA sign-off before promotion."

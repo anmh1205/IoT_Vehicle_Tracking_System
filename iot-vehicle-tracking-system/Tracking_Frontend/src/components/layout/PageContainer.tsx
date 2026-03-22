@@ -1,5 +1,6 @@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+
 interface PageContainerProps {
   children: React.ReactNode;
   pageTitle?: string;
@@ -10,6 +11,7 @@ interface PageContainerProps {
   headerClassName?: string;
   contentClassName?: string;
 }
+
 export const PageContainer = ({
   children,
   pageTitle,
@@ -23,7 +25,7 @@ export const PageContainer = ({
   const content = (
     <div
       className={cn(
-        'mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-4 px-4 pb-6 pt-2 sm:px-6',
+        'mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-4 px-4 pb-8 pt-2 sm:px-6',
         contentClassName,
       )}
     >
@@ -46,10 +48,10 @@ export const PageContainer = ({
       {children}
     </div>
   );
+
   if (!scrollable) {
-    return <div className={cn('flex flex-1 flex-col', className)}>{content}</div>;
+    return <div className={cn('flex min-h-0 flex-1 flex-col', className)}>{content}</div>;
   }
-  return (
-    <ScrollArea className={cn('h-[calc(100vh-4rem)] w-full', className)}>{content}</ScrollArea>
-  );
+
+  return <ScrollArea className={cn('flex min-h-0 flex-1 w-full', className)}>{content}</ScrollArea>;
 };

@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
+
 import { ChevronDown, LogOut, UserCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/lib/stores/auth-store';
 import { authServices } from '@/lib/api/auth';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -19,22 +20,25 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+
 export const NavUser = () => {
   const { isMobile } = useSidebar();
   const router = useRouter();
   const { user, clearAuth } = useAuthStore();
   const displayName = user?.fullName || user?.username || 'Người dùng';
   const email = user?.email || user?.username || '';
+
   const handleLogout = async () => {
     try {
       await authServices.logout();
     } catch {
-      // ignore
+      // Ignore and continue clearing client-side auth.
     } finally {
       clearAuth();
-      router.replace('/login');
+      router.replace('/login?reason=signed-out');
     }
   };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>

@@ -42,8 +42,8 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
       refreshPromise = apiClient
         .post('/auth/refresh')
-        .then((r) => {
-          const payload = unwrap<{ user: User; token: string | null }>(r.data);
+        .then((response) => {
+          const payload = unwrap<{ user: User; token: string | null }>(response.data);
           useAuthStore.getState().setAuth(payload.user, payload.token);
         })
         .finally(() => {
@@ -61,11 +61,18 @@ apiClient.interceptors.response.use(
       return apiClient(originalRequest);
     } catch {
       useAuthStore.getState().clearAuth();
+
       if (typeof window !== 'undefined') {
-        const currentPath = window.location.pathname + window.location.search;
-        const encoded = encodeURIComponent(currentPath);
-        window.location.href = `/login?redirect=${encoded}`;
+        const currentUrl = new URL(window.location.href);
+        if (currentUrl.pathname !== '/login') {
+          const searchParams = new URLSearchParams({
+            redirect: `${currentUrl.pathname}${currentUrl.search}`,
+            reason: 'session-expired',
+          });
+          window.location.assign(`/login?${searchParams.toString()}`);
+        }
       }
+
       return Promise.reject(error);
     }
   },

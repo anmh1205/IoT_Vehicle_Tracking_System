@@ -67,7 +67,7 @@ export interface RealtimeEventMap {
 
   'firmware.assignment.updated': {
     firmware_id: number;
-    device_ids: number[];
+    device_ids: string[];
     status: string;
   };
 }

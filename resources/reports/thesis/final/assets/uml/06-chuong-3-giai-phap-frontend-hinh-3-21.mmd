@@ -1,0 +1,11 @@
+flowchart TB
+    H["Header"]
+    subgraph Body["Main area"]
+        direction LR
+        L["Left: Vehicle list"]
+        M["Center: Map"]
+        R["Right: Metrics + Alerts"]
+    end
+    H --> L
+    H --> M
+    H --> R

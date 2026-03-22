@@ -1,0 +1,24 @@
+flowchart LR
+    subgraph PowerZone["Khoang nguồn"]
+        direction TB
+        POWER["Buck / Boost / Charge"]
+        CELL["Pin 18650"]
+        POWER ----> CELL
+    end
+
+    subgraph CoreZone["Khoang xử lý + RF"]
+        direction TB
+        MCU["ESP32-S3"]
+        MODEM["SIM7600 + anten"]
+    end
+
+    subgraph IOZone["Khoang cổng kết nối"]
+        direction TB
+        OBD["OBD2 / BLE"]
+        PORT["USB debug"]
+    end
+
+    POWER ----> MCU
+    POWER ----> MODEM
+    MCU ----> OBD
+    MCU ----> PORT

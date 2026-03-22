@@ -45,6 +45,14 @@ Keep all important docs in `./resources/docs` folder:
 └── system-architecture.md
 ```
 
+## Temporary Artifacts
+
+- Never create `tmp*` files or folders in the repository root.
+- Important generated or extracted artifacts must live under the matching domain inside `./resources/`.
+- Hardware extracts go to `./resources/docs/hardware-datasheets/extracted-text/`.
+- Thesis/report assets go to `./resources/reports/thesis-chapters/assets/`.
+- Disposable scratch/build/cache outputs must use the system temp directory or be deleted after the task finishes.
+
 ## External Files
 
 Reference external instruction files in `opencode.json`:

@@ -25,6 +25,12 @@ typedef struct {
     uint8_t ble_mac[6];
     bool ign_last_known;
     float last_battery_v;
+    bool ota_pending_confirm;
+    uint32_t ota_confirm_timeout_sec;
+    char ota_job_id[TRACKER_JOB_ID_MAX_LEN];
+    char ota_target_version[TRACKER_TARGET_VERSION_MAX_LEN];
+    char ota_previous_version[TRACKER_TARGET_VERSION_MAX_LEN];
+    char ota_partition[TRACKER_PARTITION_MAX_LEN];
 } rtc_context_t;
 
 typedef struct {

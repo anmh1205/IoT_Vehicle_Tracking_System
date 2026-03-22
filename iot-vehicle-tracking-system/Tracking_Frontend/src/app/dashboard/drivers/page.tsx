@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+
+import { useDeferredValue, useMemo, useState } from 'react';
 import { CircleCheckBig, CircleOff, IdCard, Plus, UserRound } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
@@ -7,19 +8,41 @@ import { DataTable } from '@/components/common/data-table';
 import { StatCard } from '@/components/common/stat-card';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { driverServices } from '@/lib/api/drivers';
+import { notificationUtils } from '@/lib/notification';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { getDriverColumns } from '@/features/drivers/components/driver-columns';
 import { DriverForm } from '@/features/drivers/components/driver-form';
+
+const PAGE_SIZE = 20;
 
 const DriversPage = () => {
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any | null>(null);
   const [deleteItem, setDeleteItem] = useState<any | null>(null);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<'all' | 'active' | 'inactive' | 'suspended'>('all');
+  const deferredSearch = useDeferredValue(search);
   const queryClient = useQueryClient();
 
   const drivers = useQuery({
-    queryKey: ['drivers'],
-    queryFn: () => driverServices.getList({ limit: 200 }),
+    queryKey: ['drivers', page, deferredSearch, status],
+    queryFn: () =>
+      driverServices.getList({
+        page,
+        limit: PAGE_SIZE,
+        search: deferredSearch || undefined,
+        status: status === 'all' ? undefined : status,
+      }),
   });
 
   const createMutation = useMutation({
@@ -37,9 +60,18 @@ const DriversPage = () => {
         status: payload.status || undefined,
         notes: payload.notes || undefined,
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['drivers'] });
+    onSuccess: async () => {
+      setPage(1);
+      setSearch('');
+      setStatus('all');
+      await queryClient.invalidateQueries({ queryKey: ['drivers'] });
       setOpen(false);
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error(
+        'Thêm tài xế thất bại',
+        getApiErrorMessage(error, 'Không thể thêm tài xế.'),
+      );
     },
   });
 
@@ -62,6 +94,12 @@ const DriversPage = () => {
       setOpen(false);
       setEditItem(null);
     },
+    onError: (error: unknown) => {
+      notificationUtils.error(
+        'Cập nhật tài xế thất bại',
+        getApiErrorMessage(error, 'Không thể cập nhật tài xế.'),
+      );
+    },
   });
 
   const deleteMutation = useMutation({
@@ -70,20 +108,33 @@ const DriversPage = () => {
       queryClient.invalidateQueries({ queryKey: ['drivers'] });
       setDeleteItem(null);
     },
+    onError: (error: unknown) => {
+      notificationUtils.error(
+        'Xóa tài xế thất bại',
+        getApiErrorMessage(error, 'Không thể xóa tài xế.'),
+      );
+    },
   });
 
-  const rows = drivers.data?.items ?? drivers.data?.data?.items ?? [];
-  const stats = {
-    total: rows.length,
-    active: rows.filter((row: any) => row.status === 'active').length,
-    inactive: rows.filter((row: any) => row.status === 'inactive').length,
-    withLicense: rows.filter((row: any) => Boolean(row.licenseNumber)).length,
-  };
+  const rows = useMemo(() => drivers.data?.items ?? drivers.data?.data?.items ?? [], [drivers.data]);
+  const pagination = drivers.data?.pagination ?? drivers.data?.data?.pagination;
+  const stats = useMemo(
+    () => ({
+      total: pagination?.total ?? rows.length,
+      active: rows.filter((row: any) => row.status === 'active').length,
+      inactive: rows.filter((row: any) => row.status === 'inactive').length,
+      withLicense: rows.filter((row: any) => Boolean(row.licenseNumber)).length,
+    }),
+    [pagination?.total, rows],
+  );
+
+  const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
     <PageContainer
       pageTitle="Tài xế"
-      pageDescription="Quản lý danh sách tài xế"
+      pageDescription="Quản lý hồ sơ tài xế và trạng thái vận hành theo từng nhóm lái xe"
       pageHeaderAction={
         <Button
           onClick={() => {
@@ -104,13 +155,13 @@ const DriversPage = () => {
           isLoading={drivers.isLoading}
         />
         <StatCard
-          title="Đang hoạt động"
+          title="Hoạt động trên trang"
           value={stats.active}
           icon={<CircleCheckBig className="h-4 w-4" />}
           isLoading={drivers.isLoading}
         />
         <StatCard
-          title="Ngưng hoạt động"
+          title="Ngưng hoạt động trên trang"
           value={stats.inactive}
           icon={<CircleOff className="h-4 w-4" />}
           isLoading={drivers.isLoading}
@@ -132,16 +183,75 @@ const DriversPage = () => {
           onDelete: setDeleteItem,
         })}
         data={rows}
-        searchKey="fullName"
-        searchPlaceholder="Tìm tài xế..."
+        pagination={false}
         isLoading={drivers.isLoading}
+        emptyTitle="Chưa có tài xế phù hợp"
+        emptyDescription="Thử nới bộ lọc hoặc thêm hồ sơ tài xế mới để bắt đầu theo dõi."
+        emptyAction={{
+          label: 'Thêm tài xế',
+          onClick: () => {
+            setEditItem(null);
+            setOpen(true);
+          },
+        }}
+        toolbar={
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Input
+              value={search}
+              onChange={(event) => {
+                setPage(1);
+                setSearch(event.target.value);
+              }}
+              placeholder="Tìm theo mã, tên, số điện thoại hoặc GPLX..."
+              className="w-full sm:max-w-sm"
+            />
+            <Select
+              value={status}
+              onValueChange={(value: 'all' | 'active' | 'inactive' | 'suspended') => {
+                setPage(1);
+                setStatus(value);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[220px]">
+                <SelectValue placeholder="Trạng thái" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                <SelectItem value="active">Hoạt động</SelectItem>
+                <SelectItem value="inactive">Ngưng hoạt động</SelectItem>
+                <SelectItem value="suspended">Tạm ngưng</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        }
       />
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Trang {pagination?.page ?? page} / {totalPages}. Hiển thị {rows.length} hồ sơ trên tổng{' '}
+          {pagination?.total ?? rows.length} tài xế.
+        </p>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
+            Trang trước
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage((value) => value + 1)}
+          >
+            Trang sau
+          </Button>
+        </div>
+      </div>
 
       <DriverForm
         open={open}
-        onOpenChange={(v) => {
-          setOpen(v);
-          if (!v) setEditItem(null);
+        isPending={isSubmitting}
+        onOpenChange={(value) => {
+          setOpen(value);
+          if (!value) setEditItem(null);
         }}
         defaultValues={editItem ?? undefined}
         onSubmit={(payload) => {
@@ -151,11 +261,11 @@ const DriversPage = () => {
       />
 
       <ConfirmDialog
-        open={!!deleteItem}
+        open={Boolean(deleteItem)}
         onCancel={() => setDeleteItem(null)}
         onConfirm={() => deleteItem && deleteMutation.mutate(deleteItem.id)}
         title="Xóa tài xế"
-        description={`Bạn có chắc muốn xóa tài xế ${deleteItem?.fullName ?? ''}?`}
+        description={`Bạn có chắc muốn xóa hồ sơ tài xế ${deleteItem?.fullName ?? ''}?`}
         confirmLabel="Xóa"
         variant="destructive"
         isPending={deleteMutation.isPending}

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient, unwrap } from '@/lib/api/client';
+import { toLocalDateInputValue } from '@/lib/utils';
 import type {
   FuelSummary,
   VehicleFuelData,
@@ -8,8 +9,8 @@ import type {
   FuelAnalyticsParams,
 } from '@/features/fuel-analytics/types';
 
-const defaultFrom = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-const defaultTo = new Date().toISOString().slice(0, 10);
+const defaultFrom = toLocalDateInputValue(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
+const defaultTo = toLocalDateInputValue(new Date());
 
 export const useFuelAnalyticsParams = (): FuelAnalyticsParams => {
   return useMemo(
@@ -49,13 +50,13 @@ export const useFuelByVehicle = (params: FuelAnalyticsParams) => {
         params: { from: params.from, to: params.to },
       });
       const data = unwrap<{ vehicles: VehicleFuelData[] }>(response.data);
-      return (data.vehicles ?? []).map((v) => ({
-        vehicleId: String(v.vehicleId ?? ''),
-        plateNumber: String(v.plateNumber ?? ''),
-        totalFuel: Number(v.totalFuel ?? 0),
-        totalDistance: Number(v.totalDistance ?? 0),
-        avgConsumption: Number(v.avgConsumption ?? 0),
-        tripCount: Number(v.tripCount ?? 0),
+      return (data.vehicles ?? []).map((vehicle) => ({
+        vehicleId: String(vehicle.vehicleId ?? ''),
+        plateNumber: String(vehicle.plateNumber ?? ''),
+        totalFuel: Number(vehicle.totalFuel ?? 0),
+        totalDistance: Number(vehicle.totalDistance ?? 0),
+        avgConsumption: Number(vehicle.avgConsumption ?? 0),
+        tripCount: Number(vehicle.tripCount ?? 0),
       }));
     },
   });
@@ -69,11 +70,11 @@ export const useFuelTrends = (params: FuelAnalyticsParams) => {
         params: { from: params.from, to: params.to, interval: params.interval },
       });
       const data = unwrap<{ trends: FuelTrend[] }>(response.data);
-      return (data.trends ?? []).map((t) => ({
-        date: String(t.date ?? ''),
-        fuelUsed: Number(t.fuelUsed ?? 0),
-        distance: Number(t.distance ?? 0),
-        consumption: Number(t.consumption ?? 0),
+      return (data.trends ?? []).map((trend) => ({
+        date: String(trend.date ?? ''),
+        fuelUsed: Number(trend.fuelUsed ?? 0),
+        distance: Number(trend.distance ?? 0),
+        consumption: Number(trend.consumption ?? 0),
       }));
     },
   });

@@ -24,16 +24,25 @@ const sanitizeGeofence = (g: Geofence): GeofencePublic => ({
   color: g.color,
   displayHidden: g.display_hidden,
   createdBy: g.created_by,
+  vehicleIds: [],
   createdAt: g.created_at.toISOString(),
   updatedAt: g.updated_at.toISOString(),
 });
+
+const hydrateVehicleIds = async (geofence: Geofence): Promise<GeofencePublic> => {
+  const vehicleIds = await geofenceRepo.findVehiclesByGeofenceId(geofence.id);
+  return {
+    ...sanitizeGeofence(geofence),
+    vehicleIds: vehicleIds.map((row) => row.vehicle_id),
+  };
+};
 
 export const getGeofenceById = async (id: number): Promise<GeofencePublic> => {
   const geofence = await geofenceRepo.findById(id);
   if (!geofence) {
     throw createNotFoundError(`Geofence with ID ${id} not found`);
   }
-  return sanitizeGeofence(geofence);
+  return hydrateVehicleIds(geofence);
 };
 
 export const createGeofence = async (
@@ -42,7 +51,7 @@ export const createGeofence = async (
 ): Promise<GeofencePublic> => {
   const geofence = await geofenceRepo.create(input, createdBy);
   logger.info(`Geofence "${input.name}" created successfully`);
-  return sanitizeGeofence(geofence);
+  return hydrateVehicleIds(geofence);
 };
 
 export const updateGeofence = async (
@@ -60,7 +69,7 @@ export const updateGeofence = async (
   }
 
   logger.info(`Geofence "${existing.name}" updated successfully`);
-  return sanitizeGeofence(updated);
+  return hydrateVehicleIds(updated);
 };
 
 export const deleteGeofence = async (id: number): Promise<void> => {

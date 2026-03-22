@@ -58,7 +58,7 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
             data: (online) {
               if (!online && _hasError) {
                 return ErrorView(
-                  message: 'No internet connection',
+                  message: 'Không có kết nối Internet',
                   onRetry: _reload,
                 );
               }
@@ -187,8 +187,8 @@ class _WebViewScreenState extends ConsumerState<WebViewScreen> {
 
   String _friendlyError(WebResourceErrorType? type) {
     if (type == WebResourceErrorType.NOT_CONNECTED_TO_INTERNET) {
-      return 'No internet connection.';
+      return 'Không có kết nối Internet.';
     }
-    return 'Something went wrong. Please try again.';
+    return 'Đã xảy ra lỗi. Vui lòng thử lại.';
   }
 }

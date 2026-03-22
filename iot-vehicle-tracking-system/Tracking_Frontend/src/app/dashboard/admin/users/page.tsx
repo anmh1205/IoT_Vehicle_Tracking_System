@@ -1,1 +1,7 @@
-export { default } from '@/app/dashboard/users/page';
+import { redirect } from 'next/navigation';
+
+const AdminUsersAliasPage = () => {
+  redirect('/dashboard/users');
+};
+
+export default AdminUsersAliasPage;

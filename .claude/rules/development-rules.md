@@ -16,6 +16,9 @@
 - Use `ai-multimodal` skill for describing details of images, videos, documents, etc. if needed
 - Use `ai-multimodal` skill and `imagemagick` skill for generating and editing images, videos, documents, etc. if needed
 - Use `sequential-thinking` and `debug` skills for sequential thinking, analyzing code, debugging, etc. if needed
+- Never leave `tmp*` files or folders in the repository root
+- Put important generated artifacts under the matching domain in `resources/` instead of root scratch files
+- Delete disposable scratch/build/cache outputs after use unless the user explicitly asks to keep them
 - **[IMPORTANT]** Follow the codebase structure and code standards in `./docs` during implementation.
 - **[IMPORTANT]** Do not just simulate the implementation or mocking them, always implement the real code.
 

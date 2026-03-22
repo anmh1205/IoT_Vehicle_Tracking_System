@@ -1,0 +1,17 @@
+flowchart LR
+    Bridge["MQTT Bridge"]
+
+    subgraph Hot["Hot Path - realtime"]
+        VM["VictoriaMetrics"]
+        WS["Socket.IO"]
+    end
+
+    subgraph Durable["Durable Path - nghiệp vụ"]
+        PG["PostgreSQL"]
+        API["Backend API"]
+    end
+
+    Bridge ----> VM
+    Bridge ----> WS
+    Bridge ----> PG
+    API ----> PG

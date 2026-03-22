@@ -1,26 +1,42 @@
 'use client';
+
 import { Bell, BellRing, Settings2, TriangleAlert } from 'lucide-react';
-import type { NotificationItem } from '@/features/notifications/types';
 import { StatCard } from '@/components/common/stat-card';
+import type { NotificationStatsSummary } from '@/features/notifications/types';
 
-const countByType = (items: NotificationItem[]) => {
-  const result: Record<string, number> = {};
-  for (const item of items) {
-    result[item.type] = (result[item.type] ?? 0) + 1;
-  }
-  return result;
-};
-
-export const NotificationStats = ({ items }: { items: NotificationItem[] }) => {
-  const unreadCount = items.filter((item) => !item.isRead).length;
-  const byType = countByType(items);
-
+export const NotificationStats = ({
+  stats,
+  isLoading,
+}: {
+  stats?: NotificationStatsSummary;
+  isLoading?: boolean;
+}) => {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <StatCard title="Tổng thông báo" value={items.length} icon={<Bell className="h-4 w-4" />} />
-      <StatCard title="Chưa đọc" value={unreadCount} icon={<BellRing className="h-4 w-4" />} />
-      <StatCard title="Cảnh báo" value={byType.alert ?? 0} icon={<TriangleAlert className="h-4 w-4" />} />
-      <StatCard title="Hệ thống" value={byType.system ?? 0} icon={<Settings2 className="h-4 w-4" />} />
+      <StatCard
+        title="Tổng thông báo"
+        value={stats?.total ?? 0}
+        icon={<Bell className="h-4 w-4" />}
+        isLoading={isLoading}
+      />
+      <StatCard
+        title="Chưa đọc"
+        value={stats?.unreadCount ?? 0}
+        icon={<BellRing className="h-4 w-4" />}
+        isLoading={isLoading}
+      />
+      <StatCard
+        title="Cảnh báo"
+        value={stats?.byType.alert ?? 0}
+        icon={<TriangleAlert className="h-4 w-4" />}
+        isLoading={isLoading}
+      />
+      <StatCard
+        title="Hệ thống"
+        value={stats?.byType.system ?? 0}
+        icon={<Settings2 className="h-4 w-4" />}
+        isLoading={isLoading}
+      />
     </div>
   );
 };

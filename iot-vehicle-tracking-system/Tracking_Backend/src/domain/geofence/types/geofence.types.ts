@@ -34,6 +34,7 @@ export interface GeofencePublic {
   color: string;
   displayHidden: boolean;
   createdBy: number | null;
+  vehicleIds: string[];
   createdAt: string;
   updatedAt: string;
 }

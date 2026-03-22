@@ -14,7 +14,15 @@ CREATE TYPE device_status_enum AS ENUM ('running', 'stopped', 'disconnected');
 CREATE TYPE session_status_enum AS ENUM ('running', 'completed', 'disconnected');
 CREATE TYPE event_type_enum AS ENUM ('error', 'warning', 'status_change', 'validation', 'connection', 'firmware');
 CREATE TYPE severity_enum AS ENUM ('debug', 'info', 'warning', 'error', 'critical');
-CREATE TYPE firmware_status_enum AS ENUM ('started', 'in_progress', 'success', 'failed', 'timeout');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'firmware_status_enum') THEN
+        CREATE TYPE firmware_status_enum AS ENUM (
+            'assigned', 'downloading', 'verifying', 'installing',
+            'rebooting', 'confirming', 'success', 'failed', 'rolled_back'
+        );
+    END IF;
+END $$;
 
 -- =============================================================================
 -- ENUM Types: Vehicle Tracking

@@ -8,6 +8,7 @@ import {
   changePasswordSchema,
   createUserSchema,
   updateUserSchema,
+  userListQuerySchema,
   updateProfileSchema,
   updateNotificationSchema,
 } from '@/api/validators/auth.validator';
@@ -166,8 +167,13 @@ export const getNotificationSettings = asyncHandler(
 
 // --- User Management (Admin) ---
 
-export const listUsers = asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
-  const users = await userManagementService.listUsers();
+export const listUsers = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const parsed = userListQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    throw createValidationError('Invalid user query', parsed.error.flatten().fieldErrors);
+  }
+
+  const users = await userManagementService.listUsers(parsed.data);
   sendOk(res, users);
 });
 
