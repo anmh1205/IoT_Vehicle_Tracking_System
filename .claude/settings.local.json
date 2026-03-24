@@ -1,11 +1,11 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [],
     "deny": [],
     "defaultMode": "bypassPermissions"
   },
-  "outputStyle": "Explanatory",
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
+  "outputStyle": "Tech Lead Mode (Level 4)"
 }
