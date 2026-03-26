@@ -4,7 +4,7 @@ on:
   push:
     branches: [uat]
     paths:
-      - 'iot-vehicle-tracking-system/Tracking_PostgreSQL/**'
+      - 'iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/**'
 
 jobs:
   deploy-uat:
@@ -19,7 +19,7 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "iot-vehicle-tracking-system/Tracking_PostgreSQL/"
+          source: "iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/"
           target: /opt/tracking/
           strip_components: 1
 

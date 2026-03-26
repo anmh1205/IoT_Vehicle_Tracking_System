@@ -2,7 +2,7 @@
 
 ## Context links
 - Research backend: `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/reports/research-backend-best-practices-260226-1442.md`
-- Findings scope root: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/`
+- Findings scope root: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/`
 - Plan overview: `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260226-1442-codebase-hardening-and-quality-improvements/plan.md`
 
 ## Overview
@@ -35,10 +35,10 @@
 - Secret lifecycle: generate strong, hash/store, deliver qua reset channel thay vì API plaintext.
 
 ## Related code files
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Backend/src/api/routes/auth.routes.ts`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Backend/src/api/routes/users.routes.ts`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Backend/src/api/controllers/auth.controller.ts`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Backend/src/api/routes/metrics.routes.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/routes/auth.routes.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/routes/users.routes.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/controllers/auth.controller.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/routes/metrics.routes.ts`
 
 ## Implementation Steps
 1. Inventory toàn bộ user-management/admin endpoints và map role matrix tối thiểu.

@@ -6,7 +6,7 @@
 
 ## Context
 
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/app/page.tsx` đang redirect thẳng `/` sang `/dashboard`.
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/page.tsx` đang redirect thẳng `/` sang `/dashboard`.
 - Hệ thống đã có nhiều năng lực thật để đưa lên landing page: bản đồ realtime, cảnh báo, chuyến đi, geofence, nhiên liệu, bảo trì, xuất dữ liệu, firmware, trạng thái hệ thống, mobile shell.
 - UI hiện tại mạnh về dashboard vận hành, nhưng thiếu lớp public-facing để giới thiệu sản phẩm.
 - Yêu cầu có ảnh minh hoạ, nhưng phần tăng trust nên ưu tiên screenshot thật từ dashboard, không dùng art AI thay toàn bộ.
@@ -84,12 +84,12 @@
 
 ## Suggested File Targets
 
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/app/page.tsx`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/app/layout.tsx`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/app/globals.css`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/app/theme.css`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/features/marketing/*`
-- `iot-vehicle-tracking-system/Tracking_Frontend/public/landing/*`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/page.tsx`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/layout.tsx`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/globals.css`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/theme.css`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/marketing/*`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/public/landing/*`
 - `docs/project-overview-pdr.md`
 - `docs/codebase-summary.md`
 - `docs/system-architecture.md`

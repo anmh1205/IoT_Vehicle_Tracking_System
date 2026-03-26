@@ -32,7 +32,7 @@
 # Root-level scratch artifacts should never stay in the repo
 /tmp*
 
-/iot-vehicle-tracking-firmware/build
+/iot-vehicle-tracking-system-firmware/build
 /.agents
 /iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/History
 /iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/Project Logs for iot-vehicle-tracking-system-main

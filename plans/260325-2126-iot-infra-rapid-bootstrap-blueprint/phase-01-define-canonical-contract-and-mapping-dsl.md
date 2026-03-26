@@ -38,8 +38,8 @@
 
 ## Related code files
 - Files to modify:
-1. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/constants/topics.ts`
-2. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/validators/payload.validator.ts`
+1. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/constants/topics.ts`
+2. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/validators/payload.validator.ts`
 - Files to create:
 1. `resources/templates/iot-infra/message-catalog.yaml`
 2. `resources/templates/iot-infra/payload-schemas/base-envelope.schema.json`

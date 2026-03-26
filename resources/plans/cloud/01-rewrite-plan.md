@@ -92,7 +92,7 @@
 ```bash
 # Copy UI components
 cp -r "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\frontend\src\components\ui" \
-      "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\frontend\src\components\ui"
+      "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-cloud\frontend\src\components\ui"
 ```
 
 ### 3.2 Map Components (COPY VÃ€ UPDATE)
@@ -111,7 +111,7 @@ cp -r "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backu
 
 ```bash
 cp "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-backup\frontend\src\components\icons.tsx" \
-   "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\frontend\src\components\"
+   "E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-cloud\frontend\src\components\"
 ```
 
 ### 3.4 Database Schema (CHUYá»‚N Äá»”I)

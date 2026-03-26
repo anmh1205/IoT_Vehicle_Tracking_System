@@ -3446,7 +3446,7 @@ CONFIG_BT_NIMBLE_ROLE_PERIPHERAL=n
 Cấu trúc mã nguồn firmware hiện tại bám sát mã nguồn ESP-IDF đang chạy trên thiết bị, tập trung vào các mô-đun theo chức năng thay vì chia thành nhiều task nghiệp vụ riêng biệt:
 
 ```
-iot-vehicle-tracking-firmware/
+iot-vehicle-tracking-system-firmware/
 ├── main/
 │   ├── main.c                  # Điểm vào chính, chọn trạng thái khởi động
 │   ├── CMakeLists.txt
@@ -4119,7 +4119,7 @@ Hệ thống áp dụng mô hình triển khai per-service Docker Compose theo q
 Cấu trúc thư mục tổng thể của hệ thống theo quy ước IVM26 được tổ chức như sau:
 
 ```
-iot-vehicle-tracking-system/                  # Thư mục gốc của tất cả dịch vụ
+iot-vehicle-tracking-system-cloud/                  # Thư mục gốc của tất cả dịch vụ
 |
 |-- Tracking_Backend/                         # Express + TypeScript API Server
 |   |-- src/
@@ -6736,7 +6736,7 @@ Toàn bộ mã nguồn của dự án được quản lý trên GitHub:
 
 ```
 IoT_Vehicle_Tracking_System/
-├── iot-vehicle-tracking-system/
+├── iot-vehicle-tracking-system-cloud/
 │   ├── Tracking_Backend/          # Express + TypeScript API
 │   ├── Tracking_Frontend/         # Next.js 15 Web App
 │   ├── Tracking_MqttBridge/       # Dịch vụ MQTT Bridge
@@ -6754,7 +6754,7 @@ IoT_Vehicle_Tracking_System/
 
 Schema PostgreSQL đầy đủ được lưu tại:
 
-- **File:** `iot-vehicle-tracking-system/Tracking_PostgreSQL/init/` (các file SQL khởi tạo)
+- **File:** `iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/` (các file SQL khởi tạo)
 - **Tài liệu thiết kế:** `resources/plans/cloud/10-database-postgresql.md`
 
 **Các bảng chính trong PostgreSQL:**
@@ -6861,7 +6861,7 @@ cd IoT_Vehicle_Tracking_System
 docker network create tracking-network
 
 # 3. Khởi động infrastructure services
-cd iot-vehicle-tracking-system/Tracking_PostgreSQL && docker-compose up -d
+cd iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL && docker-compose up -d
 cd ../Tracking_EMQX && docker-compose up -d
 cd ../Tracking_VictoriaMetrics && docker-compose up -d
 cd ../Tracking_VictoriaLogs && docker-compose up -d

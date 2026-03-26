@@ -37,9 +37,9 @@
 
 ## Related code files
 - Files to modify:
-1. `iot-vehicle-tracking-system/Tracking_EMQX/docker-compose.yml`
-2. `iot-vehicle-tracking-system/Tracking_VictoriaMetrics/docker-compose.yml`
-3. `iot-vehicle-tracking-system/Tracking_VictoriaLogs/docker-compose.yml`
+1. `iot-vehicle-tracking-system-cloud/Tracking_EMQX/docker-compose.yml`
+2. `iot-vehicle-tracking-system-cloud/Tracking_VictoriaMetrics/docker-compose.yml`
+3. `iot-vehicle-tracking-system-cloud/Tracking_VictoriaLogs/docker-compose.yml`
 - Files to create:
 1. `resources/templates/iot-infra/infra-profile.yaml`
 2. `tools/iot-infra-codegen/src/render-compose.ts`

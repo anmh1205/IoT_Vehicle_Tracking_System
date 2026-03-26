@@ -2,12 +2,12 @@
 
 ## Context Links
 - Primary firmware tree:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/inc/pin_map.h`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/src/modem_at.c`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/src/modem_lte.c`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/src/modem_gnss.c`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/src/power_mgr.c`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/src/state_machine.c`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/inc/pin_map.h`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/src/modem_at.c`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/src/modem_lte.c`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/src/modem_gnss.c`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/src/power_mgr.c`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/src/state_machine.c`
 
 ## Overview
 - Priority: P1

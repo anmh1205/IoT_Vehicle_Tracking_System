@@ -39,11 +39,11 @@
 
 ## Related code files
 - Files to modify:
-1. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/handlers/rawdata.handler.ts`
-2. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/handlers/event.handler.ts`
-3. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/handlers/status.handler.ts`
-4. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/infrastructure/victoriametrics.ts`
-5. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/infrastructure/victorialogs.ts`
+1. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/handlers/rawdata.handler.ts`
+2. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/handlers/event.handler.ts`
+3. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/handlers/status.handler.ts`
+4. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/infrastructure/victoriametrics.ts`
+5. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/infrastructure/victorialogs.ts`
 - Files to create:
 1. `tools/iot-infra-codegen/src/generate-emqx.ts`
 2. `tools/iot-infra-codegen/src/generate-bridge.ts`

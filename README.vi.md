@@ -66,30 +66,30 @@ docker network create tracking-network
 
 #### 2) Chuẩn bị file môi trường
 Tạo/copy các file sau:
-- `iot-vehicle-tracking-system/Tracking_Backend/.env`
-- `iot-vehicle-tracking-system/Tracking_Frontend/.env`
-- `iot-vehicle-tracking-system/Tracking_MqttBridge/.env`
-- `iot-vehicle-tracking-system/Tracking_EMQX/.env`
-- `iot-vehicle-tracking-system/Tracking_PostgreSQL/.env`
-- `iot-vehicle-tracking-system/Tracking_Grafana/.env`
-- `iot-vehicle-tracking-system/Tracking_Mobile/.env` (cho luồng mobile)
+- `iot-vehicle-tracking-system-cloud/Tracking_Backend/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_EMQX/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_Grafana/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_Mobile/.env` (cho luồng mobile)
 
 Template có sẵn ở các file `.env.example` tương ứng (nếu có).
 
 #### 3) Khởi động trước nhóm dịch vụ hạ tầng
 ```bash
-docker compose -f iot-vehicle-tracking-system/Tracking_PostgreSQL/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_EMQX/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_VictoriaMetrics/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_VictoriaLogs/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_Grafana/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_EMQX/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_VictoriaMetrics/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_VictoriaLogs/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_Grafana/docker-compose.yml up -d
 ```
 
 #### 4) Khởi động nhóm dịch vụ ứng dụng
 ```bash
-docker compose -f iot-vehicle-tracking-system/Tracking_MqttBridge/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_Backend/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_Frontend/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_Backend/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_Frontend/docker-compose.yml up -d
 ```
 
 #### 5) Xác thực runtime
@@ -108,28 +108,28 @@ Nếu bạn chỉ cần một service ở chế độ watch, hãy giữ hạ t�
 
 Backend:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Backend
+cd iot-vehicle-tracking-system-cloud/Tracking_Backend
 npm ci
 npm run dev
 ```
 
 Frontend:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Frontend
+cd iot-vehicle-tracking-system-cloud/Tracking_Frontend
 npm ci
 npm run dev
 ```
 
 MQTT Bridge:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_MqttBridge
+cd iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
 npm ci
 npm run dev
 ```
 
 Mobile:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Mobile
+cd iot-vehicle-tracking-system-cloud/Tracking_Mobile
 flutter pub get
 flutter test
 flutter run
@@ -141,7 +141,7 @@ flutter run
 
 Backend:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Backend
+cd iot-vehicle-tracking-system-cloud/Tracking_Backend
 npm run lint
 npm run typecheck
 npm run test
@@ -150,7 +150,7 @@ npm run build
 
 Frontend:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Frontend
+cd iot-vehicle-tracking-system-cloud/Tracking_Frontend
 npm run lint
 npm run typecheck
 npm run build
@@ -158,14 +158,14 @@ npm run build
 
 MQTT Bridge:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_MqttBridge
+cd iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
 npm run typecheck
 npm run build
 ```
 
 Mobile:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Mobile
+cd iot-vehicle-tracking-system-cloud/Tracking_Mobile
 flutter test
 flutter build apk --release --target-platform android-arm64
 flutter build appbundle --release
@@ -238,16 +238,16 @@ Grafana hiển thị dữ liệu từ VictoriaMetrics và VictoriaLogs.
 
 | Service | Path | Runtime | Vai trò chính | Lệnh chạy local |
 |---|---|---|---|---|
-| Backend | `iot-vehicle-tracking-system/Tracking_Backend` | Node.js + Express + TS | REST, realtime, docs, health, metrics | `npm run dev` |
-| Frontend | `iot-vehicle-tracking-system/Tracking_Frontend` | Next.js + React + TS | Dashboard + landing | `npm run dev` |
-| MQTT Bridge | `iot-vehicle-tracking-system/Tracking_MqttBridge` | Node.js + TS | Ingest MQTT + routing | `npm run dev` |
-| Mobile | `iot-vehicle-tracking-system/Tracking_Mobile` | Flutter | Mobile shell | `flutter run` |
-| EMQX | `iot-vehicle-tracking-system/Tracking_EMQX` | Docker image | MQTT broker | `docker compose up -d` |
-| PostgreSQL | `iot-vehicle-tracking-system/Tracking_PostgreSQL` | Docker image | CSDL quan hệ | `docker compose up -d` |
-| VictoriaMetrics | `iot-vehicle-tracking-system/Tracking_VictoriaMetrics` | Docker image | Kho metrics | `docker compose up -d` |
-| VictoriaLogs | `iot-vehicle-tracking-system/Tracking_VictoriaLogs` | Docker image | Kho logs | `docker compose up -d` |
-| Grafana | `iot-vehicle-tracking-system/Tracking_Grafana` | Docker image | Dashboard quan sát | `docker compose up -d` |
-| NPM (tuỳ chọn) | `iot-vehicle-tracking-system/Tracking_NPM` | Docker image | Quản lý reverse proxy | `docker compose --profile production up -d` |
+| Backend | `iot-vehicle-tracking-system-cloud/Tracking_Backend` | Node.js + Express + TS | REST, realtime, docs, health, metrics | `npm run dev` |
+| Frontend | `iot-vehicle-tracking-system-cloud/Tracking_Frontend` | Next.js + React + TS | Dashboard + landing | `npm run dev` |
+| MQTT Bridge | `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge` | Node.js + TS | Ingest MQTT + routing | `npm run dev` |
+| Mobile | `iot-vehicle-tracking-system-cloud/Tracking_Mobile` | Flutter | Mobile shell | `flutter run` |
+| EMQX | `iot-vehicle-tracking-system-cloud/Tracking_EMQX` | Docker image | MQTT broker | `docker compose up -d` |
+| PostgreSQL | `iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL` | Docker image | CSDL quan hệ | `docker compose up -d` |
+| VictoriaMetrics | `iot-vehicle-tracking-system-cloud/Tracking_VictoriaMetrics` | Docker image | Kho metrics | `docker compose up -d` |
+| VictoriaLogs | `iot-vehicle-tracking-system-cloud/Tracking_VictoriaLogs` | Docker image | Kho logs | `docker compose up -d` |
+| Grafana | `iot-vehicle-tracking-system-cloud/Tracking_Grafana` | Docker image | Dashboard quan sát | `docker compose up -d` |
+| NPM (tuỳ chọn) | `iot-vehicle-tracking-system-cloud/Tracking_NPM` | Docker image | Quản lý reverse proxy | `docker compose --profile production up -d` |
 
 ---
 
@@ -339,7 +339,7 @@ Vì sao theo thứ tự này:
 
 ### Backend
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Backend
+cd iot-vehicle-tracking-system-cloud/Tracking_Backend
 npm ci
 npm run dev
 ```
@@ -356,7 +356,7 @@ npm run verify
 
 ### Frontend
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Frontend
+cd iot-vehicle-tracking-system-cloud/Tracking_Frontend
 npm ci
 npm run dev
 ```
@@ -370,7 +370,7 @@ npm run build
 
 ### MQTT Bridge
 ```bash
-cd iot-vehicle-tracking-system/Tracking_MqttBridge
+cd iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
 npm ci
 npm run dev
 ```
@@ -384,7 +384,7 @@ npm run verify
 
 ### Mobile
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Mobile
+cd iot-vehicle-tracking-system-cloud/Tracking_Mobile
 flutter pub get
 flutter test
 flutter run
@@ -438,7 +438,7 @@ Các bước này phản chiếu phần quality trong workflow UAT.
   - `/ws-health`
   - `/metrics`
 - Đường dẫn provisioning Grafana:
-  - `iot-vehicle-tracking-system/Tracking_Grafana/provisioning`
+  - `iot-vehicle-tracking-system-cloud/Tracking_Grafana/provisioning`
 - Retention mặc định từ compose:
   - VictoriaMetrics: `30d`
   - VictoriaLogs: `7d`

@@ -4,7 +4,7 @@ on:
   push:
     branches: [uat]
     paths:
-      - 'iot-vehicle-tracking-system/Tracking_EMQX/**'
+      - 'iot-vehicle-tracking-system-cloud/Tracking_EMQX/**'
 
 jobs:
   deploy-uat:
@@ -19,7 +19,7 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "iot-vehicle-tracking-system/Tracking_EMQX/"
+          source: "iot-vehicle-tracking-system-cloud/Tracking_EMQX/"
           target: /opt/tracking/
           strip_components: 1
 

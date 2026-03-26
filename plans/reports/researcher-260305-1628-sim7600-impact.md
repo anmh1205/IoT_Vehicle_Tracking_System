@@ -1,12 +1,12 @@
 # Researcher Report — SIM7600CE-T impact
 
 ## 1. Canonical firmware touchpoints
-- `iot-vehicle-tracking-firmware/main/src/modem_lte.c`: LTE bring-up and PDP/registration flow (líneas ~34-77).
-- `iot-vehicle-tracking-firmware/main/src/modem_gnss.c`: GNSS commands (`AT+CGNSPWR`, `AT+CGNSINF`) and parser (líneas 46-114).
-- `iot-vehicle-tracking-firmware/main/src/modem_at.c`: shared UART driver + AT engine (líneas 55-154).
-- `iot-vehicle-tracking-firmware/main/src/state_machine.c`: lifecycle hooks that call `modem_gnss_*`, `modem_lte_*`, and power manager (líneas 214-244).
-- `iot-vehicle-tracking-firmware/main/inc/pin_map.h`: pin assignments for UART, PWRKEY, modem-related GPIO (líneas 6-20).
-- `iot-vehicle-tracking-firmware/main/src/power_mgr.c`: `modem_power_key_pulse` and GPIO setup (líneas 13-73).
+- `iot-vehicle-tracking-system-firmware/main/src/modem_lte.c`: LTE bring-up and PDP/registration flow (líneas ~34-77).
+- `iot-vehicle-tracking-system-firmware/main/src/modem_gnss.c`: GNSS commands (`AT+CGNSPWR`, `AT+CGNSINF`) and parser (líneas 46-114).
+- `iot-vehicle-tracking-system-firmware/main/src/modem_at.c`: shared UART driver + AT engine (líneas 55-154).
+- `iot-vehicle-tracking-system-firmware/main/src/state_machine.c`: lifecycle hooks that call `modem_gnss_*`, `modem_lte_*`, and power manager (líneas 214-244).
+- `iot-vehicle-tracking-system-firmware/main/inc/pin_map.h`: pin assignments for UART, PWRKEY, modem-related GPIO (líneas 6-20).
+- `iot-vehicle-tracking-system-firmware/main/src/power_mgr.c`: `modem_power_key_pulse` and GPIO setup (líneas 13-73).
 
 ## 2. Current assumptions tied to A7670C+NEO-M8N vs integrated modem
 1. `modem_gnss.c` relies on A7670C-style `AT+CGNS*` commands, implying GNSS is accessed via the cellular modem UART rather than an external NEO-M8N UART stream (líneas 46-114).

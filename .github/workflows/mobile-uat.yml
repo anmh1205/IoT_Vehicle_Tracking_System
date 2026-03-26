@@ -4,14 +4,14 @@ on:
   push:
     branches: [uat]
     paths:
-      - 'iot-vehicle-tracking-system/Tracking_Mobile/**'
+      - 'iot-vehicle-tracking-system-cloud/Tracking_Mobile/**'
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: iot-vehicle-tracking-system/Tracking_Mobile
+        working-directory: iot-vehicle-tracking-system-cloud/Tracking_Mobile
     steps:
       - uses: actions/checkout@v4
 
@@ -35,13 +35,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: iot-vehicle-tracking-system/Tracking_Mobile/build/app/outputs/flutter-apk/app-release.apk
+          path: iot-vehicle-tracking-system-cloud/Tracking_Mobile/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
       - uses: actions/upload-artifact@v4
         with:
           name: android-appbundle
-          path: iot-vehicle-tracking-system/Tracking_Mobile/build/app/outputs/bundle/release/app-release.aab
+          path: iot-vehicle-tracking-system-cloud/Tracking_Mobile/build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
       - name: Discord Notification
@@ -56,7 +56,7 @@ jobs:
     runs-on: macos-latest
     defaults:
       run:
-        working-directory: iot-vehicle-tracking-system/Tracking_Mobile
+        working-directory: iot-vehicle-tracking-system-cloud/Tracking_Mobile
     steps:
       - uses: actions/checkout@v4
 
@@ -72,7 +72,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: iot-vehicle-tracking-system/Tracking_Mobile/build/ios/iphoneos/Runner.app
+          path: iot-vehicle-tracking-system-cloud/Tracking_Mobile/build/ios/iphoneos/Runner.app
           retention-days: 30
 
       - name: Discord Notification

@@ -36,12 +36,12 @@
   - Start hook, health state, graceful shutdown with timeout + fallback.
 
 ## Related code files
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Backend/src/infrastructure/realtime/mqtt-event-listener.ts`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_MqttBridge/src/handlers/status.handler.ts`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_MqttBridge/src/handlers/event.handler.ts`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_MqttBridge/src/handlers/firmware.handler.ts`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_MqttBridge/src/handlers/rawdata.handler.ts`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_MqttBridge/src/config/env.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Backend/src/infrastructure/realtime/mqtt-event-listener.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/handlers/status.handler.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/handlers/event.handler.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/handlers/firmware.handler.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/handlers/rawdata.handler.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/config/env.ts`
 
 ## Implementation Steps
 1. Chuẩn hóa MQTT client wrapper API (connect/end) và shutdown contract.

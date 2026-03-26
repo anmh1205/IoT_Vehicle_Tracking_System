@@ -4,7 +4,7 @@ on:
   push:
     branches: [uat]
     paths:
-      - 'iot-vehicle-tracking-system/Tracking_VictoriaMetrics/**'
+      - 'iot-vehicle-tracking-system-cloud/Tracking_VictoriaMetrics/**'
 
 jobs:
   deploy-uat:
@@ -19,7 +19,7 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "iot-vehicle-tracking-system/Tracking_VictoriaMetrics/"
+          source: "iot-vehicle-tracking-system-cloud/Tracking_VictoriaMetrics/"
           target: /opt/tracking/
           strip_components: 1
 

@@ -67,24 +67,24 @@
 - If no strong match exists, export unresolved drivers for manual triage instead of guessing.
 
 ## Files with direct first-wave impact
-- `iot-vehicle-tracking-system/Tracking_PostgreSQL/init/06-vehicles.sql`
-- `iot-vehicle-tracking-system/Tracking_PostgreSQL/init/07-trips-alerts.sql`
-- `iot-vehicle-tracking-system/Tracking_PostgreSQL/init/11-drivers.sql`
-- `iot-vehicle-tracking-system/Tracking_Backend/src/api/openapi/spec.ts`
-- `iot-vehicle-tracking-system/Tracking_Backend/src/api/routes/index.ts`
-- `iot-vehicle-tracking-system/Tracking_Backend/src/api/controllers/customer.controller.ts`
-- `iot-vehicle-tracking-system/Tracking_Backend/src/api/controllers/driver.controller.ts`
-- `iot-vehicle-tracking-system/Tracking_Backend/src/domain/customer/*`
-- `iot-vehicle-tracking-system/Tracking_Backend/src/domain/driver/*`
-- `iot-vehicle-tracking-system/Tracking_Backend/src/domain/trip/*`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/config/nav-config.ts`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/customers/*`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/app/dashboard/drivers/page.tsx`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/features/drivers/*`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/features/trips/*`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/lib/api/customers.ts`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/lib/api/drivers.ts`
-- `iot-vehicle-tracking-system/Tracking_Frontend/src/lib/validations/customer.schema.ts`
+- `iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/06-vehicles.sql`
+- `iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/07-trips-alerts.sql`
+- `iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/11-drivers.sql`
+- `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/openapi/spec.ts`
+- `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/routes/index.ts`
+- `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/controllers/customer.controller.ts`
+- `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/controllers/driver.controller.ts`
+- `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/domain/customer/*`
+- `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/domain/driver/*`
+- `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/domain/trip/*`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/config/nav-config.ts`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/customers/*`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/dashboard/drivers/page.tsx`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/drivers/*`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/trips/*`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/api/customers.ts`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/api/drivers.ts`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/validations/customer.schema.ts`
 - `docs/codebase-summary.md`
 - `docs/project-overview-pdr.md`
 - `docs/system-architecture.md`

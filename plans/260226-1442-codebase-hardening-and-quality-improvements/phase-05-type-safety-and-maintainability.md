@@ -36,9 +36,9 @@
   - Config centralization cho image domains/security-sensitive constants.
 
 ## Related code files
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/lib/api/**/*.ts`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/lib/hooks/**/*.ts`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/next.config.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/api/**/*.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/hooks/**/*.ts`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/next.config.ts`
 - Các module type liên quan auth/telemetry contracts trong backend/bridge/frontend.
 
 ## Implementation Steps

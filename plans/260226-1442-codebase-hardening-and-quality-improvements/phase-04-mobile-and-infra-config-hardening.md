@@ -42,14 +42,14 @@
   - Internal network + explicit ingress ports only.
 
 ## Related code files
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Mobile/lib/core/config/app_config.dart`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Mobile/lib/features/notifications/local_notification_service.dart`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Mobile/lib/core/services/notification_service.dart`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_EMQX/etc/emqx.conf`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_EMQX/docker-compose.yml`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/docker-compose*.yml` (các file stack liên quan network/image)
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Grafana/provisioning/datasources/*`
-- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Grafana/provisioning/dashboards/*`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Mobile/lib/core/config/app_config.dart`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Mobile/lib/features/notifications/local_notification_service.dart`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Mobile/lib/core/services/notification_service.dart`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_EMQX/etc/emqx.conf`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_EMQX/docker-compose.yml`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/docker-compose*.yml` (các file stack liên quan network/image)
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Grafana/provisioning/datasources/*`
+- `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Grafana/provisioning/dashboards/*`
 
 ## Implementation Steps
 1. Định nghĩa config schema tối thiểu cho mobile transport + EMQX secrets + monitoring IDs.

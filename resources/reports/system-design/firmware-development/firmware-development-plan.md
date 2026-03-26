@@ -1,8 +1,8 @@
 # Kế Hoạch Phát Triển Firmware — IoT Vehicle Tracker
 
 > **Platform:** ESP-IDF v5.4.x | **MCU:** ESP32-S3 | **Ngôn ngữ:** C
-> **Canonical firmware path:** `iot-vehicle-tracking-firmware/`
-> **Legacy baseline path (chỉ dùng để đối chiếu):** `iot-vehicle-tracking-system/Tracking_Firmware/`
+> **Canonical firmware path:** `iot-vehicle-tracking-system-firmware/`
+> **Legacy baseline path (chỉ dùng để đối chiếu):** `iot-vehicle-tracking-system-firmware/`
 
 ---
 
@@ -27,16 +27,16 @@ Firmware điều khiển thiết bị tracker lắp trên xe với kiến trúc 
 ### 2.1 Kết quả đối chiếu hai cây firmware
 
 Đã đối chiếu:
-- `iot-vehicle-tracking-system/Tracking_Firmware/`
-- `iot-vehicle-tracking-firmware/`
+- `iot-vehicle-tracking-system-firmware/`
+- `iot-vehicle-tracking-system-firmware/`
 
 **Kết luận hiện tại:** snapshot file-level đang **parity** ở mức thư mục chính (không thấy khác biệt qua so sánh trực tiếp tại thời điểm rà soát).
 
 ### 2.2 Merge decision
 
-- **Canonical target:** `iot-vehicle-tracking-firmware/`
+- **Canonical target:** `iot-vehicle-tracking-system-firmware/`
 - **Legacy path:** giữ vai trò tham chiếu/baseline cho giai đoạn chuyển tiếp
-- **Docs/plans mới:** dùng `iot-vehicle-tracking-firmware/` làm đường dẫn chính
+- **Docs/plans mới:** dùng `iot-vehicle-tracking-system-firmware/` làm đường dẫn chính
 - **Legacy path chỉ giữ lại** khi cần mô tả `current gap vs target`
 
 ### 2.3 Parity checklist trước khi deprecate path cũ
@@ -73,9 +73,9 @@ Các file source hiện tại cho thấy firmware chưa refactor xong sang kiế
 
 | File baseline | Hiện trạng | Gap với target |
 |---------------|-----------|----------------|
-| `iot-vehicle-tracking-system/Tracking_Firmware/main/src/modem_gnss.c` | Dùng `AT+CGNSPWR`, `AT+CGNSINF` | Vẫn giả định GNSS tích hợp modem |
-| `iot-vehicle-tracking-system/Tracking_Firmware/main/inc/pin_map.h` | Chưa có UART riêng cho GNSS | Chưa tách interface vật lý cho NEO-M8N |
-| `iot-vehicle-tracking-system/Tracking_Firmware/main/src/state_machine.c` | LTE connect + GNSS lifecycle còn coupling | Chưa tách control path cho LTE và GNSS |
+| `iot-vehicle-tracking-system-firmware/main/src/modem_gnss.c` | Dùng `AT+CGNSPWR`, `AT+CGNSINF` | Vẫn giả định GNSS tích hợp modem |
+| `iot-vehicle-tracking-system-firmware/main/inc/pin_map.h` | Chưa có UART riêng cho GNSS | Chưa tách interface vật lý cho NEO-M8N |
+| `iot-vehicle-tracking-system-firmware/main/src/state_machine.c` | LTE connect + GNSS lifecycle còn coupling | Chưa tách control path cho LTE và GNSS |
 
 > **Ghi chú:** Đợt hiện tại chỉ cập nhật **docs + plans**. Source firmware chưa chỉnh trong scope này.
 
@@ -84,7 +84,7 @@ Các file source hiện tại cho thấy firmware chưa refactor xong sang kiế
 ## 4. Cấu Trúc Project Mục Tiêu
 
 ```text
-iot-vehicle-tracking-firmware/
+iot-vehicle-tracking-system-firmware/
 ├── CMakeLists.txt
 ├── sdkconfig.defaults
 ├── partitions.csv
@@ -219,7 +219,7 @@ iot-vehicle-tracking-firmware/
 ## 8. Verification Checklist
 
 ### 8.1 Path migration verification
-- [x] Chốt `iot-vehicle-tracking-firmware/` là path canonical trong plan này
+- [x] Chốt `iot-vehicle-tracking-system-firmware/` là path canonical trong plan này
 - [x] Legacy path chỉ giữ lại trong mục baseline gap
 - [x] Hai cây firmware đang parity ở snapshot hiện tại
 
@@ -251,5 +251,5 @@ iot-vehicle-tracking-firmware/
 Plan này đã chuẩn hóa firmware development theo hướng:
 
 - **Runtime target:** SIMCom SIM7600CE-T (LTE + GNSS tích hợp), trong khi **A7670C + NEO-M8N** chỉ được giữ lại như baseline lịch sử để so sánh
-- **`iot-vehicle-tracking-firmware/`** là firmware path canonical
+- **`iot-vehicle-tracking-system-firmware/`** là firmware path canonical
 - Tài liệu phản ánh đúng **target architecture**, đồng thời giữ rõ **baseline gap** so với source hiện tại

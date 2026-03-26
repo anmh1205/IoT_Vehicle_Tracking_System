@@ -1,6 +1,6 @@
 # Context links
 - Root currently missing compose: repo root
-- Service compose hiện hữu: `iot-vehicle-tracking-system/Tracking_*/docker-compose*.yml`
+- Service compose hiện hữu: `iot-vehicle-tracking-system-cloud/Tracking_*/docker-compose*.yml`
 - Workflow baseline từ phase 01
 
 # Overview

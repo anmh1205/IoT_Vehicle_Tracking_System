@@ -3,7 +3,7 @@
 ## Phase Status
 
 ### P1 - Accessibility Remediation (Web + Mobile) Complete
-- Scope: Web dashboard (`iot-vehicle-tracking-system/Tracking_Frontend`) and mobile shell (`iot-vehicle-tracking-system/Tracking_Mobile`) accessibility hardening.
+- Scope: Web dashboard (`iot-vehicle-tracking-system-cloud/Tracking_Frontend`) and mobile shell (`iot-vehicle-tracking-system-cloud/Tracking_Mobile`) accessibility hardening.
 - Milestones completed:
   - Skip-link and main-content landmarks.
   - Keyboard semantics and pressed-state support.

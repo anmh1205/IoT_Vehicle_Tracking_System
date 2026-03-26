@@ -66,30 +66,30 @@ docker network create tracking-network
 
 #### 2) Prepare environment files
 Copy/prepare these files:
-- `iot-vehicle-tracking-system/Tracking_Backend/.env`
-- `iot-vehicle-tracking-system/Tracking_Frontend/.env`
-- `iot-vehicle-tracking-system/Tracking_MqttBridge/.env`
-- `iot-vehicle-tracking-system/Tracking_EMQX/.env`
-- `iot-vehicle-tracking-system/Tracking_PostgreSQL/.env`
-- `iot-vehicle-tracking-system/Tracking_Grafana/.env`
-- `iot-vehicle-tracking-system/Tracking_Mobile/.env` (for mobile flow)
+- `iot-vehicle-tracking-system-cloud/Tracking_Backend/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_Frontend/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_EMQX/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_Grafana/.env`
+- `iot-vehicle-tracking-system-cloud/Tracking_Mobile/.env` (for mobile flow)
 
 Templates are available at corresponding `.env.example` files where present.
 
 #### 3) Start infrastructure services first
 ```bash
-docker compose -f iot-vehicle-tracking-system/Tracking_PostgreSQL/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_EMQX/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_VictoriaMetrics/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_VictoriaLogs/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_Grafana/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_EMQX/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_VictoriaMetrics/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_VictoriaLogs/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_Grafana/docker-compose.yml up -d
 ```
 
 #### 4) Start application services
 ```bash
-docker compose -f iot-vehicle-tracking-system/Tracking_MqttBridge/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_Backend/docker-compose.yml up -d
-docker compose -f iot-vehicle-tracking-system/Tracking_Frontend/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_Backend/docker-compose.yml up -d
+docker compose -f iot-vehicle-tracking-system-cloud/Tracking_Frontend/docker-compose.yml up -d
 ```
 
 #### 5) Validate runtime
@@ -108,28 +108,28 @@ If you only need one service in watch mode, keep infra on Docker and run app ser
 
 Backend:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Backend
+cd iot-vehicle-tracking-system-cloud/Tracking_Backend
 npm ci
 npm run dev
 ```
 
 Frontend:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Frontend
+cd iot-vehicle-tracking-system-cloud/Tracking_Frontend
 npm ci
 npm run dev
 ```
 
 MQTT Bridge:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_MqttBridge
+cd iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
 npm ci
 npm run dev
 ```
 
 Mobile:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Mobile
+cd iot-vehicle-tracking-system-cloud/Tracking_Mobile
 flutter pub get
 flutter test
 flutter run
@@ -141,7 +141,7 @@ flutter run
 
 Backend:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Backend
+cd iot-vehicle-tracking-system-cloud/Tracking_Backend
 npm run lint
 npm run typecheck
 npm run test
@@ -150,7 +150,7 @@ npm run build
 
 Frontend:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Frontend
+cd iot-vehicle-tracking-system-cloud/Tracking_Frontend
 npm run lint
 npm run typecheck
 npm run build
@@ -158,14 +158,14 @@ npm run build
 
 MQTT Bridge:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_MqttBridge
+cd iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
 npm run typecheck
 npm run build
 ```
 
 Mobile:
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Mobile
+cd iot-vehicle-tracking-system-cloud/Tracking_Mobile
 flutter test
 flutter build apk --release --target-platform android-arm64
 flutter build appbundle --release
@@ -238,16 +238,16 @@ Grafana visualizes VictoriaMetrics and VictoriaLogs.
 
 | Service | Path | Runtime | Main role | Local run command |
 |---|---|---|---|---|
-| Backend | `iot-vehicle-tracking-system/Tracking_Backend` | Node.js + Express + TS | REST, realtime, docs, health, metrics | `npm run dev` |
-| Frontend | `iot-vehicle-tracking-system/Tracking_Frontend` | Next.js + React + TS | Dashboard + landing | `npm run dev` |
-| MQTT Bridge | `iot-vehicle-tracking-system/Tracking_MqttBridge` | Node.js + TS | MQTT ingest + routing | `npm run dev` |
-| Mobile | `iot-vehicle-tracking-system/Tracking_Mobile` | Flutter | Mobile shell | `flutter run` |
-| EMQX | `iot-vehicle-tracking-system/Tracking_EMQX` | Docker image | MQTT broker | `docker compose up -d` |
-| PostgreSQL | `iot-vehicle-tracking-system/Tracking_PostgreSQL` | Docker image | Relational DB | `docker compose up -d` |
-| VictoriaMetrics | `iot-vehicle-tracking-system/Tracking_VictoriaMetrics` | Docker image | Metrics store | `docker compose up -d` |
-| VictoriaLogs | `iot-vehicle-tracking-system/Tracking_VictoriaLogs` | Docker image | Log store | `docker compose up -d` |
-| Grafana | `iot-vehicle-tracking-system/Tracking_Grafana` | Docker image | Dashboards | `docker compose up -d` |
-| NPM (optional) | `iot-vehicle-tracking-system/Tracking_NPM` | Docker image | Reverse proxy manager | `docker compose --profile production up -d` |
+| Backend | `iot-vehicle-tracking-system-cloud/Tracking_Backend` | Node.js + Express + TS | REST, realtime, docs, health, metrics | `npm run dev` |
+| Frontend | `iot-vehicle-tracking-system-cloud/Tracking_Frontend` | Next.js + React + TS | Dashboard + landing | `npm run dev` |
+| MQTT Bridge | `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge` | Node.js + TS | MQTT ingest + routing | `npm run dev` |
+| Mobile | `iot-vehicle-tracking-system-cloud/Tracking_Mobile` | Flutter | Mobile shell | `flutter run` |
+| EMQX | `iot-vehicle-tracking-system-cloud/Tracking_EMQX` | Docker image | MQTT broker | `docker compose up -d` |
+| PostgreSQL | `iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL` | Docker image | Relational DB | `docker compose up -d` |
+| VictoriaMetrics | `iot-vehicle-tracking-system-cloud/Tracking_VictoriaMetrics` | Docker image | Metrics store | `docker compose up -d` |
+| VictoriaLogs | `iot-vehicle-tracking-system-cloud/Tracking_VictoriaLogs` | Docker image | Log store | `docker compose up -d` |
+| Grafana | `iot-vehicle-tracking-system-cloud/Tracking_Grafana` | Docker image | Dashboards | `docker compose up -d` |
+| NPM (optional) | `iot-vehicle-tracking-system-cloud/Tracking_NPM` | Docker image | Reverse proxy manager | `docker compose --profile production up -d` |
 
 ---
 
@@ -339,7 +339,7 @@ Why this order:
 
 ### Backend
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Backend
+cd iot-vehicle-tracking-system-cloud/Tracking_Backend
 npm ci
 npm run dev
 ```
@@ -356,7 +356,7 @@ npm run verify
 
 ### Frontend
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Frontend
+cd iot-vehicle-tracking-system-cloud/Tracking_Frontend
 npm ci
 npm run dev
 ```
@@ -370,7 +370,7 @@ npm run build
 
 ### MQTT Bridge
 ```bash
-cd iot-vehicle-tracking-system/Tracking_MqttBridge
+cd iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
 npm ci
 npm run dev
 ```
@@ -384,7 +384,7 @@ npm run verify
 
 ### Mobile
 ```bash
-cd iot-vehicle-tracking-system/Tracking_Mobile
+cd iot-vehicle-tracking-system-cloud/Tracking_Mobile
 flutter pub get
 flutter test
 flutter run
@@ -438,7 +438,7 @@ This mirrors the quality sections in UAT workflows.
   - `/ws-health`
   - `/metrics`
 - Grafana provisioning path:
-  - `iot-vehicle-tracking-system/Tracking_Grafana/provisioning`
+  - `iot-vehicle-tracking-system-cloud/Tracking_Grafana/provisioning`
 - Victoria retention from compose defaults:
   - VictoriaMetrics: `30d`
   - VictoriaLogs: `7d`

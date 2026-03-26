@@ -152,7 +152,7 @@ internal/events/device/data         # Real-time data summary (optional, QoS 0)
 
 ## 4. Cấu Trúc Thư Mục
 
-> 📁 **Vị trí:** `iot-vehicle-tracking-system/mqtt-bridge/` (standalone service, tách biệt khỏi backend)
+> 📁 **Vị trí:** `iot-vehicle-tracking-system-cloud/mqtt-bridge/` (standalone service, tách biệt khỏi backend)
 
 ```
 mqtt-bridge/

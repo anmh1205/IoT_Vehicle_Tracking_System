@@ -37,8 +37,8 @@
 
 ## Related code files
 - Files to modify:
-1. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/services/batch-writer.service.ts`
-2. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/infrastructure/logger.ts`
+1. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/services/batch-writer.service.ts`
+2. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/infrastructure/logger.ts`
 - Files to create:
 1. `tools/iot-infra-codegen/tests/contract-validation.test.ts`
 2. `tools/iot-infra-codegen/tests/replay-integration.test.ts`

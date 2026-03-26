@@ -2,7 +2,7 @@
 
 ## Context Links
 - Schematic assets: `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/thesis-chapters/assets/schematic/`
-- Firmware pin map: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/inc/pin_map.h`
+- Firmware pin map: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/inc/pin_map.h`
 - Doc tables: hardware/firmware files from phases 03-04.
 
 ## Overview

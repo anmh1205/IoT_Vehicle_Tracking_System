@@ -2,9 +2,9 @@
 
 ## Context Links
 - Firmware pins:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/inc/pin_map.h`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/src/power_mgr.c`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/src/modem_at.c`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/inc/pin_map.h`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/src/power_mgr.c`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/src/modem_at.c`
 - Hardware docs:
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/iot-vehicle-tracking-report/02-hardware/03-system-diagram.md`
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/iot-vehicle-tracking-report/03-firmware/part-04-power-management-gpio.md`
@@ -30,8 +30,8 @@
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/iot-vehicle-tracking-report/03-firmware/part-04-power-management-gpio.md`
   - `E:/anmh1205/IoT_Vehicle_Tracking_System/resources/reports/iot-vehicle-tracking-report/02-hardware/03-system-diagram.md`
 - Modify (if proven mismatch):
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/inc/pin_map.h`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/main/src/power_mgr.c`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/inc/pin_map.h`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/main/src/power_mgr.c`
 
 ## Implementation Steps
 1. Build interface matrix with current values.

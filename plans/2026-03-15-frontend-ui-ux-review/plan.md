@@ -1,7 +1,7 @@
 # Frontend UI/UX Review Plan
 
 ## Scope
-- App: `iot-vehicle-tracking-system/Tracking_Frontend`
+- App: `iot-vehicle-tracking-system-cloud/Tracking_Frontend`
 - Focus: app shell, dashboard, map, tables/lists, notifications, login, copy/accessibility baseline
 
 ## Execution status

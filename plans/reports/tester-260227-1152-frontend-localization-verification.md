@@ -1,7 +1,7 @@
 # Tester report: Frontend localization verification
 
 ## Test Results Overview
-- `npm run lint`: PASS (ESLint completed without errors) from `E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\Tracking_Frontend\package.json`
+- `npm run lint`: PASS (ESLint completed without errors) from `E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-cloud\Tracking_Frontend\package.json`
 - `npm run typecheck`: PASS (TypeScript compiler finished with --noEmit)
 - `npm run build`: PASS (Next.js production build succeeded)
 
@@ -21,7 +21,7 @@
 - None
 
 ## Recommendations
-- Keep warning in mind; optionally define `turbopack.root` in `E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\Tracking_Frontend\next.config.ts` to silence unrelated warning
+- Keep warning in mind; optionally define `turbopack.root` in `E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-cloud\Tracking_Frontend\next.config.ts` to silence unrelated warning
 - Consider running `npm run test:coverage` if coverage metrics become required
 
 ## Next Steps

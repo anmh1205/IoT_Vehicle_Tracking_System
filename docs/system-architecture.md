@@ -19,7 +19,7 @@ The frontend now has a split between:
 ## UI Layer Accessibility Architecture
 The completed remediation spans two UI layers:
 
-1. **Next.js Web UI (`iot-vehicle-tracking-system/Tracking_Frontend`)**
+1. **Next.js Web UI (`iot-vehicle-tracking-system-cloud/Tracking_Frontend`)**
    - Added top-level skip-link in `src/app/layout.tsx`.
    - Introduced a `main-content` anchor target in layout/dashboard shells for keyboard focus flow.
    - Improved keyboard support for card-based and map-control interactions.
@@ -27,7 +27,7 @@ The completed remediation spans two UI layers:
    - Increased key mobile hit targets and made notification popovers responsive in width.
    - Standardized height containers to `100dvh` for mobile-viewport stability.
 
-2. **Flutter Shell (`iot-vehicle-tracking-system/Tracking_Mobile`)**
+2. **Flutter Shell (`iot-vehicle-tracking-system-cloud/Tracking_Mobile`)**
    - Wrapped loading/error surfaces in Flutter semantic widgets with live-region behavior.
    - Updated status copy to user locale (Vietnamese).
    - Kept retry/loading actions in clear, touchable controls.
@@ -39,6 +39,6 @@ The completed remediation spans two UI layers:
 - Mobile and dashboard continue to share the same operational capability set; accessibility is implemented per platform conventions.
 
 ## Traceability
-- See marketing/public entry changes in `iot-vehicle-tracking-system/Tracking_Frontend/src/app/page.tsx`, `iot-vehicle-tracking-system/Tracking_Frontend/src/features/marketing/**/*`, `iot-vehicle-tracking-system/Tracking_Frontend/public/landing/*`, and `iot-vehicle-tracking-system/Tracking_Frontend/middleware.ts`.
-- See related dashboard accessibility changes in `iot-vehicle-tracking-system/Tracking_Frontend/src/**/*` for controls, layout, and form validation.
-- See related mobile changes in `iot-vehicle-tracking-system/Tracking_Mobile/lib/features/webview/**/*` and `iot-vehicle-tracking-system/Tracking_Mobile/lib/widgets/**/*` for semantic messaging and loading/error behavior.
+- See marketing/public entry changes in `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/marketing/**/*`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/public/landing/*`, and `iot-vehicle-tracking-system-cloud/Tracking_Frontend/middleware.ts`.
+- See related dashboard accessibility changes in `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/**/*` for controls, layout, and form validation.
+- See related mobile changes in `iot-vehicle-tracking-system-cloud/Tracking_Mobile/lib/features/webview/**/*` and `iot-vehicle-tracking-system-cloud/Tracking_Mobile/lib/widgets/**/*` for semantic messaging and loading/error behavior.

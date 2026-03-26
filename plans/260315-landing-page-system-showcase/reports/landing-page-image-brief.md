@@ -13,7 +13,7 @@
 ## Output Convention
 
 - Raw generated assets: `resources/design/landing-page/generated/`
-- Optimized web assets: `iot-vehicle-tracking-system/Tracking_Frontend/public/landing/`
+- Optimized web assets: `iot-vehicle-tracking-system-cloud/Tracking_Frontend/public/landing/`
 - Naming: kebab-case, mô tả đúng chức năng.
 
 ## Asset Matrix

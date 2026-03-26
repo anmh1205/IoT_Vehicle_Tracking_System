@@ -4,14 +4,14 @@ on:
   push:
     branches: [uat]
     paths:
-      - 'iot-vehicle-tracking-system/Tracking_MqttBridge/**'
+      - 'iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/**'
 
 jobs:
   quality-and-build:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: iot-vehicle-tracking-system/Tracking_MqttBridge
+        working-directory: iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
     steps:
       - uses: actions/checkout@v4
 
@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: iot-vehicle-tracking-system/Tracking_MqttBridge/package-lock.json
+          cache-dependency-path: iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/package-lock.json
 
       - run: npm ci
       - run: npx tsc --noEmit
@@ -33,7 +33,7 @@ jobs:
 
       - uses: docker/build-push-action@v6
         with:
-          context: iot-vehicle-tracking-system/Tracking_MqttBridge
+          context: iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/tracking-mqtt-bridge:uat
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: mqtt-bridge-compose
-          path: iot-vehicle-tracking-system/Tracking_MqttBridge/docker-compose.uat.yml
+          path: iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/docker-compose.uat.yml
 
   deploy-uat:
     needs: quality-and-build

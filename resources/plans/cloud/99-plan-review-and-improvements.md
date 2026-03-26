@@ -11,7 +11,7 @@
 
 This review uncovered **65+ distinct issues** across the IoT Vehicle Tracking System coding plans, categorized as **9 CRITICAL**, **18 HIGH**, **16 MEDIUM**, and **6 LOW** severity findings. Three systemic failures stand out:
 
-1. **CLAUDE.md is fundamentally out of sync with all plan documents** — it describes a different project structure (`/iot-vehicle-tracking-system/backend/` vs `Tracking_Backend/`), different commands (`npm run install:all` vs per-service installs), and different Docker strategies. Every AI agent using CLAUDE.md as entry point will start in the wrong directory.
+1. **CLAUDE.md is fundamentally out of sync with all plan documents** — it describes a different project structure (`/iot-vehicle-tracking-system-cloud/backend/` vs `Tracking_Backend/`), different commands (`npm run install:all` vs per-service installs), and different Docker strategies. Every AI agent using CLAUDE.md as entry point will start in the wrong directory.
 
 2. **The MQTT Bridge has no single source of truth** — three documents place it in three different locations (inside `backend/src/`, at repo root `mqtt-bridge/`, or as `Tracking_MqttBridge/`). Its import paths reference backend internals (`@/infrastructure/logger`) that are impossible if it's truly standalone.
 
@@ -208,7 +208,7 @@ Additionally, **~50% of the backend business logic** (vehicle, customer, trip, a
 ### 4.1 Changes to `CLAUDE.md`
 
 ```diff
-- All commands run from `/iot-vehicle-tracking-system/`:
+- All commands run from `/iot-vehicle-tracking-system-cloud/`:
 + All commands run from respective service directories:
 
 - # Install all dependencies (root, backend, frontend, mqtt-bridge)
@@ -225,10 +225,10 @@ Additionally, **~50% of the backend business logic** (vehicle, customer, trip, a
 + # Terminal 2: cd Tracking_Frontend && npm run dev
 + # Terminal 3: cd Tracking_MqttBridge && npm run dev
 
-- ## Backend-specific (`/iot-vehicle-tracking-system/backend/`):
+- ## Backend-specific (`/iot-vehicle-tracking-system-cloud/backend/`):
 + ## Backend-specific (`Tracking_Backend/`):
 
-- ## MQTT Bridge (`/iot-vehicle-tracking-system/mqtt-bridge/`):
+- ## MQTT Bridge (`/iot-vehicle-tracking-system-cloud/mqtt-bridge/`):
 + ## MQTT Bridge (`Tracking_MqttBridge/`):
 
 + ### Quick Start (all services via Docker)

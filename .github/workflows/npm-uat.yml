@@ -4,7 +4,7 @@ on:
   push:
     branches: [uat]
     paths:
-      - 'iot-vehicle-tracking-system/Tracking_NPM/**'
+      - 'iot-vehicle-tracking-system-cloud/Tracking_NPM/**'
 
 jobs:
   deploy-uat:
@@ -19,7 +19,7 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "iot-vehicle-tracking-system/Tracking_NPM/"
+          source: "iot-vehicle-tracking-system-cloud/Tracking_NPM/"
           target: /opt/tracking/
           strip_components: 1
 

@@ -2,12 +2,12 @@
 
 ### Scope
 - Files:
-  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\Tracking_Firmware\main\src\ble_mgr.c
-  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\Tracking_Firmware\main\src\ble_obd.c
-  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\Tracking_Firmware\main\src\mqtt_client.c
-  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\Tracking_Firmware\main\src\command_handler.c
-  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\Tracking_Firmware\main\inc\command_handler.h
-  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system\Tracking_Firmware\main\src\ble_init.c
+  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware\main\src\ble_mgr.c
+  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware\main\src\ble_obd.c
+  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware\main\src\mqtt_client.c
+  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware\main\src\command_handler.c
+  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware\main\inc\command_handler.h
+  - E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware\main\src\ble_init.c
 - Focus: latest fixes only
 - Scout findings: Không có kết quả scout riêng cho firmware; review trực tiếp trên file.
 

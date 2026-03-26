@@ -1,6 +1,6 @@
 [
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\error.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\error.tsx",
         "Extension":  ".tsx",
         "Lines":  18,
         "Mojibake":  true,
@@ -14,7 +14,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\global-error.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\global-error.tsx",
         "Extension":  ".tsx",
         "Lines":  22,
         "Mojibake":  true,
@@ -28,7 +28,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\globals.css",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\globals.css",
         "Extension":  ".css",
         "Lines":  121,
         "Mojibake":  false,
@@ -42,7 +42,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\layout.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\layout.tsx",
         "Extension":  ".tsx",
         "Lines":  35,
         "Mojibake":  true,
@@ -56,7 +56,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\not-found.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\not-found.tsx",
         "Extension":  ".tsx",
         "Lines":  14,
         "Mojibake":  false,
@@ -70,7 +70,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  11,
         "Mojibake":  true,
@@ -84,7 +84,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\theme.css",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\theme.css",
         "Extension":  ".css",
         "Lines":  88,
         "Mojibake":  false,
@@ -98,7 +98,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\layout.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\layout.tsx",
         "Extension":  ".tsx",
         "Lines":  47,
         "Mojibake":  false,
@@ -112,7 +112,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  49,
         "Mojibake":  true,
@@ -126,7 +126,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\admin\\system\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\admin\\system\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  1,
         "Mojibake":  false,
@@ -140,7 +140,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\admin\\system-status\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\admin\\system-status\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  1,
         "Mojibake":  false,
@@ -154,7 +154,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\admin\\users\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\admin\\users\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  1,
         "Mojibake":  false,
@@ -168,7 +168,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\alerts\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\alerts\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  166,
         "Mojibake":  true,
@@ -182,7 +182,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\customers\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\customers\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  243,
         "Mojibake":  false,
@@ -196,7 +196,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\customers\\[id]\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\customers\\[id]\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  88,
         "Mojibake":  true,
@@ -210,7 +210,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\devices\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\devices\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  134,
         "Mojibake":  true,
@@ -224,7 +224,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\devices\\[id]\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\devices\\[id]\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  119,
         "Mojibake":  true,
@@ -238,7 +238,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\drivers\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\drivers\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  156,
         "Mojibake":  true,
@@ -252,7 +252,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\exports\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\exports\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  285,
         "Mojibake":  true,
@@ -266,7 +266,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\firmware\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\firmware\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  213,
         "Mojibake":  false,
@@ -280,7 +280,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\fuel\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\fuel\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  14,
         "Mojibake":  true,
@@ -294,7 +294,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\geofences\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\geofences\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  175,
         "Mojibake":  true,
@@ -308,7 +308,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\geofences\\[id]\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\geofences\\[id]\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  97,
         "Mojibake":  true,
@@ -322,7 +322,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\maintenance\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\maintenance\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  138,
         "Mojibake":  true,
@@ -336,7 +336,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\maintenance\\[id]\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\maintenance\\[id]\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  96,
         "Mojibake":  true,
@@ -350,7 +350,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\map\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\map\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  31,
         "Mojibake":  true,
@@ -364,7 +364,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\notifications\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\notifications\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  54,
         "Mojibake":  true,
@@ -378,7 +378,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\settings\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\settings\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  92,
         "Mojibake":  false,
@@ -392,7 +392,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\simulator\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\simulator\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  76,
         "Mojibake":  true,
@@ -406,7 +406,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\statistics\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\statistics\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  14,
         "Mojibake":  true,
@@ -420,7 +420,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\system-admin\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\system-admin\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  51,
         "Mojibake":  true,
@@ -434,7 +434,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\system-status\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\system-status\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  70,
         "Mojibake":  true,
@@ -448,7 +448,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\trips\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\trips\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  141,
         "Mojibake":  true,
@@ -462,7 +462,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\trips\\[id]\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\trips\\[id]\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  142,
         "Mojibake":  true,
@@ -476,7 +476,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\users\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\users\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  306,
         "Mojibake":  false,
@@ -490,7 +490,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\vehicles\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\vehicles\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  152,
         "Mojibake":  false,
@@ -504,7 +504,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\vehicles\\[id]\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\vehicles\\[id]\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  96,
         "Mojibake":  true,
@@ -518,7 +518,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\dashboard\\violations\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\dashboard\\violations\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  141,
         "Mojibake":  true,
@@ -532,7 +532,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\app\\login\\page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\app\\login\\page.tsx",
         "Extension":  ".tsx",
         "Lines":  9,
         "Mojibake":  false,
@@ -546,7 +546,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\active-theme.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\active-theme.tsx",
         "Extension":  ".tsx",
         "Lines":  46,
         "Mojibake":  false,
@@ -560,7 +560,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\breadcrumbs.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\breadcrumbs.tsx",
         "Extension":  ".tsx",
         "Lines":  37,
         "Mojibake":  false,
@@ -574,7 +574,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\mode-toggle.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\mode-toggle.tsx",
         "Extension":  ".tsx",
         "Lines":  29,
         "Mojibake":  false,
@@ -588,7 +588,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\nav-user.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\nav-user.tsx",
         "Extension":  ".tsx",
         "Lines":  107,
         "Mojibake":  false,
@@ -602,7 +602,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\theme-selector.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\theme-selector.tsx",
         "Extension":  ".tsx",
         "Lines":  73,
         "Mojibake":  false,
@@ -616,7 +616,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\auth\\session-guard.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\auth\\session-guard.tsx",
         "Extension":  ".tsx",
         "Lines":  59,
         "Mojibake":  false,
@@ -630,7 +630,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\common\\confirm-dialog.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\common\\confirm-dialog.tsx",
         "Extension":  ".tsx",
         "Lines":  62,
         "Mojibake":  false,
@@ -644,7 +644,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\common\\connection-banner.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\common\\connection-banner.tsx",
         "Extension":  ".tsx",
         "Lines":  23,
         "Mojibake":  false,
@@ -658,7 +658,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\common\\data-table-column-header.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\common\\data-table-column-header.tsx",
         "Extension":  ".tsx",
         "Lines":  36,
         "Mojibake":  false,
@@ -672,7 +672,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\common\\data-table.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\common\\data-table.tsx",
         "Extension":  ".tsx",
         "Lines":  199,
         "Mojibake":  false,
@@ -686,7 +686,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\common\\empty-state.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\common\\empty-state.tsx",
         "Extension":  ".tsx",
         "Lines":  30,
         "Mojibake":  false,
@@ -700,7 +700,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\common\\stat-card.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\common\\stat-card.tsx",
         "Extension":  ".tsx",
         "Lines":  69,
         "Mojibake":  false,
@@ -714,7 +714,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\kbar\\index.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\kbar\\index.tsx",
         "Extension":  ".tsx",
         "Lines":  68,
         "Mojibake":  false,
@@ -728,7 +728,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\kbar\\kbar-content.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\kbar\\kbar-content.tsx",
         "Extension":  ".tsx",
         "Lines":  18,
         "Mojibake":  false,
@@ -742,7 +742,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\kbar\\result-item.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\kbar\\result-item.tsx",
         "Extension":  ".tsx",
         "Lines":  34,
         "Mojibake":  false,
@@ -756,7 +756,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\kbar\\use-theme-switching.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\kbar\\use-theme-switching.tsx",
         "Extension":  ".tsx",
         "Lines":  31,
         "Mojibake":  false,
@@ -770,7 +770,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\layout\\AppSidebar.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\layout\\AppSidebar.tsx",
         "Extension":  ".tsx",
         "Lines":  117,
         "Mojibake":  false,
@@ -784,7 +784,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\layout\\notification-bell.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\layout\\notification-bell.tsx",
         "Extension":  ".tsx",
         "Lines":  5,
         "Mojibake":  false,
@@ -798,7 +798,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\layout\\PageContainer.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\layout\\PageContainer.tsx",
         "Extension":  ".tsx",
         "Lines":  55,
         "Mojibake":  false,
@@ -812,7 +812,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\map\\geofence-layer.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\map\\geofence-layer.tsx",
         "Extension":  ".tsx",
         "Lines":  1,
         "Mojibake":  false,
@@ -826,7 +826,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\map\\map-sidebar.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\map\\map-sidebar.tsx",
         "Extension":  ".tsx",
         "Lines":  1,
         "Mojibake":  false,
@@ -840,7 +840,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\map\\map-view.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\map\\map-view.tsx",
         "Extension":  ".tsx",
         "Lines":  1,
         "Mojibake":  false,
@@ -854,7 +854,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\map\\vehicle-marker.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\map\\vehicle-marker.tsx",
         "Extension":  ".tsx",
         "Lines":  1,
         "Mojibake":  false,
@@ -868,7 +868,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\providers\\providers.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\providers\\providers.tsx",
         "Extension":  ".tsx",
         "Lines":  30,
         "Mojibake":  false,
@@ -882,7 +882,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\providers\\query-provider.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\providers\\query-provider.tsx",
         "Extension":  ".tsx",
         "Lines":  14,
         "Mojibake":  false,
@@ -896,7 +896,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\providers\\realtime-provider.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\providers\\realtime-provider.tsx",
         "Extension":  ".tsx",
         "Lines":  5,
         "Mojibake":  false,
@@ -910,7 +910,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\providers\\socket-provider.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\providers\\socket-provider.tsx",
         "Extension":  ".tsx",
         "Lines":  83,
         "Mojibake":  false,
@@ -924,7 +924,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\alert-dialog.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\alert-dialog.tsx",
         "Extension":  ".tsx",
         "Lines":  166,
         "Mojibake":  false,
@@ -938,7 +938,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\alert.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\alert.tsx",
         "Extension":  ".tsx",
         "Lines":  54,
         "Mojibake":  false,
@@ -952,7 +952,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\avatar.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\avatar.tsx",
         "Extension":  ".tsx",
         "Lines":  90,
         "Mojibake":  false,
@@ -966,7 +966,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\badge.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\badge.tsx",
         "Extension":  ".tsx",
         "Lines":  44,
         "Mojibake":  false,
@@ -980,7 +980,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\breadcrumb.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\breadcrumb.tsx",
         "Extension":  ".tsx",
         "Lines":  92,
         "Mojibake":  true,
@@ -994,7 +994,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\button.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\button.tsx",
         "Extension":  ".tsx",
         "Lines":  57,
         "Mojibake":  false,
@@ -1008,7 +1008,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\calendar.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\calendar.tsx",
         "Extension":  ".tsx",
         "Lines":  170,
         "Mojibake":  false,
@@ -1022,7 +1022,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\card.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\card.tsx",
         "Extension":  ".tsx",
         "Lines":  66,
         "Mojibake":  false,
@@ -1036,7 +1036,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\checkbox.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\checkbox.tsx",
         "Extension":  ".tsx",
         "Lines":  25,
         "Mojibake":  false,
@@ -1050,7 +1050,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\collapsible.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\collapsible.tsx",
         "Extension":  ".tsx",
         "Lines":  16,
         "Mojibake":  false,
@@ -1064,7 +1064,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\command.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\command.tsx",
         "Extension":  ".tsx",
         "Lines":  155,
         "Mojibake":  true,
@@ -1078,7 +1078,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\dialog.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\dialog.tsx",
         "Extension":  ".tsx",
         "Lines":  134,
         "Mojibake":  true,
@@ -1092,7 +1092,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\dropdown-menu.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\dropdown-menu.tsx",
         "Extension":  ".tsx",
         "Lines":  212,
         "Mojibake":  false,
@@ -1106,7 +1106,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\form.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\form.tsx",
         "Extension":  ".tsx",
         "Lines":  128,
         "Mojibake":  false,
@@ -1120,7 +1120,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\input.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\input.tsx",
         "Extension":  ".tsx",
         "Lines":  18,
         "Mojibake":  false,
@@ -1134,7 +1134,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\label.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\label.tsx",
         "Extension":  ".tsx",
         "Lines":  17,
         "Mojibake":  false,
@@ -1148,7 +1148,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\popover.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\popover.tsx",
         "Extension":  ".tsx",
         "Lines":  64,
         "Mojibake":  false,
@@ -1162,7 +1162,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\progress.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\progress.tsx",
         "Extension":  ".tsx",
         "Lines":  24,
         "Mojibake":  false,
@@ -1176,7 +1176,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\radio-group.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\radio-group.tsx",
         "Extension":  ".tsx",
         "Lines":  40,
         "Mojibake":  false,
@@ -1190,7 +1190,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\scroll-area.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\scroll-area.tsx",
         "Extension":  ".tsx",
         "Lines":  51,
         "Mojibake":  false,
@@ -1204,7 +1204,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\select.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\select.tsx",
         "Extension":  ".tsx",
         "Lines":  165,
         "Mojibake":  false,
@@ -1218,7 +1218,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\separator.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\separator.tsx",
         "Extension":  ".tsx",
         "Lines":  24,
         "Mojibake":  false,
@@ -1232,7 +1232,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\sheet.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\sheet.tsx",
         "Extension":  ".tsx",
         "Lines":  121,
         "Mojibake":  true,
@@ -1246,7 +1246,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\sidebar.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\sidebar.tsx",
         "Extension":  ".tsx",
         "Lines":  644,
         "Mojibake":  true,
@@ -1260,7 +1260,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\skeleton.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\skeleton.tsx",
         "Extension":  ".tsx",
         "Lines":  11,
         "Mojibake":  false,
@@ -1274,7 +1274,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\slider.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\slider.tsx",
         "Extension":  ".tsx",
         "Lines":  53,
         "Mojibake":  false,
@@ -1288,7 +1288,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\switch.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\switch.tsx",
         "Extension":  ".tsx",
         "Lines":  31,
         "Mojibake":  false,
@@ -1302,7 +1302,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\table.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\table.tsx",
         "Extension":  ".tsx",
         "Lines":  81,
         "Mojibake":  false,
@@ -1316,7 +1316,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\tabs.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\tabs.tsx",
         "Extension":  ".tsx",
         "Lines":  79,
         "Mojibake":  false,
@@ -1330,7 +1330,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\textarea.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\textarea.tsx",
         "Extension":  ".tsx",
         "Lines":  15,
         "Mojibake":  false,
@@ -1344,7 +1344,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\components\\ui\\tooltip.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\components\\ui\\tooltip.tsx",
         "Extension":  ".tsx",
         "Lines":  46,
         "Mojibake":  false,
@@ -1358,7 +1358,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\config\\nav-config.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\config\\nav-config.ts",
         "Extension":  ".ts",
         "Lines":  68,
         "Mojibake":  false,
@@ -1372,7 +1372,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\admin\\components\\system-settings-editor.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\admin\\components\\system-settings-editor.tsx",
         "Extension":  ".tsx",
         "Lines":  6,
         "Mojibake":  false,
@@ -1386,7 +1386,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\admin\\components\\vl-log-viewer.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\admin\\components\\vl-log-viewer.tsx",
         "Extension":  ".tsx",
         "Lines":  16,
         "Mojibake":  false,
@@ -1400,7 +1400,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\admin\\components\\vm-query-viewer.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\admin\\components\\vm-query-viewer.tsx",
         "Extension":  ".tsx",
         "Lines":  22,
         "Mojibake":  false,
@@ -1414,7 +1414,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\alerts\\components\\alert-columns.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\alerts\\components\\alert-columns.tsx",
         "Extension":  ".tsx",
         "Lines":  72,
         "Mojibake":  true,
@@ -1428,7 +1428,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\alerts\\components\\alert-detail-modal.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\alerts\\components\\alert-detail-modal.tsx",
         "Extension":  ".tsx",
         "Lines":  74,
         "Mojibake":  true,
@@ -1442,7 +1442,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\alerts\\components\\alert-filters.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\alerts\\components\\alert-filters.tsx",
         "Extension":  ".tsx",
         "Lines":  51,
         "Mojibake":  true,
@@ -1456,7 +1456,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\auth\\components\\login-form.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\auth\\components\\login-form.tsx",
         "Extension":  ".tsx",
         "Lines":  122,
         "Mojibake":  false,
@@ -1470,7 +1470,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\auth\\components\\logout-button.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\auth\\components\\logout-button.tsx",
         "Extension":  ".tsx",
         "Lines":  23,
         "Mojibake":  false,
@@ -1484,7 +1484,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\activity-feed.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\activity-feed.tsx",
         "Extension":  ".tsx",
         "Lines":  55,
         "Mojibake":  true,
@@ -1498,7 +1498,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\alerts-severity-chart.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\alerts-severity-chart.tsx",
         "Extension":  ".tsx",
         "Lines":  26,
         "Mojibake":  false,
@@ -1512,7 +1512,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\area-graph.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\area-graph.tsx",
         "Extension":  ".tsx",
         "Lines":  55,
         "Mojibake":  true,
@@ -1526,7 +1526,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\bar-graph.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\bar-graph.tsx",
         "Extension":  ".tsx",
         "Lines":  37,
         "Mojibake":  false,
@@ -1540,7 +1540,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\device-status-chart.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\device-status-chart.tsx",
         "Extension":  ".tsx",
         "Lines":  31,
         "Mojibake":  false,
@@ -1554,7 +1554,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\overview-stats.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\overview-stats.tsx",
         "Extension":  ".tsx",
         "Lines":  82,
         "Mojibake":  true,
@@ -1568,7 +1568,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\pie-graph.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\pie-graph.tsx",
         "Extension":  ".tsx",
         "Lines":  31,
         "Mojibake":  false,
@@ -1582,7 +1582,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\quick-actions.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\quick-actions.tsx",
         "Extension":  ".tsx",
         "Lines":  34,
         "Mojibake":  true,
@@ -1596,7 +1596,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\recent-alerts.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\recent-alerts.tsx",
         "Extension":  ".tsx",
         "Lines":  69,
         "Mojibake":  true,
@@ -1610,7 +1610,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\stat-cards.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\stat-cards.tsx",
         "Extension":  ".tsx",
         "Lines":  33,
         "Mojibake":  false,
@@ -1624,7 +1624,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\components\\vehicle-activity-chart.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\components\\vehicle-activity-chart.tsx",
         "Extension":  ".tsx",
         "Lines":  29,
         "Mojibake":  false,
@@ -1638,7 +1638,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\hooks\\use-dashboard-realtime.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\hooks\\use-dashboard-realtime.ts",
         "Extension":  ".ts",
         "Lines":  25,
         "Mojibake":  false,
@@ -1652,7 +1652,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\dashboard\\hooks\\use-dashboard-stats.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\dashboard\\hooks\\use-dashboard-stats.ts",
         "Extension":  ".ts",
         "Lines":  234,
         "Mojibake":  true,
@@ -1666,7 +1666,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-card.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-card.tsx",
         "Extension":  ".tsx",
         "Lines":  72,
         "Mojibake":  true,
@@ -1680,7 +1680,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-columns.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-columns.tsx",
         "Extension":  ".tsx",
         "Lines":  80,
         "Mojibake":  true,
@@ -1694,7 +1694,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-commands-tab.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-commands-tab.tsx",
         "Extension":  ".tsx",
         "Lines":  2,
         "Mojibake":  false,
@@ -1708,7 +1708,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-constants.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-constants.ts",
         "Extension":  ".ts",
         "Lines":  24,
         "Mojibake":  true,
@@ -1722,7 +1722,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-create-modal.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-create-modal.tsx",
         "Extension":  ".tsx",
         "Lines":  10,
         "Mojibake":  false,
@@ -1736,7 +1736,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-design-constants.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-design-constants.ts",
         "Extension":  ".ts",
         "Lines":  12,
         "Mojibake":  false,
@@ -1750,7 +1750,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal.tsx",
         "Extension":  ".tsx",
         "Lines":  2,
         "Mojibake":  false,
@@ -1764,7 +1764,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-sheet.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-sheet.tsx",
         "Extension":  ".tsx",
         "Lines":  14,
         "Mojibake":  false,
@@ -1778,7 +1778,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-edit-modal.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-edit-modal.tsx",
         "Extension":  ".tsx",
         "Lines":  13,
         "Mojibake":  false,
@@ -1792,7 +1792,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-filters.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-filters.tsx",
         "Extension":  ".tsx",
         "Lines":  76,
         "Mojibake":  true,
@@ -1806,7 +1806,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-form.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-form.tsx",
         "Extension":  ".tsx",
         "Lines":  180,
         "Mojibake":  true,
@@ -1820,7 +1820,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-grid.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-grid.tsx",
         "Extension":  ".tsx",
         "Lines":  17,
         "Mojibake":  false,
@@ -1834,7 +1834,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-runtime-chart.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-runtime-chart.tsx",
         "Extension":  ".tsx",
         "Lines":  24,
         "Mojibake":  true,
@@ -1848,7 +1848,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-session-table.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-session-table.tsx",
         "Extension":  ".tsx",
         "Lines":  2,
         "Mojibake":  false,
@@ -1862,7 +1862,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-skeletons.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-skeletons.tsx",
         "Extension":  ".tsx",
         "Lines":  23,
         "Mojibake":  false,
@@ -1876,7 +1876,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-stats-bar.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-stats-bar.tsx",
         "Extension":  ".tsx",
         "Lines":  37,
         "Mojibake":  true,
@@ -1890,7 +1890,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-telemetry-tab.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-telemetry-tab.tsx",
         "Extension":  ".tsx",
         "Lines":  2,
         "Mojibake":  false,
@@ -1904,7 +1904,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-utils.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-utils.ts",
         "Extension":  ".ts",
         "Lines":  16,
         "Mojibake":  false,
@@ -1918,7 +1918,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-vibration-chart.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-vibration-chart.tsx",
         "Extension":  ".tsx",
         "Lines":  37,
         "Mojibake":  true,
@@ -1932,7 +1932,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\error-box.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\error-box.tsx",
         "Extension":  ".tsx",
         "Lines":  17,
         "Mojibake":  true,
@@ -1946,7 +1946,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\export-modal.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\export-modal.tsx",
         "Extension":  ".tsx",
         "Lines":  113,
         "Mojibake":  true,
@@ -1960,7 +1960,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\index.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\index.ts",
         "Extension":  ".ts",
         "Lines":  21,
         "Mojibake":  false,
@@ -1974,7 +1974,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\mobile-device-content.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\mobile-device-content.tsx",
         "Extension":  ".tsx",
         "Lines":  15,
         "Mojibake":  false,
@@ -1988,7 +1988,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\mobile-device-header.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\mobile-device-header.tsx",
         "Extension":  ".tsx",
         "Lines":  13,
         "Mojibake":  true,
@@ -2002,7 +2002,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\mobile-tab-selector.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\mobile-tab-selector.tsx",
         "Extension":  ".tsx",
         "Lines":  10,
         "Mojibake":  false,
@@ -2016,7 +2016,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\stat-card.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\stat-card.tsx",
         "Extension":  ".tsx",
         "Lines":  12,
         "Mojibake":  false,
@@ -2030,7 +2030,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\empty-state.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\empty-state.tsx",
         "Extension":  ".tsx",
         "Lines":  16,
         "Mojibake":  false,
@@ -2044,7 +2044,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\error-codes-tab.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\error-codes-tab.tsx",
         "Extension":  ".tsx",
         "Lines":  146,
         "Mojibake":  true,
@@ -2058,7 +2058,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\index.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\index.tsx",
         "Extension":  ".tsx",
         "Lines":  140,
         "Mojibake":  true,
@@ -2072,7 +2072,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\modal-container.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\modal-container.tsx",
         "Extension":  ".tsx",
         "Lines":  157,
         "Mojibake":  true,
@@ -2086,7 +2086,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\modal-context.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\modal-context.tsx",
         "Extension":  ".tsx",
         "Lines":  68,
         "Mojibake":  false,
@@ -2100,7 +2100,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\overview-tab.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\overview-tab.tsx",
         "Extension":  ".tsx",
         "Lines":  85,
         "Mojibake":  true,
@@ -2114,7 +2114,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\runtime-tab.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\runtime-tab.tsx",
         "Extension":  ".tsx",
         "Lines":  29,
         "Mojibake":  true,
@@ -2128,7 +2128,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\session-vibration-chart-dialog.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\session-vibration-chart-dialog.tsx",
         "Extension":  ".tsx",
         "Lines":  39,
         "Mojibake":  false,
@@ -2142,7 +2142,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\sessions-tab.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\sessions-tab.tsx",
         "Extension":  ".tsx",
         "Lines":  74,
         "Mojibake":  true,
@@ -2156,7 +2156,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\settings-tab.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\settings-tab.tsx",
         "Extension":  ".tsx",
         "Lines":  126,
         "Mojibake":  true,
@@ -2170,7 +2170,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\vibration-tab.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\components\\device-detail-modal\\vibration-tab.tsx",
         "Extension":  ".tsx",
         "Lines":  30,
         "Mojibake":  true,
@@ -2184,7 +2184,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-create-device.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-create-device.ts",
         "Extension":  ".ts",
         "Lines":  22,
         "Mojibake":  true,
@@ -2198,7 +2198,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-delete-device.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-delete-device.ts",
         "Extension":  ".ts",
         "Lines":  22,
         "Mojibake":  true,
@@ -2212,7 +2212,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-detail.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-detail.ts",
         "Extension":  ".ts",
         "Lines":  50,
         "Mojibake":  false,
@@ -2226,7 +2226,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-error-codes.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-error-codes.ts",
         "Extension":  ".ts",
         "Lines":  80,
         "Mojibake":  false,
@@ -2240,7 +2240,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-realtime.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-realtime.ts",
         "Extension":  ".ts",
         "Lines":  19,
         "Mojibake":  false,
@@ -2254,7 +2254,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-runtime-chart.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-runtime-chart.ts",
         "Extension":  ".ts",
         "Lines":  45,
         "Mojibake":  false,
@@ -2268,7 +2268,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-sessions.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-sessions.ts",
         "Extension":  ".ts",
         "Lines":  83,
         "Mojibake":  false,
@@ -2282,7 +2282,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-vibration-chart.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-device-vibration-chart.ts",
         "Extension":  ".ts",
         "Lines":  50,
         "Mojibake":  false,
@@ -2296,7 +2296,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-devices.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-devices.ts",
         "Extension":  ".ts",
         "Lines":  62,
         "Mojibake":  false,
@@ -2310,7 +2310,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-send-command.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-send-command.ts",
         "Extension":  ".ts",
         "Lines":  23,
         "Mojibake":  true,
@@ -2324,7 +2324,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-update-device-settings.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-update-device-settings.ts",
         "Extension":  ".ts",
         "Lines":  24,
         "Mojibake":  true,
@@ -2338,7 +2338,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-update-device.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\hooks\\use-update-device.ts",
         "Extension":  ".ts",
         "Lines":  23,
         "Mojibake":  true,
@@ -2352,7 +2352,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\devices\\types\\index.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\devices\\types\\index.ts",
         "Extension":  ".ts",
         "Lines":  42,
         "Mojibake":  false,
@@ -2366,7 +2366,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\drivers\\components\\driver-columns.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\drivers\\components\\driver-columns.tsx",
         "Extension":  ".tsx",
         "Lines":  55,
         "Mojibake":  true,
@@ -2380,7 +2380,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\drivers\\components\\driver-form.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\drivers\\components\\driver-form.tsx",
         "Extension":  ".tsx",
         "Lines":  216,
         "Mojibake":  true,
@@ -2394,7 +2394,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\drivers\\types\\index.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\drivers\\types\\index.ts",
         "Extension":  ".ts",
         "Lines":  31,
         "Mojibake":  false,
@@ -2408,7 +2408,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\fuel-analytics\\components\\fuel-analytics-page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\fuel-analytics\\components\\fuel-analytics-page.tsx",
         "Extension":  ".tsx",
         "Lines":  39,
         "Mojibake":  false,
@@ -2422,7 +2422,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\fuel-analytics\\components\\fuel-by-vehicle-chart.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\fuel-analytics\\components\\fuel-by-vehicle-chart.tsx",
         "Extension":  ".tsx",
         "Lines":  63,
         "Mojibake":  true,
@@ -2436,7 +2436,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\fuel-analytics\\components\\fuel-date-filter.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\fuel-analytics\\components\\fuel-date-filter.tsx",
         "Extension":  ".tsx",
         "Lines":  68,
         "Mojibake":  true,
@@ -2450,7 +2450,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\fuel-analytics\\components\\fuel-summary-cards.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\fuel-analytics\\components\\fuel-summary-cards.tsx",
         "Extension":  ".tsx",
         "Lines":  50,
         "Mojibake":  true,
@@ -2464,7 +2464,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\fuel-analytics\\components\\fuel-trends-chart.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\fuel-analytics\\components\\fuel-trends-chart.tsx",
         "Extension":  ".tsx",
         "Lines":  84,
         "Mojibake":  true,
@@ -2478,7 +2478,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\fuel-analytics\\hooks\\use-fuel-analytics.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\fuel-analytics\\hooks\\use-fuel-analytics.ts",
         "Extension":  ".ts",
         "Lines":  75,
         "Mojibake":  false,
@@ -2492,7 +2492,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\fuel-analytics\\types\\index.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\fuel-analytics\\types\\index.ts",
         "Extension":  ".ts",
         "Lines":  26,
         "Mojibake":  false,
@@ -2506,7 +2506,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\geofences\\components\\geofence-columns.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\geofences\\components\\geofence-columns.tsx",
         "Extension":  ".tsx",
         "Lines":  54,
         "Mojibake":  false,
@@ -2520,7 +2520,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\geofences\\components\\geofence-form.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\geofences\\components\\geofence-form.tsx",
         "Extension":  ".tsx",
         "Lines":  105,
         "Mojibake":  false,
@@ -2534,7 +2534,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\geofences\\components\\geofence-map-editor.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\geofences\\components\\geofence-map-editor.tsx",
         "Extension":  ".tsx",
         "Lines":  25,
         "Mojibake":  false,
@@ -2548,7 +2548,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\geofences\\components\\geofence-vehicle-binder.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\geofences\\components\\geofence-vehicle-binder.tsx",
         "Extension":  ".tsx",
         "Lines":  31,
         "Mojibake":  false,
@@ -2562,7 +2562,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\geofences\\hooks\\use-geofences.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\geofences\\hooks\\use-geofences.ts",
         "Extension":  ".ts",
         "Lines":  7,
         "Mojibake":  false,
@@ -2576,7 +2576,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\maintenance\\components\\maintenance-calendar.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\maintenance\\components\\maintenance-calendar.tsx",
         "Extension":  ".tsx",
         "Lines":  44,
         "Mojibake":  true,
@@ -2590,7 +2590,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\maintenance\\components\\mileage-forecaster.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\maintenance\\components\\mileage-forecaster.tsx",
         "Extension":  ".tsx",
         "Lines":  28,
         "Mojibake":  false,
@@ -2604,7 +2604,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\device-cluster.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\device-cluster.tsx",
         "Extension":  ".tsx",
         "Lines":  24,
         "Mojibake":  false,
@@ -2618,7 +2618,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\device-filter-compact.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\device-filter-compact.tsx",
         "Extension":  ".tsx",
         "Lines":  46,
         "Mojibake":  true,
@@ -2632,7 +2632,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\device-filter.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\device-filter.tsx",
         "Extension":  ".tsx",
         "Lines":  31,
         "Mojibake":  true,
@@ -2646,7 +2646,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\device-list-item.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\device-list-item.tsx",
         "Extension":  ".tsx",
         "Lines":  31,
         "Mojibake":  true,
@@ -2660,7 +2660,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\device-list-panel.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\device-list-panel.tsx",
         "Extension":  ".tsx",
         "Lines":  66,
         "Mojibake":  true,
@@ -2674,7 +2674,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\device-marker.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\device-marker.tsx",
         "Extension":  ".tsx",
         "Lines":  32,
         "Mojibake":  true,
@@ -2688,7 +2688,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\device-search.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\device-search.tsx",
         "Extension":  ".tsx",
         "Lines":  22,
         "Mojibake":  true,
@@ -2702,7 +2702,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\geofence-layer.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\geofence-layer.tsx",
         "Extension":  ".tsx",
         "Lines":  23,
         "Mojibake":  false,
@@ -2716,7 +2716,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\index.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\index.ts",
         "Extension":  ".ts",
         "Lines":  12,
         "Mojibake":  false,
@@ -2730,7 +2730,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\map-controls.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\map-controls.tsx",
         "Extension":  ".tsx",
         "Lines":  115,
         "Mojibake":  true,
@@ -2744,7 +2744,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\map-layer-switcher.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\map-layer-switcher.tsx",
         "Extension":  ".tsx",
         "Lines":  30,
         "Mojibake":  true,
@@ -2758,7 +2758,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\map-sidebar.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\map-sidebar.tsx",
         "Extension":  ".tsx",
         "Lines":  80,
         "Mojibake":  true,
@@ -2772,7 +2772,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\map-toolbar.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\map-toolbar.tsx",
         "Extension":  ".tsx",
         "Lines":  19,
         "Mojibake":  false,
@@ -2786,7 +2786,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\map-view.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\map-view.tsx",
         "Extension":  ".tsx",
         "Lines":  36,
         "Mojibake":  false,
@@ -2800,7 +2800,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\marker-icon.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\marker-icon.ts",
         "Extension":  ".ts",
         "Lines":  20,
         "Mojibake":  false,
@@ -2814,7 +2814,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\mobile-device-drawer.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\mobile-device-drawer.tsx",
         "Extension":  ".tsx",
         "Lines":  86,
         "Mojibake":  true,
@@ -2828,7 +2828,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\selected-device-card.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\selected-device-card.tsx",
         "Extension":  ".tsx",
         "Lines":  37,
         "Mojibake":  true,
@@ -2842,7 +2842,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\tracking-map.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\tracking-map.tsx",
         "Extension":  ".tsx",
         "Lines":  90,
         "Mojibake":  false,
@@ -2856,7 +2856,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\components\\vehicle-marker.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\components\\vehicle-marker.tsx",
         "Extension":  ".tsx",
         "Lines":  39,
         "Mojibake":  false,
@@ -2870,7 +2870,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\constants\\map-config.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\constants\\map-config.ts",
         "Extension":  ".ts",
         "Lines":  37,
         "Mojibake":  true,
@@ -2884,7 +2884,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\hooks\\use-device-positions.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\hooks\\use-device-positions.ts",
         "Extension":  ".ts",
         "Lines":  39,
         "Mojibake":  false,
@@ -2898,7 +2898,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\hooks\\use-map-realtime.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\hooks\\use-map-realtime.ts",
         "Extension":  ".ts",
         "Lines":  54,
         "Mojibake":  false,
@@ -2912,7 +2912,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\store\\map-store.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\store\\map-store.ts",
         "Extension":  ".ts",
         "Lines":  57,
         "Mojibake":  false,
@@ -2926,7 +2926,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\map\\types\\index.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\map\\types\\index.ts",
         "Extension":  ".ts",
         "Lines":  20,
         "Mojibake":  false,
@@ -2940,7 +2940,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-architecture.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-architecture.tsx",
         "Extension":  ".tsx",
         "Lines":  72,
         "Mojibake":  true,
@@ -2954,7 +2954,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-feature-grid.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-feature-grid.tsx",
         "Extension":  ".tsx",
         "Lines":  44,
         "Mojibake":  true,
@@ -2968,7 +2968,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-header.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-header.tsx",
         "Extension":  ".tsx",
         "Lines":  53,
         "Mojibake":  true,
@@ -2982,7 +2982,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-hero.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-hero.tsx",
         "Extension":  ".tsx",
         "Lines":  113,
         "Mojibake":  true,
@@ -2996,7 +2996,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-page.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-page.tsx",
         "Extension":  ".tsx",
         "Lines":  51,
         "Mojibake":  true,
@@ -3010,7 +3010,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-proof.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\marketing\\components\\landing-proof.tsx",
         "Extension":  ".tsx",
         "Lines":  80,
         "Mojibake":  true,
@@ -3024,7 +3024,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\marketing\\components\\marketing-section-heading.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\marketing\\components\\marketing-section-heading.tsx",
         "Extension":  ".tsx",
         "Lines":  31,
         "Mojibake":  false,
@@ -3038,7 +3038,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\marketing\\data\\landing-content.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\marketing\\data\\landing-content.ts",
         "Extension":  ".ts",
         "Lines":  117,
         "Mojibake":  true,
@@ -3052,7 +3052,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-badge.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-badge.tsx",
         "Extension":  ".tsx",
         "Lines":  25,
         "Mojibake":  false,
@@ -3066,7 +3066,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-center.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-center.tsx",
         "Extension":  ".tsx",
         "Lines":  7,
         "Mojibake":  false,
@@ -3080,7 +3080,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-dropdown.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-dropdown.tsx",
         "Extension":  ".tsx",
         "Lines":  73,
         "Mojibake":  false,
@@ -3094,7 +3094,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-filters.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-filters.tsx",
         "Extension":  ".tsx",
         "Lines":  95,
         "Mojibake":  true,
@@ -3108,7 +3108,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-item.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-item.tsx",
         "Extension":  ".tsx",
         "Lines":  26,
         "Mojibake":  true,
@@ -3122,7 +3122,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-list.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-list.tsx",
         "Extension":  ".tsx",
         "Lines":  103,
         "Mojibake":  true,
@@ -3136,7 +3136,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-stats.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\components\\notification-stats.tsx",
         "Extension":  ".tsx",
         "Lines":  23,
         "Mojibake":  true,
@@ -3150,7 +3150,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\hooks\\use-mark-all-read.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\hooks\\use-mark-all-read.ts",
         "Extension":  ".ts",
         "Lines":  19,
         "Mojibake":  true,
@@ -3164,7 +3164,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\hooks\\use-notifications.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\hooks\\use-notifications.ts",
         "Extension":  ".ts",
         "Lines":  8,
         "Mojibake":  false,
@@ -3178,7 +3178,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\hooks\\use-realtime-events.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\hooks\\use-realtime-events.ts",
         "Extension":  ".ts",
         "Lines":  73,
         "Mojibake":  true,
@@ -3192,7 +3192,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\hooks\\use-unread-count.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\hooks\\use-unread-count.ts",
         "Extension":  ".ts",
         "Lines":  12,
         "Mojibake":  false,
@@ -3206,7 +3206,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\notifications\\types\\index.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\notifications\\types\\index.ts",
         "Extension":  ".ts",
         "Lines":  10,
         "Mojibake":  false,
@@ -3220,7 +3220,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\settings\\components\\notification-prefs.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\settings\\components\\notification-prefs.tsx",
         "Extension":  ".tsx",
         "Lines":  31,
         "Mojibake":  false,
@@ -3234,7 +3234,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\settings\\components\\password-form.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\settings\\components\\password-form.tsx",
         "Extension":  ".tsx",
         "Lines":  47,
         "Mojibake":  false,
@@ -3248,7 +3248,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\settings\\components\\profile-form.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\settings\\components\\profile-form.tsx",
         "Extension":  ".tsx",
         "Lines":  29,
         "Mojibake":  false,
@@ -3262,7 +3262,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\settings\\components\\theme-selector.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\settings\\components\\theme-selector.tsx",
         "Extension":  ".tsx",
         "Lines":  2,
         "Mojibake":  false,
@@ -3276,7 +3276,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\simulator\\components\\data-configurator.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\simulator\\components\\data-configurator.tsx",
         "Extension":  ".tsx",
         "Lines":  88,
         "Mojibake":  false,
@@ -3290,7 +3290,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\simulator\\components\\device-selector.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\simulator\\components\\device-selector.tsx",
         "Extension":  ".tsx",
         "Lines":  69,
         "Mojibake":  true,
@@ -3304,7 +3304,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\simulator\\components\\simulation-controls.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\simulator\\components\\simulation-controls.tsx",
         "Extension":  ".tsx",
         "Lines":  103,
         "Mojibake":  true,
@@ -3318,7 +3318,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\simulator\\components\\simulation-preview.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\simulator\\components\\simulation-preview.tsx",
         "Extension":  ".tsx",
         "Lines":  48,
         "Mojibake":  true,
@@ -3332,7 +3332,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\simulator\\hooks\\use-simulator.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\simulator\\hooks\\use-simulator.ts",
         "Extension":  ".ts",
         "Lines":  240,
         "Mojibake":  true,
@@ -3346,7 +3346,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\statistics\\components\\device-uptime-chart.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\statistics\\components\\device-uptime-chart.tsx",
         "Extension":  ".tsx",
         "Lines":  65,
         "Mojibake":  true,
@@ -3360,7 +3360,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\statistics\\components\\fleet-utilization-chart.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\statistics\\components\\fleet-utilization-chart.tsx",
         "Extension":  ".tsx",
         "Lines":  47,
         "Mojibake":  true,
@@ -3374,7 +3374,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\statistics\\components\\statistics-overview.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\statistics\\components\\statistics-overview.tsx",
         "Extension":  ".tsx",
         "Lines":  138,
         "Mojibake":  true,
@@ -3388,7 +3388,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\statistics\\hooks\\use-statistics.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\statistics\\hooks\\use-statistics.ts",
         "Extension":  ".ts",
         "Lines":  94,
         "Mojibake":  false,
@@ -3402,7 +3402,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\constants.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\constants.ts",
         "Extension":  ".ts",
         "Lines":  18,
         "Mojibake":  true,
@@ -3416,7 +3416,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\types.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\types.ts",
         "Extension":  ".ts",
         "Lines":  45,
         "Mojibake":  false,
@@ -3430,7 +3430,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\logs-filter.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\logs-filter.tsx",
         "Extension":  ".tsx",
         "Lines":  62,
         "Mojibake":  true,
@@ -3444,7 +3444,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\logs-viewer.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\logs-viewer.tsx",
         "Extension":  ".tsx",
         "Lines":  73,
         "Mojibake":  true,
@@ -3458,7 +3458,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\metrics-explorer.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\metrics-explorer.tsx",
         "Extension":  ".tsx",
         "Lines":  97,
         "Mojibake":  true,
@@ -3472,7 +3472,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\query-builder.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\query-builder.tsx",
         "Extension":  ".tsx",
         "Lines":  214,
         "Mojibake":  true,
@@ -3486,7 +3486,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\query-results-table.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\query-results-table.tsx",
         "Extension":  ".tsx",
         "Lines":  46,
         "Mojibake":  true,
@@ -3500,7 +3500,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\chart-views\\line-chart-view.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\chart-views\\line-chart-view.tsx",
         "Extension":  ".tsx",
         "Lines":  58,
         "Mojibake":  false,
@@ -3514,7 +3514,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\chart-views\\table-view.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\chart-views\\table-view.tsx",
         "Extension":  ".tsx",
         "Lines":  52,
         "Mojibake":  true,
@@ -3528,7 +3528,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\data-table\\column-header.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\data-table\\column-header.tsx",
         "Extension":  ".tsx",
         "Lines":  32,
         "Mojibake":  false,
@@ -3542,7 +3542,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\data-table\\data-table.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\data-table\\data-table.tsx",
         "Extension":  ".tsx",
         "Lines":  121,
         "Mojibake":  true,
@@ -3556,7 +3556,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\data-table\\pagination.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\data-table\\pagination.tsx",
         "Extension":  ".tsx",
         "Lines":  36,
         "Mojibake":  true,
@@ -3570,7 +3570,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\components\\data-table\\toolbar.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\components\\data-table\\toolbar.tsx",
         "Extension":  ".tsx",
         "Lines":  39,
         "Mojibake":  true,
@@ -3584,7 +3584,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-admin\\hooks\\use-system-admin.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-admin\\hooks\\use-system-admin.ts",
         "Extension":  ".ts",
         "Lines":  210,
         "Mojibake":  false,
@@ -3598,7 +3598,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-status\\components\\health-card.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-status\\components\\health-card.tsx",
         "Extension":  ".tsx",
         "Lines":  19,
         "Mojibake":  true,
@@ -3612,7 +3612,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-status\\components\\metric-card.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-status\\components\\metric-card.tsx",
         "Extension":  ".tsx",
         "Lines":  26,
         "Mojibake":  false,
@@ -3626,7 +3626,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-status\\components\\status-badge.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-status\\components\\status-badge.tsx",
         "Extension":  ".tsx",
         "Lines":  12,
         "Mojibake":  true,
@@ -3640,7 +3640,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-status\\components\\status-progress.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-status\\components\\status-progress.tsx",
         "Extension":  ".tsx",
         "Lines":  11,
         "Mojibake":  false,
@@ -3654,7 +3654,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\system-status\\hooks\\use-system-status.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\system-status\\hooks\\use-system-status.ts",
         "Extension":  ".ts",
         "Lines":  81,
         "Mojibake":  false,
@@ -3668,7 +3668,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\trips\\components\\trip-columns.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\trips\\components\\trip-columns.tsx",
         "Extension":  ".tsx",
         "Lines":  55,
         "Mojibake":  true,
@@ -3682,7 +3682,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\trips\\components\\trip-detail.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\trips\\components\\trip-detail.tsx",
         "Extension":  ".tsx",
         "Lines":  50,
         "Mojibake":  false,
@@ -3696,7 +3696,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\trips\\components\\trip-form.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\trips\\components\\trip-form.tsx",
         "Extension":  ".tsx",
         "Lines":  85,
         "Mojibake":  true,
@@ -3710,7 +3710,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\trips\\components\\trip-replay-controls.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\trips\\components\\trip-replay-controls.tsx",
         "Extension":  ".tsx",
         "Lines":  57,
         "Mojibake":  false,
@@ -3724,7 +3724,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\trips\\hooks\\use-trip-live-tracking.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\trips\\hooks\\use-trip-live-tracking.ts",
         "Extension":  ".ts",
         "Lines":  20,
         "Mojibake":  false,
@@ -3738,7 +3738,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\vehicles\\components\\vehicle-assign-device.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\vehicles\\components\\vehicle-assign-device.tsx",
         "Extension":  ".tsx",
         "Lines":  60,
         "Mojibake":  false,
@@ -3752,7 +3752,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\vehicles\\components\\vehicle-columns.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\vehicles\\components\\vehicle-columns.tsx",
         "Extension":  ".tsx",
         "Lines":  51,
         "Mojibake":  true,
@@ -3766,7 +3766,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\vehicles\\components\\vehicle-detail-modal.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\vehicles\\components\\vehicle-detail-modal.tsx",
         "Extension":  ".tsx",
         "Lines":  45,
         "Mojibake":  true,
@@ -3780,7 +3780,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\features\\vehicles\\components\\vehicle-form.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\features\\vehicles\\components\\vehicle-form.tsx",
         "Extension":  ".tsx",
         "Lines":  88,
         "Mojibake":  true,
@@ -3794,7 +3794,7 @@
         "HasButton":  true
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\hooks\\use-breadcrumbs.tsx",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\hooks\\use-breadcrumbs.tsx",
         "Extension":  ".tsx",
         "Lines":  91,
         "Mojibake":  false,
@@ -3808,7 +3808,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\hooks\\use-device-status-realtime.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\hooks\\use-device-status-realtime.ts",
         "Extension":  ".ts",
         "Lines":  92,
         "Mojibake":  false,
@@ -3822,7 +3822,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\hooks\\use-media-query.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\hooks\\use-media-query.ts",
         "Extension":  ".ts",
         "Lines":  14,
         "Mojibake":  false,
@@ -3836,7 +3836,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\hooks\\use-mobile.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\hooks\\use-mobile.ts",
         "Extension":  ".ts",
         "Lines":  15,
         "Mojibake":  false,
@@ -3850,7 +3850,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\hooks\\use-nav.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\hooks\\use-nav.ts",
         "Extension":  ".ts",
         "Lines":  48,
         "Mojibake":  false,
@@ -3864,7 +3864,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\hooks\\use-realtime-subscription.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\hooks\\use-realtime-subscription.ts",
         "Extension":  ".ts",
         "Lines":  29,
         "Mojibake":  false,
@@ -3878,7 +3878,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\hooks\\use-role-access.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\hooks\\use-role-access.ts",
         "Extension":  ".ts",
         "Lines":  31,
         "Mojibake":  false,
@@ -3892,7 +3892,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\hooks\\mutations\\use-create-export.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\hooks\\mutations\\use-create-export.ts",
         "Extension":  ".ts",
         "Lines":  28,
         "Mojibake":  true,
@@ -3906,7 +3906,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\notification.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\notification.ts",
         "Extension":  ".ts",
         "Lines":  14,
         "Mojibake":  false,
@@ -3920,7 +3920,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\utils.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\utils.ts",
         "Extension":  ".ts",
         "Lines":  5,
         "Mojibake":  false,
@@ -3934,7 +3934,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\alerts.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\alerts.ts",
         "Extension":  ".ts",
         "Lines":  14,
         "Mojibake":  false,
@@ -3948,7 +3948,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\auth.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\auth.ts",
         "Extension":  ".ts",
         "Lines":  34,
         "Mojibake":  false,
@@ -3962,7 +3962,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\client.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\client.ts",
         "Extension":  ".ts",
         "Lines":  69,
         "Mojibake":  false,
@@ -3976,7 +3976,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\customers.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\customers.ts",
         "Extension":  ".ts",
         "Lines":  11,
         "Mojibake":  false,
@@ -3990,7 +3990,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\dashboard.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\dashboard.ts",
         "Extension":  ".ts",
         "Lines":  15,
         "Mojibake":  false,
@@ -4004,7 +4004,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\device-detail.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\device-detail.ts",
         "Extension":  ".ts",
         "Lines":  80,
         "Mojibake":  false,
@@ -4018,7 +4018,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\devices.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\devices.ts",
         "Extension":  ".ts",
         "Lines":  31,
         "Mojibake":  false,
@@ -4032,7 +4032,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\drivers.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\drivers.ts",
         "Extension":  ".ts",
         "Lines":  13,
         "Mojibake":  false,
@@ -4046,7 +4046,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\export.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\export.ts",
         "Extension":  ".ts",
         "Lines":  59,
         "Mojibake":  false,
@@ -4060,7 +4060,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\exports.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\exports.ts",
         "Extension":  ".ts",
         "Lines":  1,
         "Mojibake":  false,
@@ -4074,7 +4074,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\firmware.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\firmware.ts",
         "Extension":  ".ts",
         "Lines":  15,
         "Mojibake":  false,
@@ -4088,7 +4088,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\geofences.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\geofences.ts",
         "Extension":  ".ts",
         "Lines":  13,
         "Mojibake":  false,
@@ -4102,7 +4102,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\maintenance.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\maintenance.ts",
         "Extension":  ".ts",
         "Lines":  11,
         "Mojibake":  false,
@@ -4116,7 +4116,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\map.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\map.ts",
         "Extension":  ".ts",
         "Lines":  4,
         "Mojibake":  false,
@@ -4130,7 +4130,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\notifications.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\notifications.ts",
         "Extension":  ".ts",
         "Lines":  10,
         "Mojibake":  false,
@@ -4144,7 +4144,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\simulator.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\simulator.ts",
         "Extension":  ".ts",
         "Lines":  22,
         "Mojibake":  false,
@@ -4158,7 +4158,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\statistics.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\statistics.ts",
         "Extension":  ".ts",
         "Lines":  11,
         "Mojibake":  false,
@@ -4172,7 +4172,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\system-admin.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\system-admin.ts",
         "Extension":  ".ts",
         "Lines":  18,
         "Mojibake":  false,
@@ -4186,7 +4186,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\system-status.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\system-status.ts",
         "Extension":  ".ts",
         "Lines":  5,
         "Mojibake":  false,
@@ -4200,7 +4200,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\trips.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\trips.ts",
         "Extension":  ".ts",
         "Lines":  15,
         "Mojibake":  false,
@@ -4214,7 +4214,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\users.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\users.ts",
         "Extension":  ".ts",
         "Lines":  30,
         "Mojibake":  false,
@@ -4228,7 +4228,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\vehicles.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\vehicles.ts",
         "Extension":  ".ts",
         "Lines":  13,
         "Mojibake":  false,
@@ -4242,7 +4242,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\api\\violations.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\api\\violations.ts",
         "Extension":  ".ts",
         "Lines":  11,
         "Mojibake":  false,
@@ -4256,7 +4256,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\store\\map-store.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\store\\map-store.ts",
         "Extension":  ".ts",
         "Lines":  1,
         "Mojibake":  false,
@@ -4270,7 +4270,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\stores\\auth-store.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\stores\\auth-store.ts",
         "Extension":  ".ts",
         "Lines":  28,
         "Mojibake":  false,
@@ -4284,7 +4284,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\stores\\map-store.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\stores\\map-store.ts",
         "Extension":  ".ts",
         "Lines":  1,
         "Mojibake":  false,
@@ -4298,7 +4298,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\utils\\browser-notification.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\utils\\browser-notification.ts",
         "Extension":  ".ts",
         "Lines":  55,
         "Mojibake":  true,
@@ -4312,7 +4312,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\utils\\logger.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\utils\\logger.ts",
         "Extension":  ".ts",
         "Lines":  14,
         "Mojibake":  false,
@@ -4326,7 +4326,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\utils\\query-invalidation.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\utils\\query-invalidation.ts",
         "Extension":  ".ts",
         "Lines":  65,
         "Mojibake":  false,
@@ -4340,7 +4340,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\utils\\date\\format.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\utils\\date\\format.ts",
         "Extension":  ".ts",
         "Lines":  57,
         "Mojibake":  false,
@@ -4354,7 +4354,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\alert.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\alert.schema.ts",
         "Extension":  ".ts",
         "Lines":  12,
         "Mojibake":  false,
@@ -4368,7 +4368,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\auth.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\auth.schema.ts",
         "Extension":  ".ts",
         "Lines":  7,
         "Mojibake":  false,
@@ -4382,7 +4382,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\customer.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\customer.schema.ts",
         "Extension":  ".ts",
         "Lines":  11,
         "Mojibake":  false,
@@ -4396,7 +4396,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\device.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\device.schema.ts",
         "Extension":  ".ts",
         "Lines":  15,
         "Mojibake":  false,
@@ -4410,7 +4410,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\export.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\export.schema.ts",
         "Extension":  ".ts",
         "Lines":  12,
         "Mojibake":  false,
@@ -4424,7 +4424,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\firmware.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\firmware.schema.ts",
         "Extension":  ".ts",
         "Lines":  12,
         "Mojibake":  false,
@@ -4438,7 +4438,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\geofence.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\geofence.schema.ts",
         "Extension":  ".ts",
         "Lines":  9,
         "Mojibake":  false,
@@ -4452,7 +4452,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\maintenance.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\maintenance.schema.ts",
         "Extension":  ".ts",
         "Lines":  10,
         "Mojibake":  false,
@@ -4466,7 +4466,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\settings.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\settings.schema.ts",
         "Extension":  ".ts",
         "Lines":  20,
         "Mojibake":  false,
@@ -4480,7 +4480,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\trip.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\trip.schema.ts",
         "Extension":  ".ts",
         "Lines":  10,
         "Mojibake":  false,
@@ -4494,7 +4494,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\user.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\user.schema.ts",
         "Extension":  ".ts",
         "Lines":  9,
         "Mojibake":  false,
@@ -4508,7 +4508,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\lib\\validations\\vehicle.schema.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\lib\\validations\\vehicle.schema.ts",
         "Extension":  ".ts",
         "Lines":  18,
         "Mojibake":  false,
@@ -4522,7 +4522,7 @@
         "HasButton":  false
     },
     {
-        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system\\Tracking_Frontend\\src\\types\\index.ts",
+        "File":  "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\iot-vehicle-tracking-system-cloud\\Tracking_Frontend\\src\\types\\index.ts",
         "Extension":  ".ts",
         "Lines":  25,
         "Mojibake":  false,

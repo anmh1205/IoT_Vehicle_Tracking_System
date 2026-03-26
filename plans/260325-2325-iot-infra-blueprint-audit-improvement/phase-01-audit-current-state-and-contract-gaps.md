@@ -31,10 +31,10 @@
 
 ## Related code files
 - Files to inspect:
-1. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/index.ts`
-2. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/constants/topics.ts`
-3. `iot-vehicle-tracking-system/Tracking_MqttBridge/src/validators/payload.validator.ts`
-4. `iot-vehicle-tracking-system/Tracking_PostgreSQL/init/*.sql`
+1. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/index.ts`
+2. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/constants/topics.ts`
+3. `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/validators/payload.validator.ts`
+4. `iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/*.sql`
 5. `.github/workflows/*-uat.yml`
 - Files to modify/create in this phase:
 1. `plans/reports/audit-260325-2325-iot-infra-blueprint-gap-risk.md`

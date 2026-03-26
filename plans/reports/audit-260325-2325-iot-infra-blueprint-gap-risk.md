@@ -4,7 +4,7 @@ Date: 2026-03-25 23:25 ICT
 Scope: đối chiếu `plans/260325-2126-iot-infra-rapid-bootstrap-blueprint` với codebase hiện tại (ingest stack).
 
 ## Evidence snapshots (path:line)
-- Hard-code route theo topic suffix: `iot-vehicle-tracking-system/Tracking_MqttBridge/src/index.ts:35-58`.
+- Hard-code route theo topic suffix: `iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/index.ts:35-58`.
 - Topic families fixed trong constants: `.../src/constants/topics.ts:1-6`.
 - Payload contract đang nằm trong code (zod): `.../src/validators/payload.validator.ts:3-50`.
 - Rawdata handler gắn chặt VM/VL/DB side-effects: `.../src/handlers/rawdata.handler.ts:77-121`.

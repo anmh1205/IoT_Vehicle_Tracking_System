@@ -4,14 +4,14 @@ on:
   push:
     branches: [uat]
     paths:
-      - 'iot-vehicle-tracking-system/Tracking_Backend/**'
+      - 'iot-vehicle-tracking-system-cloud/Tracking_Backend/**'
 
 jobs:
   quality-and-build:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: iot-vehicle-tracking-system/Tracking_Backend
+        working-directory: iot-vehicle-tracking-system-cloud/Tracking_Backend
     steps:
       - uses: actions/checkout@v4
 
@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: iot-vehicle-tracking-system/Tracking_Backend/package-lock.json
+          cache-dependency-path: iot-vehicle-tracking-system-cloud/Tracking_Backend/package-lock.json
 
       - run: npm ci
       - run: npm run lint
@@ -35,7 +35,7 @@ jobs:
 
       - uses: docker/build-push-action@v6
         with:
-          context: iot-vehicle-tracking-system/Tracking_Backend
+          context: iot-vehicle-tracking-system-cloud/Tracking_Backend
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/tracking-backend:uat
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: backend-compose
-          path: iot-vehicle-tracking-system/Tracking_Backend/docker-compose.uat.yml
+          path: iot-vehicle-tracking-system-cloud/Tracking_Backend/docker-compose.uat.yml
 
   deploy-uat:
     needs: quality-and-build

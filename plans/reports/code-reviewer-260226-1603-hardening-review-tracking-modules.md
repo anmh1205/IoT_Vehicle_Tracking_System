@@ -14,7 +14,7 @@ Hardening direction đúng (RBAC, MQTT auth parity, infra tightening), nhưng c�
 1) Password reset flow bị “success but unusable” (regression nghiệp vụ nghiêm trọng)
 - Impact: API reset password trả thành công nhưng không trả/không gửi temporary credential hoặc reset token; tài khoản bị đổi mật khẩu mà không có kênh lấy mật khẩu mới -> lockout.
 - Evidence:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Backend/src/api/controllers/auth.controller.ts:224-233`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/controllers/auth.controller.ts:224-233`
   - Snippet:
     ```ts
     const temporaryPassword = `Tmp${randomBytes(12).toString('base64url')}!`;
@@ -27,7 +27,7 @@ Hardening direction đúng (RBAC, MQTT auth parity, infra tightening), nhưng c�
 2) Axios refresh flow có thể tự chờ chính nó khi `/auth/refresh` trả 401 (deadlock/hang)
 - Impact: request chain có thể treo vô hạn khi refresh fail; UI stuck, request queue không thoát.
 - Evidence:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/lib/api/client.ts:39-55`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/lib/api/client.ts:39-55`
   - Snippet:
     ```ts
     if (!isRefreshing) {
@@ -56,11 +56,11 @@ Hardening direction đúng (RBAC, MQTT auth parity, infra tightening), nhưng c�
 2) Frontend image allowlist có risk regression hiển thị ảnh (Low)
 - `next.config.ts` chỉ allow `https://localhost|*.localhost|tracking.local|*.tracking.local`.
 - Nếu hệ thống dùng CDN hoặc domain ảnh khác, ảnh sẽ fail runtime.
-- Reference: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/next.config.ts:6-11`
+- Reference: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/next.config.ts:6-11`
 
 3) Mobile secure-config check dùng `contains('localhost')` (Low)
 - Có thể cho qua vài host string không mong muốn nếu chỉ kiểm tra substring, không parse hostname chuẩn.
-- Reference: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Mobile/lib/core/config/app_config.dart:28-42`
+- Reference: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Mobile/lib/core/config/app_config.dart:28-42`
 
 ### Edge Cases Found by Scout
 - Auth-failure path khi refresh endpoint cũng fail -> interceptor recursion/deadlock.
@@ -69,16 +69,16 @@ Hardening direction đúng (RBAC, MQTT auth parity, infra tightening), nhưng c�
 
 ### Positive Observations
 - RBAC backend cho admin routes đã được siết đúng hướng:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Backend/src/api/routes/users.routes.ts:13-18`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Backend/src/api/routes/auth.routes.ts:20-24`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/routes/users.routes.ts:13-18`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/routes/auth.routes.ts:20-24`
 - Metrics đã fail-closed khi production thiếu mật khẩu:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Backend/src/api/routes/metrics.routes.ts:15-22`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/routes/metrics.routes.ts:15-22`
 - Open redirect ở login đã được chặn bằng internal-path check:
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_Frontend/src/features/auth/components/login-form.tsx:19-23`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/auth/components/login-form.tsx:19-23`
 - MQTT bridge auth parity tốt hơn (status/event/firmware đều verify token):
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_MqttBridge/src/handlers/status.handler.ts:46-50`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_MqttBridge/src/handlers/event.handler.ts:55-59`
-  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system/Tracking_MqttBridge/src/handlers/firmware.handler.ts:41-45`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/handlers/status.handler.ts:46-50`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/handlers/event.handler.ts:55-59`
+  - `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/handlers/firmware.handler.ts:41-45`
 
 ### Previously Identified Risks: Fixed Status
 - RBAC thiếu ở user-management routes: **Fixed**.

@@ -1,7 +1,7 @@
 # Phase 07 — Run build, consistency checks, and final baseline lock
 
 ## Context Links
-- Firmware project root: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-firmware/`
+- Firmware project root: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/`
 - Plan folder: `E:/anmh1205/IoT_Vehicle_Tracking_System/plans/260306-0044-hardware-power-pinout-rebaseline/`
 
 ## Overview
