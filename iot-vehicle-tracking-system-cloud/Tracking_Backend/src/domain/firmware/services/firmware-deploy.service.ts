@@ -42,7 +42,7 @@ export const deployFirmware = async (
     });
   }
 
-  publishEvent('firmware.assignment.updated', {
+  publishEvent('firmware:assignment', {
     firmware_id: firmwareId,
     device_ids: deployments.map((d) => d.device_id),
     status: 'assigned',

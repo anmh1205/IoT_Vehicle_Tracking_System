@@ -11,6 +11,7 @@ import {
   Upload,
   Wifi,
   Wrench,
+  Waypoints,
 } from 'lucide-react';
 
 export interface MarketingFeature {
@@ -30,6 +31,21 @@ export interface FlowStep {
   icon: LucideIcon;
   title: string;
   description: string;
+}
+
+export interface LoginLandingHighlight {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+export interface LoginLandingContent {
+  badge: string;
+  title: string;
+  description: string;
+  highlights: LoginLandingHighlight[];
+  proofLabels: string[];
+  assistText: string;
 }
 
 export const heroSignals = [
@@ -122,3 +138,29 @@ export const flowSteps: FlowStep[] = [
     description: 'System status, metrics và exports giúp nhìn thấy sức khỏe toàn hệ thống.',
   },
 ];
+
+export const loginLandingContent: LoginLandingContent = {
+  badge: 'Trung tâm điều hành đội xe',
+  title: 'Theo dõi đội xe theo thời gian thực, xử lý sự cố ngay khi phát sinh.',
+  description:
+    'Từ vị trí xe, trạng thái thiết bị đến cảnh báo bất thường, mọi tín hiệu được đưa về cùng một màn hình để ca trực phối hợp nhanh và chính xác.',
+  highlights: [
+    {
+      icon: Activity,
+      title: 'Nắm tình hình ngay khi đăng nhập',
+      description: 'Bản đồ, trạng thái kết nối và cảnh báo được cập nhật liên tục để bạn biết xe nào cần ưu tiên trước.',
+    },
+    {
+      icon: Waypoints,
+      title: 'Điều phối liền mạch trong một luồng',
+      description: 'Dữ liệu đi từ thiết bị qua backend lên dashboard theo cùng ngữ cảnh, giúp thao tác ít hơn và quyết định nhanh hơn.',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'Truy cập đúng quyền, vận hành ổn định',
+      description: 'Xác thực theo vai trò và quản lý phiên tập trung giúp mỗi bộ phận vào đúng phạm vi cần xử lý.',
+    },
+  ],
+  proofLabels: ['Bản đồ GPS realtime', 'Cảnh báo geofence', 'Theo dõi chuyến đi', 'Trạng thái hệ thống', 'Quản lý quyền truy cập'],
+  assistText: 'Đăng nhập để tiếp tục theo dõi và điều phối đội xe trong ca hiện tại.',
+};

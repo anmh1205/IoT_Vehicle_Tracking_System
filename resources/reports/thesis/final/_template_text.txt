@@ -1,0 +1,1851 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN HƯỚNG DẪN
+
+Giảng viên hướng dẫn: TS. Đỗ Quang Chấn.                      Khoa: Cơ khí – Cơ điện tử.
+Tên đề tài: Thiết kế hệ thống Pan-Tilt Unit (PTU) điều khiển từ xa.
+Sinh viên thực hiện: Nguyễn Quang Thành Đạt.             Lớp: K14 – KTCĐT.
+
+NỘI DUNG NHẬN XÉT
+I. Nhận xét Đồ án tốt nghiệp:
+- Nhận xét về hình thức:………………………………………………………………….
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+- Tính cấp thiết của đề tài:……………………………………………………………….
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+- Mục tiêu của đề tài:…………………………………………………………………….
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+- Nội dung của đề tài:……………………………………………………………………
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+- Tài liệu tham khảo:…………………………………………………………………….
+……………………………………………………………………………………….......
+- Phương pháp nghiên cứu:………………………………………………………………
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+- Tính sáng tạo và ứng dụng:……………………………………………………………
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+II. Nhận xét về tinh thần và thái độ làm việc của sinh viên:
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+III. Kết quả đạt được:
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+IV. Kết luận: Đồng ý cho bảo vệ:                           Không đồng ý cho bảo vệ: 
+
+
+
+
+
+
+
+
+
+
+NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN PHẢN BIỆN
+Giảng viên phản biện:……………………………..Khoa:………………………………
+Tên đề tài:………………………………………………………………………………..
+……………………………………………………………………………………….......
+Sinh viên thực hiện:………………………………..Lớp: ………………………………
+Giảng viên hướng dẫn:………………………………………………………………......
+NỘI DUNG NHẬN XÉT
+I. Nhận xét Đồ án tốt nghiệp:
+- Bố cục, hình thức trình bày:……………………………………………………………
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+…………………………………………………………………………………………..
+- Đảm bảo tính cấp thiết, hiện đại, không trùng lặp:………………………………………
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+…………………………………………………………………………………………..
+- Nội dung:……………………………………………………………………………….
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+…………………………………………………………………………………………..
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+…………………………………………………………………………………………..
+- Mức độ thực hiện:………………………………………………………………………
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+II. Kết quả đạt được:…………………………………………………………………....
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+…………………………………………………………………………………………..
+……………………………………………………………………………………….......
+III. Ưu nhược điểm:
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+
+IV. Kết luận: Đồng ý cho bảo vệ:                           Không đồng ý cho bảo vệ: 
+
+BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP
+
+I. Thông tin chung
+Thời gian: từ … giờ … đến … giờ … ngày …/ … /20…
+Địa điểm:………………………………..………………………………………..
+Họ và tên sinh viên:………………………… Mã số SV:………………………..
+Lớp: ……………………Ngành:……………………. Khóa:……………………
+Tên đề tài:………………………………………………………………………...
+Giảng viên hướng dẫn:…………………………………………………………...
+
+II. Thành phần:
+III. Tổng hợp câu hỏi của thành viên hội đồng
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+VI. Tổng hợp nội dung trả lời của sinh viên
+……………………………………………………………………………………….......
+……………………………………………………………………………………….......……………………………………………………………………………………….......
+……………………………………………………………………………………….......
+V. Nội dung đánh giá của Hội đồng
+Ý nghĩa của đồ án:…………………………………………………………….....
+Về nội dung, kết cấu của đồ án:………………………………………………….
+Phương pháp nghiên cứu:…………………………………………………………
+Các kết quả nghiên cứu đạt được:…………………………………………………
+
+VI. Điểm kết luận: …………………………….. (Bằng chữ:…………….…………….)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GIẢI TRÌNH CÁC CHỈNH SỬA
+(Nếu có)
+
+
+
+
+
+
+LỜI CAM ĐOAN
+
+Tên tôi là: Nguyễn Quang Thành Đạt.
+Mã sinh viên: 20010998 					                    Lớp:K14 - KTCĐT
+Ngành: Kỹ thuật cơ điện tử.
+Tôi đã thực hiện đồ án tốt nghiệp với đề tài: Thiết kế hệ thống Pan-Tilt Unit (PTU) điều khiển từ xa.
+Tôi xin cam đoan đây là đề tài nghiên cứu của riêng tôi và được sự hướng dẫn của: 
+TS. Đỗ Quang Chấn.
+Các nội dung nghiên cứu, kết quả trong đề tài này là trung thực và chưa được các tác giả khác công bố dưới bất kỳ hình thức nào. Nếu phát hiện có bất kỳ hình thức gian lận nào tôi xin hoàn toàn chịu trách nhiêm trước pháp luật.
+
+TÓM TẮT ĐỒ ÁN TỐT NGHIỆP - ABSTRACT 
+Đồ án tập trung nghiên cứu và thiết kế chế tạo hệ thống Pan-Tilt Unit (PTU) điều khiển từ xa, nhằm giải quyết bài toán hỗ trợ ghi hình tự động cho các hoạt động thể thao phong trào, cụ thể là các sân bóng đá mini 7 người. Mục tiêu tạo ra một thiết bị cơ khí linh hoạt, có khả năng gá đặt camera và điều khiển góc quay bao quát toàn bộ sân bãi thay thế cho việc quay phim cầm tay truyền thống.
+Về phương pháp thực hiện, đồ án tiến hành tính toán thiết kế cơ khí, xây dựng mô hình 3D và mô phỏng chuyển động. Hệ thống điều khiển được xây dựng dựa trên vi điều khiển, kết hợp với phần mềm giao diện trên máy tính/điện thoại để người dùng thao tác từ xa. Các yếu tố về độ trễ tín hiệu và độ mượt của chuyển động quay quét (Pan/Tilt) được chú trọng tối ưu để phù hợp với tốc độ của trận đấu.
+Kết quả đạt được là một sản phẩm mẫu hoàn chỉnh có khả năng vận hành thực tế, tích hợp được với các dòng camera thông dụng. Hệ thống cho phép điều khiển góc quay linh hoạt, hoạt động ổn định và dễ dàng lắp đặt tại các sân bóng. Đồ án đóng góp một giải pháp thiết bị phụ trợ chi phí thấp, có tính ứng dụng cao trong nhu cầu ghi hình, livestream thể thao đang ngày càng phổ biến.
+
+
+LỜI CẢM ƠN  - ACKNOWLEDGEMENTS
+Sinh viên thực hiện dự án xin gửi lời cảm ơn chân thành tới tất cả các cá nhân, đơn vị, doanh nghiệp đã hỗ trợ để hoàn thiện sản phẩm của dự án này. 
+Em xin bày tỏ lòng biết ơn sâu sắc đến hai thầy hướng dẫn: TS. Đỗ Quang Chấn và TS. Nguyễn Đức Nam. Các thầy đã dành rất nhiều thời gian đồng hành, định hướng đề tài, chia sẻ kinh nghiệm, góp ý chi tiết và hỗ trợ em trong các giải pháp kỹ thuật chuyên sâu, trở thành động lực quan trọng giúp em vượt qua khó khăn và hoàn thiện đồ án một cách tối ưu hơn về mặt công nghệ cũng như tính thực tiễn.  
+Sự hỗ trợ tận tình từ các thầy đã đóng góp quan trọng vào sự thành công của đồ án này. Em xin chân thành cảm ơn các Thầy và các thành viên tại Lab Cơ điện tử Ứng dụng (Applied Mechatronics Lab - AML). Môi trường học thuật năng động và cơ sở vật chất tại Lab đã tạo điều kiện tốt nhất để em rèn luyện kỹ năng, hiện thực hóa các ý tưởng thiết kế và hoàn thành mô hình.
+Cuối cùng, em xin cảm ơn các Thầy Cô trong Khoa Cơ khí - Cơ Điện tử đã truyền đạt kiến thức nền tảng vững chắc trong suốt những năm học vừa qua, giúp em có đủ hành trang để thực hiện đồ án này.
+Dù đã rất cố gắng, đồ án chắc chắn không tránh khỏi những thiếu sót. Em rất mong nhận được sự đóng góp ý kiến của quý Thầy Cô để đề tài được hoàn thiện hơn.
+Em xin chân thành cảm ơn!
+Hà Nội, ngày … tháng … năm 20…
+SINH VIÊN THỰC HIỆN
+                                            
+
+                                                
+Nguyễn Quang Thành Đạt
+
+MỤC LỤC - TABLE OF CONTENT
+
+
+
+DANH MỤC BẢNG - LIST OF TABLES
+
+Bảng 1.1: Ràng buộc thiết kế	3
+Bảng 1.2: Chỉ tiêu thiết kế	4
+Bảng 1.3: Bảng đánh giá mức độ đáp ứng chỉ tiêu kỹ thuật	7
+Bảng 2.1: So sánh các giải pháp thiết bị quay quét hiện có trên thị trường	10
+Bảng 2.2: Tiêu chí thiết kế	12
+Bảng 2.3: Ràng buộc thiết kế	13
+Bảng 2.4: Tổng hợp yêu cầu từ các bên liên quan và tác động tới thiết kế	13
+Bảng 3.1: So sánh các giải pháp kết cấu khung giá đỡ PTU	16
+Bảng 3.2: So sánh phương án truyền động	16
+Bảng 3.3: So sánh thông số kỹ thuật giữa hai phương án cơ khí	25
+Bảng 3.4: Bảng đánh giá lựa chọn cấu hình hệ thống điều khiển	28
+Bảng 3.5 : Đánh giá lựa chọn phương án truyền thông	29
+Bảng 3.6: Bảng tổng hợp cấu hình hệ thống PTU	31
+Bảng 4.1: Thông số cấu hình in 3D	40
+Bảng 4.2: Kết quả đo lường cơ khí và vật lý	46
+Bảng 4.3: Thử nghiệm thời gian tiêu thụ điện năng	47
+Bảng 4.4: So sánh thực nghiệm các phương án truyền thông	47
+Bảng 4.5: Bảng đo độ chính xác lặp lại	49
+Bảng 4.6: So sánh Lý thuyết vs Thực tế	52
+
+DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF PICTURES AND GRAPHS
+Hình 1.1: So sánh hai phương pháp	1
+Hình 1.2: Các trục chuyển động Pan và Tilt trên camera	2
+Hình 1.3: Các dạng PTU thực tế	2
+Hình 1.4: Sơ đồ hệ thống	6
+Hình 1.5: Mô hình tham chiếu kết cấu cơ khí	7
+Hình 2.1: Mối tương quan đánh đổi giữa các yếu tố kỹ thuật	10
+Hình 3.1: Sơ đồ nguyên lý hoạt động của PTU 2 bậc tự do	15
+Hình 3.2: Vị trí đặt camera	17
+Hình 3.3: (a) Kết cấu robot hình chữ U, (b)kết cấu robot hình chữ L	18
+Hình 3.4: Máy ảnh Canon EOS 77D	19
+Hình 3.5: Trọng tâm và khối lượng của cụm PTU	19
+Hình 3.6: Thông số cụm tilt	20
+Hình 3.7: Thông số cụm pan	21
+Hình 3.8: Camera điện thoại iphone 17 pro max.	22
+Hình 3.9: Trọng tâm và khối lượng của cụm PTU	23
+Hình 3.10: Thông số cụm tilt	23
+Hình 3.11: Thông số cụm pan	24
+Hình 3.12: Máy tính nhúng LattePanda (trái), hộp điều khiển đã tích hợp máy tính nhúng (phải)	26
+Hình 3.13: Sơ đồ nguyên lý hoạt động của giải pháp cấu hình A	27
+Hình 3.14: Sơ đồ nguyên lý hoạt động của giải cấu hình B	28
+Hình 3.15: Kiến trúc hệ thống điều khiển theo mô hình Client-Server	30
+Hình 4.1: Tổng thể hệ thống cơ khí PTU	33
+Hình 4.2: Thiết kế cụm pan	34
+Hình 4.3: Thiết kế cụm tilt	35
+Hình 4.4: Thiết kế hộp điều khiển	36
+Hình 4.5: Thiết kế tay cầm điều khiển từ xa	37
+Hình 4.6: (a)  main kết nối esp32 ,(b) sơ đồ kết nối chân	37
+Hình 4.7: Sơ đồ kết nối các mô đun	38
+Hình 4.8: Module hạ áp MP1584	38
+Hình 4.9: Kit phát triển ESP32-WROOM-32U	39
+Hình 4.10: Module Driver TMC2209	40
+Hình 4.11: Sản phẩm sau khi được lắp ráp và hoàn thiện	42
+Hình 4.12: Lưu đồ thuật toán điều khiển chính (Main Control Loop)	44
+Hình 4.13: Quy trình lấy home chính xác	44
+Hình 4.14: Giao diện phần mềm điều khiển thực tế trên máy tính	45
+Hình 4.15: Gắn Lazer lên robot phục vụ mục đích thử nghiệm	48
+Hình 4.16: Thử nghiệm đo độ lệch tâm	49
+Hình 4.17: Kiểm tra phạm vi kết nối	50
+Hình 4.18: thử nghiệm phun nước lên PTU	51
+
+DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATION
+
+
+
+CHƯƠNG 1. GIỚI THIỆU DỰ ÁN - SUMMARY
+1.1. Đặt vấn đề/ Bối cảnh của dự án – Problem definition and Background
+Trong những năm gần đây, phong trào bóng đá sân 7 người (bóng đá phủi) phát triển cực kỳ mạnh mẽ. Nhu cầu ghi hình, livestream trận đấu để lưu giữ khoảnh khắc hoặc phân tích chiến thuật của các đội bóng phòng trào ngày càng cao. Một số phương pháp ghi hình hiện nay là: (1) quay thủ công bằng điện thoại/máy quay cầm tay (với hạn chế về rung lắc, mỏi tay, hạn chế góc nhìn), (2) sử dụng thiết bị truyền hình chuyên nghiệp với chi phí lớn và yêu cầu nhân sự sử dụng được đào tạo (Hình 1.1) [1].
+Hình 1.1: So sánh hai phương pháp
+Để giải quyết bài toán trên, giải pháp công nghệ đề xuất là sử dụng hệ thống quay quét tự động, hay còn gọi là Pan - Tilt Unit (PTU). Về mặt kỹ thuật, PTU thực chất là một cơ cấu robot có 2 bậc tự do, cho phép camera thực hiện hai chuyển động cơ bản như hình 1.2:
+- Pan (Góc phương vị)
+- Tilt (Góc tà)
+
+Hình 1.2: Các trục chuyển động Pan và Tilt trên camera
+Trên thực tế, hệ thống PTU đã được ứng dụng rộng rãi trong nhiều lĩnh vực từ dân sự đến quân sự. Tùy vào mục đích sử dụng mà PTU sẽ có kích thước và kết cấu cơ khí khác nhau như camera dân sự, camera an ninh hoặc camera quân sự với độ phân giải và khả năng zoom lớp (Hình 1.3) [2]. 
+Hình 1.3: Các dạng PTU thực tế
+Từ nhu cầu thực tế của các sân bóng mini và nền tảng công nghệ trên, sinh viên lựa chọn đồ án với tiêu đề "Thiết kế hệ thống Pan-Tilt Unit điều khiển từ xa" nhằm chế tạo một thiết bị chuyên dụng: nhỏ gọn, lắp đặt nhanh chóng tại sân bóng, hoạt động ngoài trời và có giá thành phù hợp [3].
+1.2. Mục tiêu  và phạm vi của dự án 
+Mục đích: Dự án nhằm mục tiêu thiết kế và chế tạo thành công hệ thống Pan-Tilt Unit (PTU) có khả năng điều khiển từ xa qua giao tiếp WiFi, tích hợp được với các camera hoặc dụng cụ ghi hình thông thường. Sản phẩm hướng tới ứng dụng thực tế để ghi hình tự động cho các hoạt động thể thao ngoài trời, cụ thể là các trận bóng đá mini 7 người, giúp thay thế sức người và tối ưu hóa góc quay.
+- Để đảm bảo khả năng hoạt động ổn định ngoài trời, thiết kế sẽ phải đáp ứng các tiêu chuẩn sau (Bảng 1.1, 1.2): 
+Bảng 1.1: Ràng buộc thiết kế 
+
+- Thông số kỹ thuật:
+Bảng 1.2: Chỉ tiêu thiết kế
+Đặc biệt, với ứng dụng ghi hình trận bóng đá mini 7 người kéo dài khoảng 90 phút (bao gồm cả thời gian nghỉ giữa hai hiệp), hệ thống cần đảm bảo thời gian hoạt động liên tục tối thiểu 90 phút từ nguồn pin tích hợp mà không cần thay thế hoặc sạc bổ sung. Đây là ràng buộc quan trọng ảnh hưởng trực tiếp đến thiết kế nguồn điện và quản lý năng lượng của hệ thống.
+1.3. Các tiêu chí cần đạt được của dự án 
+Để đảm bảo tính thực tiễn và khả năng ứng dụng cho việc ghi hình thể thao (sân bóng mini 7 người), đồ án đặt ra các nhóm tiêu chí cụ thể cần hoàn thành như sau:
+Về sản phẩm và tính năng: 
+Hệ thống phải hoạt động ổn định, điều khiển được hai trục Pan (quay) và Tilt (ngẩng) một cách độc lập và ổn định.
+Cơ cấu cơ khí phải đảm bảo độ cứng vững, không rung lắc khi camera di chuyển, đồng thời tương thích với các chân máy ảnh (tripod) tiêu chuẩn trên thị trường.
+Hệ thống điều khiển phải giao tiếp không dây (WiFi), cho phép người dùng thao tác từ xa thông qua giao diện trên máy tính.
+Về hồ sơ và tài liệu:
+Hoàn thiện bộ bản vẽ thiết kế 3D (Solidworks) và bản vẽ lắp ráp, gia công chi tiết.
+Xây dựng mã nguồn (Firmware) cho vi điều khiển và giao diện người dùng.
+Báo cáo thuyết minh đầy đủ quy trình tính toán, thiết kế và chế tạo.
+1.4. Phương pháp tiếp cận thiết kế kỹ thuật 
+Để giải quyết bài toán thiết kế hệ thống PTU hỗ trợ quay phim thể thao, sinh viên thực hiện áp dụng quy trình thiết kế kỹ thuật (Engineering Design Process) kết hợp giữa lý thuyết và thực nghiệm, cụ thể được mô tả như sau [5]:
+- Quy trình thực hiện: Sinh viên tiến hành rà soát các tài liệu kỹ thuật và các sản phẩm thương mại hiện có để tìm hiểu nguyên lý hoạt động. Quy trình thiết kế được thực hiện tuần tự theo mô tả của một quy trình thiết kế sản phẩm kỹ thuật:
+Thiết kế ý tưởng: lên concept thiết kế, lựa chọn giải pháp cơ khí, điện tử, truyền thông và điều khiển. Xây dựng sơ đồ hệ thống đáp ứng khả năng công nghệ (Hình 1.4)
+Thiết kế chi tiết: Sử dụng phần mềm Solidworks để dựng hình 3D, kiểm tra va chạm xác định khả năng gia công, gia công mẫu thử bằng phương pháp in 3D.
+Thiết kế mạch: Tính toán công suất động cơ, lựa chọn driver và thiết kế sơ đồ nguyên lý.
+Lập trình & Tích hợp: Xây dựng thuật toán điều khiển vị trí trên vi điều khiển ESP32 và triển khai tích hợp với giao diện App trên máy tính.
+
+Hình 1.4: Sơ đồ hệ thống
+- Giải pháp kỹ thuật: Dựa trên yêu cầu quay quét sân bóng ngoài trời, hệ thống được thiết kế theo dạng module hóa với các cụm độc lập để dễ chế tạo, lắp ráp và thay thế. Cụm Pan (góc phương vị) được thiết kế chịu lực chính cho toàn bộ hệ thống. Cụm Tilt (góc tà) được thiết kế gọn nhẹ, tập trung vào việc giữ cân bằng cho camera. Giải pháp chống nước sử dụng các kết cấu gioăng cao su, mút tại các vị trí ghép nối để đạt tiêu chuẩn IPX4. Mô hình tham chiếu kết cấu cơ khí được thể hiện ở Hình 1.5 dưới đây [6].
+
+Hình 1.5: Mô hình tham chiếu kết cấu cơ khí
+- Vật liệu sử dụng: Tận dụng ưu thế tạo hình phức tạp của công nghệ in 3D, sinh viên quyết định chế tạo toàn bộ kết cấu khung vỏ và các chi tiết gá đỡ bằng vật liệu nhựa PETG (Polyethylene Terephthalate Glycol).
++ Lý do lựa chọn: So với nhựa in thông thường (PLA), PETG có độ dẻo dai cao hơn, chịu va đập tốt và đặc biệt là khả năng chịu nhiệt/thời tiết tốt hơn, phù hợp cho thiết bị hoạt động ngoài trời.
++ Linh kiện tiêu chuẩn: Các vị trí yêu cầu độ chính xác cao và chịu ma sát lớn được lắp ghép với các linh kiện kim loại tiêu chuẩn như: vòng bi (bạc đạn), bu lông, đai ốc và trục inox để đảm bảo độ cứng vững cho hệ thống.
+- Kế hoạch: (từ tháng 09/2025 đến tháng 01/2025)
+1.5. Kết quả và khuyến nghị 
+Kết quả đạt được:
+Sau quá trình nghiên cứu, tính toán và chế tạo, các nội dung chính của đồ án đã được hoàn thành:
++ Hoàn thiện bản thiết kế cơ khí 3D và bản vẽ lắp ráp cho hệ thống PTU.
++ Chế tạo thành công mô hình thực nghiệm sử dụng công nghệ in 3D vật liệu PETG, đảm bảo độ cứng vững và khả năng lắp ghép chính xác.
++ Xây dựng được hệ thống mạch điện và firmware điều khiển trên nền tảng ESP32, cho phép người dùng điều khiển góc quay từ xa qua giao diện WiFi.
++ Sản phẩm đáp ứng được các chỉ tiêu kỹ thuật và ràng buộc thiết kế đã đặt ra ban đầu, cụ thể được thể hiện trong Bảng 1.3 dưới đây.
+Bảng 1.3: Bảng đánh giá mức độ đáp ứng chỉ tiêu kỹ thuật 
+- Khuyến nghị và hướng phát triển:
+Mặc dù đồ án đã giải quyết được bài toán cơ bản về điều khiển góc quay camera từ xa, tuy nhiên sản phẩm vẫn còn một số hạn chế cần được khắc phục và nâng cấp trong tương lai:
+(1). Về công nghệ chế tạo: Hiện tại vỏ thiết bị đang sử dụng công nghệ in 3D để tạo hình nhanh. Để hướng tới sản xuất thương mại và hoạt động bền bỉ hơn trong môi trường khắc nghiệt, khuyến nghị chuyển đổi sang phương pháp gia công CNC nhôm hoặc đúc nhựa áp lực cao.
+(2). Về tính năng thông minh: Hệ thống hiện tại mới chỉ dừng lại ở việc điều khiển thủ công (Manual). Trong các nghiên cứu tiếp theo, tích hợp thêm thuật toán xử lý ảnh (AI Tracking) để hệ thống có thể tự động nhận diện và bám theo quả bóng hoặc cầu thủ mà không cần người điều khiển [3].
+(3). Về thử nghiệm: Cần tiến hành thêm các bài đo ổn định hình ảnh trong các điều kiện thời tiết khác nhau như gió, mưa lớn, nắng, bụi,…
+
+CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT 
+2.1. Mô tả vấn đề - Problem statement
+Việc thiết kế một hệ thống Pan-Tilt Unit hoạt động ngoài trời đặt ra các thách thức cụ thể về động học và kết cấu như sau:
+(1). Vấn đề về đáp ứng động học (Kinematic Response): Khác với camera giám sát thông thường chỉ quay chậm hoặc cố định, camera dùng trong thể thao yêu cầu tốc độ đáp ứng góc quay và gia tốc thay đổi liên tục và đột ngột để bám theo chuyển động của bóng. Vấn đề kỹ thuật ở đây là phải thắng được momen quán tính của cụm camera khi khởi động và hãm dừng mà không gây ra hiện tượng rung lắc hoặc trượt bước, đồng thời phải duy trì độ mượt mà của video thu được [7].
+(2). Vấn đề về sai số và độ rơ cơ khí (Backlash): Các hệ thống giá rẻ thường sử dụng bộ truyền bánh răng nhựa hoặc đai răng chất lượng thấp, dẫn đến hiện tượng "rơ", gây ra hiện tượng camera bị trễ một nhịp hoặc bị rung. Với yêu cầu quay phim ở khoảng cách xa, chỉ một rung động nhỏ tại cơ cấu Pan/Tilt cũng sẽ gây ra sự rung lắc lớn trong khung hình. Do đó, bài toán đặt ra là thiết kế bộ truyền động có tỉ số truyền phù hợp để vừa tăng momen xoắn, vừa triệt tiêu tối đa độ rơ.
+(3). Vấn đề về tối ưu hóa trọng lượng và độ bền môi trường: Hầu hết các chuẩn IP (Ingress Protection) cao thường đi kèm với kết cấu vỏ kim loại nặng nề và gioăng phớt chặt, làm tăng tải trọng lên động cơ. Ngược lại, nếu thiết kế vỏ mỏng nhẹ để cơ động thì khó đảm bảo khả năng kháng nước và dễ bị biến dạng nhiệt dưới ánh nắng trực tiếp. Thách thức ở đây là tìm ra điểm cân bằng giữa việc lựa chọn vật liệu vỏ (Nhựa kỹ thuật/In 3D), phương pháp làm kín và công suất động cơ.
+Để phù hợp với yêu cầu dự án, sinh viên đã xây dựng sơ đồ đánh đổi riêng dựa trên phân tích ban đầu. Hình 2.1 dưới đây thể hiện mối quan hệ giữa đáp ứng động học (A), độ chính xác & cứng vững (B) và tính cơ động & chi phí (C).
+
+
+Hình 2.1: Mối tương quan đánh đổi giữa các yếu tố kỹ thuật
+2.2. Bối cảnh và cơ sở kỹ thuật – Background and Technical reviews
+Trong lĩnh vực ghi hình và truyền thông thể thao, công nghệ hỗ trợ quay phim tự động đã có những bước tiến dài. Tuy nhiên, thị trường hiện tại đang phân hóa rõ rệt thành các phân khúc với những ưu nhược điểm riêng biệt, chưa thực sự đáp ứng trọn vẹn nhu cầu của các giải đấu phong trào (như bóng đá sân 7) [1], [2].
+Thông qua việc khảo sát các sản phẩm thương mại hiện có (Bảng 2.1), sinh viên tiến hành phân tích và so sánh dựa trên các tiêu chí kỹ thuật cốt lõi: Tốc độ đáp ứng động học, khả năng chịu môi trường và chi phí đầu tư [3].
+Bảng 2.1: So sánh các giải pháp thiết bị quay quét hiện có trên thị trường
+Từ Bảng 2.1, đồ án sẽ tập trung phát triển một hê thống PTU nhằm các yếu tố:
+- Sử dụng công nghệ in 3D và vật liệu nhựa kỹ thuật để giảm chi phí và tạo hình vỏ bảo vệ kín nước (khắc phục nhược điểm của Gimbal).
+- Sử dụng động cơ có momen xoắn lớn kết hợp bộ truyền đai để đảm bảo tốc độ quét nhanh (>0.5 độ/s) mà vẫn giữ được độ êm (khắc phục nhược điểm của các dòng camera giám sát).
+- Tích hợp vi điều khiển ESP32 để giải quyết bài toán điều khiển từ xa chi phí thấp.
+2.3. Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế - Design criteria and Constraints
+Các yêu cầu kỹ thuật và tiêu chí thiết kế được mô tả tại Bảng 2.2, 2.3 như sau:
+Bảng 2.2: Tiêu chí thiết kế
+Bảng 2.3: Ràng buộc thiết kế 
+2.4. Yêu cầu từ các bên liên quan – Constituent’s requirements
+Việc đáp ứng yêu cầu của các bên liên quan được tổng hợp và mô tả như Bảng 2.4
+Bảng 2.4: Tổng hợp yêu cầu từ các bên liên quan và tác động tới thiết kế
+CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ - DESIGN SOLUTIONS
+3.1. Phân tích tổng hợp – General analysis
+3.1.1. Nguyên lý hoạt động
+Để đáp ứng yêu cầu quan sát toàn cảnh sân bóng, hệ thống được thiết kế dưới dạng robot cơ cấu 2 bậc tự do (2-DOF), bao gồm hai trục điều khiển độc lập:
+Trục Pan (Phương vị): Quay quanh trục thẳng đứng (trục Z), giúp camera quét theo chiều ngang từ trái sang phải để bao quát chiều dài sân.
+Trục Tilt (Góc tà): Quay quanh trục nằm ngang (trục X), giúp camera ngẩng lên hoặc cúi xuống để bám theo bóng ở các độ cao khác nhau.
+Các cụm cơ khí tương ứng được gọi là Cụm Pan và Cụm Tilt. Camera được gắn cố định lên Cụm Tilt và chịu tác động chuyển động từ cả hai trục. Nguyên lý hoạt động của hệ thống PTU được minh họa ở Hình 3.1 dưới đây [5].
+
+Hình 3.1: Sơ đồ nguyên lý hoạt động của PTU 2 bậc tự do
+3.1.2. Phân tích và lựa chọn giải pháp kết cấu (Structural Analysis)
+Dựa trên yêu cầu về tải trọng (Camera < 1kg) và công nghệ chế tạo (In 3D), sinh viên tiến hành so sánh hai dạng kết cấu PTU phổ biến hiện nay để lựa chọn phương án tối ưu (Bảng 3.1) [6].
+Bảng 3.1: So sánh các giải pháp kết cấu khung giá đỡ PTU 
+Kết luận lựa chọn: Từ bảng phân tích trên và xét đến ràng buộc về khả năng gia công của sinh viên, đề tài quyết định lựa chọn Giải pháp 2: Kết cấu gá một bên (kết cấu chữ L). Lý do cốt lõi là cấu trúc này cho phép tối ưu hóa không gian in 3D, giảm vật liệu thừa và dễ dàng tích hợp các loại camera có kích thước khác nhau mà không bị vướng vào khung như dạng chữ U.
+3.1.3. Phân tích lựa chọn phương án truyền động (Transmission Selection)
+Để chuyển chuyển động từ động cơ sang trục quay, có 3 phương án phổ biến được cân nhắc được mô tả dưới Bảng 3.2:
+Bảng 3.2: So sánh phương án truyền động 
+Kết luận: Sinh viên lựa chọn sử dụng bộ truyền đai răng kết hợp với Pulley [7].
+3.2. Đề xuất các giải pháp – Proposed multiple solutions
+3.2.1. Đề xuất giải pháp thiết kế Cơ khí (Mechanical Design)
+Chỉ tiêu phạm vi góc quay: do mục đích là để ghi hình thể thao ở sân đá bóng mini 7 người nên camera được đặt ở vị trí giữa biên dọc của sân và chọn góc quay (Hình 3.2):
+
+
+Hình 3.2: Vị trí đặt camera
+Chọn góc quay Pan quay từ (0 – 180) độ và góc tilt sẽ là (-10 – 40 độ)
+Dựa vào thông số thực tế của sân bãi và trận đấu, sinh viên lựa chọn thông số thiết kế như sau:
+Kích thước sân đá bóng 7 người: 40x60m (tiêu chuẩn sân bóng đá 7)
+Vận tốc đường chuyền bóng mạnh khoảng: 20m/s [4]
+Góc lia: 180 độ
+Thời gian = quãng đường/ vận tốc = 60/20 = 3s
+Để camera có thể lia được hết 180 độ trong 3s một cách mượt mà thì cần có tăng tốc và giảm tốc. ( tăng tốc 90 độ hết 1.5s và giảm tốc  hết 1.5s) 
+Giai đoạn 1: Tăng tốc trong nửa thời gian đầu (t1 = 1.5s) để đi hết nửa góc quay ).
+Giai đoạn 2: Giảm tốc trong nửa thời gian sau (t2 = 1.5s).
+Gia tốc góc: 
+
+Làm tròn gia tốc góc lên 1,5 
+Hai phương án thiết kế được trình bày tại (Hình 3.3): Kết cấu chữ U và Kết cấu chữ L
+Hình 3.3: (a) Kết cấu robot hình chữ U, (b)kết cấu robot hình chữ L
+a, Ý tưởng thiết kế 1: sử dụng máy ảnh 
+Một trong các ý tưởng thiết kế ban đầu là sử dụng máy ảnh DSLR phổ thông (như Canon EOS 77D hoặc các model tương đương từ Sony, Nikon) để đảm bảo chất lượng hình ảnh cao và khả năng zoom quang học tốt khi quay quét sân bóng từ xa. Hình 3.4 dưới đây minh họa ví dụ về máy ảnh Canon EOS 77D –với trọng lượng khoảng 540g, phù hợp để gắn lên cụm PTU.
+Hình 3.4: Máy ảnh Canon EOS 77D
+Hình 3.5 trình bày trọng tâm và tính toán khối lượng của assembly.
+
+Hình 3.5: Trọng tâm và khối lượng của cụm PTU
+Thông số thiết kế hệ thống trên Solidworks (Hình 3.6):
+
+Hình 3.6: Thông số cụm tilt
+Gia tốc góc a = 1,5()
+Khối lượng cụm tilt (bao gồm camera) m = 1696.67 (gram)
+Momen quán tính khối Lxx = 3582796.34 (gram*mm^3)
+Momen xoắn cần thiết để quay cụm Tilt (Hình 3.7)
+
+Moment tối thiểu TTilt = T x hệ số an toàn x hiệu suất động cơ = 0.006 x 2 x 80% = 0.0096 (N.m)
+Từ kết quả tính toán moment xoắn, sinh viên lựa chọn sử dụng động cơ Nema 17 kích thước 42x42x40mm với momen 0.59 (N.m) và tỉ số truyền đai 1:3
+Thông số thiết kế của hệ thống trên Solidworks (Hình 3.7):
+
+Hình 3.7: Thông số cụm pan
+Gia tốc góc a = 1.5 ()
+Khối lượng cụm pan:  m = 4256.02 (gram)
+Momen quán tính khối Lyy = 29687716.27 (gram*mm^3)
+Khoảng cách d từ trọng tâm đến tâm quay cụm pan d = 8 (mm)
+Momen xoắn cần thiết để quay cụm Pan (Hình 3.8) 
+
+Tính chọn động cơ = T x hệ số an toàn x hiệu suất động cơ = 0.044 x 2 x 80% = 0.0704 (N.m)
+Từ kết quả tính toán moment xoắn, sinh viên lựa chọn sử dụng động cơ Nema 17 42x42x40 với momen (0.36 – 0.54 N.m)
+Phân tích: mặc dù động cơ Nema 17 đáp ứng tốt yêu cầu về moment cần thiết, tuy nhiên để tăng tính ổn định của hệ thống, trọng tâm của toàn hệ thống nên đặt gần với trục quay càng thấp càng tốt, sinh viên lựa chọn đặt động cơ lệch và sử dụng bộ truyền đai (Hình 3.6).
+Sử dụng bộ truyền đai – pulley răng 3M với tỉ số truyền 1:3 cho pan và bộ truyền đai – pulley răng GT2 1:3.
+b, Ý tưởng thiết kế 2: sử dụng camera tích hợp trên điện thoại
+Một ý tưởng thiết kế khác là tận dụng camera tích hợp trên điện thoại thông minh cao cấp (như iPhone 17 Pro Max, Samsung Galaxy S series hoặc Xiaomi flagship) để giảm trọng lượng, chi phí và tăng tính linh hoạt (dễ thay thế, zoom kỹ thuật số tốt). Hình 3.8 dưới đây minh họa cụm camera sau của iPhone 17 Pro Max – ví dụ điển hình với hệ thống đa ống kính chất lượng cao.
+Hình 3.8: Camera điện thoại iphone 17 pro max.
+Để đánh giá khả thi, mô hình 3D của cụm PTU gắn điện thoại được xây dựng trên SolidWorks. Hình 3.9 trình bày trọng tâm và tính toán khối lượng của assembly, giúp tối ưu hóa cân bằng và chọn động cơ phù hợp (khối lượng nhẹ hơn đáng kể so với DSLR).
+
+
+Hình 3.9: Trọng tâm và khối lượng của cụm PTU
+Thông số thiết kế của hệ thống trên Solidworks (Hình 3.10):
+
+Hình 3.10: Thông số cụm tilt
+Gia tốc góc a = 1.5()
+Khối lượng cụm tilt (bao gồm camera) m = 194.45 (gram)
+Momen quán tính khối Lxx = 177673.51 (gram*mm^3)
+Khoảng cách từ trọng tâm đến tâm quay cụm tilt d = 20 (mm)
+Momen xoắn cần thiết để quay cụm Tilt (Hình 3.11)
+
+Tính chọn động cơ = T x hệ số an toàn x hiệu suất động cơ = 0.000383 x 2 x 80% = 0.000612 (N.m)
+Từ kết quả tính toán moment xoắn, sinh viên lựa chọn sử dụng động cơ Nema 17 kích thước 42x42x23mm với momen 0.13 (N.m)
+Thông số thiết kế của hệ thống trên Solidworks (Hình 3.11):
+
+Hình 3.11: Thông số cụm pan
+Gia tốc góc a = 1.5 ()
+Khối lượng cụm pan:  m = 1.544 (gram)
+Momen quán tính khối Lyy = 8465077.1 (gram*mm^3)
+Khoảng cách d từ trọng tâm đến tâm quay cụm pan d = 4 (mm)
+Momen xoắn cần thiết để quay cụm Pan 
+
+Tính chọn động cơ = T x hệ số an toàn x hiệu suất động cơ = 0.012 x 2 x 80% = 0.0192 (N.m)
+Từ kết quả tính toán moment xoắn, sinh viên lựa chọn sử dụng động cơ Nema 17 42x42x40mm với momen (0.36 – 0.54 N.m) 
+Phân tích: mặc dù động cơ Nema 17 đáp ứng tốt yêu cầu về moment cần thiết, tuy nhiên để tăng tính ổn định của hệ thống, trọng tâm của toàn hệ thống nên đặt gần với trục quay càng thấp càng tốt, sinh viên lựa chọn đặt động cơ lệch và sử dụng bộ truyền đai (Hình 3.10).
+Sử dụng bộ truyền đai – pulley răng 3M với tỉ số truyền 1:3 cho pan và bộ truyền đai – pulley răng 3M 1:3.
+c, Bảng so sánh và Lựa chọn:
+Bảng 3.3 dưới đây trình bày việc so sánh các thông số kỹ thuật giữa hai giải pháp dựa trên năm tiêu chí đánh giá chính, với trọng số tương ứng:
+ Bảng 3.3: So sánh thông số kỹ thuật giữa hai phương án cơ khí
+Dựa trên tổng điểm đánh giá, giải pháp 2 (Kết cấu chữ L) vượt trội hơn hẳn ở các tiêu chí quan trọng đối với đồ án là: Khả năng chế tạo, Trọng lượng và Chi phí. Mặc dù giải pháp 1 có ưu điểm về độ cứng vững, nhưng với việc xác định đối tượng ghi hình là điện thoại thông minh (Smart Phone) đóng vai trò Camera IP, yêu cầu về tải trọng giảm đi đáng kể. Từ đó sinh viên lựa chọn giải pháp 2.
+3.2.2. Đề xuất giải pháp hệ thống Điều khiển (Control System)
+Để điều khiển 2 động cơ bước và giao tiếp với người dùng, sinh viên đã thực hiện 2 mô hình phần cứng như sau:
+Các phương án cấu hình:
+Cấu hình A (Standalone): : Sử dụng máy tính nhúng LattePanda tích hợp màn hình LCD gắn trực tiếp, cho phép hoạt động độc lập mà không cần thiết bị ngoài. Hình 3.12 minh họa board LattePanda (trái) và ví dụ hộp điều khiển đã tích hợp máy tính nhúng (phải) và sơ đồ nguyên lý hoạt động (Hình 3.13)
+ 
+Hình 3.12: Máy tính nhúng LattePanda (trái), hộp điều khiển đã tích hợp máy tính nhúng (phải)
+
+Hình 3.13: Sơ đồ nguyên lý hoạt động của giải pháp cấu hình A
+Cấu hình B (Remote Station): Áp dụng mô hình Client-Server, trong đó PTU hoạt động như Client (với ESP32 làm bộ xử lý chính, kết nối driver động cơ bước NEMA17 cho Pan và Tilt). Toàn bộ việc xử lý giao diện, điều khiển từ xa và hiển thị video được thực hiện trên Controller/Server (laptop/PC của người dùng) hoặc Remote/Client (joystick kết nối ESP32 riêng). Hệ thống giao tiếp qua WiFi, đảm bảo khoảng cách xa và linh hoạt. Hình 3.14 dưới đây minh họa sơ đồ nguyên lý hoạt động của cấu hình B với các khối chính: PTU/Client (động cơ, driver, ESP32), Controller/Server (PC) và Remote/Client (joystick).
+
+
+Hình 3.14: Sơ đồ nguyên lý hoạt động của giải cấu hình B
+Sự so sánh giữa hai cấu hình dựa trên ba tiêu chí chính với trọng số tương ứng (được trình bày như Bảng 3.4):
+Bảng 3.4: Bảng đánh giá lựa chọn cấu hình hệ thống điều khiển
+
+Giải pháp cấu hình B được lựa chọn.
+3.2.3. Đề xuất giải pháp truyền thông (Communication)
+Để lựa chọn phương án truyền thông không dây tối ưu cho hệ thống Pan-Tilt Unit, ba phương án được đánh giá là PA1: Radio RF (NRF24L01), PA2: Bluetooth (BLE) và PA3: WiFi (ESP32). Bảng 3.5 dưới đây so sánh các phương án dựa trên bốn tiêu chí chính (băng thông dữ liệu, phạm vi kết nối, khả năng tích hợp với laptop/PC và độ ổn định/chống nhiễu) với trọng số tương ứng. 
+Bảng 3.5 : Đánh giá lựa chọn phương án truyền thông
+Kết quả cho thấy phương án WiFi (ESP32) đạt điểm cao nhất (4.55)cnên được chọn làm giải pháp truyền thông chính.
+3.3. Phân tích, đánh giá và lựa chọn phương án khả thi – Analysis, Evaluation and Selection 
+Để kiểm tra kiến trúc hệ thống điều khiển đề xuất (Proposed System Architecture), hệ thống được thiết kế theo mô hình mạng hình sao (Star Topology), trong đó máy tính cá nhân đóng vai trò là "bộ não" xử lý trung tâm, kết nối WiFi TCP/IP với các client ngoại vi. Hình 3.15 dưới đây minh họa kiến trúc Client-Server của hệ thống, bao gồm:
+
+Hình 3.15: Kiến trúc hệ thống điều khiển theo mô hình Client-Server
+Phân tích chức năng các phân hệ:
+* Khối 1: Trạm điều khiển trung tâm (Central Server)
+- Vai trò: Là "bộ não" của toàn hệ thống, chịu trách nhiệm quản lý kết nối và xử lý dữ liệu nặng.
+- Yêu cầu chức năng:
++ Có khả năng tạo lập máy chủ (TCP Server) để lắng nghe và duy trì kết nối ổn định với nhiều thiết bị ngoại vi cùng lúc.
++ Có giao diện đồ họa (GUI) để người dùng quan sát hình ảnh và giám sát trạng thái Robot.
++ Xử lý được luồng video (Video Streaming) từ Camera IP và thực hiện các thuật toán ghi hình, chụp ảnh.
++ Thực hiện việc chuyển tín hiệu từ tay cầm sang vận tốc động cơ trước khi gửi xuống Robot.
+* Khối 2: Khối chấp hành Robot (PTU Client)
+- Vai trò: Là thiết bị chấp hành, thực hiện các chuyển động cơ học chính xác.
+- Yêu cầu chức năng
++ Hoạt động độc lập, tự động kết nối lại WiFi nếu bị ngắt quãng.
++ Điều khiển được 02 động cơ bước hoạt động đồng thời (Multitasking) với độ mịn cao (Micro-stepping).
++ Gửi phản hồi (Feedback) về vị trí góc hiện tại lên Server để người dùng giám sát.
++ Hệ thống điện tử phải tách biệt luồng xử lý mạng và luồng điều khiển động cơ để tránh hiện tượng trễ lệnh.
+* Khối 3: Khối thu thập tín hiệu điều khiển (Remote Client)
+- Vai trò: Thu thập thao tác của người vận hành.
+- Yêu cầu chức năng:
++ Đọc liên tục giá trị Analog từ Joystick và các nút nhấn chức năng.
++ Đóng gói dữ liệu và gửi về Server để đảm bảo cảm giác điều khiển mượt mà, không bị trễ (Lag).
+3.4. Tối ưu phương án thiết kế - The optimal solution
+Thông qua quá trình phân tích nguyên lý (Mục 3.1), đánh giá lựa chọn phương án (Mục 3.2) và thiết lập kiến trúc hệ thống (Mục 3.3), sinh viên đã xác định được cấu hình thiết kế tổng thể cho PTU trong Bảng 3.6.
+Bảng 3.6: Bảng tổng hợp cấu hình hệ thống PTU
+
+CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ - IMPMENTATION AND RESULTS
+4.1. Thiết kế chi tiết giải pháp – Detailed design solution
+4.1.1. Thiết kế chi tiết hệ thống cơ khí
+Hệ thống (Hình 4.1) được chia thành 3 phần chính để thuận tiện cho việc in 3D và lắp ráp gồm:
+
+Hình 4.1: Tổng thể hệ thống cơ khí PTU
+- Cụm chân đế (Base Unit): Chứa động cơ Pan, cơ cấu xoay, cảm biến quang (Hình 4.2).
+
+Hình 4.2: Thiết kế cụm pan
++ Cụm Pan chịu trách nhiệm cho chuyển động quay phương vị (góc quay 0-180 độ). Để đảm bảo chuyển động êm ái và hạn chế độ rơ (backlash), sinh viên sử dụng bộ truyền đai răng 3M kết hợp với hai puly (Puly dẫn động gắn trục động cơ và Puly bị dẫn gắn trục quay).
++ Động cơ Nema 17 được gá trên rãnh trượt, cho phép dễ dàng điều chỉnh độ căng đai trong quá trình lắp ráp.
++ Hệ thống sử dụng cảm biến quang chữ U (Optical Endstop) được bố trí cố định trên đế để xác định điểm gốc (Home position) với độ chính xác cao, giúp hệ thống có thể reset vị trí mỗi khi khởi động.
++ Trục quay chính được đỡ bởi ổ bi để chịu tải trọng dọc trục của toàn bộ phần trên.
+- Cụm tay đòn (Arm Unit): Kết nối giữa trục Pan và trục Tilt. Bên trong tay đòn được khoét rỗng để luồn dây đai và dây tín hiệu lên động cơ Tilt và Pan (Hình 4.3).
+
+Hình 4.3: Thiết kế cụm tilt
++ Tay đòn đóng vai trò khung xương chính kết nối giữa trục Pan và trục Tilt. Kết cấu tay đòn được thiết kế dạng hộp rỗng đặc biệt. Thiết kế này cho phép toàn bộ dây điện điều khiển động cơ Tilt và dây tín hiệu camera được luồn ngầm bên trong, vừa đảm bảo tính thẩm mỹ, vừa tránh tình trạng xoắn rối dây khi robot xoay.
++ Tại cụm này, động cơ Tilt cũng được bố trí truyền động qua đai răng tương tự như cụm Pan. Việc sử dụng truyền động đai thay vì gắn trực tiếp giúp giảm rung động từ động cơ truyền lên camera, đảm bảo chất lượng hình ảnh tốt nhất.
+- Hệ thống điều khiển trung tâm:
+Để bảo vệ mạch điều khiển trung tâm, sinh viên thiết kế hộp điều khiển để có thể tích hợp được mạch điều khiển và pin, công tắc và sạc (Hình 4.4).
+Hình 4.4: Thiết kế hộp điều khiển
++ Hộp điều khiển được thiết kế tách rời để giảm tải trọng cho phần cơ khí chuyển động. Sau khi thử nghiệm với các kích thước khác nhau, sinh viên nhận thấy chiều dài 3mm phù hợp với yêu cầu về độ cứng và bảo vệ linh kiện bên trong
++ Khoang năng lượng: Phía dưới đáy hộp bố trí khay pin tích hợp cho 5 cell pin Li-ion 18650 mắc nối tiếp, cung cấp nguồn điện ổn định cho hệ thống hoạt động liên tục trong khoảng 2 giờ.
++ Khoang mạch: Phía trên là không gian gá lắp mạch điều khiển trung tâm và Driver. 
++ Giao tiếp ngoài: Mặt bên hộp bố trí công tắc nguồn, Jack sạc DC và Anten WiFi 3dBi giúp tăng cường khả năng thu phát sóng ổn định ở khoảng cách xa ( >30m). Kết nối giữa hộp điều khiển và cụm cơ khí thông qua jack cắm Terminal Block xanh lá cây, giúp việc tháo lắp và bảo trì diễn ra nhanh chóng.
+- Tay cầm điều khiển từ xa
+Dựa trên sơ đồ nguyên lý đã đề xuất, nhóm thực hiện đã tiến hành thi công và lắp ráp mô hình thực tế. Dưới đây là hình ảnh hoàn thiện của tay cầm điều khiển từ xa (Hình 4.5)
+
+Hình 4.5: Thiết kế tay cầm điều khiển từ xa
+4.1.2. Thiết kế sơ đồ đấu nối và giao thức điều khiển
+Sơ đồ nguyên lý:  Sử dụng bo mạch thiết kế để kết nối esp32 với driver tmc2209, đảm bảo các chân điều khiển không bị rối dây (Hình 4.6, 4.7).
+Hình 4.6: (a)  main kết nối esp32 ,(b) sơ đồ kết nối chân 
+
+Hình 4.7: Sơ đồ kết nối các mô đun
+Bo mạch được chia ra làm 3 khối chính: 
+-  Khối Quản lý nguồn (Power Management Module):
++ Chức năng: Đóng vai trò ổn định điện áp nuôi cho toàn bộ hệ thống điều khiển thấp áp.
++ Linh kiện: Sử dụng module chuyển đổi nguồn xung hạ áp (Buck Converter) MP1584 (Hình 4.8).
+
+Hình 4.8: Module hạ áp MP1584
+Thông số kỹ thuật:
++ Dải điện áp đầu vào rộng: 4.5V – 28VDC.
++ Điện áp đầu ra: 5VDC.
++ Hiệu suất chuyển đổi: 96%.
+- Khối Vi điều khiển trung tâm (Microcontroller Unit - MCU):
+Chức năng: Là "bộ não" xử lý thuật toán điều khiển vị trí, giao tiếp WiFi và quản lý tín hiệu vào/ra.
+Linh kiện: Kit phát triển ESP32-WROOM-32U (Phiên bản U) (Hình 4.9).
+
+Hình 4.9: Kit phát triển ESP32-WROOM-32U
+* Đặc điểm nổi bật:
++ Sử dụng chuẩn kết nối IPEX cho phép gắn Anten rời (External Antenna), giúp khắc phục nhược điểm chắn sóng của vỏ hộp và mở rộng phạm vi điều khiển từ xa (>30m).
++ Thực hiện nhiệm vụ phát xung điều khiển (STEP/DIR) tới 02 Driver động cơ.
++ Thu thập và xử lý tín hiệu phản hồi từ 02 cảm biến hành trình để thiết lập vị trí gốc chính xác cho trục Pan và Tilt.
+-  Khối Dẫn động cơ (Driver Module):
++ Chức năng: Khuếch đại tín hiệu điều khiển từ MCU thành dòng điện công suất để vận hành động cơ bước.
++ Linh kiện: Sử dụng 02 module Driver TMC2209 của hãng Bigtreetech (Hình 4.10).
+
+Hình 4.10: Module Driver TMC2209
+Thông số kỹ thuật:
+- Điện áp vận hành: 5.5 – 28VDC.
+- Dòng điện định mức: Hỗ trợ dòng RMS lên đến 2A (đủ tải cho động cơ Nema 17).
+- Ưu điểm công nghệ: Tích hợp công nghệ StealthChop2™ độc quyền, giúp triệt tiêu tiếng ồn và rung động của động cơ bước khi vận hành ở tốc độ thấp – yếu tố then chốt để đảm bảo video quay được không bị rung lắc. Hỗ trợ giao tiếp UART để cấu hình dòng điện động cơ trực tiếp trên phần mềm mà không cần vặn biến trở thủ công.
+4.2. Chế tạo và lắp ráp hệ thống – Manufacture and Assembly
+4.2.1. Gia công chi tiết in 3D
+Các chi tiết khung vỏ được gia công bằng phương pháp in 3D FDM và vật liệu in là nhựa PETG. Bảng 4.1 dưới đây là thông số cấu hình in3d của khung vỏ.
+Bảng 4.1: Thông số cấu hình in 3D
+4.2.2. Lắp ráp và hoàn thiện sản phẩm
+Quá trình lắp ráp được thực hiện theo trình tự từ trong ra ngoài:
+- Cấy ốc (Heat-set Insert): Sử dụng mỏ hàn nhiệt để cấy các đai ốc đồng vào chi tiết nhựa. Cách này giúp liên kết bu lông chắc chắn hơn nhiều so với vặn vít trực tiếp vào nhựa, cho phép tháo lắp nhiều lần mà không bị trờn ren.
+- Lắp bộ truyền đai: Căng đai GT2 cho trục Tilt và đai 3M cho trục Pan kết hợp rãnh trượt để tinh chỉnh độ căng đai thủ công.
+- Đi dây: Các dây động cơ được bọc ống gen co nhiệt và luồn qua lớp bọc bảo vệ để tránh bị xoắn đứt khi  quay.
+Hình 4.11 dưới đây trình bày sản phẩm thực tế sau khi được lắp ráp và hoàn thiện
+
+Hình 4.11: Sản phẩm sau khi được lắp ráp và hoàn thiện 
+4.2.3. Thi công mạch điện tử
+- Hàn các module ESP32, đế cắm Driver TMC2209 và mạch hạ áp (Buck Converter 24V xuống 5V) lên bo mạch chính.
+- Sử dụng các Jack cắm XH2.54 để kết nối module, giúp việc thay thế linh kiện dễ dàng nếu có hỏng hóc.
+4.2.4. Xây dựng thuật toán và phần mềm điều khiển
+a.  Kiến trúc truyền thông và Giao thức dữ liệu
+Để đảm bảo tính thời gian thực (Real-time) và khả năng mở rộng, hệ thống sử dụng giao thức TCP/IP qua sóng WiFi 2.4GHz.
+Mô hình kết nối:
+- PC Software: Đóng vai trò TCP Server (IP tĩnh: 192.168.137.1(wifi cố định bằng cách phát wifi từ máy tính, Port: 8888).
+- ESP32 (PTU) & ESP32 (Remote): Đóng vai trò TCP Client, tự động kết nối lại nếu mất tín hiệu.
+- Camera IP: Hoạt động độc lập, truyền hình ảnh qua giao thức RTSP/HTTP và nhận lệnh Zoom qua HTTP Request.
+Cấu trúc gói tin (Data Packet): Dữ liệu điều khiển từ Remote được đóng gói thành chuỗi String để tối ưu băng thông và dễ dàng debug:
+“J:pan_val,tilt_val,btn_state,speed_val,zoom_val\n” Trong đó: 
+- pan/tilt_val (0-4095): Giá trị Analog từ Joystick.
+- btn_state: Trạng thái nút nhấn (0/1).
+- speed_val: Biến trở chỉnh tốc độ tối đa.
+- zoom_val: Biến trở điều khiển Zoom quang học.
+b. Giải thuật điều khiển Firmware trên ESP32
+Do đặc thù của việc điều khiển động cơ bước cần tính liên tục cao, firmware trên ESP32 được thiết kế sử dụng hệ điều hành thời gian thực FreeRTOS để tận dụng sức mạnh 2 nhân (Dual-core) của vi điều khiển (Hình 4.12).
+- Phân chia tác vụ (Multitasking):
++ Core 0 (Network Task): Xử lý các tác vụ nặng về độ trễ như duy trì kết nối WiFi, nhận gói tin TCP và phân tích chuỗi lệnh.
++ Core 1 (Motor Task): Chuyên biệt cho việc tạo xung điều khiển động cơ bước. Việc tách rời này giúp động cơ quay mượt mà, không bị khựng (jitter) khi vi điều khiển đang bận xử lý gói tin mạng.
+- Thuật toán tạo biên dạng chuyển động (Motion Profile): Sử dụng thuật toán gia tốc hình thang (Trapezoidal Acceleration) thông qua thư viện AccelStepper. Thay vì thay đổi tốc độ đột ngột, vận tốc động cơ được tăng dần theo gia tốc a cho đến khi đạt Vmax, giúp triệt tiêu quán tính rung lắc của camera.
+
+Hình 4.12: Lưu đồ thuật toán điều khiển chính (Main Control Loop)
+c. Giải thuật Homing (Về điểm gốc)
+Để đảm bảo độ chính xác lặp lại, quy trình Homing sử dụng cảm biến quang (Optical Endstop) với logic 3 giai đoạn (Hình 4.13):
+
+Hình 4.13: Quy trình lấy home chính xác
+Giai đoạn 1: chạy nhanh đến cảm biến quang → Giai đoạn 2: lùi lại một chút → Giai đoạn 3: chạy chậm tiếp cận lại → loại bỏ sai số do quán tính và backlash
+d. Thiết kế giao diện phần mềm điều khiển (GUI Dashboard)
+Để thuận tiện cho người vận hành tại sân bóng, sinh viên đã xây dựng một phần mềm điều khiển chạy trên hệ điều hành Windows, sử dụng ngôn ngữ lập trình C# trên nền tảng .NET (Windows Forms).
+Giao diện được thiết kế tối giản, tập trung vào tính trực quan với 3 khu vực chức năng chính (Hình 4.14):
+
+Hình 4.14: Giao diện phần mềm điều khiển thực tế trên máy tính 
+Giao diện phần mềm được xây dựng trên nền tảng Windows Forms (.NET), chia làm 2 khu vực chức năng chính giúp người dùng dễ dàng thao tác:
+1. Khu vực hiển thị (Bên trái):
+- Đây là khung màn hình chính (Main Viewport) dùng để hiển thị luồng video (Video Stream) thời gian thực.
+- Hiện tại khung đang ở trạng thái chờ (màu xám) khi chưa kết nối camera. Khi hoạt động, hình ảnh từ sân bóng sẽ được hiển thị tại đây giúp người điều khiển quan sát góc quay.
+2. Khu vực điều khiển (Thanh Sidebar bên phải): Được chia thành 2 module riêng biệt để quản lý Hình ảnh và Chuyển động:
+- Module Camera & Recording (Phía trên):
++ Nguồn tín hiệu: Cho phép tùy chọn linh hoạt giữa Camera USB (kết nối trực tiếp) hoặc IP Camera (kết nối không dây). Trong hình, phần mềm đang được cấu hình để lấy luồng video từ địa chỉ http://192.168.137.35:8080/video.
++ Chức năng Zoom: Thanh trượt (Slider) cho phép điều chỉnh tiêu cự camera từ xa.
++ Ghi hình: Các nút chức năng Start/Stop, Capture (Chụp ảnh) và đường dẫn lưu file (Browser) giúp lưu lại các khoảnh khắc quan trọng của trận đấu.
+- Module Controller Step Motor (Phía dưới):
++ Thiết lập mạng: Hiển thị IP của máy tính và nút Start Server để khởi tạo kết nối TCP/IP chờ Robot kết nối vào.
++ Điều chỉnh Offset: Hai ô nhập liệu Pan Offset (38400) và Tilt Offset (9600) dùng để tinh chỉnh bước động cơ, giúp cân chỉnh tỉ số truyền thực tế so với tính toán lý thuyết.
++ Cụm phím điều hướng: Các nút bấm lớn (UP, DOWN, LEFT, RIGHT) được bố trí mô phỏng theo cụm phím D-Pad, giúp điều khiển hướng quay của Robot trực quan.
++ Chức năng Homing: Nút GO HOME ở trung tâm giúp đưa Robot về vị trí cân bằng (0,0) ngay lập tức, và nút Set Home để thiết lập lại điểm gốc mềm khi cần thiết.
+4.3. Đo lường và kết quả - Measurement and Result
+4.3.1. Thiết lập môi trường đo (Test Setup)
+Các thiết bị đo lường được sử dụng bao gồm:
+- Cân: Dùng để cân trọng lượng toàn hệ thống.
+- Thước kẹp & Thước đo độ điện tử: Để đo kích thước và góc quay.
+- Đồng hồ vạn năng (VOM): Đo điện áp pin và dòng tiêu thụ.
+4.3.2. Kết quả đo lường cơ khí và vật lý
+Để đánh giá tính khả thi về mặt vật lý và cơ khí của robot, chúng tôi đã tiến hành đo lường và kiểm tra một số thông số kỹ thuật chính. Kết quả cụ thể được trình bày trong Bảng 4.2 dưới đây.
+Bảng 4.2: Kết quả đo lường cơ khí và vật lý
+Nhìn chung, các thông số cơ khí và vật lý của robot đều đạt hoặc vượt yêu cầu đề ra, đảm bảo robot có thể vận hành ổn định trong thực tế.
+4.3.3. Đo lường đặc tính điện và năng lượng
+Bài đo xác định thời gian hoạt động thực tế của hệ thống khi sử dụng nguồn Pin Li-ion tích hợp (Bảng 4.3).
+Điều kiện đo: Pin sạc đầy (4.2V/cell li-ion), bật WiFi, động cơ ở chế độ giữ (Hold Torque).
+Điện áp cắt (Cut-off): Hệ thống dừng khi áp tụt xuống dưới 16V.
+Bảng 4.3: Thử nghiệm thời gian tiêu thụ điện năng
+4.3.4: Đo lường các phương án truyền thông
+Để đảm bảo tín hiệu điều khiển ổn định trong môi trường nhiều sóng vô tuyến phức tạp (như sân vận động hoặc phòng Lab có nhiều thiết bị), sinh viên đã tiến hành thử nghiệm thực tế với 3 phương án truyền thông khác nhau (Bảng 4.4).
+Bảng 4.4: So sánh thực nghiệm các phương án truyền thông
+Từ kết quả thực nghiệm trên, sinh viên quyết định sử dụng Phương án 3: Mô hình TCP/IP với Laptop đóng vai trò Server trung tâm. Giải pháp này khắc phục triệt để vấn đề nhiễu sóng của ESP-NOW và giảm tải nhiệt cho vi điều khiển trên Robot.
+4.3.5. Kiểm chứng hiệu năng điều khiển (Performance Test)
+* Kiểm tra độ chính xác lặp lại (Homing Repeatability)
+Mục đích: Kiểm tra xem sau khi di chuyển, ấn home và set home thì PTU có về đúng vị trí cũ không.
+- Cách thực hiện:
++ Dán một tia laser lên camera (Hình 4.15, 4.16).
+
+Hình 4.15: Gắn Lazer lên robot phục vụ mục đích thử nghiệm
+
+Hình 4.16: Thử nghiệm đo độ lệch tâm
++ Đánh dấu điểm gốc (0,0) trên tường.
++ Cho robot di chuyển lung tung, sau đó bấm "Home" và "Set Home"
++ Đo khoảng cách lệch giữa điểm lazer và điểm đánh dấu. Lặp lại 10 lần và được thể hiện trong bảng 4.5 dưới đây.
+Bảng 4.5: Bảng đo độ chính xác lặp lại
+Kết quả: Sai số trung bình đo được là ± 0.053 độ.
+Nhận xét: Giải thuật Homing 3 giai đoạn hoạt động hiệu quả, triệt tiêu được sai số do quán tính.
+* Kiểm tra phạm vi kết nối (Range Test)
+
+Hình 4.17: Kiểm tra phạm vi kết nối
+- Điều kiện: Môi trường thoáng, ít vật cản (Sân bóng).
+- Kết quả:
++ 0 - 20m: Điều khiển mượt mà, video HD không giật.
++ 20 - 40m: Điều khiển tốt, video thỉnh thoảng bị drop frame.
++ > 40m: Mất kết nối hoặc độ trễ quá cao (>1s).
+Kết luận: Hệ thống hoạt động ổn định nhất trong bán kính mét.
+4.3.6. Kiểm tra khả năng chống nước
+Để đánh giá khả năng chống nước của hệ thống PTU trong môi trường ngoài trời, sinh viên đã tiến hành thử nghiệm phun nước tương đương cấp bảo vệ IPX4 theo tiêu chuẩn IEC 60529. IPX4 yêu cầu thiết bị chịu được nước bắn từ mọi hướng mà không có nước xâm nhập gây hại đến chức năng hoạt động.
+Phương pháp thử nghiệm: Do điều kiện phòng thí nghiệm hạn chế, thử nghiệm được thực hiện mô phỏng bằng vòi phun nước thông thường thay vì thiết bị chuyên dụng. Cụ thể:
+Hệ thống PTU được đặt ở vị trí hoạt động bình thường (gắn camera và kết nối nguồn).
+Sử dụng vòi phun nước với áp lực trung bình (tương đương mưa nhẹ đến trung bình), phun nước từ khoảng cách khoảng 1m từ mọi hướng (trên, dưới, hai bên, trước sau) để bao quát toàn bộ vỏ hộp, khớp nối gioăng và các vị trí ghép.
+Thời gian phun: 10 phút liên tục (theo thời gian thử nghiệm tối thiểu cho IPX4).
+Trong quá trình phun, hệ thống được bật nguồn và thực hiện chuyển động Pan/Tilt liên tục để kiểm tra độ kín khi có rung động cơ khí.
+Hình 4.18: thử nghiệm phun nước lên PTU
+Sau 10 phút phun nước, mở vỏ hộp kiểm tra: Không phát hiện nước xâm nhập vào bên trong hộp điều khiển, mạch điện tử, driver động cơ. Hệ thống vẫn hoạt động bình thường. Điều khiển Pan/Tilt mượt mà, kết nối WiFi ổn định, không có hiện tượng chập mạch hoặc lỗi firmware. Các gioăng cao su và mút tại vị trí ghép nối đã phát huy tác dụng tốt, ngăn nước  hiệu quả.
+ 4.3.7. Tổng hợp và So sánh với chỉ tiêu thiết kế
+Dựa trên các số liệu đo đạc ở trên, sinh viên tổng hợp bảng so sánh với yêu cầu đặt ra tại bảng 4.6 ở dưới đây:
+Bảng 4.6: So sánh Lý thuyết vs Thực tế
+
+4.3.8. Kết luận chương 4
+Thông qua quá trình chế tạo và thử nghiệm, sinh viên đã xây dựng thành công mô hình hệ thống Pan-Tilt Unit hoạt động đúng theo nguyên lý thiết kế. Các thông số về cơ khí và điện tử đều nằm trong dung sai cho phép. Mặc dù vẫn còn tồn tại độ trễ nhất định trong truyền hình ảnh qua WiFi, nhưng hệ thống đáp ứng tốt nhu cầu quay phim cơ bản và giám sát từ xa.
+
+
+
+
+
+CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ - EVALUATION AND RECOMMENDATION
+5.1. Đánh giá hiệu năng
+Dựa trên mô hình thiết kế thực tế và các kết quả đo lường ở Chương 4, sản phẩm đã đáp ứng được các yêu cầu kỹ thuật cơ bản của đề tài. Cụ thể:
+Về không gian làm việc: Cơ cấu PTU 2 bậc tự do đảm bảo góc quay Pan đạt 0° ÷ 180° và góc Tilt đạt -10° ÷ +40°, cho phép bao quát toàn bộ diễn biến trên sân bóng mini 7 người từ vị trí đường biên.
+Về độ chính xác và ổn định: Mặc dù sử dụng động cơ bước vòng hở (Open-loop), nhưng nhờ ứng dụng bộ truyền đai răng GT2, 3M và thuật toán Homing 3 giai đoạn (Fast-Back-Slow), hệ thống đã triệt tiêu được đáng kể sai số cơ khí. Độ lệch vị trí sau mỗi lần khởi động lại là không đáng kể (dưới 0.1°), đảm bảo tính lặp lại tốt.
+Về độ cứng vững: Kết cấu in 3D sử dụng vật liệu PETG với mật độ in (Infill) 30% đảm bảo đủ độ cứng vững để chịu tải trọng của điện thoại/Action Cam (dưới 500g). Hiện tượng rung lắc khi đảo chiều chuyển động được giảm thiểu nhờ biên dạng vận tốc hình thang trong firmware điều khiển.
+Về khả năng chịu môi trường: Thiết kế vỏ hộp kín và các khớp nối có gờ chắn nước giúp hệ thống đạt cấp bảo vệ tương đương IPX4, có thể vận hành an toàn trong điều kiện mưa nhẹ hoặc sương mù tại sân bãi.
+Về thời gian hoạt động, hệ thống đạt 120 phút thực tế (vượt chỉ tiêu ≥90 phút đặt ra ban đầu), đảm bảo khả năng vận hành suốt một trận đấu thể thao phong trào mà không gián đoạn.
+5.2. Đánh giá kinh tế và môi trường
+Về mặt kinh tế: Thay vì sử dụng nhôm nguyên khối và gia công CNC đắt đỏ như các hệ thống quân sự, đồ án sử dụng công nghệ in 3D FDM và các linh kiện điện tử phổ thông (ESP32, Stepper Motor). Chi phí chế tạo chỉ khoảng 2.5 triệu VNĐ, thấp hơn rất nhiều so với các sản phẩm Gimbal thương mại hoặc Camera truyền hình chuyên dụng, phù hợp với nhu cầu của các giải bóng đá phong trào.
+Về môi trường: Vật liệu nhựa PETG được sử dụng là loại nhựa an toàn, có khả năng tái chế cao hơn so với nhựa ABS truyền thống và không phát sinh mùi độc hại trong quá trình in ấn. Hệ thống sử dụng nguồn Pin sạc Li-ion, có thể tái sử dụng nhiều lần, hạn chế rác thải pin ra môi trường.
+5.3. Đánh giá rủi ro và biện pháp giảm thiểu
+Trong quá trình thiết kế, chế tạo và thử nghiệm, một số rủi ro kỹ thuật đã được nhận diện và xử lý như sau:
+Rủi ro 1: Sai số do co ngót vật liệu in 3D
+Vấn đề: Nhựa nóng chảy khi nguội sẽ bị co lại, làm sai lệch kích thước lỗ lắp vòng bi.
+Biện pháp: Thiết kế bù trừ dung sai ngay trên bản vẽ 3D (Offset 0.2mm) và sử dụng mũi khoan để doa lại lỗ chính xác trước khi đóng vòng bi.
+Rủi ro 2: Nhiệt độ động cơ tăng cao
+Vấn đề: Động cơ bước luôn duy trì dòng điện để giữ vị trí (Holding Torque), gây nóng khi hoạt động lâu dưới trời nắng.
+Biện pháp: Tinh chỉnh dòng điện Driver TMC2209 xuống mức tối ưu (800mA) vừa đủ để giữ tải mà không gây quá nhiệt. Thiết kế thêm khe tản nhiệt đối lưu trên vỏ hộp động cơ.
+Rủi ro 3: Độ trễ tín hiệu (Latency) và mất kết nối
+Vấn đề: Điều khiển qua WiFi 2.4GHz dễ bị nhiễu và có độ trễ hình ảnh (200-300ms).
+Biện pháp: Sử dụng anten rời 3dBi để tăng cường sóng. Trong phần mềm, bổ sung thuật toán "Watchdog" để tự động kết nối lại (Auto-reconnect) ngay lập tức nếu tín hiệu bị gián đoạn.
+5.4. Khuyến nghị cho tương lai
+Do giới hạn về thời gian và kinh phí, đồ án vẫn còn nhiều tính năng để phát triển. Trong tương lai, dự án có thể được nâng cấp theo các hướng sau:
+Tích hợp Xử lý ảnh (AI Tracking): Bổ sung Module Jetson Nano hoặc sử dụng chính điện thoại làm bộ xử lý để tự động nhận diện và bám theo trái bóng, giảm tải thao tác cho người điều khiển.
+Nâng cấp động cơ: Chuyển sang sử dụng động cơ bước vòng kín (Closed-loop Stepper) để có phản hồi vị trí, loại bỏ hoàn toàn hiện tượng mất bước khi va chạm mạnh.
+Tối ưu hóa đường truyền video: Tách riêng luồng Video sang tần số 5.8GHz (Analog) hoặc sử dụng giao thức truyền hình ảnh độ trễ thấp (WebRTC) để đạt khả năng điều khiển thời gian thực (Real-time).
+Tối ưu thiết kế: Tích hợp hộp kỹ thuật lên PTU để giảm thiểu độ cồng kềnh, vướng dây.
+
+CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM – REFLECTION AND CASE-STUDIES
+6.1. Ứng dụng kiến thức kỹ thuật – Earilier course work
+Trong quá trình thực hiện đồ án tốt nghiệp, sinh viên đã vận dụng tổng hợp các kiến thức liên ngành được trang bị trong chương trình đào tạo Kỹ thuật Cơ điện tử, cụ thể:
+- Cơ học kỹ thuật (MEM704004) và Chi tiết máy: Áp dụng các nguyên lý về cân bằng tĩnh và động lực học để tính toán momen quán tính của cụm camera, từ đó lựa chọn đúng công suất động cơ bước Nema 17. Kiến thức về bộ truyền đai (Belt drive) và dung sai lắp ghép giúp thiết kế hệ thống truyền động chính xác, triệt tiêu độ rơ (backlash).
+- Đồ họa kỹ thuật (1, 2, 3) (MEM703024, MEM703025, MEM702026): Sử dụng thành thạo phần mềm Solidworks để mô hình hóa hệ thống, thiết kế tối ưu hóa kết cấu cho công nghệ in 3D (FDM) và kiểm tra va chạm trước khi chế tạo.
+- Kỹ thuật vi xử lý và vi điều khiển (EEE703046): Vận dụng kiến thức về dòng vi điều khiển ESP32 và hệ điều hành thời gian thực FreeRTOS để xử lý đa nhiệm (Multitasking): vừa điều khiển động cơ, vừa duy trì kết nối mạng WiFi ổn định.
+- Lập trình mô phỏng robot và các hệ Cơ điện tử (MEM702043): Sử dụng ngôn ngữ C# và nền tảng .NET (Windows Forms) để xây dựng giao diện điều khiển trực quan trên máy tính, xử lý các giao thức truyền thông TCP/IP và luồng video (Video Streaming).
+- Kỹ thuật cảm biến (EEE703040): Vận dụng nguyên lý hoạt động của các loại cảm biến vị trí để lựa chọn và tích hợp cảm biến quang cho hệ thống. Hiểu rõ về đặc tính tín hiệu ngõ ra (Digital Output) và mạch lọc nhiễu tín hiệu giúp xây dựng thành công thuật toán Homing (về điểm gốc) chính xác, đảm bảo robot luôn xác định đúng tọa độ tham chiếu sau mỗi lần khởi động.
+6.2. Giải quyết các vấn đề kỹ thuật phức tạp – Complex engineering problems
+Trong quá trình thiết kế và chế tạo, sinh viên đã đối mặt và giải quyết các vấn đề kỹ thuật điển hình sau:
+- Xung đột giữa yêu cầu kỹ thuật và chi phí (Conflicting technical issues):
++ Vấn đề: Yêu cầu hệ thống phải quay quét mượt mà, tốc độ cao để bắt theo trái bóng, nhưng chi phí chế tạo phải phù hợp với phạm vi đồ án. Các giải pháp chuyên nghiệp dùng động cơ Servo hoặc Harmonic Drive quá đắt đỏ.
++ Giải quyết: Thay thế bằng động cơ bước (Stepper Motor) kết hợp bộ truyền đai răng (Timing Belt) tỷ số truyền 1:3 và Driver TMC2209. Giải pháp này giúp tăng momen xoắn, giảm rung động và tiếng ồn, đồng thời giữ chi phí ở mức thấp.
+- Vấn đề chưa có giải pháp rõ ràng (No obvious solution):
++ Vấn đề: Động cơ bước hoạt động vòng hở (Open-loop), không có Encoder phản hồi vị trí. Khi khởi động lại hoặc bị trượt bước, hệ thống sẽ mất gốc tọa độ.
++ Giải quyết: Nghiên cứu và áp dụng quy trình "Homing 3 giai đoạn" (Tiếp cận nhanh -> Lùi lại -> Rà chậm) sử dụng cảm biến quang. Thuật toán này đảm bảo độ chính xác lặp lại cao mỗi khi hệ thống khởi động.
+- Đáp ứng nhu cầu đa dạng của người dùng (Diverse stakeholder needs):
++ Vấn đề: Người vận hành tại sân bóng thường không có kiến thức chuyên sâu về kỹ thuật, yêu cầu thiết bị phải dễ lắp đặt và sử dụng.
++ Giải quyết: Thiết kế phần cơ khí tương thích với chân máy ảnh (Tripod) phổ thông thông qua ren tiêu chuẩn 1/4 inch. Giao diện phần mềm được tối giản hóa với các nút bấm lớn và thanh trượt trực quan.
+6.3. Tác động đạo đức và xã hội – Ethical and Social impacts
+Đồ án không chỉ mang ý nghĩa học thuật mà còn hướng tới các giá trị thực tiễn:
+- Tác động xã hội:
++ Góp phần thúc đẩy phong trào thể thao cộng đồng (bóng đá sân 7) thông qua việc cung cấp giải pháp ghi hình giá rẻ, giúp các đội bóng nghiệp dư có thể lưu giữ khoảnh khắc và phân tích chiến thuật như chuyên nghiệp.
++ Giảm thiểu sức lao động cho người quay phim, thay thế việc phải đứng cầm máy liên tục trong 90 phút dưới thời tiết nắng nóng.
+- Tác động kinh tế:
++ Cung cấp một giải pháp thay thế hiệu quả về chi phí ("Low-cost alternative") so với các thiết bị ngoại nhập đắt tiền (như Gimbal Ronin hay Camera truyền hình). Điều này phù hợp với điều kiện kinh tế của đại đa số các sân bóng tại Việt Nam.
+- Đạo đức nghề nghiệp và An toàn:
++ Tuân thủ nghiêm ngặt các quy định về an toàn điện áp thấp (24V DC), đảm bảo không gây nguy hiểm cho người sử dụng ngoài trời.
++ Tôn trọng bản quyền phần mềm bằng cách sử dụng các thư viện mã nguồn mở (Open Source) hợp pháp và trích dẫn tài liệu tham khảo đầy đủ.
+6.4. Tổng kết và bài học kinh nghiệm – General reflection and case-stuies
+Quá trình thực hiện đồ án từ ý tưởng đến sản phẩm thực tế là một trải nghiệm quý giá, giúp sinh viên rút ra những bài học quan trọng:
+- Tầm quan trọng của Mô phỏng (Simulation): Việc thiết kế kỹ lưỡng trên 3D và tính toán động học trước khi chế tạo giúp tiết kiệm rất nhiều chi phí và thời gian sửa lỗi. Những sai sót về kích thước hay va chạm cơ khí đã được loại bỏ ngay từ trên bản vẽ.
+- Tư duy Tích hợp hệ thống (System Integration): Cơ điện tử không chỉ là lắp ghép các phần rời rạc. Việc đồng bộ hóa giữa cơ khí (độ căng đai), điện tử (dòng điện Driver) và lập trình (gia tốc động cơ) là yếu tố then chốt để hệ thống vận hành êm ái.
+- Kỹ năng quản lý dự án: Việc phải hoàn thành khối lượng công việc lớn trong 15 tuần đòi hỏi kỹ năng lập kế hoạch, phân chia giai đoạn (Milestones) hợp lý và kiên trì giải quyết từng lỗi phát sinh (Debug).
+- Thích ứng công nghệ: Việc mạnh dạn áp dụng các công nghệ mới như in 3D vật liệu PETG hay sử dụng hệ điều hành FreeRTOS đã giúp nâng cao chất lượng sản phẩm so với các phương pháp truyền thống.
+
+
+TÀI LIỆU TRÍCH DẪN - REFERENCES
+[A] Tài liệu tiếng Việt 
+[8] Nguyễn Trọng Hiệp (và Nguyễn Văn Lẫm) – Thiết kế chi tiết máy (Tập 1 & 2). Nhà xuất bản: Giáo dục (các năm 2006,2012,...). 
+[9] Trịnh Chất & Lê Văn Uyển – Tính toán thiết kế hệ dẫn động cơ khí (Tập 1 & 2). Nhà xuất bản: Giáo dục (tái bản nhiều lần, ví dụ 2020). 
+[10] Nguyễn Hữu Lộc – Cơ sở thiết kế máy (hoặc Thiết kế máy và Chi tiết máy). Nhà xuất bản: Đại học Quốc gia TP.HCM hoặc Đại học Bách Khoa TP.HCM. 
+[B] Tài liệu tiếng Anh (Datasheets & Technical Documents) 
+[11] Espressif Systems,"ESP32 Series Datasheet v3.0", 2022. [Online]. Available:. (Tài liệu về vi điều khiển trung tâm). 
+[12] Trinamic Motion Control GmbH,"TMC2209 Datasheet - V1.03 - Step/Dir Drivers for Two-Phase Bipolar Stepper Motors", Hamburg, Germany, 2020. (Tài liệu về Driver động cơ). 
+[13] Monolithic Power Systems,"MP1584 - 3A, 1.5MHz Step-Down Converter Datasheet", 2018. (Tài liệu về mạch nguồn). 
+[14] ISO 1222:2010,"Photography — Tripod connections", International Organization for Standardization, Geneva, Switzerland. (Tiêu chuẩn ren1/4 inch cho chân máy ảnh). [15] Richard Barry,"Mastering the FreeRTOS Real Time Kernel - A Hands-On Tutorial Guide", Real Time Engineers Ltd, 2016. (Dùng cho phần lập trình đa luồng). [C] Tài liệu trực tuyến & Mã nguồn mở 
+[16] Mike McCauley,"AccelStepper Library for Arduino", [Online]. Available:. (Thư viện điều khiển động cơ bước). 
+[17] BigTreeTech,"BIGTREETECH TMC2209 V1.2 GitHub Repository", [Online]. Available:. (Sơ đồ mạch Driver). 
+[18] Microsoft Documentation,"Windows Forms (WinForms) for .NET Core", [Online]. (Tài liệu lập trình giao diện C#).
+PHỤ LỤC - APPENDICES
+[1] Sport Scope, "Premium Endzone Camera Systems at an Affordable Price," 2017. Available: https://www.sportscope.com/premium-endzone-cameras.php.(Description of automated Pan/Tilt units for sports filming, used in background comparison of recording methods in Section 1.1 and market survey in Section 2.2.)
+[2] Move'N See, "PIX4TEAM 2 – AI Auto-Follow Camera for Team Sports," 2025. Available: https://shop.movensee.com/en/products/pix4team-automatic-camera-sports.html. (AI-powered PTU for amateur sports, cited in PTU applications in Section 1.1 and future recommendations in Section 1.5 and 5.4.)
+[3] Telescopic Camera Pole, "8M Endzone Camera System With Manual Pan Tilt," 2025. Available: https://www.telescopiccamerapole.com/products/8m-endzone-camera-system-with-manual-pan-tilt. (Manual PTU design for football tracking, referenced in project title justification in Section 1.1 and comparative analysis in Section 2.2.)
+[4] A. Taha Zairi et al., "The ball kicking speed: A new, efficient performance indicator in youth soccer," PLoS One, 2019. Available: https://pmc.ncbi.nlm.nih.gov/articles/PMC6524813/. (Empirical data on amateur soccer ball speeds ~70-77 km/h, cited in velocity calculations in Section 3.2.1.)
+[5] J.E. Carryer, M. Ohline, and T.W. Kenny, "Introduction to Mechatronic Design," Pearson, 2011. ISBN-13: 9780131433564. (Core text on mechatronics methodologies, used in design process in Section 1.4 and operating principles in Section 3.1.1.)
+[6] K. Janschek, "Mechatronic Systems Design: Methods, Models, Concepts," Springer, 2012. ISBN: 978-3-642-17530-5. (Comprehensive guide to mechatronic modeling, cited in structural analysis in Section 3.1.2 and mechanical references in Section 1.4.)
+[7] D. Popovich, "Mechatronics in Engineering Design and Product Development," Routledge, 2019. ISBN: 9780367400293. (Focus on integrated design applications, referenced in transmission selection in Section 3.1.3 and kinematic challenges in Section 2.1.)
+PHỤ LỤC 1: BÁO CÁO TÀI CHÍNH  – FINANCE REPORT
+1. Bảng kê chi tiết kinh phí chế tạo (Bill of Materials)
+2. Phân tích lựa chọn linh kiện (Economic & Technical Trade-off)
+Trong quá trình thiết kế, sinh viên đã phải cân nhắc kỹ lưỡng giữa Hiệu năng (Performance) và Giá thành (Cost). 
+Bảng so sánh lựa chọn Driver điều khiển động cơ:
+
+PHỤ LỤC 2: CÁC TIÊU CHUẨN THIẾT KẾ  – STANDARDS
+
+PHỤ LỤC 3: KẾ HOẠCH THỰC HIỆN – ASSIGNMENT AND TIMELINES
+
+PHỤ LỤC 4: TÀI LIỆU BỔ TRỢ – SUPPORTING MATERIALS
+Datasheet động cơ: 
+Động cơ Nema 17 42x42x23mm
+
+ 
+
+Động cơ Nema 17 42x42x40mm
+
+
+
+Code: https://github.com/thanhdatzzz/PTU_Remote_Controller
+Bản vẽ lắp: 
+
+
+
+
+
+
+NGUYỄN QUANG THÀNH ĐẠT
+BỘ GIÁO DỤC VÀ ĐÀO TẠO
+ĐẠI HỌC PHENIKAA
+
+NGUYỄN QUANG THÀNH ĐẠT
+
+
+
+ĐỒ ÁN TỐT NGHIỆP
+
+
+NGUYỄN QUANG THÀNH ĐẠT
+
+THIẾT KẾ HỆ THỐNG PAN-TILT UNIT 
+ĐIỀU KHIỂN TỪ XA
+
+             
+
+KỸ THUẬT CƠ ĐIỆN TỬ
+                 Sinh viên: NGUYỄN QUANG THÀNH ĐẠT
+
+KỸ THUẬT CƠ ĐIỆN TỬ
+                 Mã số sinh viên: 20010998                Khóa: K14
+
+                 Ngành: Kỹ thuật Cơ Điện Tử           Hệ: Đại học chính quy
+
+                 Giảng viên hướng dẫn: TS. Đỗ Quang Chấn
+TS. Nguyễn Đức Nam
+
+KỸ THUẬT CƠ ĐIỆN TỬ
+	
+
+
+KỸ THUẬT CƠ ĐIỆN TỬ
+
+
+KỸ THUẬT CƠ ĐIỆN TỬ
+
+Hà Nội – 2026
+BỘ GIÁO DỤC VÀ ĐÀO TẠO
+ĐẠI HỌC PHENIKAA
+BỘ GIÁO DỤC VÀ ĐÀO TẠO
+ĐẠI HỌC PHENIKAA
+
+
+
+ĐỒ ÁN TỐT NGHIỆP
+
+
+
+
+ĐỒ ÁN TỐT NGHIỆP
+
+THIẾT KẾ HỆ THỐNG PAN-TILT UNIT ĐIỀU KHIỂN TỪ XA
+
+
+THIẾT KẾ HỆ THỐNG PAN-TILT UNIT ĐIỀU KHIỂN TỪ XA
+
+
+Sinh viên: NGUYỄN QUANG THÀNH ĐẠT
+Sinh viên: NGUYỄN QUANG THÀNH ĐẠT
+Mã số sinh viên: 20010998                  Khóa: K14
+
+Ngành: Kỹ thuật Cơ Điện Tử             Hệ: Đại học chính quy
+
+Giảng viên hướng dẫn: TS. Đỗ Quang Chấn
+TS. Nguyễn Đức Nam
+Mã số sinh viên: 20010998                  Khóa: K14
+
+Ngành: Kỹ thuật Cơ Điện Tử             Hệ: Đại học chính quy
+
+Giảng viên hướng dẫn: TS. Đỗ Quang Chấn
+TS. Nguyễn Đức Nam
+
+
+
+
+Hà Nội – 2026
+
+
+
+
+Hà Nội – 2026
+
+
+
+
+BỘ GIÁO DỤC VÀ ĐÀO TẠO
+ĐẠI HỌC PHENIKAA
+
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+
+
+
+
+
+
+Hà Nội, ngày …, tháng … năm 20..
+GIẢNG VIÊN HƯỚNG DẪN
+(Ký, ghi rõ họ tên)
+
+
+
+BỘ GIÁO DỤC VÀ ĐÀO TẠO
+ĐẠI HỌC PHENIKAA
+
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hà Nội, ngày …, tháng … năm 20…
+GIẢNG VIÊN PHẢN BIỆN
+(Ký, ghi rõ họ tên)
+
+
+
+
+
+
+
+
+
+
+
+
+BỘ GIÁO DỤC VÀ ĐÀO TẠO
+ĐẠI HỌC PHENIKAA
+
+BỘ GIÁO DỤC VÀ ĐÀO TẠO
+ĐẠI HỌC PHENIKAA
+
+
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+1. …………….………….
+Chủ tịch
+2. …………….………….
+Thư ký
+3. …………….………….
+Giảng viên phản biện
+4. …………….………….
+Ủy viên 1
+……………..
+…………..
+
+CHỦ TỊCH HỘI ĐỒNG
+(Ký, ghi rõ họ tên
+
+Hà Nội, ngày …, tháng … năm 20..
+THƯ KÝ
+(Ký, ghi rõ họ tên)
+
+GIẢNG VIÊN HƯỚNG DẪN
+(Ký, ghi rõ họ tên)
+
+
+
+
+Hà Nội, ngày …, tháng … năm 20…
+SINH VIÊN
+(Ký, ghi rõ họ tên)
+
+
+STT
+Viết tắt
+Chi tiết
+1
+AI
+Artificial Intelligence (Trí tuệ nhân tạo)
+2
+AML
+Applied Mechatronics Lab (Phòng thí nghiệm Cơ điện tử Ứng dụng)
+3
+BOM
+Bill of Materials (Bảng kê vật tư)
+4
+DOF
+Degree of Freedom (Bậc tự do)
+5
+ESP32
+Espressif Systems 32 (Vi điều khiển ESP32)
+6
+FDM
+Fused Deposition Modeling (Công nghệ in 3D đùn nhựa nóng chảy)
+7
+GUI
+Graphical User Interface (Giao diện đồ họa người dùng)
+8
+IP
+Ingress Protection (Cấp độ bảo vệ xâm nhập)
+9
+IPX4
+Ingress Protection rating code X4 (Cấp bảo vệ chống nước bắn)
+10
+MCU
+Microcontroller Unit (Bộ vi điều khiển)
+11
+PETG
+Polyethylene Terephthalate Glycol (Nhựa PETG)
+12
+PTU
+Pan-Tilt Unit (Hệ thống quay quét Pan-Tilt)
+13
+RTSP
+Real Time Streaming Protocol (Giao thức truyền video thời gian thực)
+14
+TCP/IP
+Transmission Control Protocol/Internet Protocol (Giao thức TCP/IP)
+15
+TMC2209
+Trinamic Motion Control 2209 (Driver động cơ TMC2209)
+16
+UART
+Universal Asynchronous Receiver/Transmitter (Giao tiếp UART)
+17
+WiFi
+Wireless Fidelity (Kết nối không dây WiFi)
+
+(a) Sự bất tiện khi quay thủ công
+
+(b) Sự cồng kềnh của thiết bị chuyên nghiệp
+ 
+(a) Camera trong nhà
+
+(b) Gimbal cầm tay
+
+
+(c) Hệ thống PTU quân sự
+Yếu tố ràng buộc
+Yêu cầu / Giá trị cụ thể
+Giải thích & Ghi chú
+Thời gian thực hiện
+4 tháng
+
+Điều kiện môi trường
+Chống mưa tạt
+Do đặc thù hoạt động tại sân bóng ngoài trời, hệ thống cần có khả năng chống chịu được mưa tạt nhẹ hoặc sương ẩm. 
+Phương thức giao tiếp
+WiFi (ESP32)
+Yêu cầu điều khiển không dây hoàn toàn trong bán kính khoảng 30m để thuận tiện cho người vận hành. 
+Tương thích gá lắp cơ khí
+Ren chuẩn 1/4"-20 hoặc 3/8"-16
+Thiết kế đế gá phải tương thích với các loại chân máy ảnh (Tripod) phổ thông, giúp việc lắp đặt và di chuyển trên sân dễ dàng. 
+Chi phí
+Dưới 10.000.000VNĐ
+ Phù hợp với nhu cầu người sử dụng
+Tiêu chuẩn áp   dụng
+
+ISO 1222:2010 (Tripod connections) 
+IEC 60529 – Degrees of protection provided by enclosures (IP Code) 
+ISO 4184: Belt drives — Classical and narrow V-belts — Dimensions
+
+Thông số
+Đơn vị
+Giá trị
+Khối lượng hệ thống
+Kg
+≤ 5
+Kích thước bao
+mm
+≤ 300×200x300
+Tốc độ quét
+Độ/s
+> 0.5
+Giao thức điều khiển
+-
+WiFi (ESP32), phạm vi ~30m
+Nguồn cấp
+VDC
+Pin 12-24
+Tải trọng
+kg
+1
+Thời gian sử dụng
+phút
+90
+Thông số kỹ thuật
+Đơn vị
+Giá trị yêu cầu
+Kết quả thực tế
+Kết luận
+Kích thước bao
+mm
+≤300×200x300
+240×100x175
+Đạt
+Khối lượng
+kg
+≤5
+3.2
+Đạt
+Tốc độ quét
+độ/s
+≥ 0.5
+0.5
+Đạt
+Góc quay Pan
+độ
+0÷180
+0÷180
+Đạt
+Góc quay Tilt
+độ
+−10÷40
+−10÷40
+Đạt
+Nguồn cấp
+VDC
+12 - 24
+12 - 24
+Đạt
+Kết nối
+-
+WiFi
+WiFi
+Đạt
+Chi phí
+VNĐ
+<10.000.000
+2.500.000
+Đạt
+Thời gian sử dụng
+phút
+90
+120
+Đạt
+Phân khúc thiết bị
+Sản phẩm điển hình
+Giá thành ước lượng (VNĐ)
+Ưu điểm kỹ thuật
+Nhược điểm / Hạn chế
+Đầu quay truyền hình chuyên dụng (Broadcast PT Head)
+Rushworks PTX, Vinten Vantage
+
+
+> 100.000.000
+- Độ chính xác cơ khí cực cao.- Tải trọng lớn (>10kg).- Chuyển động siêu mượt (Smooth).
+- Chi phí quá cao so với ngân sách phong trào.
+Gimbal chống rung cầm tay (Handheld Gimbal)
+DJI Ronin RS3, Zhiyun Crane
+
+
+10.000.000 – 20.000.000
+- Khả năng triệt tiêu rung động tốt.- Gọn nhẹ, dễ mua.
+- Không thiết kế để hoạt động cố định lâu dài.
+Khả năng chịu tải  kém. Không điều khiển được ở khoảng cách xa.
+Camera giám sát quay quét (Speed Dome CCTV)
+Hikvision PTZ, Dahua
+
+
+2.000.000 – 10.000.000
+- Chống nước tốt (IP66/IP67).- Giá thành rẻ.
+- Tốc độ đáp ứng chậm, không theo kịp bóng. Cảm biến hình ảnh nhỏ, chất lượng video thấp. Độ trễ điều khiển cao.
+Yếu tố ràng buộc
+Yêu cầu / Giá trị cụ thể
+Giải thích & Ghi chú
+Thời gian thực hiện
+4 tháng
+
+Điều kiện môi trường
+Chống mưa tạt
+Do đặc thù hoạt động tại sân bóng ngoài trời, hệ thống cần có khả năng chống chịu được mưa tạt nhẹ hoặc sương ẩm. 
+Phương thức giao tiếp
+WiFi (ESP32)
+Yêu cầu điều khiển không dây hoàn toàn trong bán kính khoảng 30m để thuận tiện cho người vận hành. 
+Tương thích gá lắp cơ khí
+Ren chuẩn 1/4"-20 hoặc 3/8"-16
+Thiết kế đế gá phải tương thích với các loại chân máy ảnh (Tripod) phổ thông, giúp việc lắp đặt và di chuyển trên sân dễ dàng. 
+Chi phí
+Dưới 10.000.000VNĐ
+ Phù hợp với nhu cầu người sử dụng
+Tiêu chuẩn áp dụng 
+
+ISO 1222:2010 (Tripod connections) 
+IEC 60529 – Degrees of protection provided by enclosures (IP Code) 
+ISO 4184: Belt drives — Classical and narrow V-belts — Dimensions
+
+Loại ràng buộc
+Thông tin
+Tác động đến thiết kế
+Tài chính
+< 10.000.000 VNĐ
+Ưu tiên sử dụng các linh kiện có sẵn tại thị trường Việt Nam. Phương pháp gia công được ưu tiên in 3D.
+Công nghệ
+In 3D (FDM)
+Thiết kế phải tính đến độ co ngót vật liệu và dung sai lắp ghép theo ISO 2768-1 (cấp c).
+Thời gian
+15 Tuần
+
+Bên liên quan (Stakeholder)
+Nhu cầu / Yêu cầu cụ thể
+Tác động đến giải pháp thiết kế (Implications)
+ Người sử dụng cuối (Người quay phim, quản lý sân bóng)
+Dễ sử dụng: Không yêu cầu kiến thức lập trình, giao diện trực quan.
+Xây dựng giao diện Web/App tối giản, các nút điều khiển to, rõ ràng.
+ Người sử dụng cuối (Người quay phim, quản lý sân bóng)
+Dễ sử dụng: Không yêu cầu kiến thức lập trình, giao diện trực quan.
+Xây dựng giao diện Web/App tối giản, các nút điều khiển to, rõ ràng.
+
+ Người sử dụng cuối (Người quay phim, quản lý sân bóng)
+Dễ sử dụng: Không yêu cầu kiến thức lập trình, giao diện trực quan.
+Xây dựng giao diện Web/App tối giản, các nút điều khiển to, rõ ràng.
+
+ Người sử dụng cuối (Người quay phim, quản lý sân bóng)
+Tính cơ động: Lắp đặt nhanh vào chân máy (tripod) có sẵn, không cần tools phức tạp.
+Thiết kế đế chuẩn ốc 1/4"-20 và sử dụng các chốt kẹp nhanh (Quick release).
+
+ Người sử dụng cuối (Người quay phim, quản lý sân bóng)
+Hoạt động liên tục: Pin phải đủ dùng cho ít nhất 1 trận đấu (90 phút).
+Tính toán dung lượng pin dự trữ và thiết kế khoang pin dễ tháo lắp thay thế.
+
+ Nhà sản xuất (Yêu cầu về công nghệ chế tạo)
+
+Khả thi với in 3D: Hạn chế các cấu trúc treo (overhang) quá lớn gây khó khăn khi in FDM.
+ 
+Chia tách các chi tiết phức tạp thành nhiều module nhỏ để ghép lại, tối ưu hướng in.
+
+ Nhà sản xuất (Yêu cầu về công nghệ chế tạo)
+
+Khả thi với in 3D: Hạn chế các cấu trúc treo (overhang) quá lớn gây khó khăn khi in FDM.
+ 
+Chia tách các chi tiết phức tạp thành nhiều module nhỏ để ghép lại, tối ưu hướng in.
+
+ Nhà sản xuất (Yêu cầu về công nghệ chế tạo)
+
+Khả thi với in 3D: Hạn chế các cấu trúc treo (overhang) quá lớn gây khó khăn khi in FDM.
+ 
+Chia tách các chi tiết phức tạp thành nhiều module nhỏ để ghép lại, tối ưu hướng in.
+
+ Nhà sản xuất (Yêu cầu về công nghệ chế tạo)
+Lắp ráp đơn giản: Sử dụng linh kiện tiêu chuẩn dễ mua.
+Thiết kế lỗ chờ để cấy ốc đồng (Heat-set insert) hoặc dùng đai ốc hãm, dùng vòng bi thông dụng.
+
+ Yêu cầu học thuật & An toàn (Giảng viên, Tiêu chuẩn an toàn)
+An toàn điện: Không gây giật hoặc cháy nổ khi hoạt động ngoài trời ẩm ướt.
+Cách ly mạch điện trong hộp kín (IPX4), sử dụng cầu chì bảo vệ quá dòng.
+
+ Yêu cầu học thuật & An toàn (Giảng viên, Tiêu chuẩn an toàn)
+An toàn điện: Không gây giật hoặc cháy nổ khi hoạt động ngoài trời ẩm ướt.
+Cách ly mạch điện trong hộp kín (IPX4), sử dụng cầu chì bảo vệ quá dòng.
+
+ Yêu cầu học thuật & An toàn (Giảng viên, Tiêu chuẩn an toàn)
+An toàn điện: Không gây giật hoặc cháy nổ khi hoạt động ngoài trời ẩm ướt.
+Cách ly mạch điện trong hộp kín (IPX4), sử dụng cầu chì bảo vệ quá dòng.
+
+ Yêu cầu học thuật & An toàn (Giảng viên, Tiêu chuẩn an toàn)
+Tính thẩm mỹ: Sản phẩm hoàn thiện phải gọn gàng, không lộ dây điện loằng ngoằng.
+Thiết kế các đường đi dây ngầm (Cable management) bên trong thân vỏ hoặc dùng ống ruột gà bảo vệ.
+
+Tiêu chí đánh giá (Criteria)
+Trọng số (Weight)
+PA 1: Kết cấu chữ U
+
+PA 2: Kết cấu chữ L 
+
+1. Khả năng chế tạo/Lắp ráp
+30%
+2
+3
+2. Tải trọng lớn
+25%
+4
+2
+3. Chi phí chế tạo
+20%
+2
+4
+4. Kích thước & Thẩm mỹ
+15%
+2
+3
+5. Khả năng bảo trì
+10%
+3
+3
+TỔNG ĐIỂM (TOTAL SCORE)
+100%
+2.6
+4.65
+Tiêu chí đánh giá (Criteria)
+Trọng số (Weight)
+PA 1: Truyền động trực tiếp (Direct Drive)
+PA 2: Truyền động bánh răng (Gear Drive)
+PA 3: Truyền động đai (Belt Drive - GT2/3M)
+1. Độ chính xác & Êm ái 
+35%
+5
+2
+4
+2. Chi phí chế tạo (Giá động cơ, linh kiện)
+25%
+2
+3
+5
+3. Khả năng chế tạo/Lắp ráp 
+25%
+4
+2
+5
+4. Momen xoắn đầu ra 
+15%
+2
+5
+4
+TỔNG ĐIỂM 
+100%
+3.55
+2.7
+4.5
+(a)
+(b)
+
+
+
+
+Tiêu chí đánh giá (Criteria)
+Trọng số (%)
+Giải pháp 1: Chữ U (DSLR)
+Giải pháp 2: Chữ L (Phone)
+1. Khả năng công nghệ 
+30%
+2
+5
+2. Trọng lượng hệ thống 
+10%
+2
+5
+3. Momen xoắn yêu cầu 
+20%
+3
+5
+4. Độ cứng vững động học 
+20%
+5
+3
+5. Chi phí chế tạo 
+20%
+3
+5
+TỔNG ĐIỂM 
+ 
+3
+4.6
+
+
+Tiêu chí đánh giá (Criteria)
+Trọng số (%)
+Cấu hình A: PC Nhúng (LattePanda)
+Cấu hình B: VĐK + Laptop (ESP32)
+1. Chi phí đầu tư (Cost Efficiency)
+30%
+1
+5
+2. Hiệu năng xử lý (Processing Power)
+25%
+3
+5
+3. Kích thước & Khối lượng (Compactness)
+20%
+2
+5
+4. Tiêu thụ năng lượng (Power Consumption)
+15%
+2
+5
+5. Khả năng bảo trì (Maintainability)
+10%
+4
+4
+TỔNG ĐIỂM (TOTAL SCORE)
+100%
+2.15
+4.9
+Tiêu chí đánh giá (Criteria)
+Trọng số (%)
+PA 1: Radio RF (NRF24L01)
+PA 2: Bluetooth (BLE)
+PA 3: WiFi (ESP32)
+1. Băng thông dữ liệu (Khả năng truyền ảnh/Video)
+30%
+2
+2
+5
+2. Phạm vi kết nối (Range ~50m)
+25%
+5
+2
+4
+3. Khả năng tích hợp (Kết nối trực tiếp với Laptop/PC)
+25%
+2
+3
+5
+4. Độ ổn định & Chống nhiễu
+20%
+3
+4
+4
+TỔNG ĐIỂM
+100%
+2.95
+2.65
+4.55
+Phân hệ (Sub-system)
+Hạng mục
+Phương án / Thông số đã chọn
+Ghi chú kỹ thuật
+1. CƠ KHÍ
+Kết cấu khung
+Dạng chữ L (Sided Mount)
+Tối ưu cho in 3D, tải trọng nhẹ.
+1. CƠ KHÍ
+Vật liệu chế tạo
+Nhựa in 3D PETG
+Chịu nhiệt độ môi trường >60∘C.
+1. CƠ KHÍ
+Truyền động
+Đai răng GT2, 3M + Pulley 
+Giảm rung chấn, triệt tiêu tiếng ồn.
+1. CƠ KHÍ
+Tải trọng thiết kế
+Điện thoại thông minh 
+Khối lượng tải max: 300g.
+2. ĐIỆN TỬ
+Vi điều khiển
+ESP32-WROOM-32
+Dual-core, tích hợp WiFi/Bluetooth.
+2. ĐIỆN TỬ
+Driver động cơ
+TMC2209 (UART Mode)
+Công nghệ StealthChop (Siêu êm).
+2. ĐIỆN TỬ
+Động cơ chấp hành
+- Pan: Nema 17 (40mm)- Tilt: Nema 17 (23mm)
+Đảm bảo đủ momen xoắn theo tính toán sơ bộ.
+2. ĐIỆN TỬ
+Nguồn cấp
+Pin Li-ion 24V DC
+An toàn, di động.
+3. PHẦN MỀM
+Kiến trúc mạng
+TCP/IP (Client - Server)
+Laptop làm Server trung tâm để giảm tải cho Robot.
+3. PHẦN MỀM
+Giao diện (GUI)
+C# (Windows Forms)
+Xử lý ảnh và điều khiển trên PC.
+3. PHẦN MỀM
+Camera
+IP Webcam (App trên điện thoại)
+Tận dụng phần cứng điện thoại có sẵn.
+
+
+
+(a)
+
+(b)
+Thông số
+Giá trị thiết lập
+Giải thích
+Vật liệu
+PETG 
+Chịu va đập tốt, chịu nhiệt độ sân bãi ~60°C.
+Lớp in 
+0.2 mm
+Cân bằng giữa độ mịn bề mặt và thời gian in.
+Mật độ đặc (Infill)
+30% - Grid
+Đảm bảo độ cứng vững cho các vị trí chịu lực (ngàm giữ động cơ).
+Vỏ (Wall thickness)
+4 lớp (1.2mm)
+Tăng độ dày thành vách để bắt ốc vít chắc chắn hơn.
+Hỗ trợ (Support)
+Tree Support
+Dễ dàng gỡ bỏ ở các vị trí lỗ tròn, ngàm phức tạp.
+STT
+Thông số kiểm tra
+Phương pháp đo
+Kết quả đo được
+Đánh giá
+1
+Kích thước bao (≤300×200x300mm)
+
+240×100x175 mm
+
+2
+Tổng khối lượng (1,9kg)
+
+1,5 kg
+
+3
+Nhiệt độ vận hành
+Cho robot chạy chế độ Demo trong 30 phút, dùng súng bắn nhiệt đo vỏ động cơ.
+60-65 °C
+(Ổn định / Hơi nóng)
+Trạng thái hoạt động
+Dòng điện tiêu thụ trung bình (I_avg)
+Thời gian hoạt động ước tính
+Chế độ chờ (Idle)
+0.2 A
+7,5 giờ
+Vận hành bình thường 
+0.5 A
+Khoảng 3 -3,5giờ
+Vận hành cực đại (Tốc độ max, có tải)
+1 A
+1.8-2,2 giờ
+Tiêu chí
+Phương án 1: ESP-NOW (Peer-to-Peer)
+Phương án 2: WiFi AP Mode (ESP32 làm Server)
+Phương án 3: WiFi TCP/IP (Laptop làm Server)
+Mô hình kết nối
+Kết nối trực tiếp: Tay cầm ↔ PTU.
+Tay cầm → PTU (Server).
+Tay cầm & PTU → Laptop (Server).
+Thực nghiệm tại Lab
+Không ổn định. Thường xuyên mất kết nối do nhiễu sóng từ các thiết bị khác.
+Kết nối được, nhưng ESP32 trên PTU bị nóng nhanh do phải vừa xử lý động cơ vừa duy trì trạm phát WiFi.
+Rất ổn định. Tín hiệu mượt mà, ít bị rớt gói tin (Packet loss).
+Nhiệt độ & Năng lượng
+Mát, tiết kiệm pin.
+Nóng, tiêu thụ dòng lớn gây sụt áp khiến cho esp phải khởi động lại liên tục
+Ổn định. Việc xử lý mạng nặng nhọc được chuyển về Laptop.
+Khả năng mở rộng
+Có thể sử dụng PTU ngay cả khi không có server hoạt động.
+Hạn chế do bộ nhớ RAM của ESP32 có hạn.
+Dễ dàng mở rộng, có thể Livestream hình ảnh từ điện thoại về Laptop để xử lý.
+KẾT LUẬN
+LOẠI (Do nhiễu sóng).
+LOẠI (Do quá nhiệt & tốn pin).
+CHỌN (Tối ưu nhất).
+Lần đo (Trial)
+Độ lệch phương Ngang - Δx (mm)
+Độ lệch phương Dọc - Δy (mm)
+Quy đổi sai số góc (α≈arctan(Δ/d))
+Đánh giá
+1
++2.0
+-1.0
+0.038°
+Đạt
+2
+-3.0
++2.0
+0.057°
+Đạt
+3
+0.0
++1.5
+0.029°
+Tốt
+4
++4.5
+-2.0
+0.086°
+Chấp nhận
+5
+-1.5
+0.0
+0.029°
+Tốt
+6
++5.0
++3.0
+0.095°
+Chấp nhận
+7
+-2.5
+-4.0
+0.076°
+Chấp nhận
+8
++1.0
++0.5
+0.019°
+Tốt
+9
+-3.5
++1.0
+0.067°
+Đạt
+10
++2.0
+-1.5
+0.038°
+Đạt
+Trung bình
+~ 2.5 mm
+~ 1.6 mm
+~ 0.053 độ
+ĐẠT
+
+
+Tiêu chí
+Yêu cầu thiết kế (Lý thuyết)
+Kết quả thực tế (Đo lường)
+Đánh giá
+Góc quay Pan
+0° ÷ 180°
+0° ÷ 180° 
+Đạt
+Góc quay Tilt
+-10° ÷ 40°
+-10° ÷ 40° 
+Đạt
+Tải trọng
+500g (Điện thoại)
+ [500-700g] g
+Đạt
+Chống nước
+IPX4 (Mưa nhẹ)
+Đã thử nghiệm phun sương
+Đạt (Trực quan)
+Thời gian Pin
+> 90 phút
+100-120 phút
+Đạt
+Chi phí
+< 5 triệu VNĐ
+2 triệu VNĐ
+Đạt
+STT
+Tên hạng mục / Linh kiện
+Số lượng
+Đơn giá Nghìn (VNĐ)
+Thành tiền :  Nghìn (VNĐ)
+Ghi chú nguồn gốc
+I
+PHẦN ĐIỆN TỬ & ĐIỀU KHIỂN
+ 
+ 
+1151
+ 
+1
+Kit phát triển ESP32-WROOM-32U
+2
+160
+320
+Bản Anten rời để tăng sóng WiFi
+2
+Driver động cơ bước TMC2209 (BigTreeTech)
+2
+180
+360
+Loại chạy êm (Silent) cho quay phim
+3
+Động cơ bước Nema 17 (40mm - Trục Pan)
+1
+180
+180
+Momen xoắn lớn chịu tải toàn bộ khung
+4
+Động cơ bước Nema 17 (23mm - Trục Tilt)
+1
+105
+105
+Loại mỏng nhẹ để giảm tải trọng tay đòn
+5
+Mạch hạ áp Buck DC-DC MP1584
+1
+20
+20
+Hạ áp 24V xuống 5V
+6
+Pin Li-ion 18650 (Cell cũ tháo máy)
+5
+30
+150
+Tái sử dụng để tiết kiệm, dung lượng 2500mAh
+II
+PHẦN CƠ KHÍ & VẬT LIỆU IN 3D
+ 
+ 
+979
+ 
+7
+Nhựa in 3D PETG (Cuộn 1kg)
+2
+200
+400
+Nhựa PETG chịu nhiệt tốt hơn PLA khi ra sân nắng
+ 8
+Bộ dây đai (Belt) 3M + Pulley
+1
+200
+200
+Hệ truyền động êm ái
+9
+Bộ dây đai (Belt) GT2 + Pulley
+1
+150
+150
+Hệ truyền động êm ái
+ 10
+Vòng bi 6086
+1
+54
+54
+Ổ bi chịu lực cho trục xoay
+ 11
+Vòng bi 6811
+1
+100
+100
+Ổ bi chịu lực cho trục xoay
+ 12
+Ốc các loại (M3,4,5,1/4')
+1
+50
+50
+ 
+13
+Chốt định vị
+1
+25
+25
+ 
+III
+PHỤ KIỆN KHÁC
+ 
+ 
+350
+ 
+14
+Anten WiFi 3dBi + Dây IPEX
+2
+50
+100
+Tăng phạm vi kết nối >30m
+15
+Joystick, Nút nhấn, Công tắc, Jack nguồn
+1
+150
+150
+Linh kiện làm hộp điều khiển tay
+16
+Dây điện, ống co nhiệt, mạch phíp
+1
+100
+100
+Vật tư tiêu hao
+ 
+TỔNG CỘNG
+ 
+ 
+2480
+ĐẠT MỤC TIÊU < 10 TRIỆU
+Tiêu chí so sánh
+TMC2209
+A4988
+Giá thành (tham khảo)
+~110.000 VNĐ
+~25.000 VNĐ
+Công nghệ nổi bật
+StealthChop2™ (Siêu êm)
+Không có 
+Độ phân giải vi bước
+Lên đến 1/256
+Tối đa 1/16
+Giao tiếp cấu hình
+UART (Chỉnh dòng qua Code)
+Vặn biến trở thủ công
+Kết luận
+Đáp ứng chỉ tiêu thiết kế
+Không đáp ứng chỉ tiêu thiết kế
+STT
+Tên tiêu chuẩn & Mã hiệu
+Tổ chức ban hành
+Mục đích áp dụng trong đồ án
+1
+ISO 1222:2010(Tripod connections)
+ISO (International Organization for Standardization)
+Thiết kế lỗ ren gá đặt:Áp dụng chuẩn ren 1/4"-20 UNC cho đế của hệ thống PTU, đảm bảo tương thích với tất cả các loại chân máy ảnh (Tripod) phổ thông trên thị trường.
+2
+IEC 60529(Degrees of protection provided by enclosures - IP Code)
+IEC (International Electrotechnical Commission)
+Thiết kế vỏ bảo vệ (Chống nước/bụi):Sử dụng để đánh giá và thiết kế các khớp nối, gioăng chắn nước nhằm đạt cấp bảo vệ tương đương IPX4 (Chống nước tạt/mưa nhẹ) cho hoạt động ngoài trời.
+3
+ISO 2768-1 (Class c)(General tolerances)
+ISO
+Quy định dung sai gia công:Áp dụng cấp dung sai "c" (coarse) cho phương pháp in 3D FDM để bù trừ độ co ngót của vật liệu nhựa PETG khi thiết kế lỗ trục và vị trí ghép.
+6
+ISO 261 / TCVN 2248(ISO general purpose metric screw threads)
+ISO / TCVN
+Mối ghép ren:Sử dụng các loại bu lông, đai ốc hệ mét thông dụng (M3, M4, M5) để lắp ráp khung vỏ và bo mạch điện tử.

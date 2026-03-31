@@ -1,20 +1,19 @@
 # System Architecture (Frontend Public + Dashboard + Mobile UI Layer)
 
-## Public Marketing Layer
+## Public Entry and Protected Dashboard
 The frontend now has a split between:
 
-1. **Public landing route (`/`)**
+1. **Root route (`/`)**
    - Implemented in `Tracking_Frontend/src/app/page.tsx`.
-   - Uses dedicated marketing components from `Tracking_Frontend/src/features/marketing/**/*`.
-   - Serves illustration assets from `Tracking_Frontend/public/landing/*`.
-   - Remains public through `Tracking_Frontend/middleware.ts`.
+   - Redirects visitors to `/login`.
 
-2. **Protected operational dashboard (`/dashboard/*`)**
+2. **Login route (`/login`)**
+   - Acts as the unauthenticated entry point.
+   - Uses a split-screen presentation: landing content on the left and the login form on the right.
+
+3. **Protected operational dashboard (`/dashboard/*`)**
    - Keeps the existing authenticated workflow and route tree.
    - Still relies on `session_token` middleware checks before access.
-
-3. **Login route (`/login`)**
-   - Continues to act as the auth entry point for protected flows.
 
 ## UI Layer Accessibility Architecture
 The completed remediation spans two UI layers:
@@ -33,12 +32,16 @@ The completed remediation spans two UI layers:
    - Kept retry/loading actions in clear, touchable controls.
 
 ## Integration Notes
-- No new backend contracts were added.
-- Web now has a public marketing shell at `/` and a protected dashboard shell at `/dashboard/*`.
-- `SessionGuard` skips auth loading on the landing route only, so visitors can see the page immediately while internal pages keep their auth bootstrap.
+- No new backend contracts were added for the HTTP transport layer beyond the standardized response/error shapes.
+- Web root `/` now redirects to `/login`, while the protected dashboard shell remains under `/dashboard/*`.
 - Mobile and dashboard continue to share the same operational capability set; accessibility is implemented per platform conventions.
+- The API layer now assumes success envelopes and RFC7807 problem details across shared middleware, health, metrics, and rate-limit surfaces.
+- MQTT is the canonical ingest path for both real devices and simulator traffic, and `/iot/data` is no longer part of the runtime architecture.
+- Realtime event names use colon-style contracts end to end so backend emitters and frontend consumers stay aligned.
+- Frontend feature code consumes unwrapped data, while transport-level errors stay confined to the API client and parser layer.
+- Simulator token flow and rollback/race handling were hardened to avoid replaying legacy ingestion behavior during the cutover.
 
 ## Traceability
-- See marketing/public entry changes in `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/marketing/**/*`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/public/landing/*`, and `iot-vehicle-tracking-system-cloud/Tracking_Frontend/middleware.ts`.
+- See root redirect and split login entry changes in `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/login/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/auth/components/login-form.tsx`, and `iot-vehicle-tracking-system-cloud/Tracking_Frontend/middleware.ts`.
 - See related dashboard accessibility changes in `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/**/*` for controls, layout, and form validation.
 - See related mobile changes in `iot-vehicle-tracking-system-cloud/Tracking_Mobile/lib/features/webview/**/*` and `iot-vehicle-tracking-system-cloud/Tracking_Mobile/lib/widgets/**/*` for semantic messaging and loading/error behavior.

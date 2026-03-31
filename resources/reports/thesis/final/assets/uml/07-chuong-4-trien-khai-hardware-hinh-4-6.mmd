@@ -2,17 +2,17 @@ flowchart LR
     Vin["Nguồn xe 12V/24V"]
     Buck["MP2482 Buck 5V"]
 
-    subgraph MainRail["Nhánh nguồn chính"]
+    subgraph MainRail["Nhánh chính"]
         direction TB
         Rail33["Rail 3.3V\nMCU + IMU"]
         Rail4["Rail ~4V\nModem LTE"]
     end
 
-    subgraph BackupRail["Nhánh nguồn dự phòng"]
+    subgraph BackupRail["Nhánh dự phòng"]
         direction LR
-        Charge["TP4056 Sạc pin"]
+        Charge["TP4056 sạc pin"]
         Cell["Pin 18650"]
-        Boost["SX1308 Boost 5V"]
+        Boost["SX1308 boost 5V"]
         BackupBus["Bus backup 5V"]
     end
 

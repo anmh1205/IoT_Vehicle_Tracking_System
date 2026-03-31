@@ -2,17 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { exportServices, type CreateExportInput, type ExportJob } from '@/lib/api/export';
 import { notificationUtils } from '@/lib/notification';
 import { queryInvalidation } from '@/lib/utils/query-invalidation';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 
 interface UseCreateExportOptions {
   onSuccess?: (data: ExportJob) => void;
   onError?: (error: unknown) => void;
 }
-
-const getErrorMessage = (error: any): string =>
-  error?.response?.data?.error?.message ??
-  error?.response?.data?.message ??
-  error?.message ??
-  'Không thể tạo yêu cầu xuất dữ liệu';
 
 export const useCreateExport = (options: UseCreateExportOptions = {}) => {
   const queryClient = useQueryClient();
@@ -25,7 +20,10 @@ export const useCreateExport = (options: UseCreateExportOptions = {}) => {
       options.onSuccess?.(data);
     },
     onError: (error) => {
-      notificationUtils.error('Tạo yêu cầu xuất thất bại', getErrorMessage(error));
+      notificationUtils.error(
+        'Tạo yêu cầu xuất thất bại',
+        getApiErrorMessage(error, 'Không thể tạo yêu cầu xuất dữ liệu'),
+      );
       options.onError?.(error);
     },
   });

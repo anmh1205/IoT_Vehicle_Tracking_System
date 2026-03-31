@@ -34,7 +34,7 @@ export const publishInternalEvent = (
     correlation_id: generateCorrelationId(),
     event_type: eventType,
     timestamp: new Date().toISOString(),
-    ...payload,
+    payload,
   };
 
   client.publish(topic, JSON.stringify(envelope), { qos }, (err) => {

@@ -1,11 +1,11 @@
 flowchart LR
     Device["Tracker"] --> Bridge["MQTT Bridge"]
     Bridge --> PG["PostgreSQL
-Nghiệp vụ"]
+Dữ liệu nghiệp vụ"]
     Bridge --> VM["VictoriaMetrics
-Telemetry"]
+Dữ liệu đo"]
     Bridge --> VL["VictoriaLogs
-Audit log"]
+Nhật ký"]
     API["Backend API"] --> PG
     API --> VM
     Dashboard["Dashboard"] --> API

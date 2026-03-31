@@ -2,8 +2,18 @@ import { Router } from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { registry } from '@/infrastructure/metrics/registry';
 import { appConfig, observabilityConfig } from '@/config/env';
+import { createApiError } from '@/shared/utils/errors.util';
+import { serializeApiError } from '@/shared/serializers/problem-details.serializer';
 
 const router = Router();
+
+const sendProblem = (req: Request, res: Response, status: number, code: string, detail: string): void => {
+  const requestId = req.correlationId ?? 'unknown';
+  const error = createApiError(status, detail, { code });
+  const payload = serializeApiError(error, req.path, requestId);
+  res.type('application/problem+json');
+  res.status(status).json(payload);
+};
 
 /**
  * Basic auth guard for metrics endpoint.
@@ -14,14 +24,10 @@ const metricsAuth = (req: Request, res: Response, next: NextFunction): void => {
 
   if (!password) {
     if (appConfig.isProduction) {
-      res.status(503).json({
-        success: false,
-        error: { code: 'METRICS_NOT_CONFIGURED', message: 'METRICS_PASSWORD is required in production' },
-      });
+      sendProblem(req, res, 503, 'METRICS_NOT_CONFIGURED', 'METRICS_PASSWORD is required in production');
       return;
     }
 
-    // No auth required in development when password is not configured
     next();
     return;
   }
@@ -29,10 +35,7 @@ const metricsAuth = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Basic ')) {
     res.setHeader('WWW-Authenticate', 'Basic realm="Metrics"');
-    res.status(401).json({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
-    });
+    sendProblem(req, res, 401, 'UNAUTHORIZED', 'Authentication required');
     return;
   }
 
@@ -41,26 +44,20 @@ const metricsAuth = (req: Request, res: Response, next: NextFunction): void => {
   const [, pwd] = decoded.split(':');
 
   if (pwd !== password) {
-    res
-      .status(403)
-      .json({ success: false, error: { code: 'FORBIDDEN', message: 'Invalid credentials' } });
+    sendProblem(req, res, 403, 'FORBIDDEN', 'Invalid credentials');
     return;
   }
 
   next();
 };
-
 /** GET /metrics — Prometheus metrics endpoint */
-router.get('/', metricsAuth, async (_req, res) => {
+router.get('/', metricsAuth, async (req, res) => {
   try {
     const metrics = await registry.metrics();
     res.set('Content-Type', registry.contentType);
     res.end(metrics);
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: { code: 'METRICS_ERROR', message: (err as Error).message },
-    });
+  } catch {
+    sendProblem(req, res, 500, 'METRICS_ERROR', 'Failed to collect metrics');
   }
 });
 

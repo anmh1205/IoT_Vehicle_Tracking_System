@@ -1,0 +1,4 @@
+2026-03-31T17:30:29.348247353Z [32minfo[39m: Realtime gateway initialized on path /ws {"context":"realtime","service":"tracking-backend","timestamp":"17:30:29.345"}
+2026-03-31T17:30:29.647626834Z [32minfo[39m: Server started on port 4000 (development) {"service":"tracking-backend","timestamp":"17:30:29.646"}
+2026-03-31T17:30:29.744960768Z [32minfo[39m: Connected to EMQX at mqtts://tracking-emqx:8883 for internal events {"context":"mqtt-listener","service":"tracking-backend","timestamp":"17:30:29.733"}
+2026-03-31T17:30:29.753004869Z [32minfo[39m: Subscribed to internal/events/# {"context":"mqtt-listener","service":"tracking-backend","timestamp":"17:30:29.751"}

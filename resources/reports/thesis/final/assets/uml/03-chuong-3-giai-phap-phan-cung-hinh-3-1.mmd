@@ -2,7 +2,7 @@ flowchart LR
     subgraph Input["Nguồn vào"]
         Batt["Ắc quy 12V/24V"]
         Buck["Buck 5V"]
-        Backup["Pin dự phòng + Boost"]
+        Backup["Pin dự phòng + boost"]
         Batt --> Buck
         Batt --> Backup
     end
@@ -13,10 +13,10 @@ flowchart LR
         PM --> MCU
     end
 
-    subgraph IO["Ngoại vi"]
+    subgraph IO["Thiết bị ngoại vi"]
         Modem["SIM7600CE-T"]
         IMU["LIS3DH"]
-        OBD["BLE OBD2"]
+        OBD["OBD2 BLE"]
     end
 
     Buck ----> MCU

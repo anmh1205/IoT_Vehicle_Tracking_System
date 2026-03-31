@@ -6,7 +6,7 @@ import {
   deleteOne,
 } from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
-import { generateToken } from '@/shared/utils/crypto.util';
+import { hashToken } from '@/shared/utils/crypto.util';
 import type {
   Device,
   DeviceListQuery,
@@ -71,8 +71,8 @@ export const findById = async (id: number): Promise<Device | null> =>
 export const findByDeviceId = async (deviceId: string): Promise<Device | null> =>
   findOne<Device>('SELECT * FROM devices WHERE device_id = $1', [deviceId]);
 
-export const create = async (input: CreateDeviceInput): Promise<Device> => {
-  const authToken = generateToken();
+export const create = async (input: CreateDeviceInput, authToken: string): Promise<Device> => {
+  const hashedAuthToken = hashToken(authToken);
 
   return insertOne<Device>(
     `INSERT INTO devices (device_id, device_name, auth_token, imei, vibration_threshold, request_interval, config, created_at, updated_at)
@@ -81,7 +81,7 @@ export const create = async (input: CreateDeviceInput): Promise<Device> => {
     [
       input.deviceId,
       input.deviceName,
-      authToken,
+      hashedAuthToken,
       input.imei ?? null,
       input.vibrationThreshold ?? 2.0,
       input.requestInterval ?? 10,

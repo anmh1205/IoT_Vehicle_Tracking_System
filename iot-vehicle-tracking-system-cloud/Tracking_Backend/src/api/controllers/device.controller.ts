@@ -2,7 +2,7 @@ import type { Response } from 'express';
 import { firmwareConfig } from '@/config/env';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
-import { sendOk, sendCreated } from '@/shared/utils/response.util';
+import { sendOk, sendCreated, sendAccepted } from '@/shared/utils/response.util';
 import { createValidationError } from '@/shared/utils/errors.util';
 import {
   createDeviceSchema,
@@ -176,15 +176,11 @@ export const triggerOta = asyncHandler(async (req: AuthenticatedRequest, res: Re
     },
   });
 
-  res.status(202).json({
-    success: true,
-    data: {
-      jobId,
-      status: 'assigned',
-      targetVersion: firmwareVersion,
-      commandId: result.id,
-    },
-    timestamp: new Date().toISOString(),
+  sendAccepted(res, {
+    jobId,
+    status: 'assigned',
+    targetVersion: firmwareVersion,
+    commandId: result.id,
   });
 });
 
@@ -198,13 +194,9 @@ export const rollbackOta = asyncHandler(async (req: AuthenticatedRequest, res: R
     },
   });
 
-  res.status(202).json({
-    success: true,
-    data: {
-      status: 'rolled_back',
-      commandId: result.id,
-    },
-    timestamp: new Date().toISOString(),
+  sendAccepted(res, {
+    status: 'rolled_back',
+    commandId: result.id,
   });
 });
 

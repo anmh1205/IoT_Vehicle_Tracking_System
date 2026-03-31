@@ -1,14 +1,14 @@
 flowchart TB
-    Header["Header map"]
+    Header["Thanh đầu bản đồ"]
 
-    subgraph LiveMap["Realtime map workspace"]
+    subgraph LiveMap["Khu bản đồ realtime"]
         direction LR
-        Fleet["Fleet list"]
-        MapPanel["Leaflet map"]
-        Stats["Realtime stats"]
+        Fleet["Danh sách xe"]
+        MapPanel["Bản đồ Leaflet"]
+        Stats["Số liệu realtime"]
     end
 
-    Timeline["Route timeline"]
+    Timeline["Dòng thời gian hành trình"]
 
     Header --> Fleet
     Header --> MapPanel

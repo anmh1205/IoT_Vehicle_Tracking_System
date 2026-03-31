@@ -1,12 +1,20 @@
+import type { ValidationErrorItem } from '@/shared/contracts/problem-details.contract';
+
+export interface ApiErrorDetails {
+  code?: string;
+  errors?: ValidationErrorItem[];
+  [key: string]: unknown;
+}
+
 export interface ApiError extends Error {
   status: number;
-  details?: Record<string, unknown>;
+  details?: ApiErrorDetails;
 }
 
 export const createApiError = (
   status: number,
   message: string,
-  details?: Record<string, unknown>,
+  details?: ApiErrorDetails,
 ): ApiError => {
   const error = new Error(message) as ApiError;
   error.name = 'ApiError';
@@ -28,8 +36,33 @@ export const isApiError = (value: unknown): value is ApiError => {
   );
 };
 
+const normalizeValidationErrors = (details?: unknown): ValidationErrorItem[] | undefined => {
+  if (!details || typeof details !== 'object' || Array.isArray(details)) {
+    return undefined;
+  }
+
+  const entries = Object.entries(details as Record<string, unknown>);
+  const errors: ValidationErrorItem[] = [];
+
+  for (const [field, raw] of entries) {
+    if (!Array.isArray(raw)) {
+      continue;
+    }
+
+    for (const item of raw) {
+      const message = typeof item === 'string' ? item : 'Invalid value';
+      errors.push({ field, message, code: 'VALIDATION_ERROR' });
+    }
+  }
+
+  return errors.length > 0 ? errors : undefined;
+};
+
 export const createValidationError = (message: string, details?: unknown) =>
-  createApiError(400, message, { code: 'VALIDATION_ERROR', details });
+  createApiError(400, message, {
+    code: 'VALIDATION_ERROR',
+    errors: normalizeValidationErrors(details),
+  });
 
 export const createUnauthorizedError = (message: string) =>
   createApiError(401, message, { code: 'UNAUTHORIZED' });

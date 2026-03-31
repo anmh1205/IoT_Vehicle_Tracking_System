@@ -16,7 +16,7 @@ export const processExport = async (job: ExportJob): Promise<void> => {
 
     await exportRepo.updateStatus(job.id, 'completed', filePath);
 
-    publishEvent('export.completed', {
+    publishEvent('export:ready', {
       id: job.id,
       user_id: job.user_id,
       file_path: filePath,
@@ -30,7 +30,7 @@ export const processExport = async (job: ExportJob): Promise<void> => {
 
     await exportRepo.updateStatus(job.id, 'failed');
 
-    publishEvent('export.completed', {
+    publishEvent('export:ready', {
       id: job.id,
       user_id: job.user_id,
       file_path: '',

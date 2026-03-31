@@ -3,7 +3,7 @@ services:
     image: ${DOCKERHUB_USERNAME}/tracking-frontend:uat
     container_name: tracking-frontend
     ports:
-      - '4002:4002'
+      - '4001:4001'
     env_file: .env
     restart: always
     networks:

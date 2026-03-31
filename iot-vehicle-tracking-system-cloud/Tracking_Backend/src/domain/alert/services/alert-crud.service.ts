@@ -44,7 +44,7 @@ export const createAlert = async (input: CreateAlertInput): Promise<AlertPublic>
 
   const result = sanitizeAlert(alert);
 
-  publishEvent('dashboard.alert.created', {
+  publishEvent('alert:new', {
     id: alert.id,
     vehicle_id: alert.vehicle_id ? Number(alert.vehicle_id) : undefined,
     device_id: alert.device_id ?? undefined,
@@ -56,7 +56,7 @@ export const createAlert = async (input: CreateAlertInput): Promise<AlertPublic>
     longitude: alert.longitude ?? undefined,
   });
 
-  publishEvent('dashboard.activity.created', {
+  publishEvent('activity:new', {
     id: alert.id,
     type: 'alert',
     message: `New ${alert.severity} alert: ${alert.title}`,

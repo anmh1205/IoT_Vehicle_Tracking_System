@@ -8,8 +8,6 @@ vi.mock('@/infrastructure/logger', () => ({
 
 import { errorHandler } from '../error-handler.middleware';
 
-// -- Helpers ------------------------------------------------------------------
-
 const makeReq = (overrides: Partial<Request> = {}): Request =>
   ({
     path: '/api/test',
@@ -21,59 +19,58 @@ const makeReq = (overrides: Partial<Request> = {}): Request =>
 const makeRes = () => {
   const json = vi.fn();
   const status = vi.fn().mockReturnValue({ json });
-  return { status, json, _json: json } as unknown as Response & {
+  const type = vi.fn().mockReturnValue({ status, json });
+
+  return { status, json, type } as unknown as Response & {
     status: ReturnType<typeof vi.fn>;
-    _json: ReturnType<typeof vi.fn>;
+    json: ReturnType<typeof vi.fn>;
+    type: ReturnType<typeof vi.fn>;
   };
 };
 
 const makeNext = (): NextFunction => vi.fn();
-
-// -- Tests --------------------------------------------------------------------
 
 describe('error-handler.middleware', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  // --- ApiError responses ----------------------------------------------------
-
   describe('ApiError handling', () => {
-    it('should respond with correct status and error fields for ApiError', () => {
+    it('should respond with RFC7807 fields for ApiError', () => {
       const req = makeReq({ correlationId: 'trace-abc' });
       const res = makeRes();
-      const err = createApiError(422, 'Invalid payload', { code: 'INVALID_PAYLOAD', field: 'email' });
+      const err = createApiError(422, 'Invalid payload', { code: 'INVALID_PAYLOAD' });
 
       errorHandler(err, req, res as unknown as Response, makeNext());
 
+      expect(res.type).toHaveBeenCalledWith('application/problem+json');
       expect(res.status).toHaveBeenCalledWith(422);
       const body = (res.status as ReturnType<typeof vi.fn>).mock.results[0].value.json.mock.calls[0][0];
-      expect(body.success).toBe(false);
-      expect(body.error.code).toBe('INVALID_PAYLOAD');
-      expect(body.error.message).toBe('Invalid payload');
-      expect(body.error.status).toBe(422);
-      expect(body.error.path).toBe('/api/test');
-      expect(body.error.traceId).toBe('trace-abc');
+      expect(body.code).toBe('INVALID_PAYLOAD');
+      expect(body.detail).toBe('Invalid payload');
+      expect(body.status).toBe(422);
+      expect(body.requestId).toBe('trace-abc');
+      expect(body.instance).toBe('/api/test#trace-abc');
     });
 
-    it('should include traceId matching req.correlationId in ApiError response', () => {
+    it('should include requestId matching req.correlationId', () => {
       const req = makeReq({ correlationId: 'corr-xyz' });
       const res = makeRes();
 
       errorHandler(createNotFoundError('Resource not found'), req, res as unknown as Response, makeNext());
 
       const body = (res.status as ReturnType<typeof vi.fn>).mock.results[0].value.json.mock.calls[0][0];
-      expect(body.error.traceId).toBe('corr-xyz');
+      expect(body.requestId).toBe('corr-xyz');
     });
 
-    it('should use "unknown" as traceId when correlationId is absent', () => {
+    it('should use unknown as requestId when correlationId is absent', () => {
       const req = makeReq({ correlationId: undefined });
       const res = makeRes();
 
       errorHandler(createValidationError('Bad input'), req, res as unknown as Response, makeNext());
 
       const body = (res.status as ReturnType<typeof vi.fn>).mock.results[0].value.json.mock.calls[0][0];
-      expect(body.error.traceId).toBe('unknown');
+      expect(body.requestId).toBe('unknown');
     });
 
     it('should respond 404 for createNotFoundError', () => {
@@ -94,30 +91,31 @@ describe('error-handler.middleware', () => {
       expect(res.status).toHaveBeenCalledWith(400);
     });
 
-    it('should include details in ApiError response body', () => {
+    it('should include validation errors in response body when available', () => {
       const req = makeReq();
       const res = makeRes();
-      const err = createApiError(409, 'Conflict', { code: 'CONFLICT', duplicate: 'email' });
+      const err = createApiError(400, 'Validation failed', {
+        code: 'VALIDATION_ERROR',
+        errors: [{ field: 'email', message: 'Invalid', code: 'VALIDATION_ERROR' }],
+      });
 
       errorHandler(err, req, res as unknown as Response, makeNext());
 
       const body = (res.status as ReturnType<typeof vi.fn>).mock.results[0].value.json.mock.calls[0][0];
-      expect(body.error.details).toMatchObject({ code: 'CONFLICT', duplicate: 'email' });
+      expect(body.errors).toMatchObject([{ field: 'email', message: 'Invalid', code: 'VALIDATION_ERROR' }]);
     });
 
-    it('should fallback code to "ERROR" when details.code is absent', () => {
+    it('should fallback code to ERROR when details.code is absent', () => {
       const req = makeReq();
       const res = makeRes();
-      const err = createApiError(500, 'Oops');
+      const err = createApiError(422, 'Oops');
 
       errorHandler(err, req, res as unknown as Response, makeNext());
 
       const body = (res.status as ReturnType<typeof vi.fn>).mock.results[0].value.json.mock.calls[0][0];
-      expect(body.error.code).toBe('ERROR');
+      expect(body.code).toBe('ERROR');
     });
   });
-
-  // --- Unhandled error responses --------------------------------------------
 
   describe('unhandled error handling', () => {
     it('should respond 500 for generic Error', () => {
@@ -129,27 +127,26 @@ describe('error-handler.middleware', () => {
       expect(res.status).toHaveBeenCalledWith(500);
     });
 
-    it('should include traceId in unhandled error response', () => {
+    it('should include requestId in unhandled error response', () => {
       const req = makeReq({ correlationId: 'trace-err' });
       const res = makeRes();
 
       errorHandler(new Error('Boom'), req, res as unknown as Response, makeNext());
 
       const body = (res.status as ReturnType<typeof vi.fn>).mock.results[0].value.json.mock.calls[0][0];
-      expect(body.error.traceId).toBe('trace-err');
-      expect(body.error.code).toBe('INTERNAL_ERROR');
-      expect(body.error.message).toBe('An unexpected error occurred');
-      expect(body.success).toBe(false);
+      expect(body.requestId).toBe('trace-err');
+      expect(body.code).toBe('INTERNAL_ERROR');
+      expect(body.detail).toBe('An unexpected error occurred');
     });
 
-    it('should include path in unhandled error response', () => {
+    it('should include instance with request path for unhandled error', () => {
       const req = makeReq({ path: '/api/vehicles' });
       const res = makeRes();
 
       errorHandler(new Error('Unexpected'), req, res as unknown as Response, makeNext());
 
       const body = (res.status as ReturnType<typeof vi.fn>).mock.results[0].value.json.mock.calls[0][0];
-      expect(body.error.path).toBe('/api/vehicles');
+      expect(body.instance).toBe('/api/vehicles#trace-123');
     });
   });
 });

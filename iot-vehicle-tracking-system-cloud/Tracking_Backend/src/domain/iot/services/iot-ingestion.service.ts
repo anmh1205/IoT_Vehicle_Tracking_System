@@ -145,14 +145,14 @@ export const ingestDeviceData = async (payload: IotPayload) => {
   );
 
   // Publish realtime events after all DB writes succeed
-  publishEvent('device.status.changed', {
+  publishEvent('device:status', {
     device_id: payload.deviceId,
     status: 'running',
     last_seen_at: serverTimestamp.toISOString(),
   });
 
   if (payload.data.lat != null && payload.data.lon != null) {
-    publishEvent('device.position.updated', {
+    publishEvent('device:position', {
       device_id: payload.deviceId,
       lat: payload.data.lat,
       lon: payload.data.lon,
@@ -165,7 +165,7 @@ export const ingestDeviceData = async (payload: IotPayload) => {
   }
 
   if (isNewSession) {
-    publishEvent('device.session.started', {
+    publishEvent('device:session_start', {
       device_id: payload.deviceId,
       session_id: sessionId,
     });

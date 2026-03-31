@@ -1,12 +1,12 @@
 flowchart LR
     Bridge["MQTT Bridge"]
 
-    subgraph Hot["Hot Path - realtime"]
+    subgraph Hot["Luồng nóng - realtime"]
         VM["VictoriaMetrics"]
         WS["Socket.IO"]
     end
 
-    subgraph Durable["Durable Path - nghiệp vụ"]
+    subgraph Durable["Luồng bền - nghiệp vụ"]
         PG["PostgreSQL"]
         API["Backend API"]
     end

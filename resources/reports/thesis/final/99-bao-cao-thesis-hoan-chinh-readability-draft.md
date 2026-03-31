@@ -173,15 +173,15 @@ Tôi xin chịu hoàn toàn trách nhiệm về nội dung đồ án tốt nghi�
 
 ---
 
-Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt Nam kéo theo nhu cầu giám sát phương tiện từ xa và quản lý đội xe theo thời gian thực. Đồ án này tập trung thiết kế và tích hợp một hệ thống IoT giám sát phương tiện theo chuỗi hoàn chỉnh: thiết bị gắn trên xe, hạ tầng cloud và giao diện khai thác. Mục tiêu là theo dõi vị trí, thu thập dữ liệu chẩn đoán và phát hiện cảnh báo vận hành theo thời gian thực.
+Thị trường cho thuê xe tự lái tại Việt Nam đang tăng nhanh, nên nhu cầu theo dõi xe từ xa ngày càng rõ rệt. Đồ án này xây dựng một hệ thống theo dõi xe trọn bộ, gồm: thiết bị gắn trên xe, hạ tầng máy chủ và giao diện quản lý. Mục tiêu là biết xe đang ở đâu, xe đang hoạt động ra sao và cảnh báo sớm khi có bất thường.
 
-Ở lớp thiết bị, hệ thống sử dụng ESP32-S3 làm bộ xử lý trung tâm và modem LTE + GNSS SIMCom SIM7600CE-T để đảm nhiệm cả truyền dữ liệu lẫn định vị. Về cấu hình, modem chạy ở chế độ Auto (`AT+CNMP=2`), dùng APN mặc định `internet`, cung cấp dữ liệu GNSS qua `AT+CGNSINF`, và có thể bật luồng NMEA bằng `AT+CGNSTST` khi cần phân tích sâu hơn. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng thời dùng IMU LIS3DH để phát hiện rung động và hỗ trợ nhận diện tình huống vận hành bất thường. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng 18650 1S Li-ion 3500mAh, BMS và cơ chế ngắt điện áp thấp (LVD), nhờ đó thiết bị vẫn duy trì hoạt động khi xe tắt máy.
+Ở phía thiết bị, hệ thống dùng ESP32-S3 làm bộ xử lý trung tâm và modem SIM7600CE-T để vừa truyền dữ liệu 4G vừa định vị GNSS. Thiết bị lấy dữ liệu từ cổng OBD2 của xe thông qua adapter vgate iCar Pro (BLE), đồng thời dùng cảm biến rung LIS3DH để phát hiện chuyển động lạ khi xe đang đỗ. Khối nguồn có mạch hạ áp/tăng áp, pin dự phòng 18650, mạch sạc và cơ chế bảo vệ điện áp thấp (LVD), nhờ đó thiết bị vẫn chạy được khi xe tắt máy hoặc nguồn chính yếu.
 
-Ở lớp phần mềm, dữ liệu từ thiết bị được truyền về máy chủ bằng MQTT 5.0 thông qua EMQX và được phân quyền theo ACL cho từng thiết bị. Dịch vụ MQTT Bridge tiếp nhận bản tin, xác thực payload rồi phân luồng sang PostgreSQL cho dữ liệu quan hệ và nhật ký OTA, VictoriaMetrics cho telemetry chuỗi thời gian, và VictoriaLogs cho nhật ký sự kiện. API server được xây dựng bằng Express.js kết hợp TypeScript theo kiến trúc DDD, dùng cơ chế xác thực phiên dựa trên token lưu trong cơ sở dữ liệu và hỗ trợ điều phối cập nhật firmware OTA.
+Ở phía phần mềm, dữ liệu từ thiết bị được gửi qua MQTT 5.0 vào EMQX. Dịch vụ MQTT Bridge sẽ kiểm tra dữ liệu rồi ghi vào các kho phù hợp: PostgreSQL cho dữ liệu quan hệ, VictoriaMetrics cho dữ liệu chuỗi thời gian và VictoriaLogs cho nhật ký vận hành. Backend API dùng Express.js + TypeScript, hỗ trợ xác thực theo phiên làm việc và cập nhật firmware từ xa (OTA).
 
-Giao diện web được phát triển bằng Next.js 15 và React 19, cung cấp bảng điều khiển thời gian thực với bản đồ Leaflet, biểu đồ ECharts và kết nối WebSocket qua Socket.IO để cập nhật tức thời vị trí và trạng thái phương tiện. Toàn bộ hệ thống được đóng gói và triển khai bằng Docker nhằm bảo đảm tính nhất quán giữa môi trường phát triển và môi trường vận hành.
+Giao diện web dùng Next.js và React, hiển thị bản đồ, biểu đồ và trạng thái xe gần như tức thời qua WebSocket. Toàn bộ hệ thống được đóng gói bằng Docker để dễ triển khai, dễ tái lập môi trường và thuận tiện vận hành.
 
-Kết quả đạt được là một hệ thống IoT giám sát phương tiện hoàn chỉnh từ phần cứng đến phần mềm, có khả năng theo dõi vị trí thời gian thực, đọc dữ liệu chẩn đoán OBD2, thiết lập hàng rào địa lý, phát sinh cảnh báo tự động, cập nhật firmware từ xa và hỗ trợ quản lý đội xe cho dịch vụ cho thuê xe tự lái.
+Kết quả là hệ thống có thể theo dõi vị trí xe theo thời gian thực, đọc dữ liệu cơ bản từ OBD2, cảnh báo tự động, hỗ trợ cập nhật firmware từ xa và phục vụ quản lý đội xe cho bài toán cho thuê xe tự lái.
 
 **Từ khóa:** IoT, giám sát phương tiện, GPS, OBD2, MQTT, ESP32-S3, thời gian thực, hàng rào địa lý
 
@@ -467,25 +467,26 @@ Xin chân thành cảm ơn!
 
 ### 1.1.1. Bối cảnh thị trường cho thuê xe tự lái tại Việt Nam
 
-Những năm gần đây, thị trường cho thuê xe tự lái tại Việt Nam tăng trưởng rõ rệt, đặc biệt tại TP. Hồ Chí Minh, Hà Nội và Đà Nẵng. Theo báo cáo ngành vận tải [1], nhu cầu thuê xe tăng trung bình 15–20% mỗi năm nhờ sự phục hồi của du lịch nội địa, nhu cầu di chuyển linh hoạt và xu hướng chia sẻ phương tiện. Khi quy mô đội xe mở rộng, áp lực giám sát vận hành và bảo toàn tài sản cũng tăng theo.
-Các doanh nghiệp cho thuê xe tự lái hiện nay phải đối mặt với nhiều vấn đề nghiêm trọng:
+Trong những năm gần đây, thị trường cho thuê xe tự lái tại Việt Nam tăng trưởng rõ rệt, đặc biệt tại TP. Hồ Chí Minh, Hà Nội và Đà Nẵng. Theo báo cáo ngành vận tải [1], nhu cầu thuê xe tăng trung bình 15–20% mỗi năm nhờ du lịch nội địa phục hồi và nhu cầu di chuyển linh hoạt. Khi đội xe lớn hơn, việc theo dõi và bảo vệ tài sản cũng khó hơn.
 
-- **Quản lý thủ công kém hiệu quả**: Nhiều doanh nghiệp quy mô vừa và nhỏ vẫn quản lý xe bằng sổ sách, gọi điện xác nhận hoặc dựa vào sự chủ động của khách hàng. Cách làm này không cung cấp thông tin thời gian thực về vị trí và trạng thái phương tiện [2].
-- **Rủi ro mất cắp và sử dụng sai mục đích**: Khi không có hệ thống giám sát, xe có thể bị sử dụng vượt phạm vi địa lý đã thỏa thuận, chạy quá số km quy định, hoặc trong trường hợp xấu nhất là bị chiếm đoạt. Việc phát hiện các tình huống này thường bị trễ, gây thiệt hại lớn về tài sản [3].
-- **Thiếu dữ liệu chẩn đoán kỹ thuật**: Doanh nghiệp khó theo dõi tình trạng kỹ thuật của xe từ xa, nên việc bảo trì thường mang tính bị động và chỉ được thực hiện khi sự cố đã xuất hiện. Điều này làm tăng chi phí sửa chữa và rút ngắn tuổi thọ phương tiện.
-- **Giải pháp thương mại đắt đỏ**: Các hệ thống GPS tracking thương mại hiện có trên thị trường (như Vietmap, iTracking) thường có chi phí cao — bao gồm phí thiết bị, phí dịch vụ hàng tháng, và phí tích hợp — không phù hợp với các doanh nghiệp quy mô nhỏ với ngân sách hạn chế [4].
+Các doanh nghiệp cho thuê xe hiện nay thường gặp bốn vấn đề chính:
+
+- **Quản lý còn thủ công**: Nhiều đơn vị vẫn theo dõi xe bằng sổ sách, điện thoại hoặc tin nhắn. Cách này khó biết được vị trí và trạng thái xe ngay tại thời điểm hiện tại [2].
+- **Rủi ro mất xe hoặc dùng sai mục đích**: Xe có thể đi ra ngoài khu vực đã thỏa thuận, chạy quá số km cho phép, hoặc tệ hơn là bị chiếm đoạt. Nếu phát hiện chậm, thiệt hại sẽ lớn [3].
+- **Khó biết xe đang khỏe hay không**: Doanh nghiệp thường chỉ biết xe có vấn đề khi xe đã hỏng. Việc bảo trì vì thế bị động, tốn thời gian và chi phí.
+- **Giải pháp thương mại tốn kém**: Nhiều hệ thống theo dõi xe trên thị trường có chi phí thiết bị, phí dịch vụ và phí tích hợp cao. Điều này khiến các doanh nghiệp nhỏ khó tiếp cận [4].
 
 ### 1.1.2. Thách thức kỹ thuật
 
-Không chỉ là bài toán kinh doanh, việc xây dựng một hệ thống IoT theo dõi phương tiện còn đặt ra nhiều thách thức kỹ thuật:
+Không chỉ là bài toán kinh doanh, hệ thống theo dõi phương tiện còn có bốn thách thức kỹ thuật đáng chú ý:
 
-**Thứ nhất, bài toán tiêu thụ năng lượng.** Thiết bị theo dõi nếu hoạt động liên tục sẽ làm hao ắc quy xe trong vài tuần, từ đó ảnh hưởng trực tiếp đến khả năng khởi động [5]. Với xe cho thuê, đây là rủi ro không thể chấp nhận. Vì vậy, hệ thống phải có cơ chế quản lý năng lượng thông minh và chuyển đổi hợp lý giữa các chế độ lái xe, đỗ xe và cảnh báo.
+**1. Tiêu thụ điện.** Thiết bị chạy liên tục sẽ làm hao ắc quy xe trong thời gian ngắn, ảnh hưởng trực tiếp đến việc khởi động xe [5]. Vì vậy, hệ thống phải biết tự chuyển sang chế độ tiết kiệm điện khi cần.
 
-**Thứ hai, giám sát khi xe đỗ.** Khi xe tắt máy (IGN OFF), hệ thống phải tiết kiệm điện nhưng vẫn phát hiện được các chuyển động bất thường, chẳng hạn xe bị dắt đi hoặc bị cẩu kéo. Đây là bài toán cân bằng giữa độ nhạy phát hiện và mức tiêu thụ năng lượng [6].
+**2. Theo dõi khi xe đỗ.** Khi xe tắt máy (IGN OFF), thiết bị phải dùng rất ít điện nhưng vẫn nhận ra các chuyển động bất thường, như xe bị dắt đi hoặc bị cẩu kéo [6]. Bài toán ở đây là cân bằng giữa “nhạy” và “tiết kiệm”.
 
-**Thứ ba, độ tin cậy của kết nối.** Hệ thống hoạt động trong môi trường di động nên kết nối 4G/LTE có thể gián đoạn bất kỳ lúc nào. Thiết bị cần có cơ chế lưu đệm dữ liệu, xử lý mất kết nối và đồng bộ lại khi mạng được phục hồi.
+**3. Kết nối không phải lúc nào cũng ổn định.** Xe di chuyển nên tín hiệu 4G/LTE có thể chập chờn. Thiết bị cần nhớ dữ liệu tạm thời, tự kết nối lại và gửi bù khi mạng trở lại.
 
-**Thứ tư, xử lý dữ liệu thời gian thực.** Khi số lượng xe tăng lên hàng chục hoặc hàng trăm, hệ thống backend phải xử lý liên tục luồng telemetry lớn gồm vị trí GPS, dữ liệu OBD2 và trạng thái cảm biến với độ trễ thấp, đồng thời vẫn bảo đảm giao diện giám sát trực quan cho người quản lý.
+**4. Xử lý dữ liệu theo thời gian thực.** Khi số xe tăng lên, hệ thống phải xử lý cùng lúc vị trí GPS, dữ liệu OBD2 và trạng thái cảm biến. Dù vậy, bảng điều khiển vẫn phải hiển thị nhanh và dễ hiểu cho người quản lý.
 
 ![Hình 1.1 - Sơ đồ tổng quan vấn đề và giải pháp đề xuất](./assets/figures/01-chuong-1-gioi-thieu-hinh-1-1.svg)
 
@@ -5784,7 +5785,7 @@ Những kết quả này là cơ sở trực tiếp cho Chương 5, nơi hệ th
 
 ## 5.1. Đánh giá hiệu năng
 
-Chương này tổng hợp kết quả đánh giá hệ thống trên bốn phương diện: hiệu năng kỹ thuật, hiệu quả kinh tế - môi trường, rủi ro vận hành và hướng phát triển tiếp theo. Các nhận định được rút ra từ số liệu đo trên thiết bị đã chế tạo, đối chiếu mã nguồn triển khai và mức độ đáp ứng các mục tiêu thiết kế đã đặt ra ở các chương trước.
+Chương này tổng hợp kết quả đánh giá hệ thống theo 4 góc nhìn: khả năng vận hành kỹ thuật, chi phí và tác động môi trường, rủi ro khi chạy thực tế và hướng phát triển tiếp theo. Các kết luận dựa trên số đo từ thiết bị đã chế tạo, kết quả chạy hệ thống hiện tại và mức độ đáp ứng mục tiêu đã đặt ra ở các chương trước.
 
 ### 5.1.1. Đánh giá hiệu năng phần cứng
 
@@ -6085,15 +6086,15 @@ Phiên bản phần cứng hiện có sử dụng bo mạch 2 lớp do nhóm thi
 
 ## Kết luận chương 5
 
-Kết quả đánh giá cho thấy hệ thống đã đáp ứng được các mục tiêu kỹ thuật quan trọng của một thiết bị giám sát phương tiện hoàn chỉnh có thể vận hành thực tế. Phần cứng giữ được mức tiêu thụ điện phù hợp, firmware vận hành ổn định với state machine rõ ràng và đã bổ sung được luồng OTA cơ bản, còn hạ tầng cloud duy trì độ trễ thấp cho bài toán theo dõi thời gian thực. Về chi phí, BOM 870.000–1.630.000 VND cùng chi phí vận hành thấp tạo ra lợi thế rõ rệt so với nhiều giải pháp thương mại cùng phân khúc.
+Kết quả đánh giá cho thấy hệ thống đã đạt các mục tiêu kỹ thuật chính của một thiết bị theo dõi xe có thể chạy thực tế. Phần cứng giữ được mức tiêu thụ điện phù hợp, firmware hoạt động ổn định và đã có luồng OTA cơ bản, còn hạ tầng cloud vẫn giữ độ trễ thấp cho bài toán theo dõi thời gian thực. Về chi phí, BOM 870.000–1.630.000 VND và chi phí vận hành thấp giúp hệ thống có lợi thế rõ rệt so với nhiều giải pháp thương mại cùng phân khúc.
 
-Tuy vậy, chương này cũng chỉ ra ranh giới giữa một nguyên mẫu đã vận hành được và một hệ thống sẵn sàng mở rộng quy mô. Ưu tiên tiếp theo không phải thay đổi kiến trúc nền, mà là làm sâu hơn các lớp an toàn, độ bền vận hành và khả năng mở rộng thực tế. Từ đó, Chương 6 sẽ chuyển sang góc nhìn phản tư: dự án đã tận dụng kiến thức kỹ thuật như thế nào, đã gặp những bài toán phức tạp nào, và rút ra được những bài học gì cho giai đoạn tiếp theo.
+Tuy vậy, chương này cũng cho thấy khoảng cách giữa một nguyên mẫu đã chạy được và một hệ thống sẵn sàng mở rộng lớn. Việc cần làm tiếp theo không phải là đổi kiến trúc nền, mà là tăng độ an toàn, độ bền vận hành và khả năng mở rộng. Từ đây, Chương 6 sẽ chuyển sang phần nhìn lại quá trình thực hiện: dự án đã dùng kiến thức kỹ thuật như thế nào, đã gặp những bài toán nào, và rút ra bài học gì cho giai đoạn sau.
 
 # CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM – REFLECTION AND CASE-STUDIES
 
 ## 6.1. Ứng dụng kiến thức kỹ thuật – Earlier course work
 
-Dự án "IoT Vehicle Tracking System" là kết quả của quá trình tổng hợp kiến thức từ nhiều học phần và nhiều lớp công nghệ khác nhau. Từ phần cứng, firmware đến backend và frontend, mỗi quyết định triển khai đều đòi hỏi người thực hiện chuyển kiến thức nền tảng thành lựa chọn kỹ thuật cụ thể. Phần này làm rõ quá trình chuyển hóa đó trong bối cảnh của dự án, đồng thời chỉ ra kiến thức nào thực sự được dùng ở mức vận hành chứ không chỉ dừng ở lý thuyết môn học.
+Dự án "IoT Vehicle Tracking System" là kết quả của việc ghép nhiều mảng kiến thức lại với nhau. Từ phần cứng, firmware đến backend và frontend, mỗi quyết định đều phải chuyển từ lý thuyết sang cách làm cụ thể. Phần này cho thấy những kiến thức nào đã được dùng trực tiếp trong dự án, thay vì chỉ nằm trên giấy.
 
 ### 6.1.1. Vi xử lý và Vi điều khiển
 
@@ -6154,79 +6155,75 @@ Trong quá trình thực hiện dự án, nhóm phát triển đã phải giải
 
 ### 6.2.1. Vấn đề 1: Phân tích bản tin OBD2 đa khung qua BLE
 
-Phần này chọn một ví dụ tiêu biểu ở lớp firmware để minh họa kiểu vấn đề mà tài liệu lý thuyết thường mô tả chưa đủ chi tiết cho quá trình triển khai thực tế.
+Phần này lấy một ví dụ ở lớp firmware để minh họa một vấn đề mà tài liệu lý thuyết thường nói ngắn gọn hơn nhiều so với thực tế triển khai.
 
 **Mô tả vấn đề:**
 
-Việc kết nối và giao tiếp với OBD2 adapter vgate iCar Pro qua Bluetooth Low Energy (BLE) là một trong những thách thức kỹ thuật lớn nhất của dự án. Vấn đề cụ thể bao gồm:
+Một khó khăn lớn của dự án là giao tiếp với adapter OBD2 vgate iCar Pro qua BLE (Bluetooth năng lượng thấp). Khó ở chỗ:
 
-- Giao thức BLE của vgate iCar Pro không có tài liệu chính thức công khai. Thông tin giao tiếp (UUID dịch vụ, characteristic, định dạng bản tin) phải được khảo sát ngược (reverse engineering) từ các ứng dụng mã nguồn mở và bản ghi Bluetooth.
-- Bản tin OBD2 có thể trải dài nhiều khung dữ liệu BLE (multi-frame response), đặc biệt với các lệnh như đọc mã lỗi DTC (Mode 03) hoặc dữ liệu động cơ nhiều PID. Việc ghép nối các khung dữ liệu cần tuân theo ISO 15765–2 (ISO-TP), một giao thức không được tài liệu OBD2 phổ thông đề cập chi tiết.
-- Các nguồn tài liệu trực tuyến thường mâu thuẫn nhau về cách xử lý multi-frame: một số hướng dẫn chỉ áp dụng cho ELM327 (chip interpreter), không tương thích trực tiếp với vgate iCar Pro sử dụng chip STN1110.
+- Tài liệu chính thức về giao tiếp BLE của thiết bị không đầy đủ. Nhóm phải tự đối chiếu từ mã nguồn mở và bản ghi Bluetooth.
+- Dữ liệu OBD2 nhiều khi không về trong một lần, mà bị tách thành nhiều mảnh (multi-frame). Nếu ghép sai thứ tự, dữ liệu đọc được sẽ sai.
+- Tài liệu trên mạng không thống nhất, có hướng dẫn hợp với thiết bị này nhưng lại không hợp với thiết bị khác.
 
 **Cách giải quyết:**
 
-1. _Nghiên cứu và khảo sát_: Phân tích mã nguồn của các dự án mã nguồn mở tương tự (esp32-obd2-meter, python-OBD), nghiên cứu tài liệu ISO 15765–2, và sử dụng ứng dụng nRF Connect để bắt và phân tích các bản tin BLE giữa điện thoại và vgate iCar Pro.
-2. _Thiết kế lớp trừu tượng_: Xây dựng module phân tích OBD2 với khả năng xử lý cả bản tin đơn khung (single-frame) và đa khung (multi-frame), bao gồm Flow Control frames và Consecutive Frames theo chuẩn ISO-TP.
-3. _Kiểm thử lặp đi lặp lại_: Tạo bộ test với các PID OBD2 phổ biến (Mode 01: RPM, Speed, Coolant Temp, Fuel Level) và các lệnh multi-frame (Mode 03: DTC, Mode 09: VIN) để đảm bảo tính chính xác.
+1. _Khảo sát thực tế_: Đọc tài liệu chuẩn, xem mã nguồn tham khảo và dùng công cụ bắt gói BLE để quan sát dữ liệu thật giữa điện thoại và adapter.
+2. _Viết bộ xử lý dữ liệu rõ ràng_: Xây dựng module có thể xử lý cả bản tin một mảnh và nhiều mảnh, theo đúng thứ tự khung dữ liệu.
+3. _Kiểm thử lặp nhiều vòng_: Dùng các lệnh OBD2 phổ biến để kiểm tra, so sánh kết quả nhiều lần trước khi chốt.
 
-**Bài học rút ra:** Khi làm việc với thiết bị bên thứ ba không có tài liệu rõ ràng, việc kết hợp reverse engineering, tham khảo nhiều nguồn, và kiểm thử kỹ lưỡng là phương pháp hiệu quả nhất.
+**Bài học rút ra:** Khi làm việc với thiết bị bên thứ ba chưa có tài liệu rõ ràng, cách hiệu quả nhất là bám dữ liệu thực tế, kiểm chứng nhiều nguồn và kiểm thử kỹ trước khi kết luận.
 
 ### 6.2.2. Vấn đề 2: Đường ống dữ liệu thời gian thực với đảm bảo phân phối
 
 **Mô tả vấn đề:**
 
-Hệ thống cần xử lý luồng dữ liệu telemetry liên tục từ nhiều thiết bị IoT (GPS, trạng thái nguồn, IMU; sẵn sàng mở rộng thêm OBD2) với các yêu cầu:
+Hệ thống phải nhận dữ liệu liên tục từ nhiều xe và vẫn chạy ổn định khi mạng không tốt. Khó nhất nằm ở ba điểm:
 
-- Dữ liệu phải được ghi đồng thời vào hai hệ thống lưu trữ khác nhau: VictoriaMetrics (time-series) và PostgreSQL (relational), tạo ra bài toán ghi kép (dual-write).
-- Khi mất kết nối mạng 4G, hệ thống phải phục hồi phiên MQTT đủ nhanh để giữ luồng vận hành ổn định; nếu cần bảo toàn toàn bộ telemetry trong outage kéo dài thì phải bổ sung buffer cục bộ.
-- MQTT QoS cần được cấu hình phù hợp cho từng loại dữ liệu: QoS 0 cho telemetry tần suất cao (chấp nhận mất một vài điểm dữ liệu), QoS 1 cho cảnh báo và lệnh điều khiển (đảm bảo gửi ít nhất một lần).
+- Cùng một dữ liệu phải ghi vào nhiều nơi lưu trữ, nếu xử lý không khéo sẽ bị lệch dữ liệu.
+- Mạng 4G có lúc mất sóng, nên thiết bị phải tự kết nối lại nhanh để không gián đoạn lâu.
+- Mỗi loại dữ liệu cần mức ưu tiên khác nhau: dữ liệu vị trí gửi dày có thể chấp nhận mất vài điểm, nhưng cảnh báo thì cần gửi chắc chắn hơn.
 
 **Cách giải quyết:**
 
-1. _MQTT Bridge Service độc lập_: Thiết kế dịch vụ Tracking_MqttBridge làm trung gian giữa EMQX broker và các hệ thống lưu trữ. Dịch vụ này nhận dữ liệu từ các topic telemetry, đẩy chuỗi thời gian sang VictoriaMetrics, ghi log sang VictoriaLogs và gom batch cập nhật PostgreSQL cho các trạng thái quan trọng.
-2. _Tự phục hồi kết nối trên thiết bị_: Trong phạm vi hiện nay, thiết bị ưu tiên reconnect tự động, keepalive MQTT và lưu cấu hình trong NVS để quay lại trạng thái vận hành nhanh sau khi có mạng. Replay buffer trên flash được xác định là hạng mục nâng cấp của phiên bản kế tiếp.
-3. _QoS phân tầng_: Áp dụng QoS 0 cho dữ liệu vị trí GPS tần suất cao (5–30 giây), QoS 1 cho cảnh báo và sự kiện quan trọng, đảm bảo cân bằng giữa hiệu suất và độ tin cậy.
+1. _Dùng MQTT Bridge làm lớp trung gian_: Dịch vụ này nhận dữ liệu từ broker rồi phân luồng tới từng hệ lưu trữ phù hợp.
+2. _Ưu tiên tự phục hồi kết nối_: Thiết bị tự reconnect MQTT và tiếp tục chu kỳ gửi dữ liệu khi có mạng trở lại.
+3. _Phân tầng mức đảm bảo gửi_: Dữ liệu thường dùng cấu hình nhẹ để tối ưu hiệu năng, còn cảnh báo/lệnh quan trọng dùng cấu hình đảm bảo hơn.
 
-**Bài học rút ra:** Thiết kế đường ống dữ liệu cần xem xét tất cả các trường hợp thất bại (mất mạng, server quá tải, dữ liệu bất đồng bộ) từ giai đoạn thiết kế, không để đến giai đoạn tích hợp mới xử lý.
+**Bài học rút ra:** Với hệ IoT thực tế, cần thiết kế trước các tình huống xấu như mất mạng, quá tải hoặc lệch dữ liệu. Nếu chờ tới lúc tích hợp mới xử lý thì chi phí sửa sẽ rất cao.
 
 ### 6.2.3. Vấn đề 3: Quản lý năng lượng với nhiều nguồn cấp
 
 **Mô tả vấn đề:**
 
-Hệ thống phần cứng phải hoạt động với hai nguồn năng lượng có đặc tính rất khác nhau:
-
-- Ắc quy xe 12V hoặc 24V DC (dao động tùy trạng thái sạc và tải), là nguồn chính khi xe hoạt động.
-- Pin dự phòng 18650 1S Li-ion 3.7V (dao động 2.8V - 4.2V), là nguồn dùng khi ắc quy xe bị ngắt hoặc điện áp quá thấp.
-- Việc chuyển đổi giữa hai nguồn phải diễn ra liền mạch (seamless switching), không được gây mất điện cho MCU, tránh reset hoặc mất dữ liệu.
+Thiết bị phải chạy với hai nguồn điện khác nhau: nguồn chính từ ắc quy xe và nguồn dự phòng từ pin. Vấn đề là khi đổi nguồn, hệ thống không được tắt đột ngột vì có thể reset hoặc mất dữ liệu.
 
 **Cách giải quyết:**
 
-1. _Power path management_: Thiết kế mạch power path dùng diode OR giữa MP2482 (5V chính) và SX1308 (5V backup), kết hợp GPIO18 để điều khiển nhánh nguồn theo profile 12V/24V.
-2. _Low Voltage Disconnect (LVD)_: Hiện thực LVD bằng comparator LM393 kết hợp ADC firmware, dùng ngưỡng profile: 12V (OFF=12.0V, ON=12.2V) và 24V (OFF=24.0V, ON=24.4V), bảo vệ ắc quy không bị rút cạn quá mức.
-3. _Bộ sạc pin dự phòng_: Tích hợp IC sạc TP4056 (input 5V từ MP2482, output 4.2V) để sạc pin 18650 1S khi điều kiện nguồn cho phép.
-4. _Giám sát điện áp bằng firmware_: Đọc điện áp ắc quy và pin dự phòng liên tục qua ADC, kết hợp trạng thái GPIO19 (HIGH = low-voltage) để gửi cảnh báo sớm và điều phối chuyển nguồn.
+1. _Thiết kế đường nguồn kép_: Dùng mạch chọn nguồn để hệ thống tự lấy nguồn chính hoặc nguồn dự phòng khi cần.
+2. _Bảo vệ ắc quy xe bằng LVD_: Đặt ngưỡng điện áp để tự ngắt khi điện áp xuống thấp, tránh làm cạn ắc quy.
+3. _Sạc pin dự phòng tự động_: Khi nguồn chính ổn định, pin dự phòng được sạc lại để sẵn sàng cho lần mất nguồn sau.
+4. _Theo dõi điện áp liên tục_: Firmware đọc điện áp định kỳ để quyết định khi nào chuyển nguồn và khi nào gửi cảnh báo.
 
-**Bài học rút ra:** Thiết kế hệ thống năng lượng cho IoT trong môi trường ô tô phải xét đồng thời điện áp dao động, chuyển đổi nguồn liền mạch, bảo vệ ắc quy và khả năng giám sát từ xa. Nếu bỏ sót một mắt xích, độ tin cậy của toàn hệ thống sẽ giảm rõ rệt.
+**Bài học rút ra:** Với thiết bị gắn trên xe, quản lý nguồn là phần sống còn. Chỉ cần một khâu chuyển nguồn hoặc bảo vệ điện áp làm chưa tốt, độ ổn định toàn hệ thống sẽ giảm rõ rệt.
 
 ### 6.2.4. Vấn đề 4: Kiến trúc đám mây có khả năng mở rộng cho IoT
 
 **Mô tả vấn đề:**
 
-Hệ thống cần xử lý dữ liệu từ nhiều thiết bị đồng thời, cung cấp giao diện thời gian thực cho nhiều người dùng, và đảm bảo bảo mật:
+Khi số xe tăng lên, hệ thống phải vừa xử lý dữ liệu nhanh, vừa đảm bảo an toàn. Ba điểm khó chính là:
 
-- Mỗi thiết bị có MQTT topic riêng (ví dụ `v1/{device_id}/rawdata` và `v1/{device_id}/commands`), cần có ACL phân quyền để thiết bị chỉ được publish/subscribe trên topic của mình.
-- Nhiều người dùng có thể xem cùng một xe trên dashboard, tạo ra nhiều kết nối WebSocket đồng thời cần được quản lý.
-- Session management phải an toàn (token hash SHA-256 lưu trong database) nhưng không tạo ra nút thắt cổ chai khi số lượng request lớn.
+- Mỗi thiết bị chỉ được gửi/nhận dữ liệu của chính nó.
+- Nhiều người dùng có thể xem cùng lúc, nên kênh cập nhật thời gian thực phải chịu tải tốt.
+- Cơ chế đăng nhập phải an toàn nhưng không làm chậm hệ thống.
 
 **Cách giải quyết:**
 
-1. _MQTT ACL per device_: Cấu hình EMQX ACL rules để mỗi thiết bị chỉ được publish lên topic của mình, ngăn chặn việc giả mạo dữ liệu từ thiết bị khác. Sử dụng EMQX built-in authentication với username/password riêng cho từng thiết bị.
-2. _WebSocket room-based architecture_: Sử dụng Socket.IO rooms để nhóm các client theo vehicle_id. Khi có dữ liệu telemetry mới cho một xe, server chỉ broadcast đến room tương ứng, giảm tải truyền dữ liệu không cần thiết.
-3. _Session-based authentication_: Sử dụng database-backed session tokens (SHA-256 hashed) thay vì JWT để có khả năng thu hồi phiên (session revocation) ngay lập tức. Kết hợp với Redis cache (dự kiến Phase 2) để giảm tải truy vấn database cho việc xác thực.
-4. _Per-service Docker Compose_: Mỗi dịch vụ (Backend, Frontend, MQTT Bridge, PostgreSQL, EMQX, VictoriaMetrics) có docker-compose.yml riêng, chia sẻ mạng `tracking-network`. Kiến trúc này cho phép mở rộng (scale) từng dịch vụ độc lập theo nhu cầu.
+1. _Phân quyền theo từng thiết bị_: Mỗi thiết bị có tài khoản và phạm vi topic riêng, tránh gửi nhầm hoặc giả mạo dữ liệu.
+2. _Tối ưu kênh thời gian thực_: Server chỉ gửi dữ liệu tới đúng nhóm người đang xem xe đó, giảm tải không cần thiết.
+3. _Xác thực theo phiên_: Cho phép thu hồi phiên nhanh khi cần, đồng thời vẫn đảm bảo hiệu năng ở mức chấp nhận được.
+4. _Tách dịch vụ để dễ mở rộng_: Mỗi thành phần chạy độc lập và có thể nâng cấp riêng khi tải tăng.
 
-**Bài học rút ra:** Kiến trúc đám mây cho IoT cần được thiết kế từ đầu với khả năng mở rộng theo chiều ngang (horizontal scaling). Việc tách biệt các dịch vụ (separation of concerns) và sử dụng per-device ACL là nền tảng cho bảo mật và quản lý đội xe quy mô lớn.
+**Bài học rút ra:** Hệ thống cloud cho IoT cần được thiết kế để mở rộng ngay từ đầu. Nếu bảo mật và khả năng mở rộng không được tính sớm, hệ thống sẽ khó vận hành ổn định khi số lượng xe tăng.
 
 ---
 
@@ -6234,7 +6231,7 @@ Hệ thống cần xử lý dữ liệu từ nhiều thiết bị đồng thời
 
 ### 6.3.1. Quyền riêng tư và bảo vệ dữ liệu cá nhân
 
-Hệ thống theo dõi phương tiện liên tục thu thập dữ liệu vị trí GPS, hành trình và thói quen sử dụng xe của người lái. Đây đều là dữ liệu nhạy cảm liên quan trực tiếp đến quyền riêng tư. Vì vậy, quá trình phát triển và triển khai hệ thống cần được xem xét nghiêm túc dưới góc độ đạo đức và bảo vệ dữ liệu, không thể chỉ đánh giá bằng tiêu chí kỹ thuật thuần túy.
+Hệ thống theo dõi phương tiện thu thập liên tục dữ liệu vị trí GPS, hành trình và cách sử dụng xe. Đây là dữ liệu nhạy cảm vì nó cho biết người lái đi đâu, đi khi nào và dùng xe như thế nào. Do đó, khi phát triển và triển khai hệ thống, cần nhìn vấn đề này dưới góc độ đạo đức và bảo vệ dữ liệu, không chỉ dưới góc độ kỹ thuật.
 
 **Các biện pháp bảo vệ quyền riêng tư đã được áp dụng:**
 
@@ -6293,15 +6290,15 @@ Hệ thống IoT giám sát phương tiện tạo ra một số tác động xã
 
 ### 6.4.1. Tầm quan trọng của thiết kế kiến trúc trước khi lập trình
 
-Một trong những bài học quan trọng nhất của dự án là phải ưu tiên thiết kế kiến trúc hệ thống trước khi bắt tay vào lập trình. Ở giai đoạn đầu, nhóm từng có xu hướng triển khai nhanh từng mô-đun khi chưa xây dựng xong mô hình tương tác tổng thể. Kinh nghiệm này đặc biệt rõ trong một hệ thống nhiều tầng, nơi sai lệch nhỏ ở giao diện giữa các thành phần có thể kéo theo chuỗi lỗi tích hợp về sau.
+Một bài học quan trọng của dự án là phải thiết kế kiến trúc trước khi lập trình. Ở giai đoạn đầu, nhóm từng muốn làm nhanh từng mô-đun khi mô hình tổng thể chưa rõ. Cách làm này dễ gây lỗi khi ghép các phần lại với nhau, nhất là trong một hệ thống nhiều tầng.
 
-Khi phát sinh các lỗi tích hợp (interface mismatch, data format inconsistency, circular dependencies), nhóm chuyển sang cách tiếp cận có kỷ luật hơn: xác lập sơ đồ kiến trúc và luồng dữ liệu, chốt API contracts trước hiện thực, hoàn thiện database schema bằng ER diagram trước khi tạo bảng, và chuẩn hóa kế hoạch Docker networking/port mapping.
+Khi gặp lỗi tích hợp, nhóm chuyển sang cách làm chặt chẽ hơn: vẽ lại kiến trúc và luồng dữ liệu, chốt giao diện API trước khi code, hoàn thiện sơ đồ cơ sở dữ liệu trước khi tạo bảng, và chuẩn hóa mạng Docker cùng cổng kết nối.
 
-Cách làm này giúp giảm đáng kể thời gian sửa lỗi tích hợp và hạn chế khối lượng công việc phải làm lại ở các giai đoạn sau.
+Nhờ vậy, thời gian sửa lỗi giảm đi rõ rệt và khối lượng làm lại ở các giai đoạn sau cũng ít hơn.
 
 ### 6.4.2. Độ phức tạp của hệ thống IoT nhiều tầng
 
-Dự án cho thấy một hệ thống IoT nhiều tầng phức tạp hơn đáng kể so với một ứng dụng web thông thường. Hệ thống này bao gồm bốn lớp công nghệ khác nhau:
+Dự án cho thấy một hệ thống IoT nhiều tầng phức tạp hơn nhiều so với một ứng dụng web thông thường. Hệ thống này gồm bốn lớp công nghệ khác nhau:
 
 | Tầng      | Ngôn ngữ / Công nghệ        | Thách thức chính                         |
 | --------- | --------------------------- | ---------------------------------------- |
@@ -6346,9 +6343,9 @@ Kinh nghiệm rút ra từ dự án, đặc biệt ở các mảng kiến trúc 
 
 ## Kết luận chương 6
 
-Chương 6 cho thấy việc xây dựng một hệ thống IoT giám sát phương tiện không thể xem như việc ghép nối đơn giản giữa phần cứng, firmware và web, mà là quá trình liên tục cân bằng giữa ràng buộc kỹ thuật, nhu cầu vận hành và trách nhiệm dữ liệu. Những bài học rút ra về kiến trúc, kiểm thử tích hợp, quản lý năng lượng, OTA và đạo đức dữ liệu là nền tảng thực tế để tiếp tục hoàn thiện hệ thống trong các giai đoạn sau.
+Chương 6 cho thấy việc xây dựng một hệ thống IoT giám sát phương tiện không chỉ là ghép phần cứng, firmware và web lại với nhau. Đây là quá trình phải cân bằng giữa ràng buộc kỹ thuật, nhu cầu vận hành và trách nhiệm với dữ liệu. Những bài học về kiến trúc, kiểm thử tích hợp, quản lý năng lượng, OTA và đạo đức dữ liệu là nền tảng để tiếp tục hoàn thiện hệ thống ở các giai đoạn sau.
 
-Từ đây, phần tài liệu tham khảo và phụ lục sẽ đóng vai trò củng cố cho các luận điểm đã trình bày. References giúp truy vết lại cơ sở học thuật và tài liệu kỹ thuật đã sử dụng, còn appendices tập trung vào chi phí, tiêu chuẩn, kế hoạch triển khai và các thông tin vận hành để người đọc có thể tra cứu nhanh khi cần.
+Từ đây, phần tài liệu tham khảo và phụ lục đóng vai trò hỗ trợ cho các luận điểm đã trình bày. References giúp truy ngược nguồn học thuật và tài liệu kỹ thuật, còn phụ lục tập trung vào chi phí, tiêu chuẩn, kế hoạch triển khai và các thông tin vận hành để người đọc tra cứu nhanh khi cần.
 
 ---
 
@@ -6520,13 +6517,13 @@ Danh mục tài liệu tham khảo được chia theo nhóm để người đọ
 
 ---
 
-# PHỤ LỤC 1: BÁO CÁO TÀI CHÍNH - FINANCE REPORT
+# PHỤ LỤC 1: BÁO CÁO TÀI CHÍNH (Chi phí thực hiện)
 
-Phụ lục này tổng hợp phần chi phí để bổ sung góc nhìn khả thi về mặt kinh tế cho giải pháp đã trình bày trong nội dung chính. Các bảng dưới đây không nhằm chứng minh hiệu năng kỹ thuật, mà nhằm làm rõ mức đầu tư cần thiết để chế tạo và vận hành hệ thống.
+Phụ lục này tổng hợp chi phí để trả lời một câu hỏi thực tế: làm hệ thống này tốn bao nhiêu tiền. Các bảng bên dưới tập trung vào mức đầu tư và chi phí vận hành, không dùng để đánh giá hiệu năng kỹ thuật.
 
 ## 1.1. Bảng kê chi phí linh kiện (Bill of Materials - BOM)
 
-Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng trong thiết bị tracker IoT, bao gồm đơn giá và tổng chi phí ước tính. Đơn giá được tham chiếu theo mặt bằng giá của hai nhà cung cấp linh kiện điện tử trong nước là LinhKienChatLuong và CXT tại thời điểm tháng 01/2026.
+Bảng dưới đây liệt kê các linh kiện chính của thiết bị theo dõi xe, kèm đơn giá và tổng chi phí ước tính. Mức giá được tham chiếu theo thị trường linh kiện trong nước tại thời điểm 01/2026.
 
 [Bảng PL-1.1: Bảng kê chi phí linh kiện (BOM)]
 
@@ -6904,9 +6901,9 @@ Mỗi dịch vụ yêu cầu file `.env` riêng. Mẫu cấu hình (`.env.exampl
 
 > **Lưu ý bảo mật:** Tất cả mật khẩu và secret keys là BẮT BUỘC, không có giá trị mặc định. Hệ thống sẽ từ chối khởi động nếu thiếu bất kỳ biến nào.
 
-## 4.5. Hướng dẫn cài đặt và chạy hệ thống
+## 4.5. Hướng dẫn cài đặt và chạy hệ thống (Bản theo checklist)
 
-Phần này được sắp theo đúng thứ tự thao tác để người đọc có thể dựng môi trường từ đầu mà không phải suy đoán bước tiếp theo. Mục tiêu là biến phụ lục thành một checklist thực thi ngắn gọn, thay vì chỉ là tập hợp lệnh rời rạc. Toàn bộ thông tin trong mục này phục vụ môi trường development/demo; khi triển khai production cần thay thế các giá trị minh họa bằng cấu hình và thông tin xác thực riêng.
+Phần này được sắp theo đúng thứ tự thao tác để người đọc có thể dựng môi trường từ đầu mà không phải đoán bước tiếp theo. Mục tiêu là biến phụ lục thành một checklist ngắn gọn, thay vì chỉ là danh sách lệnh rời rạc. Toàn bộ nội dung trong mục này phục vụ môi trường development/demo; khi triển khai production cần thay các giá trị minh họa bằng cấu hình và thông tin xác thực riêng.
 
 **Yêu cầu hệ thống:**
 
@@ -6918,7 +6915,7 @@ Phần này được sắp theo đúng thứ tự thao tác để người đọ
 | Git            | 2.x                 |
 | npm            | 10.x                |
 
-**Các bước cài đặt:**
+**Các bước cài đặt (làm theo thứ tự):**
 
 Luồng cài đặt dưới đây đi từ hạ tầng dùng chung đến từng dịch vụ ứng dụng. Nếu thực hiện theo đúng thứ tự này, người triển khai sẽ giảm đáng kể lỗi do thiếu mạng Docker, thiếu biến môi trường hoặc khởi động dịch vụ phụ thuộc quá sớm.
 

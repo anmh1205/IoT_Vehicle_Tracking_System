@@ -15,7 +15,6 @@ import usersRoutes from '@/api/routes/users.routes';
 import statisticsRoutes from '@/api/routes/statistics.routes';
 import notificationsRoutes from '@/api/routes/notifications.routes';
 import healthRoutes from '@/api/routes/health.routes';
-import iotRoutes from '@/api/routes/iot.routes';
 import telemetryRoutes from '@/api/routes/telemetry.routes';
 import simulatorRoutes from '@/api/routes/simulator.routes';
 import systemRoutes from '@/api/routes/system.routes';
@@ -29,7 +28,6 @@ const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/users', usersRoutes);
-router.use('/iot', iotRoutes);
 router.use('/device', deviceRoutes);
 router.use('/devices', deviceRoutes);
 router.use('/dashboard', dashboardRoutes);

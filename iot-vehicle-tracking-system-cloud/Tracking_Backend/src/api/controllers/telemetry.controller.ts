@@ -2,7 +2,7 @@ import type { Response } from 'express';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { createValidationError } from '@/shared/utils/errors.util';
-import { sendOk } from '@/shared/utils/response.util';
+import { sendOk, sendAccepted } from '@/shared/utils/response.util';
 import * as telemetryHistoryService from '@/domain/telemetry/services/telemetry-history.service';
 import * as exportJobService from '@/domain/export/services/export-job.service';
 
@@ -44,9 +44,5 @@ export const createExport = asyncHandler(async (req: AuthenticatedRequest, res: 
     },
   });
 
-  res.status(202).json({
-    success: true,
-    data: { jobId: job.id, status: job.status },
-    timestamp: new Date().toISOString(),
-  });
+  sendAccepted(res, { jobId: job.id, status: job.status });
 });

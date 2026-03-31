@@ -6,9 +6,9 @@ export interface NavItem {
 }
 
 export interface ApiEnvelope<T> {
-  success: boolean;
   data: T;
-  timestamp: string;
+  requestId: string;
+  meta?: Record<string, unknown>;
 }
 
 export interface PaginationMeta {

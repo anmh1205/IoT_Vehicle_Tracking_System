@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { pool } from '@/infrastructure/database/pool';
 import { victoriaMetricsConfig } from '@/config/env';
+import { buildSuccessResponse } from '@/shared/serializers/success-response.serializer';
+import { createApiError } from '@/shared/utils/errors.util';
+import { serializeApiError } from '@/shared/serializers/problem-details.serializer';
 
 const router = Router();
 
@@ -12,7 +15,7 @@ interface HealthCheck {
 }
 
 /** GET /health — Full status with dependency checks */
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   const checks: HealthCheck['checks'] = {};
 
   // Check PostgreSQL
@@ -48,33 +51,29 @@ router.get('/', async (_req, res) => {
     timestamp: new Date().toISOString(),
   };
 
-  res.status(allUp ? 200 : 503).json({ success: allUp, data: result, timestamp: result.timestamp });
+  const requestId = req.correlationId ?? 'unknown';
+  const payload = buildSuccessResponse(requestId, result);
+  res.status(allUp ? 200 : 503).json(payload);
 });
 
 /** GET /health/live — Liveness probe (is the process alive?) */
-router.get('/live', (_req, res) => {
-  res.status(200).json({
-    success: true,
-    data: { status: 'alive' },
-    timestamp: new Date().toISOString(),
-  });
+router.get('/live', (req, res) => {
+  const requestId = req.correlationId ?? 'unknown';
+  res.status(200).json(buildSuccessResponse(requestId, { status: 'alive' }));
 });
 
 /** GET /health/ready — Readiness probe (can it serve traffic?) */
-router.get('/ready', async (_req, res) => {
+router.get('/ready', async (req, res) => {
+  const requestId = req.correlationId ?? 'unknown';
+
   try {
     await pool.query('SELECT 1');
-    res.status(200).json({
-      success: true,
-      data: { status: 'ready' },
-      timestamp: new Date().toISOString(),
-    });
+    res.status(200).json(buildSuccessResponse(requestId, { status: 'ready' }));
   } catch {
-    res.status(503).json({
-      success: false,
-      error: { code: 'NOT_READY', message: 'Database is not reachable', status: 503 },
-      timestamp: new Date().toISOString(),
-    });
+    const error = createApiError(503, 'Database is not reachable', { code: 'NOT_READY' });
+    const payload = serializeApiError(error, req.path, requestId);
+    res.type('application/problem+json');
+    res.status(503).json(payload);
   }
 });
 

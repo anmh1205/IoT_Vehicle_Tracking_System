@@ -23,3 +23,17 @@
 - Keep Vietnamese UI strings in feature modules consistent (UI copy should match locale style used in parent feature).
 - Keep accessibility changes minimal and local to impacted components to reduce regression risk.
 - Update project docs (`docs/development-roadmap.md`, `docs/project-changelog.md`, `docs/system-architecture.md`, `docs/codebase-summary.md`) whenever accessibility standards change or are adopted.
+
+## API Response Contract Standards
+- Success responses must use the shared envelope shape `{ data, requestId, meta? }`.
+- Error responses must serialize to RFC7807 problem details and include `requestId` plus `errors[]` for validation detail.
+- Frontend API clients should unwrap the success envelope before data reaches feature code.
+- Error parsers should treat problem-details responses as the canonical server failure shape.
+- Keep request-scoped identifiers and response contract fields consistent across middleware, health, metrics, and rate-limit paths.
+
+## MQTT and Realtime Contract Standards
+- Treat MQTT as the canonical ingest path for both real devices and simulator flows.
+- Remove legacy runtime exposure such as `/iot/data` rather than keeping parallel entry points.
+- Use colon-style realtime event names as the canonical contract and update consumers in lockstep when names change.
+- Treat simulator token handling as security-sensitive; do not rely on stored token hashes as replayable bearer material.
+- Apply rollback/race mitigations around simulator publish flows when state transitions can overlap.

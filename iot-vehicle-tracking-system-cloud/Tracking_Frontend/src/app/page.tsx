@@ -1,5 +1,5 @@
+import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
-import { LandingPage } from '@/features/marketing/components/landing-page';
 
 export const metadata: Metadata = {
   title: 'Giám sát đội xe realtime | IoT Vehicle Tracking System',
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const RootPage = () => {
-  return <LandingPage />;
+  redirect('/login');
 };
 
 export default RootPage;

@@ -59,7 +59,7 @@ export const sessionConfig = {
 } as const;
 
 export const corsConfig = {
-  origin: fromEnv('CORS_ORIGIN') ?? 'http://localhost:4002',
+  origin: fromEnv('CORS_ORIGIN') ?? 'http://localhost:4001',
 } as const;
 
 export const observabilityConfig = {

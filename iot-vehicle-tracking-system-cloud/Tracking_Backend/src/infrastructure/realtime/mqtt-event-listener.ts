@@ -21,10 +21,9 @@ const log = createLogger('mqtt-listener');
 
 interface InternalEnvelope {
   correlation_id: string;
-  event_type: 'status' | 'alert' | 'session' | 'data';
+  event_type: 'status' | 'alert' | 'session' | 'data' | 'ignition';
   timestamp: string;
-  device_id: string;
-  [key: string]: unknown;
+  payload: Record<string, unknown>;
 }
 
 let client: mqtt.MqttClient | null = null;
@@ -63,42 +62,40 @@ export const initMqttEventListener = (): void => {
       return;
     }
 
-    // Extract event type from topic: internal/events/device/{type}
-    const segments = topic.split('/');
-    const eventType = segments[segments.length - 1]; // status | alert | session | data
+    const envelopePayload = (data.payload ?? {}) as Record<string, unknown>;
 
-    switch (eventType) {
+    switch (data.event_type) {
       case 'status':
-        publishEvent('device.status.changed', {
-          device_id: data.device_id,
-          status: (data.current_status as string) ?? 'unknown',
+        publishEvent('device:status', {
+          device_id: String(envelopePayload.device_id ?? ''),
+          status: String(envelopePayload.current_status ?? 'unknown'),
           last_seen_at: data.timestamp,
         });
         break;
 
       case 'data':
-        publishEvent('device.position.updated', {
-          device_id: data.device_id,
-          lat: (data.latitude as number) ?? 0,
-          lon: (data.longitude as number) ?? 0,
-          speed: (data.speed as number) ?? 0,
-          heading: (data.course as number) ?? 0,
+        publishEvent('device:position', {
+          device_id: String(envelopePayload.device_id ?? ''),
+          lat: Number(envelopePayload.latitude ?? 0),
+          lon: Number(envelopePayload.longitude ?? 0),
+          speed: Number(envelopePayload.speed ?? 0),
+          heading: Number(envelopePayload.course ?? 0),
           timestamp: Date.now(),
-          battery: (data.battery_top as number) ?? null,
+          battery: envelopePayload.battery_top == null ? null : Number(envelopePayload.battery_top),
         });
         break;
 
       case 'session': {
-        const action = data.action as string;
-        const sessionId = (data.session_id as number) ?? 0;
+        const action = String(envelopePayload.action ?? '');
+        const sessionId = Number(envelopePayload.session_id ?? 0);
         if (action === 'started') {
-          publishEvent('device.session.started', {
-            device_id: data.device_id,
+          publishEvent('device:session_start', {
+            device_id: String(envelopePayload.device_id ?? ''),
             session_id: sessionId,
           });
         } else if (action === 'ended') {
-          publishEvent('device.session.ended', {
-            device_id: data.device_id,
+          publishEvent('device:session_end', {
+            device_id: String(envelopePayload.device_id ?? ''),
             session_id: sessionId,
           });
         }
@@ -106,25 +103,26 @@ export const initMqttEventListener = (): void => {
       }
 
       case 'alert':
-        publishEvent('dashboard.alert.created', {
-          id: 0, // Bridge alerts don't have a DB id yet
-          device_id: data.device_id,
-          alert_type: (data.alert_type as string) ?? 'unknown',
+        publishEvent('alert:new', {
+          id: 0,
+          device_id: String(envelopePayload.device_id ?? ''),
+          alert_type: String(envelopePayload.alert_type ?? 'unknown'),
           severity: 'warning',
-          title: (data.alert_type as string) ?? 'Device Alert',
-          message: (data.message as string) ?? undefined,
-          latitude: (data.latitude as number) ?? undefined,
-          longitude: (data.longitude as number) ?? undefined,
+          title: String(envelopePayload.alert_type ?? 'Device Alert'),
+          message: envelopePayload.message == null ? undefined : String(envelopePayload.message),
+          latitude:
+            envelopePayload.latitude == null ? undefined : Number(envelopePayload.latitude),
+          longitude:
+            envelopePayload.longitude == null ? undefined : Number(envelopePayload.longitude),
         });
         break;
 
       case 'ignition': {
-        // Auto-manage trips based on ignition state (on/off)
-        const ignitionState = data.state as string;
-        const vehicleId = data.vehicle_id as string | undefined;
+        const ignitionState = String(envelopePayload.state ?? '');
+        const vehicleId = envelopePayload.vehicle_id as string | undefined;
         if (vehicleId && (ignitionState === 'on' || ignitionState === 'off')) {
           void handleIgnitionEvent({
-            device_id: data.device_id,
+            device_id: String(envelopePayload.device_id ?? ''),
             vehicle_id: vehicleId,
             state: ignitionState,
           });
@@ -133,7 +131,7 @@ export const initMqttEventListener = (): void => {
       }
 
       default:
-        log.debug(`Unknown internal event type: ${eventType} on ${topic}`);
+        log.debug(`Unknown internal event type: ${data.event_type} on ${topic}`);
     }
   });
 

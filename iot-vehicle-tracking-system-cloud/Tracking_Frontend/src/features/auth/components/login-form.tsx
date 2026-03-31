@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { authServices } from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { loginSchema, type LoginFormValues } from '@/lib/validations/auth.schema';
 
 export const LoginForm = () => {
@@ -61,8 +62,29 @@ export const LoginForm = () => {
         data.token,
       );
       router.replace(redirectTo);
-    } catch {
-      setErrorMessage('Thông tin đăng nhập không chính xác. Vui lòng thử lại.');
+    } catch (error) {
+      const status = (error as { response?: { status?: number } })?.response?.status;
+
+      if (status === 401) {
+        setErrorMessage(
+          getApiErrorMessage(error, 'Thông tin đăng nhập không chính xác hoặc tài khoản không khả dụng.'),
+        );
+        return;
+      }
+
+      if ((error as { response?: unknown })?.response == null) {
+        setErrorMessage('Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng và thử lại.');
+        return;
+      }
+
+      if (typeof status === 'number' && status >= 500) {
+        setErrorMessage('Hệ thống đang gặp sự cố. Vui lòng thử lại sau ít phút.');
+        return;
+      }
+
+      setErrorMessage(
+        getApiErrorMessage(error, 'Đăng nhập thất bại. Vui lòng thử lại.'),
+      );
     }
   };
 
@@ -123,6 +145,7 @@ export const LoginForm = () => {
                 onClick={() => setShowPassword((value) => !value)}
                 className="absolute right-1 top-1 inline-flex h-10 w-10 items-center justify-center text-muted-foreground sm:right-2 sm:top-0.5 sm:h-8 sm:w-8"
                 aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                aria-pressed={showPassword}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>

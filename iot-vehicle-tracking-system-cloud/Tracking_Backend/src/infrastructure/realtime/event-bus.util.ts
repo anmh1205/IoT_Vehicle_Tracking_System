@@ -1,12 +1,12 @@
 import { EventEmitter } from 'events';
 
 export interface RealtimeEventMap {
-  'device.status.changed': {
+  'device:status': {
     device_id: string;
     status: string;
     last_seen_at?: string;
   };
-  'device.position.updated': {
+  'device:position': {
     device_id: string;
     lat: number;
     lon: number;
@@ -18,16 +18,16 @@ export interface RealtimeEventMap {
     vehiclePlate?: string;
     battery?: number | null;
   };
-  'device.session.started': { device_id: string; session_id: number };
-  'device.session.ended': { device_id: string; session_id: number };
-  'command.acknowledged': {
+  'device:session_start': { device_id: string; session_id: number };
+  'device:session_end': { device_id: string; session_id: number };
+  'command:ack': {
     device_id: string;
     command_id: string;
     status: string;
   };
 
-  'dashboard.stats.updated': Record<string, unknown>;
-  'dashboard.alert.created': {
+  'stats:update': Record<string, unknown>;
+  'alert:new': {
     id: number;
     vehicle_id?: number;
     device_id?: string;
@@ -38,34 +38,34 @@ export interface RealtimeEventMap {
     latitude?: number;
     longitude?: number;
   };
-  'dashboard.activity.created': {
+  'activity:new': {
     id: number;
     type: string;
     message: string;
     timestamp: string;
   };
 
-  'geofence.entered': {
+  'geofence:enter': {
     deviceId: string;
     geofenceName: string;
     geofenceId: number;
     timestamp: string;
   };
-  'geofence.exited': {
+  'geofence:exit': {
     deviceId: string;
     geofenceName: string;
     geofenceId: number;
     timestamp: string;
   };
 
-  'export.completed': {
+  'export:ready': {
     id: number;
     user_id: number;
     file_path: string;
     status: string;
   };
 
-  'firmware.assignment.updated': {
+  'firmware:assignment': {
     firmware_id: number;
     device_ids: string[];
     status: string;

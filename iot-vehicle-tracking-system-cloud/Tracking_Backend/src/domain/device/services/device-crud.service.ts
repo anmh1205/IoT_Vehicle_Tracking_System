@@ -1,4 +1,4 @@
-import { generateToken } from '@/shared/utils/crypto.util';
+import { generateToken, hashToken } from '@/shared/utils/crypto.util';
 import { createNotFoundError, createConflictError } from '@/shared/utils/errors.util';
 import * as deviceRepo from '@/domain/device/repositories/device.repository';
 import { logger } from '@/infrastructure/logger';
@@ -31,12 +31,13 @@ export const createDevice = async (
     throw createConflictError(`Device with ID "${input.deviceId}" already exists`);
   }
 
-  const device = await deviceRepo.create(input);
+  const authToken = generateToken();
+  const device = await deviceRepo.create(input, authToken);
   logger.info(`Device "${input.deviceId}" created successfully`);
 
   return {
     ...sanitizeDevice(device),
-    authToken: device.auth_token,
+    authToken,
   };
 };
 
@@ -72,7 +73,7 @@ export const regenerateToken = async (id: number): Promise<{ authToken: string }
   }
 
   const newToken = generateToken();
-  await deviceRepo.updateAuthToken(id, newToken);
+  await deviceRepo.updateAuthToken(id, hashToken(newToken));
 
   logger.info(`Auth token regenerated for device "${existing.device_id}"`);
   return { authToken: newToken };

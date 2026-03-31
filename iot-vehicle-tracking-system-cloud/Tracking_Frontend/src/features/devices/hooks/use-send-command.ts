@@ -2,12 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deviceServices } from '@/lib/api/devices';
 import { notificationUtils } from '@/lib/notification';
 import { queryInvalidation } from '@/lib/utils/query-invalidation';
-
-const getErrorMessage = (error: any): string =>
-  error?.response?.data?.error?.message ??
-  error?.response?.data?.message ??
-  error?.message ??
-  'Không thể gửi lệnh';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 
 export const useSendCommand = (deviceId: number | string) => {
   const queryClient = useQueryClient();
@@ -19,7 +14,7 @@ export const useSendCommand = (deviceId: number | string) => {
       notificationUtils.success('Đã gửi lệnh');
     },
     onError: (error: unknown) => {
-      notificationUtils.error('Gửi lệnh thất bại', getErrorMessage(error));
+      notificationUtils.error('Gửi lệnh thất bại', getApiErrorMessage(error, 'Không thể gửi lệnh'));
     },
   });
 };

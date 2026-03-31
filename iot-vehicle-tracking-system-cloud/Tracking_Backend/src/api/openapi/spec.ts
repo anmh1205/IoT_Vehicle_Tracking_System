@@ -73,7 +73,6 @@ export const spec = {
     { name: 'Simulator', description: 'Device simulator control' },
     { name: 'System', description: 'System health & metrics' },
     { name: 'System Admin', description: 'Admin-level system management' },
-    { name: 'IoT', description: 'IoT data ingestion' },
   ],
   paths: {
     // ── Auth ────────────────────────────────────────
@@ -1078,19 +1077,5 @@ export const spec = {
       },
     },
 
-    // ── IoT ─────────────────────────────────────────
-    '/iot/data': {
-      post: {
-        tags: ['IoT'],
-        summary: 'Ingest IoT telemetry data',
-        security: [],
-        requestBody: jsonBody({
-          deviceId: { type: 'string' },
-          timestamp: { type: 'string', format: 'date-time' },
-          data: { type: 'object' },
-        }),
-        responses: { '200': { description: 'Data ingested' }, '400': { description: 'Invalid payload' } },
-      },
-    },
   },
 };

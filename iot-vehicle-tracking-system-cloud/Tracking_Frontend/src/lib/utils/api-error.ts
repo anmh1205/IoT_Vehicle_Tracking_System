@@ -58,8 +58,30 @@ const unwrapDetails = (value: unknown): unknown => {
 
 export const getApiFieldErrors = (error: unknown): Record<string, string> => {
   const payload = getErrorPayload(error);
-  const details = unwrapDetails(payload?.details);
+  const errors = payload?.errors;
 
+  if (Array.isArray(errors)) {
+    const output: Record<string, string> = {};
+    for (const item of errors) {
+      if (!isRecord(item)) {
+        continue;
+      }
+
+      const field = firstText(item.field) ?? 'general';
+      const message = firstText(item.message);
+      if (!message || output[field]) {
+        continue;
+      }
+
+      output[field] = message;
+    }
+
+    if (Object.keys(output).length > 0) {
+      return output;
+    }
+  }
+
+  const details = unwrapDetails(payload?.details);
   if (!isRecord(details)) {
     return {};
   }
@@ -84,6 +106,7 @@ export const getApiErrorMessage = (error: unknown, fallback: string): string => 
 
   const payload = getErrorPayload(error);
   const message =
+    firstText(payload?.detail) ??
     firstText(payload?.message) ??
     firstText((error as { message?: unknown })?.message);
 

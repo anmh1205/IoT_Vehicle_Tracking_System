@@ -1,5 +1,5 @@
 flowchart LR
-    IMU["IMU ISR"] --> PowerTask["power_task"]
+    IMU["Ngắt IMU"] --> PowerTask["power_task"]
     OBDTask["obd_task"] --> Queue["telemetry_queue"]
     GNSSTask["gnss_task"] --> Queue
     SensorTask["sensor_task"] --> Queue

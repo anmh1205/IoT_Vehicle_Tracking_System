@@ -1,12 +1,12 @@
 flowchart TB
-    Root["Trang Map"]
+    Root["Trang bản đồ"]
 
-    subgraph Visual["Map rendering layers"]
+    subgraph Visual["Các lớp bản đồ"]
         direction LR
-        Tile["Tile layer"]
-        Marker["Marker layer"]
-        Route["Route replay"]
-        Fence["Geofence layer"]
+        Tile["Lớp nền"]
+        Marker["Lớp điểm xe"]
+        Route["Phát lại hành trình"]
+        Fence["Lớp vùng giám sát"]
     end
 
     Sidebar["Sidebar"]

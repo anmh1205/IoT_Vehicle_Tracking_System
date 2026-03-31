@@ -31,7 +31,7 @@ const resolveAllowedOrigins = (): string[] | boolean => {
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
 
-  if (values.length === 0) return ['http://localhost:4002'];
+  if (values.length === 0) return ['http://localhost:4001'];
   if (values.includes('*')) return true;
   return values;
 };
@@ -99,72 +99,72 @@ const attachNamespaceHandlers = (
 
 const registerEventBridges = (server: TypedIOServer): void => {
   // Device events → /devices namespace
-  subscribeEvent('device.status.changed', (payload) => {
+  subscribeEvent('device:status', (payload) => {
     server.of('/devices').emit('device:status', payload);
-    recordEventEmission('device.status.changed');
+    recordEventEmission('device:status');
   });
 
-  subscribeEvent('device.position.updated', (payload) => {
+  subscribeEvent('device:position', (payload) => {
     server.of('/devices').emit('device:position', payload);
-    recordEventEmission('device.position.updated');
+    recordEventEmission('device:position');
   });
 
-  subscribeEvent('device.session.started', (payload) => {
+  subscribeEvent('device:session_start', (payload) => {
     server.of('/devices').emit('device:session_start', payload);
-    recordEventEmission('device.session.started');
+    recordEventEmission('device:session_start');
   });
 
-  subscribeEvent('device.session.ended', (payload) => {
+  subscribeEvent('device:session_end', (payload) => {
     server.of('/devices').emit('device:session_end', payload);
-    recordEventEmission('device.session.ended');
+    recordEventEmission('device:session_end');
   });
 
-  subscribeEvent('command.acknowledged', (payload) => {
+  subscribeEvent('command:ack', (payload) => {
     server
       .of('/devices')
       .to(`device:${payload.device_id}`)
       .emit('command:ack', payload);
-    recordEventEmission('command.acknowledged');
+    recordEventEmission('command:ack');
   });
 
   // Dashboard events → /dashboard namespace
-  subscribeEvent('dashboard.stats.updated', (payload) => {
+  subscribeEvent('stats:update', (payload) => {
     server.of('/dashboard').emit('stats:update', payload);
-    recordEventEmission('dashboard.stats.updated');
+    recordEventEmission('stats:update');
   });
 
-  subscribeEvent('dashboard.alert.created', (payload) => {
+  subscribeEvent('alert:new', (payload) => {
     server.of('/dashboard').emit('alert:new', payload);
     server.of('/notifications').emit('alert:new', payload);
-    recordEventEmission('dashboard.alert.created');
+    recordEventEmission('alert:new');
   });
 
-  subscribeEvent('dashboard.activity.created', (payload) => {
+  subscribeEvent('activity:new', (payload) => {
     server.of('/dashboard').emit('activity:new', payload);
-    recordEventEmission('dashboard.activity.created');
+    recordEventEmission('activity:new');
   });
 
   // Geofence events → /notifications namespace
-  subscribeEvent('geofence.entered', (payload) => {
+  subscribeEvent('geofence:enter', (payload) => {
     server.of('/notifications').emit('geofence:enter', payload);
-    recordEventEmission('geofence.entered');
+    recordEventEmission('geofence:enter');
   });
 
-  subscribeEvent('geofence.exited', (payload) => {
+  subscribeEvent('geofence:exit', (payload) => {
     server.of('/notifications').emit('geofence:exit', payload);
-    recordEventEmission('geofence.exited');
+    recordEventEmission('geofence:exit');
   });
 
   // Export events → /exports namespace
-  subscribeEvent('export.completed', (payload) => {
+  subscribeEvent('export:ready', (payload) => {
     server.of('/exports').emit('export:ready', payload);
-    recordEventEmission('export.completed');
+    recordEventEmission('export:ready');
   });
 
   // Firmware events → /firmware namespace
-  subscribeEvent('firmware.assignment.updated', (payload) => {
+  subscribeEvent('firmware:assignment', (payload) => {
     server.of('/firmware').emit('firmware:assignment', payload);
-    recordEventEmission('firmware.assignment.updated');
+    recordEventEmission('firmware:assignment');
   });
 };
 

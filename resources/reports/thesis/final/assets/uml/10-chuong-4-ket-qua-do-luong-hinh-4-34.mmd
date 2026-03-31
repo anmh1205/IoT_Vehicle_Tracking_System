@@ -1,6 +1,6 @@
 flowchart LR
-    Stream["Socket realtime stream"] --> Panel["OBD2 chart panel"]
+    Stream["Luồng realtime Socket"] --> Panel["Bảng biểu đồ OBD2"]
     Panel --> RPM["RPM"]
     Panel --> Speed["Speed"]
     Panel --> Coolant["Coolant Temp"]
-    Filter["Time range filter"] --> Panel
+    Filter["Bộ lọc thời gian"] --> Panel

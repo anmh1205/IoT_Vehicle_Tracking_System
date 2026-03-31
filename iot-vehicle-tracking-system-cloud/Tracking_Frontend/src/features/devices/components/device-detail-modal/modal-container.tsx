@@ -58,7 +58,7 @@ export const DeviceDetailModalContainer = ({
   }, [deviceId, queryClient]);
 
   useRealtimeSubscription<any>({
-    event: 'device.status.changed',
+    event: 'device:status',
     enabled: open && !!deviceId,
     handler: (payload) => {
       const payloadId = String(payload?.device_id ?? payload?.deviceId ?? '');
@@ -68,7 +68,7 @@ export const DeviceDetailModalContainer = ({
   });
 
   useRealtimeSubscription<any>({
-    event: 'device.sessions.updated',
+    event: 'device:session_start',
     enabled: open && !!deviceId,
     handler: (payload) => {
       const payloadId = String(payload?.device_id ?? payload?.deviceId ?? '');
@@ -77,10 +77,12 @@ export const DeviceDetailModalContainer = ({
     },
   });
 
-  useRealtimeSubscription({
-    event: 'device:status',
+  useRealtimeSubscription<any>({
+    event: 'device:session_end',
     enabled: open && !!deviceId,
-    handler: () => {
+    handler: (payload) => {
+      const payloadId = String(payload?.device_id ?? payload?.deviceId ?? '');
+      if (payloadId && payloadId !== String(detail.data?.device?.deviceId)) return;
       void refreshCurrent();
     },
   });

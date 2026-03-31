@@ -1,2466 +1,1603 @@
 [
   {
-    "serverName": "memory",
-    "name": "create_entities",
-    "description": "Create multiple new entities in the knowledge graph",
+    "serverName": "office-word",
+    "name": "create_document",
+    "description": "Create a new Word document with optional metadata.",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "entities": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "The name of the entity"
-              },
-              "entityType": {
-                "type": "string",
-                "description": "The type of the entity"
-              },
-              "observations": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "An array of observation contents associated with the entity"
-              }
-            },
-            "required": [
-              "name",
-              "entityType",
-              "observations"
-            ],
-            "additionalProperties": false
-          }
+        "filename": {
+          "type": "string"
+        },
+        "title": {
+          "default": null,
+          "type": "string"
+        },
+        "author": {
+          "default": null,
+          "type": "string"
         }
       },
       "required": [
-        "entities"
+        "filename"
       ],
       "additionalProperties": false
     }
   },
   {
-    "serverName": "memory",
-    "name": "create_relations",
-    "description": "Create multiple new relations between entities in the knowledge graph. Relations should be in active voice",
+    "serverName": "office-word",
+    "name": "copy_document",
+    "description": "Create a copy of a Word document.",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "relations": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "from": {
-                "type": "string",
-                "description": "The name of the entity where the relation starts"
-              },
-              "to": {
-                "type": "string",
-                "description": "The name of the entity where the relation ends"
-              },
-              "relationType": {
-                "type": "string",
-                "description": "The type of the relation"
-              }
-            },
-            "required": [
-              "from",
-              "to",
-              "relationType"
-            ],
-            "additionalProperties": false
-          }
+        "source_filename": {
+          "type": "string"
+        },
+        "destination_filename": {
+          "default": null,
+          "type": "string"
         }
       },
       "required": [
-        "relations"
+        "source_filename"
       ],
       "additionalProperties": false
     }
   },
   {
-    "serverName": "memory",
-    "name": "add_observations",
-    "description": "Add new observations to existing entities in the knowledge graph",
+    "serverName": "office-word",
+    "name": "get_document_info",
+    "description": "Get information about a Word document.",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "observations": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "entityName": {
-                "type": "string",
-                "description": "The name of the entity to add the observations to"
-              },
-              "contents": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "An array of observation contents to add"
-              }
-            },
-            "required": [
-              "entityName",
-              "contents"
-            ],
-            "additionalProperties": false
-          }
+        "filename": {
+          "type": "string"
         }
       },
       "required": [
-        "observations"
+        "filename"
       ],
       "additionalProperties": false
     }
   },
   {
-    "serverName": "memory",
-    "name": "delete_entities",
-    "description": "Delete multiple entities and their associated relations from the knowledge graph",
+    "serverName": "office-word",
+    "name": "get_document_text",
+    "description": "Extract all text from a Word document.",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "entityNames": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "An array of entity names to delete"
+        "filename": {
+          "type": "string"
         }
       },
       "required": [
-        "entityNames"
+        "filename"
       ],
       "additionalProperties": false
     }
   },
   {
-    "serverName": "memory",
-    "name": "delete_observations",
-    "description": "Delete specific observations from entities in the knowledge graph",
+    "serverName": "office-word",
+    "name": "get_document_outline",
+    "description": "Get the structure of a Word document.",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "deletions": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "entityName": {
-                "type": "string",
-                "description": "The name of the entity containing the observations"
-              },
-              "observations": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "An array of observations to delete"
-              }
-            },
-            "required": [
-              "entityName",
-              "observations"
-            ],
-            "additionalProperties": false
-          }
+        "filename": {
+          "type": "string"
         }
       },
       "required": [
-        "deletions"
+        "filename"
       ],
       "additionalProperties": false
     }
   },
   {
-    "serverName": "memory",
-    "name": "delete_relations",
-    "description": "Delete multiple relations from the knowledge graph",
+    "serverName": "office-word",
+    "name": "list_available_documents",
+    "description": "List all .docx files in the specified directory.",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "relations": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "from": {
-                "type": "string",
-                "description": "The name of the entity where the relation starts"
-              },
-              "to": {
-                "type": "string",
-                "description": "The name of the entity where the relation ends"
-              },
-              "relationType": {
-                "type": "string",
-                "description": "The type of the relation"
-              }
-            },
-            "required": [
-              "from",
-              "to",
-              "relationType"
-            ],
-            "additionalProperties": false
-          },
-          "description": "An array of relations to delete"
+        "directory": {
+          "default": ".",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "get_document_xml",
+    "description": "Get the raw XML structure of a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
         }
       },
       "required": [
-        "relations"
+        "filename"
       ],
       "additionalProperties": false
     }
   },
   {
-    "serverName": "memory",
-    "name": "read_graph",
-    "description": "Read the entire knowledge graph",
-    "inputSchema": {
-      "type": "object",
-      "properties": {},
-      "additionalProperties": false
-    }
-  },
-  {
-    "serverName": "memory",
-    "name": "search_nodes",
-    "description": "Search for nodes in the knowledge graph based on a query",
+    "serverName": "office-word",
+    "name": "insert_header_near_text",
+    "description": "Insert a header (with specified style) before or after the target paragraph. Specify by text or paragraph index. Args: filename (str), target_text (str, optional), header_title (str), position ('before' or 'after'), header_style (str, default 'Heading 1'), target_paragraph_index (int, optional).",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "query": {
-          "type": "string",
-          "description": "The search query to match against entity names, types, and observation content"
+        "filename": {
+          "type": "string"
+        },
+        "target_text": {
+          "default": null,
+          "type": "string"
+        },
+        "header_title": {
+          "default": null,
+          "type": "string"
+        },
+        "position": {
+          "default": "after",
+          "type": "string"
+        },
+        "header_style": {
+          "default": "Heading 1",
+          "type": "string"
+        },
+        "target_paragraph_index": {
+          "default": null,
+          "type": "integer"
         }
       },
       "required": [
-        "query"
+        "filename"
       ],
       "additionalProperties": false
     }
   },
   {
-    "serverName": "memory",
-    "name": "open_nodes",
-    "description": "Open specific nodes in the knowledge graph by their names",
+    "serverName": "office-word",
+    "name": "insert_line_or_paragraph_near_text",
+    "description": "Insert a new line or paragraph (with specified or matched style) before or after the target paragraph. Specify by text or paragraph index. Args: filename (str), target_text (str, optional), line_text (str), position ('before' or 'after'), line_style (str, optional), target_paragraph_index (int, optional).",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "names": {
-          "type": "array",
+        "filename": {
+          "type": "string"
+        },
+        "target_text": {
+          "default": null,
+          "type": "string"
+        },
+        "line_text": {
+          "default": null,
+          "type": "string"
+        },
+        "position": {
+          "default": "after",
+          "type": "string"
+        },
+        "line_style": {
+          "default": null,
+          "type": "string"
+        },
+        "target_paragraph_index": {
+          "default": null,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "insert_numbered_list_near_text",
+    "description": "Insert a bulleted or numbered list before or after the target paragraph. Specify by text or paragraph index. Args: filename (str), target_text (str, optional), list_items (list of str), position ('before' or 'after'), target_paragraph_index (int, optional), bullet_type ('bullet' for bullets or 'number' for numbered lists, default: 'bullet').",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "target_text": {
+          "default": null,
+          "type": "string"
+        },
+        "list_items": {
+          "default": null,
           "items": {
             "type": "string"
           },
-          "description": "An array of entity names to retrieve"
+          "type": "array"
+        },
+        "position": {
+          "default": "after",
+          "type": "string"
+        },
+        "target_paragraph_index": {
+          "default": null,
+          "type": "integer"
+        },
+        "bullet_type": {
+          "default": "bullet",
+          "type": "string"
         }
       },
       "required": [
-        "names"
+        "filename"
       ],
       "additionalProperties": false
     }
   },
   {
-    "serverName": "sequential-thinking",
-    "name": "sequentialthinking",
-    "description": "A detailed tool for dynamic and reflective problem-solving through thoughts.\nThis tool helps analyze problems through a flexible thinking process that can adapt and evolve.\nEach thought can build on, question, or revise previous insights as understanding deepens.\n\nWhen to use this tool:\n- Breaking down complex problems into steps\n- Planning and design with room for revision\n- Analysis that might need course correction\n- Problems where the full scope might not be clear initially\n- Problems that require a multi-step solution\n- Tasks that need to maintain context over multiple steps\n- Situations where irrelevant information needs to be filtered out\n\nKey features:\n- You can adjust total_thoughts up or down as you progress\n- You can question or revise previous thoughts\n- You can add more thoughts even after reaching what seemed like the end\n- You can express uncertainty and explore alternative approaches\n- Not every thought needs to build linearly - you can branch or backtrack\n- Generates a solution hypothesis\n- Verifies the hypothesis based on the Chain of Thought steps\n- Repeats the process until satisfied\n- Provides a correct answer\n\nParameters explained:\n- thought: Your current thinking step, which can include:\n* Regular analytical steps\n* Revisions of previous thoughts\n* Questions about previous decisions\n* Realizations about needing more analysis\n* Changes in approach\n* Hypothesis generation\n* Hypothesis verification\n- next_thought_needed: True if you need more thinking, even if at what seemed like the end\n- thought_number: Current number in sequence (can go beyond initial total if needed)\n- total_thoughts: Current estimate of thoughts needed (can be adjusted up/down)\n- is_revision: A boolean indicating if this thought revises previous thinking\n- revises_thought: If is_revision is true, which thought number is being reconsidered\n- branch_from_thought: If branching, which thought number is the branching point\n- branch_id: Identifier for the current branch (if any)\n- needs_more_thoughts: If reaching end but realizing more thoughts needed\n\nYou should:\n1. Start with an initial estimate of needed thoughts, but be ready to adjust\n2. Feel free to question or revise previous thoughts\n3. Don't hesitate to add more thoughts if needed, even at the \"end\"\n4. Express uncertainty when present\n5. Mark thoughts that revise previous thinking or branch into new paths\n6. Ignore information that is irrelevant to the current step\n7. Generate a solution hypothesis when appropriate\n8. Verify the hypothesis based on the Chain of Thought steps\n9. Repeat the process until satisfied with the solution\n10. Provide a single, ideally correct answer as the final output\n11. Only set next_thought_needed to false when truly done and a satisfactory answer is reached",
+    "serverName": "office-word",
+    "name": "add_paragraph",
+    "description": "Add a paragraph to a Word document with optional formatting.\n\nArgs:\n    filename: Path to Word document\n    text: Paragraph text content\n    style: Optional paragraph style name\n    font_name: Font family (e.g., 'Helvetica', 'Times New Roman')\n    font_size: Font size in points (e.g., 14, 36)\n    bold: Make text bold\n    italic: Make text italic\n    color: Text color as hex RGB (e.g., '000000')",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "thought": {
-          "type": "string",
-          "description": "Your current thinking step"
+        "filename": {
+          "type": "string"
         },
-        "nextThoughtNeeded": {
-          "type": "boolean",
-          "description": "Whether another thought step is needed"
-        },
-        "thoughtNumber": {
-          "type": "integer",
-          "description": "Current thought number",
-          "minimum": 1
-        },
-        "totalThoughts": {
-          "type": "integer",
-          "description": "Estimated total thoughts needed",
-          "minimum": 1
-        },
-        "isRevision": {
-          "type": "boolean",
-          "description": "Whether this revises previous thinking"
-        },
-        "revisesThought": {
-          "type": "integer",
-          "description": "Which thought is being reconsidered",
-          "minimum": 1
-        },
-        "branchFromThought": {
-          "type": "integer",
-          "description": "Branching point thought number",
-          "minimum": 1
-        },
-        "branchId": {
-          "type": "string",
-          "description": "Branch identifier"
-        },
-        "needsMoreThoughts": {
-          "type": "boolean",
-          "description": "If more thoughts are needed"
-        }
-      },
-      "required": [
-        "thought",
-        "nextThoughtNeeded",
-        "thoughtNumber",
-        "totalThoughts"
-      ]
-    }
-  },
-  {
-    "serverName": "context7",
-    "name": "resolve-library-id",
-    "description": "Resolves a package/product name to a Context7-compatible library ID and returns a list of matching libraries.\n\nYou MUST call this function before 'get-library-docs' to obtain a valid Context7-compatible library ID UNLESS the user explicitly provides a library ID in the format '/org/project' or '/org/project/version' in their query.\n\nSelection Process:\n1. Analyze the query to understand what library/package the user is looking for\n2. Return the most relevant match based on:\n- Name similarity to the query (exact matches prioritized)\n- Description relevance to the query's intent\n- Documentation coverage (prioritize libraries with higher Code Snippet counts)\n- Trust score (consider libraries with scores of 7-10 more authoritative)\n\nResponse Format:\n- Return the selected library ID in a clearly marked section\n- Provide a brief explanation for why this library was chosen\n- If multiple good matches exist, acknowledge this but proceed with the most relevant one\n- If no good matches exist, clearly state this and suggest query refinements\n\nFor ambiguous queries, request clarification before proceeding with a best-guess match.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "libraryName": {
-          "type": "string",
-          "description": "Library name to search for and retrieve a Context7-compatible library ID."
-        }
-      },
-      "required": [
-        "libraryName"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "context7",
-    "name": "get-library-docs",
-    "description": "Fetches up-to-date documentation for a library. You must call 'resolve-library-id' first to obtain the exact Context7-compatible library ID required to use this tool, UNLESS the user explicitly provides a library ID in the format '/org/project' or '/org/project/version' in their query.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "context7CompatibleLibraryID": {
-          "type": "string",
-          "description": "Exact Context7-compatible library ID (e.g., '/mongodb/docs', '/vercel/next.js', '/supabase/supabase', '/vercel/next.js/v14.3.0-canary.87') retrieved from 'resolve-library-id' or directly from user query in the format '/org/project' or '/org/project/version'."
-        },
-        "topic": {
-          "type": "string",
-          "description": "Topic to focus documentation on (e.g., 'hooks', 'routing')."
-        },
-        "tokens": {
-          "type": "number",
-          "description": "Maximum number of tokens of documentation to retrieve (default: 5000). Higher values provide more context but consume more tokens."
-        }
-      },
-      "required": [
-        "context7CompatibleLibraryID"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "eyes_analyze",
-    "description": "Understand images, videos, and GIFs with AI vision",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "source": {
-          "type": "string",
-          "description": "File path, URL, or image to analyze"
-        },
-        "focus": {
-          "type": "string",
-          "description": "What to focus on in the analysis"
-        },
-        "detail": {
-          "type": "string",
-          "enum": [
-            "quick",
-            "detailed"
-          ],
-          "default": "detailed",
-          "description": "Analysis depth"
-        }
-      },
-      "required": [
-        "source"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "eyes_compare",
-    "description": "Find differences between images",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "image1": {
-          "type": "string",
-          "description": "First image path or URL"
-        },
-        "image2": {
-          "type": "string",
-          "description": "Second image path or URL"
-        },
-        "focus": {
-          "type": "string",
-          "enum": [
-            "differences",
-            "similarities",
-            "layout",
-            "content"
-          ],
-          "default": "differences",
-          "description": "What to compare"
-        }
-      },
-      "required": [
-        "image1",
-        "image2"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "eyes_read_document",
-    "description": "Extract text and data from documents",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "document": {
-          "type": "string",
-          "description": "Document path or URL"
-        },
-        "pages": {
-          "type": "string",
-          "default": "all",
-          "description": "Page range (e.g., '1-5' or 'all')"
-        },
-        "extract": {
-          "type": "string",
-          "enum": [
-            "text",
-            "tables",
-            "both"
-          ],
-          "default": "both",
-          "description": "What to extract"
-        }
-      },
-      "required": [
-        "document"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "eyes_summarize_document",
-    "description": "Create summaries from documents",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "document": {
-          "type": "string",
-          "description": "Document path or URL"
-        },
-        "length": {
-          "type": "string",
-          "enum": [
-            "brief",
-            "medium",
-            "detailed"
-          ],
-          "default": "medium",
-          "description": "Summary length"
-        },
-        "focus": {
-          "type": "string",
-          "description": "Specific topics to focus on"
-        }
-      },
-      "required": [
-        "document"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "gemini_gen_image",
-    "description": "Generate images from text descriptions using Gemini Imagen API",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "prompt": {
-          "type": "string",
-          "description": "Text description of the image to generate"
-        },
-        "model": {
-          "type": "string",
-          "enum": [
-            "gemini-2.5-flash-image-preview"
-          ],
-          "default": "gemini-2.5-flash-image-preview",
-          "description": "Image generation model"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "base64",
-            "url"
-          ],
-          "default": "base64",
-          "description": "Output format for the generated image"
-        },
-        "negative_prompt": {
-          "type": "string",
-          "description": "Text describing what should NOT be in the image"
-        },
-        "style": {
-          "type": "string",
-          "enum": [
-            "photorealistic",
-            "artistic",
-            "cartoon",
-            "sketch",
-            "digital_art"
-          ],
-          "description": "Style of the generated image"
-        },
-        "aspect_ratio": {
-          "type": "string",
-          "enum": [
-            "1:1",
-            "16:9",
-            "9:16",
-            "4:3",
-            "3:4"
-          ],
-          "default": "1:1",
-          "description": "Aspect ratio of the generated image"
-        },
-        "seed": {
-          "type": "number",
-          "description": "Random seed for reproducible generation"
-        }
-      },
-      "required": [
-        "prompt"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "gemini_gen_video",
-    "description": "Generate videos from text descriptions using Gemini Veo 3.0 API",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "prompt": {
-          "type": "string",
-          "description": "Text description of the video to generate"
-        },
-        "model": {
-          "type": "string",
-          "enum": [
-            "veo-3.0-generate-001"
-          ],
-          "default": "veo-3.0-generate-001",
-          "description": "Video generation model"
-        },
-        "duration": {
-          "type": "string",
-          "enum": [
-            "4s",
-            "8s",
-            "12s"
-          ],
-          "default": "4s",
-          "description": "Duration of the generated video"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "mp4",
-            "webm"
-          ],
-          "default": "mp4",
-          "description": "Output format for the generated video"
-        },
-        "aspect_ratio": {
-          "type": "string",
-          "enum": [
-            "1:1",
-            "16:9",
-            "9:16",
-            "4:3",
-            "3:4"
-          ],
-          "default": "16:9",
-          "description": "Aspect ratio of the generated video"
-        },
-        "fps": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 60,
-          "default": 24,
-          "description": "Frames per second"
-        },
-        "image_input": {
-          "type": "string",
-          "description": "Base64 encoded image or image URL to use as starting frame"
-        },
-        "style": {
-          "type": "string",
-          "enum": [
-            "realistic",
-            "cinematic",
-            "artistic",
-            "cartoon",
-            "animation"
-          ],
-          "description": "Style of the generated video"
-        },
-        "camera_movement": {
-          "type": "string",
-          "enum": [
-            "static",
-            "pan_left",
-            "pan_right",
-            "zoom_in",
-            "zoom_out",
-            "dolly_forward",
-            "dolly_backward"
-          ],
-          "description": "Camera movement type"
-        },
-        "seed": {
-          "type": "number",
-          "description": "Random seed for reproducible generation"
-        }
-      },
-      "required": [
-        "prompt"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "gemini_image_to_video",
-    "description": "Generate videos from images and text descriptions using Gemini Imagen + Veo 3.0 APIs",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "prompt": {
-          "type": "string",
-          "description": "Text description of the video animation"
-        },
-        "image_input": {
-          "type": "string",
-          "description": "Base64 encoded image or image URL to use as starting frame"
-        },
-        "model": {
-          "type": "string",
-          "enum": [
-            "veo-3.0-generate-001"
-          ],
-          "default": "veo-3.0-generate-001",
-          "description": "Video generation model"
-        },
-        "duration": {
-          "type": "string",
-          "enum": [
-            "4s",
-            "8s",
-            "12s"
-          ],
-          "default": "4s",
-          "description": "Duration of the generated video"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "mp4",
-            "webm"
-          ],
-          "default": "mp4",
-          "description": "Output format for the generated video"
-        },
-        "aspect_ratio": {
-          "type": "string",
-          "enum": [
-            "1:1",
-            "16:9",
-            "9:16",
-            "4:3",
-            "3:4"
-          ],
-          "default": "16:9",
-          "description": "Aspect ratio of the generated video"
-        },
-        "fps": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 60,
-          "default": 24,
-          "description": "Frames per second"
-        },
-        "style": {
-          "type": "string",
-          "enum": [
-            "realistic",
-            "cinematic",
-            "artistic",
-            "cartoon",
-            "animation"
-          ],
-          "description": "Style of the generated video"
-        },
-        "camera_movement": {
-          "type": "string",
-          "enum": [
-            "static",
-            "pan_left",
-            "pan_right",
-            "zoom_in",
-            "zoom_out",
-            "dolly_forward",
-            "dolly_backward"
-          ],
-          "description": "Camera movement type"
-        },
-        "seed": {
-          "type": "number",
-          "description": "Random seed for reproducible generation"
-        }
-      },
-      "required": [
-        "prompt",
-        "image_input"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "gemini_edit_image",
-    "description": "Edit images using AI with text-based instructions for inpainting, outpainting, style transfer, object manipulation, and composition. No masks required - just describe what you want to change.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "operation": {
-          "type": "string",
-          "enum": [
-            "inpaint",
-            "outpaint",
-            "style_transfer",
-            "object_manipulation",
-            "multi_image_compose"
-          ],
-          "description": "Type of image editing operation to perform"
-        },
-        "input_image": {
-          "type": "string",
-          "description": "Base64 encoded image or file path to the input image"
-        },
-        "prompt": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Text description of the desired edit"
-        },
-        "mask_image": {
-          "type": "string",
-          "description": "Base64 encoded mask image for inpainting (white = edit area, black = keep)"
-        },
-        "mask_prompt": {
-          "type": "string",
-          "description": "Text description of the area to mask for editing"
-        },
-        "expand_direction": {
-          "type": "string",
-          "enum": [
-            "all",
-            "left",
-            "right",
-            "top",
-            "bottom",
-            "horizontal",
-            "vertical"
-          ],
-          "description": "Direction to expand the image"
-        },
-        "expansion_ratio": {
-          "type": "number",
-          "minimum": 0.1,
-          "maximum": 3,
-          "default": 1.5,
-          "description": "How much to expand the image (1.0 = no expansion)"
-        },
-        "style_image": {
-          "type": "string",
-          "description": "Base64 encoded reference image for style transfer"
-        },
-        "style_strength": {
-          "type": "number",
-          "minimum": 0.1,
-          "maximum": 1,
-          "default": 0.7,
-          "description": "Strength of style application"
-        },
-        "target_object": {
-          "type": "string",
-          "description": "Description of the object to manipulate"
-        },
-        "manipulation_type": {
-          "type": "string",
-          "enum": [
-            "move",
-            "resize",
-            "remove",
-            "replace",
-            "duplicate"
-          ],
-          "description": "Type of object manipulation"
-        },
-        "target_position": {
-          "type": "string",
-          "description": "New position for the object (e.g., 'center', 'top-left')"
-        },
-        "secondary_images": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Array of base64 encoded images for composition"
-        },
-        "composition_layout": {
-          "type": "string",
-          "enum": [
-            "blend",
-            "collage",
-            "overlay",
-            "side_by_side"
-          ],
-          "description": "How to combine multiple images"
-        },
-        "blend_mode": {
-          "type": "string",
-          "enum": [
-            "normal",
-            "multiply",
-            "screen",
-            "overlay",
-            "soft_light"
-          ],
-          "description": "Blending mode for image composition"
-        },
-        "negative_prompt": {
-          "type": "string",
-          "description": "What to avoid in the edited image"
-        },
-        "strength": {
-          "type": "number",
-          "minimum": 0.1,
-          "maximum": 1,
-          "default": 0.8,
-          "description": "Strength of the editing effect"
-        },
-        "guidance_scale": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 20,
-          "default": 7.5,
-          "description": "How closely to follow the prompt"
-        },
-        "seed": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Random seed for reproducible results"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "base64",
-            "url"
-          ],
-          "default": "base64",
-          "description": "Output format for the edited image"
-        },
-        "quality": {
-          "type": "string",
-          "enum": [
-            "draft",
-            "standard",
-            "high"
-          ],
-          "default": "standard",
-          "description": "Quality level of the editing"
-        }
-      },
-      "required": [
-        "operation",
-        "input_image",
-        "prompt"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "gemini_inpaint_image",
-    "description": "Add or modify specific areas of an image using natural language descriptions. No mask required - just describe what to change and where.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "input_image": {
-          "type": "string",
-          "description": "Base64 encoded image or file path to the input image"
-        },
-        "prompt": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Text description of what to add or change in the image"
-        },
-        "mask_image": {
-          "type": "string",
-          "description": "(Optional) Base64 encoded mask image - not used by Gemini but kept for compatibility"
-        },
-        "mask_prompt": {
-          "type": "string",
-          "description": "Text description of WHERE in the image to make changes (e.g., 'the empty space beside the cat', 'the top-left corner')"
-        },
-        "negative_prompt": {
-          "type": "string",
-          "description": "What to avoid in the edited area"
-        },
-        "strength": {
-          "type": "number",
-          "minimum": 0.1,
-          "maximum": 1,
-          "default": 0.8,
-          "description": "Strength of the editing effect"
-        },
-        "guidance_scale": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 20,
-          "default": 7.5,
-          "description": "How closely to follow the prompt"
-        },
-        "seed": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Random seed for reproducible results"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "base64",
-            "url"
-          ],
-          "default": "base64",
-          "description": "Output format"
-        },
-        "quality": {
-          "type": "string",
-          "enum": [
-            "draft",
-            "standard",
-            "high"
-          ],
-          "default": "standard",
-          "description": "Quality level"
-        }
-      },
-      "required": [
-        "input_image",
-        "prompt"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "gemini_outpaint_image",
-    "description": "Expand an image beyond its original borders in specified directions",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "input_image": {
-          "type": "string",
-          "description": "Base64 encoded image or file path to the input image"
-        },
-        "prompt": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Text description of what to add in the expanded areas"
-        },
-        "expand_direction": {
-          "type": "string",
-          "enum": [
-            "all",
-            "left",
-            "right",
-            "top",
-            "bottom",
-            "horizontal",
-            "vertical"
-          ],
-          "default": "all",
-          "description": "Direction to expand the image"
-        },
-        "expansion_ratio": {
-          "type": "number",
-          "minimum": 0.1,
-          "maximum": 3,
-          "default": 1.5,
-          "description": "How much to expand the image (1.0 = no expansion)"
-        },
-        "negative_prompt": {
-          "type": "string",
-          "description": "What to avoid in the expanded areas"
-        },
-        "strength": {
-          "type": "number",
-          "minimum": 0.1,
-          "maximum": 1,
-          "default": 0.8,
-          "description": "Strength of the editing effect"
-        },
-        "guidance_scale": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 20,
-          "default": 7.5,
-          "description": "How closely to follow the prompt"
-        },
-        "seed": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Random seed for reproducible results"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "base64",
-            "url"
-          ],
-          "default": "base64",
-          "description": "Output format"
-        },
-        "quality": {
-          "type": "string",
-          "enum": [
-            "draft",
-            "standard",
-            "high"
-          ],
-          "default": "standard",
-          "description": "Quality level"
-        }
-      },
-      "required": [
-        "input_image",
-        "prompt"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "gemini_style_transfer_image",
-    "description": "Transfer the style from one image to another using AI",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "input_image": {
-          "type": "string",
-          "description": "Base64 encoded image or file path to the input image"
-        },
-        "prompt": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Text description of the desired style"
-        },
-        "style_image": {
-          "type": "string",
-          "description": "Base64 encoded reference image for style transfer"
-        },
-        "style_strength": {
-          "type": "number",
-          "minimum": 0.1,
-          "maximum": 1,
-          "default": 0.7,
-          "description": "Strength of style application"
-        },
-        "negative_prompt": {
-          "type": "string",
-          "description": "What style elements to avoid"
-        },
-        "guidance_scale": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 20,
-          "default": 7.5,
-          "description": "How closely to follow the prompt"
-        },
-        "seed": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Random seed for reproducible results"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "base64",
-            "url"
-          ],
-          "default": "base64",
-          "description": "Output format"
-        },
-        "quality": {
-          "type": "string",
-          "enum": [
-            "draft",
-            "standard",
-            "high"
-          ],
-          "default": "standard",
-          "description": "Quality level"
-        }
-      },
-      "required": [
-        "input_image",
-        "prompt"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "gemini_compose_images",
-    "description": "Combine multiple images into a single composition using AI",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "input_image": {
-          "type": "string",
-          "description": "Base64 encoded primary image"
-        },
-        "secondary_images": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Array of base64 encoded secondary images to compose"
-        },
-        "prompt": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Text description of how to compose the images"
-        },
-        "composition_layout": {
-          "type": "string",
-          "enum": [
-            "blend",
-            "collage",
-            "overlay",
-            "side_by_side"
-          ],
-          "default": "blend",
-          "description": "How to combine the images"
-        },
-        "blend_mode": {
-          "type": "string",
-          "enum": [
-            "normal",
-            "multiply",
-            "screen",
-            "overlay",
-            "soft_light"
-          ],
-          "default": "normal",
-          "description": "Blending mode for image composition"
-        },
-        "negative_prompt": {
-          "type": "string",
-          "description": "What to avoid in the composition"
-        },
-        "strength": {
-          "type": "number",
-          "minimum": 0.1,
-          "maximum": 1,
-          "default": 0.8,
-          "description": "Strength of the composition effect"
-        },
-        "guidance_scale": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 20,
-          "default": 7.5,
-          "description": "How closely to follow the prompt"
-        },
-        "seed": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Random seed for reproducible results"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "base64",
-            "url"
-          ],
-          "default": "base64",
-          "description": "Output format"
-        },
-        "quality": {
-          "type": "string",
-          "enum": [
-            "draft",
-            "standard",
-            "high"
-          ],
-          "default": "standard",
-          "description": "Quality level"
-        }
-      },
-      "required": [
-        "input_image",
-        "secondary_images",
-        "prompt"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "jimp_crop_image",
-    "description": "Crop an image using Jimp with various modes (manual, center, aspect ratio, etc.)",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "input_image": {
-          "type": "string",
-          "description": "Input image - supports file paths, URLs, or base64 data URIs"
-        },
-        "mode": {
-          "type": "string",
-          "enum": [
-            "manual",
-            "center",
-            "top_left",
-            "top_right",
-            "bottom_left",
-            "bottom_right",
-            "aspect_ratio"
-          ],
-          "default": "manual",
-          "description": "Crop mode"
-        },
-        "x": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "X coordinate for crop start (manual mode)"
-        },
-        "y": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Y coordinate for crop start (manual mode)"
-        },
-        "width": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Width of crop region"
-        },
-        "height": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Height of crop region"
-        },
-        "aspect_ratio": {
-          "type": "string",
-          "description": "Aspect ratio (e.g., '16:9', '4:3')"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "png",
-            "jpeg",
-            "bmp"
-          ],
-          "default": "png",
-          "description": "Output image format"
-        },
-        "quality": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100,
-          "description": "JPEG quality (0-100)"
-        }
-      },
-      "required": [
-        "input_image"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "jimp_resize_image",
-    "description": "Resize an image using Jimp with various algorithms and options",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "input_image": {
-          "type": "string",
-          "description": "Input image - supports file paths, URLs, or base64 data URIs"
-        },
-        "width": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Target width in pixels"
-        },
-        "height": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Target height in pixels"
-        },
-        "scale": {
-          "type": "number",
-          "minimum": 0.01,
-          "maximum": 10,
-          "description": "Scale factor (e.g., 0.5 for 50%, 2.0 for 200%)"
-        },
-        "maintain_aspect_ratio": {
-          "type": "boolean",
-          "default": true,
-          "description": "Maintain aspect ratio when resizing"
-        },
-        "algorithm": {
-          "type": "string",
-          "enum": [
-            "nearestNeighbor",
-            "bilinear",
-            "bicubic",
-            "hermite",
-            "bezier"
-          ],
-          "default": "bilinear",
-          "description": "Resize algorithm"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "png",
-            "jpeg",
-            "bmp"
-          ],
-          "default": "png",
-          "description": "Output image format"
-        },
-        "quality": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100,
-          "description": "JPEG quality (0-100)"
-        }
-      },
-      "required": [
-        "input_image"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "jimp_rotate_image",
-    "description": "Rotate an image using Jimp by any angle",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "input_image": {
-          "type": "string",
-          "description": "Input image - supports file paths, URLs, or base64 data URIs"
-        },
-        "angle": {
-          "type": "number",
-          "description": "Rotation angle in degrees (positive = clockwise, negative = counter-clockwise)"
-        },
-        "background_color": {
-          "type": "string",
-          "description": "Background color for areas outside the rotated image (CSS color format, e.g., '#ffffff', 'white')"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "png",
-            "jpeg",
-            "bmp"
-          ],
-          "default": "png",
-          "description": "Output image format"
-        },
-        "quality": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100,
-          "description": "JPEG quality (0-100)"
-        }
-      },
-      "required": [
-        "input_image",
-        "angle"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "jimp_mask_image",
-    "description": "Apply a grayscale alpha mask to an image using Jimp (black pixels = transparent, white pixels = opaque)",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "input_image": {
-          "type": "string",
-          "description": "Input image to apply mask to - supports file paths, URLs, or base64 data URIs"
-        },
-        "mask_image": {
-          "type": "string",
-          "description": "Grayscale mask image (black = transparent, white = opaque) - supports file paths, URLs, or base64 data URIs"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "png",
-            "jpeg",
-            "bmp"
-          ],
-          "default": "png",
-          "description": "Output image format"
-        },
-        "quality": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100,
-          "description": "JPEG quality (0-100)"
-        }
-      },
-      "required": [
-        "input_image",
-        "mask_image"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "rmbg_remove_background",
-    "description": "Remove background from an image using AI-powered background removal",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "input_image": {
-          "type": "string",
-          "description": "Input image - supports file paths, URLs, or base64 data URIs"
-        },
-        "quality": {
-          "type": "string",
-          "enum": [
-            "fast",
-            "balanced",
-            "high"
-          ],
-          "default": "balanced",
-          "description": "Processing quality (fast = quick but less accurate, high = slower but more accurate)"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "png",
-            "jpeg"
-          ],
-          "default": "png",
-          "description": "Output image format (PNG preserves transparency, JPEG requires background color)"
-        },
-        "background_color": {
-          "type": "string",
-          "description": "Background color for JPEG output (CSS color format, e.g., '#ffffff', 'white')"
-        },
-        "jpeg_quality": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100,
-          "default": 85,
-          "description": "JPEG quality (0-100)"
-        }
-      },
-      "required": [
-        "input_image"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "playwright_screenshot_fullpage",
-    "description": "Capture full page screenshot including scrollable content using Playwright",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "url": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL of the webpage to capture"
-        },
-        "format": {
-          "type": "string",
-          "enum": [
-            "png",
-            "jpeg"
-          ],
-          "default": "png",
-          "description": "Screenshot format"
-        },
-        "quality": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100,
-          "description": "JPEG quality (0-100), only applicable for jpeg format"
-        },
-        "timeout": {
-          "type": "integer",
-          "minimum": 1000,
-          "maximum": 120000,
-          "default": 30000,
-          "description": "Navigation timeout in milliseconds"
-        },
-        "wait_until": {
-          "type": "string",
-          "enum": [
-            "load",
-            "domcontentloaded",
-            "networkidle"
-          ],
-          "default": "networkidle",
-          "description": "When to consider navigation successful"
-        },
-        "viewport": {
-          "type": "object",
-          "properties": {
-            "width": {
-              "type": "integer",
-              "minimum": 320,
-              "maximum": 3840,
-              "default": 1920
-            },
-            "height": {
-              "type": "integer",
-              "minimum": 240,
-              "maximum": 2160,
-              "default": 1080
-            }
-          },
-          "additionalProperties": false,
-          "description": "Viewport dimensions"
-        }
-      },
-      "required": [
-        "url"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "playwright_screenshot_viewport",
-    "description": "Capture viewport screenshot (visible area only) using Playwright",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "url": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL of the webpage to capture"
-        },
-        "format": {
-          "type": "string",
-          "enum": [
-            "png",
-            "jpeg"
-          ],
-          "default": "png",
-          "description": "Screenshot format"
-        },
-        "quality": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100,
-          "description": "JPEG quality (0-100), only applicable for jpeg format"
-        },
-        "timeout": {
-          "type": "integer",
-          "minimum": 1000,
-          "maximum": 120000,
-          "default": 30000,
-          "description": "Navigation timeout in milliseconds"
-        },
-        "wait_until": {
-          "type": "string",
-          "enum": [
-            "load",
-            "domcontentloaded",
-            "networkidle"
-          ],
-          "default": "networkidle",
-          "description": "When to consider navigation successful"
-        },
-        "viewport": {
-          "type": "object",
-          "properties": {
-            "width": {
-              "type": "integer",
-              "minimum": 320,
-              "maximum": 3840,
-              "default": 1920
-            },
-            "height": {
-              "type": "integer",
-              "minimum": 240,
-              "maximum": 2160,
-              "default": 1080
-            }
-          },
-          "additionalProperties": false,
-          "description": "Viewport dimensions"
-        }
-      },
-      "required": [
-        "url"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "playwright_screenshot_element",
-    "description": "Capture screenshot of specific element using Playwright",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "url": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL of the webpage to capture"
-        },
-        "selector": {
-          "type": "string",
-          "minLength": 1,
-          "description": "CSS selector, text content, or role of the element to capture"
-        },
-        "selector_type": {
-          "type": "string",
-          "enum": [
-            "css",
-            "text",
-            "role"
-          ],
-          "default": "css",
-          "description": "Type of selector (css, text, or role)"
-        },
-        "format": {
-          "type": "string",
-          "enum": [
-            "png",
-            "jpeg"
-          ],
-          "default": "png",
-          "description": "Screenshot format"
-        },
-        "quality": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100,
-          "description": "JPEG quality (0-100), only applicable for jpeg format"
-        },
-        "timeout": {
-          "type": "integer",
-          "minimum": 1000,
-          "maximum": 120000,
-          "default": 30000,
-          "description": "Navigation and element wait timeout in milliseconds"
-        },
-        "wait_until": {
-          "type": "string",
-          "enum": [
-            "load",
-            "domcontentloaded",
-            "networkidle"
-          ],
-          "default": "networkidle",
-          "description": "When to consider navigation successful"
-        },
-        "viewport": {
-          "type": "object",
-          "properties": {
-            "width": {
-              "type": "integer",
-              "minimum": 320,
-              "maximum": 3840,
-              "default": 1920
-            },
-            "height": {
-              "type": "integer",
-              "minimum": 240,
-              "maximum": 2160,
-              "default": 1080
-            }
-          },
-          "additionalProperties": false,
-          "description": "Viewport dimensions"
-        },
-        "wait_for_selector": {
-          "type": "boolean",
-          "default": true,
-          "description": "Wait for the selector to be visible before capturing"
-        }
-      },
-      "required": [
-        "url",
-        "selector"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "mouth_speak",
-    "description": "Generate speech from text using Gemini Speech Generation API with voice customization",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
         "text": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 32000,
-          "description": "Text to convert to speech (max 32k tokens)"
+          "type": "string"
         },
-        "voice": {
-          "type": "string",
-          "enum": [
-            "Astrid",
-            "Charon",
-            "Fenrir",
-            "Kore",
-            "Odin",
-            "Puck",
-            "Sage",
-            "Vox",
-            "Zephyr",
-            "Aoede",
-            "Apollo",
-            "Elektra",
-            "Iris",
-            "Nemesis",
-            "Perseus",
-            "Selene",
-            "Thalia",
-            "Argus",
-            "Ares",
-            "Demeter",
-            "Dione",
-            "Echo",
-            "Eros",
-            "Hephaestus",
-            "Hermes",
-            "Hyperion",
-            "Iapetus",
-            "Kronos",
-            "Leto",
-            "Maia",
-            "Mnemosyne"
-          ],
-          "default": "Zephyr",
-          "description": "Voice to use for speech generation"
+        "style": {
+          "default": null,
+          "type": "string"
         },
-        "model": {
-          "type": "string",
-          "enum": [
-            "gemini-2.5-flash-preview-tts",
-            "gemini-2.5-pro-preview-tts"
-          ],
-          "default": "gemini-2.5-flash-preview-tts",
-          "description": "Speech generation model"
+        "font_name": {
+          "default": null,
+          "type": "string"
         },
-        "language": {
-          "type": "string",
-          "enum": [
-            "ar-EG",
-            "de-DE",
-            "en-US",
-            "es-US",
-            "fr-FR",
-            "hi-IN",
-            "id-ID",
-            "it-IT",
-            "ja-JP",
-            "ko-KR",
-            "pt-BR",
-            "ru-RU",
-            "nl-NL",
-            "pl-PL",
-            "th-TH",
-            "tr-TR",
-            "vi-VN",
-            "ro-RO",
-            "uk-UA",
-            "bn-BD",
-            "en-IN",
-            "mr-IN",
-            "ta-IN",
-            "te-IN"
-          ],
-          "default": "en-US",
-          "description": "Language for speech generation"
+        "font_size": {
+          "default": null,
+          "type": "integer"
         },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "wav",
-            "base64",
-            "url"
-          ],
-          "default": "base64",
-          "description": "Output format for generated audio"
+        "bold": {
+          "default": null,
+          "type": "boolean"
         },
-        "style_prompt": {
-          "type": "string",
-          "description": "Natural language prompt to control speaking style"
+        "italic": {
+          "default": null,
+          "type": "boolean"
+        },
+        "color": {
+          "default": null,
+          "type": "string"
         }
       },
       "required": [
+        "filename",
         "text"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "additionalProperties": false
     }
   },
   {
-    "serverName": "human-mcp",
-    "name": "mouth_narrate",
-    "description": "Generate narration for long-form content with chapter breaks and style control",
+    "serverName": "office-word",
+    "name": "add_heading",
+    "description": "Add a heading to a Word document with optional formatting.\n\nArgs:\n    filename: Path to Word document\n    text: Heading text\n    level: Heading level (1-9)\n    font_name: Font family (e.g., 'Helvetica')\n    font_size: Font size in points (e.g., 14)\n    bold: Make heading bold\n    italic: Make heading italic\n    border_bottom: Add bottom border (for section headers)",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "content": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Long-form content to narrate"
+        "filename": {
+          "type": "string"
         },
-        "voice": {
-          "type": "string",
-          "enum": [
-            "Astrid",
-            "Charon",
-            "Fenrir",
-            "Kore",
-            "Odin",
-            "Puck",
-            "Sage",
-            "Vox",
-            "Zephyr",
-            "Aoede",
-            "Apollo",
-            "Elektra",
-            "Iris",
-            "Nemesis",
-            "Perseus",
-            "Selene",
-            "Thalia",
-            "Argus",
-            "Ares",
-            "Demeter",
-            "Dione",
-            "Echo",
-            "Eros",
-            "Hephaestus",
-            "Hermes",
-            "Hyperion",
-            "Iapetus",
-            "Kronos",
-            "Leto",
-            "Maia",
-            "Mnemosyne"
-          ],
-          "default": "Sage",
-          "description": "Voice to use for narration"
-        },
-        "model": {
-          "type": "string",
-          "enum": [
-            "gemini-2.5-flash-preview-tts",
-            "gemini-2.5-pro-preview-tts"
-          ],
-          "default": "gemini-2.5-pro-preview-tts",
-          "description": "Speech generation model"
-        },
-        "language": {
-          "type": "string",
-          "enum": [
-            "ar-EG",
-            "de-DE",
-            "en-US",
-            "es-US",
-            "fr-FR",
-            "hi-IN",
-            "id-ID",
-            "it-IT",
-            "ja-JP",
-            "ko-KR",
-            "pt-BR",
-            "ru-RU",
-            "nl-NL",
-            "pl-PL",
-            "th-TH",
-            "tr-TR",
-            "vi-VN",
-            "ro-RO",
-            "uk-UA",
-            "bn-BD",
-            "en-IN",
-            "mr-IN",
-            "ta-IN",
-            "te-IN"
-          ],
-          "default": "en-US",
-          "description": "Language for narration"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "wav",
-            "base64",
-            "url"
-          ],
-          "default": "base64",
-          "description": "Output format for generated audio"
-        },
-        "narration_style": {
-          "type": "string",
-          "enum": [
-            "professional",
-            "casual",
-            "educational",
-            "storytelling"
-          ],
-          "default": "professional",
-          "description": "Narration style"
-        },
-        "chapter_breaks": {
-          "type": "boolean",
-          "default": false,
-          "description": "Add pauses between chapters/sections"
-        },
-        "max_chunk_size": {
-          "type": "number",
-          "default": 8000,
-          "description": "Maximum characters per audio chunk"
-        }
-      },
-      "required": [
-        "content"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "mouth_explain",
-    "description": "Generate spoken explanations of code with technical analysis",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Code to explain"
-        },
-        "language": {
-          "type": "string",
-          "enum": [
-            "ar-EG",
-            "de-DE",
-            "en-US",
-            "es-US",
-            "fr-FR",
-            "hi-IN",
-            "id-ID",
-            "it-IT",
-            "ja-JP",
-            "ko-KR",
-            "pt-BR",
-            "ru-RU",
-            "nl-NL",
-            "pl-PL",
-            "th-TH",
-            "tr-TR",
-            "vi-VN",
-            "ro-RO",
-            "uk-UA",
-            "bn-BD",
-            "en-IN",
-            "mr-IN",
-            "ta-IN",
-            "te-IN"
-          ],
-          "default": "en-US",
-          "description": "Language for explanation"
-        },
-        "programming_language": {
-          "type": "string",
-          "description": "Programming language of the code"
-        },
-        "voice": {
-          "type": "string",
-          "enum": [
-            "Astrid",
-            "Charon",
-            "Fenrir",
-            "Kore",
-            "Odin",
-            "Puck",
-            "Sage",
-            "Vox",
-            "Zephyr",
-            "Aoede",
-            "Apollo",
-            "Elektra",
-            "Iris",
-            "Nemesis",
-            "Perseus",
-            "Selene",
-            "Thalia",
-            "Argus",
-            "Ares",
-            "Demeter",
-            "Dione",
-            "Echo",
-            "Eros",
-            "Hephaestus",
-            "Hermes",
-            "Hyperion",
-            "Iapetus",
-            "Kronos",
-            "Leto",
-            "Maia",
-            "Mnemosyne"
-          ],
-          "default": "Apollo",
-          "description": "Voice to use for explanation"
-        },
-        "model": {
-          "type": "string",
-          "enum": [
-            "gemini-2.5-flash-preview-tts",
-            "gemini-2.5-pro-preview-tts"
-          ],
-          "default": "gemini-2.5-pro-preview-tts",
-          "description": "Speech generation model"
-        },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "wav",
-            "base64",
-            "url"
-          ],
-          "default": "base64",
-          "description": "Output format for generated audio"
-        },
-        "explanation_level": {
-          "type": "string",
-          "enum": [
-            "beginner",
-            "intermediate",
-            "advanced"
-          ],
-          "default": "intermediate",
-          "description": "Technical level of explanation"
-        },
-        "include_examples": {
-          "type": "boolean",
-          "default": true,
-          "description": "Include examples in explanation"
-        }
-      },
-      "required": [
-        "code"
-      ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
-    }
-  },
-  {
-    "serverName": "human-mcp",
-    "name": "mouth_customize",
-    "description": "Test different voices and styles to find the best fit for your content",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
         "text": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 1000,
-          "description": "Sample text to test voice customization"
+          "type": "string"
         },
-        "voice": {
-          "type": "string",
-          "enum": [
-            "Astrid",
-            "Charon",
-            "Fenrir",
-            "Kore",
-            "Odin",
-            "Puck",
-            "Sage",
-            "Vox",
-            "Zephyr",
-            "Aoede",
-            "Apollo",
-            "Elektra",
-            "Iris",
-            "Nemesis",
-            "Perseus",
-            "Selene",
-            "Thalia",
-            "Argus",
-            "Ares",
-            "Demeter",
-            "Dione",
-            "Echo",
-            "Eros",
-            "Hephaestus",
-            "Hermes",
-            "Hyperion",
-            "Iapetus",
-            "Kronos",
-            "Leto",
-            "Maia",
-            "Mnemosyne"
-          ],
-          "description": "Base voice to customize"
+        "level": {
+          "default": 1,
+          "type": "integer"
         },
-        "model": {
-          "type": "string",
-          "enum": [
-            "gemini-2.5-flash-preview-tts",
-            "gemini-2.5-pro-preview-tts"
-          ],
-          "default": "gemini-2.5-flash-preview-tts",
-          "description": "Speech generation model"
+        "font_name": {
+          "default": null,
+          "type": "string"
         },
-        "language": {
-          "type": "string",
-          "enum": [
-            "ar-EG",
-            "de-DE",
-            "en-US",
-            "es-US",
-            "fr-FR",
-            "hi-IN",
-            "id-ID",
-            "it-IT",
-            "ja-JP",
-            "ko-KR",
-            "pt-BR",
-            "ru-RU",
-            "nl-NL",
-            "pl-PL",
-            "th-TH",
-            "tr-TR",
-            "vi-VN",
-            "ro-RO",
-            "uk-UA",
-            "bn-BD",
-            "en-IN",
-            "mr-IN",
-            "ta-IN",
-            "te-IN"
-          ],
-          "default": "en-US",
-          "description": "Language for speech generation"
+        "font_size": {
+          "default": null,
+          "type": "integer"
         },
-        "output_format": {
-          "type": "string",
-          "enum": [
-            "wav",
-            "base64",
-            "url"
-          ],
-          "default": "base64",
-          "description": "Output format for generated audio"
+        "bold": {
+          "default": null,
+          "type": "boolean"
         },
-        "style_variations": {
-          "type": "array",
+        "italic": {
+          "default": null,
+          "type": "boolean"
+        },
+        "border_bottom": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "filename",
+        "text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "add_picture",
+    "description": "Add an image to a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "image_path": {
+          "type": "string"
+        },
+        "width": {
+          "default": null,
+          "type": "number"
+        }
+      },
+      "required": [
+        "filename",
+        "image_path"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "add_table",
+    "description": "Add a table to a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "rows": {
+          "type": "integer"
+        },
+        "cols": {
+          "type": "integer"
+        },
+        "data": {
+          "default": null,
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "filename",
+        "rows",
+        "cols"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "add_page_break",
+    "description": "Add a page break to the document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "delete_paragraph",
+    "description": "Delete a paragraph from a document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "paragraph_index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename",
+        "paragraph_index"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "search_and_replace",
+    "description": "Search for text and replace all occurrences.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "find_text": {
+          "type": "string"
+        },
+        "replace_text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "find_text",
+        "replace_text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "create_custom_style",
+    "description": "Create a custom style in the document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "style_name": {
+          "type": "string"
+        },
+        "bold": {
+          "default": null,
+          "type": "boolean"
+        },
+        "italic": {
+          "default": null,
+          "type": "boolean"
+        },
+        "font_size": {
+          "default": null,
+          "type": "integer"
+        },
+        "font_name": {
+          "default": null,
+          "type": "string"
+        },
+        "color": {
+          "default": null,
+          "type": "string"
+        },
+        "base_style": {
+          "default": null,
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "style_name"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "format_text",
+    "description": "Format a specific range of text within a paragraph.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "paragraph_index": {
+          "type": "integer"
+        },
+        "start_pos": {
+          "type": "integer"
+        },
+        "end_pos": {
+          "type": "integer"
+        },
+        "bold": {
+          "default": null,
+          "type": "boolean"
+        },
+        "italic": {
+          "default": null,
+          "type": "boolean"
+        },
+        "underline": {
+          "default": null,
+          "type": "boolean"
+        },
+        "color": {
+          "default": null,
+          "type": "string"
+        },
+        "font_size": {
+          "default": null,
+          "type": "integer"
+        },
+        "font_name": {
+          "default": null,
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "paragraph_index",
+        "start_pos",
+        "end_pos"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "format_table",
+    "description": "Format a table with borders, shading, and structure.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "has_header_row": {
+          "default": null,
+          "type": "boolean"
+        },
+        "border_style": {
+          "default": null,
+          "type": "string"
+        },
+        "shading": {
+          "default": null,
           "items": {
             "type": "string"
           },
-          "description": "Array of different style prompts to test"
-        },
-        "compare_voices": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "Astrid",
-              "Charon",
-              "Fenrir",
-              "Kore",
-              "Odin",
-              "Puck",
-              "Sage",
-              "Vox",
-              "Zephyr",
-              "Aoede",
-              "Apollo",
-              "Elektra",
-              "Iris",
-              "Nemesis",
-              "Perseus",
-              "Selene",
-              "Thalia",
-              "Argus",
-              "Ares",
-              "Demeter",
-              "Dione",
-              "Echo",
-              "Eros",
-              "Hephaestus",
-              "Hermes",
-              "Hyperion",
-              "Iapetus",
-              "Kronos",
-              "Leto",
-              "Maia",
-              "Mnemosyne"
-            ]
-          },
-          "description": "Additional voices to compare with the main voice"
+          "type": "array"
         }
       },
       "required": [
-        "text",
-        "voice"
+        "filename",
+        "table_index"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "additionalProperties": false
     }
   },
   {
-    "serverName": "human-mcp",
-    "name": "mcp__reasoning__sequentialthinking",
-    "description": "Advanced sequential thinking for complex problems with thought revision and branching",
+    "serverName": "office-word",
+    "name": "set_table_cell_shading",
+    "description": "Apply shading/filling to a specific table cell.",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "thought": {
-          "type": "string",
-          "description": "Your current thinking step"
+        "filename": {
+          "type": "string"
         },
-        "nextThoughtNeeded": {
-          "type": "boolean",
-          "description": "Whether another thought step is needed"
+        "table_index": {
+          "type": "integer"
         },
-        "thoughtNumber": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Current thought number"
+        "row_index": {
+          "type": "integer"
         },
-        "totalThoughts": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Estimated total thoughts needed"
+        "col_index": {
+          "type": "integer"
         },
-        "sessionId": {
-          "type": "string",
-          "description": "Thinking session ID (auto-generated if not provided)"
+        "fill_color": {
+          "type": "string"
         },
-        "problem": {
-          "type": "string",
-          "description": "The problem to think through (required for new sessions)"
+        "pattern": {
+          "default": "clear",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index",
+        "row_index",
+        "col_index",
+        "fill_color"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "apply_table_alternating_rows",
+    "description": "Apply alternating row colors to a table for better readability.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
         },
-        "isRevision": {
-          "type": "boolean",
+        "table_index": {
+          "type": "integer"
+        },
+        "color1": {
+          "default": "FFFFFF",
+          "type": "string"
+        },
+        "color2": {
+          "default": "F2F2F2",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "highlight_table_header",
+    "description": "Apply special highlighting to table header row.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "header_color": {
+          "default": "4472C4",
+          "type": "string"
+        },
+        "text_color": {
+          "default": "FFFFFF",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "merge_table_cells",
+    "description": "Merge cells in a rectangular area of a table.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "start_row": {
+          "type": "integer"
+        },
+        "start_col": {
+          "type": "integer"
+        },
+        "end_row": {
+          "type": "integer"
+        },
+        "end_col": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index",
+        "start_row",
+        "start_col",
+        "end_row",
+        "end_col"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "merge_table_cells_horizontal",
+    "description": "Merge cells horizontally in a single row.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "row_index": {
+          "type": "integer"
+        },
+        "start_col": {
+          "type": "integer"
+        },
+        "end_col": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index",
+        "row_index",
+        "start_col",
+        "end_col"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "merge_table_cells_vertical",
+    "description": "Merge cells vertically in a single column.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "col_index": {
+          "type": "integer"
+        },
+        "start_row": {
+          "type": "integer"
+        },
+        "end_row": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index",
+        "col_index",
+        "start_row",
+        "end_row"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "set_table_cell_alignment",
+    "description": "Set text alignment for a specific table cell.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "row_index": {
+          "type": "integer"
+        },
+        "col_index": {
+          "type": "integer"
+        },
+        "horizontal": {
+          "default": "left",
+          "type": "string"
+        },
+        "vertical": {
+          "default": "top",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index",
+        "row_index",
+        "col_index"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "set_table_alignment_all",
+    "description": "Set text alignment for all cells in a table.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "horizontal": {
+          "default": "left",
+          "type": "string"
+        },
+        "vertical": {
+          "default": "top",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "protect_document",
+    "description": "Add password protection to a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "password"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "unprotect_document",
+    "description": "Remove password protection from a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "password"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "add_footnote_to_document",
+    "description": "Add a footnote to a specific paragraph in a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "paragraph_index": {
+          "type": "integer"
+        },
+        "footnote_text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "paragraph_index",
+        "footnote_text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "add_footnote_after_text",
+    "description": "Add a footnote after specific text with proper superscript formatting.\nThis enhanced function ensures footnotes display correctly as superscript.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "search_text": {
+          "type": "string"
+        },
+        "footnote_text": {
+          "type": "string"
+        },
+        "output_filename": {
+          "default": null,
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "search_text",
+        "footnote_text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "add_footnote_before_text",
+    "description": "Add a footnote before specific text with proper superscript formatting.\nThis enhanced function ensures footnotes display correctly as superscript.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "search_text": {
+          "type": "string"
+        },
+        "footnote_text": {
+          "type": "string"
+        },
+        "output_filename": {
+          "default": null,
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "search_text",
+        "footnote_text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "add_footnote_enhanced",
+    "description": "Enhanced footnote addition with guaranteed superscript formatting.\nAdds footnote at the end of a specific paragraph with proper style handling.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "paragraph_index": {
+          "type": "integer"
+        },
+        "footnote_text": {
+          "type": "string"
+        },
+        "output_filename": {
+          "default": null,
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "paragraph_index",
+        "footnote_text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "add_endnote_to_document",
+    "description": "Add an endnote to a specific paragraph in a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "paragraph_index": {
+          "type": "integer"
+        },
+        "endnote_text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "paragraph_index",
+        "endnote_text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "customize_footnote_style",
+    "description": "Customize footnote numbering and formatting in a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "numbering_format": {
+          "default": "1, 2, 3",
+          "type": "string"
+        },
+        "start_number": {
+          "default": 1,
+          "type": "integer"
+        },
+        "font_name": {
+          "default": null,
+          "type": "string"
+        },
+        "font_size": {
+          "default": null,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "delete_footnote_from_document",
+    "description": "Delete a footnote from a Word document.\nIdentify the footnote either by ID (1, 2, 3, etc.) or by searching for text near it.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "footnote_id": {
+          "default": null,
+          "type": "integer"
+        },
+        "search_text": {
+          "default": null,
+          "type": "string"
+        },
+        "output_filename": {
+          "default": null,
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "add_footnote_robust",
+    "description": "Add footnote with robust validation and Word compliance.\nThis is the production-ready version with comprehensive error handling.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "search_text": {
+          "default": null,
+          "type": "string"
+        },
+        "paragraph_index": {
+          "default": null,
+          "type": "integer"
+        },
+        "footnote_text": {
+          "default": "",
+          "type": "string"
+        },
+        "validate_location": {
+          "default": true,
+          "type": "boolean"
+        },
+        "auto_repair": {
           "default": false,
-          "description": "Whether this revises previous thinking"
-        },
-        "revisesThought": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Which thought is being reconsidered"
-        },
-        "branchId": {
-          "type": "string",
-          "description": "Branch identifier"
-        },
-        "branchFromThought": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Branching point thought number"
+          "type": "boolean"
         }
       },
       "required": [
-        "thought",
-        "nextThoughtNeeded",
-        "thoughtNumber",
-        "totalThoughts"
+        "filename"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "additionalProperties": false
     }
   },
   {
-    "serverName": "human-mcp",
-    "name": "brain_analyze_simple",
-    "description": "Fast pattern-based analysis using proven frameworks",
+    "serverName": "office-word",
+    "name": "validate_document_footnotes",
+    "description": "Validate all footnotes in document for coherence and compliance.\nReturns detailed report on ID conflicts, orphaned content, missing styles, etc.",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "problem": {
-          "type": "string",
-          "description": "The problem or situation to analyze"
-        },
-        "pattern": {
-          "type": "string",
-          "enum": [
-            "problem_solving",
-            "root_cause",
-            "pros_cons",
-            "swot",
-            "cause_effect"
-          ],
-          "description": "Analysis framework to use"
-        },
-        "context": {
-          "type": "string",
-          "description": "Additional context or background information"
+        "filename": {
+          "type": "string"
         }
       },
       "required": [
-        "problem",
-        "pattern"
+        "filename"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "additionalProperties": false
     }
   },
   {
-    "serverName": "human-mcp",
-    "name": "brain_patterns_info",
-    "description": "List available reasoning patterns and their descriptions",
+    "serverName": "office-word",
+    "name": "delete_footnote_robust",
+    "description": "Delete footnote with comprehensive cleanup and orphan removal.\nEnsures complete removal from document.xml, footnotes.xml, and relationships.",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "pattern": {
-          "type": "string",
-          "description": "Specific pattern to get info about (optional)"
+        "filename": {
+          "type": "string"
+        },
+        "footnote_id": {
+          "default": null,
+          "type": "integer"
+        },
+        "search_text": {
+          "default": null,
+          "type": "string"
+        },
+        "clean_orphans": {
+          "default": true,
+          "type": "boolean"
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "required": [
+        "filename"
+      ],
+      "additionalProperties": false
     }
   },
   {
-    "serverName": "human-mcp",
-    "name": "brain_reflect_enhanced",
-    "description": "AI-powered reflection for complex analysis improvement",
+    "serverName": "office-word",
+    "name": "get_paragraph_text_from_document",
+    "description": "Get text from a specific paragraph in a Word document.",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "originalAnalysis": {
-          "type": "string",
-          "minLength": 50,
-          "maxLength": 5000,
-          "description": "The analysis or reasoning to reflect on"
+        "filename": {
+          "type": "string"
         },
-        "focusAreas": {
-          "type": "array",
+        "paragraph_index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename",
+        "paragraph_index"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "find_text_in_document",
+    "description": "Find occurrences of specific text in a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "text_to_find": {
+          "type": "string"
+        },
+        "match_case": {
+          "default": true,
+          "type": "boolean"
+        },
+        "whole_word": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "filename",
+        "text_to_find"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "convert_to_pdf",
+    "description": "Convert a Word document to PDF format.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "output_filename": {
+          "default": null,
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "replace_paragraph_block_below_header",
+    "description": "Reemplaza el bloque de párrafos debajo de un encabezado, evitando modificar TOC.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "header_text": {
+          "type": "string"
+        },
+        "new_paragraphs": {
           "items": {
-            "type": "string",
-            "enum": [
-              "assumptions",
-              "logic_gaps",
-              "alternative_approaches",
-              "evidence_quality",
-              "bias_detection",
-              "completeness"
-            ]
+            "type": "string"
           },
-          "minItems": 1,
-          "maxItems": 3,
-          "description": "Specific aspects to focus reflection on"
+          "type": "array"
         },
-        "improvementGoal": {
-          "type": "string",
-          "description": "Primary goal for improvement"
-        },
-        "detailLevel": {
-          "type": "string",
-          "enum": [
-            "concise",
-            "detailed"
-          ],
-          "default": "detailed",
-          "description": "Level of analysis detail"
+        "detect_block_end_fn": {
+          "default": null,
+          "type": "string"
         }
       },
       "required": [
-        "originalAnalysis",
-        "focusAreas"
+        "filename",
+        "header_text",
+        "new_paragraphs"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "replace_block_between_manual_anchors",
+    "description": "Replace all content between start_anchor_text and end_anchor_text (or next logical header if not provided).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "start_anchor_text": {
+          "type": "string"
+        },
+        "new_paragraphs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "end_anchor_text": {
+          "default": null,
+          "type": "string"
+        },
+        "match_fn": {
+          "default": null,
+          "type": "string"
+        },
+        "new_paragraph_style": {
+          "default": null,
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "start_anchor_text",
+        "new_paragraphs"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "get_all_comments",
+    "description": "Extract all comments from a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "get_comments_by_author",
+    "description": "Extract comments from a specific author in a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "author"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "get_comments_for_paragraph",
+    "description": "Extract comments for a specific paragraph in a Word document.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "paragraph_index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename",
+        "paragraph_index"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "set_table_column_width",
+    "description": "Set the width of a specific table column.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "col_index": {
+          "type": "integer"
+        },
+        "width": {
+          "type": "number"
+        },
+        "width_type": {
+          "default": "points",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index",
+        "col_index",
+        "width"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "set_table_column_widths",
+    "description": "Set the widths of multiple table columns.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "widths": {
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "width_type": {
+          "default": "points",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index",
+        "widths"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "set_table_width",
+    "description": "Set the overall width of a table.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "width": {
+          "type": "number"
+        },
+        "width_type": {
+          "default": "points",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index",
+        "width"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "auto_fit_table_columns",
+    "description": "Set table columns to auto-fit based on content.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "format_table_cell_text",
+    "description": "Format text within a specific table cell.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "row_index": {
+          "type": "integer"
+        },
+        "col_index": {
+          "type": "integer"
+        },
+        "text_content": {
+          "default": null,
+          "type": "string"
+        },
+        "bold": {
+          "default": null,
+          "type": "boolean"
+        },
+        "italic": {
+          "default": null,
+          "type": "boolean"
+        },
+        "underline": {
+          "default": null,
+          "type": "boolean"
+        },
+        "color": {
+          "default": null,
+          "type": "string"
+        },
+        "font_size": {
+          "default": null,
+          "type": "integer"
+        },
+        "font_name": {
+          "default": null,
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index",
+        "row_index",
+        "col_index"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "serverName": "office-word",
+    "name": "set_table_cell_padding",
+    "description": "Set padding/margins for a specific table cell.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "table_index": {
+          "type": "integer"
+        },
+        "row_index": {
+          "type": "integer"
+        },
+        "col_index": {
+          "type": "integer"
+        },
+        "top": {
+          "default": null,
+          "type": "number"
+        },
+        "bottom": {
+          "default": null,
+          "type": "number"
+        },
+        "left": {
+          "default": null,
+          "type": "number"
+        },
+        "right": {
+          "default": null,
+          "type": "number"
+        },
+        "unit": {
+          "default": "points",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "table_index",
+        "row_index",
+        "col_index"
+      ],
+      "additionalProperties": false
     }
   },
   {
@@ -2477,6 +1614,10 @@
         "dblClick": {
           "type": "boolean",
           "description": "Set to true for double clicks. Default is false."
+        },
+        "includeSnapshot": {
+          "type": "boolean",
+          "description": "Whether to include a snapshot in the response. Default is false."
         }
       },
       "required": [
@@ -2493,13 +1634,13 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "pageIdx": {
+        "pageId": {
           "type": "number",
-          "description": "The index of the page to close. Call list_pages to list pages."
+          "description": "The ID of the page to close. Call list_pages to list pages."
         }
       },
       "required": [
-        "pageIdx"
+        "pageId"
       ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
@@ -2519,6 +1660,10 @@
         "to_uid": {
           "type": "string",
           "description": "The uid of the element to drop into"
+        },
+        "includeSnapshot": {
+          "type": "boolean",
+          "description": "Whether to include a snapshot in the response. Default is false."
         }
       },
       "required": [
@@ -2539,20 +1684,40 @@
         "networkConditions": {
           "type": "string",
           "enum": [
-            "No emulation",
             "Offline",
             "Slow 3G",
             "Fast 3G",
             "Slow 4G",
             "Fast 4G"
           ],
-          "description": "Throttle network. Set to \"No emulation\" to disable. If omitted, conditions remain unchanged."
+          "description": "Throttle network. Omit to disable throttling."
         },
         "cpuThrottlingRate": {
           "type": "number",
           "minimum": 1,
           "maximum": 20,
-          "description": "Represents the CPU slowdown factor. Set the rate to 1 to disable throttling. If omitted, throttling remains unchanged."
+          "description": "Represents the CPU slowdown factor. Omit or set the rate to 1 to disable throttling"
+        },
+        "geolocation": {
+          "type": "string",
+          "description": "Geolocation (`<latitude>x<longitude>`) to emulate. Latitude between -90 and 90. Longitude between -180 and 180. Omit clear the geolocation override."
+        },
+        "userAgent": {
+          "type": "string",
+          "description": "User agent to emulate. Set to empty string to clear the user agent override."
+        },
+        "colorScheme": {
+          "type": "string",
+          "enum": [
+            "dark",
+            "light",
+            "auto"
+          ],
+          "description": "Emulate the dark or the light mode. Set to \"auto\" to reset to the default."
+        },
+        "viewport": {
+          "type": "string",
+          "description": "Emulate device viewports '<width>x<height>x<devicePixelRatio>[,mobile][,touch][,landscape]'. 'touch' and 'mobile' to emulate mobile devices. 'landscape' to emulate landscape mode."
         }
       },
       "additionalProperties": false,
@@ -2562,7 +1727,7 @@
   {
     "serverName": "chrome-devtools",
     "name": "evaluate_script",
-    "description": "Evaluate a JavaScript function inside the currently selected page. Returns the response as JSON\nso returned values have to JSON-serializable.",
+    "description": "Evaluate a JavaScript function inside the currently selected page. Returns the response as JSON,\nso returned values have to be JSON-serializable.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2573,17 +1738,8 @@
         "args": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "uid": {
-                "type": "string",
-                "description": "The uid of an element on the page from the page content snapshot"
-              }
-            },
-            "required": [
-              "uid"
-            ],
-            "additionalProperties": false
+            "type": "string",
+            "description": "The uid of an element on the page from the page content snapshot"
           },
           "description": "An optional list of arguments to pass to the function."
         }
@@ -2609,6 +1765,10 @@
         "value": {
           "type": "string",
           "description": "The value to fill in"
+        },
+        "includeSnapshot": {
+          "type": "boolean",
+          "description": "Whether to include a snapshot in the response. Default is false."
         }
       },
       "required": [
@@ -2647,6 +1807,10 @@
             "additionalProperties": false
           },
           "description": "Elements from snapshot to fill out."
+        },
+        "includeSnapshot": {
+          "type": "boolean",
+          "description": "Whether to include a snapshot in the response. Default is false."
         }
       },
       "required": [
@@ -2685,6 +1849,14 @@
         "reqid": {
           "type": "number",
           "description": "The reqid of the network request. If omitted returns the currently selected request in the DevTools Network panel."
+        },
+        "requestFilePath": {
+          "type": "string",
+          "description": "The absolute or relative path to save the request body to. If omitted, the body is returned inline."
+        },
+        "responseFilePath": {
+          "type": "string",
+          "description": "The absolute or relative path to save the response body to. If omitted, the body is returned inline."
         }
       },
       "additionalProperties": false,
@@ -2728,11 +1900,49 @@
         "uid": {
           "type": "string",
           "description": "The uid of an element on the page from the page content snapshot"
+        },
+        "includeSnapshot": {
+          "type": "boolean",
+          "description": "Whether to include a snapshot in the response. Default is false."
         }
       },
       "required": [
         "uid"
       ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "chrome-devtools",
+    "name": "lighthouse_audit",
+    "description": "Get Lighthouse score and reports for accessibility, SEO and best practices. This excludes performance. For performance audits, run performance_start_trace",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "navigation",
+            "snapshot"
+          ],
+          "default": "navigation",
+          "description": "\"navigation\" reloads & audits. \"snapshot\" analyzes current state."
+        },
+        "device": {
+          "type": "string",
+          "enum": [
+            "desktop",
+            "mobile"
+          ],
+          "default": "desktop",
+          "description": "Device to emulate."
+        },
+        "outputDirPath": {
+          "type": "string",
+          "description": "Directory for reports. If omitted, uses temporary files."
+        }
+      },
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     }
@@ -2777,7 +1987,8 @@
               "profileEnd",
               "count",
               "timeEnd",
-              "verbose"
+              "verbose",
+              "issue"
             ]
           },
           "description": "Filter messages to only return messages of the specified resource types. When omitted or empty, returns all messages."
@@ -2850,18 +2061,17 @@
   {
     "serverName": "chrome-devtools",
     "name": "list_pages",
-    "description": "Get a list of pages open in the browser.",
+    "description": "Get a list of pages  open in the browser.",
     "inputSchema": {
       "type": "object",
       "properties": {},
-      "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     }
   },
   {
     "serverName": "chrome-devtools",
     "name": "navigate_page",
-    "description": "Navigates the currently selected page to a URL.",
+    "description": "Go to a URL, or back, forward, or reload. Use project URL if not specified otherwise.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2883,6 +2093,18 @@
           "type": "boolean",
           "description": "Whether to ignore cache on reload."
         },
+        "handleBeforeUnload": {
+          "type": "string",
+          "enum": [
+            "accept",
+            "decline"
+          ],
+          "description": "Whether to auto accept or beforeunload dialogs triggered by this navigation. Default is accept."
+        },
+        "initScript": {
+          "type": "string",
+          "description": "A JavaScript script to be executed on each new document before any other scripts for the next navigation."
+        },
         "timeout": {
           "type": "integer",
           "description": "Maximum wait time in milliseconds. If set to 0, the default timeout will be used."
@@ -2895,13 +2117,21 @@
   {
     "serverName": "chrome-devtools",
     "name": "new_page",
-    "description": "Creates a new page",
+    "description": "Open a new tab and load a URL. Use project URL if not specified otherwise.",
     "inputSchema": {
       "type": "object",
       "properties": {
         "url": {
           "type": "string",
           "description": "URL to load in a new page."
+        },
+        "background": {
+          "type": "boolean",
+          "description": "Whether to open the page in the background without bringing it to the front. Default is false (foreground)."
+        },
+        "isolatedContext": {
+          "type": "string",
+          "description": "If specified, the page is created in an isolated browser context with the given name. Pages in the same browser context share cookies and storage. Pages in different browser contexts are fully isolated."
         },
         "timeout": {
           "type": "integer",
@@ -2942,23 +2172,25 @@
   {
     "serverName": "chrome-devtools",
     "name": "performance_start_trace",
-    "description": "Starts a performance trace recording on the selected page. This can be used to look for performance problems and insights to improve the performance of the page. It will also report Core Web Vital (CWV) scores for the page.",
+    "description": "Start a performance trace on the selected webpage. Use to find frontend performance issues, Core Web Vitals (LCP, INP, CLS), and improve page load speed.",
     "inputSchema": {
       "type": "object",
       "properties": {
         "reload": {
           "type": "boolean",
-          "description": "Determines if, once tracing has started, the page should be automatically reloaded."
+          "default": true,
+          "description": "Determines if, once tracing has started, the current selected page should be automatically reloaded. Navigate the page to the right URL using the navigate_page tool BEFORE starting the trace if reload or autoStop is set to true."
         },
         "autoStop": {
           "type": "boolean",
+          "default": true,
           "description": "Determines if the trace recording should be automatically stopped."
+        },
+        "filePath": {
+          "type": "string",
+          "description": "The absolute file path, or a file path relative to the current working directory, to save the raw trace data. For example, trace.json.gz (compressed) or trace.json (uncompressed)."
         }
       },
-      "required": [
-        "reload",
-        "autoStop"
-      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     }
@@ -2966,10 +2198,15 @@
   {
     "serverName": "chrome-devtools",
     "name": "performance_stop_trace",
-    "description": "Stops the active performance trace recording on the selected page.",
+    "description": "Stop the active performance trace recording on the selected webpage.",
     "inputSchema": {
       "type": "object",
-      "properties": {},
+      "properties": {
+        "filePath": {
+          "type": "string",
+          "description": "The absolute file path, or a file path relative to the current working directory, to save the raw trace data. For example, trace.json.gz (compressed) or trace.json (uncompressed)."
+        }
+      },
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     }
@@ -2984,6 +2221,10 @@
         "key": {
           "type": "string",
           "description": "A key or a combination (e.g., \"Enter\", \"Control+A\", \"Control++\", \"Control+Shift+R\"). Modifiers: Control, Shift, Alt, Meta"
+        },
+        "includeSnapshot": {
+          "type": "boolean",
+          "description": "Whether to include a snapshot in the response. Default is false."
         }
       },
       "required": [
@@ -3024,13 +2265,36 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "pageIdx": {
+        "pageId": {
           "type": "number",
-          "description": "The index of the page to select. Call list_pages to list pages."
+          "description": "The ID of the page to select. Call list_pages to get available pages."
+        },
+        "bringToFront": {
+          "type": "boolean",
+          "description": "Whether to focus the page and bring it to the top."
         }
       },
       "required": [
-        "pageIdx"
+        "pageId"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "chrome-devtools",
+    "name": "take_memory_snapshot",
+    "description": "Capture a memory heapsnapshot of the currently selected page to memory leak debugging",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filePath": {
+          "type": "string",
+          "description": "A path to a .heapsnapshot file to save the heapsnapshot to."
+        }
+      },
+      "required": [
+        "filePath"
       ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
@@ -3098,6 +2362,29 @@
   },
   {
     "serverName": "chrome-devtools",
+    "name": "type_text",
+    "description": "Type text using keyboard into a previously focused input",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text to type"
+        },
+        "submitKey": {
+          "type": "string",
+          "description": "Optional key to press after typing. E.g., \"Enter\", \"Tab\", \"Escape\""
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "chrome-devtools",
     "name": "upload_file",
     "description": "Upload a file through a provided element.",
     "inputSchema": {
@@ -3110,6 +2397,10 @@
         "filePath": {
           "type": "string",
           "description": "The local path of the file to upload"
+        },
+        "includeSnapshot": {
+          "type": "boolean",
+          "description": "Whether to include a snapshot in the response. Default is false."
         }
       },
       "required": [
@@ -3128,8 +2419,12 @@
       "type": "object",
       "properties": {
         "text": {
-          "type": "string",
-          "description": "Text to appear on the page"
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Non-empty list of texts. Resolves when any value appears on the page."
         },
         "timeout": {
           "type": "integer",
@@ -3141,6 +2436,99 @@
       ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "sequential-thinking",
+    "name": "sequentialthinking",
+    "description": "A detailed tool for dynamic and reflective problem-solving through thoughts.\nThis tool helps analyze problems through a flexible thinking process that can adapt and evolve.\nEach thought can build on, question, or revise previous insights as understanding deepens.\n\nWhen to use this tool:\n- Breaking down complex problems into steps\n- Planning and design with room for revision\n- Analysis that might need course correction\n- Problems where the full scope might not be clear initially\n- Problems that require a multi-step solution\n- Tasks that need to maintain context over multiple steps\n- Situations where irrelevant information needs to be filtered out\n\nKey features:\n- You can adjust total_thoughts up or down as you progress\n- You can question or revise previous thoughts\n- You can add more thoughts even after reaching what seemed like the end\n- You can express uncertainty and explore alternative approaches\n- Not every thought needs to build linearly - you can branch or backtrack\n- Generates a solution hypothesis\n- Verifies the hypothesis based on the Chain of Thought steps\n- Repeats the process until satisfied\n- Provides a correct answer\n\nParameters explained:\n- thought: Your current thinking step, which can include:\n  * Regular analytical steps\n  * Revisions of previous thoughts\n  * Questions about previous decisions\n  * Realizations about needing more analysis\n  * Changes in approach\n  * Hypothesis generation\n  * Hypothesis verification\n- nextThoughtNeeded: True if you need more thinking, even if at what seemed like the end\n- thoughtNumber: Current number in sequence (can go beyond initial total if needed)\n- totalThoughts: Current estimate of thoughts needed (can be adjusted up/down)\n- isRevision: A boolean indicating if this thought revises previous thinking\n- revisesThought: If is_revision is true, which thought number is being reconsidered\n- branchFromThought: If branching, which thought number is the branching point\n- branchId: Identifier for the current branch (if any)\n- needsMoreThoughts: If reaching end but realizing more thoughts needed\n\nYou should:\n1. Start with an initial estimate of needed thoughts, but be ready to adjust\n2. Feel free to question or revise previous thoughts\n3. Don't hesitate to add more thoughts if needed, even at the \"end\"\n4. Express uncertainty when present\n5. Mark thoughts that revise previous thinking or branch into new paths\n6. Ignore information that is irrelevant to the current step\n7. Generate a solution hypothesis when appropriate\n8. Verify the hypothesis based on the Chain of Thought steps\n9. Repeat the process until satisfied with the solution\n10. Provide a single, ideally correct answer as the final output\n11. Only set nextThoughtNeeded to false when truly done and a satisfactory answer is reached",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "thought": {
+          "type": "string",
+          "description": "Your current thinking step"
+        },
+        "nextThoughtNeeded": {
+          "type": "boolean",
+          "description": "Whether another thought step is needed"
+        },
+        "thoughtNumber": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "description": "Current thought number (numeric value, e.g., 1, 2, 3)"
+        },
+        "totalThoughts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "description": "Estimated total thoughts needed (numeric value, e.g., 5, 10)"
+        },
+        "isRevision": {
+          "description": "Whether this revises previous thinking",
+          "type": "boolean"
+        },
+        "revisesThought": {
+          "description": "Which thought is being reconsidered",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "branchFromThought": {
+          "description": "Branching point thought number",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "branchId": {
+          "description": "Branch identifier",
+          "type": "string"
+        },
+        "needsMoreThoughts": {
+          "description": "If more thoughts are needed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "thought",
+        "nextThoughtNeeded",
+        "thoughtNumber",
+        "totalThoughts"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "thoughtNumber": {
+          "type": "number"
+        },
+        "totalThoughts": {
+          "type": "number"
+        },
+        "nextThoughtNeeded": {
+          "type": "boolean"
+        },
+        "branches": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "thoughtHistoryLength": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "thoughtNumber",
+        "totalThoughts",
+        "nextThoughtNeeded",
+        "branches",
+        "thoughtHistoryLength"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "additionalProperties": false
     }
   }
 ]

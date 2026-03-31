@@ -30,9 +30,16 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config as RetryableRequestConfig;
     const requestUrl = String(originalRequest?.url ?? '');
-    const isRefreshRequest = requestUrl.includes('/auth/refresh');
+    const requestPath = requestUrl.split('?')[0] ?? '';
+    const isRefreshRequest = requestPath.endsWith('/auth/refresh');
+    const isLoginRequest = requestPath.endsWith('/auth/login');
 
-    if (error.response?.status !== 401 || originalRequest?._retry || isRefreshRequest) {
+    if (
+      error.response?.status !== 401 ||
+      originalRequest?._retry ||
+      isRefreshRequest ||
+      isLoginRequest
+    ) {
       return Promise.reject(error);
     }
 
@@ -79,7 +86,13 @@ apiClient.interceptors.response.use(
 );
 
 export const unwrap = <T>(payload: ApiEnvelope<T> | T): T => {
-  if (payload && typeof payload === 'object' && 'success' in payload && 'data' in payload) {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    'requestId' in payload &&
+    typeof (payload as { requestId?: unknown }).requestId === 'string' &&
+    'data' in payload
+  ) {
     return (payload as ApiEnvelope<T>).data;
   }
   return payload as T;

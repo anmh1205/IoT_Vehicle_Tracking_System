@@ -6,8 +6,8 @@ import type { Response } from 'express';
 import { firmwareConfig } from '@/config/env';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
-import { sendOk, sendCreated } from '@/shared/utils/response.util';
-import { createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
+import { sendOk, sendCreated, sendError } from '@/shared/utils/response.util';
+import { createApiError, createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
 import * as firmwareListService from '@/domain/firmware/services/firmware-list.service';
 import * as firmwareUploadService from '@/domain/firmware/services/firmware-upload.service';
 import * as firmwareActivateService from '@/domain/firmware/services/firmware-activate.service';
@@ -214,16 +214,11 @@ export const downloadFirmware = asyncHandler(async (req: AuthenticatedRequest, r
   const stream = fs.createReadStream(resolvedPath);
   stream.on('error', () => {
     if (!res.headersSent) {
-      res.status(500).json({
-        success: false,
-        error: {
-          code: 'STREAM_ERROR',
-          message: 'Failed to stream firmware artifact',
-          status: 500,
-          path: req.path,
-        },
-        timestamp: new Date().toISOString(),
+      const error = createApiError(500, 'Failed to stream firmware artifact', {
+        code: 'STREAM_ERROR',
+        firmwareId: id,
       });
+      sendError(res, error, req.path);
     }
   });
 

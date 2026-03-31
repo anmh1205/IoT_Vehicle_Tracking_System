@@ -1,5 +1,30 @@
 # Project Changelog
 
+## 2026-03-31
+### API Response Contract Hard Cutover (Completed)
+- Backend responses now use a hard-cutover success envelope of `{ data, requestId, meta? }`, with `requestId` propagated from the request/response lifecycle instead of being implicit.
+- Error responses now serialize as RFC7807 problem details with `type`, `title`, `status`, `detail`, `instance`, `code`, `requestId`, and `errors[]` for validation detail.
+- Shared middleware and surface handlers now follow the new contract across error handling, rate limiting, health, and metrics paths so operational endpoints stay consistent.
+- Frontend API parsing now unwraps the success envelope and routes the new problem-details shape through the updated error parser.
+- Verification passed via validation, tests, build, and Docker checks.
+
+### Login Page Split Layout (Completed)
+- Updated the frontend login page to a split layout with a landing/marketing panel on the left and the login form on the right in `Tracking_Frontend/src/features/auth/components/login-form.tsx`.
+- Reworked the left panel into a 3-block composition: hero, highlights, and proof labels, with the marketing copy centralized in `Tracking_Frontend/src/features/marketing/data/landing-content.ts`.
+- Updated the frontend root route so `/` now redirects to `/login` instead of serving the former public entry.
+- Auth flow, session handling, and request/response behavior remain unchanged; these are routing and UI/UX updates only.
+
+## 2026-03-28
+### Login Error Path Stabilization (Completed)
+- Frontend login now distinguishes `401` authentication failures from network errors and server-side `5xx`, improving user-facing error clarity in `Tracking_Frontend/src/features/auth/components/login-form.tsx`.
+- Frontend API interceptor now bypasses refresh flow for `401` responses from `/auth/login`, allowing login form handling to remain authoritative in `Tracking_Frontend/src/lib/api/client.ts`.
+- Backend login flow now maps database failures in user lookup/session creation to controlled API errors: `503 AUTH_DB_UNAVAILABLE` for availability/connectivity faults and `500 AUTH_DB_QUERY_FAILED` for query/schema-class faults in `Tracking_Backend/src/domain/auth/services/auth-session.service.ts`.
+
+## 2026-03-27
+### Auth Login Error Hardening (Completed)
+- Added a guard and defensive error mapping in `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/domain/auth/services/auth-session.service.ts` for password hash verification.
+- Impact: when stored credential hash is missing/invalid, login now returns controlled auth failure instead of unhandled `INTERNAL_ERROR` 500.
+
 ## 2026-03-20
 ### Thesis Baseline Sync (Completed)
 - Synced the final thesis markdown sources, Mermaid sources, and exported SVG figures under `resources/reports/thesis/`.
@@ -33,7 +58,16 @@
 - Stabilized layout on mobile browsers with `100dvh` in key content containers (`src/app/dashboard/map/page.tsx`, `src/components/layout/PageContainer.tsx`).
 - Updated Flutter WebView error/loading accessibility semantics and Vietnamese status strings (`Tracking_Mobile/lib/features/webview/webview_screen.dart`, `Tracking_Mobile/lib/widgets/error_view.dart`, `Tracking_Mobile/lib/widgets/loading_indicator.dart`).
 
+## 2026-04-01
+### MQTT Canonical Cutover + Runtime Cleanup (Completed)
+- MQTT is now the canonical ingest path for both real devices and simulator traffic.
+- Legacy `/iot/data` runtime routing was removed, and the OpenAPI surface no longer advertises that endpoint.
+- Realtime events were normalized to colon-style names so backend emitters, listeners, and consumers share one contract.
+- Simulator rollback/race mitigation and token-flow hardening were applied as part of the canonical cutover, with follow-up review notes captured for any remaining legacy drift.
+- Validation passed for backend lint/typecheck/test/build, MQTT Bridge typecheck/build, plus runtime sanity and code review closeout on the completed scope.
+
 ## Impact
 - Improved keyboard navigation, screen reader clarity, and mobile tap reliability.
 - Reduced risk of viewport jump/clip issues on mobile map and dashboard pages.
 - Added a clear public product entry point without weakening protection around `/dashboard/*`.
+- Simplified ingest architecture by making MQTT the only canonical runtime path for telemetry and simulator data.

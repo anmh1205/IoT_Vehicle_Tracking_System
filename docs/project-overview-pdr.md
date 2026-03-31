@@ -3,6 +3,15 @@
 ## Current Scope
 - UI/UX accessibility remediation for dashboard web and mobile surfaces has been completed.
 - The frontend now also exposes a public landing page at `/` so the system can be presented before login, while dashboard flows remain protected.
+- The backend/frontend API contract is standardized around a success envelope and RFC7807 problem-details error shape.
+- MQTT is the canonical ingest path for both real devices and simulator traffic, and legacy `/iot/data` runtime usage has been removed.
+
+## API Contract Objectives
+- Keep success payloads consistent for all operational endpoints via `{ data, requestId, meta? }`.
+- Keep failures machine-readable and request-scoped via RFC7807 fields plus `requestId` and `errors[]`.
+- Ensure middleware, health, metrics, and rate-limit paths remain aligned with the same contract.
+- Keep frontend parsing logic tolerant of the envelope without leaking transport details into feature code.
+- Treat MQTT topic naming and realtime event names as canonical contracts alongside HTTP response shapes.
 
 ## Completed Remediation Items
 - Skip-link navigation in `Tracking_Frontend/src/app/layout.tsx` and matching main-content landmark in dashboard/login pages.
@@ -16,12 +25,17 @@
   - `Tracking_Mobile/lib/widgets/error_view.dart`
   - `Tracking_Mobile/lib/widgets/loading_indicator.dart`
 
-## Completed Public Landing Page Items
-- Replaced the root redirect in `Tracking_Frontend/src/app/page.tsx` with a public marketing route.
-- Added a dedicated marketing slice in `Tracking_Frontend/src/features/marketing/` for header, hero, feature, proof, and system-flow sections.
-- Added local illustration assets in `Tracking_Frontend/public/landing/`.
-- Updated `Tracking_Frontend/middleware.ts` so `/` and `/landing/*` remain public while protected dashboard routes still redirect to `/login` without a session.
-- Updated `Tracking_Frontend/src/components/auth/session-guard.tsx` so the landing page does not block on an auth bootstrap spinner.
+## Completed Login Entry Items
+- Replaced the root route in `Tracking_Frontend/src/app/page.tsx` so `/` now redirects to `/login`.
+- Kept the unauthenticated login experience as a split landing/form layout in `Tracking_Frontend/src/app/login/page.tsx` and `Tracking_Frontend/src/features/auth/components/login-form.tsx`.
+- Updated `Tracking_Frontend/middleware.ts` so protected dashboard routes still redirect to `/login` without a session.
+- Updated `Tracking_Frontend/src/components/auth/session-guard.tsx` so the login page does not block on an auth bootstrap spinner.
+
+## Completed MQTT Cutover Items
+- Standardized device and simulator ingestion onto MQTT as the only canonical runtime path.
+- Removed `/iot/data` from the runtime API surface and documented it as legacy/non-canonical.
+- Normalized realtime event names to colon-style so backend producers and frontend consumers share one contract.
+- Hardened simulator token flow and rollback/race handling as part of the canonical ingest migration.
 
 ## Acceptance Notes
 - A screen-reader user can jump to main content from the top of each page.
@@ -31,6 +45,7 @@
 - Unauthenticated users can see the public landing page immediately.
 
 ## Constraints / Scope Notes
-- No backend API contract changes were introduced.
+- No backend HTTP envelope changes were introduced beyond the standardized response contract.
 - Dashboard auth behavior remains protected by the existing session-cookie flow.
 - Landing page content is mapped to modules already present in the codebase; no fake customer proof or synthetic metrics were introduced.
+- Any remaining legacy event-name consumers or token lifecycle cleanup should be treated as follow-up maintenance, not as blockers for the canonical MQTT cutover.

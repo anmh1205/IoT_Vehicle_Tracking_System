@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { simulatorServices, type SimulatorConfig } from '@/lib/api/simulator';
 import { notificationUtils } from '@/lib/notification';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 export interface SimulatorPayload {
   deviceId: string;
   timestamp: string;
@@ -127,14 +128,8 @@ export const useSimulator = () => {
       void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
       notificationUtils.success('Đã bắt đầu mô phỏng');
     },
-    onError: (error: any) => {
-      notificationUtils.error(
-        'Không thể bắt đầu mô phỏng',
-        error?.response?.data?.error?.message ??
-          error?.response?.data?.message ??
-          error?.message ??
-          'Lỗi không xác định',
-      );
+    onError: (error: unknown) => {
+      notificationUtils.error('Không thể bắt đầu mô phỏng', getApiErrorMessage(error, 'Lỗi không xác định'));
     },
   });
   const stopMutation = useMutation({
@@ -144,14 +139,8 @@ export const useSimulator = () => {
       void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
       notificationUtils.info('Đã dừng mô phỏng');
     },
-    onError: (error: any) => {
-      notificationUtils.error(
-        'Không thể dừng mô phỏng',
-        error?.response?.data?.error?.message ??
-          error?.response?.data?.message ??
-          error?.message ??
-          'Lỗi không xác định',
-      );
+    onError: (error: unknown) => {
+      notificationUtils.error('Không thể dừng mô phỏng', getApiErrorMessage(error, 'Lỗi không xác định'));
     },
   });
   const start = async () => {
@@ -172,13 +161,10 @@ export const useSimulator = () => {
       void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
       notificationUtils.info('Đã tạm dừng mô phỏng');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       notificationUtils.error(
         'Không thể tạm dừng mô phỏng',
-        error?.response?.data?.error?.message ??
-          error?.response?.data?.message ??
-          error?.message ??
-          'Lỗi không xác định',
+        getApiErrorMessage(error, 'Lỗi không xác định'),
       );
     },
   });
@@ -190,13 +176,10 @@ export const useSimulator = () => {
       void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
       notificationUtils.info('Đã tiếp tục mô phỏng');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       notificationUtils.error(
         'Không thể tiếp tục mô phỏng',
-        error?.response?.data?.error?.message ??
-          error?.response?.data?.message ??
-          error?.message ??
-          'Lỗi không xác định',
+        getApiErrorMessage(error, 'Lỗi không xác định'),
       );
     },
   });

@@ -2,12 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deviceServices } from '@/lib/api/devices';
 import { notificationUtils } from '@/lib/notification';
 import { queryInvalidation } from '@/lib/utils/query-invalidation';
-
-const getErrorMessage = (error: any): string =>
-  error?.response?.data?.error?.message ??
-  error?.response?.data?.message ??
-  error?.message ??
-  'Không thể xóa thiết bị';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 
 export const useDeleteDevice = () => {
   const queryClient = useQueryClient();
@@ -18,7 +13,7 @@ export const useDeleteDevice = () => {
       notificationUtils.success('Đã xóa thiết bị');
     },
     onError: (error: unknown) => {
-      notificationUtils.error('Xóa thiết bị thất bại', getErrorMessage(error));
+      notificationUtils.error('Xóa thiết bị thất bại', getApiErrorMessage(error, 'Không thể xóa thiết bị'));
     },
   });
 };

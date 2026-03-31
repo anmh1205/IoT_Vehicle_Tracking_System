@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
+import mqtt from 'mqtt';
 import { pool } from '@/infrastructure/database/pool';
 import { logger } from '@/infrastructure/logger';
+import { mqttConfig } from '@/config/env';
+import { hashToken } from '@/shared/utils/crypto.util';
 import { createValidationError } from '@/shared/utils/errors.util';
-import { ingestDeviceData } from '@/domain/iot/services/iot-ingestion.service';
 import type {
   SimulatorPoint,
   SimulatorStartInput,
@@ -12,11 +14,23 @@ import type {
 interface DeviceSimulatorRuntime {
   deviceId: string;
   authToken: string;
+  simulatorAuthTokenHash: string;
+  originalAuthToken: string;
   lat: number;
   lon: number;
   heading: number;
   battery: number;
   sessionIdBeforeStart: number | null;
+}
+
+interface SimulatorMqttClient {
+  publish: (
+    topic: string,
+    message: string,
+    options: { qos: 0 | 1; retain?: boolean },
+    callback: (error?: Error | null) => void,
+  ) => void;
+  end: (force?: boolean, callback?: () => void) => void;
 }
 
 interface RunningSimulationState {
@@ -34,6 +48,7 @@ interface RunningSimulationState {
   timer: NodeJS.Timeout;
   ticking: boolean;
   paused: boolean;
+  mqttClient: SimulatorMqttClient;
 }
 
 interface StoredSnapshot {
@@ -83,6 +98,133 @@ const normalizeHeading = (value: number): number => {
   const heading = value % 360;
   return heading < 0 ? heading + 360 : heading;
 };
+
+const createSimulatorMqttClient = (): Promise<SimulatorMqttClient> => {
+  const protocol = mqttConfig.useTls ? 'mqtts' : 'mqtt';
+  const port = mqttConfig.useTls ? mqttConfig.tlsPort : mqttConfig.port;
+  const brokerUrl = `${protocol}://${mqttConfig.host}:${port}`;
+
+  return new Promise((resolve, reject) => {
+    const client = mqtt.connect(brokerUrl, {
+      username: mqttConfig.username,
+      password: mqttConfig.password,
+      clientId: `backend-simulator-${process.pid}-${Date.now()}`,
+      reconnectPeriod: 5000,
+      clean: true,
+      rejectUnauthorized: mqttConfig.rejectUnauthorized,
+    });
+
+    const cleanup = (): void => {
+      client.removeAllListeners('connect');
+      client.removeAllListeners('error');
+    };
+
+    client.once('connect', () => {
+      cleanup();
+      resolve(client as unknown as SimulatorMqttClient);
+    });
+
+    client.once('error', (error) => {
+      cleanup();
+      reject(error);
+    });
+  });
+};
+
+const publishMqttMessage = (
+  client: SimulatorMqttClient,
+  topic: string,
+  message: Record<string, unknown>,
+  options: { qos: 0 | 1; retain?: boolean },
+): Promise<void> =>
+  new Promise((resolve, reject) => {
+    client.publish(topic, JSON.stringify(message), options, (error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+  });
+
+const endMqttClient = (client: SimulatorMqttClient): Promise<void> =>
+  new Promise((resolve) => {
+    client.end(false, () => resolve());
+  });
+
+const publishDeviceStatus = (
+  client: SimulatorMqttClient,
+  device: DeviceSimulatorRuntime,
+  status: 'running' | 'stopped',
+  timestamp: number,
+): Promise<void> =>
+  publishMqttMessage(
+    client,
+    `v1/${device.deviceId}/status`,
+    {
+      device_id: device.deviceId,
+      auth_token: device.authToken,
+      status,
+      timestamp,
+    },
+    { qos: 1, retain: true },
+  );
+
+const publishDeviceRawData = (
+  client: SimulatorMqttClient,
+  device: DeviceSimulatorRuntime,
+  timestamp: number,
+  data: {
+    vibration: number;
+    batteryTop: number;
+    latitude: number;
+    longitude: number;
+    speed: number;
+    course: number;
+    errorCode?: number;
+  },
+): Promise<void> =>
+  publishMqttMessage(
+    client,
+    `v1/${device.deviceId}/rawdata`,
+    {
+      device_id: device.deviceId,
+      auth_token: device.authToken,
+      timestamp,
+      data: {
+        vibration: data.vibration,
+        battery_top: data.batteryTop,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        speed: data.speed,
+        course: data.course,
+        error_code: data.errorCode,
+      },
+    },
+    { qos: 0 },
+  );
+
+const publishDeviceEvent = (
+  client: SimulatorMqttClient,
+  device: DeviceSimulatorRuntime,
+  timestamp: number,
+  eventType: 'error' | 'warning' | 'info',
+  code: number,
+  message: string,
+): Promise<void> =>
+  publishMqttMessage(
+    client,
+    `v1/${device.deviceId}/events`,
+    {
+      device_id: device.deviceId,
+      auth_token: device.authToken,
+      event_type: eventType,
+      code,
+      message,
+      timestamp,
+    },
+    { qos: 1 },
+  );
 
 const dedupeDeviceIds = (ids: string[]): string[] =>
   Array.from(new Set(ids.map((item) => item.trim()).filter((item) => item.length > 0)));
@@ -209,6 +351,30 @@ const closeSimulatorOwnedSession = async (sessionId: number, deviceId: string): 
   );
 };
 
+const restoreSimulatorAuthTokens = async (
+  devices: DeviceSimulatorRuntime[],
+  reason: string,
+): Promise<void> => {
+  await Promise.all(
+    devices.map(async (device) => {
+      try {
+        await pool.query(
+          `UPDATE devices
+           SET auth_token = $3, updated_at = NOW()
+           WHERE device_id = $1 AND auth_token = $2`,
+          [device.deviceId, device.simulatorAuthTokenHash, device.originalAuthToken],
+        );
+      } catch (error) {
+        logger.error('Failed to restore device auth token after simulator state change', {
+          reason,
+          deviceId: device.deviceId,
+          error: (error as Error).message,
+        });
+      }
+    }),
+  );
+};
+
 const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> => {
   if (!runningSimulation) {
     return toStatus(lastSnapshot, false);
@@ -219,6 +385,18 @@ const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> 
   clearInterval(current.timer);
 
   const now = new Date();
+  const timestamp = now.getTime();
+
+  for (const device of current.devices) {
+    try {
+      await publishDeviceStatus(current.mqttClient, device, 'stopped', timestamp);
+    } catch (error) {
+      logger.error('Failed to publish simulator stop status', {
+        deviceId: device.deviceId,
+        error: (error as Error).message,
+      });
+    }
+  }
 
   for (const device of current.devices) {
     try {
@@ -252,6 +430,16 @@ const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> 
         error: (error as Error).message,
       });
     }
+  }
+
+  await restoreSimulatorAuthTokens(current.devices, reason);
+
+  try {
+    await endMqttClient(current.mqttClient);
+  } catch (error) {
+    logger.error('Failed to close simulator MQTT client', {
+      error: (error as Error).message,
+    });
   }
 
   lastSnapshot = {
@@ -311,20 +499,27 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
 
     const errorCode = Math.random() < 0.03 ? (Math.random() < 0.4 ? 201 : 501) : null;
 
-    await ingestDeviceData({
-      deviceId: device.deviceId,
-      authToken: device.authToken,
-      timestamp: now.getTime(),
-      data: {
-        lat: device.lat,
-        lon: device.lon,
-        spd: speed,
-        vib: vibration,
-        batt: device.battery,
-        heading: roundTo(device.heading, 2),
-        err: errorCode ?? undefined,
-      },
+    const timestamp = now.getTime();
+    await publishDeviceRawData(state.mqttClient, device, timestamp, {
+      vibration,
+      batteryTop: device.battery,
+      latitude: device.lat,
+      longitude: device.lon,
+      speed,
+      course: roundTo(device.heading, 2),
+      errorCode: errorCode ?? undefined,
     });
+
+    if (errorCode !== null) {
+      await publishDeviceEvent(
+        state.mqttClient,
+        device,
+        timestamp,
+        'error',
+        errorCode,
+        `Simulated device error ${errorCode}`,
+      );
+    }
 
     const point: SimulatorPoint = {
       deviceId: device.deviceId,
@@ -420,9 +615,13 @@ export const startSimulation = async (
     const initialLat = row.latitude ?? roundTo(input.lat + randomBetween(-0.0005, 0.0005), 6);
     const initialLon = row.longitude ?? roundTo(input.lon + randomBetween(-0.0005, 0.0005), 6);
 
+    const simulatorAuthToken = `sim-${randomUUID()}`;
+
     runtimes.push({
       deviceId: row.device_id,
-      authToken: row.auth_token,
+      authToken: simulatorAuthToken,
+      simulatorAuthTokenHash: hashToken(simulatorAuthToken),
+      originalAuthToken: row.auth_token,
       lat: initialLat,
       lon: initialLon,
       heading: normalizeHeading(randomBetween(0, 359)),
@@ -431,9 +630,36 @@ export const startSimulation = async (
     });
   }
 
+  await Promise.all(
+    runtimes.map((device) =>
+      pool.query(
+        `UPDATE devices
+         SET auth_token = $2, updated_at = NOW()
+         WHERE device_id = $1`,
+        [device.deviceId, device.simulatorAuthTokenHash],
+      ),
+    ),
+  );
+
   const startedAt = new Date();
   const expiresAt = new Date(startedAt.getTime() + input.durationMin * 60_000);
   const jobId = `sim-${Date.now()}`;
+
+  let mqttClient: SimulatorMqttClient | null = null;
+
+  try {
+    mqttClient = await createSimulatorMqttClient();
+    const startedTimestamp = Date.now();
+    await Promise.all(
+      runtimes.map((device) => publishDeviceStatus(mqttClient!, device, 'running', startedTimestamp)),
+    );
+  } catch (error) {
+    if (mqttClient) {
+      await endMqttClient(mqttClient);
+    }
+    await restoreSimulatorAuthTokens(runtimes, 'start_failed');
+    throw error;
+  }
 
   const timer = setInterval(
     () => {
@@ -460,6 +686,7 @@ export const startSimulation = async (
     timer,
     ticking: false,
     paused: false,
+    mqttClient: mqttClient!,
   };
 
   await executeTickSafely();

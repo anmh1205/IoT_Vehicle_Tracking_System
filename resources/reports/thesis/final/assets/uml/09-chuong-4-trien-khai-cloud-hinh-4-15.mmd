@@ -1,5 +1,5 @@
 flowchart TB
-    Device["Tracker Device"] --> EMQX["EMQX Broker"]
+    Device["Thiết bị tracker"] --> EMQX["EMQX Broker"]
     EMQX --> Bridge["MQTT Bridge"]
     Bridge --> API["Backend API"]
     Bridge --> VM["VictoriaMetrics"]
