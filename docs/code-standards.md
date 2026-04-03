@@ -31,6 +31,12 @@
 - Error parsers should treat problem-details responses as the canonical server failure shape.
 - Keep request-scoped identifiers and response contract fields consistent across middleware, health, metrics, and rate-limit paths.
 
+## Thesis Asset Readability Standards
+- Keep thesis final markdown and Mermaid labels short, self-standing, and glossary-aligned.
+- Preserve technical names, protocol names, and library names exactly when they are load-bearing.
+- Prefer Vietnamese descriptive prose for explanatory copy; keep English only for canonical product/tool names.
+- Update the related thesis assets and docs together so captions, labels, and summaries do not drift.
+
 ## MQTT and Realtime Contract Standards
 - Treat MQTT as the canonical ingest path for both real devices and simulator flows.
 - Remove legacy runtime exposure such as `/iot/data` rather than keeping parallel entry points.

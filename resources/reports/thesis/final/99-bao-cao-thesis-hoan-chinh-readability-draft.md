@@ -173,13 +173,13 @@ Tôi xin chịu hoàn toàn trách nhiệm về nội dung đồ án tốt nghi�
 
 ---
 
-Thị trường cho thuê xe tự lái tại Việt Nam đang tăng nhanh, nên nhu cầu theo dõi xe từ xa ngày càng rõ rệt. Đồ án này xây dựng một hệ thống theo dõi xe trọn bộ, gồm: thiết bị gắn trên xe, hạ tầng máy chủ và giao diện quản lý. Mục tiêu là biết xe đang ở đâu, xe đang hoạt động ra sao và cảnh báo sớm khi có bất thường.
+Thị trường cho thuê xe tự lái tại Việt Nam đang tăng nhanh, nên nhu cầu theo dõi xe từ xa ngày càng rõ rệt. Đồ án này xây dựng một hệ thống theo dõi xe trọn bộ, gồm thiết bị gắn trên xe, hạ tầng máy chủ và bảng điều khiển quản lý. Mục tiêu là biết xe đang ở đâu, xe đang hoạt động ra sao và cảnh báo sớm khi có bất thường.
 
 Ở phía thiết bị, hệ thống dùng ESP32-S3 làm bộ xử lý trung tâm và modem SIM7600CE-T để vừa truyền dữ liệu 4G vừa định vị GNSS. Thiết bị lấy dữ liệu từ cổng OBD2 của xe thông qua adapter vgate iCar Pro (BLE), đồng thời dùng cảm biến rung LIS3DH để phát hiện chuyển động lạ khi xe đang đỗ. Khối nguồn có mạch hạ áp/tăng áp, pin dự phòng 18650, mạch sạc và cơ chế bảo vệ điện áp thấp (LVD), nhờ đó thiết bị vẫn chạy được khi xe tắt máy hoặc nguồn chính yếu.
 
 Ở phía phần mềm, dữ liệu từ thiết bị được gửi qua MQTT 5.0 vào EMQX. Dịch vụ MQTT Bridge sẽ kiểm tra dữ liệu rồi ghi vào các kho phù hợp: PostgreSQL cho dữ liệu quan hệ, VictoriaMetrics cho dữ liệu chuỗi thời gian và VictoriaLogs cho nhật ký vận hành. Backend API dùng Express.js + TypeScript, hỗ trợ xác thực theo phiên làm việc và cập nhật firmware từ xa (OTA).
 
-Giao diện web dùng Next.js và React, hiển thị bản đồ, biểu đồ và trạng thái xe gần như tức thời qua WebSocket. Toàn bộ hệ thống được đóng gói bằng Docker để dễ triển khai, dễ tái lập môi trường và thuận tiện vận hành.
+Bảng điều khiển web dùng Next.js và React, hiển thị bản đồ, biểu đồ và trạng thái xe gần như tức thời qua WebSocket. Toàn bộ hệ thống được đóng gói bằng Docker để dễ triển khai, dễ tái lập môi trường và thuận tiện vận hành.
 
 Kết quả là hệ thống có thể theo dõi vị trí xe theo thời gian thực, đọc dữ liệu cơ bản từ OBD2, cảnh báo tự động, hỗ trợ cập nhật firmware từ xa và phục vụ quản lý đội xe cho bài toán cho thuê xe tự lái.
 

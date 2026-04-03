@@ -11,6 +11,13 @@ const figuresDir = join(assetsDir, "figures");
 const mermaidConfigPath = join(assetsDir, "mermaid-thesis-config.json");
 const mermaidTempDir = mkdtempSync(join(tmpdir(), "ivts-thesis-mermaid-"));
 const npxBin = process.platform === "win32" ? "npx.cmd" : "npx";
+const clusterGroupRegex = /<g class="cluster"([^>]*)><rect([^>]*)\/><g class="cluster-label"([^>]*)><g>([\s\S]*?)<\/g><\/g><\/g>/gu;
+const clusterLabelBackgroundRegex = /<rect class="background"[^>]*\/>/u;
+const clusterLabelTransformRegex = /transform="translate\(([-0-9.]+),\s*([-0-9.]+)\)"/u;
+const clusterLabelStripFill = "#f1f5f9";
+const clusterLabelStripHorizontalPadding = 8;
+const clusterLabelStripYOffset = -6;
+const clusterLabelStripHeight = 30;
 
 mkdirSync(figuresDir, { recursive: true });
 
@@ -119,6 +126,55 @@ const renderMermaid = (inputPath, outputPath, width, height) => {
   });
 };
 
+const getNumericAttribute = (attributes, name) => {
+  const match = new RegExp(`\\s${name}="([^"]+)"`, "u").exec(attributes);
+  if (!match) return null;
+  const value = Number(match[1]);
+  return Number.isFinite(value) ? value : null;
+};
+
+const applyClusterLabelOverlay = (svgSource) => {
+  const overlayLabels = [];
+
+  const patchedSource = svgSource.replace(
+    clusterGroupRegex,
+    (full, clusterAttrs, rectAttrs, labelAttrs, labelInner) => {
+      const clusterX = getNumericAttribute(rectAttrs, "x");
+      const clusterWidth = getNumericAttribute(rectAttrs, "width");
+      const transformMatch = clusterLabelTransformRegex.exec(labelAttrs);
+      const labelX = transformMatch ? Number(transformMatch[1]) : null;
+
+      let patchedLabelInner = labelInner;
+      if (clusterX !== null && clusterWidth !== null && labelX !== null) {
+        const bgX = (clusterX - labelX + clusterLabelStripHorizontalPadding).toFixed(3);
+        const bgWidth = Math.max(clusterWidth - clusterLabelStripHorizontalPadding * 2, 40).toFixed(3);
+        const backgroundRect = `<rect class="background" style="stroke: none; fill: ${clusterLabelStripFill}; opacity: 1" x="${bgX}" y="${clusterLabelStripYOffset}" width="${bgWidth}" height="${clusterLabelStripHeight}"/>`;
+        patchedLabelInner = labelInner.replace(clusterLabelBackgroundRegex, backgroundRect);
+      }
+
+      overlayLabels.push(`<g class="cluster-label"${labelAttrs}><g>${patchedLabelInner}</g></g>`);
+      return `<g class="cluster"${clusterAttrs}><rect${rectAttrs}/></g>`;
+    }
+  );
+
+  if (overlayLabels.length === 0) return svgSource;
+
+  const closingTagIndex = patchedSource.lastIndexOf("</svg>");
+  if (closingTagIndex === -1) return patchedSource;
+
+  const overlayGroup = `<g class="cluster-label-overlays">${overlayLabels.join("")}</g>`;
+  return `${patchedSource.slice(0, closingTagIndex)}${overlayGroup}${patchedSource.slice(closingTagIndex)}`;
+};
+
+const postProcessRenderedSvg = (outputPath) => {
+  if (!outputPath.endsWith(".svg")) return;
+  const svgSource = readFileSync(outputPath, "utf8");
+  const patchedSource = applyClusterLabelOverlay(svgSource);
+  if (patchedSource !== svgSource) {
+    writeFileSync(outputPath, patchedSource, "utf8");
+  }
+};
+
 const figureNames = collectReferencedFigureNames();
 const missingMappings = figureNames.filter((name) => !diagramByFileName[name]);
 
@@ -140,6 +196,7 @@ try {
 
     try {
       renderMermaid(sourcePath, outputPath, width, height);
+      postProcessRenderedSvg(outputPath);
       process.stdout.write(`Rendered: ${figureName}\n`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

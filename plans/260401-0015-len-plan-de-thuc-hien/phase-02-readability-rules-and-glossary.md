@@ -5,7 +5,8 @@
 
 ## Overview
 - Priority: P1
-- Current status: pending
+- Current status: completed
+- Progress: 100%
 - Mục tiêu: tạo rulebook ngắn và glossary thống nhất để áp cho toàn bộ asset.
 
 ## Key Insights
@@ -22,6 +23,23 @@
 - Decision: term chính thức + term cấm dùng + pattern câu khuyến nghị.
 - Governance: mọi chỉnh sửa Phase 03 phải bám rulebook này.
 
+## Canonical glossary
+- `dashboard` -> `bảng điều khiển web` when describing UI; keep `dashboard` only in product names, routes, or file paths.
+- `diagram` -> `sơ đồ` in prose; keep tool names like `Mermaid`/`PlantUML` unchanged.
+- `caption` -> `chú thích`; keep each caption self-standing in 1-2 sentences.
+- `render` -> `dựng` or `tái sinh artifact` depending on context.
+- `realtime` -> `thời gian thực` unless it is part of a canonical library name.
+
+## Readability rules
+1. Use Vietnamese for descriptive prose; keep technical names unchanged when they are load-bearing.
+2. Prefer one idea per sentence; split long captions before they become multi-clause blocks.
+3. Keep diagram labels short and concrete; avoid full sentences in node text.
+4. Use one canonical term per concept across the batch; do not mix synonyms in the same file.
+5. Keep captions self-contained: object, action, outcome.
+6. Preserve version numbers, protocol names, and library names exactly as implemented.
+7. Prefer explicit nouns over vague pronouns when the file is meant to stand alone.
+8. Avoid hidden abbreviations unless the abbreviation is already canonical in the domain.
+
 ## Related code files
 - Modify: file markdown thesis final trong scope
 - Modify: file `.mmd` trong scope
@@ -36,9 +54,9 @@
 5. Chốt checklist review dùng cho Phase 03/04.
 
 ## Todo list
-- [ ] Có glossary canonical + alias map.
-- [ ] Có 6-10 readability rules dạng pass/fail.
-- [ ] Có mẫu caption chuẩn cho hình/bảng/sơ đồ.
+- [x] Có glossary canonical + alias map.
+- [x] Có 6-10 readability rules dạng pass/fail.
+- [x] Có mẫu caption chuẩn cho hình/bảng/sơ đồ.
 
 ## Success Criteria
 - Mỗi thuật ngữ trọng yếu chỉ còn 1 tên chuẩn.

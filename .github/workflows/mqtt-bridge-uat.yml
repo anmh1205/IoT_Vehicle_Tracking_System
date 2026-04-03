@@ -5,6 +5,13 @@ on:
     branches: [uat]
     paths:
       - 'iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/**'
+      - 'scripts/deploy/**'
+      - '.github/workflows/mqtt-bridge-uat.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: mqtt-bridge-uat-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality-and-build:
@@ -50,9 +57,56 @@ jobs:
     needs: quality-and-build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           name: mqtt-bridge-compose
+
+      - name: Validate required deploy secrets
+        env:
+          SSH_DEPLOY_IP: ${{ secrets.SSH_DEPLOY_IP }}
+          SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
+          SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          MQTT_BRIDGE_UAT_ENV_FILE: ${{ secrets.MQTT_BRIDGE_UAT_ENV_FILE }}
+        run: |
+          required_vars=(
+            SSH_DEPLOY_IP
+            SSH_DEPLOY_PORT
+            SSH_DEPLOY_USER
+            SSH_PRIVATE_KEY
+            DOCKERHUB_USERNAME
+            MQTT_BRIDGE_UAT_ENV_FILE
+          )
+          for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+              echo "::error::Missing required secret: $var"
+              exit 1
+            fi
+          done
+
+      - name: Ensure VPS directories exist
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p /opt/tracking/scripts/deploy
+            mkdir -p /opt/tracking/Tracking_MqttBridge
+
+      - name: Upload deploy scripts to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "scripts/deploy/bootstrap-vps.sh,scripts/deploy/deploy-service.sh"
+          target: /opt/tracking/
 
       - name: SCP compose file to server
         uses: appleboy/scp-action@v0.1.7
@@ -71,14 +125,21 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DOCKERHUB_USERNAME
+          envs: DOCKERHUB_USERNAME,SERVICE_ENV_CONTENT,SERVICE_DIR,COMPOSE_FILE,SERVICE_NAME,HEALTHCHECK_URL
           script: |
-            cd /opt/tracking/Tracking_MqttBridge
-            export DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME
-            docker compose -f docker-compose.uat.yml pull
-            docker compose -f docker-compose.uat.yml up -d
+            chmod +x /opt/tracking/scripts/deploy/bootstrap-vps.sh
+            chmod +x /opt/tracking/scripts/deploy/deploy-service.sh
+            export DOCKERHUB_USERNAME="$DOCKERHUB_USERNAME"
+            export SERVICE_ENV_CONTENT="$SERVICE_ENV_CONTENT"
+            /opt/tracking/scripts/deploy/bootstrap-vps.sh "$SERVICE_DIR" "$COMPOSE_FILE"
+            /opt/tracking/scripts/deploy/deploy-service.sh "$SERVICE_DIR" "$COMPOSE_FILE" "$SERVICE_NAME" "$HEALTHCHECK_URL"
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          SERVICE_ENV_CONTENT: ${{ secrets.MQTT_BRIDGE_UAT_ENV_FILE }}
+          SERVICE_DIR: /opt/tracking/Tracking_MqttBridge
+          COMPOSE_FILE: docker-compose.uat.yml
+          SERVICE_NAME: mqtt-bridge
+          HEALTHCHECK_URL: ""
 
       - name: Discord Notification
         if: always()

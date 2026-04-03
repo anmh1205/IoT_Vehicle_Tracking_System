@@ -1,5 +1,12 @@
 # Project Changelog
 
+## 2026-04-03
+### CI/CD UAT Minimal Rollout (In Progress)
+- Added manual fallback trigger `workflow_dispatch` to UAT deploy pipelines for Backend, Frontend, and MQTT Bridge in `.github/workflows/backend-uat.yml`, `.github/workflows/frontend-uat.yml`, and `.github/workflows/mqtt-bridge-uat.yml`.
+- Added deploy preflight secret validation and shared SSH deploy flow to make first-time VPS bootstrap idempotent and fail-fast on missing runtime config.
+- Added reusable VPS deploy scripts in `scripts/deploy/bootstrap-vps.sh` and `scripts/deploy/deploy-service.sh` to standardize compose validation, first-time `.env` provisioning, per-service redeploy, and optional post-deploy health checks.
+- Added CI/CD secret/env reference and rollout checklist in `docs/cicd-required-secrets-and-env.md`.
+
 ## 2026-03-31
 ### API Response Contract Hard Cutover (Completed)
 - Backend responses now use a hard-cutover success envelope of `{ data, requestId, meta? }`, with `requestId` propagated from the request/response lifecycle instead of being implicit.
@@ -23,7 +30,7 @@
 ## 2026-03-27
 ### Auth Login Error Hardening (Completed)
 - Added a guard and defensive error mapping in `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/domain/auth/services/auth-session.service.ts` for password hash verification.
-- Impact: when stored credential hash is missing/invalid, login now returns controlled auth failure instead of unhandled `INTERNAL_ERROR` 500.
+- Impact: when stored credential hash is missing/invalid, login now returns controlled auth failure instead of unhandled internal 500.
 
 ## 2026-03-20
 ### Thesis Baseline Sync (Completed)
@@ -59,6 +66,11 @@
 - Updated Flutter WebView error/loading accessibility semantics and Vietnamese status strings (`Tracking_Mobile/lib/features/webview/webview_screen.dart`, `Tracking_Mobile/lib/widgets/error_view.dart`, `Tracking_Mobile/lib/widgets/loading_indicator.dart`).
 
 ## 2026-04-01
+### Thesis Readability Sync (Completed)
+- Normalized the final thesis markdown sources and Mermaid labels under `resources/reports/thesis/final/` to keep prose, captions, and diagram labels easier to read.
+- Regenerated the exported SVG figures after the Mermaid source update so the rendered artifact set stays in sync.
+- Kept runtime application code untouched; the change was limited to thesis assets and directly related documentation.
+
 ### MQTT Canonical Cutover + Runtime Cleanup (Completed)
 - MQTT is now the canonical ingest path for both real devices and simulator traffic.
 - Legacy `/iot/data` runtime routing was removed, and the OpenAPI surface no longer advertises that endpoint.

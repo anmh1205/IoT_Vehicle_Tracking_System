@@ -5,7 +5,8 @@
 
 ## Overview
 - Priority: P2
-- Current status: pending
+- Current status: completed
+- Progress: 100%
 - Mục tiêu: đóng gói thay đổi, xác nhận chất lượng cuối, bàn giao rõ phạm vi và rollback point.
 
 ## Key Insights
@@ -22,6 +23,12 @@
 - Review flow: technical correctness -> readability -> consistency -> sign-off.
 - Output pack: handoff note + open items + rollback guidance.
 
+## Handoff note
+- Changed files: thesis final Markdown, in-scope Mermaid sources, regenerated SVG figures, the validated plan phases, and directly related docs under `docs/`.
+- Verify: compare the updated thesis sources with the regenerated SVG set and confirm the glossary terms stay canonical in the final review.
+- Rollback point: restore the pre-sync copies of `resources/reports/thesis/final/assets/uml/` and `resources/reports/thesis/final/assets/figures/` if the readability pass must be reverted.
+- Open items: none blocker for this scope; any future thesis content expansion should start a new batch.
+
 ## Related code files
 - Modify: `./plan.md` (cập nhật progress/status khi kết thúc)
 - Modify: tài liệu thesis/asset trong scope đã pass QA
@@ -36,9 +43,9 @@
 5. Đề xuất backlog nhỏ cho phần ngoài scope hiện tại.
 
 ## Todo list
-- [ ] Có final checklist signed-off.
-- [ ] Có handoff note đầy đủ và ngắn gọn.
-- [ ] Có danh sách unresolved/follow-up rõ ràng.
+- [x] Có final checklist signed-off.
+- [x] Có handoff note đầy đủ và ngắn gọn.
+- [x] Có danh sách unresolved/follow-up rõ ràng.
 
 ## Success Criteria
 - Người nhận handoff hiểu ngay cách verify kết quả.

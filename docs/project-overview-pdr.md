@@ -5,6 +5,7 @@
 - The frontend now also exposes a public landing page at `/` so the system can be presented before login, while dashboard flows remain protected.
 - The backend/frontend API contract is standardized around a success envelope and RFC7807 problem-details error shape.
 - MQTT is the canonical ingest path for both real devices and simulator traffic, and legacy `/iot/data` runtime usage has been removed.
+- Thesis readability sync on 2026-04-01 kept the final thesis markdown, Mermaid sources, and exported SVG figures aligned to a shared glossary without touching runtime code.
 
 ## API Contract Objectives
 - Keep success payloads consistent for all operational endpoints via `{ data, requestId, meta? }`.

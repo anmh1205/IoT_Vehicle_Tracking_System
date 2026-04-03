@@ -171,13 +171,13 @@ Tôi xin chịu hoàn toàn trách nhiệm về nội dung đồ án tốt nghi�
 
 ---
 
-Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt Nam kéo theo nhu cầu giám sát phương tiện từ xa và quản lý đội xe theo thời gian thực. Đồ án này trình bày quá trình thiết kế, chế tạo và tích hợp một hệ thống IoT giám sát phương tiện từ thiết bị gắn trên xe đến hạ tầng cloud và giao diện khai thác, phục vụ theo dõi vị trí, thu thập dữ liệu chẩn đoán và phát hiện cảnh báo vận hành.
+Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt Nam kéo theo nhu cầu giám sát phương tiện từ xa và quản lý đội xe theo thời gian thực. Đồ án này mô tả quá trình thiết kế, chế tạo và tích hợp một hệ thống IoT giám sát phương tiện, từ thiết bị gắn trên xe đến hạ tầng cloud và bảng điều khiển khai thác, để theo dõi vị trí, thu thập dữ liệu chẩn đoán và phát hiện cảnh báo vận hành.
 
 Về phần cứng, hệ thống sử dụng ESP32-S3 làm bộ xử lý trung tâm, kết hợp modem LTE + GNSS SIMCom SIM7600CE-T để định vị và truyền dữ liệu. Modem được cấu hình ở chế độ Auto (`AT+CNMP=2`) để tự động chuyển giữa LTE/UMTS/GSM, dùng APN mặc định `internet` và cung cấp dữ liệu GNSS qua `AT+CGNSINF` hoặc luồng NMEA tùy chọn `AT+CGNSTST` trên cùng UART1, nên không cần thêm module GNSS độc lập. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng thời sử dụng IMU LIS3DH để phát hiện rung động và hỗ trợ phân tích hành vi vận hành. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng 18650 1S Li-ion 3500mAh, BMS và cơ chế ngắt điện áp thấp (LVD), giúp thiết bị vẫn hoạt động khi xe tắt máy.
 
 Về phần mềm, dữ liệu từ thiết bị được truyền về máy chủ bằng MQTT 5.0 thông qua EMQX và được phân quyền theo ACL cho từng thiết bị. Dịch vụ MQTT Bridge tiếp nhận bản tin, xác thực payload rồi phân luồng đến các hệ lưu trữ chuyên biệt: PostgreSQL cho dữ liệu quan hệ và nhật ký OTA, VictoriaMetrics cho dữ liệu chuỗi thời gian, và VictoriaLogs cho nhật ký sự kiện. API server được xây dựng bằng Express.js kết hợp TypeScript theo kiến trúc DDD, sử dụng cơ chế xác thực phiên dựa trên token lưu trong cơ sở dữ liệu và hỗ trợ kích hoạt cập nhật firmware OTA cho thiết bị.
 
-Giao diện web được phát triển bằng Next.js 15 và React 19, cung cấp bảng điều khiển thời gian thực với bản đồ Leaflet, biểu đồ ECharts và kết nối WebSocket qua Socket.IO để cập nhật tức thời vị trí và trạng thái phương tiện. Toàn bộ hệ thống được đóng gói và triển khai bằng Docker nhằm bảo đảm tính nhất quán giữa môi trường phát triển và môi trường vận hành.
+Bảng điều khiển web dùng Next.js 15 và React 19, hiển thị bản đồ Leaflet, biểu đồ ECharts và kết nối Socket.IO để cập nhật gần như tức thời vị trí cùng trạng thái phương tiện. Toàn bộ hệ thống được đóng gói và triển khai bằng Docker để bảo đảm tính nhất quán giữa môi trường phát triển và môi trường vận hành.
 
 Kết quả đạt được là một hệ thống IoT giám sát phương tiện hoàn chỉnh từ phần cứng đến phần mềm, có khả năng theo dõi vị trí thời gian thực, đọc dữ liệu chẩn đoán OBD2, thiết lập hàng rào địa lý, phát sinh cảnh báo tự động, cập nhật firmware từ xa và hỗ trợ quản lý đội xe cho dịch vụ cho thuê xe tự lái.
 

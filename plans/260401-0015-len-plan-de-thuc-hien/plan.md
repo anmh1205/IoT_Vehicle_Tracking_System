@@ -1,7 +1,7 @@
 ---
 title: "Implementation plan: chỉnh asset thesis final dễ hiểu"
 description: "Kế hoạch 5 phase để chuẩn hóa nội dung và diagram thesis theo tiêu chí dễ hiểu, nhất quán, kiểm soát rủi ro."
-status: pending
+status: completed
 priority: P2
 effort: 10h
 branch: feature/cicd
@@ -19,19 +19,19 @@ Mục tiêu: cải thiện asset có mã cho thesis final theo hướng dễ hi�
 ## Phases
 1. **Phase 01 — Audit and scope**  
    File: [phase-01-audit-and-scope.md](./phase-01-audit-and-scope.md)  
-   Status: pending | Progress: 0%
+   Status: completed | Progress: 100%
 2. **Phase 02 — Readability rules and glossary**  
    File: [phase-02-readability-rules-and-glossary.md](./phase-02-readability-rules-and-glossary.md)  
-   Status: pending | Progress: 0%
+   Status: completed | Progress: 100%
 3. **Phase 03 — Asset text normalization**  
    File: [phase-03-asset-text-normalization.md](./phase-03-asset-text-normalization.md)  
-   Status: pending | Progress: 0%
+   Status: completed | Progress: 100%
 4. **Phase 04 — Regenerate and QA gates**  
    File: [phase-04-regenerate-and-qa-gates.md](./phase-04-regenerate-and-qa-gates.md)  
-   Status: pending | Progress: 0%
+   Status: completed | Progress: 100%
 5. **Phase 05 — Final review and handoff**  
    File: [phase-05-final-review-and-handoff.md](./phase-05-final-review-and-handoff.md)  
-   Status: pending | Progress: 0%
+   Status: completed | Progress: 100%
 
 ## Dependency chain
 - P02 blocked by P01

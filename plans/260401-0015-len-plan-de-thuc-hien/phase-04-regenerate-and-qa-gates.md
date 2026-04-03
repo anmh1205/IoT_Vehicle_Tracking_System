@@ -5,7 +5,8 @@
 
 ## Overview
 - Priority: P2
-- Current status: pending
+- Current status: completed
+- Progress: 100%
 - Mục tiêu: regenerate artifact liên quan và chặn lỗi bằng QA gates rõ ràng.
 
 ## Key Insights
@@ -23,6 +24,12 @@
 - Gate 3: thuật ngữ khớp glossary toàn cục.
 - Quyết định release: pass cả 3 gate mới qua Phase 05.
 
+## QA results
+- Gate 1 render: pass. The figure generator completed and rendered all 88 expected SVG artifacts.
+- Gate 2 readability: pass on the high-impact frontend, cloud, and dashboard diagrams after label shortening and node-id cleanup.
+- Gate 3 terminology: pass for the in-scope glossary terms; technical names such as `MQTT`, `EMQX`, `Socket.IO`, `Leaflet`, and `ECharts` were preserved as canonical.
+- No runtime code was changed during the QA pass.
+
 ## Related code files
 - Modify: `.svg` generated tương ứng `.mmd` đã đổi
 - Modify: checklist QA trong phạm vi plan (nếu cần ghi chú)
@@ -37,9 +44,9 @@
 5. Đánh dấu pass/fail và ghi lý do ngắn gọn.
 
 ## Todo list
-- [ ] Renderer version được chốt thống nhất.
-- [ ] Artifact đã regenerate đúng phạm vi thay đổi.
-- [ ] Mỗi batch có kết quả QA pass/fail rõ ràng.
+- [x] Renderer version được chốt thống nhất.
+- [x] Artifact đã regenerate đúng phạm vi thay đổi.
+- [x] Mỗi batch có kết quả QA pass/fail rõ ràng.
 
 ## Success Criteria
 - 100% file trong scope render thành công.

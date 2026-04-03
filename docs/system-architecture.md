@@ -37,6 +37,7 @@ The completed remediation spans two UI layers:
 - Mobile and dashboard continue to share the same operational capability set; accessibility is implemented per platform conventions.
 - The API layer now assumes success envelopes and RFC7807 problem details across shared middleware, health, metrics, and rate-limit surfaces.
 - MQTT is the canonical ingest path for both real devices and simulator traffic, and `/iot/data` is no longer part of the runtime architecture.
+- Thesis readability sync keeps `resources/reports/thesis/final/` aligned to the same glossary rules used in the documentation set.
 - Realtime event names use colon-style contracts end to end so backend emitters and frontend consumers stay aligned.
 - Frontend feature code consumes unwrapped data, while transport-level errors stay confined to the API client and parser layer.
 - Simulator token flow and rollback/race handling were hardened to avoid replaying legacy ingestion behavior during the cutover.

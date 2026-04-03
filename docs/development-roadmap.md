@@ -48,10 +48,19 @@
   - Token-flow hardening and simulator rollback/race mitigation were applied during the cutover.
   - Validation passed for backend lint/typecheck/test/build, MQTT Bridge typecheck/build, runtime sanity, and review closeout.
 
+### P3 - CI/CD UAT Minimal Rollout In Progress
+- Scope: implement IVM26-style minimal CI/CD for Backend/Frontend/MQTT Bridge (GitHub secrets baseline, first-time VPS bootstrap, auto deploy on `push uat` with manual fallback).
+- Milestones in progress:
+  - Added `workflow_dispatch` manual fallback trigger in `.github/workflows/backend-uat.yml`, `.github/workflows/frontend-uat.yml`, `.github/workflows/mqtt-bridge-uat.yml`.
+  - Added deploy preflight checks for required secrets and standardized SSH deploy flow.
+  - Added reusable VPS deploy scripts `scripts/deploy/bootstrap-vps.sh` and `scripts/deploy/deploy-service.sh`.
+  - Added rollout checklist and required secret/env mapping in `docs/cicd-required-secrets-and-env.md`.
+
 ## Notes
 - No remaining open tasks for accessibility remediation.
 - Login entry implementation is complete; future work can add richer marketing content or a dedicated contact/demo funnel if needed.
 - Thesis baseline sync is complete and limited to `resources/reports/thesis/` final sources, Mermaid sources, exported SVG figures, and the figure generator path fix.
 - Diagram pack v2 pilot is complete; next decisions are governance/compliance follow-ups before any broader rollout.
 - MQTT canonical cutover is complete for the documented scope; any remaining consumer drift or token lifecycle follow-up should be tracked as separate maintenance work.
+- Thesis readability sync is complete for the final thesis markdown and Mermaid asset set; future edits should keep the same glossary and caption rules.
 - Related docs synchronized in `docs/project-overview-pdr.md`, `docs/project-changelog.md`, `docs/system-architecture.md`, and `docs/codebase-summary.md` where applicable.

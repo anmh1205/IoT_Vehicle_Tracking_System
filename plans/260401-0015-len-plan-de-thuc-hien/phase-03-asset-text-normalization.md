@@ -5,7 +5,8 @@
 
 ## Overview
 - Priority: P1
-- Current status: pending
+- Current status: completed
+- Progress: 100%
 - Mục tiêu: normalize text trên markdown/caption/diagram label theo canonical rules.
 
 ## Key Insights
@@ -21,6 +22,12 @@
 - Batch strategy: theo domain nội dung (ví dụ kiến trúc, data flow, vận hành).
 - Edit strategy: text first -> diagram labels -> caption alignment.
 - Traceability: mỗi lô có change note ngắn “đổi gì, vì sao”.
+
+## Execution note
+- Scope executed on thesis final Markdown and Mermaid sources only; runtime code was not touched.
+- Normalized 43 in-scope `.mmd` files and regenerated 88 SVG figures from the updated sources.
+- Kept canonical technical names intact while shortening Vietnamese prose and labels where readability was low.
+- Directly related docs under `docs/` were aligned with the same glossary and scope note.
 
 ## Related code files
 - Modify: markdown thesis final trong scope
@@ -38,9 +45,9 @@
 5. Soát liên kết tham chiếu hình/bảng sau khi đổi text.
 
 ## Todo list
-- [ ] Hoàn tất normalize batch 1 (ưu tiên cao).
-- [ ] Hoàn tất normalize batch 2 (ưu tiên trung bình).
-- [ ] Soát consistency toàn cục sau mỗi batch.
+- [x] Hoàn tất normalize batch 1 (ưu tiên cao).
+- [x] Hoàn tất normalize batch 2 (ưu tiên trung bình).
+- [x] Soát consistency toàn cục sau mỗi batch.
 
 ## Success Criteria
 - Tỷ lệ thuật ngữ lệch chuẩn trong scope về 0.

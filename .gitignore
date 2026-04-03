@@ -40,3 +40,6 @@
 /iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/__Previews
 /iot-vehicle-tracking-system-pcb/iot-vehicle-tracking-system-main/Library/SIM7600CE/SIM7600CE/History
 .claude/hooks/.logs/hook-log.jsonl
+
+# Auto Claude data directory
+.auto-claude/
