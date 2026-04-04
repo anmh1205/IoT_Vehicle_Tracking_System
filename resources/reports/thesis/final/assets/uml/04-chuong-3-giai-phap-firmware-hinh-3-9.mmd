@@ -6,7 +6,7 @@ sequenceDiagram
     FW->>SIM: AT + CPIN + CEREG + CSQ
 
     alt Không phản hồi
-        FW->>SIM: Reset PWRKEY và thử lại
+        FW->>SIM: Reset PWR-KEY và thử lại
     else Chưa vào mạng
         FW->>SIM: Retry đăng ký mạng
     else Driving

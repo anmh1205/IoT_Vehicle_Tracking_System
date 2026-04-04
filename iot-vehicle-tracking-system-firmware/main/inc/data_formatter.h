@@ -17,7 +17,7 @@
  * @return Heap-allocated JSON string. Caller must free with `cJSON_free`.
  *         Returns NULL when formatting fails.
  */
-char *data_format_rawdata(const config_t *cfg, const telemetry_t *telemetry);
+char *data_format_rawdata(const config_t *cfg, const telemetry_t *telemetry, bool include_auth_token);
 
 /**
  * @brief Build status payload JSON string.
@@ -29,7 +29,10 @@ char *data_format_rawdata(const config_t *cfg, const telemetry_t *telemetry);
  * @return Heap-allocated JSON string. Caller must free with `cJSON_free`.
  *         Returns NULL when formatting fails.
  */
-char *data_format_status(const config_t *cfg, const char *status, uint32_t session_id);
+char *data_format_status(const config_t *cfg,
+                         const char *status,
+                         uint32_t session_id,
+                         bool include_auth_token);
 
 /**
  * @brief Build event payload JSON string.
@@ -42,7 +45,11 @@ char *data_format_status(const config_t *cfg, const char *status, uint32_t sessi
  * @return Heap-allocated JSON string. Caller must free with `cJSON_free`.
  *         Returns NULL when formatting fails.
  */
-char *data_format_event(const config_t *cfg, const char *event_type, int code, const char *message);
+char *data_format_event(const config_t *cfg,
+                        const char *event_type,
+                        int code,
+                        const char *message,
+                        bool include_auth_token);
 
 /**
  * @brief Build firmware-status payload JSON string.
@@ -53,4 +60,6 @@ char *data_format_event(const config_t *cfg, const char *event_type, int code, c
  * @return Heap-allocated JSON string. Caller must free with `cJSON_free`.
  *         Returns NULL when formatting fails.
  */
-char *data_format_firmware(const config_t *cfg, const firmware_status_t *status);
+char *data_format_firmware(const config_t *cfg,
+                           const firmware_status_t *status,
+                           bool include_auth_token);

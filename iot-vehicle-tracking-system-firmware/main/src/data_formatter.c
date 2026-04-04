@@ -38,7 +38,9 @@ static char *data_formatter_print(cJSON *root) {
  *
  * @return Heap JSON string or NULL on failure.
  */
-char *data_format_rawdata(const config_t *cfg, const telemetry_t *telemetry) {
+char *data_format_rawdata(const config_t *cfg,
+                          const telemetry_t *telemetry,
+                          bool include_auth_token) {
     if (cfg == NULL || telemetry == NULL) {
         return NULL;
     }
@@ -54,7 +56,9 @@ char *data_format_rawdata(const config_t *cfg, const telemetry_t *telemetry) {
 
     /* Root metadata fields. */
     cJSON_AddStringToObject(root, "device_id", cfg->device_id);
-    cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
+    if (include_auth_token) {
+        cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
+    }
     cJSON_AddNumberToObject(root, "timestamp", (double)telemetry->gnss.timestamp_ms);
     cJSON_AddNumberToObject(root, "uptime", (double)util_uptime_ms());
 
@@ -83,7 +87,10 @@ char *data_format_rawdata(const config_t *cfg, const telemetry_t *telemetry) {
  *
  * @return Heap JSON string or NULL on failure.
  */
-char *data_format_status(const config_t *cfg, const char *status, uint32_t session_id) {
+char *data_format_status(const config_t *cfg,
+                         const char *status,
+                         uint32_t session_id,
+                         bool include_auth_token) {
     if (cfg == NULL || status == NULL) {
         return NULL;
     }
@@ -94,7 +101,9 @@ char *data_format_status(const config_t *cfg, const char *status, uint32_t sessi
     }
 
     cJSON_AddStringToObject(root, "device_id", cfg->device_id);
-    cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
+    if (include_auth_token) {
+        cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
+    }
     cJSON_AddStringToObject(root, "status", status);
     cJSON_AddNumberToObject(root, "timestamp", (double)util_uptime_ms());
     if (session_id > 0) {
@@ -114,7 +123,11 @@ char *data_format_status(const config_t *cfg, const char *status, uint32_t sessi
  *
  * @return Heap JSON string or NULL on failure.
  */
-char *data_format_event(const config_t *cfg, const char *event_type, int code, const char *message) {
+char *data_format_event(const config_t *cfg,
+                        const char *event_type,
+                        int code,
+                        const char *message,
+                        bool include_auth_token) {
     if (cfg == NULL || event_type == NULL) {
         return NULL;
     }
@@ -125,7 +138,9 @@ char *data_format_event(const config_t *cfg, const char *event_type, int code, c
     }
 
     cJSON_AddStringToObject(root, "device_id", cfg->device_id);
-    cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
+    if (include_auth_token) {
+        cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
+    }
     cJSON_AddStringToObject(root, "event_type", event_type);
     cJSON_AddNumberToObject(root, "code", code);
     if (!util_string_empty(message)) {
@@ -144,7 +159,9 @@ char *data_format_event(const config_t *cfg, const char *event_type, int code, c
  *
  * @return Heap JSON string or NULL on failure.
  */
-char *data_format_firmware(const config_t *cfg, const firmware_status_t *status) {
+char *data_format_firmware(const config_t *cfg,
+                           const firmware_status_t *status,
+                           bool include_auth_token) {
     if (cfg == NULL || status == NULL) {
         return NULL;
     }
@@ -155,7 +172,9 @@ char *data_format_firmware(const config_t *cfg, const firmware_status_t *status)
     }
 
     cJSON_AddStringToObject(root, "device_id", cfg->device_id);
-    cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
+    if (include_auth_token) {
+        cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
+    }
     cJSON_AddStringToObject(root, "jobId", status->job_id);
     cJSON_AddStringToObject(root, "status", status->status);
     cJSON_AddNumberToObject(root, "progress", status->progress);

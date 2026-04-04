@@ -56,6 +56,14 @@
   - Added reusable VPS deploy scripts `scripts/deploy/bootstrap-vps.sh` and `scripts/deploy/deploy-service.sh`.
   - Added rollout checklist and required secret/env mapping in `docs/cicd-required-secrets-and-env.md`.
 
+### P2 - Hardware Spec Firmware Thesis Sync In Progress
+- Scope: align firmware + thesis final assets with hardware netlist baseline decisions (SIM7600CE-T canonical, LIS3DSH migration, modem control-line model expansion).
+- Milestones in progress:
+  - Firmware IMU runtime path switched to LIS3DSH naming and WHO_AM_I expectation in `iot-vehicle-tracking-system-firmware/main`.
+  - Modem control abstraction expanded with RESET/DTR/STATUS/NET-LIGHT hooks (GPIO_NC placeholders pending final board pin mapping).
+  - Thesis final markdown pair and impacted UML sources synced to LIS3DSH + PWR-KEY terminology.
+  - Figure render pipeline executed to regenerate synchronized SVG artifacts.
+
 ## Notes
 - No remaining open tasks for accessibility remediation.
 - Login entry implementation is complete; future work can add richer marketing content or a dedicated contact/demo funnel if needed.

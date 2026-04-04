@@ -22,6 +22,8 @@ static const char *TAG = "TRACKER_MQTT";
 static esp_mqtt_client_handle_t s_client = NULL;
 /* Callback for cloud command messages. */
 static mqtt_command_cb_t s_command_callback = NULL;
+/* Callback for PUBACK notification. */
+static mqtt_puback_cb_t s_puback_callback = NULL;
 /* Cached connection state from MQTT events. */
 static bool s_connected = false;
 
@@ -94,6 +96,12 @@ static void tracker_mqtt_event_handler(void *handler_args,
         case MQTT_EVENT_DISCONNECTED:
             s_connected = false;
             ESP_LOGW(TAG, "MQTT disconnected");
+            break;
+
+        case MQTT_EVENT_PUBLISHED:
+            if (s_puback_callback != NULL && event != NULL) {
+                s_puback_callback(event->msg_id);
+            }
             break;
 
         case MQTT_EVENT_DATA: {
@@ -197,12 +205,16 @@ bool tracker_mqtt_is_connected(void) {
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t tracker_mqtt_publish(const char *topic, const char *payload, int qos) {
-    ESP_RETURN_ON_NULL(s_client, ESP_ERR_INVALID_STATE, TAG, "MQTT not initialized");
-    ESP_RETURN_ON_NULL(topic, ESP_ERR_INVALID_ARG, TAG, "topic is NULL");
-    ESP_RETURN_ON_NULL(payload, ESP_ERR_INVALID_ARG, TAG, "payload is NULL");
-
-    int msg_id = esp_mqtt_client_publish(s_client, topic, payload, 0, qos, 0);
+    int msg_id = tracker_mqtt_publish_with_msg_id(topic, payload, qos);
     return msg_id >= 0 ? ESP_OK : ESP_FAIL;
+}
+
+int tracker_mqtt_publish_with_msg_id(const char *topic, const char *payload, int qos) {
+    ESP_RETURN_ON_NULL(s_client, -1, TAG, "MQTT not initialized");
+    ESP_RETURN_ON_NULL(topic, -1, TAG, "topic is NULL");
+    ESP_RETURN_ON_NULL(payload, -1, TAG, "payload is NULL");
+
+    return esp_mqtt_client_publish(s_client, topic, payload, 0, qos, 0);
 }
 
 /**
@@ -267,6 +279,10 @@ esp_err_t tracker_mqtt_subscribe_commands(void) {
  */
 void tracker_mqtt_set_command_callback(mqtt_command_cb_t cb) {
     s_command_callback = cb;
+}
+
+void tracker_mqtt_set_puback_callback(mqtt_puback_cb_t cb) {
+    s_puback_callback = cb;
 }
 
 /**

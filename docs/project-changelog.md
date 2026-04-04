@@ -7,6 +7,18 @@
 - Added reusable VPS deploy scripts in `scripts/deploy/bootstrap-vps.sh` and `scripts/deploy/deploy-service.sh` to standardize compose validation, first-time `.env` provisioning, per-service redeploy, and optional post-deploy health checks.
 - Added CI/CD secret/env reference and rollout checklist in `docs/cicd-required-secrets-and-env.md`.
 
+### Firmware Boot WDT Stabilization (Completed)
+- Fixed repeated ESP32-S3 boot resets (`rst:0x8 TG1WDT_SYS_RST`) in firmware startup by switching LIS3DSH I2C bus configuration to synchronous mode in `iot-vehicle-tracking-system-firmware/main/src/imu_lis3dsh.c` (`trans_queue_depth: 4 -> 0`).
+- Removed dependency on ESP-IDF I2C asynchronous experimental path during early boot IMU init to reduce watchdog reset risk before state-machine runtime.
+- Runtime validation on target hardware is required to confirm sustained boot stability and no WDT reset loop recurrence.
+
+## 2026-04-04
+### Hardware Spec Firmware Thesis Sync (In Progress)
+- Renamed firmware IMU module from LIS3DH naming to LIS3DSH (`main/src/imu_lis3dsh.c`, `main/inc/imu_lis3dsh.h`, `main/CMakeLists.txt`, `main/src/state_machine.c`, `main/inc/pin_map.h`) and aligned WHO_AM_I check to LIS3DSH (`0x3F`).
+- Expanded modem control abstraction in firmware power/modem flow: added placeholders for `RESET`, `SIM-DTR`, `STATUS`, `NET-LIGHT` in `main/inc/pin_map.h`; added `modem_reset_pulse`, `modem_set_dtr`, `modem_read_status`, `modem_read_netlight` in `main/src/power_mgr.c` + `main/inc/power_mgr.h`; integrated DTR + AT reset recovery + status/netlight logging in `main/src/modem_lte.c`.
+- Synced thesis final markdown pair (`resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh-readability-draft.md`, `resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`) and impacted Mermaid UML sources to LIS3DSH terminology plus PWR-KEY naming.
+- Regenerated thesis figure artifacts via `resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs` (88 SVG outputs rendered) to keep source and rendered assets consistent.
+
 ## 2026-03-31
 ### API Response Contract Hard Cutover (Completed)
 - Backend responses now use a hard-cutover success envelope of `{ data, requestId, meta? }`, with `requestId` propagated from the request/response lifecycle instead of being implicit.

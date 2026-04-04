@@ -173,7 +173,7 @@ Tôi xin chịu hoàn toàn trách nhiệm về nội dung đồ án tốt nghi�
 
 Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt Nam kéo theo nhu cầu giám sát phương tiện từ xa và quản lý đội xe theo thời gian thực. Đồ án này mô tả quá trình thiết kế, chế tạo và tích hợp một hệ thống IoT giám sát phương tiện, từ thiết bị gắn trên xe đến hạ tầng cloud và bảng điều khiển khai thác, để theo dõi vị trí, thu thập dữ liệu chẩn đoán và phát hiện cảnh báo vận hành.
 
-Về phần cứng, hệ thống sử dụng ESP32-S3 làm bộ xử lý trung tâm, kết hợp modem LTE + GNSS SIMCom SIM7600CE-T để định vị và truyền dữ liệu. Modem được cấu hình ở chế độ Auto (`AT+CNMP=2`) để tự động chuyển giữa LTE/UMTS/GSM, dùng APN mặc định `internet` và cung cấp dữ liệu GNSS qua `AT+CGNSINF` hoặc luồng NMEA tùy chọn `AT+CGNSTST` trên cùng UART1, nên không cần thêm module GNSS độc lập. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng thời sử dụng IMU LIS3DH để phát hiện rung động và hỗ trợ phân tích hành vi vận hành. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng 18650 1S Li-ion 3500mAh, BMS và cơ chế ngắt điện áp thấp (LVD), giúp thiết bị vẫn hoạt động khi xe tắt máy.
+Về phần cứng, hệ thống sử dụng ESP32-S3 làm bộ xử lý trung tâm, kết hợp modem LTE + GNSS SIMCom SIM7600CE-T để định vị và truyền dữ liệu. Modem được cấu hình ở chế độ Auto (`AT+CNMP=2`) để tự động chuyển giữa LTE/UMTS/GSM, dùng APN mặc định `internet` và cung cấp dữ liệu GNSS qua `AT+CGNSINF` hoặc luồng NMEA tùy chọn `AT+CGNSTST` trên cùng UART1, nên không cần thêm module GNSS độc lập. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng thời sử dụng IMU LIS3DSH để phát hiện rung động và hỗ trợ phân tích hành vi vận hành. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng 18650 1S Li-ion 3500mAh, BMS và cơ chế ngắt điện áp thấp (LVD), giúp thiết bị vẫn hoạt động khi xe tắt máy.
 
 Về phần mềm, dữ liệu từ thiết bị được truyền về máy chủ bằng MQTT 5.0 thông qua EMQX và được phân quyền theo ACL cho từng thiết bị. Dịch vụ MQTT Bridge tiếp nhận bản tin, xác thực payload rồi phân luồng đến các hệ lưu trữ chuyên biệt: PostgreSQL cho dữ liệu quan hệ và nhật ký OTA, VictoriaMetrics cho dữ liệu chuỗi thời gian, và VictoriaLogs cho nhật ký sự kiện. API server được xây dựng bằng Express.js kết hợp TypeScript theo kiến trúc DDD, sử dụng cơ chế xác thực phiên dựa trên token lưu trong cơ sở dữ liệu và hỗ trợ kích hoạt cập nhật firmware OTA cho thiết bị.
 
@@ -195,7 +195,7 @@ Kết quả đạt được là một hệ thống IoT giám sát phương tiệ
 
 As the self-drive car rental market in Vietnam grows, the need for remote vehicle monitoring and real-time fleet management becomes increasingly practical for operators. This thesis presents the design and development of an end-to-end IoT vehicle tracking system, covering the onboard device, cloud services, and operational dashboard for real-time tracking, diagnostic data collection, and alerting.
 
-On the hardware side, the system employs the ESP32-S3 microcontroller as the central processing unit, paired with the SIMCom SIM7600CE-T LTE+GNSS modem. The modem is configured to Auto mode (`AT+CNMP=2`) so it can switch between LTE/UMTS/GSM automatically, uses the default APN `internet`, and delivers GNSS data via `AT+CGNSINF` (with optional NMEA streaming through `AT+CGNSTST`) on the same UART1 channel without a dedicated GNSS interface. The device reads engine diagnostic data via the OBD2 protocol through a vgate iCar Pro adapter using Bluetooth Low Energy (BLE), while integrating the LIS3DH IMU accelerometer for motion detection and abnormal parking-state alerts. The power management system includes buck/boost converters, a 18650 1S Li-ion 3500mAh backup battery charger path with BMS protection, and a low-voltage disconnect (LVD) mechanism to ensure continuous operation even when the vehicle engine is off.
+On the hardware side, the system employs the ESP32-S3 microcontroller as the central processing unit, paired with the SIMCom SIM7600CE-T LTE+GNSS modem. The modem is configured to Auto mode (`AT+CNMP=2`) so it can switch between LTE/UMTS/GSM automatically, uses the default APN `internet`, and delivers GNSS data via `AT+CGNSINF` (with optional NMEA streaming through `AT+CGNSTST`) on the same UART1 channel without a dedicated GNSS interface. The device reads engine diagnostic data via the OBD2 protocol through a vgate iCar Pro adapter using Bluetooth Low Energy (BLE), while integrating the LIS3DSH IMU accelerometer for motion detection and abnormal parking-state alerts. The power management system includes buck/boost converters, a 18650 1S Li-ion 3500mAh backup battery charger path with BMS protection, and a low-voltage disconnect (LVD) mechanism to ensure continuous operation even when the vehicle engine is off.
 
 On the software side, device data is transmitted through MQTT 5.0 via EMQX with per-device ACL authorization. The MQTT Bridge validates and routes incoming messages to specialized storage systems: PostgreSQL for relational data and OTA update logs, VictoriaMetrics for time-series telemetry, and VictoriaLogs for operational event logs. The API server is built with Express.js and TypeScript following Domain-Driven Design (DDD), using database-backed session token authentication and providing OTA orchestration endpoints for devices.
 
@@ -328,8 +328,8 @@ Xin chân thành cảm ơn!
 | Hình 3.1 | Sơ đồ khối tổng thể hệ thống tracker | ...   |
 | Hình 3.1a | Phân rã chi tiết các khối chức năng của tracker | ...   |
 | Hình 3.2 | Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro | ...   |
-| Hình 3.3 | Sơ đồ kết nối LIS3DH với ESP32-S3 qua I2C | ...   |
-| Hình 3.3a | Sơ đồ chi tiết chân kết nối LIS3DH với ESP32-S3 | ...   |
+| Hình 3.3 | Sơ đồ kết nối LIS3DSH với ESP32-S3 qua I2C | ...   |
+| Hình 3.3a | Sơ đồ chi tiết chân kết nối LIS3DSH với ESP32-S3 | ...   |
 | Hình 3.4 | Sơ đồ khối hệ thống quản lý nguồn | ...   |
 | Hình 3.4a | Kiến trúc nguồn và phân phối điện áp trong hệ thống | ...   |
 | Hình 3.5 | Sơ đồ kiến trúc phân lớp của firmware | ...   |
@@ -514,7 +514,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 - Thiết bị tracker IoT sử dụng vi điều khiển ESP32-S3
 - Modem LTE + GNSS SIMCom SIM7600CE-T (Auto mode LTE/UMTS/GSM, APN mặc định `internet`) kết nối trực tiếp qua UART1 để cung cấp cả dữ liệu 4G và GNSS
 - Adapter OBD2 BLE vgate iCar Pro (đọc dữ liệu chẩn đoán xe qua Bluetooth)
-- Cảm biến gia tốc LIS3DH (IMU) để phát hiện chuyển động và rung
+- Cảm biến gia tốc LIS3DSH (IMU) để phát hiện chuyển động và rung
 - Pin dự phòng 18650 1S với mạch sạc và bảo vệ
 
 **Phạm vi firmware:**
@@ -545,7 +545,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 
 | Tầng (Layer)   | Công nghệ chính                                                   | Phạm vi                                               |
 | -------------- | ----------------------------------------------------------------- | ----------------------------------------------------- |
-| Phần cứng      | ESP32-S3, SIMCom SIM7600CE-T (LTE + GNSS), vgate iCar Pro, LIS3DH | Thiết kế PCB, chế tạo và tích hợp thiết bị hoàn chỉnh |
+| Phần cứng      | ESP32-S3, SIMCom SIM7600CE-T (LTE + GNSS), vgate iCar Pro, LIS3DSH | Thiết kế PCB, chế tạo và tích hợp thiết bị hoàn chỉnh |
 | Firmware       | ESP-IDF, FreeRTOS, MQTT 5.0                                       | Lập trình nhúng đầy đủ                                |
 | MQTT Broker    | EMQX 5.x                                                          | Cấu hình và triển khai                                |
 | Backend        | Express.js, TypeScript, PostgreSQL, VictoriaMetrics               | Phát triển API và xử lý dữ liệu                       |
@@ -625,7 +625,7 @@ _Hình 1.2: Quy trình phát triển dự án theo các giai đoạn_
 
 ### 1.4.2. Kiến trúc hệ thống
 
-Hệ thống được thiết kế theo kiến trúc phân tầng (layered architecture) nhằm tách biệt rõ vai trò của từng lớp chức năng và giảm phụ thuộc chéo khi tích hợp. Kiến trúc triển khai thực tế gồm lớp thiết bị tracker (ESP32-S3, SIM7600CE-T, LIS3DH, vgate iCar Pro) kết nối MQTT lên EMQX; MQTT Bridge tiếp nhận và phân luồng dữ liệu sang VictoriaMetrics, VictoriaLogs và Backend API; lớp ứng dụng phía trên phục vụ dashboard web Next.js và hệ quan trắc Grafana. Ứng dụng di động được giữ ở phạm vi phát triển giai đoạn sau.
+Hệ thống được thiết kế theo kiến trúc phân tầng (layered architecture) nhằm tách biệt rõ vai trò của từng lớp chức năng và giảm phụ thuộc chéo khi tích hợp. Kiến trúc triển khai thực tế gồm lớp thiết bị tracker (ESP32-S3, SIM7600CE-T, LIS3DSH, vgate iCar Pro) kết nối MQTT lên EMQX; MQTT Bridge tiếp nhận và phân luồng dữ liệu sang VictoriaMetrics, VictoriaLogs và Backend API; lớp ứng dụng phía trên phục vụ dashboard web Next.js và hệ quan trắc Grafana. Ứng dụng di động được giữ ở phạm vi phát triển giai đoạn sau.
 
 ![Hình 1.3 - Kiến trúc tổng thể hệ thống IoT Vehicle Tracking](./assets/figures/01-chuong-1-gioi-thieu-hinh-1-3.svg)
 
@@ -657,7 +657,7 @@ Một trong những điểm thiết kế trọng tâm của dự án là chiến
 - Vi điều khiển ESP32-S3 vào chế độ ngủ sâu (deep sleep)
 - Tiêu thụ cực thấp (< 500 µA)
 - Thức dậy định kỳ (10–30 phút) để gửi heartbeat
-- IMU (LIS3DH) hoạt động độc lập, cảnh rung ở ngưỡng đã cấu hình
+- IMU (LIS3DSH) hoạt động độc lập, cảnh rung ở ngưỡng đã cấu hình
 
 **Chế độ 3 — Alert Mode (phát hiện chuyển động bất thường):**
 
@@ -683,7 +683,7 @@ _Hình 1.4: Sơ đồ chuyển đổi giữa các chế độ năng lượng_
 | Vi điều khiển                 | ESP32-S3                                 | —         | MCU chính, xử lý và điều khiển   |
 | LTE + GNSS                    | SIMCom SIM7600CE-T (LTE + GNSS tích hợp) | —         | Truyền dữ liệu 4G và định vị GPS |
 | OBD2 Adapter                  | vgate iCar Pro                           | BLE 4.0   | Đọc dữ liệu chẩn đoán xe         |
-| Cảm biến gia tốc              | LIS3DH                                   | —         | Phát hiện chuyển động và rung    |
+| Cảm biến gia tốc              | LIS3DSH                                   | —         | Phát hiện chuyển động và rung    |
 | Pin dự phòng                  | 18650 1S Li-ion                          | 3500 mAh  | Nguồn điện dự phòng              |
 | Framework firmware            | ESP-IDF                                  | 5.x       | Phát triển firmware nhúng        |
 | RTOS                          | FreeRTOS                                 | —         | Hệ điều hành thời gian thực      |
@@ -709,7 +709,7 @@ Dự án đã đạt được các kết quả chính sau:
 
 **Về phần cứng:**
 
-- Hoàn thiện thiết bị tracker IoT với bo mạch riêng do nhóm thiết kế, sử dụng ESP32-S3-WROOM-1 làm vi điều khiển trung tâm, tích hợp modem LTE + GNSS SIMCom SIM7600CE-T, cảm biến gia tốc LIS3DH, khối nguồn đa rail, pin dự phòng 18650 1S và kết nối OBD2 BLE qua adapter vgate iCar Pro.
+- Hoàn thiện thiết bị tracker IoT với bo mạch riêng do nhóm thiết kế, sử dụng ESP32-S3-WROOM-1 làm vi điều khiển trung tâm, tích hợp modem LTE + GNSS SIMCom SIM7600CE-T, cảm biến gia tốc LIS3DSH, khối nguồn đa rail, pin dự phòng 18650 1S và kết nối OBD2 BLE qua adapter vgate iCar Pro.
 - Quá trình lựa chọn linh kiện bám theo datasheet, độ ổn định chất lượng và khả năng cung ứng trong nước để thuận lợi cho việc chế tạo, kiểm thử và thay thế khi cần.
 - Hệ thống quản lý năng lượng đa chế độ hoạt động hiệu quả, với mức tiêu thụ điện ngủ sâu đạt yêu cầu (< 500 µA), đảm bảo không làm cạn ắc quy xe trong quá trình sử dụng bình thường.
 - Mạch Low Voltage Disconnect (LVD) bảo vệ ắc quy xe hiệu quả, tự động ngắt khi điện áp tụt dưới ngưỡng an toàn.
@@ -919,7 +919,7 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 
 **FC-03: Phát hiện bất thường khi đậu xe**
 
-- IMU (LIS3DH) phát hiện chuyển động/rung bất thường
+- IMU (LIS3DSH) phát hiện chuyển động/rung bất thường
 - Đánh thức ESP32 từ deep sleep trong vòng 100ms
 - Gửi cảnh báo ưu tiên (priority alert) lên server
 
@@ -1093,9 +1093,9 @@ _Hình 3.1a: Phân rã chi tiết các khối chức năng của tracker_
 
 > Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
-Hệ thống vận hành theo ba chế độ chính: (1) chế độ lái xe — khi động cơ bật (IGN ON), các module cần thiết được kích hoạt; (2) chế độ đỗ xe — khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ IMU LIS3DH duy trì giám sát chuyển động; (3) chế độ cảnh báo — khi IMU ghi nhận chuyển động bất thường, hệ thống tự đánh thức và gửi cảnh báo qua 4G.
+Hệ thống vận hành theo ba chế độ chính: (1) chế độ lái xe — khi động cơ bật (IGN ON), các module cần thiết được kích hoạt; (2) chế độ đỗ xe — khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ IMU LIS3DSH duy trì giám sát chuyển động; (3) chế độ cảnh báo — khi IMU ghi nhận chuyển động bất thường, hệ thống tự đánh thức và gửi cảnh báo qua 4G.
 
-Luồng dữ liệu được tổ chức theo ba nhánh: OBD2 (RPM, tốc độ, nhiên liệu) đọc qua BLE từ adapter vgate iCar Pro; dữ liệu GNSS được cung cấp trực tiếp bởi module tích hợp SIMCom SIM7600CE-T (GNSS nội bộ) trên cùng UART với LTE; và dữ liệu chuyển động thu từ IMU LIS3DH qua I2C. ESP32-S3 tổng hợp, đóng gói và truyền toàn bộ dữ liệu lên máy chủ qua MQTT thông qua kết nối 4G/LTE của SIM7600CE-T.
+Luồng dữ liệu được tổ chức theo ba nhánh: OBD2 (RPM, tốc độ, nhiên liệu) đọc qua BLE từ adapter vgate iCar Pro; dữ liệu GNSS được cung cấp trực tiếp bởi module tích hợp SIMCom SIM7600CE-T (GNSS nội bộ) trên cùng UART với LTE; và dữ liệu chuyển động thu từ IMU LIS3DSH qua I2C. ESP32-S3 tổng hợp, đóng gói và truyền toàn bộ dữ liệu lên máy chủ qua MQTT thông qua kết nối 4G/LTE của SIM7600CE-T.
 
 #### 3.1.1.2. Phân tích và lựa chọn vi điều khiển (MCU)
 
@@ -1200,7 +1200,7 @@ Vấn đề cốt lõi của tracker không chỉ là modem có lên mạng đư
 **SIMCom SIM7600CE-T** được lựa chọn làm kiến trúc truyền thông chính vì các lý do sau:
 
 - Tích hợp LTE và GNSS trong cùng một module giúp giảm số lượng phần cứng rời và rút gọn đường kết nối UART.
-- Giữ nguyên sơ đồ chân đang triển khai (UART1 trên GPIO16/17, PWRKEY trên GPIO26), không cần thay đổi pin mapping phần cứng.
+- Giữ nguyên sơ đồ chân đang triển khai (UART1 trên GPIO16/17, PWR-KEY trên GPIO26), không cần thay đổi pin mapping phần cứng.
 - Luồng AT được chuẩn hóa với Auto mode (`AT+CNMP=2`), kiểm tra `AT+CEREG?` trước `AT+CGACT=1,1`, và APN mặc định `internet`, phù hợp với firmware hiện tại.
 - GNSS tích hợp được điều khiển trực tiếp bằng `AT+CGNSPWR` và đọc dữ liệu qua `AT+CGNSINF`, thống nhất với module firmware đang vận hành.
 - Phù hợp với phương án BOM phần cứng đang áp dụng cho bo mạch đã chế tạo, thuận lợi cho triển khai và đối chiếu tài liệu kỹ thuật.
@@ -1213,7 +1213,7 @@ Vấn đề cốt lõi của tracker không chỉ là modem có lên mạng đư
 | LTE category / tốc độ     | Cat-4, tối đa 150 Mbps downlink / 50 Mbps uplink [60]                                                                    |
 | GNSS                      | GNSS tích hợp (GPS/GLONASS/BeiDou/Galileo), điều khiển bằng `AT+CGNSPWR`, đọc dữ liệu bằng `AT+CGNSINF` [60]             |
 | GNSS tích hợp trong modem | Có [60]                                                                                                                  |
-| Giao tiếp với MCU         | 1 UART (GPIO16/17) cho toàn bộ AT LTE/GNSS + GPIO26 điều khiển PWRKEY [60]                                               |
+| Giao tiếp với MCU         | 1 UART (GPIO16/17) cho toàn bộ AT LTE/GNSS + GPIO26 điều khiển PWR-KEY [60]                                               |
 | Giao thức dữ liệu         | LTE dùng AT command cho PDP/MQTT; GNSS lấy dữ liệu qua `AT+CGNSINF` và có thể stream NMEA bằng `AT+CGNSTST` khi cần [60] |
 | Điện áp modem             | 3.4–4.2 V, điển hình 3.8 V [60]                                                                                          |
 | Luồng attach LTE          | `AT+CNMP=2` (auto mode), cấu hình `AT+CGDCONT=1,"IP","internet"`, kiểm tra `AT+CEREG?` trước `AT+CGACT=1,1`              |
@@ -1276,7 +1276,7 @@ Một ràng buộc thiết kế quan trọng là ESP32-S3 không thể duy trì 
 | Đỗ xe (IGN OFF) | Không         | Không cần dữ liệu OBD2, chỉ cần IMU phát hiện chuyển động |
 | Cảnh báo        | Tùy chọn      | Có thể kết nối để xác nhận IGN, hoặc chỉ dùng IMU + GPS   |
 
-Khi xe chạy (IGN ON), ESP32-S3 duy trì kết nối BLE liên tục với adapter, đọc dữ liệu OBD2 định kỳ mỗi 5–30 giây. Khi xe đỗ (IGN OFF), kết nối BLE được ngắt trước khi ESP32 vào deep sleep, vì IMU LIS3DH đủ khả năng phát hiện chuyển động bất thường (rung, kéo, cẩu xe) mà không cần dữ liệu từ OBD2. Việc này giúp tiết kiệm năng lượng đáng kể — khoảng 7.000 lần so với việc duy trì kết nối BLE [8].
+Khi xe chạy (IGN ON), ESP32-S3 duy trì kết nối BLE liên tục với adapter, đọc dữ liệu OBD2 định kỳ mỗi 5–30 giây. Khi xe đỗ (IGN OFF), kết nối BLE được ngắt trước khi ESP32 vào deep sleep, vì IMU LIS3DSH đủ khả năng phát hiện chuyển động bất thường (rung, kéo, cẩu xe) mà không cần dữ liệu từ OBD2. Việc này giúp tiết kiệm năng lượng đáng kể — khoảng 7.000 lần so với việc duy trì kết nối BLE [8].
 
 Trong trường hợp adapter OBD2 không kết nối được (timeout 10 giây, retry 2–3 lần), hệ thống tự động chuyển sang phương pháp dự phòng (fallback) là đo điện áp ắc quy qua ADC để phát hiện trạng thái IGN. Phương pháp này kém chính xác hơn nhưng đảm bảo hệ thống vẫn hoạt động bình thường.
 
@@ -1286,11 +1286,11 @@ Trong trường hợp adapter OBD2 không kết nối được (timeout 10 giây
 
 Cảm biến đo quán tính (IMU - Inertial Measurement Unit) đóng vai trò then chốt trong việc phát hiện chuyển động của xe khi đang đỗ, cho phép hệ thống phát hiện các tình huống bất thường như rung xe (cố gắng mở cửa), kéo xe, hoặc cẩu xe. Đặc biệt, IMU cho phép ESP32-S3 ở trạng thái deep sleep liên tục và chỉ thức dậy khi có chuyển động thực sự, giúp tiết kiệm năng lượng đáng kể.
 
-##### b) Lựa chọn cảm biến: LIS3DH
+##### b) Lựa chọn cảm biến: LIS3DSH
 
-**LIS3DH** của STMicroelectronics là cảm biến gia tốc 3 trục (3-axis accelerometer) low-power được lựa chọn cho hệ thống. Các đặc tính kỹ thuật chính được tóm tắt trong bảng sau:
+**LIS3DSH** của STMicroelectronics là cảm biến gia tốc 3 trục (3-axis accelerometer) low-power được lựa chọn cho hệ thống. Các đặc tính kỹ thuật chính được tóm tắt trong bảng sau:
 
-[Bảng 3.7: Thông số kỹ thuật cảm biến LIS3DH]
+[Bảng 3.7: Thông số kỹ thuật cảm biến LIS3DSH]
 
 | Thông số             | Giá trị                                         |
 | -------------------- | ----------------------------------------------- |
@@ -1306,19 +1306,19 @@ Cảm biến đo quán tính (IMU - Inertial Measurement Unit) đóng vai trò t
 
 ##### c) Nguyên lý hoạt động trong hệ thống
 
-LIS3DH được cấu hình ở chế độ low-power với tần suất lấy mẫu 1 Hz (ODR = 1 Hz) và chỉ bật chức năng motion detection. Khi phát hiện gia tốc vượt ngưỡng 0.2g trên bất kỳ trục nào (X, Y, Z), cảm biến tự động phát tín hiệu interrupt đến chân GPIO của ESP32-S3 thông qua chân INT1, đánh thức vi điều khiển từ trạng thái deep sleep [9].
+LIS3DSH được cấu hình ở chế độ low-power với tần suất lấy mẫu 1 Hz (ODR = 1 Hz) và chỉ bật chức năng motion detection. Khi phát hiện gia tốc vượt ngưỡng 0.2g trên bất kỳ trục nào (X, Y, Z), cảm biến tự động phát tín hiệu interrupt đến chân GPIO của ESP32-S3 thông qua chân INT1, đánh thức vi điều khiển từ trạng thái deep sleep [9].
 
 Ngưỡng gia tốc 0.2g được chọn để cân bằng giữa độ nhạy và khả năng chống báo giả. Giá trị này đủ lớn để loại bỏ rung nhẹ từ môi trường (gió, xe cộ đi ngang) nhưng đủ nhỏ để phát hiện các chuyển động thực sự như rung của xe hoặc di chuyển.
 
-![Hình 3.3 - Sơ đồ kết nối LIS3DH với ESP32-S3 qua I2C](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-3.svg)
+![Hình 3.3 - Sơ đồ kết nối LIS3DSH với ESP32-S3 qua I2C](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-3.svg)
 
-_Hình 3.3: Sơ đồ kết nối LIS3DH với ESP32-S3 qua I2C_
+_Hình 3.3: Sơ đồ kết nối LIS3DSH với ESP32-S3 qua I2C_
 
 > Nguồn: Hình vẽ của tác giả
 
-![Hình 3.3a - Sơ đồ chi tiết chân kết nối LIS3DH với ESP32-S3](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-02.svg)
+![Hình 3.3a - Sơ đồ chi tiết chân kết nối LIS3DSH với ESP32-S3](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-02.svg)
 
-_Hình 3.3a: Sơ đồ chi tiết chân kết nối LIS3DH với ESP32-S3_
+_Hình 3.3a: Sơ đồ chi tiết chân kết nối LIS3DSH với ESP32-S3_
 
 > Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
@@ -1327,8 +1327,8 @@ Cấu hình I2C sử dụng địa chỉ `0x18`, tốc độ `400 kHz`, với ha
 ##### d) Ưu điểm của giải pháp
 
 - **Tiết kiệm năng lượng tốt nhất:** Dòng tiêu thụ chỉ 2–5 µA ở chế độ low-power, trong khi vẫn duy trì khả năng phát hiện chuyển động. ESP32-S3 không cần chạy liên tục để kiểm tra cảm biến.
-- **Phát hiện chuyển động độc lập:** LIS3DH tự xử lý việc phát hiện chuyển động bằng phần cứng, chỉ gửi interrupt khi có sự kiện — không phụ thuộc vào CPU của ESP32.
-- **Hệ sinh thái phát triển phong phú:** Nhiều thư viện sẵn có cho Arduino và ESP-IDF; IC LIS3DH hoặc cảm biến tương đương đều dễ tích hợp vào sơ đồ phần cứng của thiết bị.
+- **Phát hiện chuyển động độc lập:** LIS3DSH tự xử lý việc phát hiện chuyển động bằng phần cứng, chỉ gửi interrupt khi có sự kiện — không phụ thuộc vào CPU của ESP32.
+- **Hệ sinh thái phát triển phong phú:** Nhiều thư viện sẵn có cho Arduino và ESP-IDF; IC LIS3DSH hoặc cảm biến tương đương đều dễ tích hợp vào sơ đồ phần cứng của thiết bị.
 
 #### 3.2.1.3. Thiết kế hệ thống quản lý nguồn
 
@@ -1463,7 +1463,7 @@ Kết quả quy đổi cho thấy baseline pin 18650 1S vẫn đủ khả năng 
 | STT | Thành phần                   | Đơn vị | SL  | Giá ước tính (VND) | Ghi chú                               |
 | --- | ---------------------------- | ------ | --- | ------------------ | ------------------------------------- |
 | 1   | ESP32-S3-WROOM-1 (N16R8)     | Cái    | 1   | 100.000–200.000    | MCU trung tâm của bo mạch             |
-| 2   | IC cảm biến LIS3DH           | Cái    | 1   | 20.000–50.000      | Cảm biến gia tốc 3 trục               |
+| 2   | IC cảm biến LIS3DSH           | Cái    | 1   | 20.000–50.000      | Cảm biến gia tốc 3 trục               |
 | 3   | vgate iCar Pro (OBD2 BLE)    | Cái    | 1   | 150.000–300.000    | BLE 4.0, ELM327 compatible            |
 | 4   | SIMCom SIM7600CE-T           | Bộ     | 1   | 330.000–500.000    | Modem LTE + GNSS tích hợp + anten     |
 | 5   | Pin 18650 1S Li-ion 3500mAh  | Cái    | 1   | 100.000–200.000    | Loại có protection board              |
@@ -1592,7 +1592,7 @@ _Hình 3.6: Sơ đồ tương tác giữa các FreeRTOS task_
 
 Luồng hoạt động tổng thể của firmware được tổ chức theo trình tự sau:
 
-1. **Khởi tạo ngoại vi**: Cấu hình và khởi động các peripheral gồm IMU (LIS3DH qua I2C), modem SIM7600CE-T (UART1, Auto mode `AT+CNMP=2`, GNSS qua `AT+CGNSINF`), ADC (đọc điện áp), và BLE stack (NimBLE).
+1. **Khởi tạo ngoại vi**: Cấu hình và khởi động các peripheral gồm IMU (LIS3DSH qua I2C), modem SIM7600CE-T (UART1, Auto mode `AT+CNMP=2`, GNSS qua `AT+CGNSINF`), ADC (đọc điện áp), và BLE stack (NimBLE).
 2. **Đọc trạng thái IGN và điện áp ắc quy**: Hệ thống ưu tiên đọc trạng thái động cơ (IGN) trực tiếp từ ECU qua OBD2 BLE. Nếu không kết nối được OBD2, hệ thống fallback sang đo điện áp ắc quy qua ADC theo profile: profile 12V dùng IGN_ON >= 13.0V và IGN_OFF <= 12.0V; profile 24V dùng IGN_ON >= 26.0V và IGN_OFF <= 24.0V.
 3. **Quyết định chế độ hoạt động**: Dựa trên trạng thái IGN và dữ liệu cảm biến, firmware chuyển sang chế độ phù hợp (lái xe, đỗ xe, hoặc cảnh báo).
 4. **Thực thi tác vụ trong từng chế độ**:
@@ -1734,7 +1734,7 @@ Toàn bộ lệnh AT cho LTE và GNSS được thực hiện trên cùng UART1. 
 
 | Tình huống               | Biện pháp                                                                                |
 | ------------------------ | ---------------------------------------------------------------------------------------- |
-| Modem không phản hồi     | Reset nhanh qua PWRKEY (GPIO26) rồi bắt đầu lại chuỗi AT                                 |
+| Modem không phản hồi     | Reset nhanh qua PWR-KEY (GPIO26) rồi bắt đầu lại chuỗi AT                                 |
 | Mất kết nối 4G           | Đợi `AT+CEREG?` thành `1`, gọi `AT+CGACT=0,1` rồi `AT+CGACT=1,1` để tái khởi động PDP    |
 | GNSS không fix dù đã bật | Gọi lại `AT+CGNSINF`, nếu vẫn thất bại thì bật lại GNSS (`AT+CGNSPWR=0`/`1`) rồi thử lại |
 | Modem quá nóng           | Đưa `AT+CFUN=0` để tạm thời tắt RF và chờ nhiệt độ giảm trước khi tiếp tục               |
@@ -1760,12 +1760,12 @@ Module quản lý nguồn sử dụng các chân GPIO của ESP32-S3 để đi�
 | 5    | CHARGER_EN    | Output | Điều khiển IC sạc TP4056                  |
 | 18   | POWER_PATH_EN | Output | Chọn nguồn cấp (ắc quy hoặc pin dự phòng) |
 | 19   | LVD_STATUS    | Input  | Đọc trạng thái LVD từ comparator LM393    |
-| 21   | LIS3DH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU              |
-| 47   | LIS3DH_SDA    | I/O    | Đường dữ liệu I2C                         |
-| 48   | LIS3DH_SCL    | I/O    | Đường clock I2C                           |
+| 21   | LIS3DSH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU              |
+| 47   | LIS3DSH_SDA    | I/O    | Đường dữ liệu I2C                         |
+| 48   | LIS3DSH_SCL    | I/O    | Đường clock I2C                           |
 | 16   | MODEM_UART_TX | Output | UART TX đến modem                         |
 | 17   | MODEM_UART_RX | Input  | UART RX từ modem                          |
-| 26   | MODEM_PWRKEY  | Output | Điều khiển nguồn modem                    |
+| 26   | MODEM_PWR-KEY  | Output | Điều khiển nguồn modem                    |
 
 ##### b) Điều khiển Power Path (Diode OR + EN)
 
@@ -2097,7 +2097,7 @@ Cấu hình được quản lý theo ba cơ chế:
 | Cảm biến             | Phương pháp hiệu chuẩn                                | Lưu trữ |
 | -------------------- | ----------------------------------------------------- | ------- |
 | ADC (điện áp ắc quy) | So sánh với đồng hồ vạn năng, tính hệ số hiệu chỉnh   | NVS     |
-| IMU (LIS3DH)         | Đặt thiết bị trên mặt phẳng, đo offset các trục X/Y/Z | NVS     |
+| IMU (LIS3DSH)         | Đặt thiết bị trên mặt phẳng, đo offset các trục X/Y/Z | NVS     |
 | GNSS                 | Hiệu chỉnh offset vị trí (nếu cần)                    | NVS     |
 
 Các giá trị hiệu chuẩn được lưu trữ trong NVS và được tải khi thiết bị khởi động, đảm bảo tính nhất quán của phép đo giữa các lần reset.
@@ -2889,7 +2889,7 @@ Dựa trên phân tích các giải pháp đề xuất cho từng tầng hệ th
 | Vi điều khiển        | ESP32-S3                | BLE 5.0 tích hợp, dual-core, hỗ trợ AI                    |
 | LTE + GNSS           | SIMCom SIM7600CE-T      | Modem tích hợp LTE + GNSS, giảm số lượng module phần cứng |
 | OBD2 Adapter         | vgate iCar Pro (BLE)    | Không cần dây, tương thích rộng                           |
-| Cảm biến IMU         | LIS3DH                  | Siêu tiết kiệm điện, wake-on-motion                       |
+| Cảm biến IMU         | LIS3DSH                  | Siêu tiết kiệm điện, wake-on-motion                       |
 | MQTT Broker          | EMQX                    | Rules Engine, ACL per device, clustering                  |
 | Database quan hệ     | PostgreSQL 16           | Mature, PostGIS, open-source                              |
 | Database time-series | VictoriaMetrics         | Write throughput cao, PromQL compatible                   |
@@ -2909,7 +2909,7 @@ _Hình 3.23: Sơ đồ kiến trúc tổng thể phương án tối ưu_
 
 **Kiến trúc phân tầng:**
 
-- **Tầng thiết bị (Device Layer):** ESP32-S3 + SIMCom SIM7600CE-T + vgate iCar Pro + LIS3DH, quản lý nguồn thông minh với pin dự phòng 18650 1S
+- **Tầng thiết bị (Device Layer):** ESP32-S3 + SIMCom SIM7600CE-T + vgate iCar Pro + LIS3DSH, quản lý nguồn thông minh với pin dự phòng 18650 1S
 - **Tầng truyền thông (Communication Layer):** MQTT 5.0 qua 4G LTE, QoS phân tầng và cơ chế tự phục hồi kết nối
 - **Tầng xử lý (Processing Layer):** MQTT Bridge --> dual-write PostgreSQL + VictoriaMetrics, Express.js API (DDD)
 - **Tầng trình bày (Presentation Layer):** Next.js 15, Leaflet maps, Socket.IO real-time, ECharts
@@ -2969,7 +2969,7 @@ Vi điều khiển ESP32-S3-WROOM-1 được lựa chọn làm nhân xử lý tr
 
 **Giao tiếp BLE với OBD2 adapter:** ESP32-S3 sử dụng BLE 5.0 tích hợp để kết nối với adapter vgate iCar Pro (BLE 4.0). Kết nối này cho phép đọc dữ liệu chẩn đoán xe theo chuẩn OBD-II bao gồm trạng thái khóa điện (IGN), tốc độ động cơ (RPM), vận tốc xe, mức nhiên liệu và mã lỗi chẩn đoán (DTC).
 
-**Giao tiếp I2C với cảm biến LIS3DH:** Cảm biến gia tốc 3 trục LIS3DH được kết nối qua bus I2C (GPIO47 SDA, GPIO48 SCL). Cảm biến này đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang đỗ, cho phép đánh thức ESP32-S3 từ chế độ deep sleep thông qua ngắt ngoài (interrupt) khi phát hiện rung động bất thường.
+**Giao tiếp I2C với cảm biến LIS3DSH:** Cảm biến gia tốc 3 trục LIS3DSH được kết nối qua bus I2C (GPIO47 SDA, GPIO48 SCL). Cảm biến này đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang đỗ, cho phép đánh thức ESP32-S3 từ chế độ deep sleep thông qua ngắt ngoài (interrupt) khi phát hiện rung động bất thường.
 
 ![Hình 4.2a - Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3](./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-08.svg)
 
@@ -3019,10 +3019,10 @@ _Hình 4.3: Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và
 Sơ đồ nguyên lý tổng hợp của hệ thống thể hiện toàn bộ các khối mạch đã được tích hợp trên PCB do nhóm tự thiết kế. Các kết nối nội bộ chính bao gồm:
 
 - **UART1** (2 dây tín hiệu TX/RX): Kết nối với modem SIM7600CE-T để truyền nhận cả dữ liệu 4G và GNSS (AT + `AT+CGNSINF`/`AT+CGNSTST`).
-- **I2C** (2 dây tín hiệu SDA/SCL): Kết nối với cảm biến gia tốc LIS3DH
+- **I2C** (2 dây tín hiệu SDA/SCL): Kết nối với cảm biến gia tốc LIS3DSH
 - **BLE** (không dây): Kết nối với adapter OBD2 vgate iCar Pro
 - **ADC** (1 kênh): Đọc điện áp ắc quy qua voltage divider
-- **GPIO** (3 chân output): Điều khiển Power Path EN, Charger EN, Modem PWRKEY
+- **GPIO** (3 chân output): Điều khiển Power Path EN, Charger EN, Modem PWR-KEY
 - **GPIO** (2 chân input): Đọc trạng thái LVD, ngắt từ IMU
 
 ![Hình 4.4 - Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-4.svg)
@@ -3050,10 +3050,10 @@ Việc phân công chân GPIO của ESP32-S3 được thiết kế đảm bảo 
 | GPIO 17   | MODEM_UART_RX | Input             | Nhận dữ liệu UART từ modem SIM7600CE-T                                        |
 | GPIO 18   | POWER_PATH_EN | Output            | Điều khiển nhánh nguồn: LOW = ưu tiên MP2482, HIGH = ưu tiên backup SX1308    |
 | GPIO 19   | LVD_STATUS    | Input             | Đọc trạng thái Low Voltage Disconnect (HIGH = low-voltage, LOW = bình thường) |
-| GPIO 21   | LIS3DH_INT    | Input (Interrupt) | Nhận tín hiệu ngắt từ cảm biến gia tốc LIS3DH khi phát hiện chuyển động       |
-| GPIO 47   | LIS3DH_SDA    | I/O (I2C)         | Đường dữ liệu I2C kết nối với cảm biến LIS3DH                                 |
-| GPIO 48   | LIS3DH_SCL    | I/O (I2C)         | Đường xung nhịp I2C kết nối với cảm biến LIS3DH                               |
-| GPIO 26   | MODEM_PWRKEY  | Output            | Điều khiển bật/tắt nguồn modem SIM7600CE-T                                    |
+| GPIO 21   | LIS3DSH_INT    | Input (Interrupt) | Nhận tín hiệu ngắt từ cảm biến gia tốc LIS3DSH khi phát hiện chuyển động       |
+| GPIO 47   | LIS3DSH_SDA    | I/O (I2C)         | Đường dữ liệu I2C kết nối với cảm biến LIS3DSH                                 |
+| GPIO 48   | LIS3DSH_SCL    | I/O (I2C)         | Đường xung nhịp I2C kết nối với cảm biến LIS3DSH                               |
+| GPIO 26   | MODEM_PWR-KEY  | Output            | Điều khiển bật/tắt nguồn modem SIM7600CE-T                                    |
 
 #### b) Các lưu ý về phân công chân
 
@@ -3061,11 +3061,11 @@ Việc phân công chân GPIO cần tuân thủ một số ràng buộc kỹ thu
 
 - **GPIO 34–39** chỉ hỗ trợ chế độ input, không có điện trở pull-up/pull-down nội. Do đó, các chân này không được sử dụng cho các tín hiệu output trong thiết kế này.
 - **Các chân ADC** nằm trong dải GPIO 0–15 và GPIO 25–27, hỗ trợ độ phân giải 12-bit. Chân GPIO 4 được chọn làm kênh ADC đo điện áp vì nằm trong vùng ADC1, cho phép đọc đồng thời với WiFi/BLE.
-- **Deep Sleep Wakeup** hỗ trợ qua hai cơ chế: EXT0 (GPIO 0–31) và EXT1 (GPIO 32–39). Chân GPIO 21 (LIS3DH_INT) nằm trong vùng EXT0, cho phép đánh thức ESP32-S3 khi cảm biến gia tốc phát hiện rung động.
+- **Deep Sleep Wakeup** hỗ trợ qua hai cơ chế: EXT0 (GPIO 0–31) và EXT1 (GPIO 32–39). Chân GPIO 21 (LIS3DSH_INT) nằm trong vùng EXT0, cho phép đánh thức ESP32-S3 khi cảm biến gia tốc phát hiện rung động.
 
 #### c) Sơ đồ đấu nối tổng thể
 
-Sơ đồ đấu nối mô tả cách ánh xạ chân giữa ESP32-S3-WROOM-1 trên PCB chính và các khối phần cứng tích hợp trên bo mạch. Hình 4.5 đã được chuẩn hóa theo pin mapping firmware hiện tại, trong đó `GPIO47/48` dành cho I2C IMU, `GPIO26` điều khiển `PWRKEY`, `GPIO19` nhận `LVD_STATUS`, và `GPIO4` đo `U_batt`.
+Sơ đồ đấu nối mô tả cách ánh xạ chân giữa ESP32-S3-WROOM-1 trên PCB chính và các khối phần cứng tích hợp trên bo mạch. Hình 4.5 đã được chuẩn hóa theo pin mapping firmware hiện tại, trong đó `GPIO47/48` dành cho I2C IMU, `GPIO26` điều khiển `PWR-KEY`, `GPIO19` nhận `LVD_STATUS`, và `GPIO4` đo `U_batt`.
 
 ![Hình 4.5 - Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần cứng tích hợp](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-5.svg)
 
@@ -3252,7 +3252,7 @@ Các nội dung triển khai chi tiết ở tầng phần mềm được trình 
 | STT | Thành phần                   | Đơn vị | SL  | Giá ước tính (VND) | Ghi chú                                         |
 | --- | ---------------------------- | ------ | --- | ------------------ | ----------------------------------------------- |
 | 1   | ESP32-S3-WROOM-1 (N16R8)     | Cái    | 1   | 100,000–200,000    | MCU trung tâm của bo mạch                       |
-| 2   | IC cảm biến LIS3DH           | Cái    | 1   | 20,000–50,000      | Cảm biến gia tốc 3 trục, giao tiếp I2C          |
+| 2   | IC cảm biến LIS3DSH           | Cái    | 1   | 20,000–50,000      | Cảm biến gia tốc 3 trục, giao tiếp I2C          |
 | 3   | vgate iCar Pro (OBD2 BLE)    | Cái    | 1   | 150,000–300,000    | Adapter OBD2 BLE 4.0, tương thích ESP32-S3      |
 | 4   | SIMCom SIM7600CE-T           | Bộ     | 1   | 330,000–500,000    | Modem LTE Cat-4 tích hợp GNSS + anten + khe SIM |
 | 5   | Pin 18650 1S Li-ion 3500mAh  | Cái    | 1   | 100,000–200,000    | Loại có protection board                        |
@@ -3291,11 +3291,11 @@ Quy trình lắp ráp mạch điện tử được triển khai theo các bướ
 
 **Bước 2 - Lắp ráp khối nguồn trên PCB:** Hàn và kiểm tra MP2482 để tạo bus 5V từ nguồn ắc quy xe (12V hoặc 24V). Lắp XL1509 3.3E cấp riêng cho ESP32-S3, TPS54231 tạo rail ~4V cho modem SIM7600CE-T, SX1308 tạo 5V backup từ pin 18650 1S, diode OR giữa nhánh 5V chính và nhánh 5V backup, cùng TP4056 kết nối với pin và BMS.
 
-**Bước 3 - Lắp ráp khối xử lý và điều khiển:** Hàn ESP32-S3-WROOM-1, LIS3DH, LM393 và các linh kiện liên quan lên PCB chính. Kiểm tra các chân GPIO theo bảng phân công (Bảng 4.1) và cấp nguồn theo từng rail chức năng (3.3V logic, ~4V modem, 5V bus/backup).
+**Bước 3 - Lắp ráp khối xử lý và điều khiển:** Hàn ESP32-S3-WROOM-1, LIS3DSH, LM393 và các linh kiện liên quan lên PCB chính. Kiểm tra các chân GPIO theo bảng phân công (Bảng 4.1) và cấp nguồn theo từng rail chức năng (3.3V logic, ~4V modem, 5V bus/backup).
 
-**Bước 4 - Tích hợp các thành phần còn lại:** Lắp modem SIM7600CE-T lên bo mạch, kiểm tra UART1 (GPIO16, GPIO17) và chân `PWRKEY` (GPIO26), cấu hình lấy dữ liệu GNSS qua `AT+CGNSINF`/`AT+CGNSTST` trên cùng UART, kiểm tra cảm biến LIS3DH trên I2C (GPIO47, GPIO48), và hiệu chuẩn mạch đo điện áp ắc quy tại GPIO4 (ADC).
+**Bước 4 - Tích hợp các thành phần còn lại:** Lắp modem SIM7600CE-T lên bo mạch, kiểm tra UART1 (GPIO16, GPIO17) và chân `PWR-KEY` (GPIO26), cấu hình lấy dữ liệu GNSS qua `AT+CGNSINF`/`AT+CGNSTST` trên cùng UART, kiểm tra cảm biến LIS3DSH trên I2C (GPIO47, GPIO48), và hiệu chuẩn mạch đo điện áp ắc quy tại GPIO4 (ADC).
 
-**Bước 5 - Kiểm tra tích hợp:** Nạp firmware cơ bản để kiểm tra từng chức năng: đọc ADC, điều khiển GPIO, giao tiếp UART với modem, quét BLE, đọc I2C từ LIS3DH. Kiểm tra chuyển nguồn tự động bằng cách thay đổi điện áp đầu vào.
+**Bước 5 - Kiểm tra tích hợp:** Nạp firmware cơ bản để kiểm tra từng chức năng: đọc ADC, điều khiển GPIO, giao tiếp UART với modem, quét BLE, đọc I2C từ LIS3DSH. Kiểm tra chuyển nguồn tự động bằng cách thay đổi điện áp đầu vào.
 
 **Bước 6 - Lắp ráp vào vỏ:** Định vị bo mạch chính, cụm anten và pin dự phòng bên trong vỏ hộp theo bố cục đã thiết kế. Cố định bằng ốc vít hoặc keo nhiệt. Kết nối anten 4G/LTE và GNSS. Đóng nắp vỏ hộp và kiểm tra tổng thể.
 
@@ -3318,7 +3318,7 @@ Sau khi lắp ráp, hệ thống cần được kiểm tra và hiệu chuẩn:
 - **Hiệu chuẩn ADC:** So sánh giá trị điện áp đọc từ ADC với giá trị đo từ đồng hồ vạn năng (multimeter). Điều chỉnh hệ số hiệu chỉnh trong firmware nếu cần.
 - **Kiểm tra chuyển nguồn:** Mô phỏng tình huống ắc quy yếu theo profile cấu hình (ví dụ hệ 12V giảm từ 12V xuống dưới 12V), xác nhận hệ thống tự động chuyển sang pin dự phòng.
 - **Kiểm tra sạc pin:** Xác nhận IC sạc TP4056 hoạt động đúng: sạc khi IGN ON, ngừng sạc khi IGN OFF hoặc U_batt thấp.
-- **Kiểm tra giao tiếp:** Xác nhận modem phản hồi lệnh AT qua UART, cảm biến LIS3DH trả về dữ liệu qua I2C, kết nối BLE với OBD2 adapter thành công.
+- **Kiểm tra giao tiếp:** Xác nhận modem phản hồi lệnh AT qua UART, cảm biến LIS3DSH trả về dữ liệu qua I2C, kết nối BLE với OBD2 adapter thành công.
 
 ---
 
@@ -3373,7 +3373,7 @@ Sau khi lắp đặt xong, cần thực hiện các kiểm tra sau:
 3. **Kiểm tra GNSS:** Xác nhận modem SIM7600CE-T bắt được vệ tinh và trả về tọa độ GPS chính xác (sai số < 5 mét)
 4. **Kiểm tra 4G/LTE:** Xác nhận modem đăng ký mạng thành công, gửi được dữ liệu lên server qua MQTT
 5. **Kiểm tra chuyển nguồn:** Tắt máy xe (IGN OFF), xác nhận thiết bị chuyển sang chế độ tiết kiệm năng lượng và sử dụng pin dự phòng khi cần
-6. **Kiểm tra deep sleep:** Xác nhận ESP32-S3 vào chế độ deep sleep khi xe đỗ, và đánh thức đúng khi phát hiện rung động (qua LIS3DH) hoặc đến chu kỳ heartbeat
+6. **Kiểm tra deep sleep:** Xác nhận ESP32-S3 vào chế độ deep sleep khi xe đỗ, và đánh thức đúng khi phát hiện rung động (qua LIS3DSH) hoặc đến chu kỳ heartbeat
 
 ![Hình 4.16 - Checklist kiểm tra hệ thống sau khi lắp đặt trong xe](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-16.svg)
 
@@ -3505,10 +3505,10 @@ Việc đồng bộ giữa các mô-đun được thực hiện có chọn lọc
 | 17   | MODEM_UART_RX | Input  | UART RX từ modem SIM7600CE-T             |
 | 18   | POWER_PATH_EN | Output | Chọn nguồn cấp (ắc quy/pin dự phòng)     |
 | 19   | LVD_STATUS    | Input  | Trạng thái từ comparator LM393           |
-| 21   | LIS3DH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU             |
-| 47   | LIS3DH_SDA    | I/O    | I2C data line                            |
-| 48   | LIS3DH_SCL    | I/O    | I2C clock line                           |
-| 26   | MODEM_PWRKEY  | Output | Điều khiển nguồn modem                   |
+| 21   | LIS3DSH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU             |
+| 47   | LIS3DSH_SDA    | I/O    | I2C data line                            |
+| 48   | LIS3DSH_SCL    | I/O    | I2C clock line                           |
+| 26   | MODEM_PWR-KEY  | Output | Điều khiển nguồn modem                   |
 
 ---
 
@@ -3713,10 +3713,10 @@ int modem_init(modem_ctx_t *ctx)
 {
     // Bước 1: Kiểm tra modem phản hồi
     if (modem_send_at(ctx, "AT", "OK", 5000) != 0) {
-        // Modem không phản hồi - reset bằng GPIO PWRKEY
-        gpio_set_level(MODEM_PWRKEY, 0);
+        // Modem không phản hồi - reset bằng GPIO PWR-KEY
+        gpio_set_level(MODEM_PWR-KEY, 0);
         vTaskDelay(pdMS_TO_TICKS(1500));
-        gpio_set_level(MODEM_PWRKEY, 1);
+        gpio_set_level(MODEM_PWR-KEY, 1);
         vTaskDelay(pdMS_TO_TICKS(10000));  // Đợi khởi động lại
         if (modem_send_at(ctx, "AT", "OK", 5000) != 0) {
             return -1;  // Khởi tạo thất bại
@@ -3979,7 +3979,7 @@ void enter_deep_sleep(uint32_t sleep_duration_sec)
     //    - Timer: heartbeat định kỳ
     esp_sleep_enable_timer_wakeup(sleep_duration_sec * 1000000ULL);
     //    - IMU interrupt: phát hiện chuyển động
-    esp_sleep_enable_ext0_wakeup(LIS3DH_INT, 1);
+    esp_sleep_enable_ext0_wakeup(LIS3DSH_INT, 1);
 
     // 7. Vào deep sleep
     esp_deep_sleep_start();
@@ -5175,7 +5175,7 @@ _Hình 4.32: Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ
 **Phân tích kết quả:**
 
 - Dòng tiêu thụ trong chế độ Active (~350 mA) phù hợp với tính toán thiết kế tại Chương 3, trong đó modem SIM7600CE-T chiếm khoảng 200–250 mA (khi truyền dữ liệu 4G), ESP32-S3 chiếm khoảng 60–80 mA và linh kiện phụ trợ chiếm khoảng 20–30 mA.
-- Dòng tiêu thụ trong chế độ Deep Sleep (~0.5 mA) nằm sát ngưỡng thiết kế hệ thống. Giá trị này cao hơn mức lý thuyết của riêng lõi ESP32-S3 + LIS3DH do còn có tổn hao từ mạch nguồn, đường cấp nguồn, linh kiện phụ trợ và điều kiện đo thực tế. Dù vậy, mức tiêu thụ này vẫn đủ để thiết bị duy trì giám sát đỗ xe trong thời gian dài mà không gây hao ắc quy đáng kể.
+- Dòng tiêu thụ trong chế độ Deep Sleep (~0.5 mA) nằm sát ngưỡng thiết kế hệ thống. Giá trị này cao hơn mức lý thuyết của riêng lõi ESP32-S3 + LIS3DSH do còn có tổn hao từ mạch nguồn, đường cấp nguồn, linh kiện phụ trợ và điều kiện đo thực tế. Dù vậy, mức tiêu thụ này vẫn đủ để thiết bị duy trì giám sát đỗ xe trong thời gian dài mà không gây hao ắc quy đáng kể.
 - Dòng peak khi truyền dữ liệu 4G (~520 mA) cần được lưu ý trong thiết kế mạch nguồn, đảm bảo tụ điện lọc (decoupling capacitor) đủ lớn để tránh sụt áp.
 
 #### 4.3.2.2. Thời lượng pin dự phòng
@@ -5789,7 +5789,7 @@ Mã nguồn hiện tại không tổ chức thành nhiều task nghiệp vụ c�
 
 **Máy trạng thái (State Machine):**
 
-Máy trạng thái ba chế độ (Driving, Parking, Alert) hoạt động chính xác trong các kịch bản thử nghiệm. Việc chuyển đổi giữa các trạng thái dựa trên tín hiệu IGN (ignition) và dữ liệu IMU LIS3DH được thực hiện trơn tru, không xảy ra tình trạng "state bouncing" nhờ cơ chế debounce và hysteresis. Thời gian chuyển từ Parking sang Alert khi phát hiện chuyển động bất thường dưới 500 ms, đảm bảo cảnh báo kịp thời.
+Máy trạng thái ba chế độ (Driving, Parking, Alert) hoạt động chính xác trong các kịch bản thử nghiệm. Việc chuyển đổi giữa các trạng thái dựa trên tín hiệu IGN (ignition) và dữ liệu IMU LIS3DSH được thực hiện trơn tru, không xảy ra tình trạng "state bouncing" nhờ cơ chế debounce và hysteresis. Thời gian chuyển từ Parking sang Alert khi phát hiện chuyển động bất thường dưới 500 ms, đảm bảo cảnh báo kịp thời.
 
 **Khả năng tự phục hồi kết nối và OTA:**
 
@@ -5857,7 +5857,7 @@ Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính t
 | ESP32-S3-WROOM-1                       | Vi điều khiển chính       | 80.000–150.000        |
 | SIMCom SIM7600CE-T                     | Modem LTE + GNSS tích hợp | 330.000–500.000       |
 | vgate iCar Pro BLE                     | Adapter OBD2 BLE          | 250.000–500.000       |
-| IC cảm biến LIS3DH                     | Cảm biến gia tốc (IMU)    | 30.000–50.000         |
+| IC cảm biến LIS3DSH                     | Cảm biến gia tốc (IMU)    | 30.000–50.000         |
 | Pin 18650 1S (1 cell, 3500mAh)         | Pin dự phòng              | 80.000–120.000        |
 | Mạch sạc TP4056 + boost/buck converter | Quản lý năng lượng        | 50.000–100.000        |
 | PCB, vỏ hộp, dây cáp, linh kiện phụ    | Cơ khí và kết nối         | 130.000–260.000       |
@@ -6065,7 +6065,7 @@ Kiến thức về vi xử lý và vi điều khiển đóng vai trò cốt lõi
 
 - **Lập trình ESP32-S3**: Áp dụng kiến thức về kiến trúc Xtensa LX7 dual-core, thanh ghi, bộ nhớ và tập lệnh để lập trình firmware trên nền tảng ESP-IDF. Việc hiểu rõ kiến trúc phần cứng của MCU giúp tối ưu hóa hiệu suất và tiêu thụ năng lượng.
 - **FreeRTOS và đồng bộ tài nguyên**: Kiến thức về hệ điều hành thời gian thực được áp dụng để tổ chức task nền NimBLE, dùng mutex cho kênh AT command, semaphore cho phản hồi BLE OBD2 và queue/mutex trong BLE manager. Dù firmware không chia thành nhiều task nghiệp vụ cấp cao, tư duy đồng bộ tài nguyên và kiểm soát cạnh tranh vẫn là phần được vận dụng trực tiếp.
-- **Giao tiếp ngoại vi GPIO/ADC/UART/I2C/SPI**: Cấu hình và sử dụng các giao diện ngoại vi để giao tiếp với modem SIM7600CE-T (UART, tích hợp LTE + GNSS), cảm biến LIS3DH (SPI/I2C), đọc điện áp ắc quy (ADC), và điều khiển power path EN/charger (GPIO). Đây là những kỹ năng cơ bản được rèn luyện trong các bài thực hành vi điều khiển.
+- **Giao tiếp ngoại vi GPIO/ADC/UART/I2C/SPI**: Cấu hình và sử dụng các giao diện ngoại vi để giao tiếp với modem SIM7600CE-T (UART, tích hợp LTE + GNSS), cảm biến LIS3DSH (SPI/I2C), đọc điện áp ắc quy (ADC), và điều khiển power path EN/charger (GPIO). Đây là những kỹ năng cơ bản được rèn luyện trong các bài thực hành vi điều khiển.
 
 ### 6.1.2. Mạng máy tính và IoT
 
@@ -6099,7 +6099,7 @@ Kiến thức điện tử là nền tảng cho việc thiết kế phần cứn
 
 - **Thiết kế mạch quản lý nguồn**: Áp dụng kiến thức về mạch buck converter (giảm áp ắc quy xe 12V hoặc 24V xuống 3.3V/5V), boost converter (tăng áp từ pin 3.7V lên 5V), và power path management để thiết kế hệ thống cấp nguồn đa đầu vào (ắc quy xe + pin dự phòng).
 - **Đọc giá trị ADC**: Sử dụng kiến thức về bộ chuyển đổi tương tự - số (ADC) để đọc điện áp ắc quy xe thông qua mạch chia áp (voltage divider), tính toán độ phân giải và sai số.
-- **Giao tiếp cảm biến**: Áp dụng kiến thức về giao diện SPI/I2C để giao tiếp với cảm biến gia tốc LIS3DH, cấu hình các thanh ghi điều khiển, đọc dữ liệu gia tốc 3 trục, và thiết lập ngắt (interrupt) cho phát hiện chuyển động.
+- **Giao tiếp cảm biến**: Áp dụng kiến thức về giao diện SPI/I2C để giao tiếp với cảm biến gia tốc LIS3DSH, cấu hình các thanh ghi điều khiển, đọc dữ liệu gia tốc 3 trục, và thiết lập ngắt (interrupt) cho phát hiện chuyển động.
 
 ### 6.1.6. Kỹ thuật phần mềm
 
@@ -6374,9 +6374,9 @@ Chương 6 cho thấy việc xây dựng một hệ thống IoT giám sát phư�
 
 [22] SIMCom Wireless Solutions, "SIM7600CE-T Module Hardware Design Guide," Version 1.02, 2022.
 
-[23] STMicroelectronics, "LIS3DH - MEMS Digital Output Motion Sensor Ultra-Low-Power High-Performance 3-Axis 'Nano' Accelerometer Datasheet," DocID 17530, Rev. 3, 2021. [Online]. Available: https://www.st.com/resource/en/datasheet/lis3dh.pdf
+[23] STMicroelectronics, "LIS3DSH - MEMS Digital Output Motion Sensor Ultra-Low-Power High-Performance 3-Axis 'Nano' Accelerometer Datasheet," DocID 17530, Rev. 3, 2021. [Online]. Available: https://www.st.com/resource/en/datasheet/lis3dh.pdf
 
-[24] STMicroelectronics, "LIS3DH Application Note AN3308," Rev. 2, 2020.
+[24] STMicroelectronics, "LIS3DSH Application Note AN3308," Rev. 2, 2020.
 
 [25] OASIS, "MQTT Version 5.0 - OASIS Standard," Mar. 2019. [Online]. Available: https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html
 
@@ -6489,7 +6489,7 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | 1   | Vi điều khiển     | ESP32-S3-WROOM-1 (N16R8)              | 1        | 120.000       | 120.000          | MCU chính, 16MB Flash, 8MB PSRAM                    |
 | 2   | LTE + GNSS        | SIMCom SIM7600CE-T                    | 1 bộ     | 330.000       | 330.000          | Modem LTE Cat-4 tích hợp GPS/GNSS                   |
 | 3   | OBD2 Adapter      | vgate iCar Pro BLE                    | 1        | 350.000       | 350.000          | Bluetooth Low Energy OBD2                           |
-| 4   | Cảm biến gia tốc  | IC LIS3DH                             | 1        | 45.000        | 45.000           | IMU 3 trục, phát hiện chuyển động                   |
+| 4   | Cảm biến gia tốc  | IC LIS3DSH                             | 1        | 45.000        | 45.000           | IMU 3 trục, phát hiện chuyển động                   |
 | 5   | Pin dự phòng      | 18650 1S Li-ion 3500mAh               | 1        | 80.000        | 80.000           | Samsung/LG cell                                     |
 | 6   | IC sạc pin        | TP4056 + mạch phụ trợ                 | 1        | 25.000        | 25.000           | Sạc 1S, input 5V từ MP2482, dòng theo PROG          |
 | 7   | Buck 3.3V         | Mạch XL1509 3.3E                      | 1        | 18.000        | 18.000           | 12–24V -> 3.3V cấp ESP32-S3                         |

@@ -31,6 +31,9 @@ static bool s_lte_connected = false;
 
 #define MODEM_LTE_CEREG_MAX_RETRY 20
 #define MODEM_LTE_CEREG_POLL_INTERVAL_MS 1000
+#define MODEM_LTE_POWER_RAIL_SETTLE_MS 250
+#define MODEM_LTE_WAKE_DTR_SETTLE_MS 50
+#define MODEM_LTE_AT_RETRY_AFTER_RESET 1
 
 /**
  * @brief Send AT command and check expected token.
@@ -43,6 +46,44 @@ static bool s_lte_connected = false;
  */
 static esp_err_t modem_lte_send_simple(const char *cmd, const char *expect, uint32_t timeout_ms) {
     return modem_at_send_expect(cmd, expect, timeout_ms);
+}
+
+/**
+ * @brief Issue hard reset once when AT probe fails.
+ *
+ * @return ESP_OK on success, otherwise reset/AT errors.
+ */
+static esp_err_t modem_lte_recover_with_reset(void) {
+    esp_err_t reset_err = modem_reset_pulse();
+    if (reset_err == ESP_ERR_NOT_SUPPORTED) {
+        return ESP_FAIL;
+    }
+    ESP_RETURN_ON_FALSE(reset_err == ESP_OK, reset_err, TAG, "Modem reset failed");
+
+    vTaskDelay(pdMS_TO_TICKS(MODEM_LTE_POWER_RAIL_SETTLE_MS));
+    ESP_RETURN_ON_FALSE(modem_lte_send_simple("AT\r", "OK", 5000) == ESP_OK, ESP_FAIL, TAG, "AT failed after reset");
+    return ESP_OK;
+}
+
+/**
+ * @brief Log modem STATUS/NET-LIGHT lines when mapping exists.
+ */
+static void modem_lte_log_hw_lines_if_available(void) {
+    bool level = false;
+
+    esp_err_t status_err = modem_read_status(&level);
+    if (status_err == ESP_OK) {
+        ESP_LOGI(TAG, "SIM7600 STATUS=%d", level ? 1 : 0);
+    } else if (status_err != ESP_ERR_NOT_SUPPORTED) {
+        ESP_LOGW(TAG, "Read STATUS failed: %s", esp_err_to_name(status_err));
+    }
+
+    esp_err_t netlight_err = modem_read_netlight(&level);
+    if (netlight_err == ESP_OK) {
+        ESP_LOGI(TAG, "SIM7600 NET-LIGHT=%d", level ? 1 : 0);
+    } else if (netlight_err != ESP_ERR_NOT_SUPPORTED) {
+        ESP_LOGW(TAG, "Read NET-LIGHT failed: %s", esp_err_to_name(netlight_err));
+    }
 }
 
 /**
@@ -99,10 +140,26 @@ esp_err_t modem_lte_init(void) {
 
     /* Power up modem hardware and initialize AT transport first. */
     ESP_RETURN_ON_FALSE(modem_power_on() == ESP_OK, ESP_FAIL, TAG, "Modem power on failed");
+    vTaskDelay(pdMS_TO_TICKS(MODEM_LTE_POWER_RAIL_SETTLE_MS));
+
+    /* Drive DTR low when available so modem stays in active mode during init. */
+    esp_err_t dtr_err = modem_set_dtr(false);
+    if (dtr_err != ESP_OK && dtr_err != ESP_ERR_NOT_SUPPORTED) {
+        ESP_LOGW(TAG, "Set DTR failed: %s", esp_err_to_name(dtr_err));
+    }
+    vTaskDelay(pdMS_TO_TICKS(MODEM_LTE_WAKE_DTR_SETTLE_MS));
+
     ESP_RETURN_ON_FALSE(modem_at_init() == ESP_OK, ESP_FAIL, TAG, "AT init failed");
 
     /* Basic sanity and modem setup sequence. */
-    ESP_RETURN_ON_FALSE(modem_lte_send_simple("AT\r", "OK", 5000) == ESP_OK, ESP_FAIL, TAG, "AT failed");
+    esp_err_t at_err = modem_lte_send_simple("AT\r", "OK", 5000);
+    if (at_err != ESP_OK) {
+        ESP_RETURN_ON_FALSE(MODEM_LTE_AT_RETRY_AFTER_RESET > 0 && modem_lte_recover_with_reset() == ESP_OK,
+                            ESP_FAIL,
+                            TAG,
+                            "AT failed and recovery failed");
+    }
+
     ESP_RETURN_ON_FALSE(modem_lte_send_simple("ATE0\r", "OK", 5000) == ESP_OK, ESP_FAIL, TAG, "ATE0 failed");
     ESP_RETURN_ON_FALSE(modem_lte_send_simple("AT+CPIN?\r", "+CPIN: READY", 5000) == ESP_OK,
                         ESP_FAIL,
@@ -120,6 +177,8 @@ esp_err_t modem_lte_init(void) {
                         ESP_FAIL,
                         TAG,
                         "PDP config failed");
+
+    modem_lte_log_hw_lines_if_available();
 
     s_lte_initialized = true;
     return ESP_OK;
@@ -179,6 +238,11 @@ esp_err_t modem_lte_disconnect(void) {
  * @return ESP_OK on success, otherwise modem command error.
  */
 esp_err_t modem_lte_sleep(void) {
+    esp_err_t dtr_err = modem_set_dtr(true);
+    if (dtr_err != ESP_OK && dtr_err != ESP_ERR_NOT_SUPPORTED) {
+        ESP_LOGW(TAG, "Set DTR sleep failed: %s", esp_err_to_name(dtr_err));
+    }
+
     return modem_lte_send_simple("AT+CSCLK=1\r", "OK", 5000);
 }
 
@@ -188,6 +252,11 @@ esp_err_t modem_lte_sleep(void) {
  * @return ESP_OK on success, otherwise modem command error.
  */
 esp_err_t modem_lte_wakeup(void) {
+    esp_err_t dtr_err = modem_set_dtr(false);
+    if (dtr_err != ESP_OK && dtr_err != ESP_ERR_NOT_SUPPORTED) {
+        ESP_LOGW(TAG, "Set DTR wake failed: %s", esp_err_to_name(dtr_err));
+    }
+
     return modem_lte_send_simple("AT\r", "OK", 5000);
 }
 

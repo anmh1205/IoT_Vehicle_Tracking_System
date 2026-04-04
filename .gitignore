@@ -51,3 +51,5 @@
 .worktrees/
 .security-key
 logs/security/
+.gstack/
+/iot-vehicle-tracking-system-hardware/Project Logs for iot-vehicle-tracking-system-main

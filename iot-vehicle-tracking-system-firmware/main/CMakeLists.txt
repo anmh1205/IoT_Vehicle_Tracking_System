@@ -6,7 +6,7 @@ idf_component_register(
         "src/ble_obd.c"
         "src/ble_util.c"
         "src/adc_reader.c"
-        "src/imu_lis3dh.c"
+        "src/imu_lis3dsh.c"
         "src/power_mgr.c"
         "src/modem_at.c"
         "src/modem_lte.c"
@@ -17,6 +17,10 @@ idf_component_register(
         "src/state_machine.c"
         "src/nvs_config.c"
         "src/util.c"
+        "src/sd_log_store.c"
+        "src/offline_queue.c"
+        "src/session_mgr.c"
+        "src/telemetry_counters.c"
     INCLUDE_DIRS
         "inc"
     REQUIRES
@@ -32,4 +36,7 @@ idf_component_register(
         mqtt
         nvs_flash
         esp_timer
+        fatfs
+        sdmmc
+        vfs
 )

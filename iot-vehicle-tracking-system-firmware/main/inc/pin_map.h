@@ -22,14 +22,22 @@
 #define PIN_POWER_MUX_SEL GPIO_NUM_18
 /** @brief Low-voltage detector status input pin. */
 #define PIN_LVD_STATUS GPIO_NUM_19
-/** @brief LIS3DH interrupt pin (INT1). */
-#define PIN_LIS3DH_INT GPIO_NUM_21
-/** @brief LIS3DH I2C SDA pin. */
-#define PIN_LIS3DH_SDA GPIO_NUM_47
-/** @brief LIS3DH I2C SCL pin. */
-#define PIN_LIS3DH_SCL GPIO_NUM_48
-/** @brief Modem power-key control pin. */
+/** @brief LIS3DSH interrupt pin (INT1). */
+#define PIN_LIS3DSH_INT GPIO_NUM_21
+/** @brief LIS3DSH I2C SDA pin. */
+#define PIN_LIS3DSH_SDA GPIO_NUM_47
+/** @brief LIS3DSH I2C SCL pin. */
+#define PIN_LIS3DSH_SCL GPIO_NUM_48
+/** @brief Modem power-key control pin (SIM7600 PWR-KEY). */
 #define PIN_MODEM_PWRKEY GPIO_NUM_26
+/** @brief Modem hardware reset control pin (SIM7600 RESET). */
+#define PIN_MODEM_RESET GPIO_NUM_NC
+/** @brief Modem sleep handshake pin (SIM7600 SIM-DTR). */
+#define PIN_MODEM_DTR GPIO_NUM_NC
+/** @brief Modem status input pin (SIM7600 STATUS). */
+#define PIN_MODEM_STATUS GPIO_NUM_NC
+/** @brief Modem network light input pin (SIM7600 NET-LIGHT). */
+#define PIN_MODEM_NETLIGHT GPIO_NUM_NC
 
 /** @brief UART peripheral used for modem AT communication. */
 #define MODEM_UART_NUM UART_NUM_1

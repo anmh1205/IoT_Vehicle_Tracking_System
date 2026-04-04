@@ -18,6 +18,7 @@
  * @param payload Null-terminated command payload.
  */
 typedef void (*mqtt_command_cb_t)(const char *topic, const char *payload);
+typedef void (*mqtt_puback_cb_t)(int msg_id);
 
 /**
  * @brief Initialize MQTT client and derive device-scoped topics.
@@ -59,6 +60,7 @@ bool tracker_mqtt_is_connected(void);
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t tracker_mqtt_publish(const char *topic, const char *payload, int qos);
+int tracker_mqtt_publish_with_msg_id(const char *topic, const char *payload, int qos);
 
 /**
  * @brief Publish payload to `v1/{device}/rawdata`.
@@ -109,6 +111,7 @@ esp_err_t tracker_mqtt_subscribe_commands(void);
  * @param cb Callback function.
  */
 void tracker_mqtt_set_command_callback(mqtt_command_cb_t cb);
+void tracker_mqtt_set_puback_callback(mqtt_puback_cb_t cb);
 
 /**
  * @brief Get rawdata topic string.

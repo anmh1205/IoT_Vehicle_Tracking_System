@@ -8,6 +8,7 @@
 
 #include "driver/gpio.h"
 
+#include "esp_err.h"
 #include "esp_log.h"
 #include "esp_ota_ops.h"
 #include "esp_sleep.h"
@@ -20,13 +21,16 @@
 #include "ble_obd.h"
 #include "command_handler.h"
 #include "data_formatter.h"
-#include "imu_lis3dh.h"
+#include "imu_lis3dsh.h"
 #include "modem_gnss.h"
 #include "modem_lte.h"
 #include "mqtt_client.h"
 #include "obd.h"
+#include "offline_queue.h"
 #include "pin_map.h"
 #include "power_mgr.h"
+#include "session_mgr.h"
+#include "telemetry_counters.h"
 #include "util.h"
 
 /**
@@ -58,6 +62,7 @@ static ble_obd_ctx_t *s_ble_ctx = NULL;
 static uint64_t s_last_raw_publish_ms = 0;
 static uint64_t s_alarm_enter_ms = 0;
 static uint32_t s_session_id = 1;
+static uint64_t s_ignition_off_started_ms = 0;
 static bool s_status_running = false;
 static bool s_mqtt_started = false;
 static bool s_ota_confirm_checked = false;
@@ -151,6 +156,10 @@ static void state_machine_command_callback(const char *topic, const char *payloa
     command_handler_process(payload);
 }
 
+static void state_machine_puback_callback(int msg_id) {
+    offline_queue_handle_publish_ack(msg_id);
+}
+
 /**
  * @brief Refresh telemetry snapshot from sensors/modem/OBD.
  *
@@ -192,11 +201,15 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
  * @brief Format and publish rawdata payload.
  */
 static void state_machine_publish_rawdata(void) {
-    char *payload = data_format_rawdata(&s_config, &s_telemetry);
+    char *payload = data_format_rawdata(&s_config, &s_telemetry, true);
     if (payload == NULL) {
         return;
     }
-    tracker_mqtt_publish_rawdata(payload);
+
+    (void)offline_queue_enqueue(OFFLINE_RECORD_RAWDATA,
+                                payload,
+                                s_telemetry.gnss.fix_valid,
+                                tracker_mqtt_is_connected());
     cJSON_free(payload);
     s_last_raw_publish_ms = util_uptime_ms();
 }
@@ -207,11 +220,15 @@ static void state_machine_publish_rawdata(void) {
  * @param status Status string.
  */
 static void state_machine_publish_status(const char *status) {
-    char *payload = data_format_status(&s_config, status, s_session_id);
+    char *payload = data_format_status(&s_config, status, s_session_id, true);
     if (payload == NULL) {
         return;
     }
-    tracker_mqtt_publish_status(payload);
+
+    (void)offline_queue_enqueue(OFFLINE_RECORD_STATUS,
+                                payload,
+                                s_telemetry.gnss.fix_valid,
+                                tracker_mqtt_is_connected());
     cJSON_free(payload);
 }
 
@@ -219,11 +236,15 @@ static void state_machine_publish_status(const char *status) {
  * @brief Format and publish event payload.
  */
 static void state_machine_publish_event(const char *event_type, int code, const char *message) {
-    char *payload = data_format_event(&s_config, event_type, code, message);
+    char *payload = data_format_event(&s_config, event_type, code, message, true);
     if (payload == NULL) {
         return;
     }
-    tracker_mqtt_publish_event(payload);
+
+    (void)offline_queue_enqueue(OFFLINE_RECORD_EVENT,
+                                payload,
+                                s_telemetry.gnss.fix_valid,
+                                tracker_mqtt_is_connected());
     cJSON_free(payload);
 }
 
@@ -237,11 +258,15 @@ static void state_machine_publish_firmware_payload(const firmware_status_t *firm
         return;
     }
 
-    char *payload = data_format_firmware(&s_config, firmware);
+    char *payload = data_format_firmware(&s_config, firmware, true);
     if (payload == NULL) {
         return;
     }
-    tracker_mqtt_publish_firmware(payload);
+
+    (void)offline_queue_enqueue(OFFLINE_RECORD_FIRMWARE,
+                                payload,
+                                s_telemetry.gnss.fix_valid,
+                                tracker_mqtt_is_connected());
     cJSON_free(payload);
 }
 
@@ -453,10 +478,11 @@ static void state_machine_prepare_sleep(void) {
     charger_disable();
     power_select_backup();
 
+    (void)modem_set_dtr(true);
     gpio_set_level(PIN_MODEM_PWRKEY, 0);
 
     /* Wake by motion interrupt or periodic heartbeat timer. */
-    esp_sleep_enable_ext0_wakeup(PIN_LIS3DH_INT, 1);
+    esp_sleep_enable_ext0_wakeup(PIN_LIS3DSH_INT, 1);
     esp_sleep_enable_timer_wakeup((uint64_t)s_config.heartbeat_interval_s * 1000000ULL);
 }
 
@@ -480,10 +506,18 @@ esp_err_t state_machine_init(const config_t *config) {
     /* Bring up local sensors, modem, and transport modules. */
     ESP_RETURN_ON_FALSE(adc_reader_init() == ESP_OK, ESP_FAIL, TAG, "adc_reader_init failed");
     ESP_RETURN_ON_FALSE(imu_init() == ESP_OK, ESP_FAIL, TAG, "imu_init failed");
+    esp_err_t motion_cfg_err = imu_configure_motion_interrupt(120, 200);
+    if (motion_cfg_err != ESP_OK) {
+        ESP_LOGW(TAG, "imu_configure_motion_interrupt failed: %s", esp_err_to_name(motion_cfg_err));
+    }
     ESP_RETURN_ON_FALSE(power_mgr_init() == ESP_OK, ESP_FAIL, TAG, "power_mgr_init failed");
     ESP_RETURN_ON_FALSE(modem_lte_init() == ESP_OK, ESP_FAIL, TAG, "modem_lte_init failed");
     ESP_RETURN_ON_FALSE(tracker_mqtt_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "tracker_mqtt_init failed");
+    ESP_RETURN_ON_FALSE(offline_queue_init() == ESP_OK, ESP_FAIL, TAG, "offline_queue_init failed");
+    telemetry_counters_reset();
+    session_mgr_init();
     tracker_mqtt_set_command_callback(state_machine_command_callback);
+    tracker_mqtt_set_puback_callback(state_machine_puback_callback);
 
     if (s_config.command_subscribe_enabled) {
         command_handler_init(&s_config);
@@ -506,19 +540,31 @@ app_state_t state_machine_run(app_state_t current_state) {
     switch (current_state) {
         case APP_STATE_INIT:
             g_rtc_context.last_state = APP_STATE_INIT;
+            offline_queue_set_online(tracker_mqtt_is_connected());
             return APP_STATE_CHECK_IGN;
 
-        case APP_STATE_CHECK_IGN:
+        case APP_STATE_CHECK_IGN: {
             /* Quickly probe ignition proxies and choose run/sleep branch. */
             state_machine_try_connect_ble();
             state_machine_refresh_telemetry(false, true);
+            session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
             g_rtc_context.ign_last_known = s_telemetry.ignition;
             return s_telemetry.ignition ? APP_STATE_DRIVING : APP_STATE_PARKED;
+        }
 
         case APP_STATE_DRIVING: {
             /* Full online mode with high-frequency telemetry and command handling. */
             state_machine_try_connect_network();
             state_machine_refresh_telemetry(true, true);
+            offline_queue_set_online(tracker_mqtt_is_connected());
+            offline_queue_replay_tick();
+
+            session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
+            if (session_mgr_should_start()) {
+                session_mgr_mark_started(util_uptime_ms());
+                s_session_id = session_mgr_current_session_id();
+                offline_queue_set_session(s_session_id);
+            }
 
             if (!s_status_running) {
                 state_machine_publish_status("running");
@@ -526,8 +572,9 @@ app_state_t state_machine_run(app_state_t current_state) {
             }
 
             uint64_t now_ms = util_uptime_ms();
-            if ((now_ms - s_last_raw_publish_ms) >= ((uint64_t)s_config.tracking_interval_s * 1000ULL) ||
-                command_handler_consume_location_request()) {
+            bool should_publish_raw = ((now_ms - s_last_raw_publish_ms) >= ((uint64_t)s_config.tracking_interval_s * 1000ULL)) ||
+                                      command_handler_consume_location_request();
+            if (should_publish_raw && !offline_queue_should_throttle_rawdata()) {
                 state_machine_publish_rawdata();
             }
 
@@ -537,9 +584,17 @@ app_state_t state_machine_run(app_state_t current_state) {
             }
             state_machine_process_ota_command(action);
 
-            if (!s_telemetry.ignition || !command_handler_is_tracking_enabled()) {
+            if ((!s_telemetry.ignition || !command_handler_is_tracking_enabled()) && s_ignition_off_started_ms == 0) {
+                s_ignition_off_started_ms = now_ms;
                 state_machine_publish_status("stopped");
                 s_status_running = false;
+            }
+
+            if (s_ignition_off_started_ms != 0 &&
+                (now_ms - s_ignition_off_started_ms) >= session_mgr_drain_timeout_ms()) {
+                offline_queue_stop_session(true);
+                session_mgr_mark_stopped(now_ms);
+                s_ignition_off_started_ms = 0;
                 return APP_STATE_PARKED;
             }
 
