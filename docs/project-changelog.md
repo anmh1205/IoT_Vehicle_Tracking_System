@@ -1,5 +1,10 @@
 # Project Changelog
 
+## 2026-04-05
+### BLE OBD Diagnostics Counters and Log Instrumentation (Completed)
+- Added rolling BLE OBD transaction counters and periodic diagnostic logging in `iot-vehicle-tracking-system-firmware/main/src/ble_obd.c` to track request volume, valid/invalid responses, timeouts, and RX buffer overflows.
+- The firmware now emits a periodic health snapshot and logs a final diagnostic summary on disconnect, improving field troubleshooting for BLE OBD sessions without changing the public OBD command contract.
+
 ## 2026-04-03
 ### CI/CD UAT Minimal Rollout (In Progress)
 - Added manual fallback trigger `workflow_dispatch` to UAT deploy pipelines for Backend, Frontend, and MQTT Bridge in `.github/workflows/backend-uat.yml`, `.github/workflows/frontend-uat.yml`, and `.github/workflows/mqtt-bridge-uat.yml`.

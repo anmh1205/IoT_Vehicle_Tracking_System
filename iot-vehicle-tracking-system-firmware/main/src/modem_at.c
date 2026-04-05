@@ -198,11 +198,14 @@ esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32
 esp_err_t modem_at_send_expect(const char *cmd, const char *expect, uint32_t timeout_ms) {
     char response[MODEM_RX_BUFFER_SIZE] = {0};
     esp_err_t err = modem_at_send(cmd, response, sizeof(response), timeout_ms);
-    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "AT send failed");
-    ESP_RETURN_ON_FALSE(expect == NULL || strstr(response, expect) != NULL,
-                        ESP_FAIL,
-                        TAG,
-                        "Expected response not found");
+    if (err != ESP_OK) {
+        return err;
+    }
+
+    if (expect != NULL && strstr(response, expect) == NULL) {
+        return ESP_FAIL;
+    }
+
     return ESP_OK;
 }
 

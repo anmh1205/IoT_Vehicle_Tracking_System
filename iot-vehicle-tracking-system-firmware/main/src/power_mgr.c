@@ -22,18 +22,34 @@ static bool s_voltage_low_latched = false;
 #define MODEM_RESET_PULSE_MS 200
 
 /**
+ * @brief Build a GPIO bit mask safely for valid pins only.
+ *
+ * @param pin GPIO number.
+ *
+ * @return Bit mask when pin is valid, otherwise 0.
+ */
+static uint64_t power_gpio_mask(gpio_num_t pin) {
+    if ((int)pin < 0 || (int)pin >= 64) {
+        return 0;
+    }
+    return (1ULL << (uint32_t)pin);
+}
+
+/**
  * @brief Configure power-control and status GPIOs.
  *
  * @return ESP_OK on success.
  */
 esp_err_t power_mgr_init(void) {
-    uint64_t output_mask = (1ULL << PIN_POWER_MUX_SEL) | (1ULL << PIN_CHARGER_EN) | (1ULL << PIN_MODEM_PWRKEY);
+    uint64_t output_mask = power_gpio_mask(PIN_POWER_MUX_SEL) |
+                           power_gpio_mask(PIN_CHARGER_EN) |
+                           power_gpio_mask(PIN_MODEM_PWRKEY);
 
     if (PIN_MODEM_RESET != GPIO_NUM_NC) {
-        output_mask |= 1ULL << PIN_MODEM_RESET;
+        output_mask |= power_gpio_mask(PIN_MODEM_RESET);
     }
     if (PIN_MODEM_DTR != GPIO_NUM_NC) {
-        output_mask |= 1ULL << PIN_MODEM_DTR;
+        output_mask |= power_gpio_mask(PIN_MODEM_DTR);
     }
 
     /* Configure output pins controlling mux, charger, and modem control lines. */
@@ -46,12 +62,12 @@ esp_err_t power_mgr_init(void) {
     };
     ESP_ERROR_CHECK(gpio_config(&output_cfg));
 
-    uint64_t input_mask = (1ULL << PIN_LVD_STATUS) | (1ULL << PIN_IGN_IN);
+    uint64_t input_mask = power_gpio_mask(PIN_LVD_STATUS) | power_gpio_mask(PIN_IGN_IN);
     if (PIN_MODEM_STATUS != GPIO_NUM_NC) {
-        input_mask |= 1ULL << PIN_MODEM_STATUS;
+        input_mask |= power_gpio_mask(PIN_MODEM_STATUS);
     }
     if (PIN_MODEM_NETLIGHT != GPIO_NUM_NC) {
-        input_mask |= 1ULL << PIN_MODEM_NETLIGHT;
+        input_mask |= power_gpio_mask(PIN_MODEM_NETLIGHT);
     }
 
     /* Configure digital input pins from low-voltage detector and modem status lines. */

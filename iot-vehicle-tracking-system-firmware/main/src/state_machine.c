@@ -39,6 +39,14 @@
  */
 
 #define OBD_MODE_CURRENT_DATA 0x01
+/* Current hardware revision has no IMU mounted; keep IMU path optional. */
+#define TRACKER_ENABLE_IMU 0
+#define TRACKER_BLE_RETRY_BACKOFF_MS 1000ULL
+#define TRACKER_NETWORK_RETRY_MIN_BACKOFF_MS 30000ULL
+#define TRACKER_NETWORK_RETRY_MAX_BACKOFF_MS 300000ULL
+#define TRACKER_OBD_DEBUG_LOG_INTERVAL_MS 1000ULL
+#define TRACKER_OBD_POLL_INTERVAL_MS 1000ULL
+#define TRACKER_OBD_PID_TIMEOUT_MS 500U
 
 /* RTC-retained context survives deep sleep and helps OTA/session continuity. */
 RTC_DATA_ATTR rtc_context_t g_rtc_context = {
@@ -61,11 +69,18 @@ static telemetry_t s_telemetry;
 static ble_obd_ctx_t *s_ble_ctx = NULL;
 static uint64_t s_last_raw_publish_ms = 0;
 static uint64_t s_alarm_enter_ms = 0;
+static uint64_t s_last_obd_debug_log_ms = 0;
+static uint64_t s_last_obd_poll_ms = 0;
 static uint32_t s_session_id = 1;
 static uint64_t s_ignition_off_started_ms = 0;
 static bool s_status_running = false;
 static bool s_mqtt_started = false;
 static bool s_ota_confirm_checked = false;
+static bool s_imu_available = false;
+static uint64_t s_ble_retry_not_before_ms = 0;
+static uint32_t s_ble_retry_attempts = 0;
+static uint64_t s_network_retry_not_before_ms = 0;
+static uint32_t s_network_retry_attempts = 0;
 static char s_current_version[TRACKER_TARGET_VERSION_MAX_LEN] = CONFIG_APP_PROJECT_VER;
 
 /**
@@ -170,15 +185,31 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
     /* Always sample local board sensors first. */
     s_telemetry.battery_top = adc_read_battery_voltage();
     s_telemetry.battery_bot = 3.8f;
-    s_telemetry.vibration = imu_get_vibration_composite();
+    s_telemetry.vibration = s_imu_available ? imu_get_vibration_composite() : 0;
 
     /* Pull selected OBD PIDs when BLE OBD session is connected. */
     if (read_obd && s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
-        ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0C, 300);
-        ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0D, 300);
-        ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x05, 300);
-        ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x2F, 300);
-        ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x04, 300);
+        uint64_t now_ms = util_uptime_ms();
+
+        if ((now_ms - s_last_obd_poll_ms) >= TRACKER_OBD_POLL_INTERVAL_MS) {
+            ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0C, TRACKER_OBD_PID_TIMEOUT_MS);
+            ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0D, TRACKER_OBD_PID_TIMEOUT_MS);
+            ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x05, TRACKER_OBD_PID_TIMEOUT_MS);
+            ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x2F, TRACKER_OBD_PID_TIMEOUT_MS);
+            ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x04, TRACKER_OBD_PID_TIMEOUT_MS);
+            s_last_obd_poll_ms = now_ms;
+        }
+
+        if ((now_ms - s_last_obd_debug_log_ms) >= TRACKER_OBD_DEBUG_LOG_INTERVAL_MS) {
+            ESP_LOGI(TAG,
+                     "OBD pid-values rpm=%ld speed=%ld coolant=%ld fuel=%ld load=%ld",
+                     (long)s_telemetry.obd_rpm,
+                     (long)s_telemetry.obd_speed,
+                     (long)s_telemetry.obd_coolant_temp,
+                     (long)s_telemetry.obd_fuel_level,
+                     (long)s_telemetry.obd_engine_load);
+            s_last_obd_debug_log_ms = now_ms;
+        }
     }
 
     if (read_gnss) {
@@ -298,47 +329,130 @@ static void state_machine_publish_firmware_status(const char *status,
 /**
  * @brief Attempt BLE OBD connection with retry and ELM327 initialization.
  */
+static void state_machine_schedule_ble_retry(uint64_t now_ms, const char *reason) {
+    s_ble_retry_not_before_ms = now_ms + TRACKER_BLE_RETRY_BACKOFF_MS;
+    s_ble_retry_attempts += 1;
+
+    if ((s_ble_retry_attempts % 10U) == 1U) {
+        ESP_LOGE(TAG,
+                 "BLE/OBD unavailable (%s), retry in %lus (attempt=%lu)",
+                 reason,
+                 (unsigned long)(TRACKER_BLE_RETRY_BACKOFF_MS / 1000ULL),
+                 (unsigned long)s_ble_retry_attempts);
+    }
+}
+
 static void state_machine_try_connect_ble(void) {
     if (s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
         return;
     }
 
-    if (!util_string_empty(s_config.obd2_ble_address)) {
-        ble_obd_set_preferred_address(s_config.obd2_ble_address);
+    uint64_t now_ms = util_uptime_ms();
+    if (now_ms < s_ble_retry_not_before_ms) {
+        return;
     }
 
-    ble_stack_init();
-    /* Retry a few times because BLE scan/connect is timing-sensitive. */
-    for (int attempt = 0; attempt < 3; ++attempt) {
-        s_ble_ctx = ble_obd_connect(state_machine_obd_response_cb, NULL);
-        if (s_ble_ctx != NULL) {
-            if (ble_obd_elm327_init(s_ble_ctx) == ESP_OK) {
-                return;
-            }
-            ble_obd_disconnect(s_ble_ctx);
-            s_ble_ctx = NULL;
-        }
-        vTaskDelay(pdMS_TO_TICKS(500));
+    if (s_ble_ctx != NULL) {
+        ble_obd_disconnect(s_ble_ctx);
+        s_ble_ctx = NULL;
     }
+
+    bool use_preferred_mac = !util_string_empty(s_config.obd2_ble_address) &&
+                             ble_obd_set_preferred_address(s_config.obd2_ble_address) == ESP_OK;
+    if (!use_preferred_mac) {
+        ble_obd_set_preferred_address("");
+        if ((s_ble_retry_attempts % 10U) == 0U) {
+            ESP_LOGW(TAG, "BLE connect mode: auto-discover (preferred MAC missing/invalid)");
+        }
+    } else if ((s_ble_retry_attempts % 10U) == 0U) {
+        ESP_LOGI(TAG, "BLE connect mode: preferred-mac (%s)", s_config.obd2_ble_address);
+    }
+
+    /* One connect attempt per retry window to avoid log storms. */
+    s_ble_ctx = ble_obd_connect(state_machine_obd_response_cb, NULL);
+    if (s_ble_ctx != NULL) {
+        if (ble_obd_elm327_init(s_ble_ctx) == ESP_OK) {
+            s_ble_retry_not_before_ms = 0;
+            s_ble_retry_attempts = 0;
+            return;
+        }
+        ble_obd_disconnect(s_ble_ctx);
+        s_ble_ctx = NULL;
+    }
+
+    state_machine_schedule_ble_retry(now_ms, "connect_or_ble_stack_or_elm327_init_failed");
 }
 
 /**
  * @brief Bring up LTE/GNSS/MQTT network stack.
  */
+static void state_machine_schedule_network_retry(uint64_t now_ms, const char *step, esp_err_t err) {
+    uint64_t backoff_ms = TRACKER_NETWORK_RETRY_MIN_BACKOFF_MS;
+    if (s_network_retry_attempts > 0) {
+        uint32_t shift = s_network_retry_attempts > 4 ? 4 : s_network_retry_attempts;
+        backoff_ms <<= shift;
+        if (backoff_ms > TRACKER_NETWORK_RETRY_MAX_BACKOFF_MS) {
+            backoff_ms = TRACKER_NETWORK_RETRY_MAX_BACKOFF_MS;
+        }
+    }
+
+    s_network_retry_not_before_ms = now_ms + backoff_ms;
+    s_network_retry_attempts += 1;
+
+    ESP_LOGE(TAG,
+             "%s failed: %s, retry in %lus (attempt=%lu)",
+             step,
+             esp_err_to_name(err),
+             (unsigned long)(backoff_ms / 1000ULL),
+             (unsigned long)s_network_retry_attempts);
+}
+
 static void state_machine_try_connect_network(void) {
-    modem_lte_init();
-    modem_lte_connect();
-    modem_gnss_power_on();
+    uint64_t now_ms = util_uptime_ms();
+    if (now_ms < s_network_retry_not_before_ms) {
+        return;
+    }
+
+    esp_err_t err = modem_lte_init();
+    if (err != ESP_OK) {
+        state_machine_schedule_network_retry(now_ms, "modem_lte_init", err);
+        return;
+    }
+
+    err = modem_lte_connect();
+    if (err != ESP_OK) {
+        state_machine_schedule_network_retry(now_ms, "modem_lte_connect", err);
+        return;
+    }
+
+    err = modem_gnss_power_on();
+    if (err != ESP_OK) {
+        state_machine_schedule_network_retry(now_ms, "modem_gnss_power_on", err);
+        return;
+    }
 
     if (!s_mqtt_started) {
         /* Start MQTT client only once. */
-        tracker_mqtt_connect();
+        err = tracker_mqtt_connect();
+        if (err != ESP_OK) {
+            state_machine_schedule_network_retry(now_ms, "tracker_mqtt_connect", err);
+            return;
+        }
         s_mqtt_started = true;
     }
 
+    s_network_retry_attempts = 0;
+    s_network_retry_not_before_ms = 0;
+
     if (s_config.command_subscribe_enabled) {
-        tracker_mqtt_subscribe_commands();
+        err = tracker_mqtt_subscribe_commands();
+        if (err != ESP_OK) {
+            state_machine_schedule_network_retry(now_ms, "tracker_mqtt_subscribe_commands", err);
+            return;
+        }
     }
+
+    s_network_retry_not_before_ms = 0;
 }
 
 /**
@@ -481,8 +595,10 @@ static void state_machine_prepare_sleep(void) {
     (void)modem_set_dtr(true);
     gpio_set_level(PIN_MODEM_PWRKEY, 0);
 
-    /* Wake by motion interrupt or periodic heartbeat timer. */
-    esp_sleep_enable_ext0_wakeup(PIN_LIS3DSH_INT, 1);
+    /* Wake by motion interrupt only when IMU path is active. */
+    if (s_imu_available) {
+        esp_sleep_enable_ext0_wakeup(PIN_LIS3DSH_INT, 1);
+    }
     esp_sleep_enable_timer_wakeup((uint64_t)s_config.heartbeat_interval_s * 1000000ULL);
 }
 
@@ -505,13 +621,31 @@ esp_err_t state_machine_init(const config_t *config) {
 
     /* Bring up local sensors, modem, and transport modules. */
     ESP_RETURN_ON_FALSE(adc_reader_init() == ESP_OK, ESP_FAIL, TAG, "adc_reader_init failed");
-    ESP_RETURN_ON_FALSE(imu_init() == ESP_OK, ESP_FAIL, TAG, "imu_init failed");
-    esp_err_t motion_cfg_err = imu_configure_motion_interrupt(120, 200);
-    if (motion_cfg_err != ESP_OK) {
-        ESP_LOGW(TAG, "imu_configure_motion_interrupt failed: %s", esp_err_to_name(motion_cfg_err));
+#if TRACKER_ENABLE_IMU
+    if (imu_init() == ESP_OK) {
+        s_imu_available = true;
+        esp_err_t motion_cfg_err = imu_configure_motion_interrupt(120, 200);
+        if (motion_cfg_err != ESP_OK) {
+            ESP_LOGW(TAG, "imu_configure_motion_interrupt failed: %s", esp_err_to_name(motion_cfg_err));
+        }
+    } else {
+        s_imu_available = false;
+        ESP_LOGW(TAG, "IMU init failed, continuing without motion sensing");
     }
+#else
+    s_imu_available = false;
+    ESP_LOGW(TAG, "IMU init skipped (TRACKER_ENABLE_IMU=0)");
+#endif
     ESP_RETURN_ON_FALSE(power_mgr_init() == ESP_OK, ESP_FAIL, TAG, "power_mgr_init failed");
-    ESP_RETURN_ON_FALSE(modem_lte_init() == ESP_OK, ESP_FAIL, TAG, "modem_lte_init failed");
+    esp_err_t modem_init_err = modem_lte_init();
+    if (modem_init_err != ESP_OK) {
+        s_network_retry_not_before_ms = util_uptime_ms() + TRACKER_NETWORK_RETRY_MIN_BACKOFF_MS;
+        s_network_retry_attempts = 1;
+        ESP_LOGE(TAG,
+                 "modem_lte_init failed: %s (continuing without LTE, retry in %lus)",
+                 esp_err_to_name(modem_init_err),
+                 (unsigned long)(TRACKER_NETWORK_RETRY_MIN_BACKOFF_MS / 1000ULL));
+    }
     ESP_RETURN_ON_FALSE(tracker_mqtt_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "tracker_mqtt_init failed");
     ESP_RETURN_ON_FALSE(offline_queue_init() == ESP_OK, ESP_FAIL, TAG, "offline_queue_init failed");
     telemetry_counters_reset();
@@ -547,9 +681,10 @@ app_state_t state_machine_run(app_state_t current_state) {
             /* Quickly probe ignition proxies and choose run/sleep branch. */
             state_machine_try_connect_ble();
             state_machine_refresh_telemetry(false, true);
+            bool ble_connected = (s_ble_ctx != NULL) && ble_obd_is_connected(s_ble_ctx);
             session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
             g_rtc_context.ign_last_known = s_telemetry.ignition;
-            return s_telemetry.ignition ? APP_STATE_DRIVING : APP_STATE_PARKED;
+            return (s_telemetry.ignition || ble_connected) ? APP_STATE_DRIVING : APP_STATE_PARKED;
         }
 
         case APP_STATE_DRIVING: {
@@ -584,13 +719,20 @@ app_state_t state_machine_run(app_state_t current_state) {
             }
             state_machine_process_ota_command(action);
 
-            if ((!s_telemetry.ignition || !command_handler_is_tracking_enabled()) && s_ignition_off_started_ms == 0) {
+            bool tracking_enabled = command_handler_is_tracking_enabled();
+            bool ble_connected = (s_ble_ctx != NULL) && ble_obd_is_connected(s_ble_ctx);
+
+            if (!ble_connected && (!s_telemetry.ignition || !tracking_enabled) && s_ignition_off_started_ms == 0) {
                 s_ignition_off_started_ms = now_ms;
                 state_machine_publish_status("stopped");
                 s_status_running = false;
             }
 
-            if (s_ignition_off_started_ms != 0 &&
+            if (ble_connected) {
+                s_ignition_off_started_ms = 0;
+            }
+
+            if (!ble_connected && s_ignition_off_started_ms != 0 &&
                 (now_ms - s_ignition_off_started_ms) >= session_mgr_drain_timeout_ms()) {
                 offline_queue_stop_session(true);
                 session_mgr_mark_stopped(now_ms);
@@ -628,7 +770,7 @@ app_state_t state_machine_run(app_state_t current_state) {
                 return APP_STATE_DRIVING;
             }
 
-            if (!imu_motion_detected() || (now_ms - s_alarm_enter_ms) >= 300000ULL) {
+            if (!s_imu_available || !imu_motion_detected() || (now_ms - s_alarm_enter_ms) >= 300000ULL) {
                 s_alarm_enter_ms = 0;
                 return APP_STATE_PARKED;
             }

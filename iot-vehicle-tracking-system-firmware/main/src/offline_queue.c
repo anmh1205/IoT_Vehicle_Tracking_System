@@ -13,6 +13,7 @@
 #include "util.h"
 
 static const char *TAG = "OFFLINE_QUEUE";
+#define OFFLINE_QUEUE_SD_MOUNT_RETRY_MS 30000ULL
 
 typedef struct {
     bool initialized;
@@ -24,6 +25,7 @@ typedef struct {
     uint64_t pending_since_ms;
     uint32_t retry_count;
     uint64_t next_retry_ms;
+    uint64_t next_sd_mount_retry_ms;
 } offline_queue_ctx_t;
 
 static offline_queue_ctx_t s_ctx;
@@ -59,6 +61,32 @@ static int offline_queue_backoff_ms(void) {
     return (int)(delay + jitter);
 }
 
+static void offline_queue_try_mount(uint64_t now_ms) {
+    if (!CONFIG_TRACKER_SD_LOG_ENABLE || sd_log_store_is_mounted()) {
+        return;
+    }
+
+    if (now_ms < s_ctx.next_sd_mount_retry_ms) {
+        return;
+    }
+
+    esp_err_t err = sd_log_store_mount();
+    if (err == ESP_OK) {
+        s_ctx.next_sd_mount_retry_ms = 0;
+        if (s_ctx.session_id != 0) {
+            (void)sd_log_store_start_session(s_ctx.session_id);
+        }
+        ESP_LOGI(TAG, "SD log store mounted");
+        return;
+    }
+
+    s_ctx.next_sd_mount_retry_ms = now_ms + OFFLINE_QUEUE_SD_MOUNT_RETRY_MS;
+    ESP_LOGE(TAG,
+             "sd_log_store_mount unavailable: %s, retry in %lus",
+             esp_err_to_name(err),
+             (unsigned long)(OFFLINE_QUEUE_SD_MOUNT_RETRY_MS / 1000ULL));
+}
+
 static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
     const char *topic = offline_queue_topic_from_type((offline_record_type_t)rec->type);
     int qos = rec->critical ? 1 : 0;
@@ -87,8 +115,12 @@ esp_err_t offline_queue_init(void) {
     ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "sd_log_store_init failed");
     if (CONFIG_TRACKER_SD_LOG_ENABLE) {
         err = sd_log_store_mount();
-        if (err != ESP_OK && err != ESP_ERR_NOT_SUPPORTED) {
-            ESP_LOGW(TAG, "sd_log_store_mount failed: %s", esp_err_to_name(err));
+        if (err != ESP_OK) {
+            s_ctx.next_sd_mount_retry_ms = util_uptime_ms() + OFFLINE_QUEUE_SD_MOUNT_RETRY_MS;
+            ESP_LOGE(TAG,
+                     "sd_log_store_mount unavailable: %s, retry in %lus",
+                     esp_err_to_name(err),
+                     (unsigned long)(OFFLINE_QUEUE_SD_MOUNT_RETRY_MS / 1000ULL));
         }
     }
 
@@ -136,6 +168,11 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
     util_copy_string(rec.payload, sizeof(rec.payload), payload);
 
     if (CONFIG_TRACKER_SD_LOG_ENABLE) {
+        offline_queue_try_mount(util_uptime_ms());
+        if (!sd_log_store_is_mounted()) {
+            return ESP_OK;
+        }
+
         esp_err_t err = sd_log_store_append(&rec);
         ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "sd append failed");
         (void)sd_log_store_gc_if_needed();
@@ -149,6 +186,12 @@ void offline_queue_replay_tick(void) {
     if (!s_ctx.initialized || !CONFIG_TRACKER_SD_REPLAY_ENABLE || !s_ctx.online) {
         return;
     }
+
+    offline_queue_try_mount(util_uptime_ms());
+    if (!sd_log_store_is_mounted()) {
+        return;
+    }
+
     if (!tracker_mqtt_is_connected()) {
         return;
     }

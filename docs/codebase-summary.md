@@ -10,13 +10,17 @@ _This note is derived from `repomix-output.xml` generated at the root of the rep
 - **Tracking_Grafana**, **Tracking_VictoriaMetrics**, **Tracking_VictoriaLogs**, **Tracking_PostgreSQL**: Observability and persistence stacks defined via datasource YAMLs and Compose manifests.
 - **Tracking_NPM**: Auxiliary compose helpers for testing npm-based services.
 
+## Firmware + hardware alignment
+- Firmware changes continue to concentrate in `iot-vehicle-tracking-system-firmware/main/src/` and related hardware docs.
+- The current BLE OBD session layer in `main/src/ble_obd.c` now includes diagnostic counters and periodic log instrumentation for request volume, response validity, timeouts, and RX overflow handling.
+- The firmware still targets the SIMCom SIM7600CE-T LTE+GNSS modem (auto-mode `AT+CNMP=2`, APN `internet`, GNSS via `AT+CGNSINF`/`AT+CGNSTST`), simplifying the architecture by removing the legacy A7670C + u-blox NEO-M8N split while keeping the existing UART pin mapping on ESP32-S3.
+
 ## Dashboard UX & data consistency
 - Shared components in `Tracking_Frontend/src/components/common` define the UX baseline for cards, tables, empty states, and shared actions. They centralize loading states, pagination, search, visibility controls, and empty-result messaging so feature modules stay consistent.
 - Feature-specific modules (for example `features/dashboard/components/overview-stats.tsx`, `features/devices/components/device-stats-bar.tsx`, `features/fuel-analytics/*`, `features/statistics/*`, `features/notifications/*`, `features/system-status/components/metric-card.tsx`) plug into the shared components and rely on the same formatting utilities to keep unit labels and percentage trends consistent across alerts, devices, trips, vehicles, and drivers pages.
 - Tables across alerts, customers, devices, drivers, exports, geofences, maintenance, maps, system-status, trips, vehicles, and violations now reuse the shared table layer and maintain a consistent empty/loading state that describes what data is expected and how to fetch it.
 
 ## Supporting flows
-- **Firmware + hardware alignment:** The latest firmware revision now targets the SIMCom SIM7600CE-T LTE+GNSS modem (auto-mode `AT+CNMP=2`, APN `internet`, GNSS via `AT+CGNSINF`/`AT+CGNSTST`), simplifying the architecture by removing the legacy A7670C + u-blox NEO-M8N split while keeping the existing UART pin mapping on ESP32-S3.
 - Backend and frontend each expose UAT-specific Docker Compose overrides plus Next.js middleware entry points (`Tracking_Frontend/next.config.ts`) that connect user sessions to the auth layer.
 - The frontend middleware now treats `/login` as the unauthenticated entry point and keeps protected operational routes (`/dashboard/*`) behind session checks.
 - Shared utility modules cover alerts (`components/ui/alert`), API clients, telemetry formatters, and auth state management (`src/lib/stores/auth-store.ts`). Localization changes continue to remain inside `Tracking_Frontend/src/**` and do not require backend or env updates.

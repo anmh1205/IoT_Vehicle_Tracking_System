@@ -806,6 +806,8 @@ Internet of Things (IoT) là mô hình cho phép các thiết bị vật lý k�
 - **Lớp mạng và truyền thông (Network Layer)**: Sử dụng các giao thức truyền thông như MQTT, HTTP, CoAP qua hạ tầng mạng di động (4G/LTE) để truyền dữ liệu từ thiết bị lên đám mây.
 - **Lớp ứng dụng và xử lý (Application Layer)**: Bao gồm các dịch vụ đám mây (MQTT broker, API server, cơ sở dữ liệu) và giao diện người dùng (web dashboard, ứng dụng di động).
 
+Trong triển khai của đề tài, kiến trúc ba lớp trên được bổ sung thêm một lớp đệm dữ liệu cục bộ tại thiết bị bằng **microSD SDMMC 4-bit + FATFS**. Lớp đệm này tiếp nhận telemetry khi mạng 4G/LTE gián đoạn, sau đó phát lại (replay) theo thứ tự bản ghi khi kết nối phục hồi. Cách tổ chức này tăng độ liên tục dữ liệu trong vận hành thực tế mà không làm thay đổi kiến trúc cloud ở tầng trên.
+
 ### 2.2.2. Các giải pháp giám sát phương tiện hiện có
 
 [Bảng 2.1: So sánh các giải pháp giám sát phương tiện]
@@ -1096,6 +1098,8 @@ _Hình 3.1a: Phân rã chi tiết các khối chức năng của tracker_
 Hệ thống vận hành theo ba chế độ chính: (1) chế độ lái xe — khi động cơ bật (IGN ON), các module cần thiết được kích hoạt; (2) chế độ đỗ xe — khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ IMU LIS3DSH duy trì giám sát chuyển động; (3) chế độ cảnh báo — khi IMU ghi nhận chuyển động bất thường, hệ thống tự đánh thức và gửi cảnh báo qua 4G.
 
 Luồng dữ liệu được tổ chức theo ba nhánh: OBD2 (RPM, tốc độ, nhiên liệu) đọc qua BLE từ adapter vgate iCar Pro; dữ liệu GNSS được cung cấp trực tiếp bởi module tích hợp SIMCom SIM7600CE-T (GNSS nội bộ) trên cùng UART với LTE; và dữ liệu chuyển động thu từ IMU LIS3DSH qua I2C. ESP32-S3 tổng hợp, đóng gói và truyền toàn bộ dữ liệu lên máy chủ qua MQTT thông qua kết nối 4G/LTE của SIM7600CE-T.
+
+Để tăng độ liên tục dữ liệu khi mạng gián đoạn, luồng telemetry được bổ sung thêm nhánh lưu đệm cục bộ trên microSD (SDMMC 4-bit + FATFS). Dữ liệu được ghi theo thứ tự bản ghi, sau đó replay lên MQTT khi kết nối phục hồi.
 
 #### 3.1.1.2. Phân tích và lựa chọn vi điều khiển (MCU)
 
@@ -1537,12 +1541,13 @@ Firmware chịu trách nhiệm thu thập dữ liệu từ các cảm biến (IM
 
 Firmware được tổ chức theo bốn lớp trách nhiệm chính để giữ mã nguồn gọn, dễ theo dõi và thuận lợi khi mở rộng:
 
-| Lớp | Thành phần chính                                                                        | Vai trò                                                                    |
-| --- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| 1   | `adc_reader`, `imu_lis3dh`, `modem_at`, `modem_lte`, `modem_gnss`, `ble_mgr`, `ble_obd` | Trừu tượng hóa phần cứng và giao thức ngoại vi                             |
-| 2   | `power_mgr`, `nvs_config`, `app_state`                                                  | Quản lý nguồn, lưu cấu hình NVS và duy trì ngữ cảnh RTC qua deep sleep     |
-| 3   | `state_machine`, `command_handler`                                                      | Điều phối trạng thái vận hành, lệnh điều khiển và luồng OTA                |
-| 4   | `data_formatter`, `mqtt_client`                                                         | Đóng gói payload JSON, publish/subcribe MQTT theo topic chuẩn của hệ thống |
+| Lớp | Thành phần chính                                                                        | Vai trò                                                                                  |
+| --- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 1   | `adc_reader`, `imu_lis3dh`, `modem_at`, `modem_lte`, `modem_gnss`, `ble_mgr`, `ble_obd` | Trừu tượng hóa phần cứng và giao thức ngoại vi                                           |
+| 2   | `power_mgr`, `nvs_config`, `app_state`                                                  | Quản lý nguồn, lưu cấu hình NVS và duy trì ngữ cảnh RTC qua deep sleep                   |
+| 3   | `state_machine`, `command_handler`                                                      | Điều phối trạng thái vận hành, lệnh điều khiển và luồng OTA                              |
+| 4   | `data_formatter`, `mqtt_client`                                                         | Đóng gói payload JSON, publish/subscribe MQTT theo topic chuẩn của hệ thống               |
+| 5   | `offline_queue`, `sd_log_store`                                                         | Hàng đợi cục bộ trên microSD (enqueue, replay theo ACK/QoS, quota GC, metadata phiên ghi) |
 
 Trong triển khai hiện tại, firmware không tách thành nhiều tác vụ nghiệp vụ cấp cao như sơ đồ khái niệm ban đầu. Phần lớn quyết định vận hành được gom về một state machine trung tâm; các primitive FreeRTOS chỉ được dùng ở những nơi thật sự cần đồng bộ như NimBLE host task, BLE manager, BLE OBD và lớp AT command.
 
@@ -1931,18 +1936,17 @@ Các lệnh điều khiển từ máy chủ hiện được firmware xử lý g�
 
 ##### c) Chiến lược xử lý mất kết nối
 
-Ở phạm vi triển khai này, firmware ưu tiên tự phục hồi kết nối MQTT thay vì lưu toàn bộ telemetry vào flash. Firmware duy trì cấu hình trong NVS, bật reconnect tự động với chu kỳ lặp phù hợp, và chỉ tiếp tục publish khi phiên MQTT được tái lập. Cách làm này giúp hệ thống gọn hơn, giảm rủi ro hao mòn flash, đồng thời vẫn đáp ứng tốt các khoảng mất mạng ngắn.
+Ở phạm vi triển khai hiện tại, firmware kết hợp hai cơ chế song song: (1) tự phục hồi kết nối MQTT và (2) hàng đợi cục bộ trên **microSD SDMMC 4-bit** để giữ dữ liệu khi mất mạng. Luồng dữ liệu được hiện thực qua cặp module `offline_queue` và `sd_log_store`: bản ghi được enqueue khi telemetry phát sinh (`offline_queue_enqueue()`), ghi xuống FATFS (`sd_log_store_append()`), sau đó replay theo thứ tự sequence khi mạng phục hồi (`offline_queue_replay_tick()`) và chốt ACK cho bản ghi quan trọng (`offline_queue_handle_publish_ack()`).
 
-Về mặt mở rộng, buffer telemetry cục bộ trên flash vẫn là hướng phát triển hợp lý cho giai đoạn sau nếu cần bảo toàn đầy đủ hành trình trong các khoảng mất sóng kéo dài. Tuy nhiên, cơ chế này chưa được hiện thực và kiểm chứng đầy đủ trong phạm vi hiện nay.
+Thiết kế này cho phép tách bản ghi thành hai nhóm: **critical** (QoS 1, yêu cầu ACK) và **non-critical** (QoS 0, ưu tiên throughput), đồng thời áp dụng cơ chế quota + garbage collection (`sd_log_store_gc_if_needed()`) để tránh đầy thẻ. Trong phạm vi vận hành hiện tại, hệ thống giả định thẻ SD ở trạng thái **card-present-at-boot**; luồng hotplug runtime (rút/cắm nóng) không phải phạm vi mục tiêu.
 
 ```c
-/* Chiến lược hiện tại: chỉ publish khi phiên MQTT đang sẵn sàng */
-if (!tracker_mqtt_is_connected()) {
-    tracker_mqtt_connect();
-    return;
-}
+/* Chiến lược hiện tại: enqueue local + replay khi MQTT sẵn sàng */
+offline_queue_enqueue(type, payload, gps_fix, net_up);
 
-tracker_mqtt_publish_rawdata(json_payload);
+if (tracker_mqtt_is_connected()) {
+    offline_queue_replay_tick();
+}
 ```
 
 ##### d) Máy trạng thái thiết bị (Device State Machine)
@@ -2884,18 +2888,19 @@ Dựa trên phân tích các giải pháp đề xuất cho từng tầng hệ th
 
 [Bảng 3.29: Ma trận đánh giá tổng hợp các phương án thiết kế]
 
-| Tầng hệ thống        | Phương án được chọn     | Lý do chính                                               |
-| -------------------- | ----------------------- | --------------------------------------------------------- |
-| Vi điều khiển        | ESP32-S3                | BLE 5.0 tích hợp, dual-core, hỗ trợ AI                    |
-| LTE + GNSS           | SIMCom SIM7600CE-T      | Modem tích hợp LTE + GNSS, giảm số lượng module phần cứng |
-| OBD2 Adapter         | vgate iCar Pro (BLE)    | Không cần dây, tương thích rộng                           |
-| Cảm biến IMU         | LIS3DSH                  | Siêu tiết kiệm điện, wake-on-motion                       |
-| MQTT Broker          | EMQX                    | Rules Engine, ACL per device, clustering                  |
-| Database quan hệ     | PostgreSQL 16           | Mature, PostGIS, open-source                              |
-| Database time-series | VictoriaMetrics         | Write throughput cao, PromQL compatible                   |
-| API Server           | Express.js + TypeScript | Nhẹ, linh hoạt, DDD architecture                          |
-| Frontend             | Next.js 15 + React 19   | SSR/SSG, App Router, ecosystem                            |
-| Bản đồ               | Leaflet.js              | Open-source, self-hosted tiles                            |
+| Tầng hệ thống        | Phương án được chọn                    | Lý do chính                                                                 |
+| -------------------- | -------------------------------------- | --------------------------------------------------------------------------- |
+| Vi điều khiển        | ESP32-S3                               | BLE 5.0 tích hợp, dual-core, hỗ trợ AI                                      |
+| LTE + GNSS           | SIMCom SIM7600CE-T                     | Modem tích hợp LTE + GNSS, giảm số lượng module phần cứng                   |
+| OBD2 Adapter         | vgate iCar Pro (BLE)                   | Không cần dây, tương thích rộng                                             |
+| Cảm biến IMU         | LIS3DSH                                 | Siêu tiết kiệm điện, wake-on-motion                                         |
+| Buffer cục bộ        | microSD SDMMC 4-bit + FATFS + replay   | Duy trì liên tục telemetry khi mất mạng, phát lại theo thứ tự khi reconnect |
+| MQTT Broker          | EMQX                                   | Rules Engine, ACL per device, clustering                                    |
+| Database quan hệ     | PostgreSQL 16                          | Mature, PostGIS, open-source                                                |
+| Database time-series | VictoriaMetrics                        | Write throughput cao, PromQL compatible                                     |
+| API Server           | Express.js + TypeScript                | Nhẹ, linh hoạt, DDD architecture                                            |
+| Frontend             | Next.js 15 + React 19                  | SSR/SSG, App Router, ecosystem                                              |
+| Bản đồ               | Leaflet.js                             | Open-source, self-hosted tiles                                              |
 
 ## 3.4. Tối ưu phương án thiết kế – The optimal solution
 
@@ -2910,7 +2915,7 @@ _Hình 3.23: Sơ đồ kiến trúc tổng thể phương án tối ưu_
 **Kiến trúc phân tầng:**
 
 - **Tầng thiết bị (Device Layer):** ESP32-S3 + SIMCom SIM7600CE-T + vgate iCar Pro + LIS3DSH, quản lý nguồn thông minh với pin dự phòng 18650 1S
-- **Tầng truyền thông (Communication Layer):** MQTT 5.0 qua 4G LTE, QoS phân tầng và cơ chế tự phục hồi kết nối
+- **Tầng truyền thông (Communication Layer):** MQTT 5.0 qua 4G LTE, QoS phân tầng, kết hợp buffer cục bộ microSD và cơ chế replay khi kết nối phục hồi
 - **Tầng xử lý (Processing Layer):** MQTT Bridge --> dual-write PostgreSQL + VictoriaMetrics, Express.js API (DDD)
 - **Tầng trình bày (Presentation Layer):** Next.js 15, Leaflet maps, Socket.IO real-time, ECharts
 
@@ -3066,6 +3071,8 @@ Việc phân công chân GPIO cần tuân thủ một số ràng buộc kỹ thu
 #### c) Sơ đồ đấu nối tổng thể
 
 Sơ đồ đấu nối mô tả cách ánh xạ chân giữa ESP32-S3-WROOM-1 trên PCB chính và các khối phần cứng tích hợp trên bo mạch. Hình 4.5 đã được chuẩn hóa theo pin mapping firmware hiện tại, trong đó `GPIO47/48` dành cho I2C IMU, `GPIO26` điều khiển `PWR-KEY`, `GPIO19` nhận `LVD_STATUS`, và `GPIO4` đo `U_batt`.
+
+Bên cạnh các chân đã đưa vào `pin_map.h`, netlist phần cứng còn thể hiện đầy đủ cụm microSD `J4` theo chuẩn SDMMC 4-bit (`SD-DAT0..3`, `SD-CMD`, `SD-CLK`, `SD-CD`) với pull-up ngoài trên các đường dữ liệu/lệnh. Điều này là nền tảng để firmware triển khai `sd_log_store` và `offline_queue` cho cơ chế lưu đệm cục bộ.
 
 ![Hình 4.5 - Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần cứng tích hợp](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-5.svg)
 
@@ -3237,7 +3244,15 @@ _Hình 4.11: Sơ đồ bố cục bên trong vỏ hộp bảo vệ_
 
 ### 4.1.2. Triển khai firmware, cloud và giao diện điều khiển
 
-Các nội dung triển khai chi tiết ở tầng phần mềm được trình bày tại các mục 4.2.3 đến 4.2.7 để đồng bộ với luồng chế tạo, lắp ráp và vận hành hệ thống.
+Ngoài các mô-đun truyền thông và điều phối trạng thái, firmware đã triển khai luồng **SD card log** theo chu trình vận hành rõ ràng:
+
+1. **Khởi tạo và mount thẻ SD**: `sd_log_store_init()` và `sd_log_store_mount()` khởi tạo host SDMMC 4-bit, mount FATFS vào `/sdcard`, tạo cây thư mục làm việc và nạp metadata phiên ghi.
+2. **Ghi bản ghi cục bộ**: `offline_queue_enqueue()` chuẩn hóa bản ghi telemetry/sự kiện, sau đó `sd_log_store_append()` ghi xuống hàng đợi file theo thứ tự `seq`.
+3. **Replay khi mạng phục hồi**: `offline_queue_replay_tick()` đọc bản ghi chờ, publish theo topic phù hợp; bản ghi critical đi QoS 1 và được chốt bằng `offline_queue_handle_publish_ack()`.
+4. **Kiểm soát dung lượng**: `sd_log_store_gc_if_needed()` dọn dữ liệu non-critical đã ACK khi vượt ngưỡng quota, giữ ổn định không gian lưu trữ.
+5. **Kết thúc phiên ghi an toàn**: firmware gọi `sd_log_store_stop_session()` và `sd_log_store_unmount()` khi dừng phiên để giảm nguy cơ lỗi hệ thống tệp.
+
+Trong phạm vi đồ án, luồng này vận hành theo giả định **card-present-at-boot** nhằm ưu tiên độ ổn định; hotplug runtime không phải mục tiêu chính ở phiên bản hiện tại.
 
 ---
 
@@ -5039,6 +5054,8 @@ Cơ chế này cho phép đối chiếu (correlate) một request cụ thể t�
 | Bảo vệ API           | Rate limiting, CORS whitelist, kiểm tra input bằng schema (Zod)            | Cao         | Tất cả endpoint public có giới hạn tần suất và validate đầu vào |
 | Độ tin cậy dịch vụ   | Health check endpoint + restart policy + watchdog cho firmware             | Cao         | Tự phục hồi khi service treo, có trạng thái sống/chết rõ ràng   |
 | Dữ liệu và sao lưu   | Backup tự động PostgreSQL + chính sách retention cho telemetry/log         | Cao         | Phục hồi được dữ liệu theo RPO/RTO đã định                      |
+| Lưu trữ cục bộ SD    | Mount retry có backoff, fsync trước close, unmount sạch theo vòng đời phiên | Cao         | Không phát sinh lỗi ghi hàng loạt khi mạng gián đoạn            |
+| Replay hàng đợi SD   | ACK timeout + retry backoff, tách critical/non-critical, GC theo quota      | Cao         | Hàng đợi replay tiến dần, không bị nghẽn vô hạn                 |
 | Hiệu năng hệ thống   | Connection pooling, tối ưu truy vấn, cache nóng (Redis khi cần)            | Trung bình  | P95 latency API giữ ổn định khi tăng tải                        |
 | Khả năng mở rộng     | Load balancing và nhiều instance backend khi tăng số thiết bị              | Trung bình  | Scale-out không làm gián đoạn kết nối WebSocket/MQTT            |
 | Quan sát và cảnh báo | Security event logging, alert theo ngưỡng lỗi/latency                      | Trung bình  | Cảnh báo được gửi tới Telegram/Email khi vượt ngưỡng            |
@@ -5368,7 +5385,7 @@ Máy trạng thái quản lý các chế độ hoạt động (Driving -> Parkin
 
 #### 4.3.3.6. Khả năng tự phục hồi kết nối MQTT
 
-Trong phạm vi hiện nay, firmware chưa triển khai cơ chế replay telemetry từ flash khi mất sóng kéo dài. Vì vậy, phần thử nghiệm ở mục này tập trung vào khả năng phát hiện mất kết nối, tái lập phiên MQTT và tiếp tục gửi dữ liệu sau khi mạng phục hồi.
+Trong phạm vi hiện nay, firmware đã triển khai cơ chế replay telemetry từ hàng đợi cục bộ microSD. Vì bộ số đo định lượng chuyên biệt cho replay dài hạn chưa được tách riêng, phần thử nghiệm ở mục này tập trung vào khả năng phát hiện mất kết nối, tái lập phiên MQTT và quan sát phục hồi luồng telemetry khi mạng trở lại.
 
 [Bảng 4.25: Kết quả kiểm thử reconnect MQTT]
 
@@ -5378,10 +5395,10 @@ Trong phạm vi hiện nay, firmware chưa triển khai cơ chế replay telemet
 | 2   | Thời gian tự động kết nối lại            | <= 30 giây                       | ~15–30 giây                | Đạt                              |
 | 3   | Khôi phục subscription lệnh điều khiển   | Tự động sau reconnect            | Thành công                 | Đạt                              |
 | 4   | Tiếp tục gửi telemetry sau khi có mạng   | Trong chu kỳ gửi kế tiếp         | 5–30 giây tùy cấu hình     | Đạt                              |
-| 5   | Xử lý mất dữ liệu trong thời gian outage | Chấp nhận mất một số mẫu rawdata | Phù hợp với QoS 0 hiện tại | Đạt                              |
-| 6   | Replay telemetry từ flash                | Hướng mở rộng                    | Chưa triển khai            | Ngoài phạm vi phiên bản hiện tại |
+| 5   | Xử lý mất dữ liệu trong thời gian outage | Giảm mất dữ liệu bằng enqueue cục bộ + replay | Phù hợp với phạm vi đánh giá định tính hiện tại | Đạt |
+| 6   | Replay telemetry từ hàng đợi cục bộ      | Đã triển khai trong firmware              | Hoạt động theo cơ chế ACK/QoS và backoff          | Đạt ở mức triển khai hiện tại |
 
-**Nhận xét:** Kết quả cho thấy firmware phục hồi kết nối đủ nhanh cho các khoảng mất mạng ngắn, đồng thời tự khôi phục luồng lệnh và telemetry khi 4G ổn định trở lại. Tuy nhiên, trong phạm vi triển khai hiện nay vẫn chưa có cơ chế replay dữ liệu từ flash; vì vậy, các mẫu rawdata phát sinh trong thời gian mất sóng kéo dài có thể bị bỏ qua.
+**Nhận xét:** Kết quả cho thấy firmware phục hồi kết nối đủ nhanh cho các khoảng mất mạng ngắn, đồng thời tự khôi phục luồng lệnh và telemetry khi 4G ổn định trở lại. Bên cạnh đó, phiên bản hiện tại đã có replay từ hàng đợi cục bộ microSD để giảm khoảng trống dữ liệu khi outage kéo dài. Do chưa tách bộ số đo định lượng riêng cho replay dài hạn, nhận định ở mục này được trình bày theo hướng định tính và đối chiếu mã nguồn triển khai.
 
 #### 4.3.3.7. Đối chiếu luồng OTA đã triển khai
 
@@ -5602,8 +5619,8 @@ _Hình 4.45: Screenshot giao diện gửi lệnh điều khiển từ Dashboard 
 | 1   | Phát hiện mất kết nối                   | Thiết bị phát hiện trong vòng 10 giây  | MQTT keepalive timeout                       |
 | 2   | Tạm dừng publish khi mất mạng           | Không phát sinh crash/hang             | Chuyển sang vòng reconnect                   |
 | 3   | Phục hồi kết nối                        | Tự động kết nối lại trong vòng 30 giây | Auto-reconnect với exponential backoff       |
-| 4   | Telemetry tiếp tục sau khi có mạng      | Gửi lại từ chu kỳ kế tiếp              | Không replay dữ liệu outage                  |
-| 5   | Dashboard tiếp tục cập nhật bình thường | Bản đồ nhận dữ liệu mới sau reconnect  | Có khoảng trống tương ứng thời gian mất sóng |
+| 4   | Telemetry tiếp tục sau khi có mạng      | Replay dần bản ghi từ hàng đợi cục bộ + gửi chu kỳ mới | Giảm khoảng trống dữ liệu outage |
+| 5   | Dashboard tiếp tục cập nhật bình thường | Bản đồ nhận dữ liệu mới sau reconnect và trong pha replay | Có thể còn khoảng trống nhỏ tùy thời gian outage/queue depth |
 
 ![Hình 4.46 - Screenshot hành trình trên bản đồ, thể hiện giai đoạn gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-37.svg)
 
@@ -5611,7 +5628,7 @@ _Hình 4.46: Screenshot hành trình trên bản đồ, thể hiện giai đoạ
 
 > Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
-**Nhận xét:** Cơ chế auto-reconnect hoạt động ổn định, giúp hệ thống tiếp tục truyền dữ liệu sau khi mạng 4G phục hồi. Phiên bản hiện tại chưa triển khai replay buffer trên flash, vì vậy bản đồ vẫn có khoảng trống tương ứng với thời gian mất sóng; tuy nhiên, luồng vận hành tổng thể không bị treo và dashboard khôi phục cập nhật đúng sau reconnect.
+**Nhận xét:** Cơ chế auto-reconnect hoạt động ổn định, giúp hệ thống tiếp tục truyền dữ liệu sau khi mạng 4G phục hồi. Phiên bản hiện tại đã triển khai replay buffer cục bộ trên microSD, do đó mức độ đứt quãng dữ liệu trong outage kéo dài được giảm đáng kể; tuy nhiên, khi thời gian mất sóng lớn hoặc hàng đợi tăng sâu, dashboard vẫn có thể xuất hiện khoảng trống nhỏ trước khi replay bắt kịp hoàn toàn.
 
 ---
 
@@ -5646,7 +5663,7 @@ Phần này tổng hợp tất cả kết quả đo lường và so sánh với 
 | 3   | GPS TTFF (Cold Start)       | < 60 giây            | ~30 giây             | Đạt        | GNSS đa hệ thống      |
 | 4   | GPS TTFF (Warm Start)       | < 15 giây            | ~5 giây              | Đạt        | Có dữ liệu ephemeris  |
 | 5   | Độ trễ MQTT (4G ổn định)    | < 500 ms             | ~120–180 ms          | Đạt        | QoS 0/1               |
-| 6   | Khả năng reconnect MQTT     | Tự động, < 30 giây   | ~15–30 giây          | Đạt        | Chưa có replay flash  |
+| 6   | Khả năng reconnect MQTT     | Tự động, < 30 giây   | ~15–30 giây          | Đạt        | Đã kết hợp replay cục bộ microSD theo ACK/QoS |
 | 7   | Độ tin cậy state machine    | >= 99.5%             | >= 99.8%             | Đạt        | 1000+ chu kỳ          |
 | 8   | Tần suất gửi GPS (driving)  | 5–30 giây (cấu hình) | 5 giây (mặc định)    | Đạt        | Cấu hình từ xa        |
 
@@ -5793,7 +5810,7 @@ Máy trạng thái ba chế độ (Driving, Parking, Alert) hoạt động chín
 
 **Khả năng tự phục hồi kết nối và OTA:**
 
-Ở phạm vi triển khai hiện nay, firmware phục hồi phiên MQTT khá ổn định khi gặp các khoảng mất sóng ngắn. Sau khi mạng 4G trở lại, firmware tự kết nối lại broker, khôi phục kênh lệnh điều khiển và tiếp tục gửi telemetry từ chu kỳ kế tiếp. Bên cạnh đó, firmware đã có thêm luồng OTA cơ bản gồm gán job, tải firmware, xác nhận sau reboot và rollback thủ công. Dù vậy, cơ chế replay telemetry từ flash cho outage kéo dài và watchdog giám sát treo hệ thống vẫn chưa được bổ sung.
+Ở phạm vi triển khai hiện nay, firmware phục hồi phiên MQTT khá ổn định khi gặp các khoảng mất sóng ngắn. Sau khi mạng 4G trở lại, firmware tự kết nối lại broker, khôi phục kênh lệnh điều khiển và tiếp tục gửi telemetry từ chu kỳ kế tiếp. Song song đó, luồng replay từ hàng đợi microSD đã được triển khai để phát lại bản ghi theo thứ tự sequence, phân tầng QoS theo mức quan trọng và cập nhật trạng thái ACK cho bản ghi critical. Bên cạnh đó, firmware đã có thêm luồng OTA cơ bản gồm gán job, tải firmware, xác nhận sau reboot và rollback thủ công. Các hạng mục còn lại cần làm sâu thêm là watchdog giám sát treo hệ thống và bộ số đo định lượng chuyên biệt cho kịch bản SD replay dài hạn.
 
 [Bảng 5.2: Đánh giá hiệu năng firmware]
 
@@ -5932,20 +5949,21 @@ Phần này đánh giá rủi ro của hệ thống bằng ma trận xác suất
 
 | ID  | Rủi ro                                                    | Xác suất       | Tác động       | Mức độ rủi ro  | Biện pháp giảm thiểu                                                                                                                                                       | Trạng thái           |
 | --- | --------------------------------------------------------- | -------------- | -------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| R1  | Mất sóng 4G/LTE tại khu vực nông thôn, vùng sâu           | 4 - Cao        | 3 - Trung bình | **Cao**        | Auto-reconnect, MQTT keepalive, GPS cache vị trí cuối; buffer flash là hướng nâng cấp                                                                                      | Triển khai một phần  |
+| R1  | Mất sóng 4G/LTE tại khu vực nông thôn, vùng sâu           | 4 - Cao        | 3 - Trung bình | **Cao**        | Auto-reconnect, MQTT keepalive, enqueue cục bộ microSD và replay theo sequence khi mạng phục hồi                                                                            | Đã triển khai        |
 | R2  | Không tương thích BLE OBD2 với một số dòng xe             | 2 - Thấp       | 3 - Trung bình | **Trung bình** | Sử dụng vgate iCar Pro (tương thích rộng), hỗ trợ nhiều giao thức OBD2 (ISO 15765, ISO 14230, J1850)                                                                       | Đã giảm thiểu        |
 | R3  | Quá tải MQTT broker khi số lượng thiết bị tăng cao        | 2 - Thấp       | 4 - Cao        | **Trung bình** | EMQX hỗ trợ clustering; khi tải tăng có thể scale ngang broker và mở rộng riêng MQTT Bridge để san tải ingest/xử lý phía sau                                               | Có phương án         |
 | R4  | Tấn công bảo mật (giả mạo thiết bị, chiếm quyền truy cập) | 3 - Trung bình | 5 - Rất cao    | **Cao**        | Session-based auth với SHA-256, MQTT ACL per device, HTTPS/TLS, Zod input validation, rate limiting                                                                        | Đã triển khai cơ bản |
-| R5  | Mất dữ liệu trong thời gian mất kết nối mạng kéo dài      | 3 - Trung bình | 4 - Cao        | **Cao**        | Retry publish, reconnect tự động, QoS 1 cho cảnh báo; replay buffer cục bộ là hạng mục mở rộng                                                                             | Có phương án         |
+| R5  | Mất dữ liệu trong thời gian mất kết nối mạng kéo dài      | 2 - Thấp       | 4 - Cao        | **Trung bình** | Retry publish, replay cục bộ với QoS phân tầng, ACK timeout + retry backoff, GC theo quota                                                                                 | Đã giảm thiểu        |
 | R6  | Hư hỏng phần cứng do nhiệt độ cực đoan (xe đỗ ngoài nắng) | 2 - Thấp       | 4 - Cao        | **Trung bình** | ESP32-S3 hoạt động -40 đến 85°C, thiết kế tản nhiệt, đặt thiết bị trong vị trí mát, cảnh báo nhiệt độ                                                                      | Thiết kế có tính đến |
 | R7  | Cạn ắc quy xe do thiết bị hoạt động liên tục              | 2 - Thấp       | 5 - Rất cao    | **Cao**        | Mạch switch profile chuyển sang pin dự phòng: 12V (OFF=12.0V, ON=12.2V), 24V (OFF=24.0V, ON=24.4V), deep sleep xấp xỉ 500 μA trên thiết bị hiện tại, pin dự phòng 18650 1S | Đã triển khai        |
 | R8  | Lỗi firmware gây treo hệ thống (firmware hang)            | 3 - Trung bình | 4 - Cao        | **Cao**        | OTA từ xa với xác nhận sau reboot và rollback thủ công đã có; watchdog timer và cơ chế giám sát treo vẫn cần bổ sung                                                       | Triển khai một phần  |
+| R9  | Lỗi SD card (card absent, mount fail, quota đầy)          | 3 - Trung bình | 3 - Trung bình | **Trung bình** | Mount retry có backoff, fsync + unmount sạch, card-present-at-boot, quota/GC và theo dõi bộ đếm lỗi ghi                                                                    | Đã triển khai cơ bản |
 
 ### 5.3.2. Phân tích chi tiết các rủi ro chính
 
 **Rủi ro R1 - Mất sóng 4G tại khu vực nông thôn:**
 
-Đây là rủi ro có xác suất cao nhất trong thực tế vận hành tại Việt Nam, đặc biệt khi xe di chuyển qua các tuyến đường liên tỉnh hoặc vùng núi. Phiên bản hiện tại ưu tiên cơ chế reconnect tự động: khi mất kết nối 4G, firmware phát hiện timeout MQTT, tái lập phiên làm việc khi mạng phục hồi và tiếp tục gửi telemetry từ chu kỳ kế tiếp. Cách tiếp cận này phù hợp cho các khoảng mất sóng ngắn, nhưng chưa bảo toàn đầy đủ dữ liệu trong outage kéo dài. Vì vậy, replay buffer trên flash vẫn là hạng mục nên ưu tiên ở vòng phát triển tiếp theo nếu mục tiêu là không gián đoạn lịch sử hành trình.
+Đây là rủi ro có xác suất cao nhất trong thực tế vận hành tại Việt Nam, đặc biệt khi xe di chuyển qua các tuyến đường liên tỉnh hoặc vùng núi. Phiên bản hiện tại kết hợp reconnect tự động với hàng đợi cục bộ microSD: khi mất kết nối 4G, telemetry/sự kiện vẫn được enqueue vào lưu trữ cục bộ; khi mạng phục hồi, firmware replay theo thứ tự sequence và đồng bộ ACK cho bản ghi critical. Cách tiếp cận này giúp giảm đáng kể nguy cơ đứt quãng dữ liệu hành trình trong outage kéo dài.
 
 **Rủi ro R4 - Tấn công bảo mật:**
 
@@ -5961,13 +5979,13 @@ Bảo mật là rủi ro có tác động nghiêm trọng nhất. Hệ thống �
 
 | Phân loại               | Số rủi ro      | Mức cao | Mức trung bình | Mức thấp |
 | ----------------------- | -------------- | ------- | -------------- | -------- |
-| Kết nối và truyền thông | 3 (R1, R3, R5) | 2       | 1              | 0        |
+| Kết nối và truyền thông | 3 (R1, R3, R5) | 1       | 2              | 0        |
 | Bảo mật                 | 1 (R4)         | 1       | 0              | 0        |
-| Phần cứng               | 3 (R2, R6, R7) | 1       | 2              | 0        |
+| Phần cứng               | 4 (R2, R6, R7, R9) | 1    | 3              | 0        |
 | Firmware                | 1 (R8)         | 1       | 0              | 0        |
-| **Tổng cộng**           | **8**          | **5**   | **3**          | **0**    |
+| **Tổng cộng**           | **9**          | **4**   | **5**          | **0**    |
 
-Kết quả cho thấy 5/8 rủi ro ở mức cao; tuy nhiên, phần lớn đã có biện pháp giảm thiểu được triển khai hoặc đã có phương án xử lý. Các rủi ro cần ưu tiên xử lý tiếp theo là R4 (bảo mật nâng cao) và R8 (bổ sung watchdog, tăng cường giám sát treo và kiểm thử OTA ở điều kiện vận hành dài ngày).
+Kết quả cho thấy 4/9 rủi ro ở mức cao; phần lớn đã có biện pháp giảm thiểu triển khai trong phiên bản hiện tại, bao gồm lớp lưu đệm cục bộ microSD cho kịch bản mất mạng. Các rủi ro cần ưu tiên xử lý tiếp theo là R4 (bảo mật nâng cao), R8 (bổ sung watchdog, tăng cường giám sát treo và kiểm thử OTA dài ngày) và R9 (mở rộng kiểm thử độ bền SD card theo chu kỳ vận hành thực tế).
 
 ---
 
@@ -6065,7 +6083,7 @@ Kiến thức về vi xử lý và vi điều khiển đóng vai trò cốt lõi
 
 - **Lập trình ESP32-S3**: Áp dụng kiến thức về kiến trúc Xtensa LX7 dual-core, thanh ghi, bộ nhớ và tập lệnh để lập trình firmware trên nền tảng ESP-IDF. Việc hiểu rõ kiến trúc phần cứng của MCU giúp tối ưu hóa hiệu suất và tiêu thụ năng lượng.
 - **FreeRTOS và đồng bộ tài nguyên**: Kiến thức về hệ điều hành thời gian thực được áp dụng để tổ chức task nền NimBLE, dùng mutex cho kênh AT command, semaphore cho phản hồi BLE OBD2 và queue/mutex trong BLE manager. Dù firmware không chia thành nhiều task nghiệp vụ cấp cao, tư duy đồng bộ tài nguyên và kiểm soát cạnh tranh vẫn là phần được vận dụng trực tiếp.
-- **Giao tiếp ngoại vi GPIO/ADC/UART/I2C/SPI**: Cấu hình và sử dụng các giao diện ngoại vi để giao tiếp với modem SIM7600CE-T (UART, tích hợp LTE + GNSS), cảm biến LIS3DSH (SPI/I2C), đọc điện áp ắc quy (ADC), và điều khiển power path EN/charger (GPIO). Đây là những kỹ năng cơ bản được rèn luyện trong các bài thực hành vi điều khiển.
+- **Giao tiếp ngoại vi GPIO/ADC/UART/I2C/SPI/SDMMC**: Cấu hình và sử dụng các giao diện ngoại vi để giao tiếp với modem SIM7600CE-T (UART, tích hợp LTE + GNSS), cảm biến LIS3DSH (SPI/I2C), đọc điện áp ắc quy (ADC), điều khiển power path EN/charger (GPIO), và vận hành bus SDMMC 4-bit cho lưu trữ cục bộ trên microSD. Đây là những kỹ năng cốt lõi được rèn luyện trực tiếp trong quá trình triển khai thiết bị.
 
 ### 6.1.2. Mạng máy tính và IoT
 
@@ -6099,7 +6117,7 @@ Kiến thức điện tử là nền tảng cho việc thiết kế phần cứn
 
 - **Thiết kế mạch quản lý nguồn**: Áp dụng kiến thức về mạch buck converter (giảm áp ắc quy xe 12V hoặc 24V xuống 3.3V/5V), boost converter (tăng áp từ pin 3.7V lên 5V), và power path management để thiết kế hệ thống cấp nguồn đa đầu vào (ắc quy xe + pin dự phòng).
 - **Đọc giá trị ADC**: Sử dụng kiến thức về bộ chuyển đổi tương tự - số (ADC) để đọc điện áp ắc quy xe thông qua mạch chia áp (voltage divider), tính toán độ phân giải và sai số.
-- **Giao tiếp cảm biến**: Áp dụng kiến thức về giao diện SPI/I2C để giao tiếp với cảm biến gia tốc LIS3DSH, cấu hình các thanh ghi điều khiển, đọc dữ liệu gia tốc 3 trục, và thiết lập ngắt (interrupt) cho phát hiện chuyển động.
+- **Giao tiếp cảm biến và bus nhớ**: Áp dụng kiến thức về giao diện SPI/I2C để giao tiếp với cảm biến gia tốc LIS3DSH, cấu hình các thanh ghi điều khiển, đọc dữ liệu gia tốc 3 trục, và thiết lập ngắt (interrupt) cho phát hiện chuyển động. Đồng thời, bus SDMMC 4-bit được khai thác để ghi dữ liệu cục bộ lên microSD với yêu cầu tuân thủ pull-up phần cứng, trình tự mount/unmount và tính toàn vẹn dữ liệu khi mất nguồn.
 
 ### 6.1.6. Kỹ thuật phần mềm
 
@@ -6147,7 +6165,7 @@ Hệ thống cần xử lý luồng dữ liệu telemetry liên tục từ nhi�
 **Cách giải quyết:**
 
 1. _MQTT Bridge Service độc lập_: Thiết kế dịch vụ Tracking_MqttBridge làm trung gian giữa EMQX broker và các hệ thống lưu trữ. Dịch vụ này nhận dữ liệu từ các topic telemetry, đẩy chuỗi thời gian sang VictoriaMetrics, ghi log sang VictoriaLogs và gom batch cập nhật PostgreSQL cho các trạng thái quan trọng.
-2. _Tự phục hồi kết nối trên thiết bị_: Trong phạm vi hiện nay, thiết bị ưu tiên reconnect tự động, keepalive MQTT và lưu cấu hình trong NVS để quay lại trạng thái vận hành nhanh sau khi có mạng. Replay buffer trên flash được xác định là hạng mục nâng cấp của phiên bản kế tiếp.
+2. _Tự phục hồi kết nối trên thiết bị kết hợp replay cục bộ_: Thiết bị duy trì reconnect tự động, keepalive MQTT và lưu cấu hình trong NVS để quay lại trạng thái vận hành nhanh sau khi có mạng. Song song đó, telemetry/sự kiện được lưu vào hàng đợi microSD và phát lại theo thứ tự sequence khi kết nối phục hồi, giúp giảm mất mát dữ liệu trong outage kéo dài; phạm vi vận hành ở bản hiện tại giả định card-present-at-boot để đảm bảo ổn định.
 3. _QoS phân tầng_: Áp dụng QoS 0 cho dữ liệu vị trí GPS tần suất cao (5–30 giây), QoS 1 cho cảnh báo và sự kiện quan trọng, đảm bảo cân bằng giữa hiệu suất và độ tin cậy.
 
 **Bài học rút ra:** Thiết kế đường ống dữ liệu cần xem xét tất cả các trường hợp thất bại (mất mạng, server quá tải, dữ liệu bất đồng bộ) từ giai đoạn thiết kế, không để đến giai đoạn tích hợp mới xử lý.
@@ -6257,7 +6275,7 @@ Hệ thống IoT giám sát phương tiện tạo ra một số tác động xã
 
 Một trong những bài học quan trọng nhất của dự án là phải ưu tiên thiết kế kiến trúc hệ thống trước khi bắt tay vào lập trình. Ở giai đoạn đầu, nhóm từng có xu hướng triển khai nhanh từng mô-đun khi chưa xây dựng xong mô hình tương tác tổng thể.
 
-Khi phát sinh các lỗi tích hợp (interface mismatch, data format inconsistency, circular dependencies), nhóm chuyển sang cách tiếp cận có kỷ luật hơn: xác lập sơ đồ kiến trúc và luồng dữ liệu, chốt API contracts trước hiện thực, hoàn thiện database schema bằng ER diagram trước khi tạo bảng, và chuẩn hóa kế hoạch Docker networking/port mapping.
+Khi phát sinh các lỗi tích hợp (interface mismatch, data format inconsistency, circular dependencies), nhóm chuyển sang cách tiếp cận có kỷ luật hơn: xác lập sơ đồ kiến trúc và luồng dữ liệu, chốt API contracts trước hiện thực, hoàn thiện database schema bằng ER diagram trước khi tạo bảng, chuẩn hóa kế hoạch Docker networking/port mapping, và đặc tả rõ failure-mode cho nhánh lưu trữ cục bộ (mất mạng, đầy quota, mount fail, ACK timeout) trước khi tối ưu hiệu năng.
 
 Cách làm này giúp giảm đáng kể thời gian sửa lỗi tích hợp và hạn chế khối lượng công việc phải làm lại ở các giai đoạn sau.
 
@@ -6293,8 +6311,8 @@ Chi phí giấy phép phần mềm của toàn bộ hệ thống là 0 VND, nên
 Dự án cho thấy kiểm thử ở mọi tầng của hệ thống là yêu cầu bắt buộc:
 
 - **Unit tests**: Kiểm thử các hàm xử lý dữ liệu, phân tích bản tin OBD2, tính toán năng lượng trong firmware và backend.
-- **Integration tests**: Kiểm thử giao tiếp giữa các dịch vụ — MQTT Bridge nhận dữ liệu từ EMQX và ghi vào VictoriaMetrics, Backend API đọc/ghi PostgreSQL.
-- **End-to-end tests**: Mô phỏng toàn bộ luồng dữ liệu từ thiết bị giả lập (simulated device) đến giao diện web, kiểm tra tính đúng đắn của dữ liệu hiển thị trên dashboard.
+- **Integration tests**: Kiểm thử giao tiếp giữa các dịch vụ — MQTT Bridge nhận dữ liệu từ EMQX và ghi vào VictoriaMetrics, Backend API đọc/ghi PostgreSQL, cùng với luồng replay từ hàng đợi microSD về topic MQTT phù hợp.
+- **End-to-end tests**: Mô phỏng toàn bộ luồng dữ liệu từ thiết bị giả lập (simulated device) đến giao diện web, kiểm tra tính đúng đắn của dữ liệu hiển thị trên dashboard, bao gồm cả kịch bản mất mạng rồi phục hồi để xác nhận dữ liệu replay.
 
 Các lỗi được phát hiện ở giai đoạn kiểm thử sớm (unit test) có chi phí khắc phục thấp hơn rất nhiều so với lỗi chỉ được phát hiện ở giai đoạn tích hợp hoặc triển khai sản xuất [1].
 

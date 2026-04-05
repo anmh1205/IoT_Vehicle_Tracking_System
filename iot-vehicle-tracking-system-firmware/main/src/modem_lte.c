@@ -31,9 +31,11 @@ static bool s_lte_connected = false;
 
 #define MODEM_LTE_CEREG_MAX_RETRY 20
 #define MODEM_LTE_CEREG_POLL_INTERVAL_MS 1000
-#define MODEM_LTE_POWER_RAIL_SETTLE_MS 250
+#define MODEM_LTE_POWER_RAIL_SETTLE_MS 5000
 #define MODEM_LTE_WAKE_DTR_SETTLE_MS 50
 #define MODEM_LTE_AT_RETRY_AFTER_RESET 1
+#define MODEM_LTE_AT_READY_TIMEOUT_MS 15000
+#define MODEM_LTE_AT_READY_POLL_MS 500
 
 /**
  * @brief Send AT command and check expected token.
@@ -49,6 +51,44 @@ static esp_err_t modem_lte_send_simple(const char *cmd, const char *expect, uint
 }
 
 /**
+ * @brief Poll plain `AT` until modem responds or timeout expires.
+ *
+ * @param timeout_ms Total timeout in milliseconds.
+ *
+ * @return ESP_OK when modem replies `OK`, otherwise timeout/failure.
+ */
+static esp_err_t modem_lte_wait_at_ready(uint32_t timeout_ms) {
+    uint64_t start_ms = util_uptime_ms();
+    char response[256] = {0};
+
+    while ((util_uptime_ms() - start_ms) < timeout_ms) {
+        esp_err_t err = modem_at_send("AT\r", response, sizeof(response), 5000);
+        if (err == ESP_OK && strstr(response, "\r\nOK\r\n") != NULL) {
+            return ESP_OK;
+        }
+
+        uint64_t elapsed_ms = util_uptime_ms() - start_ms;
+        uint64_t remain_ms = elapsed_ms < timeout_ms ? (timeout_ms - elapsed_ms) : 0;
+        if (remain_ms == 0) {
+            break;
+        }
+
+        uint32_t retry_ms = MODEM_LTE_AT_READY_POLL_MS;
+        if ((uint64_t)retry_ms > remain_ms) {
+            retry_ms = (uint32_t)remain_ms;
+        }
+
+        ESP_LOGE(TAG,
+                 "AT not ready (%s), retry in %lums",
+                 err == ESP_OK ? "unexpected_response" : esp_err_to_name(err),
+                 (unsigned long)retry_ms);
+        vTaskDelay(pdMS_TO_TICKS(retry_ms));
+    }
+
+    return ESP_ERR_TIMEOUT;
+}
+
+/**
  * @brief Issue hard reset once when AT probe fails.
  *
  * @return ESP_OK on success, otherwise reset/AT errors.
@@ -56,13 +96,16 @@ static esp_err_t modem_lte_send_simple(const char *cmd, const char *expect, uint
 static esp_err_t modem_lte_recover_with_reset(void) {
     esp_err_t reset_err = modem_reset_pulse();
     if (reset_err == ESP_ERR_NOT_SUPPORTED) {
-        return ESP_FAIL;
+        /* Boards without RESET line must retry startup via SIM PWRKEY pulse. */
+        ESP_LOGW(TAG, "RESET pin unavailable, retrying startup with PWRKEY pulse");
+        ESP_RETURN_ON_FALSE(modem_power_on() == ESP_OK, ESP_FAIL, TAG, "Modem PWRKEY pulse failed");
+        vTaskDelay(pdMS_TO_TICKS(MODEM_LTE_POWER_RAIL_SETTLE_MS));
+        return modem_lte_wait_at_ready(MODEM_LTE_AT_READY_TIMEOUT_MS);
     }
     ESP_RETURN_ON_FALSE(reset_err == ESP_OK, reset_err, TAG, "Modem reset failed");
 
     vTaskDelay(pdMS_TO_TICKS(MODEM_LTE_POWER_RAIL_SETTLE_MS));
-    ESP_RETURN_ON_FALSE(modem_lte_send_simple("AT\r", "OK", 5000) == ESP_OK, ESP_FAIL, TAG, "AT failed after reset");
-    return ESP_OK;
+    return modem_lte_wait_at_ready(MODEM_LTE_AT_READY_TIMEOUT_MS);
 }
 
 /**
@@ -151,13 +194,12 @@ esp_err_t modem_lte_init(void) {
 
     ESP_RETURN_ON_FALSE(modem_at_init() == ESP_OK, ESP_FAIL, TAG, "AT init failed");
 
-    /* Basic sanity and modem setup sequence. */
-    esp_err_t at_err = modem_lte_send_simple("AT\r", "OK", 5000);
+    /* SIM7600 boot may take seconds after PWRKEY pulse; poll AT until ready. */
+    esp_err_t at_err = modem_lte_wait_at_ready(MODEM_LTE_AT_READY_TIMEOUT_MS);
     if (at_err != ESP_OK) {
-        ESP_RETURN_ON_FALSE(MODEM_LTE_AT_RETRY_AFTER_RESET > 0 && modem_lte_recover_with_reset() == ESP_OK,
-                            ESP_FAIL,
-                            TAG,
-                            "AT failed and recovery failed");
+        if (!(MODEM_LTE_AT_RETRY_AFTER_RESET > 0 && modem_lte_recover_with_reset() == ESP_OK)) {
+            return ESP_FAIL;
+        }
     }
 
     ESP_RETURN_ON_FALSE(modem_lte_send_simple("ATE0\r", "OK", 5000) == ESP_OK, ESP_FAIL, TAG, "ATE0 failed");

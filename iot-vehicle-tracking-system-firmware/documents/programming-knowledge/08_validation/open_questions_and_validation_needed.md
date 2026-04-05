@@ -36,7 +36,7 @@ This file tracks the remaining unknowns after the RTC docs and source audit. Any
 
 ## Sources
 
-### Project evidence
+### [Project Evidence]
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/01_project_analysis/*.md`
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/02_hardware_mapping/*.md`
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/03_esp32s3_esp_idf/*.md`
@@ -44,7 +44,7 @@ This file tracks the remaining unknowns after the RTC docs and source audit. Any
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/05_imu/*.md`
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/07_rtc/*.md`
 
-### Validation needed
+### [Validation Needed]
 - DS3231M datasheet and board continuity tests
 - Modem boot trace and UART capture
 - IMU wake polarity and threshold field tests

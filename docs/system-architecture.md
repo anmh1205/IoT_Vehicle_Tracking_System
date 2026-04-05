@@ -40,6 +40,7 @@ The completed remediation spans two UI layers:
 - Thesis readability sync keeps `resources/reports/thesis/final/` aligned to the same glossary rules used in the documentation set.
 - Realtime event names use colon-style contracts end to end so backend emitters and frontend consumers stay aligned.
 - Frontend feature code consumes unwrapped data, while transport-level errors stay confined to the API client and parser layer.
+- The BLE OBD session layer now tracks request/response health via rolling counters and periodic log snapshots in `main/src/ble_obd.c`, but the external OBD command contract remains unchanged.
 - Simulator token flow and rollback/race handling were hardened to avoid replaying legacy ingestion behavior during the cutover.
 
 ## Traceability

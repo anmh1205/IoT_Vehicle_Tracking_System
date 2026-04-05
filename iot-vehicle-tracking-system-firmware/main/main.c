@@ -16,6 +16,7 @@
  */
 
 static const char *TAG = "TRACKER_MAIN";
+static const uint32_t INIT_RETRY_INTERVAL_MS = 10000;
 
 /**
  * @brief ESP-IDF application entrypoint.
@@ -28,11 +29,18 @@ void app_main(void) {
     esp_log_level_set("*", ESP_LOG_INFO);
 
     /* Initialize NVS first because config and command updates rely on it. */
-    ESP_ERROR_CHECK(nvs_config_init());
+    esp_err_t err = nvs_config_init();
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "nvs_config_init failed: %s (using in-memory defaults)", esp_err_to_name(err));
+    }
 
     /* Load persisted runtime configuration (or defaults if not present). */
     config_t config = {0};
-    ESP_ERROR_CHECK(nvs_config_load(&config));
+    err = nvs_config_load(&config);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "nvs_config_load failed: %s (using defaults)", esp_err_to_name(err));
+        app_config_set_defaults(&config);
+    }
 
     /* Compare running partition and boot partition for OTA diagnostics. */
     const esp_partition_t *running = esp_ota_get_running_partition();
@@ -69,8 +77,18 @@ void app_main(void) {
              (int)wakeup,
              (int)state);
 
-    /* Initialize all runtime subsystems used by state machine. */
-    ESP_ERROR_CHECK(state_machine_init(&config));
+    /* Initialize runtime subsystems with timed retry to avoid boot-loop aborts. */
+    while (true) {
+        err = state_machine_init(&config);
+        if (err == ESP_OK) {
+            break;
+        }
+        ESP_LOGW(TAG,
+                 "state_machine_init failed: %s (retry in %lums)",
+                 esp_err_to_name(err),
+                 (unsigned long)INIT_RETRY_INTERVAL_MS);
+        vTaskDelay(pdMS_TO_TICKS(INIT_RETRY_INTERVAL_MS));
+    }
 
     /**
      * Main control loop:

@@ -35,7 +35,7 @@ This file lists claims that are either inference-heavy, under-sourced, or likely
 
 ## Sources
 
-### Project evidence
+### [Project Evidence]
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/01_project_analysis/*.md`
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/02_hardware_mapping/*.md`
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/03_esp32s3_esp_idf/*.md`
@@ -43,7 +43,7 @@ This file lists claims that are either inference-heavy, under-sourced, or likely
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/05_imu/*.md`
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/07_rtc/*.md`
 
-### Validation needed
+### [Validation Needed]
 - DS3231M datasheet and board routing confirmation
 - Modem boot log capture and UART trace
 - IMU wake polarity scope capture

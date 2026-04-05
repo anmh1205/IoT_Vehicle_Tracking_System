@@ -48,7 +48,7 @@ This comparison is here to prevent copy mistakes. The tracker runtime is **LIS3D
 - ST LIS3DH datasheet: https://www.st.com/resource/en/datasheet/lis3dh.pdf
 - ST LIS3DH product page: https://www.st.com/content/st_com/en/products/mems-and-sensors/accelerometers/lis3dh.html
 
-### Project evidence
+### [Project Evidence]
 - `iot-vehicle-tracking-system-firmware/main/src/imu_lis3dsh.c`
 - `iot-vehicle-tracking-system-firmware/main/inc/imu_lis3dsh.h`
 - `iot-vehicle-tracking-system-firmware/main/inc/pin_map.h`

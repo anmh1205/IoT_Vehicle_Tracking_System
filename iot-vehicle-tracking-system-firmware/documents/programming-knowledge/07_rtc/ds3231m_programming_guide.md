@@ -84,7 +84,7 @@ Implication:
 
 ## Sources
 
-### Project evidence
+### [Project Evidence]
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/02_hardware_mapping/netlist_parsed_summary.md`
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/02_hardware_mapping/hardware_pin_mapping.md`
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/02_hardware_mapping/hardware_firmware_crosscheck.md`
@@ -92,7 +92,7 @@ Implication:
 - `iot-vehicle-tracking-system-firmware/main/inc/app_state.h`
 - `iot-vehicle-tracking-system-firmware/main/CMakeLists.txt`
 
-### Validation needed
+### [Validation Needed]
 - DS3231M datasheet and register map
 - Board schematic / continuity check for any RTC alarm or wake pin
 - Power rail notes for U7 VBAT / VCC behavior

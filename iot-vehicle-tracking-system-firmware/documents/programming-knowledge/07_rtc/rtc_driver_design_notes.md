@@ -80,14 +80,14 @@ Because the IMU already uses the same bus, the RTC driver should follow the same
 
 ## Sources
 
-### Project evidence
+### [Project Evidence]
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/02_hardware_mapping/netlist_parsed_summary.md`
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/02_hardware_mapping/hardware_pin_mapping.md`
 - `iot-vehicle-tracking-system-firmware/main/src/state_machine.c`
 - `iot-vehicle-tracking-system-firmware/main/inc/app_state.h`
 - `iot-vehicle-tracking-system-firmware/main/CMakeLists.txt`
 
-### Validation needed
+### [Validation Needed]
 - DS3231M datasheet
 - Board schematic / continuity test for U7 wake/alarm pin
 - Power-rail confirmation for RTC backup behavior

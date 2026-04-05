@@ -610,16 +610,40 @@ ble_mgr_ctx_t *ble_mgr_init(uint32_t timeout_ms) {
     ble_mgr_queue_clear(mgr_ctx);
     /* Start BLE stack then wait for sync callback to post queue result. */
     esp_err_t err = ble_init_stack(&s_ble_init_cfg);
-    bool wait_ok = ble_mgr_queue_wait(mgr_ctx, NULL, timeout_ms);
-    if (err != ESP_OK || !wait_ok) {
-        if (err != ESP_OK) {
-            ESP_LOGE(TAG, "BLE stack init failed: %s", esp_err_to_name(err));
-        } else {
-            ESP_LOGE(TAG, "Timed out waiting for BLE stack sync");
-        }
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "BLE stack init failed: %s, forcing deinit and retry", esp_err_to_name(err));
+        (void)ble_stack_deinit();
+        err = ble_init_stack(&s_ble_init_cfg);
+    }
+
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "BLE stack init failed after retry: %s", esp_err_to_name(err));
         xQueueReset(mgr_ctx->result_queue);
         vQueueDelete(mgr_ctx->result_queue);
         mgr_ctx->result_queue = NULL;
+        mgr_ctx->disc_cfg = NULL;
+        mgr_ctx->usr_ctx = NULL;
+        mgr_ctx->is_connecting = false;
+        mgr_ctx->is_connected = false;
+        mgr_ctx->conn_handle = BLE_HS_CONN_HANDLE_NONE;
+        xSemaphoreGive(mgr_ctx->lock_mtx);
+        vSemaphoreDelete(mgr_ctx->lock_mtx);
+        mgr_ctx->lock_mtx = NULL;
+        return NULL;
+    }
+
+    bool wait_ok = ble_mgr_queue_wait(mgr_ctx, NULL, timeout_ms);
+    if (!wait_ok) {
+        ESP_LOGE(TAG, "Timed out waiting for BLE stack sync");
+        (void)ble_stack_deinit();
+        xQueueReset(mgr_ctx->result_queue);
+        vQueueDelete(mgr_ctx->result_queue);
+        mgr_ctx->result_queue = NULL;
+        mgr_ctx->disc_cfg = NULL;
+        mgr_ctx->usr_ctx = NULL;
+        mgr_ctx->is_connecting = false;
+        mgr_ctx->is_connected = false;
+        mgr_ctx->conn_handle = BLE_HS_CONN_HANDLE_NONE;
         xSemaphoreGive(mgr_ctx->lock_mtx);
         vSemaphoreDelete(mgr_ctx->lock_mtx);
         mgr_ctx->lock_mtx = NULL;

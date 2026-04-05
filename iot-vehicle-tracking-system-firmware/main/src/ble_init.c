@@ -6,8 +6,8 @@
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 
+#include "esp_bt.h"
 #include "esp_log.h"
-#include "esp_nimble_hci.h"
 
 #include "host/ble_hs.h"
 #include "host/ble_store.h"
@@ -23,8 +23,34 @@
 
 static const char *TAG = "BLE_INIT";
 
-/* Handle of host task created for NimBLE event loop. */
-static TaskHandle_t s_ble_task_handle = NULL;
+/**
+ * @brief Convert controller status enum to readable text.
+ */
+static const char *ble_controller_status_to_str(esp_bt_controller_status_t status) {
+    switch (status) {
+        case ESP_BT_CONTROLLER_STATUS_IDLE:
+            return "IDLE";
+        case ESP_BT_CONTROLLER_STATUS_INITED:
+            return "INITED";
+        case ESP_BT_CONTROLLER_STATUS_ENABLED:
+            return "ENABLED";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+/**
+ * @brief Log BLE init stage with current controller status.
+ */
+static void ble_log_controller_stage(const char *stage) {
+    esp_bt_controller_status_t status = esp_bt_controller_get_status();
+    ESP_LOGI(TAG,
+             "BLE init stage=%s controller_status=%s(%d)",
+             stage,
+             ble_controller_status_to_str(status),
+             (int)status);
+}
+
 /* Semaphore used to signal task stop completion during deinit. */
 static SemaphoreHandle_t s_ble_stop_sem = NULL;
 /* Global stack state guard. */
@@ -52,6 +78,9 @@ static void ble_task(void *param) {
 
     /* Release NimBLE RTOS resources associated with host task. */
     nimble_port_freertos_deinit();
+
+    /* Task was created with xTaskCreate, so it must self-delete instead of returning. */
+    vTaskDelete(NULL);
 }
 
 /**
@@ -80,22 +109,24 @@ static void default_sync_cb(void) {
 esp_err_t ble_init_stack(const ble_init_config_t *config) {
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
 
+    ble_log_controller_stage("enter");
+
     /* Idempotent init: repeated calls are accepted. */
     if (s_stack_started) {
+        ESP_LOGW(TAG, "ble_init_stack called while stack already started");
+        ble_log_controller_stage("already-started");
         return ESP_OK;
     }
 
-    /* Initialize BLE controller <-> host transport layer. */
-    esp_err_t err = esp_nimble_hci_init();
-    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "esp_nimble_hci_init failed");
-
-    /* Initialize NimBLE host core. */
-    err = nimble_port_init();
+    /* Initialize NimBLE host + controller stack. */
+    ble_log_controller_stage("before-nimble_port_init");
+    esp_err_t err = nimble_port_init();
     if (err != ESP_OK) {
-        /* Roll back HCI init if host init fails. */
-        esp_nimble_hci_deinit();
+        ESP_LOGE(TAG, "nimble_port_init failed: %s", esp_err_to_name(err));
+        ble_log_controller_stage("after-nimble_port_init-fail");
+        return err;
     }
-    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "nimble_port_init failed");
+    ble_log_controller_stage("after-nimble_port_init-ok");
 
     /* Install callbacks and persistent key store hooks. */
     ble_hs_cfg.reset_cb = config->reset_cb;
@@ -107,23 +138,23 @@ esp_err_t ble_init_stack(const ble_init_config_t *config) {
     s_ble_stop_sem = xSemaphoreCreateBinary();
     if (s_ble_stop_sem == NULL) {
         nimble_port_deinit();
-        esp_nimble_hci_deinit();
         ESP_LOGE(TAG, "Failed to create BLE stop semaphore");
         return ESP_ERR_NO_MEM;
     }
 
     /* Spawn NimBLE host task. */
-    BaseType_t task_result = xTaskCreate(ble_task, "nimble_host", 4096, NULL, 5, &s_ble_task_handle);
+    BaseType_t task_result = xTaskCreate(ble_task, "nimble_host", 4096, NULL, 5, NULL);
     if (task_result != pdPASS) {
         /* Full rollback when task creation fails. */
         vSemaphoreDelete(s_ble_stop_sem);
         s_ble_stop_sem = NULL;
         nimble_port_deinit();
-        esp_nimble_hci_deinit();
+        ble_log_controller_stage("after-task-create-fail");
+        return ESP_FAIL;
     }
-    ESP_RETURN_ON_FALSE(task_result == pdPASS, ESP_FAIL, TAG, "Failed to create NimBLE task");
 
     s_stack_started = true;
+    ble_log_controller_stage("init-success");
     return ESP_OK;
 }
 
@@ -146,8 +177,11 @@ esp_err_t ble_stack_init(void) {
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t ble_stack_deinit(void) {
+    ble_log_controller_stage("deinit-enter");
+
     /* Idempotent deinit for safe repeated calls. */
     if (!s_stack_started) {
+        ESP_LOGW(TAG, "ble_stack_deinit called while stack not started");
         return ESP_OK;
     }
 
@@ -162,11 +196,10 @@ esp_err_t ble_stack_deinit(void) {
         s_ble_stop_sem = NULL;
     }
 
-    /* Deinitialize host and controller transport. */
+    /* Deinitialize host and controller stack. */
     nimble_port_deinit();
-    esp_nimble_hci_deinit();
-    s_ble_task_handle = NULL;
     s_stack_started = false;
+    ble_log_controller_stage("deinit-done");
     ESP_LOGI(TAG, "NimBLE stack deinitialized");
     return ESP_OK;
 }

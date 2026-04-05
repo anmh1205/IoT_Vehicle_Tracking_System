@@ -73,13 +73,13 @@ Implication:
 
 ## Sources
 
-### Project evidence
+### [Project Evidence]
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/02_hardware_mapping/netlist_parsed_summary.md`
 - `iot-vehicle-tracking-system-firmware/documents/programming-knowledge/02_hardware_mapping/hardware_pin_mapping.md`
 - `iot-vehicle-tracking-system-firmware/main/src/state_machine.c`
 - `iot-vehicle-tracking-system-firmware/main/inc/app_state.h`
 
-### Validation needed
+### [Validation Needed]
 - DS3231M datasheet
 - Board schematic / continuity test for U7 pins
 - Bench capture for I2C address and alarm/flag behavior

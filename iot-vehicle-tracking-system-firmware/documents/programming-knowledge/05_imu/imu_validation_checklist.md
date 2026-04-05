@@ -72,7 +72,7 @@ Pass only if all project-confirmed items succeed and the field-test items are do
 - ST LIS3DSH datasheet: https://www.st.com/resource/en/datasheet/lis3dsh.pdf
 - ST LIS3DH datasheet: https://www.st.com/resource/en/datasheet/lis3dh.pdf
 
-### Project evidence
+### [Project Evidence]
 - `iot-vehicle-tracking-system-firmware/main/src/imu_lis3dsh.c`
 - `iot-vehicle-tracking-system-firmware/main/inc/imu_lis3dsh.h`
 - `iot-vehicle-tracking-system-firmware/main/inc/pin_map.h`
