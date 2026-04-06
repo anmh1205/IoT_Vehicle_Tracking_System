@@ -8,6 +8,7 @@ router.use(requireAuth);
 router.get('/fleet', statisticsController.getFleetStats);
 router.get('/maintenance', statisticsController.getMaintenanceStats);
 router.get('/summary', statisticsController.getSummary);
+router.get('/policy-limits', statisticsController.getPolicyLimits);
 router.get('/fleet-usage', statisticsController.getFleetUsage);
 router.get('/fleet-utilization', statisticsController.getFleetUsage);
 router.get('/device-uptime', statisticsController.getDeviceUptime);

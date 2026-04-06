@@ -25,9 +25,18 @@ export const violationListQuerySchema = z.object({
   vehicleId: z.string().max(50).optional(),
   driverId: z.coerce.number().int().positive().optional(),
   violationType: z.string().max(50).optional(),
+  policyType: z.enum(['ADMIN_BOUNDARY', 'RADIUS', 'DISTANCE_QUOTA']).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-  acknowledged: z
-    .string()
-    .optional()
-    .transform((v) => (v === 'true' ? true : v === 'false' ? false : undefined)),
+  acknowledged: z.preprocess((value) => {
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
+    if (value === true || value === 'true' || value === 1 || value === '1') {
+      return true;
+    }
+    if (value === false || value === 'false' || value === 0 || value === '0') {
+      return false;
+    }
+    return value;
+  }, z.boolean().optional()),
 });

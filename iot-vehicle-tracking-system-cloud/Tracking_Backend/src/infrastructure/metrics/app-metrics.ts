@@ -78,3 +78,34 @@ export const rateLimitHitsTotal = new client.Counter({
   labelNames: ['path'] as const,
   registers: [registry],
 });
+
+// --- Policy Evaluation Metrics ---
+
+export const policyEvalTotal = new client.Counter({
+  name: 'policy_eval_total',
+  help: 'Total policy evaluations by type and result',
+  labelNames: ['policy_type', 'result'] as const,
+  registers: [registry],
+});
+
+export const policyEvalDurationSeconds = new client.Histogram({
+  name: 'policy_eval_duration_seconds',
+  help: 'Policy evaluation duration in seconds',
+  labelNames: ['policy_type'] as const,
+  buckets: [0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5],
+  registers: [registry],
+});
+
+export const policyViolationsTotal = new client.Counter({
+  name: 'policy_violation_total',
+  help: 'Total policy violations by type and severity',
+  labelNames: ['policy_type', 'severity'] as const,
+  registers: [registry],
+});
+
+export const policyQuotaResetTotal = new client.Counter({
+  name: 'policy_quota_reset_total',
+  help: 'Total quota reset operations by cycle',
+  labelNames: ['cycle'] as const,
+  registers: [registry],
+});

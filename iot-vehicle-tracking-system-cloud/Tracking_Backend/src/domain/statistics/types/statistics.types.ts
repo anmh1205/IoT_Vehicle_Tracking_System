@@ -39,3 +39,14 @@ export interface StatisticsSummary {
   totalSessions: number;
   totalAlerts: number;
 }
+
+export interface PolicyLimitsSummary {
+  vehicleId: string;
+  quotaLimitKm: number;
+  consumedKm: number;
+  remainingKm: number;
+  quotaState: 'UNDER_LIMIT' | 'NEAR_LIMIT' | 'EXCEEDED';
+  cycleStartAt: string | null;
+  cycleEndAt: string | null;
+  updatedAt: string;
+}

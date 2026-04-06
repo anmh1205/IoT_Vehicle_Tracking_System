@@ -56,6 +56,16 @@
   - Added reusable VPS deploy scripts `scripts/deploy/bootstrap-vps.sh` and `scripts/deploy/deploy-service.sh`.
   - Added rollout checklist and required secret/env mapping in `docs/cicd-required-secrets-and-env.md`.
 
+### P2 - Cloud Geofence and Distance Limits (Backend) Complete
+- Scope: cloud-side policy engine for admin boundary, radius, and distance quota on the backend.
+- Milestones completed:
+  - Policy contract/scope closed in plan and validation log.
+  - Backend review covered geofence CRUD, policy evaluator, ingest, and violation repository flow.
+  - Policy types, evaluation flow, metrics, and API endpoints are now documented as part of the completed feature set.
+- Validation status:
+  - Backend lint, typecheck, test, and build were reported as passing for the completed scope.
+  - Code review captured follow-up hardening items for future maintenance, but they do not block feature completion.
+
 ### P2 - Hardware Spec Firmware Thesis Sync In Progress
 - Scope: align firmware + thesis final assets with hardware netlist baseline decisions (SIM7600CE-T canonical, LIS3DSH migration, modem control-line model expansion).
 - Milestones in progress:
@@ -70,5 +80,6 @@
 - Thesis baseline sync is complete and limited to `resources/reports/thesis/` final sources, Mermaid sources, exported SVG figures, and the figure generator path fix.
 - Diagram pack v2 pilot is complete; next decisions are governance/compliance follow-ups before any broader rollout.
 - MQTT canonical cutover is complete for the documented scope; any remaining consumer drift or token lifecycle follow-up should be tracked as separate maintenance work.
+- Cloud geofence policy and distance quota implementation is complete; known hardening follow-ups are documented in review notes.
 - Thesis readability sync is complete for the final thesis markdown and Mermaid asset set; future edits should keep the same glossary and caption rules.
 - Related docs synchronized in `docs/project-overview-pdr.md`, `docs/project-changelog.md`, `docs/system-architecture.md`, and `docs/codebase-summary.md` where applicable.

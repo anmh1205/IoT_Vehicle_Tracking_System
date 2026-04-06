@@ -9,7 +9,7 @@ version: 1.0.0
 
 ## Overview
 
-Kích hoạt skill này khi cần vòng lặp debug firmware ESP32 theo chu kỳ: monitor serial -> phân tích lỗi -> sửa code -> build/flash -> monitor lại.
+Kích hoạt skill này khi cần vòng lặp debug firmware ESP32 theo chu kỳ: monitor serial -> phân tích lỗi -> sửa code -> build/flash -> monitor lại. Trên Windows, chạy lệnh ESP-IDF qua PowerShell/CMD (không dùng Git Bash cho `idf.py`).
 
 ## When to use
 
@@ -39,8 +39,8 @@ Kích hoạt khi yêu cầu có một trong các ý sau:
 3. Nếu có lỗi:
    - Xác định file nguồn liên quan
    - Sửa trực tiếp code (không mock)
-   - Chạy compile/build
-   - Flash bằng `idf.py -p <COM> build flash`
+   - Chạy compile/build qua PowerShell/CMD
+   - Flash qua PowerShell/CMD với `idf.py -p <COM> build flash`
 4. Nếu ổn định:
    - Kết thúc vòng lặp
 5. Nếu chưa ổn định và chưa có fatal rõ:
@@ -54,6 +54,19 @@ Kích hoạt khi yêu cầu có một trong các ý sau:
   - `python .claude/skills/esp32-loop-coding/scripts/log_analyzer.py --from-file iot-vehicle-tracking-system-firmware/documents/test-logs/com6-monitor-latest.log --tail-lines 800 --json`
 - Chạy vòng lặp cơ bản:
   - `python .claude/skills/esp32-loop-coding/scripts/loop_runner.py --firmware-dir iot-vehicle-tracking-system-firmware --max-iterations 8 --json`
+
+## ESP-IDF command policy (Windows)
+
+- Không chạy trực tiếp `idf.py ...` trong Git Bash/MSYS.
+- Chạy qua PowerShell:
+  - `powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\Espressif\esp-idf-v5.5.3\export.ps1'; cd 'E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware'; idf.py build"`
+- Hoặc chạy qua CMD từ bash:
+  - `cmd.exe /c "cd /d E:\anmh1205\IoT_Vehicle_Tracking_System\iot-vehicle-tracking-system-firmware && call C:\Espressif\esp-idf-v5.5.3\export.bat && idf.py build"`
+- Áp dụng tương tự cho các lệnh khác:
+  - `idf.py -p <COM> flash`
+  - `idf.py -p <COM> monitor`
+  - `idf.py -p <COM> build flash`
+  - `idf.py fullclean && idf.py build`
 
 ## Guardrails
 

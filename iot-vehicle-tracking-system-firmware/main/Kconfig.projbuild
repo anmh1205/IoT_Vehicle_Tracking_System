@@ -47,55 +47,6 @@ config TRACKER_SD_DIAG_ENABLE
     bool "Enable SD diagnostics counters"
     default y
 
-config TRACKER_SDMMC_BUS_WIDTH
-    int "SDMMC bus width"
-    range 1 4
-    default 4
-
-config TRACKER_SDMMC_GPIO_CLK
-    int "SDMMC CLK GPIO"
-    range -1 48
-    default -1
-
-config TRACKER_SDMMC_GPIO_CMD
-    int "SDMMC CMD GPIO"
-    range -1 48
-    default -1
-
-config TRACKER_SDMMC_GPIO_D0
-    int "SDMMC DAT0 GPIO"
-    range -1 48
-    default -1
-
-config TRACKER_SDMMC_GPIO_D1
-    int "SDMMC DAT1 GPIO"
-    range -1 48
-    default -1
-
-config TRACKER_SDMMC_GPIO_D2
-    int "SDMMC DAT2 GPIO"
-    range -1 48
-    default -1
-
-config TRACKER_SDMMC_GPIO_D3
-    int "SDMMC DAT3 GPIO"
-    range -1 48
-    default -1
-
-config TRACKER_SDMMC_GPIO_CD
-    int "SDMMC card-detect GPIO"
-    range -1 48
-    default -1
-
-config TRACKER_SDMMC_GPIO_WP
-    int "SDMMC write-protect GPIO"
-    range -1 48
-    default -1
-
-config TRACKER_SDMMC_CD_ACTIVE_LOW
-    bool "Card detect active low"
-    default y
-
 config TRACKER_SD_LOG_QUOTA_BYTES
     int "SD queue quota bytes"
     range 131072 134217728

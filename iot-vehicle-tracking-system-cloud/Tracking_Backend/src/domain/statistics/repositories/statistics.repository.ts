@@ -174,6 +174,16 @@ interface SummaryTotalsRow {
   total_alerts: string;
 }
 
+interface PolicyLimitsRow {
+  vehicle_id: string;
+  quota_limit_km: string;
+  consumed_m: string;
+  quota_state: 'UNDER_LIMIT' | 'NEAR_LIMIT' | 'EXCEEDED';
+  cycle_start_at: Date | null;
+  cycle_end_at: Date | null;
+  updated_at: Date;
+}
+
 export const getTripSummary = async (
   range: StatisticsDateRange,
   interval: StatisticsInterval,
@@ -255,4 +265,26 @@ export const getSummaryTotals = async (
     totalSessions: Number.parseInt(row?.total_sessions ?? '0', 10) || 0,
     totalAlerts: Number.parseInt(row?.total_alerts ?? '0', 10) || 0,
   };
+};
+
+export const getPolicyLimitsSummary = async (): Promise<PolicyLimitsRow[]> => {
+  const query = `
+    SELECT
+      s.vehicle_id,
+      COALESCE(NULLIF((p.params_json->>'limitKm'), '')::numeric, 0)::text AS quota_limit_km,
+      COALESCE(s.consumed_m, 0)::text AS consumed_m,
+      s.quota_state,
+      s.cycle_start_at,
+      s.cycle_end_at,
+      s.updated_at
+    FROM vehicle_policy_state s
+    JOIN vehicle_policies p ON p.id = s.policy_id
+    WHERE p.policy_type = 'DISTANCE_QUOTA'
+      AND p.status = 'active'
+    ORDER BY s.updated_at DESC
+    LIMIT 500
+  `;
+
+  const result = await pool.query<PolicyLimitsRow>(query);
+  return result.rows;
 };

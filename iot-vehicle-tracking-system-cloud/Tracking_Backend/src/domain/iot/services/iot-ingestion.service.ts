@@ -1,8 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { pool } from '@/infrastructure/database/pool';
+import { createLogger } from '@/infrastructure/logger';
 import { createNotFoundError, createUnauthorizedError } from '@/shared/utils/errors.util';
 import { publishEvent } from '@/infrastructure/realtime';
+import { evaluateVehiclePolicies } from '@/domain/geofence/services/policy-evaluator.service';
 import type { QueryResultRow } from 'pg';
+
+const log = createLogger('iot-ingestion-service');
 
 interface DeviceRow extends QueryResultRow {
   id: number;
@@ -31,8 +35,12 @@ export interface IotPayload {
 
 export const ingestDeviceData = async (payload: IotPayload) => {
   const correlationId = randomUUID();
-  const deviceTimestamp = payload.timestamp ? new Date(payload.timestamp) : new Date();
   const serverTimestamp = new Date();
+
+  const deviceTimestamp = payload.timestamp ? new Date(payload.timestamp) : serverTimestamp;
+  if (Number.isNaN(deviceTimestamp.getTime())) {
+    throw createUnauthorizedError('Invalid device timestamp');
+  }
 
   const deviceResult = await pool.query<DeviceRow>(
     'SELECT id, device_id, auth_token FROM devices WHERE device_id = $1 LIMIT 1',
@@ -74,6 +82,15 @@ export const ingestDeviceData = async (payload: IotPayload) => {
      LIMIT 1`,
     [payload.deviceId],
   );
+
+  const vehicleRow = await pool.query<{ vehicle_id: string }>(
+    `SELECT vehicle_id
+     FROM vehicles
+     WHERE device_id = $1
+     LIMIT 1`,
+    [payload.deviceId],
+  );
+  const vehicleId = vehicleRow.rows[0]?.vehicle_id ?? null;
 
   let sessionId = activeSessionResult.rows[0]?.id;
   const isNewSession = !sessionId;
@@ -152,6 +169,25 @@ export const ingestDeviceData = async (payload: IotPayload) => {
   });
 
   if (payload.data.lat != null && payload.data.lon != null) {
+    if (vehicleId) {
+      try {
+        await evaluateVehiclePolicies({
+          vehicleId,
+          deviceId: payload.deviceId,
+          lat: payload.data.lat,
+          lon: payload.data.lon,
+          timestamp: deviceTimestamp,
+        });
+      } catch (error) {
+        log.error('Policy evaluation failed during telemetry ingestion', {
+          deviceId: payload.deviceId,
+          vehicleId,
+          correlationId,
+          error,
+        });
+      }
+    }
+
     publishEvent('device:position', {
       device_id: payload.deviceId,
       lat: payload.data.lat,

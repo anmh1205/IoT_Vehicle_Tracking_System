@@ -35,8 +35,12 @@ The completed remediation spans two UI layers:
 - No new backend contracts were added for the HTTP transport layer beyond the standardized response/error shapes.
 - Web root `/` now redirects to `/login`, while the protected dashboard shell remains under `/dashboard/*`.
 - Mobile and dashboard continue to share the same operational capability set; accessibility is implemented per platform conventions.
-- The API layer now assumes success envelopes and RFC7807 problem details across shared middleware, health, metrics, and rate-limit surfaces.
+- The API layer now assumes success envelopes and RFC7807 problem details across shared middleware, health, metrics, policy, and rate-limit surfaces.
 - MQTT is the canonical ingest path for both real devices and simulator traffic, and `/iot/data` is no longer part of the runtime architecture.
+- Cloud geofence policy evaluation runs server-side in `Tracking_Backend/src/domain/geofence/services/policy-evaluator.service.ts`, using policy state and violation repositories to persist decisions.
+- Policy types are evaluated as a matrix: `ADMIN_BOUNDARY` for strict polygon checks, `RADIUS` for center/radius checks, and `DISTANCE_QUOTA` for cycle-based distance accumulation.
+- The evaluator emits policy metrics for evaluation count, evaluation latency, violation count, and quota reset count through `src/infrastructure/metrics/app-metrics.ts`.
+- API surface for policy management is exposed under `src/api/routes/geofence.routes.ts` with policy CRUD, state lookup, and violation listing endpoints.
 - Thesis readability sync keeps `resources/reports/thesis/final/` aligned to the same glossary rules used in the documentation set.
 - Realtime event names use colon-style contracts end to end so backend emitters and frontend consumers stay aligned.
 - Frontend feature code consumes unwrapped data, while transport-level errors stay confined to the API client and parser layer.

@@ -4,11 +4,13 @@ import {
   getAlertFrequency,
   getTripSummary,
   getSummaryTotals,
+  getPolicyLimitsSummary,
 } from '@/domain/statistics/repositories/statistics.repository';
 import type {
   StatisticsDateRange,
   StatisticsInterval,
   StatisticsSummary,
+  PolicyLimitsSummary,
 } from '@/domain/statistics/types/statistics.types';
 import { createValidationError } from '@/shared/utils/errors.util';
 
@@ -121,5 +123,26 @@ export const getSummaryStats = async (params: {
     averageUptimePercent: Number(averageUptimePercent.toFixed(2)),
     totalSessions: totals.totalSessions,
     totalAlerts: totals.totalAlerts,
+  };
+};
+
+export const getPolicyLimitsStats = async (): Promise<{ items: PolicyLimitsSummary[] }> => {
+  const rows = await getPolicyLimitsSummary();
+  return {
+    items: rows.map((row) => {
+      const quotaLimitKm = Number.parseFloat(row.quota_limit_km ?? '0') || 0;
+      const consumedMeters = Number.parseFloat(row.consumed_m ?? '0') || 0;
+      const consumedKm = Number((consumedMeters / 1000).toFixed(3));
+      return {
+        vehicleId: row.vehicle_id,
+        quotaLimitKm,
+        consumedKm,
+        remainingKm: Number(Math.max(quotaLimitKm - consumedKm, 0).toFixed(3)),
+        quotaState: row.quota_state,
+        cycleStartAt: row.cycle_start_at?.toISOString() ?? null,
+        cycleEndAt: row.cycle_end_at?.toISOString() ?? null,
+        updatedAt: row.updated_at.toISOString(),
+      };
+    }),
   };
 };

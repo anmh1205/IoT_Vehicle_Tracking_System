@@ -8,9 +8,14 @@ import {
   updateGeofenceSchema,
   geofenceListQuerySchema,
   assignVehicleToGeofenceSchema,
+  createVehiclePolicySchema,
+  updateVehiclePolicySchema,
+  vehiclePolicyListQuerySchema,
+  policyViolationListQuerySchema,
 } from '@/api/validators/geofence.validator';
 import * as geofenceCrudService from '@/domain/geofence/services/geofence-crud.service';
 import * as geofenceListService from '@/domain/geofence/services/geofence-list.service';
+import * as vehiclePolicyCrudService from '@/domain/geofence/services/vehicle-policy-crud.service';
 
 export const listGeofences = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const parsed = geofenceListQuerySchema.safeParse(req.query);
@@ -100,3 +105,70 @@ export const unassignVehicle = asyncHandler(async (req: AuthenticatedRequest, re
   const result = await geofenceCrudService.unassignVehicleFromGeofence(geofenceId, vehicleId);
   sendOk(res, result);
 });
+
+export const listVehiclePolicies = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const parsed = vehiclePolicyListQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
+  }
+
+  const result = await vehiclePolicyCrudService.listVehiclePolicies(parsed.data);
+  sendOk(res, result);
+});
+
+export const getVehiclePolicy = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number.parseInt(req.params.policyId, 10);
+  if (Number.isNaN(id)) {
+    throw createValidationError('Invalid policy ID');
+  }
+
+  const policy = await vehiclePolicyCrudService.getVehiclePolicyById(id);
+  sendOk(res, policy);
+});
+
+export const createVehiclePolicy = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const parsed = createVehiclePolicySchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw createValidationError('Invalid policy data', parsed.error.flatten().fieldErrors);
+  }
+
+  const policy = await vehiclePolicyCrudService.createVehiclePolicy(parsed.data, req.user?.id);
+  sendCreated(res, policy);
+});
+
+export const updateVehiclePolicy = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const id = Number.parseInt(req.params.policyId, 10);
+  if (Number.isNaN(id)) {
+    throw createValidationError('Invalid policy ID');
+  }
+
+  const parsed = updateVehiclePolicySchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw createValidationError('Invalid policy data', parsed.error.flatten().fieldErrors);
+  }
+
+  const policy = await vehiclePolicyCrudService.updateVehiclePolicy(id, parsed.data, req.user?.id);
+  sendOk(res, policy);
+});
+
+export const listVehiclePolicyStates = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { vehicleId } = req.params;
+  if (!vehicleId) {
+    throw createValidationError('Vehicle ID is required');
+  }
+
+  const states = await vehiclePolicyCrudService.listVehiclePolicyStates(vehicleId);
+  sendOk(res, { items: states });
+});
+
+export const listVehiclePolicyViolations = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const parsed = policyViolationListQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
+    }
+
+    const result = await vehiclePolicyCrudService.listVehiclePolicyViolations(parsed.data);
+    sendOk(res, result);
+  },
+);

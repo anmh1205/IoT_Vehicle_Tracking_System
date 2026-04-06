@@ -8,6 +8,12 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/', geofenceController.listGeofences);
+router.get('/policies', geofenceController.listVehiclePolicies);
+router.get('/policies/:policyId', geofenceController.getVehiclePolicy);
+router.post('/policies', geofenceController.createVehiclePolicy);
+router.put('/policies/:policyId', geofenceController.updateVehiclePolicy);
+router.get('/policy-violations', geofenceController.listVehiclePolicyViolations);
+router.get('/vehicles/:vehicleId/policy-states', geofenceController.listVehiclePolicyStates);
 router.get('/:id', geofenceController.getGeofence);
 router.post('/', geofenceController.createGeofence);
 router.put('/:id', geofenceController.updateGeofence);

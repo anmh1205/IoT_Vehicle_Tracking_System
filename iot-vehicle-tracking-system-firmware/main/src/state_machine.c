@@ -689,6 +689,7 @@ app_state_t state_machine_run(app_state_t current_state) {
 
         case APP_STATE_DRIVING: {
             /* Full online mode with high-frequency telemetry and command handling. */
+            state_machine_try_connect_ble();
             state_machine_try_connect_network();
             state_machine_refresh_telemetry(true, true);
             offline_queue_set_online(tracker_mqtt_is_connected());

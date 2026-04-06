@@ -33,6 +33,11 @@ export const findAll = async (
     params.push(query.violationType);
   }
 
+  if (query.policyType) {
+    conditions.push(`policy_type = $${paramIndex++}`);
+    params.push(query.policyType);
+  }
+
   if (query.severity) {
     conditions.push(`severity = $${paramIndex++}`);
     params.push(query.severity);
@@ -64,15 +69,18 @@ export const findById = async (id: number): Promise<Violation | null> =>
 
 export const create = async (input: CreateViolationInput): Promise<Violation> =>
   insertOne<Violation>(
-    `INSERT INTO violations (alert_id, vehicle_id, driver_id, violation_type, severity, description,
-      location_lat, location_lon, speed_limit, actual_speed, fine_amount, notes, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+    `INSERT INTO violations (alert_id, vehicle_id, driver_id, violation_type, policy_type, severity, description,
+      location_lat, location_lon, speed_limit, actual_speed, fine_amount, notes, detected_at, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, COALESCE($14, NOW()), NOW(), NOW())
      RETURNING *`,
     [
       input.alertId ?? null,
       input.vehicleId ?? null,
       input.driverId ?? null,
       input.violationType,
+      input.violationType.startsWith('policy_')
+        ? input.violationType.replace('policy_', '').toUpperCase()
+        : null,
       input.severity ?? 'medium',
       input.description ?? null,
       input.locationLat ?? null,
@@ -81,6 +89,7 @@ export const create = async (input: CreateViolationInput): Promise<Violation> =>
       input.actualSpeed ?? null,
       input.fineAmount ?? 0,
       input.notes ?? null,
+      new Date().toISOString(),
     ],
   );
 

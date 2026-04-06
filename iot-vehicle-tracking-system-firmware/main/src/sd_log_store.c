@@ -14,6 +14,7 @@
 #include "sdkconfig.h"
 #include "sdmmc_cmd.h"
 
+#include "pin_map.h"
 #include "telemetry_counters.h"
 #include "util.h"
 
@@ -81,26 +82,25 @@ static esp_err_t sd_log_store_ensure_dirs(void) {
 }
 
 static esp_err_t sd_log_store_apply_host_slot(sdmmc_host_t *host, sdmmc_slot_config_t *slot) {
-    if (CONFIG_TRACKER_SDMMC_GPIO_CLK < 0 || CONFIG_TRACKER_SDMMC_GPIO_CMD < 0 ||
-        CONFIG_TRACKER_SDMMC_GPIO_D0 < 0) {
+    if (PIN_SDMMC_CLK == GPIO_NUM_NC || PIN_SDMMC_CMD == GPIO_NUM_NC || PIN_SDMMC_D0 == GPIO_NUM_NC) {
         ESP_LOGW(TAG, "SD GPIO map unset; skip SD mount");
         return ESP_ERR_NOT_SUPPORTED;
     }
 
     (void)host;
-    slot->clk = CONFIG_TRACKER_SDMMC_GPIO_CLK;
-    slot->cmd = CONFIG_TRACKER_SDMMC_GPIO_CMD;
-    slot->d0 = CONFIG_TRACKER_SDMMC_GPIO_D0;
-    slot->d1 = CONFIG_TRACKER_SDMMC_GPIO_D1 >= 0 ? CONFIG_TRACKER_SDMMC_GPIO_D1 : GPIO_NUM_NC;
-    slot->d2 = CONFIG_TRACKER_SDMMC_GPIO_D2 >= 0 ? CONFIG_TRACKER_SDMMC_GPIO_D2 : GPIO_NUM_NC;
-    slot->d3 = CONFIG_TRACKER_SDMMC_GPIO_D3 >= 0 ? CONFIG_TRACKER_SDMMC_GPIO_D3 : GPIO_NUM_NC;
-    slot->width = CONFIG_TRACKER_SDMMC_BUS_WIDTH;
+    slot->clk = PIN_SDMMC_CLK;
+    slot->cmd = PIN_SDMMC_CMD;
+    slot->d0 = PIN_SDMMC_D0;
+    slot->d1 = PIN_SDMMC_D1;
+    slot->d2 = PIN_SDMMC_D2;
+    slot->d3 = PIN_SDMMC_D3;
+    slot->width = SDMMC_BUS_WIDTH;
 
-    if (CONFIG_TRACKER_SDMMC_GPIO_CD >= 0) {
-        slot->cd = CONFIG_TRACKER_SDMMC_GPIO_CD;
+    if (PIN_SDMMC_CD != GPIO_NUM_NC) {
+        slot->cd = PIN_SDMMC_CD;
     }
-    if (CONFIG_TRACKER_SDMMC_GPIO_WP >= 0) {
-        slot->wp = CONFIG_TRACKER_SDMMC_GPIO_WP;
+    if (PIN_SDMMC_WP != GPIO_NUM_NC) {
+        slot->wp = PIN_SDMMC_WP;
     }
 
     return ESP_OK;

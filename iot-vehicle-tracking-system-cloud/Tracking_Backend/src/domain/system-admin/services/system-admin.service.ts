@@ -40,6 +40,9 @@ const ALLOWED_TABLES = [
   'device_sessions',
   'export_jobs',
   'firmware',
+  'vehicle_policies',
+  'vehicle_policy_state',
+  'policy_audit_logs',
 ] as const;
 
 type AllowedTable = (typeof ALLOWED_TABLES)[number];

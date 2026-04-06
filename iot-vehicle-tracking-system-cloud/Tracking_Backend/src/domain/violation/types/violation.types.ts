@@ -69,4 +69,5 @@ export interface ViolationListQuery {
   violationType?: string;
   severity?: string;
   acknowledged?: boolean;
+  policyType?: 'ADMIN_BOUNDARY' | 'RADIUS' | 'DISTANCE_QUOTA';
 }

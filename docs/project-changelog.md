@@ -1,5 +1,13 @@
 # Project Changelog
 
+## 2026-04-06
+### Cloud Geofence Policy and Distance Quota (Completed)
+- Added backend policy types for `ADMIN_BOUNDARY`, `RADIUS`, and `DISTANCE_QUOTA` with telemetry-driven evaluation in `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/domain/geofence/services/policy-evaluator.service.ts`.
+- Added policy state persistence, violation creation, and quota-cycle reset tracking so the backend can persist spatial state and distance consumption per vehicle/policy.
+- Exposed policy CRUD, policy-state lookup, and violation listing through the geofence API surface in `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/api/routes/geofence.routes.ts` and `src/api/controllers/geofence.controller.ts`.
+- Added policy metrics for evaluation count, evaluation latency, violation count, and quota reset count in `src/infrastructure/metrics/app-metrics.ts`.
+- Validation status: backend lint, typecheck, test, and build were reported as passing for the completed scope; code review captured non-blocking hardening follow-ups for later maintenance.
+
 ## 2026-04-05
 ### BLE OBD Diagnostics Counters and Log Instrumentation (Completed)
 - Added rolling BLE OBD transaction counters and periodic diagnostic logging in `iot-vehicle-tracking-system-firmware/main/src/ble_obd.c` to track request volume, valid/invalid responses, timeouts, and RX buffer overflows.

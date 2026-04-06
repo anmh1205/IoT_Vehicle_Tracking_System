@@ -53,6 +53,11 @@ export const getSummary = asyncHandler(async (req: AuthenticatedRequest, res: Re
   sendOk(res, result);
 });
 
+export const getPolicyLimits = asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
+  const result = await statisticsService.getPolicyLimitsStats();
+  sendOk(res, result);
+});
+
 export const getFleetStats = asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
   const [distanceFuel, runtime, violations] = await Promise.all([
     pool.query(

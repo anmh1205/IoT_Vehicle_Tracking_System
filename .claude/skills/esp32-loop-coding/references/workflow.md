@@ -24,7 +24,9 @@
 3. Phân tích log bằng `scripts/log_analyzer.py`.
 4. Nếu `status=fatal` hoặc `unstable`:
    - sửa code trực tiếp theo tag/file gợi ý,
-   - chạy build/flash: `idf.py -p <COM> build flash`.
+   - chạy build/flash qua shell hỗ trợ:
+     - PowerShell: `powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\Espressif\esp-idf-v5.5.3\export.ps1'; cd '<firmware-dir>'; idf.py -p <COM> build flash"`
+     - CMD: `cmd.exe /c "cd /d <firmware-dir> && call C:\Espressif\esp-idf-v5.5.3\export.bat && idf.py -p <COM> build flash"`.
 5. Quay lại monitor để xác nhận sau fix.
 6. Kết thúc khi `status=stable` liên tiếp theo tiêu chí task.
 

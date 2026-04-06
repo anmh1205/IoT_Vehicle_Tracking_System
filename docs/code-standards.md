@@ -29,7 +29,14 @@
 - Error responses must serialize to RFC7807 problem details and include `requestId` plus `errors[]` for validation detail.
 - Frontend API clients should unwrap the success envelope before data reaches feature code.
 - Error parsers should treat problem-details responses as the canonical server failure shape.
-- Keep request-scoped identifiers and response contract fields consistent across middleware, health, metrics, and rate-limit paths.
+- Keep request-scoped identifiers and response contract fields consistent across middleware, health, metrics, policy, and rate-limit paths.
+
+## Cloud Policy Standards
+- Policy types must remain explicit and limited to the supported backend contract: `ADMIN_BOUNDARY`, `RADIUS`, and `DISTANCE_QUOTA`.
+- Geofence boundary checks should keep strict boundary semantics unless the policy contract is updated.
+- Distance quota evaluation must preserve cycle-based accumulation and reset behavior.
+- Policy mutation and evaluation paths should keep validation local to the affected controller or service and avoid ad hoc request parsing.
+- Metrics labels for policy evaluation must stay low-cardinality and use policy type / result / severity / cycle only.
 
 ## Thesis Asset Readability Standards
 - Keep thesis final markdown and Mermaid labels short, self-standing, and glossary-aligned.
