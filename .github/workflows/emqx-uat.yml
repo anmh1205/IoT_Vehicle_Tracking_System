@@ -35,14 +35,14 @@ jobs:
           SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
           SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          EMQX_UAT_ENV_FILE: ${{ secrets.EMQX_UAT_ENV_FILE }}
+          SERVICE_ENV_CONTENT: ${{ secrets.EMQX_UAT_ENV_FILE || secrets.BACKEND_UAT_ENV_FILE }}
         run: |
           required_vars=(
             SSH_DEPLOY_IP
             SSH_DEPLOY_PORT
             SSH_DEPLOY_USER
             SSH_PRIVATE_KEY
-            EMQX_UAT_ENV_FILE
+            SERVICE_ENV_CONTENT
           )
           for var in "${required_vars[@]}"; do
             if [ -z "${!var}" ]; then
@@ -78,7 +78,7 @@ jobs:
             docker compose logs --tail=100 emqx || true
             exit 1
         env:
-          SERVICE_ENV_CONTENT: ${{ secrets.EMQX_UAT_ENV_FILE }}
+          SERVICE_ENV_CONTENT: ${{ secrets.EMQX_UAT_ENV_FILE || secrets.BACKEND_UAT_ENV_FILE }}
           SERVICE_DIR: /opt/tracking/Tracking_EMQX
           COMPOSE_FILE: docker-compose.yml
 

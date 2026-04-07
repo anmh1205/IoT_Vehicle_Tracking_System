@@ -41,7 +41,6 @@ jobs:
             echo "No test directory, skipping flutter test"
           fi
       - run: flutter build apk --release --target-platform android-arm64
-      - run: flutter build appbundle --release
 
       - uses: actions/upload-artifact@v4
         with:
