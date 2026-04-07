@@ -27,8 +27,8 @@ jobs:
           SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
           SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          NPM_ADMIN_EMAIL: ${{ secrets.NPM_ADMIN_EMAIL }}
-          NPM_ADMIN_PASSWORD: ${{ secrets.NPM_ADMIN_PASSWORD }}
+          NPM_ADMIN_EMAIL: ${{ secrets.NPM_ADMIN_EMAIL || secrets.SSH_DEPLOY_USER }}
+          NPM_ADMIN_PASSWORD: ${{ secrets.NPM_ADMIN_PASSWORD || secrets.SSH_DEPLOY_PASSWORD }}
         run: |
           required_vars=(
             SSH_DEPLOY_IP

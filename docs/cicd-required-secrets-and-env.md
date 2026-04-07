@@ -19,8 +19,8 @@ Tài liệu này áp dụng cho luồng deploy tối giản kiểu IVM26:
 - `DISCORD_WEBHOOK_URL`
 
 ### NPM UAT proxy/SSL bootstrap secrets
-- `NPM_ADMIN_EMAIL`
-- `NPM_ADMIN_PASSWORD`
+- `NPM_ADMIN_EMAIL` (optional; fallback `SSH_DEPLOY_USER`)
+- `NPM_ADMIN_PASSWORD` (optional; fallback `SSH_DEPLOY_PASSWORD`)
 
 ### Service runtime env payload secrets (multiline)
 - `BACKEND_UAT_ENV_FILE`
