@@ -5,6 +5,7 @@ on:
     branches: [uat]
     paths:
       - 'iot-vehicle-tracking-system-cloud/Tracking_Grafana/**'
+      - 'scripts/deploy/**'
       - '.github/workflows/grafana-uat.yml'
   workflow_dispatch:
 

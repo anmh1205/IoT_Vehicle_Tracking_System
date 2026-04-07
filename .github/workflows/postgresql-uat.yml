@@ -5,6 +5,7 @@ on:
     branches: [uat]
     paths:
       - 'iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/**'
+      - 'scripts/deploy/**'
       - '.github/workflows/postgresql-uat.yml'
   workflow_dispatch:
 

@@ -5,6 +5,7 @@ on:
     branches: [uat]
     paths:
       - 'iot-vehicle-tracking-system-cloud/Tracking_EMQX/**'
+      - 'scripts/deploy/**'
       - '.github/workflows/emqx-uat.yml'
   workflow_dispatch:
 
