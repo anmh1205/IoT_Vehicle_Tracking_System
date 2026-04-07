@@ -36,14 +36,12 @@ jobs:
           SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
           SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SERVICE_ENV_CONTENT: ${{ secrets.POSTGRESQL_UAT_ENV_FILE || secrets.BACKEND_UAT_ENV_FILE }}
         run: |
           required_vars=(
             SSH_DEPLOY_IP
             SSH_DEPLOY_PORT
             SSH_DEPLOY_USER
             SSH_PRIVATE_KEY
-            SERVICE_ENV_CONTENT
           )
           for var in "${required_vars[@]}"; do
             if [ -z "${!var}" ]; then
@@ -51,6 +49,26 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Build service env payload
+        env:
+          BASE_ENV_CONTENT: ${{ secrets.POSTGRESQL_UAT_ENV_FILE || secrets.BACKEND_UAT_ENV_FILE }}
+        run: |
+          {
+            printf '%s\n' "$BASE_ENV_CONTENT"
+            cat iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/.env.example
+          } > /tmp/postgresql-env-raw
+
+          awk -F= '
+            /^[[:space:]]*#/ || /^[[:space:]]*$/ {next}
+            !seen[$1]++ {print}
+          ' /tmp/postgresql-env-raw > /tmp/postgresql-env-merged
+
+          {
+            echo "SERVICE_ENV_CONTENT<<EOF"
+            cat /tmp/postgresql-env-merged
+            echo "EOF"
+          } >> "$GITHUB_ENV"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -77,7 +95,7 @@ jobs:
             docker compose logs --tail=100 postgres || true
             exit 1
         env:
-          SERVICE_ENV_CONTENT: ${{ secrets.POSTGRESQL_UAT_ENV_FILE || secrets.BACKEND_UAT_ENV_FILE }}
+          SERVICE_ENV_CONTENT: ${{ env.SERVICE_ENV_CONTENT }}
           SERVICE_DIR: /opt/tracking/Tracking_PostgreSQL
           COMPOSE_FILE: docker-compose.yml
 
