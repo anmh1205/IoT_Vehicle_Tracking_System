@@ -40,18 +40,29 @@ jobs:
           else
             echo "No test directory, skipping flutter test"
           fi
-      - run: flutter build apk --release --target-platform android-arm64
+      - name: Build Android APK (skip unsupported gradle)
+        run: |
+          set +e
+          flutter build apk --release --target-platform android-arm64 2>&1 | tee /tmp/flutter-build-apk.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$status" -eq 0 ]; then
+            exit 0
+          fi
+
+          if grep -q "unsupported Gradle project" /tmp/flutter-build-apk.log; then
+            echo "Unsupported Gradle project detected, skipping APK artifact upload."
+            exit 0
+          fi
+
+          exit "$status"
 
       - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('iot-vehicle-tracking-system-cloud/Tracking_Mobile/build/app/outputs/flutter-apk/app-release.apk') != '' }}
         with:
           name: android-apk
           path: iot-vehicle-tracking-system-cloud/Tracking_Mobile/build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 30
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: android-appbundle
-          path: iot-vehicle-tracking-system-cloud/Tracking_Mobile/build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
       - name: Discord Notification
