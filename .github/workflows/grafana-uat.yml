@@ -35,12 +35,14 @@ jobs:
           SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
           SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          GRAFANA_UAT_ENV_FILE: ${{ secrets.GRAFANA_UAT_ENV_FILE }}
         run: |
           required_vars=(
             SSH_DEPLOY_IP
             SSH_DEPLOY_PORT
             SSH_DEPLOY_USER
             SSH_PRIVATE_KEY
+            GRAFANA_UAT_ENV_FILE
           )
           for var in "${required_vars[@]}"; do
             if [ -z "${!var}" ]; then
@@ -56,8 +58,12 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: SERVICE_ENV_CONTENT,SERVICE_DIR,COMPOSE_FILE
           script: |
-            cd /opt/tracking/Tracking_Grafana
+            chmod +x /opt/tracking/scripts/deploy/bootstrap-vps.sh
+            export SERVICE_ENV_CONTENT="$SERVICE_ENV_CONTENT"
+            /opt/tracking/scripts/deploy/bootstrap-vps.sh "$SERVICE_DIR" "$COMPOSE_FILE"
+            cd "$SERVICE_DIR"
             docker compose pull
             docker compose up -d
             docker compose ps grafana
@@ -69,6 +75,10 @@ jobs:
             done
             docker compose logs --tail=100 grafana || true
             exit 1
+        env:
+          SERVICE_ENV_CONTENT: ${{ secrets.GRAFANA_UAT_ENV_FILE }}
+          SERVICE_DIR: /opt/tracking/Tracking_Grafana
+          COMPOSE_FILE: docker-compose.yml
 
       - name: Discord Notification
         if: always() && env.DISCORD_WEBHOOK_URL != ''

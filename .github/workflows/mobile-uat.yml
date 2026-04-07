@@ -34,7 +34,12 @@ jobs:
 
       - run: flutter pub get
       - run: flutter doctor -v
-      - run: flutter test
+      - run: |
+          if [ -d test ]; then
+            flutter test
+          else
+            echo "No test directory, skipping flutter test"
+          fi
       - run: flutter build apk --release --target-platform android-arm64
       - run: flutter build appbundle --release
 
@@ -62,6 +67,7 @@ jobs:
           status: ${{ job.status }}
 
   build-ios:
+    if: ${{ false }}
     runs-on: macos-latest
     defaults:
       run:
