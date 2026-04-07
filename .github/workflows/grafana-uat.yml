@@ -13,22 +13,14 @@ concurrency:
   group: grafana-uat-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   deploy-uat:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: SCP config files to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_DEPLOY_IP }}
-          port: ${{ secrets.SSH_DEPLOY_PORT }}
-          username: ${{ secrets.SSH_DEPLOY_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "iot-vehicle-tracking-system-cloud/Tracking_Grafana/"
-          target: /opt/tracking/
-          strip_components: 1
 
       - name: Validate required deploy secrets
         env:
@@ -36,6 +28,7 @@ jobs:
           SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
           SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          BASE_ENV_CONTENT: ${{ secrets.GRAFANA_UAT_ENV_FILE || secrets.BACKEND_UAT_ENV_FILE }}
         run: |
           required_vars=(
             SSH_DEPLOY_IP
@@ -49,6 +42,21 @@ jobs:
               exit 1
             fi
           done
+          if [ -z "$BASE_ENV_CONTENT" ]; then
+            echo "::error::Missing required secret: GRAFANA_UAT_ENV_FILE or BACKEND_UAT_ENV_FILE"
+            exit 1
+          fi
+
+      - name: SCP config files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "iot-vehicle-tracking-system-cloud/Tracking_Grafana/"
+          target: /opt/tracking/
+          strip_components: 1
 
       - name: Build service env payload
         env:
@@ -86,10 +94,14 @@ jobs:
 
             GRAFANA_DATA_DIR="/opt/tracking/Tracking_Data/Tracking_Grafana"
             mkdir -p "$GRAFANA_DATA_DIR"
-            if chown -R 472:472 "$GRAFANA_DATA_DIR"; then
-              chmod 775 "$GRAFANA_DATA_DIR"
-            else
-              chmod -R ug+rwX "$GRAFANA_DATA_DIR" || true
+            if ! chown -R 472:472 "$GRAFANA_DATA_DIR"; then
+              echo "Failed to set ownership for $GRAFANA_DATA_DIR" >&2
+              exit 1
+            fi
+            chmod -R u+rwX,go-rwx "$GRAFANA_DATA_DIR"
+            if [ ! -w "$GRAFANA_DATA_DIR" ]; then
+              echo "Grafana data directory is not writable: $GRAFANA_DATA_DIR" >&2
+              exit 1
             fi
 
             docker compose pull
