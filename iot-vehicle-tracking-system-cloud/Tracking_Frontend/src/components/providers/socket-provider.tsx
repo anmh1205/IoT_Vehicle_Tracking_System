@@ -22,8 +22,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
     setStatus('connecting');
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+    const wsPath = process.env.NEXT_PUBLIC_WS_PATH || '/ws';
     const s = io(wsUrl, {
       auth: { token },
+      path: wsPath,
       transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: Infinity,

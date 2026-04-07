@@ -33,7 +33,8 @@ Tài liệu này áp dụng cho luồng deploy tối giản kiểu IVM26:
 - `GRAFANA_UAT_ENV_FILE` (optional, fallback `BACKEND_UAT_ENV_FILE`)
 
 ## Frontend build-time public config secrets
-- `NEXT_PUBLIC_API_BASE_URL`
+- `NEXT_PUBLIC_API_BASE_URL` (legacy compatibility)
+- `NEXT_PUBLIC_API_URL` (preferred, consumed by frontend rewrite)
 - `NEXT_PUBLIC_WS_URL`
 - `NEXT_PUBLIC_WS_PATH`
 - `NEXT_PUBLIC_MQTT_HOST`
@@ -59,10 +60,11 @@ Tài liệu này áp dụng cho luồng deploy tối giản kiểu IVM26:
     - `mqtt.thingdock.dev` → `tracking-emqx:8083`
 
 ## Runtime behavior notes
-- `bootstrap-vps.sh` chỉ tạo `$SERVICE_DIR/.env` khi file chưa tồn tại, dữ liệu lấy từ secret `*_UAT_ENV_FILE` tương ứng.
+- `bootstrap-vps.sh` chỉ tạo `$SERVICE_DIR/.env` khi file chưa tồn tại; khi file đã tồn tại, script sẽ **reconcile** `SERVICE_ENV_CONTENT` theo cơ chế upsert (key đã có sẽ được cập nhật), đồng thời backup file cũ thành `.env.bak`.
 - `deploy-service.sh` chạy healthcheck theo service nếu có URL; backend hiện dùng `http://localhost:4000/health` với ngưỡng `3` lần thành công liên tiếp, `HEALTHCHECK_MAX_ATTEMPTS=40`, và `HEALTHCHECK_INTERVAL_SECONDS=3`.
 - Khi healthcheck không đạt, script in log tail của service rồi fail để giữ deploy ngắn và rõ nguyên nhân.
 - Discord notification dùng pattern an toàn `if: always()` + `continue-on-error: true`, nên bước báo trạng thái không làm hỏng kết quả deploy chính.
+- Lưu ý networking: `NEXT_PUBLIC_*` là build-time public config cho frontend (browser-facing), còn các biến như `MQTT_HOST` trong backend/mqtt-bridge là internal Docker networking (ví dụ `tracking-emqx`).
 
 ## Preflight checklist trước khi bật auto deploy
 - [ ] Đã tạo đầy đủ secrets ở mức repository.
