@@ -5,12 +5,41 @@ on:
     branches: [uat]
     paths:
       - 'iot-vehicle-tracking-system-cloud/Tracking_NPM/**'
+      - '.github/workflows/npm-uat.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: npm-uat-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   deploy-uat:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Validate required deploy secrets
+        env:
+          SSH_DEPLOY_IP: ${{ secrets.SSH_DEPLOY_IP }}
+          SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
+          SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          required_vars=(
+            SSH_DEPLOY_IP
+            SSH_DEPLOY_PORT
+            SSH_DEPLOY_USER
+            SSH_PRIVATE_KEY
+          )
+          for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+              echo "::error::Missing required secret: $var"
+              exit 1
+            fi
+          done
 
       - name: SCP config files to server
         uses: appleboy/scp-action@v0.1.7
@@ -31,14 +60,36 @@ jobs:
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /opt/tracking/Tracking_NPM
-            docker compose pull
-            docker compose up -d
+            NPM_DIR="/opt/tracking/Tracking_NPM"
+            NPM_DATA_DIR="/opt/tracking/Tracking_Data/Tracking_NPM"
+
+            mkdir -p "$NPM_DATA_DIR/data" "$NPM_DATA_DIR/letsencrypt"
+            chmod -R u+rwX,go-rwx "$NPM_DATA_DIR"
+
+            cd "$NPM_DIR"
+            docker compose --profile production pull npm
+            docker compose --profile production up -d npm
+            docker compose --profile production ps npm
+
+            i=1
+            while [ "$i" -le 20 ]; do
+              if curl --connect-timeout 2 --max-time 5 -fsS http://127.0.0.1:81 >/dev/null; then
+                exit 0
+              fi
+              sleep 3
+              i=$((i + 1))
+            done
+
+            docker compose --profile production logs --tail=100 npm || true
+            exit 1
 
       - name: Discord Notification
-        if: always()
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        continue-on-error: true
         uses: sarisia/actions-status-discord@v1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          webhook: ${{ env.DISCORD_WEBHOOK_URL }}
           title: "NPM UAT Deploy"
           status: ${{ job.status }}
