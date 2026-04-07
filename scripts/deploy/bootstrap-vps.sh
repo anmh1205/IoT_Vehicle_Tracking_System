@@ -23,31 +23,42 @@ fi
 
 mkdir -p "$SERVICE_DIR"
 
-if [ ! -f "$SERVICE_DIR/.env" ]; then
+ENV_FILE="$SERVICE_DIR/.env"
+
+if [ ! -f "$ENV_FILE" ]; then
   umask 077
-  : > "$SERVICE_DIR/.env"
+  : > "$ENV_FILE"
+fi
 
-  if [ -n "${SERVICE_ENV_CONTENT:-}" ]; then
-    printf '%s\n' "$SERVICE_ENV_CONTENT" > "$SERVICE_DIR/.env"
-  fi
+if [ -n "${SERVICE_ENV_CONTENT:-}" ]; then
+  while IFS= read -r line; do
+    case "$line" in
+      ''|'#'*) continue ;;
+    esac
 
-  if [ -f "$SERVICE_DIR/.env.example" ]; then
-    while IFS= read -r line; do
-      case "$line" in
-        ''|'#'*) continue ;;
-      esac
+    key="${line%%=*}"
+    if ! grep -q "^${key}=" "$ENV_FILE"; then
+      printf '%s\n' "$line" >> "$ENV_FILE"
+    fi
+  done <<< "$SERVICE_ENV_CONTENT"
+fi
 
-      key="${line%%=*}"
-      if ! grep -q "^${key}=" "$SERVICE_DIR/.env"; then
-        printf '%s\n' "$line" >> "$SERVICE_DIR/.env"
-      fi
-    done < "$SERVICE_DIR/.env.example"
-  fi
+if [ -f "$SERVICE_DIR/.env.example" ]; then
+  while IFS= read -r line; do
+    case "$line" in
+      ''|'#'*) continue ;;
+    esac
 
-  if [ ! -s "$SERVICE_DIR/.env" ]; then
-    echo "SERVICE_ENV_CONTENT is empty and no .env.example fallback found"
-    exit 1
-  fi
+    key="${line%%=*}"
+    if ! grep -q "^${key}=" "$ENV_FILE"; then
+      printf '%s\n' "$line" >> "$ENV_FILE"
+    fi
+  done < "$SERVICE_DIR/.env.example"
+fi
+
+if [ ! -s "$ENV_FILE" ]; then
+  echo "SERVICE_ENV_CONTENT is empty and no .env.example fallback found"
+  exit 1
 fi
 
 if [ ! -f "$SERVICE_DIR/$COMPOSE_FILE" ]; then
