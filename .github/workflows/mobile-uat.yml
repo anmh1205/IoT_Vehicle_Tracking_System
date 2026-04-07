@@ -5,6 +5,12 @@ on:
     branches: [uat]
     paths:
       - 'iot-vehicle-tracking-system-cloud/Tracking_Mobile/**'
+      - '.github/workflows/mobile-uat.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: mobile-uat-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-android:
@@ -45,10 +51,13 @@ jobs:
           retention-days: 30
 
       - name: Discord Notification
-        if: always()
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        continue-on-error: true
         uses: sarisia/actions-status-discord@v1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          webhook: ${{ env.DISCORD_WEBHOOK_URL }}
           title: "Android Build"
           status: ${{ job.status }}
 
@@ -76,9 +85,12 @@ jobs:
           retention-days: 30
 
       - name: Discord Notification
-        if: always()
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        continue-on-error: true
         uses: sarisia/actions-status-discord@v1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          webhook: ${{ env.DISCORD_WEBHOOK_URL }}
           title: "iOS Build"
           status: ${{ job.status }}

@@ -5,6 +5,12 @@ on:
     branches: [uat]
     paths:
       - 'iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/**'
+      - '.github/workflows/postgresql-uat.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: postgresql-uat-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy-uat:
@@ -23,6 +29,26 @@ jobs:
           target: /opt/tracking/
           strip_components: 1
 
+      - name: Validate required deploy secrets
+        env:
+          SSH_DEPLOY_IP: ${{ secrets.SSH_DEPLOY_IP }}
+          SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
+          SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          required_vars=(
+            SSH_DEPLOY_IP
+            SSH_DEPLOY_PORT
+            SSH_DEPLOY_USER
+            SSH_PRIVATE_KEY
+          )
+          for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+              echo "::error::Missing required secret: $var"
+              exit 1
+            fi
+          done
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -34,11 +60,23 @@ jobs:
             cd /opt/tracking/Tracking_PostgreSQL
             docker compose pull
             docker compose up -d
+            docker compose ps postgres
+            for _ in {1..20}; do
+              if docker compose exec -T postgres sh -lc 'pg_isready -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-vehicle_tracking}"' >/dev/null; then
+                exit 0
+              fi
+              sleep 3
+            done
+            docker compose logs --tail=100 postgres || true
+            exit 1
 
       - name: Discord Notification
-        if: always()
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        continue-on-error: true
         uses: sarisia/actions-status-discord@v1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          webhook: ${{ env.DISCORD_WEBHOOK_URL }}
           title: "PostgreSQL UAT Deploy"
           status: ${{ job.status }}

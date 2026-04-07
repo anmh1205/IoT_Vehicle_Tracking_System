@@ -31,7 +31,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx tsc --noEmit
-      - run: npm test --if-present
+      - run: npm test
 
       - uses: docker/login-action@v3
         with:
@@ -46,7 +46,7 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/tracking-backend:uat
-            ${{ secrets.DOCKERHUB_USERNAME }}/tracking-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/tracking-backend:uat-${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -134,7 +134,7 @@ jobs:
             export DOCKERHUB_USERNAME="$DOCKERHUB_USERNAME"
             export SERVICE_ENV_CONTENT="$SERVICE_ENV_CONTENT"
             /opt/tracking/scripts/deploy/bootstrap-vps.sh "$SERVICE_DIR" "$COMPOSE_FILE"
-            /opt/tracking/scripts/deploy/deploy-service.sh "$SERVICE_DIR" "$COMPOSE_FILE" "$SERVICE_NAME" "$HEALTHCHECK_URL"
+            /opt/tracking/scripts/deploy/deploy-service.sh "$SERVICE_DIR" "$COMPOSE_FILE" "$SERVICE_NAME" "$HEALTHCHECK_URL" "3"
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           SERVICE_ENV_CONTENT: ${{ secrets.BACKEND_UAT_ENV_FILE }}
@@ -144,9 +144,12 @@ jobs:
           HEALTHCHECK_URL: http://localhost:4000/health
 
       - name: Discord Notification
-        if: always()
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        continue-on-error: true
         uses: sarisia/actions-status-discord@v1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          webhook: ${{ env.DISCORD_WEBHOOK_URL }}
           title: "Backend UAT Deploy"
           status: ${{ job.status }}
