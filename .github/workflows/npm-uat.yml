@@ -65,6 +65,12 @@ jobs:
             NPM_DIR="/opt/tracking/Tracking_NPM"
             NPM_DATA_DIR="/opt/tracking/Tracking_Data/Tracking_NPM"
 
+            TRAEFIK_RUNNING="$(docker ps --filter name='^/traefik$' --format '{{.Names}}')"
+            if [ -n "$TRAEFIK_RUNNING" ]; then
+              echo "Stopping traefik to release host ports 80/443 for tracking-npm..."
+              docker stop traefik
+            fi
+
             CONFLICTS="$(
               {
                 docker ps --filter publish=80 --format '{{.Names}}\t{{.Ports}}'
