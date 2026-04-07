@@ -60,15 +60,33 @@ jobs:
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -eu
+
             NPM_DIR="/opt/tracking/Tracking_NPM"
             NPM_DATA_DIR="/opt/tracking/Tracking_Data/Tracking_NPM"
+
+            CONFLICTS="$(
+              {
+                docker ps --filter publish=80 --format '{{.Names}}\t{{.Ports}}'
+                docker ps --filter publish=443 --format '{{.Names}}\t{{.Ports}}'
+              } | awk -F'\t' '$1 != "tracking-npm" && !seen[$1]++ {print $0}'
+            )"
+            if [ -n "$CONFLICTS" ]; then
+              echo "Port conflict detected on host ports 80/443 (not tracking-npm):" >&2
+              printf '%s\n' "$CONFLICTS" >&2
+              exit 1
+            fi
 
             mkdir -p "$NPM_DATA_DIR/data" "$NPM_DATA_DIR/letsencrypt"
             chmod -R u+rwX,go-rwx "$NPM_DATA_DIR"
 
             cd "$NPM_DIR"
             docker compose --profile production pull npm
-            docker compose --profile production up -d npm
+            if ! docker compose --profile production up -d npm; then
+              docker compose --profile production ps npm || true
+              docker compose --profile production logs --tail=100 npm || true
+              exit 1
+            fi
             docker compose --profile production ps npm
 
             i=1
