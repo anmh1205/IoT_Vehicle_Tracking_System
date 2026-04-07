@@ -141,7 +141,7 @@ jobs:
           SERVICE_DIR: /opt/tracking/Tracking_Backend
           COMPOSE_FILE: docker-compose.uat.yml
           SERVICE_NAME: backend
-          HEALTHCHECK_URL: http://localhost:4000/health
+          HEALTHCHECK_URL: http://localhost:4000/health/live
 
       - name: Discord Notification
         if: always() && env.DISCORD_WEBHOOK_URL != ''
