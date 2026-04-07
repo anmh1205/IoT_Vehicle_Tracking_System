@@ -83,6 +83,15 @@ jobs:
             export SERVICE_ENV_CONTENT="$SERVICE_ENV_CONTENT"
             /opt/tracking/scripts/deploy/bootstrap-vps.sh "$SERVICE_DIR" "$COMPOSE_FILE"
             cd "$SERVICE_DIR"
+
+            GRAFANA_DATA_DIR="/opt/tracking/Tracking_Data/Tracking_Grafana"
+            mkdir -p "$GRAFANA_DATA_DIR"
+            if chown -R 472:472 "$GRAFANA_DATA_DIR"; then
+              chmod 775 "$GRAFANA_DATA_DIR"
+            else
+              chmod -R ug+rwX "$GRAFANA_DATA_DIR" || true
+            fi
+
             docker compose pull
             docker compose up -d
             docker compose ps grafana
