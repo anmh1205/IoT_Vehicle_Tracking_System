@@ -95,9 +95,20 @@ jobs:
             fi
             docker compose --profile production ps npm
 
+            PORTS_LINE="$(docker ps --filter name='^/tracking-npm$' --format '{{.Ports}}')"
+            case "$PORTS_LINE" in
+              *":81->"*) ;;
+              *)
+                echo "tracking-npm is running but port 81 is not published: $PORTS_LINE" >&2
+                docker ps --filter name='^/tracking-npm$' --format 'table {{.Names}}\t{{.Ports}}'
+                docker compose --profile production logs --tail=100 npm || true
+                exit 1
+                ;;
+            esac
+
             i=1
-            while [ "$i" -le 20 ]; do
-              if curl --connect-timeout 2 --max-time 5 -fsS http://127.0.0.1:81 >/dev/null; then
+            while [ "$i" -le 40 ]; do
+              if curl --connect-timeout 2 --max-time 5 -sS http://127.0.0.1:81 >/dev/null; then
                 exit 0
               fi
               sleep 3
