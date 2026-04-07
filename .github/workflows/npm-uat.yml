@@ -27,12 +27,16 @@ jobs:
           SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
           SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          NPM_ADMIN_EMAIL: ${{ secrets.NPM_ADMIN_EMAIL }}
+          NPM_ADMIN_PASSWORD: ${{ secrets.NPM_ADMIN_PASSWORD }}
         run: |
           required_vars=(
             SSH_DEPLOY_IP
             SSH_DEPLOY_PORT
             SSH_DEPLOY_USER
             SSH_PRIVATE_KEY
+            NPM_ADMIN_EMAIL
+            NPM_ADMIN_PASSWORD
           )
           for var in "${required_vars[@]}"; do
             if [ -z "${!var}" ]; then
@@ -59,6 +63,7 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: NPM_ADMIN_EMAIL,NPM_ADMIN_PASSWORD
           script: |
             set -eu
 
@@ -102,17 +107,196 @@ jobs:
               exit 1
             fi
 
+            npm_ready=0
             i=1
             while [ "$i" -le 40 ]; do
               if curl --connect-timeout 2 --max-time 5 -sS http://127.0.0.1:81 >/dev/null; then
-                exit 0
+                npm_ready=1
+                break
               fi
               sleep 3
               i=$((i + 1))
             done
 
-            docker compose --profile production logs --tail=100 npm || true
-            exit 1
+            if [ "$npm_ready" -ne 1 ]; then
+              docker compose --profile production logs --tail=100 npm || true
+              exit 1
+            fi
+
+            if ! docker exec tracking-npm node --version >/dev/null 2>&1; then
+              echo "Node runtime is unavailable inside tracking-npm container; cannot run NPM API bootstrap." >&2
+              exit 1
+            fi
+
+            docker exec \
+              -e NPM_ADMIN_EMAIL="$NPM_ADMIN_EMAIL" \
+              -e NPM_ADMIN_PASSWORD="$NPM_ADMIN_PASSWORD" \
+              tracking-npm \
+              node - <<'NODE'
+            const http = require('http');
+
+            const baseHost = '127.0.0.1';
+            const basePort = 81;
+            const adminEmail = process.env.NPM_ADMIN_EMAIL;
+            const adminPassword = process.env.NPM_ADMIN_PASSWORD;
+
+            if (!adminEmail || !adminPassword) {
+              throw new Error('NPM_ADMIN_EMAIL/NPM_ADMIN_PASSWORD are required');
+            }
+
+            const desiredHosts = [
+              {
+                name: 'frontend',
+                primaryDomain: 'thingdock.dev',
+                domainNames: ['thingdock.dev'],
+                forwardHost: 'tracking-frontend',
+                forwardPort: 4001,
+                http2Support: true
+              },
+              {
+                name: 'backend',
+                primaryDomain: 'be.thingdock.dev',
+                domainNames: ['be.thingdock.dev'],
+                forwardHost: 'tracking-backend',
+                forwardPort: 4000,
+                http2Support: true
+              },
+              {
+                name: 'mqtt-ws',
+                primaryDomain: 'mqtt.thingdock.dev',
+                domainNames: ['mqtt.thingdock.dev'],
+                forwardHost: 'tracking-emqx',
+                forwardPort: 8083,
+                http2Support: false
+              }
+            ];
+
+            function apiRequest(path, { method = 'GET', token, body } = {}) {
+              return new Promise((resolve, reject) => {
+                const payload = body == null ? null : JSON.stringify(body);
+                const headers = {
+                  Accept: 'application/json'
+                };
+                if (payload != null) {
+                  headers['Content-Type'] = 'application/json';
+                  headers['Content-Length'] = Buffer.byteLength(payload);
+                }
+                if (token) {
+                  headers.Authorization = `Bearer ${token}`;
+                }
+
+                const req = http.request(
+                  {
+                    host: baseHost,
+                    port: basePort,
+                    path: `/api${path}`,
+                    method,
+                    headers
+                  },
+                  (res) => {
+                    let raw = '';
+                    res.on('data', (chunk) => {
+                      raw += chunk;
+                    });
+                    res.on('end', () => {
+                      let parsed = raw;
+                      if (raw) {
+                        try {
+                          parsed = JSON.parse(raw);
+                        } catch (_) {
+                          parsed = raw;
+                        }
+                      }
+
+                      if (res.statusCode < 200 || res.statusCode >= 300) {
+                        return reject(
+                          new Error(
+                            `NPM API ${method} ${path} failed (${res.statusCode}): ${typeof parsed === 'string' ? parsed : JSON.stringify(parsed)}`
+                          )
+                        );
+                      }
+
+                      resolve(parsed);
+                    });
+                  }
+                );
+
+                req.on('error', reject);
+                if (payload != null) req.write(payload);
+                req.end();
+              });
+            }
+
+            function buildPayload(spec, existingCertificateId) {
+              const certId = Number.isInteger(existingCertificateId) && existingCertificateId > 0 ? existingCertificateId : 'new';
+              return {
+                domain_names: spec.domainNames,
+                forward_scheme: 'http',
+                forward_host: spec.forwardHost,
+                forward_port: spec.forwardPort,
+                certificate_id: certId,
+                ssl_forced: true,
+                hsts_enabled: true,
+                hsts_subdomains: true,
+                trust_forwarded_proto: true,
+                http2_support: !!spec.http2Support,
+                block_exploits: true,
+                caching_enabled: false,
+                allow_websocket_upgrade: true,
+                advanced_config: '',
+                enabled: true,
+                meta: {
+                  dns_challenge: false
+                },
+                locations: []
+              };
+            }
+
+            (async () => {
+              const auth = await apiRequest('/tokens', {
+                method: 'POST',
+                body: {
+                  identity: adminEmail,
+                  secret: adminPassword
+                }
+              });
+
+              const token = auth && auth.token;
+              if (!token) {
+                throw new Error(`NPM API token missing in response: ${JSON.stringify(auth)}`);
+              }
+
+              const existingHosts = await apiRequest('/nginx/proxy-hosts', { token });
+              const hostList = Array.isArray(existingHosts) ? existingHosts : [];
+
+              for (const spec of desiredHosts) {
+                const existing = hostList.find(
+                  (item) => Array.isArray(item.domain_names) && item.domain_names.includes(spec.primaryDomain)
+                );
+
+                const payload = buildPayload(spec, existing && existing.certificate_id);
+
+                if (existing && existing.id) {
+                  await apiRequest(`/nginx/proxy-hosts/${existing.id}`, {
+                    method: 'PUT',
+                    token,
+                    body: payload
+                  });
+                  console.log(`Updated proxy host: ${spec.primaryDomain} -> ${spec.forwardHost}:${spec.forwardPort}`);
+                } else {
+                  await apiRequest('/nginx/proxy-hosts', {
+                    method: 'POST',
+                    token,
+                    body: payload
+                  });
+                  console.log(`Created proxy host: ${spec.primaryDomain} -> ${spec.forwardHost}:${spec.forwardPort}`);
+                }
+              }
+            })().catch((error) => {
+              console.error(error.message || error);
+              process.exit(1);
+            });
+            NODE
 
       - name: Discord Notification
         if: always() && env.DISCORD_WEBHOOK_URL != ''

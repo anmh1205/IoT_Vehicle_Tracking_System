@@ -5,6 +5,7 @@ Tài liệu này áp dụng cho luồng deploy tối giản kiểu IVM26:
 1) Build/push image trên GitHub Actions.
 2) SSH bootstrap VPS lần đầu.
 3) Auto deploy khi `push` nhánh `uat` hoặc chạy manual `workflow_dispatch`.
+4) Các workflow UAT dùng `concurrency` để tránh chồng deploy cùng môi trường.
 
 ## Repository Secrets bắt buộc
 
@@ -17,10 +18,17 @@ Tài liệu này áp dụng cho luồng deploy tối giản kiểu IVM26:
 - `DOCKERHUB_TOKEN`
 - `DISCORD_WEBHOOK_URL`
 
+### NPM UAT proxy/SSL bootstrap secrets
+- `NPM_ADMIN_EMAIL`
+- `NPM_ADMIN_PASSWORD`
+
 ### Service runtime env payload secrets (multiline)
 - `BACKEND_UAT_ENV_FILE`
 - `FRONTEND_UAT_ENV_FILE`
 - `MQTT_BRIDGE_UAT_ENV_FILE`
+- `POSTGRESQL_UAT_ENV_FILE` (optional, fallback `BACKEND_UAT_ENV_FILE`)
+- `EMQX_UAT_ENV_FILE` (optional, fallback `BACKEND_UAT_ENV_FILE`)
+- `GRAFANA_UAT_ENV_FILE` (optional, fallback `BACKEND_UAT_ENV_FILE`)
 
 ## Frontend build-time public config secrets
 - `NEXT_PUBLIC_API_BASE_URL`
@@ -32,6 +40,7 @@ Tài liệu này áp dụng cho luồng deploy tối giản kiểu IVM26:
 ## Mapping chính
 - `.github/workflows/backend-uat.yml`
   - Build image: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`
+  - Image tags: `tracking-backend:uat` và `tracking-backend:uat-${github.sha}`
   - Deploy: shared deploy secrets + `BACKEND_UAT_ENV_FILE`
 - `.github/workflows/frontend-uat.yml`
   - Build image: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, frontend build-time public config secrets
@@ -39,10 +48,19 @@ Tài liệu này áp dụng cho luồng deploy tối giản kiểu IVM26:
 - `.github/workflows/mqtt-bridge-uat.yml`
   - Build image: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`
   - Deploy: shared deploy secrets + `MQTT_BRIDGE_UAT_ENV_FILE`
+- `.github/workflows/npm-uat.yml`
+  - Deploy NPM container: shared deploy secrets
+  - Bootstrap proxy + SSL via NPM API: `NPM_ADMIN_EMAIL`, `NPM_ADMIN_PASSWORD`
+  - Auto reconcile target routes:
+    - `thingdock.dev` → `tracking-frontend:4001`
+    - `be.thingdock.dev` → `tracking-backend:4000`
+    - `mqtt.thingdock.dev` → `tracking-emqx:8083`
 
 ## Runtime behavior notes
 - `bootstrap-vps.sh` chỉ tạo `$SERVICE_DIR/.env` khi file chưa tồn tại, dữ liệu lấy từ secret `*_UAT_ENV_FILE` tương ứng.
-- `deploy-service.sh` chạy healthcheck theo service nếu có URL; hiện tại frontend dùng `http://localhost:4001`, backend dùng `http://localhost:4000/health`.
+- `deploy-service.sh` chạy healthcheck theo service nếu có URL; backend hiện dùng `http://localhost:4000/health` với ngưỡng `3` lần thành công liên tiếp, `HEALTHCHECK_MAX_ATTEMPTS=40`, và `HEALTHCHECK_INTERVAL_SECONDS=3`.
+- Khi healthcheck không đạt, script in log tail của service rồi fail để giữ deploy ngắn và rõ nguyên nhân.
+- Discord notification dùng pattern an toàn `if: always()` + `continue-on-error: true`, nên bước báo trạng thái không làm hỏng kết quả deploy chính.
 
 ## Preflight checklist trước khi bật auto deploy
 - [ ] Đã tạo đầy đủ secrets ở mức repository.
