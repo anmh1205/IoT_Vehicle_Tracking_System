@@ -27,16 +27,12 @@ jobs:
           SSH_DEPLOY_PORT: ${{ secrets.SSH_DEPLOY_PORT }}
           SSH_DEPLOY_USER: ${{ secrets.SSH_DEPLOY_USER }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          NPM_ADMIN_EMAIL: ${{ secrets.NPM_ADMIN_EMAIL || secrets.SSH_DEPLOY_USER }}
-          NPM_ADMIN_PASSWORD: ${{ secrets.NPM_ADMIN_PASSWORD || secrets.SSH_DEPLOY_PASSWORD }}
         run: |
           required_vars=(
             SSH_DEPLOY_IP
             SSH_DEPLOY_PORT
             SSH_DEPLOY_USER
             SSH_PRIVATE_KEY
-            NPM_ADMIN_EMAIL
-            NPM_ADMIN_PASSWORD
           )
           for var in "${required_vars[@]}"; do
             if [ -z "${!var}" ]; then
@@ -65,6 +61,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: NPM_ADMIN_EMAIL,NPM_ADMIN_PASSWORD
           script: |
+            NPM_ADMIN_EMAIL="${NPM_ADMIN_EMAIL:-}"
+            NPM_ADMIN_PASSWORD="${NPM_ADMIN_PASSWORD:-}"
             set -eu
 
             NPM_DIR="/opt/tracking/Tracking_NPM"
@@ -121,6 +119,11 @@ jobs:
             if [ "$npm_ready" -ne 1 ]; then
               docker compose --profile production logs --tail=100 npm || true
               exit 1
+            fi
+
+            if [ -z "$NPM_ADMIN_EMAIL" ] || [ -z "$NPM_ADMIN_PASSWORD" ]; then
+              echo "NPM admin secrets are missing; skip proxy/SSL bootstrap and keep NPM container deploy only."
+              exit 0
             fi
 
             if ! docker exec tracking-npm node --version >/dev/null 2>&1; then
