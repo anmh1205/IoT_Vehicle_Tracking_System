@@ -66,8 +66,6 @@ void app_config_set_defaults(config_t *config) {
     config->mqtt_port = CONFIG_TRACKER_DEFAULT_MQTT_PORT;
     config->heartbeat_interval_s = CONFIG_TRACKER_DEFAULT_HEARTBEAT_INTERVAL_S;
     config->tracking_interval_s = CONFIG_TRACKER_DEFAULT_TRACKING_INTERVAL_S;
-    config->lvd_threshold_v = 12.0f;
-    config->lvd_hysteresis_v = 12.2f;
 #if defined(CONFIG_TRACKER_ENABLE_COMMAND_SUBSCRIBE)
     config->command_subscribe_enabled = CONFIG_TRACKER_ENABLE_COMMAND_SUBSCRIBE;
 #else
@@ -97,10 +95,6 @@ bool app_config_is_valid(const config_t *config) {
     }
 
     if (config->tracking_interval_s == 0 || config->heartbeat_interval_s == 0) {
-        return false;
-    }
-
-    if (config->lvd_hysteresis_v < config->lvd_threshold_v) {
         return false;
     }
 
@@ -167,14 +161,28 @@ esp_err_t nvs_config_load(config_t *config) {
     }
     ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to open NVS namespace");
 
-    size_t required_size = sizeof(*config);
-    err = nvs_get_blob(handle, NVS_KEY, config, &required_size);
-    nvs_close(handle);
-
+    size_t stored_size = 0;
+    err = nvs_get_blob(handle, NVS_KEY, NULL, &stored_size);
     if (err == ESP_ERR_NVS_NOT_FOUND) {
+        nvs_close(handle);
         ESP_LOGW(TAG, "Config not found, writing defaults");
         return nvs_config_save(config);
     }
+    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to query config blob size");
+
+    if (stored_size != sizeof(*config)) {
+        nvs_close(handle);
+        ESP_LOGW(TAG,
+                 "Config size mismatch in NVS stored=%lu expected=%lu, rewriting defaults",
+                 (unsigned long)stored_size,
+                 (unsigned long)sizeof(*config));
+        app_config_set_defaults(config);
+        return nvs_config_save(config);
+    }
+
+    size_t required_size = sizeof(*config);
+    err = nvs_get_blob(handle, NVS_KEY, config, &required_size);
+    nvs_close(handle);
 
     ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to read config blob");
 

@@ -51,9 +51,11 @@
 ### P3 - CI/CD UAT Minimal Rollout In Progress
 - Scope: implement IVM26-style minimal CI/CD for Backend/Frontend/MQTT Bridge (GitHub secrets baseline, first-time VPS bootstrap, auto deploy on `push uat` with manual fallback).
 - Milestones in progress:
-  - Added `workflow_dispatch` manual fallback trigger in `.github/workflows/backend-uat.yml`, `.github/workflows/frontend-uat.yml`, `.github/workflows/mqtt-bridge-uat.yml`.
+  - Added `workflow_dispatch` manual fallback trigger and `concurrency` guards in UAT workflows to avoid overlapping deploys.
   - Added deploy preflight checks for required secrets and standardized SSH deploy flow.
   - Added reusable VPS deploy scripts `scripts/deploy/bootstrap-vps.sh` and `scripts/deploy/deploy-service.sh`.
+  - Added health-gated deploy retries with bounded timeout/interval settings in the deploy script.
+  - Added backend image tag policy `uat` + `uat-${github.sha}` for stable rollback and traceable builds.
   - Added rollout checklist and required secret/env mapping in `docs/cicd-required-secrets-and-env.md`.
 
 ### P2 - Cloud Geofence and Distance Limits (Backend) Complete
@@ -73,6 +75,14 @@
   - Modem control abstraction expanded with RESET/DTR/STATUS/NET-LIGHT hooks (GPIO_NC placeholders pending final board pin mapping).
   - Thesis final markdown pair and impacted UML sources synced to LIS3DSH + PWR-KEY terminology.
   - Figure render pipeline executed to regenerate synchronized SVG artifacts.
+
+### Firmware Runtime Hardening Complete
+- Scope: SD log store recovery, DS3231M RTC UTC-safe validation, offline queue replay ACK hardening, and state machine integration in the firmware runtime.
+- Milestones completed:
+  - SD log store recovery now handles transient storage faults more cleanly.
+  - DS3231M RTC handling keeps time checks UTC-safe for replay and persistence flows.
+  - Offline queue replay ACK handling now gates state advancement until completion is confirmed.
+  - Compile validation passed for the completed firmware scope.
 
 ## Notes
 - No remaining open tasks for accessibility remediation.

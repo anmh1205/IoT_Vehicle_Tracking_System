@@ -6,6 +6,8 @@
 - The backend/frontend API contract is standardized around a success envelope and RFC7807 problem-details error shape.
 - MQTT is the canonical ingest path for both real devices and simulator traffic, and legacy `/iot/data` runtime usage has been removed.
 - Cloud geofence policy and distance quota support is implemented on the backend with admin boundary, radius, and distance quota policy types.
+- Firmware runtime hardening now covers SD log store recovery, DS3231M RTC UTC-safe validation, and offline queue replay ACK handling in the state machine.
+- UAT CI/CD now uses manual fallback dispatch, concurrency guards, bounded health retries, and safe non-blocking notifications for deploy visibility.
 - Thesis readability sync on 2026-04-01 kept the final thesis markdown, Mermaid sources, and exported SVG figures aligned to a shared glossary without touching runtime code.
 
 ## API Contract Objectives

@@ -37,6 +37,13 @@ static SemaphoreHandle_t s_at_lock = NULL;
 static modem_urc_entry_t s_urc_entries[MODEM_MAX_URC_CALLBACKS];
 /* Tracks whether UART driver was initialized successfully. */
 static bool s_uart_ready = false;
+/* Active UART baudrate for modem transport. */
+static uint32_t s_uart_baud = MODEM_UART_BAUD;
+/* Active UART pin mapping for modem transport. */
+static gpio_num_t s_uart_tx_pin = PIN_MODEM_TX;
+static gpio_num_t s_uart_rx_pin = PIN_MODEM_RX;
+/* Active UART line inversion mask. */
+static uint32_t s_uart_inverse_mask = 0;
 
 /**
  * @brief Dispatch one response/URC line to registered callbacks.
@@ -66,8 +73,20 @@ static void modem_at_dispatch_line(const char *line) {
  * @return true when response has terminal marker.
  */
 static bool modem_at_response_done(const char *buffer) {
+    size_t len = strlen(buffer);
+    while (len > 0) {
+        char c = buffer[len - 1];
+        if (c != '\r' && c != '\n' && c != ' ' && c != '\t') {
+            break;
+        }
+        len -= 1;
+    }
+
+    bool ends_with_ok = len >= 2 && strncmp(buffer + (len - 2), "OK", 2) == 0;
+    bool ends_with_error = len >= 5 && strncmp(buffer + (len - 5), "ERROR", 5) == 0;
+
     return strstr(buffer, "\r\nOK\r\n") != NULL || strstr(buffer, "\r\nERROR\r\n") != NULL ||
-           strstr(buffer, "+CME ERROR") != NULL;
+           strstr(buffer, "+CME ERROR") != NULL || ends_with_ok || ends_with_error;
 }
 
 /**
@@ -93,12 +112,17 @@ esp_err_t modem_at_init(void) {
     ESP_ERROR_CHECK(uart_driver_install(MODEM_UART_NUM, MODEM_RX_BUFFER_SIZE, 0, 0, NULL, 0));
     ESP_ERROR_CHECK(uart_param_config(MODEM_UART_NUM, &uart_cfg));
     ESP_ERROR_CHECK(uart_set_pin(MODEM_UART_NUM, PIN_MODEM_TX, PIN_MODEM_RX, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+    ESP_ERROR_CHECK(uart_set_line_inverse(MODEM_UART_NUM, MODEM_UART_LINE_INVERSE_MASK));
     ESP_ERROR_CHECK(uart_flush(MODEM_UART_NUM));
 
     s_at_lock = xSemaphoreCreateMutex();
     ESP_RETURN_ON_NULL(s_at_lock, ESP_ERR_NO_MEM, TAG, "Failed to create AT mutex");
 
     memset(s_urc_entries, 0, sizeof(s_urc_entries));
+    s_uart_baud = MODEM_UART_BAUD;
+    s_uart_tx_pin = PIN_MODEM_TX;
+    s_uart_rx_pin = PIN_MODEM_RX;
+    s_uart_inverse_mask = MODEM_UART_LINE_INVERSE_MASK;
     s_uart_ready = true;
     return ESP_OK;
 }
@@ -207,6 +231,72 @@ esp_err_t modem_at_send_expect(const char *cmd, const char *expect, uint32_t tim
     }
 
     return ESP_OK;
+}
+
+esp_err_t modem_at_set_baud(uint32_t baud) {
+    ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
+    ESP_RETURN_ON_FALSE(baud > 0, ESP_ERR_INVALID_ARG, TAG, "Invalid baud");
+
+    if (baud == s_uart_baud) {
+        return ESP_OK;
+    }
+
+    esp_err_t err = uart_set_baudrate(MODEM_UART_NUM, baud);
+    if (err != ESP_OK) {
+        return err;
+    }
+
+    s_uart_baud = baud;
+    uart_flush_input(MODEM_UART_NUM);
+    return ESP_OK;
+}
+
+uint32_t modem_at_get_baud(void) {
+    return s_uart_baud;
+}
+
+esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin) {
+    ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
+
+    esp_err_t err = uart_set_pin(MODEM_UART_NUM, tx_pin, rx_pin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    if (err != ESP_OK) {
+        return err;
+    }
+
+    s_uart_tx_pin = tx_pin;
+    s_uart_rx_pin = rx_pin;
+    uart_flush_input(MODEM_UART_NUM);
+    return ESP_OK;
+}
+
+void modem_at_get_pins(gpio_num_t *out_tx_pin, gpio_num_t *out_rx_pin) {
+    if (out_tx_pin != NULL) {
+        *out_tx_pin = s_uart_tx_pin;
+    }
+    if (out_rx_pin != NULL) {
+        *out_rx_pin = s_uart_rx_pin;
+    }
+}
+
+esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask) {
+    ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
+
+    if (inverse_mask == s_uart_inverse_mask) {
+        return ESP_OK;
+    }
+
+    esp_err_t err = uart_set_line_inverse(MODEM_UART_NUM, inverse_mask);
+    if (err != ESP_OK) {
+        return err;
+    }
+
+    s_uart_inverse_mask = inverse_mask;
+    uart_flush_input(MODEM_UART_NUM);
+    return ESP_OK;
+}
+
+uint32_t modem_at_get_line_inverse(void) {
+    return s_uart_inverse_mask;
 }
 
 /**

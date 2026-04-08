@@ -37,6 +37,9 @@ The completed remediation spans two UI layers:
 - Mobile and dashboard continue to share the same operational capability set; accessibility is implemented per platform conventions.
 - The API layer now assumes success envelopes and RFC7807 problem details across shared middleware, health, metrics, policy, and rate-limit surfaces.
 - MQTT is the canonical ingest path for both real devices and simulator traffic, and `/iot/data` is no longer part of the runtime architecture.
+- UAT deployment workflows use `workflow_dispatch` plus `concurrency` guards so the same environment is not deployed twice in parallel.
+- Backend UAT images are published with both a mutable `uat` tag and an immutable `uat-${github.sha}` tag to balance promotion speed and rollback traceability.
+- Health-gated deploy scripts retry with bounded attempts/intervals and fail after dumping tail logs, while notification steps stay non-blocking with `continue-on-error: true`.
 - Cloud geofence policy evaluation runs server-side in `Tracking_Backend/src/domain/geofence/services/policy-evaluator.service.ts`, using policy state and violation repositories to persist decisions.
 - Policy types are evaluated as a matrix: `ADMIN_BOUNDARY` for strict polygon checks, `RADIUS` for center/radius checks, and `DISTANCE_QUOTA` for cycle-based distance accumulation.
 - The evaluator emits policy metrics for evaluation count, evaluation latency, violation count, and quota reset count through `src/infrastructure/metrics/app-metrics.ts`.
@@ -45,6 +48,7 @@ The completed remediation spans two UI layers:
 - Realtime event names use colon-style contracts end to end so backend emitters and frontend consumers stay aligned.
 - Frontend feature code consumes unwrapped data, while transport-level errors stay confined to the API client and parser layer.
 - The BLE OBD session layer now tracks request/response health via rolling counters and periodic log snapshots in `main/src/ble_obd.c`, but the external OBD command contract remains unchanged.
+- The firmware runtime also hardens SD log store recovery, DS3231M RTC UTC validation, and offline queue replay ACK handling before the state machine advances device state.
 - Simulator token flow and rollback/race handling were hardened to avoid replaying legacy ingestion behavior during the cutover.
 
 ## Traceability

@@ -1,6 +1,12 @@
 # Project Changelog
 
 ## 2026-04-06
+### Firmware SD Log Recovery, RTC Validation, and Replay ACK Hardening (Completed)
+- Hardened the firmware SD log store recovery path so log writes can recover cleanly after transient storage faults.
+- Integrated DS3231M RTC handling with UTC-safe validation to keep firmware time checks consistent across replay and persistence flows.
+- Hardened offline queue replay ACK handling and state machine integration so replay completion is confirmed before the device advances state.
+- Validation status: compile validation passed for the completed firmware scope.
+
 ### Cloud Geofence Policy and Distance Quota (Completed)
 - Added backend policy types for `ADMIN_BOUNDARY`, `RADIUS`, and `DISTANCE_QUOTA` with telemetry-driven evaluation in `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/domain/geofence/services/policy-evaluator.service.ts`.
 - Added policy state persistence, violation creation, and quota-cycle reset tracking so the backend can persist spatial state and distance consumption per vehicle/policy.

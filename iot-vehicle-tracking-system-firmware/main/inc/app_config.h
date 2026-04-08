@@ -53,10 +53,6 @@ typedef struct {
     uint16_t tracking_interval_s;
     /** Preferred OBD BLE peripheral address. Empty means auto-discover. */
     char obd2_ble_address[TRACKER_MAC_ADDR_STR_LEN];
-    /** Battery low-voltage threshold (V). */
-    float lvd_threshold_v;
-    /** Recovery hysteresis threshold (V) to clear low-voltage state. */
-    float lvd_hysteresis_v;
     /** Enable command topic subscription from cloud. */
     bool command_subscribe_enabled;
     /** Cellular APN used for PDP context creation. */

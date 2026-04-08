@@ -17,7 +17,11 @@
  * @return Heap-allocated JSON string. Caller must free with `cJSON_free`.
  *         Returns NULL when formatting fails.
  */
-char *data_format_rawdata(const config_t *cfg, const telemetry_t *telemetry, bool include_auth_token);
+char *data_format_rawdata(const config_t *cfg,
+                          const telemetry_t *telemetry,
+                          bool include_auth_token,
+                          bool timestamp_trusted,
+                          uint64_t timestamp_ms);
 
 /**
  * @brief Build status payload JSON string.
@@ -32,7 +36,9 @@ char *data_format_rawdata(const config_t *cfg, const telemetry_t *telemetry, boo
 char *data_format_status(const config_t *cfg,
                          const char *status,
                          uint32_t session_id,
-                         bool include_auth_token);
+                         bool include_auth_token,
+                         bool timestamp_trusted,
+                         uint64_t timestamp_ms);
 
 /**
  * @brief Build event payload JSON string.
@@ -49,7 +55,9 @@ char *data_format_event(const config_t *cfg,
                         const char *event_type,
                         int code,
                         const char *message,
-                        bool include_auth_token);
+                        bool include_auth_token,
+                        bool timestamp_trusted,
+                        uint64_t timestamp_ms);
 
 /**
  * @brief Build firmware-status payload JSON string.
@@ -62,4 +70,6 @@ char *data_format_event(const config_t *cfg,
  */
 char *data_format_firmware(const config_t *cfg,
                            const firmware_status_t *status,
-                           bool include_auth_token);
+                           bool include_auth_token,
+                           bool timestamp_trusted,
+                           uint64_t timestamp_ms);

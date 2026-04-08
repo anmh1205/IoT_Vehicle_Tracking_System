@@ -251,7 +251,7 @@ static void ble_obd_diag_log_periodic(ble_obd_ctx_t *ctx, bool force_now) {
         return;
     }
 
-    ESP_LOGI(TAG,
+    ESP_LOGD(TAG,
              "OBD diag total=%lu valid=%lu invalid=%lu timeout=%lu overflow=%lu",
              (unsigned long)ctx->diag.rxtx_total,
              (unsigned long)ctx->diag.notify_valid,

@@ -19,6 +19,7 @@ typedef struct {
     uint8_t critical;
     uint8_t gps_fix;
     uint8_t net_up;
+    uint8_t time_trusted;
     char payload[384];
 } sd_log_record_t;
 
@@ -48,6 +49,7 @@ esp_err_t sd_log_store_append(const sd_log_record_t *record);
 esp_err_t sd_log_store_get_meta(sd_log_meta_t *out_meta);
 esp_err_t sd_log_store_set_ack_seq_critical(uint32_t ack_seq_critical);
 esp_err_t sd_log_store_set_replay_seq(uint32_t replay_seq);
+esp_err_t sd_log_store_ack_critical_and_advance_replay(uint32_t ack_seq_critical, uint32_t replay_seq);
 esp_err_t sd_log_store_peek_next(uint32_t min_seq, sd_log_record_t *out_record);
 esp_err_t sd_log_store_gc_if_needed(void);
 esp_err_t sd_log_store_get_stats(sd_log_stats_t *out_stats);

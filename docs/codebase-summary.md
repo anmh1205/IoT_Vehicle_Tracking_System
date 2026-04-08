@@ -8,10 +8,10 @@ _This note is derived from `repomix-output.xml` generated at the root of the rep
 - **Tracking_Mobile**: Flutter screens, connectivity helpers, and notification flows remain in `lib/`, staying in sync with backend APIs and the MQTT bridge contracts.
 - **Tracking_EMQX** / **Tracking_MqttBridge**: EMQX configuration (`docker-compose.yml`, `emqx.conf`) and a Node bridge (`src/handlers`, `src/validators`, `src/config/env.ts`) handle telemetry ingestion and broker authentication. The bridge is part of the canonical MQTT path for both devices and simulator traffic.
 - **Tracking_Grafana**, **Tracking_VictoriaMetrics**, **Tracking_VictoriaLogs**, **Tracking_PostgreSQL**: Observability and persistence stacks defined via datasource YAMLs and Compose manifests.
-- **Tracking_NPM**: Auxiliary compose helpers for testing npm-based services.
 
 ## Firmware + hardware alignment
 - Firmware changes continue to concentrate in `iot-vehicle-tracking-system-firmware/main/src/` and related hardware docs.
+- The current firmware hardening work now also covers SD log store recovery, DS3231M RTC UTC-safe validation, offline queue replay ACK handling, and state machine integration.
 - The current BLE OBD session layer in `main/src/ble_obd.c` now includes diagnostic counters and periodic log instrumentation for request volume, response validity, timeouts, and RX overflow handling.
 - The firmware still targets the SIMCom SIM7600CE-T LTE+GNSS modem (auto-mode `AT+CNMP=2`, APN `internet`, GNSS via `AT+CGNSINF`/`AT+CGNSTST`), simplifying the architecture by removing the legacy A7670C + u-blox NEO-M8N split while keeping the existing UART pin mapping on ESP32-S3.
 

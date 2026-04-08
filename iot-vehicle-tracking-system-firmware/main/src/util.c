@@ -23,6 +23,8 @@
 #endif
 
 static const char *TAG = "UTIL";
+/* Single runtime gate for all sleep features across modules. */
+static bool s_sleep_enabled = false;
 
 #define OTA_HTTP_BUFFER_SIZE 1024
 
@@ -58,6 +60,14 @@ size_t util_copy_string(char *dst, size_t dst_size, const char *src) {
  */
 uint64_t util_uptime_ms(void) {
     return (uint64_t)(esp_timer_get_time() / 1000ULL);
+}
+
+void util_set_sleep_enabled(bool enabled) {
+    s_sleep_enabled = enabled;
+}
+
+bool util_is_sleep_enabled(void) {
+    return s_sleep_enabled;
 }
 
 /**

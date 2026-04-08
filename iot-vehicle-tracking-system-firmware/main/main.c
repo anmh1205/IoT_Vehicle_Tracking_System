@@ -8,6 +8,7 @@
 #include "esp_sleep.h"
 
 #include "nvs_config.h"
+#include "retry_manager.h"
 #include "util.h"
 
 /**
@@ -16,7 +17,15 @@
  */
 
 static const char *TAG = "TRACKER_MAIN";
-static const uint32_t INIT_RETRY_INTERVAL_MS = 10000;
+
+static retry_state_t s_init_retry = {0};
+static const retry_policy_t s_init_retry_policy = {
+    .mode = RETRY_MODE_FIXED,
+    .base_delay_ms = 10000,
+    .max_delay_ms = 10000,
+    .max_attempts = 0,
+    .jitter_ms = 0,
+};
 
 /**
  * @brief ESP-IDF application entrypoint.
@@ -27,6 +36,10 @@ static const uint32_t INIT_RETRY_INTERVAL_MS = 10000;
 void app_main(void) {
     /* Keep default logging at INFO so field diagnostics stay readable. */
     esp_log_level_set("*", ESP_LOG_INFO);
+    /* NimBLE info logs are very noisy during stable OBD traffic; keep only warnings/errors. */
+    esp_log_level_set("NimBLE", ESP_LOG_WARN);
+    /* Global sleep gate: keep disabled for current hardware bring-up flow. */
+    util_set_sleep_enabled(false);
 
     /* Initialize NVS first because config and command updates rely on it. */
     esp_err_t err = nvs_config_init();
@@ -62,12 +75,14 @@ void app_main(void) {
     /* Choose boot state based on wakeup source semantics. */
     app_state_t state = APP_STATE_INIT;
     esp_sleep_wakeup_cause_t wakeup = esp_sleep_get_wakeup_cause();
-    if (wakeup == ESP_SLEEP_WAKEUP_TIMER) {
-        /* Timer wakeup should perform heartbeat flow. */
-        state = APP_STATE_HEARTBEAT;
-    } else if (wakeup == ESP_SLEEP_WAKEUP_EXT0) {
-        /* IMU interrupt wakeup should enter motion alarm flow. */
-        state = APP_STATE_ALARM;
+    if (util_is_sleep_enabled()) {
+        if (wakeup == ESP_SLEEP_WAKEUP_TIMER) {
+            /* Timer wakeup should perform heartbeat flow. */
+            state = APP_STATE_HEARTBEAT;
+        } else if (wakeup == ESP_SLEEP_WAKEUP_EXT0) {
+            /* IMU interrupt wakeup should enter motion alarm flow. */
+            state = APP_STATE_ALARM;
+        }
     }
 
     /* Log enough boot metadata for fleet troubleshooting. */
@@ -77,25 +92,41 @@ void app_main(void) {
              (int)wakeup,
              (int)state);
 
-    /* Initialize runtime subsystems with timed retry to avoid boot-loop aborts. */
-    while (true) {
-        err = state_machine_init(&config);
-        if (err == ESP_OK) {
-            break;
-        }
-        ESP_LOGW(TAG,
-                 "state_machine_init failed: %s (retry in %lums)",
-                 esp_err_to_name(err),
-                 (unsigned long)INIT_RETRY_INTERVAL_MS);
-        vTaskDelay(pdMS_TO_TICKS(INIT_RETRY_INTERVAL_MS));
-    }
+    bool state_machine_ready = false;
 
     /**
      * Main control loop:
-     * - execute one finite-state-machine step,
+     * - retry state_machine_init non-blocking until ready,
+     * - execute one finite-state-machine step after init,
      * - sleep briefly to avoid busy spin.
      */
     while (true) {
+        uint64_t now_ms = util_uptime_ms();
+        if (!state_machine_ready) {
+            if (retry_state_can_run(&s_init_retry, now_ms)) {
+                err = state_machine_init(&config);
+                if (err == ESP_OK) {
+                    retry_state_reset(&s_init_retry);
+                    state_machine_ready = true;
+                } else {
+                    uint32_t delay_ms = retry_state_current_delay_ms(&s_init_retry,
+                                                                     &s_init_retry_policy,
+                                                                     now_ms);
+                    (void)retry_state_schedule(&s_init_retry,
+                                               &s_init_retry_policy,
+                                               now_ms,
+                                               err);
+                    ESP_LOGW(TAG,
+                             "retry step=state_machine_init err=%s attempt=%lu next_delay_ms=%lu",
+                             esp_err_to_name(err),
+                             (unsigned long)s_init_retry.attempts,
+                             (unsigned long)delay_ms);
+                }
+            }
+            vTaskDelay(pdMS_TO_TICKS(100));
+            continue;
+        }
+
         state = state_machine_run(state);
         vTaskDelay(pdMS_TO_TICKS(100));
     }

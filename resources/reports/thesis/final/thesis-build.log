@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex 2026.4.5)  6 APR 2026 07:15
+This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex 2026.4.5)  7 APR 2026 09:49
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -659,26 +659,26 @@ LaTeX Warning: Unused global option(s):
 (./thesis-build.aux)
 \openout1 = `thesis-build.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 130.
-LaTeX Font Info:    ... okay on input line 130.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 130.
-LaTeX Font Info:    ... okay on input line 130.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 130.
-LaTeX Font Info:    ... okay on input line 130.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 130.
-LaTeX Font Info:    ... okay on input line 130.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 130.
-LaTeX Font Info:    ... okay on input line 130.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 130.
-LaTeX Font Info:    ... okay on input line 130.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 130.
-LaTeX Font Info:    ... okay on input line 130.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 130.
-LaTeX Font Info:    ... okay on input line 130.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 130.
-LaTeX Font Info:    ... okay on input line 130.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 130.
-LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 137.
+LaTeX Font Info:    ... okay on input line 137.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 137.
+LaTeX Font Info:    ... okay on input line 137.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 137.
+LaTeX Font Info:    ... okay on input line 137.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 137.
+LaTeX Font Info:    ... okay on input line 137.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 137.
+LaTeX Font Info:    ... okay on input line 137.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 137.
+LaTeX Font Info:    ... okay on input line 137.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 137.
+LaTeX Font Info:    ... okay on input line 137.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 137.
+LaTeX Font Info:    ... okay on input line 137.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 137.
+LaTeX Font Info:    ... okay on input line 137.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 137.
+LaTeX Font Info:    ... okay on input line 137.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: xetex
@@ -721,71 +721,71 @@ Package fontspec Info:
 
 \symlegacymaths=\mathgroup6
 LaTeX Font Info:    Overwriting symbol font `legacymaths' in version `bold'
-(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 130.
-LaTeX Font Info:    Redeclaring math accent \acute on input line 130.
-LaTeX Font Info:    Redeclaring math accent \grave on input line 130.
-LaTeX Font Info:    Redeclaring math accent \ddot on input line 130.
-LaTeX Font Info:    Redeclaring math accent \tilde on input line 130.
-LaTeX Font Info:    Redeclaring math accent \bar on input line 130.
-LaTeX Font Info:    Redeclaring math accent \breve on input line 130.
-LaTeX Font Info:    Redeclaring math accent \check on input line 130.
-LaTeX Font Info:    Redeclaring math accent \hat on input line 130.
-LaTeX Font Info:    Redeclaring math accent \dot on input line 130.
-LaTeX Font Info:    Redeclaring math accent \mathring on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Delta on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Theta on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Xi on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Pi on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Phi on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Psi on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \Omega on input line 130.
-LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 130.
-LaTeX Font Info:    Redeclaring symbol font `operators' on input line 130.
+(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 137.
+LaTeX Font Info:    Redeclaring math accent \acute on input line 137.
+LaTeX Font Info:    Redeclaring math accent \grave on input line 137.
+LaTeX Font Info:    Redeclaring math accent \ddot on input line 137.
+LaTeX Font Info:    Redeclaring math accent \tilde on input line 137.
+LaTeX Font Info:    Redeclaring math accent \bar on input line 137.
+LaTeX Font Info:    Redeclaring math accent \breve on input line 137.
+LaTeX Font Info:    Redeclaring math accent \check on input line 137.
+LaTeX Font Info:    Redeclaring math accent \hat on input line 137.
+LaTeX Font Info:    Redeclaring math accent \dot on input line 137.
+LaTeX Font Info:    Redeclaring math accent \mathring on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Delta on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Theta on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Xi on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Pi on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Phi on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Psi on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \Omega on input line 137.
+LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 137.
+LaTeX Font Info:    Redeclaring symbol font `operators' on input line 137.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `normal' on input line 130.
+(Font)              `operators' in the math version `normal' on input line 137.
 
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
 (Font)                  OT1/cmr/m/n --> TU/TeXGyreTermes(0)/m/n on input line 1
-30.
+37.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `bold' on input line 130.
+(Font)              `operators' in the math version `bold' on input line 137.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
 (Font)                  OT1/cmr/bx/n --> TU/TeXGyreTermes(0)/m/n on input line 
-130.
+137.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
 (Font)                  TU/TeXGyreTermes(0)/m/n --> TU/TeXGyreTermes(0)/m/n on 
-input line 130.
+input line 137.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
 (Font)                  OT1/cmr/m/it --> TU/TeXGyreTermes(0)/m/it on input line
- 130.
+ 137.
 LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
 (Font)                  OT1/cmr/bx/n --> TU/TeXGyreTermes(0)/b/n on input line 
-130.
+137.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
-(Font)                  OT1/cmss/m/n --> TU/lmss/m/n on input line 130.
+(Font)                  OT1/cmss/m/n --> TU/lmss/m/n on input line 137.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
-(Font)                  OT1/cmtt/m/n --> TU/lmtt/m/n on input line 130.
+(Font)                  OT1/cmtt/m/n --> TU/lmtt/m/n on input line 137.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
 (Font)                  TU/TeXGyreTermes(0)/m/n --> TU/TeXGyreTermes(0)/b/n on 
-input line 130.
+input line 137.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
 (Font)                  OT1/cmr/bx/it --> TU/TeXGyreTermes(0)/b/it on input lin
-e 130.
+e 137.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
-(Font)                  OT1/cmss/bx/n --> TU/lmss/b/n on input line 130.
+(Font)                  OT1/cmss/bx/n --> TU/lmss/b/n on input line 137.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
-(Font)                  OT1/cmtt/m/n --> TU/lmtt/b/n on input line 130.
-LaTeX Info: Redefining \microtypecontext on input line 130.
-Package microtype Info: Applying patch `item' on input line 130.
-Package microtype Info: Applying patch `toc' on input line 130.
-Package microtype Info: Applying patch `eqnum' on input line 130.
-Package microtype Info: Applying patch `footnote' on input line 130.
-Package microtype Info: Applying patch `verbatim' on input line 130.
-LaTeX Info: Redefining \microtypesetup on input line 130.
+(Font)                  OT1/cmtt/m/n --> TU/lmtt/b/n on input line 137.
+LaTeX Info: Redefining \microtypecontext on input line 137.
+Package microtype Info: Applying patch `item' on input line 137.
+Package microtype Info: Applying patch `toc' on input line 137.
+Package microtype Info: Applying patch `eqnum' on input line 137.
+Package microtype Info: Applying patch `footnote' on input line 137.
+Package microtype Info: Applying patch `verbatim' on input line 137.
+LaTeX Info: Redefining \microtypesetup on input line 137.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
 Package microtype Info: No adjustment of tracking.
@@ -795,304 +795,20 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `TeXGyreTermes' (encoding: TU).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-Package hyperref Info: Link coloring OFF on input line 130.
+Package hyperref Info: Link coloring OFF on input line 137.
 [1
 
 ]
-Overfull \hbox (54.5859pt too wide) in alignment at lines 140--144
- [] [] 
- []
-
-
-Overfull \hbox (54.5859pt too wide) in alignment at lines 144--146
- [] [] 
- []
-
-
-Overfull \hbox (54.5859pt too wide) in alignment at lines 146--153
- [] [] 
- []
-
-Missing character: There is no ☐ (U+2610) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no ☐ (U+2610) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-[2
-
-]
-Overfull \hbox (51.33592pt too wide) in alignment at lines 209--213
- [] [] 
- []
-
-
-Overfull \hbox (51.33592pt too wide) in alignment at lines 213--215
- [] [] 
- []
-
-
-Overfull \hbox (51.33592pt too wide) in alignment at lines 215--222
- [] [] 
- []
-
-Missing character: There is no ☐ (U+2610) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no ☐ (U+2610) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-[3
-
-]
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-[4
-
-] [5
-
-]
-Overfull \hbox (54.5859pt too wide) in alignment at lines 355--359
- [] [] 
- []
-
-
-Overfull \hbox (54.5859pt too wide) in alignment at lines 359--361
- [] [] 
- []
-
-
-Overfull \hbox (54.5859pt too wide) in alignment at lines 361--371
- [] [] 
- []
-
-[6
-
-]
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-Missing character: There is no   (U+2003) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-[7
-
-] [8] [9
-
-]
-ignored: Infinite glue shrinkage found in box being split [10
-
-] [11] [12
-
-]
-Overfull \hbox (105.13596pt too wide) in alignment at lines 648--652
- [] [] [] 
- []
-
-
-Overfull \hbox (105.13596pt too wide) in alignment at lines 652--654
- [] [] [] 
- []
-
-
-Overfull \hbox (105.13596pt too wide) in alignment at lines 654--781
- [] [] [] 
- []
-
-
-ignored: Infinite glue shrinkage found in box being split [13
-
-]
-ignored: Infinite glue shrinkage found in box being split [14] [15] [16
-
-]
-File: ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-1_svg-raw.pdf Graphic file (
-type pdf)
-<use ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-1_svg-raw.pdf>
- [17
-
-] [18]
-Overfull \hbox (153.67595pt too wide) in alignment at lines 1069--1073
- [] [] [] 
- []
-
-
-Overfull \hbox (153.67595pt too wide) in alignment at lines 1073--1075
- [] [] [] 
- []
-
-
-Overfull \hbox (153.67595pt too wide) in alignment at lines 1075--1086
- [] [] [] 
- []
-
-
-Overfull \hbox (112.15598pt too wide) in alignment at lines 1101--1105
- [] [] [] 
- []
-
-
-Overfull \hbox (112.15598pt too wide) in alignment at lines 1105--1107
- [] [] [] 
- []
-
-
-Overfull \hbox (112.15598pt too wide) in alignment at lines 1107--1117
- [] [] [] 
- []
-
-
-ignored: Infinite glue shrinkage found in box being split [19]
-File: ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-2_svg-raw.pdf Graphic file (
-type pdf)
-<use ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-2_svg-raw.pdf>
- [20]
-File: ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-3_svg-raw.pdf Graphic file (
-type pdf)
-<use ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-3_svg-raw.pdf>
- [21] [22]
-File: ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-4_svg-raw.pdf Graphic file (
-type pdf)
-<use ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-4_svg-raw.pdf>
-
-Overfull \hbox (71.73596pt too wide) in alignment at lines 1340--1344
- [] [] [] [] 
- []
-
-
-Overfull \hbox (71.73596pt too wide) in alignment at lines 1344--1346
- [] [] [] [] 
- []
-
-
-Overfull \hbox (71.73596pt too wide) in alignment at lines 1346--1368
- [] [] [] [] 
- []
-
-[23] [24]
-File: ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-5_svg-raw.pdf Graphic file (
-type pdf)
-<use ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-5_svg-raw.pdf>
- [25] [26
-
-]
-Overfull \hbox (160.34601pt too wide) in alignment at lines 1650--1655
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (160.34601pt too wide) in alignment at lines 1655--1657
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (160.34601pt too wide) in alignment at lines 1657--1674
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (40.996pt too wide) in alignment at lines 1693--1697
- [] [] [] [] 
- []
-
-
-Overfull \hbox (40.996pt too wide) in alignment at lines 1697--1699
- [] [] [] [] 
- []
-
-
-Overfull \hbox (40.996pt too wide) in alignment at lines 1699--1712
- [] [] [] [] 
- []
-
-[27]
-Overfull \hbox (65.66595pt too wide) in alignment at lines 1743--1747
- [] [] [] [] 
- []
-
-
-Overfull \hbox (65.66595pt too wide) in alignment at lines 1747--1749
- [] [] [] [] 
- []
-
-
-Overfull \hbox (65.66595pt too wide) in alignment at lines 1749--1763
- [] [] [] [] 
- []
-
-
-Overfull \hbox (145.58598pt too wide) in alignment at lines 1796--1801
- [] [] [] [] 
- []
-
-
-Overfull \hbox (145.58598pt too wide) in alignment at lines 1801--1803
- [] [] [] [] 
- []
-
-
-Overfull \hbox (145.58598pt too wide) in alignment at lines 1803--1821
- [] [] [] [] 
- []
-
-[28]
-File: ./svg-inkscape/02-chuong-2-phan-tich-hinh-2-1_svg-raw.pdf Graphic file (t
-ype pdf)
-<use ./svg-inkscape/02-chuong-2-phan-tich-hinh-2-1_svg-raw.pdf>
- [29] [30]
-Overfull \hbox (664.79602pt too wide) in alignment at lines 2086--2090
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (664.79602pt too wide) in alignment at lines 2090--2092
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (664.79602pt too wide) in alignment at lines 2092--2109
- [] [] [] [] [] 
- []
-
-[31]
-Overfull \hbox (23.926pt too wide) in alignment at lines 2184--2189
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (23.926pt too wide) in alignment at lines 2189--2191
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (23.926pt too wide) in alignment at lines 2191--2199
- [] [] [] [] [] [] 
- []
-
-[32] [33]
-File: ./svg-inkscape/03-chuong-3-giai-phap-phan-cung-hinh-3-1_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/03-chuong-3-giai-phap-phan-cung-hinh-3-1_svg-raw.pdf>
-LaTeX Font Info:    Trying to load font information for U+msa on input line 225
-9.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 169
+.
  (/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 225
-9.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 169
+.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -1103,1716 +819,333 @@ File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 (/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
 (RS)
-) [34
+) [2
 
 ]
-Overfull \hbox (903.086pt too wide) in alignment at lines 2322--2326
- [] [] [] [] 
- []
-
-
-Overfull \hbox (903.086pt too wide) in alignment at lines 2326--2328
- [] [] [] [] 
- []
-
-
-Overfull \hbox (903.086pt too wide) in alignment at lines 2328--2358
- [] [] [] [] 
- []
-
-[35]
-Overfull \hbox (536.59935pt too wide) in alignment at lines 2490--2495
- [] [] [] [] 
- []
-
-
-Overfull \hbox (536.59935pt too wide) in alignment at lines 2495--2497
- [] [] [] [] 
- []
-
-
-Overfull \hbox (536.59935pt too wide) in alignment at lines 2497--2524
- [] [] [] [] 
- []
-
-[36]
-Overfull \hbox (212.75594pt too wide) in alignment at lines 2557--2561
- [] [] 
- []
-
-
-Overfull \hbox (212.75594pt too wide) in alignment at lines 2561--2563
- [] [] 
- []
-
-
-Overfull \hbox (212.75594pt too wide) in alignment at lines 2563--2587
- [] [] 
- []
-
-[37]
-Overfull \hbox (433.74603pt too wide) in alignment at lines 2612--2617
- [] [] [] 
- []
-
-
-Overfull \hbox (433.74603pt too wide) in alignment at lines 2617--2619
- [] [] [] 
- []
-
-Missing character: There is no ↔ (U+2194) in font TeX Gyre Termes/OT:script=lat
-n;language=dflt;mapping=tex-text;!
-
-Overfull \hbox (433.74603pt too wide) in alignment at lines 2619--2644
- [] [] [] 
- []
-
-File: ./svg-inkscape/03-chuong-3-giai-phap-phan-cung-hinh-3-2_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/03-chuong-3-giai-phap-phan-cung-hinh-3-2_svg-raw.pdf>
-[38] [39]
-File: ./svg-inkscape/03-chuong-3-giai-phap-phan-cung-hinh-3-3_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/03-chuong-3-giai-phap-phan-cung-hinh-3-3_svg-raw.pdf>
- [40] [41]
-File: ./svg-inkscape/03-chuong-3-giai-phap-phan-cung-hinh-3-4_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/03-chuong-3-giai-phap-phan-cung-hinh-3-4_svg-raw.pdf>
- [42]
-Overfull \hbox (131.66602pt too wide) in alignment at lines 2957--2961
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (131.66602pt too wide) in alignment at lines 2961--2963
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (131.66602pt too wide) in alignment at lines 2963--2974
- [] [] [] [] [] [] 
- []
-
-
-ignored: Infinite glue shrinkage found in box being split [43]
-Overfull \hbox (45.56601pt too wide) in alignment at lines 3091--3095
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (45.56601pt too wide) in alignment at lines 3095--3097
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (45.56601pt too wide) in alignment at lines 3097--3137
- [] [] [] [] [] [] 
- []
-
-
-ignored: Infinite glue shrinkage found in box being split [44]
-Overfull \hbox (38.79593pt too wide) in alignment at lines 3143--3147
- [] [] [] 
- []
-
-
-Overfull \hbox (38.79593pt too wide) in alignment at lines 3147--3149
- [] [] [] 
- []
-
-
-Overfull \hbox (38.79593pt too wide) in alignment at lines 3149--3158
- [] [] [] 
- []
-
-
-Overfull \hbox (748.54936pt too wide) in alignment at lines 3199--3203
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (748.54936pt too wide) in alignment at lines 3203--3205
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (748.54936pt too wide) in alignment at lines 3205--3218
- [] [] [] [] [] 
- []
-
-[45]
-Overfull \hbox (317.61595pt too wide) in alignment at lines 3265--3269
- [] [] [] 
- []
-
-
-Overfull \hbox (317.61595pt too wide) in alignment at lines 3269--3271
- [] [] [] 
- []
-
-
-Overfull \hbox (317.61595pt too wide) in alignment at lines 3271--3285
- [] [] [] 
- []
-
-File: ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-5_svg-raw.pdf Graphi
-c file (type pdf)
-<use ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-5_svg-raw.pdf>
-[46]
-Underfull \hbox (badness 1142) in paragraph at lines 3305--3311
-[] []\TU/TeXGyreTermes(0)/b/n/10 b) Cơ chế điều phối với FreeRTOS[] \TU/TeXGyre
-Termes(0)/m/n/10 Firmware sử dụng FreeRTOS theo hướng tối giản: \TU/lmtt/m/n/10
- app_main()
- []
-
-[47]
-LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 3322.
-File: ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-6_svg-raw.pdf Graphi
-c file (type pdf)
-<use ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-6_svg-raw.pdf>
- [48]
-File: ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-7_svg-raw.pdf Graphi
-c file (type pdf)
-<use ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-7_svg-raw.pdf>
- [49]
-File: ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-8_svg-raw.pdf Graphi
-c file (type pdf)
-<use ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-8_svg-raw.pdf>
- [50] [51]
-Overfull \hbox (174.84596pt too wide) in alignment at lines 3593--3597
- [] [] [] 
- []
-
-
-Overfull \hbox (174.84596pt too wide) in alignment at lines 3597--3599
- [] [] [] 
- []
-
-
-Overfull \hbox (174.84596pt too wide) in alignment at lines 3599--3615
- [] [] [] 
- []
-
-
-Overfull \hbox (9.70592pt too wide) in alignment at lines 3645--3649
- [] [] 
- []
-
-
-Overfull \hbox (9.70592pt too wide) in alignment at lines 3649--3651
- [] [] 
- []
-
-
-Overfull \hbox (9.70592pt too wide) in alignment at lines 3651--3660
- [] [] 
- []
-
-[52]
-File: ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-9_svg-raw.pdf Graphi
-c file (type pdf)
-<use ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-9_svg-raw.pdf>
- [53] [54]
-File: ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-10_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-10_svg-raw.pdf>
- [55]
-Overfull \hbox (150.99597pt too wide) in alignment at lines 3764--3768
- [] [] [] 
- []
-
-
-Overfull \hbox (150.99597pt too wide) in alignment at lines 3768--3770
- [] [] [] 
- []
-
-
-Overfull \hbox (150.99597pt too wide) in alignment at lines 3770--3778
- [] [] [] 
- []
-
-[56] [57]
-Overfull \hbox (33.58597pt too wide) in alignment at lines 3924--3928
- [] [] [] [] 
- []
-
-
-Overfull \hbox (33.58597pt too wide) in alignment at lines 3928--3930
- [] [] [] [] 
- []
-
-
-Overfull \hbox (33.58597pt too wide) in alignment at lines 3930--3941
- [] [] [] [] 
- []
-
-
-Overfull \hbox (152.36594pt too wide) in alignment at lines 3947--3951
- [] [] [] 
- []
-
-
-Overfull \hbox (152.36594pt too wide) in alignment at lines 3951--3953
- [] [] [] 
- []
-
-
-Overfull \hbox (152.36594pt too wide) in alignment at lines 3953--3966
- [] [] [] 
- []
-
-[58]
-File: ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-11_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/04-chuong-3-giai-phap-firmware-hinh-3-11_svg-raw.pdf>
- [59] [60] [61]
-Underfull \hbox (badness 10000) in paragraph at lines 4174--4183
-\TU/lmtt/m/n/10 ign_on_threshold=13.0\TU/TeXGyreTermes(0)/m/n/10 , \TU/lmtt/m/n
-/10 ign_off_threshold=12.0\TU/TeXGyreTermes(0)/m/n/10 ) hoặc profile 24V (\TU/l
-mtt/m/n/10 switch_off=24.0\TU/TeXGyreTermes(0)/m/n/10 ,
- []
-
-[62]
-Overfull \hbox (707.39604pt too wide) in alignment at lines 4251--4255
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (707.39604pt too wide) in alignment at lines 4255--4257
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (707.39604pt too wide) in alignment at lines 4257--4270
- [] [] [] [] [] 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 4279--4280
-[]\TU/lmtt/m/n/10 Device -> EMQX -> MQTT Bridge -> PostgreSQL/VictoriaMetrics/V
-ictoriaLogs -> Backend
- []
-
-[63]
-File: ./svg-inkscape/05-chuong-3-giai-phap-backend-hinh-3-12_svg-raw.pdf Graphi
-c file (type pdf)
-<use ./svg-inkscape/05-chuong-3-giai-phap-backend-hinh-3-12_svg-raw.pdf>
- [64] [65]
-ignored: Infinite glue shrinkage found in box being split [66] [67]
-Overfull \hbox (616.15935pt too wide) in alignment at lines 4596--4600
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (616.15935pt too wide) in alignment at lines 4600--4602
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (616.15935pt too wide) in alignment at lines 4602--4612
- [] [] [] [] [] 
- []
-
-File: ./svg-inkscape/05-chuong-3-giai-phap-backend-hinh-3-13_svg-raw.pdf Graphi
-c file (type pdf)
-<use ./svg-inkscape/05-chuong-3-giai-phap-backend-hinh-3-13_svg-raw.pdf>
-[68]
-Missing character: There is no ┌ (U+250C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ┼ (U+253C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ┬ (U+252C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ┐ (U+2510) in font [lmmono10-regular]:!
-
-Overfull \hbox (6.81596pt too wide) in alignment at lines 4674--4678
- [] [] [] 
- []
-
-
-Overfull \hbox (6.81596pt too wide) in alignment at lines 4678--4680
- [] [] [] 
- []
-
-
-Overfull \hbox (6.81596pt too wide) in alignment at lines 4680--4687
- [] [] [] 
- []
-
-[69]
-File: ./svg-inkscape/05-chuong-3-giai-phap-backend-hinh-3-14_svg-raw.pdf Graphi
-c file (type pdf)
-<use ./svg-inkscape/05-chuong-3-giai-phap-backend-hinh-3-14_svg-raw.pdf>
- [70] [71]
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-[72]
-Underfull \hbox (badness 3000) in paragraph at lines 4864--4869
-[] []\TU/TeXGyreTermes(0)/b/n/10 c) MQTT Bridge - Dịch vụ độc lập[] \TU/TeXGyre
-Termes(0)/m/n/10 MQTT Bridge đã được tách thành dịch vụ Node.js độc lập
- []
-
-
-ignored: Infinite glue shrinkage found in box being split [73]
-File: ./svg-inkscape/05-chuong-3-giai-phap-backend-hinh-3-14a_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/05-chuong-3-giai-phap-backend-hinh-3-14a_svg-raw.pdf>
- [74]
-Overfull \hbox (507.76935pt too wide) in alignment at lines 5033--5037
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (507.76935pt too wide) in alignment at lines 5037--5039
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (507.76935pt too wide) in alignment at lines 5039--5050
- [] [] [] [] [] 
- []
-
-[75]
-Overfull \hbox (90.70596pt too wide) in alignment at lines 5096--5100
- [] [] [] [] 
- []
-
-
-Overfull \hbox (90.70596pt too wide) in alignment at lines 5100--5102
- [] [] [] [] 
- []
-
-
-Overfull \hbox (90.70596pt too wide) in alignment at lines 5102--5119
- [] [] [] [] 
- []
-
-
-Overfull \hbox (33.73598pt too wide) in alignment at lines 5185--5189
- [] [] [] [] 
- []
-
-
-Overfull \hbox (33.73598pt too wide) in alignment at lines 5189--5191
- [] [] [] [] 
- []
-
-
-Overfull \hbox (33.73598pt too wide) in alignment at lines 5191--5200
- [] [] [] [] 
- []
-
-[76]
-Overfull \hbox (47.17596pt too wide) in alignment at lines 5214--5218
- [] [] [] [] 
- []
-
-
-Overfull \hbox (47.17596pt too wide) in alignment at lines 5218--5220
- [] [] [] [] 
- []
-
-
-Overfull \hbox (47.17596pt too wide) in alignment at lines 5220--5233
- [] [] [] [] 
- []
-
-[77]
-File: ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-15_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-15_svg-raw.pdf>
- [78]
-File: ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-16_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-16_svg-raw.pdf>
- [79]
-File: ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-17_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-17_svg-raw.pdf>
-
-ignored: Infinite glue shrinkage found in box being split [80]
-File: ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-18_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-18_svg-raw.pdf>
-
-Overfull \hbox (1.61597pt too wide) in alignment at lines 5469--5473
- [] [] [] [] 
- []
-
-
-Overfull \hbox (1.61597pt too wide) in alignment at lines 5473--5475
- [] [] [] [] 
- []
-
-
-Overfull \hbox (1.61597pt too wide) in alignment at lines 5475--5498
- [] [] [] [] 
- []
-
-[81]
-File: ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-19_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-19_svg-raw.pdf>
-
-Overfull \hbox (74.04594pt too wide) in alignment at lines 5571--5575
- [] [] [] 
- []
-
-
-Overfull \hbox (74.04594pt too wide) in alignment at lines 5575--5577
- [] [] [] 
- []
-
-
-Overfull \hbox (74.04594pt too wide) in alignment at lines 5577--5586
- [] [] [] 
- []
-
-[82]
-File: ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-20_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-20_svg-raw.pdf>
-
-Overfull \hbox (82.86597pt too wide) in alignment at lines 5610--5614
- [] [] [] [] 
- []
-
-
-Overfull \hbox (82.86597pt too wide) in alignment at lines 5614--5616
- [] [] [] [] 
- []
-
-
-Overfull \hbox (82.86597pt too wide) in alignment at lines 5616--5623
- [] [] [] [] 
- []
-
-[83]
-File: ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-21_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-21_svg-raw.pdf>
-File: ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-22_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-22_svg-raw.pdf>
- [84]
-Overfull \hbox (119.85594pt too wide) in alignment at lines 5718--5722
- [] [] [] 
- []
-
-
-Overfull \hbox (119.85594pt too wide) in alignment at lines 5722--5724
- [] [] [] 
- []
-
-
-Overfull \hbox (119.85594pt too wide) in alignment at lines 5724--5740
- [] [] [] 
- []
-
-
-ignored: Infinite glue shrinkage found in box being split [85]
-File: ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-23_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/06-chuong-3-giai-phap-frontend-hinh-3-23_svg-raw.pdf>
- [86]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-1_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-1_svg-raw.pdf>
- [87
+[3
 
 ]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-2_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-2_svg-raw.pdf>
- [88]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-3_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-3_svg-raw.pdf>
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-4_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-4_svg-raw.pdf>
- [89]
-Overfull \hbox (118.71931pt too wide) in alignment at lines 5999--6003
- [] [] [] [] 
+Overfull \hbox (54.5859pt too wide) in alignment at lines 203--207
+ [] [] 
  []
 
 
-Overfull \hbox (118.71931pt too wide) in alignment at lines 6003--6005
- [] [] [] [] 
+Overfull \hbox (54.5859pt too wide) in alignment at lines 207--209
+ [] [] 
  []
 
 
-Overfull \hbox (118.71931pt too wide) in alignment at lines 6005--6028
- [] [] [] [] 
+Overfull \hbox (54.5859pt too wide) in alignment at lines 209--216
+ [] [] 
  []
 
-[90]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-5_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-5_svg-raw.pdf>
- [91]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-6_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-6_svg-raw.pdf>
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-7_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-7_svg-raw.pdf>
- [92]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-8_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-8_svg-raw.pdf>
+[4
 
-Overfull \hbox (76.67601pt too wide) in alignment at lines 6232--6236
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (76.67601pt too wide) in alignment at lines 6236--6238
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (76.67601pt too wide) in alignment at lines 6238--6247
- [] [] [] [] [] [] 
- []
-
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-9_svg-raw.pdf Graph
-ic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-9_svg-raw.pdf>
-[93]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-10_svg-raw.pdf Grap
-hic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-10_svg-raw.pdf>
- [94] [95]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-11_svg-raw.pdf Grap
-hic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-11_svg-raw.pdf>
-
-Underfull \hbox (badness 1565) in paragraph at lines 6393--6398
-[]\TU/TeXGyreTermes(0)/b/n/10 Ghi bản ghi cục bộ\TU/TeXGyreTermes(0)/m/n/10 : \
-TU/lmtt/m/n/10 offline_queue_enqueue() \TU/TeXGyreTermes(0)/m/n/10 chuẩn hóa bả
-n ghi telemetry/sự kiện, sau đó
- []
-
-[96]
-Underfull \hbox (badness 10000) in paragraph at lines 6407--6411
-[]\TU/TeXGyreTermes(0)/b/n/10 Kết thúc phiên ghi an toàn\TU/TeXGyreTermes(0)/m/
-n/10 : firmware gọi \TU/lmtt/m/n/10 sd_log_store_stop_session() \TU/TeXGyreTerm
-es(0)/m/n/10 và
- []
-
-
-Overfull \hbox (87.59601pt too wide) in alignment at lines 6431--6435
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (87.59601pt too wide) in alignment at lines 6435--6437
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (87.59601pt too wide) in alignment at lines 6437--6476
- [] [] [] [] [] [] 
- []
-
-
-ignored: Infinite glue shrinkage found in box being split [97]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-12_svg-raw.pdf Grap
-hic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-12_svg-raw.pdf>
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-13_svg-raw.pdf Grap
-hic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-13_svg-raw.pdf>
- [98]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-14_svg-raw.pdf Grap
-hic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-14_svg-raw.pdf>
- [99]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-15_svg-raw.pdf Grap
-hic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-15_svg-raw.pdf>
- [100]
-File: ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-16_svg-raw.pdf Grap
-hic file (type pdf)
-<use ./svg-inkscape/07-chuong-4-trien-khai-hardware-hinh-4-16_svg-raw.pdf>
- [101] [102]
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no └ (U+2514) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no └ (U+2514) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no └ (U+2514) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no └ (U+2514) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no └ (U+2514) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no └ (U+2514) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-
-Overfull \hbox (248.43594pt too wide) in alignment at lines 6849--6853
- [] [] [] 
- []
-
-
-Overfull \hbox (248.43594pt too wide) in alignment at lines 6853--6855
- [] [] [] 
- []
-
-
-Overfull \hbox (248.43594pt too wide) in alignment at lines 6855--6867
- [] [] [] 
- []
-
-[103] [104] [105] [106] [107] [108] [109]
-Underfull \hbox (badness 2213) in paragraph at lines 7357--7365
-[] []\TU/TeXGyreTermes(0)/b/n/10 e) Luồng cập nhật firmware OTA[] \TU/TeXGyreTe
-rmes(0)/m/n/10 Tính năng OTA mới được tích hợp xuyên suốt từ backend đến
- []
-
-
-Underfull \hbox (badness 4686) in paragraph at lines 7357--7365
-\TU/TeXGyreTermes(0)/m/n/10 firmware. Backend tạo \TU/lmtt/m/n/10 jobId\TU/TeXG
-yreTermes(0)/m/n/10 , tra cứu firmware theo \TU/lmtt/m/n/10 firmwareVersion\TU/
-TeXGyreTermes(0)/m/n/10 , sinh URL tải file dạng
- []
-
-
-Underfull \hbox (badness 3000) in paragraph at lines 7357--7365
-\TU/lmtt/m/n/10 /api/v1/firmware/{id}/download\TU/TeXGyreTermes(0)/m/n/10 , rồi
- gửi lệnh \TU/lmtt/m/n/10 ota_update \TU/TeXGyreTermes(0)/m/n/10 qua topic \TU/
-lmtt/m/n/10 v1/{device_id}/commands\TU/TeXGyreTermes(0)/m/n/10 .
- []
-
-[110] [111] [112] [113]
-Overfull \hbox (92.87282pt too wide) in paragraph at lines 7636--7637
-[] []\TU/TeXGyreTermes(0)/b/n/10 b) Lưu đồ thuật toán tổng thể[] [] 
- []
-
-[114]
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-15_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-15_svg-raw.pdf>
- [115] [116]
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-16_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-16_svg-raw.pdf>
- [117] [118] [119]
-Overfull \hbox (10.72597pt too wide) in alignment at lines 7943--7947
- [] [] [] [] 
- []
-
-
-Overfull \hbox (10.72597pt too wide) in alignment at lines 7947--7949
- [] [] [] [] 
- []
-
-
-Overfull \hbox (10.72597pt too wide) in alignment at lines 7949--7962
- [] [] [] [] 
- []
-
-[120]
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-17_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-17_svg-raw.pdf>
- [121] [122]
-Underfull \hbox (badness 10000) in paragraph at lines 8139--8146
-\TU/lmtt/m/n/10 vehicle_speed\TU/TeXGyreTermes(0)/m/n/10 , \TU/lmtt/m/n/10 vehi
-cle_vibration\TU/TeXGyreTermes(0)/m/n/10 , \TU/lmtt/m/n/10 vehicle_battery_top\
-TU/TeXGyreTermes(0)/m/n/10 , \TU/lmtt/m/n/10 vehicle_battery_bot\TU/TeXGyreTerm
-es(0)/m/n/10 ,
- []
-
-[123] [124] [125]
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-18_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-18_svg-raw.pdf>
- [126] [127]
-ignored: Infinite glue shrinkage found in box being split [128]
-Underfull \hbox (badness 5231) in paragraph at lines 8503--8512
-[]\TU/TeXGyreTermes(0)/m/n/10 Các sự kiện chính được phát từ server đến client 
-bao gồm: \TU/lmtt/m/n/10 device:status\TU/TeXGyreTermes(0)/m/n/10 , \TU/lmtt/m/
-n/10 device:position\TU/TeXGyreTermes(0)/m/n/10 ,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 8503--8512
-\TU/lmtt/m/n/10 device:session_start\TU/TeXGyreTermes(0)/m/n/10 , \TU/lmtt/m/n/
-10 device:session_end\TU/TeXGyreTermes(0)/m/n/10 , \TU/lmtt/m/n/10 command:ack\
-TU/TeXGyreTermes(0)/m/n/10 , \TU/lmtt/m/n/10 stats:update\TU/TeXGyreTermes(0)/m
-/n/10 , \TU/lmtt/m/n/10 alert:new\TU/TeXGyreTermes(0)/m/n/10 ,
- []
-
-[129] [130]
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-19_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-19_svg-raw.pdf>
- [131]
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-20_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-20_svg-raw.pdf>
- [132]
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-21_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-21_svg-raw.pdf>
- [133]
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-22_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-22_svg-raw.pdf>
- [134]
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-23_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-23_svg-raw.pdf>
- [135] [136]
-Overfull \hbox (218.3593pt too wide) in alignment at lines 8789--8793
- [] [] [] 
- []
-
-
-Overfull \hbox (218.3593pt too wide) in alignment at lines 8793--8795
- [] [] [] 
- []
-
-
-Overfull \hbox (218.3593pt too wide) in alignment at lines 8795--8806
- [] [] [] 
- []
-
-[137]
-Overfull \hbox (192.89597pt too wide) in alignment at lines 8865--8869
- [] [] [] [] 
- []
-
-
-Overfull \hbox (192.89597pt too wide) in alignment at lines 8869--8871
- [] [] [] [] 
- []
-
-
-Overfull \hbox (192.89597pt too wide) in alignment at lines 8871--8881
- [] [] [] [] 
- []
-
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-24_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-24_svg-raw.pdf>
-[138]
-File: ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-25_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/09-chuong-4-trien-khai-cloud-hinh-4-25_svg-raw.pdf>
-
-Underfull \hbox (badness 5878) in paragraph at lines 9005--9008
-[] []\TU/TeXGyreTermes(0)/b/n/10 f) Sentry - Theo dõi lỗi (Error Tracking)[] \T
-U/TeXGyreTermes(0)/m/n/10 Backend tích hợp Sentry thông qua hai middleware:
- []
-
-
-Overfull \hbox (272.65599pt too wide) in alignment at lines 9060--9064
- [] [] [] [] 
- []
-
-
-Overfull \hbox (272.65599pt too wide) in alignment at lines 9064--9066
- [] [] [] [] 
- []
-
-
-Overfull \hbox (272.65599pt too wide) in alignment at lines 9066--9096
- [] [] [] [] 
- []
-
-[139]
-Overfull \hbox (18.98596pt too wide) in alignment at lines 9123--9127
- [] [] [] [] 
- []
-
-
-Overfull \hbox (18.98596pt too wide) in alignment at lines 9127--9129
- [] [] [] [] 
- []
-
-
-Overfull \hbox (18.98596pt too wide) in alignment at lines 9129--9145
- [] [] [] [] 
- []
-
-[140]
-Overfull \hbox (207.736pt too wide) in alignment at lines 9177--9181
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (207.736pt too wide) in alignment at lines 9181--9183
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (207.736pt too wide) in alignment at lines 9183--9196
- [] [] [] [] [] 
- []
-
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-20_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-20_svg-raw.pdf>
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-21_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-21_svg-raw.pdf>
-[141]
-Overfull \hbox (18.31593pt too wide) in alignment at lines 9239--9243
- [] [] [] 
- []
-
-
-Overfull \hbox (18.31593pt too wide) in alignment at lines 9243--9245
- [] [] [] 
- []
-
-
-Overfull \hbox (18.31593pt too wide) in alignment at lines 9245--9255
- [] [] [] 
- []
-
-[142]
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-22_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-22_svg-raw.pdf>
-
-Overfull \hbox (195.63599pt too wide) in alignment at lines 9320--9325
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (195.63599pt too wide) in alignment at lines 9325--9327
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (195.63599pt too wide) in alignment at lines 9327--9342
- [] [] [] [] [] [] 
- []
-
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-23_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-23_svg-raw.pdf>
-[143]
-Overfull \hbox (227.44601pt too wide) in alignment at lines 9391--9396
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (227.44601pt too wide) in alignment at lines 9396--9398
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (227.44601pt too wide) in alignment at lines 9398--9410
- [] [] [] [] [] [] 
- []
-
-
-ignored: Infinite glue shrinkage found in box being split [144]
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-24_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-24_svg-raw.pdf>
-
-Overfull \hbox (184.19601pt too wide) in alignment at lines 9439--9444
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (184.19601pt too wide) in alignment at lines 9444--9446
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (184.19601pt too wide) in alignment at lines 9446--9459
- [] [] [] [] [] [] [] 
- []
-
-
-ignored: Infinite glue shrinkage found in box being split [145]
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-25_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-25_svg-raw.pdf>
-
-Overfull \hbox (200.1561pt too wide) in alignment at lines 9486--9491
- [] [] [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (200.1561pt too wide) in alignment at lines 9491--9493
- [] [] [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (200.1561pt too wide) in alignment at lines 9493--9501
- [] [] [] [] [] [] [] [] [] 
- []
-
-[146]
-Overfull \hbox (202.43602pt too wide) in alignment at lines 9520--9525
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (202.43602pt too wide) in alignment at lines 9525--9527
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (202.43602pt too wide) in alignment at lines 9527--9538
- [] [] [] [] [] [] 
- []
-
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-26_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-26_svg-raw.pdf>
-[147] [148]
-Overfull \hbox (76.84598pt too wide) in alignment at lines 9642--9647
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (76.84598pt too wide) in alignment at lines 9647--9649
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (76.84598pt too wide) in alignment at lines 9649--9656
- [] [] [] [] [] [] [] 
- []
-
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-27_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-27_svg-raw.pdf>
-
-Overfull \hbox (58.806pt too wide) in alignment at lines 9677--9681
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (58.806pt too wide) in alignment at lines 9681--9683
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (58.806pt too wide) in alignment at lines 9683--9694
- [] [] [] [] [] 
- []
-
-[149]
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-28_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-28_svg-raw.pdf>
- [150]
-Overfull \hbox (267.03601pt too wide) in alignment at lines 9798--9802
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (267.03601pt too wide) in alignment at lines 9802--9804
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (267.03601pt too wide) in alignment at lines 9804--9819
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (188.28596pt too wide) in alignment at lines 9842--9846
- [] [] [] 
- []
-
-
-Overfull \hbox (188.28596pt too wide) in alignment at lines 9846--9848
- [] [] [] 
- []
-
-
-Overfull \hbox (188.28596pt too wide) in alignment at lines 9848--9863
- [] [] [] 
- []
-
-
-ignored: Infinite glue shrinkage found in box being split [151]
-Overfull \hbox (59.80602pt too wide) in alignment at lines 9887--9892
- [] [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (59.80602pt too wide) in alignment at lines 9892--9894
- [] [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (59.80602pt too wide) in alignment at lines 9894--9911
- [] [] [] [] [] [] [] [] 
- []
-
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-29_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-29_svg-raw.pdf>
-[152]
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-30_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-30_svg-raw.pdf>
- [153]
-Overfull \hbox (61.60602pt too wide) in alignment at lines 9990--9995
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (61.60602pt too wide) in alignment at lines 9995--9997
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (61.60602pt too wide) in alignment at lines 9997--10007
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (195.686pt too wide) in alignment at lines 10028--10033
- [] [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (195.686pt too wide) in alignment at lines 10033--10035
- [] [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (195.686pt too wide) in alignment at lines 10035--10047
- [] [] [] [] [] [] [] [] 
- []
-
-[154]
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-31_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-31_svg-raw.pdf>
-
-ignored: Infinite glue shrinkage found in box being split [155]
-File: ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-32_svg-raw.pdf Graphic
- file (type pdf)
-<use ./svg-inkscape/10-chuong-4-ket-qua-do-luong-hinh-4-32_svg-raw.pdf>
-
-Overfull \hbox (37.68599pt too wide) in alignment at lines 10138--10142
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (37.68599pt too wide) in alignment at lines 10142--10144
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (37.68599pt too wide) in alignment at lines 10144--10165
- [] [] [] [] [] 
- []
-
-[156]
-Overfull \hbox (167.27602pt too wide) in alignment at lines 10197--10201
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (167.27602pt too wide) in alignment at lines 10201--10203
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (167.27602pt too wide) in alignment at lines 10203--10212
- [] [] [] [] [] 
- []
-
-[157]
-Overfull \hbox (245.66599pt too wide) in alignment at lines 10287--10291
- [] [] [] [] 
- []
-
-
-Overfull \hbox (245.66599pt too wide) in alignment at lines 10291--10293
- [] [] [] [] 
- []
-
-
-Overfull \hbox (245.66599pt too wide) in alignment at lines 10293--10305
- [] [] [] [] 
- []
-
-
-Overfull \hbox (336.05602pt too wide) in alignment at lines 10340--10345
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (336.05602pt too wide) in alignment at lines 10345--10347
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (336.05602pt too wide) in alignment at lines 10347--10365
- [] [] [] [] [] [] 
- []
-
-[158]
-Overfull \hbox (151.28601pt too wide) in alignment at lines 10386--10391
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (151.28601pt too wide) in alignment at lines 10391--10393
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (151.28601pt too wide) in alignment at lines 10393--10411
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (40.45601pt too wide) in alignment at lines 10421--10426
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (40.45601pt too wide) in alignment at lines 10426--10428
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (40.45601pt too wide) in alignment at lines 10428--10441
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (63.60602pt too wide) in alignment at lines 10451--10456
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (63.60602pt too wide) in alignment at lines 10456--10458
- [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (63.60602pt too wide) in alignment at lines 10458--10469
- [] [] [] [] [] [] 
- []
-
-[159]
-Overfull \hbox (40.22598pt too wide) in alignment at lines 10479--10483
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (40.22598pt too wide) in alignment at lines 10483--10485
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (40.22598pt too wide) in alignment at lines 10485--10506
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (112.936pt too wide) in alignment at lines 10538--10542
- [] [] [] [] 
- []
-
-
-Overfull \hbox (112.936pt too wide) in alignment at lines 10542--10544
- [] [] [] [] 
- []
-
-
-Overfull \hbox (112.936pt too wide) in alignment at lines 10544--10556
- [] [] [] [] 
- []
-
-[160] [161]
-Overfull \hbox (247.24597pt too wide) in alignment at lines 10655--10660
- [] [] [] [] 
- []
-
-
-Overfull \hbox (247.24597pt too wide) in alignment at lines 10660--10662
- [] [] [] [] 
- []
-
-
-Overfull \hbox (247.24597pt too wide) in alignment at lines 10662--10677
- [] [] [] [] 
- []
-
-[162
 
 ]
-Overfull \hbox (309.50598pt too wide) in alignment at lines 10739--10743
- [] [] [] [] 
+Overfull \hbox (51.33592pt too wide) in alignment at lines 272--276
+ [] [] 
  []
 
 
-Overfull \hbox (309.50598pt too wide) in alignment at lines 10743--10745
- [] [] [] [] 
+Overfull \hbox (51.33592pt too wide) in alignment at lines 276--278
+ [] [] 
  []
 
 
-Overfull \hbox (309.50598pt too wide) in alignment at lines 10745--10759
- [] [] [] [] 
+Overfull \hbox (51.33592pt too wide) in alignment at lines 278--285
+ [] [] 
  []
 
-[163] [164]
-Overfull \hbox (145.62598pt too wide) in alignment at lines 10915--10920
- [] [] [] [] [] 
- []
+[5
+
+] [6
+
+] [7
+
+] [1
 
 
-Overfull \hbox (145.62598pt too wide) in alignment at lines 10920--10922
- [] [] [] [] [] 
- []
+] [2
 
-
-Overfull \hbox (145.62598pt too wide) in alignment at lines 10922--10932
- [] [] [] [] [] 
- []
-
-[165]
-Overfull \hbox (855.13937pt too wide) in alignment at lines 11031--11036
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (855.13937pt too wide) in alignment at lines 11036--11038
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (855.13937pt too wide) in alignment at lines 11038--11073
- [] [] [] [] [] [] [] 
- []
-
-[166] [167] [168]
-Overfull \hbox (89.47598pt too wide) in alignment at lines 11323--11327
- [] [] [] [] 
- []
-
-
-Overfull \hbox (89.47598pt too wide) in alignment at lines 11327--11329
- [] [] [] [] 
- []
-
-
-Overfull \hbox (89.47598pt too wide) in alignment at lines 11329--11342
- [] [] [] [] 
- []
-
-[169] [170
-
-] [171] [172] [173]
-Overfull \hbox (176.82597pt too wide) in alignment at lines 11792--11796
- [] [] [] 
- []
-
-
-Overfull \hbox (176.82597pt too wide) in alignment at lines 11796--11798
- [] [] [] 
- []
-
-
-Overfull \hbox (176.82597pt too wide) in alignment at lines 11798--11812
- [] [] [] 
- []
-
-[174] [175] [176] [177] [178
-
-] [179] [180] [181]
-Overfull \hbox (261.80603pt too wide) in alignment at lines 12404--12409
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (261.80603pt too wide) in alignment at lines 12409--12411
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (261.80603pt too wide) in alignment at lines 12411--12453
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (50.96597pt too wide) in alignment at lines 12462--12466
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (50.96597pt too wide) in alignment at lines 12466--12468
- [] [] [] [] [] 
- []
-
-
-Overfull \hbox (50.96597pt too wide) in alignment at lines 12468--12476
- [] [] [] [] [] 
- []
-
-[182
+] [3] [4
 
 ]
-Overfull \hbox (59.6393pt too wide) in alignment at lines 12527--12531
+Overfull \hbox (10.2864pt too wide) in alignment at lines 576--580
  [] [] [] 
  []
 
 
-Overfull \hbox (59.6393pt too wide) in alignment at lines 12531--12533
+Overfull \hbox (10.2864pt too wide) in alignment at lines 580--582
  [] [] [] 
  []
 
 
-Overfull \hbox (59.6393pt too wide) in alignment at lines 12533--12542
- [] [] [] 
- []
-
-[183]
-Overfull \hbox (7.37598pt too wide) in alignment at lines 12577--12581
+Overfull \hbox (10.2864pt too wide) in alignment at lines 582--654
  [] [] [] 
  []
 
 
-Overfull \hbox (7.37598pt too wide) in alignment at lines 12581--12583
+ignored: Infinite glue shrinkage found in box being split [5
+
+] [6]
+Overfull \hbox (10.27946pt too wide) in alignment at lines 662--666
  [] [] [] 
  []
 
 
-Overfull \hbox (7.37598pt too wide) in alignment at lines 12583--12594
+Overfull \hbox (10.27946pt too wide) in alignment at lines 666--668
  [] [] [] 
  []
 
 
-Overfull \hbox (134.99594pt too wide) in alignment at lines 12645--12649
+Overfull \hbox (10.27946pt too wide) in alignment at lines 668--680
+ [] [] [] 
+ []
+
+[7
+
+]
+Overfull \hbox (10.27946pt too wide) in alignment at lines 688--692
  [] [] [] 
  []
 
 
-Overfull \hbox (134.99594pt too wide) in alignment at lines 12649--12651
+Overfull \hbox (10.27946pt too wide) in alignment at lines 692--694
  [] [] [] 
  []
 
 
-Overfull \hbox (134.99594pt too wide) in alignment at lines 12651--12665
+Overfull \hbox (10.27946pt too wide) in alignment at lines 694--821
  [] [] [] 
  []
 
 
-ignored: Infinite glue shrinkage found in box being split [184] [185] [186]
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no │ (U+2502) in font [lmmono10-regular]:!
-Missing character: There is no └ (U+2514) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ├ (U+251C) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no └ (U+2514) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no └ (U+2514) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no └ (U+2514) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
-Missing character: There is no ─ (U+2500) in font [lmmono10-regular]:!
+ignored: Infinite glue shrinkage found in box being split [8
 
-ignored: Infinite glue shrinkage found in box being split [187] [188]
-Overfull \hbox (20.30594pt too wide) in alignment at lines 13013--13017
+]
+ignored: Infinite glue shrinkage found in box being split [9] [10]
+Overfull \hbox (1.17265pt too wide) in alignment at lines 829--833
+ [] [] [] 
+ []
+
+
+Overfull \hbox (1.17265pt too wide) in alignment at lines 833--835
+ [] [] [] 
+ []
+
+
+Overfull \hbox (1.17265pt too wide) in alignment at lines 835--884
+ [] [] [] 
+ []
+
+[11
+
+]
+File: ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-1_svg-raw.pdf Graphic file (
+type pdf)
+<use ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-1_svg-raw.pdf>
+ [1
+
+
+] [2]
+Overfull \hbox (153.67595pt too wide) in alignment at lines 1110--1114
+ [] [] [] 
+ []
+
+
+Overfull \hbox (153.67595pt too wide) in alignment at lines 1114--1116
+ [] [] [] 
+ []
+
+
+Overfull \hbox (153.67595pt too wide) in alignment at lines 1116--1127
+ [] [] [] 
+ []
+
+
+Overfull \hbox (112.15598pt too wide) in alignment at lines 1142--1146
+ [] [] [] 
+ []
+
+
+Overfull \hbox (112.15598pt too wide) in alignment at lines 1146--1148
+ [] [] [] 
+ []
+
+
+Overfull \hbox (112.15598pt too wide) in alignment at lines 1148--1158
+ [] [] [] 
+ []
+
+
+ignored: Infinite glue shrinkage found in box being split [3]
+File: ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-2_svg-raw.pdf Graphic file (
+type pdf)
+<use ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-2_svg-raw.pdf>
+ [4]
+File: ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-3_svg-raw.pdf Graphic file (
+type pdf)
+<use ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-3_svg-raw.pdf>
+ [5] [6]
+File: ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-4_svg-raw.pdf Graphic file (
+type pdf)
+<use ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-4_svg-raw.pdf>
+
+Overfull \hbox (71.73596pt too wide) in alignment at lines 1381--1385
  [] [] [] [] 
  []
 
 
-Overfull \hbox (20.30594pt too wide) in alignment at lines 13017--13019
+Overfull \hbox (71.73596pt too wide) in alignment at lines 1385--1387
  [] [] [] [] 
  []
 
 
-Overfull \hbox (20.30594pt too wide) in alignment at lines 13019--13035
+Overfull \hbox (71.73596pt too wide) in alignment at lines 1387--1409
  [] [] [] [] 
  []
 
-[189] [190] (./thesis-build.aux)
- ***********
-LaTeX2e <2025-11-01>
-L3 programming layer <2026-03-20>
- ***********
- ) 
+[7] [8]
+File: ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-5_svg-raw.pdf Graphic file (
+type pdf)
+<use ./svg-inkscape/01-chuong-1-gioi-thieu-hinh-1-5_svg-raw.pdf>
+ [9] [10
+
+]
+Overfull \hbox (160.34601pt too wide) in alignment at lines 1691--1696
+ [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (160.34601pt too wide) in alignment at lines 1696--1698
+ [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (160.34601pt too wide) in alignment at lines 1698--1715
+ [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (40.996pt too wide) in alignment at lines 1734--1738
+ [] [] [] [] 
+ []
+
+
+Overfull \hbox (40.996pt too wide) in alignment at lines 1738--1740
+ [] [] [] [] 
+ []
+
+
+Overfull \hbox (40.996pt too wide) in alignment at lines 1740--1753
+ [] [] [] [] 
+ []
+
+[11]
+Overfull \hbox (65.66595pt too wide) in alignment at lines 1784--1788
+ [] [] [] [] 
+ []
+
+
+Overfull \hbox (65.66595pt too wide) in alignment at lines 1788--1790
+ [] [] [] [] 
+ []
+
+
+Overfull \hbox (65.66595pt too wide) in alignment at lines 1790--1804
+ [] [] [] [] 
+ []
+
+
+Overfull \hbox (145.58598pt too wide) in alignment at lines 1837--1842
+ [] [] [] [] 
+ []
+
+
+Overfull \hbox (145.58598pt too wide) in alignment at lines 1842--1844
+ [] [] [] [] 
+ []
+
+
+Overfull \hbox (145.58598pt too wide) in alignment at lines 1844--1862
+ [] [] [] [] 
+ []
+
+[12]
+File: ./svg-inkscape/02-chuong-2-phan-tich-hinh-2-1_svg-raw.pdf Graphic file (t
+ype pdf)
+<use ./svg-inkscape/02-chuong-2-phan-tich-hinh-2-1_svg-raw.pdf>
+ [13] [14]
+Overfull \hbox (664.79602pt too wide) in alignment at lines 2127--2131
+ [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (664.79602pt too wide) in alignment at lines 2131--2133
+ [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (664.79602pt too wide) in alignment at lines 2133--2150
+ [] [] [] [] [] 
+ []
+
+[15]
+Overfull \hbox (23.926pt too wide) in alignment at lines 2225--2230
+ [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (23.926pt too wide) in alignment at lines 2230--2232
+ [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (23.926pt too wide) in alignment at lines 2232--2240
+ [] [] [] [] [] [] 
+ []
+
+[16] [17]
+File: ./svg-inkscape/03-chuong-3-giai-phap-phan-cung-hinh-3-1_svg-raw.pdf Graph
+ic file (type pdf)
+<use ./svg-inkscape/03-chuong-3-giai-phap-phan-cung-hinh-3-1_svg-raw.pdf>
+Package svg Info: Calling Inkscape on input line 2300.
+runsystem(inkscape "./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-01.svg
+" -D --export-filename="thesis-99-bao-cao-thesis-hoan-chinh-01_svg-raw.pdf")...
+executed.
+
+
+
+Package svg Warning: The export with Inkscape failed for file
+(svg)                `./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-01.s
+vg'
+(svg)                Troubleshooting: Please check in the log file how
+(svg)                the invocation of Inkscape took place and try to
+(svg)                execute it yourself in the terminal on input line 2300.
+
+
+! Package svg Error: File `thesis-99-bao-cao-thesis-hoan-chinh-01_svg-raw.pdf' 
+is missing.
+
+See the svg package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.2300 ...is-99-bao-cao-thesis-hoan-chinh-01.svg}}
+                                                  
+Did you run the export with Inkscape? There's no file
+`./svg-inkscape/thesis-99-bao-cao-thesis-hoan-chinh-01_svg-raw.pdf'
+although `./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-01.svg' was foun
+d.
+
+ 
 Here is how much of TeX's memory you used:
- 19735 strings out of 467992
- 439971 string characters out of 5429469
- 934168 words of memory out of 5000000
- 48256 multiletter control sequences out of 15000+600000
- 629948 words of font info for 70 fonts, out of 8000000 for 9000
+ 18848 strings out of 467992
+ 384077 string characters out of 5429469
+ 965203 words of memory out of 5000000
+ 47434 multiletter control sequences out of 15000+600000
+ 629956 words of font info for 71 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 94i,6n,93p,1223b,561s stack positions out of 10000i,1000n,20000p,200000b,200000s
-
-Output written on thesis-build.pdf (190 pages).
+ 94i,6n,93p,1223b,499s stack positions out of 10000i,1000n,20000p,200000b,200000s
+Output written on thesis-build.pdf (35 pages).

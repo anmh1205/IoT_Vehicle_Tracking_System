@@ -15,7 +15,9 @@
  */
 
 /** @brief Compile-time array length helper. */
+#ifndef ARRAY_SIZE
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#endif
 /** @brief Minimum helper macro. */
 #define MIN_VALUE(a, b) ((a) < (b) ? (a) : (b))
 /** @brief Maximum helper macro. */
@@ -76,6 +78,20 @@ size_t util_copy_string(char *dst, size_t dst_size, const char *src);
  * @return Uptime in milliseconds.
  */
 uint64_t util_uptime_ms(void);
+
+/**
+ * @brief Enable or disable all firmware sleep features globally.
+ *
+ * @param enabled True to allow sleep features, false to disable them.
+ */
+void util_set_sleep_enabled(bool enabled);
+
+/**
+ * @brief Read global firmware sleep enable flag.
+ *
+ * @return true when sleep features are enabled.
+ */
+bool util_is_sleep_enabled(void);
 
 /**
  * @brief Clamp floating-point value into `[min_value, max_value]`.

@@ -72,6 +72,8 @@
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
 \usepackage{longtable,booktabs,array}
 \newcounter{none} % for unnumbered tables
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
@@ -115,6 +117,11 @@
 \titleformat{\subsection}{\bfseries\normalsize}{}{0pt}{}
 \titlespacing*{\subsection}{0pt}{12pt}{0pt}
 \newcommand{\majorheading}[1]{\clearpage\section*{#1}}
+\newcommand{\chapterheading}[1]{\clearpage\section*{#1}\setcounter{subsection}{0}}
+\newcommand{\frontmatterstart}{\clearpage\pagenumbering{roman}\setcounter{page}{1}}
+\newcommand{\mainmatterstart}{\clearpage\pagenumbering{arabic}\setcounter{page}{1}}
+\newcommand{\checkbox}{\(\square\)}
+\newcommand{\thesisspacer}{\hspace{2em}}
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \usepackage{bookmark}
@@ -129,10 +136,66 @@
 
 \begin{document}
 \sloppy
+\pagenumbering{gobble}
 
-\textbf{PHẦN MỞ ĐẦU - BÌA VÀ PHẦN ĐẦU}
+\thispagestyle{empty}
+\begin{center}
+\textbf{BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\
+\textbf{ĐẠI HỌC PHENIKAA}
+\vspace*{2.5cm}
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+{\Large\textbf{ĐỒ ÁN TỐT NGHIỆP}}\\[0.8cm]
+{\Large\textbf{THIẾT KẾ HỆ THỐNG IOT CHO ỨNG DỤNG QUẢN LÝ}}\\
+{\Large\textbf{PHƯƠNG TIỆN GIAO THÔNG TRONG LĨNH VỰC}}\\
+{\Large\textbf{CHO THUÊ XE TỰ LÁI}}
+\vfill
+
+\textbf{LÊ TRỌNG AN}
+\end{center}
+\clearpage
+
+\thispagestyle{empty}
+\begin{center}
+\textbf{BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\
+\textbf{ĐẠI HỌC PHENIKAA}
+\vspace*{2cm}
+
+{\Large\textbf{ĐỒ ÁN TỐT NGHIỆP}}\\[0.8cm]
+{\large\textbf{THIẾT KẾ HỆ THỐNG IOT CHO ỨNG DỤNG QUẢN LÝ}}\\
+{\large\textbf{PHƯƠNG TIỆN GIAO THÔNG TRONG LĨNH VỰC}}\\
+{\large\textbf{CHO THUÊ XE TỰ LÁI}}
+\vfill
+
+\begin{tabular}{ll}
+\textbf{Sinh viên:} & \textbf{Lê Trọng An} \\
+\textbf{Mã số sinh viên:} & \textbf{21010389} \\
+\textbf{Lớp:} & \textbf{K15-KTCĐT2} \\
+\textbf{Ngành:} & \textbf{Kỹ thuật Cơ điện tử} \\
+\textbf{Giảng viên hướng dẫn:} & \textbf{TS. Nguyễn Đức Nam} \\
+\end{tabular}
+\end{center}
+\clearpage
+
+\thispagestyle{empty}
+\begin{center}
+\textbf{PHENIKAA UNIVERSITY}\\
+\textbf{FACULTY OF MECHANICAL ENGINEERING AND MECHATRONICS}
+\vspace*{2cm}
+
+\textbf{MEM710071 -- CAPSTONE DESIGN 2}
+\vspace*{1.8cm}
+
+{\Large\textbf{DESIGN OF AN IOT SYSTEM FOR VEHICLE MANAGEMENT}}\\
+{\Large\textbf{IN SELF-DRIVE CAR RENTAL SERVICES}}
+\vfill
+
+\begin{tabular}{ll}
+\textbf{Student:} & \textbf{Le Trong An} \\
+\textbf{Student ID:} & \textbf{21010389} \\
+\textbf{Supervisor:} & \textbf{Dr. Nguyen Duc Nam} \\
+\end{tabular}
+\end{center}
+\clearpage
 
 \majorheading{NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN HƯỚNG DẪN}
 
@@ -185,7 +248,7 @@ tiện giao thông trong lĩnh vực cho thuê xe tự lái \\
 
 \textbf{IV. Kết luận:}
 
-☐ Đồng ý cho bảo vệ    ☐ Không đồng ý cho bảo vệ
+\checkbox\ Đồng ý cho bảo vệ \thesisspacer \checkbox\ Không đồng ý cho bảo vệ
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}ll@{}}
@@ -264,7 +327,7 @@ tiện giao thông trong lĩnh vực cho thuê xe tự lái \\
 
 \textbf{V. Kết luận:}
 
-☐ Đồng ý cho bảo vệ    ☐ Không đồng ý cho bảo vệ
+\checkbox\ Đồng ý cho bảo vệ \thesisspacer \checkbox\ Không đồng ý cho bảo vệ
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}ll@{}}
@@ -293,9 +356,9 @@ tiện giao thông trong lĩnh vực cho thuê xe tự lái \\
 \item
   Địa điểm: .............................
 \item
-  Họ và tên sinh viên: Lê Trọng An   Mã số SV: 21010389
+  Họ và tên sinh viên: Lê Trọng An \thesisspacer Mã số SV: 21010389
 \item
-  Lớp: K15-KTCĐT2   Ngành: Kỹ thuật Cơ điện tử   Khóa: K15
+  Lớp: K15-KTCĐT2 \thesisspacer Ngành: Kỹ thuật Cơ điện tử \thesisspacer Khóa: K15
 \item
   Tên đề tài: Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện
   giao thông trong lĩnh vực cho thuê xe tự lái
@@ -349,31 +412,8 @@ STT & Nội dung yêu cầu chỉnh sửa & Nội dung đã chỉnh sửa & Ghi 
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\majorheading{TRANG BÌA}
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}ll@{}}
-\toprule\noalign{}
-& \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\textbf{Trường:} & Trường Kỹ thuật - Đại học Phenikaa \\
-\textbf{Khoa:} & Cơ khí - Cơ Điện tử \\
-\textbf{Đề tài:} & Thiết kế hệ thống IoT cho ứng dụng quản lý phương
-tiện giao thông trong lĩnh vực cho thuê xe tự lái \\
-\textbf{Sinh viên thực hiện:} & Lê Trọng An \\
-\textbf{MSSV:} & 21010389 \\
-\textbf{Lớp:} & K15-KTCĐT2 \\
-\textbf{Giảng viên hướng dẫn:} & TS. Nguyễn Đức Nam \\
-\textbf{Năm:} & 2026 \\
-\end{longtable}
-}
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
-
-\section{LỜI CAM ĐOAN}\label{lux1eddi-cam-ux111oan}
+\frontmatterstart
+\majorheading{LỜI CAM ĐOAN}\label{lux1eddi-cam-ux111oan}
 
 Tôi xin cam đoan đồ án tốt nghiệp với đề tài \textbf{"Thiết kế hệ thống
 IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê
@@ -394,7 +434,7 @@ mình.
 \textbf{Đề tài:} Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện
 giao thông trong lĩnh vực cho thuê xe tự lái
 
-\textbf{Sinh viên thực hiện:} Lê Trọng An  \textbf{MSSV:} 21010389
+\textbf{Sinh viên thực hiện:} Lê Trọng An \thesisspacer \textbf{MSSV:} 21010389
 
 \textbf{Giảng viên hướng dẫn:} TS. Nguyễn Đức Nam
 
@@ -451,7 +491,7 @@ thời gian thực, hàng rào địa lý
 \textbf{Title:} Design of an IoT System for Vehicle Management in
 Self-Drive Car Rental Services
 
-\textbf{Student:} Lê Trọng An  \textbf{Student ID:} 21010389
+\textbf{Student:} Lê Trọng An \thesisspacer \textbf{Student ID:} 21010389
 
 \textbf{Supervisor:} Dr. Nguyen Duc Nam
 
@@ -533,12 +573,12 @@ Xin chân thành cảm ơn!
 \majorheading{MỤC LỤC - TABLE OF CONTENTS}\label{mux1ee5c-lux1ee5c---table-of-contents}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-STT & Nội dung & Trang \\
-\midrule\noalign{}
+\begin{longtable}{|C{0.10\linewidth}|L{0.72\linewidth}|C{0.12\linewidth}|}
+\hline
+\textbf{STT} & \textbf{Nội dung} & \textbf{Trang} \\
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 & NHẬN XÉT CỦA GIẢNG VIÊN HƯỚNG DẪN & ... \\
 & NHẬN XÉT CỦA GIẢNG VIÊN PHẢN BIỆN & ... \\
@@ -619,12 +659,12 @@ case-studies & ... \\
 \majorheading{DANH MỤC BẢNG - LIST OF TABLES}\label{danh-mux1ee5c-bux1ea3ng---list-of-tables}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-Bảng & Mô tả & Trang \\
-\midrule\noalign{}
+\begin{longtable}{|C{0.15\linewidth}|L{0.67\linewidth}|C{0.12\linewidth}|}
+\hline
+\textbf{Bảng} & \textbf{Mô tả} & \textbf{Trang} \\
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 Bảng 2.1 & So sánh các giao thức IoT phổ biến & ... \\
 Bảng 2.2 & Thông số kỹ thuật ESP32-S3 & ... \\
@@ -645,12 +685,12 @@ Bảng 5.2 & So sánh với các giải pháp hiện có & ... \\
 \majorheading{DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF PICTURES AND GRAPHS}\label{danh-mux1ee5c-huxecnh-ux1ea3nh-vuxe0-ux111ux1ed3-thux1ecb---list-of-pictures-and-graphs}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-Hình & Mô tả & Trang \\
-\midrule\noalign{}
+\begin{longtable}{|C{0.15\linewidth}|L{0.67\linewidth}|C{0.12\linewidth}|}
+\hline
+\textbf{Hình} & \textbf{Mô tả} & \textbf{Trang} \\
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 Hình 1.1 & Sơ đồ tổng quan vấn đề và giải pháp đề xuất & ... \\
 Hình 1.2 & Quy trình phát triển dự án theo các giai đoạn & ... \\
@@ -786,12 +826,12 @@ Hình PL-3.1 & Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần
 \majorheading{DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATIONS}\label{danh-mux1ee5c-tux1eeb-viux1ebft-tux1eaft---list-of-abbreviations}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-Từ viết tắt & Tiếng Anh & Tiếng Việt \\
-\midrule\noalign{}
+\begin{longtable}{|C{0.18\linewidth}|L{0.37\linewidth}|L{0.37\linewidth}|}
+\hline
+\textbf{Từ viết tắt} & \textbf{Tiếng Anh} & \textbf{Tiếng Việt} \\
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 \textbf{ADC} & Analog-to-Digital Converter & Bộ chuyển đổi tương tự sang
 số \\
@@ -846,7 +886,8 @@ thời gian thực \\
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\majorheading{CHƯƠNG 1. GIỚI THIỆU DỰ ÁN -- SUMMARY}
+\mainmatterstart
+\chapterheading{CHƯƠNG 1. GIỚI THIỆU DỰ ÁN -- SUMMARY}
 
 \subsection{1.1. Đặt vấn đề / Bối cảnh của dự
 án}\label{11-ux111ux1eb7t-vux1ea5n-ux111ux1ec1--bux1ed1i-cux1ea3nh-cux1ee7a-dux1ef1-uxe1n}
@@ -1505,7 +1546,7 @@ pháp tiếp cận và bộ tiêu chí đánh giá làm nền tảng cho các ch
 theo. Từ đây, Chương 2 sẽ đi sâu phân tích các vấn đề kỹ thuật cần giải
 quyết.
 
-\majorheading{CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT}
+\chapterheading{CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT}
 
 \subsection{2.1. Mô tả vấn đề -- Problem
 statement}\label{21-muxf4-tux1ea3-vux1ea5n-ux111ux1ec1--problem-statement}
@@ -2217,7 +2258,7 @@ tổng thể. Trên cơ sở khảo sát và đối sánh các giải pháp hi�
 ràng buộc thiết kế và ma trận truy xuất yêu cầu. Đây là nền tảng để
 chuyển sang bước lựa chọn giải pháp ở Chương 3.
 
-\majorheading{CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ -- DESIGN SOLUTIONS}
+\chapterheading{CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ -- DESIGN SOLUTIONS}
 
 Chương này trình bày quá trình phân tích và lựa chọn các giải pháp thiết
 kế cho hệ thống IoT giám sát phương tiện. Nội dung được tổ chức theo bốn
@@ -5791,7 +5832,7 @@ theo các tiêu chí hiệu năng, chi phí và khả năng mở rộng. Kết q
 tạo nền tảng kỹ thuật nhất quán cho giai đoạn triển khai chi tiết ở
 Chương 4.
 
-\majorheading{CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ -- IMPLEMENTATION AND RESULTS}
+\chapterheading{CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ -- IMPLEMENTATION AND RESULTS}
 
 Chương này trình bày quá trình triển khai giải pháp từ thiết kế chi tiết
 đến thử nghiệm thực tế. Nội dung bao gồm phần cứng thiết bị, firmware,
@@ -10616,7 +10657,7 @@ Management," Version 1.1, Chapter 31, 2023.
 Performance,"
 \url{https://docs.victoriametrics.com/articles/benchmarks.html}, 2024.
 
-\majorheading{CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ -- EVALUATION AND RECOMMENDATION}
+\chapterheading{CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ -- EVALUATION AND RECOMMENDATION}
 
 \subsection{5.1. Đánh giá hiệu
 năng}\label{51-ux111uxe1nh-giuxe1-hiux1ec7u-nux103ng}
@@ -11358,7 +11399,7 @@ khúc. Phần còn lại cần ưu tiên ở giai đoạn tiếp theo không n�
 thay đổi kiến trúc tổng thể, mà ở việc làm sâu hơn các lớp an toàn như
 watchdog, bảo mật MQTT/TLS và kiểm thử vận hành dài hạn.
 
-\majorheading{CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM -- REFLECTION AND}
+\chapterheading{CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM -- REFLECTION AND}
 CASE-STUDIES
 
 \subsection{6.1. Ứng dụng kiến thức kỹ thuật -- Earlier course

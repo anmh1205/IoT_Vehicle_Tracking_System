@@ -611,13 +611,7 @@ ble_mgr_ctx_t *ble_mgr_init(uint32_t timeout_ms) {
     /* Start BLE stack then wait for sync callback to post queue result. */
     esp_err_t err = ble_init_stack(&s_ble_init_cfg);
     if (err != ESP_OK) {
-        ESP_LOGW(TAG, "BLE stack init failed: %s, forcing deinit and retry", esp_err_to_name(err));
-        (void)ble_stack_deinit();
-        err = ble_init_stack(&s_ble_init_cfg);
-    }
-
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "BLE stack init failed after retry: %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "BLE stack init failed: %s", esp_err_to_name(err));
         xQueueReset(mgr_ctx->result_queue);
         vQueueDelete(mgr_ctx->result_queue);
         mgr_ctx->result_queue = NULL;

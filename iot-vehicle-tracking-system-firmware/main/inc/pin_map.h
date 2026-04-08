@@ -8,17 +8,11 @@
  * @brief Hardware pin and peripheral mapping for ESP32-S3 board.
  */
 
-/* Power / sensing */
-/** @brief Ignition input pin (via +12V divider sense net). */
-#define PIN_IGN_IN GPIO_NUM_3
+/* Voltage sensing */
+/** @brief +12V source divider ADC input. */
+#define PIN_U_SUPPLY_ADC GPIO_NUM_3
 /** @brief Battery divider ADC input. */
 #define PIN_U_BATT_ADC GPIO_NUM_4
-/** @brief Charger enable output pin. */
-#define PIN_CHARGER_EN GPIO_NUM_5
-/** @brief Power source multiplexer select pin. */
-#define PIN_POWER_MUX_SEL GPIO_NUM_16
-/** @brief Low-voltage detector status input pin. */
-#define PIN_LVD_STATUS GPIO_NUM_19
 
 /* Modem control + UART */
 /** @brief Modem UART TX pin (MCU -> modem). */
@@ -41,6 +35,8 @@
 #define PIN_LIS3DSH_INT1 GPIO_NUM_41
 /** @brief LIS3DSH interrupt pin (INT2). */
 #define PIN_LIS3DSH_INT2 GPIO_NUM_42
+/** @brief Active LIS3DSH interrupt pin used by firmware flow. */
+#define PIN_LIS3DSH_INT PIN_LIS3DSH_INT1
 /** @brief LIS3DSH I2C SDA pin. */
 #define PIN_LIS3DSH_SDA GPIO_NUM_2
 /** @brief LIS3DSH I2C SCL pin. */
@@ -77,3 +73,10 @@
 #define MODEM_UART_NUM UART_NUM_1
 /** @brief UART baud rate for modem communication. */
 #define MODEM_UART_BAUD 115200
+/**
+ * @brief Fixed UART line inversion mask for modem link.
+ *
+ * Hardware netlist uses transistor level-shift stages on SIM UART path; RX is inverted at MCU side.
+ * Keep this fixed value (no runtime auto-swap) and tune here per board revision if needed.
+ */
+#define MODEM_UART_LINE_INVERSE_MASK UART_SIGNAL_RXD_INV
