@@ -1,6 +1,7 @@
 #include "util.h"
 
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "esp_crt_bundle.h"
@@ -60,6 +61,57 @@ size_t util_copy_string(char *dst, size_t dst_size, const char *src) {
  */
 uint64_t util_uptime_ms(void) {
     return (uint64_t)(esp_timer_get_time() / 1000ULL);
+}
+
+void util_generate_uuid_v4(char *out, size_t out_size) {
+    if (out == NULL || out_size < 37) {
+        return;
+    }
+
+    uint8_t bytes[16] = {0};
+    for (size_t i = 0; i < 16; i += 4) {
+        uint32_t r = esp_random();
+        bytes[i] = (uint8_t)(r & 0xFFU);
+        bytes[i + 1] = (uint8_t)((r >> 8) & 0xFFU);
+        bytes[i + 2] = (uint8_t)((r >> 16) & 0xFFU);
+        bytes[i + 3] = (uint8_t)((r >> 24) & 0xFFU);
+    }
+
+    bytes[6] = (uint8_t)((bytes[6] & 0x0FU) | 0x40U);
+    bytes[8] = (uint8_t)((bytes[8] & 0x3FU) | 0x80U);
+
+    (void)snprintf(out,
+                   out_size,
+                   "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+                   bytes[0],
+                   bytes[1],
+                   bytes[2],
+                   bytes[3],
+                   bytes[4],
+                   bytes[5],
+                   bytes[6],
+                   bytes[7],
+                   bytes[8],
+                   bytes[9],
+                   bytes[10],
+                   bytes[11],
+                   bytes[12],
+                   bytes[13],
+                   bytes[14],
+                   bytes[15]);
+}
+
+void util_generate_boot_id(char *out, size_t out_size, uint32_t boot_count) {
+    if (out == NULL || out_size == 0) {
+        return;
+    }
+
+    uint32_t salt = esp_random();
+    (void)snprintf(out,
+                   out_size,
+                   "boot-%lu-%08lx",
+                   (unsigned long)boot_count,
+                   (unsigned long)salt);
 }
 
 void util_set_sleep_enabled(bool enabled) {

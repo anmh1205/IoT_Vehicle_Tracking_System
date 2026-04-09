@@ -20,7 +20,9 @@
 /** @brief Modem UART RX pin (modem -> MCU). */
 #define PIN_MODEM_RX GPIO_NUM_18
 /** @brief Modem sleep handshake pin (MCU -> modem, SIM-DTR). */
-#define PIN_MODEM_DTR GPIO_NUM_21
+#define PIN_MODEM_DTR GPIO_NUM_NC
+/** @brief User LED pin (MCU -> USER-LED). */
+#define PIN_USER_LED GPIO_NUM_21
 /** @brief Modem power-key control pin (MCU -> modem, SIM7600 PWR-KEY). */
 #define PIN_MODEM_PWRKEY GPIO_NUM_34
 /** @brief Modem hardware reset control pin (MCU -> modem, SIM7600 RESET). */
@@ -76,7 +78,7 @@
 /**
  * @brief Fixed UART line inversion mask for modem link.
  *
- * Hardware netlist uses transistor level-shift stages on SIM UART path; RX is inverted at MCU side.
- * Keep this fixed value (no runtime auto-swap) and tune here per board revision if needed.
+ * Netlist-locked modem UART: no line inversion.
+ * Keep fixed at 0 and avoid runtime auto-swap/invert probing.
  */
-#define MODEM_UART_LINE_INVERSE_MASK UART_SIGNAL_RXD_INV
+#define MODEM_UART_LINE_INVERSE_MASK 0U

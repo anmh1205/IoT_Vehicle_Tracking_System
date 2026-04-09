@@ -1,5 +1,11 @@
 # Project Changelog
 
+## 2026-04-09
+### Firmware GNSS Observability and Recovery Hardening (Completed)
+- Added GNSS query observability for transport failures, parse failures, no-fix streaks, and fix-success streaks in the modem GNSS path.
+- Added bounded GNSS self-heal with cooldown so repeated poll failures repower the GNSS engine without thrashing the modem.
+- Added GNSS re-arm lifecycle in the tracker state machine so LTE recovery and GNSS fail streaks can re-enable GNSS with cooldown gating.
+
 ## 2026-04-06
 ### Firmware SD Log Recovery, RTC Validation, and Replay ACK Hardening (Completed)
 - Hardened the firmware SD log store recovery path so log writes can recover cleanly after transient storage faults.

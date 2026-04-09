@@ -1,7 +1,7 @@
 {
-  "idf.port": "COM3",
+  "idf.port": "COM6",
   "idf.portWin": "COM6",
-  "idf.monitorPort": "COM3",
+  "idf.monitorPort": "COM6",
   "idf.flashType": "UART",
   "idf.openOcdConfigs": ["board/esp32s3-builtin.cfg"],
   "idf.customExtraVars": {

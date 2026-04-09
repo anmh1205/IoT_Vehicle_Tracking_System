@@ -26,6 +26,33 @@ static char *data_formatter_print(cJSON *root) {
     return json;
 }
 
+static void data_formatter_add_metadata(cJSON *root,
+                                        uint64_t sent_at_ms,
+                                        const char *message_id,
+                                        uint32_t seq_no,
+                                        const char *boot_id) {
+    if (root == NULL) {
+        return;
+    }
+
+    cJSON *metadata = cJSON_CreateObject();
+    if (metadata == NULL) {
+        return;
+    }
+
+    cJSON_AddStringToObject(metadata, "schema_version", "v1.0.0");
+    if (!util_string_empty(message_id)) {
+        cJSON_AddStringToObject(metadata, "message_id", message_id);
+    }
+    cJSON_AddNumberToObject(metadata, "sent_at", (double)sent_at_ms);
+    cJSON_AddNumberToObject(metadata, "seq_no", (double)seq_no);
+    if (!util_string_empty(boot_id)) {
+        cJSON_AddStringToObject(metadata, "boot_id", boot_id);
+    }
+
+    cJSON_AddItemToObject(root, "metadata", metadata);
+}
+
 /**
  * @brief Format raw telemetry payload.
  *
@@ -38,7 +65,10 @@ char *data_format_rawdata(const config_t *cfg,
                           const telemetry_t *telemetry,
                           bool include_auth_token,
                           bool timestamp_trusted,
-                          uint64_t timestamp_ms) {
+                          uint64_t timestamp_ms,
+                          const char *message_id,
+                          uint32_t seq_no,
+                          const char *boot_id) {
     if (cfg == NULL || telemetry == NULL) {
         return NULL;
     }
@@ -80,6 +110,7 @@ char *data_format_rawdata(const config_t *cfg,
     cJSON_AddNumberToObject(data, "error_code", telemetry->error_code);
 
     cJSON_AddItemToObject(root, "data", data);
+    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
     return data_formatter_print(root);
 }
 
@@ -97,7 +128,10 @@ char *data_format_status(const config_t *cfg,
                          uint32_t session_id,
                          bool include_auth_token,
                          bool timestamp_trusted,
-                         uint64_t timestamp_ms) {
+                         uint64_t timestamp_ms,
+                         const char *message_id,
+                         uint32_t seq_no,
+                         const char *boot_id) {
     if (cfg == NULL || status == NULL) {
         return NULL;
     }
@@ -120,6 +154,7 @@ char *data_format_status(const config_t *cfg,
         cJSON_AddNumberToObject(root, "session_id", session_id);
     }
 
+    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
     return data_formatter_print(root);
 }
 
@@ -139,7 +174,10 @@ char *data_format_event(const config_t *cfg,
                         const char *message,
                         bool include_auth_token,
                         bool timestamp_trusted,
-                        uint64_t timestamp_ms) {
+                        uint64_t timestamp_ms,
+                        const char *message_id,
+                        uint32_t seq_no,
+                        const char *boot_id) {
     if (cfg == NULL || event_type == NULL) {
         return NULL;
     }
@@ -163,6 +201,7 @@ char *data_format_event(const config_t *cfg,
     cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
     cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
 
+    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
     return data_formatter_print(root);
 }
 
@@ -178,7 +217,10 @@ char *data_format_firmware(const config_t *cfg,
                            const firmware_status_t *status,
                            bool include_auth_token,
                            bool timestamp_trusted,
-                           uint64_t timestamp_ms) {
+                           uint64_t timestamp_ms,
+                           const char *message_id,
+                           uint32_t seq_no,
+                           const char *boot_id) {
     if (cfg == NULL || status == NULL) {
         return NULL;
     }
@@ -208,5 +250,6 @@ char *data_format_firmware(const config_t *cfg,
     cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
     cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
 
+    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
     return data_formatter_print(root);
 }

@@ -25,8 +25,10 @@
 #endif
 
 #ifndef CONFIG_TRACKER_DEFAULT_MQTT_HOST
-#define CONFIG_TRACKER_DEFAULT_MQTT_HOST "localhost"
+#define CONFIG_TRACKER_DEFAULT_MQTT_HOST "mqtt.thingdock.dev"
 #endif
+
+#define TRACKER_LEGACY_MQTT_HOST_LOCALHOST "localhost"
 
 #ifndef CONFIG_TRACKER_DEFAULT_MQTT_PORT
 #define CONFIG_TRACKER_DEFAULT_MQTT_PORT 1883
@@ -190,6 +192,15 @@ esp_err_t nvs_config_load(config_t *config) {
     if (!app_config_is_valid(config)) {
         ESP_LOGW(TAG, "Invalid config in NVS, restoring defaults");
         app_config_set_defaults(config);
+        return nvs_config_save(config);
+    }
+
+    if (strcmp(config->mqtt_host, TRACKER_LEGACY_MQTT_HOST_LOCALHOST) == 0) {
+        ESP_LOGW(TAG,
+                 "Legacy MQTT host '%s' detected, migrating to '%s'",
+                 TRACKER_LEGACY_MQTT_HOST_LOCALHOST,
+                 CONFIG_TRACKER_DEFAULT_MQTT_HOST);
+        util_copy_string(config->mqtt_host, sizeof(config->mqtt_host), CONFIG_TRACKER_DEFAULT_MQTT_HOST);
         return nvs_config_save(config);
     }
 

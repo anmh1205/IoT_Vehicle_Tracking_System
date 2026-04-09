@@ -1,87 +1,1421 @@
-   0.006s ESP-ROM:esp32s3-20210327
-   0.011s Build:Mar 27 2021
-   0.014s rst:0x1 (POWERON),boot:0xb (SPI_FAST_FLASH_BOOT)
-   0.015s SPIWP:0xee
-   0.017s mode:DIO, clock div:1
-   0.021s load:0x3fce2820,len:0x14f0
-   0.022s load:0x403c8700,len:0xd24
-   0.025s load:0x403cb700,len:0x2ef0
-   0.026s entry 0x403c8924
-   0.031s I (24) boot: ESP-IDF v5.5.3 2nd stage bootloader
-   0.035s I (25) boot: compile time Apr  7 2026 23:00:21
-   0.039s I (25) boot: Multicore bootloader
-   0.042s I (25) boot: chip revision: v0.2
-   0.046s I (28) boot: efuse block revision: v1.3
-   0.049s I (31) boot.esp32s3: Boot SPI Speed : 80MHz
-   0.053s I (35) boot.esp32s3: SPI Mode       : DIO
-   0.057s I (39) boot.esp32s3: SPI Flash Size : 16MB
-   0.061s I (43) boot: Enabling RNG early entropy source...
-   0.064s I (47) boot: Partition Table:
-   0.070s I (50) boot: ## Label            Usage          Type ST Offset   Length
-   0.076s I (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000
-   0.083s I (63) boot:  1 otadata          OTA data         01 00 0000f000 00002000
-   0.089s I (69) boot:  2 phy_init         RF data          01 01 00011000 00001000
-   0.096s I (76) boot:  3 factory          factory app      00 00 00020000 00180000
-   0.103s I (82) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
-   0.108s I (89) boot:  5 ota_1            OTA app          00 11 00320000 00180000
-   0.112s I (95) boot: End of partition table
-   0.116s I (98) boot: Defaulting to factory image
-   0.123s I (102) esp_image: segment 0: paddr=00020020 vaddr=3c0b0020 size=3a42ch (238636) map
-   0.162s I (152) esp_image: segment 1: paddr=0005a454 vaddr=3fc9c200 size=044a4h ( 17572) load
-   0.169s I (156) esp_image: segment 2: paddr=0005e900 vaddr=40374000 size=01718h (  5912) load
-   0.177s I (157) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=aa318h (697112) map
-   0.297s I (286) esp_image: segment 4: paddr=0010a340 vaddr=40375718 size=16aach ( 92844) load
-   0.316s I (306) esp_image: segment 5: paddr=00120df4 vaddr=50000000 size=000f0h (   240) load
-   0.325s I (307) esp_image: segment 6: paddr=00120eec vaddr=600fe000 size=0006ch (   108) load
-   0.329s I (319) boot: Loaded app from partition at offset 0x20000
-   0.334s I (320) boot: Disabling RNG early entropy source...
-   0.337s I (331) cpu_start: Multicore app
-   0.349s I (340) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
-   0.353s I (341) cpu_start: Pro cpu start user code
-   0.357s I (341) cpu_start: cpu freq: 160000000 Hz
-   0.360s I (342) app_init: Application information:
-   0.365s I (346) app_init: Project name:     Tracking_Firmware
-   0.369s I (351) app_init: App version:      ff2ee4d-dirty
-   0.374s I (355) app_init: Compile time:     Apr  8 2026 14:41:33
-   0.379s I (360) app_init: ELF file SHA256:  f615de81e...
-   0.383s I (365) app_init: ESP-IDF:          v5.5.3
-   0.386s I (368) efuse_init: Min chip rev:     v0.0
-   0.391s I (372) efuse_init: Max chip rev:     v0.99 
-   0.394s I (376) efuse_init: Chip rev:         v0.2
-   0.401s I (380) heap_init: Initializing. RAM available for dynamic allocation:
-   0.406s I (386) heap_init: At 3FCA2DF8 len 00046918 (282 KiB): RAM
-   0.411s I (392) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
-   0.416s I (397) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
-   0.422s I (402) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
-   0.425s I (408) spi_flash: detected chip: winbond
-   0.428s I (411) spi_flash: flash io: dio
-   0.434s I (414) sleep_gpio: Configure to isolate all GPIO pins in sleep state
-   0.440s I (420) sleep_gpio: Enable automatic switching of GPIO sleep configuration
-   0.445s I (438) coexist: coex firmware version: 093e3d2
-   0.449s I (439) coexist: coexist rom version e7ae62f
-   0.453s I (439) main_task: Started on CPU0
-   0.466s I (459) main_task: Calling app_main()
-   0.480s I (469) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
-   0.486s I (469) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
-   0.490s W (469) STATE_MACHINE: IMU init skipped (TRACKER_ENABLE_IMU=0)
-   0.496s I (479) STATE_MACHINE: RTC health available=1 valid=1
-   0.501s I (479) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
-   3.165s W (3159) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
-   3.171s I (3159) BLE_INIT: BLE init stage=enter controller_status=IDLE(0)
-   3.179s I (3159) BLE_INIT: BLE init stage=before-nimble_port_init controller_status=IDLE(0)
-   3.184s I (3169) BLE_INIT: BT controller compile version [1bb2f50]
-   3.188s I (3169) BLE_INIT: Using main XTAL as clock source
-   3.195s W (3169) BLE_INIT: light sleep mode will not be able to apply when bluetooth is enabled.
-   3.204s I (3179) BLE_INIT: Feature Config, ADV:1, BLE_50:1, DTM:1, SCAN:1, CCA:0, SMP:1, CONNECT:1
-   3.209s I (3189) BLE_INIT: Bluetooth MAC: d0:cf:13:1b:92:86
-   3.214s I (3199) phy_init: phy_version 711,97bcf0a2,Aug 25 2025,19:04:10
-   3.256s I (3249) BLE_INIT: BLE init stage=after-nimble_port_init-ok controller_status=ENABLED(2)
-   3.260s I (3249) BLE_INIT: NimBLE host task started
-   3.267s I (3249) BLE_INIT: BLE init stage=init-success controller_status=ENABLED(2)
-   3.269s I (3249) BLE_MGR: NimBLE stack synced
-  18.263s W (18259) BLE_OBD: BLE connect failed: TIMEOUT
-  18.274s E (18259) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=1 next_delay_ms=1000
-  19.652s E (19649) MODEM_AT: AT UART not initialized
-  19.659s I (19649) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=3000
-  22.654s I (22649) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
-  22.660s I (22649) POWER_MGR: SIM7600 DTR set level=1 gpio=21 raw_gpio_level=0 inverted_stage=1
+
+===== monitor start port=COM6 ts=1775726886 =====
+I (18822) MODEM_LTE: RDY token seen from UART
+I (18822) MODEM_LTE: RDY gate open, continue to AT sync
+I (18822) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (20412) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (20412) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (22022) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (23622) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (25222) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (26862) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (26862) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (26862) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (26862) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+I (26872) BLE_INIT: BLE init stage=enter controller_status=IDLE(0)
+I (26872) BLE_INIT: BLE init stage=before-nimble_port_init controller_status=IDLE(0)
+I (26882) BLE_INIT: BT controller compile version [1bb2f50]
+I (26892) BLE_INIT: Using main XTAL as clock source
+W (26892) BLE_INIT: light sleep mode will not be able to apply when bluetooth is enabled.
+I (26902) BLE_INIT: Feature Config, ADV:1, BLE_50:1, DTM:1, SCAN:1, CCA:0, SMP:1, CONNECT:1
+I (26912) BLE_INIT: Bluetooth MAC: d0:cf:13:1b:92:86
+I (26912) phy_init: phy_version 711,97bcf0a2,Aug 25 2025,19:04:10
+I (26962) BLE_INIT: BLE init stage=after-nimble_port_init-ok controller_status=ENABLED(2)
+I (26962) BLE_INIT: NimBLE host task started
+I (26972) BLE_MGR: NimBLE stack synced
+I (26972) BLE_INIT: BLE init stage=init-success controller_status=ENABLED(2)
+W (41982) BLE_OBD: BLE connect failed: TIMEOUT
+E (41982) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=1 next_delay_ms=1000
+I (43592) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (43592) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+W (58592) BLE_OBD: BLE connect failed: TIMEOUT
+I (60202) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+W (75202) BLE_OBD: BLE connect failed: TIMEOUT
+I (76802) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (76802) MODEM_LTE: LTE connected and PDP active
+I (76802) MODEM_GNSS: GNSS power-on sequence start
+I (76912) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (77022) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (77132) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (77132) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1
+W (92132) BLE_OBD: BLE connect failed: TIMEOUT
+I (92242) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (92242) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (92352) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (92352) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (92352) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (92472) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (92472) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.624830,N,10544.722477,E,090426,092926.0,10.8,0.0,    OK  
+I (92472) MODEM_GNSS: GNSS fallback fix lat=20.960414 lon=105.745375 speed_kmh=0.00
+I (92482) MODEM_GNSS: GNSS fix success lat=20.960414 lon=105.745375 sat=1 streak=1
+W (108982) BLE_OBD: BLE connect failed: TIMEOUT
+I (109092) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (109092) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (109202) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (109202) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (109202) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (109322) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (109322) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.623001,N,10544.720144,E,090426,092941.0,11.1,0.0,    OK  
+I (109322) MODEM_GNSS: GNSS fallback fix lat=20.960383 lon=105.745336 speed_kmh=0.00
+I (109332) MODEM_GNSS: GNSS fix success lat=20.960383 lon=105.745336 sat=1 streak=2
+W (125842) BLE_OBD: BLE connect failed: TIMEOUT
+I (125952) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (125952) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (126062) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (126062) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (126062) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (126182) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (126182) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.622951,N,10544.720131,E,090426,092958.0,11.2,0.0,    OK  
+I (126182) MODEM_GNSS: GNSS fallback fix lat=20.960383 lon=105.745336 speed_kmh=0.00
+I (126192) MODEM_GNSS: GNSS fix success lat=20.960383 lon=105.745336 sat=1 streak=3
+W (142692) BLE_OBD: BLE connect failed: TIMEOUT
+I (142802) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (142802) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (142912) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (142912) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (142912) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (143032) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (143032) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.622957,N,10544.720139,E,090426,093015.0,11.3,0.0,    OK  
+I (143032) MODEM_GNSS: GNSS fallback fix lat=20.960383 lon=105.745336 speed_kmh=0.00
+I (143042) MODEM_GNSS: GNSS fix success lat=20.960383 lon=105.745336 sat=1 streak=4
+W (159542) BLE_OBD: BLE connect failed: TIMEOUT
+I (159652) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (159652) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (159762) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (159762) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (159762) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (159882) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (159882) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.622869,N,10544.720033,E,090426,093031.0,11.6,0.0,    OK  
+I (159882) MODEM_GNSS: GNSS fallback fix lat=20.960381 lon=105.745334 speed_kmh=0.00
+I (159892) MODEM_GNSS: GNSS fix success lat=20.960381 lon=105.745334 sat=1 streak=5
+W (176392) BLE_OBD: BLE connect failed: TIMEOUT
+I (176502) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (176502) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (176612) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (176612) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (176612) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (176732) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (176732) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.622790,N,10544.719876,E,090426,093048.0,12.3,0.0,    OK  
+I (176732) MODEM_GNSS: GNSS fallback fix lat=20.960380 lon=105.745331 speed_kmh=0.00
+I (176742) MODEM_GNSS: GNSS fix success lat=20.960380 lon=105.745331 sat=1 streak=6
+W (193242) BLE_OBD: BLE connect failed: TIMEOUT
+I (193352) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (193352) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (193462) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (193462) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (193462) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (193582) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (193582) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.622739,N,10544.719823,E,090426,093105.0,12.6,0.0,    OK  
+I (193582) MODEM_GNSS: GNSS fallback fix lat=20.960379 lon=105.745330 speed_kmh=0.00
+I (193592) MODEM_GNSS: GNSS fix success lat=20.960379 lon=105.745330 sat=1 streak=7
+
+===== monitor start port=COM6 ts=1775731421 =====
+W (58532) BLE_OBD: BLE connect failed: TIMEOUT
+I (60152) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+W (75152) BLE_OBD: BLE connect failed: TIMEOUT
+I (76752) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (76752) MODEM_LTE: LTE connected and PDP active
+I (76752) MODEM_GNSS: GNSS power-on sequence start
+I (76862) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (76972) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (77082) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (77082) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1
+W (92082) BLE_OBD: BLE connect failed: TIMEOUT
+I (92192) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (92192) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (92302) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (92302) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (92302) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (92422) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (92422) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (92422) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (92422) MODEM_GNSS: GNSS no-fix streak=1 fix_valid=0
+W (108922) BLE_OBD: BLE connect failed: TIMEOUT
+I (109032) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (109032) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (109142) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (109142) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (109142) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (109252) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (109252) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (109252) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (109252) MODEM_GNSS: GNSS no-fix streak=2 fix_valid=0
+W (125762) BLE_OBD: BLE connect failed: TIMEOUT
+I (125872) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (125872) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (125982) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (125982) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (125982) MODEM_GNSS: GNSS primary AT+CGNSINF backoff active fail_streak=3 cooldown_ms=60000
+W (125982) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (126102) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (126102) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (126102) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (126102) MODEM_GNSS: GNSS no-fix streak=3 fix_valid=0
+W (142612) BLE_OBD: BLE connect failed: TIMEOUT
+I (142612) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=43148
+I (142722) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (142722) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (142722) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (142722) MODEM_GNSS: GNSS no-fix streak=4 fix_valid=0
+W (159232) BLE_OBD: BLE connect failed: TIMEOUT
+I (159232) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=26530
+I (159342) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (159342) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (159342) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (159342) MODEM_GNSS: GNSS no-fix streak=5 fix_valid=0
+W (175852) BLE_OBD: BLE connect failed: TIMEOUT
+I (175852) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=9910
+I (175962) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (175962) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (175962) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (175962) MODEM_GNSS: GNSS no-fix streak=6 fix_valid=0
+W (192462) BLE_OBD: BLE connect failed: TIMEOUT
+I (192572) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (192572) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (192682) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (192682) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (192682) MODEM_GNSS: GNSS primary AT+CGNSINF backoff active fail_streak=4 cooldown_ms=60000
+W (192682) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (192802) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (192802) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (192802) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (192802) MODEM_GNSS: GNSS no-fix streak=7 fix_valid=0
+W (194312) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (209312) BLE_OBD: BLE connect failed: TIMEOUT
+E (209312) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=11 next_delay_ms=1000
+I (209312) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=43146
+I (209432) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (209432) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (209432) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (209432) MODEM_GNSS: GNSS no-fix streak=8 fix_valid=0
+W (225932) BLE_OBD: BLE connect failed: TIMEOUT
+I (225932) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=26528
+I (226042) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (226042) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (226042) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (226042) MODEM_GNSS: GNSS no-fix streak=9 fix_valid=0
+W (242542) BLE_OBD: BLE connect failed: TIMEOUT
+I (242542) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=9920
+I (242652) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (242652) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (242652) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (242652) MODEM_GNSS: GNSS no-fix streak=10 fix_valid=0
+W (259152) BLE_OBD: BLE connect failed: TIMEOUT
+I (259262) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (259262) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (259372) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (259372) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (259372) MODEM_GNSS: GNSS primary AT+CGNSINF backoff active fail_streak=5 cooldown_ms=60000
+W (259372) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (259492) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (259492) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (259492) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (259492) MODEM_GNSS: GNSS no-fix streak=11 fix_valid=0
+
+===== monitor start port=COM6 ts=1775731664 =====
+W (309212) BLE_OBD: BLE connect failed: TIMEOUT
+I (309212) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=9942
+I (309322) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (309322) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (309322) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (309322) MODEM_GNSS: GNSS no-fix streak=14 fix_valid=0
+W (325822) BLE_OBD: BLE connect failed: TIMEOUT
+I (325932) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (325932) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (326042) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (326042) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (326042) MODEM_GNSS: GNSS primary AT+CGNSINF backoff active fail_streak=6 cooldown_ms=60000
+W (326042) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (326162) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (326162) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (326162) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (326162) MODEM_GNSS: GNSS no-fix streak=15 fix_valid=0
+W (342672) BLE_OBD: BLE connect failed: TIMEOUT
+I (342672) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=43150
+I (342782) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (342782) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (342782) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (342782) MODEM_GNSS: GNSS no-fix streak=16 fix_valid=0
+W (359282) BLE_OBD: BLE connect failed: TIMEOUT
+I (359282) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=26540
+I (359392) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (359392) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (359392) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (359392) MODEM_GNSS: GNSS no-fix streak=17 fix_valid=0
+W (360892) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (375892) BLE_OBD: BLE connect failed: TIMEOUT
+E (375892) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=21 next_delay_ms=1000
+I (375892) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=9926
+I (376012) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (376012) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (376012) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (376012) MODEM_GNSS: GNSS no-fix streak=18 fix_valid=0
+W (392512) BLE_OBD: BLE connect failed: TIMEOUT
+I (392622) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (392622) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (392732) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (392732) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (392732) MODEM_GNSS: GNSS primary AT+CGNSINF backoff active fail_streak=7 cooldown_ms=60000
+W (392732) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (392852) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (392852) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (392852) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (392852) MODEM_GNSS: GNSS no-fix streak=19 fix_valid=0
+W (409362) BLE_OBD: BLE connect failed: TIMEOUT
+I (409362) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=43152
+I (409472) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (409472) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (409472) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (409472) MODEM_GNSS: GNSS no-fix streak=20 fix_valid=0
+W (425972) BLE_OBD: BLE connect failed: TIMEOUT
+I (425972) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=26542
+I (426082) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (426082) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (426082) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (426082) MODEM_GNSS: GNSS no-fix streak=21 fix_valid=0
+W (442582) BLE_OBD: BLE connect failed: TIMEOUT
+I (442582) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=9932
+I (442692) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (442692) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (442692) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (442692) MODEM_GNSS: GNSS no-fix streak=22 fix_valid=0
+W (459192) BLE_OBD: BLE connect failed: TIMEOUT
+I (459302) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (459302) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (459412) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (459412) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (459412) MODEM_GNSS: GNSS primary AT+CGNSINF backoff active fail_streak=8 cooldown_ms=60000
+W (459412) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (459532) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (459532) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (459532) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (459532) MODEM_GNSS: GNSS no-fix streak=23 fix_valid=0
+W (476032) BLE_OBD: BLE connect failed: TIMEOUT
+I (476032) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=43162
+I (476142) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (476142) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (476142) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (476142) MODEM_GNSS: GNSS no-fix streak=24 fix_valid=0
+W (492642) BLE_OBD: BLE connect failed: TIMEOUT
+I (492642) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=26550
+I (492752) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (492752) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (492752) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (492752) MODEM_GNSS: GNSS no-fix streak=25 fix_valid=0
+W (509252) BLE_OBD: BLE connect failed: TIMEOUT
+I (509252) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=9940
+I (509362) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (509362) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (509362) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (509362) MODEM_GNSS: GNSS no-fix streak=26 fix_valid=0
+W (525862) BLE_OBD: BLE connect failed: TIMEOUT
+I (525972) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (525972) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (526082) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (526082) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (526082) MODEM_GNSS: GNSS primary AT+CGNSINF backoff active fail_streak=9 cooldown_ms=60000
+W (526082) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (526202) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (526202) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (526202) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (526202) MODEM_GNSS: GNSS no-fix streak=27 fix_valid=0
+W (527712) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (542712) BLE_OBD: BLE connect failed: TIMEOUT
+E (542712) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=31 next_delay_ms=1000
+I (542712) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=43146
+I (542832) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (542832) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (542832) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (542832) MODEM_GNSS: GNSS no-fix streak=28 fix_valid=0
+W (559332) BLE_OBD: BLE connect failed: TIMEOUT
+I (559332) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=26530
+I (559442) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (559442) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (559442) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (559442) MODEM_GNSS: GNSS no-fix streak=29 fix_valid=0
+W (575942) BLE_OBD: BLE connect failed: TIMEOUT
+I (575942) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=9920
+I (576052) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (576052) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (576052) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (576052) MODEM_GNSS: GNSS no-fix streak=30 fix_valid=0
+W (592552) BLE_OBD: BLE connect failed: TIMEOUT
+I (592662) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (592662) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (592772) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (592772) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (592772) MODEM_GNSS: GNSS primary AT+CGNSINF backoff active fail_streak=10 cooldown_ms=60000
+W (592772) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (592892) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (592892) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (592892) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (592892) MODEM_GNSS: GNSS no-fix streak=31 fix_valid=0
+W (609392) BLE_OBD: BLE connect failed: TIMEOUT
+I (609392) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=43158
+I (609502) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (609502) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (609502) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (609502) MODEM_GNSS: GNSS no-fix streak=32 fix_valid=0
+W (626002) BLE_OBD: BLE connect failed: TIMEOUT
+I (626002) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=26548
+I (626112) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (626112) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (626112) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (626112) MODEM_GNSS: GNSS no-fix streak=33 fix_valid=0
+W (642612) BLE_OBD: BLE connect failed: TIMEOUT
+I (642612) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=9938
+I (642722) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (642722) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (642722) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (642722) MODEM_GNSS: GNSS no-fix streak=34 fix_valid=0
+W (659222) BLE_OBD: BLE connect failed: TIMEOUT
+I (659332) MODEM_GNSS: GNSS query attempt=1 cmd=AT+CGNSINF
+I (659332) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+I (659442) MODEM_GNSS: GNSS query attempt=2 cmd=AT+CGNSINF
+I (659442) MODEM_GNSS: GNSS cmd=AT+CGNSINF err=ESP_FAIL resp=  ERROR  
+W (659442) MODEM_GNSS: GNSS primary AT+CGNSINF backoff active fail_streak=11 cooldown_ms=60000
+W (659442) MODEM_GNSS: GNSS primary query failed, trying fallback AT+CGPSINFO
+I (659562) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (659562) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (659562) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (659562) MODEM_GNSS: GNSS no-fix streak=35 fix_valid=0
+W (676062) BLE_OBD: BLE connect failed: TIMEOUT
+I (676062) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=43162
+I (676172) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (676172) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (676172) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (676172) MODEM_GNSS: GNSS no-fix streak=36 fix_valid=0
+W (692672) BLE_OBD: BLE connect failed: TIMEOUT
+I (692672) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=26552
+I (692782) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (692782) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (692782) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (692782) MODEM_GNSS: GNSS no-fix streak=37 fix_valid=0
+W (694282) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (709282) BLE_OBD: BLE connect failed: TIMEOUT
+E (709282) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=41 next_delay_ms=1000
+I (709282) MODEM_GNSS: GNSS primary query skipped by backoff remaining_ms=9938
+I (709402) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (709402) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (709402) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (709402) MODEM_GNSS: GNSS no-fix streak=38 fix_valid=0
+
+===== monitor start port=COM6 ts=1775732377 =====
+I (13792) uart: queue free spaces: 32
+I (13792) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (13792) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (17172) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+I (20452) MODEM_LTE: RDY token seen from UART
+I (20452) MODEM_LTE: RDY gate open, continue to AT sync
+I (20452) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (23852) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (23852) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (27322) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (30642) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (32262) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (33882) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (33882) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (33882) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (33882) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+I (33892) BLE_INIT: BLE init stage=enter controller_status=IDLE(0)
+I (33892) BLE_INIT: BLE init stage=before-nimble_port_init controller_status=IDLE(0)
+I (33902) BLE_INIT: BT controller compile version [1bb2f50]
+I (33912) BLE_INIT: Using main XTAL as clock source
+W (33912) BLE_INIT: light sleep mode will not be able to apply when bluetooth is enabled.
+I (33922) BLE_INIT: Feature Config, ADV:1, BLE_50:1, DTM:1, SCAN:1, CCA:0, SMP:1, CONNECT:1
+I (33932) BLE_INIT: Bluetooth MAC: d0:cf:13:1b:92:86
+I (33932) phy_init: phy_version 711,97bcf0a2,Aug 25 2025,19:04:10
+I (33982) BLE_INIT: BLE init stage=after-nimble_port_init-ok controller_status=ENABLED(2)
+I (33982) BLE_INIT: NimBLE host task started
+I (33982) BLE_MGR: NimBLE stack synced
+I (33982) BLE_INIT: BLE init stage=init-success controller_status=ENABLED(2)
+W (48992) BLE_OBD: BLE connect failed: TIMEOUT
+E (48992) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=1 next_delay_ms=1000
+I (50592) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (50592) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+W (65592) BLE_OBD: BLE connect failed: TIMEOUT
+I (67222) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+W (82222) BLE_OBD: BLE connect failed: TIMEOUT
+I (83822) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (83822) MODEM_LTE: LTE connected and PDP active
+I (83822) MODEM_GNSS: GNSS power-on sequence start
+I (83932) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (84042) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (84152) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (84152) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (99152) BLE_OBD: BLE connect failed: TIMEOUT
+I (99262) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (99262) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (99262) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (99262) MODEM_GNSS: GNSS no-fix streak=1 fix_valid=0
+W (115762) BLE_OBD: BLE connect failed: TIMEOUT
+I (115872) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (115872) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (115872) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (115872) MODEM_GNSS: GNSS no-fix streak=2 fix_valid=0
+W (132372) BLE_OBD: BLE connect failed: TIMEOUT
+I (132482) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (132482) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (132482) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (132482) MODEM_GNSS: GNSS no-fix streak=3 fix_valid=0
+W (149012) BLE_OBD: BLE connect failed: TIMEOUT
+I (149122) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (149122) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (149122) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (149122) MODEM_GNSS: GNSS no-fix streak=4 fix_valid=0
+W (165622) BLE_OBD: BLE connect failed: TIMEOUT
+I (165732) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (165732) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (165732) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (165732) MODEM_GNSS: GNSS no-fix streak=5 fix_valid=0
+W (182232) BLE_OBD: BLE connect failed: TIMEOUT
+I (182342) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (182342) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (182342) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (182342) MODEM_GNSS: GNSS no-fix streak=6 fix_valid=0
+W (198842) BLE_OBD: BLE connect failed: TIMEOUT
+I (198952) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (198952) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (198952) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (198952) MODEM_GNSS: GNSS no-fix streak=7 fix_valid=0
+W (200482) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (215482) BLE_OBD: BLE connect failed: TIMEOUT
+E (215482) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=11 next_delay_ms=1000
+I (215592) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (215592) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (215592) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (215592) MODEM_GNSS: GNSS no-fix streak=8 fix_valid=0
+W (232092) BLE_OBD: BLE connect failed: TIMEOUT
+I (232202) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (232202) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (232202) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (232202) MODEM_GNSS: GNSS no-fix streak=9 fix_valid=0
+
+===== monitor start port=COM6 ts=1775732640 =====
+W (281952) BLE_OBD: BLE connect failed: TIMEOUT
+I (282062) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (282062) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (282062) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (282062) MODEM_GNSS: GNSS no-fix streak=12 fix_valid=0
+W (298562) BLE_OBD: BLE connect failed: TIMEOUT
+I (298672) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (298672) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (298672) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (298672) MODEM_GNSS: GNSS no-fix streak=13 fix_valid=0
+W (315172) BLE_OBD: BLE connect failed: TIMEOUT
+I (315282) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (315282) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (315282) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (315282) MODEM_GNSS: GNSS no-fix streak=14 fix_valid=0
+W (331782) BLE_OBD: BLE connect failed: TIMEOUT
+I (331892) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (331892) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (331892) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (331892) MODEM_GNSS: GNSS no-fix streak=15 fix_valid=0
+W (348422) BLE_OBD: BLE connect failed: TIMEOUT
+I (348532) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (348532) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (348532) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (348532) MODEM_GNSS: GNSS no-fix streak=16 fix_valid=0
+W (365032) BLE_OBD: BLE connect failed: TIMEOUT
+I (365142) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (365142) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (365142) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (365142) MODEM_GNSS: GNSS no-fix streak=17 fix_valid=0
+W (366642) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (381642) BLE_OBD: BLE connect failed: TIMEOUT
+E (381642) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=21 next_delay_ms=1000
+I (381752) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (381752) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (381752) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (381752) MODEM_GNSS: GNSS no-fix streak=18 fix_valid=0
+W (398252) BLE_OBD: BLE connect failed: TIMEOUT
+I (398362) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (398362) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (398362) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (398362) MODEM_GNSS: GNSS no-fix streak=19 fix_valid=0
+W (414882) BLE_OBD: BLE connect failed: TIMEOUT
+I (414992) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (414992) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (414992) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (414992) MODEM_GNSS: GNSS no-fix streak=20 fix_valid=0
+W (431492) BLE_OBD: BLE connect failed: TIMEOUT
+I (431602) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (431602) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (431602) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (431602) MODEM_GNSS: GNSS no-fix streak=21 fix_valid=0
+W (448102) BLE_OBD: BLE connect failed: TIMEOUT
+I (448212) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (448212) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (448212) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (448212) MODEM_GNSS: GNSS no-fix streak=22 fix_valid=0
+W (464722) BLE_OBD: BLE connect failed: TIMEOUT
+I (464832) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (464832) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (464832) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (464832) MODEM_GNSS: GNSS no-fix streak=23 fix_valid=0
+W (481332) BLE_OBD: BLE connect failed: TIMEOUT
+I (481442) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (481442) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (481442) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (481442) MODEM_GNSS: GNSS no-fix streak=24 fix_valid=0
+W (497942) BLE_OBD: BLE connect failed: TIMEOUT
+I (498052) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (498052) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (498052) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (498052) MODEM_GNSS: GNSS no-fix streak=25 fix_valid=0
+W (514562) BLE_OBD: BLE connect failed: TIMEOUT
+I (514672) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (514672) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (514672) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (514672) MODEM_GNSS: GNSS no-fix streak=26 fix_valid=0
+W (531182) BLE_OBD: BLE connect failed: TIMEOUT
+I (531292) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (531292) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (531292) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (531292) MODEM_GNSS: GNSS no-fix streak=27 fix_valid=0
+W (532792) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (547792) BLE_OBD: BLE connect failed: TIMEOUT
+E (547792) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=31 next_delay_ms=1000
+I (547912) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (547912) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (547912) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (547912) MODEM_GNSS: GNSS no-fix streak=28 fix_valid=0
+W (564412) BLE_OBD: BLE connect failed: TIMEOUT
+I (564522) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (564522) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (564522) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (564522) MODEM_GNSS: GNSS no-fix streak=29 fix_valid=0
+W (581022) BLE_OBD: BLE connect failed: TIMEOUT
+I (581132) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (581132) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (581132) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (581132) MODEM_GNSS: GNSS no-fix streak=30 fix_valid=0
+W (597642) BLE_OBD: BLE connect failed: TIMEOUT
+I (597752) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (597752) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (597752) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (597752) MODEM_GNSS: GNSS no-fix streak=31 fix_valid=0
+W (614262) BLE_OBD: BLE connect failed: TIMEOUT
+I (614372) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (614372) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (614372) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (614372) MODEM_GNSS: GNSS no-fix streak=32 fix_valid=0
+W (630872) BLE_OBD: BLE connect failed: TIMEOUT
+I (630982) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (630982) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (630982) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (630982) MODEM_GNSS: GNSS no-fix streak=33 fix_valid=0
+W (647482) BLE_OBD: BLE connect failed: TIMEOUT
+I (647592) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (647592) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (647592) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (647592) MODEM_GNSS: GNSS no-fix streak=34 fix_valid=0
+W (664102) BLE_OBD: BLE connect failed: TIMEOUT
+I (664212) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (664212) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (664212) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (664212) MODEM_GNSS: GNSS no-fix streak=35 fix_valid=0
+W (680712) BLE_OBD: BLE connect failed: TIMEOUT
+I (680822) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (680822) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (680822) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (680822) MODEM_GNSS: GNSS no-fix streak=36 fix_valid=0
+W (697322) BLE_OBD: BLE connect failed: TIMEOUT
+I (697432) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (697432) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (697432) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (697432) MODEM_GNSS: GNSS no-fix streak=37 fix_valid=0
+W (698942) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (713942) BLE_OBD: BLE connect failed: TIMEOUT
+E (713942) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=41 next_delay_ms=1000
+I (714052) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (714052) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (714052) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (714052) MODEM_GNSS: GNSS no-fix streak=38 fix_valid=0
+W (730562) BLE_OBD: BLE connect failed: TIMEOUT
+I (730672) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (730672) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (730672) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (730672) MODEM_GNSS: GNSS no-fix streak=39 fix_valid=0
+W (747182) BLE_OBD: BLE connect failed: TIMEOUT
+I (747292) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (747292) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (747292) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (747292) MODEM_GNSS: GNSS no-fix streak=40 fix_valid=0
+W (763792) BLE_OBD: BLE connect failed: TIMEOUT
+I (763902) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (763902) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (763902) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (763902) MODEM_GNSS: GNSS no-fix streak=41 fix_valid=0
+W (780402) BLE_OBD: BLE connect failed: TIMEOUT
+I (780512) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (780512) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (780512) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (780512) MODEM_GNSS: GNSS no-fix streak=42 fix_valid=0
+W (797022) BLE_OBD: BLE connect failed: TIMEOUT
+I (797132) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (797132) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (797132) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (797132) MODEM_GNSS: GNSS no-fix streak=43 fix_valid=0
+W (813632) BLE_OBD: BLE connect failed: TIMEOUT
+I (813742) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (813742) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (813742) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (813742) MODEM_GNSS: GNSS no-fix streak=44 fix_valid=0
+W (830242) BLE_OBD: BLE connect failed: TIMEOUT
+I (830352) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (830352) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (830352) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (830352) MODEM_GNSS: GNSS no-fix streak=45 fix_valid=0
+W (846862) BLE_OBD: BLE connect failed: TIMEOUT
+I (846972) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (846972) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (846972) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (846972) MODEM_GNSS: GNSS no-fix streak=46 fix_valid=0
+W (863482) BLE_OBD: BLE connect failed: TIMEOUT
+I (863592) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (863592) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (863592) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (863592) MODEM_GNSS: GNSS no-fix streak=47 fix_valid=0
+W (865092) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+
+===== monitor start port=COM6 ts=1775733489 =====
+I (11332) uart: queue free spaces: 32
+I (11332) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (11332) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (12822) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+I (18782) MODEM_LTE: RDY token seen from UART
+I (18782) MODEM_LTE: RDY gate open, continue to AT sync
+I (18782) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (20372) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (20372) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (21992) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (23592) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (25192) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (26802) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (26802) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (26802) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (26802) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+I (26812) BLE_INIT: BLE init stage=enter controller_status=IDLE(0)
+I (26812) BLE_INIT: BLE init stage=before-nimble_port_init controller_status=IDLE(0)
+I (26822) BLE_INIT: BT controller compile version [1bb2f50]
+I (26832) BLE_INIT: Using main XTAL as clock source
+W (26832) BLE_INIT: light sleep mode will not be able to apply when bluetooth is enabled.
+I (26842) BLE_INIT: Feature Config, ADV:1, BLE_50:1, DTM:1, SCAN:1, CCA:0, SMP:1, CONNECT:1
+I (26852) BLE_INIT: Bluetooth MAC: d0:cf:13:1b:92:86
+I (26852) phy_init: phy_version 711,97bcf0a2,Aug 25 2025,19:04:10
+I (26902) BLE_INIT: BLE init stage=after-nimble_port_init-ok controller_status=ENABLED(2)
+I (26902) BLE_INIT: NimBLE host task started
+I (26902) BLE_INIT: BLE init stage=init-success controller_status=ENABLED(2)
+I (26902) BLE_MGR: NimBLE stack synced
+W (41912) BLE_OBD: BLE connect failed: TIMEOUT
+E (41912) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=1 next_delay_ms=1000
+I (43522) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (43522) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+W (58522) BLE_OBD: BLE connect failed: TIMEOUT
+I (60132) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+W (75132) BLE_OBD: BLE connect failed: TIMEOUT
+I (76732) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (76732) MODEM_LTE: LTE connected and PDP active
+I (76732) MODEM_GNSS: GNSS power-on sequence start
+I (76842) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (76952) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (77062) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (77062) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (92062) BLE_OBD: BLE connect failed: TIMEOUT
+I (92172) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (92172) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (92172) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (92172) MODEM_GNSS: GNSS no-fix streak=1 fix_valid=0
+W (108672) BLE_OBD: BLE connect failed: TIMEOUT
+I (108782) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (108782) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (108782) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (108782) MODEM_GNSS: GNSS no-fix streak=2 fix_valid=0
+W (125292) BLE_OBD: BLE connect failed: TIMEOUT
+I (125402) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (125402) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (125402) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (125402) MODEM_GNSS: GNSS no-fix streak=3 fix_valid=0
+W (141912) BLE_OBD: BLE connect failed: TIMEOUT
+I (142022) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (142022) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (142022) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (142022) MODEM_GNSS: GNSS no-fix streak=4 fix_valid=0
+W (158522) BLE_OBD: BLE connect failed: TIMEOUT
+I (158632) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (158632) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (158632) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (158632) MODEM_GNSS: GNSS no-fix streak=5 fix_valid=0
+W (175132) BLE_OBD: BLE connect failed: TIMEOUT
+I (175242) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (175242) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (175242) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (175242) MODEM_GNSS: GNSS no-fix streak=6 fix_valid=0
+W (191752) BLE_OBD: BLE connect failed: TIMEOUT
+I (191862) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (191862) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (191862) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (191862) MODEM_GNSS: GNSS no-fix streak=7 fix_valid=0
+W (193362) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (208362) BLE_OBD: BLE connect failed: TIMEOUT
+E (208362) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=11 next_delay_ms=1000
+I (208472) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (208472) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (208472) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (208472) MODEM_GNSS: GNSS no-fix streak=8 fix_valid=0
+W (224982) BLE_OBD: BLE connect failed: TIMEOUT
+I (225092) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (225092) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (225092) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (225092) MODEM_GNSS: GNSS no-fix streak=9 fix_valid=0
+W (241592) BLE_OBD: BLE connect failed: TIMEOUT
+I (241702) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (241702) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (241702) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (241702) MODEM_GNSS: GNSS no-fix streak=10 fix_valid=0
+W (258212) BLE_OBD: BLE connect failed: TIMEOUT
+I (258322) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (258322) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (258322) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (258322) MODEM_GNSS: GNSS no-fix streak=11 fix_valid=0
+W (274822) BLE_OBD: BLE connect failed: TIMEOUT
+I (274932) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (274932) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (274932) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (274932) MODEM_GNSS: GNSS no-fix streak=12 fix_valid=0
+W (291432) BLE_OBD: BLE connect failed: TIMEOUT
+I (291542) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (291542) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (291542) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (291542) MODEM_GNSS: GNSS no-fix streak=13 fix_valid=0
+
+===== monitor start port=COM6 ts=1775734411 =====
+
+===== monitor start port=COM6 ts=1775735017 =====
+
+===== monitor start port=COM6 ts=1775736107 =====
+I (3172) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (3172) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (3672) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (3672) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (3872) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (3872) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+W (5272) STATE_MACHINE: Sleep disabled by util flag, bypassing deep sleep
+I (11342) uart: queue free spaces: 32
+I (11342) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (11342) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (12842) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+I (18822) MODEM_LTE: RDY token seen from UART
+I (18822) MODEM_LTE: RDY gate open, continue to AT sync
+I (18822) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (20412) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (20412) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (22022) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (23662) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (25262) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (26882) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (26882) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (26882) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (26882) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+I (26892) BLE_INIT: BLE init stage=enter controller_status=IDLE(0)
+I (26892) BLE_INIT: BLE init stage=before-nimble_port_init controller_status=IDLE(0)
+I (26902) BLE_INIT: BT controller compile version [1bb2f50]
+I (26912) BLE_INIT: Using main XTAL as clock source
+W (26912) BLE_INIT: light sleep mode will not be able to apply when bluetooth is enabled.
+I (26922) BLE_INIT: Feature Config, ADV:1, BLE_50:1, DTM:1, SCAN:1, CCA:0, SMP:1, CONNECT:1
+I (26932) BLE_INIT: Bluetooth MAC: d0:cf:13:1b:92:86
+I (26932) phy_init: phy_version 711,97bcf0a2,Aug 25 2025,19:04:10
+I (26982) BLE_INIT: BLE init stage=after-nimble_port_init-ok controller_status=ENABLED(2)
+I (26982) BLE_INIT: NimBLE host task started
+I (26982) BLE_MGR: NimBLE stack synced
+I (26982) BLE_INIT: BLE init stage=init-success controller_status=ENABLED(2)
+W (41992) BLE_OBD: BLE connect failed: TIMEOUT
+E (41992) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=1 next_delay_ms=1000
+I (43602) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (43602) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+W (58602) BLE_OBD: BLE connect failed: TIMEOUT
+I (60212) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+W (75212) BLE_OBD: BLE connect failed: TIMEOUT
+I (76822) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (76822) MODEM_LTE: LTE connected and PDP active
+I (76822) MODEM_GNSS: GNSS power-on sequence start
+I (76932) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (77042) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (77152) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (77152) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (92152) BLE_OBD: BLE connect failed: TIMEOUT
+I (92262) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (92262) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (92262) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (92262) MODEM_GNSS: GNSS no-fix streak=1 fix_valid=0
+W (108762) BLE_OBD: BLE connect failed: TIMEOUT
+I (108872) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (108872) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (108872) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (108872) MODEM_GNSS: GNSS no-fix streak=2 fix_valid=0
+W (125382) BLE_OBD: BLE connect failed: TIMEOUT
+I (125492) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (125492) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (125492) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (125492) MODEM_GNSS: GNSS no-fix streak=3 fix_valid=0
+W (141992) BLE_OBD: BLE connect failed: TIMEOUT
+I (142102) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (142102) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (142102) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (142102) MODEM_GNSS: GNSS no-fix streak=4 fix_valid=0
+W (158602) BLE_OBD: BLE connect failed: TIMEOUT
+I (158712) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (158712) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (158712) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (158712) MODEM_GNSS: GNSS no-fix streak=5 fix_valid=0
+W (175212) BLE_OBD: BLE connect failed: TIMEOUT
+I (175322) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (175322) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (175322) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (175322) MODEM_GNSS: GNSS no-fix streak=6 fix_valid=0
+W (191852) BLE_OBD: BLE connect failed: TIMEOUT
+I (191962) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (191962) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (191962) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (191962) MODEM_GNSS: GNSS no-fix streak=7 fix_valid=0
+W (193462) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (208462) BLE_OBD: BLE connect failed: TIMEOUT
+E (208462) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=11 next_delay_ms=1000
+I (208572) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (208572) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (208572) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (208572) MODEM_GNSS: GNSS no-fix streak=8 fix_valid=0
+W (225072) BLE_OBD: BLE connect failed: TIMEOUT
+I (225182) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (225182) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (225182) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (225182) MODEM_GNSS: GNSS no-fix streak=9 fix_valid=0
+W (241682) BLE_OBD: BLE connect failed: TIMEOUT
+I (241792) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (241792) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (241792) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (241792) MODEM_GNSS: GNSS no-fix streak=10 fix_valid=0
+
+===== monitor start port=COM6 ts=1775736971 =====
+I (3162) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (3162) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (3662) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (3662) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (3862) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (3862) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+W (5262) STATE_MACHINE: Sleep disabled by util flag, bypassing deep sleep
+I (11342) uart: queue free spaces: 32
+I (11342) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (11342) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (12832) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+I (18802) MODEM_LTE: RDY token seen from UART
+I (18802) MODEM_LTE: RDY gate open, continue to AT sync
+I (18802) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (20402) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (20402) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (22002) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (23602) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (25202) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (26832) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (26832) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (26832) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (26832) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+I (26842) BLE_INIT: BLE init stage=enter controller_status=IDLE(0)
+I (26842) BLE_INIT: BLE init stage=before-nimble_port_init controller_status=IDLE(0)
+I (26852) BLE_INIT: BT controller compile version [1bb2f50]
+I (26862) BLE_INIT: Using main XTAL as clock source
+W (26862) BLE_INIT: light sleep mode will not be able to apply when bluetooth is enabled.
+I (26872) BLE_INIT: Feature Config, ADV:1, BLE_50:1, DTM:1, SCAN:1, CCA:0, SMP:1, CONNECT:1
+I (26882) BLE_INIT: Bluetooth MAC: d0:cf:13:1b:92:86
+I (26882) phy_init: phy_version 711,97bcf0a2,Aug 25 2025,19:04:10
+I (26932) BLE_INIT: BLE init stage=after-nimble_port_init-ok controller_status=ENABLED(2)
+I (26932) BLE_INIT: NimBLE host task started
+I (26932) BLE_INIT: BLE init stage=init-success controller_status=ENABLED(2)
+I (26932) BLE_MGR: NimBLE stack synced
+W (41942) BLE_OBD: BLE connect failed: TIMEOUT
+E (41942) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=1 next_delay_ms=1000
+I (43542) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (43542) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+W (58542) BLE_OBD: BLE connect failed: TIMEOUT
+I (60152) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+W (75152) BLE_OBD: BLE connect failed: TIMEOUT
+I (76752) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (76752) MODEM_LTE: LTE connected and PDP active
+I (76752) MODEM_GNSS: GNSS power-on sequence start
+I (76862) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (76972) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (77082) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (77082) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (92082) BLE_OBD: BLE connect failed: TIMEOUT
+I (92192) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (92192) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (92192) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (92192) MODEM_GNSS: GNSS no-fix streak=1 fix_valid=0
+W (108702) BLE_OBD: BLE connect failed: TIMEOUT
+I (108812) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (108812) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (108812) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (108812) MODEM_GNSS: GNSS no-fix streak=2 fix_valid=0
+W (125312) BLE_OBD: BLE connect failed: TIMEOUT
+I (125422) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (125422) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (125422) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (125422) MODEM_GNSS: GNSS no-fix streak=3 fix_valid=0
+W (141932) BLE_OBD: BLE connect failed: TIMEOUT
+I (142042) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (142042) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (142042) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (142042) MODEM_GNSS: GNSS no-fix streak=4 fix_valid=0
+W (158542) BLE_OBD: BLE connect failed: TIMEOUT
+I (158652) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (158652) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (158652) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (158652) MODEM_GNSS: GNSS no-fix streak=5 fix_valid=0
+W (175162) BLE_OBD: BLE connect failed: TIMEOUT
+I (175272) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (175272) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (175272) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (175272) MODEM_GNSS: GNSS no-fix streak=6 fix_valid=0
+W (191772) BLE_OBD: BLE connect failed: TIMEOUT
+I (191882) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (191882) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (191882) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (191882) MODEM_GNSS: GNSS no-fix streak=7 fix_valid=0
+W (193382) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (208382) BLE_OBD: BLE connect failed: TIMEOUT
+E (208382) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=11 next_delay_ms=1000
+I (208492) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (208492) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (208492) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (208492) MODEM_GNSS: GNSS no-fix streak=8 fix_valid=0
+W (225002) BLE_OBD: BLE connect failed: TIMEOUT
+I (225112) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (225112) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (225112) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (225112) MODEM_GNSS: GNSS no-fix streak=9 fix_valid=0
+W (241622) BLE_OBD: BLE connect failed: TIMEOUT
+I (241732) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (241732) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (241732) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (241732) MODEM_GNSS: GNSS no-fix streak=10 fix_valid=0
+W (241962) MODEM_GNSS: GNSS power-off fallback accepted via CGPS=0
+W (241962) MODEM_GNSS: GNSS no-fix recover stage=power-off done; power-on due in 2000 ms
+W (258452) BLE_OBD: BLE connect failed: TIMEOUT
+E (258452) MODEM_GNSS: GNSS not powered
+
+===== monitor start port=COM6 ts=1775737416 =====
+I (3172) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (3172) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (3672) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (3672) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (3872) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (3872) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+W (5272) STATE_MACHINE: Sleep disabled by util flag, bypassing deep sleep
+I (11352) uart: queue free spaces: 32
+I (11352) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (11352) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (12842) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+I (18842) MODEM_LTE: RDY token seen from UART
+I (18842) MODEM_LTE: RDY gate open, continue to AT sync
+I (18842) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (20442) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (20442) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (22042) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (23642) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (25242) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (26862) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (26862) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (26862) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (26862) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+I (26872) BLE_INIT: BLE init stage=enter controller_status=IDLE(0)
+I (26872) BLE_INIT: BLE init stage=before-nimble_port_init controller_status=IDLE(0)
+I (26882) BLE_INIT: BT controller compile version [1bb2f50]
+I (26892) BLE_INIT: Using main XTAL as clock source
+W (26892) BLE_INIT: light sleep mode will not be able to apply when bluetooth is enabled.
+I (26902) BLE_INIT: Feature Config, ADV:1, BLE_50:1, DTM:1, SCAN:1, CCA:0, SMP:1, CONNECT:1
+I (26912) BLE_INIT: Bluetooth MAC: d0:cf:13:1b:92:86
+I (26912) phy_init: phy_version 711,97bcf0a2,Aug 25 2025,19:04:10
+I (26962) BLE_INIT: BLE init stage=after-nimble_port_init-ok controller_status=ENABLED(2)
+I (26962) BLE_INIT: NimBLE host task started
+I (26962) BLE_INIT: BLE init stage=init-success controller_status=ENABLED(2)
+I (26962) BLE_MGR: NimBLE stack synced
+W (41972) BLE_OBD: BLE connect failed: TIMEOUT
+E (41972) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=1 next_delay_ms=1000
+I (43572) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (43572) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+W (58572) BLE_OBD: BLE connect failed: TIMEOUT
+I (60182) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+W (75182) BLE_OBD: BLE connect failed: TIMEOUT
+I (76782) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (76782) MODEM_LTE: LTE connected and PDP active
+I (76782) MODEM_GNSS: GNSS power-on sequence start
+I (76892) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (77002) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (77112) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (77112) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (92112) BLE_OBD: BLE connect failed: TIMEOUT
+I (92222) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (92222) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (92222) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (92222) MODEM_GNSS: GNSS no-fix streak=1 fix_valid=0
+W (108732) BLE_OBD: BLE connect failed: TIMEOUT
+I (108842) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (108842) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (108842) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (108842) MODEM_GNSS: GNSS no-fix streak=2 fix_valid=0
+W (125342) BLE_OBD: BLE connect failed: TIMEOUT
+I (125452) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (125452) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (125452) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (125452) MODEM_GNSS: GNSS no-fix streak=3 fix_valid=0
+W (141962) BLE_OBD: BLE connect failed: TIMEOUT
+I (142072) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (142072) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (142072) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (142072) MODEM_GNSS: GNSS no-fix streak=4 fix_valid=0
+W (158572) BLE_OBD: BLE connect failed: TIMEOUT
+I (158682) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (158682) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (158682) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (158682) MODEM_GNSS: GNSS no-fix streak=5 fix_valid=0
+W (175192) BLE_OBD: BLE connect failed: TIMEOUT
+I (175302) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (175302) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (175302) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (175302) MODEM_GNSS: GNSS no-fix streak=6 fix_valid=0
+W (191802) BLE_OBD: BLE connect failed: TIMEOUT
+I (191912) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (191912) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (191912) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (191912) MODEM_GNSS: GNSS no-fix streak=7 fix_valid=0
+W (193412) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (208412) BLE_OBD: BLE connect failed: TIMEOUT
+E (208412) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=11 next_delay_ms=1000
+I (208522) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (208522) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (208522) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (208522) MODEM_GNSS: GNSS no-fix streak=8 fix_valid=0
+W (225022) BLE_OBD: BLE connect failed: TIMEOUT
+I (225132) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (225132) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (225132) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (225132) MODEM_GNSS: GNSS no-fix streak=9 fix_valid=0
+W (241642) BLE_OBD: BLE connect failed: TIMEOUT
+I (241752) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (241752) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (241752) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (241752) MODEM_GNSS: GNSS no-fix streak=10 fix_valid=0
+W (241982) MODEM_GNSS: GNSS power-off fallback accepted via CGPS=0
+W (241982) MODEM_GNSS: GNSS no-fix recover stage=power-off done; power-on due in 2000 ms
+W (258472) BLE_OBD: BLE connect failed: TIMEOUT
+I (258472) MODEM_GNSS: GNSS power-on sequence start
+I (258582) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (258692) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (258802) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (258802) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (258802) MODEM_GNSS: GNSS no-fix recover repower executed
+I (258922) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (258922) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (258922) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (258922) MODEM_GNSS: GNSS no-fix streak=11 fix_valid=0
+W (275422) BLE_OBD: BLE connect failed: TIMEOUT
+I (275532) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (275532) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (275532) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (275532) MODEM_GNSS: GNSS no-fix streak=12 fix_valid=0
+
+===== monitor start port=COM6 ts=1775737762 =====
+W (358492) BLE_OBD: BLE connect failed: TIMEOUT
+I (358602) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (358602) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (358602) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (358602) MODEM_GNSS: GNSS no-fix streak=17 fix_valid=0
+W (360112) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (375112) BLE_OBD: BLE connect failed: TIMEOUT
+E (375112) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=21 next_delay_ms=1000
+I (375222) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (375222) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (375222) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (375222) MODEM_GNSS: GNSS no-fix streak=18 fix_valid=0
+W (391722) BLE_OBD: BLE connect failed: TIMEOUT
+I (391832) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (391832) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (391832) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (391832) MODEM_GNSS: GNSS no-fix streak=19 fix_valid=0
+W (408332) BLE_OBD: BLE connect failed: TIMEOUT
+I (408442) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (408442) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (408442) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (408442) MODEM_GNSS: GNSS no-fix streak=20 fix_valid=0
+W (424952) BLE_OBD: BLE connect failed: TIMEOUT
+I (425062) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (425062) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (425062) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (425062) MODEM_GNSS: GNSS no-fix streak=21 fix_valid=0
+W (441572) BLE_OBD: BLE connect failed: TIMEOUT
+I (441682) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (441682) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (441682) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (441682) MODEM_GNSS: GNSS no-fix streak=22 fix_valid=0
+W (441912) MODEM_GNSS: GNSS power-off fallback accepted via CGPS=0
+W (441912) MODEM_GNSS: GNSS no-fix recover stage=power-off done; power-on due in 2000 ms
+W (458402) BLE_OBD: BLE connect failed: TIMEOUT
+I (458402) MODEM_GNSS: GNSS power-on sequence start
+I (458512) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (458622) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (458732) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (458732) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (458732) MODEM_GNSS: GNSS no-fix recover repower executed
+I (458852) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (458852) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (458852) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (458852) MODEM_GNSS: GNSS no-fix streak=23 fix_valid=0
+W (475362) BLE_OBD: BLE connect failed: TIMEOUT
+I (475472) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (475472) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (475472) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (475472) MODEM_GNSS: GNSS no-fix streak=24 fix_valid=0
+W (491972) BLE_OBD: BLE connect failed: TIMEOUT
+I (492082) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (492082) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (492082) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (492082) MODEM_GNSS: GNSS no-fix streak=25 fix_valid=0
+W (508592) BLE_OBD: BLE connect failed: TIMEOUT
+I (508702) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (508702) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (508702) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (508702) MODEM_GNSS: GNSS no-fix streak=26 fix_valid=0
+W (525202) BLE_OBD: BLE connect failed: TIMEOUT
+I (525312) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (525312) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (525312) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (525312) MODEM_GNSS: GNSS no-fix streak=27 fix_valid=0
+W (526812) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (541812) BLE_OBD: BLE connect failed: TIMEOUT
+E (541812) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=31 next_delay_ms=1000
+I (541922) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (541922) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (541922) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (541922) MODEM_GNSS: GNSS no-fix streak=28 fix_valid=0
+W (558422) BLE_OBD: BLE connect failed: TIMEOUT
+I (558532) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (558532) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (558532) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (558532) MODEM_GNSS: GNSS no-fix streak=29 fix_valid=0
+W (575042) BLE_OBD: BLE connect failed: TIMEOUT
+I (575152) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (575152) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (575152) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (575152) MODEM_GNSS: GNSS no-fix streak=30 fix_valid=0
+W (591682) BLE_OBD: BLE connect failed: TIMEOUT
+I (591792) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (591792) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (591792) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (591792) MODEM_GNSS: GNSS no-fix streak=31 fix_valid=0
+W (608292) BLE_OBD: BLE connect failed: TIMEOUT
+I (608402) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (608402) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (608402) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (608402) MODEM_GNSS: GNSS no-fix streak=32 fix_valid=0
+W (624912) BLE_OBD: BLE connect failed: TIMEOUT
+I (625022) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (625022) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (625022) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (625022) MODEM_GNSS: GNSS no-fix streak=33 fix_valid=0
+W (641532) BLE_OBD: BLE connect failed: TIMEOUT
+I (641642) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (641642) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (641642) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (641642) MODEM_GNSS: GNSS no-fix streak=34 fix_valid=0
+W (641872) MODEM_GNSS: GNSS power-off fallback accepted via CGPS=0
+W (641872) MODEM_GNSS: GNSS no-fix recover stage=power-off done; power-on due in 2000 ms
+W (658362) BLE_OBD: BLE connect failed: TIMEOUT
+I (658362) MODEM_GNSS: GNSS power-on sequence start
+I (658472) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (658582) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (658692) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (658692) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (658692) MODEM_GNSS: GNSS no-fix recover repower executed
+I (658812) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (658812) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (658812) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (658812) MODEM_GNSS: GNSS no-fix streak=35 fix_valid=0
+W (675322) BLE_OBD: BLE connect failed: TIMEOUT
+I (675432) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (675432) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (675432) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (675432) MODEM_GNSS: GNSS no-fix streak=36 fix_valid=0
+W (691932) BLE_OBD: BLE connect failed: TIMEOUT
+I (692042) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (692042) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (692042) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (692042) MODEM_GNSS: GNSS no-fix streak=37 fix_valid=0
+W (693552) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (708552) BLE_OBD: BLE connect failed: TIMEOUT
+E (708552) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=41 next_delay_ms=1000
+I (708662) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (708662) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (708662) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (708662) MODEM_GNSS: GNSS no-fix streak=38 fix_valid=0
+W (725162) BLE_OBD: BLE connect failed: TIMEOUT
+I (725272) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (725272) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (725272) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (725272) MODEM_GNSS: GNSS no-fix streak=39 fix_valid=0
+W (741772) BLE_OBD: BLE connect failed: TIMEOUT
+I (741882) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (741882) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (741882) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (741882) MODEM_GNSS: GNSS no-fix streak=40 fix_valid=0
+W (758392) BLE_OBD: BLE connect failed: TIMEOUT
+I (758502) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (758502) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (758502) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (758502) MODEM_GNSS: GNSS no-fix streak=41 fix_valid=0
+W (775012) BLE_OBD: BLE connect failed: TIMEOUT
+I (775122) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (775122) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (775122) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (775122) MODEM_GNSS: GNSS no-fix streak=42 fix_valid=0
+W (791622) BLE_OBD: BLE connect failed: TIMEOUT
+I (791732) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (791732) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (791732) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (791732) MODEM_GNSS: GNSS no-fix streak=43 fix_valid=0
+W (808242) BLE_OBD: BLE connect failed: TIMEOUT
+I (808352) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (808352) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (808352) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (808352) MODEM_GNSS: GNSS no-fix streak=44 fix_valid=0
+W (824852) BLE_OBD: BLE connect failed: TIMEOUT
+I (824962) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (824962) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (824962) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (824962) MODEM_GNSS: GNSS no-fix streak=45 fix_valid=0
+W (841472) BLE_OBD: BLE connect failed: TIMEOUT
+I (841582) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (841582) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (841582) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (841582) MODEM_GNSS: GNSS no-fix streak=46 fix_valid=0
+W (841812) MODEM_GNSS: GNSS power-off fallback accepted via CGPS=0
+W (841812) MODEM_GNSS: GNSS no-fix recover stage=power-off done; power-on due in 2000 ms
+W (858302) BLE_OBD: BLE connect failed: TIMEOUT
+I (858302) MODEM_GNSS: GNSS power-on sequence start
+I (858412) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (858522) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (858632) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (858632) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (858632) MODEM_GNSS: GNSS no-fix recover repower executed
+I (858742) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (858742) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (858742) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (858742) MODEM_GNSS: GNSS no-fix streak=47 fix_valid=0
+W (860242) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (875242) BLE_OBD: BLE connect failed: TIMEOUT
+E (875242) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=51 next_delay_ms=1000
+I (875352) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (875352) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (875352) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (875352) MODEM_GNSS: GNSS no-fix streak=48 fix_valid=0
+W (891852) BLE_OBD: BLE connect failed: TIMEOUT
+I (891962) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (891962) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (891962) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (891962) MODEM_GNSS: GNSS no-fix streak=49 fix_valid=0
+W (908472) BLE_OBD: BLE connect failed: TIMEOUT
+I (908582) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (908582) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (908582) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (908582) MODEM_GNSS: GNSS no-fix streak=50 fix_valid=0
+W (925082) BLE_OBD: BLE connect failed: TIMEOUT
+I (925192) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (925192) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (925192) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (925192) MODEM_GNSS: GNSS no-fix streak=51 fix_valid=0
+
+===== monitor start port=COM6 ts=1775741646 =====
+W (4262332) BLE_OBD: BLE connect failed: TIMEOUT
+I (4262452) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (4262452) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.627867,N,10544.722735,E,090426,133437.0,4.2,0.0,    OK  
+I (4262452) MODEM_GNSS: GNSS fallback fix lat=20.960464 lon=105.745379 speed_kmh=0.00
+I (4262462) MODEM_GNSS: GNSS fix success lat=20.960464 lon=105.745379 sat=1 streak=152
+W (4348472) BLE_OBD: BLE connect failed: TIMEOUT
+I (4348592) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (4348592) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.627826,N,10544.722695,E,090426,133603.0,4.9,0.0,    OK  
+I (4348592) MODEM_GNSS: GNSS fallback fix lat=20.960464 lon=105.745378 speed_kmh=0.00
+I (4348602) MODEM_GNSS: GNSS fix success lat=20.960464 lon=105.745378 sat=1 streak=153
+
+===== monitor start port=COM6 ts=1775751411 =====
+I (86893) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (86893) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (87393) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (87393) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (87593) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (87593) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+
+===== monitor start port=COM6 ts=1775751651 =====
+I (305703) MODEM_LTE: FSM BACKOFF -> POWER_ON_PULSE
+
+===== monitor start port=COM6 ts=1775751772 =====
+I (380363) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (380863) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (380863) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (381063) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (381063) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (452493) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (452493) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+
+===== monitor start port=COM6 ts=1775752659 =====
+I (76663) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (76663) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (77163) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (77163) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (77363) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (77363) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (77463) STATE_MACHINE: mqtt status=stopped metadata mid=a332d590-4a2d-4974-9fb9-85ec053b2ced seq=2 boot=boot-1-6a64ef22 ts=1735706676000
+
+===== monitor start port=COM6 ts=1775752787 =====
+����   � �   �    � �� �  � �   � �� ���� � ����� ������ �� �� �  ��  �  ��� � �   � �� ���� ��� � �    �� ��� �� �  � ���� �  �    �� �  ���� ��� �� ��    � ��� �� � �     �� � �� �� �� �� �� ��� �    ��� ��� � �  � � ���� ��� � ���  � �  �   � �   �   �� �� �  � �   ����� �  � �� �   � ������� ������� �    �  ��� ��� �  � � �� �� ��� �� � �   �     ��  � �  �   � �   �   �� �� �  � �   �� �� �  ��� ��� ����  � ����� � �   � � ���  � �� � ��� �    �� �� ��� �  �  ������ �  �� ���   �� ��� �  ��     � ��� �        �� �����  ��� �  �  ���          � �� �� ���� �  � ���� � �  �  �    ����� ����     ��    � � ��������   ��� �  �� ������  � �����  � �  �   � �   �   �� �� �  � �   �� �� �  ��� ��� ����  � ����� � �     �� ���� �  ����� ��  � ������  �� �� � ���  ���     ����� ��  � ������  ��  �� ����  � �  �   � �   �     �� �  � �   � �� ���� � ����� ������ �� �� �  ��  �  ��� � �   ����� � �� ��  � � ��� � ������� ��� � � ����� � ��� �  �  ������ � ��� �  �� � ��� �  ����� ��  ���   ���   �  �  � � � �� ����   �    � � ���  � �� �    ���   �� �  �� ���   ���� ��� �  �� ���   ��  ��   � � ���   � ��� �� ��� �      ������� ����   ������� ����� �  ���  � � � �  � �� �  �         ��� ��� �  �� �  ��� ��    � ��  �         ��  � 
+�  �   �    �     �    �  � �   �� �� �  ��� ��� ����  � ����� � �   ����� ��  � ������  ��  �� ��  � �� � ���� �    � ������ ������� �  �  ���� �� �� ��� �� ��� �  ������ �  �� ���    ��  �� ��   ����������� � ����  � �� �   �    �     �    �  � �   �� �� �  ��� ��� ����  � ����� � �     ��� � ��  �� �  � � ���� � ��� ���� �� �� �����  �  �� ���� ��� �������� �������� ��  �� �  �  ��� �� �� �� ������� �  ��  ����� ����  ��� ��� �� ������ ���  � � �� ���� ����� � ���� �     ���� � � �����  ��� � ��� �� ��������� ��� �        ��  � �  �   �    �     �    �  � �   �� �� �  ��� ��� ����  � ����� � �     �� ���� �  ����� ��  � ������  ��  �� ��  ���       �� �� ��� �� �  �  ���  � �  �   �    �      �   �  � �   � �� ���� � ����� ������ �� �� �  ��  �  ��� � �   ����� � �� ��  � � ��� � ������� ��� � � ����� � ��� �  �  ������ � ��� �  �� � ��� �  ����� ��  ��� �  ���  � � �  �� ��  � ���� ���   �� ��  ���  �   �� �   ��� �   �  �   ����   �      � �    ��  �� ���� � �� �� �  � ��� �� ���  �     ������� ����   ������� ����� �  ���  � � � �  � �� �  �         ��� ��� �  �� �  ��� ��    �   �  �        ��  � 
+
+===== monitor start port=COM6 ts=1775753225 =====
+I (620203) MODEM_LTE: FSM BACKOFF -> POWER_ON_PULSE
+I (620303) STATE_MACHINE: mqtt status=stopped metadata mid=332cc8d0-9068-452a-bc9b-8a55870d4597 seq=9 boot=boot-1-6a64ef22 ts=1735707219000
+I (691733) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (692233) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (692233) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (692433) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (692433) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (692533) STATE_MACHINE: mqtt status=stopped metadata mid=f55f7183-bbbb-43d8-b658-f9052fd7d1ea seq=10 boot=boot-1-6a64ef22 ts=1735707291000
+I (765863) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (765863) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (765963) STATE_MACHINE: mqtt status=stopped metadata mid=93aadfb0-489f-4168-9ad9-76332396327e seq=11 boot=boot-1-6a64ef22 ts=1735707365000
+
+===== monitor start port=COM6 ts=1775759927 =====
+I (79363) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (79363) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (79863) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (79863) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (80063) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (80063) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (80163) STATE_MACHINE: mqtt status=stopped metadata mid=633c3487-39ef-4daf-bcc6-7d8c1f697a1b seq=2 boot=boot-1-d9f422ad ts=1735713962000
+W (157163) STATE_MACHINE: Sleep disabled by util flag, bypassing deep sleep
+I (157263) uart: queue free spaces: 32
+I (157263) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (157263) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (157363) STATE_MACHINE: mqtt status=stopped metadata mid=f6b1d06d-20b6-4850-9b95-c13aa72f3f3b seq=3 boot=boot-1-d9f422ad ts=1735714040000
+
+===== monitor start port=COM6 ts=1775761426 =====
+I (1521433) MODEM_LTE: FSM BACKOFF -> POWER_ON_PULSE
+I (1521533) STATE_MACHINE: mqtt status=stopped metadata mid=7b294475-4ca8-4f71-88ed-3eb54278d35e seq=21 boot=boot-1-d9f422ad ts=1735715404000
+I (1599403) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (1599903) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (1599903) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (1600103) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (1600103) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (1600203) STATE_MACHINE: mqtt status=stopped metadata mid=6b8f7b21-f231-41c1-8ad8-3762e7f69112 seq=22 boot=boot-1-d9f422ad ts=1735715483000
+I (1675693) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (1675693) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (1675793) STATE_MACHINE: mqtt status=stopped metadata mid=10fee5c3-245a-4f7d-9dfc-7214940d0486 seq=23 boot=boot-1-d9f422ad ts=1735715558000

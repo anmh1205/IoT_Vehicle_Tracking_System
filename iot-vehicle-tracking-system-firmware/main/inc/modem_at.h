@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "driver/gpio.h"
+#include "driver/uart.h"
 #include "esp_err.h"
 
 /**
@@ -18,6 +19,17 @@
  * @param urc_line Null-terminated URC line (without trailing CRLF).
  */
 typedef void (*modem_urc_cb_t)(const char *urc_line);
+
+/**
+ * @brief UART receive error counters captured from ESP-IDF UART event queue.
+ */
+typedef struct {
+    uint32_t frame_err_count;
+    uint32_t parity_err_count;
+    uint32_t fifo_overflow_count;
+    uint32_t buffer_full_count;
+    uint32_t break_count;
+} modem_at_uart_diag_t;
 
 /**
  * @brief Initialize UART and AT transport synchronization primitives.
@@ -105,9 +117,70 @@ esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask);
 uint32_t modem_at_get_line_inverse(void);
 
 /**
+ * @brief Configure UART frame format at runtime.
+ *
+ * @param data_bits UART data bits.
+ * @param parity UART parity mode.
+ * @param stop_bits UART stop bits.
+ *
+ * @return ESP_OK on success, otherwise an ESP-IDF error code.
+ */
+esp_err_t modem_at_set_frame_format(uart_word_length_t data_bits,
+                                    uart_parity_t parity,
+                                    uart_stop_bits_t stop_bits);
+
+/**
+ * @brief Read current UART frame format.
+ *
+ * @param out_data_bits Optional output data bits pointer.
+ * @param out_parity Optional output parity pointer.
+ * @param out_stop_bits Optional output stop bits pointer.
+ */
+void modem_at_get_frame_format(uart_word_length_t *out_data_bits,
+                               uart_parity_t *out_parity,
+                               uart_stop_bits_t *out_stop_bits);
+
+/**
+ * @brief Configure UART source clock.
+ *
+ * @param source_clk UART source clock selector.
+ *
+ * @return ESP_OK on success, otherwise an ESP-IDF error code.
+ */
+esp_err_t modem_at_set_source_clk(uart_sclk_t source_clk);
+
+/**
+ * @brief Read active UART source clock.
+ *
+ * @return Active source clock selector.
+ */
+uart_sclk_t modem_at_get_source_clk(void);
+
+/**
+ * @brief Snapshot UART receive diagnostics.
+ *
+ * @param out_diag Output diagnostics structure.
+ */
+void modem_at_get_uart_diag(modem_at_uart_diag_t *out_diag);
+
+/**
+ * @brief Reset UART receive diagnostics counters.
+ */
+void modem_at_reset_uart_diag(void);
+
+/**
  * @brief Register callback for URC lines matching a prefix.
  *
  * @param prefix Prefix string to match, e.g. `"+CMTI"`.
  * @param cb Callback invoked when prefix matches.
  */
 void modem_at_register_urc(const char *prefix, modem_urc_cb_t cb);
+
+/**
+ * @brief Poll UART RX and dispatch URC lines without sending an AT command.
+ *
+ * @param max_read_bytes Maximum bytes to drain from UART RX in one call.
+ *
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT if AT transport is busy, or state errors.
+ */
+esp_err_t modem_at_poll_urc(uint32_t max_read_bytes);

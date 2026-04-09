@@ -184,6 +184,7 @@ esp_err_t rtc_ds3231m_init(void) {
     }
 
     s_ctx.initialized = true;
+    ESP_LOGI(TAG, "RTC init available=%d time_valid=%d", s_ctx.available ? 1 : 0, s_ctx.time_valid ? 1 : 0);
     return s_ctx.available ? ESP_OK : ESP_FAIL;
 }
 
@@ -242,6 +243,10 @@ esp_err_t rtc_ds3231m_get_time_ms(uint64_t *out_time_ms) {
 
     *out_time_ms = epoch_ms;
     s_ctx.time_valid = rtc_ds3231m_is_time_valid_ms(*out_time_ms);
+    if (!s_ctx.time_valid) {
+        ESP_LOGW(TAG, "RTC read out-of-range ms=%llu", (unsigned long long)*out_time_ms);
+        return ESP_ERR_INVALID_STATE;
+    }
     return ESP_OK;
 }
 
@@ -277,6 +282,7 @@ esp_err_t rtc_ds3231m_set_time_ms(uint64_t time_ms) {
     }
 
     s_ctx.time_valid = true;
+    ESP_LOGI(TAG, "RTC set time ms=%llu", (unsigned long long)time_ms);
     return ESP_OK;
 }
 

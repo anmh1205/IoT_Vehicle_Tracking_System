@@ -32,6 +32,10 @@ export const handleFirmware = async (
   }
 
   const payload = result.data;
+  const messageId = payload.metadata?.message_id;
+  const schemaVersion = payload.metadata?.schema_version;
+  const seqNo = payload.metadata?.seq_no;
+  const bootId = payload.metadata?.boot_id;
 
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
@@ -131,6 +135,10 @@ export const handleFirmware = async (
       current_version: payload.currentVersion,
       partition: payload.partition,
       error: payload.error,
+      message_id: messageId,
+      schema_version: schemaVersion,
+      seq_no: seqNo,
+      boot_id: bootId,
     },
   ).catch((err) => {
     logger.error(`VictoriaLogs write failed for firmware event`, err);

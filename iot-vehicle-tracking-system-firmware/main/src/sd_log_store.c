@@ -419,6 +419,14 @@ esp_err_t sd_log_store_mount(void) {
         ESP_LOGW(TAG, "SD store mounted in degraded mode");
     }
 
+    ESP_LOGI(TAG,
+             "SD mounted root=%s session=%u write_seq=%u replay_seq=%u ack_critical=%u",
+             SD_LOG_ROOT_DIR,
+             (unsigned)s_ctx.meta.session_id,
+             (unsigned)s_ctx.meta.write_seq,
+             (unsigned)s_ctx.meta.replay_seq,
+             (unsigned)s_ctx.meta.ack_seq_critical);
+
     return ESP_OK;
 }
 

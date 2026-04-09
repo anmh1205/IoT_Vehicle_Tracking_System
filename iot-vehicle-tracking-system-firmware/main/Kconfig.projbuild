@@ -10,7 +10,7 @@ config TRACKER_DEFAULT_AUTH_TOKEN
 
 config TRACKER_DEFAULT_MQTT_HOST
     string "Default MQTT host"
-    default "localhost"
+    default "mqtt.thingdock.dev"
 
 config TRACKER_DEFAULT_MQTT_PORT
     int "Default MQTT port"

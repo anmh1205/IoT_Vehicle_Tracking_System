@@ -58,6 +58,34 @@ def build_log_file_path(firmware_dir: Path, port: str) -> Path:
     return firmware_dir / "documents" / "test-logs" / f"com{com_num}-monitor-latest.log"
 
 
+GNSS_FIX_SUCCESS_RE = re.compile(
+    r"GNSS fix success lat=([+-]?\d+(?:\.\d+)?) lon=([+-]?\d+(?:\.\d+)?) sat=(\d+)"
+)
+CGNSINF_RE = re.compile(r"\+CGNSINF:\s*(.*)")
+
+
+def _has_valid_gnss_fix(lines: list[str]) -> bool:
+    for raw in lines:
+        line = raw.strip()
+        fixed = GNSS_FIX_SUCCESS_RE.search(line)
+        if fixed and float(fixed.group(1)) != 0.0 and float(fixed.group(2)) != 0.0 and int(fixed.group(3)) > 0:
+            return True
+        cgnsinf = CGNSINF_RE.search(line)
+        if not cgnsinf:
+            continue
+        fields = [part.strip() for part in cgnsinf.group(1).split(",")]
+        if len(fields) < 16 or fields[1] != "1":
+            continue
+        try:
+            lat, lon = float(fields[3] or 0.0), float(fields[4] or 0.0)
+            sat = int(fields[14] or 0) + int(fields[15] or 0)
+        except ValueError:
+            continue
+        if lat != 0.0 and lon != 0.0 and sat > 0:
+            return True
+    return False
+
+
 def run_loop(
     firmware_dir: Path,
     preferred_port: str | None,
@@ -66,24 +94,27 @@ def run_loop(
     max_seconds: int,
     stable_seconds: int,
     quiet_seconds: int,
+    gnss_streak_target: int = 3,
 ) -> LoopResult:
     port = resolve_port(preferred_port)
     log_file = build_log_file_path(firmware_dir, port)
 
     results: list[IterationResult] = []
     final_status = "unknown"
+    gnss_fix_streak = 0
 
     existing_size = 0
     if log_file.exists():
         existing_size = log_file.stat().st_size
 
     for idx in range(1, max_iterations + 1):
+        monitor_stable_seconds = stable_seconds if gnss_streak_target <= 0 else max_seconds
         read_result = read_serial(
             port=port,
             baud=baud,
             log_file=str(log_file),
             max_seconds=max_seconds,
-            stable_seconds=stable_seconds,
+            stable_seconds=monitor_stable_seconds,
             quiet_seconds=quiet_seconds,
         )
 
@@ -108,9 +139,21 @@ def run_loop(
             effective_status = analyzed.status
 
         if effective_status == "stable":
-            final_status = "stable"
-            results.append(IterationResult(iteration=idx, status="stable", action="stop"))
-            break
+            if _has_valid_gnss_fix(lines):
+                gnss_fix_streak += 1
+            else:
+                gnss_fix_streak = 0
+
+            if gnss_fix_streak >= gnss_streak_target:
+                final_status = "stable"
+                results.append(IterationResult(iteration=idx, status="stable", action="stop-gnss-ok"))
+                break
+
+            final_status = "stable-no-gnss"
+            results.append(
+                IterationResult(iteration=idx, status="stable-no-gnss", action="monitor-next-until-gnss-fix")
+            )
+            continue
 
         if effective_status in {"fatal", "unstable"}:
             action = "needs-code-fix-and-manual-build-flash"
@@ -142,6 +185,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--stable-seconds", type=int, default=int(os.getenv("ESP32_STABLE_SECONDS", "20"))
     )
     parser.add_argument("--quiet-seconds", type=int, default=int(os.getenv("ESP32_QUIET_SECONDS", "3")))
+    parser.add_argument(
+        "--gnss-streak-target",
+        type=int,
+        default=int(os.getenv("ESP32_GNSS_STREAK_TARGET", "3")),
+        help="Consecutive stable iterations with valid GNSS fix required before stop",
+    )
     parser.add_argument("--json", action="store_true")
     return parser
 
@@ -159,6 +208,7 @@ def main() -> int:
         max_seconds=args.max_seconds,
         stable_seconds=args.stable_seconds,
         quiet_seconds=args.quiet_seconds,
+        gnss_streak_target=max(args.gnss_streak_target, 1),
     )
 
     if args.json:
@@ -168,7 +218,7 @@ def main() -> int:
         for item in result.iterations:
             print(f"#{item.iteration} status={item.status} action={item.action}")
 
-    if result.final_status in {"fatal", "unstable", "serial-error"}:
+    if result.final_status in {"fatal", "unstable", "serial-error", "stable-no-gnss", "timeout"}:
         return 2
     return 0
 

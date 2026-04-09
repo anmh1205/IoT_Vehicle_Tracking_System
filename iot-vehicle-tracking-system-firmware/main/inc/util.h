@@ -80,6 +80,23 @@ size_t util_copy_string(char *dst, size_t dst_size, const char *src);
 uint64_t util_uptime_ms(void);
 
 /**
+ * @brief Generate a random RFC4122 UUID v4 string.
+ *
+ * @param out Destination buffer.
+ * @param out_size Destination buffer size, must be >= 37.
+ */
+void util_generate_uuid_v4(char *out, size_t out_size);
+
+/**
+ * @brief Generate boot identifier string stable for current runtime boot.
+ *
+ * @param out Destination buffer.
+ * @param out_size Destination buffer size.
+ * @param boot_count Persisted RTC boot counter.
+ */
+void util_generate_boot_id(char *out, size_t out_size, uint32_t boot_count);
+
+/**
  * @brief Enable or disable all firmware sleep features globally.
  *
  * @param enabled True to allow sleep features, false to disable them.

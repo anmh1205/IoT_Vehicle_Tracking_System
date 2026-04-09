@@ -1,3 +1,11 @@
+export interface PayloadMetadata {
+  schema_version: string;
+  message_id: string;
+  sent_at: number;
+  seq_no?: number;
+  boot_id?: string;
+}
+
 export interface RawDataPayload {
   device_id: string;
   auth_token: string;
@@ -15,13 +23,26 @@ export interface RawDataPayload {
     ignition?: boolean;
     error_code?: number;
   };
+  metadata?: PayloadMetadata;
 }
 
 export interface StatusPayload {
   device_id: string;
+  auth_token: string;
   status: 'running' | 'stopped';
   session_id?: number;
   timestamp: number;
+  metadata?: PayloadMetadata;
+}
+
+export interface EventPayload {
+  device_id: string;
+  auth_token: string;
+  event_type: 'error' | 'warning' | 'info';
+  code?: number;
+  message?: string;
+  timestamp: number;
+  metadata?: PayloadMetadata;
 }
 
 export interface FirmwareStatusPayload {
@@ -43,4 +64,5 @@ export interface FirmwareStatusPayload {
   currentVersion: string;
   partition?: string;
   error?: string;
+  metadata?: PayloadMetadata;
 }

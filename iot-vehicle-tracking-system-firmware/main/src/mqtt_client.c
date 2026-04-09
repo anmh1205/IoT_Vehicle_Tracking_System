@@ -6,6 +6,7 @@
 
 #include "esp_event.h"
 #include "esp_log.h"
+#include "esp_netif.h"
 
 #include "util.h"
 
@@ -98,6 +99,27 @@ static void tracker_mqtt_event_handler(void *handler_args,
             ESP_LOGW(TAG, "MQTT disconnected");
             break;
 
+        case MQTT_EVENT_ERROR:
+            s_connected = false;
+            if (event != NULL && event->error_handle != NULL) {
+                ESP_LOGE(TAG,
+                         "MQTT error type=%d connect_rc=%d tls_esp_err=0x%x tls_stack_err=0x%x tls_cert_flags=0x%x sock_errno=%d",
+                         event->error_handle->error_type,
+                         event->error_handle->connect_return_code,
+                         event->error_handle->esp_tls_last_esp_err,
+                         event->error_handle->esp_tls_stack_err,
+                         event->error_handle->esp_tls_cert_verify_flags,
+                         event->error_handle->esp_transport_sock_errno);
+                if (event->error_handle->esp_transport_sock_errno != 0) {
+                    ESP_LOGE(TAG,
+                             "MQTT socket errno detail: %s",
+                             strerror(event->error_handle->esp_transport_sock_errno));
+                }
+            } else {
+                ESP_LOGE(TAG, "MQTT error with no detail payload");
+            }
+            break;
+
         case MQTT_EVENT_PUBLISHED:
             if (s_puback_callback != NULL && event != NULL) {
                 s_puback_callback(event->msg_id);
@@ -140,10 +162,26 @@ static void tracker_mqtt_event_handler(void *handler_args,
 esp_err_t tracker_mqtt_init(const config_t *cfg) {
     ESP_RETURN_ON_NULL(cfg, ESP_ERR_INVALID_ARG, TAG, "cfg is NULL");
 
+    static bool s_netif_initialized = false;
+    if (!s_netif_initialized) {
+        esp_err_t netif_err = esp_netif_init();
+        ESP_RETURN_ON_FALSE(netif_err == ESP_OK || netif_err == ESP_ERR_INVALID_STATE,
+                            netif_err,
+                            TAG,
+                            "esp_netif_init failed");
+        s_netif_initialized = true;
+    }
+
     /* Store config copy because caller may update its own buffer later. */
     s_cfg = *cfg;
     tracker_mqtt_build_topics();
     snprintf(s_broker_uri, sizeof(s_broker_uri), "mqtt://%s:%u", s_cfg.mqtt_host, s_cfg.mqtt_port);
+
+    ESP_LOGI(TAG,
+             "MQTT init broker=%s user_set=%d command_subscribe=%d",
+             s_broker_uri,
+             !util_string_empty(s_cfg.mqtt_username) ? 1 : 0,
+             s_cfg.command_subscribe_enabled ? 1 : 0);
 
     /* Build ESP-IDF MQTT configuration object. */
     esp_mqtt_client_config_t mqtt_cfg = {

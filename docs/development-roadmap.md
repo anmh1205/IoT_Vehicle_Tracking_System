@@ -77,12 +77,20 @@
   - Figure render pipeline executed to regenerate synchronized SVG artifacts.
 
 ### Firmware Runtime Hardening Complete
-- Scope: SD log store recovery, DS3231M RTC UTC-safe validation, offline queue replay ACK hardening, and state machine integration in the firmware runtime.
+- Scope: SD log store recovery, DS3231M RTC UTC-safe validation, offline queue replay ACK hardening, GNSS observability/recovery, and state machine integration in the firmware runtime.
 - Milestones completed:
   - SD log store recovery now handles transient storage faults more cleanly.
   - DS3231M RTC handling keeps time checks UTC-safe for replay and persistence flows.
   - Offline queue replay ACK handling now gates state advancement until completion is confirmed.
+  - GNSS polling now carries bounded retry, self-heal, and re-arm lifecycle handling after LTE recovery or repeated fail streaks.
   - Compile validation passed for the completed firmware scope.
+
+### P2 - Firmware GNSS Reliability Observability and Recovery Complete
+- Scope: GNSS observability, bounded retry/self-heal, and GNSS re-arm lifecycle after LTE recovery/fail streak.
+- Milestones completed:
+  - GNSS query diagnostics now distinguish transport fail, parse fail, no-fix, and fix-success streaks.
+  - Self-heal repower is bounded by cooldown to avoid modem thrash during repeated poll failures.
+  - The tracker state machine re-arms GNSS after LTE recovery or fail-streak thresholds with cooldown gating.
 
 ## Notes
 - No remaining open tasks for accessibility remediation.

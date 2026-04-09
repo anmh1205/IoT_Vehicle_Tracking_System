@@ -16,7 +16,7 @@
     "fontSize": "18px"
   },
   "flowchart": {
-    "defaultRenderer": "elk",
+    "defaultRenderer": "dagre",
     "curve": "linear",
     "htmlLabels": false,
     "nodeSpacing": 240,

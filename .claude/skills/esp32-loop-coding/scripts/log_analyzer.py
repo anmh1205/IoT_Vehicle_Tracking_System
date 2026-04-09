@@ -18,6 +18,7 @@ FATAL_PATTERNS = [
 
 BOOT_PATTERNS = ["Loaded app", "Calling app_main", "app_main", "TRACKER_MAIN: Boot"]
 ERROR_PATTERN = "E ("
+IGNORABLE_ERROR_PATTERNS = ["retry step="]
 
 
 @dataclass
@@ -39,7 +40,7 @@ def analyze_lines(lines: list[str]) -> AnalyzeResult:
         line = raw_line.strip()
         if any(pattern in line for pattern in BOOT_PATTERNS):
             boot_count += 1
-        if ERROR_PATTERN in line:
+        if ERROR_PATTERN in line and not any(pattern in line for pattern in IGNORABLE_ERROR_PATTERNS):
             error_count += 1
 
         for pattern in FATAL_PATTERNS:

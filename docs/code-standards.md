@@ -50,3 +50,9 @@
 - Use colon-style realtime event names as the canonical contract and update consumers in lockstep when names change.
 - Treat simulator token handling as security-sensitive; do not rely on stored token hashes as replayable bearer material.
 - Apply rollback/race mitigations around simulator publish flows when state transitions can overlap.
+
+## Firmware GNSS Reliability Standards
+- GNSS polling should keep retry and self-heal behavior bounded with explicit cooldowns to prevent modem thrash.
+- Log GNSS transport failures, parse failures, no-fix streaks, and fix-success streaks separately so recovery behavior stays observable.
+- Re-arm GNSS from the tracker state machine after LTE recovery or repeated GNSS poll failures, not from ad hoc caller loops.
+- Keep GNSS power-cycle recovery localized to the modem/GNSS layer and state machine lifecycle, not spread across unrelated subsystems.

@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 import { mqttConfig } from '../config/env';
 import { logger } from '../infrastructure/logger';
@@ -28,6 +29,17 @@ export const connectMqtt = (): Promise<MqttClient> => {
 
     if (mqttConfig.useTls) {
       options.rejectUnauthorized = mqttConfig.rejectUnauthorized;
+      options.servername = mqttConfig.servername;
+
+      if (mqttConfig.caCertPath) {
+        try {
+          options.ca = fs.readFileSync(mqttConfig.caCertPath);
+        } catch (err) {
+          logger.error({ err, caCertPath: mqttConfig.caCertPath }, 'Failed to load MQTT CA certificate');
+          reject(err as Error);
+          return;
+        }
+      }
     }
 
     logger.info(`Connecting to MQTT broker at ${brokerUrl}...`);

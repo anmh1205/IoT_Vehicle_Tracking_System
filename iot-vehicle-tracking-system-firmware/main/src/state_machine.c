@@ -52,6 +52,17 @@
 #define TRACKER_IGNITION_OFF_DRAIN_FIXED_MS 3000ULL
 #define TRACKER_RTC_SYNC_MIN_INTERVAL_MS 60000ULL
 #define TRACKER_RTC_READ_RETRY_BACKOFF_MS 1000ULL
+#define TRACKER_GNSS_REARM_COOLDOWN_MS 15000ULL
+#define TRACKER_GNSS_FAIL_REARM_THRESHOLD 3U
+#define TRACKER_MQTT_RUNTIME_DISABLED 0
+#define TRACKER_USER_LED_BLINK_PERIOD_MS 3000ULL
+#define TRACKER_USER_LED_ON_MS 300ULL
+#define TRACKER_USER_LED_ACTIVE_LEVEL 1
+#define TRACKER_METADATA_MESSAGE_ID_LEN 37
+#define TRACKER_BOOT_ID_LEN 48
+#define TRACKER_OBD_FAIL_ALERT_COOLDOWN_MS 300000ULL
+#define TRACKER_EVENT_CODE_OBD_CONNECT_FAILED 2001
+#define TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED 2002
 
 /* RTC-retained context survives deep sleep and helps OTA/session continuity. */
 RTC_DATA_ATTR rtc_context_t g_rtc_context = {
@@ -79,7 +90,9 @@ static uint64_t s_last_obd_poll_ms = 0;
 static uint32_t s_session_id = 1;
 static uint64_t s_ignition_off_started_ms = 0;
 static bool s_status_running = false;
+#if !TRACKER_MQTT_RUNTIME_DISABLED
 static bool s_mqtt_started = false;
+#endif
 static bool s_gnss_started = false;
 static bool s_ota_confirm_checked = false;
 static bool s_imu_available = false;
@@ -93,10 +106,21 @@ static retry_state_t s_imu_bootstrap_retry = {0};
 static uint64_t s_last_rtc_sync_ms = 0;
 static bool s_time_trusted = false;
 static uint64_t s_event_timestamp_ms = 0;
+static bool s_prev_lte_initialized = false;
+static bool s_lte_ever_initialized = false;
+static uint32_t s_gnss_poll_fail_streak = 0;
+static uint64_t s_last_gnss_rearm_ms = 0;
 static bool s_hw_bootstrap_done = false;
 static bool s_sleep_disabled_log_once = false;
 static bool s_startup_system_check_log_once = false;
+static bool s_user_led_initialized = false;
+static uint64_t s_user_led_cycle_started_ms = 0;
 static char s_current_version[TRACKER_TARGET_VERSION_MAX_LEN] = CONFIG_APP_PROJECT_VER;
+static uint32_t s_metadata_seq_no = 0;
+static char s_boot_id[TRACKER_BOOT_ID_LEN] = {0};
+static bool s_obd_fail_alert_emitted = false;
+static int s_last_obd_fail_alert_code = 0;
+static uint64_t s_last_obd_fail_alert_ms = 0;
 
 static const retry_policy_t s_ble_retry_policy = {
     .mode = RETRY_MODE_FIXED,
@@ -242,6 +266,118 @@ static bool state_machine_can_poll_gnss(void) {
     return s_gnss_started && modem_lte_is_initialized();
 }
 
+static void state_machine_set_user_led(bool on) {
+    if (PIN_USER_LED == GPIO_NUM_NC) {
+        return;
+    }
+
+#if TRACKER_USER_LED_ACTIVE_LEVEL
+    gpio_set_level(PIN_USER_LED, on ? 1 : 0);
+#else
+    gpio_set_level(PIN_USER_LED, on ? 0 : 1);
+#endif
+}
+
+static void state_machine_update_user_led(void) {
+    if (PIN_USER_LED == GPIO_NUM_NC) {
+        return;
+    }
+
+    if (!s_user_led_initialized) {
+        gpio_config_t user_led_cfg = {
+            .pin_bit_mask = (1ULL << (uint32_t)PIN_USER_LED),
+            .mode = GPIO_MODE_OUTPUT,
+            .pull_up_en = GPIO_PULLUP_DISABLE,
+            .pull_down_en = GPIO_PULLDOWN_DISABLE,
+            .intr_type = GPIO_INTR_DISABLE,
+        };
+        ESP_ERROR_CHECK(gpio_config(&user_led_cfg));
+        s_user_led_initialized = true;
+        s_user_led_cycle_started_ms = util_uptime_ms();
+        state_machine_set_user_led(false);
+    }
+
+    uint64_t now_ms = util_uptime_ms();
+    if (s_user_led_cycle_started_ms == 0 || now_ms < s_user_led_cycle_started_ms) {
+        s_user_led_cycle_started_ms = now_ms;
+    }
+
+    while ((now_ms - s_user_led_cycle_started_ms) >= TRACKER_USER_LED_BLINK_PERIOD_MS) {
+        s_user_led_cycle_started_ms += TRACKER_USER_LED_BLINK_PERIOD_MS;
+    }
+
+    bool led_on = (now_ms - s_user_led_cycle_started_ms) < TRACKER_USER_LED_ON_MS;
+    state_machine_set_user_led(led_on);
+}
+
+static bool state_machine_try_rearm_gnss(const char *reason) {
+    uint64_t now_ms = util_uptime_ms();
+    if (s_last_gnss_rearm_ms != 0 && (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
+        return false;
+    }
+
+    s_last_gnss_rearm_ms = now_ms;
+    esp_err_t off_err = modem_gnss_power_off();
+    esp_err_t on_err = modem_gnss_power_on();
+
+    if (off_err == ESP_OK && on_err == ESP_OK) {
+        s_gnss_started = true;
+        s_gnss_poll_fail_streak = 0;
+        ESP_LOGW(TAG, "GNSS re-armed reason=%s", reason);
+        return true;
+    }
+
+    ESP_LOGW(TAG,
+             "GNSS re-arm failed reason=%s off=%s on=%s",
+             reason,
+             esp_err_to_name(off_err),
+             esp_err_to_name(on_err));
+    return false;
+}
+
+static bool state_machine_try_reassert_gnss_power(const char *reason) {
+    uint64_t now_ms = util_uptime_ms();
+    if (s_last_gnss_rearm_ms != 0 && (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
+        return false;
+    }
+
+    s_last_gnss_rearm_ms = now_ms;
+    esp_err_t on_err = modem_gnss_power_on();
+    if (on_err == ESP_OK) {
+        s_gnss_started = true;
+        s_gnss_poll_fail_streak = 0;
+        ESP_LOGW(TAG, "GNSS power reasserted reason=%s", reason);
+        return true;
+    }
+
+    ESP_LOGW(TAG,
+             "GNSS power reassert failed reason=%s on=%s",
+             reason,
+             esp_err_to_name(on_err));
+    return false;
+}
+
+static uint32_t state_machine_next_seq_no(void) {
+    s_metadata_seq_no += 1;
+    if (s_metadata_seq_no == 0) {
+        s_metadata_seq_no = 1;
+    }
+    return s_metadata_seq_no;
+}
+
+static void state_machine_fill_message_id(char *out, size_t out_size) {
+    util_generate_uuid_v4(out, out_size);
+}
+
+static void state_machine_init_boot_metadata(void) {
+    util_generate_boot_id(s_boot_id, sizeof(s_boot_id), g_rtc_context.boot_count);
+    s_metadata_seq_no = 0;
+    ESP_LOGI(TAG,
+             "metadata boot initialized boot_id=%s boot_count=%lu",
+             s_boot_id,
+             (unsigned long)g_rtc_context.boot_count);
+}
+
 static void state_machine_bootstrap_rtc(void) {
     if (s_hw_bootstrap_done || !rtc_ds3231m_is_available()) {
         return;
@@ -366,6 +502,14 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
         gnss_data_t gnss = {0};
         if (modem_gnss_get_location(&gnss) == ESP_OK) {
             s_telemetry.gnss = gnss;
+            s_gnss_poll_fail_streak = 0;
+        } else {
+            s_gnss_poll_fail_streak += 1;
+            if (s_gnss_poll_fail_streak >= TRACKER_GNSS_FAIL_REARM_THRESHOLD) {
+                if (state_machine_try_rearm_gnss("poll_fail_threshold")) {
+                    s_gnss_poll_fail_streak = 0;
+                }
+            }
         }
     }
 
@@ -379,7 +523,7 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
 }
 
 static bool state_machine_network_time_valid(uint64_t *out_time_ms) {
-    if (!tracker_mqtt_is_connected() || !s_telemetry.gnss.fix_valid) {
+    if (!s_telemetry.gnss.fix_valid) {
         return false;
     }
 
@@ -460,11 +604,25 @@ static void state_machine_update_time_source(void) {
 static void state_machine_publish_rawdata(void) {
     state_machine_update_time_source();
 
+    char message_id[TRACKER_METADATA_MESSAGE_ID_LEN] = {0};
+    state_machine_fill_message_id(message_id, sizeof(message_id));
+    uint32_t seq_no = state_machine_next_seq_no();
+
+    ESP_LOGD(TAG,
+             "mqtt rawdata metadata mid=%s seq=%lu boot=%s ts=%llu",
+             message_id,
+             (unsigned long)seq_no,
+             s_boot_id,
+             (unsigned long long)s_event_timestamp_ms);
+
     char *payload = data_format_rawdata(&s_config,
                                         &s_telemetry,
                                         true,
                                         s_time_trusted,
-                                        s_event_timestamp_ms);
+                                        s_event_timestamp_ms,
+                                        message_id,
+                                        seq_no,
+                                        s_boot_id);
     if (payload == NULL) {
         return;
     }
@@ -487,12 +645,27 @@ static void state_machine_publish_rawdata(void) {
 static void state_machine_publish_status(const char *status) {
     state_machine_update_time_source();
 
+    char message_id[TRACKER_METADATA_MESSAGE_ID_LEN] = {0};
+    state_machine_fill_message_id(message_id, sizeof(message_id));
+    uint32_t seq_no = state_machine_next_seq_no();
+
+    ESP_LOGI(TAG,
+             "mqtt status=%s metadata mid=%s seq=%lu boot=%s ts=%llu",
+             status,
+             message_id,
+             (unsigned long)seq_no,
+             s_boot_id,
+             (unsigned long long)s_event_timestamp_ms);
+
     char *payload = data_format_status(&s_config,
                                        status,
                                        s_session_id,
                                        true,
                                        s_time_trusted,
-                                       s_event_timestamp_ms);
+                                       s_event_timestamp_ms,
+                                       message_id,
+                                       seq_no,
+                                       s_boot_id);
     if (payload == NULL) {
         return;
     }
@@ -512,13 +685,29 @@ static void state_machine_publish_status(const char *status) {
 static void state_machine_publish_event(const char *event_type, int code, const char *message) {
     state_machine_update_time_source();
 
+    char message_id[TRACKER_METADATA_MESSAGE_ID_LEN] = {0};
+    state_machine_fill_message_id(message_id, sizeof(message_id));
+    uint32_t seq_no = state_machine_next_seq_no();
+
+    ESP_LOGI(TAG,
+             "mqtt event=%s code=%d metadata mid=%s seq=%lu boot=%s ts=%llu",
+             event_type,
+             code,
+             message_id,
+             (unsigned long)seq_no,
+             s_boot_id,
+             (unsigned long long)s_event_timestamp_ms);
+
     char *payload = data_format_event(&s_config,
                                       event_type,
                                       code,
                                       message,
                                       true,
                                       s_time_trusted,
-                                      s_event_timestamp_ms);
+                                      s_event_timestamp_ms,
+                                      message_id,
+                                      seq_no,
+                                      s_boot_id);
     if (payload == NULL) {
         return;
     }
@@ -544,11 +733,27 @@ static void state_machine_publish_firmware_payload(const firmware_status_t *firm
 
     state_machine_update_time_source();
 
+    char message_id[TRACKER_METADATA_MESSAGE_ID_LEN] = {0};
+    state_machine_fill_message_id(message_id, sizeof(message_id));
+    uint32_t seq_no = state_machine_next_seq_no();
+
+    ESP_LOGI(TAG,
+             "mqtt firmware status=%s progress=%u metadata mid=%s seq=%lu boot=%s ts=%llu",
+             firmware->status,
+             (unsigned)firmware->progress,
+             message_id,
+             (unsigned long)seq_no,
+             s_boot_id,
+             (unsigned long long)s_event_timestamp_ms);
+
     char *payload = data_format_firmware(&s_config,
                                          firmware,
                                          true,
                                          s_time_trusted,
-                                         s_event_timestamp_ms);
+                                         s_event_timestamp_ms,
+                                         message_id,
+                                         seq_no,
+                                         s_boot_id);
     if (payload == NULL) {
         return;
     }
@@ -560,6 +765,20 @@ static void state_machine_publish_firmware_payload(const firmware_status_t *firm
                                 s_time_trusted,
                                 s_event_timestamp_ms);
     cJSON_free(payload);
+}
+
+static void state_machine_publish_obd_failure_event_if_needed(uint64_t now_ms,
+                                                              int code,
+                                                              const char *message) {
+    bool is_new_error_type = !s_obd_fail_alert_emitted || (s_last_obd_fail_alert_code != code);
+    bool cooldown_elapsed = (now_ms - s_last_obd_fail_alert_ms) >= TRACKER_OBD_FAIL_ALERT_COOLDOWN_MS;
+
+    if (is_new_error_type || cooldown_elapsed) {
+        state_machine_publish_event("warning", code, message);
+        s_obd_fail_alert_emitted = true;
+        s_last_obd_fail_alert_code = code;
+        s_last_obd_fail_alert_ms = now_ms;
+    }
 }
 
 /**
@@ -637,13 +856,27 @@ static void state_machine_try_connect_ble(void) {
     s_ble_ctx = ble_obd_connect(state_machine_obd_response_cb, NULL);
     if (s_ble_ctx != NULL) {
         if (ble_obd_elm327_init(s_ble_ctx) == ESP_OK) {
+            s_obd_fail_alert_emitted = false;
+            s_last_obd_fail_alert_code = 0;
+            s_last_obd_fail_alert_ms = 0;
             retry_state_reset(&s_ble_retry);
             return;
         }
+
+        state_machine_publish_obd_failure_event_if_needed(
+            now_ms,
+            TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED,
+            "obd_elm327_init_failed");
         ble_obd_disconnect(s_ble_ctx);
         s_ble_ctx = NULL;
+        state_machine_schedule_ble_retry(now_ms, "connect_or_ble_stack_or_elm327_init_failed");
+        return;
     }
 
+    state_machine_publish_obd_failure_event_if_needed(
+        now_ms,
+        TRACKER_EVENT_CODE_OBD_CONNECT_FAILED,
+        "obd_connect_failed");
     state_machine_schedule_ble_retry(now_ms, "connect_or_ble_stack_or_elm327_init_failed");
 }
 
@@ -677,6 +910,7 @@ static void state_machine_try_connect_network(void) {
         return;
     }
     if (err != ESP_OK) {
+        s_prev_lte_initialized = false;
         state_machine_schedule_network_retry(now_ms, "modem_lte_tick", err);
         return;
     }
@@ -690,8 +924,9 @@ static void state_machine_try_connect_network(void) {
         s_gnss_started = true;
     }
 
-    if (!s_mqtt_started) {
-        /* Start MQTT client only once. */
+#if !TRACKER_MQTT_RUNTIME_DISABLED
+    if (!s_mqtt_started && s_gnss_started) {
+        /* Start MQTT only after GNSS power path is established to avoid early TCP/TLS race. */
         err = tracker_mqtt_connect();
         if (err != ESP_OK) {
             state_machine_schedule_network_retry(now_ms, "tracker_mqtt_connect", err);
@@ -699,9 +934,20 @@ static void state_machine_try_connect_network(void) {
         }
         s_mqtt_started = true;
     }
+#endif
 
     retry_state_reset(&s_network_retry);
 
+    bool lte_now_initialized = modem_lte_is_initialized();
+    if (lte_now_initialized && !s_prev_lte_initialized) {
+        if (s_lte_ever_initialized) {
+            (void)state_machine_try_reassert_gnss_power("lte_recovered");
+        }
+        s_lte_ever_initialized = true;
+    }
+    s_prev_lte_initialized = lte_now_initialized;
+
+#if !TRACKER_MQTT_RUNTIME_DISABLED
     if (s_config.command_subscribe_enabled) {
         err = tracker_mqtt_subscribe_commands();
         if (err != ESP_OK) {
@@ -709,6 +955,7 @@ static void state_machine_try_connect_network(void) {
             return;
         }
     }
+#endif
 
     retry_state_reset(&s_network_retry);
 }
@@ -869,6 +1116,12 @@ esp_err_t state_machine_init(const config_t *config) {
 
     memset(&s_telemetry, 0, sizeof(s_telemetry));
     s_config = *config;
+    ESP_LOGI(TAG,
+             "Runtime config device=%s mqtt_host=%s mqtt_port=%u mqtt_user_set=%d",
+             s_config.device_id,
+             s_config.mqtt_host,
+             (unsigned int)s_config.mqtt_port,
+             !util_string_empty(s_config.mqtt_username) ? 1 : 0);
     retry_state_reset(&s_ble_retry);
     retry_state_reset(&s_network_retry);
     retry_state_reset(&s_rtc_bootstrap_retry);
@@ -880,6 +1133,8 @@ esp_err_t state_machine_init(const config_t *config) {
     if (!util_string_empty(CONFIG_APP_PROJECT_VER)) {
         util_copy_string(s_current_version, sizeof(s_current_version), CONFIG_APP_PROJECT_VER);
     }
+
+    state_machine_init_boot_metadata();
 
     /* Bring up local sensors, modem, and transport modules. */
     ESP_RETURN_ON_FALSE(adc_reader_init() == ESP_OK, ESP_FAIL, TAG, "adc_reader_init failed");
@@ -894,6 +1149,10 @@ esp_err_t state_machine_init(const config_t *config) {
     s_time_trusted = false;
     s_event_timestamp_ms = 0;
     s_last_rtc_sync_ms = 0;
+    s_prev_lte_initialized = false;
+    s_lte_ever_initialized = false;
+    s_gnss_poll_fail_streak = 0;
+    s_last_gnss_rearm_ms = 0;
 
     esp_err_t rtc_init_err = rtc_ds3231m_init();
     if (rtc_init_err != ESP_OK) {
@@ -932,6 +1191,8 @@ esp_err_t state_machine_init(const config_t *config) {
  * @return Next state.
  */
 app_state_t state_machine_run(app_state_t current_state) {
+    state_machine_update_user_led();
+
     switch (current_state) {
         case APP_STATE_INIT:
             g_rtc_context.last_state = APP_STATE_INIT;
@@ -957,10 +1218,16 @@ app_state_t state_machine_run(app_state_t current_state) {
              * Bring modem path first; BLE OBD connect can block for multiple seconds and would
              * otherwise starve LTE AT FSM tick cadence during startup.
              */
-            if (modem_lte_is_initialized()) {
+            bool lte_ready = modem_lte_is_initialized();
+            if (lte_ready) {
                 state_machine_try_connect_ble();
             }
-            state_machine_refresh_telemetry(false, true);
+
+            /*
+             * Allow GNSS polling during startup checks once LTE stack is initialized.
+             * This keeps GNSS observability active even when ignition is still off.
+             */
+            state_machine_refresh_telemetry(lte_ready, true);
             bool ble_connected = (s_ble_ctx != NULL) && ble_obd_is_connected(s_ble_ctx);
             session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
             g_rtc_context.ign_last_known = s_telemetry.ignition;

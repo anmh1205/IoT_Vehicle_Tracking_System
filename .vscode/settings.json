@@ -1,3 +1,26 @@
 {
-  "cmake.sourceDirectory": "${workspaceFolder}/iot-vehicle-tracking-system-firmware"
+  "cmake.sourceDirectory": "${workspaceFolder}/iot-vehicle-tracking-system-firmware",
+  "latex-workshop.latex.tools": [
+    {
+      "name": "texify",
+      "command": "C:/Users/Admin/AppData/Local/Programs/MiKTeX/miktex/bin/x64/texify.exe",
+      "args": [
+        "--pdf",
+        "--batch",
+        "--synctex=1",
+        "--tex-option=--interaction=nonstopmode",
+        "--tex-option=--file-line-error",
+        "%DOC_EXT%"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "texify (MiKTeX)",
+      "tools": [
+        "texify"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipe.default": "first"
 }
