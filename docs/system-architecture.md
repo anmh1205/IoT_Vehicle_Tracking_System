@@ -45,7 +45,7 @@ The completed remediation spans two UI layers:
 - Policy types are evaluated as a matrix: `ADMIN_BOUNDARY` for strict polygon checks, `RADIUS` for center/radius checks, and `DISTANCE_QUOTA` for cycle-based distance accumulation.
 - The evaluator emits policy metrics for evaluation count, evaluation latency, violation count, and quota reset count through `src/infrastructure/metrics/app-metrics.ts`.
 - API surface for policy management is exposed under `src/api/routes/geofence.routes.ts` with policy CRUD, state lookup, and violation listing endpoints.
-- Thesis readability sync keeps `resources/reports/thesis/final/` aligned to the same glossary rules used in the documentation set.
+- Thesis readability sync keeps `resources/reports/thesis/final/` aligned to the same glossary rules used in the documentation set, and its figure generator now relies on canonical basenames so regenerated assets stay deterministic after filename normalization.
 - Realtime event names use colon-style contracts end to end so backend emitters and frontend consumers stay aligned.
 - Frontend feature code consumes unwrapped data, while transport-level errors stay confined to the API client and parser layer.
 - The BLE OBD session layer now tracks request/response health via rolling counters and periodic log snapshots in `main/src/ble_obd.c`, but the external OBD command contract remains unchanged.

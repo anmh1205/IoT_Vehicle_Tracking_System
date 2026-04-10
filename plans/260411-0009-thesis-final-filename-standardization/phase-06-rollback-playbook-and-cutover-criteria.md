@@ -6,8 +6,8 @@
 
 # Overview
 - Priority: P1
-- Status: pending
-- Brief: Định nghĩa rollback theo stage và tiêu chí go/no-go để cutover an toàn.
+- Status: completed
+- Brief: Rollback theo stage đã chốt; cutover criteria giữ nguyên scope.
 
 # Key Insights
 - Rename bulk không có rollback rõ là không deploy được.
@@ -45,10 +45,10 @@
 5. Chốt owner phê duyệt cutover + rollback authority.
 
 # Todo List
-- [ ] Freeze checkpoint strategy.
-- [ ] Freeze stage-by-stage rollback steps.
-- [ ] Freeze go/no-go criteria.
-- [ ] Freeze post-cutover smoke checklist.
+- [x] Freeze checkpoint strategy.
+- [x] Freeze stage-by-stage rollback steps.
+- [x] Freeze go/no-go criteria.
+- [x] Freeze post-cutover smoke checklist.
 
 # Success Criteria
 - Có rollback rõ cho mọi điểm fail chính.

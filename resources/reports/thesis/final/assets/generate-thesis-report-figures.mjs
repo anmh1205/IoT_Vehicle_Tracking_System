@@ -1,12 +1,12 @@
 ﻿import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { diagramByFileName } from "./thesis-mermaid-diagrams.mjs";
 
-const projectRoot = process.cwd();
-const chaptersDir = join(projectRoot, "resources", "reports", "thesis", "final");
-const assetsDir = join(chaptersDir, "assets");
+const assetsDir = dirname(fileURLToPath(import.meta.url));
+const chaptersDir = dirname(assetsDir);
 const figuresDir = join(assetsDir, "figures");
 const mermaidConfigPath = join(assetsDir, "mermaid-thesis-config.json");
 const mermaidTempDir = mkdtempSync(join(tmpdir(), "ivts-thesis-mermaid-"));
@@ -72,22 +72,17 @@ const getRenderSize = (figureName, code) => {
   return { width: 2600, height: 1700 };
 };
 
-const collectReferencedFigureNames = () => {
-  const chapterFiles = readdirSync(chaptersDir, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
-    .map((entry) => join(chaptersDir, entry.name));
+const canonicalChapterPath = join(chaptersDir, "thesis-final-report.md");
 
+const collectReferencedFigureNames = () => {
   const figureNameRegex = /(?:\.\/)?assets\/figures\/([^\s)]+)/gu;
   const names = new Set();
+  const content = readFileSync(canonicalChapterPath, "utf8");
 
-  for (const chapterPath of chapterFiles) {
-    const content = readFileSync(chapterPath, "utf8");
-    let match = figureNameRegex.exec(content);
-    while (match) {
-      names.add(match[1]);
-      match = figureNameRegex.exec(content);
-    }
-    figureNameRegex.lastIndex = 0;
+  let match = figureNameRegex.exec(content);
+  while (match) {
+    names.add(match[1]);
+    match = figureNameRegex.exec(content);
   }
 
   return [...names].sort();

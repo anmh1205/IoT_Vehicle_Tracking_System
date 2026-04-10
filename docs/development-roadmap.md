@@ -83,6 +83,7 @@
   - Firmware IMU runtime path switched to LIS3DSH naming and WHO_AM_I expectation in `iot-vehicle-tracking-system-firmware/main`.
   - Modem control abstraction expanded with RESET/DTR/STATUS/NET-LIGHT hooks (GPIO_NC placeholders pending final board pin mapping).
   - Thesis final markdown pair and impacted UML sources synced to LIS3DSH + PWR-KEY terminology.
+  - Thesis final asset basenames were standardized to canonical names so regenerated figure outputs resolve deterministically after filename normalization.
   - Figure render pipeline executed to regenerate synchronized SVG artifacts.
 
 ### Firmware Runtime Hardening Complete

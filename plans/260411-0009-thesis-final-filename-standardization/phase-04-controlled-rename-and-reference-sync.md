@@ -7,8 +7,8 @@
 
 # Overview
 - Priority: P1
-- Status: pending
-- Brief: Thực thi rename theo stage cố định, sync references đồng bộ, không rename mù.
+- Status: completed
+- Brief: Rename + sync refs hoàn tất; scope giữ nguyên.
 
 # Key Insights
 - Rename source trước, generated sau (hoặc regenerate) là đường an toàn nhất.
@@ -50,11 +50,11 @@
 7. Ghi execution log theo `manifest.id` + status.
 
 # Todo List
-- [ ] Create execution checkpoint.
-- [ ] Run S1 rename source set.
-- [ ] Run S2 reference sync set.
-- [ ] Run S3 figure regeneration.
-- [ ] Run S4 legacy cleanup and logging.
+- [x] Create execution checkpoint.
+- [x] Run S1 rename source set.
+- [x] Run S2 reference sync set.
+- [x] Run S3 figure regeneration.
+- [x] Run S4 legacy cleanup and logging.
 
 # Success Criteria
 - Tất cả record trong manifest-approved được apply hoặc có exception approved.

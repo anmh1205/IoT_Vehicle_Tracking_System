@@ -1,7 +1,7 @@
 ---
 title: "Plan bulk filename standardization for thesis final"
 description: "Safe staged migration to clean thesis final filenames and sync all references/build outputs."
-status: pending
+status: completed
 priority: P2
 effort: 12h
 branch: feature/cicd
@@ -30,9 +30,9 @@ Chuẩn hóa tên file trong `resources/reports/thesis/final`, loại prefix b�
 1. [phase-01-inventory-and-naming-freeze.md](./phase-01-inventory-and-naming-freeze.md) — Chốt inventory + policy + cấm drift.
 2. [phase-02-dependency-scan-and-manifest-design.md](./phase-02-dependency-scan-and-manifest-design.md) — Quét dependency và thiết kế manifest rename.
 3. [phase-03-dry-run-and-conflict-resolution.md](./phase-03-dry-run-and-conflict-resolution.md) — Dry-run, chặn xung đột, chốt cut list.
-4. [phase-04-controlled-rename-and-reference-sync.md](./phase-04-controlled-rename-and-reference-sync.md) — Rename có kiểm soát + sync refs.
-5. [phase-05-build-basename-alignment-and-validation.md](./phase-05-build-basename-alignment-and-validation.md) — Căn basename build theo `.tex` canonical + validate.
-6. [phase-06-rollback-playbook-and-cutover-criteria.md](./phase-06-rollback-playbook-and-cutover-criteria.md) — Rollback theo stage + tiêu chí cutover.
+4. [phase-04-controlled-rename-and-reference-sync.md](./phase-04-controlled-rename-and-reference-sync.md) — Completed: rename có kiểm soát + sync refs.
+5. [phase-05-build-basename-alignment-and-validation.md](./phase-05-build-basename-alignment-and-validation.md) — Completed: căn basename build theo `.tex` canonical + validate.
+6. [phase-06-rollback-playbook-and-cutover-criteria.md](./phase-06-rollback-playbook-and-cutover-criteria.md) — Completed: rollback theo stage + tiêu chí cutover.
 
 # Dependency trọng yếu cần khóa cứng
 - `resources/reports/thesis/final/assets/thesis-mermaid-diagrams.mjs`: map `.mmd` -> `.svg` theo filename.

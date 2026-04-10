@@ -171,6 +171,38 @@
 \newcommand{\mainmatterstart}{\clearpage\pagenumbering{arabic}\setcounter{page}{1}}
 \newcommand{\checkbox}{\(\square\)}
 \newcommand{\thesisspacer}{\hspace{2em}}
+\newcommand{\thesisofficialheader}{%
+  \noindent
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \textbf{BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\
+    \textbf{ĐẠI HỌC PHENIKAA}\\
+    \rule{0.72\linewidth}{0.6pt}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \textbf{CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM}\\
+    \textbf{Độc lập - Tự do - Hạnh phúc}\\
+    \rule{0.72\linewidth}{0.6pt}
+  \end{minipage}
+  \par\vspace{0.6cm}
+}
+\newcommand{\thesissignaturepair}[4]{%
+  \vspace{0.8cm}
+  \noindent
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \textbf{#1}\\
+    \emph{(Ký, ghi rõ họ tên)}\\[2.8cm]
+    #2
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \textbf{#3}\\
+    \emph{(Ký, ghi rõ họ tên)}\\[2.8cm]
+    #4
+  \end{minipage}
+}
 \newcommand{\thesisfigurecaption}[1]{%
   \begin{center}\emph{#1}\end{center}%
 }
@@ -200,21 +232,38 @@
 \pagenumbering{gobble}
 
 \thispagestyle{empty}
-\begin{center}
-\textbf{BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\
-\textbf{ĐẠI HỌC PHENIKAA}\\[0.25cm]
-\rule{0.55\linewidth}{0.6pt}
-\vspace*{2.2cm}
+\noindent
+\begin{minipage}[t][0.90\textheight][t]{0.15\textwidth}
+  \centering
+  \vspace{0.05\textheight}
+  \rotatebox{90}{\textbf{\Large LE TRONG AN}}\\[1.6cm]
+  \rotatebox{90}{\textbf{\large KY THUAT CO DIEN TU}}
+\end{minipage}\hfill
+\begin{minipage}[t][0.90\textheight][t]{0.80\textwidth}
+  \begin{center}
+    \textbf{BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\
+    \textbf{ĐẠI HỌC PHENIKAA}\\[0.25cm]
+    \rule{0.58\linewidth}{0.6pt}
+    \vspace*{2.0cm}
 
-{\Large\textbf{ĐỒ ÁN TỐT NGHIỆP}}\\[0.9cm]
-{\Large\textbf{THIẾT KẾ HỆ THỐNG IOT CHO ỨNG DỤNG QUẢN LÝ}}\\
-{\Large\textbf{PHƯƠNG TIỆN GIAO THÔNG TRONG LĨNH VỰC}}\\
-{\Large\textbf{CHO THUÊ XE TỰ LÁI}}
-\vfill
+    {\Large\textbf{ĐỒ ÁN TỐT NGHIỆP}}\\[0.9cm]
+    {\Large\textbf{THIẾT KẾ HỆ THỐNG IOT CHO ỨNG DỤNG QUẢN LÝ}}\\
+    {\Large\textbf{PHƯƠNG TIỆN GIAO THÔNG TRONG LĨNH VỰC}}\\
+    {\Large\textbf{CHO THUÊ XE TỰ LÁI}}
+    \vfill
 
-\textbf{LÊ TRỌNG AN}\\[0.4cm]
-\textbf{HÀ NỘI - 2026}
-\end{center}
+    \begin{minipage}{0.92\linewidth}
+      \raggedright
+      \textbf{Sinh viên:} Lê Trọng An\\
+      \textbf{Mã số sinh viên:} 21010389 \hfill \textbf{Khóa:} K15\\
+      \textbf{Ngành:} Kỹ thuật Cơ Điện tử \hfill \textbf{Hệ:} Đại học chính quy\\
+      \textbf{Giảng viên hướng dẫn:} TS. Nguyễn Đức Nam
+    \end{minipage}
+
+    \vspace{0.7cm}
+    \textbf{HÀ NỘI -- 2026}
+  \end{center}
+\end{minipage}
 \clearpage
 
 \thispagestyle{empty}
@@ -230,22 +279,16 @@
 {\large\textbf{CHO THUÊ XE TỰ LÁI}}
 \vfill
 
-\begin{tabular}{|l|l|}
-\hline
-\textbf{Sinh viên:} & \textbf{Lê Trọng An} \\
-\hline
-\textbf{Mã số sinh viên:} & \textbf{21010389} \\
-\hline
-\textbf{Lớp:} & \textbf{K15-KTCĐT2} \\
-\hline
-\textbf{Ngành:} & \textbf{Kỹ thuật Cơ điện tử} \\
-\hline
-\textbf{Giảng viên hướng dẫn:} & \textbf{TS. Nguyễn Đức Nam} \\
-\hline
-\end{tabular}
+\begin{minipage}{0.84\linewidth}
+  \raggedright
+  \textbf{Sinh viên:} Lê Trọng An\\
+  \textbf{Mã số sinh viên:} 21010389 \hfill \textbf{Khóa:} K15\\
+  \textbf{Ngành:} Kỹ thuật Cơ Điện tử \hfill \textbf{Hệ:} Đại học chính quy\\
+  \textbf{Giảng viên hướng dẫn:} TS. Nguyễn Đức Nam
+\end{minipage}
 
 \vspace{1.0cm}
-\textbf{HÀ NỘI - 2026}
+\textbf{HÀ NỘI -- 2026}
 \end{center}
 \clearpage
 
@@ -257,251 +300,187 @@
 \vspace*{1.8cm}
 
 \textbf{MEM710071 -- CAPSTONE DESIGN 2}
-\vspace*{1.8cm}
+\vspace*{0.8cm}
 
 {\Large\textbf{DESIGN OF AN IOT SYSTEM FOR VEHICLE MANAGEMENT}}\\
-{\Large\textbf{IN SELF-DRIVE CAR RENTAL SERVICES}}
+{\Large\textbf{IN SELF-DRIVE CAR RENTAL SERVICES}}\\[0.2cm]
+\textbf{Semester: I Academic year: 2025--2026}
 \vfill
 
-\begin{tabular}{|l|l|}
-\hline
-\textbf{Student:} & \textbf{Le Trong An} \\
-\hline
-\textbf{Student ID:} & \textbf{21010389} \\
-\hline
-\textbf{Supervisor:} & \textbf{Dr. Nguyen Duc Nam} \\
-\hline
+\begin{tabular}{lll}
+\textbf{Project Team:} & & \\
+\textbf{Student name} & \textbf{Student ID} & \textbf{Cohort} \\
+Le Trong An & 21010389 & K15 \\
 \end{tabular}
 
-\vspace{1.0cm}
-\textbf{HANOI - 2026}
+\vspace{0.4cm}
+\textbf{Course Instructor:} Dr. Nguyen Duc Nam
+
+\vfill
+This report is submitted to the Faculty of Mechanical Engineering and Mechatronics,\\
+School of Engineering, Phenikaa University in partial fulfillment of the requirements\\
+of the Graduation Thesis course MEM710071.
+
+\vspace{0.7cm}
+\textbf{HANOI -- 2026}
 \end{center}
 \clearpage
 
-\majorheading{NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN HƯỚNG DẪN}
+\thispagestyle{empty}
+\begin{center}
+  \textbf{ĐẠI HỌC PHENIKAA}\\
+  \textbf{KHOA CƠ KHÍ -- CƠ ĐIỆN TỬ}\\[0.25cm]
+  \rule{0.56\linewidth}{0.6pt}
+  \vspace*{1.2cm}
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline \textbf{} & \textbf{} \\
-\hline
-\endhead
-\hline
-\endlastfoot
-\textbf{Giảng viên hướng dẫn:} & TS. Nguyễn Đức Nam \\
-\textbf{Khoa:} & Cơ khí - Cơ Điện tử \\
-\textbf{Tên đề tài:} & Thiết kế hệ thống IoT cho ứng dụng quản lý phương
-tiện giao thông trong lĩnh vực cho thuê xe tự lái \\
-\textbf{Sinh viên thực hiện:} & Lê Trọng An \\
-\textbf{Lớp:} & K15-KTCĐT2 \\
-\end{longtable}
-}
+  \textbf{MEM710071}\\
+  {\Large\textbf{ĐỒ ÁN TỐT NGHIỆP}}\\
+  {\large\textbf{THIẾT KẾ HỆ THỐNG IOT CHO ỨNG DỤNG QUẢN LÝ}}\\
+  {\large\textbf{PHƯƠNG TIỆN GIAO THÔNG TRONG LĨNH VỰC CHO THUÊ XE TỰ LÁI}}\\
+  \vspace{0.4cm}
+  \textbf{Học kỳ I Năm học 2025--2026}
+  \vfill
 
-\textbf{NỘI DUNG NHẬN XÉT}
+  \begin{tabular}{lll}
+    \textbf{Họ và tên sinh viên} & \textbf{Mã số sinh viên} & \textbf{Lớp} \\
+    Lê Trọng An & 21010389 & K15-KTCĐT2 \\
+  \end{tabular}
 
-\textbf{I. Nhận xét Đồ án tốt nghiệp:}
+  \vspace{0.5cm}
+  \textbf{Giáo viên hướng dẫn:} TS. Nguyễn Đức Nam
 
-\begin{itemize}
-\tightlist
-\item
-  Nhận xét về hình thức: .............................
-\item
-  Tính cấp thiết của đề tài: .............................
-\item
-  Mục tiêu của đề tài: .............................
-\item
-  Nội dung của đề tài: .............................
-\item
-  Tài liệu tham khảo: .............................
-\item
-  Phương pháp nghiên cứu: .............................
-\item
-  Tính sáng tạo và ứng dụng: .............................
-\end{itemize}
+  \vspace{1.6cm}
+  \textbf{HÀ NỘI, 2026}
+\end{center}
+\clearpage
 
-\textbf{II. Nhận xét về tinh thần và thái độ làm việc của sinh viên:}
+\thispagestyle{empty}
+\thesisofficialheader
+\begin{center}
+  \textbf{\Large NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN HƯỚNG DẪN}
+\end{center}
 
-.............................
+\textbf{Giảng viên hướng dẫn:} TS. Nguyễn Đức Nam \hfill \textbf{Khoa:} Cơ khí -- Cơ Điện tử.\\
+\textbf{Tên đề tài:} Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái.\\
+\textbf{Sinh viên thực hiện:} Lê Trọng An. \hfill \textbf{Lớp:} K15-KTCĐT2.
 
-\textbf{III. Kết quả đạt được:}
+\begin{center}
+  \textbf{NỘI DUNG NHẬN XÉT}
+\end{center}
+\textbf{I. Nhận xét Đồ án tốt nghiệp:}\\
+- Nhận xét về hình thức: \dotfill\\[0.55cm]
+- Tính cấp thiết của đề tài: \dotfill\\[0.55cm]
+- Mục tiêu của đề tài: \dotfill\\[0.55cm]
+- Nội dung của đề tài: \dotfill\\[0.55cm]
+- Tài liệu tham khảo: \dotfill\\[0.55cm]
+- Phương pháp nghiên cứu: \dotfill\\[0.55cm]
+- Tính sáng tạo và ứng dụng: \dotfill\\[0.55cm]
+\textbf{II. Nhận xét về tinh thần và thái độ làm việc của sinh viên:} \dotfill\\[0.55cm]
+\textbf{III. Kết quả đạt được:} \dotfill\\[0.55cm]
+\textbf{IV. Kết luận:} Đồng ý cho bảo vệ: \checkbox \thesisspacer Không đồng ý cho bảo vệ: \checkbox
 
-.............................
+\begin{flushright}
+  Hà Nội, ngày \ldots, tháng \ldots năm 20\ldots\\
+  \textbf{GIẢNG VIÊN HƯỚNG DẪN}\\
+  \emph{(Ký, ghi rõ họ tên)}\\[2.6cm]
+  TS. Nguyễn Đức Nam
+\end{flushright}
+\clearpage
 
-\textbf{IV. Kết luận:}
+\thispagestyle{empty}
+\thesisofficialheader
+\begin{center}
+  \textbf{\Large NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN PHẢN BIỆN}
+\end{center}
 
-\checkbox\ Đồng ý cho bảo vệ \thesisspacer \checkbox\ Không đồng ý cho bảo vệ
+\textbf{Giảng viên phản biện:} \dotfill \hfill \textbf{Khoa:} \dotfill\\
+\textbf{Tên đề tài:} Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái.\\
+\textbf{Sinh viên thực hiện:} Lê Trọng An \hfill \textbf{Lớp:} K15-KTCĐT2\\
+\textbf{Giảng viên hướng dẫn:} TS. Nguyễn Đức Nam
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline \textbf{} & \textbf{} \\
-\hline
-\endhead
-\hline
-\endlastfoot
-\textbf{Điểm đánh giá:} & ......./10 \\
-\textbf{Ngày:} & ......./......./2026 \\
-\textbf{Chữ ký:} & \\
-\end{longtable}
-}
+\begin{center}
+  \textbf{NỘI DUNG NHẬN XÉT}
+\end{center}
+\textbf{I. Nhận xét Đồ án tốt nghiệp:}\\
+- Bố cục, hình thức trình bày: \dotfill\\[0.55cm]
+- Đảm bảo tính cấp thiết, hiện đại, không trùng lặp: \dotfill\\[0.55cm]
+- Nội dung: \dotfill\\[0.55cm]
+- Mức độ thực hiện: \dotfill\\[0.55cm]
+\textbf{II. Kết quả đạt được:} \dotfill\\[0.55cm]
+\textbf{III. Ưu nhược điểm:} \dotfill\\[0.55cm]
+\textbf{IV. Kết luận:} Đồng ý cho bảo vệ: \checkbox \thesisspacer Không đồng ý cho bảo vệ: \checkbox
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\begin{flushright}
+  Hà Nội, ngày \ldots, tháng \ldots năm 20\ldots\\
+  \textbf{GIẢNG VIÊN PHẢN BIỆN}\\
+  \emph{(Ký, ghi rõ họ tên)}\\[2.6cm]
+  \dotfill
+\end{flushright}
+\clearpage
 
-\majorheading{NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN PHẢN BIỆN}
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline \textbf{} & \textbf{} \\
-\hline
-\endhead
-\hline
-\endlastfoot
-\textbf{Giảng viên phản biện:} & {[}...{]} \\
-\textbf{Khoa:} & Cơ khí - Cơ Điện tử \\
-\textbf{Tên đề tài:} & Thiết kế hệ thống IoT cho ứng dụng quản lý phương
-tiện giao thông trong lĩnh vực cho thuê xe tự lái \\
-\textbf{Sinh viên thực hiện:} & Lê Trọng An \\
-\textbf{Lớp:} & K15-KTCĐT2 \\
-\end{longtable}
-}
-
-\textbf{NỘI DUNG NHẬN XÉT}
-
-\textbf{I. Nhận xét Đồ án tốt nghiệp:}
-
-\begin{itemize}
-\tightlist
-\item
-  Nhận xét về hình thức: .............................
-\item
-  Tính cấp thiết của đề tài: .............................
-\item
-  Mục tiêu của đề tài: .............................
-\item
-  Nội dung của đề tài: .............................
-\item
-  Tài liệu tham khảo: .............................
-\item
-  Phương pháp nghiên cứu: .............................
-\item
-  Tính sáng tạo và ứng dụng: .............................
-\end{itemize}
-
-\textbf{II. Nhận xét về tinh thần và thái độ làm việc của sinh viên:}
-
-.............................
-
-\textbf{III. Ưu nhược điểm:}
-
-\begin{itemize}
-\tightlist
-\item
-  Ưu điểm: .............................
-\item
-  Nhược điểm: .............................
-\end{itemize}
-
-\textbf{IV. Kết quả đạt được:}
-
-.............................
-
-\textbf{V. Kết luận:}
-
-\checkbox\ Đồng ý cho bảo vệ \thesisspacer \checkbox\ Không đồng ý cho bảo vệ
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline \textbf{} & \textbf{} \\
-\hline
-\endhead
-\hline
-\endlastfoot
-\textbf{Điểm đánh giá:} & ......./10 \\
-\textbf{Ngày:} & ......./......./2026 \\
-\textbf{Chữ ký:} & \\
-\end{longtable}
-}
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
-
-\majorheading{BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP}
+\thispagestyle{empty}
+\thesisofficialheader
+\begin{center}
+  \textbf{\Large BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP}
+\end{center}
 
 \textbf{I. Thông tin chung}
+\begin{enumerate}
+  \item Thời gian: từ \ldots giờ \ldots đến \ldots giờ \ldots ngày \ldots/\ldots/20\ldots
+  \item Địa điểm: \dotfill
+  \item Họ và tên sinh viên: Lê Trọng An \hfill Mã số SV: 21010389
+  \item Lớp: K15-KTCĐT2 \hfill Ngành: Kỹ thuật Cơ Điện tử \hfill Khóa: K15
+  \item Tên đề tài: Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái.
+  \item Giảng viên hướng dẫn: TS. Nguyễn Đức Nam
+\end{enumerate}
 
-\begin{itemize}
-\tightlist
-\item
-  Thời gian: từ ... giờ ... đến ... giờ ... ngày .../..../20...
-\item
-  Địa điểm: .............................
-\item
-  Họ và tên sinh viên: Lê Trọng An \thesisspacer Mã số SV: 21010389
-\item
-  Lớp: K15-KTCĐT2 \thesisspacer Ngành: Kỹ thuật Cơ điện tử \thesisspacer Khóa: K15
-\item
-  Tên đề tài: Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện
-  giao thông trong lĩnh vực cho thuê xe tự lái
-\item
-  Giảng viên hướng dẫn: TS. Nguyễn Đức Nam
-\end{itemize}
+\textbf{II. Thành phần hội đồng}
+\begin{enumerate}
+  \item \dotfill Chủ tịch
+  \item \dotfill Thư ký
+  \item \dotfill Giảng viên phản biện
+  \item \dotfill Ủy viên 1
+\end{enumerate}
 
-\textbf{II. Thành phần hội đồng:} {[}...{]}
+\textbf{III. Tổng hợp câu hỏi của thành viên hội đồng:} \dotfill\\[0.6cm]
+\textbf{IV. Tổng hợp nội dung trả lời của sinh viên:} \dotfill\\[0.6cm]
+\textbf{V. Nội dung đánh giá của Hội đồng}
+\begin{enumerate}
+  \item Ý nghĩa của đồ án: \dotfill
+  \item Về nội dung, kết cấu của đồ án: \dotfill
+  \item Phương pháp nghiên cứu: \dotfill
+  \item Các kết quả nghiên cứu đạt được: \dotfill
+\end{enumerate}
+\textbf{VI. Điểm kết luận:} \dotfill\ (Bằng chữ: \dotfill)
 
-\textbf{III. Tổng hợp câu hỏi của thành viên hội đồng:}
-.............................
+\thesissignaturepair{CHỦ TỊCH HỘI ĐỒNG}{}{THƯ KÝ}{}
+\clearpage
 
-\textbf{IV. Tổng hợp nội dung trả lời của sinh viên:}
-.............................
-
-\textbf{V. Nội dung đánh giá của Hội đồng:}
-
-\begin{itemize}
-\tightlist
-\item
-  Ý nghĩa của đồ án: .............................
-\item
-  Về nội dung, kết cấu của đồ án: .............................
-\item
-  Phương pháp nghiên cứu: .............................
-\item
-  Các kết quả nghiên cứu đạt được: .............................
-\end{itemize}
-
-\textbf{VI. Điểm kết luận:} .............. (Bằng chữ: ..............)
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
-
-\majorheading{GIẢI TRÌNH CÁC CHỈNH SỬA}
-
-\emph{(Nếu có)}
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline \textbf{STT} & \textbf{Nội dung yêu cầu chỉnh sửa} & \textbf{Nội dung đã chỉnh sửa} & \textbf{Ghi chú} \\
-\hline
-\endhead
-\hline
-\endlastfoot
-1 & & & \\
-2 & & & \\
-3 & & & \\
-\end{longtable}
-}
-
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\thispagestyle{empty}
+\begin{center}
+  \textbf{\Large GIẢI TRÌNH CÁC CHỈNH SỬA}\\[0.3cm]
+  \emph{(Nếu có)}
+\end{center}
+\clearpage
 
 \frontmatterstart
-\majorheading{LỜI CAM ĐOAN}\label{lux1eddi-cam-ux111oan}
+\majorheading{LỜI CAM ĐOAN}
 
-Tôi xin cam đoan đồ án tốt nghiệp với đề tài \textbf{"Thiết kế hệ thống
-IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê
-xe tự lái"} là công trình nghiên cứu của riêng tôi dưới sự hướng dẫn của
-TS. Nguyễn Đức Nam.
+Tên tôi là: Lê Trọng An.\\
+Mã sinh viên: 21010389 \hfill Lớp: K15-KTCĐT2\\
+Ngành: Kỹ thuật Cơ Điện tử.
 
-Các số liệu, kết quả trình bày trong đồ án là trung thực và chưa từng
-được công bố trong bất kỳ công trình nghiên cứu nào khác. Các tài liệu
-tham khảo, trích dẫn trong đồ án đều được ghi rõ nguồn gốc.
+Tôi đã thực hiện đồ án tốt nghiệp với đề tài: \textbf{Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái}.
 
-Tôi xin chịu hoàn toàn trách nhiệm về nội dung đồ án tốt nghiệp của
-mình.
+Tôi xin cam đoan đây là đề tài nghiên cứu của riêng tôi và được sự hướng dẫn của TS. Nguyễn Đức Nam.
+
+Các nội dung nghiên cứu, kết quả trong đề tài này là trung thực và chưa được công bố dưới bất kỳ hình thức nào. Nếu phát hiện có bất kỳ hình thức gian lận nào, tôi xin hoàn toàn chịu trách nhiệm trước pháp luật.
+
+\begin{flushright}
+  Hà Nội, ngày \ldots, tháng \ldots năm 20\ldots
+\end{flushright}
+
+\thesissignaturepair{GIẢNG VIÊN HƯỚNG DẪN}{TS. Nguyễn Đức Nam}{SINH VIÊN THỰC HIỆN}{Lê Trọng An}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 

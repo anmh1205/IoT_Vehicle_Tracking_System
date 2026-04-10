@@ -47,8 +47,8 @@
 ### Hardware Spec Firmware Thesis Sync (In Progress)
 - Renamed firmware IMU module from LIS3DH naming to LIS3DSH (`main/src/imu_lis3dsh.c`, `main/inc/imu_lis3dsh.h`, `main/CMakeLists.txt`, `main/src/state_machine.c`, `main/inc/pin_map.h`) and aligned WHO_AM_I check to LIS3DSH (`0x3F`).
 - Expanded modem control abstraction in firmware power/modem flow: added placeholders for `RESET`, `SIM-DTR`, `STATUS`, `NET-LIGHT` in `main/inc/pin_map.h`; added `modem_reset_pulse`, `modem_set_dtr`, `modem_read_status`, `modem_read_netlight` in `main/src/power_mgr.c` + `main/inc/power_mgr.h`; integrated DTR + AT reset recovery + status/netlight logging in `main/src/modem_lte.c`.
-- Synced thesis final markdown pair (`resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh-readability-draft.md`, `resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`) and impacted Mermaid UML sources to LIS3DSH terminology plus PWR-KEY naming.
-- Regenerated thesis figure artifacts via `resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs` (88 SVG outputs rendered) to keep source and rendered assets consistent.
+- Standardized thesis final asset basenames under `resources/reports/thesis/final/` and synced the markdown pair (`resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh-readability-draft.md`, `resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`) plus impacted Mermaid UML sources to LIS3DSH terminology and PWR-KEY naming.
+- Regenerated thesis figure artifacts via `resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs` (88 SVG outputs rendered) with deterministic basename resolution so regenerated assets stay aligned after filename normalization.
 
 ## 2026-03-31
 ### API Response Contract Hard Cutover (Completed)

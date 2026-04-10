@@ -6,8 +6,8 @@
 
 # Overview
 - Priority: P1
-- Status: pending
-- Brief: Căn output build LaTeX cùng basename với canonical `.tex`, rồi validate toàn diện.
+- Status: completed
+- Brief: Validation scoped PASS; basename build khớp canonical `.tex`.
 
 # Key Insights
 - Drift `thesis-build.*` vs canonical `.tex` làm khó trace artifact và rollback.
@@ -47,11 +47,11 @@
 6. Tổng hợp checklist pass/fail; fail thì quay lại phase 3/4.
 
 # Todo List
-- [ ] Lock build command with canonical basename.
-- [ ] Run figure generation validation.
-- [ ] Run latex build validation.
-- [ ] Run grep + broken-link/path validation.
-- [ ] Produce final validation report.
+- [x] Lock build command with canonical basename.
+- [x] Run figure generation validation.
+- [x] Run latex build validation.
+- [x] Run grep + broken-link/path validation.
+- [x] Produce final validation report.
 
 # Success Criteria
 - Output basename không drift khỏi canonical `.tex`.
@@ -85,3 +85,4 @@
 - Output bắt buộc: `thesis-final-report.pdf`.
 - Không chấp nhận `thesis-build.pdf`.
 - `.log/.aux/.tmp` là artifact untracked; chỉ giữ PDF final theo policy đã chốt.
+- Generator script đã vá: bỏ `process.cwd()`, neo theo `import.meta.url`, chỉ quét canonical `thesis-final-report.md`.

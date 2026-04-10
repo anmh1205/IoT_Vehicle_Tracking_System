@@ -42,6 +42,7 @@
 - Keep thesis final markdown and Mermaid labels short, self-standing, and glossary-aligned.
 - Preserve technical names, protocol names, and library names exactly when they are load-bearing.
 - Prefer Vietnamese descriptive prose for explanatory copy; keep English only for canonical product/tool names.
+- Keep thesis final asset basenames canonical so the figure generator resolves outputs deterministically after filename normalization.
 - Update the related thesis assets and docs together so captions, labels, and summaries do not drift.
 
 ## MQTT and Realtime Contract Standards
