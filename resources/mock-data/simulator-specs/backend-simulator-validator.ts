@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import type { MqttTopicContract, SimulatorPayload } from './backend-simulator-types';
+
+const REQUIRED_METADATA_FIELDS = ['schema_version', 'message_id', 'sent_at', 'seq_no', 'boot_id'] as const;
 
 export const startSimulatorSchema = z
   .object({
@@ -42,3 +45,50 @@ export const startSimulatorSchema = z
       });
     }
   });
+
+export const validateContractMetadata = (payload: SimulatorPayload): string[] => {
+  const errors: string[] = [];
+
+  for (const field of REQUIRED_METADATA_FIELDS) {
+    if (payload[field] === undefined || payload[field] === null || payload[field] === '') {
+      errors.push(`missing_${field}`);
+    }
+  }
+
+  if (payload.schema_version !== undefined && typeof payload.schema_version !== 'string') {
+    errors.push('invalid_schema_version_type');
+  }
+
+  if (payload.message_id !== undefined && typeof payload.message_id !== 'string') {
+    errors.push('invalid_message_id_type');
+  }
+
+  if (payload.sent_at !== undefined && Number.isNaN(Date.parse(String(payload.sent_at)))) {
+    errors.push('invalid_sent_at_iso');
+  }
+
+  if (payload.seq_no !== undefined && !Number.isInteger(payload.seq_no)) {
+    errors.push('invalid_seq_no_integer');
+  }
+
+  if (payload.boot_id !== undefined && typeof payload.boot_id !== 'string') {
+    errors.push('invalid_boot_id_type');
+  }
+
+  return errors;
+};
+
+export const validatePayloadForTopic = (
+  topicContract: MqttTopicContract,
+  payload: SimulatorPayload,
+): string[] => {
+  const errors = validateContractMetadata(payload);
+
+  for (const field of topicContract.requiredFields) {
+    if (payload[field] === undefined || payload[field] === null || payload[field] === '') {
+      errors.push(`missing_topic_field:${field}`);
+    }
+  }
+
+  return errors;
+};

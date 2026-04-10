@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { createUserSchema, loginSchema, updateUserSchema } from './auth.validator';
 
 describe('auth.validator', () => {

@@ -83,13 +83,20 @@
 % Allow footnotes in longtable head/foot
 \IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
 \makesavenoteenv{longtable}
+\providecommand{\tabularnewline}{\\}
 \newcommand{\thesislongtableorignewline}{}
+\newcommand{\thesislongtableorigtabularnewline}{}
 \AtBeginEnvironment{longtable}{%
   \normalsize
   \let\thesislongtableorignewline\\
+  \let\thesislongtableorigtabularnewline\tabularnewline
   \renewcommand{\\}{\thesislongtableorignewline\hline}%
+  \renewcommand{\tabularnewline}{\thesislongtableorigtabularnewline\hline}%
 }
-\AtEndEnvironment{longtable}{\let\\\thesislongtableorignewline}
+\AtEndEnvironment{longtable}{%
+  \let\\\thesislongtableorignewline
+  \let\tabularnewline\thesislongtableorigtabularnewline
+}
 \usepackage{graphicx}
 \makeatletter
 \newsavebox\pandoc@box
@@ -98,34 +105,45 @@
   \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
   \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
   \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
-  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
-  \else\usebox{\pandoc@box}%
+  \ifdim\@tempa\p@<\p@\makebox[\linewidth][c]{\scalebox{\@tempa}{\usebox\pandoc@box}}%
+  \else\makebox[\linewidth][c]{\usebox\pandoc@box}%
   \fi%
 }
 % Set default figure placement to htbp
 \def\fps@figure{htbp}
 \makeatother
-\usepackage{svg}
 \usepackage{xstring}
-\svgsetup{inkscapeformat=pdf,inkscapelatex=false}
 \newcommand{\safeincludesvg}[1]{%
   \StrSubstitute{#1}{.svg}{.png}[\safeincludepngpath]%
-  \IfFileExists{\safeincludepngpath}{\includegraphics[width=0.74\linewidth,keepaspectratio]{\safeincludepngpath}}{%
-    \IfFileExists{#1}{\includesvg[width=0.74\linewidth,keepaspectratio]{#1}}{%
-      \fbox{\parbox{0.9\linewidth}{\centering Missing figure file:\\ \texttt{\detokenize{#1}}}}%
+  \StrSubstitute{#1}{./assets/figures/}{./svg-inkscape/}[\safeincludepdfbasepath]%
+  \StrSubstitute{\safeincludepdfbasepath}{.svg}{_svg-raw.pdf}[\safeincludepdfpath]%
+  \IfFileExists{\safeincludepngpath}{%
+    \includegraphics[width=0.92\linewidth,height=0.70\textheight,keepaspectratio]{\safeincludepngpath}%
+  }{%
+    \IfFileExists{\safeincludepdfpath}{%
+      \includegraphics[width=0.92\linewidth,height=0.70\textheight,keepaspectratio]{\safeincludepdfpath}%
+    }{%
+      \fbox{\parbox{0.9\linewidth}{\centering Missing figure assets for:\\ \texttt{\detokenize{#1}}}}%
     }%
   }%
 }
 \newcommand{\safeincludesvgsmall}[1]{%
   \StrSubstitute{#1}{.svg}{.png}[\safeincludepngpath]%
-  \IfFileExists{\safeincludepngpath}{\includegraphics[width=0.56\linewidth,keepaspectratio]{\safeincludepngpath}}{%
-    \IfFileExists{#1}{\includesvg[width=0.56\linewidth,keepaspectratio]{#1}}{%
-      \fbox{\parbox{0.9\linewidth}{\centering Missing figure file:\\ \texttt{\detokenize{#1}}}}%
+  \StrSubstitute{#1}{./assets/figures/}{./svg-inkscape/}[\safeincludepdfbasepath]%
+  \StrSubstitute{\safeincludepdfbasepath}{.svg}{_svg-raw.pdf}[\safeincludepdfpath]%
+  \IfFileExists{\safeincludepngpath}{%
+    \includegraphics[width=0.76\linewidth,height=0.56\textheight,keepaspectratio]{\safeincludepngpath}%
+  }{%
+    \IfFileExists{\safeincludepdfpath}{%
+      \includegraphics[width=0.76\linewidth,height=0.56\textheight,keepaspectratio]{\safeincludepdfpath}%
+    }{%
+      \fbox{\parbox{0.9\linewidth}{\centering Missing figure assets for:\\ \texttt{\detokenize{#1}}}}%
     }%
   }%
 }
 \setlength{\emergencystretch}{10em} % reduce overfull lines
 \setlength{\tabcolsep}{3pt}
+\setlength{\arrayrulewidth}{0.8pt}
 \setlength{\LTleft}{0pt}
 \setlength{\LTright}{0pt}
 \setlength{\hfuzz}{1pt}
@@ -153,6 +171,12 @@
 \newcommand{\mainmatterstart}{\clearpage\pagenumbering{arabic}\setcounter{page}{1}}
 \newcommand{\checkbox}{\(\square\)}
 \newcommand{\thesisspacer}{\hspace{2em}}
+\newcommand{\thesisfigurecaption}[1]{%
+  \begin{center}\emph{#1}\end{center}%
+}
+\newcommand{\thesistabletitle}[1]{%
+  \begin{center}\textbf{#1}\end{center}%
+}
 \newcounter{ieeeref}
 \newcommand{\ieeebibitem}[2]{%
   \refstepcounter{ieeeref}\noindent[\theieeeref]\label{#1} #2\par
@@ -258,8 +282,7 @@
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-& \\
+\hline \textbf{} & \textbf{} \\
 \hline
 \endhead
 \hline
@@ -309,8 +332,7 @@ tiện giao thông trong lĩnh vực cho thuê xe tự lái \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-& \\
+\hline \textbf{} & \textbf{} \\
 \hline
 \endhead
 \hline
@@ -327,8 +349,7 @@ tiện giao thông trong lĩnh vực cho thuê xe tự lái \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-& \\
+\hline \textbf{} & \textbf{} \\
 \hline
 \endhead
 \hline
@@ -388,8 +409,7 @@ tiện giao thông trong lĩnh vực cho thuê xe tự lái \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-& \\
+\hline \textbf{} & \textbf{} \\
 \hline
 \endhead
 \hline
@@ -455,8 +475,7 @@ tiện giao thông trong lĩnh vực cho thuê xe tự lái \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-STT & Nội dung yêu cầu chỉnh sửa & Nội dung đã chỉnh sửa & Ghi chú \\
+\hline \textbf{STT} & \textbf{Nội dung yêu cầu chỉnh sửa} & \textbf{Nội dung đã chỉnh sửa} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -504,17 +523,18 @@ thống IoT giám sát phương tiện, từ thiết bị gắn trên xe đến 
 cloud và bảng điều khiển khai thác, để theo dõi vị trí, thu thập dữ liệu
 chẩn đoán và phát hiện cảnh báo vận hành.
 
-Về phần cứng, hệ thống sử dụng ESP32-S3 làm bộ xử lý trung tâm, kết hợp
-modem LTE + GNSS SIMCom SIM7600CE-T để định vị và truyền dữ liệu. Modem
-được cấu hình ở chế độ Auto (\texttt{AT+CNMP=2}) để tự động chuyển giữa
+Về phần cứng, hệ thống được hiện thực trên bo mạch PCB tự thiết kế với
+các linh kiện tích hợp trực tiếp: ESP32-S3 (MCU), SIMCom SIM7600CE-T
+(LTE + GNSS), LIS3DSH (IMU), DS3231M (RTC), W25Q128 (SPI Flash), cùng
+các khối nguồn MP2482, TPS54231, AP2112, SX1308 và TP4056. Modem được
+cấu hình ở chế độ Auto (\texttt{AT+CNMP=2}) để tự động chuyển giữa
 LTE/UMTS/GSM, dùng APN mặc định \texttt{internet} và cung cấp dữ liệu
 GNSS qua \texttt{AT+CGNSINF} hoặc luồng NMEA tùy chọn
-\texttt{AT+CGNSTST} trên cùng UART1, nên không cần thêm module GNSS độc
-lập. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng
-thời sử dụng IMU LIS3DSH để phát hiện rung động và hỗ trợ phân tích hành
-vi vận hành. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng
-18650 1S Li-ion 3500mAh, BMS và cơ chế ngắt điện áp thấp (LVD), giúp
-thiết bị vẫn hoạt động khi xe tắt máy.
+\texttt{AT+CGNSTST} trên cùng UART1. Thiết bị đọc dữ liệu OBD2 qua
+adapter vgate iCar Pro bằng BLE (thiết bị ngoại vi bên ngoài PCB), đồng
+thời dùng IMU LIS3DSH để phát hiện rung động và hỗ trợ phân tích hành vi
+vận hành. Kiến trúc nguồn dùng bus 5V chính, nhánh ~4V cho modem, nhánh
+logic 3.3V và pin dự phòng 18650 1S để duy trì hoạt động khi xe tắt máy.
 
 Về phần mềm, dữ liệu từ thiết bị được truyền về máy chủ bằng MQTT 5.0
 thông qua EMQX và được phân quyền theo ACL cho từng thiết bị. Dịch vụ
@@ -559,20 +579,20 @@ and development of an end-to-end IoT vehicle tracking system, covering
 the onboard device, cloud services, and operational dashboard for
 real-time tracking, diagnostic data collection, and alerting.
 
-On the hardware side, the system employs the ESP32-S3 microcontroller as
-the central processing unit, paired with the SIMCom SIM7600CE-T LTE+GNSS
-modem. The modem is configured to Auto mode (\texttt{AT+CNMP=2}) so it
-can switch between LTE/UMTS/GSM automatically, uses the default APN
-\texttt{internet}, and delivers GNSS data via \texttt{AT+CGNSINF} (with
-optional NMEA streaming through \texttt{AT+CGNSTST}) on the same UART1
-channel without a dedicated GNSS interface. The device reads engine
-diagnostic data via the OBD2 protocol through a vgate iCar Pro adapter
-using Bluetooth Low Energy (BLE), while integrating the LIS3DSH IMU
-accelerometer for motion detection and abnormal parking-state alerts.
-The power management system includes buck/boost converters, a 18650 1S
-Li-ion 3500mAh backup battery charger path with BMS protection, and a
-low-voltage disconnect (LVD) mechanism to ensure continuous operation
-even when the vehicle engine is off.
+On the hardware side, the tracker is implemented as a custom integrated
+PCB rather than an assembly of off-the-shelf development boards. The
+main board integrates ESP32-S3 (MCU), SIMCom SIM7600CE-T (LTE+GNSS),
+LIS3DSH (IMU), DS3231M (RTC), W25Q128 (SPI Flash), and power blocks based
+on MP2482, TPS54231, AP2112, SX1308, and TP4056. The modem is configured
+to Auto mode (\texttt{AT+CNMP=2}) so it can switch between LTE/UMTS/GSM
+automatically, uses the default APN \texttt{internet}, and delivers GNSS
+data via \texttt{AT+CGNSINF} (with optional NMEA streaming through
+\texttt{AT+CGNSTST}) on the same UART1 channel. The device reads engine
+diagnostic data via OBD2 through a vgate iCar Pro adapter over Bluetooth
+Low Energy (BLE), where this adapter is an external peripheral outside
+the main PCB. The power architecture uses a 5V main rail, an
+approximately 4V modem rail, a 3.3V logic rail, and a 18650 1S backup
+cell to maintain operation when the vehicle engine is off.
 
 On the software side, device data is transmitted through MQTT 5.0 via
 EMQX with per-device ACL authorization. The MQTT Bridge validates and
@@ -631,8 +651,7 @@ Xin chân thành cảm ơn!
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|C{0.10\linewidth}|L{0.72\linewidth}|C{0.12\linewidth}|}
-\hline
-\textbf{STT} & \textbf{Nội dung} & \textbf{Trang} \\
+\hline \textbf{} \textbf{STT} & \textbf{Nội dung} & \textbf{Trang} \\
 \hline
 \endhead
 \hline
@@ -716,8 +735,7 @@ case studies & ... \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|C{0.15\linewidth}|L{0.67\linewidth}|C{0.12\linewidth}|}
-\hline
-\textbf{Bảng} & \textbf{Mô tả} & \textbf{Trang} \\
+\hline \textbf{} \textbf{Bảng} & \textbf{Mô tả} & \textbf{Trang} \\
 \hline
 \endhead
 \hline
@@ -742,8 +760,7 @@ Bảng 5.2 & So sánh với các giải pháp hiện có & ... \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|C{0.15\linewidth}|L{0.67\linewidth}|C{0.12\linewidth}|}
-\hline
-\textbf{Hình} & \textbf{Mô tả} & \textbf{Trang} \\
+\hline \textbf{} \textbf{Hình} & \textbf{Mô tả} & \textbf{Trang} \\
 \hline
 \endhead
 \hline
@@ -883,8 +900,7 @@ Hình PL-3.1 & Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|C{0.18\linewidth}|L{0.37\linewidth}|L{0.37\linewidth}|}
-\hline
-\textbf{Từ viết tắt} & \textbf{Tiếng Anh} & \textbf{Tiếng Việt} \\
+\hline \textbf{} \textbf{Từ viết tắt} & \textbf{Tiếng Anh} & \textbf{Tiếng Việt} \\
 \hline
 \endhead
 \hline
@@ -1016,7 +1032,7 @@ quản lý.
 
 \pandocbounded{\safeincludesvg{./assets/figures/01-chuong-1-gioi-thieu-hinh-1-1.svg}}
 
-\emph{Hình 1.1: Sơ đồ tổng quan vấn đề và giải pháp đề xuất}
+\thesisfigurecaption{Hình 1.1: Sơ đồ tổng quan vấn đề và giải pháp đề xuất}
 
 \subsubsection{1.1.3. Động lực thực hiện dự
 án}\label{113-ux111ux1ed9ng-lux1ef1c-thux1ef1c-hiux1ec7n-dux1ef1-uxe1n}
@@ -1156,12 +1172,11 @@ yêu cầu sau:
   WebView)
 \end{itemize}
 
-{[}Bảng 1.1: Tóm tắt phạm vi dự án theo tầng (layer){]}
+\thesistabletitle{Bảng 1.1: Tóm tắt phạm vi dự án theo tầng (layer)}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tầng (Layer) & Công nghệ chính & Phạm vi \\
+\hline \textbf{Tầng (Layer)} & \textbf{Công nghệ chính} & \textbf{Phạm vi} \\
 \hline
 \endhead
 \hline
@@ -1191,9 +1206,10 @@ thống, làm cơ sở để đánh giá mức độ hoàn thành:
 cứng}\label{131-tiuxeau-chuxed-phux1ea7n-cux1ee9ng}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 1.3.1A: Tổng hợp thông tin về STT, Tiêu chí, Mục tiêu cụ thể}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-STT & Tiêu chí & Mục tiêu cụ thể \\
+\hline \textbf{STT} & \textbf{Tiêu chí} & \textbf{Mục tiêu cụ thể} \\
 \hline
 \endhead
 \hline
@@ -1210,15 +1226,16 @@ ON=12.2V; Profile 24V: OFF=24.0V, ON=24.4V \\
 \end{longtable}
 }
 
-{[}Bảng 1.2: Tiêu chí phần cứng{]}
+\thesistabletitle{Bảng 1.2: Tiêu chí phần cứng}
 
 \subsubsection{1.3.2. Tiêu chí
 firmware}\label{132-tiuxeau-chuxed-firmware}
 
+\thesistabletitle{Bảng 1.2A: Tiêu chí firmware}
+
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-STT & Tiêu chí & Mục tiêu cụ thể \\
+\hline \textbf{STT} & \textbf{Tiêu chí} & \textbf{Mục tiêu cụ thể} \\
 \hline
 \endhead
 \hline
@@ -1236,10 +1253,11 @@ cục bộ \\
 \subsubsection{1.3.3. Tiêu chí
 cloud/backend}\label{133-tiuxeau-chuxed-cloudbackend}
 
+\thesistabletitle{Bảng 1.2B: Tiêu chí cloud/backend}
+
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-STT & Tiêu chí & Mục tiêu cụ thể \\
+\hline \textbf{STT} & \textbf{Tiêu chí} & \textbf{Mục tiêu cụ thể} \\
 \hline
 \endhead
 \hline
@@ -1256,10 +1274,11 @@ STT & Tiêu chí & Mục tiêu cụ thể \\
 \subsubsection{1.3.4. Tiêu chí
 frontend}\label{134-tiuxeau-chuxed-frontend}
 
+\thesistabletitle{Bảng 1.2C: Tiêu chí frontend}
+
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-STT & Tiêu chí & Mục tiêu cụ thể \\
+\hline \textbf{STT} & \textbf{Tiêu chí} & \textbf{Mục tiêu cụ thể} \\
 \hline
 \endhead
 \hline
@@ -1316,7 +1335,7 @@ toàn hệ thống. Cụ thể:
 
 \pandocbounded{\safeincludesvg{./assets/figures/01-chuong-1-gioi-thieu-hinh-1-2.svg}}
 
-\emph{Hình 1.2: Quy trình phát triển dự án theo các giai đoạn}
+\thesisfigurecaption{Hình 1.2: Quy trình phát triển dự án theo các giai đoạn}
 
 \subsubsection{1.4.2. Kiến trúc hệ
 thống}\label{142-kiux1ebfn-truxfac-hux1ec7-thux1ed1ng}
@@ -1332,7 +1351,7 @@ phát triển giai đoạn sau.
 
 \pandocbounded{\safeincludesvg{./assets/figures/01-chuong-1-gioi-thieu-hinh-1-3.svg}}
 
-\emph{Hình 1.3: Kiến trúc tổng thể hệ thống IoT Vehicle Tracking}
+\thesisfigurecaption{Hình 1.3: Kiến trúc tổng thể hệ thống IoT Vehicle Tracking}
 
 \textbf{Chiến lược dữ liệu (Data Strategy):}
 
@@ -1410,42 +1429,41 @@ Switch\_ON=12.2V; 24V dùng Switch\_OFF=24.0V, Switch\_ON=24.4V, bảo vệ
 
 \pandocbounded{\safeincludesvg{./assets/figures/01-chuong-1-gioi-thieu-hinh-1-4.svg}}
 
-\emph{Hình 1.4: Sơ đồ chuyển đổi giữa các chế độ năng lượng}
+\thesisfigurecaption{Hình 1.4: Sơ đồ chuyển đổi giữa các chế độ năng lượng}
 
 \subsubsection{1.4.4. Công nghệ sử
 dụng}\label{144-cuxf4ng-nghux1ec7-sux1eed-dux1ee5ng}
 
-{[}Bảng 1.3: Tổng hợp công nghệ sử dụng trong dự án{]}
+\thesistabletitle{Bảng 1.3: Tổng hợp công nghệ sử dụng trong dự án}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Thành phần & Công nghệ & Phiên bản & Vai trò \\
+\hline \textbf{Thành phần} & \textbf{Công nghệ} & \textbf{Phiên bản} & \textbf{Vai trò} \\
 \hline
 \endhead
 \hline
 \endlastfoot
-Vi điều khiển & ESP32-S3 & --- & MCU chính, xử lý và điều khiển \\
+Vi điều khiển & ESP32-S3 & --- & MCU chính, xử lý và điều khiển \\\hline
 LTE + GNSS & SIMCom SIM7600CE-T (LTE + GNSS tích hợp) & --- & Truyền dữ
-liệu 4G và định vị GPS \\
-OBD2 Adapter & vgate iCar Pro & BLE 4.0 & Đọc dữ liệu chẩn đoán xe \\
-Cảm biến gia tốc & LIS3DSH & --- & Phát hiện chuyển động và rung \\
-Pin dự phòng & 18650 1S Li-ion & 3500 mAh & Nguồn điện dự phòng \\
-Framework firmware & ESP-IDF & 5.x & Phát triển firmware nhúng \\
-RTOS & FreeRTOS & --- & Hệ điều hành thời gian thực \\
-MQTT Broker & EMQX & 5.x & Tiếp nhận dữ liệu IoT \\
-API Server & Express.js + TypeScript & --- & REST API backend \\
-Cơ sở dữ liệu quan hệ & PostgreSQL & 16 & Lưu trữ dữ liệu có cấu trúc \\
+liệu 4G và định vị GPS \\\hline
+OBD2 Adapter & vgate iCar Pro & BLE 4.0 & Đọc dữ liệu chẩn đoán xe \\\hline
+Cảm biến gia tốc & LIS3DSH & --- & Phát hiện chuyển động và rung \\\hline
+Pin dự phòng & 18650 1S Li-ion & 3500 mAh & Nguồn điện dự phòng \\\hline
+Framework firmware & ESP-IDF & 5.x & Phát triển firmware nhúng \\\hline
+RTOS & FreeRTOS & --- & Hệ điều hành thời gian thực \\\hline
+MQTT Broker & EMQX & 5.x & Tiếp nhận dữ liệu IoT \\\hline
+API Server & Express.js + TypeScript & --- & REST API backend \\\hline
+Cơ sở dữ liệu quan hệ & PostgreSQL & 16 & Lưu trữ dữ liệu có cấu trúc \\\hline
 Cơ sở dữ liệu chuỗi thời gian & VictoriaMetrics & --- & Lưu trữ
-telemetry \\
-Nhật ký sự kiện & VictoriaLogs & --- & Lưu trữ logs \\
-Frontend & Next.js 15 + React 19 & --- & Giao diện web \\
-Bản đồ & Leaflet & --- & Hiển thị bản đồ thời gian thực \\
-Biểu đồ & ECharts & --- & Trực quan hóa dữ liệu \\
-WebSocket & Socket.IO & 4.8 & Giao tiếp thời gian thực \\
-Container hóa & Docker + Docker Compose & --- & Triển khai dịch vụ \\
+telemetry \\\hline
+Nhật ký sự kiện & VictoriaLogs & --- & Lưu trữ logs \\\hline
+Frontend & Next.js 15 + React 19 & --- & Giao diện web \\\hline
+Bản đồ & Leaflet & --- & Hiển thị bản đồ thời gian thực \\\hline
+Biểu đồ & ECharts & --- & Trực quan hóa dữ liệu \\\hline
+WebSocket & Socket.IO & 4.8 & Giao tiếp thời gian thực \\\hline
+Container hóa & Docker + Docker Compose & --- & Triển khai dịch vụ \\\hline
 Giám sát & Grafana + VictoriaMetrics/VictoriaLogs & --- & Dashboard giám
-sát hạ tầng \\
+sát hạ tầng \\\hline
 \end{longtable}
 }
 
@@ -1568,7 +1586,7 @@ xuất các hướng phát triển tiếp theo:
 
 \pandocbounded{\safeincludesvg{./assets/figures/01-chuong-1-gioi-thieu-hinh-1-5.svg}}
 
-\emph{Hình 1.5: Lộ trình phát triển dự án theo các giai đoạn (Roadmap)}
+\thesisfigurecaption{Hình 1.5: Lộ trình phát triển dự án theo các giai đoạn (Roadmap)}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -1721,13 +1739,12 @@ thay đổi kiến trúc cloud ở tầng trên.
 \subsubsection{2.2.2. Các giải pháp giám sát phương tiện hiện
 có}\label{222-cuxe1c-giux1ea3i-phuxe1p-giuxe1m-suxe1t-phux1b0ux1a1ng-tiux1ec7n-hiux1ec7n-cuxf3}
 
-{[}Bảng 2.1: So sánh các giải pháp giám sát phương tiện{]}
+\thesistabletitle{Bảng 2.1: So sánh các giải pháp giám sát phương tiện}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Tiêu chí & Giám sát thủ công & GPS Tracker đơn giản & Fleet Management
-thương mại & Hệ thống đề xuất \\
+\hline \textbf{Tiêu chí} & \textbf{Giám sát thủ công} & \textbf{GPS Tracker đơn giản} & \textbf{Fleet Management
+thương mại} & \textbf{Hệ thống đề xuất} \\
 \hline
 \endhead
 \hline
@@ -1764,12 +1781,11 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 yếu vì tác động trực tiếp đến hiệu suất, độ tin cậy và mức tiêu thụ năng
 lượng của toàn hệ thống {[}4{]}.
 
-{[}Bảng 2.2: So sánh các giao thức truyền thông IoT{]}
+\thesistabletitle{Bảng 2.2: So sánh các giao thức truyền thông IoT}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Tiêu chí & MQTT & HTTP/REST & CoAP \\
+\hline \textbf{Tiêu chí} & \textbf{MQTT} & \textbf{HTTP/REST} & \textbf{CoAP} \\
 \hline
 \endhead
 \hline
@@ -1814,12 +1830,11 @@ này vì các lý do sau:
 \subsubsection{2.2.4. So sánh vi điều khiển
 (MCU)}\label{224-so-suxe1nh-vi-ux111iux1ec1u-khiux1ec3n-mcu}
 
-{[}Bảng 2.3: So sánh các vi điều khiển cho ứng dụng IoT tracker{]}
+\thesistabletitle{Bảng 2.3: So sánh các vi điều khiển cho ứng dụng IoT tracker}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Tiêu chí & ESP32-S3 & STM32L4 & Raspberry Pi Zero 2W \\
+\hline \textbf{Tiêu chí} & \textbf{ESP32-S3} & \textbf{STM32L4} & \textbf{Raspberry Pi Zero 2W} \\
 \hline
 \endhead
 \hline
@@ -1867,13 +1882,11 @@ chính vì:
 \subsubsection{2.2.5. So sánh cơ sở dữ
 liệu}\label{225-so-suxe1nh-cux1a1-sux1edf-dux1eef-liux1ec7u}
 
-{[}Bảng 2.4: So sánh các giải pháp cơ sở dữ liệu cho hệ thống IoT{]}
+\thesistabletitle{Bảng 2.4: So sánh các giải pháp cơ sở dữ liệu cho hệ thống IoT}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Tiêu chí & PostgreSQL + VictoriaMetrics & MongoDB + InfluxDB &
-TimescaleDB \\
+\hline \textbf{Tiêu chí} & \textbf{PostgreSQL + VictoriaMetrics} & \textbf{MongoDB + InfluxDB} & \textbf{TimescaleDB} \\
 \hline
 \endhead
 \hline
@@ -1920,7 +1933,7 @@ khác nhau) & Thấp (1 hệ thống) \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/02-chuong-2-phan-tich-hinh-2-1.svg}}
 
-\emph{Hình 2.1: Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture
+\thesisfigurecaption{Hình 2.1: Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture
 Diagram}
 
 \subsection{2.3. Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế -- Design
@@ -2117,9 +2130,10 @@ kế}\label{233-ruxe0ng-buux1ed9c-thiux1ebft-kux1ebf}
 dụng}\label{234-tiuxeau-chuux1ea9n-thiux1ebft-kux1ebf-uxe1p-dux1ee5ng}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 2.3.4A: Tổng hợp thông tin về Tiêu chuẩn, Mô tả, Áp dụng trong hệ thống}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tiêu chuẩn & Mô tả & Áp dụng trong hệ thống \\
+\hline \textbf{Tiêu chuẩn} & \textbf{Mô tả} & \textbf{Áp dụng trong hệ thống} \\
 \hline
 \endhead
 \hline
@@ -2127,7 +2141,7 @@ Tiêu chuẩn & Mô tả & Áp dụng trong hệ thống \\
 IEEE 802.15.1 (Bluetooth) & Chuẩn BLE 4.0/5.0 & Kết nối OBD2 adapter \\
 3GPP LTE Cat-4 & Chuẩn 4G/LTE & Truyền dữ liệu qua modem SIM7600CE-T
 (Cat-4) \\
-NMEA 0183 & Chuẩn dữ liệu GPS & Phân tích tọa độ từ module GNSS \\
+NMEA 0183 & Chuẩn dữ liệu GPS & Phân tích tọa độ từ khối GNSS tích hợp \\
 SAE J1979 (OBD2) & Chuẩn chẩn đoán động cơ & Đọc dữ liệu qua OBD2 BLE
 adapter \\
 MQTT v5.0 (OASIS) & Giao thức IoT messaging & Truyền dữ liệu thiết bị -
@@ -2152,12 +2166,11 @@ vận hành thực tế.
 \subsubsection{2.4.2. Ma trận yêu cầu các bên liên
 quan}\label{242-ma-trux1eadn-yuxeau-cux1ea7u-cuxe1c-buxean-liuxean-quan}
 
-{[}Bảng 2.5: Ma trận yêu cầu các bên liên quan{]}
+\thesistabletitle{Bảng 2.5: Ma trận yêu cầu các bên liên quan}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Bên liên quan & Vai trò & Yêu cầu chính & Mức độ ưu tiên \\
+\hline \textbf{STT} & \textbf{Bên liên quan} & \textbf{Vai trò} & \textbf{Yêu cầu chính} & \textbf{Mức độ ưu tiên} \\
 \hline
 \endhead
 \hline
@@ -2249,14 +2262,13 @@ trì:
 \subsubsection{2.4.4. Ma trận truy xuất yêu cầu - chức
 năng}\label{244-ma-trux1eadn-truy-xuux1ea5t-yuxeau-cux1ea7u---chux1ee9c-nux103ng}
 
-{[}Bảng 2.6: Ma trận truy xuất yêu cầu các bên liên quan với chức năng
-hệ thống{]}
+\thesistabletitle{Bảng 2.6: Ma trận truy xuất yêu cầu các bên liên quan với chức năng
+hệ thống}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-Yêu cầu bên liên quan & FC-01 (Vị trí) & FC-02 (OBD2) & FC-03 (Bất
-thường) & FC-04 (Năng lượng) & FC-05 (Web) \\
+\hline \textbf{Yêu cầu bên liên quan} & \textbf{FC-01 (Vị trí)} & \textbf{FC-02 (OBD2)} & \textbf{FC-03 (Bất
+thường)} & \textbf{FC-04 (Năng lượng)} & \textbf{FC-05 (Web)} \\
 \hline
 \endhead
 \hline
@@ -2313,34 +2325,39 @@ tracker nhỏ gọn, tiêu thụ năng lượng thấp, có khả năng đọc d
 hành liên tục với nguồn dự phòng, mức độ tích hợp và mức độ phù hợp với
 ngân sách.
 
+\textbf{Quy ước thuật ngữ trong phần cứng:} tài liệu dùng cụm ``khối phần
+cứng/khối chức năng'' cho các thành phần tích hợp trên PCB; từ ``module''
+chỉ dùng khi nói về module phần mềm (firmware/cloud) hoặc khi trích dẫn
+nguyên văn tên sản phẩm của nhà sản xuất.
+
 \paragraph{3.1.1.1. Sơ đồ khối hệ
 thống}\label{3111-sux1a1-ux111ux1ed3-khux1ed1i-hux1ec7-thux1ed1ng}
 
-Hệ thống tracker được tổ chức theo kiến trúc module với năm khối chức
-năng chính, trong đó ESP32-S3 đóng vai trò điều phối trung tâm. Sơ đồ
+Hệ thống tracker được tổ chức theo kiến trúc khối chức năng với năm khối
+chính, trong đó ESP32-S3 đóng vai trò điều phối trung tâm. Sơ đồ
 khối tổng thể được trình bày như sau:
 
 \pandocbounded{\safeincludesvg{./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-1.svg}}
 
-\emph{Hình 3.1: Sơ đồ khối tổng thể hệ thống tracker}
+\thesisfigurecaption{Hình 3.1: Sơ đồ khối tổng thể hệ thống tracker}
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-01.svg}}
 
-\emph{Hình 3.1a: Phân rã chi tiết các khối chức năng của tracker}
+\thesisfigurecaption{Hình 3.1a: Phân rã chi tiết các khối chức năng của tracker}
 
 Hệ thống vận hành theo ba chế độ chính: (1) chế độ lái xe --- khi động
-cơ bật (IGN ON), các module cần thiết được kích hoạt; (2) chế độ đỗ xe
---- khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ IMU
-LIS3DSH duy trì giám sát chuyển động; (3) chế độ cảnh báo --- khi IMU
+cơ bật (IGN ON), các khối chức năng cần thiết được kích hoạt; (2) chế độ
+đỗ xe --- khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ
+IMU LIS3DSH duy trì giám sát chuyển động; (3) chế độ cảnh báo --- khi IMU
 ghi nhận chuyển động bất thường, hệ thống tự đánh thức và gửi cảnh báo
 qua 4G.
 
 Luồng dữ liệu được tổ chức theo ba nhánh: OBD2 (RPM, tốc độ, nhiên liệu)
 đọc qua BLE từ adapter vgate iCar Pro; dữ liệu GNSS được cung cấp trực
-tiếp bởi module tích hợp SIMCom SIM7600CE-T (GNSS nội bộ) trên cùng UART
-với LTE; và dữ liệu chuyển động thu từ IMU LIS3DSH qua I2C. ESP32-S3
-tổng hợp, đóng gói và truyền toàn bộ dữ liệu lên máy chủ qua MQTT thông
-qua kết nối 4G/LTE của SIM7600CE-T.
+tiếp bởi khối modem tích hợp SIMCom SIM7600CE-T (GNSS nội bộ) trên cùng
+UART với LTE; và dữ liệu chuyển động thu từ IMU LIS3DSH qua I2C.
+ESP32-S3 tổng hợp, đóng gói và truyền toàn bộ dữ liệu lên máy chủ qua
+MQTT thông qua kết nối 4G/LTE của SIM7600CE-T.
 
 Để tăng độ liên tục dữ liệu khi mạng gián đoạn, luồng telemetry được bổ
 sung thêm nhánh lưu đệm cục bộ trên microSD (SDMMC 4-bit + FATFS). Dữ
@@ -2380,12 +2397,11 @@ cứng}\label{b-ux111ux1ed1i-chiux1ebfu-yuxeau-cux1ea7u-thiux1ebft-kux1ebf-vux1e
 Thay vì chấm điểm tổng quát, Bảng 3.1 đối chiếu trực tiếp các ràng buộc
 kỹ thuật của tracker với thông số và tác động tích hợp của từng MCU.
 
-{[}Bảng 3.1: Đối chiếu yêu cầu kỹ thuật khi lựa chọn vi điều khiển{]}
+\thesistabletitle{Bảng 3.1: Đối chiếu yêu cầu kỹ thuật khi lựa chọn vi điều khiển}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Yêu cầu của tracker & ESP32-S3 & STM32L4 & nRF52840 \\
+\hline \textbf{Yêu cầu của tracker} & \textbf{ESP32-S3} & \textbf{STM32L4} & \textbf{nRF52840} \\
 \hline
 \endhead
 \hline
@@ -2481,12 +2497,11 @@ Trên cơ sở đối chiếu trực tiếp các yêu cầu của hệ thống,
   {[}53{]}, {[}54{]}.
 \end{itemize}
 
-{[}Bảng 3.2: Thông số kỹ thuật ESP32-S3 được chọn{]}
+\thesistabletitle{Bảng 3.2: Thông số kỹ thuật ESP32-S3 được chọn}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-Thông số & Giá trị \\
+\hline \textbf{Thông số} & \textbf{Giá trị} \\
 \hline
 \endhead
 \hline
@@ -2548,20 +2563,18 @@ không, mà còn là phương án LTE/GNSS ảnh hưởng thế nào tới sơ �
 sơ tiêu thụ nguồn và mức độ thuận lợi khi phát triển firmware. Bảng 3.3
 dưới đây đối chiếu trực tiếp các điểm khác biệt này.
 
-{[}Bảng 3.3: Đối chiếu các phương án LTE/GNSS theo tác động tích hợp{]}
+\thesistabletitle{Bảng 3.3: Đối chiếu các phương án LTE/GNSS theo tác động tích hợp}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Yêu cầu tích hợp & A7670C + NEO-M8N & EC200U-CN + NEO-M8N &
-SIM7600CE-T \\
+\hline \textbf{Yêu cầu tích hợp} & \textbf{A7670C + NEO-M8N} & \textbf{EC200U-CN + NEO-M8N} & \textbf{SIM7600CE-T} \\
 \hline
 \endhead
 \hline
 \endlastfoot
-Số module phần cứng & 2 module: A7670C (LTE) + NEO-M8N (GNSS) {[}58{]},
-{[}62{]} & 2 module: EC200U-CN (LTE) + NEO-M8N (GNSS) {[}59{]}, {[}61{]}
-& 1 module tích hợp LTE + GNSS (SIM7600CE-T) {[}60{]} \\
+Số khối phần cứng rời & 2 khối rời: A7670C (LTE) + NEO-M8N (GNSS)
+{[}58{]}, {[}62{]} & 2 khối rời: EC200U-CN (LTE) + NEO-M8N (GNSS)
+{[}59{]}, {[}61{]} & 1 khối tích hợp LTE + GNSS (SIM7600CE-T) {[}60{]} \\
 LTE category / tốc độ & Cat-1, tối đa 10 Mbps DL / 5 Mbps UL {[}58{]} &
 Cat-1, tối đa 10 Mbps DL / 5 Mbps UL {[}59{]}, {[}61{]} & Cat-4, tối đa
 150 Mbps DL / 50 Mbps UL {[}60{]} \\
@@ -2581,10 +2594,10 @@ riêng & Tương tự phương án tách nếu GNSS dùng module riêng & Reset 
 thường kéo theo gián đoạn GNSS \\
 Mức phụ thuộc giữa các chức năng firmware & Thấp, tách rõ
 \texttt{modem\_lte} và \texttt{gnss} & Thấp, nhưng phải đổi tập lệnh
-modem & Cao hơn do LTE/GNSS chung module \\
+modem & Cao hơn do LTE/GNSS chung khối tích hợp \\
 Tác động tới BOM phần cứng thực tế & Bộ modem + GNSS đang chốt
 330.000--500.000 VND (BOM dự án) & Chưa phải cấu hình BOM chính của repo
-& Giảm số module phần cứng rời, thuận lợi cho đi dây và lắp ráp \\
+& Giảm số khối phần cứng rời, thuận lợi cho đi dây và lắp ráp \\
 \end{longtable}
 }
 
@@ -2615,12 +2628,11 @@ chính vì các lý do sau:
   tạo, thuận lợi cho triển khai và đối chiếu tài liệu kỹ thuật.
 \end{itemize}
 
-{[}Bảng 3.4: Thông số kỹ thuật phương án SIM7600CE-T{]}
+\thesistabletitle{Bảng 3.4: Thông số kỹ thuật phương án SIM7600CE-T}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-Thông số & Giá trị \\
+\hline \textbf{Thông số} & \textbf{Giá trị} \\
 \hline
 \endhead
 \hline
@@ -2657,7 +2669,7 @@ solutions}\label{32-ux111ux1ec1-xuux1ea5t-cuxe1c-giux1ea3i-phuxe1p--proposed-sol
 \subsubsection{3.2.1. Giải pháp phần
 cứng}\label{321-giux1ea3i-phuxe1p-phux1ea7n-cux1ee9ng}
 
-\paragraph{3.2.1.1. Thiết kế mô-đun thu thập dữ liệu
+\paragraph{3.2.1.1. Thiết kế khối thu thập dữ liệu
 OBD2}\label{3211-thiux1ebft-kux1ebf-muxf4-ux111un-thu-thux1eadp-dux1eef-liux1ec7u-obd2}
 
 \subparagraph{a) Lựa chọn phương pháp kết nối
@@ -2669,14 +2681,13 @@ sử dụng adapter OBD2 có dây (wired ELM327 qua UART) hoặc adapter OBD2
 không dây (BLE ELM327). Nhóm lựa chọn kết nối không dây qua BLE dựa trên
 các lý do sau:
 
-{[}Bảng 3.5: So sánh phương pháp kết nối OBD2 theo thông số triển
-khai{]}
+\thesistabletitle{Bảng 3.5: So sánh phương pháp kết nối OBD2 theo thông số triển
+khai}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tiêu chí kỹ thuật & OBD2 có dây (ELM327 UART) & OBD2 không dây (BLE
-ELM327 / vgate iCar Pro) \\
+\hline \textbf{Tiêu chí kỹ thuật} & \textbf{OBD2 có dây (ELM327 UART)} & \textbf{OBD2 không dây (BLE
+ELM327 / vgate iCar Pro)} \\
 \hline
 \endhead
 \hline
@@ -2748,7 +2759,7 @@ dựa trên các tiêu chí sau:
 
 \pandocbounded{\safeincludesvg{./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-2.svg}}
 
-\emph{Hình 3.2: Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro}
+\thesisfigurecaption{Hình 3.2: Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro}
 
 \subparagraph{c) Chiến lược kết nối theo chế độ hoạt
 động}\label{c-chiux1ebfn-lux1b0ux1ee3c-kux1ebft-nux1ed1i-theo-chux1ebf-ux111ux1ed9-houx1ea1t-ux111ux1ed9ng}
@@ -2757,12 +2768,11 @@ Một ràng buộc thiết kế quan trọng là ESP32-S3 không thể duy trì 
 BLE trong trạng thái deep sleep. Do đó, chiến lược kết nối OBD2 được xây
 dựng theo từng chế độ hoạt động:
 
-{[}Bảng 3.6: Chiến lược kết nối BLE OBD2 theo chế độ hoạt động{]}
+\thesistabletitle{Bảng 3.6: Chiến lược kết nối BLE OBD2 theo chế độ hoạt động}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Chế độ & Cần BLE OBD2? & Lý do \\
+\hline \textbf{Chế độ} & \textbf{Cần BLE OBD2?} & \textbf{Lý do} \\
 \hline
 \endhead
 \hline
@@ -2788,7 +2798,7 @@ Trong trường hợp adapter OBD2 không kết nối được (timeout 10 giây
 là đo điện áp ắc quy qua ADC để phát hiện trạng thái IGN. Phương pháp
 này kém chính xác hơn nhưng đảm bảo hệ thống vẫn hoạt động bình thường.
 
-\paragraph{3.2.1.2. Thiết kế mô-đun cảm biến chuyển động
+\paragraph{3.2.1.2. Thiết kế khối cảm biến chuyển động
 IMU}\label{3212-thiux1ebft-kux1ebf-muxf4-ux111un-cux1ea3m-biux1ebfn-chuyux1ec3n-ux111ux1ed9ng-imu}
 
 \subparagraph{a) Vai trò của IMU trong hệ
@@ -2808,12 +2818,11 @@ LIS3DSH}\label{b-lux1ef1a-chux1ecdn-cux1ea3m-biux1ebfn-lis3dsh}
 (3-axis accelerometer) low-power được lựa chọn cho hệ thống. Các đặc
 tính kỹ thuật chính được tóm tắt trong bảng sau:
 
-{[}Bảng 3.7: Thông số kỹ thuật cảm biến LIS3DSH{]}
+\thesistabletitle{Bảng 3.7: Thông số kỹ thuật cảm biến LIS3DSH}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-Thông số & Giá trị \\
+\hline \textbf{Thông số} & \textbf{Giá trị} \\
 \hline
 \endhead
 \hline
@@ -2846,11 +2855,11 @@ của xe hoặc di chuyển.
 
 \pandocbounded{\safeincludesvg{./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-3.svg}}
 
-\emph{Hình 3.3: Sơ đồ kết nối LIS3DSH với ESP32-S3 qua I2C}
+\thesisfigurecaption{Hình 3.3: Sơ đồ kết nối LIS3DSH với ESP32-S3 qua I2C}
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-02.svg}}
 
-\emph{Hình 3.3a: Sơ đồ chi tiết chân kết nối LIS3DSH với ESP32-S3}
+\thesisfigurecaption{Hình 3.3a: Sơ đồ chi tiết chân kết nối LIS3DSH với ESP32-S3}
 
 Cấu hình I2C sử dụng địa chỉ \texttt{0x18}, tốc độ \texttt{400\ kHz},
 với hai điện trở kéo lên \texttt{10\ kΩ} trên các net \texttt{IMU-SCL}
@@ -2888,29 +2897,27 @@ chức thành năm khối chức năng chính.
 
 \pandocbounded{\safeincludesvg{./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-4.svg}}
 
-\emph{Hình 3.4: Sơ đồ khối hệ thống quản lý nguồn}
+\thesisfigurecaption{Hình 3.4: Sơ đồ khối hệ thống quản lý nguồn}
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-03.svg}}
 
-\emph{Hình 3.4a: Kiến trúc nguồn và phân phối điện áp trong hệ thống}
+\thesisfigurecaption{Hình 3.4a: Kiến trúc nguồn và phân phối điện áp trong hệ thống}
 
-\subparagraph{a) Buck 3.3V cho ESP32-S3 (XL1509
-3.3E)}\label{a-buck-33v-cho-esp32-s3-xl1509-33e}
+\subparagraph{a) Buck 3.3V cho ESP32-S3 (AP2112-3.3)}\label{a-buck-33v-cho-esp32-s3-xl1509-33e}
 
-Nhánh buck 3.3V dùng \textbf{XL1509 3.3E} để hạ điện áp từ ắc quy xe
+Nhánh buck 3.3V dùng \textbf{AP2112-3.3} để hạ điện áp từ ắc quy xe
 (12--24V) xuống 3.3V, cấp trực tiếp cho ESP32-S3 và các tải logic 3.3V.
 
-{[}Bảng 3.8: Thông số khối Buck 3.3V{]}
+\thesistabletitle{Bảng 3.8: Thông số khối Buck 3.3V}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Khối & IC & Input & Output & Tải \\
+\hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
 \hline
 \endlastfoot
-Buck 3.3V & XL1509 3.3E & 12--24V & 3.3V & ESP32-S3 \\
+Buck 3.3V & AP2112-3.3 & 12--24V & 3.3V & ESP32-S3 \\
 \end{longtable}
 }
 
@@ -2921,12 +2928,11 @@ Nhánh buck 5V dùng \textbf{MP2482} để tạo \textbf{bus 5V chính} từ ngu
 12--24V của xe. Bus 5V này là nguồn trung gian cho các khối phụ trợ và
 đầu vào mạch sạc pin.
 
-{[}Bảng 3.9: Thông số khối Buck 5V{]}
+\thesistabletitle{Bảng 3.9: Thông số khối Buck 5V}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Khối & IC & Input & Output & Tải \\
+\hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
 \hline
@@ -2942,12 +2948,11 @@ Do modem SIM7600CE-T làm việc trên miền nguồn thấp áp, hệ thống b
 nhánh buck riêng dùng \textbf{TPS54231} để hạ 12--24V xuống khoảng
 \textbf{4V} cấp cho modem.
 
-{[}Bảng 3.10: Thông số khối Buck 3.8V/4V cho modem{]}
+\thesistabletitle{Bảng 3.10: Thông số khối Buck 3.8V/4V cho modem}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Khối & IC & Input & Output & Tải \\
+\hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
 \hline
@@ -2963,12 +2968,11 @@ Khi ắc quy xe yếu, nguồn dự phòng lấy từ pin 18650 1S (danh định
 ~3.7V). Khối \textbf{SX1308} tăng áp lên 5V để duy trì cấp
 nguồn cho hệ thống.
 
-{[}Bảng 3.11: Thông số khối Boost 5V dự phòng{]}
+\thesistabletitle{Bảng 3.11: Thông số khối Boost 5V dự phòng}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Khối & IC & Input & Output & Tải \\
+\hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
 \hline
@@ -2995,12 +2999,11 @@ LVD dùng ngưỡng profile kép theo firmware:
   \textbf{Profile 24V:} Switch\_OFF = 24.0V, Switch\_ON = 24.4V
 \end{itemize}
 
-{[}Bảng 3.12: Bảng trạng thái chuyển nguồn và cảnh báo{]}
+\thesistabletitle{Bảng 3.12: Bảng trạng thái chuyển nguồn và cảnh báo}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-Trạng thái & IGN & U\_batt & Nguồn tracker & Sạc pin & Cảnh báo \\
+\hline \textbf{Trạng thái} & \textbf{IGN} & \textbf{U} \_batt & Nguồn tracker & Sạc pin & Cảnh báo \\
 \hline
 \endhead
 \hline
@@ -3018,7 +3021,7 @@ phục hồi \\
 \end{longtable}
 }
 
-Ngoài kênh ADC, tín hiệu trạng thái LVD từ comparator LM393 được đưa về
+Ngoài kênh ADC, tín hiệu trạng thái LVD từ khối LVD phần cứng được đưa về
 \textbf{GPIO19 (LVD\_STATUS)} để giám sát nhanh. Quy ước runtime:
 \textbf{GPIO19 HIGH = low-voltage}, \textbf{GPIO19 LOW = bình thường}.
 
@@ -3028,12 +3031,11 @@ Ngoài kênh ADC, tín hiệu trạng thái LVD từ comparator LM393 được �
 Khối sạc dùng \textbf{TP4056}, nhận \textbf{5V từ nhánh MP2482} và sạc
 pin 18650 1S theo chuẩn \textbf{4.2V/1S}.
 
-{[}Bảng 3.13: Thông số khối sạc pin{]}
+\thesistabletitle{Bảng 3.13: Thông số khối sạc pin}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Khối & IC & Input & Output & Tải \\
+\hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
 \hline
@@ -3050,15 +3052,14 @@ hành.
 Li-ion}\label{g-pin-dux1ef1-phuxf2ng-18650-1s-li-ion}
 
 Pin 18650 1S Li-ion được chọn làm nguồn dự phòng với cấu hình 1 cell đơn
-giản, giữ nguyên kiến trúc 1S Li-ion + TP4056 + BMS + SX1308 của hệ
-thống.
+giản, kết hợp khối sạc TP4056, khối boost SX1308 và mạch bảo vệ pin 1S
+trong kiến trúc nguồn của hệ thống.
 
-{[}Bảng 3.14: Thông số kỹ thuật pin dự phòng 18650 1S{]}
+\thesistabletitle{Bảng 3.14: Thông số kỹ thuật pin dự phòng 18650 1S}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-Thông số & Giá trị \\
+\hline \textbf{Thông số} & \textbf{Giá trị} \\
 \hline
 \endhead
 \hline
@@ -3129,12 +3130,11 @@ thực nghiệm lại nếu chuyển sang mẫu pin mới trong pha chế tạo 
 \paragraph{3.2.1.4. Bảng tổng hợp linh kiện (Bill of
 Materials)}\label{3214-bux1ea3ng-tux1ed5ng-hux1ee3p-linh-kiux1ec7n-bill-of-materials}
 
-{[}Bảng 3.14A: Bảng tổng hợp linh kiện hệ thống tracker (BOM){]}
+\thesistabletitle{Bảng 3.14A: Bảng tổng hợp linh kiện hệ thống tracker (BOM)}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Thành phần & Đơn vị & SL & Giá ước tính (VND) & Ghi chú \\
+\hline \textbf{STT} & \textbf{Thành phần} & \textbf{Đơn vị} & \textbf{SL} & \textbf{Giá ước tính (VND)} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -3151,18 +3151,18 @@ tích hợp + anten \\
 protection board \\
 6 & IC sạc TP4056 + mạch phụ trợ & Cái & 1 & 20.000--40.000 & Input 5V,
 output 4.2V, dòng theo PROG \\
-7 & Mạch buck XL1509 3.3V & Cái & 1 & 15.000--30.000 & 12--24V
+7 & Mạch buck AP2112-3.3 & Cái & 1 & 15.000--30.000 & 12--24V
 -\textgreater{} 3.3V cấp ESP32-S3 \\
 8 & Mạch buck MP2482 5V & Cái & 1 & 15.000--30.000 & Bus 5V chính \\
 9 & Mạch buck TPS54231 ~4V & Cái & 1 & 20.000--40.000 &
 12--24V -\textgreater{} ~4V cấp modem SIM7600CE-T \\
 10 & Mạch boost SX1308 5V backup & Cái & 1 & 10.000--20.000 & Backup từ
 pin 18650 1S \\
-11 & Comparator LM393 & Cái & 1 & 5.000--15.000 & Giám sát LVD
+11 & Khối giám sát LVD + ADC & Cái & 1 & 5.000--15.000 & Giám sát LVD
 (GPIO19) \\
-12 & Diode Schottky 1N5822 & Cái & 2 & 2.000--5.000 & Diode-OR power
+12 & Diode Schottky (SS54/SS34) & Cái & 2 & 2.000--5.000 & Diode-OR power
 path \\
-13 & BMS/Protection Board 1S & Cái & 1 & 10.000--20.000 & Bảo vệ pin
+13 & Mạch bảo vệ pin 1S (BMS) & Cái & 1 & 10.000--20.000 & Bảo vệ pin
 18650 1S \\
 14 & Điện trở (10kOhm, 2.2kOhm) & Gói & 1 & 5.000--10.000 & Voltage
 divider, pull-up \\
@@ -3181,20 +3181,19 @@ LED \\
 \end{longtable}
 }
 
-{[}Bảng 3.15: Tổng hợp chi phí theo nhóm{]}
+\thesistabletitle{Bảng 3.15: Tổng hợp chi phí theo nhóm}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Nhóm & Hạng mục & Chi phí (VND) \\
+\hline \textbf{Nhóm} & \textbf{Hạng mục} & \textbf{Chi phí (VND)} \\
 \hline
 \endhead
 \hline
 \endlastfoot
 A & Thành phần chính (MCU, cảm biến, modem, OBD2, pin) &
 670.000--1.250.000 \\
-B & Quản lý nguồn (XL1509, MP2482, TPS54231, SX1308, TP4056, diode OR,
-LM393, BMS) & 80.000--155.000 \\
+B & Quản lý nguồn (AP2112-3.3, MP2482, TPS54231, SX1308, TP4056, diode OR,
+khối LVD, pin 1S) & 80.000--155.000 \\
 C & Linh kiện phụ trợ (điện trở, tụ, diode, connector) &
 42.000--75.000 \\
 D & PCB và vỏ (tùy chọn) & 100.000--200.000 \\
@@ -3237,12 +3236,11 @@ vụ, bài toán thiết kế phải đồng thời thỏa mãn các yêu cầu 
 \paragraph{3.1.2.2. So sánh các phương án nền tảng
 Firmware}\label{3122-so-suxe1nh-cuxe1c-phux1b0ux1a1ng-uxe1n-nux1ec1n-tux1ea3ng-firmware}
 
-{[}Bảng 3.5A: So sánh các phương án nền tảng firmware{]}
+\thesistabletitle{Bảng 3.5A: So sánh các phương án nền tảng firmware}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Phương án & Mô tả & Ưu điểm & Hạn chế & Mức phù hợp \\
+\hline \textbf{Phương án} & \textbf{Mô tả} & \textbf{Ưu điểm} & \textbf{Hạn chế} & \textbf{Mức phù hợp} \\
 \hline
 \endhead
 \hline
@@ -3256,7 +3254,7 @@ driver chính thức Espressif & Đa nhiệm tốt, hỗ trợ power management 
 tích hợp NimBLE/modem/UART/I2C ổn định & Độ phức tạp cao hơn Arduino &
 \textbf{Cao} \\
 \textbf{PA-FW3: Zephyr RTOS trên ESP32} & RTOS đa nền tảng, kiến trúc
-module hóa & Tính chuẩn hóa tốt, khả năng mở rộng dài hạn & Hệ sinh thái
+phân lớp & Tính chuẩn hóa tốt, khả năng mở rộng dài hạn & Hệ sinh thái
 ESP32 chuyên biệt và tài liệu thực chiến BLE-OBD2/modem ít hơn ESP-IDF &
 Trung bình \\
 \end{longtable}
@@ -3275,8 +3273,8 @@ Lý do lựa chọn:
 \item
   \textbf{Khớp yêu cầu điều phối thời gian thực của hệ thống}: ESP-IDF +
   FreeRTOS cho phép tổ chức state machine trung tâm, các driver bất đồng
-  bộ và primitive đồng bộ ở mức module, phù hợp với bài toán IoT chạy
-  trên tài nguyên hạn chế.
+  bộ và primitive đồng bộ ở mức khối chức năng, phù hợp với bài toán IoT
+  chạy trên tài nguyên hạn chế.
 \item
   \textbf{Tối ưu cho ESP32-S3}: driver và power feature chính thức giúp
   giảm rủi ro tích hợp phần cứng.
@@ -3306,9 +3304,10 @@ Firmware được tổ chức theo bốn lớp trách nhiệm chính để giữ
 gọn, dễ theo dõi và thuận lợi khi mở rộng:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2A: Tổng hợp thông tin về Lớp, Thành phần chính, Vai trò}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Lớp & Thành phần chính & Vai trò \\
+\hline \textbf{Lớp} & \textbf{Thành phần chính} & \textbf{Vai trò} \\
 \hline
 \endhead
 \hline
@@ -3337,7 +3336,7 @@ BLE OBD và lớp AT command.
 
 \pandocbounded{\safeincludesvg{./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-5.svg}}
 
-\emph{Hình 3.5: Sơ đồ kiến trúc phân lớp của firmware}
+\thesisfigurecaption{Hình 3.5: Sơ đồ kiến trúc phân lớp của firmware}
 
 \subparagraph{b) Cơ chế điều phối với
 FreeRTOS}\label{b-cux1a1-chux1ebf-ux111iux1ec1u-phux1ed1i-vux1edbi-freertos}
@@ -3384,7 +3383,7 @@ chung.
 
 \pandocbounded{\safeincludesvg{./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-6.svg}}
 
-\emph{Hình 3.6: Sơ đồ tương tác giữa các FreeRTOS task}
+\thesisfigurecaption{Hình 3.6: Sơ đồ tương tác giữa các FreeRTOS task}
 
 \subparagraph{c) Luồng hoạt động cơ
 bản}\label{c-luux1ed3ng-houx1ea1t-ux111ux1ed9ng-cux1a1-bux1ea3n}
@@ -3432,7 +3431,7 @@ Luồng hoạt động tổng thể của firmware được tổ chức theo tr�
 
 \pandocbounded{\safeincludesvg{./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-7.svg}}
 
-\emph{Hình 3.7: Lưu đồ thuật toán luồng hoạt động chính của firmware}
+\thesisfigurecaption{Hình 3.7: Lưu đồ thuật toán luồng hoạt động chính của firmware}
 
 \paragraph{3.2.2.2. Module giao tiếp Bluetooth
 OBD2}\label{3222-module-giao-tiux1ebfp-bluetooth-obd2}
@@ -3546,7 +3545,7 @@ Quy trình kết nối BLE với adapter OBD2 diễn ra theo các bước sau:
 
 \pandocbounded{\safeincludesvg{./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-8.svg}}
 
-\emph{Hình 3.8: Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE
+\thesisfigurecaption{Hình 3.8: Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE
 OBD2}
 
 \subparagraph{c) Chiến lược kết nối theo chế độ hoạt
@@ -3579,9 +3578,10 @@ có việc lưu địa chỉ MAC vào flash, thời gian reconnect chỉ mất k
 Module BLE OBD2 được thiết kế với nhiều lớp xử lý lỗi:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2B: Tổng hợp thông tin về Tình huống lỗi, Xử lý, Thời gian timeout}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tình huống lỗi & Xử lý & Thời gian timeout \\
+\hline \textbf{Tình huống lỗi} & \textbf{Xử lý} & \textbf{Thời gian timeout} \\
 \hline
 \endhead
 \hline
@@ -3618,9 +3618,10 @@ GPIO17 RX). Firmware sử dụng một chuỗi lệnh AT chính xác để đả
 modem sẵn sàng trước khi bật PDP context và khởi động GNSS.
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2C: Tổng hợp thông tin về Bước, Lệnh AT, Mục đích chính}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Bước & Lệnh AT & Mục đích chính \\
+\hline \textbf{Bước} & \textbf{Lệnh AT} & \textbf{Mục đích chính} \\
 \hline
 \endhead
 \hline
@@ -3670,9 +3671,10 @@ tránh kích hoạt PDP context khi modem chưa đăng ký mạng.
 \subparagraph{d) Xử lý sự cố}\label{d-xux1eed-luxfd-sux1ef1-cux1ed1}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2D: Tổng hợp thông tin về Tình huống, Biện pháp}
+
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-Tình huống & Biện pháp \\
+\hline \textbf{Tình huống} & \textbf{Biện pháp} \\
 \hline
 \endhead
 \hline
@@ -3694,7 +3696,7 @@ ESP32-S3 tỉnh dậy.
 
 \pandocbounded{\safeincludesvg{./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-9.svg}}
 
-\emph{Hình 3.9: Lưu đồ điều phối modem SIM7600CE-T theo trạng thái mạng
+\thesisfigurecaption{Hình 3.9: Lưu đồ điều phối modem SIM7600CE-T theo trạng thái mạng
 và chế độ vận hành}
 
 \paragraph{3.2.2.4. Module quản lý nguồn và
@@ -3708,9 +3710,10 @@ giám sát hệ thống nguồn điện. Bảng sau liệt kê đầy đủ các
 sử dụng:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2E: Tổng hợp thông tin về GPIO, Chức năng, Hướng}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-GPIO & Chức năng & Hướng & Mô tả \\
+\hline \textbf{GPIO} & \textbf{Chức năng} & \textbf{Hướng} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -3720,7 +3723,7 @@ GPIO & Chức năng & Hướng & Mô tả \\
 5 & CHARGER\_EN & Output & Điều khiển IC sạc TP4056 \\
 18 & POWER\_PATH\_EN & Output & Chọn nguồn cấp (ắc quy hoặc pin dự
 phòng) \\
-19 & LVD\_STATUS & Input & Đọc trạng thái LVD từ comparator LM393 \\
+19 & LVD\_STATUS & Input & Đọc trạng thái LVD từ khối LVD phần cứng \\
 21 & LIS3DSH\_INT & Input & Ngắt từ cảm biến gia tốc IMU \\
 47 & LIS3DSH\_SDA & I/O & Đường dữ liệu I2C \\
 48 & LIS3DSH\_SCL & I/O & Đường clock I2C \\
@@ -3772,7 +3775,7 @@ Logic điều khiển nguồn bám theo profile 12V/24V:
 
 \pandocbounded{\safeincludesvg{./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-10.svg}}
 
-\emph{Hình 3.10: Lưu đồ thuật toán điều khiển power path}
+\thesisfigurecaption{Hình 3.10: Lưu đồ thuật toán điều khiển power path}
 
 \subparagraph{c) Điều khiển IC sạc
 (TP4056)}\label{c-ux111iux1ec1u-khiux1ec3n-ic-sux1ea1c-tp4056}
@@ -3781,9 +3784,10 @@ IC sạc TP4056 được điều khiển qua chân GPIO5 (CHARGER\_EN). Logic s�
 được thiết kế để bảo vệ cả ắc quy xe lẫn pin dự phòng:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2F: Tổng hợp thông tin về Điều kiện, Trạng thái charger, Lý do}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Điều kiện & Trạng thái charger & Lý do \\
+\hline \textbf{Điều kiện} & \textbf{Trạng thái charger} & \textbf{Lý do} \\
 \hline
 \endhead
 \hline
@@ -3806,12 +3810,12 @@ Firmware đọc điện áp ắc quy qua kênh ADC 12-bit (GPIO4) với bộ chi
 ADC được chuyển đổi sang điện áp thực thông qua công thức hiệu chuẩn
 (calibration).
 
-Ngoài ra, hệ thống có thêm kênh giám sát LVD độc lập sử dụng comparator
-LM393 (GPIO19). Đây là kênh dự phòng cho ADC, cho phép kiểm tra nhanh
+Ngoài ra, hệ thống có thêm kênh giám sát LVD độc lập từ khối LVD phần
+cứng (GPIO19). Đây là kênh dự phòng cho ADC, cho phép kiểm tra nhanh
 trạng thái nguồn với cơ chế trễ (hysteresis): profile 12V dùng
 Switch\_OFF=12.0V, Switch\_ON=12.2V; profile 24V dùng Switch\_OFF=24.0V,
-Switch\_ON=24.4V. Comparator tự xử lý hysteresis ở mức phần cứng, tránh
-hiện tượng dao động (oscillation) quanh ngưỡng.
+Switch\_ON=24.4V. Khối LVD xử lý hysteresis ở mức phần cứng, tránh hiện
+ tượng dao động (oscillation) quanh ngưỡng.
 
 \subparagraph{e) Các chế độ quản lý
 nguồn}\label{e-cuxe1c-chux1ebf-ux111ux1ed9-quux1ea3n-luxfd-nguux1ed3n}
@@ -3819,10 +3823,11 @@ nguồn}\label{e-cuxe1c-chux1ebf-ux111ux1ed9-quux1ea3n-luxfd-nguux1ed3n}
 Firmware hỗ trợ ba chế độ năng lượng chính:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2G: Tổng hợp thông tin về Chế độ, Trạng thái ESP32, Trạng thái modem}
+
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Chế độ & Trạng thái ESP32 & Trạng thái modem & Trạng thái BLE & Dòng
-tiêu thụ \\
+\hline \textbf{Chế độ} & \textbf{Trạng thái ESP32} & \textbf{Trạng thái modem} & \textbf{Trạng thái BLE} & \textbf{Dòng
+tiêu thụ} \\
 \hline
 \endhead
 \hline
@@ -3941,9 +3946,10 @@ Hệ thống sử dụng cấu trúc phân cấp MQTT topic để tách rõ lu�
 telemetry, trạng thái, sự kiện và OTA:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2H: Tổng hợp thông tin về Topic, Hướng, QoS}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Topic & Hướng & QoS & Mô tả \\
+\hline \textbf{Topic} & \textbf{Hướng} & \textbf{QoS} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -3964,9 +3970,10 @@ Cảnh báo và sự kiện quan trọng \\
 Các lệnh điều khiển từ máy chủ hiện được firmware xử lý gồm:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2I: Tổng hợp thông tin về Lệnh, Mục đích, Tham số chính}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Lệnh & Mục đích & Tham số chính \\
+\hline \textbf{Lệnh} & \textbf{Mục đích} & \textbf{Tham số chính} \\
 \hline
 \endhead
 \hline
@@ -4027,9 +4034,10 @@ hành vi thiết bị tại từng thời điểm vận hành. Hệ thống đ�
 trạng thái chính:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2J: Tổng hợp thông tin về Trạng thái, Mã, Mô tả}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Trạng thái & Mã & Mô tả \\
+\hline \textbf{Trạng thái} & \textbf{Mã} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -4044,12 +4052,11 @@ SLEEP & 6 & Deep sleep - tiêu thụ năng lượng tối thiểu \\
 \end{longtable}
 }
 
-\textbf{Bảng chuyển đổi trạng thái:}
+\thesistabletitle{Bảng chuyển đổi trạng thái:}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Trạng thái hiện tại & Sự kiện kích hoạt & Trạng thái tiếp theo \\
+\hline \textbf{Trạng thái hiện tại} & \textbf{Sự kiện kích hoạt} & \textbf{Trạng thái tiếp theo} \\
 \hline
 \endhead
 \hline
@@ -4069,7 +4076,7 @@ SLEEP & Timer wake-up hoặc IMU interrupt & CHECK\_IGN \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-11.svg}}
 
-\emph{Hình 3.11: Sơ đồ máy trạng thái của thiết bị theo dõi}
+\thesisfigurecaption{Hình 3.11: Sơ đồ máy trạng thái của thiết bị theo dõi}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -4214,9 +4221,10 @@ Calibration)}\label{c-hiux1ec7u-chuux1ea9n-cux1ea3m-biux1ebfn-sensor-calibration
 cảm biến:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.2K: Tổng hợp thông tin về Cảm biến, Phương pháp hiệu chuẩn, Lưu trữ}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Cảm biến & Phương pháp hiệu chuẩn & Lưu trữ \\
+\hline \textbf{Cảm biến} & \textbf{Phương pháp hiệu chuẩn} & \textbf{Lưu trữ} \\
 \hline
 \endhead
 \hline
@@ -4261,12 +4269,11 @@ sau:
 \paragraph{3.1.3.2. So sánh các phương án kiến trúc
 Cloud}\label{3132-so-suxe1nh-cuxe1c-phux1b0ux1a1ng-uxe1n-kiux1ebfn-truxfac-cloud}
 
-{[}Bảng 3.15A: So sánh các phương án kiến trúc Cloud{]}
+\thesistabletitle{Bảng 3.15A: So sánh các phương án kiến trúc Cloud}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Phương án & Mô tả ngắn & Ưu điểm & Hạn chế & Mức phù hợp \\
+\hline \textbf{Phương án} & \textbf{Mô tả ngắn} & \textbf{Ưu điểm} & \textbf{Hạn chế} & \textbf{Mức phù hợp} \\
 \hline
 \endhead
 \hline
@@ -4352,11 +4359,11 @@ các tầng chính sau:
 
 \pandocbounded{\safeincludesvg{./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-12.svg}}
 
-\emph{Hình 3.12: Sơ đồ kiến trúc tổng quan hệ thống Cloud}
+\thesisfigurecaption{Hình 3.12: Sơ đồ kiến trúc tổng quan hệ thống Cloud}
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-04.svg}}
 
-\emph{Hình 3.12a: Luồng dữ liệu chi tiết từ thiết bị đến dashboard}
+\thesisfigurecaption{Hình 3.12a: Luồng dữ liệu chi tiết từ thiết bị đến dashboard}
 
 \subparagraph{b) Luồng dữ liệu chính trong hệ
 thống}\label{b-luux1ed3ng-dux1eef-liux1ec7u-chuxednh-trong-hux1ec7-thux1ed1ng}
@@ -4424,12 +4431,11 @@ Cách tổ chức này có các ưu điểm sau:
   lẻ theo nhu cầu.
 \end{itemize}
 
-{[}Bảng 3.16: Phân bổ tài nguyên Docker cho các dịch vụ{]}
+\thesistabletitle{Bảng 3.16: Phân bổ tài nguyên Docker cho các dịch vụ}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Dịch vụ & Container & Port & Tài nguyên \\
+\hline \textbf{Dịch vụ} & \textbf{Container} & \textbf{Port} & \textbf{Tài nguyên} \\
 \hline
 \endhead
 \hline
@@ -4471,12 +4477,11 @@ Broker}\label{b-so-suxe1nh-vuxe0-lux1ef1a-chux1ecdn-mqtt-broker}
 Để lựa chọn MQTT Broker phù hợp, đồ án đã đánh giá bốn giải pháp phổ
 biến trên thị trường:
 
-{[}Bảng 3.17: So sánh các MQTT Broker phổ biến{]}
+\thesistabletitle{Bảng 3.17: So sánh các MQTT Broker phổ biến}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Tiêu chí & Mosquitto & EMQX & HiveMQ & VerneMQ \\
+\hline \textbf{Tiêu chí} & \textbf{Mosquitto} & \textbf{EMQX} & \textbf{HiveMQ} & \textbf{VerneMQ} \\
 \hline
 \endhead
 \hline
@@ -4598,12 +4603,11 @@ ngược: telemetry ghi rất nhanh theo thời gian thực và dữ liệu nghi
 yêu cầu toàn vẹn quan hệ dài hạn. Một mô hình lưu trữ duy nhất thường
 tối ưu tốt cho một phía nhưng kém hiệu quả ở phía còn lại.
 
-{[}Bảng 3.18A: So sánh các phương án kiến trúc lưu trữ dữ liệu{]}
+\thesistabletitle{Bảng 3.18A: So sánh các phương án kiến trúc lưu trữ dữ liệu}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Phương án & Mô tả & Ưu điểm & Hạn chế & Mức phù hợp \\
+\hline \textbf{Phương án} & \textbf{Mô tả} & \textbf{Ưu điểm} & \textbf{Hạn chế} & \textbf{Mức phù hợp} \\
 \hline
 \endhead
 \hline
@@ -4652,7 +4656,7 @@ kép sử dụng ba cơ sở dữ liệu chuyên biệt:
 
 \pandocbounded{\safeincludesvg{./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-13.svg}}
 
-\emph{Hình 3.13: Sơ đồ chiến lược lưu trữ kép}
+\thesisfigurecaption{Hình 3.13: Sơ đồ chiến lược lưu trữ kép}
 
 \begin{verbatim}
                MQTT Bridge
@@ -4672,12 +4676,11 @@ PostgreSQL    VictoriaMetrics  VictoriaLogs
 | Geofences   | Lưu trữ: 30d  | Lưu trữ: 7d
 \end{verbatim}
 
-{[}Bảng 3.18: So sánh các cơ sở dữ liệu trong hệ thống{]}
+\thesistabletitle{Bảng 3.18: So sánh các cơ sở dữ liệu trong hệ thống}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Cơ sở dữ liệu & Mục đích & Ưu điểm chính \\
+\hline \textbf{Cơ sở dữ liệu} & \textbf{Mục đích} & \textbf{Ưu điểm chính} \\
 \hline
 \endhead
 \hline
@@ -4700,12 +4703,11 @@ bảng quan trọng.
 
 \textbf{Các nhóm bảng chính (Phase 1 - khoảng 20 bảng):}
 
-{[}Bảng 3.19: Các nhóm bảng chính trong PostgreSQL{]}
+\thesistabletitle{Bảng 3.19: Các nhóm bảng chính trong PostgreSQL}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Nhóm bảng & Các bảng chính & Mô tả \\
+\hline \textbf{Nhóm bảng} & \textbf{Các bảng chính} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -4734,7 +4736,7 @@ kết nối và lịch sử trạng thái \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-14.svg}}
 
-\emph{Hình 3.14: Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)}
+\thesisfigurecaption{Hình 3.14: Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)}
 
 \begin{verbatim}
 users (1) ──< (N) vehicles           [Chủ sở hữu xe]
@@ -4766,12 +4768,11 @@ VictoriaMetrics là cơ sở dữ liệu chuỗi thời gian tương thích Prom
 được lựa chọn thay thế InfluxDB nhờ hiệu năng vượt trội (nhanh hơn 10
 lần), mức tiêu thụ RAM thấp hơn và tích hợp tốt với Grafana.
 
-{[}Bảng 3.20: So sánh VictoriaMetrics và InfluxDB{]}
+\thesistabletitle{Bảng 3.20: So sánh VictoriaMetrics và InfluxDB}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tiêu chí & InfluxDB & VictoriaMetrics (Đã chọn) \\
+\hline \textbf{Tiêu chí} & \textbf{InfluxDB} & \textbf{VictoriaMetrics (Đã chọn)} \\
 \hline
 \endhead
 \hline
@@ -4812,12 +4813,11 @@ API Server là tầng ứng dụng Backend cung cấp REST API, WebSocket và x�
 lý logic nghiệp vụ. Để lựa chọn framework phù hợp, đồ án đã đánh giá ba
 phương án:
 
-{[}Bảng 3.21: So sánh framework Backend{]}
+\thesistabletitle{Bảng 3.21: So sánh framework Backend}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Tiêu chí & Express + TypeScript & NestJS & Go + Gin \\
+\hline \textbf{Tiêu chí} & \textbf{Express + TypeScript} & \textbf{NestJS} & \textbf{Go + Gin} \\
 \hline
 \endhead
 \hline
@@ -4880,12 +4880,11 @@ HTTP Status Code chuẩn.
 \subparagraph{b) Bảng tóm tắt API
 Endpoints}\label{b-bux1ea3ng-tuxf3m-tux1eaft-api-endpoints}
 
-{[}Bảng 3.22: Tóm tắt các nhóm API Endpoints chính{]}
+\thesistabletitle{Bảng 3.22: Tóm tắt các nhóm API Endpoints chính}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Nhóm & Method & Endpoint & Mô tả & Auth \\
+\hline \textbf{Nhóm} & \textbf{Method} & \textbf{Endpoint} & \textbf{Mô tả} & \textbf{Auth} \\
 \hline
 \endhead
 \hline
@@ -4916,7 +4915,7 @@ Có \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-14a.svg}}
 
-\emph{Hình 3.14a: Luồng điều phối OTA giữa Backend, EMQX, thiết bị và
+\thesisfigurecaption{Hình 3.14a: Luồng điều phối OTA giữa Backend, EMQX, thiết bị và
 MQTT Bridge}
 
 Backend vẫn duy trì một số alias tương thích như \texttt{/api/v1/device}
@@ -4957,12 +4956,11 @@ Hệ thống sử dụng cơ chế xác thực dựa trên phiên làm việc (s
 authentication) với token lưu trữ trong cơ sở dữ liệu, thay vì JSON Web
 Token (JWT).
 
-{[}Bảng 3.23: So sánh JWT và Session-based authentication{]}
+\thesistabletitle{Bảng 3.23: So sánh JWT và Session-based authentication}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tiêu chí & JWT & Session-based (Đã chọn) \\
+\hline \textbf{Tiêu chí} & \textbf{JWT} & \textbf{Session-based (Đã chọn)} \\
 \hline
 \endhead
 \hline
@@ -5023,12 +5021,11 @@ frontend cần đồng thời đáp ứng các yêu cầu sau:
 \paragraph{3.1.4.2. So sánh các phương án công nghệ
 Frontend}\label{3142-so-suxe1nh-cuxe1c-phux1b0ux1a1ng-uxe1n-cuxf4ng-nghux1ec7-frontend}
 
-{[}Bảng 3.23A: So sánh các phương án công nghệ frontend tổng thể{]}
+\thesistabletitle{Bảng 3.23A: So sánh các phương án công nghệ frontend tổng thể}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Phương án & Mô tả stack & Ưu điểm & Hạn chế & Mức phù hợp \\
+\hline \textbf{Phương án} & \textbf{Mô tả stack} & \textbf{Ưu điểm} & \textbf{Hạn chế} & \textbf{Mức phù hợp} \\
 \hline
 \endhead
 \hline
@@ -5086,12 +5083,11 @@ web}\label{a-framework-ux1ee9ng-dux1ee5ng-web}
 Nuxt.js và Vite + React theo các tiêu chí hiệu năng, khả năng mở rộng và
 trải nghiệm phát triển.
 
-{[}Bảng 3.24: So sánh framework Frontend{]}
+\thesistabletitle{Bảng 3.24: So sánh framework Frontend}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Tiêu chí & Next.js 15 & Nuxt.js 3 & Vite + React \\
+\hline \textbf{Tiêu chí} & \textbf{Next.js 15} & \textbf{Nuxt.js 3} & \textbf{Vite + React} \\
 \hline
 \endhead
 \hline
@@ -5175,12 +5171,11 @@ Management)}\label{c-quux1ea3n-luxfd-trux1ea1ng-thuxe1i-state-management}
 Hệ thống áp dụng chiến lược tách biệt giữa trạng thái client và trạng
 thái server:
 
-{[}Bảng 3.25: Chiến lược quản lý trạng thái{]}
+\thesistabletitle{Bảng 3.25: Chiến lược quản lý trạng thái}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Loại trạng thái & Thư viện & Mục đích & Ví dụ \\
+\hline \textbf{Loại trạng thái} & \textbf{Thư viện} & \textbf{Mục đích} & \textbf{Ví dụ} \\
 \hline
 \endhead
 \hline
@@ -5204,12 +5199,11 @@ localStorage) nhằm tăng tính bảo mật.
 \subparagraph{d) Thư viện bản
 đồ}\label{d-thux1b0-viux1ec7n-bux1ea3n-ux111ux1ed3}
 
-{[}Bảng 3.26: So sánh thư viện bản đồ{]}
+\thesistabletitle{Bảng 3.26: So sánh thư viện bản đồ}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Tiêu chí & Leaflet.js & Mapbox GL JS & Google Maps JS API \\
+\hline \textbf{Tiêu chí} & \textbf{Leaflet.js} & \textbf{Mapbox GL JS} & \textbf{Google Maps JS API} \\
 \hline
 \endhead
 \hline
@@ -5285,7 +5279,7 @@ src/
 
 \pandocbounded{\safeincludesvg{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-15.svg}}
 
-\emph{Hình 3.15: Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng
+\thesisfigurecaption{Hình 3.15: Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng
 Frontend}
 
 \textbf{Nguyên tắc tổ chức:}
@@ -5313,7 +5307,7 @@ Luồng dữ liệu trong ứng dụng Frontend tuân theo mô hình một chi�
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-05.svg}}
 
-\emph{Hình 3.15a: Luồng dữ liệu một chiều giữa Next.js, Query, Zustand
+\thesisfigurecaption{Hình 3.15a: Luồng dữ liệu một chiều giữa Next.js, Query, Zustand
 và Backend}
 
 \begin{enumerate}
@@ -5365,7 +5359,7 @@ sử dụng JWT:
 
 \pandocbounded{\safeincludesvg{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-16.svg}}
 
-\emph{Hình 3.16: Biểu đồ trình tự (Sequence Diagram) luồng xác thực
+\thesisfigurecaption{Hình 3.16: Biểu đồ trình tự (Sequence Diagram) luồng xác thực
 người dùng}
 
 \paragraph{3.2.4.3. Thiết kế các trang chức năng chính (Main Feature
@@ -5387,7 +5381,7 @@ tổng thể về trạng thái hệ thống:
   \textbf{Bản đồ mini:} Hiển thị vị trí tất cả xe đang hoạt động trên
   bản đồ thu nhỏ.
 \item
-  \textbf{Bảng cảnh báo gần đây:} Danh sách 10 cảnh báo mới nhất với
+  \thesistabletitle{Bảng cảnh báo gần đây:} Danh sách 10 cảnh báo mới nhất với
   badge mức độ nghiêm trọng (low, medium, high, critical).
 \item
   \textbf{Biểu đồ thống kê:} Biểu đồ số chuyến đi theo ngày và phân loại
@@ -5396,7 +5390,7 @@ tổng thể về trạng thái hệ thống:
 
 \pandocbounded{\safeincludesvg{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-17.svg}}
 
-\emph{Hình 3.17: Giao diện trang Dashboard tổng quan}
+\thesisfigurecaption{Hình 3.17: Giao diện trang Dashboard tổng quan}
 
 \subparagraph{b) Quản lý phương tiện (Vehicle
 Management)}\label{b-quux1ea3n-luxfd-phux1b0ux1a1ng-tiux1ec7n-vehicle-management}
@@ -5404,9 +5398,10 @@ Management)}\label{b-quux1ea3n-luxfd-phux1b0ux1a1ng-tiux1ec7n-vehicle-management
 \textbf{Trang danh sách (\texttt{/dashboard/vehicles}):}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.4A: Tổng hợp thông tin về Cột, Mô tả, Chức năng}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Cột & Mô tả & Chức năng \\
+\hline \textbf{Cột} & \textbf{Mô tả} & \textbf{Chức năng} \\
 \hline
 \endhead
 \hline
@@ -5428,7 +5423,7 @@ hiện tại trên bản đồ, trạng thái thiết bị IoT, các cảnh báo
 
 \pandocbounded{\safeincludesvg{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-18.svg}}
 
-\emph{Hình 3.18: Giao diện trang quản lý phương tiện}
+\thesisfigurecaption{Hình 3.18: Giao diện trang quản lý phương tiện}
 
 \subparagraph{c) Quản lý chuyến đi, cảnh báo và vùng địa
 lý}\label{c-quux1ea3n-luxfd-chuyux1ebfn-ux111i-cux1ea3nh-buxe1o-vuxe0-vuxf9ng-ux111ux1ecba-luxfd}
@@ -5439,12 +5434,11 @@ kiện. Trang cảnh báo tổng hợp cảnh báo theo badge mức độ nghiê
 hỗ trợ xử lý hàng loạt. Trang geofence cho phép vẽ hình tròn, đa giác
 hoặc hình chữ nhật trực tiếp trên bản đồ bằng Leaflet Geoman.
 
-{[}Bảng 3.27: Ma trận các trang chức năng chính{]}
+\thesistabletitle{Bảng 3.27: Ma trận các trang chức năng chính}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Trang & Đường dẫn & Chức năng chính & Real-time \\
+\hline \textbf{Trang} & \textbf{Đường dẫn} & \textbf{Chức năng chính} & \textbf{Real-time} \\
 \hline
 \endhead
 \hline
@@ -5486,11 +5480,11 @@ ba lớp chính:
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-06.svg}}
 
-\emph{Hình 3.19a: Phân rã lớp bản đồ React Leaflet và kênh Socket.IO}
+\thesisfigurecaption{Hình 3.19a: Phân rã lớp bản đồ React Leaflet và kênh Socket.IO}
 
 \pandocbounded{\safeincludesvg{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-19.svg}}
 
-\emph{Hình 3.19: Kiến trúc tích hợp bản đồ thời gian thực}
+\thesisfigurecaption{Hình 3.19: Kiến trúc tích hợp bản đồ thời gian thực}
 
 \subparagraph{b) Cơ chế cập nhật vị trí thời gian
 thực}\label{b-cux1a1-chux1ebf-cux1eadp-nhux1eadt-vux1ecb-truxed-thux1eddi-gian-thux1ef1c}
@@ -5536,9 +5530,10 @@ Quy trình cập nhật vị trí xe trên bản đồ diễn ra như sau:
 Hệ thống bao gồm bốn component bản đồ chuyên biệt:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.2.4B: Tổng hợp thông tin về Component, File, Chức năng}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Component & File & Chức năng \\
+\hline \textbf{Component} & \textbf{File} & \textbf{Chức năng} \\
 \hline
 \endhead
 \hline
@@ -5556,7 +5551,7 @@ thông tin xe khi click marker (biển số, tốc độ, trạng thái) \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-20.svg}}
 
-\emph{Hình 3.20: Giao diện trang bản đồ thời gian thực với các marker
+\thesisfigurecaption{Hình 3.20: Giao diện trang bản đồ thời gian thực với các marker
 xe}
 
 \paragraph{3.2.4.5. Thiết kế responsive và trải nghiệm người dùng
@@ -5568,12 +5563,11 @@ responsive}\label{a-chiux1ebfn-lux1b0ux1ee3c-responsive}
 
 Hệ thống áp dụng chiến lược Mobile-First với ba mức breakpoint chính:
 
-{[}Bảng 3.28: Breakpoint và tương ứng giao diện{]}
+\thesistabletitle{Bảng 3.28: Breakpoint và tương ứng giao diện}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Breakpoint & Kích thước & Giao diện & Điều chỉnh chính \\
+\hline \textbf{Breakpoint} & \textbf{Kích thước} & \textbf{Giao diện} & \textbf{Điều chỉnh chính} \\
 \hline
 \endhead
 \hline
@@ -5595,7 +5589,7 @@ menu), và Main Content Area (page content, filters, data tables).
 
 \pandocbounded{\safeincludesvg{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-21.svg}}
 
-\emph{Hình 3.21: Wireframe bố cục giao diện Dashboard}
+\thesisfigurecaption{Hình 3.21: Wireframe bố cục giao diện Dashboard}
 
 \subparagraph{c) Hệ thống theme
 Light/Dark}\label{c-hux1ec7-thux1ed1ng-theme-lightdark}
@@ -5613,7 +5607,7 @@ dụng:
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Bảng dữ liệu (Data Tables):} Sắp xếp, lọc, phân trang phía
+  \thesistabletitle{Bảng dữ liệu (Data Tables):} Sắp xếp, lọc, phân trang phía
   server, chọn nhiều dòng, xuất dữ liệu CSV/Excel.
 \item
   \textbf{Biểu mẫu (Forms):} React Hook Form + Zod validation, inline
@@ -5628,7 +5622,7 @@ dụng:
 
 \pandocbounded{\safeincludesvg{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-22.svg}}
 
-\emph{Hình 3.22: Các mẫu thiết kế UI của hệ thống - Data Table, Form,
+\thesisfigurecaption{Hình 3.22: Các mẫu thiết kế UI của hệ thống - Data Table, Form,
 Charts}
 
 \subparagraph{e) Tối ưu trải nghiệm người
@@ -5668,19 +5662,18 @@ Dựa trên phân tích các giải pháp đề xuất cho từng tầng hệ th
 3.2, bảng tổng hợp dưới đây đánh giá và so sánh các phương án đã xem
 xét:
 
-{[}Bảng 3.29: Ma trận đánh giá tổng hợp các phương án thiết kế{]}
+\thesistabletitle{Bảng 3.29: Ma trận đánh giá tổng hợp các phương án thiết kế}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tầng hệ thống & Phương án được chọn & Lý do chính \\
+\hline \textbf{Tầng hệ thống} & \textbf{Phương án được chọn} & \textbf{Lý do chính} \\
 \hline
 \endhead
 \hline
 \endlastfoot
 Vi điều khiển & ESP32-S3 & BLE 5.0 tích hợp, dual-core, hỗ trợ AI \\
 LTE + GNSS & SIMCom SIM7600CE-T & Modem tích hợp LTE + GNSS, giảm số
-lượng module phần cứng \\
+lượng khối phần cứng rời \\
 OBD2 Adapter & vgate iCar Pro (BLE) & Không cần dây, tương thích rộng \\
 Cảm biến IMU & LIS3DSH & Siêu tiết kiệm điện, wake-on-motion \\
 Buffer cục bộ & microSD SDMMC 4-bit + FATFS + replay & Duy trì liên tục
@@ -5704,7 +5697,7 @@ cho hệ thống IoT giám sát phương tiện được tổng hợp như sau:
 
 \pandocbounded{\safeincludesvg{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-23.svg}}
 
-\emph{Hình 3.23: Sơ đồ kiến trúc tổng thể phương án tối ưu}
+\thesisfigurecaption{Hình 3.23: Sơ đồ kiến trúc tổng thể phương án tối ưu}
 
 \textbf{Kiến trúc phân tầng:}
 
@@ -5769,11 +5762,11 @@ giữa ắc quy xe và pin dự phòng.
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-07.svg}}
 
-\emph{Hình 4.1a: Bố trí chi tiết các khối phần cứng trong tracker}
+\thesisfigurecaption{Hình 4.1a: Bố trí chi tiết các khối phần cứng trong tracker}
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-1.svg}}
 
-\emph{Hình 4.1: Sơ đồ khối tổng thể hệ thống tracker IoT}
+\thesisfigurecaption{Hình 4.1: Sơ đồ khối tổng thể hệ thống tracker IoT}
 
 \paragraph{b) Khối vi điều khiển và giao
 tiếp}\label{b-khux1ed1i-vi-ux111iux1ec1u-khiux1ec3n-vuxe0-giao-tiux1ebfp}
@@ -5782,9 +5775,10 @@ Vi điều khiển ESP32-S3-WROOM-1 được lựa chọn làm nhân xử lý tr
 của hệ thống với các thông số kỹ thuật nổi bật:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 4.1.1A: Tổng hợp thông tin về Thông số, Giá trị}
+
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-Thông số & Giá trị \\
+\hline \textbf{Thông số} & \textbf{Giá trị} \\
 \hline
 \endhead
 \hline
@@ -5809,7 +5803,7 @@ SIM7600CE-T thông qua tập lệnh AT. Modem được cấu hình Auto mode
 mặc định \texttt{internet}, và cung cấp dữ liệu GNSS qua
 \texttt{AT+CGNSINF} (có thể thêm stream NMEA \texttt{AT+CGNSTST} nếu
 cần) trên cùng UART. Tốc độ baud mặc định 115200 bps, dữ liệu 8-bit, 1
-stop bit, không parity. Kiến trúc này giảm số module phần cứng và giữ
+stop bit, không parity. Kiến trúc này giảm số khối phần cứng rời và giữ
 pin mapping hiện tại.
 
 \textbf{Giao tiếp BLE với OBD2 adapter:} ESP32-S3 sử dụng BLE 5.0 tích
@@ -5826,11 +5820,11 @@ ngoài (interrupt) khi phát hiện rung động bất thường.
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-08.svg}}
 
-\emph{Hình 4.2a: Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3}
+\thesisfigurecaption{Hình 4.2a: Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3}
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-2.svg}}
 
-\emph{Hình 4.2: Sơ đồ kết nối giữa ESP32-S3 và modem SIM7600CE-T qua
+\thesisfigurecaption{Hình 4.2: Sơ đồ kết nối giữa ESP32-S3 và modem SIM7600CE-T qua
 UART}
 
 \paragraph{c) Khối đo điện áp ắc
@@ -5874,7 +5868,7 @@ cấu hình:
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-3.svg}}
 
-\emph{Hình 4.3: Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC
+\thesisfigurecaption{Hình 4.3: Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC
 ESP32-S3}
 
 \paragraph{d) Sơ đồ nguyên lý tổng
@@ -5906,7 +5900,7 @@ gồm:
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-4.svg}}
 
-\emph{Hình 4.4: Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker}
+\thesisfigurecaption{Hình 4.4: Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -5921,12 +5915,11 @@ Việc phân công chân GPIO của ESP32-S3 được thiết kế đảm bảo 
 external wakeup. Bảng 4.1 trình bày chi tiết phân công chân GPIO cho
 toàn bộ hệ thống.
 
-\textbf{Bảng 4.1: Phân công chân GPIO của ESP32-S3}
+\thesistabletitle{Bảng 4.1: Phân công chân GPIO của ESP32-S3}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Chân GPIO & Chức năng & Hướng & Mô tả chi tiết \\
+\hline \textbf{Chân GPIO} & \textbf{Chức năng} & \textbf{Hướng} & \textbf{Mô tả chi tiết} \\
 \hline
 \endhead
 \hline
@@ -5997,7 +5990,7 @@ cho cơ chế lưu đệm cục bộ.
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-5.svg}}
 
-\emph{Hình 4.5: Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần
+\thesisfigurecaption{Hình 4.5: Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần
 cứng tích hợp}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -6016,7 +6009,7 @@ Kiến trúc nguồn gồm sáu khối chức năng chính:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Buck 3.3V (XL1509 3.3E):} Chuyển đổi 12V/24V xuống 3.3V cấp
+  \textbf{Buck 3.3V (AP2112-3.3):} Chuyển đổi 12V/24V xuống 3.3V cấp
   ESP32-S3
 \item
   \textbf{Buck 5V (MP2482):} Chuyển đổi 12V/24V xuống 5V bus chính
@@ -6030,35 +6023,33 @@ Kiến trúc nguồn gồm sáu khối chức năng chính:
   \textbf{Power path Diode-OR + điều khiển EN:} Tự động duy trì nguồn
   liên tục giữa nhánh chính và nhánh backup
 \item
-  \textbf{Mạch sạc TP4056 + LVD (LM393/ADC):} Sạc pin 1S và giám sát
+  \textbf{Mạch sạc TP4056 + LVD (khối LVD/ADC):} Sạc pin 1S và giám sát
   ngưỡng điện áp bảo vệ ắc quy
 \end{enumerate}
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-99-bao-cao-thesis-hoan-chinh-09.svg}}
 
-\emph{Hình 4.6a: Kiến trúc power path giữa nguồn xe và pin dự phòng}
+\thesisfigurecaption{Hình 4.6a: Kiến trúc power path giữa nguồn xe và pin dự phòng}
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-6.svg}}
 
-\emph{Hình 4.6: Kiến trúc tổng thể mạch quản lý nguồn}
+\thesisfigurecaption{Hình 4.6: Kiến trúc tổng thể mạch quản lý nguồn}
 
-\paragraph{b) Buck 3.3V cho ESP32-S3 (XL1509
-3.3E)}\label{b-buck-33v-cho-esp32-s3-xl1509-33e}
+\paragraph{b) Buck 3.3V cho ESP32-S3 (AP2112-3.3)}\label{b-buck-33v-cho-esp32-s3-xl1509-33e}
 
-Khối buck 3.3V dùng \textbf{XL1509 3.3E} để hạ áp từ 12V/24V xuống 3.3V
+Khối buck 3.3V dùng \textbf{AP2112-3.3} để hạ áp từ 12V/24V xuống 3.3V
 cấp cho ESP32-S3.
 
-\textbf{Bảng 4.2: Khối Buck 3.3V}
+\thesistabletitle{Bảng 4.2: Khối Buck 3.3V}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Khối & IC & Input & Output & Tải \\
+\hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
 \hline
 \endlastfoot
-Buck 3.3V & XL1509 3.3E & 12--24V & 3.3V & ESP32-S3 \\
+Buck 3.3V & AP2112-3.3 & 12--24V & 3.3V & ESP32-S3 \\
 \end{longtable}
 }
 
@@ -6067,12 +6058,11 @@ Buck 3.3V & XL1509 3.3E & 12--24V & 3.3V & ESP32-S3 \\
 
 Khối buck 5V dùng \textbf{MP2482} tạo bus 5V chính từ 12V/24V.
 
-\textbf{Bảng 4.3: Khối Buck 5V}
+\thesistabletitle{Bảng 4.3: Khối Buck 5V}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Khối & IC & Input & Output & Tải \\
+\hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
 \hline
@@ -6083,7 +6073,7 @@ Buck 5V & MP2482 & 12--24V & 5V & Bus 5V chính \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-7.svg}}
 
-\emph{Hình 4.7: Kiến trúc nhánh buck 5V chính dùng MP2482}
+\thesisfigurecaption{Hình 4.7: Kiến trúc nhánh buck 5V chính dùng MP2482}
 
 \paragraph{d) Buck 3.8V/4V cho modem
 (TPS54231)}\label{d-buck-38v4v-cho-modem-tps54231}
@@ -6091,12 +6081,11 @@ Buck 5V & MP2482 & 12--24V & 5V & Bus 5V chính \\
 Khối buck modem dùng \textbf{TPS54231} để hạ 12V/24V xuống khoảng 4V cấp
 cho SIM7600CE-T.
 
-\textbf{Bảng 4.4: Khối Buck 3.8V/4V cho modem}
+\thesistabletitle{Bảng 4.4: Khối Buck 3.8V/4V cho modem}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Khối & IC & Input & Output & Tải \\
+\hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
 \hline
@@ -6111,12 +6100,11 @@ Path}\label{e-boost-5v-dux1ef1-phuxf2ng-vuxe0-power-path}
 Khối boost dùng \textbf{SX1308} để nâng áp từ pin 18650 1S
 (~3.7V) lên 5V khi chạy nguồn dự phòng.
 
-\textbf{Bảng 4.5: Khối Boost 5V dự phòng}
+\thesistabletitle{Bảng 4.5: Khối Boost 5V dự phòng}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Khối & IC & Input & Output & Tải \\
+\hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
 \hline
@@ -6127,19 +6115,18 @@ Boost 5V & SX1308 & Battery ~3.7V & 5V & Backup từ pin \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-8.svg}}
 
-\emph{Hình 4.8: Kiến trúc nhánh nguồn dự phòng 5V từ pin 18650 qua
+\thesisfigurecaption{Hình 4.8: Kiến trúc nhánh nguồn dự phòng 5V từ pin 18650 qua
 SX1308}
 
 Power path runtime được triển khai theo \textbf{diode OR} giữa nhánh 5V
 chính (MP2482) và nhánh 5V backup (SX1308), phối hợp điều khiển GPIO để
 đảm bảo chuyển nguồn liên tục.
 
-\textbf{Bảng 4.6: Logic chuyển nguồn tự động}
+\thesistabletitle{Bảng 4.6: Logic chuyển nguồn tự động}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-Trạng thái & IGN & U\_batt & Nguồn Tracker & Sạc Pin & Cảnh báo \\
+\hline \textbf{Trạng thái} & \textbf{IGN} & \textbf{U} \_batt & Nguồn Tracker & Sạc Pin & Cảnh báo \\
 \hline
 \endhead
 \hline
@@ -6157,7 +6144,7 @@ Profile 24V: U\_batt \textgreater= 24.4V & Ắc quy & Không & Có \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-9.svg}}
 
-\emph{Hình 4.9: Sơ đồ power path runtime giữa nhánh chính và nhánh
+\thesisfigurecaption{Hình 4.9: Sơ đồ power path runtime giữa nhánh chính và nhánh
 backup}
 
 \paragraph{f) Mạch sạc pin
@@ -6166,12 +6153,11 @@ TP4056}\label{f-mux1ea1ch-sux1ea1c-pin-tp4056}
 Khối sạc pin dùng \textbf{TP4056}, nhận \textbf{5V từ MP2482} và sạc pin
 18650 1S ở mức 4.2V (1S).
 
-\textbf{Bảng 4.7: Khối sạc TP4056}
+\thesistabletitle{Bảng 4.7: Khối sạc TP4056}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Khối & IC & Input & Output & Tải \\
+\hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
 \hline
@@ -6182,7 +6168,7 @@ Sạc pin & TP4056 & 5V từ MP2482 & 4.2V & Pin 18650 1S \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-10.svg}}
 
-\emph{Hình 4.10: Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng}
+\thesisfigurecaption{Hình 4.10: Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng}
 
 Dòng sạc của TP4056 được xác lập theo điện trở PROG và giới hạn nhiệt,
 không cố định một giá trị trong mọi điều kiện.
@@ -6190,7 +6176,7 @@ không cố định một giá trị trong mọi điều kiện.
 \paragraph{g) Mạch giám sát điện áp Low Voltage Disconnect
 (LVD)}\label{g-mux1ea1ch-giuxe1m-suxe1t-ux111iux1ec7n-uxe1p-low-voltage-disconnect-lvd}
 
-Hệ thống dùng ADC (R1 = 100 kΩ, R2 = 10 kΩ) kết hợp comparator LM393 để
+Hệ thống dùng ADC (R1 = 100 kΩ, R2 = 10 kΩ) kết hợp khối LVD phần cứng để
 giám sát điện áp.
 
 Ngưỡng profile:
@@ -6239,14 +6225,14 @@ năng:
 
 Bố cục bên trong được chia thành ba vùng rõ ràng: cụm xử lý và truyền
 thông (\texttt{ESP32-S3}, \texttt{SIM7600CE-T}), cụm nguồn
-(\texttt{XL1509\ 3.3E}, \texttt{MP2482}, \texttt{TPS54231},
-\texttt{SX1308}, \texttt{TP4056}, \texttt{LM393}) và cụm lưu trữ năng
-lượng (\texttt{pin\ 18650\ 1S\ +\ BMS}). Hình 4.11 thể hiện cách nhóm
+(\texttt{AP2112-3.3}, \texttt{MP2482}, \texttt{TPS54231},
+\texttt{SX1308}, \texttt{TP4056}, \texttt{khối\ LVD}) và cụm lưu trữ năng
+lượng (\texttt{pin\ 18650\ 1S\ +\ mạch\ bảo\ vệ\ 1S}). Hình 4.11 thể hiện cách nhóm
 các khối phần cứng này trong vỏ hộp cùng vị trí anten và cổng OBD2.
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-11.svg}}
 
-\emph{Hình 4.11: Sơ đồ bố cục bên trong vỏ hộp bảo vệ}
+\thesisfigurecaption{Hình 4.11: Sơ đồ bố cục bên trong vỏ hộp bảo vệ}
 
 \paragraph{c) Các lưu ý thiết
 kế}\label{c-cuxe1c-lux1b0u-uxfd-thiux1ebft-kux1ebf}
@@ -6321,12 +6307,11 @@ Assembly)}\label{421-lux1eafp-ruxe1p-mux1ea1ch-ux111iux1ec7n-tux1eed-electronics
 \paragraph{a) Danh sách vật liệu (Bill of
 Materials)}\label{a-danh-suxe1ch-vux1eadt-liux1ec7u-bill-of-materials}
 
-\textbf{Bảng 4.6: Danh sách vật liệu đầy đủ cho hệ thống tracker}
+\thesistabletitle{Bảng 4.6: Danh sách vật liệu đầy đủ cho hệ thống tracker}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Thành phần & Đơn vị & SL & Giá ước tính (VND) & Ghi chú \\
+\hline \textbf{STT} & \textbf{Thành phần} & \textbf{Đơn vị} & \textbf{SL} & \textbf{Giá ước tính (VND)} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -6343,18 +6328,18 @@ tích hợp GNSS + anten + khe SIM \\
 protection board \\
 6 & IC sạc TP4056 + mạch phụ trợ & Cái & 1 & 20,000--40,000 & Input 5V
 từ MP2482, output 4.2V, dòng theo PROG \\
-7 & Mạch buck XL1509 3.3V & Cái & 1 & 15,000--30,000 & 12--24V
+7 & Mạch buck AP2112-3.3 & Cái & 1 & 15,000--30,000 & 12--24V
 -\textgreater{} 3.3V cho ESP32-S3 \\
 8 & Mạch buck MP2482 5V & Cái & 1 & 15,000--30,000 & Bus 5V chính \\
 9 & Mạch buck TPS54231 ~4V & Cái & 1 & 20,000--40,000 &
 12--24V -\textgreater{} ~4V cấp modem SIM7600CE-T \\
 10 & Mạch boost SX1308 5V backup & Cái & 1 & 10,000--20,000 & Backup từ
 pin 18650 1S \\
-11 & Comparator LM393 & Cái & 1 & 5,000--15,000 & Giám sát LVD
+11 & Khối giám sát LVD + ADC & Cái & 1 & 5,000--15,000 & Giám sát LVD
 (GPIO19) \\
-12 & Diode Schottky 1N5822 & Cái & 2 & 2,000--5,000 & Diode OR dự
+12 & Diode Schottky (SS54/SS34) & Cái & 2 & 2,000--5,000 & Diode OR dự
 phòng \\
-13 & BMS/Protection Board 1S & Cái & 1 & 10,000--20,000 & Bảo vệ pin
+13 & Mạch bảo vệ pin 1S (BMS) & Cái & 1 & 10,000--20,000 & Bảo vệ pin
 18650 1S \\
 14 & Điện trở (10k, 2.2k, v.v.) & Gói & 1 & 5,000--10,000 & Voltage
 divider, pull-up/pull-down \\
@@ -6372,12 +6357,11 @@ tắc, LED chỉ thị \\
 \end{longtable}
 }
 
-\textbf{Bảng 4.7: Tổng chi phí ước tính}
+\thesistabletitle{Bảng 4.7: Tổng chi phí ước tính}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-Hạng mục & Chi phí (VND) \\
+\hline \textbf{Hạng mục} & \textbf{Chi phí (VND)} \\
 \hline
 \endhead
 \hline
@@ -6397,17 +6381,17 @@ Quy trình lắp ráp mạch điện tử được triển khai theo các bướ
 
 \textbf{Bước 1 - Kiểm tra linh kiện:} Kiểm tra toàn bộ IC, linh kiện và
 bán thành phẩm trước khi lắp ráp. Test riêng từng khối chức năng chính
-(ESP32-S3-WROOM-1, XL1509 3.3E, MP2482, TPS54231, SX1308, TP4056,
-SIM7600CE-T, LM393) để bảo đảm hoạt động đúng.
+(ESP32-S3-WROOM-1, AP2112-3.3, MP2482, TPS54231, SX1308, TP4056,
+SIM7600CE-T, khối LVD) để bảo đảm hoạt động đúng.
 
 \textbf{Bước 2 - Lắp ráp khối nguồn trên PCB:} Hàn và kiểm tra MP2482 để
-tạo bus 5V từ nguồn ắc quy xe (12V hoặc 24V). Lắp XL1509 3.3E cấp riêng
+tạo bus 5V từ nguồn ắc quy xe (12V hoặc 24V). Lắp AP2112-3.3 cấp riêng
 cho ESP32-S3, TPS54231 tạo rail ~4V cho modem SIM7600CE-T,
 SX1308 tạo 5V backup từ pin 18650 1S, diode OR giữa nhánh 5V chính và
-nhánh 5V backup, cùng TP4056 kết nối với pin và BMS.
+nhánh 5V backup, cùng TP4056 kết nối với pin và mạch bảo vệ 1S.
 
 \textbf{Bước 3 - Lắp ráp khối xử lý và điều khiển:} Hàn
-ESP32-S3-WROOM-1, LIS3DSH, LM393 và các linh kiện liên quan lên PCB
+ESP32-S3-WROOM-1, LIS3DSH và các linh kiện liên quan lên PCB
 chính. Kiểm tra các chân GPIO theo bảng phân công (Bảng 4.1) và cấp
 nguồn theo từng rail chức năng (3.3V logic, ~4V modem, 5V
 bus/backup).
@@ -6431,11 +6415,11 @@ kiểm tra tổng thể.
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-12.svg}}
 
-\emph{Hình 4.12: Quy trình lắp ráp phần cứng trên PCB}
+\thesisfigurecaption{Hình 4.12: Quy trình lắp ráp phần cứng trên PCB}
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-13.svg}}
 
-\emph{Hình 4.13: Sơ đồ bố trí linh kiện sau khi lắp ráp}
+\thesisfigurecaption{Hình 4.13: Sơ đồ bố trí linh kiện sau khi lắp ráp}
 
 \paragraph{c) Kiểm tra và hiệu
 chuẩn}\label{c-kiux1ec3m-tra-vuxe0-hiux1ec7u-chuux1ea9n}
@@ -6502,7 +6486,7 @@ hoặc 24V) và GND được lấy từ cổng OBD2 thông qua dây nối riêng
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-14.svg}}
 
-\emph{Hình 4.14: Minh họa vị trí cổng OBD2 trên xe và cách kết nối}
+\thesisfigurecaption{Hình 4.14: Minh họa vị trí cổng OBD2 trên xe và cách kết nối}
 
 \paragraph{c) Đi dây và kết nối
 anten}\label{c-ux111i-duxe2y-vuxe0-kux1ebft-nux1ed1i-anten}
@@ -6544,7 +6528,7 @@ nhiễu}\label{d-quux1ea3n-luxfd-cuxe1p-vuxe0-chux1ed1ng-nhiux1ec5u}
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-15.svg}}
 
-\emph{Hình 4.15: Minh họa lắp đặt thiết bị tracker trong xe và đi dây}
+\thesisfigurecaption{Hình 4.15: Minh họa lắp đặt thiết bị tracker trong xe và đi dây}
 
 \paragraph{e) Kiểm tra sau lắp
 đặt}\label{e-kiux1ec3m-tra-sau-lux1eafp-ux111ux1eb7t}
@@ -6578,7 +6562,7 @@ Sau khi lắp đặt xong, cần thực hiện các kiểm tra sau:
 
 \pandocbounded{\safeincludesvg{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-16.svg}}
 
-\emph{Hình 4.16: Checklist kiểm tra hệ thống sau khi lắp đặt trong xe}
+\thesisfigurecaption{Hình 4.16: Checklist kiểm tra hệ thống sau khi lắp đặt trong xe}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -6601,12 +6585,11 @@ Espressif cung cấp cho dòng vi điều khiển ESP32-S3. ESP-IDF cung cấp �
 điều hành thời gian thực FreeRTOS, thư viện ngoại vi (peripheral
 drivers), BLE stack (NimBLE) và hệ thống build dựa trên CMake.
 
-\textbf{Bảng 4.5: Công cụ phát triển firmware}
+\thesistabletitle{Bảng 4.5: Công cụ phát triển firmware}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Thành phần & Công cụ / Phiên bản & Mục đích \\
+\hline \textbf{Thành phần} & \textbf{Công cụ / Phiên bản} & \textbf{Mục đích} \\
 \hline
 \endhead
 \hline
@@ -6715,12 +6698,11 @@ tầng}\label{b-kiux1ebfn-truxfac-phuxe2n-tux1ea7ng}
 Firmware được tổ chức quanh bốn nhóm chức năng chính, phản ánh đúng cách
 chia mô-đun trong mã nguồn hiện tại:
 
-\textbf{Bảng 4.6: Kiến trúc phân tầng firmware}
+\thesistabletitle{Bảng 4.6: Kiến trúc phân tầng firmware}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Nhóm & Thành phần & Chức năng \\
+\hline \textbf{Nhóm} & \textbf{Thành phần} & \textbf{Chức năng} \\
 \hline
 \endhead
 \hline
@@ -6747,12 +6729,11 @@ dụng khó kiểm soát.
 \paragraph{c) Định nghĩa chân
 GPIO}\label{c-ux111ux1ecbnh-nghux129a-chuxe2n-gpio}
 
-\textbf{Bảng 4.7: Bảng ánh xạ chân GPIO}
+\thesistabletitle{Bảng 4.7: Bảng ánh xạ chân GPIO}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-GPIO & Chức năng & Hướng & Mô tả \\
+\hline \textbf{GPIO} & \textbf{Chức năng} & \textbf{Hướng} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -6763,7 +6744,7 @@ GPIO & Chức năng & Hướng & Mô tả \\
 16 & MODEM\_UART\_TX & Output & UART TX đến modem SIM7600CE-T \\
 17 & MODEM\_UART\_RX & Input & UART RX từ modem SIM7600CE-T \\
 18 & POWER\_PATH\_EN & Output & Chọn nguồn cấp (ắc quy/pin dự phòng) \\
-19 & LVD\_STATUS & Input & Trạng thái từ comparator LM393 \\
+19 & LVD\_STATUS & Input & Trạng thái từ khối LVD phần cứng \\
 21 & LIS3DSH\_INT & Input & Ngắt từ cảm biến gia tốc IMU \\
 47 & LIS3DSH\_SDA & I/O & I2C data line \\
 48 & LIS3DSH\_SCL & I/O & I2C clock line \\
@@ -6954,13 +6935,12 @@ là dữ liệu cần giải mã.
 \paragraph{e) Bảng PID OBD2 sử dụng trong hệ
 thống}\label{e-bux1ea3ng-pid-obd2-sux1eed-dux1ee5ng-trong-hux1ec7-thux1ed1ng}
 
-\textbf{Bảng 4.8: Các PID OBD2 được đọc định kỳ (Mode 0x01 - Current
+\thesistabletitle{Bảng 4.8: Các PID OBD2 được đọc định kỳ (Mode 0x01 - Current
 Data)}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-PID (Hex) & Thông số & Độ dài & Công thức tính & Đơn vị \\
+\hline \textbf{PID (Hex)} & \textbf{Thông số} & \textbf{Độ dài} & \textbf{Công thức tính} & \textbf{Đơn vị} \\
 \hline
 \endhead
 \hline
@@ -7117,9 +7097,10 @@ heartbeat, cảnh báo, OTA và lệnh điều khiển.
 \textbf{Cấu trúc topic MQTT:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 4.8A: Bảng bổ sung chỉ mục (4.2.3. Triển khai Firmware)}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Topic & Hướng & Mục đích \\
+\hline \textbf{Topic} & \textbf{Hướng} & \textbf{Mục đích} \\
 \hline
 \endhead
 \hline
@@ -7265,7 +7246,7 @@ quay về phân vùng trước đó và phát trạng thái \texttt{failed} ho�
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-08-chuong-4-trien-khai-firmware-02.svg}}
 
-\emph{Hình 4.16a: Chuỗi bước OTA trên firmware từ nhận lệnh đến xác nhận
+\thesisfigurecaption{Hình 4.16a: Chuỗi bước OTA trên firmware từ nhận lệnh đến xác nhận
 sau reboot}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -7334,12 +7315,11 @@ thức}\label{b-chux1ebf-ux111ux1ed9-ngux1ee7-vuxe0-ux111uxe1nh-thux1ee9c}
 
 Firmware sử dụng hai chế độ ngủ của ESP32-S3 tùy theo tình huống:
 
-\textbf{Bảng 4.9: So sánh các chế độ ngủ}
+\thesistabletitle{Bảng 4.9: So sánh các chế độ ngủ}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Chế độ & Dòng tiêu thụ & Thời gian thức dậy & BLE & Điều kiện sử dụng \\
+\hline \textbf{Chế độ} & \textbf{Dòng tiêu thụ} & \textbf{Thời gian thức dậy} & \textbf{BLE} & \textbf{Điều kiện sử dụng} \\
 \hline
 \endhead
 \hline
@@ -7427,12 +7407,11 @@ Machine)}\label{a-muxe1y-trux1ea1ng-thuxe1i-state-machine}
 Toàn bộ logic điều khiển firmware được tổ chức theo mô hình máy trạng
 thái (Finite State Machine - FSM), gồm bảy trạng thái chính:
 
-\textbf{Bảng 4.10: Các trạng thái của firmware}
+\thesistabletitle{Bảng 4.10: Các trạng thái của firmware}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Trạng thái & Mã & Mô tả \\
+\hline \textbf{Trạng thái} & \textbf{Mã} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -7449,12 +7428,11 @@ SLEEP & \texttt{STATE\_SLEEP} & Deep sleep tiết kiệm năng lượng \\
 \end{longtable}
 }
 
-\textbf{Bảng 4.11: Chuyển đổi trạng thái}
+\thesistabletitle{Bảng 4.11: Chuyển đổi trạng thái}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Trạng thái hiện tại & Điều kiện & Trạng thái mới \\
+\hline \textbf{Trạng thái hiện tại} & \textbf{Điều kiện} & \textbf{Trạng thái mới} \\
 \hline
 \endhead
 \hline
@@ -7502,7 +7480,7 @@ thể}\label{b-lux1b0u-ux111ux1ed3-thuux1eadt-touxe1n-tux1ed5ng-thux1ec3}
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-08-chuong-4-trien-khai-firmware-01.svg}}
 
-\emph{Hình 4.17: Lưu đồ thuật toán chính của firmware thiết bị theo dõi
+\thesisfigurecaption{Hình 4.17: Lưu đồ thuật toán chính của firmware thiết bị theo dõi
 xe}
 
 Lưu đồ được tổng hợp từ luồng xử lý trong mã firmware triển khai thực tế
@@ -7562,7 +7540,7 @@ PostgreSQL, còn Backend/API cùng Frontend Dashboard đảm nhiệm truy vấn,
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-15.svg}}
 
-\emph{Hình 4.18: Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu}
+\thesisfigurecaption{Hình 4.18: Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -7652,7 +7630,7 @@ iot-vehicle-tracking-system-cloud/                  # Thư mục gốc của t�
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-16.svg}}
 
-\emph{Hình 4.19: Cấu trúc thư mục hệ thống theo quy ước IVM26}
+\thesisfigurecaption{Hình 4.19: Cấu trúc thư mục hệ thống theo quy ước IVM26}
 
 \subparagraph{b) Mạng chia sẻ (Shared
 Network)}\label{b-mux1ea1ng-chia-sux1ebb-shared-network}
@@ -7799,12 +7777,11 @@ sau đó đến các dịch vụ ứng dụng:
 \end{Highlighting}
 \end{Shaded}
 
-{[}Bảng 4.5: Danh sách các dịch vụ Docker và cổng truy cập{]}
+\thesistabletitle{Bảng 4.5: Danh sách các dịch vụ Docker và cổng truy cập}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Dịch vụ & Container Name & Port & Mô tả \\
+\hline \textbf{Dịch vụ} & \textbf{Container Name} & \textbf{Port} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -7856,7 +7833,7 @@ Thiết bị IoT (ESP32)
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-17.svg}}
 
-\emph{Hình 4.20: Luồng xử lý dữ liệu của MQTT Bridge}
+\thesisfigurecaption{Hình 4.20: Luồng xử lý dữ liệu của MQTT Bridge}
 
 \subparagraph{b) Cấu trúc mã
 nguồn}\label{b-cux1ea5u-truxfac-muxe3-nguux1ed3n}
@@ -8056,12 +8033,11 @@ nghệ}\label{a-lux1ef1a-chux1ecdn-cuxf4ng-nghux1ec7-1}
 Backend API được xây dựng trên nền tảng Node.js với Express.js và
 TypeScript. Việc lựa chọn này dựa trên các yếu tố sau:
 
-{[}Bảng 4.6: So sánh framework backend cho hệ thống IoT{]}
+\thesistabletitle{Bảng 4.6: So sánh framework backend cho hệ thống IoT}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Tiêu chí & Express + TypeScript & NestJS & Go + Gin \\
+\hline \textbf{Tiêu chí} & \textbf{Express + TypeScript} & \textbf{NestJS} & \textbf{Go + Gin} \\
 \hline
 \endhead
 \hline
@@ -8204,18 +8180,17 @@ Tracking_Backend/src/
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-18.svg}}
 
-\emph{Hình 4.21: Cấu trúc thư mục Backend theo kiến trúc DDD}
+\thesisfigurecaption{Hình 4.21: Cấu trúc thư mục Backend theo kiến trúc DDD}
 
 Hệ thống bao gồm hơn 20 domain modules, mỗi module chịu trách nhiệm một
 lĩnh vực nghiệp vụ cụ thể. Điều này giúp code dễ bảo trì, dễ test, và dễ
 mở rộng khi cần thêm tính năng mới.
 
-{[}Bảng 4.7: Danh sách các domain modules chính{]}
+\thesistabletitle{Bảng 4.7: Danh sách các domain modules chính}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Domain & Số lượng Services & Mô tả \\
+\hline \textbf{Domain} & \textbf{Số lượng Services} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -8304,12 +8279,11 @@ cuối trong hệ thống phân tán.
 
 Hệ thống cung cấp các nhóm API endpoint sau:
 
-{[}Bảng 4.8: Tổng hợp các nhóm API endpoint chính{]}
+\thesistabletitle{Bảng 4.8: Tổng hợp các nhóm API endpoint chính}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Nhóm & Base Path & Xác thực & Mô tả \\
+\hline \textbf{Nhóm} & \textbf{Base Path} & \textbf{Xác thực} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -8437,9 +8411,10 @@ và trải nghiệm lập trình hiệu quả.
 \textbf{Tech stack frontend:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 4.2.5A: Tổng hợp thông tin về Công nghệ, Phiên bản, Vai trò}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Công nghệ & Phiên bản & Vai trò \\
+\hline \textbf{Công nghệ} & \textbf{Phiên bản} & \textbf{Vai trò} \\
 \hline
 \endhead
 \hline
@@ -8528,7 +8503,7 @@ Tracking_Frontend/src/
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-19.svg}}
 
-\emph{Hình 4.22: Cấu trúc thư mục Frontend theo kiến trúc
+\thesisfigurecaption{Hình 4.22: Cấu trúc thư mục Frontend theo kiến trúc
 Feature-Sliced}
 
 \subparagraph{c) Các trang chính và tính
@@ -8545,7 +8520,7 @@ loại).
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-20.svg}}
 
-\emph{Hình 4.23: Giao diện trang Dashboard tổng quan}
+\thesisfigurecaption{Hình 4.23: Giao diện trang Dashboard tổng quan}
 
 \textbf{Trang quản lý xe (\texttt{/dashboard/vehicles}):} Giao diện dạng
 bảng dữ liệu (data table) với các cột: biển số xe, hãng xe/model, trạng
@@ -8556,7 +8531,7 @@ xe, vị trí hiện tại trên bản đồ, trạng thái thiết bị, cảnh
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-21.svg}}
 
-\emph{Hình 4.24: Giao diện trang quản lý xe}
+\thesisfigurecaption{Hình 4.24: Giao diện trang quản lý xe}
 
 \textbf{Trang bản đồ thời gian thực (\texttt{/dashboard/map}):} Hiển thị
 tất cả các xe trên bản đồ Leaflet với vị trí cập nhật thời gian thực
@@ -8566,7 +8541,7 @@ phát lại hành trình (route replay).
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-22.svg}}
 
-\emph{Hình 4.25: Giao diện bản đồ thời gian thực với vị trí các xe}
+\thesisfigurecaption{Hình 4.25: Giao diện bản đồ thời gian thực với vị trí các xe}
 
 \textbf{Trang quản lý cảnh báo (\texttt{/dashboard/alerts}):} Bảng dữ
 liệu với badge mức độ nghiêm trọng (severity), hỗ trợ lọc theo loại, mức
@@ -8576,7 +8551,7 @@ thông tin cảnh báo, vị trí trên bản đồ, xe và khách hàng liên q
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-23.svg}}
 
-\emph{Hình 4.26: Giao diện trang quản lý cảnh báo}
+\thesisfigurecaption{Hình 4.26: Giao diện trang quản lý cảnh báo}
 
 \textbf{Trang quản lý vùng địa lý (\texttt{/dashboard/geofences}):} Cho
 phép tạo và quản lý các vùng địa lý (geofence) trên bản đồ. Khi xe ra
@@ -8617,12 +8592,11 @@ khai}\label{e-cuxe1c-giai-ux111oux1ea1n-triux1ec3n-khai}
 Frontend được triển khai theo 3 giai đoạn chính (Phase 4 là giai đoạn mở
 rộng trong tương lai):
 
-{[}Bảng 4.9: Các giai đoạn triển khai Frontend{]}
+\thesistabletitle{Bảng 4.9: Các giai đoạn triển khai Frontend}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Giai đoạn & Nội dung & Trạng thái \\
+\hline \textbf{Giai đoạn} & \textbf{Nội dung} & \textbf{Trạng thái} \\
 \hline
 \endhead
 \hline
@@ -8693,12 +8667,11 @@ observability" (ba trụ cột của quan sát được), gồm: metrics (chỉ 
 logs (nhật ký) và traces (truy vết). Mỗi trụ cột sử dụng công cụ chuyên
 biệt phù hợp với đặc thù hệ thống IoT.
 
-{[}Bảng 4.10: Ba trụ cột giám sát hệ thống{]}
+\thesistabletitle{Bảng 4.10: Ba trụ cột giám sát hệ thống}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Trụ cột & Công cụ & Mục đích & Dữ liệu lưu trữ \\
+\hline \textbf{Trụ cột} & \textbf{Công cụ} & \textbf{Mục đích} & \textbf{Dữ liệu lưu trữ} \\
 \hline
 \endhead
 \hline
@@ -8797,7 +8770,7 @@ giám sát. Các dashboard chính bao gồm:
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-24.svg}}
 
-\emph{Hình 4.27: Grafana dashboard hiển thị tổng quan hiệu năng hệ
+\thesisfigurecaption{Hình 4.27: Grafana dashboard hiển thị tổng quan hiệu năng hệ
 thống}
 
 \subparagraph{e) EMQX Dashboard - Giám sát MQTT
@@ -8823,7 +8796,7 @@ tiếp trạng thái của MQTT broker:
 
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-25.svg}}
 
-\emph{Hình 4.28: EMQX Dashboard hiển thị trạng thái kết nối thiết bị}
+\thesisfigurecaption{Hình 4.28: EMQX Dashboard hiển thị trạng thái kết nối thiết bị}
 
 \subparagraph{f) Sentry - Theo dõi lỗi (Error
 Tracking)}\label{f-sentry---theo-duxf5i-lux1ed7i-error-tracking}
@@ -8880,12 +8853,11 @@ production}\label{427-checklist-hardening-trux1b0ux1edbc-khi-vux1eadn-huxe0nh-pr
 thực tế, nhóm triển khai áp dụng checklist hardening theo các mức ưu
 tiên sau (tham chiếu từ bộ tài liệu cải tiến hệ thống):
 
-{[}Bảng 4.11: Checklist hardening production theo mức ưu tiên{]}
+\thesistabletitle{Bảng 4.11: Checklist hardening production theo mức ưu tiên}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Nhóm & Hạng mục bắt buộc & Mức ưu tiên & Tiêu chí nghiệm thu \\
+\hline \textbf{Nhóm} & \textbf{Hạng mục bắt buộc} & \textbf{Mức ưu tiên} & \textbf{Tiêu chí nghiệm thu} \\
 \hline
 \endhead
 \hline
@@ -8943,12 +8915,11 @@ trì, mở rộng và triển khai độc lập từng thành phần. Hệ thố
 với VictoriaMetrics, VictoriaLogs, Grafana và Sentry bảo đảm khả năng
 quan sát và phân tích sự cố trong môi trường vận hành thực tế.
 
-{[}Bảng 4.11A: Tổng hợp công nghệ sử dụng trong hệ thống Cloud{]}
+\thesistabletitle{Bảng 4.11A: Tổng hợp công nghệ sử dụng trong hệ thống Cloud}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Thành phần & Công nghệ & Phiên bản & Vai trò \\
+\hline \textbf{Thành phần} & \textbf{Công nghệ} & \textbf{Phiên bản} & \textbf{Vai trò} \\
 \hline
 \endhead
 \hline
@@ -8995,12 +8966,11 @@ cứng}\label{4311-muxf4i-trux1b0ux1eddng-thux1eed-nghiux1ec7m-phux1ea7n-cux1ee9
 Kiểm thử phần cứng được triển khai tại phòng thí nghiệm và trên xe thực
 tế với các thiết bị đo lường sau:
 
-{[}Bảng 4.12: Thiết bị đo lường sử dụng trong thử nghiệm phần cứng{]}
+\thesistabletitle{Bảng 4.12: Thiết bị đo lường sử dụng trong thử nghiệm phần cứng}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Thiết bị & Model & Thông số chính & Mục đích sử dụng \\
+\hline \textbf{STT} & \textbf{Thiết bị} & \textbf{Model} & \textbf{Thông số chính} & \textbf{Mục đích sử dụng} \\
 \hline
 \endhead
 \hline
@@ -9037,11 +9007,11 @@ chiếu & Kiểm thử độ chính xác GPS \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-20.svg}}
 
-\emph{Hình 4.29: Bố trí thiết bị đo lường trong phòng thí nghiệm}
+\thesisfigurecaption{Hình 4.29: Bố trí thiết bị đo lường trong phòng thí nghiệm}
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-21.svg}}
 
-\emph{Hình 4.30: Thiết bị tracker được lắp đặt trên xe thử nghiệm}
+\thesisfigurecaption{Hình 4.30: Thiết bị tracker được lắp đặt trên xe thử nghiệm}
 
 \paragraph{4.3.1.2. Môi trường thử nghiệm phần
 mềm}\label{4312-muxf4i-trux1b0ux1eddng-thux1eed-nghiux1ec7m-phux1ea7n-mux1ec1m}
@@ -9049,12 +9019,11 @@ mềm}\label{4312-muxf4i-trux1b0ux1eddng-thux1eed-nghiux1ec7m-phux1ea7n-mux1ec1m
 Hệ thống cloud được triển khai trên hai môi trường riêng biệt để kiểm
 thử:
 
-{[}Bảng 4.13: Cấu hình môi trường thử nghiệm phần mềm{]}
+\thesistabletitle{Bảng 4.13: Cấu hình môi trường thử nghiệm phần mềm}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Thành phần & Môi trường Development & Môi trường Stress Test \\
+\hline \textbf{Thành phần} & \textbf{Môi trường Development} & \textbf{Môi trường Stress Test} \\
 \hline
 \endhead
 \hline
@@ -9089,7 +9058,7 @@ VictoriaMetrics & Single node & Single node \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-22.svg}}
 
-\emph{Hình 4.31: Sơ đồ môi trường thử nghiệm tổng thể}
+\thesisfigurecaption{Hình 4.31: Sơ đồ môi trường thử nghiệm tổng thể}
 
 \paragraph{4.3.1.3. Kịch bản thử
 nghiệm}\label{4313-kux1ecbch-bux1ea3n-thux1eed-nghiux1ec7m}
@@ -9125,14 +9094,12 @@ thực hiện bằng cách mắc nối tiếp đồng hồ vạn năng giữa ng
 thiết bị, sau đó ghi nhận giá trị dòng trung bình trong 60 giây cho mỗi
 chế độ.
 
-{[}Bảng 4.14: Kết quả đo dòng tiêu thụ năng lượng theo chế độ hoạt
-động{]}
+\thesistabletitle{Bảng 4.14: Kết quả đo dòng tiêu thụ năng lượng theo chế độ hoạt
+động}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Chế độ hoạt động & Mô tả & Dòng trung bình & Dòng đỉnh (peak) &
-Ghi chú \\
+\hline \textbf{STT} & \textbf{Chế độ hoạt động} & \textbf{Mô tả} & \textbf{Dòng trung bình} & \textbf{Dòng đỉnh (peak)} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -9156,7 +9123,7 @@ cold start \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-23.svg}}
 
-\emph{Hình 4.32: Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ
+\thesisfigurecaption{Hình 4.32: Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ
 hoạt động hoàn chỉnh (Driving -\textgreater{} Parking -\textgreater{}
 Alert -\textgreater{} Parking)}
 
@@ -9192,14 +9159,13 @@ mạch boost converter (~85--90\%). Các giá trị dưới đây là
 \textbf{ước tính theo baseline 18650}, không phải bộ số đo thực nghiệm
 mới trên cell 18650.
 
-{[}Bảng 4.15: Thời lượng pin dự phòng theo kịch bản sử dụng (ước tính
-theo baseline 18650){]}
+\thesistabletitle{Bảng 4.15: Thời lượng pin dự phòng theo kịch bản sử dụng (ước tính
+theo baseline 18650)}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Kịch bản sử dụng & Dòng trung bình & Thời lượng ước tính & Trạng
-thái dữ liệu & Ghi chú \\
+\hline \textbf{STT} & \textbf{Kịch bản sử dụng} & \textbf{Dòng trung bình} & \textbf{Thời lượng ước tính} & \textbf{Trạng
+thái dữ liệu} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -9220,7 +9186,7 @@ thực tế \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-24.svg}}
 
-\emph{Hình 4.33: Đồ thị điện áp pin dự phòng theo thời gian theo
+\thesisfigurecaption{Hình 4.33: Đồ thị điện áp pin dự phòng theo thời gian theo
 baseline 18650 trong kịch bản tracking liên tục}
 
 \textbf{Nhận xét:} Với baseline 18650 mới, thời lượng pin dự phòng trong
@@ -9237,13 +9203,11 @@ Thiết bị được đặt trong tủ nhiệt để kiểm tra khả năng ho�
 mức nhiệt độ khác nhau, mô phỏng môi trường trong xe ô tô (có thể vượt
 60°C vào mùa hè và xuống dưới 0°C trong phòng lạnh xe).
 
-{[}Bảng 4.16: Kết quả kiểm thử nhiệt độ hoạt động{]}
+\thesistabletitle{Bảng 4.16: Kết quả kiểm thử nhiệt độ hoạt động}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.05\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.22\linewidth}|}
-\hline
-STT & Nhiệt độ thử nghiệm & Trạng thái hoạt động & GPS fix & 4G kết nối
-& OBD2 BLE & Ghi chú \\
+\hline \textbf{STT} & \textbf{Nhiệt độ thử nghiệm} & \textbf{Trạng thái hoạt động} & \textbf{GPS fix} & \textbf{4G kết nối} & \textbf{OBD2 BLE} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -9265,7 +9229,7 @@ toàn \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-25.svg}}
 
-\emph{Hình 4.34: Đồ thị dòng tiêu thụ theo nhiệt độ môi trường}
+\thesisfigurecaption{Hình 4.34: Đồ thị dòng tiêu thụ theo nhiệt độ môi trường}
 
 \textbf{Nhận xét:} Thiết bị hoạt động ổn định trong dải nhiệt độ -10°C
 đến +60°C, đạt yêu cầu thiết kế. Tại nhiệt độ 70°C, modem 4G SIM7600CE-T
@@ -9279,14 +9243,13 @@ OBD2}\label{4324-kiux1ec3m-thux1eed-tux1b0ux1a1ng-thuxedch-obd2}
 Thiết bị được kiểm thử kết nối với nhiều thương hiệu xe khác nhau thông
 qua adapter vgate iCar Pro BLE để đánh giá khả năng tương thích.
 
-{[}Bảng 4.17: Kết quả kiểm thử tương thích OBD2 trên các thương hiệu
-xe{]}
+\thesistabletitle{Bảng 4.17: Kết quả kiểm thử tương thích OBD2 trên các thương hiệu
+xe}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.04\linewidth}|p{0.10\linewidth}|p{0.10\linewidth}|p{0.10\linewidth}|p{0.10\linewidth}|p{0.10\linewidth}|p{0.10\linewidth}|p{0.10\linewidth}|p{0.18\linewidth}|}
-\hline
-STT & Xe thử nghiệm & Năm sản xuất & Giao thức OBD2 & Kết nối BLE & Đọc
-RPM & Đọc Speed & Đọc Coolant Temp & Ghi chú \\
+\hline \textbf{STT} & \textbf{Xe thử nghiệm} & \textbf{Năm sản xuất} & \textbf{Giao thức OBD2} & \textbf{Kết nối BLE} & \textbf{Đọc
+RPM} & \textbf{Đọc Speed} & \textbf{Đọc Coolant Temp} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -9314,13 +9277,12 @@ Mạch LVD được kiểm thử bằng cách sử dụng nguồn cấp DC (UNI-
 mô phỏng ắc quy xe. Kết quả đo hiện tại được thực hiện theo profile 12V
 (quét điện áp từ 13.5V xuống 10.5V) và ghi nhận điểm ngắt/đóng lại.
 
-{[}Bảng 4.18: Kết quả kiểm thử mạch LVD{]}
+\thesistabletitle{Bảng 4.18: Kết quả kiểm thử mạch LVD}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Thông số & Giá trị thiết kế & Giá trị đo & Sai lệch & Trạng
-thái \\
+\hline \textbf{STT} & \textbf{Thông số} & \textbf{Giá trị thiết kế} & \textbf{Giá trị đo} & \textbf{Sai lệch} & \textbf{Trạng
+thái} \\
 \hline
 \endhead
 \hline
@@ -9356,13 +9318,12 @@ Thời gian kết nối BLE được đo từ lúc ESP32-S3 bắt đầu quét (
 bị BLE đến khi nhận được phản hồi OBD2 đầu tiên (response cho lệnh ATZ).
 Phép đo được lặp lại 20 lần và tính giá trị trung bình.
 
-{[}Bảng 4.19: Kết quả đo thời gian kết nối BLE OBD2{]}
+\thesistabletitle{Bảng 4.19: Kết quả đo thời gian kết nối BLE OBD2}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Thông số & Giá trị trung bình & Giá trị min & Giá trị max & Độ
-lệch chuẩn \\
+\hline \textbf{STT} & \textbf{Thông số} & \textbf{Giá trị trung bình} & \textbf{Giá trị min} & \textbf{Giá trị max} & \textbf{Độ
+lệch chuẩn} \\
 \hline
 \endhead
 \hline
@@ -9381,7 +9342,7 @@ giây & 0.3 giây \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-26.svg}}
 
-\emph{Hình 4.35: Biểu đồ phân bố thời gian kết nối BLE OBD2 (20 lần đo)}
+\thesisfigurecaption{Hình 4.35: Biểu đồ phân bố thời gian kết nối BLE OBD2 (20 lần đo)}
 
 \textbf{Nhận xét:} Thời gian kết nối BLE OBD2 trung bình
 ~4 giây (scan ~1.5s + connect
@@ -9398,12 +9359,11 @@ Thời gian phản hồi cho mỗi lệnh OBD2 PID được đo từ lúc gửi 
 khi nhận được response hoàn chỉnh qua BLE. Mỗi PID được đo 50 lần và
 tính giá trị trung bình.
 
-{[}Bảng 4.20: Thời gian phản hồi OBD2 PID{]}
+\thesistabletitle{Bảng 4.20: Thời gian phản hồi OBD2 PID}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & OBD2 PID & Mô tả & Thời gian trung bình & Min & Max \\
+\hline \textbf{STT} & \textbf{OBD2 PID} & \textbf{Mô tả} & \textbf{Thời gian trung bình} & \textbf{Min} & \textbf{Max} \\
 \hline
 \endhead
 \hline
@@ -9432,13 +9392,12 @@ Time)}\label{4333-thux1eddi-gian-bux1eaft-vux1ec7-tinh-gps-gps-fix-time}
 Thời gian bắt vệ tinh (Time to First Fix - TTFF) được đo trên GNSS tích
 hợp của SIM7600CE-T trong ba kịch bản khác nhau.
 
-{[}Bảng 4.21: Thời gian bắt vệ tinh GPS (TTFF){]}
+\thesistabletitle{Bảng 4.21: Thời gian bắt vệ tinh GPS (TTFF)}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.05\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.22\linewidth}|}
-\hline
-STT & Kịch bản & Mô tả & TTFF trung bình & Min & Max & Số vệ tinh trung
-bình \\
+\hline \textbf{STT} & \textbf{Kịch bản} & \textbf{Mô tả} & \textbf{TTFF trung bình} & \textbf{Min} & \textbf{Max} & \textbf{Số vệ tinh trung
+bình} \\
 \hline
 \endhead
 \hline
@@ -9454,7 +9413,7 @@ giây & 3 giây & 12 giây & 8--10 \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-27.svg}}
 
-\emph{Hình 4.36: Đồ thị thời gian bắt vệ tinh GPS trong các kịch bản
+\thesisfigurecaption{Hình 4.36: Đồ thị thời gian bắt vệ tinh GPS trong các kịch bản
 (Cold/Warm/Hot Start)}
 
 \textbf{Độ chính xác vị trí GPS:}
@@ -9463,12 +9422,11 @@ Phép đo độ chính xác được thực hiện bằng cách đặt thiết b
 trí cố biết (xác định bằng GPS chuyên nghiệp), ghi nhận 100 điểm tọa độ
 trong 10 phút, và tính sai số trung bình.
 
-{[}Bảng 4.22: Độ chính xác vị trí GPS{]}
+\thesistabletitle{Bảng 4.22: Độ chính xác vị trí GPS}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Điều kiện & Sai số trung bình & Sai số max & CEP 95\% \\
+\hline \textbf{STT} & \textbf{Điều kiện} & \textbf{Sai số trung bình} & \textbf{Sai số max} & \textbf{CEP 95} \% \\
 \hline
 \endhead
 \hline
@@ -9499,12 +9457,11 @@ MQTT}\label{4334-ux111ux1ed9-trux1ec5-truyux1ec1n-dux1eef-liux1ec7u-mqtt}
 bản tin MQTT (publish) đến khi MQTT Bridge nhận được bản tin
 (subscribe). Phép đo sử dụng timestamp đồng bộ giữa thiết bị và server.
 
-{[}Bảng 4.23: Độ trễ truyền dữ liệu MQTT qua mạng 4G{]}
+\thesistabletitle{Bảng 4.23: Độ trễ truyền dữ liệu MQTT qua mạng 4G}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.05\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.22\linewidth}|}
-\hline
-STT & Điều kiện mạng & QoS & Độ trễ trung bình & Min & Max & P95 \\
+\hline \textbf{STT} & \textbf{Điều kiện mạng} & \textbf{QoS} & \textbf{Độ trễ trung bình} & \textbf{Min} & \textbf{Max} & \textbf{P95} \\
 \hline
 \endhead
 \hline
@@ -9522,7 +9479,7 @@ ms & ~1500 ms \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-28.svg}}
 
-\emph{Hình 4.37: Biểu đồ phân bố độ trễ MQTT trong điều kiện mạng 4G ổn
+\thesisfigurecaption{Hình 4.37: Biểu đồ phân bố độ trễ MQTT trong điều kiện mạng 4G ổn
 định}
 
 \textbf{Nhận xét:} Độ trễ MQTT trung bình ~120--180 ms
@@ -9541,13 +9498,11 @@ Parking -\textgreater{} Alert -\textgreater{} Driving) được kiểm thử
 bằng cách chạy liên tục 1000 chu kỳ chuyển đổi trạng thái và ghi nhận
 kết quả.
 
-{[}Bảng 4.24: Kết quả kiểm thử máy trạng thái firmware{]}
+\thesistabletitle{Bảng 4.24: Kết quả kiểm thử máy trạng thái firmware}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Chuyển đổi trạng thái & Số lần thử nghiệm & Thành công & Thất bại
-& Tỷ lệ thành công \\
+\hline \textbf{STT} & \textbf{Chuyển đổi trạng thái} & \textbf{Số lần thử nghiệm} & \textbf{Thành công} & \textbf{Thất bại} & \textbf{Tỷ lệ thành công} \\
 \hline
 \endhead
 \hline
@@ -9580,12 +9535,11 @@ replay dài hạn chưa được tách riêng, phần thử nghiệm ở mục n
 vào khả năng phát hiện mất kết nối, tái lập phiên MQTT và quan sát phục
 hồi luồng telemetry khi mạng trở lại.
 
-{[}Bảng 4.25: Kết quả kiểm thử reconnect MQTT{]}
+\thesistabletitle{Bảng 4.25: Kết quả kiểm thử reconnect MQTT}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Thông số & Giá trị thiết kế & Giá trị đo & Trạng thái \\
+\hline \textbf{STT} & \textbf{Thông số} & \textbf{Giá trị thiết kế} & \textbf{Giá trị đo} & \textbf{Trạng thái} \\
 \hline
 \endhead
 \hline
@@ -9624,12 +9578,11 @@ giữa backend, firmware và MQTT Bridge. Mục tiêu là xác nhận toàn bộ
 đường đi của lệnh cập nhật, trạng thái phản hồi và cơ chế lưu vết đã
 được nối thông.
 
-{[}Bảng 4.25A: Đối chiếu luồng OTA theo mã nguồn triển khai{]}
+\thesistabletitle{Bảng 4.25A: Đối chiếu luồng OTA theo mã nguồn triển khai}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Thành phần & Điểm kiểm tra & Kết quả \\
+\hline \textbf{Thành phần} & \textbf{Điểm kiểm tra} & \textbf{Kết quả} \\
 \hline
 \endhead
 \hline
@@ -9669,13 +9622,11 @@ Backend}\label{4341-hiux1ec7u-suux1ea5t-api-backend}
 Hiệu suất API được đo bằng công cụ k6 với các kịch bản khác nhau. Mỗi
 endpoint được gửi 1000 request và tính các chỉ số thống kê.
 
-{[}Bảng 4.26: Kết quả đo hiệu suất API Backend{]}
+\thesistabletitle{Bảng 4.26: Kết quả đo hiệu suất API Backend}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.05\linewidth}|p{0.24\linewidth}|p{0.08\linewidth}|p{0.09\linewidth}|p{0.09\linewidth}|p{0.09\linewidth}|p{0.09\linewidth}|p{0.19\linewidth}|}
-\hline
-STT & Endpoint & Method & Thời gian trung bình & P50 & P95 & P99 &
-Throughput (req/s) \\
+\hline \textbf{STT} & \textbf{Endpoint} & \textbf{Method} & \textbf{Thời gian trung bình} & \textbf{P50} & \textbf{P95} & \textbf{P99} & \textbf{Throughput (req/s)} \\
 \hline
 \endhead
 \hline
@@ -9701,7 +9652,7 @@ ms & 110 ms & 180 ms & ~750 \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-29.svg}}
 
-\emph{Hình 4.38: Biểu đồ thời gian phản hồi API (P50, P95, P99) cho các
+\thesisfigurecaption{Hình 4.38: Biểu đồ thời gian phản hồi API (P50, P95, P99) cho các
 endpoint chính}
 
 \textbf{Nhận xét:} Thời gian phản hồi API trung bình đạt
@@ -9718,13 +9669,11 @@ cho quy mô triển khai mục tiêu (50--100 thiết bị đồng thời).
 publish MQTT đến khi giao diện web nhận được sự kiện cập nhật qua
 WebSocket (Socket.IO).
 
-{[}Bảng 4.27: Độ trễ end-to-end (Device -\textgreater{} Cloud
--\textgreater{} Browser){]}
+\thesistabletitle{Bảng 4.27: Độ trễ end-to-end (Device -\textgreater{} Cloud -\textgreater{} Browser)}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Đoạn đường & Độ trễ trung bình & P95 & Mô tả \\
+\hline \textbf{STT} & \textbf{Đoạn đường} & \textbf{Độ trễ trung bình} & \textbf{P95} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -9746,7 +9695,7 @@ ms & ~12 ms & Internal HTTP/event \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-30.svg}}
 
-\emph{Hình 4.39: Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu)}
+\thesisfigurecaption{Hình 4.39: Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu)}
 
 \textbf{Nhận xét:} Độ trễ end-to-end trung bình ~185 ms
 (P95 ~400 ms), thấp hơn nhiều so với mục tiêu thiết kế
@@ -9764,13 +9713,12 @@ Thông lượng ghi dữ liệu (write throughput) của VictoriaMetrics và
 PostgreSQL được đo bằng cách gửi đồng thời nhiều bản ghi và đo số điểm
 dữ liệu được ghi thành công mỗi giây.
 
-{[}Bảng 4.28: Thông lượng ghi cơ sở dữ liệu{]}
+\thesistabletitle{Bảng 4.28: Thông lượng ghi cơ sở dữ liệu}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.05\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.22\linewidth}|}
-\hline
-STT & Hệ thống & Loại dữ liệu & Thông lượng trung bình & Thông lượng tối
-đa & CPU Usage & RAM Usage \\
+\hline \textbf{STT} & \textbf{Hệ thống} & \textbf{Loại dữ liệu} & \textbf{Thông lượng trung bình} & \textbf{Thông lượng tối
+đa} & \textbf{CPU Usage} & \textbf{RAM Usage} \\
 \hline
 \endhead
 \hline
@@ -9802,13 +9750,12 @@ Load)}\label{4344-kiux1ec3m-thux1eed-tux1ea3i-ux111ux1ed3ng-thux1eddi-concurrent
 Hệ thống được kiểm thử với nhiều thiết bị mô phỏng kết nối đồng thời để
 đánh giá khả năng xử lý tải.
 
-{[}Bảng 4.29: Kết quả kiểm thử tải đồng thời{]}
+\thesistabletitle{Bảng 4.29: Kết quả kiểm thử tải đồng thời}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.05\linewidth}|p{0.24\linewidth}|p{0.08\linewidth}|p{0.09\linewidth}|p{0.09\linewidth}|p{0.09\linewidth}|p{0.09\linewidth}|p{0.19\linewidth}|}
-\hline
-STT & Số thiết bị mô phỏng & Tần suất gửi (giây) & MQTT Message/s & CPU
-Server & RAM Server & Mất bản tin & Độ trễ trung bình \\
+\hline \textbf{STT} & \textbf{Số thiết bị mô phỏng} & \textbf{Tần suất gửi (giây)} & \textbf{MQTT Message/s} & \textbf{CPU
+Server} & \textbf{RAM Server} & \textbf{Mất bản tin} & \textbf{Độ trễ trung bình} \\
 \hline
 \endhead
 \hline
@@ -9829,7 +9776,7 @@ ms (ước tính ở tải biên) \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-31.svg}}
 
-\emph{Hình 4.40: Đồ thị hiệu suất hệ thống theo số lượng thiết bị đồng
+\thesisfigurecaption{Hình 4.40: Đồ thị hiệu suất hệ thống theo số lượng thiết bị đồng
 thời}
 
 \textbf{Nhận xét:} Hệ thống hoạt động ổn định với 50+ thiết bị đồng thời
@@ -9846,12 +9793,11 @@ Frontend}\label{4345-hiux1ec7u-suux1ea5t-frontend}
 Hiệu suất giao diện web được đánh giá bằng Google Lighthouse và công cụ
 Chrome DevTools.
 
-{[}Bảng 4.30: Kết quả đánh giá hiệu suất Frontend (Lighthouse){]}
+\thesistabletitle{Bảng 4.30: Kết quả đánh giá hiệu suất Frontend (Lighthouse)}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Chỉ số & Giá trị & Mục tiêu & Trạng thái \\
+\hline \textbf{STT} & \textbf{Chỉ số} & \textbf{Giá trị} & \textbf{Mục tiêu} & \textbf{Trạng thái} \\
 \hline
 \endhead
 \hline
@@ -9875,7 +9821,7 @@ nghiệm) & \textless{} 500 KB & Đạt \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-32.svg}}
 
-\emph{Hình 4.41: Kết quả Lighthouse Performance Audit của trang
+\thesisfigurecaption{Hình 4.41: Kết quả Lighthouse Performance Audit của trang
 Dashboard}
 
 \textbf{Nhận xét:} Frontend đạt điểm Lighthouse Performance
@@ -9904,12 +9850,11 @@ publish qua MQTT -\textgreater{} Bridge xử lý và lưu trữ -\textgreater{}
 Backend phát sự kiện WebSocket -\textgreater{} Dashboard cập nhật bản đồ
 và biểu đồ.
 
-{[}Bảng 4.31: Kết quả kiểm thử luồng dữ liệu chính{]}
+\thesistabletitle{Bảng 4.31: Kết quả kiểm thử luồng dữ liệu chính}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Bước & Mô tả & Kết quả & Thời gian \\
+\hline \textbf{STT} & \textbf{Bước} & \textbf{Mô tả} & \textbf{Kết quả} & \textbf{Thời gian} \\
 \hline
 \endhead
 \hline
@@ -9939,12 +9884,12 @@ hiển thị} & \textbf{Thành công} & \textbf{~1--2 giây} \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-33.svg}}
 
-\emph{Hình 4.42: Screenshot giao diện Dashboard hiển thị vị trí xe đang
+\thesisfigurecaption{Hình 4.42: Screenshot giao diện Dashboard hiển thị vị trí xe đang
 di chuyển trên bản đồ (Leaflet)}
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-34.svg}}
 
-\emph{Hình 4.43: Screenshot biểu đồ dữ liệu OBD2 thời gian thực
+\thesisfigurecaption{Hình 4.43: Screenshot biểu đồ dữ liệu OBD2 thời gian thực
 (ECharts) --- RPM, Speed, Coolant Temp}
 
 \paragraph{4.3.5.2. Kiểm thử cảnh báo
@@ -9955,12 +9900,11 @@ Geofence}\label{4352-kiux1ec3m-thux1eed-cux1ea3nh-buxe1o-geofence}
 -\textgreater{} Hệ thống phát cảnh báo -\textgreater{} Dashboard hiển
 thị thông báo.
 
-{[}Bảng 4.32: Kết quả kiểm thử cảnh báo Geofence{]}
+\thesistabletitle{Bảng 4.32: Kết quả kiểm thử cảnh báo Geofence}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Sự kiện & Kết quả & Thời gian phát hiện & Ghi chú \\
+\hline \textbf{STT} & \textbf{Sự kiện} & \textbf{Kết quả} & \textbf{Thời gian phát hiện} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -9978,7 +9922,7 @@ tự động đóng & ~3 giây & Reset tự động \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-35.svg}}
 
-\emph{Hình 4.44: Screenshot cảnh báo Geofence trên giao diện Dashboard
+\thesisfigurecaption{Hình 4.44: Screenshot cảnh báo Geofence trên giao diện Dashboard
 với bản đồ hiển thị vùng cảnh báo}
 
 \textbf{Nhận xét:} Hệ thống phát hiện xe vượt ra khỏi vùng geofence
@@ -9996,12 +9940,11 @@ từ Dashboard -\textgreater{} Lệnh được gửi qua MQTT đến thiết b�
 -\textgreater{} Thiết bị xử lý và phản hồi -\textgreater{} Dashboard cập
 nhật trạng thái.
 
-{[}Bảng 4.33: Kết quả kiểm thử lệnh điều khiển từ xa{]}
+\thesistabletitle{Bảng 4.33: Kết quả kiểm thử lệnh điều khiển từ xa}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Lệnh & Mô tả & Kết quả & Thời gian round-trip \\
+\hline \textbf{STT} & \textbf{Lệnh} & \textbf{Mô tả} & \textbf{Kết quả} & \textbf{Thời gian round-trip} \\
 \hline
 \endhead
 \hline
@@ -10019,7 +9962,7 @@ STT & Lệnh & Mô tả & Kết quả & Thời gian round-trip \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-36.svg}}
 
-\emph{Hình 4.45: Screenshot giao diện gửi lệnh điều khiển từ Dashboard
+\thesisfigurecaption{Hình 4.45: Screenshot giao diện gửi lệnh điều khiển từ Dashboard
 và kết quả phản hồi từ thiết bị}
 
 \textbf{Nhận xét:} Hệ thống lệnh điều khiển từ xa hoạt động hiệu quả với
@@ -10037,12 +9980,11 @@ hồi}\label{4354-kiux1ec3m-thux1eed-tuxecnh-huux1ed1ng-mux1ea5t-kux1ebft-nux1ed
 reconnect -\textgreater{} Phục hồi kết nối -\textgreater{} Telemetry
 tiếp tục được gửi ở các chu kỳ kế tiếp.
 
-{[}Bảng 4.34: Kết quả kiểm thử mất kết nối và phục hồi{]}
+\thesistabletitle{Bảng 4.34: Kết quả kiểm thử mất kết nối và phục hồi}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-STT & Sự kiện & Kết quả & Chi tiết \\
+\hline \textbf{STT} & \textbf{Sự kiện} & \textbf{Kết quả} & \textbf{Chi tiết} \\
 \hline
 \endhead
 \hline
@@ -10063,7 +10005,7 @@ gian outage/queue depth \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-37.svg}}
 
-\emph{Hình 4.46: Screenshot hành trình trên bản đồ, thể hiện giai đoạn
+\thesisfigurecaption{Hình 4.46: Screenshot hành trình trên bản đồ, thể hiện giai đoạn
 gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối}
 
 \textbf{Nhận xét:} Cơ chế auto-reconnect hoạt động ổn định, giúp hệ
@@ -10085,14 +10027,13 @@ thiết kế đã đặt ra tại mục 1.3 (Chương 1) và mục 2.3 (Chương
 \paragraph{4.3.6.1. Tổng hợp chỉ tiêu phần
 cứng}\label{4361-tux1ed5ng-hux1ee3p-chux1ec9-tiuxeau-phux1ea7n-cux1ee9ng}
 
-{[}Bảng 4.35: Tổng hợp kết quả đo lường phần cứng so với chỉ tiêu thiết
-kế{]}
+\thesistabletitle{Bảng 4.35: Tổng hợp kết quả đo lường phần cứng so với chỉ tiêu thiết
+kế}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Tiêu chí & Chỉ tiêu thiết kế & Kết quả đạt được & Trạng thái & Ghi
-chú \\
+\hline \textbf{STT} & \textbf{Tiêu chí} & \textbf{Chỉ tiêu thiết kế} & \textbf{Kết quả đạt được} & \textbf{Trạng thái} & \textbf{Ghi
+chú} \\
 \hline
 \endhead
 \hline
@@ -10129,14 +10070,13 @@ và cần được đo lại trên mẫu pin mới.
 \paragraph{4.3.6.2. Tổng hợp chỉ tiêu
 firmware}\label{4362-tux1ed5ng-hux1ee3p-chux1ec9-tiuxeau-firmware}
 
-{[}Bảng 4.36: Tổng hợp kết quả đo lường firmware so với chỉ tiêu thiết
-kế{]}
+\thesistabletitle{Bảng 4.36: Tổng hợp kết quả đo lường firmware so với chỉ tiêu thiết
+kế}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Tiêu chí & Chỉ tiêu thiết kế & Kết quả đạt được & Trạng thái & Ghi
-chú \\
+\hline \textbf{STT} & \textbf{Tiêu chí} & \textbf{Chỉ tiêu thiết kế} & \textbf{Kết quả đạt được} & \textbf{Trạng thái} & \textbf{Ghi
+chú} \\
 \hline
 \endhead
 \hline
@@ -10164,14 +10104,13 @@ ACK/QoS \\
 \paragraph{4.3.6.3. Tổng hợp chỉ tiêu
 Cloud/Backend}\label{4363-tux1ed5ng-hux1ee3p-chux1ec9-tiuxeau-cloudbackend}
 
-{[}Bảng 4.37: Tổng hợp kết quả đo lường Cloud/Backend so với chỉ tiêu
-thiết kế{]}
+\thesistabletitle{Bảng 4.37: Tổng hợp kết quả đo lường Cloud/Backend so với chỉ tiêu
+thiết kế}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Tiêu chí & Chỉ tiêu thiết kế & Kết quả đạt được & Trạng thái & Ghi
-chú \\
+\hline \textbf{STT} & \textbf{Tiêu chí} & \textbf{Chỉ tiêu thiết kế} & \textbf{Kết quả đạt được} & \textbf{Trạng thái} & \textbf{Ghi
+chú} \\
 \hline
 \endhead
 \hline
@@ -10194,14 +10133,13 @@ alerts \\
 \paragraph{4.3.6.4. Tổng hợp chỉ tiêu
 Frontend}\label{4364-tux1ed5ng-hux1ee3p-chux1ec9-tiuxeau-frontend}
 
-{[}Bảng 4.38: Tổng hợp kết quả đo lường Frontend so với chỉ tiêu thiết
-kế{]}
+\thesistabletitle{Bảng 4.38: Tổng hợp kết quả đo lường Frontend so với chỉ tiêu thiết
+kế}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
-\hline
-STT & Tiêu chí & Chỉ tiêu thiết kế & Kết quả đạt được & Trạng thái & Ghi
-chú \\
+\hline \textbf{STT} & \textbf{Tiêu chí} & \textbf{Chỉ tiêu thiết kế} & \textbf{Kết quả đạt được} & \textbf{Trạng thái} & \textbf{Ghi
+chú} \\
 \hline
 \endhead
 \hline
@@ -10222,13 +10160,12 @@ responsive \\
 \paragraph{4.3.6.5. Bảng tổng hợp tổng
 thể}\label{4365-bux1ea3ng-tux1ed5ng-hux1ee3p-tux1ed5ng-thux1ec3}
 
-{[}Bảng 4.39: Bảng tổng hợp tổng thể --- So sánh kết quả với chỉ tiêu
-thiết kế{]}
+\thesistabletitle{Bảng 4.39: Bảng tổng hợp tổng thể --- So sánh kết quả với chỉ tiêu
+thiết kế}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Tiêu chí & Mục tiêu & Kết quả đạt được & Trạng thái \\
+\hline \textbf{STT} & \textbf{Tiêu chí} & \textbf{Mục tiêu} & \textbf{Kết quả đạt được} & \textbf{Trạng thái} \\
 \hline
 \endhead
 \hline
@@ -10258,7 +10195,7 @@ tiếp tục gửi telemetry & Đạt \\
 
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-38.svg}}
 
-\emph{Hình 4.47: Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt
+\thesisfigurecaption{Hình 4.47: Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt
 được (spider chart)}
 
 \textbf{Tổng kết:} Hệ thống đã đáp ứng phần lớn các chỉ tiêu cốt lõi của
@@ -10278,12 +10215,11 @@ Bên cạnh các chỉ tiêu đo lường tức thời, nhóm triển khai còn 
 đánh giá độ ổn định theo chu kỳ vận hành thực tế (burn-in test) để kiểm
 tra khả năng hoạt động liên tục và xử lý các sự cố nền.
 
-{[}Bảng 4.40: Chỉ số ổn định vận hành thực tế{]}
+\thesistabletitle{Bảng 4.40: Chỉ số ổn định vận hành thực tế}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-STT & Chỉ số vận hành & Kết quả quan sát & Đánh giá \\
+\hline \textbf{STT} & \textbf{Chỉ số vận hành} & \textbf{Kết quả quan sát} & \textbf{Đánh giá} \\
 \hline
 \endhead
 \hline
@@ -10377,13 +10313,12 @@ sang baseline pin dự phòng 18650 1S (3500mAh), thời lượng dự phòng t�
 ứng vào khoảng 24--36 giờ ở kịch bản cảnh báo gián đoạn và khoảng
 2.6--3.0 giờ ở chế độ tracking liên tục.
 
-{[}Bảng 5.1: Đánh giá hiệu năng quản lý năng lượng{]}
+\thesistabletitle{Bảng 5.1: Đánh giá hiệu năng quản lý năng lượng}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Tiêu chí & Giá trị thiết kế & Giá trị hiện có / quy đổi theo baseline
-18650 & Đánh giá \\
+\hline \textbf{Tiêu chí} & \textbf{Giá trị thiết kế} & \textbf{Giá trị hiện có / quy đổi theo baseline
+18650} & \textbf{Đánh giá} \\
 \hline
 \endhead
 \hline
@@ -10461,12 +10396,11 @@ tải firmware, xác nhận sau reboot và rollback thủ công. Các hạng m�
 lại cần làm sâu thêm là watchdog giám sát treo hệ thống và bộ số đo định
 lượng chuyên biệt cho kịch bản SD replay dài hạn.
 
-{[}Bảng 5.2: Đánh giá hiệu năng firmware{]}
+\thesistabletitle{Bảng 5.2: Đánh giá hiệu năng firmware}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Tiêu chí & Giá trị thiết kế & Giá trị thực tế & Đánh giá \\
+\hline \textbf{Tiêu chí} & \textbf{Giá trị thiết kế} & \textbf{Giá trị thực tế} & \textbf{Đánh giá} \\
 \hline
 \endhead
 \hline
@@ -10537,12 +10471,11 @@ cập nhật vị trí xe trơn tru khi nhận dữ liệu WebSocket, không b�
 lag khi hiển thị 50--100 xe đồng thời. Biểu đồ ECharts hiển thị dữ liệu
 telemetry (tốc độ, RPM, nhiệt độ) trực quan, hỗ trợ zoom và pan mượt mà.
 
-{[}Bảng 5.3: Đánh giá hiệu năng tổng hợp hệ thống đám mây{]}
+\thesistabletitle{Bảng 5.3: Đánh giá hiệu năng tổng hợp hệ thống đám mây}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Thành phần & Tiêu chí & Giá trị đo được & Đánh giá \\
+\hline \textbf{Thành phần} & \textbf{Tiêu chí} & \textbf{Giá trị đo được} & \textbf{Đánh giá} \\
 \hline
 \endhead
 \hline
@@ -10572,12 +10505,11 @@ Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính t
 dựa trên giá linh kiện mua lẻ tại thị trường Việt Nam. Mức giá này có
 thể giảm 20--30\% khi mua số lượng lớn (\textgreater{} 100 bộ).
 
-{[}Bảng 5.4: Chi phí BOM thiết bị tracker{]}
+\thesistabletitle{Bảng 5.4: Chi phí BOM thiết bị tracker}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Linh kiện & Vai trò & Giá (VND) \\
+\hline \textbf{Linh kiện} & \textbf{Vai trò} & \textbf{Giá (VND)} \\
 \hline
 \endhead
 \hline
@@ -10598,13 +10530,12 @@ PCB, vỏ hộp, dây cáp, linh kiện phụ & Cơ khí và kết nối &
 So sánh với các giải pháp thương mại trên thị trường cho thấy lợi thế
 chi phí rõ rệt của hệ thống đề xuất:
 
-{[}Bảng 5.5: So sánh chi phí với giải pháp thương mại{]}
+\thesistabletitle{Bảng 5.5: So sánh chi phí với giải pháp thương mại}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.22\linewidth}|p{0.18\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|p{0.14\linewidth}|}
-\hline
-Giải pháp & Chi phí thiết bị & Phí dịch vụ hàng tháng & Tổng chi phí năm
-đầu & Khả năng tùy biến \\
+\hline \textbf{Giải pháp} & \textbf{Chi phí thiết bị} & \textbf{Phí dịch vụ hàng tháng} & \textbf{Tổng chi phí năm
+đầu} & \textbf{Khả năng tùy biến} \\
 \hline
 \endhead
 \hline
@@ -10634,13 +10565,12 @@ Chi phí vận hành hạ tầng đám mây phụ thuộc vào quy mô đội xe
 sử dụng. Đối với doanh nghiệp nhỏ (10--50 xe), toàn bộ hệ thống có thể
 chạy trên một máy chủ ảo (VPS) duy nhất.
 
-{[}Bảng 5.6: Chi phí hạ tầng đám mây theo quy mô{]}
+\thesistabletitle{Bảng 5.6: Chi phí hạ tầng đám mây theo quy mô}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Quy mô đội xe & Cấu hình VPS & Chi phí VPS/tháng & Chi phí SIM 4G/tháng
-(tổng) & Tổng chi phí vận hành/tháng \\
+\hline \textbf{Quy mô đội xe} & \textbf{Cấu hình VPS} & \textbf{Chi phí VPS/tháng} & \textbf{Chi phí SIM 4G/tháng
+(tổng)} & \textbf{Tổng chi phí vận hành/tháng} \\
 \hline
 \endhead
 \hline
@@ -10729,12 +10659,11 @@ Phần này đánh giá rủi ro của hệ thống bằng ma trận xác suất
 đặc điểm kỹ thuật của thiết bị hiện tại và các tình huống dễ phát sinh
 trong quá trình triển khai thực tế.
 
-{[}Bảng 5.7: Thang đo xác suất và tác động{]}
+\thesistabletitle{Bảng 5.7: Thang đo xác suất và tác động}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Mức độ & Xác suất & Tác động \\
+\hline \textbf{Mức độ} & \textbf{Xác suất} & \textbf{Tác động} \\
 \hline
 \endhead
 \hline
@@ -10750,13 +10679,11 @@ tê liệt hệ thống \\
 \end{longtable}
 }
 
-{[}Bảng 5.8: Ma trận đánh giá rủi ro và biện pháp giảm thiểu{]}
+\thesistabletitle{Bảng 5.8: Ma trận đánh giá rủi ro và biện pháp giảm thiểu}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.05\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.22\linewidth}|}
-\hline
-ID & Rủi ro & Xác suất & Tác động & Mức độ rủi ro & Biện pháp giảm thiểu
-& Trạng thái \\
+\hline \textbf{ID} & \textbf{Rủi ro} & \textbf{Xác suất} & \textbf{Tác động} & \textbf{Mức độ rủi ro} & \textbf{Biện pháp giảm thiểu} & \textbf{Trạng thái} \\
 \hline
 \endhead
 \hline
@@ -10838,12 +10765,11 @@ phần cứng theo đúng cell mới. Tuy nhiên, ngưỡng LVD profile 12V vẫ
 \subsubsection{5.3.3. Tổng hợp mức độ rủi
 ro}\label{533-tux1ed5ng-hux1ee3p-mux1ee9c-ux111ux1ed9-rux1ee7i-ro}
 
-{[}Bảng 5.9: Tổng hợp mức độ rủi ro theo phân loại{]}
+\thesistabletitle{Bảng 5.9: Tổng hợp mức độ rủi ro theo phân loại}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-Phân loại & Số rủi ro & Mức cao & Mức trung bình & Mức thấp \\
+\hline \textbf{Phân loại} & \textbf{Số rủi ro} & \textbf{Mức cao} & \textbf{Mức trung bình} & \textbf{Mức thấp} \\
 \hline
 \endhead
 \hline
@@ -11042,12 +10968,11 @@ trung vào tối ưu DFM, EMI, độ gọn cơ khí và độ tin cậy:
 \subsubsection{5.4.7. Tóm tắt lộ trình phát
 triển}\label{547-tuxf3m-tux1eaft-lux1ed9-truxecnh-phuxe1t-triux1ec3n}
 
-{[}Bảng 5.10: Lộ trình phát triển khuyến nghị{]}
+\thesistabletitle{Bảng 5.10: Lộ trình phát triển khuyến nghị}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Giai đoạn & Thời gian & Nội dung chính & Ưu tiên \\
+\hline \textbf{Giai đoạn} & \textbf{Thời gian} & \textbf{Nội dung chính} & \textbf{Ưu tiên} \\
 \hline
 \endhead
 \hline
@@ -11419,8 +11344,8 @@ rất khác nhau:
   giữa MP2482 (5V chính) và SX1308 (5V backup), kết hợp GPIO18 để điều
   khiển nhánh nguồn theo profile 12V/24V.
 \item
-  \emph{Low Voltage Disconnect (LVD)}: Hiện thực LVD bằng comparator
-  LM393 kết hợp ADC firmware, dùng ngưỡng profile: 12V (OFF=12.0V,
+  \emph{Low Voltage Disconnect (LVD)}: Hiện thực LVD bằng khối LVD phần
+  cứng kết hợp ADC firmware, dùng ngưỡng profile: 12V (OFF=12.0V,
   ON=12.2V) và 24V (OFF=24.0V, ON=24.4V), bảo vệ ắc quy không bị rút cạn
   quá mức.
 \item
@@ -11510,9 +11435,10 @@ bảo vệ dữ liệu.
 \textbf{Các biện pháp bảo vệ quyền riêng tư đã được áp dụng:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 6.3.1A: Tổng hợp thông tin về STT, Biện pháp, Mô tả chi tiết}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-STT & Biện pháp & Mô tả chi tiết \\
+\hline \textbf{STT} & \textbf{Biện pháp} & \textbf{Mô tả chi tiết} \\
 \hline
 \endhead
 \hline
@@ -11671,9 +11597,10 @@ một ứng dụng web thông thường. Hệ thống này bao gồm bốn lớp
 khác nhau:
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 6.4.2A: Tổng hợp thông tin về Tầng, Ngôn ngữ / Công nghệ, Thách thức chính}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tầng & Ngôn ngữ / Công nghệ & Thách thức chính \\
+\hline \textbf{Tầng} & \textbf{Ngôn ngữ / Công nghệ} & \textbf{Thách thức chính} \\
 \hline
 \endhead
 \hline
@@ -12117,13 +12044,12 @@ bị tracker IoT, bao gồm đơn giá và tổng chi phí ước tính. Đơn g
 tham chiếu theo mặt bằng giá của hai nhà cung cấp linh kiện điện tử
 trong nước là LinhKienChatLuong và CXT tại thời điểm tháng 01/2026.
 
-{[}Bảng PL-1.1: Bảng kê chi phí linh kiện (BOM){]}
+\thesistabletitle{Bảng PL-1.1: Bảng kê chi phí linh kiện (BOM)}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.05\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.13\linewidth}|p{0.22\linewidth}|}
-\hline
-STT & Linh kiện & Model / Thông số & Số lượng & Đơn giá (VND) & Thành
-tiền (VND) & Ghi chú \\
+\hline \textbf{STT} & \textbf{Linh kiện} & \textbf{Model / Thông số} & \textbf{Số lượng} & \textbf{Đơn giá (VND)} & \textbf{Thành
+tiền (VND)} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -12140,7 +12066,7 @@ phát hiện chuyển động \\
 Samsung/LG cell \\
 6 & IC sạc pin & TP4056 + mạch phụ trợ & 1 & 25.000 & 25.000 & Sạc 1S,
 input 5V từ MP2482, dòng theo PROG \\
-7 & Buck 3.3V & Mạch XL1509 3.3E & 1 & 18.000 & 18.000 & 12--24V
+7 & Buck 3.3V & Mạch AP2112-3.3 & 1 & 18.000 & 18.000 & 12--24V
 -\textgreater{} 3.3V cấp ESP32-S3 \\
 8 & Buck 5V & Mạch MP2482 (12V/24V-\textgreater5V) & 1 & 15.000 & 15.000
 & Tạo bus 5V chính \\
@@ -12148,9 +12074,9 @@ input 5V từ MP2482, dòng theo PROG \\
 -\textgreater{} ~4V cấp modem SIM7600CE-T \\
 10 & Boost converter & Mạch SX1308 (3.7V-\textgreater5V) & 1 & 12.000 &
 12.000 & Tăng áp từ pin dự phòng \\
-11 & Diode OR & 1N5822 (Schottky) & 2 & 2.500 & 5.000 & OR nguồn giữa
+11 & Diode OR & SS54/SS34 (Schottky) & 2 & 2.500 & 5.000 & OR nguồn giữa
 nhánh 5V chính và backup \\
-12 & Comparator & LM393 & 1 & 8.000 & 8.000 & Cho mạch Low Voltage
+12 & Khối LVD & Khối giám sát LVD + ADC & 1 & 8.000 & 8.000 & Cho mạch Low Voltage
 Disconnect \\
 13 & Anten GPS & Anten gốm GNSS 25x25mm & 1 & 25.000 & 25.000 & Anten
 GPS/GLONASS/BeiDou \\
@@ -12175,12 +12101,11 @@ Dây kết nối nội bộ \\
 \subsection{1.2. Chi phí hạ tầng cloud (ước tính hàng
 tháng)}\label{12-chi-phuxed-hux1ea1-tux1ea7ng-cloud-ux1b0ux1edbc-tuxednh-huxe0ng-thuxe1ng}
 
-{[}Bảng PL-1.2: Chi phí hạ tầng cloud{]}
+\thesistabletitle{Bảng PL-1.2: Chi phí hạ tầng cloud}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\hline
-STT & Hạng mục & Thông số & Chi phí hàng tháng (VND) & Ghi chú \\
+\hline \textbf{STT} & \textbf{Hạng mục} & \textbf{Thông số} & \textbf{Chi phí hàng tháng (VND)} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -12198,12 +12123,11 @@ DigitalOcean / Vultr / Viettel IDC \\
 \subsection{1.3. Tổng hợp chi phí dự
 án}\label{13-tux1ed5ng-hux1ee3p-chi-phuxed-dux1ef1-uxe1n}
 
-{[}Bảng PL-1.3: Tổng hợp chi phí dự án{]}
+\thesistabletitle{Bảng PL-1.3: Tổng hợp chi phí dự án}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Hạng mục & Chi phí (VND) & Ghi chú \\
+\hline \textbf{Hạng mục} & \textbf{Chi phí (VND)} & \textbf{Ghi chú} \\
 \hline
 \endhead
 \hline
@@ -12241,9 +12165,10 @@ và 2001 (tại Châu Âu). Tiêu chuẩn này quy định giao diện vật lý
 \textbf{Áp dụng trong dự án:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 2.1A: Tổng hợp thông tin về Chuẩn cụ thể, Nội dung, Áp dụng}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Chuẩn cụ thể & Nội dung & Áp dụng \\
+\hline \textbf{Chuẩn cụ thể} & \textbf{Nội dung} & \textbf{Áp dụng} \\
 \hline
 \endhead
 \hline
@@ -12262,9 +12187,10 @@ adapter BLE \\
 \textbf{Các OBD2 PIDs sử dụng trong dự án:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 2.1B: Tổng hợp thông tin về PID (hex), Mô tả, Đơn vị}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-PID (hex) & Mô tả & Đơn vị & Mode \\
+\hline \textbf{PID (hex)} & \textbf{Mô tả} & \textbf{Đơn vị} & \textbf{Mode} \\
 \hline
 \endhead
 \hline
@@ -12291,9 +12217,10 @@ các thiết bị có tài nguyên hạn chế và băng thông thấp.
 \textbf{Các tính năng MQTT 5.0 sử dụng trong dự án:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 2.2A: Tổng hợp thông tin về Tính năng, Mô tả, Áp dụng}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tính năng & Mô tả & Áp dụng \\
+\hline \textbf{Tính năng} & \textbf{Mô tả} & \textbf{Áp dụng} \\
 \hline
 \endhead
 \hline
@@ -12331,9 +12258,10 @@ thiết kế các biện pháp bảo mật.
 \textbf{Các nguyên tắc bảo mật áp dụng:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 2.3A: Tổng hợp thông tin về Nguyên tắc, Hiện thực trong dự án}
+
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-Nguyên tắc & Hiện thực trong dự án \\
+\hline \textbf{Nguyên tắc} & \textbf{Hiện thực trong dự án} \\
 \hline
 \endhead
 \hline
@@ -12359,9 +12287,10 @@ practices)}\label{24-thiux1ebft-kux1ebf-rest-api-rfc-7231-vuxe0-best-practices}
 \textbf{Các nguyên tắc REST API áp dụng:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 2.4A: Tổng hợp thông tin về Nguyên tắc, Mô tả, Ví dụ trong dự án}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Nguyên tắc & Mô tả & Ví dụ trong dự án \\
+\hline \textbf{Nguyên tắc} & \textbf{Mô tả} & \textbf{Ví dụ trong dự án} \\
 \hline
 \endhead
 \hline
@@ -12393,12 +12322,11 @@ TIMELINES}\label{phux1ee5-lux1ee5c-3-kux1ebf-houx1ea1ch-thux1ef1c-hiux1ec7n---as
 Dự án được triển khai theo 7 giai đoạn chính, với tổng thời gian dự kiến
 24 tuần (6 tháng), từ tháng 09/2025 đến tháng 02/2026.
 
-{[}Bảng PL-3.1: Phân chia giai đoạn và thời gian thực hiện{]}
+\thesistabletitle{Bảng PL-3.1: Phân chia giai đoạn và thời gian thực hiện}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Giai đoạn & Nội dung chính & Thời gian & Kết quả đầu ra \\
+\hline \textbf{Giai đoạn} & \textbf{Nội dung chính} & \textbf{Thời gian} & \textbf{Kết quả đầu ra} \\
 \hline
 \endhead
 \hline
@@ -12442,7 +12370,7 @@ GĐ7:                                                        [========]
 
 \pandocbounded{\safeincludesvg{./assets/figures/thesis-14-phu-luc-01.svg}}
 
-\emph{Hình PL-3.1: Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần)}
+\thesisfigurecaption{Hình PL-3.1: Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần)}
 
 \subsection{3.3. Chi tiết công việc theo giai
 đoạn}\label{33-chi-tiux1ebft-cuxf4ng-viux1ec7c-theo-giai-ux111oux1ea1n}
@@ -12450,9 +12378,10 @@ GĐ7:                                                        [========]
 \textbf{Giai đoạn 1 --- Nghiên cứu và thiết kế phần cứng (Tuần 1--4):}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.3A: Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tuần & Công việc & Sản phẩm \\
+\hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \hline
 \endhead
 \hline
@@ -12467,9 +12396,10 @@ Tuần & Công việc & Sản phẩm \\
 \textbf{Giai đoạn 2 --- Phát triển firmware (Tuần 3--10):}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.3B: Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tuần & Công việc & Sản phẩm \\
+\hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \hline
 \endhead
 \hline
@@ -12484,9 +12414,10 @@ Tuần & Công việc & Sản phẩm \\
 \textbf{Giai đoạn 3 --- Hạ tầng cloud (Tuần 5--8):}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.3C: Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tuần & Công việc & Sản phẩm \\
+\hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \hline
 \endhead
 \hline
@@ -12501,9 +12432,10 @@ Tuần & Công việc & Sản phẩm \\
 \textbf{Giai đoạn 4 --- Backend API (Tuần 7--14):}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.3D: Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tuần & Công việc & Sản phẩm \\
+\hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \hline
 \endhead
 \hline
@@ -12518,9 +12450,10 @@ Tuần & Công việc & Sản phẩm \\
 \textbf{Giai đoạn 5 --- Frontend (Tuần 11--18):}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.3E: Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tuần & Công việc & Sản phẩm \\
+\hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \hline
 \endhead
 \hline
@@ -12535,9 +12468,10 @@ Tuần & Công việc & Sản phẩm \\
 \textbf{Giai đoạn 6 --- Tích hợp và kiểm thử (Tuần 17--22):}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 3.3F: Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Tuần & Công việc & Sản phẩm \\
+\hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \hline
 \endhead
 \hline
@@ -12588,7 +12522,7 @@ IoT_Vehicle_Tracking_System/
 │   ├── Tracking_Grafana/          # Monitoring Dashboards
 │   └── Tracking_NPM/             # Nginx Proxy Manager
 ├── resources/                     # Documentation
-└── CLAUDE.md                      # Project overview
+
 \end{verbatim}
 
 \subsection{4.2. Tham chiếu cơ sở dữ liệu (Database
@@ -12610,9 +12544,10 @@ Schema PostgreSQL đầy đủ được lưu tại:
 \textbf{Các bảng chính trong PostgreSQL:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 4.2A: Tổng hợp thông tin về STT, Tên bảng, Mô tả}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-STT & Tên bảng & Mô tả & Quan hệ chính \\
+\hline \textbf{STT} & \textbf{Tên bảng} & \textbf{Mô tả} & \textbf{Quan hệ chính} \\
 \hline
 \endhead
 \hline
@@ -12637,9 +12572,10 @@ customers \\
 \textbf{VictoriaMetrics metrics:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 4.2B: Tổng hợp thông tin về Metric name mẫu, Labels, Mô tả}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Metric name mẫu & Labels & Mô tả \\
+\hline \textbf{Metric name mẫu} & \textbf{Labels} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -12677,9 +12613,10 @@ cập tại:
 \textbf{Tổng hợp API endpoints chính:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 4.3A: Tổng hợp thông tin về Nhóm, Method, Endpoint}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Nhóm & Method & Endpoint & Mô tả \\
+\hline \textbf{Nhóm} & \textbf{Method} & \textbf{Endpoint} & \textbf{Mô tả} \\
 \hline
 \endhead
 \hline
@@ -12721,9 +12658,10 @@ Mỗi dịch vụ yêu cầu file \texttt{.env} riêng. Mẫu cấu hình
 \textbf{Các biến môi trường quan trọng:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 4.4A: Tổng hợp thông tin về Biến, Dịch vụ, Mô tả}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.16\linewidth}|p{0.20\linewidth}|p{0.26\linewidth}|}
-\hline
-Biến & Dịch vụ & Mô tả & Bắt buộc \\
+\hline \textbf{Biến} & \textbf{Dịch vụ} & \textbf{Mô tả} & \textbf{Bắt buộc} \\
 \hline
 \endhead
 \hline
@@ -12756,9 +12694,10 @@ thống}\label{45-hux1b0ux1edbng-dux1eabn-cuxe0i-ux111ux1eb7t-vuxe0-chux1ea1y-hu
 \textbf{Yêu cầu hệ thống:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 4.5A: Tổng hợp thông tin về Yêu cầu, Phiên bản tối thiểu}
+
 \begin{longtable}{|p{0.28\linewidth}|p{0.64\linewidth}|}
-\hline
-Yêu cầu & Phiên bản tối thiểu \\
+\hline \textbf{Yêu cầu} & \textbf{Phiên bản tối thiểu} \\
 \hline
 \endhead
 \hline
@@ -12814,9 +12753,10 @@ npm & 10.x \\
 \textbf{Truy cập hệ thống:}
 
 {\def\LTcaptype{none} % do not increment counter
+\thesistabletitle{Bảng 4.5B: Tổng hợp thông tin về Dịch vụ, URL, Tài khoản mặc định}
+
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\hline
-Dịch vụ & URL & Tài khoản mặc định \\
+\hline \textbf{Dịch vụ} & \textbf{URL} & \textbf{Tài khoản mặc định} \\
 \hline
 \endhead
 \hline

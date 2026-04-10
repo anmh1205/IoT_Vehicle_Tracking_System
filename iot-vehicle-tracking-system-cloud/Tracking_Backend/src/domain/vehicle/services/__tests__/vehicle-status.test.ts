@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('@/infrastructure/database/queries');
 vi.mock('@/infrastructure/database/pool', () => ({ pool: {} }));
@@ -73,7 +72,7 @@ const makeAlert = (overrides = {}) => ({
 
 describe('vehicle-status.service', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return aggregated status when all data is available', async () => {
@@ -161,6 +160,7 @@ describe('vehicle-status.service', () => {
   });
 
   it('should skip device/telemetry queries when vehicle has no device_id', async () => {
+    vi.mocked(findOne).mockClear();
     const vehicle = makeVehicle({ device_id: null });
 
     vi.mocked(findOne)

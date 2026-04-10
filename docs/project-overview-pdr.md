@@ -1,6 +1,7 @@
 # Project Overview & PDR
 
 ## Current Scope
+- MQTT device simulator automation is implemented through deterministic publish/replay/fault-injection scripts and bounded VPS fix-loop orchestration under `resources/mock-data/scripts/` and `resources/mock-data/simulator-specs/`.
 - UI/UX accessibility remediation for dashboard web and mobile surfaces has been completed.
 - The frontend now also exposes a public landing page at `/` so the system can be presented before login, while dashboard flows remain protected.
 - The backend/frontend API contract is standardized around a success envelope and RFC7807 problem-details error shape.

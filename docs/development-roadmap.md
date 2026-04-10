@@ -2,6 +2,15 @@
 
 ## Phase Status
 
+### P1 - MQTT Device Simulator + VPS Fix-Loop Automation Complete
+- Scope: deterministic MQTT device simulator plus bounded local-agent/VPS SSH fix-loop automation under `resources/mock-data/scripts` and `resources/mock-data/simulator-specs`.
+- Milestones completed:
+  - Added canonical MQTT contract baseline, scenario catalog, and fault-injection policy specs.
+  - Added deterministic simulator runner support for seeded publish, dry-run, replay, and publish modes.
+  - Added local VPS fix-loop orchestration with allowlisted targeted restart behavior, bounded iterations, and rollback/stop conditions.
+  - Added test matrix, checkpoint thresholds, retest gate rules, rollback runbook, operator handover, and stop-conditions policy.
+  - Backend and MQTT Bridge impacted validation passed; final code review accepted the scope with only low-medium residual operational risk.
+
 ### P1 - Accessibility Remediation (Web + Mobile) Complete
 - Scope: Web dashboard (`iot-vehicle-tracking-system-cloud/Tracking_Frontend`) and mobile shell (`iot-vehicle-tracking-system-cloud/Tracking_Mobile`) accessibility hardening.
 - Milestones completed:

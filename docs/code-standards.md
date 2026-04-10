@@ -50,6 +50,9 @@
 - Use colon-style realtime event names as the canonical contract and update consumers in lockstep when names change.
 - Treat simulator token handling as security-sensitive; do not rely on stored token hashes as replayable bearer material.
 - Apply rollback/race mitigations around simulator publish flows when state transitions can overlap.
+- Keep deterministic simulator artifacts, fault catalogs, checkpoint thresholds, and stop conditions in `resources/mock-data/simulator-specs/` so ops automation stays reproducible.
+- Keep VPS fix-loop restarts allowlisted and targeted to one service per remediation attempt; avoid broad restarts that hide the failing boundary.
+- If a fix-loop uses replay inputs, support both NDJSON and array-form outputs when the same toolchain can emit both.
 
 ## Firmware GNSS Reliability Standards
 - GNSS polling should keep retry and self-heal behavior bounded with explicit cooldowns to prevent modem thrash.

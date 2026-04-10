@@ -1,5 +1,11 @@
 # Project Changelog
 
+## 2026-04-10
+### MQTT Device Simulator and VPS Fix-Loop Automation (Completed)
+- Added deterministic MQTT device simulator artifacts under `resources/mock-data/scripts/` and `resources/mock-data/simulator-specs/` for seeded publish, dry-run, replay, and fault-injection workflows.
+- Added bounded local-agent/VPS SSH fix-loop automation with allowlisted service restarts, stop conditions, rollback runbook, operator handover, and test matrix checkpoints.
+- Validation status: backend typecheck/build passed, backend tests passed after harness fix, MQTT Bridge typecheck/build passed, and final code review accepted the scope with low-medium residual operational risk.
+
 ## 2026-04-09
 ### Firmware GNSS Observability and Recovery Hardening (Completed)
 - Added GNSS query observability for transport failures, parse failures, no-fix streaks, and fix-success streaks in the modem GNSS path.

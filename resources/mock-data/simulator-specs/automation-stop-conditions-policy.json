@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "2026-04-10",
+  "hardStops": [
+    "same_classifier_repeated",
+    "critical_service_down_window_exceeded",
+    "error_rate_more_than_2x_baseline",
+    "max_run_duration_exceeded",
+    "potential_secret_leak_detected"
+  ],
+  "override": {
+    "allowed": true,
+    "authority": "platform-lead-only",
+    "requiredFields": ["approver", "reason", "approvedAt"]
+  }
+}

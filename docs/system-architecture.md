@@ -37,6 +37,7 @@ The completed remediation spans two UI layers:
 - Mobile and dashboard continue to share the same operational capability set; accessibility is implemented per platform conventions.
 - The API layer now assumes success envelopes and RFC7807 problem details across shared middleware, health, metrics, policy, and rate-limit surfaces.
 - MQTT is the canonical ingest path for both real devices and simulator traffic, and `/iot/data` is no longer part of the runtime architecture.
+- The simulator/fix-loop tooling lives outside runtime services in `resources/mock-data/scripts/` and `resources/mock-data/simulator-specs/`; it covers deterministic publish/replay, fault injection, targeted restart allowlists, checkpoint thresholds, rollback steps, and stop conditions.
 - UAT deployment workflows use `workflow_dispatch` plus `concurrency` guards so the same environment is not deployed twice in parallel.
 - Backend UAT images are published with both a mutable `uat` tag and an immutable `uat-${github.sha}` tag to balance promotion speed and rollback traceability.
 - Health-gated deploy scripts retry with bounded attempts/intervals and fail after dumping tail logs, while notification steps stay non-blocking with `continue-on-error: true`.

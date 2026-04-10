@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { TripWaypoint } from '../trip-waypoints.service';
 
 vi.mock('@/domain/system-admin/repositories/victoriametrics.repository');

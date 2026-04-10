@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Driver, CreateDriverInput, UpdateDriverInput } from '@/domain/driver/types/driver.types';
 
 vi.mock('@/domain/driver/repositories/driver.repository');
@@ -39,7 +38,7 @@ const makeDriver = (overrides: Partial<Driver> = {}): Driver => ({
 
 describe('driver-crud.service', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   // --- getDriverById ---------------------------------------------------------
@@ -117,6 +116,7 @@ describe('driver-crud.service', () => {
     });
 
     it('should throw a 409 ApiError when driver code already exists', async () => {
+      vi.mocked(driverRepo.create).mockClear();
       vi.mocked(driverRepo.findByCode).mockResolvedValue(makeDriver());
 
       await expect(createDriver(input)).rejects.toMatchObject({
@@ -148,6 +148,7 @@ describe('driver-crud.service', () => {
     });
 
     it('should throw a 404 ApiError when the driver does not exist', async () => {
+      vi.mocked(driverRepo.update).mockClear();
       vi.mocked(driverRepo.findById).mockResolvedValue(null);
 
       await expect(updateDriver(999, input)).rejects.toMatchObject({
@@ -183,6 +184,7 @@ describe('driver-crud.service', () => {
     });
 
     it('should throw a 404 ApiError when the driver does not exist', async () => {
+      vi.mocked(driverRepo.remove).mockClear();
       vi.mocked(driverRepo.findById).mockResolvedValue(null);
 
       await expect(deleteDriver(999)).rejects.toMatchObject({
