@@ -35,7 +35,7 @@ const renderSizeByFileName = {
   "09-chuong-4-trien-khai-cloud-hinh-4-23.svg": { width: 3200, height: 1900 },
   "10-chuong-4-ket-qua-do-luong-hinh-4-20.svg": { width: 3200, height: 1900 },
   "10-chuong-4-ket-qua-do-luong-hinh-4-33.svg": { width: 3400, height: 2100 },
-  "thesis-99-bao-cao-thesis-hoan-chinh-06.svg": { width: 3200, height: 2000 },
+  "06-chuong-3-giai-phap-frontend-hinh-3-19a.svg": { width: 3200, height: 2000 },
 };
 
 const findCachedMermaidCli = () => {
