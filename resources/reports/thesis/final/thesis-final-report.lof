@@ -1,88 +1,88 @@
 \contentsline {figure}{\numberline {1.1}{\ignorespaces Sơ đồ tổng quan vấn đề và giải pháp đề xuất}}{2}{figure.fig-ch1-overview-problem-solution}%
-\contentsline {figure}{\numberline {1.2}{\ignorespaces Quy trình phát triển dự án theo các giai đoạn}}{8}{figure.fig-ch1-project-development-phases}%
-\contentsline {figure}{\numberline {1.3}{\ignorespaces Kiến trúc tổng thể hệ thống IoT Vehicle Tracking}}{9}{figure.fig-ch1-system-architecture-overview}%
-\contentsline {figure}{\numberline {1.4}{\ignorespaces Sơ đồ chuyển đổi giữa các chế độ năng lượng}}{10}{figure.fig-ch1-power-mode-transitions}%
-\contentsline {figure}{\numberline {1.5}{\ignorespaces Lộ trình phát triển dự án theo các giai đoạn (Roadmap)}}{14}{figure.fig-ch1-project-roadmap}%
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram}}{21}{figure.fig-ch2-data-architecture-overview}%
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Sơ đồ khối tổng thể hệ thống tracker}}{30}{figure.fig-ch3-so-o-khoi-tong-the-he-thong-tracker}%
-\contentsline {figure}{\numberline {3.1a}{\ignorespaces Phân rã chi tiết các khối chức năng của tracker}}{31}{figure.fig-ch3-phan-ra-chi-tiet-cac-khoi-chuc-nang-cua-tracker}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro}}{40}{figure.fig-ch3-so-o-ket-noi-ble-giua-esp32-s3-va-vgate-icar-pro}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Sơ đồ kết nối LIS3DSH với ESP32-S3 qua I2C}}{43}{figure.fig-ch3-so-o-ket-noi-lis3dsh-voi-esp32-s3-qua-i2c}%
-\contentsline {figure}{\numberline {3.3a}{\ignorespaces Sơ đồ chi tiết chân kết nối LIS3DSH với ESP32-S3}}{44}{figure.fig-ch3-so-o-chi-tiet-chan-ket-noi-lis3dsh-voi-esp32-s3}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Sơ đồ khối hệ thống quản lý nguồn}}{44}{figure.fig-ch3-so-o-khoi-he-thong-quan-ly-nguon}%
-\contentsline {figure}{\numberline {3.4a}{\ignorespaces Kiến trúc nguồn và phân phối điện áp trong hệ thống}}{44}{figure.fig-ch3-kien-truc-nguon-va-phan-phoi-ien-ap-trong-he-thong}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Sơ đồ kiến trúc phân lớp của firmware}}{54}{figure.fig-ch3-so-o-kien-truc-phan-lop-cua-firmware}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Sơ đồ tương tác giữa các FreeRTOS task}}{55}{figure.fig-ch3-so-o-tuong-tac-giua-cac-freertos-task}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Lưu đồ thuật toán luồng hoạt động chính của firmware}}{56}{figure.fig-ch3-luu-o-thuat-toan-luong-hoat-ong-chinh-cua-firmware}%
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2}}{58}{figure.fig-ch3-luu-o-thuat-toan-quy-trinh-ket-noi-va-oc-du-lieu}%
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Lưu đồ điều phối modem SIM7600CE-T theo trạng thái mạng và chế độ vận hành}}{62}{figure.fig-ch3-luu-o-ieu-phoi-modem-sim7600ce-t-theo-trang-thai-mang-va}%
-\contentsline {figure}{\numberline {3.10}{\ignorespaces Lưu đồ thuật toán điều khiển power path}}{64}{figure.fig-ch3-luu-o-thuat-toan-ieu-khien-power-path}%
-\contentsline {figure}{\numberline {3.11}{\ignorespaces Sơ đồ máy trạng thái của thiết bị theo dõi}}{71}{figure.fig-ch3-so-o-may-trang-thai-cua-thiet-bi-theo-doi}%
-\contentsline {figure}{\numberline {3.12}{\ignorespaces Sơ đồ kiến trúc tổng quan hệ thống Cloud}}{77}{figure.fig-ch3-so-o-kien-truc-tong-quan-he-thong-cloud}%
-\contentsline {figure}{\numberline {3.12a}{\ignorespaces Luồng dữ liệu chi tiết từ thiết bị đến dashboard}}{77}{figure.fig-ch3-luong-du-lieu-chi-tiet-tu-thiet-bi-en-dashboard}%
-\contentsline {figure}{\numberline {3.13}{\ignorespaces Sơ đồ chiến lược lưu trữ kép}}{83}{figure.fig-ch3-so-o-chien-luoc-luu-tru-kep}%
-\contentsline {figure}{\numberline {3.14}{\ignorespaces Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)}}{86}{figure.fig-ch3-so-o-quan-he-co-so-du-lieu-er-diagram}%
-\contentsline {figure}{\numberline {3.14a}{\ignorespaces Luồng điều phối OTA giữa Backend, EMQX, thiết bị và MQTT Bridge}}{89}{figure.fig-ch3-luong-ieu-phoi-ota-giua-backend-emqx-thiet-bi-va-mqtt-bridge}%
-\contentsline {figure}{\numberline {3.15}{\ignorespaces Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Frontend}}{97}{figure.fig-ch3-so-o-kien-truc-feature-sliced-design-cua-ung-dung-frontend}%
-\contentsline {figure}{\numberline {3.15a}{\ignorespaces Luồng dữ liệu một chiều giữa Next.js, Query, Zustand và Backend}}{97}{figure.fig-ch3-luong-du-lieu-mot-chieu-giua-next-js-query-zustand-va-backend}%
-\contentsline {figure}{\numberline {3.16}{\ignorespaces Biểu đồ trình tự (Sequence Diagram) luồng xác thực người dùng}}{98}{figure.fig-ch3-bieu-o-trinh-tu-sequence-diagram-luong-xac-thuc-nguoi-dung}%
-\contentsline {figure}{\numberline {3.17}{\ignorespaces Giao diện trang Dashboard tổng quan}}{99}{figure.fig-ch3-giao-dien-trang-dashboard-tong-quan}%
-\contentsline {figure}{\numberline {3.18}{\ignorespaces Giao diện trang quản lý phương tiện}}{100}{figure.fig-ch3-giao-dien-trang-quan-ly-phuong-tien}%
-\contentsline {figure}{\numberline {3.19a}{\ignorespaces Phân rã lớp bản đồ React Leaflet và kênh Socket.IO}}{102}{figure.fig-ch3-phan-ra-lop-ban-o-react-leaflet-va-kenh-socket-io}%
-\contentsline {figure}{\numberline {3.19}{\ignorespaces Kiến trúc tích hợp bản đồ thời gian thực}}{102}{figure.fig-ch3-kien-truc-tich-hop-ban-o-thoi-gian-thuc}%
-\contentsline {figure}{\numberline {3.20}{\ignorespaces Giao diện trang bản đồ thời gian thực với các marker xe}}{104}{figure.fig-ch3-giao-dien-trang-ban-o-thoi-gian-thuc-voi-cac-marker-xe}%
-\contentsline {figure}{\numberline {3.21}{\ignorespaces Wireframe bố cục giao diện Dashboard}}{105}{figure.fig-ch3-wireframe-bo-cuc-giao-dien-dashboard}%
-\contentsline {figure}{\numberline {3.22}{\ignorespaces Các mẫu thiết kế UI của hệ thống - Data Table, Form, Charts}}{106}{figure.fig-ch3-cac-mau-thiet-ke-ui-cua-he-thong-data-table-form-charts}%
-\contentsline {figure}{\numberline {3.23}{\ignorespaces Sơ đồ kiến trúc tổng thể phương án tối ưu}}{107}{figure.fig-ch3-so-o-kien-truc-tong-the-phuong-an-toi-uu}%
-\contentsline {figure}{\numberline {4.1a}{\ignorespaces Bố trí chi tiết các khối phần cứng trong tracker}}{109}{figure.fig-ch4-bo-tri-chi-tiet-cac-khoi-phan-cung-trong-tracker}%
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Sơ đồ khối tổng thể hệ thống tracker IoT}}{109}{figure.fig-ch4-so-o-khoi-tong-the-he-thong-tracker-iot}%
-\contentsline {figure}{\numberline {4.2a}{\ignorespaces Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3}}{111}{figure.fig-ch4-so-o-chan-ket-noi-sim7600ce-t-voi-esp32-s3}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Sơ đồ kết nối giữa ESP32-S3 và modem SIM7600CE-T qua UART}}{112}{figure.fig-ch4-so-o-ket-noi-giua-esp32-s3-va-modem-sim7600ce-t-qua}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3}}{113}{figure.fig-ch4-so-o-mach-o-ien-ap-ac-quy-bang-voltage-divider-va}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker}}{113}{figure.fig-ch4-so-o-nguyen-ly-mach-ien-tong-hop-cua-he-thong-tracker}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần cứng tích hợp}}{116}{figure.fig-ch4-so-o-au-noi-tong-the-giua-esp32-s3-va-cac-khoi}%
-\contentsline {figure}{\numberline {4.6a}{\ignorespaces Kiến trúc power path giữa nguồn xe và pin dự phòng}}{117}{figure.fig-ch4-kien-truc-power-path-giua-nguon-xe-va-pin-du-phong}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Kiến trúc tổng thể mạch quản lý nguồn}}{118}{figure.fig-ch4-kien-truc-tong-the-mach-quan-ly-nguon}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Kiến trúc nhánh buck 5V chính dùng MP2482}}{118}{figure.fig-ch4-kien-truc-nhanh-buck-5v-chinh-dung-mp2482}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Kiến trúc nhánh nguồn dự phòng 5V từ pin 18650 qua SX1308}}{119}{figure.fig-ch4-kien-truc-nhanh-nguon-du-phong-5v-tu-pin-18650-qua-sx1308}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Sơ đồ power path runtime giữa nhánh chính và nhánh backup}}{120}{figure.fig-ch4-so-o-power-path-runtime-giua-nhanh-chinh-va-nhanh-backup}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng}}{121}{figure.fig-ch4-kien-truc-sac-pin-tp4056-va-uong-cap-nguon-du-phong}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Sơ đồ bố cục bên trong vỏ hộp bảo vệ}}{123}{figure.fig-ch4-so-o-bo-cuc-ben-trong-vo-hop-bao-ve}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces Quy trình lắp ráp phần cứng trên PCB}}{127}{figure.fig-ch4-quy-trinh-lap-rap-phan-cung-tren-pcb}%
-\contentsline {figure}{\numberline {4.13}{\ignorespaces Sơ đồ bố trí linh kiện sau khi lắp ráp}}{127}{figure.fig-ch4-so-o-bo-tri-linh-kien-sau-khi-lap-rap}%
-\contentsline {figure}{\numberline {4.14}{\ignorespaces Minh họa vị trí cổng OBD2 trên xe và cách kết nối}}{128}{figure.fig-ch4-minh-hoa-vi-tri-cong-obd2-tren-xe-va-cach-ket-noi}%
-\contentsline {figure}{\numberline {4.15}{\ignorespaces Minh họa lắp đặt thiết bị tracker trong xe và đi dây}}{130}{figure.fig-ch4-minh-hoa-lap-at-thiet-bi-tracker-trong-xe-va-i-day}%
-\contentsline {figure}{\numberline {4.16}{\ignorespaces Checklist kiểm tra hệ thống sau khi lắp đặt trong xe}}{130}{figure.fig-ch4-checklist-kiem-tra-he-thong-sau-khi-lap-at-trong-xe}%
-\contentsline {figure}{\numberline {4.16a}{\ignorespaces Chuỗi bước OTA trên firmware từ nhận lệnh đến xác nhận sau reboot}}{145}{figure.fig-ch4-chuoi-buoc-ota-tren-firmware-tu-nhan-lenh-en-xac-nhan-sau}%
-\contentsline {figure}{\numberline {4.17}{\ignorespaces Lưu đồ thuật toán chính của firmware thiết bị theo dõi xe}}{151}{figure.fig-ch4-luu-o-thuat-toan-chinh-cua-firmware-thiet-bi-theo-doi-xe}%
-\contentsline {figure}{\numberline {4.18}{\ignorespaces Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu}}{152}{figure.fig-ch4-kien-truc-tong-the-he-thong-cloud-va-luong-du-lieu}%
-\contentsline {figure}{\numberline {4.19}{\ignorespaces Cấu trúc thư mục hệ thống theo quy ước IVM26}}{155}{figure.fig-ch4-cau-truc-thu-muc-he-thong-theo-quy-uoc-ivm26}%
-\contentsline {figure}{\numberline {4.20}{\ignorespaces Luồng xử lý dữ liệu của MQTT Bridge}}{159}{figure.fig-ch4-luong-xu-ly-du-lieu-cua-mqtt-bridge}%
-\contentsline {figure}{\numberline {4.21}{\ignorespaces Cấu trúc thư mục Backend theo kiến trúc DDD}}{166}{figure.fig-ch4-cau-truc-thu-muc-backend-theo-kien-truc-ddd}%
-\contentsline {figure}{\numberline {4.22}{\ignorespaces Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced}}{173}{figure.fig-ch4-cau-truc-thu-muc-frontend-theo-kien-truc-feature-sliced}%
-\contentsline {figure}{\numberline {4.23}{\ignorespaces Giao diện trang Dashboard tổng quan}}{174}{figure.fig-ch4-giao-dien-trang-dashboard-tong-quan}%
-\contentsline {figure}{\numberline {4.24}{\ignorespaces Giao diện trang quản lý xe}}{175}{figure.fig-ch4-giao-dien-trang-quan-ly-xe}%
-\contentsline {figure}{\numberline {4.25}{\ignorespaces Giao diện bản đồ thời gian thực với vị trí các xe}}{176}{figure.fig-ch4-giao-dien-ban-o-thoi-gian-thuc-voi-vi-tri-cac-xe}%
-\contentsline {figure}{\numberline {4.26}{\ignorespaces Giao diện trang quản lý cảnh báo}}{177}{figure.fig-ch4-giao-dien-trang-quan-ly-canh-bao}%
-\contentsline {figure}{\numberline {4.27}{\ignorespaces Grafana dashboard hiển thị tổng quan hiệu năng hệ thống}}{181}{figure.fig-ch4-grafana-dashboard-hien-thi-tong-quan-hieu-nang-he-thong}%
-\contentsline {figure}{\numberline {4.28}{\ignorespaces EMQX Dashboard hiển thị trạng thái kết nối thiết bị}}{181}{figure.fig-ch4-emqx-dashboard-hien-thi-trang-thai-ket-noi-thiet-bi}%
-\contentsline {figure}{\numberline {4.29}{\ignorespaces Bố trí thiết bị đo lường trong phòng thí nghiệm}}{187}{figure.fig-ch4-bo-tri-thiet-bi-o-luong-trong-phong-thi-nghiem}%
-\contentsline {figure}{\numberline {4.30}{\ignorespaces Thiết bị tracker được lắp đặt trên xe thử nghiệm}}{189}{figure.fig-ch4-thiet-bi-tracker-uoc-lap-at-tren-xe-thu-nghiem}%
-\contentsline {figure}{\numberline {4.31}{\ignorespaces Sơ đồ môi trường thử nghiệm tổng thể}}{189}{figure.fig-ch4-so-o-moi-truong-thu-nghiem-tong-the}%
-\contentsline {figure}{\numberline {4.32}{\ignorespaces Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ hoạt động hoàn chỉnh (Driving -\textgreater {} Parking -\textgreater {} Alert -\textgreater {} Parking)}}{191}{figure.fig-ch4-o-thi-dong-tieu-thu-theo-thoi-gian-trong-mot-chu-ky}%
-\contentsline {figure}{\numberline {4.33}{\ignorespaces Đồ thị điện áp pin dự phòng theo thời gian theo baseline 18650 trong kịch bản tracking liên tục}}{192}{figure.fig-ch4-o-thi-ien-ap-pin-du-phong-theo-thoi-gian-theo-baseline}%
-\contentsline {figure}{\numberline {4.34}{\ignorespaces Đồ thị dòng tiêu thụ theo nhiệt độ môi trường}}{194}{figure.fig-ch4-o-thi-dong-tieu-thu-theo-nhiet-o-moi-truong}%
-\contentsline {figure}{\numberline {4.35}{\ignorespaces Biểu đồ phân bố thời gian kết nối BLE OBD2 (20 lần đo)}}{196}{figure.fig-ch4-bieu-o-phan-bo-thoi-gian-ket-noi-ble-obd2-20-lan}%
-\contentsline {figure}{\numberline {4.36}{\ignorespaces Đồ thị thời gian bắt vệ tinh GPS trong các kịch bản (Cold/Warm/Hot Start)}}{198}{figure.fig-ch4-o-thi-thoi-gian-bat-ve-tinh-gps-trong-cac-kich-ban}%
-\contentsline {figure}{\numberline {4.37}{\ignorespaces Biểu đồ phân bố độ trễ MQTT trong điều kiện mạng 4G ổn định}}{200}{figure.fig-ch4-bieu-o-phan-bo-o-tre-mqtt-trong-ieu-kien-mang-4g}%
-\contentsline {figure}{\numberline {4.38}{\ignorespaces Biểu đồ thời gian phản hồi API (P50, P95, P99) cho các endpoint chính}}{206}{figure.fig-ch4-bieu-o-thoi-gian-phan-hoi-api-p50-p95-p99-cho-cac}%
-\contentsline {figure}{\numberline {4.39}{\ignorespaces Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu)}}{208}{figure.fig-ch4-o-thi-phan-bo-o-tre-end-to-end-1000-ban-tin}%
-\contentsline {figure}{\numberline {4.40}{\ignorespaces Đồ thị hiệu suất hệ thống theo số lượng thiết bị đồng thời}}{210}{figure.fig-ch4-o-thi-hieu-suat-he-thong-theo-so-luong-thiet-bi-ong}%
-\contentsline {figure}{\numberline {4.41}{\ignorespaces Kết quả Lighthouse Performance Audit của trang Dashboard}}{212}{figure.fig-ch4-ket-qua-lighthouse-performance-audit-cua-trang-dashboard}%
-\contentsline {figure}{\numberline {4.42}{\ignorespaces Screenshot giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ (Leaflet)}}{215}{figure.fig-ch4-screenshot-giao-dien-dashboard-hien-thi-vi-tri-xe-ang-di-chuyen}%
-\contentsline {figure}{\numberline {4.43}{\ignorespaces Screenshot biểu đồ dữ liệu OBD2 thời gian thực (ECharts) --- RPM, Speed, Coolant Temp}}{216}{figure.fig-ch4-screenshot-bieu-o-du-lieu-obd2-thoi-gian-thuc-echarts-rpm-speed}%
-\contentsline {figure}{\numberline {4.44}{\ignorespaces Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo}}{219}{figure.fig-ch4-screenshot-canh-bao-geofence-tren-giao-dien-dashboard-voi-ban-o-hien}%
-\contentsline {figure}{\numberline {4.45}{\ignorespaces Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị}}{219}{figure.fig-ch4-screenshot-giao-dien-gui-lenh-ieu-khien-tu-dashboard-va-ket-qua}%
-\contentsline {figure}{\numberline {4.46}{\ignorespaces Screenshot hành trình trên bản đồ, thể hiện giai đoạn gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối}}{220}{figure.fig-ch4-screenshot-hanh-trinh-tren-ban-o-the-hien-giai-oan-gian-oan}%
-\contentsline {figure}{\numberline {4.47}{\ignorespaces Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart)}}{224}{figure.fig-ch4-bieu-o-radar-so-sanh-chi-tieu-thiet-ke-va-ket-qua}%
-\contentsline {figure}{\numberline {PL-3.1}{\ignorespaces Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần)}}{274}{figure.fig-app3-bieu-o-gantt-ke-hoach-thuc-hien-du-an-24-tuan}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Quy trình phát triển dự án theo các giai đoạn}}{7}{figure.fig-ch1-project-development-phases}%
+\contentsline {figure}{\numberline {1.3}{\ignorespaces Kiến trúc tổng thể hệ thống IoT Vehicle Tracking}}{8}{figure.fig-ch1-system-architecture-overview}%
+\contentsline {figure}{\numberline {1.4}{\ignorespaces Sơ đồ chuyển đổi giữa các chế độ năng lượng}}{9}{figure.fig-ch1-power-mode-transitions}%
+\contentsline {figure}{\numberline {1.5}{\ignorespaces Lộ trình phát triển dự án theo các giai đoạn (Roadmap)}}{13}{figure.fig-ch1-project-roadmap}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Sơ đồ kiến trúc dữ liệu của hệ thống - Data Architecture Diagram}}{20}{figure.fig-ch2-data-architecture-overview}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Sơ đồ khối tổng thể hệ thống tracker}}{26}{figure.fig-ch3-so-o-khoi-tong-the-he-thong-tracker}%
+\contentsline {figure}{\numberline {3.1a}{\ignorespaces Phân rã chi tiết các khối chức năng của tracker}}{27}{figure.fig-ch3-phan-ra-chi-tiet-cac-khoi-chuc-nang-cua-tracker}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Sơ đồ kết nối BLE giữa ESP32-S3 và vgate iCar Pro}}{35}{figure.fig-ch3-so-o-ket-noi-ble-giua-esp32-s3-va-vgate-icar-pro}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Sơ đồ kết nối LIS3DSH với ESP32-S3 qua I2C}}{38}{figure.fig-ch3-so-o-ket-noi-lis3dsh-voi-esp32-s3-qua-i2c}%
+\contentsline {figure}{\numberline {3.3a}{\ignorespaces Sơ đồ chi tiết chân kết nối LIS3DSH với ESP32-S3}}{39}{figure.fig-ch3-so-o-chi-tiet-chan-ket-noi-lis3dsh-voi-esp32-s3}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Sơ đồ khối hệ thống quản lý nguồn}}{39}{figure.fig-ch3-so-o-khoi-he-thong-quan-ly-nguon}%
+\contentsline {figure}{\numberline {3.4a}{\ignorespaces Kiến trúc nguồn và phân phối điện áp trong hệ thống}}{39}{figure.fig-ch3-kien-truc-nguon-va-phan-phoi-ien-ap-trong-he-thong}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Sơ đồ kiến trúc phân lớp của firmware}}{48}{figure.fig-ch3-so-o-kien-truc-phan-lop-cua-firmware}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Sơ đồ tương tác giữa các FreeRTOS task}}{49}{figure.fig-ch3-so-o-tuong-tac-giua-cac-freertos-task}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Lưu đồ thuật toán luồng hoạt động chính của firmware}}{50}{figure.fig-ch3-luu-o-thuat-toan-luong-hoat-ong-chinh-cua-firmware}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Lưu đồ thuật toán quy trình kết nối và đọc dữ liệu BLE OBD2}}{52}{figure.fig-ch3-luu-o-thuat-toan-quy-trinh-ket-noi-va-oc-du-lieu}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Lưu đồ điều phối modem SIM7600CE-T theo trạng thái mạng và chế độ vận hành}}{57}{figure.fig-ch3-luu-o-ieu-phoi-modem-sim7600ce-t-theo-trang-thai-mang-va}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Lưu đồ thuật toán điều khiển power path}}{58}{figure.fig-ch3-luu-o-thuat-toan-ieu-khien-power-path}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Sơ đồ máy trạng thái của thiết bị theo dõi}}{64}{figure.fig-ch3-so-o-may-trang-thai-cua-thiet-bi-theo-doi}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Sơ đồ kiến trúc tổng quan hệ thống Cloud}}{70}{figure.fig-ch3-so-o-kien-truc-tong-quan-he-thong-cloud}%
+\contentsline {figure}{\numberline {3.12a}{\ignorespaces Luồng dữ liệu chi tiết từ thiết bị đến dashboard}}{70}{figure.fig-ch3-luong-du-lieu-chi-tiet-tu-thiet-bi-en-dashboard}%
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Sơ đồ chiến lược lưu trữ kép}}{75}{figure.fig-ch3-so-o-chien-luoc-luu-tru-kep}%
+\contentsline {figure}{\numberline {3.14}{\ignorespaces Sơ đồ quan hệ cơ sở dữ liệu (ER Diagram)}}{77}{figure.fig-ch3-so-o-quan-he-co-so-du-lieu-er-diagram}%
+\contentsline {figure}{\numberline {3.14a}{\ignorespaces Luồng điều phối OTA giữa Backend, EMQX, thiết bị và MQTT Bridge}}{81}{figure.fig-ch3-luong-ieu-phoi-ota-giua-backend-emqx-thiet-bi-va-mqtt-bridge}%
+\contentsline {figure}{\numberline {3.15}{\ignorespaces Sơ đồ kiến trúc Feature-Sliced Design của ứng dụng Frontend}}{87}{figure.fig-ch3-so-o-kien-truc-feature-sliced-design-cua-ung-dung-frontend}%
+\contentsline {figure}{\numberline {3.15a}{\ignorespaces Luồng dữ liệu một chiều giữa Next.js, Query, Zustand và Backend}}{88}{figure.fig-ch3-luong-du-lieu-mot-chieu-giua-next-js-query-zustand-va-backend}%
+\contentsline {figure}{\numberline {3.16}{\ignorespaces Biểu đồ trình tự (Sequence Diagram) luồng xác thực người dùng}}{89}{figure.fig-ch3-bieu-o-trinh-tu-sequence-diagram-luong-xac-thuc-nguoi-dung}%
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Giao diện trang Dashboard tổng quan}}{90}{figure.fig-ch3-giao-dien-trang-dashboard-tong-quan}%
+\contentsline {figure}{\numberline {3.18}{\ignorespaces Giao diện trang quản lý phương tiện}}{92}{figure.fig-ch3-giao-dien-trang-quan-ly-phuong-tien}%
+\contentsline {figure}{\numberline {3.19a}{\ignorespaces Phân rã lớp bản đồ React Leaflet và kênh Socket.IO}}{92}{figure.fig-ch3-phan-ra-lop-ban-o-react-leaflet-va-kenh-socket-io}%
+\contentsline {figure}{\numberline {3.19}{\ignorespaces Kiến trúc tích hợp bản đồ thời gian thực}}{93}{figure.fig-ch3-kien-truc-tich-hop-ban-o-thoi-gian-thuc}%
+\contentsline {figure}{\numberline {3.20}{\ignorespaces Giao diện trang bản đồ thời gian thực với các marker xe}}{93}{figure.fig-ch3-giao-dien-trang-ban-o-thoi-gian-thuc-voi-cac-marker-xe}%
+\contentsline {figure}{\numberline {3.21}{\ignorespaces Wireframe bố cục giao diện Dashboard}}{94}{figure.fig-ch3-wireframe-bo-cuc-giao-dien-dashboard}%
+\contentsline {figure}{\numberline {3.22}{\ignorespaces Các mẫu thiết kế UI của hệ thống - Data Table, Form, Charts}}{95}{figure.fig-ch3-cac-mau-thiet-ke-ui-cua-he-thong-data-table-form-charts}%
+\contentsline {figure}{\numberline {3.23}{\ignorespaces Sơ đồ kiến trúc tổng thể phương án tối ưu}}{96}{figure.fig-ch3-so-o-kien-truc-tong-the-phuong-an-toi-uu}%
+\contentsline {figure}{\numberline {4.1a}{\ignorespaces Bố trí chi tiết các khối phần cứng trong tracker}}{98}{figure.fig-ch4-bo-tri-chi-tiet-cac-khoi-phan-cung-trong-tracker}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Sơ đồ khối tổng thể hệ thống tracker IoT}}{98}{figure.fig-ch4-so-o-khoi-tong-the-he-thong-tracker-iot}%
+\contentsline {figure}{\numberline {4.2a}{\ignorespaces Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3}}{100}{figure.fig-ch4-so-o-chan-ket-noi-sim7600ce-t-voi-esp32-s3}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Sơ đồ kết nối giữa ESP32-S3 và modem SIM7600CE-T qua UART}}{101}{figure.fig-ch4-so-o-ket-noi-giua-esp32-s3-va-modem-sim7600ce-t-qua}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Sơ đồ mạch đo điện áp ắc quy bằng voltage divider và ADC ESP32-S3}}{102}{figure.fig-ch4-so-o-mach-o-ien-ap-ac-quy-bang-voltage-divider-va}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Sơ đồ nguyên lý mạch điện tổng hợp của hệ thống tracker}}{102}{figure.fig-ch4-so-o-nguyen-ly-mach-ien-tong-hop-cua-he-thong-tracker}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần cứng tích hợp}}{105}{figure.fig-ch4-so-o-au-noi-tong-the-giua-esp32-s3-va-cac-khoi}%
+\contentsline {figure}{\numberline {4.6a}{\ignorespaces Kiến trúc power path giữa nguồn xe và pin dự phòng}}{106}{figure.fig-ch4-kien-truc-power-path-giua-nguon-xe-va-pin-du-phong}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Kiến trúc tổng thể mạch quản lý nguồn}}{106}{figure.fig-ch4-kien-truc-tong-the-mach-quan-ly-nguon}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Kiến trúc nhánh buck 5V chính dùng MP2482}}{107}{figure.fig-ch4-kien-truc-nhanh-buck-5v-chinh-dung-mp2482}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Kiến trúc nhánh nguồn dự phòng 5V từ pin 18650 qua SX1308}}{107}{figure.fig-ch4-kien-truc-nhanh-nguon-du-phong-5v-tu-pin-18650-qua-sx1308}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Sơ đồ power path runtime giữa nhánh chính và nhánh backup}}{108}{figure.fig-ch4-so-o-power-path-runtime-giua-nhanh-chinh-va-nhanh-backup}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng}}{109}{figure.fig-ch4-kien-truc-sac-pin-tp4056-va-uong-cap-nguon-du-phong}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Sơ đồ bố cục bên trong vỏ hộp bảo vệ}}{109}{figure.fig-ch4-so-o-bo-cuc-ben-trong-vo-hop-bao-ve}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Quy trình lắp ráp phần cứng trên PCB}}{113}{figure.fig-ch4-quy-trinh-lap-rap-phan-cung-tren-pcb}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Sơ đồ bố trí linh kiện sau khi lắp ráp}}{113}{figure.fig-ch4-so-o-bo-tri-linh-kien-sau-khi-lap-rap}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces Minh họa vị trí cổng OBD2 trên xe và cách kết nối}}{115}{figure.fig-ch4-minh-hoa-vi-tri-cong-obd2-tren-xe-va-cach-ket-noi}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Minh họa lắp đặt thiết bị tracker trong xe và đi dây}}{116}{figure.fig-ch4-minh-hoa-lap-at-thiet-bi-tracker-trong-xe-va-i-day}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Checklist kiểm tra hệ thống sau khi lắp đặt trong xe}}{116}{figure.fig-ch4-checklist-kiem-tra-he-thong-sau-khi-lap-at-trong-xe}%
+\contentsline {figure}{\numberline {4.16a}{\ignorespaces Chuỗi bước OTA trên firmware từ nhận lệnh đến xác nhận sau reboot}}{131}{figure.fig-ch4-chuoi-buoc-ota-tren-firmware-tu-nhan-lenh-en-xac-nhan-sau}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Lưu đồ thuật toán chính của firmware thiết bị theo dõi xe}}{136}{figure.fig-ch4-luu-o-thuat-toan-chinh-cua-firmware-thiet-bi-theo-doi-xe}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu}}{138}{figure.fig-ch4-kien-truc-tong-the-he-thong-cloud-va-luong-du-lieu}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces Cấu trúc thư mục hệ thống theo quy ước IVM26}}{140}{figure.fig-ch4-cau-truc-thu-muc-he-thong-theo-quy-uoc-ivm26}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Luồng xử lý dữ liệu của MQTT Bridge}}{144}{figure.fig-ch4-luong-xu-ly-du-lieu-cua-mqtt-bridge}%
+\contentsline {figure}{\numberline {4.21}{\ignorespaces Cấu trúc thư mục Backend theo kiến trúc DDD}}{151}{figure.fig-ch4-cau-truc-thu-muc-backend-theo-kien-truc-ddd}%
+\contentsline {figure}{\numberline {4.22}{\ignorespaces Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced}}{158}{figure.fig-ch4-cau-truc-thu-muc-frontend-theo-kien-truc-feature-sliced}%
+\contentsline {figure}{\numberline {4.23}{\ignorespaces Giao diện trang Dashboard tổng quan}}{159}{figure.fig-ch4-giao-dien-trang-dashboard-tong-quan}%
+\contentsline {figure}{\numberline {4.24}{\ignorespaces Giao diện trang quản lý xe}}{161}{figure.fig-ch4-giao-dien-trang-quan-ly-xe}%
+\contentsline {figure}{\numberline {4.25}{\ignorespaces Giao diện bản đồ thời gian thực với vị trí các xe}}{162}{figure.fig-ch4-giao-dien-ban-o-thoi-gian-thuc-voi-vi-tri-cac-xe}%
+\contentsline {figure}{\numberline {4.26}{\ignorespaces Giao diện trang quản lý cảnh báo}}{163}{figure.fig-ch4-giao-dien-trang-quan-ly-canh-bao}%
+\contentsline {figure}{\numberline {4.27}{\ignorespaces Grafana dashboard hiển thị tổng quan hiệu năng hệ thống}}{165}{figure.fig-ch4-grafana-dashboard-hien-thi-tong-quan-hieu-nang-he-thong}%
+\contentsline {figure}{\numberline {4.28}{\ignorespaces EMQX Dashboard hiển thị trạng thái kết nối thiết bị}}{166}{figure.fig-ch4-emqx-dashboard-hien-thi-trang-thai-ket-noi-thiet-bi}%
+\contentsline {figure}{\numberline {4.29}{\ignorespaces Bố trí thiết bị đo lường trong phòng thí nghiệm}}{172}{figure.fig-ch4-bo-tri-thiet-bi-o-luong-trong-phong-thi-nghiem}%
+\contentsline {figure}{\numberline {4.30}{\ignorespaces Thiết bị tracker được lắp đặt trên xe thử nghiệm}}{173}{figure.fig-ch4-thiet-bi-tracker-uoc-lap-at-tren-xe-thu-nghiem}%
+\contentsline {figure}{\numberline {4.31}{\ignorespaces Sơ đồ môi trường thử nghiệm tổng thể}}{173}{figure.fig-ch4-so-o-moi-truong-thu-nghiem-tong-the}%
+\contentsline {figure}{\numberline {4.32}{\ignorespaces Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ hoạt động hoàn chỉnh (Driving -\textgreater {} Parking -\textgreater {} Alert -\textgreater {} Parking)}}{174}{figure.fig-ch4-o-thi-dong-tieu-thu-theo-thoi-gian-trong-mot-chu-ky}%
+\contentsline {figure}{\numberline {4.33}{\ignorespaces Đồ thị điện áp pin dự phòng theo thời gian theo baseline 18650 trong kịch bản tracking liên tục}}{174}{figure.fig-ch4-o-thi-ien-ap-pin-du-phong-theo-thoi-gian-theo-baseline}%
+\contentsline {figure}{\numberline {4.34}{\ignorespaces Đồ thị dòng tiêu thụ theo nhiệt độ môi trường}}{175}{figure.fig-ch4-o-thi-dong-tieu-thu-theo-nhiet-o-moi-truong}%
+\contentsline {figure}{\numberline {4.35}{\ignorespaces Biểu đồ phân bố thời gian kết nối BLE OBD2 (20 lần đo)}}{178}{figure.fig-ch4-bieu-o-phan-bo-thoi-gian-ket-noi-ble-obd2-20-lan}%
+\contentsline {figure}{\numberline {4.36}{\ignorespaces Đồ thị thời gian bắt vệ tinh GPS trong các kịch bản (Cold/Warm/Hot Start)}}{180}{figure.fig-ch4-o-thi-thoi-gian-bat-ve-tinh-gps-trong-cac-kich-ban}%
+\contentsline {figure}{\numberline {4.37}{\ignorespaces Biểu đồ phân bố độ trễ MQTT trong điều kiện mạng 4G ổn định}}{181}{figure.fig-ch4-bieu-o-phan-bo-o-tre-mqtt-trong-ieu-kien-mang-4g}%
+\contentsline {figure}{\numberline {4.38}{\ignorespaces Biểu đồ thời gian phản hồi API (P50, P95, P99) cho các endpoint chính}}{185}{figure.fig-ch4-bieu-o-thoi-gian-phan-hoi-api-p50-p95-p99-cho-cac}%
+\contentsline {figure}{\numberline {4.39}{\ignorespaces Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu)}}{187}{figure.fig-ch4-o-thi-phan-bo-o-tre-end-to-end-1000-ban-tin}%
+\contentsline {figure}{\numberline {4.40}{\ignorespaces Đồ thị hiệu suất hệ thống theo số lượng thiết bị đồng thời}}{192}{figure.fig-ch4-o-thi-hieu-suat-he-thong-theo-so-luong-thiet-bi-ong}%
+\contentsline {figure}{\numberline {4.41}{\ignorespaces Kết quả Lighthouse Performance Audit của trang Dashboard}}{192}{figure.fig-ch4-ket-qua-lighthouse-performance-audit-cua-trang-dashboard}%
+\contentsline {figure}{\numberline {4.42}{\ignorespaces Screenshot giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ (Leaflet)}}{193}{figure.fig-ch4-screenshot-giao-dien-dashboard-hien-thi-vi-tri-xe-ang-di-chuyen}%
+\contentsline {figure}{\numberline {4.43}{\ignorespaces Screenshot biểu đồ dữ liệu OBD2 thời gian thực (ECharts) --- RPM, Speed, Coolant Temp}}{194}{figure.fig-ch4-screenshot-bieu-o-du-lieu-obd2-thoi-gian-thuc-echarts-rpm-speed}%
+\contentsline {figure}{\numberline {4.44}{\ignorespaces Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo}}{195}{figure.fig-ch4-screenshot-canh-bao-geofence-tren-giao-dien-dashboard-voi-ban-o-hien}%
+\contentsline {figure}{\numberline {4.45}{\ignorespaces Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị}}{195}{figure.fig-ch4-screenshot-giao-dien-gui-lenh-ieu-khien-tu-dashboard-va-ket-qua}%
+\contentsline {figure}{\numberline {4.46}{\ignorespaces Screenshot hành trình trên bản đồ, thể hiện giai đoạn gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối}}{196}{figure.fig-ch4-screenshot-hanh-trinh-tren-ban-o-the-hien-giai-oan-gian-oan}%
+\contentsline {figure}{\numberline {4.47}{\ignorespaces Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart)}}{200}{figure.fig-ch4-bieu-o-radar-so-sanh-chi-tieu-thiet-ke-va-ket-qua}%
+\contentsline {figure}{\numberline {PL-3.1}{\ignorespaces Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần)}}{244}{figure.fig-app3-bieu-o-gantt-ke-hoach-thuc-hien-du-an-24-tuan}%

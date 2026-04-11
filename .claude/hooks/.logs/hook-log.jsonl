@@ -933,3 +933,15 @@
 {"ts":"2026-04-11T09:34:31.290Z","hook":"scout-block","tool":"Bash","dur":2,"status":"ok","exit":0,"error":""}
 {"ts":"2026-04-11T09:35:07.462Z","hook":"scout-block","tool":"Bash","dur":2,"status":"ok","exit":0,"error":""}
 {"ts":"2026-04-11T09:35:07.582Z","hook":"scout-block","tool":"Bash","dur":2,"status":"ok","exit":0,"error":""}
+{"ts":"2026-04-11T09:40:34.097Z","hook":"scout-block","tool":"Bash","dur":2,"status":"ok","exit":0,"error":""}
+{"ts":"2026-04-11T09:40:34.155Z","hook":"scout-block","tool":"Bash","dur":1,"status":"ok","exit":0,"error":""}
+{"ts":"2026-04-11T09:54:06.653Z","hook":"scout-block","tool":"Glob","dur":8,"status":"block","exit":2,"error":""}
+{"ts":"2026-04-11T09:54:06.775Z","hook":"scout-block","tool":"Glob","dur":9,"status":"block","exit":2,"error":""}
+{"ts":"2026-04-11T16:23:42.460Z","hook":"scout-block","tool":"Glob","dur":10,"status":"ok","exit":0,"error":""}
+{"ts":"2026-04-11T16:23:43.324Z","hook":"scout-block","tool":"Glob","dur":10,"status":"ok","exit":0,"error":""}
+{"ts":"2026-04-11T16:23:43.474Z","hook":"scout-block","tool":"Glob","dur":12,"status":"block","exit":2,"error":""}
+{"ts":"2026-04-11T16:23:43.932Z","hook":"scout-block","tool":"Glob","dur":15,"status":"ok","exit":0,"error":""}
+{"ts":"2026-04-11T16:23:44.003Z","hook":"scout-block","tool":"Glob","dur":24,"status":"ok","exit":0,"error":""}
+{"ts":"2026-04-11T16:23:44.149Z","hook":"scout-block","tool":"Glob","dur":20,"status":"block","exit":2,"error":""}
+{"ts":"2026-04-11T16:24:33.268Z","hook":"scout-block","tool":"Glob","dur":9,"status":"block","exit":2,"error":""}
+{"ts":"2026-04-11T16:24:33.774Z","hook":"scout-block","tool":"Glob","dur":18,"status":"block","exit":2,"error":""}
