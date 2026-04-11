@@ -167,6 +167,34 @@
     }%
   }%
 }
+\newcommand{\safeincludesvgnarrow}[1]{%
+  \StrSubstitute{#1}{.svg}{.png}[\safeincludepngpath]%
+  \StrSubstitute{#1}{./assets/figures/}{./svg-inkscape/}[\safeincludepdfbasepath]%
+  \StrSubstitute{\safeincludepdfbasepath}{.svg}{_svg-raw.pdf}[\safeincludepdfpath]%
+  \IfFileExists{\safeincludepngpath}{%
+    \includegraphics[width=0.56\linewidth,height=0.34\textheight,keepaspectratio]{\safeincludepngpath}%
+  }{%
+    \IfFileExists{\safeincludepdfpath}{%
+      \includegraphics[width=0.56\linewidth,height=0.34\textheight,keepaspectratio]{\safeincludepdfpath}%
+    }{%
+      \fbox{\parbox{0.9\linewidth}{\centering Missing figure assets for:\\ \texttt{\detokenize{#1}}}}%
+    }%
+  }%
+}
+\newcommand{\safeincludesvgchart}[1]{%
+  \StrSubstitute{#1}{.svg}{.png}[\safeincludepngpath]%
+  \StrSubstitute{#1}{./assets/figures/}{./svg-inkscape/}[\safeincludepdfbasepath]%
+  \StrSubstitute{\safeincludepdfbasepath}{.svg}{_svg-raw.pdf}[\safeincludepdfpath]%
+  \IfFileExists{\safeincludepngpath}{%
+    \includegraphics[width=0.72\linewidth,height=0.28\textheight,keepaspectratio]{\safeincludepngpath}%
+  }{%
+    \IfFileExists{\safeincludepdfpath}{%
+      \includegraphics[width=0.72\linewidth,height=0.28\textheight,keepaspectratio]{\safeincludepdfpath}%
+    }{%
+      \fbox{\parbox{0.9\linewidth}{\centering Missing figure assets for:\\ \texttt{\detokenize{#1}}}}%
+    }%
+  }%
+}
 \setlength{\emergencystretch}{10em} % reduce overfull lines
 \setlength{\tabcolsep}{\thesisdefaulttabcolsep}
 \setlength{\arrayrulewidth}{0.8pt}
@@ -210,7 +238,7 @@
   \setcounter{subsection}{0}%
 }
 \newcommand{\appendixsection}[1]{\clearpage\section{#1}}
-\newcommand{\frontmatterstart}{\clearpage\pagenumbering{roman}\setcounter{page}{1}}
+\newcommand{\frontmatterstart}{\clearpage\hypersetup{pageanchor=true}\pagenumbering{roman}\setcounter{page}{1}}
 \newcommand{\mainmatterstart}{\clearpage\pagenumbering{arabic}\setcounter{page}{1}}
 \newcommand{\checkbox}{\(\square\)}
 \newcommand{\thesisspacer}{\hspace{2em}}
@@ -314,6 +342,7 @@
 \date{}
 
 \begin{document}
+\hypersetup{pageanchor=false}
 \pagenumbering{gobble}
 
 \thesiscoverstart
@@ -601,47 +630,45 @@ Các nội dung nghiên cứu, kết quả trong đề tài này là trung thự
 
 \majorheading{TÓM TẮT ĐỒ ÁN TỐT NGHIỆP - ABSTRACT}
 
-Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt Nam kéo theo
-nhu cầu giám sát phương tiện từ xa và quản lý đội xe theo thời gian
-thực. Đồ án này mô tả quá trình thiết kế, chế tạo và tích hợp một hệ
-thống IoT giám sát phương tiện, từ thiết bị gắn trên xe đến hạ tầng
-cloud và bảng điều khiển khai thác, để theo dõi vị trí, thu thập dữ liệu
-chẩn đoán và phát hiện cảnh báo vận hành.
+Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt Nam khiến
+nhu cầu giám sát phương tiện không còn dừng ở việc biết xe đang ở đâu,
+mà còn ở việc hiểu xe đang vận hành ra sao và có dấu hiệu bất thường hay
+không. Từ nhu cầu đó, đồ án này trình bày quá trình thiết kế và triển
+khai một hệ thống IoT giám sát phương tiện theo hướng end-to-end, bao
+gồm thiết bị gắn trên xe, hạ tầng cloud và bảng điều khiển web, nhằm hỗ
+trợ doanh nghiệp theo dõi vị trí, nắm bắt trạng thái kỹ thuật và phản
+ứng sớm với các rủi ro vận hành.
 
-Về phần cứng, hệ thống được hiện thực trên bo mạch PCB tự thiết kế với
-các linh kiện tích hợp trực tiếp: ESP32-S3 (MCU), SIMCom SIM7600CE-T
-(LTE + GNSS), LIS3DSH (IMU), DS3231M (RTC), W25Q128 (SPI Flash), cùng
-các khối nguồn MP2482, TPS54231, AP2112, SX1308 và TP4056. Modem được
-cấu hình ở chế độ Auto (\texttt{AT+CNMP=2}) để tự động chuyển giữa
-LTE/UMTS/GSM, dùng APN mặc định \texttt{internet} và cung cấp dữ liệu
-GNSS qua \texttt{AT+CGNSINF} hoặc luồng NMEA tùy chọn
-\texttt{AT+CGNSTST} trên cùng UART1. Thiết bị đọc dữ liệu OBD2 qua
-adapter vgate iCar Pro bằng BLE (thiết bị ngoại vi bên ngoài PCB), đồng
-thời dùng IMU LIS3DSH để phát hiện rung động và hỗ trợ phân tích hành vi
-vận hành. Kiến trúc nguồn dùng bus 5V chính, nhánh ~4V cho modem, nhánh
-logic 3.3V và pin dự phòng 18650 1S để duy trì hoạt động khi xe tắt máy.
+Ở tầng thiết bị, hệ thống được xây dựng trên bo mạch PCB tự thiết kế.
+Trong đó, ESP32-S3 giữ vai trò bộ điều khiển trung tâm; SIM7600CE-T đảm
+nhiệm truyền dữ liệu 4G và định vị vệ tinh GNSS; LIS3DSH theo dõi rung
+động để nhận biết chuyển động khi xe đỗ; còn adapter vgate iCar Pro cho
+phép đọc dữ liệu OBD2 từ xe qua BLE. Kiến trúc nguồn được tổ chức theo
+nhiều nhánh để thiết bị vẫn duy trì hoạt động khi xe tắt máy, đồng thời
+hạn chế ảnh hưởng tới ắc quy chính.
 
-Về phần mềm, dữ liệu từ thiết bị được truyền về máy chủ bằng MQTT 5.0
-thông qua EMQX và được phân quyền theo ACL cho từng thiết bị. Dịch vụ
-MQTT Bridge tiếp nhận bản tin, xác thực payload rồi phân luồng đến các
-hệ lưu trữ chuyên biệt: PostgreSQL cho dữ liệu quan hệ và nhật ký OTA,
-VictoriaMetrics cho dữ liệu chuỗi thời gian, và VictoriaLogs cho nhật ký
-sự kiện. API server được xây dựng bằng Express.js kết hợp TypeScript
-theo kiến trúc DDD, sử dụng cơ chế xác thực phiên dựa trên token lưu
-trong cơ sở dữ liệu và hỗ trợ kích hoạt cập nhật firmware OTA cho thiết
-bị.
+Ở tầng phần mềm, dữ liệu từ thiết bị được gửi bằng MQTT 5.0 tới EMQX.
+Có thể hiểu MQTT là một cơ chế nhắn tin nhẹ, phù hợp với thiết bị IoT
+cần gửi nhiều bản tin nhỏ qua mạng di động. Sau đó, MQTT Bridge tiếp
+nhận và phân luồng dữ liệu tới từng hệ lưu trữ phù hợp: PostgreSQL cho
+dữ liệu quan hệ và nhật ký OTA, VictoriaMetrics cho dữ liệu chuỗi thời
+gian, VictoriaLogs cho nhật ký sự kiện. API server được xây dựng bằng
+Express.js và TypeScript, đóng vai trò kết nối giữa thiết bị, dữ liệu
+lưu trữ và giao diện khai thác.
 
-Bảng điều khiển web dùng Next.js 15 và React 19, hiển thị bản đồ
-Leaflet, biểu đồ ECharts và kết nối Socket.IO để cập nhật gần như tức
-thời vị trí cùng trạng thái phương tiện. Toàn bộ hệ thống được đóng gói
-và triển khai bằng Docker để bảo đảm tính nhất quán giữa môi trường phát
-triển và môi trường vận hành.
+Bảng điều khiển web được phát triển bằng Next.js 15 và React 19, hiển
+thị bản đồ, biểu đồ và trạng thái phương tiện gần như theo thời gian
+thực thông qua Socket.IO. Nhờ đó, người vận hành không chỉ quan sát vị
+trí xe mà còn có thể theo dõi lịch sử hành trình, cảnh báo và trạng thái
+thiết bị trên cùng một giao diện thống nhất.
 
 Kết quả đạt được là một hệ thống IoT giám sát phương tiện hoàn chỉnh từ
 phần cứng đến phần mềm, có khả năng theo dõi vị trí thời gian thực, đọc
 dữ liệu chẩn đoán OBD2, thiết lập hàng rào địa lý, phát sinh cảnh báo tự
-động, cập nhật firmware từ xa và hỗ trợ quản lý đội xe cho dịch vụ cho
-thuê xe tự lái.
+động, cập nhật firmware từ xa và hỗ trợ quản lý đội xe. Quan trọng hơn,
+hệ thống cho thấy một hướng triển khai phù hợp với bối cảnh doanh nghiệp
+cho thuê xe tự lái trong nước: chi phí hợp lý, có thể tùy biến và đủ dư
+địa để mở rộng trong các giai đoạn sau.
 
 \textbf{Từ khóa:} IoT, giám sát phương tiện, GPS, OBD2, MQTT, ESP32-S3,
 thời gian thực, hàng rào địa lý
@@ -816,9 +843,13 @@ Những năm gần đây, thị trường cho thuê xe tự lái tại Việt Na
 trưởng rõ rệt, đặc biệt tại TP. Hồ Chí Minh, Hà Nội và Đà Nẵng. Theo báo
 cáo ngành vận tải {[}1{]}, nhu cầu thuê xe tăng trung bình 15--20\% mỗi
 năm nhờ sự phục hồi của du lịch nội địa, nhu cầu di chuyển linh hoạt và
-xu hướng chia sẻ phương tiện. Khi quy mô đội xe mở rộng, áp lực giám sát
-vận hành và bảo toàn tài sản cũng tăng theo. Các doanh nghiệp cho thuê
-xe tự lái hiện nay phải đối mặt với nhiều vấn đề nghiêm trọng:
+xu hướng chia sẻ phương tiện. Với doanh nghiệp vận hành đội xe, tốc độ
+tăng trưởng này mang lại cơ hội kinh doanh nhưng cũng kéo theo một yêu
+cầu rất thực tế: phải biết xe đang ở đâu, đang được sử dụng như thế nào
+và có an toàn hay không mà không thể chỉ dựa vào các cuộc gọi xác nhận.
+Khi quy mô đội xe mở rộng, áp lực giám sát vận hành và bảo toàn tài sản
+tăng lên nhanh chóng. Trong thực tế, các doanh nghiệp cho thuê xe tự lái
+hiện nay thường gặp bốn nhóm khó khăn sau:
 
 \begin{itemize}
 \tightlist
@@ -849,30 +880,35 @@ xe tự lái hiện nay phải đối mặt với nhiều vấn đề nghiêm tr
 \subsubsection{1.1.2. Thách thức kỹ
 thuật}\label{112-thuxe1ch-thux1ee9c-kux1ef9-thuux1eadt}
 
-Không chỉ là bài toán kinh doanh, việc xây dựng một hệ thống IoT theo
-dõi phương tiện còn đặt ra nhiều thách thức kỹ thuật:
+Để giải quyết những khó khăn trên, hệ thống không thể chỉ là một thiết
+bị định vị đơn giản. Bài toán thực tế là phải dung hòa nhiều yêu cầu kỹ
+thuật vốn dễ xung đột với nhau: thiết bị phải tiết kiệm điện nhưng vẫn
+luôn sẵn sàng, phải truyền dữ liệu liên tục nhưng vẫn chịu được mất
+sóng, và phải đủ đơn giản để triển khai thực tế với chi phí hợp lý. Bốn
+thách thức nổi bật là:
 
-\textbf{Thứ nhất, bài toán tiêu thụ năng lượng.} Thiết bị theo dõi nếu
-hoạt động liên tục sẽ làm hao ắc quy xe trong vài tuần, từ đó ảnh hưởng
-trực tiếp đến khả năng khởi động {[}5{]}. Với xe cho thuê, đây là rủi ro
-không thể chấp nhận. Vì vậy, hệ thống phải có cơ chế quản lý năng lượng
-thông minh và chuyển đổi hợp lý giữa các chế độ lái xe, đỗ xe và cảnh
-báo.
+\textbf{Thứ nhất, bài toán tiêu thụ năng lượng.} Nếu thiết bị theo dõi
+hoạt động liên tục ở trạng thái công suất cao, ắc quy xe có thể bị hao
+đáng kể chỉ sau vài tuần, từ đó ảnh hưởng trực tiếp đến khả năng khởi
+động {[}5{]}. Vì vậy, hệ thống phải biết khi nào cần hoạt động đầy đủ và
+khi nào có thể chuyển sang chế độ tiết kiệm điện.
 
-\textbf{Thứ hai, giám sát khi xe đỗ.} Khi xe tắt máy (IGN OFF), hệ thống
-phải tiết kiệm điện nhưng vẫn phát hiện được các chuyển động bất thường,
-chẳng hạn xe bị dắt đi hoặc bị cẩu kéo. Đây là bài toán cân bằng giữa độ
-nhạy phát hiện và mức tiêu thụ năng lượng {[}6{]}.
+\textbf{Thứ hai, giám sát khi xe đỗ.} Khi xe tắt máy (IGN OFF), thiết bị
+không thể duy trì mọi khối chức năng như lúc xe đang chạy. Tuy nhiên,
+nó vẫn phải phát hiện được các chuyển động bất thường, chẳng hạn xe bị
+dắt đi hoặc bị cẩu kéo. Đây là bài toán cân bằng giữa độ nhạy phát hiện
+và mức tiêu thụ năng lượng {[}6{]}.
 
 \textbf{Thứ ba, độ tin cậy của kết nối.} Hệ thống hoạt động trong môi
-trường di động nên kết nối 4G/LTE có thể gián đoạn bất kỳ lúc nào. Thiết
-bị cần có cơ chế lưu đệm dữ liệu, xử lý mất kết nối và đồng bộ lại khi
-mạng được phục hồi.
+trường di động nên kết nối 4G/LTE có thể gián đoạn bất kỳ lúc nào. Điều
+người quản lý cần không chỉ là "có mạng thì gửi được", mà là khi mất
+mạng thiết bị vẫn không làm mất dữ liệu quan trọng và có thể đồng bộ lại
+khi kết nối được phục hồi.
 
 \textbf{Thứ tư, xử lý dữ liệu thời gian thực.} Khi số lượng xe tăng lên
-hàng chục hoặc hàng trăm, hệ thống backend phải xử lý liên tục luồng
-telemetry lớn gồm vị trí GPS, dữ liệu OBD2 và trạng thái cảm biến với độ
-trễ thấp, đồng thời vẫn bảo đảm giao diện giám sát trực quan cho người
+hàng chục hoặc hàng trăm, hệ thống backend phải tiếp nhận liên tục dữ
+liệu vị trí, thông số OBD2 và trạng thái cảm biến với độ trễ thấp, đồng
+thời vẫn giữ giao diện giám sát dễ quan sát và dễ thao tác cho người
 quản lý.
 
 {\thesissetfigureid{1.1}{fig-ch1-overview-problem-solution}
@@ -887,11 +923,15 @@ quản lý.
 \subsubsection{1.1.3. Động lực thực hiện dự
 án}\label{113-ux111ux1ed9ng-lux1ef1c-thux1ef1c-hiux1ec7n-dux1ef1-uxe1n}
 
-Từ những nhu cầu thực tiễn trên, dự án "IoT Vehicle Tracking System"
-được triển khai nhằm xây dựng một giải pháp đồng bộ, bao gồm thiết bị
-phần cứng IoT, firmware nhúng, hệ thống cloud và giao diện web. Mục tiêu
-là tạo ra một hệ thống có chi phí hợp lý, dễ tùy biến và có thể mở rộng
-theo quy mô doanh nghiệp cho thuê xe tự lái tại Việt Nam.
+Nói cách khác, mục tiêu của đề tài không chỉ là làm ra một thiết bị biết
+gửi tọa độ GPS. Điều cần xây dựng là một hệ thống đủ trọn vẹn để người
+vận hành đội xe có thể nhìn thấy trạng thái phương tiện, hiểu nguyên
+nhân của các cảnh báo và đưa ra quyết định kịp thời. Từ nhu cầu thực
+tiễn đó, dự án "IoT Vehicle Tracking System" được triển khai nhằm xây
+dựng một giải pháp đồng bộ, bao gồm thiết bị phần cứng IoT, firmware
+nhúng, hệ thống cloud và giao diện web. Mục tiêu là tạo ra một hệ thống
+có chi phí hợp lý, dễ tùy biến và có thể mở rộng theo quy mô doanh
+nghiệp cho thuê xe tự lái tại Việt Nam.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -903,8 +943,10 @@ quát}\label{121-mux1ee5c-tiuxeau-tux1ed5ng-quuxe1t}
 
 Mục tiêu chính của dự án là thiết kế và hiện thực một hệ thống IoT theo
 dõi phương tiện hoàn chỉnh, bao gồm cả phần cứng lẫn phần mềm, phục vụ
-cho bài toán quản lý đội xe cho thuê tự lái. Hệ thống cần đáp ứng các
-yêu cầu sau:
+cho bài toán quản lý đội xe cho thuê tự lái. Các mục tiêu dưới đây được
+xác định từ góc nhìn của đơn vị vận hành đội xe: họ cần thông tin đủ
+nhanh để can thiệp, nhưng cũng cần hệ thống đủ bền bỉ để chạy lâu dài
+trên xe. Hệ thống cần đáp ứng các yêu cầu sau:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -921,8 +963,8 @@ yêu cầu sau:
 \item
   \textbf{Cảnh báo thông minh}: Tự động phát hiện và gửi thông báo khi
   có các sự kiện bất thường như: xe vượt ra khỏi vùng địa lý cho phép
-  (geofencing), vượt tốc độ quy định, chuyển động bất thường khi xe đang
-  đỗ, hoặc mất kết nối thiết bị.
+  (hàng rào địa lý - geofencing), vượt tốc độ quy định, chuyển động bất
+  thường khi xe đang đỗ, hoặc mất kết nối thiết bị.
 \item
   \textbf{Tối ưu hóa năng lượng}: Đảm bảo thiết bị hoạt động liên tục mà
   không làm cạn ắc quy xe, với thời lượng pin dự phòng đủ để hoạt động
@@ -935,6 +977,12 @@ yêu cầu sau:
 
 \subsubsection{1.2.2. Phạm vi dự
 án}\label{122-phux1ea1m-vi-dux1ef1-uxe1n}
+
+Để đề tài không dàn trải, phạm vi nghiên cứu được giới hạn theo từng
+tầng của hệ thống, từ đối tượng ứng dụng đến phần cứng, firmware và
+cloud. Cách xác định phạm vi này giúp người đọc thấy rõ đâu là phần đã
+được triển khai trong đồ án và đâu là nội dung được giữ lại cho các giai
+đoạn phát triển sau.
 
 \textbf{Đối tượng ứng dụng:}
 
@@ -1052,10 +1100,19 @@ giám sát \\\hline
 án}\label{13-cuxe1c-tiuxeau-chuxed-cux1ea7n-ux111ux1ea1t-ux111ux1b0ux1ee3c-cux1ee7a-dux1ef1-uxe1n}
 
 Dự án đặt ra các tiêu chí cụ thể (success criteria) cho từng tầng của hệ
-thống, làm cơ sở để đánh giá mức độ hoàn thành:
+thống. Các tiêu chí này không chỉ dùng để đánh giá kết quả cuối cùng, mà
+còn đóng vai trò như một cam kết thiết kế xuyên suốt quá trình thực hiện:
+mỗi quyết định chọn linh kiện, tổ chức firmware hay xây dựng hạ tầng đều
+phải quay lại trả lời câu hỏi liệu nó có giúp hệ thống vận hành đủ ổn
+định, đủ tiết kiệm năng lượng và đủ hữu ích cho bài toán quản lý xe hay
+không.
 
 \subsubsection{1.3.1. Tiêu chí phần
 cứng}\label{131-tiuxeau-chuxed-phux1ea7n-cux1ee9ng}
+
+Ở tầng phần cứng, điều quan trọng nhất không phải là "gắn được nhiều khối
+chức năng", mà là thiết bị có thể tồn tại bền bỉ trong môi trường trên xe:
+đủ tiết kiệm điện, đủ ổn định về nhiệt và đủ an toàn với ắc quy.
 
 
 {\thesissettableid{1.3.1A}{tab-ch1-tong-hop-thong-tin-ve-stt-tieu-chi-muc-tieu-cu-the}
@@ -1085,6 +1142,10 @@ ON=12.2V; Profile 24V: OFF=24.0V, ON=24.4V \\\hline
 \subsubsection{1.3.2. Tiêu chí
 firmware}\label{132-tiuxeau-chuxed-firmware}
 
+Ở tầng firmware, tiêu chí không chỉ dừng ở việc đọc được cảm biến hay gửi
+được dữ liệu, mà nằm ở khả năng điều phối đúng nhịp giữa các khối để thiết
+bị phản ứng phù hợp với từng trạng thái vận hành của xe.
+
 
 {\thesissettableid{1.2A}{tab-ch1-tieu-chi-firmware}
 \def\LTcaptype{table}
@@ -1111,6 +1172,10 @@ cục bộ \\\hline
 \subsubsection{1.3.3. Tiêu chí
 cloud/backend}\label{133-tiuxeau-chuxed-cloudbackend}
 
+Khi chuyển lên cloud/backend, trọng tâm đánh giá đổi sang khả năng tiếp
+nhận dữ liệu liên tục, phản hồi nhanh và bảo vệ dữ liệu khi số lượng thiết
+bị tăng lên theo quy mô đội xe.
+
 
 {\thesissettableid{1.2B}{tab-ch1-tieu-chi-cloud-backend}
 \def\LTcaptype{table}
@@ -1124,17 +1189,22 @@ cloud/backend}\label{133-tiuxeau-chuxed-cloudbackend}
 \hline
 \endhead
 1 & Độ trễ xử lý MQTT message & \textless{} 500 ms (end-to-end) \\\hline
-2 & Số lượng thiết bị đồng thời & \textgreater= 100 thiết bị \\\hline
+2 & Số lượng thiết bị đồng thời & \textgreater= 50 thiết bị (đã kiểm thử), dư địa tới khoảng 100 thiết bị \\\hline
 3 & Độ sẵn sàng hệ thống (uptime) & \textgreater= 99.5\% \\\hline
 4 & Thời gian phản hồi API & \textless{} 200 ms (p95) \\\hline
 5 & Lưu trữ dữ liệu telemetry & \textgreater= 90 ngày \\\hline
-6 & Bảo mật xác thực & Session-based, SHA-256 hashed tokens \\\hline
+6 & Bảo mật xác thực & Phiên đăng nhập bằng opaque token lưu trong DB,
+token được băm SHA-256 \\\hline
 \end{longtable}
 }
 
 
 \subsubsection{1.3.4. Tiêu chí
 frontend}\label{134-tiuxeau-chuxed-frontend}
+
+Cuối cùng, frontend là nơi toàn bộ nỗ lực kỹ thuật được chuyển thành trải
+nghiệm quan sát và ra quyết định cho người vận hành, nên tiêu chí ở đây tập
+trung vào tính cập nhật, dễ theo dõi và dễ sử dụng trong bối cảnh thực tế.
 
 
 {\thesissettableid{1.2C}{tab-ch1-tieu-chi-frontend}
@@ -1164,39 +1234,48 @@ thuật}\label{14-phux1b0ux1a1ng-phuxe1p-tiux1ebfp-cux1eadn-thiux1ebft-kux1ebf-k
 \subsubsection{1.4.1. Phương pháp luận tổng
 thể}\label{141-phux1b0ux1a1ng-phuxe1p-luux1eadn-tux1ed5ng-thux1ec3}
 
-Dự án áp dụng phương pháp \textbf{thiết kế từ dưới lên (bottom-up
-design)} kết hợp \textbf{phát triển lặp (iterative development)}. Cách
-tiếp cận này cho phép kiểm chứng từng lớp kỹ thuật trước khi tích hợp
-toàn hệ thống. Cụ thể:
+Vì đề tài đi qua cả mạch nguồn, firmware nhúng, cloud lẫn dashboard, rủi
+ro lớn nhất không nằm ở việc từng khối chạy riêng lẻ, mà ở việc chúng có
+còn phối hợp đúng khi ghép thành một hệ thống hoàn chỉnh hay không. Từ
+đó, dự án chọn phương pháp \textbf{thiết kế từ dưới lên (bottom-up
+design)} kết hợp \textbf{phát triển lặp (iterative development)}: kiểm
+chứng trước những giả định rủi ro nhất ở tầng thấp, rồi mới ghép dần lên
+các tầng trên. Cách tiếp cận này giúp mỗi giai đoạn tạo ra một kết quả
+có thể đo và kiểm tra được, đồng thời giảm nguy cơ chỉ đến cuối dự án
+mới lộ ra xung đột về nguồn, giao tiếp hay hiệu năng. Cụ thể, tiến trình
+được tổ chức như sau:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Giai đoạn 1 --- Nghiên cứu và thiết kế phần cứng}: Khảo sát
-  các linh kiện sẵn có trên thị trường, lựa chọn dựa trên các tiêu chí
-  về hiệu năng, chi phí, và tính sẵn sàng. Thiết kế sơ đồ mạch, bố trí
-  linh kiện, và tính toán công suất.
+  \textbf{Giai đoạn 1 --- Nghiên cứu và thiết kế phần cứng}: Xây nền cho
+  hệ thống bằng cách khảo sát linh kiện, đối chiếu datasheet, thiết kế
+  sơ đồ nguyên lý và tính toán nguồn. Mục tiêu của giai đoạn này là bảo
+  đảm thiết bị có thể tồn tại bền bỉ trong môi trường trên xe trước khi
+  nói đến các tính năng ở tầng trên.
 \item
-  \textbf{Giai đoạn 2 --- Phát triển firmware}: Lập trình nhúng trên nền
-  tảng ESP-IDF, hiện thực các module giao tiếp (BLE OBD2, UART modem,
-  SPI/I2C IMU), quản lý năng lượng, và giao thức MQTT.
+  \textbf{Giai đoạn 2 --- Phát triển firmware}: Biến sơ đồ phần cứng
+  thành hành vi vận hành thật trên ESP-IDF, bao gồm giao tiếp BLE OBD2,
+  UART modem, I2C IMU, quản lý năng lượng và truyền dữ liệu MQTT. Đây là
+  giai đoạn quyết định thiết bị có ``phản ứng đúng lúc'' hay không.
 \item
-  \textbf{Giai đoạn 3 --- Xây dựng hạ tầng cloud}: Triển khai các dịch
-  vụ cơ sở hạ tầng (EMQX, PostgreSQL, VictoriaMetrics) bằng Docker,
-  thiết kế cơ sở dữ liệu, và cấu hình mạng.
+  \textbf{Giai đoạn 3 --- Xây dựng hạ tầng cloud}: Chuẩn bị lớp tiếp
+  nhận và lưu trữ dữ liệu bằng cách triển khai EMQX, PostgreSQL,
+  VictoriaMetrics và các dịch vụ phụ trợ trên Docker, đồng thời xác định
+  cấu trúc dữ liệu và kết nối mạng.
 \item
-  \textbf{Giai đoạn 4 --- Phát triển backend API}: Xây dựng REST API
-  theo kiến trúc Domain-Driven Design, hiện thực các domain (vehicles,
-  devices, telemetry, alerts, geofences), và tích hợp WebSocket cho dữ
-  liệu thời gian thực.
+  \textbf{Giai đoạn 4 --- Phát triển backend API}: Chuyển dữ liệu thô
+  thành nghiệp vụ có thể truy vấn và điều phối, thông qua REST API, xử
+  lý domain và kênh WebSocket thời gian thực.
 \item
-  \textbf{Giai đoạn 5 --- Phát triển frontend}: Xây dựng giao diện web
-  với Next.js 15, tích hợp bản đồ Leaflet, biểu đồ ECharts, và kết nối
-  WebSocket (Socket.IO) để hiển thị dữ liệu trực tuyến.
+  \textbf{Giai đoạn 5 --- Phát triển frontend}: Biến dữ liệu kỹ thuật
+  thành thông tin dễ đọc đối với người vận hành bằng dashboard web,
+  bản đồ trực tuyến và biểu đồ trực quan.
 \item
-  \textbf{Giai đoạn 6 --- Tích hợp và kiểm thử}: Tích hợp toàn hệ thống,
-  kiểm thử chức năng, kiểm thử hiệu năng, và tối ưu hóa.
+  \textbf{Giai đoạn 6 --- Tích hợp và kiểm thử}: Ghép toàn bộ các lớp
+  lại thành một chuỗi hoàn chỉnh từ xe đến dashboard, sau đó kiểm thử,
+  đo đạc và tối ưu những điểm còn nghẽn.
 \end{enumerate}
 
 {\thesissetfigureid{1.2}{fig-ch1-project-development-phases}
@@ -1211,14 +1290,18 @@ toàn hệ thống. Cụ thể:
 \subsubsection{1.4.2. Kiến trúc hệ
 thống}\label{142-kiux1ebfn-truxfac-hux1ec7-thux1ed1ng}
 
-Hệ thống được thiết kế theo kiến trúc phân tầng (layered architecture)
-nhằm tách biệt rõ vai trò của từng lớp chức năng và giảm phụ thuộc chéo
-khi tích hợp. Kiến trúc triển khai thực tế gồm lớp thiết bị tracker
+Nhìn theo hành trình của một bản tin, hệ thống khởi đầu ở thiết bị gắn
+trên xe, đi qua lớp tiếp nhận dữ liệu thời gian thực trên cloud, rồi mới
+đến lớp nghiệp vụ và lớp giao diện cho người quản lý. Góc nhìn này giúp
+lý giải tự nhiên vì sao kiến trúc được tổ chức theo dạng phân tầng
+(layered architecture): thiết bị thu thập và gửi dữ liệu; lớp trung gian
+tiếp nhận, phân luồng và lưu trữ; lớp ứng dụng phân tích, quản lý và
+trình bày thông tin cho người dùng. Trong triển khai thực tế, tracker
 (ESP32-S3, SIM7600CE-T, LIS3DSH, vgate iCar Pro) kết nối MQTT lên EMQX;
 MQTT Bridge tiếp nhận và phân luồng dữ liệu sang VictoriaMetrics,
-VictoriaLogs và Backend API; lớp ứng dụng phía trên phục vụ dashboard
-web Next.js và hệ quan trắc Grafana. Ứng dụng di động được giữ ở phạm vi
-phát triển giai đoạn sau.
+VictoriaLogs và Backend API; lớp ứng dụng phía trên phục vụ dashboard web
+Next.js và hệ quan trắc Grafana. Ứng dụng di động được giữ ở phạm vi phát
+triển giai đoạn sau để tránh làm dàn trải đồ án.
 
 {\thesissetfigureid{1.3}{fig-ch1-system-architecture-overview}
 \begin{figure}[htbp]
@@ -1231,31 +1314,43 @@ phát triển giai đoạn sau.
 
 \textbf{Chiến lược dữ liệu (Data Strategy):}
 
-Hệ thống áp dụng chiến lược tách biệt dữ liệu theo đặc tính:
+Chiến lược dữ liệu được xây theo cùng logic phân tầng này. Lý do là dữ liệu
+trong hệ thống không đồng nhất: có loại cần tính nhất quán và quan hệ
+chặt chẽ, có loại cần ghi liên tục với tần suất cao, và có loại chủ yếu
+phục vụ truy vết sự cố. Vì vậy, mỗi nhóm dữ liệu được đưa về đúng nơi
+phù hợp với đặc tính truy vấn và mục đích sử dụng.
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{PostgreSQL}: Lưu trữ dữ liệu quan hệ có cấu trúc --- thông tin
-  người dùng, xe, khách hàng, hành trình, cảnh báo, vùng địa lý
-  (geofences), lệnh điều khiển.
+  \textbf{PostgreSQL}: Lưu trữ dữ liệu quan hệ có cấu trúc như người
+  dùng, xe, khách hàng, hành trình, cảnh báo, vùng địa lý
+  (geofences) và lệnh điều khiển. Đây là lớp dữ liệu cần quan hệ rõ
+  ràng và ràng buộc chặt chẽ.
 \item
   \textbf{VictoriaMetrics}: Lưu trữ dữ liệu chuỗi thời gian
-  (time-series) --- tọa độ GPS, dữ liệu OBD2, chỉ số cảm biến, với khả
-  năng truy vấn nhanh và lưu trữ dài hạn hiệu quả.
+  (time-series) như tọa độ GPS, dữ liệu OBD2 và chỉ số cảm biến. Nhóm
+  dữ liệu này cần ghi nhiều, đọc nhanh theo trục thời gian và lưu dài
+  hạn với chi phí hợp lý.
 \item
-  \textbf{VictoriaLogs}: Lưu trữ nhật ký sự kiện, audit trail, và các
-  bản ghi hoạt động của thiết bị.
+  \textbf{VictoriaLogs}: Lưu trữ nhật ký sự kiện, audit trail và các bản
+  ghi hoạt động của thiết bị để phục vụ quan sát hệ thống và truy vết sự
+  cố.
 \end{itemize}
 
 \subsubsection{1.4.3. Chiến lược quản lý năng
 lượng}\label{143-chiux1ebfn-lux1b0ux1ee3c-quux1ea3n-luxfd-nux103ng-lux1b0ux1ee3ng}
 
-Một trong những điểm thiết kế trọng tâm của dự án là chiến lược quản lý
-năng lượng đa chế độ (multi-mode power management), được xây dựng để xử
-lý trực tiếp bài toán tiêu thụ ắc quy xe:
+Thiết kế năng lượng của tracker thực chất là bài toán quyết định lúc nào
+thiết bị cần hoạt động đầy đủ, lúc nào chỉ nên ``canh chừng'', và lúc nào
+phải ưu tiên bảo vệ nguồn xe. Nếu xử lý không khéo, hệ thống sẽ rơi vào
+hai cực đoan: theo dõi rất sát nhưng làm hao ắc quy, hoặc tiết kiệm điện
+quá mức nên bỏ lỡ sự kiện quan trọng. Vì vậy, chiến lược quản lý năng
+lượng đa chế độ (multi-mode power management) được xây quanh các trạng
+thái vận hành thật của xe, để mỗi thời điểm chỉ bật những khối thật sự
+cần thiết:
 
-\textbf{Chế độ 1 --- Driving Mode (IGN ON):}
+\textbf{Chế độ 1 --- Driving Mode (IGN ON, ưu tiên độ đầy đủ dữ liệu):}
 
 \begin{itemize}
 \tightlist
@@ -1269,7 +1364,7 @@ lý trực tiếp bài toán tiêu thụ ắc quy xe:
   Kết nối server liên tục để theo dõi thời gian thực
 \end{itemize}
 
-\textbf{Chế độ 2 --- Parking Mode (IGN OFF, không chuyển động):}
+\textbf{Chế độ 2 --- Parking Mode (IGN OFF, ưu tiên bảo toàn năng lượng):}
 
 \begin{itemize}
 \tightlist
@@ -1283,7 +1378,7 @@ lý trực tiếp bài toán tiêu thụ ắc quy xe:
   IMU (LIS3DSH) hoạt động độc lập, cảnh rung ở ngưỡng đã cấu hình
 \end{itemize}
 
-\textbf{Chế độ 3 --- Alert Mode (phát hiện chuyển động bất thường):}
+\textbf{Chế độ 3 --- Alert Mode (ưu tiên phản ứng nhanh khi có sự cố):}
 
 \begin{itemize}
 \tightlist
@@ -1297,11 +1392,16 @@ lý trực tiếp bài toán tiêu thụ ắc quy xe:
   Sử dụng pin dự phòng nếu nguồn chính bị cắt
 \end{itemize}
 
-Hệ thống còn bao gồm mạch chuyển nguồn dự phòng với cơ chế hysteresis để
-tự động chuyển sang pin dự phòng khi điện áp ắc quy tụt xuống dưới
-ngưỡng an toàn theo profile: 12V dùng Switch\_OFF=12.0V,
-Switch\_ON=12.2V; 24V dùng Switch\_OFF=24.0V, Switch\_ON=24.4V, bảo vệ
-ắc quy không bị rút cạn quá mức {[}7{]}.
+Bên cạnh đó, hệ thống còn có mạch chuyển nguồn dự phòng với cơ chế
+hysteresis để tránh đóng/ngắt liên tục khi điện áp dao động quanh ngưỡng.
+Thiết bị tự động chuyển sang pin dự phòng khi điện áp ắc quy tụt xuống
+dưới mức an toàn theo từng profile: 12V dùng
+Switch\_OFF=12.0V, Switch\_ON=12.2V; 24V dùng
+Switch\_OFF=24.0V, Switch\_ON=24.4V, qua đó bảo vệ ắc quy không bị rút
+cạn quá mức {[}7{]}.
+
+Nhờ cách tổ chức này, năng lượng không còn là bài toán tối ưu từng linh
+kiện riêng lẻ, mà trở thành một phần của logic vận hành toàn hệ thống.
 
 {\thesissetfigureid{1.4}{fig-ch1-power-mode-transitions}
 \begin{figure}[htbp]
@@ -1358,7 +1458,10 @@ nghị}\label{15-kux1ebft-quux1ea3-vuxe0-khuyux1ebfn-nghux1ecb}
 \subsubsection{1.5.1. Kết quả đạt
 được}\label{151-kux1ebft-quux1ea3-ux111ux1ea1t-ux111ux1b0ux1ee3c}
 
-Dự án đã đạt được các kết quả chính sau:
+Nhìn theo cách đó, các kết quả đạt được không nên hiểu như một danh sách
+các khối đã lắp xong, mà như bằng chứng cho thấy chuỗi giá trị từ thiết
+bị đến dashboard đã được hình thành. Có thể tóm lược theo bốn tầng chính
+như sau:
 
 \textbf{Về phần cứng:}
 
@@ -1410,8 +1513,9 @@ Dự án đã đạt được các kết quả chính sau:
   Design, cung cấp các endpoint quản lý xe, thiết bị, telemetry, cảnh
   báo, geofences, và xác thực người dùng.
 \item
-  Hệ thống xử lý được \textgreater= 100 thiết bị đồng thời với độ trễ
-  end-to-end \textless{} 500 ms.
+  Hệ thống đã kiểm thử ở mức 50+ thiết bị đồng thời với độ trễ
+  end-to-end \textless{} 500 ms, đồng thời cho thấy còn dư địa mở rộng
+  ổn định tới khoảng 100 thiết bị.
 \end{itemize}
 
 \textbf{Về frontend:}
@@ -1430,8 +1534,9 @@ Dự án đã đạt được các kết quả chính sau:
 \subsubsection{1.5.2. Khuyến nghị và hướng phát
 triển}\label{152-khuyux1ebfn-nghux1ecb-vuxe0-hux1b0ux1edbng-phuxe1t-triux1ec3n}
 
-Trên cơ sở các kết quả đã đạt được và các giới hạn hiện hữu, dự án đề
-xuất các hướng phát triển tiếp theo:
+Trên cơ sở các kết quả đã đạt được và các giới hạn hiện hữu, các hướng phát
+triển tiếp theo được sắp theo logic mở rộng từ việc làm chắc hệ lõi đến
+việc mở rộng giá trị sử dụng của hệ thống:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -1481,14 +1586,23 @@ xuất các hướng phát triển tiếp theo:
 \subsection{Kết luận chương
 1}\label{kux1ebft-luux1eadn-chux1b0ux1a1ng-1}
 
-Chương 1 đã làm rõ bối cảnh hình thành đề tài, động lực triển khai và
-các thách thức kỹ thuật cốt lõi của bài toán quản lý đội xe tự lái tại
-Việt Nam. Trên cơ sở đó, chương đã xác định mục tiêu, phạm vi, phương
-pháp tiếp cận và bộ tiêu chí đánh giá làm nền tảng cho các chương tiếp
-theo. Từ đây, Chương 2 sẽ đi sâu phân tích các vấn đề kỹ thuật cần giải
-quyết.
+Chương 1 đã trả lời câu hỏi vì sao đề tài này cần được thực hiện và hệ
+thống cần đạt được điều gì trong bối cảnh thực tế của doanh nghiệp cho
+thuê xe tự lái. Từ bối cảnh thị trường, nhu cầu vận hành đến các thách
+thức về năng lượng, kết nối và dữ liệu, chương đã thiết lập bộ mục tiêu,
+phạm vi và tiêu chí đánh giá cho toàn bộ đồ án. Nếu Chương 1 là phần
+đặt vấn đề, thì Chương 2 sẽ chuyển sang câu hỏi quan trọng hơn: cần giải
+quyết chính xác những bài toán kỹ thuật nào để biến mục tiêu đó thành
+một hệ thống khả thi.
 
 \chapterheading{CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT}
+
+Nếu Chương 1 đặt ra bối cảnh và mục tiêu của đề tài, thì Chương 2 đi
+sâu vào phần cốt lõi hơn: bóc tách bài toán kỹ thuật thật sự của hệ
+thống. Trọng tâm của chương không chỉ là liệt kê công nghệ, mà là làm rõ
+vì sao mỗi quyết định về phần cứng, truyền thông, lưu trữ và kiến trúc
+đều phải xuất phát từ nhu cầu vận hành thực tế của một hệ thống giám sát
+phương tiện.
 
 \subsection{2.1. Mô tả vấn đề -- Problem
 statement}\label{21-muxf4-tux1ea3-vux1ea5n-ux111ux1ec1--problem-statement}
@@ -1501,10 +1615,11 @@ tục mở rộng, nhu cầu giám sát phương tiện theo thời gian thực 
 thành yêu cầu thiết yếu đối với doanh nghiệp vận tải. Theo thống kê của
 Bộ Giao thông Vận tải, số lượng ô tô cá nhân và thương mại tăng trung
 bình 10--12\% mỗi năm trong giai đoạn 2020--2025, kéo theo áp lực ngày
-càng lớn về quản lý, an ninh và tối ưu vận hành {[}1{]}. Tuy nhiên, phần
-lớn doanh nghiệp cho thuê xe và quản lý đội xe tại Việt Nam vẫn dựa vào
-các phương thức giám sát thủ công hoặc bán tự động, dẫn đến nhiều hạn
-chế:
+càng lớn về quản lý, an ninh và tối ưu vận hành {[}1{]}. Tuy nhiên, điều
+doanh nghiệp cần không chỉ là dữ liệu vị trí rời rạc, mà là khả năng
+nhìn thấy trạng thái phương tiện đủ sớm để đưa ra quyết định vận hành.
+Khoảng cách giữa nhu cầu này và cách làm hiện tại thể hiện ở các hạn chế
+sau:
 
 \begin{itemize}
 \tightlist
@@ -1528,9 +1643,9 @@ chế:
 \subsubsection{2.1.2. Xác định vấn đề kỹ
 thuật}\label{212-xuxe1c-ux111ux1ecbnh-vux1ea5n-ux111ux1ec1-kux1ef9-thuux1eadt}
 
-Từ bối cảnh thực tiễn đó, đề tài tập trung vào bài toán thiết kế và xây
-dựng hệ thống IoT giám sát phương tiện với các vấn đề kỹ thuật cốt lõi
-sau:
+Từ bối cảnh thực tiễn đó, bài toán của đề tài có thể quy về bốn câu hỏi
+kỹ thuật nền tảng. Đây cũng là bốn câu hỏi chi phối gần như mọi quyết
+định ở các chương sau, từ lựa chọn phần cứng đến thiết kế cloud:
 
 \textbf{Vấn đề 1: Quản lý năng lượng trong môi trường ô tô}
 
@@ -1538,15 +1653,18 @@ Thiết bị theo dõi phải hoạt động liên tục 24/7 trong môi trườ
 nơi nguồn điện luôn bị ràng buộc bởi dung lượng ắc quy. Khi xe tắt máy
 (IGN OFF), thiết bị vẫn lấy điện từ ắc quy 12V hoặc 24V của xe; nếu duy
 trì chế độ theo dõi liên tục, ắc quy có thể cạn sau vài tuần và làm xe
-không khởi động được {[}2{]}. Đây là thách thức lớn của các hệ thống GPS
-tracker hiện nay.
+không khởi động được {[}2{]}. Vì vậy, câu hỏi không đơn thuần là "thiết
+bị có hoạt động được không", mà là "thiết bị có hoạt động đủ thông minh
+để không gây phiền toái cho chính chiếc xe mà nó đang giám sát hay
+không".
 
 \textbf{Vấn đề 2: Giám sát khi xe đậu}
 
 Khi xe tắt máy, hệ thống cần tiết kiệm điện nhưng vẫn phát hiện được các
 chuyển động bất thường như bị trộm hoặc bị kéo cẩu. Vì vậy, thiết bị
 phải có cơ chế đánh thức nhanh khi phát hiện sự kiện, đồng thời duy trì
-dòng tiêu thụ ở mức rất thấp.
+dòng tiêu thụ ở mức rất thấp. Nói cách khác, khi xe "im lặng" thì thiết
+bị cũng phải "ngủ", nhưng vẫn phải tỉnh dậy đủ nhanh khi có sự cố.
 
 \textbf{Vấn đề 3: Truyền dữ liệu qua mạng di động}
 
@@ -1554,39 +1672,45 @@ Hệ thống phải truyền liên tục dữ liệu GPS và OBD2 qua mạng 4G/
 trễ thấp, đồng thời duy trì cơ chế reconnect ổn định khi mất sóng. Bên
 cạnh đó, kiến trúc truyền thông cũng cần chừa dư địa để bổ sung lưu đệm
 cục bộ nếu triển khai ở quy mô lớn hơn. Việc lựa chọn giao thức phù hợp
-như MQTT, HTTP hay CoAP ảnh hưởng trực tiếp đến hiệu suất và độ tin cậy
-toàn hệ thống.
+như MQTT, HTTP hay CoAP không chỉ là quyết định công nghệ, mà còn ảnh
+hưởng trực tiếp đến hiệu suất và độ tin cậy toàn hệ thống.
 
 \textbf{Vấn đề 4: Kiến trúc đám mây có khả năng mở rộng}
 
 Hệ thống cần hỗ trợ nhiều phương tiện đồng thời, cập nhật vị trí theo
 thời gian thực qua WebSocket, bảo đảm an toàn thông qua xác thực phiên
-và xử lý được luồng dữ liệu lớn đến từ nhiều thiết bị IoT.
+và xử lý được luồng dữ liệu lớn đến từ nhiều thiết bị IoT. Với người sử
+dụng cuối, điều này được cảm nhận rất đơn giản: bản đồ phải cập nhật kịp
+thời, cảnh báo phải đến đúng lúc, và dữ liệu phải nhất quán ngay cả khi
+số lượng xe tăng lên.
 
 \subsubsection{2.1.3. Mục tiêu kỹ
 thuật}\label{213-mux1ee5c-tiuxeau-kux1ef9-thuux1eadt}
 
-Từ các vấn đề trên, đề tài đặt ra các mục tiêu kỹ thuật cụ thể như sau:
+Từ bốn vấn đề nền tảng trên, đồ án rút ra bốn nhóm mục tiêu kỹ thuật.
+Mỗi nhóm vừa trả lời một nhu cầu vận hành cụ thể của doanh nghiệp cho
+thuê xe, vừa trở thành tiêu chí để sàng lọc và lựa chọn giải pháp ở
+Chương 3:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Thiết kế thiết bị tracker tích hợp GPS/GNSS và OBD2 dựa trên vi điều
-  khiển ESP32-S3, tối ưu tiêu thụ năng lượng khi xe đậu (mục tiêu dòng
-  deep sleep toàn thiết bị dưới 500 µA trong phiên bản phần cứng hiện
-  tại và tiếp tục giảm ở các vòng tối ưu PCB tiếp theo).
+  Thiết kế thiết bị tracker tích hợp GNSS và OBD2 dựa trên vi điều khiển
+  ESP32-S3, đồng thời tối ưu tiêu thụ năng lượng khi xe đậu
+  (mục tiêu dòng deep sleep toàn thiết bị dưới 500 µA trong phiên bản
+  phần cứng hiện tại và tiếp tục giảm ở các vòng tối ưu PCB tiếp theo).
 \item
-  Xây dựng hệ thống quản lý năng lượng thông minh với pin dự phòng, cơ
-  chế Low Voltage Disconnect (LVD) bảo vệ ắc quy xe.
+  Xây dựng cơ chế quản lý nguồn thông minh với pin dự phòng và mạch Low
+  Voltage Disconnect (LVD) để thiết bị bám được trạng thái xe nhưng không
+  làm ảnh hưởng đến khả năng khởi động của phương tiện.
 \item
-  Thiết kế kiến trúc truyền thông sử dụng giao thức MQTT qua mạng
-  4G/LTE, ưu tiên tự phục hồi kết nối và sẵn sàng mở rộng với cơ chế lưu
-  trữ tạm khi mất mạng kéo dài.
+  Thiết kế đường truyền dữ liệu sử dụng MQTT qua mạng 4G/LTE, ưu tiên tự
+  phục hồi kết nối và chừa sẵn phương án lưu đệm khi mất mạng kéo dài.
 \item
-  Phát triển nền tảng đám mây (cloud platform) với khả năng mở rộng, bao
-  gồm API server, cơ sở dữ liệu quan hệ và chuỗi thời gian
-  (time-series), giao diện web theo dõi thời gian thực.
+  Phát triển nền tảng đám mây có khả năng mở rộng, bao gồm API server,
+  cơ sở dữ liệu quan hệ, cơ sở dữ liệu chuỗi thời gian và giao diện web
+  theo dõi thời gian thực.
 \end{enumerate}
 
 \subsection{2.2. Bối cảnh và cơ sở kỹ thuật -- Background and Technical
@@ -1596,9 +1720,11 @@ reviews}\label{22-bux1ed1i-cux1ea3nh-vuxe0-cux1a1-sux1edf-kux1ef9-thuux1eadt--ba
 tiện}\label{221-tux1ed5ng-quan-vux1ec1-hux1ec7-thux1ed1ng-iot-trong-giuxe1m-suxe1t-phux1b0ux1a1ng-tiux1ec7n}
 
 Internet of Things (IoT) là mô hình cho phép các thiết bị vật lý kết nối
-với nhau và với hạ tầng đám mây thông qua Internet. Trong bài toán giám
-sát phương tiện, hệ thống IoT thường được tổ chức thành ba lớp chính
-{[}3{]}:
+với nhau và với hạ tầng đám mây thông qua Internet. Ở góc nhìn đơn giản,
+một hệ thống IoT giám sát phương tiện luôn phải đi qua ba bước: thu dữ
+liệu trên xe, truyền dữ liệu lên mạng, rồi biến dữ liệu đó thành thông
+tin mà người quản lý có thể đọc và hành động. Tương ứng với ba bước đó,
+hệ thống thường được tổ chức thành ba lớp chính {[}3{]}:
 
 \begin{itemize}
 \tightlist
@@ -1619,10 +1745,11 @@ sát phương tiện, hệ thống IoT thường được tổ chức thành ba 
 
 Trong triển khai của đề tài, kiến trúc ba lớp trên được bổ sung thêm một
 lớp đệm dữ liệu cục bộ tại thiết bị bằng \textbf{microSD SDMMC 4-bit +
-FATFS}. Lớp đệm này tiếp nhận telemetry khi mạng 4G/LTE gián đoạn, sau
-đó phát lại (replay) theo thứ tự bản ghi khi kết nối phục hồi. Cách tổ
-chức này tăng độ liên tục dữ liệu trong vận hành thực tế mà không làm
-thay đổi kiến trúc cloud ở tầng trên.
+FATFS}. Có thể hình dung lớp này như một "vùng nhớ chờ", dùng để giữ lại
+dữ liệu telemetry khi mạng 4G/LTE gián đoạn, sau đó phát lại (replay)
+theo đúng thứ tự khi kết nối phục hồi. Cách tổ chức này giúp tăng độ
+liên tục dữ liệu trong vận hành thực tế mà không làm thay đổi kiến trúc
+cloud ở tầng trên.
 
 \subsubsection{2.2.2. Các giải pháp giám sát phương tiện hiện
 có}\label{222-cuxe1c-giux1ea3i-phuxe1p-giuxe1m-suxe1t-phux1b0ux1a1ng-tiux1ec7n-hiux1ec7n-cuxf3}
@@ -1641,7 +1768,7 @@ thương mại} & \textbf{Hệ thống đề xuất} \\
 \hline
 \endhead
 Chi phí thiết bị & Không & 500.000--1.500.000 VND & 1.000.000--5.000.000
-VND & 870.000--1.630.000 VND \\\hline
+VND & 1.514.000 VND \\\hline
 Phí dịch vụ hàng tháng & Không & 50.000--100.000 VND & 200.000--500.000
 VND & Chi phí 4G SIM (~70.000 VND) \\\hline
 Độ chính xác vị trí & Thấp (báo cáo thủ công) & Trung bình (GPS) & Cao
@@ -1668,9 +1795,10 @@ hướng lựa chọn phù hợp hơn về cả kỹ thuật lẫn chi phí vậ
 \subsubsection{2.2.3. So sánh giao thức truyền thông
 IoT}\label{223-so-suxe1nh-giao-thux1ee9c-truyux1ec1n-thuxf4ng-iot}
 
-Việc lựa chọn giao thức truyền thông là một quyết định kỹ thuật trọng
-yếu vì tác động trực tiếp đến hiệu suất, độ tin cậy và mức tiêu thụ năng
-lượng của toàn hệ thống {[}4{]}.
+Việc lựa chọn giao thức truyền thông không thể chỉ hiểu là chọn một
+``chuẩn phổ biến''. Với hệ thống theo dõi phương tiện, đây là quyết định
+chi phối trực tiếp lượng dữ liệu phải truyền, khả năng chịu mất sóng và
+cách backend mở rộng về sau {[}4{]}.
 
 {\thesissettableid{2.2}{tab-ch2-iot-communication-protocols}
 \def\LTcaptype{table}
@@ -1698,8 +1826,11 @@ Hỗ trợ EMQX Broker & Có (native) & Có (qua plugin) & Hạn chế \\\hline
 \end{longtable}
 }
 
-\textbf{Phân tích lựa chọn:} Giao thức MQTT được lựa chọn cho hệ thống
-này vì các lý do sau:
+\textbf{Phân tích lựa chọn:} Kết quả so sánh cho thấy MQTT phù hợp hơn
+không phải vì nó ``cao cấp'' hơn HTTP hay CoAP, mà vì cách nó trao đổi
+dữ liệu gần với nhịp vận hành của hệ thống: thiết bị gửi nhiều bản tin
+nhỏ qua mạng di động không phải lúc nào cũng ổn định, đồng thời đôi lúc
+cần nhận lệnh ngược từ server. Cụ thể:
 
 \begin{itemize}
 \tightlist
@@ -1707,17 +1838,20 @@ này vì các lý do sau:
   \textbf{Overhead thấp}: Header tối thiểu 2 bytes, giảm băng thông và
   tiết kiệm năng lượng cho thiết bị IoT chạy bằng pin.
 \item
-  \textbf{Mô hình Publish/Subscribe}: Cho phép nhiều subscriber nhận dữ
-  liệu đồng thời mà không tăng tải cho thiết bị gửi. Phù hợp với kiến
-  trúc đa client (web dashboard, mobile app, dịch vụ xử lý dữ liệu).
+  \textbf{Mô hình Publish/Subscribe}: Cho phép nhiều thành phần nhận dữ
+  liệu cùng lúc mà không làm thiết bị trên xe phải gửi lặp đi lặp lại
+  cho từng nơi nhận. Điều này phù hợp với kiến trúc có dashboard, dịch
+  vụ xử lý và các kênh cảnh báo cùng khai thác một nguồn dữ liệu.
 \item
-  \textbf{QoS linh hoạt}: QoS 0 cho dữ liệu telemetry tần suất cao (vị
-  trí GPS), QoS 1 cho cảnh báo và lệnh điều khiển, đảm bảo tin nhắn được
-  gửi ít nhất một lần.
+  \textbf{QoS linh hoạt}: Hệ thống không cần mọi bản tin đều được bảo
+  đảm ở cùng một mức. QoS 0 phù hợp với dữ liệu telemetry tần suất cao
+  như vị trí GPS, trong khi QoS 1 phù hợp hơn với cảnh báo và lệnh điều
+  khiển vì các bản tin này cần được đảm bảo tới nơi ít nhất một lần.
 \item
-  \textbf{Retain Message và Last Will}: Hỗ trợ lưu trữ tin nhắn cuối
-  cùng và thông báo tự động khi thiết bị mất kết nối, rất hữu ích cho
-  việc giám sát trạng thái online/offline của tracker.
+  \textbf{Retain Message và Last Will}: Hai cơ chế này giúp hệ thống
+  phản ánh trạng thái online/offline của thiết bị rõ ràng hơn, từ đó
+  người vận hành có thể phân biệt giữa "xe không có dữ liệu mới" và
+  "thiết bị vừa mất kết nối".
 \end{itemize}
 
 \subsubsection{2.2.4. So sánh vi điều khiển
@@ -1750,8 +1884,11 @@ Cộng đồng hỗ trợ & Rất lớn & Lớn & Rất lớn \\\hline
 \end{longtable}
 }
 
-\textbf{Phân tích lựa chọn:} ESP32-S3 được lựa chọn làm vi điều khiển
-chính vì:
+\textbf{Phân tích lựa chọn:} Nếu chỉ nhìn riêng thông số low-power,
+STM32L4 có lợi thế đáng kể. Tuy nhiên, khi đặt vào bối cảnh toàn hệ
+thống - nơi thiết bị phải đồng thời xử lý BLE OBD2, modem, IMU và logic
+trạng thái - ESP32-S3 cho thấy điểm cân bằng tốt hơn giữa tích hợp, chi
+phí và độ phức tạp triển khai. Các lý do chính là:
 
 \begin{itemize}
 \tightlist
@@ -1765,13 +1902,14 @@ chính vì:
 \item
   \textbf{Hệ sinh thái phát triển phong phú}: Hỗ trợ ESP-IDF (chính
   thức) và Arduino framework, cộng đồng lớn, nhiều thư viện có sẵn cho
-  MQTT, BLE, GNSS.
+  MQTT, BLE, GNSS. Điều này làm giảm đáng kể thời gian thử sai khi hiện
+  thực đồ án.
 \item
   \textbf{Deep sleep 10--15 µA ở mức MCU}: Mặc dù cao hơn STM32L4 (1--2
   µA), mức này vẫn là nền tảng phù hợp cho một thiết kế low-power. Trong
   hệ thống hoàn chỉnh, dòng ngủ sâu còn phụ thuộc mạch nguồn, cảm biến
-  và linh kiện phụ trợ; do đó giá trị đo trên toàn thiết bị sẽ cao hơn
-  thông số riêng của vi điều khiển.
+  và linh kiện phụ trợ, nên chênh lệch ở mức riêng MCU không phải là yếu
+  tố duy nhất quyết định tuổi thọ pin toàn thiết bị.
 \end{itemize}
 
 \subsubsection{2.2.5. So sánh cơ sở dữ
@@ -1808,16 +1946,20 @@ khác nhau) & Thấp (1 hệ thống) \\\hline
 \end{longtable}
 }
 
-\textbf{Phân tích lựa chọn:} Sự kết hợp PostgreSQL + VictoriaMetrics
-được chọn vì:
+\textbf{Phân tích lựa chọn:} Với hệ thống này, không phải mọi dữ liệu
+đều giống nhau. Thông tin người dùng, phương tiện hay hành trình cần cấu
+trúc quan hệ chặt chẽ; trong khi dữ liệu vị trí và cảm biến lại là dữ
+liệu biến đổi liên tục theo thời gian. Vì vậy, sự kết hợp PostgreSQL +
+VictoriaMetrics được chọn vì:
 
 \begin{itemize}
 \tightlist
 \item
   \textbf{Phân tách trách nhiệm rõ ràng}: PostgreSQL xử lý dữ liệu quan
-  hệ (người dùng, phương tiện, cảnh báo, geofence), VictoriaMetrics xử
-  lý dữ liệu chuỗi thời gian (tọa độ GPS, dữ liệu OBD2, telemetry cảm
-  biến). Mỗi hệ thống được tối ưu cho loại dữ liệu của mình.
+  hệ như người dùng, phương tiện, cảnh báo và geofence; VictoriaMetrics
+  xử lý dữ liệu chuỗi thời gian như tọa độ GPS, dữ liệu OBD2 và telemetry
+  cảm biến. Mỗi hệ thống làm tốt phần việc mà nó được thiết kế để phục
+  vụ.
 \item
   \textbf{Hiệu suất và tài nguyên}: VictoriaMetrics có tỷ lệ nén dữ liệu
   rất cao (10--70x) và tiêu thụ ít RAM hơn InfluxDB, phù hợp với server
@@ -1844,7 +1986,10 @@ Constraints}\label{23-yuxeau-cux1ea7u-kux1ef9-thuux1eadt-vuxe0-cuxe1c-tiuxeau-ch
 \subsubsection{2.3.1. Yêu cầu chức
 năng}\label{231-yuxeau-cux1ea7u-chux1ee9c-nux103ng}
 
-Hệ thống cần đáp ứng các yêu cầu chức năng sau:
+Những yêu cầu chức năng dưới đây đánh dấu bước chuyển từ ``bài toán''
+sang ``năng lực hệ thống''. Có thể xem chúng như năm lời hứa vận hành tối
+thiểu mà hệ thống phải thực hiện được để người quản lý thật sự dùng được
+trong bối cảnh đội xe vận hành ngoài thực tế.
 
 \textbf{FC-01: Theo dõi vị trí thời gian thực}
 
@@ -1867,7 +2012,7 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 \item
   Đọc trạng thái IGN (bật/tắt máy), RPM, tốc độ, nhiên liệu
 \item
-  Tần suất đọc: 1--5 giây khi xe chạy
+  Tần suất đọc: 5--30 giây khi xe chạy (mặc định 5 giây)
 \end{itemize}
 
 \textbf{FC-03: Phát hiện bất thường khi đậu xe}
@@ -1893,8 +2038,8 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
   Pin dự phòng tự động tiếp quản theo profile nguồn: hệ 12V tại ngưỡng
   Switch\_OFF=12.0V, hệ 24V tại ngưỡng Switch\_OFF=24.0V
 \item
-  Mạch chuyển nguồn dự phòng bảo vệ ắc quy không bị rút cạn: profile 12V
-  chuyển tại Switch\_OFF=12.0V, profile 24V chuyển tại Switch\_OFF=24.0V
+  Có phương án dự phòng suy luận trạng thái IGN qua ADC khi kết nối OBD2
+  BLE không sẵn sàng
 \end{itemize}
 
 \textbf{FC-05: Giao diện web giám sát}
@@ -1911,8 +2056,19 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
   Quản lý phương tiện, tài xế, khách hàng, hành trình
 \end{itemize}
 
+Năm nhóm chức năng trên bao quát trọn chuỗi nhu cầu cốt lõi của hệ
+thống: biết xe đang ở đâu, hiểu xe đang như thế nào, phát hiện khi có
+bất thường, không làm phiền hệ thống điện của xe và trình bày thông tin ở
+dạng mà người vận hành có thể đọc nhanh, xử lý nhanh.
+
 \subsubsection{2.3.2. Yêu cầu phi chức
 năng}\label{232-yuxeau-cux1ea7u-phi-chux1ee9c-nux103ng}
+
+Nếu yêu cầu chức năng trả lời ``hệ thống phải làm được gì'', thì yêu cầu
+phi chức năng trả lời ``hệ thống phải làm tốt tới mức nào''. Đây là lớp
+tiêu chí cho biết nguyên mẫu có đủ độ chín để bước ra môi trường vận
+hành thật hay chưa, đặc biệt khi phải theo dõi nhiều xe và chạy liên
+tục.
 
 \textbf{NFR-01: Hiệu suất (Performance)}
 
@@ -1924,7 +2080,8 @@ năng}\label{232-yuxeau-cux1ea7u-phi-chux1ee9c-nux103ng}
 \item
   API response time: dưới 200ms cho 95\% request
 \item
-  Hỗ trợ đồng thời tối thiểu 50 phương tiện kết nối MQTT
+  Hỗ trợ đồng thời tối thiểu 50 phương tiện kết nối MQTT, với dư địa mở
+  rộng ổn định tới khoảng 100 thiết bị
 \end{itemize}
 
 \textbf{NFR-02: Độ tin cậy (Reliability)}
@@ -1945,8 +2102,8 @@ năng}\label{232-yuxeau-cux1ea7u-phi-chux1ee9c-nux103ng}
 \begin{itemize}
 \tightlist
 \item
-  Xác thực phiên (session-based authentication) với token được hash
-  SHA-256
+  Xác thực phiên bằng opaque session token; chỉ lưu hash SHA-256 của
+  token trong cơ sở dữ liệu
 \item
   MQTT ACL (Access Control List) phân quyền theo từng thiết bị
 \item
@@ -1980,6 +2137,10 @@ năng}\label{232-yuxeau-cux1ea7u-phi-chux1ee9c-nux103ng}
 
 \subsubsection{2.3.3. Ràng buộc thiết
 kế}\label{233-ruxe0ng-buux1ed9c-thiux1ebft-kux1ebf}
+
+Các ràng buộc sau đây giới hạn không gian thiết kế của đề tài. Chúng buộc
+nhóm phải chọn phương án cân bằng giữa tính khả thi học thuật, khả năng
+triển khai thực tế trên xe và ngân sách sẵn có.
 
 \textbf{Ràng buộc phần cứng:}
 
@@ -2030,16 +2191,21 @@ kế}\label{233-ruxe0ng-buux1ed9c-thiux1ebft-kux1ebf}
 \subsubsection{2.3.4. Tiêu chuẩn thiết kế áp
 dụng}\label{234-tiuxeau-chuux1ea9n-thiux1ebft-kux1ebf-uxe1p-dux1ee5ng}
 
+Bảng dưới đây tổng hợp các chuẩn kỹ thuật và quy ước triển khai được dùng
+làm nền cho hệ thống. Điểm quan trọng không phải là gom thật nhiều chuẩn,
+mà là chọn đúng những chuẩn thực sự chi phối khả năng tương thích giữa
+thiết bị, mạng truyền và ứng dụng.
+
 
 {\thesissettableid{2.3.4A}{tab-ch2-tong-hop-thong-tin-ve-tieu-chuan-mo-ta-ap-dung-trong}
 \def\LTcaptype{table}
 \begin{longtable}{|p{0.30\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
-\caption{Tổng hợp thông tin về Tiêu chuẩn, Mô tả, Áp dụng trong hệ thống}\label{tab:ch2-tong-hop-thong-tin-ve-tieu-chuan-mo-ta-ap-dung-trong}\\
-\hline \textbf{Tiêu chuẩn} & \textbf{Mô tả} & \textbf{Áp dụng trong hệ thống} \\
+\caption{Tổng hợp chuẩn và quy ước kỹ thuật áp dụng trong hệ thống}\label{tab:ch2-tong-hop-thong-tin-ve-tieu-chuan-mo-ta-ap-dung-trong}\\
+\hline \textbf{Chuẩn / quy ước} & \textbf{Mô tả} & \textbf{Áp dụng trong hệ thống} \\
 \hline
 \endfirsthead
-\caption[]{Tổng hợp thông tin về Tiêu chuẩn, Mô tả, Áp dụng trong hệ thống (tiếp theo)}\\
-\hline \textbf{Tiêu chuẩn} & \textbf{Mô tả} & \textbf{Áp dụng trong hệ thống} \\
+\caption[]{Tổng hợp chuẩn và quy ước kỹ thuật áp dụng trong hệ thống (tiếp theo)}\\
+\hline \textbf{Chuẩn / quy ước} & \textbf{Mô tả} & \textbf{Áp dụng trong hệ thống} \\
 \hline
 \endhead
 IEEE 802.15.1 (Bluetooth) & Chuẩn BLE 4.0/5.0 & Kết nối OBD2 adapter \\\hline
@@ -2051,8 +2217,9 @@ adapter \\\hline
 MQTT v5.0 (OASIS) & Giao thức IoT messaging & Truyền dữ liệu thiết bị -
 server \\\hline
 REST (RFC 7231) & Kiến trúc API & Backend API server \\\hline
-OAuth 2.0 / Session Auth & Chuẩn xác thực & Xác thực người dùng và thiết
-bị \\\hline
+Opaque session token + MQTT ACL & Cơ chế xác thực và phân quyền &
+Xác thực phiên người dùng, phân quyền truy cập thiết bị theo ACL
+MQTT \\\hline
 \end{longtable}
 }
 
@@ -2063,10 +2230,12 @@ requirements}\label{24-yuxeau-cux1ea7u-tux1eeb-cuxe1c-buxean-liuxean-quan--stake
 \subsubsection{2.4.1. Xác định các bên liên
 quan}\label{241-xuxe1c-ux111ux1ecbnh-cuxe1c-buxean-liuxean-quan}
 
-Hệ thống IoT Vehicle Tracking System liên quan đến nhiều nhóm sử dụng
-với nhu cầu khác nhau. Vì vậy, việc tách riêng yêu cầu của từng bên là
-cần thiết để tránh thiết kế dàn trải và giữ trọng tâm vào các nhu cầu
-vận hành thực tế.
+Hệ thống IoT Vehicle Tracking System liên quan đến nhiều nhóm sử dụng với
+nhu cầu khác nhau. Nếu không tách rõ ngay từ đầu, hệ thống rất dễ rơi vào
+tình trạng mạnh về mặt kỹ thuật nhưng lệch khỏi nhu cầu vận hành. Vì vậy,
+phần này xác định ai là người hưởng lợi trực tiếp, ai là người vận hành,
+ai là người bị tác động, từ đó giữ trọng tâm thiết kế vào những nhu cầu
+thực sự cần giải quyết.
 
 \subsubsection{2.4.2. Ma trận yêu cầu các bên liên
 quan}\label{242-ma-trux1eadn-yuxeau-cux1ea7u-cuxe1c-buxean-liuxean-quan}
@@ -2105,6 +2274,11 @@ thông báo về trạng thái đơn thuê & Thấp (Phase 2) \\\hline
 
 \subsubsection{2.4.3. Phân tích chi tiết yêu
 cầu}\label{243-phuxe2n-tuxedch-chi-tiux1ebft-yuxeau-cux1ea7u}
+
+Từ ma trận trên, có thể thấy không phải mọi bên liên quan đều đòi hỏi cùng
+một loại giá trị. Nhóm sử dụng chính quan tâm đến hiệu quả vận hành và an
+ninh; nhóm quản trị quan tâm đến tính ổn định và khả năng kiểm soát; còn
+nhóm bảo trì cần hệ thống dễ chẩn đoán và dễ can thiệp khi có sự cố.
 
 \textbf{Công ty cho thuê xe (Stakeholder chính)}
 
@@ -2168,6 +2342,12 @@ trì:
   sách kiểm tra (checklist) khi lắp đặt mới hoặc bảo trì.
 \end{enumerate}
 
+Nhìn tổng thể, ba nhóm yêu cầu này kéo hệ thống về một điểm cân bằng khá
+rõ: phải đủ mạnh để quản lý đội xe, nhưng cũng phải đủ gọn và ổn định để
+lắp đặt, vận hành và bảo trì trên thực địa. Đây cũng là cơ sở để ma trận
+truy xuất ở mục tiếp theo ánh xạ yêu cầu định tính sang các chức năng cụ
+thể của hệ thống.
+
 \subsubsection{2.4.4. Ma trận truy xuất yêu cầu - chức
 năng}\label{244-ma-trux1eadn-truy-xuux1ea5t-yuxeau-cux1ea7u---chux1ee9c-nux103ng}
 
@@ -2207,36 +2387,37 @@ năng lượng thông minh và giao diện giám sát thân thiện.
 \subsection{Kết luận chương
 2}\label{kux1ebft-luux1eadn-chux1b0ux1a1ng-2}
 
-Chương 2 đã làm rõ các bài toán kỹ thuật chính của hệ thống giám sát
-phương tiện, từ phần cứng, truyền thông và xử lý dữ liệu đến kiến trúc
-tổng thể. Trên cơ sở khảo sát và đối sánh các giải pháp hiện có, chương
-đã xác định hướng tiếp cận phù hợp, đồng thời chốt các yêu cầu kỹ thuật,
-ràng buộc thiết kế và ma trận truy xuất yêu cầu. Đây là nền tảng để
-chuyển sang bước lựa chọn giải pháp ở Chương 3.
+Chương 2 đã chuyển bài toán ở mức "ý tưởng" thành các ràng buộc kỹ
+thuật cụ thể: thiết bị phải tiết kiệm điện ra sao, truyền dữ liệu thế
+nào, lưu trữ ở đâu và kiến trúc cần mở rộng theo hướng nào. Thông qua
+quá trình khảo sát và đối sánh các giải pháp hiện có, chương đã làm rõ
+tiêu chí lựa chọn thay vì chỉ liệt kê công nghệ. Đây chính là cơ sở để
+Chương 3 bước sang phần quyết định quan trọng tiếp theo: chọn phương án
+thiết kế nào là phù hợp nhất với bài toán đã được phân tích.
 
 \chapterheading{CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ -- DESIGN SOLUTIONS}
 
-Chương này trình bày quá trình phân tích và lựa chọn các giải pháp thiết
-kế cho hệ thống IoT giám sát phương tiện. Nội dung được tổ chức theo bốn
-tầng: phần cứng thiết bị theo dõi, firmware nhúng trên vi điều khiển, hệ
-thống backend và cloud, cùng giao diện người dùng. Ở mỗi tầng, các
-phương án được so sánh theo yêu cầu kỹ thuật, thông số chính và mức độ
-phù hợp với điều kiện triển khai thực tế trước khi chốt phương án sử
-dụng.
+Sau khi xác định rõ yêu cầu và ràng buộc ở Chương 2, Chương 3 tập trung
+vào câu hỏi "chọn gì và vì sao chọn như vậy". Trình bày trong chương này
+không chỉ nêu phương án cuối cùng, mà còn giải thích quá trình cân nhắc
+giữa nhiều lựa chọn khác nhau ở bốn tầng: phần cứng thiết bị theo dõi,
+firmware nhúng trên vi điều khiển, hệ thống backend/cloud và giao diện
+người dùng. Nhờ đó, người đọc có thể theo dõi logic thiết kế theo từng
+bước thay vì chỉ nhìn thấy kết quả cuối cùng.
 
-\subsection{3.1. Phân tích tổng hợp -- General
-analysis}\label{31-phuxe2n-tuxedch-tux1ed5ng-hux1ee3p--general-analysis}
+\subsection{3.1. Phân tích và đề xuất giải pháp phần cứng -- Hardware
+analysis and solution}\label{31-phuxe2n-tuxedch-tux1ed5ng-hux1ee3p--general-analysis}
 
 \subsubsection{3.1.1. Phân tích và lựa chọn phần
 cứng}\label{311-phuxe2n-tuxedch-vuxe0-lux1ef1a-chux1ecdn-phux1ea7n-cux1ee9ng}
 
 Phần này trình bày quá trình phân tích, lựa chọn và thiết kế các thành
-phần phần cứng cho thiết bị theo dõi xe IoT. Mục tiêu là xây dựng một
-tracker nhỏ gọn, tiêu thụ năng lượng thấp, có khả năng đọc dữ liệu OBD2,
-định vị GNSS và truyền dữ liệu về máy chủ qua mạng 4G/LTE. Mỗi quyết
-định kỹ thuật được đánh giá theo bốn tiêu chí: độ tin cậy, khả năng vận
-hành liên tục với nguồn dự phòng, mức độ tích hợp và mức độ phù hợp với
-ngân sách.
+phần phần cứng cho thiết bị theo dõi xe IoT. Mục tiêu không chỉ là tạo
+ra một tracker "đủ chức năng" trên lý thuyết, mà là một thiết bị có thể
+lắp lên xe, vận hành ổn định và còn chừa dư địa cho bảo trì, mở rộng.
+Vì vậy, mỗi quyết định kỹ thuật đều được soi chiếu dưới bốn góc nhìn:
+độ tin cậy, khả năng hoạt động liên tục với nguồn dự phòng, mức độ tích
+hợp và mức độ phù hợp với ngân sách.
 
 \textbf{Quy ước thuật ngữ trong phần cứng:} tài liệu dùng cụm ``khối phần
 cứng/khối chức năng'' cho các thành phần tích hợp trên PCB; từ ``module''
@@ -2247,8 +2428,11 @@ nguyên văn tên sản phẩm của nhà sản xuất.
 thống}\label{3111-sux1a1-ux111ux1ed3-khux1ed1i-hux1ec7-thux1ed1ng}
 
 Hệ thống tracker được tổ chức theo kiến trúc khối chức năng với năm khối
-chính, trong đó ESP32-S3 đóng vai trò điều phối trung tâm. Sơ đồ
-khối tổng thể được trình bày như sau:
+chính, trong đó ESP32-S3 đóng vai trò điều phối trung tâm. Nếu nhìn dưới
+góc độ người sử dụng, năm khối này tương ứng với năm câu hỏi rất thực tế:
+thiết bị lấy dữ liệu xe ở đâu, xác định vị trí bằng cách nào, phát hiện
+rung/chuyển động ra sao, gửi dữ liệu về máy chủ như thế nào và lấy điện từ
+đâu để duy trì hoạt động. Sơ đồ khối tổng thể được trình bày như sau:
 
 
 {\thesissetfigureid{3.1}{fig-ch3-so-o-khoi-tong-the-he-thong-tracker}
@@ -2272,12 +2456,20 @@ khối tổng thể được trình bày như sau:
 }
 
 
-Hệ thống vận hành theo ba chế độ chính: (1) chế độ lái xe --- khi động
-cơ bật (IGN ON), các khối chức năng cần thiết được kích hoạt; (2) chế độ
-đỗ xe --- khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ
-IMU LIS3DSH duy trì giám sát chuyển động; (3) chế độ cảnh báo --- khi IMU
-ghi nhận chuyển động bất thường, hệ thống tự đánh thức và gửi cảnh báo
-qua 4G.
+Ở tầng thiết bị, khối OBD2 cung cấp trạng thái vận hành của xe; khối
+LTE/GNSS chịu trách nhiệm truyền dữ liệu và định vị; khối IMU duy trì khả
+năng giám sát khi xe tắt máy; khối nguồn đảm bảo thiết bị chuyển đổi giữa
+nguồn chính và nguồn dự phòng an toàn; còn khối vi điều khiển là nơi tổng
+hợp toàn bộ tín hiệu để ra quyết định theo trạng thái. Nhờ cách tách này,
+tracker không còn được nhìn như một bo mạch rời rạc, mà như một chuỗi chức
+năng nối tiếp từ thu thập dữ liệu, xử lý cục bộ, truyền tin cho đến bảo vệ
+nguồn.
+
+Hệ thống vận hành theo ba chế độ chính: (1) chế độ lái xe --- khi động cơ
+bật (IGN ON), các khối chức năng cần thiết được kích hoạt; (2) chế độ đỗ
+xe --- khi động cơ tắt (IGN OFF), ESP32 chuyển sang deep sleep và chỉ IMU
+LIS3DSH duy trì giám sát chuyển động; (3) chế độ cảnh báo --- khi IMU ghi
+nhận chuyển động bất thường, hệ thống tự đánh thức và gửi cảnh báo qua 4G.
 
 Luồng dữ liệu được tổ chức theo ba nhánh: OBD2 (RPM, tốc độ, nhiên liệu)
 đọc qua BLE từ adapter vgate iCar Pro; dữ liệu GNSS được cung cấp trực
@@ -2372,39 +2564,43 @@ UART cho chức năng chính \\\hline
 \subparagraph{c) Phân tích các yếu tố quan
 trọng}\label{c-phuxe2n-tuxedch-cuxe1c-yux1ebfu-tux1ed1-quan-trux1ecdng}
 
-\textbf{BLE tích hợp:} Đây là ràng buộc cứng vì tracker dùng adapter
-OBD2 vgate iCar Pro theo chuẩn BLE 4.0. ESP32-S3 và nRF52840 đều đáp ứng
-trực tiếp bằng BLE 5.0 tích hợp, trong khi STM32L4 phải bổ sung thêm
-module BLE ngoài. Việc thêm module ngoài không chỉ tăng BOM mà còn phát
-sinh thêm miền nguồn và công đoạn tích hợp phần cứng.
+\textbf{BLE tích hợp:} Đây là ràng buộc rất thực tế vì tracker dùng
+adapter OBD2 vgate iCar Pro theo chuẩn BLE 4.0. Nếu MCU không có BLE
+tích hợp, thiết kế sẽ phải bổ sung thêm một module riêng. Điều đó không
+chỉ làm tăng BOM, mà còn khiến sơ đồ mạch, nguồn cấp và firmware phức
+tạp hơn ngay từ đầu. Ở khía cạnh này, ESP32-S3 và nRF52840 thuận lợi hơn
+STM32L4.
 
-\textbf{Ngân sách UART:} Kiến trúc mục tiêu cần tối thiểu các luồng UART
-riêng cho modem và kênh debug. ESP32-S3 đáp ứng tốt với 3 UART phần
-cứng, còn dư địa cho mở rộng. STM32L4 cũng có thể đáp ứng nếu chọn đúng
-biến thể, nhưng đổi lại phải thêm BLE ngoài. nRF52840 thường chỉ có 2
-UART nên dư địa cho debug độc lập hạn chế hơn.
+\textbf{Ngân sách UART:} Trong kiến trúc hiện tại, UART không phải tài
+nguyên "thừa". Hệ thống cần ít nhất một kênh cho modem và một kênh cho
+debug, đồng thời vẫn nên chừa dư địa cho mở rộng hoặc chẩn đoán khi
+triển khai thực tế. ESP32-S3 đáp ứng tốt nhu cầu này với 3 UART phần
+cứng; nRF52840 hạn chế hơn; còn STM32L4 có thể đáp ứng nhưng phải đánh
+đổi bằng việc bổ sung BLE ngoài.
 
 \textbf{Tiêu thụ deep sleep:} STM32L4 và nRF52840 có lợi thế rõ ràng về
-dòng ngủ sâu theo tài liệu hãng. Tuy nhiên chênh lệch giữa nhóm ESP32-S3
-và STM32L4 không quyết định toàn bộ thời lượng pin, vì tracker vẫn chịu
-tải chính từ modem LTE, GNSS và các chu kỳ wake-up định kỳ. Trong bài
-toán heartbeat nhiều ngày với pin 1S, chênh lệch này có ý nghĩa nhưng
+dòng ngủ sâu theo tài liệu hãng. Tuy nhiên, trong một tracker hoàn chỉnh,
+MCU không phải thành phần duy nhất tiêu thụ năng lượng. Modem LTE, GNSS,
+chu kỳ wake-up và các linh kiện phụ trợ cũng góp phần đáng kể vào ngân
+sách điện năng. Vì vậy, chênh lệch ở mức riêng MCU có ý nghĩa, nhưng
 không đủ để bù cho việc tăng độ phức tạp tích hợp {[}19{]}, {[}53{]},
 {[}54{]}, {[}55{]}.
 
 \textbf{Độ phức tạp triển khai:} ESP32-S3 có lợi thế thực tế vì vừa có
-BLE sẵn, vừa có ESP-IDF/Arduino IDE, phù hợp cho firmware phải đồng thời
-xử lý BLE OBD2, AT command modem, I2C IMU và deep sleep. STM32L4 mạnh về
-low power nhưng kéo theo thêm công việc tích hợp BLE. nRF52840 phù hợp
-nếu hệ thống ưu tiên radio BLE là chính, nhưng dư địa UART cho kịch bản
-hiện tại hạn chế hơn.
+BLE sẵn, vừa có hệ sinh thái ESP-IDF/Arduino IDE quen thuộc, phù hợp cho
+firmware phải đồng thời xử lý BLE OBD2, AT command modem, I2C IMU và
+deep sleep. STM32L4 mạnh về low power nhưng kéo theo thêm công việc tích
+hợp BLE. nRF52840 phù hợp nếu hệ thống ưu tiên radio BLE là chính, nhưng
+dư địa UART cho kịch bản hiện tại hạn chế hơn.
 
 \subparagraph{d) Kết luận lựa
 chọn}\label{d-kux1ebft-luux1eadn-lux1ef1a-chux1ecdn}
 
 Trên cơ sở đối chiếu trực tiếp các yêu cầu của hệ thống,
-\textbf{ESP32-S3} được chọn làm vi điều khiển chính cho tracker. Quyết
-định này dựa trên các điểm chốt sau:
+\textbf{ESP32-S3} được chọn làm vi điều khiển chính cho tracker. Nói ngắn
+gọn, đây là phương án cân bằng tốt nhất giữa "đủ mạnh để làm được việc"
+và "đủ gọn để triển khai thực tế". Quyết định này dựa trên các điểm chốt
+sau:
 
 \begin{itemize}
 \tightlist
@@ -2463,9 +2659,12 @@ Phương án tích hợp & Tích hợp trực tiếp vào bo mạch chính \\\hl
 \paragraph{3.1.1.3. Phân tích và lựa chọn modem truyền
 thông}\label{3113-phuxe2n-tuxedch-vuxe0-lux1ef1a-chux1ecdn-modem-truyux1ec1n-thuxf4ng}
 
-Modem truyền thông đóng vai trò then chốt trong hệ thống, đảm nhận hai
-chức năng: (1) kết nối mạng di động 4G/LTE để truyền dữ liệu về máy chủ,
-và (2) định vị GNSS để xác định vị trí xe. Trong kiến trúc hiện tại, hệ
+Modem truyền thông đóng vai trò then chốt trong hệ thống vì nó đồng thời
+giải quyết hai nhu cầu thiết yếu nhất của tracker: gửi dữ liệu về máy chủ
+qua mạng di động và cung cấp vị trí của xe thông qua GNSS. Với bài toán
+này, lựa chọn modem không chỉ ảnh hưởng đến tốc độ hay thông số kỹ
+thuật, mà còn tác động trực tiếp đến cách đi dây, cách tổ chức firmware
+và mức độ phức tạp của toàn bộ bo mạch. Trong kiến trúc hiện tại, hệ
 thống sử dụng \textbf{SIM7600CE-T tích hợp LTE + GNSS} nhằm giảm số
 lượng phần cứng rời, đơn giản hóa đi dây và đồng bộ với firmware thực
 tế.
@@ -2544,7 +2743,9 @@ Tác động tới BOM phần cứng thực tế & Bộ modem + GNSS đang chố
 chọn}\label{c-kux1ebft-luux1eadn-lux1ef1a-chux1ecdn}
 
 \textbf{SIMCom SIM7600CE-T} được lựa chọn làm kiến trúc truyền thông
-chính vì các lý do sau:
+chính vì đây là phương án giúp thiết kế tổng thể gọn hơn và dễ triển
+khai hơn, dù không phải lúc nào cũng linh hoạt nhất ở từng thành phần
+riêng lẻ. Các lý do cụ thể gồm:
 
 \begin{itemize}
 \tightlist
@@ -2606,23 +2807,26 @@ mapping phần cứng giữ nguyên \\\hline
 }
 
 
-\subsection{3.2. Đề xuất các giải pháp -- Proposed
-solutions}\label{32-ux111ux1ec1-xuux1ea5t-cuxe1c-giux1ea3i-phuxe1p--proposed-solutions}
-
-\subsubsection{3.2.1. Giải pháp phần
+\subsubsection{3.1.2. Giải pháp phần
 cứng}\label{321-giux1ea3i-phuxe1p-phux1ea7n-cux1ee9ng}
 
-\paragraph{3.2.1.1. Thiết kế khối thu thập dữ liệu
+Trên cơ sở các lựa chọn phần cứng đã phân tích ở mục 3.1.1, phần này đi
+vào cách nhóm hiện thực chúng thành kiến trúc tracker hoàn chỉnh, từ
+kết nối OBD2 và IMU đến khối nguồn và BOM tham chiếu.
+
+\paragraph{3.1.2.1. Thiết kế khối thu thập dữ liệu
 OBD2}\label{3211-thiux1ebft-kux1ebf-muxf4-ux111un-thu-thux1eadp-dux1eef-liux1ec7u-obd2}
 
 \subparagraph{a) Lựa chọn phương pháp kết nối
 OBD2}\label{a-lux1ef1a-chux1ecdn-phux1b0ux1a1ng-phuxe1p-kux1ebft-nux1ed1i-obd2}
 
 Thu thập dữ liệu từ ECU xe qua cổng OBD2 (On-Board Diagnostics II) là
-một yêu cầu cốt lõi của thiết kế tracker. Có hai hướng tiếp cận chính:
-sử dụng adapter OBD2 có dây (wired ELM327 qua UART) hoặc adapter OBD2
-không dây (BLE ELM327). Nhóm lựa chọn kết nối không dây qua BLE dựa trên
-các lý do sau:
+một yêu cầu cốt lõi của thiết kế tracker vì đây là nguồn thông tin giúp
+hệ thống đi xa hơn một thiết bị định vị thông thường. Có hai hướng tiếp
+cận chính: sử dụng adapter OBD2 có dây (wired ELM327 qua UART) hoặc
+adapter OBD2 không dây (BLE ELM327). Nhóm lựa chọn kết nối không dây qua
+BLE vì cách làm này phù hợp hơn với cách bố trí thiết bị thực tế trên xe
+và với tài nguyên phần cứng của tracker:
 
 
 {\thesissettableid{3.5}{tab-ch3-so-sanh-phuong-phap-ket-noi-obd2-theo-thong-so-trien-khai}
@@ -2700,8 +2904,9 @@ dựa trên các tiêu chí sau:
   chưa được công bố đầy đủ, không đưa ra giá trị mA cố định khi chưa có
   datasheet chính thức đúng mẫu.
 \item
-  \textbf{Phổ biến và giá hợp lý:} Có nguồn cung khá phổ biến trên thị
-  trường trong nước, với giá khoảng 150.000--300.000 VND.
+  \textbf{Phổ biến và giá hợp lý:} Ở lần rà soát thị trường Việt Nam ngày
+  12/04/2026, các mức giá tham khảo ghi nhận cho vgate iCar Pro BLE nằm
+  quanh khoảng 367.000--609.000 VND tùy kênh bán lẻ và phiên bản.
 \end{itemize}
 
 
@@ -2719,8 +2924,9 @@ dựa trên các tiêu chí sau:
 động}\label{c-chiux1ebfn-lux1b0ux1ee3c-kux1ebft-nux1ed1i-theo-chux1ebf-ux111ux1ed9-houx1ea1t-ux111ux1ed9ng}
 
 Một ràng buộc thiết kế quan trọng là ESP32-S3 không thể duy trì kết nối
-BLE trong trạng thái deep sleep. Do đó, chiến lược kết nối OBD2 được xây
-dựng theo từng chế độ hoạt động:
+BLE trong trạng thái deep sleep. Vì vậy, kết nối OBD2 không được xem là
+một kênh "luôn bật", mà chỉ hoạt động khi nó thực sự tạo ra giá trị dữ liệu
+cho từng trạng thái vận hành của xe:
 
 
 {\thesissettableid{3.6}{tab-ch3-chien-luoc-ket-noi-ble-obd2-theo-che-o-hoat-ong}
@@ -2744,19 +2950,21 @@ Cảnh báo & Tùy chọn & Có thể kết nối để xác nhận IGN, hoặc 
 }
 
 
-Khi xe chạy (IGN ON), ESP32-S3 duy trì kết nối BLE liên tục với adapter,
-đọc dữ liệu OBD2 định kỳ mỗi 5--30 giây. Khi xe đỗ (IGN OFF), kết nối
-BLE được ngắt trước khi ESP32 vào deep sleep, vì IMU LIS3DSH đủ khả năng
-phát hiện chuyển động bất thường (rung, kéo, cẩu xe) mà không cần dữ
-liệu từ OBD2. Việc này giúp tiết kiệm năng lượng đáng kể --- khoảng
-7.000 lần so với việc duy trì kết nối BLE {[}8{]}.
+Khi xe chạy (IGN ON), ESP32-S3 duy trì kết nối BLE liên tục với adapter để
+đọc dữ liệu OBD2 định kỳ mỗi 5--30 giây. Khi xe đỗ (IGN OFF), kết nối BLE
+được ngắt trước khi ESP32 vào deep sleep, vì ở thời điểm này mục tiêu ưu
+tiên không còn là lấy dữ liệu động cơ, mà là giữ mức tiêu thụ thấp nhất
+trong khi vẫn duy trì khả năng phát hiện xâm nhập. IMU LIS3DSH đảm nhiệm
+việc giám sát đó độc lập và chỉ đánh thức hệ thống khi có tín hiệu đáng
+ngờ. Cách tổ chức này giúp giảm đáng kể năng lượng tiêu thụ ở pha đỗ xe mà
+không làm mất đi chức năng cảnh báo cốt lõi.
 
 Trong trường hợp adapter OBD2 không kết nối được (timeout 10 giây, retry
 2--3 lần), hệ thống tự động chuyển sang phương pháp dự phòng (fallback)
 là đo điện áp ắc quy qua ADC để phát hiện trạng thái IGN. Phương pháp
 này kém chính xác hơn nhưng đảm bảo hệ thống vẫn hoạt động bình thường.
 
-\paragraph{3.2.1.2. Thiết kế khối cảm biến chuyển động
+\paragraph{3.1.2.2. Thiết kế khối cảm biến chuyển động
 IMU}\label{3212-thiux1ebft-kux1ebf-muxf4-ux111un-cux1ea3m-biux1ebfn-chuyux1ec3n-ux111ux1ed9ng-imu}
 
 \subparagraph{a) Vai trò của IMU trong hệ
@@ -2863,13 +3071,15 @@ pháp}\label{d-ux1b0u-ux111iux1ec3m-cux1ee7a-giux1ea3i-phuxe1p}
   hợp vào sơ đồ phần cứng của thiết bị.
 \end{itemize}
 
-\paragraph{3.2.1.3. Thiết kế hệ thống quản lý
+\paragraph{3.1.2.3. Thiết kế hệ thống quản lý
 nguồn}\label{3213-thiux1ebft-kux1ebf-hux1ec7-thux1ed1ng-quux1ea3n-luxfd-nguux1ed3n}
 
-Hệ thống quản lý nguồn là khối phức tạp nhất trong thiết kế phần cứng,
-phụ trách chuyển đổi điện áp, điều phối đường nguồn (power path), sạc
-pin dự phòng và bảo vệ ắc quy xe khỏi rút cạn quá mức. Cấu trúc được tổ
-chức thành năm khối chức năng chính.
+Hệ thống quản lý nguồn là khối phức tạp nhất trong thiết kế phần cứng, vì
+nó phải đồng thời giải quyết ba bài toán vốn dễ xung đột với nhau: tạo
+đúng các mức điện áp cho từng tải, duy trì đường nguồn dự phòng khi cần và
+bảo vệ ắc quy xe khỏi bị rút cạn quá mức. Vì vậy, khối này được tách thành
+năm nhánh chức năng để người đọc dễ theo dõi vai trò của từng đường nguồn
+thay vì chỉ nhìn một sơ đồ điện phức tạp.
 
 
 {\thesissetfigureid{3.4}{fig-ch3-so-o-khoi-he-thong-quan-ly-nguon}
@@ -2893,24 +3103,27 @@ chức thành năm khối chức năng chính.
 }
 
 
-\subparagraph{a) Buck 3.3V cho ESP32-S3 (AP2112-3.3)}\label{a-buck-33v-cho-esp32-s3-xl1509-33e}
+\subparagraph{a) LDO 3.3V cho ESP32-S3 (AP2112-3.3)}\label{a-buck-33v-cho-esp32-s3-xl1509-33e}
 
-Nhánh buck 3.3V dùng \textbf{AP2112-3.3} để hạ điện áp từ ắc quy xe
-(12--24V) xuống 3.3V, cấp trực tiếp cho ESP32-S3 và các tải logic 3.3V.
+Nhánh 3.3V dùng \textbf{AP2112-3.3} như một LDO để hạ từ \textbf{bus 5V
+chính} xuống 3.3V, cấp cho ESP32-S3 và các tải logic 3.3V. Cách tổ chức
+này phù hợp với kiến trúc nguồn thực tế của bo mạch: MP2482 đảm nhiệm bước
+hạ áp đầu tiên từ 12--24V xuống 5V, còn AP2112-3.3 đảm nhiệm bước ổn áp
+cuối cho miền logic.
 
 
 {\thesissettableid{3.8}{tab-ch3-thong-so-khoi-buck-3-3v}
 \def\LTcaptype{table}
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\caption{Thông số khối Buck 3.3V}\label{tab:ch3-thong-so-khoi-buck-3-3v}\\
+\caption{Thông số khối LDO 3.3V}\label{tab:ch3-thong-so-khoi-buck-3-3v}\\
 \hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endfirsthead
-\caption[]{Thông số khối Buck 3.3V (tiếp theo)}\\
+\caption[]{Thông số khối LDO 3.3V (tiếp theo)}\\
 \hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
-Buck 3.3V & AP2112-3.3 & 12--24V & 3.3V & ESP32-S3 \\\hline
+LDO 3.3V & AP2112-3.3 & 5V & 3.3V & ESP32-S3 \\\hline
 \end{longtable}
 }
 
@@ -3145,7 +3358,7 @@ trì giám sát tạm thời khi ắc quy xe yếu, nhưng vẫn cần được 
 thực nghiệm lại nếu chuyển sang mẫu pin mới trong pha chế tạo tiếp theo
 {[}14{]}.
 
-\paragraph{3.2.1.4. Bảng tổng hợp linh kiện (Bill of
+\paragraph{3.1.2.4. Bảng tổng hợp linh kiện (Bill of
 Materials)}\label{3214-bux1ea3ng-tux1ed5ng-hux1ee3p-linh-kiux1ec7n-bill-of-materials}
 
 
@@ -3153,51 +3366,51 @@ Materials)}\label{3214-bux1ea3ng-tux1ed5ng-hux1ee3p-linh-kiux1ec7n-bill-of-mater
 \def\LTcaptype{table}
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
 \caption{Bảng tổng hợp linh kiện hệ thống tracker (BOM)}\label{tab:ch3-bang-tong-hop-linh-kien-he-thong-tracker-bom}\\
-\hline \textbf{STT} & \textbf{Thành phần} & \textbf{Đơn vị} & \textbf{SL} & \textbf{Giá ước tính (VND)} & \textbf{Ghi chú} \\
+\hline \textbf{STT} & \textbf{Thành phần} & \textbf{Đơn vị} & \textbf{SL} & \textbf{Giá tham chiếu T4/2026 (VND)} & \textbf{Ghi chú} \\
 \hline
 \endfirsthead
 \caption[]{Bảng tổng hợp linh kiện hệ thống tracker (BOM) (tiếp theo)}\\
-\hline \textbf{STT} & \textbf{Thành phần} & \textbf{Đơn vị} & \textbf{SL} & \textbf{Giá ước tính (VND)} & \textbf{Ghi chú} \\
+\hline \textbf{STT} & \textbf{Thành phần} & \textbf{Đơn vị} & \textbf{SL} & \textbf{Giá tham chiếu T4/2026 (VND)} & \textbf{Ghi chú} \\
 \hline
 \endhead
-1 & ESP32-S3-WROOM-1 (N16R8) & Cái & 1 & 100.000--200.000 & MCU trung
+1 & ESP32-S3-WROOM-1 (N16R8) & Cái & 1 & 95.000 & MCU trung
 tâm của bo mạch \\\hline
-2 & IC cảm biến LIS3DSH & Cái & 1 & 20.000--50.000 & Cảm biến gia tốc 3
+2 & IC cảm biến LIS3DSH & Cái & 1 & 40.000 & Cảm biến gia tốc 3
 trục \\\hline
-3 & vgate iCar Pro (OBD2 BLE) & Cái & 1 & 150.000--300.000 & BLE 4.0,
+3 & vgate iCar Pro (OBD2 BLE) & Cái & 1 & 367.000 & BLE 4.0,
 ELM327 compatible \\\hline
-4 & SIMCom SIM7600CE-T & Bộ & 1 & 330.000--500.000 & Modem LTE + GNSS
-tích hợp + anten \\\hline
-5 & Pin 18650 1S Li-ion 3500mAh & Cái & 1 & 100.000--200.000 & Loại có
+4 & SIMCom SIM7600CE-T & Bộ & 1 & 650.000 & Modem LTE + GNSS
+tích hợp \\\hline
+5 & Pin 18650 1S Li-ion 3500mAh & Cái & 1 & 79.000 & Loại có
 protection board \\\hline
-6 & IC sạc TP4056 + mạch phụ trợ & Cái & 1 & 20.000--40.000 & Input 5V,
+6 & IC sạc TP4056 + mạch phụ trợ & Cái & 1 & 25.000 & Input 5V,
 output 4.2V, dòng theo PROG \\\hline
-7 & Mạch buck AP2112-3.3 & Cái & 1 & 15.000--30.000 & 12--24V
+7 & Mạch LDO AP2112-3.3 & Cái & 1 & 5.000 & 5V
 -\textgreater{} 3.3V cấp ESP32-S3 \\\hline
-8 & Mạch buck MP2482 5V & Cái & 1 & 15.000--30.000 & Bus 5V chính \\\hline
-9 & Mạch buck TPS54231 ~4V & Cái & 1 & 20.000--40.000 &
+8 & Mạch buck MP2482 5V & Cái & 1 & 17.000 & Bus 5V chính \\\hline
+9 & Mạch buck TPS54231 ~4V & Cái & 1 & 9.000 &
 12--24V -\textgreater{} ~4V cấp modem SIM7600CE-T \\\hline
-10 & Mạch boost SX1308 5V backup & Cái & 1 & 10.000--20.000 & Backup từ
+10 & Mạch boost SX1308 5V backup & Cái & 1 & 12.000 & Backup từ
 pin 18650 1S \\\hline
-11 & Khối giám sát LVD + ADC & Cái & 1 & 5.000--15.000 & Giám sát LVD
+11 & Khối giám sát LVD + ADC & Cái & 1 & 8.000 & Giám sát LVD
 (GPIO19) \\\hline
-12 & Diode Schottky (SS54/SS34) & Cái & 2 & 2.000--5.000 & Diode-OR power
+12 & Diode Schottky (SS54/SS34) & Cái & 2 & 2.500 & Diode-OR power
 path \\\hline
-13 & Mạch bảo vệ pin 1S (BMS) & Cái & 1 & 10.000--20.000 & Bảo vệ pin
+13 & Mạch bảo vệ pin 1S (BMS) & Cái & 1 & 12.000 & Bảo vệ pin
 18650 1S \\\hline
-14 & Điện trở (10kOhm, 2.2kOhm) & Gói & 1 & 5.000--10.000 & Voltage
+14 & Điện trở (10kOhm, 2.2kOhm) & Gói & 1 & 5.000 & Voltage
 divider, pull-up \\\hline
-15 & Tụ điện (100uF, 220uF) & Gói & 1 & 5.000--10.000 & Lọc nhiễu,
+15 & Tụ điện (100uF, 220uF) & Gói & 1 & 5.000 & Lọc nhiễu,
 decoupling \\\hline
-16 & Connector, header pin & Gói & 1 & 10.000--20.000 & Kết nối dây,
-header \\\hline
-17 & PCB 2 lớp (~50x50 mm) & Cái & 1 & 50.000--100.000 &
+16 & Connector, header pin & Gói & 1 & 55.000 & Header, jack OBD2 và
+đầu nối nguồn \\\hline
+17 & PCB 2 lớp (~50x50 mm) & Cái & 1 & 20.000 &
 Bo mạch theo layout của đề tài \\\hline
-18 & Vỏ bảo vệ (tùy chọn) & Cái & 1 & 50.000--100.000 & Nhựa hoặc kim
+18 & Vỏ bảo vệ (tùy chọn) & Cái & 1 & 25.000 & Nhựa hoặc kim
 loại \\\hline
-19 & Dây nối, cáp, phụ kiện & - & - & 20.000--30.000 & Dây điện, cáp
-USB \\\hline
-20 & Linh kiện phụ trợ khác & - & - & 20.000--30.000 & Fuse, switch,
+19 & Dây nối, cáp, phụ kiện & - & - & 60.000 & Dây điện, anten
+4G/GNSS, khay SIM \\\hline
+20 & Linh kiện phụ trợ khác & - & - & 20.000 & Fuse, switch,
 LED \\\hline
 \end{longtable}
 }
@@ -3216,32 +3429,38 @@ LED \\\hline
 \hline
 \endhead
 A & Thành phần chính (MCU, cảm biến, modem, OBD2, pin) &
-670.000--1.250.000 \\\hline
+1.231.000 \\\hline
 B & Quản lý nguồn (AP2112-3.3, MP2482, TPS54231, SX1308, TP4056, diode OR,
-khối LVD, pin 1S) & 80.000--155.000 \\\hline
-C & Linh kiện phụ trợ (điện trở, tụ, diode, connector) &
-42.000--75.000 \\\hline
-D & PCB và vỏ (tùy chọn) & 100.000--200.000 \\\hline
-& \textbf{Tổng cộng} & \textbf{872.000--1.635.000} \\\hline
+khối LVD, pin 1S) & 93.000 \\\hline
+C & Kết nối, RF và linh kiện phụ trợ & 145.000 \\\hline
+D & PCB và vỏ (tùy chọn) & 45.000 \\\hline
+& \textbf{Tổng cộng} & \textbf{1.514.000} \\\hline
 \end{longtable}
 }
 
 
-Tổng chi phí ước tính cho toàn bộ phần cứng hệ thống tracker nằm trong
-khoảng \textbf{872.000--1.635.000 VND}, phù hợp với ngân sách đồ án tốt
-nghiệp. Mức chi phí này phản ánh phương án phần cứng của đề tài với bo
-mạch 2 lớp do nhóm phát triển, các linh kiện được lắp trực tiếp trên bo
-mạch và hoàn thiện thành một thiết bị độc lập.
+Theo mặt bằng giá tham chiếu thị trường Việt Nam được rà soát ngày
+12/04/2026, tổng chi phí vật tư cho một bộ tracker hoàn chỉnh vào khoảng
+\textbf{1.514.000 VND}. Mức này vẫn nằm dưới ngưỡng chi phí mục tiêu của
+đồ án, đồng thời phản ánh thực tế hơn so với mặt bằng giá linh kiện ở
+thời điểm đầu năm.
 
-\subsubsection{3.1.2. Phân tích và lựa chọn giải pháp Firmware}
+\subsection{3.2. Phân tích và đề xuất giải pháp Firmware -- Firmware
+analysis and solution}\label{32-ux111ux1ec1-xuux1ea5t-cuxe1c-giux1ea3i-phuxe1p--proposed-solutions}
 
-\paragraph{3.1.2.1. Đặt vấn đề cho giải pháp
+\subsubsection{3.2.1. Phân tích và lựa chọn giải pháp Firmware}
+
+\paragraph{3.2.1.1. Đặt vấn đề cho giải pháp
 Firmware}\label{3121-ux111ux1eb7t-vux1ea5n-ux111ux1ec1-cho-giux1ea3i-phuxe1p-firmware}
 
-Firmware là lớp phần mềm nhúng chạy trực tiếp trên vi điều khiển
-ESP32-S3 và giữ vai trò điều phối toàn bộ hoạt động của thiết bị theo
-dõi. Do firmware là điểm hội tụ giữa phần cứng, truyền thông và nghiệp
-vụ, bài toán thiết kế phải đồng thời thỏa mãn các yêu cầu sau:
+Nếu xem phần cứng là ``cơ thể'' của thiết bị, thì firmware là lớp biến
+tập linh kiện đó thành một hệ thống biết \emph{phản ứng đúng lúc}. Người
+dùng không trực tiếp nhìn thấy firmware, nhưng việc vị trí có cập nhật
+đều, cảnh báo có đến kịp hay không, hay ắc quy xe có bị ảnh hưởng hay
+không đều do lớp này quyết định. Vì nằm ở điểm giao nhau giữa phần cứng,
+truyền thông và yêu cầu nghiệp vụ, bài toán firmware không dừng ở chuyện
+``cho thiết bị chạy được'', mà phải bảo đảm thiết bị chạy đúng, ổn định
+và tiết kiệm năng lượng trong môi trường thực tế.
 
 \begin{itemize}
 \tightlist
@@ -3259,7 +3478,7 @@ vụ, bài toán thiết kế phải đồng thời thỏa mãn các yêu cầu 
   sau mất kết nối mạng hoặc lỗi ngoại vi.
 \end{itemize}
 
-\paragraph{3.1.2.2. So sánh các phương án nền tảng
+\paragraph{3.2.1.2. So sánh các phương án nền tảng
 Firmware}\label{3122-so-suxe1nh-cuxe1c-phux1b0ux1a1ng-uxe1n-nux1ec1n-tux1ea3ng-firmware}
 
 
@@ -3290,39 +3509,49 @@ Trung bình \\\hline
 }
 
 
-\paragraph{3.1.2.3. Chọn giải pháp
+\paragraph{3.2.1.3. Chọn giải pháp
 Firmware}\label{3123-chux1ecdn-giux1ea3i-phuxe1p-firmware}
 
 Từ kết quả so sánh, đồ án chọn \textbf{PA-FW2: ESP-IDF + FreeRTOS} làm
-nền tảng firmware chính.
+nền tảng firmware chính. Đây không phải là lựa chọn ``mạnh nhất trên giấy'',
+mà là lựa chọn bám sát nhất cách thiết bị phải vận hành ngoài thực tế:
+nhiều ngoại vi, nhiều trạng thái, yêu cầu tiết kiệm điện và cần dễ truy
+vết khi có lỗi.
 
-Lý do lựa chọn:
+Nền tảng này thuyết phục hơn ở bốn điểm chính:
 
 \begin{itemize}
 \tightlist
 \item
   \textbf{Khớp yêu cầu điều phối thời gian thực của hệ thống}: ESP-IDF +
   FreeRTOS cho phép tổ chức state machine trung tâm, các driver bất đồng
-  bộ và primitive đồng bộ ở mức khối chức năng, phù hợp với bài toán IoT
-  chạy trên tài nguyên hạn chế.
+  bộ và primitive đồng bộ ở mức khối chức năng. Nói cách khác, đây là
+  nền tảng đủ linh hoạt để firmware vừa theo dõi nhiều tín hiệu cùng lúc
+  vừa không làm luồng xử lý chính trở nên rối và khó kiểm soát.
 \item
   \textbf{Tối ưu cho ESP32-S3}: driver và power feature chính thức giúp
-  giảm rủi ro tích hợp phần cứng.
+  giảm rủi ro tích hợp phần cứng, đồng thời rút ngắn đáng kể thời gian
+  xử lý các lỗi phát sinh trong giai đoạn chế tạo và kiểm thử.
 \item
   \textbf{Phù hợp bài toán năng lượng}: hỗ trợ deep sleep/wakeup và điều
-  khiển peripheral theo trạng thái.
+  khiển peripheral theo trạng thái, nên phù hợp với một thiết bị phải
+  luôn cân bằng giữa khả năng giám sát và mức tiêu thụ điện.
 \item
   \textbf{Dễ kiểm soát chất lượng vận hành}: thuận lợi xây dựng state
-  machine, retry strategy và fallback cho BLE/modem.
+  machine, retry strategy và fallback cho BLE/modem. Điều này đặc biệt
+  quan trọng vì thiết bị không hoạt động trong phòng thí nghiệm lý tưởng
+  mà trong môi trường xe có nhiễu, rung động và mất sóng bất chợt.
 \end{itemize}
 
 \subsubsection{3.2.2. Giải pháp
 Firmware}\label{322-giux1ea3i-phuxe1p-firmware}
 
-Firmware chịu trách nhiệm thu thập dữ liệu từ các cảm biến (IMU, GNSS,
-OBD2), quản lý nguồn điện, điều khiển giao tiếp mạng (4G/LTE) và truyền
-dữ liệu lên máy chủ qua giao thức MQTT. Trên cơ sở phương án đã chọn ở
-mục 3.1.2, phần này trình bày chi tiết giải pháp triển khai.
+Firmware là nơi toàn bộ quyết định vận hành của thiết bị được hiện thực
+hóa thành hành vi cụ thể: đọc cảm biến, đánh giá trạng thái xe, điều
+khiển modem, quản lý năng lượng và gửi dữ liệu lên máy chủ. Trên cơ sở
+phương án đã chọn ở mục 3.2.1, phần này trình bày cách nhóm biến các yêu
+cầu đó thành một kiến trúc firmware đủ rõ ràng để phát triển, đủ gọn để
+vận hành ổn định và đủ linh hoạt để mở rộng sau này.
 
 \paragraph{3.2.2.1. Kiến trúc firmware và luồng hoạt
 động}\label{3221-kiux1ebfn-truxfac-firmware-vuxe0-luux1ed3ng-houx1ea1t-ux111ux1ed9ng}
@@ -3330,8 +3559,11 @@ mục 3.1.2, phần này trình bày chi tiết giải pháp triển khai.
 \subparagraph{a) Kiến trúc phân lớp (Layered
 Architecture)}\label{a-kiux1ebfn-truxfac-phuxe2n-lux1edbp-layered-architecture}
 
-Firmware được tổ chức theo bốn lớp trách nhiệm chính để giữ mã nguồn
-gọn, dễ theo dõi và thuận lợi khi mở rộng:
+Để người đọc dễ hình dung, firmware được tách theo từng lớp trách nhiệm
+thay vì trình bày như một khối mã nguồn lớn. Cách chia này giúp trả lời
+rõ ba câu hỏi quan trọng: lớp nào làm việc với phần cứng, lớp nào giữ
+trạng thái vận hành, và lớp nào chịu trách nhiệm giao tiếp với hệ
+thống bên ngoài.
 
 
 {\thesissettableid{3.2.2A}{tab-ch3-tong-hop-thong-tin-ve-lop-thanh-phan-chinh-vai-tro}
@@ -3382,12 +3614,13 @@ BLE OBD và lớp AT command.
 \subparagraph{b) Cơ chế điều phối với
 FreeRTOS}\label{b-cux1a1-chux1ebf-ux111iux1ec1u-phux1ed1i-vux1edbi-freertos}
 
-Firmware sử dụng FreeRTOS theo hướng tối giản: \texttt{app\_main()} khởi
-tạo hệ thống, nạp cấu hình từ NVS, xác định trạng thái ban đầu theo
-nguyên nhân đánh thức rồi gọi \texttt{state\_machine\_run()} theo chu kỳ
-ngắn. Cách tổ chức này giúp luồng xử lý chính dễ đọc, dễ debug và bám
-sát đặc thù của một thiết bị nhúng chuyên dụng hơn là tách thành quá
-nhiều task nghiệp vụ.
+Điểm đáng chú ý trong triển khai này là FreeRTOS không được dùng theo
+hướng ``chia nhỏ càng nhiều task càng tốt''. Thay vào đó, firmware giữ
+một luồng điều phối trung tâm trong \texttt{app\_main()}, nạp cấu hình từ
+NVS, xác định trạng thái ban đầu theo nguyên nhân đánh thức rồi gọi
+\texttt{state\_machine\_run()} theo chu kỳ ngắn. Cách tổ chức này giúp
+logic điều khiển vẫn tập trung, dễ đọc và dễ debug, trong khi các cơ
+chế đồng bộ của FreeRTOS chỉ xuất hiện ở những nơi thật sự cần thiết.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -3436,7 +3669,10 @@ chung.
 \subparagraph{c) Luồng hoạt động cơ
 bản}\label{c-luux1ed3ng-houx1ea1t-ux111ux1ed9ng-cux1a1-bux1ea3n}
 
-Luồng hoạt động tổng thể của firmware được tổ chức theo trình tự sau:
+Nếu nhìn từ góc độ vận hành, firmware lặp lại một chu trình rất rõ:
+khởi tạo, nhận biết trạng thái xe, chọn chế độ phù hợp, thực hiện tác vụ
+và quay về trạng thái tiết kiệm năng lượng khi có thể. Luồng tổng thể
+được tổ chức theo trình tự sau:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -3716,6 +3952,15 @@ vệ tinh); \texttt{AT+CGNSTST} chỉ dùng nếu cần dữ liệu NMEA hoàn t
 Toàn bộ lệnh AT cho LTE và GNSS được thực hiện trên cùng UART1. Trình tự
 kiểm tra \texttt{AT+CEREG?} trước khi gọi \texttt{AT+CGACT=1,1} giúp
 tránh kích hoạt PDP context khi modem chưa đăng ký mạng.
+
+\subparagraph{b) Trình tự khởi tạo LTE/GNSS trong
+firmware}\label{b-trinh-tux1ef1-khoi-tao-ltegnss-trong-firmware}
+
+Ở tầng firmware, chuỗi lệnh trên không được gửi dồn trong một lần, mà
+được tách thành các bước kiểm tra có điều kiện: xác nhận modem phản hồi,
+xác nhận SIM sẵn sàng, chờ modem đăng ký mạng, sau đó mới bật PDP
+context và GNSS. Cách tổ chức này giúp quá trình khởi tạo dễ retry hơn
+và hạn chế lỗi dây chuyền khi điều kiện sóng di động thay đổi.
 
 \subparagraph{c) Quản lý kết nối và tiết kiệm
 điện}\label{c-quux1ea3n-luxfd-kux1ebft-nux1ed1i-vuxe0-tiux1ebft-kiux1ec7m-ux111iux1ec7n}
@@ -4360,14 +4605,20 @@ GNSS & Hiệu chỉnh offset vị trí (nếu cần) & NVS \\\hline
 Các giá trị hiệu chuẩn được lưu trữ trong NVS và được tải khi thiết bị
 khởi động, đảm bảo tính nhất quán của phép đo giữa các lần reset.
 
-\subsubsection{3.1.3. Phân tích và lựa chọn kiến trúc Cloud}
+\subsection{3.3. Phân tích và đề xuất kiến trúc Backend/Cloud --
+Backend/cloud analysis and solution}\label{33-phan-tich-va-de-xuat-kien-truc-backend-cloud}
 
-\paragraph{3.1.3.1. Đặt vấn đề cho kiến trúc
+\subsubsection{3.3.1. Phân tích và lựa chọn kiến trúc Cloud}
+
+\paragraph{3.3.1.1. Đặt vấn đề cho kiến trúc
 Cloud}\label{3131-ux111ux1eb7t-vux1ea5n-ux111ux1ec1-cho-kiux1ebfn-truxfac-cloud}
 
-Hệ thống Backend/Cloud là tầng điều phối trung tâm của toàn bộ giải pháp
-IoT. Vì vậy, thiết kế cần đồng thời giải quyết các bài toán kỹ thuật
-sau:
+Khi dữ liệu rời khỏi thiết bị, trọng tâm không còn là ``đọc được dữ
+liệu'' mà là ``biến bản tin đó thành thông tin hữu ích''. Ở tầng
+Backend/Cloud, một bản tin chỉ thật sự có giá trị khi nó được tiếp nhận
+ổn định, lưu đúng nơi, đẩy tới dashboard đúng lúc và vẫn truy vết được
+khi có sự cố. Vì vậy, kiến trúc cloud phải đồng thời giải quyết các bài
+toán sau:
 
 \begin{itemize}
 \tightlist
@@ -4386,7 +4637,7 @@ sau:
   self-hosted, dễ triển khai, dễ mở rộng theo từng dịch vụ.
 \end{itemize}
 
-\paragraph{3.1.3.2. So sánh các phương án kiến trúc
+\paragraph{3.3.1.2. So sánh các phương án kiến trúc
 Cloud}\label{3132-so-suxe1nh-cuxe1c-phux1b0ux1a1ng-uxe1n-kiux1ebfn-truxfac-cloud}
 
 
@@ -4417,7 +4668,7 @@ lý nhiều dịch vụ Docker & \textbf{Cao (Đã chọn)} \\\hline
 }
 
 
-\paragraph{3.1.3.3. Chọn giải pháp kiến trúc
+\paragraph{3.3.1.3. Chọn giải pháp kiến trúc
 Cloud}\label{3133-chux1ecdn-giux1ea3i-phuxe1p-kiux1ebfn-truxfac-cloud}
 
 Đồ án chọn \textbf{PA-C: kiến trúc phân tầng kết hợp hướng sự kiện
@@ -4426,41 +4677,58 @@ Cloud}\label{3133-chux1ecdn-giux1ea3i-phuxe1p-kiux1ebfn-truxfac-cloud}
 \texttt{Device\ -\textgreater{}\ EMQX\ -\textgreater{}\ MQTT\ Bridge\ -\textgreater{}\ PostgreSQL/}\\
 \texttt{VictoriaMetrics/VictoriaLogs\ -\textgreater{}\ Backend\ API\ -\textgreater{}\ Frontend}
 
-Lý do lựa chọn:
+Lựa chọn này xuất phát từ cách dữ liệu thực sự di chuyển trong hệ thống:
+thiết bị gửi bản tin liên tục, lớp ingest tiếp nhận và phân luồng, lớp
+lưu trữ ghi theo đúng đặc tính dữ liệu, còn lớp ứng dụng phục vụ người
+dùng và nghiệp vụ. Nói cách khác, kiến trúc được chọn vì nó bám sát
+hành trình tự nhiên của dữ liệu thay vì dồn mọi trách nhiệm về một dịch
+vụ duy nhất.
+
+Các lý do lựa chọn chính gồm:
 
 \begin{itemize}
 \tightlist
 \item
   \textbf{Khớp bản chất dữ liệu IoT}: MQTT xử lý tốt mô hình pub/sub,
-  giảm mức phụ thuộc trực tiếp giữa thiết bị và tầng ứng dụng.
+  giảm mức phụ thuộc trực tiếp giữa thiết bị và tầng ứng dụng. Điều này
+  giúp thiết bị chỉ tập trung gửi dữ liệu, thay vì phải biết chi tiết ai
+  sẽ nhận và xử lý dữ liệu đó ở phía sau.
 \item
   \textbf{Tối ưu hiệu năng theo vai trò}: Bridge xử lý ingestion, API
-  tập trung nghiệp vụ, database tách theo loại dữ liệu.
+  tập trung nghiệp vụ, database tách theo loại dữ liệu. Mỗi lớp chỉ làm
+  đúng việc mình mạnh nhất, nhờ đó hệ thống dễ giữ ổn định hơn khi tải
+  tăng.
 \item
   \textbf{Dễ scale theo chiều ngang}: có thể nhân bản riêng
-  broker/bridge/api khi số thiết bị tăng.
+  broker/bridge/api khi số thiết bị tăng, thay vì phải mở rộng toàn bộ
+  hệ thống một cách đồng loạt và tốn kém.
 \item
   \textbf{Phù hợp chi phí và phạm vi thực hiện}: self-hosted qua Docker
-  Compose, không phụ thuộc nền tảng cloud thương mại.
+  Compose, không phụ thuộc nền tảng cloud thương mại, nên phù hợp với
+  tính chất của một đồ án vừa cần triển khai thật, vừa cần kiểm soát tốt
+  nguồn lực.
 \end{itemize}
 
-\subsubsection{3.2.3. Giải pháp Backend \&
+\subsubsection{3.3.2. Giải pháp Backend \&
 Cloud}\label{323-giux1ea3i-phuxe1p-backend--cloud}
 
-Phần này trình bày chi tiết giải pháp thiết kế và triển khai hệ thống
-Backend/Cloud theo phương án đã lựa chọn ở mục 3.1.3.
+Sau khi xác định phương án kiến trúc phù hợp, phần này đi vào cách triển
+khai cụ thể từng lớp của hệ thống Backend/Cloud. Cách trình bày được sắp
+xếp theo hành trình dữ liệu, từ lúc bản tin đi vào broker cho tới khi
+thông tin xuất hiện trên dashboard của người vận hành.
 
-\paragraph{3.2.3.1. Kiến trúc tổng quan hệ thống Cloud (Cloud
+\paragraph{3.3.2.1. Kiến trúc tổng quan hệ thống Cloud (Cloud
 Architecture
 Overview)}\label{3231-kiux1ebfn-truxfac-tux1ed5ng-quan-hux1ec7-thux1ed1ng-cloud-cloud-architecture-overview}
 
 \subparagraph{a) Mô hình kiến trúc tổng
 thể}\label{a-muxf4-huxecnh-kiux1ebfn-truxfac-tux1ed5ng-thux1ec3}
 
-Hệ thống Cloud áp dụng kiến trúc phân tầng (layered architecture) kết
-hợp kiến trúc hướng sự kiện (event-driven architecture) để xử lý luồng
-dữ liệu IoT liên tục từ nhiều thiết bị đồng thời. Kiến trúc tổng thể gồm
-các tầng chính sau:
+Để người đọc dễ theo dõi, có thể hình dung hệ thống cloud như một chuỗi
+xử lý nhiều lớp: lớp đầu nhận dữ liệu, lớp giữa lưu và xử lý, lớp cuối
+cung cấp thông tin cho người dùng. Kiến trúc này vừa tận dụng được ưu
+thế của mô hình hướng sự kiện cho IoT, vừa giữ cho trách nhiệm của từng
+thành phần không bị chồng lấn. Cụ thể, hệ thống gồm các tầng chính sau:
 
 \begin{itemize}
 \tightlist
@@ -4507,7 +4775,8 @@ các tầng chính sau:
 \subparagraph{b) Luồng dữ liệu chính trong hệ
 thống}\label{b-luux1ed3ng-dux1eef-liux1ec7u-chuxednh-trong-hux1ec7-thux1ed1ng}
 
-Luồng dữ liệu chính của hệ thống được tổ chức theo trình tự sau:
+Nếu mô tả bằng một ``câu chuyện dữ liệu'', luồng chính của hệ thống diễn
+ra theo trình tự sau:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -4552,10 +4821,12 @@ Luồng dữ liệu chính của hệ thống được tổ chức theo trình t
 \subparagraph{c) Mô hình triển khai
 Docker}\label{c-muxf4-huxecnh-triux1ec3n-khai-docker}
 
-Hệ thống áp dụng mô hình triển khai per-service Docker Compose theo quy
-ước IVM26. Mỗi dịch vụ có một file \texttt{docker-compose.yml} riêng và
-cùng tham gia mạng Docker \texttt{tracking-network} (external network).
-Cách tổ chức này có các ưu điểm sau:
+Ở mức triển khai, kiến trúc trên được hiện thực bằng mô hình per-service
+Docker Compose theo quy ước IVM26. Mỗi dịch vụ có một file
+\texttt{docker-compose.yml} riêng và cùng tham gia mạng Docker
+\texttt{tracking-network} (external network). Cách tổ chức này giúp cấu
+trúc vận hành của đồ án bám sát cách các hệ thống thật được chia dịch vụ
+trong thực tế:
 
 \begin{itemize}
 \tightlist
@@ -4596,23 +4867,22 @@ Tracking\_Grafana & tracking-grafana & 4002 & Chưa cấu hình cứng \\\hline
 }
 
 
-\paragraph{3.2.3.2. MQTT Broker - EMQX (Message Broker Selection \&
+\paragraph{3.3.2.2. MQTT Broker - EMQX (Message Broker Selection \&
 Configuration)}\label{3232-mqtt-broker---emqx-message-broker-selection--configuration}
 
 \subparagraph{a) Vai trò của MQTT
 Broker}\label{a-vai-truxf2-cux1ee7a-mqtt-broker}
 
-MQTT Broker là thành phần middleware trung tâm trong kiến trúc IoT, chịu
-trách nhiệm tiếp nhận message từ các publisher (thiết bị tracker) và
-phân phối đến các subscriber (MQTT Bridge, Backend). Broker hoạt động
-theo mô hình \textbf{Publish-Subscribe (Pub/Sub)}, qua đó cho phép giao
-tiếp bất đồng bộ giữa các thành phần mà không cần biết địa chỉ cụ thể
-của nhau.
+MQTT Broker là điểm vào đầu tiên của dữ liệu ở phía cloud. Vai trò của
+nó có thể hiểu đơn giản là một ``trạm trung chuyển tin nhắn'': thiết bị
+gửi bản tin đến broker, broker tiếp nhận và phân phối cho các thành phần
+cần xử lý tiếp theo. Nhờ mô hình \textbf{Publish-Subscribe (Pub/Sub)},
+các thành phần trong hệ thống có thể giao tiếp bất đồng bộ mà không cần
+ghép chặt với nhau.
 
-Trong hệ thống theo dõi phương tiện, MQTT Broker xử lý luồng dữ liệu
-liên tục từ hàng chục đến hàng trăm thiết bị tracker, mỗi thiết bị gửi
-dữ liệu vị trí và telemetry với tần suất từ 1 đến 60 giây tùy chế độ
-hoạt động.
+Trong hệ thống theo dõi phương tiện, cách tổ chức này đặc biệt quan
+trọng vì số lượng thiết bị có thể tăng dần theo thời gian, trong khi
+nhịp gửi dữ liệu lại thay đổi theo chế độ hoạt động của từng xe.
 
 \subparagraph{b) So sánh và lựa chọn MQTT
 Broker}\label{b-so-suxe1nh-vuxe0-lux1ef1a-chux1ecdn-mqtt-broker}
@@ -4653,7 +4923,9 @@ phí \\\hline
 
 \textbf{Kết luận lựa chọn: EMQX Single Node}
 
-EMQX được lựa chọn làm MQTT Broker cho hệ thống với các lý do chính:
+EMQX được lựa chọn làm MQTT Broker cho hệ thống vì đây là phương án giữ
+được thế cân bằng tốt giữa hiệu năng, khả năng mở rộng và mức độ phù hợp
+với nguồn lực triển khai của đồ án. Các lý do chính gồm:
 
 \begin{itemize}
 \tightlist
@@ -4742,13 +5014,15 @@ Ngoài ra, hệ thống có thể mở rộng thêm rule cho geofence sơ cấp,
 kê traffic theo topic, hoặc phát hiện thiết bị im lặng bất thường để
 phục vụ vận hành.
 
-\paragraph{3.2.3.3. Thiết kế cơ sở dữ liệu (Database Architecture
+\paragraph{3.3.2.3. Thiết kế cơ sở dữ liệu (Database Architecture
 Design)}\label{3233-thiux1ebft-kux1ebf-cux1a1-sux1edf-dux1eef-liux1ec7u-database-architecture-design}
 
-\textbf{Đặt vấn đề lưu trữ:} Dữ liệu hệ thống có hai đặc tính trái
-ngược: telemetry ghi rất nhanh theo thời gian thực và dữ liệu nghiệp vụ
-yêu cầu toàn vẹn quan hệ dài hạn. Một mô hình lưu trữ duy nhất thường
-tối ưu tốt cho một phía nhưng kém hiệu quả ở phía còn lại.
+\textbf{Đặt vấn đề lưu trữ:} Khi đi sâu hơn vào tầng dữ liệu, có thể thấy
+hệ thống đang phục vụ hai nhu cầu rất khác nhau. Một mặt, telemetry cần
+được ghi nhanh và truy vấn theo thời gian. Mặt khác, dữ liệu nghiệp vụ
+đòi hỏi tính toàn vẹn, quan hệ rõ ràng và khả năng quản lý dài hạn. Nếu
+dùng một công cụ cho cả hai loại bài toán, hệ thống thường sẽ phải đánh
+đổi hiệu quả ở một trong hai phía.
 
 
 {\thesissettableid{3.18A}{tab-ch3-so-sanh-cac-phuong-an-kien-truc-luu-tru-du-lieu}
@@ -4979,7 +5253,7 @@ và dễ triển khai. VictoriaLogs lưu trữ các loại nhật ký: sự ki�
 bị, nhật ký lỗi, phiên làm việc, message MQTT, và nhật ký kiểm toán
 (audit trail). Chính sách lưu trữ: 7 ngày cho nhật ký thông thường.
 
-\paragraph{3.2.3.4. API Server và kiến trúc phần mềm (API Server \&
+\paragraph{3.3.2.4. API Server và kiến trúc phần mềm (API Server \&
 Software
 Architecture)}\label{3234-api-server-vuxe0-kiux1ebfn-truxfac-phux1ea7n-mux1ec1m-api-server--software-architecture}
 
@@ -5048,7 +5322,7 @@ MQTT Bridge đã được tách thành dịch vụ Node.js độc lập
 Cách tách này giúp dịch vụ dễ mở rộng hơn, cô lập lỗi tốt hơn và giữ
 kiến trúc tổng thể gọn hơn.
 
-\paragraph{3.2.3.5. Thiết kế API Endpoints (REST API
+\paragraph{3.3.2.5. Thiết kế API Endpoints (REST API
 Design)}\label{3235-thiux1ebft-kux1ebf-api-endpoints-rest-api-design}
 
 \subparagraph{a) Nguyên tắc thiết
@@ -5115,7 +5389,7 @@ nhiều (\texttt{/devices}, \texttt{/vehicles}, \texttt{/customers},
 \texttt{/trips}, \texttt{/alerts}, \texttt{/geofences}) để thống nhất
 cách đặt tên.
 
-\paragraph{3.2.3.6. WebSocket và truyền dữ liệu thời gian thực
+\paragraph{3.3.2.6. WebSocket và truyền dữ liệu thời gian thực
 (Real-time
 Communication)}\label{3236-websocket-vuxe0-truyux1ec1n-dux1eef-liux1ec7u-thux1eddi-gian-thux1ef1c-real-time-communication}
 
@@ -5137,15 +5411,18 @@ trình OTA được MQTT Bridge ghi vào \texttt{firmware\_update\_log} và
 VictoriaLogs để phục vụ truy vết, theo dõi và đồng bộ với giao diện quản
 trị.
 
-\paragraph{3.2.3.7. Bảo mật hệ thống (Security
+\paragraph{3.3.2.7. Bảo mật hệ thống (Security
 Design)}\label{3237-bux1ea3o-mux1eadt-hux1ec7-thux1ed1ng-security-design}
 
 \subparagraph{a) Xác thực Session-based (Không dùng
 JWT)}\label{a-xuxe1c-thux1ef1c-session-based-khuxf4ng-duxf9ng-jwt}
 
 Hệ thống sử dụng cơ chế xác thực dựa trên phiên làm việc (session-based
-authentication) với token lưu trữ trong cơ sở dữ liệu, thay vì JSON Web
-Token (JWT).
+authentication) với \emph{opaque session token} lưu trữ trong cơ sở dữ
+liệu, thay vì JSON Web Token (JWT) tự mang toàn bộ thông tin phiên. Token
+ở đây chỉ đóng vai trò khóa tham chiếu; backend mới là nơi lưu và kiểm
+tra trạng thái phiên, còn giá trị token được băm SHA-256 trước khi ghi
+xuống cơ sở dữ liệu.
 
 
 {\thesissettableid{3.23}{tab-ch3-so-sanh-jwt-va-session-based-authentication}
@@ -5173,13 +5450,17 @@ token ID) \\\hline
 \subparagraph{b) Bảo mật tầng truyền
 tải}\label{b-bux1ea3o-mux1eadt-tux1ea7ng-truyux1ec1n-tux1ea3i}
 
-Helmet (security headers), CORS (giới hạn origin), Rate Limiting (giới
-hạn request/IP), và Request-ID Correlation (UUID per request).
+Hệ thống bảo vệ tầng truyền tải bằng nhiều lớp bổ trợ: Helmet để thiết
+lập các header bảo mật, CORS để giới hạn origin hợp lệ, rate limiting để
+chặn lạm dụng theo IP, và cơ chế gắn Request-ID để truy vết luồng xử lý
+theo từng request.
 
 \subparagraph{c) Bảo mật MQTT}\label{c-bux1ea3o-mux1eadt-mqtt}
 
-ACL per device, Client ID duy nhất, và xác thực MQTT bằng
-username/password.
+Ở tầng MQTT, mỗi thiết bị được cấp ACL riêng và Client ID duy nhất, kết
+hợp xác thực bằng username/password. Cách làm này giúp cô lập phạm vi
+publish/subscribe của từng tracker và giảm rủi ro một thiết bị truy cập
+nhầm sang luồng dữ liệu của thiết bị khác.
 
 \subparagraph{d) Hệ thống thông báo cảnh
 báo}\label{d-hux1ec7-thux1ed1ng-thuxf4ng-buxe1o-cux1ea3nh-buxe1o}
@@ -5188,14 +5469,19 @@ Hệ thống hỗ trợ gửi thông báo qua Telegram Bot (thời gian thực) 
 SMTP (chi tiết). Các loại cảnh báo: xe di chuyển bất thường, vi phạm tốc
 độ, pin thấp, thiết bị mất kết nối, lịch bảo trì sắp đến.
 
-\subsubsection{3.1.4. Phân tích và lựa chọn công nghệ Frontend}
+\subsection{3.4. Phân tích và đề xuất công nghệ Frontend -- Frontend
+analysis and solution}\label{34-phan-tich-va-de-xuat-cong-nghe-frontend}
 
-\paragraph{3.1.4.1. Đặt vấn đề cho giải pháp
+\subsubsection{3.4.1. Phân tích và lựa chọn công nghệ Frontend}
+
+\paragraph{3.4.1.1. Đặt vấn đề cho giải pháp
 Frontend}\label{3141-ux111ux1eb7t-vux1ea5n-ux111ux1ec1-cho-giux1ea3i-phuxe1p-frontend}
 
-Giao diện người dùng (Frontend) là lớp tương tác trực tiếp giữa người
-vận hành và hệ thống IoT giám sát phương tiện. Do đó, bài toán thiết kế
-frontend cần đồng thời đáp ứng các yêu cầu sau:
+Nếu cloud là nơi xử lý dữ liệu, thì frontend là nơi người vận hành thực
+sự ``nhìn thấy'' hệ thống đang hoạt động ra sao. Một dashboard tốt không
+chỉ hiển thị đủ thông tin, mà còn phải giúp người dùng nhận ra điều gì
+quan trọng, điều gì bất thường và cần hành động ở đâu. Vì vậy, bài toán
+thiết kế frontend cần đồng thời đáp ứng các yêu cầu sau:
 
 \begin{itemize}
 \tightlist
@@ -5213,7 +5499,7 @@ frontend cần đồng thời đáp ứng các yêu cầu sau:
   cho mô hình vận hành đa dịch vụ.
 \end{itemize}
 
-\paragraph{3.1.4.2. So sánh các phương án công nghệ
+\paragraph{3.4.1.2. So sánh các phương án công nghệ
 Frontend}\label{3142-so-suxe1nh-cuxe1c-phux1b0ux1a1ng-uxe1n-cuxf4ng-nghux1ec7-frontend}
 
 
@@ -5242,13 +5528,15 @@ realtime thuận lợi & Độ phức tạp framework cao hơn CSR thuần &
 }
 
 
-\paragraph{3.1.4.3. Chọn giải pháp
+\paragraph{3.4.1.3. Chọn giải pháp
 Frontend}\label{3143-chux1ecdn-giux1ea3i-phuxe1p-frontend}
 
 Đồ án chọn \textbf{PA-FE3: Next.js 15 + React 19} làm nền tảng frontend
-chính.
+chính. Đây không phải là lựa chọn chạy theo xu hướng framework, mà là
+lựa chọn bám sát nhu cầu của một dashboard phải vừa ``đọc nhanh'' vừa
+``phản ứng nhanh'' khi dữ liệu và cảnh báo thay đổi liên tục.
 
-Lý do lựa chọn:
+Các lý do lựa chọn gồm:
 
 \begin{itemize}
 \tightlist
@@ -5266,21 +5554,26 @@ Lý do lựa chọn:
   output và đóng gói Docker rõ ràng.
 \end{itemize}
 
-\subsubsection{3.2.4. Giải pháp
+\subsubsection{3.4.2. Giải pháp
 Frontend}\label{324-giux1ea3i-phuxe1p-frontend}
 
-Phần này trình bày các giải pháp thiết kế, lựa chọn công nghệ và kiến
-trúc ứng dụng web theo phương án đã chọn ở mục 3.1.4.
+Trên cơ sở phương án đã chọn ở mục 3.4.1, phần này trình bày cách nhóm
+biến stack công nghệ thành một giao diện để người vận hành nắm tình
+huống nhanh, thao tác gọn và vẫn theo kịp dữ liệu thời gian thực: từ lựa
+chọn công nghệ, tổ chức mã nguồn đến cách quản lý trạng thái và hiển thị
+dữ liệu.
 
-\paragraph{3.2.4.1. Lựa chọn công nghệ Frontend (Technology
+\paragraph{3.4.2.1. Lựa chọn công nghệ Frontend (Technology
 Selection)}\label{3241-lux1ef1a-chux1ecdn-cuxf4ng-nghux1ec7-frontend-technology-selection}
 
 \subparagraph{a) Framework ứng dụng
 web}\label{a-framework-ux1ee9ng-dux1ee5ng-web}
 
-Để lựa chọn framework phù hợp cho lớp giao diện, nhóm so sánh Next.js,
-Nuxt.js và Vite + React theo các tiêu chí hiệu năng, khả năng mở rộng và
-trải nghiệm phát triển.
+Để lựa chọn framework phù hợp, nhóm không dừng ở so sánh tên công nghệ,
+mà đặt câu hỏi thực tế hơn: framework nào giúp dashboard tải nhanh, tổ
+chức rõ và vẫn dễ mở rộng khi số lượng trang quản trị tăng lên. Từ đó,
+nhóm đối chiếu Next.js, Nuxt.js và Vite + React theo các tiêu chí hiệu
+năng, khả năng mở rộng và trải nghiệm phát triển.
 
 
 {\thesissettableid{3.24}{tab-ch3-so-sanh-framework-frontend}
@@ -5315,7 +5608,8 @@ Cộng đồng \& tài liệu & Rất lớn & Lớn & Lớn \\\hline
 
 
 \textbf{Kết luận lựa chọn:} Next.js 15 được chọn làm framework chính vì
-các lý do sau:
+nó tạo được thế cân bằng tốt giữa trải nghiệm của người dùng cuối và khả
+năng tổ chức mã nguồn của đội phát triển. Các lý do cụ thể gồm:
 
 \begin{itemize}
 \tightlist
@@ -5344,9 +5638,9 @@ các lý do sau:
 Library)}\label{b-thux1b0-viux1ec7n-giao-diux1ec7n-ui-component-library}
 
 Hệ thống sử dụng shadcn/ui kết hợp với Radix UI làm nền tảng xây dựng
-giao diện. Đây không phải thư viện component truyền thống, mà là bộ sưu
-tập component có thể tùy chỉnh hoàn toàn và được sao chép trực tiếp vào
-dự án.
+giao diện. Điểm đáng giá của lựa chọn này không nằm ở số lượng component
+dựng sẵn, mà ở khả năng giữ giao diện nhất quán trong khi nhóm vẫn kiểm
+soát được cách từng thành phần được triển khai trong dự án.
 
 \textbf{Đặc điểm nổi bật:}
 
@@ -5371,8 +5665,10 @@ dự án.
 \subparagraph{c) Quản lý trạng thái (State
 Management)}\label{c-quux1ea3n-luxfd-trux1ea1ng-thuxe1i-state-management}
 
-Hệ thống áp dụng chiến lược tách biệt giữa trạng thái client và trạng
-thái server:
+Với một dashboard vừa có dữ liệu tĩnh, dữ liệu thời gian thực và trạng
+thái giao diện, dồn mọi thứ vào cùng một nơi quản lý sẽ làm mã nguồn
+nhanh chóng rối lên. Vì vậy, hệ thống áp dụng chiến lược tách biệt giữa
+trạng thái client và trạng thái server:
 
 
 {\thesissettableid{3.25}{tab-ch3-chien-luoc-quan-ly-trang-thai}
@@ -5440,7 +5736,7 @@ công cộng, và có hệ sinh thái plugin phong phú (MarkerCluster, Geoman
 cho vẽ geofence). Điều này đặc biệt phù hợp với hệ thống IoT có thể
 triển khai trong môi trường private network.
 
-\paragraph{3.2.4.2. Kiến trúc ứng dụng web (Web Application
+\paragraph{3.4.2.2. Kiến trúc ứng dụng web (Web Application
 Architecture)}\label{3242-kiux1ebfn-truxfac-ux1ee9ng-dux1ee5ng-web-web-application-architecture}
 
 \subparagraph{a) Mô hình kiến trúc Feature-Sliced
@@ -5448,7 +5744,9 @@ Design}\label{a-muxf4-huxecnh-kiux1ebfn-truxfac-feature-sliced-design}
 
 Ứng dụng Frontend được tổ chức theo mô hình Feature-Sliced Design (FSD),
 trong đó mỗi tính năng nghiệp vụ được đóng gói thành một module độc lập
-bao gồm components, hooks, types và utils.
+bao gồm components, hooks, types và utils. Cách tổ chức này giúp người
+đọc và người phát triển nhìn thấy ngay mối liên hệ giữa cấu trúc mã
+nguồn và các nghiệp vụ thực tế của hệ thống.
 
 \begin{verbatim}
 src/
@@ -5554,19 +5852,22 @@ Luồng dữ liệu trong ứng dụng Frontend tuân theo mô hình một chi�
 \subparagraph{c) Cơ chế xác thực và bảo vệ
 route}\label{c-cux1a1-chux1ebf-xuxe1c-thux1ef1c-vuxe0-bux1ea3o-vux1ec7-route}
 
-Hệ thống Frontend sử dụng cơ chế xác thực dựa trên session token, không
-sử dụng JWT:
+Hệ thống Frontend sử dụng \emph{opaque session token} do Backend cấp,
+không dùng JWT tự mang thông tin phiên. Việc client gửi token trong
+header \texttt{Authorization:\ Bearer} chỉ là hình thức truyền token; về
+bản chất, đây vẫn là cơ chế session-based vì mọi quyền truy cập đều được
+quyết định sau khi server tra cứu phiên tương ứng:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Đăng nhập:} Người dùng nhập email và mật khẩu, Backend trả về
-  session token.
+  \textbf{Đăng nhập:} Người dùng nhập email và mật khẩu, Backend tạo bản
+  ghi phiên và trả về session token ngẫu nhiên.
 \item
   \textbf{Lưu trữ token:} Token chỉ được lưu trong bộ nhớ Zustand
-  (memory-only), KHÔNG lưu vào localStorage hay sessionStorage, nhằm
-  giảm thiểu rủi ro XSS.
+  (memory-only), không lưu vào localStorage hay sessionStorage, nhằm giảm
+  thiểu rủi ro XSS.
 \item
   \textbf{Gửi request:} Mọi request HTTP tự động đính kèm token vào
   header
@@ -5576,8 +5877,9 @@ sử dụng JWT:
   vực \texttt{/dashboard/*}, tự động chuyển hướng về trang đăng nhập nếu
   chưa xác thực hoặc token hết hạn.
 \item
-  \textbf{Auto-refresh:} Khi token sắp hết hạn, hệ thống tự động yêu cầu
-  Backend cấp token mới mà không cần người dùng đăng nhập lại.
+  \textbf{Gia hạn phiên:} Khi phiên sắp hết hạn, Frontend chủ động gọi
+  cơ chế gia hạn để nhận token mới, nhờ đó người dùng không bị đăng nhập
+  lại đột ngột trong lúc thao tác.
 \end{enumerate}
 
 
@@ -5591,7 +5893,7 @@ sử dụng JWT:
 }
 
 
-\paragraph{3.2.4.3. Thiết kế các trang chức năng chính (Main Feature
+\paragraph{3.4.2.3. Thiết kế các trang chức năng chính (Main Feature
 Pages)}\label{3243-thiux1ebft-kux1ebf-cuxe1c-trang-chux1ee9c-nux103ng-chuxednh-main-feature-pages}
 
 \subparagraph{a) Trang tổng quan
@@ -5661,11 +5963,13 @@ thị thông tin đầy đủ của phương tiện bao gồm thông tin cơ b�
 hiện tại trên bản đồ, trạng thái thiết bị IoT, các cảnh báo đang hoạt
 động, lịch sử chuyến đi và lịch sử bảo trì.
 
+\clearpage
+
 
 {\thesissetfigureid{3.18}{fig-ch3-giao-dien-trang-quan-ly-phuong-tien}
 \begin{figure}[htbp]
 \centering
-\pandocbounded{\safeincludesvg{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-18.svg}}
+\pandocbounded{\safeincludesvgnarrow{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-18.svg}}
 \caption{Giao diện trang quản lý phương tiện}
 \label{fig:ch3-giao-dien-trang-quan-ly-phuong-tien}
 \end{figure}
@@ -5719,7 +6023,7 @@ Không \\\hline
 }
 
 
-\paragraph{3.2.4.4. Tích hợp bản đồ thời gian thực (Real-time Map
+\paragraph{3.4.2.4. Tích hợp bản đồ thời gian thực (Real-time Map
 Integration)}\label{3244-tuxedch-hux1ee3p-bux1ea3n-ux111ux1ed3-thux1eddi-gian-thux1ef1c-real-time-map-integration}
 
 \subparagraph{a) Kiến trúc tích hợp bản
@@ -5822,21 +6126,25 @@ thông tin xe khi click marker (biển số, tốc độ, trạng thái) \\\hlin
 {\thesissetfigureid{3.20}{fig-ch3-giao-dien-trang-ban-o-thoi-gian-thuc-voi-cac-marker-xe}
 \begin{figure}[htbp]
 \centering
-\pandocbounded{\safeincludesvgcompact{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-20.svg}}
+\pandocbounded{\safeincludesvgnarrow{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-20.svg}}
 \caption{Giao diện trang bản đồ thời gian thực với các marker xe}
 \label{fig:ch3-giao-dien-trang-ban-o-thoi-gian-thuc-voi-cac-marker-xe}
 \end{figure}
 }
 
+\clearpage
 
-\paragraph{3.2.4.5. Thiết kế responsive và trải nghiệm người dùng
+
+\paragraph{3.4.2.5. Thiết kế responsive và trải nghiệm người dùng
 (Responsive Design \&
 UX)}\label{3245-thiux1ebft-kux1ebf-responsive-vuxe0-trux1ea3i-nghiux1ec7m-ngux1b0ux1eddi-duxf9ng-responsive-design--ux}
 
 \subparagraph{a) Chiến lược
 responsive}\label{a-chiux1ebfn-lux1b0ux1ee3c-responsive}
 
-Hệ thống áp dụng chiến lược Mobile-First với ba mức breakpoint chính:
+Trong phạm vi hiện tại, giao diện được ưu tiên cho desktop và tablet,
+nhưng vẫn giữ ba mức breakpoint chính để không phá vỡ trải nghiệm trên màn
+hình nhỏ:
 
 
 {\thesissettableid{3.28}{tab-ch3-breakpoint-va-tuong-ung-giao-dien}
@@ -5946,13 +6254,12 @@ dùng}\label{e-tux1ed1i-ux1b0u-trux1ea3i-nghiux1ec7m-ngux1b0ux1eddi-duxf9ng}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\subsection{3.3. Phân tích, đánh giá và lựa chọn phương án khả thi --
+\subsection{3.5. Phân tích, đánh giá và lựa chọn phương án khả thi --
 Analysis, Evaluation and
 Selection}\label{33-phuxe2n-tuxedch-ux111uxe1nh-giuxe1-vuxe0-lux1ef1a-chux1ecdn-phux1b0ux1a1ng-uxe1n-khux1ea3-thi--analysis-evaluation-and-selection}
 
-Dựa trên phân tích các giải pháp đề xuất cho từng tầng hệ thống ở mục
-3.2, bảng tổng hợp dưới đây đánh giá và so sánh các phương án đã xem
-xét:
+Dựa trên phân tích và đề xuất ở các mục 3.1 đến 3.4, bảng tổng hợp dưới
+đây đánh giá và so sánh các phương án đã xem xét:
 
 
 {\thesissettableid{3.29}{tab-ch3-ma-tran-anh-gia-tong-hop-cac-phuong-an-thiet-ke}
@@ -5985,10 +6292,10 @@ Bản đồ & Leaflet.js & Open-source, self-hosted tiles \\\hline
 }
 
 
-\subsection{3.4. Tối ưu phương án thiết kế -- The optimal
+\subsection{3.6. Tối ưu phương án thiết kế -- The optimal
 solution}\label{34-tux1ed1i-ux1b0u-phux1b0ux1a1ng-uxe1n-thiux1ebft-kux1ebf--the-optimal-solution}
 
-Từ kết quả phân tích và đánh giá ở mục 3.3, phương án thiết kế tối ưu
+Từ kết quả phân tích và đánh giá ở mục 3.5, phương án thiết kế tối ưu
 cho hệ thống IoT giám sát phương tiện được tổng hợp như sau:
 
 
@@ -6023,28 +6330,31 @@ cho hệ thống IoT giám sát phương tiện được tổng hợp như sau:
 \end{itemize}
 
 Phương án này đáp ứng các yêu cầu kỹ thuật đã đặt ra ở Chương 2, đồng
-thời giữ chi phí phần cứng trong khoảng 870.000 đến 1.630.000 VNĐ cho
-mỗi thiết bị.
+thời giữ chi phí phần cứng ở mức khoảng 1.514.000 VND cho mỗi thiết bị
+theo mặt bằng giá tham chiếu tháng 4/2026.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \subsection{Kết luận chương
 3}\label{kux1ebft-luux1eadn-chux1b0ux1a1ng-3}
 
-Chương 3 đã trình bày có hệ thống quá trình phân tích, đề xuất và lựa
-chọn phương án thiết kế cho toàn bộ hệ thống IoT giám sát phương tiện
-trên bốn tầng: phần cứng, firmware, backend/cloud và frontend. Thông qua
-các bảng so sánh và ma trận đánh giá, phương án tối ưu đã được xác lập
-theo các tiêu chí hiệu năng, chi phí và khả năng mở rộng. Kết quả này
-tạo nền tảng kỹ thuật nhất quán cho giai đoạn triển khai chi tiết ở
-Chương 4.
+Chương 3 đã trả lời câu hỏi "thiết kế hệ thống này như thế nào để vừa
+đáp ứng yêu cầu kỹ thuật, vừa khả thi khi triển khai". Từ phần cứng,
+firmware đến backend/cloud và frontend, các phương án không chỉ được nêu
+ra mà còn được cân nhắc theo tiêu chí hiệu năng, chi phí, độ phức tạp và
+khả năng mở rộng. Nhờ đó, phương án cuối cùng ở Chương 3 không xuất hiện
+như một lựa chọn cảm tính, mà như kết quả của quá trình sàng lọc có cơ
+sở. Trên nền tảng đó, Chương 4 sẽ chuyển sang phần hiện thực: biến các
+lựa chọn thiết kế thành hệ thống vận hành được trong thực tế.
 
 \chapterheading{CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ -- IMPLEMENTATION AND RESULTS}
 
-Chương này trình bày quá trình triển khai giải pháp từ thiết kế chi tiết
-đến thử nghiệm thực tế. Nội dung bao gồm phần cứng thiết bị, firmware,
-hạ tầng cloud, giao diện giám sát và các kết quả đo lường sau khi tích
-hợp hệ thống trên xe.
+Nếu Chương 3 dừng ở mức lựa chọn phương án, thì Chương 4 trả lời câu
+hỏi liệu những lựa chọn đó có thực sự hoạt động khi đưa vào chế tạo, lập
+trình và tích hợp hay không. Nội dung chương đi từ phần cứng thiết bị,
+firmware, hạ tầng cloud, giao diện giám sát đến các kết quả đo lường sau
+khi lắp đặt hệ thống trên xe, qua đó giúp người đọc đối chiếu giữa ý
+tưởng thiết kế và kết quả triển khai thực tế.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -6057,11 +6367,13 @@ cứng}\label{411-thiux1ebft-kux1ebf-chi-tiux1ebft-phux1ea7n-cux1ee9ng}
 \paragraph{a) Kiến trúc tổng
 thể}\label{a-kiux1ebfn-truxfac-tux1ed5ng-thux1ec3}
 
-Hệ thống tracker sử dụng ESP32-S3 làm bộ xử lý trung tâm. Vi điều khiển
-này giao tiếp UART với modem 4G/GNSS, BLE với OBD2, I2C với cảm biến gia
-tốc và ADC để giám sát điện áp ắc quy. Toàn bộ hệ thống được cấp nguồn
-bởi mạch quản lý năng lượng thông minh, có khả năng tự động chuyển đổi
-giữa ắc quy xe và pin dự phòng.
+Hệ thống tracker sử dụng ESP32-S3 làm bộ xử lý trung tâm. Có thể hình
+dung đây là "bộ não" của thiết bị, chịu trách nhiệm thu thập dữ liệu,
+điều phối các khối phần cứng và quyết định trạng thái vận hành. Vi điều
+khiển này giao tiếp UART với modem 4G/GNSS, BLE với OBD2, I2C với cảm
+biến gia tốc và ADC để giám sát điện áp ắc quy. Toàn bộ hệ thống được
+cấp nguồn bởi mạch quản lý năng lượng thông minh, có khả năng tự động
+chuyển đổi giữa ắc quy xe và pin dự phòng.
 
 
 {\thesissetfigureid{4.1a}{fig-ch4-bo-tri-chi-tiet-cac-khoi-phan-cung-trong-tracker}
@@ -6118,26 +6430,27 @@ Active (BLE) & ~20--40 mA \\\hline
 
 
 \textbf{Giao tiếp UART với modem SIM7600CE-T (LTE + GNSS tích hợp):}
-ESP32-S3 sử dụng UART1 (GPIO16 TX, GPIO17 RX) để giao tiếp với SIMCom
-SIM7600CE-T thông qua tập lệnh AT. Modem được cấu hình Auto mode
-(\texttt{AT+CNMP=2}) để tự động chuyển giữa LTE/UMTS/GSM, sử dụng APN
-mặc định \texttt{internet}, và cung cấp dữ liệu GNSS qua
-\texttt{AT+CGNSINF} (có thể thêm stream NMEA \texttt{AT+CGNSTST} nếu
-cần) trên cùng UART. Tốc độ baud mặc định 115200 bps, dữ liệu 8-bit, 1
-stop bit, không parity. Kiến trúc này giảm số khối phần cứng rời và giữ
-pin mapping hiện tại.
+Ở mức chức năng, khối modem đảm nhiệm hai việc: đưa dữ liệu của xe lên
+mạng 4G và trả về vị trí GNSS của xe. ESP32-S3 sử dụng UART1 (GPIO16 TX,
+GPIO17 RX) để giao tiếp với SIMCom SIM7600CE-T thông qua tập lệnh AT.
+Modem được cấu hình Auto mode (\texttt{AT+CNMP=2}) để tự động chuyển
+giữa LTE/UMTS/GSM, sử dụng APN mặc định \texttt{internet}, và cung cấp
+dữ liệu GNSS qua \texttt{AT+CGNSINF} (có thể thêm stream NMEA
+\texttt{AT+CGNSTST} nếu cần) trên cùng UART. Tốc độ baud mặc định 115200
+bps, dữ liệu 8-bit, 1 stop bit, không parity. Kiến trúc này giảm số khối
+phần cứng rời và giữ pin mapping hiện tại.
 
 \textbf{Giao tiếp BLE với OBD2 adapter:} ESP32-S3 sử dụng BLE 5.0 tích
-hợp để kết nối với adapter vgate iCar Pro (BLE 4.0). Kết nối này cho
-phép đọc dữ liệu chẩn đoán xe theo chuẩn OBD-II bao gồm trạng thái khóa
-điện (IGN), tốc độ động cơ (RPM), vận tốc xe, mức nhiên liệu và mã lỗi
-chẩn đoán (DTC).
+hợp để kết nối với adapter vgate iCar Pro (BLE 4.0). Nhờ kết nối này,
+tracker không chỉ biết xe đang ở đâu mà còn biết xe đang ở trạng thái
+nào thông qua các dữ liệu OBD-II như trạng thái khóa điện (IGN), tốc độ
+động cơ (RPM), vận tốc xe, mức nhiên liệu và mã lỗi chẩn đoán (DTC).
 
 \textbf{Giao tiếp I2C với cảm biến LIS3DSH:} Cảm biến gia tốc 3 trục
-LIS3DSH được kết nối qua bus I2C (GPIO47 SDA, GPIO48 SCL). Cảm biến này
-đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang
-đỗ, cho phép đánh thức ESP32-S3 từ chế độ deep sleep thông qua ngắt
-ngoài (interrupt) khi phát hiện rung động bất thường.
+LIS3DSH được kết nối qua bus I2C (GPIO47 SDA, GPIO48 SCL). Vai trò chính
+của cảm biến này là giúp hệ thống "ngủ mà vẫn canh", tức là phát hiện
+chuyển động khi xe đang đỗ và đánh thức ESP32-S3 từ chế độ deep sleep
+thông qua ngắt ngoài (interrupt) khi có rung động bất thường.
 
 
 {\thesissetfigureid{4.2a}{fig-ch4-so-o-chan-ket-noi-sim7600ce-t-voi-esp32-s3}
@@ -6366,7 +6679,7 @@ Kiến trúc nguồn gồm sáu khối chức năng chính:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Buck 3.3V (AP2112-3.3):} Chuyển đổi 12V/24V xuống 3.3V cấp
+  \textbf{LDO 3.3V (AP2112-3.3):} Hạ từ bus 5V chính xuống 3.3V cấp
   ESP32-S3
 \item
   \textbf{Buck 5V (MP2482):} Chuyển đổi 12V/24V xuống 5V bus chính
@@ -6406,24 +6719,24 @@ Kiến trúc nguồn gồm sáu khối chức năng chính:
 }
 
 
-\paragraph{b) Buck 3.3V cho ESP32-S3 (AP2112-3.3)}\label{b-buck-33v-cho-esp32-s3-xl1509-33e}
+\paragraph{b) LDO 3.3V cho ESP32-S3 (AP2112-3.3)}\label{b-buck-33v-cho-esp32-s3-xl1509-33e}
 
-Khối buck 3.3V dùng \textbf{AP2112-3.3} để hạ áp từ 12V/24V xuống 3.3V
-cấp cho ESP32-S3.
+Khối 3.3V dùng \textbf{AP2112-3.3} như một LDO để hạ từ bus 5V chính xuống
+3.3V cấp cho ESP32-S3.
 
 
 {\thesissettableid{4.2}{tab-ch4-khoi-buck-3-3v}
 \def\LTcaptype{table}
 \begin{longtable}{|p{0.12\linewidth}|p{0.10\linewidth}|p{0.30\linewidth}|p{0.20\linewidth}|p{0.20\linewidth}|}
-\caption{Khối Buck 3.3V}\label{tab:ch4-khoi-buck-3-3v}\\
+\caption{Khối LDO 3.3V}\label{tab:ch4-khoi-buck-3-3v}\\
 \hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endfirsthead
-\caption[]{Khối Buck 3.3V (tiếp theo)}\\
+\caption[]{Khối LDO 3.3V (tiếp theo)}\\
 \hline \textbf{Khối} & \textbf{IC} & \textbf{Input} & \textbf{Output} & \textbf{Tải} \\
 \hline
 \endhead
-Buck 3.3V & AP2112-3.3 & 12--24V & 3.3V & ESP32-S3 \\\hline
+LDO 3.3V & AP2112-3.3 & 5V & 3.3V & ESP32-S3 \\\hline
 \end{longtable}
 }
 
@@ -6556,6 +6869,8 @@ Profile 24V: U\_batt \textgreater= 24.4V & Ắc quy & Không & Có \\\hline
 \end{figure}
 }
 
+\clearpage
+
 
 \paragraph{f) Mạch sạc pin
 TP4056}\label{f-mux1ea1ch-sux1ea1c-pin-tp4056}
@@ -6584,7 +6899,7 @@ Sạc pin & TP4056 & 5V từ MP2482 & 4.2V & Pin 18650 1S \\\hline
 {\thesissetfigureid{4.10}{fig-ch4-kien-truc-sac-pin-tp4056-va-uong-cap-nguon-du-phong}
 \begin{figure}[htbp]
 \centering
-\pandocbounded{\safeincludesvgcompact{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-10.svg}}
+\pandocbounded{\safeincludesvgnarrow{./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-10.svg}}
 \caption{Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng}
 \label{fig:ch4-kien-truc-sac-pin-tp4056-va-uong-cap-nguon-du-phong}
 \end{figure}
@@ -6732,6 +7047,13 @@ Assembly}\label{42-chux1ebf-tux1ea1o-vuxe0-lux1eafp-ruxe1p-hux1ec7-thux1ed1ng--m
 \subsubsection{4.2.1. Lắp ráp mạch điện tử (Electronics
 Assembly)}\label{421-lux1eafp-ruxe1p-mux1ea1ch-ux111iux1ec7n-tux1eed-electronics-assembly}
 
+Phần lắp ráp không chỉ nhằm ghép các linh kiện thành một bo mạch hoàn
+chỉnh, mà còn là bước kiểm chứng xem các giả định thiết kế ở Chương 3 có
+đứng vững khi đi vào hiện thực hay không. Vì vậy, phần này được trình
+bày theo đúng thứ tự mà một người triển khai thực tế sẽ quan tâm: cần có
+những vật tư gì, lắp theo thứ tự nào, và kiểm tra ra sao để hạn chế lỗi
+ngay từ đầu.
+
 \paragraph{a) Danh sách vật liệu (Bill of
 Materials)}\label{a-danh-suxe1ch-vux1eadt-liux1ec7u-bill-of-materials}
 
@@ -6740,50 +7062,50 @@ Materials)}\label{a-danh-suxe1ch-vux1eadt-liux1ec7u-bill-of-materials}
 \def\LTcaptype{table}
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
 \caption{Danh sách vật liệu đầy đủ cho hệ thống tracker}\label{tab:ch4-danh-sach-vat-lieu-ay-u-cho-he-thong-tracker}\\
-\hline \textbf{STT} & \textbf{Thành phần} & \textbf{Đơn vị} & \textbf{SL} & \textbf{Giá ước tính (VND)} & \textbf{Ghi chú} \\
+\hline \textbf{STT} & \textbf{Thành phần} & \textbf{Đơn vị} & \textbf{SL} & \textbf{Giá tham chiếu T4/2026 (VND)} & \textbf{Ghi chú} \\
 \hline
 \endfirsthead
 \caption[]{Danh sách vật liệu đầy đủ cho hệ thống tracker (tiếp theo)}\\
-\hline \textbf{STT} & \textbf{Thành phần} & \textbf{Đơn vị} & \textbf{SL} & \textbf{Giá ước tính (VND)} & \textbf{Ghi chú} \\
+\hline \textbf{STT} & \textbf{Thành phần} & \textbf{Đơn vị} & \textbf{SL} & \textbf{Giá tham chiếu T4/2026 (VND)} & \textbf{Ghi chú} \\
 \hline
 \endhead
-1 & ESP32-S3-WROOM-1 (N16R8) & Cái & 1 & 100,000--200,000 & MCU trung
+1 & ESP32-S3-WROOM-1 (N16R8) & Cái & 1 & 95.000 & MCU trung
 tâm của bo mạch \\\hline
-2 & IC cảm biến LIS3DSH & Cái & 1 & 20,000--50,000 & Cảm biến gia tốc 3
+2 & IC cảm biến LIS3DSH & Cái & 1 & 40.000 & Cảm biến gia tốc 3
 trục, giao tiếp I2C \\\hline
-3 & vgate iCar Pro (OBD2 BLE) & Cái & 1 & 150,000--300,000 & Adapter
+3 & vgate iCar Pro (OBD2 BLE) & Cái & 1 & 367.000 & Adapter
 OBD2 BLE 4.0, tương thích ESP32-S3 \\\hline
-4 & SIMCom SIM7600CE-T & Bộ & 1 & 330,000--500,000 & Modem LTE Cat-4
-tích hợp GNSS + anten + khe SIM \\\hline
-5 & Pin 18650 1S Li-ion 3500mAh & Cái & 1 & 100,000--200,000 & Loại có
+4 & SIMCom SIM7600CE-T & Bộ & 1 & 650.000 & Modem LTE Cat-4
+tích hợp GNSS \\\hline
+5 & Pin 18650 1S Li-ion 3500mAh & Cái & 1 & 79.000 & Loại có
 protection board \\\hline
-6 & IC sạc TP4056 + mạch phụ trợ & Cái & 1 & 20,000--40,000 & Input 5V
+6 & IC sạc TP4056 + mạch phụ trợ & Cái & 1 & 25.000 & Input 5V
 từ MP2482, output 4.2V, dòng theo PROG \\\hline
-7 & Mạch buck AP2112-3.3 & Cái & 1 & 15,000--30,000 & 12--24V
+7 & Mạch LDO AP2112-3.3 & Cái & 1 & 5.000 & 5V
 -\textgreater{} 3.3V cho ESP32-S3 \\\hline
-8 & Mạch buck MP2482 5V & Cái & 1 & 15,000--30,000 & Bus 5V chính \\\hline
-9 & Mạch buck TPS54231 ~4V & Cái & 1 & 20,000--40,000 &
+8 & Mạch buck MP2482 5V & Cái & 1 & 17.000 & Bus 5V chính \\\hline
+9 & Mạch buck TPS54231 ~4V & Cái & 1 & 9.000 &
 12--24V -\textgreater{} ~4V cấp modem SIM7600CE-T \\\hline
-10 & Mạch boost SX1308 5V backup & Cái & 1 & 10,000--20,000 & Backup từ
+10 & Mạch boost SX1308 5V backup & Cái & 1 & 12.000 & Backup từ
 pin 18650 1S \\\hline
-11 & Khối giám sát LVD + ADC & Cái & 1 & 5,000--15,000 & Giám sát LVD
+11 & Khối giám sát LVD + ADC & Cái & 1 & 8.000 & Giám sát LVD
 (GPIO19) \\\hline
-12 & Diode Schottky (SS54/SS34) & Cái & 2 & 2,000--5,000 & Diode OR dự
+12 & Diode Schottky (SS54/SS34) & Cái & 2 & 2.500 & Diode OR dự
 phòng \\\hline
-13 & Mạch bảo vệ pin 1S (BMS) & Cái & 1 & 10,000--20,000 & Bảo vệ pin
+13 & Mạch bảo vệ pin 1S (BMS) & Cái & 1 & 12.000 & Bảo vệ pin
 18650 1S \\\hline
-14 & Điện trở (10k, 2.2k, v.v.) & Gói & 1 & 5,000--10,000 & Voltage
+14 & Điện trở (10k, 2.2k, v.v.) & Gói & 1 & 5.000 & Voltage
 divider, pull-up/pull-down \\\hline
-15 & Tụ điện (100uF, 220uF, v.v.) & Gói & 1 & 5,000--10,000 & Lọc nhiễu,
+15 & Tụ điện (100uF, 220uF, v.v.) & Gói & 1 & 5.000 & Lọc nhiễu,
 decoupling \\\hline
-16 & Connector, Header Pin & Gói & 1 & 10,000--20,000 & Kết nối dây,
-header pin \\\hline
-17 & PCB (nếu tự thiết kế) & Cái & 1 & 50,000--100,000 & PCB 2 lớp, kích
+16 & Connector, Header Pin & Gói & 1 & 55.000 & Header, jack OBD2 và
+đầu nối nguồn \\\hline
+17 & PCB (nếu tự thiết kế) & Cái & 1 & 20.000 & PCB 2 lớp, kích
 thước ~50x50 mm \\\hline
-18 & Vỏ bảo vệ & Cái & 1 & 50,000--100,000 & Vỏ nhựa hoặc kim loại \\\hline
-19 & Dây nối, cáp điện & Mét & --- & 20,000--30,000 & Dây điện, cáp
-USB \\\hline
-20 & Linh kiện phụ trợ khác & --- & --- & 20,000--30,000 & Cầu chì, công
+18 & Vỏ bảo vệ & Cái & 1 & 25.000 & Vỏ nhựa hoặc kim loại \\\hline
+19 & Dây nối, cáp điện & Mét & --- & 60.000 & Dây điện, anten
+4G/GNSS, khay SIM \\\hline
+20 & Linh kiện phụ trợ khác & --- & --- & 20.000 & Cầu chì, công
 tắc, LED chỉ thị \\\hline
 \end{longtable}
 }
@@ -6801,19 +7123,20 @@ tắc, LED chỉ thị \\\hline
 \hline \textbf{Hạng mục} & \textbf{Chi phí (VND)} \\
 \hline
 \endhead
-Thành phần chính (MCU, cảm biến, modem, OBD2) & 670,000--1,250,000 \\\hline
-Hệ thống quản lý nguồn & 50,000--80,000 \\\hline
-Linh kiện phụ trợ & 50,000--100,000 \\\hline
-PCB (nếu tự thiết kế) & 50,000--100,000 \\\hline
-Vỏ bảo vệ & 50,000--100,000 \\\hline
-\textbf{Tổng cộng} & \textbf{870,000--1,630,000} \\\hline
+Thành phần chính (MCU, cảm biến, modem, OBD2, pin) & 1.231.000 \\\hline
+Hệ thống quản lý nguồn & 93.000 \\\hline
+Kết nối, RF và linh kiện phụ trợ & 145.000 \\\hline
+PCB và vỏ bảo vệ & 45.000 \\\hline
+\textbf{Tổng cộng} & \textbf{1.514.000} \\\hline
 \end{longtable}
 }
 
 
 \paragraph{b) Quy trình lắp ráp}\label{b-quy-truxecnh-lux1eafp-ruxe1p}
 
-Quy trình lắp ráp mạch điện tử được triển khai theo các bước sau:
+Để giảm rủi ro lỗi dây chuyền, quy trình lắp ráp không đi theo hướng hàn
+toàn bộ rồi mới kiểm tra, mà chia thành từng cụm chức năng và kiểm tra
+ngay sau mỗi bước. Trình tự thực hiện như sau:
 
 \textbf{Bước 1 - Kiểm tra linh kiện:} Kiểm tra toàn bộ IC, linh kiện và
 bán thành phẩm trước khi lắp ráp. Test riêng từng khối chức năng chính
@@ -6874,7 +7197,9 @@ kiểm tra tổng thể.
 \paragraph{c) Kiểm tra và hiệu
 chuẩn}\label{c-kiux1ec3m-tra-vuxe0-hiux1ec7u-chuux1ea9n}
 
-Sau khi lắp ráp, hệ thống cần được kiểm tra và hiệu chuẩn:
+Sau khi hoàn tất lắp ráp cơ khí và điện, hệ thống cần được hiệu chuẩn để
+đảm bảo các giá trị đo và cơ chế chuyển nguồn phản ánh đúng điều kiện
+vận hành thực tế của xe. Các hạng mục kiểm tra chính gồm:
 
 \begin{itemize}
 \tightlist
@@ -6900,10 +7225,19 @@ Sau khi lắp ráp, hệ thống cần được kiểm tra và hiệu chuẩn:
 \subsubsection{4.2.2. Lắp đặt trong xe (Vehicle
 Installation)}\label{422-lux1eafp-ux111ux1eb7t-trong-xe-vehicle-installation}
 
+Nếu bước lắp ráp trả lời câu hỏi ``thiết bị có hoạt động được không'',
+thì bước lắp đặt trong xe trả lời câu hỏi ``thiết bị có hoạt động ổn
+định trong môi trường thật hay không''. Phần này vì thế tập trung vào
+những quyết định ảnh hưởng trực tiếp đến chất lượng thu sóng, độ an toàn
+điện và khả năng bảo trì sau này.
+
 \paragraph{a) Vị trí lắp
 đặt}\label{a-vux1ecb-truxed-lux1eafp-ux111ux1eb7t}
 
-Thiết bị tracker được lắp đặt tại một trong các vị trí sau trong xe:
+Thiết bị tracker có thể được lắp ở nhiều vị trí khác nhau trong xe, tuy
+nhiên việc chọn vị trí không chỉ phụ thuộc vào chỗ trống. Người triển
+khai cần đồng thời cân nhắc độ kín đáo, độ thuận tiện khi đi dây, khoảng
+cách tới cổng OBD2 và điều kiện thu sóng cho GNSS/4G.
 
 \begin{itemize}
 \tightlist
@@ -6997,7 +7331,10 @@ nhiễu}\label{d-quux1ea3n-luxfd-cuxe1p-vuxe0-chux1ed1ng-nhiux1ec5u}
 \paragraph{e) Kiểm tra sau lắp
 đặt}\label{e-kiux1ec3m-tra-sau-lux1eafp-ux111ux1eb7t}
 
-Sau khi lắp đặt xong, cần thực hiện các kiểm tra sau:
+Sau khi lắp đặt xong, cần kiểm tra lại toàn bộ theo góc nhìn vận hành
+thực tế, tức là không chỉ xem thiết bị có lên nguồn hay không mà còn
+đánh giá được nó có giao tiếp tốt, chuyển chế độ đúng và duy trì kết nối
+ổn định trong xe hay không.
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -8040,17 +8377,18 @@ server.
 
 \subsubsection{4.2.4. Triển khai hệ thống Cloud}
 
-Hệ thống Cloud là lớp lõi phía máy chủ, chịu trách nhiệm tiếp nhận dữ
-liệu từ thiết bị IoT, xử lý nghiệp vụ, lưu trữ và cung cấp giao diện
-giám sát cho người quản lý. Trên cơ sở phương án đã chọn ở Chương 3,
-phần này trình bày quá trình triển khai hạ tầng cloud gồm cấu hình
-Docker, dịch vụ MQTT Bridge, Backend API, Frontend Dashboard và hệ thống
-giám sát.
+Hệ thống Cloud là nơi biến dữ liệu từ thiết bị thành khả năng quan sát
+và điều hành ở phía người quản lý. Trên cơ sở phương án đã chọn ở
+Chương 3, phần này trình bày quá trình hiện thực hóa tầng máy chủ theo
+từng khối: hạ tầng Docker, MQTT Bridge, Backend API, Frontend Dashboard
+và lớp giám sát vận hành.
 
-Kiến trúc cloud triển khai thực tế gồm thiết bị IoT gửi MQTT vào EMQX,
-MQTT Bridge phân luồng dữ liệu sang VictoriaMetrics, VictoriaLogs và
-PostgreSQL, còn Backend/API cùng Frontend Dashboard đảm nhiệm truy vấn,
-điều khiển và hiển thị thời gian thực.
+Nếu nhìn theo hành trình dữ liệu, triển khai thực tế diễn ra như sau:
+thiết bị IoT gửi MQTT vào EMQX, MQTT Bridge phân luồng dữ liệu sang
+VictoriaMetrics, VictoriaLogs và PostgreSQL, còn Backend/API cùng
+Frontend Dashboard đảm nhiệm truy vấn, điều khiển và hiển thị thời gian
+thực. Cách mô tả này giúp người đọc nối được kiến trúc ở Chương 3 với
+các cấu hình triển khai cụ thể ở phần sau.
 
 
 {\thesissetfigureid{4.18}{fig-ch4-kien-truc-tong-the-he-thong-cloud-va-luong-du-lieu}
@@ -8071,10 +8409,12 @@ Setup)}\label{4241-cux1ea5u-huxecnh-docker-vuxe0-hux1ea1-tux1ea7ng-docker-infras
 \subparagraph{a) Mô hình triển khai per-service (IVM26
 Pattern)}\label{a-muxf4-huxecnh-triux1ec3n-khai-per-service-ivm26-pattern}
 
-Hệ thống áp dụng mô hình triển khai per-service Docker Compose theo quy
-ước IVM26. Theo đó, mỗi dịch vụ có một file \texttt{docker-compose.yml}
-riêng thay vì gom toàn bộ vào một file lớn. Cách tổ chức này có một số
-lợi điểm rõ ràng:
+Ở giai đoạn triển khai, nhóm chọn mô hình per-service Docker Compose
+theo quy ước IVM26. Đây là cách tổ chức phù hợp với đồ án vì vẫn đủ đơn
+giản để cài đặt, nhưng đã phản ánh khá rõ tư duy chia dịch vụ trong một
+hệ thống thật. Theo đó, mỗi dịch vụ có một file
+\texttt{docker-compose.yml} riêng thay vì gom toàn bộ vào một file lớn.
+Cách tổ chức này có một số lợi điểm rõ ràng:
 
 \begin{itemize}
 \tightlist
@@ -8163,11 +8503,11 @@ iot-vehicle-tracking-system-cloud/                  # Thư mục gốc của t�
 \subparagraph{b) Mạng chia sẻ (Shared
 Network)}\label{b-mux1ea1ng-chia-sux1ebb-shared-network}
 
-Tất cả dịch vụ trong hệ thống giao tiếp với nhau qua một Docker network
-dùng chung có tên \texttt{tracking-network}. Mạng này được tạo một lần
-duy nhất và khai báo là \texttt{external} trong từng file
-\texttt{docker-compose.yml}. Nhờ đó, các container thuộc các file
-compose khác nhau vẫn có thể truy cập lẫn nhau thông qua tên container.
+Một chi tiết tưởng nhỏ nhưng ảnh hưởng lớn đến tính ổn định khi triển
+khai là cách các dịch vụ ``nhìn thấy nhau'' trên Docker. Toàn bộ dịch vụ
+được đưa vào mạng dùng chung \texttt{tracking-network}; nhờ vậy, dù nằm
+ở các file compose khác nhau, các container vẫn có thể giao tiếp qua tên
+dịch vụ mà không cần cấu hình thủ công phức tạp.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8328,9 +8668,46 @@ MQTT Bridge & tracking-mqtt-bridge & --- & Cầu nối MQTT (không expose
 port) \\\hline
 Backend API & tracking-backend & 4000 & REST API và WebSocket \\\hline
 Frontend & tracking-frontend & 4001 & Giao diện web \\\hline
-NPM & tracking-npm & 80, 443 & Reverse proxy \\\hline
+NPM & tracking-npm & 80, 81, 443 & Reverse proxy \\\hline
 \end{longtable}
 }
+
+\textbf{Mapping truy cập cloud UAT:}
+
+{\thesissettableid{4.5-cloud}{tab-ch4-mapping-domain-va-port-cong-khai-cloud-uat}
+\def\LTcaptype{table}
+\begin{longtable}{|p{0.21\linewidth}|p{0.12\linewidth}|p{0.20\linewidth}|p{0.13\linewidth}|p{0.24\linewidth}|}
+\caption{Mapping subdomain, port public và service nội bộ của hệ thống cloud UAT}\label{tab:ch4-mapping-domain-va-port-cong-khai-cloud-uat}\\
+\hline \textbf{Subdomain public} & \textbf{Port public} & \textbf{Service nội bộ} & \textbf{Upstream port} & \textbf{Vai trò} \\
+\hline
+\endfirsthead
+\caption[]{Mapping subdomain, port public và service nội bộ của hệ thống cloud UAT (tiếp theo)}\\
+\hline \textbf{Subdomain public} & \textbf{Port public} & \textbf{Service nội bộ} & \textbf{Upstream port} & \textbf{Vai trò} \\
+\hline
+\endhead
+\nolinkurl{thingdock.dev} & 443 & tracking-frontend & 4001 & Frontend web qua NPM reverse proxy \\\hline
+\nolinkurl{api.thingdock.dev} & 443 & tracking-backend & 4000 & Backend API, Swagger, Socket.IO qua NPM reverse proxy \\\hline
+\nolinkurl{mqtt.thingdock.dev} & 443 & tracking-emqx & 8083 & MQTT over WebSocket qua NPM reverse proxy \\\hline
+\nolinkurl{mqtts.thingdock.dev} & 8883 & tracking-emqx & 8883 & MQTT TLS trực tiếp cho thiết bị \\\hline
+\nolinkurl{grafana.thingdock.dev} & 443 & tracking-grafana & 4002 & Grafana qua NPM reverse proxy \\\hline
+\nolinkurl{emqx.thingdock.dev} & 443 & tracking-emqx & 18083 & EMQX Dashboard qua NPM reverse proxy \\\hline
+\nolinkurl{npm.thingdock.dev} & 443 & tracking-npm & 81 & Nginx Proxy Manager Admin qua NPM reverse proxy \\\hline
+\nolinkurl{(internal only)} & 8428 & tracking-victoriametrics & 8428 & VictoriaMetrics, chỉ dùng nội bộ \\\hline
+\end{longtable}
+}
+
+\textbf{Ghi chú:} Trong triển khai UAT hiện tại, Cloudflare chỉ giữ vai
+trò DNS trỏ domain về public IP của VPS; sau đó Nginx Proxy Manager mới
+làm reverse proxy đến các container nội bộ. Vì vậy, người dùng chỉ truy
+cập \texttt{https://thingdock.dev}, \texttt{https://api.thingdock.dev},
+\texttt{wss://mqtt.thingdock.dev}, \texttt{https://grafana.thingdock.dev},
+\texttt{https://emqx.thingdock.dev} và \texttt{https://npm.thingdock.dev}
+qua cổng HTTPS mặc định. Các port \texttt{4001}, \texttt{4000},
+\texttt{8083}, \texttt{4002}, \texttt{18083} và \texttt{81} là port nội
+bộ phía sau NPM, không xuất hiện trong URL public. Riêng MQTT TLS cho
+thiết bị đi trực tiếp tới EMQX qua \texttt{mqtts.thingdock.dev:8883}.
+VictoriaMetrics (\texttt{8428}) được giữ ở chế độ nội bộ, không public
+qua subdomain.
 
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -8341,12 +8718,11 @@ Implementation)}\label{4242-triux1ec3n-khai-mqtt-bridge-mqtt-bridge-implementati
 \subparagraph{a) Vai trò và kiến
 trúc}\label{a-vai-truxf2-vuxe0-kiux1ebfn-truxfac}
 
-MQTT Bridge (\texttt{Tracking\_MqttBridge/}) là dịch vụ
-Node.js/TypeScript độc lập, làm nhiệm vụ nhận dữ liệu từ EMQX rồi ghi về
-các lớp lưu trữ phía sau như PostgreSQL, VictoriaMetrics và
-VictoriaLogs. Việc tách dịch vụ này khỏi Backend API giúp đường ingest
-telemetry gọn hơn, dễ scale riêng và tránh trộn lẫn với lớp nghiệp vụ
-web.
+MQTT Bridge (\texttt{Tracking\_MqttBridge/}) là nơi hệ thống ``dịch''
+dữ liệu thô từ broker thành các bản ghi có cấu trúc phù hợp với từng lớp
+lưu trữ và lớp ứng dụng phía sau. Việc tách dịch vụ này khỏi Backend API
+giúp đường ingest telemetry gọn hơn, dễ scale riêng và tránh trộn lẫn
+với lớp nghiệp vụ web.
 
 Luồng dữ liệu xử lý của MQTT Bridge được mô tả như sau:
 
@@ -8958,13 +9334,20 @@ phép đối chiếu lỗi giữa frontend và backend log.
 \subsubsection{4.2.5. Triển khai Frontend Dashboard (Frontend Dashboard
 Implementation)}\label{425-triux1ec3n-khai-frontend-dashboard-frontend-dashboard-implementation}
 
+Sau khi dữ liệu đã được tiếp nhận và xử lý ở tầng cloud, bước tiếp theo
+là biến chúng thành giao diện đủ rõ ràng để người vận hành có thể quan
+sát và ra quyết định. Vì vậy, phần frontend không chỉ được đánh giá ở
+khía cạnh công nghệ, mà còn ở khả năng tổ chức thông tin theo đúng nhu
+cầu sử dụng thực tế.
+
 \subparagraph{a) Lựa chọn công
 nghệ}\label{a-lux1ef1a-chux1ecdn-cuxf4ng-nghux1ec7-2}
 
 Frontend Dashboard được xây dựng trên nền tảng Next.js 15 với React 19,
 sử dụng App Router và các tính năng mới nhất của React như Server
-Components. Đây là bộ công nghệ hiện đại, cung cấp hiệu năng render tốt
-và trải nghiệm lập trình hiệu quả.
+Components. Việc lựa chọn stack này bám theo mục tiêu đã nêu từ Chương
+3: giao diện cần tải nhanh, cập nhật thời gian thực ổn định và vẫn đủ
+dễ tổ chức khi số lượng tính năng quản trị tăng dần.
 
 \textbf{Tech stack frontend:}
 
@@ -8999,7 +9382,10 @@ Feature-Sliced}\label{b-kiux1ebfn-truxfac-feature-sliced}
 
 Frontend được tổ chức theo kiến trúc Feature-Sliced, trong đó mỗi tính
 năng (feature) được gom nhóm vào một thư mục riêng bao gồm các thành
-phần UI, hooks, types, và utilities liên quan. Cách tiếp cận này giúp:
+phần UI, hooks, types, và utilities liên quan. Cách tiếp cận này khiến
+cấu trúc mã nguồn phản chiếu khá sát cấu trúc nghiệp vụ, nên người đọc
+không cần đi quá sâu vào code vẫn có thể hình dung hệ thống web đang
+được tổ chức như thế nào.
 
 \begin{itemize}
 \tightlist
@@ -9077,7 +9463,9 @@ Tracking_Frontend/src/
 \subparagraph{c) Các trang chính và tính
 năng}\label{c-cuxe1c-trang-chuxednh-vuxe0-tuxednh-nux103ng}
 
-Frontend Dashboard cung cấp các trang quản lý chính sau:
+Để dashboard thực sự hữu ích trong vận hành, giao diện không được dừng ở
+việc ``có nhiều trang'', mà mỗi trang phải trả lời được một nhu cầu quản
+lý cụ thể. Vì vậy, hệ thống cung cấp các nhóm trang chính sau:
 
 \textbf{Trang tổng quan Dashboard (\texttt{/dashboard}):} Hiển thị các
 thẻ thống kê (stats cards) bao gồm tổng số xe, số chuyến đi trong ngày,
@@ -9162,7 +9550,10 @@ gửi thông báo thử nghiệm để kiểm tra cấu hình.
 \subparagraph{d) Quản lý trạng thái và dữ
 liệu}\label{d-quux1ea3n-luxfd-trux1ea1ng-thuxe1i-vuxe0-dux1eef-liux1ec7u}
 
-Frontend sử dụng chiến lược quản lý trạng thái kết hợp:
+Với dashboard thời gian thực, nếu không tách bạch rõ loại dữ liệu nào là
+trạng thái giao diện, loại nào là dữ liệu từ máy chủ và loại nào là cập
+nhật sự kiện, mã nguồn sẽ rất dễ rối. Vì vậy, frontend sử dụng chiến
+lược quản lý trạng thái kết hợp:
 
 \begin{itemize}
 \tightlist
@@ -9259,13 +9650,19 @@ chạy với user \texttt{nextjs} (không phải root) để tăng tính bảo m
 \subsubsection{4.2.6. Cấu hình giám sát hệ thống (Monitoring \&
 Observability)}\label{426-cux1ea5u-huxecnh-giuxe1m-suxe1t-hux1ec7-thux1ed1ng-monitoring--observability}
 
+Khi hệ thống đã có đủ các lớp phần cứng, firmware, cloud và frontend,
+câu hỏi tiếp theo là làm sao biết hệ thống đang khỏe hay đang có vấn đề.
+Đó là lý do lớp giám sát không được xem như phần phụ, mà là điều kiện để
+vận hành ổn định và xử lý sự cố có cơ sở.
+
 \subparagraph{a) Tổng quan chiến lược giám
 sát}\label{a-tux1ed5ng-quan-chiux1ebfn-lux1b0ux1ee3c-giuxe1m-suxe1t}
 
 Hệ thống giám sát được thiết kế theo mô hình "three pillars of
 observability" (ba trụ cột của quan sát được), gồm: metrics (chỉ số),
-logs (nhật ký) và traces (truy vết). Mỗi trụ cột sử dụng công cụ chuyên
-biệt phù hợp với đặc thù hệ thống IoT.
+logs (nhật ký) và traces (truy vết). Cách tổ chức này giúp người vận
+hành không chỉ biết ``có lỗi hay không'', mà còn lần ra lỗi xuất phát từ
+đâu, ảnh hưởng tới dịch vụ nào và đang diễn ra ở quy mô nào.
 
 
 {\thesissettableid{4.10}{tab-ch4-ba-tru-cot-giam-sat-he-thong}
@@ -9571,9 +9968,11 @@ routing \\\hline
 
 Phần này trình bày thiết lập thử nghiệm, kết quả đo theo từng tầng hệ
 thống (phần cứng, firmware, cloud), kết quả kiểm thử tích hợp end-to-end
-và đối chiếu với các tiêu chí thiết kế ở Chương 1 và Chương 2. Toàn bộ
-giá trị được ghi nhận trên thiết bị phần cứng đã chế tạo và lắp đặt thực
-tế trong điều kiện vận hành bám sát bối cảnh khai thác.
+và đối chiếu với các tiêu chí thiết kế ở Chương 1 và Chương 2. Nói cách
+khác, đây là phần kiểm chứng xem hệ thống sau khi hiện thực có thực sự
+đáp ứng được những gì đã hứa ở các chương trước hay không. Toàn bộ giá
+trị được ghi nhận trên thiết bị phần cứng đã chế tạo và lắp đặt thực tế
+trong điều kiện vận hành bám sát bối cảnh khai thác.
 
 \textbf{Ghi chú:} Các giá trị đo lường trong chương này là kết quả thu
 được trên môi trường thử nghiệm cụ thể (xem mục 4.3.1). Một số chỉ số
@@ -9779,10 +10178,12 @@ cold start \\\hline
 
 
 
+\clearpage
+
 {\thesissetfigureid{4.32}{fig-ch4-o-thi-dong-tieu-thu-theo-thoi-gian-trong-mot-chu-ky}
 \begin{figure}[htbp]
 \centering
-\pandocbounded{\safeincludesvgcompact{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-23.svg}}
+\pandocbounded{\safeincludesvgchart{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-23.svg}}
 \caption{Đồ thị dòng tiêu thụ theo thời gian trong một chu kỳ hoạt động hoàn chỉnh (Driving -\textgreater{} Parking -\textgreater{} Alert -\textgreater{} Parking)}
 \label{fig:ch4-o-thi-dong-tieu-thu-theo-thoi-gian-trong-mot-chu-ky}
 \end{figure}
@@ -9822,6 +10223,8 @@ mạch boost converter (~85--90\%). Các giá trị dưới đây là
 mới trên cell 18650.
 
 
+\clearpage
+
 {\thesissettableid{4.15}{tab-ch4-thoi-luong-pin-du-phong-theo-kich-ban-su-dung-uoc-tinh}
 \def\LTcaptype{table}
 \begin{longtable}{|p{0.06\linewidth}|p{0.14\linewidth}|p{0.17\linewidth}|p{0.17\linewidth}|p{0.14\linewidth}|p{0.24\linewidth}|}
@@ -9851,10 +10254,12 @@ thực tế \\\hline
 
 
 
+\clearpage
+
 {\thesissetfigureid{4.33}{fig-ch4-o-thi-ien-ap-pin-du-phong-theo-thoi-gian-theo-baseline}
 \begin{figure}[htbp]
 \centering
-\pandocbounded{\safeincludesvgcompact{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-24.svg}}
+\pandocbounded{\safeincludesvgchart{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-24.svg}}
 \caption{Đồ thị điện áp pin dự phòng theo thời gian theo baseline 18650 trong kịch bản tracking liên tục}
 \label{fig:ch4-o-thi-ien-ap-pin-du-phong-theo-thoi-gian-theo-baseline}
 \end{figure}
@@ -10836,10 +11241,12 @@ gian outage/queue depth \\\hline
 
 
 
+\clearpage
+
 {\thesissetfigureid{4.46}{fig-ch4-screenshot-hanh-trinh-tren-ban-o-the-hien-giai-oan-gian-oan}
 \begin{figure}[htbp]
 \centering
-\pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-37.svg}}
+\pandocbounded{\safeincludesvgnarrow{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-37.svg}}
 \caption{Screenshot hành trình trên bản đồ, thể hiện giai đoạn gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối}
 \label{fig:ch4-screenshot-hanh-trinh-tren-ban-o-the-hien-giai-oan-gian-oan}
 \end{figure}
@@ -11115,22 +11522,24 @@ thống vẫn cần được bổ sung thêm các hạng mục hardening như wa
 \subsubsection{4.3.8. Kết luận chương
 4}\label{438-kux1ebft-luux1eadn-chux1b0ux1a1ng-4}
 
-Trên cơ sở quá trình hiện thực đã trình bày, Chương 4 tổng hợp kết quả
-theo bốn nhóm chính: phần cứng, firmware, cloud và đo lường. Thiết bị
-tracker đã được chế tạo thành một bộ phần cứng hoàn chỉnh và đưa vào vận
-hành thử; firmware ESP-IDF/FreeRTOS hiện thực đầy đủ các mô-đun giao
-tiếp, máy trạng thái năng lượng và cơ chế tự phục hồi kết nối; hạ tầng
-cloud cùng backend/frontend cũng vận hành đồng bộ theo kiến trúc đề
-xuất.
+Trên cơ sở quá trình hiện thực đã trình bày, Chương 4 cho thấy các lựa
+chọn thiết kế ở Chương 3 không chỉ dừng trên bản vẽ hay sơ đồ khối, mà
+đã được chuyển thành một hệ thống có thể vận hành thử trong điều kiện
+thực tế. Thiết bị tracker đã được chế tạo thành một bộ phần cứng hoàn
+chỉnh; firmware ESP-IDF/FreeRTOS hiện thực đầy đủ các mô-đun giao tiếp,
+máy trạng thái năng lượng và cơ chế tự phục hồi kết nối; hạ tầng cloud
+cùng backend/frontend cũng vận hành đồng bộ theo kiến trúc đề xuất.
 
 Về đo lường, hệ thống đã đáp ứng phần lớn chỉ tiêu cốt lõi của cấu hình
 đang triển khai. Các tiêu chí quan trọng như độ chính xác GPS, độ trễ
 end-to-end, thời lượng pin dự phòng, khả năng xử lý đồng thời, thời gian
 tải dashboard, geofence, cảnh báo bất thường và độ ổn định của state
-machine đều đạt hoặc vượt mục tiêu tổng hợp. Dù vậy, một số hạng mục vẫn
-cần tiếp tục hoàn thiện ở vòng tối ưu tiếp theo, đáng chú ý là ngưỡng
-LVD profile 12V, mức dòng ở pha truyền 4G liên tục và cơ chế replay
-telemetry từ flash cho các tình huống mất sóng kéo dài.
+machine đều đạt hoặc vượt mục tiêu tổng hợp. Dù vậy, kết quả cũng chỉ ra
+những điểm còn cần làm sâu thêm ở vòng tối ưu tiếp theo, đáng chú ý là
+ngưỡng LVD profile 12V, mức dòng ở pha truyền 4G liên tục và cơ chế
+replay telemetry từ flash cho các tình huống mất sóng kéo dài. Đây sẽ là
+cơ sở để Chương 5 chuyển từ phần "đã làm được gì" sang phần "đánh giá
+chất lượng của những gì đã làm".
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -11154,31 +11563,43 @@ năng}\label{51-ux111uxe1nh-giuxe1-hiux1ec7u-nux103ng}
 
 Chương này tổng hợp kết quả đánh giá hệ thống trên bốn phương diện: hiệu
 năng kỹ thuật, hiệu quả kinh tế - môi trường, rủi ro vận hành và hướng
-phát triển tiếp theo. Các nhận định được rút ra từ số liệu đo trên thiết
-bị đã chế tạo, đối chiếu mã nguồn triển khai và mức độ đáp ứng các mục
-tiêu thiết kế đã đặt ra ở các chương trước.
+phát triển tiếp theo. Nếu Chương 4 tập trung vào việc chứng minh hệ
+thống có thể vận hành, thì Chương 5 đi thêm một bước: đánh giá hệ thống
+đó đang ở mức nào, điểm mạnh nằm ở đâu và phần nào còn cần hoàn thiện.
+Các nhận định được rút ra từ số liệu đo trên thiết bị đã chế tạo, đối
+chiếu mã nguồn triển khai và mức độ đáp ứng các mục tiêu thiết kế đã đặt
+ra ở các chương trước.
 
 \subsubsection{5.1.1. Đánh giá hiệu năng phần
 cứng}\label{511-ux111uxe1nh-giuxe1-hiux1ec7u-nux103ng-phux1ea7n-cux1ee9ng}
 
-Hệ thống phần cứng được đánh giá trên ba khía cạnh chính: quản lý năng
-lượng, kết nối BLE OBD2 và độ chính xác định vị GPS/GNSS.
+Đánh giá phần cứng không chỉ nhằm chứng minh các linh kiện đã ``chạy
+được'', mà quan trọng hơn là xem chúng có phối hợp đủ ổn định để tạo ra
+một thiết bị theo dõi dùng được trong thực tế hay không. Vì vậy, phần
+này tập trung vào ba khía cạnh người vận hành quan tâm nhất: thiết bị có
+tiết kiệm điện đủ tốt không, có lấy được dữ liệu xe ổn định không, và
+định vị có đủ chính xác cho nhu cầu theo dõi hay không.
 
 \textbf{Quản lý năng lượng:}
 
-Hệ thống quản lý năng lượng đa chế độ vận hành ổn định trong các kịch
-bản thử nghiệm. Mạch buck converter đầu vào 12V/24V (dải 7--40V) hạ áp
-xuống 5V, sau đó qua LDO 3.3V cấp cho ESP32-S3, đạt hiệu suất tổng trên
-90\% ở điều kiện thử nghiệm profile 12V. Logic chuyển nguồn dự phòng
-được chuẩn hóa theo hai profile: 12V (\texttt{Switch\_OFF=12.0V},
-\texttt{Switch\_ON=12.2V}, \texttt{IGN\_ON\textgreater{}=13.0V},
-\texttt{IGN\_OFF\textless{}=12.0V}) và 24V (\texttt{Switch\_OFF=24.0V},
-\texttt{Switch\_ON=24.4V}, \texttt{IGN\_ON\textgreater{}=26.0V},
+Kết quả đo cho thấy khối nguồn đang đi đúng hướng thiết kế: thiết bị có
+thể duy trì nhiều chế độ vận hành mà vẫn giữ mức tiêu thụ điện đủ thấp
+trong trạng thái chờ. Mạch buck converter đầu vào 12V/24V (dải 7--40V)
+hạ áp xuống 5V, sau đó qua LDO 3.3V cấp cho ESP32-S3, đạt hiệu suất tổng
+trên 90\% ở điều kiện thử nghiệm profile 12V. Logic chuyển nguồn dự
+phòng được chuẩn hóa theo hai profile: 12V
+(\texttt{Switch\_OFF=12.0V}, \texttt{Switch\_ON=12.2V},
+\texttt{IGN\_ON\textgreater{}=13.0V},
+\texttt{IGN\_OFF\textless{}=12.0V}) và 24V
+(\texttt{Switch\_OFF=24.0V}, \texttt{Switch\_ON=24.4V},
+\texttt{IGN\_ON\textgreater{}=26.0V},
 \texttt{IGN\_OFF\textless{}=24.0V}). Trên thiết bị hiện tại, dòng deep
 sleep toàn hệ thống xấp xỉ 500 µA; nếu quy đổi cùng giả định tiêu thụ
 sang baseline pin dự phòng 18650 1S (3500mAh), thời lượng dự phòng tương
 ứng vào khoảng 24--36 giờ ở kịch bản cảnh báo gián đoạn và khoảng
-2.6--3.0 giờ ở chế độ tracking liên tục.
+2.6--3.0 giờ ở chế độ tracking liên tục. Nói cách khác, thiết bị đã đạt
+được điều kiện tối thiểu để theo dõi liên tục mà không gây áp lực quá
+lớn lên nguồn điện của xe.
 
 
 {\thesissettableid{5.1}{tab-ch5-anh-gia-hieu-nang-quan-ly-nang-luong}
@@ -11218,22 +11639,30 @@ Kết nối BLE với adapter vgate iCar Pro hoạt động ổn định sau khi
 lập ban đầu. Thời gian kết nối BLE khi thiết bị đánh thức từ deep sleep
 dao động trong khoảng 1--3 giây, phụ thuộc trạng thái adapter. Các thông
 số OBD2 (RPM, tốc độ, nhiệt độ nước, mức nhiên liệu) được đọc thành công
-với độ chính xác cao, sai số dưới 2\% so với đồng hồ táp-lô xe.
+với sai số dưới 2\% so với đồng hồ táp-lô xe. Đây là kết quả quan trọng,
+vì nó cho thấy dữ liệu mở rộng từ phương tiện có thể được bổ sung vào
+hệ thống mà không làm tăng quá nhiều độ trễ khi thiết bị vừa thức dậy.
 
 \textbf{Độ chính xác GPS/GNSS:}
 
 GNSS tích hợp trên SIM7600CE-T cung cấp độ chính xác vị trí đạt mức chấp
-nhận được cho ứng dụng tracking xe (tham chiếu \textcite{ref:sim7600ce-product}). Sai số vị trí trung bình khoảng
+nhận được cho ứng dụng tracking xe (tham chiếu
+\textcite{ref:sim7600ce-product}). Sai số vị trí trung bình khoảng
 2.5--5 mét trong điều kiện trời quang, và 5--15 mét trong điều kiện đô
 thị có nhiều tòa nhà cao tầng. Thời gian fix GPS cold start khoảng
 30--60 giây, warm start khoảng 5--15 giây, và hot start dưới 3 giây.
+Nhìn từ góc độ sử dụng, các giá trị này đủ để phục vụ bài toán theo dõi
+phương tiện, xác định vị trí xe và tái hiện hành trình với độ tin cậy
+hợp lý.
 
 \subsubsection{5.1.2. Đánh giá hiệu năng
 firmware}\label{512-ux111uxe1nh-giuxe1-hiux1ec7u-nux103ng-firmware}
 
-Firmware xây dựng trên nền tảng ESP-IDF với FreeRTOS được đánh giá theo
-ba khía cạnh: mô hình điều phối thực thi, độ ổn định của máy trạng thái
-và khả năng tự phục hồi kết nối kèm OTA.
+Đánh giá firmware tập trung vào câu hỏi cốt lõi: phần mềm nhúng có giúp
+thiết bị phản ứng đúng trước các tình huống vận hành khác nhau hay
+không. Trên tinh thần đó, phần này xem xét ba khía cạnh chính: cách
+điều phối thực thi, độ ổn định của máy trạng thái và khả năng tự phục
+hồi kết nối kèm OTA.
 
 \textbf{Điều phối thực thi với FreeRTOS:}
 
@@ -11243,8 +11672,9 @@ một vòng điều khiển trung tâm gọi \texttt{state\_machine\_run()} theo
 chu kỳ; còn FreeRTOS được dùng có chọn lọc cho các phần cần nền bất đồng
 bộ hoặc đồng bộ truy cập tài nguyên, như NimBLE host task, mutex của lớp
 AT command, queue/mutex trong BLE manager và semaphore phản hồi OBD2.
-Cách tổ chức này giúp logic firmware tập trung hơn, dễ đọc và thuận lợi
-khi truy vết lỗi trên thiết bị hiện tại.
+Cách tổ chức này cho thấy một lựa chọn thiết kế khá thực dụng: ưu tiên
+giữ luồng điều khiển dễ hiểu và dễ debug, thay vì theo đuổi một cấu trúc
+đa task phức tạp nhưng khó kiểm chứng trong giai đoạn đồ án.
 
 \textbf{Máy trạng thái (State Machine):}
 
@@ -11300,6 +11730,11 @@ thực; chưa có watchdog & Đạt ở mức triển khai hiện tại \\\hline
 \subsubsection{5.1.3. Đánh giá hiệu năng hệ thống đám mây
 (Cloud)}\label{513-ux111uxe1nh-giuxe1-hiux1ec7u-nux103ng-hux1ec7-thux1ed1ng-ux111uxe1m-muxe2y-cloud}
 
+Nhìn tổng thể, tầng cloud được đánh giá không chỉ qua hiệu năng của từng
+dịch vụ riêng lẻ mà qua khả năng phối hợp giữa chúng để giữ cho dữ liệu
+đi từ thiết bị đến dashboard đủ nhanh và ổn định. Trên cơ sở đó, từng
+thành phần được xem xét như sau:
+
 \textbf{API Server (Tracking\_Backend):}
 
 API server xây dựng trên Express.js với TypeScript xử lý các request
@@ -11341,11 +11776,14 @@ OBD2) với hiệu suất ghi và đọc cao hơn so với InfluxDB truyền th�
 (Frontend)}\label{514-ux111uxe1nh-giuxe1-hiux1ec7u-nux103ng-giao-diux1ec7n-ngux1b0ux1eddi-duxf9ng-frontend}
 
 Giao diện web xây dựng trên Next.js 15 với React 19 cung cấp trải nghiệm
-người dùng mượt mà. Dashboard hiển thị thông tin tổng quan đội xe với
-thời gian tải trang dưới 2 giây (First Contentful Paint). Bản đồ Leaflet
-cập nhật vị trí xe trơn tru khi nhận dữ liệu WebSocket, không bị giật
-lag khi hiển thị 50--100 xe đồng thời. Biểu đồ ECharts hiển thị dữ liệu
-telemetry (tốc độ, RPM, nhiệt độ) trực quan, hỗ trợ zoom và pan mượt mà.
+người dùng mượt mà. Ở góc nhìn vận hành, kết quả này có ý nghĩa vì nó
+cho thấy dashboard không trở thành ``điểm nghẽn cuối cùng'' sau khi dữ
+liệu đã được thu thập và xử lý ở các lớp phía dưới. Dashboard hiển thị
+thông tin tổng quan đội xe với thời gian tải trang dưới 2 giây (First
+Contentful Paint). Bản đồ Leaflet cập nhật vị trí xe trơn tru khi nhận
+dữ liệu WebSocket, không bị giật lag khi hiển thị 50--100 xe đồng thời.
+Biểu đồ ECharts hiển thị dữ liệu telemetry (tốc độ, RPM, nhiệt độ) trực
+quan, hỗ trợ zoom và pan mượt mà.
 
 
 {\thesissettableid{5.3}{tab-ch5-anh-gia-hieu-nang-tong-hop-he-thong-am-may}
@@ -11378,12 +11816,20 @@ samples/s & Tốt \\\hline
 \subsection{5.2. Đánh giá kinh tế và môi
 trường}\label{52-ux111uxe1nh-giuxe1-kinh-tux1ebf-vuxe0-muxf4i-trux1b0ux1eddng}
 
+Sau phần đánh giá kỹ thuật, cần nhìn hệ thống dưới góc độ thực tế hơn:
+chi phí triển khai có hợp lý không, và việc ứng dụng hệ thống có tạo ra
+giá trị bền vững hay không. Vì vậy, mục này tập trung vào hai câu hỏi:
+giải pháp đề xuất có lợi thế kinh tế gì và tác động môi trường của nó
+nên được hiểu như thế nào.
+
 \subsubsection{5.2.1. Phân tích chi phí phần
 cứng}\label{521-phuxe2n-tuxedch-chi-phuxed-phux1ea7n-cux1ee9ng}
 
-Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính toán
-dựa trên giá linh kiện mua lẻ tại thị trường Việt Nam. Mức giá này có
-thể giảm 20--30\% khi mua số lượng lớn (\textgreater{} 100 bộ).
+Chi phí Bill of Materials (BOM) của thiết bị tracker IoT dưới đây dùng
+giá tham chiếu thị trường Việt Nam đã được rà soát lại vào ngày
+12/04/2026. Với đơn hàng lớn, mức giá này vẫn có thể giảm thêm; tuy
+nhiên việc giữ giá mua lẻ giúp phần đánh giá kinh tế bám sát bối cảnh
+triển khai thử nghiệm của đồ án.
 
 
 {\thesissettableid{5.4}{tab-ch5-chi-phi-bom-thiet-bi-tracker}
@@ -11397,16 +11843,16 @@ thể giảm 20--30\% khi mua số lượng lớn (\textgreater{} 100 bộ).
 \hline \textbf{Linh kiện} & \textbf{Vai trò} & \textbf{Giá (VND)} \\
 \hline
 \endhead
-ESP32-S3-WROOM-1 & Vi điều khiển chính & 80.000--150.000 \\\hline
-SIMCom SIM7600CE-T & Modem LTE + GNSS tích hợp & 330.000--500.000 \\\hline
-vgate iCar Pro BLE & Adapter OBD2 BLE & 250.000--500.000 \\\hline
-IC cảm biến LIS3DSH & Cảm biến gia tốc (IMU) & 30.000--50.000 \\\hline
-Pin 18650 1S (1 cell, 3500mAh) & Pin dự phòng & 80.000--120.000 \\\hline
-Mạch sạc TP4056 + boost/buck converter & Quản lý năng lượng &
-50.000--100.000 \\\hline
-PCB, vỏ hộp, dây cáp, linh kiện phụ & Cơ khí và kết nối &
-130.000--260.000 \\\hline
-\textbf{Tổng cộng} & & \textbf{870.000--1.630.000} \\\hline
+ESP32-S3-WROOM-1 & Vi điều khiển chính & 95.000 \\\hline
+SIMCom SIM7600CE-T & Modem LTE + GNSS tích hợp & 650.000 \\\hline
+vgate iCar Pro BLE & Adapter OBD2 BLE & 367.000 \\\hline
+IC cảm biến LIS3DSH & Cảm biến gia tốc (IMU) & 40.000 \\\hline
+Pin 18650 1S (1 cell, 3500mAh) & Pin dự phòng & 79.000 \\\hline
+Khối nguồn (TP4056, boost/buck, LDO, BMS, LVD) & Quản lý năng lượng &
+93.000 \\\hline
+PCB, vỏ hộp, jack OBD2, anten, dây cáp, linh kiện phụ & Cơ khí và kết nối &
+190.000 \\\hline
+\textbf{Tổng cộng} & & \textbf{1.514.000} \\\hline
 \end{longtable}
 }
 
@@ -11428,8 +11874,8 @@ chi phí rõ rệt của hệ thống đề xuất:
 đầu} & \textbf{Khả năng tùy biến} \\
 \hline
 \endhead
-Hệ thống đề xuất & 870.000--1.630.000 VND & ~70.000 VND
-(SIM 4G) & 1.710.000--2.470.000 VND & Cao (mã nguồn mở) \\\hline
+Hệ thống đề xuất & 1.514.000 VND & ~70.000 VND
+(SIM 4G) & 2.354.000 VND & Cao (mã nguồn mở) \\\hline
 GPS Tracker đơn giản (Việt Nam) & 500.000--1.500.000 VND &
 50.000--100.000 VND & 1.100.000--2.700.000 VND & Thấp \\\hline
 Fleet Management thương mại (quốc tế) & 5.000.000--12.500.000 VND
@@ -11442,10 +11888,11 @@ iTracking / Vietmap Tracking & 2.000.000--4.000.000 VND &
 }
 
 
-Như vậy, chi phí tổng thể của hệ thống đề xuất chỉ bằng khoảng 10--20\%
-so với giải pháp fleet management thương mại quốc tế, và tương đương
-hoặc thấp hơn so với giải pháp GPS tracker đơn giản nhưng cung cấp nhiều
-tính năng hơn (OBD2, cảnh báo thông minh, quản lý năng lượng).
+Như vậy, chi phí tổng thể của hệ thống đề xuất vẫn thấp hơn rõ rệt so
+với các nền tảng fleet management thương mại quốc tế, đồng thời vẫn nằm
+trong vùng chi phí chấp nhận được so với nhóm GPS tracker phổ thông
+trong nước dù cung cấp thêm OBD2, cảnh báo thông minh và cơ chế quản lý
+năng lượng nhiều chế độ.
 
 \subsubsection{5.2.2. Phân tích chi phí hạ tầng đám
 mây}\label{522-phuxe2n-tuxedch-chi-phuxed-hux1ea1-tux1ea7ng-ux111uxe1m-muxe2y}
@@ -11549,9 +11996,11 @@ thiểu}\label{53-ux111uxe1nh-giuxe1-rux1ee7i-ro-vuxe0-biux1ec7n-phuxe1p-giux1ea
 ro}\label{531-ma-trux1eadn-rux1ee7i-ro}
 
 Phần này đánh giá rủi ro của hệ thống bằng ma trận xác suất - tác động
-(Probability-Impact Matrix) gồm 5 mức độ. Các rủi ro được xác định từ
-đặc điểm kỹ thuật của thiết bị hiện tại và các tình huống dễ phát sinh
-trong quá trình triển khai thực tế.
+(Probability-Impact Matrix) gồm 5 mức độ. Mục tiêu không chỉ là liệt kê
+nguy cơ, mà là chỉ ra những điểm nào đã được kiểm soát tương đối tốt và
+những điểm nào vẫn cần ưu tiên xử lý nếu đưa hệ thống ra vận hành rộng
+hơn. Các rủi ro được xác định từ đặc điểm kỹ thuật của thiết bị hiện tại
+và các tình huống dễ phát sinh trong quá trình triển khai thực tế.
 
 
 {\thesissettableid{5.7}{tab-ch5-thang-o-xac-suat-va-tac-ong}
@@ -11701,15 +12150,19 @@ kỳ vận hành thực tế).
 \subsection{5.4. Khuyến nghị cho tương
 lai}\label{54-khuyux1ebfn-nghux1ecb-cho-tux1b0ux1a1ng-lai}
 
-Dựa trên kết quả đánh giá ở các phần trên, đồ án đề xuất các hướng phát
-triển trong tương lai, được phân theo các giai đoạn triển khai cụ thể.
+Dựa trên kết quả đánh giá ở các phần trên, phần này chuyển từ câu hỏi
+``hệ thống đang ở đâu'' sang câu hỏi ``nên đi tiếp theo hướng nào''.
+Các khuyến nghị được sắp xếp theo từng giai đoạn để người đọc có thể
+thấy rõ đâu là bước phát triển gần, đâu là hướng mở rộng dài hạn.
 
 \subsubsection{5.4.1. Giai đoạn 2: Mở rộng tính năng (Phase
 2)}\label{541-giai-ux111oux1ea1n-2-mux1edf-rux1ed9ng-tuxednh-nux103ng-phase-2}
 
 Hệ thống đã được thiết kế với kiến trúc mở rộng, cơ sở dữ liệu
-PostgreSQL đã bao gồm các bảng dữ liệu cho các tính năng Phase 2. Các
-tính năng khuyến nghị triển khai trong giai đoạn tiếp theo bao gồm:
+PostgreSQL đã bao gồm các bảng dữ liệu cho các tính năng Phase 2. Điều
+này cho thấy đồ án không dừng ở một nguyên mẫu trình diễn, mà đã chuẩn
+bị sẵn một phần nền móng để mở rộng thành hệ thống nghiệp vụ đầy đủ hơn.
+Các tính năng khuyến nghị triển khai trong giai đoạn tiếp theo bao gồm:
 
 \begin{itemize}
 \tightlist
@@ -11735,9 +12188,10 @@ tính năng khuyến nghị triển khai trong giai đoạn tiếp theo bao gồ
 \subsubsection{5.4.2. Ứng dụng trí tuệ nhân tạo và học máy
 (AI/ML)}\label{542-ux1ee9ng-dux1ee5ng-truxed-tuux1ec7-nhuxe2n-tux1ea1o-vuxe0-hux1ecdc-muxe1y-aiml}
 
-Với lượng dữ liệu telemetry lớn được thu thập liên tục từ các thiết bị
-IoT, hệ thống có tiềm năng lớn trong việc ứng dụng AI/ML để tạo giá trị
-gia tăng:
+Khi hệ thống đã có khả năng thu thập telemetry liên tục và khá ổn định,
+giá trị tiếp theo không chỉ nằm ở việc ``nhìn thấy dữ liệu'', mà ở việc
+biến dữ liệu đó thành dự báo và khuyến nghị. Vì vậy, AI/ML là một hướng
+mở rộng hợp lý để tăng chiều sâu cho hệ thống:
 
 \textbf{Phân tích hành vi lái xe (Driving Behavior Analysis):}
 
@@ -11766,9 +12220,10 @@ dụng sai mục đích.
 \subsubsection{5.4.3. Ứng dụng di động (Mobile
 Application)}\label{543-ux1ee9ng-dux1ee5ng-di-ux111ux1ed9ng-mobile-application}
 
-Hiện tại hệ thống chỉ có giao diện web (Tracking\_Frontend). Để mở rộng
-khả năng tiếp cận người dùng, việc phát triển ứng dụng di động là cần
-thiết:
+Hiện tại hệ thống chỉ có giao diện web (Tracking\_Frontend). Tuy nhiên,
+trong bối cảnh quản lý phương tiện, nhu cầu nhận cảnh báo và theo dõi từ
+thiết bị di động là rất tự nhiên. Vì vậy, việc phát triển ứng dụng di
+động là bước mở rộng hợp lý tiếp theo:
 
 \begin{itemize}
 \tightlist
@@ -11792,8 +12247,9 @@ thiết:
 Computing)}\label{544-tuxednh-touxe1n-biuxean-edge-computing}
 
 Với khả năng xử lý của ESP32-S3 (dual-core Xtensa LX7, 240 MHz, 8MB
-PSRAM), có thể triển khai một số mô hình suy luận AI/ML ngay trên thiết
-bị (on-device inference):
+PSRAM), một hướng mở rộng đáng chú ý là chuyển bớt phần phân tích xuống
+ngay trên thiết bị. Cách tiếp cận này giúp hệ thống phản ứng sớm hơn và
+giảm phụ thuộc vào băng thông mạng:
 
 \begin{itemize}
 \tightlist
@@ -11816,8 +12272,10 @@ bị (on-device inference):
 \subsubsection{5.4.5. Triển khai sản xuất (Production
 Deployment)}\label{545-triux1ec3n-khai-sux1ea3n-xuux1ea5t-production-deployment}
 
-Để chuyển từ môi trường phát triển sang sản xuất, cần thực hiện các bước
-sau:
+Để chuyển từ môi trường phát triển sang sản xuất, hệ thống không chỉ cần
+``chạy được ổn định hơn'' mà còn phải đạt mức sẵn sàng cao hơn về bảo
+mật, giám sát và tự động hóa triển khai. Vì vậy, các bước chuyển đổi
+trọng tâm gồm:
 
 \begin{itemize}
 \tightlist
@@ -11848,9 +12306,10 @@ sau:
 v2)}\label{546-phux1ea7n-cux1ee9ng-phiuxean-bux1ea3n-2-hardware-v2}
 
 Phiên bản phần cứng hiện có sử dụng bo mạch 2 lớp do nhóm thiết kế và
-được lắp ráp thủ công, đủ để triển khai và đánh giá ở quy mô đồ án. Để
-tiến tới sản xuất hàng loạt, các cải tiến phần cứng tiếp theo nên tập
-trung vào tối ưu DFM, EMI, độ gọn cơ khí và độ tin cậy:
+được lắp ráp thủ công, đủ để triển khai và đánh giá ở quy mô đồ án. Tuy
+nhiên, nếu nhìn dưới góc độ sản phẩm, đây mới là bước khởi đầu. Để tiến
+tới sản xuất hàng loạt, các cải tiến phần cứng tiếp theo nên tập trung
+vào tối ưu DFM, EMI, độ gọn cơ khí và độ tin cậy:
 
 \begin{itemize}
 \tightlist
@@ -11912,11 +12371,17 @@ thuật trọng yếu của một thiết bị giám sát phương tiện có kh
 hành thực tế. Ở tầng phần cứng, mức tiêu thụ điện duy trì trong ngưỡng
 thiết kế; ở tầng firmware, state machine vận hành ổn định và luồng OTA cơ
 bản đã được tích hợp; ở tầng cloud, độ trễ vẫn đáp ứng yêu cầu theo dõi
-thời gian thực. Về chi phí, BOM 870.000--1.630.000 VND cùng chi phí vận
+thời gian thực. Về chi phí, BOM khoảng 1.514.000 VND cùng chi phí vận
 hành thấp tạo lợi thế rõ rệt so với nhiều giải pháp thương mại cùng phân
-khúc. Trọng tâm giai đoạn tiếp theo không phải thay đổi kiến trúc tổng
-thể, mà là tăng chiều sâu hardening: watchdog, bảo mật MQTT/TLS và kiểm
-thử vận hành dài hạn.
+khúc.
+
+Điểm quan trọng rút ra từ chương này là kiến trúc tổng thể của đề tài đã
+đi đúng hướng; phần việc còn lại chủ yếu là làm hệ thống "cứng cáp" hơn
+cho vận hành dài hạn, thay vì phải thay đổi lại từ gốc. Vì vậy, trọng
+tâm giai đoạn tiếp theo không phải thay đổi kiến trúc tổng thể, mà là
+tăng chiều sâu hardening: watchdog, bảo mật MQTT/TLS và kiểm thử vận
+hành dài hạn. Trên nền tảng đó, Chương 6 sẽ nhìn lại toàn bộ quá trình
+thực hiện dưới góc độ học thuật và bài học kinh nghiệm.
 
 \chapterheading{CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM -- REFLECTION AND LESSONS LEARNED}
 
@@ -11927,15 +12392,19 @@ Dự án "IoT Vehicle Tracking System" là kết quả của quá trình tổng 
 kiến thức từ nhiều học phần và nhiều lớp công nghệ khác nhau. Từ phần
 cứng, firmware đến backend và frontend, mỗi quyết định triển khai đều
 đòi hỏi người thực hiện chuyển kiến thức nền tảng thành lựa chọn kỹ
-thuật cụ thể. Phần này làm rõ quá trình chuyển hóa đó trong bối cảnh của
-dự án.
+thuật cụ thể. Vì vậy, chương này không chỉ mang tính tổng kết, mà còn là
+phần nhìn lại xem kiến thức đã học được vận dụng như thế nào khi đi vào
+một bài toán thực tế có nhiều ràng buộc đồng thời.
 
 \subsubsection{6.1.1. Vi xử lý và Vi điều
 khiển}\label{611-vi-xux1eed-luxfd-vuxe0-vi-ux111iux1ec1u-khiux1ec3n}
 
-Kiến thức về vi xử lý và vi điều khiển đóng vai trò cốt lõi trong việc
-thiết kế và lập trình thiết bị tracker IoT. Các nội dung được áp dụng
-bao gồm:
+Trong toàn bộ đồ án, lớp kiến thức về vi xử lý và vi điều khiển là nơi
+mọi quyết định kỹ thuật bắt đầu trở nên cụ thể. Chính ở lớp này, các
+khái niệm học thuật như thanh ghi, bus ngoại vi hay đồng bộ tài nguyên
+không còn là lý thuyết riêng lẻ, mà trở thành công cụ trực tiếp để tạo
+ra một thiết bị có thể vận hành ngoài thực tế. Các nội dung được áp
+dụng bao gồm:
 
 \begin{itemize}
 \tightlist
@@ -11963,8 +12432,10 @@ bao gồm:
 \subsubsection{6.1.2. Mạng máy tính và
 IoT}\label{612-mux1ea1ng-muxe1y-tuxednh-vuxe0-iot}
 
-Kiến thức mạng máy tính là nền tảng cho toàn bộ lớp truyền thông của hệ
-thống:
+Nếu phần cứng quyết định thiết bị có thu được dữ liệu hay không, thì
+kiến thức mạng quyết định dữ liệu đó có đi đúng nơi và đến đủ nhanh hay
+không. Vì vậy, nhóm kiến thức này xuất hiện xuyên suốt từ thiết bị, cloud
+đến giao diện thời gian thực:
 
 \begin{itemize}
 \tightlist
@@ -12000,8 +12471,10 @@ thống:
 \subsubsection{6.1.3. Cơ sở dữ
 liệu}\label{613-cux1a1-sux1edf-dux1eef-liux1ec7u}
 
-Kiến thức cơ sở dữ liệu được áp dụng trong việc thiết kế và tối ưu hóa
-hệ thống lưu trữ:
+Kiến thức cơ sở dữ liệu được vận dụng không chỉ để ``lưu được dữ liệu'',
+mà để tổ chức dữ liệu theo đúng đặc tính sử dụng của hệ thống. Đây là
+một điểm học được rất rõ khi đồ án phải đồng thời xử lý dữ liệu telemetry
+và dữ liệu nghiệp vụ:
 
 \begin{itemize}
 \tightlist
@@ -12027,8 +12500,10 @@ hệ thống lưu trữ:
 \subsubsection{6.1.4. Lập trình hướng đối
 tượng}\label{614-lux1eadp-truxecnh-hux1b0ux1edbng-ux111ux1ed1i-tux1b0ux1ee3ng}
 
-Các nguyên tắc lập trình hướng đối tượng (OOP) được áp dụng rộng rãi
-trong việc phát triển phần mềm:
+Các nguyên tắc lập trình hướng đối tượng (OOP) không được áp dụng như
+một khuôn mẫu hình thức, mà như một cách giữ cho hệ thống nhiều tầng vẫn
+duy trì được sự rõ ràng khi mở rộng. Điều này thể hiện rõ nhất ở các lớp
+backend và frontend:
 
 \begin{itemize}
 \tightlist
@@ -12053,8 +12528,10 @@ trong việc phát triển phần mềm:
 \subsubsection{6.1.5. Điện tử số và
 Analog}\label{615-ux111iux1ec7n-tux1eed-sux1ed1-vuxe0-analog}
 
-Kiến thức điện tử là nền tảng cho việc thiết kế phần cứng của thiết bị
-tracker:
+Kiến thức điện tử là phần giúp đồ án thoát khỏi phạm vi của một hệ thống
+phần mềm thuần túy. Nhờ lớp kiến thức này, các yêu cầu như bảo vệ ắc quy,
+đọc điện áp hay duy trì nguồn dự phòng mới được chuyển thành mạch điện
+cụ thể:
 
 \begin{itemize}
 \tightlist
@@ -12080,8 +12557,10 @@ tracker:
 \subsubsection{6.1.6. Kỹ thuật phần
 mềm}\label{616-kux1ef9-thuux1eadt-phux1ea7n-mux1ec1m}
 
-Các phương pháp và công cụ kỹ thuật phần mềm được áp dụng xuyên suốt dự
-án:
+Các phương pháp và công cụ kỹ thuật phần mềm là lớp keo gắn toàn bộ đồ
+án lại với nhau. Chúng không trực tiếp tạo ra tính năng, nhưng quyết
+định hệ thống có thể được phát triển, kiểm thử và mở rộng một cách có tổ
+chức hay không:
 
 \begin{itemize}
 \tightlist
@@ -12109,18 +12588,21 @@ Các phương pháp và công cụ kỹ thuật phần mềm được áp dụng
 
 \subsection{6.2. Giải quyết các vấn đề kỹ thuật phức tạp -- Complex engineering problems}\label{62-giux1ea3i-quyux1ebft-cuxe1c-vux1ea5n-ux111ux1ec1-kux1ef9-thuux1eadt-phux1ee9c-tux1ea1p--complex-engineering-problems}
 
-Trong quá trình thực hiện dự án, nhóm phát triển đã phải giải quyết
-nhiều vấn đề kỹ thuật phức tạp. Phần này trình bày bốn vấn đề tiêu biểu
-cùng cách tiếp cận xử lý tương ứng.
+Phần trước cho thấy kiến thức nền đã được vận dụng như thế nào. Phần này
+đi thêm một bước: nhìn vào những bài toán khó thật sự mà nhóm đã phải
+giải quyết trong quá trình triển khai. Việc nêu ra các vấn đề này không
+chỉ để mô tả thách thức, mà để làm rõ cách tư duy kỹ thuật đã thay đổi
+khi đồ án chuyển từ mức ý tưởng sang mức hệ thống vận hành được.
 
 \subsubsection{6.2.1. Vấn đề 1: Phân tích bản tin OBD2 đa khung qua
 BLE}\label{621-vux1ea5n-ux111ux1ec1-1-phuxe2n-tuxedch-bux1ea3n-tin-obd2-ux111a-khung-qua-ble}
 
 \textbf{Mô tả vấn đề:}
 
-Việc kết nối và giao tiếp với OBD2 adapter vgate iCar Pro qua Bluetooth
-Low Energy (BLE) là một trong những thách thức kỹ thuật lớn nhất của dự
-án. Vấn đề cụ thể bao gồm:
+Thoạt nhìn, việc lấy dữ liệu OBD2 qua BLE có vẻ chỉ là một bước tích hợp
+ngoại vi. Tuy nhiên, khi triển khai thực tế, đây lại là một trong những
+thử thách kỹ thuật khó nhất của đồ án vì phải làm việc với thiết bị bên
+thứ ba có tài liệu hạn chế. Vấn đề cụ thể bao gồm:
 
 \begin{itemize}
 \tightlist
@@ -12173,9 +12655,10 @@ phối}\label{622-vux1ea5n-ux111ux1ec1-2-ux111ux1b0ux1eddng-ux1ed1ng-dux1eef-liu
 
 \textbf{Mô tả vấn đề:}
 
-Hệ thống cần xử lý luồng dữ liệu telemetry liên tục từ nhiều thiết bị
-IoT (GPS, trạng thái nguồn, IMU; sẵn sàng mở rộng thêm OBD2) với các yêu
-cầu:
+Đường ống dữ liệu thời gian thực là nơi nhiều ràng buộc gặp nhau cùng
+lúc: tốc độ, độ tin cậy, chi phí lưu trữ và khả năng mở rộng. Hệ thống
+cần xử lý luồng dữ liệu telemetry liên tục từ nhiều thiết bị IoT (GPS,
+trạng thái nguồn, IMU; sẵn sàng mở rộng thêm OBD2) với các yêu cầu:
 
 \begin{itemize}
 \tightlist
@@ -12227,8 +12710,10 @@ cấp}\label{623-vux1ea5n-ux111ux1ec1-3-quux1ea3n-luxfd-nux103ng-lux1b0ux1ee3ng-
 
 \textbf{Mô tả vấn đề:}
 
-Hệ thống phần cứng phải hoạt động với hai nguồn năng lượng có đặc tính
-rất khác nhau:
+Quản lý năng lượng là vấn đề không dễ nhận thấy khi mới nhìn hệ thống từ
+góc độ phần mềm, nhưng lại quyết định trực tiếp độ tin cậy của thiết bị
+trong xe. Hệ thống phần cứng phải hoạt động với hai nguồn năng lượng có
+đặc tính rất khác nhau:
 
 \begin{itemize}
 \tightlist
@@ -12278,8 +12763,11 @@ IoT}\label{624-vux1ea5n-ux111ux1ec1-4-kiux1ebfn-truxfac-ux111uxe1m-muxe2y-cuxf3-
 
 \textbf{Mô tả vấn đề:}
 
-Hệ thống cần xử lý dữ liệu từ nhiều thiết bị đồng thời, cung cấp giao
-diện thời gian thực cho nhiều người dùng, và đảm bảo bảo mật:
+Bài toán cloud của đồ án không dừng ở việc ``đưa dữ liệu lên server'',
+mà phải giải được ba yêu cầu cùng lúc: nhiều thiết bị, nhiều người dùng
+và mức an toàn đủ cho dữ liệu vận hành. Vì vậy, hệ thống cần xử lý dữ
+liệu từ nhiều thiết bị đồng thời, cung cấp giao diện thời gian thực cho
+nhiều người dùng, và đảm bảo bảo mật:
 
 \begin{itemize}
 \tightlist
@@ -12333,14 +12821,21 @@ là nền tảng cho bảo mật và quản lý đội xe quy mô lớn.
 
 \subsection{6.3. Tác động đạo đức và xã hội -- Ethical and social impacts}\label{63-tuxe1c-ux111ux1ed9ng-ux111ux1ea1o-ux111ux1ee9c-vuxe0-xuxe3-hux1ed9i--ethical-and-social-impacts}
 
+Một hệ thống theo dõi phương tiện không chỉ là bài toán kỹ thuật. Khi hệ
+thống bắt đầu thu thập dữ liệu vị trí, hành trình và thói quen sử dụng
+xe, nó đồng thời chạm tới các câu hỏi về quyền riêng tư, trách nhiệm sử
+dụng dữ liệu và ảnh hưởng xã hội. Vì vậy, việc đánh giá đồ án sẽ chưa đủ
+nếu chỉ dừng ở hiệu năng kỹ thuật.
+
 \subsubsection{6.3.1. Quyền riêng tư và bảo vệ dữ liệu cá
 nhân}\label{631-quyux1ec1n-riuxeang-tux1b0-vuxe0-bux1ea3o-vux1ec7-dux1eef-liux1ec7u-cuxe1-nhuxe2n}
 
 Hệ thống theo dõi phương tiện liên tục thu thập dữ liệu vị trí GPS, hành
 trình và thói quen sử dụng xe của người lái. Đây đều là dữ liệu nhạy cảm
-liên quan trực tiếp đến quyền riêng tư. Vì vậy, quá trình phát triển và
-triển khai hệ thống cần được xem xét nghiêm túc dưới góc độ đạo đức và
-bảo vệ dữ liệu.
+vì chúng không chỉ mô tả phương tiện đang ở đâu, mà còn phản ánh hành vi
+và nhịp sinh hoạt của con người gắn với phương tiện đó. Vì vậy, quá trình
+phát triển và triển khai hệ thống cần được xem xét nghiêm túc dưới góc
+độ đạo đức và bảo vệ dữ liệu.
 
 \textbf{Các biện pháp bảo vệ quyền riêng tư đã được áp dụng:}
 
@@ -12390,9 +12885,11 @@ mình, ngăn chặn truy cập trái phép dữ liệu thiết bị khác \\\hli
 \subsubsection{6.3.2. An toàn phương tiện và trách nhiệm kỹ
 thuật}\label{632-an-touxe0n-phux1b0ux1a1ng-tiux1ec7n-vuxe0-truxe1ch-nhiux1ec7m-kux1ef9-thuux1eadt}
 
-Việc truy cập hệ thống OBD2 của xe đặt ra câu hỏi về an toàn phương
-tiện: liệu thiết bị tracker có thể ảnh hưởng đến hoạt động của động cơ
-hoặc các hệ thống điện tử trên xe?
+Việc truy cập hệ thống OBD2 của xe đặt ra một câu hỏi quan trọng hơn
+chính bản thân khả năng đọc dữ liệu: thiết bị theo dõi có vô tình làm
+ảnh hưởng đến độ an toàn vận hành của xe hay không? Đây là lý do các
+quyết định thiết kế ở phần này phải ưu tiên nguyên tắc an toàn trước khi
+tối đa hóa tính năng.
 
 \textbf{Các biện pháp đảm bảo an toàn đã được áp dụng:}
 
@@ -12418,10 +12915,15 @@ hoặc các hệ thống điện tử trên xe?
 \subsubsection{6.3.3. Tác động xã hội tích
 cực}\label{633-tuxe1c-ux111ux1ed9ng-xuxe3-hux1ed9i-tuxedch-cux1ef1c}
 
-Hệ thống IoT giám sát phương tiện tạo ra một số tác động xã hội tích cực
-có thể nhận thấy:
+Ở chiều ngược lại, nếu được triển khai đúng cách, hệ thống IoT giám sát
+phương tiện cũng có thể tạo ra những giá trị xã hội rõ ràng chứ không
+chỉ là công cụ kiểm soát. Một số tác động tích cực có thể nhận thấy gồm:
 
 \textbf{Hỗ trợ doanh nghiệp nhỏ và vừa:}
+
+Bên cạnh các lợi ích trên, hệ thống vẫn đi kèm những lo ngại cần được
+xác định sớm để tránh biến công cụ hỗ trợ vận hành thành công cụ gây áp
+lực hoặc xâm phạm quyền riêng tư.
 
 \begin{itemize}
 \tightlist
@@ -12483,14 +12985,21 @@ xét}\label{634-nhux1eefng-lo-ngux1ea1i-cux1ea7n-xem-xuxe9t}
 
 \subsection{6.4. Tổng kết và bài học kinh nghiệm -- Reflection and Lessons Learned}\label{64-tux1ed5ng-kux1ebft-vuxe0-buxe0i-hux1ecdc-kinh-nghiux1ec7m--reflection-and-lessons-learned}
 
+Nếu Chương 5 đánh giá hệ thống bằng số liệu và Chương 6.1--6.3 nhìn lại
+kiến thức, thách thức và tác động xã hội, thì mục này là phần khép lại
+toàn bộ hành trình thực hiện đồ án. Trọng tâm ở đây không phải kể lại
+những gì đã làm, mà rút ra những điều thực sự có giá trị cho các giai
+đoạn phát triển sau.
+
 \subsubsection{6.4.1. Tầm quan trọng của thiết kế kiến trúc trước khi
 lập
 trình}\label{641-tux1ea7m-quan-trux1ecdng-cux1ee7a-thiux1ebft-kux1ebf-kiux1ebfn-truxfac-trux1b0ux1edbc-khi-lux1eadp-truxecnh}
 
 Một trong những bài học quan trọng nhất của dự án là phải ưu tiên thiết
-kế kiến trúc hệ thống trước khi bắt tay vào lập trình. Ở giai đoạn đầu,
-nhóm từng có xu hướng triển khai nhanh từng mô-đun khi chưa xây dựng
-xong mô hình tương tác tổng thể.
+kế kiến trúc hệ thống trước khi bắt tay vào lập trình. Bài học này không
+đến từ lý thuyết, mà đến từ chính giai đoạn đầu của đồ án khi nhóm từng
+có xu hướng triển khai nhanh từng mô-đun trước khi xây dựng xong mô hình
+tương tác tổng thể.
 
 Khi phát sinh các lỗi tích hợp (interface mismatch, data format
 inconsistency, circular dependencies), nhóm chuyển sang cách tiếp cận có
@@ -12507,8 +13016,9 @@ khối lượng công việc phải làm lại ở các giai đoạn sau.
 tầng}\label{642-ux111ux1ed9-phux1ee9c-tux1ea1p-cux1ee7a-hux1ec7-thux1ed1ng-iot-nhiux1ec1u-tux1ea7ng}
 
 Dự án cho thấy một hệ thống IoT nhiều tầng phức tạp hơn đáng kể so với
-một ứng dụng web thông thường. Hệ thống này bao gồm bốn lớp công nghệ
-khác nhau:
+một ứng dụng web thông thường. Độ phức tạp không nằm ở từng lớp riêng
+lẻ, mà ở chỗ mọi lớp đều có ràng buộc riêng và chỉ bộc lộ rõ khi ghép
+lại với nhau. Hệ thống này bao gồm bốn lớp công nghệ khác nhau:
 
 
 {\thesissettableid{6.4.2A}{tab-ch6-tong-hop-thong-tin-ve-tang-ngon-ngu-cong-nghe-thach-thuc}
@@ -12543,7 +13053,8 @@ là với hệ thống đa tầng, cần thực hiện kiểm thử tích hợp 
 mở}\label{643-sux1ee9c-mux1ea1nh-cux1ee7a-hux1ec7-sinh-thuxe1i-muxe3-nguux1ed3n-mux1edf}
 
 Dự án sử dụng hoàn toàn công nghệ mã nguồn mở. Quá trình triển khai cho
-thấy các thành phần này đã đủ ổn định để kết hợp thành một hệ thống IoT
+thấy sức mạnh của hệ sinh thái này không chỉ nằm ở chi phí bằng 0, mà ở
+khả năng ghép nối nhiều công cụ trưởng thành thành một hệ thống IoT khá
 hoàn chỉnh:
 
 \begin{itemize}
@@ -12580,7 +13091,10 @@ có thể tập trung cho phần cứng và hạ tầng máy chủ.
 \subsubsection{6.4.4. Kiểm thử ở mọi tầng là bắt
 buộc}\label{644-kiux1ec3m-thux1eed-ux1edf-mux1ecdi-tux1ea7ng-luxe0-bux1eaft-buux1ed9c}
 
-Dự án cho thấy kiểm thử ở mọi tầng của hệ thống là yêu cầu bắt buộc:
+Dự án cho thấy kiểm thử ở mọi tầng của hệ thống là yêu cầu bắt buộc.
+Trong một hệ thống nhiều lớp, rất ít lỗi tự lộ ra đúng tại nơi chúng
+phát sinh; phần lớn chỉ biểu hiện ở tầng khác. Vì vậy, kiểm thử phải đi
+theo toàn bộ hành trình dữ liệu:
 
 \begin{itemize}
 \tightlist
@@ -12609,9 +13123,11 @@ nhân}\label{645-tux1ed5ng-kux1ebft-cuxe1-nhuxe2n}
 Dự án "IoT Vehicle Tracking System" đưa người thực hiện đi trọn một vòng
 từ ý tưởng, thiết kế mạch, đặt mua linh kiện, chế tạo phần cứng, tích
 hợp và đánh giá. Giá trị lớn nhất của quá trình này không nằm ở việc
-ghép đủ các thành phần, mà ở chỗ mỗi quyết định kỹ thuật đều phải được
+ghép đủ các thành phần, mà ở chỗ từng quyết định kỹ thuật đều phải được
 kiểm chứng lại bằng số liệu, bằng thử nghiệm và bằng mức độ phù hợp với
-điều kiện triển khai thật.
+điều kiện triển khai thật. Chính quá trình lặp đi lặp lại giữa giả định
+và kiểm chứng đó mới là phần trưởng thành quan trọng nhất mà đồ án mang
+lại.
 
 Kinh nghiệm rút ra từ dự án, đặc biệt ở các mảng kiến trúc hệ thống,
 quản lý năng lượng cho thiết bị IoT, bảo mật backend và tổ chức luồng dữ
@@ -12623,12 +13139,14 @@ này.
 \subsection{Kết luận chương
 6}\label{kux1ebft-luux1eadn-chux1b0ux1a1ng-6}
 
-Chương 6 cho thấy việc xây dựng một hệ thống IoT giám sát phương tiện
-không thể xem như việc ghép nối đơn giản giữa phần cứng, firmware và
-web, mà là quá trình liên tục cân bằng giữa ràng buộc kỹ thuật, nhu cầu
-vận hành và trách nhiệm dữ liệu. Những bài học rút ra về kiến trúc, kiểm
-thử tích hợp, quản lý năng lượng, OTA và đạo đức dữ liệu là nền tảng
-thực tế để tiếp tục hoàn thiện hệ thống trong các giai đoạn sau.
+Chương 6 khép lại câu chuyện của đồ án bằng một góc nhìn rộng hơn so với
+các chương trước: xây dựng một hệ thống IoT giám sát phương tiện không
+phải là việc ghép nối đơn giản giữa phần cứng, firmware và web, mà là
+quá trình liên tục cân bằng giữa ràng buộc kỹ thuật, nhu cầu vận hành và
+trách nhiệm dữ liệu. Những bài học rút ra về kiến trúc, kiểm thử tích
+hợp, quản lý năng lượng, OTA và đạo đức dữ liệu vì thế không chỉ là phần
+tổng kết cho đồ án hiện tại, mà còn là nền tảng thực tế cho các giai
+đoạn hoàn thiện tiếp theo.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -12773,8 +13291,8 @@ services," ISO Standard, 2016.
 {[}Online{]}. Available:
 \url{https://www.vgatemall.com/product/vgate-icar-pro.html}
 
-{[}30{]} Injoinic Technology, "TP4056--3A Synchronous Switch Step-Down
-Li-ion Battery Charger Datasheet," Version 1.0, 2022.
+{[}30{]} NanJing Top Power ASIC Corp., "TP4056 Standalone Linear Li-Ion
+Battery Charger with Thermal Regulation," Datasheet, Rev. 1.0.
 
 {[}31{]} Apache NimBLE Project, "NimBLE Host API Reference," Version
 1.5, 2023. {[}Online{]}. Available:
@@ -12959,8 +13477,10 @@ BOM)}\label{11-bux1ea3ng-kuxea-chi-phuxed-linh-kiux1ec7n-bill-of-materials---bom
 
 Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng trong thiết
 bị tracker IoT, bao gồm đơn giá và tổng chi phí ước tính. Đơn giá được
-tham chiếu theo mặt bằng giá của hai nhà cung cấp linh kiện điện tử
-trong nước là LinhKienChatLuong và CXT tại thời điểm tháng 01/2026.
+tham chiếu theo mặt bằng giá thị trường Việt Nam đã được rà soát lại vào
+ngày 12/04/2026 từ các kênh bán lẻ như Điện tử Á Châu, Điện tử Đức Huy
+và một số sàn thương mại điện tử trong nước đối với các linh kiện khó
+kiếm.
 
 
 {\thesissettableid{PL-1.1}{tab-app1-bang-ke-chi-phi-linh-kien-bom}
@@ -12976,23 +13496,23 @@ tiền (VND)} & \textbf{Ghi chú} \\
 tiền (VND)} & \textbf{Ghi chú} \\
 \hline
 \endhead
-1 & Vi điều khiển & ESP32-S3-WROOM-1 (N16R8) & 1 & 120.000 & 120.000 &
+1 & Vi điều khiển & ESP32-S3-WROOM-1 (N16R8) & 1 & 95.000 & 95.000 &
 MCU chính, 16MB Flash, 8MB PSRAM \\\hline
-2 & LTE + GNSS & \nolinkurl{SIM7600CE-T} & 1 bộ & 330.000 & 330.000 & Modem
+2 & LTE + GNSS & \nolinkurl{SIM7600CE-T} & 1 bộ & 650.000 & 650.000 & Modem
 LTE Cat-4 tích hợp GPS/GNSS \\\hline
-3 & OBD2 Adapter & vgate iCar Pro BLE & 1 & 350.000 & 350.000 &
+3 & OBD2 Adapter & vgate iCar Pro BLE & 1 & 367.000 & 367.000 &
 Bluetooth Low Energy OBD2 \\\hline
-4 & Cảm biến gia tốc & IC LIS3DSH & 1 & 45.000 & 45.000 & IMU 3 trục,
+4 & Cảm biến gia tốc & IC LIS3DSH & 1 & 40.000 & 40.000 & IMU 3 trục,
 phát hiện chuyển động \\\hline
-5 & Pin dự phòng & 18650 1S Li-ion 3500mAh & 1 & 80.000 & 80.000 &
+5 & Pin dự phòng & 18650 1S Li-ion 3500mAh & 1 & 79.000 & 79.000 &
 Samsung/LG cell \\\hline
-6 & IC sạc pin & TP4056 + mạch phụ trợ & 1 & 25.000 & 25.000 & Sạc 1S,
-input 5V từ MP2482, dòng theo PROG \\\hline
-7 & Buck 3.3V & Mạch AP2112-3.3 & 1 & 18.000 & 18.000 & 12--24V
+6 & IC sạc pin & TP4056 + mạch phụ trợ & 1 & 37.000 & 37.000 & Sạc 1S
++ bảo vệ pin, input 5V từ MP2482 \\\hline
+7 & LDO 3.3V & Mạch AP2112-3.3 & 1 & 5.000 & 5.000 & 5V
 -\textgreater{} 3.3V cấp ESP32-S3 \\\hline
-8 & Buck 5V & Mạch MP2482 (12V/24V-\textgreater5V) & 1 & 15.000 & 15.000
+8 & Buck 5V & Mạch MP2482 (12V/24V-\textgreater5V) & 1 & 17.000 & 17.000
 & Tạo bus 5V chính \\\hline
-9 & Buck 3.8V/4V & Mạch TPS54231 & 1 & 20.000 & 20.000 & 12--24V
+9 & Buck 3.8V/4V & Mạch TPS54231 & 1 & 9.000 & 9.000 & 12--24V
 -\textgreater{} ~4V cấp modem SIM7600CE-T \\\hline
 10 & Boost converter & Mạch SX1308 (3.7V-\textgreater5V) & 1 & 12.000 &
 12.000 & Tăng áp từ pin dự phòng \\\hline
@@ -13016,7 +13536,7 @@ nối nguồn ắc quy xe (12V hoặc 24V) \\\hline
 vệ thiết bị \\\hline
 20 & Dây kết nối & Dây nối, header, jumper & 1 bộ & 20.000 & 20.000 &
 Dây kết nối nội bộ \\\hline
-& & & & \textbf{Tổng cộng} & \textbf{1.183.000} & \\\hline
+& & & & \textbf{Tổng cộng} & \textbf{1.514.000} & \\\hline
 \end{longtable}
 }
 
@@ -13062,19 +13582,19 @@ DigitalOcean / Vultr / Viettel IDC \\\hline
 \hline \textbf{Hạng mục} & \textbf{Chi phí (VND)} & \textbf{Ghi chú} \\
 \hline
 \endhead
-Phần cứng (1 bộ tracker) & 1.183.000 & Theo BOM ở bảng PL-1.1 \\\hline
+Phần cứng (1 bộ tracker) & 1.514.000 & Theo BOM ở bảng PL-1.1 \\\hline
 Phần mềm (licenses) & 0 & Toàn bộ mã nguồn mở \\\hline
 Hạ tầng cloud (3 tháng dev + 3 tháng test) & 2.370.000--3.570.000 & 6
 tháng x chi phí hàng tháng \\\hline
 SIM 4G (6 tháng) & 420.000 & 70.000 x 6 tháng \\\hline
 Công cụ phát triển (khác) & 200.000 & USB-UART, mỏ hàn, dây đo \\\hline
-\textbf{Tổng chi phí dự án} & \textbf{4.173.000--5.373.000} & \\\hline
+\textbf{Tổng chi phí dự án} & \textbf{4.504.000--5.704.000} & \\\hline
 \end{longtable}
 }
 
 
 \textbf{Nhận xét:} Tổng chi phí dự án vẫn dưới 6.000.000 VND, trong đó
-chi phí phần cứng cho mỗi bộ tracker khoảng 1.183.000 VND, thấp hơn đáng
+chi phí phần cứng cho mỗi bộ tracker khoảng 1.514.000 VND, thấp hơn đáng
 kể so với các giải pháp thương mại tương đương (2.000.000--5.000.000
 VND/thiết bị). Khi sản xuất số lượng lớn (\textgreater50 bộ), chi phí
 linh kiện có thể giảm thêm 15--25\% nhờ mua sỉ.
@@ -13604,6 +14124,8 @@ cập tại:
 \begin{itemize}
 \tightlist
 \item
+  \textbf{URL (cloud/UAT):} \texttt{https://api.thingdock.dev/api-docs}
+\item
   \textbf{URL (development):} \texttt{http://localhost:4000/api-docs}
 \item
   \textbf{Tài liệu thiết kế:}
@@ -13778,14 +14300,21 @@ npm & 10.x \\\hline
 \hline \textbf{Dịch vụ} & \textbf{URL} & \textbf{Tài khoản mặc định} \\
 \hline
 \endhead
-Frontend Web & http://localhost:4001 & admin / Admin@2026 \\\hline
-Backend API & http://localhost:4000 & --- \\\hline
-Swagger Docs & http://localhost:4000/api-docs & --- \\\hline
-EMQX Dashboard & http://localhost:18083 & admin / Anmh1205 \\\hline
-Grafana & http://localhost:4002 & admin / Anmh1205 \\\hline
-VictoriaMetrics & http://localhost:8428 & --- \\\hline
+Frontend Web & \nolinkurl{https://thingdock.dev} & admin / Admin@2026 \\\hline
+Backend API & \nolinkurl{https://api.thingdock.dev} & --- \\\hline
+Swagger Docs & \nolinkurl{https://api.thingdock.dev/api-docs} & --- \\\hline
+MQTT WebSocket & \nolinkurl{wss://mqtt.thingdock.dev} & --- \\\hline
+MQTT TLS Broker & \nolinkurl{mqtts://mqtts.thingdock.dev:8883} & Theo tài khoản MQTT của thiết bị \\\hline
+Grafana & \nolinkurl{https://grafana.thingdock.dev} & admin / Anmh1205 \\\hline
+EMQX Dashboard & \nolinkurl{https://emqx.thingdock.dev} & admin / Anmh1205 \\\hline
+NPM Admin & \nolinkurl{https://npm.thingdock.dev} & Tài khoản admin cấu hình khi bootstrap \\\hline
 \end{longtable}
 }
+
+\textbf{Ghi chú cloud UAT:} VictoriaMetrics được giữ ở chế độ nội bộ,
+không công khai qua subdomain. Nếu cần truy cập phục vụ vận hành, dịch vụ
+này vẫn nằm tại \texttt{tracking-victoriametrics:8428} trong Docker
+network hoặc có thể xuất bản thêm subdomain riêng ở giai đoạn sau.
 
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}

@@ -1,10 +1,10 @@
 # Fdb version 4
-["xdvipdfmx"] 1775927562.25505 "thesis-final-report.xdv" "thesis-final-report.pdf" "thesis-final-report" 1775927582.15183 0
-  "thesis-final-report.xdv" 1775927560 4625260 47af547f8d9e25a69cbee3ef8c7115cc "xelatex"
+["xdvipdfmx"] 1775938926.90891 "thesis-final-report.xdv" "thesis-final-report.pdf" "thesis-final-report" 1775938942.99916 0
+  "thesis-final-report.xdv" 1775938926 4944480 4967cf2abb6068154377372d36755cd3 "xelatex"
   (generated)
   "thesis-final-report.pdf"
   (rewritten before read)
-["xelatex"] 1775927537.82087 "thesis-final-report.tex" "thesis-final-report.xdv" "thesis-final-report" 1775927582.07084 0
+["xelatex"] 1775938912.66456 "thesis-final-report.tex" "thesis-final-report.xdv" "thesis-final-report" 1775938942.971 0
   "C:/Users/Admin/AppData/Local/MiKTeX/miktex/data/le/xetex/xelatex.fmt" 1775718870 27177066 365ef0e8607d1e140bf203d71976060b ""
   "C:/Users/Admin/AppData/Local/Programs/MiKTeX/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136747054 1528 7e12f4c0fcf5a072cebdcfbfc610f54c ""
   "C:/Users/Admin/AppData/Local/Programs/MiKTeX/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1233951848 1004 54797486969f23fa377b128694d548df ""
@@ -274,11 +274,11 @@
   "assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-37.png" 1775846701 14672 69f199ab1f589cd68a56740289b7ba51 ""
   "assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-38.png" 1775846707 11030 d38cecccd53e37d75611db11e3ca118b ""
   "assets/figures/14-phu-luc-hinh-pl-3-1.png" 1775846714 22675 0fa8dbfacefb316afb81198120f93b06 ""
-  "thesis-final-report.aux" 1775927560 230532 cb959f748d44552a5c57fe5c27440267 "xelatex"
-  "thesis-final-report.lof" 1775927560 17076 f02e97b8cd3cc19341fad304995984cc "xelatex"
-  "thesis-final-report.lot" 1775927560 23297 5fc4010aac25e761b2af72d3146a0c31 "xelatex"
-  "thesis-final-report.tex" 1775927504 692663 88a1304247f711df0c96337ee44295df ""
-  "thesis-final-report.toc" 1775927560 39710 456b9df791185e1c088fa99a7bb3aa53 "xelatex"
+  "thesis-final-report.aux" 1775938925 232375 393d2fb986780b1bbed20ae64625bd21 "xelatex"
+  "thesis-final-report.lof" 1775938926 17083 a30bd9e05d20b4e76f0705ab9c4e11a2 "xelatex"
+  "thesis-final-report.lot" 1775938926 23489 fe37a18d416f4ab79a065c7596609bed "xelatex"
+  "thesis-final-report.tex" 1775938875 735256 9dd5ed314ca81bbef1a1a5619c68fe91 ""
+  "thesis-final-report.toc" 1775938926 40199 18c513ef905152898f1a040dbfdc6d27 "xelatex"
   (generated)
   "thesis-final-report.aux"
   "thesis-final-report.lof"
