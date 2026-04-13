@@ -113,6 +113,18 @@
 - Remaining closure:
   - Phase 07 hardware acceptance (gates A-F) remains in progress and requires real-board measurements.
 
+### P1 - OTA End-to-End Firmware-Cloud Hardening (Phases 01-04 Complete in Code)
+- Scope: harden OTA contract from backend deploy/download to MQTT bridge ingest ordering and firmware runtime error mapping.
+- Milestones completed:
+  - Backend OTA artifact readiness checks added before deploy, plus strict download response headers for device-safe binary fetch.
+  - Backend deploy flow now validates device IDs, deduplicates active jobs by device/version, tracks dispatch outcomes, and surfaces derived stuck status for operators.
+  - MQTT Bridge firmware ingest now suppresses duplicate `message_id`, rejects out-of-order `seq_no`, and keeps terminal-state sticky against late non-terminal payloads.
+  - Firmware OTA executor now emits milestone statuses via callback path and maps failures to stable short error codes.
+  - Firmware confirm timeout is now persisted as deadline and enforced on next boot using trusted-time checks.
+- Remaining closure:
+  - Phase 05 (real VPS + ESP32 loops) needs live infrastructure + hardware execution evidence.
+  - Phase 06 release gate still depends on Phase 05 evidence pack.
+
 ## Notes
 - No remaining open tasks for accessibility remediation.
 - Login entry implementation is complete; future work can add richer marketing content or a dedicated contact/demo funnel if needed.

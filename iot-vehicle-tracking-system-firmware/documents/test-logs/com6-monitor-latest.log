@@ -1467,3 +1467,2239 @@ I (78364) POWER_MGR: SIM7600 RESET pulse end gpio=35
 I (78364) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
 I (78464) STATE_MACHINE: mqtt status=stopped metadata mid=4889e2a2-8732-424d-a3b1-eed806e8124a seq=2 boot=boot-1-4ace04ad ts=1735693282000
 I (156274) STATE_MACHINE: Sleep accepted enter_count=1 timer_wake_count=0 imu_wake_count=0 false_wake_count=0
+
+===== monitor start port=COM6 ts=1776070664 =====
+I (5325351) OFFLINE_QUEUE: replay publish ok seq=129 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=67
+I (5327071) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (5327071) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.640360,N,10544.726379,E,130426,085807.0,14.5,0.0,    OK  
+I (5327071) MODEM_GNSS: GNSS fallback fix lat=20.960673 lon=105.745440 speed_kmh=0.00
+I (5327081) MODEM_GNSS: GNSS fix success lat=20.960673 lon=105.745440 sat=1 streak=84
+I (5327091) STATE_MACHINE: HW diag supply=12.16V batt=4.08V ign=1 vib=947 lte=1 mqtt=1 ble=1 gnss_fix=1
+I (5387871) OFFLINE_QUEUE: replay publish ok seq=130 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=68
+I (5389611) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (5389611) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.637758,N,10544.726191,E,130426,085910.0,19.1,1.2,264.5    OK  
+I (5389611) MODEM_GNSS: GNSS fallback fix lat=20.960629 lon=105.745437 speed_kmh=2.22
+I (5389621) MODEM_GNSS: GNSS fix success lat=20.960629 lon=105.745437 sat=1 streak=85
+I (5389631) STATE_MACHINE: HW diag supply=12.18V batt=4.07V ign=1 vib=947 lte=1 mqtt=1 ble=1 gnss_fix=1
+
+===== monitor start port=COM6 ts=1776070859 =====
+I (86821) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (86921) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (86921) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (87421) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (87421) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (87621) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (87621) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (87621) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (87621) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (87621) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (87631) STATE_MACHINE: HW diag supply=12.17V batt=4.08V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (87741) STATE_MACHINE: mqtt status=stopped metadata mid=d5ce3779-8194-456f-a5e3-f0c44f7dda51 seq=2 boot=boot-1-91b8d1e5 ts=1776070843000
+
+===== monitor start port=COM6 ts=1776071043 =====
+W (244861) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (244961) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (244961) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (244961) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (244961) STATE_MACHINE: HW diag supply=12.12V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (245071) STATE_MACHINE: mqtt status=stopped metadata mid=0d683966-954d-429b-96e9-1d6afbdc71cc seq=4 boot=boot-1-91b8d1e5 ts=1776071000000
+
+===== monitor start port=COM6 ts=1776071163 =====
+W (318481) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (318691) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (318691) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (318691) STATE_MACHINE: HW diag supply=12.17V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (318791) STATE_MACHINE: mqtt status=stopped metadata mid=aec6689a-d158-4b0e-9e5b-aa3319e4bf91 seq=5 boot=boot-1-91b8d1e5 ts=1776071074000
+W (408511) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (408721) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (408721) STATE_MACHINE: HW diag supply=12.19V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (408821) STATE_MACHINE: mqtt status=stopped metadata mid=e2a0da9e-49ff-4d26-8f0f-6656c0e40431 seq=6 boot=boot-1-91b8d1e5 ts=1776071164000
+
+===== monitor start port=COM6 ts=1776072898 =====
+I (2101241) OFFLINE_QUEUE: replay publish ok seq=141 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=10
+I (2102411) STATE_MACHINE: BLE connect attempt=11 timeout_ms=12000
+W (2102411) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+W (2114411) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+E (2114411) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=11 next_delay_ms=10000
+I (2114531) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (2114531) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.637982,N,10544.723432,E,130426,093602.0,15.7,0.0,    OK  
+I (2114531) MODEM_GNSS: GNSS fallback fix lat=20.960633 lon=105.745391 speed_kmh=0.00
+I (2114541) MODEM_GNSS: GNSS fix success lat=20.960633 lon=105.745391 sat=1 streak=11
+I (2114551) STATE_MACHINE: HW diag supply=12.15V batt=4.07V ign=1 vib=947 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (2175191) OFFLINE_QUEUE: replay publish ok seq=142 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=11
+W (2188331) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+I (2188451) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (2188451) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.638644,N,10544.721441,E,130426,093716.0,12.6,0.0,    OK  
+I (2188451) MODEM_GNSS: GNSS fallback fix lat=20.960644 lon=105.745357 speed_kmh=0.00
+I (2188461) MODEM_GNSS: GNSS fix success lat=20.960644 lon=105.745357 sat=1 streak=12
+I (2188471) STATE_MACHINE: HW diag supply=12.15V batt=4.07V ign=1 vib=947 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (2249111) OFFLINE_QUEUE: replay publish ok seq=143 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=12
+W (2262251) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+I (2262251) RTC_DS3231M: RTC set time ms=1776073036000
+I (2262251) STATE_MACHINE: mqtt event=warning code=2001 metadata mid=70d82692-2db8-40ed-8ee8-a934e7f7bf40 seq=14 boot=boot-1-91b8d1e5 ts=1776073036000
+
+===== monitor start port=COM6 ts=1776073569 =====
+I (80901) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (81001) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (81001) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (81501) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (81501) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (81701) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (81701) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (81701) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (81701) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (81701) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (81711) STATE_MACHINE: HW diag supply=12.14V batt=4.08V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (81821) STATE_MACHINE: mqtt status=stopped metadata mid=d4496091-5ab2-487c-aa4d-a6636247f78c seq=2 boot=boot-1-7fc83e4c ts=1776073499000
+W (160041) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (160141) uart: queue free spaces: 32
+I (160141) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (160141) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (160141) STATE_MACHINE: HW diag supply=12.15V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (160251) STATE_MACHINE: mqtt status=stopped metadata mid=112236fa-92dd-4b59-8ac5-407fd9db5728 seq=3 boot=boot-1-7fc83e4c ts=1776073578000
+W (238821) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (238921) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (238921) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (238921) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (238921) STATE_MACHINE: HW diag supply=12.10V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (239031) STATE_MACHINE: mqtt status=stopped metadata mid=f599a53d-858a-4aba-8560-6dacb2aa1a63 seq=4 boot=boot-1-7fc83e4c ts=1776073657000
+W (323741) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (323951) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (323951) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (323951) STATE_MACHINE: HW diag supply=12.09V batt=4.08V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (324051) STATE_MACHINE: mqtt status=stopped metadata mid=8e833e90-55d2-4e41-954e-e97eefac7cdb seq=5 boot=boot-1-7fc83e4c ts=1776073742000
+
+===== monitor start port=COM6 ts=1776073967 =====
+W (479071) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (479281) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (479281) STATE_MACHINE: HW diag supply=12.11V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (479381) STATE_MACHINE: mqtt status=stopped metadata mid=decb42e7-95d1-4d86-b114-34d0e0b05c51 seq=7 boot=boot-1-7fc83e4c ts=1776073897000
+W (554921) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=6
+I (555131) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (555131) STATE_MACHINE: HW diag supply=12.19V batt=4.05V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (555231) STATE_MACHINE: mqtt status=stopped metadata mid=2c08249d-8ea4-46a2-85cc-cb7aac5d915e seq=8 boot=boot-1-7fc83e4c ts=1776073973000
+W (628391) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=7
+I (628621) MODEM_LTE: PDP profile configured apn=internet
+I (628621) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (628621) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (628621) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+I (628621) STATE_MACHINE: BLE connect attempt=1 timeout_ms=12000
+W (628631) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+I (628641) BLE_INIT: BLE init stage=enter controller_status=IDLE(0)
+I (628641) BLE_INIT: BLE init stage=before-nimble_port_init controller_status=IDLE(0)
+I (628651) BLE_INIT: BT controller compile version [1bb2f50]
+I (628661) BLE_INIT: Using main XTAL as clock source
+W (628661) BLE_INIT: light sleep mode will not be able to apply when bluetooth is enabled.
+I (628671) BLE_INIT: Feature Config, ADV:1, BLE_50:1, DTM:1, SCAN:1, CCA:0, SMP:1, CONNECT:1
+I (628681) BLE_INIT: Bluetooth MAC: d0:cf:13:1b:92:86
+I (628681) phy_init: phy_version 711,97bcf0a2,Aug 25 2025,19:04:10
+I (628741) BLE_INIT: BLE init stage=after-nimble_port_init-ok controller_status=ENABLED(2)
+I (628741) BLE_INIT: NimBLE host task started
+I (628741) BLE_INIT: BLE init stage=init-success controller_status=ENABLED(2)
+I (628741) BLE_MGR: NimBLE stack synced
+W (640751) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+I (640751) STATE_MACHINE: mqtt event=warning code=2001 metadata mid=f95cd711-b046-465b-97ee-de7c52fde062 seq=9 boot=boot-1-7fc83e4c ts=1776074058000
+E (725541) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=1 next_delay_ms=10000
+E (725551) IMU_LIS3DSH: Accel read failed
+
+===== monitor start port=COM6 ts=1776074286 =====
+W (804771) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=8
+I (804981) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (804981) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+W (816981) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+I (816981) STATE_MACHINE: HW diag supply=12.13V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (817081) STATE_MACHINE: mqtt status=stopped metadata mid=16d34839-cb0f-4a72-bc8e-4ea762da1ea5 seq=11 boot=boot-1-7fc83e4c ts=1776074235000
+W (890111) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=9
+I (890331) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+W (902331) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+I (902331) STATE_MACHINE: HW diag supply=12.15V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (902431) STATE_MACHINE: mqtt status=stopped metadata mid=65ed2f93-02a9-4eb0-a862-22dae109d31c seq=12 boot=boot-1-7fc83e4c ts=1776074320000
+
+===== monitor start port=COM6 ts=1776074500 =====
+
+===== monitor start port=COM6 ts=1776074977 =====
+I (80671) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (80771) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (80771) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (81271) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (81271) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (81471) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (81471) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (81471) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (81471) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (81471) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (81481) STATE_MACHINE: HW diag supply=12.09V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (81591) STATE_MACHINE: mqtt status=stopped metadata mid=64e41a39-36b1-486c-b350-84c75b088143 seq=2 boot=boot-1-bfb2a234 ts=1776074943000
+W (159081) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (159181) uart: queue free spaces: 32
+I (159181) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (159181) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (159181) STATE_MACHINE: HW diag supply=12.13V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (159291) STATE_MACHINE: mqtt status=stopped metadata mid=273f6793-4b98-4ccb-b585-1e66589c6eb1 seq=3 boot=boot-1-bfb2a234 ts=1776075021000
+W (243481) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (243581) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (243581) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (243581) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (243581) STATE_MACHINE: HW diag supply=12.16V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+Guru Meditation Error: Core  0 panic'ed (Interrupt wdt timeout on CPU0). 
+
+===== monitor start port=COM6 ts=1776075360 =====
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x7 (TG0WDT_SYS_RST),boot:0xb (SPI_FAST_FLASH_BOOT)
+Saved PC:0x40383d63
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (29) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (29) boot: compile time Apr  9 2026 05:30:37
+I (29) boot: Multicore bootloader
+I (29) boot: chip revision: v0.2
+I (32) boot: efuse block revision: v1.3
+I (36) boot.esp32s3: Boot SPI Speed : 80MHz
+I (40) boot.esp32s3: SPI Mode       : DIO
+I (43) boot.esp32s3: SPI Flash Size : 16MB
+W (47) boot.esp32s3: PRO CPU has been reset by WDT.
+W (52) boot.esp32s3: APP CPU has been reset by WDT.
+I (56) boot: Enabling RNG early entropy source...
+I (61) boot: Partition Table:
+I (63) boot: ## Label            Usage          Type ST Offset   Length
+I (70) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (76) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (83) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (89) boot:  3 factory          factory app      00 00 00020000 00180000
+I (96) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (102) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (109) boot: End of partition table
+I (112) boot: Defaulting to factory image
+I (116) esp_image: segment 0: paddr=00020020 vaddr=3c0b0020 size=3b484h (242820) map
+I (166) esp_image: segment 1: paddr=0005b4ac vaddr=3fc9ba00 size=04524h ( 17700) load
+I (170) esp_image: segment 2: paddr=0005f9d8 vaddr=40374000 size=00640h (  1600) load
+I (171) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=aa694h (698004) map
+I (301) esp_image: segment 4: paddr=0010a6bc vaddr=40374640 size=17364h ( 95076) load
+I (322) esp_image: segment 5: paddr=00121a28 vaddr=50000000 size=000f8h (   248) load
+I (322) esp_image: segment 6: paddr=00121b28 vaddr=600fe000 size=0006ch (   108) load
+I (335) boot: Loaded app from partition at offset 0x20000
+I (335) boot: Disabling RNG early entropy source...
+I (347) cpu_start: Multicore app
+I (355) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (356) cpu_start: Pro cpu start user code
+I (356) cpu_start: cpu freq: 160000000 Hz
+I (358) app_init: Application information:
+I (361) app_init: Project name:     Tracking_Firmware
+I (366) app_init: App version:      6089714-dirty
+I (371) app_init: Compile time:     Apr 13 2026 16:42:29
+I (376) app_init: ELF file SHA256:  0e79c5ac4...
+I (380) app_init: ESP-IDF:          v5.5.3
+I (384) efuse_init: Min chip rev:     v0.0
+I (388) efuse_init: Max chip rev:     v0.99 
+I (392) efuse_init: Chip rev:         v0.2
+I (396) heap_init: Initializing. RAM available for dynamic allocation:
+I (402) heap_init: At 3FCA2BF0 len 00046B20 (282 KiB): RAM
+I (407) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (412) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (417) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (424) spi_flash: detected chip: winbond
+I (426) spi_flash: flash io: dio
+I (430) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (436) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (454) coexist: coex firmware version: 093e3d2
+I (454) coexist: coexist rom version e7ae62f
+I (455) main_task: Started on CPU0
+I (475) main_task: Calling app_main()
+W (485) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (485) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (485) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+I (495) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (505) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (525) STATE_MACHINE: metadata boot initialized boot_id=boot-1-6b66987e boot_count=1
+I (525) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (535) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (545) RTC_DS3231M: RTC init available=1 time_valid=1
+I (545) STATE_MACHINE: RTC health available=1 valid=1
+I (555) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (555) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1855) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=16865 replay_seq=147 ack_critical=124
+I (1855) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=0b9e19c0-f387-413e-911d-c626c9f51a1c seq=1 boot=boot-1-6b66987e ts=1776075290000
+
+===== monitor start port=COM6 ts=1776075832 =====
+W (311781) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (311991) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (311991) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (311991) STATE_MACHINE: HW diag supply=12.17V batt=4.04V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (312091) STATE_MACHINE: mqtt status=stopped metadata mid=515ed7de-5dbc-45b4-a1a0-17d554abbebf seq=5 boot=boot-1-b1a70335 ts=1776075762000
+W (389831) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (390041) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (390041) STATE_MACHINE: HW diag supply=12.16V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (390141) STATE_MACHINE: mqtt status=stopped metadata mid=659fa9b4-997f-4794-a0de-dec1523c819f seq=6 boot=boot-1-b1a70335 ts=1776075840000
+W (469751) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (469961) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (469961) STATE_MACHINE: HW diag supply=12.17V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (470061) STATE_MACHINE: mqtt status=stopped metadata mid=c1f13bde-2ce6-4335-8935-84d88184f5c9 seq=7 boot=boot-1-b1a70335 ts=1776075920000
+
+===== monitor start port=COM6 ts=1776076042 =====
+W (545801) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=6
+I (546011) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (546011) STATE_MACHINE: HW diag supply=12.18V batt=4.10V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (546111) STATE_MACHINE: mqtt status=stopped metadata mid=57c24d91-23c1-414c-97d1-80b0c8e0c4e1 seq=8 boot=boot-1-b1a70335 ts=1776075996000
+W (625701) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=7
+I (625931) MODEM_LTE: PDP profile configured apn=internet
+I (625931) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (625931) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (625931) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+I (625931) STATE_MACHINE: BLE connect attempt=1 timeout_ms=12000
+W (625941) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+I (625951) BLE_INIT: BLE init stage=enter controller_status=IDLE(0)
+I (625951) BLE_INIT: BLE init stage=before-nimble_port_init controller_status=IDLE(0)
+I (625961) BLE_INIT: BT controller compile version [1bb2f50]
+I (625971) BLE_INIT: Using main XTAL as clock source
+W (625971) BLE_INIT: light sleep mode will not be able to apply when bluetooth is enabled.
+I (625981) BLE_INIT: Feature Config, ADV:1, BLE_50:1, DTM:1, SCAN:1, CCA:0, SMP:1, CONNECT:1
+I (625991) BLE_INIT: Bluetooth MAC: d0:cf:13:1b:92:86
+I (625991) phy_init: phy_version 711,97bcf0a2,Aug 25 2025,19:04:10
+I (626041) BLE_INIT: BLE init stage=after-nimble_port_init-ok controller_status=ENABLED(2)
+I (626041) BLE_INIT: NimBLE host task started
+I (626051) BLE_MGR: NimBLE stack synced
+I (626051) BLE_INIT: BLE init stage=init-success controller_status=ENABLED(2)
+W (638051) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+I (638051) STATE_MACHINE: mqtt event=warning code=2001 metadata mid=3b5470f8-c5b3-4d32-9a70-288e491a42cd seq=9 boot=boot-1-b1a70335 ts=1776076088000
+E (711581) STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed err=ESP_FAIL attempt=1 next_delay_ms=10000
+I (711581) STATE_MACHINE: HW diag supply=12.11V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (711681) STATE_MACHINE: mqtt status=stopped metadata mid=02d15ed5-1fe5-4f83-a9fa-20d39fdac9a5 seq=10 boot=boot-1-b1a70335 ts=1776076161000
+
+===== monitor start port=COM6 ts=1776076589 =====
+W (1310201) TRACKER_MQTT: CMQTTCONNECT timeout but session state is connected (disc_state=0), continue
+I (1340321) TRACKER_MQTT: MQTT subscribed commands topic=v1/TRACKER_001/commands
+W (1352321) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+I (1352321) STATE_MACHINE: mqtt event=warning code=2001 metadata mid=1c590331-9938-44f0-a861-132cbcb1d80d seq=13 boot=boot-1-b1a70335 ts=1776076802000
+I (1430091) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1430091) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.627080,N,10544.720606,E,130426,104235.0,18.4,0.0,    OK  
+I (1430091) MODEM_GNSS: GNSS fallback fix lat=20.960451 lon=105.745343 speed_kmh=0.00
+I (1430101) MODEM_GNSS: GNSS fix success lat=20.960451 lon=105.745343 sat=1 streak=1
+I (1430111) STATE_MACHINE: HW diag supply=12.12V batt=4.06V ign=0 vib=947 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (1490761) OFFLINE_QUEUE: replay publish ok seq=147 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=1
+I (1491781) RTC_DS3231M: RTC set time ms=1776076955000
+I (1491781) STATE_MACHINE: mqtt status=stopped metadata mid=f1a5b2e3-d917-4d8d-92cd-94d5d451947f seq=14 boot=boot-1-b1a70335 ts=1776076955000
+
+===== monitor start port=COM6 ts=1776077125 =====
+I (1649221) OFFLINE_QUEUE: replay publish ok seq=148 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=2
+I (1650241) RTC_DS3231M: RTC set time ms=1776077113000
+I (1650241) STATE_MACHINE: mqtt status=stopped metadata mid=89003c2b-3c69-40f9-9ebb-ff8274a3f033 seq=15 boot=boot-1-b1a70335 ts=1776077113000
+W (1730441) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=12
+I (1730541) STATE_MACHINE: BLE connect attempt=6 timeout_ms=12000
+W (1742541) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+I (1742541) RTC_DS3231M: RTC set time ms=1776077113000
+I (1742541) STATE_MACHINE: mqtt event=warning code=2001 metadata mid=1cbfd04e-3240-40da-bfd0-f6bbd37f2469 seq=16 boot=boot-1-b1a70335 ts=1776077113000
+I (1833931) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1833931) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.630420,N,10544.721023,E,130426,104918.0,15.7,0.0,    OK  
+I (1833931) MODEM_GNSS: GNSS fallback fix lat=20.960507 lon=105.745350 speed_kmh=0.00
+I (1833941) MODEM_GNSS: GNSS fix success lat=20.960507 lon=105.745350 sat=1 streak=3
+I (1833951) STATE_MACHINE: HW diag supply=12.19V batt=4.06V ign=0 vib=947 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (1894611) OFFLINE_QUEUE: replay publish ok seq=149 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=3
+I (1895631) RTC_DS3231M: RTC set time ms=1776077358000
+I (1895631) STATE_MACHINE: mqtt status=stopped metadata mid=147d6b2f-a649-4c0e-88ce-d21fc0bb0877 seq=17 boot=boot-1-b1a70335 ts=1776077358000
+W (1973061) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=13
+W (1985161) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+I (1985281) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1985281) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.630988,N,10544.721098,E,130426,105150.0,15.1,0.0,    OK  
+I (1985281) MODEM_GNSS: GNSS fallback fix lat=20.960516 lon=105.745352 speed_kmh=0.00
+I (1985291) MODEM_GNSS: GNSS fix success lat=20.960516 lon=105.745352 sat=1 streak=4
+I (1985301) STATE_MACHINE: HW diag supply=12.13V batt=4.05V ign=0 vib=947 lte=1 mqtt=1 ble=0 gnss_fix=1
+
+===== monitor start port=COM6 ts=1776078277 =====
+I (2794671) OFFLINE_QUEUE: replay publish ok seq=154 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=8
+I (2795691) RTC_DS3231M: RTC set time ms=1776078258000
+I (2795691) STATE_MACHINE: mqtt status=stopped metadata mid=727e68d0-a6b7-4d96-a3c6-0f86ce6780a9 seq=24 boot=boot-1-b1a70335 ts=1776078258000
+W (2870041) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=18
+W (2882141) BLE_OBD: BLE connect failed: TIMEOUT (timeout=12000ms preferred_mac=0)
+I (2882141) RTC_DS3231M: RTC set time ms=1776078258000
+I (2882141) STATE_MACHINE: mqtt event=warning code=2001 metadata mid=28b22065-d88d-4a84-9bf9-d0105ba32410 seq=25 boot=boot-1-b1a70335 ts=1776078258000
+
+===== monitor start port=COM6 ts=1776078636 =====
+I (81506) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (81606) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (81606) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (82106) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (82106) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (82306) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (82306) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (82306) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (82306) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (82306) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (82316) STATE_MACHINE: HW diag supply=12.18V batt=4.08V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (82426) STATE_MACHINE: mqtt status=stopped metadata mid=a3d7e0f7-e19c-4877-84e6-dc1cd5b9235c seq=2 boot=boot-1-b0206c08 ts=1776078644000
+W (159216) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (159316) uart: queue free spaces: 32
+I (159316) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (159316) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (159316) STATE_MACHINE: HW diag supply=12.12V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (159426) STATE_MACHINE: mqtt status=stopped metadata mid=13f77fd2-edc2-4ae0-b3a7-8913ee13a17e seq=3 boot=boot-1-b0206c08 ts=1776078721000
+W (238356) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (238456) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (238456) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (238456) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (238456) STATE_MACHINE: HW diag supply=12.17V batt=4.10V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (238566) STATE_MACHINE: mqtt status=stopped metadata mid=2998ac25-0314-4d2b-804d-42492bb6c231 seq=4 boot=boot-1-b0206c08 ts=1776078800000
+W (318886) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (319096) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (319096) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (319096) STATE_MACHINE: HW diag supply=12.16V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (319196) STATE_MACHINE: mqtt status=stopped metadata mid=33ab1838-488f-4d65-871e-97ebf524a726 seq=5 boot=boot-1-b0206c08 ts=1776078881000
+
+===== monitor start port=COM6 ts=1776079021 =====
+W (398556) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (398766) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (398766) STATE_MACHINE: HW diag supply=12.18V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (398866) STATE_MACHINE: mqtt status=stopped metadata mid=3ebf580d-69b1-421d-8333-81d01662433c seq=6 boot=boot-1-b0206c08 ts=1776078961000
+W (477546) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (477756) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (477756) STATE_MACHINE: HW diag supply=12.11V batt=4.10V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (477856) STATE_MACHINE: mqtt status=stopped metadata mid=556fc534-fa1e-4f26-8fa6-07f9275bd45f seq=7 boot=boot-1-b0206c08 ts=1776079040000
+W (556666) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=6
+I (556876) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (556876) STATE_MACHINE: HW diag supply=12.16V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (556976) STATE_MACHINE: mqtt status=stopped metadata mid=ee03be75-d2c4-456c-81ca-5e57765d6b2c seq=8 boot=boot-1-b0206c08 ts=1776079119000
+W (636566) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=7
+I (636796) MODEM_LTE: PDP profile configured apn=internet
+I (636796) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (636796) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (636796) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (636796) STATE_MACHINE: Field validation override: BLE OBD connect loop disabled for OTA stability
+I (636816) STATE_MACHINE: HW diag supply=12.11V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (636916) STATE_MACHINE: mqtt status=stopped metadata mid=4823e15f-b122-49bd-966e-bf35ecf6aeb9 seq=9 boot=boot-1-b0206c08 ts=1776079199000
+
+===== monitor start port=COM6 ts=1776079304 =====
+W (716586) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=8
+I (716796) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (716796) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+I (716796) STATE_MACHINE: HW diag supply=12.14V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (716896) STATE_MACHINE: mqtt status=stopped metadata mid=b1ac2247-1bbf-405f-9a3d-b5d84a3af226 seq=10 boot=boot-1-b0206c08 ts=1776079279000
+W (802436) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=9
+I (802656) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+I (802656) STATE_MACHINE: HW diag supply=12.14V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (802756) STATE_MACHINE: mqtt status=stopped metadata mid=cfaf96c8-2618-4ac2-bfef-9d38d20ecd40 seq=11 boot=boot-1-b0206c08 ts=1776079365000
+W (882346) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=10
+I (882556) MODEM_LTE: PDP IP check response="..+CGPADDR: 1,26.31.90.8....OK.."
+I (882556) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (882556) MODEM_LTE: LTE connected and PDP active
+I (882556) MODEM_GNSS: GNSS power-on sequence start
+I (882676) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (882786) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (882896) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (882896) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+
+===== monitor start port=COM6 ts=1776079563 =====
+
+===== monitor start port=COM6 ts=1776079809 =====
+W (1214236) TRACKER_MQTT: CMQTTCONNECT timeout but session state is connected (disc_state=0), continue
+I (1244356) TRACKER_MQTT: MQTT subscribed commands topic=v1/TRACKER_001/commands
+
+===== monitor start port=COM6 ts=1776079905 =====
+I (79269) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (79369) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (79369) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (79869) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (79869) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (80069) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (80069) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (80069) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (80069) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (80069) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (80079) STATE_MACHINE: HW diag supply=12.12V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (80189) STATE_MACHINE: mqtt status=stopped metadata mid=4a725dd9-9503-4110-a523-465853666664 seq=2 boot=boot-1-e88844b4 ts=1776079901000
+W (156409) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (156509) uart: queue free spaces: 32
+I (156509) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (156509) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (156509) STATE_MACHINE: HW diag supply=12.17V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (156619) STATE_MACHINE: mqtt status=stopped metadata mid=92bb8b7d-a139-4a1a-b960-e18f95ea6469 seq=3 boot=boot-1-e88844b4 ts=1776079978000
+W (230899) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (230999) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (230999) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (230999) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (230999) STATE_MACHINE: HW diag supply=12.15V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (231109) STATE_MACHINE: mqtt status=stopped metadata mid=bcb408e1-6d7a-49ab-9cf5-555219bc115c seq=4 boot=boot-1-e88844b4 ts=1776080052000
+W (306399) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (306599) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (306599) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (306599) STATE_MACHINE: HW diag supply=12.17V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (306699) STATE_MACHINE: mqtt status=stopped metadata mid=1ed80817-0e28-47a3-a1d1-075a39154282 seq=5 boot=boot-1-e88844b4 ts=1776080128000
+W (387659) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (387869) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (387869) STATE_MACHINE: HW diag supply=12.09V batt=4.10V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (387969) STATE_MACHINE: mqtt status=stopped metadata mid=76505c4f-c3c3-4d24-bb8c-393d78c1323a seq=6 boot=boot-1-e88844b4 ts=1776080209000
+
+===== monitor start port=COM6 ts=1776080510 =====
+I (80336) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (80436) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (80436) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (80936) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (80936) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (81136) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (81136) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (81136) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (81136) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (81136) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (81146) STATE_MACHINE: HW diag supply=12.14V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (81256) STATE_MACHINE: mqtt status=stopped metadata mid=57e0af7e-ca87-4b0a-ae4e-3e0e34030543 seq=2 boot=boot-1-8b6025be ts=1776080506000
+W (160886) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (160986) uart: queue free spaces: 32
+I (160986) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (160986) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (160986) STATE_MACHINE: HW diag supply=12.18V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (161096) STATE_MACHINE: mqtt status=stopped metadata mid=85f289ed-96d4-4753-8635-2dde9ba70d14 seq=3 boot=boot-1-8b6025be ts=1776080585000
+W (235466) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (235566) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (235566) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (235566) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (235566) STATE_MACHINE: HW diag supply=12.17V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (235676) STATE_MACHINE: mqtt status=stopped metadata mid=84033db5-64c5-43fd-9e6f-37f43e7bb64d seq=4 boot=boot-1-8b6025be ts=1776080660000
+W (315386) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (315596) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (315596) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (315596) STATE_MACHINE: HW diag supply=12.17V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (315696) STATE_MACHINE: mqtt status=stopped metadata mid=de64729c-0e73-4995-9f10-1c8d73c5c2e3 seq=5 boot=boot-1-8b6025be ts=1776080740000
+W (401436) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (401646) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (401646) STATE_MACHINE: HW diag supply=12.14V batt=4.04V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (401746) STATE_MACHINE: mqtt status=stopped metadata mid=0f5c409f-9ae1-41fc-8659-7bdbefcd22f7 seq=6 boot=boot-1-8b6025be ts=1776080826000
+
+===== monitor start port=COM6 ts=1776081092 =====
+I (88526) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (88626) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (88626) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (89126) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (89126) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (89326) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (89326) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (89326) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (89326) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (89326) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (89336) STATE_MACHINE: HW diag supply=12.09V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (89446) STATE_MACHINE: mqtt status=stopped metadata mid=407f46cd-0d67-4710-a44d-47e91bed3540 seq=2 boot=boot-1-a47d31eb ts=1776081102000
+W (167096) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (167196) uart: queue free spaces: 32
+I (167196) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (167196) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (167196) STATE_MACHINE: HW diag supply=12.17V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (167306) STATE_MACHINE: mqtt status=stopped metadata mid=3c900253-1624-4909-848a-5713c5791e1c seq=3 boot=boot-1-a47d31eb ts=1776081180000
+
+===== monitor start port=COM6 ts=1776081472 =====
+I (80476) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (80576) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (80576) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (81076) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (81076) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (81276) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (81276) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (81276) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (81276) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (81276) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (81286) STATE_MACHINE: HW diag supply=12.19V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (81396) STATE_MACHINE: mqtt status=stopped metadata mid=f261b61d-0e00-404f-83de-32fd39482468 seq=2 boot=boot-1-20fd6ec7 ts=1776081474000
+W (157886) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (157986) uart: queue free spaces: 32
+I (157986) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (157986) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (157986) STATE_MACHINE: HW diag supply=12.18V batt=4.09V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (158096) STATE_MACHINE: mqtt status=stopped metadata mid=8808f104-f1bd-4b55-bb34-1c6b01e339e7 seq=3 boot=boot-1-20fd6ec7 ts=1776081551000
+W (232226) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (232326) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (232326) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (232326) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (232326) STATE_MACHINE: HW diag supply=12.16V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (232436) STATE_MACHINE: mqtt status=stopped metadata mid=9dc53ff1-3644-4326-9ba2-d86a2bab330e seq=4 boot=boot-1-20fd6ec7 ts=1776081625000
+W (306636) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (306846) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (306846) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (306846) STATE_MACHINE: HW diag supply=12.13V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (306946) STATE_MACHINE: mqtt status=stopped metadata mid=76ee2355-8e5c-4793-a6a6-4c7c67881049 seq=5 boot=boot-1-20fd6ec7 ts=1776081699000
+
+===== monitor start port=COM6 ts=1776081853 =====
+W (470416) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (470626) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (470626) STATE_MACHINE: HW diag supply=12.16V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (470726) STATE_MACHINE: mqtt status=stopped metadata mid=a3e01425-d6a0-436e-9552-ee4197b73540 seq=7 boot=boot-1-20fd6ec7 ts=1776081863000
+W (544976) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=6
+I (545186) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (545186) STATE_MACHINE: HW diag supply=12.13V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (545286) STATE_MACHINE: mqtt status=stopped metadata mid=19bd892c-4dac-4b27-98c3-cd7426f36acc seq=8 boot=boot-1-20fd6ec7 ts=1776081938000
+W (619466) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=7
+I (619696) MODEM_LTE: PDP profile configured apn=internet
+I (619696) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (619696) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (619696) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (619696) STATE_MACHINE: Field validation override: BLE OBD connect loop disabled for OTA stability
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x7 (TG0WDT_SYS_RST),boot:0xb (SPI_FAST_FLASH_BOOT)
+Saved PC:0x40000dd4
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (29) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (29) boot: compile time Apr  9 2026 05:30:37
+I (29) boot: Multicore bootloader
+I (29) boot: chip revision: v0.2
+I (32) boot: efuse block revision: v1.3
+I (36) boot.esp32s3: Boot SPI Speed : 80MHz
+I (40) boot.esp32s3: SPI Mode       : DIO
+I (43) boot.esp32s3: SPI Flash Size : 16MB
+W (47) boot.esp32s3: PRO CPU has been reset by WDT.
+W (52) boot.esp32s3: APP CPU has been reset by WDT.
+I (56) boot: Enabling RNG early entropy source...
+I (61) boot: Partition Table:
+I (63) boot: ## Label            Usage          Type ST Offset   Length
+I (70) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (76) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (83) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (89) boot:  3 factory          factory app      00 00 00020000 00180000
+I (96) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (102) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (109) boot: End of partition table
+I (112) boot: Defaulting to factory image
+I (116) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35a6ch (219756) map
+I (162) esp_image: segment 1: paddr=00055a94 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (165) esp_image: segment 2: paddr=00059028 vaddr=40374000 size=06ff0h ( 28656) load
+I (172) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=80acch (527052) map
+I (267) esp_image: segment 4: paddr=000e0af4 vaddr=4037aff0 size=0aa7ch ( 43644) load
+I (276) esp_image: segment 5: paddr=000eb578 vaddr=50000000 size=000f8h (   248) load
+I (277) esp_image: segment 6: paddr=000eb678 vaddr=600fe000 size=0006ch (   108) load
+I (287) boot: Loaded app from partition at offset 0x20000
+I (287) boot: Disabling RNG early entropy source...
+I (302) cpu_start: Multicore app
+I (310) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (311) cpu_start: Pro cpu start user code
+I (311) cpu_start: cpu freq: 160000000 Hz
+I (312) app_init: Application information:
+I (316) app_init: Project name:     Tracking_Firmware
+I (321) app_init: App version:      6089714-dirty
+I (325) app_init: Compile time:     Apr 13 2026 16:42:29
+I (330) app_init: ELF file SHA256:  6df09b5f9...
+I (335) app_init: ESP-IDF:          v5.5.3
+I (339) efuse_init: Min chip rev:     v0.0
+I (342) efuse_init: Max chip rev:     v0.99 
+I (346) efuse_init: Chip rev:         v0.2
+I (350) heap_init: Initializing. RAM available for dynamic allocation:
+I (357) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (362) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (367) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (372) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (378) spi_flash: detected chip: winbond
+I (381) spi_flash: flash io: dio
+I (385) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (390) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (408) coexist: coex firmware version: 093e3d2
+I (409) coexist: coexist rom version e7ae62f
+I (409) main_task: Started on CPU0
+I (429) main_task: Calling app_main()
+W (439) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (439) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (439) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+I (449) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (459) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (479) STATE_MACHINE: metadata boot initialized boot_id=boot-1-65891a73 boot_count=1
+I (479) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (489) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (499) RTC_DS3231M: RTC init available=1 time_valid=1
+I (499) STATE_MACHINE: RTC health available=1 valid=1
+I (509) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (509) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1809) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=16933 replay_seq=156 ack_critical=124
+I (1809) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=6a15217b-794a-4fe9-b68f-6e2371ee5d14 seq=1 boot=boot-1-65891a73 ts=1776082029000
+I (84029) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (84129) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (84129) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (84629) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (84629) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (84829) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (84829) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (84829) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (84829) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (84829) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (84839) STATE_MACHINE: HW diag supply=12.10V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (84949) STATE_MACHINE: mqtt status=stopped metadata mid=e3898c52-1279-4ab0-94d8-23a4acca40c3 seq=2 boot=boot-1-65891a73 ts=1776082112000
+W (159179) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (159279) uart: queue free spaces: 32
+I (159279) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (159279) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (159279) STATE_MACHINE: HW diag supply=12.12V batt=4.08V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (159389) STATE_MACHINE: mqtt status=stopped metadata mid=16adeeef-9ee5-4030-970d-598ebb3ba50b seq=3 boot=boot-1-65891a73 ts=1776082187000
+W (233589) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (233689) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (233689) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (233689) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (233689) STATE_MACHINE: HW diag supply=12.15V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (233799) STATE_MACHINE: mqtt status=stopped metadata mid=31b3e9db-6844-4699-87f9-429000f3c389 seq=4 boot=boot-1-65891a73 ts=1776082261000
+W (310139) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (310349) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (310349) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (310349) STATE_MACHINE: HW diag supply=12.18V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (310449) STATE_MACHINE: mqtt status=stopped metadata mid=c85ee9d2-a833-40fe-a939-baf303fedfa0 seq=5 boot=boot-1-65891a73 ts=1776082338000
+
+===== monitor start port=COM6 ts=1776082992 =====
+W (1199449) TRACKER_MQTT: CMQTTCONNECT timeout but session state is connected (disc_state=0), continue
+I (1229569) TRACKER_MQTT: MQTT subscribed commands topic=v1/TRACKER_001/commands
+I (1229769) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1229769) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.624249,N,10544.725030,E,130426,122839.0,10.1,0.0,    OK    +CMQTTSUB: 0,0  
+I (1229769) MODEM_GNSS: GNSS fallback fix lat=20.960404 lon=105.745417 speed_kmh=0.00
+I (1229779) MODEM_GNSS: GNSS fix success lat=20.960404 lon=105.745417 sat=1 streak=1
+I (1229789) STATE_MACHINE: HW diag supply=12.20V batt=4.06V ign=0 vib=947 lte=1 mqtt=1 ble=0 gnss_fix=1
+
+===== monitor start port=COM6 ts=1776083803 =====
+I (1721509) OFFLINE_QUEUE: replay publish ok seq=159 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=4
+I (1722529) RTC_DS3231M: RTC set time ms=1776083750000
+I (1722529) STATE_MACHINE: mqtt status=stopped metadata mid=1eaa4445-388e-4260-9d69-2a62689672d4 seq=15 boot=boot-1-65891a73 ts=1776083750000
+W (1800659) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=14
+I (1800879) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1800879) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.624468,N,10544.724055,E,130426,123811.0,11.1,0.0,    OK  
+I (1800879) MODEM_GNSS: GNSS fallback fix lat=20.960408 lon=105.745401 speed_kmh=0.00
+I (1800889) MODEM_GNSS: GNSS fix success lat=20.960408 lon=105.745401 sat=1 streak=5
+I (1800899) STATE_MACHINE: HW diag supply=12.12V batt=4.06V ign=0 vib=947 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (1861579) OFFLINE_QUEUE: replay publish ok seq=160 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=5
+I (1862599) RTC_DS3231M: RTC set time ms=1776083891000
+I (1862599) STATE_MACHINE: mqtt status=stopped metadata mid=efaffaf3-cbcc-4dd3-b8b5-4cfabea6af36 seq=16 boot=boot-1-65891a73 ts=1776083891000
+
+===== monitor start port=COM6 ts=1776084307 =====
+I (82096) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (82196) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (82196) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (82696) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (82696) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (82896) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (82896) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (82896) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (82896) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (82896) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (82906) STATE_MACHINE: HW diag supply=12.14V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (83016) STATE_MACHINE: mqtt status=stopped metadata mid=300c0c36-cedc-4ee5-af9e-5195f0ba26e0 seq=2 boot=boot-1-64cc7cfe ts=1776084305000
+W (167176) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (167276) uart: queue free spaces: 32
+I (167276) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (167276) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (167276) STATE_MACHINE: HW diag supply=12.16V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (167386) STATE_MACHINE: mqtt status=stopped metadata mid=006d0c5d-78cf-4a5c-bdaf-9a03bd97427d seq=3 boot=boot-1-64cc7cfe ts=1776084390000
+W (242336) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (242436) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (242436) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (242436) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (242436) STATE_MACHINE: HW diag supply=12.20V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (242546) STATE_MACHINE: mqtt status=stopped metadata mid=b74de6e7-85c4-4f33-84e7-4ff6987a08b2 seq=4 boot=boot-1-64cc7cfe ts=1776084465000
+W (317386) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (317596) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (317596) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (317596) STATE_MACHINE: HW diag supply=12.12V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (317696) STATE_MACHINE: mqtt status=stopped metadata mid=a6ed943e-31c2-4aa7-85d3-0992ef3bf856 seq=5 boot=boot-1-64cc7cfe ts=1776084540000
+
+===== monitor start port=COM6 ts=1776084644 =====
+W (405416) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (405626) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (405626) STATE_MACHINE: HW diag supply=12.11V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (405726) STATE_MACHINE: mqtt status=stopped metadata mid=4624f501-4c1d-43b2-ac1e-7b96a5a53f15 seq=6 boot=boot-1-64cc7cfe ts=1776084628000
+W (484846) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (485056) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x7 (TG0WDT_SYS_RST),boot:0xb (SPI_FAST_FLASH_BOOT)
+Saved PC:0x40047976
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (29) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (29) boot: compile time Apr  9 2026 05:30:37
+I (29) boot: Multicore bootloader
+I (29) boot: chip revision: v0.2
+I (32) boot: efuse block revision: v1.3
+I (36) boot.esp32s3: Boot SPI Speed : 80MHz
+I (40) boot.esp32s3: SPI Mode       : DIO
+I (43) boot.esp32s3: SPI Flash Size : 16MB
+W (47) boot.esp32s3: PRO CPU has been reset by WDT.
+W (52) boot.esp32s3: APP CPU has been reset by WDT.
+I (56) boot: Enabling RNG early entropy source...
+I (61) boot: Partition Table:
+I (63) boot: ## Label            Usage          Type ST Offset   Length
+I (70) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (76) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (83) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (89) boot:  3 factory          factory app      00 00 00020000 00180000
+I (96) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (102) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (109) boot: End of partition table
+I (112) boot: Defaulting to factory image
+I (116) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35b7ch (220028) map
+I (162) esp_image: segment 1: paddr=00055ba4 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (165) esp_image: segment 2: paddr=00059138 vaddr=40374000 size=06ee0h ( 28384) load
+I (172) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=80bf8h (527352) map
+I (267) esp_image: segment 4: paddr=000e0c20 vaddr=4037aee0 size=0ab8ch ( 43916) load
+I (276) esp_image: segment 5: paddr=000eb7b4 vaddr=50000000 size=000f8h (   248) load
+I (277) esp_image: segment 6: paddr=000eb8b4 vaddr=600fe000 size=0006ch (   108) load
+I (287) boot: Loaded app from partition at offset 0x20000
+I (288) boot: Disabling RNG early entropy source...
+I (302) cpu_start: Multicore app
+I (310) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (311) cpu_start: Pro cpu start user code
+I (311) cpu_start: cpu freq: 160000000 Hz
+I (313) app_init: Application information:
+I (316) app_init: Project name:     Tracking_Firmware
+I (321) app_init: App version:      6089714-dirty
+I (326) app_init: Compile time:     Apr 13 2026 16:42:29
+I (331) app_init: ELF file SHA256:  c20c12535...
+I (335) app_init: ESP-IDF:          v5.5.3
+I (339) efuse_init: Min chip rev:     v0.0
+I (343) efuse_init: Max chip rev:     v0.99 
+I (347) efuse_init: Chip rev:         v0.2
+I (350) heap_init: Initializing. RAM available for dynamic allocation:
+I (357) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (362) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (367) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (372) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (379) spi_flash: detected chip: winbond
+I (381) spi_flash: flash io: dio
+I (385) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (391) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (408) coexist: coex firmware version: 093e3d2
+I (409) coexist: coexist rom version e7ae62f
+I (410) main_task: Started on CPU0
+I (430) main_task: Calling app_main()
+W (440) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (440) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (440) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+I (450) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (460) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (480) STATE_MACHINE: metadata boot initialized boot_id=boot-1-8eb865d9 boot_count=1
+I (480) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (490) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (500) RTC_DS3231M: RTC init available=1 time_valid=1
+I (500) STATE_MACHINE: RTC health available=1 valid=1
+I (510) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (510) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1810) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=16957 replay_seq=163 ack_critical=124
+I (1810) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=9a2d2a61-af0e-4adf-88d6-57abd967eb84 seq=1 boot=boot-1-8eb865d9 ts=1776084724000
+I (76690) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (76790) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (76790) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (77290) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (77290) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (77490) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (77490) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (77490) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (77490) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (77490) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (77500) STATE_MACHINE: HW diag supply=12.26V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (77610) STATE_MACHINE: mqtt status=stopped metadata mid=a185a7e5-6a01-4825-a0e1-841bd8946e03 seq=2 boot=boot-1-8eb865d9 ts=1776084800000
+W (152480) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (152580) uart: queue free spaces: 32
+I (152580) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (152580) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x7 (TG0WDT_SYS_RST),boot:0xb (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037cb3d
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (29) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (29) boot: compile time Apr  9 2026 05:30:37
+I (29) boot: Multicore bootloader
+I (29) boot: chip revision: v0.2
+I (32) boot: efuse block revision: v1.3
+I (36) boot.esp32s3: Boot SPI Speed : 80MHz
+I (40) boot.esp32s3: SPI Mode       : DIO
+I (43) boot.esp32s3: SPI Flash Size : 16MB
+W (47) boot.esp32s3: PRO CPU has been reset by WDT.
+W (52) boot.esp32s3: APP CPU has been reset by WDT.
+I (56) boot: Enabling RNG early entropy source...
+I (61) boot: Partition Table:
+I (63) boot: ## Label            Usage          Type ST Offset   Length
+I (70) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (76) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (83) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (89) boot:  3 factory          factory app      00 00 00020000 00180000
+I (96) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (102) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (109) boot: End of partition table
+I (112) boot: Defaulting to factory image
+I (116) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35b7ch (220028) map
+I (162) esp_image: segment 1: paddr=00055ba4 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (165) esp_image: segment 2: paddr=00059138 vaddr=40374000 size=06ee0h ( 28384) load
+I (172) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=80bf8h (527352) map
+I (267) esp_image: segment 4: paddr=000e0c20 vaddr=4037aee0 size=0ab8ch ( 43916) load
+I (276) esp_image: segment 5: paddr=000eb7b4 vaddr=50000000 size=000f8h (   248) load
+I (277) esp_image: segment 6: paddr=000eb8b4 vaddr=600fe000 size=0006ch (   108) load
+I (287) boot: Loaded app from partition at offset 0x20000
+I (288) boot: Disabling RNG early entropy source...
+I (302) cpu_start: Multicore app
+I (310) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (311) cpu_start: Pro cpu start user code
+I (311) cpu_start: cpu freq: 160000000 Hz
+I (313) app_init: Application information:
+I (316) app_init: Project name:     Tracking_Firmware
+I (321) app_init: App version:      6089714-dirty
+I (326) app_init: Compile time:     Apr 13 2026 16:42:29
+I (331) app_init: ELF file SHA256:  c20c12535...
+I (335) app_init: ESP-IDF:          v5.5.3
+I (339) efuse_init: Min chip rev:     v0.0
+I (343) efuse_init: Max chip rev:     v0.99 
+I (347) efuse_init: Chip rev:         v0.2
+I (350) heap_init: Initializing. RAM available for dynamic allocation:
+I (357) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (362) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (367) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (372) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (379) spi_flash: detected chip: winbond
+I (381) spi_flash: flash io: dio
+I (385) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (391) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (408) coexist: coex firmware version: 093e3d2
+I (409) coexist: coexist rom version e7ae62f
+I (410) main_task: Started on CPU0
+I (430) main_task: Calling app_main()
+W (440) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (440) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (440) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+I (450) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (460) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (480) STATE_MACHINE: metadata boot initialized boot_id=boot-1-594cd076 boot_count=1
+I (480) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (490) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (500) RTC_DS3231M: RTC init available=1 time_valid=1
+I (500) STATE_MACHINE: RTC health available=1 valid=1
+I (510) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (510) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1810) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=16959 replay_seq=163 ack_critical=124
+I (1810) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=bc6e0ac4-5ddb-4215-9f9a-f13b884c84f7 seq=1 boot=boot-1-594cd076 ts=1776084892000
+I (82130) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (82230) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (82230) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (82730) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (82730) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (82930) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (82930) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (82930) IMU_LIS3DSH: Reusing shared I2C bus port=0
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x7 (TG0WDT_SYS_RST),boot:0xb (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037bbf4
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (29) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (29) boot: compile time Apr  9 2026 05:30:37
+I (29) boot: Multicore bootloader
+I (29) boot: chip revision: v0.2
+I (32) boot: efuse block revision: v1.3
+I (36) boot.esp32s3: Boot SPI Speed : 80MHz
+I (40) boot.esp32s3: SPI Mode       : DIO
+I (43) boot.esp32s3: SPI Flash Size : 16MB
+W (47) boot.esp32s3: PRO CPU has been reset by WDT.
+W (52) boot.esp32s3: APP CPU has been reset by WDT.
+I (56) boot: Enabling RNG early entropy source...
+I (61) boot: Partition Table:
+I (63) boot: ## Label            Usage          Type ST Offset   Length
+I (70) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (76) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (83) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (89) boot:  3 factory          factory app      00 00 00020000 00180000
+I (96) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (102) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (109) boot: End of partition table
+I (112) boot: Defaulting to factory image
+I (116) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35b7ch (220028) map
+I (162) esp_image: segment 1: paddr=00055ba4 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (165) esp_image: segment 2: paddr=00059138 vaddr=40374000 size=06ee0h ( 28384) load
+I (172) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=80bf8h (527352) map
+I (267) esp_image: segment 4: paddr=000e0c20 vaddr=4037aee0 size=0ab8ch ( 43916) load
+I (276) esp_image: segment 5: paddr=000eb7b4 vaddr=50000000 size=000f8h (   248) load
+I (277) esp_image: segment 6: paddr=000eb8b4 vaddr=600fe000 size=0006ch (   108) load
+I (287) boot: Loaded app from partition at offset 0x20000
+I (288) boot: Disabling RNG early entropy source...
+I (302) cpu_start: Multicore app
+I (310) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (311) cpu_start: Pro cpu start user code
+I (311) cpu_start: cpu freq: 160000000 Hz
+I (313) app_init: Application information:
+I (316) app_init: Project name:     Tracking_Firmware
+I (321) app_init: App version:      6089714-dirty
+I (326) app_init: Compile time:     Apr 13 2026 16:42:29
+I (331) app_init: ELF file SHA256:  c20c12535...
+I (335) app_init: ESP-IDF:          v5.5.3
+I (339) efuse_init: Min chip rev:     v0.0
+I (343) efuse_init: Max chip rev:     v0.99 
+I (347) efuse_init: Chip rev:         v0.2
+I (350) heap_init: Initializing. RAM available for dynamic allocation:
+I (357) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (362) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (367) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (372) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (379) spi_flash: detected chip: winbond
+I (381) spi_flash: flash io: dio
+I (385) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (391) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (408) coexist: coex firmware version: 093e3d2
+I (409) coexist: coexist rom version e7ae62f
+I (410) main_task: Started on CPU0
+I (430) main_task: Calling app_main()
+W (440) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (440) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (440) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+I (450) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (460) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (480) STATE_MACHINE: metadata boot initialized boot_id=boot-1-72698982 boot_count=1
+I (480) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (490) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (500) RTC_DS3231M: RTC init available=1 time_valid=1
+I (500) STATE_MACHINE: RTC health available=1 valid=1
+I (510) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (510) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1810) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=16960 replay_seq=163 ack_critical=124
+I (1810) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=8d0ebd2e-a444-48a4-b0b2-3d7c513dff47 seq=1 boot=boot-1-72698982 ts=1776084990000
+I (88450) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (88550) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (88550) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (89050) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (89050) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (89250) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (89250) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (89250) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (89250) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (89250) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (89260) STATE_MACHINE: HW diag supply=12.11V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (89370) STATE_MACHINE: mqtt status=stopped metadata mid=ef357bc2-2ede-48b6-b426-87484fc42fbc seq=2 boot=boot-1-72698982 ts=1776085077000
+
+===== monitor start port=COM6 ts=1776085468 =====
+I (76446) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (76546) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (76546) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (77046) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (77046) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (77246) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (77246) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (77246) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (77246) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (77246) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (77256) STATE_MACHINE: HW diag supply=12.14V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (77366) STATE_MACHINE: mqtt status=stopped metadata mid=107fc010-a298-423a-85c7-e46b4be4d7c0 seq=2 boot=boot-1-e4b7b51c ts=1776085465000
+W (158886) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (158986) uart: queue free spaces: 32
+I (158986) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (158986) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (158986) STATE_MACHINE: HW diag supply=12.20V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+Guru Meditation Error: Core  0 panic'ed (Interrupt wdt timeout on CPU0). 
+
+===== raw-monitor start port=COM6 ts=1776085647 =====
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0xb (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (24) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (25) boot: compile time Apr  9 2026 05:30:37
+I (25) boot: Multicore bootloader
+I (25) boot: chip revision: v0.2
+I (28) boot: efuse block revision: v1.3
+I (31) boot.esp32s3: Boot SPI Speed : 80MHz
+I (35) boot.esp32s3: SPI Mode       : DIO
+I (39) boot.esp32s3: SPI Flash Size : 16MB
+I (43) boot: Enabling RNG early entropy source...
+I (47) boot: Partition Table:
+I (50) boot: ## Label            Usage          Type ST Offset   Length
+I (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (63) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (69) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (76) boot:  3 factory          factory app      00 00 00020000 00180000
+I (82) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (89) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (95) boot: End of partition table
+I (98) boot: Defaulting to factory image
+I (102) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35cbch (220348) map
+I (148) esp_image: segment 1: paddr=00055ce4 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (152) esp_image: segment 2: paddr=00059278 vaddr=40374000 size=06da0h ( 28064) load
+I (159) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=80fc8h (528328) map
+I (253) esp_image: segment 4: paddr=000e0ff0 vaddr=4037ada0 size=0accch ( 44236) load
+I (263) esp_image: segment 5: paddr=000ebcc4 vaddr=50000000 size=000f8h (   248) load
+I (263) esp_image: segment 6: paddr=000ebdc4 vaddr=600fe000 size=0006ch (   108) load
+I (274) boot: Loaded app from partition at offset 0x20000
+I (274) boot: Disabling RNG early entropy source...
+I (288) cpu_start: Multicore app
+I (297) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (297) cpu_start: Pro cpu start user code
+I (297) cpu_start: cpu freq: 160000000 Hz
+I (299) app_init: Application information:
+I (303) app_init: Project name:     Tracking_Firmware
+I (308) app_init: App version:      6089714-dirty
+I (312) app_init: Compile time:     Apr 13 2026 16:42:29
+I (317) app_init: ELF file SHA256:  ade958bab...
+I (321) app_init: ESP-IDF:          v5.5.3
+I (325) efuse_init: Min chip rev:     v0.0
+I (329) efuse_init: Max chip rev:     v0.99 
+I (333) efuse_init: Chip rev:         v0.2
+I (337) heap_init: Initializing. RAM available for dynamic allocation:
+I (343) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (348) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (353) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (359) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (365) spi_flash: detected chip: winbond
+I (368) spi_flash: flash io: dio
+I (371) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (377) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (395) coexist: coex firmware version: 093e3d2
+I (395) coexist: coexist rom version e7ae62f
+I (396) main_task: Started on CPU0
+I (416) main_task: Calling app_main()
+W (426) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (426) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (426) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+W (436) TRACKER_MAIN: Field validation override: task WDT timeout set to 30000ms
+I (446) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (456) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (466) STATE_MACHINE: metadata boot initialized boot_id=boot-1-9cc5c433 boot_count=1
+I (476) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (486) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (496) RTC_DS3231M: RTC init available=1 time_valid=1
+I (496) STATE_MACHINE: RTC health available=1 valid=1
+I (496) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (506) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1936) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=16967 replay_seq=163 ack_critical=124
+I (1936) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=3552b92a-bf9a-499c-b21d-eb1946e02078 seq=1 boot=boot-1-9cc5c433 ts=1776085586000
+I (87126) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (87226) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (87226) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (87726) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (87726) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (87926) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (87926) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (87926) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (87926) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (87926) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (87936) STATE_MACHINE: HW diag supply=12.11V batt=4.08V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (88046) STATE_MACHINE: mqtt status=stopped metadata mid=23b3cf04-4ea4-4031-8f9b-8c60d1b9305e seq=2 boot=boot-1-9cc5c433 ts=1776085673000
+W (162686) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (162786) uart: queue free spaces: 32
+I (162786) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (162786) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (162786) STATE_MACHINE: HW diag supply=12.16V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (162896) STATE_MACHINE: mqtt status=stopped metadata mid=c67fd634-1156-4534-814a-ef839c65d356 seq=3 boot=boot-1-9cc5c433 ts=1776085747000
+W (239666) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (239766) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (239766) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (239766) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (239766) STATE_MACHINE: HW diag supply=12.19V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (239876) STATE_MACHINE: mqtt status=stopped metadata mid=77372311-8e31-4a5c-a567-200aa33915b2 seq=4 boot=boot-1-9cc5c433 ts=1776085824000
+
+===== raw-monitor start port=COM6 ts=1776085919 =====
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0xb (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (24) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (25) boot: compile time Apr  9 2026 05:30:37
+I (25) boot: Multicore bootloader
+I (25) boot: chip revision: v0.2
+I (28) boot: efuse block revision: v1.3
+I (31) boot.esp32s3: Boot SPI Speed : 80MHz
+I (35) boot.esp32s3: SPI Mode       : DIO
+I (39) boot.esp32s3: SPI Flash Size : 16MB
+I (43) boot: Enabling RNG early entropy source...
+I (47) boot: Partition Table:
+I (50) boot: ## Label            Usage          Type ST Offset   Length
+I (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (63) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (69) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (76) boot:  3 factory          factory app      00 00 00020000 00180000
+I (82) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (89) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (95) boot: End of partition table
+I (98) boot: Defaulting to factory image
+I (102) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35cbch (220348) map
+I (148) esp_image: segment 1: paddr=00055ce4 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (152) esp_image: segment 2: paddr=00059278 vaddr=40374000 size=06da0h ( 28064) load
+I (159) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=80fc8h (528328) map
+I (253) esp_image: segment 4: paddr=000e0ff0 vaddr=4037ada0 size=0accch ( 44236) load
+I (263) esp_image: segment 5: paddr=000ebcc4 vaddr=50000000 size=000f8h (   248) load
+I (263) esp_image: segment 6: paddr=000ebdc4 vaddr=600fe000 size=0006ch (   108) load
+I (274) boot: Loaded app from partition at offset 0x20000
+I (274) boot: Disabling RNG early entropy source...
+I (288) cpu_start: Multicore app
+I (297) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (297) cpu_start: Pro cpu start user code
+I (297) cpu_start: cpu freq: 160000000 Hz
+I (299) app_init: Application information:
+I (303) app_init: Project name:     Tracking_Firmware
+I (308) app_init: App version:      6089714-dirty
+I (312) app_init: Compile time:     Apr 13 2026 16:42:29
+I (317) app_init: ELF file SHA256:  ade958bab...
+I (321) app_init: ESP-IDF:          v5.5.3
+I (325) efuse_init: Min chip rev:     v0.0
+I (329) efuse_init: Max chip rev:     v0.99 
+I (333) efuse_init: Chip rev:         v0.2
+I (337) heap_init: Initializing. RAM available for dynamic allocation:
+I (343) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (348) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (353) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (359) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (365) spi_flash: detected chip: winbond
+I (368) spi_flash: flash io: dio
+I (371) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (377) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (395) coexist: coex firmware version: 093e3d2
+I (395) coexist: coexist rom version e7ae62f
+I (396) main_task: Started on CPU0
+I (416) main_task: Calling app_main()
+W (426) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (426) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (426) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+W (436) TRACKER_MAIN: Field validation override: task WDT timeout set to 30000ms
+I (446) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (456) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (466) STATE_MACHINE: metadata boot initialized boot_id=boot-1-9e2a27cc boot_count=1
+I (476) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (486) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (496) RTC_DS3231M: RTC init available=1 time_valid=1
+I (496) STATE_MACHINE: RTC health available=1 valid=1
+I (496) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (506) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1926) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=16971 replay_seq=163 ack_critical=124
+I (1936) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=54672e15-22c4-41dd-9b2d-b8ab1c5de07c seq=1 boot=boot-1-9e2a27cc ts=1776085858000
+I (82186) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (82286) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (82286) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (82786) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (82786) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (82986) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (82986) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (82986) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (82986) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (82986) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (82996) STATE_MACHINE: HW diag supply=12.13V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (83106) STATE_MACHINE: mqtt status=stopped metadata mid=9d3e8eff-d547-4ea0-b4a6-bb393fcb89aa seq=2 boot=boot-1-9e2a27cc ts=1776085940000
+W (163386) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (163486) uart: queue free spaces: 32
+I (163486) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (163486) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (163486) STATE_MACHINE: HW diag supply=12.14V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (163596) STATE_MACHINE: mqtt status=stopped metadata mid=1ab5093c-f0f1-432e-820b-c9dc19dcbab4 seq=3 boot=boot-1-9e2a27cc ts=1776086020000
+W (241296) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (241396) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (241396) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (241396) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (241396) STATE_MACHINE: HW diag supply=12.15V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (241506) STATE_MACHINE: mqtt status=stopped metadata mid=038eb645-137b-4417-97a3-31c5f85ab1c2 seq=4 boot=boot-1-9e2a27cc ts=1776086098000
+W (320466) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (320676) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (320676) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (320676) STATE_MACHINE: HW diag supply=12.19V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (320776) STATE_MACHINE: mqtt status=stopped metadata mid=e07ca161-cafa-49a8-8d9e-a337b3f9ea64 seq=5 boot=boot-1-9e2a27cc ts=1776086177000
+W (407066) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (407276) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (407276) STATE_MACHINE: HW diag supply=12.15V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (407376) STATE_MACHINE: mqtt status=stopped metadata mid=b2feba45-0df2-4de2-b5ab-721d5f19f4e0 seq=6 boot=boot-1-9e2a27cc ts=1776086264000
+W (483996) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (484206) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (484206) STATE_MACHINE: HW diag supply=12.17V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (484306) STATE_MACHINE: mqtt status=stopped metadata mid=75e8a974-a21f-4ee5-82f1-b6b460c472fc seq=7 boot=boot-1-9e2a27cc ts=1776086341000
+W (559046) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=6
+I (559256) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (559256) STATE_MACHINE: HW diag supply=12.15V batt=4.04V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (559356) STATE_MACHINE: mqtt status=stopped metadata mid=b1a3a6ac-48ff-4805-b40c-50802b74cc2d seq=8 boot=boot-1-9e2a27cc ts=1776086416000
+W (637966) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=7
+I (638196) MODEM_LTE: PDP profile configured apn=internet
+I (638196) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (638196) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (638196) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (638196) STATE_MACHINE: Field validation override: BLE OBD connect loop disabled for OTA stability
+I (638216) STATE_MACHINE: HW diag supply=12.17V batt=4.05V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (638316) STATE_MACHINE: mqtt status=stopped metadata mid=d4de8e0d-bfd2-487b-bdba-e65b3fee2c42 seq=9 boot=boot-1-9e2a27cc ts=1776086495000
+W (718976) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=8
+I (719186) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (719186) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+I (719186) STATE_MACHINE: HW diag supply=12.08V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (719286) STATE_MACHINE: mqtt status=stopped metadata mid=7a2a5e32-e991-402b-9d8b-7be55a67ede5 seq=10 boot=boot-1-9e2a27cc ts=1776086576000
+
+===== raw-monitor start port=COM6 ts=1776086668 =====
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0xb (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (24) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (25) boot: compile time Apr  9 2026 05:30:37
+I (25) boot: Multicore bootloader
+I (25) boot: chip revision: v0.2
+I (28) boot: efuse block revision: v1.3
+I (31) boot.esp32s3: Boot SPI Speed : 80MHz
+I (35) boot.esp32s3: SPI Mode       : DIO
+I (39) boot.esp32s3: SPI Flash Size : 16MB
+I (43) boot: Enabling RNG early entropy source...
+I (47) boot: Partition Table:
+I (50) boot: ## Label            Usage          Type ST Offset   Length
+I (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (63) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (69) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (76) boot:  3 factory          factory app      00 00 00020000 00180000
+I (82) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (89) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (95) boot: End of partition table
+I (98) boot: Defaulting to factory image
+I (102) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35cbch (220348) map
+I (148) esp_image: segment 1: paddr=00055ce4 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (152) esp_image: segment 2: paddr=00059278 vaddr=40374000 size=06da0h ( 28064) load
+I (159) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=80fc8h (528328) map
+I (253) esp_image: segment 4: paddr=000e0ff0 vaddr=4037ada0 size=0accch ( 44236) load
+I (263) esp_image: segment 5: paddr=000ebcc4 vaddr=50000000 size=000f8h (   248) load
+I (263) esp_image: segment 6: paddr=000ebdc4 vaddr=600fe000 size=0006ch (   108) load
+I (274) boot: Loaded app from partition at offset 0x20000
+I (274) boot: Disabling RNG early entropy source...
+I (288) cpu_start: Multicore app
+I (297) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (297) cpu_start: Pro cpu start user code
+I (297) cpu_start: cpu freq: 160000000 Hz
+I (299) app_init: Application information:
+I (303) app_init: Project name:     Tracking_Firmware
+I (308) app_init: App version:      6089714-dirty
+I (312) app_init: Compile time:     Apr 13 2026 16:42:29
+I (317) app_init: ELF file SHA256:  ade958bab...
+I (321) app_init: ESP-IDF:          v5.5.3
+I (325) efuse_init: Min chip rev:     v0.0
+I (329) efuse_init: Max chip rev:     v0.99 
+I (333) efuse_init: Chip rev:         v0.2
+I (337) heap_init: Initializing. RAM available for dynamic allocation:
+I (343) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (348) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (353) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (359) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (365) spi_flash: detected chip: winbond
+I (368) spi_flash: flash io: dio
+I (371) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (377) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (395) coexist: coex firmware version: 093e3d2
+I (395) coexist: coexist rom version e7ae62f
+I (396) main_task: Started on CPU0
+I (416) main_task: Calling app_main()
+W (426) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (426) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (426) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+W (436) TRACKER_MAIN: Field validation override: task WDT timeout set to 30000ms
+I (446) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (456) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (466) STATE_MACHINE: metadata boot initialized boot_id=boot-1-47a0961e boot_count=1
+I (476) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (486) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (496) RTC_DS3231M: RTC init available=1 time_valid=1
+I (496) STATE_MACHINE: RTC health available=1 valid=1
+I (496) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (506) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1936) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=16982 replay_seq=163 ack_critical=124
+I (1936) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=83157659-bfdc-4b68-81a2-b81555c99f70 seq=1 boot=boot-1-47a0961e ts=1776086607000
+I (82546) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (82646) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (82646) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (83146) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (83146) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (83346) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (83346) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (83346) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (83346) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (83346) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (83356) STATE_MACHINE: HW diag supply=12.13V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (83466) STATE_MACHINE: mqtt status=stopped metadata mid=9590a4dd-c09a-4175-8c5f-cf7f10a22726 seq=2 boot=boot-1-47a0961e ts=1776086688000
+W (163336) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (163436) uart: queue free spaces: 32
+I (163436) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (163436) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (163436) STATE_MACHINE: HW diag supply=12.16V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (163546) STATE_MACHINE: mqtt status=stopped metadata mid=6dc1be09-b963-4026-b494-54d1a67cc8ec seq=3 boot=boot-1-47a0961e ts=1776086768000
+W (243246) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (243346) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (243346) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (243346) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (243346) STATE_MACHINE: HW diag supply=12.10V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (243456) STATE_MACHINE: mqtt status=stopped metadata mid=00b8ab0e-4168-4ef4-b72e-0c25e799fdc3 seq=4 boot=boot-1-47a0961e ts=1776086848000
+W (335516) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (335726) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (335726) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (335726) STATE_MACHINE: HW diag supply=12.18V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (335826) STATE_MACHINE: mqtt status=stopped metadata mid=a1cadf0c-3d09-4049-a36d-89398812fd04 seq=5 boot=boot-1-47a0961e ts=1776086941000
+W (410636) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (410846) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (410846) STATE_MACHINE: HW diag supply=12.15V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (410946) STATE_MACHINE: mqtt status=stopped metadata mid=ca4601a9-8b02-4fe7-9a70-e99514a52c3c seq=6 boot=boot-1-47a0961e ts=1776087016000
+W (491326) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (491536) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (491536) STATE_MACHINE: HW diag supply=12.19V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (491636) STATE_MACHINE: mqtt status=stopped metadata mid=c5e8578e-a0b9-4fdd-9efc-464b388378a5 seq=7 boot=boot-1-47a0961e ts=1776087096000
+W (577566) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=6
+I (577776) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (577776) STATE_MACHINE: HW diag supply=12.17V batt=4.05V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (577876) STATE_MACHINE: mqtt status=stopped metadata mid=7e9868e1-ce88-4ad9-9069-ca1375305c69 seq=8 boot=boot-1-47a0961e ts=1776087183000
+W (652676) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=7
+I (652906) MODEM_LTE: PDP profile configured apn=internet
+I (652906) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (652906) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (652906) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (652906) STATE_MACHINE: Field validation override: BLE OBD connect loop disabled for OTA stability
+I (652926) STATE_MACHINE: HW diag supply=12.16V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (653026) STATE_MACHINE: mqtt status=stopped metadata mid=d24605ea-d770-40fa-8183-82dace7fa4c7 seq=9 boot=boot-1-47a0961e ts=1776087258000
+W (737006) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=8
+I (737216) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (737216) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+I (737216) STATE_MACHINE: HW diag supply=12.17V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (737316) STATE_MACHINE: mqtt status=stopped metadata mid=7cd33fc0-c170-4860-b3c2-ca841f652e93 seq=10 boot=boot-1-47a0961e ts=1776087342000
+W (812656) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=9
+I (812876) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+I (812876) STATE_MACHINE: HW diag supply=12.15V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (812976) STATE_MACHINE: mqtt status=stopped metadata mid=444a145a-7ed3-46c3-b28c-e9e9eea6a01c seq=11 boot=boot-1-47a0961e ts=1776087418000
+W (887816) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=10
+I (888026) MODEM_LTE: PDP IP check response="..+CGPADDR: 1,6.76.208.108....OK.."
+I (888026) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (888026) MODEM_LTE: LTE connected and PDP active
+I (888026) MODEM_GNSS: GNSS power-on sequence start
+I (888146) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (888256) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (888366) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (888366) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+
+===== raw-monitor start port=COM6 ts=1776087616 =====
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0xb (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (24) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (25) boot: compile time Apr  9 2026 05:30:37
+I (25) boot: Multicore bootloader
+I (25) boot: chip revision: v0.2
+I (28) boot: efuse block revision: v1.3
+I (31) boot.esp32s3: Boot SPI Speed : 80MHz
+I (35) boot.esp32s3: SPI Mode       : DIO
+I (39) boot.esp32s3: SPI Flash Size : 16MB
+I (43) boot: Enabling RNG early entropy source...
+I (47) boot: Partition Table:
+I (50) boot: ## Label            Usage          Type ST Offset   Length
+I (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (63) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (69) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (76) boot:  3 factory          factory app      00 00 00020000 00180000
+I (82) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (89) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (95) boot: End of partition table
+I (98) boot: Defaulting to factory image
+I (102) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35cbch (220348) map
+I (148) esp_image: segment 1: paddr=00055ce4 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (152) esp_image: segment 2: paddr=00059278 vaddr=40374000 size=06da0h ( 28064) load
+I (159) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=80fc8h (528328) map
+I (253) esp_image: segment 4: paddr=000e0ff0 vaddr=4037ada0 size=0accch ( 44236) load
+I (263) esp_image: segment 5: paddr=000ebcc4 vaddr=50000000 size=000f8h (   248) load
+I (263) esp_image: segment 6: paddr=000ebdc4 vaddr=600fe000 size=0006ch (   108) load
+I (274) boot: Loaded app from partition at offset 0x20000
+I (274) boot: Disabling RNG early entropy source...
+I (288) cpu_start: Multicore app
+I (297) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (297) cpu_start: Pro cpu start user code
+I (297) cpu_start: cpu freq: 160000000 Hz
+I (299) app_init: Application information:
+I (303) app_init: Project name:     Tracking_Firmware
+I (308) app_init: App version:      6089714-dirty
+I (312) app_init: Compile time:     Apr 13 2026 16:42:29
+I (317) app_init: ELF file SHA256:  ade958bab...
+I (321) app_init: ESP-IDF:          v5.5.3
+I (325) efuse_init: Min chip rev:     v0.0
+I (329) efuse_init: Max chip rev:     v0.99 
+I (333) efuse_init: Chip rev:         v0.2
+I (337) heap_init: Initializing. RAM available for dynamic allocation:
+I (343) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (348) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (353) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (359) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (365) spi_flash: detected chip: winbond
+I (368) spi_flash: flash io: dio
+I (371) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (377) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (395) coexist: coex firmware version: 093e3d2
+I (395) coexist: coexist rom version e7ae62f
+I (396) main_task: Started on CPU0
+I (416) main_task: Calling app_main()
+W (426) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (426) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (426) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+W (436) TRACKER_MAIN: Field validation override: task WDT timeout set to 30000ms
+I (446) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (456) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (466) STATE_MACHINE: metadata boot initialized boot_id=boot-1-1d9e321b boot_count=1
+I (476) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (486) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (496) RTC_DS3231M: RTC init available=1 time_valid=1
+I (496) STATE_MACHINE: RTC health available=1 valid=1
+I (496) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (506) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1936) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=16994 replay_seq=163 ack_critical=124
+I (1936) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=8562f739-e217-4045-860b-a58e1cc4bf23 seq=1 boot=boot-1-1d9e321b ts=1776087556000
+I (77516) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (77616) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (77616) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (78116) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (78116) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (78316) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (78316) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (78316) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (78316) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (78316) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (78326) STATE_MACHINE: HW diag supply=12.16V batt=4.08V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (78436) STATE_MACHINE: mqtt status=stopped metadata mid=cf981287-b9d4-4ca8-9096-2711a6bb2865 seq=2 boot=boot-1-1d9e321b ts=1776087632000
+W (164216) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (164316) uart: queue free spaces: 32
+I (164316) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (164316) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (164316) STATE_MACHINE: HW diag supply=12.07V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (164426) STATE_MACHINE: mqtt status=stopped metadata mid=d817c861-8720-4a1a-836b-eabc1d5c4a25 seq=3 boot=boot-1-1d9e321b ts=1776087718000
+W (244976) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (245076) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (245076) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (245076) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (245076) STATE_MACHINE: HW diag supply=12.11V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (245186) STATE_MACHINE: mqtt status=stopped metadata mid=d49d09d4-d484-40ae-9668-b7a4f31f9da3 seq=4 boot=boot-1-1d9e321b ts=1776087799000
+W (319996) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (320206) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (320206) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (320206) STATE_MACHINE: HW diag supply=12.17V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (320306) STATE_MACHINE: mqtt status=stopped metadata mid=1f993827-4faa-475f-bb8c-fe97f3221a3b seq=5 boot=boot-1-1d9e321b ts=1776087874000
+W (401046) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (401256) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (401256) STATE_MACHINE: HW diag supply=12.16V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (401356) STATE_MACHINE: mqtt status=stopped metadata mid=633252a7-aab1-4ade-8f23-3eec6964676a seq=6 boot=boot-1-1d9e321b ts=1776087955000
+W (476116) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (476326) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (476326) STATE_MACHINE: HW diag supply=12.11V batt=4.04V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (476426) STATE_MACHINE: mqtt status=stopped metadata mid=40b667bb-871d-4a2d-b4c1-a5a94c737437 seq=7 boot=boot-1-1d9e321b ts=1776088030000
+W (556006) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=6
+I (556216) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (556216) STATE_MACHINE: HW diag supply=12.15V batt=4.05V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (556316) STATE_MACHINE: mqtt status=stopped metadata mid=61a942eb-e887-4f10-a9c9-6dfbfb8f490c seq=8 boot=boot-1-1d9e321b ts=1776088110000
+W (635586) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=7
+I (635816) MODEM_LTE: PDP profile configured apn=internet
+I (635816) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (635816) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (635816) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (635816) STATE_MACHINE: Field validation override: BLE OBD connect loop disabled for OTA stability
+I (635836) STATE_MACHINE: HW diag supply=12.07V batt=4.05V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (635936) STATE_MACHINE: mqtt status=stopped metadata mid=f0cc2909-a4ef-4787-be47-4c7e3855d0ef seq=9 boot=boot-1-1d9e321b ts=1776088190000
+W (716206) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=8
+I (716416) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (716416) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+I (716416) STATE_MACHINE: HW diag supply=12.24V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (716516) STATE_MACHINE: mqtt status=stopped metadata mid=4e5b6a8c-0ea5-4540-9ff6-4e8d35b5dd60 seq=10 boot=boot-1-1d9e321b ts=1776088270000
+
+===== monitor start port=COM6 ts=1776088953 =====
+I (77066) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (77166) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (77166) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (77666) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (77666) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (77866) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (77866) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (77866) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (77866) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (77866) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (77876) STATE_MACHINE: HW diag supply=12.12V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (77986) STATE_MACHINE: mqtt status=stopped metadata mid=34a8aa7a-1d17-4608-8640-e6639b213bee seq=2 boot=boot-1-ae357d14 ts=77617
+W (152616) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (152716) uart: queue free spaces: 32
+I (152716) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (152716) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (152716) STATE_MACHINE: HW diag supply=12.13V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (152826) STATE_MACHINE: mqtt status=stopped metadata mid=50f82ff1-5574-43bb-a7f7-dc68ed8b9efa seq=3 boot=boot-1-ae357d14 ts=152457
+W (233756) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (233856) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (233856) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (233856) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (233856) STATE_MACHINE: HW diag supply=12.18V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (233966) STATE_MACHINE: mqtt status=stopped metadata mid=4030b781-d3d3-4e3b-8ce5-55e8c0ccafba seq=4 boot=boot-1-ae357d14 ts=233597
+
+===== monitor start port=COM6 ts=1776089897 =====
+I (82000) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (82100) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (82100) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (82600) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (82600) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (82800) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (82800) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (82800) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (82800) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (82800) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (82810) STATE_MACHINE: HW diag supply=12.13V batt=4.06V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (82920) STATE_MACHINE: mqtt status=stopped metadata mid=d6fd7394-fd01-45b5-83b1-9751e7215f7e seq=2 boot=boot-1-082fb1bd ts=82537
+W (163340) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (163440) uart: queue free spaces: 32
+I (163440) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (163440) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (163440) STATE_MACHINE: HW diag supply=12.13V batt=4.07V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+Guru Meditation Error: Core  0 panic'ed (Interrupt wdt timeout on CPU0). 
+
+===== raw-capture start port=COM6 ts=1776090071 =====
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0xb (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (24) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (25) boot: compile time Apr  9 2026 05:30:37
+I (25) boot: Multicore bootloader
+I (25) boot: chip revision: v0.2
+I (28) boot: efuse block revision: v1.3
+I (31) boot.esp32s3: Boot SPI Speed : 80MHz
+I (35) boot.esp32s3: SPI Mode       : DIO
+I (39) boot.esp32s3: SPI Flash Size : 16MB
+I (43) boot: Enabling RNG early entropy source...
+I (47) boot: Partition Table:
+I (50) boot: ## Label            Usage          Type ST Offset   Length
+I (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (63) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (69) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (76) boot:  3 factory          factory app      00 00 00020000 00180000
+I (82) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (89) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (95) boot: End of partition table
+I (98) boot: Defaulting to factory image
+I (102) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35cech (220396) map
+I (148) esp_image: segment 1: paddr=00055d14 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (152) esp_image: segment 2: paddr=000592a8 vaddr=40374000 size=06d70h ( 28016) load
+I (159) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=8107ch (528508) map
+I (253) esp_image: segment 4: paddr=000e10a4 vaddr=4037ad70 size=0acfch ( 44284) load
+I (263) esp_image: segment 5: paddr=000ebda8 vaddr=50000000 size=000f8h (   248) load
+I (263) esp_image: segment 6: paddr=000ebea8 vaddr=600fe000 size=0006ch (   108) load
+I (274) boot: Loaded app from partition at offset 0x20000
+I (274) boot: Disabling RNG early entropy source...
+I (288) cpu_start: Multicore app
+I (297) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (297) cpu_start: Pro cpu start user code
+I (298) cpu_start: cpu freq: 160000000 Hz
+I (299) app_init: Application information:
+I (303) app_init: Project name:     Tracking_Firmware
+I (308) app_init: App version:      6089714-dirty
+I (312) app_init: Compile time:     Apr 13 2026 16:42:29
+I (317) app_init: ELF file SHA256:  74940287b...
+I (321) app_init: ESP-IDF:          v5.5.3
+I (325) efuse_init: Min chip rev:     v0.0
+I (329) efuse_init: Max chip rev:     v0.99 
+I (333) efuse_init: Chip rev:         v0.2
+I (337) heap_init: Initializing. RAM available for dynamic allocation:
+I (343) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (348) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (353) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (359) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (365) spi_flash: detected chip: winbond
+I (368) spi_flash: flash io: dio
+I (371) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (377) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (395) coexist: coex firmware version: 093e3d2
+I (395) coexist: coexist rom version e7ae62f
+I (396) main_task: Started on CPU0
+I (416) main_task: Calling app_main()
+W (426) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (426) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (426) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+W (436) TRACKER_MAIN: Field validation override: task WDT timeout set to 30000ms
+I (446) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (456) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (466) STATE_MACHINE: metadata boot initialized boot_id=boot-1-2ed3dfb0 boot_count=1
+I (476) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (486) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+W (496) RTC_DS3231M: DS3231M probe failed: ESP_ERR_INVALID_STATE
+I (496) RTC_DS3231M: RTC init available=0 time_valid=0
+W (496) STATE_MACHINE: rtc_ds3231m_init failed: ESP_FAIL (continue with fallback time)
+I (506) STATE_MACHINE: RTC health available=0 valid=0
+I (516) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (516) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1946) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=17024 replay_seq=163 ack_critical=124
+I (1946) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=329a95e2-b98f-4204-92e9-8c1d28c91c72 seq=1 boot=boot-1-2ed3dfb0 ts=1578
+I (80696) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (80796) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (80796) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (81296) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (81296) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (81496) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (81496) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (81496) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (81496) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (81496) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x7 (TG0WDT_SYS_RST),boot:0xb (SPI_FAST_FLASH_BOOT)
+Saved PC:0x400559cc
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (29) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (29) boot: compile time Apr  9 2026 05:30:37
+I (29) boot: Multicore bootloader
+I (29) boot: chip revision: v0.2
+I (32) boot: efuse block revision: v1.3
+I (36) boot.esp32s3: Boot SPI Speed : 80MHz
+I (40) boot.esp32s3: SPI Mode       : DIO
+I (43) boot.esp32s3: SPI Flash Size : 16MB
+W (47) boot.esp32s3: PRO CPU has been reset by WDT.
+W (52) boot.esp32s3: APP CPU has been reset by WDT.
+I (56) boot: Enabling RNG early entropy source...
+I (61) boot: Partition Table:
+I (63) boot: ## Label            Usage          Type ST Offset   Length
+I (70) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (76) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (83) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (89) boot:  3 factory          factory app      00 00 00020000 00180000
+I (96) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (102) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (109) boot: End of partition table
+I (112) boot: Defaulting to factory image
+I (116) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35cech (220396) map
+I (162) esp_image: segment 1: paddr=00055d14 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (166) esp_image: segment 2: paddr=000592a8 vaddr=40374000 size=06d70h ( 28016) load
+I (172) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=8107ch (528508) map
+I (267) esp_image: segment 4: paddr=000e10a4 vaddr=4037ad70 size=0acfch ( 44284) load
+I (277) esp_image: segment 5: paddr=000ebda8 vaddr=50000000 size=000f8h (   248) load
+I (277) esp_image: segment 6: paddr=000ebea8 vaddr=600fe000 size=0006ch (   108) load
+I (288) boot: Loaded app from partition at offset 0x20000
+I (288) boot: Disabling RNG early entropy source...
+I (302) cpu_start: Multicore app
+I (311) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (311) cpu_start: Pro cpu start user code
+I (311) cpu_start: cpu freq: 160000000 Hz
+I (313) app_init: Application information:
+I (317) app_init: Project name:     Tracking_Firmware
+I (321) app_init: App version:      6089714-dirty
+I (326) app_init: Compile time:     Apr 13 2026 16:42:29
+I (331) app_init: ELF file SHA256:  74940287b...
+I (335) app_init: ESP-IDF:          v5.5.3
+I (339) efuse_init: Min chip rev:     v0.0
+I (343) efuse_init: Max chip rev:     v0.99 
+I (347) efuse_init: Chip rev:         v0.2
+I (351) heap_init: Initializing. RAM available for dynamic allocation:
+I (357) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (362) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (367) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (373) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (379) spi_flash: detected chip: winbond
+I (382) spi_flash: flash io: dio
+I (385) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (391) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (409) coexist: coex firmware version: 093e3d2
+I (409) coexist: coexist rom version e7ae62f
+I (410) main_task: Started on CPU0
+I (430) main_task: Calling app_main()
+W (440) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (440) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (440) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+W (450) TRACKER_MAIN: Field validation override: task WDT timeout set to 30000ms
+I (460) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (470) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=1 ota_min_mv=3850
+I (480) STATE_MACHINE: metadata boot initialized boot_id=boot-1-b443d634 boot_count=1
+I (490) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+I (500) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+W (510) RTC_DS3231M: DS3231M probe failed: ESP_ERR_INVALID_STATE
+I (510) RTC_DS3231M: RTC init available=0 time_valid=0
+W (510) STATE_MACHINE: rtc_ds3231m_init failed: ESP_FAIL (continue with fallback time)
+I (520) STATE_MACHINE: RTC health available=0 valid=0
+I (530) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (530) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1830) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=17025 replay_seq=163 ack_critical=124
+I (1830) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=3270f1e6-44da-4823-a287-573a97c9b69e seq=1 boot=boot-1-b443d634 ts=1448
+I (82690) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (82790) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (82790) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (83290) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (83290) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (83490) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (83490) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (83490) IMU_LIS3DSH: Reusing shared I2C bus port=0
+I (83490) IMU_LIS3DSH: LIS3DSH initialized at I2C addr 0x1D
+I (83490) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (83500) STATE_MACHINE: HW diag supply=12.16V batt=4.08V ign=0 vib=947 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (83610) STATE_MACHINE: mqtt status=stopped metadata mid=793df89b-42fe-443e-aef2-fa70799314a3 seq=2 boot=boot-1-b443d634 ts=83227
+
+===== raw-capture start port=COM6 ts=1776090539 =====
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0xb (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (24) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (25) boot: compile time Apr  9 2026 05:30:37
+I (25) boot: Multicore bootloader
+I (25) boot: chip revision: v0.2
+I (28) boot: efuse block revision: v1.3
+I (31) boot.esp32s3: Boot SPI Speed : 80MHz
+I (35) boot.esp32s3: SPI Mode       : DIO
+I (39) boot.esp32s3: SPI Flash Size : 16MB
+I (43) boot: Enabling RNG early entropy source...
+I (47) boot: Partition Table:
+I (50) boot: ## Label            Usage          Type ST Offset   Length
+I (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (63) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (69) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (76) boot:  3 factory          factory app      00 00 00020000 00180000
+I (82) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (89) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (95) boot: End of partition table
+I (98) boot: Defaulting to factory image
+I (102) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35d3ch (220476) map
+I (149) esp_image: segment 1: paddr=00055d64 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (152) esp_image: segment 2: paddr=000592f8 vaddr=40374000 size=06d20h ( 27936) load
+I (159) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=810a0h (528544) map
+I (253) esp_image: segment 4: paddr=000e10c8 vaddr=4037ad20 size=0ad4ch ( 44364) load
+I (263) esp_image: segment 5: paddr=000ebe1c vaddr=50000000 size=000f8h (   248) load
+I (263) esp_image: segment 6: paddr=000ebf1c vaddr=600fe000 size=0006ch (   108) load
+I (274) boot: Loaded app from partition at offset 0x20000
+I (274) boot: Disabling RNG early entropy source...
+I (288) cpu_start: Multicore app
+I (297) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (298) cpu_start: Pro cpu start user code
+I (298) cpu_start: cpu freq: 160000000 Hz
+I (299) app_init: Application information:
+I (303) app_init: Project name:     Tracking_Firmware
+I (308) app_init: App version:      6089714-dirty
+I (312) app_init: Compile time:     Apr 13 2026 16:42:29
+I (317) app_init: ELF file SHA256:  b92af2697...
+I (321) app_init: ESP-IDF:          v5.5.3
+I (325) efuse_init: Min chip rev:     v0.0
+I (329) efuse_init: Max chip rev:     v0.99 
+I (333) efuse_init: Chip rev:         v0.2
+I (337) heap_init: Initializing. RAM available for dynamic allocation:
+I (343) heap_init: At 3FC9B968 len 0004DDA8 (311 KiB): RAM
+I (348) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (354) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (359) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (365) spi_flash: detected chip: winbond
+I (368) spi_flash: flash io: dio
+I (371) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (377) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (395) coexist: coex firmware version: 093e3d2
+I (395) coexist: coexist rom version e7ae62f
+I (396) main_task: Started on CPU0
+I (416) main_task: Calling app_main()
+W (426) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (426) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (426) TRACKER_MAIN: Field validation override: IMU runtime disabled for OTA stability
+W (436) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+W (446) TRACKER_MAIN: Field validation override: task WDT timeout set to 30000ms
+I (456) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (456) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=0 ota_min_mv=3850
+I (476) STATE_MACHINE: metadata boot initialized boot_id=boot-1-845a1d4b boot_count=1
+I (486) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+W (486) STATE_MACHINE: IMU wake disabled by config (timer-only parked sleep fallback)
+I (496) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (506) RTC_DS3231M: RTC init available=1 time_valid=1
+I (506) STATE_MACHINE: RTC health available=1 valid=1
+I (516) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (516) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1946) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=17031 replay_seq=163 ack_critical=124
+I (1946) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=99e5dd8e-6dfc-4bee-a8fc-2257bc3cf842 seq=1 boot=boot-1-845a1d4b ts=1776090478000
+I (85216) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (85316) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (85316) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (85816) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (85816) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (86016) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (86016) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (86016) STATE_MACHINE: HW diag supply=12.11V batt=4.09V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (86116) STATE_MACHINE: mqtt status=stopped metadata mid=7bc8e03e-007b-4227-ba4d-3aaf4bbaf1be seq=2 boot=boot-1-845a1d4b ts=1776090562000
+W (167226) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (167326) uart: queue free spaces: 32
+I (167326) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (167326) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (167326) STATE_MACHINE: HW diag supply=12.14V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (167436) STATE_MACHINE: mqtt status=stopped metadata mid=fb50b315-ea90-4488-bd52-3b663759519b seq=3 boot=boot-1-845a1d4b ts=1776090644000
+W (244676) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (244776) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (244776) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (244776) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (244776) STATE_MACHINE: HW diag supply=12.12V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (244886) STATE_MACHINE: mqtt status=stopped metadata mid=115a28e2-5076-4aef-9ca8-f060caa14452 seq=4 boot=boot-1-845a1d4b ts=1776090721000
+W (319776) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+
+===== monitor start port=COM6 ts=1776090938 =====
+W (154686) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (154786) uart: queue free spaces: 32
+I (154786) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (154786) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (154786) STATE_MACHINE: HW diag supply=12.14V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (154896) STATE_MACHINE: mqtt status=stopped metadata mid=19285848-1d6e-4983-a6ca-d371f5ba21bf seq=3 boot=boot-1-cbd1b6a2 ts=1776090951000
+W (229686) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (229786) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (229786) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (229786) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (229786) STATE_MACHINE: HW diag supply=12.10V batt=4.11V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (229896) STATE_MACHINE: mqtt status=stopped metadata mid=54bceee9-b575-49a7-8063-5ee37b52b971 seq=4 boot=boot-1-cbd1b6a2 ts=1776091026000
+W (314866) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (315076) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (315076) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (315076) STATE_MACHINE: HW diag supply=12.12V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (315176) STATE_MACHINE: mqtt status=stopped metadata mid=210fd7d0-8462-4dd1-8612-250057fde9eb seq=5 boot=boot-1-cbd1b6a2 ts=1776091111000
+W (395676) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (395886) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (395886) STATE_MACHINE: HW diag supply=12.15V batt=4.05V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (395986) STATE_MACHINE: mqtt status=stopped metadata mid=1fa0b2b3-d292-4edf-a896-1c95b83e3e75 seq=6 boot=boot-1-cbd1b6a2 ts=1776091192000
+W (470556) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (470766) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (470766) STATE_MACHINE: HW diag supply=12.18V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (470866) STATE_MACHINE: mqtt status=stopped metadata mid=b802931b-287a-4b7f-8735-526b2abec889 seq=7 boot=boot-1-cbd1b6a2 ts=1776091267000
+W (549956) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=6
+I (550166) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (550166) STATE_MACHINE: HW diag supply=12.14V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (550266) STATE_MACHINE: mqtt status=stopped metadata mid=92630cee-0b4b-473c-b56c-12d930e68db3 seq=8 boot=boot-1-cbd1b6a2 ts=1776091347000
+W (630976) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=7
+I (631216) MODEM_LTE: PDP profile configured apn=internet
+I (631216) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (631216) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (631216) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (631216) STATE_MACHINE: Field validation override: BLE OBD connect loop disabled for OTA stability
+I (631226) STATE_MACHINE: HW diag supply=12.15V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (631336) STATE_MACHINE: mqtt status=stopped metadata mid=1275512a-2b34-4524-83d2-6e583671e071 seq=9 boot=boot-1-cbd1b6a2 ts=1776091428000
+W (712296) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=8
+I (712506) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (712506) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+I (712506) STATE_MACHINE: HW diag supply=12.15V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (712606) STATE_MACHINE: mqtt status=stopped metadata mid=c177d1ca-3095-486c-ae8f-c4416fb3d18b seq=10 boot=boot-1-cbd1b6a2 ts=1776091509000
+W (795366) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=9
+I (795586) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+I (795586) STATE_MACHINE: HW diag supply=12.17V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (795686) STATE_MACHINE: mqtt status=stopped metadata mid=c209ad67-14a3-4057-8f30-728e0dcc4c45 seq=11 boot=boot-1-cbd1b6a2 ts=1776091592000
+W (870566) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=10
+I (870776) MODEM_LTE: PDP IP check response="..+CGPADDR: 1,29.111.71.82....OK.."
+I (870776) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (870776) MODEM_LTE: LTE connected and PDP active
+I (870776) MODEM_GNSS: GNSS power-on sequence start
+I (870896) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (870996) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (871106) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (871106) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (1202446) TRACKER_MQTT: CMQTTCONNECT timeout but session state is connected (disc_state=0), continue
+I (1232566) TRACKER_MQTT: MQTT subscribed commands topic=v1/TRACKER_001/commands
+I (1232676) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1232676) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.634761,N,10544.721496,E,130426,145452.0,5.7,0.0,    OK  
+I (1232676) MODEM_GNSS: GNSS fallback fix lat=20.960579 lon=105.745358 speed_kmh=0.00
+I (1232686) MODEM_GNSS: GNSS fix success lat=20.960579 lon=105.745358 sat=1 streak=1
+I (1232696) STATE_MACHINE: HW diag supply=12.13V batt=4.09V ign=0 vib=0 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (1293436) OFFLINE_QUEUE: replay publish ok seq=163 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=1
+I (1294456) RTC_DS3231M: RTC set time ms=1776092092000
+I (1294456) STATE_MACHINE: mqtt status=stopped metadata mid=11f40913-4d59-499d-8144-c1a9fcd90fe3 seq=12 boot=boot-1-cbd1b6a2 ts=1776092092000
+W (1381056) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=11
+I (1381276) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1381276) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.632698,N,10544.723669,E,130426,145720.0,28.3,0.9,66.6    OK  
+I (1381276) MODEM_GNSS: GNSS fallback fix lat=20.960545 lon=105.745394 speed_kmh=1.67
+I (1381286) MODEM_GNSS: GNSS fix success lat=20.960545 lon=105.745394 sat=1 streak=2
+I (1381296) STATE_MACHINE: HW diag supply=12.15V batt=4.08V ign=0 vib=0 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (1442076) OFFLINE_QUEUE: replay publish ok seq=164 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=2
+I (1443096) RTC_DS3231M: RTC set time ms=1776092240000
+I (1443096) STATE_MACHINE: mqtt status=stopped metadata mid=33da3819-f503-4f0f-aef3-e16678722b7e seq=13 boot=boot-1-cbd1b6a2 ts=1776092240000
+W (1529326) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=12
+I (1529546) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1529546) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.632597,N,10544.721689,E,130426,145949.0,3.7,0.0,    OK  
+I (1529546) MODEM_GNSS: GNSS fallback fix lat=20.960543 lon=105.745361 speed_kmh=0.00
+I (1529556) MODEM_GNSS: GNSS fix success lat=20.960543 lon=105.745361 sat=1 streak=3
+I (1529566) STATE_MACHINE: HW diag supply=12.11V batt=4.07V ign=0 vib=0 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (1590316) OFFLINE_QUEUE: replay publish ok seq=165 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=3
+I (1591336) RTC_DS3231M: RTC set time ms=1776092389000
+I (1591336) STATE_MACHINE: mqtt status=stopped metadata mid=97bfc199-bb63-4d69-905f-5cf4a8711146 seq=14 boot=boot-1-cbd1b6a2 ts=1776092389000
+
+===== monitor start port=COM6 ts=1776092765 =====
+I (80446) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (80546) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (80546) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (81046) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (81046) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (81246) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (81246) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (81246) STATE_MACHINE: HW diag supply=12.14V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (81346) STATE_MACHINE: mqtt status=stopped metadata mid=b1e9d3dc-e853-4d00-82b5-c93fb3795352 seq=2 boot=boot-1-a1bb8b0c ts=1776092764000
+W (156596) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (156696) uart: queue free spaces: 32
+I (156696) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (156696) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (156696) STATE_MACHINE: HW diag supply=12.15V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (156806) STATE_MACHINE: mqtt status=stopped metadata mid=26073aff-3bb8-4e5c-8c58-def65c7f98da seq=3 boot=boot-1-a1bb8b0c ts=1776092839000
+W (235186) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (235286) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (235286) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (235286) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (235286) STATE_MACHINE: HW diag supply=12.11V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (235396) STATE_MACHINE: mqtt status=stopped metadata mid=14eddf4c-6e0a-48a6-8bc9-db65cda80280 seq=4 boot=boot-1-a1bb8b0c ts=1776092918000
+W (317416) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (317626) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (317626) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (317626) STATE_MACHINE: HW diag supply=12.15V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (317726) STATE_MACHINE: mqtt status=stopped metadata mid=849b8fd8-002c-4f1b-85f5-fc298f00efc1 seq=5 boot=boot-1-a1bb8b0c ts=1776093000000
+W (399556) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (399766) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (399766) STATE_MACHINE: HW diag supply=12.16V batt=4.09V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (399866) STATE_MACHINE: mqtt status=stopped metadata mid=d7bae680-db87-4d30-9fa0-8ac988181edf seq=6 boot=boot-1-a1bb8b0c ts=1776093082000
+W (478576) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (478786) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (478786) STATE_MACHINE: HW diag supply=12.18V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (478886) STATE_MACHINE: mqtt status=stopped metadata mid=bc6d2c6a-46d8-49a0-9f2b-567dc22ce052 seq=7 boot=boot-1-a1bb8b0c ts=1776093161000
+W (554106) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=6
+I (554316) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (554316) STATE_MACHINE: HW diag supply=12.13V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (554416) STATE_MACHINE: mqtt status=stopped metadata mid=d1e47b4c-8643-492d-8403-87e9ec3c03a6 seq=8 boot=boot-1-a1bb8b0c ts=1776093237000
+W (632016) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=7
+I (632256) MODEM_LTE: PDP profile configured apn=internet
+I (632256) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (632256) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (632256) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (632256) STATE_MACHINE: Field validation override: BLE OBD connect loop disabled for OTA stability
+I (632266) STATE_MACHINE: HW diag supply=12.13V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (632376) STATE_MACHINE: mqtt status=stopped metadata mid=66e3dff7-cfb8-4581-8b58-89ff8422107f seq=9 boot=boot-1-a1bb8b0c ts=1776093315000
+W (712706) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=8
+I (712916) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (712916) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+I (712916) STATE_MACHINE: HW diag supply=12.16V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (713016) STATE_MACHINE: mqtt status=stopped metadata mid=6594904f-4483-4691-966d-a8352bd5ffe2 seq=10 boot=boot-1-a1bb8b0c ts=1776093396000
+W (788256) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=9
+I (788476) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+I (788476) STATE_MACHINE: HW diag supply=12.17V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (788576) STATE_MACHINE: mqtt status=stopped metadata mid=a491d417-013d-4420-ba3c-c726e4d70924 seq=11 boot=boot-1-a1bb8b0c ts=1776093471000
+W (868126) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=10
+I (868336) MODEM_LTE: PDP IP check response="..+CGPADDR: 1,215.10.240.143....OK.."
+I (868336) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (868336) MODEM_LTE: LTE connected and PDP active
+I (868336) MODEM_GNSS: GNSS power-on sequence start
+I (868456) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (868566) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (868676) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (868676) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+W (1200016) TRACKER_MQTT: CMQTTCONNECT timeout but session state is connected (disc_state=0), continue
+I (1230136) TRACKER_MQTT: MQTT subscribed commands topic=v1/TRACKER_001/commands
+I (1230246) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1230246) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.628522,N,10544.721676,E,130426,152615.0,19.7,0.0,    OK  
+I (1230246) MODEM_GNSS: GNSS fallback fix lat=20.960475 lon=105.745361 speed_kmh=0.00
+I (1230256) MODEM_GNSS: GNSS fix success lat=20.960475 lon=105.745361 sat=1 streak=1
+I (1230266) STATE_MACHINE: HW diag supply=12.09V batt=4.05V ign=0 vib=0 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (1291056) OFFLINE_QUEUE: replay publish ok seq=168 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=1
+I (1292076) RTC_DS3231M: RTC set time ms=1776093975000
+I (1292076) STATE_MACHINE: mqtt status=stopped metadata mid=cc3c02ac-e86e-4a8c-878e-e48fb8c03c7b seq=12 boot=boot-1-a1bb8b0c ts=1776093975000
+W (1373536) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=11
+I (1373756) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1373756) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.629354,N,10544.721745,E,130426,152838.0,20.9,0.0,    OK  
+I (1373756) MODEM_GNSS: GNSS fallback fix lat=20.960489 lon=105.745362 speed_kmh=0.00
+I (1373766) MODEM_GNSS: GNSS fix success lat=20.960489 lon=105.745362 sat=1 streak=2
+I (1373776) STATE_MACHINE: HW diag supply=12.14V batt=4.06V ign=0 vib=0 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (1418686) MODEM_LTE: RDY token seen from UART
+W (1434246) TRACKER_MQTT: AT command failed cmd="v1/TRACKER_001/rawdata" err=ESP_ERR_TIMEOUT resp="
+RDY
+
++CPIN: READY
+
+SMS DONE
+
+PB DONE
+"
+E (1434246) TRACKER_MQTT: send input data failed
+
+===== command-check start port=COM6 ts=1776094248 =====
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0xb (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2ef0
+entry 0x403c8924
+I (24) boot: ESP-IDF v5.5.3 2nd stage bootloader
+I (25) boot: compile time Apr  9 2026 05:30:37
+I (25) boot: Multicore bootloader
+I (25) boot: chip revision: v0.2
+I (28) boot: efuse block revision: v1.3
+I (31) boot.esp32s3: Boot SPI Speed : 80MHz
+I (35) boot.esp32s3: SPI Mode       : DIO
+I (39) boot.esp32s3: SPI Flash Size : 16MB
+I (43) boot: Enabling RNG early entropy source...
+I (47) boot: Partition Table:
+I (50) boot: ## Label            Usage          Type ST Offset   Length
+I (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (63) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (69) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (76) boot:  3 factory          factory app      00 00 00020000 00180000
+I (82) boot:  4 ota_0            OTA app          00 10 001a0000 00180000
+I (89) boot:  5 ota_1            OTA app          00 11 00320000 00180000
+I (95) boot: End of partition table
+I (98) boot: Defaulting to factory image
+I (102) esp_image: segment 0: paddr=00020020 vaddr=3c090020 size=35dbch (220604) map
+I (149) esp_image: segment 1: paddr=00055de4 vaddr=3fc95b00 size=0358ch ( 13708) load
+I (152) esp_image: segment 2: paddr=00059378 vaddr=40374000 size=06ca0h ( 27808) load
+I (159) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=81288h (529032) map
+I (253) esp_image: segment 4: paddr=000e12b0 vaddr=4037aca0 size=0adcch ( 44492) load
+I (263) esp_image: segment 5: paddr=000ec084 vaddr=50000000 size=000f8h (   248) load
+I (264) esp_image: segment 6: paddr=000ec184 vaddr=600fe000 size=0006ch (   108) load
+I (274) boot: Loaded app from partition at offset 0x20000
+I (274) boot: Disabling RNG early entropy source...
+I (288) cpu_start: Multicore app
+I (297) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (298) cpu_start: Pro cpu start user code
+I (298) cpu_start: cpu freq: 160000000 Hz
+I (299) app_init: Application information:
+I (303) app_init: Project name:     Tracking_Firmware
+I (308) app_init: App version:      6089714-dirty
+I (312) app_init: Compile time:     Apr 13 2026 16:42:29
+I (317) app_init: ELF file SHA256:  41293abdb...
+I (322) app_init: ESP-IDF:          v5.5.3
+I (325) efuse_init: Min chip rev:     v0.0
+I (329) efuse_init: Max chip rev:     v0.99 
+I (333) efuse_init: Chip rev:         v0.2
+I (337) heap_init: Initializing. RAM available for dynamic allocation:
+I (343) heap_init: At 3FC9B970 len 0004DDA0 (311 KiB): RAM
+I (349) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (354) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (359) heap_init: At 600FE06C len 00001F7C (7 KiB): RTCRAM
+I (365) spi_flash: detected chip: winbond
+I (368) spi_flash: flash io: dio
+I (371) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (377) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (395) coexist: coex firmware version: 093e3d2
+I (396) coexist: coexist rom version e7ae62f
+I (396) main_task: Started on CPU0
+I (416) main_task: Calling app_main()
+W (426) TRACKER_MAIN: Field validation override: sleep disabled for continuous hardware bring-up
+W (426) TRACKER_MAIN: Field validation override: IMU wake enabled for hardware acceptance
+W (426) TRACKER_MAIN: Field validation override: IMU runtime disabled for OTA stability
+W (436) TRACKER_MAIN: Field validation override: mqtt broker=mqtt.thingdock.dev (default TLS port) user=device
+W (446) TRACKER_MAIN: Field validation override: task WDT timeout set to 30000ms
+I (456) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
+I (456) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=0 imu_wake=0 ota_min_mv=3850
+I (476) STATE_MACHINE: metadata boot initialized boot_id=boot-1-ddfae74d boot_count=1
+I (486) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
+W (486) STATE_MACHINE: IMU wake disabled by config (timer-only parked sleep fallback)
+I (496) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
+I (506) RTC_DS3231M: RTC init available=1 time_valid=1
+I (506) STATE_MACHINE: RTC health available=1 valid=1
+I (516) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+I (516) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (1946) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=17064 replay_seq=169 ack_critical=124
+I (1946) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=ca2b72f2-2819-4520-aed1-f40567767c19 seq=1 boot=boot-1-ddfae74d ts=1776094188000
+I (77236) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (77336) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (77336) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (77836) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (77836) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (78036) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (78036) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (78036) STATE_MACHINE: HW diag supply=12.10V batt=4.08V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (78136) STATE_MACHINE: mqtt status=stopped metadata mid=42a8400f-89f8-4660-a740-ed71b064845e seq=2 boot=boot-1-ddfae74d ts=1776094265000
+
+===== monitor start port=COM6 ts=1776094897 =====
+I (81376) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (81476) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (81476) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (81976) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (81976) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (82176) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (82176) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (82176) STATE_MACHINE: HW diag supply=12.21V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (82276) STATE_MACHINE: mqtt status=stopped metadata mid=81d2221b-02b5-4ca4-a0cd-8e9211a62aed seq=2 boot=boot-1-e01f7557 ts=1776094887000
+W (159726) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=1
+I (159826) uart: queue free spaces: 32
+I (159826) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (159826) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
+I (159826) STATE_MACHINE: HW diag supply=12.09V batt=4.04V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (159936) STATE_MACHINE: mqtt status=stopped metadata mid=96166fb3-f6d6-409f-9f74-217a45773b3a seq=3 boot=boot-1-e01f7557 ts=1776094965000
+W (238186) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=2
+I (238286) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (238286) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (238286) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+I (238286) STATE_MACHINE: HW diag supply=12.13V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (238396) STATE_MACHINE: mqtt status=stopped metadata mid=ac27cf25-d1f9-44b3-942f-67fd4b0f926a seq=4 boot=boot-1-e01f7557 ts=1776095043000
+W (319076) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=3
+I (319286) MODEM_LTE: AT sync ready tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
+I (319286) MODEM_LTE: FSM AT_SYNC -> ATE0
+I (319286) STATE_MACHINE: HW diag supply=12.12V batt=4.05V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (319386) STATE_MACHINE: mqtt status=stopped metadata mid=1598b955-5e33-4eca-846c-e04b14279cc4 seq=5 boot=boot-1-e01f7557 ts=1776095124000
+W (399866) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=4
+I (400076) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
+I (400076) STATE_MACHINE: HW diag supply=12.15V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (400176) STATE_MACHINE: mqtt status=stopped metadata mid=eef70254-52ed-4639-ad4a-9eb94507ef04 seq=6 boot=boot-1-e01f7557 ts=1776095205000
+W (480826) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=5
+I (481036) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
+I (481036) STATE_MACHINE: HW diag supply=12.13V batt=4.07V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (481136) STATE_MACHINE: mqtt status=stopped metadata mid=490f4cf2-2f73-4173-b3ab-acb205ba9f8e seq=7 boot=boot-1-e01f7557 ts=1776095286000
+W (559576) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=6
+I (559786) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
+I (559786) STATE_MACHINE: HW diag supply=12.14V batt=4.05V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (559886) STATE_MACHINE: mqtt status=stopped metadata mid=e99b9564-8eff-4adf-a50a-2222a3878cb8 seq=8 boot=boot-1-e01f7557 ts=1776095365000
+W (634946) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=7
+I (635176) MODEM_LTE: PDP profile configured apn=internet
+I (635176) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
+I (635176) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
+I (635176) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
+W (635176) STATE_MACHINE: Field validation override: BLE OBD connect loop disabled for OTA stability
+I (635186) STATE_MACHINE: HW diag supply=12.17V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (635296) STATE_MACHINE: mqtt status=stopped metadata mid=94f151d9-7d7c-400a-b137-c054d8a2079c seq=9 boot=boot-1-e01f7557 ts=1776095440000
+W (718506) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=8
+I (718716) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
+I (718716) MODEM_LTE: FSM CEREG_WAIT -> PDP_ACTIVATE
+I (718716) STATE_MACHINE: HW diag supply=12.14V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (718816) STATE_MACHINE: mqtt status=stopped metadata mid=32f474ec-b0e2-45e5-b895-11743c55ff46 seq=10 boot=boot-1-e01f7557 ts=1776095523000
+W (793726) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=9
+I (793946) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+I (793946) STATE_MACHINE: HW diag supply=12.14V batt=4.06V ign=0 vib=0 lte=0 mqtt=0 ble=0 gnss_fix=0
+I (794046) STATE_MACHINE: mqtt status=stopped metadata mid=587a38bc-ef01-4f68-b028-50c661428f57 seq=11 boot=boot-1-e01f7557 ts=1776095599000
+W (874656) STATE_MACHINE: Sleep blocked reason=sleep_policy_disabled blocked_count=10
+I (874866) MODEM_LTE: PDP IP check response="..+CGPADDR: 1,6.64.171.78....OK.."
+I (874866) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (874866) MODEM_LTE: LTE connected and PDP active
+I (874866) MODEM_GNSS: GNSS power-on sequence start
+I (874986) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR  
+I (875096) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR  
+I (875206) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+W (875206) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+
+===== monitor start port=COM6 ts=1776095824 =====
+W (1206536) TRACKER_MQTT: CMQTTCONNECT timeout but session state is connected (disc_state=0), continue
+I (1236656) TRACKER_MQTT: MQTT subscribed commands topic=v1/TRACKER_001/commands
+I (1236856) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (1236856) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.634334,N,10544.721787,E,130426,160143.0,16.5,0.0,    OK    +CMQTTSUB: 0,0  
+I (1236856) MODEM_GNSS: GNSS fallback fix lat=20.960572 lon=105.745363 speed_kmh=0.00
+I (1236866) MODEM_GNSS: GNSS fix success lat=20.960572 lon=105.745363 sat=1 streak=1
+I (1236876) STATE_MACHINE: HW diag supply=12.13V batt=4.07V ign=0 vib=0 lte=1 mqtt=1 ble=0 gnss_fix=1
+I (1297606) OFFLINE_QUEUE: replay publish ok seq=169 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=1
+I (1298626) RTC_DS3231M: RTC set time ms=1776096103000
+I (1298626) STATE_MACHINE: mqtt status=stopped metadata mid=ff0c7c2a-43ea-4067-b60e-c8aed54b0d3b seq=12 boot=boot-1-e01f7557 ts=1776096103000

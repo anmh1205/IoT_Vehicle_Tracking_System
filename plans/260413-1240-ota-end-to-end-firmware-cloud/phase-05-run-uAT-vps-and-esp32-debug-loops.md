@@ -10,7 +10,7 @@
 - Date: 2026-04-13
 - Description: Execute the real OTA loop on hardware and VPS, debug truthfully, and converge until stable.
 - Priority: P1
-- Implementation status: pending
+- Implementation status: in_progress
 - Review status: pending
 
 ## Key Insights
@@ -82,7 +82,8 @@
 6. After each loop, patch only the failing boundary, rerun same loop, then rerun happy path.
 
 ## Todo list
-- [ ] Prove VPS artifact hosting and TLS from device-safe path
+- [x] Pre-loop firmware build + flash smoke on ESP32 COM6
+- [x] Prove VPS artifact hosting and TLS from device-safe path
 - [ ] Prove single-device happy path OTA
 - [ ] Run targeted negative loops
 - [ ] Capture evidence across serial, MQTT, DB, logs
@@ -93,6 +94,24 @@
 - Each failure class maps to deterministic operator-visible result.
 - No unexplained stuck deployment remains.
 - Fix loops are reproducible by another engineer.
+
+## Execution note (current workspace)
+- Real `vps-control` loop executed on UAT (`103.47.227.216`):
+  - services healthy after backend/bridge image refresh
+  - OTA hardening migration applied (`13-ota-hardening.sql`)
+  - artifact hosting fixed (storage permission + public HTTPS URL)
+  - EMQX trace proved backend publishes to `v1/TRACKER_001/commands`
+- Real `esp32-loop-coding` loop executed continuously on `COM6` with iterative flash/retest.
+- Firmware loop patches added and flashed:
+  - force `command_subscribe_enabled=true` in field-validation runtime
+  - disable BLE connect loop in field-validation mode to reduce OTA-path starvation
+  - process OTA/reboot command also in `APP_STATE_CHECK_IGN` (ignition-off path)
+  - preserve UART pending URC dispatch in `modem_at_send` instead of raw flush
+  - add command ingress log (`Command received: ...`) for proof
+- Current blocker remains hard: device repeatedly resets by watchdog before stable OTA lifecycle.
+  - serial shows repeated `rst:0x7 (TG0WDT_SYS_RST)` and reboot loops
+  - deployment rows for firmware `r3` stay at `assigned`/`stuck_timeout` with no OTA progress events
+- Phase remains open until watchdog root cause is closed and one full OTA lifecycle is captured.
 
 ## Risk Assessment
 - Risk: broad service restarts hide true boundary.
@@ -107,3 +126,8 @@
 
 ## Next steps
 - Phase 06 converts loop results into final test evidence, doc updates, and release gate.
+
+## Unresolved questions
+- What exact code path causes `TG0WDT_SYS_RST` during modem bring-up on current field-validation build?
+- Why does command ingress still not appear in serial (`Command received`) despite broker-side command publish confirmation?
+- Should we temporarily gate OTA validation on ignition-off path only (current test mode) or force ignition-on hardware state for final acceptance run?

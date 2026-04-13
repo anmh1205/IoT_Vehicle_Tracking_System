@@ -6,6 +6,7 @@
 #include "esp_log.h"
 #include "esp_ota_ops.h"
 #include "esp_sleep.h"
+#include "esp_task_wdt.h"
 #include "sdkconfig.h"
 
 #include "nvs_config.h"
@@ -27,6 +28,23 @@ static const retry_policy_t s_init_retry_policy = {
     .max_attempts = 0,
     .jitter_ms = 0,
 };
+
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_ESP_TASK_WDT_EN
+static void tracker_main_relax_task_wdt_for_field_validation(void) {
+    const esp_task_wdt_config_t wdt_cfg = {
+        .timeout_ms = 30000,
+        .idle_core_mask = (1U << portNUM_PROCESSORS) - 1U,
+        .trigger_panic = false,
+    };
+
+    esp_err_t err = esp_task_wdt_reconfigure(&wdt_cfg);
+    if (err == ESP_OK) {
+        ESP_LOGW(TAG, "Field validation override: task WDT timeout set to %ums", (unsigned)wdt_cfg.timeout_ms);
+    } else {
+        ESP_LOGW(TAG, "Field validation task WDT reconfigure failed: %s", esp_err_to_name(err));
+    }
+}
+#endif
 
 /**
  * @brief ESP-IDF application entrypoint.
@@ -65,6 +83,12 @@ void app_main(void) {
     config.imu_wakeup_enabled = true;
 #endif
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE
+    if (config.imu_wakeup_enabled) {
+        ESP_LOGW(TAG, "Field validation override: IMU runtime disabled for OTA stability");
+    }
+    config.imu_wakeup_enabled = false;
+#endif
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE
     if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_HOST)) {
         util_copy_string(config.mqtt_host,
                          sizeof(config.mqtt_host),
@@ -88,7 +112,15 @@ void app_main(void) {
         ESP_LOGW(TAG, "Field validation override: command subscribe disabled (publish-path validation)");
     }
     config.command_subscribe_enabled = false;
+#else
+    if (!config.command_subscribe_enabled) {
+        ESP_LOGW(TAG, "Field validation override: command subscribe re-enabled for OTA loop");
+    }
+    config.command_subscribe_enabled = true;
 #endif
+#endif
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_ESP_TASK_WDT_EN
+    tracker_main_relax_task_wdt_for_field_validation();
 #endif
     util_set_sleep_enabled(config.sleep_enabled);
 

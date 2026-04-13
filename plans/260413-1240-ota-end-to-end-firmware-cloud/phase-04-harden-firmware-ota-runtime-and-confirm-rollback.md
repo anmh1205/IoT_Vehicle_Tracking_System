@@ -14,8 +14,8 @@
 - Date: 2026-04-13
 - Description: Tighten firmware OTA execution so cloud and hardware behavior match a production-like contract.
 - Priority: P1
-- Implementation status: pending
-- Review status: pending
+- Implementation status: completed
+- Review status: in_progress
 
 ## Key Insights
 - Firmware already does real HTTPS download, SHA256 verify, partition switch, reboot, and post-boot confirm. Good.
@@ -84,11 +84,11 @@
 7. Verify sleep gates and unsafe-start gates remain intact after changes.
 
 ## Todo list
-- [ ] Freeze firmware status payload fields
-- [ ] Add stable error taxonomy
-- [ ] Verify confirm-timeout semantics
-- [ ] Verify interrupted-update semantics
-- [ ] Verify manual rollback semantics
+- [x] Freeze firmware status payload fields
+- [x] Add stable error taxonomy
+- [x] Verify confirm-timeout semantics
+- [x] Verify interrupted-update semantics
+- [x] Verify manual rollback semantics
 
 ## Success Criteria
 - Firmware behavior matches cloud lifecycle names and error codes.

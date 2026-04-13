@@ -13,8 +13,8 @@
 - Date: 2026-04-13
 - Description: Make backend OTA artifact serving and deployment lifecycle safe enough for a real UAT device.
 - Priority: P1
-- Implementation status: pending
-- Review status: pending
+- Implementation status: completed
+- Review status: in_progress
 
 ## Key Insights
 - Current deploy service already emits `ota_update` with `jobId`, `version`, `url`, `size`, `sha256`, `force`, `confirmTimeoutSec`.
@@ -78,11 +78,11 @@
 7. Emit consistent realtime events if backend owns UI push.
 
 ## Todo list
-- [ ] Make artifact download contract explicit
-- [ ] Harden deploy preconditions and dedupe
-- [ ] Add stuck/timeout reconciliation plan
-- [ ] Normalize deployment response shape for frontend
-- [ ] Define backend-owned error messages for operators
+- [x] Make artifact download contract explicit
+- [x] Harden deploy preconditions and dedupe
+- [x] Add stuck/timeout reconciliation plan
+- [x] Normalize deployment response shape for frontend
+- [x] Define backend-owned error messages for operators
 
 ## Success Criteria
 - A real device can fetch OTA binary from VPS via backend URL with valid TLS and exact binary content.

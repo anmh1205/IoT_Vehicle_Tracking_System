@@ -140,6 +140,33 @@ static void modem_at_dispatch_chunk_lines(const char *chunk, size_t chunk_len) {
 }
 
 /**
+ * @brief Drain pending UART bytes and dispatch complete URC lines.
+ *
+ * Must be called while `s_at_lock` is already held to avoid lock inversion
+ * with `modem_at_poll_urc`.
+ */
+static void modem_at_drain_pending_input(uint32_t max_read_bytes) {
+    if (!s_uart_ready || max_read_bytes == 0U) {
+        return;
+    }
+
+    uint32_t remaining = max_read_bytes;
+    char chunk[128];
+    while (remaining > 0U) {
+        modem_at_drain_uart_events();
+        size_t read_cap = (size_t)MIN_VALUE((uint32_t)(sizeof(chunk) - 1U), remaining);
+        int read = uart_read_bytes(MODEM_UART_NUM, (uint8_t *)chunk, read_cap, 0);
+        if (read <= 0) {
+            break;
+        }
+
+        remaining -= (uint32_t)read;
+        chunk[read] = '\0';
+        modem_at_dispatch_chunk_lines(chunk, (size_t)read);
+    }
+}
+
+/**
  * @brief Detect AT command completion markers in response buffer.
  *
  * @param buffer Full response buffer.
@@ -197,7 +224,6 @@ esp_err_t modem_at_init(void) {
     s_at_lock = xSemaphoreCreateMutex();
     ESP_RETURN_ON_NULL(s_at_lock, ESP_ERR_NO_MEM, TAG, "Failed to create AT mutex");
 
-    memset(s_urc_entries, 0, sizeof(s_urc_entries));
     s_dispatch_line_len = 0;
     s_dispatch_line_buf[0] = '\0';
     s_uart_baud = MODEM_UART_BAUD;
@@ -229,6 +255,9 @@ void modem_at_deinit(void) {
     }
 
     s_uart_event_queue = NULL;
+    memset(s_urc_entries, 0, sizeof(s_urc_entries));
+    s_dispatch_line_len = 0;
+    s_dispatch_line_buf[0] = '\0';
     memset(&s_uart_diag, 0, sizeof(s_uart_diag));
 }
 
@@ -254,9 +283,12 @@ esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32
         response[0] = '\0';
     }
 
-    /* Clear stale RX bytes before sending fresh command. */
+    /*
+     * Preserve asynchronous URCs (especially MQTT RX commands) instead of
+     * dropping them with a raw UART flush before each AT command.
+     */
     modem_at_drain_uart_events();
-    uart_flush_input(MODEM_UART_NUM);
+    modem_at_drain_pending_input(MODEM_RX_BUFFER_SIZE);
     int written = uart_write_bytes(MODEM_UART_NUM, cmd, strlen(cmd));
     if (written < 0) {
         xSemaphoreGive(s_at_lock);

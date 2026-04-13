@@ -9,8 +9,8 @@
 - Date: 2026-04-13
 - Description: Freeze the actual OTA contract and prove UAT/VPS baseline before any fix loop.
 - Priority: P1
-- Implementation status: pending
-- Review status: pending
+- Implementation status: completed
+- Review status: in_progress
 
 ## Key Insights
 - Firmware side is not zero-state. `command_handler.c`, `state_machine.c`, `util.c`, `mqtt_client.c`, `main.c` already cover parse, apply, publish, reboot, confirm.
@@ -73,11 +73,11 @@
 6. Decide minimum production-like scope. Do not add cohort rollout orchestration if single-device hardening is still broken.
 
 ## Todo list
-- [ ] Freeze OTA command contract and firmware status contract
-- [ ] Define canonical lifecycle owner per state
-- [ ] Define error taxonomy shortlist
-- [ ] Define UAT/VPS baseline checklist
-- [ ] Define go/no-go criteria before fix loop
+- [x] Freeze OTA command contract and firmware status contract
+- [x] Define canonical lifecycle owner per state
+- [x] Define error taxonomy shortlist
+- [x] Define UAT/VPS baseline checklist
+- [x] Define go/no-go criteria before fix loop
 
 ## Success Criteria
 - One written contract exists for command, status, state transitions, and ownership.

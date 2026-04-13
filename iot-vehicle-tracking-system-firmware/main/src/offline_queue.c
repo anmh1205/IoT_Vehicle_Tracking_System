@@ -324,7 +324,15 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
 
         esp_err_t err = sd_log_store_append(&rec);
         ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "sd append failed");
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE
+        static bool s_gc_skip_logged = false;
+        if (!s_gc_skip_logged) {
+            ESP_LOGW(TAG, "Field validation override: defer synchronous SD GC to keep OTA loop responsive");
+            s_gc_skip_logged = true;
+        }
+#else
         (void)sd_log_store_gc_if_needed();
+#endif
     }
 
     s_ctx.next_seq += 1;

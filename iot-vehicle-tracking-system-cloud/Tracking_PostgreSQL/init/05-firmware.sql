@@ -52,6 +52,14 @@ CREATE TABLE IF NOT EXISTS firmware_update_log (
     started_at TIMESTAMPTZ,
     completed_at TIMESTAMPTZ,
     error_message TEXT,
+    status_reason_code VARCHAR(64),
+    first_assigned_at TIMESTAMPTZ,
+    command_dispatched_at TIMESTAMPTZ,
+    last_seen_at TIMESTAMPTZ,
+    last_message_id UUID,
+    last_seq_no BIGINT,
+    last_boot_id VARCHAR(80),
+    confirm_timeout_sec INTEGER DEFAULT 180 CHECK (confirm_timeout_sec > 0),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -61,6 +69,8 @@ CREATE INDEX IF NOT EXISTS idx_firmware_update_log_firmware_id ON firmware_updat
 CREATE INDEX IF NOT EXISTS idx_firmware_update_log_status ON firmware_update_log(status);
 CREATE INDEX IF NOT EXISTS idx_firmware_update_log_device_created_desc ON firmware_update_log(device_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_firmware_update_log_job_id ON firmware_update_log(job_id);
+CREATE INDEX IF NOT EXISTS idx_firmware_update_log_job_device ON firmware_update_log(job_id, device_id);
+CREATE INDEX IF NOT EXISTS idx_firmware_update_log_last_seen ON firmware_update_log(last_seen_at DESC);
 
 DO $$
 BEGIN

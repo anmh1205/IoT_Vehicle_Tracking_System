@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import { pool } from '@/infrastructure/database/pool';
 import {
   findOne,
@@ -16,7 +18,6 @@ import type {
 interface CountRow {
   count: string;
 }
-
 
 export const findAll = async (
   query: FirmwareListQuery,
@@ -134,19 +135,36 @@ export const createDeployments = async (
   firmwareId: number,
   deviceIds: string[],
   targetVersion: string,
+  confirmTimeoutSec: number,
 ): Promise<FirmwareDeploymentRow[]> => {
-  if (deviceIds.length === 0) return [];
+  if (deviceIds.length === 0) {
+    return [];
+  }
 
   const values: unknown[] = [];
   const rowsSql: string[] = [];
   let paramIndex = 1;
 
   for (const deviceId of deviceIds) {
-    const jobId = `ota_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const jobId = `ota_${Date.now()}_${randomUUID().slice(0, 8)}`;
     rowsSql.push(
-      `($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, 'assigned', 0, $${paramIndex++}, NOW(), NOW())`,
+      `(
+        $${paramIndex++},
+        $${paramIndex++},
+        $${paramIndex++},
+        'assigned',
+        0,
+        $${paramIndex++},
+        NOW(),
+        NOW(),
+        NOW(),
+        $${paramIndex++},
+        NOW(),
+        NOW(),
+        NOW()
+      )`,
     );
-    values.push(jobId, deviceId, firmwareId, targetVersion);
+    values.push(jobId, deviceId, firmwareId, targetVersion, confirmTimeoutSec);
   }
 
   return findMany<FirmwareDeploymentRow>(
@@ -157,12 +175,70 @@ export const createDeployments = async (
       status,
       progress,
       target_version,
+      first_assigned_at,
+      command_dispatched_at,
+      last_seen_at,
+      confirm_timeout_sec,
       started_at,
+      created_at,
       updated_at
     )
      VALUES ${rowsSql.join(', ')}
      RETURNING *`,
     values,
+  );
+};
+
+export const findExistingDeviceIds = async (deviceIds: string[]): Promise<Set<string>> => {
+  if (deviceIds.length === 0) {
+    return new Set<string>();
+  }
+
+  const rows = await findMany<{ device_id: string }>(
+    `SELECT device_id
+     FROM devices
+     WHERE device_id = ANY($1::text[])`,
+    [deviceIds],
+  );
+
+  return new Set(rows.map((row) => row.device_id));
+};
+
+export const findActiveDeploymentsByDeviceAndTargetVersion = async (
+  deviceIds: string[],
+  targetVersion: string,
+): Promise<FirmwareDeploymentRow[]> => {
+  if (deviceIds.length === 0) {
+    return [];
+  }
+
+  return findMany<FirmwareDeploymentRow>(
+    `SELECT *
+     FROM firmware_update_log
+     WHERE device_id = ANY($1::text[])
+       AND target_version = $2
+       AND status NOT IN ('success', 'failed', 'rolled_back')
+     ORDER BY updated_at DESC`,
+    [deviceIds, targetVersion],
+  );
+};
+
+export const markDeploymentDispatchFailed = async (
+  deploymentId: number,
+  reasonCode: string,
+  reasonMessage: string,
+): Promise<void> => {
+  await pool.query(
+    `UPDATE firmware_update_log
+     SET status = 'failed',
+         status_reason_code = $2,
+         error_message = $3,
+         progress = COALESCE(progress, 0),
+         completed_at = NOW(),
+         last_seen_at = NOW(),
+         updated_at = NOW()
+     WHERE id = $1`,
+    [deploymentId, reasonCode, reasonMessage],
   );
 };
 
@@ -172,7 +248,7 @@ export const findDeploymentsByFirmwareId = async (
   findMany<FirmwareDeploymentRow>(
     `SELECT * FROM firmware_update_log
      WHERE firmware_id = $1
-     ORDER BY created_at DESC`,
+     ORDER BY updated_at DESC`,
     [firmwareId],
   );
 
@@ -194,7 +270,7 @@ export const listLatestDeploymentsByDevice = async (
     `SELECT *
      FROM firmware_update_log
      WHERE device_id = $1
-     ORDER BY created_at DESC
+     ORDER BY updated_at DESC
      LIMIT $2 OFFSET $3`,
     [deviceId, limit, offset],
   );

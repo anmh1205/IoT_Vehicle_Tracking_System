@@ -13,7 +13,7 @@
 - Date: 2026-04-13
 - Description: Convert hardening and loop results into a production-like validation package and documentation truth.
 - Priority: P2
-- Implementation status: pending
+- Implementation status: in_progress
 - Review status: pending
 
 ## Key Insights
@@ -74,16 +74,28 @@
 5. Prepare short operator runbook for deploy/rollback/stuck triage if implementation introduces non-obvious ops steps.
 
 ## Todo list
+- [x] Capture ESP32 local build/flash smoke evidence for release-gate traceability
 - [ ] Run full OTA matrix
 - [ ] Record expected outcomes and evidence
-- [ ] Freeze UAT release gate
-- [ ] Update required docs
+- [x] Freeze UAT release gate
+- [x] Update required docs
 - [ ] Add short operator triage guidance if needed
 
 ## Success Criteria
 - OTA feature is validated beyond happy path.
 - Required docs reflect actual end-to-end OTA architecture and operations.
 - Another engineer can deploy, diagnose, and rollback on UAT using project docs and runtime signals.
+
+## Execution note (current workspace)
+- Required docs were updated to reflect code truth for OTA hardening phases 01-04.
+- ESP32 local evidence now includes:
+  - ESP-IDF export path validated (`C:\Espressif\esp-idf-v5.5.3`)
+  - `idf.py build` success
+  - repeated `idf.py -p COM6 build flash` success after OTA runtime loop patches
+  - serial logs captured in `documents/test-logs/com6-monitor-latest.log`
+- UAT VPS loop was executed and command publish path was validated at broker-side,
+  but matrix is still blocked by firmware watchdog resets before OTA lifecycle completion.
+- Full UAT hardware matrix remains open until Phase 05 closes watchdog + command ingress on-device.
 
 ## Risk Assessment
 - Risk: docs drift from code after late fixes.
@@ -98,3 +110,7 @@
 
 ## Next steps
 - After implementation and validation, ask for review/approval before wider rollout beyond UAT.
+
+## Unresolved questions
+- Can we get a decoded backtrace for the recurring `TG0WDT_SYS_RST` (current logs only show reset reason + saved PC)?
+- Is there any modem/UART hardware wiring or power condition in this bench setup that can induce interrupt watchdog resets around LTE FSM transitions?

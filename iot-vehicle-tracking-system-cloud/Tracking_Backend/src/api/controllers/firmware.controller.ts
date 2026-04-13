@@ -7,7 +7,7 @@ import { firmwareConfig } from '@/config/env';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { sendOk, sendCreated, sendError } from '@/shared/utils/response.util';
-import { createApiError, createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
+import { createApiError, createValidationError } from '@/shared/utils/errors.util';
 import * as firmwareListService from '@/domain/firmware/services/firmware-list.service';
 import * as firmwareUploadService from '@/domain/firmware/services/firmware-upload.service';
 import * as firmwareActivateService from '@/domain/firmware/services/firmware-activate.service';
@@ -152,7 +152,12 @@ export const deployFirmware = asyncHandler(async (req: AuthenticatedRequest, res
 
   const deviceIds = Array.isArray(req.body?.deviceIds) ? req.body.deviceIds : [];
   const strategy = req.body?.strategy as 'rolling' | 'all_at_once' | undefined;
-  const result = await firmwareDeployService.deployFirmware(id, { deviceIds, strategy });
+  const confirmTimeoutSec = req.body?.confirmTimeoutSec;
+  const result = await firmwareDeployService.deployFirmware(id, {
+    deviceIds,
+    strategy,
+    confirmTimeoutSec,
+  });
   sendOk(res, result);
 });
 
@@ -179,13 +184,15 @@ export const getAssignedDevices = asyncHandler(async (req: AuthenticatedRequest,
     devices: deployments.map((item) => ({
       jobId: item.jobId,
       deviceId: item.deviceId,
-      status: item.status,
+      status: item.summaryStatus,
       progress: item.progress ?? 0,
       targetVersion: item.targetVersion,
       currentVersion: item.currentVersion,
       partition: item.partition,
-      updatedAt: item.completedAt ?? item.startedAt,
+      updatedAt: item.lastSeenAt ?? item.updatedAt,
       errorMessage: item.errorMessage,
+      errorCode: item.errorCode,
+      stuckReason: item.stuckReason,
     })),
   });
 });
@@ -196,30 +203,30 @@ export const downloadFirmware = asyncHandler(async (req: AuthenticatedRequest, r
     throw createValidationError('Invalid firmware ID');
   }
 
-  const firmware = await firmwareListService.getFirmwareById(id);
-  const filename = firmware.filename.endsWith('.bin')
-    ? firmware.filename
-    : `${firmware.filename}.bin`;
-  const resolvedPath = path.resolve(firmware.filePath);
+  const artifact = await firmwareDeployService.getFirmwareArtifactDescriptor(id);
+  const filename = artifact.filename.endsWith('.bin') ? artifact.filename : `${artifact.filename}.bin`;
+  const safeFilename = filename.replace(/["\r\n]/gu, '_');
 
-  if (!fs.existsSync(resolvedPath)) {
-    throw createNotFoundError('Firmware artifact not found on storage');
-  }
-
-  const stat = fs.statSync(resolvedPath);
   res.setHeader('Content-Type', 'application/octet-stream');
-  res.setHeader('Content-Length', stat.size.toString());
-  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Length', artifact.size.toString());
+  res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('ETag', `"sha256-${artifact.sha256}"`);
+  res.setHeader('Accept-Ranges', 'none');
 
-  const stream = fs.createReadStream(resolvedPath);
-  stream.on('error', () => {
-    if (!res.headersSent) {
-      const error = createApiError(500, 'Failed to stream firmware artifact', {
-        code: 'STREAM_ERROR',
-        firmwareId: id,
-      });
-      sendError(res, error, req.path);
+  const stream = fs.createReadStream(artifact.resolvedPath);
+  stream.on('error', (streamError) => {
+    if (res.headersSent) {
+      res.destroy(streamError as Error);
+      return;
     }
+
+    const error = createApiError(500, 'Failed to stream firmware artifact', {
+      code: 'STREAM_ERROR',
+      firmwareId: id,
+    });
+    sendError(res, error, req.path);
   });
 
   stream.pipe(res);

@@ -276,6 +276,8 @@ void command_handler_process(const char *command_json) {
         return;
     }
 
+    ESP_LOGI(TAG, "Command received: %s", command->valuestring);
+
     if (strcmp(command->valuestring, "update_config") == 0) {
         if (cJSON_IsObject(params)) {
             command_apply_update_config(params);

@@ -72,6 +72,7 @@ RTC_DATA_ATTR rtc_context_t g_rtc_context = {
     .ble_mac = {0},
     .ign_last_known = false,
     .last_battery_v = 0.0f,
+    .ota_confirm_deadline_ms = 0,
 };
 
 static const char *TAG = "STATE_MACHINE";
@@ -90,6 +91,7 @@ static uint64_t s_last_obd_poll_ms = 0;
 static uint32_t s_session_id = 1;
 static uint64_t s_ignition_off_started_ms = 0;
 static bool s_status_running = false;
+static bool s_status_stopped = true;
 #if !TRACKER_MQTT_RUNTIME_DISABLED
 static bool s_mqtt_started = false;
 #endif
@@ -126,6 +128,7 @@ static char s_boot_id[TRACKER_BOOT_ID_LEN] = {0};
 static bool s_obd_fail_alert_emitted = false;
 static int s_last_obd_fail_alert_code = 0;
 static uint64_t s_last_obd_fail_alert_ms = 0;
+static bool s_field_validation_ble_skip_logged = false;
 
 static const retry_policy_t s_ble_retry_policy = {
     .mode = RETRY_MODE_FIXED,
@@ -916,6 +919,11 @@ static void state_machine_publish_firmware_status(const char *status,
     state_machine_publish_firmware_payload(&firmware);
 }
 
+static void state_machine_ota_status_callback(const firmware_status_t *firmware, void *user_ctx) {
+    (void)user_ctx;
+    state_machine_publish_firmware_payload(firmware);
+}
+
 /**
  * @brief Attempt BLE OBD connection with retry and ELM327 initialization.
  */
@@ -937,6 +945,19 @@ static void state_machine_schedule_ble_retry(uint64_t now_ms, const char *reason
 }
 
 static void state_machine_try_connect_ble(void) {
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE
+    if (!s_field_validation_ble_skip_logged) {
+        ESP_LOGW(TAG, "Field validation override: BLE OBD connect loop disabled for OTA stability");
+        s_field_validation_ble_skip_logged = true;
+    }
+    if (s_ble_ctx != NULL) {
+        ble_obd_disconnect(s_ble_ctx);
+        s_ble_ctx = NULL;
+    }
+    retry_state_reset(&s_ble_retry);
+    return;
+#endif
+
     if (s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
         return;
     }
@@ -1097,6 +1118,22 @@ static void state_machine_try_confirm_running_firmware(void) {
         return;
     }
 
+    state_machine_update_time_source();
+    if (g_rtc_context.ota_confirm_deadline_ms > 0 &&
+        s_time_trusted &&
+        s_event_timestamp_ms > g_rtc_context.ota_confirm_deadline_ms) {
+        g_rtc_context.ota_pending_confirm = false;
+        g_rtc_context.ota_confirm_deadline_ms = 0;
+        state_machine_publish_firmware_status("failed",
+                                              100,
+                                              g_rtc_context.ota_target_version,
+                                              g_rtc_context.ota_job_id,
+                                              g_rtc_context.ota_partition,
+                                              "confirm_timeout_exceeded");
+        esp_restart();
+        return;
+    }
+
     state_machine_publish_firmware_status("confirming",
                                           99,
                                           g_rtc_context.ota_target_version,
@@ -1107,6 +1144,7 @@ static void state_machine_try_confirm_running_firmware(void) {
     /* Mark image valid to prevent automatic rollback on next boot. */
     if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
         g_rtc_context.ota_pending_confirm = false;
+        g_rtc_context.ota_confirm_deadline_ms = 0;
         util_copy_string(s_current_version, sizeof(s_current_version), g_rtc_context.ota_target_version);
         state_machine_publish_firmware_status("success",
                                               100,
@@ -1115,6 +1153,8 @@ static void state_machine_try_confirm_running_firmware(void) {
                                               g_rtc_context.ota_partition,
                                               "");
     } else {
+        g_rtc_context.ota_pending_confirm = false;
+        g_rtc_context.ota_confirm_deadline_ms = 0;
         state_machine_publish_firmware_status("failed",
                                               100,
                                               g_rtc_context.ota_target_version,
@@ -1148,9 +1188,11 @@ static void state_machine_process_ota_command(command_action_t action) {
 
         if (util_ota_trigger_manual_rollback(&rollback) == ESP_OK) {
             g_rtc_context.ota_pending_confirm = false;
+            g_rtc_context.ota_confirm_deadline_ms = 0;
             state_machine_publish_firmware_payload(&rollback);
             esp_restart();
         } else {
+            g_rtc_context.ota_confirm_deadline_ms = 0;
             state_machine_publish_firmware_status("failed",
                                                   100,
                                                   g_rtc_context.ota_previous_version,
@@ -1180,7 +1222,12 @@ static void state_machine_process_ota_command(command_action_t action) {
     }
 
     s_ota_in_progress = true;
-    if (util_ota_apply_update(&s_config, s_current_version, &cmd, &report) == ESP_OK) {
+    if (util_ota_apply_update(&s_config,
+                              s_current_version,
+                              &cmd,
+                              &report,
+                              state_machine_ota_status_callback,
+                              NULL) == ESP_OK) {
         /* Persist OTA context across reboot in RTC memory for post-boot confirm. */
         util_copy_string(g_rtc_context.ota_job_id, sizeof(g_rtc_context.ota_job_id), cmd.job_id);
         util_copy_string(g_rtc_context.ota_target_version,
@@ -1194,11 +1241,16 @@ static void state_machine_process_ota_command(command_action_t action) {
                          report.partition);
         g_rtc_context.ota_pending_confirm = true;
         g_rtc_context.ota_confirm_timeout_sec = cmd.confirm_timeout_sec;
-
-        state_machine_publish_firmware_payload(&report);
+        state_machine_update_time_source();
+        if (s_time_trusted) {
+            g_rtc_context.ota_confirm_deadline_ms =
+                s_event_timestamp_ms + ((uint64_t)cmd.confirm_timeout_sec * 1000ULL);
+        } else {
+            g_rtc_context.ota_confirm_deadline_ms = 0;
+        }
         esp_restart();
     } else {
-        state_machine_publish_firmware_payload(&report);
+        g_rtc_context.ota_confirm_deadline_ms = 0;
         s_ota_in_progress = false;
     }
 }
@@ -1298,6 +1350,9 @@ esp_err_t state_machine_init(const config_t *config) {
     s_gnss_poll_fail_streak = 0;
     s_last_gnss_rearm_ms = 0;
     s_last_hw_diag_log_ms = 0;
+    s_status_running = false;
+    s_status_stopped = true;
+    s_ignition_off_started_ms = 0;
 
     esp_err_t rtc_init_err = rtc_ds3231m_init();
     if (rtc_init_err != ESP_OK) {
@@ -1324,8 +1379,11 @@ esp_err_t state_machine_init(const config_t *config) {
     }
 
     /* Handle post-OTA confirmation and publish initial firmware status on boot. */
+    bool had_pending_confirm = g_rtc_context.ota_pending_confirm;
     state_machine_try_confirm_running_firmware();
-    state_machine_publish_firmware_status("success", 100, s_current_version, "", "", "");
+    if (!had_pending_confirm) {
+        state_machine_publish_firmware_status("success", 100, s_current_version, "", "", "");
+    }
     return ESP_OK;
 }
 
@@ -1377,6 +1435,14 @@ app_state_t state_machine_run(app_state_t current_state) {
             offline_queue_replay_tick();
             session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
             g_rtc_context.ign_last_known = s_telemetry.ignition;
+
+            /* Keep OTA/reboot command path alive even when ignition is off. */
+            command_action_t startup_action = command_handler_consume_action();
+            if (startup_action == COMMAND_ACTION_REBOOT) {
+                esp_restart();
+            }
+            state_machine_process_ota_command(startup_action);
+
             return s_telemetry.ignition ? APP_STATE_DRIVING : APP_STATE_PARKED;
         }
 
@@ -1402,6 +1468,7 @@ app_state_t state_machine_run(app_state_t current_state) {
             if (!s_status_running) {
                 state_machine_publish_status("running");
                 s_status_running = true;
+                s_status_stopped = false;
             }
 
             uint64_t now_ms = util_uptime_ms();
@@ -1423,6 +1490,7 @@ app_state_t state_machine_run(app_state_t current_state) {
                 s_ignition_off_started_ms = now_ms;
                 state_machine_publish_status("stopped");
                 s_status_running = false;
+                s_status_stopped = true;
             }
 
             if (ignition_active) {
@@ -1442,7 +1510,10 @@ app_state_t state_machine_run(app_state_t current_state) {
 
         case APP_STATE_PARKED:
             /* Transition stop status before sleeping. */
-            state_machine_publish_status("stopped");
+            if (!s_status_stopped) {
+                state_machine_publish_status("stopped");
+                s_status_stopped = true;
+            }
             s_status_running = false;
             return APP_STATE_SLEEP;
 

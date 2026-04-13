@@ -4,7 +4,69 @@ import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { logger } from '../infrastructure/logger';
 import { verifyDeviceToken } from '../services/device-auth.service';
 
-const OTA_FINAL_STATUSES = new Set(['success', 'failed', 'rolled_back']);
+const OTA_TERMINAL_STATUSES = new Set(['success', 'failed', 'rolled_back']);
+
+interface FirmwareLogRow {
+  id: number;
+  status: string;
+  progress: number | null;
+  last_message_id: string | null;
+  last_seq_no: number | null;
+}
+
+interface UpdateDecision {
+  accept: boolean;
+  reason: string;
+}
+
+const decideFirmwareUpdate = (
+  existing: FirmwareLogRow | null,
+  payload: {
+    status: string;
+    progress?: number;
+    metadata?: {
+      message_id?: string;
+      seq_no?: number;
+    };
+  },
+): UpdateDecision => {
+  if (!existing) {
+    return { accept: true, reason: 'new_job' };
+  }
+
+  const incomingMessageId = payload.metadata?.message_id;
+  const incomingSeqNo = payload.metadata?.seq_no;
+  const existingIsTerminal = OTA_TERMINAL_STATUSES.has(existing.status);
+  const incomingIsTerminal = OTA_TERMINAL_STATUSES.has(payload.status);
+
+  if (incomingMessageId && existing.last_message_id === incomingMessageId) {
+    return { accept: false, reason: 'duplicate_message_id' };
+  }
+
+  if (
+    incomingSeqNo !== undefined &&
+    existing.last_seq_no !== null &&
+    incomingSeqNo < existing.last_seq_no
+  ) {
+    return { accept: false, reason: 'out_of_order_seq' };
+  }
+
+  if (existingIsTerminal && !incomingIsTerminal) {
+    return { accept: false, reason: 'terminal_sticky' };
+  }
+
+  if (
+    incomingSeqNo !== undefined &&
+    existing.last_seq_no !== null &&
+    incomingSeqNo === existing.last_seq_no &&
+    payload.status === existing.status &&
+    (payload.progress ?? existing.progress ?? 0) <= (existing.progress ?? 0)
+  ) {
+    return { accept: false, reason: 'duplicate_seq_snapshot' };
+  }
+
+  return { accept: true, reason: existingIsTerminal ? 'terminal_override' : 'state_advance' };
+};
 
 /**
  * Handle firmware update progress on topic v1/{deviceId}/firmware.
@@ -36,6 +98,7 @@ export const handleFirmware = async (
   const schemaVersion = payload.metadata?.schema_version;
   const seqNo = payload.metadata?.seq_no;
   const bootId = payload.metadata?.boot_id;
+  const isFinal = OTA_TERMINAL_STATUSES.has(payload.status);
 
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
@@ -50,20 +113,37 @@ export const handleFirmware = async (
     return;
   }
 
-  // Upsert firmware update progress by job_id + device_id.
+  let updateDecision: UpdateDecision = { accept: true, reason: 'unknown' };
+
   try {
-    const existing = await pool.query<{ id: number }>(
-      `SELECT id
+    const existingResult = await pool.query<FirmwareLogRow>(
+      `SELECT id, status, progress, last_message_id, last_seq_no
        FROM firmware_update_log
        WHERE job_id = $1 AND device_id = $2
-       ORDER BY created_at DESC
+       ORDER BY updated_at DESC
        LIMIT 1`,
       [payload.jobId, payload.device_id],
     );
 
-    const isFinal = OTA_FINAL_STATUSES.has(payload.status);
+    const existing = existingResult.rows[0] ?? null;
+    updateDecision = decideFirmwareUpdate(existing, payload);
 
-    if (existing.rows.length === 0) {
+    if (!updateDecision.accept) {
+      logger.info(
+        {
+          jobId: payload.jobId,
+          deviceId: payload.device_id,
+          status: payload.status,
+          seqNo,
+          messageId,
+          reason: updateDecision.reason,
+        },
+        'Ignored firmware update payload',
+      );
+      return;
+    }
+
+    if (!existing) {
       await pool.query(
         `INSERT INTO firmware_update_log (
           job_id,
@@ -76,9 +156,28 @@ export const handleFirmware = async (
           started_at,
           completed_at,
           error_message,
+          status_reason_code,
+          first_assigned_at,
+          last_seen_at,
+          last_message_id,
+          last_seq_no,
+          last_boot_id,
           created_at,
           updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8, $9, NOW(), NOW())`,
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7,
+          NOW(),
+          $8,
+          $9,
+          $10,
+          NOW(),
+          NOW(),
+          $11,
+          $12,
+          $13,
+          NOW(),
+          NOW()
+        )`,
         [
           payload.jobId,
           payload.device_id,
@@ -89,29 +188,49 @@ export const handleFirmware = async (
           payload.partition ?? null,
           isFinal ? new Date() : null,
           payload.error ?? null,
+          payload.error ?? null,
+          messageId ?? null,
+          seqNo ?? null,
+          bootId ?? null,
         ],
       );
     } else {
       await pool.query(
         `UPDATE firmware_update_log
          SET status = $2,
-             progress = $3,
+             progress = COALESCE($3, progress),
              target_version = $4,
              current_version = $5,
              partition = $6,
              error_message = $7,
-             completed_at = CASE WHEN $8 THEN NOW() ELSE completed_at END,
+             status_reason_code = $8,
+             started_at = CASE
+               WHEN started_at IS NULL AND $2 <> 'assigned' THEN NOW()
+               ELSE started_at
+             END,
+             completed_at = CASE WHEN $9 THEN NOW() ELSE completed_at END,
+             last_seen_at = NOW(),
+             last_message_id = COALESCE($10, last_message_id),
+             last_seq_no = CASE
+               WHEN $11 IS NULL THEN last_seq_no
+               ELSE GREATEST(COALESCE(last_seq_no, -1), $11)
+             END,
+             last_boot_id = COALESCE($12, last_boot_id),
              updated_at = NOW()
          WHERE id = $1`,
         [
-          existing.rows[0].id,
+          existing.id,
           payload.status,
           payload.progress ?? null,
           payload.targetVersion,
           payload.currentVersion,
           payload.partition ?? null,
           payload.error ?? null,
+          payload.error ?? null,
           isFinal,
+          messageId ?? null,
+          seqNo ?? null,
+          bootId ?? null,
         ],
       );
     }
@@ -120,9 +239,9 @@ export const handleFirmware = async (
       { err, deviceId: payload.device_id, jobId: payload.jobId },
       'Failed to log firmware status',
     );
+    return;
   }
 
-  // Write to VictoriaLogs
   writeDeviceEvent(
     payload.device_id,
     'firmware_update',
@@ -139,6 +258,7 @@ export const handleFirmware = async (
       schema_version: schemaVersion,
       seq_no: seqNo,
       boot_id: bootId,
+      update_reason: updateDecision.reason,
     },
   ).catch((err) => {
     logger.error(`VictoriaLogs write failed for firmware event`, err);
@@ -146,8 +266,9 @@ export const handleFirmware = async (
 
   logger.info(
     `Firmware ${payload.status} for ${payload.device_id}: ` +
-    `job=${payload.jobId} target=${payload.targetVersion} current=${payload.currentVersion} ` +
-    `partition=${payload.partition ?? 'n/a'} progress=${payload.progress ?? 0}%` +
-    (payload.error ? ` error=${payload.error}` : ''),
+      `job=${payload.jobId} target=${payload.targetVersion} current=${payload.currentVersion} ` +
+      `partition=${payload.partition ?? 'n/a'} progress=${payload.progress ?? 0}%` +
+      (payload.error ? ` error=${payload.error}` : ''),
   );
 };
+

@@ -13,8 +13,8 @@
 - Date: 2026-04-13
 - Description: Make OTA status ingestion idempotent, ordered enough, and observable enough for real operations.
 - Priority: P1
-- Implementation status: pending
-- Review status: pending
+- Implementation status: completed
+- Review status: in_progress
 
 ## Key Insights
 - Current handler upserts latest row by `job_id + device_id`. Good start. Not enough for out-of-order progress, duplicate messages, or stale terminal overwrites.
@@ -63,11 +63,11 @@
 7. If needed, emit backend-consumable internal events for `progress`, `complete`, `failed`, `rolled_back`, `stuck`.
 
 ## Todo list
-- [ ] Harden firmware payload validation
-- [ ] Add duplicate suppression strategy
-- [ ] Add out-of-order update rule
-- [ ] Make terminal state sticky
-- [ ] Improve OTA logs/metrics fields
+- [x] Harden firmware payload validation
+- [x] Add duplicate suppression strategy
+- [x] Add out-of-order update rule
+- [x] Make terminal state sticky
+- [x] Improve OTA logs/metrics fields
 
 ## Success Criteria
 - Duplicate publish does not create state regression.

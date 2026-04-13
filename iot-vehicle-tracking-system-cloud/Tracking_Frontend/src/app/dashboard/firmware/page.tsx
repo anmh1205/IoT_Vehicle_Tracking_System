@@ -45,6 +45,20 @@ const STATUS_LABELS: Record<string, string> = {
   inactive: 'Ngưng hoạt động',
 };
 
+const OTA_STATUS_LABELS: Record<string, string> = {
+  assigned: 'Đã xếp hàng',
+  downloading: 'Đang tải',
+  verifying: 'Đang xác minh',
+  installing: 'Đang cài đặt',
+  rebooting: 'Đang khởi động lại',
+  confirming: 'Đang xác nhận',
+  success: 'Thành công',
+  failed: 'Thất bại',
+  rolled_back: 'Đã rollback',
+  in_progress: 'Đang xử lý',
+  stuck_timeout: 'Bị kẹt (timeout)',
+};
+
 const formatBytes = (value: number) => {
   if (!Number.isFinite(value) || value <= 0) return '0 B';
   const units = ['B', 'KB', 'MB', 'GB'];
@@ -389,8 +403,13 @@ const FirmwarePage = () => {
       return results
         .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
         .sort((left, right) => {
-          const rightTime = Date.parse(right.completedAt ?? right.startedAt ?? '') || 0;
-          const leftTime = Date.parse(left.completedAt ?? left.startedAt ?? '') || 0;
+          const rightTime =
+            Date.parse(
+              right.completedAt ?? right.lastSeenAt ?? right.updatedAt ?? right.startedAt ?? '',
+            ) || 0;
+          const leftTime =
+            Date.parse(left.completedAt ?? left.lastSeenAt ?? left.updatedAt ?? left.startedAt ?? '') ||
+            0;
           return rightTime - leftTime;
         });
     },
@@ -554,24 +573,41 @@ const FirmwarePage = () => {
                 key={`${item.id}-${item.jobId ?? item.deviceId}`}
                 className="rounded-lg border p-3 text-sm"
               >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <p className="font-medium">{item.deviceId}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Target {item.targetVersion ?? '--'} • Hiện tại {item.currentVersion ?? '--'}
-                    </p>
-                  </div>
-                  <Badge variant={item.status === 'failed' ? 'destructive' : 'outline'}>
-                    {STATUS_LABELS[item.status] ?? item.status}
-                  </Badge>
-                </div>
+                {(() => {
+                  const displayStatus = item.summaryStatus ?? item.status;
+                  const badgeVariant =
+                    displayStatus === 'failed' || displayStatus === 'stuck_timeout'
+                      ? 'destructive'
+                      : 'outline';
+
+                  return (
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="font-medium">{item.deviceId}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Target {item.targetVersion ?? '--'} • Hiện tại {item.currentVersion ?? '--'}
+                        </p>
+                      </div>
+                      <Badge variant={badgeVariant}>
+                        {OTA_STATUS_LABELS[displayStatus] ?? STATUS_LABELS[displayStatus] ?? displayStatus}
+                      </Badge>
+                    </div>
+                  );
+                })()}
                 <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span>Tiến độ: {item.progress ?? 0}%</span>
                   <span>Bắt đầu: {formatDateTime(item.startedAt)}</span>
                   <span>Hoàn tất: {formatDateTime(item.completedAt)}</span>
+                  <span>Cập nhật: {formatDateTime(item.lastSeenAt ?? item.updatedAt)}</span>
                 </div>
+                {item.stuckReason ? (
+                  <p className="mt-2 text-xs text-amber-600">Lý do kẹt: {item.stuckReason}</p>
+                ) : null}
                 {item.errorMessage ? (
-                  <p className="mt-2 text-xs text-rose-600">{item.errorMessage}</p>
+                  <p className="mt-2 text-xs text-rose-600">
+                    {item.errorCode ? `${item.errorCode}: ` : ''}
+                    {item.errorMessage}
+                  </p>
                 ) : null}
               </div>
             ))

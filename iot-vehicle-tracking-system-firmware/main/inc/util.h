@@ -142,6 +142,14 @@ int util_clamp_int(int value, int min_value, int max_value);
 bool util_string_empty(const char *value);
 
 /**
+ * @brief OTA status callback used by OTA executor to emit milestone updates.
+ *
+ * @param status Current firmware status snapshot.
+ * @param user_ctx Opaque callback context pointer.
+ */
+typedef void (*ota_status_callback_t)(const firmware_status_t *status, void *user_ctx);
+
+/**
  * @brief Download firmware image, verify hash, and set next boot partition.
  *
  * @param cfg Runtime configuration.
@@ -154,7 +162,9 @@ bool util_string_empty(const char *value);
 esp_err_t util_ota_apply_update(const config_t *cfg,
                                 const char *current_version,
                                 const ota_command_t *cmd,
-                                firmware_status_t *out_status);
+                                firmware_status_t *out_status,
+                                ota_status_callback_t status_callback,
+                                void *status_callback_ctx);
 
 /**
  * @brief Switch boot partition to rollback target manually.
@@ -164,4 +174,3 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t util_ota_trigger_manual_rollback(firmware_status_t *out_status);
-

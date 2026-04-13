@@ -1,7 +1,7 @@
 ---
 title: "OTA end-to-end firmware-cloud hard plan"
 description: "Production-like plan to close OTA gaps across firmware, backend, MQTT bridge, frontend, and UAT/VPS operations."
-status: pending
+status: in_progress
 priority: P2
 effort: "6 phases / 6-9d"
 branch: feature/cicd
@@ -35,12 +35,12 @@ Close the real OTA loop on UAT/VPS with ESP32 hardware + serial: upload artifact
 ## Phases
 | Phase | Status | Progress | Output |
 |---|---|---:|---|
-| 1. Audit contract and UAT baseline | pending | 0% | exact gaps, env/runtime checklist, go/no-go baseline |
-| 2. Harden backend artifact and deployment contract | pending | 0% | stable download contract, deploy lifecycle, operator-safe API |
-| 3. Harden MQTT bridge and OTA state reconciliation | pending | 0% | idempotent OTA ingestion, stuck/duplicate handling |
-| 4. Harden firmware OTA runtime and confirm/rollback | pending | 0% | safer OTA execution, better error mapping, durable semantics |
-| 5. Run UAT/VPS and ESP32 debug loops | pending | 0% | real end-to-end loop using `vps-control` + `esp32-loop-coding` |
-| 6. Close test matrix, docs, and release gate | pending | 0% | production-like validation evidence and doc updates |
+| 1. Audit contract and UAT baseline | completed | 100% | exact gaps, env/runtime checklist, go/no-go baseline |
+| 2. Harden backend artifact and deployment contract | completed | 100% | stable download contract, deploy lifecycle, operator-safe API |
+| 3. Harden MQTT bridge and OTA state reconciliation | completed | 100% | idempotent OTA ingestion, stuck/duplicate handling |
+| 4. Harden firmware OTA runtime and confirm/rollback | completed | 100% | safer OTA execution, better error mapping, durable semantics |
+| 5. Run UAT/VPS and ESP32 debug loops | in_progress | 35% | real end-to-end loop using `vps-control` + `esp32-loop-coding` |
+| 6. Close test matrix, docs, and release gate | in_progress | 60% | production-like validation evidence and doc updates |
 
 ## Dependency order
 1. UAT/VPS baseline first.

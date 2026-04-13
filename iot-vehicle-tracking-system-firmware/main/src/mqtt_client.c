@@ -27,11 +27,13 @@
 #define MQTT_DEFAULT_DISCONNECT_TIMEOUT_S 120
 #define MQTT_CLIENT_INDEX 0
 #define MQTT_SSL_CTX_INDEX 1
-#define MQTT_INPUT_TIMEOUT_MS 30000U
+#define MQTT_INPUT_TIMEOUT_MS 8000U
 #define MQTT_CONNECT_TIMEOUT_MS 330000U
 #define MQTT_CMD_TIMEOUT_MS 15000U
 #define MQTT_POLL_MAX_BYTES 256U
 #define MQTT_CONNECT_RESULT_POLL_MS 100U
+#define MQTT_CONNECT_SESSION_PROBE_WINDOW_MS 15000U
+#define MQTT_CONNECT_SESSION_PROBE_INTERVAL_MS 500U
 #define MQTT_IMPLICIT_TLS_PORT 8883U
 #define TRACKER_MQTT_TLS_HOST "mqtt.thingdock.dev"
 #define MQTT_ERR_NETWORK_NOT_OPENED 9
@@ -58,6 +60,13 @@ typedef struct {
     char payload[MQTT_COMMAND_PAYLOAD_MAX_LEN];
 } mqtt_rx_ctx_t;
 
+typedef enum {
+    MQTT_RX_PENDING_NONE = 0,
+    MQTT_RX_PENDING_START_HEADER,
+    MQTT_RX_PENDING_TOPIC_HEADER,
+    MQTT_RX_PENDING_PAYLOAD_HEADER,
+} mqtt_rx_pending_header_t;
+
 /* Callback for cloud command messages. */
 static mqtt_command_cb_t s_command_callback = NULL;
 /* Callback for publish ACK notification. */
@@ -73,6 +82,7 @@ static bool s_tls_enabled = false;
 static bool s_urc_registered = false;
 static int s_next_msg_id = 1;
 static mqtt_rx_ctx_t s_rx_ctx = {0};
+static mqtt_rx_pending_header_t s_rx_pending_header = MQTT_RX_PENDING_NONE;
 static bool s_connect_result_pending = false;
 static bool s_connect_result_ready = false;
 static int s_connect_result_err = -1;
@@ -91,6 +101,8 @@ static bool tracker_mqtt_err_indicates_disconnect(int err_code) {
     return err_code == MQTT_ERR_NETWORK_NOT_OPENED || err_code == MQTT_ERR_NO_CONNECTION ||
            err_code == MQTT_ERR_NOT_SUPPORTED_OPERATION || err_code == MQTT_ERR_SOCKET_CLOSED_BY_SERVER;
 }
+
+static bool tracker_mqtt_query_disconnect_state(int *out_disc_state);
 
 static void tracker_mqtt_mark_disconnected(const char *reason, int err_code) {
     if (s_connected) {
@@ -117,6 +129,7 @@ static bool tracker_mqtt_use_tls(const config_t *cfg) {
 static void tracker_mqtt_rx_reset(void) {
     memset(&s_rx_ctx, 0, sizeof(s_rx_ctx));
     s_rx_ctx.client_index = -1;
+    s_rx_pending_header = MQTT_RX_PENDING_NONE;
 }
 
 static bool tracker_mqtt_parse_next_int(const char **cursor, int *out_value) {
@@ -499,12 +512,11 @@ static void tracker_mqtt_build_topics(void) {
     }
 }
 
-static void tracker_mqtt_append_topic_chunk(const char *chunk) {
-    if (chunk == NULL || s_rx_ctx.topic_chunk_remaining <= 0) {
-        return;
+static size_t tracker_mqtt_append_topic_chunk(const char *chunk, size_t chunk_len) {
+    if (chunk == NULL || chunk_len == 0U || s_rx_ctx.topic_chunk_remaining <= 0) {
+        return 0U;
     }
 
-    size_t chunk_len = strlen(chunk);
     size_t consume_len = (size_t)MIN_VALUE((int)chunk_len, s_rx_ctx.topic_chunk_remaining);
     size_t cap_remaining = sizeof(s_rx_ctx.topic) - 1 - s_rx_ctx.topic_len;
     size_t copy_len = MIN_VALUE(consume_len, cap_remaining);
@@ -519,14 +531,14 @@ static void tracker_mqtt_append_topic_chunk(const char *chunk) {
     }
 
     s_rx_ctx.topic_chunk_remaining -= (int)consume_len;
+    return consume_len;
 }
 
-static void tracker_mqtt_append_payload_chunk(const char *chunk) {
-    if (chunk == NULL || s_rx_ctx.payload_chunk_remaining <= 0) {
-        return;
+static size_t tracker_mqtt_append_payload_chunk(const char *chunk, size_t chunk_len) {
+    if (chunk == NULL || chunk_len == 0U || s_rx_ctx.payload_chunk_remaining <= 0) {
+        return 0U;
     }
 
-    size_t chunk_len = strlen(chunk);
     size_t consume_len = (size_t)MIN_VALUE((int)chunk_len, s_rx_ctx.payload_chunk_remaining);
     size_t cap_remaining = sizeof(s_rx_ctx.payload) - 1 - s_rx_ctx.payload_len;
     size_t copy_len = MIN_VALUE(consume_len, cap_remaining);
@@ -541,6 +553,70 @@ static void tracker_mqtt_append_payload_chunk(const char *chunk) {
     }
 
     s_rx_ctx.payload_chunk_remaining -= (int)consume_len;
+    return consume_len;
+}
+
+static bool tracker_mqtt_parse_plain_int_list(const char *text, int *out_values, size_t value_count) {
+    ESP_RETURN_ON_FALSE(text != NULL, false, TAG, "plain parse text null");
+    ESP_RETURN_ON_FALSE(out_values != NULL, false, TAG, "plain parse out_values null");
+    ESP_RETURN_ON_FALSE(value_count > 0, false, TAG, "plain parse value_count invalid");
+
+    const char *cursor = text;
+    for (size_t i = 0; i < value_count; ++i) {
+        if (!tracker_mqtt_parse_next_int(&cursor, &out_values[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool tracker_mqtt_try_consume_pending_header(const char *line) {
+    if (line == NULL || line[0] == '\0' || s_rx_pending_header == MQTT_RX_PENDING_NONE) {
+        return false;
+    }
+
+    int values[3] = {0};
+    switch (s_rx_pending_header) {
+        case MQTT_RX_PENDING_START_HEADER:
+            if (!tracker_mqtt_parse_plain_int_list(line, values, 3)) {
+                return false;
+            }
+            tracker_mqtt_rx_reset();
+            s_rx_ctx.active = true;
+            s_rx_ctx.client_index = values[0];
+            s_rx_ctx.topic_total_len = values[1];
+            s_rx_ctx.payload_total_len = values[2];
+            ESP_LOGI(TAG,
+                     "MQTT RX start client=%d topic_len=%d payload_len=%d",
+                     s_rx_ctx.client_index,
+                     s_rx_ctx.topic_total_len,
+                     s_rx_ctx.payload_total_len);
+            s_rx_pending_header = MQTT_RX_PENDING_NONE;
+            return true;
+
+        case MQTT_RX_PENDING_TOPIC_HEADER:
+            if (!tracker_mqtt_parse_plain_int_list(line, values, 2) || !s_rx_ctx.active) {
+                return false;
+            }
+            s_rx_ctx.topic_chunk_remaining = values[1];
+            s_rx_pending_header = MQTT_RX_PENDING_NONE;
+            ESP_LOGI(TAG, "MQTT RX topic chunk expect=%d", s_rx_ctx.topic_chunk_remaining);
+            return true;
+
+        case MQTT_RX_PENDING_PAYLOAD_HEADER:
+            if (!tracker_mqtt_parse_plain_int_list(line, values, 2) || !s_rx_ctx.active) {
+                return false;
+            }
+            s_rx_ctx.payload_chunk_remaining = values[1];
+            s_rx_pending_header = MQTT_RX_PENDING_NONE;
+            ESP_LOGI(TAG, "MQTT RX payload chunk expect=%d", s_rx_ctx.payload_chunk_remaining);
+            return true;
+
+        case MQTT_RX_PENDING_NONE:
+        default:
+            return false;
+    }
 }
 
 static void tracker_mqtt_dispatch_rx_if_complete(void) {
@@ -549,6 +625,10 @@ static void tracker_mqtt_dispatch_rx_if_complete(void) {
     }
 
     if (s_command_callback != NULL && strcmp(s_rx_ctx.topic, s_topic_commands) == 0) {
+        ESP_LOGI(TAG,
+                 "MQTT RX command topic=%s payload_len=%u",
+                 s_rx_ctx.topic,
+                 (unsigned)s_rx_ctx.payload_len);
         s_command_callback(s_rx_ctx.topic, s_rx_ctx.payload);
         return;
     }
@@ -556,71 +636,145 @@ static void tracker_mqtt_dispatch_rx_if_complete(void) {
     ESP_LOGI(TAG, "MQTT RX ignored topic=%s len=%u", s_rx_ctx.topic, (unsigned)s_rx_ctx.payload_len);
 }
 
+static const char *tracker_mqtt_seek_urc_prefix(const char *cursor) {
+    if (cursor == NULL) {
+        return NULL;
+    }
+
+    while (*cursor == ' ' || *cursor == '\t') {
+        ++cursor;
+    }
+    if (*cursor == '+') {
+        return cursor;
+    }
+
+    return strchr(cursor, '+');
+}
+
 static void tracker_mqtt_on_urc_line(const char *line) {
     if (line == NULL || line[0] == '\0') {
         return;
     }
 
-    if (s_rx_ctx.topic_chunk_remaining > 0) {
-        tracker_mqtt_append_topic_chunk(line);
-        return;
-    }
-    if (s_rx_ctx.payload_chunk_remaining > 0) {
-        tracker_mqtt_append_payload_chunk(line);
-        return;
-    }
-
-    if (strncmp(line, "+CMQTTCONNECT:", strlen("+CMQTTCONNECT:")) == 0) {
-        int values[2] = {0};
-        if (tracker_mqtt_parse_int_list_from_text(line, "+CMQTTCONNECT:", values, 2)) {
-            tracker_mqtt_on_connect_result_line(values[0], values[1]);
+    const char *cursor = line;
+    while (cursor != NULL && cursor[0] != '\0') {
+        if (s_rx_ctx.topic_chunk_remaining > 0) {
+            size_t consumed = tracker_mqtt_append_topic_chunk(cursor, strlen(cursor));
+            if (consumed == 0U || cursor[consumed] == '\0') {
+                return;
+            }
+            cursor += consumed;
+            while (*cursor == ' ' || *cursor == '\t') {
+                ++cursor;
+            }
+            continue;
         }
-        return;
-    }
+        if (s_rx_ctx.payload_chunk_remaining > 0) {
+            size_t consumed = tracker_mqtt_append_payload_chunk(cursor, strlen(cursor));
+            if (consumed == 0U || cursor[consumed] == '\0') {
+                return;
+            }
+            cursor += consumed;
+            while (*cursor == ' ' || *cursor == '\t') {
+                ++cursor;
+            }
+            continue;
+        }
 
-    if (strncmp(line, "+CMQTTRXSTART:", strlen("+CMQTTRXSTART:")) == 0) {
-        int values[3] = {0};
-        if (tracker_mqtt_parse_int_list_from_text(line, "+CMQTTRXSTART:", values, 3)) {
+        if (tracker_mqtt_try_consume_pending_header(cursor)) {
+            return;
+        }
+
+        cursor = tracker_mqtt_seek_urc_prefix(cursor);
+        if (cursor == NULL || cursor[0] == '\0') {
+            return;
+        }
+
+        if (strncmp(cursor, "+CMQTTCONNECT:", strlen("+CMQTTCONNECT:")) == 0) {
+            int values[2] = {0};
+            if (tracker_mqtt_parse_int_list_from_text(cursor, "+CMQTTCONNECT:", values, 2)) {
+                tracker_mqtt_on_connect_result_line(values[0], values[1]);
+            }
+            return;
+        }
+
+        if (strncmp(cursor, "+CMQTTRXSTART:", strlen("+CMQTTRXSTART:")) == 0) {
+            int values[3] = {0};
+            if (tracker_mqtt_parse_int_list_from_text(cursor, "+CMQTTRXSTART:", values, 3)) {
+                tracker_mqtt_rx_reset();
+                s_rx_ctx.active = true;
+                s_rx_ctx.client_index = values[0];
+                s_rx_ctx.topic_total_len = values[1];
+                s_rx_ctx.payload_total_len = values[2];
+                ESP_LOGI(TAG,
+                         "MQTT RX start client=%d topic_len=%d payload_len=%d",
+                         s_rx_ctx.client_index,
+                         s_rx_ctx.topic_total_len,
+                         s_rx_ctx.payload_total_len);
+            } else {
+                s_rx_pending_header = MQTT_RX_PENDING_START_HEADER;
+            }
+            return;
+        }
+
+        if (strncmp(cursor, "+CMQTTRXTOPIC:", strlen("+CMQTTRXTOPIC:")) == 0) {
+            int values[2] = {0};
+            if (tracker_mqtt_parse_int_list_from_text(cursor, "+CMQTTRXTOPIC:", values, 2) && s_rx_ctx.active) {
+                s_rx_ctx.topic_chunk_remaining = values[1];
+                ESP_LOGI(TAG, "MQTT RX topic chunk expect=%d", s_rx_ctx.topic_chunk_remaining);
+            } else if (s_rx_ctx.active) {
+                s_rx_pending_header = MQTT_RX_PENDING_TOPIC_HEADER;
+            }
+            return;
+        }
+
+        if (strncmp(cursor, "+CMQTTRXPAYLOAD:", strlen("+CMQTTRXPAYLOAD:")) == 0) {
+            int values[2] = {0};
+            if (tracker_mqtt_parse_int_list_from_text(cursor, "+CMQTTRXPAYLOAD:", values, 2) &&
+                s_rx_ctx.active) {
+                s_rx_ctx.payload_chunk_remaining = values[1];
+                ESP_LOGI(TAG, "MQTT RX payload chunk expect=%d", s_rx_ctx.payload_chunk_remaining);
+            } else if (s_rx_ctx.active) {
+                s_rx_pending_header = MQTT_RX_PENDING_PAYLOAD_HEADER;
+            }
+            return;
+        }
+
+        if (strncmp(cursor, "+CMQTTRXEND:", strlen("+CMQTTRXEND:")) == 0) {
+            ESP_LOGI(TAG,
+                     "MQTT RX end topic_len=%u payload_len=%u",
+                     (unsigned)s_rx_ctx.topic_len,
+                     (unsigned)s_rx_ctx.payload_len);
+            tracker_mqtt_dispatch_rx_if_complete();
             tracker_mqtt_rx_reset();
-            s_rx_ctx.active = true;
-            s_rx_ctx.client_index = values[0];
-            s_rx_ctx.topic_total_len = values[1];
-            s_rx_ctx.payload_total_len = values[2];
+            return;
         }
+
+        if (strncmp(cursor, "+CMQTTSUB:", strlen("+CMQTTSUB:")) == 0) {
+            int values[2] = {0};
+            if (tracker_mqtt_parse_int_list_from_text(cursor, "+CMQTTSUB:", values, 2) &&
+                values[0] == MQTT_CLIENT_INDEX) {
+                if (values[1] == 0) {
+                    s_commands_subscribed = true;
+                }
+                ESP_LOGI(TAG, "MQTT subscribe URC client=%d err=%d", values[0], values[1]);
+            }
+            return;
+        }
+
+        if (strncmp(cursor, "+CMQTTCONNLOST:", strlen("+CMQTTCONNLOST:")) == 0 ||
+            strncmp(cursor, "+CMQTTPING:", strlen("+CMQTTPING:")) == 0 ||
+            strcmp(cursor, "+CMQTTNONET") == 0) {
+            if (s_connected) {
+                ESP_LOGW(TAG, "MQTT URC disconnect: %s", cursor);
+            }
+            tracker_mqtt_mark_disconnected(cursor, MQTT_ERR_NO_CONNECTION);
+            return;
+        }
+
         return;
     }
 
-    if (strncmp(line, "+CMQTTRXTOPIC:", strlen("+CMQTTRXTOPIC:")) == 0) {
-        int values[2] = {0};
-        if (tracker_mqtt_parse_int_list_from_text(line, "+CMQTTRXTOPIC:", values, 2) && s_rx_ctx.active) {
-            s_rx_ctx.topic_chunk_remaining = values[1];
-        }
-        return;
-    }
-
-    if (strncmp(line, "+CMQTTRXPAYLOAD:", strlen("+CMQTTRXPAYLOAD:")) == 0) {
-        int values[2] = {0};
-        if (tracker_mqtt_parse_int_list_from_text(line, "+CMQTTRXPAYLOAD:", values, 2) && s_rx_ctx.active) {
-            s_rx_ctx.payload_chunk_remaining = values[1];
-        }
-        return;
-    }
-
-    if (strncmp(line, "+CMQTTRXEND:", strlen("+CMQTTRXEND:")) == 0) {
-        tracker_mqtt_dispatch_rx_if_complete();
-        tracker_mqtt_rx_reset();
-        return;
-    }
-
-    if (strncmp(line, "+CMQTTCONNLOST:", strlen("+CMQTTCONNLOST:")) == 0 ||
-        strncmp(line, "+CMQTTPING:", strlen("+CMQTTPING:")) == 0 ||
-        strcmp(line, "+CMQTTNONET") == 0) {
-        if (s_connected) {
-            ESP_LOGW(TAG, "MQTT URC disconnect: %s", line);
-        }
-        tracker_mqtt_mark_disconnected(line, MQTT_ERR_NO_CONNECTION);
-        return;
-    }
 }
 
 static esp_err_t tracker_mqtt_start_service(void) {
@@ -812,6 +966,28 @@ static esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_con
                                                       &connect_err,
                                                       &parsed);
     if (!parsed) {
+        uint64_t probe_start_ms = util_uptime_ms();
+        while ((util_uptime_ms() - probe_start_ms) < MQTT_CONNECT_SESSION_PROBE_WINDOW_MS) {
+            int disc_state = -1;
+            if (tracker_mqtt_query_disconnect_state(&disc_state) && disc_state == 0) {
+                tracker_mqtt_reset_connect_wait();
+                s_connected = true;
+                s_commands_subscribed = false;
+                ESP_LOGI(TAG, "CMQTTCONNECT session probe connected (disc_state=%d)", disc_state);
+                if (out_connect_err_code != NULL) {
+                    *out_connect_err_code = 0;
+                }
+                return ESP_OK;
+            }
+
+            if (s_connect_result_ready) {
+                break;
+            }
+
+            (void)modem_at_poll_urc(MQTT_POLL_MAX_BYTES);
+            vTaskDelay(pdMS_TO_TICKS(MQTT_CONNECT_SESSION_PROBE_INTERVAL_MS));
+        }
+
         esp_err_t wait_err = tracker_mqtt_wait_connect_result(&connect_err);
         tracker_mqtt_reset_connect_wait();
         if (wait_err != ESP_OK) {

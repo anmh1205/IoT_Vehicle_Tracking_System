@@ -205,6 +205,30 @@ static void util_fill_partition_label(const esp_partition_t *partition, char *ou
     util_copy_string(out, out_size, "ota");
 }
 
+static void util_ota_emit_status(const firmware_status_t *status,
+                                 ota_status_callback_t status_callback,
+                                 void *status_callback_ctx) {
+    if (status == NULL || status_callback == NULL) {
+        return;
+    }
+
+    status_callback(status, status_callback_ctx);
+}
+
+static void util_ota_set_status(firmware_status_t *status,
+                                const char *next_status,
+                                uint8_t progress,
+                                ota_status_callback_t status_callback,
+                                void *status_callback_ctx) {
+    if (status == NULL || util_string_empty(next_status)) {
+        return;
+    }
+
+    util_copy_string(status->status, sizeof(status->status), next_status);
+    status->progress = progress;
+    util_ota_emit_status(status, status_callback, status_callback_ctx);
+}
+
 /**
  * @brief Download, verify, and install OTA image.
  *
@@ -218,7 +242,9 @@ static void util_fill_partition_label(const esp_partition_t *partition, char *ou
 esp_err_t util_ota_apply_update(const config_t *cfg,
                                 const char *current_version,
                                 const ota_command_t *cmd,
-                                firmware_status_t *out_status) {
+                                firmware_status_t *out_status,
+                                ota_status_callback_t status_callback,
+                                void *status_callback_ctx) {
     ESP_RETURN_ON_NULL(cfg, ESP_ERR_INVALID_ARG, TAG, "cfg is NULL");
     ESP_RETURN_ON_NULL(current_version, ESP_ERR_INVALID_ARG, TAG, "current_version is NULL");
     ESP_RETURN_ON_NULL(cmd, ESP_ERR_INVALID_ARG, TAG, "cmd is NULL");
@@ -228,6 +254,7 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
     esp_http_client_handle_t http = NULL;
     esp_ota_handle_t ota_handle = 0;
     bool ota_begun = false;
+    const char *failure_code = "ota_apply_failed";
 
     /* Prepare output report skeleton. */
     memset(out_status, 0, sizeof(*out_status));
@@ -249,15 +276,24 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
     };
 
     http = esp_http_client_init(&http_cfg);
-    ESP_GOTO_ON_FALSE(http != NULL, cleanup, TAG, "esp_http_client_init failed");
+    if (http == NULL) {
+        failure_code = "http_open_failed";
+        goto cleanup;
+    }
 
-    util_copy_string(out_status->status, sizeof(out_status->status), "downloading");
-    out_status->progress = 5;
+    util_ota_set_status(out_status, "downloading", 5, status_callback, status_callback_ctx);
+    uint8_t last_emitted_download_progress = 5;
 
     /* Open HTTP stream and validate response status. */
+    failure_code = "http_open_failed";
     ESP_GOTO_ON_ERROR(esp_http_client_open(http, 0), cleanup, TAG, "HTTP open failed");
     int status_code = esp_http_client_fetch_headers(http);
-    ESP_GOTO_ON_FALSE(status_code >= 0, cleanup, TAG, "HTTP fetch headers failed");
+    if (status_code < 0) {
+        failure_code = "http_open_failed";
+        goto cleanup;
+    }
+
+    failure_code = "http_status_not_200";
     ESP_GOTO_ON_FALSE(esp_http_client_get_status_code(http) == 200,
                       cleanup,
                       TAG,
@@ -265,6 +301,7 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
                       esp_http_client_get_status_code(http));
 
     /* Start OTA write session to target partition. */
+    failure_code = "ota_begin_failed";
     ESP_GOTO_ON_ERROR(esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &ota_handle),
                       cleanup,
                       TAG,
@@ -281,6 +318,7 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
     while (true) {
         int read_len = esp_http_client_read(http, (char *)buffer, sizeof(buffer));
         if (read_len < 0) {
+            failure_code = "http_read_failed";
             mbedtls_sha256_free(&sha_ctx);
             ESP_GOTO_ON_FALSE(false, cleanup, TAG, "HTTP read failed");
         }
@@ -289,6 +327,7 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
         }
 
         /* Write chunk to OTA partition and update running hash. */
+        failure_code = "ota_write_failed";
         ESP_GOTO_ON_ERROR(esp_ota_write(ota_handle, buffer, (size_t)read_len), cleanup, TAG, "esp_ota_write failed");
         ESP_GOTO_ON_ERROR(mbedtls_sha256_update(&sha_ctx, buffer, (size_t)read_len),
                           cleanup,
@@ -298,43 +337,50 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
         total_read += read_len;
         if (cmd->size > 0) {
             int progress = (int)((total_read * 100ULL) / cmd->size);
-            out_status->progress = (uint8_t)util_clamp_int(progress, 5, 90);
+            uint8_t bounded_progress = (uint8_t)util_clamp_int(progress, 5, 90);
+            out_status->progress = bounded_progress;
+            if (bounded_progress >= (uint8_t)(last_emitted_download_progress + 5U) || bounded_progress >= 90U) {
+                last_emitted_download_progress = bounded_progress;
+                util_ota_emit_status(out_status, status_callback, status_callback_ctx);
+            }
         }
     }
 
     uint8_t computed_hash[32] = {0};
+    failure_code = "sha256_mismatch";
     ESP_GOTO_ON_ERROR(mbedtls_sha256_finish(&sha_ctx, computed_hash), cleanup, TAG, "sha256 finish failed");
     mbedtls_sha256_free(&sha_ctx);
 
     uint8_t expected_hash[32] = {0};
+    failure_code = "sha256_mismatch";
     ESP_GOTO_ON_FALSE(util_hex_to_bytes(cmd->sha256, expected_hash, sizeof(expected_hash)),
                       cleanup,
                       TAG,
                       "Invalid expected sha256 hex");
 
-    util_copy_string(out_status->status, sizeof(out_status->status), "verifying");
-    out_status->progress = 92;
+    util_ota_set_status(out_status, "verifying", 92, status_callback, status_callback_ctx);
 
     /* Abort update if hash mismatch to avoid booting corrupt image. */
+    failure_code = "sha256_mismatch";
     ESP_GOTO_ON_FALSE(memcmp(expected_hash, computed_hash, sizeof(computed_hash)) == 0,
                       cleanup,
                       TAG,
                       "OTA sha256 mismatch");
 
+    failure_code = "ota_end_failed";
     ESP_GOTO_ON_ERROR(esp_ota_end(ota_handle), cleanup, TAG, "esp_ota_end failed");
     ota_begun = false;
 
-    util_copy_string(out_status->status, sizeof(out_status->status), "installing");
-    out_status->progress = 96;
+    util_ota_set_status(out_status, "installing", 96, status_callback, status_callback_ctx);
 
     /* Set next boot partition to freshly written image. */
+    failure_code = "set_boot_partition_failed";
     ESP_GOTO_ON_ERROR(esp_ota_set_boot_partition(update_partition),
                       cleanup,
                       TAG,
                       "esp_ota_set_boot_partition failed");
 
-    util_copy_string(out_status->status, sizeof(out_status->status), "rebooting");
-    out_status->progress = 100;
+    util_ota_set_status(out_status, "rebooting", 100, status_callback, status_callback_ctx);
     err = ESP_OK;
 
 cleanup:
@@ -349,8 +395,9 @@ cleanup:
 
     if (err != ESP_OK) {
         util_copy_string(out_status->status, sizeof(out_status->status), "failed");
-        util_copy_string(out_status->error, sizeof(out_status->error), esp_err_to_name(err));
+        util_copy_string(out_status->error, sizeof(out_status->error), failure_code);
         out_status->progress = 0;
+        util_ota_emit_status(out_status, status_callback, status_callback_ctx);
     }
 
     return err;

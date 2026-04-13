@@ -55,6 +55,10 @@ The completed remediation spans two UI layers:
 - GNSS queries in `modem_gnss.c` now emit streak-aware observability for transport failure, parse failure, no-fix, and fix-success paths, then perform bounded self-heal repower with cooldown when failures persist.
 - The tracker state machine re-arms GNSS after LTE recovery or repeated GNSS poll failures, gating repeat re-arm attempts with cooldown to avoid modem thrash.
 - Simulator token flow and rollback/race handling were hardened to avoid replaying legacy ingestion behavior during the cutover.
+- OTA lifecycle now uses one canonical raw state set end-to-end: `assigned`, `downloading`, `verifying`, `installing`, `rebooting`, `confirming`, `success`, `failed`, `rolled_back`; backend/frontend derive `in_progress` and `stuck_timeout` for operator grouping without mutating firmware-native raw states.
+- Backend OTA deploy now treats artifact readiness and command dispatch as explicit preconditions, and firmware download responses are hardened for device fetch semantics (binary-only headers, no session redirect dependency).
+- MQTT Bridge OTA ingest now uses metadata-aware reconciliation (`message_id`, `seq_no`, `boot_id`) to block duplicate/out-of-order regressions and keep terminal states sticky.
+- Firmware OTA runtime now emits milestone statuses during apply flow and enforces confirm-timeout deadline checks on post-OTA boot when trusted time is available.
 
 ## Traceability
 - See root redirect and split login entry changes in `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/app/login/page.tsx`, `iot-vehicle-tracking-system-cloud/Tracking_Frontend/src/features/auth/components/login-form.tsx`, and `iot-vehicle-tracking-system-cloud/Tracking_Frontend/middleware.ts`.

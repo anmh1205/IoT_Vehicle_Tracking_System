@@ -16,6 +16,17 @@
 - Added bounded local-agent/VPS SSH fix-loop automation with allowlisted service restarts, stop conditions, rollback runbook, operator handover, and test matrix checkpoints.
 - Validation status: backend typecheck/build passed, backend tests passed after harness fix, MQTT Bridge typecheck/build passed, and final code review accepted the scope with low-medium residual operational risk.
 
+## 2026-04-13
+### OTA End-to-End Firmware-Cloud Hardening (Phases 01-04 Completed in Code)
+- Backend OTA deploy flow now performs artifact readiness checks (file exists, metadata size/sha validity), device ID validation, active-job dedupe, dispatch failure marking, and derived reconcile status (`in_progress` / `stuck_timeout`) for operator APIs.
+- Backend OTA download endpoint now returns deterministic binary headers (`Content-Length`, `Content-Type`, `ETag`, `no-store`, `nosniff`) and uses hardened stream error handling suitable for device OTA clients.
+- PostgreSQL firmware log schema now includes OTA ordering/reconcile fields (`status_reason_code`, `first_assigned_at`, `command_dispatched_at`, `last_seen_at`, `last_message_id`, `last_seq_no`, `last_boot_id`, `confirm_timeout_sec`) via `init/05-firmware.sql` + compatibility patch `init/13-ota-hardening.sql`.
+- MQTT Bridge firmware handler now enforces duplicate suppression (`message_id`), out-of-order guard (`seq_no`), and terminal-state stickiness, and persists ordering metadata for debug/reconcile.
+- Firmware OTA runtime now emits OTA milestone statuses through callback-based reporting and maps OTA failures to stable short error codes (`http_open_failed`, `sha256_mismatch`, `ota_end_failed`, etc.).
+- Firmware OTA confirm timeout is now persisted as an absolute deadline and enforced on post-OTA boot (`confirm_timeout_exceeded` path) when trusted time is available.
+- Frontend firmware dashboard now reads `summaryStatus`/`stuckReason`/`errorCode` and displays OTA reconcile context without custom local inference.
+- Validation status: Backend lint/typecheck/test/build passed; MQTT Bridge typecheck/build passed; Frontend lint/typecheck/build passed. Firmware compile command not executable in this environment because `idf.py` is unavailable.
+
 ## 2026-04-09
 ### Firmware GNSS Observability and Recovery Hardening (Completed)
 - Added GNSS query observability for transport failures, parse failures, no-fix streaks, and fix-success streaks in the modem GNSS path.
