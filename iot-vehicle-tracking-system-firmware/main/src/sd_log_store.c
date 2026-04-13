@@ -46,13 +46,25 @@ typedef struct {
     sd_log_state_t state;
     sdmmc_card_t *card;
     sd_log_meta_t meta;
+    bool peek_cache_valid;
+    uint32_t peek_cache_min_seq;
+    long peek_cache_offset;
 } sd_log_store_ctx_t;
 
 static sd_log_store_ctx_t s_ctx;
 
+static void sd_log_store_reset_peek_cache(void) {
+    s_ctx.peek_cache_valid = false;
+    s_ctx.peek_cache_min_seq = 0;
+    s_ctx.peek_cache_offset = 0;
+}
+
 static void sd_log_store_set_state(sd_log_state_t state) {
     s_ctx.state = state;
     s_ctx.mounted = state == SD_LOG_STATE_MOUNTED;
+    if (state != SD_LOG_STATE_MOUNTED) {
+        sd_log_store_reset_peek_cache();
+    }
 }
 
 static void sd_log_store_mark_degraded(void) {
@@ -219,6 +231,8 @@ static esp_err_t sd_log_store_recover_meta_if_needed(void) {
 }
 
 static esp_err_t sd_log_store_recover_data_if_needed(void) {
+    sd_log_store_reset_peek_cache();
+
     struct stat log_st = {0};
     struct stat bak_st = {0};
     struct stat tmp_st = {0};
@@ -347,6 +361,7 @@ static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *ou
 esp_err_t sd_log_store_init(void) {
     memset(&s_ctx, 0, sizeof(s_ctx));
     sd_log_store_set_state(SD_LOG_STATE_UNAVAILABLE);
+    sd_log_store_reset_peek_cache();
     s_ctx.initialized = true;
     return ESP_OK;
 }
@@ -593,6 +608,13 @@ esp_err_t sd_log_store_peek_next(uint32_t min_seq, sd_log_record_t *out_record) 
         return ESP_ERR_NOT_FOUND;
     }
 
+    if (s_ctx.peek_cache_valid && min_seq >= s_ctx.peek_cache_min_seq) {
+        if (fseek(fp, s_ctx.peek_cache_offset, SEEK_SET) != 0) {
+            sd_log_store_reset_peek_cache();
+            (void)fseek(fp, 0, SEEK_SET);
+        }
+    }
+
     char line[SD_LOG_LINE_MAX] = {0};
     esp_err_t found = ESP_ERR_NOT_FOUND;
     while (fgets(line, sizeof(line), fp) != NULL) {
@@ -605,8 +627,27 @@ esp_err_t sd_log_store_peek_next(uint32_t min_seq, sd_log_record_t *out_record) 
             continue;
         }
         *out_record = rec;
+        long next_offset = ftell(fp);
+        if (next_offset >= 0) {
+            s_ctx.peek_cache_valid = true;
+            s_ctx.peek_cache_min_seq = rec.seq + 1;
+            s_ctx.peek_cache_offset = next_offset;
+        } else {
+            sd_log_store_reset_peek_cache();
+        }
         found = ESP_OK;
         break;
+    }
+
+    if (found != ESP_OK) {
+        long end_offset = ftell(fp);
+        if (end_offset >= 0) {
+            s_ctx.peek_cache_valid = true;
+            s_ctx.peek_cache_min_seq = min_seq;
+            s_ctx.peek_cache_offset = end_offset;
+        } else {
+            sd_log_store_reset_peek_cache();
+        }
     }
 
     fclose(fp);
@@ -689,6 +730,7 @@ esp_err_t sd_log_store_gc_if_needed(void) {
     }
 
     remove(SD_LOG_DATA_BAK_PATH);
+    sd_log_store_reset_peek_cache();
     return ESP_OK;
 }
 

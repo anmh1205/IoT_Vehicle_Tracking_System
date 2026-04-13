@@ -3,6 +3,8 @@
 #include <math.h>
 #include <string.h>
 
+#include "freertos/FreeRTOS.h"
+
 #include "driver/gpio.h"
 #include "driver/i2c_master.h"
 
@@ -30,6 +32,9 @@
 #define LIS3DSH_INT1_CFG 0x30
 #define LIS3DSH_INT1_THS 0x32
 #define LIS3DSH_INT1_DURATION 0x33
+#define IMU_I2C_XFER_TIMEOUT_MS 20U
+#define IMU_READ_FAIL_BACKOFF_MS 2000ULL
+#define IMU_READ_FAIL_BACKOFF_THRESHOLD 3U
 
 static const char *TAG = "IMU_LIS3DSH";
 
@@ -40,6 +45,8 @@ static i2c_master_dev_handle_t s_dev_handle = NULL;
 static bool s_bus_owned = false;
 /* Detected LIS3DSH I2C address (0x1D or 0x1E). */
 static uint8_t s_lis3dsh_addr = LIS3DSH_ADDR_PRIMARY;
+static uint32_t s_read_fail_streak = 0;
+static uint64_t s_read_backoff_until_ms = 0;
 
 /**
  * @brief Write one LIS3DSH register.
@@ -51,7 +58,10 @@ static uint8_t s_lis3dsh_addr = LIS3DSH_ADDR_PRIMARY;
  */
 static esp_err_t imu_write_reg(uint8_t reg, uint8_t value) {
     uint8_t payload[2] = {reg, value};
-    return i2c_master_transmit(s_dev_handle, payload, sizeof(payload), 100 / portTICK_PERIOD_MS);
+    return i2c_master_transmit(s_dev_handle,
+                               payload,
+                               sizeof(payload),
+                               pdMS_TO_TICKS(IMU_I2C_XFER_TIMEOUT_MS));
 }
 
 /**
@@ -64,7 +74,12 @@ static esp_err_t imu_write_reg(uint8_t reg, uint8_t value) {
  */
 static esp_err_t imu_read_reg(uint8_t reg, uint8_t *value) {
     ESP_RETURN_ON_NULL(value, ESP_ERR_INVALID_ARG, TAG, "value is NULL");
-    return i2c_master_transmit_receive(s_dev_handle, &reg, 1, value, 1, 100 / portTICK_PERIOD_MS);
+    return i2c_master_transmit_receive(s_dev_handle,
+                                       &reg,
+                                       1,
+                                       value,
+                                       1,
+                                       pdMS_TO_TICKS(IMU_I2C_XFER_TIMEOUT_MS));
 }
 
 /**
@@ -80,7 +95,12 @@ static esp_err_t imu_read_regs(uint8_t reg, uint8_t *data, size_t len) {
     ESP_RETURN_ON_NULL(data, ESP_ERR_INVALID_ARG, TAG, "data is NULL");
     /* Set auto-increment bit for multi-byte reads. */
     uint8_t read_reg = reg | 0x80;
-    return i2c_master_transmit_receive(s_dev_handle, &read_reg, 1, data, len, 100 / portTICK_PERIOD_MS);
+    return i2c_master_transmit_receive(s_dev_handle,
+                                       &read_reg,
+                                       1,
+                                       data,
+                                       len,
+                                       pdMS_TO_TICKS(IMU_I2C_XFER_TIMEOUT_MS));
 }
 
 /**
@@ -174,6 +194,8 @@ esp_err_t imu_init(void) {
     ESP_GOTO_ON_ERROR(gpio_config(&int_cfg), fail, TAG, "INT GPIO config failed");
 
     ESP_LOGI(TAG, "LIS3DSH initialized at I2C addr 0x%02X", s_lis3dsh_addr);
+    s_read_fail_streak = 0;
+    s_read_backoff_until_ms = 0;
     return ESP_OK;
 
 fail:
@@ -253,13 +275,30 @@ esp_err_t imu_read_accel(int16_t *x, int16_t *y, int16_t *z) {
  * @return Score from 0..1000.
  */
 uint16_t imu_get_vibration_composite(void) {
+    uint64_t now_ms = util_uptime_ms();
+    if (s_read_backoff_until_ms != 0 && now_ms < s_read_backoff_until_ms) {
+        return 0;
+    }
+
     int16_t x = 0;
     int16_t y = 0;
     int16_t z = 0;
 
     if (imu_read_accel(&x, &y, &z) != ESP_OK) {
+        s_read_fail_streak += 1U;
+        if (s_read_fail_streak >= IMU_READ_FAIL_BACKOFF_THRESHOLD) {
+            s_read_backoff_until_ms = now_ms + IMU_READ_FAIL_BACKOFF_MS;
+            ESP_LOGW(TAG,
+                     "IMU read fail streak=%lu, apply backoff=%llums",
+                     (unsigned long)s_read_fail_streak,
+                     (unsigned long long)IMU_READ_FAIL_BACKOFF_MS);
+            s_read_fail_streak = 0;
+        }
         return 0;
     }
+
+    s_read_fail_streak = 0;
+    s_read_backoff_until_ms = 0;
 
     /* Convert raw high-resolution counts to mg approximation. */
     float x_mg = x / 16.0f;
@@ -292,4 +331,6 @@ void imu_deinit(void) {
     }
     s_bus_handle = NULL;
     s_bus_owned = false;
+    s_read_fail_streak = 0;
+    s_read_backoff_until_ms = 0;
 }

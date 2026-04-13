@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "esp_crt_bundle.h"
@@ -254,6 +255,9 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
     esp_http_client_handle_t http = NULL;
     esp_ota_handle_t ota_handle = 0;
     bool ota_begun = false;
+    uint8_t *buffer = NULL;
+    bool sha_ctx_started = false;
+    mbedtls_sha256_context sha_ctx;
     const char *failure_code = "ota_apply_failed";
 
     /* Prepare output report skeleton. */
@@ -309,17 +313,18 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
     ota_begun = true;
 
     /* Initialize SHA-256 context to verify full downloaded image integrity. */
-    mbedtls_sha256_context sha_ctx;
     mbedtls_sha256_init(&sha_ctx);
     ESP_GOTO_ON_ERROR(mbedtls_sha256_starts(&sha_ctx, 0), cleanup, TAG, "sha256 start failed");
+    sha_ctx_started = true;
 
-    uint8_t buffer[OTA_HTTP_BUFFER_SIZE];
+    buffer = (uint8_t *)malloc(OTA_HTTP_BUFFER_SIZE);
+    ESP_GOTO_ON_FALSE(buffer != NULL, cleanup, TAG, "ota buffer alloc failed");
+
     int total_read = 0;
     while (true) {
-        int read_len = esp_http_client_read(http, (char *)buffer, sizeof(buffer));
+        int read_len = esp_http_client_read(http, (char *)buffer, OTA_HTTP_BUFFER_SIZE);
         if (read_len < 0) {
             failure_code = "http_read_failed";
-            mbedtls_sha256_free(&sha_ctx);
             ESP_GOTO_ON_FALSE(false, cleanup, TAG, "HTTP read failed");
         }
         if (read_len == 0) {
@@ -350,6 +355,7 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
     failure_code = "sha256_mismatch";
     ESP_GOTO_ON_ERROR(mbedtls_sha256_finish(&sha_ctx, computed_hash), cleanup, TAG, "sha256 finish failed");
     mbedtls_sha256_free(&sha_ctx);
+    sha_ctx_started = false;
 
     uint8_t expected_hash[32] = {0};
     failure_code = "sha256_mismatch";
@@ -384,6 +390,14 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
     err = ESP_OK;
 
 cleanup:
+    if (sha_ctx_started) {
+        mbedtls_sha256_free(&sha_ctx);
+    }
+
+    if (buffer != NULL) {
+        free(buffer);
+    }
+
     if (http != NULL) {
         esp_http_client_close(http);
         esp_http_client_cleanup(http);

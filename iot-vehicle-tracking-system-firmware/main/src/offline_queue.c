@@ -17,6 +17,7 @@
 static const char *TAG = "OFFLINE_QUEUE";
 #define OFFLINE_QUEUE_SD_MOUNT_RETRY_MS 30000ULL
 #define OFFLINE_QUEUE_AUTH_TOKEN_REPLAY "\"auth_token\":\"TRACKER_001_Anmh1205\""
+#define OFFLINE_QUEUE_REPLAY_MIN_PUBLISH_INTERVAL_MS 600ULL
 
 typedef struct {
     bool initialized;
@@ -27,6 +28,7 @@ typedef struct {
     int acked_msg_id;
     uint32_t pending_seq;
     uint64_t pending_since_ms;
+    uint64_t last_replay_publish_ms;
     retry_state_t replay_retry;
     retry_state_t sd_mount_retry;
     portMUX_TYPE ack_lock;
@@ -246,6 +248,7 @@ esp_err_t offline_queue_init(void) {
     memset(&s_ctx, 0, sizeof(s_ctx));
     s_ctx.pending_msg_id = -1;
     s_ctx.acked_msg_id = -1;
+    s_ctx.last_replay_publish_ms = 0;
     retry_state_reset(&s_ctx.replay_retry);
     retry_state_reset(&s_ctx.sd_mount_retry);
     s_ctx.ack_lock = (portMUX_TYPE)portMUX_INITIALIZER_UNLOCKED;
@@ -418,6 +421,11 @@ void offline_queue_replay_tick(void) {
         return;
     }
 
+    if (s_ctx.last_replay_publish_ms != 0 &&
+        (now_ms - s_ctx.last_replay_publish_ms) < OFFLINE_QUEUE_REPLAY_MIN_PUBLISH_INTERVAL_MS) {
+        return;
+    }
+
     sd_log_meta_t meta = {0};
     if (sd_log_store_get_meta(&meta) != ESP_OK) {
         return;
@@ -447,6 +455,7 @@ void offline_queue_replay_tick(void) {
     }
 
     if (offline_queue_publish_record(&rec) == ESP_OK) {
+        s_ctx.last_replay_publish_ms = now_ms;
         retry_state_reset(&s_ctx.replay_retry);
         return;
     }

@@ -41,13 +41,14 @@
  */
 
 #define OBD_MODE_CURRENT_DATA 0x01
-#define TRACKER_BLE_RETRY_BACKOFF_MS 10000ULL
+#define TRACKER_BLE_RETRY_MIN_BACKOFF_MS 5000ULL
+#define TRACKER_BLE_RETRY_MAX_BACKOFF_MS 120000ULL
 #define TRACKER_NETWORK_RETRY_MIN_BACKOFF_MS 5000ULL
 #define TRACKER_NETWORK_RETRY_MAX_BACKOFF_MS 90000ULL
 #define TRACKER_OBD_DEBUG_LOG_INTERVAL_MS 1000ULL
 #define TRACKER_OBD_POLL_INTERVAL_MS 1200ULL
 #define TRACKER_OBD_PID_TIMEOUT_MS 700U
-#define TRACKER_BLE_CONNECT_TIMEOUT_MS 12000U
+#define TRACKER_BLE_CONNECT_TIMEOUT_MS 8000U
 #define TRACKER_RTC_SYNC_MIN_INTERVAL_MS 60000ULL
 #define TRACKER_RTC_READ_RETRY_BACKOFF_MS 1000ULL
 #define TRACKER_GNSS_REARM_COOLDOWN_MS 15000ULL
@@ -90,6 +91,7 @@ static uint64_t s_last_raw_publish_ms = 0;
 static uint64_t s_alarm_enter_ms = 0;
 static uint64_t s_last_obd_debug_log_ms = 0;
 static uint64_t s_last_obd_poll_ms = 0;
+static uint8_t s_obd_aux_pid_cursor = 0;
 static uint32_t s_session_id = 1;
 static uint64_t s_ignition_off_started_ms = 0;
 static bool s_status_running = false;
@@ -134,9 +136,9 @@ static uint64_t s_last_obd_fail_alert_ms = 0;
 static bool s_field_validation_ble_skip_logged = false;
 
 static const retry_policy_t s_ble_retry_policy = {
-    .mode = RETRY_MODE_FIXED,
-    .base_delay_ms = (uint32_t)TRACKER_BLE_RETRY_BACKOFF_MS,
-    .max_delay_ms = (uint32_t)TRACKER_BLE_RETRY_BACKOFF_MS,
+    .mode = RETRY_MODE_EXPONENTIAL,
+    .base_delay_ms = (uint32_t)TRACKER_BLE_RETRY_MIN_BACKOFF_MS,
+    .max_delay_ms = (uint32_t)TRACKER_BLE_RETRY_MAX_BACKOFF_MS,
     .max_attempts = 0,
     .jitter_ms = 0,
 };
@@ -597,11 +599,16 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
         uint64_t now_ms = util_uptime_ms();
 
         if ((now_ms - s_last_obd_poll_ms) >= TRACKER_OBD_POLL_INTERVAL_MS) {
-            ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0C, TRACKER_OBD_PID_TIMEOUT_MS);
-            ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0D, TRACKER_OBD_PID_TIMEOUT_MS);
-            ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x05, TRACKER_OBD_PID_TIMEOUT_MS);
-            ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x2F, TRACKER_OBD_PID_TIMEOUT_MS);
-            ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x04, TRACKER_OBD_PID_TIMEOUT_MS);
+            /*
+             * Keep RPM fresh every cycle for ignition inference, but rotate the
+             * remaining PIDs to avoid multi-second blocking bursts.
+             */
+            (void)ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0C, TRACKER_OBD_PID_TIMEOUT_MS);
+
+            static const uint8_t s_aux_pids[] = {0x0D, 0x05, 0x2F, 0x04};
+            uint8_t aux_pid = s_aux_pids[s_obd_aux_pid_cursor % ARRAY_SIZE(s_aux_pids)];
+            (void)ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, aux_pid, TRACKER_OBD_PID_TIMEOUT_MS);
+            s_obd_aux_pid_cursor = (uint8_t)((s_obd_aux_pid_cursor + 1U) % ARRAY_SIZE(s_aux_pids));
             s_last_obd_poll_ms = now_ms;
         }
 
@@ -652,8 +659,9 @@ telemetry_finalize:
 
     uint64_t now_ms = util_uptime_ms();
     if (s_last_hw_diag_log_ms == 0 || (now_ms - s_last_hw_diag_log_ms) >= TRACKER_HW_DIAG_LOG_INTERVAL_MS) {
+        UBaseType_t stack_hwm_words = uxTaskGetStackHighWaterMark(NULL);
         ESP_LOGI(TAG,
-                 "HW diag supply=%.2fV batt=%.2fV ign=%d vib=%u lte=%d mqtt=%d ble=%d gnss_fix=%d",
+                 "HW diag supply=%.2fV batt=%.2fV ign=%d vib=%u lte=%d mqtt=%d ble=%d gnss_fix=%d stack_hwm_words=%lu",
                  s_telemetry.battery_top,
                  s_telemetry.battery_bot,
                  s_telemetry.ignition ? 1 : 0,
@@ -661,7 +669,8 @@ telemetry_finalize:
                  modem_lte_is_connected() ? 1 : 0,
                  tracker_mqtt_is_connected() ? 1 : 0,
                  (s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) ? 1 : 0,
-                 s_telemetry.gnss.fix_valid ? 1 : 0);
+                 s_telemetry.gnss.fix_valid ? 1 : 0,
+                 (unsigned long)stack_hwm_words);
         s_last_hw_diag_log_ms = now_ms;
     }
 }
@@ -1385,6 +1394,7 @@ esp_err_t state_machine_init(const config_t *config) {
     s_gnss_poll_fail_streak = 0;
     s_last_gnss_rearm_ms = 0;
     s_last_gnss_poll_ms = 0;
+    s_obd_aux_pid_cursor = 0;
     s_last_hw_diag_log_ms = 0;
     s_status_running = false;
     s_status_stopped = true;

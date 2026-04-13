@@ -28,6 +28,7 @@
  */
 
 #define BLE_DISCOVERY_TIMEOUT_MS 5000U
+#define BLE_CONNECT_ATTEMPT_TIMEOUT_MS 7000U
 
 /* CCCD payload enabling notifications (0x0001 little-endian). */
 static const uint8_t cccd_notify_enable_cfg[] = {0x01, 0x00};
@@ -488,7 +489,7 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
             ble_mgr_queue_clear(mgr_ctx);
             rc = ble_gap_connect(BLE_OWN_ADDR_PUBLIC,
                                  &event->disc.addr,
-                                 30000,
+                                 BLE_CONNECT_ATTEMPT_TIMEOUT_MS,
                                  &s_conn_params,
                                  ble_mgr_gap_event_cb,
                                  mgr_ctx);
