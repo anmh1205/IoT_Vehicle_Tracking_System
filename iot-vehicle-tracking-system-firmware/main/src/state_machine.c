@@ -42,8 +42,8 @@
 
 #define OBD_MODE_CURRENT_DATA 0x01
 #define TRACKER_BLE_RETRY_BACKOFF_MS 10000ULL
-#define TRACKER_NETWORK_RETRY_MIN_BACKOFF_MS 30000ULL
-#define TRACKER_NETWORK_RETRY_MAX_BACKOFF_MS 300000ULL
+#define TRACKER_NETWORK_RETRY_MIN_BACKOFF_MS 5000ULL
+#define TRACKER_NETWORK_RETRY_MAX_BACKOFF_MS 90000ULL
 #define TRACKER_OBD_DEBUG_LOG_INTERVAL_MS 1000ULL
 #define TRACKER_OBD_POLL_INTERVAL_MS 1200ULL
 #define TRACKER_OBD_PID_TIMEOUT_MS 700U
@@ -52,6 +52,7 @@
 #define TRACKER_RTC_READ_RETRY_BACKOFF_MS 1000ULL
 #define TRACKER_GNSS_REARM_COOLDOWN_MS 15000ULL
 #define TRACKER_GNSS_FAIL_REARM_THRESHOLD 3U
+#define TRACKER_GNSS_POLL_INTERVAL_MS 2000ULL
 #define TRACKER_MQTT_RUNTIME_DISABLED 0
 #define TRACKER_USER_LED_BLINK_PERIOD_MS 3000ULL
 #define TRACKER_USER_LED_ON_MS 300ULL
@@ -63,6 +64,7 @@
 #define TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED 2002
 #define TRACKER_SLEEP_REJECT_LOG_INTERVAL_MS 10000ULL
 #define TRACKER_HW_DIAG_LOG_INTERVAL_MS 15000ULL
+#define TRACKER_PENDING_ACTION_DRAIN_LIMIT 4U
 
 /* RTC-retained context survives deep sleep and helps OTA/session continuity. */
 RTC_DATA_ATTR rtc_context_t g_rtc_context = {
@@ -111,6 +113,7 @@ static bool s_prev_lte_initialized = false;
 static bool s_lte_ever_initialized = false;
 static uint32_t s_gnss_poll_fail_streak = 0;
 static uint64_t s_last_gnss_rearm_ms = 0;
+static uint64_t s_last_gnss_poll_ms = 0;
 static bool s_hw_bootstrap_done = false;
 static uint64_t s_last_sleep_reject_log_ms = 0;
 static uint32_t s_sleep_blocked_count = 0;
@@ -260,6 +263,26 @@ static void state_machine_command_callback(const char *topic, const char *payloa
 
 static void state_machine_puback_callback(int msg_id) {
     offline_queue_handle_publish_ack(msg_id);
+}
+
+static void state_machine_process_ota_command(command_action_t action);
+
+static void state_machine_handle_pending_action(void) {
+    for (uint32_t i = 0; i < TRACKER_PENDING_ACTION_DRAIN_LIMIT; ++i) {
+        command_action_t action = command_handler_consume_action();
+        if (action == COMMAND_ACTION_NONE) {
+            return;
+        }
+
+        if (action == COMMAND_ACTION_REBOOT) {
+            esp_restart();
+        }
+
+        state_machine_process_ota_command(action);
+        if (s_ota_in_progress) {
+            return;
+        }
+    }
 }
 
 /**
@@ -595,6 +618,13 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
     }
 
     if (read_gnss && state_machine_can_poll_gnss()) {
+        uint64_t now_ms = util_uptime_ms();
+        if (s_last_gnss_poll_ms != 0 &&
+            (now_ms - s_last_gnss_poll_ms) < TRACKER_GNSS_POLL_INTERVAL_MS) {
+            goto telemetry_finalize;
+        }
+        s_last_gnss_poll_ms = now_ms;
+
         gnss_data_t gnss = {0};
         if (modem_gnss_get_location(&gnss) == ESP_OK) {
             s_telemetry.gnss = gnss;
@@ -609,6 +639,7 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
         }
     }
 
+telemetry_finalize:
     if (s_telemetry.gnss.timestamp_ms == 0) {
         s_telemetry.gnss.timestamp_ms = util_uptime_ms();
     }
@@ -957,6 +988,10 @@ static void state_machine_try_connect_ble(void) {
     retry_state_reset(&s_ble_retry);
     return;
 #endif
+    if (!s_telemetry.ignition || !tracker_mqtt_is_connected() || s_ota_in_progress ||
+        g_rtc_context.ota_pending_confirm) {
+        return;
+    }
 
     if (s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
         return;
@@ -1349,6 +1384,7 @@ esp_err_t state_machine_init(const config_t *config) {
     s_lte_ever_initialized = false;
     s_gnss_poll_fail_streak = 0;
     s_last_gnss_rearm_ms = 0;
+    s_last_gnss_poll_ms = 0;
     s_last_hw_diag_log_ms = 0;
     s_status_running = false;
     s_status_stopped = true;
@@ -1413,6 +1449,7 @@ app_state_t state_machine_run(app_state_t current_state) {
                 ESP_LOGI(TAG, "Startup system check: ADC/BLE/RTC/LTE/MQTT");
                 s_startup_system_check_log_once = true;
             }
+            state_machine_handle_pending_action();
             state_machine_try_connect_network();
             state_machine_bootstrap_rtc();
             state_machine_bootstrap_imu();
@@ -1422,37 +1459,28 @@ app_state_t state_machine_run(app_state_t current_state) {
              * otherwise starve LTE AT FSM tick cadence during startup.
              */
             bool lte_ready = modem_lte_is_initialized();
+            state_machine_refresh_telemetry(lte_ready, true);
+            state_machine_handle_pending_action();
             if (lte_ready) {
                 state_machine_try_connect_ble();
             }
-
-            /*
-             * Allow GNSS polling during startup checks once LTE stack is initialized.
-             * This keeps GNSS observability active even when ignition is still off.
-             */
-            state_machine_refresh_telemetry(lte_ready, true);
             offline_queue_set_online(tracker_mqtt_is_connected());
             offline_queue_replay_tick();
             session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
             g_rtc_context.ign_last_known = s_telemetry.ignition;
-
-            /* Keep OTA/reboot command path alive even when ignition is off. */
-            command_action_t startup_action = command_handler_consume_action();
-            if (startup_action == COMMAND_ACTION_REBOOT) {
-                esp_restart();
-            }
-            state_machine_process_ota_command(startup_action);
 
             return s_telemetry.ignition ? APP_STATE_DRIVING : APP_STATE_PARKED;
         }
 
         case APP_STATE_DRIVING: {
             /* Full online mode with high-frequency telemetry and command handling. */
+            state_machine_handle_pending_action();
             state_machine_try_connect_network();
+            state_machine_refresh_telemetry(true, true);
+            state_machine_handle_pending_action();
             if (modem_lte_is_initialized()) {
                 state_machine_try_connect_ble();
             }
-            state_machine_refresh_telemetry(true, true);
             state_machine_bootstrap_rtc();
             state_machine_bootstrap_imu();
             offline_queue_set_online(tracker_mqtt_is_connected());
@@ -1477,12 +1505,6 @@ app_state_t state_machine_run(app_state_t current_state) {
             if (should_publish_raw && !offline_queue_should_throttle_rawdata()) {
                 state_machine_publish_rawdata();
             }
-
-            command_action_t action = command_handler_consume_action();
-            if (action == COMMAND_ACTION_REBOOT) {
-                esp_restart();
-            }
-            state_machine_process_ota_command(action);
 
             bool tracking_enabled = command_handler_is_tracking_enabled();
             bool ignition_active = s_telemetry.ignition && tracking_enabled;
@@ -1519,11 +1541,12 @@ app_state_t state_machine_run(app_state_t current_state) {
 
         case APP_STATE_ALARM: {
             /* Alarm mode after motion wakeup: publish event + periodic rawdata. */
+            state_machine_handle_pending_action();
             state_machine_try_connect_network();
             state_machine_refresh_telemetry(true, false);
+            state_machine_handle_pending_action();
             offline_queue_set_online(tracker_mqtt_is_connected());
             offline_queue_replay_tick();
-            state_machine_process_ota_command(command_handler_consume_action());
 
             if (s_alarm_enter_ms == 0) {
                 s_alarm_enter_ms = util_uptime_ms();
@@ -1556,13 +1579,14 @@ app_state_t state_machine_run(app_state_t current_state) {
         case APP_STATE_HEARTBEAT:
             /* Timer wake heartbeat path: one data publish then return to sleep. */
             s_timer_wake_count += 1;
+            state_machine_handle_pending_action();
             state_machine_try_connect_network();
             state_machine_refresh_telemetry(true, false);
+            state_machine_handle_pending_action();
             offline_queue_set_online(tracker_mqtt_is_connected());
             offline_queue_replay_tick();
             state_machine_publish_rawdata();
             state_machine_publish_status("heartbeat");
-            state_machine_process_ota_command(command_handler_consume_action());
             return APP_STATE_SLEEP;
 
         case APP_STATE_SLEEP:

@@ -23,8 +23,11 @@ static config_t *s_config = NULL;
 static bool s_tracking_enabled = true;
 /* One-shot location request flag set by `request_location`. */
 static bool s_location_requested = false;
-/* Pending action consumed by state machine loop. */
-static command_action_t s_pending_action = COMMAND_ACTION_NONE;
+/* Reboot command latch consumed by state machine loop. */
+static bool s_reboot_pending = false;
+/* Pending OTA action consumed by state machine loop. */
+static bool s_ota_action_pending = false;
+static command_action_t s_ota_action = COMMAND_ACTION_NONE;
 /* Last parsed OTA command payload. */
 static ota_command_t s_ota_command = {0};
 
@@ -84,7 +87,9 @@ esp_err_t command_handler_init(config_t *config) {
     s_config = config;
     s_tracking_enabled = true;
     s_location_requested = false;
-    s_pending_action = COMMAND_ACTION_NONE;
+    s_reboot_pending = false;
+    s_ota_action_pending = false;
+    s_ota_action = COMMAND_ACTION_NONE;
     memset(&s_ota_command, 0, sizeof(s_ota_command));
     return ESP_OK;
 }
@@ -284,19 +289,19 @@ void command_handler_process(const char *command_json) {
         }
     } else if (strcmp(command->valuestring, "request_location") == 0) {
         s_location_requested = true;
-        s_pending_action = COMMAND_ACTION_REQUEST_LOCATION;
     } else if (strcmp(command->valuestring, "enable_tracking") == 0) {
         const cJSON *enabled = cJSON_GetObjectItemCaseSensitive(params, "enabled");
         if (cJSON_IsBool(enabled)) {
             s_tracking_enabled = cJSON_IsTrue(enabled);
         }
     } else if (strcmp(command->valuestring, "reboot") == 0) {
-        s_pending_action = COMMAND_ACTION_REBOOT;
+        s_reboot_pending = true;
     } else if (strcmp(command->valuestring, "ota_update") == 0) {
         ota_command_t parsed = {0};
         if (command_parse_ota_update(params, &parsed)) {
             s_ota_command = parsed;
-            s_pending_action = COMMAND_ACTION_OTA_UPDATE;
+            s_ota_action_pending = true;
+            s_ota_action = COMMAND_ACTION_OTA_UPDATE;
         } else {
             ESP_LOGW(TAG, "Invalid ota_update params");
         }
@@ -306,7 +311,8 @@ void command_handler_process(const char *command_json) {
         memset(&s_ota_command, 0, sizeof(s_ota_command));
         s_ota_command.rollback_pending = true;
         s_ota_command.pending = false;
-        s_pending_action = COMMAND_ACTION_OTA_ROLLBACK;
+        s_ota_action_pending = true;
+        s_ota_action = COMMAND_ACTION_OTA_ROLLBACK;
     }
 
     cJSON_Delete(root);
@@ -338,9 +344,19 @@ bool command_handler_is_tracking_enabled(void) {
  * @return Action value (or NONE).
  */
 command_action_t command_handler_consume_action(void) {
-    command_action_t current = s_pending_action;
-    s_pending_action = COMMAND_ACTION_NONE;
-    return current;
+    if (s_reboot_pending) {
+        s_reboot_pending = false;
+        return COMMAND_ACTION_REBOOT;
+    }
+
+    if (s_ota_action_pending) {
+        command_action_t action = s_ota_action;
+        s_ota_action_pending = false;
+        s_ota_action = COMMAND_ACTION_NONE;
+        return action;
+    }
+
+    return COMMAND_ACTION_NONE;
 }
 
 /**

@@ -21,8 +21,8 @@ static gnss_data_t s_last_gnss = {0};
 /* Reflects whether GNSS engine is currently powered by modem command. */
 static bool s_gnss_powered = false;
 
-#define MODEM_GNSS_QUERY_TIMEOUT_MS 3000U
-#define MODEM_GNSS_QUERY_SOFT_RETRY_COUNT 1U
+#define MODEM_GNSS_QUERY_TIMEOUT_MS 1500U
+#define MODEM_GNSS_QUERY_SOFT_RETRY_COUNT 0U
 #define MODEM_GNSS_QUERY_FAIL_SELF_HEAL_THRESHOLD 3U
 #define MODEM_GNSS_QUERY_SELF_HEAL_COOLDOWN_MS 20000ULL
 #define MODEM_GNSS_LOG_THROTTLE_MS 10000ULL

@@ -21,8 +21,9 @@
  */
 
 #define MODEM_RX_BUFFER_SIZE 1024
-#define MODEM_MAX_URC_CALLBACKS 4
-#define MODEM_URC_LINE_BUFFER_SIZE 256
+#define MODEM_MAX_URC_CALLBACKS 8
+#define MODEM_URC_LINE_BUFFER_SIZE 1024
+#define MODEM_RESPONSE_PROBE_SIZE 256
 
 /**
  * @brief One URC callback registration entry.
@@ -59,6 +60,7 @@ static modem_at_uart_diag_t s_uart_diag = {0};
 /* Incremental line-assembly buffer for URC/response dispatch across UART chunks. */
 static char s_dispatch_line_buf[MODEM_URC_LINE_BUFFER_SIZE] = {0};
 static size_t s_dispatch_line_len = 0;
+static bool s_dispatch_line_overflow = false;
 
 /**
  * @brief Drain UART event queue and aggregate error counters.
@@ -122,16 +124,23 @@ static void modem_at_dispatch_chunk_lines(const char *chunk, size_t chunk_len) {
     for (size_t i = 0; i < chunk_len; ++i) {
         char ch = chunk[i];
         if (ch == '\r' || ch == '\n') {
-            if (s_dispatch_line_len > 0U) {
+            if (!s_dispatch_line_overflow && s_dispatch_line_len > 0U) {
                 s_dispatch_line_buf[s_dispatch_line_len] = '\0';
                 modem_at_dispatch_line(s_dispatch_line_buf);
-                s_dispatch_line_len = 0U;
             }
+            s_dispatch_line_len = 0U;
+            s_dispatch_line_overflow = false;
+            continue;
+        }
+
+        if (s_dispatch_line_overflow) {
             continue;
         }
 
         if (s_dispatch_line_len + 1U >= sizeof(s_dispatch_line_buf)) {
             s_dispatch_line_len = 0U;
+            s_dispatch_line_overflow = true;
+            ESP_LOGW(TAG, "AT line overflow (>=%u bytes), drop current line", (unsigned)sizeof(s_dispatch_line_buf));
             continue;
         }
 
@@ -185,9 +194,37 @@ static bool modem_at_response_done(const char *buffer) {
 
     bool ends_with_ok = len >= 2 && strncmp(buffer + (len - 2), "OK", 2) == 0;
     bool ends_with_error = len >= 5 && strncmp(buffer + (len - 5), "ERROR", 5) == 0;
+    bool ends_with_prompt = len >= 1 && buffer[len - 1] == '>';
 
     return strstr(buffer, "\r\nOK\r\n") != NULL || strstr(buffer, "\r\nERROR\r\n") != NULL ||
-           strstr(buffer, "+CME ERROR") != NULL || ends_with_ok || ends_with_error;
+           strstr(buffer, "+CME ERROR") != NULL || ends_with_ok || ends_with_error || ends_with_prompt;
+}
+
+static void modem_at_append_response_probe(char *probe,
+                                           size_t *probe_len,
+                                           const char *chunk,
+                                           size_t chunk_len) {
+    if (probe == NULL || probe_len == NULL || chunk == NULL || chunk_len == 0U) {
+        return;
+    }
+
+    size_t max_probe_len = MODEM_RESPONSE_PROBE_SIZE - 1U;
+    if (chunk_len >= max_probe_len) {
+        memcpy(probe, chunk + (chunk_len - max_probe_len), max_probe_len);
+        *probe_len = max_probe_len;
+        probe[*probe_len] = '\0';
+        return;
+    }
+
+    if (*probe_len + chunk_len > max_probe_len) {
+        size_t drop_len = (*probe_len + chunk_len) - max_probe_len;
+        memmove(probe, probe + drop_len, *probe_len - drop_len);
+        *probe_len -= drop_len;
+    }
+
+    memcpy(probe + *probe_len, chunk, chunk_len);
+    *probe_len += chunk_len;
+    probe[*probe_len] = '\0';
 }
 
 /**
@@ -226,6 +263,7 @@ esp_err_t modem_at_init(void) {
 
     s_dispatch_line_len = 0;
     s_dispatch_line_buf[0] = '\0';
+    s_dispatch_line_overflow = false;
     s_uart_baud = MODEM_UART_BAUD;
     s_uart_tx_pin = PIN_MODEM_TX;
     s_uart_rx_pin = PIN_MODEM_RX;
@@ -258,6 +296,7 @@ void modem_at_deinit(void) {
     memset(s_urc_entries, 0, sizeof(s_urc_entries));
     s_dispatch_line_len = 0;
     s_dispatch_line_buf[0] = '\0';
+    s_dispatch_line_overflow = false;
     memset(&s_uart_diag, 0, sizeof(s_uart_diag));
 }
 
@@ -298,6 +337,8 @@ esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32
     size_t used = 0;
     uint64_t deadline = esp_timer_get_time() + ((uint64_t)timeout_ms * 1000ULL);
     char chunk[128];
+    char response_probe[MODEM_RESPONSE_PROBE_SIZE] = {0};
+    size_t response_probe_len = 0U;
 
     while (esp_timer_get_time() < deadline) {
         modem_at_drain_uart_events();
@@ -313,12 +354,25 @@ esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32
             used += copy_len;
             response[used] = '\0';
         }
+        modem_at_append_response_probe(response_probe, &response_probe_len, chunk, (size_t)read);
 
         modem_at_dispatch_chunk_lines(chunk, (size_t)read);
 
-        if (response != NULL && modem_at_response_done(response)) {
+        bool response_done = false;
+        if (response != NULL) {
+            response_done = modem_at_response_done(response);
+        }
+        if (!response_done) {
+            response_done = modem_at_response_done(response_probe);
+        }
+
+        if (response_done) {
             xSemaphoreGive(s_at_lock);
-            return strstr(response, "ERROR") != NULL ? ESP_FAIL : ESP_OK;
+            bool has_error = strstr(response_probe, "ERROR") != NULL || strstr(response_probe, "+CME ERROR") != NULL;
+            if (!has_error && response != NULL) {
+                has_error = strstr(response, "ERROR") != NULL;
+            }
+            return has_error ? ESP_FAIL : ESP_OK;
         }
     }
 
@@ -536,13 +590,45 @@ void modem_at_register_urc(const char *prefix, modem_urc_cb_t cb) {
         return;
     }
 
+    size_t prefix_len = strlen(prefix);
     for (size_t i = 0; i < ARRAY_SIZE(s_urc_entries); ++i) {
         if (s_urc_entries[i].callback == NULL) {
-            util_copy_string(s_urc_entries[i].prefix, sizeof(s_urc_entries[i].prefix), prefix);
+            continue;
+        }
+
+        if (s_urc_entries[i].callback == cb || strcmp(s_urc_entries[i].prefix, prefix) == 0) {
+            size_t copied = util_copy_string(s_urc_entries[i].prefix, sizeof(s_urc_entries[i].prefix), prefix);
             s_urc_entries[i].callback = cb;
+            if (copied < prefix_len) {
+                ESP_LOGW(TAG,
+                         "URC prefix truncated on update idx=%u src_len=%u dst_len=%u",
+                         (unsigned)i,
+                         (unsigned)prefix_len,
+                         (unsigned)sizeof(s_urc_entries[i].prefix));
+            }
             return;
         }
     }
+
+    for (size_t i = 0; i < ARRAY_SIZE(s_urc_entries); ++i) {
+        if (s_urc_entries[i].callback == NULL) {
+            size_t copied = util_copy_string(s_urc_entries[i].prefix, sizeof(s_urc_entries[i].prefix), prefix);
+            s_urc_entries[i].callback = cb;
+            if (copied < prefix_len) {
+                ESP_LOGW(TAG,
+                         "URC prefix truncated idx=%u src_len=%u dst_len=%u",
+                         (unsigned)i,
+                         (unsigned)prefix_len,
+                         (unsigned)sizeof(s_urc_entries[i].prefix));
+            }
+            return;
+        }
+    }
+
+    ESP_LOGE(TAG,
+             "URC register failed (table full=%u) prefix=%s",
+             (unsigned)ARRAY_SIZE(s_urc_entries),
+             prefix);
 }
 
 esp_err_t modem_at_poll_urc(uint32_t max_read_bytes) {
