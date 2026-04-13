@@ -50,6 +50,8 @@ The completed remediation spans two UI layers:
 - Frontend feature code consumes unwrapped data, while transport-level errors stay confined to the API client and parser layer.
 - The BLE OBD session layer now tracks request/response health via rolling counters and periodic log snapshots in `main/src/ble_obd.c`, but the external OBD command contract remains unchanged.
 - The firmware runtime also hardens SD log store recovery, DS3231M RTC UTC validation, offline queue replay ACK handling, and GNSS recovery before the state machine advances device state.
+- Firmware runtime policy is now centralized through shared config/NVS for product-facing cadence and safety gates (`tracking`, `parked heartbeat`, `alarm cadence`, `ignition hold`, `sleep enable`, `IMU wake enable`, `OTA minimum battery window`) instead of module-local literals.
+- Parked heartbeat wake now publishes both telemetry snapshot (`rawdata`) and runtime visibility (`status`) before returning to sleep when policy allows.
 - GNSS queries in `modem_gnss.c` now emit streak-aware observability for transport failure, parse failure, no-fix, and fix-success paths, then perform bounded self-heal repower with cooldown when failures persist.
 - The tracker state machine re-arms GNSS after LTE recovery or repeated GNSS poll failures, gating repeat re-arm attempts with cooldown to avoid modem thrash.
 - Simulator token flow and rollback/race handling were hardened to avoid replaying legacy ingestion behavior during the cutover.

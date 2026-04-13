@@ -6,6 +6,7 @@
 #include "esp_log.h"
 #include "esp_ota_ops.h"
 #include "esp_sleep.h"
+#include "sdkconfig.h"
 
 #include "nvs_config.h"
 #include "retry_manager.h"
@@ -38,9 +39,6 @@ void app_main(void) {
     esp_log_level_set("*", ESP_LOG_INFO);
     /* NimBLE info logs are very noisy during stable OBD traffic; keep only warnings/errors. */
     esp_log_level_set("NimBLE", ESP_LOG_WARN);
-    /* Global sleep gate: keep disabled for current hardware bring-up flow. */
-    util_set_sleep_enabled(false);
-
     /* Initialize NVS first because config and command updates rely on it. */
     esp_err_t err = nvs_config_init();
     if (err != ESP_OK) {
@@ -54,6 +52,45 @@ void app_main(void) {
         ESP_LOGW(TAG, "nvs_config_load failed: %s (using defaults)", esp_err_to_name(err));
         app_config_set_defaults(&config);
     }
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_KEEP_AWAKE
+    if (config.sleep_enabled) {
+        ESP_LOGW(TAG, "Field validation override: sleep disabled for continuous hardware bring-up");
+    }
+    config.sleep_enabled = false;
+#endif
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_FORCE_IMU_WAKE
+    if (!config.imu_wakeup_enabled) {
+        ESP_LOGW(TAG, "Field validation override: IMU wake enabled for hardware acceptance");
+    }
+    config.imu_wakeup_enabled = true;
+#endif
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE
+    if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_HOST)) {
+        util_copy_string(config.mqtt_host,
+                         sizeof(config.mqtt_host),
+                         CONFIG_TRACKER_FIELD_VALIDATION_MQTT_HOST);
+        util_copy_string(config.mqtt_username,
+                         sizeof(config.mqtt_username),
+                         CONFIG_TRACKER_FIELD_VALIDATION_MQTT_USERNAME);
+        util_copy_string(config.mqtt_password,
+                         sizeof(config.mqtt_password),
+                         CONFIG_TRACKER_FIELD_VALIDATION_MQTT_PASSWORD);
+        util_copy_string(config.auth_token,
+                         sizeof(config.auth_token),
+                         CONFIG_TRACKER_FIELD_VALIDATION_AUTH_TOKEN);
+        ESP_LOGW(TAG,
+                 "Field validation override: mqtt broker=%s (default TLS port) user=%s",
+                 config.mqtt_host,
+                 config.mqtt_username);
+    }
+#if CONFIG_TRACKER_FIELD_VALIDATION_DISABLE_COMMAND_SUBSCRIBE
+    if (config.command_subscribe_enabled) {
+        ESP_LOGW(TAG, "Field validation override: command subscribe disabled (publish-path validation)");
+    }
+    config.command_subscribe_enabled = false;
+#endif
+#endif
+    util_set_sleep_enabled(config.sleep_enabled);
 
     /* Compare running partition and boot partition for OTA diagnostics. */
     const esp_partition_t *running = esp_ota_get_running_partition();
@@ -79,9 +116,12 @@ void app_main(void) {
         if (wakeup == ESP_SLEEP_WAKEUP_TIMER) {
             /* Timer wakeup should perform heartbeat flow. */
             state = APP_STATE_HEARTBEAT;
-        } else if (wakeup == ESP_SLEEP_WAKEUP_EXT0) {
+        } else if (wakeup == ESP_SLEEP_WAKEUP_EXT0 && config.imu_wakeup_enabled) {
             /* IMU interrupt wakeup should enter motion alarm flow. */
             state = APP_STATE_ALARM;
+        } else if (wakeup == ESP_SLEEP_WAKEUP_EXT0) {
+            /* Fallback when IMU wake is not enabled/proven yet. */
+            state = APP_STATE_HEARTBEAT;
         }
     }
 

@@ -102,6 +102,17 @@
   - Self-heal repower is bounded by cooldown to avoid modem thrash during repeated poll failures.
   - The tracker state machine re-arms GNSS after LTE recovery or fail-streak thresholds with cooldown gating.
 
+### P2 - Firmware Runtime Completion (Phases 01-06) Complete in Code
+- Scope: centralized runtime policy for sleep/wakeup, IMU gate, LTE/GNSS/MQTT cadence contracts, BLE ignition fallback hardening, and OTA safety preconditions.
+- Milestones completed:
+  - Config/NVS now owns runtime cadence and safety knobs (driving 1s, parked heartbeat 120s, alarm cadence 3s, ignition hold 3s baseline, OTA power gate).
+  - State machine now enforces policy-based sleep gating with explicit reject reasons.
+  - Alarm + heartbeat runtime contracts are explicit (`alarm raw cadence`, `heartbeat raw + status`).
+  - Ignition inference now prioritizes OBD but keeps ADC fallback authoritative when BLE adapter is absent.
+  - OTA command flow now validates start safety window before update execution.
+- Remaining closure:
+  - Phase 07 hardware acceptance (gates A-F) remains in progress and requires real-board measurements.
+
 ## Notes
 - No remaining open tasks for accessibility remediation.
 - Login entry implementation is complete; future work can add richer marketing content or a dedicated contact/demo funnel if needed.

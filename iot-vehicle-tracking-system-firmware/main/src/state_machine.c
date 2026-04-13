@@ -41,15 +41,13 @@
  */
 
 #define OBD_MODE_CURRENT_DATA 0x01
-/* Current hardware revision has no IMU mounted; keep IMU path optional. */
-#define TRACKER_ENABLE_IMU 0
-#define TRACKER_BLE_RETRY_BACKOFF_MS 1000ULL
+#define TRACKER_BLE_RETRY_BACKOFF_MS 10000ULL
 #define TRACKER_NETWORK_RETRY_MIN_BACKOFF_MS 30000ULL
 #define TRACKER_NETWORK_RETRY_MAX_BACKOFF_MS 300000ULL
 #define TRACKER_OBD_DEBUG_LOG_INTERVAL_MS 1000ULL
 #define TRACKER_OBD_POLL_INTERVAL_MS 1200ULL
 #define TRACKER_OBD_PID_TIMEOUT_MS 700U
-#define TRACKER_IGNITION_OFF_DRAIN_FIXED_MS 3000ULL
+#define TRACKER_BLE_CONNECT_TIMEOUT_MS 12000U
 #define TRACKER_RTC_SYNC_MIN_INTERVAL_MS 60000ULL
 #define TRACKER_RTC_READ_RETRY_BACKOFF_MS 1000ULL
 #define TRACKER_GNSS_REARM_COOLDOWN_MS 15000ULL
@@ -63,6 +61,8 @@
 #define TRACKER_OBD_FAIL_ALERT_COOLDOWN_MS 300000ULL
 #define TRACKER_EVENT_CODE_OBD_CONNECT_FAILED 2001
 #define TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED 2002
+#define TRACKER_SLEEP_REJECT_LOG_INTERVAL_MS 10000ULL
+#define TRACKER_HW_DIAG_LOG_INTERVAL_MS 15000ULL
 
 /* RTC-retained context survives deep sleep and helps OTA/session continuity. */
 RTC_DATA_ATTR rtc_context_t g_rtc_context = {
@@ -95,14 +95,13 @@ static bool s_mqtt_started = false;
 #endif
 static bool s_gnss_started = false;
 static bool s_ota_confirm_checked = false;
+static bool s_ota_in_progress = false;
 static bool s_imu_available = false;
 static retry_state_t s_ble_retry = {0};
 static retry_state_t s_network_retry = {0};
 static retry_state_t s_rtc_bootstrap_retry = {0};
 static retry_state_t s_rtc_read_retry = {0};
-#if TRACKER_ENABLE_IMU
 static retry_state_t s_imu_bootstrap_retry = {0};
-#endif
 static uint64_t s_last_rtc_sync_ms = 0;
 static bool s_time_trusted = false;
 static uint64_t s_event_timestamp_ms = 0;
@@ -111,10 +110,16 @@ static bool s_lte_ever_initialized = false;
 static uint32_t s_gnss_poll_fail_streak = 0;
 static uint64_t s_last_gnss_rearm_ms = 0;
 static bool s_hw_bootstrap_done = false;
-static bool s_sleep_disabled_log_once = false;
+static uint64_t s_last_sleep_reject_log_ms = 0;
+static uint32_t s_sleep_blocked_count = 0;
+static uint32_t s_sleep_enter_count = 0;
+static uint32_t s_timer_wake_count = 0;
+static uint32_t s_imu_wake_count = 0;
+static uint32_t s_imu_false_wake_count = 0;
 static bool s_startup_system_check_log_once = false;
 static bool s_user_led_initialized = false;
 static uint64_t s_user_led_cycle_started_ms = 0;
+static uint64_t s_last_hw_diag_log_ms = 0;
 static char s_current_version[TRACKER_TARGET_VERSION_MAX_LEN] = CONFIG_APP_PROJECT_VER;
 static uint32_t s_metadata_seq_no = 0;
 static char s_boot_id[TRACKER_BOOT_ID_LEN] = {0};
@@ -154,7 +159,6 @@ static const retry_policy_t s_rtc_read_retry_policy = {
     .jitter_ms = 0,
 };
 
-#if TRACKER_ENABLE_IMU
 static const retry_policy_t s_imu_bootstrap_retry_policy = {
     .mode = RETRY_MODE_FIXED,
     .base_delay_ms = 5000,
@@ -162,7 +166,6 @@ static const retry_policy_t s_imu_bootstrap_retry_policy = {
     .max_attempts = 0,
     .jitter_ms = 0,
 };
-#endif
 
 /**
  * @brief Convert OBD RPM payload bytes to integer RPM.
@@ -266,6 +269,84 @@ static bool state_machine_can_poll_gnss(void) {
     return s_gnss_started && modem_lte_is_initialized();
 }
 
+static uint64_t state_machine_tracking_interval_ms(void) {
+    return (uint64_t)s_config.tracking_interval_s * 1000ULL;
+}
+
+static uint64_t state_machine_alarm_interval_ms(void) {
+    return (uint64_t)s_config.alarm_interval_s * 1000ULL;
+}
+
+static uint64_t state_machine_alarm_timeout_ms(void) {
+    return (uint64_t)s_config.alarm_timeout_s * 1000ULL;
+}
+
+static uint64_t state_machine_ignition_off_hold_ms(void) {
+    return (uint64_t)s_config.ignition_off_hold_ms;
+}
+
+static bool state_machine_imu_runtime_enabled(void) {
+    return s_config.imu_wakeup_enabled;
+}
+
+static bool state_machine_ota_start_is_safe(void) {
+    if (!tracker_mqtt_is_connected()) {
+        ESP_LOGW(TAG, "OTA blocked reason=mqtt_not_connected");
+        return false;
+    }
+
+    if (s_telemetry.battery_bot <= 0.0f) {
+        ESP_LOGW(TAG, "OTA blocked reason=battery_unavailable");
+        return false;
+    }
+
+    float threshold_v = (float)s_config.ota_min_battery_mv / 1000.0f;
+    if (s_telemetry.battery_bot < threshold_v) {
+        ESP_LOGW(TAG,
+                 "OTA blocked reason=power_unsafe battery=%.2f threshold=%.2f",
+                 (double)s_telemetry.battery_bot,
+                 (double)threshold_v);
+        return false;
+    }
+
+    return true;
+}
+
+static bool state_machine_can_enter_sleep(const char **out_reason) {
+    if (!s_config.sleep_enabled) {
+        if (out_reason != NULL) {
+            *out_reason = "sleep_policy_disabled";
+        }
+        return false;
+    }
+
+    if (s_ota_in_progress) {
+        if (out_reason != NULL) {
+            *out_reason = "ota_in_progress";
+        }
+        return false;
+    }
+
+    if (g_rtc_context.ota_pending_confirm) {
+        if (out_reason != NULL) {
+            *out_reason = "ota_pending_confirm";
+        }
+        return false;
+    }
+
+    if (s_telemetry.ignition) {
+        if (out_reason != NULL) {
+            *out_reason = "ignition_on";
+        }
+        return false;
+    }
+
+    if (out_reason != NULL) {
+        *out_reason = "ok";
+    }
+    return true;
+}
+
 static void state_machine_set_user_led(bool on) {
     if (PIN_USER_LED == GPIO_NUM_NC) {
         return;
@@ -295,6 +376,12 @@ static void state_machine_update_user_led(void) {
         s_user_led_initialized = true;
         s_user_led_cycle_started_ms = util_uptime_ms();
         state_machine_set_user_led(false);
+        ESP_LOGI(TAG,
+                 "User LED initialized pin=%d active_level=%d blink_period_ms=%llu on_ms=%llu",
+                 (int)PIN_USER_LED,
+                 (int)TRACKER_USER_LED_ACTIVE_LEVEL,
+                 (unsigned long long)TRACKER_USER_LED_BLINK_PERIOD_MS,
+                 (unsigned long long)TRACKER_USER_LED_ON_MS);
     }
 
     uint64_t now_ms = util_uptime_ms();
@@ -431,8 +518,11 @@ static void state_machine_bootstrap_rtc(void) {
     }
 }
 
-#if TRACKER_ENABLE_IMU
 static void state_machine_bootstrap_imu(void) {
+    if (!state_machine_imu_runtime_enabled()) {
+        return;
+    }
+
     if (s_imu_available) {
         return;
     }
@@ -448,6 +538,8 @@ static void state_machine_bootstrap_imu(void) {
         esp_err_t motion_cfg_err = imu_configure_motion_interrupt(120, 200);
         if (motion_cfg_err != ESP_OK) {
             ESP_LOGW(TAG, "imu_configure_motion_interrupt failed: %s", esp_err_to_name(motion_cfg_err));
+        } else {
+            ESP_LOGI(TAG, "IMU bootstrap ready (motion interrupt configured)");
         }
         return;
     }
@@ -465,12 +557,13 @@ static void state_machine_bootstrap_imu(void) {
              (unsigned long)s_imu_bootstrap_retry.attempts,
              (unsigned long)delay_ms);
 }
-#endif
 
 static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
     /* Always sample local board voltages first (+12V supply and backup battery). */
-    s_telemetry.battery_top = adc_read_supply_voltage();
-    s_telemetry.battery_bot = adc_read_battery_voltage();
+    float supply_raw_v = adc_read_supply_voltage();
+    float batt_raw_v = adc_read_battery_voltage();
+    s_telemetry.battery_top = supply_raw_v * TRACKER_ADC_SUPPLY_CALIB_GAIN;
+    s_telemetry.battery_bot = batt_raw_v * TRACKER_ADC_BATT_CALIB_GAIN;
     s_telemetry.vibration = s_imu_available ? imu_get_vibration_composite() : 0;
 
     /* Pull selected OBD PIDs when BLE OBD session is connected. */
@@ -517,9 +610,26 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
         s_telemetry.gnss.timestamp_ms = util_uptime_ms();
     }
 
-    /* Ignition heuristic: running engine or charging voltage detected. */
-    s_telemetry.ignition = s_telemetry.obd_rpm > 0 || s_telemetry.battery_top > 13.0f;
+    /* Ignition fallback combines OBD RPM with board-side ADC voltage threshold. */
+    float ignition_threshold_v = (float)s_config.ignition_adc_threshold_mv / 1000.0f;
+    bool adc_ignition = s_telemetry.battery_top >= ignition_threshold_v;
+    s_telemetry.ignition = s_telemetry.obd_rpm > 0 || adc_ignition;
     s_telemetry.error_code = 0;
+
+    uint64_t now_ms = util_uptime_ms();
+    if (s_last_hw_diag_log_ms == 0 || (now_ms - s_last_hw_diag_log_ms) >= TRACKER_HW_DIAG_LOG_INTERVAL_MS) {
+        ESP_LOGI(TAG,
+                 "HW diag supply=%.2fV batt=%.2fV ign=%d vib=%u lte=%d mqtt=%d ble=%d gnss_fix=%d",
+                 s_telemetry.battery_top,
+                 s_telemetry.battery_bot,
+                 s_telemetry.ignition ? 1 : 0,
+                 (unsigned)s_telemetry.vibration,
+                 modem_lte_is_connected() ? 1 : 0,
+                 tracker_mqtt_is_connected() ? 1 : 0,
+                 (s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) ? 1 : 0,
+                 s_telemetry.gnss.fix_valid ? 1 : 0);
+        s_last_hw_diag_log_ms = now_ms;
+    }
 }
 
 static bool state_machine_network_time_valid(uint64_t *out_time_ms) {
@@ -835,6 +945,12 @@ static void state_machine_try_connect_ble(void) {
     if (!retry_state_can_run(&s_ble_retry, now_ms)) {
         return;
     }
+    if ((s_ble_retry.attempts % 5U) == 0U) {
+        ESP_LOGI(TAG,
+                 "BLE connect attempt=%lu timeout_ms=%u",
+                 (unsigned long)(s_ble_retry.attempts + 1U),
+                 (unsigned int)TRACKER_BLE_CONNECT_TIMEOUT_MS);
+    }
 
     if (s_ble_ctx != NULL) {
         ble_obd_disconnect(s_ble_ctx);
@@ -853,9 +969,10 @@ static void state_machine_try_connect_ble(void) {
     }
 
     /* One connect attempt per retry window to avoid log storms. */
-    s_ble_ctx = ble_obd_connect(state_machine_obd_response_cb, NULL);
+    s_ble_ctx = ble_obd_connect(state_machine_obd_response_cb, NULL, TRACKER_BLE_CONNECT_TIMEOUT_MS);
     if (s_ble_ctx != NULL) {
         if (ble_obd_elm327_init(s_ble_ctx) == ESP_OK) {
+            ESP_LOGI(TAG, "BLE OBD connected + ELM327 ready");
             s_obd_fail_alert_emitted = false;
             s_last_obd_fail_alert_code = 0;
             s_last_obd_fail_alert_ms = 0;
@@ -925,8 +1042,8 @@ static void state_machine_try_connect_network(void) {
     }
 
 #if !TRACKER_MQTT_RUNTIME_DISABLED
-    if (!s_mqtt_started && s_gnss_started) {
-        /* Start MQTT only after GNSS power path is established to avoid early TCP/TLS race. */
+    if (s_gnss_started && (!s_mqtt_started || !tracker_mqtt_is_connected())) {
+        /* Reconnect MQTT when link drops; AT backend does not use ESP-MQTT auto-reconnect. */
         err = tracker_mqtt_connect();
         if (err != ESP_OK) {
             state_machine_schedule_network_retry(now_ms, "tracker_mqtt_connect", err);
@@ -948,7 +1065,7 @@ static void state_machine_try_connect_network(void) {
     s_prev_lte_initialized = lte_now_initialized;
 
 #if !TRACKER_MQTT_RUNTIME_DISABLED
-    if (s_config.command_subscribe_enabled) {
+    if (s_config.command_subscribe_enabled && tracker_mqtt_is_connected()) {
         err = tracker_mqtt_subscribe_commands();
         if (err != ESP_OK) {
             state_machine_schedule_network_retry(now_ms, "tracker_mqtt_subscribe_commands", err);
@@ -1052,6 +1169,17 @@ static void state_machine_process_ota_command(command_action_t action) {
     /* OTA update flow. */
     state_machine_publish_firmware_status("assigned", 0, cmd.version, cmd.job_id, "", "");
 
+    if (!state_machine_ota_start_is_safe()) {
+        state_machine_publish_firmware_status("failed",
+                                              0,
+                                              cmd.version,
+                                              cmd.job_id,
+                                              "",
+                                              "unsafe_runtime_window");
+        return;
+    }
+
+    s_ota_in_progress = true;
     if (util_ota_apply_update(&s_config, s_current_version, &cmd, &report) == ESP_OK) {
         /* Persist OTA context across reboot in RTC memory for post-boot confirm. */
         util_copy_string(g_rtc_context.ota_job_id, sizeof(g_rtc_context.ota_job_id), cmd.job_id);
@@ -1071,6 +1199,7 @@ static void state_machine_process_ota_command(command_action_t action) {
         esp_restart();
     } else {
         state_machine_publish_firmware_payload(&report);
+        s_ota_in_progress = false;
     }
 }
 
@@ -1089,7 +1218,12 @@ static void state_machine_prepare_sleep(void) {
         s_ble_ctx = NULL;
     }
 
-    modem_gnss_power_off();
+    if (s_gnss_started) {
+        esp_err_t gnss_off_err = modem_gnss_power_off();
+        if (gnss_off_err != ESP_OK) {
+            ESP_LOGW(TAG, "GNSS power-off before sleep failed: %s", esp_err_to_name(gnss_off_err));
+        }
+    }
     s_gnss_started = false;
     modem_lte_disconnect();
     // modem_power_off();
@@ -1097,9 +1231,14 @@ static void state_machine_prepare_sleep(void) {
     (void)modem_set_dtr(true);
     gpio_set_level(PIN_MODEM_PWRKEY, 0);
 
-    /* Wake by motion interrupt only when IMU path is active. */
-    if (s_imu_available) {
-        esp_sleep_enable_ext0_wakeup(PIN_LIS3DSH_INT, 1);
+    /* Wake by motion interrupt only when IMU wake policy is enabled and IMU is ready. */
+    if (state_machine_imu_runtime_enabled() && s_imu_available) {
+        esp_err_t wake_err = esp_sleep_enable_ext0_wakeup(PIN_LIS3DSH_INT, 1);
+        if (wake_err != ESP_OK) {
+            ESP_LOGW(TAG,
+                     "IMU ext0 wake arm failed: %s (timer-only fallback)",
+                     esp_err_to_name(wake_err));
+        }
     }
     esp_sleep_enable_timer_wakeup((uint64_t)s_config.heartbeat_interval_s * 1000000ULL);
 }
@@ -1117,18 +1256,25 @@ esp_err_t state_machine_init(const config_t *config) {
     memset(&s_telemetry, 0, sizeof(s_telemetry));
     s_config = *config;
     ESP_LOGI(TAG,
-             "Runtime config device=%s mqtt_host=%s mqtt_port=%u mqtt_user_set=%d",
+             "Runtime config device=%s mqtt_host=%s mqtt_port=%u apn=%s tracking=%us heartbeat=%us alarm=%us ign_hold_ms=%u sleep=%d imu_wake=%d ota_min_mv=%u",
              s_config.device_id,
              s_config.mqtt_host,
              (unsigned int)s_config.mqtt_port,
-             !util_string_empty(s_config.mqtt_username) ? 1 : 0);
+             s_config.apn,
+             (unsigned int)s_config.tracking_interval_s,
+             (unsigned int)s_config.heartbeat_interval_s,
+             (unsigned int)s_config.alarm_interval_s,
+             (unsigned int)s_config.ignition_off_hold_ms,
+             s_config.sleep_enabled ? 1 : 0,
+             s_config.imu_wakeup_enabled ? 1 : 0,
+             (unsigned int)s_config.ota_min_battery_mv);
     retry_state_reset(&s_ble_retry);
     retry_state_reset(&s_network_retry);
     retry_state_reset(&s_rtc_bootstrap_retry);
     retry_state_reset(&s_rtc_read_retry);
-#if TRACKER_ENABLE_IMU
     retry_state_reset(&s_imu_bootstrap_retry);
-#endif
+
+    util_set_sleep_enabled(s_config.sleep_enabled);
 
     if (!util_string_empty(CONFIG_APP_PROJECT_VER)) {
         util_copy_string(s_current_version, sizeof(s_current_version), CONFIG_APP_PROJECT_VER);
@@ -1138,12 +1284,10 @@ esp_err_t state_machine_init(const config_t *config) {
 
     /* Bring up local sensors, modem, and transport modules. */
     ESP_RETURN_ON_FALSE(adc_reader_init() == ESP_OK, ESP_FAIL, TAG, "adc_reader_init failed");
-#if TRACKER_ENABLE_IMU
     s_imu_available = false;
-#else
-    s_imu_available = false;
-    ESP_LOGW(TAG, "IMU init skipped (TRACKER_ENABLE_IMU=0)");
-#endif
+    if (!state_machine_imu_runtime_enabled()) {
+        ESP_LOGW(TAG, "IMU wake disabled by config (timer-only parked sleep fallback)");
+    }
     ESP_RETURN_ON_FALSE(power_mgr_init() == ESP_OK, ESP_FAIL, TAG, "power_mgr_init failed");
 
     s_time_trusted = false;
@@ -1153,6 +1297,7 @@ esp_err_t state_machine_init(const config_t *config) {
     s_lte_ever_initialized = false;
     s_gnss_poll_fail_streak = 0;
     s_last_gnss_rearm_ms = 0;
+    s_last_hw_diag_log_ms = 0;
 
     esp_err_t rtc_init_err = rtc_ds3231m_init();
     if (rtc_init_err != ESP_OK) {
@@ -1165,6 +1310,7 @@ esp_err_t state_machine_init(const config_t *config) {
         ESP_LOGI(TAG, "RTC health available=%d valid=%d", rtc_available ? 1 : 0, rtc_time_valid ? 1 : 0);
     }
 
+    modem_lte_set_apn(s_config.apn);
     modem_lte_request_connect();
     ESP_RETURN_ON_FALSE(tracker_mqtt_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "tracker_mqtt_init failed");
     ESP_RETURN_ON_FALSE(offline_queue_init() == ESP_OK, ESP_FAIL, TAG, "offline_queue_init failed");
@@ -1192,6 +1338,7 @@ esp_err_t state_machine_init(const config_t *config) {
  */
 app_state_t state_machine_run(app_state_t current_state) {
     state_machine_update_user_led();
+    util_set_sleep_enabled(s_config.sleep_enabled);
 
     switch (current_state) {
         case APP_STATE_INIT:
@@ -1210,9 +1357,7 @@ app_state_t state_machine_run(app_state_t current_state) {
             }
             state_machine_try_connect_network();
             state_machine_bootstrap_rtc();
-#if TRACKER_ENABLE_IMU
             state_machine_bootstrap_imu();
-#endif
 
             /*
              * Bring modem path first; BLE OBD connect can block for multiple seconds and would
@@ -1228,10 +1373,11 @@ app_state_t state_machine_run(app_state_t current_state) {
              * This keeps GNSS observability active even when ignition is still off.
              */
             state_machine_refresh_telemetry(lte_ready, true);
-            bool ble_connected = (s_ble_ctx != NULL) && ble_obd_is_connected(s_ble_ctx);
+            offline_queue_set_online(tracker_mqtt_is_connected());
+            offline_queue_replay_tick();
             session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
             g_rtc_context.ign_last_known = s_telemetry.ignition;
-            return (s_telemetry.ignition || ble_connected) ? APP_STATE_DRIVING : APP_STATE_PARKED;
+            return s_telemetry.ignition ? APP_STATE_DRIVING : APP_STATE_PARKED;
         }
 
         case APP_STATE_DRIVING: {
@@ -1242,9 +1388,7 @@ app_state_t state_machine_run(app_state_t current_state) {
             }
             state_machine_refresh_telemetry(true, true);
             state_machine_bootstrap_rtc();
-#if TRACKER_ENABLE_IMU
             state_machine_bootstrap_imu();
-#endif
             offline_queue_set_online(tracker_mqtt_is_connected());
             offline_queue_replay_tick();
 
@@ -1261,7 +1405,7 @@ app_state_t state_machine_run(app_state_t current_state) {
             }
 
             uint64_t now_ms = util_uptime_ms();
-            bool should_publish_raw = ((now_ms - s_last_raw_publish_ms) >= ((uint64_t)s_config.tracking_interval_s * 1000ULL)) ||
+            bool should_publish_raw = ((now_ms - s_last_raw_publish_ms) >= state_machine_tracking_interval_ms()) ||
                                       command_handler_consume_location_request();
             if (should_publish_raw && !offline_queue_should_throttle_rawdata()) {
                 state_machine_publish_rawdata();
@@ -1274,20 +1418,19 @@ app_state_t state_machine_run(app_state_t current_state) {
             state_machine_process_ota_command(action);
 
             bool tracking_enabled = command_handler_is_tracking_enabled();
-            bool ble_connected = (s_ble_ctx != NULL) && ble_obd_is_connected(s_ble_ctx);
-
-            if (!ble_connected && (!s_telemetry.ignition || !tracking_enabled) && s_ignition_off_started_ms == 0) {
+            bool ignition_active = s_telemetry.ignition && tracking_enabled;
+            if (!ignition_active && s_ignition_off_started_ms == 0) {
                 s_ignition_off_started_ms = now_ms;
                 state_machine_publish_status("stopped");
                 s_status_running = false;
             }
 
-            if (ble_connected) {
+            if (ignition_active) {
                 s_ignition_off_started_ms = 0;
             }
 
-            if (!ble_connected && s_ignition_off_started_ms != 0 &&
-                (now_ms - s_ignition_off_started_ms) >= TRACKER_IGNITION_OFF_DRAIN_FIXED_MS) {
+            if (s_ignition_off_started_ms != 0 &&
+                (now_ms - s_ignition_off_started_ms) >= state_machine_ignition_off_hold_ms()) {
                 offline_queue_stop_session(true);
                 session_mgr_mark_stopped(now_ms);
                 s_ignition_off_started_ms = 0;
@@ -1307,15 +1450,18 @@ app_state_t state_machine_run(app_state_t current_state) {
             /* Alarm mode after motion wakeup: publish event + periodic rawdata. */
             state_machine_try_connect_network();
             state_machine_refresh_telemetry(true, false);
+            offline_queue_set_online(tracker_mqtt_is_connected());
+            offline_queue_replay_tick();
             state_machine_process_ota_command(command_handler_consume_action());
 
             if (s_alarm_enter_ms == 0) {
                 s_alarm_enter_ms = util_uptime_ms();
+                s_imu_wake_count += 1;
                 state_machine_publish_event("warning", 1001, "motion_detected");
             }
 
             uint64_t now_ms = util_uptime_ms();
-            if ((now_ms - s_last_raw_publish_ms) >= 5000ULL) {
+            if ((now_ms - s_last_raw_publish_ms) >= state_machine_alarm_interval_ms()) {
                 state_machine_publish_rawdata();
             }
 
@@ -1324,7 +1470,11 @@ app_state_t state_machine_run(app_state_t current_state) {
                 return APP_STATE_DRIVING;
             }
 
-            if (!s_imu_available || !imu_motion_detected() || (now_ms - s_alarm_enter_ms) >= 300000ULL) {
+            bool alarm_timeout = (now_ms - s_alarm_enter_ms) >= state_machine_alarm_timeout_ms();
+            if (!state_machine_imu_runtime_enabled() || !s_imu_available || !imu_motion_detected() || alarm_timeout) {
+                if (!alarm_timeout) {
+                    s_imu_false_wake_count += 1;
+                }
                 s_alarm_enter_ms = 0;
                 return APP_STATE_PARKED;
             }
@@ -1334,23 +1484,40 @@ app_state_t state_machine_run(app_state_t current_state) {
 
         case APP_STATE_HEARTBEAT:
             /* Timer wake heartbeat path: one data publish then return to sleep. */
+            s_timer_wake_count += 1;
             state_machine_try_connect_network();
             state_machine_refresh_telemetry(true, false);
+            offline_queue_set_online(tracker_mqtt_is_connected());
+            offline_queue_replay_tick();
             state_machine_publish_rawdata();
+            state_machine_publish_status("heartbeat");
             state_machine_process_ota_command(command_handler_consume_action());
             return APP_STATE_SLEEP;
 
         case APP_STATE_SLEEP:
-            /* Sleep path can be globally disabled from util sleep gate. */
-            if (!util_is_sleep_enabled()) {
-                if (!s_sleep_disabled_log_once) {
-                    ESP_LOGW(TAG, "Sleep disabled by util flag, bypassing deep sleep");
-                    s_sleep_disabled_log_once = true;
+            /* Sleep path is policy-driven with explicit block reasons. */
+            const char *reason = "ok";
+            if (!state_machine_can_enter_sleep(&reason)) {
+                s_sleep_blocked_count += 1;
+                uint64_t now_ms = util_uptime_ms();
+                if (s_last_sleep_reject_log_ms == 0 ||
+                    (now_ms - s_last_sleep_reject_log_ms) >= TRACKER_SLEEP_REJECT_LOG_INTERVAL_MS) {
+                    ESP_LOGW(TAG,
+                             "Sleep blocked reason=%s blocked_count=%lu",
+                             reason,
+                             (unsigned long)s_sleep_blocked_count);
+                    s_last_sleep_reject_log_ms = now_ms;
                 }
                 return APP_STATE_CHECK_IGN;
             }
 
-            s_sleep_disabled_log_once = false;
+            s_sleep_enter_count += 1;
+            ESP_LOGI(TAG,
+                     "Sleep accepted enter_count=%lu timer_wake_count=%lu imu_wake_count=%lu false_wake_count=%lu",
+                     (unsigned long)s_sleep_enter_count,
+                     (unsigned long)s_timer_wake_count,
+                     (unsigned long)s_imu_wake_count,
+                     (unsigned long)s_imu_false_wake_count);
             state_machine_prepare_sleep();
             esp_deep_sleep_start();
             return APP_STATE_SLEEP;

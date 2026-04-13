@@ -1419,3 +1419,51 @@ I (1600203) STATE_MACHINE: mqtt status=stopped metadata mid=6b8f7b21-f231-41c1-8
 I (1675693) MODEM_LTE: AT sync fixed UART tx=17 rx=18 baud=115200 invert=OFF fmt=8N1 clk=DEFAULT
 I (1675693) MODEM_LTE: FSM WAIT_BOOT -> WAIT_RDY
 I (1675793) STATE_MACHINE: mqtt status=stopped metadata mid=10fee5c3-245a-4f7d-9dfc-7214940d0486 seq=23 boot=boot-1-d9f422ad ts=1735715558000
+
+===== monitor start port=COM6 ts=1775999929 =====
+I (73664) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (73664) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (74164) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (74164) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (74364) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (74364) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (74464) STATE_MACHINE: mqtt status=stopped metadata mid=d21c7804-7002-44d5-9e03-7ea2a1d6ec47 seq=2 boot=boot-1-8583deeb ts=1735689836000
+
+===== monitor start port=COM6 ts=1776000089 =====
+
+===== monitor start port=COM6 ts=1776000384 =====
+
+===== monitor start port=COM6 ts=1776000755 =====
+I (78544) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (78544) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (79044) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (79044) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (79244) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (79244) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (79344) STATE_MACHINE: mqtt status=stopped metadata mid=70ccd680-e691-4cfe-8aa0-0381aeabeea2 seq=2 boot=boot-1-b4069b55 ts=1735690672000
+I (151094) STATE_MACHINE: Sleep accepted enter_count=1 timer_wake_count=0 imu_wake_count=0 false_wake_count=0
+E (151094) MODEM_AT: AT UART not initialized
+
+===== monitor start port=COM6 ts=1776001132 =====
+I (75964) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (75964) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (76464) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (76464) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (76664) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (76664) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (76764) STATE_MACHINE: mqtt status=stopped metadata mid=3595e848-208e-4e9e-ad80-b820022abb07 seq=2 boot=boot-1-7adecf72 ts=1735691045000
+I (150064) STATE_MACHINE: Sleep accepted enter_count=1 timer_wake_count=0 imu_wake_count=0 false_wake_count=0
+
+===== monitor start port=COM6 ts=1776001360 =====
+
+===== monitor start port=COM6 ts=1776002209 =====
+
+===== monitor start port=COM6 ts=1776003368 =====
+I (77664) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (77664) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500 profile=INVERTED_STAGE
+I (78164) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+I (78164) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+I (78364) POWER_MGR: SIM7600 RESET pulse end gpio=35
+I (78364) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+I (78464) STATE_MACHINE: mqtt status=stopped metadata mid=4889e2a2-8732-424d-a3b1-eed806e8124a seq=2 boot=boot-1-4ace04ad ts=1735693282000
+I (156274) STATE_MACHINE: Sleep accepted enter_count=1 timer_wake_count=0 imu_wake_count=0 false_wake_count=0

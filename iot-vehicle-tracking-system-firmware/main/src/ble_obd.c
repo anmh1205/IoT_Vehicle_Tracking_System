@@ -27,6 +27,8 @@
 #define OBD_SERVICE_UUID "0x18f0"
 #define BLE_OBD_ELM327_INTER_CMD_DELAY_MS 80
 #define BLE_OBD_DIAG_LOG_INTERVAL_MS 10000U
+#define BLE_OBD_CONNECT_TIMEOUT_DEFAULT_MS 15000U
+#define BLE_OBD_CONNECT_TIMEOUT_MIN_MS 7000U
 
 /**
  * @brief BLE OBD runtime context.
@@ -142,13 +144,22 @@ static bool ble_obd_device_filter_cb(ble_mgr_ctx_t *mgr_ctx, const ble_addr_t *a
     (void)mgr_ctx;
     (void)usr_ctx;
 
+    char addr_str[BLE_ADDR_STR_LEN] = {0};
+    if (addr != NULL) {
+        (void)ble_addr_to_str(addr, addr_str);
+    } else {
+        util_copy_string(addr_str, sizeof(addr_str), "unknown");
+    }
+
     if (s_has_preferred_addr && addr != NULL) {
         if (memcmp(addr->val, s_preferred_addr.val, sizeof(addr->val)) == 0) {
+            ESP_LOGI(TAG, "BLE candidate matched preferred MAC: %s", addr_str);
             return true;
         }
         return false;
     }
 
+    ESP_LOGI(TAG, "BLE candidate discovered (service matched): %s", addr_str);
     return true;
 }
 
@@ -370,7 +381,7 @@ esp_err_t ble_obd_set_preferred_address(const char *address) {
  *
  * @return BLE OBD context on success, otherwise NULL.
  */
-ble_obd_ctx_t *ble_obd_connect(ble_obd_response_cb_t response_cb, void *usr_ctx) {
+ble_obd_ctx_t *ble_obd_connect(ble_obd_response_cb_t response_cb, void *usr_ctx, uint32_t connect_timeout_ms) {
     ble_mgr_ctx_t *mgr_ctx = ble_mgr_init(1000);
     ESP_RETURN_ON_NULL(mgr_ctx, NULL, TAG, "Failed to init BLE manager");
 
@@ -391,9 +402,15 @@ ble_obd_ctx_t *ble_obd_connect(ble_obd_response_cb_t response_cb, void *usr_ctx)
     /* Attach notification callback to RX characteristic definition. */
     s_obd_chars[1].notify_cb = ble_obd_notify_cb;
 
-    ble_mgr_status_t status = ble_mgr_connect_service(mgr_ctx, &s_obd_disc_cfg, 15000, ctx);
+    uint32_t timeout_ms = connect_timeout_ms == 0 ? BLE_OBD_CONNECT_TIMEOUT_DEFAULT_MS : connect_timeout_ms;
+    timeout_ms = MAX_VALUE(timeout_ms, BLE_OBD_CONNECT_TIMEOUT_MIN_MS);
+    ble_mgr_status_t status = ble_mgr_connect_service(mgr_ctx, &s_obd_disc_cfg, timeout_ms, ctx);
     if (status != BLE_MGR_E_OK) {
-        ESP_LOGW(TAG, "BLE connect failed: %s", ble_mgr_status_to_string(status));
+        ESP_LOGW(TAG,
+                 "BLE connect failed: %s (timeout=%lums preferred_mac=%d)",
+                 ble_mgr_status_to_string(status),
+                 (unsigned long)timeout_ms,
+                 s_has_preferred_addr ? 1 : 0);
         ble_obd_disconnect(ctx);
         return NULL;
     }

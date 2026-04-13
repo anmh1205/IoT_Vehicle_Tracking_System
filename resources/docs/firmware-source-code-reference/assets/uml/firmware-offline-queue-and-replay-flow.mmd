@@ -1,0 +1,18 @@
+flowchart TD
+    A[Payload built by data_formatter] --> B[offline_queue_enqueue]
+    B --> C{SD log enabled}
+    C -->|No| H[Return]
+    C -->|Yes| D[sd_log_store_append]
+    D --> E[queue.log and queue.dat]
+
+    F[offline_queue_replay_tick] --> G{online and MQTT connected}
+    G -->|No| H
+    G -->|Yes| I[sd_log_store_peek_next replay_seq]
+    I --> J{critical record}
+    J -->|No| K[publish and advance replay_seq]
+    J -->|Yes| L[publish and keep pending_msg_id]
+    L --> M[puback callback from mqtt_client]
+    M --> N[ack critical and advance replay_seq]
+    K --> O[retry reset]
+    N --> O
+    O --> H

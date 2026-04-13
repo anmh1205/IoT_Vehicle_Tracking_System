@@ -87,4 +87,40 @@ config TRACKER_IGNITION_OFF_DRAIN_MS
     range 500 30000
     default 3000
 
+config TRACKER_FIELD_VALIDATION_MODE
+    bool "Enable field-validation override profile"
+    default n
+
+if TRACKER_FIELD_VALIDATION_MODE
+
+config TRACKER_FIELD_VALIDATION_KEEP_AWAKE
+    bool "Disable sleep in field-validation mode"
+    default y
+
+config TRACKER_FIELD_VALIDATION_FORCE_IMU_WAKE
+    bool "Force IMU wake enabled in field-validation mode"
+    default y
+
+config TRACKER_FIELD_VALIDATION_MQTT_HOST
+    string "Field-validation MQTT host override"
+    default "mqtt.thingdock.dev"
+
+config TRACKER_FIELD_VALIDATION_MQTT_USERNAME
+    string "Field-validation MQTT username override"
+    default "device"
+
+config TRACKER_FIELD_VALIDATION_MQTT_PASSWORD
+    string "Field-validation MQTT password override"
+    default "Anmh1205"
+
+config TRACKER_FIELD_VALIDATION_AUTH_TOKEN
+    string "Field-validation payload auth token override"
+    default "TRACKER_001_Anmh1205"
+
+config TRACKER_FIELD_VALIDATION_DISABLE_COMMAND_SUBSCRIBE
+    bool "Disable command subscribe in field-validation mode"
+    default y
+
+endif
+
 endmenu

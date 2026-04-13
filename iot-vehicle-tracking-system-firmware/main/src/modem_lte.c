@@ -11,6 +11,7 @@
 
 #include "esp_log.h"
 
+#include "app_config.h"
 #include "modem_at.h"
 #include "pin_map.h"
 #include "power_mgr.h"
@@ -120,6 +121,7 @@ static const retry_policy_t s_lte_backoff_policy = {
 static bool s_rdy_seen = false;
 static uint64_t s_last_hw_recover_ms = 0;
 static uint32_t s_cpin_soft_retry_count = 0;
+static char s_active_apn[TRACKER_HOST_MAX_LEN] = CONFIG_TRACKER_MODEM_APN;
 
 static bool modem_lte_rdy_seen_in_cycle(void) {
     return s_rdy_seen;
@@ -542,6 +544,21 @@ static void modem_lte_log_registration_snapshot(void) {
     }
 }
 
+void modem_lte_set_apn(const char *apn) {
+    if (util_string_empty(apn)) {
+        return;
+    }
+
+    char next_apn[TRACKER_HOST_MAX_LEN] = {0};
+    util_copy_string(next_apn, sizeof(next_apn), apn);
+    if (strcmp(s_active_apn, next_apn) == 0) {
+        return;
+    }
+
+    util_copy_string(s_active_apn, sizeof(s_active_apn), next_apn);
+    ESP_LOGI(TAG, "APN override applied apn=%s", s_active_apn);
+}
+
 static void modem_lte_enter_backoff(uint64_t now_ms, esp_err_t err, const char *reason) {
     uint32_t delay_ms = retry_state_current_delay_ms(&s_lte_backoff_retry,
                                                      &s_lte_backoff_policy,
@@ -756,7 +773,8 @@ esp_err_t modem_lte_tick(uint64_t now_ms) {
             }
 
             if (now_ms >= s_state_deadline_ms) {
-                modem_lte_enter_backoff(now_ms, ESP_ERR_TIMEOUT, "wait_rdy_timeout");
+                ESP_LOGW(TAG, "WAIT_RDY timeout without RDY token, fallback to AT sync");
+                modem_lte_transition(MODEM_LTE_STATE_AT_SYNC, now_ms, MODEM_LTE_WAKE_DTR_SETTLE_MS);
                 return ESP_ERR_NOT_FINISHED;
             }
 
@@ -909,12 +927,14 @@ esp_err_t modem_lte_tick(uint64_t now_ms) {
 
         case MODEM_LTE_STATE_SET_PDP: {
             char pdp_cmd[96] = {0};
-            snprintf(pdp_cmd, sizeof(pdp_cmd), "AT+CGDCONT=1,\"IP\",\"%s\"\r", CONFIG_TRACKER_MODEM_APN);
+            snprintf(pdp_cmd, sizeof(pdp_cmd), "AT+CGDCONT=1,\"IP\",\"%s\"\r", s_active_apn);
             esp_err_t err = modem_lte_send_simple(pdp_cmd, "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
             if (err != ESP_OK) {
                 modem_lte_enter_recover_or_backoff(now_ms, err, "AT+CGDCONT");
                 return ESP_ERR_NOT_FINISHED;
             }
+
+            ESP_LOGI(TAG, "PDP profile configured apn=%s", s_active_apn);
 
             modem_lte_log_hw_lines_if_available();
             s_lte_initialized = true;
@@ -991,9 +1011,21 @@ esp_err_t modem_lte_tick(uint64_t now_ms) {
         }
 
         case MODEM_LTE_STATE_PDP_IP_CHECK: {
-            esp_err_t err = modem_lte_send_simple("AT+CGPADDR=1\r", "+CGPADDR:", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
-            if (err != ESP_OK) {
-                modem_lte_enter_recover_or_backoff(now_ms, err, "AT+CGPADDR=1");
+            char response[256] = {0};
+            esp_err_t err = modem_at_send("AT+CGPADDR=1\r",
+                                          response,
+                                          sizeof(response),
+                                          MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
+            bool has_cgpaddr = err == ESP_OK && strstr(response, "+CGPADDR:") != NULL;
+            if (has_cgpaddr) {
+                char preview[97] = {0};
+                modem_lte_response_preview(response, preview, sizeof(preview));
+                ESP_LOGI(TAG, "PDP IP check response=\"%s\"", preview);
+            }
+            if (!has_cgpaddr) {
+                modem_lte_enter_recover_or_backoff(now_ms,
+                                                   err == ESP_OK ? ESP_FAIL : err,
+                                                   "AT+CGPADDR=1");
                 return ESP_ERR_NOT_FINISHED;
             }
 
@@ -1038,6 +1070,7 @@ esp_err_t modem_lte_tick(uint64_t now_ms) {
             return ESP_ERR_NOT_FINISHED;
 
         case MODEM_LTE_STATE_CONNECTED:
+            (void)modem_at_poll_urc(MODEM_LTE_URC_POLL_MAX_BYTES);
             return s_lte_connected ? ESP_OK : ESP_ERR_NOT_FINISHED;
 
         default:

@@ -30,6 +30,13 @@ esp_err_t modem_lte_connect(void);
 void modem_lte_request_connect(void);
 
 /**
+ * @brief Override PDP APN used in `AT+CGDCONT`.
+ *
+ * @param apn APN string. Empty/NULL keeps previous value.
+ */
+void modem_lte_set_apn(const char *apn);
+
+/**
  * @brief Advance LTE connect workflow one bounded step.
  *
  * @param now_ms Current uptime in milliseconds.

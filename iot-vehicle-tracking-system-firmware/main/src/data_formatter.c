@@ -236,7 +236,15 @@ char *data_format_firmware(const config_t *cfg,
     }
     uint64_t effective_ts_ms = timestamp_ms == 0 ? util_uptime_ms() : timestamp_ms;
 
-    cJSON_AddStringToObject(root, "jobId", status->job_id);
+    const char *job_id = status->job_id;
+    if (util_string_empty(job_id)) {
+        job_id = boot_id;
+    }
+    if (util_string_empty(job_id)) {
+        job_id = "boot";
+    }
+
+    cJSON_AddStringToObject(root, "jobId", job_id);
     cJSON_AddStringToObject(root, "status", status->status);
     cJSON_AddNumberToObject(root, "progress", status->progress);
     cJSON_AddStringToObject(root, "targetVersion", status->target_version);

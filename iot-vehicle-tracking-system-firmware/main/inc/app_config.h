@@ -30,6 +30,10 @@
 #define TRACKER_PARTITION_MAX_LEN 32
 /** @brief Length of SHA-256 hex string with null terminator. */
 #define TRACKER_SHA256_HEX_LEN 65
+/** @brief ADC calibration gain for +12V supply channel (measured 12.2V vs raw 11.96V). */
+#define TRACKER_ADC_SUPPLY_CALIB_GAIN 1.02007f
+/** @brief ADC calibration gain for battery channel (measured 4.09V vs raw 4.01V). */
+#define TRACKER_ADC_BATT_CALIB_GAIN 1.01995f
 
 /**
  * @brief Runtime configuration persisted in NVS and used by all modules.
@@ -51,6 +55,20 @@ typedef struct {
     uint16_t heartbeat_interval_s;
     /** Interval between raw telemetry uploads while driving (seconds). */
     uint16_t tracking_interval_s;
+    /** Interval between alarm-mode raw telemetry uploads (seconds). */
+    uint16_t alarm_interval_s;
+    /** Delay before entering parked/sleep flow after ignition-off (milliseconds). */
+    uint16_t ignition_off_hold_ms;
+    /** Maximum time to keep alarm mode active without sustained motion (seconds). */
+    uint16_t alarm_timeout_s;
+    /** Minimum battery-cell voltage required before accepting OTA start (millivolts). */
+    uint16_t ota_min_battery_mv;
+    /** Supply-voltage threshold for ADC ignition fallback (millivolts). */
+    uint16_t ignition_adc_threshold_mv;
+    /** Enable deep-sleep policy when runtime is eligible. */
+    bool sleep_enabled;
+    /** Enable IMU motion wakeup path when hardware proof is available. */
+    bool imu_wakeup_enabled;
     /** Preferred OBD BLE peripheral address. Empty means auto-discover. */
     char obd2_ble_address[TRACKER_MAC_ADDR_STR_LEN];
     /** Enable command topic subscription from cloud. */

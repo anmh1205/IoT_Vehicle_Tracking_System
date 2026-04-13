@@ -4,11 +4,10 @@
 
 #include "app_config.h"
 #include "esp_err.h"
-#include_next "mqtt_client.h"
 
 /**
  * @file mqtt_client.h
- * @brief MQTT client wrapper for tracker topics and command callbacks.
+ * @brief MQTT wrapper for tracker topics and command callbacks.
  */
 
 /**

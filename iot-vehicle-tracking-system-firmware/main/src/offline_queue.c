@@ -16,6 +16,7 @@
 
 static const char *TAG = "OFFLINE_QUEUE";
 #define OFFLINE_QUEUE_SD_MOUNT_RETRY_MS 30000ULL
+#define OFFLINE_QUEUE_AUTH_TOKEN_REPLAY "\"auth_token\":\"TRACKER_001_Anmh1205\""
 
 typedef struct {
     bool initialized;
@@ -104,11 +105,107 @@ static void offline_queue_try_mount(uint64_t now_ms) {
              (unsigned long)delay_ms);
 }
 
+static bool offline_queue_replace_fragment(char *payload,
+                                           size_t payload_len,
+                                           const char *needle,
+                                           const char *replacement) {
+    if (payload == NULL || payload_len == 0 || needle == NULL || replacement == NULL) {
+        return false;
+    }
+
+    char *match = strstr(payload, needle);
+    if (match == NULL) {
+        return false;
+    }
+
+    size_t old_len = strlen(needle);
+    size_t new_len = strlen(replacement);
+    size_t current_len = strlen(payload);
+    if (new_len > old_len && (current_len + (new_len - old_len)) >= payload_len) {
+        ESP_LOGW(TAG, "payload sanitize skipped (buffer too small)");
+        return false;
+    }
+
+    size_t tail_len = strlen(match + old_len);
+    if (new_len != old_len) {
+        memmove(match + new_len, match + old_len, tail_len + 1);
+    }
+    memcpy(match, replacement, new_len);
+    return true;
+}
+
+static const char *offline_queue_payload_for_publish(const sd_log_record_t *rec,
+                                                     char *scratch_payload,
+                                                     size_t scratch_len) {
+    ESP_RETURN_ON_FALSE(rec != NULL, "", TAG, "record null");
+    ESP_RETURN_ON_FALSE(scratch_payload != NULL && scratch_len > 0, rec->payload, TAG, "scratch invalid");
+
+    bool needs_auth_patch = strstr(rec->payload, "\"auth_token\":\"device-secret-token\"") != NULL ||
+                            strstr(rec->payload, "\"auth_token\":\"Anmh1205\"") != NULL;
+    bool needs_job_patch = rec->type == OFFLINE_RECORD_FIRMWARE &&
+                           strstr(rec->payload, "\"jobId\":\"\"") != NULL;
+    if (!needs_auth_patch && !needs_job_patch) {
+        return rec->payload;
+    }
+
+    util_copy_string(scratch_payload, scratch_len, rec->payload);
+
+    bool patched = false;
+    if (needs_auth_patch) {
+        bool replaced = false;
+        replaced |= offline_queue_replace_fragment(scratch_payload,
+                                                   scratch_len,
+                                                   "\"auth_token\":\"device-secret-token\"",
+                                                   OFFLINE_QUEUE_AUTH_TOKEN_REPLAY);
+        replaced |= offline_queue_replace_fragment(scratch_payload,
+                                                   scratch_len,
+                                                   "\"auth_token\":\"Anmh1205\"",
+                                                   OFFLINE_QUEUE_AUTH_TOKEN_REPLAY);
+        patched |= replaced;
+    }
+    if (needs_job_patch) {
+        patched |= offline_queue_replace_fragment(scratch_payload,
+                                                  scratch_len,
+                                                  "\"jobId\":\"\"",
+                                                  "\"jobId\":\"replay\"");
+    }
+    return patched ? scratch_payload : rec->payload;
+}
+
+static bool offline_queue_is_stale_firmware_record(const sd_log_record_t *rec) {
+    if (rec == NULL || rec->type != OFFLINE_RECORD_FIRMWARE) {
+        return false;
+    }
+
+    const char *payload = rec->payload;
+    if (strstr(payload, "\"status\":\"success\"") == NULL) {
+        return false;
+    }
+    if (strstr(payload, "\"targetVersion\":\"unknown\"") == NULL) {
+        return false;
+    }
+    if (strstr(payload, "\"currentVersion\":\"unknown\"") == NULL) {
+        return false;
+    }
+
+    return strstr(payload, "\"jobId\":\"replay\"") != NULL ||
+           strstr(payload, "\"jobId\":\"\"") != NULL ||
+           strstr(payload, "\"jobId\":\"boot\"") != NULL;
+}
+
 static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
     const char *topic = offline_queue_topic_from_type((offline_record_type_t)rec->type);
     int qos = rec->critical ? 1 : 0;
-    int msg_id = tracker_mqtt_publish_with_msg_id(topic, rec->payload, qos);
+    char payload_scratch[sizeof(rec->payload)] = {0};
+    const char *payload = offline_queue_payload_for_publish(rec, payload_scratch, sizeof(payload_scratch));
+    int msg_id = tracker_mqtt_publish_with_msg_id(topic, payload, qos);
     if (msg_id < 0) {
+        ESP_LOGW(TAG,
+                 "replay publish failed seq=%lu type=%u qos=%d topic=%s",
+                 (unsigned long)rec->seq,
+                 (unsigned int)rec->type,
+                 qos,
+                 topic);
         return ESP_FAIL;
     }
 
@@ -116,6 +213,13 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
         telemetry_counters_inc_replay_success();
         s_ctx.pending_msg_id = -1;
         s_ctx.pending_seq = 0;
+        ESP_LOGI(TAG,
+                 "replay publish ok seq=%lu type=%u qos=%d topic=%s msg_id=%d",
+                 (unsigned long)rec->seq,
+                 (unsigned int)rec->type,
+                 qos,
+                 topic,
+                 msg_id);
         return sd_log_store_set_replay_seq(rec->seq + 1);
     }
 
@@ -128,6 +232,13 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
         s_ctx.acked_msg_id = -1;
     }
     taskEXIT_CRITICAL(&s_ctx.ack_lock);
+    ESP_LOGI(TAG,
+             "replay publish pending-ack seq=%lu type=%u qos=%d topic=%s msg_id=%d",
+             (unsigned long)rec->seq,
+             (unsigned int)rec->type,
+             qos,
+             topic,
+             msg_id);
     return ESP_OK;
 }
 
@@ -313,6 +424,18 @@ void offline_queue_replay_tick(void) {
     if (rec.critical && rec.seq <= meta.ack_seq_critical) {
         (void)sd_log_store_set_replay_seq(rec.seq + 1);
         return;
+    }
+
+    if (offline_queue_is_stale_firmware_record(&rec)) {
+        if (sd_log_store_ack_critical_and_advance_replay(rec.seq, rec.seq + 1) == ESP_OK) {
+            telemetry_counters_inc_replay_success();
+            ESP_LOGI(TAG,
+                     "replay skip stale firmware seq=%lu job=boot/replay",
+                     (unsigned long)rec.seq);
+            retry_state_reset(&s_ctx.replay_retry);
+            return;
+        }
+        telemetry_counters_inc_replay_retry();
     }
 
     if (offline_queue_publish_record(&rec) == ESP_OK) {

@@ -55,10 +55,11 @@ esp_err_t ble_obd_set_preferred_address(const char *address);
  *
  * @param response_cb Callback for decoded OBD responses.
  * @param usr_ctx User context forwarded to callback.
+ * @param connect_timeout_ms Discovery/connect timeout in milliseconds.
  *
  * @return Opaque context pointer on success, otherwise NULL.
  */
-ble_obd_ctx_t *ble_obd_connect(ble_obd_response_cb_t response_cb, void *usr_ctx);
+ble_obd_ctx_t *ble_obd_connect(ble_obd_response_cb_t response_cb, void *usr_ctx, uint32_t connect_timeout_ms);
 
 /**
  * @brief Disconnect and release BLE OBD context.

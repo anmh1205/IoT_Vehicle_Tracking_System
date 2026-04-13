@@ -1,5 +1,15 @@
 # Project Changelog
 
+## 2026-04-12
+### Firmware Runtime Completion - Phases 01-06 (Completed in Code, Hardware Validation Pending)
+- Centralized runtime timing and policy fields in firmware config/NVS (`tracking`, `heartbeat`, `alarm`, `ignition hold`, `sleep`, `IMU wake`, OTA power gate, ADC ignition threshold) so product-facing cadence no longer depends on scattered literals.
+- Added legacy NVS config migration path that preserves identity/credentials and replaces legacy default cadence drift with current runtime defaults.
+- Updated command handling so `update_config` only mutates approved runtime knobs with bounded validation and persists only valid config states.
+- Reworked FSM runtime behavior: parked heartbeat now publishes `rawdata + status`, alarm cadence follows config, ignition fallback no longer depends on BLE connection, and sleep rejects emit explicit reason logs.
+- Added OTA start safety gate (`mqtt connected + minimum battery voltage`) and blocked unsafe OTA windows instead of attempting updates blindly.
+- Added timer-only fallback behavior when IMU wake is not enabled/proven and bounded BLE connect impact via reduced connect timeout and longer retry backoff.
+- Validation status: local ESP-IDF build command could not run in this environment because `idf.py` is not installed; real-hardware acceptance gates remain tracked in firmware runtime plan Phase 07.
+
 ## 2026-04-10
 ### MQTT Device Simulator and VPS Fix-Loop Automation (Completed)
 - Added deterministic MQTT device simulator artifacts under `resources/mock-data/scripts/` and `resources/mock-data/simulator-specs/` for seeded publish, dry-run, replay, and fault-injection workflows.

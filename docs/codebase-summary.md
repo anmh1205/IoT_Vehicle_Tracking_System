@@ -15,6 +15,9 @@ _This note is derived from `repomix-output.xml` generated at the root of the rep
 - The current firmware hardening work now also covers SD log store recovery, DS3231M RTC UTC-safe validation, offline queue replay ACK handling, and state machine integration.
 - GNSS reliability now includes streak-aware observability in `main/src/modem_gnss.c`, bounded self-heal repower, and tracker-level re-arm logic in `main/src/state_machine.c` after LTE recovery or repeated GNSS poll failures.
 - The current BLE OBD session layer in `main/src/ble_obd.c` now includes diagnostic counters and periodic log instrumentation for request volume, response validity, timeouts, and RX overflow handling.
+- Runtime timing/policy control is centralized through `main/inc/app_config.h` + `main/src/nvs_config.c` + `main/src/command_handler.c`, including cadence and safety gates for sleep/IMU/OTA.
+- The state machine now uses config-backed cadence and policy for driving, parked heartbeat, alarm mode, ignition hold delay, and sleep eligibility reasons; parked heartbeat now publishes both `rawdata` and `status`.
+- OTA command start is now guarded by runtime safety preconditions (MQTT readiness + minimum battery threshold) before download/install is attempted.
 - The firmware still targets the SIMCom SIM7600CE-T LTE+GNSS modem (auto-mode `AT+CNMP=2`, APN `internet`, GNSS via `AT+CGNSINF`/`AT+CGNSTST`), simplifying the architecture by removing the legacy A7670C + u-blox NEO-M8N split while keeping the existing UART pin mapping on ESP32-S3.
 
 ## Dashboard UX & data consistency

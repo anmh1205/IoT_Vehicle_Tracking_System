@@ -22,7 +22,7 @@
 /** @brief Modem sleep handshake pin (MCU -> modem, SIM-DTR). */
 #define PIN_MODEM_DTR GPIO_NUM_NC
 /** @brief User LED pin (MCU -> USER-LED). */
-#define PIN_USER_LED GPIO_NUM_21
+#define PIN_USER_LED GPIO_NUM_15
 /** @brief Modem power-key control pin (MCU -> modem, SIM7600 PWR-KEY). */
 #define PIN_MODEM_PWRKEY GPIO_NUM_34
 /** @brief Modem hardware reset control pin (MCU -> modem, SIM7600 RESET). */
