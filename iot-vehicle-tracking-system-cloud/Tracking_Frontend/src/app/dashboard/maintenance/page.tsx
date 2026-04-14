@@ -353,6 +353,7 @@ const MaintenancePage = () => {
             searchKey="vehicleId"
             searchPlaceholder="Tìm phương tiện..."
             isLoading={maint.isLoading}
+            pagination={false}
           />
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-muted-foreground">

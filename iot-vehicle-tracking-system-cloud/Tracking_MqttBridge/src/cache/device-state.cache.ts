@@ -1,5 +1,3 @@
-import { logger } from '../infrastructure/logger';
-
 interface DeviceState {
   status: 'online' | 'offline' | 'running' | 'stopped';
   sessionId: number | null;
@@ -7,8 +5,6 @@ interface DeviceState {
 }
 
 const deviceStates = new Map<string, DeviceState>();
-
-let sessionCounter = Date.now();
 
 /**
  * Get the cached status of a device.
@@ -31,26 +27,6 @@ export const setStatus = (
     sessionId: sessionId !== undefined ? sessionId : (existing?.sessionId ?? null),
     lastSeenAt: Date.now(),
   });
-};
-
-/**
- * Get the current session ID for a device, or create a new one if none exists.
- * Returns [sessionId, isNew] tuple.
- */
-export const getOrCreateSession = (deviceId: string): [number, boolean] => {
-  const state = deviceStates.get(deviceId);
-
-  if (state?.sessionId) {
-    return [state.sessionId, false];
-  }
-
-  sessionCounter += 1;
-  const newSessionId = sessionCounter;
-
-  setStatus(deviceId, state?.status ?? 'online', newSessionId);
-  logger.debug(`Created new session ${newSessionId} for device ${deviceId}`);
-
-  return [newSessionId, true];
 };
 
 /**

@@ -26,6 +26,12 @@ import { DriverDetailModal } from '@/features/drivers/components/driver-detail-m
 
 const PAGE_SIZE = 20;
 
+const getDriverId = (item: any): number | null => {
+  const candidate = item?.id ?? item?.driverId ?? item?.driver_id ?? null;
+  const parsed = Number(candidate);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+};
+
 const DriversPage = () => {
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any | null>(null);
@@ -295,7 +301,7 @@ const DriversPage = () => {
       <DriverDetailModal
         open={Boolean(detailItem)}
         onOpenChange={(value) => !value && setDetailItem(null)}
-        driverId={detailItem?.id ?? null}
+        driverId={getDriverId(detailItem)}
       />
 
       <ConfirmDialog

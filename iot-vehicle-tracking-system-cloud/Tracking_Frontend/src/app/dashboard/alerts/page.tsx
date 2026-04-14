@@ -183,6 +183,7 @@ const AlertsPage = () => {
         searchKey="title"
         searchPlaceholder="Tìm cảnh báo..."
         isLoading={alerts.isLoading}
+        pagination={false}
         toolbar={
           <AlertFilters
             severity={severity}

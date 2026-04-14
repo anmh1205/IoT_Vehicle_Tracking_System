@@ -49,6 +49,20 @@ const InfoRow = ({
   </div>
 );
 
+const normalizeViolationDetail = (payload: any) => {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    !Array.isArray(payload) &&
+    'data' in payload &&
+    payload.data &&
+    typeof payload.data === 'object'
+  ) {
+    return payload.data;
+  }
+  return payload;
+};
+
 const hasLocation = (lat: number | null, lon: number | null) =>
   lat !== null &&
   lon !== null &&
@@ -67,7 +81,7 @@ export const ViolationDetailModal = ({
 }) => {
   const query = useQuery({
     queryKey: ['violation-detail', violationId],
-    queryFn: () => violationServices.getById(violationId as number),
+    queryFn: () => violationServices.getById(violationId as number).then(normalizeViolationDetail),
     enabled: open && violationId !== null,
   });
 

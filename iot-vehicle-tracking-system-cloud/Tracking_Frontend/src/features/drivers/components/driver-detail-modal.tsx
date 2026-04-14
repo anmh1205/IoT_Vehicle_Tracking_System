@@ -39,6 +39,20 @@ const InfoRow = ({
   </div>
 );
 
+const normalizeDriverDetail = (payload: any) => {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    !Array.isArray(payload) &&
+    'data' in payload &&
+    payload.data &&
+    typeof payload.data === 'object'
+  ) {
+    return payload.data;
+  }
+  return payload;
+};
+
 export const DriverDetailModal = ({
   open,
   onOpenChange,
@@ -50,7 +64,7 @@ export const DriverDetailModal = ({
 }) => {
   const detailQuery = useQuery({
     queryKey: ['driver-detail', driverId],
-    queryFn: () => driverServices.getById(driverId as number),
+    queryFn: () => driverServices.getById(driverId as number).then(normalizeDriverDetail),
     enabled: open && driverId !== null,
   });
 

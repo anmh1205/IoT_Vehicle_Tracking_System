@@ -1,9 +1,13 @@
 import { statusSchema } from '../validators/payload.validator';
-import { updateDeviceStatus } from '../infrastructure/database';
+import {
+  completeDeviceSession,
+  ensureDeviceSession,
+  updateDeviceStatus,
+} from '../infrastructure/database';
 import { verifyDeviceToken } from '../services/device-auth.service';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
-import { getStatus, setStatus, getOrCreateSession, clearSession } from '../cache/device-state.cache';
+import { clearSession, getStatus, setStatus } from '../cache/device-state.cache';
 import { logger } from '../infrastructure/logger';
 import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 
@@ -75,7 +79,9 @@ export const handleStatus = async (
   }
 
   if (payload.status === 'running') {
-    const [sessionId, isNewSession] = getOrCreateSession(payload.device_id);
+    const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs);
+    const sessionId = ensuredSession.sessionId;
+    const isNewSession = ensuredSession.isNew;
     setStatus(payload.device_id, 'running', sessionId);
 
     await updateDeviceStatus(payload.device_id, 'running');
@@ -113,8 +119,13 @@ export const handleStatus = async (
       `Device ${payload.device_id}: ${previousStatus} -> running (session=${sessionId})`,
     );
   } else if (payload.status === 'stopped') {
-    const endedSessionId = clearSession(payload.device_id);
-    setStatus(payload.device_id, 'stopped');
+    const endedSessionId = await completeDeviceSession(
+      payload.device_id,
+      timestampMs,
+      previousState?.sessionId,
+    );
+    clearSession(payload.device_id);
+    setStatus(payload.device_id, 'stopped', null);
 
     await updateDeviceStatus(payload.device_id, 'stopped');
 
