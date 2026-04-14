@@ -133,17 +133,24 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DOCKERHUB_USERNAME,SERVICE_ENV_CONTENT,SERVICE_DIR,COMPOSE_FILE,SERVICE_NAME,HEALTHCHECK_URL
+          envs: DOCKERHUB_USERNAME,SERVICE_ENV_CONTENT,SERVICE_ENV_OVERRIDES,SERVICE_DIR,COMPOSE_FILE,SERVICE_NAME,HEALTHCHECK_URL
           script: |
             chmod +x /opt/tracking/scripts/deploy/bootstrap-vps.sh
             chmod +x /opt/tracking/scripts/deploy/deploy-service.sh
             export DOCKERHUB_USERNAME="$DOCKERHUB_USERNAME"
             export SERVICE_ENV_CONTENT="$SERVICE_ENV_CONTENT"
+            export SERVICE_ENV_OVERRIDES="$SERVICE_ENV_OVERRIDES"
             /opt/tracking/scripts/deploy/bootstrap-vps.sh "$SERVICE_DIR" "$COMPOSE_FILE"
             /opt/tracking/scripts/deploy/deploy-service.sh "$SERVICE_DIR" "$COMPOSE_FILE" "$SERVICE_NAME" "$HEALTHCHECK_URL"
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           SERVICE_ENV_CONTENT: ${{ secrets.FRONTEND_UAT_ENV_FILE }}
+          SERVICE_ENV_OVERRIDES: |
+            NEXT_PUBLIC_API_URL=https://api.thingdock.dev
+            NEXT_PUBLIC_WS_URL=https://api.thingdock.dev
+            NEXT_PUBLIC_WS_PATH=/ws
+            NEXT_PUBLIC_MQTT_HOST=mqtt.thingdock.dev
+            NEXT_PUBLIC_MQTT_WS_PORT=8083
           SERVICE_DIR: /opt/tracking/Tracking_Frontend
           COMPOSE_FILE: docker-compose.uat.yml
           SERVICE_NAME: frontend

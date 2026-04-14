@@ -30,7 +30,12 @@ if [ ! -f "$ENV_FILE" ]; then
   : > "$ENV_FILE"
 fi
 
-if [ -n "${SERVICE_ENV_CONTENT:-}" ]; then
+apply_env_block() {
+  local env_content="${1:-}"
+  if [ -z "$env_content" ]; then
+    return 0
+  fi
+
   cp "$ENV_FILE" "$ENV_FILE.bak"
 
   managed_keys_file="$(mktemp)"
@@ -63,6 +68,13 @@ if [ -n "${SERVICE_ENV_CONTENT:-}" ]; then
   fi
 
   rm -f "$managed_keys_file" "$managed_lines_file" "$env_preserved_file"
+}
+
+apply_env_block "${SERVICE_ENV_CONTENT:-}"
+apply_env_block "${SERVICE_ENV_OVERRIDES:-}"
+
+if [ -n "${SERVICE_ENV_CONTENT:-}" ] || [ -n "${SERVICE_ENV_OVERRIDES:-}" ]; then
+  :
 fi
 
 if [ -f "$SERVICE_DIR/.env.example" ]; then
