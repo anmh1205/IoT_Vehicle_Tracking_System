@@ -208,7 +208,16 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        SELECT context
        FROM event_logs
        WHERE event_logs.device_id = d.device_id
-         AND event_logs.event_type = 'rawdata'
+         AND (
+           event_logs.event_type::text IN ('rawdata', 'raw_data', 'telemetry', 'device_data')
+           OR event_logs.context ? 'speed'
+           OR event_logs.context ? 'spd'
+           OR event_logs.context ? 'battery'
+           OR event_logs.context ? 'battery_top'
+           OR event_logs.context ? 'batt'
+           OR event_logs.context ? 'temperature'
+           OR event_logs.context ? 'temp'
+         )
        ORDER BY server_timestamp DESC
        LIMIT 1
      ) el ON true

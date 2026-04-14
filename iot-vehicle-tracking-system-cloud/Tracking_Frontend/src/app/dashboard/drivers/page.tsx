@@ -61,7 +61,7 @@ const DriversPage = () => {
     queryFn: () =>
       tripServices.getList({
         page: 1,
-        limit: 500,
+        limit: 100,
         sortBy: 'actualStart',
         sortOrder: 'desc',
       }),

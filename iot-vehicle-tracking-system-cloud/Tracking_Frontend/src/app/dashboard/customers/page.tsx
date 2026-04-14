@@ -429,7 +429,7 @@ const CustomersPage = () => {
     queryFn: () =>
       vehicleServices.getList({
         page: 1,
-        limit: 500,
+        limit: 100,
         sortBy: 'updatedAt',
         sortOrder: 'desc',
       }),
