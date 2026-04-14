@@ -52,7 +52,7 @@ apply_env_block() {
     key="${line%%=*}"
     printf '%s\n' "$key" >> "$managed_keys_file"
     printf '%s\n' "$line" >> "$managed_lines_file"
-  done <<< "$SERVICE_ENV_CONTENT"
+  done <<< "$env_content"
 
   if [ -s "$managed_keys_file" ]; then
     awk -F= 'NR==FNR {keys[$0]=1; next} {

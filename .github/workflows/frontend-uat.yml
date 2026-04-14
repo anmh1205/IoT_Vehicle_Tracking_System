@@ -47,12 +47,12 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/tracking-frontend:uat
             ${{ secrets.DOCKERHUB_USERNAME }}/tracking-frontend:latest
           build-args: |
-            NEXT_PUBLIC_API_URL=${{ (startsWith(secrets['NEXT_PUBLIC_API_URL'], 'http://') || startsWith(secrets['NEXT_PUBLIC_API_URL'], 'https://')) && secrets['NEXT_PUBLIC_API_URL'] || secrets.NEXT_PUBLIC_API_BASE_URL }}
-            NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
-            NEXT_PUBLIC_WS_URL=${{ secrets.NEXT_PUBLIC_WS_URL }}
-            NEXT_PUBLIC_WS_PATH=${{ secrets.NEXT_PUBLIC_WS_PATH }}
-            NEXT_PUBLIC_MQTT_HOST=${{ secrets.NEXT_PUBLIC_MQTT_HOST }}
-            NEXT_PUBLIC_MQTT_WS_PORT=${{ secrets.NEXT_PUBLIC_MQTT_WS_PORT }}
+            NEXT_PUBLIC_API_URL=https://api.thingdock.dev
+            NEXT_PUBLIC_API_BASE_URL=https://api.thingdock.dev
+            NEXT_PUBLIC_WS_URL=https://api.thingdock.dev
+            NEXT_PUBLIC_WS_PATH=/ws
+            NEXT_PUBLIC_MQTT_HOST=mqtt.thingdock.dev
+            NEXT_PUBLIC_MQTT_WS_PORT=8083
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
