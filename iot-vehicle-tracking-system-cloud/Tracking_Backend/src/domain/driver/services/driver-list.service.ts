@@ -4,6 +4,7 @@ import type {
   DriverListQuery,
   DriverPublic,
 } from '@/domain/driver/types/driver.types';
+import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 
 const sanitizeDriver = (d: Driver): DriverPublic => ({
   id: d.id,
@@ -31,8 +32,24 @@ export const listDrivers = async (
 }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
+  let result: { drivers: Driver[]; total: number };
 
-  const result = await driverRepo.findAll(query);
+  try {
+    result = await driverRepo.findAll(query);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      return {
+        items: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+        },
+      };
+    }
+    throw error;
+  }
 
   return {
     items: result.drivers.map(sanitizeDriver),

@@ -9,7 +9,7 @@ export interface DevicePosition {
   speed: number;
   heading: number;
   status: DeviceMapStatus;
-  timestamp: number;
+  timestamp: number | null;
   battery?: number | null;
   vibration?: number | null;
   temperature?: number | null;

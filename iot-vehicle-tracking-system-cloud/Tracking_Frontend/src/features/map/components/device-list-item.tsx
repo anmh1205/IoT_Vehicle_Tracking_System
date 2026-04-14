@@ -1,7 +1,22 @@
 'use client';
-import { cn } from '@/lib/utils';
-import { MAP_STATUS_LABELS } from '@/features/map/constants/map-config';
+
+import { Badge } from '@/components/ui/badge';
+import { hasValidMapCoordinates, MAP_STATUS_LABELS } from '@/features/map/constants/map-config';
 import type { DevicePosition } from '@/features/map/types';
+import { formatRelative } from '@/lib/utils/date/format';
+import { cn } from '@/lib/utils';
+
+const STATUS_VARIANTS: Record<
+  DevicePosition['status'],
+  'default' | 'secondary' | 'destructive' | 'outline'
+> = {
+  running: 'default',
+  online: 'secondary',
+  stopped: 'outline',
+  disconnected: 'outline',
+  error: 'destructive',
+};
+
 export const DeviceListItem = ({
   device,
   active,
@@ -16,16 +31,31 @@ export const DeviceListItem = ({
       type="button"
       onClick={onClick}
       className={cn(
-        'w-full rounded-lg border px-3 py-2 text-left transition-colors hover:bg-muted',
-        active && 'border-primary bg-primary/5',
+        'w-full rounded-xl border px-3 py-3 text-left transition-colors hover:bg-muted/60',
+        active && 'border-primary bg-primary/5 shadow-sm',
       )}
     >
-      <div className="flex items-center justify-between gap-2">
-        <p className="line-clamp-1 text-sm font-semibold">{device.deviceName}</p>
-        <span className="text-xs text-muted-foreground">{device.speed} km/h</span>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="line-clamp-1 text-sm font-semibold">{device.deviceName}</p>
+          <p className="line-clamp-1 text-xs text-muted-foreground">
+            {device.vehiclePlate ?? 'Chưa gán biển số'} • {device.deviceId}
+          </p>
+        </div>
+        <Badge variant={STATUS_VARIANTS[device.status]}>{MAP_STATUS_LABELS[device.status]}</Badge>
       </div>
-      <p className="text-xs text-muted-foreground">{device.deviceId}</p>
-      <p className="mt-1 text-xs">Trạng thái: {MAP_STATUS_LABELS[device.status]}</p>
+
+      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span>Tốc độ {device.speed} km/h</span>
+        <span>
+          {hasValidMapCoordinates(device)
+            ? `${device.lat.toFixed(4)}, ${device.lon.toFixed(4)}`
+            : 'Chưa có tọa độ hợp lệ'}
+        </span>
+        <span>
+          {device.timestamp ? `Cập nhật ${formatRelative(device.timestamp)}` : 'Chưa có mốc thời gian'}
+        </span>
+      </div>
     </button>
   );
 };

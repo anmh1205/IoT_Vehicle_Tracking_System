@@ -18,6 +18,7 @@ const DRIVER_STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructi
 };
 
 export const getDriverColumns = (actions: {
+  onDetail: (row: any) => void;
   onEdit: (row: any) => void;
   onDelete: (row: any) => void;
 }): ColumnDef<any>[] => [
@@ -45,6 +46,9 @@ export const getDriverColumns = (actions: {
     meta: { label: 'Thao tác' },
     cell: ({ row }) => (
       <div className="flex flex-wrap gap-1">
+        <Button size="sm" variant="outline" onClick={() => actions.onDetail(row.original)}>
+          Chi tiết
+        </Button>
         <Button size="sm" variant="outline" onClick={() => actions.onEdit(row.original)}>
           Sửa
         </Button>

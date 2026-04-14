@@ -2,7 +2,7 @@
 
 import { useDeferredValue, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CarFront, CircleOff, Plus, Wrench, Zap } from 'lucide-react';
+import { AlertTriangle, CarFront, CircleOff, Plus, Wrench, Zap } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
 import { StatCard } from '@/components/common/stat-card';
@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { deviceServices } from '@/lib/api/devices';
 import { vehicleServices } from '@/lib/api/vehicles';
 import { notificationUtils } from '@/lib/notification';
@@ -162,6 +163,12 @@ const VehiclesPage = () => {
   );
 
   const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
+  const vehiclesErrorMessage = vehicles.isError
+    ? getApiErrorMessage(
+        vehicles.error,
+        'Khong the tai danh sach phuong tien tu may chu. Vui long thu lai.',
+      )
+    : null;
 
   return (
     <PageContainer
@@ -188,6 +195,27 @@ const VehiclesPage = () => {
         <StatCard title="Ngưng hoạt động trên trang" value={stats.inactive} icon={<CircleOff className="h-4 w-4" />} isLoading={vehicles.isLoading} />
       </div>
 
+      {vehiclesErrorMessage ? (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Khong the dong bo du lieu phuong tien</AlertTitle>
+          <AlertDescription>
+            <p>{vehiclesErrorMessage}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => {
+                void vehicles.refetch();
+              }}
+              disabled={vehicles.isFetching}
+            >
+              Thu lai
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <DataTable
         columns={getVehicleColumns({
           onEdit: (row) => {
@@ -203,6 +231,7 @@ const VehiclesPage = () => {
         data={rows}
         pagination={false}
         isLoading={vehicles.isLoading}
+        onRowClick={setDetailItem}
         emptyTitle="Chưa có phương tiện phù hợp"
         emptyDescription="Thử nới bộ lọc hoặc thêm phương tiện mới để bắt đầu ghép thiết bị telemetry."
         emptyAction={{

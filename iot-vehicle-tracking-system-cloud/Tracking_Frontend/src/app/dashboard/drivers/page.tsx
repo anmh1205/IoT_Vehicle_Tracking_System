@@ -1,7 +1,7 @@
 'use client';
 
 import { useDeferredValue, useMemo, useState } from 'react';
-import { CircleCheckBig, CircleOff, IdCard, Plus, UserRound } from 'lucide-react';
+import { AlertTriangle, CircleCheckBig, CircleOff, IdCard, Plus, UserRound } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
@@ -16,17 +16,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { driverServices } from '@/lib/api/drivers';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { getDriverColumns } from '@/features/drivers/components/driver-columns';
 import { DriverForm } from '@/features/drivers/components/driver-form';
+import { DriverDetailModal } from '@/features/drivers/components/driver-detail-modal';
 
 const PAGE_SIZE = 20;
 
 const DriversPage = () => {
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any | null>(null);
+  const [detailItem, setDetailItem] = useState<any | null>(null);
   const [deleteItem, setDeleteItem] = useState<any | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -130,6 +133,12 @@ const DriversPage = () => {
 
   const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const driversErrorMessage = drivers.isError
+    ? getApiErrorMessage(
+        drivers.error,
+        'Khong the tai danh sach tai xe tu may chu. Vui long thu lai.',
+      )
+    : null;
 
   return (
     <PageContainer
@@ -174,8 +183,30 @@ const DriversPage = () => {
         />
       </div>
 
+      {driversErrorMessage ? (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Khong the dong bo du lieu tai xe</AlertTitle>
+          <AlertDescription>
+            <p>{driversErrorMessage}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => {
+                void drivers.refetch();
+              }}
+              disabled={drivers.isFetching}
+            >
+              Thu lai
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <DataTable
         columns={getDriverColumns({
+          onDetail: setDetailItem,
           onEdit: (row) => {
             setEditItem(row);
             setOpen(true);
@@ -185,6 +216,7 @@ const DriversPage = () => {
         data={rows}
         pagination={false}
         isLoading={drivers.isLoading}
+        onRowClick={setDetailItem}
         emptyTitle="Chưa có tài xế phù hợp"
         emptyDescription="Thử nới bộ lọc hoặc thêm hồ sơ tài xế mới để bắt đầu theo dõi."
         emptyAction={{
@@ -258,6 +290,12 @@ const DriversPage = () => {
           if (editItem?.id) updateMutation.mutate({ id: editItem.id, payload });
           else createMutation.mutate(payload);
         }}
+      />
+
+      <DriverDetailModal
+        open={Boolean(detailItem)}
+        onOpenChange={(value) => !value && setDetailItem(null)}
+        driverId={detailItem?.id ?? null}
       />
 
       <ConfirmDialog

@@ -4,6 +4,12 @@ export const geofenceServices = {
   getList: (params?: Record<string, unknown>) =>
     apiClient.get('/geofences', { params }).then((r) => unwrap<any>(r.data)),
   getById: (id: number) => apiClient.get(`/geofences/${id}`).then((r) => unwrap<any>(r.data)),
+  getPolicyViolations: (params?: Record<string, unknown>) =>
+    apiClient.get('/geofences/policy-violations', { params }).then((r) => unwrap<any>(r.data)),
+  getVehiclePolicyStates: (vehicleId: string) =>
+    apiClient
+      .get(`/geofences/vehicles/${vehicleId}/policy-states`)
+      .then((r) => unwrap<any>(r.data)),
   create: (data: Record<string, unknown>) =>
     apiClient.post('/geofences', data).then((r) => unwrap<any>(r.data)),
   update: (id: number, data: Record<string, unknown>) =>

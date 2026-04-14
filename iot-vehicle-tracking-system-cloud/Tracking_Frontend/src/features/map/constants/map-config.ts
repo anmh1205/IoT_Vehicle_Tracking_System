@@ -1,4 +1,4 @@
-import type { DeviceMapStatus, MapLayer, MapViewport } from '@/features/map/types';
+import type { DeviceMapStatus, DevicePosition, MapLayer, MapViewport } from '@/features/map/types';
 
 export const DEFAULT_MAP_VIEWPORT: MapViewport = {
   center: [10.762622, 106.660172],
@@ -42,3 +42,26 @@ export const MAP_STATUS_LABELS: Record<DeviceMapStatus, string> = {
 };
 
 export const MAP_REALTIME_THROTTLE_MS = 500;
+
+export const parseMapTimestamp = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Date.parse(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (value instanceof Date) {
+    return Number.isFinite(value.getTime()) ? value.getTime() : null;
+  }
+  return null;
+};
+
+export const hasValidMapCoordinates = (
+  position: Pick<DevicePosition, 'lat' | 'lon'> | { lat: number; lon: number },
+) =>
+  Number.isFinite(position.lat) &&
+  Number.isFinite(position.lon) &&
+  Math.abs(position.lat) <= 90 &&
+  Math.abs(position.lon) <= 180 &&
+  !(position.lat === 0 && position.lon === 0);

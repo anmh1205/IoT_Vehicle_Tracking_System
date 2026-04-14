@@ -3,27 +3,12 @@
 import { useMemo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useMapStore } from '@/features/map/store/map-store';
-import type { DevicePosition } from '@/features/map/types';
 import { DeviceFilter } from './device-filter';
 import { DeviceListItem } from './device-list-item';
 import { DeviceSearch } from './device-search';
+import { MapDeviceSummary } from './map-device-summary';
+import { buildMapDeviceStats, filterDevices, sortDevices } from './map-panel-utils';
 import { SelectedDeviceCard } from './selected-device-card';
-
-const filterDevices = (
-  devices: DevicePosition[],
-  searchTerm: string,
-  statusFilter: 'all' | DevicePosition['status'],
-) => {
-  return devices.filter((device) => {
-    const matchesSearch =
-      searchTerm.trim().length === 0 ||
-      device.deviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      device.deviceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (device.vehiclePlate ?? '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || device.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-};
 
 export const DeviceListPanel = () => {
   const positions = useMapStore((state) => state.positions);
@@ -33,20 +18,23 @@ export const DeviceListPanel = () => {
   const setSearchTerm = useMapStore((state) => state.setSearchTerm);
   const statusFilter = useMapStore((state) => state.statusFilter);
   const setStatusFilter = useMapStore((state) => state.setStatusFilter);
-  const devices = useMemo(
-    () => Array.from(positions.values()).sort((a, b) => a.deviceName.localeCompare(b.deviceName)),
-    [positions],
-  );
+
+  const devices = useMemo(() => sortDevices(Array.from(positions.values())), [positions]);
   const filteredDevices = useMemo(
     () => filterDevices(devices, searchTerm, statusFilter),
     [devices, searchTerm, statusFilter],
   );
   const selectedDevice = selectedDeviceId ? (positions.get(selectedDeviceId) ?? null) : null;
+  const stats = useMemo(
+    () => buildMapDeviceStats(filteredDevices, devices.length),
+    [devices.length, filteredDevices],
+  );
 
   return (
-    <aside className="flex h-full min-h-0 w-[320px] flex-col gap-3 border-r bg-background p-3">
+    <aside className="flex h-full min-h-0 w-[340px] flex-col gap-3 border-r bg-background p-3">
       <DeviceSearch value={searchTerm} onChange={setSearchTerm} />
       <DeviceFilter value={statusFilter} onChange={setStatusFilter} />
+      <MapDeviceSummary stats={stats} />
 
       <ScrollArea className="min-h-0 flex-1">
         <div className="space-y-2 pr-2">

@@ -5,6 +5,7 @@ export interface Device {
   currentStatus: 'running' | 'stopped' | 'disconnected' | 'online';
   imei: string | null;
   firmwareVersion: string | null;
+  targetFirmwareVersion?: string | null;
   vehiclePlate?: string | null;
   customerName?: string | null;
   lastSeenAt: string | null;
@@ -13,7 +14,10 @@ export interface Device {
   totalRuntimeSeconds?: number;
   requestInterval?: number;
   vibrationThreshold?: number;
+  lastErrorCode?: number | null;
   config?: Record<string, unknown> | null;
+  currentSession?: DeviceSession | null;
+  recentSessions?: DeviceSession[];
 }
 
 export interface DeviceSession {
