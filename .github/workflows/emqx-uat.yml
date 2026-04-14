@@ -119,15 +119,15 @@ jobs:
                 docker cp "tracking-npm:${MATCHED_PRIVKEY}" "$WORKDIR/emqx-privkey.pem"
                 docker cp "tracking-npm:${MATCHED_CHAIN}" "$WORKDIR/emqx-chain.pem"
 
-                CURRENT_FP="$(docker exec tracking-emqx sh -lc "openssl x509 -in /opt/emqx/etc/certs/emqx.pem -noout -fingerprint -sha256 2>/dev/null | cut -d= -f2" || true)"
+                CURRENT_FP="$(docker exec tracking-emqx sh -lc "openssl x509 -in /opt/emqx/etc/certs/cert.pem -noout -fingerprint -sha256 2>/dev/null | cut -d= -f2" || true)"
                 NEW_FP="$(openssl x509 -in "$WORKDIR/emqx-fullchain.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
 
                 if [ "$CURRENT_FP" != "$NEW_FP" ]; then
-                  docker cp "$WORKDIR/emqx-fullchain.pem" tracking-emqx:/opt/emqx/etc/certs/emqx.pem
-                  docker cp "$WORKDIR/emqx-privkey.pem" tracking-emqx:/opt/emqx/etc/certs/emqx.key
+                  docker cp "$WORKDIR/emqx-fullchain.pem" tracking-emqx:/opt/emqx/etc/certs/cert.pem
+                  docker cp "$WORKDIR/emqx-privkey.pem" tracking-emqx:/opt/emqx/etc/certs/key.pem
                   docker cp "$WORKDIR/emqx-chain.pem" tracking-emqx:/opt/emqx/etc/certs/cacert.pem
 
-                  docker exec -u 0 tracking-emqx sh -lc 'chown emqx:emqx /opt/emqx/etc/certs/emqx.pem /opt/emqx/etc/certs/emqx.key /opt/emqx/etc/certs/cacert.pem && chmod 644 /opt/emqx/etc/certs/emqx.pem /opt/emqx/etc/certs/cacert.pem && chmod 600 /opt/emqx/etc/certs/emqx.key'
+                  docker exec -u 0 tracking-emqx sh -lc 'chown emqx:emqx /opt/emqx/etc/certs/cert.pem /opt/emqx/etc/certs/key.pem /opt/emqx/etc/certs/cacert.pem && chmod 644 /opt/emqx/etc/certs/cert.pem /opt/emqx/etc/certs/cacert.pem && chmod 600 /opt/emqx/etc/certs/key.pem'
                   docker restart tracking-emqx >/dev/null
                   sleep 3
                 else
@@ -150,7 +150,7 @@ jobs:
               fi
 
               rm -f "$WORKDIR/current-cert.pem"
-              docker cp tracking-emqx:/opt/emqx/etc/certs/emqx.pem "$WORKDIR/current-cert.pem" >/dev/null 2>&1 || true
+              docker cp tracking-emqx:/opt/emqx/etc/certs/cert.pem "$WORKDIR/current-cert.pem" >/dev/null 2>&1 || true
               if [ -s "$WORKDIR/current-cert.pem" ] && openssl x509 -in "$WORKDIR/current-cert.pem" -noout -checkhost "$MQTT_TLS_DOMAIN" >/dev/null 2>&1; then
                 TLS_OK=1
               fi
