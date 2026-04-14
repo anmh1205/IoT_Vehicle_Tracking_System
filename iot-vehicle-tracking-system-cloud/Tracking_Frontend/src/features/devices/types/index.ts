@@ -2,7 +2,7 @@ export interface Device {
   id: number;
   deviceId: string;
   deviceName: string;
-  currentStatus: 'running' | 'stopped' | 'disconnected';
+  currentStatus: 'running' | 'stopped' | 'disconnected' | 'online';
   imei: string | null;
   firmwareVersion: string | null;
   vehiclePlate?: string | null;

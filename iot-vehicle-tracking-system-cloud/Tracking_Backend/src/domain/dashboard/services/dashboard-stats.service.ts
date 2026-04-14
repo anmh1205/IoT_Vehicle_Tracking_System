@@ -17,12 +17,12 @@ export const getStats = async (): Promise<DashboardStats> => {
     dashboardRepo.getSessionsToday(),
   ]);
 
+  const totalDevices = Object.values(statusCounts).reduce((sum, value) => sum + value, 0);
+  const activeDevices = (statusCounts['running'] ?? 0) + (statusCounts['online'] ?? 0);
+
   return {
-    totalDevices:
-      (statusCounts['running'] ?? 0) +
-      (statusCounts['stopped'] ?? 0) +
-      (statusCounts['disconnected'] ?? 0),
-    activeDevices: statusCounts['running'] ?? 0,
+    totalDevices,
+    activeDevices,
     stoppedDevices: statusCounts['stopped'] ?? 0,
     offlineDevices: statusCounts['disconnected'] ?? 0,
     totalRuntimeToday: runtimeToday,

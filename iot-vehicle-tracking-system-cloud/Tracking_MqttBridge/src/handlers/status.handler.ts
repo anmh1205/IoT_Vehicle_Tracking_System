@@ -5,6 +5,7 @@ import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { getStatus, setStatus, getOrCreateSession, clearSession } from '../cache/device-state.cache';
 import { logger } from '../infrastructure/logger';
+import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 
 /**
  * Handle device status changes on topic v1/{deviceId}/status.
@@ -35,6 +36,10 @@ export const handleStatus = async (
   }
 
   const payload = result.data;
+  const messageId = payload.metadata?.message_id;
+  const schemaVersion = payload.metadata?.schema_version;
+  const seqNo = payload.metadata?.seq_no;
+  const bootId = payload.metadata?.boot_id;
 
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
@@ -51,6 +56,23 @@ export const handleStatus = async (
 
   const previousState = getStatus(payload.device_id);
   const previousStatus = previousState?.status ?? 'offline';
+  const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
+    payload.timestamp,
+    payload.metadata?.sent_at,
+  );
+
+  if (timestampSource !== 'payload') {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        payloadTimestamp: payload.timestamp,
+        metadataSentAt: payload.metadata?.sent_at,
+        normalizedTimestampMs: timestampMs,
+        timestampSource,
+      },
+      'Normalized invalid status timestamp before publishing realtime events',
+    );
+  }
 
   if (payload.status === 'running') {
     const [sessionId, isNewSession] = getOrCreateSession(payload.device_id);
@@ -63,7 +85,11 @@ export const handleStatus = async (
         device_id: payload.device_id,
         session_id: sessionId,
         action: 'started',
-        timestamp: new Date(payload.timestamp).toISOString(),
+        message_id: messageId,
+        schema_version: schemaVersion,
+        seq_no: seqNo,
+        boot_id: bootId,
+        timestamp: new Date(timestampMs).toISOString(),
       });
     }
 
@@ -71,7 +97,14 @@ export const handleStatus = async (
       payload.device_id,
       'status_change',
       `Device status: ${previousStatus} -> running`,
-      { session_id: sessionId, previous_status: previousStatus },
+      {
+        session_id: sessionId,
+        previous_status: previousStatus,
+        message_id: messageId,
+        schema_version: schemaVersion,
+        seq_no: seqNo,
+        boot_id: bootId,
+      },
     ).catch((err) => {
       logger.error(`VictoriaLogs write failed for status change`, err);
     });
@@ -90,7 +123,11 @@ export const handleStatus = async (
         device_id: payload.device_id,
         session_id: endedSessionId,
         action: 'ended',
-        timestamp: new Date(payload.timestamp).toISOString(),
+        message_id: messageId,
+        schema_version: schemaVersion,
+        seq_no: seqNo,
+        boot_id: bootId,
+        timestamp: new Date(timestampMs).toISOString(),
       });
     }
 
@@ -98,7 +135,14 @@ export const handleStatus = async (
       payload.device_id,
       'status_change',
       `Device status: ${previousStatus} -> stopped`,
-      { session_id: endedSessionId, previous_status: previousStatus },
+      {
+        session_id: endedSessionId,
+        previous_status: previousStatus,
+        message_id: messageId,
+        schema_version: schemaVersion,
+        seq_no: seqNo,
+        boot_id: bootId,
+      },
     ).catch((err) => {
       logger.error(`VictoriaLogs write failed for status change`, err);
     });
@@ -113,5 +157,9 @@ export const handleStatus = async (
     device_id: payload.device_id,
     previous_status: previousStatus,
     current_status: payload.status,
+    message_id: messageId,
+    schema_version: schemaVersion,
+    seq_no: seqNo,
+    boot_id: bootId,
   });
 };

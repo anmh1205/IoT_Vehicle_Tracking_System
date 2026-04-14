@@ -42,10 +42,9 @@ export const queryMetrics = asyncHandler(async (req: AuthenticatedRequest, res: 
 export const queryLogs = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   requireAdminRole(req);
 
-  const logsql = req.query.query as string;
-  if (!logsql) {
-    throw createValidationError('Missing required query parameter: query');
-  }
+  const logsql = typeof req.query.query === 'string' && req.query.query.trim()
+    ? req.query.query.trim()
+    : '*';
 
   const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : undefined;
   const result = await systemAdminService.queryLogs(logsql, limit);

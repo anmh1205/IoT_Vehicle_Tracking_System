@@ -16,12 +16,6 @@ services:
     volumes:
       - emqx-data:/opt/emqx/data
       - emqx-log:/opt/emqx/log
-    ports:
-      - "0.0.0.0:1883:1883"     # MQTT (non-TLS)
-      - "0.0.0.0:8883:8883"     # MQTTS (TLS)
-      - "0.0.0.0:8083:8083"     # WebSocket (WS)
-      - "0.0.0.0:8084:8084"     # WebSocket Secure (WSS)
-      - "0.0.0.0:18083:18083"   # Dashboard
     healthcheck:
       test: ["CMD", "emqx", "ping"]
       interval: 10s

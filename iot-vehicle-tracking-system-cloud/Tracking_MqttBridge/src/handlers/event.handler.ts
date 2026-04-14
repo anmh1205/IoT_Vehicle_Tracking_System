@@ -1,17 +1,9 @@
-import { z } from 'zod';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { logger } from '../infrastructure/logger';
 import { verifyDeviceToken } from '../services/device-auth.service';
-
-const eventSchema = z.object({
-  device_id: z.string().min(1),
-  auth_token: z.string().min(1),
-  event_type: z.enum(['error', 'warning', 'info']),
-  code: z.number().int().optional(),
-  message: z.string().optional(),
-  timestamp: z.number().positive(),
-});
+import { eventSchema } from '../validators/payload.validator';
+import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 
 /**
  * Handle device events (errors, warnings) on topic v1/{deviceId}/events.
@@ -43,6 +35,14 @@ export const handleEvent = async (
   }
 
   const payload = result.data;
+  const messageId = payload.metadata?.message_id;
+  const schemaVersion = payload.metadata?.schema_version;
+  const seqNo = payload.metadata?.seq_no;
+  const bootId = payload.metadata?.boot_id;
+  const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
+    payload.timestamp,
+    payload.metadata?.sent_at,
+  );
 
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
@@ -58,6 +58,19 @@ export const handleEvent = async (
     return;
   }
 
+  if (timestampSource !== 'payload') {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        payloadTimestamp: payload.timestamp,
+        metadataSentAt: payload.metadata?.sent_at,
+        normalizedTimestampMs: timestampMs,
+        timestampSource,
+      },
+      'Normalized invalid event timestamp before publishing alerts',
+    );
+  }
+
   // Log to VictoriaLogs
   writeDeviceEvent(
     payload.device_id,
@@ -66,6 +79,10 @@ export const handleEvent = async (
     {
       event_code: payload.code,
       severity: payload.event_type,
+      message_id: messageId,
+      schema_version: schemaVersion,
+      seq_no: seqNo,
+      boot_id: bootId,
     },
   ).catch((err) => {
     logger.error({ err, deviceId: payload.device_id }, 'VictoriaLogs write failed for device event');
@@ -78,7 +95,11 @@ export const handleEvent = async (
       alert_type: `device_${payload.event_type}`,
       code: payload.code,
       message: payload.message,
-      timestamp: new Date(payload.timestamp).toISOString(),
+      message_id: messageId,
+      schema_version: schemaVersion,
+      seq_no: seqNo,
+      boot_id: bootId,
+      timestamp: new Date(timestampMs).toISOString(),
     });
   }
 

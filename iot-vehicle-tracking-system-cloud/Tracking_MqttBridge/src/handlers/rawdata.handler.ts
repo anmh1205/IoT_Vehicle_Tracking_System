@@ -7,6 +7,7 @@ import { getStatus, setStatus, getOrCreateSession } from '../cache/device-state.
 import { addUpdate } from '../services/batch-writer.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
+import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 
 const VIBRATION_ALERT_THRESHOLD = 500;
 
@@ -46,6 +47,10 @@ export const handleRawData = async (
   }
 
   const payload = result.data;
+  const messageId = payload.metadata?.message_id;
+  const schemaVersion = payload.metadata?.schema_version;
+  const seqNo = payload.metadata?.seq_no;
+  const bootId = payload.metadata?.boot_id;
 
   // Verify topic deviceId matches payload deviceId
   if (payload.device_id !== deviceIdFromTopic) {
@@ -69,10 +74,30 @@ export const handleRawData = async (
       device_id: payload.device_id,
       session_id: sessionId,
       action: 'started',
+      message_id: messageId,
+      schema_version: schemaVersion,
+      seq_no: seqNo,
+      boot_id: bootId,
     });
   }
 
-  const timestampMs = payload.timestamp;
+  const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
+    payload.timestamp,
+    payload.metadata?.sent_at,
+  );
+
+  if (timestampSource !== 'payload') {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        payloadTimestamp: payload.timestamp,
+        metadataSentAt: payload.metadata?.sent_at,
+        normalizedTimestampMs: timestampMs,
+        timestampSource,
+      },
+      'Normalized invalid telemetry timestamp before persistence',
+    );
+  }
 
   // 4. Write to VictoriaMetrics
   const metricsData: Record<string, number | undefined> = {
@@ -101,6 +126,10 @@ export const handleRawData = async (
   // 5. Write to VictoriaLogs
   writeDeviceEvent(payload.device_id, 'rawdata', 'Device telemetry received', {
     session_id: sessionId,
+    message_id: messageId,
+    schema_version: schemaVersion,
+    seq_no: seqNo,
+    boot_id: bootId,
     latitude: payload.data.latitude,
     longitude: payload.data.longitude,
     speed: payload.data.speed,
@@ -146,6 +175,10 @@ export const handleRawData = async (
       device_id: payload.device_id,
       previous_status: previousStatus,
       current_status: 'online',
+      message_id: messageId,
+      schema_version: schemaVersion,
+      seq_no: seqNo,
+      boot_id: bootId,
     });
   }
 
@@ -159,6 +192,10 @@ export const handleRawData = async (
       alert_type: 'high_vibration',
       value: payload.data.vibration,
       threshold: VIBRATION_ALERT_THRESHOLD,
+      message_id: messageId,
+      schema_version: schemaVersion,
+      seq_no: seqNo,
+      boot_id: bootId,
       latitude: payload.data.latitude,
       longitude: payload.data.longitude,
     });

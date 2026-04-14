@@ -4,7 +4,9 @@ import type { Device } from '@/features/devices/types';
 
 export const DeviceStatsBar = ({ devices }: { devices: Device[] }) => {
   const total = devices.length;
-  const online = devices.filter((d) => d.currentStatus === 'running').length;
+  const online = devices.filter(
+    (d) => d.currentStatus === 'running' || d.currentStatus === 'online',
+  ).length;
   const stopped = devices.filter((d) => d.currentStatus === 'stopped').length;
   const disconnected = devices.filter((d) => d.currentStatus === 'disconnected').length;
 

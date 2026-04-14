@@ -13,6 +13,7 @@ export const getDeviceStatus = (device: Device): Device['currentStatus'] =>
 
 export const getDeviceBadgeClassName = (status: string): string => {
   if (status === 'running') return 'bg-emerald-500';
+  if (status === 'online') return 'bg-emerald-500';
   if (status === 'stopped') return 'bg-amber-500';
   if (status === 'disconnected') return 'bg-rose-500';
   return 'bg-slate-500';

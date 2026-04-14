@@ -121,10 +121,7 @@ jobs:
               exit 1
             fi
 
-            if [ -z "$NPM_ADMIN_EMAIL" ] || [ -z "$NPM_ADMIN_PASSWORD" ]; then
-              echo "NPM admin secrets are missing; skip proxy/SSL bootstrap and keep NPM container deploy only."
-              exit 0
-            fi
+            NPM_ADMIN_EMAIL="${NPM_ADMIN_EMAIL:-admin@example.com}"
 
             if ! docker exec tracking-npm node --version >/dev/null 2>&1; then
               echo "Node runtime is unavailable inside tracking-npm container; cannot run NPM API bootstrap." >&2
@@ -133,23 +130,18 @@ jobs:
 
             docker exec \
               -e NPM_ADMIN_EMAIL="$NPM_ADMIN_EMAIL" \
-              -e NPM_ADMIN_PASSWORD="$NPM_ADMIN_PASSWORD" \
               tracking-npm \
               node - <<'NODE'
             const http = require('http');
+            const userModel = require('/app/models/user');
+            const internalToken = require('/app/internal/token');
 
             const baseHost = '127.0.0.1';
             const basePort = 81;
-            const adminEmail = process.env.NPM_ADMIN_EMAIL;
-            const adminPassword = process.env.NPM_ADMIN_PASSWORD;
-
-            if (!adminEmail || !adminPassword) {
-              throw new Error('NPM_ADMIN_EMAIL/NPM_ADMIN_PASSWORD are required');
-            }
+            const adminEmail = process.env.NPM_ADMIN_EMAIL || 'admin@example.com';
 
             const desiredHosts = [
               {
-                name: 'frontend',
                 primaryDomain: 'thingdock.dev',
                 domainNames: ['thingdock.dev'],
                 forwardHost: 'tracking-frontend',
@@ -157,22 +149,51 @@ jobs:
                 http2Support: true
               },
               {
-                name: 'backend',
-                primaryDomain: 'be.thingdock.dev',
-                domainNames: ['be.thingdock.dev'],
+                primaryDomain: 'api.thingdock.dev',
+                domainNames: ['api.thingdock.dev'],
                 forwardHost: 'tracking-backend',
                 forwardPort: 4000,
                 http2Support: true
               },
               {
-                name: 'mqtt-ws',
-                primaryDomain: 'mqtt.thingdock.dev',
-                domainNames: ['mqtt.thingdock.dev'],
+                primaryDomain: 'grafana.thingdock.dev',
+                domainNames: ['grafana.thingdock.dev'],
+                forwardHost: 'tracking-grafana',
+                forwardPort: 4002,
+                http2Support: true
+              },
+              {
+                primaryDomain: 'emqx.thingdock.dev',
+                domainNames: ['emqx.thingdock.dev'],
                 forwardHost: 'tracking-emqx',
-                forwardPort: 8083,
-                http2Support: false
+                forwardPort: 18083,
+                http2Support: true
+              },
+              {
+                primaryDomain: 'npm.thingdock.dev',
+                domainNames: ['npm.thingdock.dev'],
+                forwardHost: 'tracking-npm',
+                forwardPort: 81,
+                http2Support: true
               }
             ];
+            const desiredCertificateDomains = [
+              'thingdock.dev',
+              'api.thingdock.dev',
+              'mqtt.thingdock.dev',
+              'grafana.thingdock.dev',
+              'emqx.thingdock.dev',
+              'npm.thingdock.dev'
+            ];
+            const obsoleteProxyDomains = ['be.thingdock.dev', 'mqtt.thingdock.dev'];
+            const desiredStream = {
+              incoming_port: 8883,
+              forwarding_host: 'tracking-emqx',
+              forwarding_port: 8883,
+              tcp_forwarding: true,
+              udp_forwarding: false,
+              meta: {}
+            };
 
             function apiRequest(path, { method = 'GET', token, body } = {}) {
               return new Promise((resolve, reject) => {
@@ -230,14 +251,23 @@ jobs:
               });
             }
 
-            function buildPayload(spec, existingCertificateId) {
-              const certId = Number.isInteger(existingCertificateId) && existingCertificateId > 0 ? existingCertificateId : 'new';
+            function sortDomains(domains) {
+              return [...new Set((Array.isArray(domains) ? domains : []).map(String))].sort();
+            }
+
+            function sameDomains(left, right) {
+              const a = sortDomains(left);
+              const b = sortDomains(right);
+              return a.length === b.length && a.every((value, index) => value === b[index]);
+            }
+
+            function buildProxyPayload(spec, certificateId) {
               return {
                 domain_names: spec.domainNames,
                 forward_scheme: 'http',
                 forward_host: spec.forwardHost,
                 forward_port: spec.forwardPort,
-                certificate_id: certId,
+                certificate_id: certificateId,
                 ssl_forced: true,
                 hsts_enabled: true,
                 hsts_subdomains: true,
@@ -255,20 +285,53 @@ jobs:
               };
             }
 
-            (async () => {
-              const auth = await apiRequest('/tokens', {
+            async function getAdminToken() {
+              const user = await userModel.query().findOne({ email: adminEmail });
+              if (!user) {
+                throw new Error(`NPM admin user not found for email: ${adminEmail}`);
+              }
+              const auth = await internalToken.getTokenFromUser(user);
+              if (!auth?.token) {
+                throw new Error('Failed to mint NPM admin API token');
+              }
+              return auth.token;
+            }
+
+            async function ensureCertificate(token) {
+              const certificates = await apiRequest('/nginx/certificates', { token });
+              const certificateList = Array.isArray(certificates) ? certificates : [];
+              const existing = certificateList.find(
+                (item) => item.provider === 'letsencrypt' && sameDomains(item.domain_names, desiredCertificateDomains)
+              );
+
+              if (existing?.id) {
+                console.log(`Reusing certificate ${existing.id} for ${desiredCertificateDomains.join(', ')}`);
+                return existing;
+              }
+
+              const letsencryptEmail =
+                certificateList.find((item) => item.provider === 'letsencrypt' && item.meta?.letsencrypt_email)
+                  ?.meta?.letsencrypt_email || 'admin@thingdock.dev';
+
+              const created = await apiRequest('/nginx/certificates', {
                 method: 'POST',
+                token,
                 body: {
-                  identity: adminEmail,
-                  secret: adminPassword
+                  provider: 'letsencrypt',
+                  domain_names: desiredCertificateDomains,
+                  meta: {
+                    letsencrypt_email: letsencryptEmail,
+                    letsencrypt_agree: true,
+                    dns_challenge: false
+                  }
                 }
               });
 
-              const token = auth && auth.token;
-              if (!token) {
-                throw new Error(`NPM API token missing in response: ${JSON.stringify(auth)}`);
-              }
+              console.log(`Created certificate ${created.id} for ${desiredCertificateDomains.join(', ')}`);
+              return created;
+            }
 
+            async function upsertProxyHosts(token, certificateId) {
               const existingHosts = await apiRequest('/nginx/proxy-hosts', { token });
               const hostList = Array.isArray(existingHosts) ? existingHosts : [];
 
@@ -276,10 +339,9 @@ jobs:
                 const existing = hostList.find(
                   (item) => Array.isArray(item.domain_names) && item.domain_names.includes(spec.primaryDomain)
                 );
+                const payload = buildProxyPayload(spec, certificateId);
 
-                const payload = buildPayload(spec, existing && existing.certificate_id);
-
-                if (existing && existing.id) {
+                if (existing?.id) {
                   await apiRequest(`/nginx/proxy-hosts/${existing.id}`, {
                     method: 'PUT',
                     token,
@@ -295,6 +357,62 @@ jobs:
                   console.log(`Created proxy host: ${spec.primaryDomain} -> ${spec.forwardHost}:${spec.forwardPort}`);
                 }
               }
+
+              for (const host of hostList) {
+                const domains = Array.isArray(host.domain_names) ? host.domain_names : [];
+                const shouldDelete = domains.some((domain) => obsoleteProxyDomains.includes(domain));
+                if (host.id && shouldDelete) {
+                  await apiRequest(`/nginx/proxy-hosts/${host.id}`, {
+                    method: 'DELETE',
+                    token
+                  });
+                  console.log(`Deleted obsolete proxy host: ${domains.join(', ')}`);
+                }
+              }
+            }
+
+            async function ensureStream(token) {
+              const existingStreams = await apiRequest('/nginx/streams', { token });
+              const streamList = Array.isArray(existingStreams) ? existingStreams : [];
+              const current = streamList.find(
+                (item) => Number(item.incoming_port) === desiredStream.incoming_port
+              );
+
+              const hasSameTarget =
+                current &&
+                current.forwarding_host === desiredStream.forwarding_host &&
+                Number(current.forwarding_port) === desiredStream.forwarding_port &&
+                Boolean(current.tcp_forwarding) === Boolean(desiredStream.tcp_forwarding) &&
+                Boolean(current.udp_forwarding) === Boolean(desiredStream.udp_forwarding);
+
+              if (current?.id && hasSameTarget) {
+                console.log(`Stream ${desiredStream.incoming_port} already points to ${desiredStream.forwarding_host}:${desiredStream.forwarding_port}`);
+                return;
+              }
+
+              if (current?.id) {
+                await apiRequest(`/nginx/streams/${current.id}`, {
+                  method: 'PUT',
+                  token,
+                  body: desiredStream
+                });
+                console.log(`Updated stream ${desiredStream.incoming_port} -> ${desiredStream.forwarding_host}:${desiredStream.forwarding_port}`);
+                return;
+              }
+
+              await apiRequest('/nginx/streams', {
+                method: 'POST',
+                token,
+                body: desiredStream
+              });
+              console.log(`Created stream ${desiredStream.incoming_port} -> ${desiredStream.forwarding_host}:${desiredStream.forwarding_port}`);
+            }
+
+            (async () => {
+              const token = await getAdminToken();
+              const certificate = await ensureCertificate(token);
+              await upsertProxyHosts(token, certificate.id);
+              await ensureStream(token);
             })().catch((error) => {
               console.error(error.message || error);
               process.exit(1);

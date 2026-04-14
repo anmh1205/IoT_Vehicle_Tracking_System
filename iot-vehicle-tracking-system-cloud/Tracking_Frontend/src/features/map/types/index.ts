@@ -1,4 +1,4 @@
-export type DeviceMapStatus = 'running' | 'stopped' | 'error' | 'disconnected';
+export type DeviceMapStatus = 'running' | 'stopped' | 'error' | 'disconnected' | 'online';
 
 export interface DevicePosition {
   deviceId: string;

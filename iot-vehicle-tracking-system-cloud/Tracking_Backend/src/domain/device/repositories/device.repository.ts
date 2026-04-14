@@ -35,7 +35,7 @@ export const findAll = async (
   let paramIndex = 1;
 
   if (query.status) {
-    conditions.push(`current_status = $${paramIndex++}`);
+    conditions.push(`current_status::text = $${paramIndex++}`);
     params.push(query.status);
   }
 
@@ -58,7 +58,10 @@ export const findAll = async (
   const total = parseInt(countResult.rows[0].total, 10);
 
   const devices = await findMany<Device>(
-    `SELECT * FROM devices ${whereClause} ${orderClause} LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+    `SELECT *,
+        COALESCE(last_latitude, latitude) AS latitude,
+        COALESCE(last_longitude, longitude) AS longitude
+     FROM devices ${whereClause} ${orderClause} LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
 
@@ -66,10 +69,24 @@ export const findAll = async (
 };
 
 export const findById = async (id: number): Promise<Device | null> =>
-  findOne<Device>('SELECT * FROM devices WHERE id = $1', [id]);
+  findOne<Device>(
+    `SELECT *,
+        COALESCE(last_latitude, latitude) AS latitude,
+        COALESCE(last_longitude, longitude) AS longitude
+     FROM devices
+     WHERE id = $1`,
+    [id],
+  );
 
 export const findByDeviceId = async (deviceId: string): Promise<Device | null> =>
-  findOne<Device>('SELECT * FROM devices WHERE device_id = $1', [deviceId]);
+  findOne<Device>(
+    `SELECT *,
+        COALESCE(last_latitude, latitude) AS latitude,
+        COALESCE(last_longitude, longitude) AS longitude
+     FROM devices
+     WHERE device_id = $1`,
+    [deviceId],
+  );
 
 export const create = async (input: CreateDeviceInput, authToken: string): Promise<Device> => {
   const hashedAuthToken = hashToken(authToken);
@@ -157,8 +174,8 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     `SELECT
        d.device_id,
        d.device_name,
-       d.latitude,
-       d.longitude,
+       COALESCE(d.last_latitude, d.latitude) AS latitude,
+       COALESCE(d.last_longitude, d.longitude) AS longitude,
        d.current_status,
        d.last_seen_at,
        COALESCE(NULLIF(el.context->>'spd', '')::float8, 0) AS speed,
@@ -174,7 +191,8 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        ORDER BY server_timestamp DESC
        LIMIT 1
      ) el ON true
-     WHERE d.latitude IS NOT NULL AND d.longitude IS NOT NULL`,
+     WHERE COALESCE(d.last_latitude, d.latitude) IS NOT NULL
+       AND COALESCE(d.last_longitude, d.longitude) IS NOT NULL`,
   );
 
   return result.rows.map((row) => ({

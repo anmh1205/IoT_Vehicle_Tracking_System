@@ -4,6 +4,7 @@ import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { sendOk } from '@/shared/utils/response.util';
 import * as statisticsService from '@/domain/statistics/services/statistics.service';
 import { pool } from '@/infrastructure/database/pool';
+import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 
 export const getFleetUsage = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const result = await statisticsService.getFleetUsageStats({
@@ -110,31 +111,47 @@ export const getFleetStats = asyncHandler(async (_req: AuthenticatedRequest, res
 
 export const getMaintenanceStats = asyncHandler(
   async (_req: AuthenticatedRequest, res: Response) => {
-    const result = await pool.query(
-      `SELECT
-       COALESCE(SUM(CASE WHEN next_service_date < CURRENT_DATE AND status != 'completed' THEN 1 ELSE 0 END), 0)::int AS overdue,
-       COALESCE(SUM(CASE WHEN next_service_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days' THEN 1 ELSE 0 END), 0)::int AS due_soon,
-       COALESCE(SUM(CASE WHEN next_service_date > CURRENT_DATE + INTERVAL '7 days' THEN 1 ELSE 0 END), 0)::int AS upcoming
-     FROM maintenance`,
-    );
-
-    const vehiclesResult = await pool.query(
-      `SELECT
-       m.vehicle_id,
-       v.plate_number AS plate,
-       m.maintenance_type AS service_type,
-       m.next_service_date AS due_date,
-       CASE
-         WHEN m.next_service_date < CURRENT_DATE THEN 'overdue'
-         WHEN m.next_service_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'due_soon'
-         ELSE 'upcoming'
-       END AS status
-     FROM maintenance m
-     LEFT JOIN vehicles v ON v.vehicle_id = m.vehicle_id
-     WHERE m.next_service_date IS NOT NULL
-     ORDER BY m.next_service_date ASC
-     LIMIT 50`,
-    );
+    let result;
+    let vehiclesResult;
+    try {
+      [result, vehiclesResult] = await Promise.all([
+        pool.query(
+          `SELECT
+           COALESCE(SUM(CASE WHEN next_service_date < CURRENT_DATE AND status != 'completed' THEN 1 ELSE 0 END), 0)::int AS overdue,
+           COALESCE(SUM(CASE WHEN next_service_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days' THEN 1 ELSE 0 END), 0)::int AS due_soon,
+           COALESCE(SUM(CASE WHEN next_service_date > CURRENT_DATE + INTERVAL '7 days' THEN 1 ELSE 0 END), 0)::int AS upcoming
+         FROM maintenance`,
+        ),
+        pool.query(
+          `SELECT
+           m.vehicle_id,
+           v.plate_number AS plate,
+           m.maintenance_type AS service_type,
+           m.next_service_date AS due_date,
+           CASE
+             WHEN m.next_service_date < CURRENT_DATE THEN 'overdue'
+             WHEN m.next_service_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'due_soon'
+             ELSE 'upcoming'
+           END AS status
+         FROM maintenance m
+         LEFT JOIN vehicles v ON v.vehicle_id = m.vehicle_id
+         WHERE m.next_service_date IS NOT NULL
+         ORDER BY m.next_service_date ASC
+         LIMIT 50`,
+        ),
+      ]);
+    } catch (error) {
+      if (isUndefinedTableError(error)) {
+        sendOk(res, {
+          overdue: 0,
+          dueSoon: 0,
+          upcoming: 0,
+          vehicles: [],
+        });
+        return;
+      }
+      throw error;
+    }
 
     sendOk(res, {
       overdue: Number(result.rows[0]?.overdue ?? 0),

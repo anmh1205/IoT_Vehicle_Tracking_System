@@ -33,6 +33,11 @@ const app = express();
 // 1. Sentry request handler (FIRST middleware — captures request context)
 app.use(sentryRequestHandler);
 
+// Trust the first reverse proxy in production (NPM on UAT).
+if (appConfig.isProduction) {
+  app.set('trust proxy', 1);
+}
+
 // 2. Security headers
 app.use(helmet());
 

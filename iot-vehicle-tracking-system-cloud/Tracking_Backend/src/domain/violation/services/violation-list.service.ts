@@ -1,6 +1,11 @@
 import * as violationRepo from '@/domain/violation/repositories/violation.repository';
 import { sanitizeViolation } from '@/domain/violation/services/violation-crud.service';
-import type { ViolationListQuery, ViolationPublic } from '@/domain/violation/types/violation.types';
+import type {
+  Violation,
+  ViolationListQuery,
+  ViolationPublic,
+} from '@/domain/violation/types/violation.types';
+import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 
 export const listViolations = async (
   query: ViolationListQuery,
@@ -10,8 +15,23 @@ export const listViolations = async (
 }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
-
-  const result = await violationRepo.findAll(query);
+  let result: { violations: Violation[]; total: number };
+  try {
+    result = await violationRepo.findAll(query);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      return {
+        items: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+        },
+      };
+    }
+    throw error;
+  }
 
   return {
     items: result.violations.map(sanitizeViolation),
