@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { driverServices } from '@/lib/api/drivers';
+import { tripServices } from '@/lib/api/trips';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { getDriverColumns } from '@/features/drivers/components/driver-columns';
@@ -31,6 +32,8 @@ const getDriverId = (item: any): number | null => {
   const parsed = Number(candidate);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 };
+
+const normalizeDriverName = (value: unknown) => String(value ?? '').trim().toLowerCase();
 
 const DriversPage = () => {
   const [open, setOpen] = useState(false);
@@ -51,6 +54,16 @@ const DriversPage = () => {
         limit: PAGE_SIZE,
         search: deferredSearch || undefined,
         status: status === 'all' ? undefined : status,
+      }),
+  });
+  const tripAssignments = useQuery({
+    queryKey: ['drivers', 'trip-assignment'],
+    queryFn: () =>
+      tripServices.getList({
+        page: 1,
+        limit: 500,
+        sortBy: 'actualStart',
+        sortOrder: 'desc',
       }),
   });
 
@@ -126,15 +139,66 @@ const DriversPage = () => {
   });
 
   const rows = useMemo(() => drivers.data?.items ?? drivers.data?.data?.items ?? [], [drivers.data]);
+  const assignmentByDriver = useMemo(() => {
+    const trips = tripAssignments.data?.items ?? tripAssignments.data?.data?.items ?? [];
+    const map = new Map<
+      string,
+      {
+        tripCount: number;
+        latestVehicleId: string | null;
+        latestDeviceId: string | null;
+        latestTripCode: string | null;
+        latestTripStatus: string | null;
+        latestStartAt: string | null;
+      }
+    >();
+
+    for (const trip of trips) {
+      const key = normalizeDriverName(trip?.driverName);
+      if (!key) continue;
+
+      const current = map.get(key);
+      const candidateStart = String(
+        trip?.actualStart ?? trip?.plannedStart ?? trip?.updatedAt ?? trip?.createdAt ?? '',
+      );
+      const candidateScore = Date.parse(candidateStart);
+      const currentScore = current?.latestStartAt ? Date.parse(current.latestStartAt) : Number.NEGATIVE_INFINITY;
+      const hasBetterTimestamp = Number.isFinite(candidateScore) && candidateScore > currentScore;
+
+      map.set(key, {
+        tripCount: (current?.tripCount ?? 0) + 1,
+        latestVehicleId:
+          hasBetterTimestamp || !current ? String(trip?.vehicleId ?? '').trim() || null : current.latestVehicleId,
+        latestDeviceId:
+          hasBetterTimestamp || !current ? String(trip?.deviceId ?? '').trim() || null : current.latestDeviceId,
+        latestTripCode:
+          hasBetterTimestamp || !current ? String(trip?.tripCode ?? '').trim() || null : current.latestTripCode,
+        latestTripStatus:
+          hasBetterTimestamp || !current ? String(trip?.status ?? '').trim() || null : current.latestTripStatus,
+        latestStartAt: hasBetterTimestamp || !current ? candidateStart || null : current.latestStartAt,
+      });
+    }
+
+    return map;
+  }, [tripAssignments.data]);
+  const enrichedRows = useMemo(
+    () =>
+      rows.map((row: any) => ({
+        ...row,
+        assignment: assignmentByDriver.get(normalizeDriverName(row?.fullName)) ?? null,
+      })),
+    [assignmentByDriver, rows],
+  );
   const pagination = drivers.data?.pagination ?? drivers.data?.data?.pagination;
   const stats = useMemo(
     () => ({
-      total: pagination?.total ?? rows.length,
-      active: rows.filter((row: any) => row.status === 'active').length,
-      inactive: rows.filter((row: any) => row.status === 'inactive').length,
-      withLicense: rows.filter((row: any) => Boolean(row.licenseNumber)).length,
+      total: pagination?.total ?? enrichedRows.length,
+      active: enrichedRows.filter((row: any) => row.status === 'active').length,
+      inactive: enrichedRows.filter((row: any) => row.status === 'inactive').length,
+      withLicense: enrichedRows.filter((row: any) => Boolean(row.licenseNumber)).length,
+      withTripLink: enrichedRows.filter((row: any) => (row.assignment?.tripCount ?? 0) > 0).length,
     }),
-    [pagination?.total, rows],
+    [enrichedRows, pagination?.total],
   );
 
   const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
@@ -182,10 +246,10 @@ const DriversPage = () => {
           isLoading={drivers.isLoading}
         />
         <StatCard
-          title="Có GPLX"
-          value={stats.withLicense}
+          title="Da co chuyen gan day"
+          value={stats.withTripLink}
           icon={<IdCard className="h-4 w-4" />}
-          isLoading={drivers.isLoading}
+          isLoading={drivers.isLoading || tripAssignments.isLoading}
         />
       </div>
 
@@ -219,9 +283,9 @@ const DriversPage = () => {
           },
           onDelete: setDeleteItem,
         })}
-        data={rows}
+        data={enrichedRows}
         pagination={false}
-        isLoading={drivers.isLoading}
+        isLoading={drivers.isLoading || tripAssignments.isLoading}
         onRowClick={setDetailItem}
         emptyTitle="Chưa có tài xế phù hợp"
         emptyDescription="Thử nới bộ lọc hoặc thêm hồ sơ tài xế mới để bắt đầu theo dõi."
@@ -233,7 +297,7 @@ const DriversPage = () => {
           },
         }}
         toolbar={
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className="flex w-full flex-col gap-2 sm:flex-row lg:flex-nowrap">
             <Input
               value={search}
               onChange={(event) => {
@@ -266,8 +330,8 @@ const DriversPage = () => {
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          Trang {pagination?.page ?? page} / {totalPages}. Hiển thị {rows.length} hồ sơ trên tổng{' '}
-          {pagination?.total ?? rows.length} tài xế.
+          Trang {pagination?.page ?? page} / {totalPages}. Hiển thị {enrichedRows.length} hồ sơ trên tổng{' '}
+          {pagination?.total ?? enrichedRows.length} tài xế.
         </p>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
@@ -302,6 +366,7 @@ const DriversPage = () => {
         open={Boolean(detailItem)}
         onOpenChange={(value) => !value && setDetailItem(null)}
         driverId={getDriverId(detailItem)}
+        assignmentHint={detailItem?.assignment ?? null}
       />
 
       <ConfirmDialog

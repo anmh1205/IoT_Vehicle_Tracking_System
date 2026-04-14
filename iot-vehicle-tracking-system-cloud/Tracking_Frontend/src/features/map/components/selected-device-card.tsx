@@ -17,13 +17,7 @@ const STATUS_VARIANTS: Record<
   error: 'destructive',
 };
 
-const StatItem = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) => (
+const StatItem = ({ label, value }: { label: string; value: string }) => (
   <div className="rounded-xl border bg-muted/20 px-3 py-2">
     <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
     <p className="mt-1 text-sm font-semibold">{value}</p>
@@ -33,14 +27,9 @@ const StatItem = ({
 export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }) => {
   if (!device) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Thiết bị đã chọn</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Chọn một thiết bị để xem ngữ cảnh telemetry, tốc độ, cảm biến và thời điểm cập nhật.
-        </CardContent>
-      </Card>
+      <div className="rounded-xl border border-dashed px-3 py-2 text-sm text-muted-foreground">
+        Chọn một thiết bị để xem telemetry chi tiết.
+      </div>
     );
   }
 
@@ -57,13 +46,16 @@ export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }
           <Badge variant={STATUS_VARIANTS[device.status]}>{MAP_STATUS_LABELS[device.status]}</Badge>
         </div>
       </CardHeader>
+
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
           <StatItem label="Tốc độ" value={`${device.speed} km/h`} />
           <StatItem label="Hướng" value={`${device.heading}°`} />
           <StatItem
             label="Pin"
-            value={device.battery !== null && device.battery !== undefined ? `${device.battery}%` : 'Chưa có'}
+            value={
+              device.battery !== null && device.battery !== undefined ? `${device.battery}%` : 'Chưa có'
+            }
           />
           <StatItem
             label="Nhiệt độ"
@@ -103,7 +95,7 @@ export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }
           </div>
         ) : (
           <div className="rounded-xl border border-dashed px-3 py-2 text-xs text-muted-foreground">
-            Thiết bị chưa có tọa độ hợp lệ để hiển thị chính xác trên bản đồ.
+            Thiết bị chưa có tọa độ hợp lệ trên bản đồ.
           </div>
         )}
       </CardContent>

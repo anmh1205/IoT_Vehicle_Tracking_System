@@ -14,6 +14,8 @@ export const FleetUtilizationChart = ({
   }>;
   isLoading?: boolean;
 }) => {
+  const hasMeaningfulData = data.some((item) => item.active > 0 || item.inactive > 0);
+
   return (
     <Card>
       <CardHeader>
@@ -22,7 +24,7 @@ export const FleetUtilizationChart = ({
       <CardContent className="h-[320px]">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
-        ) : data.length === 0 ? (
+        ) : data.length === 0 || !hasMeaningfulData ? (
           <div className="flex h-full items-center justify-center">
             <EmptyState
               title="Chưa có dữ liệu"

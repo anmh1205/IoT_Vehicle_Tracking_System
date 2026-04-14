@@ -78,6 +78,7 @@ export interface DeviceSessionPublic {
 export interface DevicePosition {
   deviceId: string;
   deviceName: string;
+  vehiclePlate?: string | null;
   latitude: number;
   longitude: number;
   currentStatus: string;

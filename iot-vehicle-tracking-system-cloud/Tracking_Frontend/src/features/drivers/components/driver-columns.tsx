@@ -32,6 +32,26 @@ export const getDriverColumns = (actions: {
   { accessorKey: 'licenseNumber', header: 'Số GPLX', meta: { label: 'Số GPLX' } },
   { accessorKey: 'licenseType', header: 'Hạng GPLX', meta: { label: 'Hạng GPLX' } },
   {
+    id: 'assignment',
+    header: 'Liên kết xe',
+    meta: { label: 'Liên kết xe' },
+    cell: ({ row }) => {
+      const assignment = row.original.assignment;
+      if (!assignment || (assignment.tripCount ?? 0) === 0) {
+        return <span className="text-xs text-muted-foreground">Chưa có chuyến gần đây</span>;
+      }
+
+      return (
+        <div className="space-y-1 text-sm">
+          <p className="font-medium">{assignment.latestVehicleId ?? 'Chưa gán xe'}</p>
+          <p className="text-xs text-muted-foreground">
+            {(assignment.latestDeviceId ?? 'Chưa có thiết bị')} • {assignment.tripCount} chuyến
+          </p>
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: 'status',
     header: 'Trạng thái',
     meta: { label: 'Trạng thái' },

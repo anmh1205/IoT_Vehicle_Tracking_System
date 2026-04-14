@@ -20,6 +20,8 @@ export const AreaGraph = ({
   data: FleetRuntimePoint[];
   isLoading?: boolean;
 }) => {
+  const hasMeaningfulData = data.some((point) => point.runtime > 0);
+
   return (
     <Card>
       <CardHeader>
@@ -28,7 +30,7 @@ export const AreaGraph = ({
       <CardContent className="h-[320px]">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
-        ) : data.length === 0 ? (
+        ) : data.length === 0 || !hasMeaningfulData ? (
           <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
             Chưa có dữ liệu runtime trong giai đoạn này.
           </div>

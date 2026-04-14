@@ -340,7 +340,7 @@ const ExportsPage = () => {
         emptyDescription="Hãy tạo yêu cầu mới hoặc nới bộ lọc để xem hàng đợi gần đây."
         emptyAction={{ label: 'Tạo yêu cầu xuất', onClick: () => setOpen(true) }}
         toolbar={
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className="flex w-full flex-col gap-2 sm:flex-row lg:flex-nowrap">
             <Input
               value={search}
               onChange={(event) => setSearch(event.target.value)}

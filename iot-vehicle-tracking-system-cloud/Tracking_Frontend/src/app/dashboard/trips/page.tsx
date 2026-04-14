@@ -3,6 +3,7 @@
 import { useDeferredValue, useMemo, useState } from 'react';
 import { CircleCheckBig, CirclePlay, CircleX, Plus, Route } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
 import { StatCard } from '@/components/common/stat-card';
@@ -25,6 +26,7 @@ import { TripForm } from '@/features/trips/components/trip-form';
 const PAGE_SIZE = 20;
 
 const TripsPage = () => {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any | null>(null);
   const [deleteItem, setDeleteItem] = useState<any | null>(null);
@@ -189,6 +191,10 @@ const TripsPage = () => {
         data={rows}
         pagination={false}
         isLoading={trips.isLoading}
+        onRowClick={(row) => {
+          if (!row?.id) return;
+          router.push(`/dashboard/trips/${row.id}`);
+        }}
         emptyTitle="Chưa có chuyến đi phù hợp"
         emptyDescription="Hãy tạo chuyến đi mới hoặc nới bộ lọc để xem lại các hành trình gần đây."
         emptyAction={{
@@ -199,7 +205,7 @@ const TripsPage = () => {
           },
         }}
         toolbar={
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className="flex w-full flex-col gap-2 sm:flex-row lg:flex-nowrap">
             <Input
               value={search}
               onChange={(event) => {

@@ -12,6 +12,10 @@ export const BarGraph = ({
   data: DeviceActivityPoint[];
   isLoading?: boolean;
 }) => {
+  const hasMeaningfulData = data.some(
+    (point) => point.running > 0 || point.idle > 0 || point.offline > 0,
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -20,7 +24,7 @@ export const BarGraph = ({
       <CardContent className="h-[320px]">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
-        ) : data.length === 0 ? (
+        ) : data.length === 0 || !hasMeaningfulData ? (
           <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
             Chưa có dữ liệu hoạt động để hiển thị.
           </div>

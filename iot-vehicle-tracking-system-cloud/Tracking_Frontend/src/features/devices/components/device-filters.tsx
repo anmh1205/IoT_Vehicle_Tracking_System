@@ -17,8 +17,8 @@ export const DeviceFilters = ({
   onChange: (filters: DeviceFiltersQuery) => void;
 }) => {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="relative min-w-[220px] flex-1 sm:flex-none">
+    <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_160px_210px]">
+      <div className="relative min-w-0">
         <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Tìm theo ID hoặc tên thiết bị..."
@@ -40,7 +40,7 @@ export const DeviceFilters = ({
           })
         }
       >
-        <SelectTrigger className="w-[150px]">
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Trạng thái" />
         </SelectTrigger>
         <SelectContent>
@@ -63,7 +63,7 @@ export const DeviceFilters = ({
           });
         }}
       >
-        <SelectTrigger className="w-[190px]">
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Sắp xếp" />
         </SelectTrigger>
         <SelectContent>

@@ -21,6 +21,8 @@ export const DeviceUptimeChart = ({
   }>;
   isLoading?: boolean;
 }) => {
+  const hasMeaningfulData = data.some((item) => item.uptimePercent > 0);
+
   return (
     <Card>
       <CardHeader>
@@ -29,7 +31,7 @@ export const DeviceUptimeChart = ({
       <CardContent className="h-[320px]">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
-        ) : data.length === 0 ? (
+        ) : data.length === 0 || !hasMeaningfulData ? (
           <div className="flex h-full items-center justify-center">
             <EmptyState
               title="Chưa có dữ liệu"

@@ -30,6 +30,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { customerServices } from '@/lib/api/customers';
+import { vehicleServices } from '@/lib/api/vehicles';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorDescription, getApiErrorMessage, getApiFieldErrors } from '@/lib/utils/api-error';
 
@@ -63,6 +64,11 @@ const EMPTY_FORM = {
   taxCode: '',
   notes: '',
   status: 'active',
+};
+
+const getCustomerNumericId = (value: unknown): number | null => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 };
 
 const CustomerForm = ({
@@ -418,6 +424,16 @@ const CustomersPage = () => {
         customerType: customerType === 'all' ? undefined : customerType,
       }),
   });
+  const vehicleAssignments = useQuery({
+    queryKey: ['customers', 'vehicle-assignment'],
+    queryFn: () =>
+      vehicleServices.getList({
+        page: 1,
+        limit: 500,
+        sortBy: 'updatedAt',
+        sortOrder: 'desc',
+      }),
+  });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => customerServices.delete(id),
@@ -434,15 +450,39 @@ const CustomersPage = () => {
   });
 
   const rows = useMemo(() => customers.data?.items ?? customers.data?.data?.items ?? [], [customers.data]);
+  const assignmentByCustomer = useMemo(() => {
+    const vehicles = vehicleAssignments.data?.items ?? vehicleAssignments.data?.data?.items ?? [];
+    const map = new Map<number, { count: number; plates: string[] }>();
+
+    for (const vehicle of vehicles) {
+      const customerId = getCustomerNumericId(vehicle?.customerId);
+      if (!customerId) continue;
+
+      const current = map.get(customerId) ?? { count: 0, plates: [] };
+      const plate = typeof vehicle?.plateNumber === 'string' ? vehicle.plateNumber.trim() : '';
+      const nextPlates =
+        plate && !current.plates.includes(plate) ? [...current.plates, plate] : current.plates;
+
+      map.set(customerId, {
+        count: current.count + 1,
+        plates: nextPlates.slice(0, 3),
+      });
+    }
+
+    return map;
+  }, [vehicleAssignments.data]);
   const pagination = customers.data?.pagination ?? customers.data?.data?.pagination;
   const stats = useMemo(
     () => ({
       total: pagination?.total ?? rows.length,
       active: rows.filter((row: any) => row.status === 'active').length,
       inactive: rows.filter((row: any) => row.status === 'inactive' || row.status === 'suspended').length,
-      withEmail: rows.filter((row: any) => Boolean(row.email)).length,
+      withVehicle: rows.filter((row: any) => {
+        const customerId = getCustomerNumericId(row?.id);
+        return customerId !== null && (assignmentByCustomer.get(customerId)?.count ?? 0) > 0;
+      }).length,
     }),
-    [pagination?.total, rows],
+    [assignmentByCustomer, pagination?.total, rows],
   );
 
   const columns: ColumnDef<any>[] = [
@@ -502,6 +542,27 @@ const CustomersPage = () => {
     },
   ];
 
+  columns.splice(4, 0, {
+    id: 'vehicleAssignment',
+    header: 'Phuong tien',
+    meta: { label: 'Phuong tien' },
+    cell: ({ row }: any) => {
+      const customerId = getCustomerNumericId(row.original?.id);
+      const assignment = customerId !== null ? assignmentByCustomer.get(customerId) : undefined;
+
+      if (!assignment || assignment.count === 0) {
+        return <span className="text-xs text-muted-foreground">Chua gan phuong tien</span>;
+      }
+
+      return (
+        <div className="space-y-1">
+          <p className="text-sm font-medium">{assignment.count} xe</p>
+          <p className="line-clamp-1 text-xs text-muted-foreground">{assignment.plates.join(', ')}</p>
+        </div>
+      );
+    },
+  });
+
   const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
 
   return (
@@ -540,10 +601,10 @@ const CustomersPage = () => {
           isLoading={customers.isLoading}
         />
         <StatCard
-          title="Có email"
-          value={stats.withEmail}
+          title="Da gan phuong tien"
+          value={stats.withVehicle}
           icon={<Mail className="h-4 w-4" />}
-          isLoading={customers.isLoading}
+          isLoading={customers.isLoading || vehicleAssignments.isLoading}
         />
       </div>
 
@@ -562,7 +623,7 @@ const CustomersPage = () => {
           },
         }}
         toolbar={
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className="flex w-full flex-col gap-2 sm:flex-row lg:flex-nowrap">
             <Input
               value={search}
               onChange={(event) => {

@@ -161,6 +161,7 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
   const result = await pool.query<{
     device_id: string;
     device_name: string;
+    vehicle_plate: string | null;
     latitude: number;
     longitude: number;
     current_status: string;
@@ -174,30 +175,50 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     `SELECT
        d.device_id,
        d.device_name,
+       v.plate_number AS vehicle_plate,
        COALESCE(d.last_latitude, d.latitude) AS latitude,
        COALESCE(d.last_longitude, d.longitude) AS longitude,
        d.current_status,
        d.last_seen_at,
-       COALESCE(NULLIF(el.context->>'spd', '')::float8, 0) AS speed,
+       COALESCE(
+         NULLIF(el.context->>'speed', '')::float8,
+         NULLIF(el.context->>'spd', '')::float8,
+         0
+       ) AS speed,
        COALESCE(NULLIF(el.context->>'heading', '')::float8, 0) AS heading,
-       COALESCE(NULLIF(el.context->>'batt', '')::float8, 0) AS battery,
-       COALESCE(NULLIF(el.context->>'vib', '')::float8, 0) AS vibration,
-       COALESCE(NULLIF(el.context->>'temp', '')::float8, 0) AS temperature
+       COALESCE(
+         NULLIF(el.context->>'battery_top', '')::float8,
+         NULLIF(el.context->>'battery', '')::float8,
+         NULLIF(el.context->>'batt', '')::float8,
+         0
+       ) AS battery,
+       COALESCE(
+         NULLIF(el.context->>'vibration', '')::float8,
+         NULLIF(el.context->>'vib', '')::float8,
+         0
+       ) AS vibration,
+       COALESCE(
+         NULLIF(el.context->>'temperature', '')::float8,
+         NULLIF(el.context->>'temp', '')::float8,
+         0
+       ) AS temperature
      FROM devices d
+     LEFT JOIN vehicles v ON v.device_id = d.device_id
      LEFT JOIN LATERAL (
        SELECT context
        FROM event_logs
-       WHERE device_id = d.device_id
+       WHERE event_logs.device_id = d.device_id
+         AND event_logs.event_type = 'rawdata'
        ORDER BY server_timestamp DESC
        LIMIT 1
      ) el ON true
-     WHERE COALESCE(d.last_latitude, d.latitude) IS NOT NULL
-       AND COALESCE(d.last_longitude, d.longitude) IS NOT NULL`,
+     ORDER BY d.device_id`,
   );
 
   return result.rows.map((row) => ({
     deviceId: row.device_id,
     deviceName: row.device_name,
+    vehiclePlate: row.vehicle_plate,
     latitude: row.latitude,
     longitude: row.longitude,
     currentStatus: row.current_status,
