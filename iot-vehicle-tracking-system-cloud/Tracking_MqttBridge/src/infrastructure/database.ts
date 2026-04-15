@@ -34,7 +34,8 @@ const toIsoTimestamp = (timestampMs: number) => new Date(timestampMs).toISOStrin
 
 /**
  * Validate device by checking device_id and comparing auth_token hash.
- * The devices table stores auth_token as SHA-256 hash.
+ * The devices table usually stores auth_token as SHA-256 hash.
+ * For backward compatibility, accept both hashed and raw-token match.
  */
 export const validateDevice = async (
   deviceId: string,
@@ -45,7 +46,10 @@ export const validateDevice = async (
       `SELECT id, device_id, vehicle_id, current_status
        FROM devices
        WHERE device_id = $1
-         AND auth_token = encode(sha256($2::bytea), 'hex')
+         AND (
+           auth_token = encode(sha256($2::bytea), 'hex')
+           OR auth_token = $2
+         )
          AND is_active = true`,
       [deviceId, authToken],
     );
