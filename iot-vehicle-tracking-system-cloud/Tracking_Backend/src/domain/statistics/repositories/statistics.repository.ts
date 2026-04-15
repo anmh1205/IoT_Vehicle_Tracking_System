@@ -47,6 +47,7 @@ export const getFleetUsage = async (
 ): Promise<FleetUsagePoint[]> => {
   const step = toSeriesStep(interval);
   const bucketExpr = toBucketExpression(interval);
+  const bucketFromSeries = bucketExpr.replace(/ts/g, 'series.ts');
 
   const totalResult = await pool.query<{ total: string }>(
     'SELECT COUNT(*)::text as total FROM vehicles',
@@ -56,16 +57,19 @@ export const getFleetUsage = async (
   const query = `
     WITH series AS (
       SELECT generate_series($1::timestamptz, $2::timestamptz, $3::interval) AS ts
-    ),
-    bucketed AS (
-      SELECT ${bucketExpr.replace('ts', 'actual_start')} AS bucket, COUNT(DISTINCT vehicle_id)::text AS active_vehicles
-      FROM trips
-      WHERE actual_start BETWEEN $1 AND $2
-      GROUP BY bucket
     )
-    SELECT ${bucketExpr} AS label, COALESCE(bucketed.active_vehicles, '0') AS active_vehicles
+    SELECT
+      ${bucketFromSeries} AS label,
+      COUNT(DISTINCT vehicles.id)::text AS active_vehicles
     FROM series
-    LEFT JOIN bucketed ON bucketed.bucket = ${bucketExpr}
+    LEFT JOIN vehicles
+      ON vehicles.device_id IS NOT NULL
+    LEFT JOIN device_sessions sessions
+      ON sessions.device_id = vehicles.device_id
+     AND COALESCE(sessions.server_session_start, sessions.created_at) < (${bucketFromSeries} + $3::interval)
+     AND COALESCE(sessions.server_session_end, NOW()) >= ${bucketFromSeries}
+     AND COALESCE(sessions.status::text, '') <> 'failed'
+    GROUP BY label
     ORDER BY label ASC
   `;
 

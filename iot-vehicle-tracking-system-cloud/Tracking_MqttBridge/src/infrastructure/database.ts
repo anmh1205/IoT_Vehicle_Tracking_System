@@ -88,6 +88,7 @@ export const ensureDeviceSession = async (
 
   try {
     await client.query('BEGIN');
+    await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [deviceId]);
 
     const active = await client.query<DeviceSessionRow>(
       `SELECT id
