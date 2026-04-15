@@ -244,7 +244,7 @@ const VehiclesPage = () => {
           },
         }}
         toolbar={
-          <div className="flex w-full flex-col gap-2 sm:flex-row lg:flex-nowrap">
+          <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:gap-2 lg:flex-nowrap">
             <Input
               value={search}
               onChange={(event) => {
@@ -252,7 +252,7 @@ const VehiclesPage = () => {
                 setSearch(event.target.value);
               }}
               placeholder="Tìm theo mã xe, biển số hoặc hãng xe..."
-              className="w-full sm:max-w-sm"
+              className="w-full md:min-w-[320px] md:max-w-[460px]"
             />
             <Select
               value={status}
