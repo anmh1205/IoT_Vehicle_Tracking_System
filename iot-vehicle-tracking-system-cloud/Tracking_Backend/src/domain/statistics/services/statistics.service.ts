@@ -15,13 +15,27 @@ import type {
 import { createValidationError } from '@/shared/utils/errors.util';
 
 const DEFAULT_RANGE_DAYS = 30;
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
-const parseDate = (value: string | undefined, fallback: Date): Date => {
+const parseDate = (
+  value: string | undefined,
+  fallback: Date,
+  boundary: 'start' | 'end',
+): Date => {
   if (!value) return fallback;
-  const date = new Date(value);
+  const trimmed = value.trim();
+  const date = DATE_ONLY_PATTERN.test(trimmed)
+    ? new Date(`${trimmed}T00:00:00.000Z`)
+    : new Date(trimmed);
+
   if (Number.isNaN(date.getTime())) {
     throw createValidationError(`Invalid date value: ${value}`);
   }
+
+  if (boundary === 'end' && DATE_ONLY_PATTERN.test(trimmed)) {
+    date.setUTCHours(23, 59, 59, 999);
+  }
+
   return date;
 };
 
@@ -29,8 +43,8 @@ const parseRange = (from?: string, to?: string): StatisticsDateRange => {
   const now = new Date();
   const defaultFrom = new Date(now.getTime() - DEFAULT_RANGE_DAYS * 24 * 60 * 60 * 1000);
 
-  const parsedFrom = parseDate(from, defaultFrom);
-  const parsedTo = parseDate(to, now);
+  const parsedFrom = parseDate(from, defaultFrom, 'start');
+  const parsedTo = parseDate(to, now, 'end');
 
   if (parsedFrom > parsedTo) {
     throw createValidationError('"from" must be earlier than or equal to "to"');
