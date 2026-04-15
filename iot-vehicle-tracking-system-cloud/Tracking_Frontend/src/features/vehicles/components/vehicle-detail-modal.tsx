@@ -16,9 +16,9 @@ export const VehicleDetailModal = ({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-[min(96vw,72rem)] max-w-none overflow-y-auto pr-5">
         <SheetHeader>
-          <SheetTitle>{vehicle?.plateNumber ?? 'Chi tiet phuong tien'}</SheetTitle>
+          <SheetTitle>{vehicle?.plateNumber ?? 'Chi tiết phương tiện'}</SheetTitle>
           <SheetDescription>
-            Xem thong tin nhan dien, lien ket telemetry va boi canh van hanh theo tung phuong tien.
+            Xem thông tin nhận diện, liên kết telemetry và bối cảnh vận hành theo từng phương tiện.
           </SheetDescription>
         </SheetHeader>
 

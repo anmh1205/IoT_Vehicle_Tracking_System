@@ -152,6 +152,7 @@ export const DeviceDetailModal = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="h-[90vh] w-[95vw] max-w-[1200px] overflow-y-auto">
+        <DialogTitle className="sr-only">Chi tiết thiết bị</DialogTitle>
         <DeviceDetailModalProvider value={context}>
           <DeviceDetailModalContent />
         </DeviceDetailModalProvider>

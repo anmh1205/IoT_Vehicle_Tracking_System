@@ -15,12 +15,12 @@ import { tripServices } from '@/lib/api/trips';
 const SPEED_MS: Record<string, number> = { '1x': 500, '2x': 250, '4x': 125 };
 
 const STATUS_LABELS: Record<string, string> = {
-  planned: 'Da len lich',
-  in_progress: 'Dang chay',
-  completed: 'Hoan thanh',
-  cancelled: 'Da huy',
-  started: 'Da bat dau',
-  ended: 'Da ket thuc',
+  planned: 'Đã lên lịch',
+  in_progress: 'Đang chạy',
+  completed: 'Hoàn thành',
+  cancelled: 'Đã hủy',
+  started: 'Đã bắt đầu',
+  ended: 'Đã kết thúc',
 };
 
 const formatMetaTime = (value: unknown) => {
@@ -87,18 +87,18 @@ const TripDetailPage = ({
   const maxSpeed = summary?.maxSpeed ?? 0;
   const trip = tripQuery.data ?? null;
   const tripMetaCards = [
-    { label: 'Phuong tien', value: trip?.vehicleId ?? 'Chua gan' },
-    { label: 'Thiet bi', value: trip?.deviceId ?? 'Chua gan' },
-    { label: 'Tai xe', value: trip?.driverName ?? 'Chua gan' },
-    { label: 'Ma chuyen', value: trip?.tripCode ?? `TRIP-${tripId}` },
-    { label: 'Khoi hanh', value: formatMetaTime(trip?.actualStart ?? trip?.plannedStart) },
-    { label: 'Ket thuc', value: formatMetaTime(trip?.actualEnd ?? trip?.plannedEnd) },
+    { label: 'Phương tiện', value: trip?.vehicleId ?? 'Chưa gán' },
+    { label: 'Thiết bị', value: trip?.deviceId ?? 'Chưa gán' },
+    { label: 'Tài xế', value: trip?.driverName ?? 'Chưa gán' },
+    { label: 'Mã chuyến', value: trip?.tripCode ?? `TRIP-${tripId}` },
+    { label: 'Khởi hành', value: formatMetaTime(trip?.actualStart ?? trip?.plannedStart) },
+    { label: 'Kết thúc', value: formatMetaTime(trip?.actualEnd ?? trip?.plannedEnd) },
   ];
 
   return (
     <PageContainer
-      pageTitle={`Chuyen di #${tripId}`}
-      pageDescription={tripQuery.data?.tripCode ?? 'Chi tiet hanh trinh va replay telemetry'}
+      pageTitle={`Chuyến đi #${tripId}`}
+      pageDescription={tripQuery.data?.tripCode ?? 'Chi tiết hành trình và replay telemetry'}
     >
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Card>
@@ -106,40 +106,40 @@ const TripDetailPage = ({
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-2">
                 <Badge variant={tripQuery.data?.status === 'in_progress' ? 'default' : 'secondary'}>
-                  {STATUS_LABELS[tripQuery.data?.status] ?? tripQuery.data?.status ?? 'Chua xac dinh'}
+                  {STATUS_LABELS[tripQuery.data?.status] ?? tripQuery.data?.status ?? 'Chưa xác định'}
                 </Badge>
                 <p className="text-sm text-muted-foreground">
-                  {tripQuery.data?.driverName ? `Tai xe: ${tripQuery.data.driverName}` : 'Chua gan tai xe'}
+                  {tripQuery.data?.driverName ? `Tài xế: ${tripQuery.data.driverName}` : 'Chưa gán tài xế'}
                 </p>
               </div>
               <Select value={interval} onValueChange={setInterval_}>
                 <SelectTrigger className="w-full sm:w-[160px]">
-                  <SelectValue placeholder="Do phan giai" />
+                  <SelectValue placeholder="Độ phân giải" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="15s">15 giay</SelectItem>
-                  <SelectItem value="1m">1 phut</SelectItem>
-                  <SelectItem value="5m">5 phut</SelectItem>
-                  <SelectItem value="10m">10 phut</SelectItem>
+                  <SelectItem value="15s">15 giây</SelectItem>
+                  <SelectItem value="1m">1 phút</SelectItem>
+                  <SelectItem value="5m">5 phút</SelectItem>
+                  <SelectItem value="10m">10 phút</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-xl border bg-muted/30 p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Khoang cach</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Khoảng cách</p>
               <p className="mt-2 text-2xl font-semibold">{distanceKm} km</p>
             </div>
             <div className="rounded-xl border bg-muted/30 p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Thoi gian</p>
-              <p className="mt-2 text-2xl font-semibold">{durationMinutes} phut</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Thời gian</p>
+              <p className="mt-2 text-2xl font-semibold">{durationMinutes} phút</p>
             </div>
             <div className="rounded-xl border bg-muted/30 p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Toc do trung binh</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Tốc độ trung bình</p>
               <p className="mt-2 text-2xl font-semibold">{avgSpeed} km/h</p>
             </div>
             <div className="rounded-xl border bg-muted/30 p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Toc do toi da</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Tốc độ tối đa</p>
               <p className="mt-2 text-2xl font-semibold">{maxSpeed} km/h</p>
             </div>
           </CardContent>
@@ -147,13 +147,13 @@ const TripDetailPage = ({
 
         <Card>
           <CardHeader>
-            <CardTitle>Replay hanh trinh</CardTitle>
+            <CardTitle>Replay hành trình</CardTitle>
           </CardHeader>
           <CardContent>
             {points.length === 0 ? (
               <EmptyState
-                title="Chua co du lieu replay"
-                description="Chuyen di chua co du telemetry de chay lai hanh trinh."
+                title="Chưa có dữ liệu replay"
+                description="Chuyến đi chưa có đủ telemetry để chạy lại hành trình."
               />
             ) : (
               <TripReplayControls
@@ -176,7 +176,7 @@ const TripDetailPage = ({
 
       <Card>
         <CardHeader>
-          <CardTitle>Boi canh chuyen di</CardTitle>
+          <CardTitle>Bối cảnh chuyến đi</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
           {tripMetaCards.map((item) => (
@@ -192,9 +192,9 @@ const TripDetailPage = ({
 
       {telemetryQuery.isError ? (
         <EmptyState
-          title="Khong the tai telemetry"
-          description="Du lieu hanh trinh hien chua san sang. Hay thu lai sau."
-          action={{ label: 'Thu lai', onClick: () => void telemetryQuery.refetch() }}
+          title="Không thể tải telemetry"
+          description="Dữ liệu hành trình hiện chưa sẵn sàng. Hãy thử lại sau."
+          action={{ label: 'Thử lại', onClick: () => void telemetryQuery.refetch() }}
         />
       ) : (
         <TripDetail points={points} moving={moving} />
