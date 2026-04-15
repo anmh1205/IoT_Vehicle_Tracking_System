@@ -1,6 +1,45 @@
 # Project Changelog
 
+## 2026-04-12
+### Firmware Runtime Completion - Phases 01-06 (Completed in Code, Hardware Validation Pending)
+- Centralized runtime timing and policy fields in firmware config/NVS (`tracking`, `heartbeat`, `alarm`, `ignition hold`, `sleep`, `IMU wake`, OTA power gate, ADC ignition threshold) so product-facing cadence no longer depends on scattered literals.
+- Added legacy NVS config migration path that preserves identity/credentials and replaces legacy default cadence drift with current runtime defaults.
+- Updated command handling so `update_config` only mutates approved runtime knobs with bounded validation and persists only valid config states.
+- Reworked FSM runtime behavior: parked heartbeat now publishes `rawdata + status`, alarm cadence follows config, ignition fallback no longer depends on BLE connection, and sleep rejects emit explicit reason logs.
+- Added OTA start safety gate (`mqtt connected + minimum battery voltage`) and blocked unsafe OTA windows instead of attempting updates blindly.
+- Added timer-only fallback behavior when IMU wake is not enabled/proven and bounded BLE connect impact via reduced connect timeout and longer retry backoff.
+- Validation status: local ESP-IDF build command could not run in this environment because `idf.py` is not installed; real-hardware acceptance gates remain tracked in firmware runtime plan Phase 07.
+
+## 2026-04-10
+### MQTT Device Simulator and VPS Fix-Loop Automation (Completed)
+- Added deterministic MQTT device simulator artifacts under `resources/mock-data/scripts/` and `resources/mock-data/simulator-specs/` for seeded publish, dry-run, replay, and fault-injection workflows.
+- Added bounded local-agent/VPS SSH fix-loop automation with allowlisted service restarts, stop conditions, rollback runbook, operator handover, and test matrix checkpoints.
+- Validation status: backend typecheck/build passed, backend tests passed after harness fix, MQTT Bridge typecheck/build passed, and final code review accepted the scope with low-medium residual operational risk.
+
+## 2026-04-13
+### OTA End-to-End Firmware-Cloud Hardening (Phases 01-04 Completed in Code)
+- Backend OTA deploy flow now performs artifact readiness checks (file exists, metadata size/sha validity), device ID validation, active-job dedupe, dispatch failure marking, and derived reconcile status (`in_progress` / `stuck_timeout`) for operator APIs.
+- Backend OTA download endpoint now returns deterministic binary headers (`Content-Length`, `Content-Type`, `ETag`, `no-store`, `nosniff`) and uses hardened stream error handling suitable for device OTA clients.
+- PostgreSQL firmware log schema now includes OTA ordering/reconcile fields (`status_reason_code`, `first_assigned_at`, `command_dispatched_at`, `last_seen_at`, `last_message_id`, `last_seq_no`, `last_boot_id`, `confirm_timeout_sec`) via `init/05-firmware.sql` + compatibility patch `init/13-ota-hardening.sql`.
+- MQTT Bridge firmware handler now enforces duplicate suppression (`message_id`), out-of-order guard (`seq_no`), and terminal-state stickiness, and persists ordering metadata for debug/reconcile.
+- Firmware OTA runtime now emits OTA milestone statuses through callback-based reporting and maps OTA failures to stable short error codes (`http_open_failed`, `sha256_mismatch`, `ota_end_failed`, etc.).
+- Firmware OTA confirm timeout is now persisted as an absolute deadline and enforced on post-OTA boot (`confirm_timeout_exceeded` path) when trusted time is available.
+- Frontend firmware dashboard now reads `summaryStatus`/`stuckReason`/`errorCode` and displays OTA reconcile context without custom local inference.
+- Validation status: Backend lint/typecheck/test/build passed; MQTT Bridge typecheck/build passed; Frontend lint/typecheck/build passed. Firmware compile command not executable in this environment because `idf.py` is unavailable.
+
+## 2026-04-09
+### Firmware GNSS Observability and Recovery Hardening (Completed)
+- Added GNSS query observability for transport failures, parse failures, no-fix streaks, and fix-success streaks in the modem GNSS path.
+- Added bounded GNSS self-heal with cooldown so repeated poll failures repower the GNSS engine without thrashing the modem.
+- Added GNSS re-arm lifecycle in the tracker state machine so LTE recovery and GNSS fail streaks can re-enable GNSS with cooldown gating.
+
 ## 2026-04-06
+### Firmware SD Log Recovery, RTC Validation, and Replay ACK Hardening (Completed)
+- Hardened the firmware SD log store recovery path so log writes can recover cleanly after transient storage faults.
+- Integrated DS3231M RTC handling with UTC-safe validation to keep firmware time checks consistent across replay and persistence flows.
+- Hardened offline queue replay ACK handling and state machine integration so replay completion is confirmed before the device advances state.
+- Validation status: compile validation passed for the completed firmware scope.
+
 ### Cloud Geofence Policy and Distance Quota (Completed)
 - Added backend policy types for `ADMIN_BOUNDARY`, `RADIUS`, and `DISTANCE_QUOTA` with telemetry-driven evaluation in `iot-vehicle-tracking-system-cloud/Tracking_Backend/src/domain/geofence/services/policy-evaluator.service.ts`.
 - Added policy state persistence, violation creation, and quota-cycle reset tracking so the backend can persist spatial state and distance consumption per vehicle/policy.
@@ -29,8 +68,8 @@
 ### Hardware Spec Firmware Thesis Sync (In Progress)
 - Renamed firmware IMU module from LIS3DH naming to LIS3DSH (`main/src/imu_lis3dsh.c`, `main/inc/imu_lis3dsh.h`, `main/CMakeLists.txt`, `main/src/state_machine.c`, `main/inc/pin_map.h`) and aligned WHO_AM_I check to LIS3DSH (`0x3F`).
 - Expanded modem control abstraction in firmware power/modem flow: added placeholders for `RESET`, `SIM-DTR`, `STATUS`, `NET-LIGHT` in `main/inc/pin_map.h`; added `modem_reset_pulse`, `modem_set_dtr`, `modem_read_status`, `modem_read_netlight` in `main/src/power_mgr.c` + `main/inc/power_mgr.h`; integrated DTR + AT reset recovery + status/netlight logging in `main/src/modem_lte.c`.
-- Synced thesis final markdown pair (`resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh-readability-draft.md`, `resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`) and impacted Mermaid UML sources to LIS3DSH terminology plus PWR-KEY naming.
-- Regenerated thesis figure artifacts via `resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs` (88 SVG outputs rendered) to keep source and rendered assets consistent.
+- Standardized thesis final asset basenames under `resources/reports/thesis/final/` and synced the markdown pair (`resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh-readability-draft.md`, `resources/reports/thesis/final/99-bao-cao-thesis-hoan-chinh.md`) plus impacted Mermaid UML sources to LIS3DSH terminology and PWR-KEY naming.
+- Regenerated thesis figure artifacts via `resources/reports/thesis/final/assets/generate-thesis-report-figures.mjs` (88 SVG outputs rendered) with deterministic basename resolution so regenerated assets stay aligned after filename normalization.
 
 ## 2026-03-31
 ### API Response Contract Hard Cutover (Completed)

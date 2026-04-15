@@ -1,0 +1,30 @@
+flowchart TB
+    Fsm["Power FSM<br/>GPIO5 / GPIO18 / GPIO19"]
+
+    subgraph MainRail["Nhanh chinh 5V"]
+        direction TB
+        Vin["Nguon xe 12V/24V"]
+        Buck["MP2482 Buck 5V"]
+        MainBus["Bus chinh 5V"]
+        Rail33["Rail 3.3V<br/>MCU + IMU"]
+        Rail4["Rail ~4V<br/>Modem LTE"]
+        Vin --> Buck --> MainBus
+        MainBus --> Rail33
+        MainBus --> Rail4
+    end
+
+    subgraph BackupRail["Nhanh du phong"]
+        direction TB
+        Charge["TP4056 sac pin"]
+        Cell["Pin 18650"]
+        Boost["SX1308 boost 5V"]
+        BackupBus["Bus backup 5V"]
+        Charge --> Cell --> Boost --> BackupBus
+    end
+
+    Or["Diode OR / rail runtime"]
+
+    Fsm -. dieu khien .-> Buck
+    Fsm -. uu tien nguon .-> BackupBus
+    MainBus --> Or
+    BackupBus --> Or

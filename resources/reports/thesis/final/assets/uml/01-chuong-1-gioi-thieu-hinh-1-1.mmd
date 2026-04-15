@@ -1,17 +1,20 @@
 flowchart LR
-    subgraph Current["Hiện trạng"]
-        C1["Quản lý thủ công"]
-        C2["Theo dõi chậm"]
-        C3["Xử lý chậm"]
+    subgraph Current["Hien trang can cai thien"]
+        direction TB
+        C1["Quan ly thu cong"]
+        C2["Theo doi cham"]
+        C3["Xu ly cham"]
         C1 --> C2 --> C3
     end
-    subgraph Proposed["Giải pháp mới"]
-        P1["Thiết bị tracker
-GPS + OBD2 + IMU + 4G"]
-        P2["Cloud xử lý
-EMQX + Bridge + Backend"]
-        P3["Dashboard giám sát
-Bản đồ + cảnh báo + báo cáo"]
+
+    Gap["Can chuyen doi so"]
+
+    subgraph Proposed["Giai phap de xuat"]
+        direction TB
+        P1["Tracker<br/>GPS + OBD2 + IMU + 4G"]
+        P2["Cloud<br/>EMQX + Bridge + Backend"]
+        P3["Dashboard<br/>Ban do + canh bao + bao cao"]
         P1 --> P2 --> P3
     end
-    C3 ----> P1
+
+    Current --> Gap --> Proposed

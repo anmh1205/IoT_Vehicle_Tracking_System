@@ -1,6 +1,10 @@
-flowchart LR
-    Stream["Luồng realtime Socket"] --> Panel["Bảng biểu đồ OBD2"]
-    Panel --> RPM["RPM"]
-    Panel --> Speed["Speed"]
-    Panel --> Coolant["Coolant Temp"]
-    Filter["Bộ lọc thời gian"] --> Panel
+flowchart TB
+    subgraph RealtimeOBD["Bang du lieu OBD2 realtime"]
+        direction LR
+        RPM["RPM"]
+        Speed["Speed"]
+        Coolant["Coolant Temp"]
+    end
+
+    Stream["Luong realtime Socket"] --> RealtimeOBD
+    Filter["Bo loc thoi gian"] --> RealtimeOBD

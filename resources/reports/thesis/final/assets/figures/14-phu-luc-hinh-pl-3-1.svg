@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1240" viewBox="0 0 1800 1240">
+<rect width="100%" height="100%" fill="white"/>
+<rect x="430" y="60" width="940" height="100" rx="24" fill="#dbeafe" stroke="#93c5fd" stroke-width="3"/>
+<text x="900.0" y="123" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="700" fill="#1f2937">Ke hoach thuc hien du an theo giai doan (24 tuan)</text>
+<text x="900.0" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#475569">Cac giai doan co the chong lap mot phan theo tien do thuc te</text>
+<line x1="900" y1="160" x2="900" y2="205" stroke="#64748b" stroke-width="4"/>
+<rect x="120" y="230" width="620" height="140" rx="22" fill="#eef4fb" stroke="#93c5fd" stroke-width="3"/>
+<text x="430.0" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1f2937">GD1 | Tuan 1-4</text>
+<text x="430.0" y="317" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Nghien cuu yeu cau</text>
+<text x="430.0" y="351" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Thiet ke phan cung</text>
+<rect x="1060" y="230" width="620" height="140" rx="22" fill="#eef4fb" stroke="#93c5fd" stroke-width="3"/>
+<text x="1370.0" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1f2937">GD2 | Tuan 3-10</text>
+<text x="1370.0" y="317" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Firmware ESP-IDF</text>
+<text x="1370.0" y="351" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">OBD2 BLE + power FSM</text>
+<rect x="120" y="450" width="620" height="140" rx="22" fill="#eef4fb" stroke="#93c5fd" stroke-width="3"/>
+<text x="430.0" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1f2937">GD3 | Tuan 5-8</text>
+<text x="430.0" y="537" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">EMQX + PostgreSQL</text>
+<text x="430.0" y="571" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Docker Compose</text>
+<rect x="1060" y="450" width="620" height="140" rx="22" fill="#eef4fb" stroke="#93c5fd" stroke-width="3"/>
+<text x="1370.0" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1f2937">GD4 | Tuan 7-14</text>
+<text x="1370.0" y="537" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Backend API</text>
+<text x="1370.0" y="571" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">MQTT Bridge</text>
+<rect x="120" y="670" width="620" height="140" rx="22" fill="#eef4fb" stroke="#93c5fd" stroke-width="3"/>
+<text x="430.0" y="718" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1f2937">GD5 | Tuan 11-18</text>
+<text x="430.0" y="757" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Dashboard</text>
+<text x="430.0" y="791" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Ban do + canh bao</text>
+<rect x="1060" y="670" width="620" height="140" rx="22" fill="#eef4fb" stroke="#93c5fd" stroke-width="3"/>
+<text x="1370.0" y="718" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1f2937">GD6 | Tuan 17-22</text>
+<text x="1370.0" y="757" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Tich hop he thong</text>
+<text x="1370.0" y="791" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Kiem thu thuc dia</text>
+<rect x="590" y="910" width="620" height="140" rx="22" fill="#eef4fb" stroke="#93c5fd" stroke-width="3"/>
+<text x="900.0" y="958" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1f2937">GD7 | Tuan 21-24</text>
+<text x="900.0" y="997" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Bao cao khoa luan</text>
+<text x="900.0" y="1031" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Slide bao ve</text>
+<line x1="900" y1="205" x2="430" y2="230" stroke="#64748b" stroke-width="4"/>
+<polygon points="430,230 445.6,218 445.6,242" fill="#64748b"/>
+<line x1="900" y1="205" x2="1370" y2="230" stroke="#64748b" stroke-width="4"/>
+<polygon points="1370,230 1354.4,218 1354.4,242" fill="#64748b"/>
+<line x1="430" y1="370" x2="430" y2="450" stroke="#64748b" stroke-width="4"/>
+<polygon points="430,450 418,434.4 442,434.4" fill="#64748b"/>
+<line x1="1370" y1="370" x2="1370" y2="450" stroke="#64748b" stroke-width="4"/>
+<polygon points="1370,450 1358,434.4 1382,434.4" fill="#64748b"/>
+<line x1="430" y1="590" x2="430" y2="670" stroke="#64748b" stroke-width="4"/>
+<polygon points="430,670 418,654.4 442,654.4" fill="#64748b"/>
+<line x1="1370" y1="590" x2="1370" y2="670" stroke="#64748b" stroke-width="4"/>
+<polygon points="1370,670 1358,654.4 1382,654.4" fill="#64748b"/>
+<line x1="430" y1="810" x2="900" y2="910" stroke="#64748b" stroke-width="4"/>
+<polygon points="900,910 884.4,898 884.4,922" fill="#64748b"/>
+<line x1="1370" y1="810" x2="900" y2="910" stroke="#64748b" stroke-width="4"/>
+<polygon points="900,910 915.6,898 915.6,922" fill="#64748b"/>
+</svg>

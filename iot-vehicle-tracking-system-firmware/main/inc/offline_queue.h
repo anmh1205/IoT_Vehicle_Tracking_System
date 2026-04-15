@@ -23,7 +23,9 @@ void offline_queue_set_online(bool online);
 esp_err_t offline_queue_enqueue(offline_record_type_t type,
                                 const char *payload,
                                 bool gps_fix,
-                                bool net_up);
+                                bool net_up,
+                                bool time_trusted,
+                                uint64_t timestamp_ms);
 void offline_queue_replay_tick(void);
 void offline_queue_handle_publish_ack(int msg_id);
 bool offline_queue_should_throttle_rawdata(void);

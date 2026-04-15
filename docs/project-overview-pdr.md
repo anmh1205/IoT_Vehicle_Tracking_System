@@ -1,11 +1,15 @@
 # Project Overview & PDR
 
 ## Current Scope
+- MQTT device simulator automation is implemented through deterministic publish/replay/fault-injection scripts and bounded VPS fix-loop orchestration under `resources/mock-data/scripts/` and `resources/mock-data/simulator-specs/`.
 - UI/UX accessibility remediation for dashboard web and mobile surfaces has been completed.
 - The frontend now also exposes a public landing page at `/` so the system can be presented before login, while dashboard flows remain protected.
 - The backend/frontend API contract is standardized around a success envelope and RFC7807 problem-details error shape.
 - MQTT is the canonical ingest path for both real devices and simulator traffic, and legacy `/iot/data` runtime usage has been removed.
 - Cloud geofence policy and distance quota support is implemented on the backend with admin boundary, radius, and distance quota policy types.
+- Firmware runtime hardening now covers SD log store recovery, DS3231M RTC UTC-safe validation, offline queue replay ACK handling, and GNSS reliability recovery in the state machine.
+- GNSS observability now tracks transport failures, parse failures, no-fix streaks, and fix-success streaks, with bounded self-heal and re-arm handling after LTE recovery/fail streaks.
+- UAT CI/CD now uses manual fallback dispatch, concurrency guards, bounded health retries, and safe non-blocking notifications for deploy visibility.
 - Thesis readability sync on 2026-04-01 kept the final thesis markdown, Mermaid sources, and exported SVG figures aligned to a shared glossary without touching runtime code.
 
 ## API Contract Objectives

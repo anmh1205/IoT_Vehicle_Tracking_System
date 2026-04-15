@@ -1,0 +1,28 @@
+flowchart TB
+    Title["Ke hoach thuc hien du an<br/>theo giai doan trong 24 tuan"]
+
+    subgraph Row1[" "]
+        direction LR
+        P1["GD1 | Tuan 1-4<br/>Nghien cuu yeu cau<br/>Thiet ke phan cung"]
+        P2["GD2 | Tuan 3-10<br/>Firmware ESP-IDF<br/>OBD2 BLE + power FSM"]
+    end
+
+    subgraph Row2[" "]
+        direction LR
+        P3["GD3 | Tuan 5-8<br/>EMQX + PostgreSQL<br/>Docker Compose"]
+        P4["GD4 | Tuan 7-14<br/>Backend API<br/>MQTT Bridge"]
+    end
+
+    subgraph Row3[" "]
+        direction LR
+        P5["GD5 | Tuan 11-18<br/>Dashboard<br/>ban do + canh bao"]
+        P6["GD6 | Tuan 17-22<br/>Tich hop he thong<br/>Kiem thu thuc dia"]
+    end
+
+    subgraph Row4[" "]
+        direction LR
+        P7["GD7 | Tuan 21-24<br/>Bao cao khoa luan<br/>Slide bao ve"]
+    end
+
+    Title --> P1
+    P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7

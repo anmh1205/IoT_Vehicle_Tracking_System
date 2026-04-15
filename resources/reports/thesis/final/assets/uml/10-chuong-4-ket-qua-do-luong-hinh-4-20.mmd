@@ -1,13 +1,21 @@
-flowchart LR
-    Supply["Nguon DC"]
-    OBD["Bộ mô phỏng OBD2"]
-    DMM["Dong ho do"]
-    Scope["Oscilloscope"]
+flowchart TB
     Tracker["Tracker prototype"]
-    Laptop["Laptop thu log"]
+
+    subgraph Inputs["Nguon va tin hieu vao"]
+        direction LR
+        Supply["Nguon DC"]
+        OBD["Bo mo phong OBD2"]
+    end
+
+    subgraph Instruments["Thiet bi do"]
+        direction LR
+        DMM["Dong ho do"]
+        Scope["Oscilloscope"]
+        Laptop["Laptop thu log"]
+    end
 
     Supply --> Tracker
     OBD --> Tracker
-    DMM --> Tracker
-    Scope --> Tracker
+    Tracker --> DMM
+    Tracker --> Scope
     Tracker --> Laptop

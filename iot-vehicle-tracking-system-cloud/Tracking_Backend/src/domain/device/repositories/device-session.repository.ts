@@ -28,7 +28,19 @@ export const getSessionStats = async (
   const result = await pool.query(
     `SELECT
        COUNT(*)::int AS total_sessions,
-       COALESCE(AVG(uptime), 0) AS avg_uptime,
+       COALESCE(
+         AVG(
+           COALESCE(
+             uptime,
+             EXTRACT(
+               EPOCH FROM (
+                 COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at)
+               )
+             )
+           )
+         ),
+         0
+       ) AS avg_uptime,
        COALESCE(AVG(avg_vibration), 0) AS avg_vibration,
        COALESCE(SUM(data_points_count), 0)::int AS total_data_points
      FROM device_sessions

@@ -26,6 +26,44 @@ interface InternalEnvelope {
   payload: Record<string, unknown>;
 }
 
+interface RealtimeMetadata {
+  message_id?: string;
+  schema_version?: string;
+  seq_no?: number;
+  boot_id?: string;
+}
+
+const extractMetadata = (envelopePayload: Record<string, unknown>): RealtimeMetadata | undefined => {
+  const messageId = envelopePayload.message_id == null ? undefined : String(envelopePayload.message_id);
+  const schemaVersion = envelopePayload.schema_version == null
+    ? undefined
+    : String(envelopePayload.schema_version);
+  const seqNoRaw = envelopePayload.seq_no == null ? undefined : Number(envelopePayload.seq_no);
+  const seqNo = Number.isFinite(seqNoRaw) ? seqNoRaw : undefined;
+  const bootId = envelopePayload.boot_id == null ? undefined : String(envelopePayload.boot_id);
+
+  if (
+    messageId === undefined &&
+    schemaVersion === undefined &&
+    seqNo === undefined &&
+    bootId === undefined
+  ) {
+    return undefined;
+  }
+
+  return {
+    message_id: messageId,
+    schema_version: schemaVersion,
+    seq_no: seqNo,
+    boot_id: bootId,
+  };
+};
+
+const toTimestampMs = (value: string): number => {
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : Date.now();
+};
+
 let client: mqtt.MqttClient | null = null;
 
 export const initMqttEventListener = (): void => {
@@ -63,6 +101,7 @@ export const initMqttEventListener = (): void => {
     }
 
     const envelopePayload = (data.payload ?? {}) as Record<string, unknown>;
+    const metadata = extractMetadata(envelopePayload);
 
     switch (data.event_type) {
       case 'status':
@@ -70,6 +109,7 @@ export const initMqttEventListener = (): void => {
           device_id: String(envelopePayload.device_id ?? ''),
           status: String(envelopePayload.current_status ?? 'unknown'),
           last_seen_at: data.timestamp,
+          metadata,
         });
         break;
 
@@ -80,8 +120,9 @@ export const initMqttEventListener = (): void => {
           lon: Number(envelopePayload.longitude ?? 0),
           speed: Number(envelopePayload.speed ?? 0),
           heading: Number(envelopePayload.course ?? 0),
-          timestamp: Date.now(),
+          timestamp: toTimestampMs(data.timestamp),
           battery: envelopePayload.battery_top == null ? null : Number(envelopePayload.battery_top),
+          metadata,
         });
         break;
 
@@ -92,11 +133,13 @@ export const initMqttEventListener = (): void => {
           publishEvent('device:session_start', {
             device_id: String(envelopePayload.device_id ?? ''),
             session_id: sessionId,
+            metadata,
           });
         } else if (action === 'ended') {
           publishEvent('device:session_end', {
             device_id: String(envelopePayload.device_id ?? ''),
             session_id: sessionId,
+            metadata,
           });
         }
         break;
@@ -114,6 +157,7 @@ export const initMqttEventListener = (): void => {
             envelopePayload.latitude == null ? undefined : Number(envelopePayload.latitude),
           longitude:
             envelopePayload.longitude == null ? undefined : Number(envelopePayload.longitude),
+          metadata,
         });
         break;
 

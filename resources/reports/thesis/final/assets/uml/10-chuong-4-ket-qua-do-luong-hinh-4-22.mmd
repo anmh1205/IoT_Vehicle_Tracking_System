@@ -1,6 +1,17 @@
-flowchart LR
-    Bench["Bench test phần cứng"] --> Network["4G/Wi-Fi test network"]
-    Vehicle["Xe thử nghiệm"] --> Network
-    Network --> Cloud["EMQX + Bridge + Backend"]
-    Cloud --> Dashboard["Dashboard + Grafana"]
-    Dashboard --> Report["Kết quả đo + log"]
+flowchart TB
+    subgraph Inputs["Nguon du lieu thu nghiem"]
+        direction LR
+        Bench["Bench test phan cung"]
+        Vehicle["Xe thu nghiem"]
+    end
+
+    Network["Mang 4G / Wi-Fi test"]
+    Cloud["EMQX + Bridge + Backend"]
+
+    subgraph Outputs["Quan sat ket qua"]
+        direction LR
+        Dashboard["Dashboard + Grafana"]
+        Report["Do thi + log"]
+    end
+
+    Inputs --> Network --> Cloud --> Outputs

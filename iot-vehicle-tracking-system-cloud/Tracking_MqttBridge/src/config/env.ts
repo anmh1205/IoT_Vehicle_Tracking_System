@@ -24,19 +24,34 @@ const requireEnv = (key: string, value: string | undefined): string => {
 
 export const appConfig = {
   nodeEnv: fromEnv('NODE_ENV') ?? 'development',
-  isProduction: fromEnv('NODE_ENV') === 'production',
+  isDevelopment: (fromEnv('NODE_ENV') ?? 'development') === 'development',
 } as const;
+
+const strictTlsEnv = !appConfig.isDevelopment;
+const strictTlsUseTls = fromEnv('MQTT_USE_TLS') !== 'false';
+const strictTlsRejectUnauthorized = fromEnv('MQTT_REJECT_UNAUTHORIZED') !== 'false';
+
+if (strictTlsEnv) {
+  if (!strictTlsUseTls) {
+    throw new Error('CRITICAL: MQTT_USE_TLS must be true outside development');
+  }
+  if (!strictTlsRejectUnauthorized) {
+    throw new Error('CRITICAL: MQTT_REJECT_UNAUTHORIZED must be true outside development');
+  }
+}
 
 export const mqttConfig = {
   host: fromEnv('MQTT_HOST') ?? 'localhost',
   port: toInt(fromEnv('MQTT_PORT'), 1883),
   tlsPort: toInt(fromEnv('MQTT_TLS_PORT'), 8883),
-  useTls: appConfig.isProduction
-    ? fromEnv('MQTT_USE_TLS') !== 'false'
+  useTls: strictTlsEnv
+    ? strictTlsUseTls
     : toBool(fromEnv('MQTT_USE_TLS'), false),
-  rejectUnauthorized: appConfig.isProduction
-    ? fromEnv('MQTT_REJECT_UNAUTHORIZED') !== 'false'
+  rejectUnauthorized: strictTlsEnv
+    ? strictTlsRejectUnauthorized
     : toBool(fromEnv('MQTT_REJECT_UNAUTHORIZED'), false),
+  servername: fromEnv('MQTT_SERVERNAME') ?? fromEnv('MQTT_HOST') ?? 'localhost',
+  caCertPath: fromEnv('MQTT_CA_CERT_PATH') ?? '',
   username: fromEnv('MQTT_USERNAME') ?? 'mqtt_bridge',
   password: requireEnv('MQTT_PASSWORD', fromEnv('MQTT_PASSWORD')),
 } as const;

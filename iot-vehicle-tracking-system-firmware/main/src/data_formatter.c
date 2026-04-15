@@ -2,16 +2,12 @@
 
 #include "cJSON.h"
 
-#include "esp_log.h"
-
 #include "util.h"
 
 /**
  * @file data_formatter.c
  * @brief JSON payload builders for telemetry/status/event/firmware channels.
  */
-
-static const char *TAG = "DATA_FORMATTER";
 
 /**
  * @brief Serialize cJSON object to compact string and free cJSON tree.
@@ -30,6 +26,33 @@ static char *data_formatter_print(cJSON *root) {
     return json;
 }
 
+static void data_formatter_add_metadata(cJSON *root,
+                                        uint64_t sent_at_ms,
+                                        const char *message_id,
+                                        uint32_t seq_no,
+                                        const char *boot_id) {
+    if (root == NULL) {
+        return;
+    }
+
+    cJSON *metadata = cJSON_CreateObject();
+    if (metadata == NULL) {
+        return;
+    }
+
+    cJSON_AddStringToObject(metadata, "schema_version", "v1.0.0");
+    if (!util_string_empty(message_id)) {
+        cJSON_AddStringToObject(metadata, "message_id", message_id);
+    }
+    cJSON_AddNumberToObject(metadata, "sent_at", (double)sent_at_ms);
+    cJSON_AddNumberToObject(metadata, "seq_no", (double)seq_no);
+    if (!util_string_empty(boot_id)) {
+        cJSON_AddStringToObject(metadata, "boot_id", boot_id);
+    }
+
+    cJSON_AddItemToObject(root, "metadata", metadata);
+}
+
 /**
  * @brief Format raw telemetry payload.
  *
@@ -40,7 +63,12 @@ static char *data_formatter_print(cJSON *root) {
  */
 char *data_format_rawdata(const config_t *cfg,
                           const telemetry_t *telemetry,
-                          bool include_auth_token) {
+                          bool include_auth_token,
+                          bool timestamp_trusted,
+                          uint64_t timestamp_ms,
+                          const char *message_id,
+                          uint32_t seq_no,
+                          const char *boot_id) {
     if (cfg == NULL || telemetry == NULL) {
         return NULL;
     }
@@ -55,11 +83,18 @@ char *data_format_rawdata(const config_t *cfg,
     }
 
     /* Root metadata fields. */
+    uint64_t effective_ts_ms = timestamp_ms == 0 ? telemetry->gnss.timestamp_ms : timestamp_ms;
+    if (effective_ts_ms == 0) {
+        effective_ts_ms = util_uptime_ms();
+        timestamp_trusted = false;
+    }
+
     cJSON_AddStringToObject(root, "device_id", cfg->device_id);
     if (include_auth_token) {
         cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
     }
-    cJSON_AddNumberToObject(root, "timestamp", (double)telemetry->gnss.timestamp_ms);
+    cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
+    cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
     cJSON_AddNumberToObject(root, "uptime", (double)util_uptime_ms());
 
     /* Nested telemetry object. */
@@ -75,6 +110,7 @@ char *data_format_rawdata(const config_t *cfg,
     cJSON_AddNumberToObject(data, "error_code", telemetry->error_code);
 
     cJSON_AddItemToObject(root, "data", data);
+    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
     return data_formatter_print(root);
 }
 
@@ -90,7 +126,12 @@ char *data_format_rawdata(const config_t *cfg,
 char *data_format_status(const config_t *cfg,
                          const char *status,
                          uint32_t session_id,
-                         bool include_auth_token) {
+                         bool include_auth_token,
+                         bool timestamp_trusted,
+                         uint64_t timestamp_ms,
+                         const char *message_id,
+                         uint32_t seq_no,
+                         const char *boot_id) {
     if (cfg == NULL || status == NULL) {
         return NULL;
     }
@@ -104,12 +145,16 @@ char *data_format_status(const config_t *cfg,
     if (include_auth_token) {
         cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
     }
+    uint64_t effective_ts_ms = timestamp_ms == 0 ? util_uptime_ms() : timestamp_ms;
+
     cJSON_AddStringToObject(root, "status", status);
-    cJSON_AddNumberToObject(root, "timestamp", (double)util_uptime_ms());
+    cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
+    cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
     if (session_id > 0) {
         cJSON_AddNumberToObject(root, "session_id", session_id);
     }
 
+    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
     return data_formatter_print(root);
 }
 
@@ -127,7 +172,12 @@ char *data_format_event(const config_t *cfg,
                         const char *event_type,
                         int code,
                         const char *message,
-                        bool include_auth_token) {
+                        bool include_auth_token,
+                        bool timestamp_trusted,
+                        uint64_t timestamp_ms,
+                        const char *message_id,
+                        uint32_t seq_no,
+                        const char *boot_id) {
     if (cfg == NULL || event_type == NULL) {
         return NULL;
     }
@@ -141,13 +191,17 @@ char *data_format_event(const config_t *cfg,
     if (include_auth_token) {
         cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
     }
+    uint64_t effective_ts_ms = timestamp_ms == 0 ? util_uptime_ms() : timestamp_ms;
+
     cJSON_AddStringToObject(root, "event_type", event_type);
     cJSON_AddNumberToObject(root, "code", code);
     if (!util_string_empty(message)) {
         cJSON_AddStringToObject(root, "message", message);
     }
-    cJSON_AddNumberToObject(root, "timestamp", (double)util_uptime_ms());
+    cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
+    cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
 
+    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
     return data_formatter_print(root);
 }
 
@@ -161,7 +215,12 @@ char *data_format_event(const config_t *cfg,
  */
 char *data_format_firmware(const config_t *cfg,
                            const firmware_status_t *status,
-                           bool include_auth_token) {
+                           bool include_auth_token,
+                           bool timestamp_trusted,
+                           uint64_t timestamp_ms,
+                           const char *message_id,
+                           uint32_t seq_no,
+                           const char *boot_id) {
     if (cfg == NULL || status == NULL) {
         return NULL;
     }
@@ -175,7 +234,17 @@ char *data_format_firmware(const config_t *cfg,
     if (include_auth_token) {
         cJSON_AddStringToObject(root, "auth_token", cfg->auth_token);
     }
-    cJSON_AddStringToObject(root, "jobId", status->job_id);
+    uint64_t effective_ts_ms = timestamp_ms == 0 ? util_uptime_ms() : timestamp_ms;
+
+    const char *job_id = status->job_id;
+    if (util_string_empty(job_id)) {
+        job_id = boot_id;
+    }
+    if (util_string_empty(job_id)) {
+        job_id = "boot";
+    }
+
+    cJSON_AddStringToObject(root, "jobId", job_id);
     cJSON_AddStringToObject(root, "status", status->status);
     cJSON_AddNumberToObject(root, "progress", status->progress);
     cJSON_AddStringToObject(root, "targetVersion", status->target_version);
@@ -186,6 +255,9 @@ char *data_format_firmware(const config_t *cfg,
     if (!util_string_empty(status->error)) {
         cJSON_AddStringToObject(root, "error", status->error);
     }
+    cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
+    cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
 
+    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
     return data_formatter_print(root);
 }

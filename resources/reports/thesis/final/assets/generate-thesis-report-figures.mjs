@@ -1,12 +1,12 @@
 ﻿import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { diagramByFileName } from "./thesis-mermaid-diagrams.mjs";
 
-const projectRoot = process.cwd();
-const chaptersDir = join(projectRoot, "resources", "reports", "thesis", "final");
-const assetsDir = join(chaptersDir, "assets");
+const assetsDir = dirname(fileURLToPath(import.meta.url));
+const chaptersDir = dirname(assetsDir);
 const figuresDir = join(assetsDir, "figures");
 const mermaidConfigPath = join(assetsDir, "mermaid-thesis-config.json");
 const mermaidTempDir = mkdtempSync(join(tmpdir(), "ivts-thesis-mermaid-"));
@@ -23,6 +23,9 @@ mkdirSync(figuresDir, { recursive: true });
 
 const imageExtension = /\.(svg|png|jpg|jpeg|webp)$/iu;
 const renderSizeByFileName = {
+  "01-chuong-1-gioi-thieu-hinh-1-2.svg": { width: 3600, height: 5000 },
+  "01-chuong-1-gioi-thieu-hinh-1-3.svg": { width: 3600, height: 5000 },
+  "01-chuong-1-gioi-thieu-hinh-1-5.svg": { width: 3600, height: 5200 },
   "06-chuong-3-giai-phap-frontend-hinh-3-17.svg": { width: 3200, height: 1900 },
   "06-chuong-3-giai-phap-frontend-hinh-3-18.svg": { width: 3200, height: 1900 },
   "06-chuong-3-giai-phap-frontend-hinh-3-20.svg": { width: 3400, height: 2100 },
@@ -32,7 +35,7 @@ const renderSizeByFileName = {
   "09-chuong-4-trien-khai-cloud-hinh-4-23.svg": { width: 3200, height: 1900 },
   "10-chuong-4-ket-qua-do-luong-hinh-4-20.svg": { width: 3200, height: 1900 },
   "10-chuong-4-ket-qua-do-luong-hinh-4-33.svg": { width: 3400, height: 2100 },
-  "thesis-99-bao-cao-thesis-hoan-chinh-06.svg": { width: 3200, height: 2000 },
+  "06-chuong-3-giai-phap-frontend-hinh-3-19a.svg": { width: 3200, height: 2000 },
 };
 
 const findCachedMermaidCli = () => {
@@ -69,22 +72,17 @@ const getRenderSize = (figureName, code) => {
   return { width: 2600, height: 1700 };
 };
 
-const collectReferencedFigureNames = () => {
-  const chapterFiles = readdirSync(chaptersDir, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
-    .map((entry) => join(chaptersDir, entry.name));
+const canonicalChapterPath = join(chaptersDir, "thesis-final-report.md");
 
+const collectReferencedFigureNames = () => {
   const figureNameRegex = /(?:\.\/)?assets\/figures\/([^\s)]+)/gu;
   const names = new Set();
+  const content = readFileSync(canonicalChapterPath, "utf8");
 
-  for (const chapterPath of chapterFiles) {
-    const content = readFileSync(chapterPath, "utf8");
-    let match = figureNameRegex.exec(content);
-    while (match) {
-      names.add(match[1]);
-      match = figureNameRegex.exec(content);
-    }
-    figureNameRegex.lastIndex = 0;
+  let match = figureNameRegex.exec(content);
+  while (match) {
+    names.add(match[1]);
+    match = figureNameRegex.exec(content);
   }
 
   return [...names].sort();
@@ -191,13 +189,15 @@ try {
     const { width, height } = getRenderSize(figureName, code);
     const sourcePath = join(mermaidTempDir, figureName.replace(/\.[^.]+$/u, ".mmd"));
     const outputPath = join(figuresDir, figureName);
+    const outputPngPath = join(figuresDir, figureName.replace(/\.svg$/u, ".png"));
 
     writeFileSync(sourcePath, code, "utf8");
 
     try {
       renderMermaid(sourcePath, outputPath, width, height);
       postProcessRenderedSvg(outputPath);
-      process.stdout.write(`Rendered: ${figureName}\n`);
+      renderMermaid(sourcePath, outputPngPath, width, height);
+      process.stdout.write(`Rendered: ${figureName} (+PNG)\n`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       throw new Error(`Render failed for ${figureName}: ${message}`);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "esp_err.h"
 
@@ -22,6 +23,35 @@ esp_err_t modem_lte_init(void);
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t modem_lte_connect(void);
+
+/**
+ * @brief Trigger non-blocking LTE connect workflow.
+ */
+void modem_lte_request_connect(void);
+
+/**
+ * @brief Override PDP APN used in `AT+CGDCONT`.
+ *
+ * @param apn APN string. Empty/NULL keeps previous value.
+ */
+void modem_lte_set_apn(const char *apn);
+
+/**
+ * @brief Advance LTE connect workflow one bounded step.
+ *
+ * @param now_ms Current uptime in milliseconds.
+ *
+ * @return ESP_OK when connected, ESP_ERR_NOT_FINISHED while progressing,
+ *         or error code on hard failure.
+ */
+esp_err_t modem_lte_tick(uint64_t now_ms);
+
+/**
+ * @brief Read LTE initialization flag.
+ *
+ * @return true when base modem init sequence is completed.
+ */
+bool modem_lte_is_initialized(void);
 
 /**
  * @brief Deactivate PDP context if connected.

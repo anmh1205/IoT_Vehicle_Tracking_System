@@ -1,7 +1,10 @@
-flowchart LR
-    User["Operator"] --> UI["Giao diện lệnh"]
-    UI --> API["Backend API"]
-    API --> Bridge["MQTT Bridge"]
-    Bridge --> Device["Tracker"]
-    Device --> Ack["ACK/Kết quả"]
-    Ack --> UI
+flowchart TB
+    Operator["Operator<br/>chon lenh tu Dashboard"]
+    UI["Dashboard<br/>tao yeu cau dieu khien"]
+    API["Backend API<br/>xac thuc + luu lenh"]
+    Bridge["MQTT Bridge<br/>publish lenh den tracker"]
+    Device["Tracker<br/>nhan lenh va thuc thi"]
+    Ack["ACK / ket qua<br/>tra ve Dashboard"]
+
+    Operator --> UI --> API --> Bridge --> Device --> Ack
+    Ack -. cap nhat lai .-> UI

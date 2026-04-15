@@ -11,6 +11,7 @@ idf_component_register(
         "src/modem_at.c"
         "src/modem_lte.c"
         "src/modem_gnss.c"
+        "src/rtc_ds3231m.c"
         "src/mqtt_client.c"
         "src/data_formatter.c"
         "src/command_handler.c"
@@ -21,6 +22,7 @@ idf_component_register(
         "src/offline_queue.c"
         "src/session_mgr.c"
         "src/telemetry_counters.c"
+        "src/retry_manager.c"
     INCLUDE_DIRS
         "inc"
     REQUIRES

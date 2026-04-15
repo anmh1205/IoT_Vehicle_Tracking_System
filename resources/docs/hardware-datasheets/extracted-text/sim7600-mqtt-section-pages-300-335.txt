@@ -1,0 +1,1417 @@
+
+===== PAGE 300 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 300 / 460
+Parameter Saving Mode -
+Maximum Response Time 120000ms
+Reference
+Defined Values
+<filename> String type, filename, the max length is 64.unit:byte.
+<path>
+The directory where the sent file saved. Numeric type, range is 1-3
+1 –F:/ (/cache)
+2 – D:/(sd card)
+3 –E:/ (/data/media/)
+<method>
+HTTP method specification:
+0–GET
+1– POST
+2– HEAD
+3– DELETE
+<httpstatuscode> Please refer to chapter 13.3.1
+<errcode> Please refer to chapter13.3.2
+<send_header>
+Send file as HTTP header and Body or Only as Body. Numeric type,
+the range is 0-1, the default is 0.
+0 –Send file as HTTP header and body
+1 – Send file as Body
+Example
+AT+HTTPPOSTFILE="baidu.txt",3
+OK
++HTTPPOSTFILE: 1,714,0
+13.2.9 AT+HTTPREADFILE Receive HTTP(S) Response Content to a file
+AT+HTTPREADFILE Receive HTTP(S) Response Content to a File
+Test Command
+AT+HTTPREADFILE=?
+Response
++HTTPREADTFILE: <filename>[,(1-4)]
+OK
+Write Command
+AT+HTTPREADFILE=<filena
+me>[,<path>]
+Response
+a)if parameter format is right :
+OK
++HTTPREADFILE: <result>
+===== PAGE 301 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 301 / 460
+b)if parameter format is right:
++HTTPREADFILE: <result>
+OK
+c)if failed:
++HTTPREADFILE: <result>
+ERROR
+d)if parameter format is not right or any other error occurs:
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<filename> String type, filename, the max length is 64.unit:byte.
+<path>
+1 – F:/ (/cache/)
+2 – D:/(sd card)
+3 – E:/ (/data/media/)
+4 – /mssl_cert/(this is for CA file downloading)
+Example
+AT+HTTPREADFILE="baidu.txt",3
+OK
++HTTPREADFILE: 0
+13.3 Summary of result codes for HTTPS
+13.3.1 Summary of HTTP(S) Response Code
+Code of <httpstatuscode> Meaning
+100 Continue
+101 Switching Protocols
+===== PAGE 302 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 302 / 460
+200 OK
+201 Created
+201 Accepted
+203 Non-Authoritative Information
+204 No Content
+205 Reset Content
+206 Partial Content
+300 Multiple Choices
+301 Moved Permanently
+302 Found
+303 See Other
+304 Not Modified
+305 Use Proxy
+307 Temporary Redirect
+400 Bad Request
+401 Unauthorized
+402 Payment Required
+403 Forbidden
+404 Not Found
+405 Method Not Allowed
+406 Not Acceptable
+407 Proxy Authentication Required
+408 Request Timeout
+409 Conflict
+410 Gone
+411 Length Required
+412 Precondition Failed
+413 Request Entity Too Large
+414 Request-URI Too Large
+415 Unsupported Media Type
+416 Requested range not satisfiable
+417 Expectation Failed
+500 Internal Server Error
+501 Not Implemented
+502 Bad Gateway
+503 Service Unavailable
+504 Gateway timeout
+505 HTTP Version not supported
+600 Not HTTP PDU
+601 Network Error
+602 No memory
+===== PAGE 303 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 303 / 460
+603 DNS Error
+604 Stack Busy
+13.3.2 Summary of HTTP(S) error Code
+Code of <errcode> Meaning
+0 Success
+701 Alert state
+702 Unknown error
+703 Busy
+704 Connection closed error
+705 Timeout
+706 Receive/send socket data failed
+707 File not exists or other memory error
+708 Invalid parameter
+709 Network error
+710 start a new ssl session failed
+711 Wrong state
+712 Failed to create socket
+713 Get DNS failed
+714 Connect socket failed
+715 Handshake failed
+716 Close socket failed
+717 No network error
+718 Send data timeout
+719 CA missed
+===== PAGE 304 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 304 / 460
+14. AT Commands for HTP
+14.1 Overview of AT Commands for HTP
+Command Description
+AT+CHTPSERV Set HTP server info
+AT+CHTPUPDATE Updating date time using HTP protocol
+14.2 Detailed Description of AT Commands for HTP
+14.2.1 AT+CHTPSERV Set HTP server info
+AT+CHTPSERV Set HTP server info
+Test Command
+AT+CHTPSERV=?
+Response
++CHTPSERV: "ADD","HOST",(1-65535), (0-1)[,"PROXY",(1-65535)]
++CHTPSERV: "DEL",(0-15)
+OK
+Read Command
+AT+CHTPSERV?
+Response
++CHTPSERV: <index>"<host>",<port>,<http_version>
+[,"<proxy>",<proxy_port>]
+…
++CHTPSERV: <index>"<host>",<port>[,"<proxy>",<proxy_port>]
+OK
+or
+OK (if HTP server not setted)
+Write Command
+AT+CHTPSERV="<cmd>","<
+host_or_idx>"[,<port>,<http
+_version>[,"<proxy>",<prox
+Response
+OK
+or
+ERROR
+===== PAGE 305 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 305 / 460
+y_port>]]
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<cmd> This command to operate the HTP server list.
+“ADD”: add a HTP server item to the list
+“DEL”: delete a HTP server item from the list
+<host_or_idx> If the <cmd> is “ADD”, this field is the same as <host>, needs
+quotation marks; If the <cmd> is “DEL”, this field is the index of the
+HTP server item to be deleted from the list, does not need quotation
+marks.
+<host> The HTP server address.
+<port> The HTP server port.
+<http_version> The HTTP version of the HTP server:
+0-HTTP 1.0
+1-HTTP 1.1
+<proxy> The proxy address
+<proxy_port> The port of the proxy
+<index> The HTP server index.
+Example
+AT+CHTPSERV=”ADD”,”www.google.com”,80,1
+OK
+14.2.2 AT+CHTPUPDATE Updating date time using HTP protocol
+AT+CHTPUPDATE Updating date time using HTP protocol
+Test Command
+AT+CHTPUPDATE=?
+Response
+OK
+Read Command
+AT+CHTPUPDATE?
+Response
++CHTPUPDATE: <status>
+OK
+Execution Command
+AT+CHTPUPDATE
+Response
+OK
+===== PAGE 306 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 306 / 460
++CHTPUPDATE: <err>
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<status> The status of HTP module:
+Updating: HTP module is synchronizing date time
+NULL: HTP module is idle now
+<err> The result of the HTP updating
+Example
+AT+CHTPUPDATE
+OK
++CHTPUPDATE: 0
+14.2.3 Unsolicited HTP Codes
+Code of <err>
+0 Operation succeeded
+1 Unknown error
+2 Wrong parameter
+3 Wrong date and time calculated
+4 Network error
+===== PAGE 307 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 307 / 460
+15. AT Commands for NTP
+15.1 Overview of AT Commands for NTP
+Command Description
+AT+CNTP Update system time
+15.2 Detailed Description of AT Commands for NTP
+15.2.1 AT+CNTP Update system time
+AT+CNTP Update system time
+Test Command
+AT+CNTP=?
+Response
++CNTP: 255,(-96~96)
+OK
+Read Command
+AT+CNTP?
+Response
++CNTP: <host>,<timezone>
+OK
+Write Command
+AT+CNTP=”<host>”[,<timez
+one>]
+Response
+OK
+or
+ERROR
+Execution Command
+AT+CNTP
+Response
++CNTP: <host>,<timezone>
+OK
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+===== PAGE 308 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 308 / 460
+Reference -
+Defined Values
+<host> NTP server address, length is 255.
+<timezone> Local time zone,the range is(-96 to 96), default value is 0.
+Example
+AT+CNTP="202.120.2.101",32
+OK
+AT+CNTP
+OK
++CNTP: 0
+15.2.2 Unsolicited NTP Codes
+Code of <err>
+0 Operation succeeded
+1 Unknown error
+2 Wrong parameter
+3 Wrong date and time calculated
+4 Network error
+5 Time zone error
+6 Time out error
+===== PAGE 309 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 309 / 460
+16. AT Commands for MQTT(S)
+16.1 Overview of AT Commands for MQTT(S)
+Command Description
+AT+CMQTTSTART Start MQTT service
+AT+CMQTTSTOP STOP MQTT service
+AT+CMQTTACCQ Acquire a client
+AT+CMQTTREL Release a client
+AT+CMQTTSSLCFG Set the SSL context
+AT+CMQTTWILLTOPIC Input the will topic
+AT+CMQTTWILLMSG Input the will message
+AT+CMQTTCONNECT Connect to MQTT server
+AT+CMQTTDISC Disconnect from server
+AT+CMQTTTOPIC Input the publish message topic
+AT+CMQTTPAYLOAD Input the publish message body
+AT+CMQTTPUB Publish a message to server
+AT+CMQTTSUBTOPIC Input a subscribe message topic
+AT+CMQTTSUB Subscribe a message to server
+AT+CMQTTUNSUBTOPIC Input a unsubscribe message topic
+AT+CMQTTUNSUB Unsubscribe a message to server
+AT+CMQTTCFG Configure the MQTT Context
+16.2 Detailed Description of AT Commands for MQTT(S)
+16.2.1 AT+CMQTTSTART Start MQTT service
+AT+CMQTTSTART Start MQTT service
+Execution Command
+AT+CMQTTSTART
+Response
+OK
++CMQTTSTART: <err>
+===== PAGE 310 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 310 / 460
+or
++CMQTTSTART: <err>
+OK
+or
+ERROR
++CMQTTSTART: <err>
+or
++CMQTTSTART: <err>
+ERROR
+or
+ERROR
+Defined Values
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTSTART
+OK
++CMQTTSTART: 0
+ It must be executed before any other MQTT related operations
+16.2.2 AT+CMQTTSTOP STOP MQTT service
+AT+CMQTTSTOP STOP MQTT service
+Execution Command
+AT+CMQTTSTOP
+Response
+OK
++CMQTTSTOP: <err>
+or
++CMQTTSTOP: <err>
+NOTE
+===== PAGE 311 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 311 / 460
+OK
+or
+ERROR
++CMQTTSTOP: <err>
+or
++CMQTTSTOP: <err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTSTOP
+OK
++CMQTTSTOP: 0
+16.2.3 AT+CMQTTACCQ Acquire a client
+AT+CMQTTACCQ Acquire a client
+Test Command
+AT+CMQTTACCQ=?
+Response
++CMQTTACCQ: (0-1),(1-128),(0-1),(3-4)
+OK
+Read Command
+AT+CMQTTACCQ?
+Response
++CMQTTACCQ: <client_index>,<clientID>,<server_type>
++CMQTTACCQ: <client_index>,<clientID>,<server_type>
+OK
+Write Command
+AT+CMQTTACCQ=<client_i
+ndex>,<clientID>[,<server_t
+ype>[,<mqtt_version>]]
+Response
+OK
+or
++CMQTTACCQ: <client_index>,<err>
+===== PAGE 312 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 312 / 460
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<clientID> The UTF-encoded string. It specifies a unique identifier for the client.
+The string length is from 1 to 128 bytes.
+<server_type> A numeric parameter that identifies the server type. The default value
+is 0.
+0 - MQTT server with TCP
+1 - MQTT server with SSL/TLS
+<mqtt_version> A numeric parameter that identifies the MQTT protocol version. The
+permitted value is 3 or 4.
+3 - MQTT version 3.1
+4 - MQTT version 3.1.1
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTACCQ=0,"client test0",0,4
+OK
+ It must be called before all commands about MQTT connect and after AT+CMQTTSTART
+16.2.4 AT+CMQTTREL Release a client
+AT+CMQTTREL Release a client
+Test Command
+AT+CMQTTREL=?
+Response
++CMQTTREL: (0-1)
+OK
+NOTE
+===== PAGE 313 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 313 / 460
+Read Command
+AT+CMQTTREL?
+Response
+OK
+Write Command
+AT+CMQTTREL=<client_ind
+ex>
+Response
+OK
+or
++CMQTTREL: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time 120000ms
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTREL=0
+OK
+ It must be called after AT+CMQTTDISC and before AT+CMQTTSTOP
+16.2.5 AT+CMQTTSSLCFG Set the SSL context
+AT+CMQTTSSLCFG Set the SSL context
+Test Command
+AT+CMQTTSSLCFG=?
+Response
++CMQTTSSLCFG: (0,1),(0-9)
+OK
+Read Command
+AT+CMQTTSSLCFG?
+Response
++CMQTTSSLCFG: <session_id>,[<ssl_ctx_index >]
++CMQTTSSLCFG: <session_id>,[<ssl_ctx_index >]
+NOTE
+===== PAGE 314 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 314 / 460
+OK
+Write Command
+AT+CMQTTSSLCFG=<sessi
+on_id>,<ssl_ctx_index>
+Response
+OK
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<session_id> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<ssl_ctx_index> The SSL context ID which will be used in the SSL connection. Refer to
+the <ssl_ctx_index> of AT+CSSLCFG
+Example
+AT+CMQTTSSLCFG=0,1
+OK
+ If you don’t set the SSL context by this command before connecting to server by
+AT+CMQTTCONNECT, the CMQTTCONNECT operation will use the SSL context as same as
+index <session_id> (the 1st parameter of AT+ CMQTTCONNECT) when connecting to the server
+16.2.6 AT+CMQTTWILLTOPIC Input the will topic
+AT+CMQTTWILLTOPIC Input the will topic
+Test Command
+AT+CMQTTWILLTOPIC=?
+Response
++CMQTTWILLTOPIC: (0-1),(1-1024)
+OK
+Write Command
+AT+CMQTTWILLTOPIC=<cli
+ent_index>,<req_length>
+Response
+>
+<input data here>
+OK
+or
+NOTE
+===== PAGE 315 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 315 / 460
++CMQTTWILLTOPIC: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<req_length> The length of input topic. The will topic should be UTF-encoded string.
+The range is from 1 to 1024 bytes.
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTWILLTOPIC=0,15
+>simcomwilltopic
+OK
+16.2.7 AT+CMQTTWILLMSG Input the will message
+AT+CMQTTWILLMSG Input the will message
+Test Command
+AT+CMQTTWILLMSG=?
+Response
++CMQTTWILLMSG: (0-1),(1-1024),(0-2)
+OK
+Write Command
+AT+CMQTTWILLMSG=<clie
+nt_index>,<req_length>,<qo
+s>
+Response
+>
+<input data here>
+OK
+or
++CMQTTWILLMSG: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+===== PAGE 316 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 316 / 460
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<req_length> The length of input data. The will message should be UTF-encoded
+string. The range is from 1 to 1024 bytes.
+<qos> The qos value of the will message. The range is from 0 to 2.
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTWILLMSG=0,17,0
+>simcomwillmessage
+OK
+16.2.8 AT+CMQTTDISC Disconnect from server
+AT+CMQTTDISC Disconnect from server
+Test Command
+AT+CMQTTDISC=?
+Response
++CMQTTDISC: (0-1),(0,60-180)
+OK
+Read Command
+AT+CMQTTDISC?
+Response
++CMQTTDISC: 0,<disc_state>
++CMQTTDISC: 1,<disc_state>
+OK
+Write Command
+AT+CMQTTDISC=<client_in
+dex>,<timeout>
+Response
+OK
++CMQTTDISC: <client_index>,<err>
+or
++CMQTTDISC: <client_index>,<err>
+OK
+or
++CMQTTDISC: <client_index>,<err>
+ERROR
+or
+===== PAGE 317 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 317 / 460
+ERROR
+Parameter Saving Mode -
+Maximum Response Time 120000ms
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<timeout> The timeout value for disconnection. The unit is second. The range is
+60s to 180s. The default value is 0s (not set the timeout value)
+<disc_state> 1 - disconnection
+0 - connection
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTDISC=0,120
+OK
++CMQTTDISC: 0,0
+16.2.9 AT+CMQTTCONNECT Connect to MQTT server
+AT+CMQTTCONNECT Connect to MQTT server
+Test Command
+AT+CMQTTCONNECT=?
+Response
++CMQTTCONNECT: (0-1),(9-256),(1-64800),(0-1)
+OK
+Read Command
+AT+CMQTTCONNECT?
+Response
++CMQTTCONNECT:
+0[,<server_addr>,<keepalive_time>,<clean_session>[,<user_nam
+e>[,<pass_word>]]]
++CMQTTCONNECT:
+1[,<server_addr>,<keepalive_time>,<clean_session>[,<user_nam
+e>[,<pass_word>]]]
+OK
+Write Command
+AT+CMQTTCONNECT=<clie
+nt_index>,<server_addr>,<k
+eepalive_time>,<clean_sess
+Response
+OK
++CMQTTCONNECT: <client_index>,<err>
+===== PAGE 318 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 318 / 460
+ion>[,<user_name>[,<pass_
+word>]]
+or
++CMQTTCONNECT: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time 120000ms
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<server_addr> The string that described the server address and port. The range of
+the string length is 9 to 256 bytes. The string should be like this
+“tcp://116.247.119.165:5141”, must begin with “tcp://”. If the
+<server_addr> not include the port, the default port is 1883.
+<keepalive_time> The time interval between two messages received from a client. The
+client will send a keep-alive packet when there is no message sent to
+server after song long time. The range is from 1s to 64800s (18 hours)
+<clean_session> The clean session flag. The value range is from 0 to 1, and default
+value is 0.
+0 - the server must store the subscriptions of the client after it
+disconnected. This includes continuing to store QoS 1 and QoS 2
+messages for the subscribed topics so that they can be delivered
+when the client reconnects. The server must also maintain the state of
+in-flight messages being delivered at the point the connection is lost.
+This information must be kept until the client reconnects.
+1 - the server must discard any previously maintained information
+about the client and treat the connection as "clean". The server must
+also discard any state when the client disconnects.
+<user_name> The user name identifies the name of the user which can be used for
+authentication when connecting to server. The string length is from 1
+to 256 bytes.
+<password> The password corresponding to the user which can be used for
+authentication when connecting to server. The string length is from 1
+to 256 bytes.
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTCONNECT=0,"tcp://hooleeping.com:8883",60,1
+OK
+===== PAGE 319 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 319 / 460
++CMQTTCONNECT: 0,0
+ If you don’t set the SSL context by AT+CMQTTSSLCFG before connecting a SSL/TLS MQTT
+server by AT+CMQTTCONNECT, it will use the <client_index> (the 1st parameter of
+AT+CMQTTCONNECT) SSL context when connecting to the server.
+16.2.10 AT+CMQTTTOPIC Input the publish message topic
+AT+CMQTTTOPIC Input the publish message topic
+Test Command
+AT+CMQTTTOPIC=?
+Response
++CMQTTTOPIC: (0-1),(1-1024)
+OK
+Write Command
+AT+CMQTTTOPIC=<client_i
+ndex>,<req_length>
+Response
+>
+<input data here>
+OK
+or
++CMQTTTOPIC: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<req_length> The length of input topic data. The publish message topic should be
+UTF-encoded string. The range is from 1 to 1024 bytes.
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTTOPIC=0,11
+>simcomtopic
+OK
+NOTE
+===== PAGE 320 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 320 / 460
+ The topic will be clean after execute AT+CMQTTPUB
+16.2.11 AT+CMQTTPAYLOAD Input the publish message body
+AT+CMQTTPAYLOAD Input the publish message body
+Test Command
+AT+CMQTTPAYLOAD=?
+Response
++CMQTTPAYLOAD: (0-1),(1-10240)
+OK
+Write Command
+AT+CMQTTPAYLOAD=<clie
+nt_index>,<req_length>
+Response
+>
+<input data here>
+OK
++CMQTTPAYLOAD: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<req_length> The length of input message data. The publish message should be
+UTF-encoded string. The range is from 1 to 10240 bytes
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTPAYLOAD=0,13
+>simcompayload
+OK
+NOTE
+===== PAGE 321 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 321 / 460
+ The payload will be clean after execute AT+CMQTTPUB
+16.2.12 AT+CMQTTPUB Publish a message to server
+AT+CMQTTPUB Publish a message to server
+Test Command
+AT+CMQTTPUB=?
+Response
++CMQTTPUB: (0-1),(0-2),(60-180),(0-1),(0-1)
+OK
+Write Command
+AT+CMQTTPUB=<client_ind
+ex>,<qos>,<pub_timeout>[,
+<ratained> [,<dup>]]
+Response
+OK
++CMQTTPUB: <client_index>,<err>
+or
++CMQTTPUB: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time 120000ms
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<qos> The publish message’s qos. The range is from 0 to 2.
+0 – at most once
+1 – at least once
+2 – exactly once
+<pub_timeout> The publishing timeout interval value. Since the client publish a
+message to server, it will report failed if the client receive no response
+from server after the timeout value seconds. The range is from 60s to
+180s
+<ratained> The retain flag of the publish message. The value is 0 or 1. The default
+value is 0.
+When a client sends a PUBLISH to a server, if the retain flag is set to
+NOTE
+===== PAGE 322 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 322 / 460
+1, the server should hold on to the message after it has been delivered
+to the current subscribers
+<dup> The dup flag to the message. The value is 0 or 1. The default value is
+0. The flag is set when the client or server attempts to re-deliver a
+message
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTPUB=0,0,120
+OK
++CMQTTPUB: 0,0
+16.2.13 AT+CMQTTSUBTOPIC Input a subscribe message topic
+AT+CMQTTSUBTOPIC Input a subscribe message topic
+Test Command
+AT+CMQTTSUBTOPIC=?
+Response
++CMQTTSUBTOPIC: (0-1),(1-1024),(0-2)
+OK
+Write Command
+AT+CMQTTSUBTOPIC=<clie
+nt_index>,<req_length>,<qo
+s>
+Response
+>
+<input data here>
+OK
+or
++CMQTTSUBTOPIC: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<req_length> The length of input topic data. The publish message topic should be
+UTF-encoded string. The range is from 1 to 1024 bytes.
+===== PAGE 323 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 323 / 460
+NOTE: The max length of the total cached topics is 5120
+<qos> The publish message’s qos. The range is from 0 to 2.
+0 – at most once
+1 – at least once
+2 – exactly once
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTSUBTOPIC=0,11,0
+>simcomtopic
+OK
+ The topic will be clean after execute AT+CMQTTSUB.
+16.2.14 AT+CMQTTSUB Subscribe a message to server
+AT+CMQTTSUB Subscribe a message to server
+Test Command
+AT+CMQTTSUB=?
+Response
++CMQTTSUB: (0-1),(1-1024),(0-2),(0-1)
+OK
+Write Command
+/*subscribe one or more
+topicswhichinputby
+AT+CMQTTSUBTOPIC*/
+AT+CMQTTSUB=<client_ind
+ex>[,<dup>]
+Response
+OK
++CMQTTSUB: <client_index>,<err>
+or
++CMQTTSUB: <client_index>,<err>
+ERROR
+or
+ERROR
+Write Command
+/* subcribe one topic*/
+AT+CMQTTSUB=<client_ind
+ex>,<reqLength>,<qos>[,<d
+up>]
+Response
+>
+<input data here>
+OK
++CMQTTSUB: <client_index>,<err>
+or
+NOTE
+===== PAGE 324 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 324 / 460
++CMQTTSUB: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time 120000ms
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<req_length> The length of input topic data. The message topic should be
+UTF-encoded string. The range is from 1 to 1024 bytes.
+<qos> The publish message’s qos. The range is from 0 to 2.
+0 – at most once
+1 – at least once
+2 – exactly once
+<dup> The dup flag to the message. The value is 0 or 1. The default value is
+0. The flag is set when the client or server attempts to re-deliver a
+message.
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTSUB=0
+OK
++CMQTTSUB: 0,0
+16.2.15 AT+CMQTTUNSUBTOPIC Input a unsubscribe message topic
+AT+CMQTTUNSUBTOPIC Input a unsubscribe message topic
+Test Command
+AT+CMQTTUNSUBTOPIC=?
+Response
++CMQTTUNSUBTOPIC: (0-1),(1-1024)
+OK
+Write Command
+AT+CMQTTUNSUBTOPIC=<
+client_index>,<req_length>
+Response
+>
+<input data here>
+OK
+===== PAGE 325 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 325 / 460
+or
++CMQTTUNSUBTOPIC: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<req_length> The length of input topic data. The publish message topic should be
+UTF-encoded string. The range is from 1 to 1024 bytes.
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTUNSUBTOPIC=0,11
+>simcomtopic
+OK
+ The max length of the total cached topics is 5120.
+ The topic will be clean after execute AT+CMQTTUNSUB
+16.2.16 AT+CMQTTUNSUB Unsubscribe a message to server
+AT+CMQTTUNSUB Unsubscribe a message to server
+Test Command
+AT+CMQTTUNSUB=?
+Response
++CMQTTUNSUB: (0-1),(1-1024),(0-1)
+OK
+Write Command
+/* unsubscribe one or more
+topics which input by
+AT+CMQTTUNSUBTOPIC*/
+Response
+OK
++CMQTTUNSUB: <client_index>,<err>
+NOTE
+===== PAGE 326 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 326 / 460
+AT+CMQTTUNSUB=<client_
+index>,<dup>
+or
++CMQTTUNSUB: <client_index>,<err>
+ERROR
+or
+ERROR
+Write Command
+/* unsubscribe one topic*/
+AT+CMQTTUNSUB=<client_
+index>,<reqLength>,<dup>
+Response
+>
+<input data here>
+OK
++CMQTTUNSUB: <client_index>,<err>
+or
++CMQTTUNSUB: <client_index>,<err>
+ERROR
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time 120000ms
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<req_length> The length of input topic data. The message topic should be
+UTF-encoded string. The range is from 1 to 1024 bytes.
+<dup> The dup flag to the message. The value is 0 or 1. The default value is
+0. The flag is set when the client or server attempts to re-deliver a
+message.
+<err> The result code, please refer to chapter 16.3.1
+Example
+AT+CMQTTUNSUB =0,0
+OK
++CMQTTUNSUB: 0,0
+16.2.17 AT+CMQTTCFG Configure the MQTT Context
+===== PAGE 327 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 327 / 460
+AT+CMQTTCFG Configure the MQTT Context
+Test Command
+AT+CMQTTCFG=?
+Response
++CMQTTCFG: "checkUTF8",(0-1),(0-1)
++CMQTTCFG: "optimeout",(0-1),(20-120)
+OK
+Read Command
+AT+CMQTTCFG?
+Response
++CMQTTCFG: 0,<checkUTF8_flag>,<optimeout_val>
++CMQTTCFG: 1,<checkUTF8_flag>,<optimeout_val>
+OK
+Write Command
+/*Configure the check UTF8
+flag of the specified MQTT
+client context*/
+AT+CMQTTCFG="checkUTF
+8",<client_index>,<checkUT
+F8_flag>
+Response
+OK
+or
++CMQTTCFG: <client_index>,<err>
+OK
+or
+ERROR
+Write Command
+/*Configure the max timeout
+interval of the send or
+receive data operation*/
+AT+CMQTTCFG="optimeout
+",<client_index>,<optimeout
+_val>
+Response
+OK
+or
++CMQTTCFG: <client_index>,<err>
+OK
+or
+ERROR
+Parameter Saving Mode -
+Maximum Response Time -
+Reference
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<checkUTF8_flag> The flag to indicate whether to check the string is UTF8 coding or not,
+the default value is 1.
+0 – Not check UTF8 coding.
+1 – Check UTF8 coding.
+<optimeout_val> The max timeout interval of sending or receiving data operation. The
+range is from 20 seconds to 120 seconds, the default value is 120
+seconds.
+<err> The result code, please refer to chapter 16.3.1
+Example
+===== PAGE 328 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 328 / 460
+AT+CMQTTCFG="checkUTF8",0,0
+OK
+AT+CMQTTCFG="optimeout",0,120
+OK
+ It must be called before AT+CMQTTCONNECT and after AT+CMQTTACCQ. The setting will be
+cleared after AT+CMQTTREL
+16.3 Summary of result codes for MQTT(S)
+16.3.1 Summary of Command result <err> codes
+Code of <err> Meaning
+0 operation succeeded
+1 failed
+2 bad UTF-8 string
+3 sock connect fail
+4 sock create fail
+5 sock close fail
+6 message receive fail
+7 network open fail
+8 network close fail
+9 network not opened
+10 client index error
+11 no connection
+12 invalid parameter
+13 not supported operation
+14 client is busy
+15 require connection fail
+16 sock sending fail
+17 timeout
+18 topic is empty
+19 client is used
+NOTE
+===== PAGE 329 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 329 / 460
+20 client not acquired
+21 client not released
+22 length out of range
+23 network is opened
+24 packet fail
+25 DNS error
+26 socket is closed by server
+27 connection refused: unaccepted protocol version
+28 connection refused: identifier rejected
+29 connection refused: server unavailable
+30 connection refused: bad user name or password
+31 connection refused: not authorized
+32 handshake fail
+33 not set certificate
+34 open SSL session failed
+16.3.2 Summary of Unsolicited Result Codes
+Unsolicited codes Description
++CMQTTCONNLOST:
+<client_index>,<cause>
+When client disconnect passively, URC “+CMQTTCONNLOST”
+will be reported, then user need to connect MQTT server again.
++CMQTTPING:
+<client_index>,<err>
+When send ping (which keep-alive to the server) to server failed,
+the module will report this URC.
+If received this message, you should disconnect the connection
+and re-connect
++CMQTTNONET When the network is become no network, the module will report
+this URC.
+If received this message, you should restart the MQTT service by
+AT+CMQTTSTART.
++CMQTTRXSTART:
+<client_index>,<topic_total_len
+>,<payload_total_len>
++CMQTTRXTOPIC:
+<client_index>,<sub_topic_len>
+<sub_topic>
+/*for long topic, split to multiple
+packets to report*/
+[<CR><LF>+CMQTTRXTOPIC:
+<client_index>,<sub_topic_len>
+<sub_topic>]
+If a client subscribes to one or more topics, any message
+published to those topics are sent by the server to the client. The
+following URC is used for transmitting the message published
+from server to client.
+1)+CMQTTRXSTART:
+<client_index>,<topic_total_len>,<payload_total_len>
+At the beginning of receiving published message, the module will
+report this to user, and indicate client index with <client_index>,
+the topic total length with <topic_total_len> and the payload total
+length with <payload_total_len>.
+2)+CMQTTRXTOPIC:
+<client_index>,<sub_topic_len>\r\n<sub_topic>
+===== PAGE 330 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 330 / 460
++CMQTTRXPAYLOAD:
+<client_index>,<sub_payload_l
+en>
+<sub_payload>
+/*for long payload, split to multiple
+packets to report*/
+[+CMQTTRXPAYLOAD:
+<client_index>,<sub_payload_l
+en>
+<sub_payload>]
++CMQTTRXEND: <client_index>
+After the command “+CMQTTRXSTART” received, the module will
+report the second message to user, and indicate client index with
+<client_index>, the topic packet length with <sub_topic_len> and
+the topic content with <sub_topic> after “\r\n”.
+For long topic, it will be split to multiple packets to report and the
+command “+CMQTTRXTOPIC” will be send more than once with
+the rest of topic content. The sum of <sub_topic_len> is equal to
+<topic_total_len>.
+3)+CMQTTRXPAYLOAD:
+<client_index>,<sub_payload_len>\r\n<sub_payload>
+After the command “+CMQTTRXTOPIC” received, the module will
+send third message to user, and indicate client index with
+<client_index>, the payload packet length with
+<sub_payload_len> and the payload content with <sub_payload>
+after “\r\n”.
+For long payload, the same as “+CMQTTRXTOPIC”.
+4) +CMQTTRXEND: <client_index>
+At last, the module will send fourth message to user and indicate
+the topic and payload have been transmitted completely.
+Defined Values
+<client_index> A numeric parameter that identifies a client. The range of permitted
+values is 0 to 1.
+<cause> The cause of disconnection.
+1 – Socket is closed passively.
+2 – Socket is reset.
+3 – Network is closed.
+<topic_total_len> The length of message topic received from MQTT server. The range is
+from 1 to 1024 bytes.
+<payload_total_len> The length of message body received from MQTT server. The range is
+from 1 to 10240 bytes.
+<sub_topic_len> The sub topic packet length, The sum of <sub_topic_len> is equal to
+<topic_total_len>.
+<sub_topic> The sub topic content.
+<sub_payload_len> Max length is 1500. The sub message body packet length. The sum of
+<sub_payload_len> is equal to <payload_total_len>.
+<sub_payload> The sub message body content.
+<err> The result code, please refer to chapter 16.3.1
+===== PAGE 331 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 331 / 460
+17. AT Commands for GPS
+17.1 Overview of AT Commands for GPS
+Command Description
+AT+CGPS Start/Stop GPS session
+AT+CGPSINFO Get GPS fixed position information
+AT+CGPSCOLD Cold start GPS
+AT+CGPSHOT Hot start GPS
+AT+CGPSURL Set AGPS drfault server URL
+AT+CGPSSSL Set AGPS transport security
+AT+CGPSAUTO Start GPS automatic
+AT+CGPSNMEA Configure NMEA sentence type
+AT+CGPSNMEARATE Set NMEA output rate
+AT+CGPSMD Configure AGPS MO method
+AT+CGPSFTM Start GPS test mode
+AT+CGPSDEL Delete the GPS information
+AT+CGPSXE Enable/Disable GPS XTRA function
+AT+CGPSXD Download XTRA assistant file
+AT+CGPSXDAUTO Download XTRA assistant file automatically
+AT+CGPSINFOCFG Report GPS NMEA-0183 sentence
+AT+CGPSPMD Configure positioning mode
+AT+CGPSMSB Configure based mode switch to standalone
+AT+CGPSHOR Configure positioning desired accuracy
+AT+CGPSNOTIFY LCS respond position request
+AT+CGNSSINFO Get GNSS fixed position information
+AT+CGNSSMODE Configure GNSS support mode
+AT+CGPSIPV6 Set AGPS IPV6 Addr&Port
+AT+CGPSXTRADATA Query the validity of the current gpsOne XTRA data
+17.2 Detailed Description of AT Commands for GPS
+===== PAGE 332 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 332 / 460
+17.2.1 AT+CGPS Start/Stop GPS session
+AT+CGPS Start/Stop GPS Session
+Test Command
+AT+CGPS=?
+Response
++CGPS: (list of supported <on/off>s),( list of supported <mode>s)
+OK
+Read Command
+AT+CGPS?
+Response
++CGPS: <on/off>,<mode>
+OK
+Write Command
+AT+CGPS=<on/off>[,<mode
+>]
+Response
+OK
+If UE-assisted mode, when fixed will report indication:
++CGPS:<lat>,<lon>,<alt>,<date>,<time>
+If <off>, it will report indication:
++CGPS:0
+or
+ERROR
+Defined Values
+<on/off> Values reserved by the present document:
+0 – stop GPS session
+1 – start GPS session
+<mode> Ignore - standalone mode
+1 – standalone mode
+2 – UE-based mode
+3 – UE-assisted mode
+<lat> Latitude of current position. Unit is in 10^8 degree
+<lon> Longitude of current position. Unit is in 10^8 degree
+<alt> MSL Altitude. Unit is meters.
+<date> UTC Date. Output format is ddmmyyyy
+<time> UTC Time. Output format is hhmmss.s
+<unconfidence> Unconfidence of the location, GPS fixed report 39, cell fixed report
+100.
+<uncertainty_meter> Uncertainty meters.
+Example
+AT+CGPS?
++CGPS:1
+===== PAGE 333 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 333 / 460
+OK
+AT+CGPS=1
+OK
+ Output of NMEA sentences is automatic; no control via AT commands is provided. If executing
+AT+CGPS=1, the GPS session will choose cold or hot start automatically.
+ UE-based and UE-assisted mode depend on URL (AT+CGPSURL). When UE-based mode fails, it
+will switch standalone mode.
+ UE-assisted mode is singly fixed. Standalone and UE-based mode is consecutively fixed.
+ After the GPS closed, it should to wait about 2s~30s for start again. Reason ： If the signal
+conditions are right (strong enough signals to allow ephemeris demodulation) or ephemeris
+demodulation is on going, sometimes MGP will stay on longer in order to demodulate more
+ephemeris. This will help the engine provide faster TTFF and possibly better yield later (up to 2
+hours), because it has the benefit of more ephemeris available.
+ For SIM7600E-H-M2/SIM7600SA-H-M2/SIM7600A-H-M2 module, GPS started should be decided
+by the physical switch of GPS flight mode in the module firstly. Close the switch, GPS will be
+started automatically, then you can open or close gps by AT command, otherwize, GPS could not
+be started in any way.
+17.2.2 AT+CGPSINFO Get GPS fixed position information
+AT+CGPSINFO Get GPS fixed position infomation
+Test Command
+AT+CGPSINFO=?
+Response
++CGPSINFO: (scope of <time>)
+OK
+Read Command
+AT+CGPSINFO?
+Response
++CGPSINFO: <time>
+OK
+Write Command
+AT+CGPSINFO=<time>
+Response
+OK
++CGPSINFO:[<lat>],[<N/S>],[<log>],[<E/W>],[<date>],[<UTC
+time>],[<alt>],[<speed>],[<course>]
+If <off>, it will report indication:
+OK (if <time>=0)
+Execution Command
+AT+CGPSINFO
+Response
++CGPSINFO:[<lat>],[<N/S>],[<log>],[<E/W>],[<date>],[<UTC
+time>],[<alt>],[<speed>],[<course>]
+NOTE
+===== PAGE 334 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 334 / 460
+OK
+Defined Values
+<lat> Latitude of current position. Output format is ddmm.mmmmmm
+<N/S> N/S Indicator, N=north or S=south
+<log> Longitude of current position. Output format is dddmm.mmmmmm
+<E/W> E/W Indicator, E=east or W=west
+<date> Date. Output format is ddmmyy
+<UTC time> UTC Time. Output format is hhmmss.s
+<alt> MSL Altitude. Unit is meters.
+<speed> Speed Over Ground. Unit is knots.
+<course> Course. Degrees.
+<time> The range is 0-255, unit is second, after set <time> will report the GPS
+information every the seconds.
+Example
+AT+CGPSINFO=?
++CGPSINFO: (0-255)
+OK
+AT+CGPSINFO?
++CGPSINFO: 0
+OK
+AT+CGPSINFO
++CGPSINFO:3113.343286,N,12121.234064,E,250311,072809.3,44.1,0.0,0
+OK
+17.2.3 AT+CGPSCOLD Cold Start GPS
+AT+CGPSCOLD Cold Start GPS
+Test Command
+AT+CGPSCOLD=?
+Response
+OK
+Execution Command
+AT+CGPSCOLD
+Response
+OK
+Example
+===== PAGE 335 =====
+SIM7500_SIM7600 Series_AT Command Manual_V2.00
+www.simcom.com 335 / 460
+AT+CGPSCOLD=?
+OK
+AT+CGPSCOLD
+OK
+ Before using this command,it must use AT+CGPS=0 to stop GPS session.
+17.2.4 AT+CGPSHOT Hot Start GPS
+AT+CGPSHOT Hot Start GPS
+Test Command
+AT+CGPSHOT=?
+Response
+OK
+Execution Command
+AT+CGPSHOT
+Response
+OK
+Example
+AT+CGPSHOT=?
+OK
+AT+CGPSHOT
+OK
+ Before using this command,it must use AT+CGPS=0 to stop GPS session.
+17.2.5 AT+CGPSURL Set AGPS default server URL
+AT+CGPSURL Set AGPS default server URL
+Test Command
+AT+CGPSURL=?
+Response
+OK
+Read Command
+AT+CGPSURL?
+Response
++CGPSURL: <URL>
+OK
+NOTE
+NOTE

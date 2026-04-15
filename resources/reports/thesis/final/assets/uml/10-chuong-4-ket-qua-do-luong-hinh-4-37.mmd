@@ -1,5 +1,8 @@
 flowchart TB
-    Loss["Mất kết nối tạm thời"] --> Buffer["Thiết bị lưu đệm local"]
-    Buffer --> Recover["Khôi phục mạng"]
-    Recover --> Replay["Bridge nhận replay"]
-    Replay --> Map["Map cập nhật đầy đủ hành trình"]
+    Before["Ban do hanh trinh"]
+    Outage["Mat ket noi tam thoi<br/>thiet bi luu dem local"]
+    Recover["Khoi phuc mang 4G"]
+    Replay["Bridge nhan replay"]
+    Sync["Ban do cap nhat day du"]
+
+    Before --> Outage --> Recover --> Replay --> Sync

@@ -1,10 +1,18 @@
 import { EventEmitter } from 'events';
 
+interface RealtimeMetadata {
+  message_id?: string;
+  schema_version?: string;
+  seq_no?: number;
+  boot_id?: string;
+}
+
 export interface RealtimeEventMap {
   'device:status': {
     device_id: string;
     status: string;
     last_seen_at?: string;
+    metadata?: RealtimeMetadata;
   };
   'device:position': {
     device_id: string;
@@ -17,9 +25,18 @@ export interface RealtimeEventMap {
     deviceName?: string;
     vehiclePlate?: string;
     battery?: number | null;
+    metadata?: RealtimeMetadata;
   };
-  'device:session_start': { device_id: string; session_id: number };
-  'device:session_end': { device_id: string; session_id: number };
+  'device:session_start': {
+    device_id: string;
+    session_id: number;
+    metadata?: RealtimeMetadata;
+  };
+  'device:session_end': {
+    device_id: string;
+    session_id: number;
+    metadata?: RealtimeMetadata;
+  };
   'command:ack': {
     device_id: string;
     command_id: string;
@@ -37,6 +54,7 @@ export interface RealtimeEventMap {
     message?: string;
     latitude?: number;
     longitude?: number;
+    metadata?: RealtimeMetadata;
   };
   'activity:new': {
     id: number;

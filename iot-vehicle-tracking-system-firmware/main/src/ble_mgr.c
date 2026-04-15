@@ -28,6 +28,7 @@
  */
 
 #define BLE_DISCOVERY_TIMEOUT_MS 5000U
+#define BLE_CONNECT_ATTEMPT_TIMEOUT_MS 7000U
 
 /* CCCD payload enabling notifications (0x0001 little-endian). */
 static const uint8_t cccd_notify_enable_cfg[] = {0x01, 0x00};
@@ -488,7 +489,7 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
             ble_mgr_queue_clear(mgr_ctx);
             rc = ble_gap_connect(BLE_OWN_ADDR_PUBLIC,
                                  &event->disc.addr,
-                                 30000,
+                                 BLE_CONNECT_ATTEMPT_TIMEOUT_MS,
                                  &s_conn_params,
                                  ble_mgr_gap_event_cb,
                                  mgr_ctx);
@@ -611,13 +612,7 @@ ble_mgr_ctx_t *ble_mgr_init(uint32_t timeout_ms) {
     /* Start BLE stack then wait for sync callback to post queue result. */
     esp_err_t err = ble_init_stack(&s_ble_init_cfg);
     if (err != ESP_OK) {
-        ESP_LOGW(TAG, "BLE stack init failed: %s, forcing deinit and retry", esp_err_to_name(err));
-        (void)ble_stack_deinit();
-        err = ble_init_stack(&s_ble_init_cfg);
-    }
-
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "BLE stack init failed after retry: %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "BLE stack init failed: %s", esp_err_to_name(err));
         xQueueReset(mgr_ctx->result_queue);
         vQueueDelete(mgr_ctx->result_queue);
         mgr_ctx->result_queue = NULL;

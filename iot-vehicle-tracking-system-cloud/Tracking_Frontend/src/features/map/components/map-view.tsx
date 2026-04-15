@@ -6,8 +6,8 @@ import { MapLayerSwitcher } from './map-layer-switcher';
 import { VehicleMarker } from './vehicle-marker';
 import { GeofenceLayer } from './geofence-layer';
 import { useGeofences } from '@/features/geofences/hooks/use-geofences';
-import 'leaflet/dist/leaflet.css';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+
 export const MapView = () => {
   const positions = useMapStore((s) => s.positions);
   const selectedDeviceId = useMapStore((s) => s.selectedDeviceId);

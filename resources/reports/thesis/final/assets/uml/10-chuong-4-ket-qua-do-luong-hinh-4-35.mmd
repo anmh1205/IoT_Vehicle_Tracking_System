@@ -1,5 +1,12 @@
 flowchart TB
-    Map["Bản đồ Leaflet"] --> Fence["Vùng geofence"]
-    Vehicle["Điểm xe"] --> Fence
-    Fence --> Alert["Kích hoạt cảnh báo"]
-    Alert --> List["Danh sách cảnh báo"]
+    Header["Trang geofence"]
+
+    subgraph Screen["Man hinh canh bao"]
+        direction LR
+        Map["Ban do + vung geofence"]
+        Alert["Canh bao dang mo"]
+    end
+
+    History["Danh sach canh bao / lich su xu ly"]
+
+    Header --> Screen --> History

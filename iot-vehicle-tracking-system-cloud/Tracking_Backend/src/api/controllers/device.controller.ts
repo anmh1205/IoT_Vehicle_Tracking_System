@@ -1,5 +1,4 @@
 import type { Response } from 'express';
-import { firmwareConfig } from '@/config/env';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { sendOk, sendCreated, sendAccepted } from '@/shared/utils/response.util';
@@ -18,6 +17,7 @@ import * as deviceTelemetryService from '@/domain/device/services/device-telemet
 import * as deviceCommandService from '@/domain/device/services/device-command.service';
 import * as deviceErrorService from '@/domain/device/services/device-error.service';
 import * as firmwareRepo from '@/domain/firmware/repositories/firmware.repository';
+import * as firmwareDeployService from '@/domain/firmware/services/firmware-deploy.service';
 
 const resolveDeviceId = async (rawId: string): Promise<string> => {
   const parsed = Number.parseInt(rawId, 10);
@@ -157,10 +157,8 @@ export const triggerOta = asyncHandler(async (req: AuthenticatedRequest, res: Re
     throw createValidationError(`Firmware version ${firmwareVersion} not found`);
   }
 
-  const publicBaseUrl = firmwareConfig.publicBaseUrl?.replace(/\/$/, '') ?? '';
-  if (!publicBaseUrl) {
-    throw createValidationError('FIRMWARE_PUBLIC_BASE_URL is not configured for OTA download');
-  }
+  const artifact = await firmwareDeployService.getFirmwareArtifactDescriptor(firmware.id);
+  const downloadUrl = firmwareDeployService.buildFirmwareDownloadUrl(firmware.id);
 
   const jobId = `ota_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const result = await deviceCommandService.sendCommand(deviceId, {
@@ -168,9 +166,9 @@ export const triggerOta = asyncHandler(async (req: AuthenticatedRequest, res: Re
     params: {
       jobId,
       version: firmware.version,
-      url: `${publicBaseUrl}/api/v1/firmware/${firmware.id}/download`,
-      size: firmware.size,
-      sha256: firmware.sha256,
+      url: downloadUrl,
+      size: artifact.size,
+      sha256: artifact.sha256,
       force,
       confirmTimeoutSec,
     },

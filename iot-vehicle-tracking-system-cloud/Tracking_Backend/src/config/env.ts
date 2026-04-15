@@ -71,4 +71,6 @@ export const observabilityConfig = {
 export const firmwareConfig = {
   storagePath: fromEnv('FIRMWARE_STORAGE_PATH') ?? '/app/firmware',
   publicBaseUrl: fromEnv('FIRMWARE_PUBLIC_BASE_URL') ?? null,
+  assignedTimeoutSec: toInt(fromEnv('OTA_ASSIGNED_TIMEOUT_SEC'), 600),
+  inProgressTimeoutSec: toInt(fromEnv('OTA_IN_PROGRESS_TIMEOUT_SEC'), 900),
 } as const;

@@ -1,7 +1,6 @@
-flowchart LR
-    UBatt["Ắc quy xe"] --> R1["R1 100kΩ"]
-    R1 --> Node["Nút chia áp"]
+flowchart TB
+    UBatt["Ac quy xe"] --> Divider["Bo chia ap R1 / R2"]
+    Divider --> Node["Nut chia ap"]
     Node --> ADC["GPIO4 ADC"]
-    Node --> R2["R2 10kΩ"]
-    R2 --> GND["GND"]
-    ADC --> Rule["Firmware xác định IGN/LVD"]
+    Node --> GND["GND tham chieu"]
+    ADC --> Rule["Firmware xac dinh IGN / LVD"]

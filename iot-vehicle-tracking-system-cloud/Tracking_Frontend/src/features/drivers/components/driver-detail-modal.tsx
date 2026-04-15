@@ -39,41 +39,18 @@ const InfoRow = ({
   </div>
 );
 
-const normalizeDriverDetail = (payload: any) => {
-  if (
-    payload &&
-    typeof payload === 'object' &&
-    !Array.isArray(payload) &&
-    'data' in payload &&
-    payload.data &&
-    typeof payload.data === 'object'
-  ) {
-    return payload.data;
-  }
-  return payload;
-};
-
 export const DriverDetailModal = ({
   open,
   onOpenChange,
   driverId,
-  assignmentHint,
 }: {
   open: boolean;
   onOpenChange: (value: boolean) => void;
   driverId: number | null;
-  assignmentHint?: {
-    tripCount?: number;
-    latestVehicleId?: string | null;
-    latestDeviceId?: string | null;
-    latestTripCode?: string | null;
-    latestTripStatus?: string | null;
-    latestStartAt?: string | null;
-  } | null;
 }) => {
   const detailQuery = useQuery({
     queryKey: ['driver-detail', driverId],
-    queryFn: () => driverServices.getById(driverId as number).then(normalizeDriverDetail),
+    queryFn: () => driverServices.getById(driverId as number),
     enabled: open && driverId !== null,
   });
 
@@ -152,21 +129,7 @@ export const DriverDetailModal = ({
     detail.phone,
   ]);
 
-  const recentTrips = useMemo(() => tripQuery.data ?? [], [tripQuery.data]);
-  const activeAssignment = useMemo(() => {
-    if (recentTrips.length > 0) {
-      const [latestTrip] = recentTrips;
-      return {
-        tripCount: recentTrips.length,
-        latestVehicleId: latestTrip?.vehicleId ?? null,
-        latestDeviceId: latestTrip?.deviceId ?? null,
-        latestTripCode: latestTrip?.tripCode ?? null,
-        latestTripStatus: latestTrip?.status ?? null,
-        latestStartAt: latestTrip?.actualStart ?? latestTrip?.plannedStart ?? null,
-      };
-    }
-    return assignmentHint ?? null;
-  }, [assignmentHint, recentTrips]);
+  const recentTrips = tripQuery.data ?? [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -268,20 +231,6 @@ export const DriverDetailModal = ({
                     label="Số chuyến gần đây"
                     value={String(recentTrips.length)}
                     hint={tripQuery.isLoading ? 'Đang tải lịch sử chuyến' : 'Lọc theo tên tài xế'}
-                  />
-                  <InfoRow
-                    label="Xe gần nhất"
-                    value={activeAssignment?.latestVehicleId ?? 'Chưa gán xe'}
-                    hint={activeAssignment?.latestTripCode ? `Trip ${activeAssignment.latestTripCode}` : undefined}
-                  />
-                  <InfoRow
-                    label="Thiết bị theo xe"
-                    value={activeAssignment?.latestDeviceId ?? 'Chưa gán thiết bị'}
-                    hint={
-                      activeAssignment?.latestStartAt
-                        ? formatRelative(activeAssignment.latestStartAt)
-                        : 'Không có mốc telemetry'
-                    }
                   />
                 </CardContent>
               </Card>

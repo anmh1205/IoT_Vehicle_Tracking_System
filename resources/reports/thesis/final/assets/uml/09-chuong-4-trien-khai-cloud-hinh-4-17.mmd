@@ -1,14 +1,15 @@
-sequenceDiagram
-    participant EMQX
-    participant Bridge
-    participant PG as PostgreSQL
-    participant VM as VictoriaMetrics
-    participant VL as VictoriaLogs
-    participant WS as Socket.IO
+flowchart LR
+    EMQX["EMQX topic<br/>telemetry / alert"] --> Bridge["MQTT Bridge<br/>validate + normalize"]
 
-    EMQX->>Bridge: telemetry/alert topic
-    Bridge->>Bridge: validate + normalize payload
-    Bridge->>PG: write business event
-    Bridge->>VM: write telemetry metric
-    Bridge->>VL: write audit log
-    Bridge->>WS: push realtime event
+    subgraph Outputs["Dich vu nhan du lieu"]
+        direction TB
+        PG["PostgreSQL<br/>business event"]
+        VM["VictoriaMetrics<br/>telemetry metric"]
+        VL["VictoriaLogs<br/>audit log"]
+        WS["Socket.IO<br/>realtime event"]
+    end
+
+    Bridge --> PG
+    Bridge --> VM
+    Bridge --> VL
+    Bridge --> WS

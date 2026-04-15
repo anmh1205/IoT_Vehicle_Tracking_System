@@ -34,8 +34,7 @@ const toIsoTimestamp = (timestampMs: number) => new Date(timestampMs).toISOStrin
 
 /**
  * Validate device by checking device_id and comparing auth_token hash.
- * The devices table usually stores auth_token as SHA-256 hash.
- * For backward compatibility, accept both hashed and raw-token match.
+ * The devices table stores auth_token as SHA-256 hash.
  */
 export const validateDevice = async (
   deviceId: string,
@@ -46,12 +45,9 @@ export const validateDevice = async (
       `SELECT id, device_id, vehicle_id, current_status
        FROM devices
        WHERE device_id = $1
-         AND (
-           auth_token = encode(sha256($2::bytea), 'hex')
-           OR auth_token = $3
-         )
+         AND auth_token = encode(sha256($2::bytea), 'hex')
          AND is_active = true`,
-      [deviceId, authToken, authToken],
+      [deviceId, authToken],
     );
     return result.rows[0] ?? null;
   } catch (err) {
@@ -88,7 +84,6 @@ export const ensureDeviceSession = async (
 
   try {
     await client.query('BEGIN');
-    await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [deviceId]);
 
     const active = await client.query<DeviceSessionRow>(
       `SELECT id
@@ -152,14 +147,18 @@ export const touchDeviceSession = async (params: {
            EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
            0
          ),
+         total_runtime_seconds = GREATEST(
+           EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
+           0
+         ),
          avg_vibration = CASE
-           WHEN $3::numeric IS NULL THEN avg_vibration
-           WHEN avg_vibration IS NULL THEN $3::numeric
-           ELSE ROUND(((avg_vibration + $3::numeric) / 2)::numeric, 2)
+           WHEN $3 IS NULL THEN avg_vibration
+           WHEN avg_vibration IS NULL THEN $3
+           ELSE ROUND(((avg_vibration + $3) / 2)::numeric, 2)
          END,
-         last_latitude = COALESCE($4::numeric, last_latitude),
-         last_longitude = COALESCE($5::numeric, last_longitude),
-         last_speed = COALESCE($6::numeric, last_speed),
+         last_latitude = COALESCE($4, last_latitude),
+         last_longitude = COALESCE($5, last_longitude),
+         last_speed = COALESCE($6, last_speed),
          updated_at = NOW()
        WHERE id = $1`,
       [
@@ -172,8 +171,38 @@ export const touchDeviceSession = async (params: {
       ],
     );
   } catch (err) {
-    logger.error({ err, sessionId: params.sessionId }, 'touchDeviceSession failed');
-    throw err;
+    try {
+      await pool.query(
+        `UPDATE device_sessions
+         SET
+           last_update = $2,
+           uptime = GREATEST(
+             EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
+             0
+           ),
+           avg_vibration = CASE
+             WHEN $3 IS NULL THEN avg_vibration
+             WHEN avg_vibration IS NULL THEN $3
+             ELSE ROUND(((avg_vibration + $3) / 2)::numeric, 2)
+           END,
+           last_latitude = COALESCE($4, last_latitude),
+           last_longitude = COALESCE($5, last_longitude),
+           last_speed = COALESCE($6, last_speed),
+           updated_at = NOW()
+         WHERE id = $1`,
+        [
+          params.sessionId,
+          occurredAt,
+          params.vibration ?? null,
+          params.latitude ?? null,
+          params.longitude ?? null,
+          params.speed ?? null,
+        ],
+      );
+    } catch (fallbackErr) {
+      logger.error({ err: fallbackErr, sessionId: params.sessionId }, 'touchDeviceSession failed');
+      throw fallbackErr;
+    }
   }
 };
 
@@ -213,24 +242,51 @@ export const completeDeviceSession = async (
       return null;
     }
 
-    const completed = await client.query<DeviceSessionRow>(
-      `UPDATE device_sessions
-       SET
-         status = 'completed',
-         server_session_end = $2,
-         session_end = $2,
-         last_update = $2,
-         uptime = GREATEST(
-           EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
-           0
-         ),
-         updated_at = NOW()
-       WHERE id = $1
-       RETURNING COALESCE(uptime, 0)::text AS runtime_seconds`,
-      [session.id, occurredAt],
-    );
+    let runtimeSeconds = 0;
 
-    const runtimeSeconds = Number.parseInt(String(completed.rows[0]?.runtime_seconds ?? '0'), 10);
+    try {
+      const completed = await client.query<DeviceSessionRow>(
+        `UPDATE device_sessions
+         SET
+           status = 'completed',
+           server_session_end = $2,
+           session_end = $2,
+           last_update = $2,
+           uptime = GREATEST(
+             EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
+             0
+           ),
+           total_runtime_seconds = GREATEST(
+             EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
+             0
+           ),
+           updated_at = NOW()
+         WHERE id = $1
+         RETURNING COALESCE(total_runtime_seconds, uptime, 0)::text AS runtime_seconds`,
+        [session.id, occurredAt],
+      );
+
+      runtimeSeconds = Number.parseInt(String(completed.rows[0]?.runtime_seconds ?? '0'), 10);
+    } catch {
+      const completed = await client.query<DeviceSessionRow>(
+        `UPDATE device_sessions
+         SET
+           status = 'completed',
+           server_session_end = $2,
+           session_end = $2,
+           last_update = $2,
+           uptime = GREATEST(
+             EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
+             0
+           ),
+           updated_at = NOW()
+         WHERE id = $1
+         RETURNING COALESCE(uptime, 0)::text AS runtime_seconds`,
+        [session.id, occurredAt],
+      );
+
+      runtimeSeconds = Number.parseInt(String(completed.rows[0]?.runtime_seconds ?? '0'), 10);
+    }
 
     await client.query(
       `UPDATE devices

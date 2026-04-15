@@ -7,7 +7,7 @@ import { firmwareConfig } from '@/config/env';
 import type { AuthenticatedRequest } from '@/shared/types/common.types';
 import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { sendOk, sendCreated, sendError } from '@/shared/utils/response.util';
-import { createApiError, createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
+import { createApiError, createValidationError } from '@/shared/utils/errors.util';
 import * as firmwareListService from '@/domain/firmware/services/firmware-list.service';
 import * as firmwareUploadService from '@/domain/firmware/services/firmware-upload.service';
 import * as firmwareActivateService from '@/domain/firmware/services/firmware-activate.service';
@@ -95,7 +95,9 @@ export const uploadFirmware = asyncHandler(async (req: FirmwareUploadRequest, re
   }
 
   const resolvedFilePath = path.resolve(file.path);
-  const filename = String(file.originalname || file.filename);
+  // Persist unique storage filename to avoid collisions when operators upload
+  // repeated builds with the same original file name.
+  const filename = String(file.filename || file.originalname);
   const sha256 = await computeSha256(resolvedFilePath);
 
   try {
@@ -152,7 +154,12 @@ export const deployFirmware = asyncHandler(async (req: AuthenticatedRequest, res
 
   const deviceIds = Array.isArray(req.body?.deviceIds) ? req.body.deviceIds : [];
   const strategy = req.body?.strategy as 'rolling' | 'all_at_once' | undefined;
-  const result = await firmwareDeployService.deployFirmware(id, { deviceIds, strategy });
+  const confirmTimeoutSec = req.body?.confirmTimeoutSec;
+  const result = await firmwareDeployService.deployFirmware(id, {
+    deviceIds,
+    strategy,
+    confirmTimeoutSec,
+  });
   sendOk(res, result);
 });
 
@@ -179,13 +186,15 @@ export const getAssignedDevices = asyncHandler(async (req: AuthenticatedRequest,
     devices: deployments.map((item) => ({
       jobId: item.jobId,
       deviceId: item.deviceId,
-      status: item.status,
+      status: item.summaryStatus,
       progress: item.progress ?? 0,
       targetVersion: item.targetVersion,
       currentVersion: item.currentVersion,
       partition: item.partition,
-      updatedAt: item.completedAt ?? item.startedAt,
+      updatedAt: item.lastSeenAt ?? item.updatedAt,
       errorMessage: item.errorMessage,
+      errorCode: item.errorCode,
+      stuckReason: item.stuckReason,
     })),
   });
 });
@@ -196,30 +205,115 @@ export const downloadFirmware = asyncHandler(async (req: AuthenticatedRequest, r
     throw createValidationError('Invalid firmware ID');
   }
 
-  const firmware = await firmwareListService.getFirmwareById(id);
-  const filename = firmware.filename.endsWith('.bin')
-    ? firmware.filename
-    : `${firmware.filename}.bin`;
-  const resolvedPath = path.resolve(firmware.filePath);
+  const artifact = await firmwareDeployService.getFirmwareArtifactDescriptor(id);
+  const encoding =
+    typeof req.query?.encoding === 'string' ? String(req.query.encoding).trim().toLowerCase() : '';
+  const filename = artifact.filename.endsWith('.bin') ? artifact.filename : `${artifact.filename}.bin`;
+  const safeFilename = filename.replace(/["\r\n]/gu, '_');
 
-  if (!fs.existsSync(resolvedPath)) {
-    throw createNotFoundError('Firmware artifact not found on storage');
-  }
+  if (encoding === 'hex') {
+    const encodedLength = artifact.size * 2;
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Length', encodedLength.toString());
+    res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}.hex"`);
+    res.setHeader('Cache-Control', 'no-store, no-transform');
+    res.setHeader('Content-Encoding', 'identity');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('ETag', `"sha256-${artifact.sha256}"`);
+    res.setHeader('Accept-Ranges', 'none');
+    res.setHeader('X-Firmware-Encoding', 'hex');
+    res.setHeader('X-Firmware-Original-Size', artifact.size.toString());
 
-  const stat = fs.statSync(resolvedPath);
-  res.setHeader('Content-Type', 'application/octet-stream');
-  res.setHeader('Content-Length', stat.size.toString());
-  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    const stream = fs.createReadStream(artifact.resolvedPath, { highWaterMark: 4096 });
+    stream.on('error', (streamError) => {
+      if (res.headersSent) {
+        res.destroy(streamError as Error);
+        return;
+      }
 
-  const stream = fs.createReadStream(resolvedPath);
-  stream.on('error', () => {
-    if (!res.headersSent) {
-      const error = createApiError(500, 'Failed to stream firmware artifact', {
+      const error = createApiError(500, 'Failed to stream firmware artifact (hex)', {
         code: 'STREAM_ERROR',
         firmwareId: id,
       });
       sendError(res, error, req.path);
+    });
+
+    stream.on('data', (chunk) => {
+      const hexChunk = Buffer.isBuffer(chunk)
+        ? chunk.toString('hex')
+        : Buffer.from(chunk).toString('hex');
+      if (!res.write(hexChunk)) {
+        stream.pause();
+      }
+    });
+
+    res.on('drain', () => {
+      stream.resume();
+    });
+
+    stream.on('end', () => {
+      res.end();
+    });
+    return;
+  }
+
+  const rangeHeader = typeof req.headers.range === 'string' ? req.headers.range.trim() : '';
+  let rangeStart = 0;
+  let rangeEnd = artifact.size - 1;
+  let statusCode = 200;
+
+  if (rangeHeader) {
+    const match = /^bytes=(\d+)-(\d*)$/u.exec(rangeHeader);
+    if (!match) {
+      throw createValidationError('Invalid Range header');
     }
+
+    rangeStart = Number.parseInt(match[1], 10);
+    rangeEnd = match[2] ? Number.parseInt(match[2], 10) : artifact.size - 1;
+
+    if (
+      !Number.isFinite(rangeStart) ||
+      !Number.isFinite(rangeEnd) ||
+      rangeStart < 0 ||
+      rangeEnd < rangeStart ||
+      rangeStart >= artifact.size
+    ) {
+      throw createValidationError('Range out of bounds');
+    }
+
+    rangeEnd = Math.min(rangeEnd, artifact.size - 1);
+    statusCode = 206;
+  }
+
+  const contentLength = rangeEnd - rangeStart + 1;
+  res.status(statusCode);
+  res.setHeader('Content-Type', 'application/octet-stream');
+  res.setHeader('Content-Length', contentLength.toString());
+  res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
+  res.setHeader('Cache-Control', 'no-store, no-transform');
+  res.setHeader('Content-Encoding', 'identity');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('ETag', `"sha256-${artifact.sha256}"`);
+  res.setHeader('Accept-Ranges', 'bytes');
+  if (statusCode === 206) {
+    res.setHeader('Content-Range', `bytes ${rangeStart}-${rangeEnd}/${artifact.size}`);
+  }
+
+  const stream = fs.createReadStream(artifact.resolvedPath, {
+    start: rangeStart,
+    end: rangeEnd,
+  });
+  stream.on('error', (streamError) => {
+    if (res.headersSent) {
+      res.destroy(streamError as Error);
+      return;
+    }
+
+    const error = createApiError(500, 'Failed to stream firmware artifact', {
+      code: 'STREAM_ERROR',
+      firmwareId: id,
+    });
+    sendError(res, error, req.path);
   });
 
   stream.pipe(res);

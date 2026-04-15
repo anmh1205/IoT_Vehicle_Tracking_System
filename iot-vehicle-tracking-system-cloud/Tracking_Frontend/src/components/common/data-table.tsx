@@ -145,7 +145,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div className="flex min-w-0 flex-1 flex-col gap-2 md:flex-row md:flex-wrap md:items-center">
           {searchKey ? (
             <div className="relative w-full md:max-w-sm">
@@ -169,7 +169,7 @@ export function DataTable<TData, TValue>({
           {toolbar}
         </div>
 
-        <div className="flex w-full shrink-0 justify-end lg:w-auto">
+        <div className="flex shrink-0 justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="w-full sm:w-auto">

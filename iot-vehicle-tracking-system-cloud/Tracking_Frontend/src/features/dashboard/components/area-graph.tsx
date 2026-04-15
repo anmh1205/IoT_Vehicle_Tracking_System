@@ -20,17 +20,22 @@ export const AreaGraph = ({
   data: FleetRuntimePoint[];
   isLoading?: boolean;
 }) => {
-  const hasMeaningfulData = data.some((point) => point.runtime > 0);
+  const totalRuntime = data.reduce((sum, item) => sum + item.runtime, 0);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Xu hướng thời gian hoạt động đội xe trong 30 ngày</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          {totalRuntime > 0
+            ? `${totalRuntime.toFixed(1)} giờ hoạt động được ghi nhận trong 30 ngày gần nhất`
+            : 'Lịch sử runtime đang được làm đầy từ tín hiệu vận hành mới'}
+        </p>
       </CardHeader>
       <CardContent className="h-[320px]">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
-        ) : data.length === 0 || !hasMeaningfulData ? (
+        ) : data.length === 0 ? (
           <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
             Chưa có dữ liệu runtime trong giai đoạn này.
           </div>
@@ -44,9 +49,9 @@ export const AreaGraph = ({
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" />
-              <YAxis />
-              <Tooltip />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
+              <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={12} />
+              <Tooltip cursor={{ stroke: '#93c5fd', strokeDasharray: '4 4' }} />
               <Area
                 type="monotone"
                 dataKey="runtime"

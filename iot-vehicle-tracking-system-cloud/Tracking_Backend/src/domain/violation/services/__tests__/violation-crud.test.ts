@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type {
   Violation,
   CreateViolationInput,
@@ -48,7 +47,7 @@ const makeViolation = (overrides: Partial<Violation> = {}): Violation => ({
 
 describe('violation-crud.service', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   // --- getViolationById -------------------------------------------------------
@@ -164,6 +163,7 @@ describe('violation-crud.service', () => {
     });
 
     it('should throw 400 ApiError when violation already acknowledged', async () => {
+      vi.mocked(violationRepo.acknowledge).mockClear();
       vi.mocked(violationRepo.findById).mockResolvedValue(
         makeViolation({ acknowledged: true }),
       );

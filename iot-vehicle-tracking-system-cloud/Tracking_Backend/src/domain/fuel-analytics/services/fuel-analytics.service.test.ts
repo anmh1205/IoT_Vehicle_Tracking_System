@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type {
   FuelSummary,
   VehicleFuelData,
@@ -43,7 +42,7 @@ const makeTrend = (overrides: Partial<FuelTrend> = {}): FuelTrend => ({
 
 describe('fuel-analytics.service', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   // --- getFuelSummary --------------------------------------------------------
@@ -134,6 +133,7 @@ describe('fuel-analytics.service', () => {
     });
 
     it('should use default date range when no dates are provided', async () => {
+      vi.mocked(fuelRepo.getByVehicle).mockClear();
       vi.mocked(fuelRepo.getByVehicle).mockResolvedValue([]);
 
       await getFuelByVehicle({});

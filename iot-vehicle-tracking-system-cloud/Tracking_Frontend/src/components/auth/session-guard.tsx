@@ -10,10 +10,10 @@ export const SessionGuard = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, setAuth, clearAuth, isLoading, setLoading } = useAuthStore();
   const [checked, setChecked] = useState(false);
   const pathname = usePathname();
-  const isPublicLandingRoute = pathname === '/';
+  const isPublicRoute = pathname === '/' || pathname === '/login';
 
   useEffect(() => {
-    if (isPublicLandingRoute) {
+    if (isPublicRoute) {
       setLoading(false);
       setChecked(true);
       return;
@@ -50,9 +50,9 @@ export const SessionGuard = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         setChecked(true);
       });
-  }, [clearAuth, isAuthenticated, isPublicLandingRoute, setAuth, setLoading]);
+  }, [clearAuth, isAuthenticated, isPublicRoute, setAuth, setLoading]);
 
-  if (isPublicLandingRoute) {
+  if (isPublicRoute) {
     return <>{children}</>;
   }
 

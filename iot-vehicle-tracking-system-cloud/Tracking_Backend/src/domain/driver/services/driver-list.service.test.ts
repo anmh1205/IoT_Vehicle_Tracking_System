@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Driver, DriverListQuery } from '@/domain/driver/types/driver.types';
 
 vi.mock('@/domain/driver/repositories/driver.repository');

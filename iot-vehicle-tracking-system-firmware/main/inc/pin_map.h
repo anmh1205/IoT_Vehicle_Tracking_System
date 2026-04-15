@@ -8,17 +8,11 @@
  * @brief Hardware pin and peripheral mapping for ESP32-S3 board.
  */
 
-/* Power / sensing */
-/** @brief Ignition input pin (via +12V divider sense net). */
-#define PIN_IGN_IN GPIO_NUM_3
+/* Voltage sensing */
+/** @brief +12V source divider ADC input. */
+#define PIN_U_SUPPLY_ADC GPIO_NUM_3
 /** @brief Battery divider ADC input. */
 #define PIN_U_BATT_ADC GPIO_NUM_4
-/** @brief Charger enable output pin. */
-#define PIN_CHARGER_EN GPIO_NUM_5
-/** @brief Power source multiplexer select pin. */
-#define PIN_POWER_MUX_SEL GPIO_NUM_16
-/** @brief Low-voltage detector status input pin. */
-#define PIN_LVD_STATUS GPIO_NUM_19
 
 /* Modem control + UART */
 /** @brief Modem UART TX pin (MCU -> modem). */
@@ -26,7 +20,9 @@
 /** @brief Modem UART RX pin (modem -> MCU). */
 #define PIN_MODEM_RX GPIO_NUM_18
 /** @brief Modem sleep handshake pin (MCU -> modem, SIM-DTR). */
-#define PIN_MODEM_DTR GPIO_NUM_21
+#define PIN_MODEM_DTR GPIO_NUM_NC
+/** @brief User LED pin (MCU -> USER-LED). */
+#define PIN_USER_LED GPIO_NUM_15
 /** @brief Modem power-key control pin (MCU -> modem, SIM7600 PWR-KEY). */
 #define PIN_MODEM_PWRKEY GPIO_NUM_34
 /** @brief Modem hardware reset control pin (MCU -> modem, SIM7600 RESET). */
@@ -41,6 +37,8 @@
 #define PIN_LIS3DSH_INT1 GPIO_NUM_41
 /** @brief LIS3DSH interrupt pin (INT2). */
 #define PIN_LIS3DSH_INT2 GPIO_NUM_42
+/** @brief Active LIS3DSH interrupt pin used by firmware flow. */
+#define PIN_LIS3DSH_INT PIN_LIS3DSH_INT1
 /** @brief LIS3DSH I2C SDA pin. */
 #define PIN_LIS3DSH_SDA GPIO_NUM_2
 /** @brief LIS3DSH I2C SCL pin. */
@@ -77,3 +75,10 @@
 #define MODEM_UART_NUM UART_NUM_1
 /** @brief UART baud rate for modem communication. */
 #define MODEM_UART_BAUD 115200
+/**
+ * @brief Fixed UART line inversion mask for modem link.
+ *
+ * Netlist-locked modem UART: no line inversion.
+ * Keep fixed at 0 and avoid runtime auto-swap/invert probing.
+ */
+#define MODEM_UART_LINE_INVERSE_MASK 0U

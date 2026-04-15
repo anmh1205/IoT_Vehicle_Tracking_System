@@ -166,22 +166,43 @@ export const getDeviceActivitySeries = async (days: number): Promise<DeviceActiv
         '1 day'::interval
       ) AS bucket
     ),
-    total_devices AS (
-      SELECT COUNT(*)::int AS total
-      FROM devices
+    bucketed AS (
+      SELECT
+        DATE_TRUNC('day', server_timestamp) AS bucket,
+        COUNT(*) FILTER (
+          WHERE
+            LOWER(COALESCE(message, '')) LIKE '%offline%'
+            OR LOWER(COALESCE(message, '')) LIKE '%disconnect%'
+            OR LOWER(COALESCE(event_code, '')) = 'device_offline'
+        )::text AS offline,
+        COUNT(*) FILTER (
+          WHERE
+            LOWER(COALESCE(message, '')) LIKE '%idle%'
+            OR LOWER(COALESCE(message, '')) LIKE '%stop%'
+            OR LOWER(COALESCE(event_type::text, '')) IN ('session_end', 'stopped')
+        )::text AS idle,
+        COUNT(*) FILTER (
+          WHERE
+            NOT (
+              LOWER(COALESCE(message, '')) LIKE '%offline%'
+              OR LOWER(COALESCE(message, '')) LIKE '%disconnect%'
+              OR LOWER(COALESCE(event_code, '')) = 'device_offline'
+              OR LOWER(COALESCE(message, '')) LIKE '%idle%'
+              OR LOWER(COALESCE(message, '')) LIKE '%stop%'
+              OR LOWER(COALESCE(event_type::text, '')) IN ('session_end', 'stopped')
+            )
+        )::text AS running
+      FROM event_logs
+      WHERE server_timestamp >= DATE_TRUNC('day', $1::timestamptz)
+      GROUP BY bucket
     )
     SELECT
       TO_CHAR(series.bucket, 'YYYY-MM-DD') AS label,
-      COUNT(DISTINCT sessions.device_id)::text AS running,
-      '0'::text AS idle,
-      GREATEST(total_devices.total - COUNT(DISTINCT sessions.device_id), 0)::text AS offline
+      COALESCE(bucketed.running, '0') AS running,
+      COALESCE(bucketed.idle, '0') AS idle,
+      COALESCE(bucketed.offline, '0') AS offline
     FROM series
-    CROSS JOIN total_devices
-    LEFT JOIN device_sessions sessions
-      ON COALESCE(sessions.server_session_start, sessions.created_at) < (series.bucket + INTERVAL '1 day')
-     AND COALESCE(sessions.server_session_end, NOW()) >= series.bucket
-     AND COALESCE(sessions.status::text, '') <> 'failed'
-    GROUP BY series.bucket, total_devices.total
+    LEFT JOIN bucketed ON bucketed.bucket = series.bucket
     ORDER BY series.bucket ASC
   `;
 

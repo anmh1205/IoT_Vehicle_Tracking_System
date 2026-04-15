@@ -22,6 +22,13 @@ esp_err_t adc_reader_init(void);
 float adc_read_battery_voltage(void);
 
 /**
+ * @brief Read and convert +12V supply sense voltage to volts.
+ *
+ * @return Supply voltage in volts. Returns 0.0f if ADC is not initialized.
+ */
+float adc_read_supply_voltage(void);
+
+/**
  * @brief Deinitialize ADC resources.
  */
 void adc_reader_deinit(void);

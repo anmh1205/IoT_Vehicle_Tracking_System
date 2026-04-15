@@ -1,8 +1,16 @@
-flowchart LR
-    Device["Thiết bị đầu cuối"] --> EMQX["EMQX Broker"]
-    EMQX --> Metric["Số liệu kết nối"]
-    EMQX --> Topic["Thông lượng topic"]
-    EMQX --> Health["Tình trạng broker"]
-    Metric --> UI["Bảng điều khiển EMQX"]
+flowchart TB
+    Device["Thiet bi dau cuoi"] --> EMQX["EMQX Broker"]
+
+    subgraph BrokerView["Chi so theo doi"]
+        direction LR
+        Metric["So lieu ket noi"]
+        Topic["Thong luong topic"]
+        Health["Tinh trang broker"]
+    end
+
+    UI["Bang dieu khien EMQX"]
+
+    EMQX --> BrokerView
+    Metric --> UI
     Topic --> UI
     Health --> UI

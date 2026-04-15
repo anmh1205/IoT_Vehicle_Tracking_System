@@ -53,6 +53,8 @@ typedef struct {
     bool ota_pending_confirm;
     /** OTA confirm timeout copied from command payload. */
     uint32_t ota_confirm_timeout_sec;
+    /** Absolute UTC deadline for OTA confirm when trusted time is available. */
+    uint64_t ota_confirm_deadline_ms;
     /** OTA job currently being confirmed. */
     char ota_job_id[TRACKER_JOB_ID_MAX_LEN];
     /** Target version requested by pending OTA job. */

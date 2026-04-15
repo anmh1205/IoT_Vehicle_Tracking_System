@@ -1,9 +1,0 @@
-flowchart LR
-    UI["Trang Next.js"] --> Query["TanStack Query"]
-    UI --> Store["Zustand Store"]
-    Query --> API["Backend API"]
-    API --> PG["PostgreSQL"]
-    API --> VM["VictoriaMetrics"]
-    Socket["Socket.IO"] --> Store
-    Query --> View["Bản đồ / bảng / biểu đồ"]
-    Store --> View

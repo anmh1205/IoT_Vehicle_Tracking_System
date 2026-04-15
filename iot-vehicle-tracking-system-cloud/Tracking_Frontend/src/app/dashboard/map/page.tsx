@@ -25,12 +25,12 @@ const MapPage = () => {
   const mapErrorMessage = positionsQuery.isError
     ? getApiErrorMessage(
         positionsQuery.error,
-        'Khong the tai vi tri thiet bi tu may chu. Vui long thu lai.',
+        'Không thể tải vị trí thiết bị từ máy chủ. Vui lòng thử lại.',
       )
     : null;
 
   return (
-    <section aria-label="Ban do theo doi" className="flex min-h-0 flex-1 overflow-hidden">
+    <section aria-label="Bản đồ theo dõi" className="flex min-h-0 flex-1 overflow-hidden">
       <div className="flex min-h-0 flex-1">
         <div className="hidden md:block md:w-[340px]">
           <DeviceListPanel />
@@ -40,7 +40,7 @@ const MapPage = () => {
             <div className="absolute left-3 right-3 top-3 z-[1200]">
               <Alert variant="destructive" className="border bg-background/95 shadow-lg backdrop-blur">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Khong the dong bo du lieu ban do</AlertTitle>
+                <AlertTitle>Không thể đồng bộ dữ liệu bản đồ</AlertTitle>
                 <AlertDescription>
                   <p>{mapErrorMessage}</p>
                   <Button
@@ -52,7 +52,7 @@ const MapPage = () => {
                     }}
                     disabled={positionsQuery.isFetching}
                   >
-                    Thu lai
+                    Thử lại
                   </Button>
                 </AlertDescription>
               </Alert>

@@ -1,0 +1,68 @@
+   0.506s I (480) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
+   7.838s I (7830) POWER_MGR: SIM7600 DTR set level=0 gpio=21
+   7.844s I (7830) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500
+   8.339s I (8330) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+   8.342s I (8330) MODEM_LTE: FSM POWER_ON_PULSE -> WAIT_BOOT
+  16.689s I (16680) MODEM_LTE: FSM WAIT_BOOT -> AT_SYNC
+  20.564s W (20550) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=115200 invert=NONE), retry in 500ms
+  23.784s W (23770) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=115200 invert=NONE), retry in 500ms
+  28.971s W (28960) MODEM_LTE: AT sync switching baud 115200 -> 9600 (tx=17 rx=18)
+  32.514s W (32500) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=9600 invert=NONE), retry in 500ms
+  36.405s W (36390) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=9600 invert=NONE), retry in 500ms
+  40.951s W (40940) MODEM_LTE: AT sync switching baud 9600 -> 57600 (tx=17 rx=18)
+  44.835s W (44820) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=57600 invert=NONE), retry in 500ms
+  48.055s W (48040) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=57600 invert=NONE), retry in 500ms
+  53.232s W (53220) MODEM_LTE: AT sync switching baud 57600 -> 38400 (tx=17 rx=18)
+  56.785s W (56770) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=38400 invert=NONE), retry in 500ms
+  60.655s W (60640) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=38400 invert=NONE), retry in 500ms
+  65.212s W (65200) MODEM_LTE: AT sync switching baud 38400 -> 19200 (tx=17 rx=18)
+  69.086s W (69070) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=19200 invert=NONE), retry in 500ms
+  72.316s W (72300) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=19200 invert=NONE), retry in 500ms
+  77.503s W (77490) MODEM_LTE: AT sync switching baud 19200 -> 230400 (tx=17 rx=18)
+  81.046s W (81030) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=230400 invert=NONE), retry in 500ms
+  84.917s W (84900) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=230400 invert=NONE), retry in 500ms
+  89.455s W (89440) MODEM_LTE: Startup fallback: no AT across default baud sweep, issuing RESET pulse
+  89.461s I (89440) POWER_MGR: SIM7600 RESET pulse begin gpio=35 pulse_ms=200
+  89.651s I (89640) POWER_MGR: SIM7600 RESET pulse end gpio=35
+  89.655s I (89640) MODEM_LTE: FSM AT_SYNC -> WAIT_BOOT
+  96.182s I (96170) MODEM_LTE: FSM WAIT_BOOT -> AT_SYNC
+ 101.058s W (101040) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=115200 invert=NONE), retry in 500ms
+ 104.938s W (104920) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=115200 invert=NONE), retry in 500ms
+ 108.145s W (108130) MODEM_LTE: AT sync switching baud 115200 -> 9600 (tx=17 rx=18)
+ 113.338s W (113320) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=9600 invert=NONE), retry in 500ms
+ 116.878s W (116860) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=9600 invert=NONE), retry in 500ms
+ 120.745s W (120730) MODEM_LTE: AT sync switching baud 9600 -> 57600 (tx=17 rx=18)
+ 125.299s W (125280) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=57600 invert=NONE), retry in 500ms
+ 129.179s W (129160) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=57600 invert=NONE), retry in 500ms
+ 132.385s W (132370) MODEM_LTE: AT sync switching baud 57600 -> 38400 (tx=17 rx=18)
+ 137.599s W (137580) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=38400 invert=NONE), retry in 500ms
+ 141.139s W (141120) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=38400 invert=NONE), retry in 500ms
+ 145.016s W (145000) MODEM_LTE: AT sync switching baud 38400 -> 19200 (tx=17 rx=18)
+ 149.570s W (149550) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=19200 invert=NONE), retry in 500ms
+ 153.450s W (153430) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=19200 invert=NONE), retry in 500ms
+ 156.677s W (156660) MODEM_LTE: AT sync switching baud 19200 -> 230400 (tx=17 rx=18)
+ 161.880s W (161860) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=230400 invert=NONE), retry in 500ms
+ 165.410s W (165390) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=230400 invert=NONE), retry in 500ms
+ 169.279s W (169260) MODEM_LTE: Startup fallback: no AT across default baud sweep, issuing PWRKEY pulse
+ 169.286s I (169260) POWER_MGR: SIM7600 PWRKEY pulse begin gpio=34 pulse_ms=500
+ 169.775s I (169760) POWER_MGR: SIM7600 PWRKEY pulse end gpio=34
+ 169.780s I (169760) MODEM_LTE: FSM AT_SYNC -> WAIT_BOOT
+ 177.015s I (177000) MODEM_LTE: FSM WAIT_BOOT -> AT_SYNC
+ 180.892s W (180870) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=115200 invert=NONE), retry in 500ms
+ 184.111s W (184090) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=115200 invert=NONE), retry in 500ms
+ 189.288s W (189270) MODEM_LTE: AT sync switching baud 115200 -> 9600 (tx=17 rx=18)
+ 192.842s W (192820) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=9600 invert=NONE), retry in 500ms
+ 196.711s W (196690) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=9600 invert=NONE), retry in 500ms
+ 201.249s W (201230) MODEM_LTE: AT sync switching baud 9600 -> 57600 (tx=17 rx=18)
+ 205.132s W (205110) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=57600 invert=NONE), retry in 500ms
+ 208.372s W (208350) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=57600 invert=NONE), retry in 500ms
+ 213.559s W (213540) MODEM_LTE: AT sync switching baud 57600 -> 38400 (tx=17 rx=18)
+ 217.113s W (217090) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=38400 invert=NONE), retry in 500ms
+ 220.983s W (220960) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=38400 invert=NONE), retry in 500ms
+ 225.510s W (225490) MODEM_LTE: AT sync switching baud 38400 -> 19200 (tx=17 rx=18)
+ 229.384s W (229360) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=19200 invert=NONE), retry in 500ms
+ 232.614s W (232590) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=19200 invert=NONE), retry in 500ms
+ 237.800s W (237780) MODEM_LTE: AT sync switching baud 19200 -> 230400 (tx=17 rx=18)
+ 241.344s W (241320) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CRLF, tx=17 rx=18, baud=230400 invert=NONE), retry in 500ms
+ 245.214s W (245190) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=CR, tx=17 rx=18, baud=230400 invert=NONE), retry in 500ms
+ 249.789s W (249760) MODEM_LTE: AT sync no response after fixed UART baud sweep and startup fallbacks, forcing power-cycle recover (tx=17 rx=18 baud=230400 invert=NONE)

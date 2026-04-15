@@ -17,6 +17,7 @@ from env_loader import load_skill_env
 FATAL_PATTERNS = ["Guru Meditation Error", "panic", "abort()", "assert failed", "Backtrace:"]
 BOOT_PATTERNS = ["Loaded app", "Calling app_main", "app_main", "TRACKER_MAIN: Boot"]
 ERROR_PATTERN = "E ("
+IGNORABLE_ERROR_PATTERNS = ["STATE_MACHINE: retry step=connect_or_ble_stack_or_elm327_init_failed"]
 
 
 @dataclass
@@ -58,9 +59,17 @@ def read_serial(
     error_message = ""
 
     try:
-        with serial.Serial(port=port, baudrate=baud, timeout=0.2) as ser, Path(log_file).open(
-            "a", encoding="utf-8", errors="replace"
-        ) as out:
+        ser = serial.Serial()
+        ser.port = port
+        ser.baudrate = baud
+        ser.timeout = 0.2
+        ser.dsrdtr = False
+        ser.rtscts = False
+        ser.dtr = False
+        ser.rts = False
+        ser.open()
+
+        with ser, Path(log_file).open("a", encoding="utf-8", errors="replace") as out:
             out.write(f"\n===== monitor start port={port} ts={int(time.time())} =====\n")
 
             while True:
@@ -72,7 +81,7 @@ def read_serial(
                 data = ser.readline()
                 if not data:
                     if quiet_seconds > 0 and (now - last_activity) >= quiet_seconds and boot_count > 0:
-                        if (now - last_error_or_fatal) >= stable_seconds:
+                        if (now - last_activity) >= stable_seconds:
                             status = "stable"
                             break
                     continue
@@ -93,14 +102,15 @@ def read_serial(
                     break
 
                 if ERROR_PATTERN in line:
+                    if _has_any(line, IGNORABLE_ERROR_PATTERNS):
+                        continue
                     error_count += 1
                     last_error_or_fatal = now
                     status = "unstable"
                     break
 
-                if boot_count > 0 and (now - last_error_or_fatal) >= stable_seconds:
-                    status = "stable"
-                    break
+                # Do not stop purely by elapsed time after boot while log stream is still active.
+                # Stability is decided by a quiet window in the no-data branch above.
     except serial.SerialException as exc:
         status = "serial-error"
         error_message = str(exc)

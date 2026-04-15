@@ -1,0 +1,18 @@
+
+===== monitor start port=COM5 ts=1775684003 =====
+W (719185) BLE_OBD: BLE connect failed: TIMEOUT
+W (735675) BLE_OBD: BLE connect failed: TIMEOUT
+W (752175) BLE_OBD: BLE connect failed: TIMEOUT
+W (768665) BLE_OBD: BLE connect failed: TIMEOUT
+W (785165) BLE_OBD: BLE connect failed: TIMEOUT
+W (801655) BLE_OBD: BLE connect failed: TIMEOUT
+W (818145) BLE_OBD: BLE connect failed: TIMEOUT
+W (834635) BLE_OBD: BLE connect failed: TIMEOUT
+
+===== monitor start port=COM5 ts=1775684177 =====
+
+===== monitor start port=COM5 ts=1775997285 =====
+
+===== monitor start port=COM5 ts=1775998021 =====
+
+===== monitor start port=COM5 ts=1775998288 =====

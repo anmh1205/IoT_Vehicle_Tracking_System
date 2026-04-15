@@ -1,6 +1,12 @@
 'use client';
 
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { VehicleDetailContent } from './vehicle-detail-content';
 
 export const VehicleDetailModal = ({
@@ -14,16 +20,15 @@ export const VehicleDetailModal = ({
 }) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[min(96vw,72rem)] max-w-none overflow-y-auto pr-5">
+      <SheetContent className="overflow-y-auto sm:max-w-4xl">
         <SheetHeader>
-          <SheetTitle>{vehicle?.plateNumber ?? 'Chi tiết phương tiện'}</SheetTitle>
+          <SheetTitle>{vehicle?.plateNumber ?? vehicle?.vehicleId ?? 'Chi tiết phương tiện'}</SheetTitle>
           <SheetDescription>
-            Xem thông tin nhận diện, liên kết telemetry và bối cảnh vận hành theo từng phương tiện.
+            Ngữ cảnh khai thác, pháp lý và liên kết telemetry của phương tiện đang chọn.
           </SheetDescription>
         </SheetHeader>
-
         <div className="mt-4">
-          <VehicleDetailContent vehicle={vehicle} />
+          <VehicleDetailContent vehicle={vehicle} compact />
         </div>
       </SheetContent>
     </Sheet>

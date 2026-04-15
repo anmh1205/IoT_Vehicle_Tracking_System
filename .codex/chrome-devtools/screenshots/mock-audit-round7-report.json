@@ -1,0 +1,3930 @@
+[
+  {
+    "name": "mock-dashboard-overview",
+    "route": "/dashboard",
+    "finalUrl": "https://thingdock.dev/dashboard",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-dashboard-overview.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "dashboard-chart",
+        "selector": "svg.recharts-surface",
+        "text": null,
+        "min": 1,
+        "count": 6,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 8,
+      "handledRequests": 8,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/dashboard/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/dashboard/activity"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/dashboard/device-activity"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/dashboard/device-status"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/dashboard/fleet-runtime"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-map-with-selection",
+    "route": "/dashboard/map",
+    "finalUrl": "https://thingdock.dev/dashboard/map",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-map-with-selection.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "map-markers",
+        "selector": ".leaflet-marker-icon",
+        "text": null,
+        "min": 1,
+        "count": 4,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 7,
+      "handledRequests": 7,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/positions"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/geofences"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-devices-modal",
+    "route": "/dashboard/devices",
+    "finalUrl": "https://thingdock.dev/dashboard/devices",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-devices-modal.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.\n\nIf you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.\n\nFor more information, see https://radix-ui.com/primitives/docs/components/dialog"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "devices-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 6,
+        "ok": true
+      },
+      {
+        "label": "devices-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 13,
+      "handledRequests": 13,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/runtime"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/sessions"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/commands"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/errors"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/telemetry"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-vehicles-sheet",
+    "route": "/dashboard/vehicles",
+    "finalUrl": "https://thingdock.dev/dashboard/vehicles",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-vehicles-sheet.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "vehicles-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 5,
+        "ok": true
+      },
+      {
+        "label": "vehicles-sheet",
+        "selector": "[data-slot=\"sheet-content\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-drivers-modal",
+    "route": "/dashboard/drivers",
+    "finalUrl": "https://thingdock.dev/dashboard/drivers",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-drivers-modal.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "drivers-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 4,
+        "ok": true
+      },
+      {
+        "label": "drivers-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 6,
+      "handledRequests": 6,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/drivers"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/drivers/201"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/trips"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-customers-list",
+    "route": "/dashboard/customers",
+    "finalUrl": "https://thingdock.dev/dashboard/customers",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-customers-list.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "customers-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 4,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/customers"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-customer-detail",
+    "route": "/dashboard/customers/301",
+    "finalUrl": "https://thingdock.dev/dashboard/customers/301",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-customer-detail.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "customer-detail-card",
+        "selector": "[data-slot=\"card\"]",
+        "text": null,
+        "min": 1,
+        "count": 4,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/customers/301"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-trips-list",
+    "route": "/dashboard/trips",
+    "finalUrl": "https://thingdock.dev/dashboard/trips",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-trips-list.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "trips-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 4,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/trips"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-trip-detail",
+    "route": "/dashboard/trips/501",
+    "finalUrl": "https://thingdock.dev/dashboard/trips/501",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-trip-detail.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "trip-map",
+        "selector": ".leaflet-pane svg path",
+        "text": null,
+        "min": 1,
+        "count": 4,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/trips/501"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/trips/501/telemetry"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-alerts-modal",
+    "route": "/dashboard/alerts",
+    "finalUrl": "https://thingdock.dev/dashboard/alerts",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-alerts-modal.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "alerts-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 4,
+        "ok": true
+      },
+      {
+        "label": "alerts-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/alerts"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-violations-modal",
+    "route": "/dashboard/violations",
+    "finalUrl": "https://thingdock.dev/dashboard/violations",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-violations-modal.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "violations-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 3,
+        "ok": true
+      },
+      {
+        "label": "violations-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/violations"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/violations/801"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-geofences-list",
+    "route": "/dashboard/geofences",
+    "finalUrl": "https://thingdock.dev/dashboard/geofences",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-geofences-list.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "geofences-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 2,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/geofences"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-geofence-detail",
+    "route": "/dashboard/geofences/701",
+    "finalUrl": "https://thingdock.dev/dashboard/geofences/701",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-geofence-detail.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "geofence-detail-card",
+        "selector": "[data-slot=\"card\"]",
+        "text": null,
+        "min": 1,
+        "count": 9,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 6,
+      "handledRequests": 6,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/geofences/701"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/geofences/policy-violations"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-maintenance-list",
+    "route": "/dashboard/maintenance",
+    "finalUrl": "https://thingdock.dev/dashboard/maintenance",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-maintenance-list.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "maintenance-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 3,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 8,
+      "handledRequests": 8,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/maintenance"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-maintenance-detail",
+    "route": "/dashboard/maintenance/901",
+    "finalUrl": "https://thingdock.dev/dashboard/maintenance/901",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-maintenance-detail.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "maintenance-detail-card",
+        "selector": "[data-slot=\"card\"]",
+        "text": null,
+        "min": 1,
+        "count": 4,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/maintenance/901"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-firmware-deploy-dialog",
+    "route": "/dashboard/firmware",
+    "finalUrl": "https://thingdock.dev/dashboard/firmware",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-firmware-deploy-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "firmware-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 2,
+        "ok": true
+      },
+      {
+        "label": "firmware-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 7,
+      "handledRequests": 7,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/firmware"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/firmware/1/deployments"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/firmware/2/deployments"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-exports-page",
+    "route": "/dashboard/exports",
+    "finalUrl": "https://thingdock.dev/dashboard/exports",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-exports-page.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "exports-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 3,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/exports"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-notifications-page",
+    "route": "/dashboard/notifications",
+    "finalUrl": "https://thingdock.dev/dashboard/notifications",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-notifications-page.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "notifications-card",
+        "selector": "[data-slot=\"card\"]",
+        "text": null,
+        "min": 1,
+        "count": 5,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-statistics-page",
+    "route": "/dashboard/statistics",
+    "finalUrl": "https://thingdock.dev/dashboard/statistics",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-statistics-page.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "statistics-charts",
+        "selector": "svg.recharts-surface",
+        "text": null,
+        "min": 1,
+        "count": 2,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 6,
+      "handledRequests": 6,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/statistics/summary"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/statistics/fleet-usage"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/statistics/device-uptime"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-fuel-page",
+    "route": "/dashboard/fuel",
+    "finalUrl": "https://thingdock.dev/dashboard/fuel",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-fuel-page.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "fuel-cards",
+        "selector": "[data-slot=\"card\"]",
+        "text": null,
+        "min": 1,
+        "count": 6,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 6,
+      "handledRequests": 6,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/fuel-analytics/summary"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/fuel-analytics/by-vehicle"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/fuel-analytics/trends"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-system-status-page",
+    "route": "/dashboard/system-status",
+    "finalUrl": "https://thingdock.dev/dashboard/system-status",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-system-status-page.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "system-cards",
+        "selector": "[data-slot=\"card\"]",
+        "text": null,
+        "min": 1,
+        "count": 10,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/system/health"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/system/metrics"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-system-admin-tabs",
+    "route": "/dashboard/system-admin",
+    "finalUrl": "https://thingdock.dev/dashboard/system-admin",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-system-admin-tabs.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "system-admin-cards",
+        "selector": "[data-slot=\"card\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/system-admin/logs"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-users-page",
+    "route": "/dashboard/users",
+    "finalUrl": "https://thingdock.dev/dashboard/users",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-users-page.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "users-rows",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 4,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/users"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-settings-page",
+    "route": "/dashboard/settings",
+    "finalUrl": "https://thingdock.dev/dashboard/settings",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-settings-page.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "settings-tabs",
+        "selector": "[role=\"tab\"]",
+        "text": null,
+        "min": 4,
+        "count": 4,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/users/notification-settings"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-simulator-page",
+    "route": "/dashboard/simulator",
+    "finalUrl": "https://thingdock.dev/dashboard/simulator#main-content",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-simulator-page.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "simulator-cards",
+        "selector": "[data-slot=\"card\"]",
+        "text": null,
+        "min": 3,
+        "count": 6,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 6,
+      "handledRequests": 6,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/simulator/status"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-devices-create-modal",
+    "route": "/dashboard/devices",
+    "finalUrl": "https://thingdock.dev/dashboard/devices",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-devices-create-modal.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "devices-create-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "devices-create-form",
+        "selector": "[role=\"dialog\"] form",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-devices-edit-modal",
+    "route": "/dashboard/devices",
+    "finalUrl": "https://thingdock.dev/dashboard/devices",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-devices-edit-modal.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "devices-edit-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "devices-edit-device-id",
+        "selector": "[role=\"dialog\"] input",
+        "text": null,
+        "min": 3,
+        "count": 5,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-devices-delete-dialog",
+    "route": "/dashboard/devices",
+    "finalUrl": "https://thingdock.dev/dashboard/devices",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-devices-delete-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "devices-delete-dialog",
+        "selector": "[role=\"dialog\"],[role=\"alertdialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "devices-delete-text",
+        "selector": null,
+        "text": "xoa thiet bi",
+        "min": 1,
+        "count": 0,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-devices-session-chart-dialog",
+    "route": "/dashboard/devices",
+    "finalUrl": "https://thingdock.dev/dashboard/devices",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-devices-session-chart-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.\n\nIf you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.\n\nFor more information, see https://radix-ui.com/primitives/docs/components/dialog"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "devices-detail-and-chart-dialogs",
+        "selector": "[role=\"dialog\"],[role=\"alertdialog\"]",
+        "text": null,
+        "min": 2,
+        "count": 2,
+        "ok": true
+      },
+      {
+        "label": "devices-session-actions",
+        "selector": "[role=\"dialog\"] button",
+        "text": null,
+        "min": 3,
+        "count": 12,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 13,
+      "handledRequests": 13,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/runtime"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/sessions"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/commands"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/errors"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/telemetry"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-devices-export-dialog",
+    "route": "/dashboard/devices",
+    "finalUrl": "https://thingdock.dev/dashboard/devices",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-devices-export-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.\n\nIf you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.\n\nFor more information, see https://radix-ui.com/primitives/docs/components/dialog"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "devices-export-dialogs",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 2,
+        "count": 2,
+        "ok": true
+      },
+      {
+        "label": "devices-export-form",
+        "selector": null,
+        "text": "xuat du lieu thiet bi",
+        "min": 1,
+        "count": 0,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 13,
+      "handledRequests": 13,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/runtime"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/sessions"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/commands"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/errors"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/101/telemetry"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-vehicles-create-dialog",
+    "route": "/dashboard/vehicles",
+    "finalUrl": "https://thingdock.dev/dashboard/vehicles",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-vehicles-create-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "vehicles-create-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "vehicles-create-inputs",
+        "selector": "[role=\"dialog\"] input",
+        "text": null,
+        "min": 4,
+        "count": 5,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-vehicles-edit-dialog",
+    "route": "/dashboard/vehicles",
+    "finalUrl": "https://thingdock.dev/dashboard/vehicles",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-vehicles-edit-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "vehicles-edit-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-vehicles-assign-dialog",
+    "route": "/dashboard/vehicles",
+    "finalUrl": "https://thingdock.dev/dashboard/vehicles",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-vehicles-assign-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "vehicles-assign-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "vehicles-assign-select",
+        "selector": "[role=\"dialog\"] [role=\"combobox\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-vehicles-delete-dialog",
+    "route": "/dashboard/vehicles",
+    "finalUrl": "https://thingdock.dev/dashboard/vehicles",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-vehicles-delete-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "vehicles-delete-dialog",
+        "selector": "[role=\"dialog\"],[role=\"alertdialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "vehicles-delete-text",
+        "selector": null,
+        "text": "xoa phuong tien",
+        "min": 1,
+        "count": 0,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-drivers-create-dialog",
+    "route": "/dashboard/drivers",
+    "finalUrl": "https://thingdock.dev/dashboard/drivers",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-drivers-create-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "drivers-create-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/drivers"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-drivers-edit-dialog",
+    "route": "/dashboard/drivers",
+    "finalUrl": "https://thingdock.dev/dashboard/drivers",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-drivers-edit-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "drivers-edit-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/drivers"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-drivers-delete-dialog",
+    "route": "/dashboard/drivers",
+    "finalUrl": "https://thingdock.dev/dashboard/drivers",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-drivers-delete-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "drivers-delete-dialog",
+        "selector": "[role=\"dialog\"],[role=\"alertdialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "drivers-delete-text",
+        "selector": null,
+        "text": "xoa tai xe",
+        "min": 1,
+        "count": 0,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/drivers"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-customers-create-dialog",
+    "route": "/dashboard/customers",
+    "finalUrl": "https://thingdock.dev/dashboard/customers",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-customers-create-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "customers-create-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/customers"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-customers-edit-dialog",
+    "route": "/dashboard/customers",
+    "finalUrl": "https://thingdock.dev/dashboard/customers",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-customers-edit-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "customers-edit-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/customers"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-customers-delete-dialog",
+    "route": "/dashboard/customers",
+    "finalUrl": "https://thingdock.dev/dashboard/customers",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-customers-delete-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "customers-delete-dialog",
+        "selector": "[role=\"dialog\"],[role=\"alertdialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "customers-delete-text",
+        "selector": null,
+        "text": "xoa khach hang",
+        "min": 1,
+        "count": 0,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/customers"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-trips-create-dialog",
+    "route": "/dashboard/trips",
+    "finalUrl": "https://thingdock.dev/dashboard/trips",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-trips-create-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "trips-create-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/trips"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-trips-edit-dialog",
+    "route": "/dashboard/trips",
+    "finalUrl": "https://thingdock.dev/dashboard/trips",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-trips-edit-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "trips-edit-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/trips"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-trips-delete-dialog",
+    "route": "/dashboard/trips",
+    "finalUrl": "https://thingdock.dev/dashboard/trips",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-trips-delete-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "trips-delete-dialog",
+        "selector": "[role=\"dialog\"],[role=\"alertdialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/trips"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-geofences-create-dialog",
+    "route": "/dashboard/geofences",
+    "finalUrl": "https://thingdock.dev/dashboard/geofences",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-geofences-create-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "geofences-create-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/geofences"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-geofences-edit-dialog",
+    "route": "/dashboard/geofences",
+    "finalUrl": "https://thingdock.dev/dashboard/geofences",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-geofences-edit-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "geofences-edit-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/geofences"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-geofences-manage-vehicles-panel",
+    "route": "/dashboard/geofences",
+    "finalUrl": "https://thingdock.dev/dashboard/geofences",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-geofences-manage-vehicles-panel.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "geofences-manage-panel",
+        "selector": null,
+        "text": "quan ly phuong tien trong vung",
+        "min": 1,
+        "count": 0,
+        "ok": true
+      },
+      {
+        "label": "geofences-manage-checkbox",
+        "selector": "[role=\"checkbox\"]",
+        "text": null,
+        "min": 1,
+        "count": 5,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/geofences"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-geofences-delete-dialog",
+    "route": "/dashboard/geofences",
+    "finalUrl": "https://thingdock.dev/dashboard/geofences",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-geofences-delete-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "geofences-delete-dialog",
+        "selector": "[role=\"dialog\"],[role=\"alertdialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "geofences-delete-text",
+        "selector": null,
+        "text": "xoa vung giam sat",
+        "min": 1,
+        "count": 0,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/geofences"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/vehicles"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-maintenance-tabs",
+    "route": "/dashboard/maintenance",
+    "finalUrl": "https://thingdock.dev/dashboard/maintenance",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-maintenance-tabs.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "maintenance-tabs",
+        "selector": "[role=\"tab\"]",
+        "text": null,
+        "min": 3,
+        "count": 3,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 8,
+      "handledRequests": 8,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/maintenance"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-firmware-upload-dialog",
+    "route": "/dashboard/firmware",
+    "finalUrl": "https://thingdock.dev/dashboard/firmware",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-firmware-upload-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "firmware-upload-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 7,
+      "handledRequests": 7,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/firmware"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/firmware/1/deployments"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/firmware/2/deployments"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-exports-create-dialog",
+    "route": "/dashboard/exports",
+    "finalUrl": "https://thingdock.dev/dashboard/exports",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-exports-create-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "exports-create-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/exports"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-notifications-item-actions",
+    "route": "/dashboard/notifications",
+    "finalUrl": "https://thingdock.dev/dashboard/notifications",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-notifications-item-actions.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "notifications-list",
+        "selector": "[data-slot=\"card\"]",
+        "text": null,
+        "min": 1,
+        "count": 5,
+        "ok": true
+      },
+      {
+        "label": "notifications-actions-buttons",
+        "selector": "button",
+        "text": null,
+        "min": 4,
+        "count": 26,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-users-create-dialog",
+    "route": "/dashboard/users",
+    "finalUrl": "https://thingdock.dev/dashboard/users",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-users-create-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "users-create-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/users"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-users-edit-dialog",
+    "route": "/dashboard/users",
+    "finalUrl": "https://thingdock.dev/dashboard/users",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-users-edit-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "users-edit-dialog",
+        "selector": "[role=\"dialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/users"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-users-delete-dialog",
+    "route": "/dashboard/users",
+    "finalUrl": "https://thingdock.dev/dashboard/users",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-users-delete-dialog.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "users-delete-dialog",
+        "selector": "[role=\"dialog\"],[role=\"alertdialog\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "users-delete-text",
+        "selector": null,
+        "text": "xoa nguoi dung",
+        "min": 1,
+        "count": 0,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 4,
+      "handledRequests": 4,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/users"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-system-admin-query-builder",
+    "route": "/dashboard/system-admin",
+    "finalUrl": "https://thingdock.dev/dashboard/system-admin",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-system-admin-query-builder.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "system-admin-query-form",
+        "selector": "datalist#query-builder-columns",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "system-admin-query-table",
+        "selector": "table tbody tr",
+        "text": null,
+        "min": 1,
+        "count": 2,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 7,
+      "handledRequests": 7,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/system-admin/logs"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/system-admin/tables"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/system-admin/tables/devices/columns"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/system-admin/tables/devices"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-system-admin-metrics-run",
+    "route": "/dashboard/system-admin",
+    "finalUrl": "https://thingdock.dev/dashboard/system-admin",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-system-admin-metrics-run.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "system-admin-metrics-chart",
+        "selector": "svg.recharts-surface",
+        "text": null,
+        "min": 1,
+        "count": 2,
+        "ok": true
+      },
+      {
+        "label": "system-admin-metrics-card",
+        "selector": null,
+        "text": "kham pha chi so",
+        "min": 1,
+        "count": 0,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 5,
+      "handledRequests": 5,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/system-admin/logs"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/system-admin/metrics"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-map-controls-state",
+    "route": "/dashboard/map",
+    "finalUrl": "https://thingdock.dev/dashboard/map",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-map-controls-state.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "map-sidebar-items",
+        "selector": "aside button",
+        "text": null,
+        "min": 3,
+        "count": 7,
+        "ok": true
+      },
+      {
+        "label": "map-markers",
+        "selector": ".leaflet-marker-icon",
+        "text": null,
+        "min": 1,
+        "count": 4,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 7,
+      "handledRequests": 7,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/positions"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/geofences"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-map-mobile-drawer",
+    "route": "/dashboard/map",
+    "finalUrl": "https://thingdock.dev/dashboard/map",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-map-mobile-drawer.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "map-mobile-sheet",
+        "selector": "[data-slot=\"sheet-content\"][data-state=\"open\"][class*=\"88dvh\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      },
+      {
+        "label": "map-mobile-search",
+        "selector": "[data-slot=\"sheet-content\"][data-state=\"open\"][class*=\"88dvh\"] [data-slot=\"scroll-area\"]",
+        "text": null,
+        "min": 1,
+        "count": 1,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 6,
+      "handledRequests": 6,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices/positions"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/geofences"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  },
+  {
+    "name": "mock-simulator-running-state",
+    "route": "/dashboard/simulator",
+    "finalUrl": "https://thingdock.dev/dashboard/simulator",
+    "routeMatched": true,
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\mock-audit-round7\\mock-simulator-running-state.png",
+    "actionError": null,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      },
+      {
+        "type": "error",
+        "text": "WebSocket connection to 'ws://localhost:4000/ws/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [],
+    "probes": [
+      {
+        "label": "simulator-running-buttons",
+        "selector": "button",
+        "text": null,
+        "min": 4,
+        "count": 20,
+        "ok": true
+      },
+      {
+        "label": "simulator-status-text",
+        "selector": null,
+        "text": "trang thai",
+        "min": 1,
+        "count": 0,
+        "ok": true
+      }
+    ],
+    "failedProbes": [],
+    "apiCoverage": {
+      "totalRequests": 6,
+      "handledRequests": 6,
+      "unhandledRequests": 0,
+      "uniqueHandledPaths": [
+        {
+          "method": "GET",
+          "pathName": "/api/v1/auth/me"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications/stats"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/notifications"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/devices"
+        },
+        {
+          "method": "GET",
+          "pathName": "/api/v1/simulator/status"
+        }
+      ]
+    },
+    "unhandledApiRequests": []
+  }
+]

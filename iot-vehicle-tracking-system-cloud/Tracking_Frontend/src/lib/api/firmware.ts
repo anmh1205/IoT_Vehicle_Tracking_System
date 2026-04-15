@@ -23,12 +23,23 @@ export interface FirmwareDeployment {
   jobId: string | null;
   deviceId: string;
   status: string;
+  summaryStatus: string;
   progress: number | null;
   targetVersion: string | null;
   currentVersion: string | null;
   partition: string | null;
   startedAt: string | null;
   completedAt: string | null;
+  updatedAt: string;
+  firstAssignedAt: string | null;
+  commandDispatchedAt: string | null;
+  lastSeenAt: string | null;
+  lastSeqNo: number | null;
+  lastMessageId: string | null;
+  lastBootId: string | null;
+  isStuck: boolean;
+  stuckReason: string | null;
+  errorCode: string | null;
   errorMessage: string | null;
 }
 

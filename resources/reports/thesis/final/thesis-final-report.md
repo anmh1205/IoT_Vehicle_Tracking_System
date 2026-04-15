@@ -395,8 +395,8 @@ Xin chân thành cảm ơn!
 | Hình 4.44 | Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo | ...   |
 | Hình 4.45 | Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị | ...   |
 | Hình 4.46 | Screenshot hành trình trên bản đồ, thể hiện giai đoạn gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối | ...   |
-| Hình 4.47 | Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart) | ...   |
-| Hình PL-3.1 | Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần) | ...   |
+| Hình 4.47 | Biểu đồ so sánh chỉ tiêu thiết kế và kết quả đạt được | ...   |
+| Hình PL-3.1 | Kế hoạch thực hiện dự án theo giai đoạn (24 tuần) | ...   |
 
 ---
 
@@ -5709,9 +5709,9 @@ Phần này tổng hợp tất cả kết quả đo lường và so sánh với 
 | 9   | Khôi phục kết nối MQTT   | Tự động sau mất sóng | Reconnect ổn định, tiếp tục gửi telemetry | Đạt        |
 | 10  | Độ tin cậy state machine | >= 99%               | >= 99.8%                                  | Đạt        |
 
-![Hình 4.47 - Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-38.svg)
+![Hình 4.47 - Biểu đồ so sánh chỉ tiêu thiết kế và kết quả đạt được](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-38.svg)
 
-_Hình 4.47: Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart)_
+_Hình 4.47: Biểu đồ so sánh chỉ tiêu thiết kế và kết quả đạt được_
 
 > Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
@@ -6660,7 +6660,7 @@ Dự án được triển khai theo 7 giai đoạn chính, với tổng thời g
 
 > **Ghi chú:** Các giai đoạn có sự chồng chéo (overlap) có chủ đích để tối ưu hóa thời gian. Ví dụ, GĐ3 (hạ tầng cloud) bắt đầu trước khi GĐ2 (firmware) hoàn thành để có môi trường test sớm.
 
-## 3.2. Biểu đồ Gantt (Gantt Chart)
+## 3.2. Kế hoạch thực hiện dự án theo giai đoạn
 
 ```
 Tuần:  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
@@ -6675,9 +6675,9 @@ GĐ7:                                                        [========]
        |--- Tháng 01 ---|--- Tháng 02 ---|
 ```
 
-![Hình PL-3.1 - Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần)](./assets/figures/14-phu-luc-hinh-pl-3-1.svg)
+![Hình PL-3.1 - Kế hoạch thực hiện dự án theo giai đoạn (24 tuần)](./assets/figures/14-phu-luc-hinh-pl-3-1.svg)
 
-_Hình PL-3.1: Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần)_
+_Hình PL-3.1: Kế hoạch thực hiện dự án theo giai đoạn (24 tuần)_
 
 > Nguồn: Hình vẽ của tác giả
 

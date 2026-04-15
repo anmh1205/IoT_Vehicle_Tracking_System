@@ -1,34 +1,11 @@
 flowchart TB
-    subgraph Vehicle["Thiết bị trên xe"]
-        OBD["OBD2 BLE Adapter"]
-        Tracker["Tracker
-ESP32-S3 + SIM7600CE-T"]
-        OBD --> Tracker
-    end
+    Tracker["Tracker tren xe<br/>ESP32-S3 + SIM7600 + OBD2"]
+    EMQX["EMQX Broker"]
+    Bridge["MQTT Bridge"]
+    API["Backend API + Socket.IO"]
+    Store["PostgreSQL + VictoriaMetrics + VictoriaLogs"]
+    Clients["Dashboard / Mobile / Grafana"]
 
-    subgraph Cloud["Tầng cloud"]
-        EMQX["EMQX Broker"]
-        Bridge["MQTT Bridge"]
-        API["Backend API
-Socket.IO"]
-        PG["PostgreSQL"]
-        VM["VictoriaMetrics"]
-        VL["VictoriaLogs"]
-        EMQX --> Bridge
-        Bridge --> API
-        Bridge --> VM
-        Bridge --> VL
-        API --> PG
-    end
-
-    subgraph Client["Tầng hiển thị"]
-        Web["Dashboard Next.js"]
-        Mobile["Mobile app"]
-        Grafana["Grafana"]
-    end
-
-    Tracker ----> EMQX
-    API ----> Web
-    API ----> Mobile
-    VM ----> Grafana
-    VL ----> Grafana
+    Tracker --> EMQX --> Bridge --> API --> Store
+    API --> Clients
+    Store --> Clients

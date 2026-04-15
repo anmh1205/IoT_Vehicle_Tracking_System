@@ -1,15 +1,12 @@
 stateDiagram-v2
-    direction LR
+    direction TB
     [*] --> Parking
-    state "Parking
-Deep sleep" as Parking
-    state "Driving
-4G + GNSS + OBD2" as Driving
-    state "Alert
-Đánh thức modem" as Alert
+    state "Parking<br/>Deep sleep" as Parking
+    state "Driving<br/>4G + GNSS + OBD2" as Driving
+    state "Alert<br/>Danh thuc modem" as Alert
 
-    Parking --> Driving: Bật IGN
-    Driving --> Parking: Tắt IGN
+    Parking --> Driving: Bat IGN
+    Driving --> Parking: Tat IGN
     Parking --> Alert: IMU rung
-    Alert --> Parking: Hoàn tất
-    Alert --> Driving: Xe tiếp tục chạy
+    Alert --> Parking: Hoan tat
+    Alert --> Driving: Xe tiep tuc chay

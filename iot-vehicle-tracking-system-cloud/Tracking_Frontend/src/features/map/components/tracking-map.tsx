@@ -8,7 +8,7 @@ import { useMapStore } from '@/features/map/store/map-store';
 import { GeofenceLayer } from './geofence-layer';
 import { DeviceCluster } from './device-cluster';
 import { MapControls } from './map-controls';
-import 'leaflet/dist/leaflet.css';
+
 const FollowSelectedDevice = ({ device }: { device: DevicePosition | null }) => {
   const map = useMap();
   const followMode = useMapStore((state) => state.followMode);

@@ -13,6 +13,7 @@ const STATUS_LABELS: Record<string, string> = {
   active: 'Đang hoạt động',
   acknowledged: 'Đã xác nhận',
   resolved: 'Đã giải quyết',
+  dismissed: 'Đã bỏ qua',
 };
 const ALERT_TYPE_LABELS: Record<string, string> = {
   speeding: 'Vượt tốc độ',
@@ -59,10 +60,19 @@ export const getAlertColumns = (actions: {
           <Button size="sm" variant="outline" onClick={() => actions.onView(row.original)}>
             Chi tiết
           </Button>
-          <Button size="sm" variant="outline" onClick={() => actions.onAck(row.original.id)}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={row.original.status !== 'active'}
+            onClick={() => actions.onAck(row.original.id)}
+          >
             Xác nhận
           </Button>
-          <Button size="sm" onClick={() => actions.onResolve(row.original.id)}>
+          <Button
+            size="sm"
+            disabled={row.original.status === 'resolved' || row.original.status === 'dismissed'}
+            onClick={() => actions.onResolve(row.original.id)}
+          >
             Giải quyết
           </Button>
         </div>

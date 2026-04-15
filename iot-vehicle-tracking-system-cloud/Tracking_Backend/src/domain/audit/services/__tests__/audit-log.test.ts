@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { AuditLog, RecordAuditInput, AuditLogListQuery } from '@/domain/audit/types/audit-log.types';
 
 vi.mock('@/domain/audit/repositories/audit-log.repository');

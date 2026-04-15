@@ -15,7 +15,9 @@
  */
 
 /** @brief Compile-time array length helper. */
+#ifndef ARRAY_SIZE
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#endif
 /** @brief Minimum helper macro. */
 #define MIN_VALUE(a, b) ((a) < (b) ? (a) : (b))
 /** @brief Maximum helper macro. */
@@ -78,6 +80,37 @@ size_t util_copy_string(char *dst, size_t dst_size, const char *src);
 uint64_t util_uptime_ms(void);
 
 /**
+ * @brief Generate a random RFC4122 UUID v4 string.
+ *
+ * @param out Destination buffer.
+ * @param out_size Destination buffer size, must be >= 37.
+ */
+void util_generate_uuid_v4(char *out, size_t out_size);
+
+/**
+ * @brief Generate boot identifier string stable for current runtime boot.
+ *
+ * @param out Destination buffer.
+ * @param out_size Destination buffer size.
+ * @param boot_count Persisted RTC boot counter.
+ */
+void util_generate_boot_id(char *out, size_t out_size, uint32_t boot_count);
+
+/**
+ * @brief Enable or disable all firmware sleep features globally.
+ *
+ * @param enabled True to allow sleep features, false to disable them.
+ */
+void util_set_sleep_enabled(bool enabled);
+
+/**
+ * @brief Read global firmware sleep enable flag.
+ *
+ * @return true when sleep features are enabled.
+ */
+bool util_is_sleep_enabled(void);
+
+/**
  * @brief Clamp floating-point value into `[min_value, max_value]`.
  *
  * @param value Input value.
@@ -109,6 +142,14 @@ int util_clamp_int(int value, int min_value, int max_value);
 bool util_string_empty(const char *value);
 
 /**
+ * @brief OTA status callback used by OTA executor to emit milestone updates.
+ *
+ * @param status Current firmware status snapshot.
+ * @param user_ctx Opaque callback context pointer.
+ */
+typedef void (*ota_status_callback_t)(const firmware_status_t *status, void *user_ctx);
+
+/**
  * @brief Download firmware image, verify hash, and set next boot partition.
  *
  * @param cfg Runtime configuration.
@@ -121,7 +162,9 @@ bool util_string_empty(const char *value);
 esp_err_t util_ota_apply_update(const config_t *cfg,
                                 const char *current_version,
                                 const ota_command_t *cmd,
-                                firmware_status_t *out_status);
+                                firmware_status_t *out_status,
+                                ota_status_callback_t status_callback,
+                                void *status_callback_ctx);
 
 /**
  * @brief Switch boot partition to rollback target manually.
@@ -131,4 +174,3 @@ esp_err_t util_ota_apply_update(const config_t *cfg,
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t util_ota_trigger_manual_rollback(firmware_status_t *out_status);
-

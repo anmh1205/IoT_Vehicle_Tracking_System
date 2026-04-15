@@ -40,12 +40,6 @@ const VIOLATION_TYPE_LABELS: Record<string, string> = {
 const ALL_TYPES = 'all';
 const PAGE_SIZE = 20;
 
-const getViolationId = (item: any): number | null => {
-  const candidate = item?.id ?? item?.violationId ?? item?.violation_id ?? null;
-  const parsed = Number(candidate);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-};
-
 const ViolationsPage = () => {
   const queryClient = useQueryClient();
   const [typeFilter, setTypeFilter] = useState<string>(ALL_TYPES);
@@ -143,13 +137,7 @@ const ViolationsPage = () => {
               size="sm"
               variant="outline"
               disabled={ackMutation.isPending}
-              onClick={() => {
-                const violationId = getViolationId(row.original);
-                if (violationId === null) {
-                  return;
-                }
-                ackMutation.mutate(violationId);
-              }}
+              onClick={() => ackMutation.mutate(row.original.id)}
             >
               {ackMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               Xác nhận
@@ -196,7 +184,6 @@ const ViolationsPage = () => {
         searchLabel="Tìm vi phạm theo phương tiện"
         searchPlaceholder="Tìm biển số hoặc mã xe..."
         isLoading={violations.isLoading}
-        pagination={false}
         onRowClick={setDetailItem}
         toolbar={
           <div className="w-full sm:w-auto">
@@ -246,7 +233,7 @@ const ViolationsPage = () => {
       <ViolationDetailModal
         open={Boolean(detailItem)}
         onOpenChange={(value) => !value && setDetailItem(null)}
-        violationId={getViolationId(detailItem)}
+        violationId={detailItem?.id ?? null}
       />
     </PageContainer>
   );

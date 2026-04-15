@@ -1,9 +1,20 @@
-flowchart LR
+flowchart TB
     Device["Tracker"] --> EMQX["EMQX"]
     EMQX --> Bridge["MQTT Bridge"]
-    Bridge --> API["Backend API"]
-    API --> Query["TanStack Query"]
-    API --> Store["Realtime Store"]
-    Query --> Dashboard["Dashboard"]
+
+    subgraph AppLayer["Lop ung dung"]
+        direction LR
+        API["Backend API"]
+        Query["TanStack Query"]
+        Store["Realtime Store"]
+    end
+
+    Dashboard["Dashboard hop nhat"]
+    Obs["Metrics + Logs"]
+
+    Bridge --> API
+    Bridge --> Obs
+    API --> Query
+    API --> Store
+    Query --> Dashboard
     Store --> Dashboard
-    Bridge --> Obs["Metrics + Logs"]

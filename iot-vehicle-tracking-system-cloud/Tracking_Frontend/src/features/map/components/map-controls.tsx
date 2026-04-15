@@ -102,9 +102,9 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
       <div className="flex flex-col gap-2 rounded-xl border border-border/70 bg-background/95 p-2 shadow-lg backdrop-blur sm:flex-row">
         <Button
           size="sm"
-          variant={followMode ? 'default' : 'secondary'}
+          variant={followMode ? 'default' : 'outline'}
           onClick={toggleFollowMode}
-          className="h-10 justify-start border border-border/60 px-3 sm:h-9"
+          className="h-10 justify-start px-3 sm:h-9"
           aria-pressed={followMode}
         >
           <Waypoints className="mr-1 h-4 w-4" aria-hidden="true" />
@@ -112,9 +112,9 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
         </Button>
         <Button
           size="sm"
-          variant={showGeofences ? 'default' : 'secondary'}
+          variant={showGeofences ? 'default' : 'outline'}
           onClick={toggleGeofences}
-          className="h-10 justify-start border border-border/60 px-3 sm:h-9"
+          className="h-10 justify-start px-3 sm:h-9"
           aria-pressed={showGeofences}
         >
           <Layers2 className="mr-1 h-4 w-4" aria-hidden="true" />

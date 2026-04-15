@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
 import { CalendarClock, CircleCheckBig, CircleOff, Wrench } from 'lucide-react';
@@ -60,6 +61,7 @@ const TYPE_OPTIONS = [
 ] as const;
 
 const MaintenancePage = () => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [day, setDay] = useState<Date | undefined>(new Date());
   const [tab, setTab] = useState('list');
@@ -353,7 +355,7 @@ const MaintenancePage = () => {
             searchKey="vehicleId"
             searchPlaceholder="Tìm phương tiện..."
             isLoading={maint.isLoading}
-            pagination={false}
+            onRowClick={(row) => router.push(`/dashboard/maintenance/${row.id}`)}
           />
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-muted-foreground">

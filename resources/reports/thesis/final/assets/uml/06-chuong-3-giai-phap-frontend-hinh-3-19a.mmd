@@ -1,0 +1,18 @@
+flowchart TB
+    Root["Trang ban do"]
+
+    subgraph RealtimeMap["Khu ban do realtime"]
+        direction TB
+        MapCore["Leaflet map core"]
+        Overlays["Marker xe · tuyen duong · vung giam sat"]
+    end
+
+    Sidebar["Sidebar"]
+    Socket["Socket.IO"]
+    Query["TanStack Query"]
+
+    Root --> MapCore
+    Root --> Sidebar
+    MapCore --> Overlays
+    Socket --> Overlays
+    Query --> Overlays

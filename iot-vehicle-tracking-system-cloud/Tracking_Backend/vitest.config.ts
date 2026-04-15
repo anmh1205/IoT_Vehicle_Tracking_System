@@ -8,7 +8,8 @@ export default defineConfig({
     },
   },
   test: {
-    globals: false,
+    globals: true,
     include: ['src/**/*.test.ts'],
+    mockReset: true,
   },
 });

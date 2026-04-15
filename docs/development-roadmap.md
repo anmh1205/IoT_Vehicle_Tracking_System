@@ -2,6 +2,15 @@
 
 ## Phase Status
 
+### P1 - MQTT Device Simulator + VPS Fix-Loop Automation Complete
+- Scope: deterministic MQTT device simulator plus bounded local-agent/VPS SSH fix-loop automation under `resources/mock-data/scripts` and `resources/mock-data/simulator-specs`.
+- Milestones completed:
+  - Added canonical MQTT contract baseline, scenario catalog, and fault-injection policy specs.
+  - Added deterministic simulator runner support for seeded publish, dry-run, replay, and publish modes.
+  - Added local VPS fix-loop orchestration with allowlisted targeted restart behavior, bounded iterations, and rollback/stop conditions.
+  - Added test matrix, checkpoint thresholds, retest gate rules, rollback runbook, operator handover, and stop-conditions policy.
+  - Backend and MQTT Bridge impacted validation passed; final code review accepted the scope with only low-medium residual operational risk.
+
 ### P1 - Accessibility Remediation (Web + Mobile) Complete
 - Scope: Web dashboard (`iot-vehicle-tracking-system-cloud/Tracking_Frontend`) and mobile shell (`iot-vehicle-tracking-system-cloud/Tracking_Mobile`) accessibility hardening.
 - Milestones completed:
@@ -51,9 +60,11 @@
 ### P3 - CI/CD UAT Minimal Rollout In Progress
 - Scope: implement IVM26-style minimal CI/CD for Backend/Frontend/MQTT Bridge (GitHub secrets baseline, first-time VPS bootstrap, auto deploy on `push uat` with manual fallback).
 - Milestones in progress:
-  - Added `workflow_dispatch` manual fallback trigger in `.github/workflows/backend-uat.yml`, `.github/workflows/frontend-uat.yml`, `.github/workflows/mqtt-bridge-uat.yml`.
+  - Added `workflow_dispatch` manual fallback trigger and `concurrency` guards in UAT workflows to avoid overlapping deploys.
   - Added deploy preflight checks for required secrets and standardized SSH deploy flow.
   - Added reusable VPS deploy scripts `scripts/deploy/bootstrap-vps.sh` and `scripts/deploy/deploy-service.sh`.
+  - Added health-gated deploy retries with bounded timeout/interval settings in the deploy script.
+  - Added backend image tag policy `uat` + `uat-${github.sha}` for stable rollback and traceable builds.
   - Added rollout checklist and required secret/env mapping in `docs/cicd-required-secrets-and-env.md`.
 
 ### P2 - Cloud Geofence and Distance Limits (Backend) Complete
@@ -72,7 +83,47 @@
   - Firmware IMU runtime path switched to LIS3DSH naming and WHO_AM_I expectation in `iot-vehicle-tracking-system-firmware/main`.
   - Modem control abstraction expanded with RESET/DTR/STATUS/NET-LIGHT hooks (GPIO_NC placeholders pending final board pin mapping).
   - Thesis final markdown pair and impacted UML sources synced to LIS3DSH + PWR-KEY terminology.
+  - Thesis final asset basenames were standardized to canonical names so regenerated figure outputs resolve deterministically after filename normalization.
   - Figure render pipeline executed to regenerate synchronized SVG artifacts.
+
+### Firmware Runtime Hardening Complete
+- Scope: SD log store recovery, DS3231M RTC UTC-safe validation, offline queue replay ACK hardening, GNSS observability/recovery, and state machine integration in the firmware runtime.
+- Milestones completed:
+  - SD log store recovery now handles transient storage faults more cleanly.
+  - DS3231M RTC handling keeps time checks UTC-safe for replay and persistence flows.
+  - Offline queue replay ACK handling now gates state advancement until completion is confirmed.
+  - GNSS polling now carries bounded retry, self-heal, and re-arm lifecycle handling after LTE recovery or repeated fail streaks.
+  - Compile validation passed for the completed firmware scope.
+
+### P2 - Firmware GNSS Reliability Observability and Recovery Complete
+- Scope: GNSS observability, bounded retry/self-heal, and GNSS re-arm lifecycle after LTE recovery/fail streak.
+- Milestones completed:
+  - GNSS query diagnostics now distinguish transport fail, parse fail, no-fix, and fix-success streaks.
+  - Self-heal repower is bounded by cooldown to avoid modem thrash during repeated poll failures.
+  - The tracker state machine re-arms GNSS after LTE recovery or fail-streak thresholds with cooldown gating.
+
+### P2 - Firmware Runtime Completion (Phases 01-06) Complete in Code
+- Scope: centralized runtime policy for sleep/wakeup, IMU gate, LTE/GNSS/MQTT cadence contracts, BLE ignition fallback hardening, and OTA safety preconditions.
+- Milestones completed:
+  - Config/NVS now owns runtime cadence and safety knobs (driving 1s, parked heartbeat 120s, alarm cadence 3s, ignition hold 3s baseline, OTA power gate).
+  - State machine now enforces policy-based sleep gating with explicit reject reasons.
+  - Alarm + heartbeat runtime contracts are explicit (`alarm raw cadence`, `heartbeat raw + status`).
+  - Ignition inference now prioritizes OBD but keeps ADC fallback authoritative when BLE adapter is absent.
+  - OTA command flow now validates start safety window before update execution.
+- Remaining closure:
+  - Phase 07 hardware acceptance (gates A-F) remains in progress and requires real-board measurements.
+
+### P1 - OTA End-to-End Firmware-Cloud Hardening (Phases 01-04 Complete in Code)
+- Scope: harden OTA contract from backend deploy/download to MQTT bridge ingest ordering and firmware runtime error mapping.
+- Milestones completed:
+  - Backend OTA artifact readiness checks added before deploy, plus strict download response headers for device-safe binary fetch.
+  - Backend deploy flow now validates device IDs, deduplicates active jobs by device/version, tracks dispatch outcomes, and surfaces derived stuck status for operators.
+  - MQTT Bridge firmware ingest now suppresses duplicate `message_id`, rejects out-of-order `seq_no`, and keeps terminal-state sticky against late non-terminal payloads.
+  - Firmware OTA executor now emits milestone statuses via callback path and maps failures to stable short error codes.
+  - Firmware confirm timeout is now persisted as deadline and enforced on next boot using trusted-time checks.
+- Remaining closure:
+  - Phase 05 (real VPS + ESP32 loops) needs live infrastructure + hardware execution evidence.
+  - Phase 06 release gate still depends on Phase 05 evidence pack.
 
 ## Notes
 - No remaining open tasks for accessibility remediation.
