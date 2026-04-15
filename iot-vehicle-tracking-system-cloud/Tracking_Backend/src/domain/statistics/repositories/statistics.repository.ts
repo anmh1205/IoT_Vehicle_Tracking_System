@@ -60,7 +60,7 @@ export const getFleetUsage = async (
     )
     SELECT
       ${bucketFromSeries} AS label,
-      COUNT(DISTINCT vehicles.id)::text AS active_vehicles
+      COUNT(DISTINCT CASE WHEN sessions.id IS NOT NULL THEN vehicles.id END)::text AS active_vehicles
     FROM series
     LEFT JOIN vehicles
       ON vehicles.device_id IS NOT NULL
