@@ -22,9 +22,12 @@ export const verifyDeviceToken = async (
       `SELECT id, device_id, vehicle_id, current_status
        FROM devices
        WHERE device_id = $1
-         AND auth_token = encode(sha256($2::bytea), 'hex')
+         AND (
+           auth_token = encode(sha256($2::bytea), 'hex')
+           OR auth_token = $3
+         )
          AND is_active = true`,
-      [deviceId, authToken],
+      [deviceId, authToken, authToken],
     );
     return result.rows[0] ?? null;
   } catch (err) {

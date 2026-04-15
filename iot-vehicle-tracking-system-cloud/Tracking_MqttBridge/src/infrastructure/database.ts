@@ -48,10 +48,10 @@ export const validateDevice = async (
        WHERE device_id = $1
          AND (
            auth_token = encode(sha256($2::bytea), 'hex')
-           OR auth_token = $2
+           OR auth_token = $3
          )
          AND is_active = true`,
-      [deviceId, authToken],
+      [deviceId, authToken, authToken],
     );
     return result.rows[0] ?? null;
   } catch (err) {
