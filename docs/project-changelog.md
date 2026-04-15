@@ -3,6 +3,7 @@
 ## 2026-04-16
 ### Dashboard Device Limit Fix + Vietnamese Copy Normalization (Completed)
 - Fixed frontend fallback device snapshot loading in `Tracking_Frontend/src/features/dashboard/hooks/use-dashboard-stats.ts` and `Tracking_Frontend/src/features/statistics/hooks/use-statistics.ts` to page through `/api/v1/devices` with `limit=100`, avoiding backend validation failures from `limit=500`.
+- Hardened backend device list query parsing in `Tracking_Backend/src/api/validators/device.validator.ts` by clamping `limit` to `100`, so stale clients requesting higher limits no longer receive `400` responses.
 - Updated dashboard-facing UI copy from Vietnamese without diacritics to proper Vietnamese with diacritics in `Tracking_Frontend/src/app/dashboard/page.tsx`, `devices/page.tsx`, `drivers/page.tsx`, `vehicles/page.tsx`, and `customers/page.tsx`.
 - Validation status: frontend `npm run lint`, `npm run typecheck`, and `npm run build` passed locally.
 

@@ -30,7 +30,12 @@ export const updateDeviceSchema = z.object({
 
 export const deviceListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .default(20)
+    .transform((value) => Math.min(value, 100)),
   status: z.enum(['running', 'stopped', 'disconnected']).optional(),
   search: z.string().max(100).optional(),
   sortBy: z.enum(['deviceId', 'deviceName', 'currentStatus', 'lastSeenAt', 'createdAt']).optional(),
