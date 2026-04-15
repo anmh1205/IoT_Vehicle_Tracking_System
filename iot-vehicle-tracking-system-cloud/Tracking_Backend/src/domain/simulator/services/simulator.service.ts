@@ -20,7 +20,6 @@ interface DeviceSimulatorRuntime {
   lon: number;
   heading: number;
   battery: number;
-  sessionIdBeforeStart: number | null;
 }
 
 interface SimulatorMqttClient {
@@ -410,10 +409,7 @@ const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> 
       );
 
       const activeSessionId = activeSessionResult.rows[0]?.id ?? null;
-      const isSimulatorOwnedSession =
-        activeSessionId !== null && activeSessionId !== device.sessionIdBeforeStart;
-
-      if (isSimulatorOwnedSession && activeSessionId !== null) {
+      if (activeSessionId !== null) {
         await closeSimulatorOwnedSession(activeSessionId, device.deviceId);
         continue;
       }
@@ -611,6 +607,10 @@ export const startSimulation = async (
        LIMIT 1`,
       [row.device_id],
     );
+    const activeSessionId = activeSessionResult.rows[0]?.id ?? null;
+    if (activeSessionId !== null) {
+      await closeSimulatorOwnedSession(activeSessionId, row.device_id);
+    }
 
     const initialLat = row.latitude ?? roundTo(input.lat + randomBetween(-0.0005, 0.0005), 6);
     const initialLon = row.longitude ?? roundTo(input.lon + randomBetween(-0.0005, 0.0005), 6);
@@ -626,7 +626,6 @@ export const startSimulation = async (
       lon: initialLon,
       heading: normalizeHeading(randomBetween(0, 359)),
       battery: roundTo(randomBetween(input.batteryMin, input.batteryMax), 2),
-      sessionIdBeforeStart: activeSessionResult.rows[0]?.id ?? null,
     });
   }
 
