@@ -1,6 +1,7 @@
 import { createNotFoundError } from '@/shared/utils/errors.util';
 import * as maintenanceRepo from '@/domain/maintenance/repositories/maintenance.repository';
 import { logger } from '@/infrastructure/logger';
+import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 import type {
   Maintenance,
   CreateMaintenanceInput,
@@ -29,7 +30,16 @@ const sanitizeMaintenance = (m: Maintenance): MaintenancePublic => ({
 });
 
 export const getMaintenanceById = async (id: number): Promise<MaintenancePublic> => {
-  const record = await maintenanceRepo.findById(id);
+  let record: Maintenance | null;
+  try {
+    record = await maintenanceRepo.findById(id);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      throw createNotFoundError('Maintenance module is not initialized');
+    }
+    throw error;
+  }
+
   if (!record) {
     throw createNotFoundError(`Maintenance record with ID ${id} not found`);
   }
@@ -40,7 +50,15 @@ export const createMaintenance = async (
   input: CreateMaintenanceInput,
   createdBy?: number,
 ): Promise<MaintenancePublic> => {
-  const record = await maintenanceRepo.create(input, createdBy);
+  let record: Maintenance;
+  try {
+    record = await maintenanceRepo.create(input, createdBy);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      throw createNotFoundError('Maintenance module is not initialized');
+    }
+    throw error;
+  }
   logger.info(`Maintenance "${input.title}" created for vehicle "${input.vehicleId}"`);
   return sanitizeMaintenance(record);
 };
@@ -49,12 +67,29 @@ export const updateMaintenance = async (
   id: number,
   input: UpdateMaintenanceInput,
 ): Promise<MaintenancePublic> => {
-  const existing = await maintenanceRepo.findById(id);
+  let existing: Maintenance | null;
+  try {
+    existing = await maintenanceRepo.findById(id);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      throw createNotFoundError('Maintenance module is not initialized');
+    }
+    throw error;
+  }
+
   if (!existing) {
     throw createNotFoundError(`Maintenance record with ID ${id} not found`);
   }
 
-  const updated = await maintenanceRepo.update(id, input);
+  let updated: Maintenance | null;
+  try {
+    updated = await maintenanceRepo.update(id, input);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      throw createNotFoundError('Maintenance module is not initialized');
+    }
+    throw error;
+  }
   if (!updated) {
     throw createNotFoundError(`Maintenance record with ID ${id} not found`);
   }
@@ -64,11 +99,27 @@ export const updateMaintenance = async (
 };
 
 export const deleteMaintenance = async (id: number): Promise<void> => {
-  const existing = await maintenanceRepo.findById(id);
+  let existing: Maintenance | null;
+  try {
+    existing = await maintenanceRepo.findById(id);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      throw createNotFoundError('Maintenance module is not initialized');
+    }
+    throw error;
+  }
+
   if (!existing) {
     throw createNotFoundError(`Maintenance record with ID ${id} not found`);
   }
 
-  await maintenanceRepo.remove(id);
+  try {
+    await maintenanceRepo.remove(id);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      throw createNotFoundError('Maintenance module is not initialized');
+    }
+    throw error;
+  }
   logger.info(`Maintenance record ${id} deleted successfully`);
 };

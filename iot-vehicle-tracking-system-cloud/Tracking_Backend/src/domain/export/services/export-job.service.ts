@@ -6,6 +6,7 @@ import type {
   CreateExportInput,
 } from '@/domain/export/types/export.types';
 import { createNotFoundError, createForbiddenError } from '@/shared/utils/errors.util';
+import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 
 const sanitizeExportJob = (job: ExportJob): ExportJobPublic => ({
   id: job.id,
@@ -18,7 +19,16 @@ const sanitizeExportJob = (job: ExportJob): ExportJobPublic => ({
 });
 
 export const listExports = async (userId: number): Promise<ExportJobPublic[]> => {
-  const jobs = await exportRepo.findAll(userId);
+  let jobs: ExportJob[];
+  try {
+    jobs = await exportRepo.findAll(userId);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      return [];
+    }
+    throw error;
+  }
+
   return jobs.map(sanitizeExportJob);
 };
 
@@ -26,7 +36,15 @@ export const createExport = async (
   userId: number,
   input: CreateExportInput,
 ): Promise<ExportJobPublic> => {
-  const job = await exportRepo.create(userId, input);
+  let job: ExportJob;
+  try {
+    job = await exportRepo.create(userId, input);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      throw createNotFoundError('Export storage is not initialized');
+    }
+    throw error;
+  }
 
   // Trigger async processing (fire-and-forget)
   void processExport(job);
@@ -35,7 +53,16 @@ export const createExport = async (
 };
 
 export const getExportStatus = async (id: number, userId: number): Promise<ExportJobPublic> => {
-  const job = await exportRepo.findById(id);
+  let job: ExportJob | null;
+  try {
+    job = await exportRepo.findById(id);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      throw createNotFoundError('Export storage is not initialized');
+    }
+    throw error;
+  }
+
   if (!job) throw createNotFoundError('Export job not found');
   if (job.user_id !== userId) throw createForbiddenError('Access denied to this export job');
   return sanitizeExportJob(job);

@@ -31,6 +31,7 @@ export const FuelByVehicleChart = ({ data, isLoading }: FuelByVehicleChartProps)
       })),
     [data],
   );
+  const hasMeaningfulData = chartData.some((item) => item.fuel > 0 || item.distance > 0);
 
   return (
     <Card>
@@ -40,7 +41,7 @@ export const FuelByVehicleChart = ({ data, isLoading }: FuelByVehicleChartProps)
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
-        ) : chartData.length === 0 ? (
+        ) : chartData.length === 0 || !hasMeaningfulData ? (
           <div className="flex h-[300px] items-center justify-center">
             <EmptyState
               title="Chưa có dữ liệu"

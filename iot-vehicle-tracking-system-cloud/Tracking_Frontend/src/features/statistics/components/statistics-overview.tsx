@@ -22,7 +22,19 @@ import {
 } from '@/features/statistics/hooks/use-statistics';
 import { FleetUtilizationChart } from './fleet-utilization-chart';
 import { DeviceUptimeChart } from './device-uptime-chart';
-import { formatNumber } from '@/lib/utils/date/format';
+import { formatDateTime, formatNumber } from '@/lib/utils/date/format';
+
+const formatFleetLabel = (value: string, interval: 'day' | 'week' | 'month'): string => {
+  if (interval === 'month') {
+    return formatDateTime(value, 'MM/yyyy');
+  }
+
+  if (interval === 'week') {
+    return formatDateTime(value, 'dd/MM');
+  }
+
+  return formatDateTime(value, 'dd/MM');
+};
 
 export const StatisticsOverview = () => {
   const defaultParams = useStatisticsParams();
@@ -37,11 +49,11 @@ export const StatisticsOverview = () => {
   const fleetData = useMemo(
     () =>
       (fleetQuery.data?.labels ?? []).map((label: string, index: number) => ({
-        label,
+        label: formatFleetLabel(label, interval),
         active: Number(fleetQuery.data?.activeVehicles?.[index] ?? 0),
         inactive: Number(fleetQuery.data?.inactiveVehicles?.[index] ?? 0),
       })),
-    [fleetQuery.data],
+    [fleetQuery.data, interval],
   );
   const uptimeData = useMemo(
     () =>

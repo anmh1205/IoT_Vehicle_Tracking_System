@@ -37,6 +37,7 @@ export const FuelTrendsChart = ({ data, isLoading }: FuelTrendsChartProps) => {
       })),
     [data],
   );
+  const hasMeaningfulData = chartData.some((item) => item.fuelUsed > 0 || item.consumption > 0);
 
   return (
     <Card>
@@ -46,7 +47,7 @@ export const FuelTrendsChart = ({ data, isLoading }: FuelTrendsChartProps) => {
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
-        ) : chartData.length === 0 ? (
+        ) : chartData.length === 0 || !hasMeaningfulData ? (
           <div className="flex h-[300px] items-center justify-center">
             <EmptyState
               title="Chưa có dữ liệu"

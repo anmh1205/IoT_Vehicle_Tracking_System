@@ -430,7 +430,7 @@ const CustomersPage = () => {
       vehicleServices.getList({
         page: 1,
         limit: 100,
-        sortBy: 'updatedAt',
+        sortBy: 'createdAt',
         sortOrder: 'desc',
       }),
   });

@@ -12,7 +12,7 @@ export const DeviceSelector = ({
   onChange: (deviceIds: string[]) => void;
 }) => {
   const [search, setSearch] = useState('');
-  const devicesQuery = useDevices({ limit: 200 });
+  const devicesQuery = useDevices({ limit: 100 });
   const devices = useMemo(() => {
     const rows = devicesQuery.data?.items ?? [];
     const keyword = search.trim().toLowerCase();

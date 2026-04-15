@@ -14,7 +14,7 @@ export const FleetUtilizationChart = ({
   }>;
   isLoading?: boolean;
 }) => {
-  const hasMeaningfulData = data.some((item) => item.active > 0 || item.inactive > 0);
+  const hasMeaningfulData = data.some((item) => item.active > 0);
 
   return (
     <Card>
@@ -35,7 +35,7 @@ export const FleetUtilizationChart = ({
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" />
+              <XAxis dataKey="label" minTickGap={24} />
               <YAxis />
               <Tooltip />
               <Bar dataKey="active" stackId="a" fill="#22c55e" />
