@@ -55,3 +55,9 @@ logs/security/
 /iot-vehicle-tracking-system-hardware/Project Logs for iot-vehicle-tracking-system-main
 /iot-vehicle-tracking-system-firmware/documents/test-logs
 .claude/skills/vps-control/keys/id_ed25519_vps_control
+
+# VPS control skill secrets
+.claude/skills/vps-control/.env
+.claude/skills/vps-control/keys/
+.codex/skills/vps-control/.env
+.codex/skills/vps-control/keys/
