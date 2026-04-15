@@ -38,7 +38,7 @@ const DevicesPage = () => {
   const devicesErrorMessage = devicesQuery.isError
     ? getApiErrorMessage(
         devicesQuery.error,
-        'Khong the tai danh sach thiet bi tu may chu. Vui long thu lai.',
+        'Không thể tải danh sách thiết bị từ máy chủ. Vui lòng thử lại.',
       )
     : null;
 
@@ -70,7 +70,7 @@ const DevicesPage = () => {
       {devicesErrorMessage ? (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Khong the dong bo du lieu thiet bi</AlertTitle>
+          <AlertTitle>Không thể đồng bộ dữ liệu thiết bị</AlertTitle>
           <AlertDescription>
             <p>{devicesErrorMessage}</p>
             <Button
@@ -82,7 +82,7 @@ const DevicesPage = () => {
               }}
               disabled={devicesQuery.isFetching}
             >
-              Thu lai
+              Thử lại
             </Button>
           </AlertDescription>
         </Alert>

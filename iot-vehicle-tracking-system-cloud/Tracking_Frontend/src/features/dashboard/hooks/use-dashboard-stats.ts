@@ -51,6 +51,9 @@ interface DashboardDeviceSnapshot {
   totalRuntimeSeconds: number;
 }
 
+const DEVICE_LIST_LIMIT = 100;
+const DEVICE_LIST_MAX_PAGES = 50;
+
 const normalizeStats = (raw: any): DashboardOverviewStats => ({
   totalDevices: Number(raw?.totalDevices ?? raw?.total_devices ?? 0),
   activeDevices: Number(raw?.activeDevices ?? raw?.active_devices ?? 0),
@@ -180,14 +183,26 @@ const toDeviceSnapshot = (raw: any): DashboardDeviceSnapshot => ({
 });
 
 const loadDeviceSnapshot = async (): Promise<DashboardDeviceSnapshot[]> => {
-  const payload = await deviceServices.getList({
-    page: 1,
-    limit: 500,
-    sortBy: 'lastSeenAt',
-    sortOrder: 'desc',
-  });
+  const snapshots: DashboardDeviceSnapshot[] = [];
 
-  return (payload.items ?? []).map(toDeviceSnapshot);
+  for (let page = 1; page <= DEVICE_LIST_MAX_PAGES; page += 1) {
+    const payload = await deviceServices.getList({
+      page,
+      limit: DEVICE_LIST_LIMIT,
+      sortBy: 'lastSeenAt',
+      sortOrder: 'desc',
+    });
+
+    const rows = payload.items ?? [];
+    snapshots.push(...rows.map(toDeviceSnapshot));
+
+    const totalPages = Number(payload.pagination?.totalPages ?? 1);
+    if (rows.length === 0 || page >= totalPages) {
+      break;
+    }
+  }
+
+  return snapshots;
 };
 
 const getSnapshotStatus = (device: DashboardDeviceSnapshot) =>

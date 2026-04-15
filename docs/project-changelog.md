@@ -1,5 +1,11 @@
 # Project Changelog
 
+## 2026-04-16
+### Dashboard Device Limit Fix + Vietnamese Copy Normalization (Completed)
+- Fixed frontend fallback device snapshot loading in `Tracking_Frontend/src/features/dashboard/hooks/use-dashboard-stats.ts` and `Tracking_Frontend/src/features/statistics/hooks/use-statistics.ts` to page through `/api/v1/devices` with `limit=100`, avoiding backend validation failures from `limit=500`.
+- Updated dashboard-facing UI copy from Vietnamese without diacritics to proper Vietnamese with diacritics in `Tracking_Frontend/src/app/dashboard/page.tsx`, `devices/page.tsx`, `drivers/page.tsx`, `vehicles/page.tsx`, and `customers/page.tsx`.
+- Validation status: frontend `npm run lint`, `npm run typecheck`, and `npm run build` passed locally.
+
 ## 2026-04-12
 ### Firmware Runtime Completion - Phases 01-06 (Completed in Code, Hardware Validation Pending)
 - Centralized runtime timing and policy fields in firmware config/NVS (`tracking`, `heartbeat`, `alarm`, `ignition hold`, `sleep`, `IMU wake`, OTA power gate, ADC ignition threshold) so product-facing cadence no longer depends on scattered literals.

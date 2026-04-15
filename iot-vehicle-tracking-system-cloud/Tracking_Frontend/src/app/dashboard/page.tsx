@@ -42,7 +42,7 @@ const DashboardPage = () => {
   const dashboardErrorMessage = dashboardErrorQuery
     ? getApiErrorMessage(
         dashboardErrorQuery.error,
-        'Khong the dong bo mot phan du lieu tong quan. Vui long thu lai.',
+        'Không thể đồng bộ một phần dữ liệu tổng quan. Vui lòng thử lại.',
       )
     : null;
 
@@ -56,13 +56,13 @@ const DashboardPage = () => {
 
   return (
     <PageContainer
-      pageTitle="Tong quan"
-      pageDescription="Bang dieu khien theo doi doi xe, hoat dong thiet bi va canh bao quan trong."
+      pageTitle="Tổng quan"
+      pageDescription="Bảng điều khiển theo dõi đội xe, hoạt động thiết bị và cảnh báo quan trọng."
     >
       {dashboardErrorMessage ? (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Khong the dong bo day du du lieu tong quan</AlertTitle>
+          <AlertTitle>Không thể đồng bộ đầy đủ dữ liệu tổng quan</AlertTitle>
           <AlertDescription>
             <p>{dashboardErrorMessage}</p>
             <Button
@@ -75,7 +75,7 @@ const DashboardPage = () => {
                 }
               }}
             >
-              Thu lai tat ca
+              Thử lại tất cả
             </Button>
           </AlertDescription>
         </Alert>

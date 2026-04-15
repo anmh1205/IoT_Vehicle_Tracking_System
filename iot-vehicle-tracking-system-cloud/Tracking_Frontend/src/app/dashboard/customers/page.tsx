@@ -546,14 +546,14 @@ const CustomersPage = () => {
 
   columns.splice(4, 0, {
     id: 'vehicleAssignment',
-    header: 'Phuong tien',
-    meta: { label: 'Phuong tien' },
+    header: 'Phương tiện',
+    meta: { label: 'Phương tiện' },
     cell: ({ row }: any) => {
       const customerId = getCustomerNumericId(row.original?.id);
       const assignment = customerId !== null ? assignmentByCustomer.get(customerId) : undefined;
 
       if (!assignment || assignment.count === 0) {
-        return <span className="text-xs text-muted-foreground">Chua gan phuong tien</span>;
+        return <span className="text-xs text-muted-foreground">Chưa gán phương tiện</span>;
       }
 
       return (
@@ -603,7 +603,7 @@ const CustomersPage = () => {
           isLoading={customers.isLoading}
         />
         <StatCard
-          title="Da gan phuong tien"
+          title="Đã gán phương tiện"
           value={stats.withVehicle}
           icon={<Mail className="h-4 w-4" />}
           isLoading={customers.isLoading || vehicleAssignments.isLoading}

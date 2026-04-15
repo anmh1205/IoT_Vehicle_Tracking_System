@@ -166,7 +166,7 @@ const VehiclesPage = () => {
   const vehiclesErrorMessage = vehicles.isError
     ? getApiErrorMessage(
         vehicles.error,
-        'Khong the tai danh sach phuong tien tu may chu. Vui long thu lai.',
+        'Không thể tải danh sách phương tiện từ máy chủ. Vui lòng thử lại.',
       )
     : null;
 
@@ -198,7 +198,7 @@ const VehiclesPage = () => {
       {vehiclesErrorMessage ? (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Khong the dong bo du lieu phuong tien</AlertTitle>
+          <AlertTitle>Không thể đồng bộ dữ liệu phương tiện</AlertTitle>
           <AlertDescription>
             <p>{vehiclesErrorMessage}</p>
             <Button
@@ -210,7 +210,7 @@ const VehiclesPage = () => {
               }}
               disabled={vehicles.isFetching}
             >
-              Thu lai
+              Thử lại
             </Button>
           </AlertDescription>
         </Alert>

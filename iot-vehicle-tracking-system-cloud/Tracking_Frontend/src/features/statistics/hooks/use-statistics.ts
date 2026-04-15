@@ -28,6 +28,9 @@ interface StatisticsDeviceSnapshot {
   totalRuntimeSeconds: number;
 }
 
+const DEVICE_LIST_LIMIT = 100;
+const DEVICE_LIST_MAX_PAGES = 50;
+
 const defaultFrom = toLocalDateInputValue(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
 const defaultTo = toLocalDateInputValue(new Date());
 
@@ -60,14 +63,26 @@ const toDeviceSnapshot = (raw: any): StatisticsDeviceSnapshot => ({
 });
 
 const loadDeviceSnapshot = async (): Promise<StatisticsDeviceSnapshot[]> => {
-  const payload = await deviceServices.getList({
-    page: 1,
-    limit: 500,
-    sortBy: 'lastSeenAt',
-    sortOrder: 'desc',
-  });
+  const snapshots: StatisticsDeviceSnapshot[] = [];
 
-  return (payload.items ?? []).map(toDeviceSnapshot);
+  for (let page = 1; page <= DEVICE_LIST_MAX_PAGES; page += 1) {
+    const payload = await deviceServices.getList({
+      page,
+      limit: DEVICE_LIST_LIMIT,
+      sortBy: 'lastSeenAt',
+      sortOrder: 'desc',
+    });
+
+    const rows = payload.items ?? [];
+    snapshots.push(...rows.map(toDeviceSnapshot));
+
+    const totalPages = Number(payload.pagination?.totalPages ?? 1);
+    if (rows.length === 0 || page >= totalPages) {
+      break;
+    }
+  }
+
+  return snapshots;
 };
 
 const getSnapshotStatus = (device: StatisticsDeviceSnapshot) =>
