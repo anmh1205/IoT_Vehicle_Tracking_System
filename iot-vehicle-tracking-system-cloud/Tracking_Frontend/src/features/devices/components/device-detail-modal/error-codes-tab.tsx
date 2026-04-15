@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -6,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -16,13 +16,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDateTime } from '@/lib/utils/date/format';
-import { useDeviceDetailModal } from './modal-context';
 import { DeviceDetailEmptyState } from './empty-state';
+import { useDeviceDetailModal } from './modal-context';
+
 const getType = (errorCode: number): 'critical' | 'warning' | 'info' => {
-  if (errorCode >= 500) return 'critical';
-  if (errorCode >= 200) return 'warning';
+  if (errorCode >= 500) {
+    return 'critical';
+  }
+  if (errorCode >= 200) {
+    return 'warning';
+  }
   return 'info';
 };
+
 export const ErrorCodesTab = () => {
   const {
     errorCodes,
@@ -34,22 +40,21 @@ export const ErrorCodesTab = () => {
     onErrorCodesStatusChange,
     onErrorCodesTypeChange,
   } = useDeviceDetailModal();
+
   if (errorCodes.length === 0) {
     return (
       <DeviceDetailEmptyState
         title="Không có mã lỗi"
-        description="Thiết bị chưa ghi nhận mã lỗi trong giai đoạn hiện tại."
+        description="Thiết bị chưa ghi nhận mã lỗi trong giai đoạn đang xem."
       />
     );
   }
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
-        <Select
-          value={errorCodesStatus}
-          onValueChange={(value) => onErrorCodesStatusChange(value as any)}
-        >
-          <SelectTrigger className="w-[160px]">
+        <Select value={errorCodesStatus} onValueChange={(value) => onErrorCodesStatusChange(value as any)}>
+          <SelectTrigger className="w-[170px]">
             <SelectValue placeholder="Trạng thái lỗi" />
           </SelectTrigger>
           <SelectContent>
@@ -59,11 +64,8 @@ export const ErrorCodesTab = () => {
           </SelectContent>
         </Select>
 
-        <Select
-          value={errorCodesType}
-          onValueChange={(value) => onErrorCodesTypeChange(value as any)}
-        >
-          <SelectTrigger className="w-[160px]">
+        <Select value={errorCodesType} onValueChange={(value) => onErrorCodesTypeChange(value as any)}>
+          <SelectTrigger className="w-[170px]">
             <SelectValue placeholder="Mức độ lỗi" />
           </SelectTrigger>
           <SelectContent>
@@ -75,7 +77,7 @@ export const ErrorCodesTab = () => {
         </Select>
       </div>
 
-      <div className="rounded border">
+      <div className="rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -94,9 +96,7 @@ export const ErrorCodesTab = () => {
                 <TableRow key={item.id}>
                   <TableCell>{item.errorCode}</TableCell>
                   <TableCell>{item.errorName}</TableCell>
-                  <TableCell className="max-w-[220px] truncate">
-                    {item.description || '-'}
-                  </TableCell>
+                  <TableCell className="max-w-[260px] truncate">{item.description || '-'}</TableCell>
                   <TableCell>
                     <Badge
                       variant={
@@ -134,12 +134,8 @@ export const ErrorCodesTab = () => {
           >
             Trang trước
           </Button>
-          <span className="text-xs">Trang {errorCodesPage}</span>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onErrorCodesPageChange(errorCodesPage + 1)}
-          >
+          <span className="text-xs text-muted-foreground">Trang {errorCodesPage}</span>
+          <Button size="sm" variant="outline" onClick={() => onErrorCodesPageChange(errorCodesPage + 1)}>
             Trang sau
           </Button>
         </div>

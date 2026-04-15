@@ -1,55 +1,53 @@
 'use client';
-import { useMemo, useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatDateTime, formatDuration } from '@/lib/utils/date/format';
-import { useDeviceDetailModal } from './modal-context';
+import { formatDateTime, formatDuration, formatNumber } from '@/lib/utils/date/format';
+import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-constants';
 import { DeviceDetailEmptyState } from './empty-state';
-import { SessionVibrationChartDialog } from './session-vibration-chart-dialog';
+import { useDeviceDetailModal } from './modal-context';
+
 export const SessionsTab = () => {
-  const { sessions, sessionsHasMore, onSessionsLoadMore, sessionsLoading, vibrationChart } =
-    useDeviceDetailModal();
-  const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
-  const selectedSession = useMemo(
-    () => sessions.find((item) => item.id === selectedSessionId) ?? null,
-    [sessions, selectedSessionId],
-  );
+  const { sessions, sessionsHasMore, onSessionsLoadMore, sessionsLoading } = useDeviceDetailModal();
+
   if (sessions.length === 0 && !sessionsLoading) {
     return (
       <DeviceDetailEmptyState
-        title="Chưa có phiên chạy nào"
-        description="Dữ liệu phiên sẽ hiển thị khi thiết bị bắt đầu hoạt động."
+        title="Chưa có phiên chạy"
+        description="Danh sách phiên sẽ hiển thị sau khi thiết bị bắt đầu và kết thúc ít nhất một chu kỳ chạy."
       />
     );
   }
+
   return (
     <div className="space-y-3">
       {sessions.map((session) => (
         <Card key={session.id}>
           <CardHeader className="pb-2">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="text-sm">Phiên #{session.id}</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => setSelectedSessionId(session.id)}>
-                Xem biểu đồ rung
-              </Button>
+              <Badge variant="outline">
+                {DEVICE_STATUS_LABELS[session.status] ?? session.status}
+              </Badge>
             </div>
           </CardHeader>
-          <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
+          <CardContent className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <p className="text-xs text-muted-foreground">Bắt đầu</p>
-              <p>{formatDateTime(session.serverSessionStart)}</p>
+              <p className="font-medium">{formatDateTime(session.serverSessionStart)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Kết thúc</p>
-              <p>{formatDateTime(session.serverSessionEnd)}</p>
+              <p className="font-medium">{formatDateTime(session.serverSessionEnd)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Thời lượng</p>
-              <p>{formatDuration(session.uptime ?? 0)}</p>
+              <p className="font-medium">{formatDuration(session.uptime ?? 0)}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Rung động trung bình</p>
-              <p>{session.avgVibration?.toFixed(2) ?? '-'}</p>
+              <p className="text-xs text-muted-foreground">Số điểm dữ liệu</p>
+              <p className="font-medium">{formatNumber(session.dataPointsCount)}</p>
             </div>
           </CardContent>
         </Card>
@@ -61,16 +59,9 @@ export const SessionsTab = () => {
           onClick={onSessionsLoadMore}
           disabled={!sessionsHasMore || sessionsLoading}
         >
-          {sessionsLoading ? 'Đang tải...' : sessionsHasMore ? 'Tải thêm' : 'Đã tải hết'}
+          {sessionsLoading ? 'Đang tải...' : sessionsHasMore ? 'Tải thêm phiên' : 'Đã tải hết'}
         </Button>
       </div>
-
-      <SessionVibrationChartDialog
-        open={!!selectedSession}
-        onOpenChange={(open) => !open && setSelectedSessionId(null)}
-        title={selectedSession ? `Biểu đồ rung phiên #${selectedSession.id}` : 'Biểu đồ rung'}
-        data={vibrationChart}
-      />
     </div>
   );
 };

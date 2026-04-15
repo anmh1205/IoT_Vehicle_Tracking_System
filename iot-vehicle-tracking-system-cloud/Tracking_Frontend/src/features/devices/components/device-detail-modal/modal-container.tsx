@@ -3,19 +3,95 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
+import { useRoleAccess } from '@/hooks/use-role-access';
 import { notificationUtils } from '@/lib/notification';
-import type { Device } from '@/features/devices/types';
+import type { Device, DeviceRawFeedRow } from '@/features/devices/types';
 import { useDeleteDevice } from '@/features/devices/hooks/use-delete-device';
+import { useDeviceCommands } from '@/features/devices/hooks/use-device-commands';
 import { useDeviceDetail } from '@/features/devices/hooks/use-device-detail';
 import { useDeviceErrorCodes } from '@/features/devices/hooks/use-device-error-codes';
+import { useDeviceEventLogs } from '@/features/devices/hooks/use-device-event-logs';
+import { useDevicePositionSnapshot } from '@/features/devices/hooks/use-device-position-snapshot';
 import { useDeviceRuntimeChart } from '@/features/devices/hooks/use-device-runtime-chart';
 import { useDeviceSessions } from '@/features/devices/hooks/use-device-sessions';
+import { useDeviceTrackingTelemetry } from '@/features/devices/hooks/use-device-tracking-telemetry';
 import { useDeviceVibrationChart } from '@/features/devices/hooks/use-device-vibration-chart';
 import { useSendCommand } from '@/features/devices/hooks/use-send-command';
 import { useUpdateDevice } from '@/features/devices/hooks/use-update-device';
 import { useUpdateDeviceSettings } from '@/features/devices/hooks/use-update-device-settings';
 import { DeviceDetailModal } from './index';
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
+
+const resolveTimestamp = (value: unknown): string | null => {
+  if (typeof value === 'string' && value.length > 0) {
+    return value;
+  }
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return new Date(value).toISOString();
+  }
+  return null;
+};
+
+const buildRawFeed = (params: {
+  telemetryRows: any[];
+  sessions: any[];
+  errors: any[];
+  commands: any[];
+  eventLogs: any[];
+}): DeviceRawFeedRow[] => {
+  const telemetryRows = params.telemetryRows.map((row) => ({
+    id: `telemetry-${String(row.timestamp ?? Math.random())}`,
+    timestamp: resolveTimestamp(row.timestamp),
+    source: 'telemetry' as const,
+    event: 'telemetry_snapshot',
+    summary: `spd=${row.speed ?? '-'} · lat=${row.latitude ?? '-'} · lon=${row.longitude ?? '-'}`,
+    payload: row,
+  }));
+
+  const sessionRows = params.sessions.map((row) => ({
+    id: `session-${String(row.id ?? Math.random())}`,
+    timestamp: resolveTimestamp(row.serverSessionStart ?? row.server_session_start ?? row.createdAt),
+    source: 'session' as const,
+    event: `session_${String(row.status ?? 'unknown')}`,
+    summary: `uptime=${row.uptime ?? '-'}s · dataPoints=${row.dataPointsCount ?? row.data_points_count ?? 0}`,
+    payload: row,
+  }));
+
+  const errorRows = params.errors.map((row) => ({
+    id: `error-${String(row.id ?? Math.random())}`,
+    timestamp: resolveTimestamp(row.occurredAt ?? row.occurred_at ?? row.createdAt),
+    source: 'error' as const,
+    event: `error_${String(row.errorCode ?? row.error_code ?? 'unknown')}`,
+    summary: String(row.description ?? row.message ?? '-'),
+    payload: row,
+  }));
+
+  const commandRows = params.commands.map((row) => ({
+    id: `command-${String(row.id ?? Math.random())}`,
+    timestamp: resolveTimestamp(row.sentAt ?? row.sent_at ?? row.createdAt),
+    source: 'command' as const,
+    event: `command_${String(row.command ?? 'unknown')}`,
+    summary: `status=${String(row.status ?? 'pending')}`,
+    payload: row,
+  }));
+
+  const eventLogRows = params.eventLogs.map((row, index) => ({
+    id: `event-log-${String(row.id ?? index)}`,
+    timestamp: resolveTimestamp(row.server_timestamp ?? row.created_at ?? row.createdAt),
+    source: 'event-log' as const,
+    event: String(row.event_type ?? row.topic ?? 'event_log'),
+    summary: String(row.message ?? row.payload ?? row.context ?? '-'),
+    payload: row,
+  }));
+
+  return [...telemetryRows, ...sessionRows, ...errorRows, ...commandRows, ...eventLogRows]
+    .sort((left, right) => {
+      const leftTime = left.timestamp ? Date.parse(left.timestamp) : 0;
+      const rightTime = right.timestamp ? Date.parse(right.timestamp) : 0;
+      return rightTime - leftTime;
+    })
+    .slice(0, 200);
+};
 
 export const DeviceDetailModalContainer = ({
   device,
@@ -28,17 +104,27 @@ export const DeviceDetailModalContainer = ({
 }) => {
   const [activeTab, setActiveTab] = useState<DeviceDetailTab>('overview');
   const queryClient = useQueryClient();
+  const access = useRoleAccess();
   const deviceId = device?.id ?? null;
 
   const detail = useDeviceDetail(deviceId);
   const sessions = useDeviceSessions(deviceId, { pageSize: 10 });
   const errors = useDeviceErrorCodes(deviceId, 10);
+  const commands = useDeviceCommands(deviceId, 10);
+  const tracking = useDeviceTrackingTelemetry(deviceId);
   const runtime = useDeviceRuntimeChart(deviceId);
   const vibration = useDeviceVibrationChart(deviceId);
   const updateName = useUpdateDevice();
   const updateSettings = useUpdateDeviceSettings(deviceId);
   const deleteDevice = useDeleteDevice();
   const sendCommand = useSendCommand(deviceId ?? 0);
+
+  const devicePublicId = detail.data?.device?.deviceId ?? device?.deviceId ?? null;
+  const position = useDevicePositionSnapshot(devicePublicId, open);
+  const eventLogs = useDeviceEventLogs(devicePublicId, {
+    enabled: open && access.canViewSystemInfo,
+    limit: 20,
+  });
 
   const refreshCurrent = useCallback(async () => {
     if (!deviceId) {
@@ -51,11 +137,14 @@ export const DeviceDetailModalContainer = ({
       queryClient.invalidateQueries({ queryKey: ['device-detail', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-sessions', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-errors', deviceId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-commands', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-runtime-chart', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-vibration-chart', deviceId] }),
-      queryClient.invalidateQueries({ queryKey: ['device-commands', deviceId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-tracking-telemetry', deviceId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-position-snapshot'] }),
+      queryClient.invalidateQueries({ queryKey: ['device-event-logs', devicePublicId] }),
     ]);
-  }, [deviceId, queryClient]);
+  }, [deviceId, devicePublicId, queryClient]);
 
   useRealtimeSubscription<any>({
     event: 'device:status',
@@ -87,6 +176,18 @@ export const DeviceDetailModalContainer = ({
     },
   });
 
+  const rawFeed = useMemo(
+    () =>
+      buildRawFeed({
+        telemetryRows: tracking.rows,
+        sessions: sessions.sessions,
+        errors: errors.items,
+        commands: commands.items,
+        eventLogs: eventLogs.items,
+      }),
+    [commands.items, errors.items, eventLogs.items, sessions.sessions, tracking.rows],
+  );
+
   const context = useMemo(
     () => ({
       device:
@@ -108,12 +209,30 @@ export const DeviceDetailModalContainer = ({
       onErrorCodesPageChange: errors.onPageChange,
       onErrorCodesStatusChange: errors.onStatusChange,
       onErrorCodesTypeChange: errors.onTypeChange,
+      commands: commands.items,
+      commandsTotal: commands.total,
+      commandsPage: commands.page,
+      commandsTotalPages: commands.totalPages,
+      onCommandsPageChange: commands.onPageChange,
       runtimeChart: runtime.data,
       runtimeRange: runtime.range,
       onRuntimeRangeChange: runtime.onRangeChange,
       vibrationChart: vibration.data,
       vibrationPeriod: vibration.period,
       onVibrationPeriodChange: vibration.onPeriodChange,
+      trackingRows: tracking.rows,
+      trackingRowsAscending: tracking.rowsAscending,
+      trackingPeriod: tracking.period,
+      onTrackingPeriodChange: tracking.onPeriodChange,
+      routePoints: tracking.routePoints,
+      distanceKm: tracking.distanceKm,
+      averageSpeed: tracking.averageSpeed,
+      maxSpeed: tracking.maxSpeed,
+      latestTrackingRow: tracking.latestRow,
+      positionSnapshot: position.position,
+      eventLogs: eventLogs.items,
+      eventLogsTotal: eventLogs.total,
+      rawFeed,
       activeTab,
       onTabChange: setActiveTab,
       onUpdateNameId: async (data: Record<string, unknown>) => {
@@ -140,6 +259,11 @@ export const DeviceDetailModalContainer = ({
     }),
     [
       activeTab,
+      commands.items,
+      commands.onPageChange,
+      commands.page,
+      commands.total,
+      commands.totalPages,
       deleteDevice,
       detail.data?.device,
       detail.data?.runtime,
@@ -155,7 +279,11 @@ export const DeviceDetailModalContainer = ({
       errors.status,
       errors.total,
       errors.type,
+      eventLogs.items,
+      eventLogs.total,
       onOpenChange,
+      position.position,
+      rawFeed,
       refreshCurrent,
       runtime.data,
       runtime.onRangeChange,
@@ -166,6 +294,15 @@ export const DeviceDetailModalContainer = ({
       sessions.isLoading,
       sessions.onLoadMore,
       sessions.sessions,
+      tracking.averageSpeed,
+      tracking.distanceKm,
+      tracking.latestRow,
+      tracking.maxSpeed,
+      tracking.onPeriodChange,
+      tracking.period,
+      tracking.routePoints,
+      tracking.rows,
+      tracking.rowsAscending,
       updateName,
       updateSettings,
       vibration.data,

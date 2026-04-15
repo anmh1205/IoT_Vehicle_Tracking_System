@@ -3,12 +3,17 @@
 import { createContext, useContext } from 'react';
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
 import type { RuntimeRange } from '@/features/devices/hooks/use-device-runtime-chart';
+import type { TrackingTelemetryPeriod } from '@/features/devices/hooks/use-device-tracking-telemetry';
 import type { VibrationPeriod } from '@/features/devices/hooks/use-device-vibration-chart';
 import type {
   Device,
+  DeviceCommand,
   DeviceErrorCode,
+  DevicePositionSnapshot,
+  DeviceRawFeedRow,
   DeviceRuntimeBucket,
   DeviceSession,
+  DeviceTelemetryRow,
   DeviceVibrationPoint,
 } from '@/features/devices/types';
 
@@ -35,12 +40,30 @@ export interface DeviceDetailModalContextValue {
   onErrorCodesPageChange: (page: number) => void;
   onErrorCodesStatusChange: (status: 'all' | 'active' | 'resolved') => void;
   onErrorCodesTypeChange: (type: 'all' | 'critical' | 'warning' | 'info') => void;
+  commands: DeviceCommand[];
+  commandsTotal: number;
+  commandsPage: number;
+  commandsTotalPages: number;
+  onCommandsPageChange: (page: number) => void;
   runtimeChart: DeviceRuntimeBucket[];
   runtimeRange: RuntimeRange;
   onRuntimeRangeChange: (range: RuntimeRange) => void;
   vibrationChart: DeviceVibrationPoint[];
   vibrationPeriod: VibrationPeriod;
   onVibrationPeriodChange: (period: VibrationPeriod) => void;
+  trackingRows: DeviceTelemetryRow[];
+  trackingRowsAscending: DeviceTelemetryRow[];
+  trackingPeriod: TrackingTelemetryPeriod;
+  onTrackingPeriodChange: (period: TrackingTelemetryPeriod) => void;
+  routePoints: [number, number][];
+  distanceKm: number;
+  averageSpeed: number;
+  maxSpeed: number;
+  latestTrackingRow: DeviceTelemetryRow | null;
+  positionSnapshot: DevicePositionSnapshot | null;
+  eventLogs: Record<string, unknown>[];
+  eventLogsTotal: number;
+  rawFeed: DeviceRawFeedRow[];
   activeTab: DeviceDetailTab;
   onTabChange: (tab: DeviceDetailTab) => void;
   onUpdateNameId: (data: Record<string, unknown>) => Promise<void>;

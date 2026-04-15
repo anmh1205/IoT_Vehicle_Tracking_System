@@ -1,4 +1,4 @@
-export const DEVICE_STATUS_LABELS: Record<string, string> = {
+﻿export const DEVICE_STATUS_LABELS: Record<string, string> = {
   running: 'Đang chạy',
   online: 'Trực tuyến',
   stopped: 'Tạm dừng',
@@ -19,10 +19,11 @@ export const DEVICE_STATUS_VARIANTS: Record<
 
 export const DEVICE_DETAIL_TABS = [
   'overview',
+  'route',
   'sessions',
   'errors',
-  'runtime',
-  'vibration',
+  'commands',
+  'raw',
   'settings',
 ] as const;
 

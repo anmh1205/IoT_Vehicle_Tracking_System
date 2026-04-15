@@ -101,7 +101,7 @@ export const SettingsTab = () => {
                   name="vibrationThreshold"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Ngưỡng rung</FormLabel>
+                      <FormLabel>Ngưỡng rung cảnh báo</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -130,7 +130,7 @@ export const SettingsTab = () => {
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Xóa thiết bị sẽ loại nó khỏi bảng điều khiển và dừng các luồng thao tác trong giao diện.
+            Xóa thiết bị sẽ loại khỏi bảng điều khiển và dừng toàn bộ thao tác quản trị liên quan.
           </p>
           <Button
             variant="destructive"

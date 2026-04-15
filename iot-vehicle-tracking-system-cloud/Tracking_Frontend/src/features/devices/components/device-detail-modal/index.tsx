@@ -4,7 +4,13 @@ import { useState } from 'react';
 import { Download, MoreVertical, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,19 +29,39 @@ import { ExportModal } from '@/features/devices/components/export-modal';
 import { DeviceDetailSkeleton } from '@/features/devices/components/device-skeletons';
 import { useRoleAccess } from '@/hooks/use-role-access';
 import { formatRelative } from '@/lib/utils/date/format';
-import { DeviceDetailModalProvider, useDeviceDetailModal } from './modal-context';
+import { CommandsTab } from './commands-tab';
 import { ErrorCodesTab } from './error-codes-tab';
+import { DeviceDetailModalProvider, useDeviceDetailModal } from './modal-context';
 import { OverviewTab } from './overview-tab';
-import { RuntimeTab } from './runtime-tab';
+import { RawDataTab } from './raw-data-tab';
+import { RouteTab } from './route-tab';
 import { SessionsTab } from './sessions-tab';
 import { SettingsTab } from './settings-tab';
-import { VibrationTab } from './vibration-tab';
+
+const toCoordinateLabel = (latitude: number | null | undefined, longitude: number | null | undefined) =>
+  latitude !== null &&
+  latitude !== undefined &&
+  longitude !== null &&
+  longitude !== undefined &&
+  Number.isFinite(latitude) &&
+  Number.isFinite(longitude)
+    ? `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`
+    : 'Chưa có vị trí';
 
 const DeviceDetailModalContent = () => {
   const [exportOpen, setExportOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { device, loading, error, activeTab, onTabChange, onRefresh, openExportModal } =
-    useDeviceDetailModal();
+  const {
+    device,
+    loading,
+    error,
+    activeTab,
+    onTabChange,
+    onRefresh,
+    openExportModal,
+    latestTrackingRow,
+    positionSnapshot,
+  } = useDeviceDetailModal();
   const access = useRoleAccess();
 
   if (loading) {
@@ -46,22 +72,29 @@ const DeviceDetailModalContent = () => {
     return <ErrorBox description={error.message} />;
   }
 
-  const vibrationTabVisible = access.canViewSystemInfo;
   const settingsTabVisible = access.canEditDevice;
   const metadata = [
     { label: 'IMEI', value: device?.imei ?? '-' },
     { label: 'Firmware', value: device?.firmwareVersion ?? '-' },
     { label: 'Chu kỳ gửi', value: `${device?.requestInterval ?? 60}s` },
+    {
+      label: 'Tọa độ',
+      value: toCoordinateLabel(
+        latestTrackingRow?.latitude ?? positionSnapshot?.latitude ?? device?.latitude,
+        latestTrackingRow?.longitude ?? positionSnapshot?.longitude ?? device?.longitude,
+      ),
+    },
   ];
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <DialogHeader className="space-y-3 border-b bg-background px-6 py-5">
+        <DialogDescription className="sr-only">
+          Bảng chi tiết thiết bị tracking gồm tổng quan, bản đồ lộ trình, phiên chạy, lỗi, lệnh và dữ liệu thô.
+        </DialogDescription>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
-            <DialogTitle className="text-xl">
-              {device?.deviceName ?? 'Chi tiết thiết bị'}
-            </DialogTitle>
+            <DialogTitle className="text-xl">{device?.deviceName ?? 'Chi tiết thiết bị'}</DialogTitle>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span>{device?.deviceId ?? '-'}</span>
               <Badge
@@ -114,7 +147,7 @@ const DeviceDetailModalContent = () => {
           </DropdownMenu>
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           {metadata.map((item) => (
             <div key={item.label} className="rounded-lg border bg-muted/30 px-3 py-2">
               <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -140,6 +173,12 @@ const DeviceDetailModalContent = () => {
               Tổng quan
             </TabsTrigger>
             <TabsTrigger
+              value="route"
+              className="h-9 flex-none rounded-full border bg-muted/60 px-3 text-xs data-[state=active]:border-primary/30 data-[state=active]:bg-primary/10 sm:text-sm"
+            >
+              Lộ trình
+            </TabsTrigger>
+            <TabsTrigger
               value="sessions"
               className="h-9 flex-none rounded-full border bg-muted/60 px-3 text-xs data-[state=active]:border-primary/30 data-[state=active]:bg-primary/10 sm:text-sm"
             >
@@ -152,19 +191,17 @@ const DeviceDetailModalContent = () => {
               Mã lỗi
             </TabsTrigger>
             <TabsTrigger
-              value="runtime"
+              value="commands"
               className="h-9 flex-none rounded-full border bg-muted/60 px-3 text-xs data-[state=active]:border-primary/30 data-[state=active]:bg-primary/10 sm:text-sm"
             >
-              Runtime
+              Lệnh
             </TabsTrigger>
-            {vibrationTabVisible ? (
-              <TabsTrigger
-                value="vibration"
-                className="h-9 flex-none rounded-full border bg-muted/60 px-3 text-xs data-[state=active]:border-primary/30 data-[state=active]:bg-primary/10 sm:text-sm"
-              >
-                Biểu đồ rung
-              </TabsTrigger>
-            ) : null}
+            <TabsTrigger
+              value="raw"
+              className="h-9 flex-none rounded-full border bg-muted/60 px-3 text-xs data-[state=active]:border-primary/30 data-[state=active]:bg-primary/10 sm:text-sm"
+            >
+              Dữ liệu thô
+            </TabsTrigger>
             {settingsTabVisible ? (
               <TabsTrigger
                 value="settings"
@@ -179,20 +216,21 @@ const DeviceDetailModalContent = () => {
         <TabsContent value="overview" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
           <OverviewTab />
         </TabsContent>
+        <TabsContent value="route" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
+          <RouteTab />
+        </TabsContent>
         <TabsContent value="sessions" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
           <SessionsTab />
         </TabsContent>
         <TabsContent value="errors" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
           <ErrorCodesTab />
         </TabsContent>
-        <TabsContent value="runtime" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
-          <RuntimeTab />
+        <TabsContent value="commands" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
+          <CommandsTab />
         </TabsContent>
-        {vibrationTabVisible ? (
-          <TabsContent value="vibration" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
-            <VibrationTab />
-          </TabsContent>
-        ) : null}
+        <TabsContent value="raw" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
+          <RawDataTab />
+        </TabsContent>
         {settingsTabVisible ? (
           <TabsContent value="settings" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
             <SettingsTab />
@@ -216,7 +254,7 @@ export const DeviceDetailModal = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[92dvh] w-[min(96vw,1200px)] max-w-none flex-col overflow-hidden p-0 sm:rounded-2xl">
+      <DialogContent className="flex h-[94dvh] w-[min(99vw,1480px)] max-w-none flex-col overflow-hidden p-0 sm:h-[92dvh] sm:w-[min(97vw,1440px)] sm:max-w-none sm:rounded-2xl">
         <DeviceDetailModalProvider value={context}>
           <DeviceDetailModalContent />
         </DeviceDetailModalProvider>
