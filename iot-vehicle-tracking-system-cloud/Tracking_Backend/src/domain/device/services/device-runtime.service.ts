@@ -24,11 +24,21 @@ export const getRuntimeStats = async (deviceId: string): Promise<RuntimeStats> =
   }
 
   const stats = await sessionRepo.getSessionStats(deviceId);
-  const recentSessions = await sessionRepo.findByDeviceId(deviceId, 1);
+  const [currentSession, recentSessions] = await Promise.all([
+    sessionRepo.findCurrentSession(deviceId),
+    sessionRepo.findByDeviceId(deviceId, 1),
+  ]);
   const lastSession = recentSessions.length > 0 ? sanitizeSession(recentSessions[0]) : null;
+  const activeRuntimeSeconds =
+    currentSession?.server_session_start != null
+      ? Math.max(
+          Math.floor((Date.now() - currentSession.server_session_start.getTime()) / 1000),
+          currentSession.uptime ?? 0,
+        )
+      : 0;
 
   return {
-    totalRuntime: device.total_runtime_seconds,
+    totalRuntime: Math.max(device.total_runtime_seconds ?? 0, 0) + activeRuntimeSeconds,
     totalSessions: stats.totalSessions,
     avgSessionDuration: stats.avgUptime,
     avgVibration: stats.avgVibration,

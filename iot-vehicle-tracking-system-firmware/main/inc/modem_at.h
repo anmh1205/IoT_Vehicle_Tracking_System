@@ -56,6 +56,28 @@ void modem_at_deinit(void);
 esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32_t timeout_ms);
 
 /**
+ * @brief Send AT command and collect raw UART bytes until idle timeout.
+ *
+ * Use this for commands that may stream binary payloads where `OK/ERROR`
+ * markers can appear before the full payload transfer completes.
+ *
+ * @param cmd AT command string including CR/LF terminator if needed.
+ * @param response Output buffer for raw bytes.
+ * @param resp_len Output buffer capacity.
+ * @param out_len Optional output length of collected bytes.
+ * @param timeout_ms Overall timeout for the whole command transaction.
+ * @param idle_timeout_ms Stop collecting when no new bytes arrive within this window.
+ *
+ * @return ESP_OK when bytes were collected, otherwise timeout/state errors.
+ */
+esp_err_t modem_at_send_collect(const char *cmd,
+                                uint8_t *response,
+                                size_t resp_len,
+                                size_t *out_len,
+                                uint32_t timeout_ms,
+                                uint32_t idle_timeout_ms);
+
+/**
  * @brief Send AT command and assert expected substring appears in response.
  *
  * @param cmd AT command string.

@@ -1,13 +1,13 @@
 stateDiagram-v2
-    direction LR
+    direction TB
     [*] --> Sample
     Sample --> IgnCheck
-    IgnCheck --> Main: Bật IGN
-    IgnCheck --> VoltCheck: Tắt IGN
-    VoltCheck --> Backup: U_batt thấp
-    VoltCheck --> Recover: U_batt đủ
-    Recover --> Main: Đạt ngưỡng bật lại
-    Recover --> Hold: Chưa đổi ngưỡng
+    IgnCheck --> Main: Bat IGN
+    IgnCheck --> VoltCheck: Tat IGN
+    VoltCheck --> Backup: U_batt thap
+    VoltCheck --> Recover: U_batt du
+    Recover --> Main: Dat nguong bat lai
+    Recover --> Hold: Chua doi nguong
     Main --> Sample
     Backup --> Sample
     Hold --> Sample

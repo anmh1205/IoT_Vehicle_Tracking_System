@@ -128,7 +128,7 @@ const buildLogsQuery = (filters: LogsFilterState) => {
   if (filters.to) {
     clauses.push(`to:${filters.to}`);
   }
-  return clauses.join(' ');
+  return clauses.join(' ').trim() || '*';
 };
 export const useSystemLogs = (filters: LogsFilterState) => {
   return useQuery({

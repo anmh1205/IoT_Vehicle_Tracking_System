@@ -25,6 +25,7 @@
 #include "modem_gnss.h"
 #include "modem_lte.h"
 #include "mqtt_client.h"
+#include "nvs_config.h"
 #include "obd.h"
 #include "offline_queue.h"
 #include "pin_map.h"
@@ -43,8 +44,13 @@
 #define OBD_MODE_CURRENT_DATA 0x01
 #define TRACKER_BLE_RETRY_MIN_BACKOFF_MS 5000ULL
 #define TRACKER_BLE_RETRY_MAX_BACKOFF_MS 120000ULL
+#define TRACKER_BLE_PARKED_RETRY_MAX_BACKOFF_MS 30000ULL
 #define TRACKER_NETWORK_RETRY_MIN_BACKOFF_MS 5000ULL
 #define TRACKER_NETWORK_RETRY_MAX_BACKOFF_MS 90000ULL
+#define TRACKER_IMU_BOOTSTRAP_RETRY_MIN_BACKOFF_MS 5000ULL
+#define TRACKER_IMU_BOOTSTRAP_RETRY_MAX_BACKOFF_MS 60000ULL
+#define TRACKER_PARKED_WAKE_INTERVAL_CAP_S 120U
+#define TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS 30000ULL
 #define TRACKER_OBD_DEBUG_LOG_INTERVAL_MS 1000ULL
 #define TRACKER_OBD_POLL_INTERVAL_MS 1200ULL
 #define TRACKER_OBD_PID_TIMEOUT_MS 700U
@@ -66,6 +72,7 @@
 #define TRACKER_SLEEP_REJECT_LOG_INTERVAL_MS 10000ULL
 #define TRACKER_HW_DIAG_LOG_INTERVAL_MS 15000ULL
 #define TRACKER_PENDING_ACTION_DRAIN_LIMIT 4U
+#define TRACKER_MODEM_POWEROFF_SETTLE_MS 250ULL
 
 /* RTC-retained context survives deep sleep and helps OTA/session continuity. */
 RTC_DATA_ATTR rtc_context_t g_rtc_context = {
@@ -127,18 +134,30 @@ static bool s_startup_system_check_log_once = false;
 static bool s_user_led_initialized = false;
 static uint64_t s_user_led_cycle_started_ms = 0;
 static uint64_t s_last_hw_diag_log_ms = 0;
+static uint64_t s_heartbeat_started_ms = 0;
+static bool s_heartbeat_raw_published = false;
 static char s_current_version[TRACKER_TARGET_VERSION_MAX_LEN] = CONFIG_APP_PROJECT_VER;
 static uint32_t s_metadata_seq_no = 0;
 static char s_boot_id[TRACKER_BOOT_ID_LEN] = {0};
 static bool s_obd_fail_alert_emitted = false;
 static int s_last_obd_fail_alert_code = 0;
 static uint64_t s_last_obd_fail_alert_ms = 0;
-static bool s_field_validation_ble_skip_logged = false;
+static firmware_status_t s_deferred_firmware_report = {0};
+static bool s_deferred_firmware_report_pending = false;
+static bool s_ble_retry_last_ignition = false;
 
 static const retry_policy_t s_ble_retry_policy = {
     .mode = RETRY_MODE_EXPONENTIAL,
     .base_delay_ms = (uint32_t)TRACKER_BLE_RETRY_MIN_BACKOFF_MS,
     .max_delay_ms = (uint32_t)TRACKER_BLE_RETRY_MAX_BACKOFF_MS,
+    .max_attempts = 0,
+    .jitter_ms = 0,
+};
+
+static const retry_policy_t s_ble_retry_parked_policy = {
+    .mode = RETRY_MODE_EXPONENTIAL,
+    .base_delay_ms = (uint32_t)TRACKER_BLE_RETRY_MIN_BACKOFF_MS,
+    .max_delay_ms = (uint32_t)TRACKER_BLE_PARKED_RETRY_MAX_BACKOFF_MS,
     .max_attempts = 0,
     .jitter_ms = 0,
 };
@@ -168,9 +187,9 @@ static const retry_policy_t s_rtc_read_retry_policy = {
 };
 
 static const retry_policy_t s_imu_bootstrap_retry_policy = {
-    .mode = RETRY_MODE_FIXED,
-    .base_delay_ms = 5000,
-    .max_delay_ms = 5000,
+    .mode = RETRY_MODE_EXPONENTIAL,
+    .base_delay_ms = (uint32_t)TRACKER_IMU_BOOTSTRAP_RETRY_MIN_BACKOFF_MS,
+    .max_delay_ms = (uint32_t)TRACKER_IMU_BOOTSTRAP_RETRY_MAX_BACKOFF_MS,
     .max_attempts = 0,
     .jitter_ms = 0,
 };
@@ -311,6 +330,14 @@ static uint64_t state_machine_alarm_timeout_ms(void) {
 
 static uint64_t state_machine_ignition_off_hold_ms(void) {
     return (uint64_t)s_config.ignition_off_hold_ms;
+}
+
+static uint16_t state_machine_parked_wake_interval_s(void) {
+    uint16_t configured = s_config.heartbeat_interval_s;
+    if (configured > TRACKER_PARKED_WAKE_INTERVAL_CAP_S) {
+        return TRACKER_PARKED_WAKE_INTERVAL_CAP_S;
+    }
+    return configured;
 }
 
 static bool state_machine_imu_runtime_enabled(void) {
@@ -560,7 +587,8 @@ static void state_machine_bootstrap_imu(void) {
         return;
     }
 
-    if (imu_init() == ESP_OK) {
+    esp_err_t imu_err = imu_init();
+    if (imu_err == ESP_OK) {
         s_imu_available = true;
         retry_state_reset(&s_imu_bootstrap_retry);
         esp_err_t motion_cfg_err = imu_configure_motion_interrupt(120, 200);
@@ -578,10 +606,10 @@ static void state_machine_bootstrap_imu(void) {
     (void)retry_state_schedule(&s_imu_bootstrap_retry,
                                &s_imu_bootstrap_retry_policy,
                                now_ms,
-                               ESP_FAIL);
+                               imu_err);
     ESP_LOGW(TAG,
              "retry step=imu_init err=%s attempt=%lu next_delay_ms=%lu",
-             esp_err_to_name(ESP_FAIL),
+             esp_err_to_name(imu_err),
              (unsigned long)s_imu_bootstrap_retry.attempts,
              (unsigned long)delay_ms);
 }
@@ -874,6 +902,20 @@ static void state_machine_publish_event(const char *event_type, int code, const 
     cJSON_free(payload);
 }
 
+static void state_machine_defer_firmware_report(const firmware_status_t *firmware) {
+    if (firmware == NULL) {
+        return;
+    }
+
+    s_deferred_firmware_report = *firmware;
+    s_deferred_firmware_report_pending = true;
+    ESP_LOGI(TAG,
+             "defer firmware status=%s progress=%u job=%s until mqtt connected",
+             firmware->status,
+             (unsigned)firmware->progress,
+             firmware->job_id);
+}
+
 /**
  * @brief Publish firmware payload object to firmware topic.
  *
@@ -911,6 +953,18 @@ static void state_machine_publish_firmware_payload(const firmware_status_t *firm
         return;
     }
 
+    if (tracker_mqtt_is_connected()) {
+        esp_err_t live_err = tracker_mqtt_publish_firmware(payload);
+        if (live_err == ESP_OK) {
+            cJSON_free(payload);
+            return;
+        }
+
+        ESP_LOGW(TAG,
+                 "mqtt firmware live publish failed err=%s fallback=offline_queue",
+                 esp_err_to_name(live_err));
+    }
+
     (void)offline_queue_enqueue(OFFLINE_RECORD_FIRMWARE,
                                 payload,
                                 s_telemetry.gnss.fix_valid,
@@ -918,6 +972,84 @@ static void state_machine_publish_firmware_payload(const firmware_status_t *firm
                                 s_time_trusted,
                                 s_event_timestamp_ms);
     cJSON_free(payload);
+}
+
+static void state_machine_try_flush_deferred_firmware_report(void) {
+    if (!s_deferred_firmware_report_pending || !tracker_mqtt_is_connected() || s_ota_in_progress) {
+        return;
+    }
+
+    state_machine_publish_firmware_payload(&s_deferred_firmware_report);
+    s_deferred_firmware_report_pending = false;
+}
+
+static void state_machine_persist_ota_context(void) {
+    ota_persist_context_t persisted = {0};
+    persisted.pending_confirm = g_rtc_context.ota_pending_confirm;
+    persisted.confirm_timeout_sec = g_rtc_context.ota_confirm_timeout_sec;
+    persisted.confirm_deadline_ms = g_rtc_context.ota_confirm_deadline_ms;
+    util_copy_string(persisted.job_id, sizeof(persisted.job_id), g_rtc_context.ota_job_id);
+    util_copy_string(persisted.target_version,
+                     sizeof(persisted.target_version),
+                     g_rtc_context.ota_target_version);
+    util_copy_string(persisted.previous_version,
+                     sizeof(persisted.previous_version),
+                     g_rtc_context.ota_previous_version);
+    util_copy_string(persisted.partition, sizeof(persisted.partition), g_rtc_context.ota_partition);
+
+    esp_err_t err = nvs_config_save_ota_context(&persisted);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "persist ota context failed: %s", esp_err_to_name(err));
+    }
+}
+
+static void state_machine_clear_persisted_ota_context(void) {
+    esp_err_t err = nvs_config_clear_ota_context();
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "clear ota context failed: %s", esp_err_to_name(err));
+    }
+}
+
+static void state_machine_restore_ota_context_from_nvs(void) {
+    if (g_rtc_context.ota_pending_confirm) {
+        return;
+    }
+
+    ota_persist_context_t persisted = {0};
+    bool found = false;
+    esp_err_t err = nvs_config_load_ota_context(&persisted, &found);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "load ota context failed: %s", esp_err_to_name(err));
+        return;
+    }
+    if (!found) {
+        return;
+    }
+    if (!persisted.pending_confirm || util_string_empty(persisted.job_id) ||
+        util_string_empty(persisted.target_version)) {
+        state_machine_clear_persisted_ota_context();
+        return;
+    }
+
+    g_rtc_context.ota_pending_confirm = true;
+    g_rtc_context.ota_confirm_timeout_sec = persisted.confirm_timeout_sec;
+    g_rtc_context.ota_confirm_deadline_ms = persisted.confirm_deadline_ms;
+    util_copy_string(g_rtc_context.ota_job_id, sizeof(g_rtc_context.ota_job_id), persisted.job_id);
+    util_copy_string(g_rtc_context.ota_target_version,
+                     sizeof(g_rtc_context.ota_target_version),
+                     persisted.target_version);
+    util_copy_string(g_rtc_context.ota_previous_version,
+                     sizeof(g_rtc_context.ota_previous_version),
+                     persisted.previous_version);
+    util_copy_string(g_rtc_context.ota_partition,
+                     sizeof(g_rtc_context.ota_partition),
+                     persisted.partition);
+
+    ESP_LOGI(TAG,
+             "restored ota context from nvs job=%s target=%s pending=%d",
+             g_rtc_context.ota_job_id,
+             g_rtc_context.ota_target_version,
+             g_rtc_context.ota_pending_confirm ? 1 : 0);
 }
 
 static void state_machine_publish_obd_failure_event_if_needed(uint64_t now_ms,
@@ -935,6 +1067,34 @@ static void state_machine_publish_obd_failure_event_if_needed(uint64_t now_ms,
 }
 
 /**
+ * @brief Build canonical firmware status struct from OTA state inputs.
+ */
+static void state_machine_fill_firmware_status(firmware_status_t *firmware,
+                                               const char *status,
+                                               uint8_t progress,
+                                               const char *version,
+                                               const char *job_id,
+                                               const char *partition,
+                                               const char *error) {
+    if (firmware == NULL) {
+        return;
+    }
+
+    memset(firmware, 0, sizeof(*firmware));
+    util_copy_string(firmware->status, sizeof(firmware->status), status);
+    firmware->progress = progress;
+    util_copy_string(firmware->job_id, sizeof(firmware->job_id), job_id);
+    util_copy_string(firmware->target_version, sizeof(firmware->target_version), version);
+    util_copy_string(firmware->current_version, sizeof(firmware->current_version), s_current_version);
+    if (!util_string_empty(partition)) {
+        util_copy_string(firmware->partition, sizeof(firmware->partition), partition);
+    }
+    if (!util_string_empty(error)) {
+        util_copy_string(firmware->error, sizeof(firmware->error), error);
+    }
+}
+
+/**
  * @brief Build firmware status payload fields then publish.
  */
 static void state_machine_publish_firmware_status(const char *status,
@@ -944,19 +1104,44 @@ static void state_machine_publish_firmware_status(const char *status,
                                                   const char *partition,
                                                   const char *error) {
     firmware_status_t firmware = {0};
-    util_copy_string(firmware.status, sizeof(firmware.status), status);
-    firmware.progress = progress;
-    util_copy_string(firmware.job_id, sizeof(firmware.job_id), job_id);
-    util_copy_string(firmware.target_version, sizeof(firmware.target_version), version);
-    util_copy_string(firmware.current_version, sizeof(firmware.current_version), s_current_version);
-    if (!util_string_empty(partition)) {
-        util_copy_string(firmware.partition, sizeof(firmware.partition), partition);
-    }
-    if (!util_string_empty(error)) {
-        util_copy_string(firmware.error, sizeof(firmware.error), error);
+    state_machine_fill_firmware_status(&firmware, status, progress, version, job_id, partition, error);
+    state_machine_publish_firmware_payload(&firmware);
+}
+
+static void state_machine_stage_firmware_status_for_online_publish(const char *status,
+                                                                   uint8_t progress,
+                                                                   const char *version,
+                                                                   const char *job_id,
+                                                                   const char *partition,
+                                                                   const char *error) {
+    firmware_status_t firmware = {0};
+    state_machine_fill_firmware_status(&firmware, status, progress, version, job_id, partition, error);
+    state_machine_defer_firmware_report(&firmware);
+}
+
+/**
+ * @brief Publish firmware status immediately when online, otherwise defer once.
+ *
+ * Keeping this policy in one place avoids duplicated connected/offline branching
+ * across OTA confirm and rollback paths.
+ */
+static void state_machine_publish_or_stage_firmware_status(const char *status,
+                                                           uint8_t progress,
+                                                           const char *version,
+                                                           const char *job_id,
+                                                           const char *partition,
+                                                           const char *error) {
+    if (tracker_mqtt_is_connected()) {
+        state_machine_publish_firmware_status(status, progress, version, job_id, partition, error);
+        return;
     }
 
-    state_machine_publish_firmware_payload(&firmware);
+    state_machine_stage_firmware_status_for_online_publish(status,
+                                                           progress,
+                                                           version,
+                                                           job_id,
+                                                           partition,
+                                                           error);
 }
 
 static void state_machine_ota_status_callback(const firmware_status_t *firmware, void *user_ctx) {
@@ -967,9 +1152,14 @@ static void state_machine_ota_status_callback(const firmware_status_t *firmware,
 /**
  * @brief Attempt BLE OBD connection with retry and ELM327 initialization.
  */
-static void state_machine_schedule_ble_retry(uint64_t now_ms, const char *reason) {
-    uint32_t delay_ms = retry_state_current_delay_ms(&s_ble_retry, &s_ble_retry_policy, now_ms);
-    esp_err_t sched_err = retry_state_schedule(&s_ble_retry, &s_ble_retry_policy, now_ms, ESP_FAIL);
+static const retry_policy_t *state_machine_current_ble_retry_policy(void) {
+    return s_telemetry.ignition ? &s_ble_retry_policy : &s_ble_retry_parked_policy;
+}
+
+static void state_machine_schedule_ble_retry(uint64_t now_ms, const char *reason, const retry_policy_t *policy) {
+    const retry_policy_t *active_policy = policy != NULL ? policy : &s_ble_retry_policy;
+    uint32_t delay_ms = retry_state_current_delay_ms(&s_ble_retry, active_policy, now_ms);
+    esp_err_t sched_err = retry_state_schedule(&s_ble_retry, active_policy, now_ms, ESP_FAIL);
     if (sched_err != ESP_OK) {
         return;
     }
@@ -985,20 +1175,7 @@ static void state_machine_schedule_ble_retry(uint64_t now_ms, const char *reason
 }
 
 static void state_machine_try_connect_ble(void) {
-#if CONFIG_TRACKER_FIELD_VALIDATION_MODE
-    if (!s_field_validation_ble_skip_logged) {
-        ESP_LOGW(TAG, "Field validation override: BLE OBD connect loop disabled for OTA stability");
-        s_field_validation_ble_skip_logged = true;
-    }
-    if (s_ble_ctx != NULL) {
-        ble_obd_disconnect(s_ble_ctx);
-        s_ble_ctx = NULL;
-    }
-    retry_state_reset(&s_ble_retry);
-    return;
-#endif
-    if (!s_telemetry.ignition || !tracker_mqtt_is_connected() || s_ota_in_progress ||
-        g_rtc_context.ota_pending_confirm) {
+    if (!tracker_mqtt_is_connected() || s_ota_in_progress || g_rtc_context.ota_pending_confirm) {
         return;
     }
 
@@ -1007,13 +1184,26 @@ static void state_machine_try_connect_ble(void) {
     }
 
     uint64_t now_ms = util_uptime_ms();
+    const retry_policy_t *ble_retry_policy = state_machine_current_ble_retry_policy();
+
+    if (s_telemetry.ignition && !s_ble_retry_last_ignition) {
+        /*
+         * Moving from parked to driving should trigger an immediate retry window
+         * instead of waiting on parked-mode backoff state.
+         */
+        retry_state_reset(&s_ble_retry);
+    }
+    s_ble_retry_last_ignition = s_telemetry.ignition;
+
     if (!retry_state_can_run(&s_ble_retry, now_ms)) {
         return;
     }
     if ((s_ble_retry.attempts % 5U) == 0U) {
+        const char *mode = s_telemetry.ignition ? "driving" : "parked";
         ESP_LOGI(TAG,
-                 "BLE connect attempt=%lu timeout_ms=%u",
+                 "BLE connect attempt=%lu mode=%s timeout_ms=%u",
                  (unsigned long)(s_ble_retry.attempts + 1U),
+                 mode,
                  (unsigned int)TRACKER_BLE_CONNECT_TIMEOUT_MS);
     }
 
@@ -1051,7 +1241,9 @@ static void state_machine_try_connect_ble(void) {
             "obd_elm327_init_failed");
         ble_obd_disconnect(s_ble_ctx);
         s_ble_ctx = NULL;
-        state_machine_schedule_ble_retry(now_ms, "connect_or_ble_stack_or_elm327_init_failed");
+        state_machine_schedule_ble_retry(now_ms,
+                                         "connect_or_ble_stack_or_elm327_init_failed",
+                                         ble_retry_policy);
         return;
     }
 
@@ -1059,7 +1251,9 @@ static void state_machine_try_connect_ble(void) {
         now_ms,
         TRACKER_EVENT_CODE_OBD_CONNECT_FAILED,
         "obd_connect_failed");
-    state_machine_schedule_ble_retry(now_ms, "connect_or_ble_stack_or_elm327_init_failed");
+    state_machine_schedule_ble_retry(now_ms,
+                                     "connect_or_ble_stack_or_elm327_init_failed",
+                                     ble_retry_policy);
 }
 
 /**
@@ -1139,6 +1333,7 @@ static void state_machine_try_connect_network(void) {
     }
 #endif
 
+    state_machine_try_flush_deferred_firmware_report();
     retry_state_reset(&s_network_retry);
 }
 
@@ -1168,43 +1363,46 @@ static void state_machine_try_confirm_running_firmware(void) {
         s_event_timestamp_ms > g_rtc_context.ota_confirm_deadline_ms) {
         g_rtc_context.ota_pending_confirm = false;
         g_rtc_context.ota_confirm_deadline_ms = 0;
-        state_machine_publish_firmware_status("failed",
-                                              100,
-                                              g_rtc_context.ota_target_version,
-                                              g_rtc_context.ota_job_id,
-                                              g_rtc_context.ota_partition,
-                                              "confirm_timeout_exceeded");
+        state_machine_clear_persisted_ota_context();
+        state_machine_publish_or_stage_firmware_status(TRACKER_OTA_STATUS_FAILED,
+                                                       TRACKER_OTA_PROGRESS_DONE,
+                                                       g_rtc_context.ota_target_version,
+                                                       g_rtc_context.ota_job_id,
+                                                       g_rtc_context.ota_partition,
+                                                       TRACKER_OTA_ERROR_CONFIRM_TIMEOUT_EXCEEDED);
         esp_restart();
         return;
     }
 
-    state_machine_publish_firmware_status("confirming",
-                                          99,
-                                          g_rtc_context.ota_target_version,
-                                          g_rtc_context.ota_job_id,
-                                          g_rtc_context.ota_partition,
-                                          "");
+    state_machine_publish_or_stage_firmware_status(TRACKER_OTA_STATUS_CONFIRMING,
+                                                   TRACKER_OTA_PROGRESS_CONFIRMING,
+                                                   g_rtc_context.ota_target_version,
+                                                   g_rtc_context.ota_job_id,
+                                                   g_rtc_context.ota_partition,
+                                                   "");
 
     /* Mark image valid to prevent automatic rollback on next boot. */
     if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
         g_rtc_context.ota_pending_confirm = false;
         g_rtc_context.ota_confirm_deadline_ms = 0;
         util_copy_string(s_current_version, sizeof(s_current_version), g_rtc_context.ota_target_version);
-        state_machine_publish_firmware_status("success",
-                                              100,
-                                              g_rtc_context.ota_target_version,
-                                              g_rtc_context.ota_job_id,
-                                              g_rtc_context.ota_partition,
-                                              "");
+        state_machine_clear_persisted_ota_context();
+        state_machine_publish_or_stage_firmware_status(TRACKER_OTA_STATUS_SUCCESS,
+                                                       TRACKER_OTA_PROGRESS_DONE,
+                                                       g_rtc_context.ota_target_version,
+                                                       g_rtc_context.ota_job_id,
+                                                       g_rtc_context.ota_partition,
+                                                       "");
     } else {
         g_rtc_context.ota_pending_confirm = false;
         g_rtc_context.ota_confirm_deadline_ms = 0;
-        state_machine_publish_firmware_status("failed",
-                                              100,
-                                              g_rtc_context.ota_target_version,
-                                              g_rtc_context.ota_job_id,
-                                              g_rtc_context.ota_partition,
-                                              "confirm_failed");
+        state_machine_clear_persisted_ota_context();
+        state_machine_publish_or_stage_firmware_status(TRACKER_OTA_STATUS_FAILED,
+                                                       TRACKER_OTA_PROGRESS_DONE,
+                                                       g_rtc_context.ota_target_version,
+                                                       g_rtc_context.ota_job_id,
+                                                       g_rtc_context.ota_partition,
+                                                       TRACKER_OTA_ERROR_CONFIRM_FAILED);
     }
 }
 
@@ -1233,16 +1431,17 @@ static void state_machine_process_ota_command(command_action_t action) {
         if (util_ota_trigger_manual_rollback(&rollback) == ESP_OK) {
             g_rtc_context.ota_pending_confirm = false;
             g_rtc_context.ota_confirm_deadline_ms = 0;
+            state_machine_clear_persisted_ota_context();
             state_machine_publish_firmware_payload(&rollback);
             esp_restart();
         } else {
             g_rtc_context.ota_confirm_deadline_ms = 0;
-            state_machine_publish_firmware_status("failed",
-                                                  100,
+            state_machine_publish_firmware_status(TRACKER_OTA_STATUS_FAILED,
+                                                  TRACKER_OTA_PROGRESS_DONE,
                                                   g_rtc_context.ota_previous_version,
                                                   g_rtc_context.ota_job_id,
                                                   g_rtc_context.ota_partition,
-                                                  "manual_rollback_failed");
+                                                  TRACKER_OTA_ERROR_MANUAL_ROLLBACK_FAILED);
         }
         return;
     }
@@ -1253,15 +1452,20 @@ static void state_machine_process_ota_command(command_action_t action) {
     util_copy_string(report.current_version, sizeof(report.current_version), s_current_version);
 
     /* OTA update flow. */
-    state_machine_publish_firmware_status("assigned", 0, cmd.version, cmd.job_id, "", "");
+    state_machine_publish_firmware_status(TRACKER_OTA_STATUS_ASSIGNED,
+                                          TRACKER_OTA_PROGRESS_ASSIGNED,
+                                          cmd.version,
+                                          cmd.job_id,
+                                          "",
+                                          "");
 
     if (!state_machine_ota_start_is_safe()) {
-        state_machine_publish_firmware_status("failed",
-                                              0,
+        state_machine_publish_firmware_status(TRACKER_OTA_STATUS_FAILED,
+                                              TRACKER_OTA_PROGRESS_ASSIGNED,
                                               cmd.version,
                                               cmd.job_id,
                                               "",
-                                              "unsafe_runtime_window");
+                                              TRACKER_OTA_ERROR_UNSAFE_RUNTIME_WINDOW);
         return;
     }
 
@@ -1292,6 +1496,7 @@ static void state_machine_process_ota_command(command_action_t action) {
         } else {
             g_rtc_context.ota_confirm_deadline_ms = 0;
         }
+        state_machine_persist_ota_context();
         esp_restart();
     } else {
         g_rtc_context.ota_confirm_deadline_ms = 0;
@@ -1321,11 +1526,22 @@ static void state_machine_prepare_sleep(void) {
         }
     }
     s_gnss_started = false;
-    modem_lte_disconnect();
-    // modem_power_off();
+    esp_err_t lte_disconnect_err = modem_lte_disconnect();
+    if (lte_disconnect_err != ESP_OK) {
+        ESP_LOGW(TAG, "LTE disconnect before sleep failed: %s", esp_err_to_name(lte_disconnect_err));
+    }
 
-    (void)modem_set_dtr(true);
-    gpio_set_level(PIN_MODEM_PWRKEY, 0);
+    esp_err_t modem_power_off_err = modem_power_off();
+    if (modem_power_off_err != ESP_OK) {
+        ESP_LOGW(TAG, "Modem power-off before sleep failed: %s", esp_err_to_name(modem_power_off_err));
+    } else {
+        vTaskDelay(pdMS_TO_TICKS((uint32_t)TRACKER_MODEM_POWEROFF_SETTLE_MS));
+    }
+
+    esp_err_t dtr_sleep_err = modem_set_dtr(true);
+    if (dtr_sleep_err != ESP_OK && dtr_sleep_err != ESP_ERR_NOT_SUPPORTED) {
+        ESP_LOGW(TAG, "Set DTR sleep level before deep sleep failed: %s", esp_err_to_name(dtr_sleep_err));
+    }
 
     /* Wake by motion interrupt only when IMU wake policy is enabled and IMU is ready. */
     if (state_machine_imu_runtime_enabled() && s_imu_available) {
@@ -1336,7 +1552,8 @@ static void state_machine_prepare_sleep(void) {
                      esp_err_to_name(wake_err));
         }
     }
-    esp_sleep_enable_timer_wakeup((uint64_t)s_config.heartbeat_interval_s * 1000000ULL);
+    uint16_t wake_interval_s = state_machine_parked_wake_interval_s();
+    esp_sleep_enable_timer_wakeup((uint64_t)wake_interval_s * 1000000ULL);
 }
 
 /**
@@ -1369,6 +1586,8 @@ esp_err_t state_machine_init(const config_t *config) {
     retry_state_reset(&s_rtc_bootstrap_retry);
     retry_state_reset(&s_rtc_read_retry);
     retry_state_reset(&s_imu_bootstrap_retry);
+    memset(&s_deferred_firmware_report, 0, sizeof(s_deferred_firmware_report));
+    s_deferred_firmware_report_pending = false;
 
     util_set_sleep_enabled(s_config.sleep_enabled);
 
@@ -1396,9 +1615,12 @@ esp_err_t state_machine_init(const config_t *config) {
     s_last_gnss_poll_ms = 0;
     s_obd_aux_pid_cursor = 0;
     s_last_hw_diag_log_ms = 0;
+    s_heartbeat_started_ms = 0;
+    s_heartbeat_raw_published = false;
     s_status_running = false;
     s_status_stopped = true;
     s_ignition_off_started_ms = 0;
+    s_ble_retry_last_ignition = false;
 
     esp_err_t rtc_init_err = rtc_ds3231m_init();
     if (rtc_init_err != ESP_OK) {
@@ -1425,10 +1647,16 @@ esp_err_t state_machine_init(const config_t *config) {
     }
 
     /* Handle post-OTA confirmation and publish initial firmware status on boot. */
+    state_machine_restore_ota_context_from_nvs();
     bool had_pending_confirm = g_rtc_context.ota_pending_confirm;
     state_machine_try_confirm_running_firmware();
     if (!had_pending_confirm) {
-        state_machine_publish_firmware_status("success", 100, s_current_version, "", "", "");
+        state_machine_publish_firmware_status(TRACKER_OTA_STATUS_SUCCESS,
+                                              TRACKER_OTA_PROGRESS_DONE,
+                                              s_current_version,
+                                              "",
+                                              "",
+                                              "");
     }
     return ESP_OK;
 }
@@ -1587,17 +1815,50 @@ app_state_t state_machine_run(app_state_t current_state) {
         }
 
         case APP_STATE_HEARTBEAT:
-            /* Timer wake heartbeat path: one data publish then return to sleep. */
-            s_timer_wake_count += 1;
+            /*
+             * Timer wake heartbeat path:
+             * keep a short online window so LTE/MQTT/BLE OBD can recover and provide
+             * at least one parked raw sample before returning to deep sleep.
+             */
+            if (s_heartbeat_started_ms == 0) {
+                s_heartbeat_started_ms = util_uptime_ms();
+                s_heartbeat_raw_published = false;
+                s_timer_wake_count += 1;
+            }
             state_machine_handle_pending_action();
             state_machine_try_connect_network();
-            state_machine_refresh_telemetry(true, false);
+            state_machine_refresh_telemetry(true, true);
             state_machine_handle_pending_action();
+            if (modem_lte_is_initialized()) {
+                state_machine_try_connect_ble();
+            }
             offline_queue_set_online(tracker_mqtt_is_connected());
             offline_queue_replay_tick();
-            state_machine_publish_rawdata();
-            state_machine_publish_status("heartbeat");
-            return APP_STATE_SLEEP;
+
+            uint64_t now_ms = util_uptime_ms();
+            bool obd_connected = s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx);
+            if (!s_heartbeat_raw_published) {
+                if (!offline_queue_should_throttle_rawdata()) {
+                    state_machine_publish_rawdata();
+                } else {
+                    ESP_LOGW(TAG, "heartbeat rawdata throttled; publishing status only");
+                }
+
+                if (!obd_connected) {
+                    ESP_LOGW(TAG, "heartbeat publish without OBD connection");
+                }
+
+                state_machine_publish_status("heartbeat");
+                s_heartbeat_raw_published = true;
+            }
+
+            bool heartbeat_timeout = (now_ms - s_heartbeat_started_ms) >= TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS;
+            if (s_heartbeat_raw_published || heartbeat_timeout) {
+                s_heartbeat_started_ms = 0;
+                s_heartbeat_raw_published = false;
+                return APP_STATE_SLEEP;
+            }
+            return APP_STATE_HEARTBEAT;
 
         case APP_STATE_SLEEP:
             /* Sleep path is policy-driven with explicit block reasons. */

@@ -1,7 +1,5 @@
-flowchart LR
-    Vin["Ắc quy"] --> Fuse["Cầu chì"]
+flowchart TB
+    Vin["Ac quy"] --> Fuse["Cau chi"]
     Fuse --> Buck["MP2482 Buck 5V"]
-    Buck --> L["Cuộn cảm"]
-    L --> Vout["Bus 5V"]
-    Buck --> D["Schottky diode"]
-    D --> Vout
+    Buck --> Filter["Cuon cam + diode"]
+    Filter --> Vout["Bus 5V chinh"]

@@ -1,6 +1,6 @@
 ---
 name: esp32-loop-coding
-description: Chạy loop debug ESP32 firmware: tự dò COM, monitor serial đến lỗi/ổn định, phân tích log, sửa code, build+flash, cập nhật test log liên tục.
+description: "Chạy loop debug ESP32 firmware: tự dò COM, monitor serial đến lỗi/ổn định, phân tích log, sửa code, build+flash, cập nhật test log liên tục."
 license: MIT
 version: 1.0.0
 ---

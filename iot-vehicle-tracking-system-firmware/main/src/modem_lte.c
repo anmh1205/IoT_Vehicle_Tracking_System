@@ -35,6 +35,7 @@ static const char *TAG = "MODEM_LTE";
 #define MODEM_LTE_ENABLE_DTR_WAKE_PULSE 0
 #define MODEM_LTE_SHORT_CMD_TIMEOUT_MS 5000U
 #define MODEM_LTE_AT_SYNC_CMD_TIMEOUT_MS 1500U
+#define MODEM_LTE_BOOT_ALIVE_PROBE_TIMEOUT_MS 800U
 #define MODEM_LTE_PDP_ACT_TIMEOUT_MS 15000U
 #define MODEM_LTE_AT_READY_POLL_MS 500ULL
 #define MODEM_LTE_AT_SYNC_RECOVER_THRESHOLD 3U
@@ -439,6 +440,51 @@ static void modem_lte_force_dtr_wake_pulse(void) {
 }
 
 /**
+ * @brief Probe whether modem AT path is already responsive before power-cycling.
+ *
+ * @param now_ms Current monotonic timestamp in milliseconds.
+ *
+ * @return true when modem is alive and FSM was advanced without PWRKEY/RESET pulse.
+ */
+static bool modem_lte_try_resume_alive_modem(uint64_t now_ms) {
+    esp_err_t at_init_err = modem_at_init();
+    if (at_init_err != ESP_OK) {
+        return false;
+    }
+
+    if (!s_rdy_urc_registered) {
+        modem_at_register_urc("RDY", modem_lte_on_urc_rdy);
+        s_rdy_urc_registered = true;
+    }
+
+    modem_lte_set_fixed_uart_cfg();
+    modem_lte_reset_at_sync_sweep();
+    if (modem_lte_apply_at_sync_config() != ESP_OK) {
+        return false;
+    }
+
+    char response[128] = {0};
+    modem_at_reset_uart_diag();
+    esp_err_t probe_err = modem_at_send("AT\r",
+                                        response,
+                                        sizeof(response),
+                                        MODEM_LTE_BOOT_ALIVE_PROBE_TIMEOUT_MS);
+    bool at_ready = probe_err == ESP_OK && strstr(response, "OK") != NULL;
+    if (!at_ready) {
+        return false;
+    }
+
+    s_at_sync_fail_count = 0;
+    s_at_sync_diag_log_ms = 0;
+    s_rdy_diag_log_ms = 0;
+    s_state_deadline_ms = 0;
+    modem_lte_clear_rdy_token();
+    ESP_LOGI(TAG, "startup fast-path: modem alive, skip PWRKEY/RESET pulse");
+    modem_lte_transition(MODEM_LTE_STATE_ATE0, now_ms, 0);
+    return true;
+}
+
+/**
  * @brief Log modem STATUS/NET-LIGHT lines when mapping exists.
  */
 static void modem_lte_log_hw_lines_if_available(void) {
@@ -712,21 +758,14 @@ esp_err_t modem_lte_tick(uint64_t now_ms) {
                 ESP_LOGW(TAG, "Set DTR wake failed: %s", esp_err_to_name(dtr_err));
             }
             modem_lte_force_dtr_wake_pulse();
+            if (modem_lte_try_resume_alive_modem(now_ms)) {
+                return ESP_ERR_NOT_FINISHED;
+            }
 
             esp_err_t err = modem_power_on();
             if (err != ESP_OK) {
                 modem_lte_enter_backoff(now_ms, err, "modem_power_on");
                 return ESP_ERR_NOT_FINISHED;
-            }
-
-            /* Boot hardening: always issue SIMCOM reset pulse after startup PWRKEY pulse. */
-            esp_err_t reset_err = modem_reset_pulse();
-            if (reset_err != ESP_OK && reset_err != ESP_ERR_NOT_SUPPORTED) {
-                modem_lte_enter_backoff(now_ms, reset_err, "boot_reset_pulse");
-                return ESP_ERR_NOT_FINISHED;
-            }
-            if (reset_err == ESP_ERR_NOT_SUPPORTED) {
-                ESP_LOGW(TAG, "BOOT reset pulse skipped (RESET pin unavailable)");
             }
 
             modem_lte_transition(MODEM_LTE_STATE_WAIT_BOOT, now_ms, MODEM_LTE_POWER_RAIL_SETTLE_MS);

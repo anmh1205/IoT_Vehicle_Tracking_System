@@ -20,6 +20,7 @@ import {
 import { violationServices } from '@/lib/api/violations';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
+import { ViolationDetailModal } from '@/features/violations/components/violation-detail-modal';
 
 const SEVERITY_LABELS: Record<string, string> = {
   critical: 'Nghiêm trọng',
@@ -43,6 +44,7 @@ const ViolationsPage = () => {
   const queryClient = useQueryClient();
   const [typeFilter, setTypeFilter] = useState<string>(ALL_TYPES);
   const [page, setPage] = useState(1);
+  const [detailItem, setDetailItem] = useState<any | null>(null);
 
   const violations = useQuery({
     queryKey: ['violations', page, typeFilter],
@@ -125,18 +127,24 @@ const ViolationsPage = () => {
       id: 'actions',
       header: '',
       meta: { label: 'Thao tác' },
-      cell: ({ row }) =>
-        !row.original.acknowledged ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={ackMutation.isPending}
-            onClick={() => ackMutation.mutate(row.original.id)}
-          >
-            {ackMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Xác nhận
+      cell: ({ row }) => (
+        <div className="flex flex-wrap gap-1">
+          <Button size="sm" variant="outline" onClick={() => setDetailItem(row.original)}>
+            Chi tiết
           </Button>
-        ) : null,
+          {!row.original.acknowledged ? (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={ackMutation.isPending}
+              onClick={() => ackMutation.mutate(row.original.id)}
+            >
+              {ackMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Xác nhận
+            </Button>
+          ) : null}
+        </div>
+      ),
     },
   ];
 
@@ -176,6 +184,7 @@ const ViolationsPage = () => {
         searchLabel="Tìm vi phạm theo phương tiện"
         searchPlaceholder="Tìm biển số hoặc mã xe..."
         isLoading={violations.isLoading}
+        onRowClick={setDetailItem}
         toolbar={
           <div className="w-full sm:w-auto">
             <Select
@@ -220,6 +229,12 @@ const ViolationsPage = () => {
           </Button>
         </div>
       </div>
+
+      <ViolationDetailModal
+        open={Boolean(detailItem)}
+        onOpenChange={(value) => !value && setDetailItem(null)}
+        violationId={detailItem?.id ?? null}
+      />
     </PageContainer>
   );
 };

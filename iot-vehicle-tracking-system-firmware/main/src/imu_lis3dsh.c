@@ -3,8 +3,6 @@
 #include <math.h>
 #include <string.h>
 
-#include "freertos/FreeRTOS.h"
-
 #include "driver/gpio.h"
 #include "driver/i2c_master.h"
 
@@ -20,6 +18,7 @@
 
 #define LIS3DSH_I2C_PORT I2C_NUM_0
 #define LIS3DSH_I2C_FREQ_HZ 400000
+#define LIS3DSH_I2C_FREQ_FALLBACK_HZ 100000
 #define LIS3DSH_ADDR_PRIMARY 0x1D
 #define LIS3DSH_ADDR_SECONDARY 0x1E
 #define LIS3DSH_WHO_AM_I_REG 0x0F
@@ -61,7 +60,7 @@ static esp_err_t imu_write_reg(uint8_t reg, uint8_t value) {
     return i2c_master_transmit(s_dev_handle,
                                payload,
                                sizeof(payload),
-                               pdMS_TO_TICKS(IMU_I2C_XFER_TIMEOUT_MS));
+                               IMU_I2C_XFER_TIMEOUT_MS);
 }
 
 /**
@@ -74,12 +73,26 @@ static esp_err_t imu_write_reg(uint8_t reg, uint8_t value) {
  */
 static esp_err_t imu_read_reg(uint8_t reg, uint8_t *value) {
     ESP_RETURN_ON_NULL(value, ESP_ERR_INVALID_ARG, TAG, "value is NULL");
-    return i2c_master_transmit_receive(s_dev_handle,
-                                       &reg,
-                                       1,
-                                       value,
-                                       1,
-                                       pdMS_TO_TICKS(IMU_I2C_XFER_TIMEOUT_MS));
+    esp_err_t err = i2c_master_transmit_receive(s_dev_handle,
+                                                &reg,
+                                                1,
+                                                value,
+                                                1,
+                                                IMU_I2C_XFER_TIMEOUT_MS);
+    if (err == ESP_OK || err != ESP_ERR_INVALID_STATE) {
+        return err;
+    }
+
+    ESP_LOGW(TAG, "imu_read_reg fallback split-xfer reg=0x%02X err=%s", reg, esp_err_to_name(err));
+    if (s_bus_handle != NULL) {
+        (void)i2c_master_bus_reset(s_bus_handle);
+    }
+
+    err = i2c_master_transmit(s_dev_handle, &reg, 1, IMU_I2C_XFER_TIMEOUT_MS);
+    if (err != ESP_OK) {
+        return err;
+    }
+    return i2c_master_receive(s_dev_handle, value, 1, IMU_I2C_XFER_TIMEOUT_MS);
 }
 
 /**
@@ -95,12 +108,64 @@ static esp_err_t imu_read_regs(uint8_t reg, uint8_t *data, size_t len) {
     ESP_RETURN_ON_NULL(data, ESP_ERR_INVALID_ARG, TAG, "data is NULL");
     /* Set auto-increment bit for multi-byte reads. */
     uint8_t read_reg = reg | 0x80;
-    return i2c_master_transmit_receive(s_dev_handle,
-                                       &read_reg,
-                                       1,
-                                       data,
-                                       len,
-                                       pdMS_TO_TICKS(IMU_I2C_XFER_TIMEOUT_MS));
+    esp_err_t err = i2c_master_transmit_receive(s_dev_handle,
+                                                &read_reg,
+                                                1,
+                                                data,
+                                                len,
+                                                IMU_I2C_XFER_TIMEOUT_MS);
+    if (err == ESP_OK || err != ESP_ERR_INVALID_STATE) {
+        return err;
+    }
+
+    ESP_LOGW(TAG, "imu_read_regs fallback split-xfer reg=0x%02X len=%u err=%s",
+             read_reg,
+             (unsigned)len,
+             esp_err_to_name(err));
+    if (s_bus_handle != NULL) {
+        (void)i2c_master_bus_reset(s_bus_handle);
+    }
+
+    err = i2c_master_transmit(s_dev_handle, &read_reg, 1, IMU_I2C_XFER_TIMEOUT_MS);
+    if (err != ESP_OK) {
+        return err;
+    }
+    return i2c_master_receive(s_dev_handle, data, len, IMU_I2C_XFER_TIMEOUT_MS);
+}
+
+/**
+ * @brief Attach LIS3DSH device handle, then verify WHO_AM_I register.
+ *
+ * @param device_addr Candidate LIS3DSH I2C address.
+ * @param scl_speed_hz Per-device SCL frequency to use for transfers.
+ * @param out_who_am_i Output WHO_AM_I value.
+ *
+ * @return ESP_OK when handle is bound and WHO_AM_I matches expected value.
+ */
+static esp_err_t imu_try_bind_device(uint8_t device_addr, uint32_t scl_speed_hz, uint8_t *out_who_am_i) {
+    ESP_RETURN_ON_NULL(out_who_am_i, ESP_ERR_INVALID_ARG, TAG, "out_who_am_i is NULL");
+
+    i2c_device_config_t dev_cfg = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = device_addr,
+        .scl_speed_hz = scl_speed_hz,
+    };
+
+    esp_err_t err = i2c_master_bus_add_device(s_bus_handle, &dev_cfg, &s_dev_handle);
+    if (err != ESP_OK) {
+        return err;
+    }
+
+    uint8_t who_am_i = 0;
+    err = imu_read_reg(LIS3DSH_WHO_AM_I_REG, &who_am_i);
+    if (err != ESP_OK || who_am_i != 0x3F) {
+        i2c_master_bus_rm_device(s_dev_handle);
+        s_dev_handle = NULL;
+        return err != ESP_OK ? err : ESP_ERR_NOT_FOUND;
+    }
+
+    *out_who_am_i = who_am_i;
+    return ESP_OK;
 }
 
 /**
@@ -149,34 +214,68 @@ esp_err_t imu_init(void) {
     }
     ESP_GOTO_ON_ERROR(bus_err, fail, TAG, "I2C bus setup failed");
 
-    i2c_device_config_t dev_cfg = {
-        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
-        .device_address = LIS3DSH_ADDR_PRIMARY,
-        .scl_speed_hz = LIS3DSH_I2C_FREQ_HZ,
+    uint8_t candidate_addrs[2] = {0};
+    size_t candidate_count = 0;
+
+    esp_err_t primary_probe_err = i2c_master_probe(s_bus_handle, LIS3DSH_ADDR_PRIMARY, IMU_I2C_XFER_TIMEOUT_MS);
+    if (primary_probe_err == ESP_OK) {
+        candidate_addrs[candidate_count++] = LIS3DSH_ADDR_PRIMARY;
+    } else {
+        ESP_LOGW(TAG,
+                 "IMU probe addr=0x%02X failed err=%s",
+                 LIS3DSH_ADDR_PRIMARY,
+                 esp_err_to_name(primary_probe_err));
+    }
+
+    esp_err_t secondary_probe_err = i2c_master_probe(s_bus_handle, LIS3DSH_ADDR_SECONDARY, IMU_I2C_XFER_TIMEOUT_MS);
+    if (secondary_probe_err == ESP_OK) {
+        candidate_addrs[candidate_count++] = LIS3DSH_ADDR_SECONDARY;
+    } else {
+        ESP_LOGW(TAG,
+                 "IMU probe addr=0x%02X failed err=%s",
+                 LIS3DSH_ADDR_SECONDARY,
+                 esp_err_to_name(secondary_probe_err));
+    }
+
+    if (candidate_count == 0U) {
+        /* Keep fallback WHO_AM_I checks even if probe fails due transient bus timing. */
+        candidate_addrs[0] = LIS3DSH_ADDR_PRIMARY;
+        candidate_addrs[1] = LIS3DSH_ADDR_SECONDARY;
+        candidate_count = 2U;
+        ESP_LOGW(TAG, "IMU probe found no address, falling back to WHO_AM_I scan");
+    }
+
+    static const uint32_t s_probe_speeds_hz[] = {
+        LIS3DSH_I2C_FREQ_HZ,
+        LIS3DSH_I2C_FREQ_FALLBACK_HZ,
     };
 
-    ESP_GOTO_ON_ERROR(i2c_master_bus_add_device(s_bus_handle, &dev_cfg, &s_dev_handle),
-                      fail,
-                      TAG,
-                      "i2c_master_bus_add_device failed");
-
-    /* Validate sensor identity and try fallback address when needed. */
     uint8_t who_am_i = 0;
-    err = imu_read_reg(LIS3DSH_WHO_AM_I_REG, &who_am_i);
-    if (err != ESP_OK || who_am_i != 0x3F) {
-        i2c_master_bus_rm_device(s_dev_handle);
-        s_dev_handle = NULL;
-
-        dev_cfg.device_address = LIS3DSH_ADDR_SECONDARY;
-        ESP_GOTO_ON_ERROR(i2c_master_bus_add_device(s_bus_handle, &dev_cfg, &s_dev_handle),
-                          fail,
-                          TAG,
-                          "fallback I2C address add failed");
-
-        ESP_GOTO_ON_ERROR(imu_read_reg(LIS3DSH_WHO_AM_I_REG, &who_am_i), fail, TAG, "WHO_AM_I read failed");
-        ESP_GOTO_ON_FALSE(who_am_i == 0x3F, fail, TAG, "Unexpected WHO_AM_I: 0x%02X", who_am_i);
-        s_lis3dsh_addr = LIS3DSH_ADDR_SECONDARY;
+    uint32_t active_speed_hz = 0;
+    bool imu_ready = false;
+    for (size_t speed_idx = 0; speed_idx < (sizeof(s_probe_speeds_hz) / sizeof(s_probe_speeds_hz[0])); ++speed_idx) {
+        uint32_t speed_hz = s_probe_speeds_hz[speed_idx];
+        for (size_t addr_idx = 0; addr_idx < candidate_count; ++addr_idx) {
+            uint8_t addr = candidate_addrs[addr_idx];
+            err = imu_try_bind_device(addr, speed_hz, &who_am_i);
+            if (err == ESP_OK) {
+                s_lis3dsh_addr = addr;
+                active_speed_hz = speed_hz;
+                imu_ready = true;
+                break;
+            }
+            ESP_LOGW(TAG,
+                     "IMU WHO_AM_I failed addr=0x%02X speed=%lu err=%s",
+                     addr,
+                     (unsigned long)speed_hz,
+                     esp_err_to_name(err));
+        }
+        if (imu_ready) {
+            break;
+        }
     }
+
+    ESP_GOTO_ON_FALSE(imu_ready, fail, TAG, "WHO_AM_I read failed for all address/speed candidates");
 
     /* ODR=12.5Hz, BDU=1, XYZ enabled. */
     ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DSH_CTRL_REG4, 0x3F), fail, TAG, "CTRL_REG4 write failed");
@@ -193,7 +292,11 @@ esp_err_t imu_init(void) {
     };
     ESP_GOTO_ON_ERROR(gpio_config(&int_cfg), fail, TAG, "INT GPIO config failed");
 
-    ESP_LOGI(TAG, "LIS3DSH initialized at I2C addr 0x%02X", s_lis3dsh_addr);
+    ESP_LOGI(TAG,
+             "LIS3DSH initialized addr=0x%02X who_am_i=0x%02X speed=%luHz",
+             s_lis3dsh_addr,
+             who_am_i,
+             (unsigned long)active_speed_hz);
     s_read_fail_streak = 0;
     s_read_backoff_until_ms = 0;
     return ESP_OK;

@@ -59,6 +59,11 @@ const extractMetadata = (envelopePayload: Record<string, unknown>): RealtimeMeta
   };
 };
 
+const toTimestampMs = (value: string): number => {
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : Date.now();
+};
+
 let client: mqtt.MqttClient | null = null;
 
 export const initMqttEventListener = (): void => {
@@ -115,7 +120,7 @@ export const initMqttEventListener = (): void => {
           lon: Number(envelopePayload.longitude ?? 0),
           speed: Number(envelopePayload.speed ?? 0),
           heading: Number(envelopePayload.course ?? 0),
-          timestamp: Date.now(),
+          timestamp: toTimestampMs(data.timestamp),
           battery: envelopePayload.battery_top == null ? null : Number(envelopePayload.battery_top),
           metadata,
         });

@@ -1,22 +1,28 @@
-gantt
-    title Kế hoạch thực hiện dự án (24 tuần)
-    dateFormat  YYYY-MM-DD
-    axisFormat  %d/%m
+flowchart TB
+    Title["Ke hoach thuc hien du an<br/>theo giai doan trong 24 tuan"]
 
-    section Phần cứng
-    Nghiên cứu và thiết kế         :a1, 2025-09-01, 28d
+    subgraph Row1[" "]
+        direction LR
+        P1["GD1 | Tuan 1-4<br/>Nghien cuu yeu cau<br/>Thiet ke phan cung"]
+        P2["GD2 | Tuan 3-10<br/>Firmware ESP-IDF<br/>OBD2 BLE + power FSM"]
+    end
 
-    section Firmware
-    Setup driver nền tảng          :a2, 2025-09-15, 21d
-    OBD2 BLE và power FSM          :a3, after a2, 35d
+    subgraph Row2[" "]
+        direction LR
+        P3["GD3 | Tuan 5-8<br/>EMQX + PostgreSQL<br/>Docker Compose"]
+        P4["GD4 | Tuan 7-14<br/>Backend API<br/>MQTT Bridge"]
+    end
 
-    section Cloud và Backend
-    EMQX + DB + Docker             :a4, 2025-09-29, 28d
-    Backend API + MQTT Bridge      :a5, 2025-10-13, 42d
+    subgraph Row3[" "]
+        direction LR
+        P5["GD5 | Tuan 11-18<br/>Dashboard<br/>ban do + canh bao"]
+        P6["GD6 | Tuan 17-22<br/>Tich hop he thong<br/>Kiem thu thuc dia"]
+    end
 
-    section Frontend
-    Dashboard + bản đồ + cảnh báo  :a6, 2025-11-10, 42d
+    subgraph Row4[" "]
+        direction LR
+        P7["GD7 | Tuan 21-24<br/>Bao cao khoa luan<br/>Slide bao ve"]
+    end
 
-    section Tích hợp
-    Tích hợp hệ thống              :a7, 2025-12-22, 42d
-    Viết báo cáo                   :a8, 2026-01-19, 28d
+    Title --> P1
+    P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7

@@ -35,6 +35,70 @@
 /** @brief ADC calibration gain for battery channel (measured 4.09V vs raw 4.01V). */
 #define TRACKER_ADC_BATT_CALIB_GAIN 1.01995f
 
+/** @brief OTA confirm timeout defaults and bounds (seconds). */
+#define TRACKER_OTA_CONFIRM_TIMEOUT_DEFAULT_SEC 180U
+#define TRACKER_OTA_CONFIRM_TIMEOUT_MIN_SEC 60U
+#define TRACKER_OTA_CONFIRM_TIMEOUT_MAX_SEC 3600U
+
+/** @brief Runtime config bounds shared by parser + validator. */
+#define TRACKER_CONFIG_MIN_TRACKING_INTERVAL_S 1U
+#define TRACKER_CONFIG_MAX_TRACKING_INTERVAL_S 3600U
+#define TRACKER_CONFIG_MIN_HEARTBEAT_INTERVAL_S 60U
+#define TRACKER_CONFIG_MAX_HEARTBEAT_INTERVAL_S 65535U
+#define TRACKER_CONFIG_MIN_ALARM_INTERVAL_S 1U
+#define TRACKER_CONFIG_MAX_ALARM_INTERVAL_S 60U
+#define TRACKER_CONFIG_MIN_IGNITION_OFF_HOLD_MS 1000U
+#define TRACKER_CONFIG_MAX_IGNITION_OFF_HOLD_MS 60000U
+#define TRACKER_CONFIG_MIN_ALARM_TIMEOUT_S 30U
+#define TRACKER_CONFIG_MAX_ALARM_TIMEOUT_S 3600U
+#define TRACKER_CONFIG_MIN_OTA_BATTERY_MV 3300U
+#define TRACKER_CONFIG_MAX_OTA_BATTERY_MV 4500U
+#define TRACKER_CONFIG_MIN_IGNITION_ADC_THRESHOLD_MV 11000U
+#define TRACKER_CONFIG_MAX_IGNITION_ADC_THRESHOLD_MV 15000U
+
+/** @brief Canonical firmware lifecycle status strings used in MQTT/cloud contract. */
+#define TRACKER_OTA_STATUS_ASSIGNED "assigned"
+#define TRACKER_OTA_STATUS_DOWNLOADING "downloading"
+#define TRACKER_OTA_STATUS_VERIFYING "verifying"
+#define TRACKER_OTA_STATUS_INSTALLING "installing"
+#define TRACKER_OTA_STATUS_REBOOTING "rebooting"
+#define TRACKER_OTA_STATUS_CONFIRMING "confirming"
+#define TRACKER_OTA_STATUS_SUCCESS "success"
+#define TRACKER_OTA_STATUS_FAILED "failed"
+#define TRACKER_OTA_STATUS_ROLLED_BACK "rolled_back"
+
+/** @brief OTA progress milestones aligned with device state transitions. */
+#define TRACKER_OTA_PROGRESS_ASSIGNED 0U
+#define TRACKER_OTA_PROGRESS_DOWNLOADING_START 5U
+#define TRACKER_OTA_PROGRESS_DOWNLOADING_MAX 90U
+#define TRACKER_OTA_PROGRESS_VERIFYING 92U
+#define TRACKER_OTA_PROGRESS_INSTALLING 96U
+#define TRACKER_OTA_PROGRESS_CONFIRMING 99U
+#define TRACKER_OTA_PROGRESS_DONE 100U
+
+/** @brief Canonical OTA error codes surfaced to cloud/backend. */
+#define TRACKER_OTA_ERROR_APPLY_FAILED "ota_apply_failed"
+#define TRACKER_OTA_ERROR_HTTP_INIT_FAILED "http_init_failed"
+#define TRACKER_OTA_ERROR_HTTP_CONFIG_FAILED "http_config_failed"
+#define TRACKER_OTA_ERROR_HTTP_SSL_CONFIG_FAILED "http_ssl_config_failed"
+#define TRACKER_OTA_ERROR_HTTP_ACTION_FAILED "http_action_failed"
+#define TRACKER_OTA_ERROR_HTTP_ACTION_TIMEOUT "http_action_timeout"
+#define TRACKER_OTA_ERROR_HTTP_STATUS_NOT_200 "http_status_not_200"
+#define TRACKER_OTA_ERROR_HTTP_EMPTY_BODY "http_empty_body"
+#define TRACKER_OTA_ERROR_OTA_BEGIN_FAILED "ota_begin_failed"
+#define TRACKER_OTA_ERROR_HTTP_READ_FAILED "http_read_failed"
+#define TRACKER_OTA_ERROR_HTTP_READ_PARSE_FAILED "http_read_parse_failed"
+#define TRACKER_OTA_ERROR_HTTP_HEX_DECODE_FAILED "http_hex_decode_failed"
+#define TRACKER_OTA_ERROR_OTA_WRITE_FAILED "ota_write_failed"
+#define TRACKER_OTA_ERROR_HTTP_SIZE_MISMATCH "http_size_mismatch"
+#define TRACKER_OTA_ERROR_SHA256_MISMATCH "sha256_mismatch"
+#define TRACKER_OTA_ERROR_OTA_END_FAILED "ota_end_failed"
+#define TRACKER_OTA_ERROR_SET_BOOT_PARTITION_FAILED "set_boot_partition_failed"
+#define TRACKER_OTA_ERROR_CONFIRM_TIMEOUT_EXCEEDED "confirm_timeout_exceeded"
+#define TRACKER_OTA_ERROR_CONFIRM_FAILED "confirm_failed"
+#define TRACKER_OTA_ERROR_MANUAL_ROLLBACK_FAILED "manual_rollback_failed"
+#define TRACKER_OTA_ERROR_UNSAFE_RUNTIME_WINDOW "unsafe_runtime_window"
+
 /**
  * @brief Runtime configuration persisted in NVS and used by all modules.
  */

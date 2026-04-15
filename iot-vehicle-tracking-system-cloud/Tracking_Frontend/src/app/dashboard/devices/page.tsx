@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
-import { Cpu, LayoutGrid, Plus, Table2 } from 'lucide-react';
+import { AlertTriangle, Cpu, LayoutGrid, Plus, Table2 } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { DataTable } from '@/components/common/data-table';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import type { DeviceFilters as DeviceFiltersParams } from '@/lib/api/devices';
@@ -21,6 +22,7 @@ import { MobileTabSelector } from '@/features/devices/components/mobile-tab-sele
 import { DeviceCreateModal } from '@/features/devices/components/device-create-modal';
 import { DeviceEditModal } from '@/features/devices/components/device-edit-modal';
 import { DeviceDetailModalContainer } from '@/features/devices/components/device-detail-modal/modal-container';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 type ViewMode = 'table' | 'cards';
 const DevicesPage = () => {
   const [filters, setFilters] = useState<DeviceFiltersParams>({ page: 1, limit: 20 });
@@ -33,6 +35,12 @@ const DevicesPage = () => {
   const deleteMutation = useDeleteDevice();
   useDeviceRealtime();
   const rows = devicesQuery.data?.items ?? [];
+  const devicesErrorMessage = devicesQuery.isError
+    ? getApiErrorMessage(
+        devicesQuery.error,
+        'Khong the tai danh sach thiet bi tu may chu. Vui long thu lai.',
+      )
+    : null;
 
   const resetDeviceListView = () => {
     setViewMode('table');
@@ -59,30 +67,49 @@ const DevicesPage = () => {
 
       <DeviceStatsBar devices={rows} />
 
+      {devicesErrorMessage ? (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Khong the dong bo du lieu thiet bi</AlertTitle>
+          <AlertDescription>
+            <p>{devicesErrorMessage}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => {
+                void devicesQuery.refetch();
+              }}
+              disabled={devicesQuery.isFetching}
+            >
+              Thu lai
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <Tabs
         value={viewMode}
         onValueChange={(value) => setViewMode(value as ViewMode)}
         className="space-y-4"
       >
-        <div className="flex items-center justify-between gap-2">
-          <MobileTabSelector />
-          <TabsList className="hidden sm:grid sm:grid-cols-2">
-            <TabsTrigger value="table">
-              <Table2 className="mr-2 h-4 w-4" />
-              Bảng dữ liệu
-            </TabsTrigger>
-            <TabsTrigger value="cards">
-              <LayoutGrid className="mr-2 h-4 w-4" />
-              Chế độ thẻ
-            </TabsTrigger>
-          </TabsList>
-          <div className="hidden sm:block">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-center gap-2">
+            <MobileTabSelector />
+            <TabsList className="hidden sm:grid sm:grid-cols-2">
+              <TabsTrigger value="table">
+                <Table2 className="mr-2 h-4 w-4" />
+                Bảng dữ liệu
+              </TabsTrigger>
+              <TabsTrigger value="cards">
+                <LayoutGrid className="mr-2 h-4 w-4" />
+                Chế độ thẻ
+              </TabsTrigger>
+            </TabsList>
+          </div>
+          <div className="min-w-0 lg:flex-1">
             <DeviceFilters filters={filters} onChange={setFilters} />
           </div>
-        </div>
-
-        <div className="sm:hidden">
-          <DeviceFilters filters={filters} onChange={setFilters} />
         </div>
 
         <TabsContent value="table" className="space-y-0">
@@ -97,6 +124,7 @@ const DevicesPage = () => {
             emptyIcon={<Cpu className="h-10 w-10" />}
             emptyTitle="Chưa có thiết bị"
             emptyAction={{ label: 'Thêm thiết bị', onClick: () => setCreateOpen(true) }}
+            onRowClick={setViewDevice}
           />
         </TabsContent>
 

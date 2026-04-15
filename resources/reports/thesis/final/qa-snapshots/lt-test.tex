@@ -1,0 +1,34 @@
+﻿\documentclass{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{longtable,array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\begin{document}
+\begin{longtable}{|L{0.2\linewidth}|L{0.3\linewidth}|L{0.4\linewidth}|}
+\caption{Test}\
+\hline \textbf{A} & \textbf{B} & \textbf{C} \\
+\hline
+\endfirsthead
+\caption[]{Test (cont)}\\
+\hline \textbf{A} & \textbf{B} & \textbf{C} \\
+\hline
+\endhead
+1 & one & alpha \\\hline
+2 & two & beta \\\hline
+\end{longtable}
+
+\bigskip
+
+\begin{longtable}{|L{0.2\linewidth}|L{0.3\linewidth}|L{0.4\linewidth}|}
+\caption{Test2}\\
+\hline \textbf{A} & \textbf{B} & \textbf{C} \\
+\hline
+\endfirsthead
+\caption[]{Test2 (cont)}\\
+\hline \textbf{A} & \textbf{B} & \textbf{C} \\
+\hline
+\endhead
+1 & one & alpha \\\hline
+2 & two & beta \\
+\hline
+\end{longtable}
+\end{document}

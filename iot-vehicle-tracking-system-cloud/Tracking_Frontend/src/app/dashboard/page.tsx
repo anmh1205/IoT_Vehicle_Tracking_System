@@ -1,7 +1,10 @@
 'use client';
 
 import { useMemo } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { ActivityFeed } from '@/features/dashboard/components/activity-feed';
 import { AreaGraph } from '@/features/dashboard/components/area-graph';
 import { BarGraph } from '@/features/dashboard/components/bar-graph';
@@ -17,6 +20,7 @@ import {
   useDeviceStatusDistribution,
   useFleetRuntime,
 } from '@/features/dashboard/hooks/use-dashboard-stats';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 
 const DashboardPage = () => {
   useDashboardRealtime();
@@ -26,6 +30,21 @@ const DashboardPage = () => {
   const deviceActivityQuery = useDeviceActivity(7);
   const distributionQuery = useDeviceStatusDistribution();
   const fleetRuntimeQuery = useFleetRuntime(30);
+
+  const dashboardQueries = [
+    statsQuery,
+    activityQuery,
+    deviceActivityQuery,
+    distributionQuery,
+    fleetRuntimeQuery,
+  ];
+  const dashboardErrorQuery = dashboardQueries.find((query) => query.isError);
+  const dashboardErrorMessage = dashboardErrorQuery
+    ? getApiErrorMessage(
+        dashboardErrorQuery.error,
+        'Khong the dong bo mot phan du lieu tong quan. Vui long thu lai.',
+      )
+    : null;
 
   const alerts = useMemo(
     () =>
@@ -37,9 +56,31 @@ const DashboardPage = () => {
 
   return (
     <PageContainer
-      pageTitle="Tổng quan"
-      pageDescription="Bảng điều khiển theo dõi đội xe, hoạt động thiết bị và cảnh báo quan trọng."
+      pageTitle="Tong quan"
+      pageDescription="Bang dieu khien theo doi doi xe, hoat dong thiet bi va canh bao quan trong."
     >
+      {dashboardErrorMessage ? (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Khong the dong bo day du du lieu tong quan</AlertTitle>
+          <AlertDescription>
+            <p>{dashboardErrorMessage}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => {
+                for (const query of dashboardQueries) {
+                  void query.refetch();
+                }
+              }}
+            >
+              Thu lai tat ca
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <OverviewStats stats={statsQuery.data} isLoading={statsQuery.isLoading} />
 
       <div className="grid gap-4 lg:grid-cols-2">

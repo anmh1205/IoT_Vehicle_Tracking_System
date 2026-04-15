@@ -30,16 +30,38 @@ import {
 
 const app = express();
 
+const shouldSkipCompression = (req: express.Request): boolean => {
+  const path = req.path.toLowerCase();
+  const isFirmwareDownload = /\/firmware\/\d+\/download$/u.test(path);
+  const encoding =
+    typeof req.query?.encoding === 'string' ? String(req.query.encoding).trim().toLowerCase() : '';
+  return isFirmwareDownload && encoding === 'hex';
+};
+
 // 1. Sentry request handler (FIRST middleware — captures request context)
 app.use(sentryRequestHandler);
 
-// 2. Security headers
+// 2. Trust the first reverse proxy in production (NPM on UAT).
+if (appConfig.isProduction) {
+  app.set('trust proxy', 1);
+}
+
+// 3. Security headers
 app.use(helmet());
 
-// 3. Compression
-app.use(compression());
+// 4. Compression
+app.use(
+  compression({
+    filter: (req, res) => {
+      if (shouldSkipCompression(req)) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+  }),
+);
 
-// 4. CORS
+// 5. CORS
 app.use(
   cors({
     origin: corsConfig.origin,

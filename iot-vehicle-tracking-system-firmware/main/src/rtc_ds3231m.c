@@ -4,7 +4,6 @@
 
 #include "driver/i2c_master.h"
 #include "esp_log.h"
-#include "freertos/FreeRTOS.h"
 
 #include "pin_map.h"
 #include "util.h"
@@ -17,7 +16,7 @@
 #define RTC_DS3231M_I2C_PORT I2C_NUM_0
 #define RTC_DS3231M_I2C_FREQ_HZ 100000
 #define RTC_DS3231M_I2C_ADDR 0x68
-#define RTC_DS3231M_TIMEOUT_TICKS (100 / portTICK_PERIOD_MS)
+#define RTC_DS3231M_TIMEOUT_MS 100
 
 #define RTC_REG_SECONDS 0x00
 #define RTC_REG_STATUS 0x0F
@@ -104,14 +103,14 @@ static esp_err_t rtc_read_regs(uint8_t reg, uint8_t *data, size_t len) {
                                        1,
                                        data,
                                        len,
-                                       RTC_DS3231M_TIMEOUT_TICKS);
+                                       RTC_DS3231M_TIMEOUT_MS);
 }
 
 static esp_err_t rtc_write_reg(uint8_t reg, uint8_t value) {
     ESP_RETURN_ON_NULL(s_ctx.dev_handle, ESP_ERR_INVALID_STATE, TAG, "rtc_write_reg device not ready");
 
     uint8_t payload[2] = {reg, value};
-    return i2c_master_transmit(s_ctx.dev_handle, payload, sizeof(payload), RTC_DS3231M_TIMEOUT_TICKS);
+    return i2c_master_transmit(s_ctx.dev_handle, payload, sizeof(payload), RTC_DS3231M_TIMEOUT_MS);
 }
 
 bool rtc_ds3231m_is_time_valid_ms(uint64_t time_ms) {
@@ -272,7 +271,7 @@ esp_err_t rtc_ds3231m_set_time_ms(uint64_t time_ms) {
     esp_err_t write_err = i2c_master_transmit(s_ctx.dev_handle,
                                               regs,
                                               sizeof(regs),
-                                              RTC_DS3231M_TIMEOUT_TICKS);
+                                              RTC_DS3231M_TIMEOUT_MS);
 
     ESP_RETURN_ON_FALSE(write_err == ESP_OK, ESP_FAIL, TAG, "RTC write time failed");
 

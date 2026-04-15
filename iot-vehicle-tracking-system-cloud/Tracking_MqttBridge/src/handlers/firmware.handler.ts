@@ -12,6 +12,7 @@ interface FirmwareLogRow {
   progress: number | null;
   last_message_id: string | null;
   last_seq_no: number | null;
+  last_boot_id: string | null;
 }
 
 interface UpdateDecision {
@@ -27,6 +28,7 @@ const decideFirmwareUpdate = (
     metadata?: {
       message_id?: string;
       seq_no?: number;
+      boot_id?: string;
     };
   },
 ): UpdateDecision => {
@@ -36,6 +38,12 @@ const decideFirmwareUpdate = (
 
   const incomingMessageId = payload.metadata?.message_id;
   const incomingSeqNo = payload.metadata?.seq_no;
+  const incomingBootId = payload.metadata?.boot_id;
+  const bootChanged =
+    incomingBootId !== undefined &&
+    incomingBootId !== null &&
+    existing.last_boot_id !== null &&
+    incomingBootId !== existing.last_boot_id;
   const existingIsTerminal = OTA_TERMINAL_STATUSES.has(existing.status);
   const incomingIsTerminal = OTA_TERMINAL_STATUSES.has(payload.status);
 
@@ -46,7 +54,8 @@ const decideFirmwareUpdate = (
   if (
     incomingSeqNo !== undefined &&
     existing.last_seq_no !== null &&
-    incomingSeqNo < existing.last_seq_no
+    incomingSeqNo < existing.last_seq_no &&
+    !bootChanged
   ) {
     return { accept: false, reason: 'out_of_order_seq' };
   }
@@ -63,6 +72,10 @@ const decideFirmwareUpdate = (
     (payload.progress ?? existing.progress ?? 0) <= (existing.progress ?? 0)
   ) {
     return { accept: false, reason: 'duplicate_seq_snapshot' };
+  }
+
+  if (bootChanged) {
+    return { accept: true, reason: 'boot_seq_reset' };
   }
 
   return { accept: true, reason: existingIsTerminal ? 'terminal_override' : 'state_advance' };
@@ -118,6 +131,7 @@ export const handleFirmware = async (
   try {
     const existingResult = await pool.query<FirmwareLogRow>(
       `SELECT id, status, progress, last_message_id, last_seq_no
+             , last_boot_id
        FROM firmware_update_log
        WHERE job_id = $1 AND device_id = $2
        ORDER BY updated_at DESC
@@ -195,9 +209,10 @@ export const handleFirmware = async (
         ],
       );
     } else {
+      const shouldMarkStarted = payload.status !== 'assigned';
       await pool.query(
         `UPDATE firmware_update_log
-         SET status = $2,
+         SET status = $2::firmware_status_enum,
              progress = COALESCE($3, progress),
              target_version = $4,
              current_version = $5,
@@ -205,15 +220,15 @@ export const handleFirmware = async (
              error_message = $7,
              status_reason_code = $8,
              started_at = CASE
-               WHEN started_at IS NULL AND $2 <> 'assigned' THEN NOW()
+               WHEN started_at IS NULL AND $13 THEN NOW()
                ELSE started_at
              END,
              completed_at = CASE WHEN $9 THEN NOW() ELSE completed_at END,
              last_seen_at = NOW(),
              last_message_id = COALESCE($10, last_message_id),
              last_seq_no = CASE
-               WHEN $11 IS NULL THEN last_seq_no
-               ELSE GREATEST(COALESCE(last_seq_no, -1), $11)
+               WHEN $11::BIGINT IS NULL THEN last_seq_no
+               ELSE GREATEST(COALESCE(last_seq_no, -1::BIGINT), $11::BIGINT)
              END,
              last_boot_id = COALESCE($12, last_boot_id),
              updated_at = NOW()
@@ -231,6 +246,7 @@ export const handleFirmware = async (
           messageId ?? null,
           seqNo ?? null,
           bootId ?? null,
+          shouldMarkStarted,
         ],
       );
     }
@@ -271,4 +287,3 @@ export const handleFirmware = async (
       (payload.error ? ` error=${payload.error}` : ''),
   );
 };
-

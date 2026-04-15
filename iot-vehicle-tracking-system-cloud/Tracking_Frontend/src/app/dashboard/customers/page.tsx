@@ -1,6 +1,7 @@
 'use client';
 
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Loader2, Mail, Plus, UserRound, UserRoundCheck, UserRoundX } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -390,6 +391,7 @@ const CustomerForm = ({
 };
 
 const CustomersPage = () => {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any | null>(null);
   const [deleteItem, setDeleteItem] = useState<any | null>(null);
@@ -552,6 +554,7 @@ const CustomersPage = () => {
         data={rows}
         pagination={false}
         isLoading={customers.isLoading}
+        onRowClick={(row) => router.push(`/dashboard/customers/${row.id}`)}
         emptyTitle="Chưa có khách hàng phù hợp"
         emptyDescription="Thử nới bộ lọc hoặc thêm hồ sơ khách hàng mới để bắt đầu phân nhóm đội xe."
         emptyAction={{

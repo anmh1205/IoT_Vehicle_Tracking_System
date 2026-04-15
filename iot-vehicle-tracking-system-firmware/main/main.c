@@ -70,23 +70,11 @@ void app_main(void) {
         ESP_LOGW(TAG, "nvs_config_load failed: %s (using defaults)", esp_err_to_name(err));
         app_config_set_defaults(&config);
     }
-#if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_KEEP_AWAKE
-    if (config.sleep_enabled) {
-        ESP_LOGW(TAG, "Field validation override: sleep disabled for continuous hardware bring-up");
-    }
-    config.sleep_enabled = false;
-#endif
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_FORCE_IMU_WAKE
     if (!config.imu_wakeup_enabled) {
         ESP_LOGW(TAG, "Field validation override: IMU wake enabled for hardware acceptance");
     }
     config.imu_wakeup_enabled = true;
-#endif
-#if CONFIG_TRACKER_FIELD_VALIDATION_MODE
-    if (config.imu_wakeup_enabled) {
-        ESP_LOGW(TAG, "Field validation override: IMU runtime disabled for OTA stability");
-    }
-    config.imu_wakeup_enabled = false;
 #endif
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE
     if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_HOST)) {

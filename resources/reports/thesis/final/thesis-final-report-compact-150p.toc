@@ -1,0 +1,214 @@
+\contentsline {section}{NHẬN XÉT CỦA GIẢNG VIÊN HƯỚNG DẪN}{i}{section*.1}%
+\contentsline {section}{NHẬN XÉT CỦA GIẢNG VIÊN PHẢN BIỆN}{ii}{section*.2}%
+\contentsline {section}{BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP}{iii}{section*.3}%
+\contentsline {section}{GIẢI TRÌNH CÁC CHỈNH SỬA}{iv}{section*.4}%
+\contentsline {section}{LỜI CAM ĐOAN}{v}{section*.5}%
+\contentsline {section}{TÓM TẮT ĐỒ ÁN TỐT NGHIỆP - ABSTRACT}{vi}{section*.6}%
+\contentsline {section}{LỜI CẢM ƠN - ACKNOWLEDGEMENTS}{viii}{section*.7}%
+\contentsline {section}{MỤC LỤC - TABLE OF CONTENT}{ix}{section*.8}%
+\contentsline {section}{DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATION}{xii}{section*.9}%
+\contentsline {section}{CHƯƠNG 1. GIỚI THIỆU DỰ ÁN -- PROJECT OVERVIEW}{1}{section*.10}%
+\contentsline {subsection}{1.1. Đặt vấn đề / Bối cảnh của dự án}{1}{subsection*.11}%
+\contentsline {subsubsection}{1.1.1. Bối cảnh thị trường cho thuê xe tự lái tại Việt Nam}{1}{subsubsection*.12}%
+\contentsline {subsubsection}{1.1.2. Thách thức kỹ thuật}{1}{subsubsection*.13}%
+\contentsline {subsubsection}{1.1.3. Động lực thực hiện dự án}{2}{subsubsection*.15}%
+\contentsline {subsection}{1.2. Mục tiêu và phạm vi của dự án}{2}{subsection*.16}%
+\contentsline {subsubsection}{1.2.1. Mục tiêu tổng quát}{2}{subsubsection*.17}%
+\contentsline {subsubsection}{1.2.2. Phạm vi dự án}{3}{subsubsection*.18}%
+\contentsline {subsection}{1.3. Các tiêu chí cần đạt được của dự án}{4}{subsection*.19}%
+\contentsline {subsubsection}{1.3.1. Tiêu chí phần cứng}{4}{subsubsection*.20}%
+\contentsline {subsubsection}{1.3.2. Tiêu chí firmware}{5}{subsubsection*.21}%
+\contentsline {subsubsection}{1.3.3. Tiêu chí cloud/backend}{5}{subsubsection*.22}%
+\contentsline {subsubsection}{1.3.4. Tiêu chí frontend}{6}{subsubsection*.23}%
+\contentsline {subsection}{1.4. Phương pháp tiếp cận thiết kế kỹ thuật}{6}{subsection*.24}%
+\contentsline {subsubsection}{1.4.1. Phương pháp luận tổng thể}{6}{subsubsection*.25}%
+\contentsline {subsubsection}{1.4.2. Kiến trúc hệ thống}{7}{subsubsection*.27}%
+\contentsline {subsubsection}{1.4.3. Chiến lược quản lý năng lượng}{8}{subsubsection*.29}%
+\contentsline {subsubsection}{1.4.4. Công nghệ sử dụng}{10}{subsubsection*.31}%
+\contentsline {subsection}{1.5. Kết quả và khuyến nghị}{11}{subsection*.32}%
+\contentsline {subsubsection}{1.5.1. Kết quả đạt được}{11}{subsubsection*.33}%
+\contentsline {subsubsection}{1.5.2. Khuyến nghị và hướng phát triển}{12}{subsubsection*.34}%
+\contentsline {subsection}{Kết luận chương 1}{13}{subsection*.36}%
+\contentsline {section}{CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT}{15}{section*.37}%
+\contentsline {subsection}{2.1. Mô tả vấn đề -- Problem statement}{15}{subsection*.38}%
+\contentsline {subsubsection}{2.1.1. Bối cảnh thực tế}{15}{subsubsection*.39}%
+\contentsline {subsubsection}{2.1.2. Xác định vấn đề kỹ thuật}{15}{subsubsection*.40}%
+\contentsline {subsubsection}{2.1.3. Mục tiêu kỹ thuật}{16}{subsubsection*.41}%
+\contentsline {subsection}{2.2. Bối cảnh và cơ sở kỹ thuật -- Background and Technical reviews}{16}{subsection*.42}%
+\contentsline {subsubsection}{2.2.1. Tổng quan về hệ thống IoT trong giám sát phương tiện}{16}{subsubsection*.43}%
+\contentsline {subsubsection}{2.2.2. Các giải pháp giám sát phương tiện hiện có}{17}{subsubsection*.44}%
+\contentsline {subsubsection}{2.2.3. So sánh giao thức truyền thông IoT}{18}{subsubsection*.45}%
+\contentsline {subsubsection}{2.2.4. So sánh vi điều khiển (MCU)}{19}{subsubsection*.46}%
+\contentsline {subsubsection}{2.2.5. So sánh cơ sở dữ liệu}{20}{subsubsection*.47}%
+\contentsline {subsection}{2.3. Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế -- Design criteria and Constraints}{21}{subsection*.49}%
+\contentsline {subsubsection}{2.3.1. Yêu cầu chức năng}{21}{subsubsection*.50}%
+\contentsline {subsubsection}{2.3.2. Yêu cầu phi chức năng}{22}{subsubsection*.51}%
+\contentsline {subsubsection}{2.3.3. Ràng buộc thiết kế}{23}{subsubsection*.52}%
+\contentsline {subsubsection}{2.3.4. Tiêu chuẩn thiết kế áp dụng}{24}{subsubsection*.53}%
+\contentsline {subsection}{2.4. Yêu cầu từ các bên liên quan -- Stakeholder requirements}{24}{subsection*.54}%
+\contentsline {subsubsection}{2.4.1. Xác định các bên liên quan}{24}{subsubsection*.55}%
+\contentsline {subsubsection}{2.4.2. Ma trận yêu cầu các bên liên quan}{24}{subsubsection*.56}%
+\contentsline {subsubsection}{2.4.3. Phân tích chi tiết yêu cầu}{25}{subsubsection*.57}%
+\contentsline {subsubsection}{2.4.4. Ma trận truy xuất yêu cầu - chức năng}{26}{subsubsection*.58}%
+\contentsline {subsection}{Kết luận chương 2}{27}{subsection*.59}%
+\contentsline {section}{CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ -- DESIGN SOLUTIONS}{28}{section*.60}%
+\contentsline {subsection}{3.1. Phân tích và đề xuất giải pháp phần cứng -- Hardware analysis and solution}{28}{subsection*.61}%
+\contentsline {subsubsection}{3.1.1. Phân tích và lựa chọn phần cứng}{28}{subsubsection*.62}%
+\contentsline {paragraph}{3.1.1.1. Sơ đồ khối hệ thống}{28}{paragraph*.63}%
+\contentsline {paragraph}{3.1.1.2. Phân tích và lựa chọn vi điều khiển (MCU)}{29}{paragraph*.66}%
+\contentsline {subparagraph}{a) Các ứng viên}{29}{subparagraph*.67}%
+\contentsline {subparagraph}{b) Đối chiếu yêu cầu thiết kế với thông số phần cứng}{30}{subparagraph*.68}%
+\contentsline {subparagraph}{c) Phân tích các yếu tố quan trọng}{31}{subparagraph*.69}%
+\contentsline {subparagraph}{d) Kết luận lựa chọn}{31}{subparagraph*.70}%
+\contentsline {paragraph}{3.1.1.3. Phân tích và lựa chọn modem truyền thông}{32}{paragraph*.71}%
+\contentsline {subparagraph}{a) Các ứng viên}{33}{subparagraph*.72}%
+\contentsline {subparagraph}{b) Đối chiếu kiến trúc LTE/GNSS theo ràng buộc tích hợp}{33}{subparagraph*.73}%
+\contentsline {subparagraph}{c) Kết luận lựa chọn}{34}{subparagraph*.74}%
+\contentsline {subsubsection}{3.1.2. Giải pháp phần cứng}{35}{subsubsection*.75}%
+\contentsline {paragraph}{3.1.2.1. Thiết kế khối thu thập dữ liệu OBD2}{35}{paragraph*.76}%
+\contentsline {subparagraph}{a) Lựa chọn phương pháp kết nối OBD2}{35}{subparagraph*.77}%
+\contentsline {subparagraph}{b) Lựa chọn adapter OBD2 BLE: vgate iCar Pro}{36}{subparagraph*.78}%
+\contentsline {subparagraph}{c) Chiến lược kết nối theo chế độ hoạt động}{38}{subparagraph*.80}%
+\contentsline {paragraph}{3.1.2.2. Thiết kế khối cảm biến chuyển động IMU}{38}{paragraph*.81}%
+\contentsline {subparagraph}{a) Vai trò của IMU trong hệ thống}{38}{subparagraph*.82}%
+\contentsline {subparagraph}{b) Lựa chọn cảm biến: LIS3DSH}{38}{subparagraph*.83}%
+\contentsline {subparagraph}{c) Nguyên lý hoạt động trong hệ thống}{39}{subparagraph*.84}%
+\contentsline {subparagraph}{d) Ưu điểm của giải pháp}{39}{subparagraph*.87}%
+\contentsline {paragraph}{3.1.2.3. Thiết kế hệ thống quản lý nguồn}{39}{paragraph*.88}%
+\contentsline {subparagraph}{a) LDO 3.3V cho ESP32-S3 (AP2112-3.3)}{40}{subparagraph*.91}%
+\contentsline {subparagraph}{b) Buck 5V bus chính (MP2482)}{42}{subparagraph*.92}%
+\contentsline {subparagraph}{c) Buck 3.8V/4V cho modem (TPS54231)}{42}{subparagraph*.93}%
+\contentsline {subparagraph}{d) Boost 5V từ pin dự phòng (SX1308) và Power Path}{42}{subparagraph*.94}%
+\contentsline {subparagraph}{e) Giám sát điện áp và LVD}{42}{subparagraph*.95}%
+\contentsline {subparagraph}{f) Mạch sạc pin 1S (TP4056)}{43}{subparagraph*.96}%
+\contentsline {subparagraph}{g) Pin dự phòng 18650 1S Li-ion}{43}{subparagraph*.97}%
+\contentsline {paragraph}{3.1.2.4. Bảng tổng hợp linh kiện (Bill of Materials)}{44}{paragraph*.98}%
+\contentsline {subsection}{3.2. Phân tích và đề xuất giải pháp Firmware -- Firmware analysis and solution}{46}{subsection*.99}%
+\contentsline {subsubsection}{3.2.1. Phân tích và lựa chọn giải pháp Firmware}{46}{subsubsection*.100}%
+\contentsline {paragraph}{3.2.1.1. Đặt vấn đề cho giải pháp Firmware}{46}{paragraph*.101}%
+\contentsline {paragraph}{3.2.1.2. So sánh các phương án nền tảng Firmware}{47}{paragraph*.102}%
+\contentsline {paragraph}{3.2.1.3. Chọn giải pháp Firmware}{47}{paragraph*.103}%
+\contentsline {subsubsection}{3.2.2. Giải pháp Firmware}{48}{subsubsection*.104}%
+\contentsline {paragraph}{3.2.2.1. Kiến trúc firmware và luồng hoạt động}{48}{paragraph*.105}%
+\contentsline {subparagraph}{a) Kiến trúc phân lớp (Layered Architecture)}{48}{subparagraph*.106}%
+\contentsline {subparagraph}{b) Cơ chế điều phối với FreeRTOS}{49}{subparagraph*.108}%
+\contentsline {subparagraph}{c) Luồng hoạt động cơ bản}{50}{subparagraph*.110}%
+\contentsline {paragraph}{3.2.2.2. Module giao tiếp Bluetooth OBD2}{52}{paragraph*.112}%
+\contentsline {subparagraph}{a) Tổng quan giao tiếp BLE OBD2}{52}{subparagraph*.113}%
+\contentsline {subparagraph}{b) Quy trình kết nối BLE OBD2}{52}{subparagraph*.114}%
+\contentsline {subparagraph}{c) Chiến lược kết nối theo chế độ hoạt động}{53}{subparagraph*.116}%
+\contentsline {subparagraph}{d) Xử lý lỗi và cơ chế dự phòng (Fallback)}{54}{subparagraph*.117}%
+\contentsline {paragraph}{3.2.2.3. Module điều khiển modem SIMCom}{55}{paragraph*.118}%
+\contentsline {subparagraph}{a) Kiến trúc modem SIMCom SIM7600CE-T (LTE + GNSS tích hợp)}{55}{subparagraph*.119}%
+\contentsline {subparagraph}{b) Trình tự khởi tạo LTE/GNSS trong firmware}{56}{subparagraph*.120}%
+\contentsline {subparagraph}{c) Quản lý kết nối và tiết kiệm điện}{56}{subparagraph*.121}%
+\contentsline {subparagraph}{d) Xử lý sự cố}{56}{subparagraph*.122}%
+\contentsline {paragraph}{3.2.2.4. Module quản lý nguồn và GPIO}{58}{paragraph*.124}%
+\contentsline {subparagraph}{a) Sơ đồ chân GPIO}{58}{subparagraph*.125}%
+\contentsline {subparagraph}{b) Điều khiển Power Path (Diode OR + EN)}{58}{subparagraph*.126}%
+\contentsline {subparagraph}{c) Điều khiển IC sạc (TP4056)}{59}{subparagraph*.128}%
+\contentsline {subparagraph}{d) Giám sát điện áp và LVD}{59}{subparagraph*.129}%
+\contentsline {subparagraph}{e) Các chế độ quản lý nguồn}{60}{subparagraph*.130}%
+\contentsline {paragraph}{3.2.2.5. Định dạng dữ liệu và máy trạng thái}{60}{paragraph*.131}%
+\contentsline {subparagraph}{a) Định dạng dữ liệu MQTT}{60}{subparagraph*.132}%
+\contentsline {subparagraph}{b) Thiết kế MQTT Topic}{62}{subparagraph*.133}%
+\contentsline {subparagraph}{c) Chiến lược xử lý mất kết nối}{63}{subparagraph*.134}%
+\contentsline {subparagraph}{d) Máy trạng thái thiết bị (Device State Machine)}{63}{subparagraph*.135}%
+\contentsline {paragraph}{3.2.2.6. Cấu hình hệ thống}{66}{paragraph*.137}%
+\contentsline {subparagraph}{a) Cấu trúc dữ liệu cấu hình}{67}{subparagraph*.138}%
+\contentsline {subparagraph}{b) Quản lý cấu hình}{67}{subparagraph*.139}%
+\contentsline {subparagraph}{c) Hiệu chuẩn cảm biến (Sensor Calibration)}{67}{subparagraph*.140}%
+\contentsline {subsection}{3.3. Phân tích và đề xuất kiến trúc Backend/Cloud -- Backend/cloud analysis and solution}{68}{subsection*.141}%
+\contentsline {subsubsection}{3.3.1. Phân tích và lựa chọn kiến trúc Cloud}{68}{subsubsection*.142}%
+\contentsline {paragraph}{3.3.1.1. Đặt vấn đề cho kiến trúc Cloud}{68}{paragraph*.143}%
+\contentsline {paragraph}{3.3.1.2. So sánh các phương án kiến trúc Cloud}{68}{paragraph*.144}%
+\contentsline {paragraph}{3.3.1.3. Chọn giải pháp kiến trúc Cloud}{69}{paragraph*.145}%
+\contentsline {subsubsection}{3.3.2. Giải pháp Backend \& Cloud}{70}{subsubsection*.146}%
+\contentsline {paragraph}{3.3.2.1. Kiến trúc tổng quan hệ thống Cloud (Cloud Architecture Overview)}{70}{paragraph*.147}%
+\contentsline {subparagraph}{a) Mô hình kiến trúc tổng thể}{70}{subparagraph*.148}%
+\contentsline {subparagraph}{b) Luồng dữ liệu chính trong hệ thống}{70}{subparagraph*.151}%
+\contentsline {subparagraph}{c) Mô hình triển khai Docker}{72}{subparagraph*.152}%
+\contentsline {paragraph}{3.3.2.2. MQTT Broker - EMQX (Message Broker Selection \& Configuration)}{72}{paragraph*.153}%
+\contentsline {subparagraph}{a) Vai trò của MQTT Broker}{73}{subparagraph*.154}%
+\contentsline {subparagraph}{b) So sánh và lựa chọn MQTT Broker}{73}{subparagraph*.155}%
+\contentsline {subparagraph}{c) Cấu hình EMQX Rules Engine}{74}{subparagraph*.156}%
+\contentsline {paragraph}{3.3.2.3. Thiết kế cơ sở dữ liệu (Database Architecture Design)}{75}{paragraph*.157}%
+\contentsline {subparagraph}{a) Chiến lược lưu trữ kép (Dual Database Strategy)}{75}{subparagraph*.158}%
+\contentsline {subparagraph}{b) Cơ sở dữ liệu PostgreSQL - Schema quan hệ}{77}{subparagraph*.160}%
+\contentsline {subparagraph}{c) Cơ sở dữ liệu VictoriaMetrics - Schema chuỗi thời gian}{77}{subparagraph*.162}%
+\contentsline {subparagraph}{d) VictoriaLogs - Cơ sở dữ liệu nhật ký}{79}{subparagraph*.163}%
+\contentsline {paragraph}{3.3.2.4. API Server và kiến trúc phần mềm (API Server \& Software Architecture)}{79}{paragraph*.164}%
+\contentsline {subparagraph}{a) Lựa chọn công nghệ}{79}{subparagraph*.165}%
+\contentsline {subparagraph}{b) Kiến trúc Domain-Driven Design (DDD)}{79}{subparagraph*.166}%
+\contentsline {subparagraph}{c) MQTT Bridge - Dịch vụ độc lập}{80}{subparagraph*.167}%
+\contentsline {paragraph}{3.3.2.5. Thiết kế API Endpoints (REST API Design)}{80}{paragraph*.168}%
+\contentsline {subparagraph}{a) Nguyên tắc thiết kế}{80}{subparagraph*.169}%
+\contentsline {subparagraph}{b) Bảng tóm tắt API Endpoints}{80}{subparagraph*.170}%
+\contentsline {paragraph}{3.3.2.6. WebSocket và truyền dữ liệu thời gian thực (Real-time Communication)}{81}{paragraph*.172}%
+\contentsline {paragraph}{3.3.2.7. Bảo mật hệ thống (Security Design)}{82}{paragraph*.173}%
+\contentsline {subparagraph}{a) Xác thực Session-based (Không dùng JWT)}{82}{subparagraph*.174}%
+\contentsline {subparagraph}{b) Bảo mật tầng truyền tải}{82}{subparagraph*.175}%
+\contentsline {subparagraph}{c) Bảo mật MQTT}{82}{subparagraph*.176}%
+\contentsline {subparagraph}{d) Hệ thống thông báo cảnh báo}{82}{subparagraph*.177}%
+\contentsline {subsection}{3.4. Phân tích và đề xuất công nghệ Frontend -- Frontend analysis and solution}{82}{subsection*.178}%
+\contentsline {subsubsection}{3.4.1. Phân tích và lựa chọn công nghệ Frontend}{82}{subsubsection*.179}%
+\contentsline {paragraph}{3.4.1.1. Đặt vấn đề cho giải pháp Frontend}{82}{paragraph*.180}%
+\contentsline {paragraph}{3.4.1.2. So sánh các phương án công nghệ Frontend}{83}{paragraph*.181}%
+\contentsline {paragraph}{3.4.1.3. Chọn giải pháp Frontend}{83}{paragraph*.182}%
+\contentsline {subsubsection}{3.4.2. Giải pháp Frontend}{84}{subsubsection*.183}%
+\contentsline {paragraph}{3.4.2.1. Lựa chọn công nghệ Frontend (Technology Selection)}{84}{paragraph*.184}%
+\contentsline {subparagraph}{a) Framework ứng dụng web}{84}{subparagraph*.185}%
+\contentsline {subparagraph}{b) Thư viện giao diện (UI Component Library)}{85}{subparagraph*.186}%
+\contentsline {subparagraph}{c) Quản lý trạng thái (State Management)}{85}{subparagraph*.187}%
+\contentsline {subparagraph}{d) Thư viện bản đồ}{86}{subparagraph*.188}%
+\contentsline {paragraph}{3.4.2.2. Kiến trúc ứng dụng web (Web Application Architecture)}{86}{paragraph*.189}%
+\contentsline {subparagraph}{a) Mô hình kiến trúc Feature-Sliced Design}{86}{subparagraph*.190}%
+\contentsline {subparagraph}{b) Luồng dữ liệu trong ứng dụng}{87}{subparagraph*.192}%
+\contentsline {subparagraph}{c) Cơ chế xác thực và bảo vệ route}{88}{subparagraph*.194}%
+\contentsline {paragraph}{3.4.2.3. Thiết kế các trang chức năng chính (Main Feature Pages)}{88}{paragraph*.196}%
+\contentsline {subparagraph}{a) Trang tổng quan (Dashboard)}{88}{subparagraph*.197}%
+\contentsline {subparagraph}{b) Quản lý phương tiện (Vehicle Management)}{89}{subparagraph*.199}%
+\contentsline {subparagraph}{c) Quản lý chuyến đi, cảnh báo và vùng địa lý}{91}{subparagraph*.201}%
+\contentsline {paragraph}{3.4.2.4. Tích hợp bản đồ thời gian thực (Real-time Map Integration)}{92}{paragraph*.202}%
+\contentsline {subparagraph}{a) Kiến trúc tích hợp bản đồ}{92}{subparagraph*.203}%
+\contentsline {subparagraph}{b) Cơ chế cập nhật vị trí thời gian thực}{92}{subparagraph*.206}%
+\contentsline {subparagraph}{c) Các thành phần bản đồ}{93}{subparagraph*.207}%
+\contentsline {paragraph}{3.4.2.5. Thiết kế responsive và trải nghiệm người dùng (Responsive Design \& UX)}{95}{paragraph*.209}%
+\contentsline {subparagraph}{a) Chiến lược responsive}{95}{subparagraph*.210}%
+\contentsline {subparagraph}{b) Layout chính}{95}{subparagraph*.211}%
+\contentsline {subparagraph}{c) Hệ thống theme Light/Dark}{95}{subparagraph*.213}%
+\contentsline {subparagraph}{d) Các mẫu thiết kế giao diện (UI Patterns)}{95}{subparagraph*.214}%
+\contentsline {subparagraph}{e) Tối ưu trải nghiệm người dùng}{96}{subparagraph*.216}%
+\contentsline {subsection}{3.5. Phân tích, đánh giá và lựa chọn phương án khả thi -- Analysis, Evaluation and Selection}{96}{subsection*.217}%
+\contentsline {subsection}{3.6. Tối ưu phương án thiết kế -- The optimal solution}{97}{subsection*.218}%
+\contentsline {subsection}{Kết luận chương 3}{98}{subsection*.220}%
+\contentsline {section}{CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ -- IMPLEMENTATION AND RESULTS}{99}{section*.221}%
+\contentsline {subsection}{4.1. Tóm tắt triển khai giải pháp -- Compact implementation summary}{99}{subsection*.222}%
+\contentsline {subsubsection}{4.1.1. Triển khai phần cứng thiết bị}{99}{subsubsection*.223}%
+\contentsline {subsubsection}{4.1.2. Triển khai firmware nhúng}{99}{subsubsection*.224}%
+\contentsline {subsubsection}{4.1.3. Triển khai cloud, backend, frontend và giám sát}{100}{subsubsection*.225}%
+\contentsline {subsubsection}{4.1.4. Kết luận phần triển khai}{100}{subsubsection*.226}%
+\contentsline {subsection}{4.2. Tóm tắt đo lường và kết quả -- Compact measurements and results}{101}{subsection*.227}%
+\contentsline {subsubsection}{4.2.1. Kết quả phần cứng và năng lượng}{101}{subsubsection*.228}%
+\contentsline {subsubsection}{4.2.2. Kết quả firmware}{101}{subsubsection*.229}%
+\contentsline {subsubsection}{4.2.3. Kết quả cloud, backend và frontend}{101}{subsubsection*.230}%
+\contentsline {subsubsection}{4.2.4. Tóm tắt chỉ tiêu chính}{102}{subsubsection*.231}%
+\contentsline {subsubsection}{4.2.5. Nhận xét và giới hạn}{102}{subsubsection*.232}%
+\contentsline {section}{CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ -- EVALUATION AND RECOMMENDATIONS}{103}{section*.233}%
+\contentsline {subsection}{5.1. Đánh giá hiệu năng}{103}{subsection*.234}%
+\contentsline {subsubsection}{5.1.1. Đánh giá theo từng lớp kỹ thuật}{103}{subsubsection*.235}%
+\contentsline {subsection}{5.2. Đánh giá kinh tế và khả năng áp dụng}{103}{subsection*.236}%
+\contentsline {subsection}{5.3. Đánh giá rủi ro và biện pháp giảm thiểu}{103}{subsection*.237}%
+\contentsline {subsection}{5.4. Khuyến nghị phát triển tiếp theo}{104}{subsection*.238}%
+\contentsline {subsection}{Kết luận chương 5}{104}{subsection*.239}%
+\contentsline {section}{CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM -- REFLECTION AND LESSONS LEARNED}{105}{section*.240}%
+\contentsline {subsection}{6.1. Ứng dụng kiến thức kỹ thuật -- Application of prior coursework}{105}{subsection*.241}%
+\contentsline {subsection}{6.2. Các vấn đề kỹ thuật phức tạp đã xử lý}{105}{subsection*.242}%
+\contentsline {subsection}{6.3. Tác động đạo đức và xã hội}{105}{subsection*.243}%
+\contentsline {subsection}{6.4. Bài học kinh nghiệm và định hướng cá nhân}{106}{subsection*.244}%
+\contentsline {subsection}{Kết luận chương 6}{106}{subsection*.245}%
+\contentsline {section}{TÀI LIỆU TRÍCH DẪN - REFERENCES}{107}{section*.246}%
+\contentsline {subsection}{{[}A{]} Tài liệu tiếng Việt}{107}{subsection*.247}%
+\contentsline {subsection}{{[}B{]} Tài liệu tiếng Anh (Books \& Papers)}{107}{subsection*.248}%
+\contentsline {subsection}{{[}C{]} Tài liệu kỹ thuật (Datasheets \& Technical Documents)}{108}{subsection*.249}%
+\contentsline {subsection}{{[}D{]} Tài liệu trực tuyến (Online Resources)}{109}{subsection*.250}%

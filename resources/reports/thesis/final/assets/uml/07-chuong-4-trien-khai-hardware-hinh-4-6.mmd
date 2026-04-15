@@ -1,30 +1,12 @@
-flowchart LR
-    Vin["Nguồn xe 12V/24V"]
-    Buck["MP2482 Buck 5V"]
+flowchart TB
+    Source["Nguon xe 12V/24V"]
+    Main["Nhanh chinh<br/>Buck 5V -> rail 3.3V / 4V"]
+    Backup["Nhanh du phong<br/>TP4056 -> pin 18650 -> boost 5V"]
+    Runtime["Rail runtime / diode OR"]
+    Loads["MCU + IMU + Modem"]
+    Fsm["Power FSM"]
 
-    subgraph MainRail["Nhánh chính"]
-        direction TB
-        Rail33["Rail 3.3V\nMCU + IMU"]
-        Rail4["Rail ~4V\nModem LTE"]
-    end
-
-    subgraph BackupRail["Nhánh dự phòng"]
-        direction LR
-        Charge["TP4056 sạc pin"]
-        Cell["Pin 18650"]
-        Boost["SX1308 boost 5V"]
-        BackupBus["Bus backup 5V"]
-    end
-
-    Fsm["Power FSM\nGPIO5 / GPIO18 / GPIO19"]
-
-    Vin ----> Buck
-    Buck ----> Rail33
-    Buck ----> Rail4
-    Buck ----> Charge
-    Charge ----> Cell
-    Cell ----> Boost
-    Boost ----> BackupBus
-
-    Fsm -.->|điều khiển| Buck
-    Fsm -.->|ưu tiên nguồn| BackupBus
+    Source --> Main --> Runtime --> Loads
+    Source --> Backup --> Runtime
+    Fsm -. dieu khien .-> Main
+    Fsm -. uu tien nguon .-> Runtime

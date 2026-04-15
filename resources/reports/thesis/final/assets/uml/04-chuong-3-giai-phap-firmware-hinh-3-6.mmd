@@ -1,11 +1,24 @@
-flowchart LR
-    IMU["Ngắt IMU"] --> PowerTask["power_task"]
-    OBDTask["obd_task"] --> Queue["telemetry_queue"]
-    GNSSTask["gnss_task"] --> Queue
-    SensorTask["sensor_task"] --> Queue
-    Queue --> MQTTTask["mqtt_task"]
-    MQTTTask --> Broker["EMQX"]
-    CmdTask["command_task"] --> MQTTTask
+flowchart TB
+    IMU["Ngat IMU"] --> PowerTask["power_task"]
+
+    subgraph WorkerTasks["Cac task nghiep vu"]
+        direction LR
+        OBDTask["obd_task"]
+        GNSSTask["gnss_task"]
+        SensorTask["sensor_task"]
+        CmdTask["command_task"]
+    end
+
+    Queue["telemetry_queue"]
+    MQTTTask["mqtt_task"]
+    Broker["EMQX"]
+
     PowerTask --> OBDTask
     PowerTask --> GNSSTask
     PowerTask --> CmdTask
+    OBDTask --> Queue
+    GNSSTask --> Queue
+    SensorTask --> Queue
+    Queue --> MQTTTask
+    CmdTask --> MQTTTask
+    MQTTTask --> Broker

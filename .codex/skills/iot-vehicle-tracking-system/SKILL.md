@@ -1,6 +1,6 @@
 ---
 name: iot-vehicle-tracking-system
-description: [TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]
+description: "Use for repository-specific workflows in the IoT Vehicle Tracking System monorepo, especially when work spans firmware, MQTT, backend, frontend, mobile, Docker Compose, CI/CD, or project documentation."
 ---
 
 # Iot Vehicle Tracking System

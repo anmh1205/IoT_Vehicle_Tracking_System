@@ -95,7 +95,9 @@ export const uploadFirmware = asyncHandler(async (req: FirmwareUploadRequest, re
   }
 
   const resolvedFilePath = path.resolve(file.path);
-  const filename = String(file.originalname || file.filename);
+  // Persist unique storage filename to avoid collisions when operators upload
+  // repeated builds with the same original file name.
+  const filename = String(file.filename || file.originalname);
   const sha256 = await computeSha256(resolvedFilePath);
 
   try {
@@ -204,18 +206,103 @@ export const downloadFirmware = asyncHandler(async (req: AuthenticatedRequest, r
   }
 
   const artifact = await firmwareDeployService.getFirmwareArtifactDescriptor(id);
+  const encoding =
+    typeof req.query?.encoding === 'string' ? String(req.query.encoding).trim().toLowerCase() : '';
   const filename = artifact.filename.endsWith('.bin') ? artifact.filename : `${artifact.filename}.bin`;
   const safeFilename = filename.replace(/["\r\n]/gu, '_');
 
+  if (encoding === 'hex') {
+    const encodedLength = artifact.size * 2;
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Length', encodedLength.toString());
+    res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}.hex"`);
+    res.setHeader('Cache-Control', 'no-store, no-transform');
+    res.setHeader('Content-Encoding', 'identity');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('ETag', `"sha256-${artifact.sha256}"`);
+    res.setHeader('Accept-Ranges', 'none');
+    res.setHeader('X-Firmware-Encoding', 'hex');
+    res.setHeader('X-Firmware-Original-Size', artifact.size.toString());
+
+    const stream = fs.createReadStream(artifact.resolvedPath, { highWaterMark: 4096 });
+    stream.on('error', (streamError) => {
+      if (res.headersSent) {
+        res.destroy(streamError as Error);
+        return;
+      }
+
+      const error = createApiError(500, 'Failed to stream firmware artifact (hex)', {
+        code: 'STREAM_ERROR',
+        firmwareId: id,
+      });
+      sendError(res, error, req.path);
+    });
+
+    stream.on('data', (chunk) => {
+      const hexChunk = Buffer.isBuffer(chunk)
+        ? chunk.toString('hex')
+        : Buffer.from(chunk).toString('hex');
+      if (!res.write(hexChunk)) {
+        stream.pause();
+      }
+    });
+
+    res.on('drain', () => {
+      stream.resume();
+    });
+
+    stream.on('end', () => {
+      res.end();
+    });
+    return;
+  }
+
+  const rangeHeader = typeof req.headers.range === 'string' ? req.headers.range.trim() : '';
+  let rangeStart = 0;
+  let rangeEnd = artifact.size - 1;
+  let statusCode = 200;
+
+  if (rangeHeader) {
+    const match = /^bytes=(\d+)-(\d*)$/u.exec(rangeHeader);
+    if (!match) {
+      throw createValidationError('Invalid Range header');
+    }
+
+    rangeStart = Number.parseInt(match[1], 10);
+    rangeEnd = match[2] ? Number.parseInt(match[2], 10) : artifact.size - 1;
+
+    if (
+      !Number.isFinite(rangeStart) ||
+      !Number.isFinite(rangeEnd) ||
+      rangeStart < 0 ||
+      rangeEnd < rangeStart ||
+      rangeStart >= artifact.size
+    ) {
+      throw createValidationError('Range out of bounds');
+    }
+
+    rangeEnd = Math.min(rangeEnd, artifact.size - 1);
+    statusCode = 206;
+  }
+
+  const contentLength = rangeEnd - rangeStart + 1;
+  res.status(statusCode);
   res.setHeader('Content-Type', 'application/octet-stream');
-  res.setHeader('Content-Length', artifact.size.toString());
+  res.setHeader('Content-Length', contentLength.toString());
   res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
-  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Cache-Control', 'no-store, no-transform');
+  res.setHeader('Content-Encoding', 'identity');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('ETag', `"sha256-${artifact.sha256}"`);
-  res.setHeader('Accept-Ranges', 'none');
+  res.setHeader('Accept-Ranges', 'bytes');
+  if (statusCode === 206) {
+    res.setHeader('Content-Range', `bytes ${rangeStart}-${rangeEnd}/${artifact.size}`);
+  }
 
-  const stream = fs.createReadStream(artifact.resolvedPath);
+  const stream = fs.createReadStream(artifact.resolvedPath, {
+    start: rangeStart,
+    end: rangeEnd,
+  });
   stream.on('error', (streamError) => {
     if (res.headersSent) {
       res.destroy(streamError as Error);

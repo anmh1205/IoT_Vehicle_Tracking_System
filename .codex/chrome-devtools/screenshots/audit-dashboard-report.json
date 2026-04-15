@@ -1,0 +1,368 @@
+[
+  {
+    "route": "/dashboard",
+    "url": "https://thingdock.dev/dashboard",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/api/v1/dashboard/activity?limit=50",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/api/v1/dashboard/stats",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/api/v1/dashboard/device-status",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/api/v1/dashboard/device-activity?days=7",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/api/v1/dashboard/fleet-runtime?days=30",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/api/v1/notifications?limit=8",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/api/v1/notifications/stats",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/users?_rsc=18t7j",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/map",
+    "url": "https://thingdock.dev/dashboard/map",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-map.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/users?_rsc=1idy5",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard?_rsc=1idy5",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/users?_rsc=1146w",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/system-admin?_rsc=1146w",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/devices",
+    "url": "https://thingdock.dev/dashboard/devices",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-devices.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/drivers?_rsc=1ypm1",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/system-admin?_rsc=1513o",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/settings?_rsc=1513o",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/map?_rsc=1513o",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard?_rsc=1513o",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/vehicles?_rsc=1513o",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/devices/1",
+    "url": "https://thingdock.dev/dashboard/devices/1",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-devices-1.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/users?_rsc=3wjvx",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/vehicles",
+    "url": "https://thingdock.dev/dashboard/vehicles",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-vehicles.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard?_rsc=12tk3",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/customers?_rsc=12tk3",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/drivers",
+    "url": "https://thingdock.dev/dashboard/drivers",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-drivers.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/map?_rsc=1d73t",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/customers?_rsc=1d73t",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/trips",
+    "url": "https://thingdock.dev/dashboard/trips",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-trips.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/users?_rsc=1ncm2",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/settings?_rsc=1ncm2",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/map?_rsc=1ncm2",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/trips?_rsc=1ncm2",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/system-admin?_rsc=3cxqo",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/map?_rsc=3cxqo",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/notifications?_rsc=3cxqo",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/violations",
+    "url": "https://thingdock.dev/dashboard/violations",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-violations.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/alerts?_rsc=1sxky",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/settings?_rsc=okg06",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/geofences?_rsc=okg06",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/geofences",
+    "url": "https://thingdock.dev/dashboard/geofences",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-geofences.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/settings?_rsc=khnkd",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/trips?_rsc=khnkd",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/violations?_rsc=khnkd",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/notifications?_rsc=khnkd",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/alerts",
+    "url": "https://thingdock.dev/dashboard/alerts",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-alerts.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/trips?_rsc=sb668",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/trips?_rsc=resix",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/statistics",
+    "url": "https://thingdock.dev/dashboard/statistics",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-statistics.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "route": "/dashboard/maintenance",
+    "url": "https://thingdock.dev/dashboard/maintenance",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-maintenance.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard?_rsc=krxai",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/simulator?_rsc=krxai",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/firmware?_rsc=krxai",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/customers",
+    "url": "https://thingdock.dev/dashboard/customers",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-customers.png",
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/users?_rsc=14b9o",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/drivers?_rsc=14b9o",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/system-status",
+    "url": "https://thingdock.dev/dashboard/system-status",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-system-status.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/system-admin?_rsc=xhlfx",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/settings?_rsc=xhlfx",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard?_rsc=xhlfx",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/exports?_rsc=xhlfx",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/maintenance?_rsc=xhlfx",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/settings?_rsc=w1y4s",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "https://thingdock.dev/dashboard/system-status?_rsc=w1y4s",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard/system-admin",
+    "url": "https://thingdock.dev/dashboard/system-admin",
+    "title": "Bảng điều khiển | Theo dõi phương tiện IoT",
+    "screenshotPath": "E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.codex\\chrome-devtools\\screenshots\\audit-dashboard-system-admin.png",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://thingdock.dev/dashboard/settings?_rsc=bdd5m",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  }
+]

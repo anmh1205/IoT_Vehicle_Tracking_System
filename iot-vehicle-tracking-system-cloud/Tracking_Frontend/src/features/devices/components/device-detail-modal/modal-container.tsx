@@ -89,7 +89,10 @@ export const DeviceDetailModalContainer = ({
 
   const context = useMemo(
     () => ({
-      device: detail.data?.device ?? device,
+      device:
+        detail.data?.device || device
+          ? ({ ...(device ?? {}), ...(detail.data?.device ?? {}) } as Device)
+          : null,
       runtime: detail.data?.runtime ?? null,
       loading: detail.isLoading,
       error: detail.error as Error | null,

@@ -381,6 +381,78 @@ esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32
     return ESP_ERR_TIMEOUT;
 }
 
+esp_err_t modem_at_send_collect(const char *cmd,
+                                uint8_t *response,
+                                size_t resp_len,
+                                size_t *out_len,
+                                uint32_t timeout_ms,
+                                uint32_t idle_timeout_ms) {
+    ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
+    ESP_RETURN_ON_NULL(cmd, ESP_ERR_INVALID_ARG, TAG, "cmd is NULL");
+    ESP_RETURN_ON_FALSE(response != NULL && resp_len > 0U, ESP_ERR_INVALID_ARG, TAG, "response buffer invalid");
+
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
+        return ESP_ERR_TIMEOUT;
+    }
+
+    memset(response, 0, resp_len);
+    if (out_len != NULL) {
+        *out_len = 0U;
+    }
+
+    modem_at_drain_uart_events();
+    modem_at_drain_pending_input(MODEM_RX_BUFFER_SIZE);
+
+    int written = uart_write_bytes(MODEM_UART_NUM, cmd, strlen(cmd));
+    if (written < 0) {
+        xSemaphoreGive(s_at_lock);
+        return ESP_FAIL;
+    }
+
+    size_t used = 0U;
+    bool received_any = false;
+    uint64_t deadline = esp_timer_get_time() + ((uint64_t)timeout_ms * 1000ULL);
+    uint64_t idle_deadline = 0ULL;
+    char chunk[128] = {0};
+
+    while (esp_timer_get_time() < deadline) {
+        modem_at_drain_uart_events();
+        int read = uart_read_bytes(MODEM_UART_NUM, (uint8_t *)chunk, sizeof(chunk), pdMS_TO_TICKS(50));
+        if (read > 0) {
+            received_any = true;
+            idle_deadline = esp_timer_get_time() + ((uint64_t)idle_timeout_ms * 1000ULL);
+
+            size_t copy_len = MIN_VALUE((size_t)read, resp_len - used);
+            if (copy_len > 0U) {
+                memcpy(response + used, chunk, copy_len);
+                used += copy_len;
+            }
+
+            if (used >= resp_len) {
+                break;
+            }
+            continue;
+        }
+
+        if (received_any && idle_timeout_ms > 0U && esp_timer_get_time() >= idle_deadline) {
+            break;
+        }
+    }
+
+    modem_at_drain_uart_events();
+    xSemaphoreGive(s_at_lock);
+
+    if (out_len != NULL) {
+        *out_len = used;
+    }
+
+    if (!received_any) {
+        return ESP_ERR_TIMEOUT;
+    }
+
+    return ESP_OK;
+}
+
 /**
  * @brief Send AT command and assert expected marker in response.
  *

@@ -39,8 +39,8 @@ Close the real OTA loop on UAT/VPS with ESP32 hardware + serial: upload artifact
 | 2. Harden backend artifact and deployment contract | completed | 100% | stable download contract, deploy lifecycle, operator-safe API |
 | 3. Harden MQTT bridge and OTA state reconciliation | completed | 100% | idempotent OTA ingestion, stuck/duplicate handling |
 | 4. Harden firmware OTA runtime and confirm/rollback | completed | 100% | safer OTA execution, better error mapping, durable semantics |
-| 5. Run UAT/VPS and ESP32 debug loops | in_progress | 35% | real end-to-end loop using `vps-control` + `esp32-loop-coding` |
-| 6. Close test matrix, docs, and release gate | in_progress | 60% | production-like validation evidence and doc updates |
+| 5. Run UAT/VPS and ESP32 debug loops | completed | 100% | real end-to-end loop using `vps-control` + `esp32-loop-coding` |
+| 6. Close test matrix, docs, and release gate | in_progress | 85% | production-like validation evidence and doc updates |
 
 ## Dependency order
 1. UAT/VPS baseline first.

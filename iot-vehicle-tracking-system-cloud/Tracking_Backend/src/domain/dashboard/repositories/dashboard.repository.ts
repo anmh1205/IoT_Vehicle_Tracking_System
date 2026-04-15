@@ -1,6 +1,7 @@
 import { pool } from '@/infrastructure/database/pool';
 import { findMany } from '@/infrastructure/database/queries';
 import type { ActivityQuery } from '@/domain/dashboard/types/dashboard.types';
+import { isUndefinedColumnError } from '@/shared/utils/postgres-error.util';
 
 interface StatusCountRow {
   current_status: string;
@@ -46,7 +47,7 @@ interface FleetRuntimeRow {
 
 export const getDeviceStatusCounts = async (): Promise<Record<string, number>> => {
   const result = await pool.query<StatusCountRow>(
-    'SELECT current_status, COUNT(*)::text as count FROM devices GROUP BY current_status',
+    'SELECT COALESCE(current_status::text, \'unknown\') AS current_status, COUNT(*)::text as count FROM devices GROUP BY COALESCE(current_status::text, \'unknown\')',
   );
 
   const counts: Record<string, number> = {};
@@ -56,20 +57,38 @@ export const getDeviceStatusCounts = async (): Promise<Record<string, number>> =
   return counts;
 };
 
+const getDeviceSessionRuntimeExpression = async (): Promise<string> => {
+  const result = await pool.query<{ exists: boolean }>(
+    `SELECT EXISTS (
+       SELECT 1
+       FROM information_schema.columns
+       WHERE table_schema = 'public'
+         AND table_name = 'device_sessions'
+         AND column_name = 'total_runtime_seconds'
+     )`,
+  );
+
+  return result.rows[0]?.exists
+    ? 'COALESCE(total_runtime_seconds, uptime, 0)'
+    : 'COALESCE(uptime, EXTRACT(EPOCH FROM (COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at))), 0)';
+};
+
 export const getTotalRuntimeToday = async (): Promise<number> => {
+  const runtimeExpression = await getDeviceSessionRuntimeExpression();
   const result = await pool.query<SumRow>(
-    `SELECT COALESCE(SUM(total_runtime_seconds), 0)::text as total
+    `SELECT COALESCE(SUM(${runtimeExpression}), 0)::text as total
      FROM device_sessions
-     WHERE server_session_start >= CURRENT_DATE`,
+     WHERE COALESCE(server_session_start, created_at) >= CURRENT_DATE`,
   );
   return parseInt(result.rows[0].total, 10);
 };
 
 export const getTotalRuntimeWeek = async (): Promise<number> => {
+  const runtimeExpression = await getDeviceSessionRuntimeExpression();
   const result = await pool.query<SumRow>(
-    `SELECT COALESCE(SUM(total_runtime_seconds), 0)::text as total
+    `SELECT COALESCE(SUM(${runtimeExpression}), 0)::text as total
      FROM device_sessions
-     WHERE server_session_start >= CURRENT_DATE - INTERVAL '7 days'`,
+     WHERE COALESCE(server_session_start, created_at) >= CURRENT_DATE - INTERVAL '7 days'`,
   );
   return parseInt(result.rows[0].total, 10);
 };
@@ -160,7 +179,7 @@ export const getDeviceActivitySeries = async (days: number): Promise<DeviceActiv
           WHERE
             LOWER(COALESCE(message, '')) LIKE '%idle%'
             OR LOWER(COALESCE(message, '')) LIKE '%stop%'
-            OR LOWER(COALESCE(event_type, '')) IN ('session_end', 'stopped')
+            OR LOWER(COALESCE(event_type::text, '')) IN ('session_end', 'stopped')
         )::text AS idle,
         COUNT(*) FILTER (
           WHERE
@@ -170,7 +189,7 @@ export const getDeviceActivitySeries = async (days: number): Promise<DeviceActiv
               OR LOWER(COALESCE(event_code, '')) = 'device_offline'
               OR LOWER(COALESCE(message, '')) LIKE '%idle%'
               OR LOWER(COALESCE(message, '')) LIKE '%stop%'
-              OR LOWER(COALESCE(event_type, '')) IN ('session_end', 'stopped')
+              OR LOWER(COALESCE(event_type::text, '')) IN ('session_end', 'stopped')
             )
         )::text AS running
       FROM event_logs
@@ -194,13 +213,14 @@ export const getDeviceActivitySeries = async (days: number): Promise<DeviceActiv
 export const getDeviceStatusDistribution = async (): Promise<DeviceStatusRow[]> => {
   const query = `
     WITH grouped AS (
-      SELECT LOWER(COALESCE(current_status, 'unknown')) AS status, COUNT(*)::text AS count
+      SELECT LOWER(COALESCE(current_status::text, 'unknown')) AS status, COUNT(*)::text AS count
       FROM devices
-      GROUP BY LOWER(COALESCE(current_status, 'unknown'))
+      GROUP BY LOWER(COALESCE(current_status::text, 'unknown'))
     )
     SELECT
       CASE
         WHEN status = 'running' THEN 'Running'
+        WHEN status = 'online' THEN 'Online'
         WHEN status = 'stopped' THEN 'Stopped'
         WHEN status = 'disconnected' THEN 'Offline'
         WHEN status = 'error' THEN 'Error'
@@ -209,6 +229,7 @@ export const getDeviceStatusDistribution = async (): Promise<DeviceStatusRow[]> 
       count,
       CASE
         WHEN status = 'running' THEN '#22c55e'
+        WHEN status = 'online' THEN '#3b82f6'
         WHEN status = 'stopped' THEN '#64748b'
         WHEN status = 'disconnected' THEN '#ef4444'
         WHEN status = 'error' THEN '#f59e0b'
@@ -225,6 +246,7 @@ export const getDeviceStatusDistribution = async (): Promise<DeviceStatusRow[]> 
 export const getFleetRuntimeSeries = async (days: number): Promise<FleetRuntimeRow[]> => {
   const safeDays = Math.max(1, Math.min(days, 180));
   const fromDate = new Date(Date.now() - (safeDays - 1) * 24 * 60 * 60 * 1000);
+  const runtimeExpression = await getDeviceSessionRuntimeExpression();
 
   const query = `
     WITH series AS (
@@ -237,17 +259,7 @@ export const getFleetRuntimeSeries = async (days: number): Promise<FleetRuntimeR
     bucketed AS (
       SELECT
         DATE_TRUNC('day', COALESCE(server_session_start, created_at)) AS bucket,
-        COALESCE(SUM(
-          CASE
-            WHEN total_runtime_seconds IS NOT NULL THEN total_runtime_seconds
-            WHEN uptime IS NOT NULL THEN uptime
-            ELSE EXTRACT(
-              EPOCH FROM (
-                COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at)
-              )
-            )
-          END
-        ), 0)::text AS runtime_seconds
+        COALESCE(SUM(${runtimeExpression}), 0)::text AS runtime_seconds
       FROM device_sessions
       WHERE COALESCE(server_session_start, created_at) >= DATE_TRUNC('day', $1::timestamptz)
       GROUP BY bucket
@@ -260,6 +272,13 @@ export const getFleetRuntimeSeries = async (days: number): Promise<FleetRuntimeR
     ORDER BY series.bucket ASC
   `;
 
-  const result = await pool.query<FleetRuntimeRow>(query, [fromDate.toISOString()]);
-  return result.rows;
+  try {
+    const result = await pool.query<FleetRuntimeRow>(query, [fromDate.toISOString()]);
+    return result.rows;
+  } catch (error) {
+    if (isUndefinedColumnError(error)) {
+      return [];
+    }
+    throw error;
+  }
 };

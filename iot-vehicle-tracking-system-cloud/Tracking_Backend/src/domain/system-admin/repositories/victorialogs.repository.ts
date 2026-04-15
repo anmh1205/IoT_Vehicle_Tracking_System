@@ -1,8 +1,8 @@
 import { victoriaLogsConfig } from '@/config/env';
 
 interface VlQueryResult {
-  status: string;
-  data: unknown;
+  items: Array<Record<string, unknown>>;
+  total: number;
 }
 
 export const query = async (logsql: string, limit?: number): Promise<VlQueryResult> => {
@@ -15,5 +15,22 @@ export const query = async (logsql: string, limit?: number): Promise<VlQueryResu
     throw new Error(`VictoriaLogs query failed: ${response.statusText}`);
   }
 
-  return response.json() as Promise<VlQueryResult>;
+  const text = await response.text();
+  const items = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => JSON.parse(line) as Record<string, unknown>)
+    .map((entry) => ({
+      ...entry,
+      timestamp: String(entry._time ?? entry.timestamp ?? new Date().toISOString()),
+      level: String(entry.level ?? 'info'),
+      source: String(entry.service ?? entry.source ?? entry.context ?? 'system'),
+      message: String(entry._msg ?? entry.message ?? entry.msg ?? ''),
+    }));
+
+  return {
+    items,
+    total: items.length,
+  };
 };

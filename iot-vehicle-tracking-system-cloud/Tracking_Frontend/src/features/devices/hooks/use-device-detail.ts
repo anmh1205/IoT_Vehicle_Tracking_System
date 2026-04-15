@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { deviceDetailServices } from '@/lib/api/device-detail';
-import type { Device } from '@/features/devices/types';
+import type { Device, DeviceSession } from '@/features/devices/types';
 
 export interface DeviceDetailData {
   device: Device | null;
@@ -16,6 +16,17 @@ export interface DeviceDetailData {
   errors: unknown[];
 }
 
+const toDeviceSession = (raw: any): DeviceSession => ({
+  id: Number(raw?.id ?? 0),
+  status: raw?.status ?? 'running',
+  serverSessionStart: raw?.serverSessionStart ?? raw?.server_session_start ?? null,
+  serverSessionEnd: raw?.serverSessionEnd ?? raw?.server_session_end ?? null,
+  uptime: raw?.uptime !== undefined && raw?.uptime !== null ? Number(raw.uptime) : null,
+  avgVibration:
+    raw?.avgVibration !== undefined && raw?.avgVibration !== null ? Number(raw.avgVibration) : null,
+  dataPointsCount: Number(raw?.dataPointsCount ?? raw?.data_points_count ?? 0),
+});
+
 const toDevice = (raw: any): Device => ({
   id: Number(raw?.id ?? 0),
   deviceId: String(raw?.deviceId ?? raw?.device_id ?? ''),
@@ -25,6 +36,7 @@ const toDevice = (raw: any): Device => ({
     'disconnected') as Device['currentStatus'],
   imei: raw?.imei ?? null,
   firmwareVersion: raw?.firmwareVersion ?? raw?.firmware_version ?? null,
+  targetFirmwareVersion: raw?.targetFirmwareVersion ?? raw?.target_firmware_version ?? null,
   vehiclePlate: raw?.vehiclePlate ?? raw?.vehicle_plate ?? null,
   customerName: raw?.customerName ?? raw?.customer_name ?? null,
   lastSeenAt: raw?.lastSeenAt ?? raw?.last_seen_at ?? null,
@@ -33,7 +45,19 @@ const toDevice = (raw: any): Device => ({
   totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? raw?.total_runtime_seconds ?? 0),
   requestInterval: Number(raw?.requestInterval ?? raw?.request_interval ?? 60),
   vibrationThreshold: Number(raw?.vibrationThreshold ?? raw?.vibration_threshold ?? 0),
+  lastErrorCode:
+    raw?.lastErrorCode !== undefined && raw?.lastErrorCode !== null
+      ? Number(raw.lastErrorCode)
+      : raw?.last_error_code !== undefined && raw?.last_error_code !== null
+        ? Number(raw.last_error_code)
+        : null,
   config: raw?.config ?? null,
+  currentSession: raw?.currentSession ? toDeviceSession(raw.currentSession) : null,
+  recentSessions: Array.isArray(raw?.recentSessions)
+    ? raw.recentSessions.map(toDeviceSession)
+    : Array.isArray(raw?.recent_sessions)
+      ? raw.recent_sessions.map(toDeviceSession)
+      : [],
 });
 
 export const useDeviceDetail = (id: number | null) =>

@@ -1,10 +1,15 @@
 import { statusSchema } from '../validators/payload.validator';
-import { updateDeviceStatus } from '../infrastructure/database';
+import {
+  completeDeviceSession,
+  ensureDeviceSession,
+  updateDeviceStatus,
+} from '../infrastructure/database';
 import { verifyDeviceToken } from '../services/device-auth.service';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
-import { getStatus, setStatus, getOrCreateSession, clearSession } from '../cache/device-state.cache';
+import { clearSession, getStatus, setStatus } from '../cache/device-state.cache';
 import { logger } from '../infrastructure/logger';
+import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 
 /**
  * Handle device status changes on topic v1/{deviceId}/status.
@@ -55,9 +60,28 @@ export const handleStatus = async (
 
   const previousState = getStatus(payload.device_id);
   const previousStatus = previousState?.status ?? 'offline';
+  const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
+    payload.timestamp,
+    payload.metadata?.sent_at,
+  );
+
+  if (timestampSource !== 'payload') {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        payloadTimestamp: payload.timestamp,
+        metadataSentAt: payload.metadata?.sent_at,
+        normalizedTimestampMs: timestampMs,
+        timestampSource,
+      },
+      'Normalized invalid status timestamp before publishing realtime events',
+    );
+  }
 
   if (payload.status === 'running') {
-    const [sessionId, isNewSession] = getOrCreateSession(payload.device_id);
+    const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs);
+    const sessionId = ensuredSession.sessionId;
+    const isNewSession = ensuredSession.isNew;
     setStatus(payload.device_id, 'running', sessionId);
 
     await updateDeviceStatus(payload.device_id, 'running');
@@ -71,7 +95,7 @@ export const handleStatus = async (
         schema_version: schemaVersion,
         seq_no: seqNo,
         boot_id: bootId,
-        timestamp: new Date(payload.timestamp).toISOString(),
+        timestamp: new Date(timestampMs).toISOString(),
       });
     }
 
@@ -95,8 +119,13 @@ export const handleStatus = async (
       `Device ${payload.device_id}: ${previousStatus} -> running (session=${sessionId})`,
     );
   } else if (payload.status === 'stopped') {
-    const endedSessionId = clearSession(payload.device_id);
-    setStatus(payload.device_id, 'stopped');
+    const endedSessionId = await completeDeviceSession(
+      payload.device_id,
+      timestampMs,
+      previousState?.sessionId,
+    );
+    clearSession(payload.device_id);
+    setStatus(payload.device_id, 'stopped', null);
 
     await updateDeviceStatus(payload.device_id, 'stopped');
 
@@ -109,7 +138,7 @@ export const handleStatus = async (
         schema_version: schemaVersion,
         seq_no: seqNo,
         boot_id: bootId,
-        timestamp: new Date(payload.timestamp).toISOString(),
+        timestamp: new Date(timestampMs).toISOString(),
       });
     }
 

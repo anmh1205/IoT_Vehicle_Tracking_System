@@ -141,21 +141,21 @@ jobs:
             fi
 
             docker compose ps emqx
-            EMQX_PASSWORD="$(grep '^EMQX_DASHBOARD__DEFAULT_PASSWORD=' .env | cut -d '=' -f2-)"
-            test -n "$EMQX_PASSWORD"
             for _ in {1..20}; do
-              DASH_OK=0
+              BROKER_OK=0
               TLS_OK=0
 
-              if curl --connect-timeout 2 --max-time 5 -fsS -u "admin:$EMQX_PASSWORD" http://127.0.0.1:18083/status >/dev/null; then
-                DASH_OK=1
+              if docker exec tracking-emqx emqx ctl status >/dev/null 2>&1; then
+                BROKER_OK=1
               fi
 
-              if echo | openssl s_client -connect 127.0.0.1:8883 -servername "$MQTT_TLS_DOMAIN" 2>/dev/null | openssl x509 -noout -checkhost "$MQTT_TLS_DOMAIN" >/dev/null 2>&1; then
+              rm -f "$WORKDIR/current-cert.pem"
+              docker cp tracking-emqx:/opt/emqx/etc/certs/cert.pem "$WORKDIR/current-cert.pem" >/dev/null 2>&1 || true
+              if [ -s "$WORKDIR/current-cert.pem" ] && openssl x509 -in "$WORKDIR/current-cert.pem" -noout -checkhost "$MQTT_TLS_DOMAIN" >/dev/null 2>&1; then
                 TLS_OK=1
               fi
 
-              if [ "$DASH_OK" -eq 1 ] && [ "$TLS_OK" -eq 1 ]; then
+              if [ "$BROKER_OK" -eq 1 ] && [ "$TLS_OK" -eq 1 ]; then
                 exit 0
               fi
 

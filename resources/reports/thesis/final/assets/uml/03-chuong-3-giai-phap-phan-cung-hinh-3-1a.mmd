@@ -1,26 +1,7 @@
-flowchart LR
-    subgraph Input["Nguồn vào"]
-        Batt["Ắc quy 12V/24V"]
-        Buck["Buck 5V"]
-        Backup["Pin dự phòng + boost"]
-        Batt --> Buck
-        Batt --> Backup
-    end
+flowchart TB
+    Input["Khoi nguon<br/>12V/24V -> Buck -> Charge -> Pin 18650"]
+    Control["Khoi dieu khien<br/>ESP32-S3 + LIS3DSH"]
+    Comm["Khoi truyen thong<br/>SIM7600 + OBD2 BLE"]
 
-    subgraph Core["Khối điều khiển"]
-        MCU["ESP32-S3"]
-        PM["Power FSM"]
-        PM --> MCU
-    end
-
-    subgraph IO["Thiết bị ngoại vi"]
-        Modem["SIM7600CE-T"]
-        IMU["LIS3DSH"]
-        OBD["OBD2 BLE"]
-    end
-
-    Buck ----> MCU
-    Backup ----> MCU
-    MCU ----> Modem
-    MCU ----> IMU
-    MCU ----> OBD
+    Input --> Control --> Comm
+    Input -. nguon du phong .-> Control

@@ -13,28 +13,28 @@
     "tertiaryColor": "#eef2ff",
     "clusterBkg": "#f1f5f9",
     "clusterBorder": "#64748b",
-    "fontSize": "18px"
+    "fontSize": "22px"
   },
   "flowchart": {
     "defaultRenderer": "dagre",
     "curve": "linear",
     "htmlLabels": false,
-    "nodeSpacing": 240,
-    "rankSpacing": 280,
-    "padding": 28,
+    "nodeSpacing": 120,
+    "rankSpacing": 140,
+    "padding": 20,
     "wrappingWidth": 260,
     "useMaxWidth": false
   },
   "sequence": {
-    "diagramMarginX": 90,
-    "diagramMarginY": 50,
-    "actorMargin": 130,
-    "messageMargin": 70,
-    "width": 260,
-    "height": 90,
-    "boxMargin": 20,
-    "boxTextMargin": 14,
-    "noteMargin": 18,
+    "diagramMarginX": 36,
+    "diagramMarginY": 30,
+    "actorMargin": 72,
+    "messageMargin": 40,
+    "width": 170,
+    "height": 72,
+    "boxMargin": 14,
+    "boxTextMargin": 10,
+    "noteMargin": 12,
     "wrap": true
   }
 }

@@ -383,3 +383,264 @@ Không cần làm module mới lớn, chỉ mở rộng `alert_type/title/messag
 2. Retention raw: 7/30/90 ngày?
 3. Mức chi tiết raw trả về mặc định cho FE (full hay masked-lite)?
 4. Ngưỡng confidence ban đầu dùng 3 mức hay score 0-100?
+
+---
+
+## 11) Gap kỹ thuật so với codebase hiện tại (2026-04-15)
+
+### 11.1 Firmware đã có OBD polling cơ bản, nhưng chưa đẩy diagnostics contract
+- Đã có poll PID trong `state_machine.c`: `0x0C`, `0x0D`, `0x05`, `0x2F`, `0x04`.
+- Đã có retry + cảnh báo sự cố OBD (`obd_connect_failed`, `obd_elm327_init_failed`) qua topic events.
+- Chưa có DTC flow (`03`, `07`, `0A`), chưa có readiness/MIL (`0101`) trong payload publish cloud.
+- `data_format_rawdata` mới gửi `data` (vibration, battery, gps...), chưa có object `diagnostics`.
+
+### 11.2 MqttBridge chưa nhận và xử lý diagnostics object
+- `payload.types.ts` và `payload.validator.ts` chưa có schema `diagnostics`.
+- `rawdata.handler.ts` mới write metrics nền (vibration, battery, gps...), chưa flatten OBD signals.
+- Chưa publish internal event loại `data` dù topic `internal/events/device/data` đã khai báo.
+
+### 11.3 Backend realtime có nhận alert event, nhưng chưa persist alert từ MQTT bridge
+- `mqtt-event-listener.ts` hiện map `event_type=alert` -> `publishEvent('alert:new', ...)` chỉ để socket realtime.
+- Chưa gọi `alertRepo.create` hoặc `alertCrudService.createAlert` trong luồng internal MQTT event.
+- Hệ quả: alert OBD từ firmware/MqttBridge có thể không xuất hiện ổn định trong bảng alerts (DB-backed list).
+
+### 11.4 Schema DB hiện tại chưa thuận cho OBD alert type riêng
+- Enum `alert_type` hiện chưa có nhóm OBD-specific (đang có `maintenance_due`, `device_offline`, ...).
+- Có thể tận dụng `maintenance_due` cho MVP để tránh migration sớm.
+- Nếu muốn tách semantic rõ (`obd_dtc`, `obd_channel_unstable`), cần migration enum.
+
+### 11.5 FE đã có nền để triển khai nhanh
+- Có trang Alerts + filter severity/status.
+- Có trang Maintenance với CRUD đầy đủ.
+- Có Device Detail modal + chart hooks có thể tái dùng để thêm OBD Health card.
+- Có System Admin table query cho `event_logs`, có thể tận dụng làm raw diagnostics viewer bản đầu.
+
+---
+
+## 12) Hướng phát triển tiếp (chốt đề xuất)
+
+### 12.1 Chọn chiến lược “Signal-first, DTC-later” cho MVP
+- Không nhảy ngay vào full DTC + freeze frame.
+- Ưu tiên pipeline ổn định dựa trên tín hiệu đã có sẵn: RPM/speed/coolant/fuel/load + OBD connect-fail events.
+- Sau khi kiểm soát false-positive và channel quality mới mở rộng DTC.
+
+### 12.2 Lý do chọn hướng này
+- Fit trực tiếp với firmware hiện tại, ít rủi ro.
+- Giảm khối lượng parser/contract thay đổi trong một lần.
+- Tạo giá trị vận hành sớm (maintenance recommendations, health alerts) trước khi “đào sâu chẩn đoán”.
+
+---
+
+## 13) Lộ trình triển khai v2 (thực dụng, không phá hệ thống)
+
+### Phase G0 — Gate độ ổn định OBD channel (2-3 ngày)
+1. Thêm metric quan sát BLE/OBD session quality từ firmware event stream.
+2. Chuẩn hóa dashboard theo dõi:
+   - `obd_connect_success_rate`
+   - `obd_poll_timeout_rate`
+   - `obd_reconnect_attempts_per_hour`
+3. Gate trước khi mở feature alert bảo trì:
+   - Success rate >= 90% trên thiết bị pilot.
+   - Timeout rate <= 10%.
+
+### Phase G1 — Contract diagnostics tối thiểu (1 tuần)
+1. Mở rộng payload firmware: thêm `diagnostics` object (không breaking, optional).
+2. MqttBridge:
+   - Update `payload.types.ts`, `payload.validator.ts`.
+   - Flatten metrics OBD hiện có sang VictoriaMetrics.
+   - Write raw diagnostics vào VictoriaLogs (`event_type=obd_diagnostic_raw`).
+3. Publish internal `data` event để backend/FE realtime có thể subscribe thống nhất.
+
+### Phase G2 — Persist alert + dedup (1 tuần)
+1. Backend thêm `diagnostic evaluator service` tiêu thụ internal events.
+2. Persist alert vào bảng `alerts` (không chỉ socket event).
+3. Dùng dedup key theo cửa sổ thời gian:
+   - `vehicle_id + rule_id + root_cause + 15m window`.
+4. MVP dùng `alert_type='maintenance_due'` để tránh enum migration sớm.
+
+### Phase G3 — FE hiển thị theo workflow vận hành (1 tuần)
+1. Alerts page:
+   - Thêm filter logic theo `source=obd` (derive từ message/metadata).
+   - Hiển thị confidence + evidence ngắn.
+2. Device detail:
+   - Card `OBD Health` (connected state, last PID sample age, top issues).
+3. Raw diagnostics table:
+   - Bản đầu dùng `system-admin` query `event_logs` + preset filter `event_type=obd_diagnostic_raw`.
+
+### Phase G4 — Mở rộng DTC/recommendation engine (sau khi G0-G3 ổn định)
+1. Firmware thêm query `0101`, `03`, `07`, `0A`.
+2. MqttBridge/backend bổ sung parser DTC list + rule nâng confidence.
+3. Lúc này mới cân nhắc migration enum `alert_type` cho OBD semantic riêng.
+
+---
+
+## 14) Data contract v1.2 đề xuất (MVP)
+
+```json
+{
+  "device_id": "dev-001",
+  "auth_token": "xxx",
+  "timestamp": 1712730000000,
+  "data": {
+    "vibration": 120,
+    "battery_top": 13.8,
+    "battery_bot": 4.0,
+    "latitude": 10.77,
+    "longitude": 106.69,
+    "speed": 42,
+    "course": 135,
+    "satellites": 12,
+    "ignition": true,
+    "error_code": 0
+  },
+  "diagnostics": {
+    "channel": {
+      "ble_obd_connected": true,
+      "elm_ready": true,
+      "poll_interval_ms": 1200
+    },
+    "signals": {
+      "rpm": 1800,
+      "obd_speed_kph": 42,
+      "coolant_c": 92,
+      "fuel_level_pct": 58,
+      "engine_load_pct": 41
+    },
+    "quality": {
+      "sample_age_ms": 800,
+      "missing_signals": []
+    },
+    "events": [
+      {
+        "code": "obd_connect_failed",
+        "count_5m": 0
+      }
+    ]
+  },
+  "metadata": {
+    "schema_version": "v1.2.0",
+    "message_id": "8d5f1f48-7e57-4f79-bf52-4a3cb8a7f131",
+    "sent_at": 1712730000234,
+    "seq_no": 1204,
+    "boot_id": "boot-3f8a"
+  }
+}
+```
+
+Ghi chú:
+- MVP chưa bắt buộc DTC array.
+- `diagnostics` optional để rollout từng device.
+- `schema_version` bump lên `v1.2.0`.
+
+---
+
+## 15) Rule alert bảo trì khả thi ngay (không cần DTC)
+
+### R1: OBD channel unstable
+- Điều kiện:
+  - `obd_connect_failed` lặp >= 3 lần trong 15 phút.
+- Alert:
+  - severity = `medium`
+  - title = `OBD channel unstable`
+  - action = kiểm tra adapter BLE, nguồn OBD port, vị trí thiết bị.
+
+### R2: Coolant risk pattern
+- Điều kiện:
+  - `coolant_c >= 105` trong >= 3 mẫu liên tiếp
+  - và `engine_load_pct >= 60`.
+- Alert:
+  - severity = `high`
+  - action = kiểm tra hệ làm mát, quạt, nước làm mát.
+
+### R3: Idle-load anomaly
+- Điều kiện:
+  - `rpm > 900` kéo dài khi `obd_speed_kph <= 3` trong >= 10 phút.
+- Alert:
+  - severity = `medium`
+  - action = kiểm tra chế độ không tải, vệ sinh bướm ga, đánh giá thói quen vận hành.
+
+### R4: Voltage risk phối hợp
+- Điều kiện:
+  - `battery_top < 12.0` và `engine_load_pct > 50` trong >= 5 phút.
+- Alert:
+  - severity = `high`
+  - action = kiểm tra ắc quy/alternator.
+
+---
+
+## 16) Mapping thay đổi theo file/module (impact map)
+
+### Firmware
+- `main/src/state_machine.c`:
+  - Bổ sung publish fields cho `diagnostics.channel/signals/quality`.
+  - Giữ nguyên cadence poll hiện tại để tránh regression.
+- `main/src/data_formatter.c` và `main/inc/data_formatter.h`:
+  - Extend JSON formatter cho `diagnostics`.
+- `main/inc/app_state.h`:
+  - Nếu cần, thêm runtime fields phục vụ quality snapshot.
+
+### MqttBridge
+- `src/types/payload.types.ts`:
+  - Thêm type `diagnostics`.
+- `src/validators/payload.validator.ts`:
+  - Validate `diagnostics` optional.
+- `src/handlers/rawdata.handler.ts`:
+  - Flatten OBD metrics.
+  - Write raw diagnostics log.
+  - Publish internal `data` event.
+- `src/publishers/internal-event.publisher.ts`:
+  - Duy trì envelope chuẩn, mở rộng payload keys.
+
+### Backend
+- `src/infrastructure/realtime/mqtt-event-listener.ts`:
+  - Không chỉ broadcast realtime, cần route sang evaluator/persistence.
+- `src/domain/alert/*`:
+  - Reuse createAlert flow, thêm dedup guard.
+- `src/api/validators/alert.validator.ts`:
+  - Nếu cần thêm filter `source/confidence`, cập nhật schema query.
+
+### Frontend
+- `src/app/dashboard/alerts/page.tsx`
+- `src/features/alerts/components/alert-filters.tsx`
+- `src/features/alerts/components/alert-columns.tsx`
+- `src/features/devices/components/device-detail-modal/overview-tab.tsx`
+- `src/lib/api/alerts.ts`
+
+---
+
+## 17) KPI + Definition of Done cho release đầu
+
+### KPI kỹ thuật
+- Alert ingest latency (device -> alert row DB) p95 <= 5s.
+- OBD sample parse success rate >= 95% trên thiết bị pilot.
+- Duplicate alert rate <= 5% (sau dedup window).
+
+### KPI sản phẩm
+- Tỷ lệ alert bị dismiss trong 7 ngày đầu <= 30%.
+- Tỷ lệ alert được xác nhận hoặc resolve >= 60% (proxy cho hữu ích vận hành).
+
+### DoD
+1. Có payload `diagnostics` từ ít nhất 3 thiết bị pilot.
+2. Alerts OBD xuất hiện được cả realtime và list DB.
+3. Có filter xem riêng alerts nguồn OBD.
+4. Có dashboard theo dõi false-positive và channel quality.
+
+---
+
+## 18) Quyết định tạm thời để giảm rủi ro
+
+1. Dùng `VictoriaLogs` làm kênh raw chính cho diagnostics trong G1-G3.
+2. Chưa dual-write PostgreSQL JSONB ở MVP.
+3. Dùng `alert_type='maintenance_due'` tạm thời cho OBD maintenance alerts.
+4. Chưa bật DTC parser trong firmware cho đến khi qua gate G0.
+
+---
+
+## 19) Unresolved questions (updated)
+1. Chốt rollout pilot bao nhiêu thiết bị: 3 hay 10?
+2. Chọn window dedup mặc định: 15 phút hay 30 phút?
+3. Có chấp nhận dùng tạm `alert_type='maintenance_due'` cho OBD ở MVP không?
+4. Có cần migration enum ngay để tách `obd_channel_unstable` từ đầu không?
+5. Retention cho `obd_diagnostic_raw` ở VictoriaLogs: 30 hay 90 ngày?
+6. Ngưỡng R2 coolant risk có giữ `>=105C` hay hạ xuống `>=100C` cho xe tải?
+7. Khi nào cho phép bật DTC phase: sau 2 tuần pilot ổn định hay theo KPI gate?

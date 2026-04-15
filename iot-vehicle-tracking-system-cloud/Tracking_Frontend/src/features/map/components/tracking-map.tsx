@@ -2,33 +2,48 @@
 import { useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { useGeofences } from '@/features/geofences/hooks/use-geofences';
-import { useMapStore } from '@/features/map/store/map-store';
-import { MAP_LAYER_CONFIG } from '@/features/map/constants/map-config';
+import { hasValidMapCoordinates, MAP_LAYER_CONFIG } from '@/features/map/constants/map-config';
 import type { DevicePosition } from '@/features/map/types';
+import { useMapStore } from '@/features/map/store/map-store';
 import { GeofenceLayer } from './geofence-layer';
 import { DeviceCluster } from './device-cluster';
 import { MapControls } from './map-controls';
-import { SelectedDeviceCard } from './selected-device-card';
-import 'leaflet/dist/leaflet.css';
-const FollowSelectedDevice = ({ devices }: { devices: DevicePosition[] }) => {
+
+const FollowSelectedDevice = ({ device }: { device: DevicePosition | null }) => {
   const map = useMap();
   const followMode = useMapStore((state) => state.followMode);
-  const selectedDeviceId = useMapStore((state) => state.selectedDeviceId);
+
   useEffect(() => {
-    if (!followMode || !selectedDeviceId) {
+    if (!followMode || !device || !hasValidMapCoordinates(device)) {
       return;
     }
-    const selected = devices.find((device) => device.deviceId === selectedDeviceId);
-    if (!selected) {
-      return;
-    }
-    map.flyTo([selected.lat, selected.lon], Math.max(map.getZoom(), 14), {
+    map.flyTo([device.lat, device.lon], Math.max(map.getZoom(), 14), {
       animate: true,
       duration: 0.5,
     });
-  }, [devices, followMode, map, selectedDeviceId]);
+  }, [device, followMode, map]);
   return null;
 };
+
+const RevealSelectedDevice = ({ device }: { device: DevicePosition | null }) => {
+  const map = useMap();
+  const followMode = useMapStore((state) => state.followMode);
+
+  useEffect(() => {
+    if (followMode || !device || !hasValidMapCoordinates(device)) {
+      return;
+    }
+    map.panInside([device.lat, device.lon], {
+      animate: true,
+      duration: 0.4,
+      paddingTopLeft: [340, 24],
+      paddingBottomRight: [24, 24],
+    });
+  }, [device, followMode, map]);
+
+  return null;
+};
+
 const filterDevices = (
   devices: DevicePosition[],
   searchTerm: string,
@@ -59,6 +74,10 @@ export const TrackingMap = () => {
     [devices, searchTerm, statusFilter],
   );
   const selectedDevice = selectedDeviceId ? (positions.get(selectedDeviceId) ?? null) : null;
+  const mapDevices = useMemo(
+    () => filteredDevices.filter((device) => hasValidMapCoordinates(device)),
+    [filteredDevices],
+  );
   const geofenceQuery = useGeofences();
   const geofences = geofenceQuery.data?.items ?? geofenceQuery.data?.data?.items ?? [];
   const layer = MAP_LAYER_CONFIG[mapLayer];
@@ -72,7 +91,7 @@ export const TrackingMap = () => {
       >
         <TileLayer attribution={layer.attribution} url={layer.url} />
 
-        <DeviceCluster devices={filteredDevices} onSelect={setSelectedDevice} />
+        <DeviceCluster devices={mapDevices} onSelect={setSelectedDevice} />
 
         {showGeofences
           ? geofences.map((geofence: any) => (
@@ -80,15 +99,10 @@ export const TrackingMap = () => {
             ))
           : null}
 
-        <MapControls devices={filteredDevices} />
-        <FollowSelectedDevice devices={filteredDevices} />
+        <MapControls devices={mapDevices} />
+        <RevealSelectedDevice device={selectedDevice} />
+        <FollowSelectedDevice device={selectedDevice} />
       </MapContainer>
-
-      <div className="pointer-events-none absolute bottom-3 left-1/2 z-[900] hidden w-[360px] -translate-x-1/2 md:block">
-        <div className="pointer-events-auto">
-          <SelectedDeviceCard device={selectedDevice} />
-        </div>
-      </div>
     </div>
   );
 };

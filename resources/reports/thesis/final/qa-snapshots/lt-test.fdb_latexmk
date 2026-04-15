@@ -1,0 +1,25 @@
+# Fdb version 4
+["xdvipdfmx"] 0 "lt-test.xdv" "lt-test.pdf" "lt-test" 0 -1
+  "lt-test.xdv" 0 -1 0 "xelatex"
+  (generated)
+  "lt-test.pdf"
+  (rewritten before read)
+["xelatex"] 1776202280.48405 "lt-test.tex" "lt-test.xdv" "lt-test" 1776202282.4562 2
+  "C:/Users/Admin/AppData/Local/MiKTeX/miktex/data/le/xetex/xelatex.fmt" 1775718870 27177066 365ef0e8607d1e140bf203d71976060b ""
+  "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/generic/iftex/iftex.sty" 1734114575 7984 7dbb9280f03c0a315425f1b4f35d43ee ""
+  "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/generic/iftex/ifvtex.sty" 1734114575 1057 525c2192b5febbd8c1f662c9468335bb ""
+  "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/base/article.cls" 1761900684 20144 b966087dda3b194755eb460d32e2ef75 ""
+  "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/base/size10.clo" 1761900684 8448 686612a86f0e04f41ea577f5ec7e83d8 ""
+  "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/geometry/geometry.cfg" 1773583286 1083 f69f5eb2d8e249286c59dd1340122e59 ""
+  "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/geometry/geometry.sty" 1773583286 41904 7711079366884e0d15963c9d40019853 ""
+  "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/graphics/keyval.sty" 1749322634 2671 d9941f4bf4750e9b0603c9a2ec54693b ""
+  "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/l3backend/l3backend-xetex.def" 1761202581 32682 e8e9b6eadc6ea167c7d41a9120ebbad7 ""
+  "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/tools/array.sty" 1761901070 15651 9d7c62df82cb29a555c00550babfe364 ""
+  "C:/Users/Admin/AppData/Local/Programs/MiKTeX/tex/latex/tools/longtable.sty" 1761901070 16014 dfa4b4d4e04a78a3f05a90c19711737a ""
+  "lt-test.aux" 1776202281 8 a94a2480d3289e625eea47cd1b285758 "xelatex"
+  "lt-test.tex" 1776202266 816 7fa6e751306519825685611eb95c4511 ""
+  (generated)
+  "lt-test.aux"
+  "lt-test.log"
+  "lt-test.xdv"
+  (rewritten before read)

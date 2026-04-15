@@ -1,22 +1,18 @@
 flowchart TB
-    Root["Trang bản đồ"]
+    Root["Trang ban do"]
 
-    subgraph Visual["Các lớp bản đồ"]
-        direction LR
-        Tile["Lớp nền"]
-        Marker["Lớp điểm xe"]
-        Route["Phát lại hành trình"]
-        Fence["Lớp vùng giám sát"]
+    subgraph RealtimeMap["Khu ban do realtime"]
+        direction TB
+        MapCore["Leaflet map core"]
+        Overlays["Marker xe · tuyen duong · vung giam sat"]
     end
 
     Sidebar["Sidebar"]
     Socket["Socket.IO"]
     Query["TanStack Query"]
 
-    Root --> Tile
-    Root --> Marker
-    Root --> Route
-    Root --> Fence
+    Root --> MapCore
     Root --> Sidebar
-    Socket --> Marker
-    Query --> Route
+    MapCore --> Overlays
+    Socket --> Overlays
+    Query --> Overlays

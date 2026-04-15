@@ -6,27 +6,12 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useMapStore } from '@/features/map/store/map-store';
-import type { DevicePosition } from '@/features/map/types';
 import { DeviceFilterCompact } from './device-filter-compact';
 import { DeviceListItem } from './device-list-item';
 import { DeviceSearch } from './device-search';
+import { MapDeviceSummary } from './map-device-summary';
+import { buildMapDeviceStats, filterDevices, sortDevices } from './map-panel-utils';
 import { SelectedDeviceCard } from './selected-device-card';
-
-const filterDevices = (
-  devices: DevicePosition[],
-  searchTerm: string,
-  statusFilter: 'all' | DevicePosition['status'],
-) =>
-  devices.filter((device) => {
-    const keyword = searchTerm.trim().toLowerCase();
-    const matchesSearch =
-      keyword.length === 0 ||
-      device.deviceName.toLowerCase().includes(keyword) ||
-      device.deviceId.toLowerCase().includes(keyword) ||
-      (device.vehiclePlate ?? '').toLowerCase().includes(keyword);
-    const matchesStatus = statusFilter === 'all' || statusFilter === device.status;
-    return matchesSearch && matchesStatus;
-  });
 
 export const MobileDeviceDrawer = () => {
   const [open, setOpen] = useState(false);
@@ -37,12 +22,17 @@ export const MobileDeviceDrawer = () => {
   const setSearchTerm = useMapStore((state) => state.setSearchTerm);
   const statusFilter = useMapStore((state) => state.statusFilter);
   const setStatusFilter = useMapStore((state) => state.setStatusFilter);
-  const devices = useMemo(() => Array.from(positions.values()), [positions]);
+
+  const devices = useMemo(() => sortDevices(Array.from(positions.values())), [positions]);
   const filteredDevices = useMemo(
     () => filterDevices(devices, searchTerm, statusFilter),
     [devices, searchTerm, statusFilter],
   );
   const selectedDevice = selectedDeviceId ? (positions.get(selectedDeviceId) ?? null) : null;
+  const stats = useMemo(
+    () => buildMapDeviceStats(filteredDevices, devices.length),
+    [devices.length, filteredDevices],
+  );
 
   return (
     <>
@@ -56,7 +46,7 @@ export const MobileDeviceDrawer = () => {
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="bottom" className="flex h-[min(85dvh,40rem)] flex-col rounded-t-3xl px-4">
+        <SheetContent side="bottom" className="flex h-[min(88dvh,44rem)] flex-col rounded-t-3xl px-4">
           <SheetHeader className="px-0 pb-2">
             <SheetTitle>Thiết bị trên bản đồ</SheetTitle>
           </SheetHeader>
@@ -67,6 +57,8 @@ export const MobileDeviceDrawer = () => {
               </div>
               <DeviceFilterCompact value={statusFilter} onChange={setStatusFilter} />
             </div>
+
+            <MapDeviceSummary stats={stats} />
 
             <ScrollArea className="min-h-0 flex-1">
               <div className="space-y-2 pr-2">

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { mapServices } from '@/lib/api/map';
+import { parseMapTimestamp } from '@/features/map/constants/map-config';
 import { useMapStore } from '@/features/map/store/map-store';
 import type { DevicePosition } from '@/features/map/types';
 
@@ -10,12 +11,12 @@ const toDevicePosition = (raw: any): DevicePosition => ({
     raw?.deviceName ?? raw?.device_name ?? raw?.deviceId ?? raw?.device_id ?? 'Unknown',
   ),
   vehiclePlate: raw?.vehiclePlate ?? raw?.vehicle_plate ?? null,
-  lat: Number(raw?.lat ?? raw?.latitude ?? 0),
-  lon: Number(raw?.lon ?? raw?.longitude ?? 0),
+  lat: Number(raw?.lat ?? raw?.latitude ?? Number.NaN),
+  lon: Number(raw?.lon ?? raw?.longitude ?? Number.NaN),
   speed: Number(raw?.speed ?? 0),
   heading: Number(raw?.heading ?? 0),
   status: (raw?.status ?? raw?.currentStatus ?? 'disconnected') as DevicePosition['status'],
-  timestamp: Number(raw?.timestamp ?? Date.now()),
+  timestamp: parseMapTimestamp(raw?.timestamp ?? raw?.lastSeenAt ?? raw?.last_seen_at),
   battery: raw?.battery !== undefined && raw?.battery !== null ? Number(raw.battery) : null,
   vibration: raw?.vibration !== undefined && raw?.vibration !== null ? Number(raw.vibration) : null,
   temperature:

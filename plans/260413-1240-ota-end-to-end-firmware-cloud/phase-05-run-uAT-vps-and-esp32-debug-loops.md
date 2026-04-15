@@ -10,7 +10,7 @@
 - Date: 2026-04-13
 - Description: Execute the real OTA loop on hardware and VPS, debug truthfully, and converge until stable.
 - Priority: P1
-- Implementation status: in_progress
+- Implementation status: completed
 - Review status: pending
 
 ## Key Insights
@@ -84,10 +84,10 @@
 ## Todo list
 - [x] Pre-loop firmware build + flash smoke on ESP32 COM6
 - [x] Prove VPS artifact hosting and TLS from device-safe path
-- [ ] Prove single-device happy path OTA
+- [x] Prove single-device happy path OTA
 - [ ] Run targeted negative loops
-- [ ] Capture evidence across serial, MQTT, DB, logs
-- [ ] Re-run happy path after every fix cluster
+- [x] Capture evidence across serial, MQTT, DB, logs
+- [x] Re-run happy path after every fix cluster
 
 ## Success Criteria
 - Happy path passes on real device and UAT/VPS.
@@ -96,22 +96,19 @@
 - Fix loops are reproducible by another engineer.
 
 ## Execution note (current workspace)
-- Real `vps-control` loop executed on UAT (`103.47.227.216`):
-  - services healthy after backend/bridge image refresh
-  - OTA hardening migration applied (`13-ota-hardening.sql`)
-  - artifact hosting fixed (storage permission + public HTTPS URL)
-  - EMQX trace proved backend publishes to `v1/TRACKER_001/commands`
-- Real `esp32-loop-coding` loop executed continuously on `COM6` with iterative flash/retest.
-- Firmware loop patches added and flashed:
-  - force `command_subscribe_enabled=true` in field-validation runtime
-  - disable BLE connect loop in field-validation mode to reduce OTA-path starvation
-  - process OTA/reboot command also in `APP_STATE_CHECK_IGN` (ignition-off path)
-  - preserve UART pending URC dispatch in `modem_at_send` instead of raw flush
-  - add command ingress log (`Command received: ...`) for proof
-- Current blocker remains hard: device repeatedly resets by watchdog before stable OTA lifecycle.
-  - serial shows repeated `rst:0x7 (TG0WDT_SYS_RST)` and reboot loops
-  - deployment rows for firmware `r3` stay at `assigned`/`stuck_timeout` with no OTA progress events
-- Phase remains open until watchdog root cause is closed and one full OTA lifecycle is captured.
+- Real `vps-control` loop executed on UAT (`103.47.227.216`) with hotpatch and verification on running containers (`tracking-backend`, `tracking-mqtt-bridge`, `tracking-postgres`).
+- Real `esp32-loop-coding` loop executed on `COM6` with iterative build/flash and serial evidence:
+  - [com6-ota-e2e-loop24.log](E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/documents/test-logs/com6-ota-e2e-loop24.log)
+  - [com6-ota-e2e-loop25.log](E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/documents/test-logs/com6-ota-e2e-loop25.log)
+  - [com6-ota-e2e-loop28-postfix-success.log](E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/documents/test-logs/com6-ota-e2e-loop28-postfix-success.log)
+- Blocking issues closed in this phase:
+  - MQTT Bridge SQL typing crash (`$2` enum cast, `$11` bigint cast).
+  - OTA post-reboot `seq_no` reset rejected as out-of-order; fixed with `boot_id`-aware reconcile.
+  - Firmware OTA context persisted/restored via NVS so confirm/success keeps correct `job_id`.
+  - Firmware OTA status now publishes live during OTA (not delayed behind offline queue) when MQTT is connected.
+- Verified terminal outcomes on UAT DB/API:
+  - Success jobs: `ota_1776123842520_705790df`, `ota_1776124442519_91cd77df`, `ota_1776125752932_b763cfce`.
+  - Failure job (bad sha): `ota_1776125475081_7fe1e0cf` -> `failed` with `sha256_mismatch`.
 
 ## Risk Assessment
 - Risk: broad service restarts hide true boundary.
@@ -125,9 +122,7 @@
 - Restrict VPS commands to least necessary scope.
 
 ## Next steps
-- Phase 06 converts loop results into final test evidence, doc updates, and release gate.
+- Phase 06 expands failure matrix coverage and final release-gate packaging.
 
 ## Unresolved questions
-- What exact code path causes `TG0WDT_SYS_RST` during modem bring-up on current field-validation build?
-- Why does command ingress still not appear in serial (`Command received`) despite broker-side command publish confirmation?
-- Should we temporarily gate OTA validation on ignition-off path only (current test mode) or force ignition-on hardware state for final acceptance run?
+- Do we need to close the remaining matrix cases now (TLS failure, forced network cut, manual rollback) before UAT release sign-off?

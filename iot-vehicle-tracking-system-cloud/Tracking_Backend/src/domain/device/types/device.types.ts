@@ -4,7 +4,7 @@ export interface Device {
   device_name: string;
   auth_token: string;
   last_seen_at: Date | null;
-  current_status: 'running' | 'stopped' | 'disconnected';
+  current_status: 'running' | 'stopped' | 'disconnected' | 'online';
   total_runtime_seconds: number;
   imei: string | null;
   vibration_threshold: number;
@@ -45,7 +45,7 @@ export interface DevicePublic {
   id: number;
   deviceId: string;
   deviceName: string;
-  currentStatus: 'running' | 'stopped' | 'disconnected';
+  currentStatus: 'running' | 'stopped' | 'disconnected' | 'online';
   lastSeenAt: string | null;
   totalRuntimeSeconds: number;
   latitude: number | null;

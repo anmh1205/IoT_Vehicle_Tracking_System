@@ -1,6 +1,7 @@
 'use client';
 
 import { useDeferredValue, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircleCheckBig, CircleOff, MapPinned, Plus, Radar } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
@@ -28,6 +29,7 @@ import { GeofenceVehicleBinder } from '@/features/geofences/components/geofence-
 const PAGE_SIZE = 20;
 
 const GeofencesPage = () => {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any | null>(null);
   const [manageItem, setManageItem] = useState<any | null>(null);
@@ -200,6 +202,7 @@ const GeofencesPage = () => {
         data={rows}
         pagination={false}
         isLoading={geofences.isLoading}
+        onRowClick={(row: any) => router.push(`/dashboard/geofences/${row.id}`)}
         emptyTitle="Chưa có vùng giám sát phù hợp"
         emptyDescription="Tạo vùng mới để bắt đầu theo dõi các khu vực ra vào quan trọng."
         emptyAction={{

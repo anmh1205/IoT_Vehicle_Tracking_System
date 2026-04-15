@@ -4,6 +4,7 @@ import type {
   MaintenanceListQuery,
   MaintenancePublic,
 } from '@/domain/maintenance/types/maintenance.types';
+import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 
 const sanitizeMaintenance = (m: Maintenance): MaintenancePublic => ({
   id: m.id,
@@ -33,8 +34,23 @@ export const listMaintenance = async (
 }> => {
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
-
-  const result = await maintenanceRepo.findAll(query);
+  let result: { records: Maintenance[]; total: number };
+  try {
+    result = await maintenanceRepo.findAll(query);
+  } catch (error) {
+    if (isUndefinedTableError(error)) {
+      return {
+        items: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+        },
+      };
+    }
+    throw error;
+  }
 
   return {
     items: result.records.map(sanitizeMaintenance),

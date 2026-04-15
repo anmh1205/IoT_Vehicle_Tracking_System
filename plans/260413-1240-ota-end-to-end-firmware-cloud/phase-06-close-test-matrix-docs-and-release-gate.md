@@ -76,7 +76,7 @@
 ## Todo list
 - [x] Capture ESP32 local build/flash smoke evidence for release-gate traceability
 - [ ] Run full OTA matrix
-- [ ] Record expected outcomes and evidence
+- [x] Record expected outcomes and evidence
 - [x] Freeze UAT release gate
 - [x] Update required docs
 - [ ] Add short operator triage guidance if needed
@@ -92,10 +92,19 @@
   - ESP-IDF export path validated (`C:\Espressif\esp-idf-v5.5.3`)
   - `idf.py build` success
   - repeated `idf.py -p COM6 build flash` success after OTA runtime loop patches
-  - serial logs captured in `documents/test-logs/com6-monitor-latest.log`
-- UAT VPS loop was executed and command publish path was validated at broker-side,
-  but matrix is still blocked by firmware watchdog resets before OTA lifecycle completion.
-- Full UAT hardware matrix remains open until Phase 05 closes watchdog + command ingress on-device.
+  - serial logs captured in:
+    - `documents/test-logs/com6-ota-e2e-loop24.log`
+    - `documents/test-logs/com6-ota-e2e-loop25.log`
+    - `documents/test-logs/com6-ota-e2e-loop27-badsha2.log`
+    - `documents/test-logs/com6-ota-e2e-loop28-postfix-success.log`
+- UAT VPS loop now has verified terminal outcomes end-to-end:
+  - Success: `ota_1776123842520_705790df`, `ota_1776124442519_91cd77df`, `ota_1776125752932_b763cfce`
+  - Failure: `ota_1776125475081_7fe1e0cf` (`sha256_mismatch`)
+- Cloud/runtime fixes validated live:
+  - MQTT Bridge reconcile handles boot-based sequence reset and no longer drops post-reboot `success`.
+  - MQTT Bridge SQL parameter typing fixed; no more `$2/$11` type deduction errors.
+  - Backend firmware upload no longer fails on duplicate original filename (`firmware_filename_key`).
+  - Firmware failure status is now immediately visible to cloud during OTA (live publish path when MQTT connected).
 
 ## Risk Assessment
 - Risk: docs drift from code after late fixes.
@@ -112,5 +121,4 @@
 - After implementation and validation, ask for review/approval before wider rollout beyond UAT.
 
 ## Unresolved questions
-- Can we get a decoded backtrace for the recurring `TG0WDT_SYS_RST` (current logs only show reset reason + saved PC)?
-- Is there any modem/UART hardware wiring or power condition in this bench setup that can induce interrupt watchdog resets around LTE FSM transitions?
+- Should full UAT sign-off require executing all remaining matrix cases (manual rollback, forced network cut, TLS URL failure), or are current success+critical-failure proofs enough for release candidate?

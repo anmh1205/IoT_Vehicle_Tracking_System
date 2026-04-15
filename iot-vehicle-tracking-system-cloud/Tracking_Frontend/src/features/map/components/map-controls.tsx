@@ -29,6 +29,14 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
     if (devices.length === 0) {
       return;
     }
+    if (devices.length === 1) {
+      const [device] = devices;
+      map.flyTo([device.lat, device.lon], Math.max(map.getZoom(), 14), {
+        animate: true,
+        duration: 0.5,
+      });
+      return;
+    }
     const bounds = L.latLngBounds(
       devices.map((device) => [device.lat, device.lon] as [number, number]),
     );
@@ -51,11 +59,11 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
     <div className="pointer-events-auto absolute right-3 top-3 z-[900] flex flex-col items-end gap-2">
       <MapLayerSwitcher />
 
-      <div className="grid gap-1 rounded-md border bg-background/90 p-1 backdrop-blur">
+      <div className="grid gap-1 rounded-xl border border-border/70 bg-background/95 p-1 shadow-lg backdrop-blur">
         <Button
           size="icon"
           variant="ghost"
-          className="h-11 w-11 sm:h-8 sm:w-8"
+          className="h-10 w-10 sm:h-9 sm:w-9"
           onClick={() => map.zoomIn()}
           aria-label="Phóng to bản đồ"
         >
@@ -64,7 +72,7 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
         <Button
           size="icon"
           variant="ghost"
-          className="h-11 w-11 sm:h-8 sm:w-8"
+          className="h-10 w-10 sm:h-9 sm:w-9"
           onClick={() => map.zoomOut()}
           aria-label="Thu nhỏ bản đồ"
         >
@@ -73,7 +81,7 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
         <Button
           size="icon"
           variant="ghost"
-          className="h-11 w-11 sm:h-8 sm:w-8"
+          className="h-10 w-10 sm:h-9 sm:w-9"
           onClick={fitAllBounds}
           aria-label="Hiển thị toàn bộ thiết bị"
         >
@@ -82,34 +90,35 @@ export const MapControls = ({ devices }: { devices: DevicePosition[] }) => {
         <Button
           size="icon"
           variant="ghost"
-          className="h-11 w-11 sm:h-8 sm:w-8"
+          className="h-10 w-10 sm:h-9 sm:w-9"
           onClick={flyToSelected}
+          disabled={!selectedDeviceId}
           aria-label="Di chuyển đến thiết bị đã chọn"
         >
           <Crosshair className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 rounded-xl border border-border/70 bg-background/95 p-2 shadow-lg backdrop-blur sm:flex-row">
         <Button
           size="sm"
           variant={followMode ? 'default' : 'outline'}
           onClick={toggleFollowMode}
-          className="h-11 sm:h-8"
+          className="h-10 justify-start px-3 sm:h-9"
           aria-pressed={followMode}
         >
           <Waypoints className="mr-1 h-4 w-4" aria-hidden="true" />
-Theo dõi
+          Theo dõi
         </Button>
         <Button
           size="sm"
           variant={showGeofences ? 'default' : 'outline'}
           onClick={toggleGeofences}
-          className="h-11 sm:h-8"
+          className="h-10 justify-start px-3 sm:h-9"
           aria-pressed={showGeofences}
         >
           <Layers2 className="mr-1 h-4 w-4" aria-hidden="true" />
-Vùng địa lý
+          Vùng địa lý
         </Button>
       </div>
     </div>

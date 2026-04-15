@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { dashboardServices } from '@/lib/api/dashboard';
+import { deviceServices } from '@/lib/api/devices';
 import { apiClient, unwrap } from '@/lib/api/client';
 import { formatLocalDateKey, parseDateKeyAsLocal } from '@/lib/utils';
+import { deriveDeviceStatus } from '@/hooks/use-device-status-realtime';
 
 export interface DashboardEvent {
   id: string | number;
@@ -38,6 +40,15 @@ export interface PieStatusPoint {
 export interface FleetRuntimePoint {
   label: string;
   runtime: number;
+}
+
+interface DashboardDeviceSnapshot {
+  deviceId: string;
+  deviceName: string;
+  currentStatus: 'running' | 'stopped' | 'disconnected' | 'online';
+  lastSeenAt: string | null;
+  requestInterval: number;
+  totalRuntimeSeconds: number;
 }
 
 const normalizeStats = (raw: any): DashboardOverviewStats => ({
@@ -79,21 +90,35 @@ const formatLabel = (value: string) => {
   return new Intl.DateTimeFormat('vi-VN', { weekday: 'short' }).format(date);
 };
 
-const groupEventsByDay = (events: DashboardEvent[], days: number) => {
-  const bucket = new Map<string, DeviceActivityPoint>();
+const formatRangeLabel = (value: string) =>
+  new Intl.DateTimeFormat('vi-VN', { month: '2-digit', day: '2-digit' }).format(
+    parseDateKeyAsLocal(value),
+  );
+
+const buildDateBucket = <TValue>(
+  days: number,
+  createValue: (dateKey: string) => TValue,
+): Map<string, TValue> => {
+  const bucket = new Map<string, TValue>();
   const now = new Date();
 
   for (let index = days - 1; index >= 0; index -= 1) {
     const date = new Date(now);
     date.setDate(now.getDate() - index);
     const key = formatLocalDateKey(date);
-    bucket.set(key, {
-      label: formatLabel(key),
-      running: 0,
-      idle: 0,
-      offline: 0,
-    });
+    bucket.set(key, createValue(key));
   }
+
+  return bucket;
+};
+
+const groupEventsByDay = (events: DashboardEvent[], days: number) => {
+  const bucket = buildDateBucket(days, (dateKey) => ({
+    label: formatLabel(dateKey),
+    running: 0,
+    idle: 0,
+    offline: 0,
+  }));
 
   for (const event of events) {
     const eventDate = new Date(String(event.serverTimestamp ?? ''));
@@ -121,15 +146,7 @@ const groupEventsByDay = (events: DashboardEvent[], days: number) => {
 };
 
 const groupRuntimeByDay = (events: DashboardEvent[], days: number) => {
-  const bucket = new Map<string, number>();
-  const now = new Date();
-
-  for (let index = days - 1; index >= 0; index -= 1) {
-    const date = new Date(now);
-    date.setDate(now.getDate() - index);
-    const key = formatLocalDateKey(date);
-    bucket.set(key, 0);
-  }
+  const bucket = buildDateBucket(days, () => 0);
 
   for (const event of events) {
     const eventDate = new Date(String(event.serverTimestamp ?? ''));
@@ -146,37 +163,314 @@ const groupRuntimeByDay = (events: DashboardEvent[], days: number) => {
   }
 
   return Array.from(bucket.entries()).map(([dateKey, runtime]) => ({
-    label: new Intl.DateTimeFormat('vi-VN', { month: '2-digit', day: '2-digit' }).format(
-      parseDateKeyAsLocal(dateKey),
-    ),
+    label: formatRangeLabel(dateKey),
     runtime: Number(runtime.toFixed(1)),
   }));
 };
 
-export const useDashboardStats = () => {
-  return useQuery({
+const toDeviceSnapshot = (raw: any): DashboardDeviceSnapshot => ({
+  deviceId: String(raw?.deviceId ?? raw?.device_id ?? ''),
+  deviceName: String(raw?.deviceName ?? raw?.device_name ?? raw?.deviceId ?? 'Thiết bị'),
+  currentStatus: (raw?.currentStatus ??
+    raw?.current_status ??
+    'disconnected') as DashboardDeviceSnapshot['currentStatus'],
+  lastSeenAt: raw?.lastSeenAt ?? raw?.last_seen_at ?? null,
+  requestInterval: Number(raw?.requestInterval ?? raw?.request_interval ?? 60),
+  totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? raw?.total_runtime_seconds ?? 0),
+});
+
+const loadDeviceSnapshot = async (): Promise<DashboardDeviceSnapshot[]> => {
+  const payload = await deviceServices.getList({
+    page: 1,
+    limit: 500,
+    sortBy: 'lastSeenAt',
+    sortOrder: 'desc',
+  });
+
+  return (payload.items ?? []).map(toDeviceSnapshot);
+};
+
+const getSnapshotStatus = (device: DashboardDeviceSnapshot) =>
+  deriveDeviceStatus({
+    lastSeenAt: device.lastSeenAt,
+    requestInterval: device.requestInterval,
+    serverStatus: device.currentStatus,
+  }).status;
+
+const hasNonZeroValue = (values: number[]) => values.some((value) => Number(value) > 0);
+
+const hasMeaningfulStats = (stats: DashboardOverviewStats) =>
+  hasNonZeroValue([
+    stats.totalDevices,
+    stats.activeDevices,
+    stats.offlineDevices,
+    stats.alertsCount,
+    stats.totalRuntimeToday,
+    stats.totalRuntimeWeek,
+    stats.sessionsToday,
+  ]);
+
+const hasMeaningfulDistribution = (rows: PieStatusPoint[]) =>
+  rows.length > 0 && rows.some((row) => row.value > 0);
+
+const hasMeaningfulActivity = (rows: DeviceActivityPoint[]) =>
+  rows.length > 0 && rows.some((row) => row.running > 0 || row.idle > 0 || row.offline > 0);
+
+const hasMeaningfulRuntime = (rows: FleetRuntimePoint[]) =>
+  rows.length > 0 && rows.some((row) => row.runtime > 0);
+
+const isSameOrAfter = (value: string | null, days: number) => {
+  if (!value) {
+    return false;
+  }
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) {
+    return false;
+  }
+  return timestamp >= Date.now() - days * 24 * 60 * 60 * 1000;
+};
+
+const isToday = (value: string | null) => {
+  if (!value) {
+    return false;
+  }
+  return formatLocalDateKey(new Date(value)) === formatLocalDateKey(new Date());
+};
+
+const estimateRuntimeHours = (device: DashboardDeviceSnapshot) => {
+  if (!device.lastSeenAt) {
+    return 0;
+  }
+
+  const status = getSnapshotStatus(device);
+  const freshnessHours = Math.max(
+    (device.requestInterval * (status === 'running' || status === 'online' ? 8 : 3)) / 3600,
+    status === 'running' || status === 'online' ? 0.2 : 0.05,
+  );
+
+  if (status === 'running' || status === 'online') {
+    return Number(Math.min(freshnessHours, 2).toFixed(1));
+  }
+  if (status === 'stopped') {
+    return Number(Math.min(freshnessHours, 0.5).toFixed(1));
+  }
+  return 0;
+};
+
+const buildOverviewStatsFromDevices = (
+  devices: DashboardDeviceSnapshot[],
+): DashboardOverviewStats => {
+  const totalDevices = devices.length;
+  const activeDevices = devices.filter((device) => {
+    const status = getSnapshotStatus(device);
+    return status === 'running' || status === 'online';
+  }).length;
+  const offlineDevices = devices.filter((device) => getSnapshotStatus(device) === 'disconnected').length;
+  const alertsCount = offlineDevices;
+  const sessionsToday = devices.filter((device) => isToday(device.lastSeenAt)).length;
+  const totalRuntimeToday = Number(
+    devices
+      .filter((device) => isToday(device.lastSeenAt))
+      .reduce((sum, device) => sum + estimateRuntimeHours(device), 0)
+      .toFixed(1),
+  );
+  const totalRuntimeWeek = Number(
+    devices
+      .filter((device) => isSameOrAfter(device.lastSeenAt, 7))
+      .reduce((sum, device) => sum + estimateRuntimeHours(device), 0)
+      .toFixed(1),
+  );
+
+  return {
+    totalDevices,
+    activeDevices,
+    offlineDevices,
+    alertsCount,
+    totalRuntimeToday,
+    totalRuntimeWeek,
+    sessionsToday,
+  };
+};
+
+const buildSyntheticEvents = (devices: DashboardDeviceSnapshot[]): DashboardEvent[] =>
+  devices
+    .filter((device) => device.lastSeenAt)
+    .map((device) => {
+      const status = getSnapshotStatus(device);
+      if (status === 'disconnected') {
+        return {
+          id: `${device.deviceId}-offline`,
+          eventType: 'Thiết bị ngoại tuyến',
+          message: `${device.deviceName} chưa gửi dữ liệu gần đây`,
+          severity: 'high',
+          deviceId: device.deviceId,
+          serverTimestamp: device.lastSeenAt ?? new Date().toISOString(),
+        };
+      }
+      if (status === 'stopped') {
+        return {
+          id: `${device.deviceId}-stopped`,
+          eventType: 'Thiết bị tạm dừng',
+          message: `${device.deviceName} vẫn được nhìn thấy nhưng đã chậm nhịp gửi`,
+          severity: 'medium',
+          deviceId: device.deviceId,
+          serverTimestamp: device.lastSeenAt ?? new Date().toISOString(),
+        };
+      }
+      return {
+        id: `${device.deviceId}-running`,
+        eventType: 'Thiết bị đang hoạt động',
+        message: `${device.deviceName} đang gửi dữ liệu bình thường`,
+        severity: 'low',
+        deviceId: device.deviceId,
+        serverTimestamp: device.lastSeenAt ?? new Date().toISOString(),
+      };
+    })
+    .sort(
+      (left, right) =>
+        new Date(right.serverTimestamp ?? 0).getTime() - new Date(left.serverTimestamp ?? 0).getTime(),
+    );
+
+const buildActivityFromDevices = (
+  devices: DashboardDeviceSnapshot[],
+  days: number,
+): DeviceActivityPoint[] => {
+  const bucket = buildDateBucket(days, (dateKey) => ({
+    label: formatLabel(dateKey),
+    running: 0,
+    idle: 0,
+    offline: 0,
+  }));
+
+  for (const device of devices) {
+    if (!device.lastSeenAt) {
+      continue;
+    }
+
+    const timestamp = new Date(device.lastSeenAt);
+    if (Number.isNaN(timestamp.getTime())) {
+      continue;
+    }
+
+    const current = bucket.get(formatLocalDateKey(timestamp));
+    if (!current) {
+      continue;
+    }
+
+    const status = getSnapshotStatus(device);
+    if (status === 'disconnected') {
+      current.offline += 1;
+    } else if (status === 'stopped') {
+      current.idle += 1;
+    } else {
+      current.running += 1;
+    }
+  }
+
+  return Array.from(bucket.values());
+};
+
+const buildRuntimeFromDevices = (
+  devices: DashboardDeviceSnapshot[],
+  days: number,
+): FleetRuntimePoint[] => {
+  const bucket = buildDateBucket(days, () => 0);
+
+  for (const device of devices) {
+    if (!device.lastSeenAt) {
+      continue;
+    }
+
+    const timestamp = new Date(device.lastSeenAt);
+    if (Number.isNaN(timestamp.getTime())) {
+      continue;
+    }
+
+    const dateKey = formatLocalDateKey(timestamp);
+    if (!bucket.has(dateKey)) {
+      continue;
+    }
+
+    bucket.set(dateKey, (bucket.get(dateKey) ?? 0) + estimateRuntimeHours(device));
+  }
+
+  return Array.from(bucket.entries()).map(([dateKey, runtime]) => ({
+    label: formatRangeLabel(dateKey),
+    runtime: Number(runtime.toFixed(1)),
+  }));
+};
+
+const buildStatusDistributionFromDevices = (
+  devices: DashboardDeviceSnapshot[],
+): PieStatusPoint[] => {
+  const counts = {
+    running: 0,
+    stopped: 0,
+    disconnected: 0,
+  };
+
+  for (const device of devices) {
+    const status = getSnapshotStatus(device);
+    if (status === 'running' || status === 'online') {
+      counts.running += 1;
+    } else if (status === 'stopped') {
+      counts.stopped += 1;
+    } else {
+      counts.disconnected += 1;
+    }
+  }
+
+  return [
+    { name: 'Đang chạy', value: counts.running, color: '#22c55e' },
+    { name: 'Đã dừng', value: counts.stopped, color: '#64748b' },
+    { name: 'Ngoại tuyến', value: counts.disconnected, color: '#ef4444' },
+  ];
+};
+
+export const useDashboardStats = () =>
+  useQuery({
     queryKey: ['dashboard', 'stats'],
-    queryFn: () => dashboardServices.getStats().then(normalizeStats),
+    queryFn: async () => {
+      try {
+        const stats = normalizeStats(await dashboardServices.getStats());
+        if (hasMeaningfulStats(stats)) {
+          return stats;
+        }
+      } catch {
+        // Fall back to device snapshot below.
+      }
+
+      const devices = await loadDeviceSnapshot();
+      return buildOverviewStatsFromDevices(devices);
+    },
     refetchInterval: 60000,
   });
-};
 
-export const useDashboardActivity = (limit = 20) => {
-  return useQuery({
+export const useDashboardActivity = (limit = 20) =>
+  useQuery({
     queryKey: ['dashboard', 'activity', limit],
-    queryFn: () => dashboardServices.getActivity({ limit }).then((payload) => normalizeEvents(payload)),
+    queryFn: async () => {
+      try {
+        const events = normalizeEvents(await dashboardServices.getActivity({ limit }));
+        if (events.length > 0) {
+          return events;
+        }
+      } catch {
+        // Fall back to device snapshot below.
+      }
+
+      const devices = await loadDeviceSnapshot();
+      return buildSyntheticEvents(devices).slice(0, limit);
+    },
     refetchInterval: 30000,
   });
-};
 
-export const useDeviceActivity = (days = 7) => {
-  return useQuery({
+export const useDeviceActivity = (days = 7) =>
+  useQuery({
     queryKey: ['dashboard', 'device-activity', days],
     queryFn: async (): Promise<DeviceActivityPoint[]> => {
       try {
-        const response = await apiClient.get('/dashboard/device-activity', {
-          params: { days },
-        });
+        const response = await apiClient.get('/dashboard/device-activity', { params: { days } });
         const payload = unwrap<any>(response.data);
         const rows = Array.isArray(payload?.items)
           ? payload.items
@@ -185,23 +479,33 @@ export const useDeviceActivity = (days = 7) => {
             : [];
 
         if (rows.length > 0) {
-          return rows.map((row: any) => ({
+          const normalized = rows.map((row: any) => ({
             label: String(row?.label ?? row?.date ?? '-'),
             running: Number(row?.running ?? 0),
             idle: Number(row?.idle ?? 0),
             offline: Number(row?.offline ?? 0),
           }));
+
+          if (hasMeaningfulActivity(normalized)) {
+            return normalized;
+          }
         }
       } catch {
-        // Fallback below when endpoint is unavailable.
+        // Fall back below when endpoint is unavailable.
       }
 
-      const activityPayload = await dashboardServices.getActivity({ limit: 300 });
-      const events = normalizeEvents(activityPayload);
-      return groupEventsByDay(events, days);
+      const events = normalizeEvents(await dashboardServices.getActivity({ limit: 300 }).catch(() => []));
+      if (events.length > 0) {
+        const grouped = groupEventsByDay(events, days);
+        if (hasMeaningfulActivity(grouped)) {
+          return grouped;
+        }
+      }
+
+      const devices = await loadDeviceSnapshot();
+      return buildActivityFromDevices(devices, days);
     },
   });
-};
 
 export const useDeviceStatusDistribution = () => {
   const statsQuery = useDashboardStats();
@@ -219,14 +523,24 @@ export const useDeviceStatusDistribution = () => {
             : [];
 
         if (rows.length > 0) {
-          return rows.map((row: any, index: number) => ({
+          const normalized = rows.map((row: any, index: number) => ({
             name: String(row?.name ?? row?.status ?? `Trạng thái ${index + 1}`),
             value: Number(row?.value ?? row?.count ?? 0),
             color: row?.color ?? ['#22c55e', '#64748b', '#ef4444', '#f59e0b'][index % 4],
           }));
+
+          if (hasMeaningfulDistribution(normalized)) {
+            return normalized;
+          }
         }
       } catch {
-        // Fallback below when endpoint is unavailable.
+        // Fall back below when endpoint is unavailable.
+      }
+
+      const devices = await loadDeviceSnapshot();
+      const derived = buildStatusDistributionFromDevices(devices);
+      if (hasMeaningfulDistribution(derived)) {
+        return derived;
       }
 
       const stats = statsQuery.data ?? normalizeStats({});
@@ -243,14 +557,12 @@ export const useDeviceStatusDistribution = () => {
   });
 };
 
-export const useFleetRuntime = (days = 30) => {
-  return useQuery({
+export const useFleetRuntime = (days = 30) =>
+  useQuery({
     queryKey: ['dashboard', 'fleet-runtime', days],
     queryFn: async (): Promise<FleetRuntimePoint[]> => {
       try {
-        const response = await apiClient.get('/dashboard/fleet-runtime', {
-          params: { days },
-        });
+        const response = await apiClient.get('/dashboard/fleet-runtime', { params: { days } });
         const payload = unwrap<any>(response.data);
         const rows = Array.isArray(payload?.items)
           ? payload.items
@@ -259,18 +571,28 @@ export const useFleetRuntime = (days = 30) => {
             : [];
 
         if (rows.length > 0) {
-          return rows.map((row: any) => ({
+          const normalized = rows.map((row: any) => ({
             label: String(row?.label ?? row?.date ?? '-'),
             runtime: Number(row?.runtime ?? row?.value ?? 0),
           }));
+
+          if (hasMeaningfulRuntime(normalized)) {
+            return normalized;
+          }
         }
       } catch {
-        // Fallback below when endpoint is unavailable.
+        // Fall back below when endpoint is unavailable.
       }
 
-      const activityPayload = await dashboardServices.getActivity({ limit: 500 });
-      const events = normalizeEvents(activityPayload);
-      return groupRuntimeByDay(events, days);
+      const events = normalizeEvents(await dashboardServices.getActivity({ limit: 500 }).catch(() => []));
+      if (events.length > 0) {
+        const grouped = groupRuntimeByDay(events, days);
+        if (hasMeaningfulRuntime(grouped)) {
+          return grouped;
+        }
+      }
+
+      const devices = await loadDeviceSnapshot();
+      return buildRuntimeFromDevices(devices, days);
     },
   });
-};

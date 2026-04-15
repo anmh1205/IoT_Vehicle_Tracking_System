@@ -225,7 +225,7 @@ export const deployFirmware = async (
     throw createNotFoundError('Firmware not found');
   }
 
-  assertFirmwareArtifactReady(firmware);
+  const artifact = assertFirmwareArtifactReady(firmware);
 
   const sanitizedDeviceIds = sanitizeDeviceIds(input.deviceIds ?? []);
   if (sanitizedDeviceIds.length === 0) {
@@ -281,10 +281,10 @@ export const deployFirmware = async (
         command: 'ota_update',
         params: {
           jobId: deployment.job_id,
-          version: firmware.version,
+          version: artifact.version,
           url: downloadUrl,
-          size: firmware.size,
-          sha256: firmware.sha256,
+          size: artifact.size,
+          sha256: artifact.sha256,
           force: false,
           confirmTimeoutSec,
         },

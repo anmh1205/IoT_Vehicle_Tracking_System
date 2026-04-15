@@ -1,6 +1,17 @@
-flowchart LR
-    Bridge["MQTT Bridge"] --> VM["VictoriaMetrics"]
-    Bridge --> VL["VictoriaLogs"]
-    VM --> Grafana["Grafana Dashboard"]
+flowchart TB
+    Bridge["MQTT Bridge"]
+
+    subgraph Storage["Quan sat he thong"]
+        direction LR
+        VM["VictoriaMetrics"]
+        VL["VictoriaLogs"]
+    end
+
+    Grafana["Grafana Dashboard"]
+    Ops["Van hanh / giam sat"]
+
+    Bridge --> VM
+    Bridge --> VL
+    VM --> Grafana
     VL --> Grafana
-    Grafana --> Ops["Vận hành / giám sát"]
+    Grafana --> Ops

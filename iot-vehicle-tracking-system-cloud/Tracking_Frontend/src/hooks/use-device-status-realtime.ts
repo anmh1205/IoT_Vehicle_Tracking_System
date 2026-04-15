@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-export type DeviceRealtimeStatus = 'running' | 'stopped' | 'disconnected';
+export type DeviceRealtimeStatus = 'running' | 'stopped' | 'disconnected' | 'online';
 interface DeriveDeviceStatusParams {
   lastSeenAt?: string | Date | null;
   requestInterval?: number | null;

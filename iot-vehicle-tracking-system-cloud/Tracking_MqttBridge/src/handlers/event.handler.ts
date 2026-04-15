@@ -3,6 +3,7 @@ import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { logger } from '../infrastructure/logger';
 import { verifyDeviceToken } from '../services/device-auth.service';
 import { eventSchema } from '../validators/payload.validator';
+import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 
 /**
  * Handle device events (errors, warnings) on topic v1/{deviceId}/events.
@@ -38,6 +39,10 @@ export const handleEvent = async (
   const schemaVersion = payload.metadata?.schema_version;
   const seqNo = payload.metadata?.seq_no;
   const bootId = payload.metadata?.boot_id;
+  const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
+    payload.timestamp,
+    payload.metadata?.sent_at,
+  );
 
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
@@ -51,6 +56,19 @@ export const handleEvent = async (
   if (!device) {
     logger.warn(`Auth failed for device ${payload.device_id}`);
     return;
+  }
+
+  if (timestampSource !== 'payload') {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        payloadTimestamp: payload.timestamp,
+        metadataSentAt: payload.metadata?.sent_at,
+        normalizedTimestampMs: timestampMs,
+        timestampSource,
+      },
+      'Normalized invalid event timestamp before publishing alerts',
+    );
   }
 
   // Log to VictoriaLogs
@@ -81,7 +99,7 @@ export const handleEvent = async (
       schema_version: schemaVersion,
       seq_no: seqNo,
       boot_id: bootId,
-      timestamp: new Date(payload.timestamp).toISOString(),
+      timestamp: new Date(timestampMs).toISOString(),
     });
   }
 

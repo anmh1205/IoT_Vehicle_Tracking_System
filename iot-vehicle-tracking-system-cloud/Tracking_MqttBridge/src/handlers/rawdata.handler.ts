@@ -1,12 +1,17 @@
 import { rawDataSchema } from '../validators/payload.validator';
-import { validateDevice } from '../infrastructure/database';
+import {
+  ensureDeviceSession,
+  touchDeviceSession,
+  validateDevice,
+} from '../infrastructure/database';
 import { writeDeviceTelemetry } from '../infrastructure/victoriametrics';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
-import { getStatus, setStatus, getOrCreateSession } from '../cache/device-state.cache';
+import { getStatus, setStatus } from '../cache/device-state.cache';
 import { addUpdate } from '../services/batch-writer.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
+import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 
 const VIBRATION_ALERT_THRESHOLD = 500;
 
@@ -66,8 +71,32 @@ export const handleRawData = async (
     return;
   }
 
-  // 3. Get or create session
-  const [sessionId, isNewSession] = getOrCreateSession(payload.device_id);
+  const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
+    payload.timestamp,
+    payload.metadata?.sent_at,
+  );
+
+  if (timestampSource !== 'payload') {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        payloadTimestamp: payload.timestamp,
+        metadataSentAt: payload.metadata?.sent_at,
+        normalizedTimestampMs: timestampMs,
+        timestampSource,
+      },
+      'Normalized invalid telemetry timestamp before persistence',
+    );
+  }
+
+  const previousState = getStatus(payload.device_id);
+  const previousStatus = previousState?.status;
+
+  // 3. Get or create session in PostgreSQL, then mirror its ID in local cache.
+  const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs);
+  const sessionId = ensuredSession.sessionId;
+  const isNewSession = ensuredSession.isNew;
+
   if (isNewSession) {
     publishInternalEvent('session', {
       device_id: payload.device_id,
@@ -77,10 +106,9 @@ export const handleRawData = async (
       schema_version: schemaVersion,
       seq_no: seqNo,
       boot_id: bootId,
+      timestamp: new Date(timestampMs).toISOString(),
     });
   }
-
-  const timestampMs = payload.timestamp;
 
   // 4. Write to VictoriaMetrics
   const metricsData: Record<string, number | undefined> = {
@@ -131,6 +159,15 @@ export const handleRawData = async (
     timestamp: timestampMs,
   });
 
+  await touchDeviceSession({
+    sessionId,
+    timestampMs,
+    vibration: payload.data.vibration,
+    latitude: payload.data.latitude,
+    longitude: payload.data.longitude,
+    speed: payload.data.speed,
+  });
+
   // 7. Check geofences (fire-and-forget, non-blocking)
   if (
     payload.data.latitude !== undefined &&
@@ -148,9 +185,6 @@ export const handleRawData = async (
   }
 
   // 8. Check status change
-  const previousState = getStatus(payload.device_id);
-  const previousStatus = previousState?.status;
-
   setStatus(payload.device_id, 'online', sessionId);
 
   if (previousStatus && previousStatus !== 'online') {

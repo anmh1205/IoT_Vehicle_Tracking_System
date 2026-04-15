@@ -1,5 +1,6 @@
 'use client';
 
+import type { KeyboardEvent, MouseEvent } from 'react';
 import { useId, useState } from 'react';
 import {
   type Column,
@@ -49,6 +50,7 @@ interface DataTableProps<TData, TValue> {
   emptyDescription?: string;
   emptyAction?: { label: string; onClick: () => void };
   toolbar?: React.ReactNode;
+  onRowClick?: (row: TData) => void;
 }
 
 const humanizeColumnId = (value: string) =>
@@ -70,6 +72,14 @@ const getColumnLabel = <TData, TValue>(column: Column<TData, TValue>) => {
   return humanizeColumnId(column.id);
 };
 
+const isInteractiveTarget = (target: EventTarget | null) =>
+  target instanceof HTMLElement &&
+  Boolean(
+    target.closest(
+      'button, a, input, select, textarea, summary, [role="button"], [role="link"], [role="menuitem"], [data-row-click-ignore="true"]',
+    ),
+  );
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -84,6 +94,7 @@ export function DataTable<TData, TValue>({
   emptyDescription,
   emptyAction,
   toolbar,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -115,12 +126,29 @@ export function DataTable<TData, TValue>({
     );
   }
 
+  const handleRowClick = (row: TData, event: MouseEvent<HTMLTableRowElement>) => {
+    if (!onRowClick || isInteractiveTarget(event.target)) {
+      return;
+    }
+    onRowClick(row);
+  };
+
+  const handleRowKeyDown = (row: TData, event: KeyboardEvent<HTMLTableRowElement>) => {
+    if (!onRowClick || isInteractiveTarget(event.target)) {
+      return;
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onRowClick(row);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 md:flex-row md:flex-wrap md:items-center">
           {searchKey ? (
-            <div className="relative w-full sm:max-w-sm">
+            <div className="relative w-full md:max-w-sm">
               <Label htmlFor={searchInputId} className="sr-only">
                 {searchLabel}
               </Label>
@@ -141,28 +169,30 @@ export function DataTable<TData, TValue>({
           {toolbar}
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
-              <Settings2 className="mr-2 h-4 w-4" />
-              Cột hiển thị
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) => column.toggleVisibility(Boolean(value))}
-                >
-                  {getColumnLabel(column)}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex shrink-0 justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                <Settings2 className="mr-2 h-4 w-4" />
+                Cột hiển thị
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) => column.toggleVisibility(Boolean(value))}
+                  >
+                    {getColumnLabel(column)}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <div className="rounded-md border">
@@ -183,7 +213,13 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  className={onRowClick ? 'cursor-pointer transition-colors hover:bg-muted/40' : undefined}
+                  onClick={(event) => handleRowClick(row.original, event)}
+                  onKeyDown={(event) => handleRowKeyDown(row.original, event)}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

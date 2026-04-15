@@ -1,19 +1,15 @@
 flowchart TB
-    Header["Thanh đầu
-lọc · đồng bộ · hồ sơ"]
+    Header["Thanh dau<br/>loc · dong bo · ho so"]
 
-    subgraph Main["Không gian dashboard"]
+    subgraph Main["Khong gian dashboard"]
         direction LR
-        Sidebar["Sidebar ngắn gọn
-Danh sách xe"]
-        MapPanel["Khu bản đồ"]
+        Sidebar["Sidebar<br/>Danh sach xe"]
+        MapPanel["Khu ban do"]
         WidgetPanel["Khu widget"]
     end
 
-    AlertFeed["Luồng cảnh báo"]
+    AlertFeed["Luong canh bao"]
 
-    Header --> Sidebar
-    Header --> MapPanel
-    Header --> WidgetPanel
+    Header --> Main
     Sidebar --> MapPanel
     WidgetPanel --> AlertFeed

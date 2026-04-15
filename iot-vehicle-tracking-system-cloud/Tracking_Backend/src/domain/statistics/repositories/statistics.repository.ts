@@ -25,6 +25,22 @@ interface FleetUsageRow {
   active_vehicles: string;
 }
 
+const getDeviceSessionRuntimeExpression = async (): Promise<string> => {
+  const result = await pool.query<{ exists: boolean }>(
+    `SELECT EXISTS (
+       SELECT 1
+       FROM information_schema.columns
+       WHERE table_schema = 'public'
+         AND table_name = 'device_sessions'
+         AND column_name = 'total_runtime_seconds'
+     )`,
+  );
+
+  return result.rows[0]?.exists
+    ? 'COALESCE(total_runtime_seconds, uptime, 0)'
+    : 'COALESCE(uptime, EXTRACT(EPOCH FROM (COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at))), 0)';
+};
+
 export const getFleetUsage = async (
   range: StatisticsDateRange,
   interval: StatisticsInterval,
@@ -227,20 +243,11 @@ export const getTripSummary = async (
 export const getSummaryTotals = async (
   range: StatisticsDateRange,
 ): Promise<{ totalRuntimeHours: number; totalSessions: number; totalAlerts: number }> => {
+  const runtimeExpression = await getDeviceSessionRuntimeExpression();
   const query = `
     WITH session_stats AS (
       SELECT
-        COALESCE(SUM(
-          CASE
-            WHEN total_runtime_seconds IS NOT NULL THEN total_runtime_seconds
-            WHEN uptime IS NOT NULL THEN uptime
-            ELSE EXTRACT(
-              EPOCH FROM (
-                COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at)
-              )
-            )
-          END
-        ), 0)::text AS total_runtime_seconds,
+        COALESCE(SUM(${runtimeExpression}), 0)::text AS total_runtime_seconds,
         COUNT(*)::text AS total_sessions
       FROM device_sessions
       WHERE COALESCE(server_session_start, created_at) BETWEEN $1 AND $2

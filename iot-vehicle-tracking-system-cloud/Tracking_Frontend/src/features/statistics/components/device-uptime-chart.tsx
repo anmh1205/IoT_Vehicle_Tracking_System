@@ -21,10 +21,20 @@ export const DeviceUptimeChart = ({
   }>;
   isLoading?: boolean;
 }) => {
+  const averageUptime =
+    data.length > 0
+      ? data.reduce((sum, item) => sum + item.uptimePercent, 0) / data.length
+      : 0;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Xu hướng uptime thiết bị</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          {data.length > 0
+            ? `Uptime trung bình hiện tại: ${averageUptime.toFixed(1)}%`
+            : 'Chưa có đủ dữ liệu uptime thiết bị'}
+        </p>
       </CardHeader>
       <CardContent className="h-[320px]">
         {isLoading ? (
@@ -46,9 +56,9 @@ export const DeviceUptimeChart = ({
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" />
-              <YAxis domain={[0, 100]} />
-              <Tooltip />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
+              <YAxis domain={[0, 100]} tickLine={false} axisLine={false} fontSize={12} />
+              <Tooltip cursor={{ stroke: '#86efac', strokeDasharray: '4 4' }} />
               <Area
                 type="monotone"
                 dataKey="uptimePercent"

@@ -1,5 +1,5 @@
 flowchart TB
-    Header["Header<br/>filter severity"]
+    Header["Header<br/>loc severity"]
 
     subgraph AlertWorkspace["Alert workspace"]
         direction LR
@@ -10,7 +10,5 @@ flowchart TB
 
     History["History timeline"]
 
-    Header --> AlertList
-    AlertList --> Detail
-    Detail --> MapPanel
+    Header --> AlertWorkspace
     Detail --> History

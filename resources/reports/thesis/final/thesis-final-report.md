@@ -1,4 +1,4 @@
-﻿**PHẦN MỞ ĐẦU - BÌA VÀ PHẦN ĐẦU**
+**PHẦN MỞ ĐẦU - BÌA VÀ PHẦN ĐẦU**
 
 ---
 
@@ -148,54 +148,43 @@ _(Nếu có)_
 
 # LỜI CAM ĐOAN
 
-Tôi xin cam đoan đồ án tốt nghiệp với đề tài **"Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái"** là công trình nghiên cứu của riêng tôi dưới sự hướng dẫn của TS. Nguyễn Đức Nam.
+Tên tôi là: Lê Trọng An.  
+Mã sinh viên: 21010389 &emsp; Lớp: K15-KTCĐT2  
+Ngành: Kỹ thuật Cơ Điện tử.
 
-Các số liệu, kết quả trình bày trong đồ án là trung thực và chưa từng được công bố trong bất kỳ công trình nghiên cứu nào khác. Các tài liệu tham khảo, trích dẫn trong đồ án đều được ghi rõ nguồn gốc.
+Tôi đã thực hiện đồ án tốt nghiệp với đề tài: Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái.
 
-Tôi xin chịu hoàn toàn trách nhiệm về nội dung đồ án tốt nghiệp của mình.
+Tôi xin cam đoan đây là đề tài nghiên cứu của riêng tôi và được sự hướng dẫn của TS. Nguyễn Đức Nam.
 
-<p align="right"><i>[Thành phố], ngày ... tháng ... năm 2026</i></p>
-<p align="right"><b>Sinh viên thực hiện</b></p>
-<br/>
-<p align="right"><b>Lê Trọng An</b></p>
+Các nội dung nghiên cứu, kết quả trong đề tài này là trung thực và chưa được công bố dưới bất kỳ hình thức nào. Nếu phát hiện có bất kỳ hình thức gian lận nào, tôi xin hoàn toàn chịu trách nhiệm trước pháp luật.
+
+<p align="right"><i>Hà Nội, ngày ... tháng ... năm 20...</i></p>
+
+| **GIẢNG VIÊN HƯỚNG DẪN** | **SINH VIÊN** |
+| --- | --- |
+| TS. Nguyễn Đức Nam | Lê Trọng An |
 
 ---
 
 **TÓM TẮT ĐỒ ÁN TỐT NGHIỆP - ABSTRACT**
 
-**Đề tài:** Thiết kế hệ thống IoT cho ứng dụng quản lý phương tiện giao thông trong lĩnh vực cho thuê xe tự lái
+Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt Nam khiến nhu cầu giám sát phương tiện không còn dừng ở việc biết xe đang ở đâu, mà còn ở việc hiểu xe đang vận hành ra sao và có dấu hiệu bất thường hay không. Từ nhu cầu đó, đồ án này trình bày quá trình thiết kế và triển khai một hệ thống IoT giám sát phương tiện theo hướng end-to-end, bao gồm thiết bị gắn trên xe, hạ tầng cloud và bảng điều khiển web, nhằm hỗ trợ doanh nghiệp theo dõi vị trí, nắm bắt trạng thái kỹ thuật và phản ứng sớm với các rủi ro vận hành.
 
-**Sinh viên thực hiện:** Lê Trọng An&emsp;&emsp;**MSSV:** 21010389
+Ở tầng thiết bị, hệ thống được xây dựng trên bo mạch PCB tự thiết kế. Trong đó, ESP32-S3 giữ vai trò bộ điều khiển trung tâm; SIM7600CE-T đảm nhiệm truyền dữ liệu 4G và định vị vệ tinh GNSS; LIS3DSH theo dõi rung động để nhận biết chuyển động khi xe đỗ; còn adapter vgate iCar Pro cho phép đọc dữ liệu OBD2 từ xe qua BLE. Kiến trúc nguồn được tổ chức theo nhiều nhánh để thiết bị vẫn duy trì hoạt động khi xe tắt máy, đồng thời hạn chế ảnh hưởng tới ắc quy chính.
 
-**Giảng viên hướng dẫn:** TS. Nguyễn Đức Nam
+Ở tầng phần mềm, dữ liệu từ thiết bị được gửi bằng MQTT 5.0 tới EMQX. Có thể hiểu MQTT là một cơ chế nhắn tin nhẹ, phù hợp với thiết bị IoT cần gửi nhiều bản tin nhỏ qua mạng di động. Sau đó, MQTT Bridge tiếp nhận và phân luồng dữ liệu tới từng hệ lưu trữ phù hợp: PostgreSQL cho dữ liệu quan hệ và nhật ký OTA, VictoriaMetrics cho dữ liệu chuỗi thời gian, VictoriaLogs cho nhật ký sự kiện. API server được xây dựng bằng Express.js và TypeScript, đóng vai trò kết nối giữa thiết bị, dữ liệu lưu trữ và giao diện khai thác.
 
----
+Bảng điều khiển web được phát triển bằng Next.js 15 và React 19, hiển thị bản đồ, biểu đồ và trạng thái phương tiện gần như theo thời gian thực thông qua Socket.IO. Nhờ đó, người vận hành không chỉ quan sát vị trí xe mà còn có thể theo dõi lịch sử hành trình, cảnh báo và trạng thái thiết bị trên cùng một giao diện thống nhất.
 
-Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt Nam kéo theo nhu cầu giám sát phương tiện từ xa và quản lý đội xe theo thời gian thực. Đồ án này mô tả quá trình thiết kế, chế tạo và tích hợp một hệ thống IoT giám sát phương tiện, từ thiết bị gắn trên xe đến hạ tầng cloud và bảng điều khiển khai thác, để theo dõi vị trí, thu thập dữ liệu chẩn đoán và phát hiện cảnh báo vận hành.
-
-Về phần cứng, hệ thống sử dụng ESP32-S3 làm bộ xử lý trung tâm, kết hợp modem LTE + GNSS SIMCom SIM7600CE-T để định vị và truyền dữ liệu. Modem được cấu hình ở chế độ Auto (`AT+CNMP=2`) để tự động chuyển giữa LTE/UMTS/GSM, dùng APN mặc định `internet` và cung cấp dữ liệu GNSS qua `AT+CGNSINF` hoặc luồng NMEA tùy chọn `AT+CGNSTST` trên cùng UART1, nên không cần thêm module GNSS độc lập. Thiết bị đọc dữ liệu OBD2 qua adapter vgate iCar Pro bằng BLE, đồng thời sử dụng IMU LIS3DSH để phát hiện rung động và hỗ trợ phân tích hành vi vận hành. Khối nguồn gồm buck/boost converter, bộ sạc pin dự phòng 18650 1S Li-ion 3500mAh, BMS và cơ chế ngắt điện áp thấp (LVD), giúp thiết bị vẫn hoạt động khi xe tắt máy.
-
-Về phần mềm, dữ liệu từ thiết bị được truyền về máy chủ bằng MQTT 5.0 thông qua EMQX và được phân quyền theo ACL cho từng thiết bị. Dịch vụ MQTT Bridge tiếp nhận bản tin, xác thực payload rồi phân luồng đến các hệ lưu trữ chuyên biệt: PostgreSQL cho dữ liệu quan hệ và nhật ký OTA, VictoriaMetrics cho dữ liệu chuỗi thời gian, và VictoriaLogs cho nhật ký sự kiện. API server được xây dựng bằng Express.js kết hợp TypeScript theo kiến trúc DDD, sử dụng cơ chế xác thực phiên dựa trên token lưu trong cơ sở dữ liệu và hỗ trợ kích hoạt cập nhật firmware OTA cho thiết bị.
-
-Bảng điều khiển web dùng Next.js 15 và React 19, hiển thị bản đồ Leaflet, biểu đồ ECharts và kết nối Socket.IO để cập nhật gần như tức thời vị trí cùng trạng thái phương tiện. Toàn bộ hệ thống được đóng gói và triển khai bằng Docker để bảo đảm tính nhất quán giữa môi trường phát triển và môi trường vận hành.
-
-Kết quả đạt được là một hệ thống IoT giám sát phương tiện hoàn chỉnh từ phần cứng đến phần mềm, có khả năng theo dõi vị trí thời gian thực, đọc dữ liệu chẩn đoán OBD2, thiết lập hàng rào địa lý, phát sinh cảnh báo tự động, cập nhật firmware từ xa và hỗ trợ quản lý đội xe cho dịch vụ cho thuê xe tự lái.
+Kết quả đạt được là một hệ thống IoT giám sát phương tiện hoàn chỉnh từ phần cứng đến phần mềm, có khả năng theo dõi vị trí thời gian thực, đọc dữ liệu chẩn đoán OBD2, thiết lập hàng rào địa lý, phát sinh cảnh báo tự động, cập nhật firmware từ xa và hỗ trợ quản lý đội xe. Quan trọng hơn, hệ thống cho thấy một hướng triển khai phù hợp với bối cảnh doanh nghiệp cho thuê xe tự lái trong nước: chi phí hợp lý, có thể tùy biến và đủ dư địa để mở rộng trong các giai đoạn sau.
 
 **Từ khóa:** IoT, giám sát phương tiện, GPS, OBD2, MQTT, ESP32-S3, thời gian thực, hàng rào địa lý
 
----
-
 **Abstract (English)**
-
-**Title:** Design of an IoT System for Vehicle Management in Self-Drive Car Rental Services
-
-**Student:** Lê Trọng An&emsp;&emsp;**Student ID:** 21010389
-
-**Supervisor:** Dr. Nguyen Duc Nam
 
 As the self-drive car rental market in Vietnam grows, the need for remote vehicle monitoring and real-time fleet management becomes increasingly practical for operators. This thesis presents the design and development of an end-to-end IoT vehicle tracking system, covering the onboard device, cloud services, and operational dashboard for real-time tracking, diagnostic data collection, and alerting.
 
-On the hardware side, the system employs the ESP32-S3 microcontroller as the central processing unit, paired with the SIMCom SIM7600CE-T LTE+GNSS modem. The modem is configured to Auto mode (`AT+CNMP=2`) so it can switch between LTE/UMTS/GSM automatically, uses the default APN `internet`, and delivers GNSS data via `AT+CGNSINF` (with optional NMEA streaming through `AT+CGNSTST`) on the same UART1 channel without a dedicated GNSS interface. The device reads engine diagnostic data via the OBD2 protocol through a vgate iCar Pro adapter using Bluetooth Low Energy (BLE), while integrating the LIS3DSH IMU accelerometer for motion detection and abnormal parking-state alerts. The power management system includes buck/boost converters, a 18650 1S Li-ion 3500mAh backup battery charger path with BMS protection, and a low-voltage disconnect (LVD) mechanism to ensure continuous operation even when the vehicle engine is off.
+On the hardware side, the tracker is implemented as a custom integrated PCB rather than an assembly of off-the-shelf development boards. The main board integrates ESP32-S3 (MCU), SIMCom SIM7600CE-T (LTE+GNSS), LIS3DSH (IMU), DS3231M (RTC), W25Q128 (SPI Flash), and power blocks based on MP2482, TPS54231, AP2112, SX1308, and TP4056. The modem is configured to Auto mode (`AT+CNMP=2`) so it can switch between LTE/UMTS/GSM automatically, uses the default APN `internet`, and delivers GNSS data via `AT+CGNSINF` (with optional NMEA streaming through `AT+CGNSTST`) on the same UART1 channel. The device reads engine diagnostic data via OBD2 through a vgate iCar Pro adapter over Bluetooth Low Energy (BLE), where this adapter is an external peripheral outside the main PCB. The power architecture uses a 5V main rail, an approximately 4V modem rail, a 3.3V logic rail, and a 18650 1S backup cell to maintain operation when the vehicle engine is off.
 
 On the software side, device data is transmitted through MQTT 5.0 via EMQX with per-device ACL authorization. The MQTT Bridge validates and routes incoming messages to specialized storage systems: PostgreSQL for relational data and OTA update logs, VictoriaMetrics for time-series telemetry, and VictoriaLogs for operational event logs. The API server is built with Express.js and TypeScript following Domain-Driven Design (DDD), using database-backed session token authentication and providing OTA orchestration endpoints for devices.
 
@@ -204,7 +193,6 @@ The web interface is developed using Next.js 15 and React 19, providing a real-t
 The result is a complete end-to-end IoT vehicle tracking system, from hardware to software, capable of real-time location tracking, OBD2 diagnostic data retrieval, geofencing, automated alerts, remote firmware updates, and fleet-management support for self-drive car rental services.
 
 **Keywords:** IoT, vehicle tracking, GPS, OBD2, MQTT, ESP32-S3, real-time, geofencing
-
 ---
 
 # LỜI CẢM ƠN - ACKNOWLEDGEMENTS
@@ -226,7 +214,7 @@ Xin chân thành cảm ơn!
 
 ---
 
-# MỤC LỤC - TABLE OF CONTENTS
+# MỤC LỤC - TABLE OF CONTENT
 
 <!-- MỤC LỤC được cập nhật theo cấu trúc chương thực tế -->
 
@@ -243,7 +231,7 @@ Xin chân thành cảm ơn!
 |              | DANH MỤC BẢNG                                                                          | ...   |
 |              | DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ                                                            | ...   |
 |              | DANH MỤC TỪ VIẾT TẮT                                                                   | ...   |
-| **Chương 1** | **GIỚI THIỆU DỰ ÁN - SUMMARY**                                                         | ...   |
+| **Chương 1** | **GIỚI THIỆU DỰ ÁN - PROJECT OVERVIEW**                                                         | ...   |
 | 1.1          | Đặt vấn đề / Bối cảnh của dự án — Problem definition and Background                    | ...   |
 | 1.2          | Mục tiêu và phạm vi của dự án                                                          | ...   |
 | 1.3          | Các tiêu chí cần đạt được của dự án                                                    | ...   |
@@ -253,20 +241,22 @@ Xin chân thành cảm ơn!
 | 2.1          | Mô tả vấn đề — Problem statement                                                       | ...   |
 | 2.2          | Bối cảnh và cơ sở kỹ thuật — Background and Technical reviews                          | ...   |
 | 2.3          | Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế — Design criteria and Constraints          | ...   |
-| 2.4          | Yêu cầu từ các bên liên quan — Constituent's requirements                              | ...   |
+| 2.4          | Yêu cầu từ các bên liên quan — Stakeholder requirements                                | ...   |
 | **Chương 3** | **CÁC GIẢI PHÁP THIẾT KẾ - DESIGN SOLUTIONS**                                          | ...   |
-| 3.1          | Phân tích tổng hợp — General analysis                                                  | ...   |
+| 3.1          | Phân tích và đề xuất giải pháp phần cứng — Hardware analysis and solution              | ...   |
 | 3.1.1        | Phân tích và lựa chọn phần cứng                                                        | ...   |
-| 3.1.2        | Phân tích và lựa chọn giải pháp firmware                                               | ...   |
-| 3.1.3        | Phân tích và lựa chọn kiến trúc Cloud                                                  | ...   |
-| 3.1.4        | Phân tích và lựa chọn công nghệ Frontend                                               | ...   |
-| 3.2          | Đề xuất các giải pháp — Proposed multiple solutions                                    | ...   |
-| 3.2.1        | Giải pháp phần cứng                                                                    | ...   |
-| 3.2.2        | Giải pháp firmware                                                                     | ...   |
-| 3.2.3        | Giải pháp Backend & Cloud                                                              | ...   |
-| 3.2.4        | Giải pháp Frontend                                                                     | ...   |
-| 3.3          | Phân tích, đánh giá và lựa chọn phương án khả thi — Analysis, Evaluation and Selection | ...   |
-| 3.4          | Tối ưu phương án thiết kế — The optimal solution                                       | ...   |
+| 3.1.2        | Giải pháp phần cứng                                                                    | ...   |
+| 3.2          | Phân tích và đề xuất giải pháp Firmware — Firmware analysis and solution               | ...   |
+| 3.2.1        | Phân tích và lựa chọn giải pháp Firmware                                               | ...   |
+| 3.2.2        | Giải pháp Firmware                                                                     | ...   |
+| 3.3          | Phân tích và đề xuất kiến trúc Backend/Cloud — Backend/cloud analysis and solution     | ...   |
+| 3.3.1        | Phân tích và lựa chọn kiến trúc Cloud                                                  | ...   |
+| 3.3.2        | Giải pháp Backend & Cloud                                                              | ...   |
+| 3.4          | Phân tích và đề xuất công nghệ Frontend — Frontend analysis and solution               | ...   |
+| 3.4.1        | Phân tích và lựa chọn công nghệ Frontend                                               | ...   |
+| 3.4.2        | Giải pháp Frontend                                                                     | ...   |
+| 3.5          | Phân tích, đánh giá và lựa chọn phương án khả thi — Analysis, Evaluation and Selection | ...   |
+| 3.6          | Tối ưu phương án thiết kế — The optimal solution                                       | ...   |
 | **Chương 4** | **TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ - IMPLEMENTATION AND RESULTS**                       | ...   |
 | 4.1          | Thiết kế chi tiết giải pháp — Detailed design solution                                 | ...   |
 | 4.1.1        | Thiết kế chi tiết phần cứng                                                            | ...   |
@@ -279,17 +269,17 @@ Xin chân thành cảm ơn!
 | 4.2.5        | Triển khai Frontend Dashboard                                                          | ...   |
 | 4.2.6        | Cấu hình giám sát hệ thống                                                             | ...   |
 | 4.2.7        | Checklist hardening trước khi vận hành production                                      | ...   |
-| 4.3          | Đo lường và kết quả — Measurement and Result                                           | ...   |
-| **Chương 5** | **ĐÁNH GIÁ VÀ KHUYẾN NGHỊ - EVALUATION AND RECOMMENDATION**                            | ...   |
+| 4.3          | Đo lường và kết quả — Measurements and Results                                          | ...   |
+| **Chương 5** | **ĐÁNH GIÁ VÀ KHUYẾN NGHỊ - EVALUATION AND RECOMMENDATIONS**                            | ...   |
 | 5.1          | Đánh giá hiệu năng                                                                     | ...   |
 | 5.2          | Đánh giá kinh tế và môi trường                                                         | ...   |
 | 5.3          | Đánh giá rủi ro và biện pháp giảm thiểu                                                | ...   |
 | 5.4          | Khuyến nghị cho tương lai                                                              | ...   |
-| **Chương 6** | **PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM - REFLECTION AND CASE-STUDIES**                      | ...   |
-| 6.1          | Ứng dụng kiến thức kỹ thuật — Earlier course work                                      | ...   |
+| **Chương 6** | **PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM - REFLECTION AND LESSONS LEARNED**                      | ...   |
+| 6.1          | Ứng dụng kiến thức kỹ thuật — Application of prior coursework                                      | ...   |
 | 6.2          | Giải quyết các vấn đề kỹ thuật phức tạp — Complex engineering problems                 | ...   |
-| 6.3          | Tác động đạo đức và xã hội — Ethical and Social impacts                                | ...   |
-| 6.4          | Tổng kết và bài học kinh nghiệm — General reflection and case-studies                  | ...   |
+| 6.3          | Tác động đạo đức và xã hội — Ethical and social impacts                                | ...   |
+| 6.4          | Tổng kết và bài học kinh nghiệm — Reflection and Lessons Learned                  | ...   |
 |              | TÀI LIỆU TRÍCH DẪN - REFERENCES                                                        | ...   |
 |              | PHỤ LỤC - APPENDICES                                                                   | ...   |
 
@@ -405,12 +395,12 @@ Xin chân thành cảm ơn!
 | Hình 4.44 | Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo | ...   |
 | Hình 4.45 | Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị | ...   |
 | Hình 4.46 | Screenshot hành trình trên bản đồ, thể hiện giai đoạn gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối | ...   |
-| Hình 4.47 | Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart) | ...   |
-| Hình PL-3.1 | Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần) | ...   |
+| Hình 4.47 | Biểu đồ so sánh chỉ tiêu thiết kế và kết quả đạt được | ...   |
+| Hình PL-3.1 | Kế hoạch thực hiện dự án theo giai đoạn (24 tuần) | ...   |
 
 ---
 
-# DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATIONS
+# DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATION
 
 | Từ viết tắt   | Tiếng Anh                                      | Tiếng Việt                                 |
 | ------------- | ---------------------------------------------- | ------------------------------------------ |
@@ -451,7 +441,7 @@ Xin chân thành cảm ơn!
 
 <!-- Kết thúc phần mở đầu. Các chương nội dung bắt đầu từ file tiếp theo. -->
 
-﻿# CHƯƠNG 1. GIỚI THIỆU DỰ ÁN – SUMMARY
+# CHƯƠNG 1. GIỚI THIỆU DỰ ÁN – PROJECT OVERVIEW
 
 ## 1.1. Đặt vấn đề / Bối cảnh của dự án
 
@@ -754,7 +744,7 @@ _Hình 1.5: Lộ trình phát triển dự án theo các giai đoạn (Roadmap)_
 
 Chương 1 đã làm rõ bối cảnh hình thành đề tài, động lực triển khai và các thách thức kỹ thuật cốt lõi của bài toán quản lý đội xe tự lái tại Việt Nam. Trên cơ sở đó, chương đã xác định mục tiêu, phạm vi, phương pháp tiếp cận và bộ tiêu chí đánh giá làm nền tảng cho các chương tiếp theo. Từ đây, Chương 2 sẽ đi sâu phân tích các vấn đề kỹ thuật cần giải quyết.
 
-﻿# CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT
+# CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT
 
 ## 2.1. Mô tả vấn đề – Problem statement
 
@@ -1004,7 +994,7 @@ Hệ thống cần đáp ứng các yêu cầu chức năng sau:
 | REST (RFC 7231)           | Kiến trúc API           | Backend API server                           |
 | OAuth 2.0 / Session Auth  | Chuẩn xác thực          | Xác thực người dùng và thiết bị              |
 
-## 2.4. Yêu cầu từ các bên liên quan – Constituent's requirements
+## 2.4. Yêu cầu từ các bên liên quan – Stakeholder requirements
 
 ### 2.4.1. Xác định các bên liên quan
 
@@ -1069,11 +1059,11 @@ Ma trận truy xuất trên cho thấy các chức năng hệ thống (FC-01 đ�
 
 Chương 2 đã làm rõ các bài toán kỹ thuật chính của hệ thống giám sát phương tiện, từ phần cứng, truyền thông và xử lý dữ liệu đến kiến trúc tổng thể. Trên cơ sở khảo sát và đối sánh các giải pháp hiện có, chương đã xác định hướng tiếp cận phù hợp, đồng thời chốt các yêu cầu kỹ thuật, ràng buộc thiết kế và ma trận truy xuất yêu cầu. Đây là nền tảng để chuyển sang bước lựa chọn giải pháp ở Chương 3.
 
-﻿# CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ – DESIGN SOLUTIONS
+# CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ – DESIGN SOLUTIONS
 
 Chương này trình bày quá trình phân tích và lựa chọn các giải pháp thiết kế cho hệ thống IoT giám sát phương tiện. Nội dung được tổ chức theo bốn tầng: phần cứng thiết bị theo dõi, firmware nhúng trên vi điều khiển, hệ thống backend và cloud, cùng giao diện người dùng. Ở mỗi tầng, các phương án được so sánh theo yêu cầu kỹ thuật, thông số chính và mức độ phù hợp với điều kiện triển khai thực tế trước khi chốt phương án sử dụng.
 
-## 3.1. Phân tích tổng hợp – General analysis
+## 3.1. Phân tích và đề xuất giải pháp phần cứng – Hardware analysis and solution
 
 ### 3.1.1. Phân tích và lựa chọn phần cứng
 
@@ -1226,11 +1216,9 @@ Vấn đề cốt lõi của tracker không chỉ là modem có lên mạng đư
 | Ý nghĩa tích hợp          | Giảm số linh kiện rời, đơn giản hóa đi dây và đồng bộ với firmware thực tế                                               |
 | Ghi chú                   | APN mặc định sử dụng trong hệ thống là `internet`; pin mapping phần cứng giữ nguyên                                      |
 
-## 3.2. Đề xuất các giải pháp – Proposed multiple solutions
+### 3.1.2. Giải pháp phần cứng
 
-### 3.2.1. Giải pháp phần cứng
-
-#### 3.2.1.1. Thiết kế mô-đun thu thập dữ liệu OBD2
+#### 3.1.2.1. Thiết kế mô-đun thu thập dữ liệu OBD2
 
 ##### a) Lựa chọn phương pháp kết nối OBD2
 
@@ -1284,7 +1272,7 @@ Khi xe chạy (IGN ON), ESP32-S3 duy trì kết nối BLE liên tục với adap
 
 Trong trường hợp adapter OBD2 không kết nối được (timeout 10 giây, retry 2–3 lần), hệ thống tự động chuyển sang phương pháp dự phòng (fallback) là đo điện áp ắc quy qua ADC để phát hiện trạng thái IGN. Phương pháp này kém chính xác hơn nhưng đảm bảo hệ thống vẫn hoạt động bình thường.
 
-#### 3.2.1.2. Thiết kế mô-đun cảm biến chuyển động IMU
+#### 3.1.2.2. Thiết kế mô-đun cảm biến chuyển động IMU
 
 ##### a) Vai trò của IMU trong hệ thống
 
@@ -1334,9 +1322,9 @@ Cấu hình I2C sử dụng địa chỉ `0x18`, tốc độ `400 kHz`, với ha
 - **Phát hiện chuyển động độc lập:** LIS3DSH tự xử lý việc phát hiện chuyển động bằng phần cứng, chỉ gửi interrupt khi có sự kiện — không phụ thuộc vào CPU của ESP32.
 - **Hệ sinh thái phát triển phong phú:** Nhiều thư viện sẵn có cho Arduino và ESP-IDF; IC LIS3DSH hoặc cảm biến tương đương đều dễ tích hợp vào sơ đồ phần cứng của thiết bị.
 
-#### 3.2.1.3. Thiết kế hệ thống quản lý nguồn
+#### 3.1.2.3. Thiết kế hệ thống quản lý nguồn
 
-Hệ thống quản lý nguồn là khối phức tạp nhất trong thiết kế phần cứng, phụ trách chuyển đổi điện áp, điều phối đường nguồn (power path), sạc pin dự phòng và bảo vệ ắc quy xe khỏi rút cạn quá mức. Cấu trúc được tổ chức thành năm khối chức năng chính.
+Hệ thống quản lý nguồn là khối phức tạp nhất trong thiết kế phần cứng, vì nó phải đồng thời giải quyết ba bài toán vốn dễ xung đột với nhau: tạo đúng các mức điện áp cho từng tải, duy trì đường nguồn dự phòng khi cần và bảo vệ ắc quy xe khỏi bị rút cạn quá mức. Vì vậy, khối này được tách thành năm nhánh chức năng để người đọc dễ theo dõi vai trò của từng đường nguồn thay vì chỉ nhìn một sơ đồ điện phức tạp.
 
 ![Hình 3.4 - Sơ đồ khối hệ thống quản lý nguồn](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-4.svg)
 
@@ -1350,15 +1338,15 @@ _Hình 3.4a: Kiến trúc nguồn và phân phối điện áp trong hệ thốn
 
 > Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
-##### a) Buck 3.3V cho ESP32-S3 (XL1509 3.3E)
+##### a) LDO 3.3V cho ESP32-S3 (AP2112-3.3)
 
-Nhánh buck 3.3V dùng **XL1509 3.3E** để hạ điện áp từ ắc quy xe (12–24V) xuống 3.3V, cấp trực tiếp cho ESP32-S3 và các tải logic 3.3V.
+Nhánh 3.3V dùng **AP2112-3.3** như một LDO để hạ từ **bus 5V chính** xuống 3.3V, cấp cho ESP32-S3 và các tải logic 3.3V. Cách tổ chức này phù hợp với kiến trúc nguồn thực tế của bo mạch: MP2482 đảm nhiệm bước hạ áp đầu tiên từ 12–24V xuống 5V, còn AP2112-3.3 đảm nhiệm bước ổn áp cuối cho miền logic.
 
-[Bảng 3.8: Thông số khối Buck 3.3V]
+[Bảng 3.8: Thông số khối LDO 3.3V]
 
-| Khối      | IC          | Input  | Output | Tải      |
-| --------- | ----------- | ------ | ------ | -------- |
-| Buck 3.3V | XL1509 3.3E | 12–24V | 3.3V   | ESP32-S3 |
+| Khối     | IC          | Input | Output | Tải      |
+| -------- | ----------- | ----- | ------ | -------- |
+| LDO 3.3V | AP2112-3.3  | 5V    | 3.3V   | ESP32-S3 |
 
 ##### b) Buck 5V bus chính (MP2482)
 
@@ -1401,14 +1389,14 @@ LVD dùng ngưỡng profile kép theo firmware:
 
 [Bảng 3.12: Bảng trạng thái chuyển nguồn và cảnh báo]
 
-| Trạng thái          | IGN | U_batt                                                     | Nguồn tracker | Sạc pin | Cảnh báo              |
-| ------------------- | --- | ---------------------------------------------------------- | ------------- | ------- | --------------------- |
-| Xe chạy bình thường | ON  | Profile 12V: U_batt >= 13.0V; Profile 24V: U_batt >= 26.0V | Ắc quy        | Có      | Không                 |
-| Xe đỗ bình thường   | OFF | Profile 12V: U_batt > 12.0V; Profile 24V: U_batt > 24.0V   | Ắc quy        | Không   | Không                 |
-| Ắc quy yếu          | OFF | Profile 12V: U_batt <= 12.0V; Profile 24V: U_batt <= 24.0V | Pin 18650 1S  | Không   | Cảnh báo chuyển nguồn |
-| Ắc quy phục hồi     | OFF | Profile 12V: U_batt >= 12.2V; Profile 24V: U_batt >= 24.4V | Ắc quy        | Không   | Cảnh báo phục hồi     |
+| Trạng thái     | IGN | U_batt                                                     | Nguồn tracker | Sạc pin | Cảnh báo            |
+| -------------- | --- | ---------------------------------------------------------- | ------------- | ------- | ------------------- |
+| Xe chạy        | ON  | Profile 12V: U_batt >= 13.0V; Profile 24V: U_batt >= 26.0V | Ắc quy        | Có      | Không               |
+| Xe đỗ          | OFF | Profile 12V: U_batt > 12.0V; Profile 24V: U_batt > 24.0V   | Ắc quy        | Không   | Không               |
+| Ắc quy yếu     | OFF | Profile 12V: U_batt <= 12.0V; Profile 24V: U_batt <= 24.0V | Pin 18650 1S  | Không   | Cảnh báo chuyển nguồn |
+| Ắc quy phục hồi | OFF | Profile 12V: U_batt >= 12.2V; Profile 24V: U_batt >= 24.4V | Ắc quy        | Không   | Cảnh báo phục hồi   |
 
-Ngoài kênh ADC, tín hiệu trạng thái LVD từ comparator LM393 được đưa về **GPIO19 (LVD_STATUS)** để giám sát nhanh. Quy ước runtime: **GPIO19 HIGH = low-voltage**, **GPIO19 LOW = bình thường**.
+Ngoài kênh ADC, tín hiệu trạng thái LVD từ khối LVD phần cứng được đưa về **GPIO19 (LVD_STATUS)** để giám sát nhanh. Quy ước runtime: **GPIO19 HIGH = low-voltage**, **GPIO19 LOW = bình thường**.
 
 ##### f) Mạch sạc pin 1S (TP4056)
 
@@ -1460,48 +1448,50 @@ _Giá trị 12.6 giờ ở đây là phép tính lý tưởng theo tải giả �
 
 Kết quả quy đổi cho thấy baseline pin 18650 1S vẫn đủ khả năng duy trì hoạt động tracker trong nhiều ngày ở chế độ heartbeat và trên 12 giờ ở chế độ cảnh báo liên tục theo mô hình lý tưởng; trong vận hành toàn hệ thống, các giá trị bảo thủ hơn ở Chương 4 phù hợp hơn cho mục tiêu duy trì giám sát tạm thời khi ắc quy xe yếu, nhưng vẫn cần được kiểm thử thực nghiệm lại nếu chuyển sang mẫu pin mới trong pha chế tạo tiếp theo [14].
 
-#### 3.2.1.4. Bảng tổng hợp linh kiện (Bill of Materials)
+#### 3.1.2.4. Bảng tổng hợp linh kiện (Bill of Materials)
 
 [Bảng 3.14A: Bảng tổng hợp linh kiện hệ thống tracker (BOM)]
 
-| STT | Thành phần                   | Đơn vị | SL  | Giá ước tính (VND) | Ghi chú                               |
-| --- | ---------------------------- | ------ | --- | ------------------ | ------------------------------------- |
-| 1   | ESP32-S3-WROOM-1 (N16R8)     | Cái    | 1   | 100.000–200.000    | MCU trung tâm của bo mạch             |
-| 2   | IC cảm biến LIS3DSH           | Cái    | 1   | 20.000–50.000      | Cảm biến gia tốc 3 trục               |
-| 3   | vgate iCar Pro (OBD2 BLE)    | Cái    | 1   | 150.000–300.000    | BLE 4.0, ELM327 compatible            |
-| 4   | SIMCom SIM7600CE-T           | Bộ     | 1   | 330.000–500.000    | Modem LTE + GNSS tích hợp + anten     |
-| 5   | Pin 18650 1S Li-ion 3500mAh  | Cái    | 1   | 100.000–200.000    | Loại có protection board              |
-| 6   | IC sạc TP4056 + mạch phụ trợ | Cái    | 1   | 20.000–40.000      | Input 5V, output 4.2V, dòng theo PROG |
-| 7   | Mạch buck XL1509 3.3V        | Cái    | 1   | 15.000–30.000      | 12–24V -> 3.3V cấp ESP32-S3           |
-| 8   | Mạch buck MP2482 5V          | Cái    | 1   | 15.000–30.000      | Bus 5V chính                          |
-| 9   | Mạch buck TPS54231 ~4V       | Cái    | 1   | 20.000–40.000      | 12–24V -> ~4V cấp modem SIM7600CE-T   |
-| 10  | Mạch boost SX1308 5V backup  | Cái    | 1   | 10.000–20.000      | Backup từ pin 18650 1S                |
-| 11  | Comparator LM393             | Cái    | 1   | 5.000–15.000       | Giám sát LVD (GPIO19)                 |
-| 12  | Diode Schottky 1N5822        | Cái    | 2   | 2.000–5.000        | Diode-OR power path                   |
-| 13  | BMS/Protection Board 1S      | Cái    | 1   | 10.000–20.000      | Bảo vệ pin 18650 1S                   |
-| 14  | Điện trở (10kOhm, 2.2kOhm)   | Gói    | 1   | 5.000–10.000       | Voltage divider, pull-up              |
-| 15  | Tụ điện (100uF, 220uF)       | Gói    | 1   | 5.000–10.000       | Lọc nhiễu, decoupling                 |
-| 16  | Connector, header pin        | Gói    | 1   | 10.000–20.000      | Kết nối dây, header                   |
-| 17  | PCB 2 lớp (~50x50 mm)        | Cái    | 1   | 50.000–100.000     | Bo mạch theo layout của đề tài        |
-| 18  | Vỏ bảo vệ (tùy chọn)         | Cái    | 1   | 50.000–100.000     | Nhựa hoặc kim loại                    |
-| 19  | Dây nối, cáp, phụ kiện       | -      | -   | 20.000–30.000      | Dây điện, cáp USB                     |
-| 20  | Linh kiện phụ trợ khác       | -      | -   | 20.000–30.000      | Fuse, switch, LED                     |
+| STT | Thành phần                   | Đơn vị | SL  | Giá tham chiếu T4/2026 (VND) | Ghi chú                               |
+| --- | ---------------------------- | ------ | --- | ---------------------------- | ------------------------------------- |
+| 1   | ESP32-S3-WROOM-1 (N16R8)     | Cái    | 1   | 95.000                       | MCU trung tâm của bo mạch             |
+| 2   | IC cảm biến LIS3DSH          | Cái    | 1   | 40.000                       | Cảm biến gia tốc 3 trục               |
+| 3   | vgate iCar Pro (OBD2 BLE)    | Cái    | 1   | 367.000                      | BLE 4.0, ELM327 compatible            |
+| 4   | SIMCom SIM7600CE-T           | Bộ     | 1   | 650.000                      | Modem LTE + GNSS tích hợp             |
+| 5   | Pin 18650 1S Li-ion 3500mAh  | Cái    | 1   | 79.000                       | Loại có protection board              |
+| 6   | IC sạc TP4056 + mạch phụ trợ | Cái    | 1   | 25.000                       | Input 5V, output 4.2V, dòng theo PROG |
+| 7   | Mạch LDO AP2112-3.3          | Cái    | 1   | 5.000                        | 5V -> 3.3V cấp ESP32-S3               |
+| 8   | Mạch buck MP2482 5V          | Cái    | 1   | 17.000                       | Bus 5V chính                          |
+| 9   | Mạch buck TPS54231 ~4V       | Cái    | 1   | 9.000                        | 12–24V -> ~4V cấp modem SIM7600CE-T   |
+| 10  | Mạch boost SX1308 5V backup  | Cái    | 1   | 12.000                       | Backup từ pin 18650 1S                |
+| 11  | Khối giám sát LVD + ADC      | Cái    | 1   | 8.000                        | Giám sát LVD (GPIO19)                 |
+| 12  | Diode Schottky (SS54/SS34)   | Cái    | 2   | 2.500                        | Diode-OR power path                   |
+| 13  | Mạch bảo vệ pin 1S (BMS)     | Cái    | 1   | 12.000                       | Bảo vệ pin 18650 1S                   |
+| 14  | Điện trở (10kOhm, 2.2kOhm)   | Gói    | 1   | 8.000                        | Voltage divider, pull-up              |
+| 15  | Tụ điện (100uF, 220uF)       | Gói    | 1   | 10.000                       | Lọc nhiễu, decoupling                 |
+| 16  | Connector, header pin        | Gói    | 1   | 15.000                       | Kết nối dây, header                   |
+| 17  | PCB 2 lớp (~50x50 mm)        | Cái    | 1   | 60.000                       | Bo mạch theo layout của đề tài        |
+| 18  | Vỏ bảo vệ (tùy chọn)         | Cái    | 1   | 100.000                      | Nhựa hoặc kim loại                    |
+| 19  | Dây nối, cáp, phụ kiện       | -      | -   | 20.000                       | Dây điện, cáp USB                     |
+|      |                              |        |     | **Tổng cộng**                | **1.514.000**                         |
 
 [Bảng 3.15: Tổng hợp chi phí theo nhóm]
 
-| Nhóm | Hạng mục                                                                       | Chi phí (VND)         |
-| ---- | ------------------------------------------------------------------------------ | --------------------- |
-| A    | Thành phần chính (MCU, cảm biến, modem, OBD2, pin)                             | 670.000–1.250.000     |
-| B    | Quản lý nguồn (XL1509, MP2482, TPS54231, SX1308, TP4056, diode OR, LM393, BMS) | 80.000–155.000        |
-| C    | Linh kiện phụ trợ (điện trở, tụ, diode, connector)                             | 42.000–75.000         |
-| D    | PCB và vỏ (tùy chọn)                                                           | 100.000–200.000       |
-|      | **Tổng cộng**                                                                  | **872.000–1.635.000** |
+| Nhóm | Hạng mục                                                                                | Chi phí (VND) |
+| ---- | --------------------------------------------------------------------------------------- | ------------- |
+| A    | Thành phần chính (MCU, cảm biến, modem, OBD2, pin)                                      | 1.231.000     |
+| B    | Quản lý nguồn (AP2112-3.3, MP2482, TPS54231, SX1308, TP4056, diode OR, khối LVD, BMS) | 88.000        |
+| C    | Linh kiện phụ trợ (điện trở, tụ, diode, connector)                                      | 53.000        |
+| D    | PCB và vỏ (tùy chọn)                                                                    | 160.000       |
+|      | **Tổng cộng**                                                                           | **1.514.000** |
 
-Tổng chi phí ước tính cho toàn bộ phần cứng hệ thống tracker nằm trong khoảng **872.000–1.635.000 VND**, phù hợp với ngân sách đồ án tốt nghiệp. Mức chi phí này phản ánh phương án phần cứng của đề tài với bo mạch 2 lớp do nhóm phát triển, các linh kiện được lắp trực tiếp trên bo mạch và hoàn thiện thành một thiết bị độc lập.
+Tổng chi phí tham chiếu cho toàn bộ phần cứng hệ thống tracker là **1.514.000 VND**. Mức này vẫn nằm dưới ngưỡng chi phí mục tiêu của đồ án, đồng thời phản ánh đúng phương án phần cứng hiện tại với AP2112-3.3 cho rail logic 3.3V, khối giám sát LVD + ADC và diode Schottky SS54/SS34 cho power path.
 
-﻿### 3.1.2. Phân tích và lựa chọn giải pháp Firmware
+## 3.2. Phân tích và đề xuất giải pháp Firmware – Firmware analysis and solution
 
-#### 3.1.2.1. Đặt vấn đề cho giải pháp Firmware
+### 3.2.1. Phân tích và lựa chọn giải pháp Firmware
+
+#### 3.2.1.1. Đặt vấn đề cho giải pháp Firmware
 
 Firmware là lớp phần mềm nhúng chạy trực tiếp trên vi điều khiển ESP32-S3 và giữ vai trò điều phối toàn bộ hoạt động của thiết bị theo dõi. Do firmware là điểm hội tụ giữa phần cứng, truyền thông và nghiệp vụ, bài toán thiết kế phải đồng thời thỏa mãn các yêu cầu sau:
 
@@ -1510,7 +1500,7 @@ Firmware là lớp phần mềm nhúng chạy trực tiếp trên vi điều khi
 - **Giao tiếp đa giao thức**: BLE (OBD2), UART (modem), MQTT/HTTP (cloud), I2C/ADC/GPIO (ngoại vi phần cứng).
 - **Độ bền vận hành cao**: có cơ chế retry, fallback và phục hồi sau mất kết nối mạng hoặc lỗi ngoại vi.
 
-#### 3.1.2.2. So sánh các phương án nền tảng Firmware
+#### 3.2.1.2. So sánh các phương án nền tảng Firmware
 
 [Bảng 3.5A: So sánh các phương án nền tảng firmware]
 
@@ -1520,7 +1510,7 @@ Firmware là lớp phần mềm nhúng chạy trực tiếp trên vi điều khi
 | **PA-FW2: ESP-IDF + FreeRTOS (Đã chọn)** | Kiến trúc task/event, driver chính thức Espressif | Đa nhiệm tốt, hỗ trợ power management sâu, tích hợp NimBLE/modem/UART/I2C ổn định | Độ phức tạp cao hơn Arduino                                                         | **Cao**     |
 | **PA-FW3: Zephyr RTOS trên ESP32**       | RTOS đa nền tảng, kiến trúc module hóa            | Tính chuẩn hóa tốt, khả năng mở rộng dài hạn                                      | Hệ sinh thái ESP32 chuyên biệt và tài liệu thực chiến BLE-OBD2/modem ít hơn ESP-IDF | Trung bình  |
 
-#### 3.1.2.3. Chọn giải pháp Firmware
+#### 3.2.1.3. Chọn giải pháp Firmware
 
 Từ kết quả so sánh, đồ án chọn **PA-FW2: ESP-IDF + FreeRTOS** làm nền tảng firmware chính.
 
@@ -1764,7 +1754,7 @@ Module quản lý nguồn sử dụng các chân GPIO của ESP32-S3 để đi�
 | 4    | U_BATT_ADC    | Input  | Đọc điện áp ắc quy (ADC 12-bit)           |
 | 5    | CHARGER_EN    | Output | Điều khiển IC sạc TP4056                  |
 | 18   | POWER_PATH_EN | Output | Chọn nguồn cấp (ắc quy hoặc pin dự phòng) |
-| 19   | LVD_STATUS    | Input  | Đọc trạng thái LVD từ comparator LM393    |
+| 19   | LVD_STATUS    | Input  | Đọc trạng thái LVD từ khối LVD phần cứng  |
 | 21   | LIS3DSH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU              |
 | 47   | LIS3DSH_SDA    | I/O    | Đường dữ liệu I2C                         |
 | 48   | LIS3DSH_SCL    | I/O    | Đường clock I2C                           |
@@ -1820,7 +1810,7 @@ IC sạc TP4056 được điều khiển qua chân GPIO5 (CHARGER_EN). Logic s�
 
 Firmware đọc điện áp ắc quy qua kênh ADC 12-bit (GPIO4) với bộ chia áp để đưa điện áp ắc quy 12V hoặc 24V về dải đo của ADC (0–3.3V). Giá trị ADC được chuyển đổi sang điện áp thực thông qua công thức hiệu chuẩn (calibration).
 
-Ngoài ra, hệ thống có thêm kênh giám sát LVD độc lập sử dụng comparator LM393 (GPIO19). Đây là kênh dự phòng cho ADC, cho phép kiểm tra nhanh trạng thái nguồn với cơ chế trễ (hysteresis): profile 12V dùng Switch_OFF=12.0V, Switch_ON=12.2V; profile 24V dùng Switch_OFF=24.0V, Switch_ON=24.4V. Comparator tự xử lý hysteresis ở mức phần cứng, tránh hiện tượng dao động (oscillation) quanh ngưỡng.
+Ngoài ra, hệ thống có thêm kênh giám sát LVD độc lập từ khối LVD phần cứng (GPIO19). Đây là kênh dự phòng cho ADC, cho phép kiểm tra nhanh trạng thái nguồn với cơ chế trễ (hysteresis): profile 12V dùng Switch_OFF=12.0V, Switch_ON=12.2V; profile 24V dùng Switch_OFF=24.0V, Switch_ON=24.4V. Khối LVD xử lý hysteresis ở mức phần cứng, tránh hiện tượng dao động (oscillation) quanh ngưỡng.
 
 ##### e) Các chế độ quản lý nguồn
 
@@ -2106,9 +2096,9 @@ Cấu hình được quản lý theo ba cơ chế:
 
 Các giá trị hiệu chuẩn được lưu trữ trong NVS và được tải khi thiết bị khởi động, đảm bảo tính nhất quán của phép đo giữa các lần reset.
 
-﻿### 3.1.3. Phân tích và lựa chọn kiến trúc Cloud
+### 3.3.1. Phân tích và lựa chọn kiến trúc Cloud
 
-#### 3.1.3.1. Đặt vấn đề cho kiến trúc Cloud
+#### 3.3.1.1. Đặt vấn đề cho kiến trúc Cloud
 
 Hệ thống Backend/Cloud là tầng điều phối trung tâm của toàn bộ giải pháp IoT. Vì vậy, thiết kế cần đồng thời giải quyết các bài toán kỹ thuật sau:
 
@@ -2117,7 +2107,7 @@ Hệ thống Backend/Cloud là tầng điều phối trung tâm của toàn bộ
 - **Lưu trữ dữ liệu hỗn hợp**: vừa có dữ liệu chuỗi thời gian (GPS, nguồn, IMU; sẵn sàng mở rộng thêm OBD2), vừa có dữ liệu quan hệ nghiệp vụ (xe, người dùng, cảnh báo, geofence).
 - **Chi phí và năng lực vận hành phù hợp đồ án**: ưu tiên self-hosted, dễ triển khai, dễ mở rộng theo từng dịch vụ.
 
-#### 3.1.3.2. So sánh các phương án kiến trúc Cloud
+#### 3.3.1.2. So sánh các phương án kiến trúc Cloud
 
 [Bảng 3.15A: So sánh các phương án kiến trúc Cloud]
 
@@ -2127,7 +2117,7 @@ Hệ thống Backend/Cloud là tầng điều phối trung tâm của toàn bộ
 | **PA-B: Managed Cloud Native**     | AWS IoT Core/Lambda + dịch vụ DB managed                                | Khả năng mở rộng cao, nhiều dịch vụ sẵn có                               | Chi phí vận hành cao, phụ thuộc nhà cung cấp, độ phức tạp hạ tầng vượt phạm vi đồ án | Trung bình        |
 | **PA-C: Event-driven self-hosted** | MQTT Broker + MQTT Bridge + dual database + API/WebSocket               | Phù hợp IoT realtime, tách tải tốt, mở rộng theo dịch vụ, chi phí tự chủ | Cần chuẩn hóa message flow và quản lý nhiều dịch vụ Docker                           | **Cao (Đã chọn)** |
 
-#### 3.1.3.3. Chọn giải pháp kiến trúc Cloud
+#### 3.3.1.3. Chọn giải pháp kiến trúc Cloud
 
 Đồ án chọn **PA-C: kiến trúc phân tầng kết hợp hướng sự kiện (event-driven)** với chuỗi xử lý:
 
@@ -2140,11 +2130,11 @@ Lý do lựa chọn:
 - **Dễ scale theo chiều ngang**: có thể nhân bản riêng broker/bridge/api khi số thiết bị tăng.
 - **Phù hợp chi phí và phạm vi thực hiện**: self-hosted qua Docker Compose, không phụ thuộc nền tảng cloud thương mại.
 
-### 3.2.3. Giải pháp Backend & Cloud
+### 3.3.2. Giải pháp Backend & Cloud
 
-Phần này trình bày chi tiết giải pháp thiết kế và triển khai hệ thống Backend/Cloud theo phương án đã lựa chọn ở mục 3.1.3.
+Phần này trình bày chi tiết giải pháp thiết kế và triển khai hệ thống Backend/Cloud theo phương án đã lựa chọn ở mục 3.3.1.
 
-#### 3.2.3.1. Kiến trúc tổng quan hệ thống Cloud (Cloud Architecture Overview)
+#### 3.3.2.1. Kiến trúc tổng quan hệ thống Cloud (Cloud Architecture Overview)
 
 ##### a) Mô hình kiến trúc tổng thể
 
@@ -2202,7 +2192,7 @@ Hệ thống áp dụng mô hình triển khai per-service Docker Compose theo q
 | Tracking_VictoriaLogs    | tracking-victorialogs    | 9428                          | 512MB, 1 CPU       |
 | Tracking_Grafana         | tracking-grafana         | 4001                          | Chưa cấu hình cứng |
 
-#### 3.2.3.2. MQTT Broker - EMQX (Message Broker Selection & Configuration)
+#### 3.3.2.2. MQTT Broker - EMQX (Message Broker Selection & Configuration)
 
 ##### a) Vai trò của MQTT Broker
 
@@ -2293,7 +2283,7 @@ Thiết bị -> EMQX -> MQTT Bridge / internal events
 
 Ngoài ra, hệ thống có thể mở rộng thêm rule cho geofence sơ cấp, thống kê traffic theo topic, hoặc phát hiện thiết bị im lặng bất thường để phục vụ vận hành.
 
-#### 3.2.3.3. Thiết kế cơ sở dữ liệu (Database Architecture Design)
+#### 3.3.2.3. Thiết kế cơ sở dữ liệu (Database Architecture Design)
 
 **Đặt vấn đề lưu trữ:** Dữ liệu hệ thống có hai đặc tính trái ngược: telemetry ghi rất nhanh theo thời gian thực và dữ liệu nghiệp vụ yêu cầu toàn vẹn quan hệ dài hạn. Một mô hình lưu trữ duy nhất thường tối ưu tốt cho một phía nhưng kém hiệu quả ở phía còn lại.
 
@@ -2420,7 +2410,7 @@ VictoriaMetrics là cơ sở dữ liệu chuỗi thời gian tương thích Prom
 
 VictoriaLogs được sử dụng làm hệ thống nhật ký tập trung (centralized logging), thay thế bộ công cụ ELK Stack truyền thống với ưu điểm nhẹ hơn và dễ triển khai. VictoriaLogs lưu trữ các loại nhật ký: sự kiện thiết bị, nhật ký lỗi, phiên làm việc, message MQTT, và nhật ký kiểm toán (audit trail). Chính sách lưu trữ: 7 ngày cho nhật ký thông thường.
 
-#### 3.2.3.4. API Server và kiến trúc phần mềm (API Server & Software Architecture)
+#### 3.3.2.4. API Server và kiến trúc phần mềm (API Server & Software Architecture)
 
 ##### a) Lựa chọn công nghệ
 
@@ -2457,7 +2447,7 @@ Hệ thống bao gồm hơn 20 domain module, mỗi module có cấu trúc `serv
 
 MQTT Bridge đã được tách thành dịch vụ Node.js độc lập (`Tracking_MqttBridge/`) với `package.json`, `docker-compose.yml`, logger, connection pool và cấu hình riêng. Cách tách này giúp dịch vụ dễ mở rộng hơn, cô lập lỗi tốt hơn và giữ kiến trúc tổng thể gọn hơn.
 
-#### 3.2.3.5. Thiết kế API Endpoints (REST API Design)
+#### 3.3.2.5. Thiết kế API Endpoints (REST API Design)
 
 ##### a) Nguyên tắc thiết kế
 
@@ -2493,13 +2483,13 @@ _Hình 3.14a: Luồng điều phối OTA giữa Backend, EMQX, thiết bị và 
 
 Backend vẫn duy trì một số alias tương thích như `/api/v1/device` hoặc `/api/v1/export`, nhưng tài liệu ưu tiên dạng tài nguyên số nhiều (`/devices`, `/vehicles`, `/customers`, `/trips`, `/alerts`, `/geofences`) để thống nhất cách đặt tên.
 
-#### 3.2.3.6. WebSocket và truyền dữ liệu thời gian thực (Real-time Communication)
+#### 3.3.2.6. WebSocket và truyền dữ liệu thời gian thực (Real-time Communication)
 
 Hệ thống sử dụng **Socket.IO 4.8** làm giải pháp truyền dữ liệu thời gian thực từ Backend đến Frontend. Ở phạm vi triển khai này, hệ thống định nghĩa năm namespace chính: `/dashboard`, `/devices`, `/notifications`, `/exports` và `/firmware`. Tất cả namespace đều đi qua middleware xác thực; riêng namespace `/devices` hỗ trợ join room theo từng thiết bị (`device:{id}`) để nhận sự kiện chi tiết.
 
 Các sự kiện tiêu biểu gồm `device:status`, `device:position`, `command:ack`, `stats:update`, `alert:new`, `geofence:enter`, `geofence:exit`, `export:ready` và `firmware:assignment`. Trong triển khai hiện tại, namespace `/firmware` chủ yếu dùng để phát sự kiện gán hoặc cập nhật tác vụ OTA từ backend; còn trạng thái chi tiết của quá trình OTA được MQTT Bridge ghi vào `firmware_update_log` và VictoriaLogs để phục vụ truy vết, theo dõi và đồng bộ với giao diện quản trị.
 
-#### 3.2.3.7. Bảo mật hệ thống (Security Design)
+#### 3.3.2.7. Bảo mật hệ thống (Security Design)
 
 ##### a) Xác thực Session-based (Không dùng JWT)
 
@@ -2526,9 +2516,9 @@ ACL per device, Client ID duy nhất, và xác thực MQTT bằng username/passw
 
 Hệ thống hỗ trợ gửi thông báo qua Telegram Bot (thời gian thực) và Email SMTP (chi tiết). Các loại cảnh báo: xe di chuyển bất thường, vi phạm tốc độ, pin thấp, thiết bị mất kết nối, lịch bảo trì sắp đến.
 
-﻿### 3.1.4. Phân tích và lựa chọn công nghệ Frontend
+### 3.4.1. Phân tích và lựa chọn công nghệ Frontend
 
-#### 3.1.4.1. Đặt vấn đề cho giải pháp Frontend
+#### 3.4.1.1. Đặt vấn đề cho giải pháp Frontend
 
 Giao diện người dùng (Frontend) là lớp tương tác trực tiếp giữa người vận hành và hệ thống IoT giám sát phương tiện. Do đó, bài toán thiết kế frontend cần đồng thời đáp ứng các yêu cầu sau:
 
@@ -2537,7 +2527,7 @@ Giao diện người dùng (Frontend) là lớp tương tác trực tiếp giữ
 - **Hiệu năng và trải nghiệm người dùng**: tải trang nhanh, điều hướng mượt, responsive tốt trên desktop/mobile.
 - **Dễ triển khai production**: build và đóng gói Docker thuận lợi cho mô hình vận hành đa dịch vụ.
 
-#### 3.1.4.2. So sánh các phương án công nghệ Frontend
+#### 3.4.1.2. So sánh các phương án công nghệ Frontend
 
 [Bảng 3.23A: So sánh các phương án công nghệ frontend tổng thể]
 
@@ -2547,7 +2537,7 @@ Giao diện người dùng (Frontend) là lớp tương tác trực tiếp giữ
 | **PA-FE2: Nuxt (Vue)**                | Vue + Nuxt SSR/SSG                 | SSR tốt, cấu trúc rõ                                                          | Khác hệ sinh thái React đang dùng ở dự án, chi phí chuyển đổi cao | Trung bình  |
 | **PA-FE3: Next.js + React (Đã chọn)** | Next.js 15 + React 19 + App Router | SSR/RSC tốt, hệ sinh thái lớn, tối ưu production, tích hợp realtime thuận lợi | Độ phức tạp framework cao hơn CSR thuần                           | **Cao**     |
 
-#### 3.1.4.3. Chọn giải pháp Frontend
+#### 3.4.1.3. Chọn giải pháp Frontend
 
 Đồ án chọn **PA-FE3: Next.js 15 + React 19** làm nền tảng frontend chính.
 
@@ -2558,11 +2548,11 @@ Lý do lựa chọn:
 - **Mở rộng tính năng thuận lợi**: dễ tổ chức theo module (Feature-Sliced Design).
 - **Sẵn sàng triển khai production**: hỗ trợ build/standalone output và đóng gói Docker rõ ràng.
 
-### 3.2.4. Giải pháp Frontend
+### 3.4.2. Giải pháp Frontend
 
-Phần này trình bày các giải pháp thiết kế, lựa chọn công nghệ và kiến trúc ứng dụng web theo phương án đã chọn ở mục 3.1.4.
+Phần này trình bày các giải pháp thiết kế, lựa chọn công nghệ và kiến trúc ứng dụng web theo phương án đã chọn ở mục 3.4.1.
 
-#### 3.2.4.1. Lựa chọn công nghệ Frontend (Technology Selection)
+#### 3.4.2.1. Lựa chọn công nghệ Frontend (Technology Selection)
 
 ##### a) Framework ứng dụng web
 
@@ -2632,7 +2622,7 @@ Hệ thống áp dụng chiến lược tách biệt giữa trạng thái client
 
 **Kết luận:** Leaflet.js được chọn vì hoàn toàn miễn phí (MIT license), hỗ trợ tự host tile server cho môi trường không có Internet công cộng, và có hệ sinh thái plugin phong phú (MarkerCluster, Geoman cho vẽ geofence). Điều này đặc biệt phù hợp với hệ thống IoT có thể triển khai trong môi trường private network.
 
-#### 3.2.4.2. Kiến trúc ứng dụng web (Web Application Architecture)
+#### 3.4.2.2. Kiến trúc ứng dụng web (Web Application Architecture)
 
 ##### a) Mô hình kiến trúc Feature-Sliced Design
 
@@ -2718,7 +2708,7 @@ _Hình 3.16: Biểu đồ trình tự (Sequence Diagram) luồng xác thực ng�
 
 > Nguồn: Hình vẽ của tác giả
 
-#### 3.2.4.3. Thiết kế các trang chức năng chính (Main Feature Pages)
+#### 3.4.2.3. Thiết kế các trang chức năng chính (Main Feature Pages)
 
 ##### a) Trang tổng quan (Dashboard)
 
@@ -2776,7 +2766,7 @@ Trang quản lý chuyến đi cung cấp lịch sử và chi tiết từng chuy�
 | Thông báo   | `/dashboard/notifications` | Cấu hình Telegram, Email                | Không                    |
 | Cài đặt     | `/dashboard/settings`      | Hồ sơ, quản lý người dùng               | Không                    |
 
-#### 3.2.4.4. Tích hợp bản đồ thời gian thực (Real-time Map Integration)
+#### 3.4.2.4. Tích hợp bản đồ thời gian thực (Real-time Map Integration)
 
 ##### a) Kiến trúc tích hợp bản đồ
 
@@ -2826,7 +2816,7 @@ _Hình 3.20: Giao diện trang bản đồ thời gian thực với các marker 
 
 > Nguồn: Hình dựng từ thiết kế giao diện và luồng nghiệp vụ của tác giả
 
-#### 3.2.4.5. Thiết kế responsive và trải nghiệm người dùng (Responsive Design & UX)
+#### 3.4.2.5. Thiết kế responsive và trải nghiệm người dùng (Responsive Design & UX)
 
 ##### a) Chiến lược responsive
 
@@ -2882,9 +2872,9 @@ _Hình 3.22: Các mẫu thiết kế UI của hệ thống - Data Table, Form, C
 
 ---
 
-## 3.3. Phân tích, đánh giá và lựa chọn phương án khả thi – Analysis, Evaluation and Selection
+## 3.5. Phân tích, đánh giá và lựa chọn phương án khả thi – Analysis, Evaluation and Selection
 
-Dựa trên phân tích các giải pháp đề xuất cho từng tầng hệ thống ở mục 3.2, bảng tổng hợp dưới đây đánh giá và so sánh các phương án đã xem xét:
+Dựa trên phân tích các giải pháp đề xuất cho từng tầng hệ thống ở các mục 3.1 đến 3.4, bảng tổng hợp dưới đây đánh giá và so sánh các phương án đã xem xét:
 
 [Bảng 3.29: Ma trận đánh giá tổng hợp các phương án thiết kế]
 
@@ -2902,9 +2892,9 @@ Dựa trên phân tích các giải pháp đề xuất cho từng tầng hệ th
 | Frontend             | Next.js 15 + React 19                  | SSR/SSG, App Router, ecosystem                                              |
 | Bản đồ               | Leaflet.js                             | Open-source, self-hosted tiles                                              |
 
-## 3.4. Tối ưu phương án thiết kế – The optimal solution
+## 3.6. Tối ưu phương án thiết kế – The optimal solution
 
-Từ kết quả phân tích và đánh giá ở mục 3.3, phương án thiết kế tối ưu cho hệ thống IoT giám sát phương tiện được tổng hợp như sau:
+Từ kết quả phân tích và đánh giá ở mục 3.5, phương án thiết kế tối ưu cho hệ thống IoT giám sát phương tiện được tổng hợp như sau:
 
 ![Hình 3.23 - Sơ đồ kiến trúc tổng thể phương án tối ưu](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-23.svg)
 
@@ -2927,7 +2917,7 @@ Phương án này đáp ứng các yêu cầu kỹ thuật đã đặt ra ở Ch
 
 Chương 3 đã trình bày có hệ thống quá trình phân tích, đề xuất và lựa chọn phương án thiết kế cho toàn bộ hệ thống IoT giám sát phương tiện trên bốn tầng: phần cứng, firmware, backend/cloud và frontend. Thông qua các bảng so sánh và ma trận đánh giá, phương án tối ưu đã được xác lập theo các tiêu chí hiệu năng, chi phí và khả năng mở rộng. Kết quả này tạo nền tảng kỹ thuật nhất quán cho giai đoạn triển khai chi tiết ở Chương 4.
 
-﻿# CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ – IMPLEMENTATION AND RESULTS
+# CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ – IMPLEMENTATION AND RESULTS
 
 Chương này trình bày quá trình triển khai giải pháp từ thiết kế chi tiết đến thử nghiệm thực tế. Nội dung bao gồm phần cứng thiết bị, firmware, hạ tầng cloud, giao diện giám sát và các kết quả đo lường sau khi tích hợp hệ thống trên xe.
 
@@ -3088,12 +3078,12 @@ _Hình 4.5: Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối 
 
 Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tracker, bảo đảm thiết bị hoạt động liên tục ngay cả khi ắc quy xe yếu hoặc mất điện. Kiến trúc nguồn gồm sáu khối chức năng chính:
 
-1. **Buck 3.3V (XL1509 3.3E):** Chuyển đổi 12V/24V xuống 3.3V cấp ESP32-S3
+1. **LDO 3.3V (AP2112-3.3):** Hạ từ bus 5V chính xuống 3.3V cấp ESP32-S3
 2. **Buck 5V (MP2482):** Chuyển đổi 12V/24V xuống 5V bus chính
 3. **Buck ~4V (TPS54231):** Chuyển đổi 12V/24V xuống ~4V cấp modem SIM7600CE-T
 4. **Boost 5V (SX1308):** Tăng áp từ pin 18650 1S (~3.7V) lên 5V dự phòng
 5. **Power path Diode-OR + điều khiển EN:** Tự động duy trì nguồn liên tục giữa nhánh chính và nhánh backup
-6. **Mạch sạc TP4056 + LVD (LM393/ADC):** Sạc pin 1S và giám sát ngưỡng điện áp bảo vệ ắc quy
+6. **Mạch sạc TP4056 + LVD (khối LVD/ADC):** Sạc pin 1S và giám sát ngưỡng điện áp bảo vệ ắc quy
 
 ![Hình 4.6a - Kiến trúc power path giữa nguồn xe và pin dự phòng](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-6a.svg)
 
@@ -3107,15 +3097,15 @@ _Hình 4.6: Kiến trúc tổng thể mạch quản lý nguồn_
 
 > Nguồn: Hình vẽ của tác giả
 
-#### b) Buck 3.3V cho ESP32-S3 (XL1509 3.3E)
+#### b) LDO 3.3V cho ESP32-S3 (AP2112-3.3)
 
-Khối buck 3.3V dùng **XL1509 3.3E** để hạ áp từ 12V/24V xuống 3.3V cấp cho ESP32-S3.
+Khối 3.3V dùng **AP2112-3.3** như một LDO để hạ từ bus 5V chính xuống 3.3V cấp cho ESP32-S3.
 
-**Bảng 4.2: Khối Buck 3.3V**
+**Bảng 4.2: Khối LDO 3.3V**
 
-| Khối      | IC          | Input  | Output | Tải      |
-| --------- | ----------- | ------ | ------ | -------- |
-| Buck 3.3V | XL1509 3.3E | 12–24V | 3.3V   | ESP32-S3 |
+| Khối     | IC          | Input | Output | Tải      |
+| -------- | ----------- | ----- | ------ | -------- |
+| LDO 3.3V | AP2112-3.3  | 5V    | 3.3V   | ESP32-S3 |
 
 #### c) Buck 5V bus chính (MP2482)
 
@@ -3196,7 +3186,7 @@ Dòng sạc của TP4056 được xác lập theo điện trở PROG và giới 
 
 #### g) Mạch giám sát điện áp Low Voltage Disconnect (LVD)
 
-Hệ thống dùng ADC (R1 = 100 kΩ, R2 = 10 kΩ) kết hợp comparator LM393 để giám sát điện áp.
+Hệ thống dùng ADC (R1 = 100 kΩ, R2 = 10 kΩ) kết hợp khối LVD phần cứng để giám sát điện áp.
 
 Ngưỡng profile:
 
@@ -3222,7 +3212,7 @@ Vỏ hộp bảo vệ cần đáp ứng các yêu cầu sau:
 
 Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân vùng chức năng:
 
-Bố cục bên trong được chia thành ba vùng rõ ràng: cụm xử lý và truyền thông (`ESP32-S3`, `SIM7600CE-T`), cụm nguồn (`XL1509 3.3E`, `MP2482`, `TPS54231`, `SX1308`, `TP4056`, `LM393`) và cụm lưu trữ năng lượng (`pin 18650 1S + BMS`). Hình 4.11 thể hiện cách nhóm các khối phần cứng này trong vỏ hộp cùng vị trí anten và cổng OBD2.
+Bố cục bên trong được chia thành ba vùng rõ ràng: cụm xử lý và truyền thông (`ESP32-S3`, `SIM7600CE-T`), cụm nguồn (`AP2112-3.3`, `MP2482`, `TPS54231`, `SX1308`, `TP4056`, `khối LVD`) và cụm lưu trữ năng lượng (`pin 18650 1S + BMS`). Hình 4.11 thể hiện cách nhóm các khối phần cứng này trong vỏ hộp cùng vị trí anten và cổng OBD2.
 
 ![Hình 4.11 - Sơ đồ bố cục bên trong vỏ hộp bảo vệ](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-11.svg)
 
@@ -3272,13 +3262,13 @@ Trong phạm vi đồ án, luồng này vận hành theo giả định **card-pr
 | 4   | SIMCom SIM7600CE-T           | Bộ     | 1   | 330,000–500,000    | Modem LTE Cat-4 tích hợp GNSS + anten + khe SIM |
 | 5   | Pin 18650 1S Li-ion 3500mAh  | Cái    | 1   | 100,000–200,000    | Loại có protection board                        |
 | 6   | IC sạc TP4056 + mạch phụ trợ | Cái    | 1   | 20,000–40,000      | Input 5V từ MP2482, output 4.2V, dòng theo PROG |
-| 7   | Mạch buck XL1509 3.3V        | Cái    | 1   | 15,000–30,000      | 12–24V -> 3.3V cho ESP32-S3                     |
-| 8   | Mạch buck MP2482 5V          | Cái    | 1   | 15,000–30,000      | Bus 5V chính                                    |
-| 9   | Mạch buck TPS54231 ~4V       | Cái    | 1   | 20,000–40,000      | 12–24V -> ~4V cấp modem SIM7600CE-T             |
-| 10  | Mạch boost SX1308 5V backup  | Cái    | 1   | 10,000–20,000      | Backup từ pin 18650 1S                          |
-| 11  | Comparator LM393             | Cái    | 1   | 5,000–15,000       | Giám sát LVD (GPIO19)                           |
-| 12  | Diode Schottky 1N5822        | Cái    | 2   | 2,000–5,000        | Diode OR dự phòng                               |
-| 13  | BMS/Protection Board 1S      | Cái    | 1   | 10,000–20,000      | Bảo vệ pin 18650 1S                             |
+| 7   | Mạch LDO AP2112-3.3          | Cái    | 1   | 5,000              | 5V -> 3.3V cho ESP32-S3                         |
+| 8   | Mạch buck MP2482 5V          | Cái    | 1   | 17,000             | Bus 5V chính                                    |
+| 9   | Mạch buck TPS54231 ~4V       | Cái    | 1   | 9,000              | 12–24V -> ~4V cấp modem SIM7600CE-T             |
+| 10  | Mạch boost SX1308 5V backup  | Cái    | 1   | 12,000             | Backup từ pin 18650 1S                          |
+| 11  | Khối giám sát LVD + ADC      | Cái    | 1   | 8,000              | Giám sát LVD (GPIO19)                           |
+| 12  | Diode Schottky (SS54/SS34)   | Cái    | 2   | 2,500              | Diode OR dự phòng                               |
+| 13  | Mạch bảo vệ pin 1S (BMS)     | Cái    | 1   | 12,000             | Bảo vệ pin 18650 1S                             |
 | 14  | Điện trở (10k, 2.2k, v.v.)   | Gói    | 1   | 5,000–10,000       | Voltage divider, pull-up/pull-down              |
 | 15  | Tụ điện (100uF, 220uF, v.v.) | Gói    | 1   | 5,000–10,000       | Lọc nhiễu, decoupling                           |
 | 16  | Connector, Header Pin        | Gói    | 1   | 10,000–20,000      | Kết nối dây, header pin                         |
@@ -3289,24 +3279,24 @@ Trong phạm vi đồ án, luồng này vận hành theo giả định **card-pr
 
 **Bảng 4.7: Tổng chi phí ước tính**
 
-| Hạng mục                                      | Chi phí (VND)         |
-| --------------------------------------------- | --------------------- |
-| Thành phần chính (MCU, cảm biến, modem, OBD2) | 670,000–1,250,000     |
-| Hệ thống quản lý nguồn                        | 50,000–80,000         |
-| Linh kiện phụ trợ                             | 50,000–100,000        |
-| PCB (nếu tự thiết kế)                         | 50,000–100,000        |
-| Vỏ bảo vệ                                     | 50,000–100,000        |
-| **Tổng cộng**                                 | **870,000–1,630,000** |
+| Hạng mục                                      | Chi phí (VND) |
+| --------------------------------------------- | ------------- |
+| Thành phần chính (MCU, cảm biến, modem, OBD2) | 1.231.000     |
+| Hệ thống quản lý nguồn                        | 88.000        |
+| Linh kiện phụ trợ                             | 53.000        |
+| PCB (nếu tự thiết kế)                         | 60.000        |
+| Vỏ bảo vệ                                     | 100.000       |
+| **Tổng cộng**                                 | **1.514.000** |
 
 #### b) Quy trình lắp ráp
 
 Quy trình lắp ráp mạch điện tử được triển khai theo các bước sau:
 
-**Bước 1 - Kiểm tra linh kiện:** Kiểm tra toàn bộ IC, linh kiện và bán thành phẩm trước khi lắp ráp. Test riêng từng khối chức năng chính (ESP32-S3-WROOM-1, XL1509 3.3E, MP2482, TPS54231, SX1308, TP4056, SIM7600CE-T, LM393) để bảo đảm hoạt động đúng.
+**Bước 1 - Kiểm tra linh kiện:** Kiểm tra toàn bộ IC, linh kiện và bán thành phẩm trước khi lắp ráp. Test riêng từng khối chức năng chính (ESP32-S3-WROOM-1, AP2112-3.3, MP2482, TPS54231, SX1308, TP4056, SIM7600CE-T, khối LVD + ADC) để bảo đảm hoạt động đúng.
 
-**Bước 2 - Lắp ráp khối nguồn trên PCB:** Hàn và kiểm tra MP2482 để tạo bus 5V từ nguồn ắc quy xe (12V hoặc 24V). Lắp XL1509 3.3E cấp riêng cho ESP32-S3, TPS54231 tạo rail ~4V cho modem SIM7600CE-T, SX1308 tạo 5V backup từ pin 18650 1S, diode OR giữa nhánh 5V chính và nhánh 5V backup, cùng TP4056 kết nối với pin và BMS.
+**Bước 2 - Lắp ráp khối nguồn trên PCB:** Hàn và kiểm tra MP2482 để tạo bus 5V từ nguồn ắc quy xe (12V hoặc 24V). Lắp AP2112-3.3 cấp rail 3.3V cho ESP32-S3 từ bus 5V chính, TPS54231 tạo rail ~4V cho modem SIM7600CE-T, SX1308 tạo 5V backup từ pin 18650 1S, diode OR giữa nhánh 5V chính và nhánh 5V backup, cùng TP4056 kết nối với pin và BMS.
 
-**Bước 3 - Lắp ráp khối xử lý và điều khiển:** Hàn ESP32-S3-WROOM-1, LIS3DSH, LM393 và các linh kiện liên quan lên PCB chính. Kiểm tra các chân GPIO theo bảng phân công (Bảng 4.1) và cấp nguồn theo từng rail chức năng (3.3V logic, ~4V modem, 5V bus/backup).
+**Bước 3 - Lắp ráp khối xử lý và điều khiển:** Hàn ESP32-S3-WROOM-1, LIS3DSH, khối LVD + ADC và các linh kiện liên quan lên PCB chính. Kiểm tra các chân GPIO theo bảng phân công (Bảng 4.1) và cấp nguồn theo từng rail chức năng (3.3V logic, ~4V modem, 5V bus/backup).
 
 **Bước 4 - Tích hợp các thành phần còn lại:** Lắp modem SIM7600CE-T lên bo mạch, kiểm tra UART1 (GPIO16, GPIO17) và chân `PWR-KEY` (GPIO26), cấu hình lấy dữ liệu GNSS qua `AT+CGNSINF`/`AT+CGNSTST` trên cùng UART, kiểm tra cảm biến LIS3DSH trên I2C (GPIO47, GPIO48), và hiệu chuẩn mạch đo điện áp ắc quy tại GPIO4 (ADC).
 
@@ -3398,7 +3388,7 @@ _Hình 4.16: Checklist kiểm tra hệ thống sau khi lắp đặt trong xe_
 
 ---
 
-﻿### 4.2.3. Triển khai Firmware
+### 4.2.3. Triển khai Firmware
 
 Phần này trình bày quá trình triển khai firmware cho thiết bị theo dõi xe IoT, từ nền tảng phát triển đến cơ chế vận hành. Nội dung bao gồm môi trường phát triển, cấu trúc mã nguồn, các module chức năng chính và lưu đồ thuật toán điều khiển toàn hệ thống.
 
@@ -3519,7 +3509,7 @@ Việc đồng bộ giữa các mô-đun được thực hiện có chọn lọc
 | 16   | MODEM_UART_TX | Output | UART TX đến modem SIM7600CE-T            |
 | 17   | MODEM_UART_RX | Input  | UART RX từ modem SIM7600CE-T             |
 | 18   | POWER_PATH_EN | Output | Chọn nguồn cấp (ắc quy/pin dự phòng)     |
-| 19   | LVD_STATUS    | Input  | Trạng thái từ comparator LM393           |
+| 19   | LVD_STATUS    | Input  | Trạng thái từ khối LVD phần cứng         |
 | 21   | LIS3DSH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU             |
 | 47   | LIS3DSH_SDA    | I/O    | I2C data line                            |
 | 48   | LIS3DSH_SCL    | I/O    | I2C clock line                           |
@@ -4106,7 +4096,7 @@ Dữ liệu được gửi định kỳ theo cấu hình vận hành hiện tạ
 
 ---
 
-﻿### 4.2.4. Triển khai hệ thống Cloud
+### 4.2.4. Triển khai hệ thống Cloud
 
 Hệ thống Cloud là lớp lõi phía máy chủ, chịu trách nhiệm tiếp nhận dữ liệu từ thiết bị IoT, xử lý nghiệp vụ, lưu trữ và cung cấp giao diện giám sát cho người quản lý. Trên cơ sở phương án đã chọn ở Chương 3, phần này trình bày quá trình triển khai hạ tầng cloud gồm cấu hình Docker, dịch vụ MQTT Bridge, Backend API, Frontend Dashboard và hệ thống giám sát.
 
@@ -4242,12 +4232,8 @@ services:
   emqx:
     image: emqx/emqx:5.4.0
     container_name: tracking-emqx
-    ports:
-      - "1883:1883" # MQTT
-      - "8883:8883" # MQTT TLS
-      - "8083:8083" # MQTT WebSocket
-      - "8084:8084" # MQTT WebSocket Secure
-      - "18083:18083" # EMQX Dashboard
+    # EMQX stays internal-only on the Docker network.
+    # NPM exposes MQTT TLS :8883 via TCP stream and the dashboard via HTTPS reverse proxy.
     volumes:
       - emqx-data:/opt/emqx/data
       - emqx-log:/opt/emqx/log
@@ -4313,6 +4299,20 @@ cd Tracking_Frontend && docker-compose up -d --build
 | Backend API     | tracking-backend         | 4000                          | REST API và WebSocket            |
 | Frontend        | tracking-frontend        | 4002                          | Giao diện web                    |
 | NPM             | tracking-npm             | 80, 443                       | Reverse proxy                    |
+
+[Bảng 4.5a: Mapping subdomain, port public và service nội bộ của hệ thống cloud UAT]
+
+| Subdomain public      | Port public | Service nội bộ         | Upstream port | Vai trò                                       |
+| --------------------- | ----------- | ---------------------- | ------------- | --------------------------------------------- |
+| `thingdock.dev`       | 443         | `tracking-frontend`    | 4001          | Frontend web qua NPM reverse proxy            |
+| `api.thingdock.dev`   | 443         | `tracking-backend`     | 4000          | Backend API, Swagger, Socket.IO qua NPM       |
+| `mqtt.thingdock.dev`  | 8883        | `tracking-emqx`        | 8883          | MQTT TLS cho thiết bị qua NPM stream TCP      |
+| `grafana.thingdock.dev` | 443       | `tracking-grafana`     | 4002          | Grafana qua NPM reverse proxy                 |
+| `emqx.thingdock.dev`  | 443         | `tracking-emqx`        | 18083         | EMQX Dashboard qua NPM reverse proxy          |
+| `npm.thingdock.dev`   | 443         | `tracking-npm`         | 81            | Nginx Proxy Manager Admin qua NPM reverse proxy |
+| `(internal only)`     | 8428        | `tracking-victoriametrics` | 8428      | VictoriaMetrics, chỉ dùng nội bộ              |
+
+**Ghi chú:** Mô hình truy cập cloud UAT hiện tại là `Cloudflare DNS -> VPS public IP -> Nginx Proxy Manager -> container nội bộ`. Cloudflare chỉ giữ vai trò DNS; Nginx Proxy Manager đảm nhiệm reverse proxy HTTPS và TCP stream. Người dùng truy cập `thingdock.dev`, `api.thingdock.dev`, `grafana.thingdock.dev`, `emqx.thingdock.dev`, `npm.thingdock.dev`; còn thiết bị MQTT kết nối `mqtt.thingdock.dev`. `VictoriaMetrics` được giữ ở chế độ internal-only, không public qua subdomain.
 
 ---
 
@@ -5085,7 +5085,7 @@ Mô hình per-service Docker Compose (IVM26 Pattern) giúp hệ thống dễ b�
 | Container            | Docker + Docker Compose | -         | Đóng gói và triển khai dịch vụ                    |
 | Reverse Proxy        | Nginx Proxy Manager     | -         | Quản lý domain, SSL, routing                      |
 
-﻿## 4.3. Đo lường và kết quả – Measurement and Result
+## 4.3. Đo lường và kết quả – Measurements and Results
 
 Phần này trình bày thiết lập thử nghiệm, kết quả đo theo từng tầng hệ thống (phần cứng, firmware, cloud), kết quả kiểm thử tích hợp end-to-end và đối chiếu với các tiêu chí thiết kế ở Chương 1 và Chương 2. Toàn bộ giá trị được ghi nhận trên thiết bị phần cứng đã chế tạo và lắp đặt thực tế trong điều kiện vận hành bám sát bối cảnh khai thác.
 
@@ -5709,9 +5709,9 @@ Phần này tổng hợp tất cả kết quả đo lường và so sánh với 
 | 9   | Khôi phục kết nối MQTT   | Tự động sau mất sóng | Reconnect ổn định, tiếp tục gửi telemetry | Đạt        |
 | 10  | Độ tin cậy state machine | >= 99%               | >= 99.8%                                  | Đạt        |
 
-![Hình 4.47 - Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-38.svg)
+![Hình 4.47 - Biểu đồ so sánh chỉ tiêu thiết kế và kết quả đạt được](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-38.svg)
 
-_Hình 4.47: Biểu đồ radar so sánh chỉ tiêu thiết kế và kết quả đạt được (spider chart)_
+_Hình 4.47: Biểu đồ so sánh chỉ tiêu thiết kế và kết quả đạt được_
 
 > Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
@@ -5763,7 +5763,7 @@ Về đo lường, hệ thống đã đáp ứng phần lớn chỉ tiêu cốt 
 
 [8] VictoriaMetrics, "VictoriaMetrics Benchmarks - Write Performance," https://docs.victoriametrics.com/articles/benchmarks.html, 2024.
 
-﻿# CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ – EVALUATION AND RECOMMENDATION
+# CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ – EVALUATION AND RECOMMENDATIONS
 
 ## 5.1. Đánh giá hiệu năng
 
@@ -6071,9 +6071,9 @@ Phiên bản phần cứng hiện có sử dụng bo mạch 2 lớp do nhóm thi
 
 Kết quả đánh giá cho thấy hệ thống đã đáp ứng được các mục tiêu kỹ thuật quan trọng của một thiết bị giám sát phương tiện hoàn chỉnh có thể vận hành thực tế. Phần cứng giữ được mức tiêu thụ điện phù hợp, firmware vận hành ổn định với state machine rõ ràng và đã bổ sung được luồng OTA cơ bản, còn hạ tầng cloud duy trì độ trễ thấp cho bài toán theo dõi thời gian thực. Về chi phí, BOM 870.000–1.630.000 VND cùng chi phí vận hành thấp tạo ra lợi thế rõ rệt so với nhiều giải pháp thương mại cùng phân khúc. Phần còn lại cần ưu tiên ở giai đoạn tiếp theo không nằm ở việc thay đổi kiến trúc tổng thể, mà ở việc làm sâu hơn các lớp an toàn như watchdog, bảo mật MQTT/TLS và kiểm thử vận hành dài hạn.
 
-﻿# CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM – REFLECTION AND CASE-STUDIES
+# CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM – REFLECTION AND LESSONS LEARNED
 
-## 6.1. Ứng dụng kiến thức kỹ thuật – Earlier course work
+## 6.1. Ứng dụng kiến thức kỹ thuật – Application of prior coursework
 
 Dự án "IoT Vehicle Tracking System" là kết quả của quá trình tổng hợp kiến thức từ nhiều học phần và nhiều lớp công nghệ khác nhau. Từ phần cứng, firmware đến backend và frontend, mỗi quyết định triển khai đều đòi hỏi người thực hiện chuyển kiến thức nền tảng thành lựa chọn kỹ thuật cụ thể. Phần này làm rõ quá trình chuyển hóa đó trong bối cảnh của dự án.
 
@@ -6183,7 +6183,7 @@ Hệ thống phần cứng phải hoạt động với hai nguồn năng lượn
 **Cách giải quyết:**
 
 1. _Power path management_: Thiết kế mạch power path dùng diode OR giữa MP2482 (5V chính) và SX1308 (5V backup), kết hợp GPIO18 để điều khiển nhánh nguồn theo profile 12V/24V.
-2. _Low Voltage Disconnect (LVD)_: Hiện thực LVD bằng comparator LM393 kết hợp ADC firmware, dùng ngưỡng profile: 12V (OFF=12.0V, ON=12.2V) và 24V (OFF=24.0V, ON=24.4V), bảo vệ ắc quy không bị rút cạn quá mức.
+2. _Low Voltage Disconnect (LVD)_: Hiện thực LVD bằng khối LVD phần cứng kết hợp ADC firmware, dùng ngưỡng profile: 12V (OFF=12.0V, ON=12.2V) và 24V (OFF=24.0V, ON=24.4V), bảo vệ ắc quy không bị rút cạn quá mức.
 3. _Bộ sạc pin dự phòng_: Tích hợp IC sạc TP4056 (input 5V từ MP2482, output 4.2V) để sạc pin 18650 1S khi điều kiện nguồn cho phép.
 4. _Giám sát điện áp bằng firmware_: Đọc điện áp ắc quy và pin dự phòng liên tục qua ADC, kết hợp trạng thái GPIO19 (HIGH = low-voltage) để gửi cảnh báo sớm và điều phối chuyển nguồn.
 
@@ -6210,7 +6210,7 @@ Hệ thống cần xử lý dữ liệu từ nhiều thiết bị đồng thời
 
 ---
 
-## 6.3. Tác động đạo đức và xã hội – Ethical and Social impacts
+## 6.3. Tác động đạo đức và xã hội – Ethical and social impacts
 
 ### 6.3.1. Quyền riêng tư và bảo vệ dữ liệu cá nhân
 
@@ -6269,7 +6269,7 @@ Hệ thống IoT giám sát phương tiện tạo ra một số tác động xã
 
 ---
 
-## 6.4. Tổng kết và bài học kinh nghiệm – General reflection and case-studies
+## 6.4. Tổng kết và bài học kinh nghiệm – Reflection and Lessons Learned
 
 ### 6.4.1. Tầm quan trọng của thiết kế kiến trúc trước khi lập trình
 
@@ -6334,7 +6334,7 @@ Chương 6 cho thấy việc xây dựng một hệ thống IoT giám sát phư�
 
 [1] B. Boehm and V. R. Basili, "Software Defect Reduction Top 10 List," _IEEE Computer_, vol. 34, no. 1, pp. 135–137, 2001.
 
-﻿# TÀI LIỆU TRÍCH DẪN - REFERENCES
+# TÀI LIỆU TRÍCH DẪN - REFERENCES
 
 ---
 
@@ -6490,7 +6490,7 @@ Chương 6 cho thấy việc xây dựng một hệ thống IoT giám sát phư�
 
 <!-- Ghi chú: Tất cả tài liệu trực tuyến đã được truy cập và kiểm tra tính khả dụng trong thời gian thực hiện đồ án (tháng 09/2025 - tháng 02/2026). Định dạng trích dẫn tuân theo chuẩn IEEE. -->
 
-﻿# PHỤ LỤC - APPENDICES
+# PHỤ LỤC - APPENDICES
 
 ---
 
@@ -6498,33 +6498,32 @@ Chương 6 cho thấy việc xây dựng một hệ thống IoT giám sát phư�
 
 ## 1.1. Bảng kê chi phí linh kiện (Bill of Materials - BOM)
 
-Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng trong thiết bị tracker IoT, bao gồm đơn giá và tổng chi phí ước tính. Đơn giá được tham chiếu theo mặt bằng giá của hai nhà cung cấp linh kiện điện tử trong nước là LinhKienChatLuong và CXT tại thời điểm tháng 01/2026.
+Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng trong thiết bị tracker IoT, bao gồm đơn giá và tổng chi phí tham chiếu. Đơn giá được rà soát theo mặt bằng giá ngày 12/04/2026 từ các kênh bán lẻ như Điện tử Á Châu và Điện tử Đức Huy.
 
 [Bảng PL-1.1: Bảng kê chi phí linh kiện (BOM)]
 
-| STT | Linh kiện         | Model / Thông số                      | Số lượng | Đơn giá (VND) | Thành tiền (VND) | Ghi chú                                             |
-| --- | ----------------- | ------------------------------------- | -------- | ------------- | ---------------- | --------------------------------------------------- |
-| 1   | Vi điều khiển     | ESP32-S3-WROOM-1 (N16R8)              | 1        | 120.000       | 120.000          | MCU chính, 16MB Flash, 8MB PSRAM                    |
-| 2   | LTE + GNSS        | SIMCom SIM7600CE-T                    | 1 bộ     | 330.000       | 330.000          | Modem LTE Cat-4 tích hợp GPS/GNSS                   |
-| 3   | OBD2 Adapter      | vgate iCar Pro BLE                    | 1        | 350.000       | 350.000          | Bluetooth Low Energy OBD2                           |
-| 4   | Cảm biến gia tốc  | IC LIS3DSH                             | 1        | 45.000        | 45.000           | IMU 3 trục, phát hiện chuyển động                   |
-| 5   | Pin dự phòng      | 18650 1S Li-ion 3500mAh               | 1        | 80.000        | 80.000           | Samsung/LG cell                                     |
-| 6   | IC sạc pin        | TP4056 + mạch phụ trợ                 | 1        | 25.000        | 25.000           | Sạc 1S, input 5V từ MP2482, dòng theo PROG          |
-| 7   | Buck 3.3V         | Mạch XL1509 3.3E                      | 1        | 18.000        | 18.000           | 12–24V -> 3.3V cấp ESP32-S3                         |
-| 8   | Buck 5V           | Mạch MP2482 (12V/24V->5V)             | 1        | 15.000        | 15.000           | Tạo bus 5V chính                                    |
-| 9   | Buck 3.8V/4V      | Mạch TPS54231                         | 1        | 20.000        | 20.000           | 12–24V -> ~4V cấp modem SIM7600CE-T                 |
-| 10  | Boost converter   | Mạch SX1308 (3.7V->5V)                | 1        | 12.000        | 12.000           | Tăng áp từ pin dự phòng                             |
-| 11  | Diode OR          | 1N5822 (Schottky)                     | 2        | 2.500         | 5.000            | OR nguồn giữa nhánh 5V chính và backup              |
-| 12  | Comparator        | LM393                                 | 1        | 8.000         | 8.000            | Cho mạch Low Voltage Disconnect                     |
-| 13  | Anten GPS         | Anten gốm GNSS 25x25mm                | 1        | 25.000        | 25.000           | Anten GPS/GLONASS/BeiDou                            |
-| 14  | Anten 4G          | Anten FPC 4G LTE                      | 1        | 20.000        | 20.000           | Anten mạng di động                                  |
-| 15  | SIM tray + SIM    | Nano SIM holder + SIM 4G              | 1        | 15.000        | 15.000           | SIM data 4G                                         |
-| 16  | Connector OBD2    | Jack OBD2 16-pin male                 | 1        | 35.000        | 35.000           | Kết nối nguồn ắc quy xe (12V hoặc 24V)              |
-| 17  | Tụ điện, điện trở | Linh kiện thụ động (combo)            | 1 bộ     | 30.000        | 30.000           | Tụ lọc, điện trở chia áp ADC (R1=100k, R2=10k), LED |
-| 18  | PCB chính         | PCB 2 lớp theo layout đề tài ~50x50mm | 1        | 20.000        | 20.000           | Bo mạch chính của thiết bị                          |
-| 19  | Hộp đựng          | Hộp nhựa ABS 120x80x40mm              | 1        | 25.000        | 25.000           | Vỏ bảo vệ thiết bị                                  |
-| 20  | Dây kết nối       | Dây nối, header, jumper               | 1 bộ     | 20.000        | 20.000           | Dây kết nối nội bộ                                  |
-|     |                   |                                       |          | **Tổng cộng** | **1.183.000**    |                                                     |
+| STT | Linh kiện         | Model / Thông số               | Số lượng | Đơn giá (VND) | Thành tiền (VND) | Ghi chú                                      |
+| --- | ----------------- | ------------------------------ | -------- | ------------- | ---------------- | -------------------------------------------- |
+| 1   | Vi điều khiển     | ESP32-S3-WROOM-1 (N16R8)       | 1        | 95.000        | 95.000           | MCU chính, 16MB Flash, 8MB PSRAM             |
+| 2   | LTE + GNSS        | SIMCom SIM7600CE-T             | 1 bộ     | 650.000       | 650.000          | Modem LTE Cat-4 tích hợp GPS/GNSS            |
+| 3   | OBD2 Adapter      | vgate iCar Pro BLE             | 1        | 367.000       | 367.000          | Bluetooth Low Energy OBD2                    |
+| 4   | Cảm biến gia tốc  | IC LIS3DSH                     | 1        | 40.000        | 40.000           | IMU 3 trục, phát hiện chuyển động            |
+| 5   | Pin dự phòng      | 18650 1S Li-ion 3500mAh        | 1        | 79.000        | 79.000           | Samsung/LG cell                              |
+| 6   | IC sạc pin        | TP4056 + mạch phụ trợ          | 1        | 25.000        | 25.000           | Sạc 1S, input 5V từ MP2482, dòng theo PROG   |
+| 7   | LDO 3.3V          | Mạch AP2112-3.3                | 1        | 5.000         | 5.000            | 5V -> 3.3V cấp ESP32-S3                      |
+| 8   | Buck 5V           | Mạch MP2482 (12V/24V->5V)      | 1        | 17.000        | 17.000           | Tạo bus 5V chính                             |
+| 9   | Buck 3.8V/4V      | Mạch TPS54231                  | 1        | 9.000         | 9.000            | 12–24V -> ~4V cấp modem SIM7600CE-T          |
+| 10  | Boost converter   | Mạch SX1308 (3.7V->5V)         | 1        | 12.000        | 12.000           | Tăng áp từ pin dự phòng                      |
+| 11  | Diode OR          | SS54/SS34 (Schottky)           | 2        | 2.500         | 5.000            | OR nguồn giữa nhánh 5V chính và backup       |
+| 12  | Khối LVD          | Khối giám sát LVD + ADC        | 1        | 8.000         | 8.000            | Cho mạch Low Voltage Disconnect              |
+| 13  | Anten GPS         | Anten gốm GNSS 25x25mm         | 1        | 25.000        | 25.000           | Anten GPS/GLONASS/BeiDou                     |
+| 14  | Anten 4G          | Anten FPC 4G LTE               | 1        | 20.000        | 20.000           | Anten mạng di động                           |
+| 15  | SIM tray + SIM    | Nano SIM holder + SIM 4G       | 1        | 15.000        | 15.000           | SIM data 4G                                  |
+| 16  | Connector OBD2    | Jack OBD2 16-pin male          | 1        | 35.000        | 35.000           | Kết nối nguồn ắc quy xe (12V hoặc 24V)       |
+| 17  | Tụ điện, điện trở | Linh kiện thụ động (combo)     | 1 bộ     | 32.000        | 32.000           | Tụ lọc, điện trở chia áp ADC (R1=100k, R2=10k), LED |
+| 18  | PCB chính         | PCB 2 lớp theo layout đề tài ~50x50mm | 1   | 60.000        | 60.000           | Bo mạch chính của thiết bị                   |
+| 19  | Hộp đựng          | Hộp nhựa ABS 120x80x40mm       | 1        | 15.000        | 15.000           | Vỏ bảo vệ thiết bị                           |
+|     |                   |                                |          | **Tổng cộng** | **1.514.000**    |                                              |
 
 ## 1.2. Chi phí hạ tầng cloud (ước tính hàng tháng)
 
@@ -6544,14 +6543,14 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 
 | Hạng mục                                   | Chi phí (VND)           | Ghi chú                      |
 | ------------------------------------------ | ----------------------- | ---------------------------- |
-| Phần cứng (1 bộ tracker)                   | 1.183.000               | Theo BOM ở bảng PL-1.1       |
+| Phần cứng (1 bộ tracker)                   | 1.514.000               | Theo BOM ở bảng PL-1.1       |
 | Phần mềm (licenses)                        | 0                       | Toàn bộ mã nguồn mở          |
 | Hạ tầng cloud (3 tháng dev + 3 tháng test) | 2.370.000–3.570.000     | 6 tháng x chi phí hàng tháng |
 | SIM 4G (6 tháng)                           | 420.000                 | 70.000 x 6 tháng             |
 | Công cụ phát triển (khác)                  | 200.000                 | USB-UART, mỏ hàn, dây đo     |
-| **Tổng chi phí dự án**                     | **4.173.000–5.373.000** |                              |
+| **Tổng chi phí dự án**                     | **4.504.000–5.704.000** |                              |
 
-> **Nhận xét:** Tổng chi phí dự án vẫn dưới 6.000.000 VND, trong đó chi phí phần cứng cho mỗi bộ tracker khoảng 1.183.000 VND, thấp hơn đáng kể so với các giải pháp thương mại tương đương (2.000.000–5.000.000 VND/thiết bị). Khi sản xuất số lượng lớn (>50 bộ), chi phí linh kiện có thể giảm thêm 15–25% nhờ mua sỉ.
+> **Nhận xét:** Tổng chi phí dự án vẫn dưới 6.000.000 VND, trong đó chi phí phần cứng cho mỗi bộ tracker khoảng 1.514.000 VND, thấp hơn đáng kể so với các giải pháp thương mại tương đương (2.000.000–5.000.000 VND/thiết bị). Khi sản xuất số lượng lớn (>50 bộ), chi phí linh kiện có thể giảm thêm 15–25% nhờ mua sỉ.
 
 ---
 
@@ -6661,7 +6660,7 @@ Dự án được triển khai theo 7 giai đoạn chính, với tổng thời g
 
 > **Ghi chú:** Các giai đoạn có sự chồng chéo (overlap) có chủ đích để tối ưu hóa thời gian. Ví dụ, GĐ3 (hạ tầng cloud) bắt đầu trước khi GĐ2 (firmware) hoàn thành để có môi trường test sớm.
 
-## 3.2. Biểu đồ Gantt (Gantt Chart)
+## 3.2. Kế hoạch thực hiện dự án theo giai đoạn
 
 ```
 Tuần:  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
@@ -6676,9 +6675,9 @@ GĐ7:                                                        [========]
        |--- Tháng 01 ---|--- Tháng 02 ---|
 ```
 
-![Hình PL-3.1 - Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần)](./assets/figures/14-phu-luc-hinh-pl-3-1.svg)
+![Hình PL-3.1 - Kế hoạch thực hiện dự án theo giai đoạn (24 tuần)](./assets/figures/14-phu-luc-hinh-pl-3-1.svg)
 
-_Hình PL-3.1: Biểu đồ Gantt kế hoạch thực hiện dự án (24 tuần)_
+_Hình PL-3.1: Kế hoạch thực hiện dự án theo giai đoạn (24 tuần)_
 
 > Nguồn: Hình vẽ của tác giả
 
@@ -6807,6 +6806,7 @@ Schema PostgreSQL đầy đủ được lưu tại:
 
 Tài liệu API đầy đủ được tạo tự động bằng Swagger/OpenAPI và có thể truy cập tại:
 
+- **Domain (cloud/UAT):** `api.thingdock.dev` (đường dẫn Swagger: `/api-docs`)
 - **URL (development):** `http://localhost:4000/api-docs`
 - **Tài liệu thiết kế:** `resources/plans/cloud/21-backend-api-endpoints.md`
 
@@ -6916,6 +6916,20 @@ npm run dev
 | EMQX Dashboard  | http://localhost:18083         | admin / emqx_dev_2026 |
 | Grafana         | http://localhost:4001          | admin / admin         |
 | VictoriaMetrics | http://localhost:8428          | —                     |
+
+**Truy cập cloud/UAT:**
+
+| Dịch vụ         | URL                                  | Tài khoản mặc định                       |
+| --------------- | ------------------------------------ | ---------------------------------------- |
+| Frontend Web    | thingdock.dev                        | admin / Admin@2026                       |
+| Backend API     | api.thingdock.dev                    | —                                        |
+| Swagger Docs    | api.thingdock.dev (`/api-docs`)      | —                                        |
+| MQTT TLS Broker | mqtt.thingdock.dev                   | Theo tài khoản MQTT của thiết bị         |
+| Grafana         | grafana.thingdock.dev                | admin / Anmh1205                         |
+| EMQX Dashboard  | emqx.thingdock.dev                   | admin / Anmh1205                         |
+| NPM Admin       | npm.thingdock.dev                    | Tài khoản admin cấu hình khi bootstrap   |
+
+**Ghi chú cloud UAT:** `VictoriaMetrics` được giữ ở chế độ nội bộ, không công khai qua subdomain. Khi cần vận hành, dịch vụ này vẫn được truy cập nội bộ tại `tracking-victoriametrics:8428` trong Docker network.
 
 ---
 
