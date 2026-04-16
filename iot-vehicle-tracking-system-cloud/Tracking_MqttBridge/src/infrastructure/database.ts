@@ -245,6 +245,8 @@ export const completeDeviceSession = async (
     let runtimeSeconds = 0;
 
     try {
+      await client.query('SAVEPOINT complete_device_session');
+
       const completed = await client.query<DeviceSessionRow>(
         `UPDATE device_sessions
          SET
@@ -267,7 +269,11 @@ export const completeDeviceSession = async (
       );
 
       runtimeSeconds = Number.parseInt(String(completed.rows[0]?.runtime_seconds ?? '0'), 10);
+      await client.query('RELEASE SAVEPOINT complete_device_session');
     } catch {
+      await client.query('ROLLBACK TO SAVEPOINT complete_device_session');
+      await client.query('RELEASE SAVEPOINT complete_device_session');
+
       const completed = await client.query<DeviceSessionRow>(
         `UPDATE device_sessions
          SET
