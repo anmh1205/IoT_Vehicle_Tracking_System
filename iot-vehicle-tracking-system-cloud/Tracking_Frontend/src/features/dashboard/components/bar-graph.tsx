@@ -18,7 +18,7 @@ export const BarGraph = ({
   );
 
   return (
-    <Card>
+    <Card className="min-w-0">
       <CardHeader>
         <CardTitle>Hoạt động thiết bị trong 7 ngày</CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -27,7 +27,8 @@ export const BarGraph = ({
             : 'Đang chờ dữ liệu hoạt động được đồng bộ từ thiết bị'}
         </p>
       </CardHeader>
-      <CardContent className="h-[320px]">
+      <CardContent className="min-w-0">
+        <div className="h-[320px] min-w-0">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
         ) : data.length === 0 ? (
@@ -35,7 +36,7 @@ export const BarGraph = ({
             Chưa có dữ liệu hoạt động để hiển thị.
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <BarChart data={data} barGap={6}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
@@ -47,6 +48,7 @@ export const BarGraph = ({
             </BarChart>
           </ResponsiveContainer>
         )}
+        </div>
       </CardContent>
     </Card>
   );

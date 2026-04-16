@@ -156,13 +156,14 @@ const publishDeviceStatus = (
   device: DeviceSimulatorRuntime,
   status: 'running' | 'stopped',
   timestamp: number,
+  authTokenOverride?: string,
 ): Promise<void> =>
   publishMqttMessage(
     client,
     `v1/${device.deviceId}/status`,
     {
       device_id: device.deviceId,
-      auth_token: device.authToken,
+      auth_token: authTokenOverride ?? device.authToken,
       status,
       timestamp,
     },
@@ -429,6 +430,24 @@ const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> 
   }
 
   await restoreSimulatorAuthTokens(current.devices, reason);
+
+  const finalRetainedTimestamp = Date.now();
+  for (const device of current.devices) {
+    try {
+      await publishDeviceStatus(
+        current.mqttClient,
+        device,
+        'stopped',
+        finalRetainedTimestamp,
+        device.originalAuthToken,
+      );
+    } catch (error) {
+      logger.error('Failed to overwrite retained simulator stop status after auth restore', {
+        deviceId: device.deviceId,
+        error: (error as Error).message,
+      });
+    }
+  }
 
   try {
     await endMqttClient(current.mqttClient);

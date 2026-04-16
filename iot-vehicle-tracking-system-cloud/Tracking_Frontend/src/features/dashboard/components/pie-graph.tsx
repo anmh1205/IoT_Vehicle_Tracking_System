@@ -9,11 +9,12 @@ export const PieGraph = ({ data, isLoading }: { data: PieStatusPoint[]; isLoadin
   const hasMeaningfulData = data.some((item) => item.value > 0);
 
   return (
-    <Card>
+    <Card className="min-w-0">
       <CardHeader>
         <CardTitle>Phân bố trạng thái thiết bị</CardTitle>
       </CardHeader>
-      <CardContent className="h-[320px]">
+      <CardContent className="min-w-0">
+        <div className="h-[320px] min-w-0">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
         ) : data.length === 0 || !hasMeaningfulData ? (
@@ -21,7 +22,7 @@ export const PieGraph = ({ data, isLoading }: { data: PieStatusPoint[]; isLoadin
             Chưa có dữ liệu trạng thái thiết bị.
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <PieChart>
               <Pie data={data} dataKey="value" nameKey="name" innerRadius={68} outerRadius={92}>
                 {data.map((entry) => (
@@ -33,6 +34,7 @@ export const PieGraph = ({ data, isLoading }: { data: PieStatusPoint[]; isLoadin
             </PieChart>
           </ResponsiveContainer>
         )}
+        </div>
       </CardContent>
     </Card>
   );

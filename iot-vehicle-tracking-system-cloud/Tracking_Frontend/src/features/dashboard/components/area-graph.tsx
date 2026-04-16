@@ -23,7 +23,7 @@ export const AreaGraph = ({
   const totalRuntime = data.reduce((sum, item) => sum + item.runtime, 0);
 
   return (
-    <Card>
+    <Card className="min-w-0">
       <CardHeader>
         <CardTitle>Xu hướng thời gian hoạt động đội xe trong 30 ngày</CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -32,7 +32,8 @@ export const AreaGraph = ({
             : 'Lịch sử runtime đang được làm đầy từ tín hiệu vận hành mới'}
         </p>
       </CardHeader>
-      <CardContent className="h-[320px]">
+      <CardContent className="min-w-0">
+        <div className="h-[320px] min-w-0">
         {isLoading ? (
           <Skeleton className="h-full w-full" />
         ) : data.length === 0 ? (
@@ -40,7 +41,7 @@ export const AreaGraph = ({
             Chưa có dữ liệu runtime trong giai đoạn này.
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <AreaChart data={data}>
               <defs>
                 <linearGradient id="runtimeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -62,6 +63,7 @@ export const AreaGraph = ({
             </AreaChart>
           </ResponsiveContainer>
         )}
+        </div>
       </CardContent>
     </Card>
   );
