@@ -88,7 +88,7 @@ export const RouteTab = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
               <p className="text-xs text-muted-foreground">Quãng đường ước tính</p>
               <p className="mt-1 text-lg font-semibold">{distanceKm.toFixed(2)} km</p>

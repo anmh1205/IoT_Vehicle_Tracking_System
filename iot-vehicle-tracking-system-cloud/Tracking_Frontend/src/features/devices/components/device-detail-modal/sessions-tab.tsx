@@ -32,7 +32,7 @@ export const SessionsTab = () => {
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          <CardContent className="grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">
             <div>
               <p className="text-xs text-muted-foreground">Bắt đầu</p>
               <p className="font-medium">{formatDateTime(session.serverSessionStart)}</p>

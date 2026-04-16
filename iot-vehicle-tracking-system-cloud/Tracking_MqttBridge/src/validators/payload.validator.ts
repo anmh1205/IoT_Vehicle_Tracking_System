@@ -25,6 +25,29 @@ const rawDataPayloadBaseSchema = z.object({
     ignition: z.boolean().optional(),
     error_code: z.number().int().optional(),
   }),
+  diagnostics: z.object({
+    channel: z.object({
+      ble_obd_connected: z.boolean().optional(),
+      elm_ready: z.boolean().optional(),
+      poll_interval_ms: z.number().nonnegative().optional(),
+      connect_fail_count_5m: z.number().int().nonnegative().optional(),
+    }).optional(),
+    signals: z.object({
+      rpm: z.number().optional(),
+      obd_speed_kph: z.number().optional(),
+      coolant_c: z.number().optional(),
+      fuel_level_pct: z.number().optional(),
+      engine_load_pct: z.number().optional(),
+    }).optional(),
+    quality: z.object({
+      sample_age_ms: z.number().nonnegative().optional(),
+      missing_signals: z.array(z.string().min(1)).optional(),
+    }).optional(),
+    events: z.array(z.object({
+      code: z.string().min(1).optional(),
+      count_5m: z.number().int().nonnegative().optional(),
+    })).optional(),
+  }).optional(),
   metadata: z.unknown().optional(),
 });
 

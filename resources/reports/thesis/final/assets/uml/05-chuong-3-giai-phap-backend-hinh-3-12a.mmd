@@ -1,12 +1,6 @@
-sequenceDiagram
-    participant Device as Tracker
-    participant Broker as EMQX
-    participant Bridge as MQTT Bridge
-    participant API as Backend API
-    participant Dash as Dashboard
-
-    Device->>Broker: Publish telemetry
-    Broker->>Bridge: Forward topic
-    Bridge->>API: Push normalized event
-    Bridge->>Bridge: Persist metric/log
-    API-->>Dash: Realtime update (Socket.IO)
+flowchart TB
+    Device["Tracker"] -->|1. Publish telemetry| Broker["EMQX"]
+    Broker -->|2. Forward topic| Bridge["MQTT Bridge"]
+    Bridge -->|3. Chuẩn hóa sự kiện| API["Backend API"]
+    Bridge -->|4. Lưu metric + log| Storage["VictoriaMetrics / VictoriaLogs"]
+    API -->|5. Realtime update| Dash["Dashboard"]

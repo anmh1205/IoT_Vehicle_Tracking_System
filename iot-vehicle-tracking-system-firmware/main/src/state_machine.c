@@ -67,6 +67,7 @@
 #define TRACKER_METADATA_MESSAGE_ID_LEN 37
 #define TRACKER_BOOT_ID_LEN 48
 #define TRACKER_OBD_FAIL_ALERT_COOLDOWN_MS 300000ULL
+#define TRACKER_OBD_FAIL_WINDOW_MS 300000ULL
 #define TRACKER_EVENT_CODE_OBD_CONNECT_FAILED 2001
 #define TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED 2002
 #define TRACKER_SLEEP_REJECT_LOG_INTERVAL_MS 10000ULL
@@ -142,6 +143,10 @@ static char s_boot_id[TRACKER_BOOT_ID_LEN] = {0};
 static bool s_obd_fail_alert_emitted = false;
 static int s_last_obd_fail_alert_code = 0;
 static uint64_t s_last_obd_fail_alert_ms = 0;
+static uint64_t s_last_obd_sample_ms = 0;
+static bool s_obd_elm_ready = false;
+static uint64_t s_obd_fail_window_started_ms = 0;
+static uint32_t s_obd_fail_window_count = 0;
 static firmware_status_t s_deferred_firmware_report = {0};
 static bool s_deferred_firmware_report_pending = false;
 static bool s_ble_retry_last_ignition = false;
@@ -239,6 +244,7 @@ static void state_machine_obd_response_cb(int pid, const uint8_t *data, size_t l
     (void)usr_ctx;
 
     int32_t converted = 0;
+    bool updated = false;
     if (pid < 0 || data == NULL || len == 0) {
         return;
     }
@@ -247,30 +253,39 @@ static void state_machine_obd_response_cb(int pid, const uint8_t *data, size_t l
         case 0x0C:
             if (obd_convert_rpm(&converted, data, len) == 0) {
                 s_telemetry.obd_rpm = converted;
+                updated = true;
             }
             break;
         case 0x0D:
             if (len >= 1) {
                 s_telemetry.obd_speed = data[0];
+                updated = true;
             }
             break;
         case 0x05:
             if (obd_convert_temperature(&converted, data, len) == 0) {
                 s_telemetry.obd_coolant_temp = converted;
+                updated = true;
             }
             break;
         case 0x2F:
             if (obd_convert_percent(&converted, data, len) == 0) {
                 s_telemetry.obd_fuel_level = converted;
+                updated = true;
             }
             break;
         case 0x04:
             if (obd_convert_percent(&converted, data, len) == 0) {
                 s_telemetry.obd_engine_load = converted;
+                updated = true;
             }
             break;
         default:
             break;
+    }
+
+    if (updated) {
+        s_last_obd_sample_ms = util_uptime_ms();
     }
 }
 
@@ -686,6 +701,20 @@ telemetry_finalize:
     s_telemetry.error_code = 0;
 
     uint64_t now_ms = util_uptime_ms();
+    bool obd_connected = s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx);
+    s_telemetry.obd_ble_connected = obd_connected;
+    s_telemetry.obd_elm_ready = s_obd_elm_ready && obd_connected;
+
+    if (s_last_obd_sample_ms == 0 || now_ms < s_last_obd_sample_ms) {
+        s_telemetry.obd_sample_age_ms = UINT32_MAX;
+    } else {
+        uint64_t age_ms = now_ms - s_last_obd_sample_ms;
+        s_telemetry.obd_sample_age_ms = age_ms > UINT32_MAX ? UINT32_MAX : (uint32_t)age_ms;
+    }
+
+    state_machine_obd_refresh_fail_window(now_ms);
+    s_telemetry.obd_connect_fail_count_5m = s_obd_fail_window_count;
+
     if (s_last_hw_diag_log_ms == 0 || (now_ms - s_last_hw_diag_log_ms) >= TRACKER_HW_DIAG_LOG_INTERVAL_MS) {
         UBaseType_t stack_hwm_words = uxTaskGetStackHighWaterMark(NULL);
         ESP_LOGI(TAG,
@@ -696,7 +725,7 @@ telemetry_finalize:
                  (unsigned)s_telemetry.vibration,
                  modem_lte_is_connected() ? 1 : 0,
                  tracker_mqtt_is_connected() ? 1 : 0,
-                 (s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) ? 1 : 0,
+                 obd_connected ? 1 : 0,
                  s_telemetry.gnss.fix_valid ? 1 : 0,
                  (unsigned long)stack_hwm_words);
         s_last_hw_diag_log_ms = now_ms;
@@ -1052,9 +1081,25 @@ static void state_machine_restore_ota_context_from_nvs(void) {
              g_rtc_context.ota_pending_confirm ? 1 : 0);
 }
 
+static void state_machine_obd_refresh_fail_window(uint64_t now_ms) {
+    if (s_obd_fail_window_started_ms == 0 ||
+        now_ms < s_obd_fail_window_started_ms ||
+        (now_ms - s_obd_fail_window_started_ms) >= TRACKER_OBD_FAIL_WINDOW_MS) {
+        s_obd_fail_window_started_ms = now_ms;
+        s_obd_fail_window_count = 0;
+    }
+}
+
+static void state_machine_obd_record_connect_failure(uint64_t now_ms) {
+    state_machine_obd_refresh_fail_window(now_ms);
+    s_obd_fail_window_count += 1U;
+}
+
 static void state_machine_publish_obd_failure_event_if_needed(uint64_t now_ms,
                                                               int code,
                                                               const char *message) {
+    state_machine_obd_record_connect_failure(now_ms);
+
     bool is_new_error_type = !s_obd_fail_alert_emitted || (s_last_obd_fail_alert_code != code);
     bool cooldown_elapsed = (now_ms - s_last_obd_fail_alert_ms) >= TRACKER_OBD_FAIL_ALERT_COOLDOWN_MS;
 
@@ -1210,6 +1255,7 @@ static void state_machine_try_connect_ble(void) {
     if (s_ble_ctx != NULL) {
         ble_obd_disconnect(s_ble_ctx);
         s_ble_ctx = NULL;
+        s_obd_elm_ready = false;
     }
 
     bool use_preferred_mac = !util_string_empty(s_config.obd2_ble_address) &&
@@ -1228,6 +1274,7 @@ static void state_machine_try_connect_ble(void) {
     if (s_ble_ctx != NULL) {
         if (ble_obd_elm327_init(s_ble_ctx) == ESP_OK) {
             ESP_LOGI(TAG, "BLE OBD connected + ELM327 ready");
+            s_obd_elm_ready = true;
             s_obd_fail_alert_emitted = false;
             s_last_obd_fail_alert_code = 0;
             s_last_obd_fail_alert_ms = 0;
@@ -1235,6 +1282,7 @@ static void state_machine_try_connect_ble(void) {
             return;
         }
 
+        s_obd_elm_ready = false;
         state_machine_publish_obd_failure_event_if_needed(
             now_ms,
             TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED,
@@ -1247,6 +1295,7 @@ static void state_machine_try_connect_ble(void) {
         return;
     }
 
+    s_obd_elm_ready = false;
     state_machine_publish_obd_failure_event_if_needed(
         now_ms,
         TRACKER_EVENT_CODE_OBD_CONNECT_FAILED,
@@ -1517,6 +1566,7 @@ static void state_machine_prepare_sleep(void) {
     if (s_ble_ctx != NULL) {
         ble_obd_disconnect(s_ble_ctx);
         s_ble_ctx = NULL;
+        s_obd_elm_ready = false;
     }
 
     if (s_gnss_started) {
@@ -1614,6 +1664,10 @@ esp_err_t state_machine_init(const config_t *config) {
     s_last_gnss_rearm_ms = 0;
     s_last_gnss_poll_ms = 0;
     s_obd_aux_pid_cursor = 0;
+    s_last_obd_sample_ms = 0;
+    s_obd_elm_ready = false;
+    s_obd_fail_window_started_ms = 0;
+    s_obd_fail_window_count = 0;
     s_last_hw_diag_log_ms = 0;
     s_heartbeat_started_ms = 0;
     s_heartbeat_raw_published = false;

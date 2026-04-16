@@ -64,6 +64,14 @@ export interface DeviceDetailModalContextValue {
   eventLogs: Record<string, unknown>[];
   eventLogsTotal: number;
   rawFeed: DeviceRawFeedRow[];
+  obdActiveAlerts: {
+    id: number;
+    title: string;
+    message: string | null;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    createdAt: string | null;
+  }[];
+  obdAlertsLoading: boolean;
   activeTab: DeviceDetailTab;
   onTabChange: (tab: DeviceDetailTab) => void;
   onUpdateNameId: (data: Record<string, unknown>) => Promise<void>;

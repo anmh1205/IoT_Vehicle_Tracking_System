@@ -1,20 +1,20 @@
-flowchart LR
-    subgraph Box["Ben trong vo hop"]
-        direction LR
+flowchart TB
+    subgraph Box["Bên trong vỏ hộp bảo vệ"]
+        direction TB
 
-        subgraph CoreZone["Khoang xu ly + RF"]
+        subgraph CoreZone["Khoang xử lý + RF"]
             direction TB
             MCU["ESP32-S3"]
             MODEM["SIM7600 + anten"]
         end
 
-        subgraph PowerZone["Khoang nguon"]
+        subgraph PowerZone["Khoang nguồn"]
             direction TB
             POWER["Buck / Boost / Charge"]
             CELL["Pin 18650"]
         end
 
-        subgraph IOZone["Khoang cong ket noi"]
+        subgraph IOZone["Khoang cổng kết nối"]
             direction TB
             OBD["OBD2 / BLE"]
             PORT["USB debug"]

@@ -1,17 +1,12 @@
-sequenceDiagram
-    actor Admin as Dashboard Admin
-    participant API as Backend API
-    participant DB as PostgreSQL
-    participant Bridge as MQTT Bridge
-    participant Broker as EMQX
-    participant Device as Tracker
+flowchart TB
+    Admin["Dashboard Admin"] -->|1. Tạo lệnh OTA| API["Backend API"]
+    API -->|2. Tạo assignment| DB["PostgreSQL"]
+    API -->|3. Publish ota.assign| Bridge["MQTT Bridge"]
+    Bridge -->|4. devices/:id/ota/assign| Broker["EMQX"]
+    Broker -->|5. Deliver command| Device["Tracker"]
 
-    Admin->>API: POST /devices/:id/ota
-    API->>DB: Create OTA assignment
-    API->>Bridge: Publish ota.assign
-    Bridge->>Broker: devices/{id}/ota/assign
-    Broker-->>Device: Deliver command
-    Device->>Broker: ota.progress
-    Broker->>Bridge: Forward progress
-    Bridge->>DB: Persist status
-    API-->>Admin: Push realtime status
+    Device -->|6. ota.progress| Broker
+    Broker -->|7. Forward progress| Bridge
+    Bridge -->|8. Persist status| DB
+    Bridge -->|9. Đẩy realtime| API
+    API -->|10. Cập nhật trạng thái| Admin

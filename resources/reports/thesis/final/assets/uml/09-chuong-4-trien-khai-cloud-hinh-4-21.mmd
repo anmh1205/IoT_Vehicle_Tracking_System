@@ -1,15 +1,13 @@
 flowchart TB
-    Header["Thanh dau<br/>Tim kiem + thao tac"]
-
-    subgraph Workspace["Khu quan ly xe"]
-        direction LR
-        Filter["Bo loc<br/>trang thai"]
-        Table["Bang du lieu<br/>phuong tien"]
-        Detail["Khung chi tiet"]
-    end
-
-    Form["Form them / sua xe"]
+    Header["Thanh đầu<br/>Tìm kiếm + thao tác"]
+    Workspace["Khu quản lý xe"]
+    Filter["Bộ lọc<br/>trạng thái"]
+    Table["Bảng dữ liệu<br/>phương tiện"]
+    Detail["Khung chi tiết"]
+    Form["Form thêm / sửa xe"]
 
     Header --> Workspace
-    Table --> Detail
+    Workspace --> Filter
+    Workspace --> Table
+    Workspace --> Detail
     Header --> Form

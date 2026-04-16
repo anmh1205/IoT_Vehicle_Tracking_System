@@ -92,8 +92,8 @@ const DeviceDetailModalContent = () => {
         <DialogDescription className="sr-only">
           Bảng chi tiết thiết bị tracking gồm tổng quan, bản đồ lộ trình, phiên chạy, lỗi, lệnh và dữ liệu thô.
         </DialogDescription>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1 space-y-2">
             <DialogTitle className="text-xl">{device?.deviceName ?? 'Chi tiết thiết bị'}</DialogTitle>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span>{device?.deviceId ?? '-'}</span>
@@ -108,7 +108,8 @@ const DeviceDetailModalContent = () => {
             </div>
           </div>
 
-          <DropdownMenu>
+          <div className="shrink-0">
+            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="icon" variant="outline" aria-label="Thao tác thiết bị">
                 <MoreVertical className="h-4 w-4" />
@@ -144,10 +145,11 @@ const DeviceDetailModalContent = () => {
                 {isRefreshing ? 'Đang làm mới...' : 'Làm mới dữ liệu'}
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          </div>
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
           {metadata.map((item) => (
             <div key={item.label} className="rounded-lg border bg-muted/30 px-3 py-2">
               <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -165,7 +167,7 @@ const DeviceDetailModalContent = () => {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="border-b px-6 py-3">
-          <TabsList className="h-auto w-full justify-start gap-2 overflow-x-auto rounded-none bg-transparent p-0">
+          <TabsList className="h-auto w-full justify-start gap-2 overflow-x-auto rounded-none bg-transparent p-0 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <TabsTrigger
               value="overview"
               className="h-9 flex-none rounded-full border bg-muted/60 px-3 text-xs data-[state=active]:border-primary/30 data-[state=active]:bg-primary/10 sm:text-sm"
@@ -254,7 +256,13 @@ export const DeviceDetailModal = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[94dvh] w-[min(99vw,1480px)] max-w-none flex-col overflow-hidden p-0 sm:h-[92dvh] sm:w-[min(97vw,1440px)] sm:max-w-none sm:rounded-2xl">
+      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 p-0 sm:h-[92dvh] sm:max-h-[92dvh] sm:w-[min(97vw,1440px)] sm:max-w-none sm:rounded-2xl sm:border">
+        <DialogTitle className="sr-only">
+          {context.device?.deviceName ?? 'Chi tiết thiết bị'}
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          Bảng chi tiết thiết bị tracking gồm tổng quan, bản đồ lộ trình, phiên chạy, lỗi, lệnh và dữ liệu thô.
+        </DialogDescription>
         <DeviceDetailModalProvider value={context}>
           <DeviceDetailModalContent />
         </DeviceDetailModalProvider>

@@ -18,12 +18,79 @@ import { AlertDetailModal } from '@/features/alerts/components/alert-detail-moda
 
 const PAGE_SIZE = 50;
 
+const isObdMaintenanceAlert = (item: any): boolean => {
+  const title = String(item?.title ?? '').toLowerCase();
+  const message = String(item?.message ?? '').toLowerCase();
+  const signature = `${title} ${message}`;
+
+  return (
+    item?.alertType === 'maintenance_due' &&
+    (signature.includes('obd') ||
+      signature.includes('coolant') ||
+      signature.includes('voltage') ||
+      signature.includes('idle-load') ||
+      signature.includes('channel'))
+  );
+};
+
+const localizeObdAlertTitle = (title: string): string => {
+  const normalized = title.toLowerCase();
+
+  if (normalized.includes('idle-load anomaly')) {
+    return 'OBD: Bất thường không tải';
+  }
+  if (normalized.includes('coolant risk pattern')) {
+    return 'OBD: Rủi ro nhiệt độ nước làm mát';
+  }
+  if (normalized.includes('channel unstable')) {
+    return 'OBD: Kênh kết nối không ổn định';
+  }
+  if (normalized.includes('voltage risk under load')) {
+    return 'OBD: Rủi ro điện áp khi tải cao';
+  }
+
+  return title;
+};
+
+const localizeObdAlertMessage = (message: string): string => {
+  const idleLoadMatch = message.match(
+    /^RPM\s+([\d.]+)\s+while speed\s+([\d.]+)\s+km\/h\s+for\s+([\d.]+)\s+minutes\.?$/i,
+  );
+  if (idleLoadMatch) {
+    return `Vòng tua ${idleLoadMatch[1]} khi tốc độ ${idleLoadMatch[2]} km/h trong ${idleLoadMatch[3]} phút.`;
+  }
+
+  const coolantMatch = message.match(
+    /^Coolant\s+([\d.]+)C\s+with engine load\s+([\d.]+)%\s+sustained at runtime\.?$/i,
+  );
+  if (coolantMatch) {
+    return `Nhiệt độ nước làm mát ${coolantMatch[1]}°C với tải động cơ ${coolantMatch[2]}% trong lúc vận hành.`;
+  }
+
+  const channelMatch = message.match(
+    /^OBD connect\/init failed\s+([\d.]+)\s+times in the last 5 minutes\.?$/i,
+  );
+  if (channelMatch) {
+    return `Kết nối/khởi tạo OBD thất bại ${channelMatch[1]} lần trong 5 phút gần nhất.`;
+  }
+
+  const voltageMatch = message.match(
+    /^Battery top\s+([\d.]+)V\s+while engine load\s+([\d.]+)%\.?$/i,
+  );
+  if (voltageMatch) {
+    return `Điện áp ắc quy chính ${voltageMatch[1]}V khi tải động cơ ${voltageMatch[2]}%.`;
+  }
+
+  return message;
+};
+
 const AlertsPage = () => {
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<number[]>([]);
   const [detail, setDetail] = useState<any | null>(null);
   const [severity, setSeverity] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<string | undefined>(undefined);
+  const [source, setSource] = useState<'all' | 'obd' | 'system'>('all');
   const [page, setPage] = useState(1);
 
   const alerts = useQuery({
@@ -36,6 +103,7 @@ const AlertsPage = () => {
         status,
       }),
   });
+
   const ackMutation = useMutation({
     mutationFn: (id: number) => alertServices.acknowledge(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
@@ -46,6 +114,7 @@ const AlertsPage = () => {
       );
     },
   });
+
   const resolveMutation = useMutation({
     mutationFn: (id: number) => alertServices.resolve(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
@@ -57,11 +126,38 @@ const AlertsPage = () => {
     },
   });
 
-  const rows = useMemo(() => alerts.data?.items ?? alerts.data?.data?.items ?? [], [alerts.data]);
+  const allRows = useMemo(
+    () =>
+      (alerts.data?.items ?? alerts.data?.data?.items ?? []).map((item: any) => {
+        if (!isObdMaintenanceAlert(item)) {
+          return item;
+        }
+
+        return {
+          ...item,
+          title: localizeObdAlertTitle(String(item.title ?? 'Cảnh báo bảo trì OBD')),
+          message:
+            item.message == null ? null : localizeObdAlertMessage(String(item.message)),
+        };
+      }),
+    [alerts.data],
+  );
+
+  const rows = useMemo(() => {
+    if (source === 'all') {
+      return allRows;
+    }
+
+    return allRows.filter((item: any) => {
+      const isObd = isObdMaintenanceAlert(item);
+      return source === 'obd' ? isObd : !isObd;
+    });
+  }, [allRows, source]);
+
   const pagination = alerts.data?.pagination ?? {
     page,
     limit: PAGE_SIZE,
-    total: rows.length,
+    total: allRows.length,
     totalPages: 1,
   };
 
@@ -74,17 +170,17 @@ const AlertsPage = () => {
     const acknowledged = rows.filter((item: any) => item.status === 'acknowledged').length;
     const critical = rows.filter((item: any) => item.severity === 'critical').length;
     return {
-      total: pagination.total,
+      total: rows.length,
       pending,
       acknowledged,
       critical,
     };
-  }, [pagination.total, rows]);
+  }, [rows]);
 
   return (
     <PageContainer
       pageTitle="Cảnh báo"
-      pageDescription="Quản lý cảnh báo hệ thống theo mức độ và trạng thái xử lý"
+      pageDescription="Quản lý cảnh báo hệ thống theo mức độ, trạng thái và nguồn OBD"
       pageHeaderAction={
         <div className="flex flex-wrap gap-2">
           <Button
@@ -188,15 +284,18 @@ const AlertsPage = () => {
           <AlertFilters
             severity={severity}
             status={status}
+            source={source}
             onChange={(next) => {
               setPage(1);
               setSeverity(next.severity);
               setStatus(next.status);
+              setSource(next.source ?? 'all');
             }}
             onReset={() => {
               setPage(1);
               setSeverity(undefined);
               setStatus(undefined);
+              setSource('all');
             }}
           />
         }
@@ -204,7 +303,7 @@ const AlertsPage = () => {
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">
-          Trang {pagination.page} / {pagination.totalPages || 1} · {pagination.total} cảnh báo
+          Trang {pagination.page} / {pagination.totalPages || 1} · Server: {pagination.total} bản ghi · Hiển thị: {rows.length}
         </p>
         <div className="flex gap-2">
           <Button

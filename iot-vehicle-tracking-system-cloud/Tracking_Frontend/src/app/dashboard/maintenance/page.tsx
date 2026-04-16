@@ -9,6 +9,7 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
 import { StatCard } from '@/components/common/stat-card';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { alertServices } from '@/lib/api/alerts';
 import { maintenanceServices } from '@/lib/api/maintenance';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
@@ -33,6 +35,16 @@ const STATUS_LABELS: Record<string, string> = {
   in_progress: 'Đang xử lý',
   completed: 'Hoàn tất',
   cancelled: 'Đã hủy',
+};
+
+const STATUS_BADGE_VARIANTS: Record<
+  string,
+  'default' | 'secondary' | 'destructive' | 'outline'
+> = {
+  scheduled: 'outline',
+  in_progress: 'default',
+  completed: 'secondary',
+  cancelled: 'destructive',
 };
 
 const MAINTENANCE_TYPE_LABELS: Record<string, string> = {
@@ -59,6 +71,83 @@ const TYPE_OPTIONS = [
   { value: 'all', label: 'Tất cả loại bảo trì' },
   ...Object.entries(MAINTENANCE_TYPE_LABELS).map(([value, label]) => ({ value, label })),
 ] as const;
+
+const isObdMaintenanceAlert = (item: any): boolean => {
+  const text = `${String(item?.title ?? '')} ${String(item?.message ?? '')}`.toLowerCase();
+  return (
+    item?.alertType === 'maintenance_due' &&
+    (text.includes('obd') ||
+      text.includes('coolant') ||
+      text.includes('voltage') ||
+      text.includes('idle-load') ||
+      text.includes('channel'))
+  );
+};
+
+const OBD_SEVERITY_LABELS: Record<string, string> = {
+  low: 'Thấp',
+  medium: 'Trung bình',
+  high: 'Cao',
+  critical: 'Nghiêm trọng',
+};
+
+const OBD_SEVERITY_BADGE_CLASS: Record<string, string> = {
+  low: 'bg-muted text-muted-foreground',
+  medium: 'bg-amber-100 text-amber-700',
+  high: 'bg-orange-100 text-orange-700',
+  critical: 'bg-red-100 text-red-700',
+};
+
+const localizeObdAlertTitle = (title: string): string => {
+  const normalized = title.toLowerCase();
+
+  if (normalized.includes('idle-load anomaly')) {
+    return 'OBD: Bất thường không tải';
+  }
+  if (normalized.includes('coolant risk pattern')) {
+    return 'OBD: Rủi ro nhiệt độ nước làm mát';
+  }
+  if (normalized.includes('channel unstable')) {
+    return 'OBD: Kênh kết nối không ổn định';
+  }
+  if (normalized.includes('voltage risk under load')) {
+    return 'OBD: Rủi ro điện áp khi tải cao';
+  }
+
+  return title;
+};
+
+const localizeObdAlertMessage = (message: string): string => {
+  const idleLoadMatch = message.match(
+    /^RPM\s+([\d.]+)\s+while speed\s+([\d.]+)\s+km\/h\s+for\s+([\d.]+)\s+minutes\.?$/i,
+  );
+  if (idleLoadMatch) {
+    return `Vòng tua ${idleLoadMatch[1]} khi tốc độ ${idleLoadMatch[2]} km/h trong ${idleLoadMatch[3]} phút.`;
+  }
+
+  const coolantMatch = message.match(
+    /^Coolant\s+([\d.]+)C\s+with engine load\s+([\d.]+)%\s+sustained at runtime\.?$/i,
+  );
+  if (coolantMatch) {
+    return `Nhiệt độ nước làm mát ${coolantMatch[1]}°C với tải động cơ ${coolantMatch[2]}% trong lúc vận hành.`;
+  }
+
+  const channelMatch = message.match(
+    /^OBD connect\/init failed\s+([\d.]+)\s+times in the last 5 minutes\.?$/i,
+  );
+  if (channelMatch) {
+    return `Kết nối/khởi tạo OBD thất bại ${channelMatch[1]} lần trong 5 phút gần nhất.`;
+  }
+
+  const voltageMatch = message.match(
+    /^Battery top\s+([\d.]+)V\s+while engine load\s+([\d.]+)%\.?$/i,
+  );
+  if (voltageMatch) {
+    return `Điện áp ắc quy chính ${voltageMatch[1]}V khi tải động cơ ${voltageMatch[2]}%.`;
+  }
+
+  return message;
+};
 
 const MaintenancePage = () => {
   const router = useRouter();
@@ -107,6 +196,17 @@ const MaintenancePage = () => {
     },
   });
 
+  const obdAlertQuery = useQuery({
+    queryKey: ['alerts', 'obd-maintenance-recommendations'],
+    queryFn: () =>
+      alertServices.getList({
+        page: 1,
+        limit: 30,
+        status: 'active',
+        alertType: 'maintenance_due',
+      }),
+  });
+
   const updateMutation = useMutation({
     mutationFn: ({ id, ...payload }: any) => maintenanceServices.update(id, payload),
     onSuccess: () => {
@@ -140,6 +240,15 @@ const MaintenancePage = () => {
         .slice(0, 3),
     [rows],
   );
+
+  const obdRecommendations = useMemo(() => {
+    const items = obdAlertQuery.data?.items ?? obdAlertQuery.data?.data?.items ?? [];
+    return items.filter(isObdMaintenanceAlert).slice(0, 3).map((item: any) => ({
+      ...item,
+      title: localizeObdAlertTitle(String(item.title ?? 'Cảnh báo bảo trì OBD')),
+      message: item.message == null ? null : localizeObdAlertMessage(String(item.message)),
+    }));
+  }, [obdAlertQuery.data]);
 
   const getActionConfig = (row: any) => {
     if (row.status === 'scheduled') {
@@ -213,8 +322,11 @@ const MaintenancePage = () => {
   ];
 
   return (
-    <PageContainer pageTitle="Bảo trì" pageDescription="Lập lịch, theo dõi và đẩy trạng thái bảo trì phương tiện">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <PageContainer
+      pageTitle="Bảo trì"
+      pageDescription="Lập lịch, theo dõi và đẩy trạng thái bảo trì phương tiện"
+    >
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           title="Tổng lịch bảo trì"
           value={statsQuery.data?.total ?? 0}
@@ -321,15 +433,18 @@ const MaintenancePage = () => {
       </Card>
 
       {dueSoon.length > 0 ? (
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {dueSoon.map((item: any) => (
             <Card key={item.id}>
               <CardContent className="space-y-2 p-4">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Ưu tiên gần nhất</p>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Ưu tiên gần nhất
+                </p>
                 <div>
                   <p className="text-sm font-medium">{item.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    {item.vehicleId} · {MAINTENANCE_TYPE_LABELS[item.maintenanceType] ?? item.maintenanceType}
+                    {item.vehicleId} ·{' '}
+                    {MAINTENANCE_TYPE_LABELS[item.maintenanceType] ?? item.maintenanceType}
                   </p>
                 </div>
                 <p className="text-sm">
@@ -341,22 +456,162 @@ const MaintenancePage = () => {
         </div>
       ) : null}
 
+      {obdRecommendations.length > 0 ? (
+        <Card>
+          <CardContent className="space-y-3 p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium">Khuyến nghị từ OBD</p>
+                <p className="text-xs text-muted-foreground">
+                  Các cảnh báo bảo trì đang hoạt động được sinh tự động từ chẩn đoán OBD.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => router.push('/dashboard/alerts')}
+              >
+                Mở danh sách cảnh báo
+              </Button>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {obdRecommendations.map((item: any) => (
+                <div key={item.id} className="rounded-lg border bg-muted/20 px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Bảo trì OBD
+                    </p>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                        OBD_SEVERITY_BADGE_CLASS[String(item.severity ?? 'medium')] ??
+                        'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {OBD_SEVERITY_LABELS[String(item.severity ?? 'medium')] ?? 'Trung bình'}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm font-semibold">{item.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
+                    {item.message ?? 'Không có mô tả chi tiết từ nguồn cảnh báo.'}
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Phát sinh: {formatDateTime(item.createdAt, 'dd/MM/yyyy HH:mm')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="list">Danh sách</TabsTrigger>
-          <TabsTrigger value="calendar">Lịch</TabsTrigger>
-          <TabsTrigger value="forecast">Dự báo km</TabsTrigger>
+        <TabsList className="grid h-auto w-full grid-cols-3">
+          <TabsTrigger value="list" className="text-xs sm:text-sm">Danh sách</TabsTrigger>
+          <TabsTrigger value="calendar" className="text-xs sm:text-sm">Lịch</TabsTrigger>
+          <TabsTrigger value="forecast" className="text-xs sm:text-sm">Dự báo km</TabsTrigger>
         </TabsList>
 
         <TabsContent value="list" className="space-y-3">
-          <DataTable
-            columns={columns}
-            data={rows}
-            searchKey="vehicleId"
-            searchPlaceholder="Tìm phương tiện..."
-            isLoading={maint.isLoading}
-            onRowClick={(row) => router.push(`/dashboard/maintenance/${row.id}`)}
-          />
+          <div className="space-y-3 sm:hidden">
+            {maint.isLoading ? (
+              Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="rounded-xl border px-4 py-4">
+                  <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+                  <div className="mt-3 h-3 w-1/2 animate-pulse rounded bg-muted" />
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="h-14 animate-pulse rounded-lg bg-muted/80" />
+                    <div className="h-14 animate-pulse rounded-lg bg-muted/80" />
+                  </div>
+                </div>
+              ))
+            ) : rows.length > 0 ? (
+              rows.map((row: any) => {
+                const action = getActionConfig(row);
+                const typeLabel =
+                  MAINTENANCE_TYPE_LABELS[row.maintenanceType] ?? row.maintenanceType ?? 'Khác';
+                const statusLabel = STATUS_LABELS[row.status] ?? row.status ?? 'Chưa xác định';
+
+                return (
+                  <Card
+                    key={row.id}
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/dashboard/maintenance/${row.id}`)}
+                  >
+                    <CardContent className="space-y-3 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold">{row.title}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {row.vehicleId ?? 'Chưa có phương tiện'} · {typeLabel}
+                          </p>
+                        </div>
+                        <Badge variant={STATUS_BADGE_VARIANTS[row.status] ?? 'outline'}>
+                          {statusLabel}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="rounded-lg border bg-muted/20 px-3 py-2">
+                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                            Ngày hẹn
+                          </p>
+                          <p className="mt-1 font-medium">
+                            {formatDateTime(row.scheduledDate, 'dd/MM/yyyy')}
+                          </p>
+                        </div>
+                        <div className="rounded-lg border bg-muted/20 px-3 py-2">
+                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                            Mốc km
+                          </p>
+                          <p className="mt-1 font-medium">
+                            {row.nextServiceMileage
+                              ? `${formatNumber(row.nextServiceMileage)} km`
+                              : '-'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs text-muted-foreground">Chạm để xem chi tiết</p>
+                        {action ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={updateMutation.isPending}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              updateMutation.mutate({ id: row.id, ...action.payload });
+                            }}
+                          >
+                            {action.label}
+                          </Button>
+                        ) : (
+                          <span className="text-xs font-medium text-muted-foreground">Đã xong</span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            ) : (
+              <div className="rounded-xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+                Không có lịch bảo trì phù hợp với bộ lọc hiện tại.
+              </div>
+            )}
+          </div>
+
+          <div className="hidden sm:block">
+            <DataTable
+              columns={columns}
+              data={rows}
+              searchKey="vehicleId"
+              searchPlaceholder="Tìm phương tiện..."
+              isLoading={maint.isLoading}
+              onRowClick={(row) => router.push(`/dashboard/maintenance/${row.id}`)}
+            />
+          </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-muted-foreground">
               Trang {pagination.page} / {pagination.totalPages || 1} · {pagination.total} lịch bảo trì
@@ -365,6 +620,7 @@ const MaintenancePage = () => {
               <Button
                 variant="outline"
                 size="sm"
+                className="flex-1 sm:flex-none"
                 onClick={() => setFilters((prev) => ({ ...prev, page: prev.page - 1 }))}
                 disabled={pagination.page <= 1 || maint.isFetching}
               >
@@ -373,6 +629,7 @@ const MaintenancePage = () => {
               <Button
                 variant="outline"
                 size="sm"
+                className="flex-1 sm:flex-none"
                 onClick={() => setFilters((prev) => ({ ...prev, page: prev.page + 1 }))}
                 disabled={pagination.page >= (pagination.totalPages || 1) || maint.isFetching}
               >
@@ -383,11 +640,13 @@ const MaintenancePage = () => {
         </TabsContent>
 
         <TabsContent value="calendar">
-          <MaintenanceCalendar day={day} onDayChange={setDay} rows={rows} />
+          {tab === 'calendar' ? (
+            <MaintenanceCalendar day={day} onDayChange={setDay} rows={rows} />
+          ) : null}
         </TabsContent>
 
         <TabsContent value="forecast">
-          <MileageForecaster rows={rows} />
+          {tab === 'forecast' ? <MileageForecaster rows={rows} /> : null}
         </TabsContent>
       </Tabs>
     </PageContainer>
@@ -395,3 +654,4 @@ const MaintenancePage = () => {
 };
 
 export default MaintenancePage;
+

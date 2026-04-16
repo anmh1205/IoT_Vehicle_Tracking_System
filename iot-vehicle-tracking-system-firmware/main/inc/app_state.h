@@ -91,6 +91,14 @@ typedef struct {
     int32_t obd_fuel_level;
     /** Engine load percentage from OBD PID 0x04. */
     int32_t obd_engine_load;
+    /** Current BLE OBD link state. */
+    bool obd_ble_connected;
+    /** ELM327 initialization state for current BLE session. */
+    bool obd_elm_ready;
+    /** Age of latest successful OBD sample in milliseconds. */
+    uint32_t obd_sample_age_ms;
+    /** Number of OBD connect/init failures in the latest 5-minute window. */
+    uint32_t obd_connect_fail_count_5m;
 } telemetry_t;
 
 /** @brief Global RTC-retained context instance. */

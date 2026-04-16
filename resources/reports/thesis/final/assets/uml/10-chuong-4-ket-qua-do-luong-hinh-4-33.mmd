@@ -1,14 +1,13 @@
 flowchart TB
-    Header["Thanh dau ban do"]
-
-    subgraph Main["Khong gian realtime"]
-        direction LR
-        Fleet["Danh sach xe"]
-        MapPanel["Ban do Leaflet"]
-        Stats["So lieu realtime"]
-    end
-
-    Timeline["Dong thoi gian hanh trinh"]
+    Header["Thanh đầu bản đồ"]
+    Main["Không gian realtime"]
+    Fleet["Danh sách xe"]
+    MapPanel["Bản đồ Leaflet"]
+    Stats["Số liệu realtime"]
+    Timeline["Dòng thời gian hành trình"]
 
     Header --> Main
+    Main --> Fleet
+    Main --> MapPanel
+    Main --> Stats
     MapPanel --> Timeline

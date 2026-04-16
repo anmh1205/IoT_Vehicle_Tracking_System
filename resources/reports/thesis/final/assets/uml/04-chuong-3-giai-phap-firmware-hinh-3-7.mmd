@@ -1,11 +1,10 @@
-stateDiagram-v2
-    direction LR
-    [*] --> Init
-    Init --> CheckIGN
-    CheckIGN --> Driving: IGN ON
-    CheckIGN --> Idle: IGN OFF
-    Idle --> Alert: Có rung
-    Idle --> Sleep: Không rung
-    Driving --> Sleep
-    Alert --> Sleep
-    Sleep --> CheckIGN
+flowchart TB
+    Start(["Bắt đầu"]) --> Init["Khởi tạo hệ thống"]
+    Init --> CheckIGN{"Kiểm tra IGN"}
+    CheckIGN -->|IGN ON| Driving["Chế độ lái xe"]
+    CheckIGN -->|IGN OFF| Idle["Chế độ chờ"]
+    Idle -->|Có rung| Alert["Cảnh báo rung"]
+    Idle -->|Không rung| Sleep["Ngủ tiết kiệm"]
+    Driving -->|Mất IGN| Sleep
+    Alert -->|Xử lý xong| Sleep
+    Sleep -->|Đánh thức theo chu kỳ| CheckIGN

@@ -6,6 +6,38 @@ export interface PayloadMetadata {
   boot_id?: string;
 }
 
+export interface RawDiagnosticsChannel {
+  ble_obd_connected?: boolean;
+  elm_ready?: boolean;
+  poll_interval_ms?: number;
+  connect_fail_count_5m?: number;
+}
+
+export interface RawDiagnosticsSignals {
+  rpm?: number;
+  obd_speed_kph?: number;
+  coolant_c?: number;
+  fuel_level_pct?: number;
+  engine_load_pct?: number;
+}
+
+export interface RawDiagnosticsQuality {
+  sample_age_ms?: number;
+  missing_signals?: string[];
+}
+
+export interface RawDiagnosticsEvent {
+  code?: string;
+  count_5m?: number;
+}
+
+export interface RawDiagnostics {
+  channel?: RawDiagnosticsChannel;
+  signals?: RawDiagnosticsSignals;
+  quality?: RawDiagnosticsQuality;
+  events?: RawDiagnosticsEvent[];
+}
+
 export interface RawDataPayload {
   device_id: string;
   auth_token: string;
@@ -23,6 +55,7 @@ export interface RawDataPayload {
     ignition?: boolean;
     error_code?: number;
   };
+  diagnostics?: RawDiagnostics;
   metadata?: PayloadMetadata;
 }
 

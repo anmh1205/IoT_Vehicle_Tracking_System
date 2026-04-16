@@ -95,7 +95,7 @@ export interface DevicePositionSnapshot {
 export interface DeviceRawFeedRow {
   id: string;
   timestamp: string | null;
-  source: 'telemetry' | 'session' | 'error' | 'command' | 'event-log';
+  source: 'telemetry' | 'session' | 'error' | 'command' | 'event-log' | 'obd-diagnostic';
   event: string;
   summary: string;
   payload: Record<string, unknown>;

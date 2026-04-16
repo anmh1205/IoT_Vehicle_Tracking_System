@@ -1,17 +1,27 @@
-flowchart LR
+flowchart TB
     Bridge["MQTT Bridge"]
+    Split["Bộ điều phối lưu trữ"]
 
-    subgraph Hot["Luồng nóng - realtime"]
+    Bridge --> Split
+
+    subgraph Realtime["Luồng nóng - realtime"]
+        direction TB
+        RT["Pipeline realtime"]
         VM["VictoriaMetrics"]
         WS["Socket.IO"]
+        RT --> VM
+        RT --> WS
     end
 
     subgraph Durable["Luồng bền - nghiệp vụ"]
-        PG["PostgreSQL"]
+        direction TB
+        DV["Pipeline nghiệp vụ"]
         API["Backend API"]
+        PG["PostgreSQL"]
+        DV --> API
+        DV --> PG
+        API --> PG
     end
 
-    Bridge ----> VM
-    Bridge ----> WS
-    Bridge ----> PG
-    API ----> PG
+    Split --> Realtime
+    Realtime --> Durable

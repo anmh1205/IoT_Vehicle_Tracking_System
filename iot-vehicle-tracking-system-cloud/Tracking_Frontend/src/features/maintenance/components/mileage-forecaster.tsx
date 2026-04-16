@@ -54,23 +54,21 @@ export const MileageForecaster = ({ rows }: { rows: any[] }) => {
         <p className="text-sm text-muted-foreground">
           Các phương tiện sắp chạm mốc bảo trì được sắp theo ngưỡng km gần nhất.
         </p>
-        <div className="h-[320px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="label" interval={0} angle={-20} textAnchor="end" height={60} />
-              <YAxis />
-              <Tooltip
-                formatter={(value) => [`${formatNumber(Number(value ?? 0))} km`, 'Mốc bảo trì']}
-                labelFormatter={(label, payload) => {
-                  const nextDate = payload?.[0]?.payload?.nextDate;
-                  return `${label} · ${formatDateTime(nextDate, 'dd/MM/yyyy')}`;
-                }}
-              />
-              <Bar dataKey="mileage" fill="#0f766e" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height={320} minWidth={0}>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="label" interval={0} angle={-20} textAnchor="end" height={60} />
+            <YAxis />
+            <Tooltip
+              formatter={(value) => [`${formatNumber(Number(value ?? 0))} km`, 'Mốc bảo trì']}
+              labelFormatter={(label, payload) => {
+                const nextDate = payload?.[0]?.payload?.nextDate;
+                return `${label} · ${formatDateTime(nextDate, 'dd/MM/yyyy')}`;
+              }}
+            />
+            <Bar dataKey="mileage" fill="#0f766e" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </CardContent>
     </Card>
   );

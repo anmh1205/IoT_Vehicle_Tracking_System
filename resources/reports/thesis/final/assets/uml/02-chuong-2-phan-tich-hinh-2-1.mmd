@@ -1,11 +1,17 @@
-flowchart LR
+flowchart TB
     Device["Tracker"] --> Bridge["MQTT Bridge"]
-    Bridge --> PG["PostgreSQL
-Dữ liệu nghiệp vụ"]
-    Bridge --> VM["VictoriaMetrics
-Dữ liệu đo"]
-    Bridge --> VL["VictoriaLogs
-Nhật ký"]
+
+    subgraph DataPlane["Tầng lưu trữ và quan sát"]
+        direction TB
+        PG["PostgreSQL<br/>Dữ liệu nghiệp vụ"]
+        VM["VictoriaMetrics<br/>Dữ liệu đo"]
+        VL["VictoriaLogs<br/>Nhật ký"]
+    end
+
+    Bridge --> PG
+    Bridge --> VM
+    Bridge --> VL
+
     API["Backend API"] --> PG
     API --> VM
     Dashboard["Dashboard"] --> API

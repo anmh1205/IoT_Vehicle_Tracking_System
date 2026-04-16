@@ -4,6 +4,10 @@
 
 #include "util.h"
 
+#define DATA_FORMATTER_DEFAULT_SCHEMA_VERSION "v1.0.0"
+#define DATA_FORMATTER_RAWDATA_SCHEMA_VERSION "v1.3.0"
+#define DATA_FORMATTER_OBD_STALE_SAMPLE_MS 30000U
+
 /**
  * @file data_formatter.c
  * @brief JSON payload builders for telemetry/status/event/firmware channels.
@@ -30,7 +34,8 @@ static void data_formatter_add_metadata(cJSON *root,
                                         uint64_t sent_at_ms,
                                         const char *message_id,
                                         uint32_t seq_no,
-                                        const char *boot_id) {
+                                        const char *boot_id,
+                                        const char *schema_version) {
     if (root == NULL) {
         return;
     }
@@ -40,7 +45,11 @@ static void data_formatter_add_metadata(cJSON *root,
         return;
     }
 
-    cJSON_AddStringToObject(metadata, "schema_version", "v1.0.0");
+    const char *effective_schema_version = util_string_empty(schema_version)
+                                               ? DATA_FORMATTER_DEFAULT_SCHEMA_VERSION
+                                               : schema_version;
+
+    cJSON_AddStringToObject(metadata, "schema_version", effective_schema_version);
     if (!util_string_empty(message_id)) {
         cJSON_AddStringToObject(metadata, "message_id", message_id);
     }
@@ -51,6 +60,71 @@ static void data_formatter_add_metadata(cJSON *root,
     }
 
     cJSON_AddItemToObject(root, "metadata", metadata);
+}
+
+static void data_formatter_append_string_item(cJSON *array, const char *value) {
+    if (array == NULL || util_string_empty(value)) {
+        return;
+    }
+
+    cJSON *item = cJSON_CreateString(value);
+    if (item != NULL) {
+        cJSON_AddItemToArray(array, item);
+    }
+}
+
+static void data_formatter_add_diagnostics(cJSON *root, const telemetry_t *telemetry) {
+    if (root == NULL || telemetry == NULL) {
+        return;
+    }
+
+    cJSON *diagnostics = cJSON_CreateObject();
+    if (diagnostics == NULL) {
+        return;
+    }
+
+    cJSON *channel = cJSON_AddObjectToObject(diagnostics, "channel");
+    cJSON *signals = cJSON_AddObjectToObject(diagnostics, "signals");
+    cJSON *quality = cJSON_AddObjectToObject(diagnostics, "quality");
+    cJSON *events = cJSON_AddArrayToObject(diagnostics, "events");
+
+    if (channel == NULL || signals == NULL || quality == NULL || events == NULL) {
+        cJSON_Delete(diagnostics);
+        return;
+    }
+
+    cJSON_AddBoolToObject(channel, "ble_obd_connected", telemetry->obd_ble_connected);
+    cJSON_AddBoolToObject(channel, "elm_ready", telemetry->obd_elm_ready);
+    cJSON_AddNumberToObject(channel, "poll_interval_ms", 1200);
+    cJSON_AddNumberToObject(channel, "connect_fail_count_5m", telemetry->obd_connect_fail_count_5m);
+
+    cJSON_AddNumberToObject(signals, "rpm", telemetry->obd_rpm);
+    cJSON_AddNumberToObject(signals, "obd_speed_kph", telemetry->obd_speed);
+    cJSON_AddNumberToObject(signals, "coolant_c", telemetry->obd_coolant_temp);
+    cJSON_AddNumberToObject(signals, "fuel_level_pct", telemetry->obd_fuel_level);
+    cJSON_AddNumberToObject(signals, "engine_load_pct", telemetry->obd_engine_load);
+
+    cJSON_AddNumberToObject(quality, "sample_age_ms", telemetry->obd_sample_age_ms);
+    cJSON *missing_signals = cJSON_AddArrayToObject(quality, "missing_signals");
+    if (missing_signals != NULL &&
+        (!telemetry->obd_elm_ready || telemetry->obd_sample_age_ms > DATA_FORMATTER_OBD_STALE_SAMPLE_MS)) {
+        data_formatter_append_string_item(missing_signals, "rpm");
+        data_formatter_append_string_item(missing_signals, "obd_speed_kph");
+        data_formatter_append_string_item(missing_signals, "coolant_c");
+        data_formatter_append_string_item(missing_signals, "fuel_level_pct");
+        data_formatter_append_string_item(missing_signals, "engine_load_pct");
+    }
+
+    if (telemetry->obd_connect_fail_count_5m > 0U) {
+        cJSON *event_item = cJSON_CreateObject();
+        if (event_item != NULL) {
+            cJSON_AddStringToObject(event_item, "code", "obd_connect_failed");
+            cJSON_AddNumberToObject(event_item, "count_5m", telemetry->obd_connect_fail_count_5m);
+            cJSON_AddItemToArray(events, event_item);
+        }
+    }
+
+    cJSON_AddItemToObject(root, "diagnostics", diagnostics);
 }
 
 /**
@@ -110,7 +184,13 @@ char *data_format_rawdata(const config_t *cfg,
     cJSON_AddNumberToObject(data, "error_code", telemetry->error_code);
 
     cJSON_AddItemToObject(root, "data", data);
-    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
+    data_formatter_add_diagnostics(root, telemetry);
+    data_formatter_add_metadata(root,
+                                effective_ts_ms,
+                                message_id,
+                                seq_no,
+                                boot_id,
+                                DATA_FORMATTER_RAWDATA_SCHEMA_VERSION);
     return data_formatter_print(root);
 }
 
@@ -154,7 +234,12 @@ char *data_format_status(const config_t *cfg,
         cJSON_AddNumberToObject(root, "session_id", session_id);
     }
 
-    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
+    data_formatter_add_metadata(root,
+                                effective_ts_ms,
+                                message_id,
+                                seq_no,
+                                boot_id,
+                                DATA_FORMATTER_DEFAULT_SCHEMA_VERSION);
     return data_formatter_print(root);
 }
 
@@ -201,7 +286,12 @@ char *data_format_event(const config_t *cfg,
     cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
     cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
 
-    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
+    data_formatter_add_metadata(root,
+                                effective_ts_ms,
+                                message_id,
+                                seq_no,
+                                boot_id,
+                                DATA_FORMATTER_DEFAULT_SCHEMA_VERSION);
     return data_formatter_print(root);
 }
 
@@ -258,6 +348,11 @@ char *data_format_firmware(const config_t *cfg,
     cJSON_AddNumberToObject(root, "timestamp", (double)effective_ts_ms);
     cJSON_AddBoolToObject(root, "timestamp_trusted", timestamp_trusted);
 
-    data_formatter_add_metadata(root, effective_ts_ms, message_id, seq_no, boot_id);
+    data_formatter_add_metadata(root,
+                                effective_ts_ms,
+                                message_id,
+                                seq_no,
+                                boot_id,
+                                DATA_FORMATTER_DEFAULT_SCHEMA_VERSION);
     return data_formatter_print(root);
 }

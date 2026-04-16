@@ -62,3 +62,5 @@ logs/security/
 .claude/skills/vps-control/keys/
 .codex/skills/vps-control/.env
 .codex/skills/vps-control/keys/
+.playwright-mcp/
+resources/reports/db-sync/**/*.sql

@@ -13,19 +13,27 @@ import {
 export const AlertFilters = ({
   severity,
   status,
+  source,
   onChange,
   onReset,
 }: {
   severity?: string;
   status?: string;
-  onChange: (next: { severity?: string; status?: string }) => void;
+  source?: 'all' | 'obd' | 'system';
+  onChange: (next: { severity?: string; status?: string; source?: 'all' | 'obd' | 'system' }) => void;
   onReset?: () => void;
 }) => {
   return (
     <div className="flex flex-wrap gap-2">
       <Select
         value={severity ?? 'all'}
-        onValueChange={(value) => onChange({ severity: value === 'all' ? undefined : value, status })}
+        onValueChange={(value) =>
+          onChange({
+            severity: value === 'all' ? undefined : value,
+            status,
+            source,
+          })
+        }
       >
         <SelectTrigger className="w-full sm:w-44">
           <SelectValue placeholder="Mức độ" />
@@ -38,9 +46,16 @@ export const AlertFilters = ({
           <SelectItem value="low">Thấp</SelectItem>
         </SelectContent>
       </Select>
+
       <Select
         value={status ?? 'all'}
-        onValueChange={(value) => onChange({ severity, status: value === 'all' ? undefined : value })}
+        onValueChange={(value) =>
+          onChange({
+            severity,
+            status: value === 'all' ? undefined : value,
+            source,
+          })
+        }
       >
         <SelectTrigger className="w-full sm:w-44">
           <SelectValue placeholder="Trạng thái" />
@@ -52,6 +67,27 @@ export const AlertFilters = ({
           <SelectItem value="resolved">Đã giải quyết</SelectItem>
         </SelectContent>
       </Select>
+
+      <Select
+        value={source ?? 'all'}
+        onValueChange={(value) =>
+          onChange({
+            severity,
+            status,
+            source: value as 'all' | 'obd' | 'system',
+          })
+        }
+      >
+        <SelectTrigger className="w-full sm:w-44">
+          <SelectValue placeholder="Nguồn cảnh báo" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Tất cả nguồn</SelectItem>
+          <SelectItem value="obd">Bảo trì OBD</SelectItem>
+          <SelectItem value="system">Hệ thống / khác</SelectItem>
+        </SelectContent>
+      </Select>
+
       <Button type="button" variant="outline" onClick={() => onReset?.()}>
         <RotateCcw className="mr-2 h-4 w-4" />
         Đặt lại

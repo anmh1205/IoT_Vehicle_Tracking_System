@@ -1,14 +1,13 @@
 flowchart TB
-    Header["Header<br/>loc severity"]
+    Header["Header<br/>Lọc severity"]
+    Workspace["Không gian cảnh báo"]
+    AlertList["Danh sách cảnh báo"]
+    Detail["Chi tiết cảnh báo"]
+    MapPanel["Bản đồ geofence"]
+    History["Lịch sử / timeline"]
 
-    subgraph AlertWorkspace["Alert workspace"]
-        direction LR
-        AlertList["Danh sach canh bao"]
-        Detail["Alert detail"]
-        MapPanel["Map highlight geofence"]
-    end
-
-    History["History timeline"]
-
-    Header --> AlertWorkspace
+    Header --> Workspace
+    Workspace --> AlertList
+    Workspace --> Detail
+    Workspace --> MapPanel
     Detail --> History

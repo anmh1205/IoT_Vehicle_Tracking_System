@@ -152,9 +152,9 @@ export const touchDeviceSession = async (params: {
            0
          ),
          avg_vibration = CASE
-           WHEN $3 IS NULL THEN avg_vibration
-           WHEN avg_vibration IS NULL THEN $3
-           ELSE ROUND(((avg_vibration + $3) / 2)::numeric, 2)
+           WHEN $3::numeric IS NULL THEN avg_vibration
+           WHEN avg_vibration IS NULL THEN $3::numeric
+           ELSE ROUND(((avg_vibration + $3::numeric) / 2)::numeric, 2)
          END,
          last_latitude = COALESCE($4, last_latitude),
          last_longitude = COALESCE($5, last_longitude),
@@ -181,9 +181,9 @@ export const touchDeviceSession = async (params: {
              0
            ),
            avg_vibration = CASE
-             WHEN $3 IS NULL THEN avg_vibration
-             WHEN avg_vibration IS NULL THEN $3
-             ELSE ROUND(((avg_vibration + $3) / 2)::numeric, 2)
+             WHEN $3::numeric IS NULL THEN avg_vibration
+             WHEN avg_vibration IS NULL THEN $3::numeric
+             ELSE ROUND(((avg_vibration + $3::numeric) / 2)::numeric, 2)
            END,
            last_latitude = COALESCE($4, last_latitude),
            last_longitude = COALESCE($5, last_longitude),
