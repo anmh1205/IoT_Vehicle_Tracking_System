@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { DeviceActivityPoint } from '@/features/dashboard/hooks/use-dashboard-stats';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
 export const BarGraph = ({
   data,
@@ -18,7 +18,8 @@ export const BarGraph = ({
     0,
   );
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
-  const [isChartReady, setIsChartReady] = useState(false);
+  const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
+  const isChartReady = chartSize.width > 0 && chartSize.height > 0;
 
   useEffect(() => {
     const element = chartContainerRef.current;
@@ -27,7 +28,10 @@ export const BarGraph = ({
     }
 
     const syncSize = () => {
-      setIsChartReady(element.offsetWidth > 0 && element.offsetHeight > 0);
+      setChartSize({
+        width: element.clientWidth,
+        height: element.clientHeight,
+      });
     };
 
     syncSize();
@@ -60,17 +64,15 @@ export const BarGraph = ({
               Chưa có dữ liệu hoạt động để hiển thị.
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-              <BarChart data={data} barGap={6}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
-                <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={12} />
-                <Tooltip cursor={{ fill: 'rgba(148, 163, 184, 0.12)' }} />
-                <Bar dataKey="running" stackId="a" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="idle" stackId="a" fill="#94a3b8" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="offline" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <BarChart width={chartSize.width} height={chartSize.height} data={data} barGap={6}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
+              <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={12} />
+              <Tooltip cursor={{ fill: 'rgba(148, 163, 184, 0.12)' }} />
+              <Bar dataKey="running" stackId="a" fill="#22c55e" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="idle" stackId="a" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="offline" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
+            </BarChart>
           )}
         </div>
       </CardContent>

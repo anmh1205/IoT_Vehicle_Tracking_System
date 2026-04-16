@@ -4,15 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { FleetRuntimePoint } from '@/features/dashboard/hooks/use-dashboard-stats';
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
 export const AreaGraph = ({
   data,
@@ -23,7 +15,8 @@ export const AreaGraph = ({
 }) => {
   const totalRuntime = data.reduce((sum, item) => sum + item.runtime, 0);
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
-  const [isChartReady, setIsChartReady] = useState(false);
+  const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
+  const isChartReady = chartSize.width > 0 && chartSize.height > 0;
 
   useEffect(() => {
     const element = chartContainerRef.current;
@@ -32,7 +25,10 @@ export const AreaGraph = ({
     }
 
     const syncSize = () => {
-      setIsChartReady(element.offsetWidth > 0 && element.offsetHeight > 0);
+      setChartSize({
+        width: element.clientWidth,
+        height: element.clientHeight,
+      });
     };
 
     syncSize();
@@ -65,27 +61,25 @@ export const AreaGraph = ({
               Chưa có dữ liệu runtime trong giai đoạn này.
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-              <AreaChart data={data}>
-                <defs>
-                  <linearGradient id="runtimeGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
-                <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={12} />
-                <Tooltip cursor={{ stroke: '#93c5fd', strokeDasharray: '4 4' }} />
-                <Area
-                  type="monotone"
-                  dataKey="runtime"
-                  stroke="#2563eb"
-                  strokeWidth={2}
-                  fill="url(#runtimeGradient)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            <AreaChart width={chartSize.width} height={chartSize.height} data={data}>
+              <defs>
+                <linearGradient id="runtimeGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
+              <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={12} />
+              <Tooltip cursor={{ stroke: '#93c5fd', strokeDasharray: '4 4' }} />
+              <Area
+                type="monotone"
+                dataKey="runtime"
+                stroke="#2563eb"
+                strokeWidth={2}
+                fill="url(#runtimeGradient)"
+              />
+            </AreaChart>
           )}
         </div>
       </CardContent>

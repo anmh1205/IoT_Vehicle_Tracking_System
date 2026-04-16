@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { PieStatusPoint } from '@/features/dashboard/hooks/use-dashboard-stats';
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { Cell, Legend, Pie, PieChart, Tooltip } from 'recharts';
 
 export const PieGraph = ({ data, isLoading }: { data: PieStatusPoint[]; isLoading?: boolean }) => {
   const hasMeaningfulData = data.some((item) => item.value > 0);
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
-  const [isChartReady, setIsChartReady] = useState(false);
+  const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
+  const isChartReady = chartSize.width > 0 && chartSize.height > 0;
 
   useEffect(() => {
     const element = chartContainerRef.current;
@@ -18,7 +19,10 @@ export const PieGraph = ({ data, isLoading }: { data: PieStatusPoint[]; isLoadin
     }
 
     const syncSize = () => {
-      setIsChartReady(element.offsetWidth > 0 && element.offsetHeight > 0);
+      setChartSize({
+        width: element.clientWidth,
+        height: element.clientHeight,
+      });
     };
 
     syncSize();
@@ -46,17 +50,15 @@ export const PieGraph = ({ data, isLoading }: { data: PieStatusPoint[]; isLoadin
               Chưa có dữ liệu trạng thái thiết bị.
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-              <PieChart>
-                <Pie data={data} dataKey="value" nameKey="name" innerRadius={68} outerRadius={92}>
-                  {data.map((entry) => (
-                    <Cell key={entry.name} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" />
-              </PieChart>
-            </ResponsiveContainer>
+            <PieChart width={chartSize.width} height={chartSize.height}>
+              <Pie data={data} dataKey="value" nameKey="name" innerRadius={68} outerRadius={92}>
+                {data.map((entry) => (
+                  <Cell key={entry.name} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend verticalAlign="bottom" />
+            </PieChart>
           )}
         </div>
       </CardContent>
