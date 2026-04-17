@@ -1,84 +1,55 @@
-import {
+﻿import {
   Activity,
-  AlertTriangle,
-  BarChart3,
   Bell,
-  Car,
-  Cpu,
-  Download,
-  Fuel,
-  HardDrive,
-  LayoutDashboard,
-  Map,
-  Play,
-  Route,
-  Settings,
-  Shield,
-  UserCheck,
-  UserCog,
-  Users,
-  Wrench,
+  Boxes,
+  Command,
+  Layers3,
+  type LucideIcon,
 } from 'lucide-react';
+import type { NavItem } from '@/types';
+import {
+  dashboardRouteRegistry,
+  getDashboardRouteChildren,
+  type DashboardSurface,
+} from '@/config/dashboard-route-registry';
 
-export interface NavItem {
-  title: string;
-  url: string;
-  icon: any;
-  items?: NavItem[];
-}
+const surfaceIcons: Record<DashboardSurface, LucideIcon> = {
+  command: Command,
+  operations: Activity,
+  fleet: Boxes,
+  attention: Bell,
+  platform: Layers3,
+};
+
+const primaryRouteOrder = ['command', 'operations', 'fleet', 'attention', 'platform'];
+
+const primaryRoutes = dashboardRouteRegistry.filter((route) => route.navLevel === 'primary');
+
+const toNavItem = (routeId: string): NavItem | null => {
+  const route = primaryRoutes.find((item) => item.id === routeId);
+
+  if (!route) {
+    return null;
+  }
+
+  const children = getDashboardRouteChildren(route.id).map<NavItem>((child) => ({
+    title: child.navLabel ?? child.title,
+    url: child.path,
+    permissionKey: child.permissionKey,
+  }));
+
+  return {
+    title: route.navLabel ?? route.title,
+    url: route.path,
+    icon: surfaceIcons[route.surface],
+    permissionKey: route.permissionKey,
+    items: children.length > 0 ? children : undefined,
+  };
+};
 
 export const navConfig: { main: NavItem[]; secondary: NavItem[] } = {
-  main: [
-    { title: 'Tổng quan', url: '/dashboard', icon: LayoutDashboard },
-    { title: 'Bản đồ', url: '/dashboard/map', icon: Map },
-    {
-      title: 'Quản lý',
-      url: '#',
-      icon: Cpu,
-      items: [
-        { title: 'Thiết bị', url: '/dashboard/devices', icon: Cpu },
-        { title: 'Phương tiện', url: '/dashboard/vehicles', icon: Car },
-        { title: 'Khách hàng', url: '/dashboard/customers', icon: Users },
-        { title: 'Tài xế', url: '/dashboard/drivers', icon: UserCheck },
-      ],
-    },
-    {
-      title: 'Giám sát',
-      url: '#',
-      icon: Activity,
-      items: [
-        { title: 'Cảnh báo', url: '/dashboard/alerts', icon: Bell },
-        { title: 'Thông báo', url: '/dashboard/notifications', icon: Bell },
-        { title: 'Vi phạm', url: '/dashboard/violations', icon: AlertTriangle },
-        { title: 'Chuyến đi', url: '/dashboard/trips', icon: Route },
-        { title: 'Vùng giám sát', url: '/dashboard/geofences', icon: Shield },
-      ],
-    },
-    {
-      title: 'Kỹ thuật',
-      url: '#',
-      icon: Wrench,
-      items: [
-        { title: 'Bảo trì', url: '/dashboard/maintenance', icon: Wrench },
-        { title: 'Firmware', url: '/dashboard/firmware', icon: HardDrive },
-        { title: 'Xuất dữ liệu', url: '/dashboard/exports', icon: Download },
-        { title: 'Trạng thái hệ thống', url: '/dashboard/system-status', icon: Activity },
-        { title: 'Mô phỏng', url: '/dashboard/simulator', icon: Play },
-      ],
-    },
-    {
-      title: 'Phân tích',
-      url: '#',
-      icon: BarChart3,
-      items: [
-        { title: 'Báo cáo', url: '/dashboard/statistics', icon: BarChart3 },
-        { title: 'Nhiên liệu', url: '/dashboard/fuel', icon: Fuel },
-      ],
-    },
-  ],
-  secondary: [
-    { title: 'Cài đặt', url: '/dashboard/settings', icon: Settings },
-    { title: 'Quản lý người dùng', url: '/dashboard/users', icon: UserCog },
-    { title: 'Quản trị hệ thống', url: '/dashboard/system-admin', icon: Activity },
-  ],
+  main: primaryRouteOrder
+    .map(toNavItem)
+    .filter((item): item is NavItem => item !== null),
+  secondary: [],
 };

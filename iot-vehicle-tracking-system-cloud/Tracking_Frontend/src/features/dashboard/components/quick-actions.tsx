@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const ACTIONS = [
-  { href: '/dashboard/map', label: 'Mở bản đồ', icon: Map },
-  { href: '/dashboard/devices', label: 'Quản lý thiết bị', icon: Truck },
-  { href: '/dashboard/alerts', label: 'Xem cảnh báo', icon: Bell },
-  { href: '/dashboard/exports', label: 'Xuất dữ liệu', icon: Download },
-  { href: '/dashboard/settings', label: 'Cài đặt hệ thống', icon: Settings },
+  { href: '/dashboard/operations/map', label: 'Mở bản đồ', icon: Map },
+  { href: '/dashboard/fleet/devices', label: 'Quản lý thiết bị', icon: Truck },
+  { href: '/dashboard/attention/queue', label: 'Xem cảnh báo', icon: Bell },
+  { href: '/dashboard/platform/exports', label: 'Xuất dữ liệu', icon: Download },
+  { href: '/dashboard/platform/my-settings', label: 'Cài đặt hệ thống', icon: Settings },
 ];
 
 export const QuickActions = () => {

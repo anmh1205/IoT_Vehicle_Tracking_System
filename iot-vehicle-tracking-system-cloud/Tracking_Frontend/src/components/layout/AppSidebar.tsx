@@ -1,4 +1,5 @@
 ﻿'use client';
+
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Sidebar,
@@ -16,22 +17,27 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 import { navConfig } from '@/config/nav-config';
+import { isSameOrDescendantPath } from '@/config/dashboard-route-registry';
 import { useFilteredNavItems } from '@/hooks/use-nav';
 import { ChevronRight, Car } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NavUser } from '@/components/nav-user';
+
+const isItemActive = (pathname: string, url: string) => isSameOrDescendantPath(pathname, url);
+
 const AppSidebar = () => {
   const pathname = usePathname();
   const mainItems = useFilteredNavItems(navConfig.main);
   const secondaryItems = useFilteredNavItems(navConfig.secondary);
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="IVM26">
-              <Link href="/dashboard">
+              <Link href="/dashboard/command">
                 <Car className="h-5 w-5" />
                 <span>IVM26</span>
               </Link>
@@ -45,16 +51,18 @@ const AppSidebar = () => {
           <SidebarMenu>
             {mainItems.map((item) => {
               const Icon = item.icon || Car;
+              const hasActiveChild = item.items?.some((sub) => isItemActive(pathname, sub.url)) ?? false;
+
               return item.items && item.items.length > 0 ? (
                 <Collapsible
                   key={item.title}
                   asChild
-                  defaultOpen={item.items.some((sub) => sub.url === pathname)}
+                  defaultOpen={hasActiveChild}
                   className="group/collapsible"
                 >
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton tooltip={item.title} isActive={pathname === item.url}>
+                      <SidebarMenuButton tooltip={item.title} isActive={hasActiveChild}>
                         {item.icon && <Icon className="h-4 w-4" />}
                         <span>{item.title}</span>
                         <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -64,7 +72,7 @@ const AppSidebar = () => {
                       <SidebarMenuSub>
                         {item.items.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton asChild isActive={pathname === subItem.url}>
+                            <SidebarMenuSubButton asChild isActive={isItemActive(pathname, subItem.url)}>
                               <Link href={subItem.url}>
                                 <span>{subItem.title}</span>
                               </Link>
@@ -77,7 +85,7 @@ const AppSidebar = () => {
                 </Collapsible>
               ) : (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title} isActive={pathname === item.url}>
+                  <SidebarMenuButton asChild tooltip={item.title} isActive={isItemActive(pathname, item.url)}>
                     <Link href={item.url}>
                       <Icon className="h-4 w-4" />
                       <span>{item.title}</span>
@@ -88,24 +96,26 @@ const AppSidebar = () => {
             })}
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Quản trị</SidebarGroupLabel>
-          <SidebarMenu>
-            {secondaryItems.map((item) => {
-              const Icon = item.icon || Car;
-              return (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title} isActive={pathname === item.url}>
-                    <Link href={item.url}>
-                      <Icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
+        {secondaryItems.length > 0 ? (
+          <SidebarGroup>
+            <SidebarGroupLabel>Quản trị</SidebarGroupLabel>
+            <SidebarMenu>
+              {secondaryItems.map((item) => {
+                const Icon = item.icon || Car;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title} isActive={isItemActive(pathname, item.url)}>
+                      <Link href={item.url}>
+                        <Icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        ) : null}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
@@ -114,4 +124,5 @@ const AppSidebar = () => {
     </Sidebar>
   );
 };
+
 export default AppSidebar;

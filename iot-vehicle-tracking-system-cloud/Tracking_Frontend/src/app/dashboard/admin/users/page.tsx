@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 const AdminUsersAliasPage = () => {
-  redirect('/dashboard/users');
+  redirect('/dashboard/platform/users');
 };
 
 export default AdminUsersAliasPage;

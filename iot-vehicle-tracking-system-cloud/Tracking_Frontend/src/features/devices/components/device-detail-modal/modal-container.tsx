@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,7 +16,6 @@ import { useDevicePositionSnapshot } from '@/features/devices/hooks/use-device-p
 import { useDeviceRuntimeChart } from '@/features/devices/hooks/use-device-runtime-chart';
 import { useDeviceSessions } from '@/features/devices/hooks/use-device-sessions';
 import { useDeviceTrackingTelemetry } from '@/features/devices/hooks/use-device-tracking-telemetry';
-import { useDeviceVibrationChart } from '@/features/devices/hooks/use-device-vibration-chart';
 import { useSendCommand } from '@/features/devices/hooks/use-send-command';
 import { useUpdateDevice } from '@/features/devices/hooks/use-update-device';
 import { useUpdateDeviceSettings } from '@/features/devices/hooks/use-update-device-settings';
@@ -75,7 +74,7 @@ const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string =
   const failCount = toFiniteNumber(channel?.connect_fail_count_5m);
 
   const parts = [
-    connected ? 'OBD OK' : 'OBD unstable',
+    connected ? 'OBD ổn định' : 'OBD không ổn định',
     `rpm=${rpm?.toFixed(0) ?? '-'}`,
     `spd=${speed?.toFixed(1) ?? '-'} km/h`,
     `coolant=${coolant?.toFixed(1) ?? '-'} C`,
@@ -292,7 +291,6 @@ export const DeviceDetailModalContainer = ({
   const commands = useDeviceCommands(deviceId, 10);
   const tracking = useDeviceTrackingTelemetry(deviceId);
   const runtime = useDeviceRuntimeChart(deviceId);
-  const vibration = useDeviceVibrationChart(deviceId);
   const updateName = useUpdateDevice();
   const updateSettings = useUpdateDeviceSettings(deviceId);
   const deleteDevice = useDeleteDevice();
@@ -431,9 +429,6 @@ export const DeviceDetailModalContainer = ({
       runtimeChart: runtime.data,
       runtimeRange: runtime.range,
       onRuntimeRangeChange: runtime.onRangeChange,
-      vibrationChart: vibration.data,
-      vibrationPeriod: vibration.period,
-      onVibrationPeriodChange: vibration.onPeriodChange,
       trackingRows: tracking.rows,
       trackingRowsAscending: tracking.rowsAscending,
       trackingPeriod: tracking.period,
@@ -457,6 +452,26 @@ export const DeviceDetailModalContainer = ({
       },
       onUpdateSettings: async (data: Record<string, unknown>) => {
         await updateSettings.mutateAsync(data);
+        const requestInterval = Number(data.requestInterval);
+        if (
+          Number.isFinite(requestInterval) &&
+          requestInterval > 0 &&
+          requestInterval !== (detail.data?.device?.requestInterval ?? device?.requestInterval)
+        ) {
+          try {
+            await sendCommand.mutateAsync({
+              command: 'update_config',
+              params: {
+                tracking_interval_s: Math.round(requestInterval),
+              },
+            });
+          } catch {
+            notificationUtils.warning(
+              'Chu kỳ mới chưa được đẩy xuống thiết bị',
+              'Cấu hình đã lưu ở server, nhưng lệnh update_config chưa gửi thành công.',
+            );
+          }
+        }
       },
       onDeleteDevice: async () => {
         if (!deviceId) return;
@@ -465,7 +480,6 @@ export const DeviceDetailModalContainer = ({
       },
       onSendCommand: async (command: string) => {
         await sendCommand.mutateAsync({ command });
-        notificationUtils.success('Đã gửi lệnh', `Lệnh: ${command}`);
       },
       onRefresh: async () => {
         await refreshCurrent();
@@ -524,9 +538,6 @@ export const DeviceDetailModalContainer = ({
       tracking.rowsAscending,
       updateName,
       updateSettings,
-      vibration.data,
-      vibration.onPeriodChange,
-      vibration.period,
     ],
   );
 
@@ -543,3 +554,7 @@ export const DeviceDetailModalContainer = ({
     />
   );
 };
+
+
+
+

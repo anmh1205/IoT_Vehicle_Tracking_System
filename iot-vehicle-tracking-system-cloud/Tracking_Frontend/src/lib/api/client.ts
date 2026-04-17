@@ -3,6 +3,7 @@ import type { InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { User } from '@/lib/stores/auth-store';
 import type { ApiEnvelope } from '@/types';
+import { API_BASE_URL } from './base-url';
 
 let isRefreshing = false;
 let refreshPromise: Promise<void> | null = null;
@@ -12,7 +13,7 @@ type RetryableRequestConfig = InternalAxiosRequestConfig & {
 };
 
 export const apiClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });

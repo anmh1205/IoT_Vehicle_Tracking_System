@@ -15,11 +15,11 @@ import { useNotifications } from '../hooks/use-notifications';
 import { notificationServices } from '@/lib/api/notifications';
 
 const getTarget = (item: any) => {
-  if (item.referenceType === 'alert' && item.referenceId) return '/dashboard/alerts';
-  if (item.type === 'export') return '/dashboard/exports';
-  if (item.type === 'firmware') return '/dashboard/firmware';
-  if (item.type === 'geofence') return '/dashboard/map';
-  return '/dashboard';
+  if (item.referenceType === 'alert' && item.referenceId) return '/dashboard/attention/queue';
+  if (item.type === 'export') return '/dashboard/platform/exports';
+  if (item.type === 'firmware') return '/dashboard/platform/firmware';
+  if (item.type === 'geofence') return '/dashboard/operations/map';
+  return '/dashboard/command';
 };
 
 export const NotificationDropdown = () => {
@@ -105,7 +105,7 @@ export const NotificationDropdown = () => {
         </ScrollArea>
 
         <div className="border-t p-2 text-center text-xs text-muted-foreground">
-          <Link href="/dashboard/notifications" className="underline">
+          <Link href="/dashboard/attention/notifications" className="underline">
             Xem toàn bộ thông báo
           </Link>
         </div>

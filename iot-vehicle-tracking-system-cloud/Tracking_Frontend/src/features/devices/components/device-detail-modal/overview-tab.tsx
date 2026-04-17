@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+﻿import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeviceStatCard } from '@/features/devices/components/stat-card';
@@ -6,7 +6,15 @@ import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-const
 import type { DeviceRawFeedRow } from '@/features/devices/types';
 import { formatDateTime, formatDuration, formatNumber, formatRelative } from '@/lib/utils/date/format';
 import Link from 'next/link';
+import { RuntimeTab } from './runtime-tab';
 import { useDeviceDetailModal } from './modal-context';
+import {
+  formatCoordinateLabel,
+  formatSecondsLabel,
+  getFreshnessSeconds,
+  getObservedCadenceSeconds,
+  getTelemetryFreshnessState,
+} from './telemetry-insights';
 
 const OBD_STALE_SAMPLE_MS = 30_000;
 const OBD_COOLANT_WARNING_C = 105;
@@ -20,20 +28,51 @@ interface DiagnosticsSnapshot {
   obdSpeedKph?: number;
   coolantC?: number;
   engineLoadPct?: number;
-  fuelLevelPct?: number;
 }
 
 type ObdHealthState = 'good' | 'warning' | 'offline' | 'unknown';
 
-const toCoordinateText = (latitude: number | null | undefined, longitude: number | null | undefined) =>
-  latitude !== null &&
-  latitude !== undefined &&
-  longitude !== null &&
-  longitude !== undefined &&
-  Number.isFinite(latitude) &&
-  Number.isFinite(longitude)
-    ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-    : '-';
+const TELEMETRY_STATE_META = {
+  healthy: { label: 'Đúng nhịp', variant: 'default' as const },
+  warning: { label: 'Bắt đầu trễ', variant: 'secondary' as const },
+  stale: { label: 'Trễ rõ rệt', variant: 'outline' as const },
+  offline: { label: 'Mất tín hiệu', variant: 'destructive' as const },
+  unknown: { label: 'Chưa đủ dữ liệu', variant: 'outline' as const },
+};
+
+const healthLabel: Record<ObdHealthState, string> = {
+  good: 'Ổn định',
+  warning: 'Cảnh báo',
+  offline: 'Mất kết nối',
+  unknown: 'Chưa có dữ liệu',
+};
+
+const healthBadgeVariant: Record<
+  ObdHealthState,
+  'default' | 'secondary' | 'destructive' | 'outline'
+> = {
+  good: 'default',
+  warning: 'secondary',
+  offline: 'destructive',
+  unknown: 'outline',
+};
+
+const alertSeverityBadgeVariant: Record<
+  'low' | 'medium' | 'high' | 'critical',
+  'default' | 'secondary' | 'destructive' | 'outline'
+> = {
+  low: 'outline',
+  medium: 'secondary',
+  high: 'default',
+  critical: 'destructive',
+};
+
+const alertSeverityLabel: Record<'low' | 'medium' | 'high' | 'critical', string> = {
+  low: 'Thấp',
+  medium: 'Trung bình',
+  high: 'Cao',
+  critical: 'Nghiêm trọng',
+};
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -75,7 +114,6 @@ const extractLatestDiagnostics = (rawFeed: DeviceRawFeedRow[]): DiagnosticsSnaps
       obdSpeedKph: toFiniteNumber(signals?.obd_speed_kph),
       coolantC: toFiniteNumber(signals?.coolant_c),
       engineLoadPct: toFiniteNumber(signals?.engine_load_pct),
-      fuelLevelPct: toFiniteNumber(signals?.fuel_level_pct),
     };
   }
 
@@ -106,40 +144,6 @@ const resolveObdHealthState = (snapshot: DiagnosticsSnapshot | null): ObdHealthS
   return 'unknown';
 };
 
-const healthLabel: Record<ObdHealthState, string> = {
-  good: 'Ổn định',
-  warning: 'Cảnh báo',
-  offline: 'Mất kết nối',
-  unknown: 'Chưa có dữ liệu',
-};
-
-const healthBadgeVariant: Record<
-  ObdHealthState,
-  'default' | 'secondary' | 'destructive' | 'outline'
-> = {
-  good: 'default',
-  warning: 'secondary',
-  offline: 'destructive',
-  unknown: 'outline',
-};
-
-const alertSeverityBadgeVariant: Record<
-  'low' | 'medium' | 'high' | 'critical',
-  'default' | 'secondary' | 'destructive' | 'outline'
-> = {
-  low: 'outline',
-  medium: 'secondary',
-  high: 'default',
-  critical: 'destructive',
-};
-
-const alertSeverityLabel: Record<'low' | 'medium' | 'high' | 'critical', string> = {
-  low: 'Thấp',
-  medium: 'Trung bình',
-  high: 'Cao',
-  critical: 'Nghiêm trọng',
-};
-
 const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[] => {
   if (!snapshot) {
     return ['Chưa có snapshot OBD. Hãy mở kết nối và gửi telemetry để hiển thị phân tích.'];
@@ -150,17 +154,12 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
   if (snapshot.bleConnected === false || snapshot.elmReady === false) {
     recommendations.push('Kiểm tra adapter OBD BLE, nguồn cổng OBD và vị trí thiết bị.');
   }
-
   if (snapshot.connectFailCount5m !== undefined && snapshot.connectFailCount5m >= 3) {
-    recommendations.push('Tần suất lỗi kết nối OBD cao, nên kiểm tra nhiễu BLE hoặc retry policy.');
+    recommendations.push('Lỗi kết nối OBD lặp lại nhiều trong 5 phút gần nhất.');
   }
-
   if (snapshot.coolantC !== undefined && snapshot.coolantC >= OBD_COOLANT_WARNING_C) {
-    recommendations.push(
-      'Nhiệt độ nước làm mát cao, kiểm tra hệ thống làm mát trước chuyến tiếp theo.',
-    );
+    recommendations.push('Nhiệt độ nước làm mát cao, nên kiểm tra hệ thống làm mát.');
   }
-
   if (
     snapshot.rpm !== undefined &&
     snapshot.obdSpeedKph !== undefined &&
@@ -170,12 +169,17 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
     recommendations.push('RPM cao khi xe gần như đứng yên, nên kiểm tra chế độ không tải.');
   }
 
-  if (recommendations.length === 0) {
-    recommendations.push('OBD hiện ổn định, tiếp tục theo dõi định kỳ trong modal này.');
-  }
-
-  return recommendations.slice(0, 3);
+  return recommendations.length > 0
+    ? recommendations.slice(0, 3)
+    : ['OBD đang ổn định, tiếp tục theo dõi định kỳ trong modal thiết bị.'];
 };
+
+const InfoTile = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
+    <p className="text-xs text-muted-foreground">{label}</p>
+    <p className="mt-1 text-sm font-semibold">{value}</p>
+  </div>
+);
 
 export const OverviewTab = () => {
   const {
@@ -195,125 +199,91 @@ export const OverviewTab = () => {
     obdAlertsLoading,
   } = useDeviceDetailModal();
 
+  const diagnosticsSnapshot = extractLatestDiagnostics(rawFeed);
+  const obdHealthState = resolveObdHealthState(diagnosticsSnapshot);
+  const obdRecommendations = buildObdRecommendations(diagnosticsSnapshot);
+  const configuredCadence = device?.requestInterval ?? 60;
+  const observedCadence = getObservedCadenceSeconds(trackingRowsAscending);
+  const latestTelemetryTimestamp =
+    latestTrackingRow?.timestamp ?? positionSnapshot?.timestamp ?? device?.lastSeenAt ?? null;
+  const telemetryFreshness = getFreshnessSeconds(latestTelemetryTimestamp);
+  const telemetryState = TELEMETRY_STATE_META[
+    getTelemetryFreshnessState(telemetryFreshness, configuredCadence)
+  ];
+
   const latestPosition = {
     latitude: latestTrackingRow?.latitude ?? positionSnapshot?.latitude ?? device?.latitude ?? null,
     longitude:
       latestTrackingRow?.longitude ?? positionSnapshot?.longitude ?? device?.longitude ?? null,
   };
-
   const latestSpeed = latestTrackingRow?.speed ?? positionSnapshot?.speed ?? null;
   const latestBattery = latestTrackingRow?.battery ?? positionSnapshot?.battery ?? null;
   const latestTemperature = latestTrackingRow?.temperature ?? positionSnapshot?.temperature ?? null;
-
-  const diagnosticsSnapshot = extractLatestDiagnostics(rawFeed);
-  const obdHealthState = resolveObdHealthState(diagnosticsSnapshot);
-  const obdRecommendations = buildObdRecommendations(diagnosticsSnapshot);
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <DeviceStatCard title="Quãng đường ước tính" value={`${distanceKm.toFixed(2)} km`} />
-        <DeviceStatCard title="Tốc độ TB / tối đa" value={`${averageSpeed.toFixed(1)} / ${maxSpeed.toFixed(1)} km/h`} />
         <DeviceStatCard
-          title="Runtime"
-          value={runtime ? formatDuration(runtime.totalRuntime) : formatDuration(0)}
+          title="Tốc độ TB / tối đa"
+          value={`${averageSpeed.toFixed(1)} / ${maxSpeed.toFixed(1)} km/h`}
         />
-        <DeviceStatCard
-          title="Số mẫu telemetry"
-          value={formatNumber(trackingRowsAscending.length)}
-        />
+        <DeviceStatCard title="Runtime" value={formatDuration(runtime?.totalRuntime ?? 0)} />
+        <DeviceStatCard title="Mẫu telemetry" value={formatNumber(trackingRowsAscending.length)} />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1.4fr,1fr]">
+      <div className="grid gap-4 xl:grid-cols-[1.35fr,1fr]">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Thông tin vận hành</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
-            <div>
-              <p className="text-xs text-muted-foreground">Thiết bị</p>
-              <p className="font-medium">{device?.deviceName ?? '-'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Mã thiết bị</p>
-              <p className="font-medium">{device?.deviceId ?? '-'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Trạng thái</p>
-              <p className="font-medium">
-                {DEVICE_STATUS_LABELS[device?.currentStatus ?? ''] ?? device?.currentStatus ?? '-'}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Cập nhật gần nhất</p>
-              <p className="font-medium">{formatRelative(device?.lastSeenAt ?? null)}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Tọa độ gần nhất</p>
-              <p className="font-medium">
-                {toCoordinateText(latestPosition.latitude, latestPosition.longitude)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Tốc độ hiện tại</p>
-              <p className="font-medium">{latestSpeed !== null ? `${latestSpeed.toFixed(1)} km/h` : '-'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Pin / nhiệt độ</p>
-              <p className="font-medium">
-                {latestBattery !== null ? `${latestBattery.toFixed(1)}%` : '-'} ·{' '}
-                {latestTemperature !== null ? `${latestTemperature.toFixed(1)}°C` : '-'}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Firmware</p>
-              <p className="font-medium">{device?.firmwareVersion ?? '-'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">IMEI</p>
-              <p className="font-medium">{device?.imei ?? '-'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Chu kỳ gửi</p>
-              <p className="font-medium">{device?.requestInterval ?? 60}s</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Biển số</p>
-              <p className="font-medium">{device?.vehiclePlate ?? '-'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Khách hàng</p>
-              <p className="font-medium">{device?.customerName ?? '-'}</p>
-            </div>
+            <InfoTile label="Thiết bị" value={device?.deviceName ?? '-'} />
+            <InfoTile label="Mã thiết bị" value={device?.deviceId ?? '-'} />
+            <InfoTile
+              label="Trạng thái"
+              value={DEVICE_STATUS_LABELS[device?.currentStatus ?? ''] ?? device?.currentStatus ?? '-'}
+            />
+            <InfoTile label="Cập nhật gần nhất" value={formatRelative(device?.lastSeenAt ?? null)} />
+            <InfoTile label="Tọa độ gần nhất" value={formatCoordinateLabel(latestPosition.latitude, latestPosition.longitude, 6)} />
+            <InfoTile
+              label="Tốc độ hiện tại"
+              value={latestSpeed !== null ? `${latestSpeed.toFixed(1)} km/h` : '-'}
+            />
+            <InfoTile
+              label="Pin / nhiệt độ"
+              value={`${latestBattery !== null ? `${latestBattery.toFixed(1)}%` : '-'} · ${latestTemperature !== null ? `${latestTemperature.toFixed(1)}°C` : '-'}`}
+            />
+            <InfoTile label="Firmware" value={device?.firmwareVersion ?? '-'} />
+            <InfoTile label="IMEI" value={device?.imei ?? '-'} />
+            <InfoTile label="Chu kỳ gửi cấu hình" value={formatSecondsLabel(configuredCadence)} />
+            <InfoTile label="Biển số" value={device?.vehiclePlate ?? '-'} />
+            <InfoTile label="Khách hàng" value={device?.customerName ?? '-'} />
           </CardContent>
         </Card>
 
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Tình trạng dữ liệu</CardTitle>
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="text-base">Tình trạng telemetry</CardTitle>
+                <Badge variant={telemetryState.variant}>{telemetryState.label}</Badge>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="rounded-lg border bg-muted/20 px-3 py-2.5">
-                <p className="text-xs text-muted-foreground">Phiên chạy</p>
-                <p className="mt-1 text-base font-semibold">{formatNumber(runtime?.totalSessions ?? sessions.length)}</p>
-              </div>
-              <div className="rounded-lg border bg-muted/20 px-3 py-2.5">
-                <p className="text-xs text-muted-foreground">Lệnh điều khiển</p>
-                <p className="mt-1 text-base font-semibold">{formatNumber(commands.length)}</p>
-              </div>
-              <div className="rounded-lg border bg-muted/20 px-3 py-2.5">
-                <p className="text-xs text-muted-foreground">Mã lỗi</p>
-                <p className="mt-1 text-base font-semibold">{formatNumber(errorCodes.length)}</p>
-              </div>
-              <div className="rounded-lg border bg-muted/20 px-3 py-2.5">
-                <p className="text-xs text-muted-foreground">Mốc telemetry mới nhất</p>
-                <p className="mt-1 font-medium">
-                  {latestTrackingRow?.timestamp
+            <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
+              <InfoTile label="Nhịp quan sát" value={formatSecondsLabel(observedCadence)} />
+              <InfoTile label="Độ tươi bản tin" value={formatSecondsLabel(telemetryFreshness)} />
+              <InfoTile
+                label="Mốc mới nhất"
+                value={
+                  latestTrackingRow?.timestamp
                     ? `${formatDateTime(latestTrackingRow.timestamp)} (${formatRelative(latestTrackingRow.timestamp)})`
-                    : '-'}
-                </p>
-              </div>
+                    : '-'
+                }
+              />
+              <InfoTile label="Phiên chạy" value={formatNumber(runtime?.totalSessions ?? sessions.length)} />
+              <InfoTile label="Lệnh điều khiển" value={formatNumber(commands.length)} />
+              <InfoTile label="Mã lỗi" value={formatNumber(errorCodes.length)} />
             </CardContent>
           </Card>
 
@@ -329,42 +299,22 @@ export const OverviewTab = () => {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="grid gap-2 sm:grid-cols-2">
-                <div className="rounded-lg border bg-muted/20 px-3 py-2.5">
-                  <p className="text-xs text-muted-foreground">Độ trễ mẫu</p>
-                  <p className="mt-1 font-semibold">
-                    {diagnosticsSnapshot?.sampleAgeMs !== undefined
-                      ? `${diagnosticsSnapshot.sampleAgeMs.toFixed(0)} ms`
-                      : '-'}
-                  </p>
-                </div>
-                <div className="rounded-lg border bg-muted/20 px-3 py-2.5">
-                  <p className="text-xs text-muted-foreground">Lỗi kết nối / 5 phút</p>
-                  <p className="mt-1 font-semibold">
-                    {diagnosticsSnapshot?.connectFailCount5m !== undefined
-                      ? diagnosticsSnapshot.connectFailCount5m.toFixed(0)
-                      : '-'}
-                  </p>
-                </div>
-                <div className="rounded-lg border bg-muted/20 px-3 py-2.5">
-                  <p className="text-xs text-muted-foreground">RPM / tốc độ OBD</p>
-                  <p className="mt-1 font-semibold">
-                    {diagnosticsSnapshot?.rpm !== undefined ? diagnosticsSnapshot.rpm.toFixed(0) : '-'} /{' '}
-                    {diagnosticsSnapshot?.obdSpeedKph !== undefined
-                      ? `${diagnosticsSnapshot.obdSpeedKph.toFixed(1)} km/h`
-                      : '-'}
-                  </p>
-                </div>
-                <div className="rounded-lg border bg-muted/20 px-3 py-2.5">
-                  <p className="text-xs text-muted-foreground">Nhiệt độ nước / tải động cơ</p>
-                  <p className="mt-1 font-semibold">
-                    {diagnosticsSnapshot?.coolantC !== undefined
-                      ? `${diagnosticsSnapshot.coolantC.toFixed(1)}°C`
-                      : '-'} /{' '}
-                    {diagnosticsSnapshot?.engineLoadPct !== undefined
-                      ? `${diagnosticsSnapshot.engineLoadPct.toFixed(1)}%`
-                      : '-'}
-                  </p>
-                </div>
+                <InfoTile
+                  label="Độ trễ mẫu"
+                  value={diagnosticsSnapshot?.sampleAgeMs !== undefined ? `${diagnosticsSnapshot.sampleAgeMs.toFixed(0)} ms` : '-'}
+                />
+                <InfoTile
+                  label="Lỗi kết nối / 5 phút"
+                  value={diagnosticsSnapshot?.connectFailCount5m !== undefined ? diagnosticsSnapshot.connectFailCount5m.toFixed(0) : '-'}
+                />
+                <InfoTile
+                  label="RPM / tốc độ OBD"
+                  value={`${diagnosticsSnapshot?.rpm !== undefined ? diagnosticsSnapshot.rpm.toFixed(0) : '-'} / ${diagnosticsSnapshot?.obdSpeedKph !== undefined ? `${diagnosticsSnapshot.obdSpeedKph.toFixed(1)} km/h` : '-'}`}
+                />
+                <InfoTile
+                  label="Nhiệt độ nước / tải"
+                  value={`${diagnosticsSnapshot?.coolantC !== undefined ? `${diagnosticsSnapshot.coolantC.toFixed(1)}°C` : '-'} / ${diagnosticsSnapshot?.engineLoadPct !== undefined ? `${diagnosticsSnapshot.engineLoadPct.toFixed(1)}%` : '-'}`}
+                />
               </div>
 
               <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5">
@@ -382,7 +332,7 @@ export const OverviewTab = () => {
                     Cảnh báo bảo trì OBD đang hoạt động
                   </p>
                   <Button asChild size="sm" variant="outline" className="h-7 px-2 text-xs">
-                    <Link href="/dashboard/maintenance">Mở trang bảo trì</Link>
+                    <Link href="/dashboard/attention/maintenance">Mở trang bảo trì</Link>
                   </Button>
                 </div>
 
@@ -420,6 +370,20 @@ export const OverviewTab = () => {
           </Card>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-base">Runtime gần đây</CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Giữ biểu đồ runtime trong tổng quan để tránh trùng vai trò với tab lộ trình.
+            </p>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <RuntimeTab />
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import {
@@ -177,7 +177,18 @@ export const GeofenceForm = ({
             </div>
           </div>
 
-          <GeofenceMapEditor lat={lat} lon={lon} radius={radius} />
+          <GeofenceMapEditor
+            lat={lat}
+            lon={lon}
+            radius={radius}
+            onCenterChange={(latitude, longitude) =>
+              setForm((state) => ({
+                ...state,
+                centerLatitude: latitude.toFixed(6),
+                centerLongitude: longitude.toFixed(6),
+              }))
+            }
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" disabled={isPending} onClick={() => onOpenChange(false)}>

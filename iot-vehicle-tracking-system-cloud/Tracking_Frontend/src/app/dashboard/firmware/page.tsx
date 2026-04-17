@@ -33,6 +33,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useRoleAccess } from '@/hooks/use-role-access';
 import { useDevices } from '@/features/devices/hooks/use-devices';
+import { toApiUrl } from '@/lib/api/base-url';
 import { firmwareServices, type FirmwareDeployment, type FirmwareRecord } from '@/lib/api/firmware';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -523,7 +524,7 @@ const FirmwarePage = () => {
             {row.original.isActive ? 'Ngưng active' : 'Kích hoạt'}
           </Button>
           <Button asChild size="sm" variant="outline">
-            <a href={`/api/v1/firmware/${row.original.id}/download`}>
+            <a href={toApiUrl(`/firmware/${row.original.id}/download`)}>
               <Download className="mr-2 h-4 w-4" />
               Tải về
             </a>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -20,7 +20,6 @@ import { useDeviceDetailModal } from './modal-context';
 const schema = z.object({
   deviceName: z.string().min(1),
   requestInterval: z.number().min(10).max(3600),
-  vibrationThreshold: z.number().min(0).max(1000),
 });
 
 type SettingsFormValues = z.infer<typeof schema>;
@@ -34,7 +33,6 @@ export const SettingsTab = () => {
     defaultValues: {
       deviceName: device?.deviceName ?? '',
       requestInterval: device?.requestInterval ?? 60,
-      vibrationThreshold: device?.vibrationThreshold ?? 0,
     },
   });
 
@@ -42,16 +40,12 @@ export const SettingsTab = () => {
     form.reset({
       deviceName: device?.deviceName ?? '',
       requestInterval: device?.requestInterval ?? 60,
-      vibrationThreshold: device?.vibrationThreshold ?? 0,
     });
   }, [device, form]);
 
   const onSubmit = async (values: SettingsFormValues) => {
     await onUpdateNameId({ deviceName: values.deviceName });
-    await onUpdateSettings({
-      requestInterval: values.requestInterval,
-      vibrationThreshold: values.vibrationThreshold,
-    });
+    await onUpdateSettings({ requestInterval: values.requestInterval });
   };
 
   return (
@@ -77,44 +71,29 @@ export const SettingsTab = () => {
                 )}
               />
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="requestInterval"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Chu kỳ gửi dữ liệu (giây)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          inputMode="numeric"
-                          value={field.value}
-                          onChange={(event) => field.onChange(Number(event.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="vibrationThreshold"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ngưỡng rung cảnh báo</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          inputMode="numeric"
-                          value={field.value}
-                          onChange={(event) => field.onChange(Number(event.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="requestInterval"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Chu kỳ cấu hình (giây)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        value={field.value}
+                        onChange={(event) => field.onChange(Number(event.target.value))}
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Khi lưu, hệ thống sẽ cập nhật cấu hình trên server và gửi command <code>update_config</code>{' '}
+                      để thiết bị áp dụng `tracking_interval_s`. Nhịp gửi thực tế theo dõi ở tab Tổng
+                      quan hoặc Lộ trình.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}

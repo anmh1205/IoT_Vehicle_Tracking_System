@@ -6,6 +6,7 @@ import { z } from 'zod';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -22,14 +23,17 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useCreateDevice } from '../hooks/use-create-device';
 import { useUpdateDevice } from '../hooks/use-update-device';
+
 const schema = z.object({
   deviceId: z.string().min(1, 'Bắt buộc'),
   deviceName: z.string().min(1, 'Bắt buộc'),
   imei: z.string().optional(),
   requestInterval: z.number().min(10).max(3600),
-  vibrationThreshold: z.number().min(0).max(1000),
+  vibrationThreshold: z.number().min(0).max(1000).optional(),
 });
+
 type FormValues = z.infer<typeof schema>;
+
 export const DeviceForm = ({
   open,
   onOpenChange,
@@ -53,6 +57,7 @@ export const DeviceForm = ({
       vibrationThreshold: 5,
     },
   });
+
   useEffect(() => {
     if (!defaultValues) {
       form.reset({
@@ -64,6 +69,7 @@ export const DeviceForm = ({
       });
       return;
     }
+
     form.reset({
       deviceId: defaultValues.deviceId ?? '',
       deviceName: defaultValues.deviceName ?? '',
@@ -72,27 +78,39 @@ export const DeviceForm = ({
       vibrationThreshold: Number(defaultValues.vibrationThreshold ?? 5),
     });
   }, [defaultValues, form]);
+
   const onSubmit = (values: FormValues) => {
+    const payload = {
+      ...values,
+      vibrationThreshold: Number(defaultValues?.vibrationThreshold ?? values.vibrationThreshold ?? 5),
+    };
+
     if (defaultValues?.id) {
       updateMutation.mutate(
-        { id: defaultValues.id, ...values },
+        { id: defaultValues.id, ...payload },
         { onSuccess: () => onOpenChange(false) },
       );
       return;
     }
-    createMutation.mutate(values, {
+
+    createMutation.mutate(payload, {
       onSuccess: () => {
         onCreateSuccess?.();
         onOpenChange(false);
       },
     });
   };
+
   const pending = createMutation.isPending || updateMutation.isPending;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{defaultValues?.id ? 'Cập nhật thiết bị' : 'Tạo thiết bị'}</DialogTitle>
+          <DialogDescription>
+            Nhập thông tin thiết bị và chu kỳ gửi để cấu hình bản ghi cơ bản.
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -122,42 +140,23 @@ export const DeviceForm = ({
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="requestInterval"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Chu kỳ gửi (giây)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        value={field.value}
-                        onChange={(event) => field.onChange(Number(event.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="vibrationThreshold"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ngưỡng rung</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        value={field.value}
-                        onChange={(event) => field.onChange(Number(event.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="requestInterval"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Chu kỳ gửi (giây)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      value={field.value}
+                      onChange={(event) => field.onChange(Number(event.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="imei"

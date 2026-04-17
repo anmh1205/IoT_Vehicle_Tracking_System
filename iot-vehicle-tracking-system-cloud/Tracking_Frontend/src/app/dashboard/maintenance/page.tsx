@@ -470,7 +470,7 @@ const MaintenancePage = () => {
                 size="sm"
                 variant="outline"
                 className="w-full sm:w-auto"
-                onClick={() => router.push('/dashboard/alerts')}
+                onClick={() => router.push('/dashboard/attention/queue')}
               >
                 Mở danh sách cảnh báo
               </Button>
@@ -537,7 +537,7 @@ const MaintenancePage = () => {
                   <Card
                     key={row.id}
                     className="cursor-pointer"
-                    onClick={() => router.push(`/dashboard/maintenance/${row.id}`)}
+                    onClick={() => router.push(`/dashboard/attention/maintenance/${row.id}`)}
                   >
                     <CardContent className="space-y-3 p-4">
                       <div className="flex items-start justify-between gap-3">
@@ -609,7 +609,7 @@ const MaintenancePage = () => {
               searchKey="vehicleId"
               searchPlaceholder="Tìm phương tiện..."
               isLoading={maint.isLoading}
-              onRowClick={(row) => router.push(`/dashboard/maintenance/${row.id}`)}
+              onRowClick={(row) => router.push(`/dashboard/attention/maintenance/${row.id}`)}
             />
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

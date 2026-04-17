@@ -193,7 +193,7 @@ const TripsPage = () => {
         isLoading={trips.isLoading}
         onRowClick={(row) => {
           if (!row?.id) return;
-          router.push(`/dashboard/trips/${row.id}`);
+          router.push(`/dashboard/operations/trips/${row.id}`);
         }}
         emptyTitle="Chưa có chuyến đi phù hợp"
         emptyDescription="Hãy tạo chuyến đi mới hoặc nới bộ lọc để xem lại các hành trình gần đây."

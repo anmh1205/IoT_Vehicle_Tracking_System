@@ -62,7 +62,7 @@ export const getGeofenceColumns = (actions: {
     cell: ({ row }) => (
       <div className="flex flex-wrap gap-1">
         <Button size="sm" variant="outline" asChild>
-          <Link href={`/dashboard/geofences/${row.original.id}`}>Chi tiết</Link>
+          <Link href={`/dashboard/operations/geofences/${row.original.id}`}>Chi tiết</Link>
         </Button>
         <Button size="sm" variant="outline" onClick={() => actions.onManageVehicles(row.original)}>
           Quản lý xe

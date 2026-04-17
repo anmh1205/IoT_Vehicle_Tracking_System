@@ -152,9 +152,11 @@ const DeviceDetailPage = ({
             </div>
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
               <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                Ngưỡng rung động
+                Uptime phiên
               </p>
-              <p className="mt-1 text-sm font-medium">{detail?.vibrationThreshold ?? 0}</p>
+              <p className="mt-1 text-sm font-medium">
+                {detail?.currentSession ? formatDuration(detail.currentSession.uptime ?? 0) : '-'}
+              </p>
             </div>
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
               <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Session hiện tại</p>

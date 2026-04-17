@@ -1,15 +1,18 @@
 'use client';
-import { Cpu, Gauge, Radio, Waves } from 'lucide-react';
+import { Clock3, Cpu, Gauge, Radio } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { formatRelative } from '@/lib/utils/date/format';
 import { DEVICE_STATUS_LABELS, DEVICE_STATUS_VARIANTS } from './device-constants';
 import { getDeviceRuntimeHours } from './device-utils';
 import { DEVICE_ANIMATIONS, DEVICE_SHADOWS } from './device-design-constants';
 import type { Device } from '@/features/devices/types';
+
 interface DeviceCardProps {
   device: Device;
   onClick?: (device: Device) => void;
 }
+
 export const DeviceCard = ({ device, onClick }: DeviceCardProps) => {
   const interactive = typeof onClick === 'function';
 
@@ -61,11 +64,15 @@ export const DeviceCard = ({ device, onClick }: DeviceCardProps) => {
             {device.lastSeenAt ? 'Trực tuyến' : 'Ngoại tuyến'}
           </span>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Gauge className="h-3.5 w-3.5" />
-          Chu kỳ gửi: {device.requestInterval ?? 60} giây
-          <Waves className="ml-2 h-3.5 w-3.5" />
-          Ngưỡng rung: {device.vibrationThreshold ?? 0}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <Gauge className="h-3.5 w-3.5" />
+            Chu kỳ cấu hình: {device.requestInterval ?? 60} giây
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Clock3 className="h-3.5 w-3.5" />
+            {device.lastSeenAt ? `Cập nhật ${formatRelative(device.lastSeenAt)}` : 'Chưa có telemetry'}
+          </span>
         </div>
       </CardContent>
     </Card>

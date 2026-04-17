@@ -1,28 +1,27 @@
-'use client';
+﻿'use client';
+
 import { useMemo } from 'react';
 import type { NavItem } from '@/types';
 import { useRoleAccess } from '@/hooks/use-role-access';
+
 const GROUP_URL = '#';
-const routePermissions = {
-  '/dashboard/system-admin': 'canAccessSystemAdmin',
-  '/dashboard/system-status': 'canViewSystemInfo',
-  '/dashboard/users': 'canManageUsers',
-  '/dashboard/firmware': 'canManageFirmware',
-  '/dashboard/exports': 'canExportData',
-} as const;
+
 type AccessKey = keyof ReturnType<typeof useRoleAccess>;
+
 const isRouteAllowed = (item: NavItem, access: ReturnType<typeof useRoleAccess>): boolean => {
   if (!item.url || item.url === GROUP_URL) {
     return true;
   }
-  const accessKey = routePermissions[item.url as keyof typeof routePermissions] as
-    | AccessKey
-    | undefined;
+
+  const accessKey = item.permissionKey as AccessKey | undefined;
+
   if (!accessKey) {
     return true;
   }
+
   return Boolean(access[accessKey]);
 };
+
 const filterNavItems = (items: NavItem[], access: ReturnType<typeof useRoleAccess>): NavItem[] =>
   items
     .map<NavItem | null>((item) => {
@@ -42,6 +41,7 @@ const filterNavItems = (items: NavItem[], access: ReturnType<typeof useRoleAcces
       };
     })
     .filter((item): item is NavItem => item !== null);
+
 export const useFilteredNavItems = (items: NavItem[]) => {
   const access = useRoleAccess();
   return useMemo(() => filterNavItems(items, access), [items, access]);

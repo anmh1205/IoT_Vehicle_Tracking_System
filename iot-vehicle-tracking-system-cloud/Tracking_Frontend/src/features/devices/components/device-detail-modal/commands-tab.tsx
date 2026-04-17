@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+﻿import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -13,23 +13,15 @@ import { DeviceDetailEmptyState } from './empty-state';
 import { useDeviceDetailModal } from './modal-context';
 
 const statusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
-  if (status === 'failed') {
-    return 'destructive';
-  }
-  if (status === 'sent' || status === 'acknowledged') {
-    return 'default';
-  }
-  if (status === 'pending') {
-    return 'secondary';
-  }
+  if (status === 'failed') return 'destructive';
+  if (status === 'sent' || status === 'acknowledged') return 'default';
+  if (status === 'pending') return 'secondary';
   return 'outline';
 };
 
 const formatParams = (params: Record<string, unknown>) => {
   const entries = Object.entries(params ?? {});
-  if (entries.length === 0) {
-    return '-';
-  }
+  if (entries.length === 0) return '-';
   return entries
     .slice(0, 2)
     .map(([key, value]) => `${key}: ${String(value)}`)
@@ -67,9 +59,7 @@ export const CommandsTab = () => {
               <TableRow key={command.id}>
                 <TableCell>{formatDateTime(command.sentAt)}</TableCell>
                 <TableCell className="font-medium">{command.command || '-'}</TableCell>
-                <TableCell className="max-w-[280px] truncate">
-                  {formatParams(command.params)}
-                </TableCell>
+                <TableCell className="max-w-[280px] truncate">{formatParams(command.params)}</TableCell>
                 <TableCell>
                   <Badge variant={statusVariant(command.status)}>{command.status}</Badge>
                 </TableCell>

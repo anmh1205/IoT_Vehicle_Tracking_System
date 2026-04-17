@@ -202,7 +202,7 @@ const GeofencesPage = () => {
         data={rows}
         pagination={false}
         isLoading={geofences.isLoading}
-        onRowClick={(row: any) => router.push(`/dashboard/geofences/${row.id}`)}
+        onRowClick={(row: any) => router.push(`/dashboard/operations/geofences/${row.id}`)}
         emptyTitle="Chưa có vùng giám sát phù hợp"
         emptyDescription="Tạo vùng mới để bắt đầu theo dõi các khu vực ra vào quan trọng."
         emptyAction={{

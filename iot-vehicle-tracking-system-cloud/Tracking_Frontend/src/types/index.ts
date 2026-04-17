@@ -3,6 +3,7 @@ export interface NavItem {
   url: string;
   icon?: any;
   items?: NavItem[];
+  permissionKey?: string;
 }
 
 export interface ApiEnvelope<T> {

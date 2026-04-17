@@ -69,7 +69,7 @@ export const getTripColumns = (actions: {
       return (
         <div className="flex flex-wrap gap-1">
           <Button size="sm" variant="outline" asChild>
-            <Link href={`/dashboard/trips/${row.original.id}`}>Chi tiết</Link>
+            <Link href={`/dashboard/operations/trips/${row.original.id}`}>Chi tiết</Link>
           </Button>
           <Button size="sm" variant="outline" onClick={() => actions.onEdit(row.original)}>
             Sửa

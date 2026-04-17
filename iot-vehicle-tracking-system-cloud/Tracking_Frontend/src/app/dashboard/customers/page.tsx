@@ -615,7 +615,7 @@ const CustomersPage = () => {
         data={rows}
         pagination={false}
         isLoading={customers.isLoading}
-        onRowClick={(row) => router.push(`/dashboard/customers/${row.id}`)}
+        onRowClick={(row) => router.push(`/dashboard/fleet/customers/${row.id}`)}
         emptyTitle="Chưa có khách hàng phù hợp"
         emptyDescription="Thử nới bộ lọc hoặc thêm hồ sơ khách hàng mới để bắt đầu phân nhóm đội xe."
         emptyAction={{

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,13 +17,7 @@ const STATUS_VARIANTS: Record<
   error: 'destructive',
 };
 
-const StatItem = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) => (
+const StatItem = ({ label, value }: { label: string; value: string }) => (
   <div className="rounded-xl border bg-muted/20 px-3 py-2">
     <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
     <p className="mt-1 text-sm font-semibold">{value}</p>
@@ -51,7 +45,7 @@ export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }
           <div className="min-w-0">
             <CardTitle className="line-clamp-1 text-sm">{device.deviceName}</CardTitle>
             <p className="mt-1 text-xs text-muted-foreground">
-              {device.vehiclePlate ?? 'Chưa gán phương tiện'} • {device.deviceId}
+              {device.vehiclePlate ?? 'Chưa gán phương tiện'} · {device.deviceId}
             </p>
           </div>
           <Badge variant={STATUS_VARIANTS[device.status]}>{MAP_STATUS_LABELS[device.status]}</Badge>
@@ -85,12 +79,8 @@ export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }
             </span>
           </p>
           <p>
-            <span className="text-muted-foreground">Rung động:</span>{' '}
-            <span className="font-medium">
-              {device.vibration !== null && device.vibration !== undefined
-                ? `${device.vibration}`
-                : 'Chưa có dữ liệu'}
-            </span>
+            <span className="text-muted-foreground">Biển số:</span>{' '}
+            <span className="font-medium">{device.vehiclePlate ?? 'Chưa gán phương tiện'}</span>
           </p>
         </div>
 

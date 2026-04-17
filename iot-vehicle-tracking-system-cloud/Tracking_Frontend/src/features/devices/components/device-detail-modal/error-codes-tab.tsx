@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+﻿import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -20,12 +20,8 @@ import { DeviceDetailEmptyState } from './empty-state';
 import { useDeviceDetailModal } from './modal-context';
 
 const getType = (errorCode: number): 'critical' | 'warning' | 'info' => {
-  if (errorCode >= 500) {
-    return 'critical';
-  }
-  if (errorCode >= 200) {
-    return 'warning';
-  }
+  if (errorCode >= 500) return 'critical';
+  if (errorCode >= 200) return 'warning';
   return 'info';
 };
 
@@ -107,11 +103,7 @@ export const ErrorCodesTab = () => {
                             : 'outline'
                       }
                     >
-                      {type === 'critical'
-                        ? 'Nghiêm trọng'
-                        : type === 'warning'
-                          ? 'Cảnh báo'
-                          : 'Thông tin'}
+                      {type === 'critical' ? 'Nghiêm trọng' : type === 'warning' ? 'Cảnh báo' : 'Thông tin'}
                     </Badge>
                   </TableCell>
                   <TableCell>{formatDateTime(item.occurredAt)}</TableCell>

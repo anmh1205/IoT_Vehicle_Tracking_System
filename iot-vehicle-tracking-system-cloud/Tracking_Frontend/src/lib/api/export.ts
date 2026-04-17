@@ -1,4 +1,5 @@
 import { apiClient, unwrap } from './client';
+import { toApiUrl } from './base-url';
 
 export type ExportStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
@@ -68,5 +69,5 @@ export const exportServices = {
   getById: (id: number | string) =>
     apiClient.get(`/exports/${id}`).then((response) => toExportJob(unwrap<any>(response.data))),
 
-  downloadUrl: (id: number | string) => `/api/v1/exports/${id}/download`,
+  downloadUrl: (id: number | string) => toApiUrl(`/exports/${id}/download`),
 };

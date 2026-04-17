@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,9 +27,7 @@ export const SessionsTab = () => {
           <CardHeader className="pb-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="text-sm">Phiên #{session.id}</CardTitle>
-              <Badge variant="outline">
-                {DEVICE_STATUS_LABELS[session.status] ?? session.status}
-              </Badge>
+              <Badge variant="outline">{DEVICE_STATUS_LABELS[session.status] ?? session.status}</Badge>
             </div>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">
@@ -54,11 +52,7 @@ export const SessionsTab = () => {
       ))}
 
       <div className="flex justify-center">
-        <Button
-          variant="outline"
-          onClick={onSessionsLoadMore}
-          disabled={!sessionsHasMore || sessionsLoading}
-        >
+        <Button variant="outline" onClick={onSessionsLoadMore} disabled={!sessionsHasMore || sessionsLoading}>
           {sessionsLoading ? 'Đang tải...' : sessionsHasMore ? 'Tải thêm phiên' : 'Đã tải hết'}
         </Button>
       </div>
