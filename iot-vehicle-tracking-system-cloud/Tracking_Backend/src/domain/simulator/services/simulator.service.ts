@@ -20,6 +20,10 @@ interface DeviceSimulatorRuntime {
   lon: number;
   heading: number;
   battery: number;
+  fuelLevel: number;
+  obdConnectFailCount5m: number;
+  seqNo: number;
+  bootId: string;
 }
 
 interface SimulatorMqttClient {
@@ -68,8 +72,8 @@ interface StoredSnapshot {
 interface DeviceLookupRow {
   device_id: string;
   auth_token: string | null;
-  latitude: number | null;
-  longitude: number | null;
+  latitude: number | string | null;
+  longitude: number | string | null;
 }
 
 interface SessionLookupRow {
@@ -78,6 +82,17 @@ interface SessionLookupRow {
 
 let runningSimulation: RunningSimulationState | null = null;
 let lastSnapshot: StoredSnapshot | null = null;
+
+interface PayloadMetadata {
+  schema_version: string;
+  message_id: string;
+  sent_at: number;
+  seq_no: number;
+  boot_id: string;
+}
+
+const RAWDATA_SCHEMA_VERSION = 'v1.3.0';
+const DEFAULT_SCHEMA_VERSION = 'v1.0.0';
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.max(min, Math.min(max, value));
@@ -91,6 +106,29 @@ const randomBetween = (min: number, max: number): number => {
 const roundTo = (value: number, decimals = 6): number => {
   const factor = 10 ** decimals;
   return Math.round(value * factor) / factor;
+};
+
+const toFiniteNumber = (value: unknown): number | null => {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const createBootId = (deviceId: string): string =>
+  `sim-${deviceId}-${Date.now().toString(36)}-${randomUUID().slice(0, 8)}`;
+
+const createPayloadMetadata = (
+  device: DeviceSimulatorRuntime,
+  sentAt: number,
+  schemaVersion: string,
+): PayloadMetadata => {
+  device.seqNo += 1;
+  return {
+    schema_version: schemaVersion,
+    message_id: randomUUID(),
+    sent_at: sentAt,
+    seq_no: device.seqNo,
+    boot_id: device.bootId,
+  };
 };
 
 const normalizeHeading = (value: number): number => {
@@ -166,9 +204,68 @@ const publishDeviceStatus = (
       auth_token: authTokenOverride ?? device.authToken,
       status,
       timestamp,
+      metadata: createPayloadMetadata(device, timestamp, DEFAULT_SCHEMA_VERSION),
     },
     { qos: 1, retain: true },
   );
+
+const buildDiagnostics = (
+  speed: number,
+  rpm: number,
+  coolantC: number,
+  fuelLevelPct: number,
+  engineLoadPct: number,
+  sampleAgeMs: number,
+  connectFailCount5m: number,
+): {
+  channel: {
+    ble_obd_connected: boolean;
+    elm_ready: boolean;
+    poll_interval_ms: number;
+    connect_fail_count_5m: number;
+  };
+  signals: {
+    rpm: number;
+    obd_speed_kph: number;
+    coolant_c: number;
+    fuel_level_pct: number;
+    engine_load_pct: number;
+  };
+  quality: {
+    sample_age_ms: number;
+    missing_signals: string[];
+  };
+  events: Array<{ code: string; count_5m: number }>;
+} => {
+  const obdReady = connectFailCount5m === 0 || Math.random() > 0.1;
+  const missingSignals = obdReady
+    ? []
+    : ['rpm', 'obd_speed_kph', 'coolant_c', 'fuel_level_pct', 'engine_load_pct'];
+
+  return {
+    channel: {
+      ble_obd_connected: obdReady,
+      elm_ready: obdReady,
+      poll_interval_ms: 1200,
+      connect_fail_count_5m: connectFailCount5m,
+    },
+    signals: {
+      rpm,
+      obd_speed_kph: roundTo(Math.max(0, speed + randomBetween(-1.2, 1.2)), 2),
+      coolant_c: coolantC,
+      fuel_level_pct: fuelLevelPct,
+      engine_load_pct: engineLoadPct,
+    },
+    quality: {
+      sample_age_ms: sampleAgeMs,
+      missing_signals: missingSignals,
+    },
+    events:
+      connectFailCount5m > 0
+        ? [{ code: 'obd_connect_failed', count_5m: connectFailCount5m }]
+        : [],
+  };
+};
 
 const publishDeviceRawData = (
   client: SimulatorMqttClient,
@@ -177,10 +274,20 @@ const publishDeviceRawData = (
   data: {
     vibration: number;
     batteryTop: number;
+    batteryBot: number;
     latitude: number;
     longitude: number;
     speed: number;
     course: number;
+    satellites: number;
+    ignition: boolean;
+    rpm: number;
+    coolantC: number;
+    fuelLevelPct: number;
+    engineLoadPct: number;
+    sampleAgeMs: number;
+    connectFailCount5m: number;
+    uptimeMs: number;
     errorCode?: number;
   },
 ): Promise<void> =>
@@ -191,15 +298,29 @@ const publishDeviceRawData = (
       device_id: device.deviceId,
       auth_token: device.authToken,
       timestamp,
+      uptime: data.uptimeMs,
       data: {
         vibration: data.vibration,
         battery_top: data.batteryTop,
+        battery_bot: data.batteryBot,
         latitude: data.latitude,
         longitude: data.longitude,
         speed: data.speed,
         course: data.course,
+        satellites: data.satellites,
+        ignition: data.ignition,
         error_code: data.errorCode,
       },
+      diagnostics: buildDiagnostics(
+        data.speed,
+        data.rpm,
+        data.coolantC,
+        data.fuelLevelPct,
+        data.engineLoadPct,
+        data.sampleAgeMs,
+        data.connectFailCount5m,
+      ),
+      metadata: createPayloadMetadata(device, timestamp, RAWDATA_SCHEMA_VERSION),
     },
     { qos: 0 },
   );
@@ -222,6 +343,7 @@ const publishDeviceEvent = (
       code,
       message,
       timestamp,
+      metadata: createPayloadMetadata(device, timestamp, DEFAULT_SCHEMA_VERSION),
     },
     { qos: 1 },
   );
@@ -495,14 +617,16 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
     const noiseLon = randomBetween(-0.00002, 0.00002);
     const pullFactor = 0.015;
 
-    device.lat = roundTo(
+    const nextLat = roundTo(
       moved.lat * (1 - pullFactor) + state.config.lat * pullFactor + noiseLat,
       6,
     );
-    device.lon = roundTo(
+    const nextLon = roundTo(
       moved.lon * (1 - pullFactor) + state.config.lon * pullFactor + noiseLon,
       6,
     );
+    device.lat = Number.isFinite(nextLat) ? nextLat : roundTo(state.config.lat, 6);
+    device.lon = Number.isFinite(nextLon) ? nextLon : roundTo(state.config.lon, 6);
     device.battery = roundTo(
       clamp(
         device.battery - randomBetween(0, 0.25),
@@ -511,17 +635,46 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
       ),
       2,
     );
+    device.fuelLevel = roundTo(clamp(device.fuelLevel - randomBetween(0, 0.08), 5, 100), 2);
+    device.obdConnectFailCount5m =
+      Math.random() < 0.025
+        ? Math.min(6, device.obdConnectFailCount5m + 1)
+        : Math.max(0, device.obdConnectFailCount5m - 1);
 
-    const errorCode = Math.random() < 0.03 ? (Math.random() < 0.4 ? 201 : 501) : null;
+    const rpm = roundTo(
+      speed < 3
+        ? randomBetween(700, 980)
+        : randomBetween(850 + speed * 26, 980 + speed * 38),
+      0,
+    );
+    const engineLoadPct = roundTo(clamp(speed * 0.9 + vibration * 5 + randomBetween(5, 20), 10, 98), 2);
+    const coolantC = roundTo(clamp(76 + engineLoadPct * 0.32 + randomBetween(-2, 2), 70, 118), 1);
+    const sampleAgeMs = Math.round(randomBetween(80, 1400));
+    const satellites = Math.round(randomBetween(6, 16));
+    const batteryBot = roundTo(clamp(device.battery - randomBetween(0.15, 0.9), 0, 100), 2);
+
+    const thermalRisk = coolantC > 104 && engineLoadPct > 65;
+    const errorCode =
+      thermalRisk || Math.random() < 0.03 ? (Math.random() < 0.4 ? 201 : 501) : null;
 
     const timestamp = now.getTime();
     await publishDeviceRawData(state.mqttClient, device, timestamp, {
       vibration,
       batteryTop: device.battery,
+      batteryBot,
       latitude: device.lat,
       longitude: device.lon,
       speed,
       course: roundTo(device.heading, 2),
+      satellites,
+      ignition: true,
+      rpm,
+      coolantC,
+      fuelLevelPct: device.fuelLevel,
+      engineLoadPct,
+      sampleAgeMs,
+      connectFailCount5m: device.obdConnectFailCount5m,
+      uptimeMs: Math.max(1, Date.now() - state.startedAt.getTime()),
       errorCode: errorCode ?? undefined,
     });
 
@@ -532,7 +685,18 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
         timestamp,
         'error',
         errorCode,
-        `Simulated device error ${errorCode}`,
+        thermalRisk
+          ? `Coolant risk pattern detected: ${coolantC}C at load ${engineLoadPct}%`
+          : `Simulated device error ${errorCode}`,
+      );
+    } else if (device.obdConnectFailCount5m >= 3) {
+      await publishDeviceEvent(
+        state.mqttClient,
+        device,
+        timestamp,
+        'warning',
+        1210,
+        `OBD reconnect unstable (${device.obdConnectFailCount5m} fails in 5m window)`,
       );
     }
 
@@ -631,8 +795,11 @@ export const startSimulation = async (
       await closeSimulatorOwnedSession(activeSessionId, row.device_id);
     }
 
-    const initialLat = row.latitude ?? roundTo(input.lat + randomBetween(-0.0005, 0.0005), 6);
-    const initialLon = row.longitude ?? roundTo(input.lon + randomBetween(-0.0005, 0.0005), 6);
+    const parsedLatitude = toFiniteNumber(row.latitude);
+    const parsedLongitude = toFiniteNumber(row.longitude);
+
+    const initialLat = parsedLatitude ?? roundTo(input.lat + randomBetween(-0.0005, 0.0005), 6);
+    const initialLon = parsedLongitude ?? roundTo(input.lon + randomBetween(-0.0005, 0.0005), 6);
 
     const simulatorAuthToken = `sim-${randomUUID()}`;
 
@@ -645,6 +812,10 @@ export const startSimulation = async (
       lon: initialLon,
       heading: normalizeHeading(randomBetween(0, 359)),
       battery: roundTo(randomBetween(input.batteryMin, input.batteryMax), 2),
+      fuelLevel: roundTo(randomBetween(35, 95), 2),
+      obdConnectFailCount5m: 0,
+      seqNo: 0,
+      bootId: createBootId(row.device_id),
     });
   }
 

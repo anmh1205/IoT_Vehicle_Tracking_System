@@ -18,6 +18,11 @@ import { AlertDetailModal } from '@/features/alerts/components/alert-detail-moda
 
 const PAGE_SIZE = 50;
 
+const getPaginationTotal = (payload: any): number => {
+  const parsed = Number(payload?.pagination?.total ?? payload?.data?.pagination?.total ?? 0);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+};
+
 const isObdMaintenanceAlert = (item: any): boolean => {
   const title = String(item?.title ?? '').toLowerCase();
   const message = String(item?.message ?? '').toLowerCase();
@@ -104,6 +109,39 @@ const AlertsPage = () => {
       }),
   });
 
+  const fetchAlertCount = (params: Record<string, unknown>) =>
+    alertServices
+      .getList({
+        ...params,
+        page: 1,
+        limit: 1,
+      })
+      .then((payload) => getPaginationTotal(payload));
+
+  const summaryTotal = useQuery({
+    queryKey: ['alerts-summary-total', { severity, status }],
+    queryFn: () => fetchAlertCount({ severity, status }),
+    enabled: source === 'all',
+  });
+
+  const summaryActive = useQuery({
+    queryKey: ['alerts-summary-active', { severity, status }],
+    queryFn: () => fetchAlertCount({ severity, status: 'active' }),
+    enabled: source === 'all' && (!status || status === 'active'),
+  });
+
+  const summaryAcknowledged = useQuery({
+    queryKey: ['alerts-summary-acknowledged', { severity, status }],
+    queryFn: () => fetchAlertCount({ severity, status: 'acknowledged' }),
+    enabled: source === 'all' && (!status || status === 'acknowledged'),
+  });
+
+  const summaryCritical = useQuery({
+    queryKey: ['alerts-summary-critical', { severity, status }],
+    queryFn: () => fetchAlertCount({ severity: 'critical', status }),
+    enabled: source === 'all' && (!severity || severity === 'critical'),
+  });
+
   const ackMutation = useMutation({
     mutationFn: (id: number) => alertServices.acknowledge(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
@@ -166,16 +204,62 @@ const AlertsPage = () => {
   }, [rows]);
 
   const stats = useMemo(() => {
-    const pending = rows.filter((item: any) => item.status === 'active').length;
-    const acknowledged = rows.filter((item: any) => item.status === 'acknowledged').length;
-    const critical = rows.filter((item: any) => item.severity === 'critical').length;
+    const localPending = rows.filter((item: any) => item.status === 'active').length;
+    const localAcknowledged = rows.filter((item: any) => item.status === 'acknowledged').length;
+    const localCritical = rows.filter((item: any) => item.severity === 'critical').length;
+    const localTotal = rows.length;
+
+    if (source !== 'all') {
+      return {
+        total: localTotal,
+        pending: localPending,
+        acknowledged: localAcknowledged,
+        critical: localCritical,
+      };
+    }
+
+    const total = summaryTotal.data ?? pagination.total ?? localTotal;
+    const pending = status
+      ? status === 'active'
+        ? total
+        : 0
+      : (summaryActive.data ?? localPending);
+    const acknowledged = status
+      ? status === 'acknowledged'
+        ? total
+        : 0
+      : (summaryAcknowledged.data ?? localAcknowledged);
+    const critical = severity
+      ? severity === 'critical'
+        ? total
+        : 0
+      : (summaryCritical.data ?? localCritical);
+
     return {
-      total: rows.length,
+      total,
       pending,
       acknowledged,
       critical,
     };
-  }, [rows]);
+  }, [
+    rows,
+    source,
+    severity,
+    status,
+    pagination.total,
+    summaryTotal.data,
+    summaryActive.data,
+    summaryAcknowledged.data,
+    summaryCritical.data,
+  ]);
+
+  const summaryCardsLoading =
+    alerts.isLoading ||
+    (source === 'all' &&
+      (summaryTotal.isLoading ||
+        summaryActive.isLoading ||
+        summaryAcknowledged.isLoading ||
+        summaryCritical.isLoading));
 
   return (
     <PageContainer
@@ -204,25 +288,25 @@ const AlertsPage = () => {
           title="Tổng cảnh báo"
           value={stats.total}
           icon={<AlertTriangle className="h-4 w-4" />}
-          isLoading={alerts.isLoading}
+          isLoading={summaryCardsLoading}
         />
         <StatCard
           title="Chưa xử lý"
           value={stats.pending}
           icon={<CircleDashed className="h-4 w-4" />}
-          isLoading={alerts.isLoading}
+          isLoading={summaryCardsLoading}
         />
         <StatCard
           title="Đã xác nhận"
           value={stats.acknowledged}
           icon={<CircleCheckBig className="h-4 w-4" />}
-          isLoading={alerts.isLoading}
+          isLoading={summaryCardsLoading}
         />
         <StatCard
           title="Mức nghiêm trọng"
           value={stats.critical}
           icon={<ShieldAlert className="h-4 w-4" />}
-          isLoading={alerts.isLoading}
+          isLoading={summaryCardsLoading}
           trend={{
             value: `${stats.total > 0 ? ((stats.critical / stats.total) * 100).toFixed(1) : '0.0'}% tổng cảnh báo`,
             positive: false,

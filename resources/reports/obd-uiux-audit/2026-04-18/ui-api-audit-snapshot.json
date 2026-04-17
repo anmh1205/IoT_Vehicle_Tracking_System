@@ -1,0 +1,244 @@
+﻿{
+    "captured_at":  "2026-04-18T02:20:04.6441603+07:00",
+    "auth_user":  "admin",
+    "simulator":  {
+                      "running":  true,
+                      "paused":  true,
+                      "jobId":  "sim-1776452785058",
+                      "startedAt":  "2026-04-17T19:06:25.058Z",
+                      "expiresAt":  "2026-04-17T19:36:25.058Z",
+                      "ticks":  378,
+                      "sentPoints":  1134,
+                      "deviceIds":  [
+                                        "TRACKER_001",
+                                        "MOCK-OBD-002",
+                                        "sim-uat-001"
+                                    ],
+                      "preview":  [
+                                      {
+                                          "deviceId":  "TRACKER_001",
+                                          "timestamp":  "2026-04-17T19:19:00.129Z",
+                                          "lat":  10.823371,
+                                          "lon":  106.74075,
+                                          "speed":  67.13,
+                                          "heading":  320.22,
+                                          "vibration":  0.63,
+                                          "battery":  58,
+                                          "errorCode":  null
+                                      },
+                                      {
+                                          "deviceId":  "MOCK-OBD-002",
+                                          "timestamp":  "2026-04-17T19:19:00.129Z",
+                                          "lat":  10.804353,
+                                          "lon":  106.747539,
+                                          "speed":  37.68,
+                                          "heading":  144.19,
+                                          "vibration":  2.86,
+                                          "battery":  58,
+                                          "errorCode":  null
+                                      },
+                                      {
+                                          "deviceId":  "sim-uat-001",
+                                          "timestamp":  "2026-04-17T19:19:00.129Z",
+                                          "lat":  10.807276,
+                                          "lon":  106.741242,
+                                          "speed":  20.76,
+                                          "heading":  80.93,
+                                          "vibration":  2.64,
+                                          "battery":  58,
+                                          "errorCode":  null
+                                      }
+                                  ]
+                  },
+    "devices":  {
+                    "total":  4,
+                    "page_items":  4,
+                    "running":  3,
+                    "stopped":  0,
+                    "disconnected":  1,
+                    "first_three":  [
+                                        {
+                                            "id":  11,
+                                            "deviceId":  "MOCK-OBD-003",
+                                            "deviceName":  "Van Tracker 003",
+                                            "currentStatus":  "disconnected",
+                                            "lastSeenAt":  "2026-04-17T18:19:19.426Z",
+                                            "totalRuntimeSeconds":  "49320",
+                                            "latitude":  "10.73381900",
+                                            "longitude":  "106.73120500",
+                                            "firmwareVersion":  "v2.2.5",
+                                            "lastErrorCode":  7,
+                                            "createdAt":  "2026-04-17T17:17:51.615Z"
+                                        },
+                                        {
+                                            "id":  10,
+                                            "deviceId":  "MOCK-OBD-002",
+                                            "deviceName":  "Bus Tracker 002",
+                                            "currentStatus":  "running",
+                                            "lastSeenAt":  "2026-04-17T19:19:00.129Z",
+                                            "totalRuntimeSeconds":  "130106",
+                                            "latitude":  "10.80435300",
+                                            "longitude":  "106.74753900",
+                                            "firmwareVersion":  "v2.3.1",
+                                            "lastErrorCode":  0,
+                                            "createdAt":  "2026-04-17T17:17:51.615Z"
+                                        },
+                                        {
+                                            "id":  3,
+                                            "deviceId":  "TRACKER_001",
+                                            "deviceName":  "Tracker Sedan 001",
+                                            "currentStatus":  "running",
+                                            "lastSeenAt":  "2026-04-17T19:19:00.129Z",
+                                            "totalRuntimeSeconds":  "162222",
+                                            "latitude":  "10.82337100",
+                                            "longitude":  "106.74075000",
+                                            "firmwareVersion":  "v2.3.1",
+                                            "lastErrorCode":  0,
+                                            "createdAt":  "2026-04-13T04:30:27.828Z"
+                                        }
+                                    ]
+                },
+    "alerts":  {
+                   "total":  327,
+                   "page_items":  100,
+                   "active":  100,
+                   "acknowledged":  0,
+                   "resolved":  0,
+                   "critical":  0
+               },
+    "maintenance":  {
+                        "total":  6,
+                        "page_items":  6,
+                        "scheduled":  2,
+                        "in_progress":  2,
+                        "completed":  2
+                    },
+    "map":  {
+                "positions_total":  4,
+                "geofences_total":  3,
+                "sample_positions":  [
+                                         {
+                                             "deviceId":  "MOCK-OBD-003",
+                                             "deviceName":  "Van Tracker 003",
+                                             "latitude":  "10.73381900",
+                                             "longitude":  "106.73120500",
+                                             "currentStatus":  "disconnected",
+                                             "lastSeenAt":  "2026-04-17T18:19:19.426Z",
+                                             "speed":  0,
+                                             "heading":  0,
+                                             "battery":  63.8,
+                                             "vibration":  0,
+                                             "temperature":  39.8
+                                         },
+                                         {
+                                             "deviceId":  "TRACKER_001",
+                                             "deviceName":  "Tracker Sedan 001",
+                                             "latitude":  "10.82337100",
+                                             "longitude":  "106.74075000",
+                                             "currentStatus":  "running",
+                                             "lastSeenAt":  "2026-04-17T19:19:00.129Z",
+                                             "speed":  67.13,
+                                             "heading":  0,
+                                             "battery":  0,
+                                             "vibration":  0.63,
+                                             "temperature":  0
+                                         },
+                                         {
+                                             "deviceId":  "sim-uat-001",
+                                             "deviceName":  "Simulator UAT 001",
+                                             "latitude":  "10.80727600",
+                                             "longitude":  "106.74124200",
+                                             "currentStatus":  "running",
+                                             "lastSeenAt":  "2026-04-17T19:19:00.129Z",
+                                             "speed":  20.76,
+                                             "heading":  0,
+                                             "battery":  0,
+                                             "vibration":  2.64,
+                                             "temperature":  0
+                                         },
+                                         {
+                                             "deviceId":  "MOCK-OBD-002",
+                                             "deviceName":  "Bus Tracker 002",
+                                             "latitude":  "10.80435300",
+                                             "longitude":  "106.74753900",
+                                             "currentStatus":  "running",
+                                             "lastSeenAt":  "2026-04-17T19:19:00.129Z",
+                                             "speed":  37.68,
+                                             "heading":  0,
+                                             "battery":  0,
+                                             "vibration":  2.86,
+                                             "temperature":  0
+                                         }
+                                     ]
+            },
+    "firmware":  {
+                     "total":  21,
+                     "page_items":  21
+                 },
+    "system":  {
+                   "health":  {
+                                  "status":  "ok",
+                                  "checks":  {
+                                                 "api":  {
+                                                             "status":  "ok"
+                                                         },
+                                                 "database":  {
+                                                                  "status":  "ok",
+                                                                  "latencyMs":  1
+                                                              },
+                                                 "victoriametrics":  {
+                                                                         "status":  "ok",
+                                                                         "latencyMs":  3
+                                                                     }
+                                             },
+                                  "uptime":  3474.981170416,
+                                  "timestamp":  "2026-04-17T19:20:04.145Z"
+                              },
+                   "metrics":  {
+                                   "cpuUsage":  27.25,
+                                   "memoryUsage":  19.05,
+                                   "diskUsage":  10.84,
+                                   "activeConnections":  3
+                               }
+               },
+    "telemetry_contract_checks":  {
+                                      "summary":  {
+                                                      "simulatorRunning":  true,
+                                                      "simulatorPaused":  true,
+                                                      "simulatorTicking":  true,
+                                                      "simulatedDeviceCount":  3,
+                                                      "simulatedDevicesRunningCount":  3,
+                                                      "simulatedPositionsCount":  3,
+                                                      "coordinatesAllFiniteAndInRange":  true
+                                                  },
+                                      "coordinate_details":  [
+                                                                 {
+                                                                     "deviceId":  "TRACKER_001",
+                                                                     "latitude":  "10.82337100",
+                                                                     "longitude":  "106.74075000",
+                                                                     "latFinite":  true,
+                                                                     "lonFinite":  true,
+                                                                     "latInRange":  true,
+                                                                     "lonInRange":  true
+                                                                 },
+                                                                 {
+                                                                     "deviceId":  "sim-uat-001",
+                                                                     "latitude":  "10.80727600",
+                                                                     "longitude":  "106.74124200",
+                                                                     "latFinite":  true,
+                                                                     "lonFinite":  true,
+                                                                     "latInRange":  true,
+                                                                     "lonInRange":  true
+                                                                 },
+                                                                 {
+                                                                     "deviceId":  "MOCK-OBD-002",
+                                                                     "latitude":  "10.80435300",
+                                                                     "longitude":  "106.74753900",
+                                                                     "latFinite":  true,
+                                                                     "lonFinite":  true,
+                                                                     "latInRange":  true,
+                                                                     "lonInRange":  true
+                                                                 }
+                                                             ]
+                                  }
+}
