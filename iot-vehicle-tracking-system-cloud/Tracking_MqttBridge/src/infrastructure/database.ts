@@ -35,6 +35,11 @@ interface ActiveAlertRow {
   title: string | null;
 }
 
+interface ActiveAlertMessageRow {
+  id: number;
+  message: string | null;
+}
+
 const toIsoTimestamp = (timestampMs: number) => new Date(timestampMs).toISOString();
 
 /**
@@ -522,6 +527,89 @@ export const syncActiveMaintenanceAlertsByTitle = async (
     return existingActiveTitles;
   } catch (err) {
     logger.error({ err, deviceId }, 'syncActiveMaintenanceAlertsByTitle failed');
+    return new Set<string>();
+  }
+};
+
+export const syncActiveMaintenanceAlertsByMessage = async (
+  deviceId: string,
+  title: string,
+  managedMessages: string[],
+  activeMessages: string[],
+  resolutionNotes: string,
+): Promise<Set<string>> => {
+  const normalizedTitle = title.trim();
+  const knownMessages = Array.from(
+    new Set(
+      managedMessages
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0),
+    ),
+  );
+  if (!normalizedTitle || knownMessages.length === 0) {
+    return new Set<string>();
+  }
+
+  const desiredMessages = new Set(
+    activeMessages
+      .map((item) => item.trim())
+      .filter((item) => knownMessages.includes(item)),
+  );
+
+  try {
+    const result = await pool.query<ActiveAlertMessageRow>(
+      `SELECT id, message
+       FROM alerts
+       WHERE device_id = $1
+         AND alert_type = 'maintenance_due'
+         AND status IN ('active', 'acknowledged')
+         AND title = $2
+         AND message = ANY($3::text[])
+       ORDER BY created_at DESC, id DESC`,
+      [deviceId, normalizedTitle, knownMessages],
+    );
+
+    const existingActiveMessages = new Set<string>();
+    const seenMessages = new Set<string>();
+    const idsToResolve: number[] = [];
+
+    result.rows.forEach((row) => {
+      const message = String(row.message ?? '').trim();
+      if (!message) {
+        idsToResolve.push(row.id);
+        return;
+      }
+
+      if (seenMessages.has(message)) {
+        idsToResolve.push(row.id);
+        return;
+      }
+
+      seenMessages.add(message);
+      if (desiredMessages.has(message)) {
+        existingActiveMessages.add(message);
+        return;
+      }
+
+      idsToResolve.push(row.id);
+    });
+
+    if (idsToResolve.length > 0) {
+      await pool.query(
+        `UPDATE alerts
+         SET status = 'resolved',
+             resolved_at = NOW(),
+             resolution_notes = $2,
+             updated_at = NOW()
+         WHERE id = ANY($1::int[])
+           AND status IN ('active', 'acknowledged')`,
+        [idsToResolve, resolutionNotes],
+      );
+    }
+
+    return existingActiveMessages;
+  } catch (err) {
+    logger.error({ err, deviceId, title: normalizedTitle }, 'syncActiveMaintenanceAlertsByMessage failed');
     return new Set<string>();
   }
 };

@@ -2,6 +2,7 @@ import { rawDataSchema } from '../validators/payload.validator';
 import type { RawDiagnostics } from '../types/payload.types';
 import {
   ensureDeviceSession,
+  syncActiveMaintenanceAlertsByMessage,
   syncActiveMaintenanceAlertsByTitle,
   syncActiveObdDtcAlerts,
   touchDeviceSession,
@@ -34,6 +35,8 @@ const OBD_RULE_MAINTENANCE_TITLES = [
   'OBD: Idle-load anomaly',
   'OBD: Voltage risk under load',
 ] as const;
+const OBD_CONNECT_WARNING_TITLE = 'device_warning';
+const OBD_CONNECT_WARNING_MESSAGE = 'obd_connect_failed';
 
 const ruleCooldownUntil = new Map<string, number>();
 const idleAnomalyStartedAt = new Map<string, number>();
@@ -61,10 +64,22 @@ const matchesDtcRange = (code: string, prefix: string, start: number, end: numbe
 
 const dtcRuleDefinitions: DtcRuleDefinition[] = [
   {
-    matches: (code) => matchesDtcRange(code, 'P', 0x300, 0x304),
+    matches: (code) => matchesDtcRange(code, 'P', 0x300, 0x308),
     severity: 'high',
     confidence: 0.92,
     action: 'Kiểm tra misfire, bugi, cuộn đánh lửa và kim phun; hạn chế tải cao cho tới khi xử lý.',
+  },
+  {
+    matches: (code) => matchesDtcRange(code, 'P', 0x100, 0x104),
+    severity: 'medium',
+    confidence: 0.82,
+    action: 'Inspect MAF sensor, air filter, intake path, and related wiring.',
+  },
+  {
+    matches: (code) => matchesDtcRange(code, 'P', 0x115, 0x119),
+    severity: 'medium',
+    confidence: 0.8,
+    action: 'Inspect coolant temperature sensor, connector, and signal circuit.',
   },
   {
     matches: (code) => code === 'P0171' || code === 'P0174',
@@ -113,6 +128,12 @@ const dtcRuleDefinitions: DtcRuleDefinition[] = [
     severity: 'high',
     confidence: 0.88,
     action: 'Kiểm tra regulator và điện áp sạc quá áp.',
+  },
+  {
+    matches: (code) => matchesDtcRange(code, 'P', 0x500, 0x503),
+    severity: 'medium',
+    confidence: 0.78,
+    action: 'Inspect vehicle speed sensor, ABS ECU signal, and related wiring.',
   },
   {
     matches: (code) => ['P0700', 'P0715', 'P0720', 'P0730', 'P0740'].includes(code),
@@ -384,6 +405,26 @@ const evaluateObdDtcRules = async (
       evidence: bucketLabel,
     });
   });
+};
+
+const syncObdConnectionWarnings = async (
+  diagnostics: RawDiagnostics | undefined,
+  context: ObdAlertContext,
+): Promise<void> => {
+  const connected = toBoolean(diagnostics?.channel?.ble_obd_connected);
+  const elmReady = toBoolean(diagnostics?.channel?.elm_ready);
+  if (connected === undefined && elmReady === undefined) {
+    return;
+  }
+
+  const shouldKeepActive = connected !== true || elmReady !== true;
+  await syncActiveMaintenanceAlertsByMessage(
+    context.deviceId,
+    OBD_CONNECT_WARNING_TITLE,
+    [OBD_CONNECT_WARNING_MESSAGE],
+    shouldKeepActive ? [OBD_CONNECT_WARNING_MESSAGE] : [],
+    'Auto-resolved by mqtt bridge: OBD connection recovered in latest telemetry snapshot.',
+  );
 };
 
 const evaluateObdMaintenanceRules = (
@@ -810,23 +851,7 @@ export const handleRawData = async (
     timestamp: new Date(timestampMs).toISOString(),
   });
 
-  await evaluateObdMaintenanceRules(
-    diagnostics,
-    {
-      deviceId: payload.device_id,
-      vehicleId: device.vehicle_id,
-      timestampMs,
-      latitude: effectiveLatitude,
-      longitude: effectiveLongitude,
-      messageId,
-      schemaVersion,
-      seqNo,
-      bootId,
-    },
-    payload.data.battery_top,
-    effectiveSpeed,
-  );
-  await evaluateObdDtcRules(diagnostics, {
+  const obdAlertContext: ObdAlertContext = {
     deviceId: payload.device_id,
     vehicleId: device.vehicle_id,
     timestampMs,
@@ -836,6 +861,25 @@ export const handleRawData = async (
     schemaVersion,
     seqNo,
     bootId,
+  };
+
+  const obdRuleResults = await Promise.allSettled([
+    evaluateObdMaintenanceRules(
+      diagnostics,
+      obdAlertContext,
+      payload.data.battery_top,
+      effectiveSpeed,
+    ),
+    evaluateObdDtcRules(diagnostics, obdAlertContext),
+    syncObdConnectionWarnings(diagnostics, obdAlertContext),
+  ]);
+  obdRuleResults.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      logger.error(
+        { err: result.reason, deviceId: payload.device_id, taskIndex: index },
+        'OBD rule evaluation failed without blocking telemetry ingest',
+      );
+    }
   });
 
   // 8. Check alerts - vibration threshold
