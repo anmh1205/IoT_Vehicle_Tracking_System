@@ -65,6 +65,10 @@ const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string =
   const signals = toRecord(diagnostics.signals);
   const quality = toRecord(diagnostics.quality);
 
+  const ecuState =
+    typeof channel?.ecu_state === 'string' && channel.ecu_state.trim().length > 0
+      ? channel.ecu_state.trim().toLowerCase()
+      : null;
   const connected = channel?.ble_obd_connected === true && channel?.elm_ready === true;
   const rpm = toFiniteNumber(signals?.rpm);
   const speed = toFiniteNumber(signals?.obd_speed_kph);
@@ -74,7 +78,13 @@ const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string =
   const failCount = toFiniteNumber(channel?.connect_fail_count_5m);
 
   const parts = [
-    connected ? 'OBD ổn định' : 'OBD không ổn định',
+    ecuState === 'stopped'
+      ? 'ECU dừng'
+      : ecuState === 'live'
+        ? 'OBD ổn định'
+        : connected
+          ? 'OBD đã nối'
+          : 'OBD không ổn định',
     `rpm=${rpm?.toFixed(0) ?? '-'}`,
     `spd=${speed?.toFixed(1) ?? '-'} km/h`,
     `coolant=${coolant?.toFixed(1) ?? '-'} C`,
@@ -82,6 +92,9 @@ const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string =
     `age=${sampleAgeMs?.toFixed(0) ?? '-'} ms`,
   ];
 
+  if (ecuState && ecuState !== 'live' && ecuState !== 'stopped') {
+    parts.push(`ecu=${ecuState}`);
+  }
   if (failCount !== undefined) {
     parts.push(`fail5m=${failCount.toFixed(0)}`);
   }
@@ -137,9 +150,10 @@ const buildRawFeed = (params: {
   const eventLogRows = params.eventLogs.map((row, index) => {
     const normalizedRow = toRecord(row) ?? {};
     const diagnostics = extractDiagnosticsPayload(normalizedRow);
+    const eventCode = String(normalizedRow.event_code ?? '').toLowerCase();
     const isDiagnosticsRow =
       diagnostics !== null ||
-      String(normalizedRow.event_code ?? '').toLowerCase() === 'mqtt_bridge_rawdata';
+      eventCode === 'obd_diagnostic_raw';
     const source: DeviceRawFeedRow['source'] = isDiagnosticsRow ? 'obd-diagnostic' : 'event-log';
 
     return {

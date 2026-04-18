@@ -29,6 +29,7 @@ const rawDataPayloadBaseSchema = z.object({
     channel: z.object({
       ble_obd_connected: z.boolean().optional(),
       elm_ready: z.boolean().optional(),
+      ecu_state: z.string().min(1).optional(),
       poll_interval_ms: z.number().nonnegative().optional(),
       connect_fail_count_5m: z.number().int().nonnegative().optional(),
     }).optional(),

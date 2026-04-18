@@ -9,6 +9,7 @@ export interface PayloadMetadata {
 export interface RawDiagnosticsChannel {
   ble_obd_connected?: boolean;
   elm_ready?: boolean;
+  ecu_state?: string;
   poll_interval_ms?: number;
   connect_fail_count_5m?: number;
 }

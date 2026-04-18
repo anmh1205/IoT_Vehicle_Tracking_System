@@ -22,6 +22,7 @@ const OBD_COOLANT_WARNING_C = 105;
 interface DiagnosticsSnapshot {
   bleConnected?: boolean;
   elmReady?: boolean;
+  ecuState?: string;
   sampleAgeMs?: number;
   connectFailCount5m?: number;
   rpm?: number;
@@ -30,7 +31,7 @@ interface DiagnosticsSnapshot {
   engineLoadPct?: number;
 }
 
-type ObdHealthState = 'good' | 'warning' | 'offline' | 'unknown';
+type ObdHealthState = 'good' | 'warning' | 'inactive' | 'offline' | 'unknown';
 
 const TELEMETRY_STATE_META = {
   healthy: { label: 'Đúng nhịp', variant: 'default' as const },
@@ -43,6 +44,7 @@ const TELEMETRY_STATE_META = {
 const healthLabel: Record<ObdHealthState, string> = {
   good: 'Ổn định',
   warning: 'Cảnh báo',
+  inactive: 'ECU dừng',
   offline: 'Mất kết nối',
   unknown: 'Chưa có dữ liệu',
 };
@@ -53,8 +55,19 @@ const healthBadgeVariant: Record<
 > = {
   good: 'default',
   warning: 'secondary',
+  inactive: 'outline',
   offline: 'destructive',
   unknown: 'outline',
+};
+
+const obdEcuStateLabel: Record<string, string> = {
+  live: 'Đang trả PID',
+  stopped: 'ECU đang dừng',
+  no_data: 'Không có dữ liệu PID',
+  searching: 'Đang dò giao thức',
+  error: 'Lỗi phản hồi OBD',
+  unknown: 'Chưa rõ',
+  disconnected: 'Ngắt kết nối',
 };
 
 const alertSeverityBadgeVariant: Record<
@@ -86,6 +99,9 @@ const toFiniteNumber = (value: unknown): number | undefined => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
+const toOptionalString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.trim().length > 0 ? value : undefined;
+
 const extractLatestDiagnostics = (rawFeed: DeviceRawFeedRow[]): DiagnosticsSnapshot | null => {
   for (const row of rawFeed) {
     const payload = toRecord(row.payload);
@@ -108,6 +124,7 @@ const extractLatestDiagnostics = (rawFeed: DeviceRawFeedRow[]): DiagnosticsSnaps
       bleConnected:
         channel?.ble_obd_connected === undefined ? undefined : Boolean(channel.ble_obd_connected),
       elmReady: channel?.elm_ready === undefined ? undefined : Boolean(channel.elm_ready),
+      ecuState: toOptionalString(channel?.ecu_state),
       sampleAgeMs: toFiniteNumber(quality?.sample_age_ms),
       connectFailCount5m: toFiniteNumber(channel?.connect_fail_count_5m),
       rpm: toFiniteNumber(signals?.rpm),
@@ -129,7 +146,13 @@ const resolveObdHealthState = (snapshot: DiagnosticsSnapshot | null): ObdHealthS
     return 'offline';
   }
 
+  if (snapshot.ecuState === 'stopped') {
+    return 'inactive';
+  }
+
   if (
+    snapshot.ecuState === 'searching' ||
+    snapshot.ecuState === 'no_data' ||
     (snapshot.connectFailCount5m !== undefined && snapshot.connectFailCount5m >= 3) ||
     (snapshot.sampleAgeMs !== undefined && snapshot.sampleAgeMs > OBD_STALE_SAMPLE_MS) ||
     (snapshot.coolantC !== undefined && snapshot.coolantC >= OBD_COOLANT_WARNING_C)
@@ -137,7 +160,7 @@ const resolveObdHealthState = (snapshot: DiagnosticsSnapshot | null): ObdHealthS
     return 'warning';
   }
 
-  if (snapshot.bleConnected === true && snapshot.elmReady === true) {
+  if (snapshot.bleConnected === true && snapshot.elmReady === true && snapshot.ecuState === 'live') {
     return 'good';
   }
 
@@ -153,6 +176,16 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
 
   if (snapshot.bleConnected === false || snapshot.elmReady === false) {
     recommendations.push('Kiểm tra adapter OBD BLE, nguồn cổng OBD và vị trí thiết bị.');
+  }
+  if (snapshot.ecuState === 'stopped') {
+    recommendations.push(
+      'ECU đang trả trạng thái STOPPED. Hãy bật ignition hoặc đánh thức bus OBD trước khi kỳ vọng PID thời gian thực.',
+    );
+  }
+  if (snapshot.ecuState === 'searching' || snapshot.ecuState === 'no_data') {
+    recommendations.push(
+      'OBD đã nối nhưng ECU chưa trả PID hợp lệ. Kiểm tra giao thức xe, nguồn OBD và thời điểm wakeup.',
+    );
   }
   if (snapshot.connectFailCount5m !== undefined && snapshot.connectFailCount5m >= 3) {
     recommendations.push('Lỗi kết nối OBD lặp lại nhiều trong 5 phút gần nhất.');
@@ -299,6 +332,10 @@ export const OverviewTab = () => {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="grid gap-2 sm:grid-cols-2">
+                <InfoTile
+                  label="Trạng thái ECU OBD"
+                  value={diagnosticsSnapshot?.ecuState ? (obdEcuStateLabel[diagnosticsSnapshot.ecuState] ?? diagnosticsSnapshot.ecuState) : '-'}
+                />
                 <InfoTile
                   label="Độ trễ mẫu"
                   value={diagnosticsSnapshot?.sampleAgeMs !== undefined ? `${diagnosticsSnapshot.sampleAgeMs.toFixed(0)} ms` : '-'}

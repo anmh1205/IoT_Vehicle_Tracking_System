@@ -114,6 +114,7 @@ const extractHighlights = (row: { source: string; payload: Record<string, unknow
     return [
       ['BLE OBD', stringifyValue(channel.ble_obd_connected)],
       ['ELM ready', stringifyValue(channel.elm_ready)],
+      ['ECU state', stringifyValue(channel.ecu_state)],
       ['RPM', stringifyValue(signals.rpm)],
       ['Tốc độ OBD', stringifyValue(signals.obd_speed_kph)],
       ['Coolant', stringifyValue(signals.coolant_c)],
