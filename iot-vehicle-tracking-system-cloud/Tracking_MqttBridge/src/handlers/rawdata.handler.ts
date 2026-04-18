@@ -2,6 +2,7 @@ import { rawDataSchema } from '../validators/payload.validator';
 import type { RawDiagnostics } from '../types/payload.types';
 import {
   ensureDeviceSession,
+  syncActiveObdDtcAlerts,
   touchDeviceSession,
   validateDevice,
 } from '../infrastructure/database';
@@ -301,10 +302,10 @@ const publishObdMaintenanceAlert = (
   });
 };
 
-const evaluateObdDtcRules = (
+const evaluateObdDtcRules = async (
   diagnostics: RawDiagnostics | undefined,
   context: ObdAlertContext,
-): void => {
+): Promise<void> => {
   if (!diagnostics?.dtc || !hasValidDtcQualityGate(diagnostics)) {
     return;
   }
@@ -322,6 +323,15 @@ const evaluateObdDtcRules = (
   appendBucket('stored', normalizeDtcCodes(diagnostics.dtc.stored));
   appendBucket('pending', normalizeDtcCodes(diagnostics.dtc.pending));
   appendBucket('permanent', normalizeDtcCodes(diagnostics.dtc.permanent));
+
+  const activeDtcTitles = Array.from(dtcBuckets.keys())
+    .filter((code) => resolveDtcRule(code) !== undefined)
+    .map((code) => `OBD: DTC ${code}`);
+  const existingActiveTitles = await syncActiveObdDtcAlerts(
+    context.deviceId,
+    activeDtcTitles,
+    'Auto-resolved by mqtt bridge: DTC cleared or superseded by latest OBD snapshot.',
+  );
 
   dtcBuckets.forEach((buckets, code) => {
     const rule = resolveDtcRule(code);
@@ -345,6 +355,11 @@ const evaluateObdDtcRules = (
     );
     const message = `${code} (${bucketLabel}${milOn ? ', MIL on' : ''}). ${rule.action}`;
     const ruleId = `obd_dtc_${code.toLowerCase()}`;
+    const title = `OBD: DTC ${code}`;
+
+    if (existingActiveTitles.has(title)) {
+      return;
+    }
 
     if (!canEmitRule(context.deviceId, ruleId, context.timestampMs)) {
       return;
@@ -353,7 +368,7 @@ const evaluateObdDtcRules = (
     publishObdMaintenanceAlert(context, {
       ruleId,
       severity,
-      title: `OBD: DTC ${code}`,
+      title,
       message,
       confidence,
       value: 1,
@@ -769,7 +784,7 @@ export const handleRawData = async (
     payload.data.battery_top,
     effectiveSpeed,
   );
-  evaluateObdDtcRules(diagnostics, {
+  await evaluateObdDtcRules(diagnostics, {
     deviceId: payload.device_id,
     vehicleId: device.vehicle_id,
     timestampMs,
