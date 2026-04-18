@@ -2,6 +2,7 @@ import { rawDataSchema } from '../validators/payload.validator';
 import type { RawDiagnostics } from '../types/payload.types';
 import {
   ensureDeviceSession,
+  syncActiveMaintenanceAlertsByTitle,
   syncActiveObdDtcAlerts,
   touchDeviceSession,
   validateDevice,
@@ -27,6 +28,12 @@ const OBD_VOLTAGE_LOW_V = 12;
 const OBD_VOLTAGE_LOAD_MIN = 50;
 const OBD_DTC_MAX_SAMPLE_AGE_MS = 60_000;
 const OBD_SAMPLE_AGE_SENTINEL_MS = 0xffffffff;
+const OBD_RULE_MAINTENANCE_TITLES = [
+  'OBD: Channel unstable',
+  'OBD: Coolant risk pattern',
+  'OBD: Idle-load anomaly',
+  'OBD: Voltage risk under load',
+] as const;
 
 const ruleCooldownUntil = new Map<string, number>();
 const idleAnomalyStartedAt = new Map<string, number>();
@@ -384,10 +391,10 @@ const evaluateObdMaintenanceRules = (
   context: ObdAlertContext,
   fallbackBatteryTop: number | undefined,
   fallbackSpeed: number | undefined,
-): void => {
+): Promise<void> => {
   if (!diagnostics) {
     idleAnomalyStartedAt.delete(context.deviceId);
-    return;
+    return Promise.resolve();
   }
 
   const connectFailCount = toFiniteNumber(diagnostics.channel?.connect_fail_count_5m);
@@ -397,39 +404,27 @@ const evaluateObdMaintenanceRules = (
   const obdSpeed = toFiniteNumber(diagnostics.signals?.obd_speed_kph);
   const speed = obdSpeed ?? fallbackSpeed;
   const batteryTop = fallbackBatteryTop;
-
-  if (
-    connectFailCount !== undefined &&
-    connectFailCount >= OBD_CHANNEL_UNSTABLE_THRESHOLD &&
-    canEmitRule(context.deviceId, 'obd_channel_unstable', context.timestampMs)
-  ) {
-    publishObdMaintenanceAlert(context, {
-      ruleId: 'obd_channel_unstable',
-      severity: 'medium',
-      title: 'OBD: Channel unstable',
-      message: `OBD connect/init failed ${connectFailCount.toFixed(0)} times in the last 5 minutes.`,
-      confidence: 0.86,
-      threshold: OBD_CHANNEL_UNSTABLE_THRESHOLD,
-      value: connectFailCount,
-    });
-  }
-
-  if (
+  const activeRuleTitles = new Set<string>();
+  const channelUnstableActive =
+    connectFailCount !== undefined && connectFailCount >= OBD_CHANNEL_UNSTABLE_THRESHOLD;
+  const coolantRiskActive =
     coolant !== undefined &&
     engineLoad !== undefined &&
     coolant >= OBD_COOLANT_HIGH_C &&
-    engineLoad >= OBD_HIGH_ENGINE_LOAD &&
-    canEmitRule(context.deviceId, 'coolant_risk_pattern', context.timestampMs)
-  ) {
-    publishObdMaintenanceAlert(context, {
-      ruleId: 'coolant_risk_pattern',
-      severity: 'high',
-      title: 'OBD: Coolant risk pattern',
-      message: `Coolant ${coolant.toFixed(1)}C with engine load ${engineLoad.toFixed(1)}% sustained at runtime.`,
-      confidence: 0.9,
-      threshold: OBD_COOLANT_HIGH_C,
-      value: coolant,
-    });
+    engineLoad >= OBD_HIGH_ENGINE_LOAD;
+  const voltageRiskActive =
+    batteryTop !== undefined &&
+    engineLoad !== undefined &&
+    batteryTop < OBD_VOLTAGE_LOW_V &&
+    engineLoad > OBD_VOLTAGE_LOAD_MIN;
+  let idleAnomalyEligible = false;
+  let idleAnomalyElapsedMs = 0;
+
+  if (channelUnstableActive) {
+    activeRuleTitles.add('OBD: Channel unstable');
+  }
+  if (coolantRiskActive) {
+    activeRuleTitles.add('OBD: Coolant risk pattern');
   }
 
   if (rpm !== undefined && speed !== undefined && rpm > OBD_IDLE_RPM_THRESHOLD && speed <= OBD_IDLE_SPEED_MAX_KPH) {
@@ -439,42 +434,89 @@ const evaluateObdMaintenanceRules = (
       idleAnomalyStartedAt.set(context.deviceId, anomalyStart);
     }
 
-    const elapsedMs = Math.max(0, context.timestampMs - anomalyStart);
+    idleAnomalyElapsedMs = Math.max(0, context.timestampMs - anomalyStart);
+    idleAnomalyEligible = idleAnomalyElapsedMs >= OBD_IDLE_ANOMALY_MIN_DURATION_MS;
+    if (idleAnomalyEligible) {
+      activeRuleTitles.add('OBD: Idle-load anomaly');
+    }
+  } else {
+    idleAnomalyStartedAt.delete(context.deviceId);
+  }
+
+  if (voltageRiskActive) {
+    activeRuleTitles.add('OBD: Voltage risk under load');
+  }
+
+  return syncActiveMaintenanceAlertsByTitle(
+    context.deviceId,
+    Array.from(OBD_RULE_MAINTENANCE_TITLES),
+    Array.from(activeRuleTitles),
+    'Auto-resolved by mqtt bridge: OBD maintenance condition cleared in latest telemetry snapshot.',
+  ).then((existingActiveTitles) => {
     if (
-      elapsedMs >= OBD_IDLE_ANOMALY_MIN_DURATION_MS &&
+      channelUnstableActive &&
+      !existingActiveTitles.has('OBD: Channel unstable') &&
+      canEmitRule(context.deviceId, 'obd_channel_unstable', context.timestampMs)
+    ) {
+      publishObdMaintenanceAlert(context, {
+        ruleId: 'obd_channel_unstable',
+        severity: 'medium',
+        title: 'OBD: Channel unstable',
+        message: `OBD connect/init failed ${connectFailCount!.toFixed(0)} times in the last 5 minutes.`,
+        confidence: 0.86,
+        threshold: OBD_CHANNEL_UNSTABLE_THRESHOLD,
+        value: connectFailCount,
+      });
+    }
+
+    if (
+      coolantRiskActive &&
+      !existingActiveTitles.has('OBD: Coolant risk pattern') &&
+      canEmitRule(context.deviceId, 'coolant_risk_pattern', context.timestampMs)
+    ) {
+      publishObdMaintenanceAlert(context, {
+        ruleId: 'coolant_risk_pattern',
+        severity: 'high',
+        title: 'OBD: Coolant risk pattern',
+        message: `Coolant ${coolant!.toFixed(1)}C with engine load ${engineLoad!.toFixed(1)}% sustained at runtime.`,
+        confidence: 0.9,
+        threshold: OBD_COOLANT_HIGH_C,
+        value: coolant,
+      });
+    }
+
+    if (
+      idleAnomalyEligible &&
+      !existingActiveTitles.has('OBD: Idle-load anomaly') &&
       canEmitRule(context.deviceId, 'idle_load_anomaly', context.timestampMs)
     ) {
       publishObdMaintenanceAlert(context, {
         ruleId: 'idle_load_anomaly',
         severity: 'medium',
         title: 'OBD: Idle-load anomaly',
-        message: `RPM ${rpm.toFixed(0)} while speed ${speed.toFixed(1)} km/h for ${(elapsedMs / 60000).toFixed(1)} minutes.`,
+        message: `RPM ${rpm!.toFixed(0)} while speed ${speed!.toFixed(1)} km/h for ${(idleAnomalyElapsedMs / 60000).toFixed(1)} minutes.`,
         confidence: 0.78,
         threshold: OBD_IDLE_RPM_THRESHOLD,
         value: rpm,
       });
     }
-  } else {
-    idleAnomalyStartedAt.delete(context.deviceId);
-  }
 
-  if (
-    batteryTop !== undefined &&
-    engineLoad !== undefined &&
-    batteryTop < OBD_VOLTAGE_LOW_V &&
-    engineLoad > OBD_VOLTAGE_LOAD_MIN &&
-    canEmitRule(context.deviceId, 'voltage_risk_combined', context.timestampMs)
-  ) {
-    publishObdMaintenanceAlert(context, {
-      ruleId: 'voltage_risk_combined',
-      severity: 'high',
-      title: 'OBD: Voltage risk under load',
-      message: `Battery top ${batteryTop.toFixed(2)}V while engine load ${engineLoad.toFixed(1)}%.`,
-      confidence: 0.84,
-      threshold: OBD_VOLTAGE_LOW_V,
-      value: batteryTop,
-    });
-  }
+    if (
+      voltageRiskActive &&
+      !existingActiveTitles.has('OBD: Voltage risk under load') &&
+      canEmitRule(context.deviceId, 'voltage_risk_combined', context.timestampMs)
+    ) {
+      publishObdMaintenanceAlert(context, {
+        ruleId: 'voltage_risk_combined',
+        severity: 'high',
+        title: 'OBD: Voltage risk under load',
+        message: `Battery top ${batteryTop!.toFixed(2)}V while engine load ${engineLoad!.toFixed(1)}%.`,
+        confidence: 0.84,
+        threshold: OBD_VOLTAGE_LOW_V,
+        value: batteryTop,
+      });
+    }
+  });
 };
 
 /**
@@ -768,7 +810,7 @@ export const handleRawData = async (
     timestamp: new Date(timestampMs).toISOString(),
   });
 
-  evaluateObdMaintenanceRules(
+  await evaluateObdMaintenanceRules(
     diagnostics,
     {
       deviceId: payload.device_id,

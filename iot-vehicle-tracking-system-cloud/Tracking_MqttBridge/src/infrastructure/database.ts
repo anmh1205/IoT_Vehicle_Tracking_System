@@ -445,3 +445,83 @@ export const syncActiveObdDtcAlerts = async (
     return new Set<string>();
   }
 };
+
+export const syncActiveMaintenanceAlertsByTitle = async (
+  deviceId: string,
+  managedTitles: string[],
+  activeTitles: string[],
+  resolutionNotes: string,
+): Promise<Set<string>> => {
+  const knownTitles = Array.from(
+    new Set(
+      managedTitles
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0),
+    ),
+  );
+  if (knownTitles.length === 0) {
+    return new Set<string>();
+  }
+
+  const desiredTitles = new Set(
+    activeTitles
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0),
+  );
+
+  try {
+    const result = await pool.query<ActiveAlertRow>(
+      `SELECT id, title
+       FROM alerts
+       WHERE device_id = $1
+         AND alert_type = 'maintenance_due'
+         AND status IN ('active', 'acknowledged')
+         AND title = ANY($2::text[])
+       ORDER BY created_at DESC, id DESC`,
+      [deviceId, knownTitles],
+    );
+
+    const existingActiveTitles = new Set<string>();
+    const seenTitles = new Set<string>();
+    const idsToResolve: number[] = [];
+
+    result.rows.forEach((row) => {
+      const title = String(row.title ?? '').trim();
+      if (!title) {
+        idsToResolve.push(row.id);
+        return;
+      }
+
+      if (seenTitles.has(title)) {
+        idsToResolve.push(row.id);
+        return;
+      }
+
+      seenTitles.add(title);
+      if (desiredTitles.has(title)) {
+        existingActiveTitles.add(title);
+        return;
+      }
+
+      idsToResolve.push(row.id);
+    });
+
+    if (idsToResolve.length > 0) {
+      await pool.query(
+        `UPDATE alerts
+         SET status = 'resolved',
+             resolved_at = NOW(),
+             resolution_notes = $2,
+             updated_at = NOW()
+         WHERE id = ANY($1::int[])
+           AND status IN ('active', 'acknowledged')`,
+        [idsToResolve, resolutionNotes],
+      );
+    }
+
+    return existingActiveTitles;
+  } catch (err) {
+    logger.error({ err, deviceId }, 'syncActiveMaintenanceAlertsByTitle failed');
+    return new Set<string>();
+  }
+};
