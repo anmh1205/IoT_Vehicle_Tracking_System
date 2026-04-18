@@ -8,7 +8,7 @@ interface DeviceUpdate {
   longitude?: number;
   speed?: number;
   sessionId?: number;
-  timestamp: number;
+  serverTimestamp: number;
 }
 
 const MAX_BUFFER_SIZE = 100;
@@ -57,7 +57,10 @@ const flush = async (): Promise<void> => {
                last_latitude = COALESCE($3, last_latitude),
                last_longitude = COALESCE($4, last_longitude),
                last_speed = COALESCE($5, last_speed),
-               last_seen_at = to_timestamp($6 / 1000.0)
+               last_seen_at = GREATEST(
+                 COALESCE(last_seen_at, to_timestamp($6 / 1000.0)),
+                 to_timestamp($6 / 1000.0)
+               )
            WHERE device_id = $1`,
           [
             update.deviceId,
@@ -65,7 +68,7 @@ const flush = async (): Promise<void> => {
             update.latitude ?? null,
             update.longitude ?? null,
             update.speed ?? null,
-            update.timestamp,
+            update.serverTimestamp,
           ],
         );
 

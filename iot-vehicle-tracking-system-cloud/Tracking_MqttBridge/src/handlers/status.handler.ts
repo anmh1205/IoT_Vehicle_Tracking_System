@@ -40,6 +40,7 @@ export const handleStatus = async (
   }
 
   const payload = result.data;
+  const receivedAtMs = Date.now();
   const messageId = payload.metadata?.message_id;
   const schemaVersion = payload.metadata?.schema_version;
   const seqNo = payload.metadata?.seq_no;
@@ -79,12 +80,16 @@ export const handleStatus = async (
   }
 
   if (payload.status === 'running') {
-    const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs);
+    const ensuredSession = await ensureDeviceSession(
+      payload.device_id,
+      timestampMs,
+      receivedAtMs,
+    );
     const sessionId = ensuredSession.sessionId;
     const isNewSession = ensuredSession.isNew;
     setStatus(payload.device_id, 'running', sessionId);
 
-    await updateDeviceStatus(payload.device_id, 'running');
+    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs);
 
     if (isNewSession) {
       publishInternalEvent('session', {
@@ -123,11 +128,12 @@ export const handleStatus = async (
       payload.device_id,
       timestampMs,
       previousState?.sessionId,
+      receivedAtMs,
     );
     clearSession(payload.device_id);
     setStatus(payload.device_id, 'stopped', null);
 
-    await updateDeviceStatus(payload.device_id, 'stopped');
+    await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs);
 
     if (endedSessionId) {
       publishInternalEvent('session', {

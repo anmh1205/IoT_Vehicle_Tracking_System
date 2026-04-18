@@ -62,8 +62,22 @@ export const validateDevice = async (
 export const updateDeviceStatus = async (
   deviceId: string,
   status: string,
+  lastSeenTimestampMs?: number,
 ): Promise<void> => {
+  const lastSeenAt = lastSeenTimestampMs ? toIsoTimestamp(lastSeenTimestampMs) : null;
+
   try {
+    if (lastSeenAt) {
+      await pool.query(
+        `UPDATE devices
+         SET current_status = $2,
+             last_seen_at = GREATEST(COALESCE(last_seen_at, $3::timestamptz), $3::timestamptz)
+         WHERE device_id = $1`,
+        [deviceId, status, lastSeenAt],
+      );
+      return;
+    }
+
     await pool.query(
       `UPDATE devices
        SET current_status = $2, last_seen_at = NOW()
@@ -77,10 +91,12 @@ export const updateDeviceStatus = async (
 
 export const ensureDeviceSession = async (
   deviceId: string,
-  timestampMs: number,
+  deviceTimestampMs: number,
+  serverTimestampMs = Date.now(),
 ): Promise<{ sessionId: number; isNew: boolean }> => {
   const client = await pool.connect();
-  const occurredAt = toIsoTimestamp(timestampMs);
+  const deviceOccurredAt = toIsoTimestamp(deviceTimestampMs);
+  const serverOccurredAt = toIsoTimestamp(serverTimestampMs);
 
   try {
     await client.query('BEGIN');
@@ -112,9 +128,9 @@ export const ensureDeviceSession = async (
          created_at,
          updated_at
        )
-       VALUES ($1, 'running', $2, $2, 0, $2, NOW(), NOW())
+       VALUES ($1, 'running', $2, $3, 0, $2, NOW(), NOW())
        RETURNING id`,
-      [deviceId, occurredAt],
+      [deviceId, serverOccurredAt, deviceOccurredAt],
     );
 
     await client.query('COMMIT');
@@ -131,25 +147,28 @@ export const ensureDeviceSession = async (
 export const touchDeviceSession = async (params: {
   deviceId: string;
   sessionId: number;
-  timestampMs: number;
+  deviceTimestampMs: number;
+  serverTimestampMs?: number;
   vibration?: number;
   latitude?: number;
   longitude?: number;
   speed?: number;
 }): Promise<void> => {
-  const occurredAt = toIsoTimestamp(params.timestampMs);
+  const serverOccurredAt = toIsoTimestamp(params.serverTimestampMs ?? Date.now());
 
   try {
     await pool.query(
       `UPDATE device_sessions
        SET
-         last_update = $2,
+         last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
          data_points_count = COALESCE(data_points_count, 0) + 1,
          uptime = GREATEST(
+           COALESCE(uptime, 0),
            EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
            0
          ),
          total_runtime_seconds = GREATEST(
+           COALESCE(total_runtime_seconds, 0),
            EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
            0
          ),
@@ -165,7 +184,7 @@ export const touchDeviceSession = async (params: {
        WHERE id = $1`,
       [
         params.sessionId,
-        occurredAt,
+        serverOccurredAt,
         params.vibration ?? null,
         params.latitude ?? null,
         params.longitude ?? null,
@@ -176,7 +195,7 @@ export const touchDeviceSession = async (params: {
     await pool.query(
       `UPDATE devices
        SET current_status = 'running',
-           last_seen_at = $2::timestamptz,
+           last_seen_at = GREATEST(COALESCE(last_seen_at, $2::timestamptz), $2::timestamptz),
            last_latitude = COALESCE($3, last_latitude),
            last_longitude = COALESCE($4, last_longitude),
            last_speed = COALESCE($5, last_speed),
@@ -184,7 +203,7 @@ export const touchDeviceSession = async (params: {
        WHERE device_id = $1`,
       [
         params.deviceId,
-        occurredAt,
+        serverOccurredAt,
         params.latitude ?? null,
         params.longitude ?? null,
         params.speed ?? null,
@@ -195,9 +214,10 @@ export const touchDeviceSession = async (params: {
       await pool.query(
         `UPDATE device_sessions
          SET
-           last_update = $2,
+           last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
            data_points_count = COALESCE(data_points_count, 0) + 1,
            uptime = GREATEST(
+             COALESCE(uptime, 0),
              EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
              0
            ),
@@ -213,7 +233,7 @@ export const touchDeviceSession = async (params: {
          WHERE id = $1`,
         [
           params.sessionId,
-          occurredAt,
+          serverOccurredAt,
           params.vibration ?? null,
           params.latitude ?? null,
           params.longitude ?? null,
@@ -224,7 +244,7 @@ export const touchDeviceSession = async (params: {
       await pool.query(
         `UPDATE devices
          SET current_status = 'running',
-             last_seen_at = $2::timestamptz,
+             last_seen_at = GREATEST(COALESCE(last_seen_at, $2::timestamptz), $2::timestamptz),
              last_latitude = COALESCE($3, last_latitude),
              last_longitude = COALESCE($4, last_longitude),
              last_speed = COALESCE($5, last_speed),
@@ -232,7 +252,7 @@ export const touchDeviceSession = async (params: {
          WHERE device_id = $1`,
         [
           params.deviceId,
-          occurredAt,
+          serverOccurredAt,
           params.latitude ?? null,
           params.longitude ?? null,
           params.speed ?? null,
@@ -247,11 +267,13 @@ export const touchDeviceSession = async (params: {
 
 export const completeDeviceSession = async (
   deviceId: string,
-  timestampMs: number,
+  deviceTimestampMs: number,
   knownSessionId?: number | null,
+  serverTimestampMs?: number,
 ): Promise<number | null> => {
   const client = await pool.connect();
-  const occurredAt = toIsoTimestamp(timestampMs);
+  const deviceOccurredAt = toIsoTimestamp(deviceTimestampMs);
+  const serverOccurredAt = toIsoTimestamp(serverTimestampMs ?? Date.now());
 
   try {
     await client.query('BEGIN');
@@ -291,7 +313,7 @@ export const completeDeviceSession = async (
          SET
            status = 'completed',
            server_session_end = $2,
-           session_end = $2,
+           session_end = $3,
            last_update = $2,
            uptime = GREATEST(
              EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
@@ -304,7 +326,7 @@ export const completeDeviceSession = async (
            updated_at = NOW()
          WHERE id = $1
          RETURNING COALESCE(total_runtime_seconds, uptime, 0)::text AS runtime_seconds`,
-        [session.id, occurredAt],
+        [session.id, serverOccurredAt, deviceOccurredAt],
       );
 
       runtimeSeconds = Number.parseInt(String(completed.rows[0]?.runtime_seconds ?? '0'), 10);
@@ -318,7 +340,7 @@ export const completeDeviceSession = async (
          SET
            status = 'completed',
            server_session_end = $2,
-           session_end = $2,
+           session_end = $3,
            last_update = $2,
            uptime = GREATEST(
              EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
@@ -327,7 +349,7 @@ export const completeDeviceSession = async (
            updated_at = NOW()
          WHERE id = $1
          RETURNING COALESCE(uptime, 0)::text AS runtime_seconds`,
-        [session.id, occurredAt],
+        [session.id, serverOccurredAt, deviceOccurredAt],
       );
 
       runtimeSeconds = Number.parseInt(String(completed.rows[0]?.runtime_seconds ?? '0'), 10);

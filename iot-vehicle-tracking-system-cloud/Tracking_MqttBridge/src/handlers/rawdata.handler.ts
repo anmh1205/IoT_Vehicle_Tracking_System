@@ -285,6 +285,7 @@ export const handleRawData = async (
   }
 
   const payload = result.data;
+  const receivedAtMs = Date.now();
   const messageId = payload.metadata?.message_id;
   const schemaVersion = payload.metadata?.schema_version;
   const seqNo = payload.metadata?.seq_no;
@@ -337,7 +338,7 @@ export const handleRawData = async (
   const previousStatus = previousState?.status;
 
   // 3. Get or create session in PostgreSQL, then mirror its ID in local cache.
-  const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs);
+  const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs);
   const sessionId = ensuredSession.sessionId;
   const isNewSession = ensuredSession.isNew;
 
@@ -427,13 +428,14 @@ export const handleRawData = async (
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
     sessionId,
-    timestamp: timestampMs,
+    serverTimestamp: receivedAtMs,
   });
 
   await touchDeviceSession({
     deviceId: payload.device_id,
     sessionId,
-    timestampMs,
+    deviceTimestampMs: timestampMs,
+    serverTimestampMs: receivedAtMs,
     vibration: payload.data.vibration,
     latitude: effectiveLatitude,
     longitude: effectiveLongitude,
