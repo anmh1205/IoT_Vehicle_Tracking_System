@@ -40,6 +40,38 @@ const toBoolean = (value: unknown): boolean | undefined => {
   return undefined;
 };
 
+const normalizeGnssLocation = (
+  latitude: number | undefined,
+  longitude: number | undefined,
+  satellites: number | undefined,
+): {
+  latitude: number | undefined;
+  longitude: number | undefined;
+  speedAllowed: boolean;
+} => {
+  if (latitude === undefined || longitude === undefined) {
+    return {
+      latitude,
+      longitude,
+      speedAllowed: false,
+    };
+  }
+
+  if (latitude === 0 && longitude === 0 && (satellites ?? 0) === 0) {
+    return {
+      latitude: undefined,
+      longitude: undefined,
+      speedAllowed: false,
+    };
+  }
+
+  return {
+    latitude,
+    longitude,
+    speedAllowed: true,
+  };
+};
+
 const getRuleKey = (deviceId: string, ruleId: string) => `${deviceId}:${ruleId}`;
 
 const canEmitRule = (deviceId: string, ruleId: string, timestampMs: number): boolean => {
@@ -185,9 +217,9 @@ const evaluateObdMaintenanceRules = (
       canEmitRule(context.deviceId, 'idle_load_anomaly', context.timestampMs)
     ) {
       publishObdMaintenanceAlert(context, {
-      ruleId: 'idle_load_anomaly',
-      severity: 'medium',
-      title: 'OBD: Idle-load anomaly',
+        ruleId: 'idle_load_anomaly',
+        severity: 'medium',
+        title: 'OBD: Idle-load anomaly',
         message: `RPM ${rpm.toFixed(0)} while speed ${speed.toFixed(1)} km/h for ${(elapsedMs / 60000).toFixed(1)} minutes.`,
         confidence: 0.78,
         threshold: OBD_IDLE_RPM_THRESHOLD,
@@ -258,6 +290,15 @@ export const handleRawData = async (
   const seqNo = payload.metadata?.seq_no;
   const bootId = payload.metadata?.boot_id;
   const diagnostics = payload.diagnostics;
+  const normalizedGnss = normalizeGnssLocation(
+    payload.data.latitude,
+    payload.data.longitude,
+    payload.data.satellites,
+  );
+  const effectiveLatitude = normalizedGnss.latitude;
+  const effectiveLongitude = normalizedGnss.longitude;
+  const effectiveSpeed = normalizedGnss.speedAllowed ? payload.data.speed : undefined;
+  const effectiveCourse = normalizedGnss.speedAllowed ? payload.data.course : undefined;
 
   // Verify topic deviceId matches payload deviceId
   if (payload.device_id !== deviceIdFromTopic) {
@@ -318,10 +359,10 @@ export const handleRawData = async (
     vibration: payload.data.vibration,
     battery_top: payload.data.battery_top,
     battery_bot: payload.data.battery_bot,
-    latitude: payload.data.latitude,
-    longitude: payload.data.longitude,
-    speed: payload.data.speed,
-    course: payload.data.course,
+    latitude: effectiveLatitude,
+    longitude: effectiveLongitude,
+    speed: effectiveSpeed,
+    course: effectiveCourse,
     satellites: payload.data.satellites,
     ignition: payload.data.ignition !== undefined
       ? (payload.data.ignition ? 1 : 0)
@@ -357,9 +398,9 @@ export const handleRawData = async (
     schema_version: schemaVersion,
     seq_no: seqNo,
     boot_id: bootId,
-    latitude: payload.data.latitude,
-    longitude: payload.data.longitude,
-    speed: payload.data.speed,
+    latitude: effectiveLatitude,
+    longitude: effectiveLongitude,
+    speed: effectiveSpeed,
     diagnostics: diagnostics ?? null,
   }).catch((err) => {
     logger.error(`VictoriaLogs write failed for ${payload.device_id}`, err);
@@ -382,9 +423,9 @@ export const handleRawData = async (
   addUpdate({
     deviceId: payload.device_id,
     status: 'running',
-    latitude: payload.data.latitude,
-    longitude: payload.data.longitude,
-    speed: payload.data.speed,
+    latitude: effectiveLatitude,
+    longitude: effectiveLongitude,
+    speed: effectiveSpeed,
     sessionId,
     timestamp: timestampMs,
   });
@@ -393,22 +434,22 @@ export const handleRawData = async (
     sessionId,
     timestampMs,
     vibration: payload.data.vibration,
-    latitude: payload.data.latitude,
-    longitude: payload.data.longitude,
-    speed: payload.data.speed,
+    latitude: effectiveLatitude,
+    longitude: effectiveLongitude,
+    speed: effectiveSpeed,
   });
 
   // 7. Check geofences (fire-and-forget, non-blocking)
   if (
-    payload.data.latitude !== undefined &&
-    payload.data.longitude !== undefined &&
+    effectiveLatitude !== undefined &&
+    effectiveLongitude !== undefined &&
     device.vehicle_id
   ) {
     checkGeofences(
       payload.device_id,
       device.vehicle_id,
-      payload.data.latitude,
-      payload.data.longitude,
+      effectiveLatitude,
+      effectiveLongitude,
     ).catch((err) => {
       logger.error({ err, deviceId: payload.device_id }, 'Geofence check failed');
     });
@@ -433,17 +474,17 @@ export const handleRawData = async (
     device_id: payload.device_id,
     vehicle_id: device.vehicle_id ?? undefined,
     session_id: sessionId,
-    lat: payload.data.latitude,
-    lon: payload.data.longitude,
-    spd: payload.data.speed,
+    lat: effectiveLatitude,
+    lon: effectiveLongitude,
+    spd: effectiveSpeed,
     bb: payload.data.battery_bot,
     bt: payload.data.battery_top,
     err: payload.data.error_code,
     vib: payload.data.vibration,
-    latitude: payload.data.latitude,
-    longitude: payload.data.longitude,
-    speed: payload.data.speed,
-    course: payload.data.course,
+    latitude: effectiveLatitude,
+    longitude: effectiveLongitude,
+    speed: effectiveSpeed,
+    course: effectiveCourse,
     battery_top: payload.data.battery_top,
     diagnostics: diagnostics ?? undefined,
     message_id: messageId,
@@ -459,15 +500,15 @@ export const handleRawData = async (
       deviceId: payload.device_id,
       vehicleId: device.vehicle_id,
       timestampMs,
-      latitude: payload.data.latitude,
-      longitude: payload.data.longitude,
+      latitude: effectiveLatitude,
+      longitude: effectiveLongitude,
       messageId,
       schemaVersion,
       seqNo,
       bootId,
     },
     payload.data.battery_top,
-    payload.data.speed,
+    effectiveSpeed,
   );
 
   // 8. Check alerts - vibration threshold
@@ -484,8 +525,8 @@ export const handleRawData = async (
       schema_version: schemaVersion,
       seq_no: seqNo,
       boot_id: bootId,
-      latitude: payload.data.latitude,
-      longitude: payload.data.longitude,
+      latitude: effectiveLatitude,
+      longitude: effectiveLongitude,
     });
 
     logger.info(

@@ -143,6 +143,7 @@ export const touchDeviceSession = async (params: {
       `UPDATE device_sessions
        SET
          last_update = $2,
+         data_points_count = COALESCE(data_points_count, 0) + 1,
          uptime = GREATEST(
            EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
            0
@@ -176,6 +177,7 @@ export const touchDeviceSession = async (params: {
         `UPDATE device_sessions
          SET
            last_update = $2,
+           data_points_count = COALESCE(data_points_count, 0) + 1,
            uptime = GREATEST(
              EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
              0
