@@ -83,6 +83,19 @@ const toOptionalInt = (value: unknown): number | undefined => {
   return rounded > 0 ? rounded : undefined;
 };
 
+const asRecord = (value: unknown): Record<string, unknown> | undefined => {
+  if (typeof value !== 'object' || value === null) {
+    return undefined;
+  }
+  return value as Record<string, unknown>;
+};
+
+const getDiagnosticsSignal = (payload: Record<string, unknown>, signalKey: string): number | undefined => {
+  const diagnostics = asRecord(payload.diagnostics);
+  const signals = asRecord(diagnostics?.signals);
+  return toOptionalNumber(signals?.[signalKey]);
+};
+
 const toAlertSeverity = (value: unknown): 'low' | 'medium' | 'high' | 'critical' => {
   const normalized = String(value ?? '').toLowerCase();
   if (normalized === 'critical') return 'critical';
@@ -130,13 +143,24 @@ const persistRawDataEventLog = async (
     return;
   }
 
+  const heading = toOptionalNumber(payload.heading ?? payload.course);
+  const batteryTop = toOptionalNumber(payload.bt ?? payload.battery_top);
+  const temperature = toOptionalNumber(payload.temp ?? payload.temperature)
+    ?? getDiagnosticsSignal(payload, 'coolant_c')
+    ?? getDiagnosticsSignal(payload, 'intake_air_temp_c');
+
   const context = {
     lat: toOptionalNumber(payload.lat ?? payload.latitude),
     lon: toOptionalNumber(payload.lon ?? payload.longitude),
     spd: toOptionalNumber(payload.spd ?? payload.speed),
     bb: toOptionalNumber(payload.bb),
-    bt: toOptionalNumber(payload.bt ?? payload.battery_top),
+    bt: batteryTop,
+    batt: batteryTop,
+    heading,
+    course: heading,
     vib: toOptionalNumber(payload.vib ?? payload.vibration),
+    temp: temperature,
+    temperature,
     err: toOptionalNumber(payload.err ?? payload.error_code),
     diagnostics: payload.diagnostics ?? null,
     source: 'mqtt_bridge_rawdata',

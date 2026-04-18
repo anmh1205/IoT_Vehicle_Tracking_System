@@ -178,16 +178,54 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        COALESCE(d.last_longitude, d.longitude) AS longitude,
        d.current_status,
        d.last_seen_at,
-       COALESCE(d.last_speed, NULLIF(el.context->>'spd', '')::float8, 0) AS speed,
-       COALESCE(NULLIF(el.context->>'heading', '')::float8, 0) AS heading,
-       COALESCE(NULLIF(el.context->>'batt', '')::float8, 0) AS battery,
-       COALESCE(NULLIF(el.context->>'vib', '')::float8, 0) AS vibration,
-       COALESCE(NULLIF(el.context->>'temp', '')::float8, 0) AS temperature
+       COALESCE(
+         d.last_speed,
+         NULLIF(el.context->>'spd', '')::float8,
+         NULLIF(el.context->>'speed', '')::float8,
+         0
+       ) AS speed,
+       COALESCE(
+         NULLIF(el.context->>'heading', '')::float8,
+         NULLIF(el.context->>'course', '')::float8,
+         0
+       ) AS heading,
+       COALESCE(
+         NULLIF(el.context->>'batt', '')::float8,
+         NULLIF(el.context->>'bt', '')::float8,
+         NULLIF(el.context->>'battery_top', '')::float8,
+         0
+       ) AS battery,
+       COALESCE(
+         NULLIF(el.context->>'vib', '')::float8,
+         NULLIF(el.context->>'vibration', '')::float8,
+         0
+       ) AS vibration,
+       COALESCE(
+         NULLIF(el.context->>'temp', '')::float8,
+         NULLIF(el.context->>'temperature', '')::float8,
+         NULLIF(el.context#>>'{diagnostics,signals,coolant_c}', '')::float8,
+         NULLIF(el.context#>>'{diagnostics,signals,intake_air_temp_c}', '')::float8,
+         0
+       ) AS temperature
      FROM devices d
      LEFT JOIN LATERAL (
        SELECT context
        FROM event_logs
        WHERE device_id = d.device_id
+         AND context ?| ARRAY[
+           'spd',
+           'speed',
+           'heading',
+           'course',
+           'batt',
+           'bt',
+           'battery_top',
+           'vib',
+           'vibration',
+           'temp',
+           'temperature',
+           'diagnostics'
+         ]
        ORDER BY server_timestamp DESC
        LIMIT 1
      ) el ON true

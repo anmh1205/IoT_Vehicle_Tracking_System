@@ -13,7 +13,7 @@ import { SelectedDeviceCard } from './selected-device-card';
 export const DeviceListPanel = () => {
   const positions = useMapStore((state) => state.positions);
   const selectedDeviceId = useMapStore((state) => state.selectedDeviceId);
-  const setSelectedDevice = useMapStore((state) => state.setSelectedDevice);
+  const toggleSelectedDevice = useMapStore((state) => state.toggleSelectedDevice);
   const searchTerm = useMapStore((state) => state.searchTerm);
   const setSearchTerm = useMapStore((state) => state.setSearchTerm);
   const statusFilter = useMapStore((state) => state.statusFilter);
@@ -43,7 +43,7 @@ export const DeviceListPanel = () => {
               key={device.deviceId}
               device={device}
               active={device.deviceId === selectedDeviceId}
-              onClick={() => setSelectedDevice(device.deviceId)}
+              onClick={() => toggleSelectedDevice(device.deviceId)}
             />
           ))}
           {filteredDevices.length === 0 ? (

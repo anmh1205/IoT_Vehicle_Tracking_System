@@ -16,6 +16,7 @@ import { MapControls } from './map-controls';
 import { MapGeofenceDraftLayer } from './map-geofence-draft-layer';
 import type { MapGeofenceDraft, MapGeofenceRecord } from './map-geofence-types';
 import { MapGeofenceWorkspace } from './map-geofence-workspace';
+import { MapSelectedDeviceOverlay } from './map-selected-device-overlay';
 
 const DEFAULT_RADIUS_METERS = 500;
 
@@ -112,6 +113,7 @@ export const TrackingMap = () => {
   const positions = useMapStore((state) => state.positions);
   const selectedDeviceId = useMapStore((state) => state.selectedDeviceId);
   const setSelectedDevice = useMapStore((state) => state.setSelectedDevice);
+  const toggleSelectedDevice = useMapStore((state) => state.toggleSelectedDevice);
   const showGeofences = useMapStore((state) => state.showGeofences);
   const toggleGeofences = useMapStore((state) => state.toggleGeofences);
   const mapLayer = useMapStore((state) => state.mapLayer);
@@ -225,7 +227,7 @@ export const TrackingMap = () => {
       >
         <TileLayer attribution={layer.attribution} url={layer.url} />
 
-        <DeviceCluster devices={mapDevices} onSelect={setSelectedDevice} />
+        <DeviceCluster devices={mapDevices} onSelect={toggleSelectedDevice} />
 
         {showGeofences
           ? geofences.map((geofence) => <GeofenceLayer key={geofence.id} geofence={geofence} />)
@@ -277,6 +279,13 @@ export const TrackingMap = () => {
           saveGeofenceMutation.mutate(draft);
         }}
         onSeedFromSelectedDevice={seedDraftFromSelectedDevice}
+      />
+
+      <MapSelectedDeviceOverlay
+        device={selectedDevice}
+        onClose={() => {
+          setSelectedDevice(null);
+        }}
       />
     </div>
   );

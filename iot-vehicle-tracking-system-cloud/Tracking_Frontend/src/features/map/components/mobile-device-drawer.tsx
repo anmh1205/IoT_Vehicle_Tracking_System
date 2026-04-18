@@ -17,7 +17,7 @@ export const MobileDeviceDrawer = () => {
   const [open, setOpen] = useState(false);
   const positions = useMapStore((state) => state.positions);
   const selectedDeviceId = useMapStore((state) => state.selectedDeviceId);
-  const setSelectedDevice = useMapStore((state) => state.setSelectedDevice);
+  const toggleSelectedDevice = useMapStore((state) => state.toggleSelectedDevice);
   const searchTerm = useMapStore((state) => state.searchTerm);
   const setSearchTerm = useMapStore((state) => state.setSearchTerm);
   const statusFilter = useMapStore((state) => state.statusFilter);
@@ -68,7 +68,7 @@ export const MobileDeviceDrawer = () => {
                     device={device}
                     active={selectedDeviceId === device.deviceId}
                     onClick={() => {
-                      setSelectedDevice(device.deviceId);
+                      toggleSelectedDevice(device.deviceId);
                       setOpen(false);
                     }}
                   />

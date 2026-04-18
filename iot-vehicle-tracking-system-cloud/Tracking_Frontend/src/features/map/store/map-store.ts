@@ -15,6 +15,7 @@ export interface MapState {
   updateBatch: (positions: DevicePosition[]) => void;
   clearPositions: () => void;
   setSelectedDevice: (id: string | null) => void;
+  toggleSelectedDevice: (id: string) => void;
   selectDevice: (id: string | null) => void;
   setSearchTerm: (value: string) => void;
   setStatusFilter: (value: 'all' | DeviceMapStatus) => void;
@@ -49,6 +50,10 @@ export const useMapStore = create<MapState>((set) => ({
     }),
   clearPositions: () => set({ positions: new Map() }),
   setSelectedDevice: (id) => set({ selectedDeviceId: id }),
+  toggleSelectedDevice: (id) =>
+    set((state) => ({
+      selectedDeviceId: state.selectedDeviceId === id ? null : id,
+    })),
   selectDevice: (id) => set({ selectedDeviceId: id }),
   setSearchTerm: (value) => set({ searchTerm: value }),
   setStatusFilter: (value) => set({ statusFilter: value }),
