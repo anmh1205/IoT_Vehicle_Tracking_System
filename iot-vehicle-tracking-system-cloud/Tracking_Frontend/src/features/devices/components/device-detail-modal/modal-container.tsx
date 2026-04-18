@@ -20,6 +20,7 @@ import { useSendCommand } from '@/features/devices/hooks/use-send-command';
 import { useUpdateDevice } from '@/features/devices/hooks/use-update-device';
 import { useUpdateDeviceSettings } from '@/features/devices/hooks/use-update-device-settings';
 import { DeviceDetailModal } from './index';
+import { normalizeObdSampleAgeMs } from './normalize-obd-sample-age';
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
 
 const resolveTimestamp = (value: unknown): string | null => {
@@ -75,7 +76,7 @@ const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string =
   const speed = toFiniteNumber(signals?.obd_speed_kph);
   const coolant = toFiniteNumber(signals?.coolant_c);
   const load = toFiniteNumber(signals?.engine_load_pct);
-  const sampleAgeMs = toFiniteNumber(quality?.sample_age_ms);
+  const sampleAgeMs = normalizeObdSampleAgeMs(quality?.sample_age_ms);
   const failCount = toFiniteNumber(channel?.connect_fail_count_5m);
   const storedDtc = Array.isArray(dtc?.stored)
     ? dtc.stored.filter((item): item is string => typeof item === 'string' && item.length > 0)

@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDateTime, formatDuration } from '@/lib/utils/date/format';
 import { DeviceDetailEmptyState } from './empty-state';
 import { useDeviceDetailModal } from './modal-context';
+import { normalizeObdSampleAgeMs } from './normalize-obd-sample-age';
 
 const SOURCE_LABELS: Record<string, string> = {
   telemetry: 'Telemetry',
@@ -131,7 +132,7 @@ const extractHighlights = (row: { source: string; payload: Record<string, unknow
       ['RPM', stringifyValue(signals.rpm)],
       ['Tốc độ OBD', stringifyValue(signals.obd_speed_kph)],
       ['Coolant', stringifyValue(signals.coolant_c)],
-      ['Độ trễ mẫu', stringifyValue(quality.sample_age_ms)],
+      ['Độ trễ mẫu', stringifyValue(normalizeObdSampleAgeMs(quality.sample_age_ms))],
       ['Stored DTC', stringifyCodes(dtc.stored)],
       ['Pending DTC', stringifyCodes(dtc.pending)],
       ['Permanent DTC', stringifyCodes(dtc.permanent)],

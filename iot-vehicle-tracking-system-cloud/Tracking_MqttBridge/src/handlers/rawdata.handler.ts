@@ -25,6 +25,7 @@ const OBD_IDLE_SPEED_MAX_KPH = 3;
 const OBD_VOLTAGE_LOW_V = 12;
 const OBD_VOLTAGE_LOAD_MIN = 50;
 const OBD_DTC_MAX_SAMPLE_AGE_MS = 60_000;
+const OBD_SAMPLE_AGE_SENTINEL_MS = 0xffffffff;
 
 const ruleCooldownUntil = new Map<string, number>();
 const idleAnomalyStartedAt = new Map<string, number>();
@@ -205,6 +206,15 @@ const describeDtcBuckets = (buckets: Set<DtcBucket>): string => {
     buckets.has(bucket),
   );
   return ordered.join('/');
+};
+
+const normalizeObdSampleAgeMs = (value: unknown): number | undefined => {
+  const parsed = toFiniteNumber(value);
+  if (parsed === undefined || parsed < 0) {
+    return undefined;
+  }
+
+  return parsed >= OBD_SAMPLE_AGE_SENTINEL_MS ? undefined : parsed;
 };
 
 const hasValidDtcQualityGate = (diagnostics: RawDiagnostics): boolean => {
@@ -498,6 +508,20 @@ export const handleRawData = async (
   const pendingDtcCodes = normalizeDtcCodes(diagnostics?.dtc?.pending);
   const permanentDtcCodes = normalizeDtcCodes(diagnostics?.dtc?.permanent);
   const milOn = toBoolean(diagnostics?.mil_on) === true;
+  const normalizedObdSampleAgeMs = normalizeObdSampleAgeMs(diagnostics?.quality?.sample_age_ms);
+  const normalizedDiagnosticsQualityRest = diagnostics?.quality
+    ? Object.fromEntries(
+        Object.entries(diagnostics.quality).filter(([key]) => key !== 'sample_age_ms'),
+      )
+    : null;
+  const normalizedDiagnosticsQuality = diagnostics?.quality
+    ? {
+        ...normalizedDiagnosticsQualityRest,
+        ...(normalizedObdSampleAgeMs === undefined
+          ? {}
+          : { sample_age_ms: normalizedObdSampleAgeMs }),
+      }
+    : null;
   const normalizedGnss = normalizeGnssLocation(
     payload.data.latitude,
     payload.data.longitude,
@@ -588,7 +612,7 @@ export const handleRawData = async (
       ? undefined
       : (diagnostics?.channel?.elm_ready ? 1 : 0),
     obd_mil_on: diagnostics?.mil_on === undefined ? undefined : (milOn ? 1 : 0),
-    obd_sample_age_ms: toFiniteNumber(diagnostics?.quality?.sample_age_ms),
+    obd_sample_age_ms: normalizedObdSampleAgeMs,
     obd_connect_fail_count_5m: toFiniteNumber(diagnostics?.channel?.connect_fail_count_5m),
     obd_reported_dtc_count: toFiniteNumber(diagnostics?.reported_dtc_count),
     obd_dtc_stored_count: diagnostics?.dtc ? storedDtcCodes.length : undefined,
@@ -646,7 +670,7 @@ export const handleRawData = async (
         dtc_permanent: permanentDtcCodes,
         readiness: diagnostics.readiness ?? null,
       },
-      quality: diagnostics.quality ?? null,
+      quality: normalizedDiagnosticsQuality,
     }).catch((err) => {
       logger.error({ err, deviceId: payload.device_id }, 'OBD normalized diagnostic log write failed');
     });

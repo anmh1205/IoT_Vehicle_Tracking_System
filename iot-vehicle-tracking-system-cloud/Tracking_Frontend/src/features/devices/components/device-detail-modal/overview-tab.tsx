@@ -8,6 +8,7 @@ import { formatDateTime, formatDuration, formatNumber, formatRelative } from '@/
 import Link from 'next/link';
 import { RuntimeTab } from './runtime-tab';
 import { useDeviceDetailModal } from './modal-context';
+import { normalizeObdSampleAgeMs } from './normalize-obd-sample-age';
 import {
   formatCoordinateLabel,
   formatSecondsLabel,
@@ -177,7 +178,7 @@ const extractLatestDiagnostics = (rawFeed: DeviceRawFeedRow[]): DiagnosticsSnaps
         channel?.ble_obd_connected === undefined ? undefined : Boolean(channel.ble_obd_connected),
       elmReady: channel?.elm_ready === undefined ? undefined : Boolean(channel.elm_ready),
       ecuState: toOptionalString(channel?.ecu_state),
-      sampleAgeMs: toFiniteNumber(quality?.sample_age_ms),
+      sampleAgeMs: normalizeObdSampleAgeMs(quality?.sample_age_ms),
       connectFailCount5m: toFiniteNumber(channel?.connect_fail_count_5m),
       milOn: diagnostics.mil_on === undefined ? undefined : Boolean(diagnostics.mil_on),
       reportedDtcCount: toFiniteNumber(diagnostics.reported_dtc_count),
