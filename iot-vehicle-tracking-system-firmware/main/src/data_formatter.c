@@ -5,7 +5,7 @@
 #include "util.h"
 
 #define DATA_FORMATTER_DEFAULT_SCHEMA_VERSION "v1.0.0"
-#define DATA_FORMATTER_RAWDATA_SCHEMA_VERSION "v1.3.0"
+#define DATA_FORMATTER_RAWDATA_SCHEMA_VERSION "v1.4.0"
 #define DATA_FORMATTER_OBD_STALE_SAMPLE_MS 30000U
 
 /**
@@ -73,6 +73,50 @@ static void data_formatter_append_string_item(cJSON *array, const char *value) {
     }
 }
 
+static const char *data_formatter_monitor_status_label(obd_monitor_status_t status) {
+    switch (status) {
+        case OBD_MONITOR_STATUS_COMPLETE:
+            return "complete";
+        case OBD_MONITOR_STATUS_INCOMPLETE:
+            return "incomplete";
+        case OBD_MONITOR_STATUS_UNSUPPORTED:
+            return "unsupported";
+        case OBD_MONITOR_STATUS_UNKNOWN:
+        default:
+            return NULL;
+    }
+}
+
+static void data_formatter_add_monitor_status(cJSON *readiness,
+                                              const char *key,
+                                              obd_monitor_status_t status) {
+    if (readiness == NULL || util_string_empty(key)) {
+        return;
+    }
+
+    const char *label = data_formatter_monitor_status_label(status);
+    if (label != NULL) {
+        cJSON_AddStringToObject(readiness, key, label);
+    }
+}
+
+static void data_formatter_add_dtc_codes(cJSON *dtc,
+                                         const char *key,
+                                         const obd_dtc_list_t *list) {
+    if (dtc == NULL || util_string_empty(key) || list == NULL) {
+        return;
+    }
+
+    cJSON *codes = cJSON_AddArrayToObject(dtc, key);
+    if (codes == NULL) {
+        return;
+    }
+
+    for (uint8_t i = 0; i < list->count && i < TRACKER_OBD_MAX_DTC_CODES; ++i) {
+        data_formatter_append_string_item(codes, list->codes[i]);
+    }
+}
+
 static void data_formatter_add_diagnostics(cJSON *root, const telemetry_t *telemetry) {
     if (root == NULL || telemetry == NULL) {
         return;
@@ -95,6 +139,10 @@ static void data_formatter_add_diagnostics(cJSON *root, const telemetry_t *telem
 
     cJSON_AddBoolToObject(channel, "ble_obd_connected", telemetry->obd_ble_connected);
     cJSON_AddBoolToObject(channel, "elm_ready", telemetry->obd_elm_ready);
+    cJSON_AddStringToObject(channel,
+                            "ecu_state",
+                            util_string_empty(telemetry->obd_ecu_state) ? "unknown"
+                                                                         : telemetry->obd_ecu_state);
     cJSON_AddNumberToObject(channel, "poll_interval_ms", 1200);
     cJSON_AddNumberToObject(channel, "connect_fail_count_5m", telemetry->obd_connect_fail_count_5m);
 
@@ -121,6 +169,70 @@ static void data_formatter_add_diagnostics(cJSON *root, const telemetry_t *telem
             cJSON_AddStringToObject(event_item, "code", "obd_connect_failed");
             cJSON_AddNumberToObject(event_item, "count_5m", telemetry->obd_connect_fail_count_5m);
             cJSON_AddItemToArray(events, event_item);
+        }
+    }
+
+    if (telemetry->obd_readiness.valid) {
+        cJSON_AddBoolToObject(diagnostics, "mil_on", telemetry->obd_readiness.mil_on);
+        cJSON_AddNumberToObject(diagnostics,
+                                "reported_dtc_count",
+                                telemetry->obd_readiness.reported_dtc_count);
+
+        cJSON *readiness = cJSON_AddObjectToObject(diagnostics, "readiness");
+        if (readiness != NULL) {
+            data_formatter_add_monitor_status(readiness, "misfire", telemetry->obd_readiness.misfire);
+            data_formatter_add_monitor_status(readiness,
+                                              "fuel_system",
+                                              telemetry->obd_readiness.fuel_system);
+            data_formatter_add_monitor_status(readiness,
+                                              "comprehensive_components",
+                                              telemetry->obd_readiness.comprehensive_components);
+            data_formatter_add_monitor_status(readiness, "catalyst", telemetry->obd_readiness.catalyst);
+            data_formatter_add_monitor_status(readiness,
+                                              "heated_catalyst",
+                                              telemetry->obd_readiness.heated_catalyst);
+            data_formatter_add_monitor_status(readiness,
+                                              "evaporative_system",
+                                              telemetry->obd_readiness.evaporative_system);
+            data_formatter_add_monitor_status(readiness,
+                                              "secondary_air_system",
+                                              telemetry->obd_readiness.secondary_air_system);
+            data_formatter_add_monitor_status(readiness,
+                                              "ac_refrigerant",
+                                              telemetry->obd_readiness.ac_refrigerant);
+            data_formatter_add_monitor_status(readiness,
+                                              "oxygen_sensor",
+                                              telemetry->obd_readiness.oxygen_sensor);
+            data_formatter_add_monitor_status(readiness,
+                                              "oxygen_sensor_heater",
+                                              telemetry->obd_readiness.oxygen_sensor_heater);
+            data_formatter_add_monitor_status(readiness,
+                                              "egr_vvt_system",
+                                              telemetry->obd_readiness.egr_vvt_system);
+            data_formatter_add_monitor_status(readiness,
+                                              "nmhc_catalyst",
+                                              telemetry->obd_readiness.nmhc_catalyst);
+            data_formatter_add_monitor_status(readiness,
+                                              "nox_aftertreatment",
+                                              telemetry->obd_readiness.nox_aftertreatment);
+            data_formatter_add_monitor_status(readiness,
+                                              "boost_pressure",
+                                              telemetry->obd_readiness.boost_pressure);
+            data_formatter_add_monitor_status(readiness,
+                                              "exhaust_gas_sensor",
+                                              telemetry->obd_readiness.exhaust_gas_sensor);
+            data_formatter_add_monitor_status(readiness, "pm_filter", telemetry->obd_readiness.pm_filter);
+        }
+    }
+
+    if (telemetry->obd_stored_dtc.valid ||
+        telemetry->obd_pending_dtc.valid ||
+        telemetry->obd_permanent_dtc.valid) {
+        cJSON *dtc = cJSON_AddObjectToObject(diagnostics, "dtc");
+        if (dtc != NULL) {
+            data_formatter_add_dtc_codes(dtc, "stored", &telemetry->obd_stored_dtc);
+            data_formatter_add_dtc_codes(dtc, "pending", &telemetry->obd_pending_dtc);
+            data_formatter_add_dtc_codes(dtc, "permanent", &telemetry->obd_permanent_dtc);
         }
     }
 
@@ -175,10 +287,15 @@ char *data_format_rawdata(const config_t *cfg,
     cJSON_AddNumberToObject(data, "vibration", telemetry->vibration);
     cJSON_AddNumberToObject(data, "battery_top", telemetry->battery_top);
     cJSON_AddNumberToObject(data, "battery_bot", telemetry->battery_bot);
-    cJSON_AddNumberToObject(data, "latitude", telemetry->gnss.latitude);
-    cJSON_AddNumberToObject(data, "longitude", telemetry->gnss.longitude);
-    cJSON_AddNumberToObject(data, "speed", telemetry->gnss.speed_kmh);
-    cJSON_AddNumberToObject(data, "course", telemetry->gnss.course_deg);
+    bool has_valid_gnss_fix = telemetry->gnss.fix_valid &&
+                              telemetry->gnss.latitude != 0.0 &&
+                              telemetry->gnss.longitude != 0.0;
+    if (has_valid_gnss_fix) {
+        cJSON_AddNumberToObject(data, "latitude", telemetry->gnss.latitude);
+        cJSON_AddNumberToObject(data, "longitude", telemetry->gnss.longitude);
+        cJSON_AddNumberToObject(data, "speed", telemetry->gnss.speed_kmh);
+        cJSON_AddNumberToObject(data, "course", telemetry->gnss.course_deg);
+    }
     cJSON_AddNumberToObject(data, "satellites", telemetry->gnss.satellites);
     cJSON_AddBoolToObject(data, "ignition", telemetry->ignition);
     cJSON_AddNumberToObject(data, "error_code", telemetry->error_code);

@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 #include "freertos/task.h"
 
 #include "driver/gpio.h"
@@ -21,7 +22,7 @@
 #include "ble_obd.h"
 #include "command_handler.h"
 #include "data_formatter.h"
-#include "imu_lis3dsh.h"
+#include "imu_lis3dh.h"
 #include "modem_gnss.h"
 #include "modem_lte.h"
 #include "mqtt_client.h"
@@ -42,6 +43,10 @@
  */
 
 #define OBD_MODE_CURRENT_DATA 0x01
+#define OBD_PID_MONITOR_STATUS 0x01
+#define OBD_MODE_STORED_DTC 0x03
+#define OBD_MODE_PENDING_DTC 0x07
+#define OBD_MODE_PERMANENT_DTC 0x0A
 #define TRACKER_BLE_RETRY_MIN_BACKOFF_MS 5000ULL
 #define TRACKER_BLE_RETRY_MAX_BACKOFF_MS 120000ULL
 #define TRACKER_BLE_PARKED_RETRY_MAX_BACKOFF_MS 30000ULL
@@ -51,8 +56,12 @@
 #define TRACKER_IMU_BOOTSTRAP_RETRY_MAX_BACKOFF_MS 60000ULL
 #define TRACKER_PARKED_WAKE_INTERVAL_CAP_S 120U
 #define TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS 30000ULL
+#define TRACKER_BLE_CONNECT_TASK_STACK_BYTES 8192U
+#define TRACKER_HEARTBEAT_OBD_STALE_WARN_MS 12000ULL
+#define TRACKER_LIGHT_SLEEP_IMU_CLEAR_SETTLE_MS 25U
 #define TRACKER_OBD_DEBUG_LOG_INTERVAL_MS 1000ULL
 #define TRACKER_OBD_POLL_INTERVAL_MS 1200ULL
+#define TRACKER_OBD_DIAGNOSTIC_POLL_INTERVAL_MS 5000ULL
 #define TRACKER_OBD_PID_TIMEOUT_MS 700U
 #define TRACKER_BLE_CONNECT_TIMEOUT_MS 8000U
 #define TRACKER_RTC_SYNC_MIN_INTERVAL_MS 60000ULL
@@ -86,6 +95,29 @@ RTC_DATA_ATTR rtc_context_t g_rtc_context = {
     .ota_confirm_deadline_ms = 0,
 };
 
+typedef enum {
+    TRACKER_BLE_CONNECT_RESULT_OK = 0,
+    TRACKER_BLE_CONNECT_RESULT_CONNECT_FAILED,
+    TRACKER_BLE_CONNECT_RESULT_ELM327_INIT_FAILED,
+} tracker_ble_connect_result_code_t;
+
+typedef struct {
+    ble_obd_ctx_t *ctx;
+    tracker_ble_connect_result_code_t code;
+    uint64_t started_ms;
+    bool prime_sample_ready;
+} tracker_ble_connect_result_t;
+
+typedef struct {
+    uint64_t started_ms;
+    char preferred_mac[TRACKER_MAC_ADDR_STR_LEN];
+} tracker_ble_connect_task_args_t;
+
+typedef struct {
+    uint8_t mode;
+    int pid;
+} tracker_obd_diag_query_t;
+
 static const char *TAG = "STATE_MACHINE";
 
 #ifndef CONFIG_APP_PROJECT_VER
@@ -95,11 +127,14 @@ static const char *TAG = "STATE_MACHINE";
 static config_t s_config;
 static telemetry_t s_telemetry;
 static ble_obd_ctx_t *s_ble_ctx = NULL;
+static QueueHandle_t s_ble_connect_result_queue = NULL;
 static uint64_t s_last_raw_publish_ms = 0;
 static uint64_t s_alarm_enter_ms = 0;
 static uint64_t s_last_obd_debug_log_ms = 0;
 static uint64_t s_last_obd_poll_ms = 0;
+static uint64_t s_last_obd_diagnostic_poll_ms = 0;
 static uint8_t s_obd_aux_pid_cursor = 0;
+static uint8_t s_obd_diag_query_cursor = 0;
 static uint32_t s_session_id = 1;
 static uint64_t s_ignition_off_started_ms = 0;
 static bool s_status_running = false;
@@ -147,6 +182,9 @@ static uint64_t s_last_obd_sample_ms = 0;
 static bool s_obd_elm_ready = false;
 static uint64_t s_obd_fail_window_started_ms = 0;
 static uint32_t s_obd_fail_window_count = 0;
+static bool s_ble_connect_inflight = false;
+static uint64_t s_ble_connect_started_ms = 0;
+static bool s_imu_invalid_wakeup_gpio_logged = false;
 static firmware_status_t s_deferred_firmware_report = {0};
 static bool s_deferred_firmware_report_pending = false;
 static bool s_ble_retry_last_ignition = false;
@@ -232,20 +270,179 @@ int obd_convert_temperature(int32_t *value, const uint8_t *data, size_t len) {
     return 0;
 }
 
+static void state_machine_reset_dtc_list(obd_dtc_list_t *list, bool valid) {
+    if (list == NULL) {
+        return;
+    }
+
+    memset(list, 0, sizeof(*list));
+    list->valid = valid;
+}
+
+static bool state_machine_format_dtc_code(uint8_t high, uint8_t low, char out[TRACKER_OBD_DTC_CODE_LEN]) {
+    static const char families[] = {'P', 'C', 'B', 'U'};
+
+    if (out == NULL) {
+        return false;
+    }
+    if (high == 0 && low == 0) {
+        return false;
+    }
+
+    snprintf(out,
+             TRACKER_OBD_DTC_CODE_LEN,
+             "%c%1X%1X%1X%1X",
+             families[(high >> 6) & 0x03],
+             (high >> 4) & 0x03,
+             high & 0x0F,
+             (low >> 4) & 0x0F,
+             low & 0x0F);
+    return true;
+}
+
+static void state_machine_decode_dtc_payload(obd_dtc_list_t *list, const uint8_t *data, size_t len) {
+    if (list == NULL) {
+        return;
+    }
+
+    state_machine_reset_dtc_list(list, true);
+    if (data == NULL || len < 2) {
+        return;
+    }
+
+    for (size_t i = 0; i + 1 < len && list->count < TRACKER_OBD_MAX_DTC_CODES; i += 2) {
+        char dtc_code[TRACKER_OBD_DTC_CODE_LEN] = {0};
+        if (!state_machine_format_dtc_code(data[i], data[i + 1], dtc_code)) {
+            if (data[i] == 0 && data[i + 1] == 0) {
+                break;
+            }
+            continue;
+        }
+
+        util_copy_string(list->codes[list->count], TRACKER_OBD_DTC_CODE_LEN, dtc_code);
+        list->count += 1U;
+    }
+}
+
+static obd_monitor_status_t state_machine_decode_monitor_status(uint8_t supported_bits,
+                                                                uint8_t incomplete_bits,
+                                                                uint8_t bit_index) {
+    uint8_t mask = (uint8_t)(1U << bit_index);
+    if ((supported_bits & mask) == 0U) {
+        return OBD_MONITOR_STATUS_UNSUPPORTED;
+    }
+
+    return (incomplete_bits & mask) != 0U ? OBD_MONITOR_STATUS_INCOMPLETE
+                                          : OBD_MONITOR_STATUS_COMPLETE;
+}
+
+static void state_machine_decode_readiness_payload(obd_readiness_t *readiness,
+                                                   const uint8_t *data,
+                                                   size_t len) {
+    if (readiness == NULL) {
+        return;
+    }
+
+    memset(readiness, 0, sizeof(*readiness));
+    if (data == NULL || len < 4) {
+        return;
+    }
+
+    uint8_t byte_a = data[0];
+    uint8_t byte_b = data[1];
+    uint8_t byte_c = data[2];
+    uint8_t byte_d = data[3];
+
+    readiness->valid = true;
+    readiness->mil_on = (byte_a & 0x80U) != 0U;
+    readiness->reported_dtc_count = byte_a & 0x7FU;
+    readiness->compression_ignition = (byte_b & 0x08U) != 0U;
+
+    uint8_t common_supported = byte_b & 0x07U;
+    uint8_t common_incomplete = (byte_b >> 4) & 0x07U;
+    readiness->misfire = state_machine_decode_monitor_status(common_supported, common_incomplete, 0);
+    readiness->fuel_system = state_machine_decode_monitor_status(common_supported, common_incomplete, 1);
+    readiness->comprehensive_components =
+        state_machine_decode_monitor_status(common_supported, common_incomplete, 2);
+
+    if (readiness->compression_ignition) {
+        readiness->nmhc_catalyst = state_machine_decode_monitor_status(byte_c, byte_d, 0);
+        readiness->nox_aftertreatment = state_machine_decode_monitor_status(byte_c, byte_d, 1);
+        readiness->boost_pressure = state_machine_decode_monitor_status(byte_c, byte_d, 2);
+        readiness->exhaust_gas_sensor = state_machine_decode_monitor_status(byte_c, byte_d, 3);
+        readiness->pm_filter = state_machine_decode_monitor_status(byte_c, byte_d, 4);
+        readiness->egr_vvt_system = state_machine_decode_monitor_status(byte_c, byte_d, 5);
+        return;
+    }
+
+    readiness->catalyst = state_machine_decode_monitor_status(byte_c, byte_d, 0);
+    readiness->heated_catalyst = state_machine_decode_monitor_status(byte_c, byte_d, 1);
+    readiness->evaporative_system = state_machine_decode_monitor_status(byte_c, byte_d, 2);
+    readiness->secondary_air_system = state_machine_decode_monitor_status(byte_c, byte_d, 3);
+    readiness->ac_refrigerant = state_machine_decode_monitor_status(byte_c, byte_d, 4);
+    readiness->oxygen_sensor = state_machine_decode_monitor_status(byte_c, byte_d, 5);
+    readiness->oxygen_sensor_heater = state_machine_decode_monitor_status(byte_c, byte_d, 6);
+    readiness->egr_vvt_system = state_machine_decode_monitor_status(byte_c, byte_d, 7);
+}
+
+static void state_machine_clear_obd_diagnostic_query(uint8_t mode, int pid) {
+    if (mode == OBD_MODE_CURRENT_DATA && pid == OBD_PID_MONITOR_STATUS) {
+        memset(&s_telemetry.obd_readiness, 0, sizeof(s_telemetry.obd_readiness));
+        return;
+    }
+
+    switch (mode) {
+        case OBD_MODE_STORED_DTC:
+            state_machine_reset_dtc_list(&s_telemetry.obd_stored_dtc, true);
+            break;
+        case OBD_MODE_PENDING_DTC:
+            state_machine_reset_dtc_list(&s_telemetry.obd_pending_dtc, true);
+            break;
+        case OBD_MODE_PERMANENT_DTC:
+            state_machine_reset_dtc_list(&s_telemetry.obd_permanent_dtc, true);
+            break;
+        default:
+            break;
+    }
+}
+
 /**
  * @brief Callback for parsed OBD responses.
  *
+ * @param mode Requested mode.
  * @param pid Requested PID.
  * @param data Response payload bytes.
  * @param len Payload length.
  * @param usr_ctx User context (unused).
  */
-static void state_machine_obd_response_cb(int pid, const uint8_t *data, size_t len, void *usr_ctx) {
+static void state_machine_obd_response_cb(uint8_t mode, int pid, const uint8_t *data, size_t len, void *usr_ctx) {
     (void)usr_ctx;
 
     int32_t converted = 0;
     bool updated = false;
-    if (pid < 0 || data == NULL || len == 0) {
+    if (data == NULL || len == 0) {
+        state_machine_clear_obd_diagnostic_query(mode, pid);
+        return;
+    }
+
+    if (mode == OBD_MODE_CURRENT_DATA && pid >= 0 && (uint8_t)pid == OBD_PID_MONITOR_STATUS) {
+        state_machine_decode_readiness_payload(&s_telemetry.obd_readiness, data, len);
+        return;
+    }
+
+    if (mode == OBD_MODE_STORED_DTC) {
+        state_machine_decode_dtc_payload(&s_telemetry.obd_stored_dtc, data, len);
+        return;
+    }
+    if (mode == OBD_MODE_PENDING_DTC) {
+        state_machine_decode_dtc_payload(&s_telemetry.obd_pending_dtc, data, len);
+        return;
+    }
+    if (mode == OBD_MODE_PERMANENT_DTC) {
+        state_machine_decode_dtc_payload(&s_telemetry.obd_permanent_dtc, data, len);
+        return;
+    }
+    if (pid < 0) {
         return;
     }
 
@@ -302,6 +499,11 @@ static void state_machine_puback_callback(int msg_id) {
 }
 
 static void state_machine_process_ota_command(command_action_t action);
+static void state_machine_obd_refresh_fail_window(uint64_t now_ms);
+static void state_machine_run_obd_diagnostic_query(ble_obd_ctx_t *ctx,
+                                                   const tracker_obd_diag_query_t *query);
+static void state_machine_ble_connect_task(void *arg);
+static bool state_machine_handle_ble_connect_result(void);
 
 static void state_machine_handle_pending_action(void) {
     for (uint32_t i = 0; i < TRACKER_PENDING_ACTION_DRAIN_LIMIT; ++i) {
@@ -359,6 +561,49 @@ static bool state_machine_imu_runtime_enabled(void) {
     return s_config.imu_wakeup_enabled;
 }
 
+static bool state_machine_should_use_light_sleep_motion_wake(void) {
+    if (!state_machine_imu_runtime_enabled() || !s_imu_available) {
+        return false;
+    }
+
+    if (esp_sleep_is_valid_wakeup_gpio(PIN_LIS3DH_INT)) {
+        return false;
+    }
+
+    if (!s_imu_invalid_wakeup_gpio_logged) {
+        ESP_LOGW(TAG,
+                 "IMU wake pin gpio=%d is not RTC-capable; parked motion wake will use light sleep GPIO wake",
+                 (int)PIN_LIS3DH_INT);
+        s_imu_invalid_wakeup_gpio_logged = true;
+    }
+
+    return true;
+}
+
+static bool state_machine_has_recent_obd_sample(uint64_t now_ms, uint32_t max_age_ms) {
+    if (s_last_obd_sample_ms == 0 || now_ms < s_last_obd_sample_ms) {
+        return false;
+    }
+
+    return (now_ms - s_last_obd_sample_ms) <= (uint64_t)max_age_ms;
+}
+
+static bool state_machine_network_ready_for_heartbeat_publish(void) {
+#if TRACKER_MQTT_RUNTIME_DISABLED
+    return modem_lte_is_initialized() || s_network_retry.attempts > 0;
+#else
+    return tracker_mqtt_is_connected() || s_network_retry.attempts > 0;
+#endif
+}
+
+static bool state_machine_can_arm_imu_deep_sleep_wakeup(void) {
+    if (!state_machine_imu_runtime_enabled() || !s_imu_available) {
+        return false;
+    }
+
+    return esp_sleep_is_valid_wakeup_gpio(PIN_LIS3DH_INT);
+}
+
 static bool state_machine_ota_start_is_safe(void) {
     if (!tracker_mqtt_is_connected()) {
         ESP_LOGW(TAG, "OTA blocked reason=mqtt_not_connected");
@@ -407,6 +652,13 @@ static bool state_machine_can_enter_sleep(const char **out_reason) {
     if (s_telemetry.ignition) {
         if (out_reason != NULL) {
             *out_reason = "ignition_on";
+        }
+        return false;
+    }
+
+    if (s_ble_connect_inflight) {
+        if (out_reason != NULL) {
+            *out_reason = "ble_connect_inflight";
         }
         return false;
     }
@@ -512,6 +764,36 @@ static bool state_machine_try_reassert_gnss_power(const char *reason) {
              reason,
              esp_err_to_name(on_err));
     return false;
+}
+
+static void state_machine_try_start_gnss_nonblocking(void) {
+    if (s_gnss_started) {
+        return;
+    }
+
+    if (!modem_lte_is_initialized()) {
+        return;
+    }
+
+    uint64_t now_ms = util_uptime_ms();
+    if (s_last_gnss_rearm_ms != 0 &&
+        now_ms > s_last_gnss_rearm_ms &&
+        (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
+        return;
+    }
+
+    s_last_gnss_rearm_ms = now_ms;
+    esp_err_t err = modem_gnss_power_on();
+    if (err == ESP_OK) {
+        s_gnss_started = true;
+        s_gnss_poll_fail_streak = 0;
+        ESP_LOGI(TAG, "GNSS power-on OK");
+        return;
+    }
+
+    ESP_LOGW(TAG,
+             "GNSS power-on failed err=%s (continue publish path without GNSS)",
+             esp_err_to_name(err));
 }
 
 static uint32_t state_machine_next_seq_no(void) {
@@ -640,6 +922,12 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
     /* Pull selected OBD PIDs when BLE OBD session is connected. */
     if (read_obd && s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
         uint64_t now_ms = util_uptime_ms();
+        static const tracker_obd_diag_query_t s_diag_queries[] = {
+            {.mode = OBD_MODE_CURRENT_DATA, .pid = OBD_PID_MONITOR_STATUS},
+            {.mode = OBD_MODE_STORED_DTC, .pid = -1},
+            {.mode = OBD_MODE_PENDING_DTC, .pid = -1},
+            {.mode = OBD_MODE_PERMANENT_DTC, .pid = -1},
+        };
 
         if ((now_ms - s_last_obd_poll_ms) >= TRACKER_OBD_POLL_INTERVAL_MS) {
             /*
@@ -655,14 +943,27 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
             s_last_obd_poll_ms = now_ms;
         }
 
+        if ((now_ms - s_last_obd_diagnostic_poll_ms) >= TRACKER_OBD_DIAGNOSTIC_POLL_INTERVAL_MS) {
+            const tracker_obd_diag_query_t *diag_query =
+                &s_diag_queries[s_obd_diag_query_cursor % ARRAY_SIZE(s_diag_queries)];
+            state_machine_run_obd_diagnostic_query(s_ble_ctx, diag_query);
+            s_obd_diag_query_cursor =
+                (uint8_t)((s_obd_diag_query_cursor + 1U) % ARRAY_SIZE(s_diag_queries));
+            s_last_obd_diagnostic_poll_ms = now_ms;
+        }
+
         if ((now_ms - s_last_obd_debug_log_ms) >= TRACKER_OBD_DEBUG_LOG_INTERVAL_MS) {
             ESP_LOGD(TAG,
-                     "OBD pid-values rpm=%ld speed=%ld coolant=%ld fuel=%ld load=%ld",
+                     "OBD pid-values rpm=%ld speed=%ld coolant=%ld fuel=%ld load=%ld mil=%d dtc=%u/%u/%u",
                      (long)s_telemetry.obd_rpm,
                      (long)s_telemetry.obd_speed,
                      (long)s_telemetry.obd_coolant_temp,
                      (long)s_telemetry.obd_fuel_level,
-                     (long)s_telemetry.obd_engine_load);
+                     (long)s_telemetry.obd_engine_load,
+                     s_telemetry.obd_readiness.mil_on ? 1 : 0,
+                     (unsigned)s_telemetry.obd_stored_dtc.count,
+                     (unsigned)s_telemetry.obd_pending_dtc.count,
+                     (unsigned)s_telemetry.obd_permanent_dtc.count);
             s_last_obd_debug_log_ms = now_ms;
         }
     }
@@ -704,6 +1005,9 @@ telemetry_finalize:
     bool obd_connected = s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx);
     s_telemetry.obd_ble_connected = obd_connected;
     s_telemetry.obd_elm_ready = s_obd_elm_ready && obd_connected;
+    util_copy_string(s_telemetry.obd_ecu_state,
+                     sizeof(s_telemetry.obd_ecu_state),
+                     obd_connected ? ble_obd_get_last_ecu_state_label(s_ble_ctx) : "disconnected");
 
     if (s_last_obd_sample_ms == 0 || now_ms < s_last_obd_sample_ms) {
         s_telemetry.obd_sample_age_ms = UINT32_MAX;
@@ -837,6 +1141,19 @@ static void state_machine_publish_rawdata(void) {
         return;
     }
 
+    if (tracker_mqtt_is_connected()) {
+        esp_err_t live_err = tracker_mqtt_publish_rawdata(payload);
+        if (live_err == ESP_OK) {
+            cJSON_free(payload);
+            s_last_raw_publish_ms = util_uptime_ms();
+            return;
+        }
+
+        ESP_LOGW(TAG,
+                 "mqtt rawdata live publish failed err=%s fallback=offline_queue",
+                 esp_err_to_name(live_err));
+    }
+
     (void)offline_queue_enqueue(OFFLINE_RECORD_RAWDATA,
                                 payload,
                                 s_telemetry.gnss.fix_valid,
@@ -880,6 +1197,19 @@ static void state_machine_publish_status(const char *status) {
         return;
     }
 
+    if (tracker_mqtt_is_connected()) {
+        esp_err_t live_err = tracker_mqtt_publish_status(payload);
+        if (live_err == ESP_OK) {
+            cJSON_free(payload);
+            return;
+        }
+
+        ESP_LOGW(TAG,
+                 "mqtt status live publish failed status=%s err=%s fallback=offline_queue",
+                 status,
+                 esp_err_to_name(live_err));
+    }
+
     (void)offline_queue_enqueue(OFFLINE_RECORD_STATUS,
                                 payload,
                                 s_telemetry.gnss.fix_valid,
@@ -920,6 +1250,20 @@ static void state_machine_publish_event(const char *event_type, int code, const 
                                       s_boot_id);
     if (payload == NULL) {
         return;
+    }
+
+    if (tracker_mqtt_is_connected()) {
+        esp_err_t live_err = tracker_mqtt_publish_event(payload);
+        if (live_err == ESP_OK) {
+            cJSON_free(payload);
+            return;
+        }
+
+        ESP_LOGW(TAG,
+                 "mqtt event live publish failed event=%s code=%d err=%s fallback=offline_queue",
+                 event_type,
+                 code,
+                 esp_err_to_name(live_err));
     }
 
     (void)offline_queue_enqueue(OFFLINE_RECORD_EVENT,
@@ -1219,12 +1563,184 @@ static void state_machine_schedule_ble_retry(uint64_t now_ms, const char *reason
     }
 }
 
+static bool state_machine_prime_obd_after_connect(ble_obd_ctx_t *ctx) {
+    if (ctx == NULL) {
+        return false;
+    }
+
+    static const uint8_t s_prime_pids[] = {0x0C, 0x0D, 0x05};
+    uint64_t sample_before_ms = s_last_obd_sample_ms;
+
+    for (size_t attempt = 0; attempt < 3U; ++attempt) {
+        for (size_t i = 0; i < ARRAY_SIZE(s_prime_pids); ++i) {
+            uint8_t pid = s_prime_pids[i];
+            if (ble_obd_rxtx(ctx, OBD_MODE_CURRENT_DATA, pid, TRACKER_OBD_PID_TIMEOUT_MS) == 0 &&
+                s_last_obd_sample_ms != 0 &&
+                s_last_obd_sample_ms != sample_before_ms) {
+                ESP_LOGI(TAG, "OBD prime sample ready pid=0x%02X", pid);
+                return true;
+            }
+            vTaskDelay(pdMS_TO_TICKS(75));
+        }
+    }
+
+    ESP_LOGW(TAG,
+             "OBD prime finished without fresh PID sample after connect state=%s",
+             ble_obd_get_last_ecu_state_label(ctx));
+    return false;
+}
+
+static void state_machine_run_obd_diagnostic_query(ble_obd_ctx_t *ctx, const tracker_obd_diag_query_t *query) {
+    if (ctx == NULL || query == NULL) {
+        return;
+    }
+
+    int rc = query->pid >= 0
+                 ? ble_obd_rxtx(ctx, query->mode, (uint8_t)query->pid, TRACKER_OBD_PID_TIMEOUT_MS)
+                 : ble_obd_request_mode(ctx, query->mode, TRACKER_OBD_PID_TIMEOUT_MS);
+    if (rc == 0) {
+        return;
+    }
+
+    const char *ecu_state = ble_obd_get_last_ecu_state_label(ctx);
+    bool no_data = strcmp(ecu_state, "no_data") == 0;
+    if (no_data) {
+        state_machine_clear_obd_diagnostic_query(query->mode, query->pid);
+    }
+
+    ESP_LOGW(TAG,
+             "OBD diagnostic query failed mode=0x%02X pid=%d state=%s clear=%d",
+             (unsigned)query->mode,
+             query->pid,
+             ecu_state,
+             no_data ? 1 : 0);
+}
+
+static void state_machine_prime_obd_diagnostics_after_connect(ble_obd_ctx_t *ctx) {
+    static const tracker_obd_diag_query_t s_diag_queries[] = {
+        {.mode = OBD_MODE_CURRENT_DATA, .pid = OBD_PID_MONITOR_STATUS},
+        {.mode = OBD_MODE_STORED_DTC, .pid = -1},
+        {.mode = OBD_MODE_PENDING_DTC, .pid = -1},
+        {.mode = OBD_MODE_PERMANENT_DTC, .pid = -1},
+    };
+
+    if (ctx == NULL) {
+        return;
+    }
+
+    for (size_t i = 0; i < ARRAY_SIZE(s_diag_queries); ++i) {
+        state_machine_run_obd_diagnostic_query(ctx, &s_diag_queries[i]);
+        vTaskDelay(pdMS_TO_TICKS(75));
+    }
+}
+
+static void state_machine_ble_connect_task(void *arg) {
+    tracker_ble_connect_task_args_t *task_args = (tracker_ble_connect_task_args_t *)arg;
+    tracker_ble_connect_result_t result = {
+        .ctx = NULL,
+        .code = TRACKER_BLE_CONNECT_RESULT_CONNECT_FAILED,
+        .started_ms = task_args != NULL ? task_args->started_ms : util_uptime_ms(),
+        .prime_sample_ready = false,
+    };
+
+    if (task_args != NULL) {
+        bool use_preferred_mac = !util_string_empty(task_args->preferred_mac) &&
+                                 ble_obd_set_preferred_address(task_args->preferred_mac) == ESP_OK;
+        if (!use_preferred_mac) {
+            ble_obd_set_preferred_address("");
+        }
+
+        ble_obd_ctx_t *ctx = ble_obd_connect(state_machine_obd_response_cb, NULL, TRACKER_BLE_CONNECT_TIMEOUT_MS);
+        if (ctx != NULL) {
+            if (ble_obd_elm327_init(ctx) == ESP_OK) {
+                result.prime_sample_ready = state_machine_prime_obd_after_connect(ctx);
+                state_machine_prime_obd_diagnostics_after_connect(ctx);
+                result.ctx = ctx;
+                result.code = TRACKER_BLE_CONNECT_RESULT_OK;
+            } else {
+                result.code = TRACKER_BLE_CONNECT_RESULT_ELM327_INIT_FAILED;
+                ble_obd_disconnect(ctx);
+            }
+        }
+
+        free(task_args);
+    }
+
+    if (s_ble_connect_result_queue != NULL) {
+        (void)xQueueOverwrite(s_ble_connect_result_queue, &result);
+    }
+
+    vTaskDelete(NULL);
+}
+
+static bool state_machine_handle_ble_connect_result(void) {
+    if (s_ble_connect_result_queue == NULL) {
+        return false;
+    }
+
+    bool handled = false;
+    tracker_ble_connect_result_t result = {0};
+    while (xQueueReceive(s_ble_connect_result_queue, &result, 0) == pdTRUE) {
+        handled = true;
+        s_ble_connect_inflight = false;
+        s_ble_connect_started_ms = 0;
+
+        if (result.code == TRACKER_BLE_CONNECT_RESULT_OK && result.ctx != NULL) {
+            if (s_ble_ctx != NULL && s_ble_ctx != result.ctx) {
+                ble_obd_disconnect(s_ble_ctx);
+            }
+            s_ble_ctx = result.ctx;
+            s_obd_elm_ready = true;
+            s_last_obd_poll_ms = 0;
+            s_last_obd_diagnostic_poll_ms = 0;
+            s_obd_aux_pid_cursor = 0;
+            s_obd_diag_query_cursor = 0;
+            s_obd_fail_alert_emitted = false;
+            s_last_obd_fail_alert_code = 0;
+            s_last_obd_fail_alert_ms = 0;
+            retry_state_reset(&s_ble_retry);
+            ESP_LOGI(TAG,
+                     "BLE OBD connected + ELM327 ready duration_ms=%llu",
+                     (unsigned long long)(util_uptime_ms() - result.started_ms));
+            if (!result.prime_sample_ready) {
+                ESP_LOGW(TAG,
+                         "BLE OBD connected but ECU has not returned a fresh PID sample yet");
+            }
+            continue;
+        }
+
+        s_obd_elm_ready = false;
+        s_ble_ctx = NULL;
+        s_last_obd_sample_ms = 0;
+        s_last_obd_diagnostic_poll_ms = 0;
+        s_obd_diag_query_cursor = 0;
+        util_copy_string(s_telemetry.obd_ecu_state, sizeof(s_telemetry.obd_ecu_state), "disconnected");
+        uint64_t now_ms = util_uptime_ms();
+        int event_code = result.code == TRACKER_BLE_CONNECT_RESULT_ELM327_INIT_FAILED
+                             ? TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED
+                             : TRACKER_EVENT_CODE_OBD_CONNECT_FAILED;
+        const char *event_reason = result.code == TRACKER_BLE_CONNECT_RESULT_ELM327_INIT_FAILED
+                                       ? "obd_elm327_init_failed"
+                                       : "obd_connect_failed";
+        state_machine_publish_obd_failure_event_if_needed(now_ms, event_code, event_reason);
+        state_machine_schedule_ble_retry(now_ms,
+                                         "connect_or_ble_stack_or_elm327_init_failed",
+                                         state_machine_current_ble_retry_policy());
+    }
+
+    return handled;
+}
+
 static void state_machine_try_connect_ble(void) {
-    if (!tracker_mqtt_is_connected() || s_ota_in_progress || g_rtc_context.ota_pending_confirm) {
+    (void)state_machine_handle_ble_connect_result();
+    if (s_ota_in_progress || g_rtc_context.ota_pending_confirm) {
         return;
     }
 
     if (s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
+        return;
+    }
+    if (s_ble_connect_inflight) {
         return;
     }
 
@@ -1256,12 +1772,11 @@ static void state_machine_try_connect_ble(void) {
         ble_obd_disconnect(s_ble_ctx);
         s_ble_ctx = NULL;
         s_obd_elm_ready = false;
+        s_last_obd_sample_ms = 0;
     }
 
-    bool use_preferred_mac = !util_string_empty(s_config.obd2_ble_address) &&
-                             ble_obd_set_preferred_address(s_config.obd2_ble_address) == ESP_OK;
-    if (!use_preferred_mac) {
-        ble_obd_set_preferred_address("");
+    bool has_preferred_mac = !util_string_empty(s_config.obd2_ble_address);
+    if (!has_preferred_mac) {
         if ((s_ble_retry.attempts % 10U) == 0U) {
             ESP_LOGW(TAG, "BLE connect mode: auto-discover (preferred MAC missing/invalid)");
         }
@@ -1269,40 +1784,41 @@ static void state_machine_try_connect_ble(void) {
         ESP_LOGI(TAG, "BLE connect mode: preferred-mac (%s)", s_config.obd2_ble_address);
     }
 
-    /* One connect attempt per retry window to avoid log storms. */
-    s_ble_ctx = ble_obd_connect(state_machine_obd_response_cb, NULL, TRACKER_BLE_CONNECT_TIMEOUT_MS);
-    if (s_ble_ctx != NULL) {
-        if (ble_obd_elm327_init(s_ble_ctx) == ESP_OK) {
-            ESP_LOGI(TAG, "BLE OBD connected + ELM327 ready");
-            s_obd_elm_ready = true;
-            s_obd_fail_alert_emitted = false;
-            s_last_obd_fail_alert_code = 0;
-            s_last_obd_fail_alert_ms = 0;
-            retry_state_reset(&s_ble_retry);
-            return;
-        }
-
+    tracker_ble_connect_task_args_t *task_args = calloc(1, sizeof(*task_args));
+    if (task_args == NULL) {
         s_obd_elm_ready = false;
         state_machine_publish_obd_failure_event_if_needed(
             now_ms,
-            TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED,
-            "obd_elm327_init_failed");
-        ble_obd_disconnect(s_ble_ctx);
-        s_ble_ctx = NULL;
+            TRACKER_EVENT_CODE_OBD_CONNECT_FAILED,
+            "obd_connect_failed");
         state_machine_schedule_ble_retry(now_ms,
                                          "connect_or_ble_stack_or_elm327_init_failed",
                                          ble_retry_policy);
         return;
     }
 
-    s_obd_elm_ready = false;
-    state_machine_publish_obd_failure_event_if_needed(
-        now_ms,
-        TRACKER_EVENT_CODE_OBD_CONNECT_FAILED,
-        "obd_connect_failed");
-    state_machine_schedule_ble_retry(now_ms,
-                                     "connect_or_ble_stack_or_elm327_init_failed",
-                                     ble_retry_policy);
+    task_args->started_ms = now_ms;
+    util_copy_string(task_args->preferred_mac, sizeof(task_args->preferred_mac), s_config.obd2_ble_address);
+    if (xTaskCreate(state_machine_ble_connect_task,
+                    "ble_obd_conn",
+                    TRACKER_BLE_CONNECT_TASK_STACK_BYTES,
+                    task_args,
+                    5,
+                    NULL) != pdPASS) {
+        free(task_args);
+        s_obd_elm_ready = false;
+        state_machine_publish_obd_failure_event_if_needed(
+            now_ms,
+            TRACKER_EVENT_CODE_OBD_CONNECT_FAILED,
+            "obd_connect_failed");
+        state_machine_schedule_ble_retry(now_ms,
+                                         "connect_or_ble_stack_or_elm327_init_failed",
+                                         ble_retry_policy);
+        return;
+    }
+
+    s_ble_connect_inflight = true;
+    s_ble_connect_started_ms = now_ms;
 }
 
 /**
@@ -1331,6 +1847,8 @@ static void state_machine_try_connect_network(void) {
 
     modem_lte_request_connect();
     esp_err_t err = modem_lte_tick(now_ms);
+    bool lte_now_initialized = modem_lte_is_initialized();
+    state_machine_try_start_gnss_nonblocking();
     if (err == ESP_ERR_NOT_FINISHED) {
         return;
     }
@@ -1340,17 +1858,8 @@ static void state_machine_try_connect_network(void) {
         return;
     }
 
-    if (!s_gnss_started) {
-        err = modem_gnss_power_on();
-        if (err != ESP_OK) {
-            state_machine_schedule_network_retry(now_ms, "modem_gnss_power_on", err);
-            return;
-        }
-        s_gnss_started = true;
-    }
-
 #if !TRACKER_MQTT_RUNTIME_DISABLED
-    if (s_gnss_started && (!s_mqtt_started || !tracker_mqtt_is_connected())) {
+    if (lte_now_initialized && (!s_mqtt_started || !tracker_mqtt_is_connected())) {
         /* Reconnect MQTT when link drops; AT backend does not use ESP-MQTT auto-reconnect. */
         err = tracker_mqtt_connect();
         if (err != ESP_OK) {
@@ -1363,7 +1872,6 @@ static void state_machine_try_connect_network(void) {
 
     retry_state_reset(&s_network_retry);
 
-    bool lte_now_initialized = modem_lte_is_initialized();
     if (lte_now_initialized && !s_prev_lte_initialized) {
         if (s_lte_ever_initialized) {
             (void)state_machine_try_reassert_gnss_power("lte_recovered");
@@ -1384,6 +1892,25 @@ static void state_machine_try_connect_network(void) {
 
     state_machine_try_flush_deferred_firmware_report();
     retry_state_reset(&s_network_retry);
+}
+
+static void state_machine_run_wake_prelude(bool allow_replay) {
+    state_machine_handle_pending_action();
+    bool ble_result_handled = state_machine_handle_ble_connect_result();
+    state_machine_try_connect_network();
+    state_machine_try_connect_ble();
+    state_machine_bootstrap_rtc();
+    state_machine_bootstrap_imu();
+    state_machine_refresh_telemetry(true, true);
+    ble_result_handled = state_machine_handle_ble_connect_result() || ble_result_handled;
+    if (ble_result_handled && s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
+        state_machine_refresh_telemetry(true, true);
+    }
+    state_machine_handle_pending_action();
+    offline_queue_set_online(tracker_mqtt_is_connected());
+    if (allow_replay) {
+        offline_queue_replay_tick();
+    }
 }
 
 /**
@@ -1554,9 +2081,9 @@ static void state_machine_process_ota_command(command_action_t action) {
 }
 
 /**
- * @brief Prepare peripherals and wakeup sources before deep sleep.
+ * @brief Power down peripherals before entering any parked sleep mode.
  */
-static void state_machine_prepare_sleep(void) {
+static void state_machine_shutdown_for_sleep(void) {
     /* Snapshot context into RTC memory before shutdown. */
     g_rtc_context.last_state = APP_STATE_SLEEP;
     g_rtc_context.ign_last_known = s_telemetry.ignition;
@@ -1567,6 +2094,11 @@ static void state_machine_prepare_sleep(void) {
         ble_obd_disconnect(s_ble_ctx);
         s_ble_ctx = NULL;
         s_obd_elm_ready = false;
+    }
+
+    esp_err_t ble_stack_err = ble_stack_deinit();
+    if (ble_stack_err != ESP_OK) {
+        ESP_LOGW(TAG, "BLE stack deinit before sleep failed: %s", esp_err_to_name(ble_stack_err));
     }
 
     if (s_gnss_started) {
@@ -1592,10 +2124,13 @@ static void state_machine_prepare_sleep(void) {
     if (dtr_sleep_err != ESP_OK && dtr_sleep_err != ESP_ERR_NOT_SUPPORTED) {
         ESP_LOGW(TAG, "Set DTR sleep level before deep sleep failed: %s", esp_err_to_name(dtr_sleep_err));
     }
+}
 
-    /* Wake by motion interrupt only when IMU wake policy is enabled and IMU is ready. */
-    if (state_machine_imu_runtime_enabled() && s_imu_available) {
-        esp_err_t wake_err = esp_sleep_enable_ext0_wakeup(PIN_LIS3DSH_INT, 1);
+static void state_machine_prepare_deep_sleep_wakeup(void) {
+    (void)esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+    /* Wake by motion interrupt only when the configured IMU pin is valid for deep sleep wake. */
+    if (state_machine_can_arm_imu_deep_sleep_wakeup()) {
+        esp_err_t wake_err = esp_sleep_enable_ext0_wakeup(PIN_LIS3DH_INT, 1);
         if (wake_err != ESP_OK) {
             ESP_LOGW(TAG,
                      "IMU ext0 wake arm failed: %s (timer-only fallback)",
@@ -1603,7 +2138,65 @@ static void state_machine_prepare_sleep(void) {
         }
     }
     uint16_t wake_interval_s = state_machine_parked_wake_interval_s();
-    esp_sleep_enable_timer_wakeup((uint64_t)wake_interval_s * 1000000ULL);
+    (void)esp_sleep_enable_timer_wakeup((uint64_t)wake_interval_s * 1000000ULL);
+}
+
+static app_state_t state_machine_enter_light_sleep(void) {
+    (void)esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+
+    esp_err_t clear_int_err = imu_clear_motion_interrupt();
+    if (clear_int_err != ESP_OK) {
+        ESP_LOGW(TAG, "IMU INT clear before light sleep failed: %s", esp_err_to_name(clear_int_err));
+    }
+    vTaskDelay(pdMS_TO_TICKS(TRACKER_LIGHT_SLEEP_IMU_CLEAR_SETTLE_MS));
+
+    if (imu_motion_detected()) {
+        ESP_LOGW(TAG, "IMU interrupt still asserted before light sleep; skip sleep and enter alarm");
+        return APP_STATE_ALARM;
+    }
+
+    esp_err_t gpio_wake_err = gpio_wakeup_enable(PIN_LIS3DH_INT, GPIO_INTR_HIGH_LEVEL);
+    if (gpio_wake_err != ESP_OK) {
+        ESP_LOGW(TAG, "GPIO wake arm failed gpio=%d err=%s", (int)PIN_LIS3DH_INT, esp_err_to_name(gpio_wake_err));
+        return APP_STATE_CHECK_IGN;
+    }
+
+    esp_err_t sleep_gpio_err = esp_sleep_enable_gpio_wakeup();
+    if (sleep_gpio_err != ESP_OK) {
+        ESP_LOGW(TAG, "Light sleep GPIO wake enable failed: %s", esp_err_to_name(sleep_gpio_err));
+        return APP_STATE_CHECK_IGN;
+    }
+
+    uint16_t wake_interval_s = state_machine_parked_wake_interval_s();
+    esp_err_t timer_err = esp_sleep_enable_timer_wakeup((uint64_t)wake_interval_s * 1000000ULL);
+    if (timer_err != ESP_OK) {
+        ESP_LOGW(TAG, "Light sleep timer wake enable failed: %s", esp_err_to_name(timer_err));
+        return APP_STATE_CHECK_IGN;
+    }
+
+    ESP_LOGI(TAG,
+             "Entering light sleep interval_s=%u imu_gpio=%d",
+             (unsigned)wake_interval_s,
+             (int)PIN_LIS3DH_INT);
+    esp_err_t sleep_err = esp_light_sleep_start();
+    if (sleep_err != ESP_OK) {
+        ESP_LOGW(TAG, "esp_light_sleep_start failed: %s", esp_err_to_name(sleep_err));
+        return APP_STATE_CHECK_IGN;
+    }
+
+    esp_sleep_wakeup_cause_t wakeup = esp_sleep_get_wakeup_cause();
+    ESP_LOGI(TAG, "Light sleep wakeup cause=%d", (int)wakeup);
+
+    if (wakeup == ESP_SLEEP_WAKEUP_GPIO && state_machine_imu_runtime_enabled()) {
+        return APP_STATE_ALARM;
+    }
+    if (wakeup == ESP_SLEEP_WAKEUP_TIMER) {
+        s_heartbeat_started_ms = 0;
+        s_heartbeat_raw_published = false;
+        return APP_STATE_HEARTBEAT;
+    }
+
+    return APP_STATE_CHECK_IGN;
 }
 
 /**
@@ -1617,6 +2210,7 @@ esp_err_t state_machine_init(const config_t *config) {
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
 
     memset(&s_telemetry, 0, sizeof(s_telemetry));
+    util_copy_string(s_telemetry.obd_ecu_state, sizeof(s_telemetry.obd_ecu_state), "unknown");
     s_config = *config;
     ESP_LOGI(TAG,
              "Runtime config device=%s mqtt_host=%s mqtt_port=%u apn=%s tracking=%us heartbeat=%us alarm=%us ign_hold_ms=%u sleep=%d imu_wake=%d ota_min_mv=%u",
@@ -1636,6 +2230,12 @@ esp_err_t state_machine_init(const config_t *config) {
     retry_state_reset(&s_rtc_bootstrap_retry);
     retry_state_reset(&s_rtc_read_retry);
     retry_state_reset(&s_imu_bootstrap_retry);
+    if (s_ble_connect_result_queue == NULL) {
+        s_ble_connect_result_queue = xQueueCreate(1, sizeof(tracker_ble_connect_result_t));
+    } else {
+        xQueueReset(s_ble_connect_result_queue);
+    }
+    ESP_RETURN_ON_FALSE(s_ble_connect_result_queue != NULL, ESP_ERR_NO_MEM, TAG, "BLE result queue init failed");
     memset(&s_deferred_firmware_report, 0, sizeof(s_deferred_firmware_report));
     s_deferred_firmware_report_pending = false;
 
@@ -1664,10 +2264,15 @@ esp_err_t state_machine_init(const config_t *config) {
     s_last_gnss_rearm_ms = 0;
     s_last_gnss_poll_ms = 0;
     s_obd_aux_pid_cursor = 0;
+    s_obd_diag_query_cursor = 0;
     s_last_obd_sample_ms = 0;
+    s_last_obd_diagnostic_poll_ms = 0;
     s_obd_elm_ready = false;
     s_obd_fail_window_started_ms = 0;
     s_obd_fail_window_count = 0;
+    s_ble_connect_inflight = false;
+    s_ble_connect_started_ms = 0;
+    s_imu_invalid_wakeup_gpio_logged = false;
     s_last_hw_diag_log_ms = 0;
     s_heartbeat_started_ms = 0;
     s_heartbeat_raw_published = false;
@@ -1741,23 +2346,7 @@ app_state_t state_machine_run(app_state_t current_state) {
                 ESP_LOGI(TAG, "Startup system check: ADC/BLE/RTC/LTE/MQTT");
                 s_startup_system_check_log_once = true;
             }
-            state_machine_handle_pending_action();
-            state_machine_try_connect_network();
-            state_machine_bootstrap_rtc();
-            state_machine_bootstrap_imu();
-
-            /*
-             * Bring modem path first; BLE OBD connect can block for multiple seconds and would
-             * otherwise starve LTE AT FSM tick cadence during startup.
-             */
-            bool lte_ready = modem_lte_is_initialized();
-            state_machine_refresh_telemetry(lte_ready, true);
-            state_machine_handle_pending_action();
-            if (lte_ready) {
-                state_machine_try_connect_ble();
-            }
-            offline_queue_set_online(tracker_mqtt_is_connected());
-            offline_queue_replay_tick();
+            state_machine_run_wake_prelude(false);
             session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
             g_rtc_context.ign_last_known = s_telemetry.ignition;
 
@@ -1766,17 +2355,7 @@ app_state_t state_machine_run(app_state_t current_state) {
 
         case APP_STATE_DRIVING: {
             /* Full online mode with high-frequency telemetry and command handling. */
-            state_machine_handle_pending_action();
-            state_machine_try_connect_network();
-            state_machine_refresh_telemetry(true, true);
-            state_machine_handle_pending_action();
-            if (modem_lte_is_initialized()) {
-                state_machine_try_connect_ble();
-            }
-            state_machine_bootstrap_rtc();
-            state_machine_bootstrap_imu();
-            offline_queue_set_online(tracker_mqtt_is_connected());
-            offline_queue_replay_tick();
+            state_machine_run_wake_prelude(true);
 
             session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
             if (session_mgr_should_start()) {
@@ -1796,6 +2375,10 @@ app_state_t state_machine_run(app_state_t current_state) {
                                       command_handler_consume_location_request();
             if (should_publish_raw && !offline_queue_should_throttle_rawdata()) {
                 state_machine_publish_rawdata();
+            }
+
+            if (modem_lte_is_initialized()) {
+                state_machine_try_connect_ble();
             }
 
             bool tracking_enabled = command_handler_is_tracking_enabled();
@@ -1823,22 +2406,24 @@ app_state_t state_machine_run(app_state_t current_state) {
         }
 
         case APP_STATE_PARKED:
-            /* Transition stop status before sleeping. */
+            /*
+             * Parked transitions still need one best-effort publish window so the
+             * wake sequence finishes as: wake -> modem/sensors -> MQTT publish -> sleep.
+             */
             if (!s_status_stopped) {
                 state_machine_publish_status("stopped");
                 s_status_stopped = true;
             }
             s_status_running = false;
-            return APP_STATE_SLEEP;
+            if (s_heartbeat_started_ms == 0) {
+                s_heartbeat_started_ms = util_uptime_ms();
+                s_heartbeat_raw_published = false;
+            }
+            return APP_STATE_HEARTBEAT;
 
         case APP_STATE_ALARM: {
             /* Alarm mode after motion wakeup: publish event + periodic rawdata. */
-            state_machine_handle_pending_action();
-            state_machine_try_connect_network();
-            state_machine_refresh_telemetry(true, false);
-            state_machine_handle_pending_action();
-            offline_queue_set_online(tracker_mqtt_is_connected());
-            offline_queue_replay_tick();
+            state_machine_run_wake_prelude(true);
 
             if (s_alarm_enter_ms == 0) {
                 s_alarm_enter_ms = util_uptime_ms();
@@ -1849,6 +2434,10 @@ app_state_t state_machine_run(app_state_t current_state) {
             uint64_t now_ms = util_uptime_ms();
             if ((now_ms - s_last_raw_publish_ms) >= state_machine_alarm_interval_ms()) {
                 state_machine_publish_rawdata();
+            }
+
+            if (modem_lte_is_initialized()) {
+                state_machine_try_connect_ble();
             }
 
             if (s_telemetry.ignition) {
@@ -1871,42 +2460,53 @@ app_state_t state_machine_run(app_state_t current_state) {
         case APP_STATE_HEARTBEAT:
             /*
              * Timer wake heartbeat path:
-             * keep a short online window so LTE/MQTT/BLE OBD can recover and provide
-             * at least one parked raw sample before returning to deep sleep.
+             * bring modem up first, read local hardware while transport settles,
+             * publish one best-effort parked sample, then return to deep sleep.
              */
             if (s_heartbeat_started_ms == 0) {
                 s_heartbeat_started_ms = util_uptime_ms();
                 s_heartbeat_raw_published = false;
                 s_timer_wake_count += 1;
             }
-            state_machine_handle_pending_action();
-            state_machine_try_connect_network();
-            state_machine_refresh_telemetry(true, true);
-            state_machine_handle_pending_action();
-            if (modem_lte_is_initialized()) {
-                state_machine_try_connect_ble();
-            }
-            offline_queue_set_online(tracker_mqtt_is_connected());
-            offline_queue_replay_tick();
+            state_machine_run_wake_prelude(false);
 
             uint64_t now_ms = util_uptime_ms();
+            bool heartbeat_timeout = (now_ms - s_heartbeat_started_ms) >= TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS;
             bool obd_connected = s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx);
-            if (!s_heartbeat_raw_published) {
+            bool network_ready = state_machine_network_ready_for_heartbeat_publish();
+            bool gnss_publish_ready = !s_gnss_started || s_telemetry.gnss.fix_valid || heartbeat_timeout;
+            if (!s_heartbeat_raw_published &&
+                (!s_ble_connect_inflight || heartbeat_timeout) &&
+                (network_ready || heartbeat_timeout) &&
+                gnss_publish_ready) {
                 if (!offline_queue_should_throttle_rawdata()) {
                     state_machine_publish_rawdata();
                 } else {
                     ESP_LOGW(TAG, "heartbeat rawdata throttled; publishing status only");
                 }
 
-                if (!obd_connected) {
-                    ESP_LOGW(TAG, "heartbeat publish without OBD connection");
+                if (!state_machine_has_recent_obd_sample(now_ms, TRACKER_HEARTBEAT_OBD_STALE_WARN_MS)) {
+                    if (strcmp(s_telemetry.obd_ecu_state, "stopped") == 0) {
+                        ESP_LOGI(TAG,
+                                 "heartbeat publish without fresh OBD sample because ECU state=%s",
+                                 s_telemetry.obd_ecu_state);
+                    } else {
+                        ESP_LOGW(TAG,
+                                 "heartbeat publish without fresh OBD sample connected=%d state=%s age_ms=%lu",
+                                 obd_connected ? 1 : 0,
+                                 s_telemetry.obd_ecu_state,
+                                 (unsigned long)s_telemetry.obd_sample_age_ms);
+                    }
                 }
 
                 state_machine_publish_status("heartbeat");
                 s_heartbeat_raw_published = true;
             }
 
-            bool heartbeat_timeout = (now_ms - s_heartbeat_started_ms) >= TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS;
+            if (s_heartbeat_raw_published && !heartbeat_timeout && offline_queue_has_pending_ack()) {
+                return APP_STATE_HEARTBEAT;
+            }
+
             if (s_heartbeat_raw_published || heartbeat_timeout) {
                 s_heartbeat_started_ms = 0;
                 s_heartbeat_raw_published = false;
@@ -1916,6 +2516,7 @@ app_state_t state_machine_run(app_state_t current_state) {
 
         case APP_STATE_SLEEP:
             /* Sleep path is policy-driven with explicit block reasons. */
+            (void)state_machine_handle_ble_connect_result();
             const char *reason = "ok";
             if (!state_machine_can_enter_sleep(&reason)) {
                 s_sleep_blocked_count += 1;
@@ -1938,7 +2539,11 @@ app_state_t state_machine_run(app_state_t current_state) {
                      (unsigned long)s_timer_wake_count,
                      (unsigned long)s_imu_wake_count,
                      (unsigned long)s_imu_false_wake_count);
-            state_machine_prepare_sleep();
+            state_machine_shutdown_for_sleep();
+            if (state_machine_should_use_light_sleep_motion_wake()) {
+                return state_machine_enter_light_sleep();
+            }
+            state_machine_prepare_deep_sleep_wakeup();
             esp_deep_sleep_start();
             return APP_STATE_SLEEP;
 

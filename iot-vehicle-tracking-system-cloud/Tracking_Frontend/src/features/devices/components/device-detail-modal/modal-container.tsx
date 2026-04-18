@@ -64,6 +64,7 @@ const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string =
   const channel = toRecord(diagnostics.channel);
   const signals = toRecord(diagnostics.signals);
   const quality = toRecord(diagnostics.quality);
+  const dtc = toRecord(diagnostics.dtc);
 
   const ecuState =
     typeof channel?.ecu_state === 'string' && channel.ecu_state.trim().length > 0
@@ -76,6 +77,16 @@ const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string =
   const load = toFiniteNumber(signals?.engine_load_pct);
   const sampleAgeMs = toFiniteNumber(quality?.sample_age_ms);
   const failCount = toFiniteNumber(channel?.connect_fail_count_5m);
+  const storedDtc = Array.isArray(dtc?.stored)
+    ? dtc.stored.filter((item): item is string => typeof item === 'string' && item.length > 0)
+    : [];
+  const pendingDtc = Array.isArray(dtc?.pending)
+    ? dtc.pending.filter((item): item is string => typeof item === 'string' && item.length > 0)
+    : [];
+  const permanentDtc = Array.isArray(dtc?.permanent)
+    ? dtc.permanent.filter((item): item is string => typeof item === 'string' && item.length > 0)
+    : [];
+  const milOn = diagnostics.mil_on === undefined ? undefined : Boolean(diagnostics.mil_on);
 
   const parts = [
     ecuState === 'stopped'
@@ -85,6 +96,7 @@ const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string =
         : connected
           ? 'OBD đã nối'
           : 'OBD không ổn định',
+    `mil=${milOn === undefined ? '-' : milOn ? 'on' : 'off'}`,
     `rpm=${rpm?.toFixed(0) ?? '-'}`,
     `spd=${speed?.toFixed(1) ?? '-'} km/h`,
     `coolant=${coolant?.toFixed(1) ?? '-'} C`,
@@ -97,6 +109,15 @@ const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string =
   }
   if (failCount !== undefined) {
     parts.push(`fail5m=${failCount.toFixed(0)}`);
+  }
+  if (storedDtc.length > 0) {
+    parts.push(`stored=${storedDtc.join(',')}`);
+  }
+  if (pendingDtc.length > 0) {
+    parts.push(`pending=${pendingDtc.join(',')}`);
+  }
+  if (permanentDtc.length > 0) {
+    parts.push(`permanent=${permanentDtc.join(',')}`);
   }
 
   return parts.join(' | ');
@@ -185,6 +206,8 @@ const buildRawFeed = (params: {
               event_code: 'mqtt_bridge_rawdata',
               context: {
                 diagnostics: {
+                  mil_on: false,
+                  reported_dtc_count: 0,
                   channel: {
                     ble_obd_connected: true,
                     elm_ready: true,
@@ -201,6 +224,11 @@ const buildRawFeed = (params: {
                   quality: {
                     sample_age_ms: 900,
                     missing_signals: [],
+                  },
+                  dtc: {
+                    stored: [],
+                    pending: [],
+                    permanent: [],
                   },
                 },
               },

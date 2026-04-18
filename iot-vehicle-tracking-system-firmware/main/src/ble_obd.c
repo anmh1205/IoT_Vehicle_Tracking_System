@@ -10,6 +10,7 @@
 #include "freertos/task.h"
 
 #include "esp_log.h"
+#include "host/ble_hs_adv.h"
 #include "os/os_mbuf.h"
 
 #include "ble_mgr.h"
@@ -30,6 +31,15 @@
 #define BLE_OBD_CONNECT_TIMEOUT_DEFAULT_MS 15000U
 #define BLE_OBD_CONNECT_TIMEOUT_MIN_MS 7000U
 
+typedef enum {
+    BLE_OBD_RESPONSE_STATE_UNKNOWN = 0,
+    BLE_OBD_RESPONSE_STATE_LIVE,
+    BLE_OBD_RESPONSE_STATE_STOPPED,
+    BLE_OBD_RESPONSE_STATE_NO_DATA,
+    BLE_OBD_RESPONSE_STATE_SEARCHING,
+    BLE_OBD_RESPONSE_STATE_ERROR,
+} ble_obd_response_state_t;
+
 /**
  * @brief BLE OBD runtime context.
  */
@@ -49,8 +59,12 @@ struct ble_obd_ctx {
         uint8_t mode;
         /* Last sent PID for response validation. */
         uint8_t pid;
+        /* True when response header must contain both mode+0x40 and PID. */
+        bool expect_pid_header;
         /* True only for OBD mode/PID transaction path. */
         bool expect_obd_response;
+        /* True once the current transaction yields a valid OBD payload. */
+        bool got_valid_payload;
     } tx_data;
     struct {
         /* Aggregated notify chunks for current transaction. */
@@ -74,6 +88,8 @@ struct ble_obd_ctx {
         /* Last tick when diagnostic snapshot was logged. */
         TickType_t last_log_tick;
     } diag;
+    /* Latest ECU state inferred from parsed OBD responses. */
+    ble_obd_response_state_t last_response_state;
     /* User context forwarded to response callback. */
     void *usr_ctx;
 };
@@ -102,7 +118,22 @@ static bool ble_obd_parse_hex_response(const char *response, uint8_t *values, si
 static bool ble_obd_response_has_prompt(const char *response);
 static void ble_obd_response_reset(ble_obd_ctx_t *ctx);
 static void ble_obd_diag_log_periodic(ble_obd_ctx_t *ctx, bool force_now);
-static bool ble_obd_device_filter_cb(ble_mgr_ctx_t *mgr_ctx, const ble_addr_t *addr, void *usr_ctx);
+static int ble_obd_execute_request(ble_obd_ctx_t *ctx,
+                                   uint8_t mode,
+                                   uint8_t pid,
+                                   bool expect_pid_header,
+                                   uint32_t timeout_ms);
+static ble_obd_response_state_t ble_obd_classify_response_state(ble_obd_ctx_t *ctx, bool has_valid_obd);
+static const char *ble_obd_response_state_to_string(ble_obd_response_state_t state);
+static void ble_obd_format_log_snippet(const char *src, char *dst, size_t dst_len);
+static size_t ble_obd_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, char *buf, size_t buf_len);
+static bool ble_obd_name_contains_keyword(const char *value, const char *keyword);
+static bool ble_obd_name_looks_like_adapter(const char *name);
+static bool ble_obd_device_filter_cb(ble_mgr_ctx_t *mgr_ctx,
+                                     const ble_addr_t *addr,
+                                     const struct ble_hs_adv_fields *adv_fields,
+                                     bool service_match,
+                                     void *usr_ctx);
 static bool ble_obd_disconnected_cb(ble_mgr_ctx_t *mgr_ctx, void *usr_ctx);
 
 /* Static discovery profile to avoid dangling stack references in BLE manager. */
@@ -132,35 +163,168 @@ static uint16_t ble_obd_rx_handle(void) {
 }
 
 /**
+ * @brief Copy advertising name into a null-terminated scratch buffer.
+ */
+static size_t ble_obd_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, char *buf, size_t buf_len) {
+    if (buf == NULL || buf_len == 0) {
+        return 0;
+    }
+
+    buf[0] = '\0';
+    if (adv_fields == NULL || adv_fields->name == NULL || adv_fields->name_len == 0) {
+        return 0;
+    }
+
+    size_t copy_len = MIN_VALUE((size_t)adv_fields->name_len, buf_len - 1U);
+    memcpy(buf, adv_fields->name, copy_len);
+    buf[copy_len] = '\0';
+    return copy_len;
+}
+
+/**
+ * @brief Case-insensitive substring check used for OBD adapter names.
+ */
+static bool ble_obd_name_contains_keyword(const char *value, const char *keyword) {
+    if (util_string_empty(value) || util_string_empty(keyword)) {
+        return false;
+    }
+
+    size_t value_len = strlen(value);
+    size_t keyword_len = strlen(keyword);
+    if (keyword_len > value_len) {
+        return false;
+    }
+
+    for (size_t i = 0; i + keyword_len <= value_len; ++i) {
+        bool matched = true;
+        for (size_t j = 0; j < keyword_len; ++j) {
+            char lhs = (char)tolower((unsigned char)value[i + j]);
+            char rhs = (char)tolower((unsigned char)keyword[j]);
+            if (lhs != rhs) {
+                matched = false;
+                break;
+            }
+        }
+        if (matched) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @brief Heuristic match for common BLE OBD adapter names.
+ */
+static bool ble_obd_name_looks_like_adapter(const char *name) {
+    static const char *keywords[] = {"vgate", "icar", "icar pro", "obd", "elm", "vlink", "viecar", "kw9"};
+
+    for (size_t i = 0; i < ARRAY_SIZE(keywords); ++i) {
+        if (ble_obd_name_contains_keyword(name, keywords[i])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static ble_obd_response_state_t ble_obd_classify_response_state(ble_obd_ctx_t *ctx, bool has_valid_obd) {
+    if (ctx == NULL) {
+        return BLE_OBD_RESPONSE_STATE_UNKNOWN;
+    }
+
+    if (has_valid_obd) {
+        return BLE_OBD_RESPONSE_STATE_LIVE;
+    }
+
+    const char *response = ctx->rx_data.buf;
+    if (ble_obd_name_contains_keyword(response, "stopped")) {
+        return BLE_OBD_RESPONSE_STATE_STOPPED;
+    }
+    if (ble_obd_name_contains_keyword(response, "no data")) {
+        return BLE_OBD_RESPONSE_STATE_NO_DATA;
+    }
+    if (ble_obd_name_contains_keyword(response, "searching")) {
+        return BLE_OBD_RESPONSE_STATE_SEARCHING;
+    }
+    if (ctx->rx_data.has_error || ble_obd_name_contains_keyword(response, "error") ||
+        ble_obd_name_contains_keyword(response, "unable to connect")) {
+        return BLE_OBD_RESPONSE_STATE_ERROR;
+    }
+
+    return BLE_OBD_RESPONSE_STATE_UNKNOWN;
+}
+
+static const char *ble_obd_response_state_to_string(ble_obd_response_state_t state) {
+    switch (state) {
+        case BLE_OBD_RESPONSE_STATE_LIVE:
+            return "live";
+        case BLE_OBD_RESPONSE_STATE_STOPPED:
+            return "stopped";
+        case BLE_OBD_RESPONSE_STATE_NO_DATA:
+            return "no_data";
+        case BLE_OBD_RESPONSE_STATE_SEARCHING:
+            return "searching";
+        case BLE_OBD_RESPONSE_STATE_ERROR:
+            return "error";
+        case BLE_OBD_RESPONSE_STATE_UNKNOWN:
+        default:
+            return "unknown";
+    }
+}
+
+/**
  * @brief Optional device filter used during BLE scan results.
  *
  * @param mgr_ctx BLE manager context.
  * @param addr Candidate address.
+ * @param adv_fields Parsed advertisement fields.
+ * @param service_match True when advertisement already exposed the target service UUID.
  * @param usr_ctx User context.
  *
  * @return true when device should be connected.
  */
-static bool ble_obd_device_filter_cb(ble_mgr_ctx_t *mgr_ctx, const ble_addr_t *addr, void *usr_ctx) {
+static bool ble_obd_device_filter_cb(ble_mgr_ctx_t *mgr_ctx,
+                                     const ble_addr_t *addr,
+                                     const struct ble_hs_adv_fields *adv_fields,
+                                     bool service_match,
+                                     void *usr_ctx) {
     (void)mgr_ctx;
     (void)usr_ctx;
 
     char addr_str[BLE_ADDR_STR_LEN] = {0};
+    char name_buf[32] = {0};
     if (addr != NULL) {
         (void)ble_addr_to_str(addr, addr_str);
     } else {
         util_copy_string(addr_str, sizeof(addr_str), "unknown");
     }
+    ble_obd_copy_adv_name(adv_fields, name_buf, sizeof(name_buf));
+    const char *display_name = util_string_empty(name_buf) ? "<no-name>" : name_buf;
 
     if (s_has_preferred_addr && addr != NULL) {
         if (memcmp(addr->val, s_preferred_addr.val, sizeof(addr->val)) == 0) {
-            ESP_LOGI(TAG, "BLE candidate matched preferred MAC: %s", addr_str);
+            ESP_LOGI(TAG,
+                     "BLE candidate matched preferred MAC addr=%s name=%s service_match=%d",
+                     addr_str,
+                     display_name,
+                     service_match ? 1 : 0);
             return true;
         }
         return false;
     }
 
-    ESP_LOGI(TAG, "BLE candidate discovered (service matched): %s", addr_str);
-    return true;
+    if (service_match) {
+        ESP_LOGI(TAG, "BLE candidate discovered service-match addr=%s name=%s", addr_str, display_name);
+        return true;
+    }
+
+    if (ble_obd_name_looks_like_adapter(name_buf)) {
+        ESP_LOGI(TAG, "BLE candidate discovered name-match addr=%s name=%s", addr_str, display_name);
+        return true;
+    }
+
+    return false;
 }
 
 /**
@@ -273,6 +437,45 @@ static void ble_obd_diag_log_periodic(ble_obd_ctx_t *ctx, bool force_now) {
 }
 
 /**
+ * @brief Compact raw ELM327 response into one log-safe line.
+ */
+static void ble_obd_format_log_snippet(const char *src, char *dst, size_t dst_len) {
+    if (dst == NULL || dst_len == 0) {
+        return;
+    }
+
+    dst[0] = '\0';
+    if (util_string_empty(src)) {
+        util_copy_string(dst, dst_len, "<empty>");
+        return;
+    }
+
+    size_t out_len = 0;
+    for (size_t i = 0; src[i] != '\0' && out_len + 1U < dst_len; ++i) {
+        unsigned char raw = (unsigned char)src[i];
+        char ch = (char)raw;
+        if (ch == '\r' || ch == '\n' || ch == '\t') {
+            ch = ' ';
+        } else if (!isprint(raw)) {
+            ch = '.';
+        }
+
+        if (out_len > 0 && ch == ' ' && dst[out_len - 1U] == ' ') {
+            continue;
+        }
+
+        dst[out_len++] = ch;
+    }
+
+    if (out_len == 0) {
+        util_copy_string(dst, dst_len, "<empty>");
+        return;
+    }
+
+    dst[out_len] = '\0';
+}
+
+/**
  * @brief Notification handler for OBD RX characteristic.
  *
  * Parses common ELM327 line responses and triggers waiting semaphore.
@@ -322,26 +525,55 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
 
     bool has_valid_obd = false;
     size_t payload_offset = 0;
-    if (has_hex && value_count >= 2) {
-        for (size_t i = 0; i + 1 < value_count; ++i) {
-            if (values[i] == (ctx->tx_data.mode + 0x40) && values[i + 1] == ctx->tx_data.pid) {
-                has_valid_obd = true;
-                payload_offset = i + 2;
-                break;
+    size_t required_header_len = ctx->tx_data.expect_pid_header ? 2U : 1U;
+    if (has_hex && value_count >= required_header_len) {
+        for (size_t i = 0; i + required_header_len - 1U < value_count; ++i) {
+            if (values[i] != (ctx->tx_data.mode + 0x40)) {
+                continue;
             }
+            if (ctx->tx_data.expect_pid_header && values[i + 1] != ctx->tx_data.pid) {
+                continue;
+            }
+
+                has_valid_obd = true;
+                payload_offset = i + required_header_len;
+                break;
         }
     }
 
     if (ctx->tx_data.expect_obd_response) {
+        ble_obd_response_state_t response_state =
+            ble_obd_classify_response_state(ctx, has_valid_obd);
+        ctx->last_response_state = response_state;
         if (has_valid_obd) {
+            ctx->tx_data.got_valid_payload = true;
             ctx->diag.notify_valid++;
             if (ctx->response_cb != NULL) {
-                ctx->response_cb(ctx->tx_data.pid, values + payload_offset, value_count - payload_offset, ctx->usr_ctx);
+                int response_pid = ctx->tx_data.expect_pid_header ? (int)ctx->tx_data.pid : -1;
+                ctx->response_cb(ctx->tx_data.mode,
+                                 response_pid,
+                                 values + payload_offset,
+                                 value_count - payload_offset,
+                                 ctx->usr_ctx);
             }
         } else {
+            ctx->tx_data.got_valid_payload = false;
             ctx->diag.notify_invalid++;
+            if (ctx->diag.notify_invalid <= 5U || (ctx->diag.notify_invalid % 20U) == 0U) {
+                char raw_buf[128] = {0};
+                ble_obd_format_log_snippet(ctx->rx_data.buf, raw_buf, sizeof(raw_buf));
+                ESP_LOGW(TAG,
+                         "OBD invalid response count=%lu mode=0x%02X pid=0x%02X state=%s has_hex=%d has_error=%d raw=%s",
+                         (unsigned long)ctx->diag.notify_invalid,
+                         (unsigned)ctx->tx_data.mode,
+                         (unsigned)ctx->tx_data.pid,
+                         ble_obd_response_state_to_string(response_state),
+                         has_hex ? 1 : 0,
+                         ctx->rx_data.has_error ? 1 : 0,
+                         raw_buf);
+            }
             if ((ctx->rx_data.has_error || has_hex) && ctx->response_cb != NULL) {
-                ctx->response_cb(-1, NULL, 0, ctx->usr_ctx);
+                ctx->response_cb(ctx->tx_data.mode, -1, NULL, 0, ctx->usr_ctx);
             }
         }
     }
@@ -391,6 +623,7 @@ ble_obd_ctx_t *ble_obd_connect(ble_obd_response_cb_t response_cb, void *usr_ctx,
     ctx->mgr_ctx = mgr_ctx;
     ctx->response_cb = response_cb;
     ctx->usr_ctx = usr_ctx;
+    ctx->last_response_state = BLE_OBD_RESPONSE_STATE_UNKNOWN;
     ctx->api_mutex = xSemaphoreCreateMutex();
     ctx->response_sem = xSemaphoreCreateBinary();
 
@@ -461,6 +694,14 @@ bool ble_obd_is_connected(ble_obd_ctx_t *ctx) {
     return ble_mgr_is_connected(ctx->mgr_ctx);
 }
 
+const char *ble_obd_get_last_ecu_state_label(ble_obd_ctx_t *ctx) {
+    if (ctx == NULL) {
+        return "disconnected";
+    }
+
+    return ble_obd_response_state_to_string(ctx->last_response_state);
+}
+
 /**
  * @brief Send raw adapter command and wait for response completion.
  *
@@ -479,6 +720,8 @@ esp_err_t ble_obd_send_raw(ble_obd_ctx_t *ctx, const char *command, uint32_t tim
     }
 
     ctx->tx_data.expect_obd_response = false;
+    ctx->tx_data.expect_pid_header = false;
+    ctx->tx_data.got_valid_payload = false;
 
     /* Drain stale semaphore tokens from prior operations. */
     while (xSemaphoreTake(ctx->response_sem, 0) == pdTRUE) {
@@ -512,7 +755,11 @@ esp_err_t ble_obd_send_raw(ble_obd_ctx_t *ctx, const char *command, uint32_t tim
  *
  * @return 0 on success, -1 on failure.
  */
-int ble_obd_rxtx(ble_obd_ctx_t *ctx, uint8_t mode, uint8_t pid, uint32_t timeout_ms) {
+static int ble_obd_execute_request(ble_obd_ctx_t *ctx,
+                                   uint8_t mode,
+                                   uint8_t pid,
+                                   bool expect_pid_header,
+                                   uint32_t timeout_ms) {
     ESP_RETURN_ON_NULL(ctx, -1, TAG, "ctx is NULL");
 
     if (xSemaphoreTake(ctx->api_mutex, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
@@ -521,11 +768,17 @@ int ble_obd_rxtx(ble_obd_ctx_t *ctx, uint8_t mode, uint8_t pid, uint32_t timeout
 
     ctx->diag.rxtx_total++;
     ctx->tx_data.expect_obd_response = true;
+    ctx->tx_data.expect_pid_header = expect_pid_header;
+    ctx->tx_data.got_valid_payload = false;
 
     /* Store request metadata for response validation in notify callback. */
     ctx->tx_data.mode = mode;
     ctx->tx_data.pid = pid;
-    snprintf(ctx->tx_data.tx_buf, sizeof(ctx->tx_data.tx_buf), "%02X%02X\r", mode, pid);
+    if (expect_pid_header) {
+        snprintf(ctx->tx_data.tx_buf, sizeof(ctx->tx_data.tx_buf), "%02X%02X\r", mode, pid);
+    } else {
+        snprintf(ctx->tx_data.tx_buf, sizeof(ctx->tx_data.tx_buf), "%02X\r", mode);
+    }
 
     while (xSemaphoreTake(ctx->response_sem, 0) == pdTRUE) {
     }
@@ -534,6 +787,7 @@ int ble_obd_rxtx(ble_obd_ctx_t *ctx, uint8_t mode, uint8_t pid, uint32_t timeout
     uint16_t tx_handle = ble_obd_tx_handle();
     if (tx_handle == 0) {
         ctx->tx_data.expect_obd_response = false;
+        ctx->tx_data.expect_pid_header = false;
         xSemaphoreGive(ctx->api_mutex);
         return -1;
     }
@@ -541,6 +795,7 @@ int ble_obd_rxtx(ble_obd_ctx_t *ctx, uint8_t mode, uint8_t pid, uint32_t timeout
     ble_mgr_status_t status = ble_mgr_send(ctx->mgr_ctx, tx_handle, ctx->tx_data.tx_buf, strlen(ctx->tx_data.tx_buf));
     if (status != BLE_MGR_E_OK) {
         ctx->tx_data.expect_obd_response = false;
+        ctx->tx_data.expect_pid_header = false;
         xSemaphoreGive(ctx->api_mutex);
         return -1;
     }
@@ -550,10 +805,21 @@ int ble_obd_rxtx(ble_obd_ctx_t *ctx, uint8_t mode, uint8_t pid, uint32_t timeout
         ctx->diag.rxtx_timeout++;
     }
 
+    bool has_valid_payload = has_response == pdTRUE && ctx->tx_data.got_valid_payload;
     ctx->tx_data.expect_obd_response = false;
+    ctx->tx_data.expect_pid_header = false;
+    ctx->tx_data.got_valid_payload = false;
     ble_obd_diag_log_periodic(ctx, false);
     xSemaphoreGive(ctx->api_mutex);
-    return has_response == pdTRUE ? 0 : -1;
+    return has_valid_payload ? 0 : -1;
+}
+
+int ble_obd_rxtx(ble_obd_ctx_t *ctx, uint8_t mode, uint8_t pid, uint32_t timeout_ms) {
+    return ble_obd_execute_request(ctx, mode, pid, true, timeout_ms);
+}
+
+int ble_obd_request_mode(ble_obd_ctx_t *ctx, uint8_t mode, uint32_t timeout_ms) {
+    return ble_obd_execute_request(ctx, mode, 0, false, timeout_ms);
 }
 
 /**

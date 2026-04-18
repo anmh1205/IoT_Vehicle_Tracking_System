@@ -8,6 +8,9 @@ const payloadMetadataSchema = z.object({
   boot_id: z.string().min(1).optional(),
 });
 
+const diagnosticMonitorStatusSchema = z.enum(['complete', 'incomplete', 'unsupported']);
+const diagnosticDtcCodeSchema = z.string().regex(/^[PCBU][0-3][0-9A-F]{3}$/i);
+
 const rawDataPayloadBaseSchema = z.object({
   device_id: z.string().min(1),
   auth_token: z.string().min(1),
@@ -48,6 +51,31 @@ const rawDataPayloadBaseSchema = z.object({
       code: z.string().min(1).optional(),
       count_5m: z.number().int().nonnegative().optional(),
     })).optional(),
+    mil_on: z.boolean().optional(),
+    reported_dtc_count: z.number().int().nonnegative().optional(),
+    readiness: z.object({
+      misfire: diagnosticMonitorStatusSchema.optional(),
+      fuel_system: diagnosticMonitorStatusSchema.optional(),
+      comprehensive_components: diagnosticMonitorStatusSchema.optional(),
+      catalyst: diagnosticMonitorStatusSchema.optional(),
+      heated_catalyst: diagnosticMonitorStatusSchema.optional(),
+      evaporative_system: diagnosticMonitorStatusSchema.optional(),
+      secondary_air_system: diagnosticMonitorStatusSchema.optional(),
+      ac_refrigerant: diagnosticMonitorStatusSchema.optional(),
+      oxygen_sensor: diagnosticMonitorStatusSchema.optional(),
+      oxygen_sensor_heater: diagnosticMonitorStatusSchema.optional(),
+      egr_vvt_system: diagnosticMonitorStatusSchema.optional(),
+      nmhc_catalyst: diagnosticMonitorStatusSchema.optional(),
+      nox_aftertreatment: diagnosticMonitorStatusSchema.optional(),
+      boost_pressure: diagnosticMonitorStatusSchema.optional(),
+      exhaust_gas_sensor: diagnosticMonitorStatusSchema.optional(),
+      pm_filter: diagnosticMonitorStatusSchema.optional(),
+    }).optional(),
+    dtc: z.object({
+      stored: z.array(diagnosticDtcCodeSchema).optional(),
+      pending: z.array(diagnosticDtcCodeSchema).optional(),
+      permanent: z.array(diagnosticDtcCodeSchema).optional(),
+    }).optional(),
   }).optional(),
   metadata: z.unknown().optional(),
 });

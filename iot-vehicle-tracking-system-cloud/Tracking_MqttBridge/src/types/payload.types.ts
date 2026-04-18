@@ -32,11 +32,42 @@ export interface RawDiagnosticsEvent {
   count_5m?: number;
 }
 
+export type DiagnosticMonitorStatus = 'complete' | 'incomplete' | 'unsupported';
+
+export interface RawDiagnosticsReadiness {
+  misfire?: DiagnosticMonitorStatus;
+  fuel_system?: DiagnosticMonitorStatus;
+  comprehensive_components?: DiagnosticMonitorStatus;
+  catalyst?: DiagnosticMonitorStatus;
+  heated_catalyst?: DiagnosticMonitorStatus;
+  evaporative_system?: DiagnosticMonitorStatus;
+  secondary_air_system?: DiagnosticMonitorStatus;
+  ac_refrigerant?: DiagnosticMonitorStatus;
+  oxygen_sensor?: DiagnosticMonitorStatus;
+  oxygen_sensor_heater?: DiagnosticMonitorStatus;
+  egr_vvt_system?: DiagnosticMonitorStatus;
+  nmhc_catalyst?: DiagnosticMonitorStatus;
+  nox_aftertreatment?: DiagnosticMonitorStatus;
+  boost_pressure?: DiagnosticMonitorStatus;
+  exhaust_gas_sensor?: DiagnosticMonitorStatus;
+  pm_filter?: DiagnosticMonitorStatus;
+}
+
+export interface RawDiagnosticsDtc {
+  stored?: string[];
+  pending?: string[];
+  permanent?: string[];
+}
+
 export interface RawDiagnostics {
   channel?: RawDiagnosticsChannel;
   signals?: RawDiagnosticsSignals;
   quality?: RawDiagnosticsQuality;
   events?: RawDiagnosticsEvent[];
+  mil_on?: boolean;
+  reported_dtc_count?: number;
+  readiness?: RawDiagnosticsReadiness;
+  dtc?: RawDiagnosticsDtc;
 }
 
 export interface RawDataPayload {

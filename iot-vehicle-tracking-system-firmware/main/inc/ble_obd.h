@@ -18,6 +18,18 @@
 typedef struct ble_obd_ctx ble_obd_ctx_t;
 
 /**
+ * @brief Return the latest ECU/session state derived from OBD responses.
+ *
+ * Typical values are `live`, `stopped`, `no_data`, `searching`, `error`,
+ * `unknown`, or `disconnected`.
+ *
+ * @param ctx BLE OBD context.
+ *
+ * @return Stable lowercase label for the latest observed OBD response state.
+ */
+const char *ble_obd_get_last_ecu_state_label(ble_obd_ctx_t *ctx);
+
+/**
  * @brief Decoded OBD response payload.
  */
 typedef struct {
@@ -34,12 +46,13 @@ typedef struct {
 /**
  * @brief Callback for asynchronous OBD response notifications.
  *
- * @param pid Requested PID or -1 when response is invalid.
+ * @param mode Requested OBD mode.
+ * @param pid Requested PID, or -1 for non-PID modes such as `03`, `07`, `0A`.
  * @param data Response payload bytes (without mode/pid header).
  * @param len Payload length.
  * @param usr_ctx User context provided at connect time.
  */
-typedef void (*ble_obd_response_cb_t)(int pid, const uint8_t *data, size_t len, void *usr_ctx);
+typedef void (*ble_obd_response_cb_t)(uint8_t mode, int pid, const uint8_t *data, size_t len, void *usr_ctx);
 
 /**
  * @brief Set preferred BLE address for OBD adapter filtering.
@@ -80,16 +93,27 @@ esp_err_t ble_obd_disconnect(ble_obd_ctx_t *ctx);
 bool ble_obd_is_connected(ble_obd_ctx_t *ctx);
 
 /**
- * @brief Send OBD mode/PID request and wait for completion.
+ * @brief Send OBD mode/PID request and wait for a valid decoded payload.
  *
  * @param ctx BLE OBD context.
  * @param mode OBD mode byte.
  * @param pid OBD PID byte.
  * @param timeout_ms Wait timeout in milliseconds.
  *
- * @return 0 on success, -1 on failure or timeout.
+ * @return 0 on success, -1 when no valid payload, send failure, or timeout occurs.
  */
 int ble_obd_rxtx(ble_obd_ctx_t *ctx, uint8_t mode, uint8_t pid, uint32_t timeout_ms);
+
+/**
+ * @brief Send an OBD mode request without PID and wait for a valid decoded payload.
+ *
+ * @param ctx BLE OBD context.
+ * @param mode OBD mode byte (`03`, `07`, `0A`, ...).
+ * @param timeout_ms Wait timeout in milliseconds.
+ *
+ * @return 0 on success, -1 when no valid payload, send failure, or timeout occurs.
+ */
+int ble_obd_request_mode(ble_obd_ctx_t *ctx, uint8_t mode, uint32_t timeout_ms);
 
 /**
  * @brief Send raw ELM327 command string and wait for prompt/response completion.

@@ -61,6 +61,17 @@ const stringifyValue = (value: unknown): string => {
   return JSON.stringify(value);
 };
 
+const stringifyCodes = (value: unknown): string => {
+  if (!Array.isArray(value)) {
+    return '-';
+  }
+
+  const items = value
+    .map((item) => (typeof item === 'string' ? item.trim().toUpperCase() : ''))
+    .filter((item) => item.length > 0);
+  return items.length > 0 ? items.join(', ') : '-';
+};
+
 const formatSessionCadence = (payload: Record<string, unknown>): string => {
   const uptime = Number(payload.uptime);
   const dataPoints = Number(payload.dataPointsCount ?? payload.data_points_count);
@@ -110,15 +121,20 @@ const extractHighlights = (row: { source: string; payload: Record<string, unknow
     const channel = toRecord(diagnostics.channel) ?? {};
     const signals = toRecord(diagnostics.signals) ?? {};
     const quality = toRecord(diagnostics.quality) ?? {};
+    const dtc = toRecord(diagnostics.dtc) ?? {};
 
     return [
       ['BLE OBD', stringifyValue(channel.ble_obd_connected)],
       ['ELM ready', stringifyValue(channel.elm_ready)],
       ['ECU state', stringifyValue(channel.ecu_state)],
+      ['MIL', stringifyValue(diagnostics.mil_on)],
       ['RPM', stringifyValue(signals.rpm)],
       ['Tốc độ OBD', stringifyValue(signals.obd_speed_kph)],
       ['Coolant', stringifyValue(signals.coolant_c)],
       ['Độ trễ mẫu', stringifyValue(quality.sample_age_ms)],
+      ['Stored DTC', stringifyCodes(dtc.stored)],
+      ['Pending DTC', stringifyCodes(dtc.pending)],
+      ['Permanent DTC', stringifyCodes(dtc.permanent)],
     ];
   }
 

@@ -25,10 +25,16 @@ interface DiagnosticsSnapshot {
   ecuState?: string;
   sampleAgeMs?: number;
   connectFailCount5m?: number;
+  milOn?: boolean;
+  reportedDtcCount?: number;
   rpm?: number;
   obdSpeedKph?: number;
   coolantC?: number;
   engineLoadPct?: number;
+  dtcStored?: string[];
+  dtcPending?: string[];
+  dtcPermanent?: string[];
+  readinessIncomplete?: string[];
 }
 
 type ObdHealthState = 'good' | 'warning' | 'inactive' | 'offline' | 'unknown';
@@ -110,6 +116,37 @@ const toFiniteNumber = (value: unknown): number | undefined => {
 const toOptionalString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
 
+const toStringArray = (value: unknown): string[] | undefined => {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const normalized = value
+    .map((item) => (typeof item === 'string' ? item.trim().toUpperCase() : ''))
+    .filter((item) => item.length > 0);
+
+  return normalized.length > 0 ? normalized : undefined;
+};
+
+const readinessLabel: Record<string, string> = {
+  misfire: 'misfire',
+  fuel_system: 'fuel system',
+  comprehensive_components: 'components',
+  catalyst: 'catalyst',
+  heated_catalyst: 'heated catalyst',
+  evaporative_system: 'EVAP',
+  secondary_air_system: 'secondary air',
+  oxygen_sensor: 'O2 sensor',
+  oxygen_sensor_heater: 'O2 heater',
+  egr_vvt_system: 'EGR/VVT',
+  boost_pressure: 'boost pressure',
+  exhaust_gas_sensor: 'exhaust gas sensor',
+  pm_filter: 'PM filter',
+};
+
+const formatDtcList = (codes: string[] | undefined): string =>
+  codes && codes.length > 0 ? codes.join(', ') : '-';
+
 const extractLatestDiagnostics = (rawFeed: DeviceRawFeedRow[]): DiagnosticsSnapshot | null => {
   for (const row of rawFeed) {
     const payload = toRecord(row.payload);
@@ -127,6 +164,13 @@ const extractLatestDiagnostics = (rawFeed: DeviceRawFeedRow[]): DiagnosticsSnaps
     const channel = toRecord(diagnostics.channel);
     const signals = toRecord(diagnostics.signals);
     const quality = toRecord(diagnostics.quality);
+    const dtc = toRecord(diagnostics.dtc);
+    const readiness = toRecord(diagnostics.readiness);
+    const readinessIncomplete = readiness
+      ? Object.entries(readiness)
+          .filter(([, status]) => status === 'incomplete')
+          .map(([key]) => readinessLabel[key] ?? key)
+      : undefined;
 
     return {
       bleConnected:
@@ -135,10 +179,16 @@ const extractLatestDiagnostics = (rawFeed: DeviceRawFeedRow[]): DiagnosticsSnaps
       ecuState: toOptionalString(channel?.ecu_state),
       sampleAgeMs: toFiniteNumber(quality?.sample_age_ms),
       connectFailCount5m: toFiniteNumber(channel?.connect_fail_count_5m),
+      milOn: diagnostics.mil_on === undefined ? undefined : Boolean(diagnostics.mil_on),
+      reportedDtcCount: toFiniteNumber(diagnostics.reported_dtc_count),
       rpm: toFiniteNumber(signals?.rpm),
       obdSpeedKph: toFiniteNumber(signals?.obd_speed_kph),
       coolantC: toFiniteNumber(signals?.coolant_c),
       engineLoadPct: toFiniteNumber(signals?.engine_load_pct),
+      dtcStored: toStringArray(dtc?.stored),
+      dtcPending: toStringArray(dtc?.pending),
+      dtcPermanent: toStringArray(dtc?.permanent),
+      readinessIncomplete,
     };
   }
 
@@ -161,6 +211,9 @@ const resolveObdHealthState = (snapshot: DiagnosticsSnapshot | null): ObdHealthS
   if (
     snapshot.ecuState === 'searching' ||
     snapshot.ecuState === 'no_data' ||
+    snapshot.milOn === true ||
+    (snapshot.dtcStored?.length ?? 0) > 0 ||
+    (snapshot.dtcPending?.length ?? 0) > 0 ||
     (snapshot.connectFailCount5m !== undefined && snapshot.connectFailCount5m >= 3) ||
     (snapshot.sampleAgeMs !== undefined && snapshot.sampleAgeMs > OBD_STALE_SAMPLE_MS) ||
     (snapshot.coolantC !== undefined && snapshot.coolantC >= OBD_COOLANT_WARNING_C)
@@ -181,9 +234,24 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
   }
 
   const recommendations: string[] = [];
+  const storedDtc = snapshot.dtcStored ?? [];
+  const pendingDtc = snapshot.dtcPending ?? [];
+  const permanentDtc = snapshot.dtcPermanent ?? [];
 
   if (snapshot.bleConnected === false || snapshot.elmReady === false) {
     recommendations.push('Kiểm tra adapter OBD BLE, nguồn cổng OBD và vị trí thiết bị.');
+  }
+  if (snapshot.milOn === true) {
+    recommendations.push('MIL đang bật. Nên kiểm tra DTC stored/pending để xác định nguyên nhân gốc.');
+  }
+  if (storedDtc.length > 0) {
+    recommendations.push(`Stored DTC: ${storedDtc.join(', ')}.`);
+  }
+  if (pendingDtc.length > 0) {
+    recommendations.push(`Pending DTC: ${pendingDtc.join(', ')}.`);
+  }
+  if (permanentDtc.length > 0) {
+    recommendations.push(`Permanent DTC: ${permanentDtc.join(', ')}.`);
   }
   if (snapshot.ecuState === 'stopped') {
     recommendations.push(
@@ -208,6 +276,9 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
     snapshot.obdSpeedKph <= 3
   ) {
     recommendations.push('RPM cao khi xe gần như đứng yên, nên kiểm tra chế độ không tải.');
+  }
+  if (snapshot.readinessIncomplete && snapshot.readinessIncomplete.length > 0) {
+    recommendations.push(`Monitor chưa complete: ${snapshot.readinessIncomplete.join(', ')}.`);
   }
 
   return recommendations.length > 0
@@ -353,12 +424,33 @@ export const OverviewTab = () => {
                   value={diagnosticsSnapshot?.connectFailCount5m !== undefined ? diagnosticsSnapshot.connectFailCount5m.toFixed(0) : '-'}
                 />
                 <InfoTile
+                  label="MIL / số DTC báo cáo"
+                  value={`${diagnosticsSnapshot?.milOn === undefined ? '-' : diagnosticsSnapshot.milOn ? 'ON' : 'OFF'} / ${diagnosticsSnapshot?.reportedDtcCount !== undefined ? diagnosticsSnapshot.reportedDtcCount.toFixed(0) : '-'}`}
+                />
+                <InfoTile
                   label="RPM / tốc độ OBD"
                   value={`${diagnosticsSnapshot?.rpm !== undefined ? diagnosticsSnapshot.rpm.toFixed(0) : '-'} / ${diagnosticsSnapshot?.obdSpeedKph !== undefined ? `${diagnosticsSnapshot.obdSpeedKph.toFixed(1)} km/h` : '-'}`}
                 />
                 <InfoTile
                   label="Nhiệt độ nước / tải"
                   value={`${diagnosticsSnapshot?.coolantC !== undefined ? `${diagnosticsSnapshot.coolantC.toFixed(1)}°C` : '-'} / ${diagnosticsSnapshot?.engineLoadPct !== undefined ? `${diagnosticsSnapshot.engineLoadPct.toFixed(1)}%` : '-'}`}
+                />
+                <InfoTile
+                  label="Readiness chưa complete"
+                  value={
+                    diagnosticsSnapshot?.readinessIncomplete && diagnosticsSnapshot.readinessIncomplete.length > 0
+                      ? diagnosticsSnapshot.readinessIncomplete.join(', ')
+                      : '-'
+                  }
+                />
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-3">
+                <InfoTile label="Stored DTC" value={formatDtcList(diagnosticsSnapshot?.dtcStored)} />
+                <InfoTile label="Pending DTC" value={formatDtcList(diagnosticsSnapshot?.dtcPending)} />
+                <InfoTile
+                  label="Permanent DTC"
+                  value={formatDtcList(diagnosticsSnapshot?.dtcPermanent)}
                 />
               </div>
 

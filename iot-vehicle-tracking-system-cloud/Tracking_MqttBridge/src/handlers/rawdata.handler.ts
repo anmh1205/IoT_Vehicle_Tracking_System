@@ -24,9 +24,94 @@ const OBD_IDLE_RPM_THRESHOLD = 900;
 const OBD_IDLE_SPEED_MAX_KPH = 3;
 const OBD_VOLTAGE_LOW_V = 12;
 const OBD_VOLTAGE_LOAD_MIN = 50;
+const OBD_DTC_MAX_SAMPLE_AGE_MS = 60_000;
 
 const ruleCooldownUntil = new Map<string, number>();
 const idleAnomalyStartedAt = new Map<string, number>();
+
+type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
+type DtcBucket = 'stored' | 'pending' | 'permanent';
+
+interface DtcRuleDefinition {
+  matches: (code: string) => boolean;
+  severity: AlertSeverity;
+  confidence: number;
+  action: string;
+}
+
+const DTC_CODE_PATTERN = /^[PCBU][0-3][0-9A-F]{3}$/i;
+
+const matchesDtcRange = (code: string, prefix: string, start: number, end: number): boolean => {
+  if (!code.startsWith(prefix)) {
+    return false;
+  }
+
+  const suffix = Number.parseInt(code.slice(1), 16);
+  return Number.isFinite(suffix) && suffix >= start && suffix <= end;
+};
+
+const dtcRuleDefinitions: DtcRuleDefinition[] = [
+  {
+    matches: (code) => matchesDtcRange(code, 'P', 0x300, 0x304),
+    severity: 'high',
+    confidence: 0.92,
+    action: 'Kiểm tra misfire, bugi, cuộn đánh lửa và kim phun; hạn chế tải cao cho tới khi xử lý.',
+  },
+  {
+    matches: (code) => code === 'P0171' || code === 'P0174',
+    severity: 'high',
+    confidence: 0.88,
+    action: 'Kiểm tra rò khí nạp, MAF và áp suất nhiên liệu.',
+  },
+  {
+    matches: (code) => code === 'P0172',
+    severity: 'medium',
+    confidence: 0.82,
+    action: 'Kiểm tra rich condition, kim phun và cảm biến liên quan.',
+  },
+  {
+    matches: (code) => code === 'P0128',
+    severity: 'medium',
+    confidence: 0.8,
+    action: 'Kiểm tra thermostat và hệ thống làm mát.',
+  },
+  {
+    matches: (code) => ['P0130', 'P0133', 'P0141'].includes(code),
+    severity: 'medium',
+    confidence: 0.8,
+    action: 'Kiểm tra cảm biến O2, heater và wiring.',
+  },
+  {
+    matches: (code) => code === 'P0420' || code === 'P0430',
+    severity: 'medium',
+    confidence: 0.78,
+    action: 'Kiểm tra catalyst và chuỗi cảm biến O2 trước/sau catalyst.',
+  },
+  {
+    matches: (code) => ['P0440', 'P0442', 'P0455', 'P0456'].includes(code),
+    severity: 'low',
+    confidence: 0.72,
+    action: 'Kiểm tra nắp bình nhiên liệu và rò rỉ EVAP.',
+  },
+  {
+    matches: (code) => code === 'P0562',
+    severity: 'high',
+    confidence: 0.9,
+    action: 'Kiểm tra ắc quy, alternator và đường sạc.',
+  },
+  {
+    matches: (code) => code === 'P0563',
+    severity: 'high',
+    confidence: 0.88,
+    action: 'Kiểm tra regulator và điện áp sạc quá áp.',
+  },
+  {
+    matches: (code) => ['P0700', 'P0715', 'P0720', 'P0730', 'P0740'].includes(code),
+    severity: 'medium',
+    confidence: 0.76,
+    action: 'Kiểm tra hộp số/TCM và chuỗi tín hiệu đầu vào liên quan.',
+  },
+];
 
 const toFiniteNumber = (value: unknown): number | undefined => {
   const parsed = Number(value);
@@ -84,6 +169,52 @@ const canEmitRule = (deviceId: string, ruleId: string, timestampMs: number): boo
   return true;
 };
 
+const normalizeDtcCodes = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      value
+        .map((item) => String(item ?? '').trim().toUpperCase())
+        .filter((item) => DTC_CODE_PATTERN.test(item)),
+    ),
+  );
+};
+
+const bumpSeverity = (severity: AlertSeverity): AlertSeverity => {
+  if (severity === 'low') return 'medium';
+  if (severity === 'medium') return 'high';
+  if (severity === 'high') return 'critical';
+  return 'critical';
+};
+
+const lowerSeverity = (severity: AlertSeverity): AlertSeverity => {
+  if (severity === 'critical') return 'high';
+  if (severity === 'high') return 'medium';
+  if (severity === 'medium') return 'low';
+  return 'low';
+};
+
+const resolveDtcRule = (code: string): DtcRuleDefinition | undefined =>
+  dtcRuleDefinitions.find((definition) => definition.matches(code));
+
+const describeDtcBuckets = (buckets: Set<DtcBucket>): string => {
+  const ordered = (['stored', 'pending', 'permanent'] as DtcBucket[]).filter((bucket) =>
+    buckets.has(bucket),
+  );
+  return ordered.join('/');
+};
+
+const hasValidDtcQualityGate = (diagnostics: RawDiagnostics): boolean => {
+  const connected = toBoolean(diagnostics.channel?.ble_obd_connected);
+  const elmReady = toBoolean(diagnostics.channel?.elm_ready);
+  const sampleAgeMs = toFiniteNumber(diagnostics.quality?.sample_age_ms);
+
+  return connected === true && elmReady === true && (sampleAgeMs === undefined || sampleAgeMs <= OBD_DTC_MAX_SAMPLE_AGE_MS);
+};
+
 interface ObdAlertContext {
   deviceId: string;
   vehicleId: string | null;
@@ -98,12 +229,15 @@ interface ObdAlertContext {
 
 interface ObdAlertInput {
   ruleId: string;
-  severity: 'medium' | 'high';
+  severity: AlertSeverity;
   title: string;
   message: string;
   confidence: number;
   threshold?: number;
   value?: number;
+  dtcCode?: string;
+  evidence?: string;
+  milOn?: boolean;
 }
 
 const publishObdMaintenanceAlert = (
@@ -124,6 +258,9 @@ const publishObdMaintenanceAlert = (
     threshold_value: input.threshold,
     value: input.value,
     actual_value: input.value,
+    root_cause: input.dtcCode,
+    evidence: input.evidence,
+    mil_on: input.milOn,
     latitude: context.latitude,
     longitude: context.longitude,
     message_id: context.messageId,
@@ -142,12 +279,78 @@ const publishObdMaintenanceAlert = (
     threshold: input.threshold,
     value: input.value,
     message: input.message,
+    dtc_code: input.dtcCode,
+    evidence: input.evidence,
+    mil_on: input.milOn,
     message_id: context.messageId,
     schema_version: context.schemaVersion,
     seq_no: context.seqNo,
     boot_id: context.bootId,
   }).catch((err) => {
     logger.error({ err, deviceId: context.deviceId, ruleId: input.ruleId }, 'OBD alert log write failed');
+  });
+};
+
+const evaluateObdDtcRules = (
+  diagnostics: RawDiagnostics | undefined,
+  context: ObdAlertContext,
+): void => {
+  if (!diagnostics?.dtc || !hasValidDtcQualityGate(diagnostics)) {
+    return;
+  }
+
+  const milOn = toBoolean(diagnostics.mil_on) === true;
+  const dtcBuckets = new Map<string, Set<DtcBucket>>();
+  const appendBucket = (bucket: DtcBucket, codes: string[]) => {
+    codes.forEach((code) => {
+      const existing = dtcBuckets.get(code) ?? new Set<DtcBucket>();
+      existing.add(bucket);
+      dtcBuckets.set(code, existing);
+    });
+  };
+
+  appendBucket('stored', normalizeDtcCodes(diagnostics.dtc.stored));
+  appendBucket('pending', normalizeDtcCodes(diagnostics.dtc.pending));
+  appendBucket('permanent', normalizeDtcCodes(diagnostics.dtc.permanent));
+
+  dtcBuckets.forEach((buckets, code) => {
+    const rule = resolveDtcRule(code);
+    if (!rule) {
+      return;
+    }
+
+    const isPendingOnly =
+      buckets.size === 1 && buckets.has('pending') && !buckets.has('stored') && !buckets.has('permanent');
+    let severity = rule.severity;
+    if (isPendingOnly) {
+      severity = lowerSeverity(severity);
+    } else if (milOn) {
+      severity = bumpSeverity(severity);
+    }
+
+    const bucketLabel = describeDtcBuckets(buckets);
+    const confidence = Math.min(
+      0.99,
+      Math.max(0.55, rule.confidence + (milOn ? 0.05 : 0) - (isPendingOnly ? 0.08 : 0)),
+    );
+    const message = `${code} (${bucketLabel}${milOn ? ', MIL on' : ''}). ${rule.action}`;
+    const ruleId = `obd_dtc_${code.toLowerCase()}`;
+
+    if (!canEmitRule(context.deviceId, ruleId, context.timestampMs)) {
+      return;
+    }
+
+    publishObdMaintenanceAlert(context, {
+      ruleId,
+      severity,
+      title: `OBD: DTC ${code}`,
+      message,
+      confidence,
+      value: 1,
+      dtcCode: code,
+      milOn,
+      evidence: bucketLabel,
+    });
   });
 };
 
@@ -291,6 +494,10 @@ export const handleRawData = async (
   const seqNo = payload.metadata?.seq_no;
   const bootId = payload.metadata?.boot_id;
   const diagnostics = payload.diagnostics;
+  const storedDtcCodes = normalizeDtcCodes(diagnostics?.dtc?.stored);
+  const pendingDtcCodes = normalizeDtcCodes(diagnostics?.dtc?.pending);
+  const permanentDtcCodes = normalizeDtcCodes(diagnostics?.dtc?.permanent);
+  const milOn = toBoolean(diagnostics?.mil_on) === true;
   const normalizedGnss = normalizeGnssLocation(
     payload.data.latitude,
     payload.data.longitude,
@@ -380,8 +587,13 @@ export const handleRawData = async (
     obd_elm_ready: toBoolean(diagnostics?.channel?.elm_ready) === undefined
       ? undefined
       : (diagnostics?.channel?.elm_ready ? 1 : 0),
+    obd_mil_on: diagnostics?.mil_on === undefined ? undefined : (milOn ? 1 : 0),
     obd_sample_age_ms: toFiniteNumber(diagnostics?.quality?.sample_age_ms),
     obd_connect_fail_count_5m: toFiniteNumber(diagnostics?.channel?.connect_fail_count_5m),
+    obd_reported_dtc_count: toFiniteNumber(diagnostics?.reported_dtc_count),
+    obd_dtc_stored_count: diagnostics?.dtc ? storedDtcCodes.length : undefined,
+    obd_dtc_pending_count: diagnostics?.dtc ? pendingDtcCodes.length : undefined,
+    obd_dtc_permanent_count: diagnostics?.dtc ? permanentDtcCodes.length : undefined,
   };
 
   if (payload.uptime !== undefined) {
@@ -417,6 +629,26 @@ export const handleRawData = async (
       diagnostics,
     }).catch((err) => {
       logger.error({ err, deviceId: payload.device_id }, 'OBD diagnostics log write failed');
+    });
+
+    writeDeviceEvent(payload.device_id, 'obd_diagnostic_snapshot', 'Normalized OBD diagnostic snapshot', {
+      session_id: sessionId,
+      message_id: messageId,
+      schema_version: schemaVersion,
+      seq_no: seqNo,
+      boot_id: bootId,
+      signals: diagnostics.signals ?? null,
+      diagnostic_state: {
+        mil_on: milOn,
+        reported_dtc_count: toFiniteNumber(diagnostics.reported_dtc_count),
+        dtc_stored: storedDtcCodes,
+        dtc_pending: pendingDtcCodes,
+        dtc_permanent: permanentDtcCodes,
+        readiness: diagnostics.readiness ?? null,
+      },
+      quality: diagnostics.quality ?? null,
+    }).catch((err) => {
+      logger.error({ err, deviceId: payload.device_id }, 'OBD normalized diagnostic log write failed');
     });
   }
 
@@ -513,6 +745,17 @@ export const handleRawData = async (
     payload.data.battery_top,
     effectiveSpeed,
   );
+  evaluateObdDtcRules(diagnostics, {
+    deviceId: payload.device_id,
+    vehicleId: device.vehicle_id,
+    timestampMs,
+    latitude: effectiveLatitude,
+    longitude: effectiveLongitude,
+    messageId,
+    schemaVersion,
+    seqNo,
+    bootId,
+  });
 
   // 8. Check alerts - vibration threshold
   if (
