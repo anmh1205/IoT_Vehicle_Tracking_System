@@ -39,6 +39,14 @@ const TELEMETRY_STATE_META = {
   unknown: { label: 'Chưa đủ dữ liệu', variant: 'outline' as const },
 };
 
+const formatBatteryMetric = (value: number | null | undefined): string => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return '-';
+  }
+  const unit = value > 24 ? '%' : 'V';
+  return `${value.toFixed(1)}${unit}`;
+};
+
 const toDurationSeconds = (from: string | null | undefined, to: string | null | undefined) => {
   if (!from || !to) {
     return 0;
@@ -276,7 +284,7 @@ export const RouteTab = () => {
                   <StatTile label="Tốc độ" value={currentPoint?.speed !== null && currentPoint?.speed !== undefined ? `${currentPoint.speed.toFixed(1)} km/h` : '-'} />
                   <StatTile
                     label="Pin / nhiệt độ"
-                    value={`${currentPoint?.battery !== null && currentPoint?.battery !== undefined ? `${currentPoint.battery.toFixed(1)}%` : '-'} · ${currentPoint?.temperature !== null && currentPoint?.temperature !== undefined ? `${currentPoint.temperature.toFixed(1)}°C` : '-'}`}
+                    value={`${formatBatteryMetric(currentPoint?.battery)} · ${currentPoint?.temperature !== null && currentPoint?.temperature !== undefined ? `${currentPoint.temperature.toFixed(1)}°C` : '-'}`}
                   />
                 </CardContent>
               </Card>

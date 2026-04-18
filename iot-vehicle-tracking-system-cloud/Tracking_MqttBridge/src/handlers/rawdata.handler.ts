@@ -431,6 +431,7 @@ export const handleRawData = async (
   });
 
   await touchDeviceSession({
+    deviceId: payload.device_id,
     sessionId,
     timestampMs,
     vibration: payload.data.vibration,

@@ -24,6 +24,14 @@ const StatItem = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+const formatBatteryMetric = (value: number | null | undefined): string => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return 'Chưa có';
+  }
+  const unit = value > 24 ? '%' : 'V';
+  return `${value.toFixed(1)}${unit}`;
+};
+
 export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }) => {
   if (!device) {
     return (
@@ -55,10 +63,7 @@ export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }
         <div className="grid grid-cols-2 gap-2">
           <StatItem label="Tốc độ" value={`${device.speed} km/h`} />
           <StatItem label="Hướng" value={`${device.heading}°`} />
-          <StatItem
-            label="Pin"
-            value={device.battery !== null && device.battery !== undefined ? `${device.battery}%` : 'Chưa có'}
-          />
+          <StatItem label="Pin" value={formatBatteryMetric(device.battery)} />
           <StatItem
             label="Nhiệt độ"
             value={

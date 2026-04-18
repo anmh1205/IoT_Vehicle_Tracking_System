@@ -80,6 +80,14 @@ const alertSeverityBadgeVariant: Record<
   critical: 'destructive',
 };
 
+const formatBatteryMetric = (value: number | null | undefined): string => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return '-';
+  }
+  const unit = value > 24 ? '%' : 'V';
+  return `${value.toFixed(1)}${unit}`;
+};
+
 const alertSeverityLabel: Record<'low' | 'medium' | 'high' | 'critical', string> = {
   low: 'Thấp',
   medium: 'Trung bình',
@@ -285,7 +293,7 @@ export const OverviewTab = () => {
             />
             <InfoTile
               label="Pin / nhiệt độ"
-              value={`${latestBattery !== null ? `${latestBattery.toFixed(1)}%` : '-'} · ${latestTemperature !== null ? `${latestTemperature.toFixed(1)}°C` : '-'}`}
+              value={`${formatBatteryMetric(latestBattery)} · ${latestTemperature !== null ? `${latestTemperature.toFixed(1)}°C` : '-'}`}
             />
             <InfoTile label="Firmware" value={device?.firmwareVersion ?? '-'} />
             <InfoTile label="IMEI" value={device?.imei ?? '-'} />

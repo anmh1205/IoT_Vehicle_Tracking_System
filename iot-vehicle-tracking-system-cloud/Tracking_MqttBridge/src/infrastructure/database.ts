@@ -129,6 +129,7 @@ export const ensureDeviceSession = async (
 };
 
 export const touchDeviceSession = async (params: {
+  deviceId: string;
   sessionId: number;
   timestampMs: number;
   vibration?: number;
@@ -171,6 +172,24 @@ export const touchDeviceSession = async (params: {
         params.speed ?? null,
       ],
     );
+
+    await pool.query(
+      `UPDATE devices
+       SET current_status = 'running',
+           last_seen_at = $2::timestamptz,
+           last_latitude = COALESCE($3, last_latitude),
+           last_longitude = COALESCE($4, last_longitude),
+           last_speed = COALESCE($5, last_speed),
+           updated_at = NOW()
+       WHERE device_id = $1`,
+      [
+        params.deviceId,
+        occurredAt,
+        params.latitude ?? null,
+        params.longitude ?? null,
+        params.speed ?? null,
+      ],
+    );
   } catch (err) {
     try {
       await pool.query(
@@ -196,6 +215,24 @@ export const touchDeviceSession = async (params: {
           params.sessionId,
           occurredAt,
           params.vibration ?? null,
+          params.latitude ?? null,
+          params.longitude ?? null,
+          params.speed ?? null,
+        ],
+      );
+
+      await pool.query(
+        `UPDATE devices
+         SET current_status = 'running',
+             last_seen_at = $2::timestamptz,
+             last_latitude = COALESCE($3, last_latitude),
+             last_longitude = COALESCE($4, last_longitude),
+             last_speed = COALESCE($5, last_speed),
+             updated_at = NOW()
+         WHERE device_id = $1`,
+        [
+          params.deviceId,
+          occurredAt,
           params.latitude ?? null,
           params.longitude ?? null,
           params.speed ?? null,

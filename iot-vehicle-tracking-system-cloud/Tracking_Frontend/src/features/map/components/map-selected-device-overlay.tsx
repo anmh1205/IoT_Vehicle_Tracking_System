@@ -18,6 +18,14 @@ const formatMetric = (value: number | null | undefined, unit: string, digits = 1
   return `${value.toFixed(digits)}${unit}`;
 };
 
+const formatBatteryMetric = (value: number | null | undefined): string => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return '--';
+  }
+  const unit = value > 24 ? '%' : 'V';
+  return `${value.toFixed(1)}${unit}`;
+};
+
 const metricBlockClass =
   'shrink-0 rounded-lg border border-border/65 bg-background/80 px-2.5 py-1.5';
 
@@ -78,7 +86,7 @@ export const MapSelectedDeviceOverlay = ({
 
           <div className={metricBlockClass}>
             <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Pin</p>
-            <p className="mt-0.5 text-sm font-semibold">{formatMetric(device.battery, '%')}</p>
+            <p className="mt-0.5 text-sm font-semibold">{formatBatteryMetric(device.battery)}</p>
           </div>
 
           <div className={metricBlockClass}>
