@@ -11,6 +11,8 @@ const toNumberOrNull = (value: unknown): number | null => {
 const normalizePosition = (row: any): DevicePositionSnapshot => ({
   deviceId: String(row?.deviceId ?? row?.device_id ?? ''),
   deviceName: String(row?.deviceName ?? row?.device_name ?? row?.deviceId ?? row?.device_id ?? ''),
+  vehiclePlate: row?.vehiclePlate ?? row?.vehicle_plate ?? null,
+  customerName: row?.customerName ?? row?.customer_name ?? null,
   latitude: toNumberOrNull(row?.latitude ?? row?.lat),
   longitude: toNumberOrNull(row?.longitude ?? row?.lon),
   speed: toNumberOrNull(row?.speed),
@@ -18,8 +20,18 @@ const normalizePosition = (row: any): DevicePositionSnapshot => ({
   status: String(row?.currentStatus ?? row?.status ?? 'disconnected'),
   timestamp: row?.lastSeenAt ?? row?.last_seen_at ?? row?.timestamp ?? null,
   battery: toNumberOrNull(row?.battery),
+  deviceBattery: toNumberOrNull(row?.deviceBattery ?? row?.device_battery),
+  vehicleBattery: toNumberOrNull(row?.vehicleBattery ?? row?.vehicle_battery),
   vibration: toNumberOrNull(row?.vibration),
   temperature: toNumberOrNull(row?.temperature),
+  engineTemperature: toNumberOrNull(row?.engineTemperature ?? row?.engine_temperature),
+  rpm: toNumberOrNull(row?.rpm),
+  activeAlertCount: Math.max(0, Number(row?.activeAlertCount ?? row?.active_alert_count ?? 0) || 0),
+  activeAlertTitles: Array.isArray(row?.activeAlertTitles ?? row?.active_alert_titles)
+    ? (row?.activeAlertTitles ?? row?.active_alert_titles).filter(
+        (item: unknown): item is string => typeof item === 'string' && item.trim().length > 0,
+      )
+    : [],
 });
 
 export const useDevicePositionSnapshot = (devicePublicId: string | null, enabled = true) => {

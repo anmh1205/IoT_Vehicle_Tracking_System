@@ -8,6 +8,8 @@ import {
 import { pool } from '@/infrastructure/database/pool';
 import type {
   Driver,
+  DriverAssignment,
+  DriverRecentTrip,
   DriverListQuery,
   CreateDriverInput,
   UpdateDriverInput,
@@ -20,6 +22,72 @@ const ALLOWED_SORT_COLUMNS: Record<string, string> = {
   status: 'status',
   createdAt: 'created_at',
 };
+
+type DriverAssignmentRow = {
+  driver_key: string;
+  trip_count: number;
+  active_trip_count: number;
+  latest_trip_id: number | null;
+  latest_trip_code: string | null;
+  latest_trip_status: DriverAssignment['latestTripStatus'];
+  latest_trip_at: Date | null;
+  latest_vehicle_id: string | null;
+  latest_device_id: string | null;
+  latest_start_location: string | null;
+  latest_end_location: string | null;
+  active_trip_code: string | null;
+  active_vehicle_id: string | null;
+  active_device_id: string | null;
+};
+
+type DriverRecentTripRow = {
+  id: number;
+  trip_code: string;
+  vehicle_id: string | null;
+  device_id: string | null;
+  status: DriverRecentTrip['status'];
+  planned_start: Date | null;
+  actual_start: Date | null;
+  actual_end: Date | null;
+  start_location: string | null;
+  end_location: string | null;
+  distance_km: number | null;
+  updated_at: Date;
+};
+
+const NORMALIZED_DRIVER_NAME_SQL = (tableAlias = 't') =>
+  `LOWER(REGEXP_REPLACE(TRIM(COALESCE(${tableAlias}.driver_name, '')), '\\s+', ' ', 'g'))`;
+
+const mapAssignmentRow = (row: DriverAssignmentRow): DriverAssignment => ({
+  tripCount: Number(row.trip_count ?? 0),
+  activeTripCount: Number(row.active_trip_count ?? 0),
+  latestTripId: row.latest_trip_id ?? null,
+  latestTripCode: row.latest_trip_code ?? null,
+  latestTripStatus: row.latest_trip_status ?? null,
+  latestTripAt: row.latest_trip_at?.toISOString() ?? null,
+  latestVehicleId: row.latest_vehicle_id ?? null,
+  latestDeviceId: row.latest_device_id ?? null,
+  latestStartLocation: row.latest_start_location ?? null,
+  latestEndLocation: row.latest_end_location ?? null,
+  activeTripCode: row.active_trip_code ?? null,
+  activeVehicleId: row.active_vehicle_id ?? null,
+  activeDeviceId: row.active_device_id ?? null,
+});
+
+const mapRecentTripRow = (row: DriverRecentTripRow): DriverRecentTrip => ({
+  id: row.id,
+  tripCode: row.trip_code,
+  vehicleId: row.vehicle_id,
+  deviceId: row.device_id,
+  status: row.status,
+  plannedStart: row.planned_start?.toISOString() ?? null,
+  actualStart: row.actual_start?.toISOString() ?? null,
+  actualEnd: row.actual_end?.toISOString() ?? null,
+  startLocation: row.start_location,
+  endLocation: row.end_location,
+  distanceKm: row.distance_km,
+  updatedAt: row.updated_at.toISOString(),
+});
 
 export const findAll = async (
   query: DriverListQuery,
@@ -70,6 +138,116 @@ export const findById = async (id: number): Promise<Driver | null> =>
 
 export const findByCode = async (driverCode: string): Promise<Driver | null> =>
   findOne<Driver>('SELECT * FROM drivers WHERE driver_code = $1', [driverCode]);
+
+export const findAssignmentSummariesByNames = async (
+  driverKeys: string[],
+): Promise<Map<string, DriverAssignment>> => {
+  const normalizedKeys = Array.from(new Set(driverKeys.filter(Boolean)));
+  if (normalizedKeys.length === 0) {
+    return new Map();
+  }
+
+  const result = await pool.query<DriverAssignmentRow>(
+    `WITH input_keys AS (
+       SELECT DISTINCT driver_key
+       FROM UNNEST($1::text[]) AS input(driver_key)
+       WHERE driver_key <> ''
+     )
+     SELECT
+       input_keys.driver_key,
+       COALESCE(stats.trip_count, 0) AS trip_count,
+       COALESCE(stats.active_trip_count, 0) AS active_trip_count,
+       latest.id AS latest_trip_id,
+       latest.trip_code AS latest_trip_code,
+       latest.status AS latest_trip_status,
+       latest.latest_trip_at,
+       latest.vehicle_id AS latest_vehicle_id,
+       latest.device_id AS latest_device_id,
+       latest.start_location AS latest_start_location,
+       latest.end_location AS latest_end_location,
+       active.trip_code AS active_trip_code,
+       active.vehicle_id AS active_vehicle_id,
+       active.device_id AS active_device_id
+     FROM input_keys
+     LEFT JOIN LATERAL (
+       SELECT
+         COUNT(*)::int AS trip_count,
+         COUNT(*) FILTER (WHERE t.status = 'in_progress')::int AS active_trip_count
+       FROM trips t
+       WHERE ${NORMALIZED_DRIVER_NAME_SQL('t')} = input_keys.driver_key
+     ) stats ON true
+     LEFT JOIN LATERAL (
+       SELECT
+         t.id,
+         t.trip_code,
+         t.status,
+         COALESCE(t.actual_start, t.planned_start, t.created_at) AS latest_trip_at,
+         t.vehicle_id,
+         t.device_id,
+         t.start_location,
+         t.end_location
+       FROM trips t
+       WHERE ${NORMALIZED_DRIVER_NAME_SQL('t')} = input_keys.driver_key
+       ORDER BY COALESCE(t.actual_start, t.planned_start, t.created_at) DESC, t.id DESC
+       LIMIT 1
+     ) latest ON true
+     LEFT JOIN LATERAL (
+       SELECT
+         t.trip_code,
+         t.vehicle_id,
+         t.device_id
+       FROM trips t
+       WHERE ${NORMALIZED_DRIVER_NAME_SQL('t')} = input_keys.driver_key
+         AND t.status = 'in_progress'
+       ORDER BY COALESCE(t.actual_start, t.planned_start, t.created_at) DESC, t.id DESC
+       LIMIT 1
+     ) active ON true`,
+    [normalizedKeys],
+  );
+
+  return new Map(
+    result.rows.map((row) => [row.driver_key, mapAssignmentRow(row)]),
+  );
+};
+
+export const findAssignmentSummaryByName = async (
+  driverKey: string,
+): Promise<DriverAssignment | null> => {
+  const summaries = await findAssignmentSummariesByNames([driverKey]);
+  return summaries.get(driverKey) ?? null;
+};
+
+export const findRecentTripsByDriverName = async (
+  driverKey: string,
+  limit = 6,
+): Promise<DriverRecentTrip[]> => {
+  if (!driverKey) {
+    return [];
+  }
+
+  const result = await pool.query<DriverRecentTripRow>(
+    `SELECT
+        t.id,
+        t.trip_code,
+        t.vehicle_id,
+        t.device_id,
+        t.status,
+        t.planned_start,
+        t.actual_start,
+        t.actual_end,
+        t.start_location,
+        t.end_location,
+        t.distance_km,
+        t.updated_at
+     FROM trips t
+     WHERE ${NORMALIZED_DRIVER_NAME_SQL('t')} = $1
+     ORDER BY COALESCE(t.actual_start, t.planned_start, t.created_at) DESC, t.id DESC
+     LIMIT $2`,
+    [driverKey, limit],
+  );
+
+  return result.rows.map(mapRecentTripRow);
+};
 
 export const create = async (input: CreateDriverInput): Promise<Driver> =>
   insertOne<Driver>(

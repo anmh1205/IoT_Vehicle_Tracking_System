@@ -1,10 +1,17 @@
 flowchart TB
-    Start(["Bắt đầu"]) --> Init["Khởi tạo hệ thống"]
-    Init --> CheckIGN{"Kiểm tra IGN"}
-    CheckIGN -->|IGN ON| Driving["Chế độ lái xe"]
-    CheckIGN -->|IGN OFF| Idle["Chế độ chờ"]
-    Idle -->|Có rung| Alert["Cảnh báo rung"]
-    Idle -->|Không rung| Sleep["Ngủ tiết kiệm"]
-    Driving -->|Mất IGN| Sleep
-    Alert -->|Xử lý xong| Sleep
-    Sleep -->|Đánh thức theo chu kỳ| CheckIGN
+    Start(["Bắt đầu"]) --> Init["INIT<br/>Nạp cấu hình + khởi tạo"]
+    Init --> Wake{"Nguồn đánh thức?"}
+    Wake -->|Khởi động thường| CheckIGN["CHECK_IGN"]
+    Wake -->|Timer| Heartbeat["HEARTBEAT"]
+    Wake -->|IMU EXT0| Alarm["ALARM"]
+    Heartbeat --> CheckIGN
+    CheckIGN -->|IGN ON| Driving["DRIVING"]
+    CheckIGN -->|IGN OFF| Parked["PARKED"]
+    Driving -->|Mất IGN| Parked
+    Parked -->|Có rung| Alarm
+    Parked -->|Tới chu kỳ heartbeat| Heartbeat
+    Parked -->|Đủ điều kiện ngủ| Sleep["SLEEP"]
+    Alarm -->|IGN ON| Driving
+    Alarm -->|Hết báo động| Parked
+    Heartbeat -->|Xong chu kỳ| Sleep
+    Sleep -->|Đánh thức lại| Init

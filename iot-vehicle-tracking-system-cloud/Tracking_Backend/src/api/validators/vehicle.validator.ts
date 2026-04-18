@@ -32,13 +32,16 @@ export const createVehicleSchema = z.object({
   notes: z.string().max(500).optional(),
 });
 
-export const updateVehicleSchema = createVehicleSchema.partial();
+export const updateVehicleSchema = createVehicleSchema.partial().extend({
+  customerId: z.union([z.number().int().positive(), z.null()]).optional(),
+});
 
 export const vehicleListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   status: z.enum(['active', 'inactive', 'maintenance', 'retired']).optional(),
   customerId: z.coerce.number().int().positive().optional(),
+  customerState: z.enum(['assigned', 'unassigned']).optional(),
   search: z.string().max(100).optional(),
   sortBy: z.enum(['vehicleId', 'plateNumber', 'brand', 'status', 'createdAt']).optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),

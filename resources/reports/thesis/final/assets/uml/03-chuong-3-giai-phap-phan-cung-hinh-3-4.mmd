@@ -1,12 +1,12 @@
 flowchart TB
-    Source["Nguon xe 12V/24V"]
-    Main["Nhanh chinh<br/>Buck 5V -> rail 3.3V / 4V"]
-    Backup["Nhanh du phong<br/>TP4056 -> pin 18650 -> boost 5V"]
-    Runtime["Rail runtime / diode OR"]
+    Source["Nguồn xe 12V/24V"]
+    Main["Nhánh chính<br/>Giảm áp 5V -> đường 3.3V / 4V"]
+    Backup["Nhánh dự phòng<br/>TP5100 -> pin 18650 -> tăng áp 5V"]
+    Runtime["Đường nguồn ra / diode OR"]
     Loads["MCU + IMU + Modem"]
-    Fsm["Power FSM"]
+    Fsm["FSM nguồn"]
 
     Source --> Main --> Runtime --> Loads
     Source --> Backup --> Runtime
-    Fsm -. dieu khien .-> Main
-    Fsm -. uu tien nguon .-> Runtime
+    Fsm -. điều khiển .-> Main
+    Fsm -. ưu tiên nguồn .-> Runtime

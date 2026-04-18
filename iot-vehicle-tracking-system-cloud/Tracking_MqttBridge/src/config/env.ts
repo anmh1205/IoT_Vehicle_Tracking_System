@@ -25,6 +25,7 @@ const requireEnv = (key: string, value: string | undefined): string => {
 export const appConfig = {
   nodeEnv: fromEnv('NODE_ENV') ?? 'development',
   isDevelopment: (fromEnv('NODE_ENV') ?? 'development') === 'development',
+  healthPort: toInt(fromEnv('BRIDGE_HEALTH_PORT'), 4003),
 } as const;
 
 const strictTlsEnv = !appConfig.isDevelopment;

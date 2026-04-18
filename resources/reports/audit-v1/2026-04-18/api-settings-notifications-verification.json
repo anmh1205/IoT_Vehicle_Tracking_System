@@ -1,0 +1,31 @@
+﻿{
+    "checkedAt":  "2026-04-18T23:16:26.2987586+07:00",
+    "notificationAlertId":  109,
+    "notificationStateRow":  "1|109|t|t|t",
+    "notificationSettingsResponse":  {
+                                         "data":  {
+                                                      "preferences":  {
+                                                                          "emailAlerts":  true,
+                                                                          "pushAlerts":  true,
+                                                                          "alertTypes":  [
+                                                                                             "critical",
+                                                                                             "high",
+                                                                                             "maintenance_due"
+                                                                                         ],
+                                                                          "channels":  {
+                                                                                           "discord":  {
+                                                                                                           "enabled":  true,
+                                                                                                           "webhookUrl":  "https://discord.com/api/webhooks/local-audit/demo"
+                                                                                                       },
+                                                                                           "telegram":  {
+                                                                                                            "enabled":  true,
+                                                                                                            "botToken":  "demo-telegram-token",
+                                                                                                            "chatId":  "123456789"
+                                                                                                        }
+                                                                                       }
+                                                                      }
+                                                  },
+                                         "requestId":  "96e6ad37-0e2d-41f5-8caf-61408ef8582e"
+                                     },
+    "userPreferencesRow":  "{\"notifications\": {\"channels\": {\"discord\": {\"enabled\": true, \"webhookUrl\": \"https://discord.com/api/webhooks/local-audit/demo\"}, \"telegram\": {\"chatId\": \"123456789\", \"enabled\": true, \"botToken\": \"demo-telegram-token\"}}, \"alertTypes\": [\"critical\", \"high\", \"maintenance_due\"], \"pushAlerts\": true, \"emailAlerts\": true}}"
+}

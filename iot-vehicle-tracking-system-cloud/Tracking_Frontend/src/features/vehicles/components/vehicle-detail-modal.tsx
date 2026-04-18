@@ -20,7 +20,7 @@ export const VehicleDetailModal = ({
 }) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="overflow-y-auto sm:max-w-4xl">
+      <SheetContent className="!w-[min(96vw,72rem)] !max-w-none overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{vehicle?.plateNumber ?? vehicle?.vehicleId ?? 'Chi tiết phương tiện'}</SheetTitle>
           <SheetDescription>
@@ -28,7 +28,7 @@ export const VehicleDetailModal = ({
           </SheetDescription>
         </SheetHeader>
         <div className="mt-4">
-          <VehicleDetailContent vehicle={vehicle} compact />
+          <VehicleDetailContent vehicle={vehicle} />
         </div>
       </SheetContent>
     </Sheet>

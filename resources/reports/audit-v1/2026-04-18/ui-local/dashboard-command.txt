@@ -1,0 +1,224 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Đội xe
+Cảnh báo
+Nền tảng
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Điều hành
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Tổng quan
+
+Bảng điều khiển theo dõi đội xe, hoạt động thiết bị và cảnh báo quan trọng.
+
+Tổng thiết bị
+4
+50.0% trực tuyến
+1 ngoại tuyến
+Thiết bị đang chạy
+2
+50.0%
+50.0% còn lại đang dừng hoặc mất kết nối
+Cảnh báo đang hoạt động
+7
+1 thiết bị
+25.0% thiết bị đang ngoại tuyến
+Chuyến đi hôm nay
+42
+10.5 phiên / thiết bị
+36679.0h hôm nay / 42844.0h trong 7 ngày
+Tỷ lệ hoạt động: 50.0%
+Tỷ lệ ngoại tuyến: 25.0%
+Runtime hôm nay: +30558.4h so với trung bình 7 ngày
+Hoạt động thiết bị trong 7 ngày
+
+711 tín hiệu hoạt động được tổng hợp trong 7 ngày gần nhất
+
+2026-04-12
+2026-04-13
+2026-04-14
+2026-04-15
+2026-04-16
+2026-04-17
+2026-04-18
+0
+200
+400
+600
+800
+Phân bố trạng thái thiết bị
+OfflineRunningStopped
+Xu hướng thời gian hoạt động đội xe trong 30 ngày
+
+11.9 giờ hoạt động được ghi nhận trong 30 ngày gần nhất
+
+2026-03-20
+2026-03-22
+2026-03-24
+2026-03-26
+2026-03-28
+2026-03-30
+2026-04-01
+2026-04-03
+2026-04-05
+2026-04-07
+2026-04-09
+2026-04-11
+2026-04-13
+2026-04-15
+2026-04-18
+0
+3
+6
+9
+12
+Cảnh báo gần đây
+
+MOCK ALERT: Brake maintenance due soon
+
+50F-77777 • Bus Tracker 002
+
+medium
+
+Mileage crossed warning threshold
+
+khoảng 1 giờ trước
+
+MOCK ALERT: Harsh braking detected
+
+36E-04721 • Tracker Sedan 001
+
+low
+
+Short harsh braking event
+
+khoảng 2 giờ trước
+
+MOCK ALERT: Vehicle exited warehouse perimeter
+
+59C-99009 • Van Tracker 003
+
+medium
+
+Vehicle moved outside assigned radius
+
+khoảng 2 giờ trước
+
+OBD: DTC P0500
+
+36E-04721 • Tracker Sedan 001
+
+high
+
+P0500 (stored/pending, MIL on). Inspect vehicle speed sensor, ABS ECU signal, and related wiring.
+
+khoảng 2 giờ trước
+
+OBD: DTC P0118
+
+36E-04721 • Tracker Sedan 001
+
+high
+
+P0118 (stored/permanent, MIL on). Inspect coolant temperature sensor, connector, and signal circuit.
+
+khoảng 2 giờ trước
+
+Dòng hoạt động thời gian thực
+
+warning
+
+warning
+
+Idle too long at pickup point
+
+khoảng 2 giờ trước
+
+connection
+
+error
+
+Device offline for 12 minutes
+
+khoảng 2 giờ trước
+
+status_change
+
+info
+
+Vehicle running stable on district route
+
+khoảng 2 giờ trước
+
+connection
+
+info
+
+MQTT Bridge telemetry forwarded
+
+khoảng 2 giờ trước
+
+connection
+
+info
+
+MQTT Bridge telemetry forwarded
+
+khoảng 2 giờ trước
+
+connection
+
+info
+
+MQTT Bridge telemetry forwarded
+
+khoảng 2 giờ trước
+
+connection
+
+info
+
+MQTT Bridge telemetry forwarded
+
+khoảng 2 giờ trước
+
+connection
+
+info
+
+MQTT Bridge telemetry forwarded
+
+khoảng 2 giờ trước
+
+connection
+
+info
+
+MQTT Bridge telemetry forwarded
+
+khoảng 2 giờ trước
+
+connection
+
+info
+
+MQTT Bridge telemetry forwarded
+
+khoảng 2 giờ trước
+
+Thao tác nhanh
+Mở bản đồ
+Quản lý thiết bị
+Xem cảnh báo
+Xuất dữ liệu
+Cài đặt hệ thống
+3

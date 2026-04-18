@@ -1,7 +1,25 @@
 flowchart TB
-    Input["Khoi nguon<br/>12V/24V -> Buck -> Charge -> Pin 18650"]
-    Control["Khoi dieu khien<br/>ESP32-S3 + LIS3DSH"]
-    Comm["Khoi truyen thong<br/>SIM7600 + OBD2 BLE"]
+    subgraph Case["Cụm phần cứng sau lắp ráp"]
+        direction TB
+        Antenna["Đầu nối anten LTE / GNSS"]
 
-    Input --> Control --> Comm
-    Input -. nguon du phong .-> Control
+        subgraph PCB["PCB chính"]
+            direction LR
+            Power["Khối nguồn<br/>MP2482 / TPS54231 / AP2112"]
+            MCU["ESP32-S3-WROOM-1"]
+            Modem["SIM7600CE-T"]
+            IMU["LIS3DSH"]
+            RTC["DS3231M + W25Q128"]
+            Charger["TP5100 + SX1308"]
+        end
+
+        Battery["Pin 18650 1S"]
+        Harness["Dây nguồn / cổng OBD2"]
+    end
+
+    Antenna --> Modem
+    Harness --> Power
+    Power --> MCU
+    Charger --- Battery
+    MCU --> IMU
+    MCU --> RTC

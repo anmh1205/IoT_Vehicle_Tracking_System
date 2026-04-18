@@ -1,0 +1,244 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Đội xe
+Cảnh báo
+Hàng đợi
+Bảo trì
+Vi phạm
+Thông báo
+Nền tảng
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Cảnh báo
+Hàng đợi
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Cảnh báo
+
+Quản lý cảnh báo hệ thống theo mức độ, trạng thái và nguồn OBD
+
+Xác nhận đã chọn
+Giải quyết đã chọn
+Tổng cảnh báo
+79
+Chưa xử lý
+7
+Đã xác nhận
+1
+Mức nghiêm trọng
+24
+30.4% tổng cảnh báo
+Tìm kiếm trong bảng
+Tất cả mức độ
+Tất cả trạng thái
+Tất cả nguồn
+Đặt lại
+Cột hiển thị
+	Tiêu đề
+	Nguồn	Loại	Mức độ	Trạng thái	
+
+Chọn cảnh báo MOCK ALERT: Brake maintenance due soon
+	
+
+MOCK ALERT: Brake maintenance due soon
+
+Mileage crossed warning threshold
+
+	
+
+50F-77777
+
+Bus Tracker 002
+
+	Khuyến nghị bảo trì	Trung bình	Đang hoạt động	
+Chi tiết
+Xác nhận
+Giải quyết
+
+
+Chọn cảnh báo MOCK ALERT: Harsh braking detected
+	
+
+MOCK ALERT: Harsh braking detected
+
+Short harsh braking event
+
+	
+
+36E-04721
+
+Tracker Sedan 001
+
+	Phanh gấp	Thấp	Đang hoạt động	
+Chi tiết
+Xác nhận
+Giải quyết
+
+
+Chọn cảnh báo MOCK ALERT: Vehicle exited warehouse perimeter
+	
+
+MOCK ALERT: Vehicle exited warehouse perimeter
+
+Vehicle moved outside assigned radius
+
+	
+
+59C-99009
+
+Van Tracker 003
+
+	Rời vùng giám sát	Trung bình	Đã xác nhận	
+Chi tiết
+Xác nhận
+Giải quyết
+
+
+Chọn cảnh báo OBD: DTC P0500
+	
+
+OBD: DTC P0500
+
+P0500 (stored/pending, MIL on). Inspect vehicle speed sensor, ABS ECU signal, and related wiring.
+
+	
+
+36E-04721
+
+Tracker Sedan 001
+
+	Khuyến nghị bảo trì	Cao	Đang hoạt động	
+Chi tiết
+Xác nhận
+Giải quyết
+
+
+Chọn cảnh báo OBD: DTC P0118
+	
+
+OBD: DTC P0118
+
+P0118 (stored/permanent, MIL on). Inspect coolant temperature sensor, connector, and signal circuit.
+
+	
+
+36E-04721
+
+Tracker Sedan 001
+
+	Khuyến nghị bảo trì	Cao	Đang hoạt động	
+Chi tiết
+Xác nhận
+Giải quyết
+
+
+Chọn cảnh báo OBD: DTC P0101
+	
+
+OBD: DTC P0101
+
+P0101 (stored/pending, MIL on). Inspect MAF sensor, air filter, intake path, and related wiring.
+
+	
+
+36E-04721
+
+Tracker Sedan 001
+
+	Khuyến nghị bảo trì	Cao	Đang hoạt động	
+Chi tiết
+Xác nhận
+Giải quyết
+
+
+Chọn cảnh báo OBD: Rủi ro điện áp khi tải cao
+	
+
+OBD: Rủi ro điện áp khi tải cao
+
+Điện áp ắc quy chính 11.97V khi tải động cơ 55.0%.
+
+	
+
+36E-04721
+
+Tracker Sedan 001
+
+	Khuyến nghị bảo trì	Cao	Đã giải quyết	
+Chi tiết
+Xác nhận
+Giải quyết
+
+
+Chọn cảnh báo MOCK ALERT: Speed threshold exceeded
+	
+
+MOCK ALERT: Speed threshold exceeded
+
+Speed exceeded by 17 km/h
+
+	
+
+50F-77777
+
+Bus Tracker 002
+
+	Vượt tốc độ	Cao	Đang hoạt động	
+Chi tiết
+Xác nhận
+Giải quyết
+
+
+Chọn cảnh báo OBD: Rủi ro điện áp khi tải cao
+	
+
+OBD: Rủi ro điện áp khi tải cao
+
+Điện áp ắc quy chính 11.98V khi tải động cơ 82.0%.
+
+	
+
+36E-04721
+
+Tracker Sedan 001
+
+	Khuyến nghị bảo trì	Cao	Đã giải quyết	
+Chi tiết
+Xác nhận
+Giải quyết
+
+
+Chọn cảnh báo OBD: DTC P0174
+	
+
+OBD: DTC P0174
+
+P0174 (pending, MIL on). Kiểm tra rò khí nạp, MAF và áp suất nhiên liệu.
+
+	
+
+36E-04721
+
+Tracker Sedan 001
+
+	Khuyến nghị bảo trì	Trung bình	Đã giải quyết	
+Chi tiết
+Xác nhận
+Giải quyết
+
+Hiển thị 10 / 50 bản ghi
+
+Trang 1 / 5
+
+Trang 1 / 2 · Server: 79 bản ghi · Hiển thị: 50
+
+Trang trước
+Trang sau

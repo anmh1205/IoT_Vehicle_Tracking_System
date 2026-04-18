@@ -1,0 +1,15 @@
+ 
+ 
+- 
+Đổi từ độ tươi, mà tại sao lại là 3p, đấy là thông tin khoảng cách bản tin hiện tại hay 
+gì 
+- 
+Lại có khái niệm nhịp quan sát, đổi từ khác tốt hơn. 
+- 
+Ô hiển thị map chiều cao đang quá ít. Có thể thu gọn bớt các stats card để lấy chỗ 
+- 
+Nghiên cứu uiux theo cách tốt hơn, hiện tại đang phải dùng cuộn chuột quá nhiều. 
+có thể để modal to hơn, hoặc 95% màn hình. Ô map phần lớn diện tích bên phải, 
+bên trái dùng để hiển thị các nút thông tin. Có thể nghiên cứu uiux theo bố cục của 
+ảnh bên dưới, làm cuộc “cách mạng” lại  toàn bộ uiux của modal detail device: 
+ 

@@ -1,0 +1,22 @@
+ 
+Device detail modal:  
+- 
+Uiux cần làm tốt hơn, các phần trên quá dài khiến ô xem danh sách bản ghi bị hẹp 
+- 
+Các bản ghi: cần hiển thị theo dạng bảng matrix, có tên mã, giải thích, giá trị tương 
+ứng để dễ xem hơn 
+- 
+Tab cài đặt: tính năng cài đặt chu kì đã hoạt động đúng chưa – tôi thấy là chưa, đang 
+conflic: ví dụ như ở bên tab khác đang hiển thị chu kì cấu hình này là 33 phút. Và 
+theo firmware, sẽ có các trạng thái chạy như: driving, parking, alert thì phải có cấu 
+hình thời gian tương ứng, và phải hoạt động thật (từ cloud xuống firmware,  end to 
+end 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

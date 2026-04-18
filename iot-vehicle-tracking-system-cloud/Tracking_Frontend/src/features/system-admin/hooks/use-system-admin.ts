@@ -6,9 +6,11 @@ import type {
   LogsFilterState,
   LogRecord,
   MetricSeries,
-  QueryBuilderState,
   QueryResult,
+  TableColumn,
+  TableQueryState,
 } from '@/features/system-admin/types';
+
 const normalizeLogLevel = (value: unknown): LogRecord['level'] => {
   const level = String(value ?? 'info').toLowerCase();
   if (level === 'error' || level === 'warn' || level === 'info' || level === 'debug') {
@@ -16,6 +18,7 @@ const normalizeLogLevel = (value: unknown): LogRecord['level'] => {
   }
   return 'info';
 };
+
 const normalizeLogs = (
   payload: any,
 ): {
@@ -33,6 +36,7 @@ const normalizeLogs = (
           : Array.isArray(payload)
             ? payload
             : [];
+
   return {
     items: rows.map((row: any, index: number) => ({
       id: String(row?.id ?? row?._id ?? `${row?.timestamp ?? index}`),
@@ -47,6 +51,7 @@ const normalizeLogs = (
     total: Number(payload?.total ?? payload?.pagination?.total ?? rows.length),
   };
 };
+
 const normalizeRows = (payload: any): QueryResult => {
   const rows = Array.isArray(payload?.rows)
     ? payload.rows
@@ -59,21 +64,27 @@ const normalizeRows = (payload: any): QueryResult => {
           : Array.isArray(payload)
             ? payload
             : [];
+
   const total = Number(payload?.total ?? payload?.pagination?.total ?? rows.length);
   const page = Number(payload?.page ?? payload?.pagination?.page ?? 1);
   const limit = Number(payload?.limit ?? payload?.pagination?.limit ?? DEFAULT_PAGE_LIMIT);
+  const totalPages = Number(payload?.totalPages ?? payload?.pagination?.totalPages ?? Math.max(Math.ceil(total / Math.max(limit, 1)), 1));
+
   return {
     rows: rows as Record<string, unknown>[],
     total,
     page,
     limit,
+    totalPages,
   };
 };
+
 const normalizeMetricSeries = (payload: any): MetricSeries[] => {
   const result = payload?.data?.result ?? payload?.result ?? payload?.series ?? [];
   if (!Array.isArray(result)) {
     return [];
   }
+
   return result.map((series: any, index: number) => {
     const name =
       series?.metric?.__name__ ?? series?.name ?? series?.legend ?? `series_${index + 1}`;
@@ -82,6 +93,7 @@ const normalizeMetricSeries = (payload: any): MetricSeries[] => {
       : Array.isArray(series?.data)
         ? series.data
         : [];
+
     return {
       name: String(name),
       points: values
@@ -92,12 +104,18 @@ const normalizeMetricSeries = (payload: any): MetricSeries[] => {
               value: Number(point[1]),
             };
           }
+
           if (point && typeof point === 'object') {
+            const rawTimestamp = Number(point.timestamp ?? point.ts ?? Date.now());
             return {
-              timestamp: Number(point.timestamp ?? point.ts ?? Date.now()),
+              timestamp:
+                Number.isFinite(rawTimestamp) && rawTimestamp > 0 && rawTimestamp < 1_000_000_000_000
+                  ? rawTimestamp * 1000
+                  : rawTimestamp,
               value: Number(point.value ?? 0),
             };
           }
+
           return null;
         })
         .filter(
@@ -114,6 +132,7 @@ const normalizeMetricSeries = (payload: any): MetricSeries[] => {
     };
   });
 };
+
 const buildLogsQuery = (filters: LogsFilterState) => {
   const clauses: string[] = [];
   if (filters.level !== 'all') {
@@ -130,6 +149,25 @@ const buildLogsQuery = (filters: LogsFilterState) => {
   }
   return clauses.join(' ').trim() || '*';
 };
+
+const toIsoDateTime = (value?: string) => {
+  if (!value || value.trim().length === 0) {
+    return undefined;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
+};
+
+export const useSystemAdminHealth = (enabled = true) => {
+  return useQuery({
+    queryKey: ['system-admin', 'health'],
+    queryFn: () => systemAdminServices.health(),
+    enabled,
+    refetchInterval: 30000,
+  });
+};
+
 export const useSystemLogs = (filters: LogsFilterState) => {
   return useQuery({
     queryKey: ['system-admin', 'logs', filters],
@@ -143,51 +181,60 @@ export const useSystemLogs = (filters: LogsFilterState) => {
     refetchInterval: 60000,
   });
 };
+
 export const useSystemTables = () => {
   return useQuery({
     queryKey: ['system-admin', 'tables'],
     queryFn: async () => {
       const payload = await systemAdminServices.listTables();
       const rows = Array.isArray(payload) ? payload : [];
-      if (rows.length > 0) {
-        return rows;
-      }
-      return [...SYSTEM_TABLES];
+      return rows.length > 0 ? rows : [...SYSTEM_TABLES];
     },
   });
 };
+
 export const useTableColumns = (table: string) => {
   return useQuery({
     queryKey: ['system-admin', 'table-columns', table],
     queryFn: async () => {
       const payload = await systemAdminServices.getTableColumns(table);
       if (!Array.isArray(payload)) {
-        return [] as string[];
+        return [] as TableColumn[];
       }
+
       return payload
-        .map((row: any) => String(row?.name ?? row?.columnName ?? row ?? ''))
-        .filter((name: string) => name.length > 0);
+        .map((row: any) => ({
+          name: String(row?.name ?? row?.columnName ?? row?.column_name ?? row ?? ''),
+          dataType: String(row?.dataType ?? row?.data_type ?? row?.type ?? ''),
+          isNullable:
+            row?.isNullable === true ||
+            row?.isNullable === 'YES' ||
+            row?.is_nullable === true ||
+            row?.is_nullable === 'YES',
+        }))
+        .filter((row: TableColumn) => row.name.length > 0);
     },
     enabled: table.trim().length > 0,
   });
 };
-export const useSystemQueryBuilder = (state: QueryBuilderState) => {
+
+export const useSystemQueryBuilder = (state: TableQueryState) => {
   return useQuery({
-    queryKey: ['system-admin', 'query-builder', state],
+    queryKey: ['system-admin', 'table-query', state],
     queryFn: async () => {
       const payload = await systemAdminServices.queryTable(state.table, {
+        page: state.page,
         limit: state.limit,
-        offset: state.offset,
         search: state.search || undefined,
-        sortBy: state.sortColumn || undefined,
-        sortOrder: state.sortDirection || undefined,
-        filters: state.filters.length > 0 ? JSON.stringify(state.filters) : undefined,
+        from: toIsoDateTime(state.from),
+        to: toIsoDateTime(state.to),
       });
       return normalizeRows(payload);
     },
     enabled: Boolean(state.table),
   });
 };
+
 export const useSystemMetrics = ({
   query,
   time,
@@ -202,7 +249,9 @@ export const useSystemMetrics = ({
     queryFn: () => systemAdminServices.metrics({ query, time }),
     enabled: enabled && query.trim().length > 0,
   });
+
   const series = useMemo(() => normalizeMetricSeries(queryResult.data), [queryResult.data]);
+
   return {
     ...queryResult,
     series,

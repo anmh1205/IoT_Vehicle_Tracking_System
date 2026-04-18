@@ -7,18 +7,25 @@ export const createDeviceMarkerIcon = (status: DeviceMapStatus, heading = 0): L.
 
   return L.divIcon({
     className: 'device-marker-icon',
-    html: `<div style="position:relative;width:34px;height:34px;transform:rotate(${normalizedHeading}deg);filter:drop-shadow(0 2px 6px rgba(15,23,42,0.38));">
-      <svg viewBox="0 0 56 56" width="34" height="34" aria-hidden="true">
-        <path d="M28 5l5 8h-10l5-8z" fill="${color}" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
-        <rect x="15" y="10" width="26" height="36" rx="10" fill="${color}" stroke="#ffffff" stroke-width="2"/>
-        <rect x="19" y="14" width="18" height="10" rx="4" fill="rgba(255,255,255,0.42)"/>
-        <rect x="19" y="28" width="18" height="10" rx="3" fill="#ffffff"/>
-        <circle cx="21" cy="43" r="3" fill="#111827"/>
-        <circle cx="35" cy="43" r="3" fill="#111827"/>
+    html: `<div style="position:relative;width:40px;height:40px;transform:rotate(${normalizedHeading}deg);filter:drop-shadow(0 6px 10px rgba(15,23,42,0.28));">
+      <svg viewBox="0 0 64 64" width="40" height="40" aria-hidden="true">
+        <path d="M32 4l7 11H25L32 4Z" fill="${color}" stroke="#ffffff" stroke-width="2.6" stroke-linejoin="round"/>
+        <rect x="18" y="14" width="28" height="40" rx="13" fill="${color}" stroke="#ffffff" stroke-width="2.6"/>
+        <path d="M24 19h16c4.4 0 8 3.6 8 8v7H16v-7c0-4.4 3.6-8 8-8Z" fill="rgba(255,255,255,0.28)"/>
+        <rect x="22" y="20" width="20" height="11" rx="5.5" fill="rgba(255,255,255,0.7)"/>
+        <rect x="22" y="35" width="20" height="12" rx="4.5" fill="#ffffff"/>
+        <rect x="21" y="15" width="22" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+        <circle cx="18" cy="25" r="3.5" fill="#111827"/>
+        <circle cx="46" cy="25" r="3.5" fill="#111827"/>
+        <circle cx="18" cy="43" r="3.5" fill="#111827"/>
+        <circle cx="46" cy="43" r="3.5" fill="#111827"/>
+        <rect x="27" y="37" width="10" height="8" rx="2" fill="${color}" opacity="0.2"/>
+        <circle cx="24" cy="52" r="2" fill="#f8fafc"/>
+        <circle cx="40" cy="52" r="2" fill="#f8fafc"/>
       </svg>
     </div>`,
-    iconSize: [34, 34],
-    iconAnchor: [17, 17],
-    popupAnchor: [0, -17],
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -20],
   });
 };

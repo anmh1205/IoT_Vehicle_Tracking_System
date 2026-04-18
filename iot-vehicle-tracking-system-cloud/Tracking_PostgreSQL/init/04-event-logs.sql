@@ -28,6 +28,10 @@ CREATE INDEX IF NOT EXISTS idx_event_device_time ON event_logs(device_id, server
 CREATE INDEX IF NOT EXISTS idx_event_correlation ON event_logs(correlation_id);
 CREATE INDEX IF NOT EXISTS idx_event_type_time ON event_logs(event_type, server_timestamp);
 CREATE INDEX IF NOT EXISTS idx_event_logs_error_status ON event_logs(error_status);
+CREATE INDEX IF NOT EXISTS idx_event_logs_mqtt_bridge_code_time ON event_logs(server_timestamp)
+WHERE event_code = 'mqtt_bridge_rawdata';
+CREATE INDEX IF NOT EXISTS idx_event_logs_mqtt_bridge_source_time ON event_logs(server_timestamp)
+WHERE context->>'source' = 'mqtt_bridge_rawdata';
 
 CREATE TRIGGER trigger_event_logs_updated_at
     BEFORE UPDATE ON event_logs

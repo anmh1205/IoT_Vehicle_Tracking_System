@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { driverServices } from '@/lib/api/drivers';
-import { tripServices } from '@/lib/api/trips';
 import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
+import type { Driver } from '../types';
 
 const STATUS_LABELS: Record<string, string> = {
   active: 'Hoạt động',
@@ -21,6 +21,13 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive'> =
   active: 'default',
   inactive: 'secondary',
   suspended: 'destructive',
+};
+
+const TRIP_STATUS_LABELS: Record<string, string> = {
+  planned: 'Đã lên kế hoạch',
+  in_progress: 'Đang chạy',
+  completed: 'Hoàn thành',
+  cancelled: 'Đã hủy',
 };
 
 const InfoRow = ({
@@ -48,40 +55,24 @@ export const DriverDetailModal = ({
   onOpenChange: (value: boolean) => void;
   driverId: number | null;
 }) => {
-  const detailQuery = useQuery({
+  const detailQuery = useQuery<Driver>({
     queryKey: ['driver-detail', driverId],
     queryFn: () => driverServices.getById(driverId as number),
     enabled: open && driverId !== null,
   });
 
-  const tripQuery = useQuery({
-    queryKey: ['driver-detail-trips', driverId, detailQuery.data?.fullName],
-    queryFn: async () => {
-      const payload = await tripServices.getList({
-        page: 1,
-        limit: 6,
-        search: detailQuery.data?.fullName ?? '',
-      });
-      const items = payload?.items ?? payload?.data?.items ?? [];
-      return items.filter((trip: any) =>
-        String(trip?.driverName ?? '')
-          .toLowerCase()
-          .includes(String(detailQuery.data?.fullName ?? '').toLowerCase()),
-      );
-    },
-    enabled: open && Boolean(detailQuery.data?.fullName),
-  });
-
-  const detail = detailQuery.data ?? {};
-  const statusLabel = STATUS_LABELS[detail.status] ?? detail.status ?? 'Chưa xác định';
+  const detail = detailQuery.data;
+  const assignment = detail?.assignment;
+  const recentTrips = detail?.recentTrips ?? [];
+  const statusLabel = STATUS_LABELS[detail?.status ?? ''] ?? detail?.status ?? 'Chưa xác định';
 
   const licenseStats = useMemo(() => {
-    const licenseExpiryDate = detail.licenseExpiry ? new Date(detail.licenseExpiry) : null;
+    const licenseExpiryDate = detail?.licenseExpiry ? new Date(detail.licenseExpiry) : null;
     if (!licenseExpiryDate || Number.isNaN(licenseExpiryDate.getTime())) {
       return {
         label: 'Chưa có ngày hết hạn GPLX',
         variant: 'secondary' as const,
-        warning: 'Nên cập nhật ngày hết hạn để hệ thống nhắc bảo trì hồ sơ lái xe.',
+        warning: 'Nên cập nhật ngày hết hạn để hệ thống nhắc hồ sơ tài xế.',
       };
     }
 
@@ -107,29 +98,20 @@ export const DriverDetailModal = ({
       variant: 'default' as const,
       warning: '',
     };
-  }, [detail.licenseExpiry]);
+  }, [detail?.licenseExpiry]);
 
   const completeness = useMemo(() => {
     const requiredFields = [
-      detail.fullName,
-      detail.phone,
-      detail.licenseNumber,
-      detail.licenseType,
-      detail.licenseExpiry,
-      detail.address,
+      detail?.fullName,
+      detail?.phone,
+      detail?.licenseNumber,
+      detail?.licenseType,
+      detail?.licenseExpiry,
+      detail?.address,
     ];
     const readyCount = requiredFields.filter(Boolean).length;
     return Math.round((readyCount / requiredFields.length) * 100);
-  }, [
-    detail.address,
-    detail.fullName,
-    detail.licenseExpiry,
-    detail.licenseNumber,
-    detail.licenseType,
-    detail.phone,
-  ]);
-
-  const recentTrips = tripQuery.data ?? [];
+  }, [detail]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -144,7 +126,14 @@ export const DriverDetailModal = ({
             <Skeleton className="h-40 w-full" />
             <Skeleton className="h-40 w-full" />
           </div>
-        ) : (
+        ) : detailQuery.isError ? (
+          <Card className="border-destructive/40">
+            <CardContent className="flex items-start gap-2 p-4 text-sm text-destructive">
+              <AlertTriangle className="mt-0.5 h-4 w-4" />
+              Không thể tải đầy đủ dữ liệu tài xế. Vui lòng thử lại.
+            </CardContent>
+          </Card>
+        ) : detail ? (
           <div className="space-y-4">
             <Card className="overflow-hidden border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
               <CardContent className="space-y-4 p-5">
@@ -205,32 +194,38 @@ export const DriverDetailModal = ({
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Tín hiệu vận hành</CardTitle>
+                  <CardTitle className="text-base">Ngữ cảnh phân công hiện tại</CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-3 sm:grid-cols-2">
                   <InfoRow
-                    label="Liên hệ trực tiếp"
-                    value={detail.phone ? 'Đủ' : 'Thiếu'}
-                    hint={detail.phone ? 'Có thể gọi điều phối ngay' : 'Nên bổ sung để tránh trễ xử lý'}
+                    label="Xe đang phụ trách"
+                    value={assignment?.activeVehicleId ?? assignment?.latestVehicleId ?? 'Chưa ghi nhận'}
                   />
                   <InfoRow
-                    label="Kênh email"
-                    value={detail.email ? 'Đủ' : 'Thiếu'}
-                    hint={detail.email ? 'Có thể gửi thông báo văn bản' : 'Nên bổ sung cho cảnh báo chính thức'}
+                    label="Thiết bị gần nhất"
+                    value={assignment?.activeDeviceId ?? assignment?.latestDeviceId ?? 'Chưa ghi nhận'}
+                  />
+                  <InfoRow label="Tổng số chuyến" value={String(assignment?.tripCount ?? 0)} />
+                  <InfoRow label="Chuyến đang chạy" value={String(assignment?.activeTripCount ?? 0)} />
+                  <InfoRow
+                    label="Mã chuyến gần nhất"
+                    value={assignment?.latestTripCode ?? 'Chưa ghi nhận'}
                   />
                   <InfoRow
-                    label="Trạng thái bằng lái"
-                    value={licenseStats.label}
-                    hint={
-                      licenseStats.variant === 'destructive'
-                        ? 'Rủi ro gián đoạn khai thác'
-                        : 'Sẵn sàng vận hành'
+                    label="Trạng thái chuyến gần nhất"
+                    value={
+                      TRIP_STATUS_LABELS[assignment?.latestTripStatus ?? ''] ??
+                      assignment?.latestTripStatus ??
+                      'Chưa ghi nhận'
                     }
                   />
                   <InfoRow
-                    label="Số chuyến gần đây"
-                    value={String(recentTrips.length)}
-                    hint={tripQuery.isLoading ? 'Đang tải lịch sử chuyến' : 'Lọc theo tên tài xế'}
+                    label="Điểm đi gần nhất"
+                    value={assignment?.latestStartLocation ?? 'Chưa ghi nhận'}
+                  />
+                  <InfoRow
+                    label="Điểm đến gần nhất"
+                    value={assignment?.latestEndLocation ?? 'Chưa ghi nhận'}
                   />
                 </CardContent>
               </Card>
@@ -238,13 +233,11 @@ export const DriverDetailModal = ({
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Hành trình gần đây theo tài xế</CardTitle>
+                <CardTitle className="text-base">Lịch sử chuyến gần đây</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {tripQuery.isLoading ? (
-                  <Skeleton className="h-24 w-full" />
-                ) : recentTrips.length > 0 ? (
-                  recentTrips.map((trip: any) => (
+                {recentTrips.length > 0 ? (
+                  recentTrips.map((trip) => (
                     <div
                       key={trip.id}
                       className="grid gap-3 rounded-xl border bg-muted/20 px-3 py-3 text-sm md:grid-cols-4"
@@ -259,7 +252,9 @@ export const DriverDetailModal = ({
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Trạng thái</p>
-                        <p className="font-medium">{trip.status ?? '-'}</p>
+                        <p className="font-medium">
+                          {TRIP_STATUS_LABELS[trip.status] ?? trip.status}
+                        </p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Bắt đầu</p>
@@ -271,8 +266,7 @@ export const DriverDetailModal = ({
                   ))
                 ) : (
                   <div className="rounded-xl border border-dashed px-4 py-6 text-sm text-muted-foreground">
-                    Chưa thấy hành trình khớp theo tên tài xế này. Nếu đội xe đã có chuyến, cần chuẩn hóa
-                    trường driverName khi tạo chuyến.
+                    Chưa có dữ liệu chuyến nào gắn với tài xế này trong bảng trips.
                   </div>
                 )}
               </CardContent>
@@ -288,18 +282,8 @@ export const DriverDetailModal = ({
                 </CardContent>
               </Card>
             ) : null}
-
-            {detailQuery.isError ? (
-              <Card className="border-destructive/40">
-                <CardContent className="flex items-start gap-2 p-4 text-sm text-destructive">
-                  <AlertTriangle className="mt-0.5 h-4 w-4" />
-                  Không thể tải đầy đủ dữ liệu tài xế. Vui lòng thử lại.
-                </CardContent>
-              </Card>
-            ) : null}
           </div>
-        )}
-
+        ) : null}
       </DialogContent>
     </Dialog>
   );

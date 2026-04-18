@@ -1,23 +1,61 @@
 import { pool } from '@/infrastructure/database/pool';
 import * as vmRepo from '@/domain/system-admin/repositories/victoriametrics.repository';
 import * as vlRepo from '@/domain/system-admin/repositories/victorialogs.repository';
+import {
+  getSystemHealth as getCoreSystemHealth,
+  type SystemHealthPayload,
+} from '@/domain/system/services/system-status.service';
 import { createValidationError } from '@/shared/utils/errors.util';
 
-interface HealthStatus {
-  database: 'up' | 'down';
-  timestamp: string;
-}
+export const getSystemHealth = async (): Promise<SystemHealthPayload> => {
+  const health = await getCoreSystemHealth();
+  return health;
+};
 
-export const getSystemHealth = async (): Promise<HealthStatus> => {
-  try {
-    await pool.query('SELECT 1');
-    return { database: 'up', timestamp: new Date().toISOString() };
-  } catch {
-    return { database: 'down', timestamp: new Date().toISOString() };
+const RANGE_TIME_RE = /^(\d+)([smhdw])$/i;
+
+const toDurationSeconds = (value: string): number | null => {
+  const match = RANGE_TIME_RE.exec(value.trim());
+  if (!match) {
+    return null;
   }
+
+  const amount = Number.parseInt(match[1] ?? '0', 10);
+  const unit = (match[2] ?? '').toLowerCase();
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return null;
+  }
+
+  const multiplier =
+    unit === 's'
+      ? 1
+      : unit === 'm'
+        ? 60
+        : unit === 'h'
+          ? 60 * 60
+          : unit === 'd'
+            ? 24 * 60 * 60
+            : unit === 'w'
+              ? 7 * 24 * 60 * 60
+              : 0;
+
+  return multiplier > 0 ? amount * multiplier : null;
+};
+
+const getRangeStep = (durationSeconds: number): string => {
+  const stepSeconds = Math.max(15, Math.ceil(durationSeconds / 240));
+  return `${stepSeconds}s`;
 };
 
 export const queryMetrics = async (promql: string, time?: string): Promise<unknown> => {
+  const durationSeconds = time ? toDurationSeconds(time) : null;
+  if (durationSeconds) {
+    const endSec = Math.floor(Date.now() / 1000);
+    const startSec = endSec - durationSeconds;
+    const result = await vmRepo.queryRange(promql, startSec, endSec, getRangeStep(durationSeconds));
+    return result;
+  }
+
   const result = await vmRepo.query(promql, time);
   return result;
 };
@@ -101,8 +139,8 @@ export const queryTable = async (
   pagination: { page: number; limit: number; total: number; totalPages: number };
 }> => {
   const safeTable = assertTable(table);
-  const page = params.page ?? 1;
-  const limit = params.limit ?? 20;
+  const page = Math.max(1, params.page ?? 1);
+  const limit = Math.max(1, Math.min(params.limit ?? 20, 100));
   const offset = (page - 1) * limit;
 
   const conditions: string[] = [];
@@ -137,6 +175,7 @@ export const queryTable = async (
   }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const orderBy = hasCreatedAt.rows[0]?.exists ? 'ORDER BY t.created_at DESC' : 'ORDER BY 1 DESC';
 
   const countResult = await pool.query<{ total: string }>(
     `SELECT COUNT(*)::text as total FROM ${safeTable} t ${where}`,
@@ -145,7 +184,7 @@ export const queryTable = async (
   const total = Number.parseInt(countResult.rows[0]?.total ?? '0', 10);
 
   const rowsResult = await pool.query<Record<string, unknown>>(
-    `SELECT t.* FROM ${safeTable} t ${where} ORDER BY 1 DESC LIMIT $${idx++} OFFSET $${idx}`,
+    `SELECT t.* FROM ${safeTable} t ${where} ${orderBy} LIMIT $${idx++} OFFSET $${idx}`,
     [...values, limit, offset],
   );
 

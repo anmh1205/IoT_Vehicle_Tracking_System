@@ -1,15 +1,44 @@
-import { connectMqtt, disconnectMqtt } from './mqtt/client';
+import { connectMqtt, disconnectMqtt, getClient } from './mqtt/client';
 import { subscribeToDeviceTopics } from './mqtt/subscriptions';
 import { handleRawData } from './handlers/rawdata.handler';
 import { handleStatus } from './handlers/status.handler';
 import { handleEvent } from './handlers/event.handler';
 import { handleFirmware } from './handlers/firmware.handler';
 import { startBatchWriter, stopBatchWriter } from './services/batch-writer.service';
+import { startBridgeHealthServer, stopBridgeHealthServer } from './services/bridge-health.service';
 import { closePool } from './infrastructure/database';
 import { logger } from './infrastructure/logger';
+import { appConfig } from './config/env';
 
 // Ensure env is loaded
 import './config/env';
+
+const bridgeHealthState = {
+  startedAt: new Date().toISOString(),
+  subscriptionsReady: false,
+  shuttingDown: false,
+  lastMessageAt: undefined as string | undefined,
+  lastError: undefined as string | undefined,
+};
+
+const getBridgeHealthSnapshot = () => {
+  const mqttConnected = Boolean(getClient()?.connected);
+
+  return {
+    status:
+      bridgeHealthState.shuttingDown
+        ? 'down'
+        : mqttConnected && bridgeHealthState.subscriptionsReady
+          ? 'ok'
+          : 'degraded',
+    startedAt: bridgeHealthState.startedAt,
+    shuttingDown: bridgeHealthState.shuttingDown,
+    mqttConnected,
+    subscriptionsReady: bridgeHealthState.subscriptionsReady,
+    lastMessageAt: bridgeHealthState.lastMessageAt,
+    lastError: bridgeHealthState.lastError,
+  } as const;
+};
 
 /**
  * Extract deviceId from a topic string like "v1/{deviceId}/rawdata".
@@ -65,12 +94,19 @@ const main = async (): Promise<void> => {
   logger.info('Starting MQTT Bridge service...');
 
   startBatchWriter();
+  await startBridgeHealthServer({
+    port: appConfig.healthPort,
+    getSnapshot: getBridgeHealthSnapshot,
+  });
 
   const client = await connectMqtt();
 
   await subscribeToDeviceTopics(client);
+  bridgeHealthState.subscriptionsReady = true;
+  bridgeHealthState.lastError = undefined;
 
   client.on('message', (topic, message) => {
+    bridgeHealthState.lastMessageAt = new Date().toISOString();
     routeMessage(topic, message);
   });
 
@@ -82,6 +118,8 @@ const main = async (): Promise<void> => {
  */
 const shutdown = async (signal: string): Promise<void> => {
   logger.info({ signal }, 'Shutting down gracefully...');
+  bridgeHealthState.shuttingDown = true;
+  bridgeHealthState.subscriptionsReady = false;
 
   try {
     await disconnectMqtt();
@@ -104,6 +142,12 @@ const shutdown = async (signal: string): Promise<void> => {
     logger.error({ err }, 'Error closing database pool');
   }
 
+  try {
+    await stopBridgeHealthServer();
+  } catch (err) {
+    logger.error({ err }, 'Error stopping bridge health server');
+  }
+
   logger.info('Shutdown complete');
   process.exit(0);
 };
@@ -121,6 +165,7 @@ process.on('unhandledRejection', (reason) => {
 });
 
 main().catch((err) => {
+  bridgeHealthState.lastError = err instanceof Error ? err.message : 'Failed to start MQTT Bridge';
   logger.error({ err }, 'Failed to start MQTT Bridge');
   process.exit(1);
 });

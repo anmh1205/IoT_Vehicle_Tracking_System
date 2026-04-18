@@ -1,12 +1,14 @@
 flowchart TB
-    Power["Nguon chinh 12V/24V<br/>+ pin du phong"]
-    MCU["ESP32-S3 + Power FSM"]
+    Power["Nguồn chính 12V/24V<br/>+ Pin dự phòng"]
+    MCU["ESP32-S3 + FSM nguồn"]
     Modem["SIM7600CE-T<br/>4G + GNSS"]
     OBD["OBD2 BLE"]
     IMU["LIS3DSH"]
-    Cloud["MQTT / Cloud"]
+    Cloud["MQTT / máy chủ"]
 
     Power --> MCU
-    MCU --> Modem --> Cloud
+    MCU --> Modem
+    Modem -->|Uplink telemetry| Cloud
+    Cloud -->|Downlink commands / OTA| Modem
     MCU --> OBD
     MCU --> IMU

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { formatDateTime, formatDuration, formatNumber, formatRelative } from '@/lib/utils/date/format';
 import { useDeviceDetailModal } from './modal-context';
+import { SessionsTab } from './sessions-tab';
 import { RouteReplayMap } from './route-replay-map';
 import {
   buildRouteReplayPoints,
@@ -32,8 +33,8 @@ const PLAYBACK_SPEEDS = [
 ] as const;
 
 const TELEMETRY_STATE_META = {
-  healthy: { label: 'Đúng nhịp', variant: 'default' as const },
-  warning: { label: 'Bắt đầu trễ', variant: 'secondary' as const },
+  healthy: { label: 'Đúng chu kỳ', variant: 'default' as const },
+  warning: { label: 'Hơi chậm', variant: 'secondary' as const },
   stale: { label: 'Trễ rõ rệt', variant: 'outline' as const },
   offline: { label: 'Mất tín hiệu', variant: 'destructive' as const },
   unknown: { label: 'Chưa đủ dữ liệu', variant: 'outline' as const },
@@ -46,6 +47,9 @@ const formatBatteryMetric = (value: number | null | undefined): string => {
   const unit = value > 24 ? '%' : 'V';
   return `${value.toFixed(1)}${unit}`;
 };
+
+const formatTemperatureMetric = (value: number | null | undefined): string =>
+  value === null || value === undefined || !Number.isFinite(value) ? '-' : `${value.toFixed(1)}°C`;
 
 const toDurationSeconds = (from: string | null | undefined, to: string | null | undefined) => {
   if (!from || !to) {
@@ -128,6 +132,16 @@ export const RouteTab = () => {
   const telemetryState = TELEMETRY_STATE_META[
     getTelemetryFreshnessState(telemetryFreshness, device?.requestInterval ?? 60)
   ];
+  const currentDeviceBattery =
+    currentPoint?.deviceBattery ?? positionSnapshot?.deviceBattery ?? currentPoint?.battery ?? null;
+  const currentVehicleBattery =
+    currentPoint?.vehicleBattery ?? positionSnapshot?.vehicleBattery ?? positionSnapshot?.battery ?? null;
+  const currentEngineTemperature =
+    currentPoint?.engineTemperature ??
+    positionSnapshot?.engineTemperature ??
+    currentPoint?.temperature ??
+    positionSnapshot?.temperature ??
+    null;
 
   const firstPoint = replayPoints[0] ?? null;
   const lastPoint = replayPoints.at(-1) ?? null;
@@ -168,8 +182,12 @@ export const RouteTab = () => {
             <StatTile label="Tốc độ TB" value={`${averageSpeed.toFixed(1)} km/h`} />
             <StatTile label="Tốc độ tối đa" value={`${maxSpeed.toFixed(1)} km/h`} />
             <StatTile label="Mốc GPS" value={formatNumber(replayPoints.length)} />
-            <StatTile label="Nhịp quan sát" value={formatSecondsLabel(observedCadence)} />
-            <StatTile label="Độ tươi" value={formatSecondsLabel(telemetryFreshness)} helper={telemetryState.label} />
+            <StatTile label="Khoảng gửi thực tế" value={formatSecondsLabel(observedCadence)} />
+            <StatTile
+              label="Bản tin mới nhất cách đây"
+              value={formatSecondsLabel(telemetryFreshness)}
+              helper={telemetryState.label}
+            />
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[1.45fr,0.95fr]">
@@ -282,12 +300,14 @@ export const RouteTab = () => {
                     value={currentPoint ? formatCoordinateLabel(currentPoint.latitude, currentPoint.longitude, 6) : formatCoordinateLabel(positionSnapshot?.latitude, positionSnapshot?.longitude, 6)}
                   />
                   <StatTile label="Tốc độ" value={currentPoint?.speed !== null && currentPoint?.speed !== undefined ? `${currentPoint.speed.toFixed(1)} km/h` : '-'} />
-                  <StatTile
-                    label="Pin / nhiệt độ"
-                    value={`${formatBatteryMetric(currentPoint?.battery)} · ${currentPoint?.temperature !== null && currentPoint?.temperature !== undefined ? `${currentPoint.temperature.toFixed(1)}°C` : '-'}`}
-                  />
-                </CardContent>
-              </Card>
+                    <StatTile label="Pin thiết bị" value={formatBatteryMetric(currentDeviceBattery)} />
+                    <StatTile label="Ắc quy xe" value={formatBatteryMetric(currentVehicleBattery)} />
+                    <StatTile
+                      label="Nhiệt độ động cơ"
+                      value={formatTemperatureMetric(currentEngineTemperature)}
+                    />
+                  </CardContent>
+                </Card>
 
               <Card>
                 <CardHeader>
@@ -307,9 +327,10 @@ export const RouteTab = () => {
                     />
                   </div>
                   <div className="rounded-xl border bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground">
-                    Chu kỳ cấu hình đang được lưu thật ở backend dưới dạng `requestInterval`. Khi đổi ở
-                    tab Cài đặt, modal sẽ đồng thời phát command `update_config`; còn `Nhịp quan sát`
-                    và `Độ tươi` ở đây dùng để kiểm tra thiết bị có thực sự gửi đúng nhịp hay không.
+                    Màn hình này gộp bản đồ, replay và lịch sử phiên để tránh phải chuyển tab liên tục.
+                    `Chu kỳ gửi đã cấu hình` là giá trị lưu trên server; `Khoảng gửi thực tế` và
+                    `Bản tin mới nhất cách đây` giúp kiểm tra thiết bị có đang phát bản tin đúng nhịp
+                    hay không.
                   </div>
                 </CardContent>
               </Card>
@@ -340,6 +361,15 @@ export const RouteTab = () => {
               </Card>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Phiên vận hành gần đây</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SessionsTab embedded />
         </CardContent>
       </Card>
     </div>

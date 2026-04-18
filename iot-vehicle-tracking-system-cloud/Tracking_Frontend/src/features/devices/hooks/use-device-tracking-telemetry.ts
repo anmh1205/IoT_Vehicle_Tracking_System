@@ -9,7 +9,16 @@ import type {
 
 export type TrackingTelemetryPeriod = '6h' | '24h' | '7d';
 
-const TRACKING_METRICS: DeviceTrackingMetric[] = ['lat', 'lon', 'spd', 'bb', 'bt', 'err', 'vib'];
+const TRACKING_METRICS: DeviceTrackingMetric[] = [
+  'lat',
+  'lon',
+  'spd',
+  'bb',
+  'bt',
+  'temp',
+  'err',
+  'vib',
+];
 
 const toPeriodStart = (period: TrackingTelemetryPeriod): string => {
   const now = Date.now();
@@ -74,7 +83,10 @@ const emptyRowAt = (timestamp: string): DeviceTelemetryRow => ({
   longitude: null,
   speed: null,
   battery: null,
+  deviceBattery: null,
+  vehicleBattery: null,
   temperature: null,
+  engineTemperature: null,
   errorCode: null,
   vibration: null,
 });
@@ -104,9 +116,14 @@ const buildTelemetryRows = (
     ensureRow(point.timestamp).speed = point.value;
   }
   for (const point of metricSeries.bb) {
+    ensureRow(point.timestamp).deviceBattery = point.value;
     ensureRow(point.timestamp).battery = point.value;
   }
   for (const point of metricSeries.bt) {
+    ensureRow(point.timestamp).vehicleBattery = point.value;
+  }
+  for (const point of metricSeries.temp) {
+    ensureRow(point.timestamp).engineTemperature = point.value;
     ensureRow(point.timestamp).temperature = point.value;
   }
   for (const point of metricSeries.err) {
@@ -146,6 +163,7 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
           spd: [],
           bb: [],
           bt: [],
+          temp: [],
           err: [],
           vib: [],
         } as Record<DeviceTrackingMetric, DeviceTelemetryPoint[]>,
@@ -160,6 +178,7 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
     spd: [],
     bb: [],
     bt: [],
+    temp: [],
     err: [],
     vib: [],
   }), [query.data]);
@@ -210,6 +229,7 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
         spd: [],
         bb: [],
         bt: [],
+        temp: [],
         err: [],
         vib: [],
       } as Record<DeviceTrackingMetric, DeviceTelemetryPoint[]>),

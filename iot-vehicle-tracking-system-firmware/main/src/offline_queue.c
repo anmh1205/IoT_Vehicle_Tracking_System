@@ -481,8 +481,18 @@ void offline_queue_handle_publish_ack(int msg_id) {
         return;
     }
     taskENTER_CRITICAL(&s_ctx.ack_lock);
-    s_ctx.acked_msg_id = msg_id;
+    if (s_ctx.pending_msg_id < 0 || s_ctx.pending_msg_id == msg_id) {
+        s_ctx.acked_msg_id = msg_id;
+    }
     taskEXIT_CRITICAL(&s_ctx.ack_lock);
+}
+
+bool offline_queue_has_pending_ack(void) {
+    int pending_msg_id = -1;
+    taskENTER_CRITICAL(&s_ctx.ack_lock);
+    pending_msg_id = s_ctx.pending_msg_id;
+    taskEXIT_CRITICAL(&s_ctx.ack_lock);
+    return pending_msg_id >= 0;
 }
 
 bool offline_queue_should_throttle_rawdata(void) {

@@ -29,6 +29,7 @@ export const LogsViewer = () => {
     page: 1,
     limit: DEFAULT_PAGE_LIMIT,
   });
+
   const logsQuery = useSystemLogs(filters);
   const rows = logsQuery.data?.items ?? [];
   const total = logsQuery.data?.total ?? rows.length;

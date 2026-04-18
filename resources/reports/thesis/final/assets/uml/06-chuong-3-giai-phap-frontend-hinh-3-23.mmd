@@ -1,20 +1,25 @@
 flowchart TB
-    Device["Tracker"] --> EMQX["EMQX"]
-    EMQX --> Bridge["MQTT Bridge"]
+    Device["Thiết bị theo dõi"] -->|Rawdata / status / events / firmware| EMQX["EMQX"]
+    EMQX -->|Device topics| Bridge["MQTT Bridge"]
 
-    subgraph AppLayer["Lop ung dung"]
+    subgraph AppLayer["Lớp ứng dụng"]
         direction LR
-        API["Backend API"]
+        API["API phía máy chủ"]
         Query["TanStack Query"]
-        Store["Realtime Store"]
+        Store["Kho thời gian thực"]
     end
 
-    Dashboard["Dashboard hop nhat"]
-    Obs["Metrics + Logs"]
+    Dashboard["Giao diện web hợp nhất"]
+    Obs["Số liệu đo + nhật ký"]
 
-    Bridge --> API
-    Bridge --> Obs
-    API --> Query
-    API --> Store
+    Bridge -->|Ghi dữ liệu đo + nhật ký| Obs
+    Bridge -->|Publish internal/events/#| EMQX
+    EMQX -->|Realtime listener| API
+    Dashboard -->|REST thao tác| API
+    API -->|REST response| Query
+    API -->|Socket.IO push| Store
     Query --> Dashboard
     Store --> Dashboard
+    API -->|Commands / OTA| EMQX
+    EMQX -->|Topic commands| Device
+

@@ -1,0 +1,1808 @@
+[
+  {
+    "time": "2026-04-18T14:46:00.199Z",
+    "status": 200,
+    "method": "POST",
+    "url": "http://localhost:4000/api/v1/auth/login"
+  },
+  {
+    "time": "2026-04-18T14:46:01.139Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:01.372Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:01.502Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=5"
+  },
+  {
+    "time": "2026-04-18T14:46:01.502Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/dashboard/activity?limit=50"
+  },
+  {
+    "time": "2026-04-18T14:46:01.799Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/dashboard/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:01.887Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/dashboard/device-status"
+  },
+  {
+    "time": "2026-04-18T14:46:02.022Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/dashboard/device-activity?days=7"
+  },
+  {
+    "time": "2026-04-18T14:46:02.028Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/dashboard/fleet-runtime?days=30"
+  },
+  {
+    "time": "2026-04-18T14:46:04.885Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:04.975Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/dashboard/device-activity?days=7"
+  },
+  {
+    "time": "2026-04-18T14:46:05.138Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:05.243Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/dashboard/activity?limit=50"
+  },
+  {
+    "time": "2026-04-18T14:46:05.254Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/dashboard/device-status"
+  },
+  {
+    "time": "2026-04-18T14:46:05.351Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:05.366Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/dashboard/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:05.367Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=5"
+  },
+  {
+    "time": "2026-04-18T14:46:05.716Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/dashboard/fleet-runtime?days=30"
+  },
+  {
+    "time": "2026-04-18T14:46:09.298Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:09.610Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:09.642Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:09.804Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:12.868Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:12.916Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:12.942Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:12.965Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:15.760Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10"
+  },
+  {
+    "time": "2026-04-18T14:46:15.790Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:15.834Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/commands?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:15.932Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/errors?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:15.941Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/errors?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:15.977Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:16.015Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/commands?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:16.052Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=lat&from=2026-04-17T14:46:15.511Z&to=2026-04-18T14:46:15.511Z"
+  },
+  {
+    "time": "2026-04-18T14:46:16.053Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=spd&from=2026-04-17T14:46:15.511Z&to=2026-04-18T14:46:15.511Z"
+  },
+  {
+    "time": "2026-04-18T14:46:16.142Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=temp&from=2026-04-17T14:46:15.511Z&to=2026-04-18T14:46:15.511Z"
+  },
+  {
+    "time": "2026-04-18T14:46:16.151Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=bt&from=2026-04-17T14:46:15.511Z&to=2026-04-18T14:46:15.511Z"
+  },
+  {
+    "time": "2026-04-18T14:46:16.163Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/runtime"
+  },
+  {
+    "time": "2026-04-18T14:46:16.243Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=err&from=2026-04-17T14:46:15.511Z&to=2026-04-18T14:46:15.511Z"
+  },
+  {
+    "time": "2026-04-18T14:46:16.245Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=vib&from=2026-04-17T14:46:15.511Z&to=2026-04-18T14:46:15.511Z"
+  },
+  {
+    "time": "2026-04-18T14:46:16.256Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:16.335Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?page=1&limit=30"
+  },
+  {
+    "time": "2026-04-18T14:46:16.345Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=10&status=active&alertType=maintenance_due&deviceId=MOCK-OBD-002"
+  },
+  {
+    "time": "2026-04-18T14:46:16.434Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/system-admin/tables/event_logs?page=1&limit=20&search=MOCK-OBD-002"
+  },
+  {
+    "time": "2026-04-18T14:46:16.480Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=lon&from=2026-04-17T14:46:15.511Z&to=2026-04-18T14:46:15.511Z"
+  },
+  {
+    "time": "2026-04-18T14:46:16.515Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=bb&from=2026-04-17T14:46:15.511Z&to=2026-04-18T14:46:15.511Z"
+  },
+  {
+    "time": "2026-04-18T14:46:18.232Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:18.277Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:18.332Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:18.342Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:21.203Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/commands?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:21.231Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/errors?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:21.275Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:21.286Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10"
+  },
+  {
+    "time": "2026-04-18T14:46:21.316Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/errors?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:21.329Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=bb&from=2026-04-17T14:46:20.924Z&to=2026-04-18T14:46:20.924Z"
+  },
+  {
+    "time": "2026-04-18T14:46:21.361Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:21.369Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=spd&from=2026-04-17T14:46:20.924Z&to=2026-04-18T14:46:20.924Z"
+  },
+  {
+    "time": "2026-04-18T14:46:21.383Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=lat&from=2026-04-17T14:46:20.924Z&to=2026-04-18T14:46:20.924Z"
+  },
+  {
+    "time": "2026-04-18T14:46:21.386Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=lon&from=2026-04-17T14:46:20.924Z&to=2026-04-18T14:46:20.924Z"
+  },
+  {
+    "time": "2026-04-18T14:46:21.419Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=bt&from=2026-04-17T14:46:20.924Z&to=2026-04-18T14:46:20.924Z"
+  },
+  {
+    "time": "2026-04-18T14:46:21.436Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=temp&from=2026-04-17T14:46:20.924Z&to=2026-04-18T14:46:20.924Z"
+  },
+  {
+    "time": "2026-04-18T14:46:21.450Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/commands?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:21.467Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/runtime"
+  },
+  {
+    "time": "2026-04-18T14:46:21.509Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=err&from=2026-04-17T14:46:20.924Z&to=2026-04-18T14:46:20.924Z"
+  },
+  {
+    "time": "2026-04-18T14:46:21.511Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=vib&from=2026-04-17T14:46:20.924Z&to=2026-04-18T14:46:20.924Z"
+  },
+  {
+    "time": "2026-04-18T14:46:21.530Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?page=1&limit=30"
+  },
+  {
+    "time": "2026-04-18T14:46:21.530Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:21.538Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=10&status=active&alertType=maintenance_due&deviceId=MOCK-OBD-002"
+  },
+  {
+    "time": "2026-04-18T14:46:21.700Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/system-admin/tables/event_logs?page=1&limit=20&search=MOCK-OBD-002"
+  },
+  {
+    "time": "2026-04-18T14:46:23.998Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:24.168Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:24.217Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:24.231Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:27.375Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10"
+  },
+  {
+    "time": "2026-04-18T14:46:27.376Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/errors?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:27.397Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:27.398Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/commands?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:27.398Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/runtime"
+  },
+  {
+    "time": "2026-04-18T14:46:27.398Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:27.442Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=lat&from=2026-04-17T14:46:26.802Z&to=2026-04-18T14:46:26.802Z"
+  },
+  {
+    "time": "2026-04-18T14:46:27.473Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/errors?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:27.482Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=spd&from=2026-04-17T14:46:26.802Z&to=2026-04-18T14:46:26.802Z"
+  },
+  {
+    "time": "2026-04-18T14:46:27.502Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=bb&from=2026-04-17T14:46:26.802Z&to=2026-04-18T14:46:26.802Z"
+  },
+  {
+    "time": "2026-04-18T14:46:27.510Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=temp&from=2026-04-17T14:46:26.802Z&to=2026-04-18T14:46:26.802Z"
+  },
+  {
+    "time": "2026-04-18T14:46:27.519Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=lon&from=2026-04-17T14:46:26.802Z&to=2026-04-18T14:46:26.802Z"
+  },
+  {
+    "time": "2026-04-18T14:46:27.535Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=vib&from=2026-04-17T14:46:26.802Z&to=2026-04-18T14:46:26.802Z"
+  },
+  {
+    "time": "2026-04-18T14:46:27.560Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=bt&from=2026-04-17T14:46:26.802Z&to=2026-04-18T14:46:26.802Z"
+  },
+  {
+    "time": "2026-04-18T14:46:27.576Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/commands?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:27.604Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:27.636Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=10&status=active&alertType=maintenance_due&deviceId=MOCK-OBD-002"
+  },
+  {
+    "time": "2026-04-18T14:46:27.652Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?page=1&limit=30"
+  },
+  {
+    "time": "2026-04-18T14:46:27.666Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=err&from=2026-04-17T14:46:26.802Z&to=2026-04-18T14:46:26.802Z"
+  },
+  {
+    "time": "2026-04-18T14:46:27.715Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/system-admin/tables/event_logs?page=1&limit=20&search=MOCK-OBD-002"
+  },
+  {
+    "time": "2026-04-18T14:46:29.514Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:29.629Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:29.636Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:29.652Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:32.343Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10"
+  },
+  {
+    "time": "2026-04-18T14:46:32.368Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:32.396Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/errors?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:32.406Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/commands?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:32.420Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/errors?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:32.443Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/commands?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:32.467Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=spd&from=2026-04-17T14:46:32.181Z&to=2026-04-18T14:46:32.181Z"
+  },
+  {
+    "time": "2026-04-18T14:46:32.479Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=bb&from=2026-04-17T14:46:32.181Z&to=2026-04-18T14:46:32.181Z"
+  },
+  {
+    "time": "2026-04-18T14:46:32.489Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=lat&from=2026-04-17T14:46:32.181Z&to=2026-04-18T14:46:32.181Z"
+  },
+  {
+    "time": "2026-04-18T14:46:32.510Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:32.533Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=vib&from=2026-04-17T14:46:32.181Z&to=2026-04-18T14:46:32.181Z"
+  },
+  {
+    "time": "2026-04-18T14:46:32.544Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/runtime"
+  },
+  {
+    "time": "2026-04-18T14:46:32.551Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=lon&from=2026-04-17T14:46:32.181Z&to=2026-04-18T14:46:32.181Z"
+  },
+  {
+    "time": "2026-04-18T14:46:32.589Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=temp&from=2026-04-17T14:46:32.181Z&to=2026-04-18T14:46:32.181Z"
+  },
+  {
+    "time": "2026-04-18T14:46:32.590Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=bt&from=2026-04-17T14:46:32.181Z&to=2026-04-18T14:46:32.181Z"
+  },
+  {
+    "time": "2026-04-18T14:46:32.614Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?page=1&limit=30"
+  },
+  {
+    "time": "2026-04-18T14:46:32.646Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=err&from=2026-04-17T14:46:32.181Z&to=2026-04-18T14:46:32.181Z"
+  },
+  {
+    "time": "2026-04-18T14:46:32.652Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:32.732Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=10&status=active&alertType=maintenance_due&deviceId=MOCK-OBD-002"
+  },
+  {
+    "time": "2026-04-18T14:46:32.776Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/system-admin/tables/event_logs?page=1&limit=20&search=MOCK-OBD-002"
+  },
+  {
+    "time": "2026-04-18T14:46:34.491Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:34.566Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:34.630Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:34.635Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:37.478Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:37.482Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10"
+  },
+  {
+    "time": "2026-04-18T14:46:37.510Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/runtime"
+  },
+  {
+    "time": "2026-04-18T14:46:37.527Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:37.536Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/commands?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:37.562Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=lat&from=2026-04-17T14:46:37.308Z&to=2026-04-18T14:46:37.308Z"
+  },
+  {
+    "time": "2026-04-18T14:46:37.597Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=spd&from=2026-04-17T14:46:37.308Z&to=2026-04-18T14:46:37.308Z"
+  },
+  {
+    "time": "2026-04-18T14:46:37.603Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/errors?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:37.618Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=lon&from=2026-04-17T14:46:37.308Z&to=2026-04-18T14:46:37.308Z"
+  },
+  {
+    "time": "2026-04-18T14:46:37.642Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=bt&from=2026-04-17T14:46:37.308Z&to=2026-04-18T14:46:37.308Z"
+  },
+  {
+    "time": "2026-04-18T14:46:37.673Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/errors?limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:37.731Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=bb&from=2026-04-17T14:46:37.308Z&to=2026-04-18T14:46:37.308Z"
+  },
+  {
+    "time": "2026-04-18T14:46:37.733Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/commands?page=1&limit=10"
+  },
+  {
+    "time": "2026-04-18T14:46:37.746Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=temp&from=2026-04-17T14:46:37.308Z&to=2026-04-18T14:46:37.308Z"
+  },
+  {
+    "time": "2026-04-18T14:46:37.758Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=err&from=2026-04-17T14:46:37.308Z&to=2026-04-18T14:46:37.308Z"
+  },
+  {
+    "time": "2026-04-18T14:46:37.848Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/telemetry?metric=vib&from=2026-04-17T14:46:37.308Z&to=2026-04-18T14:46:37.308Z"
+  },
+  {
+    "time": "2026-04-18T14:46:37.850Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=10&status=active&alertType=maintenance_due&deviceId=MOCK-OBD-002"
+  },
+  {
+    "time": "2026-04-18T14:46:37.853Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:37.873Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/10/sessions?page=1&limit=30"
+  },
+  {
+    "time": "2026-04-18T14:46:37.977Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/system-admin/tables/event_logs?page=1&limit=20&search=MOCK-OBD-002"
+  },
+  {
+    "time": "2026-04-18T14:46:39.666Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:39.717Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:39.807Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:39.809Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:39.950Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/geofences?page=1&limit=100"
+  },
+  {
+    "time": "2026-04-18T14:46:41.764Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:43.062Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:43.105Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:43.133Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:43.166Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:43.307Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/geofences?page=1&limit=100"
+  },
+  {
+    "time": "2026-04-18T14:46:45.201Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:47.511Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:47.925Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:47.977Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:48.113Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:48.115Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:48.164Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/geofences?page=1&limit=100"
+  },
+  {
+    "time": "2026-04-18T14:46:50.035Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:52.069Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices/positions"
+  },
+  {
+    "time": "2026-04-18T14:46:53.444Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:53.508Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:53.521Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:53.550Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices?limit=100"
+  },
+  {
+    "time": "2026-04-18T14:46:53.564Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:53.585Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers?page=1&limit=100"
+  },
+  {
+    "time": "2026-04-18T14:46:56.562Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:56.597Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:56.620Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:46:56.675Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/drivers?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:59.575Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:46:59.640Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/drivers?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:46:59.642Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:46:59.698Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:02.376Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/drivers/4"
+  },
+  {
+    "time": "2026-04-18T14:47:03.930Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:03.971Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:04.000Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:04.018Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:47:04.263Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?page=1&limit=100&sortBy=createdAt&sortOrder=desc"
+  },
+  {
+    "time": "2026-04-18T14:47:07.046Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:07.105Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers/4"
+  },
+  {
+    "time": "2026-04-18T14:47:07.151Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?page=1&limit=100&customerId=4&sortBy=createdAt&sortOrder=desc"
+  },
+  {
+    "time": "2026-04-18T14:47:07.202Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:07.206Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:10.602Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:10.675Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:10.703Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:10.744Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:10.806Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/maintenance?page=1&limit=50"
+  },
+  {
+    "time": "2026-04-18T14:47:10.878Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/maintenance?status=scheduled&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:10.879Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/maintenance?status=completed&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:10.880Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/maintenance?status=cancelled&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:10.930Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/maintenance?status=in_progress&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:10.984Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=30&status=active&alertType=maintenance_due"
+  },
+  {
+    "time": "2026-04-18T14:47:11.195Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:11.794Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:12.242Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:14.113Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:14.178Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/maintenance?page=1&limit=50"
+  },
+  {
+    "time": "2026-04-18T14:47:14.201Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:14.241Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/maintenance?status=scheduled&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:14.258Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:14.263Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/maintenance?status=in_progress&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:14.279Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=30&status=active&alertType=maintenance_due"
+  },
+  {
+    "time": "2026-04-18T14:47:14.332Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:14.336Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:14.340Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/maintenance?status=cancelled&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:14.479Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/maintenance?status=completed&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:15.251Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:15.282Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:17.954Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:18.081Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?limit=100"
+  },
+  {
+    "time": "2026-04-18T14:47:18.094Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/geofences?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:47:18.165Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:18.165Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:21.466Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:21.567Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/geofences?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:47:21.622Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?limit=100"
+  },
+  {
+    "time": "2026-04-18T14:47:21.633Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:21.664Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:26.309Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:26.478Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:26.488Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:26.507Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:26.533Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/trips?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:47:26.554Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:27.563Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:27.600Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:29.256Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:29.366Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/trips?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:47:29.417Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:29.422Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:29.452Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:29.461Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:30.468Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/vehicles?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:30.504Z",
+    "status": 400,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/customers?limit=200"
+  },
+  {
+    "time": "2026-04-18T14:47:31.999Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/trips/6"
+  },
+  {
+    "time": "2026-04-18T14:47:32.128Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/trips/6/telemetry?interval=15s"
+  },
+  {
+    "time": "2026-04-18T14:47:33.601Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:33.650Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:33.705Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:33.713Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?status=acknowledged&page=1&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:33.734Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:33.763Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?status=active&page=1&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:33.781Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=50"
+  },
+  {
+    "time": "2026-04-18T14:47:33.836Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?severity=critical&page=1&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:36.742Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:36.841Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=50"
+  },
+  {
+    "time": "2026-04-18T14:47:36.896Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?page=1&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:36.897Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?severity=critical&page=1&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:36.900Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?status=acknowledged&page=1&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:36.944Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/alerts?status=active&page=1&limit=1"
+  },
+  {
+    "time": "2026-04-18T14:47:36.944Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:37.161Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:41.509Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:41.545Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:41.580Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:41.598Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?page=1&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:47:45.207Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:45.265Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:45.280Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:45.291Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/users/notification-settings"
+  },
+  {
+    "time": "2026-04-18T14:47:58.323Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:47:58.705Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:47:58.911Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:47:58.952Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/system/metrics"
+  },
+  {
+    "time": "2026-04-18T14:47:58.986Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/system/health"
+  },
+  {
+    "time": "2026-04-18T14:48:01.953Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:48:02.016Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:48:02.060Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:48:02.366Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/system-admin/logs?query=*&limit=20"
+  },
+  {
+    "time": "2026-04-18T14:48:02.521Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/system-admin/health"
+  },
+  {
+    "time": "2026-04-18T14:48:05.307Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/auth/me"
+  },
+  {
+    "time": "2026-04-18T14:48:05.368Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications/stats"
+  },
+  {
+    "time": "2026-04-18T14:48:05.426Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware?limit=100"
+  },
+  {
+    "time": "2026-04-18T14:48:05.508Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/notifications?limit=8"
+  },
+  {
+    "time": "2026-04-18T14:48:05.508Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/devices?limit=100"
+  },
+  {
+    "time": "2026-04-18T14:48:05.608Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/26/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.609Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/24/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.619Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/23/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.647Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/25/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.726Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/21/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.733Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/22/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.745Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/18/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.768Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/17/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.802Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/15/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.815Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/13/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.850Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/14/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.878Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/7/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.895Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/12/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.913Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/10/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.941Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/9/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.957Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/6/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:05.983Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/3/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:06.000Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/1/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:06.026Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/4/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:06.115Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/8/deployments"
+  },
+  {
+    "time": "2026-04-18T14:48:06.149Z",
+    "status": 200,
+    "method": "GET",
+    "url": "http://localhost:4000/api/v1/firmware/11/deployments"
+  }
+]

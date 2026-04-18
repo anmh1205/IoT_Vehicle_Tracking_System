@@ -28,6 +28,7 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
                                 uint64_t timestamp_ms);
 void offline_queue_replay_tick(void);
 void offline_queue_handle_publish_ack(int msg_id);
+bool offline_queue_has_pending_ack(void);
 bool offline_queue_should_throttle_rawdata(void);
 void offline_queue_stop_session(bool clean_shutdown);
 uint32_t offline_queue_depth(void);

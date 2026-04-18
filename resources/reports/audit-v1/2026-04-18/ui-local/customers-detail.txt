@@ -1,0 +1,136 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Đội xe
+Thiết bị
+Phương tiện
+Tài xế
+Khách hàng
+Cảnh báo
+Nền tảng
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Đội xe
+Khách hàng
+4
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Dong Sai Gon Logistics
+
+Hồ sơ khách hàng, phương tiện liên quan và ngữ cảnh điều phối đội xe
+
+Đang hoạt động
+Doanh nghiệp
+3 phương tiện liên quan
+
+Dong Sai Gon Logistics
+
+Mã khách hàng: CUST-LOGI-001
+
+NGƯỜI LIÊN HỆ
+
+Chưa có
+
+ĐIỆN THOẠI
+
+0901000101
+
+EMAIL
+
+ops@dsg.local
+
+MÃ SỐ THUẾ
+
+Chưa có
+
+Thiếu đầu mối liên hệ • Thiếu mã số thuế doanh nghiệp. Hồ sơ khách hàng chưa đủ để điều phối liên lạc và chứng từ ổn định.
+Thông tin liên hệ
+
+TÊN KHÁCH HÀNG
+
+Dong Sai Gon Logistics
+
+LOẠI KHÁCH HÀNG
+
+Doanh nghiệp
+
+NGƯỜI LIÊN HỆ CHÍNH
+
+Chưa có
+
+SỐ ĐIỆN THOẠI
+
+0901000101
+
+EMAIL
+
+ops@dsg.local
+
+ĐỊA CHỈ
+
+Thu Duc, HCMC
+
+Thông tin quản trị
+
+MÃ KHÁCH HÀNG
+
+CUST-LOGI-001
+
+MÃ SỐ THUẾ
+
+Chưa cập nhật
+
+TRẠNG THÁI
+
+Đang hoạt động
+
+ID NỘI BỘ
+
+4
+
+TẠO LÚC
+
+18/04/2026 20:27
+
+CẬP NHẬT GẦN NHẤT
+
+18/04/2026 20:27
+
+khoảng 1 giờ trước
+
+Phương tiện liên quan
+Gán phương tiện
+
+51H-12890
+
+XE-LOGI-01 • Hyundai • HD120
+
+Thiết bị sim-uat-001
+
+Bỏ gán
+
+59C-99009
+
+XE-SHIP-09 • Ford • Ranger
+
+Thiết bị MOCK-OBD-003
+
+Bỏ gán
+
+36E-04721
+
+XE-TEST • Honda • Civic
+
+Thiết bị TRACKER_001
+
+Bỏ gán
+Ghi chú nghiệp vụ
+
+mock-audit

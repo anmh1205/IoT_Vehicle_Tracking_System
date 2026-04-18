@@ -1,0 +1,16 @@
+tạo vùng giám sát: đang bị tràn text, uiux chưa tốt. bán kính nên để đơn vị km, ranger từ 
+1 đến không giới hạn, thanh kéo cũng vậy. tối ưu cho khoảng cách 1 đến 500km kéo dễ 
+dàng. Có thêm tính năng chọn tâm bằng cách chấm điểm trên map 
+ 
+Tạo vùng bán kính/dùng xe đã chọn đang hơi rối 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

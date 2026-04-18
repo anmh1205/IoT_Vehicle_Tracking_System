@@ -530,6 +530,15 @@ const CustomersPage = () => {
             size="sm"
             variant="outline"
             onClick={() => {
+              router.push(`/dashboard/fleet/customers/${row.original.id}`);
+            }}
+          >
+            Chi tiáº¿t
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
               setEditItem(row.original);
               setOpen(true);
             }}

@@ -1,12 +1,31 @@
 import * as driverRepo from '@/domain/driver/repositories/driver.repository';
 import type {
   Driver,
+  DriverAssignment,
   DriverListQuery,
   DriverPublic,
 } from '@/domain/driver/types/driver.types';
 import { isUndefinedTableError } from '@/shared/utils/postgres-error.util';
 
-const sanitizeDriver = (d: Driver): DriverPublic => ({
+const normalizeDriverKey = (value: string | null | undefined) =>
+  value?.trim().replace(/\s+/g, ' ').toLowerCase() ?? '';
+
+const toDriverAssignment = (assignment: DriverAssignment | null | undefined) => {
+  if (!assignment) {
+    return null;
+  }
+
+  if (assignment.tripCount === 0 && assignment.activeTripCount === 0 && !assignment.latestTripId) {
+    return null;
+  }
+
+  return assignment;
+};
+
+const sanitizeDriver = (
+  d: Driver,
+  assignment: DriverAssignment | null = null,
+): DriverPublic => ({
   id: d.id,
   driverCode: d.driver_code,
   fullName: d.full_name,
@@ -20,6 +39,7 @@ const sanitizeDriver = (d: Driver): DriverPublic => ({
   avatarUrl: d.avatar_url,
   status: d.status,
   notes: d.notes,
+  assignment: toDriverAssignment(assignment),
   createdAt: d.created_at.toISOString(),
   updatedAt: d.updated_at.toISOString(),
 });
@@ -33,6 +53,7 @@ export const listDrivers = async (
   const page = query.page ?? 1;
   const limit = query.limit ?? 20;
   let result: { drivers: Driver[]; total: number };
+  let assignments = new Map<string, DriverAssignment>();
 
   try {
     result = await driverRepo.findAll(query);
@@ -51,8 +72,21 @@ export const listDrivers = async (
     throw error;
   }
 
+  try {
+    const driverKeys = Array.from(
+      new Set(result.drivers.map((driver) => normalizeDriverKey(driver.full_name)).filter(Boolean)),
+    );
+    assignments = await driverRepo.findAssignmentSummariesByNames(driverKeys);
+  } catch (error) {
+    if (!isUndefinedTableError(error)) {
+      throw error;
+    }
+  }
+
   return {
-    items: result.drivers.map(sanitizeDriver),
+    items: result.drivers.map((driver) =>
+      sanitizeDriver(driver, assignments.get(normalizeDriverKey(driver.full_name)) ?? null),
+    ),
     pagination: {
       page,
       limit,

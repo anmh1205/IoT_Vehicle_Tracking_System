@@ -28,7 +28,7 @@
 #define MQTT_CLIENT_INDEX 0
 #define MQTT_SSL_CTX_INDEX 1
 #define MQTT_INPUT_TIMEOUT_MS 8000U
-#define MQTT_CONNECT_TIMEOUT_MS 30000U
+#define MQTT_CONNECT_TIMEOUT_MS 120000U
 #define MQTT_CMD_TIMEOUT_MS 15000U
 #define MQTT_POLL_MAX_BYTES 256U
 #define MQTT_CONNECT_RESULT_POLL_MS 100U
@@ -86,6 +86,9 @@ static mqtt_rx_pending_header_t s_rx_pending_header = MQTT_RX_PENDING_NONE;
 static bool s_connect_result_pending = false;
 static bool s_connect_result_ready = false;
 static int s_connect_result_err = -1;
+static bool s_publish_result_pending = false;
+static bool s_publish_result_ready = false;
+static int s_publish_result_err = -1;
 
 /* Cached topics and broker server address strings. */
 static char s_topic_rawdata[MQTT_TOPIC_MAX_LEN];
@@ -350,6 +353,18 @@ static void tracker_mqtt_begin_connect_wait(void) {
     s_connect_result_err = -1;
 }
 
+static void tracker_mqtt_reset_publish_wait(void) {
+    s_publish_result_pending = false;
+    s_publish_result_ready = false;
+    s_publish_result_err = -1;
+}
+
+static void tracker_mqtt_begin_publish_wait(void) {
+    s_publish_result_pending = true;
+    s_publish_result_ready = false;
+    s_publish_result_err = -1;
+}
+
 static void tracker_mqtt_on_connect_result_line(int client_index, int err_code) {
     if (client_index != MQTT_CLIENT_INDEX) {
         return;
@@ -365,6 +380,21 @@ static void tracker_mqtt_on_connect_result_line(int client_index, int err_code) 
     }
 }
 
+static void tracker_mqtt_on_publish_result_line(int client_index, int err_code) {
+    if (client_index != MQTT_CLIENT_INDEX) {
+        return;
+    }
+
+    if (s_publish_result_pending) {
+        s_publish_result_ready = true;
+        s_publish_result_err = err_code;
+    }
+
+    if (err_code != 0 && tracker_mqtt_err_indicates_disconnect(err_code)) {
+        tracker_mqtt_mark_disconnected("+CMQTTPUB", err_code);
+    }
+}
+
 static esp_err_t tracker_mqtt_wait_connect_result(int *out_err_code) {
     ESP_RETURN_ON_NULL(out_err_code, ESP_ERR_INVALID_ARG, TAG, "out_err_code null");
     uint64_t start_ms = util_uptime_ms();
@@ -377,6 +407,26 @@ static esp_err_t tracker_mqtt_wait_connect_result(int *out_err_code) {
         (void)modem_at_poll_urc(MQTT_POLL_MAX_BYTES);
         if (s_connect_result_ready) {
             *out_err_code = s_connect_result_err;
+            return ESP_OK;
+        }
+        vTaskDelay(pdMS_TO_TICKS(MQTT_CONNECT_RESULT_POLL_MS));
+    }
+
+    return ESP_ERR_TIMEOUT;
+}
+
+static esp_err_t tracker_mqtt_wait_publish_result(int *out_err_code) {
+    ESP_RETURN_ON_NULL(out_err_code, ESP_ERR_INVALID_ARG, TAG, "out_err_code null");
+    uint64_t start_ms = util_uptime_ms();
+
+    while ((util_uptime_ms() - start_ms) < MQTT_CONNECT_TIMEOUT_MS) {
+        if (s_publish_result_ready) {
+            *out_err_code = s_publish_result_err;
+            return ESP_OK;
+        }
+        (void)modem_at_poll_urc(MQTT_POLL_MAX_BYTES);
+        if (s_publish_result_ready) {
+            *out_err_code = s_publish_result_err;
             return ESP_OK;
         }
         vTaskDelay(pdMS_TO_TICKS(MQTT_CONNECT_RESULT_POLL_MS));
@@ -763,6 +813,15 @@ static void tracker_mqtt_on_urc_line(const char *line) {
                     s_commands_subscribed = true;
                 }
                 ESP_LOGI(TAG, "MQTT subscribe URC client=%d err=%d", values[0], values[1]);
+            }
+            cursor = tracker_mqtt_seek_urc_prefix(cursor + 1);
+            continue;
+        }
+
+        if (strncmp(cursor, "+CMQTTPUB:", strlen("+CMQTTPUB:")) == 0) {
+            int values[2] = {0};
+            if (tracker_mqtt_parse_int_list_from_text(cursor, "+CMQTTPUB:", values, 2)) {
+                tracker_mqtt_on_publish_result_line(values[0], values[1]);
             }
             cursor = tracker_mqtt_seek_urc_prefix(cursor + 1);
             continue;
@@ -1257,6 +1316,7 @@ esp_err_t tracker_mqtt_init(const config_t *cfg) {
     s_commands_subscribed = false;
     s_next_msg_id = 1;
     tracker_mqtt_reset_connect_wait();
+    tracker_mqtt_reset_publish_wait();
 
     ESP_RETURN_ON_FALSE(tracker_mqtt_build_server_addrs(&s_cfg) == ESP_OK, ESP_FAIL, TAG, "server addr build failed");
 
@@ -1302,6 +1362,12 @@ esp_err_t tracker_mqtt_connect(void) {
         ESP_LOGW(TAG,
                  "MQTT fallback skipped connect_err=%d; forcing cleanup",
                  connect_err_code);
+    }
+
+    if (should_try_fallback && s_tls_enabled && connect_timed_out) {
+        should_try_fallback = false;
+        ESP_LOGW(TAG,
+                 "MQTT fallback skipped after TLS primary timeout; keep retry path on direct TLS endpoint");
     }
 
     if (err != ESP_OK && should_try_fallback) {
@@ -1353,6 +1419,7 @@ esp_err_t tracker_mqtt_disconnect(void) {
     s_commands_subscribed = false;
     tracker_mqtt_rx_reset();
     tracker_mqtt_reset_connect_wait();
+    tracker_mqtt_reset_publish_wait();
     return first_err;
 }
 
@@ -1412,22 +1479,42 @@ int tracker_mqtt_publish_with_msg_id(const char *topic, const char *payload, int
                    qos,
                    (unsigned int)MQTT_DEFAULT_PUBLISH_TIMEOUT_S);
 
+    tracker_mqtt_begin_publish_wait();
     char response[MQTT_AT_RESPONSE_MAX_LEN] = {0};
-    ESP_RETURN_ON_FALSE(tracker_mqtt_send_cmd(cmd, MQTT_CONNECT_TIMEOUT_MS, response, sizeof(response)) == ESP_OK,
-                        -1,
-                        TAG,
-                        "CMQTTPUB failed");
-    ESP_RETURN_ON_FALSE(tracker_mqtt_expect_result(response,
-                                                   "+CMQTTPUB:",
-                                                   true,
-                                                   NULL,
-                                                   0,
-                                                   false,
-                                                   NULL,
-                                                   NULL) == ESP_OK,
-                        -1,
-                        TAG,
-                        "CMQTTPUB result failed");
+    if (tracker_mqtt_send_cmd(cmd, MQTT_CONNECT_TIMEOUT_MS, response, sizeof(response)) != ESP_OK) {
+        tracker_mqtt_reset_publish_wait();
+        ESP_LOGE(TAG, "CMQTTPUB failed");
+        return -1;
+    }
+
+    int publish_err = 0;
+    bool parsed = false;
+    esp_err_t result_err = tracker_mqtt_expect_result(response,
+                                                      "+CMQTTPUB:",
+                                                      true,
+                                                      NULL,
+                                                      0,
+                                                      false,
+                                                      &publish_err,
+                                                      &parsed);
+    if (!parsed) {
+        esp_err_t wait_err = tracker_mqtt_wait_publish_result(&publish_err);
+        tracker_mqtt_reset_publish_wait();
+        if (wait_err != ESP_OK) {
+            ESP_LOGW(TAG, "CMQTTPUB result timeout topic=%s", topic);
+            return -1;
+        }
+        if (publish_err != 0) {
+            ESP_LOGW(TAG, "CMQTTPUB rejected topic=%s err=%d", topic, publish_err);
+            return -1;
+        }
+    } else {
+        tracker_mqtt_reset_publish_wait();
+        if (result_err != ESP_OK) {
+            ESP_LOGW(TAG, "CMQTTPUB result failed topic=%s err=%d", topic, publish_err);
+            return -1;
+        }
+    }
 
     int msg_id = s_next_msg_id++;
     if (s_next_msg_id <= 0) {

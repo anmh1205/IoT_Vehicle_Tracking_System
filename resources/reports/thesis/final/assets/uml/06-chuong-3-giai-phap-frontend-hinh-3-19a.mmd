@@ -1,10 +1,10 @@
 flowchart TB
     Root["Trang bản đồ"]
-    Sidebar["Sidebar điều khiển"]
+    Sidebar["Thanh bên điều khiển"]
 
-    subgraph RealtimeMap["Khu bản đồ realtime"]
+    subgraph RealtimeMap["Khu bản đồ thời gian thực"]
         direction TB
-        MapCore["Leaflet map core"]
+        MapCore["Lõi bản đồ Leaflet"]
         Overlays["Marker xe<br/>Tuyến đường<br/>Vùng giám sát"]
     end
 
@@ -12,5 +12,6 @@ flowchart TB
 
     Root --> Sidebar
     Root --> RealtimeMap
-    RealtimeMap --> DataSync
+    DataSync --> MapCore
     DataSync --> Overlays
+    MapCore --> Overlays

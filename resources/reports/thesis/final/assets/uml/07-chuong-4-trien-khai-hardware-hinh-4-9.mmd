@@ -1,6 +1,17 @@
 flowchart TB
-    Main["Nhánh chính 5V"] --> ORing["Diode OR"]
-    Backup["Nhánh backup 5V"] --> ORing
-    ORing --> Load["Rail runtime"]
-    FSM["Power FSM"] -.->|điều khiển| Main
-    FSM -.->|điều khiển| Backup
+    Start["Giám sát IGN và U_batt"]
+    Ign{"IGN ON?"}
+    Main["Dùng nhánh chính 5V<br/>Cho phép sạc pin"]
+    Strong{"U_batt trên ngưỡng?"}
+    Park["Xe đỗ bình thường<br/>Giữ nhánh chính"]
+    Backup["Chuyển sang nhánh backup 5V<br/>Ngừng sạc pin"]
+    Alert["Cảnh báo điện áp thấp"]
+    Recover{"Ắc quy phục hồi?"}
+
+    Start --> Ign
+    Ign -- Có --> Main
+    Ign -- Không --> Strong
+    Strong -- Có --> Park --> Main
+    Strong -- Không --> Backup --> Alert --> Recover
+    Recover -- Có --> Main
+    Recover -- Không --> Backup

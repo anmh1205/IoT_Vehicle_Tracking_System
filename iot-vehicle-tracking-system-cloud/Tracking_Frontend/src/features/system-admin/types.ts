@@ -18,20 +18,19 @@ export interface LogsFilterState {
   limit: number;
 }
 
-export interface QueryCondition {
-  column: string;
-  operator: '=' | '!=' | 'LIKE' | '>' | '<' | '>=' | '<=';
-  value: string;
+export interface TableColumn {
+  name: string;
+  dataType: string;
+  isNullable: boolean;
 }
 
-export interface QueryBuilderState {
+export interface TableQueryState {
   table: string;
-  filters: QueryCondition[];
-  sortColumn: string;
-  sortDirection: 'asc' | 'desc';
+  page: number;
   limit: number;
-  offset: number;
   search: string;
+  from?: string;
+  to?: string;
 }
 
 export interface QueryResult {
@@ -39,6 +38,7 @@ export interface QueryResult {
   total: number;
   page: number;
   limit: number;
+  totalPages: number;
 }
 
 export interface MetricPoint {

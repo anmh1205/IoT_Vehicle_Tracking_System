@@ -936,7 +936,8 @@ static void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
              */
             (void)ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0C, TRACKER_OBD_PID_TIMEOUT_MS);
 
-            static const uint8_t s_aux_pids[] = {0x0D, 0x05, 0x2F, 0x04};
+            static const uint8_t s_aux_pids[] = {0x05, 0x2F, 0x04};
+            (void)ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0D, TRACKER_OBD_PID_TIMEOUT_MS);
             uint8_t aux_pid = s_aux_pids[s_obd_aux_pid_cursor % ARRAY_SIZE(s_aux_pids)];
             (void)ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, aux_pid, TRACKER_OBD_PID_TIMEOUT_MS);
             s_obd_aux_pid_cursor = (uint8_t)((s_obd_aux_pid_cursor + 1U) % ARRAY_SIZE(s_aux_pids));
@@ -1568,7 +1569,7 @@ static bool state_machine_prime_obd_after_connect(ble_obd_ctx_t *ctx) {
         return false;
     }
 
-    static const uint8_t s_prime_pids[] = {0x0C, 0x0D, 0x05};
+    static const uint8_t s_prime_pids[] = {0x00, 0x0D, 0x0C, 0x05};
     uint64_t sample_before_ms = s_last_obd_sample_ms;
 
     for (size_t attempt = 0; attempt < 3U; ++attempt) {
@@ -1848,7 +1849,6 @@ static void state_machine_try_connect_network(void) {
     modem_lte_request_connect();
     esp_err_t err = modem_lte_tick(now_ms);
     bool lte_now_initialized = modem_lte_is_initialized();
-    state_machine_try_start_gnss_nonblocking();
     if (err == ESP_ERR_NOT_FINISHED) {
         return;
     }
@@ -1856,6 +1856,10 @@ static void state_machine_try_connect_network(void) {
         s_prev_lte_initialized = false;
         state_machine_schedule_network_retry(now_ms, "modem_lte_tick", err);
         return;
+    }
+
+    if (lte_now_initialized) {
+        state_machine_try_start_gnss_nonblocking();
     }
 
 #if !TRACKER_MQTT_RUNTIME_DISABLED
@@ -2108,10 +2112,20 @@ static void state_machine_shutdown_for_sleep(void) {
         }
     }
     s_gnss_started = false;
+
+#if !TRACKER_MQTT_RUNTIME_DISABLED
+    esp_err_t mqtt_disconnect_err = tracker_mqtt_disconnect();
+    if (mqtt_disconnect_err != ESP_OK) {
+        ESP_LOGW(TAG, "MQTT disconnect before sleep failed: %s", esp_err_to_name(mqtt_disconnect_err));
+    }
+    s_mqtt_started = false;
+#endif
+
     esp_err_t lte_disconnect_err = modem_lte_disconnect();
     if (lte_disconnect_err != ESP_OK) {
         ESP_LOGW(TAG, "LTE disconnect before sleep failed: %s", esp_err_to_name(lte_disconnect_err));
     }
+    s_prev_lte_initialized = false;
 
     esp_err_t modem_power_off_err = modem_power_off();
     if (modem_power_off_err != ESP_OK) {
@@ -2119,6 +2133,8 @@ static void state_machine_shutdown_for_sleep(void) {
     } else {
         vTaskDelay(pdMS_TO_TICKS((uint32_t)TRACKER_MODEM_POWEROFF_SETTLE_MS));
     }
+
+    offline_queue_set_online(false);
 
     esp_err_t dtr_sleep_err = modem_set_dtr(true);
     if (dtr_sleep_err != ESP_OK && dtr_sleep_err != ESP_ERR_NOT_SUPPORTED) {

@@ -1,8 +1,9 @@
 flowchart TB
-    User["Nguoi dung<br/>nhap email + mat khau"]
-    Front["Frontend<br/>POST /auth/login"]
-    Auth["Backend<br/>xac thuc + tra cuu role"]
-    Token["Backend<br/>phat access token"]
-    Session["Frontend<br/>luu session + mo dashboard"]
+    User["Người dùng<br/>Nhập email + mật khẩu"]
+    Front["Giao diện web<br/>Gửi POST /auth/login"]
+    Auth["API phía máy chủ<br/>Xác thực + tra cứu vai trò"]
+    Token["API phía máy chủ<br/>Phát mã truy cập (access token)"]
+    Session["Giao diện web<br/>Lưu phiên đăng nhập + mở giao diện"]
 
     User --> Front --> Auth --> Token --> Session
+

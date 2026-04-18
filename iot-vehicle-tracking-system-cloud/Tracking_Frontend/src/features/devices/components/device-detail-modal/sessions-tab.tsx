@@ -8,7 +8,11 @@ import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-const
 import { DeviceDetailEmptyState } from './empty-state';
 import { useDeviceDetailModal } from './modal-context';
 
-export const SessionsTab = () => {
+export const SessionsTab = ({
+  embedded = false,
+}: {
+  embedded?: boolean;
+}) => {
   const { sessions, sessionsHasMore, onSessionsLoadMore, sessionsLoading } = useDeviceDetailModal();
 
   if (sessions.length === 0 && !sessionsLoading) {
@@ -20,7 +24,7 @@ export const SessionsTab = () => {
     );
   }
 
-  return (
+  const content = (
     <div className="space-y-3">
       {sessions.map((session) => (
         <Card key={session.id}>
@@ -57,5 +61,13 @@ export const SessionsTab = () => {
         </Button>
       </div>
     </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    content
   );
 };

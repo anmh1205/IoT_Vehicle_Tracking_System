@@ -1,14 +1,17 @@
-﻿import { Badge } from '@/components/ui/badge';
+﻿import { Info } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DeviceStatCard } from '@/features/devices/components/stat-card';
 import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-constants';
-import type { DeviceRawFeedRow } from '@/features/devices/types';
 import { formatDateTime, formatDuration, formatNumber, formatRelative } from '@/lib/utils/date/format';
 import Link from 'next/link';
-import { RuntimeTab } from './runtime-tab';
 import { useDeviceDetailModal } from './modal-context';
-import { normalizeObdSampleAgeMs } from './normalize-obd-sample-age';
+import {
+  extractLatestDiagnosticsSnapshot,
+  type ObdDiagnosticsSnapshot as DiagnosticsSnapshot,
+} from './obd-diagnostics';
 import {
   formatCoordinateLabel,
   formatSecondsLabel,
@@ -20,29 +23,11 @@ import {
 const OBD_STALE_SAMPLE_MS = 30_000;
 const OBD_COOLANT_WARNING_C = 105;
 
-interface DiagnosticsSnapshot {
-  bleConnected?: boolean;
-  elmReady?: boolean;
-  ecuState?: string;
-  sampleAgeMs?: number;
-  connectFailCount5m?: number;
-  milOn?: boolean;
-  reportedDtcCount?: number;
-  rpm?: number;
-  obdSpeedKph?: number;
-  coolantC?: number;
-  engineLoadPct?: number;
-  dtcStored?: string[];
-  dtcPending?: string[];
-  dtcPermanent?: string[];
-  readinessIncomplete?: string[];
-}
-
 type ObdHealthState = 'good' | 'warning' | 'inactive' | 'offline' | 'unknown';
 
 const TELEMETRY_STATE_META = {
-  healthy: { label: 'Đúng nhịp', variant: 'default' as const },
-  warning: { label: 'Bắt đầu trễ', variant: 'secondary' as const },
+  healthy: { label: 'Đúng chu kỳ', variant: 'default' as const },
+  warning: { label: 'Hơi chậm', variant: 'secondary' as const },
   stale: { label: 'Trễ rõ rệt', variant: 'outline' as const },
   offline: { label: 'Mất tín hiệu', variant: 'destructive' as const },
   unknown: { label: 'Chưa đủ dữ liệu', variant: 'outline' as const },
@@ -88,12 +73,15 @@ const alertSeverityBadgeVariant: Record<
 };
 
 const formatBatteryMetric = (value: number | null | undefined): string => {
-  if (value === null || value === undefined || !Number.isFinite(value)) {
+  if (value === null || value === undefined || !Number.isFinite(value) || value <= 0) {
     return '-';
   }
   const unit = value > 24 ? '%' : 'V';
   return `${value.toFixed(1)}${unit}`;
 };
+
+const formatTemperatureMetric = (value: number | null | undefined): string =>
+  value === null || value === undefined || !Number.isFinite(value) ? '-' : `${value.toFixed(1)}°C`;
 
 const alertSeverityLabel: Record<'low' | 'medium' | 'high' | 'critical', string> = {
   low: 'Thấp',
@@ -102,99 +90,24 @@ const alertSeverityLabel: Record<'low' | 'medium' | 'high' | 'critical', string>
   critical: 'Nghiêm trọng',
 };
 
-const toRecord = (value: unknown): Record<string, unknown> | null => {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return null;
-  }
-  return value as Record<string, unknown>;
-};
-
-const toFiniteNumber = (value: unknown): number | undefined => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
-};
-
-const toOptionalString = (value: unknown): string | undefined =>
-  typeof value === 'string' && value.trim().length > 0 ? value : undefined;
-
-const toStringArray = (value: unknown): string[] | undefined => {
-  if (!Array.isArray(value)) {
-    return undefined;
-  }
-
-  const normalized = value
-    .map((item) => (typeof item === 'string' ? item.trim().toUpperCase() : ''))
-    .filter((item) => item.length > 0);
-
-  return normalized.length > 0 ? normalized : undefined;
-};
-
 const readinessLabel: Record<string, string> = {
-  misfire: 'misfire',
-  fuel_system: 'fuel system',
-  comprehensive_components: 'components',
-  catalyst: 'catalyst',
-  heated_catalyst: 'heated catalyst',
+  misfire: 'Đánh lửa sai kỳ',
+  fuel_system: 'Hệ nhiên liệu',
+  comprehensive_components: 'Thành phần tổng quát',
+  catalyst: 'Bộ xúc tác',
+  heated_catalyst: 'Bộ xúc tác gia nhiệt',
   evaporative_system: 'EVAP',
-  secondary_air_system: 'secondary air',
-  oxygen_sensor: 'O2 sensor',
-  oxygen_sensor_heater: 'O2 heater',
+  secondary_air_system: 'Hệ khí phụ',
+  oxygen_sensor: 'Cảm biến O2',
+  oxygen_sensor_heater: 'Sưởi cảm biến O2',
   egr_vvt_system: 'EGR/VVT',
-  boost_pressure: 'boost pressure',
-  exhaust_gas_sensor: 'exhaust gas sensor',
-  pm_filter: 'PM filter',
+  boost_pressure: 'Áp suất tăng áp',
+  exhaust_gas_sensor: 'Cảm biến khí xả',
+  pm_filter: 'Bộ lọc hạt',
 };
 
 const formatDtcList = (codes: string[] | undefined): string =>
   codes && codes.length > 0 ? codes.join(', ') : '-';
-
-const extractLatestDiagnostics = (rawFeed: DeviceRawFeedRow[]): DiagnosticsSnapshot | null => {
-  for (const row of rawFeed) {
-    const payload = toRecord(row.payload);
-    if (!payload) {
-      continue;
-    }
-
-    const rootDiagnostics = toRecord(payload.diagnostics);
-    const contextDiagnostics = toRecord(toRecord(payload.context)?.diagnostics);
-    const diagnostics = rootDiagnostics ?? contextDiagnostics;
-    if (!diagnostics) {
-      continue;
-    }
-
-    const channel = toRecord(diagnostics.channel);
-    const signals = toRecord(diagnostics.signals);
-    const quality = toRecord(diagnostics.quality);
-    const dtc = toRecord(diagnostics.dtc);
-    const readiness = toRecord(diagnostics.readiness);
-    const readinessIncomplete = readiness
-      ? Object.entries(readiness)
-          .filter(([, status]) => status === 'incomplete')
-          .map(([key]) => readinessLabel[key] ?? key)
-      : undefined;
-
-    return {
-      bleConnected:
-        channel?.ble_obd_connected === undefined ? undefined : Boolean(channel.ble_obd_connected),
-      elmReady: channel?.elm_ready === undefined ? undefined : Boolean(channel.elm_ready),
-      ecuState: toOptionalString(channel?.ecu_state),
-      sampleAgeMs: normalizeObdSampleAgeMs(quality?.sample_age_ms),
-      connectFailCount5m: toFiniteNumber(channel?.connect_fail_count_5m),
-      milOn: diagnostics.mil_on === undefined ? undefined : Boolean(diagnostics.mil_on),
-      reportedDtcCount: toFiniteNumber(diagnostics.reported_dtc_count),
-      rpm: toFiniteNumber(signals?.rpm),
-      obdSpeedKph: toFiniteNumber(signals?.obd_speed_kph),
-      coolantC: toFiniteNumber(signals?.coolant_c),
-      engineLoadPct: toFiniteNumber(signals?.engine_load_pct),
-      dtcStored: toStringArray(dtc?.stored),
-      dtcPending: toStringArray(dtc?.pending),
-      dtcPermanent: toStringArray(dtc?.permanent),
-      readinessIncomplete,
-    };
-  }
-
-  return null;
-};
 
 const resolveObdHealthState = (snapshot: DiagnosticsSnapshot | null): ObdHealthState => {
   if (!snapshot) {
@@ -279,7 +192,9 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
     recommendations.push('RPM cao khi xe gần như đứng yên, nên kiểm tra chế độ không tải.');
   }
   if (snapshot.readinessIncomplete && snapshot.readinessIncomplete.length > 0) {
-    recommendations.push(`Monitor chưa complete: ${snapshot.readinessIncomplete.join(', ')}.`);
+    recommendations.push(
+      `Hạng mục tự chẩn đoán chưa hoàn tất: ${snapshot.readinessIncomplete.join(', ')}.`,
+    );
   }
 
   return recommendations.length > 0
@@ -287,9 +202,35 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
     : ['OBD đang ổn định, tiếp tục theo dõi định kỳ trong modal thiết bị.'];
 };
 
-const InfoTile = ({ label, value }: { label: string; value: string }) => (
+const InfoTile = ({
+  label,
+  value,
+  description,
+}: {
+  label: string;
+  value: string;
+  description?: string;
+}) => (
   <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
-    <p className="text-xs text-muted-foreground">{label}</p>
+    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <p>{label}</p>
+      {description ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
+              aria-label={`Giải thích ${label}`}
+            >
+              <Info className="h-3.5 w-3.5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-xs text-xs leading-5">
+            {description}
+          </TooltipContent>
+        </Tooltip>
+      ) : null}
+    </div>
     <p className="mt-1 text-sm font-semibold">{value}</p>
   </div>
 );
@@ -312,7 +253,7 @@ export const OverviewTab = () => {
     obdAlertsLoading,
   } = useDeviceDetailModal();
 
-  const diagnosticsSnapshot = extractLatestDiagnostics(rawFeed);
+  const diagnosticsSnapshot = extractLatestDiagnosticsSnapshot(rawFeed, readinessLabel);
   const obdHealthState = resolveObdHealthState(diagnosticsSnapshot);
   const obdRecommendations = buildObdRecommendations(diagnosticsSnapshot);
   const configuredCadence = device?.requestInterval ?? 60;
@@ -330,8 +271,19 @@ export const OverviewTab = () => {
       latestTrackingRow?.longitude ?? positionSnapshot?.longitude ?? device?.longitude ?? null,
   };
   const latestSpeed = latestTrackingRow?.speed ?? positionSnapshot?.speed ?? null;
-  const latestBattery = latestTrackingRow?.battery ?? positionSnapshot?.battery ?? null;
-  const latestTemperature = latestTrackingRow?.temperature ?? positionSnapshot?.temperature ?? null;
+  const latestDeviceBattery =
+    latestTrackingRow?.deviceBattery ?? positionSnapshot?.deviceBattery ?? latestTrackingRow?.battery ?? null;
+  const latestVehicleBattery =
+    latestTrackingRow?.vehicleBattery ?? positionSnapshot?.vehicleBattery ?? positionSnapshot?.battery ?? null;
+  const latestEngineTemperature =
+    positionSnapshot?.engineTemperature ??
+    diagnosticsSnapshot?.coolantC ??
+    latestTrackingRow?.engineTemperature ??
+    latestTrackingRow?.temperature ??
+    null;
+  const lastTelemetryLabel = latestTrackingRow?.timestamp
+    ? `${formatDateTime(latestTrackingRow.timestamp)} (${formatRelative(latestTrackingRow.timestamp)})`
+    : '-';
 
   return (
     <div className="space-y-4">
@@ -348,28 +300,69 @@ export const OverviewTab = () => {
       <div className="grid gap-4 xl:grid-cols-[1.35fr,1fr]">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Thông tin vận hành</CardTitle>
+            <CardTitle className="text-base">Ngữ cảnh thiết bị</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
-            <InfoTile label="Thiết bị" value={device?.deviceName ?? '-'} />
-            <InfoTile label="Mã thiết bị" value={device?.deviceId ?? '-'} />
+          <CardContent className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
+            <InfoTile
+              label="Thiết bị"
+              value={device?.deviceName ?? '-'}
+              description="Tên hiển thị của bộ tracker trong hệ thống điều hành."
+            />
+            <InfoTile
+              label="Mã thiết bị"
+              value={device?.deviceId ?? '-'}
+              description="Định danh duy nhất để tra cứu telemetry, lệnh và lịch sử kết nối."
+            />
             <InfoTile
               label="Trạng thái"
               value={DEVICE_STATUS_LABELS[device?.currentStatus ?? ''] ?? device?.currentStatus ?? '-'}
+              description="Trạng thái vận hành hiện tại được suy ra từ phiên chạy và nhịp telemetry."
             />
-            <InfoTile label="Cập nhật gần nhất" value={formatRelative(device?.lastSeenAt ?? null)} />
-            <InfoTile label="Tọa độ gần nhất" value={formatCoordinateLabel(latestPosition.latitude, latestPosition.longitude, 6)} />
+            <InfoTile
+              label="Cập nhật gần nhất"
+              value={formatRelative(device?.lastSeenAt ?? null)}
+              description="Khoảng thời gian từ lúc backend nhận được tín hiệu gần nhất của thiết bị."
+            />
+            <InfoTile
+              label="Tọa độ gần nhất"
+              value={formatCoordinateLabel(latestPosition.latitude, latestPosition.longitude, 6)}
+              description="Vị trí GPS gần nhất đã được hệ thống chấp nhận là hợp lệ."
+            />
             <InfoTile
               label="Tốc độ hiện tại"
               value={latestSpeed !== null ? `${latestSpeed.toFixed(1)} km/h` : '-'}
+              description="Tốc độ hiện tại lấy từ điểm telemetry mới nhất có tọa độ hợp lệ."
             />
             <InfoTile
-              label="Pin / nhiệt độ"
-              value={`${formatBatteryMetric(latestBattery)} · ${latestTemperature !== null ? `${latestTemperature.toFixed(1)}°C` : '-'}`}
+              label="Pin thiết bị"
+              value={formatBatteryMetric(latestDeviceBattery)}
+              description="Mức pin hoặc điện áp cấp cho tracker, tách riêng khỏi ắc quy xe."
             />
-            <InfoTile label="Firmware" value={device?.firmwareVersion ?? '-'} />
-            <InfoTile label="IMEI" value={device?.imei ?? '-'} />
-            <InfoTile label="Chu kỳ gửi cấu hình" value={formatSecondsLabel(configuredCadence)} />
+            <InfoTile
+              label="Ắc quy xe"
+              value={formatBatteryMetric(latestVehicleBattery)}
+              description="Điện áp ắc quy phía xe/nguồn OBD mà firmware gửi lên cloud."
+            />
+            <InfoTile
+              label="Nhiệt độ động cơ"
+              value={formatTemperatureMetric(latestEngineTemperature)}
+              description="Ưu tiên lấy từ coolant OBD; nếu thiếu sẽ lấy nhiệt độ vận hành gần nhất."
+            />
+            <InfoTile
+              label="Firmware"
+              value={device?.firmwareVersion ?? '-'}
+              description="Phiên bản firmware hiện tại mà thiết bị đã báo về server."
+            />
+            <InfoTile
+              label="IMEI"
+              value={device?.imei ?? '-'}
+              description="Mã định danh modem phục vụ truy vết phần cứng và SIM."
+            />
+            <InfoTile
+              label="Chu kỳ gửi đã cấu hình"
+              value={formatSecondsLabel(configuredCadence)}
+              description="Nhịp gửi dữ liệu mà cloud đang lưu cho thiết bị trên cấu hình hiện hành."
+            />
             <InfoTile label="Biển số" value={device?.vehiclePlate ?? '-'} />
             <InfoTile label="Khách hàng" value={device?.customerName ?? '-'} />
           </CardContent>
@@ -379,24 +372,28 @@ export const OverviewTab = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between gap-2">
-                <CardTitle className="text-base">Tình trạng telemetry</CardTitle>
+                <CardTitle className="text-base">Tình trạng gửi dữ liệu</CardTitle>
                 <Badge variant={telemetryState.variant}>{telemetryState.label}</Badge>
               </div>
             </CardHeader>
             <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
-              <InfoTile label="Nhịp quan sát" value={formatSecondsLabel(observedCadence)} />
-              <InfoTile label="Độ tươi bản tin" value={formatSecondsLabel(telemetryFreshness)} />
               <InfoTile
-                label="Mốc mới nhất"
-                value={
-                  latestTrackingRow?.timestamp
-                    ? `${formatDateTime(latestTrackingRow.timestamp)} (${formatRelative(latestTrackingRow.timestamp)})`
-                    : '-'
-                }
+                label="Khoảng gửi thực tế"
+                value={formatSecondsLabel(observedCadence)}
+                description="Khoảng cách trung vị giữa các bản tin gần đây, dùng để so với chu kỳ đã cấu hình."
               />
-              <InfoTile label="Phiên chạy" value={formatNumber(runtime?.totalSessions ?? sessions.length)} />
+              <InfoTile
+                label="Bản tin mới nhất cách đây"
+                value={formatSecondsLabel(telemetryFreshness)}
+                description="Khoảng thời gian tính từ mốc telemetry gần nhất đến hiện tại."
+              />
+              <InfoTile
+                label="Mốc telemetry mới nhất"
+                value={lastTelemetryLabel}
+              />
+              <InfoTile label="Phiên vận hành" value={formatNumber(runtime?.totalSessions ?? sessions.length)} />
               <InfoTile label="Lệnh điều khiển" value={formatNumber(commands.length)} />
-              <InfoTile label="Mã lỗi" value={formatNumber(errorCodes.length)} />
+              <InfoTile label="Mã lỗi đang lưu" value={formatNumber(errorCodes.length)} />
             </CardContent>
           </Card>
 
@@ -437,7 +434,7 @@ export const OverviewTab = () => {
                   value={`${diagnosticsSnapshot?.coolantC !== undefined ? `${diagnosticsSnapshot.coolantC.toFixed(1)}°C` : '-'} / ${diagnosticsSnapshot?.engineLoadPct !== undefined ? `${diagnosticsSnapshot.engineLoadPct.toFixed(1)}%` : '-'}`}
                 />
                 <InfoTile
-                  label="Readiness chưa complete"
+                  label="Tự chẩn đoán chưa hoàn tất"
                   value={
                     diagnosticsSnapshot?.readinessIncomplete && diagnosticsSnapshot.readinessIncomplete.length > 0
                       ? diagnosticsSnapshot.readinessIncomplete.join(', ')
@@ -508,20 +505,7 @@ export const OverviewTab = () => {
           </Card>
         </div>
       </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-base">Runtime gần đây</CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Giữ biểu đồ runtime trong tổng quan để tránh trùng vai trò với tab lộ trình.
-            </p>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <RuntimeTab />
-        </CardContent>
-      </Card>
     </div>
   );
 };
+

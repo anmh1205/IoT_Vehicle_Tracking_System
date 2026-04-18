@@ -8,6 +8,11 @@ export interface NotificationItem {
   isRead: boolean;
   referenceId: number | null;
   referenceType: string | null;
+  vehicleId: string | null;
+  vehiclePlateNumber: string | null;
+  deviceId: string | null;
+  deviceName: string | null;
+  contextLabel: string | null;
   createdAt: string;
 }
 

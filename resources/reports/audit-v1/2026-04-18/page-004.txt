@@ -1,0 +1,17 @@
+ 
+ 
+Chuyến đi đang chưa khớp với data đang có. Nên tích hợp phần này và replay 1 cách 
+phù hợp vào map: ví dụ click vào 1 chuyến đi thì mở modal có map như phần map của 
+modal thiết bị 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -26,9 +26,9 @@ const TIME_OPTIONS = [
 ];
 
 const QUERY_PRESETS = [
-  { label: 'Availability', query: 'up' },
+  { label: 'Sẵn sàng', query: 'up' },
   { label: 'CPU', query: 'process_cpu_seconds_total' },
-  { label: 'Memory', query: 'process_resident_memory_bytes' },
+  { label: 'Bộ nhớ', query: 'process_resident_memory_bytes' },
 ];
 
 export const MetricsExplorer = () => {
@@ -37,6 +37,13 @@ export const MetricsExplorer = () => {
   const [submittedQuery, setSubmittedQuery] = useState('up');
   const [submittedTime, setSubmittedTime] = useState('1h');
   const [viewMode, setViewMode] = useState<ViewMode>('chart');
+
+  const submitQuery = (query: string, time = draftTime) => {
+    setDraftQuery(query);
+    setSubmittedQuery(query);
+    setSubmittedTime(time);
+  };
+
   const metricsQuery = useSystemMetrics({
     query: submittedQuery,
     time: submittedTime,
@@ -60,7 +67,7 @@ export const MetricsExplorer = () => {
                 type="button"
                 variant={draftQuery === preset.query ? 'secondary' : 'outline'}
                 size="sm"
-                onClick={() => setDraftQuery(preset.query)}
+                onClick={() => submitQuery(preset.query)}
               >
                 {preset.label}
               </Button>
@@ -90,8 +97,7 @@ export const MetricsExplorer = () => {
 
             <Button
               onClick={() => {
-                setSubmittedQuery(draftQuery);
-                setSubmittedTime(draftTime);
+                submitQuery(draftQuery, draftTime);
               }}
               disabled={!draftQuery.trim()}
             >

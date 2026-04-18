@@ -52,6 +52,10 @@ export const victoriaLogsConfig = {
   url: fromEnv('VICTORIALOGS_URL') ?? 'http://localhost:9428',
 } as const;
 
+export const bridgeConfig = {
+  healthUrl: fromEnv('MQTT_BRIDGE_HEALTH_URL') ?? 'http://tracking-mqtt-bridge:4003',
+} as const;
+
 export const sessionConfig = {
   secret: requireEnv('SESSION_SECRET', fromEnv('SESSION_SECRET')),
   maxLifetimeHours: toInt(fromEnv('SESSION_MAX_LIFETIME_HOURS'), 24),

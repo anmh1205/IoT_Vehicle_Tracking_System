@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -20,6 +21,8 @@ import {
   useDeviceStatusDistribution,
   useFleetRuntime,
 } from '@/features/dashboard/hooks/use-dashboard-stats';
+import type { RecentAlertItem } from '@/features/dashboard/components/recent-alerts';
+import { alertServices } from '@/lib/api/alerts';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 
 const DashboardPage = () => {
@@ -27,6 +30,10 @@ const DashboardPage = () => {
 
   const statsQuery = useDashboardStats();
   const activityQuery = useDashboardActivity(50);
+  const recentAlertsQuery = useQuery({
+    queryKey: ['dashboard-recent-alerts'],
+    queryFn: () => alertServices.getList({ page: 1, limit: 5 }),
+  });
   const deviceActivityQuery = useDeviceActivity(7);
   const distributionQuery = useDeviceStatusDistribution();
   const fleetRuntimeQuery = useFleetRuntime(30);
@@ -34,6 +41,7 @@ const DashboardPage = () => {
   const dashboardQueries = [
     statsQuery,
     activityQuery,
+    recentAlertsQuery,
     deviceActivityQuery,
     distributionQuery,
     fleetRuntimeQuery,
@@ -46,12 +54,22 @@ const DashboardPage = () => {
       )
     : null;
 
-  const alerts = useMemo(
+  const alerts = useMemo<RecentAlertItem[]>(
     () =>
-      (activityQuery.data ?? []).filter((event) =>
-        ['critical', 'high', 'medium'].includes(String(event.severity ?? '').toLowerCase()),
+      ((recentAlertsQuery.data?.items ?? recentAlertsQuery.data?.data?.items ?? []) as any[]).map(
+        (alert) => ({
+          id: alert.id,
+          title: String(alert.title ?? 'Cảnh báo'),
+          message: alert.message ?? null,
+          severity: alert.severity ?? 'low',
+          createdAt: alert.createdAt ?? alert.created_at ?? null,
+          vehiclePlate: alert.vehiclePlate ?? alert.vehicle_plate ?? null,
+          vehicleId: alert.vehicleId ?? alert.vehicle_id ?? null,
+          deviceName: alert.deviceName ?? alert.device_name ?? null,
+          deviceId: alert.deviceId ?? alert.device_id ?? null,
+        }),
       ),
-    [activityQuery.data],
+    [recentAlertsQuery.data],
   );
 
   return (
@@ -91,7 +109,7 @@ const DashboardPage = () => {
       <AreaGraph data={fleetRuntimeQuery.data ?? []} isLoading={fleetRuntimeQuery.isLoading} />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <RecentAlerts alerts={alerts} isLoading={activityQuery.isLoading} />
+        <RecentAlerts alerts={alerts} isLoading={recentAlertsQuery.isLoading} />
         <ActivityFeed events={activityQuery.data ?? []} isLoading={activityQuery.isLoading} />
       </div>
 

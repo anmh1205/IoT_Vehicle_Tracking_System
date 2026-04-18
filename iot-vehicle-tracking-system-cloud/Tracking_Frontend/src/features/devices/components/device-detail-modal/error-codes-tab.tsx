@@ -19,11 +19,15 @@ import { formatDateTime } from '@/lib/utils/date/format';
 import { DeviceDetailEmptyState } from './empty-state';
 import { useDeviceDetailModal } from './modal-context';
 
-const getType = (errorCode: number): 'critical' | 'warning' | 'info' => {
+const getType = (errorCode: number, errorName: string): 'critical' | 'warning' | 'info' => {
+  if (/^[PCBU][0-9A-F]{4}$/i.test(errorName)) return 'warning';
   if (errorCode >= 500) return 'critical';
   if (errorCode >= 200) return 'warning';
   return 'info';
 };
+
+const formatErrorCodeLabel = (errorCode: number, errorName: string): string =>
+  /^[PCBU][0-9A-F]{4}$/i.test(errorName) ? errorName : String(errorCode);
 
 export const ErrorCodesTab = () => {
   const {
@@ -87,10 +91,10 @@ export const ErrorCodesTab = () => {
           </TableHeader>
           <TableBody>
             {errorCodes.map((item) => {
-              const type = getType(item.errorCode);
+              const type = getType(item.errorCode, item.errorName);
               return (
                 <TableRow key={item.id}>
-                  <TableCell>{item.errorCode}</TableCell>
+                  <TableCell>{formatErrorCodeLabel(item.errorCode, item.errorName)}</TableCell>
                   <TableCell>{item.errorName}</TableCell>
                   <TableCell className="max-w-[260px] truncate">{item.description || '-'}</TableCell>
                   <TableCell>

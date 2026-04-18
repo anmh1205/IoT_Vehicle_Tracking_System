@@ -1,0 +1,70 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Đội xe
+Thiết bị
+Phương tiện
+Tài xế
+Khách hàng
+Cảnh báo
+Nền tảng
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Đội xe
+Khách hàng
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Khách hàng
+
+Quản lý hồ sơ khách hàng, đầu mối liên hệ và nhóm sở hữu đội xe
+
+Thêm khách hàng
+Tổng khách hàng
+3
+Hoạt động trên trang
+2
+Ngưng hoạt động trên trang
+1
+Đã gán phương tiện
+2
+Tất cả trạng thái
+Tất cả loại khách hàng
+Cột hiển thị
+Mã khách hàng
+	Tên khách hàng
+	Loại	Người liên hệ	Phương tiện	Số điện thoại	Email	Trạng thái	
+CUST-LOGI-001	Dong Sai Gon Logistics	Doanh nghiệp		
+
+3 xe
+
+51H-12890, 59C-99009, 36E-04721
+
+	0901000101	ops@dsg.local	Hoạt động	
+Sửa
+Xóa
+
+CUST-BUS-002	Mien Dong Passenger Coop	Doanh nghiệp		
+
+1 xe
+
+50F-77777
+
+	0902000202	dispatch@md.local	Hoạt động	
+Sửa
+Xóa
+
+CUST-RETAIL-003	Nguyen Hai Household	Cá nhân		Chưa gán phương tiện	0903000303	owner@nh.local	Ngưng hoạt động	
+Sửa
+Xóa
+
+Trang 1 / 1. Hiển thị 3 hồ sơ trên tổng 3 khách hàng.
+
+Trang trước
+Trang sau

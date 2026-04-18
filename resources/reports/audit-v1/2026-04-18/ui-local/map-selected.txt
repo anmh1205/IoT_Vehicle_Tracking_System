@@ -1,0 +1,117 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Bản đồ
+Chuyến đi
+Vùng giám sát
+Đội xe
+Cảnh báo
+Nền tảng
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Vận hành
+Bản đồ
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Tất cả trạng thái
+
+Tổng quan đội xe hiển thị
+
+Danh sách đang ưu tiên xe lỗi, mất kết nối và mốc cập nhật mới nhất.
+
+4/4 thiết bị
+
+ĐANG CHẠY
+
+2
+
+CẦN CHÚ Ý
+
+1
+
+CÓ TỌA ĐỘ
+
+4
+
+ĐANG LỌC ẨN
+
+0
+
+Van Tracker 003
+
+59C-99009 • MOCK-OBD-003
+
+Mất kết nối
+Tốc độ 0 km/h
+10.7338, 106.7312
+Cập nhật 34 phút trước
+
+Bus Tracker 002
+
+50F-77777 • MOCK-OBD-002
+
+Đang chạy
+Tốc độ 55.8 km/h
+10.8542, 106.7711
+Cập nhật 17 phút trước
+
+Tracker Sedan 001
+
+36E-04721 • TRACKER_001
+
+Đang chạy
+Tốc độ 42.5 km/h
+10.7758, 106.7010
+Cập nhật 18 phút trước
+
+Simulator UAT 001
+
+51H-12890 • sim-uat-001
+
+Đã dừng
+Tốc độ 0 km/h
+10.8790, 106.8091
+Cập nhật 21 phút trước
++
+−
+ Leaflet | © OpenStreetMap contributors
+Đường phố
+Vệ tinh
+Theo dõi xe
+Vùng giám sát
+
+Bus Tracker 002
+
+Đang chạy
+
+50F-77777 · MOCK-OBD-002 · Mien Dong Passenger Coop
+
+10.85422, 106.77114
+Cập nhật 17 phút trước
+
+TỐC ĐỘ
+
+55.8 km/h
+
+TUA MÁY
+
+0 rpm
+
+PIN
+
+--
+
+ẮC QUY
+
+88.8%
+
+NHIỆT ĐỘ MÁY
+
+92.4°C

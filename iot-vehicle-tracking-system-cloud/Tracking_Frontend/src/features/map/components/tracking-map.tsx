@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { useGeofences } from '@/features/geofences/hooks/use-geofences';
@@ -37,27 +37,25 @@ const FollowSelectedDevice = ({ device }: { device: DevicePosition | null }) => 
   return null;
 };
 
-const RevealSelectedDevice = ({
-  device,
-  geofenceWorkspaceOpen,
-}: {
-  device: DevicePosition | null;
-  geofenceWorkspaceOpen: boolean;
-}) => {
+const RevealSelectedDevice = ({ device }: { device: DevicePosition | null }) => {
   const map = useMap();
   const followMode = useMapStore((state) => state.followMode);
+  const previousDeviceIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (followMode || !device || !hasValidMapCoordinates(device)) {
+      previousDeviceIdRef.current = device?.deviceId ?? null;
       return;
     }
-    map.panInside([device.lat, device.lon], {
+    if (previousDeviceIdRef.current === device.deviceId) {
+      return;
+    }
+    previousDeviceIdRef.current = device.deviceId;
+    map.flyTo([device.lat, device.lon], Math.max(map.getZoom(), 14), {
       animate: true,
-      duration: 0.4,
-      paddingTopLeft: [340, 24],
-      paddingBottomRight: [geofenceWorkspaceOpen ? 420 : 24, 24],
+      duration: 0.55,
     });
-  }, [device, followMode, geofenceWorkspaceOpen, map]);
+  }, [device, followMode, map]);
 
   return null;
 };
@@ -254,7 +252,7 @@ export const TrackingMap = () => {
           geofenceWorkspaceOpen={geofenceWorkspaceOpen}
           onToggleGeofenceWorkspace={openWorkspace}
         />
-        <RevealSelectedDevice device={selectedDevice} geofenceWorkspaceOpen={geofenceWorkspaceOpen} />
+        <RevealSelectedDevice device={selectedDevice} />
         <FollowSelectedDevice device={selectedDevice} />
       </MapContainer>
 

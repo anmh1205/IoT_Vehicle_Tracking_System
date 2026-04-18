@@ -23,6 +23,23 @@ export const updateNotificationSchema = z.object({
   emailAlerts: z.boolean().optional(),
   pushAlerts: z.boolean().optional(),
   alertTypes: z.array(z.string()).optional(),
+  channels: z
+    .object({
+      discord: z
+        .object({
+          enabled: z.boolean().optional(),
+          webhookUrl: z.string().url('Invalid URL format').nullable().optional(),
+        })
+        .optional(),
+      telegram: z
+        .object({
+          enabled: z.boolean().optional(),
+          botToken: z.string().min(1, 'Telegram bot token is required').nullable().optional(),
+          chatId: z.string().min(1, 'Telegram chat ID is required').nullable().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 });
 
 export const createUserSchema = z.object({

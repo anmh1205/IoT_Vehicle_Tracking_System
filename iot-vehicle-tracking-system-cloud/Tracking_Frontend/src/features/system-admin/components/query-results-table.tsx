@@ -16,12 +16,11 @@ const renderCellValue = (value: unknown) => {
   }
 
   if (typeof value === 'object') {
-    const formatted = JSON.stringify(value, null, 2);
     return (
       <details className="max-w-[360px] text-xs">
         <summary className="cursor-pointer text-muted-foreground">Xem chi tiết</summary>
         <pre className="mt-2 max-h-48 overflow-auto rounded-md bg-muted/60 p-2 whitespace-pre-wrap">
-          {formatted}
+          {JSON.stringify(value, null, 2)}
         </pre>
       </details>
     );
@@ -42,6 +41,7 @@ export const QueryResultsTable = ({
     if (!firstRow) {
       return [];
     }
+
     return Object.keys(firstRow).map((key) => ({
       accessorKey: key,
       header: ({ column }) => <DataTableColumnHeader column={column} title={key} />,

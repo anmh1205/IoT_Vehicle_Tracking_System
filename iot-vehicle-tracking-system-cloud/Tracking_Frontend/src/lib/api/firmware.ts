@@ -43,10 +43,39 @@ export interface FirmwareDeployment {
   errorMessage: string | null;
 }
 
+const normalizeFirmwareRecord = (payload: any): FirmwareRecord => ({
+  id: Number(payload?.id ?? 0),
+  version: String(payload?.version ?? ''),
+  filename: String(payload?.filename ?? ''),
+  filePath: String(payload?.filePath ?? payload?.file_path ?? ''),
+  size: Number(payload?.size ?? 0),
+  description: payload?.description ? String(payload.description) : null,
+  isActive: Boolean(payload?.isActive ?? payload?.is_active),
+  createdAt: String(payload?.createdAt ?? payload?.created_at ?? ''),
+});
+
+const normalizeFirmwareList = (payload: any): FirmwareListResponse => {
+  const rows = Array.isArray(payload?.firmwares)
+    ? payload.firmwares
+    : Array.isArray(payload?.items)
+      ? payload.items
+      : [];
+
+  return {
+    firmwares: rows.map((row: any) => normalizeFirmwareRecord(row)),
+    total: Number(payload?.total ?? payload?.pagination?.total ?? rows.length),
+    page: Number(payload?.page ?? payload?.pagination?.page ?? 1),
+    limit: Number(payload?.limit ?? payload?.pagination?.limit ?? rows.length),
+  };
+};
+
 export const firmwareServices = {
   getList: (params?: Record<string, unknown>) =>
-    apiClient.get('/firmware', { params }).then((r) => unwrap<FirmwareListResponse>(r.data)),
-  getById: (id: number) => apiClient.get(`/firmware/${id}`).then((r) => unwrap<FirmwareRecord>(r.data)),
+    apiClient
+      .get('/firmware', { params })
+      .then((r) => normalizeFirmwareList(unwrap<any>(r.data))),
+  getById: (id: number) =>
+    apiClient.get(`/firmware/${id}`).then((r) => normalizeFirmwareRecord(unwrap<any>(r.data))),
   upload: (data: FormData | Record<string, unknown>) =>
     apiClient
       .post('/firmware/upload', data, {
@@ -55,14 +84,18 @@ export const firmwareServices = {
             ? { 'Content-Type': 'multipart/form-data' }
             : undefined,
       })
-      .then((r) => unwrap<FirmwareRecord>(r.data)),
+      .then((r) => normalizeFirmwareRecord(unwrap<any>(r.data))),
   create: (data: Record<string, unknown>) =>
-    apiClient.post('/firmware', data).then((r) => unwrap<FirmwareRecord>(r.data)),
+    apiClient.post('/firmware', data).then((r) => normalizeFirmwareRecord(unwrap<any>(r.data))),
   delete: (id: number) => apiClient.delete(`/firmware/${id}`).then((r) => unwrap<any>(r.data)),
   activate: (id: number) =>
-    apiClient.post(`/firmware/${id}/activate`).then((r) => unwrap<FirmwareRecord>(r.data)),
+    apiClient
+      .post(`/firmware/${id}/activate`)
+      .then((r) => normalizeFirmwareRecord(unwrap<any>(r.data))),
   deactivate: (id: number) =>
-    apiClient.post(`/firmware/${id}/deactivate`).then((r) => unwrap<FirmwareRecord>(r.data)),
+    apiClient
+      .post(`/firmware/${id}/deactivate`)
+      .then((r) => normalizeFirmwareRecord(unwrap<any>(r.data))),
   deploy: (id: number, data: { deviceIds: string[]; strategy: 'rolling' | 'all_at_once' }) =>
     apiClient.post(`/firmware/${id}/deploy`, data).then((r) => unwrap<any>(r.data)),
   getDeployments: (id: number) =>

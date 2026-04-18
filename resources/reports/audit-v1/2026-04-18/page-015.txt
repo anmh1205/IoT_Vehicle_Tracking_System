@@ -1,0 +1,12 @@
+ 
+- 
+Modal chi tiết của ticket cảnh báo này đang hơi hẹp, bố cục chưa hợp lý chỗ thừa 
+chỗ thiếu. cần bố cục lại 
+- 
+Mark trong phần này đang lỗi hiển thị 
+- 
+Giải quyết đang là tiếng anh, cần việt hoá phù hợp. cần có thêm giải thích lỗi, đề xuất 
+hướng giải quyết cho user. Làm lại sao cho uiux phù hợp 
+- 
+ 
+ 

@@ -1,12 +1,13 @@
 sequenceDiagram
-    participant Device as Tracker
+    participant Device as Thiết bị theo dõi
     participant Broker as EMQX
     participant Bridge as MQTT Bridge
-    participant API as Backend API
-    participant Dash as Dashboard
+    participant API as API phía máy chủ
+    participant Dash as Giao diện web
 
-    Device->>Broker: Publish telemetry
-    Broker->>Bridge: Forward topic
-    Bridge->>API: Push normalized event
-    Bridge->>Bridge: Persist metric/log
-    API-->>Dash: Realtime update (Socket.IO)
+    Device->>Broker: Gửi dữ liệu vận hành
+    Broker->>Bridge: Chuyển tiếp bản tin
+    Bridge->>API: Đẩy sự kiện chuẩn hóa
+    Bridge->>Bridge: Lưu số liệu đo/nhật ký
+    API-->>Dash: Cập nhật thời gian thực (Socket.IO)
+

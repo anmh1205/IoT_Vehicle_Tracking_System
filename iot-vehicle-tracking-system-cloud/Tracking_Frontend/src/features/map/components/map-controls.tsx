@@ -81,7 +81,7 @@ export const MapControls = ({
             size="sm"
             variant={followMode ? 'default' : 'outline'}
             onClick={toggleFollowMode}
-            className="h-9 px-3"
+            className="h-8 rounded-lg px-3 text-xs"
             aria-pressed={followMode}
           >
             <Waypoints className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -91,7 +91,7 @@ export const MapControls = ({
             size="sm"
             variant={geofenceWorkspaceOpen ? 'default' : 'outline'}
             onClick={onToggleGeofenceWorkspace}
-            className="h-9 px-3"
+            className="h-8 rounded-lg px-3 text-xs"
             aria-pressed={geofenceWorkspaceOpen}
           >
             <MapPinned className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -105,7 +105,7 @@ export const MapControls = ({
           <Button
             size="icon"
             variant="ghost"
-            className="h-10 w-10 sm:h-9 sm:w-9"
+            className="h-8 w-8 rounded-lg"
             onClick={fitAllBounds}
             aria-label="Hiển thị toàn bộ thiết bị"
           >
@@ -114,7 +114,7 @@ export const MapControls = ({
           <Button
             size="icon"
             variant="ghost"
-            className="h-10 w-10 sm:h-9 sm:w-9"
+            className="h-8 w-8 rounded-lg"
             onClick={flyToSelected}
             disabled={!selectedDeviceId}
             aria-label="Di chuyển đến thiết bị đã chọn"
@@ -124,7 +124,7 @@ export const MapControls = ({
           <Button
             size="icon"
             variant={showGeofences ? 'default' : 'ghost'}
-            className="h-10 w-10 sm:h-9 sm:w-9"
+            className="h-8 w-8 rounded-lg"
             onClick={toggleGeofences}
             aria-pressed={showGeofences}
             aria-label={showGeofences ? 'Ẩn lớp vùng giám sát' : 'Hiện lớp vùng giám sát'}

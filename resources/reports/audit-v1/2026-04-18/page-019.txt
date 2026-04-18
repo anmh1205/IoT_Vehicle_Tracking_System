@@ -1,0 +1,7 @@
+ 
+ 
+ 
+ 
+Phần firmware này uiux quá tệ. cần tái thiết, cấu trúc lại toàn bộ cho phù hợp. hãy nghiên 
+cứu học hỏi cách làm, uiux, tính năng từ project E:\anmh1205\IVM26 rồi lên kế hoạch, làm 
+lại cho trang này 

@@ -1,12 +1,19 @@
-flowchart TB
-    Admin["Dashboard Admin"] -->|1. Tạo lệnh OTA| API["Backend API"]
-    API -->|2. Tạo assignment| DB["PostgreSQL"]
-    API -->|3. Publish ota.assign| Bridge["MQTT Bridge"]
-    Bridge -->|4. devices/:id/ota/assign| Broker["EMQX"]
-    Broker -->|5. Deliver command| Device["Tracker"]
+sequenceDiagram
+    participant Admin as Quản trị viên hệ thống
+    participant API as API phía máy chủ
+    participant DB as PostgreSQL
+    participant Broker as EMQX
+    participant Device as Thiết bị theo dõi
+    participant Bridge as MQTT Bridge
 
-    Device -->|6. ota.progress| Broker
-    Broker -->|7. Forward progress| Bridge
-    Bridge -->|8. Persist status| DB
-    Bridge -->|9. Đẩy realtime| API
-    API -->|10. Cập nhật trạng thái| Admin
+    Admin->>API: 1. Tạo phiên OTA
+    API->>DB: 2. Tạo deployment + job
+    API->>Broker: 3. Publish ota_update vào topic commands của thiết bị
+    Broker-->>Device: 4. Chuyển lệnh OTA
+    Device->>Broker: 5. Gửi tiến trình vào v1/{device_id}/firmware
+    Broker->>Bridge: 6. Chuyển tiếp trạng thái firmware
+    Bridge->>DB: 7. Cập nhật firmware_update_log
+    Bridge->>Broker: 8. Publish internal/events/# khi cần realtime
+    Broker->>API: 9. Backend listener nhận sự kiện
+    API-->>Admin: 10. Cập nhật giao diện /ws
+

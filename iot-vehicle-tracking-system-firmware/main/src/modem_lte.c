@@ -1142,32 +1142,31 @@ esp_err_t modem_lte_connect(void) {
 }
 
 esp_err_t modem_lte_disconnect(void) {
-    if (!s_lte_connected) {
-        return ESP_OK;
+    esp_err_t err = ESP_OK;
+
+    if (s_lte_connected) {
+        err = modem_lte_send_simple("AT+CGACT=0,1\r", "OK", 10000);
     }
 
-    esp_err_t err = modem_lte_send_simple("AT+CGACT=0,1\r", "OK", 10000);
-    if (err == ESP_OK) {
-        s_lte_connected = false;
-        s_lte_initialized = false;
-        s_connect_requested = false;
-        s_cpin_diag_log_ms = 0;
-        s_cereg_diag_log_ms = 0;
-        s_rdy_diag_log_ms = 0;
-        s_at_sync_diag_log_ms = 0;
-        s_last_cereg_stat = -1;
-        s_state = MODEM_LTE_STATE_IDLE;
-        s_next_action_ms = 0;
-        s_state_deadline_ms = 0;
-        retry_state_reset(&s_lte_backoff_retry);
-        s_recover_attempts = 0;
-        s_cpin_soft_retry_count = 0;
-        s_last_hw_recover_ms = 0;
-        modem_lte_clear_rdy_token();
-        modem_lte_reset_at_sync_sweep();
-        (void)modem_lte_apply_at_sync_config();
-        s_last_err = ESP_OK;
-    }
+    s_lte_connected = false;
+    s_lte_initialized = false;
+    s_connect_requested = false;
+    s_cpin_diag_log_ms = 0;
+    s_cereg_diag_log_ms = 0;
+    s_rdy_diag_log_ms = 0;
+    s_at_sync_diag_log_ms = 0;
+    s_last_cereg_stat = -1;
+    s_state = MODEM_LTE_STATE_IDLE;
+    s_next_action_ms = 0;
+    s_state_deadline_ms = 0;
+    retry_state_reset(&s_lte_backoff_retry);
+    s_recover_attempts = 0;
+    s_cpin_soft_retry_count = 0;
+    s_last_hw_recover_ms = 0;
+    modem_lte_clear_rdy_token();
+    modem_lte_reset_at_sync_sweep();
+    (void)modem_lte_apply_at_sync_config();
+    s_last_err = ESP_OK;
     return err;
 }
 

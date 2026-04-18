@@ -5,19 +5,74 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { authServices } from '@/lib/api/auth';
+import {
+  authServices,
+  type NotificationSettings,
+  type UpdateNotificationSettingsInput,
+} from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { NotificationPrefs } from '@/features/settings/components/notification-prefs';
 import { PasswordForm } from '@/features/settings/components/password-form';
 import { ProfileForm } from '@/features/settings/components/profile-form';
 import { ThemeSelector } from '@/features/settings/components/theme-selector';
 
+const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
+  emailAlerts: true,
+  pushAlerts: true,
+  alertTypes: ['critical', 'high'],
+  channels: {
+    discord: {
+      enabled: false,
+      webhookUrl: null,
+    },
+    telegram: {
+      enabled: false,
+      botToken: null,
+      chatId: null,
+    },
+  },
+};
+
+const toEditableNotificationSettings = (settings?: NotificationSettings): NotificationSettings => ({
+  emailAlerts: settings?.emailAlerts ?? DEFAULT_NOTIFICATION_SETTINGS.emailAlerts,
+  pushAlerts: settings?.pushAlerts ?? DEFAULT_NOTIFICATION_SETTINGS.pushAlerts,
+  alertTypes: settings?.alertTypes?.length ? settings.alertTypes : [...DEFAULT_NOTIFICATION_SETTINGS.alertTypes],
+  channels: {
+    discord: {
+      enabled: settings?.channels.discord.enabled ?? DEFAULT_NOTIFICATION_SETTINGS.channels.discord.enabled,
+      webhookUrl: settings?.channels.discord.webhookUrl ?? null,
+    },
+    telegram: {
+      enabled: settings?.channels.telegram.enabled ?? DEFAULT_NOTIFICATION_SETTINGS.channels.telegram.enabled,
+      botToken: settings?.channels.telegram.botToken ?? null,
+      chatId: settings?.channels.telegram.chatId ?? null,
+    },
+  },
+});
+
+const toNotificationPayload = (settings: NotificationSettings): UpdateNotificationSettingsInput => ({
+  emailAlerts: settings.emailAlerts,
+  pushAlerts: settings.pushAlerts,
+  alertTypes: settings.alertTypes,
+  channels: {
+    discord: {
+      enabled: settings.channels.discord.enabled,
+      webhookUrl: settings.channels.discord.webhookUrl?.trim() ? settings.channels.discord.webhookUrl.trim() : null,
+    },
+    telegram: {
+      enabled: settings.channels.telegram.enabled,
+      botToken: settings.channels.telegram.botToken?.trim() ? settings.channels.telegram.botToken.trim() : null,
+      chatId: settings.channels.telegram.chatId?.trim() ? settings.channels.telegram.chatId.trim() : null,
+    },
+  },
+});
+
 const SettingsPage = () => {
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
   const setAuth = useAuthStore((state) => state.setAuth);
-  const [notifications, setNotifications] = useState({ emailAlerts: true, pushAlerts: true });
+  const [notifications, setNotifications] = useState<NotificationSettings>(DEFAULT_NOTIFICATION_SETTINGS);
   const [profileStatus, setProfileStatus] = useState<string | null>(null);
   const [passwordStatus, setPasswordStatus] = useState<string | null>(null);
   const [notificationStatus, setNotificationStatus] = useState<string | null>(null);
@@ -28,13 +83,7 @@ const SettingsPage = () => {
   });
 
   useEffect(() => {
-    const preferences = notificationSettings.data?.preferences as
-      | { emailAlerts?: boolean; pushAlerts?: boolean }
-      | undefined;
-    setNotifications({
-      emailAlerts: preferences?.emailAlerts ?? true,
-      pushAlerts: preferences?.pushAlerts ?? true,
-    });
+    setNotifications(toEditableNotificationSettings(notificationSettings.data?.preferences));
   }, [notificationSettings.data]);
 
   const profileDefaults = useMemo(
@@ -76,11 +125,11 @@ const SettingsPage = () => {
   });
 
   const notificationMutation = useMutation({
-    mutationFn: (payload: { emailAlerts: boolean; pushAlerts: boolean }) =>
-      authServices.updateNotificationSettings(payload),
+    mutationFn: (payload: NotificationSettings) => authServices.updateNotificationSettings(toNotificationPayload(payload)),
     onMutate: () => setNotificationStatus(null),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auth', 'notification-settings'] });
+    onSuccess: (result) => {
+      queryClient.setQueryData(['auth', 'notification-settings'], result);
+      setNotifications(toEditableNotificationSettings(result.preferences));
       setNotificationStatus('Tùy chọn thông báo đã được lưu.');
     },
     onError: () => {
@@ -138,7 +187,7 @@ const SettingsPage = () => {
             <CardHeader>
               <CardTitle>Tùy chọn thông báo</CardTitle>
               <CardDescription>
-                Chọn kênh cảnh báo phù hợp với vai trò điều phối và theo dõi sự cố.
+                Bật/tắt từng kênh cảnh báo theo quy trình vận hành của bạn.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

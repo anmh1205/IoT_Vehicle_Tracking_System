@@ -60,7 +60,7 @@ export interface DeviceCommand {
   response: string | null;
 }
 
-export type DeviceTrackingMetric = 'lat' | 'lon' | 'spd' | 'bb' | 'bt' | 'err' | 'vib';
+export type DeviceTrackingMetric = 'lat' | 'lon' | 'spd' | 'bb' | 'bt' | 'temp' | 'err' | 'vib';
 
 export interface DeviceTelemetryPoint {
   timestamp: string;
@@ -73,7 +73,10 @@ export interface DeviceTelemetryRow {
   longitude: number | null;
   speed: number | null;
   battery: number | null;
+  deviceBattery: number | null;
+  vehicleBattery: number | null;
   temperature: number | null;
+  engineTemperature: number | null;
   errorCode: number | null;
   vibration: number | null;
 }
@@ -81,6 +84,8 @@ export interface DeviceTelemetryRow {
 export interface DevicePositionSnapshot {
   deviceId: string;
   deviceName: string;
+  vehiclePlate?: string | null;
+  customerName?: string | null;
   latitude: number | null;
   longitude: number | null;
   speed: number | null;
@@ -88,8 +93,14 @@ export interface DevicePositionSnapshot {
   status: string;
   timestamp: string | null;
   battery: number | null;
+  deviceBattery: number | null;
+  vehicleBattery: number | null;
   vibration: number | null;
   temperature: number | null;
+  engineTemperature: number | null;
+  rpm: number | null;
+  activeAlertCount: number;
+  activeAlertTitles: string[];
 }
 
 export interface DeviceRawFeedRow {

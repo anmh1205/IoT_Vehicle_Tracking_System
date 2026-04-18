@@ -3,7 +3,6 @@
 import { useDeferredValue, useMemo, useState } from 'react';
 import { CircleCheckBig, CirclePlay, CircleX, Plus, Route } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
 import { StatCard } from '@/components/common/stat-card';
@@ -17,19 +16,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { customerServices } from '@/lib/api/customers';
 import { tripServices } from '@/lib/api/trips';
+import { vehicleServices } from '@/lib/api/vehicles';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { getTripColumns } from '@/features/trips/components/trip-columns';
 import { TripForm } from '@/features/trips/components/trip-form';
+import { TripPreviewDialog } from '@/features/trips/components/trip-preview-dialog';
 
 const PAGE_SIZE = 20;
+const LOOKUP_LIMIT = 100;
+
+type TripVehicleContext = {
+  vehicleId?: string | null;
+  customerId?: number | string | null;
+  plateNumber?: string | null;
+  deviceId?: string | null;
+};
+
+type TripCustomerContext = {
+  id?: number | string | null;
+  name?: string | null;
+};
 
 const TripsPage = () => {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any | null>(null);
   const [deleteItem, setDeleteItem] = useState<any | null>(null);
+  const [previewTripId, setPreviewTripId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'all' | 'planned' | 'in_progress' | 'completed' | 'cancelled'>('all');
@@ -45,6 +60,16 @@ const TripsPage = () => {
         search: deferredSearch || undefined,
         status: status === 'all' ? undefined : status,
       }),
+  });
+
+  const vehiclesQuery = useQuery({
+    queryKey: ['trip-vehicles'],
+    queryFn: () => vehicleServices.getList({ limit: LOOKUP_LIMIT }),
+  });
+
+  const customersQuery = useQuery({
+    queryKey: ['trip-customers'],
+    queryFn: () => customerServices.getList({ limit: LOOKUP_LIMIT }),
   });
 
   const createMutation = useMutation({
@@ -139,6 +164,48 @@ const TripsPage = () => {
   });
 
   const rows = useMemo(() => trips.data?.items ?? trips.data?.data?.items ?? [], [trips.data]);
+  const vehicles = useMemo<TripVehicleContext[]>(
+    () => (vehiclesQuery.data?.items ?? vehiclesQuery.data?.data?.items ?? []) as TripVehicleContext[],
+    [vehiclesQuery.data],
+  );
+  const customers = useMemo<TripCustomerContext[]>(
+    () => (customersQuery.data?.items ?? customersQuery.data?.data?.items ?? []) as TripCustomerContext[],
+    [customersQuery.data],
+  );
+  const vehicleById = useMemo(
+    () => new Map(vehicles.map((vehicle) => [String(vehicle.vehicleId), vehicle])),
+    [vehicles],
+  );
+  const customerById = useMemo(
+    () => new Map(customers.map((customer) => [Number(customer.id), customer])),
+    [customers],
+  );
+  const tableRows = useMemo(
+    () =>
+      rows.map((row: any) => {
+        const vehicle: TripVehicleContext | null = row.vehicleId
+          ? (vehicleById.get(String(row.vehicleId)) ?? null)
+          : null;
+        const customer: TripCustomerContext | null = vehicle?.customerId
+          ? (customerById.get(Number(vehicle.customerId)) ?? null)
+          : null;
+
+        return {
+          ...row,
+          vehiclePrimary: row.vehicleId
+            ? vehicle?.plateNumber
+              ? `${vehicle.plateNumber} - ${row.vehicleId}`
+              : row.vehicleId
+            : 'Chưa có xe',
+          vehicleSecondary: [customer?.name, row.deviceId ?? vehicle?.deviceId]
+            .filter(Boolean)
+            .join(' • '),
+          routeLabel: [row.startLocation, row.endLocation].filter(Boolean).join(' -> '),
+        };
+      }),
+    [customerById, rows, vehicleById],
+  );
+
   const pagination = trips.data?.pagination ?? trips.data?.data?.pagination;
   const stats = useMemo(
     () => ({
@@ -156,7 +223,7 @@ const TripsPage = () => {
   return (
     <PageContainer
       pageTitle="Chuyến đi"
-      pageDescription="Điều phối, theo dõi trạng thái và replay hành trình theo từng chuyến xe"
+      pageDescription="Đối chiếu danh sách chuyến đi với dữ liệu thực tế và mở replay map ngay từ bảng"
       pageHeaderAction={
         <Button
           onClick={() => {
@@ -178,6 +245,7 @@ const TripsPage = () => {
 
       <DataTable
         columns={getTripColumns({
+          onPreview: (row) => setPreviewTripId(row.id),
           onEdit: (row) => {
             setEditItem(row);
             setOpen(true);
@@ -188,12 +256,12 @@ const TripsPage = () => {
           startPendingId: startMutation.variables ?? null,
           endPendingId: endMutation.variables ?? null,
         })}
-        data={rows}
+        data={tableRows}
         pagination={false}
         isLoading={trips.isLoading}
         onRowClick={(row) => {
           if (!row?.id) return;
-          router.push(`/dashboard/operations/trips/${row.id}`);
+          setPreviewTripId(row.id);
         }}
         emptyTitle="Chưa có chuyến đi phù hợp"
         emptyDescription="Hãy tạo chuyến đi mới hoặc nới bộ lọc để xem lại các hành trình gần đây."
@@ -212,7 +280,7 @@ const TripsPage = () => {
                 setPage(1);
                 setSearch(event.target.value);
               }}
-              placeholder="Tìm theo mã chuyến, mã xe hoặc tài xế..."
+              placeholder="Tìm theo mã chuyến, xe, thiết bị, tài xế hoặc điểm đi/đến..."
               className="w-full md:min-w-[320px] md:max-w-[460px]"
             />
             <Select
@@ -268,6 +336,14 @@ const TripsPage = () => {
         onSubmit={(payload) => {
           if (editItem?.id) updateMutation.mutate({ id: editItem.id, payload });
           else createMutation.mutate(payload);
+        }}
+      />
+
+      <TripPreviewDialog
+        open={previewTripId !== null}
+        tripId={previewTripId}
+        onOpenChange={(value) => {
+          if (!value) setPreviewTripId(null);
         }}
       />
 

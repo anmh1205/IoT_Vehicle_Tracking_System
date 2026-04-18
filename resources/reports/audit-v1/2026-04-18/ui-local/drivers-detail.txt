@@ -1,0 +1,202 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Đội xe
+Thiết bị
+Phương tiện
+Tài xế
+Khách hàng
+Cảnh báo
+Nền tảng
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Đội xe
+Tài xế
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Tài xế
+
+Quản lý hồ sơ tài xế và trạng thái vận hành theo từng nhóm lái xe
+
+Thêm tài xế
+Tổng tài xế
+3
+Hoạt động trên trang
+2
+Ngưng hoạt động trên trang
+1
+Có GPLX
+3
+Tất cả trạng thái
+Cột hiển thị
+Mã tài xế
+	Họ tên	Số điện thoại	Số GPLX	Hạng GPLX	Ngữ cảnh phân công	Trạng thái	
+DRV-001	Nguyen Van Nam	0911000101	79B2-110011	B2	
+
+XE-TEST
+
+TRACKER_001 • 2 chuyến • Hoàn thành
+
+	Hoạt động	
+Chi tiết
+Sửa
+Xóa
+
+DRV-002	Tran Quoc Bao	0911000202	79D-220022	D	
+
+XE-BUS-77
+
+MOCK-OBD-002 • 1 chuyến • Đang chạy
+
+	Hoạt động	
+Chi tiết
+Sửa
+Xóa
+
+DRV-003	Le Minh Chau	0911000303	79B2-330033	B2	
+
+XE-SHIP-09
+
+MOCK-OBD-003 • 1 chuyến • Đã lên kế hoạch
+
+	Ngưng hoạt động	
+Chi tiết
+Sửa
+Xóa
+
+Trang 1 / 1. Hiển thị 3 hồ sơ trên tổng 3 tài xế.
+
+Trang trước
+Trang sau
+Chi tiết tài xế
+Hoạt động
+GPLX còn hạn 804 ngày
+
+Nguyen Van Nam
+
+Mã tài xế: DRV-001
+
+SỐ ĐIỆN THOẠI
+
+0911000101
+
+EMAIL
+
+drv.nam@fleet.local
+
+SỐ GPLX
+
+79B2-110011
+
+HẠNG GPLX
+
+B2
+
+Hồ sơ tài xế
+
+MỨC ĐẦY ĐỦ HỒ SƠ
+
+83%
+
+NGÀY SINH
+
+-
+
+NGÀY HẾT HẠN GPLX
+
+30/06/2028
+
+CẬP NHẬT GẦN NHẤT
+
+18/04/2026 20:27
+
+khoảng 1 giờ trước
+
+TẠO LÚC
+
+18/04/2026 20:27
+
+ID NỘI BỘ
+
+4
+
+Ngữ cảnh phân công hiện tại
+
+XE ĐANG PHỤ TRÁCH
+
+XE-TEST
+
+THIẾT BỊ GẦN NHẤT
+
+TRACKER_001
+
+TỔNG SỐ CHUYẾN
+
+2
+
+CHUYẾN ĐANG CHẠY
+
+0
+
+MÃ CHUYẾN GẦN NHẤT
+
+MOCK-TRIP-001
+
+TRẠNG THÁI CHUYẾN GẦN NHẤT
+
+Hoàn thành
+
+ĐIỂM ĐI GẦN NHẤT
+
+Thu Duc Warehouse
+
+ĐIỂM ĐẾN GẦN NHẤT
+
+District 1 Service Point
+
+Lịch sử chuyến gần đây
+
+Mã chuyến
+
+MOCK-TRIP-001
+
+Phương tiện
+
+XE-TEST
+
+Trạng thái
+
+Hoàn thành
+
+Bắt đầu
+
+17/04/2026 17:27
+
+Mã chuyến
+
+MOCK-TRIP-005
+
+Phương tiện
+
+XE-LOGI-01
+
+Trạng thái
+
+Hoàn thành
+
+Bắt đầu
+
+12/04/2026 18:27
+
+Ghi chú điều phối
+
+mock-audit
+
+Đóng

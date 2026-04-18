@@ -12,6 +12,15 @@ const VEHICLE_STATUS_LABELS: Record<string, string> = {
   retired: 'Ngưng khai thác',
 };
 
+const getCustomerLabel = (vehicle: any) => {
+  const parts = [vehicle?.customerName, vehicle?.customerCode].filter(Boolean);
+  if (parts.length > 0) {
+    return parts.join(' • ');
+  }
+
+  return vehicle?.customerId ? `Khách hàng #${vehicle.customerId}` : 'Chưa gán';
+};
+
 export const getVehicleColumns = (actions: {
   onEdit: (row: any) => void;
   onDelete: (row: any) => void;
@@ -27,10 +36,16 @@ export const getVehicleColumns = (actions: {
   { accessorKey: 'brand', header: 'Hãng xe', meta: { label: 'Hãng xe' } },
   { accessorKey: 'model', header: 'Dòng xe', meta: { label: 'Dòng xe' } },
   {
+    id: 'customer',
+    header: 'Khách hàng',
+    meta: { label: 'Khách hàng' },
+    cell: ({ row }) => getCustomerLabel(row.original),
+  },
+  {
     accessorKey: 'deviceId',
     header: 'Thiết bị gắn',
     meta: { label: 'Thiết bị gắn' },
-    cell: ({ row }) => row.original.deviceId ?? 'Chưa gán',
+    cell: ({ row }) => row.original.deviceId ?? 'Chưa gắn',
   },
   {
     accessorKey: 'status',

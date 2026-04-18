@@ -1,0 +1,62 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Bản đồ
+Chuyến đi
+Vùng giám sát
+Đội xe
+Cảnh báo
+Nền tảng
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Vận hành
+Vùng giám sát
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Vùng giám sát
+
+Quản lý geofence, trigger cảnh báo và danh sách phương tiện áp dụng
+
+Thêm vùng giám sát
+Tổng vùng giám sát
+3
+Hoạt động trên trang
+3
+Ngưng hoạt động trên trang
+0
+Tổng xe đã gán
+5
+Tất cả trạng thái
+Tất cả loại vùng
+Cột hiển thị
+Tên vùng
+	Loại	Kích hoạt	Số xe	Trạng thái	
+MOCK GF: Thu Duc Warehouse	Hình tròn	Cả hai chiều	2	Hoạt động	
+Chi tiết
+Quản lý xe
+Sửa
+Xóa
+
+MOCK GF: Mien Dong Depot	Đa giác	Khi vào	1	Hoạt động	
+Chi tiết
+Quản lý xe
+Sửa
+Xóa
+
+MOCK GF: Quan 7 Corridor	Hình chữ nhật	Khi ra	2	Hoạt động	
+Chi tiết
+Quản lý xe
+Sửa
+Xóa
+
+Trang 1 / 1. Hiển thị 3 vùng trên tổng 3 bản ghi.
+
+Trang trước
+Trang sau

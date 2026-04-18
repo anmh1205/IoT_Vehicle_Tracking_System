@@ -1,0 +1,68 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Đội xe
+Thiết bị
+Phương tiện
+Tài xế
+Khách hàng
+Cảnh báo
+Nền tảng
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Đội xe
+Phương tiện
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Phương tiện
+
+Quản lý danh sách phương tiện, trạng thái vận hành và thiết bị telemetry đang gắn
+
+Thêm phương tiện
+Tổng phương tiện
+4
+Đang hoạt động trên trang
+4
+Đang bảo trì trên trang
+0
+Ngưng hoạt động trên trang
+0
+Tất cả trạng thái
+Cột hiển thị
+Mã xe
+	Biển số	Hãng xe	Dòng xe	Khách hàng	Thiết bị gắn	Trạng thái	
+XE-LOGI-01	51H-12890	Hyundai	HD120	Dong Sai Gon Logistics • CUST-LOGI-001	sim-uat-001	Đang hoạt động	
+Chi tiết
+Gán thiết bị
+Sửa
+Xóa
+
+XE-BUS-77	50F-77777	Thaco	Town	Mien Dong Passenger Coop • CUST-BUS-002	MOCK-OBD-002	Đang hoạt động	
+Chi tiết
+Gán thiết bị
+Sửa
+Xóa
+
+XE-SHIP-09	59C-99009	Ford	Ranger	Dong Sai Gon Logistics • CUST-LOGI-001	MOCK-OBD-003	Đang hoạt động	
+Chi tiết
+Gán thiết bị
+Sửa
+Xóa
+
+XE-TEST	36E-04721	Honda	Civic	Dong Sai Gon Logistics • CUST-LOGI-001	TRACKER_001	Đang hoạt động	
+Chi tiết
+Gán thiết bị
+Sửa
+Xóa
+
+Trang 1 / 1. Hiển thị 4 phương tiện trên tổng 4 bản ghi.
+
+Trang trước
+Trang sau

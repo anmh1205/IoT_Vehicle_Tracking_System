@@ -4,6 +4,8 @@ export interface Vehicle {
   plate_number: string | null;
   device_id: string | null;
   customer_id: number | null;
+  customer_code?: string | null;
+  customer_name?: string | null;
   vehicle_type: string | null;
   brand: string | null;
   model: string | null;
@@ -30,6 +32,8 @@ export interface VehiclePublic {
   plateNumber: string | null;
   deviceId: string | null;
   customerId: number | null;
+  customerCode?: string | null;
+  customerName?: string | null;
   vehicleType: string | null;
   brand: string | null;
   model: string | null;
@@ -54,7 +58,7 @@ export interface CreateVehicleInput {
   vehicleId: string;
   plateNumber?: string;
   deviceId?: string;
-  customerId?: number;
+  customerId?: number | null;
   vehicleType?: string;
   brand?: string;
   model?: string;
@@ -79,6 +83,7 @@ export interface VehicleListQuery {
   limit?: number;
   status?: string;
   customerId?: number;
+  customerState?: 'assigned' | 'unassigned';
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';

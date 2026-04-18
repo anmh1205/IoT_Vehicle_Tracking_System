@@ -4,8 +4,19 @@ import { AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { DashboardEvent } from '@/features/dashboard/hooks/use-dashboard-stats';
 import { formatRelative } from '@/lib/utils/date/format';
+
+export interface RecentAlertItem {
+  id: string | number;
+  title: string;
+  message?: string | null;
+  severity?: string;
+  createdAt?: string | null;
+  vehiclePlate?: string | null;
+  vehicleId?: string | null;
+  deviceName?: string | null;
+  deviceId?: string | null;
+}
 
 const getSeverityVariant = (
   severity?: string,
@@ -19,11 +30,20 @@ const getSeverityVariant = (
   return 'outline';
 };
 
+const getSourceLabel = (alert: RecentAlertItem) => {
+  const vehicle = alert.vehiclePlate ?? alert.vehicleId;
+  const device = alert.deviceName ?? alert.deviceId;
+  if (vehicle && device) {
+    return `${vehicle} • ${device}`;
+  }
+  return vehicle ?? device ?? 'Chưa rõ nguồn cảnh báo';
+};
+
 export const RecentAlerts = ({
   alerts,
   isLoading,
 }: {
-  alerts: DashboardEvent[];
+  alerts: RecentAlertItem[];
   isLoading?: boolean;
 }) => {
   return (
@@ -46,16 +66,21 @@ export const RecentAlerts = ({
             {alerts.slice(0, 5).map((alert) => (
               <div key={String(alert.id)} className="rounded-lg border p-3">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-medium">{alert.eventType}</p>
+                  <div className="min-w-0">
+                    <p className="line-clamp-1 text-sm font-medium">{alert.title}</p>
+                    <p className="line-clamp-1 text-xs text-muted-foreground">
+                      {getSourceLabel(alert)}
+                    </p>
+                  </div>
                   <Badge variant={getSeverityVariant(alert.severity)}>
                     {alert.severity ?? 'thông tin'}
                   </Badge>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {alert.message || alert.deviceId || 'Không có nội dung'}
+                  {alert.message || 'Không có nội dung chi tiết'}
                 </p>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  {formatRelative(alert.serverTimestamp)}
+                  {formatRelative(alert.createdAt)}
                 </p>
               </div>
             ))}

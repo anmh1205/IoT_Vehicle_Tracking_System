@@ -1,22 +1,11 @@
 flowchart LR
-    subgraph MCU["ESP32-S3"]
-        SCL["GPIO48 - SCL"]
-        SDA["GPIO47 - SDA"]
-        INT["GPIO21 - INT1"]
-        VCC["3.3V"]
-        GND["GND"]
-    end
+    MCU["ESP32-S3"]
+    Bus["Bus I2C<br/>SCL + SDA"]
+    IMU["LIS3DSH<br/>Gia tốc 3 trục"]
+    IRQ["INT1 / GPIO wake<br/>Phát hiện rung động"]
+    Power["Nguồn 3.3V"]
 
-    subgraph IMU["LIS3DSH"]
-        I2CSCL["SCL"]
-        I2CSDA["SDA"]
-        I2CINT["INT1"]
-        IVCC["VDD"]
-        IGND["GND"]
-    end
-
-    SCL ----> I2CSCL
-    SDA ----> I2CSDA
-    INT ----> I2CINT
-    VCC --> IVCC
-    GND --> IGND
+    Power --> MCU
+    Power --> IMU
+    MCU -->|Cấu hình + đọc dữ liệu| Bus --> IMU
+    IMU -->|Ngắt chuyển động| IRQ --> MCU

@@ -17,6 +17,13 @@ const DRIVER_STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructi
   suspended: 'destructive',
 };
 
+const TRIP_STATUS_LABELS: Record<string, string> = {
+  planned: 'Đã lên kế hoạch',
+  in_progress: 'Đang chạy',
+  completed: 'Hoàn thành',
+  cancelled: 'Đã hủy',
+};
+
 export const getDriverColumns = (actions: {
   onDetail: (row: any) => void;
   onEdit: (row: any) => void;
@@ -33,19 +40,24 @@ export const getDriverColumns = (actions: {
   { accessorKey: 'licenseType', header: 'Hạng GPLX', meta: { label: 'Hạng GPLX' } },
   {
     id: 'assignment',
-    header: 'Liên kết xe',
-    meta: { label: 'Liên kết xe' },
+    header: 'Ngữ cảnh phân công',
+    meta: { label: 'Ngữ cảnh phân công' },
     cell: ({ row }) => {
       const assignment = row.original.assignment;
       if (!assignment || (assignment.tripCount ?? 0) === 0) {
-        return <span className="text-xs text-muted-foreground">Chưa có chuyến gần đây</span>;
+        return <span className="text-xs text-muted-foreground">Chưa ghi nhận chuyến nào</span>;
       }
+
+      const activeVehicle = assignment.activeVehicleId ?? assignment.latestVehicleId ?? 'Chưa gán xe';
+      const tripStatus =
+        TRIP_STATUS_LABELS[assignment.latestTripStatus ?? ''] ?? assignment.latestTripStatus ?? 'Không rõ';
 
       return (
         <div className="space-y-1 text-sm">
-          <p className="font-medium">{assignment.latestVehicleId ?? 'Chưa gán xe'}</p>
+          <p className="font-medium">{activeVehicle}</p>
           <p className="text-xs text-muted-foreground">
-            {(assignment.latestDeviceId ?? 'Chưa có thiết bị')} • {assignment.tripCount} chuyến
+            {assignment.latestDeviceId ?? assignment.activeDeviceId ?? 'Chưa có thiết bị'} •{' '}
+            {assignment.tripCount} chuyến • {tripStatus}
           </p>
         </div>
       );

@@ -1,10 +1,13 @@
 flowchart TB
     UI["Trang Next.js"]
     Client["TanStack Query + Zustand"]
-    API["Backend API"]
-    Data["PostgreSQL + VictoriaMetrics + Socket.IO"]
-    View["Ban do / bang / bieu do"]
+    API["API phía máy chủ"]
+    Socket["Socket.IO /ws"]
+    View["Bản đồ / bảng / biểu đồ"]
 
-    UI --> Client --> API --> Data
-    Client --> View
-    Data --> View
+    UI -->|Thao tác người dùng| Client
+    Client -->|REST request| API
+    API -->|REST response| Client
+    Client -->|Subscribe realtime| Socket
+    Socket -->|Telemetry / status push| Client
+    Client -->|State update một chiều| View

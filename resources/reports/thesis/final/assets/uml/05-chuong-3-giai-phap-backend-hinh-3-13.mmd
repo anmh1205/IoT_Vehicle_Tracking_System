@@ -1,27 +1,22 @@
 flowchart TB
     Bridge["MQTT Bridge"]
-    Split["Bộ điều phối lưu trữ"]
 
-    Bridge --> Split
-
-    subgraph Realtime["Luồng nóng - realtime"]
-        direction TB
-        RT["Pipeline realtime"]
-        VM["VictoriaMetrics"]
-        WS["Socket.IO"]
-        RT --> VM
-        RT --> WS
+    subgraph Durable["Luồng lưu trữ bền vững"]
+        direction LR
+        VictoriaMetricsNode["VictoriaMetrics"]
+        VictoriaLogsNode["VictoriaLogs"]
+        PostgreSQLNode["PostgreSQL"]
     end
 
-    subgraph Durable["Luồng bền - nghiệp vụ"]
-        direction TB
-        DV["Pipeline nghiệp vụ"]
-        API["Backend API"]
-        PG["PostgreSQL"]
-        DV --> API
-        DV --> PG
-        API --> PG
+    subgraph Realtime["Luồng thời gian thực"]
+        direction LR
+        Internal["internal/events/#"]
+        BackendRt["Backend realtime listener"]
+        Socket["Socket.IO /ws"]
+        Internal --> BackendRt --> Socket
     end
 
-    Split --> Realtime
-    Realtime --> Durable
+    Bridge --> VictoriaMetricsNode
+    Bridge --> VictoriaLogsNode
+    Bridge --> PostgreSQLNode
+    Bridge --> Internal

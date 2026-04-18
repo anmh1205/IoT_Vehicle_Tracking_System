@@ -1,11 +1,19 @@
 stateDiagram-v2
+    state "Đã giao" as Assigned
+    state "Đang tải" as Downloading
+    state "Khởi động lại" as Rebooting
+    state "Xác nhận" as Confirming
+    state "Thành công" as Success
+    state "Thất bại" as Failed
+    state "Quay lui" as RolledBack
+
     [*] --> Assigned
     Assigned --> Downloading
-    Downloading --> Rebooting: image OK
-    Downloading --> Failed: lỗi tải/hash
+    Downloading --> Rebooting: Ảnh firmware hợp lệ
+    Downloading --> Failed: Lỗi tải hoặc hash
     Rebooting --> Confirming
-    Confirming --> Success: app hợp lệ
-    Confirming --> RolledBack: lỗi xác nhận
+    Confirming --> Success: Ứng dụng hợp lệ
+    Confirming --> RolledBack: Lỗi xác nhận
     Success --> [*]
     Failed --> [*]
     RolledBack --> [*]

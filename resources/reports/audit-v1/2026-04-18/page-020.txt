@@ -1,0 +1,22 @@
+ 
+ 
+Phần quản trị hệ thống:  
+- 
+cần lại làm uiux phần này 
+- 
+chưa có trang quản trị đầy đủ để xem các metrics của victoriametrics 
+- 
+chưa có trang xem, quản trị posgressql 
+- 
+hoàn thiện tính năng đầy đủ cho mọi usercase có thể, và uiux phải nghiên cứu làm 
+cho tốt 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

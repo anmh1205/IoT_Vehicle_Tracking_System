@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { customerServices } from '@/lib/api/customers';
 import { deviceServices } from '@/lib/api/devices';
 import { vehicleServices } from '@/lib/api/vehicles';
 import { notificationUtils } from '@/lib/notification';
@@ -58,6 +59,11 @@ const VehiclesPage = () => {
     queryFn: () => deviceServices.getList({ limit: 100 }),
   });
 
+  const customers = useQuery({
+    queryKey: ['customers', 'vehicle-form-options'],
+    queryFn: () => customerServices.getList({ page: 1, limit: 100 }),
+  });
+
   const createMutation = useMutation({
     mutationFn: (payload: any) =>
       vehicleServices.create({
@@ -66,6 +72,7 @@ const VehiclesPage = () => {
         brand: payload.brand,
         model: payload.model,
         year: payload.year ? Number(payload.year) : undefined,
+        customerId: payload.customerId === 'none' ? undefined : Number(payload.customerId),
       }),
     onMutate: () => {
       setVehicleFormError(null);
@@ -97,6 +104,7 @@ const VehiclesPage = () => {
         brand: payload.brand,
         model: payload.model,
         year: payload.year ? Number(payload.year) : undefined,
+        customerId: payload.customerId === 'none' ? null : Number(payload.customerId),
       }),
     onMutate: () => {
       setVehicleFormError(null);
@@ -152,6 +160,7 @@ const VehiclesPage = () => {
   const rows = useMemo(() => vehicles.data?.items ?? vehicles.data?.data?.items ?? [], [vehicles.data]);
   const pagination = vehicles.data?.pagination ?? vehicles.data?.data?.pagination;
   const deviceRows = devices.data?.items ?? [];
+  const customerRows = customers.data?.items ?? customers.data?.data?.items ?? [];
   const stats = useMemo(
     () => ({
       total: pagination?.total ?? rows.length,
@@ -307,6 +316,7 @@ const VehiclesPage = () => {
           }
         }}
         defaultValues={editItem ?? undefined}
+        customers={customerRows}
         formError={vehicleFormError}
         fieldErrors={vehicleFieldErrors}
         onSubmit={(payload) => {

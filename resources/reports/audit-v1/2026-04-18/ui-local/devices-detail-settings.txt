@@ -1,0 +1,139 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Đội xe
+Thiết bị
+Phương tiện
+Tài xế
+Khách hàng
+Cảnh báo
+Nền tảng
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Đội xe
+Thiết bị
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Thiết bị
+
+Quản lý thiết bị IoT
+
+Thêm thiết bị
+Tổng thiết bị
+4
+Trực tuyến
+2
+50.0% hoạt động
+Đã dừng
+1
+Mất kết nối
+1
+25.0% toàn đội
+Bảng dữ liệu
+Chế độ thẻ
+Tất cả trạng thái
+Mới cập nhật
+Cột hiển thị
+Mã thiết bị
+	Tên thiết bị
+	Trạng thái	Cập nhật	Firmware	
+MOCK-OBD-002	Bus Tracker 002	Đang chạy	2 phút trước	v2.3.1	
+
+MOCK-OBD-003	Van Tracker 003	Mất kết nối	19 phút trước	v2.2.5	
+
+TRACKER_001	Tracker Sedan 001	Đang chạy	3 phút trước	v2.3.1	
+
+sim-uat-001	Simulator UAT 001	Tạm dừng	6 phút trước	v2.1.9	
+
+Hiển thị 4 / 4 bản ghi
+
+Trang 1 / 1
+Bus Tracker 002
+
+Bảng chi tiết thiết bị tracking gồm tổng quan, bản đồ lộ trình, phiên chạy, lỗi, lệnh và dữ liệu thô.
+
+Bus Tracker 002
+MOCK-OBD-002
+Đang chạy
+Đúng chu kỳ
+Cập nhật 2 phút trước
+Biển số 50F-77777
+
+Bản tin đang về gần sát chu kỳ cấu hình.
+
+IMEI
+
+-
+
+FIRMWARE
+
+v2.3.1
+
+CHU KỲ GỬI ĐÃ CẤU HÌNH
+
+33 phút
+
+KHOẢNG GỬI THỰC TẾ
+
+5 phút
+
+BẢN TIN MỚI NHẤT CÁCH ĐÂY
+
+10 phút
+
+TỌA ĐỘ GẦN NHẤT
+
+10.85422, 106.77114
+
+Tổng quan
+Lộ trình
+Mã lỗi
+Lệnh
+Dữ liệu thô
+Cài đặt
+Định danh thiết bị
+Tên thiết bị
+
+Tên hiển thị ở dashboard, modal chi tiết và bản đồ vận hành.
+
+Driving
+Chu kỳ gửi khi đang chạy (giây)
+
+Lưu vào server và đẩy xuống thiết bị qua command update_config.tracking_interval_s.
+
+Parking
+Chu kỳ gửi khi đỗ (giây)
+
+Lưu trong config parking để phân biệt nhịp chạy và nhịp đỗ.
+
+Heartbeat khi đỗ (giây)
+
+Dùng để giữ phiên cloud còn sống dù xe đang đứng yên trong thời gian dài.
+
+Alert
+Ngưỡng quá tốc độ (km/h)
+
+Giá trị dùng để cấu hình rule cảnh báo vận tốc phía thiết bị hoặc cloud.
+
+Ngưỡng rung
+
+Đồng bộ cả cột vibration threshold hiện có và config alerts để giữ logic nhất quán.
+
+Cảnh báo mất tín hiệu sau (giây)
+
+Mốc để phát hiện thiết bị im lặng quá lâu so với chu kỳ cấu hình.
+
+Lưu cấu hình
+Vùng nguy hiểm
+
+Xóa thiết bị sẽ loại khỏi bảng điều khiển và dừng toàn bộ thao tác quản trị liên quan.
+
+Xóa thiết bị
+Đóng

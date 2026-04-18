@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
-import { CalendarClock, CircleCheckBig, CircleOff, Wrench } from 'lucide-react';
+import { CalendarClock, CircleCheckBig, CircleOff, Plus, Wrench } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
 import { StatCard } from '@/components/common/stat-card';
@@ -22,67 +22,53 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { alertServices } from '@/lib/api/alerts';
+import { alertServices, isObdMaintenanceAlert, localizeAlertForDisplay } from '@/lib/api/alerts';
+import { customerServices } from '@/lib/api/customers';
 import { maintenanceServices } from '@/lib/api/maintenance';
+import { vehicleServices } from '@/lib/api/vehicles';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { formatDateTime, formatNumber } from '@/lib/utils/date/format';
 import { MaintenanceCalendar } from '@/features/maintenance/components/maintenance-calendar';
+import { MaintenanceForm } from '@/features/maintenance/components/maintenance-form';
 import { MileageForecaster } from '@/features/maintenance/components/mileage-forecaster';
-
-const STATUS_LABELS: Record<string, string> = {
-  scheduled: 'Đã lên lịch',
-  in_progress: 'Đang xử lý',
-  completed: 'Hoàn tất',
-  cancelled: 'Đã hủy',
-};
-
-const STATUS_BADGE_VARIANTS: Record<
-  string,
-  'default' | 'secondary' | 'destructive' | 'outline'
-> = {
-  scheduled: 'outline',
-  in_progress: 'default',
-  completed: 'secondary',
-  cancelled: 'destructive',
-};
-
-const MAINTENANCE_TYPE_LABELS: Record<string, string> = {
-  oil_change: 'Thay dầu',
-  tire_rotation: 'Đảo lốp',
-  tire_replacement: 'Thay lốp',
-  inspection: 'Kiểm tra định kỳ',
-  battery: 'Ắc quy',
-  brake: 'Phanh',
-  engine: 'Động cơ',
-};
+import {
+  MAINTENANCE_STATUS_BADGE_VARIANTS,
+  MAINTENANCE_STATUS_LABELS,
+  MAINTENANCE_TYPE_OPTIONS,
+  createMaintenancePrefillFromAlert,
+  formatMaintenanceDescription,
+  formatMaintenanceTitle,
+  getMaintenanceTypeLabel,
+} from '@/features/maintenance/maintenance-meta';
 
 const PAGE_SIZE = 50;
+const LOOKUP_LIMIT = 100;
+
+type MaintenanceVehicleContext = {
+  vehicleId?: string | null;
+  customerId?: number | string | null;
+  plateNumber?: string | null;
+  deviceId?: string | null;
+};
+
+type MaintenanceCustomerContext = {
+  id?: number | string | null;
+  name?: string | null;
+};
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Tất cả trạng thái' },
-  { value: 'scheduled', label: STATUS_LABELS.scheduled },
-  { value: 'in_progress', label: STATUS_LABELS.in_progress },
-  { value: 'completed', label: STATUS_LABELS.completed },
-  { value: 'cancelled', label: STATUS_LABELS.cancelled },
+  { value: 'scheduled', label: MAINTENANCE_STATUS_LABELS.scheduled },
+  { value: 'in_progress', label: MAINTENANCE_STATUS_LABELS.in_progress },
+  { value: 'completed', label: MAINTENANCE_STATUS_LABELS.completed },
+  { value: 'cancelled', label: MAINTENANCE_STATUS_LABELS.cancelled },
 ] as const;
 
 const TYPE_OPTIONS = [
   { value: 'all', label: 'Tất cả loại bảo trì' },
-  ...Object.entries(MAINTENANCE_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+  ...MAINTENANCE_TYPE_OPTIONS,
 ] as const;
-
-const isObdMaintenanceAlert = (item: any): boolean => {
-  const text = `${String(item?.title ?? '')} ${String(item?.message ?? '')}`.toLowerCase();
-  return (
-    item?.alertType === 'maintenance_due' &&
-    (text.includes('obd') ||
-      text.includes('coolant') ||
-      text.includes('voltage') ||
-      text.includes('idle-load') ||
-      text.includes('channel'))
-  );
-};
 
 const OBD_SEVERITY_LABELS: Record<string, string> = {
   low: 'Thấp',
@@ -98,62 +84,16 @@ const OBD_SEVERITY_BADGE_CLASS: Record<string, string> = {
   critical: 'bg-red-100 text-red-700',
 };
 
-const localizeObdAlertTitle = (title: string): string => {
-  const normalized = title.toLowerCase();
-
-  if (normalized.includes('idle-load anomaly')) {
-    return 'OBD: Bất thường không tải';
-  }
-  if (normalized.includes('coolant risk pattern')) {
-    return 'OBD: Rủi ro nhiệt độ nước làm mát';
-  }
-  if (normalized.includes('channel unstable')) {
-    return 'OBD: Kênh kết nối không ổn định';
-  }
-  if (normalized.includes('voltage risk under load')) {
-    return 'OBD: Rủi ro điện áp khi tải cao';
-  }
-
-  return title;
-};
-
-const localizeObdAlertMessage = (message: string): string => {
-  const idleLoadMatch = message.match(
-    /^RPM\s+([\d.]+)\s+while speed\s+([\d.]+)\s+km\/h\s+for\s+([\d.]+)\s+minutes\.?$/i,
-  );
-  if (idleLoadMatch) {
-    return `Vòng tua ${idleLoadMatch[1]} khi tốc độ ${idleLoadMatch[2]} km/h trong ${idleLoadMatch[3]} phút.`;
-  }
-
-  const coolantMatch = message.match(
-    /^Coolant\s+([\d.]+)C\s+with engine load\s+([\d.]+)%\s+sustained at runtime\.?$/i,
-  );
-  if (coolantMatch) {
-    return `Nhiệt độ nước làm mát ${coolantMatch[1]}°C với tải động cơ ${coolantMatch[2]}% trong lúc vận hành.`;
-  }
-
-  const channelMatch = message.match(
-    /^OBD connect\/init failed\s+([\d.]+)\s+times in the last 5 minutes\.?$/i,
-  );
-  if (channelMatch) {
-    return `Kết nối/khởi tạo OBD thất bại ${channelMatch[1]} lần trong 5 phút gần nhất.`;
-  }
-
-  const voltageMatch = message.match(
-    /^Battery top\s+([\d.]+)V\s+while engine load\s+([\d.]+)%\.?$/i,
-  );
-  if (voltageMatch) {
-    return `Điện áp ắc quy chính ${voltageMatch[1]}V khi tải động cơ ${voltageMatch[2]}%.`;
-  }
-
-  return message;
-};
+const toIsoDateTime = (value: string) => (value ? new Date(value).toISOString() : undefined);
+const toIsoDate = (value: string) => (value ? new Date(`${value}T00:00:00`).toISOString() : undefined);
 
 const MaintenancePage = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [day, setDay] = useState<Date | undefined>(new Date());
   const [tab, setTab] = useState('list');
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createDefaults, setCreateDefaults] = useState<Record<string, string> | undefined>(undefined);
   const [filters, setFilters] = useState({
     page: 1,
     status: 'all',
@@ -172,6 +112,16 @@ const MaintenancePage = () => {
   const maint = useQuery({
     queryKey: ['maintenance', queryParams],
     queryFn: () => maintenanceServices.getList(queryParams),
+  });
+
+  const vehiclesQuery = useQuery({
+    queryKey: ['maintenance-vehicles'],
+    queryFn: () => vehicleServices.getList({ limit: LOOKUP_LIMIT }),
+  });
+
+  const customersQuery = useQuery({
+    queryKey: ['maintenance-customers'],
+    queryFn: () => customerServices.getList({ limit: LOOKUP_LIMIT }),
   });
 
   const statsQuery = useQuery({
@@ -207,6 +157,38 @@ const MaintenancePage = () => {
       }),
   });
 
+  const createMutation = useMutation({
+    mutationFn: (payload: any) =>
+      maintenanceServices.create({
+        vehicleId: payload.vehicleId,
+        maintenanceType: payload.maintenanceType,
+        title: payload.title.trim(),
+        description: payload.description.trim() || undefined,
+        scheduledDate: toIsoDateTime(payload.scheduledDate),
+        mileageAtService: payload.mileageAtService ? Number(payload.mileageAtService) : undefined,
+        nextServiceMileage: payload.nextServiceMileage ? Number(payload.nextServiceMileage) : undefined,
+        nextServiceDate: toIsoDate(payload.nextServiceDate),
+        cost: payload.cost ? Number(payload.cost) : undefined,
+        serviceProvider: payload.serviceProvider.trim() || undefined,
+        notes: payload.notes.trim() || undefined,
+      }),
+    onSuccess: async () => {
+      setCreateOpen(false);
+      setCreateDefaults(undefined);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['maintenance'] }),
+        queryClient.invalidateQueries({ queryKey: ['alerts', 'obd-maintenance-recommendations'] }),
+      ]);
+      notificationUtils.success('Đã tạo phiếu bảo trì', 'Phiếu mới đã được thêm vào lịch điều phối.');
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error(
+        'Tạo lịch bảo trì thất bại',
+        getApiErrorMessage(error, 'Không thể tạo phiếu bảo trì mới.'),
+      );
+    },
+  });
+
   const updateMutation = useMutation({
     mutationFn: ({ id, ...payload }: any) => maintenanceServices.update(id, payload),
     onSuccess: () => {
@@ -221,6 +203,15 @@ const MaintenancePage = () => {
   });
 
   const rows = useMemo(() => maint.data?.items ?? maint.data?.data?.items ?? [], [maint.data]);
+  const vehicles = useMemo<MaintenanceVehicleContext[]>(
+    () => (vehiclesQuery.data?.items ?? vehiclesQuery.data?.data?.items ?? []) as MaintenanceVehicleContext[],
+    [vehiclesQuery.data],
+  );
+  const customers = useMemo<MaintenanceCustomerContext[]>(
+    () =>
+      (customersQuery.data?.items ?? customersQuery.data?.data?.items ?? []) as MaintenanceCustomerContext[],
+    [customersQuery.data],
+  );
   const pagination = maint.data?.pagination ?? {
     page: filters.page,
     limit: PAGE_SIZE,
@@ -228,9 +219,96 @@ const MaintenancePage = () => {
     totalPages: 1,
   };
 
+  const vehicleById = useMemo(
+    () => new Map(vehicles.map((vehicle) => [String(vehicle.vehicleId), vehicle])),
+    [vehicles],
+  );
+  const customerById = useMemo(
+    () => new Map(customers.map((customer) => [Number(customer.id), customer])),
+    [customers],
+  );
+  const vehicleByPlate = useMemo(
+    () =>
+      new Map(
+        vehicles
+          .filter((vehicle) => vehicle.plateNumber)
+          .map((vehicle) => [String(vehicle.plateNumber).trim().toLowerCase(), vehicle]),
+      ),
+    [vehicles],
+  );
+  const vehicleByDeviceId = useMemo(
+    () =>
+      new Map(
+        vehicles
+          .filter((vehicle) => vehicle.deviceId)
+          .map((vehicle) => [String(vehicle.deviceId).trim().toLowerCase(), vehicle]),
+      ),
+    [vehicles],
+  );
+
+  const resolveVehicleContext = (item: any): MaintenanceVehicleContext | null => {
+    const byId = item?.vehicleId ? (vehicleById.get(String(item.vehicleId)) ?? null) : null;
+    if (byId) {
+      return byId;
+    }
+
+    const plateKey = String(item?.vehiclePlate ?? '').trim().toLowerCase();
+    if (plateKey) {
+      const byPlate = vehicleByPlate.get(plateKey) ?? null;
+      if (byPlate) {
+        return byPlate;
+      }
+    }
+
+    const deviceKey = String(item?.deviceId ?? '').trim().toLowerCase();
+    if (deviceKey) {
+      return vehicleByDeviceId.get(deviceKey) ?? null;
+    }
+
+    return null;
+  };
+
+  const tableRows = useMemo(
+    () =>
+      rows.map((row: any) => {
+        const vehicle: MaintenanceVehicleContext | null = row.vehicleId
+          ? (vehicleById.get(String(row.vehicleId)) ?? null)
+          : null;
+        const customer: MaintenanceCustomerContext | null = vehicle?.customerId
+          ? (customerById.get(Number(vehicle.customerId)) ?? null)
+          : null;
+        const primary = row.vehicleId
+          ? vehicle?.plateNumber
+            ? `${vehicle.plateNumber} - ${row.vehicleId}`
+            : row.vehicleId
+          : 'Chưa có phương tiện';
+        const secondary = [customer?.name, vehicle?.deviceId].filter(Boolean).join(' • ');
+        const displayTitle = formatMaintenanceTitle(row);
+        const displayDescription = formatMaintenanceDescription(row);
+
+        return {
+          ...row,
+          displayTitle,
+          displayDescription,
+          vehiclePrimary: primary,
+          vehicleSecondary: secondary,
+          vehicleSearch: [
+            row.vehicleId,
+            vehicle?.plateNumber,
+            vehicle?.deviceId,
+            customer?.name,
+            row.title,
+          ]
+            .filter(Boolean)
+            .join(' '),
+        };
+      }),
+    [customerById, rows, vehicleById],
+  );
+
   const dueSoon = useMemo(
     () =>
-      [...rows]
+      [...tableRows]
         .filter((row: any) => row.status === 'scheduled' || row.status === 'in_progress')
         .sort((a: any, b: any) => {
           const left = new Date(a.scheduledDate ?? a.nextServiceDate ?? a.createdAt).getTime();
@@ -238,17 +316,49 @@ const MaintenancePage = () => {
           return left - right;
         })
         .slice(0, 3),
-    [rows],
+    [tableRows],
   );
 
   const obdRecommendations = useMemo(() => {
     const items = obdAlertQuery.data?.items ?? obdAlertQuery.data?.data?.items ?? [];
-    return items.filter(isObdMaintenanceAlert).slice(0, 3).map((item: any) => ({
-      ...item,
-      title: localizeObdAlertTitle(String(item.title ?? 'Cảnh báo bảo trì OBD')),
-      message: item.message == null ? null : localizeObdAlertMessage(String(item.message)),
-    }));
-  }, [obdAlertQuery.data]);
+
+    return items
+      .filter(isObdMaintenanceAlert)
+      .slice(0, 3)
+      .map((item: any) => {
+        const localized = localizeAlertForDisplay(item);
+        const resolvedVehicle = resolveVehicleContext(localized);
+        const resolvedVehicleId = String(
+          localized.vehicleId ?? resolvedVehicle?.vehicleId ?? '',
+        ).trim();
+        const resolvedCustomer = resolvedVehicle?.customerId
+          ? (customerById.get(Number(resolvedVehicle.customerId)) ?? null)
+          : null;
+        const vehiclePlate = resolvedVehicle?.plateNumber ?? localized.vehiclePlate ?? null;
+        const vehiclePrimary = resolvedVehicleId
+          ? vehiclePlate
+            ? `${vehiclePlate} - ${resolvedVehicleId}`
+            : resolvedVehicleId
+          : vehiclePlate ?? 'Chưa có phương tiện';
+        const vehicleSecondary = [
+          localized.customerName ?? resolvedCustomer?.name,
+          localized.deviceName ?? localized.deviceId ?? resolvedVehicle?.deviceId,
+        ]
+          .filter(Boolean)
+          .join(' • ');
+
+        return {
+          ...localized,
+          resolvedVehicleId: resolvedVehicleId || null,
+          vehicleId: resolvedVehicleId || localized.vehicleId || null,
+          displayTitle:
+            localized.displayTitle ?? localized.title ?? 'Cảnh báo bảo trì OBD',
+          displayMessage: localized.displayMessage ?? localized.message ?? null,
+          vehiclePrimary,
+          vehicleSecondary: vehicleSecondary || null,
+        };
+      });
+  }, [customerById, obdAlertQuery.data, resolveVehicleContext]);
 
   const getActionConfig = (row: any) => {
     if (row.status === 'scheduled') {
@@ -271,23 +381,40 @@ const MaintenancePage = () => {
 
   const columns: ColumnDef<any>[] = [
     {
-      accessorKey: 'vehicleId',
+      accessorKey: 'vehicleSearch',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Phương tiện" />,
+      cell: ({ row }) => (
+        <div>
+          <p className="font-medium">{row.original.vehiclePrimary}</p>
+          {row.original.vehicleSecondary ? (
+            <p className="text-xs text-muted-foreground">{row.original.vehicleSecondary}</p>
+          ) : null}
+        </div>
+      ),
     },
     {
       accessorKey: 'title',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Hạng mục" />,
+      cell: ({ row }) => (
+        <div>
+          <p className="font-medium">{row.original.displayTitle}</p>
+          {row.original.displayDescription ? (
+            <p className="text-xs text-muted-foreground line-clamp-2">
+              {row.original.displayDescription}
+            </p>
+          ) : null}
+        </div>
+      ),
     },
     {
       accessorKey: 'maintenanceType',
       header: 'Loại',
-      cell: ({ row }) =>
-        MAINTENANCE_TYPE_LABELS[row.original.maintenanceType] ?? row.original.maintenanceType,
+      cell: ({ row }) => getMaintenanceTypeLabel(row.original.maintenanceType),
     },
     {
       accessorKey: 'status',
       header: 'Trạng thái',
-      cell: ({ row }) => STATUS_LABELS[row.original.status] ?? row.original.status,
+      cell: ({ row }) => MAINTENANCE_STATUS_LABELS[row.original.status] ?? row.original.status,
     },
     {
       accessorKey: 'scheduledDate',
@@ -324,7 +451,18 @@ const MaintenancePage = () => {
   return (
     <PageContainer
       pageTitle="Bảo trì"
-      pageDescription="Lập lịch, theo dõi và đẩy trạng thái bảo trì phương tiện"
+      pageDescription="Lập lịch, theo dõi và điều phối bảo trì phương tiện theo đúng ngữ cảnh xe và cảnh báo"
+      pageHeaderAction={
+        <Button
+          onClick={() => {
+            setCreateDefaults(undefined);
+            setCreateOpen(true);
+          }}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Tạo lịch bảo trì
+        </Button>
+      }
     >
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
@@ -437,14 +575,17 @@ const MaintenancePage = () => {
           {dueSoon.map((item: any) => (
             <Card key={item.id}>
               <CardContent className="space-y-2 p-4">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Ưu tiên gần nhất
-                </p>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Ưu tiên gần nhất</p>
                 <div>
-                  <p className="text-sm font-medium">{item.title}</p>
+                  <p className="text-sm font-medium">{item.displayTitle}</p>
                   <p className="text-xs text-muted-foreground">
-                    {item.vehicleId} ·{' '}
-                    {MAINTENANCE_TYPE_LABELS[item.maintenanceType] ?? item.maintenanceType}
+                    {item.vehiclePrimary} • {getMaintenanceTypeLabel(item.maintenanceType)}
+                  </p>
+                  {item.vehicleSecondary ? (
+                    <p className="text-xs text-muted-foreground">{item.vehicleSecondary}</p>
+                  ) : null}
+                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                    {item.displayDescription}
                   </p>
                 </div>
                 <p className="text-sm">
@@ -463,7 +604,7 @@ const MaintenancePage = () => {
               <div>
                 <p className="text-sm font-medium">Khuyến nghị từ OBD</p>
                 <p className="text-xs text-muted-foreground">
-                  Các cảnh báo bảo trì đang hoạt động được sinh tự động từ chẩn đoán OBD.
+                  Tạo phiếu trực tiếp từ cảnh báo để giữ ngữ cảnh xe, km và lý do bảo trì.
                 </p>
               </div>
               <Button
@@ -480,9 +621,7 @@ const MaintenancePage = () => {
               {obdRecommendations.map((item: any) => (
                 <div key={item.id} className="rounded-lg border bg-muted/20 px-3 py-2.5">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Bảo trì OBD
-                    </p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Bảo trì OBD</p>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                         OBD_SEVERITY_BADGE_CLASS[String(item.severity ?? 'medium')] ??
@@ -492,13 +631,27 @@ const MaintenancePage = () => {
                       {OBD_SEVERITY_LABELS[String(item.severity ?? 'medium')] ?? 'Trung bình'}
                     </span>
                   </div>
-                  <p className="mt-1 text-sm font-semibold">{item.title}</p>
+                  <p className="mt-1 text-sm font-semibold">{item.displayTitle}</p>
                   <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
-                    {item.message ?? 'Không có mô tả chi tiết từ nguồn cảnh báo.'}
+                    {item.displayMessage ?? 'Không có mô tả chi tiết từ nguồn cảnh báo.'}
                   </p>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Phát sinh: {formatDateTime(item.createdAt, 'dd/MM/yyyy HH:mm')}
-                  </p>
+                  <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                    <p>Xe: {item.vehiclePrimary}</p>
+                    <p>Phát sinh: {formatDateTime(item.createdAt, 'dd/MM/yyyy HH:mm')}</p>
+                    {item.vehicleSecondary ? <p>{item.vehicleSecondary}</p> : null}
+                  </div>
+                  <div className="mt-3 flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setCreateDefaults(createMaintenancePrefillFromAlert(item));
+                        setCreateOpen(true);
+                      }}
+                    >
+                      Tạo phiếu
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -508,9 +661,15 @@ const MaintenancePage = () => {
 
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
         <TabsList className="grid h-auto w-full grid-cols-3">
-          <TabsTrigger value="list" className="text-xs sm:text-sm">Danh sách</TabsTrigger>
-          <TabsTrigger value="calendar" className="text-xs sm:text-sm">Lịch</TabsTrigger>
-          <TabsTrigger value="forecast" className="text-xs sm:text-sm">Dự báo km</TabsTrigger>
+          <TabsTrigger value="list" className="text-xs sm:text-sm">
+            Danh sách
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="text-xs sm:text-sm">
+            Lịch
+          </TabsTrigger>
+          <TabsTrigger value="forecast" className="text-xs sm:text-sm">
+            Dự báo km
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="list" className="space-y-3">
@@ -526,12 +685,11 @@ const MaintenancePage = () => {
                   </div>
                 </div>
               ))
-            ) : rows.length > 0 ? (
-              rows.map((row: any) => {
+            ) : tableRows.length > 0 ? (
+              tableRows.map((row: any) => {
                 const action = getActionConfig(row);
-                const typeLabel =
-                  MAINTENANCE_TYPE_LABELS[row.maintenanceType] ?? row.maintenanceType ?? 'Khác';
-                const statusLabel = STATUS_LABELS[row.status] ?? row.status ?? 'Chưa xác định';
+                const statusLabel =
+                  MAINTENANCE_STATUS_LABELS[row.status] ?? row.status ?? 'Chưa xác định';
 
                 return (
                   <Card
@@ -542,12 +700,18 @@ const MaintenancePage = () => {
                     <CardContent className="space-y-3 p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold">{row.title}</p>
+                          <p className="text-sm font-semibold">{row.displayTitle}</p>
                           <p className="mt-1 text-xs text-muted-foreground">
-                            {row.vehicleId ?? 'Chưa có phương tiện'} · {typeLabel}
+                            {row.vehiclePrimary} • {getMaintenanceTypeLabel(row.maintenanceType)}
+                          </p>
+                          {row.vehicleSecondary ? (
+                            <p className="text-xs text-muted-foreground">{row.vehicleSecondary}</p>
+                          ) : null}
+                          <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                            {row.displayDescription}
                           </p>
                         </div>
-                        <Badge variant={STATUS_BADGE_VARIANTS[row.status] ?? 'outline'}>
+                        <Badge variant={MAINTENANCE_STATUS_BADGE_VARIANTS[row.status] ?? 'outline'}>
                           {statusLabel}
                         </Badge>
                       </div>
@@ -566,9 +730,7 @@ const MaintenancePage = () => {
                             Mốc km
                           </p>
                           <p className="mt-1 font-medium">
-                            {row.nextServiceMileage
-                              ? `${formatNumber(row.nextServiceMileage)} km`
-                              : '-'}
+                            {row.nextServiceMileage ? `${formatNumber(row.nextServiceMileage)} km` : '-'}
                           </p>
                         </div>
                       </div>
@@ -605,16 +767,16 @@ const MaintenancePage = () => {
           <div className="hidden sm:block">
             <DataTable
               columns={columns}
-              data={rows}
-              searchKey="vehicleId"
-              searchPlaceholder="Tìm phương tiện..."
+              data={tableRows}
+              searchKey="vehicleSearch"
+              searchPlaceholder="Tìm xe, biển số, thiết bị hoặc khách hàng..."
               isLoading={maint.isLoading}
               onRowClick={(row) => router.push(`/dashboard/attention/maintenance/${row.id}`)}
             />
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-muted-foreground">
-              Trang {pagination.page} / {pagination.totalPages || 1} · {pagination.total} lịch bảo trì
+              Trang {pagination.page} / {pagination.totalPages || 1} • {pagination.total} lịch bảo trì
             </p>
             <div className="flex gap-2">
               <Button
@@ -640,18 +802,30 @@ const MaintenancePage = () => {
         </TabsContent>
 
         <TabsContent value="calendar">
-          {tab === 'calendar' ? (
-            <MaintenanceCalendar day={day} onDayChange={setDay} rows={rows} />
-          ) : null}
+          {tab === 'calendar' ? <MaintenanceCalendar day={day} onDayChange={setDay} rows={tableRows} /> : null}
         </TabsContent>
 
         <TabsContent value="forecast">
-          {tab === 'forecast' ? <MileageForecaster rows={rows} /> : null}
+          {tab === 'forecast' ? <MileageForecaster rows={tableRows} /> : null}
         </TabsContent>
       </Tabs>
+
+      <MaintenanceForm
+        open={createOpen}
+        defaultValues={createDefaults}
+        vehicles={vehicles}
+        customers={customers}
+        isPending={createMutation.isPending}
+        onOpenChange={(value) => {
+          setCreateOpen(value);
+          if (!value) {
+            setCreateDefaults(undefined);
+          }
+        }}
+        onSubmit={(payload) => createMutation.mutate(payload)}
+      />
     </PageContainer>
   );
 };
 
 export default MaintenancePage;
-

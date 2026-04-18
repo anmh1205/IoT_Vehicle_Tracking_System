@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +8,7 @@ import { EmptyState } from '@/components/common/empty-state';
 import { Progress } from '@/components/ui/progress';
 import { formatDateTime, formatDuration, formatRelative } from '@/lib/utils/date/format';
 import { ResponsiveContainer, Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
+import { useMap } from 'react-leaflet';
 
 const MapContainer = dynamic(() => import('react-leaflet').then((m) => m.MapContainer), {
   ssr: false,
@@ -44,6 +46,50 @@ const InfoRow = ({
   </div>
 );
 
+const TripViewportSync = ({
+  pathPoints,
+  movingPoint,
+}: {
+  pathPoints: [number, number][];
+  movingPoint: [number, number] | null;
+}) => {
+  const map = useMap();
+  const fittedRef = useRef(false);
+  const boundsKey = useMemo(
+    () => pathPoints.map(([lat, lon]) => `${lat.toFixed(5)},${lon.toFixed(5)}`).join('|'),
+    [pathPoints],
+  );
+
+  useEffect(() => {
+    if (pathPoints.length === 0) {
+      fittedRef.current = false;
+      return;
+    }
+
+    if (!fittedRef.current) {
+      if (pathPoints.length === 1) {
+        map.setView(pathPoints[0], Math.max(map.getZoom(), 14), { animate: true });
+      } else {
+        map.fitBounds(pathPoints, {
+          padding: [28, 28],
+          maxZoom: 14,
+        });
+      }
+      fittedRef.current = true;
+    }
+  }, [boundsKey, map, pathPoints]);
+
+  useEffect(() => {
+    if (!movingPoint) {
+      return;
+    }
+
+    map.panTo(movingPoint, { animate: true, duration: 0.45 });
+  }, [map, movingPoint]);
+
+  return null;
+};
+
 export const TripDetail = ({
   trip,
   summary: _summary,
@@ -68,6 +114,9 @@ export const TripDetail = ({
     Number.isFinite(Number(endPoint?.lat)) && Number.isFinite(Number(endPoint?.lon));
   const hasMovingCoordinates =
     Number.isFinite(Number(moving?.lat)) && Number.isFinite(Number(moving?.lon));
+  const movingPoint = hasMovingCoordinates
+    ? ([Number(moving.lat), Number(moving.lon)] as [number, number])
+    : null;
   const peakPoint =
     points.reduce<any | null>(
       (candidate, point) =>
@@ -156,15 +205,12 @@ export const TripDetail = ({
               </div>
             ) : (
               <MapContainer
-                center={
-                  hasMovingCoordinates
-                    ? [Number(moving.lat), Number(moving.lon)]
-                    : pathPoints[0] ?? [10.762622, 106.660172]
-                }
+                center={movingPoint ?? pathPoints[0] ?? [10.762622, 106.660172]}
                 zoom={12}
                 className="h-full w-full"
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <TripViewportSync pathPoints={pathPoints} movingPoint={movingPoint} />
                 {pathPoints.length > 1 ? (
                   <Polyline positions={pathPoints} pathOptions={{ color: '#0ea5e9', weight: 5 }} />
                 ) : null}

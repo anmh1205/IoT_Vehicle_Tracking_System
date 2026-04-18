@@ -1,0 +1,385 @@
+
+===== PAGE 1 =====
+Sửa lỗi gắn xe với thiết bị rồi, nhưng phần thiết bị vẫn báo chưa gán. Tiện kiểm tra luôn 
+toàn bộ tính năng luồng gán khách hàng & tài xế với xe 
+ 
+Cảnh báo gần đây không có, mặc dù đang có nhiều cảnh báo lỗi từ dtc odb. Dòng hoạt 
+động thời gian thực: cần làm formal lại, title của các sự kiện nên viết theo dạng nhãn tốt 
+hơn, nội dung cần giải thích theo tiếng việt và thông tin cần ý nghĩa hơn 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 2 =====
+Vận hành / bản đồ: 
+ 
+- 
+Bỏ đi ô hiển thị thông tin khi chọn vào xe bên slidebar vì nó đang trùng hoạt động với 
+thanh bên đáy ô map 
+- 
+Khi click chọn 1 device nó chưa focus (như khi nhấn nút “Theo dõi xe”) 
+- 
+Thanh bên dưới: pin -> ắc quy. Pin là pin, ắc quy là ắc quy. Thay ô hướng để hiển thị 
+điẹn áp pin. Thứ tự hiển thị nên là tốc độ , tua máy, pin, ắc quy, nhiệt độ máy, toạ độ, 
+thời gian cập nhật (tìm cách để có thể hiển thị đầy đủ các thông tin này: có thể là 
+hiển thị 2 hàng hoặc cách khác tốt hơn). Các biểu tượng cảnh báo ở phía cuối sẽ 
+sáng màu đỏ khi có cảnh báo tương ứng với lỗi, và khi để trỏ chuột vào icon nào thì 
+sẽ có phần text nổi lên hiển thị đó là lỗi gì 
+- 
+Đồng bộ kích thước của 2 nút theo dõi xe/ vùng giám sát theo kích thước của đường 
+phố/vệ tinh 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 3 =====
+tạo vùng giám sát: đang bị tràn text, uiux chưa tốt. bán kính nên để đơn vị km, ranger từ 
+1 đến không giới hạn, thanh kéo cũng vậy. tối ưu cho khoảng cách 1 đến 500km kéo dễ 
+dàng. Có thêm tính năng chọn tâm bằng cách chấm điểm trên map 
+ 
+Tạo vùng bán kính/dùng xe đã chọn đang hơi rối 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 4 =====
+ 
+ 
+Chuyến đi đang chưa khớp với data đang có. Nên tích hợp phần này và replay 1 cách 
+phù hợp vào map: ví dụ click vào 1 chuyến đi thì mở modal có map như phần map của 
+modal thiết bị 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 5 =====
+ 
+ 
+Phần này cần hoàn thiện tính năng, check conflig với data 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 6 =====
+Phần modal chi tiết thiết bị: 
+- 
+Phần tab tổng quan: nên thêm khi để trỏ chuột vào ô thì sẽ hiển thị thông tin giải 
+thích thông số  
+ 
+- 
+Biểu đồ runtime gần đây có vẻ không cần thiết 
+- 
+Tab lộ trình và phiên chạy có vẻ đang bị trùng tính năng, cần gộp một cách hợp lý vào 
+tab lộ trình 
+ 
+ 
+
+===== PAGE 7 =====
+ 
+- 
+Phần hiển thị Pin / nhiệt độ: rõ ràng hoá pin và ắc quy. Nhiệt độ là nhiệt độ động cơ 
+không thể đánh đồng vào phần này 
+- 
+Firmware chưa có thông tin, có thể kiểm tra code firmware xem nó có khai báo 
+thông tin này gửi về chưa 
+- 
+Biển số, khách hàng đang lỗi mặc dù đã gán 
+- 
+Chu kì gửi cấu hình tại sao lại là 33p, liệu có sai sót gì không, nó là gì 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 8 =====
+ 
+- 
+Không dùng từ độ tươi bản tin, dùng từ khác nghe hay hơn hợp lý hơn 
+- 
+Nhịp quan sát là gì? Quá khó hiểu 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 9 =====
+ 
+ 
+- 
+Readiness chưa complete catalyst là gì?? Nói rõ ràng hơn. Mà có thể dùng tiếng việt 
+chuẩn, dùng “chưa complete không ổn. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 10 =====
+ 
+ 
+- 
+Đổi từ độ tươi, mà tại sao lại là 3p, đấy là thông tin khoảng cách bản tin hiện tại hay 
+gì 
+- 
+Lại có khái niệm nhịp quan sát, đổi từ khác tốt hơn. 
+- 
+Ô hiển thị map chiều cao đang quá ít. Có thể thu gọn bớt các stats card để lấy chỗ 
+- 
+Nghiên cứu uiux theo cách tốt hơn, hiện tại đang phải dùng cuộn chuột quá nhiều. 
+có thể để modal to hơn, hoặc 95% màn hình. Ô map phần lớn diện tích bên phải, 
+bên trái dùng để hiển thị các nút thông tin. Có thể nghiên cứu uiux theo bố cục của 
+ảnh bên dưới, làm cuộc “cách mạng” lại  toàn bộ uiux của modal detail device: 
+ 
+
+===== PAGE 11 =====
+ 
+Modal detail device: 
+- 
+Kiểm tra tab mã lỗi và lệnh xem hoạt động chưa, nếu hoạt động mà chưa có data thì 
+mock thêm để kiểm tra và audit uiux 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 12 =====
+ 
+Device detail modal:  
+- 
+Uiux cần làm tốt hơn, các phần trên quá dài khiến ô xem danh sách bản ghi bị hẹp 
+- 
+Các bản ghi: cần hiển thị theo dạng bảng matrix, có tên mã, giải thích, giá trị tương 
+ứng để dễ xem hơn 
+- 
+Tab cài đặt: tính năng cài đặt chu kì đã hoạt động đúng chưa – tôi thấy là chưa, đang 
+conflic: ví dụ như ở bên tab khác đang hiển thị chu kì cấu hình này là 33 phút. Và 
+theo firmware, sẽ có các trạng thái chạy như: driving, parking, alert thì phải có cấu 
+hình thời gian tương ứng, và phải hoạt động thật (từ cloud xuống firmware,  end to 
+end 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 13 =====
+Kiểm tra tính năng và uiux của tất cả phần phương tiện, tài xế, khách hàng 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 14 =====
+ 
+- 
+Cách cảnh báo này chưa hiển thị của thiết bị nào, xe nào 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 15 =====
+ 
+- 
+Modal chi tiết của ticket cảnh báo này đang hơi hẹp, bố cục chưa hợp lý chỗ thừa 
+chỗ thiếu. cần bố cục lại 
+- 
+Mark trong phần này đang lỗi hiển thị 
+- 
+Giải quyết đang là tiếng anh, cần việt hoá phù hợp. cần có thêm giải thích lỗi, đề xuất 
+hướng giải quyết cho user. Làm lại sao cho uiux phù hợp 
+- 
+ 
+ 
+
+===== PAGE 16 =====
+ 
+ 
+ 
+ Phần bảo trì này uiux chưa phù hợp, rối, cần tái thiết lại. tính năng chưa hoạt động đầy đủ, 
+phù hợp với hệ thống. cần nghiên cứu hoàn thiện lại 
+Chưa có hiển thị 
+ 
+
+===== PAGE 17 =====
+ 
+ 
+ 
+Thông báo đang chưa hiển thị là của thiết bị nào, xe nào 
+ 
+ 
+ 
+
+===== PAGE 18 =====
+ 
+Nền tảng: cần hiển thị nhiều thông tin cần thiết hơn của cac service trong hệ thống. hiện tại 
+quá sơ sài 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 19 =====
+ 
+ 
+ 
+ 
+Phần firmware này uiux quá tệ. cần tái thiết, cấu trúc lại toàn bộ cho phù hợp. hãy nghiên 
+cứu học hỏi cách làm, uiux, tính năng từ project E:\anmh1205\IVM26 rồi lên kế hoạch, làm 
+lại cho trang này 
+
+===== PAGE 20 =====
+ 
+ 
+Phần quản trị hệ thống:  
+- 
+cần lại làm uiux phần này 
+- 
+chưa có trang quản trị đầy đủ để xem các metrics của victoriametrics 
+- 
+chưa có trang xem, quản trị posgressql 
+- 
+hoàn thiện tính năng đầy đủ cho mọi usercase có thể, và uiux phải nghiên cứu làm 
+cho tốt 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+===== PAGE 21 =====
+ 
+Phần thông báo: thêm tính năng thêm kênh thông báo discord và bot telegram. Fe có nút 
+bật và khi bật có nút điền, thông tin sẽ lưu vào bảng db postgreslq. Nghiên cứu kĩ rồi lên kế 
+hoạch, hoàn thiện tính năng 
+ 

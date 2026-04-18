@@ -11,6 +11,8 @@ const sanitizeVehicle = (v: Vehicle): VehiclePublic => ({
   plateNumber: v.plate_number,
   deviceId: v.device_id,
   customerId: v.customer_id,
+  customerCode: v.customer_code ?? null,
+  customerName: v.customer_name ?? null,
   vehicleType: v.vehicle_type,
   brand: v.brand,
   model: v.model,

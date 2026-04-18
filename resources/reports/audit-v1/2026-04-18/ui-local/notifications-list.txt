@@ -1,0 +1,211 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Đội xe
+Cảnh báo
+Hàng đợi
+Bảo trì
+Vi phạm
+Thông báo
+Nền tảng
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Cảnh báo
+Thông báo
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Thông báo
+
+Lọc, phân loại và xử lý thông báo theo từng đợt công việc
+
+Đánh dấu tất cả đã đọc
+Tổng thông báo
+78
+Chưa đọc
+76
+Cảnh báo
+77
+Hệ thống
+0
+Tìm thông báo
+Loại
+Tất cả loại
+Trạng thái đọc
+Tất cả
+Từ ngày
+Đến ngày
+Đặt lại
+
+Hàng đợi xử lý thông báo
+
+Hiển thị 1-20 / 78 thông báo, còn 76 mục chưa đọc.
+
+Làm mới
+Cảnh báo
+Mới
+khoảng 2 giờ trước
+MOCK ALERT: Brake maintenance due soon
+Mileage crossed warning threshold
+Xe 50F-77777 · Thiết bị Bus Tracker 002
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 2 giờ trước
+MOCK ALERT: Harsh braking detected
+Short harsh braking event
+Xe 36E-04721 · Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Geofence
+khoảng 2 giờ trước
+MOCK ALERT: Vehicle exited warehouse perimeter
+Vehicle moved outside assigned radius
+Xe 59C-99009 · Thiết bị Van Tracker 003
+Ẩn
+Cảnh báo
+Mới
+khoảng 2 giờ trước
+OBD: DTC P0500
+P0500 (stored/pending, MIL on). Inspect vehicle speed sensor, ABS ECU signal, and related wiring.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 2 giờ trước
+OBD: DTC P0118
+P0118 (stored/permanent, MIL on). Inspect coolant temperature sensor, connector, and signal circuit.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 2 giờ trước
+OBD: DTC P0101
+P0101 (stored/pending, MIL on). Inspect MAF sensor, air filter, intake path, and related wiring.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 2 giờ trước
+OBD: Voltage risk under load
+Battery top 11.97V while engine load 55.0%.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+khoảng 2 giờ trước
+MOCK ALERT: Speed threshold exceeded
+Speed exceeded by 17 km/h
+Xe 50F-77777 · Thiết bị Bus Tracker 002
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: Voltage risk under load
+Battery top 11.98V while engine load 82.0%.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: DTC P0174
+P0174 (pending, MIL on). Kiểm tra rò khí nạp, MAF và áp suất nhiên liệu.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: DTC P0133
+P0133 (stored, MIL on). Kiểm tra cảm biến O2, heater và wiring.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: DTC P0420
+P0420 (permanent, MIL on). Kiểm tra catalyst và chuỗi cảm biến O2 trước/sau catalyst.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: DTC P0171
+P0171 (stored, MIL on). Kiểm tra rò khí nạp, MAF và áp suất nhiên liệu.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: DTC P0301
+P0301 (stored, MIL on). Kiểm tra misfire, bugi, cuộn đánh lửa và kim phun; hạn chế tải cao cho tới khi xử lý.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: DTC P0300
+P0300 (permanent, MIL on). Kiểm tra misfire, bugi, cuộn đánh lửa và kim phun; hạn chế tải cao cho tới khi xử lý.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: DTC P0304
+P0304 (pending, MIL on). Kiểm tra misfire, bugi, cuộn đánh lửa và kim phun; hạn chế tải cao cho tới khi xử lý.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: Voltage risk under load
+Battery top 11.96V while engine load 55.0%.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: DTC P0133
+P0133 (stored, MIL on). Kiểm tra cảm biến O2, heater và wiring.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: DTC P0174
+P0174 (pending, MIL on). Kiểm tra rò khí nạp, MAF và áp suất nhiên liệu.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+Cảnh báo
+Mới
+khoảng 3 giờ trước
+OBD: DTC P0171
+P0171 (stored, MIL on). Kiểm tra rò khí nạp, MAF và áp suất nhiên liệu.
+Thiết bị Tracker Sedan 001
+Đọc
+Ẩn
+
+Trang 1 / 4
+
+Trang trước
+Trang sau

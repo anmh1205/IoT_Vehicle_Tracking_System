@@ -39,6 +39,7 @@ const toErrorCodes = (
   };
 };
 const getErrorType = (row: DeviceErrorCode): ErrorTypeFilter => {
+  if (/^[PCBU][0-9A-F]{4}$/i.test(row.errorName)) return 'warning';
   if (row.errorCode >= 500) return 'critical';
   if (row.errorCode >= 200) return 'warning';
   return 'info';

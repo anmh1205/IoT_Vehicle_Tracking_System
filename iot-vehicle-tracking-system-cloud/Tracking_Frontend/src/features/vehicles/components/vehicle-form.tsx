@@ -12,11 +12,37 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+type VehicleFormValues = {
+  vehicleId: string;
+  plateNumber: string;
+  brand: string;
+  model: string;
+  year: string;
+  customerId: string;
+};
+
+const EMPTY_FORM: VehicleFormValues = {
+  vehicleId: '',
+  plateNumber: '',
+  brand: '',
+  model: '',
+  year: '',
+  customerId: 'none',
+};
 
 export const VehicleForm = ({
   open,
   onOpenChange,
   defaultValues,
+  customers,
   formError,
   fieldErrors,
   onSubmit,
@@ -24,21 +50,16 @@ export const VehicleForm = ({
   open: boolean;
   onOpenChange: (value: boolean) => void;
   defaultValues?: any;
+  customers?: Array<{ id: number; name?: string | null; customerCode?: string | null }>;
   formError?: string | null;
   fieldErrors?: Record<string, string>;
-  onSubmit: (values: any) => void;
+  onSubmit: (values: VehicleFormValues) => void;
 }) => {
-  const [form, setForm] = useState({
-    vehicleId: '',
-    plateNumber: '',
-    brand: '',
-    model: '',
-    year: '',
-  });
+  const [form, setForm] = useState<VehicleFormValues>(EMPTY_FORM);
 
   useEffect(() => {
     if (!defaultValues) {
-      setForm({ vehicleId: '', plateNumber: '', brand: '', model: '', year: '' });
+      setForm(EMPTY_FORM);
       return;
     }
 
@@ -48,6 +69,7 @@ export const VehicleForm = ({
       brand: defaultValues.brand ?? defaultValues.make ?? '',
       model: defaultValues.model ?? '',
       year: defaultValues.year ? String(defaultValues.year) : '',
+      customerId: defaultValues.customerId ? String(defaultValues.customerId) : 'none',
     });
   }, [defaultValues]);
 
@@ -55,16 +77,18 @@ export const VehicleForm = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>
-            {defaultValues?.id ? 'Cập nhật phương tiện' : 'Thêm phương tiện'}
-          </DialogTitle>
+          <DialogTitle>{defaultValues?.id ? 'Cập nhật phương tiện' : 'Thêm phương tiện'}</DialogTitle>
           <DialogDescription>
-            Nhập thông tin nhận diện cơ bản để quản lý phương tiện trong hệ thống.
+            Nhập thông tin nhận diện cơ bản và gán đúng khách hàng sở hữu cho phương tiện.
           </DialogDescription>
         </DialogHeader>
 
         {formError ? (
-          <p role="alert" aria-live="polite" className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p
+            role="alert"
+            aria-live="polite"
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
             {formError}
           </p>
         ) : null}
@@ -98,9 +122,7 @@ export const VehicleForm = ({
               autoCapitalize="characters"
               spellCheck={false}
               className={fieldErrors?.plateNumber ? 'border-destructive focus-visible:ring-destructive' : undefined}
-              onChange={(event) =>
-                setForm((state) => ({ ...state, plateNumber: event.target.value }))
-              }
+              onChange={(event) => setForm((state) => ({ ...state, plateNumber: event.target.value }))}
             />
             {fieldErrors?.plateNumber ? (
               <p role="alert" aria-live="polite" className="text-sm text-destructive">
@@ -156,6 +178,34 @@ export const VehicleForm = ({
             {fieldErrors?.model ? (
               <p role="alert" aria-live="polite" className="text-sm text-destructive">
                 {fieldErrors.model}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="vehicle-customer">Khách hàng sở hữu</Label>
+            <Select
+              value={form.customerId}
+              onValueChange={(value) => setForm((state) => ({ ...state, customerId: value }))}
+            >
+              <SelectTrigger
+                id="vehicle-customer"
+                className={fieldErrors?.customerId ? 'border-destructive focus-visible:ring-destructive' : undefined}
+              >
+                <SelectValue placeholder="Chọn khách hàng" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Chưa gán khách hàng</SelectItem>
+                {(customers ?? []).map((customer) => (
+                  <SelectItem key={customer.id} value={String(customer.id)}>
+                    {customer.name ?? customer.customerCode ?? `Khách hàng #${customer.id}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {fieldErrors?.customerId ? (
+              <p role="alert" aria-live="polite" className="text-sm text-destructive">
+                {fieldErrors.customerId}
               </p>
             ) : null}
           </div>

@@ -98,6 +98,30 @@ CREATE TRIGGER trigger_notification_preferences_updated_at
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- -----------------------------------------------------------------------------
+-- notification_states
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS notification_states (
+    id BIGSERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    alert_id BIGINT NOT NULL REFERENCES alerts(id) ON DELETE CASCADE,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    read_at TIMESTAMPTZ,
+    hidden_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, alert_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_notification_states_user_id ON notification_states(user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_states_alert_id ON notification_states(alert_id);
+CREATE INDEX IF NOT EXISTS idx_notification_states_user_read ON notification_states(user_id, is_read);
+CREATE INDEX IF NOT EXISTS idx_notification_states_user_hidden ON notification_states(user_id, hidden_at);
+
+CREATE TRIGGER trigger_notification_states_updated_at
+    BEFORE UPDATE ON notification_states
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- -----------------------------------------------------------------------------
 -- fcm_tokens (push notification tokens, soft delete via deleted_at)
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS fcm_tokens (

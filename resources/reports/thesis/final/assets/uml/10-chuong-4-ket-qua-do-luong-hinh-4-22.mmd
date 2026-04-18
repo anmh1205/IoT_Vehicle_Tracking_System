@@ -1,17 +1,17 @@
 flowchart TB
-    subgraph Inputs["Nguon du lieu thu nghiem"]
+    subgraph Inputs["Nguồn dữ liệu thử nghiệm"]
         direction LR
-        Bench["Bench test phan cung"]
-        Vehicle["Xe thu nghiem"]
+        Bench["Bàn thử phần cứng"]
+        Vehicle["Xe thử nghiệm"]
     end
 
-    Network["Mang 4G / Wi-Fi test"]
-    Cloud["EMQX + Bridge + Backend"]
+    Network["Mạng 4G / Wi-Fi thử nghiệm"]
+    Cloud["EMQX + Bridge + API"]
 
     subgraph Outputs["Quan sat ket qua"]
         direction LR
-        Dashboard["Dashboard + Grafana"]
-        Report["Do thi + log"]
+        Dashboard["Giao diện web + Grafana"]
+        Report["Đồ thị + log"]
     end
 
     Inputs --> Network --> Cloud --> Outputs

@@ -1,12 +1,17 @@
 flowchart TB
-    Source["Nguon xe 12V/24V"]
-    Main["Nhanh chinh<br/>Buck 5V -> rail 3.3V / 4V"]
-    Backup["Nhanh du phong<br/>TP4056 -> pin 18650 -> boost 5V"]
-    Runtime["Rail runtime / diode OR"]
-    Loads["MCU + IMU + Modem"]
-    Fsm["Power FSM"]
+    Vehicle["Ắc quy xe 12V/24V"]
+    Main5["MP2482<br/>Bus 5V chính"]
+    LDO3v3["AP2112-3.3<br/>Rail 3.3V logic"]
+    Modem4V["TPS54231<br/>Rail ~4V modem"]
+    Charger["TP5100<br/>Sạc pin 18650 1S"]
+    Backup5["SX1308<br/>Nhánh 5V dự phòng"]
+    ORing["Diode OR + FSM nguồn"]
+    Load["Tải hệ thống<br/>ESP32-S3 + SIM7600 + ngoại vi"]
 
-    Source --> Main --> Runtime --> Loads
-    Source --> Backup --> Runtime
-    Fsm -. dieu khien .-> Main
-    Fsm -. uu tien nguon .-> Runtime
+    Vehicle --> Main5
+    Main5 --> LDO3v3
+    Main5 --> Modem4V
+    Main5 --> Charger --> Backup5
+    Main5 --> ORing
+    Backup5 --> ORing
+    ORing --> Load

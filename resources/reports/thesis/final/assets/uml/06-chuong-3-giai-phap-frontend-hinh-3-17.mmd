@@ -1,12 +1,14 @@
 flowchart TB
+    Screen["Trang tổng quan"]
     Header["Thanh đầu<br/>Lọc · Đồng bộ · Hồ sơ"]
-    Main["Không gian dashboard"]
-    Sidebar["Sidebar ngắn gọn<br/>Danh sách xe"]
+    Main["Không gian tổng quan"]
+    Sidebar["Thanh bên ngắn gọn<br/>Danh sách xe"]
     MapPanel["Khu bản đồ"]
-    WidgetPanel["Khu widget"]
+    WidgetPanel["Khu tiện ích"]
     AlertFeed["Luồng cảnh báo"]
 
-    Header --> Main
+    Screen --> Header
+    Screen --> Main
     Main --> Sidebar
     Main --> MapPanel
     Main --> WidgetPanel

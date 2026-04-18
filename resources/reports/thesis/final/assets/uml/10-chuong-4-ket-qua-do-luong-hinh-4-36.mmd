@@ -1,10 +1,14 @@
 flowchart TB
-    Operator["Operator<br/>chon lenh tu Dashboard"]
-    UI["Dashboard<br/>tao yeu cau dieu khien"]
-    API["Backend API<br/>xac thuc + luu lenh"]
-    Bridge["MQTT Bridge<br/>publish lenh den tracker"]
-    Device["Tracker<br/>nhan lenh va thuc thi"]
-    Ack["ACK / ket qua<br/>tra ve Dashboard"]
+    Operator["Người vận hành<br/>Chọn lệnh từ giao diện web"]
+    UI["Giao diện web<br/>Tạo yêu cầu điều khiển"]
+    API["API phía máy chủ<br/>Xác thực + lưu lệnh"]
+    Broker["EMQX<br/>Broker MQTT"]
+    Bridge["MQTT Bridge<br/>Xử lý phản hồi thiết bị"]
+    Device["Thiết bị theo dõi<br/>Nhận lệnh và thực thi"]
 
-    Operator --> UI --> API --> Bridge --> Device --> Ack
-    Ack -. cap nhat lai .-> UI
+    Operator --> UI --> API
+    API -->|Lệnh điều khiển commands| Broker -->|Topic commands| Device
+    Device -->|ACK / trạng thái / firmware| Broker -->|Device topics| Bridge
+    Bridge -->|Publish internal/events/#| Broker -->|Backend realtime listener| API
+    API -->|Cập nhật trạng thái| UI
+

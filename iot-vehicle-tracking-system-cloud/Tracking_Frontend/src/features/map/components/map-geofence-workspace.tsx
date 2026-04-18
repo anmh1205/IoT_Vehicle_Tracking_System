@@ -24,8 +24,23 @@ const TRIGGER_LABELS: Record<MapGeofenceRecord['triggerOn'], string> = {
   both: 'Cả hai chiều',
 };
 
-const toRadiusLabel = (value: number) =>
-  value >= 1000 ? `${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)} km` : `${value} m`;
+const clampRadiusKm = (value: number) => {
+  if (!Number.isFinite(value) || value < 1) {
+    return 1;
+  }
+  return value;
+};
+
+const toRadiusKm = (value: number) => Math.max(value / 1000, 1);
+
+const toRadiusLabel = (value: number) => {
+  const radiusKm = toRadiusKm(value);
+  return radiusKm >= 10
+    ? `${radiusKm.toLocaleString('vi-VN', {
+        maximumFractionDigits: Number.isInteger(radiusKm) ? 0 : 1,
+      })} km`
+    : `${radiusKm} km`;
+};
 
 export const MapGeofenceWorkspace = ({
   open,
@@ -129,25 +144,46 @@ export const MapGeofenceWorkspace = ({
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-xs font-medium">Bán kính</label>
-                  <Input
-                    type="number"
-                    inputMode="numeric"
-                    value={draft.radiusMeters}
-                    onChange={(event) =>
-                      updateDraft({ radiusMeters: Math.max(Number(event.target.value || 0), 50) })
-                    }
-                  />
-                  <Slider
-                    min={100}
-                    max={5000}
-                    step={50}
-                    value={[draft.radiusMeters]}
-                    onValueChange={(value) =>
-                      updateDraft({ radiusMeters: value[0] ?? draft.radiusMeters })
-                    }
-                  />
-                  <p className="text-[11px] text-muted-foreground">{toRadiusLabel(draft.radiusMeters)}</p>
+                  <label className="text-xs font-medium">Bán kính ưu tiên (km)</label>
+                  {(() => {
+                    const radiusKm = clampRadiusKm(toRadiusKm(draft.radiusMeters));
+                    const sliderRadiusKm = Math.min(radiusKm, 500);
+                    const isBeyondSlider = radiusKm > 500;
+
+                    return (
+                      <>
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          min={1}
+                          value={Number.isInteger(radiusKm) ? String(radiusKm) : radiusKm.toFixed(1)}
+                          onChange={(event) => {
+                            const nextKm = clampRadiusKm(Number(event.target.value || 1));
+                            updateDraft({ radiusMeters: Math.round(nextKm * 1000) });
+                          }}
+                        />
+                        <Slider
+                          min={1}
+                          max={500}
+                          step={1}
+                          value={[sliderRadiusKm]}
+                          onValueChange={(value) =>
+                            updateDraft({ radiusMeters: Math.round((value[0] ?? 1) * 1000) })
+                          }
+                        />
+                        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                          <span>1 km</span>
+                          <span>{isBeyondSlider ? '500 km+' : `${sliderRadiusKm} km`}</span>
+                          <span>500 km</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                          {isBeyondSlider
+                            ? `Đang dùng ${toRadiusLabel(draft.radiusMeters)}. Có thể nhập tay để vượt mốc 500 km.`
+                            : `Bán kính hiện tại: ${toRadiusLabel(draft.radiusMeters)}.`}
+                        </p>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 <div className="space-y-2">

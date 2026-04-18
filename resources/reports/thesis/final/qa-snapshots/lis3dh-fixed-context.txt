@@ -1,0 +1,42 @@
+636: LIS3DH theo dõi rung động để nhận biết chuyển động khi xe đỗ; còn
+683: LIS3DH (IMU), DS3231M (RTC), W25Q128 (SPI Flash), and power blocks based
+1027:   Cảm biến gia tốc LIS3DH (IMU) để phát hiện chuyển động và rung
+1105: LIS3DH & Thiết kế PCB, chế tạo và tích hợp thiết bị hoàn chỉnh \\\hline
+1354: SIM7600CE-T, cảm biến rung LIS3DH và adapter OBD2. Lớp giữa làm nhiệm
+1434:   IMU (LIS3DH) hoạt động độc lập, cảnh rung ở ngưỡng đã cấu hình
+1510: Cảm biến gia tốc & LIS3DH & --- & Phát hiện chuyển động và rung \\\hline
+1554:   + GNSS SIMCom SIM7600CE-T, cảm biến gia tốc LIS3DH, khối nguồn đa
+2166:   IMU (LIS3DH) phát hiện chuyển động/rung bất thường
+2643: thái ngủ sâu để giảm tiêu thụ điện, và chỉ IMU LIS3DH duy trì giám sát
+3172: trong khi vẫn duy trì khả năng phát hiện xâm nhập. IMU LIS3DH đảm nhiệm
+3636: 2 & IC cảm biến LIS3DH & Cái & 1 & 40.000 & Cảm biến gia tốc 3
+3956:   IMU (LIS3DH qua I2C), modem SIM7600CE-T (UART1, Auto mode
+4346: 41 & LIS3DH\_INT & Input & Ngắt từ cảm biến gia tốc IMU \\\hline
+4347: 2 & \nolinkurl{LIS3DH_SDA} & I/O & Đường dữ liệu I2C \\\hline
+4348: 1 & \nolinkurl{LIS3DH_SCL} & I/O & Đường clock I2C \\\hline
+4913: IMU (LIS3DH) & Đặt thiết bị trên mặt phẳng, đo offset các trục X/Y/Z &
+6695: Cảm biến IMU & LIS3DH & Tiết kiệm điện và có thể tự đánh thức khi phát
+6737:   + LIS3DH, phối hợp để lấy dữ liệu xe, lấy vị trí và quản lý nguồn với
+6933:   LIS3DH
+6998: GPIO 41 & LIS3DH\_INT & Input (Interrupt) & Nhận tín hiệu ngắt từ cảm
+6999: biến gia tốc LIS3DH khi phát hiện chuyển động \\\hline
+7000: GPIO 2 & \nolinkurl{LIS3DH_SDA} & I/O (I2C) & Đường dữ liệu I2C kết nối với cảm
+7001: biến LIS3DH \\\hline
+7002: GPIO 1 & \nolinkurl{LIS3DH_SCL} & I/O (I2C) & Đường xung nhịp I2C kết nối với cảm
+7003: biến LIS3DH \\\hline
+7028:   \textit{light sleep}. Với wiring production hiện tại, chân GPIO 41 (LIS3DH\_INT)
+7492: 2 & IC cảm biến LIS3DH & Cái & 1 & 40.000 & Cảm biến gia tốc 3
+7574: ESP32-S3-WROOM-1, LIS3DH và các linh kiện liên quan lên PCB
+7583: biến LIS3DH trên I2C (GPIO2, GPIO1), và hiệu chuẩn mạch đo điện áp ắc
+7588: BLE, đọc I2C từ LIS3DH. Kiểm tra chuyển nguồn tự động bằng cách thay
+7641:   cảm biến LIS3DH trả về dữ liệu qua I2C, kết nối BLE với OBD2 adapter
+7782:   khi xe đỗ, và đánh thức đúng khi phát hiện rung động (qua LIS3DH)
+7993: 41 & LIS3DH\_INT & Input & Ngắt từ cảm biến gia tốc IMU \\\hline
+7994: 2 & \nolinkurl{LIS3DH_SDA} & I/O & I2C data line \\\hline
+7995: 1 & \nolinkurl{LIS3DH_SCL} & I/O & I2C clock line \\\hline
+10593:   lõi ESP32-S3 + LIS3DH do còn có tổn hao từ mạch nguồn, đường cấp
+12377: IC cảm biến LIS3DH & Cảm biến gia tốc (IMU) & 40.000 \\\hline
+13157:   SPI/I2C để giao tiếp với cảm biến gia tốc LIS3DH, cấu hình các thanh
+13947: {[}23{]} STMicroelectronics, "LIS3DH - MEMS Digital Output Motion
+13953: {[}24{]} STMicroelectronics, "LIS3DH Application Note AN3308," Rev. 2,
+14192: 4 & Cảm biến gia tốc & IC LIS3DH & 1 & 40.000 & 40.000 & IMU 3 trục,

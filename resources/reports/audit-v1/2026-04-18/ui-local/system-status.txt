@@ -1,0 +1,136 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Đội xe
+Cảnh báo
+Nền tảng
+Trạng thái hệ thống
+Firmware
+Xuất dữ liệu
+Mô phỏng
+Quản lý người dùng
+Quản trị hệ thống
+Cài đặt cá nhân
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Nền tảng
+Trạng thái hệ thống
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Trạng thái hệ thống
+
+Theo dõi Backend API, PostgreSQL, EMQX, MQTT Bridge, VictoriaMetrics, VictoriaLogs và Grafana trên một màn hình.
+
+Tổng quan sức khỏe
+
+Tổng dịch vụ: 7
+
+Hoạt động: 6
+
+Suy giảm: 1
+
+Ngừng: 0
+
+Lần kiểm tra gần nhất
+
+18/04/2026 23:01
+
+API & Database
+
+Backend API + PostgreSQL được kiểm tra trực tiếp bởi backend.
+
+Telemetry
+
+Dữ liệu hạ tầng được làm mới mỗi 30 giây.
+
+Backend API
+Hoạt động
+
+Mã dịch vụ: api
+
+Xem chi tiết
+PostgreSQL
+Hoạt động
+
+Mã dịch vụ: postgresql
+
+Độ trễ: 19ms
+
+Xem chi tiết
+EMQX
+Hoạt động
+
+Mã dịch vụ: emqx
+
+Điểm kiểm tra: tracking-emqx:1883
+
+Độ trễ: 20ms
+
+MQTT Bridge
+Suy giảm
+
+Mã dịch vụ: mqttBridge
+
+Điểm kiểm tra: http://tracking-mqtt-bridge:4003/ready
+
+Độ trễ: 40ms
+
+Lần ghi nhận gần nhất: 2026-04-18T12:29:51.094Z
+
+Xem chi tiết
+
+Khong thay rawdata gan day tu MQTT Bridge.
+
+VictoriaMetrics
+Hoạt động
+
+Mã dịch vụ: victoriaMetrics
+
+Điểm kiểm tra: http://tracking-victoriametrics:8428/-/healthy
+
+Độ trễ: 38ms
+
+VictoriaLogs
+Hoạt động
+
+Mã dịch vụ: victoriaLogs
+
+Điểm kiểm tra: http://tracking-victorialogs:9428/-/healthy
+
+Độ trễ: 36ms
+
+Grafana
+Hoạt động
+
+Mã dịch vụ: grafana
+
+Điểm kiểm tra: http://tracking-grafana:4002/api/health
+
+Độ trễ: 36ms
+
+Xem chi tiết
+Mức sử dụng CPU
+15.75%
+
+15.8%
+
+Mức sử dụng bộ nhớ
+20.2%
+
+20.2%
+
+Mức sử dụng ổ đĩa
+10.79%
+
+10.8%
+
+Kết nối đang mở
+2
+Các số liệu này dựa trên kiểm tra thật từ backend, không phải mock. Nếu một dịch vụ bị down hoặc chưa có tín hiệu gần đây, thẻ tương ứng sẽ ghi rõ trạng thái và lý do.

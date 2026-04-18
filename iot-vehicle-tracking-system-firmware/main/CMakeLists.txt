@@ -6,7 +6,7 @@ idf_component_register(
         "src/ble_obd.c"
         "src/ble_util.c"
         "src/adc_reader.c"
-        "src/imu_lis3dsh.c"
+        "src/imu_lis3dh.c"
         "src/power_mgr.c"
         "src/modem_at.c"
         "src/modem_lte.c"

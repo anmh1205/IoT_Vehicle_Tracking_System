@@ -15,6 +15,6 @@ export interface NotificationsQueryParams {
 export const useNotifications = (params?: NotificationsQueryParams) =>
   useQuery<NotificationListResponse>({
     queryKey: ['notifications', params],
-    queryFn: () => notificationServices.getList({ limit: 50, ...(params ?? {}) }),
+    queryFn: () => notificationServices.getList(params ?? { limit: 50 }),
     refetchInterval: 30000,
   });

@@ -50,7 +50,7 @@ INSERT INTO devices (
 VALUES
   ('TRACKER_001','Tracker Sedan 001','seed-token-tracker-001','running',NOW()-INTERVAL '2 minutes','v2.3.1','v2.4.0',10.775843,106.700981,10.775843,106.700981,42.5,158400,1.20,2000,TRUE,'{"source":"mock-audit"}'::jsonb,0),
   ('sim-uat-001','Simulator UAT 001','seed-token-sim-001','stopped',NOW()-INTERVAL '5 minutes','v2.1.9','v2.4.0',10.879015,106.809112,10.879015,106.809112,0,86420,1.00,3000,TRUE,'{"source":"mock-audit"}'::jsonb,0),
-  ('MOCK-OBD-002','Bus Tracker 002','seed-token-bus-002','running',NOW()-INTERVAL '1 minutes','v2.3.1','v2.4.0',10.854221,106.771138,10.854221,106.771138,55.8,120560,1.35,2000,TRUE,'{"source":"mock-audit"}'::jsonb,0),
+  ('MOCK-OBD-002','Bus Tracker 002','seed-token-bus-002','running',NOW()-INTERVAL '1 minutes','v2.3.1','v2.4.0',10.730644,106.719981,10.730644,106.719981,55.8,120560,1.35,180,TRUE,'{"source":"mock-audit"}'::jsonb,0),
   ('MOCK-OBD-003','Van Tracker 003','seed-token-van-003','disconnected',NOW()-INTERVAL '18 minutes','v2.2.5','v2.4.0',10.733819,106.731205,10.733819,106.731205,0,49320,1.10,2500,TRUE,'{"source":"mock-audit"}'::jsonb,7)
 ON CONFLICT (device_id) DO UPDATE
 SET device_name = EXCLUDED.device_name,
@@ -203,6 +203,17 @@ VALUES
   ('XE-TEST','TRACKER_001',(SELECT id FROM trips WHERE trip_code='MOCK-TRIP-001'),NULL,'harsh_braking','low','active','MOCK ALERT: Harsh braking detected','Short harsh braking event',10.786512,106.719122,22,2.5,3.4,NULL,NULL,NULL,NULL,NULL,NOW()-INTERVAL '30 minutes'),
   ('XE-BUS-77','MOCK-OBD-002',(SELECT id FROM trips WHERE trip_code='MOCK-TRIP-002'),NULL,'maintenance_due','medium','active','MOCK ALERT: Brake maintenance due soon','Mileage crossed warning threshold',10.854221,106.771138,0,120000,121340,NULL,NULL,NULL,NULL,NULL,NOW()-INTERVAL '10 minutes');
 
+INSERT INTO notification_states (user_id, alert_id, is_read, read_at, hidden_at)
+VALUES
+  (1, (SELECT id FROM alerts WHERE title='MOCK ALERT: Speed threshold exceeded'), TRUE, NOW()-INTERVAL '55 minutes', NULL),
+  (1, (SELECT id FROM alerts WHERE title='MOCK ALERT: Vehicle exited warehouse perimeter'), TRUE, NOW()-INTERVAL '35 minutes', NULL),
+  (1, (SELECT id FROM alerts WHERE title='MOCK ALERT: Device offline during transfer'), TRUE, NOW()-INTERVAL '7 hours 15 minutes', NOW()-INTERVAL '7 hours 10 minutes')
+ON CONFLICT (user_id, alert_id) DO UPDATE
+SET is_read = EXCLUDED.is_read,
+    read_at = EXCLUDED.read_at,
+    hidden_at = EXCLUDED.hidden_at,
+    updated_at = NOW();
+
 -- violations
 INSERT INTO violations (alert_id, vehicle_id, driver_id, violation_type, policy_type, policy_id, severity, description, location_lat, location_lon, speed_limit, actual_speed, fine_amount, acknowledged, acknowledged_by, acknowledged_at, notes, dedupe_key, evidence_json, correlation_id, detected_at, confirmed_at, resolved_at)
 VALUES
@@ -221,15 +232,21 @@ VALUES
 INSERT INTO device_sessions (device_id, status, server_session_start, server_session_end, session_start, session_end, uptime, avg_vibration, min_vibration, max_vibration, avg_battery_top, avg_battery_bot, data_points_count, last_update, start_correlation_id, end_correlation_id, last_latitude, last_longitude, last_speed)
 VALUES
   ('TRACKER_001','completed',NOW()-INTERVAL '1 day 3 hours',NOW()-INTERVAL '1 day 1 hour 50 minutes',NOW()-INTERVAL '1 day 3 hours',NOW()-INTERVAL '1 day 1 hour 50 minutes',4200,1.26,0.44,2.10,86.5,83.1,260,NOW()-INTERVAL '1 day 1 hour 50 minutes','mock-audit-session-001','mock-audit-session-001-end',10.775843,106.700981,12.4),
-  ('MOCK-OBD-002','running',NOW()-INTERVAL '90 minutes',NULL,NOW()-INTERVAL '90 minutes',NULL,5400,1.42,0.51,2.44,91.2,88.4,320,NOW()-INTERVAL '1 minute','mock-audit-session-002',NULL,10.854221,106.771138,55.8),
+  ('MOCK-OBD-002','running',NOW()-INTERVAL '90 minutes',NULL,NOW()-INTERVAL '90 minutes',NULL,5400,1.42,0.51,2.44,91.2,88.4,320,NOW()-INTERVAL '1 minute','mock-audit-session-002',NULL,10.730644,106.719981,55.8),
   ('MOCK-OBD-003','disconnected',NOW()-INTERVAL '2 hours 10 minutes',NOW()-INTERVAL '18 minutes',NOW()-INTERVAL '2 hours 10 minutes',NOW()-INTERVAL '18 minutes',6720,1.31,0.43,2.05,79.0,75.6,188,NOW()-INTERVAL '18 minutes','mock-audit-session-003','mock-audit-session-003-end',10.733819,106.731205,0);
 
 -- event logs
 INSERT INTO event_logs (correlation_id, device_id, session_id, event_type, event_code, severity, context, metadata, message, device_timestamp, server_timestamp, error_code, resolved_at, resolved_by, resolution_notes, error_status)
 VALUES
   ('mock-audit-evt-001','TRACKER_001',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-001'),'status_change','normal_run','info','{"spd":42.5,"batt":87.4,"vib":1.24,"temp":34.1,"heading":112}'::jsonb,'{"tripCode":"MOCK-TRIP-001"}'::jsonb,'Vehicle running stable on district route',NOW()-INTERVAL '32 minutes',NOW()-INTERVAL '32 minutes',NULL,NULL,NULL,NULL,'resolved'),
-  ('mock-audit-evt-002','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'warning','idle_too_long','warning','{"spd":0,"batt":89.1,"vib":0.32,"temp":36.5,"heading":225}'::jsonb,'{"tripCode":"MOCK-TRIP-002"}'::jsonb,'Idle too long at pickup point',NOW()-INTERVAL '14 minutes',NOW()-INTERVAL '14 minutes',NULL,NULL,NULL,NULL,'acknowledged'),
+  ('mock-audit-evt-002','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'warning','idle_too_long','warning','{"spd":0,"bb":89.1,"batt":89.1,"bt":12.7,"vib":0.32,"temp":36.5,"lat":10.854221,"lon":106.771138,"heading":225}'::jsonb,'{"tripCode":"MOCK-TRIP-002"}'::jsonb,'Idle too long at pickup point',NOW()-INTERVAL '14 minutes',NOW()-INTERVAL '14 minutes',NULL,NULL,NULL,NULL,'acknowledged'),
   ('mock-audit-evt-003','MOCK-OBD-003',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-003'),'connection','device_offline','error','{"spd":0,"batt":63.8,"vib":0,"temp":39.8,"heading":0}'::jsonb,'{"tripCode":"MOCK-TRIP-003"}'::jsonb,'Device offline for 12 minutes',NOW()-INTERVAL '17 minutes',NOW()-INTERVAL '17 minutes',7,NULL,NULL,NULL,'active'),
-  ('mock-audit-evt-004','sim-uat-001',NULL,'status_change','session_end','info','{"spd":0,"batt":81.2,"vib":0.15,"temp":33.2,"heading":65}'::jsonb,'{"tripCode":"MOCK-TRIP-005"}'::jsonb,'Session ended after depot handover',NOW()-INTERVAL '7 hours',NOW()-INTERVAL '7 hours',NULL,NOW()-INTERVAL '6 hours 55 minutes',1,'Normal stop at depot','resolved');
+  ('mock-audit-evt-004','sim-uat-001',NULL,'status_change','session_end','info','{"spd":0,"batt":81.2,"vib":0.15,"temp":33.2,"heading":65}'::jsonb,'{"tripCode":"MOCK-TRIP-005"}'::jsonb,'Session ended after depot handover',NOW()-INTERVAL '7 hours',NOW()-INTERVAL '7 hours',NULL,NOW()-INTERVAL '6 hours 55 minutes',1,'Normal stop at depot','resolved'),
+  ('mock-audit-evt-005','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'error','dtc_pending','error','{"spd":18.4,"bb":88.8,"batt":88.8,"bt":13.4,"vib":0.91,"temp":92.4,"lat":10.823114,"lon":106.756992,"heading":188}'::jsonb,'{"tripCode":"MOCK-TRIP-002","dtc":"P0500"}'::jsonb,'Pending OBD fault P0500 detected during shuttle route',NOW()-INTERVAL '11 minutes',NOW()-INTERVAL '11 minutes',4,NULL,NULL,NULL,'active'),
+  ('mock-audit-evt-006','TRACKER_001',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-001'),'warning','gps_signal_recovered','warning','{"spd":36.2,"batt":84.9,"vib":1.18,"temp":35.0,"heading":141}'::jsonb,'{"tripCode":"MOCK-TRIP-001","hint":"urban_canyon"}'::jsonb,'GPS jitter spike resolved after dense urban segment',NOW()-INTERVAL '1 day 2 hours 18 minutes',NOW()-INTERVAL '1 day 2 hours 18 minutes',8,NOW()-INTERVAL '1 day 2 hours 12 minutes',1,'Recovered on next valid fix','resolved'),
+  ('mock-audit-evt-007','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','obd_live_data','info','{"spd":32.7,"bb":88.1,"batt":88.1,"bt":13.8,"vib":1.04,"temp":89.6,"lat":10.794812,"lon":106.744638,"heading":197}'::jsonb,'{"tripCode":"MOCK-TRIP-002","sample":"mid-route"}'::jsonb,'Live OBD telemetry synced during corridor segment',NOW()-INTERVAL '8 minutes',NOW()-INTERVAL '8 minutes',NULL,NULL,NULL,NULL,'resolved'),
+  ('mock-audit-evt-008','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','obd_live_data','info','{"spd":46.2,"bb":87.6,"batt":87.6,"bt":14.1,"vib":1.22,"temp":91.3,"lat":10.762115,"lon":106.731844,"heading":214}'::jsonb,'{"tripCode":"MOCK-TRIP-002","sample":"urban-lane"}'::jsonb,'Live OBD telemetry updated near inner-city segment',NOW()-INTERVAL '5 minutes',NOW()-INTERVAL '5 minutes',NULL,NULL,NULL,NULL,'resolved'),
+  ('mock-audit-evt-009','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','obd_live_data','info','{"spd":55.8,"bb":87.1,"batt":87.1,"bt":14.4,"vib":1.37,"temp":93.1,"lat":10.730644,"lon":106.719981,"heading":233}'::jsonb,'{"tripCode":"MOCK-TRIP-002","sample":"latest"}'::jsonb,'Latest OBD telemetry sample matched with current device snapshot',NOW()-INTERVAL '1 minute',NOW()-INTERVAL '1 minute',NULL,NULL,NULL,NULL,'resolved'),
+  ('mock-audit-evt-010','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','mqtt_bridge_rawdata','info','{"source":"mqtt_bridge_rawdata","spd":55.8,"bb":87.1,"batt":87.1,"bt":14.4,"vib":1.37,"temp":93.1,"lat":10.730644,"lon":106.719981,"heading":233}'::jsonb,'{"tripCode":"MOCK-TRIP-002","ingestion":"mqtt-bridge"}'::jsonb,'Recent MQTT Bridge rawdata heartbeat for local audit runtime',NOW()-INTERVAL '30 seconds',NOW()-INTERVAL '30 seconds',NULL,NULL,NULL,NULL,'resolved');
 
 COMMIT;

@@ -8,6 +8,33 @@ import {
 import { pool } from '@/infrastructure/database/pool';
 import type { Alert, AlertListQuery, CreateAlertInput } from '@/domain/alert/types/alert.types';
 
+const ALERT_LINK_SELECT = `a.*,
+  d.device_name,
+  link.vehicle_plate,
+  link.customer_name`;
+
+const ALERT_LINK_JOINS = `LEFT JOIN devices d ON d.device_id = a.device_id
+  LEFT JOIN LATERAL (
+    SELECT
+      v.plate_number AS vehicle_plate,
+      c.name AS customer_name
+    FROM vehicles v
+    LEFT JOIN customers c ON c.id = v.customer_id
+    WHERE
+      (a.vehicle_id IS NOT NULL AND v.vehicle_id = a.vehicle_id)
+      OR (a.device_id IS NOT NULL AND v.device_id = a.device_id)
+      OR (d.vehicle_id IS NOT NULL AND v.vehicle_id = d.vehicle_id)
+    ORDER BY
+      CASE
+        WHEN a.vehicle_id IS NOT NULL AND v.vehicle_id = a.vehicle_id THEN 0
+        WHEN a.device_id IS NOT NULL AND v.device_id = a.device_id THEN 1
+        ELSE 2
+      END,
+      v.updated_at DESC,
+      v.id DESC
+    LIMIT 1
+  ) link ON true`;
+
 export const findAll = async (
   query: AlertListQuery,
 ): Promise<{ alerts: Alert[]; total: number }> => {
@@ -20,40 +47,45 @@ export const findAll = async (
   let paramIndex = 1;
 
   if (query.status) {
-    conditions.push(`status = $${paramIndex++}`);
+    conditions.push(`a.status = $${paramIndex++}`);
     params.push(query.status);
   }
 
   if (query.severity) {
-    conditions.push(`severity = $${paramIndex++}`);
+    conditions.push(`a.severity = $${paramIndex++}`);
     params.push(query.severity);
   }
 
   if (query.alertType) {
-    conditions.push(`alert_type = $${paramIndex++}`);
+    conditions.push(`a.alert_type = $${paramIndex++}`);
     params.push(query.alertType);
   }
 
   if (query.vehicleId) {
-    conditions.push(`vehicle_id = $${paramIndex++}`);
+    conditions.push(`a.vehicle_id = $${paramIndex++}`);
     params.push(query.vehicleId);
   }
 
   if (query.deviceId) {
-    conditions.push(`device_id = $${paramIndex++}`);
+    conditions.push(`a.device_id = $${paramIndex++}`);
     params.push(query.deviceId);
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const countResult = await pool.query(
-    `SELECT COUNT(*) as total FROM alerts ${whereClause}`,
+    `SELECT COUNT(*) as total FROM alerts a ${whereClause}`,
     params,
   );
   const total = parseInt(countResult.rows[0].total, 10);
 
   const alerts = await findMany<Alert>(
-    `SELECT * FROM alerts ${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+    `SELECT ${ALERT_LINK_SELECT}
+     FROM alerts a
+     ${ALERT_LINK_JOINS}
+     ${whereClause}
+     ORDER BY a.created_at DESC
+     LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
 
@@ -61,7 +93,13 @@ export const findAll = async (
 };
 
 export const findById = async (id: number): Promise<Alert | null> =>
-  findOne<Alert>('SELECT * FROM alerts WHERE id = $1', [id]);
+  findOne<Alert>(
+    `SELECT ${ALERT_LINK_SELECT}
+     FROM alerts a
+     ${ALERT_LINK_JOINS}
+     WHERE a.id = $1`,
+    [id],
+  );
 
 export const create = async (input: CreateAlertInput): Promise<Alert> =>
   insertOne<Alert>(

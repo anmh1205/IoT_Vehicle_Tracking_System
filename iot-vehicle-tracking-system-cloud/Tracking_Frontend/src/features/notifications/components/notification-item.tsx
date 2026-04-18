@@ -24,6 +24,27 @@ const TYPE_VARIANTS: Record<
   geofence: 'secondary',
 };
 
+const getContextText = (notification: Notification) => {
+  if (notification.contextLabel) {
+    return notification.contextLabel;
+  }
+
+  const parts = [
+    notification.vehiclePlateNumber
+      ? `Xe ${notification.vehiclePlateNumber}`
+      : notification.vehicleId
+        ? `Xe ${notification.vehicleId}`
+        : null,
+    notification.deviceName
+      ? `Thiết bị ${notification.deviceName}`
+      : notification.deviceId
+        ? `Thiết bị ${notification.deviceId}`
+        : null,
+  ].filter(Boolean);
+
+  return parts.length > 0 ? parts.join(' · ') : null;
+};
+
 export const NotificationRow = ({
   notification,
   onClick,
@@ -38,6 +59,7 @@ export const NotificationRow = ({
   showType?: boolean;
 }) => {
   const Wrapper = onClick ? 'button' : 'div';
+  const contextText = getContextText(notification);
 
   return (
     <div className="flex gap-3 rounded-xl border border-border/60 bg-card/70 p-3 transition-colors hover:bg-accent/30">
@@ -57,6 +79,9 @@ export const NotificationRow = ({
           <div className={compact ? 'truncate text-xs text-muted-foreground' : 'text-sm text-muted-foreground'}>
             {notification.message || 'Không có mô tả chi tiết.'}
           </div>
+          {contextText ? (
+            <div className="text-xs font-medium text-muted-foreground/80">{contextText}</div>
+          ) : null}
         </div>
       </Wrapper>
       {actions ? <div className="flex shrink-0 flex-col gap-2 self-start">{actions}</div> : null}

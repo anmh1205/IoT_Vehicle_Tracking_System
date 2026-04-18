@@ -42,7 +42,7 @@ export const findAll = async (query: TripListQuery): Promise<{ trips: Trip[]; to
 
   if (query.search) {
     conditions.push(
-      `(trip_code ILIKE $${paramIndex} OR driver_name ILIKE $${paramIndex} OR start_location ILIKE $${paramIndex})`,
+      `(trip_code ILIKE $${paramIndex} OR vehicle_id ILIKE $${paramIndex} OR device_id ILIKE $${paramIndex} OR driver_name ILIKE $${paramIndex} OR start_location ILIKE $${paramIndex} OR end_location ILIKE $${paramIndex} OR notes ILIKE $${paramIndex})`,
     );
     params.push(`%${query.search}%`);
     paramIndex++;

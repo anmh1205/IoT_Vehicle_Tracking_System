@@ -8,7 +8,6 @@ import { DeviceListItem } from './device-list-item';
 import { DeviceSearch } from './device-search';
 import { MapDeviceSummary } from './map-device-summary';
 import { buildMapDeviceStats, filterDevices, sortDevices } from './map-panel-utils';
-import { SelectedDeviceCard } from './selected-device-card';
 
 export const DeviceListPanel = () => {
   const positions = useMapStore((state) => state.positions);
@@ -24,7 +23,6 @@ export const DeviceListPanel = () => {
     () => filterDevices(devices, searchTerm, statusFilter),
     [devices, searchTerm, statusFilter],
   );
-  const selectedDevice = selectedDeviceId ? (positions.get(selectedDeviceId) ?? null) : null;
   const stats = useMemo(
     () => buildMapDeviceStats(filteredDevices, devices.length),
     [devices.length, filteredDevices],
@@ -53,8 +51,6 @@ export const DeviceListPanel = () => {
           ) : null}
         </div>
       </ScrollArea>
-
-      <SelectedDeviceCard device={selectedDevice} />
     </aside>
   );
 };

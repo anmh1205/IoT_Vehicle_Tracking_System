@@ -1,0 +1,12 @@
+Phần modal chi tiết thiết bị: 
+- 
+Phần tab tổng quan: nên thêm khi để trỏ chuột vào ô thì sẽ hiển thị thông tin giải 
+thích thông số  
+ 
+- 
+Biểu đồ runtime gần đây có vẻ không cần thiết 
+- 
+Tab lộ trình và phiên chạy có vẻ đang bị trùng tính năng, cần gộp một cách hợp lý vào 
+tab lộ trình 
+ 
+ 

@@ -3,9 +3,10 @@ import type {
   NotificationListResponse,
   NotificationStatsSummary,
 } from '@/features/notifications/types';
+import type { NotificationsQueryParams } from '@/features/notifications/hooks/use-notifications';
 
 export const notificationServices = {
-  getList: (params?: Record<string, unknown>) =>
+  getList: (params?: NotificationsQueryParams) =>
     apiClient
       .get('/notifications', { params })
       .then((r) => unwrap<NotificationListResponse>(r.data)),

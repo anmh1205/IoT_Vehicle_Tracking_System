@@ -1,0 +1,644 @@
+Bỏ qua đến nội dung chính
+IVM26
+Hệ thống
+Điều hành
+Vận hành
+Đội xe
+Cảnh báo
+Nền tảng
+Trạng thái hệ thống
+Firmware
+Xuất dữ liệu
+Mô phỏng
+Quản lý người dùng
+Quản trị hệ thống
+Cài đặt cá nhân
+SA
+System Administrator
+admin@tracking.local
+Bật/tắt thanh bên
+Nền tảng
+Firmware
+76
+Giao diện
+Chọn giao diện:
+Mặc định
+Chuyển giao diện
+Firmware
+
+Quản lý bản phát hành, trạng thái kích hoạt và lịch sử triển khai OTA cho thiết bị.
+
+Tải lên firmware
+Tổng bản firmware
+21
+Mới nhất vota-20260414-badsha2-1776125474
+Bản đang kích hoạt
+0
+Chưa có bản active
+Đợt triển khai
+29
+10% tiến độ trung bình
+1 thiết bị đã nhận OTA
+Đợt lỗi / kẹt
+26
+3 đợt ổn định
+Cập nhật 07:20 14/4/26
+Tình trạng phát hành hiện hành
+Tổng dung lượng lưu trữ: 17.0 MB · Theo dõi bản active, lịch sử OTA và mức độ bao phủ thiết bị.
+
+Bản active
+
+--
+
+Chưa có bản đang kích hoạt
+
+Bản gần nhất
+
+vota-20260414-badsha2-1776125474
+
+badsha2-ota-20260414-badsha2-1776125474.bin
+
+Đợt gần nhất
+
+Thành công
+
+Thiết bị TRACKER_001
+
+Phạm vi OTA
+
+1 thiết bị
+
+26 thiết bị/bản ghi lỗi
+
+Tìm firmware
+Cột hiển thị
+Phiên bản
+	Ghi chú phát hành	Thời điểm tải lên	
+
+
+vota-20260414-badsha2-1776125474
+
+Đã lưu trữ
+
+badsha2-ota-20260414-badsha2-1776125474.bin · 0 B
+
+	intentional bad sha after live-publish fix	07:11 14/4/26	
+Triển khai
+Kích hoạt
+Tải về
+Xóa
+
+
+
+vota-20260414-badsha-1776124972
+
+Đã lưu trữ
+
+badsha-ota-20260414-badsha-1776124972.bin · 0 B
+
+	intentional bad sha e2e validation	07:02 14/4/26	
+Triển khai
+Kích hoạt
+Tải về
+Xóa
+
+
+
+vota-20260414-r19-1776124423
+
+Đã lưu trữ
+
+1776124423980-tracking_firmware.bin · 0 B
+
+	duplicate-filename-test-2	06:53 14/4/26	
+Triển khai
+Kích hoạt
+Tải về
+Xóa
+
+
+
+vota-20260414-r18-1776124420
+
+Đã lưu trữ
+
+1776124421210-tracking_firmware.bin · 0 B
+
+	duplicate-filename-test-1	06:53 14/4/26	
+Triển khai
+Kích hoạt
+Tải về
+Xóa
+
+
+
+vota-20260414-r17-1776123841
+
+Đã lưu trữ
+
+Tracking_Firmware-ota-20260414-r17-1776123841.bin · 0 B
+
+	OTA e2e verify boot-seq-reset fix	06:44 14/4/26	
+Triển khai
+Kích hoạt
+Tải về
+Xóa
+
+
+
+vota-20260414-r16-1776123178
+
+Đã lưu trữ
+
+Tracking_Firmware-ota-20260414-r16-1776123178.bin · 0 B
+
+	OTA e2e after mqtt bridge bigint patch	06:33 14/4/26	
+Triển khai
+Kích hoạt
+Tải về
+Xóa
+
+
+
+vota-20260414-r15-1776121864
+
+Đã lưu trữ
+
+Tracking_Firmware-ota-20260414-r15-1776121864.bin · 0 B
+
+	OTA r15 mqtt-bridge enum fix + firmware ota nvs persist	06:11 14/4/26	
+Triển khai
+Kích hoạt
+Tải về
+Xóa
+
+
+
+vota-20260414-r14-1776118245
+
+Đã lưu trữ
+
+Tracking_Firmware_r14_1776118245.bin · 0 B
+
+	ota live firmware-status flush + 90 progress throttle	05:10 14/4/26	
+Triển khai
+Kích hoạt
+Tải về
+Xóa
+
+
+
+vota-20260414-r13-1776115831
+
+Đã lưu trữ
+
+Tracking_Firmware_r13_1776115831.bin · 0 B
+
+	binary path retest	04:30 14/4/26	
+Triển khai
+Kích hoạt
+Tải về
+Xóa
+
+
+
+vota-20260414-r12-1776115324
+
+Đã lưu trữ
+
+Tracking_Firmware_r12_1776115324.bin · 0 B
+
+	validate modem_at_send_collect OTA	04:22 14/4/26	
+Triển khai
+Kích hoạt
+Tải về
+Xóa
+
+Hiển thị 10 / 21 bản ghi
+
+Trang 1 / 3
+Bảng theo dõi triển khai
+
+Theo dõi từng thiết bị, phiên bản đích và trạng thái OTA gần nhất.
+
+Tổng 29
+Thành công 3
+Đang chạy 0
+Lỗi 26
+Thiết bị: 1
+Cập nhật: 07:20 14/4/26
+Bản gần nhất: vota-20260414-r19-1776124423
+
+TRACKER_001
+
+Đích vota-20260414-r19-1776124423 · Hiện tại vota-20260414-r19-1776124423
+
+Thành công
+Tiến độ: 100%
+Bắt đầu: 07:15 14/4/26
+Hoàn tất: 07:20 14/4/26
+Cập nhật: 07:20 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 07:15 14/4/26
+
+Phân vùng / boot
+
+Partition ota_0 · Boot boot-1-ed2266e8
+
+TRACKER_001
+
+Đích vota-20260414-badsha2-1776125474 · Hiện tại vunknown
+
+Thất bại
+Tiến độ: 0%
+Bắt đầu: 07:11 14/4/26
+Hoàn tất: 07:15 14/4/26
+Cập nhật: 07:15 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 07:11 14/4/26
+
+Phân vùng / boot
+
+Partition ota_0 · Boot boot-1-afc87c2d
+
+sha256_mismatch: sha256_mismatch
+
+TRACKER_001
+
+Đích vota-20260414-badsha-1776124972 · Hiện tại vota-20260414-r19-1776124423
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 07:02 14/4/26
+Hoàn tất: --
+Cập nhật: 07:02 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 07:02 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot boot-1-42ddd501
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r19-1776124423 · Hiện tại vota-20260414-r19-1776124423
+
+Thành công
+Tiến độ: 100%
+Bắt đầu: 06:54 14/4/26
+Hoàn tất: 06:58 14/4/26
+Cập nhật: 06:58 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 06:54 14/4/26
+
+Phân vùng / boot
+
+Partition ota_1 · Boot boot-1-42ddd501
+
+TRACKER_001
+
+Đích vota-20260414-r17-1776123841 · Hiện tại vota-20260414-r17-1776123841
+
+Thành công
+Tiến độ: 100%
+Bắt đầu: 06:44 14/4/26
+Hoàn tất: 06:48 14/4/26
+Cập nhật: 06:48 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 06:44 14/4/26
+
+Phân vùng / boot
+
+Partition ota_0 · Boot boot-1-7830f0db
+
+TRACKER_001
+
+Đích vota-20260414-r16-1776123178 · Hiện tại vota-20260414-r15-1776121864
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 06:33 14/4/26
+Hoàn tất: --
+Cập nhật: 06:33 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 06:33 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot boot-1-d6fea875
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r15-1776121864 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 06:11 14/4/26
+Hoàn tất: --
+Cập nhật: 06:11 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 06:11 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r14-1776118245 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 05:11 14/4/26
+Hoàn tất: --
+Cập nhật: 05:11 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 05:11 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r13-1776115831 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 04:50 14/4/26
+Hoàn tất: --
+Cập nhật: 04:50 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 04:50 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r13-1776115831 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 04:30 14/4/26
+Hoàn tất: --
+Cập nhật: 04:30 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 04:30 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r12-1776115324 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 04:22 14/4/26
+Hoàn tất: --
+Cập nhật: 04:22 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 04:22 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r11-1776114888 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 04:14 14/4/26
+Hoàn tất: --
+Cập nhật: 04:14 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 04:14 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r10-1776114623 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 04:10 14/4/26
+Hoàn tất: --
+Cập nhật: 04:10 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 04:10 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r9-1776114387 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 04:06 14/4/26
+Hoàn tất: --
+Cập nhật: 04:06 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 04:06 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r8-1776114154 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 04:02 14/4/26
+Hoàn tất: --
+Cập nhật: 04:02 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 04:02 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r7-1776113918 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 03:58 14/4/26
+Hoàn tất: --
+Cập nhật: 03:58 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 03:58 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260414-r6-1776113867 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 03:57 14/4/26
+Hoàn tất: --
+Cập nhật: 03:57 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 03:57 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260413-r1 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 03:51 14/4/26
+Hoàn tất: --
+Cập nhật: 03:51 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 03:51 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260413-r2 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 03:47 14/4/26
+Hoàn tất: --
+Cập nhật: 03:47 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 03:47 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+TRACKER_001
+
+Đích vota-20260413-r3 · Hiện tại --
+
+Bị kẹt (timeout)
+Tiến độ: 0%
+Bắt đầu: 03:43 14/4/26
+Hoàn tất: --
+Cập nhật: 03:43 14/4/26
+
+Mô tả ngữ cảnh
+
+Command đã gửi lúc 03:43 14/4/26
+
+Phân vùng / boot
+
+Chưa có partition · Boot --
+
+Lý do kẹt: assigned_timeout
+
+Cân bằng phát hành
+
+Danh sách active/inactive để quản lý vòng đời firmware.
+
+Active: 0
+Inactive: 21
+Tổng: 21
+Ngữ cảnh dữ liệu
+
+Thiết bị, phiên bản hiện tại và trạng thái OTA lấy trực tiếp từ API firmware.
+
+Thiết bị dùng OTA
+4
+Bản phát hành mới nhất
+vota-20260414-badsha2-1776125474
+Trạng thái triển khai gần nhất
+Thành công
+Kiểu trạng thái gần nhất
+Bình thường

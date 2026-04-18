@@ -59,21 +59,30 @@ export const getGeofenceColumns = (actions: {
   {
     id: 'actions',
     meta: { label: 'Thao tác' },
-    cell: ({ row }) => (
-      <div className="flex flex-wrap gap-1">
-        <Button size="sm" variant="outline" asChild>
-          <Link href={`/dashboard/operations/geofences/${row.original.id}`}>Chi tiết</Link>
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => actions.onManageVehicles(row.original)}>
-          Quản lý xe
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => actions.onEdit(row.original)}>
-          Sửa
-        </Button>
-        <Button size="sm" variant="destructive" onClick={() => actions.onDelete(row.original)}>
-          Xóa
-        </Button>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const isQuickEditSupported = row.original.geofenceType === 'circle';
+
+      return (
+        <div className="flex flex-wrap gap-1">
+          <Button size="sm" variant="outline" asChild>
+            <Link href={`/dashboard/operations/geofences/${row.original.id}`}>Chi tiết</Link>
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => actions.onManageVehicles(row.original)}>
+            Quản lý xe
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!isQuickEditSupported}
+            onClick={() => actions.onEdit(row.original)}
+          >
+            {isQuickEditSupported ? 'Sửa nhanh' : 'Chỉ hỗ trợ hình tròn'}
+          </Button>
+          <Button size="sm" variant="destructive" onClick={() => actions.onDelete(row.original)}>
+            Xóa
+          </Button>
+        </div>
+      );
+    },
   },
 ];

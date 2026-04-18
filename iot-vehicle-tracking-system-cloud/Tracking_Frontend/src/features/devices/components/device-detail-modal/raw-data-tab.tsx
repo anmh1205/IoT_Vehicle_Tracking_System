@@ -3,10 +3,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import type { DeviceRawFeedRow } from '@/features/devices/types';
 import { formatDateTime, formatDuration } from '@/lib/utils/date/format';
 import { DeviceDetailEmptyState } from './empty-state';
 import { useDeviceDetailModal } from './modal-context';
-import { normalizeObdSampleAgeMs } from './normalize-obd-sample-age';
+import { extractDiagnosticsSnapshotFromRow } from './obd-diagnostics';
 
 const SOURCE_LABELS: Record<string, string> = {
   telemetry: 'Telemetry',
@@ -84,86 +85,121 @@ const formatSessionCadence = (payload: Record<string, unknown>): string => {
   return `${formatDuration(Math.max(1, Math.round(uptime / dataPoints)))} / điểm`;
 };
 
-const extractHighlights = (row: { source: string; payload: Record<string, unknown> }) => {
+interface RawMatrixRow {
+  code: string;
+  label: string;
+  meaning: string;
+  value: string;
+}
+
+const rowItem = (
+  code: string,
+  label: string,
+  meaning: string,
+  value: unknown,
+): RawMatrixRow => ({
+  code,
+  label,
+  meaning,
+  value: stringifyValue(value),
+});
+
+const extractMatrixRows = (row: Pick<DeviceRawFeedRow, 'source' | 'payload'>): RawMatrixRow[] => {
   const payload = toRecord(row.payload) ?? {};
 
   if (row.source === 'telemetry') {
     return [
-      ['Tốc độ', stringifyValue(payload.speed)],
-      ['Vĩ độ', stringifyValue(payload.latitude)],
-      ['Kinh độ', stringifyValue(payload.longitude)],
-      ['Pin', stringifyValue(payload.battery)],
-      ['Nhiệt độ', stringifyValue(payload.temperature)],
-      ['Mã lỗi', stringifyValue(payload.errorCode)],
+      rowItem('spd', 'Tốc độ', 'Tốc độ hiện tại trong bản tin telemetry.', payload.speed),
+      rowItem('lat', 'Vĩ độ', 'Tọa độ vĩ độ từ GPS.', payload.latitude),
+      rowItem('lon', 'Kinh độ', 'Tọa độ kinh độ từ GPS.', payload.longitude),
+      rowItem('bb', 'Pin thiết bị', 'Pin/điện áp nuôi tracker.', payload.deviceBattery ?? payload.battery),
+      rowItem('bt', 'Ắc quy xe', 'Điện áp nguồn phía xe hoặc OBD.', payload.vehicleBattery),
+      rowItem('temp', 'Nhiệt độ động cơ', 'Nhiệt độ vận hành ưu tiên từ động cơ hoặc coolant.', payload.engineTemperature ?? payload.temperature),
+      rowItem('err', 'Mã lỗi', 'Mã lỗi kỹ thuật được firmware gửi kèm bản tin.', payload.errorCode),
     ];
   }
 
   if (row.source === 'command') {
     return [
-      ['Lệnh', stringifyValue(payload.command)],
-      ['Trạng thái', stringifyValue(payload.status)],
-      ['Gửi lúc', stringifyValue(payload.sentAt ?? payload.sent_at)],
-      ['ACK lúc', stringifyValue(payload.ackedAt ?? payload.acked_at)],
+      rowItem('command', 'Lệnh', 'Tên command được cloud phát xuống thiết bị.', payload.command),
+      rowItem('status', 'Trạng thái', 'Trạng thái gửi/ack hiện tại của command.', payload.status),
+      rowItem('sent_at', 'Gửi lúc', 'Thời điểm command được phát đi.', payload.sentAt ?? payload.sent_at),
+      rowItem('acked_at', 'ACK lúc', 'Thời điểm thiết bị phản hồi ACK.', payload.ackedAt ?? payload.acked_at),
     ];
   }
 
   if (row.source === 'error') {
     return [
-      ['Mã lỗi', stringifyValue(payload.errorCode ?? payload.error_code)],
-      ['Mô tả', stringifyValue(payload.description ?? payload.message)],
-      ['Xảy ra lúc', stringifyValue(payload.occurredAt ?? payload.occurred_at)],
-      ['Đã xử lý', stringifyValue(payload.resolvedAt ?? payload.resolved_at)],
+      rowItem('error_code', 'Mã lỗi', 'Mã lỗi do thiết bị hoặc cloud ghi nhận.', payload.errorCode ?? payload.error_code),
+      rowItem('description', 'Mô tả', 'Diễn giải lỗi để vận hành xử lý.', payload.description ?? payload.message),
+      rowItem('occurred_at', 'Xảy ra lúc', 'Thời điểm lỗi phát sinh.', payload.occurredAt ?? payload.occurred_at),
+      rowItem('resolved_at', 'Đã xử lý', 'Thời điểm lỗi được đóng hoặc xóa.', payload.resolvedAt ?? payload.resolved_at),
     ];
   }
 
   if (row.source === 'obd-diagnostic') {
-    const diagnostics =
-      toRecord(payload.diagnostics) ?? toRecord(toRecord(payload.context)?.diagnostics) ?? {};
-    const channel = toRecord(diagnostics.channel) ?? {};
-    const signals = toRecord(diagnostics.signals) ?? {};
-    const quality = toRecord(diagnostics.quality) ?? {};
-    const dtc = toRecord(diagnostics.dtc) ?? {};
+    const snapshot = extractDiagnosticsSnapshotFromRow(row);
 
     return [
-      ['BLE OBD', stringifyValue(channel.ble_obd_connected)],
-      ['ELM ready', stringifyValue(channel.elm_ready)],
-      ['ECU state', stringifyValue(channel.ecu_state)],
-      ['MIL', stringifyValue(diagnostics.mil_on)],
-      ['RPM', stringifyValue(signals.rpm)],
-      ['Tốc độ OBD', stringifyValue(signals.obd_speed_kph)],
-      ['Coolant', stringifyValue(signals.coolant_c)],
-      ['Độ trễ mẫu', stringifyValue(normalizeObdSampleAgeMs(quality.sample_age_ms))],
-      ['Stored DTC', stringifyCodes(dtc.stored)],
-      ['Pending DTC', stringifyCodes(dtc.pending)],
-      ['Permanent DTC', stringifyCodes(dtc.permanent)],
+      rowItem('ble_obd_connected', 'BLE OBD', 'Trạng thái kết nối BLE tới adapter OBD.', snapshot?.bleConnected),
+      rowItem('elm_ready', 'ELM ready', 'Adapter ELM đã sẵn sàng nhận PID hay chưa.', snapshot?.elmReady),
+      rowItem('ecu_state', 'Trạng thái ECU', 'Kết quả làm việc hiện tại giữa adapter và ECU.', snapshot?.ecuState),
+      rowItem('mil_on', 'MIL', 'Đèn báo lỗi động cơ do ECU trả về.', snapshot?.milOn),
+      rowItem('rpm', 'RPM', 'Vòng tua động cơ hiện tại.', snapshot?.rpm),
+      rowItem('obd_speed_kph', 'Tốc độ OBD', 'Tốc độ xe do ECU cung cấp.', snapshot?.obdSpeedKph),
+      rowItem('coolant_c', 'Coolant', 'Nhiệt độ nước làm mát động cơ.', snapshot?.coolantC),
+      rowItem('sample_age_ms', 'Độ trễ mẫu', 'Độ cũ của mẫu OBD gần nhất.', snapshot?.sampleAgeMs),
+      {
+        code: 'dtc.stored',
+        label: 'Stored DTC',
+        meaning: 'Mã lỗi đang lưu trong ECU.',
+        value: stringifyCodes(snapshot?.dtcStored),
+      },
+      {
+        code: 'dtc.pending',
+        label: 'Pending DTC',
+        meaning: 'Mã lỗi mới xuất hiện, đang chờ xác nhận.',
+        value: stringifyCodes(snapshot?.dtcPending),
+      },
+      {
+        code: 'dtc.permanent',
+        label: 'Permanent DTC',
+        meaning: 'Mã lỗi đã được ECU đánh dấu thường trực.',
+        value: stringifyCodes(snapshot?.dtcPermanent),
+      },
     ];
   }
 
   if (row.source === 'session') {
     return [
-      ['Trạng thái', stringifyValue(payload.status)],
-      ['Bắt đầu', stringifyValue(payload.serverSessionStart ?? payload.server_session_start)],
-      ['Kết thúc', stringifyValue(payload.serverSessionEnd ?? payload.server_session_end)],
-      ['Uptime', stringifyValue(payload.uptime)],
-      ['Điểm dữ liệu', stringifyValue(payload.dataPointsCount ?? payload.data_points_count)],
-      ['Nhịp ghi nhận', formatSessionCadence(payload)],
+      rowItem('status', 'Trạng thái', 'Trạng thái tổng quát của phiên chạy.', payload.status),
+      rowItem('server_session_start', 'Bắt đầu', 'Mốc server ghi nhận bắt đầu phiên.', payload.serverSessionStart ?? payload.server_session_start),
+      rowItem('server_session_end', 'Kết thúc', 'Mốc server ghi nhận kết thúc phiên.', payload.serverSessionEnd ?? payload.server_session_end),
+      rowItem('uptime', 'Uptime', 'Tổng thời lượng phiên vận hành.', payload.uptime),
+      rowItem('data_points_count', 'Điểm dữ liệu', 'Số điểm telemetry thuộc phiên này.', payload.dataPointsCount ?? payload.data_points_count),
+      {
+        code: 'cadence',
+        label: 'Chu kỳ trung bình',
+        meaning: 'Khoảng thời gian trung bình giữa các điểm dữ liệu trong phiên.',
+        value: formatSessionCadence(payload),
+      },
     ];
   }
 
   if (row.source === 'event-log') {
     return [
-      ['Event type', stringifyValue(payload.event_type ?? payload.topic)],
-      ['Event code', stringifyValue(payload.event_code)],
-      ['Message', stringifyValue(payload.message)],
-      ['Server time', stringifyValue(payload.server_timestamp ?? payload.created_at)],
-      ['Device ID', stringifyValue(payload.device_id ?? payload.deviceId)],
-      ['Topic', stringifyValue(payload.topic)],
+      rowItem('event_type', 'Loại sự kiện', 'Nhóm sự kiện mà backend đã ghi nhận.', payload.event_type ?? payload.topic),
+      rowItem('event_code', 'Mã sự kiện', 'Mã chi tiết để truy vết log.', payload.event_code),
+      rowItem('message', 'Thông điệp', 'Nội dung mô tả ngắn của log.', payload.message),
+      rowItem('server_timestamp', 'Thời gian server', 'Mốc server ghi log.', payload.server_timestamp ?? payload.created_at),
+      rowItem('device_id', 'Thiết bị', 'Thiết bị gắn với bản ghi log.', payload.device_id ?? payload.deviceId),
+      rowItem('topic', 'Topic', 'Topic hoặc luồng phát sinh bản ghi.', payload.topic),
     ];
   }
 
   return Object.entries(payload)
     .slice(0, 6)
-    .map(([key, value]) => [key, stringifyValue(value)]);
+    .map(([key, value]) => rowItem(key, key, 'Trường dữ liệu thô từ payload gốc.', value));
 };
 
 const SummaryTile = ({ label, value }: { label: string; value: string }) => (
@@ -312,13 +348,27 @@ export const RawDataTab = () => {
                   </p>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {extractHighlights(selectedRow).map(([label, value]) => (
-                    <div key={`${selectedRow.id}-${label}`} className="rounded-xl border bg-muted/20 px-3 py-2.5">
-                      <p className="text-xs text-muted-foreground">{label}</p>
-                      <p className="mt-1 text-sm font-semibold break-words">{value}</p>
-                    </div>
-                  ))}
+                <div className="overflow-hidden rounded-xl border">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.9fr)] gap-3 border-b bg-muted/30 px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                    <p>Mã</p>
+                    <p>Ý nghĩa</p>
+                    <p>Giá trị</p>
+                  </div>
+                  <div className="divide-y">
+                    {extractMatrixRows(selectedRow).map((item) => (
+                      <div
+                        key={`${selectedRow.id}-${item.code}`}
+                        className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.9fr)] gap-3 px-3 py-2.5 text-sm"
+                      >
+                        <div>
+                          <p className="font-mono text-xs text-foreground">{item.code}</p>
+                          <p className="text-xs text-muted-foreground">{item.label}</p>
+                        </div>
+                        <p className="text-xs leading-5 text-muted-foreground">{item.meaning}</p>
+                        <p className="break-words font-medium">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="rounded-xl border bg-slate-950 p-3 text-slate-100">
@@ -344,3 +394,4 @@ export const RawDataTab = () => {
     </div>
   );
 };
+

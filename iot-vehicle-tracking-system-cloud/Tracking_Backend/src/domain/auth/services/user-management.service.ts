@@ -14,6 +14,85 @@ import type {
   UserListQuery,
 } from '@/domain/auth/types/auth.types';
 
+interface NotificationSettings {
+  emailAlerts: boolean;
+  pushAlerts: boolean;
+  alertTypes: string[];
+  channels: {
+    discord: {
+      enabled: boolean;
+      webhookUrl: string | null;
+    };
+    telegram: {
+      enabled: boolean;
+      botToken: string | null;
+      chatId: string | null;
+    };
+  };
+}
+
+const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
+  emailAlerts: true,
+  pushAlerts: true,
+  alertTypes: ['critical', 'high'],
+  channels: {
+    discord: {
+      enabled: false,
+      webhookUrl: null,
+    },
+    telegram: {
+      enabled: false,
+      botToken: null,
+      chatId: null,
+    },
+  },
+};
+
+const extractNotificationSettings = (
+  preferences: Record<string, unknown> | null | undefined,
+): NotificationSettings => {
+  const current = (preferences?.notifications as Record<string, unknown> | undefined) ?? {};
+  const channels = (current.channels as Record<string, unknown> | undefined) ?? {};
+  const discord = (channels.discord as Record<string, unknown> | undefined) ?? {};
+  const telegram = (channels.telegram as Record<string, unknown> | undefined) ?? {};
+
+  return {
+    emailAlerts:
+      typeof current.emailAlerts === 'boolean' ? current.emailAlerts : DEFAULT_NOTIFICATION_SETTINGS.emailAlerts,
+    pushAlerts:
+      typeof current.pushAlerts === 'boolean' ? current.pushAlerts : DEFAULT_NOTIFICATION_SETTINGS.pushAlerts,
+    alertTypes: Array.isArray(current.alertTypes) && current.alertTypes.length > 0
+      ? current.alertTypes.filter((value): value is string => typeof value === 'string')
+      : [...DEFAULT_NOTIFICATION_SETTINGS.alertTypes],
+    channels: {
+      discord: {
+        enabled:
+          typeof discord.enabled === 'boolean'
+            ? discord.enabled
+            : DEFAULT_NOTIFICATION_SETTINGS.channels.discord.enabled,
+        webhookUrl:
+          typeof discord.webhookUrl === 'string' && discord.webhookUrl.trim().length > 0
+            ? discord.webhookUrl
+            : null,
+      },
+      telegram: {
+        enabled:
+          typeof telegram.enabled === 'boolean'
+            ? telegram.enabled
+            : DEFAULT_NOTIFICATION_SETTINGS.channels.telegram.enabled,
+        botToken:
+          typeof telegram.botToken === 'string' && telegram.botToken.trim().length > 0
+            ? telegram.botToken
+            : null,
+        chatId:
+          typeof telegram.chatId === 'string' && telegram.chatId.trim().length > 0
+            ? telegram.chatId
+            : null,
+      },
+    },
+  };
+};
+
 export const listUsers = async (
   query: UserListQuery,
 ): Promise<{
@@ -130,10 +209,27 @@ export const updateProfile = async (
   return sanitizeUser(updated);
 };
 
+export const getNotificationPreferences = async (userId: number): Promise<NotificationSettings> => {
+  const existing = await userRepo.findById(userId);
+  if (!existing) {
+    throw createNotFoundError(`User with id ${userId} not found`);
+  }
+
+  return extractNotificationSettings(existing.preferences);
+};
+
 export const updateNotificationPreferences = async (
   userId: number,
-  input: { emailAlerts?: boolean; pushAlerts?: boolean; alertTypes?: string[] },
-): Promise<UserPublic> => {
+  input: {
+    emailAlerts?: boolean;
+    pushAlerts?: boolean;
+    alertTypes?: string[];
+    channels?: {
+      discord?: { enabled?: boolean; webhookUrl?: string | null };
+      telegram?: { enabled?: boolean; botToken?: string | null; chatId?: string | null };
+    };
+  },
+): Promise<{ preferences: NotificationSettings }> => {
   const existing = await userRepo.findById(userId);
   if (!existing) {
     throw createNotFoundError(`User with id ${userId} not found`);
@@ -142,12 +238,42 @@ export const updateNotificationPreferences = async (
   const nextPreferences = {
     ...(existing.preferences ?? {}),
     notifications: {
-      ...((existing.preferences as Record<string, unknown> | null)?.notifications as
-        | Record<string, unknown>
-        | undefined),
+      ...extractNotificationSettings(existing.preferences),
       ...(input.emailAlerts !== undefined ? { emailAlerts: input.emailAlerts } : {}),
       ...(input.pushAlerts !== undefined ? { pushAlerts: input.pushAlerts } : {}),
       ...(input.alertTypes !== undefined ? { alertTypes: input.alertTypes } : {}),
+      channels: {
+        ...extractNotificationSettings(existing.preferences).channels,
+        ...(input.channels?.discord
+          ? {
+              discord: {
+                ...extractNotificationSettings(existing.preferences).channels.discord,
+                ...(input.channels.discord.enabled !== undefined
+                  ? { enabled: input.channels.discord.enabled }
+                  : {}),
+                ...(input.channels.discord.webhookUrl !== undefined
+                  ? { webhookUrl: input.channels.discord.webhookUrl }
+                  : {}),
+              },
+            }
+          : {}),
+        ...(input.channels?.telegram
+          ? {
+              telegram: {
+                ...extractNotificationSettings(existing.preferences).channels.telegram,
+                ...(input.channels.telegram.enabled !== undefined
+                  ? { enabled: input.channels.telegram.enabled }
+                  : {}),
+                ...(input.channels.telegram.botToken !== undefined
+                  ? { botToken: input.channels.telegram.botToken }
+                  : {}),
+                ...(input.channels.telegram.chatId !== undefined
+                  ? { chatId: input.channels.telegram.chatId }
+                  : {}),
+              },
+            }
+          : {}),
+      },
     },
   };
 
@@ -160,5 +286,5 @@ export const updateNotificationPreferences = async (
   }
 
   logger.info(`User "${updated.username}" updated notification preferences`);
-  return sanitizeUser(updated);
+  return { preferences: extractNotificationSettings(updated.preferences) };
 };

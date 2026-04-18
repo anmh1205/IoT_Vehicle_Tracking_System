@@ -172,27 +172,27 @@ Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt N
 
 Ở tầng thiết bị, hệ thống được xây dựng trên bo mạch PCB tự thiết kế. Trong đó, ESP32-S3 giữ vai trò bộ điều khiển trung tâm; SIM7600CE-T đảm nhiệm truyền dữ liệu 4G và định vị vệ tinh GNSS; LIS3DSH theo dõi rung động để nhận biết chuyển động khi xe đỗ; còn adapter vgate iCar Pro cho phép đọc dữ liệu OBD2 từ xe qua BLE. Kiến trúc nguồn được tổ chức theo nhiều nhánh để thiết bị vẫn duy trì hoạt động khi xe tắt máy, đồng thời hạn chế ảnh hưởng tới ắc quy chính.
 
-Ở tầng phần mềm, dữ liệu từ thiết bị được gửi bằng MQTT 5.0 tới EMQX. Có thể hiểu MQTT là một cơ chế nhắn tin nhẹ, phù hợp với thiết bị IoT cần gửi nhiều bản tin nhỏ qua mạng di động. Sau đó, MQTT Bridge tiếp nhận và phân luồng dữ liệu tới từng hệ lưu trữ phù hợp: PostgreSQL cho dữ liệu quan hệ và nhật ký OTA, VictoriaMetrics cho dữ liệu chuỗi thời gian, VictoriaLogs cho nhật ký sự kiện. API server được xây dựng bằng Express.js và TypeScript, đóng vai trò kết nối giữa thiết bị, dữ liệu lưu trữ và giao diện khai thác.
+Ở tầng phần mềm, dữ liệu từ thiết bị được gửi bằng MQTT 3.1.1 tới EMQX. MQTT đóng vai trò lớp nhắn tin nhẹ phù hợp với đường truyền 4G, còn EMQX là broker trung tâm tiếp nhận và phân phối bản tin. Từ đây, MQTT Bridge subscribe bốn nhóm topic `v1/{device_id}/{rawdata|status|events|firmware}`, chuẩn hóa payload rồi phân luồng dữ liệu tới PostgreSQL, VictoriaMetrics và VictoriaLogs. Song song với luồng ingest, backend còn lắng nghe nhánh `internal/events/#` để đẩy cập nhật thời gian thực ra giao diện qua Socket.IO.
 
 Bảng điều khiển web được phát triển bằng Next.js 15 và React 19, hiển thị bản đồ, biểu đồ và trạng thái phương tiện gần như theo thời gian thực thông qua Socket.IO. Nhờ đó, người vận hành không chỉ quan sát vị trí xe mà còn có thể theo dõi lịch sử hành trình, cảnh báo và trạng thái thiết bị trên cùng một giao diện thống nhất.
 
-Kết quả đạt được là một hệ thống IoT giám sát phương tiện hoàn chỉnh từ phần cứng đến phần mềm, có khả năng theo dõi vị trí thời gian thực, đọc dữ liệu chẩn đoán OBD2, thiết lập hàng rào địa lý, phát sinh cảnh báo tự động, cập nhật firmware từ xa và hỗ trợ quản lý đội xe. Quan trọng hơn, hệ thống cho thấy một hướng triển khai phù hợp với bối cảnh doanh nghiệp cho thuê xe tự lái trong nước: chi phí hợp lý, có thể tùy biến và đủ dư địa để mở rộng trong các giai đoạn sau.
+Kết quả đạt được là một hệ thống IoT giám sát phương tiện hoàn chỉnh từ phần cứng đến phần mềm, có khả năng theo dõi vị trí thời gian thực, đọc dữ liệu chẩn đoán OBD2, thiết lập vùng cho phép, phát sinh cảnh báo tự động, cập nhật firmware từ xa và hỗ trợ quản lý đội xe. Quan trọng hơn, hệ thống cho thấy một hướng triển khai phù hợp với bối cảnh doanh nghiệp cho thuê xe tự lái trong nước: chi phí hợp lý, có thể tùy biến và đủ dư địa để mở rộng trong các giai đoạn sau.
 
-**Từ khóa:** IoT, giám sát phương tiện, GPS, OBD2, MQTT, ESP32-S3, thời gian thực, hàng rào địa lý
+**Từ khóa:** IoT, giám sát phương tiện, GPS, OBD2, MQTT, ESP32-S3, thời gian thực, vùng cho phép
 
 **Abstract (English)**
 
 As the self-drive car rental market in Vietnam grows, the need for remote vehicle monitoring and real-time fleet management becomes increasingly practical for operators. This thesis presents the design and development of an end-to-end IoT vehicle tracking system, covering the onboard device, cloud services, and operational dashboard for real-time tracking, diagnostic data collection, and alerting.
 
-On the hardware side, the tracker is implemented as a custom integrated PCB rather than an assembly of off-the-shelf development boards. The main board integrates ESP32-S3 (MCU), SIMCom SIM7600CE-T (LTE+GNSS), LIS3DSH (IMU), DS3231M (RTC), W25Q128 (SPI Flash), and power blocks based on MP2482, TPS54231, AP2112, SX1308, and TP4056. The modem is configured to Auto mode (`AT+CNMP=2`) so it can switch between LTE/UMTS/GSM automatically, uses the default APN `internet`, and delivers GNSS data via `AT+CGNSINF` (with optional NMEA streaming through `AT+CGNSTST`) on the same UART1 channel. The device reads engine diagnostic data via OBD2 through a vgate iCar Pro adapter over Bluetooth Low Energy (BLE), where this adapter is an external peripheral outside the main PCB. The power architecture uses a 5V main rail, an approximately 4V modem rail, a 3.3V logic rail, and a 18650 1S backup cell to maintain operation when the vehicle engine is off.
+On the hardware side, the tracker is implemented as a custom integrated PCB rather than an assembly of off-the-shelf development boards. The main board integrates ESP32-S3 (MCU), SIMCom SIM7600CE-T (LTE+GNSS), LIS3DSH (IMU), DS3231M (RTC), W25Q128 (SPI Flash), and power blocks based on MP2482, TPS54231, AP2112, SX1308, and TP5100. The modem is configured to Auto mode (`AT+CNMP=2`) so it can switch between LTE/UMTS/GSM automatically, uses the default APN `internet`, and delivers GNSS data via `AT+CGNSINF` (with optional NMEA streaming through `AT+CGNSTST`) on the same UART1 channel. The device reads engine diagnostic data via OBD2 through a vgate iCar Pro adapter over Bluetooth Low Energy (BLE), where this adapter is an external peripheral outside the main PCB. The power architecture uses a 5V main rail, an approximately 4V modem rail, a 3.3V logic rail, and a 18650 1S backup cell charged through the TP5100 in 1-cell mode to maintain operation when the vehicle engine is off.
 
-On the software side, device data is transmitted through MQTT 5.0 via EMQX with per-device ACL authorization. The MQTT Bridge validates and routes incoming messages to specialized storage systems: PostgreSQL for relational data and OTA update logs, VictoriaMetrics for time-series telemetry, and VictoriaLogs for operational event logs. The API server is built with Express.js and TypeScript following Domain-Driven Design (DDD), using database-backed session token authentication and providing OTA orchestration endpoints for devices.
+On the software side, device data is transmitted through MQTT 3.1.1 via EMQX with per-device ACL authorization. The MQTT Bridge subscribes to the device topics `v1/{deviceId}/{rawdata|status|events|firmware}`, validates the payloads, and routes them to PostgreSQL, VictoriaMetrics, and VictoriaLogs. The backend is built with Express.js and TypeScript in a domain-oriented structure, exposes REST/OpenAPI endpoints, and listens to internal MQTT events so Socket.IO channels can push realtime updates and OTA status back to operators.
 
 The web interface is developed using Next.js 15 and React 19, providing a real-time dashboard with Leaflet maps, ECharts visualizations, and WebSocket connectivity via Socket.IO for instant vehicle position and status updates. The entire system is containerized and deployed using Docker, ensuring consistency between development and production environments.
 
-The result is a complete end-to-end IoT vehicle tracking system, from hardware to software, capable of real-time location tracking, OBD2 diagnostic data retrieval, geofencing, automated alerts, remote firmware updates, and fleet-management support for self-drive car rental services.
+The result is a complete end-to-end IoT vehicle tracking system, from hardware to software, capable of real-time location tracking, OBD2 diagnostic data retrieval, allowed-zone monitoring, automated alerts, remote firmware updates, and fleet-management support for self-drive car rental services.
 
-**Keywords:** IoT, vehicle tracking, GPS, OBD2, MQTT, ESP32-S3, real-time, geofencing
+**Keywords:** IoT, vehicle tracking, GPS, OBD2, MQTT, ESP32-S3, real-time, allowed-zone monitoring
 ---
 
 # LỜI CẢM ƠN - ACKNOWLEDGEMENTS
@@ -357,7 +357,7 @@ Xin chân thành cảm ơn!
 | Hình 4.7 | Kiến trúc nhánh buck 5V chính dùng MP2482 | ...   |
 | Hình 4.8 | Kiến trúc nhánh nguồn dự phòng 5V từ pin 18650 qua SX1308 | ...   |
 | Hình 4.9 | Sơ đồ power path runtime giữa nhánh chính và nhánh backup | ...   |
-| Hình 4.10 | Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng | ...   |
+| Hình 4.10 | Kiến trúc sạc pin TP5100 và đường cấp nguồn dự phòng | ...   |
 | Hình 4.11 | Sơ đồ bố cục bên trong vỏ hộp bảo vệ | ...   |
 | Hình 4.12 | Quy trình lắp ráp phần cứng trên PCB | ...   |
 | Hình 4.13 | Sơ đồ bố trí linh kiện sau khi lắp ráp | ...   |
@@ -367,7 +367,7 @@ Xin chân thành cảm ơn!
 | Hình 4.16a | Chuỗi bước OTA trên firmware từ nhận lệnh đến xác nhận sau reboot | ...   |
 | Hình 4.17 | Lưu đồ thuật toán chính của firmware thiết bị theo dõi xe | ...   |
 | Hình 4.18 | Kiến trúc tổng thể hệ thống Cloud và luồng dữ liệu | ...   |
-| Hình 4.19 | Cấu trúc thư mục hệ thống theo quy ước IVM26 | ...   |
+| Hình 4.19 | Cấu trúc thư mục hệ thống theo mô hình triển khai | ...   |
 | Hình 4.20 | Luồng xử lý dữ liệu của MQTT Bridge | ...   |
 | Hình 4.21 | Cấu trúc thư mục Backend theo kiến trúc DDD | ...   |
 | Hình 4.22 | Cấu trúc thư mục Frontend theo kiến trúc Feature-Sliced | ...   |
@@ -390,11 +390,11 @@ Xin chân thành cảm ơn!
 | Hình 4.39 | Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu) | ...   |
 | Hình 4.40 | Đồ thị hiệu suất hệ thống theo số lượng thiết bị đồng thời | ...   |
 | Hình 4.41 | Kết quả Lighthouse Performance Audit của trang Dashboard | ...   |
-| Hình 4.42 | Screenshot giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ (Leaflet) | ...   |
-| Hình 4.43 | Screenshot biểu đồ dữ liệu OBD2 thời gian thực (ECharts) - RPM, Speed, Coolant Temp | ...   |
-| Hình 4.44 | Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo | ...   |
-| Hình 4.45 | Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị | ...   |
-| Hình 4.46 | Screenshot hành trình trên bản đồ, thể hiện giai đoạn gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối | ...   |
+| Hình 4.42 | Minh họa giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ Leaflet | ...   |
+| Hình 4.43 | Minh họa khung dữ liệu OBD2 thời gian thực trên giao diện (RPM, Speed, Coolant Temp) | ...   |
+| Hình 4.44 | Minh họa màn hình cảnh báo vượt vùng cho phép với bản đồ và vùng theo dõi | ...   |
+| Hình 4.45 | Minh họa luồng gửi lệnh điều khiển từ Dashboard và phản hồi từ thiết bị | ...   |
+| Hình 4.46 | Minh họa quá trình bản đồ cập nhật lại hành trình sau khi phục hồi kết nối | ...   |
 | Hình 4.47 | Biểu đồ so sánh chỉ tiêu thiết kế và kết quả đạt được | ...   |
 | Hình PL-3.1 | Kế hoạch thực hiện dự án theo giai đoạn (24 tuần) | ...   |
 
@@ -487,7 +487,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 
 1. **Theo dõi vị trí thời gian thực (real-time tracking)**: Cung cấp vị trí GPS của xe với tần suất cập nhật 5–30 giây khi xe đang di chuyển, hiển thị trên bản đồ trực tuyến.
 2. **Giám sát trạng thái kỹ thuật qua OBD2**: Kết nối với cổng chẩn đoán OBD-II của xe thông qua giao thức Bluetooth Low Energy (BLE) để đọc các thông số như tốc độ, vòng tua máy, nhiệt độ động cơ, và mã lỗi chẩn đoán (DTC).
-3. **Cảnh báo thông minh**: Tự động phát hiện và gửi thông báo khi có các sự kiện bất thường như: xe vượt ra khỏi vùng địa lý cho phép (geofencing), vượt tốc độ quy định, chuyển động bất thường khi xe đang đỗ, hoặc mất kết nối thiết bị.
+3. **Cảnh báo thông minh**: Tự động phát hiện và gửi thông báo khi có các sự kiện bất thường như: xe vượt ra khỏi vùng cho phép, vượt tốc độ quy định, chuyển động bất thường khi xe đang đỗ, hoặc mất kết nối thiết bị.
 4. **Tối ưu hóa năng lượng**: Đảm bảo thiết bị hoạt động liên tục mà không làm cạn ắc quy xe, với thời lượng pin dự phòng đủ để hoạt động độc lập trong trường hợp mất nguồn chính.
 5. **Giao diện quản lý trực quan**: Cung cấp bảng điều khiển (dashboard) web cho phép người quản lý đội xe theo dõi vị trí, xem lịch sử hành trình, quản lý cảnh báo, và tạo báo cáo.
 
@@ -511,7 +511,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 
 - Phát triển trên nền tảng ESP-IDF với hệ điều hành thời gian thực FreeRTOS
 - Giao tiếp BLE với adapter OBD2
-- Truyền dữ liệu qua giao thức MQTT 5.0
+- Truyền dữ liệu qua giao thức MQTT 3.1.1 qua EMQX, phân tầng QoS 0/1 theo loại bản tin
 - Quản lý năng lượng đa chế độ (driving, parking, alert)
 
 **Phạm vi cloud/backend:**
@@ -536,7 +536,7 @@ Mục tiêu chính của dự án là thiết kế và hiện thực một hệ 
 | Tầng (Layer)   | Công nghệ chính                                                   | Phạm vi                                               |
 | -------------- | ----------------------------------------------------------------- | ----------------------------------------------------- |
 | Phần cứng      | ESP32-S3, SIMCom SIM7600CE-T (LTE + GNSS), vgate iCar Pro, LIS3DSH | Thiết kế PCB, chế tạo và tích hợp thiết bị hoàn chỉnh |
-| Firmware       | ESP-IDF, FreeRTOS, MQTT 5.0                                       | Lập trình nhúng đầy đủ                                |
+| Firmware       | ESP-IDF, FreeRTOS, MQTT 3.1.1, OTA qua HTTPS                      | Lập trình nhúng đầy đủ                                |
 | MQTT Broker    | EMQX 5.x                                                          | Cấu hình và triển khai                                |
 | Backend        | Express.js, TypeScript, PostgreSQL, VictoriaMetrics               | Phát triển API và xử lý dữ liệu                       |
 | Frontend       | Next.js 15, React 19, Leaflet, ECharts                            | Giao diện quản lý web                                 |
@@ -603,7 +603,7 @@ Dự án áp dụng phương pháp **thiết kế từ dưới lên (bottom-up d
 1. **Giai đoạn 1 — Nghiên cứu và thiết kế phần cứng**: Khảo sát các linh kiện sẵn có trên thị trường, lựa chọn dựa trên các tiêu chí về hiệu năng, chi phí, và tính sẵn sàng. Thiết kế sơ đồ mạch, bố trí linh kiện, và tính toán công suất.
 2. **Giai đoạn 2 — Phát triển firmware**: Lập trình nhúng trên nền tảng ESP-IDF, hiện thực các module giao tiếp (BLE OBD2, UART modem, SPI/I2C IMU), quản lý năng lượng, và giao thức MQTT.
 3. **Giai đoạn 3 — Xây dựng hạ tầng cloud**: Triển khai các dịch vụ cơ sở hạ tầng (EMQX, PostgreSQL, VictoriaMetrics) bằng Docker, thiết kế cơ sở dữ liệu, và cấu hình mạng.
-4. **Giai đoạn 4 — Phát triển backend API**: Xây dựng REST API theo kiến trúc Domain-Driven Design, hiện thực các domain (vehicles, devices, telemetry, alerts, geofences), và tích hợp WebSocket cho dữ liệu thời gian thực.
+4. **Giai đoạn 4 — Phát triển backend API**: Xây dựng REST API theo kiến trúc domain-oriented, hiện thực các domain chính như auth, vehicle, device, trip, alert, geofence, maintenance, firmware, telemetry, statistics, notification và violation, đồng thời tích hợp WebSocket cho dữ liệu thời gian thực.
 5. **Giai đoạn 5 — Phát triển frontend**: Xây dựng giao diện web với Next.js 15, tích hợp bản đồ Leaflet, biểu đồ ECharts, và kết nối WebSocket (Socket.IO) để hiển thị dữ liệu trực tuyến.
 6. **Giai đoạn 6 — Tích hợp và kiểm thử**: Tích hợp toàn hệ thống, kiểm thử chức năng, kiểm thử hiệu năng, và tối ưu hóa.
 
@@ -627,7 +627,7 @@ _Hình 1.3: Kiến trúc tổng thể hệ thống IoT Vehicle Tracking_
 
 Hệ thống áp dụng chiến lược tách biệt dữ liệu theo đặc tính:
 
-- **PostgreSQL**: Lưu trữ dữ liệu quan hệ có cấu trúc — thông tin người dùng, xe, khách hàng, hành trình, cảnh báo, vùng địa lý (geofences), lệnh điều khiển.
+- **PostgreSQL**: Lưu trữ dữ liệu quan hệ có cấu trúc — thông tin người dùng, xe, khách hàng, hành trình, cảnh báo, vùng cho phép (bảng `geofences`), lệnh điều khiển.
 - **VictoriaMetrics**: Lưu trữ dữ liệu chuỗi thời gian (time-series) — tọa độ GPS, dữ liệu OBD2, chỉ số cảm biến, với khả năng truy vấn nhanh và lưu trữ dài hạn hiệu quả.
 - **VictoriaLogs**: Lưu trữ nhật ký sự kiện, audit trail, và các bản ghi hoạt động của thiết bị.
 
@@ -712,7 +712,7 @@ Dự án đã đạt được các kết quả chính sau:
 **Về cloud/backend:**
 
 - Xây dựng thành công hạ tầng cloud bao gồm EMQX MQTT Broker, dịch vụ MQTT Bridge, PostgreSQL, VictoriaMetrics và VictoriaLogs, toàn bộ được container hóa bằng Docker.
-- Backend API (Express.js + TypeScript) với kiến trúc Domain-Driven Design, cung cấp các endpoint quản lý xe, thiết bị, telemetry, cảnh báo, geofences, và xác thực người dùng.
+- Backend API (Express.js + TypeScript) với kiến trúc Domain-Driven Design, cung cấp các endpoint quản lý xe, thiết bị, telemetry, cảnh báo, vùng cho phép, và xác thực người dùng.
 - Hệ thống xử lý được >= 100 thiết bị đồng thời với độ trễ end-to-end < 500 ms.
 
 **Về frontend:**
@@ -871,17 +871,17 @@ Việc lựa chọn giao thức truyền thông là một quyết định kỹ t
 | ----------------------------------- | ------------------------------ | ------------------------------------ | ---------------------------- |
 | Dữ liệu quan hệ (users, vehicles)   | Rất tốt (PostgreSQL)           | Trung bình (MongoDB)                 | Tốt (PostgreSQL core)        |
 | Dữ liệu chuỗi thời gian (telemetry) | Rất tốt (VictoriaMetrics)      | Tốt (InfluxDB)                       | Tốt (TimescaleDB extension)  |
-| Hiệu suất ghi (write)               | Cao (VM: hàng triệu điểm/giây) | Cao (InfluxDB: hàng triệu điểm/giây) | Trung bình                   |
-| Nén dữ liệu                         | Rất tốt (VM: 10–70x nén)       | Tốt (InfluxDB: TSM)                  | Tốt (PostgreSQL compression) |
-| Tài nguyên tiêu thụ                 | Thấp (VM: 1–2 GB RAM)          | Cao (InfluxDB: 4+ GB RAM)            | Trung bình                   |
-| Ngôn ngữ truy vấn                   | SQL (PG) + MetricsQL (VM)      | MongoDB Query + Flux/InfluxQL        | SQL                          |
+| Hiệu suất ghi (write)               | Cao (VictoriaMetrics: hàng triệu điểm/giây) | Cao (InfluxDB: hàng triệu điểm/giây) | Trung bình                   |
+| Nén dữ liệu                         | Rất tốt (VictoriaMetrics: 10–70x nén)       | Tốt (InfluxDB: TSM)                  | Tốt (PostgreSQL compression) |
+| Tài nguyên tiêu thụ                 | Thấp (VictoriaMetrics: 1–2 GB RAM)          | Cao (InfluxDB: 4+ GB RAM)            | Trung bình                   |
+| Ngôn ngữ truy vấn                   | SQL (PostgreSQL) + MetricsQL (VictoriaMetrics)      | MongoDB Query + Flux/InfluxQL        | SQL                          |
 | Tích hợp Grafana                    | Có (native)                    | Có                                   | Có                           |
 | Giấy phép                           | Apache 2.0                     | SSPL (MongoDB) + MIT (InfluxDB OSS)  | Apache 2.0 (Community)       |
 | Độ phức tạp vận hành                | Trung bình (2 hệ thống riêng)  | Cao (2 hệ thống khác nhau)           | Thấp (1 hệ thống)            |
 
 **Phân tích lựa chọn:** Sự kết hợp PostgreSQL + VictoriaMetrics được chọn vì:
 
-- **Phân tách trách nhiệm rõ ràng**: PostgreSQL xử lý dữ liệu quan hệ (người dùng, phương tiện, cảnh báo, geofence), VictoriaMetrics xử lý dữ liệu chuỗi thời gian (tọa độ GPS, dữ liệu OBD2, telemetry cảm biến). Mỗi hệ thống được tối ưu cho loại dữ liệu của mình.
+- **Phân tách trách nhiệm rõ ràng**: PostgreSQL xử lý dữ liệu quan hệ (người dùng, phương tiện, cảnh báo, vùng cho phép), VictoriaMetrics xử lý dữ liệu chuỗi thời gian (tọa độ GPS, dữ liệu OBD2, telemetry cảm biến). Mỗi hệ thống được tối ưu cho loại dữ liệu của mình.
 - **Hiệu suất và tài nguyên**: VictoriaMetrics có tỷ lệ nén dữ liệu rất cao (10–70x) và tiêu thụ ít RAM hơn InfluxDB, phù hợp với server có tài nguyên hạn chế.
 - **Tương thích Grafana**: Cả hai đều hỗ trợ Grafana native, thuận tiện cho việc xây dựng dashboard giám sát thống nhất mà không cần thêm công cụ trung gian.
 
@@ -1006,7 +1006,7 @@ Hệ thống IoT Vehicle Tracking System liên quan đến nhiều nhóm sử d�
 
 | STT | Bên liên quan                   | Vai trò                | Yêu cầu chính                                                                                                                                                                                   | Mức độ ưu tiên |
 | --- | ------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| 1   | Công ty cho thuê xe             | Chủ sở hữu hệ thống    | Giám sát vị trí tất cả xe theo thời gian thực; Nhận cảnh báo khi xe đi ra khỏi vùng cho phép (geofence); Báo cáo hành trình, quãng đường, nhiên liệu; Giảm thiểu thời gian xe đậu không sử dụng | Cao            |
+| 1   | Công ty cho thuê xe             | Chủ sở hữu hệ thống    | Giám sát vị trí tất cả xe theo thời gian thực; Nhận cảnh báo khi xe đi ra khỏi vùng cho phép; Báo cáo hành trình, quãng đường, nhiên liệu; Giảm thiểu thời gian xe đậu không sử dụng | Cao            |
 | 2   | Tài xế / Người thuê xe          | Người vận hành xe      | Không bị giám sát quá mức (quyền riêng tư); Thiết bị không ảnh hưởng đến vận hành xe; Không rút cạn ắc quy xe                                                                                   | Trung bình     |
 | 3   | Quản trị viên hệ thống          | Người quản lý kỹ thuật | Giao diện quản lý dễ sử dụng; Hệ thống ổn định, ít lỗi; Có khả năng theo dõi trạng thái thiết bị (online/offline); Quản lý người dùng và phân quyền                                             | Cao            |
 | 4   | Đội bảo trì                     | Kỹ thuật viên          | Thiết bị dễ lắp đặt và bảo trì; Chẩn đoán lỗi từ xa (remote diagnostics); Cảnh báo bảo trì định kỳ (battery low, thiết bị offline)                                                              | Trung bình     |
@@ -1018,7 +1018,7 @@ Hệ thống IoT Vehicle Tracking System liên quan đến nhiều nhóm sử d�
 
 Đây là nhóm đối tượng trọng tâm của hệ thống. Các yêu cầu của nhóm này tập trung vào ba khía cạnh:
 
-1. _Giám sát và an ninh_: Theo dõi vị trí phương tiện 24/7, phát hiện và cảnh báo ngay khi có bất thường (xe bị di chuyển trái phép, vượt qua geofence, tốc độ vượt ngưỡng). Hệ thống cần gửi thông báo qua nhiều kênh (web dashboard, Telegram bot, email).
+1. _Giám sát và an ninh_: Theo dõi vị trí phương tiện 24/7, phát hiện và cảnh báo ngay khi có bất thường (xe bị di chuyển trái phép, vượt ra khỏi vùng cho phép, tốc độ vượt ngưỡng). Hệ thống cần gửi thông báo qua nhiều kênh (web dashboard, Telegram bot, email).
 2. _Báo cáo và phân tích_: Xuất báo cáo hành trình chi tiết (quãng đường, thời gian, điểm dừng), thống kê nhiên liệu tiêu thụ, đánh giá hành vi lái xe (tốc độ trung bình, số lần phanh gấp). Các báo cáo này giúp tối ưu hóa chi phí vận hành và bảo trì.
 3. _Quản lý đội xe_: Quản lý trạng thái từng phương tiện (đang cho thuê, đang bảo trì, sẵn sàng), lịch bảo trì định kỳ dựa trên số km hoặc thời gian, lịch sử cho thuê và doanh thu theo phương tiện.
 
@@ -1044,7 +1044,7 @@ Yêu cầu của đội bảo trì hướng đến việc giảm thời gian và
 | Yêu cầu bên liên quan  | FC-01 (Vị trí) | FC-02 (OBD2) | FC-03 (Bất thường) | FC-04 (Năng lượng) | FC-05 (Web) |
 | ---------------------- | -------------- | ------------ | ------------------ | ------------------ | ----------- |
 | Giám sát vị trí 24/7   | X              |              |                    | X                  | X           |
-| Cảnh báo geofence      | X              |              |                    |                    | X           |
+| Cảnh báo vượt vùng cho phép | X              |              |                    |                    | X           |
 | Báo cáo nhiên liệu     |                | X            |                    |                    | X           |
 | Phát hiện trộm xe      |                |              | X                  | X                  | X           |
 | Không rút cạn ắc quy   |                |              |                    | X                  |             |
@@ -1124,7 +1124,7 @@ Thay vì chấm điểm tổng quát, Bảng 3.1 đối chiếu trực tiếp c�
 
 **BLE tích hợp:** Đây là ràng buộc cứng vì tracker dùng adapter OBD2 vgate iCar Pro theo chuẩn BLE 4.0. ESP32-S3 và nRF52840 đều đáp ứng trực tiếp bằng BLE 5.0 tích hợp, trong khi STM32L4 phải bổ sung thêm module BLE ngoài. Việc thêm module ngoài không chỉ tăng BOM mà còn phát sinh thêm miền nguồn và công đoạn tích hợp phần cứng.
 
-**Ngân sách UART:** Kiến trúc mục tiêu cần tối thiểu các luồng UART riêng cho modem và kênh debug. ESP32-S3 đáp ứng tốt với 3 UART phần cứng, còn dư địa cho mở rộng. STM32L4 cũng có thể đáp ứng nếu chọn đúng biến thể, nhưng đổi lại phải thêm BLE ngoài. nRF52840 thường chỉ có 2 UART nên dư địa cho debug độc lập hạn chế hơn.
+**Số cổng UART khả dụng:** Kiến trúc mục tiêu cần tối thiểu các luồng UART riêng cho modem và kênh debug. ESP32-S3 đáp ứng tốt với 3 UART phần cứng, còn dư địa cho mở rộng. STM32L4 cũng có thể đáp ứng nếu chọn đúng biến thể, nhưng đổi lại phải thêm BLE ngoài. nRF52840 thường chỉ có 2 UART nên dư địa cho debug độc lập hạn chế hơn.
 
 **Tiêu thụ deep sleep:** STM32L4 và nRF52840 có lợi thế rõ ràng về dòng ngủ sâu theo tài liệu hãng. Tuy nhiên chênh lệch giữa nhóm ESP32-S3 và STM32L4 không quyết định toàn bộ thời lượng pin, vì tracker vẫn chịu tải chính từ modem LTE, GNSS và các chu kỳ wake-up định kỳ. Trong bài toán heartbeat nhiều ngày với pin 1S, chênh lệch này có ý nghĩa nhưng không đủ để bù cho việc tăng độ phức tạp tích hợp [19], [53], [54], [55].
 
@@ -1298,7 +1298,7 @@ Cảm biến đo quán tính (IMU - Inertial Measurement Unit) đóng vai trò t
 
 ##### c) Nguyên lý hoạt động trong hệ thống
 
-LIS3DSH được cấu hình ở chế độ low-power với tần suất lấy mẫu 1 Hz (ODR = 1 Hz) và chỉ bật chức năng motion detection. Khi phát hiện gia tốc vượt ngưỡng 0.2g trên bất kỳ trục nào (X, Y, Z), cảm biến tự động phát tín hiệu interrupt đến chân GPIO của ESP32-S3 thông qua chân INT1, đánh thức vi điều khiển từ trạng thái deep sleep [9].
+LIS3DSH được cấu hình ở chế độ low-power với tần suất lấy mẫu 1 Hz (ODR = 1 Hz) và chỉ bật chức năng motion detection. Khi phát hiện gia tốc vượt ngưỡng 0.2g trên bất kỳ trục nào (X, Y, Z), cảm biến phát tín hiệu interrupt qua chân INT1 để firmware kích hoạt nhánh canh rung. Với wiring hiện tại, INT1 đi vào GPIO41 nên nhánh này dùng GPIO wake trong light sleep; heartbeat định kỳ vẫn dùng timer wake ở deep sleep [9].
 
 Ngưỡng gia tốc 0.2g được chọn để cân bằng giữa độ nhạy và khả năng chống báo giả. Giá trị này đủ lớn để loại bỏ rung nhẹ từ môi trường (gió, xe cộ đi ngang) nhưng đủ nhỏ để phát hiện các chuyển động thực sự như rung của xe hoặc di chuyển.
 
@@ -1314,7 +1314,7 @@ _Hình 3.3a: Sơ đồ chi tiết chân kết nối LIS3DSH với ESP32-S3_
 
 > Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
-Cấu hình I2C sử dụng địa chỉ `0x18`, tốc độ `400 kHz`, với hai điện trở kéo lên `10 kΩ` trên các net `IMU-SCL` và `IMU-SDA`. Ở runtime hiện tại, bus I2C được ánh xạ về `GPIO48` (SCL) và `GPIO47` (SDA), chân `INT1` đi vào `GPIO21` để đánh thức ESP32-S3, còn `INT2` được giữ lại cho mở rộng sau này.
+Cấu hình I2C sử dụng địa chỉ `0x18`, tốc độ `400 kHz`, với hai điện trở kéo lên `10 kΩ` trên các net `IMU-SCL` và `IMU-SDA`. Ở runtime hiện tại, bus I2C được ánh xạ về `GPIO1` (SCL) và `GPIO2` (SDA), chân `INT1` đi vào `GPIO41`, còn `INT2` đi vào `GPIO42` để dành cho các tình huống mở rộng sau này.
 
 ##### d) Ưu điểm của giải pháp
 
@@ -1398,21 +1398,21 @@ LVD dùng ngưỡng profile kép theo firmware:
 
 Ngoài kênh ADC, tín hiệu trạng thái LVD từ khối LVD phần cứng được đưa về **GPIO19 (LVD_STATUS)** để giám sát nhanh. Quy ước runtime: **GPIO19 HIGH = low-voltage**, **GPIO19 LOW = bình thường**.
 
-##### f) Mạch sạc pin 1S (TP4056)
+##### f) Mạch sạc pin 1S (TP5100)
 
-Khối sạc dùng **TP4056**, nhận **5V từ nhánh MP2482** và sạc pin 18650 1S theo chuẩn **4.2V/1S**.
+Khối sạc dùng **TP5100** ở cấu hình **1 cell**, nhận **5V từ nhánh MP2482** và sạc pin 18650 1S tới mức **4.2V**. So với phương án TP4056 trước đây, TP5100 phù hợp hơn với nhánh nguồn dự phòng vì đây là bộ sạc chuyển mạch, giảm tổn hao nhiệt khi nạp.
 
 [Bảng 3.13: Thông số khối sạc pin]
 
 | Khối    | IC     | Input        | Output | Tải          |
 | ------- | ------ | ------------ | ------ | ------------ |
-| Sạc pin | TP4056 | 5V từ MP2482 | 4.2V   | Pin 18650 1S |
+| Sạc pin | TP5100 | 5V từ MP2482 | 4.2V   | Pin 18650 1S |
 
-Dòng sạc TP4056 được thiết lập theo điện trở PROG và giới hạn nhiệt của mạch, vì vậy không dùng một giá trị dòng cố định cho mọi điều kiện vận hành.
+Dòng sạc TP5100 được cấu hình bằng điện trở thiết lập dòng sạc và còn phụ thuộc điều kiện nhiệt của mạch, vì vậy không dùng một giá trị dòng cố định cho mọi điều kiện vận hành.
 
 ##### g) Pin dự phòng 18650 1S Li-ion
 
-Pin 18650 1S Li-ion được chọn làm nguồn dự phòng với cấu hình 1 cell đơn giản, giữ nguyên kiến trúc 1S Li-ion + TP4056 + BMS + SX1308 của hệ thống.
+Pin 18650 1S Li-ion được chọn làm nguồn dự phòng với cấu hình 1 cell đơn giản, giữ nguyên kiến trúc 1S Li-ion + TP5100 + BMS + SX1308 của hệ thống.
 
 [Bảng 3.14: Thông số kỹ thuật pin dự phòng 18650 1S]
 
@@ -1459,7 +1459,7 @@ Kết quả quy đổi cho thấy baseline pin 18650 1S vẫn đủ khả năng 
 | 3   | vgate iCar Pro (OBD2 BLE)    | Cái    | 1   | 367.000                      | BLE 4.0, ELM327 compatible            |
 | 4   | SIMCom SIM7600CE-T           | Bộ     | 1   | 650.000                      | Modem LTE + GNSS tích hợp             |
 | 5   | Pin 18650 1S Li-ion 3500mAh  | Cái    | 1   | 79.000                       | Loại có protection board              |
-| 6   | IC sạc TP4056 + mạch phụ trợ | Cái    | 1   | 25.000                       | Input 5V, output 4.2V, dòng theo PROG |
+| 6   | IC sạc TP5100 + mạch phụ trợ | Cái    | 1   | 25.000                       | Input 5V, output 4.2V, dòng theo điện trở thiết lập |
 | 7   | Mạch LDO AP2112-3.3          | Cái    | 1   | 5.000                        | 5V -> 3.3V cấp ESP32-S3               |
 | 8   | Mạch buck MP2482 5V          | Cái    | 1   | 17.000                       | Bus 5V chính                          |
 | 9   | Mạch buck TPS54231 ~4V       | Cái    | 1   | 9.000                        | 12–24V -> ~4V cấp modem SIM7600CE-T   |
@@ -1480,7 +1480,7 @@ Kết quả quy đổi cho thấy baseline pin 18650 1S vẫn đủ khả năng 
 | Nhóm | Hạng mục                                                                                | Chi phí (VND) |
 | ---- | --------------------------------------------------------------------------------------- | ------------- |
 | A    | Thành phần chính (MCU, cảm biến, modem, OBD2, pin)                                      | 1.231.000     |
-| B    | Quản lý nguồn (AP2112-3.3, MP2482, TPS54231, SX1308, TP4056, diode OR, khối LVD, BMS) | 88.000        |
+| B    | Quản lý nguồn (AP2112-3.3, MP2482, TPS54231, SX1308, TP5100, diode OR, khối LVD, BMS) | 88.000        |
 | C    | Linh kiện phụ trợ (điện trở, tụ, diode, connector)                                      | 53.000        |
 | D    | PCB và vỏ (tùy chọn)                                                                    | 160.000       |
 |      | **Tổng cộng**                                                                           | **1.514.000** |
@@ -1587,15 +1587,11 @@ _Hình 3.6: Sơ đồ tương tác giữa các FreeRTOS task_
 
 Luồng hoạt động tổng thể của firmware được tổ chức theo trình tự sau:
 
-1. **Khởi tạo ngoại vi**: Cấu hình và khởi động các peripheral gồm IMU (LIS3DSH qua I2C), modem SIM7600CE-T (UART1, Auto mode `AT+CNMP=2`, GNSS qua `AT+CGNSINF`), ADC (đọc điện áp), và BLE stack (NimBLE).
-2. **Đọc trạng thái IGN và điện áp ắc quy**: Hệ thống ưu tiên đọc trạng thái động cơ (IGN) trực tiếp từ ECU qua OBD2 BLE. Nếu không kết nối được OBD2, hệ thống fallback sang đo điện áp ắc quy qua ADC theo profile: profile 12V dùng IGN_ON >= 13.0V và IGN_OFF <= 12.0V; profile 24V dùng IGN_ON >= 26.0V và IGN_OFF <= 24.0V.
-3. **Quyết định chế độ hoạt động**: Dựa trên trạng thái IGN và dữ liệu cảm biến, firmware chuyển sang chế độ phù hợp (lái xe, đỗ xe, hoặc cảnh báo).
-4. **Thực thi tác vụ trong từng chế độ**:
-   - **Chế độ lái xe (Driving)**: Kết nối OBD2, theo dõi liên tục, giữ BLE active, gửi telemetry định kỳ.
-   - **Chế độ đỗ xe (Parked)**: Không kết nối OBD2, chuyển sang deep sleep, gửi heartbeat định kỳ.
-   - **Chế độ cảnh báo (Alarm)**: Gửi cảnh báo ngay lập tức, theo dõi liên tục, có thể kết nối OBD2 tùy chọn.
-
-5. **Xử lý sau tác vụ**: Nếu IGN ON, giữ kết nối BLE và không deep sleep. Nếu IGN OFF, ngắt BLE và chuyển sang deep sleep để tiết kiệm năng lượng.
+1. **Khởi tạo và nạp cấu hình**: `app_main()` khởi tạo NVS, nạp `config_t`, ghi nhận wakeup cause, label OTA partition và bộ đếm boot trong ngữ cảnh RTC.
+2. **Bring-up subsystem**: `state_machine_init()` lần lượt khởi tạo ADC, IMU, power manager, modem LTE/GNSS, MQTT client, command handler, RTC DS3231M và hàng đợi cục bộ trên microSD.
+3. **Xác định trạng thái đầu tiên**: Timer wake đi vào `HEARTBEAT`, ngắt IMU EXT0 đi vào `ALARM`, còn khởi động thường đi theo nhánh `INIT -> CHECK_IGN`.
+4. **Điều phối vận hành**: State machine chạy qua các trạng thái `CHECK_IGN`, `DRIVING`, `PARKED`, `ALARM`, `HEARTBEAT`, đồng thời xử lý reconnect mạng, subscribe topic `commands`, OTA pending-confirm và replay dữ liệu từ `offline_queue`.
+5. **Chuẩn bị ngủ sâu**: Khi đủ điều kiện, firmware snapshot ngữ cảnh RTC, tắt BLE/GNSS/LTE, chốt đường nguồn rồi chuyển sang `SLEEP`.
 
 ![Hình 3.7 - Lưu đồ thuật toán luồng hoạt động chính của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-7.svg)
 
@@ -1752,12 +1748,13 @@ Module quản lý nguồn sử dụng các chân GPIO của ESP32-S3 để đi�
 | ---- | ------------- | ------ | ----------------------------------------- |
 | 2    | IGN_IN        | Input  | Đọc trạng thái động cơ (GPIO hoặc OBD2)   |
 | 4    | U_BATT_ADC    | Input  | Đọc điện áp ắc quy (ADC 12-bit)           |
-| 5    | CHARGER_EN    | Output | Điều khiển IC sạc TP4056                  |
+| 5    | CHARGER_EN    | Output | Điều khiển khối sạc TP5100                |
 | 18   | POWER_PATH_EN | Output | Chọn nguồn cấp (ắc quy hoặc pin dự phòng) |
 | 19   | LVD_STATUS    | Input  | Đọc trạng thái LVD từ khối LVD phần cứng  |
-| 21   | LIS3DSH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU              |
-| 47   | LIS3DSH_SDA    | I/O    | Đường dữ liệu I2C                         |
-| 48   | LIS3DSH_SCL    | I/O    | Đường clock I2C                           |
+| 41   | LIS3DSH_INT1   | Input  | Ngắt chính từ cảm biến gia tốc IMU        |
+| 42   | LIS3DSH_INT2   | Input  | Ngắt phụ, đang giữ cho mở rộng            |
+| 2    | LIS3DSH_SDA    | I/O    | Đường dữ liệu I2C                         |
+| 1    | LIS3DSH_SCL    | I/O    | Đường clock I2C                           |
 | 16   | MODEM_UART_TX | Output | UART TX đến modem                         |
 | 17   | MODEM_UART_RX | Input  | UART RX từ modem                          |
 | 26   | MODEM_PWR-KEY  | Output | Điều khiển nguồn modem                    |
@@ -1796,9 +1793,9 @@ _Hình 3.10: Lưu đồ thuật toán điều khiển power path_
 
 > Nguồn: Hình vẽ của tác giả
 
-##### c) Điều khiển IC sạc (TP4056)
+##### c) Điều khiển khối sạc (TP5100)
 
-IC sạc TP4056 được điều khiển qua chân GPIO5 (CHARGER_EN). Logic sạc được thiết kế để bảo vệ cả ắc quy xe lẫn pin dự phòng:
+Khối sạc TP5100 được điều khiển qua chân GPIO5 (CHARGER_EN). Logic sạc được thiết kế để bảo vệ cả ắc quy xe lẫn pin dự phòng:
 
 | Điều kiện                                                     | Trạng thái charger    | Lý do                                               |
 | ------------------------------------------------------------- | --------------------- | --------------------------------------------------- |
@@ -2104,7 +2101,7 @@ Hệ thống Backend/Cloud là tầng điều phối trung tâm của toàn bộ
 
 - **Tiếp nhận dữ liệu liên tục từ nhiều thiết bị**: telemetry gửi theo chu kỳ ngắn, có thể xuất hiện burst khi thiết bị reconnect.
 - **Cập nhật thời gian thực cho dashboard**: dữ liệu vị trí/trạng thái cần phản ánh gần như tức thời cho người vận hành.
-- **Lưu trữ dữ liệu hỗn hợp**: vừa có dữ liệu chuỗi thời gian (GPS, nguồn, IMU; sẵn sàng mở rộng thêm OBD2), vừa có dữ liệu quan hệ nghiệp vụ (xe, người dùng, cảnh báo, geofence).
+- **Lưu trữ dữ liệu hỗn hợp**: vừa có dữ liệu chuỗi thời gian (GPS, nguồn, IMU; sẵn sàng mở rộng thêm OBD2), vừa có dữ liệu quan hệ nghiệp vụ (xe, người dùng, cảnh báo, vùng cho phép).
 - **Chi phí và năng lực vận hành phù hợp đồ án**: ưu tiên self-hosted, dễ triển khai, dễ mở rộng theo từng dịch vụ.
 
 #### 3.3.1.2. So sánh các phương án kiến trúc Cloud
@@ -2161,14 +2158,14 @@ _Hình 3.12a: Luồng dữ liệu chi tiết từ thiết bị đến dashboard_
 
 Luồng dữ liệu chính của hệ thống được tổ chức theo trình tự sau:
 
-1. **Thiết bị IoT** gửi dữ liệu telemetry chính (GNSS, trạng thái nguồn, mức rung, ignition, uptime) lên EMQX Broker thông qua giao thức MQTT 5.0 theo topic có cấu trúc `v1/{device_id}/rawdata`.
+1. **Thiết bị IoT** gửi dữ liệu telemetry chính (GNSS, trạng thái nguồn, mức rung, ignition, uptime) lên EMQX Broker thông qua giao thức MQTT 3.1.1 theo topic có cấu trúc `v1/{device_id}/rawdata`.
 2. **EMQX Broker** tiếp nhận và phân phối message đến các subscriber. Rules Engine của EMQX chủ yếu đóng vai trò lọc/bổ trợ; phần lớn nghiệp vụ cảnh báo vẫn được xử lý tại MQTT Bridge.
-3. **MQTT Bridge** (dịch vụ Node.js độc lập) subscribe các topic từ EMQX, xác thực dữ liệu đầu vào bằng Zod schema, sau đó thực hiện ghi kép (dual write):
+3. **MQTT Bridge** (dịch vụ Node.js độc lập) subscribe các topic `v1/{device_id}/{rawdata|status|events|firmware}`, xác thực dữ liệu đầu vào bằng Zod schema, sau đó thực hiện ghi kép (dual write):
    - Ghi dữ liệu chuỗi thời gian vào **VictoriaMetrics** (vị trí, tốc độ, điện áp, rung, ignition, uptime).
    - Ghi nhật ký sự kiện vào **VictoriaLogs** (kết nối/ngắt kết nối, lỗi, sự kiện MQTT).
    - Cập nhật trạng thái thiết bị vào **PostgreSQL** (trạng thái trực tuyến, phiên làm việc).
-   - Phát sự kiện đến **Socket.IO** để cập nhật thời gian thực cho Dashboard.
-4. **API Server** (Express.js) cung cấp REST API cho Frontend, truy vấn dữ liệu từ PostgreSQL và VictoriaMetrics, đồng thời gửi lệnh điều khiển ngược về thiết bị thông qua EMQX.
+   - Publish các sự kiện nội bộ qua nhánh `internal/events/#` để backend realtime listener tiếp nhận.
+4. **API Server** (Express.js) cung cấp REST API cho Frontend, truy vấn dữ liệu từ PostgreSQL và VictoriaMetrics, đồng thời gửi lệnh điều khiển hoặc OTA ngược về thiết bị qua topic `v1/{device_id}/commands`.
 5. **Frontend** (Next.js) nhận dữ liệu cập nhật thời gian thực qua Socket.IO và dữ liệu lịch sử qua REST API.
 
 ##### c) Mô hình triển khai Docker
@@ -2281,7 +2278,7 @@ Thiết bị -> EMQX -> MQTT Bridge / internal events
                       -> Backend listener -> PostgreSQL + Socket.IO
 ```
 
-Ngoài ra, hệ thống có thể mở rộng thêm rule cho geofence sơ cấp, thống kê traffic theo topic, hoặc phát hiện thiết bị im lặng bất thường để phục vụ vận hành.
+Ngoài ra, hệ thống có thể mở rộng thêm rule cho vùng cho phép cơ bản, thống kê traffic theo topic, hoặc phát hiện thiết bị im lặng bất thường để phục vụ vận hành.
 
 #### 3.3.2.3. Thiết kế cơ sở dữ liệu (Database Architecture Design)
 
@@ -2327,7 +2324,7 @@ PostgreSQL    VictoriaMetrics  VictoriaLogs
 | Alerts      | Ignition/Uptime | Message MQTT
 | Violations  | Dữ liệu IMU   | Nhật ký kiểm toán
 | Commands    |                |
-| Geofences   | Lưu trữ: 30d  | Lưu trữ: 7d
+| Vùng cho phép | Lưu trữ: 30d  | Lưu trữ: 7d
 ```
 
 [Bảng 3.18: So sánh các cơ sở dữ liệu trong hệ thống]
@@ -2353,7 +2350,7 @@ PostgreSQL 16 lưu trữ toàn bộ dữ liệu nghiệp vụ của hệ thống
 | **Khách hàng**             | customers                                | Thông tin khách hàng thuê xe            |
 | **Chuyến đi**              | trips, trip_events, stops                | Hành trình, sự kiện và điểm dừng        |
 | **Cảnh báo & Vi phạm**     | alerts, violations                       | Cảnh báo hệ thống và vi phạm giao thông |
-| **Vùng địa lý**            | geofences, vehicle_geofences             | Vùng địa lý và gán kết với xe           |
+| **Vùng địa lý**            | geofences, vehicle_geofences             | Vùng địa lý và liên kết với xe          |
 | **Lệnh điều khiển**        | commands                                 | Lệnh gửi đến thiết bị                   |
 | **Bảo trì**                | maintenance_records                      | Lịch sử bảo trì phương tiện             |
 | **Nhật ký**                | connection_logs, device_status_history   | Nhật ký kết nối và lịch sử trạng thái   |
@@ -2523,7 +2520,7 @@ Hệ thống hỗ trợ gửi thông báo qua Telegram Bot (thời gian thực) 
 Giao diện người dùng (Frontend) là lớp tương tác trực tiếp giữa người vận hành và hệ thống IoT giám sát phương tiện. Do đó, bài toán thiết kế frontend cần đồng thời đáp ứng các yêu cầu sau:
 
 - **Hiển thị thời gian thực ổn định**: bản đồ, trạng thái thiết bị và cảnh báo phải cập nhật liên tục với độ trễ thấp.
-- **Khả năng mở rộng theo tính năng nghiệp vụ**: quản lý xe, chuyến đi, geofence, cảnh báo, báo cáo cần dễ mở rộng.
+- **Khả năng mở rộng theo tính năng nghiệp vụ**: quản lý xe, chuyến đi, vùng cho phép, cảnh báo, báo cáo cần dễ mở rộng.
 - **Hiệu năng và trải nghiệm người dùng**: tải trang nhanh, điều hướng mượt, responsive tốt trên desktop/mobile.
 - **Dễ triển khai production**: build và đóng gói Docker thuận lợi cho mô hình vận hành đa dịch vụ.
 
@@ -2618,9 +2615,9 @@ Hệ thống áp dụng chiến lược tách biệt giữa trạng thái client
 | Tùy chỉnh marker           | Cao                            | Cao                          | Trung bình             |
 | Offline/Self-hosted tiles  | Hỗ trợ                         | Không                        | Không                  |
 | React integration          | react-leaflet (trưởng thành)   | react-map-gl                 | @react-google-maps/api |
-| Vẽ geofence                | @geoman-io/leaflet-geoman-free | mapbox-gl-draw               | Drawing Manager        |
+| Vẽ vùng cho phép           | @geoman-io/leaflet-geoman-free | mapbox-gl-draw               | Drawing Manager        |
 
-**Kết luận:** Leaflet.js được chọn vì hoàn toàn miễn phí (MIT license), hỗ trợ tự host tile server cho môi trường không có Internet công cộng, và có hệ sinh thái plugin phong phú (MarkerCluster, Geoman cho vẽ geofence). Điều này đặc biệt phù hợp với hệ thống IoT có thể triển khai trong môi trường private network.
+**Kết luận:** Leaflet.js được chọn vì hoàn toàn miễn phí (MIT license), hỗ trợ tự host tile server cho môi trường không có Internet công cộng, và có hệ sinh thái plugin phong phú (MarkerCluster, Geoman cho vẽ vùng cho phép). Điều này đặc biệt phù hợp với hệ thống IoT có thể triển khai trong môi trường private network.
 
 #### 3.4.2.2. Kiến trúc ứng dụng web (Web Application Architecture)
 
@@ -2639,7 +2636,7 @@ src/
  |         +-- trips/              # Trip pages
  |         +-- map/                # Real-time map
  |         +-- alerts/             # Alert pages
- |         +-- geofences/          # Geofence pages
+ |         +-- geofences/          # Trang vùng cho phép
  |
  +-- features/                     # Feature modules (FSD)
  |    +-- vehicles/
@@ -2748,7 +2745,7 @@ _Hình 3.18: Giao diện trang quản lý phương tiện_
 
 ##### c) Quản lý chuyến đi, cảnh báo và vùng địa lý
 
-Trang quản lý chuyến đi cung cấp lịch sử và chi tiết từng chuyến, gồm tuyến đường trên bản đồ, biểu đồ tốc độ theo thời gian và timeline sự kiện. Trang cảnh báo tổng hợp cảnh báo theo badge mức độ nghiêm trọng và hỗ trợ xử lý hàng loạt. Trang geofence cho phép vẽ hình tròn, đa giác hoặc hình chữ nhật trực tiếp trên bản đồ bằng Leaflet Geoman.
+Trang quản lý chuyến đi cung cấp lịch sử và chi tiết từng chuyến, gồm tuyến đường trên bản đồ, biểu đồ tốc độ theo thời gian và timeline sự kiện. Trang cảnh báo tổng hợp cảnh báo theo badge mức độ nghiêm trọng và hỗ trợ xử lý hàng loạt. Trang vùng cho phép cho phép vẽ hình tròn, đa giác hoặc hình chữ nhật trực tiếp trên bản đồ bằng Leaflet Geoman.
 
 [Bảng 3.27: Ma trận các trang chức năng chính]
 
@@ -2761,7 +2758,7 @@ Trang quản lý chuyến đi cung cấp lịch sử và chi tiết từng chuy�
 | Cảnh báo    | `/dashboard/alerts`        | Xem, xử lý cảnh báo                     | Có (cảnh báo mới)        |
 | Vi phạm     | `/dashboard/violations`    | Quản lý vi phạm tốc độ                  | Không                    |
 | Thiết bị    | `/dashboard/devices`       | Quản lý thiết bị IoT                    | Có (trạng thái thiết bị) |
-| Vùng địa lý | `/dashboard/geofences`     | Tạo, sửa geofence trên bản đồ           | Không                    |
+| Vùng địa lý | `/dashboard/geofences`     | Tạo, sửa vùng cho phép trên bản đồ      | Không                    |
 | Bảo trì     | `/dashboard/maintenance`   | Lịch sử bảo trì phương tiện             | Không                    |
 | Thông báo   | `/dashboard/notifications` | Cấu hình Telegram, Email                | Không                    |
 | Cài đặt     | `/dashboard/settings`      | Hồ sơ, quản lý người dùng               | Không                    |
@@ -2772,17 +2769,17 @@ Trang quản lý chuyến đi cung cấp lịch sử và chi tiết từng chuy�
 
 Trang bản đồ thời gian thực (`/dashboard/map`) là tính năng cốt lõi của hệ thống giám sát phương tiện. Kiến trúc tích hợp bản đồ bao gồm ba lớp chính:
 
-![Hình 3.19a - Phân rã lớp bản đồ React Leaflet và kênh Socket.IO](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-19a.svg)
-
-_Hình 3.19a: Phân rã lớp bản đồ React Leaflet và kênh Socket.IO_
-
-> Nguồn: Hình vẽ bổ sung của tác giả
-
 ![Hình 3.19 - Kiến trúc tích hợp bản đồ thời gian thực](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-19.svg)
 
 _Hình 3.19: Kiến trúc tích hợp bản đồ thời gian thực_
 
 > Nguồn: Hình vẽ của tác giả
+
+![Hình 3.19a - Phân rã lớp bản đồ React Leaflet và kênh Socket.IO](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-19a.svg)
+
+_Hình 3.19a: Phân rã lớp bản đồ React Leaflet và kênh Socket.IO_
+
+> Nguồn: Hình vẽ bổ sung của tác giả
 
 ##### b) Cơ chế cập nhật vị trí thời gian thực
 
@@ -2807,7 +2804,7 @@ Hệ thống bao gồm bốn component bản đồ chuyên biệt:
 | ----------- | --------------------------------- | -------------------------------------------------------------------------- |
 | VehicleMap  | `components/map/vehicle-map.tsx`  | Hiển thị tất cả xe trên bản đồ với marker và popup thông tin               |
 | RouteMap    | `components/map/route-map.tsx`    | Hiển thị tuyến đường chuyến đi với polyline và các điểm dừng               |
-| GeofenceMap | `components/map/geofence-map.tsx` | Vẽ và chỉnh sửa vùng địa lý (polygon, circle, rectangle)                   |
+| GeofenceMap | `components/map/geofence-map.tsx` | Vẽ và chỉnh sửa vùng cho phép (polygon, circle, rectangle)                 |
 | MarkerPopup | `components/map/marker-popup.tsx` | Popup hiển thị thông tin xe khi click marker (biển số, tốc độ, trạng thái) |
 
 ![Hình 3.20 - Giao diện trang bản đồ thời gian thực với các marker xe](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-20.svg)
@@ -2850,7 +2847,7 @@ Hệ thống áp dụng các mẫu thiết kế giao diện nhất quán xuyên 
 
 - **Bảng dữ liệu (Data Tables):** Sắp xếp, lọc, phân trang phía server, chọn nhiều dòng, xuất dữ liệu CSV/Excel.
 - **Biểu mẫu (Forms):** React Hook Form + Zod validation, inline error messages, toast notifications (Sonner).
-- **Bản đồ (Maps):** Custom markers với màu theo trạng thái, popup thông tin, drawing tools cho geofence.
+- **Bản đồ (Maps):** Custom markers với màu theo trạng thái, popup thông tin, drawing tools cho vùng cho phép.
 - **Biểu đồ (Charts):** ECharts/Recharts cho telemetry, line chart tốc độ, gauge chart RPM, area chart nhiên liệu/nhiệt độ.
 
 ![Hình 3.22 - Các mẫu thiết kế UI của hệ thống - Data Table, Form, Charts](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-22.svg)
@@ -2905,7 +2902,7 @@ _Hình 3.23: Sơ đồ kiến trúc tổng thể phương án tối ưu_
 **Kiến trúc phân tầng:**
 
 - **Tầng thiết bị (Device Layer):** ESP32-S3 + SIMCom SIM7600CE-T + vgate iCar Pro + LIS3DSH, quản lý nguồn thông minh với pin dự phòng 18650 1S
-- **Tầng truyền thông (Communication Layer):** MQTT 5.0 qua 4G LTE, QoS phân tầng, kết hợp buffer cục bộ microSD và cơ chế replay khi kết nối phục hồi
+- **Tầng truyền thông (Communication Layer):** MQTT 3.1.1 qua 4G LTE, QoS 0/1 theo loại bản tin, kết hợp hàng đợi cục bộ microSD và cơ chế replay khi kết nối phục hồi
 - **Tầng xử lý (Processing Layer):** MQTT Bridge --> dual-write PostgreSQL + VictoriaMetrics, Express.js API (DDD)
 - **Tầng trình bày (Presentation Layer):** Next.js 15, Leaflet maps, Socket.IO real-time, ECharts
 
@@ -2931,17 +2928,17 @@ Chương này trình bày quá trình triển khai giải pháp từ thiết k�
 
 Hệ thống tracker sử dụng ESP32-S3 làm bộ xử lý trung tâm. Vi điều khiển này giao tiếp UART với modem 4G/GNSS, BLE với OBD2, I2C với cảm biến gia tốc và ADC để giám sát điện áp ắc quy. Toàn bộ hệ thống được cấp nguồn bởi mạch quản lý năng lượng thông minh, có khả năng tự động chuyển đổi giữa ắc quy xe và pin dự phòng.
 
-![Hình 4.1a - Bố trí chi tiết các khối phần cứng trong tracker](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-1a.svg)
-
-_Hình 4.1a: Bố trí chi tiết các khối phần cứng trong tracker_
-
-> Nguồn: Hình vẽ UML kỹ thuật của tác giả
-
 ![Hình 4.1 - Sơ đồ khối tổng thể hệ thống tracker IoT](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-1.svg)
 
 _Hình 4.1: Sơ đồ khối tổng thể hệ thống tracker IoT_
 
 > Nguồn: Hình vẽ của tác giả
+
+![Hình 4.1a - Bố trí chi tiết các khối phần cứng trong tracker](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-1a.svg)
+
+_Hình 4.1a: Bố trí chi tiết các khối phần cứng trong tracker_
+
+> Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
 #### b) Khối vi điều khiển và giao tiếp
 
@@ -2964,19 +2961,19 @@ Vi điều khiển ESP32-S3-WROOM-1 được lựa chọn làm nhân xử lý tr
 
 **Giao tiếp BLE với OBD2 adapter:** ESP32-S3 sử dụng BLE 5.0 tích hợp để kết nối với adapter vgate iCar Pro (BLE 4.0). Kết nối này cho phép đọc dữ liệu chẩn đoán xe theo chuẩn OBD-II bao gồm trạng thái khóa điện (IGN), tốc độ động cơ (RPM), vận tốc xe, mức nhiên liệu và mã lỗi chẩn đoán (DTC).
 
-**Giao tiếp I2C với cảm biến LIS3DSH:** Cảm biến gia tốc 3 trục LIS3DSH được kết nối qua bus I2C (GPIO47 SDA, GPIO48 SCL). Cảm biến này đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang đỗ, cho phép đánh thức ESP32-S3 từ chế độ deep sleep thông qua ngắt ngoài (interrupt) khi phát hiện rung động bất thường.
-
-![Hình 4.2a - Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-2a.svg)
-
-_Hình 4.2a: Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3_
-
-> Nguồn: Hình vẽ UML kỹ thuật của tác giả
+**Giao tiếp I2C với cảm biến LIS3DSH:** Cảm biến gia tốc 3 trục LIS3DSH được kết nối qua bus I2C (GPIO2 SDA, GPIO1 SCL). Cảm biến này đảm nhiệm chức năng phát hiện chuyển động (motion detection) khi xe đang đỗ. Với pin mapping hiện tại, tín hiệu INT1 đi vào GPIO41 nên nhánh canh rung dùng GPIO wake trong light sleep; heartbeat định kỳ vẫn dùng timer wake ở deep sleep.
 
 ![Hình 4.2 - Sơ đồ kết nối giữa ESP32-S3 và modem SIM7600CE-T qua UART](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-2.svg)
 
 _Hình 4.2: Sơ đồ kết nối giữa ESP32-S3 và modem SIM7600CE-T qua UART_
 
 > Nguồn: Hình vẽ của tác giả
+
+![Hình 4.2a - Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-2a.svg)
+
+_Hình 4.2a: Sơ đồ chân kết nối SIM7600CE-T với ESP32-S3_
+
+> Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
 #### c) Khối đo điện áp ắc quy
 
@@ -3040,14 +3037,15 @@ Việc phân công chân GPIO của ESP32-S3 được thiết kế đảm bảo 
 | --------- | ------------- | ----------------- | ----------------------------------------------------------------------------- |
 | GPIO 2    | IGN_IN        | Input             | Đọc trạng thái khóa điện (IGN) từ xe hoặc qua OBD2                            |
 | GPIO 4    | U_BATT_ADC    | Input (ADC)       | Đọc điện áp ắc quy xe qua voltage divider (R1=100k, R2=10k)                   |
-| GPIO 5    | CHARGER_EN    | Output            | Điều khiển bật/tắt IC sạc TP4056 (HIGH = sạc, LOW = không sạc)                |
+| GPIO 5    | CHARGER_EN    | Output            | Điều khiển bật/tắt khối sạc TP5100 (HIGH = sạc, LOW = không sạc)              |
 | GPIO 16   | MODEM_UART_TX | Output            | Truyền dữ liệu UART đến modem SIM7600CE-T                                     |
 | GPIO 17   | MODEM_UART_RX | Input             | Nhận dữ liệu UART từ modem SIM7600CE-T                                        |
 | GPIO 18   | POWER_PATH_EN | Output            | Điều khiển nhánh nguồn: LOW = ưu tiên MP2482, HIGH = ưu tiên backup SX1308    |
 | GPIO 19   | LVD_STATUS    | Input             | Đọc trạng thái Low Voltage Disconnect (HIGH = low-voltage, LOW = bình thường) |
-| GPIO 21   | LIS3DSH_INT    | Input (Interrupt) | Nhận tín hiệu ngắt từ cảm biến gia tốc LIS3DSH khi phát hiện chuyển động       |
-| GPIO 47   | LIS3DSH_SDA    | I/O (I2C)         | Đường dữ liệu I2C kết nối với cảm biến LIS3DSH                                 |
-| GPIO 48   | LIS3DSH_SCL    | I/O (I2C)         | Đường xung nhịp I2C kết nối với cảm biến LIS3DSH                               |
+| GPIO 41   | LIS3DSH_INT1   | Input (Interrupt) | Nhận tín hiệu ngắt chính từ cảm biến gia tốc LIS3DSH khi phát hiện chuyển động |
+| GPIO 42   | LIS3DSH_INT2   | Input (Interrupt) | Dự phòng cho ngắt thứ hai của cảm biến LIS3DSH                                 |
+| GPIO 2    | LIS3DSH_SDA    | I/O (I2C)         | Đường dữ liệu I2C kết nối với cảm biến LIS3DSH                                 |
+| GPIO 1    | LIS3DSH_SCL    | I/O (I2C)         | Đường xung nhịp I2C kết nối với cảm biến LIS3DSH                               |
 | GPIO 26   | MODEM_PWR-KEY  | Output            | Điều khiển bật/tắt nguồn modem SIM7600CE-T                                    |
 
 #### b) Các lưu ý về phân công chân
@@ -3056,11 +3054,11 @@ Việc phân công chân GPIO cần tuân thủ một số ràng buộc kỹ thu
 
 - **GPIO 34–39** chỉ hỗ trợ chế độ input, không có điện trở pull-up/pull-down nội. Do đó, các chân này không được sử dụng cho các tín hiệu output trong thiết kế này.
 - **Các chân ADC** nằm trong dải GPIO 0–15 và GPIO 25–27, hỗ trợ độ phân giải 12-bit. Chân GPIO 4 được chọn làm kênh ADC đo điện áp vì nằm trong vùng ADC1, cho phép đọc đồng thời với WiFi/BLE.
-- **Deep Sleep Wakeup** hỗ trợ qua hai cơ chế: EXT0 (GPIO 0–31) và EXT1 (GPIO 32–39). Chân GPIO 21 (LIS3DSH_INT) nằm trong vùng EXT0, cho phép đánh thức ESP32-S3 khi cảm biến gia tốc phát hiện rung động.
+- **Wakeup cho nhánh IMU** hiện dùng GPIO wake trong light sleep. Với wiring production hiện tại, chân GPIO 41 không thuộc nhóm RTC GPIO nên không thể dùng EXT0/EXT1 để đánh thức từ deep sleep theo ngắt IMU.
 
 #### c) Sơ đồ đấu nối tổng thể
 
-Sơ đồ đấu nối mô tả cách ánh xạ chân giữa ESP32-S3-WROOM-1 trên PCB chính và các khối phần cứng tích hợp trên bo mạch. Hình 4.5 đã được chuẩn hóa theo pin mapping firmware hiện tại, trong đó `GPIO47/48` dành cho I2C IMU, `GPIO26` điều khiển `PWR-KEY`, `GPIO19` nhận `LVD_STATUS`, và `GPIO4` đo `U_batt`.
+Sơ đồ đấu nối mô tả cách ánh xạ chân giữa ESP32-S3-WROOM-1 trên PCB chính và các khối phần cứng tích hợp trên bo mạch. Hình 4.5 đã được chuẩn hóa theo pin mapping firmware hiện tại, trong đó `GPIO1/2` dành cho I2C IMU, `GPIO41` nhận `INT1`, `GPIO26` điều khiển `PWR-KEY`, `GPIO19` nhận `LVD_STATUS`, và `GPIO4` đo `U_batt`.
 
 Bên cạnh các chân đã đưa vào `pin_map.h`, netlist phần cứng còn thể hiện đầy đủ cụm microSD `J4` theo chuẩn SDMMC 4-bit (`SD-DAT0..3`, `SD-CMD`, `SD-CLK`, `SD-CD`) với pull-up ngoài trên các đường dữ liệu/lệnh. Điều này là nền tảng để firmware triển khai `sd_log_store` và `offline_queue` cho cơ chế lưu đệm cục bộ.
 
@@ -3083,19 +3081,19 @@ Mạch quản lý nguồn là thành phần thiết yếu của hệ thống tra
 3. **Buck ~4V (TPS54231):** Chuyển đổi 12V/24V xuống ~4V cấp modem SIM7600CE-T
 4. **Boost 5V (SX1308):** Tăng áp từ pin 18650 1S (~3.7V) lên 5V dự phòng
 5. **Power path Diode-OR + điều khiển EN:** Tự động duy trì nguồn liên tục giữa nhánh chính và nhánh backup
-6. **Mạch sạc TP4056 + LVD (khối LVD/ADC):** Sạc pin 1S và giám sát ngưỡng điện áp bảo vệ ắc quy
-
-![Hình 4.6a - Kiến trúc power path giữa nguồn xe và pin dự phòng](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-6a.svg)
-
-_Hình 4.6a: Kiến trúc power path giữa nguồn xe và pin dự phòng_
-
-> Nguồn: Hình vẽ UML kỹ thuật của tác giả
+6. **Mạch sạc TP5100 + LVD (khối LVD/ADC):** Sạc pin 1S và giám sát ngưỡng điện áp bảo vệ ắc quy
 
 ![Hình 4.6 - Kiến trúc tổng thể mạch quản lý nguồn](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-6.svg)
 
 _Hình 4.6: Kiến trúc tổng thể mạch quản lý nguồn_
 
 > Nguồn: Hình vẽ của tác giả
+
+![Hình 4.6a - Kiến trúc power path giữa nguồn xe và pin dự phòng](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-6a.svg)
+
+_Hình 4.6a: Kiến trúc power path giữa nguồn xe và pin dự phòng_
+
+> Nguồn: Hình vẽ UML kỹ thuật của tác giả
 
 #### b) LDO 3.3V cho ESP32-S3 (AP2112-3.3)
 
@@ -3166,23 +3164,23 @@ _Hình 4.9: Sơ đồ power path runtime giữa nhánh chính và nhánh backup_
 
 > Nguồn: Hình vẽ của tác giả
 
-#### f) Mạch sạc pin TP4056
+#### f) Mạch sạc pin TP5100
 
-Khối sạc pin dùng **TP4056**, nhận **5V từ MP2482** và sạc pin 18650 1S ở mức 4.2V (1S).
+Khối sạc pin dùng **TP5100** ở cấu hình **1 cell**, nhận **5V từ MP2482** và sạc pin 18650 1S ở mức **4.2V**.
 
-**Bảng 4.7: Khối sạc TP4056**
+**Bảng 4.7: Khối sạc TP5100**
 
 | Khối    | IC     | Input        | Output | Tải          |
 | ------- | ------ | ------------ | ------ | ------------ |
-| Sạc pin | TP4056 | 5V từ MP2482 | 4.2V   | Pin 18650 1S |
+| Sạc pin | TP5100 | 5V từ MP2482 | 4.2V   | Pin 18650 1S |
 
-![Hình 4.10 - Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-10.svg)
+![Hình 4.10 - Kiến trúc sạc pin TP5100 và đường cấp nguồn dự phòng](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-10.svg)
 
-_Hình 4.10: Kiến trúc sạc pin TP4056 và đường cấp nguồn dự phòng_
+_Hình 4.10: Kiến trúc sạc pin TP5100 và đường cấp nguồn dự phòng_
 
 > Nguồn: Hình vẽ của tác giả
 
-Dòng sạc của TP4056 được xác lập theo điện trở PROG và giới hạn nhiệt, không cố định một giá trị trong mọi điều kiện.
+Dòng sạc của TP5100 được cấu hình bằng điện trở thiết lập dòng sạc và còn phụ thuộc điều kiện nhiệt của mạch, không cố định một giá trị trong mọi điều kiện.
 
 #### g) Mạch giám sát điện áp Low Voltage Disconnect (LVD)
 
@@ -3212,7 +3210,7 @@ Vỏ hộp bảo vệ cần đáp ứng các yêu cầu sau:
 
 Bố cục bên trong vỏ hộp được thiết kế theo nguyên tắc phân vùng chức năng:
 
-Bố cục bên trong được chia thành ba vùng rõ ràng: cụm xử lý và truyền thông (`ESP32-S3`, `SIM7600CE-T`), cụm nguồn (`AP2112-3.3`, `MP2482`, `TPS54231`, `SX1308`, `TP4056`, `khối LVD`) và cụm lưu trữ năng lượng (`pin 18650 1S + BMS`). Hình 4.11 thể hiện cách nhóm các khối phần cứng này trong vỏ hộp cùng vị trí anten và cổng OBD2.
+Bố cục bên trong được chia thành ba vùng rõ ràng: cụm xử lý và truyền thông (`ESP32-S3`, `SIM7600CE-T`), cụm nguồn (`AP2112-3.3`, `MP2482`, `TPS54231`, `SX1308`, `TP5100`, `khối LVD`) và cụm lưu trữ năng lượng (`pin 18650 1S + BMS`). Hình 4.11 thể hiện cách nhóm các khối phần cứng này trong vỏ hộp cùng vị trí anten và cổng OBD2.
 
 ![Hình 4.11 - Sơ đồ bố cục bên trong vỏ hộp bảo vệ](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-11.svg)
 
@@ -3261,7 +3259,7 @@ Trong phạm vi đồ án, luồng này vận hành theo giả định **card-pr
 | 3   | vgate iCar Pro (OBD2 BLE)    | Cái    | 1   | 150,000–300,000    | Adapter OBD2 BLE 4.0, tương thích ESP32-S3      |
 | 4   | SIMCom SIM7600CE-T           | Bộ     | 1   | 330,000–500,000    | Modem LTE Cat-4 tích hợp GNSS + anten + khe SIM |
 | 5   | Pin 18650 1S Li-ion 3500mAh  | Cái    | 1   | 100,000–200,000    | Loại có protection board                        |
-| 6   | IC sạc TP4056 + mạch phụ trợ | Cái    | 1   | 20,000–40,000      | Input 5V từ MP2482, output 4.2V, dòng theo PROG |
+| 6   | IC sạc TP5100 + mạch phụ trợ | Cái    | 1   | 20,000–40,000      | Input 5V từ MP2482, output 4.2V, dòng theo điện trở thiết lập |
 | 7   | Mạch LDO AP2112-3.3          | Cái    | 1   | 5,000              | 5V -> 3.3V cho ESP32-S3                         |
 | 8   | Mạch buck MP2482 5V          | Cái    | 1   | 17,000             | Bus 5V chính                                    |
 | 9   | Mạch buck TPS54231 ~4V       | Cái    | 1   | 9,000              | 12–24V -> ~4V cấp modem SIM7600CE-T             |
@@ -3292,13 +3290,13 @@ Trong phạm vi đồ án, luồng này vận hành theo giả định **card-pr
 
 Quy trình lắp ráp mạch điện tử được triển khai theo các bước sau:
 
-**Bước 1 - Kiểm tra linh kiện:** Kiểm tra toàn bộ IC, linh kiện và bán thành phẩm trước khi lắp ráp. Test riêng từng khối chức năng chính (ESP32-S3-WROOM-1, AP2112-3.3, MP2482, TPS54231, SX1308, TP4056, SIM7600CE-T, khối LVD + ADC) để bảo đảm hoạt động đúng.
+**Bước 1 - Kiểm tra linh kiện:** Kiểm tra toàn bộ IC, linh kiện và bán thành phẩm trước khi lắp ráp. Test riêng từng khối chức năng chính (ESP32-S3-WROOM-1, AP2112-3.3, MP2482, TPS54231, SX1308, TP5100, SIM7600CE-T, khối LVD + ADC) để bảo đảm hoạt động đúng.
 
-**Bước 2 - Lắp ráp khối nguồn trên PCB:** Hàn và kiểm tra MP2482 để tạo bus 5V từ nguồn ắc quy xe (12V hoặc 24V). Lắp AP2112-3.3 cấp rail 3.3V cho ESP32-S3 từ bus 5V chính, TPS54231 tạo rail ~4V cho modem SIM7600CE-T, SX1308 tạo 5V backup từ pin 18650 1S, diode OR giữa nhánh 5V chính và nhánh 5V backup, cùng TP4056 kết nối với pin và BMS.
+**Bước 2 - Lắp ráp khối nguồn trên PCB:** Hàn và kiểm tra MP2482 để tạo bus 5V từ nguồn ắc quy xe (12V hoặc 24V). Lắp AP2112-3.3 cấp rail 3.3V cho ESP32-S3 từ bus 5V chính, TPS54231 tạo rail ~4V cho modem SIM7600CE-T, SX1308 tạo 5V backup từ pin 18650 1S, diode OR giữa nhánh 5V chính và nhánh 5V backup, cùng TP5100 kết nối với pin và BMS.
 
 **Bước 3 - Lắp ráp khối xử lý và điều khiển:** Hàn ESP32-S3-WROOM-1, LIS3DSH, khối LVD + ADC và các linh kiện liên quan lên PCB chính. Kiểm tra các chân GPIO theo bảng phân công (Bảng 4.1) và cấp nguồn theo từng rail chức năng (3.3V logic, ~4V modem, 5V bus/backup).
 
-**Bước 4 - Tích hợp các thành phần còn lại:** Lắp modem SIM7600CE-T lên bo mạch, kiểm tra UART1 (GPIO16, GPIO17) và chân `PWR-KEY` (GPIO26), cấu hình lấy dữ liệu GNSS qua `AT+CGNSINF`/`AT+CGNSTST` trên cùng UART, kiểm tra cảm biến LIS3DSH trên I2C (GPIO47, GPIO48), và hiệu chuẩn mạch đo điện áp ắc quy tại GPIO4 (ADC).
+**Bước 4 - Tích hợp các thành phần còn lại:** Lắp modem SIM7600CE-T lên bo mạch, kiểm tra UART1 (GPIO16, GPIO17) và chân `PWR-KEY` (GPIO26), cấu hình lấy dữ liệu GNSS qua `AT+CGNSINF`/`AT+CGNSTST` trên cùng UART, kiểm tra cảm biến LIS3DSH trên I2C (GPIO2, GPIO1), và hiệu chuẩn mạch đo điện áp ắc quy tại GPIO4 (ADC).
 
 **Bước 5 - Kiểm tra tích hợp:** Nạp firmware cơ bản để kiểm tra từng chức năng: đọc ADC, điều khiển GPIO, giao tiếp UART với modem, quét BLE, đọc I2C từ LIS3DSH. Kiểm tra chuyển nguồn tự động bằng cách thay đổi điện áp đầu vào.
 
@@ -3322,7 +3320,7 @@ Sau khi lắp ráp, hệ thống cần được kiểm tra và hiệu chuẩn:
 
 - **Hiệu chuẩn ADC:** So sánh giá trị điện áp đọc từ ADC với giá trị đo từ đồng hồ vạn năng (multimeter). Điều chỉnh hệ số hiệu chỉnh trong firmware nếu cần.
 - **Kiểm tra chuyển nguồn:** Mô phỏng tình huống ắc quy yếu theo profile cấu hình (ví dụ hệ 12V giảm từ 12V xuống dưới 12V), xác nhận hệ thống tự động chuyển sang pin dự phòng.
-- **Kiểm tra sạc pin:** Xác nhận IC sạc TP4056 hoạt động đúng: sạc khi IGN ON, ngừng sạc khi IGN OFF hoặc U_batt thấp.
+- **Kiểm tra sạc pin:** Xác nhận khối sạc TP5100 hoạt động đúng: sạc khi IGN ON, ngừng sạc khi IGN OFF hoặc U_batt thấp.
 - **Kiểm tra giao tiếp:** Xác nhận modem phản hồi lệnh AT qua UART, cảm biến LIS3DSH trả về dữ liệu qua I2C, kết nối BLE với OBD2 adapter thành công.
 
 ---
@@ -3505,14 +3503,15 @@ Việc đồng bộ giữa các mô-đun được thực hiện có chọn lọc
 | ---- | ------------- | ------ | ---------------------------------------- |
 | 2    | IGN_IN        | Input  | Đọc trạng thái khóa điện (hoặc qua OBD2) |
 | 4    | U_BATT_ADC    | Input  | Đọc điện áp ắc quy (ADC 12-bit)          |
-| 5    | CHARGER_EN    | Output | Điều khiển IC sạc TP4056                 |
+| 5    | CHARGER_EN    | Output | Điều khiển khối sạc TP5100               |
 | 16   | MODEM_UART_TX | Output | UART TX đến modem SIM7600CE-T            |
 | 17   | MODEM_UART_RX | Input  | UART RX từ modem SIM7600CE-T             |
 | 18   | POWER_PATH_EN | Output | Chọn nguồn cấp (ắc quy/pin dự phòng)     |
 | 19   | LVD_STATUS    | Input  | Trạng thái từ khối LVD phần cứng         |
-| 21   | LIS3DSH_INT    | Input  | Ngắt từ cảm biến gia tốc IMU             |
-| 47   | LIS3DSH_SDA    | I/O    | I2C data line                            |
-| 48   | LIS3DSH_SCL    | I/O    | I2C clock line                           |
+| 41   | LIS3DSH_INT1   | Input  | Ngắt chính từ cảm biến gia tốc IMU       |
+| 42   | LIS3DSH_INT2   | Input  | Ngắt phụ, đang giữ cho mở rộng           |
+| 2    | LIS3DSH_SDA    | I/O    | Đường dữ liệu I2C                        |
+| 1    | LIS3DSH_SCL    | I/O    | Đường clock I2C                          |
 | 26   | MODEM_PWR-KEY  | Output | Điều khiển nguồn modem                   |
 
 ---
@@ -3900,7 +3899,7 @@ _Hình 4.16a: Chuỗi bước OTA trên firmware từ nhận lệnh đến xác 
 
 #### a) Đọc điện áp và điều khiển nguồn
 
-Module quản lý nguồn thực hiện đọc điện áp ắc quy qua ADC, điều khiển nhánh nguồn theo kiến trúc diode OR + EN, và điều khiển IC sạc TP4056.
+Module quản lý nguồn thực hiện đọc điện áp ắc quy qua ADC, điều khiển nhánh nguồn theo kiến trúc diode OR + EN, và điều khiển khối sạc TP5100.
 
 ```c
 // Đọc điện áp ắc quy qua ADC (12-bit, chia áp)
@@ -3983,11 +3982,12 @@ void enter_deep_sleep(uint32_t sleep_duration_sec)
     // 6. Cấu hình nguồn đánh thức
     //    - Timer: heartbeat định kỳ
     esp_sleep_enable_timer_wakeup(sleep_duration_sec * 1000000ULL);
-    //    - IMU interrupt: phát hiện chuyển động
-    esp_sleep_enable_ext0_wakeup(LIS3DSH_INT, 1);
+    //    - IMU interrupt trên GPIO41: dùng GPIO wake ở light sleep
+    gpio_wakeup_enable(PIN_LIS3DH_INT, GPIO_INTR_HIGH_LEVEL);
+    esp_sleep_enable_gpio_wakeup();
 
-    // 7. Vào deep sleep
-    esp_deep_sleep_start();
+    // 7. Vào light sleep
+    esp_light_sleep_start();
 }
 ```
 
@@ -4174,9 +4174,9 @@ iot-vehicle-tracking-system-cloud/                  # Thư mục gốc của t�
     +-- grafana-data/
 ```
 
-![Hình 4.19 - Cấu trúc thư mục hệ thống theo quy ước IVM26](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-16.svg)
+![Hình 4.19 - Cấu trúc thư mục hệ thống theo mô hình triển khai](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-16.svg)
 
-_Hình 4.19: Cấu trúc thư mục hệ thống theo quy ước IVM26_
+_Hình 4.19: Cấu trúc thư mục hệ thống theo mô hình triển khai_
 
 > Nguồn: Hình dựng từ cấu trúc triển khai thực tế của tác giả
 
@@ -4418,6 +4418,8 @@ client.on("message", (topic, message) => {
 
 Trong các handler này, `handleFirmware()` là mắt xích mới đáng chú ý sau khi bổ sung OTA. Handler này không chỉ kiểm tra payload trạng thái firmware mà còn ghi tiến trình cập nhật vào `firmware_update_log`, đồng thời phát bản ghi sang VictoriaLogs để thuận tiện cho việc truy vết khi cập nhật thất bại hoặc rollback.
 
+Cần phân biệt rõ hai chiều dữ liệu: MQTT Bridge xử lý chiều **thiết bị -> cloud**; còn chiều **cloud -> thiết bị**, đặc biệt với lệnh OTA, do backend publish trực tiếp vào topic `v1/{device_id}/commands` thông qua `device-command.service.ts`. MQTT Bridge chỉ tiếp nhận topic `firmware` khi thiết bị gửi ngược tiến trình cập nhật.
+
 ##### d) Xác thực dữ liệu đầu vào (Payload Validation)
 
 Mỗi message MQTT nhận được đều được xác thực bằng Zod schema trước khi xử lý, giúp chặn sớm payload sai cấu trúc và giảm rủi ro ghi dữ liệu bẩn vào pipeline:
@@ -4454,7 +4456,7 @@ MQTT Bridge thực hiện cơ chế ghi dữ liệu kép (dual-write): dữ li�
 
 - **VictoriaMetrics**: Lưu trữ các metric theo thời gian như `vehicle_latitude`, `vehicle_longitude`, `vehicle_speed`, `vehicle_vibration`, `vehicle_battery_top`, `vehicle_battery_bot`, `vehicle_ignition`, `vehicle_uptime`. Dữ liệu này phục vụ cho truy vấn lịch sử và biểu đồ vận hành.
 - **VictoriaLogs**: Lưu trữ các sự kiện hệ thống như kết nối/ngắt kết nối thiết bị, cảnh báo, lỗi xác thực payload. Dữ liệu này phục vụ cho phân tích và debug.
-- **PostgreSQL**: Cập nhật trạng thái hiện tại của thiết bị (`last_seen_at`, `current_status`), tạo bản ghi phiên hoạt động (session), và lưu các thực thể nghiệp vụ như alert/trip/geofence.
+- **PostgreSQL**: Cập nhật trạng thái hiện tại của thiết bị (`last_seen_at`, `current_status`), tạo bản ghi phiên hoạt động (session), và lưu các thực thể nghiệp vụ như alert, trip và vùng cho phép.
 
 ##### f) Cấu hình Docker cho MQTT Bridge
 
@@ -4694,7 +4696,7 @@ Hệ thống cung cấp các nhóm API endpoint sau:
 | Customers      | `/api/v1/customers` | Có                 | CRUD khách hàng                          |
 | Trips          | `/api/v1/trips`     | Có                 | CRUD chuyến đi, lịch sử                  |
 | Alerts         | `/api/v1/alerts`    | Có                 | Quản lý cảnh báo                         |
-| Geofences      | `/api/v1/geofences` | Có                 | CRUD vùng địa lý                         |
+| Vùng cho phép  | `/api/v1/geofences` | Có                 | CRUD vùng địa lý                         |
 | Firmware       | `/api/v1/firmware`  | Có (admin)         | OTA firmware management                  |
 
 Đặc biệt, nhóm IoT Data (`/api/v1/iot`) không yêu cầu xác thực vì các thiết bị IoT gửi dữ liệu trực tiếp thông qua MQTT hoặc HTTP fallback, và được bảo mật ở tầng EMQX ACL (Access Control List) thay vì ở tầng API.
@@ -4871,7 +4873,7 @@ _Hình 4.24: Giao diện trang quản lý xe_
 > Nguồn: Hình dựng từ giao diện dashboard triển khai bởi tác giả
 
 **Trang bản đồ thời gian thực (`/dashboard/map`):**
-Hiển thị tất cả các xe trên bản đồ Leaflet với vị trí cập nhật thời gian thực thông qua WebSocket. Hỗ trợ: hiển thị marker cho từng xe với popup trạng thái, lọc theo xe hoặc trạng thái, hiển thị vùng địa lý (geofence), và phát lại hành trình (route replay).
+Hiển thị tất cả các xe trên bản đồ Leaflet với vị trí cập nhật thời gian thực thông qua WebSocket. Hỗ trợ: hiển thị marker cho từng xe với popup trạng thái, lọc theo xe hoặc trạng thái, hiển thị vùng cho phép, và phát lại hành trình (route replay).
 
 ![Hình 4.25 - Giao diện bản đồ thời gian thực với vị trí các xe](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-22.svg)
 
@@ -4889,7 +4891,7 @@ _Hình 4.26: Giao diện trang quản lý cảnh báo_
 > Nguồn: Hình dựng từ giao diện dashboard triển khai bởi tác giả
 
 **Trang quản lý vùng địa lý (`/dashboard/geofences`):**
-Cho phép tạo và quản lý các vùng địa lý (geofence) trên bản đồ. Khi xe ra khỏi hoặc vào vùng địa lý đã định nghĩa, hệ thống sẽ tự động tạo cảnh báo.
+Cho phép tạo và quản lý các vùng cho phép trên bản đồ. Khi xe ra khỏi hoặc vào vùng đã định nghĩa, hệ thống sẽ tự động tạo cảnh báo.
 
 **Trang cài đặt thông báo (`/dashboard/notifications`):**
 Cho phép cấu hình kết nối Telegram bot, cài đặt email, lựa chọn loại cảnh báo muốn nhận, lọc theo mức độ nghiêm trọng và xe cụ thể. Có nút gửi thông báo thử nghiệm để kiểm tra cấu hình.
@@ -4912,7 +4914,7 @@ Frontend được triển khai theo 3 giai đoạn chính (Phase 4 là giai đo�
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------- | --------------- |
 | Phase 1: Core Setup          | Project setup, Tailwind + shadcn/ui, theme, layout, auth, API client, React Query                           | Hoàn thành      |
 | Phase 2: Core Features       | Dashboard, vehicle CRUD, customer CRUD, trip management, alert management, device management, real-time map | Hoàn thành      |
-| Phase 3: Advanced Features   | Geofence management, maintenance, notification settings (Telegram + Email), user management, settings       | Hoàn thành      |
+| Phase 3: Advanced Features   | Allowed-zone management, maintenance, notification settings (Telegram + Email), user management, settings   | Hoàn thành      |
 | Phase 4: Booking (tương lai) | Booking, contract, payment, damage reports, reviews                                                         | Chưa triển khai |
 
 ##### f) Cấu hình Docker cho Frontend
@@ -5554,38 +5556,38 @@ Mục này trình bày kết quả kiểm thử luồng dữ liệu end-to-end, 
 | 9   | Dashboard update              | Bản đồ và biểu đồ cập nhật                | Thành công     | ~0.05 giây            |
 |     | **Tổng thời gian end-to-end** | **Từ dữ liệu cảm biến đến hiển thị**      | **Thành công** | **~1–2 giây**         |
 
-![Hình 4.42 - Screenshot giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ (Leaflet)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-33.svg)
+![Hình 4.42 - Minh họa giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ Leaflet](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-33.svg)
 
-_Hình 4.42: Screenshot giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ (Leaflet)_
-
-> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
-
-![Hình 4.43 - Screenshot biểu đồ dữ liệu OBD2 thời gian thực (ECharts) — RPM, Speed, Coolant Temp](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-34.svg)
-
-_Hình 4.43: Screenshot biểu đồ dữ liệu OBD2 thời gian thực (ECharts) — RPM, Speed, Coolant Temp_
+_Hình 4.42: Minh họa giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ Leaflet_
 
 > Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
-#### 4.3.5.2. Kiểm thử cảnh báo Geofence
+![Hình 4.43 - Minh họa khung dữ liệu OBD2 thời gian thực trên giao diện (RPM, Speed, Coolant Temp)](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-34.svg)
 
-**Kịch bản kiểm thử:** Tạo vùng geofence bán kính 1 km quanh một điểm xác định -> Lái xe đi ra khỏi vùng geofence -> Hệ thống phát cảnh báo -> Dashboard hiển thị thông báo.
+_Hình 4.43: Minh họa khung dữ liệu OBD2 thời gian thực trên giao diện (RPM, Speed, Coolant Temp)_
 
-[Bảng 4.32: Kết quả kiểm thử cảnh báo Geofence]
+> Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
+
+#### 4.3.5.2. Kiểm thử cảnh báo vượt vùng cho phép
+
+**Kịch bản kiểm thử:** Tạo vùng cho phép bán kính 1 km quanh một điểm xác định -> Lái xe đi ra khỏi vùng cho phép -> Hệ thống phát cảnh báo -> Dashboard hiển thị thông báo.
+
+[Bảng 4.32: Kết quả kiểm thử cảnh báo vượt vùng cho phép]
 
 | STT | Sự kiện                          | Kết quả                                             | Thời gian phát hiện        | Ghi chú                   |
 | --- | -------------------------------- | --------------------------------------------------- | -------------------------- | ------------------------- |
-| 1   | Xe đi vào vùng geofence          | Hiển thị trạng thái "INSIDE"                        | ~2 giây                    | Cập nhật khi nhận GPS mới |
-| 2   | Xe đi ra khỏi vùng geofence      | Cảnh báo "GEOFENCE_EXIT"                            | ~5 giây                    | Phụ thuộc chu kỳ gửi GPS  |
+| 1   | Xe đi vào vùng cho phép          | Hiển thị trạng thái "INSIDE"                        | ~2 giây                    | Cập nhật khi nhận GPS mới |
+| 2   | Xe đi ra khỏi vùng cho phép      | Cảnh báo "GEOFENCE_EXIT"                            | ~5 giây                    | Phụ thuộc chu kỳ gửi GPS  |
 | 3   | Cảnh báo hiển thị trên Dashboard | Popup notification xuất hiện                        | ~1 giây (từ lúc alert tạo) | Qua WebSocket             |
-| 4   | Xe quay lại vùng geofence        | Hiển thị trạng thái "INSIDE", cảnh báo tự động đóng | ~3 giây                    | Reset tự động             |
+| 4   | Xe quay lại vùng cho phép        | Hiển thị trạng thái "INSIDE", cảnh báo tự động đóng | ~3 giây                    | Reset tự động             |
 
-![Hình 4.44 - Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-35.svg)
+![Hình 4.44 - Minh họa màn hình cảnh báo vượt vùng cho phép với bản đồ và vùng theo dõi](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-35.svg)
 
-_Hình 4.44: Screenshot cảnh báo Geofence trên giao diện Dashboard với bản đồ hiển thị vùng cảnh báo_
+_Hình 4.44: Minh họa màn hình cảnh báo vượt vùng cho phép với bản đồ và vùng theo dõi_
 
 > Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
-**Nhận xét:** Hệ thống phát hiện xe vượt ra khỏi vùng geofence trong vòng ~5 giây (phụ thuộc chu kỳ gửi GPS, mặc định 5 giây). Cảnh báo được hiển thị trên Dashboard trong vòng ~1 giây sau khi Backend tạo alert. Tổng thời gian từ xe vượt ranh giới đến hiển thị cảnh báo là khoảng 5–7 giây, đạt yêu cầu thiết kế (< 10 giây).
+**Nhận xét:** Hệ thống phát hiện xe vượt ra khỏi vùng cho phép trong vòng ~5 giây (phụ thuộc chu kỳ gửi GPS, mặc định 5 giây). Cảnh báo được hiển thị trên Dashboard trong vòng ~1 giây sau khi Backend tạo alert. Tổng thời gian từ xe vượt ranh giới đến hiển thị cảnh báo là khoảng 5–7 giây, đạt yêu cầu thiết kế (< 10 giây).
 
 #### 4.3.5.3. Kiểm thử lệnh điều khiển từ xa (Remote Command)
 
@@ -5600,9 +5602,9 @@ _Hình 4.44: Screenshot cảnh báo Geofence trên giao diện Dashboard với b
 | 3   | restart_device    | Khởi động lại thiết bị        | Thành công | ~15 giây (bao gồm thời gian restart) |
 | 4   | enable_alert_mode | Bật chế độ cảnh báo           | Thành công | ~2 giây                              |
 
-![Hình 4.45 - Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-36.svg)
+![Hình 4.45 - Minh họa luồng gửi lệnh điều khiển từ Dashboard và phản hồi từ thiết bị](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-36.svg)
 
-_Hình 4.45: Screenshot giao diện gửi lệnh điều khiển từ Dashboard và kết quả phản hồi từ thiết bị_
+_Hình 4.45: Minh họa luồng gửi lệnh điều khiển từ Dashboard và phản hồi từ thiết bị_
 
 > Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
@@ -5622,9 +5624,9 @@ _Hình 4.45: Screenshot giao diện gửi lệnh điều khiển từ Dashboard 
 | 4   | Telemetry tiếp tục sau khi có mạng      | Replay dần bản ghi từ hàng đợi cục bộ + gửi chu kỳ mới | Giảm khoảng trống dữ liệu outage |
 | 5   | Dashboard tiếp tục cập nhật bình thường | Bản đồ nhận dữ liệu mới sau reconnect và trong pha replay | Có thể còn khoảng trống nhỏ tùy thời gian outage/queue depth |
 
-![Hình 4.46 - Screenshot hành trình trên bản đồ, thể hiện giai đoạn gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-37.svg)
+![Hình 4.46 - Minh họa quá trình bản đồ cập nhật lại hành trình sau khi phục hồi kết nối](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-37.svg)
 
-_Hình 4.46: Screenshot hành trình trên bản đồ, thể hiện giai đoạn gián đoạn và tiếp tục cập nhật sau khi phục hồi kết nối_
+_Hình 4.46: Minh họa quá trình bản đồ cập nhật lại hành trình sau khi phục hồi kết nối_
 
 > Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
@@ -5704,7 +5706,7 @@ Phần này tổng hợp tất cả kết quả đo lường và so sánh với 
 | 4   | Độ trễ end-to-end        | < 3 giây             | ~1–2 giây                                 | Đạt        |
 | 5   | Số phương tiện đồng thời | >= 50                | 50+ (tested)                              | Đạt        |
 | 6   | Thời gian tải Dashboard  | < 3 giây             | ~1.5 giây                                 | Đạt        |
-| 7   | Phát hiện geofence       | < 10 giây            | ~5–7 giây                                 | Đạt        |
+| 7   | Phát hiện vượt vùng cho phép | < 10 giây            | ~5–7 giây                                 | Đạt        |
 | 8   | Cảnh báo bất thường      | < 10 giây            | ~5 giây (IMU -> Dashboard)                | Đạt        |
 | 9   | Khôi phục kết nối MQTT   | Tự động sau mất sóng | Reconnect ổn định, tiếp tục gửi telemetry | Đạt        |
 | 10  | Độ tin cậy state machine | >= 99%               | >= 99.8%                                  | Đạt        |
@@ -5715,7 +5717,7 @@ _Hình 4.47: Biểu đồ so sánh chỉ tiêu thiết kế và kết quả đ�
 
 > Nguồn: Hình dựng từ dữ liệu đo và kịch bản thử nghiệm của tác giả
 
-**Tổng kết:** Hệ thống đã đáp ứng phần lớn các chỉ tiêu cốt lõi của cấu hình đang triển khai, nổi bật ở các tiêu chí GPS, độ trễ end-to-end, khả năng xử lý đồng thời, geofence, cảnh báo bất thường và reconnect MQTT. Những điểm cần tiếp tục tối ưu chủ yếu nằm ở dòng tiêu thụ khi phát 4G liên tục, ngưỡng hiệu chuẩn LVD profile 12V và hạng mục replay telemetry từ flash nếu muốn bảo toàn đầy đủ dữ liệu trong các khoảng mất sóng kéo dài.
+**Tổng kết:** Hệ thống đã đáp ứng phần lớn các chỉ tiêu cốt lõi của cấu hình đang triển khai, nổi bật ở các tiêu chí GPS, độ trễ end-to-end, khả năng xử lý đồng thời, vùng cho phép, cảnh báo bất thường và reconnect MQTT. Những điểm cần tiếp tục tối ưu chủ yếu nằm ở dòng tiêu thụ khi phát 4G liên tục, ngưỡng hiệu chuẩn LVD profile 12V và hạng mục replay telemetry từ flash nếu muốn bảo toàn đầy đủ dữ liệu trong các khoảng mất sóng kéo dài.
 
 ---
 
@@ -5741,7 +5743,7 @@ Kết quả cho thấy kiến trúc hiện tại đủ ổn định để triể
 
 Trên cơ sở quá trình hiện thực đã trình bày, Chương 4 tổng hợp kết quả theo bốn nhóm chính: phần cứng, firmware, cloud và đo lường. Thiết bị tracker đã được chế tạo thành một bộ phần cứng hoàn chỉnh và đưa vào vận hành thử; firmware ESP-IDF/FreeRTOS hiện thực đầy đủ các mô-đun giao tiếp, máy trạng thái năng lượng và cơ chế tự phục hồi kết nối; hạ tầng cloud cùng backend/frontend cũng vận hành đồng bộ theo kiến trúc đề xuất.
 
-Về đo lường, hệ thống đã đáp ứng phần lớn chỉ tiêu cốt lõi của cấu hình đang triển khai. Các tiêu chí quan trọng như độ chính xác GPS, độ trễ end-to-end, thời lượng pin dự phòng, khả năng xử lý đồng thời, thời gian tải dashboard, geofence, cảnh báo bất thường và độ ổn định của state machine đều đạt hoặc vượt mục tiêu tổng hợp. Dù vậy, một số hạng mục vẫn cần tiếp tục hoàn thiện ở vòng tối ưu tiếp theo, đáng chú ý là ngưỡng LVD profile 12V, mức dòng ở pha truyền 4G liên tục và cơ chế replay telemetry từ flash cho các tình huống mất sóng kéo dài.
+Về đo lường, hệ thống đã đáp ứng phần lớn chỉ tiêu cốt lõi của cấu hình đang triển khai. Các tiêu chí quan trọng như độ chính xác GPS, độ trễ end-to-end, thời lượng pin dự phòng, khả năng xử lý đồng thời, thời gian tải dashboard, vùng cho phép, cảnh báo bất thường và độ ổn định của state machine đều đạt hoặc vượt mục tiêu tổng hợp. Dù vậy, một số hạng mục vẫn cần tiếp tục hoàn thiện ở vòng tối ưu tiếp theo, đáng chú ý là ngưỡng LVD profile 12V, mức dòng ở pha truyền 4G liên tục và cơ chế replay telemetry từ flash cho các tình huống mất sóng kéo dài.
 
 ---
 
@@ -5832,7 +5834,7 @@ API server xây dựng trên Express.js với TypeScript xử lý các request �
 
 **MQTT Broker (EMQX):**
 
-EMQX xử lý tin nhắn MQTT từ các thiết bị IoT với độ tin cậy cao. Broker hỗ trợ MQTT 5.0, cung cấp các tính năng như message expiry, topic alias, user properties và ACL theo từng thiết bị. Trong kiến trúc triển khai hiện tại, phần phân luồng và xử lý dữ liệu chủ yếu do MQTT Bridge đảm nhiệm; EMQX giữ vai trò broker trung tâm, còn Rules Engine chỉ là khả năng bổ trợ chứ không phải tuyến xử lý nghiệp vụ chính.
+EMQX xử lý tin nhắn MQTT từ các thiết bị IoT với độ tin cậy cao. Trong triển khai hiện tại, broker chạy EMQX 5.x nhưng đường truyền của firmware đang dùng MQTT 3.1.1 cùng ACL theo từng thiết bị, QoS 0/1 và cây topic `v1/{device_id}/*`. Phần phân luồng và xử lý dữ liệu chủ yếu do MQTT Bridge đảm nhiệm; EMQX giữ vai trò broker trung tâm, còn Rules Engine chỉ là khả năng bổ trợ chứ không phải tuyến xử lý nghiệp vụ chính.
 
 **WebSocket thời gian thực:**
 
@@ -5840,7 +5842,7 @@ Kết nối WebSocket thông qua Socket.IO giữa backend và frontend cung cấ
 
 **Cơ sở dữ liệu:**
 
-PostgreSQL 16 lưu trữ dữ liệu quan hệ (người dùng, xe, khách hàng, hành trình, cảnh báo, geofence) với hiệu suất truy vấn ổn định. VictoriaMetrics lưu trữ dữ liệu chuỗi thời gian (tọa độ GPS, dữ liệu OBD2) với hiệu suất ghi và đọc cao hơn so với InfluxDB truyền thống, đồng thời tiêu thụ ít tài nguyên hơn.
+PostgreSQL 16 lưu trữ dữ liệu quan hệ (người dùng, xe, khách hàng, hành trình, cảnh báo, vùng cho phép) với hiệu suất truy vấn ổn định. VictoriaMetrics lưu trữ dữ liệu chuỗi thời gian (tọa độ GPS, dữ liệu OBD2) với hiệu suất ghi và đọc cao hơn so với InfluxDB truyền thống, đồng thời tiêu thụ ít tài nguyên hơn.
 
 ### 5.1.4. Đánh giá hiệu năng giao diện người dùng (Frontend)
 
@@ -5876,7 +5878,7 @@ Chi phí Bill of Materials (BOM) của thiết bị tracker IoT được tính t
 | vgate iCar Pro BLE                     | Adapter OBD2 BLE          | 250.000–500.000       |
 | IC cảm biến LIS3DSH                     | Cảm biến gia tốc (IMU)    | 30.000–50.000         |
 | Pin 18650 1S (1 cell, 3500mAh)         | Pin dự phòng              | 80.000–120.000        |
-| Mạch sạc TP4056 + boost/buck converter | Quản lý năng lượng        | 50.000–100.000        |
+| Mạch sạc TP5100 + boost/buck converter | Quản lý năng lượng        | 50.000–100.000        |
 | PCB, vỏ hộp, dây cáp, linh kiện phụ    | Cơ khí và kết nối         | 130.000–260.000       |
 | **Tổng cộng**                          |                           | **870.000–1.630.000** |
 
@@ -6184,7 +6186,7 @@ Hệ thống phần cứng phải hoạt động với hai nguồn năng lượn
 
 1. _Power path management_: Thiết kế mạch power path dùng diode OR giữa MP2482 (5V chính) và SX1308 (5V backup), kết hợp GPIO18 để điều khiển nhánh nguồn theo profile 12V/24V.
 2. _Low Voltage Disconnect (LVD)_: Hiện thực LVD bằng khối LVD phần cứng kết hợp ADC firmware, dùng ngưỡng profile: 12V (OFF=12.0V, ON=12.2V) và 24V (OFF=24.0V, ON=24.4V), bảo vệ ắc quy không bị rút cạn quá mức.
-3. _Bộ sạc pin dự phòng_: Tích hợp IC sạc TP4056 (input 5V từ MP2482, output 4.2V) để sạc pin 18650 1S khi điều kiện nguồn cho phép.
+3. _Bộ sạc pin dự phòng_: Tích hợp IC sạc TP5100 (input 5V từ MP2482, output 4.2V ở chế độ 1 cell) để sạc pin 18650 1S khi điều kiện nguồn cho phép.
 4. _Giám sát điện áp bằng firmware_: Đọc điện áp ắc quy và pin dự phòng liên tục qua ADC, kết hợp trạng thái GPIO19 (HIGH = low-voltage) để gửi cảnh báo sớm và điều phối chuyển nguồn.
 
 **Bài học rút ra:** Thiết kế hệ thống năng lượng cho IoT trong môi trường ô tô phải xét đồng thời điện áp dao động, chuyển đổi nguồn liền mạch, bảo vệ ắc quy và khả năng giám sát từ xa. Nếu bỏ sót một mắt xích, độ tin cậy của toàn hệ thống sẽ giảm rõ rệt.
@@ -6254,7 +6256,7 @@ Hệ thống IoT giám sát phương tiện tạo ra một số tác động xã
 **Giảm tai nạn giao thông:**
 
 - Giám sát tốc độ và hành vi lái xe (phanh gấp, tăng tốc đột ngột) giúp nhận diện và cảnh báo các hành vi lái xe nguy hiểm.
-- Cảnh báo geofencing giúp đảm bảo xe hoạt động trong phạm vi an toàn đã thỏa thuận.
+- Cảnh báo vượt vùng cho phép giúp đảm bảo xe hoạt động trong phạm vi an toàn đã thỏa thuận.
 
 **Tối ưu hóa nhiên liệu và giảm phát thải:**
 
@@ -6299,7 +6301,7 @@ Dự án sử dụng hoàn toàn công nghệ mã nguồn mở. Quá trình tri�
 - **ESP-IDF** (Espressif): Framework chính thức cho ESP32-S3, cung cấp API đầy đủ cho Wi-Fi, BLE, GPIO, UART, và các ngoại vi khác. Tài liệu phong phú và cộng đồng hỗ trợ lớn.
 - **Express.js + TypeScript**: Framework web nhẹ, linh hoạt, với hệ sinh thái middleware phong phú. TypeScript bổ sung hệ thống kiểu giúp giảm lỗi runtime.
 - **Next.js 15 + React 19**: Framework frontend hiện đại với Server Components, App Router, và nhiều tối ưu hóa hiệu suất tự động.
-- **PostgreSQL 16**: Cơ sở dữ liệu quan hệ mã nguồn mở mạnh mẽ nhất, hỗ trợ PostGIS cho dữ liệu không gian (geofencing).
+- **PostgreSQL 16**: Cơ sở dữ liệu quan hệ mã nguồn mở mạnh mẽ, hỗ trợ PostGIS cho các bài toán dữ liệu không gian như vùng cho phép.
 - **EMQX**: MQTT broker ổn định, hỗ trợ clustering và có Rules Engine để xử lý các tác vụ lọc đơn giản ở tầng broker.
 - **VictoriaMetrics**: Cơ sở dữ liệu chuỗi thời gian hiệu suất cao, tiêu thụ ít tài nguyên, tương thích API Prometheus.
 - **Docker**: Nền tảng container hóa giúp đồng nhất môi trường phát triển và sản xuất, đơn giản hóa việc triển khai và quản lý các dịch vụ.
@@ -6392,9 +6394,9 @@ Chương 6 cho thấy việc xây dựng một hệ thống IoT giám sát phư�
 
 [22] SIMCom Wireless Solutions, "SIM7600CE-T Module Hardware Design Guide," Version 1.02, 2022.
 
-[23] STMicroelectronics, "LIS3DSH - MEMS Digital Output Motion Sensor Ultra-Low-Power High-Performance 3-Axis 'Nano' Accelerometer Datasheet," DocID 17530, Rev. 3, 2021. [Online]. Available: https://www.st.com/resource/en/datasheet/lis3dh.pdf
+[23] STMicroelectronics, "LIS3DSH - MEMS Digital Output Motion Sensor Ultra-Low-Power High-Performance 3-Axis 'Nano' Accelerometer Datasheet," DocID 17530, Rev. 3, 2021. [Online]. Available: https://www.st.com/resource/en/datasheet/lis3dsh.pdf
 
-[24] STMicroelectronics, "LIS3DSH Application Note AN3308," Rev. 2, 2020.
+[24] STMicroelectronics, "AN3393: LIS3DSH 3-axis digital output accelerometer." [Online]. Available: https://www.st.com/resource/en/application_note/dm00026768-lis3dsh-3axis-digital-output-accelerometer-stmicroelectronics.pdf
 
 [25] OASIS, "MQTT Version 5.0 - OASIS Standard," Mar. 2019. [Online]. Available: https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html
 
@@ -6406,7 +6408,7 @@ Chương 6 cho thấy việc xây dựng một hệ thống IoT giám sát phư�
 
 [29] vgate, "iCar Pro BLE OBD2 Adapter Specifications," 2023. [Online]. Available: https://www.vgatemall.com/product/vgate-icar-pro.html
 
-[30] Injoinic Technology, "TP4056–3A Synchronous Switch Step-Down Li-ion Battery Charger Datasheet," Version 1.0, 2022.
+[30] NanJing Top Power ASIC Corp., "TP5100 2A Switching Buck Charger IC for 8.4V/4.2V Lithium-Ion Battery," Datasheet, Rev. 2.4, 2024. [Online]. Available: https://www.toppwr.com/uploadfile/file/20230304/6402f53e7e8d9.pdf. [Accessed: Apr. 18, 2026].
 
 [31] Apache NimBLE Project, "NimBLE Host API Reference," Version 1.5, 2023. [Online]. Available: https://mynewt.apache.org/latest/network/
 
@@ -6509,7 +6511,7 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | 3   | OBD2 Adapter      | vgate iCar Pro BLE             | 1        | 367.000       | 367.000          | Bluetooth Low Energy OBD2                    |
 | 4   | Cảm biến gia tốc  | IC LIS3DSH                     | 1        | 40.000        | 40.000           | IMU 3 trục, phát hiện chuyển động            |
 | 5   | Pin dự phòng      | 18650 1S Li-ion 3500mAh        | 1        | 79.000        | 79.000           | Samsung/LG cell                              |
-| 6   | IC sạc pin        | TP4056 + mạch phụ trợ          | 1        | 25.000        | 25.000           | Sạc 1S, input 5V từ MP2482, dòng theo PROG   |
+| 6   | IC sạc pin        | TP5100 + mạch phụ trợ          | 1        | 25.000        | 25.000           | Sạc 1S, input 5V từ MP2482, dòng theo điện trở thiết lập   |
 | 7   | LDO 3.3V          | Mạch AP2112-3.3                | 1        | 5.000         | 5.000            | 5V -> 3.3V cấp ESP32-S3                      |
 | 8   | Buck 5V           | Mạch MP2482 (12V/24V->5V)      | 1        | 17.000        | 17.000           | Tạo bus 5V chính                             |
 | 9   | Buck 3.8V/4V      | Mạch TPS54231                  | 1        | 9.000         | 9.000            | 12–24V -> ~4V cấp modem SIM7600CE-T          |
@@ -6583,30 +6585,33 @@ Bảng dưới đây liệt kê chi tiết các linh kiện chính sử dụng t
 | 0x2F      | Fuel Tank Level Input      | %       | 01   |
 | 0x46      | Ambient Air Temperature    | C       | 01   |
 
-## 2.2. Tiêu chuẩn MQTT 5.0 (OASIS)
+## 2.2. MQTT 3.1.1 trong triển khai thiết bị
 
-**Mô tả:** MQTT (Message Queuing Telemetry Transport) phiên bản 5.0 là tiêu chuẩn OASIS cho giao thức truyền thông IoT, được thiết kế cho các thiết bị có tài nguyên hạn chế và băng thông thấp.
+**Mô tả:** MQTT vẫn là giao thức nhắn tin phù hợp cho IoT vì gọn, ít overhead và hoạt động tốt trên kết nối 4G. Trong hệ thống này, EMQX chạy phiên bản 5.x ở vai trò broker, nhưng firmware trên thiết bị hiện cấu hình **MQTT 3.1.1**. Vì vậy, phần trình bày dưới đây tập trung vào các đặc tính thực sự đang dùng trong đường truyền thiết bị thay vì liệt kê các khả năng mở rộng của MQTT 5.
 
-**Các tính năng MQTT 5.0 sử dụng trong dự án:**
+**Các đặc tính MQTT đang dùng trong dự án:**
 
-| Tính năng               | Mô tả                              | Áp dụng                                          |
-| ----------------------- | ---------------------------------- | ------------------------------------------------ |
-| QoS 0 (At most once)    | Gửi không xác nhận                 | Dữ liệu telemetry tần suất cao (GPS, nguồn, IMU) |
-| QoS 1 (At least once)   | Gửi với xác nhận                   | Cảnh báo, lệnh điều khiển                        |
-| Retain Message          | Lưu tin nhắn cuối cùng trên broker | Trạng thái online/offline của thiết bị           |
-| Last Will and Testament | Thông báo tự động khi mất kết nối  | Phát hiện thiết bị offline                       |
-| Topic Alias             | Giảm kích thước bản tin            | Tối ưu băng thông 4G                             |
-| Session Expiry          | Thời gian hết hạn phiên            | Quản lý kết nối thiết bị                         |
-| User Properties         | Metadata tùy chỉnh                 | Request-ID correlation                           |
+| Đặc tính             | Mô tả                                              | Áp dụng thực tế                                |
+| -------------------- | -------------------------------------------------- | ---------------------------------------------- |
+| QoS 0                | Gửi không cần ACK                                  | `rawdata` tần suất cao                         |
+| QoS 1                | Gửi có ACK, tránh mất bản tin quan trọng           | `status`, `events`, `firmware`, `commands`    |
+| Topic phân phiên bản | Chuẩn hóa theo cây `v1/{device_id}/...`            | Thiết bị publish và backend gửi lệnh           |
+| Topic lệnh hai chiều | Backend publish trực tiếp vào `v1/{device_id}/commands` | Điều khiển từ xa, OTA                     |
+| Internal event bus   | MQTT Bridge publish `internal/events/#` qua EMQX   | Backend listener -> Socket.IO realtime         |
+| ACL theo thiết bị    | Mỗi thiết bị chỉ được phép dùng topic của chính nó | Giảm rủi ro giả mạo publish/subscribe          |
 
 **Cấu trúc topic MQTT:**
 
 ```
 v1/{device_id}/rawdata             # Dữ liệu telemetry chính (QoS 0)
 v1/{device_id}/events              # Sự kiện và cảnh báo (QoS 1)
-v1/{device_id}/commands            # Lệnh điều khiển (QoS 1)
+v1/{device_id}/commands            # Lệnh điều khiển từ server (QoS 1)
 v1/{device_id}/status              # Trạng thái phiên/heartbeat (QoS 1)
 v1/{device_id}/firmware            # Tiến trình OTA (QoS 1)
+internal/events/device/status      # Sự kiện nội bộ cho backend realtime
+internal/events/device/alert       # Cảnh báo nội bộ
+internal/events/device/session     # Trạng thái phiên nội bộ
+internal/events/device/data        # Vị trí / telemetry cho realtime
 ```
 
 ## 2.3. Bảo mật thông tin (ISO 27001 - tham khảo)
@@ -6785,7 +6790,7 @@ Schema PostgreSQL đầy đủ được lưu tại:
 | 5   | `customers`  | Thông tin khách hàng                 | 1:N với trips                  |
 | 6   | `trips`      | Hành trình cho thuê                  | N:1 với vehicles, customers    |
 | 7   | `alerts`     | Cảnh báo hệ thống                    | N:1 với vehicles, devices      |
-| 8   | `geofences`  | Vùng địa lý (hàng rào ảo)            | N:N với vehicles               |
+| 8   | `geofences`  | Vùng cho phép                        | N:N với vehicles               |
 | 9   | `commands`   | Lệnh điều khiển thiết bị             | N:1 với devices                |
 | 10  | `audit_logs` | Nhật ký thao tác                     | N:1 với users                  |
 
@@ -6828,8 +6833,8 @@ Tài liệu API đầy đủ được tạo tự động bằng Swagger/OpenAPI 
 | Telemetry | GET    | `/api/v1/telemetry/history`        | Truy vấn lịch sử telemetry      |
 | Alerts    | GET    | `/api/v1/alerts`                   | Danh sách cảnh báo              |
 | Alerts    | PUT    | `/api/v1/alerts/:id/acknowledge`   | Xác nhận cảnh báo               |
-| Geofences | GET    | `/api/v1/geofences`                | Danh sách geofences             |
-| Geofences | POST   | `/api/v1/geofences`                | Tạo geofence mới                |
+| Vùng cho phép | GET    | `/api/v1/geofences`                | Danh sách vùng cho phép             |
+| Vùng cho phép | POST   | `/api/v1/geofences`                | Tạo vùng cho phép mới                |
 | Commands  | POST   | `/api/v1/devices/:id/command`      | Gửi lệnh đến thiết bị           |
 | Trips     | GET    | `/api/v1/trips`                    | Danh sách hành trình            |
 | Customers | GET    | `/api/v1/customers`                | Danh sách khách hàng            |

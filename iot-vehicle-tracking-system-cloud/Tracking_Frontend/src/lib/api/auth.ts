@@ -2,6 +2,44 @@ import { apiClient } from './client';
 import { unwrap } from './client';
 import type { User } from '@/lib/stores/auth-store';
 
+export interface NotificationChannelState {
+  enabled: boolean;
+  webhookUrl: string | null;
+}
+
+export interface TelegramChannelState {
+  enabled: boolean;
+  botToken: string | null;
+  chatId: string | null;
+}
+
+export interface NotificationSettings {
+  emailAlerts: boolean;
+  pushAlerts: boolean;
+  alertTypes: string[];
+  channels: {
+    discord: NotificationChannelState;
+    telegram: TelegramChannelState;
+  };
+}
+
+export interface UpdateNotificationSettingsInput {
+  emailAlerts?: boolean;
+  pushAlerts?: boolean;
+  alertTypes?: string[];
+  channels?: {
+    discord?: {
+      enabled?: boolean;
+      webhookUrl?: string | null;
+    };
+    telegram?: {
+      enabled?: boolean;
+      botToken?: string | null;
+      chatId?: string | null;
+    };
+  };
+}
+
 export const authServices = {
   login: (data: { username: string; password: string }) =>
     apiClient
@@ -24,20 +62,18 @@ export const authServices = {
   updatePassword: (data: { currentPassword: string; newPassword: string }) =>
     apiClient.post('/auth/change-password', data).then((r) => unwrap<{ message: string }>(r.data)),
 
-  updateNotifications: (data: {
-    emailAlerts?: boolean;
-    pushAlerts?: boolean;
-    alertTypes?: string[];
-  }) => apiClient.put('/auth/notifications', data).then((r) => unwrap<User>(r.data)),
+  updateNotifications: (data: UpdateNotificationSettingsInput) =>
+    apiClient
+      .put('/auth/notifications', data)
+      .then((r) => unwrap<{ preferences: NotificationSettings }>(r.data)),
 
   getNotificationSettings: () =>
     apiClient
       .get('/users/notification-settings')
-      .then((r) => unwrap<{ preferences: Record<string, unknown> }>(r.data)),
+      .then((r) => unwrap<{ preferences: NotificationSettings }>(r.data)),
 
-  updateNotificationSettings: (data: {
-    emailAlerts?: boolean;
-    pushAlerts?: boolean;
-    alertTypes?: string[];
-  }) => apiClient.put('/users/notification-settings', data).then((r) => unwrap<User>(r.data)),
+  updateNotificationSettings: (data: UpdateNotificationSettingsInput) =>
+    apiClient
+      .put('/users/notification-settings', data)
+      .then((r) => unwrap<{ preferences: NotificationSettings }>(r.data)),
 };

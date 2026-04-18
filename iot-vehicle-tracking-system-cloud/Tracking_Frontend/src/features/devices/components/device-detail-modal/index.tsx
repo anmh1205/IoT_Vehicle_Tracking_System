@@ -35,7 +35,6 @@ import { DeviceDetailModalProvider, useDeviceDetailModal } from './modal-context
 import { OverviewTab } from './overview-tab';
 import { RawDataTab } from './raw-data-tab';
 import { RouteTab } from './route-tab';
-import { SessionsTab } from './sessions-tab';
 import { SettingsTab } from './settings-tab';
 import {
   formatCoordinateLabel,
@@ -47,12 +46,12 @@ import {
 
 const TELEMETRY_STATE_META = {
   healthy: {
-    label: 'Đúng nhịp',
+    label: 'Đúng chu kỳ',
     description: 'Bản tin đang về gần sát chu kỳ cấu hình.',
     variant: 'default' as const,
   },
   warning: {
-    label: 'Bắt đầu trễ',
+    label: 'Hơi chậm',
     description: 'Thiết bị vẫn gửi nhưng nhịp thực tế đang chậm hơn mong đợi.',
     variant: 'secondary' as const,
   },
@@ -110,11 +109,11 @@ const DeviceDetailModalContent = () => {
   const metadata = [
     { label: 'IMEI', value: device?.imei ?? '-' },
     { label: 'Firmware', value: device?.firmwareVersion ?? '-' },
-    { label: 'Chu kỳ cấu hình', value: formatSecondsLabel(configuredCadence) },
-    { label: 'Nhịp quan sát', value: formatSecondsLabel(observedCadence) },
-    { label: 'Độ tươi telemetry', value: formatSecondsLabel(telemetryFreshness) },
+    { label: 'Chu kỳ gửi đã cấu hình', value: formatSecondsLabel(configuredCadence) },
+    { label: 'Khoảng gửi thực tế', value: formatSecondsLabel(observedCadence) },
+    { label: 'Bản tin mới nhất cách đây', value: formatSecondsLabel(telemetryFreshness) },
     {
-      label: 'Tọa độ',
+      label: 'Tọa độ gần nhất',
       value: formatCoordinateLabel(
         latestTrackingRow?.latitude ?? positionSnapshot?.latitude ?? device?.latitude,
         latestTrackingRow?.longitude ?? positionSnapshot?.longitude ?? device?.longitude,
@@ -216,12 +215,6 @@ const DeviceDetailModalContent = () => {
               Lộ trình
             </TabsTrigger>
             <TabsTrigger
-              value="sessions"
-              className="h-9 flex-none rounded-full border bg-muted/60 px-3 text-xs data-[state=active]:border-primary/30 data-[state=active]:bg-primary/10 sm:text-sm"
-            >
-              Phiên chạy
-            </TabsTrigger>
-            <TabsTrigger
               value="errors"
               className="h-9 flex-none rounded-full border bg-muted/60 px-3 text-xs data-[state=active]:border-primary/30 data-[state=active]:bg-primary/10 sm:text-sm"
             >
@@ -255,9 +248,6 @@ const DeviceDetailModalContent = () => {
         </TabsContent>
         <TabsContent value="route" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
           <RouteTab />
-        </TabsContent>
-        <TabsContent value="sessions" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
-          <SessionsTab />
         </TabsContent>
         <TabsContent value="errors" className="mt-0 min-h-0 flex-1 overflow-y-auto px-6 py-4">
           <ErrorCodesTab />

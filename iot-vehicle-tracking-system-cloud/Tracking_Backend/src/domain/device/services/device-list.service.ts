@@ -18,6 +18,9 @@ const sanitizeDevice = (device: Device): DevicePublic => ({
   firmwareVersion: device.firmware_version,
   lastErrorCode: device.last_error_code,
   createdAt: device.created_at.toISOString(),
+  vehiclePlate: device.vehicle_plate ?? null,
+  customerName: device.customer_name ?? null,
+  vehicleId: device.linked_vehicle_id ?? null,
 });
 
 export const listDevices = async (
