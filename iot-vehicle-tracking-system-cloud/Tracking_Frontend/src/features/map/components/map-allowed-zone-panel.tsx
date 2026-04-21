@@ -60,6 +60,7 @@ export const MapAllowedZonePanel = ({
 }) => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [mapPickArmed, setMapPickArmed] = useState(false);
+  const [previewReady, setPreviewReady] = useState(false);
   const initializedForOpenRef = useRef(false);
   const lastResetKeyRef = useRef<string | null>(null);
   const { zoneQuery, upsertMutation, deleteMutation } = useVehicleAllowedZone(vehicleId);
@@ -69,7 +70,7 @@ export const MapAllowedZonePanel = ({
     defaultValues: createAllowedZoneFormDefaults(zone, undefined),
   });
   const centerSource = form.watch('centerSource');
-  const previewQuery = useVehicleAllowedZonePreview(vehicleId, open && zoneQuery.isFetched && centerSource === 'vehicle_position');
+  const previewQuery = useVehicleAllowedZonePreview(vehicleId, open && previewReady && zoneQuery.isFetched && centerSource === 'vehicle_position');
   const preview = previewQuery.data;
   const radiusMeters = form.watch('radiusMeters');
   const centerLatitude = form.watch('centerLatitude');
@@ -81,6 +82,7 @@ export const MapAllowedZonePanel = ({
       initializedForOpenRef.current = false;
       lastResetKeyRef.current = null;
       setMapPickArmed(false);
+      setPreviewReady(false);
       onPreviewChange(null);
       return;
     }
@@ -90,6 +92,7 @@ export const MapAllowedZonePanel = ({
     initializedForOpenRef.current = true;
     lastResetKeyRef.current = resetKey;
     setMapPickArmed(false);
+    setPreviewReady(true);
   }, [form, onPreviewChange, open, preview, resetKey, zone]);
 
   useEffect(() => {
@@ -321,5 +324,6 @@ export const MapAllowedZonePanel = ({
     </>
   );
 };
+
 
 

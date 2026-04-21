@@ -75,6 +75,7 @@ export const AllowedZoneSetupSheet = ({
 }) => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [mapPickArmed, setMapPickArmed] = useState(false);
+  const [previewReady, setPreviewReady] = useState(false);
   const initializedForOpenRef = useRef(false);
   const lastResetKeyRef = useRef<string | null>(null);
   const { zoneQuery, upsertMutation, deleteMutation } = useVehicleAllowedZone(vehicleId);
@@ -84,7 +85,7 @@ export const AllowedZoneSetupSheet = ({
     defaultValues: createAllowedZoneFormDefaults(zone, undefined),
   });
   const centerSource = form.watch('centerSource');
-  const previewQuery = useVehicleAllowedZonePreview(vehicleId, open && zoneQuery.isFetched && centerSource === 'vehicle_position');
+  const previewQuery = useVehicleAllowedZonePreview(vehicleId, open && previewReady && zoneQuery.isFetched && centerSource === 'vehicle_position');
   const preview = previewQuery.data;
   const resetKey = getResetKey(zone, preview);
   const radiusMeters = form.watch('radiusMeters');
@@ -95,6 +96,7 @@ export const AllowedZoneSetupSheet = ({
     if (!open) {
       initializedForOpenRef.current = false;
       lastResetKeyRef.current = null;
+      setPreviewReady(false);
       return;
     }
 
@@ -110,6 +112,7 @@ export const AllowedZoneSetupSheet = ({
     setMapPickArmed(false);
     initializedForOpenRef.current = true;
     lastResetKeyRef.current = resetKey;
+    setPreviewReady(true);
   }, [form, open, preview, resetKey, zone]);
 
   useEffect(() => {
@@ -318,5 +321,6 @@ export const AllowedZoneSetupSheet = ({
     </>
   );
 };
+
 
 
