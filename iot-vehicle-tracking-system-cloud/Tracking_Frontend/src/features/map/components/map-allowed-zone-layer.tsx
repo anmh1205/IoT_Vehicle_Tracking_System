@@ -11,6 +11,12 @@ type AllowedZonePreviewDraft = {
   isPickingCenter: boolean;
 } | null;
 
+type AllowedZoneCircle = {
+  center: [number, number];
+  radiusMeters: number;
+  isPreview: boolean;
+};
+
 const ACTIVE_STYLE = {
   color: '#16a34a',
   fillColor: '#16a34a',
@@ -30,6 +36,26 @@ const hasMeaningfulCenterChange = (
   previous: [number, number] | null,
   next: [number, number],
 ) => !previous || Math.abs(previous[0] - next[0]) > 0.0002 || Math.abs(previous[1] - next[1]) > 0.0002;
+
+const toCircle = (
+  centerLatitude: number,
+  centerLongitude: number,
+  radiusMeters: number,
+  isPreview: boolean,
+): AllowedZoneCircle | null => {
+  const center = [Number(centerLatitude), Number(centerLongitude)] as [number, number];
+  const radius = Number(radiusMeters);
+
+  if (!Number.isFinite(center[0]) || !Number.isFinite(center[1]) || !Number.isFinite(radius) || radius <= 0) {
+    return null;
+  }
+
+  return {
+    center,
+    radiusMeters: radius,
+    isPreview,
+  };
+};
 
 const AllowedZoneViewport = ({ center }: { center: [number, number] | null }) => {
   const map = useMap();
@@ -80,19 +106,11 @@ export const MapAllowedZoneLayer = ({
 }) => {
   const previewCircle =
     preview && visible
-      ? {
-          center: [preview.centerLatitude, preview.centerLongitude] as [number, number],
-          radiusMeters: preview.radiusMeters,
-          isPreview: true,
-        }
+      ? toCircle(preview.centerLatitude, preview.centerLongitude, preview.radiusMeters, true)
       : null;
   const activeCircle =
     !preview && visible && activeZone
-      ? {
-          center: [activeZone.centerLatitude, activeZone.centerLongitude] as [number, number],
-          radiusMeters: activeZone.radiusMeters,
-          isPreview: false,
-        }
+      ? toCircle(activeZone.centerLatitude, activeZone.centerLongitude, activeZone.radiusMeters, false)
       : null;
   const circle = previewCircle ?? activeCircle;
 

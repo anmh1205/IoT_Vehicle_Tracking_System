@@ -192,9 +192,9 @@ export const TrackingMap = () => {
       setAllowedZonePreview,
     );
     closeGeofenceWorkspace();
+    setShowViewedAllowedZone(false);
     if (!selectedVehicleId) {
       setViewedAllowedZoneVehicleId(null);
-      setShowViewedAllowedZone(false);
       return;
     }
 

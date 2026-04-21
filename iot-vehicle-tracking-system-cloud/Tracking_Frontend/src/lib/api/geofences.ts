@@ -1,4 +1,4 @@
-﻿import { apiClient, unwrap } from './client';
+import { apiClient, unwrap } from './client';
 
 export type VehicleAllowedZoneCenterSource = 'vehicle_position' | 'map_pick';
 export type VehicleAllowedZoneMembershipState = 'unknown' | 'inside' | 'outside' | 'suspect';
@@ -61,6 +61,60 @@ export interface UpsertVehicleAllowedZonePayload {
   cooldownSec?: number;
 }
 
+const toNumber = (value: number | string) => Number(value);
+
+const toNullableNumber = (value: number | string | null | undefined) => {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  const nextValue = Number(value);
+  return Number.isFinite(nextValue) ? nextValue : null;
+};
+
+const normalizeAllowedZoneWarning = (
+  warning: VehicleAllowedZoneWarning | null | undefined,
+): VehicleAllowedZoneWarning | null => {
+  if (!warning) {
+    return null;
+  }
+
+  return {
+    ...warning,
+    staleAgeSec: toNullableNumber(warning.staleAgeSec),
+  };
+};
+
+const normalizeVehicleAllowedZone = (
+  zone: VehicleAllowedZone | null | undefined,
+): VehicleAllowedZone | null => {
+  if (!zone) {
+    return null;
+  }
+
+  return {
+    ...zone,
+    id: toNumber(zone.id),
+    centerLatitude: toNumber(zone.centerLatitude),
+    centerLongitude: toNumber(zone.centerLongitude),
+    radiusMeters: toNumber(zone.radiusMeters),
+    cooldownSec: toNumber(zone.cooldownSec),
+    warning: normalizeAllowedZoneWarning(zone.warning),
+    createdBy: toNullableNumber(zone.createdBy),
+    updatedBy: toNullableNumber(zone.updatedBy),
+  };
+};
+
+const normalizeVehicleAllowedZonePreviewCenter = (
+  preview: VehicleAllowedZonePreviewCenter,
+): VehicleAllowedZonePreviewCenter => ({
+  ...preview,
+  centerLatitude: toNumber(preview.centerLatitude),
+  centerLongitude: toNumber(preview.centerLongitude),
+  staleAgeSec: toNullableNumber(preview.staleAgeSec),
+  warning: normalizeAllowedZoneWarning(preview.warning),
+});
+
 export const geofenceServices = {
   getList: (params?: Record<string, unknown>) =>
     apiClient.get('/geofences', { params }).then((r) => unwrap<any>(r.data)),
@@ -74,15 +128,17 @@ export const geofenceServices = {
   getVehicleAllowedZone: (vehicleId: string) =>
     apiClient
       .get(`/geofences/vehicles/${vehicleId}/allowed-zone`)
-      .then((r) => unwrap<VehicleAllowedZone | null>(r.data)),
+      .then((r) => normalizeVehicleAllowedZone(unwrap<VehicleAllowedZone | null>(r.data))),
   previewVehicleAllowedZoneCenter: (vehicleId: string) =>
     apiClient
       .post(`/geofences/vehicles/${vehicleId}/allowed-zone/preview-center`)
-      .then((r) => unwrap<VehicleAllowedZonePreviewCenter>(r.data)),
+      .then((r) =>
+        normalizeVehicleAllowedZonePreviewCenter(unwrap<VehicleAllowedZonePreviewCenter>(r.data)),
+      ),
   upsertVehicleAllowedZone: (vehicleId: string, data: UpsertVehicleAllowedZonePayload) =>
     apiClient
       .put(`/geofences/vehicles/${vehicleId}/allowed-zone`, data)
-      .then((r) => unwrap<VehicleAllowedZone>(r.data)),
+      .then((r) => normalizeVehicleAllowedZone(unwrap<VehicleAllowedZone>(r.data))),
   deleteVehicleAllowedZone: (vehicleId: string) =>
     apiClient.delete(`/geofences/vehicles/${vehicleId}/allowed-zone`).then((r) => unwrap<any>(r.data)),
   create: (data: Record<string, unknown>) =>
