@@ -189,6 +189,7 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
   const result = await pool.query<{
     device_id: string;
     device_name: string;
+    linked_vehicle_id: string | null;
     vehicle_plate: string | null;
     customer_name: string | null;
     latitude: number;
@@ -210,6 +211,7 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     `SELECT
        d.device_id,
        d.device_name,
+       link.linked_vehicle_id,
        link.vehicle_plate,
        link.customer_name,
        COALESCE(d.last_latitude, d.latitude) AS latitude,
@@ -312,6 +314,7 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
   return result.rows.map((row) => ({
     deviceId: row.device_id,
     deviceName: row.device_name,
+    vehicleId: row.linked_vehicle_id,
     vehiclePlate: row.vehicle_plate,
     customerName: row.customer_name,
     latitude: row.latitude,

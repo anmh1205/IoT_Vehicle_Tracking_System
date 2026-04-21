@@ -174,8 +174,8 @@ export const TripDetail = ({
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.9fr]">
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(320px,0.88fr)]">
+      <div className="space-y-4">
         <Card>
           <CardHeader className="gap-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -195,7 +195,7 @@ export const TripDetail = ({
               </div>
             </div>
           </CardHeader>
-          <CardContent className="min-h-[320px] p-0 sm:min-h-[440px]">
+          <CardContent className="h-[360px] p-0 sm:h-[440px] xl:h-[500px]">
             {pathPoints.length === 0 ? (
               <div className="flex h-full items-center justify-center p-6">
                 <EmptyState
@@ -215,82 +215,31 @@ export const TripDetail = ({
                   <Polyline positions={pathPoints} pathOptions={{ color: '#0ea5e9', weight: 5 }} />
                 ) : null}
                 {hasStartCoordinates ? (
-                  <CircleMarker center={[Number(startPoint.lat), Number(startPoint.lon)]} radius={7} pathOptions={{ color: '#16a34a', fillColor: '#16a34a', fillOpacity: 0.85 }} />
+                  <CircleMarker
+                    center={[Number(startPoint.lat), Number(startPoint.lon)]}
+                    radius={7}
+                    pathOptions={{ color: '#16a34a', fillColor: '#16a34a', fillOpacity: 0.85 }}
+                  />
                 ) : null}
                 {hasEndCoordinates ? (
-                  <CircleMarker center={[Number(endPoint.lat), Number(endPoint.lon)]} radius={7} pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.85 }} />
+                  <CircleMarker
+                    center={[Number(endPoint.lat), Number(endPoint.lon)]}
+                    radius={7}
+                    pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.85 }}
+                  />
                 ) : null}
                 {hasMovingCoordinates ? (
-                  <CircleMarker center={[Number(moving.lat), Number(moving.lon)]} radius={9} pathOptions={{ color: '#f97316', fillColor: '#f97316', fillOpacity: 0.95 }} />
+                  <CircleMarker
+                    center={[Number(moving.lat), Number(moving.lon)]}
+                    radius={9}
+                    pathOptions={{ color: '#f97316', fillColor: '#f97316', fillOpacity: 0.95 }}
+                  />
                 ) : null}
               </MapContainer>
             )}
           </CardContent>
         </Card>
 
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tốc độ theo thời gian</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[280px]">
-              {points.length === 0 ? (
-                <EmptyState
-                  title="Chưa có dữ liệu tốc độ"
-                  description="Biểu đồ tốc độ sẽ xuất hiện khi chuyến đi ghi nhận waypoint từ telemetry."
-                />
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={points.map((point: any) => ({
-                      time: formatDateTime(point.timestamp, 'HH:mm'),
-                      speed: Number(point.speed ?? 0),
-                    }))}
-                  >
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                    <XAxis dataKey="time" tickLine={false} axisLine={false} minTickGap={24} />
-                    <YAxis tickLine={false} axisLine={false} width={36} />
-                    <Tooltip formatter={(value) => [`${value} km/h`, 'Tốc độ']} />
-                    <Area type="monotone" dataKey="speed" stroke="#f97316" fill="#fdba74" fillOpacity={0.35} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Điểm hiện tại trong replay</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Tiến độ replay</span>
-                  <span className="font-medium">
-                    {points.length > 0 ? `${Math.min(cursor + 1, points.length)}/${points.length}` : '0/0'}
-                  </span>
-                </div>
-                <Progress value={replayProgress} />
-              </div>
-
-              <div className="grid gap-3 text-sm sm:grid-cols-2">
-                <InfoRow label="Thời điểm" value={formatDateTime(moving?.timestamp)} />
-                <InfoRow label="Tốc độ" value={`${moving?.speed ?? 0} km/h`} />
-                <InfoRow
-                  label="Vĩ độ"
-                  value={moving?.lat !== null && moving?.lat !== undefined ? String(moving.lat) : 'Chưa có'}
-                />
-                <InfoRow
-                  label="Kinh độ"
-                  value={moving?.lon !== null && moving?.lon !== undefined ? String(moving.lon) : 'Chưa có'}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
         <Card>
           <CardHeader className="gap-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -311,7 +260,10 @@ export const TripDetail = ({
               value={trip?.endLocation ?? 'Chưa cấu hình'}
               description={formatDateTime(trip?.actualEnd ?? endPoint?.timestamp)}
             />
-            <InfoRow label="Phủ sóng telemetry" value={points.length ? `${points.length} waypoint` : 'Chưa có waypoint'} />
+            <InfoRow
+              label="Phủ sóng telemetry"
+              value={points.length ? `${points.length} waypoint` : 'Chưa có waypoint'}
+            />
             <InfoRow
               label="Khoảng cách giữa các mốc"
               value={averageGapSeconds > 0 ? `${averageGapSeconds} giây` : 'Chưa đủ dữ liệu'}
@@ -329,6 +281,73 @@ export const TripDetail = ({
                   : 'Chưa có dữ liệu'
               }
             />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Tốc độ theo thời gian</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[280px]">
+            {points.length === 0 ? (
+              <EmptyState
+                title="Chưa có dữ liệu tốc độ"
+                description="Biểu đồ tốc độ sẽ xuất hiện khi chuyến đi ghi nhận waypoint từ telemetry."
+              />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={points.map((point: any) => ({
+                    time: formatDateTime(point.timestamp, 'HH:mm'),
+                    speed: Number(point.speed ?? 0),
+                  }))}
+                >
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                  <XAxis dataKey="time" tickLine={false} axisLine={false} minTickGap={24} />
+                  <YAxis tickLine={false} axisLine={false} width={36} />
+                  <Tooltip formatter={(value) => [`${value} km/h`, 'Tốc độ']} />
+                  <Area
+                    type="monotone"
+                    dataKey="speed"
+                    stroke="#f97316"
+                    fill="#fdba74"
+                    fillOpacity={0.35}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Điểm hiện tại trong replay</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Tiến độ replay</span>
+                <span className="font-medium">
+                  {points.length > 0 ? `${Math.min(cursor + 1, points.length)}/${points.length}` : '0/0'}
+                </span>
+              </div>
+              <Progress value={replayProgress} />
+            </div>
+
+            <div className="grid gap-3 text-sm sm:grid-cols-2">
+              <InfoRow label="Thời điểm" value={formatDateTime(moving?.timestamp)} />
+              <InfoRow label="Tốc độ" value={`${moving?.speed ?? 0} km/h`} />
+              <InfoRow
+                label="Vĩ độ"
+                value={moving?.lat !== null && moving?.lat !== undefined ? String(moving.lat) : 'Chưa có'}
+              />
+              <InfoRow
+                label="Kinh độ"
+                value={moving?.lon !== null && moving?.lon !== undefined ? String(moving.lon) : 'Chưa có'}
+              />
+            </div>
           </CardContent>
         </Card>
 

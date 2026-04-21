@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
+import { localizeAlertTitle } from '@/lib/api/alerts';
 import { parseMapTimestamp } from '@/features/map/constants/map-config';
 import { useMapStore } from '@/features/map/store/map-store';
 import { MAP_REALTIME_THROTTLE_MS } from '@/features/map/constants/map-config';
@@ -13,11 +14,22 @@ const toNullableNumber = (value: unknown): number | null => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const localizeAlertTitles = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => localizeAlertTitle(String(item ?? '').trim()))
+    .filter((item): item is string => Boolean(item));
+};
+
 const toDevicePosition = (raw: any): DevicePosition => ({
   deviceId: String(raw?.deviceId ?? raw?.device_id ?? ''),
   deviceName: String(
     raw?.deviceName ?? raw?.device_name ?? raw?.deviceId ?? raw?.device_id ?? 'Unknown',
   ),
+  vehicleId: raw?.vehicleId ?? raw?.vehicle_id ?? null,
   vehiclePlate: raw?.vehiclePlate ?? raw?.vehicle_plate ?? null,
   customerName: raw?.customerName ?? raw?.customer_name ?? null,
   lat: Number(raw?.lat ?? raw?.latitude ?? Number.NaN),
@@ -34,11 +46,7 @@ const toDevicePosition = (raw: any): DevicePosition => ({
   engineTemperature: toNullableNumber(raw?.engineTemperature ?? raw?.engine_temperature),
   rpm: toNullableNumber(raw?.rpm),
   activeAlertCount: Number(raw?.activeAlertCount ?? raw?.active_alert_count ?? 0),
-  activeAlertTitles: Array.isArray(raw?.activeAlertTitles)
-    ? raw.activeAlertTitles.map(String)
-    : Array.isArray(raw?.active_alert_titles)
-      ? raw.active_alert_titles.map(String)
-      : [],
+  activeAlertTitles: localizeAlertTitles(raw?.activeAlertTitles ?? raw?.active_alert_titles),
 });
 
 const mergePosition = (
@@ -49,6 +57,7 @@ const mergePosition = (
   ...next,
   deviceId: next.deviceId || previous?.deviceId || '',
   deviceName: next.deviceName || previous?.deviceName || 'Unknown',
+  vehicleId: next.vehicleId ?? previous?.vehicleId ?? null,
   vehiclePlate: next.vehiclePlate ?? previous?.vehiclePlate ?? null,
   customerName: next.customerName ?? previous?.customerName ?? null,
   lat: Number.isFinite(next.lat) ? next.lat : (previous?.lat ?? Number.NaN),

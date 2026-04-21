@@ -3,18 +3,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CircleCheckBig, CircleDashed, ShieldAlert } from 'lucide-react';
-import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { PageContainer } from '@/components/layout/PageContainer';
 import { StatCard } from '@/components/common/stat-card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { getAlertColumns } from '@/features/alerts/components/alert-columns';
+import { AlertDetailModal } from '@/features/alerts/components/alert-detail-modal';
+import { AlertFilters } from '@/features/alerts/components/alert-filters';
 import { alertServices, isObdMaintenanceAlert, localizeAlertForDisplay } from '@/lib/api/alerts';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
-import { getAlertColumns } from '@/features/alerts/components/alert-columns';
-import { AlertFilters } from '@/features/alerts/components/alert-filters';
-import { AlertDetailModal } from '@/features/alerts/components/alert-detail-modal';
 
 const PAGE_SIZE = 50;
 
@@ -189,7 +189,6 @@ const AlertsPage = () => {
   return (
     <PageContainer
       pageTitle="Cảnh báo"
-      pageDescription="Quản lý cảnh báo hệ thống theo mức độ, trạng thái và nguồn OBD"
       pageHeaderAction={
         <div className="flex flex-wrap gap-2">
           <Button
@@ -334,11 +333,7 @@ const AlertsPage = () => {
         </div>
       </div>
 
-      <AlertDetailModal
-        open={!!detail}
-        onOpenChange={(value) => !value && setDetail(null)}
-        alert={detail}
-      />
+      <AlertDetailModal open={!!detail} onOpenChange={(value) => !value && setDetail(null)} alert={detail} />
     </PageContainer>
   );
 };

@@ -19,6 +19,11 @@
 #include "telemetry_counters.h"
 #include "util.h"
 
+/**
+ * @file sd_log_store.c
+ * @brief SD-backed append-only queue with crash-safe metadata rotation.
+ */
+
 #define SD_LOG_MOUNT_POINT "/sdcard"
 #define SD_LOG_ROOT_DIR SD_LOG_MOUNT_POINT "/tracker"
 #define SD_LOG_META_DIR SD_LOG_ROOT_DIR "/meta"
@@ -34,20 +39,32 @@
 static const char *TAG = "SD_LOG_STORE";
 
 typedef enum {
+    /** Card missing, mount failed, or store intentionally unavailable. */
     SD_LOG_STATE_UNAVAILABLE = 0,
+    /** Mount + metadata are healthy enough for normal operation. */
     SD_LOG_STATE_MOUNTED,
+    /** Store is usable but one recovery/write anomaly was observed. */
     SD_LOG_STATE_DEGRADED,
 } sd_log_state_t;
 
 typedef struct {
+    /** `true` once init ran. */
     bool initialized;
+    /** Fast path mirror of `state == MOUNTED`. */
     bool mounted;
+    /** Whether the optional card-detect GPIO was configured successfully. */
     bool cd_configured;
+    /** Current health state of the SD store. */
     sd_log_state_t state;
+    /** Card handle returned by `esp_vfs_fat_sdmmc_mount`. */
     sdmmc_card_t *card;
+    /** In-memory copy of persistent queue metadata. */
     sd_log_meta_t meta;
+    /** Cache validity for `peek_next` sequential scans. */
     bool peek_cache_valid;
+    /** Minimum sequence number that the cached file offset can satisfy. */
     uint32_t peek_cache_min_seq;
+    /** File offset after the last successfully parsed replay record. */
     long peek_cache_offset;
 } sd_log_store_ctx_t;
 
@@ -63,12 +80,14 @@ static void sd_log_store_set_state(sd_log_state_t state) {
     s_ctx.state = state;
     s_ctx.mounted = state == SD_LOG_STATE_MOUNTED;
     if (state != SD_LOG_STATE_MOUNTED) {
+        /* Cached log offsets are meaningless after card removal/unmount/recovery. */
         sd_log_store_reset_peek_cache();
     }
 }
 
 static void sd_log_store_mark_degraded(void) {
     if (s_ctx.state == SD_LOG_STATE_MOUNTED) {
+        /* Degraded means "still mounted, but prior I/O guarantees may have weakened". */
         s_ctx.state = SD_LOG_STATE_DEGRADED;
     }
 }
@@ -76,6 +95,7 @@ static void sd_log_store_mark_degraded(void) {
 static esp_err_t sd_log_store_write_meta_snapshot(const sd_log_meta_t *meta) {
     ESP_RETURN_ON_NULL(meta, ESP_ERR_INVALID_ARG, TAG, "meta null");
 
+    /* Write metadata through temp -> backup -> live rotation to survive reset mid-update. */
     FILE *fp = fopen(SD_LOG_META_TMP_PATH, "wb");
     if (fp == NULL) {
         ESP_LOGE(TAG,
@@ -147,6 +167,7 @@ static esp_err_t sd_log_store_read_meta(void) {
     size_t read_len = fread(&s_ctx.meta, 1, sizeof(s_ctx.meta), fp);
     fclose(fp);
     if (read_len != sizeof(s_ctx.meta)) {
+        /* Partial metadata means we keep operating but treat it as degraded. */
         memset(&s_ctx.meta, 0, sizeof(s_ctx.meta));
         sd_log_store_mark_degraded();
     }
@@ -197,6 +218,7 @@ static esp_err_t sd_log_store_recover_meta_if_needed(void) {
     bool has_tmp = stat(SD_LOG_META_TMP_PATH, &tmp_st) == 0;
 
     if (has_meta) {
+        /* Normal case: live file exists, so stale temp/backup can be discarded. */
         if (has_tmp) {
             remove(SD_LOG_META_TMP_PATH);
         }
@@ -207,6 +229,7 @@ static esp_err_t sd_log_store_recover_meta_if_needed(void) {
     }
 
     if (has_tmp) {
+        /* Crash may have happened after temp write but before promote to live. */
         if (rename(SD_LOG_META_TMP_PATH, SD_LOG_META_PATH) != 0) {
             remove(SD_LOG_META_TMP_PATH);
             sd_log_store_mark_degraded();
@@ -220,6 +243,7 @@ static esp_err_t sd_log_store_recover_meta_if_needed(void) {
     }
 
     if (has_bak) {
+        /* Last fallback: restore the previous committed snapshot. */
         if (rename(SD_LOG_META_BAK_PATH, SD_LOG_META_PATH) != 0) {
             sd_log_store_mark_degraded();
             return ESP_FAIL;
@@ -242,6 +266,7 @@ static esp_err_t sd_log_store_recover_data_if_needed(void) {
     bool has_tmp = stat(SD_LOG_DATA_TMP_PATH, &tmp_st) == 0;
 
     if (has_log) {
+        /* Normal case: log exists, so stale temp/backup artifacts can be removed. */
         if (has_tmp) {
             remove(SD_LOG_DATA_TMP_PATH);
         }
@@ -252,6 +277,7 @@ static esp_err_t sd_log_store_recover_data_if_needed(void) {
     }
 
     if (has_tmp) {
+        /* Compaction or append rotation may have been interrupted before promotion. */
         if (rename(SD_LOG_DATA_TMP_PATH, SD_LOG_DATA_PATH) != 0) {
             remove(SD_LOG_DATA_TMP_PATH);
             sd_log_store_mark_degraded();
@@ -265,6 +291,7 @@ static esp_err_t sd_log_store_recover_data_if_needed(void) {
     }
 
     if (has_bak) {
+        /* Restore the last known-good queue file if the live file disappeared. */
         if (rename(SD_LOG_DATA_BAK_PATH, SD_LOG_DATA_PATH) != 0) {
             sd_log_store_mark_degraded();
             return ESP_FAIL;
@@ -286,6 +313,7 @@ static esp_err_t sd_log_store_apply_host_slot(sdmmc_host_t *host, sdmmc_slot_con
     }
 
     (void)host;
+    /* Hardware pin mapping is defined in `pin_map.h` and may vary by board revision. */
     slot->clk = PIN_SDMMC_CLK;
     slot->cmd = PIN_SDMMC_CMD;
     slot->d0 = PIN_SDMMC_D0;
@@ -326,6 +354,10 @@ static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *ou
 
     sd_log_record_t rec = {0};
 
+    /*
+     * Newer format stores `time_trusted`.
+     * Fallback parser keeps older log files readable after firmware upgrades.
+     */
     int matched = sscanf(line,
                          "%" SCNu32 "|%" SCNu64 "|%" SCNu32 "|%hhu|%hhu|%hhu|%hhu|%hhu|%383[^\n]",
                          &rec.seq,
@@ -396,6 +428,7 @@ esp_err_t sd_log_store_mount(void) {
 
     err = esp_vfs_fat_sdmmc_mount(SD_LOG_MOUNT_POINT, &host, &slot, &mount_cfg, &s_ctx.card);
     if (err != ESP_OK && slot.width > 1) {
+        /* 1-bit fallback reduces signal-integrity sensitivity on rough prototypes/cabling. */
         ESP_LOGW(TAG, "SD mount failed in %u-bit mode (%s), retry 1-bit", (unsigned)slot.width, esp_err_to_name(err));
         slot.width = 1;
         err = esp_vfs_fat_sdmmc_mount(SD_LOG_MOUNT_POINT, &host, &slot, &mount_cfg, &s_ctx.card);
@@ -486,6 +519,7 @@ esp_err_t sd_log_store_append(const sd_log_record_t *record) {
     ESP_RETURN_ON_FALSE(s_ctx.mounted, ESP_ERR_INVALID_STATE, TAG, "not mounted");
     ESP_RETURN_ON_NULL(record, ESP_ERR_INVALID_ARG, TAG, "record null");
 
+    /* Queue data is append-only; ordering comes from `seq`, not file rewrites. */
     FILE *fp = fopen(SD_LOG_DATA_PATH, "ab");
     if (fp == NULL) {
         telemetry_counters_inc_sd_write_fail();
@@ -522,6 +556,10 @@ esp_err_t sd_log_store_append(const sd_log_record_t *record) {
     fclose(fp);
     telemetry_counters_inc_sd_write_ok();
 
+    /*
+     * Metadata is updated after the log line reaches disk.
+     * That ordering prefers replay duplicates over silent data loss after a reset.
+     */
     sd_log_meta_t meta = s_ctx.meta;
     meta.write_seq = record->seq;
     if (meta.replay_seq == 0) {
@@ -549,6 +587,7 @@ esp_err_t sd_log_store_get_meta(sd_log_meta_t *out_meta) {
 esp_err_t sd_log_store_set_ack_seq_critical(uint32_t ack_seq_critical) {
     sd_log_meta_t meta = s_ctx.meta;
     if (ack_seq_critical > meta.ack_seq_critical) {
+        /* ACK watermark is monotonic; never move it backward. */
         meta.ack_seq_critical = ack_seq_critical;
     }
 
@@ -585,6 +624,7 @@ esp_err_t sd_log_store_ack_critical_and_advance_replay(uint32_t ack_seq_critical
     if (ack_seq_critical > meta.ack_seq_critical) {
         meta.ack_seq_critical = ack_seq_critical;
     }
+    /* Commit ACK + replay advance together so a reset cannot split the two. */
     meta.replay_seq = replay_seq;
 
     esp_err_t err = sd_log_store_write_meta_snapshot(&meta);
@@ -609,6 +649,7 @@ esp_err_t sd_log_store_peek_next(uint32_t min_seq, sd_log_record_t *out_record) 
     }
 
     if (s_ctx.peek_cache_valid && min_seq >= s_ctx.peek_cache_min_seq) {
+        /* Sequential replay usually asks for increasing seq numbers; seek from cached offset. */
         if (fseek(fp, s_ctx.peek_cache_offset, SEEK_SET) != 0) {
             sd_log_store_reset_peek_cache();
             (void)fseek(fp, 0, SEEK_SET);
@@ -629,6 +670,7 @@ esp_err_t sd_log_store_peek_next(uint32_t min_seq, sd_log_record_t *out_record) 
         *out_record = rec;
         long next_offset = ftell(fp);
         if (next_offset >= 0) {
+            /* Cache the location after this record for the next monotonic replay lookup. */
             s_ctx.peek_cache_valid = true;
             s_ctx.peek_cache_min_seq = rec.seq + 1;
             s_ctx.peek_cache_offset = next_offset;
@@ -642,6 +684,7 @@ esp_err_t sd_log_store_peek_next(uint32_t min_seq, sd_log_record_t *out_record) 
     if (found != ESP_OK) {
         long end_offset = ftell(fp);
         if (end_offset >= 0) {
+            /* Remember EOF so repeated empty peeks do not rescan the full log. */
             s_ctx.peek_cache_valid = true;
             s_ctx.peek_cache_min_seq = min_seq;
             s_ctx.peek_cache_offset = end_offset;
@@ -687,6 +730,10 @@ esp_err_t sd_log_store_gc_if_needed(void) {
             telemetry_counters_inc_replay_drop();
             continue;
         }
+        /*
+         * Critical records stay until the ACK watermark passes them.
+         * Non-critical/raw records become disposable once older than that watermark.
+         */
         if (rec.critical == 0 && rec.seq <= s_ctx.meta.ack_seq_critical) {
             continue;
         }
@@ -711,6 +758,7 @@ esp_err_t sd_log_store_gc_if_needed(void) {
     fclose(out);
     fclose(in);
 
+    /* Promote compacted file with the same temp/backup rotation strategy as metadata. */
     remove(SD_LOG_DATA_BAK_PATH);
     if (rename(SD_LOG_DATA_PATH, SD_LOG_DATA_BAK_PATH) != 0) {
         remove(SD_LOG_DATA_TMP_PATH);

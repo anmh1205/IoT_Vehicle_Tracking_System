@@ -1,5 +1,6 @@
 import * as auditLogRepo from '@/domain/audit/repositories/audit-log.repository';
 import { logger } from '@/infrastructure/logger';
+import type { PoolClient } from 'pg';
 import type {
   AuditLog,
   AuditLogRecordPublic,
@@ -24,11 +25,18 @@ const sanitize = (log: AuditLog): AuditLogRecordPublic => ({
  * Fire-and-forget safe — errors are logged but never rethrown to avoid
  * disrupting the main operation.
  */
-export const record = async (params: RecordAuditInput): Promise<void> => {
+export const record = async (
+  params: RecordAuditInput,
+  client?: PoolClient,
+  options?: { strict?: boolean },
+): Promise<void> => {
   try {
-    await auditLogRepo.create(params);
+    await auditLogRepo.create(params, client);
   } catch (err) {
     logger.warn(`Failed to write audit log [${params.action}] on ${params.entityType}/${params.entityId}: ${err}`);
+    if (options?.strict) {
+      throw err;
+    }
   }
 };
 

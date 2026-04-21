@@ -12,7 +12,7 @@ const operationPillars = [
     description: 'Giữ vị trí xe, tuyến đường và trạng thái thiết bị trong một nhịp quan sát.',
   },
   {
-    title: 'Cảnh báo hợp ngữ cảnh',
+    title: 'Cảnh báo đồng bộ dữ liệu',
     description: 'Map, alerts, geofence, trips và trạng thái hệ thống nằm chung một flow.',
   },
   {
@@ -47,7 +47,7 @@ export const LandingHero = () => {
             </h1>
             <p className="max-w-2xl font-[family:var(--font-marketing)] text-base leading-8 text-slate-300 sm:text-lg">
               Hệ thống gom bản đồ realtime, cảnh báo, geofence, trips, nhiên liệu, bảo trì và sức khỏe
-              hạ tầng vào cùng một bề mặt rõ ràng, để đội vận hành phản ứng nhanh mà không đổi ngữ cảnh.
+              hạ tầng vào cùng một bề mặt rõ ràng, để đội vận hành phản ứng nhanh mà không đổi màn hình.
             </p>
           </div>
 

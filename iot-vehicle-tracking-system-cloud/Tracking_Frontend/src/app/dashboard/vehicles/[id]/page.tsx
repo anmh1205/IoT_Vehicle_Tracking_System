@@ -22,7 +22,7 @@ const VehicleDetailPage = ({
 
   if (query.isError) {
     return (
-      <PageContainer pageTitle={`Phương tiện #${id}`} pageDescription="Chi tiết">
+      <PageContainer pageTitle={`Phương tiện #${id}`} pageDescription="Chi tiết phương tiện">
         <EmptyState
           title="Không thể tải dữ liệu"
           description="Không thể lấy thông tin phương tiện. Vui lòng thử lại."
@@ -34,10 +34,7 @@ const VehicleDetailPage = ({
 
   const detail = query.data ?? {};
   const pageTitle = detail.plateNumber ?? detail.vehicleId ?? `Phương tiện #${id}`;
-  const pageDescription =
-    detail.deviceId || detail.customerId
-      ? `Theo dõi hồ sơ, cấu hình và liên kết telemetry cho ${detail.vehicleId ?? 'phương tiện'}`
-      : 'Phương tiện này vẫn thiếu liên kết telemetry hoặc khách hàng sở hữu';
+  const pageDescription = 'Chi tiết phương tiện';
 
   return (
     <PageContainer pageTitle={pageTitle} pageDescription={pageDescription}>

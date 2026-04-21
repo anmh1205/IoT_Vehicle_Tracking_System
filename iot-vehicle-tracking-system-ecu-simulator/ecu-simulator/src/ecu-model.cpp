@@ -142,19 +142,19 @@ void update_drive_snapshot(const dtc_profile_t &profile, uint32_t drive_elapsed_
   const uint8_t wave = static_cast<uint8_t>(((drive_elapsed_s / 3UL) + s_wave_offset) % 8UL);
   const drive_phase_t phase = resolve_phase(cycle_s);
 
-  s_snapshot.engine_running = phase != DRIVE_PHASE_PARKED;
+  s_snapshot.engine_running = true;
   switch (phase) {
     case DRIVE_PHASE_PARKED:
-      s_snapshot.engine_load_pct = 14;
-      s_snapshot.rpm = 0;
+      s_snapshot.engine_load_pct = static_cast<uint8_t>(16 + wave);
+      s_snapshot.rpm = static_cast<uint16_t>(760 + wave * 18U);
       s_snapshot.speed_kph = 0;
-      s_snapshot.throttle_pct = 8;
-      s_snapshot.intake_kpa = 29;
+      s_snapshot.throttle_pct = static_cast<uint8_t>(9 + wave);
+      s_snapshot.intake_kpa = static_cast<uint8_t>(31 + wave);
       s_snapshot.coolant_c = static_cast<uint8_t>(72 + (wave / 2U));
       s_snapshot.intake_air_c = static_cast<int8_t>(27 + (wave / 3U));
       s_snapshot.ambient_air_c = static_cast<int8_t>(28 + (wave / 4U));
       s_snapshot.timing_advance_deg = 8;
-      s_snapshot.maf_centigrams_per_s = 90;
+      s_snapshot.maf_centigrams_per_s = static_cast<uint16_t>(210 + wave * 14U);
       break;
     case DRIVE_PHASE_IDLE:
       s_snapshot.engine_load_pct = static_cast<uint8_t>(18 + wave);

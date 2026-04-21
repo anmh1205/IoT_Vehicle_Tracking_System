@@ -10,8 +10,16 @@ router.get('/health', systemAdminController.getHealth);
 router.get('/metrics', systemAdminController.queryMetrics);
 router.get('/logs', systemAdminController.queryLogs);
 router.get('/audit', systemAdminController.queryAudit);
-router.get('/settings', systemAdminController.getSettings);
-router.put('/settings/:key', systemAdminController.updateSetting);
+
+router.get('/vm/settings', systemAdminController.listVmSettings);
+router.post('/vm/settings', systemAdminController.createVmSetting);
+router.put('/vm/settings/:key', systemAdminController.updateVmSetting);
+router.delete('/vm/settings/:key', systemAdminController.deleteVmSetting);
+router.post('/vm/settings/:key/validate', systemAdminController.validateVmSetting);
+router.post('/vm/settings/:key/activate', systemAdminController.activateVmSetting);
+router.post('/vm/settings/:key/rollback', systemAdminController.rollbackVmSetting);
+router.get('/vm/settings/:key/revisions', systemAdminController.listVmSettingRevisions);
+
 router.get('/tables', systemAdminController.listTables);
 router.get('/tables/:table/columns', systemAdminController.listTableColumns);
 router.get('/tables/:table', systemAdminController.queryTable);

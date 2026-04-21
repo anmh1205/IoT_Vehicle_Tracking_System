@@ -7,16 +7,22 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { DeviceMapStatus } from '@/features/map/types';
+import { cn } from '@/lib/utils';
 export const DeviceFilter = ({
   value,
   onChange,
+  className,
 }: {
   value: 'all' | DeviceMapStatus;
   onChange: (value: 'all' | DeviceMapStatus) => void;
+  className?: string;
 }) => {
   return (
-    <Select value={value} onValueChange={(next) => onChange(next as 'all' | DeviceMapStatus)}>
-      <SelectTrigger className="w-full">
+    <Select
+      value={value}
+      onValueChange={(next) => onChange(next as 'all' | DeviceMapStatus)}
+    >
+      <SelectTrigger className={cn('w-full', className)}>
         <SelectValue placeholder="Trạng thái" />
       </SelectTrigger>
       <SelectContent>

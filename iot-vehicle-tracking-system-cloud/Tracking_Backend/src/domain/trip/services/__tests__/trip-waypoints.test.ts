@@ -1,8 +1,12 @@
 import type { TripWaypoint } from '../trip-waypoints.service';
 
 vi.mock('@/domain/system-admin/repositories/victoriametrics.repository');
+vi.mock('@/infrastructure/database/queries', () => ({
+  findMany: vi.fn(),
+}));
 
 import * as vmRepo from '@/domain/system-admin/repositories/victoriametrics.repository';
+import { findMany } from '@/infrastructure/database/queries';
 import { getWaypoints, computeRouteSummary } from '../trip-waypoints.service';
 
 // -- Helpers ------------------------------------------------------------------
@@ -26,6 +30,7 @@ const makeVmResult = (values: { timestamp: number; value: number }[]) => ({
 describe('trip-waypoints.service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(findMany).mockResolvedValue([]);
   });
 
   // --- computeRouteSummary ---------------------------------------------------
@@ -127,6 +132,53 @@ describe('trip-waypoints.service', () => {
   // --- getWaypoints ----------------------------------------------------------
 
   describe('getWaypoints', () => {
+    it('should use event log waypoints when rawdata GPS exists', async () => {
+      vi.mocked(findMany).mockResolvedValue([
+        {
+          server_timestamp: new Date('2026-01-15T08:00:00.000Z'),
+          lat: '10.7769',
+          lon: '106.7009',
+          speed: '42.5',
+          course: '90',
+        },
+        {
+          server_timestamp: new Date('2026-01-15T08:00:10.000Z'),
+          lat: '10.7770',
+          lon: '106.7010',
+          speed: '43.5',
+          course: '91',
+        },
+        {
+          server_timestamp: new Date('2026-01-15T08:00:16.000Z'),
+          lat: '10.7771',
+          lon: '106.7011',
+          speed: '44.5',
+          course: '92',
+        },
+      ]);
+
+      const result = await getWaypoints(
+        'DEV-001',
+        new Date('2026-01-15T08:00:00.000Z'),
+        new Date('2026-01-15T09:00:00.000Z'),
+      );
+
+      expect(vmRepo.queryRange).not.toHaveBeenCalled();
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        lat: 10.7769,
+        lon: 106.7009,
+        speed: 42.5,
+        course: 90,
+      });
+      expect(result[1]).toMatchObject({
+        lat: 10.7771,
+        lon: 106.7011,
+        speed: 44.5,
+        course: 92,
+      });
+    });
+
     it('should merge lat/lon values by timestamp into waypoints', async () => {
       const ts = 1700000000;
       vi.mocked(vmRepo.queryRange)

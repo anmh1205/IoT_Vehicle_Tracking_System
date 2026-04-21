@@ -3,6 +3,7 @@ import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -36,6 +37,9 @@ export const ExportModal = ({ open, onOpenChange, deviceId }: ExportModalProps) 
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Xuất dữ liệu thiết bị</DialogTitle>
+          <DialogDescription>
+            Chọn loại dữ liệu, định dạng và khoảng thời gian để tạo file xuất cho thiết bị đang xem.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <Select

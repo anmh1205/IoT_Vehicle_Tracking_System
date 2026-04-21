@@ -19,6 +19,7 @@ import { useDeviceTrackingTelemetry } from '@/features/devices/hooks/use-device-
 import { useSendCommand } from '@/features/devices/hooks/use-send-command';
 import { useUpdateDevice } from '@/features/devices/hooks/use-update-device';
 import { useUpdateDeviceSettings } from '@/features/devices/hooks/use-update-device-settings';
+import { getDashboardEventPresentation } from '@/features/dashboard/components/dashboard-event-presenters';
 import { DeviceDetailModal } from './index';
 import { buildDiagnosticsSummary, extractDiagnosticsPayloadFromEventLog } from './obd-diagnostics';
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
@@ -50,6 +51,22 @@ const appendConfigParam = (
     target[key] = Math.round(parsed);
   }
 };
+
+const getEventLogPresentation = (
+  row: Record<string, unknown>,
+  timestamp: string | null,
+) =>
+  getDashboardEventPresentation({
+    id: String(row.id ?? 'event-log'),
+    eventType: String(row.event_type ?? row.eventType ?? 'event'),
+    eventCode:
+      row.event_code === undefined || row.event_code === null ? null : String(row.event_code),
+    message: row.message == null ? null : String(row.message),
+    severity: String(row.severity ?? 'info'),
+    deviceId:
+      row.device_id === undefined || row.device_id === null ? null : String(row.device_id),
+    serverTimestamp: timestamp ?? new Date().toISOString(),
+  });
 
 const buildRawFeed = (params: {
   telemetryRows: any[];
@@ -98,21 +115,30 @@ const buildRawFeed = (params: {
 
   const eventLogRows = params.eventLogs.map((row, index) => {
     const normalizedRow = toRecord(row) ?? {};
+    const timestamp = resolveTimestamp(
+      normalizedRow.server_timestamp ?? normalizedRow.created_at ?? normalizedRow.createdAt,
+    );
     const diagnostics = extractDiagnosticsPayloadFromEventLog(normalizedRow);
     const isDiagnosticsRow = diagnostics !== null;
     const source: DeviceRawFeedRow['source'] = isDiagnosticsRow ? 'obd-diagnostic' : 'event-log';
+    const presentation = isDiagnosticsRow ? null : getEventLogPresentation(normalizedRow, timestamp);
 
     return {
       id: `event-log-${String(normalizedRow.id ?? index)}`,
-      timestamp: resolveTimestamp(
-        normalizedRow.server_timestamp ?? normalizedRow.created_at ?? normalizedRow.createdAt,
-      ),
+      timestamp,
       source,
-      event: String(normalizedRow.event_type ?? normalizedRow.topic ?? 'event_log'),
+      event: presentation?.title ?? String(normalizedRow.event_type ?? normalizedRow.topic ?? 'event_log'),
       summary: diagnostics
         ? buildDiagnosticsSummary(diagnostics)
-        : String(normalizedRow.message ?? normalizedRow.payload ?? normalizedRow.context ?? '-'),
-      payload: diagnostics ? { ...normalizedRow, diagnostics } : normalizedRow,
+        : presentation?.description ??
+          String(normalizedRow.message ?? normalizedRow.payload ?? normalizedRow.context ?? '-'),
+      payload: diagnostics
+        ? { ...normalizedRow, diagnostics }
+        : {
+            ...normalizedRow,
+            localized_title: presentation?.title ?? null,
+            localized_message: presentation?.description ?? null,
+          },
     };
   });
 
@@ -253,7 +279,7 @@ export const DeviceDetailModalContainer = ({
   const deviceId = device?.id ?? null;
 
   const detail = useDeviceDetail(deviceId);
-  const sessions = useDeviceSessions(deviceId, { pageSize: 10 });
+  const sessions = useDeviceSessions(deviceId, { pageSize: 20 });
   const errors = useDeviceErrorCodes(deviceId, 10);
   const commands = useDeviceCommands(deviceId, 10);
   const tracking = useDeviceTrackingTelemetry(deviceId);
@@ -383,6 +409,7 @@ export const DeviceDetailModalContainer = ({
       errorCodes: errors.items,
       errorCodesTotal: errors.total,
       errorCodesPage: errors.page,
+      errorCodesTotalPages: errors.totalPages,
       errorCodesStatus: errors.status,
       errorCodesType: errors.type,
       onErrorCodesPageChange: errors.onPageChange,
@@ -398,8 +425,11 @@ export const DeviceDetailModalContainer = ({
       onRuntimeRangeChange: runtime.onRangeChange,
       trackingRows: tracking.rows,
       trackingRowsAscending: tracking.rowsAscending,
+      routeRowsAscending: tracking.routeRowsAscending,
       trackingPeriod: tracking.period,
       onTrackingPeriodChange: tracking.onPeriodChange,
+      trackingCustomRange: tracking.customRange,
+      onTrackingCustomRangeChange: tracking.onCustomRangeChange,
       routePoints: tracking.routePoints,
       distanceKm: tracking.distanceKm,
       averageSpeed: tracking.averageSpeed,
@@ -420,7 +450,6 @@ export const DeviceDetailModalContainer = ({
       onUpdateSettings: async (data: Record<string, unknown>) => {
         await updateSettings.mutateAsync(data);
         const config = toRecord(data.config);
-        const driving = toRecord(config?.driving);
         const parking = toRecord(config?.parking);
         const alerts = toRecord(config?.alerts);
         const commandParams: Record<string, number> = {};
@@ -501,6 +530,7 @@ export const DeviceDetailModalContainer = ({
       errors.page,
       errors.status,
       errors.total,
+      errors.totalPages,
       errors.type,
       eventLogs.items,
       eventLogs.total,
@@ -525,10 +555,13 @@ export const DeviceDetailModalContainer = ({
       tracking.latestRow,
       tracking.maxSpeed,
       tracking.onPeriodChange,
+      tracking.onCustomRangeChange,
       tracking.period,
+      tracking.customRange,
       tracking.routePoints,
       tracking.rows,
       tracking.rowsAscending,
+      tracking.routeRowsAscending,
       updateName,
       updateSettings,
     ],

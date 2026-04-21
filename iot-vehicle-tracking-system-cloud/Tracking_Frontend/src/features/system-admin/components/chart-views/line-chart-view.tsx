@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -18,9 +18,6 @@ import type { MetricSeries } from '@/features/system-admin/types';
 const COLORS = ['#2563eb', '#22c55e', '#f97316', '#8b5cf6', '#ef4444', '#0ea5e9'];
 
 export const LineChartView = ({ series }: { series: MetricSeries[] }) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [ready, setReady] = useState(false);
-
   const rows = useMemo(() => {
     const bucket = new Map<number, Record<string, number | string>>();
     for (const item of series) {
@@ -37,30 +34,6 @@ export const LineChartView = ({ series }: { series: MetricSeries[] }) => {
     return Array.from(bucket.values()).sort((a, b) => Number(a.timestamp) - Number(b.timestamp));
   }, [series]);
 
-  useEffect(() => {
-    const element = containerRef.current;
-    if (!element) {
-      setReady(false);
-      return;
-    }
-
-    const updateReady = () => {
-      const rect = element.getBoundingClientRect();
-      setReady(rect.width > 0 && rect.height > 0);
-    };
-
-    updateReady();
-
-    if (typeof ResizeObserver === 'undefined') {
-      const frame = window.requestAnimationFrame(updateReady);
-      return () => window.cancelAnimationFrame(frame);
-    }
-
-    const observer = new ResizeObserver(() => updateReady());
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
   if (series.length === 0) {
     return (
       <Card>
@@ -73,8 +46,8 @@ export const LineChartView = ({ series }: { series: MetricSeries[] }) => {
 
   return (
     <Card>
-      <CardContent ref={containerRef} className="h-[380px] p-3">
-        {ready ? (
+      <CardContent className="p-3">
+        <div className="h-[380px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={rows}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -94,11 +67,7 @@ export const LineChartView = ({ series }: { series: MetricSeries[] }) => {
               ))}
             </LineChart>
           </ResponsiveContainer>
-        ) : (
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            Đang khởi tạo biểu đồ...
-          </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );

@@ -23,7 +23,7 @@ const log = createLogger('mqtt-listener');
 
 interface InternalEnvelope {
   correlation_id: string;
-  event_type: 'status' | 'alert' | 'session' | 'data' | 'ignition';
+  event_type: 'status' | 'alert' | 'session' | 'data' | 'geofence' | 'ignition';
   timestamp: string;
   payload: Record<string, unknown>;
 }
@@ -253,17 +253,46 @@ export const initMqttEventListener = (): void => {
         break;
 
       case 'data':
+        {
+          const batteryTop = toOptionalNumber(
+            envelopePayload.bt ?? envelopePayload.battery_top ?? envelopePayload.batt,
+          );
+          const deviceBattery = toOptionalNumber(
+            envelopePayload.bb ??
+              envelopePayload.battery_bot ??
+              envelopePayload.deviceBattery ??
+              envelopePayload.device_battery,
+          );
+          const engineTemperature =
+            getDiagnosticsSignal(envelopePayload, 'coolant_c') ??
+            toOptionalNumber(envelopePayload.temp ?? envelopePayload.temperature);
+          const ambientTemperature =
+            toOptionalNumber(envelopePayload.temperature ?? envelopePayload.temp) ??
+            engineTemperature;
+          const rpm =
+            getDiagnosticsSignal(envelopePayload, 'rpm') ??
+            toOptionalNumber(envelopePayload.rpm);
+
         publishEvent('device:position', {
           device_id: String(envelopePayload.device_id ?? ''),
           lat: Number(envelopePayload.latitude ?? envelopePayload.lat ?? 0),
           lon: Number(envelopePayload.longitude ?? envelopePayload.lon ?? 0),
           speed: Number(envelopePayload.speed ?? envelopePayload.spd ?? 0),
-          heading: Number(envelopePayload.course ?? 0),
+          heading: Number(envelopePayload.heading ?? envelopePayload.course ?? 0),
           timestamp: toTimestampMs(data.timestamp),
+          status:
+            envelopePayload.current_status == null
+              ? undefined
+              : String(envelopePayload.current_status),
+          vehicleId:
+            envelopePayload.vehicle_id == null ? null : String(envelopePayload.vehicle_id),
           battery:
-            envelopePayload.battery_top == null && envelopePayload.bt == null
-              ? null
-              : Number(envelopePayload.battery_top ?? envelopePayload.bt),
+            batteryTop == null ? null : Number(batteryTop),
+          deviceBattery: deviceBattery == null ? null : Number(deviceBattery),
+          vehicleBattery: batteryTop == null ? null : Number(batteryTop),
+          temperature: ambientTemperature == null ? null : Number(ambientTemperature),
+          engineTemperature: engineTemperature == null ? null : Number(engineTemperature),
+          rpm: rpm == null ? null : Number(rpm),
           metadata,
         });
         void persistRawDataEventLog(data, envelopePayload).catch((error) => {
@@ -272,6 +301,7 @@ export const initMqttEventListener = (): void => {
             { error, deviceId: envelopePayload.device_id },
           );
         });
+        }
         break;
 
       case 'session': {
@@ -321,8 +351,11 @@ export const initMqttEventListener = (): void => {
               (envelopePayload.metadata as Record<string, unknown> | undefined)?.geofence_id,
           );
 
+          const alertMetadata = asRecord(envelopePayload.metadata);
           const realtimePayload = {
             id: 0,
+            vehicle_id:
+              envelopePayload.vehicle_id == null ? undefined : String(envelopePayload.vehicle_id),
             device_id: String(envelopePayload.device_id ?? ''),
             alert_type: rawAlertType,
             severity,
@@ -331,6 +364,7 @@ export const initMqttEventListener = (): void => {
             latitude,
             longitude,
             metadata,
+            alertMetadata,
           };
 
           if (normalizedAlertType) {
@@ -371,6 +405,42 @@ export const initMqttEventListener = (): void => {
           }
         }
         break;
+
+      case 'geofence': {
+        const eventName = String(envelopePayload.event_name ?? '');
+        if (eventName === 'allowed_zone_state_changed') {
+          const allowedZoneId = toOptionalInt(envelopePayload.allowed_zone_id);
+          const vehicleId = envelopePayload.vehicle_id == null ? '' : String(envelopePayload.vehicle_id);
+          if (allowedZoneId && vehicleId) {
+            publishEvent('geofence:allowed-zone-state-changed', {
+              device_id:
+                envelopePayload.device_id == null ? undefined : String(envelopePayload.device_id),
+              vehicle_id: vehicleId,
+              allowed_zone_id: allowedZoneId,
+              previous_membership_state:
+                String(envelopePayload.previous_membership_state ?? 'unknown') as
+                  | 'unknown'
+                  | 'inside'
+                  | 'outside'
+                  | 'suspect',
+              membership_state:
+                String(envelopePayload.membership_state ?? 'unknown') as
+                  | 'unknown'
+                  | 'inside'
+                  | 'outside'
+                  | 'suspect',
+              last_changed_at:
+                envelopePayload.last_changed_at == null
+                  ? data.timestamp
+                  : String(envelopePayload.last_changed_at),
+              latitude: toOptionalNumber(envelopePayload.latitude),
+              longitude: toOptionalNumber(envelopePayload.longitude),
+              metadata,
+            });
+          }
+        }
+        break;
+      }
 
       case 'ignition': {
         const ignitionState = String(envelopePayload.state ?? '');

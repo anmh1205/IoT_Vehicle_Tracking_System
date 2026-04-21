@@ -126,7 +126,7 @@ export const GeofenceForm = ({
             {!isQuickEditSupported ? (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                 Geofence đa giác hoặc hình chữ nhật hiện chưa có trình chỉnh sửa an toàn trong modal
-                này. Hãy dùng trang chi tiết để xem ngữ cảnh, tránh làm sai hình học đang lưu.
+                này. Hãy dùng trang chi tiết để xem thông tin, tránh làm sai hình học đang lưu.
               </div>
             ) : null}
 
@@ -192,7 +192,7 @@ export const GeofenceForm = ({
                 <div>
                   <Label htmlFor="geofence-radius">Bán kính ưu tiên (km)</Label>
                   <p className="text-xs text-muted-foreground">
-                    Ưu tiên nhập km để đồng bộ với ngữ cảnh vận hành.
+                    Ưu tiên nhập km để đồng bộ với thông tin vận hành.
                   </p>
                 </div>
                 <p className="text-sm font-medium">{radiusLabel}</p>

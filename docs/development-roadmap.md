@@ -77,6 +77,14 @@
   - Backend lint, typecheck, test, and build were reported as passing for the completed scope.
   - Code review captured follow-up hardening items for future maintenance, but they do not block feature completion.
 
+### P2 - Operations Map Allowed-Zone UX Refactor Complete
+- Scope: frontend-only UX refactor for per-vehicle allowed-zone management on the operations map.
+- Milestones completed:
+  - Added a dedicated allowed-zone map layer and docked panel under `Tracking_Frontend/src/features/map/components/`.
+  - Selected-device overlay now exposes allowed-zone status plus create/edit/show/hide actions.
+  - Shared allowed-zone hooks and form mapping were reused without changing API contracts.
+  - Non-map pages continue using `Tracking_Frontend/src/features/geofences/components/allowed-zone-setup-sheet.tsx`, so the refactor stays scoped to the map experience.
+
 ### P2 - Hardware Spec Firmware Thesis Sync In Progress
 - Scope: align firmware + thesis final assets with hardware netlist baseline decisions (SIM7600CE-T canonical, LIS3DSH migration, modem control-line model expansion).
 - Milestones in progress:

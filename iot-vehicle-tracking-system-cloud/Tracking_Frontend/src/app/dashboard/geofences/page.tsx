@@ -1,13 +1,13 @@
 'use client';
 
 import { useDeferredValue, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CircleCheckBig, CircleOff, MapPinned, Plus, Radar } from 'lucide-react';
+import { CircleOff, MapPinned, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { useQueries, useQuery } from '@tanstack/react-query';
+import type { ColumnDef } from '@tanstack/react-table';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
 import { StatCard } from '@/components/common/stat-card';
-import { ConfirmDialog } from '@/components/common/confirm-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -17,324 +17,272 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AllowedZoneSetupSheet } from '@/features/geofences/components/allowed-zone-setup-sheet';
+import { zoneQueryKey } from '@/features/geofences/hooks/use-vehicle-allowed-zone';
+import { useRoleAccess } from '@/hooks/use-role-access';
 import { geofenceServices } from '@/lib/api/geofences';
 import { vehicleServices } from '@/lib/api/vehicles';
-import { notificationUtils } from '@/lib/notification';
-import { getApiErrorMessage } from '@/lib/utils/api-error';
-import { getGeofenceColumns } from '@/features/geofences/components/geofence-columns';
-import { GeofenceForm } from '@/features/geofences/components/geofence-form';
-import { GeofenceVehicleBinder } from '@/features/geofences/components/geofence-vehicle-binder';
+import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
 
-const PAGE_SIZE = 20;
+const VEHICLE_PAGE_LIMIT = 100;
+const VEHICLE_MAX_PAGES = 20;
 
-const GeofencesPage = () => {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [editItem, setEditItem] = useState<any | null>(null);
-  const [manageItem, setManageItem] = useState<any | null>(null);
-  const [deleteItem, setDeleteItem] = useState<any | null>(null);
-  const [selectedVehicleIds, setSelectedVehicleIds] = useState<string[]>([]);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<'all' | 'active' | 'inactive'>('all');
-  const [geofenceType, setGeofenceType] = useState<'all' | 'circle' | 'polygon' | 'rectangle'>('all');
-  const deferredSearch = useDeferredValue(search);
-  const queryClient = useQueryClient();
+const membershipMeta: Record<
+  string,
+  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+> = {
+  inside: { label: 'Đang trong vùng', variant: 'default' },
+  outside: { label: 'Đang ngoài vùng', variant: 'destructive' },
+  suspect: { label: 'Sát mép vùng', variant: 'secondary' },
+  unknown: { label: 'Chưa đánh giá', variant: 'outline' },
+};
 
-  const geofences = useQuery({
-    queryKey: ['geofences', page, deferredSearch, status, geofenceType],
-    queryFn: () =>
-      geofenceServices.getList({
-        page,
-        limit: PAGE_SIZE,
-        search: deferredSearch || undefined,
-        isActive: status === 'all' ? undefined : status === 'active',
-        geofenceType: geofenceType === 'all' ? undefined : geofenceType,
-      }),
-  });
+type VehicleRow = {
+  id: number;
+  vehicleId: string;
+  plateNumber: string | null;
+  customerName: string | null;
+  deviceId: string | null;
+  status: string | null;
+};
 
-  const vehicles = useQuery({
-    queryKey: ['vehicles-for-geofence'],
-    queryFn: () => vehicleServices.getList({ limit: 100 }),
-  });
+type AllowedZoneTableRow = VehicleRow & {
+  allowedZone: Awaited<ReturnType<typeof geofenceServices.getVehicleAllowedZone>>;
+};
 
-  const createMutation = useMutation({
-    mutationFn: (payload: any) =>
-      geofenceServices.create({
-        ...payload,
-        centerLatitude: Number(payload.centerLatitude),
-        centerLongitude: Number(payload.centerLongitude),
-        radiusMeters: Number(payload.radiusMeters),
-        triggerOn: payload.triggerOn,
-        description: payload.description || undefined,
-      }),
-    onSuccess: async () => {
-      setPage(1);
-      setSearch('');
-      setStatus('all');
-      setGeofenceType('all');
-      await queryClient.invalidateQueries({ queryKey: ['geofences'] });
-      setOpen(false);
-    },
-    onError: (error: unknown) => {
-      notificationUtils.error(
-        'Thêm vùng giám sát thất bại',
-        getApiErrorMessage(error, 'Không thể thêm vùng giám sát.'),
-      );
-    },
-  });
+const extractVehicleItems = (payload: any): VehicleRow[] =>
+  (payload?.items ?? payload?.data?.items ?? []) as VehicleRow[];
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, payload }: any) =>
-      geofenceServices.update(id, {
-        ...payload,
-        centerLatitude: Number(payload.centerLatitude),
-        centerLongitude: Number(payload.centerLongitude),
-        radiusMeters: Number(payload.radiusMeters),
-        triggerOn: payload.triggerOn,
-        description: payload.description || undefined,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['geofences'] });
-      setOpen(false);
-      setEditItem(null);
-    },
-    onError: (error: unknown) => {
-      notificationUtils.error(
-        'Cập nhật vùng giám sát thất bại',
-        getApiErrorMessage(error, 'Không thể cập nhật vùng giám sát.'),
-      );
-    },
-  });
-
-  const syncVehiclesMutation = useMutation({
-    mutationFn: async ({ id, nextVehicleIds, currentVehicleIds }: { id: number; nextVehicleIds: string[]; currentVehicleIds: string[] }) => {
-      const toAssign = nextVehicleIds.filter((vehicleId) => !currentVehicleIds.includes(vehicleId));
-      const toUnassign = currentVehicleIds.filter((vehicleId) => !nextVehicleIds.includes(vehicleId));
-
-      await Promise.all([
-        ...toAssign.map((vehicleId) => geofenceServices.assignVehicle(id, vehicleId)),
-        ...toUnassign.map((vehicleId) => geofenceServices.unassignVehicle(id, vehicleId)),
-      ]);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['geofences'] });
-      if (manageItem?.id) {
-        queryClient.invalidateQueries({ queryKey: ['geofence-detail', manageItem.id] });
-      }
-    },
-    onError: (error: unknown) => {
-      notificationUtils.error(
-        'Cập nhật danh sách xe thất bại',
-        getApiErrorMessage(error, 'Không thể đồng bộ phương tiện cho vùng giám sát.'),
-      );
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => geofenceServices.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['geofences'] });
-      setDeleteItem(null);
-    },
-    onError: (error: unknown) => {
-      notificationUtils.error(
-        'Xóa vùng giám sát thất bại',
-        getApiErrorMessage(error, 'Không thể xóa vùng giám sát.'),
-      );
-    },
-  });
-
-  const rows = useMemo(() => geofences.data?.items ?? geofences.data?.data?.items ?? [], [geofences.data]);
-  const pagination = geofences.data?.pagination ?? geofences.data?.data?.pagination;
-  const vehicleRows = vehicles.data?.items ?? vehicles.data?.data?.items ?? [];
-  const stats = useMemo(
-    () => ({
-      total: pagination?.total ?? rows.length,
-      active: rows.filter((row: any) => Boolean(row.isActive)).length,
-      inactive: rows.filter((row: any) => !row.isActive).length,
-      totalVehiclesBound: rows.reduce(
-        (sum: number, row: any) => sum + (row.vehicleIds?.length ?? 0),
-        0,
-      ),
-    }),
-    [pagination?.total, rows],
+const fetchVehiclesForAllowedZonePage = async (): Promise<VehicleRow[]> => {
+  const firstPayload = await vehicleServices.getList({ page: 1, limit: VEHICLE_PAGE_LIMIT });
+  const firstItems = extractVehicleItems(firstPayload);
+  const firstPagination = firstPayload?.pagination ?? firstPayload?.data?.pagination;
+  const totalPages = Math.max(
+    Number(
+      firstPagination?.totalPages ??
+        Math.ceil(Number(firstPagination?.total ?? firstItems.length) / VEHICLE_PAGE_LIMIT),
+    ) || 1,
+    1,
   );
 
-  const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
+  if (totalPages <= 1) {
+    return firstItems;
+  }
+
+  const pagePayloads = await Promise.all(
+    Array.from({ length: Math.max(Math.min(totalPages, VEHICLE_MAX_PAGES) - 1, 0) }, (_, index) =>
+      vehicleServices.getList({
+        page: index + 2,
+        limit: VEHICLE_PAGE_LIMIT,
+      }),
+    ),
+  );
+
+  return [
+    ...firstItems,
+    ...pagePayloads.flatMap((payload) => extractVehicleItems(payload)),
+  ];
+};
+
+const columns: ColumnDef<AllowedZoneTableRow>[] = [
+  {
+    accessorKey: 'plateNumber',
+    header: 'Phương tiện',
+    meta: { label: 'Phương tiện' },
+    cell: ({ row }) => (
+      <div className="space-y-1">
+        <p className="font-medium">{row.original.plateNumber ?? row.original.vehicleId}</p>
+        <p className="text-xs text-muted-foreground">{row.original.vehicleId}</p>
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'customerName',
+    header: 'Khách hàng',
+    meta: { label: 'Khách hàng' },
+    cell: ({ row }) => row.original.customerName ?? 'Chưa gán',
+  },
+  {
+    id: 'zoneStatus',
+    header: 'Trạng thái vùng',
+    meta: { label: 'Trạng thái vùng' },
+    cell: ({ row }) => {
+      const zone = row.original.allowedZone;
+      if (!zone) {
+        return <Badge variant="outline">Chưa thiết lập</Badge>;
+      }
+      const membership = membershipMeta[zone.membershipState] ?? membershipMeta.unknown;
+      return <Badge variant={membership.variant}>{membership.label}</Badge>;
+    },
+  },
+  {
+    id: 'radius',
+    header: 'Bán kính',
+    meta: { label: 'Bán kính' },
+    cell: ({ row }) => {
+      const zone = row.original.allowedZone;
+      return zone ? `${Math.round(zone.radiusMeters)} m` : '—';
+    },
+  },
+  {
+    id: 'updatedAt',
+    header: 'Cập nhật gần nhất',
+    meta: { label: 'Cập nhật gần nhất' },
+    cell: ({ row }) => {
+      const zone = row.original.allowedZone;
+      if (!zone) {
+        return 'Chưa có vùng hoạt động';
+      }
+      return (
+        <div className="space-y-1">
+          <p>{formatDateTime(zone.updatedAt)}</p>
+          <p className="text-xs text-muted-foreground">{formatRelative(zone.updatedAt)}</p>
+        </div>
+      );
+    },
+  },
+  {
+    id: 'warning',
+    header: 'Cảnh báo',
+    meta: { label: 'Cảnh báo' },
+    cell: ({ row }) => row.original.allowedZone?.warning?.message ?? 'Ổn định',
+  },
+];
+
+const GeofencesPage = () => {
+  const access = useRoleAccess();
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<'all' | 'configured' | 'missing' | 'outside'>('all');
+  const [selectedVehicle, setSelectedVehicle] = useState<AllowedZoneTableRow | null>(null);
+  const deferredSearch = useDeferredValue(search);
+
+  const vehiclesQuery = useQuery({
+    queryKey: ['vehicles-for-allowed-zone-page'],
+    queryFn: fetchVehiclesForAllowedZonePage,
+  });
+
+  const zoneQueries = useQueries({
+    queries: (vehiclesQuery.data ?? []).map((vehicle) => ({
+      queryKey: zoneQueryKey(vehicle.vehicleId),
+      enabled: Boolean(vehicle.vehicleId),
+      queryFn: () => geofenceServices.getVehicleAllowedZone(vehicle.vehicleId).catch(() => null),
+    })),
+  });
+
+  const zonesLoading =
+    vehiclesQuery.isLoading ||
+    (vehiclesQuery.data?.length ?? 0) > 0 && zoneQueries.some((query) => query.isLoading);
+
+  const rows = useMemo<AllowedZoneTableRow[]>(() => {
+    const vehicles = vehiclesQuery.data ?? [];
+
+    return vehicles.map((vehicle, index) => ({
+      ...vehicle,
+      allowedZone: zoneQueries[index]?.data ?? null,
+    }));
+  }, [vehiclesQuery.data, zoneQueries]);
+
+  const filteredRows = useMemo(() => {
+    const keyword = deferredSearch.trim().toLowerCase();
+    return rows.filter((row) => {
+      const matchesSearch =
+        keyword.length === 0 ||
+        row.vehicleId.toLowerCase().includes(keyword) ||
+        (row.plateNumber ?? '').toLowerCase().includes(keyword) ||
+        (row.customerName ?? '').toLowerCase().includes(keyword) ||
+        (row.deviceId ?? '').toLowerCase().includes(keyword);
+
+      if (!matchesSearch) {
+        return false;
+      }
+
+      if (filter === 'configured') {
+        return Boolean(row.allowedZone);
+      }
+      if (filter === 'missing') {
+        return !row.allowedZone;
+      }
+      if (filter === 'outside') {
+        return row.allowedZone?.membershipState === 'outside';
+      }
+      return true;
+    });
+  }, [deferredSearch, filter, rows]);
+
+  const stats = useMemo(() => {
+    const configured = rows.filter((row) => Boolean(row.allowedZone)).length;
+    const missing = rows.length - configured;
+    const outside = rows.filter((row) => row.allowedZone?.membershipState === 'outside').length;
+    return { total: rows.length, configured, missing, outside };
+  }, [rows]);
 
   return (
     <PageContainer
-      pageTitle="Vùng giám sát"
-      pageDescription="Quản lý geofence, trigger cảnh báo và danh sách phương tiện áp dụng"
+      pageTitle="Vùng cho phép"
+      pageDescription="Một phương tiện chỉ có một vùng hoạt động. Trang này ưu tiên thao tác thiết lập nhanh thay cho CRUD geofence tổng quát."
       pageHeaderAction={
-        <Button
-          onClick={() => {
-            setEditItem(null);
-            setOpen(true);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Thêm vùng giám sát
+        <Button variant="outline" onClick={() => setSelectedVehicle(filteredRows[0] ?? null)} disabled={filteredRows.length === 0 || !access.canEditDevice}>
+          <MapPinned className="mr-2 h-4 w-4" />
+          Thiết lập nhanh
         </Button>
       }
     >
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Tổng vùng giám sát" value={stats.total} icon={<MapPinned className="h-4 w-4" />} isLoading={geofences.isLoading} />
-        <StatCard title="Hoạt động trên trang" value={stats.active} icon={<CircleCheckBig className="h-4 w-4" />} isLoading={geofences.isLoading} />
-        <StatCard title="Ngưng hoạt động trên trang" value={stats.inactive} icon={<CircleOff className="h-4 w-4" />} isLoading={geofences.isLoading} />
-        <StatCard title="Tổng xe đã gán" value={stats.totalVehiclesBound} icon={<Radar className="h-4 w-4" />} isLoading={geofences.isLoading} />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard title="Tổng phương tiện" value={stats.total} icon={<MapPinned className="h-4 w-4" />} isLoading={vehiclesQuery.isLoading} />
+        <StatCard title="Đã có vùng" value={stats.configured} icon={<ShieldCheck className="h-4 w-4" />} isLoading={zonesLoading} />
+        <StatCard title="Chưa thiết lập" value={stats.missing} icon={<CircleOff className="h-4 w-4" />} isLoading={zonesLoading} />
+        <StatCard title="Đang ngoài vùng" value={stats.outside} icon={<ShieldAlert className="h-4 w-4" />} isLoading={zonesLoading} />
       </div>
 
       <DataTable
-        columns={getGeofenceColumns({
-          onEdit: (row) => {
-            setEditItem(row);
-            setOpen(true);
-          },
-          onDelete: setDeleteItem,
-          onManageVehicles: (row) => {
-            setManageItem(row);
-            setSelectedVehicleIds(row.vehicleIds ?? []);
-          },
-        })}
-        data={rows}
+        columns={columns}
+        data={filteredRows}
         pagination={false}
-        isLoading={geofences.isLoading}
-        onRowClick={(row: any) => router.push(`/dashboard/operations/geofences/${row.id}`)}
-        emptyTitle="Chưa có vùng giám sát phù hợp"
-        emptyDescription="Tạo vùng mới để bắt đầu theo dõi các khu vực ra vào quan trọng."
-        emptyAction={{
-          label: 'Thêm vùng giám sát',
-          onClick: () => {
-            setEditItem(null);
-            setOpen(true);
-          },
-        }}
+        isLoading={zonesLoading}
+        onRowClick={access.canEditDevice ? setSelectedVehicle : undefined}
+        emptyTitle="Chưa có phương tiện phù hợp"
+        emptyDescription="Điều chỉnh bộ lọc hoặc chọn một phương tiện khác để thiết lập vùng cho phép."
+        emptyAction={
+          rows.length > 0 && access.canEditDevice
+            ? {
+                label: 'Mở phương tiện đầu tiên',
+                onClick: () => setSelectedVehicle(rows[0] ?? null),
+              }
+            : undefined
+        }
         toolbar={
           <div className="flex w-full flex-col gap-2 sm:flex-row lg:flex-nowrap">
             <Input
               value={search}
-              onChange={(event) => {
-                setPage(1);
-                setSearch(event.target.value);
-              }}
-              placeholder="Tìm theo tên hoặc mô tả vùng..."
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Tìm theo mã xe, biển số, khách hàng hoặc thiết bị..."
               className="w-full sm:max-w-sm"
             />
-            <Select
-              value={status}
-              onValueChange={(value: 'all' | 'active' | 'inactive') => {
-                setPage(1);
-                setStatus(value);
-              }}
-            >
+            <Select value={filter} onValueChange={(value: 'all' | 'configured' | 'missing' | 'outside') => setFilter(value)}>
               <SelectTrigger className="w-full sm:w-[220px]">
-                <SelectValue placeholder="Trạng thái" />
+                <SelectValue placeholder="Bộ lọc trạng thái" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                <SelectItem value="active">Hoạt động</SelectItem>
-                <SelectItem value="inactive">Ngưng hoạt động</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={geofenceType}
-              onValueChange={(value: 'all' | 'circle' | 'polygon' | 'rectangle') => {
-                setPage(1);
-                setGeofenceType(value);
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-[220px]">
-                <SelectValue placeholder="Loại vùng" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả loại vùng</SelectItem>
-                <SelectItem value="circle">Hình tròn</SelectItem>
-                <SelectItem value="polygon">Đa giác</SelectItem>
-                <SelectItem value="rectangle">Hình chữ nhật</SelectItem>
+                <SelectItem value="all">Tất cả phương tiện</SelectItem>
+                <SelectItem value="configured">Đã có vùng</SelectItem>
+                <SelectItem value="missing">Chưa thiết lập</SelectItem>
+                <SelectItem value="outside">Đang ngoài vùng</SelectItem>
               </SelectContent>
             </Select>
           </div>
         }
       />
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Trang {pagination?.page ?? page} / {totalPages}. Hiển thị {rows.length} vùng trên tổng{' '}
-          {pagination?.total ?? rows.length} bản ghi.
-        </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
-            Trang trước
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => setPage((value) => value + 1)}
-          >
-            Trang sau
-          </Button>
-        </div>
-      </div>
-
-      {manageItem ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Quản lý phương tiện trong vùng {manageItem.name}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <GeofenceVehicleBinder
-              vehicles={vehicleRows}
-              selected={selectedVehicleIds}
-              onChange={setSelectedVehicleIds}
-            />
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <Button variant="outline" onClick={() => setManageItem(null)}>
-                Đóng
-              </Button>
-              <Button
-                disabled={syncVehiclesMutation.isPending}
-                onClick={() =>
-                  syncVehiclesMutation.mutate({
-                    id: manageItem.id,
-                    nextVehicleIds: selectedVehicleIds,
-                    currentVehicleIds: manageItem.vehicleIds ?? [],
-                  })
-                }
-              >
-                Lưu danh sách xe
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      <GeofenceForm
-        open={open}
-        isPending={createMutation.isPending || updateMutation.isPending}
-        onOpenChange={(value) => {
-          setOpen(value);
-          if (!value) setEditItem(null);
+      <AllowedZoneSetupSheet
+        open={Boolean(selectedVehicle)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedVehicle(null);
+          }
         }}
-        defaultValues={editItem ?? undefined}
-        onSubmit={(payload) => {
-          if (editItem?.id) updateMutation.mutate({ id: editItem.id, payload });
-          else createMutation.mutate(payload);
-        }}
-      />
-
-      <ConfirmDialog
-        open={Boolean(deleteItem)}
-        onCancel={() => setDeleteItem(null)}
-        onConfirm={() => deleteItem && deleteMutation.mutate(deleteItem.id)}
-        title="Xóa vùng giám sát"
-        description={`Xóa vùng giám sát ${deleteItem?.name ?? ''}?`}
-        confirmLabel="Xóa"
-        variant="destructive"
-        isPending={deleteMutation.isPending}
+        vehicleId={selectedVehicle?.vehicleId ?? null}
+        vehicleLabel={selectedVehicle?.plateNumber ?? selectedVehicle?.vehicleId ?? null}
+        canEdit={access.canEditDevice && Boolean(selectedVehicle?.vehicleId)}
       />
     </PageContainer>
   );

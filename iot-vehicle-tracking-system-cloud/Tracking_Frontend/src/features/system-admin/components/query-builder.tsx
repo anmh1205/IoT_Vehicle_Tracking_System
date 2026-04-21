@@ -120,7 +120,7 @@ export const QueryBuilder = () => {
     const rowColumns = queryResult.data?.rows?.[0] ? Object.keys(queryResult.data.rows[0]) : [];
     const backendColumns = columnsQuery.data?.map((column) => column.name) ?? [];
     return backendColumns.length > 0 ? backendColumns : rowColumns;
-  }, [columnsQuery.data, queryResult.data?.rows]);
+  }, [columnsQuery.data, queryResult.data]);
 
   const applyQuery = () => {
     setQueryState({ ...draft, page: 1 });

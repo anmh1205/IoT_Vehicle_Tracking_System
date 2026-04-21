@@ -52,6 +52,14 @@ export const victoriaLogsConfig = {
   url: fromEnv('VICTORIALOGS_URL') ?? 'http://localhost:9428',
 } as const;
 
+export const vmalertConfig = {
+  url: fromEnv('VMALERT_URL') ?? '',
+} as const;
+
+export const vmauthConfig = {
+  url: fromEnv('VMAUTH_URL') ?? '',
+} as const;
+
 export const bridgeConfig = {
   healthUrl: fromEnv('MQTT_BRIDGE_HEALTH_URL') ?? 'http://tracking-mqtt-bridge:4003',
 } as const;

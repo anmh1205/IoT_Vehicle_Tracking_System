@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import L from 'leaflet';
 import { useMap } from 'react-leaflet';
 import { DEFAULT_MAP_VIEWPORT, MAP_LAYER_CONFIG } from '@/features/map/constants/map-config';
+import { useMapStore } from '@/features/map/store/map-store';
 import type { RouteReplayPoint } from './telemetry-insights';
 
 const MapContainer = dynamic(() => import('react-leaflet').then((module) => module.MapContainer), {
@@ -29,17 +30,37 @@ const RouteReplayViewport = ({
 }) => {
   const map = useMap();
 
-  useEffect(() => {
+  const syncViewport = useCallback(() => {
     if (pathPoints.length >= 2) {
       const bounds = L.latLngBounds(pathPoints);
       map.fitBounds(bounds.pad(0.18), { animate: false });
-      return;
+      return true;
     }
 
     if (currentPoint) {
       map.setView([currentPoint.latitude, currentPoint.longitude], 15, { animate: false });
+      return true;
     }
+
+    return false;
   }, [currentPoint, map, pathPoints]);
+
+  useEffect(() => {
+    const refreshMap = () => {
+      map.invalidateSize({ pan: false, animate: false });
+      syncViewport();
+    };
+
+    refreshMap();
+
+    const immediateTimer = window.setTimeout(refreshMap, 60);
+    const settleTimer = window.setTimeout(refreshMap, 320);
+
+    return () => {
+      window.clearTimeout(immediateTimer);
+      window.clearTimeout(settleTimer);
+    };
+  }, [map, syncViewport]);
 
   useEffect(() => {
     if (!currentPoint) {
@@ -61,18 +82,17 @@ export const RouteReplayMap = ({
   currentPoint: RouteReplayPoint | null;
   livePoint: [number, number] | null;
 }) => {
+  const mapLayer = useMapStore((state) => state.mapLayer);
   const startPoint = pathPoints[0] ?? null;
   const endPoint = pathPoints.at(-1) ?? null;
   const center = currentPoint
     ? ([currentPoint.latitude, currentPoint.longitude] as [number, number])
     : livePoint ?? pathPoints[0] ?? DEFAULT_MAP_VIEWPORT.center;
+  const layer = MAP_LAYER_CONFIG[mapLayer];
 
   return (
     <MapContainer center={center} zoom={13} className="h-full w-full" preferCanvas>
-      <TileLayer
-        url={MAP_LAYER_CONFIG.street.url}
-        attribution={MAP_LAYER_CONFIG.street.attribution}
-      />
+      <TileLayer url={layer.url} attribution={layer.attribution} />
       {pathPoints.length > 1 ? (
         <Polyline positions={pathPoints} pathOptions={{ color: '#0ea5e9', weight: 5 }} />
       ) : null}

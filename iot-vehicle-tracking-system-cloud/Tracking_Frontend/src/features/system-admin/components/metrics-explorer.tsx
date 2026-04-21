@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useSystemMetrics } from '@/features/system-admin/hooks/use-system-admin';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { LineChartView } from './chart-views/line-chart-view';
 import { TableView } from './chart-views/table-view';
 
@@ -126,7 +127,9 @@ export const MetricsExplorer = () => {
           <div className="text-xs text-muted-foreground">
             {metricsQuery.isFetching
               ? 'Đang tải dữ liệu chỉ số...'
-              : `Truy vấn hiện tại: ${submittedQuery} · ${submittedTime}`}
+              : metricsQuery.isError
+                ? getApiErrorMessage(metricsQuery.error, 'Truy vấn metrics thất bại.')
+                : `Truy vấn hiện tại: ${submittedQuery} · ${submittedTime} · ${metricsQuery.series.length} series`}
           </div>
         </CardContent>
       </Card>

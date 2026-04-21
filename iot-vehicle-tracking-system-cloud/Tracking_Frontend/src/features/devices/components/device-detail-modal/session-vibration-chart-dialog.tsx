@@ -1,5 +1,5 @@
 'use client';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis } from 'recharts';
 import type { DeviceVibrationPoint } from '@/features/devices/types';
 export const SessionVibrationChartDialog = ({
@@ -22,6 +22,9 @@ export const SessionVibrationChartDialog = ({
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            Biểu đồ rung của phiên chạy, dùng để đối chiếu biên độ theo mốc thời gian trong phiên đã chọn.
+          </DialogDescription>
         </DialogHeader>
         <div className="h-[320px]">
           <ResponsiveContainer width="100%" height="100%">

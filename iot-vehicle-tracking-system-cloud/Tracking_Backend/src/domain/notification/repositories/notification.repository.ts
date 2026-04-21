@@ -24,6 +24,27 @@ export interface NotificationFilters {
   to?: string;
 }
 
+const NOTIFICATION_LINK_JOINS = `LEFT JOIN devices d ON d.device_id = a.device_id
+  LEFT JOIN LATERAL (
+    SELECT
+      v.vehicle_id,
+      v.plate_number AS vehicle_plate_number
+    FROM vehicles v
+    WHERE
+      (a.vehicle_id IS NOT NULL AND v.vehicle_id = a.vehicle_id)
+      OR (a.device_id IS NOT NULL AND v.device_id = a.device_id)
+      OR (d.vehicle_id IS NOT NULL AND v.vehicle_id = d.vehicle_id)
+    ORDER BY
+      CASE
+        WHEN a.vehicle_id IS NOT NULL AND v.vehicle_id = a.vehicle_id THEN 0
+        WHEN a.device_id IS NOT NULL AND v.device_id = a.device_id THEN 1
+        ELSE 2
+      END,
+      v.updated_at DESC,
+      v.id DESC
+    LIMIT 1
+  ) link ON true`;
+
 const buildTypeClause = (
   type: NotificationType,
   startIndex: number,
@@ -82,7 +103,7 @@ const buildFilterSql = (
 
   if (filters.search && filters.search.trim()) {
     conditions.push(
-      `(a.title ILIKE $${paramIndex} OR COALESCE(a.message, '') ILIKE $${paramIndex} OR COALESCE(v.plate_number, '') ILIKE $${paramIndex} OR COALESCE(v.vehicle_id, '') ILIKE $${paramIndex} OR COALESCE(d.device_name, '') ILIKE $${paramIndex} OR COALESCE(a.vehicle_id, '') ILIKE $${paramIndex} OR COALESCE(a.device_id, '') ILIKE $${paramIndex})`,
+      `(a.title ILIKE $${paramIndex} OR COALESCE(a.message, '') ILIKE $${paramIndex} OR COALESCE(link.vehicle_plate_number, '') ILIKE $${paramIndex} OR COALESCE(link.vehicle_id, '') ILIKE $${paramIndex} OR COALESCE(d.device_name, '') ILIKE $${paramIndex} OR COALESCE(a.vehicle_id, '') ILIKE $${paramIndex} OR COALESCE(a.device_id, '') ILIKE $${paramIndex})`,
     );
     values.push(`%${filters.search.trim()}%`);
     paramIndex += 1;
@@ -117,19 +138,19 @@ export const findNotificationRows = async (
         a.title,
         a.message,
         a.created_at,
-        a.vehicle_id,
-        v.plate_number AS vehicle_plate_number,
+        COALESCE(a.vehicle_id, link.vehicle_id) AS vehicle_id,
+        link.vehicle_plate_number,
         a.device_id,
         d.device_name,
         CASE
-          WHEN v.plate_number IS NOT NULL AND d.device_name IS NOT NULL
-            THEN 'Xe ' || v.plate_number || ' · Thiết bị ' || d.device_name
-          WHEN v.plate_number IS NOT NULL
-            THEN 'Xe ' || v.plate_number
-          WHEN v.vehicle_id IS NOT NULL AND d.device_name IS NOT NULL
-            THEN 'Xe ' || v.vehicle_id || ' · Thiết bị ' || d.device_name
-          WHEN v.vehicle_id IS NOT NULL
-            THEN 'Xe ' || v.vehicle_id
+          WHEN link.vehicle_plate_number IS NOT NULL AND d.device_name IS NOT NULL
+            THEN 'Xe ' || link.vehicle_plate_number || ' · Thiết bị ' || d.device_name
+          WHEN link.vehicle_plate_number IS NOT NULL
+            THEN 'Xe ' || link.vehicle_plate_number
+          WHEN link.vehicle_id IS NOT NULL AND d.device_name IS NOT NULL
+            THEN 'Xe ' || link.vehicle_id || ' · Thiết bị ' || d.device_name
+          WHEN link.vehicle_id IS NOT NULL
+            THEN 'Xe ' || link.vehicle_id
           WHEN d.device_name IS NOT NULL
             THEN 'Thiết bị ' || d.device_name
           WHEN a.vehicle_id IS NOT NULL
@@ -140,8 +161,7 @@ export const findNotificationRows = async (
         END AS context_label,
         COALESCE(state.is_read, FALSE) AS is_read
      FROM alerts a
-     LEFT JOIN vehicles v ON v.vehicle_id = a.vehicle_id
-     LEFT JOIN devices d ON d.device_id = a.device_id
+     ${NOTIFICATION_LINK_JOINS}
      LEFT JOIN notification_states state
        ON state.user_id = $1 AND state.alert_id = a.id
      ${whereClause}

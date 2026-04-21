@@ -2,6 +2,12 @@
 
 #include <string.h>
 
+/**
+ * @file telemetry_counters.c
+ * @brief In-memory counters for storage/replay/MQTT diagnostics.
+ */
+
+/* Single-writer/small-footprint counter block; a plain static struct is enough here. */
 static telemetry_counters_t s_counters;
 
 void telemetry_counters_reset(void) {
@@ -45,5 +51,6 @@ void telemetry_counters_inc_mqtt_disconnected(void) {
 }
 
 telemetry_counters_t telemetry_counters_get(void) {
+    /* Return by value so callers cannot mutate the shared counter block directly. */
     return s_counters;
 }

@@ -84,6 +84,7 @@ export interface DeviceSessionPublic {
 export interface DevicePosition {
   deviceId: string;
   deviceName: string;
+  vehicleId?: string | null;
   vehiclePlate?: string | null;
   customerName?: string | null;
   latitude: number;

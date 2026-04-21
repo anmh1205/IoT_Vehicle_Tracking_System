@@ -209,7 +209,7 @@ const GeofenceDetailPage = ({
 
           {missingSignals.length > 0 ? (
             <div className="rounded-2xl border border-dashed px-4 py-3 text-sm text-muted-foreground">
-              {missingSignals.join(' • ')}. Nên hoàn thiện để vùng giám sát hoạt động đủ ngữ cảnh.
+              {missingSignals.join(' • ')}. Nên hoàn thiện để vùng giám sát hoạt động đủ thông tin.
             </div>
           ) : null}
         </CardContent>

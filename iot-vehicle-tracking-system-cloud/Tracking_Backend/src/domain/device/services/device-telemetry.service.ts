@@ -28,9 +28,9 @@ const METRIC_SQL: Record<string, { value: string; exists: string }> = {
   },
   bb: {
     value:
-      "COALESCE(context->>'bb', context->>'batt', context->>'battery', context->>'deviceBattery', metadata->>'bb', metadata->>'batt', metadata->>'battery', metadata->>'deviceBattery')",
+      "COALESCE(context->>'bb', context->>'battery_bot', context->>'deviceBattery', context->>'device_battery', metadata->>'bb', metadata->>'battery_bot', metadata->>'deviceBattery', metadata->>'device_battery')",
     exists:
-      "(context ? 'bb' OR context ? 'batt' OR context ? 'battery' OR context ? 'deviceBattery' OR metadata ? 'bb' OR metadata ? 'batt' OR metadata ? 'battery' OR metadata ? 'deviceBattery')",
+      "(context ? 'bb' OR context ? 'battery_bot' OR context ? 'deviceBattery' OR context ? 'device_battery' OR metadata ? 'bb' OR metadata ? 'battery_bot' OR metadata ? 'deviceBattery' OR metadata ? 'device_battery')",
   },
   temp: {
     value:

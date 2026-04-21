@@ -29,9 +29,17 @@ export const DeviceListPanel = () => {
   );
 
   return (
-    <aside className="flex h-full min-h-0 w-[340px] flex-col gap-3 border-r bg-background p-3">
-      <DeviceSearch value={searchTerm} onChange={setSearchTerm} />
-      <DeviceFilter value={statusFilter} onChange={setStatusFilter} />
+    <aside className="flex h-full min-h-0 w-[340px] flex-col gap-3 overflow-hidden border-r bg-background p-3">
+      <div className="flex flex-nowrap items-center gap-2">
+        <DeviceSearch
+          value={searchTerm}
+          onChange={setSearchTerm}
+          className="min-w-0 flex-1"
+          inputClassName="h-9"
+        />
+        <DeviceFilter value={statusFilter} onChange={setStatusFilter} className="h-9 w-[136px] shrink-0" />
+      </div>
+
       <MapDeviceSummary stats={stats} />
 
       <ScrollArea className="min-h-0 flex-1">

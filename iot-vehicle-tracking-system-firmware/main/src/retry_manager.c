@@ -2,10 +2,17 @@
 
 #include "util.h"
 
+/**
+ * @file retry_manager.c
+ * @brief Small retry helper shared by modem, SD, MQTT, and replay flows.
+ */
+
+/* Prevent undefined `1U << shift` behavior and runaway multiplication. */
 #define RETRY_EXP_SHIFT_CAP 20U
 
 static uint32_t retry_policy_base_delay_ms(const retry_policy_t *policy) {
     if (policy == NULL || policy->base_delay_ms == 0U) {
+        /* Never return zero; callers expect retries to eventually move forward. */
         return 1U;
     }
     return policy->base_delay_ms;
@@ -41,6 +48,10 @@ uint32_t retry_state_current_delay_ms(const retry_state_t *state,
     uint32_t delay_ms = retry_policy_base_delay_ms(policy);
 
     if (policy != NULL && policy->mode == RETRY_MODE_EXPONENTIAL && state != NULL && state->attempts > 0U) {
+        /*
+         * Attempt 0 uses the base delay.
+         * Attempt N scales as base * 2^N until capped.
+         */
         uint32_t shift = state->attempts;
         if (shift > RETRY_EXP_SHIFT_CAP) {
             shift = RETRY_EXP_SHIFT_CAP;
@@ -62,6 +73,7 @@ uint32_t retry_state_current_delay_ms(const retry_state_t *state,
     delay_ms = retry_policy_cap_delay_ms(policy, delay_ms);
 
     if (policy != NULL && policy->jitter_ms > 0U) {
+        /* Deterministic jitter from uptime spreads retries without extra RNG state. */
         uint64_t jitter_span = (uint64_t)policy->jitter_ms + 1ULL;
         uint32_t jitter = (uint32_t)(seed_ms % jitter_span);
         uint64_t jittered = (uint64_t)delay_ms + (uint64_t)jitter;
@@ -84,6 +96,7 @@ esp_err_t retry_state_schedule(retry_state_t *state,
     }
 
     if (policy->max_attempts != 0U && state->attempts >= policy->max_attempts) {
+        /* Preserve the terminal error so callers can report the real reason. */
         state->last_err = err;
         return ESP_ERR_INVALID_STATE;
     }

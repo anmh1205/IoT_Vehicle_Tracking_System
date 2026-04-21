@@ -2,14 +2,45 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { deviceDetailServices } from '@/lib/api/device-detail';
 import type { DeviceErrorCode } from '@/features/devices/types';
+
 type ErrorStatusFilter = 'all' | 'active' | 'resolved';
 type ErrorTypeFilter = 'all' | 'critical' | 'warning' | 'info';
+
 interface DeviceErrorCodesResult {
   items: DeviceErrorCode[];
   total: number;
   page: number;
   limit: number;
+  totalPages: number;
 }
+
+const localizeErrorDescription = (value: string): string => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (/GPS jitter spike resolved after dense urban segment/i.test(trimmed)) {
+    return 'Dao động GPS đã ổn định lại sau đoạn đô thị dày nhà cao tầng.';
+  }
+
+  return trimmed;
+};
+
+const localizeErrorName = (value: string, description: string, errorCode: number): string => {
+  const trimmed = value.trim();
+
+  if (/^Code 8$/i.test(trimmed) && /GPS jitter/i.test(description)) {
+    return 'GPS dao động mạnh';
+  }
+
+  if (/^Code 7$/i.test(trimmed) && /connection lost/i.test(description)) {
+    return 'Mất kết nối';
+  }
+
+  return trimmed || `Code ${errorCode}`;
+};
+
 const toErrorCodes = (
   payload: any,
   fallbackPage: number,
@@ -21,21 +52,37 @@ const toErrorCodes = (
       ? payload.data.items
       : [];
   return {
-    items: items.map((row: any) => ({
-      id: Number(row?.id ?? 0),
-      errorCode: Number(row?.errorCode ?? row?.error_code ?? 0),
-      errorName: String(
-        row?.errorName ?? row?.error_name ?? `Code ${row?.errorCode ?? row?.error_code ?? 0}`,
-      ),
-      description: String(row?.description ?? row?.message ?? ''),
-      occurredAt: String(
-        row?.occurredAt ?? row?.occurred_at ?? row?.createdAt ?? row?.created_at ?? '',
-      ),
-      resolvedAt: row?.resolvedAt ?? row?.resolved_at ?? null,
-    })),
+    items: items.map((row: any) => {
+      const errorCode = Number(row?.errorCode ?? row?.error_code ?? 0);
+      const rawDescription = String(row?.description ?? row?.message ?? '');
+      const description = localizeErrorDescription(rawDescription);
+      const rawName = String(row?.errorName ?? row?.error_name ?? `Code ${errorCode}`);
+
+      return {
+        id: Number(row?.id ?? 0),
+        errorCode,
+        errorName: localizeErrorName(rawName, rawDescription, errorCode),
+        description,
+        occurredAt: String(
+          row?.occurredAt ?? row?.occurred_at ?? row?.createdAt ?? row?.created_at ?? '',
+        ),
+        resolvedAt: row?.resolvedAt ?? row?.resolved_at ?? null,
+      };
+    }),
     total: Number(payload?.total ?? payload?.pagination?.total ?? items.length),
     page: Number(payload?.page ?? payload?.pagination?.page ?? fallbackPage),
     limit: Number(payload?.limit ?? payload?.pagination?.limit ?? fallbackLimit),
+    totalPages: Math.max(
+      1,
+      Number(
+        payload?.pagination?.totalPages ??
+          payload?.pagination?.total_pages ??
+          Math.ceil(
+            Number(payload?.total ?? payload?.pagination?.total ?? items.length) /
+              Math.max(Number(payload?.limit ?? payload?.pagination?.limit ?? fallbackLimit), 1),
+          ),
+      ),
+    ),
   };
 };
 const getErrorType = (row: DeviceErrorCode): ErrorTypeFilter => {
@@ -65,13 +112,14 @@ export const useDeviceErrorCodes = (deviceId: number | null, pageSize = 10) => {
       return true;
     });
   }, [query.data?.items, status, type]);
-  const data = query.data ?? { items: [], total: 0, page, limit: pageSize };
+  const data = query.data ?? { items: [], total: 0, page, limit: pageSize, totalPages: 1 };
   return {
     ...query,
     items: filtered,
     total: data.total,
     page: data.page,
     limit: data.limit,
+    totalPages: data.totalPages,
     status,
     type,
     onPageChange: setPage,

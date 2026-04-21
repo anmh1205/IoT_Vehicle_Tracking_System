@@ -211,6 +211,10 @@
 \titlespacing*{\section}{0pt}{12pt}{6pt}
 \titleformat{\subsection}{\bfseries\normalsize}{}{0pt}{}
 \titlespacing*{\subsection}{0pt}{12pt}{0pt}
+\titleformat{\paragraph}[block]{\bfseries\normalsize}{}{0pt}{}
+\titlespacing*{\paragraph}{0pt}{10pt}{0pt}
+\titleformat{\subparagraph}[block]{\bfseries\normalsize}{}{0pt}{}
+\titlespacing*{\subparagraph}{0pt}{8pt}{0pt}
 \newcommand{\thesisfrontmatterentry}[1]{%
   \phantomsection
   \addcontentsline{toc}{section}{#1}%
@@ -535,7 +539,7 @@
 \textbf{I. Nhận xét Đồ án tốt nghiệp:}\\
 - Bố cục, hình thức trình bày: \dotfill\\[0.55cm]
 - Đảm bảo tính cấp thiết, hiện đại, không trùng lặp: \dotfill\\[0.55cm]
-- Ná»™i dung: \dotfill\\[0.55cm]
+- Nội dung: \dotfill\\[0.55cm]
 - Mức độ thực hiện: \dotfill\\[0.55cm]
 \textbf{II. Kết quả đạt được:} \dotfill\\[0.55cm]
 \textbf{III. Ưu nhược điểm:} \dotfill\\[0.55cm]
@@ -621,14 +625,15 @@ Các nội dung nghiên cứu, kết quả trong đề tài này là trung thự
 
 \majorheading{TÓM TẮT ĐỒ ÁN TỐT NGHIỆP - ABSTRACT}
 
-Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt Nam khiến
-nhu cầu giám sát phương tiện không còn dừng ở việc biết xe đang ở đâu,
-mà còn ở việc hiểu xe đang vận hành ra sao và có dấu hiệu bất thường hay
-không. Từ nhu cầu đó, đồ án này trình bày quá trình thiết kế và triển
-khai một hệ thống giám sát phương tiện theo hướng trọn gói, bao gồm cả
-thiết bị gắn trên xe, hạ tầng máy chủ tiếp nhận dữ liệu và giao diện để
-người quản lý theo dõi, nhằm hỗ trợ doanh nghiệp nắm vị trí xe, trạng
-thái kỹ thuật và phản ứng sớm với các rủi ro vận hành.
+Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt Nam làm gia
+ tăng nhu cầu giám sát phương tiện từ xa. Nhu cầu này không chỉ dừng ở
+việc xác định vị trí xe, mà còn bao gồm theo dõi trạng thái vận hành và
+phát hiện sớm các dấu hiệu bất thường. Từ yêu cầu đó, đồ án trình bày
+quá trình thiết kế và triển khai một hệ thống giám sát phương tiện theo
+kiến trúc tích hợp, bao gồm thiết bị gắn trên xe, hạ tầng máy chủ tiếp
+nhận dữ liệu và giao diện theo dõi dành cho người quản lý. Hệ thống này
+nhằm hỗ trợ doanh nghiệp nắm được vị trí xe, trạng thái kỹ thuật và phản
+ứng sớm với các rủi ro vận hành.
 
 Ở tầng thiết bị, hệ thống được xây dựng trên bo mạch PCB tự thiết kế.
 Trong đó, ESP32-S3 giữ vai trò bộ điều khiển trung tâm; SIM7600CE-T đảm
@@ -649,13 +654,12 @@ VictoriaMetrics và VictoriaLogs. Song song với luồng ingest, backend còn
 lắng nghe nhánh \texttt{internal/events/\#} để đẩy cập nhật thời gian
 thực ra giao diện qua Socket.IO.
 
-Bảng điều khiển web được phát triển bằng Next.js 15 và React 19. Điều
-quan trọng ở đây không phải tên framework, mà là giao diện có thể hiển
-thị bản đồ, biểu đồ và trạng thái phương tiện gần như theo thời gian
-thực nhờ cơ chế đẩy dữ liệu mới từ máy chủ lên trình duyệt qua
-Socket.IO. Nhờ đó, người vận hành không chỉ quan sát vị
-trí xe mà còn có thể theo dõi lịch sử hành trình, cảnh báo và trạng thái
-thiết bị trên cùng một giao diện thống nhất.
+Bảng điều khiển web được phát triển bằng Next.js 15 và React 19. Giao
+ diện này có thể hiển thị bản đồ, biểu đồ và trạng thái phương tiện gần
+như theo thời gian thực nhờ cơ chế đẩy dữ liệu mới từ máy chủ lên trình
+duyệt qua Socket.IO. Nhờ đó, người vận hành không chỉ quan sát vị trí xe
+mà còn có thể theo dõi lịch sử hành trình, cảnh báo và trạng thái thiết
+bị trên cùng một giao diện thống nhất.
 
 Kết quả đạt được là một hệ thống IoT giám sát phương tiện hoàn chỉnh từ
 phần cứng đến phần mềm, có khả năng theo dõi vị trí thời gian thực, đọc
@@ -784,14 +788,14 @@ số \\\hline
 \textbf{BOM} & Bill of Materials & Danh sách linh kiện \\\hline
 \textbf{CI/CD} & Continuous Integration / Continuous Deployment & Tích
 hợp liên tục / Triển khai liên tục \\\hline
-\textbf{CORS} & Cross-Origin Resource Sharing & Chia sẻ tài nguyên nguồn
-chéo \\\hline
+\textbf{CORS} & Cross-Origin Resource Sharing & Cơ chế chia sẻ tài nguyên
+khác nguồn \\\hline
 \textbf{DDD} & Domain-Driven Design & Thiết kế hướng miền \\\hline
-\textbf{Docker} & Docker Container Platform & Nền tảng container hóa ứng
-dụng \\\hline
-\textbf{EMQX} & Erlang MQTT Broker & Máy chủ MQTT dựa trên Erlang \\\hline
-\textbf{ESP32} & Espressif System-on-Chip 32-bit & Vi điều khiển SoC
-32-bit cá»§a Espressif \\\hline
+\textbf{Docker} & Docker Container Platform & Nền tảng đóng gói và chạy
+ứng dụng bằng container \\\hline
+\textbf{EMQX} & Erlang MQTT Broker & Broker MQTT xây dựng trên Erlang/OTP \\\hline
+\textbf{ESP32} & Espressif System-on-Chip 32-bit & Hệ thống trên chip
+32-bit của Espressif \\\hline
 \textbf{FreeRTOS} & Free Real-Time Operating System & Hệ điều hành thời
 gian thực mã nguồn mở \\\hline
 \textbf{GPIO} & General Purpose Input/Output & Cổng vào/ra đa năng \\\hline
@@ -804,25 +808,25 @@ bản \\\hline
 siêu văn bản bảo mật \\\hline
 \textbf{IMU} & Inertial Measurement Unit & Đơn vị đo lường quán tính \\\hline
 \textbf{IoT} & Internet of Things & Internet vạn vật \\\hline
-\textbf{JWT} & JSON Web Token & Mã thông báo web dạng JSON \\\hline
+\textbf{JWT} & JSON Web Token & Mã thông báo web định dạng JSON \\\hline
 \textbf{LVD} & Low Voltage Disconnect & Ngắt điện áp thấp \\\hline
 \textbf{MCU} & Microcontroller Unit & Vi điều khiển \\\hline
 \textbf{MQTT} & Message Queuing Telemetry Transport & Giao thức truyền
-thông tin hàng đợi \\\hline
+bản tin nhẹ theo mô hình publish/subscribe \\\hline
 \textbf{OBD2} & On-Board Diagnostics II & Chẩn đoán trên xe thế hệ 2 \\\hline
 \textbf{ORM} & Object-Relational Mapping & Ánh xạ đối tượng - quan hệ \\\hline
 \textbf{PCB} & Printed Circuit Board & Bảng mạch in \\\hline
-\textbf{REST} & Representational State Transfer & Kiến trúc truyền trạng
-thái đại diện \\\hline
+\textbf{REST} & Representational State Transfer & Kiểu kiến trúc REST
+cho dịch vụ web \\\hline
 \textbf{RTOS} & Real-Time Operating System & Hệ điều hành thời gian
-thá»±c \\\hline
+thực \\\hline
 \textbf{SoC} & System on Chip & Hệ thống trên chip \\\hline
 \textbf{SQL} & Structured Query Language & Ngôn ngữ truy vấn có cấu
 trúc \\\hline
 \textbf{TLS} & Transport Layer Security & Bảo mật tầng vận chuyển \\\hline
 \textbf{UART} & Universal Asynchronous Receiver-Transmitter & Bộ thu
 phát bất đồng bộ đa năng \\\hline
-\textbf{WebSocket} & WebSocket Protocol & Giao thức kết nối hai chiều
+\textbf{WebSocket} & WebSocket Protocol & Giao thức giao tiếp hai chiều
 thời gian thực \\\hline
 \end{longtable}
 }
@@ -929,16 +933,16 @@ người quản lý.
 \subsubsection{1.1.3. Động lực thực hiện dự
 án}\label{113-ux111ux1ed9ng-lux1ef1c-thux1ef1c-hiux1ec7n-dux1ef1-uxe1n}
 
-Mục tiêu của đề tài không chỉ là làm ra một thiết bị biết gửi tọa độ
-GPS. Điều cần xây dựng là một hệ thống đủ trọn vẹn để người vận hành đội
-xe có thể nhìn thấy trạng thái phương tiện, hiểu nguyên nhân của các
-cảnh báo và đưa ra quyết định kịp thời. Từ nhu cầu thực tiễn đó, dự án
-"IoT Vehicle Tracking System", một hệ thống IoT theo dõi phương tiện,
-được triển khai nhằm xây dựng một giải pháp đồng bộ, bao gồm thiết bị
-phần cứng trên xe, phần mềm điều khiển thiết bị, hạ tầng máy chủ tiếp
-nhận và xử lý dữ liệu, cùng giao diện web để khai thác thông tin. Mục
-tiêu là tạo ra một hệ thống có chi phí hợp lý, dễ tùy biến và có thể mở
-rộng theo quy mô doanh nghiệp cho thuê xe tự lái tại Việt Nam.
+Mục tiêu của đề tài không chỉ dừng ở việc chế tạo một thiết bị gửi tọa
+độ GPS. Điều cần xây dựng là một hệ thống đủ hoàn chỉnh để người vận
+hành đội xe có thể theo dõi trạng thái phương tiện, hiểu nguyên nhân của
+các cảnh báo và đưa ra quyết định kịp thời. Từ nhu cầu thực tiễn đó, đề
+tài triển khai hệ thống ``IoT Vehicle Tracking System'' nhằm xây dựng
+một giải pháp đồng bộ, bao gồm thiết bị phần cứng trên xe, phần mềm điều
+khiển thiết bị, hạ tầng máy chủ tiếp nhận và xử lý dữ liệu, cùng giao
+ diện web để khai thác thông tin. Mục tiêu là tạo ra một hệ thống có chi
+phí hợp lý, dễ tùy biến và có thể mở rộng theo quy mô doanh nghiệp cho
+thuê xe tự lái tại Việt Nam.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -948,12 +952,12 @@ rộng theo quy mô doanh nghiệp cho thuê xe tự lái tại Việt Nam.
 \subsubsection{1.2.1. Mục tiêu tổng
 quát}\label{121-mux1ee5c-tiuxeau-tux1ed5ng-quuxe1t}
 
-Mục tiêu chính của dự án là thiết kế và hiện thực một hệ thống IoT theo
+Mục tiêu chính của dự án là thiết kế và triển khai một hệ thống IoT theo
 dõi phương tiện hoàn chỉnh, bao gồm cả phần cứng lẫn phần mềm, phục vụ
 cho bài toán quản lý đội xe cho thuê tự lái. Các mục tiêu dưới đây được
 xác định từ góc nhìn của đơn vị vận hành đội xe: họ cần thông tin đủ
-nhanh để can thiệp, nhưng cũng cần hệ thống đủ bền bỉ để chạy lâu dài
-trên xe. Hệ thống cần đáp ứng các yêu cầu sau:
+nhanh để can thiệp, nhưng cũng cần hệ thống đủ bền bỉ để vận hành lâu
+dài trên xe. Hệ thống cần đáp ứng các yêu cầu sau:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -990,11 +994,11 @@ giữ lại cho các giai đoạn phát triển sau.
 \subsubsection{1.2.2. Phạm vi dự
 án}\label{122-phux1ea1m-vi-dux1ef1-uxe1n}
 
-Để đề tài không dàn trải, phạm vi nghiên cứu được giới hạn theo từng
-tầng của hệ thống, từ đối tượng ứng dụng đến phần cứng, firmware và
-hạ tầng máy chủ. Cách xác định phạm vi này giúp người đọc thấy rõ đâu là phần đã
-được triển khai trong đồ án và đâu là nội dung được giữ lại cho các giai
-đoạn phát triển sau.
+Để bảo đảm phạm vi nghiên cứu tập trung, nội dung triển khai được giới
+hạn theo từng tầng của hệ thống, từ đối tượng ứng dụng đến phần cứng,
+firmware và hạ tầng máy chủ. Cách xác định phạm vi này giúp người đọc
+thấy rõ đâu là nội dung đã được triển khai trong đồ án và đâu là nội
+dung được giữ lại cho các giai đoạn phát triển sau.
 
 \textbf{Đối tượng ứng dụng:}
 
@@ -1059,15 +1063,15 @@ hạ tầng máy chủ. Cách xác định phạm vi này giúp người đọc 
   PostgreSQL lưu trữ dữ liệu quan hệ (người dùng, xe, khách hàng, cảnh
   báo)
 \item
-  VictoriaMetrics lưu trữ dữ liệu thay đổi liên tục theo thời gian
+  VictoriaMetrics lưu trữ dữ liệu chuỗi thời gian
 \item
   VictoriaLogs lưu trữ nhật ký sự kiện
 \item
-  API phía máy chủ hiện thực bằng Express.js và được tổ chức theo từng
+  API máy chủ được triển khai bằng Express.js và được tổ chức theo từng
   nhóm nghiệp vụ để dễ mở rộng
 \item
-  Giao diện web hiện thực bằng Next.js 15, kết hợp bản đồ và biểu đồ để
-  người dùng theo dõi vận hành
+  Giao diện web quản trị được triển khai bằng Next.js 15, kết hợp bản đồ
+  và biểu đồ để người dùng theo dõi vận hành
 \end{itemize}
 
 \textbf{Giới hạn phạm vi nghiên cứu:}
@@ -1132,9 +1136,8 @@ không.
 \subsubsection{1.3.1. Tiêu chí phần
 cứng}\label{131-tiuxeau-chuxed-phux1ea7n-cux1ee9ng}
 
-Ở tầng phần cứng, điều quan trọng nhất không phải là "gắn được nhiều khối
-chức năng", mà là thiết bị có thể tồn tại bền bỉ trong môi trường trên xe:
-đủ tiết kiệm điện, đủ ổn định về nhiệt và đủ an toàn với ắc quy.
+Ở tầng phần cứng, thiết bị cần đồng thời đáp ứng yêu cầu về tiêu thụ điện
+thấp, độ ổn định nhiệt và an toàn đối với ắc quy xe.
 
 
 {\thesissettableid{1.3.1A}{tab-ch1-tong-hop-thong-tin-ve-stt-tieu-chi-muc-tieu-cu-the}
@@ -1300,12 +1303,12 @@ nguồn, giao tiếp hay hiệu năng. Cụ thể, tiến trình được tổ c
   nói đến các tính năng ở tầng trên.
 \item
   \textbf{Giai đoạn 2 --- Phát triển firmware}: Biến sơ đồ phần cứng
-  thành một thiết bị thực sự biết ``làm gì khi nào''. Ở giai đoạn này,
-  ESP32-S3 được lập trình bằng ESP-IDF để đọc dữ liệu xe qua BLE OBD2,
-  giao tiếp với modem qua UART, nhận tín hiệu chuyển động từ IMU qua
-  I2C, quyết định khi nào cần thức hoặc ngủ, rồi gửi dữ liệu lên máy chủ
-  bằng MQTT. Đây là giai đoạn quyết định thiết bị theo dõi có phản ứng đúng lúc và
-  tiết kiệm điện đúng chỗ hay không.
+  thành một thiết bị có thể điều phối hành vi theo đúng trạng thái vận
+  hành. Ở giai đoạn này, ESP32-S3 được lập trình bằng ESP-IDF để đọc dữ
+  liệu xe qua BLE OBD2, giao tiếp với modem qua UART, nhận tín hiệu
+  chuyển động từ IMU qua I2C, quyết định khi nào cần thức hoặc ngủ, rồi
+  gửi dữ liệu lên máy chủ bằng MQTT. Đây là giai đoạn quyết định thiết
+  bị theo dõi có phản ứng đúng lúc và tiết kiệm điện đúng chỗ hay không.
 \item
   \textbf{Giai đoạn 3 --- Xây dựng hạ tầng máy chủ}: Dựng ``nơi dữ liệu
   sẽ đi tới'' sau khi rời chiếc xe. Giai đoạn này chuẩn bị các dịch vụ
@@ -1313,7 +1316,7 @@ nguồn, giao tiếp hay hiệu năng. Cụ thể, tiến trình được tổ c
   thời gian và lưu nhật ký vận hành, đồng thời chốt cách các dịch vụ kết
   nối với nhau.
 \item
-  \textbf{Giai đoạn 4 --- Phát triển API phía máy chủ}: Biến dữ liệu kỹ thuật
+  \textbf{Giai đoạn 4 --- Phát triển API máy chủ}: Biến dữ liệu kỹ thuật
   thành những chức năng quản trị có thể dùng được, như đăng nhập, quản
   lý xe, xem lịch sử, tạo cảnh báo và phát cập nhật thời gian thực ra
   giao diện quản trị.
@@ -1353,7 +1356,7 @@ Trong triển khai thực tế, lớp trên xe gồm các thành phần chuyên 
 dữ liệu và giữ thiết bị hoạt động ổn định, tiêu biểu là ESP32-S3, modem
 SIM7600CE-T, cảm biến rung LIS3DSH và adapter OBD2. Lớp giữa làm nhiệm
 vụ nhận bản tin, kiểm tra rồi chuyển dữ liệu sang nơi lưu phù hợp như
-VictoriaMetrics, VictoriaLogs và API phía máy chủ thông qua EMQX và MQTT
+VictoriaMetrics, VictoriaLogs và API máy chủ thông qua EMQX và MQTT
 Bridge. Lớp trên cùng là nơi người quản lý làm việc, gồm giao diện web
 quản trị và công cụ giám sát. Ứng dụng di động được giữ cho giai đoạn
 sau để đồ án tập trung trước vào chuỗi giá trị cốt lõi từ xe đến màn
@@ -1513,7 +1516,7 @@ Framework firmware & ESP-IDF & 5.x & Bộ công cụ để phát triển phần 
 nhúng cho ESP32 \\\hline
 RTOS & FreeRTOS & --- & Lớp điều phối các tác vụ nền theo thời gian thực \\\hline
 MQTT Broker & EMQX & 5.x & Trạm trung chuyển bản tin từ thiết bị \\\hline
-API phía máy chủ & Express.js + TypeScript & --- & Lớp giao tiếp để
+API máy chủ & Express.js + TypeScript & --- & Lớp giao tiếp để
 giao diện gọi lấy dữ liệu và gửi lệnh \\\hline
 Cơ sở dữ liệu quan hệ & PostgreSQL & 16 & Lưu trữ dữ liệu có cấu trúc \\\hline
 Cơ sở dữ liệu chuỗi thời gian & VictoriaMetrics & --- & Lưu trữ
@@ -1734,7 +1737,7 @@ thuật}\label{212-xuxe1c-ux111ux1ecbnh-vux1ea5n-ux111ux1ec1-kux1ef9-thuux1eadt}
 Từ bối cảnh thực tiễn đó, bài toán của đề tài có thể quy về bốn câu hỏi
 kỹ thuật nền tảng. Đây cũng là bốn câu hỏi chi phối gần như mọi quyết
 định ở các chương sau, từ lựa chọn phần cứng đến thiết kế hạ tầng máy
-chá»§:
+chủ:
 
 \textbf{Vấn đề 1: Quản lý năng lượng trong môi trường ô tô}
 
@@ -1752,8 +1755,9 @@ không".
 Khi xe tắt máy, hệ thống cần tiết kiệm điện nhưng vẫn phát hiện được các
 chuyển động bất thường như bị trộm hoặc bị kéo cẩu. Vì vậy, thiết bị
 phải có cơ chế đánh thức nhanh khi phát hiện sự kiện, đồng thời duy trì
-dòng tiêu thụ ở mức rất thấp. Khi xe "im lặng", thiết bị cũng phải
-"ngủ", nhưng vẫn phải tỉnh dậy đủ nhanh khi có sự cố.
+dòng tiêu thụ ở mức rất thấp. Khi xe không hoạt động, thiết bị phải
+chuyển sang trạng thái tiêu thụ điện thấp nhưng vẫn duy trì khả năng
+phát hiện sự cố.
 
 \textbf{Vấn đề 3: Truyền dữ liệu qua mạng di động}
 
@@ -1764,9 +1768,10 @@ chỉ là ``gửi được hay không'', mà là khi mất mạng thiết bị c
 số xe tăng lên không. Vì thế, việc chọn giữa MQTT, HTTP hay CoAP chính
 là chọn ``cách gửi tin'' phù hợp nhất với một thiết bị phải truyền nhiều
 gói nhỏ, đều đặn và đôi khi cần nhận lệnh ngược từ máy chủ. MQTT
-phù hợp khi thiết bị cần gửi các gói dữ liệu nhỏ thường xuyên; HTTP gần với kiểu
-``gửi yêu cầu rồi chờ trả lời'' quen thuộc của web; còn CoAP là giao thức
-gọn hơn, thường dùng cho thiết bị tài nguyên rất hạn chế.
+phù hợp khi thiết bị cần gửi các gói dữ liệu nhỏ thường xuyên; HTTP gần
+với mô hình ``gửi yêu cầu rồi chờ phản hồi'' quen thuộc của web; còn
+CoAP là giao thức gọn hơn, thường dùng cho thiết bị có tài nguyên rất
+hạn chế.
 
 \textbf{Vấn đề 4: Kiến trúc máy chủ có khả năng mở rộng}
 
@@ -1804,10 +1809,10 @@ Chương 3:
   gói dữ liệu nhỏ qua mạng di động, ưu tiên tự phục hồi kết nối và chừa sẵn
   phương án lưu đệm khi mất mạng kéo dài.
 \item
-  Phát triển nền tảng máy chủ có khả năng mở rộng, bao gồm API phía máy
-  chủ, cơ sở dữ liệu quan hệ cho phần quản trị, cơ sở dữ liệu chuỗi thời
-  gian cho dữ liệu phát sinh liên tục, và giao diện web theo dõi thời
-  gian thá»±c.
+  Phát triển nền tảng máy chủ có khả năng mở rộng, bao gồm API máy chủ,
+  cơ sở dữ liệu quan hệ cho phần quản trị, cơ sở dữ liệu chuỗi thời gian
+  cho dữ liệu phát sinh liên tục, và giao diện web theo dõi thời gian
+  thực.
 \end{enumerate}
 
 Bốn nhóm mục tiêu trên cho biết đích đến của thiết kế. Tuy nhiên, để
@@ -1846,10 +1851,10 @@ hệ thống thường được tổ chức thành ba lớp chính {[}3{]}:
   gọn hơn cho thiết bị nhỏ. Nó cũng phải xử lý các tình huống mất sóng
   hoặc kết nối lại.
 \item
-  \textbf{Lớp ứng dụng và xử lý (Application Layer)}: Đây là nơi dữ liệu
-  được biến thành thứ con người có thể dùng. Lớp này bao gồm các dịch vụ
-  máy chủ như broker MQTT, API phía máy chủ, cơ sở dữ liệu và giao diện
-  quản trị như màn hình web tổng hợp hoặc ứng dụng di động.
+  \textbf{Lớp ứng dụng và xử lý (Application Layer)}: Đây là tầng biến dữ
+  liệu thành thông tin mà con người có thể khai thác. Lớp này bao gồm
+  các dịch vụ máy chủ như broker MQTT, API máy chủ, cơ sở dữ liệu và
+  giao diện quản trị như màn hình web tổng hợp hoặc ứng dụng di động.
 \end{itemize}
 
 Trong triển khai của đề tài, kiến trúc ba lớp trên được bổ sung thêm một
@@ -1959,10 +1964,9 @@ Mức phù hợp với EMQX & Có sẵn & Có, nhưng phải bổ sung thành ph
 }
 
 \textbf{Phân tích lựa chọn:} Kết quả so sánh cho thấy MQTT phù hợp hơn
-không phải vì nó ``cao cấp'' hơn HTTP hay CoAP, mà vì cách nó trao đổi
-dữ liệu gần với nhịp vận hành của hệ thống: thiết bị gửi nhiều bản tin
-nhỏ qua mạng di động không phải lúc nào cũng ổn định, đồng thời đôi lúc
-cần nhận lệnh ngược từ máy chủ. Cụ thể:
+với hệ thống vì cách nó trao đổi dữ liệu bám sát nhịp vận hành thực tế:
+thiết bị gửi nhiều bản tin nhỏ qua mạng di động không phải lúc nào cũng
+ổn định, đồng thời đôi lúc cần nhận lệnh ngược từ máy chủ. Cụ thể:
 
 \begin{itemize}
 \tightlist
@@ -2322,7 +2326,7 @@ triển khai thực tế trên xe và ngân sách sẵn có.
 \begin{itemize}
 \tightlist
 \item
-  Framework API phía máy chủ: ưu tiên Express.js + TypeScript vì đây là nền tảng
+  Khung phát triển API máy chủ: ưu tiên Express.js + TypeScript vì đây là nền tảng
   nhóm đã có sẵn kinh nghiệm, giúp rút ngắn thời gian học lại từ đầu
 \item
   Framework giao diện web: chọn Next.js 15 + React 19 để phù hợp định hướng
@@ -2379,7 +2383,7 @@ SAE J1979 (OBD2) & Chuẩn chẩn đoán động cơ & Đọc dữ liệu qua OB
 adapter \\\hline
 MQTT v5.0 (OASIS) & Giao thức nhắn tin cho thiết bị IoT & Truyền dữ liệu thiết bị -
 máy chủ \\\hline
-REST (RFC 7231) & Cách tổ chức API theo tài nguyên & API phía máy chủ \\\hline
+REST (RFC 7231) & Cách tổ chức API theo tài nguyên & API máy chủ \\\hline
 Mã phiên ngẫu nhiên + ACL MQTT & Cơ chế xác thực và phân quyền &
 Xác thực phiên người dùng, giới hạn quyền truy cập thiết bị theo ACL
 MQTT \\\hline
@@ -2786,17 +2790,16 @@ hơn cho kịch bản thiết bị theo dõi hiện tại.
 chọn}\label{d-kux1ebft-luux1eadn-lux1ef1a-chux1ecdn}
 
 Trên cơ sở đối chiếu trực tiếp các yêu cầu của hệ thống,
-\textbf{ESP32-S3} được chọn làm vi điều khiển chính cho thiết bị theo dõi. Nói ngắn
-gọn, đây là phương án cân bằng tốt nhất giữa "đủ mạnh để làm được việc"
-và "đủ gọn để triển khai thực tế". Quyết định này dựa trên các điểm chốt
-sau:
+\textbf{ESP32-S3} được chọn làm vi điều khiển chính cho thiết bị theo dõi
+vì đây là phương án cân bằng tốt giữa năng lực xử lý, mức độ tích hợp và
+chi phí triển khai. Quyết định này dựa trên các điểm chốt sau:
 
 \begin{itemize}
 \tightlist
 \item
   Đáp ứng đầy đủ kiến trúc hiện tại: 1 kết nối BLE cho OBD2, UART cho
   modem và một đường debug riêng, đồng thời vẫn còn dư địa UART cho mở
-  rá»™ng.
+  rộng.
 \item
   BLE 5.0 tích hợp giúp bỏ hẳn module BLE ngoài, giảm BOM và rút ngắn
   công đoạn tích hợp.
@@ -3175,8 +3178,8 @@ ngờ. Cách tổ chức này giúp giảm đáng kể năng lượng tiêu th�
 không làm mất đi chức năng cảnh báo cốt lõi.
 
 Trong trường hợp adapter OBD2 không kết nối được (timeout 10 giây, retry
-2--3 lần), hệ thống tự động chuyển sang phương pháp dự phòng (fallback)
-là đo điện áp ắc quy qua ADC để phát hiện trạng thái IGN. Phương pháp
+2--3 lần), hệ thống tự động chuyển sang cơ chế dự phòng là đo điện áp
+ắc quy qua ADC để phát hiện trạng thái IGN. Phương pháp
 này kém chính xác hơn nhưng đảm bảo hệ thống vẫn hoạt động bình thường.
 
 Như vậy, OBD2 giải quyết tốt bài toán ``xe đang chạy ra sao'' nhưng
@@ -3714,14 +3717,12 @@ analysis and solution}\label{32-ux111ux1ec1-xuux1ea5t-cuxe1c-giux1ea3i-phuxe1p--
 \paragraph{3.2.1.1. Đặt vấn đề cho giải pháp
 Firmware}\label{3121-ux111ux1eb7t-vux1ea5n-ux111ux1ec1-cho-giux1ea3i-phuxe1p-firmware}
 
-Nếu xem phần cứng là ``cơ thể'' của thiết bị, thì firmware là lớp biến
-tập linh kiện đó thành một hệ thống biết \emph{phản ứng đúng lúc}. Người
-dùng không trực tiếp nhìn thấy firmware, nhưng việc vị trí có cập nhật
-đều, cảnh báo có đến kịp hay không, hay ắc quy xe có bị ảnh hưởng hay
-không đều do lớp này quyết định. Vì nằm ở điểm giao nhau giữa phần cứng,
-truyền thông và yêu cầu nghiệp vụ, bài toán firmware không dừng ở chuyện
-``cho thiết bị chạy được'', mà phải bảo đảm thiết bị chạy đúng, ổn định
-và tiết kiệm năng lượng trong môi trường thực tế.
+Firmware là lớp điều phối hành vi của thiết bị. Việc vị trí có được cập
+nhật đều, cảnh báo có đến kịp thời hay không, và ắc quy xe có bị ảnh
+hưởng hay không đều phụ thuộc vào lớp này. Do nằm ở điểm giao nhau giữa
+phần cứng, truyền thông và yêu cầu nghiệp vụ, firmware không chỉ cần bảo
+đảm thiết bị hoạt động được, mà còn phải giúp thiết bị vận hành đúng,
+ổn định và tiết kiệm năng lượng trong môi trường thực tế.
 
 \begin{itemize}
 \tightlist
@@ -3735,7 +3736,7 @@ và tiết kiệm năng lượng trong môi trường thực tế.
   \textbf{Giao tiếp đa giao thức}: BLE (OBD2), UART (modem), MQTT/HTTP
   (máy chủ), I2C/ADC/GPIO (ngoại vi phần cứng).
 \item
-  \textbf{Độ bền vận hành cao}: có cơ chế retry, fallback và phục hồi
+  \textbf{Độ bền vận hành cao}: có cơ chế thử lại, chuyển sang dự phòng và phục hồi
   sau mất kết nối mạng hoặc lỗi ngoại vi.
 \end{itemize}
 
@@ -3960,7 +3961,7 @@ và quay về trạng thái tiết kiệm năng lượng khi có thể. Luồng 
 \item
   \textbf{Đọc trạng thái IGN và điện áp ắc quy}: Hệ thống ưu tiên đọc
   trạng thái động cơ (IGN) trực tiếp từ ECU qua OBD2 BLE. Nếu không kết
-  nối được OBD2, hệ thống fallback sang đo điện áp ắc quy qua ADC theo
+  nối được OBD2, hệ thống chuyển sang đo điện áp ắc quy qua ADC theo cơ
   profile: profile 12V dùng \(IGN_{\mathrm{ON}} \ge 13.0\,\mathrm{V}\) và
   \(IGN_{\mathrm{OFF}} \le 12.0\,\mathrm{V}\); profile 24V dùng
   \(IGN_{\mathrm{ON}} \ge 26.0\,\mathrm{V}\) và
@@ -4007,12 +4008,12 @@ OBD2}\label{3222-module-giao-tiux1ebfp-bluetooth-obd2}
 \subparagraph{a) Tổng quan giao tiếp BLE
 OBD2}\label{a-tux1ed5ng-quan-giao-tiux1ebfp-ble-obd2}
 
-Nói ngắn gọn, module này là phần giúp thiết bị theo dõi ``hỏi xe đang ở trạng thái
-nào'' thông qua cổng OBD2 mà không cần dây nối trực tiếp tới vi điều
-khiển. Adapter vgate iCar Pro được cắm vào cổng chẩn đoán OBD-II của xe,
-sau đó giao tiếp không dây với thiết bị theo dõi bằng BLE. Trong firmware, NimBLE
-là lớp phần mềm lo phần Bluetooth; còn GATT là cách hai thiết bị tổ chức
-dịch vụ và trường dữ liệu để đọc/ghi thông tin với nhau.
+Module này cho phép thiết bị theo dõi truy xuất trạng thái vận hành của
+xe thông qua cổng OBD2 mà không cần dây nối trực tiếp tới vi điều khiển.
+Adapter vgate iCar Pro được cắm vào cổng chẩn đoán OBD-II của xe, sau đó
+ giao tiếp không dây với thiết bị theo dõi bằng BLE. Trong firmware,
+NimBLE đảm nhiệm lớp Bluetooth, còn GATT là cơ chế để hai thiết bị tổ
+chức dịch vụ và trường dữ liệu cho việc đọc và ghi thông tin.
 
 Kiến trúc module BLE OBD2 được chia thành bốn tầng để mỗi tầng lo một
 việc riêng. \texttt{state\_machine.c} quyết định khi nào cần đọc dữ liệu
@@ -4148,8 +4149,7 @@ toàn. Mỗi lần wake-up, firmware cần thực hiện kết nối lại với
 có việc lưu địa chỉ MAC vào flash, thời gian kết nối lại chỉ mất khoảng
 1--3 giây, nhanh hơn đáng kể so với pairing lần đầu (3--10 giây).
 
-\subparagraph{d) Xử lý lỗi và cơ chế dự phòng
-(Fallback)}\label{d-xux1eed-luxfd-lux1ed7i-vuxe0-cux1a1-chux1ebf-dux1ef1-phuxf2ng-fallback}
+\subparagraph{d) Xử lý lỗi và cơ chế dự phòng}\label{d-xux1eed-luxfd-lux1ed7i-vuxe0-cux1a1-chux1ebf-dux1ef1-phuxf2ng-fallback}
 
 Module BLE OBD2 được thiết kế với nhiều lớp xử lý lỗi:
 
@@ -4168,17 +4168,17 @@ Module BLE OBD2 được thiết kế với nhiều lớp xử lý lỗi:
 \\\hline
 \endfoot
 \endlastfoot
-Không kết nối được adapter & Retry 2--3 lần với delay 2 giây, sau đó
-fallback & 10 giây \\\hline
-Mất kết nối giữa chừng & Reconnect 2--3 lần, nếu thất bại thì fallback &
+Không kết nối được adapter & Thử lại 2--3 lần với độ trễ 2 giây, sau đó
+chuyển sang cơ chế dự phòng & 10 giây \\\hline
+Mất kết nối giữa chừng & Kết nối lại 2--3 lần, nếu thất bại thì chuyển sang cơ chế dự phòng &
 5 giây mỗi lần \\\hline
-Adapter không phản hồi lệnh & Retry 1--2 lần, nếu thất bại thì fallback
+Adapter không phản hồi lệnh & Thử lại 1--2 lần, nếu thất bại thì chuyển sang cơ chế dự phòng
 & 5 giây \\\hline
 \end{longtable}
 }
 
 
-\textbf{Cơ chế dự phòng (Fallback)}: Khi không thể giao tiếp với OBD2
+\textbf{Cơ chế dự phòng}: Khi không thể giao tiếp với OBD2
 adapter, hệ thống chuyển sang phát hiện trạng thái động cơ bằng phương
 pháp đo điện áp ắc quy. Phương pháp này có độ chính xác thấp hơn OBD2
 nhưng vẫn đảm bảo hệ thống hoạt động liên tục. Tiêu chí phân biệt theo
@@ -4286,7 +4286,7 @@ và hạn chế lỗi dây chuyền khi điều kiện sóng di động thay đ�
 \endfoot
 \endlastfoot
 Modem không phản hồi & Reset nhanh qua PWR-KEY (GPIO26) rồi bắt đầu lại
-chuá»—i AT \\\hline
+chuỗi AT \\\hline
 Mất kết nối 4G & Đợi \texttt{AT+CEREG?} thành \texttt{1}, gọi
 \texttt{AT+CGACT=0,1} rồi \texttt{AT+CGACT=1,1} để tái khởi động PDP \\\hline
 GNSS không fix dù đã bật & Gọi lại \texttt{AT+CGNSINF}, nếu vẫn thất bại
@@ -4736,7 +4736,7 @@ PARKED & IMU interrupt (motion detected) & ALARM \\\hline
 PARKED & Timer wake-up & HEARTBEAT \\\hline
 ALARM & Motion dừng, IGN = OFF & PARKED \\\hline
 ALARM & IGN = ON & DRIVING \\\hline
-HEARTBEAT & Gá»­i heartbeat xong & SLEEP \\\hline
+HEARTBEAT & Gửi heartbeat xong & SLEEP \\\hline
 SLEEP & Timer wake-up hoặc IMU interrupt & CHECK\_IGN \\\hline
 \end{longtable}
 }
@@ -4927,14 +4927,14 @@ liệu -- Server and data-processing architecture}\label{33-phan-tich-va-de-xuat
 \subsubsection{3.3.1. Phân tích và lựa chọn kiến trúc máy chủ}
 
 \paragraph{3.3.1.1. Đặt vấn đề cho kiến trúc máy
-chá»§}\label{3131-ux111ux1eb7t-vux1ea5n-ux111ux1ec1-cho-kiux1ebfn-truxfac-cloud}
+chủ}\label{3131-ux111ux1eb7t-vux1ea5n-ux111ux1ec1-cho-kiux1ebfn-truxfac-cloud}
 
 Khi dữ liệu rời khỏi thiết bị, trọng tâm không còn là ``đọc được dữ
-liệu'' mà là ``biến bản tin đó thành thông tin hữu ích''. Ở tầng
-máy chủ và xử lý dữ liệu, một bản tin chỉ thật sự có giá trị khi nó được tiếp nhận
-ổn định, lưu đúng nơi, đẩy tới giao diện quản trị đúng lúc và vẫn truy vết được
-khi có sự cố. Vì vậy, kiến trúc máy chủ phải đồng thời giải quyết các bài
-toán sau:
+liệu'' mà là ``chuyển bản tin thành thông tin có thể khai thác''. Ở tầng
+máy chủ và xử lý dữ liệu, một bản tin chỉ thật sự có giá trị khi được
+ tiếp nhận ổn định, lưu đúng nơi, cập nhật kịp thời tới giao diện quản
+trị và vẫn truy vết được khi có sự cố. Vì vậy, kiến trúc máy chủ phải
+đồng thời giải quyết các bài toán sau:
 
 \begin{itemize}
 \tightlist
@@ -4972,10 +4972,10 @@ hệ thống máy chủ}\label{3132-so-suxe1nh-cuxe1c-phux1b0ux1a1ng-uxe1n-kiux1
 \endfoot
 \endlastfoot
 \textbf{PA-A: Một API lớn + một cơ sở dữ liệu chung} & Thiết bị gửi HTTP
-trực tiếp vào API phía máy chủ và mọi dữ liệu dồn vào cùng một nơi lưu &
-Triển khai ban đầu đơn giản & Không tối ưu cho dữ liệu gửi dày theo thời
-gian, khó mở rộng cập nhật thời gian thực, tải dễ dồn lên một dịch vụ &
-Trung bình \\\hline
+trực tiếp vào API máy chủ và mọi dữ liệu dồn vào cùng một nơi lưu &
+Triển khai ban đầu đơn giản & Không tối ưu cho dữ liệu phát sinh với tần
+suất cao, khó mở rộng cập nhật thời gian thực, tải dễ dồn lên một dịch
+vụ & Trung bình \\\hline
 \textbf{PA-B: Dùng dịch vụ máy chủ do nhà cung cấp quản lý sẵn} & AWS IoT
 Core + Lambda + cơ sở dữ liệu do nhà cung cấp vận hành & Khả năng mở
 rộng cao, nhiều dịch vụ sẵn có & Chi phí vận hành cao, phụ thuộc nhà
@@ -4992,33 +4992,32 @@ chủ chi phí & Cần chuẩn hóa luồng bản tin và quản lý nhiều d�
 \paragraph{3.3.1.3. Chọn giải pháp kiến trúc
 hệ thống máy chủ}\label{3133-chux1ecdn-giux1ea3i-phuxe1p-kiux1ebfn-truxfac-cloud}
 
-Đồ án chọn \textbf{PA-C: kiến trúc phân tầng kết hợp phản ứng theo sự kiện},
-tức khi có bản tin mới thì từng lớp liên quan xử lý ngay, với chuỗi xử lý:
+Đồ án chọn \textbf{PA-C: kiến trúc phân tầng kết hợp cơ chế xử lý theo sự kiện};
+khi có bản tin mới, các lớp liên quan sẽ xử lý ngay, với chuỗi xử lý:
 
 \texttt{Device\ -\textgreater{}\ EMQX\ -\textgreater{}\ MQTT\ Bridge\ -\textgreater{}\ PostgreSQL/}\\
-\texttt{VictoriaMetrics/VictoriaLogs\ -\textgreater{}\ API\ phía\ máy\ chủ\ -\textgreater{}\ giao\ diện\ web}
+\texttt{VictoriaMetrics/VictoriaLogs\ -\textgreater{}\ API\ máy\ chủ\ -\textgreater{}\ giao\ diện\ web}
 
 Lựa chọn này xuất phát từ cách dữ liệu thực sự di chuyển trong hệ thống:
 thiết bị gửi bản tin liên tục, lớp tiếp nhận dữ liệu đầu vào tiếp nhận
-và phân luồng, lớp
-lưu trữ ghi theo đúng đặc tính dữ liệu, còn lớp ứng dụng phục vụ người
-dùng và nghiệp vụ. Nói cách khác, kiến trúc được chọn vì nó bám sát
-hành trình tự nhiên của dữ liệu thay vì dồn mọi trách nhiệm về một dịch
-vụ duy nhất.
+và phân luồng, lớp lưu trữ ghi theo đúng đặc tính dữ liệu, còn lớp ứng
+dụng phục vụ người dùng và nghiệp vụ. Nói cách khác, kiến trúc được
+chọn vì phản ánh đúng luồng xử lý dữ liệu trong hệ thống thay vì dồn mọi
+trách nhiệm về một dịch vụ duy nhất.
 
 Các lý do lựa chọn chính gồm:
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Khớp bản chất dữ liệu IoT}: MQTT xử lý tốt mô hình pub/sub,
-  tức mô hình ``một bên phát bản tin vào kênh chung, nhiều bên có thể
-  nhận'', nên giảm mức phụ thuộc trực tiếp giữa thiết bị và tầng ứng
-  dụng. Điều này giúp thiết bị chỉ tập trung gửi dữ liệu, thay vì phải
-  biết chi tiết ai sẽ nhận và xử lý dữ liệu đó ở phía sau.
+  \textbf{Khớp bản chất dữ liệu IoT}: MQTT xử lý tốt mô hình
+  publish/subscribe, tức mô hình ``một bên phát bản tin vào kênh chung,
+  nhiều bên có thể nhận'', nên giảm mức phụ thuộc trực tiếp giữa thiết
+  bị và tầng ứng dụng. Điều này giúp thiết bị chỉ tập trung gửi dữ liệu,
+  thay vì phải biết chi tiết ai sẽ nhận và xử lý dữ liệu đó ở phía sau.
 \item
   \textbf{Tối ưu hiệu năng theo vai trò}: Bridge xử lý luồng dữ liệu đi
-  vào đầu tiên, API phía máy chủ tập trung vào nghiệp vụ, còn cơ sở dữ
+  vào đầu tiên, API máy chủ tập trung vào nghiệp vụ, còn cơ sở dữ
   liệu được tách theo loại dữ liệu. Mỗi lớp chỉ làm
   đúng việc mình mạnh nhất, nhờ đó hệ thống dễ giữ ổn định hơn khi tải
   tăng.
@@ -5037,9 +5036,9 @@ Các lý do lựa chọn chính gồm:
 nghiệp vụ}\label{323-giux1ea3i-phuxe1p-backend--cloud}
 
 Sau khi xác định phương án kiến trúc phù hợp, phần này đi vào cách triển
-khai cụ thể từng lớp của hệ thống máy chủ và dịch vụ xử lý. Cách trình bày
-được sắp xếp theo hành trình dữ liệu, từ lúc bản tin đi vào broker cho tới khi
-thông tin xuất hiện trên giao diện của người vận hành.
+khai cụ thể từng lớp của hệ thống máy chủ và dịch vụ xử lý. Cách trình
+bày được sắp xếp theo luồng dữ liệu, từ lúc bản tin đi vào broker cho
+đến khi thông tin xuất hiện trên giao diện của người vận hành.
 
 \paragraph{3.3.2.1. Kiến trúc tổng quan hệ thống máy chủ (System
 Architecture
@@ -5071,8 +5070,8 @@ tầng chính sau:
   diện, áp quy tắc nghiệp vụ và quản lý trạng thái chung của hệ thống.
 \item
   \textbf{Tầng cập nhật thời gian thực}: Đây là nơi đẩy dữ liệu mới trực
-  tiếp đến người dùng thông qua WebSocket, tức kênh để máy chủ chủ động
-  gửi thông tin mới lên trình duyệt.
+  tiếp đến người dùng thông qua WebSocket, là kênh cho phép máy chủ chủ
+  động gửi thông tin mới lên trình duyệt.
 \end{itemize}
 
 
@@ -5100,8 +5099,7 @@ tầng chính sau:
 \subparagraph{b) Luồng dữ liệu chính trong hệ
 thống}\label{b-luux1ed3ng-dux1eef-liux1ec7u-chuxednh-trong-hux1ec7-thux1ed1ng}
 
-Nếu mô tả bằng một ``câu chuyện dữ liệu'', luồng chính của hệ thống diễn
-ra theo trình tự sau:
+Nếu mô tả theo luồng xử lý dữ liệu, hệ thống vận hành theo trình tự sau:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -5110,8 +5108,8 @@ ra theo trình tự sau:
   \textbf{Thiết bị IoT} gửi dòng dữ liệu vận hành chính như vị trí GNSS,
   trạng thái nguồn, mức rung, ignition và uptime lên EMQX Broker thông
   qua MQTT 3.1.1 theo topic có cấu trúc
-  \texttt{v1/\{device\_id\}/rawdata}. Ở đây, EMQX Broker có thể hiểu là
-  broker MQTT, tức nơi nhận và chuyển tiếp bản tin.
+  \texttt{v1/\{device\_id\}/rawdata}. Ở đây, EMQX Broker đóng vai trò là
+  broker MQTT, nơi tiếp nhận và chuyển tiếp bản tin.
 \item
   \textbf{EMQX Broker} tiếp nhận và phân phối bản tin đến các bên cần
   dùng dữ liệu. Rules Engine của EMQX chỉ đóng vai trò lọc hoặc bổ trợ
@@ -5119,9 +5117,9 @@ ra theo trình tự sau:
 \item
   \textbf{MQTT Bridge} là dịch vụ trung gian đứng giữa broker và các nơi
   lưu dữ liệu. Dịch vụ này lắng nghe các topic từ EMQX, kiểm tra dữ liệu
-  đầu vào bằng Zod schema, tức bộ quy tắc mô tả dữ liệu nào hợp lệ, sau
-  đó ghi đồng thời vào nhiều nơi, nghĩa là một lần nhận dữ liệu nhưng
-  lưu cho nhiều mục đích khác nhau:
+  đầu vào bằng lược đồ kiểm tra dữ liệu của Zod, sau đó
+  ghi đồng thời vào nhiều nơi, nghĩa là một lần nhận dữ liệu nhưng lưu
+  cho nhiều mục đích khác nhau:
 
   \begin{itemize}
   \tightlist
@@ -5137,10 +5135,10 @@ ra theo trình tự sau:
     trực tuyến, phiên làm việc).
   \item
     Phát sự kiện đến \textbf{Socket.IO} để cập nhật thời gian thực cho
-    giao diện quản trị.
-  \end{itemize}
+    giao diện web quản trị.
+\end{itemize}
 \item
-  \textbf{API phía máy chủ} (Express.js) là lớp để giao diện gọi vào khi cần
+  \textbf{API máy chủ} (Express.js) là lớp để giao diện gọi vào khi cần
   lấy dữ liệu lịch sử, dữ liệu quản trị hoặc gửi lệnh. Dịch vụ này truy
   vấn dữ liệu từ PostgreSQL và VictoriaMetrics, đồng thời gửi lệnh điều
   khiển ngược về thiết bị thông qua EMQX.
@@ -5154,13 +5152,12 @@ Docker}\label{c-muxf4-huxecnh-triux1ec3n-khai-docker}
 
 Ở mức triển khai, kiến trúc trên được hiện thực theo cách mỗi dịch vụ có
 một tệp Docker Compose riêng và cùng tham gia một mạng Docker dùng chung.
-Cách tổ chức này giúp cấu
-trúc vận hành của đồ án bám sát cách các hệ thống thật được chia dịch vụ.
-Hiểu đơn giản, mỗi dịch vụ được đặt trong một ``hộp chạy riêng'' gọi là
-container; các hộp này có thể nói chuyện với nhau qua mạng dùng chung,
-nhưng vẫn tách lỗi và tài nguyên tương đối rõ ràng. Nhờ vậy, cấu trúc
-vận hành của đồ án bám sát cách các hệ thống thật được chia dịch vụ
-trong thực tế:
+Cách tổ chức này giúp cấu trúc vận hành của đồ án bám sát cách các hệ
+thống thật được chia dịch vụ. Hiểu đơn giản, mỗi dịch vụ được đặt trong
+một ``hộp chạy riêng'' gọi là container; các hộp này có thể nói chuyện
+với nhau qua mạng dùng chung, nhưng vẫn tách lỗi và tài nguyên tương đối
+rõ ràng. Nhờ vậy, cấu trúc vận hành của đồ án bám sát cách các hệ thống
+thật được chia dịch vụ trong thực tế:
 
 \begin{itemize}
 \tightlist
@@ -5169,7 +5166,7 @@ trong thực tế:
   hoặc cập nhật độc lập mà không ảnh hưởng đến các dịch vụ khác.
 \item
   \textbf{Quản lý tài nguyên riêng}: Mỗi container, tức mỗi gói chạy tách
-  biệt, được giới hạn CPU và RAM cụ thể (ví dụ: API phía máy chủ
+  biệt, được giới hạn CPU và RAM cụ thể (ví dụ: API máy chủ
   512MB/1 CPU, MQTT Bridge 256MB/0.5 CPU).
 \item
   \textbf{Dễ dàng mở rộng}: Có thể nhân thêm bản sao cho từng dịch vụ riêng
@@ -5259,6 +5256,10 @@ phí \\\hline
 \end{longtable}
 }
 
+\textit{Lưu ý:} Các số liệu về số kết nối đồng thời, thông lượng bản tin
+và mức sử dụng tài nguyên trong bảng trên là giá trị tham chiếu tổng hợp
+ từ tài liệu công bố và benchmark của nhà cung cấp, được dùng để so sánh
+ tương đối giữa các broker chứ không phải số đo nội bộ của đồ án.
 
 \textbf{Kết luận lựa chọn: EMQX}
 
@@ -5294,7 +5295,7 @@ Trong hệ thống này, bộ lọc dữ liệu của EMQX chỉ được dùng 
 lý nhẹ ngay tại broker, chẳng hạn nhận biết sớm một số điều kiện bất
 thường trước khi chuyển bản tin tới lớp xử lý phía sau. Phần lớn quyết
 định nghiệp vụ, đặc biệt là ghi nhận cảnh báo và đồng bộ giao diện, vẫn
-do MQTT Bridge và API phía máy chủ đảm nhiệm.
+do MQTT Bridge và API máy chủ đảm nhiệm.
 
 Các tình huống phù hợp để cấu hình tại lớp này gồm:
 
@@ -5323,9 +5324,9 @@ Các tình huống phù hợp để cấu hình tại lớp này gồm:
   chuyển tiếp bản tin phù hợp sang lớp xử lý kế tiếp.
 \item
   MQTT Bridge đánh giá nghiệp vụ chi tiết, chuẩn hóa dữ liệu và phát sự
-  kiện cho API phía máy chủ.
+  kiện cho API máy chủ.
 \item
-  API phía máy chủ ghi dữ liệu vào PostgreSQL và phát Socket.IO để cập
+  API máy chủ ghi dữ liệu vào PostgreSQL và phát Socket.IO để cập
   nhật giao diện quản trị theo thời gian thực.
 \end{enumerate}
 
@@ -5463,7 +5464,7 @@ lưu trữ nhỏ gọn, phù hợp truy vết sự cố \\\hline
 \subparagraph{b) Cơ sở dữ liệu PostgreSQL - Schema quan
 hệ}\label{b-cux1a1-sux1edf-dux1eef-liux1ec7u-postgresql---schema-quan-hux1ec7}
 
-PostgreSQL 16 lưu trữ toàn bộ dữ liệu nghiệp vụ của hệ thống. Schema
+PostgreSQL 16 lưu trữ toàn bộ dữ liệu nghiệp vụ của hệ thống. Lược đồ
 được chuẩn hóa đến dạng chuẩn thứ ba (3NF) và hỗ trợ soft delete cho các
 bảng quan trọng.
 
@@ -5565,9 +5566,9 @@ lần), mức tiêu thụ RAM thấp hơn và tích hợp tốt với Grafana.
 \endfoot
 \endlastfoot
 \textbf{Ngôn ngữ truy vấn} & Flux (phức tạp) & PromQL (đơn giản) \\\hline
-\textbf{Hiệu năng} & Tốt & Nhanh gấp 10 lần \\\hline
+\textbf{Hiệu năng} & Tốt & Theo benchmark công bố, hiệu năng ghi có thể cao hơn đáng kể \\\hline
 \textbf{Sử dụng RAM} & Cao & Thấp \\\hline
-\textbf{Nén dữ liệu} & Tốt & Tốt hơn (gấp 10 lần) \\\hline
+\textbf{Nén dữ liệu} & Tốt & Theo benchmark công bố, hiệu quả nén dữ liệu có thể tốt hơn \\\hline
 \textbf{Tương thích Prometheus} & Không & Có \\\hline
 \textbf{Độ khó học} & Cao (Flux) & Thấp (PromQL) \\\hline
 \textbf{Tích hợp Grafana} & Qua plugin & Hỗ trợ sẵn (Native) \\\hline
@@ -5594,20 +5595,20 @@ tức dấu vết ai đã làm gì và vào lúc nào. Chính sách lưu trữ: 
 Đến đây, kiến trúc lưu trữ đã trả lời câu hỏi dữ liệu sẽ được cất ở đâu.
 Tuy nhiên, để người dùng khai thác được số dữ liệu đó, hệ thống vẫn cần
 một lớp nghiệp vụ đứng ra tổ chức API, quyền truy cập và các luồng điều
-khiển. Vì vậy, phần tiếp theo chuyển sang API phía máy chủ.
+khiển. Vì vậy, phần tiếp theo chuyển sang API máy chủ.
 
-\paragraph{3.3.2.4. API phía máy chủ và kiến trúc phần mềm (API Server \&
+\paragraph{3.3.2.4. API máy chủ và kiến trúc phần mềm (API Server \&
 Software
 Architecture)}\label{3234-api-server-vuxe0-kiux1ebfn-truxfac-phux1ea7n-mux1ec1m-api-server--software-architecture}
 
 \subparagraph{a) Lựa chọn công
 nghệ}\label{a-lux1ef1a-chux1ecdn-cuxf4ng-nghux1ec7}
 
-API phía máy chủ là lớp làm việc trực tiếp với người vận hành và các quy tắc
+API máy chủ là lớp làm việc trực tiếp với người vận hành và các quy tắc
 nghiệp vụ. Nếu MQTT Bridge chuyên nhận dòng dữ liệu thô từ thiết bị, thì
-API phía máy chủ phụ trách những gì người dùng nhìn thấy hằng ngày: đăng nhập,
-quản lý xe, xem lịch sử, tạo cảnh báo, quản lý vùng cho phép và điều phối
-OTA. Vì vai trò khác nhau, tiêu chí chọn framework ở đây cũng khác:
+API máy chủ đảm nhiệm các chức năng nghiệp vụ mà người dùng sử dụng hằng ngày:
+đăng nhập, quản lý xe, xem lịch sử, tạo cảnh báo, quản lý vùng cho phép
+và điều phối OTA. Vì vai trò khác nhau, tiêu chí chọn framework ở đây cũng khác:
 quan trọng nhất là mã nguồn phải rõ ràng, linh hoạt và dễ bảo trì, chứ
 không chỉ có kết quả đo tốc độ đẹp trên các bài thử chuẩn.
 
@@ -5615,11 +5616,11 @@ không chỉ có kết quả đo tốc độ đẹp trên các bài thử chuẩ
 {\thesissettableid{3.21}{tab-ch3-so-sanh-framework-backend}
 \def\LTcaptype{table}
 \begin{longtable}{|L{0.350\linewidth}|L{0.304\linewidth}|L{0.155\linewidth}|L{0.145\linewidth}|}
-\caption{So sánh các khung phát triển cho API phía máy chủ}\label{tab:ch3-so-sanh-framework-backend}\\
+\caption{So sánh các khung phát triển cho API máy chủ}\label{tab:ch3-so-sanh-framework-backend}\\
 \hline \textbf{Tiêu chí} & \textbf{Express + TypeScript} & \textbf{NestJS} & \textbf{Go + Gin} \\
 \\\hline
 \endfirsthead
-\caption[]{So sánh các khung phát triển cho API phía máy chủ (tiếp theo)}\\
+\caption[]{So sánh các khung phát triển cho API máy chủ (tiếp theo)}\\
 \hline \textbf{Tiêu chí} & \textbf{Express + TypeScript} & \textbf{NestJS} & \textbf{Go + Gin} \\
 \\\hline
 \endhead
@@ -5651,7 +5652,7 @@ nhưng nặng khuôn mẫu.
 \subparagraph{b) Kiến trúc Domain-Driven Design
 (DDD)}\label{b-kiux1ebfn-truxfac-domain-driven-design-ddd}
 
-API phía máy chủ được tổ chức theo kiến trúc Domain-Driven Design với ba
+API máy chủ được tổ chức theo kiến trúc Domain-Driven Design với ba
 tầng rõ ràng. Trong phạm vi đồ án, DDD có thể hiểu đơn giản là chia mã
 nguồn theo từng bài toán nghiệp vụ thay vì gom theo loại file kỹ thuật.
 Nhờ đó, phần quản lý xe, thiết bị, dữ liệu vận hành gửi liên tục hay
@@ -5695,7 +5696,7 @@ API được thiết kế theo kiểu REST, nghĩa là tổ chức theo từng t
 như xe, thiết bị hay cảnh báo: URL dạng số nhiều, gắn phiên bản ở đầu
 đường dẫn (\texttt{/api/v1/}), có phân trang, định dạng lỗi thống nhất
 và dùng HTTP Status Code chuẩn. Ở góc nhìn vận hành, API chính là ``hợp
-đồng giao tiếp'' giữa giao diện quản trị, API phía máy chủ và một số
+đồng giao tiếp'' giữa giao diện quản trị, API máy chủ và một số
 luồng thiết bị. Vì vậy, cách đặt tên và phân nhóm endpoint phải giúp
 người đọc đoán được ngay endpoint đó phục vụ ai, thao tác gì và có cần
 đăng nhập hay không.
@@ -5748,16 +5749,17 @@ Có \\\hline
 \begin{figure}[htbp]
 \centering
 \pandocbounded{\safeincludesvg{./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-14a.svg}}
-\caption{Luồng điều phối OTA giữa API phía máy chủ, EMQX, thiết bị và MQTT Bridge}
+\caption{Luồng điều phối OTA giữa API máy chủ, EMQX, thiết bị và MQTT Bridge}
 \label{fig:ch3-luong-ieu-phoi-ota-giua-backend-emqx-thiet-bi-va-mqtt-bridge}
 \end{figure}
 }
 
 
-API phía máy chủ vẫn duy trì một số alias tương thích như \texttt{/api/v1/device}
-hoặc \texttt{/api/v1/export}, nhưng tài liệu ưu tiên dạng tài nguyên số
-nhiều (\texttt{/devices}, \texttt{/vehicles}, \texttt{/customers},
-\texttt{/trips}, \texttt{/alerts}, \texttt{/geofences}) để thống nhất
+API máy chủ vẫn duy trì một số alias tương thích như \texttt{/api/v1/device}
+hoặc \texttt{/api/v1/export}, nhưng trong tài liệu, các endpoint được ưu
+ tiên mô tả theo dạng tài nguyên số nhiều (\texttt{/devices},
+\texttt{/vehicles}, \texttt{/customers}, \texttt{/trips},
+\texttt{/alerts}, \texttt{/geofences}) để thống nhất
 cách đặt tên. Cách trình bày này giúp người không quen với kiểu API dạng
 tài nguyên vẫn có thể hiểu nhanh nhóm endpoint nào phục vụ đăng nhập,
 nhóm nào phục vụ quản lý xe, nhóm nào dành cho dữ liệu vận hành hay OTA.
@@ -5783,7 +5785,7 @@ những cập nhật liên quan.
 
 Các sự kiện tiêu biểu gồm cập nhật trạng thái xe, vị trí xe, xác nhận
 lệnh, số liệu tổng quan, cảnh báo vượt vùng cho phép, tiến trình xuất báo cáo và
-phân công firmware. Riêng luồng OTA được tách khá rõ: API phía máy chủ phát các
+phân công firmware. Riêng luồng OTA được tách khá rõ: API máy chủ phát các
 sự kiện mức nghiệp vụ để giao diện biết có nhiệm vụ mới, còn trạng thái
 chi tiết trong quá trình cập nhật được MQTT Bridge ghi vào
 \texttt{firmware\_update\_log} và VictoriaLogs để thuận tiện cho việc
@@ -5803,7 +5805,7 @@ Hệ thống sử dụng cơ chế xác thực dựa trên phiên làm việc, n
 thái đăng nhập được giữ ở phía máy chủ. Mỗi lần đăng nhập thành công,
 máy chủ tạo ra một mã phiên ngẫu nhiên và lưu thông tin phiên tương ứng
 trong cơ sở dữ liệu, thay vì dùng JWT tự mang toàn bộ thông tin phiên.
-Token chỉ đóng vai trò khóa tham chiếu; API phía máy chủ mới là nơi lưu
+Token chỉ đóng vai trò khóa tham chiếu; API máy chủ mới là nơi lưu
 và kiểm tra trạng thái phiên, còn giá trị token được băm SHA-256 trước
 khi ghi xuống cơ sở dữ liệu.
 
@@ -5869,12 +5871,12 @@ interface analysis and solution}\label{34-phan-tich-va-de-xuat-cong-nghe-fronten
 \paragraph{3.4.1.1. Đặt vấn đề cho giải pháp
 giao diện web}\label{3141-ux111ux1eb7t-vux1ea5n-ux111ux1ec1-cho-giux1ea3i-phuxe1p-frontend}
 
-Nếu tầng máy chủ là nơi xử lý dữ liệu, thì giao diện web là nơi người vận
-hành thực sự ``nhìn thấy'' hệ thống đang hoạt động ra sao. Một màn hình
-tổng quan tốt không
-chỉ hiển thị đủ thông tin, mà còn phải giúp người dùng nhận ra điều gì
-quan trọng, điều gì bất thường và cần hành động ở đâu. Vì vậy, bài toán
-thiết kế giao diện web cần đồng thời đáp ứng các yêu cầu sau:
+Nếu tầng máy chủ là nơi xử lý dữ liệu, thì giao diện web là lớp trình bày
+trực tiếp thông tin vận hành cho người sử dụng. Một màn hình tổng quan
+hiệu quả không chỉ hiển thị đầy đủ thông tin, mà còn phải giúp người
+vận hành nhận ra những trạng thái quan trọng, các dấu hiệu bất thường và
+vị trí cần can thiệp. Vì vậy, thiết kế giao diện web cần đồng thời đáp
+ứng các yêu cầu sau:
 
 \begin{itemize}
 \tightlist
@@ -5930,10 +5932,10 @@ tối ưu cho môi trường vận hành và tích hợp kênh thời gian thự
 \paragraph{3.4.1.3. Chọn giải pháp
 giao diện web}\label{3143-chux1ecdn-giux1ea3i-phuxe1p-frontend}
 
-Đồ án chọn \textbf{PA-FE3: Next.js 15 + React 19} làm nền tảng giao diện web
-chính. Đây không phải là lựa chọn chạy theo xu hướng framework, mà là
-lựa chọn bám sát nhu cầu của một giao diện tổng quan phải vừa ``đọc nhanh'' vừa
-``phản ứng nhanh'' khi dữ liệu và cảnh báo thay đổi liên tục.
+Đồ án chọn \textbf{PA-FE3: Next.js 15 + React 19} làm nền tảng giao diện
+web chính vì bộ công cụ này phù hợp với yêu cầu của một giao diện tổng
+quan cần hiển thị nhanh và phản hồi kịp thời khi dữ liệu và cảnh báo thay
+đổi liên tục.
 
 Các lý do lựa chọn gồm:
 
@@ -6044,11 +6046,10 @@ năng tổ chức mã nguồn của đội phát triển. Các lý do cụ thể
 \subparagraph{b) Thư viện giao diện}\label{b-thux1b0-viux1ec7n-giao-diux1ec7n-ui-component-library}
 
 Hệ thống sử dụng shadcn/ui kết hợp với Radix UI làm nền tảng xây dựng
-giao diện. Có thể hiểu đây là một bộ khung gồm các thành phần giao diện
-cơ bản đã được chuẩn bị sẵn về khả năng dùng bàn phím, cách lấy nét và
-độ nhất quán. Điểm đáng giá của lựa chọn này không nằm ở số lượng thành phần
-dựng sẵn, mà ở khả năng giữ giao diện nhất quán trong khi nhóm vẫn kiểm
-soát được cách từng thành phần được triển khai trong dự án.
+giao diện. Bộ công cụ này cung cấp các thành phần cơ bản có tính nhất
+quán, hỗ trợ tốt cho thao tác bằng bàn phím và quản lý điểm lấy nét,
+đồng thời vẫn cho phép nhóm chủ động kiểm soát cách triển khai từng
+thành phần trong dự án.
 
 \textbf{Đặc điểm nổi bật:}
 
@@ -6154,15 +6155,12 @@ nội bộ hoặc môi trường không muốn phụ thuộc dịch vụ bản �
 
 \subparagraph{a) Mô hình kiến trúc chia theo từng nhóm tính năng}\label{a-muxf4-huxecnh-kiux1ebfn-truxfac-feature-sliced-design}
 
-Ứng dụng giao diện web được tổ chức theo cách chia mã nguồn bám theo
-từng nhóm tính năng nghiệp vụ, thường gọi là Feature-Sliced Design
-(FSD). Mỗi tính năng vì thế được đóng gói thành một module tương đối độc
-lập gồm thành phần giao diện, hook, kiểu dữ liệu và tiện ích liên quan.
-Nói gọn hơn, FSD chia mã nguồn theo ``thứ người dùng đang làm'' thay vì
-chỉ chia theo loại file. Ví dụ, phần quản lý xe sẽ gom mọi phần liên
-quan đến xe vào cùng một cụm; nhờ đó người mới đọc mã nguồn dễ lần theo
-nghiệp vụ hơn, còn việc bổ sung tính năng mới cũng ít làm rối cấu trúc
-cũ.
+Ứng dụng giao diện web được tổ chức theo hướng chia mã nguồn theo từng
+nhóm tính năng nghiệp vụ, thường gọi là Feature-Sliced Design (FSD). Mỗi
+tính năng được đóng gói thành một module tương đối độc lập gồm thành
+phần giao diện, hook, kiểu dữ liệu và tiện ích liên quan. Cách tổ chức
+này giúp cấu trúc mã nguồn bám sát nghiệp vụ hơn, nhờ đó thuận lợi cho
+việc bảo trì và mở rộng tính năng.
 
 \begin{itemize}
 \tightlist
@@ -6222,7 +6220,7 @@ dữ liệu đi từ nơi lấy dữ liệu đến nơi hiển thị theo một 
 \item
   \textbf{REST API (TanStack Query):} Dữ liệu CRUD, gồm các thao tác tạo,
   đọc, sửa, xóa cơ bản như danh sách xe, chuyến đi hay cảnh báo, được
-  lấy từ API phía máy chủ qua HTTP. TanStack Query giúp lưu tạm và làm
+  lấy từ API máy chủ qua HTTP. TanStack Query giúp lưu tạm và làm
   mới dữ liệu theo cơ chế ``hiển thị ngay dữ liệu đang có rồi âm thầm hỏi
   bản mới'', nhờ đó người dùng không phải chờ trắng màn hình mỗi lần tải
   lại.
@@ -6245,7 +6243,7 @@ dữ liệu đi từ nơi lấy dữ liệu đến nơi hiển thị theo một 
 \begin{figure}[htbp]
 \centering
 \pandocbounded{\safeincludesvgsmall{./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-15a.svg}}
-\caption{Luồng dữ liệu một chiều giữa Next.js, Query, Zustand và API phía máy chủ}
+\caption{Luồng dữ liệu một chiều giữa Next.js, Query, Zustand và API máy chủ}
 \label{fig:ch3-luong-du-lieu-mot-chieu-giua-next-js-query-zustand-va-backend}
 \end{figure}
 }
@@ -6265,7 +6263,7 @@ tương ứng:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Đăng nhập:} Người dùng nhập email và mật khẩu, API phía máy chủ tạo bản
+  \textbf{Đăng nhập:} Người dùng nhập email và mật khẩu, API máy chủ tạo bản
   ghi phiên và trả về một mã phiên ngẫu nhiên.
 \item
   \textbf{Lưu trữ token:} Token chỉ được giữ trong bộ nhớ tạm của Zustand,
@@ -6309,7 +6307,7 @@ tổng thể về trạng thái hệ thống:
 \item
   \textbf{Các thẻ chỉ số nhanh:} Hiển thị các chỉ số quan trọng: tổng số xe đang
   hoạt động, số chuyến đi trong ngày, số cảnh báo chưa xử lý, số vi phạm
-  má»›i.
+  mới.
 \item
   \textbf{Bản đồ mini:} Hiển thị vị trí tất cả xe đang hoạt động trên
   bản đồ thu nhỏ.
@@ -6465,7 +6463,7 @@ ba lớp chính:
 
 
 \subparagraph{b) Cơ chế cập nhật vị trí thời gian
-thá»±c}\label{b-cux1a1-chux1ebf-cux1eadp-nhux1eadt-vux1ecb-truxed-thux1eddi-gian-thux1ef1c}
+thực}\label{b-cux1a1-chux1ebf-cux1eadp-nhux1eadt-vux1ecb-truxed-thux1eddi-gian-thux1ef1c}
 
 Quy trình cập nhật vị trí xe trên bản đồ diễn ra như sau:
 
@@ -6476,14 +6474,14 @@ Quy trình cập nhật vị trí xe trên bản đồ diễn ra như sau:
   \textbf{Thiết bị IoT} gửi dữ liệu GPS qua MQTT đến EMQX Broker.
 \item
   \textbf{MQTT Bridge} nhận và xử lý dữ liệu, lưu vào VictoriaMetrics,
-  đồng thời chuyển tiếp đến API phía máy chủ.
+  đồng thời chuyển tiếp đến API máy chủ.
 \item
-  \textbf{API phía máy chủ} phát sự kiện \texttt{vehicle:\{id\}:location} qua
+  \textbf{API máy chủ} phát sự kiện \texttt{vehicle:\{id\}:location} qua
   Socket.IO đến tất cả trình duyệt đang đăng ký nhận dữ liệu.
 \item
-  \textbf{Giao diện web} nhận sự kiện, cập nhật tọa độ điểm đánh dấu trên bản đồ. Sử
-  dụng kỹ thuật nội suy (interpolation) để điểm đánh dấu di chuyển mượt mà giữa
-  hai điểm tọa độ liên tiếp.
+  \textbf{Giao diện web} nhận sự kiện và cập nhật tọa độ điểm đánh dấu
+  trên bản đồ. Kỹ thuật nội suy (interpolation) được dùng để điểm đánh
+  dấu di chuyển mượt hơn giữa hai điểm tọa độ liên tiếp.
 \end{enumerate}
 
 \textbf{Tối ưu hiệu năng bản đồ:}
@@ -6703,7 +6701,7 @@ Database quan hệ & PostgreSQL 16 & Ổn định, quen thuộc, phù hợp dữ
 có quan hệ chặt chẽ \\\hline
 Database time-series & VictoriaMetrics & Ghi dữ liệu theo thời gian rất
 nhanh và truy vấn tốt theo mốc thời gian \\\hline
-API phía máy chủ & Express.js + TypeScript & Nhẹ, linh hoạt, dễ tổ chức theo
+API máy chủ & Express.js + TypeScript & Nhẹ, linh hoạt, dễ tổ chức theo
 từng bài toán nghiệp vụ \\\hline
 Giao diện web & Next.js 15 + React 19 & Hiện nội dung sớm, tổ chức trang
 rõ và hệ sinh thái lớn \\\hline
@@ -6743,7 +6741,7 @@ cho hệ thống IoT giám sát phương tiện được tổng hợp như sau:
   gửi bù khi kết nối phục hồi
 \item
   \textbf{Tầng xử lý}: MQTT Bridge nhận bản tin rồi ghi ra nhiều nơi phù
-  hợp như PostgreSQL và VictoriaMetrics, sau đó API phía máy chủ xử lý
+  hợp như PostgreSQL và VictoriaMetrics, sau đó API máy chủ xử lý
   nghiệp vụ cho người dùng
 \item
   \textbf{Tầng trình bày}: Next.js 15, bản đồ Leaflet, kênh thời gian thực
@@ -6790,15 +6788,12 @@ cứng}\label{411-thiux1ebft-kux1ebf-chi-tiux1ebft-phux1ea7n-cux1ee9ng}
 \paragraph{a) Kiến trúc tổng
 thể}\label{a-kiux1ebfn-truxfac-tux1ed5ng-thux1ec3}
 
-Xét theo chức năng, ESP32-S3 là bộ điều phối trung tâm của thiết bị theo dõi. Nó
-thu tín hiệu từ các khối khác, quyết định thiết bị đang ở chế độ nào và
-ra lệnh cho từng phần cứng hoạt động đúng lúc. Cụ thể hơn, ESP32-S3 nói
-chuyện với modem qua UART, tức cổng nối tiếp cơ bản; lấy dữ liệu xe qua
-BLE, tức Bluetooth tiết kiệm năng lượng; đọc cảm biến rung qua I2C, tức
-đường giao tiếp ngắn cho cảm biến; và đo điện áp ắc quy qua ADC, tức
-bộ chuyển đổi từ tín hiệu điện áp analog sang số. Toàn bộ thiết bị được
-nuôi bởi mạch quản lý năng lượng có khả năng tự chuyển giữa ắc quy xe và
-pin dự phòng.
+Trên nguyên mẫu đã chế tạo, ESP32-S3 giữ vai trò bộ điều phối trung tâm
+và liên kết trực tiếp với các khối phần cứng còn lại. Cụ thể, vi điều
+khiển giao tiếp với modem qua UART, làm việc với adapter OBD2 qua BLE,
+đọc cảm biến rung qua I2C và đo điện áp ắc quy qua ADC. Phần này tập
+trung vào cách các khối đã được bố trí và kết nối trong thiết bị thực tế,
+không lặp lại phần phân tích lý do lựa chọn đã trình bày ở Chương 3.
 
 
 {\thesissetfigureid{4.1}{fig-ch4-so-o-khoi-tong-the-he-thong-tracker-iot}
@@ -6858,24 +6853,19 @@ Active (BLE) & ~20--40 mA \\\hline
 
 
 \textbf{Giao tiếp UART với modem SIM7600CE-T (LTE + GNSS tích hợp):}
-Khối modem gói hai nhiệm vụ quan trọng vào cùng một phần cứng: đưa dữ
-liệu lên mạng di động và cung cấp vị trí GNSS của xe. ESP32-S3 trao đổi
-với modem qua UART1 bằng tập lệnh AT, tức là các lệnh văn bản để yêu cầu
-modem đăng ký mạng, mở kết nối dữ liệu và đọc thông tin định vị. Nhờ
-GNSS đã nằm sẵn trong modem, thiết kế không cần thêm một module định vị
-riêng, nên đi dây gọn hơn và việc tích hợp firmware cũng đơn giản hơn.
+Trên bản triển khai hiện tại, modem được nối với ESP32-S3 qua UART1 để
+xử lý cả luồng LTE và GNSS bằng AT command. Cách nối này bám đúng pin
+mapping và kiến trúc đã chốt ở Chương 3.
 
-\textbf{Giao tiếp BLE với OBD2 adapter:} ESP32-S3 sử dụng BLE 5.0 tích
-hợp để kết nối với adapter vgate iCar Pro (BLE 4.0). Nhờ kết nối này,
-thiết bị theo dõi không chỉ biết xe đang ở đâu mà còn biết xe đang ở trạng thái
-nào thông qua các dữ liệu OBD-II như trạng thái khóa điện (IGN), tốc độ
-động cơ (RPM), vận tốc xe, mức nhiên liệu và mã lỗi chẩn đoán (DTC).
+\textbf{Giao tiếp BLE với OBD2 adapter:} ESP32-S3 dùng BLE 5.0 tích hợp
+để kết nối với adapter vgate iCar Pro (BLE 4.0), từ đó đọc các thông số
+OBD-II như trạng thái IGN, RPM, tốc độ xe, mức nhiên liệu và mã lỗi chẩn
+đoán trong quá trình thử nghiệm.
 
 \textbf{Giao tiếp I2C với cảm biến LIS3DSH:} Cảm biến gia tốc 3 trục
-LIS3DSH được kết nối qua bus I2C (GPIO2 SDA, GPIO1 SCL). Vai trò chính
-của cảm biến này là giúp hệ thống "ngủ mà vẫn canh", tức là phát hiện
-chuyển động khi xe đang đỗ và đánh thức ESP32-S3 từ light sleep thông
-qua GPIO wake khi có rung động bất thường; heartbeat định kỳ vẫn dùng timer wake.
+LIS3DSH được nối qua bus I2C (GPIO2 SDA, GPIO1 SCL). Trong bản phần cứng
+hiện tại, cảm biến này chịu trách nhiệm phát hiện chuyển động khi xe đỗ
+và tạo tín hiệu đánh thức cho ESP32-S3 theo cấu hình firmware đang dùng.
 
 
 {\thesissetfigureid{4.2}{fig-ch4-so-o-ket-noi-giua-esp32-s3-va-modem-sim7600ce-t-qua}
@@ -7719,7 +7709,7 @@ với dây điện nguồn.
 dày.
 
 \paragraph{d) Quản lý cáp và chống
-nhiá»…u}\label{d-quux1ea3n-luxfd-cuxe1p-vuxe0-chux1ed1ng-nhiux1ec5u}
+nhiễu}\label{d-quux1ea3n-luxfd-cuxe1p-vuxe0-chux1ed1ng-nhiux1ec5u}
 
 \begin{itemize}
 \tightlist
@@ -8129,7 +8119,7 @@ characteristic. Mỗi lệnh có dạng \texttt{"MMPP\textbackslash{}r"}, trong
 \NormalTok{    snprintf}\OperatorTok{(}\NormalTok{obd}\OperatorTok{{-}\textgreater{}}\NormalTok{tx\_data}\OperatorTok{.}\NormalTok{buf}\OperatorTok{,} \KeywordTok{sizeof}\OperatorTok{(}\NormalTok{obd}\OperatorTok{{-}\textgreater{}}\NormalTok{tx\_data}\OperatorTok{.}\NormalTok{buf}\OperatorTok{),}
              \StringTok{"}\SpecialCharTok{\%02X\%02X\textbackslash{}r}\StringTok{"}\OperatorTok{,}\NormalTok{ mode}\OperatorTok{,}\NormalTok{ pid}\OperatorTok{);}
 
-    \CommentTok{// Gá»­i qua GATT write characteristic}
+    \CommentTok{// Gửi qua GATT write characteristic}
 \NormalTok{    ble\_mgr\_send}\OperatorTok{(}\NormalTok{obd}\OperatorTok{{-}\textgreater{}}\NormalTok{mgr\_ctx}\OperatorTok{,}\NormalTok{ obd\_tx\_char}\OperatorTok{{-}\textgreater{}}\NormalTok{handle}\OperatorTok{,}
 \NormalTok{                 obd}\OperatorTok{{-}\textgreater{}}\NormalTok{tx\_data}\OperatorTok{.}\NormalTok{buf}\OperatorTok{,}\NormalTok{ strlen}\OperatorTok{(}\NormalTok{obd}\OperatorTok{{-}\textgreater{}}\NormalTok{tx\_data}\OperatorTok{.}\NormalTok{buf}\OperatorTok{));}
 
@@ -8237,7 +8227,7 @@ Các hàm chuyển đổi tương ứng được định nghĩa trong component
 \end{Shaded}
 
 \paragraph{f) Xử lý lỗi và
-fallback}\label{f-xux1eed-luxfd-lux1ed7i-vuxe0-fallback}
+cơ chế dự phòng}\label{f-xux1eed-luxfd-lux1ed7i-vuxe0-fallback}
 
 Khi thiết bị theo dõi không thể kết nối BLE với adapter OBD2 trong thời gian chờ
 cho phép, firmware không dừng lại mà chuyển sang cơ chế dự phòng. Lúc
@@ -8347,16 +8337,19 @@ heartbeat, cảnh báo, OTA và lệnh điều khiển.
 
 \textbf{Cấu trúc topic MQTT:}
 
+\textit{Lưu ý:} Bảng dưới đây mô tả hợp đồng topic đang được triển khai ở
+firmware và hệ thống máy chủ; đây không phải bảng chỉ số hiệu năng.
+
 
 {\thesissettableid{4.8A}{tab-ch4-bang-bo-sung-chi-muc-4-2-3-trien-khai-firmware}
 \def\LTcaptype{table}
 \begin{longtable}{|L{0.332\linewidth}|L{0.231\linewidth}|L{0.401\linewidth}|}
-\caption{Bảng bổ sung chỉ mục (4.2.3. Triển khai Firmware)}\label{tab:ch4-bang-bo-sung-chi-muc-4-2-3-trien-khai-firmware}\\
-\hline \textbf{Topic} & \textbf{Hướng} & \textbf{Mục đích} \\
+\caption{Cấu trúc topic MQTT trong firmware và hệ thống máy chủ}\label{tab:ch4-bang-bo-sung-chi-muc-4-2-3-trien-khai-firmware}\\
+\hline \textbf{Topic} & \textbf{Hướng truyền} & \textbf{Mục đích} \\
 \\\hline
 \endfirsthead
-\caption[]{Bảng bổ sung chỉ mục (4.2.3. Triển khai Firmware) (tiếp theo)}\\
-\hline \textbf{Topic} & \textbf{Hướng} & \textbf{Mục đích} \\
+\caption[]{Cấu trúc topic MQTT trong firmware và hệ thống máy chủ (tiếp theo)}\\
+\hline \textbf{Topic} & \textbf{Hướng truyền} & \textbf{Mục đích} \\
 \\\hline
 \endhead
 \\\hline
@@ -8465,8 +8458,8 @@ chu kỳ kế tiếp.
 \paragraph{e) Luồng cập nhật firmware
 OTA}\label{e-luux1ed3ng-cux1eadp-nhux1eadt-firmware-ota}
 
-Tính năng OTA mới được tích hợp xuyên suốt từ API phía máy chủ đến firmware.
-API phía máy chủ tạo \texttt{jobId}, tra cứu firmware theo
+Tính năng OTA mới được tích hợp xuyên suốt từ API máy chủ đến firmware.
+API máy chủ tạo \texttt{jobId}, tra cứu firmware theo
 \texttt{firmwareVersion}, sinh URL tải file dạng
 \texttt{/api/v1/firmware/\{id\}/download}, rồi gửi lệnh
 \texttt{ota\_update} qua topic \texttt{v1/\{device\_id\}/commands}.
@@ -8516,7 +8509,7 @@ quay về phân vùng trước đó và phát trạng thái \texttt{failed} ho�
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \paragraph{4.2.3.5. Triển khai quản lý nguồn và chế độ
-ngá»§}\label{4235-triux1ec3n-khai-quux1ea3n-luxfd-nguux1ed3n-vuxe0-chux1ebf-ux111ux1ed9-ngux1ee7}
+ngủ}\label{4235-triux1ec3n-khai-quux1ea3n-luxfd-nguux1ed3n-vuxe0-chux1ebf-ux111ux1ed9-ngux1ee7}
 
 \paragraph{a) Đọc điện áp và điều khiển
 nguồn}\label{a-ux111ux1ecdc-ux111iux1ec7n-uxe1p-vuxe0-ux111iux1ec1u-khiux1ec3n-nguux1ed3n}
@@ -8730,7 +8723,7 @@ DRIVING & IGN = OFF (phát hiện) & PARKED \\\hline
 PARKED & IMU interrupt (chuyển động) & ALARM \\\hline
 PARKED & Timer wake-up & HEARTBEAT \\\hline
 ALARM & Chuyển động dừng, IGN = OFF & PARKED \\\hline
-HEARTBEAT & Gá»­i xong heartbeat & SLEEP \\\hline
+HEARTBEAT & Gửi xong heartbeat & SLEEP \\\hline
 SLEEP & Timer hoặc IMU wake-up & CHECK\_IGN \\\hline
 \end{longtable}
 }
@@ -8823,20 +8816,17 @@ máy chủ.
 
 \subsubsection{4.2.4. Triển khai hệ thống máy chủ}
 
-Hệ thống máy chủ là nơi biến dữ liệu từ thiết bị thành khả năng quan sát
-và điều hành ở phía người quản lý. Trên cơ sở phương án đã chọn ở
-Chương 3, phần này trình bày quá trình hiện thực hóa tầng máy chủ theo
-từng khối: hạ tầng Docker, MQTT Bridge, API quản trị phía máy chủ, giao
-diện quản trị và lớp giám sát vận hành.
+Hệ thống máy chủ là nơi dữ liệu từ thiết bị được tiếp nhận, chuẩn hóa,
+lưu trữ và đưa tới giao diện quản trị. Trên cơ sở phương án đã chọn ở
+Chương 3, phần này tập trung vào cách tầng máy chủ đã được triển khai
+thực tế theo từng khối: hạ tầng Docker, MQTT Bridge, API quản trị, giao
+diện web và lớp giám sát vận hành.
 
-Nếu nhìn theo hành trình dữ liệu, triển khai thực tế có thể tóm gọn như
-sau: thiết bị gửi bản tin lên lớp tiếp nhận; lớp này kiểm tra và đẩy dữ
-liệu sang từng nơi lưu phù hợp; sau đó API phía máy chủ và giao diện web dùng phần dữ
-liệu đã được chuẩn hóa để truy vấn, điều khiển và hiển thị thời gian
-thực. Nói cụ thể hơn, chuỗi đó lần lượt đi qua EMQX, MQTT Bridge,
-VictoriaMetrics, VictoriaLogs, PostgreSQL, API phía máy chủ và giao diện
-quản trị. Cách mô tả này giúp người đọc nối được kiến trúc ở Chương 3
-với các cấu hình triển khai cụ thể ở phần sau.
+Trong bản triển khai hiện tại, luồng dữ liệu chính đi qua EMQX, MQTT
+Bridge, VictoriaMetrics, VictoriaLogs, PostgreSQL, API máy chủ và giao
+ diện quản trị. Trọng tâm của mục này là mô tả cấu hình và cách các thành
+phần đang vận hành, không lặp lại phần phân tích lựa chọn kiến trúc đã
+trình bày ở Chương 3.
 
 
 {\thesissetfigureid{4.18}{fig-ch4-kien-truc-tong-the-he-thong-cloud-va-luong-du-lieu}
@@ -8855,15 +8845,13 @@ với các cấu hình triển khai cụ thể ở phần sau.
 
 \subparagraph{a) Mô hình triển khai tách theo từng dịch vụ}\label{a-muxf4-huxecnh-triux1ec3n-khai-per-service-ivm26-pattern}
 
-Ở giai đoạn triển khai, nhóm chọn cách tách mỗi dịch vụ thành một đơn vị
-cấu hình Docker Compose riêng. Cách tổ chức này phù hợp với đồ án vì vẫn
-đủ đơn giản để cài đặt, nhưng đã phản ánh khá rõ tư duy chia dịch vụ
-trong một hệ thống thật. Theo đó, mỗi dịch vụ có tệp cấu hình riêng thay
-vì gom toàn bộ vào một tệp lớn.
-Có thể hiểu ngắn gọn: mỗi dịch vụ chạy trong một container, tức một môi
-trường thực thi tách biệt, nên dễ quản lý hơn khi cần sửa một phần mà
-không muốn làm ảnh hưởng cả hệ thống. Cách tổ chức này có một số lợi
-điểm rõ ràng:
+Ở giai đoạn triển khai, mỗi dịch vụ được tách thành một cấu hình Docker
+Compose riêng. Cách tổ chức này phản ánh trực tiếp mô hình phân tách đã
+được đề xuất ở Chương 3, đồng thời tạo thuận lợi cho việc khởi động,
+cập nhật và kiểm thử từng thành phần trong môi trường thực tế. Việc mỗi
+dịch vụ chạy trong một container độc lập cũng giúp hệ thống dễ quản lý
+hơn khi cần điều chỉnh từng khối riêng lẻ. Cách tổ chức này có một số
+lợi điểm rõ ràng:
 
 \begin{itemize}
 \tightlist
@@ -8889,7 +8877,7 @@ Cấu trúc thư mục tổng thể của hệ thống được tổ chức như
 \begin{itemize}
 \tightlist
 \item
-  \texttt{Tracking\_Backend/}: API phía máy chủ viết bằng Express +
+  \texttt{Tracking\_Backend/}: API máy chủ viết bằng Express +
   TypeScript.
 \item
   \texttt{Tracking\_Frontend/}: giao diện quản trị web bằng Next.js.
@@ -9093,7 +9081,7 @@ VictoriaLogs & tracking-victorialogs & 9428 & Nhật ký tập trung \\\hline
 Grafana & tracking-grafana & 4002 & Màn hình giám sát \\\hline
 MQTT Bridge & tracking-mqtt-bridge & --- & Dịch vụ trung gian xử lý bản
 tin MQTT (không mở cổng ra ngoài) \\\hline
-API phía máy chủ & tracking-backend & 4000 & REST API và kênh WebSocket \\\hline
+API máy chủ & tracking-backend & 4000 & REST API và kênh WebSocket \\\hline
 Giao diện web & tracking-frontend & 4001 & Giao diện web \\\hline
 Nginx Proxy Manager & tracking-npm & 80, 81, 443 & Cổng chuyển tiếp truy
 cập từ Internet vào các dịch vụ nội bộ \\\hline
@@ -9117,7 +9105,7 @@ cập từ Internet vào các dịch vụ nội bộ \\\hline
 \endfoot
 \endlastfoot
 \nolinkurl{thingdock.dev} & 443 & tracking-frontend & 4001 & Giao diện web đi qua lớp chuyển tiếp Nginx Proxy Manager \\\hline
-\nolinkurl{api.thingdock.dev} & 443 & tracking-backend & 4000 & API phía máy chủ, Swagger và Socket.IO đi qua lớp chuyển tiếp Nginx Proxy Manager \\\hline
+\nolinkurl{api.thingdock.dev} & 443 & tracking-backend & 4000 & API máy chủ, Swagger và Socket.IO đi qua lớp chuyển tiếp Nginx Proxy Manager \\\hline
 \nolinkurl{mqtt.thingdock.dev} & 443 & tracking-emqx & 8083 & MQTT qua WebSocket đi qua lớp chuyển tiếp Nginx Proxy Manager \\\hline
 \nolinkurl{mqtts.thingdock.dev} & 8883 & tracking-emqx & 8883 & MQTT TLS trực tiếp cho thiết bị \\\hline
 \nolinkurl{grafana.thingdock.dev} & 443 & tracking-grafana & 4002 & Grafana đi qua lớp chuyển tiếp Nginx Proxy Manager \\\hline
@@ -9157,7 +9145,7 @@ rõ ràng để lưu vào cơ sở dữ liệu, dựng giao diện quản trị 
 vậy, MQTT Bridge làm nhiệm vụ nhận bản tin thô, kiểm tra nó, rồi chuyển
 nó thành các bản ghi phù hợp cho từng nơi sử dụng. Việc tách thành dịch
 vụ riêng cũng giúp đường vào dữ liệu vận hành gửi liên tục gọn hơn và không trộn lẫn với
-nghiệp vụ web của API phía máy chủ.
+nghiệp vụ web của API máy chủ.
 
 Luồng xử lý của MQTT Bridge có thể hình dung theo bốn bước:
 
@@ -9174,7 +9162,7 @@ Luồng xử lý của MQTT Bridge có thể hình dung theo bốn bước:
   VictoriaMetrics, sự kiện hoặc lỗi vào VictoriaLogs, còn trạng thái
   phiên vào PostgreSQL.
 \item
-  Cuối cùng, MQTT Bridge phát sự kiện nội bộ để API phía máy chủ nhận và đẩy cập
+  Cuối cùng, MQTT Bridge phát sự kiện nội bộ để API máy chủ nhận và đẩy cập
   nhật mới ra giao diện quản trị theo thời gian thực.
 \end{enumerate}
 
@@ -9356,16 +9344,16 @@ vai trò xử lý các gói dữ liệu nhỏ.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\paragraph{4.2.4.3. Triển khai API phía máy chủ}\label{4243-triux1ec3n-khai-backend-api-backend-api-implementation}
+\paragraph{4.2.4.3. Triển khai API máy chủ}\label{4243-triux1ec3n-khai-backend-api-backend-api-implementation}
 
 \subparagraph{a) Lựa chọn công
 nghệ}\label{a-lux1ef1a-chux1ecdn-cuxf4ng-nghux1ec7-1}
 
-API phía máy chủ được xây dựng trên nền tảng Node.js với Express.js và
+API máy chủ được xây dựng trên nền tảng Node.js với Express.js và
 TypeScript. Đây là lớp phục vụ trực tiếp giao diện quản trị: nhận yêu
 cầu từ người dùng, kiểm tra quyền truy cập, lấy dữ liệu đúng chỗ rồi trả
 lại kết quả ổn định. Vì đường dữ liệu vận hành gửi liên tục đã được MQTT
-Bridge gánh riêng, API phía máy chủ không phải ôm cả dòng dữ liệu kỹ
+Bridge gánh riêng, API máy chủ không phải ôm cả dòng dữ liệu kỹ
 thuật lẫn nghiệp vụ quản trị trong cùng một chỗ. Việc lựa chọn công nghệ
 ở đây vì thế ưu tiên sự rõ ràng và linh hoạt trong phát triển lâu dài.
 
@@ -9373,11 +9361,11 @@ thuật lẫn nghiệp vụ quản trị trong cùng một chỗ. Việc lựa c
 {\thesissettableid{4.6}{tab-ch4-so-sanh-framework-backend-cho-he-thong-iot}
 \def\LTcaptype{table}
 \begin{longtable}{|L{0.246\linewidth}|L{0.269\linewidth}|L{0.318\linewidth}|L{0.121\linewidth}|}
-\caption{So sánh các khung phát triển API phía máy chủ cho hệ thống IoT}\label{tab:ch4-so-sanh-framework-backend-cho-he-thong-iot}\\
+\caption{So sánh các khung phát triển API máy chủ cho hệ thống IoT}\label{tab:ch4-so-sanh-framework-backend-cho-he-thong-iot}\\
 \hline \textbf{Tiêu chí} & \textbf{Express + TypeScript} & \textbf{NestJS} & \textbf{Go + Gin} \\
 \\\hline
 \endfirsthead
-\caption[]{So sánh các khung phát triển API phía máy chủ cho hệ thống IoT (tiếp theo)}\\
+\caption[]{So sánh các khung phát triển API máy chủ cho hệ thống IoT (tiếp theo)}\\
 \hline \textbf{Tiêu chí} & \textbf{Express + TypeScript} & \textbf{NestJS} & \textbf{Go + Gin} \\
 \\\hline
 \endhead
@@ -9408,7 +9396,7 @@ Hỗ trợ cập nhật thời gian thực & Rất tốt (tích hợp Socket.IO 
   nguyên máy chủ ở mức hợp lý.
 \item
   \textbf{Zod Validation}: Sử dụng Zod để chặn yêu cầu sai cấu trúc ngay
-  từ đầu vào. Đây là lớp bảo vệ quan trọng vì API phía máy chủ nhận dữ
+  từ đầu vào. Đây là lớp bảo vệ quan trọng vì API máy chủ nhận dữ
   liệu từ cả giao diện người dùng lẫn các luồng nội bộ khác.
 \item
   \textbf{Kiểm soát middleware chain}: Toàn quyền kiểm soát thứ tự và
@@ -9441,7 +9429,7 @@ Hỗ trợ cập nhật thời gian thực & Rất tốt (tích hợp Socket.IO 
 \subparagraph{b) Kiến trúc Domain-Driven Design
 (DDD)}\label{b-kiux1ebfn-truxfac-domain-driven-design-ddd-1}
 
-API phía máy chủ được tổ chức theo kiến trúc Domain-Driven Design với
+API máy chủ được tổ chức theo kiến trúc Domain-Driven Design với
 các lớp rõ ràng: lớp nhận yêu cầu, lớp xử lý nghiệp vụ và lớp truy cập
 dữ liệu. Cách tổ chức này gom mỗi bài toán nghiệp vụ vào một khu vực
 riêng, nên người đọc mã nguồn có thể lần theo ``một việc'' trọn vẹn
@@ -9452,7 +9440,7 @@ thế có thư mục riêng với các thành phần chính như \texttt{service
 \begin{itemize}
 \tightlist
 \item
-  \texttt{index.ts}: điểm khởi động của API phía máy chủ.
+  \texttt{index.ts}: điểm khởi động của API máy chủ.
 \item
   \texttt{api/}: lớp API gồm routes và tài liệu OpenAPI.
 \item
@@ -9476,7 +9464,7 @@ thế có thư mục riêng với các thành phần chính như \texttt{service
 \begin{figure}[htbp]
 \centering
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-18.svg}}
-\caption{Cấu trúc thư mục API phía máy chủ theo kiến trúc DDD}
+\caption{Cấu trúc thư mục API máy chủ theo kiến trúc DDD}
 \label{fig:ch4-cau-truc-thu-muc-backend-theo-kien-truc-ddd}
 \end{figure}
 }
@@ -9606,27 +9594,27 @@ Dữ liệu IoT & \nolinkurl{/api/v1/iot} & Không (public) & Nhận dữ liệu
 bị IoT \\\hline
 Tổng quan & \nolinkurl{/api/v1/dashboard} & Có & Thống kê, hoạt động gần
 đây, cảnh báo \\\hline
-Vehicles & \nolinkurl{/api/v1/vehicles} & Có & CRUD xe, gán thiết bị \\\hline
+Xe & \nolinkurl{/api/v1/vehicles} & Có & CRUD xe, gán thiết bị \\\hline
 Khách hàng & \nolinkurl{/api/v1/customers} & Có & CRUD khách hàng \\\hline
 Chuyến đi & \nolinkurl{/api/v1/trips} & Có & CRUD chuyến đi, lịch sử \\\hline
 Cảnh báo & \nolinkurl{/api/v1/alerts} & Có & Quản lý cảnh báo \\\hline
 Vùng địa lý & \nolinkurl{/api/v1/geofences} & Có & CRUD vùng địa lý \\\hline
-Firmware & \nolinkurl{/api/v1/firmware} & Có (admin) & OTA firmware
-management \\\hline
+Firmware & \nolinkurl{/api/v1/firmware} & Có (admin) & Quản lý firmware
+OTA \\\hline
 \end{longtable}
 }
 
 
-Riêng nhóm IoT Data (\texttt{/api/v1/iot}) không đi theo luồng đăng nhập
+Riêng nhóm dữ liệu IoT (\texttt{/api/v1/iot}) không đi theo luồng đăng nhập
 người dùng thông thường. Các thiết bị gửi dữ liệu trực tiếp bằng MQTT
-hoặc HTTP fallback, nên lớp bảo vệ chính nằm ở cơ chế nhận diện thiết bị
-và ACL của EMQX thay vì ở phiên đăng nhập web.
+hoặc qua cơ chế dự phòng HTTP, nên lớp bảo vệ chính nằm ở cơ chế nhận
+diện thiết bị và ACL của EMQX thay vì ở phiên đăng nhập web.
 
 \subparagraph{f) WebSocket (Socket.IO)}\label{f-websocket-socketio}
 
 Hệ thống sử dụng Socket.IO 4.8 để đẩy các thay đổi mới ra giao diện web
 ngay khi chúng xảy ra. Thay vì để giao diện quản trị hỏi lại API liên
-tục, API phía máy chủ chỉ phát sự kiện đúng vào nhóm chức năng liên
+tục, API máy chủ chỉ phát sự kiện đúng vào nhóm chức năng liên
 quan. Vì thế, Socket.IO được tách thành 5 namespace, mỗi namespace phục
 vụ một nhóm nhu cầu cụ thể:
 
@@ -9648,7 +9636,7 @@ Các sự kiện chính được phát từ máy chủ đến trình duyệt bao
 \texttt{geofence:enter}, \texttt{geofence:exit}, \texttt{export:ready}
 và \texttt{firmware:assignment}. Trong triển khai hiện tại,
 \texttt{firmware:assignment} phản ánh bước khởi tạo hoặc cập nhật tác vụ
-OTA từ API phía máy chủ; tiến trình thực thi chi tiết vẫn được theo dõi chủ yếu
+OTA từ API máy chủ; tiến trình thực thi chi tiết vẫn được theo dõi chủ yếu
 qua \texttt{firmware\_update\_log} và lớp log quan trắc.
 
 \subparagraph{g) Cấu hình Docker cho
@@ -9706,7 +9694,7 @@ phản hồi có cấu trúc:
 \end{Shaded}
 
 Trường \texttt{traceId} chính là mã truy vết từng yêu cầu được tạo bởi
-middleware, cho phép đối chiếu lỗi giữa log của giao diện web và log của API phía máy chủ.
+middleware, cho phép đối chiếu lỗi giữa log của giao diện web và log của API máy chủ.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -9721,21 +9709,15 @@ quan sát và ra quyết định. Vì thế, phần giao diện web không chỉ
 \subparagraph{a) Lựa chọn công
 nghệ}\label{a-lux1ef1a-chux1ecdn-cuxf4ng-nghux1ec7-2}
 
-Giao diện web quản trị được xây dựng trên nền tảng Next.js 15 với React 19.
-Điều quan trọng không phải tên công nghệ, mà là giao diện phải đáp ứng ba
-nhu cầu rất thực tế: tải trang đủ nhanh, cập nhật thời gian thực ổn định
-và vẫn giữ cấu trúc mã nguồn gọn khi tính năng quản trị tăng lên. Nếu
-phần máy chủ trả lời câu hỏi ``cần cung cấp dữ liệu gì'', thì giao diện
-web trả lời câu hỏi ``nên trình bày ra sao để người vận hành hiểu nhanh
-và thao tác ít nhất''.
+Giao diện web quản trị được xây dựng trên nền tảng Next.js 15 với React
+19. Khác với Chương 3, phần này không phân tích lại lý do lựa chọn công
+nghệ, mà tập trung vào cấu trúc triển khai hiện tại của giao diện và cách
+các thành phần đang phối hợp với API máy chủ.
 
-Có thể nhìn toàn bộ phần giao diện web thành ba nhóm vai trò. Nhóm thứ
-nhất dựng khung ứng dụng và điều hướng trang. Nhóm thứ hai giữ trạng
-thái giao diện và đồng bộ dữ liệu với máy chủ. Nhóm thứ ba tạo ra những
-gì người vận hành nhìn thấy trực tiếp như bản đồ, biểu đồ và cập nhật
-thời gian thực. Cách chia này giúp người đọc hiểu mỗi công cụ xuất hiện
-để giải quyết một nhu cầu rõ ràng, chứ không phải để làm dày thêm danh
-sách công nghệ.
+Trong bản triển khai hiện nay, giao diện web có thể chia thành ba nhóm
+vai trò chính: khung ứng dụng và điều hướng trang, lớp quản lý trạng thái
+và đồng bộ dữ liệu với máy chủ, cùng lớp hiển thị trực tiếp cho người
+vận hành như bản đồ, biểu đồ và cập nhật thời gian thực.
 
 \textbf{Thành phần công nghệ của giao diện web:}
 
@@ -9774,12 +9756,11 @@ bàn phím tốt và dễ ghép lại theo nhu cầu \\\hline
 \subparagraph{b) Kiến trúc
 tách theo từng nhóm tính năng}\label{b-kiux1ebfn-truxfac-feature-sliced}
 
-Giao diện web được tổ chức theo kiến trúc chia mã nguồn theo từng nhóm tính năng, nghĩa là mỗi tính
-năng người dùng nhìn thấy sẽ có một khu vực mã nguồn tương đối riêng.
-Trong mỗi khu vực đó, các thành phần UI, hook, kiểu dữ liệu và tiện ích
-liên quan được đặt gần nhau. Nhờ vậy, cấu trúc mã nguồn phản chiếu khá
-sát cấu trúc nghiệp vụ, nên ngay cả người không đi sâu vào code cũng có
-thể hình dung hệ thống web được tổ chức như thế nào.
+Giao diện web được tổ chức theo kiến trúc chia mã nguồn theo từng nhóm
+ tính năng. Trong mỗi khu vực, các thành phần UI, hook, kiểu dữ liệu và
+ tiện ích liên quan được đặt gần nhau. Phần này ghi nhận cấu trúc mã
+ nguồn đang được sử dụng trong bản triển khai hiện tại, thay vì lặp lại
+ phần lập luận lựa chọn kiến trúc đã nêu ở Chương 3.
 
 \begin{itemize}
 \tightlist
@@ -9840,7 +9821,7 @@ loại).
 \begin{figure}[htbp]
 \centering
 \pandocbounded{\safeincludesvg{./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-20.svg}}
-\caption{Giao diện trang tổng quan hệ thống}
+\caption{Giao diện trang tổng quan hệ thống trong bản triển khai thực tế}
 \label{fig:ch4-giao-dien-trang-dashboard-tong-quan}
 \end{figure}
 }
@@ -9928,9 +9909,10 @@ hợp nhiều công cụ quản lý trạng thái:
   dữ liệu khi cần. Khi WebSocket đã hoạt động, cơ chế polling sẽ giảm
   xuống để tránh tải trùng lặp.
 \item
-  \textbf{Socket.IO Client}: Nhận các cập nhật thời gian thực do API phía máy chủ
-  phát ra. Giao diện web không nối trực tiếp tới MQTT broker; mọi dữ liệu
-  thời gian thực đều được API phía máy chủ chuẩn hóa rồi mới đẩy ra giao diện.
+  \textbf{Socket.IO Client}: Nhận các cập nhật thời gian thực do API máy
+  chủ phát ra. Giao diện web không kết nối trực tiếp tới MQTT broker;
+  mọi dữ liệu thời gian thực đều được API máy chủ chuẩn hóa trước khi
+  đẩy ra giao diện.
 \end{itemize}
 
 \subparagraph{e) Các giai đoạn triển
@@ -10030,7 +10012,7 @@ phải là thêm thật nhiều công cụ, mà là thêm khả năng quan sát 
 nguyên nhân sự cố có cơ sở. Trong phạm vi đồ án, phần truy vết chưa dùng
 đầy đủ cơ chế truy vết phân tán như OpenTelemetry để nối dấu vết qua
 nhiều dịch vụ; thay vào đó hệ thống dùng mã nhận diện từng yêu cầu để
-nối log giữa giao diện web, API phía máy chủ và các dịch vụ liên quan.
+nối log giữa giao diện web, API máy chủ và các dịch vụ liên quan.
 Cách làm này đơn giản hơn nhưng vẫn đủ cho quy mô triển khai hiện tại.
 
 
@@ -10074,7 +10056,7 @@ VictoriaMetrics đóng hai vai trò trong hệ thống:
   trạng thái bật/tắt máy và thời gian chạy liên tục. Nguồn dữ liệu này đi từ MQTT Bridge.
 \item
   \textbf{Lưu trữ chỉ số sức khỏe hệ thống}: Đây là các chỉ số cho biết
-  API phía máy chủ và hạ tầng đang hoạt động ra sao, ví dụ số yêu cầu HTTP, độ
+  API máy chủ và hạ tầng đang hoạt động ra sao, ví dụ số yêu cầu HTTP, độ
   trễ xử lý, số kết nối WebSocket hay số bản tin MQTT. Các dịch vụ gửi
   nhóm chỉ số này qua thư viện \texttt{prom-client}.
 \end{enumerate}
@@ -10087,7 +10069,7 @@ VictoriaMetrics, từ đó dựng biểu đồ giám sát theo thời gian thự
 \subparagraph{c) VictoriaLogs - Nhật ký tập trung}\label{c-victorialogs---nhux1eadt-kuxfd-tux1eadp-trung-centralized-logging}
 
 VictoriaLogs là hệ thống nhật ký tập trung, thu thập log từ tất cả các
-dịch vụ trong hệ thống. API phía máy chủ sử dụng \texttt{victorialogs-transport}
+dịch vụ trong hệ thống. API máy chủ sử dụng \texttt{victorialogs-transport}
 của Winston để gửi log trực tiếp tới VictoriaLogs. Mỗi bản ghi log bao
 gồm:
 
@@ -10098,7 +10080,7 @@ gồm:
 \item
   \textbf{Level}: Mức độ nghiêm trọng (info, warn, error)
 \item
-  \textbf{Service}: Tên dịch vụ phát sinh log (API phía máy chủ, mqtt-bridge,
+  \textbf{Service}: Tên dịch vụ phát sinh log (API máy chủ, mqtt-bridge,
   giao diện web)
 \item
   \textbf{Request-ID}: Mã nhận diện yêu cầu để truy vết
@@ -10135,7 +10117,7 @@ giám sát. Các màn hình chính bao gồm:
 \item
   \textbf{Hiệu năng ứng dụng}: Phân phối
   thời gian xử lý yêu cầu, các endpoint chậm nhất, tỷ lệ
-  lá»—i theo endpoint.
+  lỗi theo endpoint.
 \end{itemize}
 
 
@@ -10182,7 +10164,7 @@ tiếp trạng thái của broker MQTT:
 
 \subparagraph{f) Sentry - Theo dõi lỗi ứng dụng}\label{f-sentry---theo-duxf5i-lux1ed7i-error-tracking}
 
-API phía máy chủ tích hợp Sentry thông qua hai middleware:
+API máy chủ tích hợp Sentry thông qua hai middleware:
 \texttt{sentryRequestHandler} (đặt đầu tiên trong middleware chain) và
 \texttt{sentryErrorHandler} (đặt cuối cùng). Sentry tự động thu thập:
 
@@ -10205,7 +10187,7 @@ cập trực tiếp vào log của máy chủ.
 
 \subparagraph{g) Liên kết truy vết bằng mã nhận diện yêu cầu}\label{g-request-id-correlation}
 
-Mỗi yêu cầu HTTP đến API phía máy chủ đều được gán một mã truy vết duy
+Mỗi yêu cầu HTTP đến API máy chủ đều được gán một mã truy vết duy
 nhất (UUID v4) bởi middleware \texttt{requestIdMiddleware}. Mã này được:
 
 \begin{itemize}
@@ -10222,7 +10204,7 @@ nhất (UUID v4) bởi middleware \texttt{requestIdMiddleware}. Mã này đượ
 \end{itemize}
 
 Cơ chế này cho phép lần theo một yêu cầu cụ thể từ giao diện web, qua
-API phía máy chủ, đến cơ sở dữ liệu và MQTT Bridge, giúp việc dò lỗi
+API máy chủ, đến cơ sở dữ liệu và MQTT Bridge, giúp việc dò lỗi
 và phân tích sự cố trong hệ thống nhiều dịch vụ hiệu quả hơn.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -10297,7 +10279,7 @@ dịch vụ được tách thành một tiến trình độc lập, đóng gói 
 Docker riêng và giao tiếp
 qua một mạng Docker dùng chung. Kết quả triển khai cho thấy
 MQTT Bridge thực hiện đúng vai trò cầu nối dữ liệu giữa thiết bị IoT và
-các hệ lưu trữ, đồng thời API phía máy chủ và giao diện web đáp ứng yêu
+các hệ lưu trữ, đồng thời API máy chủ và giao diện web đáp ứng yêu
 cầu tích hợp, giám sát vận hành thời gian thực.
 
 Mô hình mỗi dịch vụ có một cấu hình Docker Compose riêng giúp hệ thống dễ bảo
@@ -10323,7 +10305,7 @@ quan sát và phân tích sự cố trong môi trường vận hành thực tế
 MQTT Broker & EMQX & 5.4.0 & Tiếp nhận dữ liệu từ thiết bị IoT \\\hline
 MQTT Bridge & Node.js + TypeScript & 20 LTS & Xử lý và phân phối dữ liệu
 MQTT \\\hline
-API phía máy chủ & Express + TypeScript & 4.x & Cung cấp API, đẩy dữ
+API máy chủ & Express + TypeScript & 4.x & Cung cấp API, đẩy dữ
 liệu thời gian thực và xử lý nghiệp vụ \\\hline
 Giao diện web & Next.js + React & 15 / 19 & Giao diện web quản trị \\\hline
 CSDL quan hệ & PostgreSQL & 16 & Dữ liệu người dùng, xe, cảnh báo \\\hline
@@ -10342,12 +10324,12 @@ Cổng chuyển tiếp & Nginx Proxy Manager & - & Quản lý tên miền, SSL,
 \subsection{4.3. Đo lường và kết quả -- Measurements and Results}\label{43-ux111o-lux1b0ux1eddng-vuxe0-kux1ebft-quux1ea3--measurements-and-results}
 
 Phần này trình bày thiết lập thử nghiệm, kết quả đo theo từng tầng hệ
-thống (phần cứng, firmware, máy chủ), kết quả kiểm thử tích hợp end-to-end
+thống (phần cứng, firmware, máy chủ), kết quả kiểm thử tích hợp toàn tuyến
 và đối chiếu với các tiêu chí thiết kế ở Chương 1 và Chương 2. Nói cách
-khác, đây là phần kiểm chứng xem hệ thống sau khi hiện thực có thực sự
-đáp ứng được những gì đã hứa ở các chương trước hay không. Toàn bộ giá
-trị được ghi nhận trên thiết bị phần cứng đã chế tạo và lắp đặt thực tế
-trong điều kiện vận hành bám sát bối cảnh khai thác.
+khác, đây là phần kiểm chứng xem hệ thống sau khi được triển khai có
+thực sự đáp ứng được những gì đã đề ra ở các chương trước hay không.
+Toàn bộ giá trị được ghi nhận trên thiết bị phần cứng đã chế tạo và lắp
+đặt thực tế trong điều kiện vận hành bám sát bối cảnh khai thác.
 
 \textbf{Ghi chú:} Các giá trị đo lường trong chương này là kết quả thu
 được trên môi trường thử nghiệm cụ thể (xem mục 4.3.1). Một số chỉ số
@@ -10437,7 +10419,7 @@ chiếu & Kiểm thử độ chính xác GPS \\\hline
 mềm}\label{4312-muxf4i-trux1b0ux1eddng-thux1eed-nghiux1ec7m-phux1ea7n-mux1ec1m}
 
 Hệ thống máy chủ được triển khai trên hai môi trường riêng biệt để kiểm
-thá»­:
+thử:
 
 
 {\thesissettableid{4.13}{tab-ch4-cau-hinh-moi-truong-thu-nghiem-phan-mem}
@@ -10508,14 +10490,14 @@ Các kịch bản thử nghiệm được thiết kế bao phủ ba nhóm chính
 \tightlist
 \item
   \textbf{Kiểm thử đơn vị (Unit Test):} Kiểm tra từng module độc lập ---
-  phần cứng, firmware, API phía máy chủ và các thành phần giao diện web.
+  phần cứng, firmware, API máy chủ và các thành phần giao diện web.
 \item
   \textbf{Kiểm thử tích hợp (Integration Test):} Kiểm tra sự tương tác
   giữa các module --- BLE + OBD2, MQTT + Bridge + Database, API +
   WebSocket + Frontend.
 \item
   \textbf{Kiểm thử hệ thống (System Test):} Kiểm tra toàn bộ luồng dữ
-  liệu end-to-end, từ thiết bị đến giao diện người dùng.
+  liệu toàn tuyến, từ thiết bị đến giao diện người dùng.
 \end{enumerate}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -10556,7 +10538,7 @@ liệu \\\hline
 3 & Xe đỗ (IGN OFF) & Vi điều khiển ngủ nhẹ + 4G tắt & ~15
 mA & ~25 mA & Heartbeat mỗi 10--30 phút \\\hline
 4 & Ngủ sâu & Vi điều khiển ngủ sâu + IMU đánh thức & ~0.5 mA
-& ~2 mA (ước tính, cần xác nhận thêm) & Chỉ IMU + RTC hoạt
+& ~2 mA (ước tính bước đầu, cần đo lặp lại) & Chỉ IMU + RTC hoạt
 động \\\hline
 5 & Cảnh báo bất thường & Đánh thức từ ngủ sâu &
 ~380 mA & ~550 mA & Tương tự chế độ xe chạy + GPS
@@ -10606,10 +10588,10 @@ phòng}\label{4322-thux1eddi-lux1b0ux1ee3ng-pin-dux1ef1-phuxf2ng}
 Pin dự phòng 18650 1S (dung lượng danh định 3500 mAh, điện áp danh định
 3.7V) được quy đổi theo cùng công thức đã dùng cho phương án gốc:
 \(T = \dfrac{C \times V_{\text{pin}} \times \eta}{P_{\text{tieu thu}}}\),
-trong đó \(\eta\) là hiệu suất chuyển đổi của
-mạch boost converter (~85--90\%). Các giá trị dưới đây là
-\textbf{quy đổi theo bộ pin tham chiếu 18650}, chưa phải bộ số đo thực
-nghiệm mới trên pin 18650 thực tế.
+trong đó \(\eta\) là hiệu suất chuyển đổi của mạch boost converter
+(~85--90\%). Các giá trị dưới đây là \textbf{giá trị quy đổi theo bộ pin
+tham chiếu 18650}, không phải số đo thực nghiệm trực tiếp trên cell dùng
+trong thử nghiệm hiện tại.
 
 
 \clearpage
@@ -10618,29 +10600,27 @@ nghiệm mới trên pin 18650 thực tế.
 \def\LTcaptype{table}
 \begin{longtable}{|L{0.068\linewidth}|L{0.230\linewidth}|L{0.117\linewidth}|L{0.142\linewidth}|L{0.209\linewidth}|L{0.169\linewidth}|}
 \caption{Thời lượng pin dự phòng theo kịch bản sử dụng (quy đổi theo bộ pin tham chiếu 18650)}\label{tab:ch4-thoi-luong-pin-du-phong-theo-kich-ban-su-dung-uoc-tinh}\\
-\hline \textbf{STT} & \textbf{Kịch bản sử dụng} & \textbf{Dòng trung bình} & \textbf{Thời lượng ước tính} & \textbf{Trạng
-thái dữ liệu} & \textbf{Ghi chú} \\
+\hline \textbf{STT} & \textbf{Kịch bản sử dụng} & \textbf{Dòng trung bình} & \textbf{Thời lượng ước tính} & \textbf{Nguồn giá
+trị} & \textbf{Ghi chú} \\
 \\\hline
 \endfirsthead
 \caption[]{Thời lượng pin dự phòng theo kịch bản sử dụng (quy đổi theo bộ pin tham chiếu 18650) (tiếp theo)}\\
-\hline \textbf{STT} & \textbf{Kịch bản sử dụng} & \textbf{Dòng trung bình} & \textbf{Thời lượng ước tính} & \textbf{Trạng
-thái dữ liệu} & \textbf{Ghi chú} \\
+\hline \textbf{STT} & \textbf{Kịch bản sử dụng} & \textbf{Dòng trung bình} & \textbf{Thời lượng ước tính} & \textbf{Nguồn giá
+trị} & \textbf{Ghi chú} \\
 \\\hline
 \endhead
 \\\hline
 \endfoot
 \endlastfoot
 1 & Theo dõi liên tục khi xe chạy & ~350 mA &
-~2.6--3.0 giờ & Quy đổi theo bộ pin tham chiếu 18650 & Trường hợp
-xấu nhất, phụ thuộc hiệu suất boost \\\hline
+~2.6--3.0 giờ & Quy đổi thiết kế & Trường hợp xấu nhất, phụ thuộc hiệu
+suất boost \\\hline
 2 & Sleep + heartbeat 30 phút & ~15 mA & ~64
-giờ & Quy đổi theo bộ pin tham chiếu 18650 & Xe đậu bình thường \\\hline
+giờ & Quy đổi thiết kế & Xe đậu bình thường \\\hline
 3 & Ngủ sâu, chỉ chờ IMU đánh thức & ~0.5 mA &
-~1,940 giờ (~81 ngày) & Quy đổi theo
-bộ pin tham chiếu 18650 & Chế độ tiết kiệm tối đa \\\hline
+~1,940 giờ (~81 ngày) & Quy đổi thiết kế & Chế độ tiết kiệm tối đa \\\hline
 4 & Hỗn hợp (50\% xe chạy + 50\% xe đỗ) & ~182 mA &
-~5.0 giờ & Quy đổi theo bộ pin tham chiếu 18650 & Mô phỏng sử dụng
-thực tế \\\hline
+~5.0 giờ & Quy đổi thiết kế & Mô phỏng sử dụng thực tế \\\hline
 \end{longtable}
 }
 
@@ -10658,12 +10638,12 @@ thực tế \\\hline
 }
 
 
-\textbf{Nhận xét:} Với bộ pin tham chiếu 18650, thời lượng pin dự phòng trong
-chế độ theo dõi liên tục khi xe chạy được ước tính còn khoảng 2.6--3.0 giờ tùy hiệu
-suất chuyển đổi thực tế. Trong kịch bản xe đỗ và chỉ gửi heartbeat định
-kỳ, thiết bị vẫn có thể duy trì hoạt động trong nhiều ngày; tuy nhiên,
-các giá trị này cần được kiểm thử lại trên mẫu pin 18650 thực tế nếu
-dùng cho giai đoạn chế tạo tiếp theo.
+\textbf{Nhận xét:} Với bộ pin tham chiếu 18650, thời lượng pin dự phòng
+trong chế độ theo dõi liên tục khi xe chạy được quy đổi vào khoảng
+2.6--3.0 giờ, tùy hiệu suất chuyển đổi thực tế. Trong kịch bản xe đỗ và
+chỉ gửi heartbeat định kỳ, thiết bị vẫn có thể duy trì hoạt động trong
+nhiều ngày; tuy nhiên, các giá trị này cần được kiểm thử lại trên mẫu
+pin 18650 thực tế nếu sử dụng cho giai đoạn chế tạo tiếp theo.
 
 \paragraph{4.3.2.3. Kiểm thử nhiệt độ hoạt
 động}\label{4323-kiux1ec3m-thux1eed-nhiux1ec7t-ux111ux1ed9-houx1ea1t-ux111ux1ed9ng}
@@ -10978,11 +10958,11 @@ mét & ~3.8 mét \\\hline
 2 & Ngoài trời, trời u ám & ~3.5 mét & ~7.2
 mét & ~5.5 mét \\\hline
 3 & Trong phố (urban canyon) & ~5.8 mét &
-~15 mét (cần xác nhận thêm) & ~10 mét (cần
-xác nhận thêm) \\\hline
+~15 mét (đo bước đầu, cần xác nhận lại) & ~10 mét (đo bước đầu, cần
+xác nhận lại) \\\hline
 4 & Bãi đỗ xe có mái che & ~8.5 mét (ước tính ban đầu) &
-~20 mét (cần xác nhận thêm) & ~15 mét (cần
-xác nhận thêm) \\\hline
+~20 mét (đo bước đầu, cần xác nhận lại) & ~15 mét (đo bước đầu, cần
+xác nhận lại) \\\hline
 \end{longtable}
 }
 
@@ -11142,17 +11122,17 @@ chiếu mã nguồn triển khai.
 \paragraph{4.3.3.7. Đối chiếu luồng OTA đã triển
 khai}\label{4337-ux111ux1ed1i-chiux1ebfu-luux1ed3ng-ota-ux111uxe3-triux1ec3n-khai}
 
-Khác với phần kết nối lại được đánh giá bằng các phép đo định lượng, luồng
-OTA ở giai đoạn này được đối chiếu theo mã nguồn và kiểm tra tích hợp
-giữa API phía máy chủ, firmware và MQTT Bridge. Mục tiêu là xác nhận toàn bộ
-đường đi của lệnh cập nhật, trạng thái phản hồi và cơ chế lưu vết đã
-được nối thông.
+Khác với phần kết nối lại được đánh giá bằng các phép đo định lượng,
+luồng OTA ở giai đoạn này được đánh giá chủ yếu bằng đối chiếu mã nguồn
+triển khai và kiểm thử tích hợp theo kịch bản giữa API máy chủ, firmware
+và MQTT Bridge. Mục tiêu là xác nhận toàn bộ đường đi của lệnh cập nhật,
+trạng thái phản hồi và cơ chế lưu vết đã được nối thông.
 
 
 {\thesissettableid{4.25A}{tab-ch4-oi-chieu-luong-ota-theo-ma-nguon-trien-khai}
 \def\LTcaptype{table}
 \begin{longtable}{|L{0.224\linewidth}|L{0.580\linewidth}|L{0.160\linewidth}|}
-\caption{Đối chiếu luồng OTA theo mã nguồn triển khai}\label{tab:ch4-oi-chieu-luong-ota-theo-ma-nguon-trien-khai}\\
+\caption{Đối chiếu mức độ hoàn thiện luồng OTA theo mã nguồn và kiểm thử tích hợp}\label{tab:ch4-oi-chieu-luong-ota-theo-ma-nguon-trien-khai}\\
 \hline \textbf{Thành phần} & \textbf{Điểm kiểm tra} & \textbf{Kết quả} \\
 \\\hline
 \endfirsthead
@@ -11174,14 +11154,14 @@ Firmware & Đọc và hiểu đủ \texttt{jobId}, \texttt{version}, \texttt{url
 Firmware & Tải firmware qua HTTPS, kiểm tra SHA-256, đổi boot partition
 và xác nhận sau reboot & Đã hiện thực \\\hline
 Firmware & Hỗ trợ rollback thủ công về phân vùng trước đó & Đã hiện
-thá»±c \\\hline
+thực \\\hline
 MQTT Bridge & Kiểm tra gói dữ liệu OTA hợp lệ, cập nhật
 \texttt{firmware\_update\_log}, ghi VictoriaLogs & Đã hiện thực \\\hline
 \end{longtable}
 }
 
 
-\textbf{Nhận xét:} Luồng OTA cơ bản đã khép kín từ API phía máy chủ đến thiết bị
+\textbf{Nhận xét:} Luồng OTA cơ bản đã khép kín từ API máy chủ đến thiết bị
 và quay lại lớp giám sát. Ở phạm vi triển khai hiện nay, firmware phát
 các mốc quan trọng như \texttt{assigned}, \texttt{rebooting},
 \texttt{confirming}, \texttt{success}, \texttt{failed} hoặc
@@ -11196,10 +11176,10 @@ vẫn cần xem lớp máy chủ có tiếp nhận và phân phối dữ liệu 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \subsubsection{4.3.4. Kết quả kiểm thử hệ thống máy
-chá»§}\label{434-kux1ebft-quux1ea3-kiux1ec3m-thux1eed-hux1ec7-thux1ed1ng-cloud}
+chủ}\label{434-kux1ebft-quux1ea3-kiux1ec3m-thux1eed-hux1ec7-thux1ed1ng-cloud}
 
-\paragraph{4.3.4.1. Hiệu suất API phía máy
-chá»§}\label{4341-hiux1ec7u-suux1ea5t-api-backend}
+\paragraph{4.3.4.1. Hiệu suất API máy
+chủ}\label{4341-hiux1ec7u-suux1ea5t-api-backend}
 
 Hiệu suất API được đo bằng công cụ k6 với các kịch bản khác nhau. Mỗi
 điểm truy cập được gửi 1000 lượt yêu cầu và tính các chỉ số thống kê.
@@ -11208,11 +11188,11 @@ Hiệu suất API được đo bằng công cụ k6 với các kịch bản khá
 {\thesissettableid{4.26}{tab-ch4-ket-qua-o-hieu-suat-api-backend}
 \def\LTcaptype{table}
 \begin{longtable}{|L{0.060\linewidth}|L{0.147\linewidth}|L{0.107\linewidth}|L{0.166\linewidth}|L{0.071\linewidth}|L{0.076\linewidth}|L{0.076\linewidth}|L{0.205\linewidth}|}
-\caption{Kết quả đo hiệu suất API phía máy chủ}\label{tab:ch4-ket-qua-o-hieu-suat-api-backend}\\
+\caption{Kết quả đo hiệu suất API máy chủ}\label{tab:ch4-ket-qua-o-hieu-suat-api-backend}\\
 \hline \textbf{STT} & \textbf{Endpoint} & \textbf{Phương thức} & \textbf{Thời gian trung bình} & \textbf{P50} & \textbf{P95} & \textbf{P99} & \textbf{Số yêu cầu/giây} \\
 \\\hline
 \endfirsthead
-\caption[]{Kết quả đo hiệu suất API phía máy chủ (tiếp theo)}\\
+\caption[]{Kết quả đo hiệu suất API máy chủ (tiếp theo)}\\
 \hline \textbf{STT} & \textbf{Endpoint} & \textbf{Phương thức} & \textbf{Thời gian trung bình} & \textbf{P50} & \textbf{P95} & \textbf{P99} & \textbf{Số yêu cầu/giây} \\
 \\\hline
 \endhead
@@ -11251,17 +11231,18 @@ ms & 110 ms & 180 ms & ~750 \\\hline
 
 
 \textbf{Nhận xét:} Thời gian phản hồi API trung bình đạt
-~35--120 ms cho các thao tác CRUD, đạt mục tiêu thiết kế
+~35--120 ms cho các thao tác CRUD, đáp ứng mục tiêu thiết kế
 (\textless{} 200 ms cho P95). Endpoint POST /api/auth/login có thời gian
-cao hơn (~120 ms) do quá trình hash và xác thực password.
-Tổng thể, API phía máy chủ xây bằng Express.js + TypeScript + PostgreSQL đạt hiệu suất tốt
-cho quy mô triển khai mục tiêu (50--100 thiết bị đồng thời).
+cao hơn (~120 ms) do phải băm và xác thực mật khẩu.
+Tổng thể, API máy chủ xây dựng bằng Express.js + TypeScript + PostgreSQL
+đạt hiệu suất tốt cho quy mô triển khai mục tiêu (50--100 thiết bị đồng
+thời).
 
 \paragraph{4.3.4.2. Độ trễ WebSocket
 (Socket.IO)}\label{4342-ux111ux1ed9-trux1ec5-websocket-socketio}
 
-Độ trễ end-to-end của dữ liệu thời gian thực được đo từ lúc thiết bị
-publish MQTT đến khi giao diện web nhận được sự kiện cập nhật qua
+Độ trễ toàn tuyến của dữ liệu thời gian thực được đo từ lúc thiết bị
+phát bản tin MQTT đến khi giao diện web nhận được sự kiện cập nhật qua
 WebSocket (Socket.IO).
 
 
@@ -11282,15 +11263,15 @@ WebSocket (Socket.IO).
 1 & Thiết bị -\textgreater{} EMQX (gửi MQTT) & ~150 ms &
 ~300 ms & Qua mạng 4G \\\hline
 2 & EMQX -\textgreater{} MQTT Bridge (nhận bản tin) & ~5 ms &
-~15 ms & Ná»™i bá»™ Docker network \\\hline
+~15 ms & Mạng Docker nội bộ \\\hline
 3 & Bridge -\textgreater{} VictoriaMetrics (ghi dữ liệu) & ~10
 ms & ~30 ms & HTTP write API \\\hline
-4 & Bridge -\textgreater{} API phía máy chủ (sự kiện nội bộ) & ~5
-ms & ~12 ms & Internal HTTP/event \\\hline
-5 & API phía máy chủ -\textgreater{} Giao diện web (WebSocket) & ~15 ms
-& ~40 ms & Socket.IO emit \\\hline
-6 & \textbf{Tổng end-to-end} & \textbf{~185 ms} &
-\textbf{~400 ms} & \textbf{Thiết bị đến giao diện quản trị} \\\hline
+4 & Bridge -\textgreater{} API máy chủ (sự kiện nội bộ) & ~5
+ms & ~12 ms & HTTP nội bộ / sự kiện nội bộ \\\hline
+5 & API máy chủ -\textgreater{} Giao diện web (WebSocket) & ~15 ms
+& ~40 ms & Phát sự kiện bằng Socket.IO \\\hline
+6 & \textbf{Tổng toàn tuyến} & \textbf{~185 ms} &
+\textbf{~400 ms} & \textbf{Từ thiết bị đến giao diện quản trị} \\\hline
 \end{longtable}
 }
 
@@ -11300,20 +11281,20 @@ ms & ~12 ms & Internal HTTP/event \\\hline
 \begin{figure}[htbp]
 \centering
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-30.svg}}
-\caption{Đồ thị phân bố độ trễ end-to-end (1000 bản tin mẫu)}
+\caption{Đồ thị phân bố độ trễ toàn tuyến (1000 bản tin mẫu)}
 \label{fig:ch4-o-thi-phan-bo-o-tre-end-to-end-1000-ban-tin}
 \end{figure}
 }
 
 
-\textbf{Nhận xét:} Độ trễ end-to-end trung bình ~185 ms
+\textbf{Nhận xét:} Độ trễ toàn tuyến trung bình ~185 ms
 (P95 ~400 ms), thấp hơn nhiều so với mục tiêu thiết kế
 (\textless{} 3 giây). Phần lớn độ trễ tập trung ở đoạn truyền dữ liệu từ
 thiết bị lên EMQX qua mạng 4G (~150 ms). Các đoạn xử lý
-nội bộ (EMQX -\textgreater{} Bridge -\textgreater{} API phía máy chủ
+nội bộ (EMQX -\textgreater{} Bridge -\textgreater{} API máy chủ
 -\textgreater{} giao diện web) có độ trễ rất thấp (~35 ms
-tổng), nhờ sử dụng Docker network nội bộ và cách Socket.IO phát sự kiện
-ngay khi có dữ liệu mới.
+tổng), nhờ sử dụng mạng Docker nội bộ và cơ chế phát sự kiện của
+Socket.IO ngay khi có dữ liệu mới.
 
 \paragraph{4.3.4.3. Tốc độ ghi dữ liệu của cơ sở
 liệu}\label{4343-thuxf4ng-lux1b0ux1ee3ng-ghi-cux1a1-sux1edf-dux1eef-liux1ec7u}
@@ -11393,8 +11374,8 @@ Server} & \textbf{RAM Server} & \textbf{Mất bản tin} & \textbf{Độ trễ t
 4 & 100 & 5 & ~200 msg/s & ~30\% &
 ~2.5 GB & 0\% & ~220 ms \\\hline
 5 & 200 & 5 & ~400 msg/s & ~55\% &
-~3.5 GB & 0.1\% (ước tính ở tải biên) & ~350
-ms (ước tính ở tải biên) \\\hline
+~3.5 GB & 0.1\% (ước tính tại tải biên) & ~350
+ms (ước tính tại tải biên) \\\hline
 \end{longtable}
 }
 
@@ -11441,20 +11422,13 @@ giúp quan sát chi tiết cách trình duyệt hiển thị và xử lý giao d
 \\\hline
 \endfoot
 \endlastfoot
-1 & Điểm Lighthouse tổng hợp & 87/100 (đo trên bản dựng thử nghiệm)
-& \textgreater{} 85 & Đạt \\\hline
-2 & First Contentful Paint (FCP), tức thời gian thấy nội dung đầu tiên & ~1.2 giây (đo trên bản
-dựng thử nghiệm) & \textless{} 1.5 giây & Đạt \\\hline
-3 & Largest Contentful Paint (LCP), tức thời gian hiện khối nội dung lớn nhất & ~2.1 giây (đo trên
-bản dựng thử nghiệm) & \textless{} 2.5 giây & Đạt \\\hline
-4 & Total Blocking Time (TBT), tức thời gian trang bị chặn phản hồi & ~120 ms (đo trên bản dựng
-thử nghiệm) & \textless{} 200 ms & Đạt \\\hline
-5 & CLS, tức mức xê dịch bố cục khi trang đang tải & ~0.05 (đo trên bản
-dựng thử nghiệm) & \textless{} 0.1 & Đạt \\\hline
-6 & Time to Interactive (TTI), tức thời điểm trang phản hồi tốt với thao tác & ~2.5 giây (đo trên bản
-dựng thử nghiệm) & \textless{} 3.5 giây & Đạt \\\hline
-7 & Kích thước gói tải xuống đã nén & ~380 KB (đo trên bản dựng thử
-nghiệm) & \textless{} 500 KB & Đạt \\\hline
+1 & Điểm Lighthouse tổng hợp & 87/100 & \textgreater{} 85 & Đạt \\\hline
+2 & First Contentful Paint (FCP), tức thời gian thấy nội dung đầu tiên & ~1.2 giây & \textless{} 1.5 giây & Đạt \\\hline
+3 & Largest Contentful Paint (LCP), tức thời gian hiện khối nội dung lớn nhất & ~2.1 giây & \textless{} 2.5 giây & Đạt \\\hline
+4 & Total Blocking Time (TBT), tức thời gian trang bị chặn phản hồi & ~120 ms & \textless{} 200 ms & Đạt \\\hline
+5 & CLS, tức mức xê dịch bố cục khi trang đang tải & ~0.05 & \textless{} 0.1 & Đạt \\\hline
+6 & Time to Interactive (TTI), tức thời điểm trang phản hồi tốt với thao tác & ~2.5 giây & \textless{} 3.5 giây & Đạt \\\hline
+7 & Kích thước gói tải xuống đã nén & ~380 KB & \textless{} 500 KB & Đạt \\\hline
 \end{longtable}
 }
 
@@ -11471,21 +11445,19 @@ nghiệm) & \textless{} 500 KB & Đạt \\\hline
 
 
 \textbf{Nhận xét:} Giao diện web đạt điểm Lighthouse ~87/100, vượt mục
-tiêu thiết kế (\textgreater{} 85). Chỉ số First Contentful Paint khoảng
-1.2 giây cho thấy trang hiển thị nội dung đầu tiên khá nhanh. Các chỉ
-số Core Web Vitals, tức nhóm chỉ số Google dùng để đánh giá trải nghiệm
-tải và phản hồi của trang, đều đạt ngưỡng tốt. Việc sử dụng Next.js 15
-với React Server Components, tức cơ chế dựng sẵn một phần giao diện ở
-phía máy chủ, cùng kỹ thuật tách nhỏ mã nguồn khi tải giúp tối ưu kích
-thước gói tải xuống và thời gian mở trang.
+ tiêu thiết kế (\textgreater{} 85). Chỉ số First Contentful Paint khoảng
+1.2 giây cho thấy trang hiển thị nội dung đầu tiên khá nhanh. Các chỉ số
+Core Web Vitals đều đạt ngưỡng tốt. Các giá trị trong bảng được đo trên
+bản dựng thử nghiệm ở chế độ desktop. Việc sử dụng Next.js 15 với React
+Server Components cùng kỹ thuật tách nhỏ mã nguồn khi tải giúp tối ưu
+kích thước gói tải xuống và thời gian mở trang.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\subsubsection{4.3.5. Kiểm thử tích hợp toàn hệ thống (End-to-End
-Integration
-Test)}\label{435-kiux1ec3m-thux1eed-tuxedch-hux1ee3p-touxe0n-hux1ec7-thux1ed1ng-end-to-end-integration-test}
+\subsubsection{4.3.5. Kiểm thử tích hợp toàn hệ thống (kiểm thử toàn
+ tuyến)}\label{435-kiux1ec3m-thux1eed-tuxedch-hux1ee3p-touxe0n-hux1ec7-thux1ed1ng-end-to-end-integration-test}
 
-Mục này trình bày kết quả kiểm thử luồng dữ liệu end-to-end, từ thiết bị
+Mục này trình bày kết quả kiểm thử luồng dữ liệu toàn tuyến, từ thiết bị
 phần cứng đến giao diện người dùng cuối, xác nhận tất cả các tầng hệ
 thống hoạt động đồng bộ và chính xác.
 
@@ -11495,7 +11467,7 @@ Flow)}\label{4351-luux1ed3ng-dux1eef-liux1ec7u-chuxednh-main-data-flow}
 \textbf{Kịch bản kiểm thử:} Xe bật máy (IGN ON) -\textgreater{} Thiết bị
 bắt đầu thu thập dữ liệu OBD2 và GPS -\textgreater{} Dữ liệu được
 gửi lên MQTT -\textgreater{} Bridge xử lý và lưu trữ -\textgreater{}
-API phía máy chủ phát sự kiện WebSocket -\textgreater{} giao diện web cập nhật bản đồ
+API máy chủ phát sự kiện WebSocket -\textgreater{} giao diện web cập nhật bản đồ
 và biểu đồ.
 
 
@@ -11527,11 +11499,11 @@ công & ~0.5 giây \\\hline
 ~0.01 giây \\\hline
 7 & Ghi cơ sở dữ liệu & Ghi VictoriaMetrics + PostgreSQL & Thành công &
 ~0.02 giây \\\hline
-8 & Đẩy WebSocket & API phía máy chủ phát sự kiện đến giao diện web & Thành công &
+8 & Đẩy WebSocket & API máy chủ phát sự kiện đến giao diện web & Thành công &
 ~0.02 giây \\\hline
 9 & Cập nhật UI & Bản đồ và biểu đồ cập nhật & Thành công &
 ~0.05 giây \\\hline
-& \textbf{Tổng thời gian end-to-end} & \textbf{Từ dữ liệu cảm biến đến
+& \textbf{Tổng thời gian toàn tuyến} & \textbf{Từ dữ liệu cảm biến đến
 hiển thị} & \textbf{Thành công} & \textbf{~1--2 giây} \\\hline
 \end{longtable}
 }
@@ -11542,7 +11514,7 @@ hiển thị} & \textbf{Thành công} & \textbf{~1--2 giây} \\\hline
 \begin{figure}[htbp]
 \centering
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-33.svg}}
-\caption{Minh họa giao diện Dashboard hiển thị vị trí xe đang di chuyển trên bản đồ Leaflet}
+\caption{Minh họa giao diện trang tổng quan hiển thị vị trí xe đang di chuyển trên bản đồ Leaflet}
 \label{fig:ch4-screenshot-giao-dien-dashboard-hien-thi-vi-tri-xe-ang-di-chuyen}
 \end{figure}
 }
@@ -11608,7 +11580,7 @@ tự động đóng & ~3 giây & Reset tự động \\\hline
 \textbf{Nhận xét:} Hệ thống phát hiện xe vượt ra khỏi vùng cho phép
 trong vòng ~5 giây (phụ thuộc chu kỳ gửi GPS, mặc định 5
 giây). Cảnh báo được hiển thị trên giao diện web trong vòng ~1
-giây sau khi API phía máy chủ tạo cảnh báo. Tổng thời gian từ xe vượt ranh giới đến
+giây sau khi API máy chủ tạo cảnh báo. Tổng thời gian từ xe vượt ranh giới đến
 hiển thị cảnh báo là khoảng 5--7 giây, đạt yêu cầu thiết kế (\textless{}
 10 giây).
 
@@ -11652,7 +11624,7 @@ nhật trạng thái.
 \begin{figure}[htbp]
 \centering
 \pandocbounded{\safeincludesvg{./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-36.svg}}
-\caption{Minh họa luồng gửi lệnh điều khiển từ Dashboard và phản hồi từ thiết bị}
+\caption{Minh họa luồng gửi lệnh điều khiển từ trang tổng quan và phản hồi từ thiết bị}
 \label{fig:ch4-screenshot-giao-dien-gui-lenh-ieu-khien-tu-dashboard-va-ket-qua}
 \end{figure}
 }
@@ -11759,7 +11731,7 @@ chú} \\
 ~180--220 mA (TB); ~350 mA khi truyền liên
 tục & Đạt ở mức trung bình & Xem ghi chú (*) \\\hline
 3 & Thời lượng pin dự phòng (theo dõi liên tục) & \textgreater= 2.5 giờ &
-~2.6--3.0 giờ (quy đổi theo bộ pin tham chiếu 18650) & Đạt theo quy
+~2.6--3.0 giờ (quy đổi thiết kế theo bộ pin tham chiếu 18650) & Đạt theo quy
 đổi & Cần đo lại trên mẫu pin 18650 \\\hline
 4 & Nhiệt độ hoạt động & -10°C đến +60°C & -10°C đến +60°C & Đạt &
 Module 4G hạn chế ở 70°C \\\hline
@@ -11917,7 +11889,7 @@ tích hợp SIM7600CE-T) & Đạt \\\hline
 2 & Chu kỳ cập nhật dữ liệu & \textless= 10 giây & 5 giây (cấu hình
 được) & Đạt \\\hline
 3 & Thời lượng pin dự phòng & \textgreater= 2.5 giờ &
-~2.6--3.0 giờ (quy đổi theo bộ pin tham chiếu 18650) & Đạt theo quy
+~2.6--3.0 giờ (quy đổi thiết kế theo bộ pin tham chiếu 18650) & Đạt theo quy
 đổi \\\hline
 4 & Độ trễ toàn tuyến & \textless{} 3 giây & ~1--2 giây &
 Đạt \\\hline
@@ -11949,11 +11921,11 @@ tiếp tục gửi dữ liệu vận hành & Đạt \\\hline
 
 \textbf{Tổng kết:} Hệ thống đã đáp ứng phần lớn các chỉ tiêu cốt lõi của
 cấu hình đang triển khai, nổi bật ở các tiêu chí GPS, độ trễ toàn tuyến,
-khả năng xử lý đồng thời, theo dõi vùng cho phép, cảnh báo bất thường và tự kết nối lại
-MQTT. Những điểm cần tiếp tục tối ưu chủ yếu nằm ở dòng tiêu thụ khi
-phát 4G liên tục, ngưỡng hiệu chuẩn LVD profile 12V và hạng mục phát lại
-dữ liệu vận hành từ flash nếu muốn bảo toàn đầy đủ dữ liệu trong các khoảng mất
-sóng kéo dài.
+khả năng xử lý đồng thời, theo dõi vùng cho phép, cảnh báo bất thường và
+khả năng tự kết nối lại MQTT. Những điểm cần tiếp tục tối ưu chủ yếu nằm
+ở dòng tiêu thụ khi phát 4G liên tục, ngưỡng hiệu chuẩn LVD profile 12V
+và cơ chế phát lại dữ liệu vận hành từ bộ nhớ cục bộ microSD nếu mục
+tiêu là tăng mức độ bảo toàn dữ liệu trong các khoảng mất sóng kéo dài.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -11979,7 +11951,7 @@ tra khả năng hoạt động liên tục và xử lý các sự cố nền.
 \\\hline
 \endfoot
 \endlastfoot
-1 & Tỷ lệ sẵn sàng của API phía máy chủ (7 ngày) & 99.6\% & Đạt, phù hợp môi trường
+1 & Tỷ lệ sẵn sàng của API máy chủ (7 ngày) & 99.6\% & Đạt, phù hợp môi trường
 triển khai hiện tại \\\hline
 2 & Tỷ lệ tự kết nối lại MQTT sau mất mạng ngắn & \textgreater{} 98\% & Đạt,
 phục hồi tự động ổn định \\\hline
@@ -12082,12 +12054,12 @@ chuyển nguồn dự phòng được chuẩn hóa theo hai profile riêng cho h
 \(Switch_{\mathrm{ON}} = 24.4\,\mathrm{V}\),
 \(IGN_{\mathrm{ON}} \ge 26.0\,\mathrm{V}\),
 \(IGN_{\mathrm{OFF}} \le 24.0\,\mathrm{V}\)). Trên thiết bị hiện tại, dòng deep
-sleep toàn hệ thống xấp xỉ 500 µA; nếu quy đổi cùng giả định tiêu thụ
-sang pin dự phòng tham chiếu 18650 1S (3500mAh), thời lượng dự phòng
-tương ứng vào khoảng 24--36 giờ ở kịch bản cảnh báo gián đoạn và khoảng
-2.6--3.0 giờ ở chế độ theo dõi liên tục khi xe chạy. Kết quả này cho
-thấy thiết bị đã đạt điều kiện tối thiểu để theo dõi liên tục mà không
-gây áp lực quá lớn lên nguồn điện của xe.
+sleep toàn hệ thống xấp xỉ 500 µA; nếu quy đổi theo cùng giả định tiêu
+thụ sang bộ pin dự phòng tham chiếu 18650 1S (3500mAh), thời lượng dự
+phòng tương ứng vào khoảng 24--36 giờ ở kịch bản cảnh báo gián đoạn và
+khoảng 2.6--3.0 giờ ở chế độ theo dõi liên tục khi xe chạy. Kết quả quy
+đổi này cho thấy thiết bị đã đạt điều kiện tối thiểu để theo dõi liên tục
+mà không gây áp lực quá lớn lên nguồn điện của xe.
 
 
 {\thesissettableid{5.1}{tab-ch5-anh-gia-hieu-nang-quan-ly-nang-luong}
@@ -12112,7 +12084,7 @@ Dòng tiêu thụ khi xe đang chạy & \textless{} 250 mA (trung bình) &
 ~180--220 mA trung bình; ~350 mA khi truyền
 liên tục & Đạt trung bình \\\hline
 Thời gian hoạt động pin dự phòng (chế độ cảnh báo) & \textgreater= 24 giờ
-(mục tiêu với bộ pin tham chiếu 18650) & ~24--36 giờ (quy đổi theo
+(mục tiêu với bộ pin tham chiếu 18650) & ~24--36 giờ (quy đổi thiết kế theo
 bộ pin tham chiếu 18650, cần đo lại) & Đạt theo quy đổi tối thiểu \\\hline
 Hiệu suất mạch hạ áp buck converter & \textgreater{} 85\% & 90--93\% & Tốt \\\hline
 Ngưỡng LVD & Profile 12V: \(12.0\,\mathrm{V}\); Profile 24V: \(24.0\,\mathrm{V}\) &
@@ -12241,7 +12213,7 @@ dịch vụ riêng lẻ mà còn qua khả năng phối hợp giữa chúng đ�
 liệu đi từ thiết bị đến giao diện quản trị đủ nhanh và ổn định. Trên cơ sở đó,
 từng thành phần được xem xét như sau:
 
-\textbf{Dịch vụ API phía máy chủ (Tracking\_Backend):}
+\textbf{Dịch vụ API máy chủ (Tracking\_Backend):}
 
 Dịch vụ API là nơi tiếp nhận yêu cầu từ giao diện quản trị và trả về dữ
 liệu cho người dùng. Trong điều kiện thử nghiệm với 50--100 thiết bị gửi
@@ -12268,11 +12240,11 @@ chính.
 
 WebSocket là kênh cho phép máy chủ chủ động gửi dữ liệu mới lên giao
 diện thay vì bắt trình duyệt phải hỏi liên tục. Kết nối WebSocket thông
-qua Socket.IO giữa API phía máy chủ và giao diện web giúp vị trí xe được cập nhật gần
+qua Socket.IO giữa API máy chủ và giao diện web giúp vị trí xe được cập nhật gần
 như theo thời gian thực, với độ trễ dưới 2 giây tính từ lúc thiết bị gửi
 dữ liệu đến khi điểm xe xuất hiện trên bản đồ. Phần độ trễ này bao gồm
 thời gian truyền qua 4G, thời gian trung chuyển tại EMQX, thời gian xử
-lý ở API phía máy chủ và thời gian giao diện vẽ lại dữ liệu; phần còn lại là độ
+lý ở API máy chủ và thời gian giao diện vẽ lại dữ liệu; phần còn lại là độ
 trễ mạng giữa các thành phần.
 
 \textbf{Cơ sở dữ liệu:}
@@ -12321,9 +12293,9 @@ theo cách trực quan, phóng to hoặc kéo xem mượt mà.
 \\\hline
 \endfoot
 \endlastfoot
-API phía máy chủ & Thời gian phản hồi trung bình & 20--80 ms (đơn giản),
+API máy chủ & Thời gian phản hồi trung bình & 20--80 ms (đơn giản),
 100--300 ms (phức tạp) & Tốt \\\hline
-API phía máy chủ & Số yêu cầu xử lý cùng lúc & 100--500 yêu cầu/giây & Đạt yêu cầu \\\hline
+API máy chủ & Số yêu cầu xử lý cùng lúc & 100--500 yêu cầu/giây & Đạt yêu cầu \\\hline
 MQTT Broker & Độ trễ xử lý bản tin & \textless{} 50 ms & Tốt \\\hline
 WebSocket & Độ trễ từ thiết bị đến màn hình & \textless{} 2 giây & Đạt yêu cầu \\\hline
 Giao diện web & Thời gian hiện nội dung đầu tiên & \textless{} 2 giây & Tốt \\\hline
@@ -12399,7 +12371,7 @@ chi phí rõ rệt của hệ thống đề xuất:
 \endfirsthead
 \caption[]{So sánh chi phí với giải pháp thương mại (tiếp theo)}\\
 \hline \textbf{Giải pháp} & \textbf{Chi phí thiết bị} & \textbf{Phí dịch vụ hàng tháng} & \textbf{Tổng chi phí năm
-đầu} & \textbf{Khả năng tùy biến} \\
+đầu (ước tính)} & \textbf{Khả năng tùy biến} \\
 \\\hline
 \endhead
 \\\hline
@@ -12658,11 +12630,12 @@ thuê. Hệ thống đã có nhiều cơ chế bảo vệ: ngưỡng LVD profile
 \(OFF = 24.0\,\mathrm{V}\)/\(ON = 24.4\,\mathrm{V}\); cơ chế chuyển
 nguồn có hysteresis; chế độ deep sleep của thiết bị hiện tại ở mức xấp
 xỉ 500 μA; và pin dự phòng 18650 1S cho phép hoạt động độc lập khi mạch
-LVD ngắt nguồn từ ắc quy. Với bộ pin tham chiếu 18650, thời lượng dự phòng
-vẫn đủ cho cảnh báo gián đoạn ngắn hạn, nhưng các giá trị quy đổi cho vận hành liên
-tục cần được hiểu là quy đổi thiết kế và nên được đo lại nếu triển khai
-phần cứng theo đúng cell mới. Tuy nhiên, ngưỡng LVD profile 12V vẫn cần
-được hiệu chuẩn thêm để bám sát đúng giá trị thiết kế.
+LVD ngắt nguồn từ ắc quy. Với bộ pin tham chiếu 18650, thời lượng dự
+phòng vẫn đủ cho cảnh báo gián đoạn ngắn hạn; tuy nhiên, các giá trị
+quy đổi cho vận hành liên tục cần được hiểu là quy đổi thiết kế và nên
+được đo lại nếu triển khai phần cứng theo đúng cell mới. Ngưỡng LVD
+profile 12V vì vậy vẫn cần được hiệu chuẩn thêm để bám sát giá trị thiết
+kế.
 
 \subsubsection{5.3.3. Tổng hợp mức độ rủi
 ro}\label{533-tux1ed5ng-hux1ee3p-mux1ee9c-ux111ux1ed9-rux1ee7i-ro}
@@ -13020,7 +12993,7 @@ toàn hay không. Điểm quan trọng nhóm rút ra là: trong hệ thống IoT
 ``truyền được'' chưa đủ; còn phải biết khi nào ưu tiên tốc độ, khi nào
 ưu tiên độ tin cậy và khi nào cần giữ kết nối hai chiều. Vì vậy, nhóm
 kiến thức này xuất hiện xuyên suốt từ thiết bị, hệ thống máy chủ đến giao diện thời
-gian thá»±c:
+gian thực:
 
 \begin{itemize}
 \tightlist
@@ -13184,7 +13157,7 @@ chức hay không:
   code giúp quá trình phát triển có tổ chức hơn.
 \item
   \textbf{Docker và cách đóng gói dịch vụ thành container}: Kiến thức về
-  container hóa được dùng để đóng gói từng dịch vụ như API phía máy chủ,
+  container hóa được dùng để đóng gói từng dịch vụ như API máy chủ,
   giao diện web, broker MQTT hay cơ sở
   dữ liệu theo cùng một cách, nhờ đó môi trường phát triển và triển khai
   ít bị lệch nhau hơn.
@@ -13397,7 +13370,7 @@ mạch, bảo vệ ắc quy và khả năng giám sát từ xa. Nếu bỏ sót 
 Khi thiết bị đã đứng vững về nguồn, bài toán còn lại là làm sao lớp máy
 chủ không trở thành điểm nghẽn mới khi số thiết bị và người dùng cùng
 tăng. Phần tiếp theo vì thế chuyển sang kiến trúc máy chủ có khả năng mở
-rá»™ng.
+rộng.
 
 \subsubsection{6.2.4. Vấn đề 4: Kiến trúc đám mây có khả năng mở rộng
 cho
@@ -13451,7 +13424,7 @@ nhiều người dùng, và đảm bảo bảo mật:
   việc thu hồi. Ở giai đoạn sau có thể bổ sung Redis cache để giảm tải
   truy vấn xác thực.
 \item
-  \emph{Triển khai tách từng dịch vụ}: Mỗi dịch vụ như API phía máy chủ,
+  \emph{Triển khai tách từng dịch vụ}: Mỗi dịch vụ như API máy chủ,
   giao diện web, MQTT Bridge hay cơ sở dữ liệu đều có cấu hình triển khai
   riêng, nhưng vẫn nằm trong cùng một mạng nội bộ để giao tiếp với nhau.
   Cách tách này giúp mở rộng từng phần theo đúng nhu cầu thay vì phải
@@ -13572,11 +13545,12 @@ mặt tích cực mà hệ thống mang lại cho doanh nghiệp và xã hội. 
 theo vì thế chuyển sang tác động xã hội tích cực.
 
 \subsubsection{6.3.3. Tác động xã hội tích
-cá»±c}\label{633-tuxe1c-ux111ux1ed9ng-xuxe3-hux1ed9i-tuxedch-cux1ef1c}
+cực}\label{633-tuxe1c-ux111ux1ed9ng-xuxe3-hux1ed9i-tuxedch-cux1ef1c}
 
 Ở chiều ngược lại, nếu được triển khai đúng cách, hệ thống IoT giám sát
-phương tiện cũng có thể tạo ra những giá trị xã hội rõ ràng chứ không
-chỉ là công cụ kiểm soát. Một số tác động tích cực có thể nhận thấy gồm:
+phương tiện có thể tạo ra những giá trị xã hội rõ ràng, chứ không chỉ
+đơn thuần là một công cụ kiểm soát. Một số tác động tích cực có thể nhận
+thấy gồm:
 
 \textbf{Hỗ trợ doanh nghiệp nhỏ và vừa:}
 
@@ -13633,7 +13607,7 @@ xét}\label{634-nhux1eefng-lo-ngux1ea1i-cux1ea7n-xem-xuxe9t}
   thuê.
 \item
   \textbf{Phụ thuộc công nghệ}: Hệ thống cần có cơ chế dự phòng
-  (fallback) khi mất kết nối hoặc thiết bị hỏng, không để việc mất kết
+  khi mất kết nối hoặc thiết bị hỏng, không để việc mất kết
   nối làm ảnh hưởng đến hoạt động bình thường của xe.
 \item
   \textbf{Trách nhiệm dữ liệu}: Doanh nghiệp sử dụng hệ thống có trách
@@ -13704,7 +13678,7 @@ Firmware & C/C++ trên ESP32-S3, bộ điều phối công việc nền & Phải
 nhớ ổn định, canh thời gian chính xác và tránh xung đột truy cập \\\hline
 Backend & TypeScript, dịch vụ API & Phải tổ chức dữ liệu lớn, giữ phản
 hồi ổn định và bảo vệ truy cập \\\hline
-Frontend & TypeScript, dashboard web & Phải giữ giao diện dễ dùng, cập
+Frontend & TypeScript, giao diện web tổng quan & Phải giữ giao diện dễ dùng, cập
 nhật dữ liệu mới liên tục mà không giật lag \\\hline
 \end{longtable}
 }
@@ -13767,7 +13741,7 @@ dựa vào niềm tin rằng các thành phần trưởng thành sẽ tự ghép
 nhau.
 
 \subsubsection{6.4.4. Kiểm thử ở mọi tầng là bắt
-buá»™c}\label{644-kiux1ec3m-thux1eed-ux1edf-mux1ecdi-tux1ea7ng-luxe0-bux1eaft-buux1ed9c}
+buộc}\label{644-kiux1ec3m-thux1eed-ux1edf-mux1ecdi-tux1ea7ng-luxe0-bux1eaft-buux1ed9c}
 
 Dự án cho thấy kiểm thử ở mọi tầng của hệ thống là yêu cầu bắt buộc.
 Trong một hệ thống nhiều lớp, rất ít lỗi tự lộ ra đúng tại nơi chúng
@@ -13777,16 +13751,16 @@ theo toàn bộ hành trình dữ liệu:
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Kiểm thử đơn vị (unit test)}: dùng để kiểm tra các hàm nhỏ và
+  \textbf{Kiểm thử đơn vị}: dùng để kiểm tra các hàm nhỏ và
   các quy tắc xử lý dữ liệu, ví dụ phân tích bản tin OBD2 hoặc tính toán
   năng lượng trong firmware và dịch vụ máy chủ.
 \item
-  \textbf{Kiểm thử tích hợp (integration test)}: dùng để kiểm tra cách
+  \textbf{Kiểm thử tích hợp}: dùng để kiểm tra cách
   các dịch vụ nói chuyện với nhau, ví dụ MQTT Bridge nhận dữ liệu từ
-  EMQX rồi ghi vào VictoriaMetrics, API phía máy chủ đọc/ghi PostgreSQL, hay
+  EMQX rồi ghi vào VictoriaMetrics, API máy chủ đọc/ghi PostgreSQL, hay
   luồng phát lại dữ liệu đã lưu từ microSD về đúng kênh MQTT.
 \item
-  \textbf{Kiểm thử đầu-cuối (end-to-end)}: mô phỏng toàn bộ hành trình
+  \textbf{Kiểm thử đầu-cuối}: mô phỏng toàn bộ hành trình
   dữ liệu từ thiết bị giả lập đến giao diện web để kiểm tra người dùng
   thực sự nhìn thấy gì trên màn hình giám sát, kể cả trong kịch bản mất mạng rồi
   phục hồi để xác nhận dữ liệu phát lại.
@@ -14185,7 +14159,7 @@ tiền (VND)} & \textbf{Ghi chú} \\
 \endlastfoot
 1 & Vi điều khiển & ESP32-S3-WROOM-1 (N16R8) & 1 & 95.000 & 95.000 &
 MCU chính, 16MB Flash, 8MB PSRAM \\\hline
-2 & LTE + GNSS & \nolinkurl{SIM7600CE-T} & 1 bá»™ & 650.000 & 650.000 & Modem
+2 & LTE + GNSS & \nolinkurl{SIM7600CE-T} & 1 bộ & 650.000 & 650.000 & Modem
 LTE Cat-4 tích hợp GPS/GNSS \\\hline
 3 & OBD2 Adapter & vgate iCar Pro BLE & 1 & 367.000 & 367.000 &
 Bluetooth Low Energy OBD2 \\\hline
@@ -14228,18 +14202,18 @@ Dây kết nối nội bộ \\\hline
 }
 
 
-\subsection{1.2. Chi phí hạ tầng cloud (ước tính hàng
+\subsection{1.2. Chi phí hạ tầng đám mây (ước tính hàng
 tháng)}\label{12-chi-phuxed-hux1ea1-tux1ea7ng-cloud-ux1b0ux1edbc-tuxednh-huxe0ng-thuxe1ng}
 
 
 {\thesissettableid{PL-1.2}{tab-app1-chi-phi-ha-tang-cloud}
 \def\LTcaptype{table}
 \begin{longtable}{|L{0.085\linewidth}|L{0.222\linewidth}|L{0.187\linewidth}|L{0.226\linewidth}|L{0.225\linewidth}|}
-\caption{Chi phí hạ tầng cloud}\label{tab:app1-chi-phi-ha-tang-cloud}\\
+\caption{Chi phí hạ tầng đám mây}\label{tab:app1-chi-phi-ha-tang-cloud}\\
 \hline \textbf{STT} & \textbf{Hạng mục} & \textbf{Thông số} & \textbf{Chi phí hàng tháng (VND)} & \textbf{Ghi chú} \\
 \\\hline
 \endfirsthead
-\caption[]{Chi phí hạ tầng cloud (tiếp theo)}\\
+\caption[]{Chi phí hạ tầng đám mây (tiếp theo)}\\
 \hline \textbf{STT} & \textbf{Hạng mục} & \textbf{Thông số} & \textbf{Chi phí hàng tháng (VND)} & \textbf{Ghi chú} \\
 \\\hline
 \endhead
@@ -14277,7 +14251,7 @@ DigitalOcean / Vultr / Viettel IDC \\\hline
 \endlastfoot
 Phần cứng (1 bộ thiết bị theo dõi) & 1.514.000 & Theo BOM ở bảng PL-1.1 \\\hline
 Phần mềm (licenses) & 0 & Toàn bộ mã nguồn mở \\\hline
-Hạ tầng cloud (3 tháng dev + 3 tháng test) & 2.370.000--3.570.000 & 6
+Hạ tầng đám mây (3 tháng phát triển + 3 tháng kiểm thử) & 2.370.000--3.570.000 & 6
 tháng x chi phí hàng tháng \\\hline
 SIM 4G (6 tháng) & 420.000 & 70.000 x 6 tháng \\\hline
 Công cụ phát triển (khác) & 200.000 & USB-UART, mỏ hàn, dây đo \\\hline
@@ -14539,7 +14513,7 @@ Dự án được triển khai theo 7 giai đoạn chính, với tổng thời g
 Sơ đồ mạch, BOM, bố trí PCB \\\hline
 \textbf{GĐ2} & Phát triển firmware & Tuần 3--10 (8 tuần) & Firmware
 ESP-IDF hoàn chỉnh \\\hline
-\textbf{GĐ3} & Xây dựng hạ tầng cloud & Tuần 5--8 (4 tuần) & Docker
+\textbf{GĐ3} & Xây dựng hạ tầng đám mây & Tuần 5--8 (4 tuần) & Docker
 infrastructure, EMQX, databases \\\hline
 \textbf{GĐ4} & Phát triển backend API & Tuần 7--14 (8 tuần) & REST API,
 MQTT Bridge, WebSocket \\\hline
@@ -14553,8 +14527,8 @@ tích hợp, báo cáo kiểm thử \\\hline
 }
 
 
-\textbf{Ghi chú:} Các giai đoạn có sự chồng chéo (overlap) có chủ đích
-để tối ưu hóa thời gian. Ví dụ, GĐ3 (hạ tầng cloud) bắt đầu trước khi
+\textbf{Ghi chú:} Các giai đoạn có sự chồng chéo có chủ đích
+để tối ưu hóa thời gian. Ví dụ, GĐ3 (hạ tầng đám mây) bắt đầu trước khi
 GĐ2 (firmware) hoàn thành để có môi trường test sớm.
 
 \subsection{3.2. Kế hoạch thực hiện dự án theo giai đoạn}\label{32-kux1ebf-houx1ea1ch-thux1ef1c-hiux1ec7n-dux1ef1-uxe1n-theo-giai-ux111oux1ea1n}
@@ -14583,11 +14557,11 @@ dưới đây, thể hiện
 {\thesissettableid{3.3A}{tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham}
 \def\LTcaptype{table}
 \begin{longtable}{|L{0.160\linewidth}|L{0.366\linewidth}|L{0.439\linewidth}|}
-\caption{Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}\label{tab:ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham}\\
+\caption{Kế hoạch công việc và sản phẩm đầu ra của giai đoạn 1}\label{tab:ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham}\\
 \hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \\\hline
 \endfirsthead
-\caption[]{Tổng hợp thông tin về Tuần, Công việc, Sản phẩm (tiếp theo)}\\
+\caption[]{Kế hoạch công việc và sản phẩm đầu ra của giai đoạn 1 (tiếp theo)}\\
 \hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \\\hline
 \endhead
@@ -14608,11 +14582,11 @@ dưới đây, thể hiện
 {\thesissettableid{3.3B}{tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-ca9bd3}
 \def\LTcaptype{table}
 \begin{longtable}{|L{0.160\linewidth}|L{0.462\linewidth}|L{0.342\linewidth}|}
-\caption{Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}\label{tab:ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-ca9bd3}\\
+\caption{Kế hoạch công việc và sản phẩm đầu ra của giai đoạn 2}\label{tab:ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-ca9bd3}\\
 \hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \\\hline
 \endfirsthead
-\caption[]{Tổng hợp thông tin về Tuần, Công việc, Sản phẩm (tiếp theo)}\\
+\caption[]{Kế hoạch công việc và sản phẩm đầu ra của giai đoạn 2 (tiếp theo)}\\
 \hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \\\hline
 \endhead
@@ -14627,17 +14601,17 @@ dưới đây, thể hiện
 }
 
 
-\textbf{Giai đoạn 3 --- Hạ tầng cloud (Tuần 5--8):}
+\textbf{Giai đoạn 3 --- Hạ tầng đám mây (Tuần 5--8):}
 
 
 {\thesissettableid{3.3C}{tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-b7165b}
 \def\LTcaptype{table}
 \begin{longtable}{|L{0.160\linewidth}|L{0.474\linewidth}|L{0.330\linewidth}|}
-\caption{Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}\label{tab:ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-b7165b}\\
+\caption{Kế hoạch công việc và sản phẩm đầu ra của giai đoạn 3}\label{tab:ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-b7165b}\\
 \hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \\\hline
 \endfirsthead
-\caption[]{Tổng hợp thông tin về Tuần, Công việc, Sản phẩm (tiếp theo)}\\
+\caption[]{Kế hoạch công việc và sản phẩm đầu ra của giai đoạn 3 (tiếp theo)}\\
 \hline \textbf{Tuần} & \textbf{Công việc} & \textbf{Sản phẩm} \\
 \\\hline
 \endhead
@@ -14652,7 +14626,7 @@ dưới đây, thể hiện
 }
 
 
-\textbf{Giai đoạn 4 --- API phía máy chủ (Tuần 7--14):}
+\textbf{Giai đoạn 4 --- API máy chủ (Tuần 7--14):}
 
 
 {\thesissettableid{3.3D}{tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-b63b40}
@@ -14719,7 +14693,7 @@ dưới đây, thể hiện
 \\\hline
 \endfoot
 \endlastfoot
-17--18 & Tích hợp firmware - cloud & Hệ thống end-to-end \\\hline
+17--18 & Tích hợp firmware - hạ tầng máy chủ & Hệ thống toàn tuyến \\\hline
 19--20 & Kiểm thử chức năng, hiệu năng & Báo cáo kiểm thử \\\hline
 21--22 & Sửa lỗi, tối ưu, triển khai thử nghiệm & Hệ thống ổn định \\\hline
 \end{longtable}
@@ -14767,10 +14741,10 @@ trữ trên GitHub:
   thống.
 \end{itemize}
 
-\subsection{4.2. Tham chiếu cơ sở dữ liệu (Database
-Schema)}\label{42-tham-chiux1ebfu-cux1a1-sux1edf-dux1eef-liux1ec7u-database-schema}
+\subsection{4.2. Tham chiếu cơ sở dữ liệu (Lược đồ cơ
+sở dữ liệu)}\label{42-tham-chiux1ebfu-cux1a1-sux1edf-dux1eef-liux1ec7u-database-schema}
 
-Schema PostgreSQL đầy đủ được lưu tại các tệp SQL khởi tạo trong dịch vụ
+Lược đồ PostgreSQL đầy đủ được lưu tại các tệp SQL khởi tạo trong dịch vụ
 PostgreSQL; phần phụ lục này chỉ tóm tắt các bảng chính phục vụ luận
 văn.
 
@@ -15040,7 +15014,7 @@ npm & 10.x \\\hline
 \endfoot
 \endlastfoot
 Giao diện web & \nolinkurl{https://thingdock.dev} & Tài khoản quản trị được cấu hình riêng khi triển khai \\\hline
-API phía máy chủ & \nolinkurl{https://api.thingdock.dev} & --- \\\hline
+API máy chủ & \nolinkurl{https://api.thingdock.dev} & --- \\\hline
 Tài liệu API (Swagger) & \nolinkurl{https://api.thingdock.dev/api-docs} & --- \\\hline
 Kênh MQTT qua WebSocket & \nolinkurl{wss://mqtt.thingdock.dev} & --- \\\hline
 broker MQTT qua TLS & \nolinkurl{mqtts://mqtts.thingdock.dev:8883} & Theo tài khoản MQTT của thiết bị \\\hline
@@ -15059,7 +15033,6 @@ tên miền phụ riêng ở giai đoạn sau.
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \end{document}
-
 
 
 

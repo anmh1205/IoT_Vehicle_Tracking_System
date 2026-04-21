@@ -11,9 +11,9 @@ const SummaryItem = ({
   label: string;
   value: string | number;
 }) => (
-  <div className="rounded-xl border bg-background/80 px-3 py-2">
-    <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
-    <p className="mt-1 text-base font-semibold">{value}</p>
+  <div className="rounded-lg border bg-background/80 px-2.5 py-2">
+    <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+    <p className="mt-1 text-sm font-semibold">{value}</p>
   </div>
 );
 
@@ -34,22 +34,17 @@ export const MapDeviceSummary = ({
       )}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <p className="text-sm font-semibold">Tổng quan đội xe hiển thị</p>
-          <p className="text-xs text-muted-foreground">
-            Danh sách đang ưu tiên xe lỗi, mất kết nối và mốc cập nhật mới nhất.
-          </p>
-        </div>
+        <p className="text-sm font-semibold">Tổng quan thiết bị</p>
         <Badge variant={hiddenCount > 0 ? 'outline' : 'secondary'}>
-          {stats.visible}/{stats.total} thiết bị
+          {stats.visible}/{stats.total}
         </Badge>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <SummaryItem label="Đang chạy" value={stats.running} />
         <SummaryItem label="Cần chú ý" value={stats.attention} />
-        <SummaryItem label="Có tọa độ" value={stats.withCoordinates} />
-        <SummaryItem label="Đang lọc ẩn" value={hiddenCount} />
+        <SummaryItem label="Đủ tọa độ" value={stats.withCoordinates} />
+        <SummaryItem label="Đang ẩn" value={hiddenCount} />
       </div>
     </div>
   );

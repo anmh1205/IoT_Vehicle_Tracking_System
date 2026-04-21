@@ -17,99 +17,99 @@
 \contentsline {table}{\numberline {3.4}{\ignorespaces Thông số kỹ thuật phương án SIM7600CE-T}}{44}{table.tab-ch3-thong-so-ky-thuat-phuong-an-sim7600ce-t}%
 \contentsline {table}{\numberline {3.5}{\ignorespaces So sánh phương pháp kết nối OBD2 theo thông số triển khai}}{46}{table.tab-ch3-so-sanh-phuong-phap-ket-noi-obd2-theo-thong-so-trien-khai}%
 \contentsline {table}{\numberline {3.6}{\ignorespaces Chiến lược kết nối BLE OBD2 theo chế độ hoạt động}}{47}{table.tab-ch3-chien-luoc-ket-noi-ble-obd2-theo-che-o-hoat-ong}%
-\contentsline {table}{\numberline {3.7}{\ignorespaces Thông số kỹ thuật cảm biến LIS3DSH}}{50}{table.tab-ch3-thong-so-ky-thuat-cam-bien-LIS3DH}%
-\contentsline {table}{\numberline {3.8}{\ignorespaces Thông số khối LDO 3.3V}}{53}{table.tab-ch3-thong-so-khoi-buck-3-3v}%
+\contentsline {table}{\numberline {3.7}{\ignorespaces Thông số kỹ thuật cảm biến LIS3DSH}}{49}{table.tab-ch3-thong-so-ky-thuat-cam-bien-LIS3DH}%
+\contentsline {table}{\numberline {3.8}{\ignorespaces Thông số khối LDO 3.3V}}{52}{table.tab-ch3-thong-so-khoi-buck-3-3v}%
 \contentsline {table}{\numberline {3.9}{\ignorespaces Thông số khối Buck 5V}}{53}{table.tab-ch3-thong-so-khoi-buck-5v}%
 \contentsline {table}{\numberline {3.10}{\ignorespaces Thông số khối Buck 3.8V/4V cho modem}}{54}{table.tab-ch3-thong-so-khoi-buck-3-8v-4v-cho-modem}%
 \contentsline {table}{\numberline {3.11}{\ignorespaces Thông số khối Boost 5V dự phòng}}{54}{table.tab-ch3-thong-so-khoi-boost-5v-du-phong}%
-\contentsline {table}{\numberline {3.12}{\ignorespaces Bảng trạng thái chuyển nguồn và cảnh báo}}{55}{table.tab-ch3-bang-trang-thai-chuyen-nguon-va-canh-bao}%
+\contentsline {table}{\numberline {3.12}{\ignorespaces Bảng trạng thái chuyển nguồn và cảnh báo}}{54}{table.tab-ch3-bang-trang-thai-chuyen-nguon-va-canh-bao}%
 \contentsline {table}{\numberline {3.13}{\ignorespaces Thông số khối sạc pin}}{55}{table.tab-ch3-thong-so-khoi-sac-pin}%
 \contentsline {table}{\numberline {3.14}{\ignorespaces Thông số kỹ thuật pin dự phòng 18650 1S}}{56}{table.tab-ch3-thong-so-ky-thuat-pin-du-phong-18650-1s}%
 \contentsline {table}{\numberline {3.14A}{\ignorespaces Bảng tổng hợp linh kiện hệ thống thiết bị theo dõi (BOM)}}{57}{table.tab-ch3-bang-tong-hop-linh-kien-he-thong-tracker-bom}%
 \contentsline {table}{\numberline {3.15}{\ignorespaces Tổng hợp chi phí theo nhóm}}{58}{table.tab-ch3-tong-hop-chi-phi-theo-nhom}%
 \contentsline {table}{\numberline {3.5A}{\ignorespaces So sánh các phương án nền tảng firmware}}{59}{table.tab-ch3-so-sanh-cac-phuong-an-nen-tang-firmware}%
 \contentsline {table}{\numberline {3.2.2A}{\ignorespaces Tổng hợp thông tin về Lớp, Thành phần chính, Vai trò}}{61}{table.tab-ch3-tong-hop-thong-tin-ve-lop-thanh-phan-chinh-vai-tro}%
-\contentsline {table}{\numberline {3.2.2B}{\ignorespaces Tổng hợp thông tin về Tình huống lỗi, Xử lý, Thời gian timeout}}{70}{table.tab-ch3-tong-hop-thong-tin-ve-tinh-huong-loi-xu-ly-thoi-gian}%
+\contentsline {table}{\numberline {3.2.2B}{\ignorespaces Tổng hợp thông tin về Tình huống lỗi, Xử lý, Thời gian timeout}}{69}{table.tab-ch3-tong-hop-thong-tin-ve-tinh-huong-loi-xu-ly-thoi-gian}%
 \contentsline {table}{\numberline {3.2.2C}{\ignorespaces Tổng hợp thông tin về Bước, Lệnh AT, Mục đích chính}}{70}{table.tab-ch3-tong-hop-thong-tin-ve-buoc-lenh-at-muc-ich-chinh}%
-\contentsline {table}{\numberline {3.2.2D}{\ignorespaces Tổng hợp thông tin về Tình huống, Biện pháp}}{72}{table.tab-ch3-tong-hop-thong-tin-ve-tinh-huong-bien-phap}%
-\contentsline {table}{\numberline {3.2.2E}{\ignorespaces Tổng hợp thông tin về GPIO, Chức năng, Hướng}}{72}{table.tab-ch3-tong-hop-thong-tin-ve-gpio-chuc-nang-huong}%
-\contentsline {table}{\numberline {3.2.2F}{\ignorespaces Tổng hợp thông tin về Điều kiện, Trạng thái charger, Lý do}}{76}{table.tab-ch3-tong-hop-thong-tin-ve-ieu-kien-trang-thai-charger-ly-do}%
-\contentsline {table}{\numberline {3.2.2G}{\ignorespaces Tổng hợp thông tin về Chế độ, Trạng thái ESP32, Trạng thái modem}}{76}{table.tab-ch3-tong-hop-thong-tin-ve-che-o-trang-thai-esp32-trang-thai}%
-\contentsline {table}{\numberline {3.2.2H}{\ignorespaces Tổng hợp thông tin về Topic, Hướng, QoS}}{79}{table.tab-ch3-tong-hop-thong-tin-ve-topic-huong-qos}%
-\contentsline {table}{\numberline {3.2.2I}{\ignorespaces Tổng hợp thông tin về Lệnh, Mục đích, Tham số chính}}{79}{table.tab-ch3-tong-hop-thong-tin-ve-lenh-muc-ich-tham-so-chinh}%
-\contentsline {table}{\numberline {3.2.2J}{\ignorespaces Tổng hợp thông tin về Trạng thái, Mã, Mô tả}}{81}{table.tab-ch3-tong-hop-thong-tin-ve-trang-thai-ma-mo-ta}%
-\contentsline {table}{\numberline {3.2.2K}{\ignorespaces Tổng hợp thông tin về Cảm biến, Phương pháp hiệu chuẩn, Lưu trữ}}{85}{table.tab-ch3-tong-hop-thong-tin-ve-cam-bien-phuong-phap-hieu-chuan-luu}%
-\contentsline {table}{\numberline {3.15A}{\ignorespaces So sánh các phương án kiến trúc hệ thống máy chủ}}{87}{table.tab-ch3-so-sanh-cac-phuong-an-kien-truc-cloud}%
-\contentsline {table}{\numberline {3.16}{\ignorespaces Phân bổ tài nguyên Docker cho các dịch vụ}}{91}{table.tab-ch3-phan-bo-tai-nguyen-docker-cho-cac-dich-vu}%
-\contentsline {table}{\numberline {3.17}{\ignorespaces So sánh các MQTT Broker phổ biến}}{92}{table.tab-ch3-so-sanh-cac-mqtt-broker-pho-bien}%
-\contentsline {table}{\numberline {3.18A}{\ignorespaces So sánh các phương án kiến trúc lưu trữ dữ liệu}}{94}{table.tab-ch3-so-sanh-cac-phuong-an-kien-truc-luu-tru-du-lieu}%
-\contentsline {table}{\numberline {3.18}{\ignorespaces So sánh các cơ sở dữ liệu trong hệ thống}}{95}{table.tab-ch3-so-sanh-cac-co-so-du-lieu-trong-he-thong}%
-\contentsline {table}{\numberline {3.19}{\ignorespaces Các nhóm bảng chính trong PostgreSQL}}{96}{table.tab-ch3-cac-nhom-bang-chinh-trong-postgresql}%
-\contentsline {table}{\numberline {3.20}{\ignorespaces So sánh VictoriaMetrics và InfluxDB}}{98}{table.tab-ch3-so-sanh-victoriametrics-va-influxdb}%
-\contentsline {table}{\numberline {3.21}{\ignorespaces So sánh các khung phát triển cho API phía máy chủ}}{99}{table.tab-ch3-so-sanh-framework-backend}%
-\contentsline {table}{\numberline {3.22}{\ignorespaces Tóm tắt các nhóm API Endpoints chính}}{101}{table.tab-ch3-tom-tat-cac-nhom-api-endpoints-chinh}%
-\contentsline {table}{\numberline {3.23}{\ignorespaces So sánh JWT và cơ chế xác thực theo phiên làm việc}}{103}{table.tab-ch3-so-sanh-jwt-va-session-based-authentication}%
-\contentsline {table}{\numberline {3.23A}{\ignorespaces So sánh các phương án công nghệ giao diện web tổng thể}}{104}{table.tab-ch3-so-sanh-cac-phuong-an-cong-nghe-frontend-tong-the}%
-\contentsline {table}{\numberline {3.24}{\ignorespaces So sánh các khung phát triển giao diện web}}{106}{table.tab-ch3-so-sanh-framework-frontend}%
-\contentsline {table}{\numberline {3.25}{\ignorespaces Chiến lược quản lý trạng thái}}{108}{table.tab-ch3-chien-luoc-quan-ly-trang-thai}%
-\contentsline {table}{\numberline {3.26}{\ignorespaces So sánh thư viện bản đồ}}{109}{table.tab-ch3-so-sanh-thu-vien-ban-o}%
-\contentsline {table}{\numberline {3.2.4A}{\ignorespaces Tổng hợp thông tin về Cột, Mô tả, Chức năng}}{112}{table.tab-ch3-tong-hop-thong-tin-ve-cot-mo-ta-chuc-nang}%
-\contentsline {table}{\numberline {3.27}{\ignorespaces Ma trận các trang chức năng chính}}{116}{table.tab-ch3-ma-tran-cac-trang-chuc-nang-chinh}%
-\contentsline {table}{\numberline {3.2.4B}{\ignorespaces Tổng hợp thông tin về thành phần bản đồ, file và chức năng}}{119}{table.tab-ch3-tong-hop-thong-tin-ve-component-file-chuc-nang}%
-\contentsline {table}{\numberline {3.28}{\ignorespaces Ngưỡng chiều rộng màn hình và cách điều chỉnh giao diện}}{121}{table.tab-ch3-breakpoint-va-tuong-ung-giao-dien}%
-\contentsline {table}{\numberline {3.29}{\ignorespaces Ma trận đánh giá tổng hợp các phương án thiết kế}}{123}{table.tab-ch3-ma-tran-anh-gia-tong-hop-cac-phuong-an-thiet-ke}%
-\contentsline {table}{\numberline {4.1.1A}{\ignorespaces Tổng hợp thông tin về Thông số, Giá trị}}{126}{table.tab-ch4-tong-hop-thong-tin-ve-thong-so-gia-tri}%
-\contentsline {table}{\numberline {4.1}{\ignorespaces Phân công chân GPIO của ESP32-S3}}{132}{table.tab-ch4-phan-cong-chan-gpio-cua-esp32-s3}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Khối LDO 3.3V}}{137}{table.tab-ch4-khoi-buck-3-3v}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces Khối Buck 5V}}{137}{table.tab-ch4-khoi-buck-5v}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces Khối Buck 3.8V/4V cho modem}}{138}{table.tab-ch4-khoi-buck-3-8v-4v-cho-modem}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Khối Boost 5V dự phòng}}{138}{table.tab-ch4-khoi-boost-5v-du-phong}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces Logic chuyển nguồn tự động}}{139}{table.tab-ch4-logic-chuyen-nguon-tu-ong}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Khối sạc TP5100}}{141}{table.tab-ch4-khoi-sac-tp4056}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces Danh sách vật liệu đầy đủ cho hệ thống thiết bị theo dõi}}{145}{table.tab-ch4-danh-sach-vat-lieu-ay-u-cho-he-thong-tracker}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Tổng chi phí ước tính}}{146}{table.tab-ch4-tong-chi-phi-uoc-tinh}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Công cụ phát triển firmware}}{154}{table.tab-ch4-cong-cu-phat-trien-firmware}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces Kiến trúc phân tầng firmware}}{156}{table.tab-ch4-kien-truc-phan-tang-firmware}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Bảng ánh xạ chân GPIO}}{156}{table.tab-ch4-bang-anh-xa-chan-gpio}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces Các PID OBD2 được đọc định kỳ (Mode 0x01 - Current Data)}}{161}{table.tab-ch4-cac-pid-obd2-uoc-oc-inh-ky-mode-0x01-current-data}%
-\contentsline {table}{\numberline {4.8A}{\ignorespaces Bảng bổ sung chỉ mục (4.2.3. Triển khai Firmware)}}{164}{table.tab-ch4-bang-bo-sung-chi-muc-4-2-3-trien-khai-firmware}%
-\contentsline {table}{\numberline {4.9}{\ignorespaces So sánh các chế độ ngủ}}{169}{table.tab-ch4-so-sanh-cac-che-o-ngu}%
-\contentsline {table}{\numberline {4.10}{\ignorespaces Các trạng thái của firmware}}{171}{table.tab-ch4-cac-trang-thai-cua-firmware}%
-\contentsline {table}{\numberline {4.11}{\ignorespaces Chuyển đổi trạng thái}}{171}{table.tab-ch4-chuyen-oi-trang-thai}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Danh sách các dịch vụ được đóng gói bằng Docker và cổng truy cập}}{180}{table.tab-ch4-danh-sach-cac-dich-vu-docker-va-cong-truy-cap}%
-\contentsline {table}{\numberline {4.5A}{\ignorespaces Ánh xạ tên miền công khai, cổng truy cập và dịch vụ nội bộ trong môi trường thử nghiệm}}{181}{table.tab-ch4-mapping-domain-va-port-cong-khai-moi-truong-thu-nghiem}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces So sánh các khung phát triển API phía máy chủ cho hệ thống IoT}}{186}{table.tab-ch4-so-sanh-framework-backend-cho-he-thong-iot}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Danh sách các module nghiệp vụ chính}}{188}{table.tab-ch4-danh-sach-cac-domain-modules-chinh}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces Tổng hợp các nhóm API endpoint chính}}{190}{table.tab-ch4-tong-hop-cac-nhom-api-endpoint-chinh}%
-\contentsline {table}{\numberline {4.2.5A}{\ignorespaces Tổng hợp thông tin về Công nghệ, Phiên bản, Vai trò}}{193}{table.tab-ch4-tong-hop-thong-tin-ve-cong-nghe-phien-ban-vai-tro}%
-\contentsline {table}{\numberline {4.9}{\ignorespaces Các giai đoạn triển khai giao diện web}}{198}{table.tab-ch4-cac-giai-oan-trien-khai-frontend}%
-\contentsline {table}{\numberline {4.10}{\ignorespaces Ba trụ cột giám sát hệ thống}}{200}{table.tab-ch4-ba-tru-cot-giam-sat-he-thong}%
-\contentsline {table}{\numberline {4.11}{\ignorespaces Checklist làm cứng vận hành theo mức ưu tiên}}{204}{table.tab-ch4-checklist-hardening-production-theo-muc-uu-tien}%
-\contentsline {table}{\numberline {4.11A}{\ignorespaces Tổng hợp công nghệ sử dụng trong hệ thống máy chủ}}{205}{table.tab-ch4-tong-hop-cong-nghe-su-dung-trong-he-thong-cloud}%
-\contentsline {table}{\numberline {4.12}{\ignorespaces Thiết bị đo lường sử dụng trong thử nghiệm phần cứng}}{207}{table.tab-ch4-thiet-bi-o-luong-su-dung-trong-thu-nghiem-phan-cung}%
-\contentsline {table}{\numberline {4.13}{\ignorespaces Cấu hình môi trường thử nghiệm phần mềm}}{208}{table.tab-ch4-cau-hinh-moi-truong-thu-nghiem-phan-mem}%
-\contentsline {table}{\numberline {4.14}{\ignorespaces Kết quả đo dòng tiêu thụ năng lượng theo chế độ hoạt động}}{212}{table.tab-ch4-ket-qua-o-dong-tieu-thu-nang-luong-theo-che-o-hoat}%
-\contentsline {table}{\numberline {4.15}{\ignorespaces Thời lượng pin dự phòng theo kịch bản sử dụng (quy đổi theo bộ pin tham chiếu 18650)}}{215}{table.tab-ch4-thoi-luong-pin-du-phong-theo-kich-ban-su-dung-uoc-tinh}%
-\contentsline {table}{\numberline {4.16}{\ignorespaces Kết quả kiểm thử nhiệt độ hoạt động}}{217}{table.tab-ch4-ket-qua-kiem-thu-nhiet-o-hoat-ong}%
-\contentsline {table}{\numberline {4.17}{\ignorespaces Kết quả kiểm thử tương thích OBD2 trên các thương hiệu xe}}{218}{table.tab-ch4-ket-qua-kiem-thu-tuong-thich-obd2-tren-cac-thuong-hieu-xe}%
-\contentsline {table}{\numberline {4.18}{\ignorespaces Kết quả kiểm thử mạch LVD}}{219}{table.tab-ch4-ket-qua-kiem-thu-mach-lvd}%
-\contentsline {table}{\numberline {4.19}{\ignorespaces Kết quả đo thời gian kết nối BLE OBD2}}{220}{table.tab-ch4-ket-qua-o-thoi-gian-ket-noi-ble-obd2}%
-\contentsline {table}{\numberline {4.20}{\ignorespaces Thời gian phản hồi OBD2 PID}}{221}{table.tab-ch4-thoi-gian-phan-hoi-obd2-pid}%
-\contentsline {table}{\numberline {4.21}{\ignorespaces Thời gian bắt vệ tinh GPS (TTFF)}}{221}{table.tab-ch4-thoi-gian-bat-ve-tinh-gps-ttff}%
-\contentsline {table}{\numberline {4.22}{\ignorespaces Độ chính xác vị trí GPS}}{222}{table.tab-ch4-o-chinh-xac-vi-tri-gps}%
-\contentsline {table}{\numberline {4.23}{\ignorespaces Độ trễ truyền dữ liệu MQTT qua mạng 4G}}{223}{table.tab-ch4-o-tre-truyen-du-lieu-mqtt-qua-mang-4g}%
+\contentsline {table}{\numberline {3.2.2D}{\ignorespaces Tổng hợp thông tin về Tình huống, Biện pháp}}{71}{table.tab-ch3-tong-hop-thong-tin-ve-tinh-huong-bien-phap}%
+\contentsline {table}{\numberline {3.2.2E}{\ignorespaces Tổng hợp thông tin về GPIO, Chức năng, Hướng}}{73}{table.tab-ch3-tong-hop-thong-tin-ve-gpio-chuc-nang-huong}%
+\contentsline {table}{\numberline {3.2.2F}{\ignorespaces Tổng hợp thông tin về Điều kiện, Trạng thái charger, Lý do}}{75}{table.tab-ch3-tong-hop-thong-tin-ve-ieu-kien-trang-thai-charger-ly-do}%
+\contentsline {table}{\numberline {3.2.2G}{\ignorespaces Tổng hợp thông tin về Chế độ, Trạng thái ESP32, Trạng thái modem}}{75}{table.tab-ch3-tong-hop-thong-tin-ve-che-o-trang-thai-esp32-trang-thai}%
+\contentsline {table}{\numberline {3.2.2H}{\ignorespaces Tổng hợp thông tin về Topic, Hướng, QoS}}{78}{table.tab-ch3-tong-hop-thong-tin-ve-topic-huong-qos}%
+\contentsline {table}{\numberline {3.2.2I}{\ignorespaces Tổng hợp thông tin về Lệnh, Mục đích, Tham số chính}}{78}{table.tab-ch3-tong-hop-thong-tin-ve-lenh-muc-ich-tham-so-chinh}%
+\contentsline {table}{\numberline {3.2.2J}{\ignorespaces Tổng hợp thông tin về Trạng thái, Mã, Mô tả}}{80}{table.tab-ch3-tong-hop-thong-tin-ve-trang-thai-ma-mo-ta}%
+\contentsline {table}{\numberline {3.2.2K}{\ignorespaces Tổng hợp thông tin về Cảm biến, Phương pháp hiệu chuẩn, Lưu trữ}}{84}{table.tab-ch3-tong-hop-thong-tin-ve-cam-bien-phuong-phap-hieu-chuan-luu}%
+\contentsline {table}{\numberline {3.15A}{\ignorespaces So sánh các phương án kiến trúc hệ thống máy chủ}}{86}{table.tab-ch3-so-sanh-cac-phuong-an-kien-truc-cloud}%
+\contentsline {table}{\numberline {3.16}{\ignorespaces Phân bổ tài nguyên Docker cho các dịch vụ}}{90}{table.tab-ch3-phan-bo-tai-nguyen-docker-cho-cac-dich-vu}%
+\contentsline {table}{\numberline {3.17}{\ignorespaces So sánh các MQTT Broker phổ biến}}{91}{table.tab-ch3-so-sanh-cac-mqtt-broker-pho-bien}%
+\contentsline {table}{\numberline {3.18A}{\ignorespaces So sánh các phương án kiến trúc lưu trữ dữ liệu}}{93}{table.tab-ch3-so-sanh-cac-phuong-an-kien-truc-luu-tru-du-lieu}%
+\contentsline {table}{\numberline {3.18}{\ignorespaces So sánh các cơ sở dữ liệu trong hệ thống}}{94}{table.tab-ch3-so-sanh-cac-co-so-du-lieu-trong-he-thong}%
+\contentsline {table}{\numberline {3.19}{\ignorespaces Các nhóm bảng chính trong PostgreSQL}}{95}{table.tab-ch3-cac-nhom-bang-chinh-trong-postgresql}%
+\contentsline {table}{\numberline {3.20}{\ignorespaces So sánh VictoriaMetrics và InfluxDB}}{97}{table.tab-ch3-so-sanh-victoriametrics-va-influxdb}%
+\contentsline {table}{\numberline {3.21}{\ignorespaces So sánh các khung phát triển cho API máy chủ}}{98}{table.tab-ch3-so-sanh-framework-backend}%
+\contentsline {table}{\numberline {3.22}{\ignorespaces Tóm tắt các nhóm API Endpoints chính}}{100}{table.tab-ch3-tom-tat-cac-nhom-api-endpoints-chinh}%
+\contentsline {table}{\numberline {3.23}{\ignorespaces So sánh JWT và cơ chế xác thực theo phiên làm việc}}{102}{table.tab-ch3-so-sanh-jwt-va-session-based-authentication}%
+\contentsline {table}{\numberline {3.23A}{\ignorespaces So sánh các phương án công nghệ giao diện web tổng thể}}{103}{table.tab-ch3-so-sanh-cac-phuong-an-cong-nghe-frontend-tong-the}%
+\contentsline {table}{\numberline {3.24}{\ignorespaces So sánh các khung phát triển giao diện web}}{105}{table.tab-ch3-so-sanh-framework-frontend}%
+\contentsline {table}{\numberline {3.25}{\ignorespaces Chiến lược quản lý trạng thái}}{107}{table.tab-ch3-chien-luoc-quan-ly-trang-thai}%
+\contentsline {table}{\numberline {3.26}{\ignorespaces So sánh thư viện bản đồ}}{107}{table.tab-ch3-so-sanh-thu-vien-ban-o}%
+\contentsline {table}{\numberline {3.2.4A}{\ignorespaces Tổng hợp thông tin về Cột, Mô tả, Chức năng}}{111}{table.tab-ch3-tong-hop-thong-tin-ve-cot-mo-ta-chuc-nang}%
+\contentsline {table}{\numberline {3.27}{\ignorespaces Ma trận các trang chức năng chính}}{115}{table.tab-ch3-ma-tran-cac-trang-chuc-nang-chinh}%
+\contentsline {table}{\numberline {3.2.4B}{\ignorespaces Tổng hợp thông tin về thành phần bản đồ, file và chức năng}}{118}{table.tab-ch3-tong-hop-thong-tin-ve-component-file-chuc-nang}%
+\contentsline {table}{\numberline {3.28}{\ignorespaces Ngưỡng chiều rộng màn hình và cách điều chỉnh giao diện}}{120}{table.tab-ch3-breakpoint-va-tuong-ung-giao-dien}%
+\contentsline {table}{\numberline {3.29}{\ignorespaces Ma trận đánh giá tổng hợp các phương án thiết kế}}{122}{table.tab-ch3-ma-tran-anh-gia-tong-hop-cac-phuong-an-thiet-ke}%
+\contentsline {table}{\numberline {4.1.1A}{\ignorespaces Tổng hợp thông tin về Thông số, Giá trị}}{125}{table.tab-ch4-tong-hop-thong-tin-ve-thong-so-gia-tri}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Phân công chân GPIO của ESP32-S3}}{131}{table.tab-ch4-phan-cong-chan-gpio-cua-esp32-s3}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Khối LDO 3.3V}}{136}{table.tab-ch4-khoi-buck-3-3v}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Khối Buck 5V}}{136}{table.tab-ch4-khoi-buck-5v}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Khối Buck 3.8V/4V cho modem}}{137}{table.tab-ch4-khoi-buck-3-8v-4v-cho-modem}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Khối Boost 5V dự phòng}}{137}{table.tab-ch4-khoi-boost-5v-du-phong}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Logic chuyển nguồn tự động}}{138}{table.tab-ch4-logic-chuyen-nguon-tu-ong}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Khối sạc TP5100}}{140}{table.tab-ch4-khoi-sac-tp4056}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Danh sách vật liệu đầy đủ cho hệ thống thiết bị theo dõi}}{144}{table.tab-ch4-danh-sach-vat-lieu-ay-u-cho-he-thong-tracker}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Tổng chi phí ước tính}}{145}{table.tab-ch4-tong-chi-phi-uoc-tinh}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Công cụ phát triển firmware}}{153}{table.tab-ch4-cong-cu-phat-trien-firmware}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Kiến trúc phân tầng firmware}}{155}{table.tab-ch4-kien-truc-phan-tang-firmware}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Bảng ánh xạ chân GPIO}}{155}{table.tab-ch4-bang-anh-xa-chan-gpio}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces Các PID OBD2 được đọc định kỳ (Mode 0x01 - Current Data)}}{160}{table.tab-ch4-cac-pid-obd2-uoc-oc-inh-ky-mode-0x01-current-data}%
+\contentsline {table}{\numberline {4.8A}{\ignorespaces Cấu trúc topic MQTT trong firmware và hệ thống máy chủ}}{163}{table.tab-ch4-bang-bo-sung-chi-muc-4-2-3-trien-khai-firmware}%
+\contentsline {table}{\numberline {4.9}{\ignorespaces So sánh các chế độ ngủ}}{168}{table.tab-ch4-so-sanh-cac-che-o-ngu}%
+\contentsline {table}{\numberline {4.10}{\ignorespaces Các trạng thái của firmware}}{170}{table.tab-ch4-cac-trang-thai-cua-firmware}%
+\contentsline {table}{\numberline {4.11}{\ignorespaces Chuyển đổi trạng thái}}{170}{table.tab-ch4-chuyen-oi-trang-thai}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Danh sách các dịch vụ được đóng gói bằng Docker và cổng truy cập}}{179}{table.tab-ch4-danh-sach-cac-dich-vu-docker-va-cong-truy-cap}%
+\contentsline {table}{\numberline {4.5A}{\ignorespaces Ánh xạ tên miền công khai, cổng truy cập và dịch vụ nội bộ trong môi trường thử nghiệm}}{179}{table.tab-ch4-mapping-domain-va-port-cong-khai-moi-truong-thu-nghiem}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces So sánh các khung phát triển API máy chủ cho hệ thống IoT}}{185}{table.tab-ch4-so-sanh-framework-backend-cho-he-thong-iot}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Danh sách các module nghiệp vụ chính}}{187}{table.tab-ch4-danh-sach-cac-domain-modules-chinh}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces Tổng hợp các nhóm API endpoint chính}}{189}{table.tab-ch4-tong-hop-cac-nhom-api-endpoint-chinh}%
+\contentsline {table}{\numberline {4.2.5A}{\ignorespaces Tổng hợp thông tin về Công nghệ, Phiên bản, Vai trò}}{192}{table.tab-ch4-tong-hop-thong-tin-ve-cong-nghe-phien-ban-vai-tro}%
+\contentsline {table}{\numberline {4.9}{\ignorespaces Các giai đoạn triển khai giao diện web}}{197}{table.tab-ch4-cac-giai-oan-trien-khai-frontend}%
+\contentsline {table}{\numberline {4.10}{\ignorespaces Ba trụ cột giám sát hệ thống}}{199}{table.tab-ch4-ba-tru-cot-giam-sat-he-thong}%
+\contentsline {table}{\numberline {4.11}{\ignorespaces Checklist làm cứng vận hành theo mức ưu tiên}}{203}{table.tab-ch4-checklist-hardening-production-theo-muc-uu-tien}%
+\contentsline {table}{\numberline {4.11A}{\ignorespaces Tổng hợp công nghệ sử dụng trong hệ thống máy chủ}}{204}{table.tab-ch4-tong-hop-cong-nghe-su-dung-trong-he-thong-cloud}%
+\contentsline {table}{\numberline {4.12}{\ignorespaces Thiết bị đo lường sử dụng trong thử nghiệm phần cứng}}{206}{table.tab-ch4-thiet-bi-o-luong-su-dung-trong-thu-nghiem-phan-cung}%
+\contentsline {table}{\numberline {4.13}{\ignorespaces Cấu hình môi trường thử nghiệm phần mềm}}{207}{table.tab-ch4-cau-hinh-moi-truong-thu-nghiem-phan-mem}%
+\contentsline {table}{\numberline {4.14}{\ignorespaces Kết quả đo dòng tiêu thụ năng lượng theo chế độ hoạt động}}{211}{table.tab-ch4-ket-qua-o-dong-tieu-thu-nang-luong-theo-che-o-hoat}%
+\contentsline {table}{\numberline {4.15}{\ignorespaces Thời lượng pin dự phòng theo kịch bản sử dụng (quy đổi theo bộ pin tham chiếu 18650)}}{214}{table.tab-ch4-thoi-luong-pin-du-phong-theo-kich-ban-su-dung-uoc-tinh}%
+\contentsline {table}{\numberline {4.16}{\ignorespaces Kết quả kiểm thử nhiệt độ hoạt động}}{216}{table.tab-ch4-ket-qua-kiem-thu-nhiet-o-hoat-ong}%
+\contentsline {table}{\numberline {4.17}{\ignorespaces Kết quả kiểm thử tương thích OBD2 trên các thương hiệu xe}}{217}{table.tab-ch4-ket-qua-kiem-thu-tuong-thich-obd2-tren-cac-thuong-hieu-xe}%
+\contentsline {table}{\numberline {4.18}{\ignorespaces Kết quả kiểm thử mạch LVD}}{218}{table.tab-ch4-ket-qua-kiem-thu-mach-lvd}%
+\contentsline {table}{\numberline {4.19}{\ignorespaces Kết quả đo thời gian kết nối BLE OBD2}}{219}{table.tab-ch4-ket-qua-o-thoi-gian-ket-noi-ble-obd2}%
+\contentsline {table}{\numberline {4.20}{\ignorespaces Thời gian phản hồi OBD2 PID}}{220}{table.tab-ch4-thoi-gian-phan-hoi-obd2-pid}%
+\contentsline {table}{\numberline {4.21}{\ignorespaces Thời gian bắt vệ tinh GPS (TTFF)}}{220}{table.tab-ch4-thoi-gian-bat-ve-tinh-gps-ttff}%
+\contentsline {table}{\numberline {4.22}{\ignorespaces Độ chính xác vị trí GPS}}{221}{table.tab-ch4-o-chinh-xac-vi-tri-gps}%
+\contentsline {table}{\numberline {4.23}{\ignorespaces Độ trễ truyền dữ liệu MQTT qua mạng 4G}}{222}{table.tab-ch4-o-tre-truyen-du-lieu-mqtt-qua-mang-4g}%
 \contentsline {table}{\numberline {4.24}{\ignorespaces Kết quả kiểm thử máy trạng thái firmware}}{223}{table.tab-ch4-ket-qua-kiem-thu-may-trang-thai-firmware}%
 \contentsline {table}{\numberline {4.25}{\ignorespaces Kết quả kiểm thử kết nối lại MQTT}}{224}{table.tab-ch4-ket-qua-kiem-thu-reconnect-mqtt}%
-\contentsline {table}{\numberline {4.25A}{\ignorespaces Đối chiếu luồng OTA theo mã nguồn triển khai}}{226}{table.tab-ch4-oi-chieu-luong-ota-theo-ma-nguon-trien-khai}%
-\contentsline {table}{\numberline {4.26}{\ignorespaces Kết quả đo hiệu suất API phía máy chủ}}{227}{table.tab-ch4-ket-qua-o-hieu-suat-api-backend}%
-\contentsline {table}{\numberline {4.27}{\ignorespaces Độ trễ toàn tuyến (thiết bị -\textgreater {} máy chủ -\textgreater {} trình duyệt)}}{229}{table.tab-ch4-o-tre-end-to-end-device-cloud-browser}%
+\contentsline {table}{\numberline {4.25A}{\ignorespaces Đối chiếu mức độ hoàn thiện luồng OTA theo mã nguồn và kiểm thử tích hợp}}{225}{table.tab-ch4-oi-chieu-luong-ota-theo-ma-nguon-trien-khai}%
+\contentsline {table}{\numberline {4.26}{\ignorespaces Kết quả đo hiệu suất API máy chủ}}{226}{table.tab-ch4-ket-qua-o-hieu-suat-api-backend}%
+\contentsline {table}{\numberline {4.27}{\ignorespaces Độ trễ toàn tuyến (thiết bị -\textgreater {} máy chủ -\textgreater {} trình duyệt)}}{228}{table.tab-ch4-o-tre-end-to-end-device-cloud-browser}%
 \contentsline {table}{\numberline {4.28}{\ignorespaces Tốc độ ghi dữ liệu của cơ sở dữ liệu}}{230}{table.tab-ch4-thong-luong-ghi-co-so-du-lieu}%
-\contentsline {table}{\numberline {4.29}{\ignorespaces Kết quả kiểm thử tải đồng thời}}{231}{table.tab-ch4-ket-qua-kiem-thu-tai-ong-thoi}%
+\contentsline {table}{\numberline {4.29}{\ignorespaces Kết quả kiểm thử tải đồng thời}}{230}{table.tab-ch4-ket-qua-kiem-thu-tai-ong-thoi}%
 \contentsline {table}{\numberline {4.30}{\ignorespaces Kết quả đánh giá hiệu suất giao diện web bằng Lighthouse}}{232}{table.tab-ch4-ket-qua-anh-gia-hieu-suat-frontend-lighthouse}%
-\contentsline {table}{\numberline {4.31}{\ignorespaces Kết quả kiểm thử luồng dữ liệu chính}}{234}{table.tab-ch4-ket-qua-kiem-thu-luong-du-lieu-chinh}%
-\contentsline {table}{\numberline {4.32}{\ignorespaces Kết quả kiểm thử cảnh báo vượt vùng cho phép}}{235}{table.tab-ch4-ket-qua-kiem-thu-canh-bao-geofence}%
-\contentsline {table}{\numberline {4.33}{\ignorespaces Kết quả kiểm thử lệnh điều khiển từ xa}}{235}{table.tab-ch4-ket-qua-kiem-thu-lenh-ieu-khien-tu-xa}%
-\contentsline {table}{\numberline {4.34}{\ignorespaces Kết quả kiểm thử mất kết nối và phục hồi}}{236}{table.tab-ch4-ket-qua-kiem-thu-mat-ket-noi-va-phuc-hoi}%
+\contentsline {table}{\numberline {4.31}{\ignorespaces Kết quả kiểm thử luồng dữ liệu chính}}{233}{table.tab-ch4-ket-qua-kiem-thu-luong-du-lieu-chinh}%
+\contentsline {table}{\numberline {4.32}{\ignorespaces Kết quả kiểm thử cảnh báo vượt vùng cho phép}}{236}{table.tab-ch4-ket-qua-kiem-thu-canh-bao-geofence}%
+\contentsline {table}{\numberline {4.33}{\ignorespaces Kết quả kiểm thử lệnh điều khiển từ xa}}{237}{table.tab-ch4-ket-qua-kiem-thu-lenh-ieu-khien-tu-xa}%
+\contentsline {table}{\numberline {4.34}{\ignorespaces Kết quả kiểm thử mất kết nối và phục hồi}}{237}{table.tab-ch4-ket-qua-kiem-thu-mat-ket-noi-va-phuc-hoi}%
 \contentsline {table}{\numberline {4.35}{\ignorespaces Tổng hợp kết quả đo lường phần cứng so với chỉ tiêu thiết kế}}{241}{table.tab-ch4-tong-hop-ket-qua-o-luong-phan-cung-so-voi-chi-tieu}%
 \contentsline {table}{\numberline {4.36}{\ignorespaces Tổng hợp kết quả đo lường firmware so với chỉ tiêu thiết kế}}{242}{table.tab-ch4-tong-hop-ket-qua-o-luong-firmware-so-voi-chi-tieu-thiet}%
 \contentsline {table}{\numberline {4.37}{\ignorespaces Tổng hợp kết quả đo lường máy chủ và dịch vụ xử lý dữ liệu so với chỉ tiêu thiết kế}}{243}{table.tab-ch4-tong-hop-ket-qua-o-luong-cloud-backend-so-voi-chi-tieu}%
@@ -129,7 +129,7 @@
 \contentsline {table}{\numberline {6.3.1A}{\ignorespaces Tổng hợp thông tin về STT, Biện pháp, Mô tả chi tiết}}{274}{table.tab-ch6-tong-hop-thong-tin-ve-stt-bien-phap-mo-ta-chi-tiet}%
 \contentsline {table}{\numberline {6.4.2A}{\ignorespaces Tổng hợp thông tin về Tầng, Ngôn ngữ / Công nghệ, Thách thức chính}}{278}{table.tab-ch6-tong-hop-thong-tin-ve-tang-ngon-ngu-cong-nghe-thach-thuc}%
 \contentsline {table}{\numberline {PL-1.1}{\ignorespaces Bảng kê chi phí linh kiện (BOM)}}{288}{table.tab-app1-bang-ke-chi-phi-linh-kien-bom}%
-\contentsline {table}{\numberline {PL-1.2}{\ignorespaces Chi phí hạ tầng cloud}}{290}{table.tab-app1-chi-phi-ha-tang-cloud}%
+\contentsline {table}{\numberline {PL-1.2}{\ignorespaces Chi phí hạ tầng đám mây}}{290}{table.tab-app1-chi-phi-ha-tang-cloud}%
 \contentsline {table}{\numberline {PL-1.3}{\ignorespaces Tổng hợp chi phí dự án}}{290}{table.tab-app1-tong-hop-chi-phi-du-an}%
 \contentsline {table}{\numberline {2.1A}{\ignorespaces Tổng hợp thông tin về Chuẩn cụ thể, Nội dung, Áp dụng}}{292}{table.tab-ch2-tong-hop-thong-tin-ve-chuan-cu-the-noi-dung-ap-dung}%
 \contentsline {table}{\numberline {2.1B}{\ignorespaces Tổng hợp thông tin về PID (hex), Mô tả, Đơn vị}}{292}{table.tab-ch2-tong-hop-thong-tin-ve-pid-hex-mo-ta-on-vi}%
@@ -137,9 +137,9 @@
 \contentsline {table}{\numberline {2.3A}{\ignorespaces Tổng hợp thông tin về Nguyên tắc, Hiện thực trong dự án}}{294}{table.tab-ch2-tong-hop-thong-tin-ve-nguyen-tac-hien-thuc-trong-du-an}%
 \contentsline {table}{\numberline {2.4A}{\ignorespaces Tổng hợp thông tin về Nguyên tắc, Mô tả, Ví dụ trong dự án}}{295}{table.tab-ch2-tong-hop-thong-tin-ve-nguyen-tac-mo-ta-vi-du-trong}%
 \contentsline {table}{\numberline {PL-3.1}{\ignorespaces Phân chia giai đoạn và thời gian thực hiện}}{296}{table.tab-app3-phan-chia-giai-oan-va-thoi-gian-thuc-hien}%
-\contentsline {table}{\numberline {3.3A}{\ignorespaces Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}}{298}{table.tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham}%
-\contentsline {table}{\numberline {3.3B}{\ignorespaces Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}}{298}{table.tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-ca9bd3}%
-\contentsline {table}{\numberline {3.3C}{\ignorespaces Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}}{298}{table.tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-b7165b}%
+\contentsline {table}{\numberline {3.3A}{\ignorespaces Kế hoạch công việc và sản phẩm đầu ra của giai đoạn 1}}{298}{table.tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham}%
+\contentsline {table}{\numberline {3.3B}{\ignorespaces Kế hoạch công việc và sản phẩm đầu ra của giai đoạn 2}}{298}{table.tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-ca9bd3}%
+\contentsline {table}{\numberline {3.3C}{\ignorespaces Kế hoạch công việc và sản phẩm đầu ra của giai đoạn 3}}{298}{table.tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-b7165b}%
 \contentsline {table}{\numberline {3.3D}{\ignorespaces Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}}{299}{table.tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-b63b40}%
 \contentsline {table}{\numberline {3.3E}{\ignorespaces Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}}{299}{table.tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-c5129f}%
 \contentsline {table}{\numberline {3.3F}{\ignorespaces Tổng hợp thông tin về Tuần, Công việc, Sản phẩm}}{299}{table.tab-ch3-tong-hop-thong-tin-ve-tuan-cong-viec-san-pham-af9e31}%

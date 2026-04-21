@@ -1,10 +1,10 @@
 # Fdb version 4
-["xdvipdfmx"] 1776512414.86776 "thesis-final-report.xdv" "thesis-final-report.pdf" "thesis-final-report" 1776512424.45187 0
-  "thesis-final-report.xdv" 1776512414 5257124 034dd1ec8e9732bfd87a22aa3e941aa2 "xelatex"
+["xdvipdfmx"] 1776730313.93519 "thesis-final-report.xdv" "thesis-final-report.pdf" "thesis-final-report" 1776730323.46399 0
+  "thesis-final-report.xdv" 1776730313 5238392 156a97303aeeb7b89eb3ba5b342a6c70 "xelatex"
   (generated)
   "thesis-final-report.pdf"
   (rewritten before read)
-["xelatex"] 1776512401.79435 "thesis-final-report.tex" "thesis-final-report.xdv" "thesis-final-report" 1776512424.43179 0
+["xelatex"] 1776730302.91142 "thesis-final-report.tex" "thesis-final-report.xdv" "thesis-final-report" 1776730323.44719 0
   "C:/Users/Admin/AppData/Local/MiKTeX/miktex/data/le/xetex/xelatex.fmt" 1775718870 27177066 365ef0e8607d1e140bf203d71976060b ""
   "C:/Users/Admin/AppData/Local/Programs/MiKTeX/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136747054 1528 7e12f4c0fcf5a072cebdcfbfc610f54c ""
   "C:/Users/Admin/AppData/Local/Programs/MiKTeX/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1233951848 1004 54797486969f23fa377b128694d548df ""
@@ -266,11 +266,11 @@
   "assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-37.png" 1776512381 24135 e9210ad89729b55b2ff3896cf904261f ""
   "assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-38.png" 1776512387 15794 42eef48416b5d8caf5db07ff328f8cfe ""
   "assets/figures/14-phu-luc-hinh-pl-3-1.png" 1776512392 77926 8a89ec401a451818b79f7ed711192189 ""
-  "thesis-final-report.aux" 1776512414 229169 290ab6c4d131d1d282a15a43e42cf1ea "xelatex"
-  "thesis-final-report.lof" 1776512414 13559 97786396fe7f011980ccd61052b9600d "xelatex"
-  "thesis-final-report.lot" 1776512414 26132 f3c65101aeb13b26b528e01070d45d45 "xelatex"
-  "thesis-final-report.tex" 1776492768 781387 3327017c7ffd8c899f4a0d7581232b44 ""
-  "thesis-final-report.toc" 1776512414 40505 f3c716f2ebac0ef942540a7cae7258e0 "xelatex"
+  "thesis-final-report.aux" 1776730313 229327 3328cd1ee49d9e484f9cef82892d9333 "xelatex"
+  "thesis-final-report.lof" 1776730313 13597 2c53069b0e855fa462364c2012654110 "xelatex"
+  "thesis-final-report.lot" 1776730313 26197 38133c1259a31832d35fdf02f012c0a3 "xelatex"
+  "thesis-final-report.tex" 1776729513 779487 62708ffb05c9d03bde716fec4d7979e8 ""
+  "thesis-final-report.toc" 1776730313 40481 b98c34ebdf301d8a70e1506fc55a8552 "xelatex"
   (generated)
   "thesis-final-report.aux"
   "thesis-final-report.lof"

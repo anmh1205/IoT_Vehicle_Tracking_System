@@ -196,6 +196,7 @@ export const ingestDeviceData = async (payload: IotPayload) => {
       heading: 0,
       timestamp: deviceTimestamp.getTime(),
       status: 'running',
+      vehicleId: vehicleId ?? null,
       battery: payload.data.batt ?? null,
     });
   }

@@ -44,7 +44,7 @@ export const useDeviceSessions = (
   deviceId: number | null,
   options: UseDeviceSessionsOptions = {},
 ) => {
-  const limit = options.pageSize ?? 10;
+  const limit = options.pageSize ?? 20;
   const query = useInfiniteQuery({
     queryKey: ['device-sessions', deviceId, limit],
     enabled: !!deviceId,

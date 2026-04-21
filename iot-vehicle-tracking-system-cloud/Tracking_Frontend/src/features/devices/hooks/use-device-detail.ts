@@ -37,6 +37,7 @@ const toDevice = (raw: any): Device => ({
   imei: raw?.imei ?? null,
   firmwareVersion: raw?.firmwareVersion ?? raw?.firmware_version ?? null,
   targetFirmwareVersion: raw?.targetFirmwareVersion ?? raw?.target_firmware_version ?? null,
+  vehicleId: raw?.vehicleId ?? raw?.vehicle_id ?? null,
   vehiclePlate: raw?.vehiclePlate ?? raw?.vehicle_plate ?? null,
   customerName: raw?.customerName ?? raw?.customer_name ?? null,
   lastSeenAt: raw?.lastSeenAt ?? raw?.last_seen_at ?? null,

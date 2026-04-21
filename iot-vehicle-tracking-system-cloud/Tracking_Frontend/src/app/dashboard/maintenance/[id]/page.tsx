@@ -113,13 +113,13 @@ const MaintenanceDetailPage = ({
     : 'Chưa gắn phương tiện';
   const missingSignals = [
     !detail.vehicleId ? 'Chưa liên kết phương tiện' : null,
-    !customer?.name ? 'Chưa có ngữ cảnh khách hàng' : null,
+    !customer?.name ? 'Chưa có thông tin khách hàng' : null,
     !detail.scheduledDate && detail.status !== 'completed' ? 'Chưa có lịch hẹn xử lý' : null,
     !detail.serviceProvider ? 'Chưa có đơn vị thực hiện' : null,
   ].filter(Boolean);
 
   return (
-    <PageContainer pageTitle={pageTitle} pageDescription="Theo dõi tiến trình bảo trì, ngữ cảnh xe và cảnh báo liên quan">
+    <PageContainer pageTitle={pageTitle} pageDescription="Theo dõi tiến trình bảo trì, xe và cảnh báo liên quan">
       <Card className="overflow-hidden border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
         <CardContent className="space-y-4 p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -153,7 +153,7 @@ const MaintenanceDetailPage = ({
 
           {missingSignals.length > 0 ? (
             <div className="rounded-2xl border border-dashed px-4 py-3 text-sm text-muted-foreground">
-              {missingSignals.join(' • ')}. Nên hoàn thiện để phiếu bảo trì đủ ngữ cảnh vận hành.
+              {missingSignals.join(' • ')}. Nên hoàn thiện để phiếu bảo trì đủ thông tin vận hành.
             </div>
           ) : null}
         </CardContent>

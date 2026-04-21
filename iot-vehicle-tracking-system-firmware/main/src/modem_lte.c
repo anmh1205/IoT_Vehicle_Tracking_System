@@ -768,7 +768,8 @@ esp_err_t modem_lte_tick(uint64_t now_ms) {
                 return ESP_ERR_NOT_FINISHED;
             }
 
-            modem_lte_transition(MODEM_LTE_STATE_WAIT_BOOT, now_ms, MODEM_LTE_POWER_RAIL_SETTLE_MS);
+            /* Count boot settle from after the blocking PWRKEY pulse completes. */
+            modem_lte_transition(MODEM_LTE_STATE_WAIT_BOOT, util_uptime_ms(), MODEM_LTE_POWER_RAIL_SETTLE_MS);
             return ESP_ERR_NOT_FINISHED;
         }
 
@@ -1100,7 +1101,7 @@ esp_err_t modem_lte_tick(uint64_t now_ms) {
                 return ESP_ERR_NOT_FINISHED;
             }
 
-            modem_lte_restart_wait_rdy(now_ms, "recover_done");
+            modem_lte_restart_wait_rdy(util_uptime_ms(), "recover_done");
             return ESP_ERR_NOT_FINISHED;
         }
 

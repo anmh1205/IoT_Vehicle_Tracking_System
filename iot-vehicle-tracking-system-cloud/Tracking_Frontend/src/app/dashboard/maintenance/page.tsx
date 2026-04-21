@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -246,27 +246,30 @@ const MaintenancePage = () => {
     [vehicles],
   );
 
-  const resolveVehicleContext = (item: any): MaintenanceVehicleContext | null => {
-    const byId = item?.vehicleId ? (vehicleById.get(String(item.vehicleId)) ?? null) : null;
-    if (byId) {
-      return byId;
-    }
-
-    const plateKey = String(item?.vehiclePlate ?? '').trim().toLowerCase();
-    if (plateKey) {
-      const byPlate = vehicleByPlate.get(plateKey) ?? null;
-      if (byPlate) {
-        return byPlate;
+  const resolveVehicleContext = useCallback(
+    (item: any): MaintenanceVehicleContext | null => {
+      const byId = item?.vehicleId ? (vehicleById.get(String(item.vehicleId)) ?? null) : null;
+      if (byId) {
+        return byId;
       }
-    }
 
-    const deviceKey = String(item?.deviceId ?? '').trim().toLowerCase();
-    if (deviceKey) {
-      return vehicleByDeviceId.get(deviceKey) ?? null;
-    }
+      const plateKey = String(item?.vehiclePlate ?? '').trim().toLowerCase();
+      if (plateKey) {
+        const byPlate = vehicleByPlate.get(plateKey) ?? null;
+        if (byPlate) {
+          return byPlate;
+        }
+      }
 
-    return null;
-  };
+      const deviceKey = String(item?.deviceId ?? '').trim().toLowerCase();
+      if (deviceKey) {
+        return vehicleByDeviceId.get(deviceKey) ?? null;
+      }
+
+      return null;
+    },
+    [vehicleByDeviceId, vehicleById, vehicleByPlate],
+  );
 
   const tableRows = useMemo(
     () =>
@@ -451,7 +454,7 @@ const MaintenancePage = () => {
   return (
     <PageContainer
       pageTitle="Bảo trì"
-      pageDescription="Lập lịch, theo dõi và điều phối bảo trì phương tiện theo đúng ngữ cảnh xe và cảnh báo"
+      pageDescription="Lập lịch, theo dõi và điều phối bảo trì phương tiện theo đúng xe và cảnh báo"
       pageHeaderAction={
         <Button
           onClick={() => {
@@ -604,7 +607,7 @@ const MaintenancePage = () => {
               <div>
                 <p className="text-sm font-medium">Khuyến nghị từ OBD</p>
                 <p className="text-xs text-muted-foreground">
-                  Tạo phiếu trực tiếp từ cảnh báo để giữ ngữ cảnh xe, km và lý do bảo trì.
+                  Tạo phiếu trực tiếp từ cảnh báo để giữ thông tin xe, km và lý do bảo trì.
                 </p>
               </div>
               <Button

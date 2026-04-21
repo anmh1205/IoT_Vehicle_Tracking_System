@@ -1,9 +1,18 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Activity, AlertTriangle, Database, HardDrive, MemoryStick, Server } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  CircleOff,
+  HardDrive,
+  MemoryStick,
+  Server,
+} from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatCard } from '@/components/common/stat-card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useRoleAccess } from '@/hooks/use-role-access';
 import { formatDateTime } from '@/lib/utils/date/format';
 import { HealthCard } from '@/features/system-status/components/health-card';
@@ -45,7 +54,6 @@ const SystemStatusPage = () => {
   return (
     <PageContainer
       pageTitle="Trạng thái hệ thống"
-      pageDescription="Theo dõi Backend API, PostgreSQL, EMQX, MQTT Bridge, VictoriaMetrics, VictoriaLogs và Grafana trên một màn hình."
     >
       {(healthNotice || metricsNotice) && (
         <Card className="border-amber-200 bg-amber-50/70">
@@ -59,42 +67,32 @@ const SystemStatusPage = () => {
         </Card>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Tổng quan sức khỏe</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>Tổng dịch vụ: {serviceSummary.total}</p>
-            <p>Hoạt động: {serviceSummary.up}</p>
-            <p>Suy giảm: {serviceSummary.degraded}</p>
-            <p>Ngừng: {serviceSummary.down}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Lần kiểm tra gần nhất</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            <p>{lastCheckedAt}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">API & Database</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm text-muted-foreground">
-            <p>Backend API + PostgreSQL được kiểm tra trực tiếp bởi backend.</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Telemetry</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm text-muted-foreground">
-            <p>Dữ liệu hạ tầng được làm mới mỗi 30 giây.</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Tổng dịch vụ kiểm tra"
+          value={serviceSummary.total}
+          icon={<Server className="h-4 w-4" />}
+          subtitle={`Kiểm tra gần nhất: ${lastCheckedAt}`}
+          isLoading={healthQuery.isLoading}
+        />
+        <StatCard
+          title="Dịch vụ hoạt động"
+          value={serviceSummary.up}
+          icon={<CheckCircle2 className="h-4 w-4" />}
+          isLoading={healthQuery.isLoading}
+        />
+        <StatCard
+          title="Dịch vụ suy giảm"
+          value={serviceSummary.degraded}
+          icon={<AlertTriangle className="h-4 w-4" />}
+          isLoading={healthQuery.isLoading}
+        />
+        <StatCard
+          title="Dịch vụ ngừng"
+          value={serviceSummary.down}
+          icon={<CircleOff className="h-4 w-4" />}
+          isLoading={healthQuery.isLoading}
+        />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -141,14 +139,6 @@ const SystemStatusPage = () => {
           unavailableText={metricsNotice}
         />
       </div>
-
-      <Card>
-        <CardContent className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
-          <Database className="h-4 w-4" />
-          Các số liệu này dựa trên kiểm tra thật từ backend, không phải mock. Nếu một dịch vụ bị
-          down hoặc chưa có tín hiệu gần đây, thẻ tương ứng sẽ ghi rõ trạng thái và lý do.
-        </CardContent>
-      </Card>
     </PageContainer>
   );
 };

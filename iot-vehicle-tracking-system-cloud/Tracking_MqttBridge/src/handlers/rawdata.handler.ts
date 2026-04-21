@@ -807,6 +807,7 @@ export const handleRawData = async (
       device.vehicle_id,
       effectiveLatitude,
       effectiveLongitude,
+      new Date(timestampMs).toISOString(),
     ).catch((err) => {
       logger.error({ err, deviceId: payload.device_id }, 'Geofence check failed');
     });

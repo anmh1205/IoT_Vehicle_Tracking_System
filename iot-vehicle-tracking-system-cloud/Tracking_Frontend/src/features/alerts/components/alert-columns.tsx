@@ -43,9 +43,11 @@ export const getAlertColumns = (actions: {
       accessorKey: 'title',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Tiêu đề" />,
       cell: ({ row }) => (
-        <div className="space-y-1">
-          <p className="font-medium">{row.original.displayTitle ?? row.original.title}</p>
-          <p className="text-xs text-muted-foreground">
+        <div className="max-w-[32rem] min-w-0 space-y-1 whitespace-normal">
+          <p className="break-words font-medium leading-5">
+            {row.original.displayTitle ?? row.original.title}
+          </p>
+          <p className="break-words text-xs leading-5 text-muted-foreground">
             {row.original.displayMessage ?? row.original.message ?? 'Chưa có mô tả chi tiết'}
           </p>
         </div>
@@ -55,11 +57,11 @@ export const getAlertColumns = (actions: {
       id: 'source',
       header: 'Nguồn',
       cell: ({ row }) => (
-        <div className="space-y-1 text-sm">
-          <p className="font-medium">
+        <div className="max-w-[14rem] min-w-0 space-y-1 whitespace-normal text-sm">
+          <p className="break-words font-medium">
             {row.original.vehiclePlate ?? row.original.vehicleId ?? 'Chưa gắn xe'}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="break-words text-xs text-muted-foreground">
             {row.original.deviceName ?? row.original.deviceId ?? 'Chưa gắn thiết bị'}
           </p>
         </div>
@@ -68,7 +70,11 @@ export const getAlertColumns = (actions: {
     {
       accessorKey: 'alertType',
       header: 'Loại',
-      cell: ({ row }) => ALERT_TYPE_LABELS[row.original.alertType] ?? row.original.alertType,
+      cell: ({ row }) => (
+        <span className="whitespace-normal break-words text-sm leading-5">
+          {ALERT_TYPE_LABELS[row.original.alertType] ?? row.original.alertType}
+        </span>
+      ),
     },
     {
       accessorKey: 'severity',
@@ -82,18 +88,23 @@ export const getAlertColumns = (actions: {
     {
       accessorKey: 'status',
       header: 'Trạng thái',
-      cell: ({ row }) => STATUS_LABELS[row.original.status] ?? row.original.status,
+      cell: ({ row }) => (
+        <span className="whitespace-normal break-words text-sm leading-5">
+          {STATUS_LABELS[row.original.status] ?? row.original.status}
+        </span>
+      ),
     },
     {
       id: 'actions',
       cell: ({ row }) => (
-        <div className="flex gap-1">
-          <Button size="sm" variant="outline" onClick={() => actions.onView(row.original)}>
+        <div className="flex w-full min-w-0 flex-wrap justify-start gap-1 whitespace-normal md:justify-end">
+          <Button size="sm" className="whitespace-nowrap" variant="outline" onClick={() => actions.onView(row.original)}>
             Chi tiết
           </Button>
           <Button
             size="sm"
             variant="outline"
+            className="whitespace-nowrap"
             disabled={row.original.status !== 'active'}
             onClick={() => actions.onAck(row.original.id)}
           >
@@ -101,6 +112,7 @@ export const getAlertColumns = (actions: {
           </Button>
           <Button
             size="sm"
+            className="whitespace-nowrap"
             disabled={row.original.status === 'resolved' || row.original.status === 'dismissed'}
             onClick={() => actions.onResolve(row.original.id)}
           >

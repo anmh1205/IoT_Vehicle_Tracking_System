@@ -79,6 +79,52 @@ CREATE TRIGGER trigger_system_settings_updated_at
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- -----------------------------------------------------------------------------
+-- system_admin_setting_revisions
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS system_admin_setting_revisions (
+    id BIGSERIAL PRIMARY KEY,
+    setting_key VARCHAR(100) NOT NULL,
+    revision INT NOT NULL,
+    action VARCHAR(32) NOT NULL,
+    snapshot JSONB NOT NULL,
+    actor_user_id INT REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(setting_key, revision)
+);
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints tc
+        WHERE tc.table_schema = 'public'
+          AND tc.table_name = 'system_admin_setting_revisions'
+          AND tc.constraint_type = 'FOREIGN KEY'
+          AND tc.constraint_name = 'system_admin_setting_revisions_setting_key_fkey'
+    ) THEN
+        ALTER TABLE system_admin_setting_revisions
+            DROP CONSTRAINT system_admin_setting_revisions_setting_key_fkey;
+    END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_system_admin_setting_revisions_key_created
+    ON system_admin_setting_revisions(setting_key, created_at DESC);
+
+-- -----------------------------------------------------------------------------
+-- system_admin_idempotency_keys
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS system_admin_idempotency_keys (
+    idempotency_key VARCHAR(128) PRIMARY KEY,
+    action VARCHAR(64) NOT NULL,
+    request_hash VARCHAR(128) NOT NULL,
+    response_payload JSONB NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_system_admin_idempotency_created
+    ON system_admin_idempotency_keys(created_at DESC);
+
+-- -----------------------------------------------------------------------------
 -- notification_preferences
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS notification_preferences (

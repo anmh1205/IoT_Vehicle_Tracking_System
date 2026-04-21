@@ -14,23 +14,43 @@
 #include "telemetry_counters.h"
 #include "util.h"
 
+/**
+ * @file offline_queue.c
+ * @brief SD-backed offline queue with FIFO replay and QoS-aware ACK handling.
+ */
+
 static const char *TAG = "OFFLINE_QUEUE";
+/* Retry delayed SD mounts instead of probing every enqueue/replay tick. */
 #define OFFLINE_QUEUE_SD_MOUNT_RETRY_MS 30000ULL
+/* Sanitize legacy test credentials that may already be persisted on SD. */
 #define OFFLINE_QUEUE_AUTH_TOKEN_REPLAY "\"auth_token\":\"TRACKER_001_Anmh1205\""
+/* Keep replay traffic from monopolizing the MQTT link during recovery. */
 #define OFFLINE_QUEUE_REPLAY_MIN_PUBLISH_INTERVAL_MS 600ULL
 
 typedef struct {
+    /** `true` once `offline_queue_init` completed successfully. */
     bool initialized;
+    /** Caller-provided link state gate for replay. */
     bool online;
+    /** Session ID stamped into new queue records. */
     uint32_t session_id;
+    /** Next sequence number assigned on append. */
     uint32_t next_seq;
+    /** In-flight QoS1 MQTT message waiting for ACK, or `-1` when none. */
     int pending_msg_id;
+    /** Latest ACKed MQTT message ID seen from the client callback. */
     int acked_msg_id;
+    /** Queue sequence associated with `pending_msg_id`. */
     uint32_t pending_seq;
+    /** Timestamp when the current QoS1 publish was sent. */
     uint64_t pending_since_ms;
+    /** Last time replay actually published a record. */
     uint64_t last_replay_publish_ms;
+    /** Backoff state for replay publish/ACK failures. */
     retry_state_t replay_retry;
+    /** Backoff state for remount attempts after SD failure/removal. */
     retry_state_t sd_mount_retry;
+    /** Protects the small pending/acked ACK handshake state. */
     portMUX_TYPE ack_lock;
 } offline_queue_ctx_t;
 
@@ -87,6 +107,7 @@ static void offline_queue_try_mount(uint64_t now_ms) {
     if (err == ESP_OK) {
         retry_state_reset(&s_ctx.sd_mount_retry);
         if (s_ctx.session_id != 0) {
+            /* Preserve session continuity across temporary card removal/remount. */
             (void)sd_log_store_start_session(s_ctx.session_id);
         }
         ESP_LOGI(TAG, "SD log store mounted");
@@ -130,6 +151,7 @@ static bool offline_queue_replace_fragment(char *payload,
 
     size_t tail_len = strlen(match + old_len);
     if (new_len != old_len) {
+        /* Shift the tail in-place so the caller keeps one self-contained buffer. */
         memmove(match + new_len, match + old_len, tail_len + 1);
     }
     memcpy(match, replacement, new_len);
@@ -150,6 +172,10 @@ static const char *offline_queue_payload_for_publish(const sd_log_record_t *rec,
         return rec->payload;
     }
 
+    /*
+     * Replay should publish data that matches the current cloud contract even if
+     * older on-disk records were generated with placeholder credentials/job IDs.
+     */
     util_copy_string(scratch_payload, scratch_len, rec->payload);
 
     bool patched = false;
@@ -190,6 +216,10 @@ static bool offline_queue_is_stale_firmware_record(const sd_log_record_t *rec) {
         return false;
     }
 
+    /*
+     * Old boot/replay success payloads are not useful once the device is healthy
+     * again and can create confusing duplicate firmware history upstream.
+     */
     return strstr(payload, "\"jobId\":\"replay\"") != NULL ||
            strstr(payload, "\"jobId\":\"\"") != NULL ||
            strstr(payload, "\"jobId\":\"boot\"") != NULL;
@@ -212,6 +242,7 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
     }
 
     if (qos == 0) {
+        /* QoS0 has no broker ACK; advancing replay_seq immediately is intentional. */
         telemetry_counters_inc_replay_success();
         s_ctx.pending_msg_id = -1;
         s_ctx.pending_seq = 0;
@@ -225,6 +256,7 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
         return sd_log_store_set_replay_seq(rec->seq + 1);
     }
 
+    /* QoS1 records advance only after the MQTT client reports the matching ACK. */
     taskENTER_CRITICAL(&s_ctx.ack_lock);
     int previous_acked_msg_id = s_ctx.acked_msg_id;
     s_ctx.pending_msg_id = msg_id;
@@ -275,6 +307,7 @@ esp_err_t offline_queue_init(void) {
 
     sd_log_meta_t meta = {0};
     if (sd_log_store_get_meta(&meta) == ESP_OK) {
+        /* Continue sequence numbering after the latest persisted write. */
         s_ctx.next_seq = meta.write_seq + 1;
         if (s_ctx.next_seq == 0) {
             s_ctx.next_seq = 1;
@@ -320,6 +353,7 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
     util_copy_string(rec.payload, sizeof(rec.payload), payload);
 
     if (CONFIG_TRACKER_SD_LOG_ENABLE) {
+        /* Treat a temporarily unavailable card as best-effort; do not fail caller telemetry paths. */
         offline_queue_try_mount(util_uptime_ms());
         if (!sd_log_store_is_mounted()) {
             return ESP_OK;
@@ -370,6 +404,7 @@ void offline_queue_replay_tick(void) {
     taskEXIT_CRITICAL(&s_ctx.ack_lock);
 
     if (acked_msg_id >= 0 && acked_msg_id == pending_msg_id && pending_seq > 0) {
+        /* ACK finalizes the current QoS1 record and advances both critical + replay pointers. */
         if (sd_log_store_ack_critical_and_advance_replay(pending_seq, pending_seq + 1) == ESP_OK) {
             telemetry_counters_inc_replay_success();
             taskENTER_CRITICAL(&s_ctx.ack_lock);
@@ -390,6 +425,7 @@ void offline_queue_replay_tick(void) {
     }
 
     if (pending_msg_id >= 0) {
+        /* One record is still in flight; wait until ACK arrives or the timeout expires. */
         if ((now_ms - pending_since_ms) >= (uint64_t)CONFIG_TRACKER_SD_ACK_TIMEOUT_MS) {
             telemetry_counters_inc_replay_retry();
             taskENTER_CRITICAL(&s_ctx.ack_lock);
@@ -438,6 +474,7 @@ void offline_queue_replay_tick(void) {
     }
 
     if (rec.critical && rec.seq <= meta.ack_seq_critical) {
+        /* Metadata says this critical record was already committed earlier; skip duplicate replay. */
         (void)sd_log_store_set_replay_seq(rec.seq + 1);
         return;
     }
@@ -501,6 +538,7 @@ bool offline_queue_should_throttle_rawdata(void) {
         return false;
     }
 
+    /* Raw telemetry slows down earlier than the hard GC threshold to reduce churn. */
     size_t soft_limit = (stats.quota_bytes * (size_t)CONFIG_TRACKER_SD_LOG_SOFT_QUOTA_PERCENT) / 100U;
     return stats.bytes_used >= soft_limit;
 }

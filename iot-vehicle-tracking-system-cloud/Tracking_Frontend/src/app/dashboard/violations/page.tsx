@@ -21,20 +21,13 @@ import { violationServices } from '@/lib/api/violations';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { ViolationDetailModal } from '@/features/violations/components/violation-detail-modal';
+import { getViolationTypeLabel, VIOLATION_TYPE_LABELS } from '@/features/violations/utils/violation-labels';
 
 const SEVERITY_LABELS: Record<string, string> = {
   critical: 'Nghiêm trọng',
   high: 'Cao',
   medium: 'Trung bình',
   low: 'Thấp',
-};
-
-const VIOLATION_TYPE_LABELS: Record<string, string> = {
-  speeding: 'Vượt tốc độ',
-  harsh_braking: 'Phanh gấp',
-  idle_too_long: 'Dừng quá lâu',
-  geofence_enter: 'Vào vùng cấm',
-  geofence_exit: 'Rời vùng giám sát',
 };
 
 const ALL_TYPES = 'all';
@@ -92,8 +85,7 @@ const ViolationsPage = () => {
       accessorKey: 'violationType',
       header: 'Loại vi phạm',
       meta: { label: 'Loại vi phạm' },
-      cell: ({ row }) =>
-        VIOLATION_TYPE_LABELS[row.original.violationType] ?? row.original.violationType,
+      cell: ({ row }) => getViolationTypeLabel(row.original.violationType),
     },
     {
       accessorKey: 'severity',

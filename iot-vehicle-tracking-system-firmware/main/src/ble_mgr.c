@@ -178,6 +178,32 @@ static bool ble_mgr_queue_wait(ble_mgr_ctx_t *mgr_ctx, ble_mgr_status_t *status,
     return true;
 }
 
+static void ble_mgr_reset_context(ble_mgr_ctx_t *mgr_ctx) {
+    if (mgr_ctx == NULL) {
+        return;
+    }
+
+    if (mgr_ctx->result_queue != NULL) {
+        xQueueReset(mgr_ctx->result_queue);
+        vQueueDelete(mgr_ctx->result_queue);
+        mgr_ctx->result_queue = NULL;
+    }
+    if (mgr_ctx->lock_mtx != NULL) {
+        vSemaphoreDelete(mgr_ctx->lock_mtx);
+        mgr_ctx->lock_mtx = NULL;
+    }
+
+    mgr_ctx->disc_cfg = NULL;
+    mgr_ctx->usr_ctx = NULL;
+    mgr_ctx->is_connecting = false;
+    mgr_ctx->is_connected = false;
+    mgr_ctx->conn_handle = BLE_HS_CONN_HANDLE_NONE;
+    memset(&mgr_ctx->scan_diag, 0, sizeof(mgr_ctx->scan_diag));
+    mgr_ctx->svc_disc_ctx.svc_disc_completed = false;
+    mgr_ctx->svc_disc_ctx.chr_disc_completed = false;
+    mgr_ctx->svc_disc_ctx.chr_disc_started = false;
+}
+
 /**
  * @brief Finalize connect/discovery operation and notify waiter.
  *
@@ -647,6 +673,11 @@ const char *ble_mgr_status_to_string(ble_mgr_status_t status) {
  */
 ble_mgr_ctx_t *ble_mgr_init(uint32_t timeout_ms) {
     ble_mgr_ctx_t *mgr_ctx = &s_mgr;
+
+    if ((mgr_ctx->lock_mtx != NULL || mgr_ctx->result_queue != NULL) && !ble_stack_is_started()) {
+        ESP_LOGW(TAG, "Resetting stale BLE manager context after stack deinit");
+        ble_mgr_reset_context(mgr_ctx);
+    }
 
     if (mgr_ctx->lock_mtx != NULL) {
         return mgr_ctx;

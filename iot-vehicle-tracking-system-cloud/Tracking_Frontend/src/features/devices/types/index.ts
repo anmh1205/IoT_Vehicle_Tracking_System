@@ -6,6 +6,7 @@ export interface Device {
   imei: string | null;
   firmwareVersion: string | null;
   targetFirmwareVersion?: string | null;
+  vehicleId?: string | null;
   vehiclePlate?: string | null;
   customerName?: string | null;
   lastSeenAt: string | null;

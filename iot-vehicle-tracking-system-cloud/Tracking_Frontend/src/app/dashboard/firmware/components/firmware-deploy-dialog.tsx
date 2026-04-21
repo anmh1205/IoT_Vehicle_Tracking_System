@@ -265,7 +265,7 @@ export const FirmwareDeployDialog = ({
 
             <Card className="border-dashed bg-background">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Ngữ cảnh đợt triển khai</CardTitle>
+                <CardTitle className="text-sm">Thông tin đợt triển khai</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
                 <p>Firmware đích: {getFirmwareDisplayVersion(firmware?.version)}</p>

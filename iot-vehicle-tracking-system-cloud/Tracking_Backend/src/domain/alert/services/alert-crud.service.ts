@@ -49,7 +49,7 @@ export const createAlert = async (input: CreateAlertInput): Promise<AlertPublic>
 
   publishEvent('alert:new', {
     id: alert.id,
-    vehicle_id: alert.vehicle_id ? Number(alert.vehicle_id) : undefined,
+    vehicle_id: alert.vehicle_id ?? undefined,
     device_id: alert.device_id ?? undefined,
     alert_type: alert.alert_type,
     severity: alert.severity,

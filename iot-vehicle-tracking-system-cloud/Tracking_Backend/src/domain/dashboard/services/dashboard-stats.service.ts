@@ -19,14 +19,15 @@ export const getStats = async (): Promise<DashboardStats> => {
 
   const totalDevices = Object.values(statusCounts).reduce((sum, value) => sum + value, 0);
   const activeDevices = (statusCounts['running'] ?? 0) + (statusCounts['online'] ?? 0);
+  const toHours = (seconds: number) => Number((seconds / 3600).toFixed(2));
 
   return {
     totalDevices,
     activeDevices,
     stoppedDevices: statusCounts['stopped'] ?? 0,
     offlineDevices: statusCounts['disconnected'] ?? 0,
-    totalRuntimeToday: runtimeToday,
-    totalRuntimeWeek: runtimeWeek,
+    totalRuntimeToday: toHours(runtimeToday),
+    totalRuntimeWeek: toHours(runtimeWeek),
     alertsCount,
     sessionsToday,
   };

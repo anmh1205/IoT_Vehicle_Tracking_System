@@ -3,6 +3,7 @@ export type DeviceMapStatus = 'running' | 'stopped' | 'error' | 'disconnected' |
 export interface DevicePosition {
   deviceId: string;
   deviceName: string;
+  vehicleId?: string | null;
   vehiclePlate: string | null;
   customerName?: string | null;
   lat: number;

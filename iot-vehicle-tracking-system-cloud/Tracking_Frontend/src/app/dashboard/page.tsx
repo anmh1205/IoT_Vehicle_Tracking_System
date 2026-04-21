@@ -9,10 +9,11 @@ import { Button } from '@/components/ui/button';
 import { ActivityFeed } from '@/features/dashboard/components/activity-feed';
 import { AreaGraph } from '@/features/dashboard/components/area-graph';
 import { BarGraph } from '@/features/dashboard/components/bar-graph';
+import type { RecentAlertItem } from '@/features/dashboard/components/recent-alerts';
+import { RecentAlerts } from '@/features/dashboard/components/recent-alerts';
 import { OverviewStats } from '@/features/dashboard/components/overview-stats';
 import { PieGraph } from '@/features/dashboard/components/pie-graph';
 import { QuickActions } from '@/features/dashboard/components/quick-actions';
-import { RecentAlerts } from '@/features/dashboard/components/recent-alerts';
 import { useDashboardRealtime } from '@/features/dashboard/hooks/use-dashboard-realtime';
 import {
   useDashboardActivity,
@@ -21,8 +22,7 @@ import {
   useDeviceStatusDistribution,
   useFleetRuntime,
 } from '@/features/dashboard/hooks/use-dashboard-stats';
-import type { RecentAlertItem } from '@/features/dashboard/components/recent-alerts';
-import { alertServices } from '@/lib/api/alerts';
+import { alertServices, localizeAlertForDisplay } from '@/lib/api/alerts';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 
 const DashboardPage = () => {
@@ -32,7 +32,7 @@ const DashboardPage = () => {
   const activityQuery = useDashboardActivity(50);
   const recentAlertsQuery = useQuery({
     queryKey: ['dashboard-recent-alerts'],
-    queryFn: () => alertServices.getList({ page: 1, limit: 5 }),
+    queryFn: () => alertServices.getList({ page: 1, limit: 5, status: 'active' }),
   });
   const deviceActivityQuery = useDeviceActivity(7);
   const distributionQuery = useDeviceStatusDistribution();
@@ -57,17 +57,21 @@ const DashboardPage = () => {
   const alerts = useMemo<RecentAlertItem[]>(
     () =>
       ((recentAlertsQuery.data?.items ?? recentAlertsQuery.data?.data?.items ?? []) as any[]).map(
-        (alert) => ({
-          id: alert.id,
-          title: String(alert.title ?? 'Cảnh báo'),
-          message: alert.message ?? null,
-          severity: alert.severity ?? 'low',
-          createdAt: alert.createdAt ?? alert.created_at ?? null,
-          vehiclePlate: alert.vehiclePlate ?? alert.vehicle_plate ?? null,
-          vehicleId: alert.vehicleId ?? alert.vehicle_id ?? null,
-          deviceName: alert.deviceName ?? alert.device_name ?? null,
-          deviceId: alert.deviceId ?? alert.device_id ?? null,
-        }),
+        (alert) => {
+          const localized = localizeAlertForDisplay(alert);
+
+          return {
+            id: alert.id,
+            title: String(localized.displayTitle ?? localized.title ?? 'Cảnh báo'),
+            message: localized.displayMessage ?? localized.message ?? null,
+            severity: alert.severity ?? 'low',
+            createdAt: alert.createdAt ?? alert.created_at ?? null,
+            vehiclePlate: alert.vehiclePlate ?? alert.vehicle_plate ?? null,
+            vehicleId: alert.vehicleId ?? alert.vehicle_id ?? null,
+            deviceName: alert.deviceName ?? alert.device_name ?? null,
+            deviceId: alert.deviceId ?? alert.device_id ?? null,
+          };
+        },
       ),
     [recentAlertsQuery.data],
   );
@@ -75,7 +79,7 @@ const DashboardPage = () => {
   return (
     <PageContainer
       pageTitle="Tổng quan"
-      pageDescription="Bảng điều khiển theo dõi đội xe, hoạt động thiết bị và cảnh báo quan trọng."
+      pageDescription="Theo dõi nhanh đội xe, thiết bị và cảnh báo."
     >
       {dashboardErrorMessage ? (
         <Alert variant="destructive">

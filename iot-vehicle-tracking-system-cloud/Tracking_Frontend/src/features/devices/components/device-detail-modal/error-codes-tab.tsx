@@ -34,6 +34,7 @@ export const ErrorCodesTab = () => {
     errorCodes,
     errorCodesPage,
     errorCodesTotal,
+    errorCodesTotalPages,
     errorCodesStatus,
     errorCodesType,
     onErrorCodesPageChange,
@@ -130,8 +131,15 @@ export const ErrorCodesTab = () => {
           >
             Trang trước
           </Button>
-          <span className="text-xs text-muted-foreground">Trang {errorCodesPage}</span>
-          <Button size="sm" variant="outline" onClick={() => onErrorCodesPageChange(errorCodesPage + 1)}>
+          <span className="text-xs text-muted-foreground">
+            Trang {errorCodesPage} / {errorCodesTotalPages}
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={errorCodesPage >= errorCodesTotalPages}
+            onClick={() => onErrorCodesPageChange(errorCodesPage + 1)}
+          >
             Trang sau
           </Button>
         </div>

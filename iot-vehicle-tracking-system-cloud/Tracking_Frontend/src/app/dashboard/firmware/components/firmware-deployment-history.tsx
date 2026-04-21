@@ -127,7 +127,7 @@ export const FirmwareDeploymentHistory = ({
                     <div className="min-w-0 space-y-1">
                       <p className="truncate font-medium">{deviceLabel}</p>
                       <p className="truncate text-xs text-muted-foreground">
-                        {sourceLabel || 'Chưa có ngữ cảnh phương tiện'}
+                        {sourceLabel || 'Chưa có thông tin phương tiện'}
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -173,7 +173,7 @@ export const FirmwareDeploymentHistory = ({
                     </div>
 
                     <div className="space-y-2 rounded-lg border bg-muted/10 p-3 text-xs">
-                      <p className="font-medium">Ngữ cảnh triển khai</p>
+                      <p className="font-medium">Thông tin triển khai</p>
                       <div className="space-y-1 text-muted-foreground">
                         <p className="inline-flex items-center gap-1.5">
                           <Smartphone className="h-3.5 w-3.5" />

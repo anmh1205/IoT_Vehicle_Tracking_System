@@ -82,7 +82,7 @@ export const featureCards: MarketingFeature[] = [
   {
     icon: Wrench,
     title: 'Bảo trì và sức khỏe hệ thống',
-    description: 'Quản lý bảo trì, firmware và tình trạng hạ tầng mà không phải đổi ngữ cảnh.',
+    description: 'Quản lý bảo trì, firmware và tình trạng hạ tầng mà không phải đổi màn hình.',
     routeLabel: '/dashboard/maintenance + /dashboard/system-status',
   },
   {
@@ -140,27 +140,27 @@ export const flowSteps: FlowStep[] = [
 ];
 
 export const loginLandingContent: LoginLandingContent = {
-  badge: 'Trung tâm điều hành đội xe',
-  title: 'Theo dõi đội xe theo thời gian thực, xử lý sự cố ngay khi phát sinh.',
+  badge: 'Điều hành đội xe',
+  title: 'Đăng nhập để giám sát đội xe và xử lý cảnh báo.',
   description:
-    'Từ vị trí xe, trạng thái thiết bị đến cảnh báo bất thường, mọi tín hiệu được đưa về cùng một màn hình để ca trực phối hợp nhanh và chính xác.',
+    'Một màn hình cho map, trạng thái thiết bị, cảnh báo và nhật ký vận hành.',
   highlights: [
     {
       icon: Activity,
-      title: 'Nắm tình hình ngay khi đăng nhập',
-      description: 'Bản đồ, trạng thái kết nối và cảnh báo được cập nhật liên tục để bạn biết xe nào cần ưu tiên trước.',
+      title: 'Map và cảnh báo',
+      description: 'Ưu tiên xe cần xử lý ngay ở đầu ca trực.',
     },
     {
       icon: Waypoints,
-      title: 'Điều phối liền mạch trong một luồng',
-      description: 'Dữ liệu đi từ thiết bị qua backend lên dashboard theo cùng ngữ cảnh, giúp thao tác ít hơn và quyết định nhanh hơn.',
+      title: 'Thiết bị và chuyến đi',
+      description: 'Theo dõi đầy đủ xe-thiết bị-chuyến đi.',
     },
     {
       icon: ShieldCheck,
-      title: 'Truy cập đúng quyền, vận hành ổn định',
-      description: 'Xác thực theo vai trò và quản lý phiên tập trung giúp mỗi bộ phận vào đúng phạm vi cần xử lý.',
+      title: 'Phân quyền rõ ràng',
+      description: 'Mỗi vai trò vào đúng phạm vi thao tác.',
     },
   ],
-  proofLabels: ['Bản đồ GPS realtime', 'Cảnh báo geofence', 'Theo dõi chuyến đi', 'Trạng thái hệ thống', 'Quản lý quyền truy cập'],
-  assistText: 'Đăng nhập để tiếp tục theo dõi và điều phối đội xe trong ca hiện tại.',
+  proofLabels: ['Map realtime', 'Cảnh báo', 'Chuyến đi', 'Trạng thái hệ thống', 'Quản lý quyền'],
+  assistText: 'Đăng nhập để tiếp tục ca trực.',
 };

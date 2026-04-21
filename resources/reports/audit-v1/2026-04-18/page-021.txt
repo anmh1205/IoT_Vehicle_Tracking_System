@@ -1,5 +1,0 @@
- 
-Phần thông báo: thêm tính năng thêm kênh thông báo discord và bot telegram. Fe có nút 
-bật và khi bật có nút điền, thông tin sẽ lưu vào bảng db postgreslq. Nghiên cứu kĩ rồi lên kế 
-hoạch, hoàn thiện tính năng 
- 

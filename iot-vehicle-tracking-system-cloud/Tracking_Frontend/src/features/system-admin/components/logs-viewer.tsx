@@ -91,8 +91,42 @@ export const LogsViewer = () => {
         data={rows}
         isLoading={logsQuery.isLoading}
         pageSize={filters.limit}
+        showPagination={false}
         emptyMessage="Không có nhật ký phù hợp với bộ lọc hiện tại."
       />
+
+      <Card>
+        <CardContent className="flex items-center justify-between gap-3 p-3">
+          <p className="text-xs text-muted-foreground">
+            Trang {logsQuery.data?.page ?? filters.page} / {logsQuery.data?.totalPages ?? 1}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="rounded-md border px-3 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => setFilters((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+              disabled={filters.page <= 1 || logsQuery.isFetching}
+            >
+              Trước
+            </button>
+            <button
+              type="button"
+              className="rounded-md border px-3 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  page: Math.min(logsQuery.data?.totalPages ?? prev.page, prev.page + 1),
+                }))
+              }
+              disabled={
+                filters.page >= (logsQuery.data?.totalPages ?? 1) || logsQuery.isFetching
+              }
+            >
+              Sau
+            </button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

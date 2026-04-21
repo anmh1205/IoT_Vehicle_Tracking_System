@@ -1,8 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import type { DeviceRawFeedRow } from '@/features/devices/types';
 import { formatDateTime, formatDuration } from '@/lib/utils/date/format';
 import { DeviceDetailEmptyState } from './empty-state';
@@ -14,7 +22,7 @@ const SOURCE_LABELS: Record<string, string> = {
   session: 'Phiên',
   error: 'Lỗi',
   command: 'Lệnh',
-  'event-log': 'Event log',
+  'event-log': 'Sự kiện',
   'obd-diagnostic': 'OBD',
 };
 
@@ -37,7 +45,7 @@ const FILTERS = [
   { label: 'Phiên', value: 'session' },
   { label: 'Lỗi', value: 'error' },
   { label: 'Lệnh', value: 'command' },
-  { label: 'Event log', value: 'event-log' },
+  { label: 'Sự kiện', value: 'event-log' },
 ] as const;
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
@@ -112,17 +120,22 @@ const extractMatrixRows = (row: Pick<DeviceRawFeedRow, 'source' | 'payload'>): R
       rowItem('spd', 'Tốc độ', 'Tốc độ hiện tại trong bản tin telemetry.', payload.speed),
       rowItem('lat', 'Vĩ độ', 'Tọa độ vĩ độ từ GPS.', payload.latitude),
       rowItem('lon', 'Kinh độ', 'Tọa độ kinh độ từ GPS.', payload.longitude),
-      rowItem('bb', 'Pin thiết bị', 'Pin/điện áp nuôi tracker.', payload.deviceBattery ?? payload.battery),
-      rowItem('bt', 'Ắc quy xe', 'Điện áp nguồn phía xe hoặc OBD.', payload.vehicleBattery),
-      rowItem('temp', 'Nhiệt độ động cơ', 'Nhiệt độ vận hành ưu tiên từ động cơ hoặc coolant.', payload.engineTemperature ?? payload.temperature),
+      rowItem('bb', 'Pin thiết bị', 'Nguồn nuôi tracker hoặc pin backup.', payload.deviceBattery),
+      rowItem('bt', 'Ắc quy xe', 'Điện áp phía xe hoặc nguồn OBD.', payload.vehicleBattery),
+      rowItem(
+        'temp',
+        'Nhiệt độ động cơ',
+        'Nhiệt độ vận hành ưu tiên từ động cơ hoặc coolant OBD.',
+        payload.engineTemperature ?? payload.temperature,
+      ),
       rowItem('err', 'Mã lỗi', 'Mã lỗi kỹ thuật được firmware gửi kèm bản tin.', payload.errorCode),
     ];
   }
 
   if (row.source === 'command') {
     return [
-      rowItem('command', 'Lệnh', 'Tên command được cloud phát xuống thiết bị.', payload.command),
-      rowItem('status', 'Trạng thái', 'Trạng thái gửi/ack hiện tại của command.', payload.status),
+      rowItem('command', 'Lệnh', 'Tên command cloud phát xuống thiết bị.', payload.command),
+      rowItem('status', 'Trạng thái', 'Trạng thái gửi và ACK hiện tại của command.', payload.status),
       rowItem('sent_at', 'Gửi lúc', 'Thời điểm command được phát đi.', payload.sentAt ?? payload.sent_at),
       rowItem('acked_at', 'ACK lúc', 'Thời điểm thiết bị phản hồi ACK.', payload.ackedAt ?? payload.acked_at),
     ];
@@ -151,19 +164,19 @@ const extractMatrixRows = (row: Pick<DeviceRawFeedRow, 'source' | 'payload'>): R
       rowItem('sample_age_ms', 'Độ trễ mẫu', 'Độ cũ của mẫu OBD gần nhất.', snapshot?.sampleAgeMs),
       {
         code: 'dtc.stored',
-        label: 'Stored DTC',
-        meaning: 'Mã lỗi đang lưu trong ECU.',
+        label: 'DTC đang lưu',
+        meaning: 'Mã lỗi hiện đang lưu trong ECU.',
         value: stringifyCodes(snapshot?.dtcStored),
       },
       {
         code: 'dtc.pending',
-        label: 'Pending DTC',
+        label: 'DTC chờ xác nhận',
         meaning: 'Mã lỗi mới xuất hiện, đang chờ xác nhận.',
         value: stringifyCodes(snapshot?.dtcPending),
       },
       {
         code: 'dtc.permanent',
-        label: 'Permanent DTC',
+        label: 'DTC thường trực',
         meaning: 'Mã lỗi đã được ECU đánh dấu thường trực.',
         value: stringifyCodes(snapshot?.dtcPermanent),
       },
@@ -188,9 +201,19 @@ const extractMatrixRows = (row: Pick<DeviceRawFeedRow, 'source' | 'payload'>): R
 
   if (row.source === 'event-log') {
     return [
-      rowItem('event_type', 'Loại sự kiện', 'Nhóm sự kiện mà backend đã ghi nhận.', payload.event_type ?? payload.topic),
+      rowItem(
+        'event_type',
+        'Loại sự kiện',
+        'Nhóm sự kiện mà backend đã ghi nhận.',
+        payload.localized_title ?? payload.event_type ?? payload.topic,
+      ),
       rowItem('event_code', 'Mã sự kiện', 'Mã chi tiết để truy vết log.', payload.event_code),
-      rowItem('message', 'Thông điệp', 'Nội dung mô tả ngắn của log.', payload.message),
+      rowItem(
+        'message',
+        'Thông điệp',
+        'Nội dung mô tả ngắn của log.',
+        payload.localized_message ?? payload.message,
+      ),
       rowItem('server_timestamp', 'Thời gian server', 'Mốc server ghi log.', payload.server_timestamp ?? payload.created_at),
       rowItem('device_id', 'Thiết bị', 'Thiết bị gắn với bản ghi log.', payload.device_id ?? payload.deviceId),
       rowItem('topic', 'Topic', 'Topic hoặc luồng phát sinh bản ghi.', payload.topic),
@@ -198,14 +221,14 @@ const extractMatrixRows = (row: Pick<DeviceRawFeedRow, 'source' | 'payload'>): R
   }
 
   return Object.entries(payload)
-    .slice(0, 6)
+    .slice(0, 8)
     .map(([key, value]) => rowItem(key, key, 'Trường dữ liệu thô từ payload gốc.', value));
 };
 
-const SummaryTile = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
-    <p className="text-xs text-muted-foreground">{label}</p>
-    <p className="mt-1 text-base font-semibold">{value}</p>
+const SummaryPill = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-full border bg-background px-2.5 py-1 text-[11px]">
+    <span className="text-muted-foreground">{label}</span>
+    <span className="ml-2 font-semibold text-foreground">{value}</span>
   </div>
 );
 
@@ -256,37 +279,42 @@ export const RawDataTab = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-        <SummaryTile label="Bản ghi đang tải" value={String(rawFeed.length)} />
-        <SummaryTile label="Telemetry" value={String(counts.telemetry)} />
-        <SummaryTile label="OBD diagnostics" value={String(counts.obd)} />
-        <SummaryTile label="Phiên / event log" value={`${counts.session} / ${counts.eventLog}`} />
-        <SummaryTile label="Lệnh / lỗi" value={`${counts.command} / ${counts.error}`} />
-        <SummaryTile label="Event logs hệ thống" value={String(eventLogsTotal)} />
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <div className="rounded-2xl border bg-muted/10 px-3 py-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-1.5">
+            <SummaryPill label="Bản ghi" value={String(rawFeed.length)} />
+            <SummaryPill label="Telemetry" value={String(counts.telemetry)} />
+            <SummaryPill label="OBD" value={String(counts.obd)} />
+            <SummaryPill label="Phiên" value={String(counts.session)} />
+            <SummaryPill label="Lệnh / lỗi" value={`${counts.command} / ${counts.error}`} />
+            <SummaryPill label="Sự kiện" value={`${counts.eventLog} / ${eventLogsTotal}`} />
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            {FILTERS.map((item) => (
+              <Button
+                key={item.value}
+                size="sm"
+                variant={filter === item.value ? 'default' : 'outline'}
+                className="h-7 px-2.5 text-[11px]"
+                onClick={() => setFilter(item.value)}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {FILTERS.map((item) => (
-          <Button
-            key={item.value}
-            size="sm"
-            variant={filter === item.value ? 'default' : 'outline'}
-            onClick={() => setFilter(item.value)}
-          >
-            {item.label}
-          </Button>
-        ))}
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-[0.95fr,1.05fr]">
-        <Card>
-          <CardHeader>
+      <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <Card className="flex min-h-0 flex-col">
+          <CardHeader className="pb-3">
             <CardTitle className="text-base">Danh sách bản ghi</CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="h-[58dvh] px-4 pb-4">
-              <div className="space-y-2">
+          <CardContent className="min-h-0 flex-1 p-0">
+            <ScrollArea className="h-full px-4 pb-4">
+              <div className="space-y-2 pt-1">
                 {visibleRows.length > 0 ? (
                   visibleRows.map((row) => {
                     const active = row.id === selectedId;
@@ -294,7 +322,7 @@ export const RawDataTab = () => {
                       <button
                         key={row.id}
                         type="button"
-                        className={`w-full rounded-xl border px-3 py-3 text-left transition-colors ${active ? 'border-primary/40 bg-primary/5' : 'bg-background hover:bg-muted/40'}`}
+                        className={`w-full rounded-xl border px-3 py-3 text-left transition-colors ${active ? 'border-primary/40 bg-primary/5 shadow-sm' : 'bg-background hover:bg-muted/40'}`}
                         onClick={() => setSelectedId(row.id)}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -324,68 +352,79 @@ export const RawDataTab = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="text-base">Chi tiết bản ghi</CardTitle>
-              {selectedRow ? (
-                <Badge variant={SOURCE_VARIANTS[selectedRow.source] ?? 'outline'}>
-                  {SOURCE_LABELS[selectedRow.source] ?? selectedRow.source}
-                </Badge>
-              ) : null}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <Card className="flex min-h-0 flex-col">
+          <CardHeader className="pb-3">
             {selectedRow ? (
-              <>
-                <div>
-                  <p className="text-sm font-semibold">{selectedRow.event}</p>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <CardTitle className="text-base">{selectedRow.event}</CardTitle>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {formatDateTime(selectedRow.timestamp)}
                   </p>
-                  <p className="mt-3 text-sm text-muted-foreground">
+                  <p className="mt-2 text-sm text-muted-foreground">
                     {selectedRow.summary || 'Không có tóm tắt cho bản ghi này.'}
                   </p>
                 </div>
-
-                <div className="overflow-hidden rounded-xl border">
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.9fr)] gap-3 border-b bg-muted/30 px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                    <p>Mã</p>
-                    <p>Ý nghĩa</p>
-                    <p>Giá trị</p>
-                  </div>
-                  <div className="divide-y">
-                    {extractMatrixRows(selectedRow).map((item) => (
-                      <div
-                        key={`${selectedRow.id}-${item.code}`}
-                        className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.9fr)] gap-3 px-3 py-2.5 text-sm"
-                      >
-                        <div>
-                          <p className="font-mono text-xs text-foreground">{item.code}</p>
-                          <p className="text-xs text-muted-foreground">{item.label}</p>
-                        </div>
-                        <p className="text-xs leading-5 text-muted-foreground">{item.meaning}</p>
-                        <p className="break-words font-medium">{item.value}</p>
-                      </div>
-                    ))}
-                  </div>
+                <Badge variant={SOURCE_VARIANTS[selectedRow.source] ?? 'outline'}>
+                  {SOURCE_LABELS[selectedRow.source] ?? selectedRow.source}
+                </Badge>
+              </div>
+            ) : (
+              <CardTitle className="text-base">Chi tiết bản ghi</CardTitle>
+            )}
+          </CardHeader>
+          <CardContent className="min-h-0 flex-1">
+            {selectedRow ? (
+              <div className="grid h-full min-h-0 gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(320px,0.92fr)]">
+                <div className="min-h-0 overflow-hidden rounded-xl border">
+                  <ScrollArea className="h-full">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[110px]">Mã</TableHead>
+                          <TableHead>Ý nghĩa</TableHead>
+                          <TableHead className="w-[240px]">Giá trị</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {extractMatrixRows(selectedRow).map((item) => (
+                          <TableRow key={`${selectedRow.id}-${item.code}`}>
+                            <TableCell className="font-mono text-xs">{item.code}</TableCell>
+                            <TableCell className="whitespace-normal">
+                              <p className="font-medium text-foreground">{item.label}</p>
+                              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                {item.meaning}
+                              </p>
+                            </TableCell>
+                            <TableCell className="whitespace-normal break-words font-medium">
+                              {item.value}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
                 </div>
 
-                <div className="rounded-xl border bg-slate-950 p-3 text-slate-100">
+                <div className="min-h-0 rounded-xl border bg-slate-950 p-3 text-slate-100">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-300">
                       Payload JSON
                     </p>
-                    <span className="text-[11px] text-slate-400">Nguồn gốc giữ nguyên để đối chiếu</span>
+                    <span className="text-[11px] text-slate-400">
+                      Đối chiếu payload API gốc
+                    </span>
                   </div>
-                  <pre className="mt-3 max-h-[32rem] overflow-auto text-xs leading-5 text-slate-200">
-                    {JSON.stringify(selectedRow.payload, null, 2)}
-                  </pre>
+                  <ScrollArea className="mt-3 h-[calc(100%-2rem)]">
+                    <pre className="pr-4 text-xs leading-5 text-slate-200">
+                      {JSON.stringify(selectedRow.payload, null, 2)}
+                    </pre>
+                  </ScrollArea>
                 </div>
-              </>
+              </div>
             ) : (
               <div className="rounded-xl border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
-                Chọn một bản ghi ở cột trái để xem chi tiết đã được làm gọn.
+                Chọn một bản ghi ở cột bên trái để xem chi tiết.
               </div>
             )}
           </CardContent>

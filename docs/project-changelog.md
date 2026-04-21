@@ -1,5 +1,12 @@
 # Project Changelog
 
+## 2026-04-21
+### Allowed-Zone Map UX Refactor (Completed)
+- Refactored the operations map allowed-zone flow in `Tracking_Frontend/src/features/map/components/tracking-map.tsx` so allowed-zone rendering/editing now uses a dedicated map layer and docked panel instead of the generic geofence draft/workspace path.
+- Updated `Tracking_Frontend/src/features/map/components/map-selected-device-overlay.tsx` to show allowed-zone status and direct create/edit/show/hide actions for the selected device overlay.
+- Kept shared allowed-zone data hooks and form payload mapping unchanged in `Tracking_Frontend/src/features/geofences/hooks/use-vehicle-allowed-zone.ts` and `src/features/geofences/lib/allowed-zone-form.ts`; non-map surfaces still use `src/features/geofences/components/allowed-zone-setup-sheet.tsx`.
+- Validation status: documentation-only update to reflect an already implemented frontend UX refactor; no new runtime contract changes were documented.
+
 ## 2026-04-16
 ### Dashboard Device Limit Fix + Vietnamese Copy Normalization (Completed)
 - Fixed frontend fallback device snapshot loading in `Tracking_Frontend/src/features/dashboard/hooks/use-dashboard-stats.ts` and `Tracking_Frontend/src/features/statistics/hooks/use-statistics.ts` to page through `/api/v1/devices` with `limit=100`, avoiding backend validation failures from `limit=500`.

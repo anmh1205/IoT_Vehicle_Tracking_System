@@ -5,6 +5,7 @@ const EXACT_ALERT_TITLE_LABELS: Record<string, string> = {
   'mock alert: harsh braking detected': 'Cảnh báo mô phỏng: Phát hiện phanh gấp',
   'mock alert: vehicle exited warehouse perimeter': 'Cảnh báo mô phỏng: Xe đã rời chu vi kho',
   'mock alert: speed threshold exceeded': 'Cảnh báo mô phỏng: Vượt ngưỡng tốc độ',
+  'mock alert: device offline during transfer': 'Cảnh báo mô phỏng: Thiết bị mất kết nối khi truyền dữ liệu',
 };
 
 const translateDtcStatus = (value: string) =>
@@ -128,6 +129,11 @@ export const localizeAlertMessage = (
   );
   if (channelMatch) {
     return `Kết nối hoặc khởi tạo OBD thất bại ${channelMatch[1]} lần trong 5 phút gần nhất.`;
+  }
+
+  const offlineTransferMatch = trimmed.match(/^SIM link dropped for\s+([\d.]+)\s+minutes\.?$/i);
+  if (offlineTransferMatch) {
+    return `Liên kết SIM bị gián đoạn trong ${offlineTransferMatch[1]} phút.`;
   }
 
   const voltageMatch = trimmed.match(

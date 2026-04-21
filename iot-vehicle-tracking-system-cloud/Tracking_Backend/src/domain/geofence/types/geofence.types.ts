@@ -195,3 +195,92 @@ export interface VehiclePolicyViolationQuery {
   status?: 'open' | 'acknowledged' | 'resolved';
   acknowledged?: boolean;
 }
+
+export type VehicleAllowedZoneStatus = 'active' | 'disabled';
+
+export type VehicleAllowedZoneCenterSource = 'vehicle_position' | 'map_pick';
+
+export type VehicleAllowedZoneMembershipState = 'unknown' | 'inside' | 'outside' | 'suspect';
+
+export type VehicleAllowedZoneAlertMode =
+  | 'transition_only'
+  | 'transition_and_recovery'
+  | 'periodic_while_outside'
+  | 'silent';
+
+export interface VehicleAllowedZoneWarning {
+  code: 'STALE_POSITION' | 'POSITION_TIMESTAMP_UNAVAILABLE';
+  message: string;
+  staleAgeSec?: number | null;
+  snapshotAt?: string | null;
+}
+
+export interface VehicleAllowedZone {
+  id: number;
+  vehicle_id: string;
+  zone_type: 'circle';
+  center_lat: number;
+  center_lon: number;
+  radius_m: number;
+  center_source: VehicleAllowedZoneCenterSource;
+  center_snapshot_at: Date | null;
+  status: VehicleAllowedZoneStatus;
+  last_membership_state: VehicleAllowedZoneMembershipState;
+  last_membership_changed_at: Date | null;
+  last_alerted_state: VehicleAllowedZoneMembershipState | null;
+  last_alerted_at: Date | null;
+  suppression_until: Date | null;
+  alert_mode: VehicleAllowedZoneAlertMode;
+  cooldown_sec: number;
+  source_warning_json: VehicleAllowedZoneWarning | null;
+  created_by: number | null;
+  updated_by: number | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface VehicleAllowedZonePublic {
+  id: number;
+  vehicleId: string;
+  zoneType: 'circle';
+  centerLatitude: number;
+  centerLongitude: number;
+  radiusMeters: number;
+  centerSource: VehicleAllowedZoneCenterSource;
+  centerSnapshotAt: string | null;
+  status: VehicleAllowedZoneStatus;
+  membershipState: VehicleAllowedZoneMembershipState;
+  lastMembershipChangedAt: string | null;
+  lastAlertedState: VehicleAllowedZoneMembershipState | null;
+  lastAlertedAt: string | null;
+  suppressionUntil: string | null;
+  alertMode: VehicleAllowedZoneAlertMode;
+  cooldownSec: number;
+  warning: VehicleAllowedZoneWarning | null;
+  createdBy: number | null;
+  updatedBy: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpsertVehicleAllowedZoneInput {
+  centerSource: VehicleAllowedZoneCenterSource;
+  centerLatitude?: number;
+  centerLongitude?: number;
+  radiusMeters: number;
+  alertMode?: VehicleAllowedZoneAlertMode;
+  cooldownSec?: number;
+}
+
+export interface VehicleAllowedZonePreviewCenterPublic {
+  vehicleId: string;
+  plateNumber: string | null;
+  deviceId: string | null;
+  centerLatitude: number;
+  centerLongitude: number;
+  centerSource: 'vehicle_position';
+  snapshotAt: string | null;
+  isStale: boolean;
+  staleAgeSec: number | null;
+  warning: VehicleAllowedZoneWarning | null;
+}

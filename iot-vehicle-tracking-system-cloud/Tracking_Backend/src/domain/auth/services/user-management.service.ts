@@ -31,6 +31,15 @@ interface NotificationSettings {
   };
 }
 
+const normalizeNullableString = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
 const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   emailAlerts: true,
   pushAlerts: true,
@@ -70,24 +79,15 @@ const extractNotificationSettings = (
           typeof discord.enabled === 'boolean'
             ? discord.enabled
             : DEFAULT_NOTIFICATION_SETTINGS.channels.discord.enabled,
-        webhookUrl:
-          typeof discord.webhookUrl === 'string' && discord.webhookUrl.trim().length > 0
-            ? discord.webhookUrl
-            : null,
+        webhookUrl: normalizeNullableString(discord.webhookUrl),
       },
       telegram: {
         enabled:
           typeof telegram.enabled === 'boolean'
             ? telegram.enabled
             : DEFAULT_NOTIFICATION_SETTINGS.channels.telegram.enabled,
-        botToken:
-          typeof telegram.botToken === 'string' && telegram.botToken.trim().length > 0
-            ? telegram.botToken
-            : null,
-        chatId:
-          typeof telegram.chatId === 'string' && telegram.chatId.trim().length > 0
-            ? telegram.chatId
-            : null,
+        botToken: normalizeNullableString(telegram.botToken),
+        chatId: normalizeNullableString(telegram.chatId),
       },
     },
   };
@@ -235,41 +235,49 @@ export const updateNotificationPreferences = async (
     throw createNotFoundError(`User with id ${userId} not found`);
   }
 
+  const currentSettings = extractNotificationSettings(existing.preferences);
+  const discordWebhookUrl =
+    input.channels?.discord?.webhookUrl !== undefined
+      ? normalizeNullableString(input.channels.discord.webhookUrl)
+      : undefined;
+  const telegramBotToken =
+    input.channels?.telegram?.botToken !== undefined
+      ? normalizeNullableString(input.channels.telegram.botToken)
+      : undefined;
+  const telegramChatId =
+    input.channels?.telegram?.chatId !== undefined
+      ? normalizeNullableString(input.channels.telegram.chatId)
+      : undefined;
+
   const nextPreferences = {
     ...(existing.preferences ?? {}),
     notifications: {
-      ...extractNotificationSettings(existing.preferences),
+      ...currentSettings,
       ...(input.emailAlerts !== undefined ? { emailAlerts: input.emailAlerts } : {}),
       ...(input.pushAlerts !== undefined ? { pushAlerts: input.pushAlerts } : {}),
       ...(input.alertTypes !== undefined ? { alertTypes: input.alertTypes } : {}),
       channels: {
-        ...extractNotificationSettings(existing.preferences).channels,
+        ...currentSettings.channels,
         ...(input.channels?.discord
           ? {
               discord: {
-                ...extractNotificationSettings(existing.preferences).channels.discord,
+                ...currentSettings.channels.discord,
                 ...(input.channels.discord.enabled !== undefined
                   ? { enabled: input.channels.discord.enabled }
                   : {}),
-                ...(input.channels.discord.webhookUrl !== undefined
-                  ? { webhookUrl: input.channels.discord.webhookUrl }
-                  : {}),
+                ...(discordWebhookUrl !== undefined ? { webhookUrl: discordWebhookUrl } : {}),
               },
             }
           : {}),
         ...(input.channels?.telegram
           ? {
               telegram: {
-                ...extractNotificationSettings(existing.preferences).channels.telegram,
+                ...currentSettings.channels.telegram,
                 ...(input.channels.telegram.enabled !== undefined
                   ? { enabled: input.channels.telegram.enabled }
                   : {}),
-                ...(input.channels.telegram.botToken !== undefined
-                  ? { botToken: input.channels.telegram.botToken }
-                  : {}),
-                ...(input.channels.telegram.chatId !== undefined
-                  ? { chatId: input.channels.telegram.chatId }
-                  : {}),
+                ...(telegramBotToken !== undefined ? { botToken: telegramBotToken } : {}),
+                ...(telegramChatId !== undefined ? { chatId: telegramChatId } : {}),
               },
             }
           : {}),

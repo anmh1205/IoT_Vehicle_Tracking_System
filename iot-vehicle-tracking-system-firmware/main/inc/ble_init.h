@@ -35,6 +35,13 @@ esp_err_t ble_init_stack(const ble_init_config_t *config);
 esp_err_t ble_stack_init(void);
 
 /**
+ * @brief Read current NimBLE stack lifecycle flag.
+ *
+ * @return true when stack init completed and deinit has not run yet.
+ */
+bool ble_stack_is_started(void);
+
+/**
  * @brief Stop and deinitialize NimBLE stack.
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.

@@ -122,8 +122,8 @@ export const TripPreviewDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-6xl">
-        <DialogHeader className="gap-3">
+      <DialogContent className="flex h-[min(92dvh,960px)] max-h-[92dvh] w-[min(96vw,1320px)] max-w-none flex-col overflow-hidden p-0 sm:w-[min(96vw,1320px)] sm:max-w-none">
+        <DialogHeader className="shrink-0 gap-3 border-b bg-background px-6 py-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <DialogTitle>{tripQuery.data?.tripCode ?? 'Xem nhanh chuyến đi'}</DialogTitle>
@@ -152,93 +152,95 @@ export const TripPreviewDialog = ({
           </div>
         </DialogHeader>
 
-        {tripQuery.isError ? (
-          <EmptyState
-            title="Không thể tải chuyến đi"
-            description="Dữ liệu chuyến đi hiện chưa sẵn sàng. Hãy thử lại sau."
-            action={{ label: 'Thử lại', onClick: () => void tripQuery.refetch() }}
-          />
-        ) : tripQuery.isLoading ? (
-          <div className="rounded-xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
-            Đang tải dữ liệu chuyến đi...
-          </div>
-        ) : tripQuery.data ? (
-          <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <StatTile label="Khoảng cách" value={`${distanceKm} km`} />
-              <StatTile label="Thời gian" value={formatDuration(durationMinutes * 60)} />
-              <StatTile label="TB tốc độ" value={`${avgSpeed} km/h`} />
-              <StatTile label="Đỉnh tốc độ" value={`${maxSpeed} km/h`} />
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+          {tripQuery.isError ? (
+            <EmptyState
+              title="Không thể tải chuyến đi"
+              description="Dữ liệu chuyến đi hiện chưa sẵn sàng. Hãy thử lại sau."
+              action={{ label: 'Thử lại', onClick: () => void tripQuery.refetch() }}
+            />
+          ) : tripQuery.isLoading ? (
+            <div className="rounded-xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+              Đang tải dữ liệu chuyến đi...
             </div>
+          ) : tripQuery.data ? (
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <StatTile label="Khoảng cách" value={`${distanceKm} km`} />
+                <StatTile label="Thời gian" value={formatDuration(durationMinutes * 60)} />
+                <StatTile label="TB tốc độ" value={`${avgSpeed} km/h`} />
+                <StatTile label="Đỉnh tốc độ" value={`${maxSpeed} km/h`} />
+              </div>
 
-            <div className="rounded-2xl border bg-muted/20 p-4 text-sm">
-              <div className="grid gap-3 lg:grid-cols-2">
-                <div>
-                  <p className="text-xs text-muted-foreground">Điểm đi</p>
-                  <p className="font-medium">{tripQuery.data.startLocation ?? 'Chưa cấu hình'}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {formatDateTime(tripQuery.data.actualStart ?? tripQuery.data.plannedStart)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Điểm đến</p>
-                  <p className="font-medium">{tripQuery.data.endLocation ?? 'Chưa cấu hình'}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {formatDateTime(tripQuery.data.actualEnd ?? tripQuery.data.plannedEnd)}
-                  </p>
+              <div className="rounded-2xl border bg-muted/20 p-4 text-sm">
+                <div className="grid gap-3 lg:grid-cols-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Điểm đi</p>
+                    <p className="font-medium">{tripQuery.data.startLocation ?? 'Chưa cấu hình'}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {formatDateTime(tripQuery.data.actualStart ?? tripQuery.data.plannedStart)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Điểm đến</p>
+                    <p className="font-medium">{tripQuery.data.endLocation ?? 'Chưa cấu hình'}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {formatDateTime(tripQuery.data.actualEnd ?? tripQuery.data.plannedEnd)}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {telemetryQuery.isError ? (
-              <EmptyState
-                title="Không thể tải replay"
-                description="Telemetry hành trình hiện chưa sẵn sàng."
-                action={{ label: 'Thử lại', onClick: () => void telemetryQuery.refetch() }}
-              />
-            ) : (
-              <>
-                <div className="rounded-2xl border bg-muted/10 p-4">
-                  {points.length === 0 ? (
-                    <EmptyState
-                      title="Chưa có dữ liệu replay"
-                      description="Chuyến đi chưa ghi nhận đủ waypoint để phát lại hành trình."
-                    />
-                  ) : (
-                    <TripReplayControls
-                      playing={playing}
-                      cursor={cursor}
-                      max={Math.max(points.length - 1, 0)}
-                      speed={speed}
-                      onToggle={() => setPlaying((value) => !value)}
-                      onReset={() => {
-                        setCursor(0);
-                        setPlaying(false);
-                      }}
-                      onCursorChange={setCursor}
-                      onSpeedChange={setSpeed}
-                    />
-                  )}
-                </div>
-
-                <TripDetail
-                  trip={tripQuery.data}
-                  summary={summary}
-                  points={points}
-                  moving={moving}
-                  cursor={cursor}
+              {telemetryQuery.isError ? (
+                <EmptyState
+                  title="Không thể tải replay"
+                  description="Telemetry hành trình hiện chưa sẵn sàng."
+                  action={{ label: 'Thử lại', onClick: () => void telemetryQuery.refetch() }}
                 />
-              </>
-            )}
-          </div>
-        ) : (
-          <EmptyState
-            title="Chưa có chuyến đi"
-            description="Không tìm thấy dữ liệu cho chuyến đi đang chọn."
-          />
-        )}
+              ) : (
+                <>
+                  <div className="rounded-2xl border bg-muted/10 p-4">
+                    {points.length === 0 ? (
+                      <EmptyState
+                        title="Chưa có dữ liệu replay"
+                        description="Chuyến đi chưa ghi nhận đủ waypoint để phát lại hành trình."
+                      />
+                    ) : (
+                      <TripReplayControls
+                        playing={playing}
+                        cursor={cursor}
+                        max={Math.max(points.length - 1, 0)}
+                        speed={speed}
+                        onToggle={() => setPlaying((value) => !value)}
+                        onReset={() => {
+                          setCursor(0);
+                          setPlaying(false);
+                        }}
+                        onCursorChange={setCursor}
+                        onSpeedChange={setSpeed}
+                      />
+                    )}
+                  </div>
 
-        <DialogFooter>
+                  <TripDetail
+                    trip={tripQuery.data}
+                    summary={summary}
+                    points={points}
+                    moving={moving}
+                    cursor={cursor}
+                  />
+                </>
+              )}
+            </div>
+          ) : (
+            <EmptyState
+              title="Chưa có chuyến đi"
+              description="Không tìm thấy dữ liệu cho chuyến đi đang chọn."
+            />
+          )}
+        </div>
+
+        <DialogFooter className="shrink-0 border-t bg-background px-6 py-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Đóng
           </Button>

@@ -263,7 +263,7 @@ const FirmwarePage = () => {
       <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
         <Card className="border-dashed">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Ngữ cảnh bản phát hành</CardTitle>
+            <CardTitle className="text-base">Thông tin bản phát hành</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border bg-muted/20 p-3">
@@ -301,7 +301,7 @@ const FirmwarePage = () => {
 
         <Card className="border-dashed">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Ngữ cảnh đợt OTA gần nhất</CardTitle>
+            <CardTitle className="text-base">Thông tin đợt OTA gần nhất</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border bg-muted/20 p-3">

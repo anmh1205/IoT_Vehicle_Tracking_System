@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { hasValidMapCoordinates, MAP_STATUS_LABELS } from '@/features/map/constants/map-config';
+import { MAP_STATUS_LABELS } from '@/features/map/constants/map-config';
 import type { DevicePosition } from '@/features/map/types';
 import { formatRelative } from '@/lib/utils/date/format';
 import { cn } from '@/lib/utils';
@@ -39,7 +39,7 @@ export const DeviceListItem = ({
         <div className="min-w-0">
           <p className="line-clamp-1 text-sm font-semibold">{device.deviceName}</p>
           <p className="line-clamp-1 text-xs text-muted-foreground">
-            {device.vehiclePlate ?? 'Chưa gán biển số'} • {device.deviceId}
+            {device.vehiclePlate ?? device.deviceId ?? 'Chưa gán phương tiện'}
           </p>
         </div>
         <Badge variant={STATUS_VARIANTS[device.status]}>{MAP_STATUS_LABELS[device.status]}</Badge>
@@ -47,11 +47,6 @@ export const DeviceListItem = ({
 
       <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span>Tốc độ {device.speed} km/h</span>
-        <span>
-          {hasValidMapCoordinates(device)
-            ? `${device.lat.toFixed(4)}, ${device.lon.toFixed(4)}`
-            : 'Chưa có tọa độ hợp lệ'}
-        </span>
         <span>
           {device.timestamp ? `Cập nhật ${formatRelative(device.timestamp)}` : 'Chưa có mốc thời gian'}
         </span>

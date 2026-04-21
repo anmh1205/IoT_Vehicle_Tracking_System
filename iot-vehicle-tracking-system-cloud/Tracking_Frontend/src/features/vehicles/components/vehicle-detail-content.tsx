@@ -1,9 +1,21 @@
 'use client';
 
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatCard } from '@/components/common/stat-card';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDateTime, formatNumber } from '@/lib/utils/date/format';
+import { AllowedZoneSetupSheet } from '@/features/geofences/components/allowed-zone-setup-sheet';
+import { AllowedZoneStatusCard } from '@/features/geofences/components/allowed-zone-status-card';
+import { useRoleAccess } from '@/hooks/use-role-access';
 
 const VEHICLE_STATUS_LABELS: Record<string, string> = {
   active: 'Đang hoạt động',
@@ -30,13 +42,6 @@ const formatValue = (value: string | number | null | undefined, fallback = 'Chư
   const next = String(value).trim();
   return next.length > 0 ? next : fallback;
 };
-
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
-    <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-    <p className="mt-1 text-sm font-medium leading-6">{value}</p>
-  </div>
-);
 
 const formatMileage = (value: number | null | undefined) =>
   value === null || value === undefined ? 'Chưa cập nhật' : `${formatNumber(value)} km`;
@@ -71,6 +76,47 @@ const getCustomerLabel = (vehicle: any) => {
   return vehicle?.customerId ? `Khách hàng #${vehicle.customerId}` : 'Chưa gán';
 };
 
+const DetailRow = ({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+}) => (
+  <div className="grid gap-1 py-3 sm:grid-cols-[168px_minmax(0,1fr)] sm:gap-4">
+    <div>
+      <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+    </div>
+    <div className="min-w-0">
+      <p className="text-sm font-medium leading-6 text-foreground">{value}</p>
+      {hint ? <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{hint}</p> : null}
+    </div>
+  </div>
+);
+
+const DetailSection = ({
+  title,
+  rows,
+}: {
+  title: string;
+  rows: Array<{ label: string; value: string; hint?: string }>;
+}) => (
+  <Card>
+    <CardHeader className="px-4 pt-3 pb-2">
+      <CardTitle className="text-base">{title}</CardTitle>
+    </CardHeader>
+    <CardContent className="px-4 pb-4">
+      <div className="divide-y rounded-2xl border bg-muted/10 px-4">
+        {rows.map((row) => (
+          <DetailRow key={row.label} label={row.label} value={row.value} hint={row.hint} />
+        ))}
+      </div>
+    </CardContent>
+  </Card>
+);
+
 export const VehicleDetailContent = ({
   vehicle,
   compact = false,
@@ -78,18 +124,13 @@ export const VehicleDetailContent = ({
   vehicle: any | null;
   compact?: boolean;
 }) => {
+  const [allowedZoneOpen, setAllowedZoneOpen] = useState(false);
+  const access = useRoleAccess();
   if (!vehicle) {
     return null;
   }
 
   const insuranceBadge = getInsuranceBadge(vehicle.insuranceExpiry);
-  const headline = formatValue(
-    vehicle.plateNumber ?? vehicle.vehicleId,
-    'Phương tiện chưa có biển số',
-  );
-  const subheadline = [vehicle.vehicleId, vehicle.vehicleType, [vehicle.brand, vehicle.model].filter(Boolean).join(' ')]
-    .filter(Boolean)
-    .join(' • ');
   const customerLabel = getCustomerLabel(vehicle);
   const statusLabel =
     VEHICLE_STATUS_LABELS[vehicle.status] ?? formatValue(vehicle.status, 'Chưa xác định');
@@ -98,124 +139,126 @@ export const VehicleDetailContent = ({
     !vehicle.customerId ? 'Chưa gắn khách hàng sở hữu' : null,
   ].filter(Boolean);
 
+  const operationsRows = [
+    { label: 'Trạng thái', value: statusLabel },
+    { label: 'Biểu tượng bản đồ', value: formatValue(vehicle.iconType, 'Mặc định') },
+    { label: 'Nhiên liệu', value: formatValue(vehicle.fuelType, 'Chưa xác định') },
+    { label: 'Hộp số', value: formatValue(vehicle.transmission, 'Chưa xác định') },
+    { label: 'Ghi chú vận hành', value: formatValue(vehicle.notes, 'Chưa có ghi chú') },
+  ];
+
+  const identityRows = [
+    { label: 'Mã xe', value: formatValue(vehicle.vehicleId, 'Chưa có') },
+    { label: 'Biển số', value: formatValue(vehicle.plateNumber, 'Chưa có') },
+    { label: 'Hãng xe', value: formatValue(vehicle.brand) },
+    { label: 'Dòng xe', value: formatValue(vehicle.model) },
+    {
+      label: 'Loại xe',
+      value: formatValue(vehicle.vehicleType, 'Chưa phân loại'),
+    },
+    {
+      label: 'Năm sản xuất',
+      value: vehicle.year ? String(vehicle.year) : 'Chưa cập nhật',
+    },
+    { label: 'Màu sơn', value: formatValue(vehicle.color) },
+    { label: 'VIN', value: formatValue(vehicle.vin) },
+    {
+      label: 'Số đăng kiểm',
+      value: formatValue(vehicle.registrationNumber, 'Chưa cập nhật'),
+    },
+    {
+      label: 'Hạn bảo hiểm',
+      value: formatDateTime(vehicle.insuranceExpiry, 'dd/MM/yyyy'),
+      hint: insuranceBadge.label,
+    },
+    { label: 'Tạo lúc', value: formatDateTime(vehicle.createdAt) },
+    { label: 'Cập nhật gần nhất', value: formatDateTime(vehicle.updatedAt) },
+  ];
+
   return (
     <div className={cn('space-y-4', compact && 'space-y-3')}>
       <Card className="overflow-hidden border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
-        <CardContent className={cn('space-y-4', compact ? 'p-4' : 'p-6')}>
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.95fr)]">
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                <Badge variant={VEHICLE_STATUS_VARIANTS[vehicle.status] ?? 'secondary'}>
-                  {statusLabel}
-                </Badge>
-                <Badge variant={vehicle.deviceId ? 'secondary' : 'outline'}>
-                  {vehicle.deviceId ? 'Telemetry đã gắn' : 'Thiếu thiết bị telemetry'}
-                </Badge>
-                <Badge variant={insuranceBadge.variant}>{insuranceBadge.label}</Badge>
-              </div>
-
-              <div className="space-y-1">
-                <h2 className="text-2xl font-semibold tracking-tight">{headline}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {subheadline || 'Chưa đủ thông tin nhận diện cho phương tiện này.'}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border bg-background/70 px-4 py-3 text-sm text-muted-foreground">
-                Theo dõi tình trạng khai thác, pháp lý và liên kết telemetry của xe tại một chỗ để
-                đối chiếu nhanh trước khi xử lý cảnh báo hoặc bảo trì.
-              </div>
-
+        <CardContent className={cn('space-y-4', compact ? 'p-4' : 'p-5')}>
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant={VEHICLE_STATUS_VARIANTS[vehicle.status] ?? 'secondary'}>
+                {statusLabel}
+              </Badge>
+              <Badge variant={vehicle.deviceId ? 'secondary' : 'outline'}>
+                {vehicle.deviceId ? 'Đã gắn telemetry' : 'Thiếu thiết bị telemetry'}
+              </Badge>
+              <Badge variant={insuranceBadge.variant}>{insuranceBadge.label}</Badge>
               {missingAssignments.length > 0 ? (
-                <div className="rounded-2xl border border-dashed px-4 py-3 text-sm text-muted-foreground">
-                  {missingAssignments.join(' • ')}. Các màn hình hành trình, ownership và cảnh báo sẽ
-                  thiếu ngữ cảnh nếu liên kết chưa hoàn chỉnh.
-                </div>
+                <TooltipProvider delayDuration={120}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-muted-foreground/40 text-muted-foreground transition-colors hover:text-foreground"
+                        aria-label="Thông tin trạng thái gán phương tiện"
+                      >
+                        <Info className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={8} className="max-w-[320px] text-xs leading-relaxed">
+                      {missingAssignments.join(' • ')}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ) : null}
             </div>
+          </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <InfoRow label="Thiết bị gắn" value={formatValue(vehicle.deviceId, 'Chưa gắn')} />
-              <InfoRow label="Khách hàng" value={customerLabel} />
-              <InfoRow label="Odometer" value={formatMileage(vehicle.mileageKm)} />
-              <InfoRow
-                label="Số ghế"
-                value={vehicle.seats ? String(vehicle.seats) : 'Chưa cập nhật'}
-              />
-            </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            <StatCard
+              title="Thiết bị gắn"
+              value={formatValue(vehicle.deviceId, 'Chưa gắn')}
+              className="min-w-[180px] sm:min-w-[200px]"
+            />
+            <StatCard
+              title="Khách hàng"
+              value={customerLabel}
+              className="min-w-[180px] sm:min-w-[220px]"
+            />
+            <StatCard
+              title="Odometer"
+              value={formatMileage(vehicle.mileageKm)}
+              className="min-w-[180px] sm:min-w-[200px]"
+            />
+            <StatCard
+              title="Số ghế"
+              value={vehicle.seats ? String(vehicle.seats) : 'Chưa cập nhật'}
+              className="min-w-[160px] sm:min-w-[180px]"
+            />
           </div>
         </CardContent>
       </Card>
 
+      <AllowedZoneStatusCard
+        vehicleId={vehicle.vehicleId ?? null}
+        title="Vùng cho phép của phương tiện"
+        canEdit={access.canEditDevice && Boolean(vehicle.vehicleId)}
+        onConfigure={() => setAllowedZoneOpen(true)}
+      />
+
       <div className="grid gap-4 xl:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Nhận diện phương tiện</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2">
-            <InfoRow label="Mã xe" value={formatValue(vehicle.vehicleId, 'Chưa có')} />
-            <InfoRow label="Biển số" value={formatValue(vehicle.plateNumber, 'Chưa có')} />
-            <InfoRow label="Hãng xe" value={formatValue(vehicle.brand)} />
-            <InfoRow label="Dòng xe" value={formatValue(vehicle.model)} />
-            <InfoRow
-              label="Năm sản xuất"
-              value={vehicle.year ? String(vehicle.year) : 'Chưa cập nhật'}
-            />
-            <InfoRow label="Màu sơn" value={formatValue(vehicle.color)} />
-            <InfoRow label="VIN" value={formatValue(vehicle.vin)} />
-            <InfoRow label="Loại xe" value={formatValue(vehicle.vehicleType, 'Chưa phân loại')} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Liên kết hệ thống</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2">
-            <InfoRow label="Thiết bị telemetry" value={formatValue(vehicle.deviceId, 'Chưa gắn')} />
-            <InfoRow label="Khách hàng sở hữu" value={customerLabel} />
-            <InfoRow label="Trạng thái" value={statusLabel} />
-            <InfoRow label="Biểu tượng bản đồ" value={formatValue(vehicle.iconType, 'Mặc định')} />
-            <InfoRow label="Tạo lúc" value={formatDateTime(vehicle.createdAt)} />
-            <InfoRow label="Cập nhật gần nhất" value={formatDateTime(vehicle.updatedAt)} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Khai thác và cấu hình</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2">
-            <InfoRow label="Nhiên liệu" value={formatValue(vehicle.fuelType, 'Chưa xác định')} />
-            <InfoRow label="Hộp số" value={formatValue(vehicle.transmission, 'Chưa xác định')} />
-            <InfoRow
-              label="Số ghế"
-              value={vehicle.seats ? String(vehicle.seats) : 'Chưa cập nhật'}
-            />
-            <InfoRow label="Odometer" value={formatMileage(vehicle.mileageKm)} />
-            <InfoRow label="Màu nhận diện" value={formatValue(vehicle.colorHex, 'Chưa cấu hình')} />
-            <InfoRow label="Ghi chú vận hành" value={formatValue(vehicle.notes, 'Chưa có ghi chú')} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Pháp lý và hồ sơ</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2">
-            <InfoRow
-              label="Số đăng kiểm"
-              value={formatValue(vehicle.registrationNumber, 'Chưa cập nhật')}
-            />
-            <InfoRow
-              label="Hạn bảo hiểm"
-              value={formatDateTime(vehicle.insuranceExpiry, 'dd/MM/yyyy')}
-            />
-            <InfoRow label="Trạng thái bảo hiểm" value={insuranceBadge.label} />
-            <InfoRow label="ID nội bộ" value={vehicle.id ? String(vehicle.id) : 'Chưa có'} />
-          </CardContent>
-        </Card>
+        <DetailSection
+          title="Thông tin vận hành"
+          rows={operationsRows}
+        />
+        <DetailSection
+          title="Nhận diện và pháp lý"
+          rows={identityRows}
+        />
       </div>
+
+      <AllowedZoneSetupSheet
+        open={allowedZoneOpen}
+        onOpenChange={setAllowedZoneOpen}
+        vehicleId={vehicle.vehicleId ?? null}
+        vehicleLabel={vehicle.plateNumber ?? vehicle.vehicleId ?? null}
+        canEdit={access.canEditDevice && Boolean(vehicle.vehicleId)}
+      />
     </div>
   );
 };

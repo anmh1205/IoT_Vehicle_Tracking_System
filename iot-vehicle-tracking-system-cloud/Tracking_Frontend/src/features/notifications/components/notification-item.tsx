@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { localizeAlertMessage, localizeAlertTitle } from '@/lib/api/alerts';
 import { formatRelative } from '@/lib/utils/date/format';
 import type { NotificationItem as Notification } from '../types';
 
@@ -10,7 +11,7 @@ const TYPE_LABELS: Record<Notification['type'], string> = {
   system: 'Hệ thống',
   export: 'Xuất dữ liệu',
   firmware: 'Firmware',
-  geofence: 'Geofence',
+  geofence: 'Vùng giám sát',
 };
 
 const TYPE_VARIANTS: Record<
@@ -60,6 +61,9 @@ export const NotificationRow = ({
 }) => {
   const Wrapper = onClick ? 'button' : 'div';
   const contextText = getContextText(notification);
+  const displayTitle = localizeAlertTitle(notification.title, notification.type) ?? notification.title;
+  const displayMessage =
+    localizeAlertMessage(notification.message, notification.type) ?? notification.message;
 
   return (
     <div className="flex gap-3 rounded-xl border border-border/60 bg-card/70 p-3 transition-colors hover:bg-accent/30">
@@ -75,9 +79,9 @@ export const NotificationRow = ({
           <span className="text-xs text-muted-foreground">{formatRelative(notification.createdAt)}</span>
         </div>
         <div className="mt-2 space-y-1">
-          <div className="text-sm font-medium">{notification.title}</div>
+          <div className="text-sm font-medium">{displayTitle}</div>
           <div className={compact ? 'truncate text-xs text-muted-foreground' : 'text-sm text-muted-foreground'}>
-            {notification.message || 'Không có mô tả chi tiết.'}
+            {displayMessage || 'Không có mô tả chi tiết.'}
           </div>
           {contextText ? (
             <div className="text-xs font-medium text-muted-foreground/80">{contextText}</div>

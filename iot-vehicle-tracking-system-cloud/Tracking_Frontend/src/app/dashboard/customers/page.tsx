@@ -533,7 +533,7 @@ const CustomersPage = () => {
               router.push(`/dashboard/fleet/customers/${row.original.id}`);
             }}
           >
-            Chi tiáº¿t
+            Chi tiết
           </Button>
           <Button
             size="sm"

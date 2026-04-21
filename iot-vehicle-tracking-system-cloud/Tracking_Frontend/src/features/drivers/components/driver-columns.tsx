@@ -40,8 +40,8 @@ export const getDriverColumns = (actions: {
   { accessorKey: 'licenseType', header: 'Hạng GPLX', meta: { label: 'Hạng GPLX' } },
   {
     id: 'assignment',
-    header: 'Ngữ cảnh phân công',
-    meta: { label: 'Ngữ cảnh phân công' },
+    header: 'Phân công',
+    meta: { label: 'Phân công' },
     cell: ({ row }) => {
       const assignment = row.original.assignment;
       if (!assignment || (assignment.tripCount ?? 0) === 0) {
