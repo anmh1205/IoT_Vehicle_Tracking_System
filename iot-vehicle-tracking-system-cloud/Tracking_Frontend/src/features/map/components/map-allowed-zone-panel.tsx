@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useVehicleAllowedZone } from '@/features/geofences/hooks/use-vehicle-allowed-zone';
+import { useVehicleAllowedZone, useVehicleAllowedZonePreview } from '@/features/geofences/hooks/use-vehicle-allowed-zone';
 import {
   allowedZoneAlertModeOptions,
   allowedZoneFormSchema,
@@ -62,16 +62,15 @@ export const MapAllowedZonePanel = ({
   const [mapPickArmed, setMapPickArmed] = useState(false);
   const initializedForOpenRef = useRef(false);
   const lastResetKeyRef = useRef<string | null>(null);
-  const { zoneQuery, previewQuery, upsertMutation, deleteMutation } = useVehicleAllowedZone(vehicleId, {
-    enablePreview: open,
-  });
+  const { zoneQuery, upsertMutation, deleteMutation } = useVehicleAllowedZone(vehicleId);
   const zone = zoneQuery.data;
-  const preview = previewQuery.data;
   const form = useForm<AllowedZoneFormValues>({
     resolver: zodResolver(allowedZoneFormSchema),
-    defaultValues: createAllowedZoneFormDefaults(zone, preview),
+    defaultValues: createAllowedZoneFormDefaults(zone, undefined),
   });
   const centerSource = form.watch('centerSource');
+  const previewQuery = useVehicleAllowedZonePreview(vehicleId, open && centerSource === 'vehicle_position');
+  const preview = previewQuery.data;
   const radiusMeters = form.watch('radiusMeters');
   const centerLatitude = form.watch('centerLatitude');
   const centerLongitude = form.watch('centerLongitude');
@@ -322,3 +321,4 @@ export const MapAllowedZonePanel = ({
     </>
   );
 };
+

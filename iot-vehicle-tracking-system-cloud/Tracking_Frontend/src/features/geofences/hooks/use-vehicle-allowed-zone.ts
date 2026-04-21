@@ -11,10 +11,17 @@ export const previewQueryKey = (vehicleId: string | null | undefined) => [
   vehicleId,
 ] as const;
 
-export const useVehicleAllowedZone = (
+export const useVehicleAllowedZonePreview = (
   vehicleId: string | null | undefined,
-  options?: { enablePreview?: boolean },
-) => {
+  enabled = false,
+) =>
+  useQuery({
+    queryKey: previewQueryKey(vehicleId),
+    enabled: Boolean(vehicleId) && enabled,
+    queryFn: () => geofenceServices.previewVehicleAllowedZoneCenter(vehicleId as string),
+  });
+
+export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
   const queryClient = useQueryClient();
   const enabled = Boolean(vehicleId);
 
@@ -22,12 +29,6 @@ export const useVehicleAllowedZone = (
     queryKey: zoneQueryKey(vehicleId),
     enabled,
     queryFn: () => geofenceServices.getVehicleAllowedZone(vehicleId as string),
-  });
-
-  const previewQuery = useQuery({
-    queryKey: previewQueryKey(vehicleId),
-    enabled: enabled && Boolean(options?.enablePreview),
-    queryFn: () => geofenceServices.previewVehicleAllowedZoneCenter(vehicleId as string),
   });
 
   const invalidate = async () => {
@@ -71,7 +72,6 @@ export const useVehicleAllowedZone = (
 
   return {
     zoneQuery,
-    previewQuery,
     upsertMutation,
     deleteMutation,
     refresh: invalidate,
