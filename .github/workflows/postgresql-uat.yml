@@ -88,12 +88,15 @@ jobs:
             docker compose ps postgres
             for _ in {1..20}; do
               if docker compose exec -T postgres sh -lc 'pg_isready -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-vehicle_tracking}"' >/dev/null; then
-                exit 0
+                break
               fi
               sleep 3
             done
-            docker compose logs --tail=100 postgres || true
-            exit 1
+            if ! docker compose exec -T postgres sh -lc 'pg_isready -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-vehicle_tracking}"' >/dev/null; then
+              docker compose logs --tail=100 postgres || true
+              exit 1
+            fi
+            docker compose exec -T postgres sh -lc 'export PGPASSWORD="${POSTGRES_PASSWORD:-}"; psql -v ON_ERROR_STOP=1 -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-vehicle_tracking}"' < scripts/uat-runtime-schema-sync.sql
         env:
           SERVICE_ENV_CONTENT: ${{ env.SERVICE_ENV_CONTENT }}
           SERVICE_DIR: /opt/tracking/Tracking_PostgreSQL
