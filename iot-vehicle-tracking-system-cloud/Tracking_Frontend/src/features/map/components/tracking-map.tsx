@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { useGeofences } from '@/features/geofences/hooks/use-geofences';
@@ -149,6 +149,8 @@ export const TrackingMap = () => {
   const [showViewedAllowedZone, setShowViewedAllowedZone] = useState(false);
   const [allowedZoneMapPick, setAllowedZoneMapPick] = useState<{ latitude: number; longitude: number } | null>(null);
   const [allowedZonePreview, setAllowedZonePreview] = useState<AllowedZonePreviewDraft>(null);
+  const workspaceOwnsGeofenceLayerRef = useRef(workspaceOwnsGeofenceLayer);
+  const showGeofencesRef = useRef(showGeofences);
   const queryClient = useQueryClient();
 
   const devices = useMemo(() => Array.from(positions.values()), [positions]);
@@ -172,18 +174,26 @@ export const TrackingMap = () => {
   );
   const layer = MAP_LAYER_CONFIG[mapLayer];
 
-  const hideWorkspaceGeofenceLayer = () => {
-    if (workspaceOwnsGeofenceLayer && showGeofences) {
+  const hideWorkspaceGeofenceLayer = useCallback(() => {
+    if (workspaceOwnsGeofenceLayerRef.current && showGeofencesRef.current) {
       toggleGeofences();
     }
     setWorkspaceOwnsGeofenceLayer(false);
-  };
+  }, [toggleGeofences]);
 
-  const closeGeofenceWorkspace = () => {
+  const closeGeofenceWorkspace = useCallback(() => {
     setGeofenceWorkspaceOpen(false);
     setDraft(null);
     hideWorkspaceGeofenceLayer();
-  };
+  }, [hideWorkspaceGeofenceLayer]);
+
+  useEffect(() => {
+    workspaceOwnsGeofenceLayerRef.current = workspaceOwnsGeofenceLayer;
+  }, [workspaceOwnsGeofenceLayer]);
+
+  useEffect(() => {
+    showGeofencesRef.current = showGeofences;
+  }, [showGeofences]);
 
   useEffect(() => {
     clearAllowedZoneSession(
@@ -199,7 +209,7 @@ export const TrackingMap = () => {
     }
 
     setViewedAllowedZoneVehicleId(selectedVehicleId);
-  }, [selectedDeviceId, selectedVehicleId]);
+  }, [closeGeofenceWorkspace, selectedDeviceId, selectedVehicleId]);
 
   useEffect(() => {
     if (
@@ -493,3 +503,6 @@ export const TrackingMap = () => {
     </div>
   );
 };
+
+
+
