@@ -8,7 +8,6 @@ import { DeviceListItem } from './device-list-item';
 import { DeviceSearch } from './device-search';
 import { MapDeviceSummary } from './map-device-summary';
 import { buildMapDeviceStats, filterDevices, sortDevices } from './map-panel-utils';
-import { SelectedDeviceCard } from './selected-device-card';
 
 export const DeviceListPanel = () => {
   const positions = useMapStore((state) => state.positions);
@@ -24,16 +23,23 @@ export const DeviceListPanel = () => {
     () => filterDevices(devices, searchTerm, statusFilter),
     [devices, searchTerm, statusFilter],
   );
-  const selectedDevice = selectedDeviceId ? (positions.get(selectedDeviceId) ?? null) : null;
   const stats = useMemo(
     () => buildMapDeviceStats(filteredDevices, devices.length),
     [devices.length, filteredDevices],
   );
 
   return (
-    <aside className="flex h-full min-h-0 w-[340px] flex-col gap-3 border-r bg-background p-3">
-      <DeviceSearch value={searchTerm} onChange={setSearchTerm} />
-      <DeviceFilter value={statusFilter} onChange={setStatusFilter} />
+    <aside className="flex h-full min-h-0 w-[340px] flex-col gap-3 overflow-hidden border-r bg-background p-3">
+      <div className="flex flex-nowrap items-center gap-2">
+        <DeviceSearch
+          value={searchTerm}
+          onChange={setSearchTerm}
+          className="min-w-0 flex-1"
+          inputClassName="h-9"
+        />
+        <DeviceFilter value={statusFilter} onChange={setStatusFilter} className="h-9 w-[136px] shrink-0" />
+      </div>
+
       <MapDeviceSummary stats={stats} />
 
       <ScrollArea className="min-h-0 flex-1">
@@ -53,8 +59,6 @@ export const DeviceListPanel = () => {
           ) : null}
         </div>
       </ScrollArea>
-
-      <SelectedDeviceCard device={selectedDevice} />
     </aside>
   );
 };

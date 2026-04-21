@@ -143,8 +143,22 @@ export function DataTable<TData, TValue>({
     }
   };
 
+  const shouldHideEmptyAccessorCell = (cell: any) => {
+    const accessorKey = (cell.column.columnDef as { accessorKey?: string }).accessorKey;
+    if (!accessorKey) {
+      return false;
+    }
+
+    const rawValue = cell.getValue();
+    if (rawValue == null) {
+      return true;
+    }
+
+    return typeof rawValue === 'string' && rawValue.trim().length === 0;
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div className="flex min-w-0 flex-1 flex-col gap-2 md:flex-row md:flex-wrap md:items-center">
           {searchKey ? (
@@ -169,7 +183,7 @@ export function DataTable<TData, TValue>({
           {toolbar}
         </div>
 
-        <div className="flex shrink-0 justify-end">
+        <div className="hidden shrink-0 justify-end sm:flex">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="w-full sm:w-auto">
@@ -195,52 +209,134 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
-      <div className="rounded-md border">
-        <Table className="min-w-[48rem]">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  tabIndex={onRowClick ? 0 : undefined}
-                  className={onRowClick ? 'cursor-pointer transition-colors hover:bg-muted/40' : undefined}
-                  onClick={(event) => handleRowClick(row.original, event)}
-                  onKeyDown={(event) => handleRowKeyDown(row.original, event)}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+      <div className="space-y-3 md:hidden">
+        {table.getRowModel().rows.length > 0 ? (
+          table.getRowModel().rows.map((row) => {
+            const visibleCells = row.getVisibleCells();
+            const actionCell = visibleCells.find((cell) => cell.column.id === 'actions');
+            const dataCells = visibleCells.filter(
+              (cell) => cell.column.id !== 'actions' && !shouldHideEmptyAccessorCell(cell),
+            );
+
+            return (
+              <div
+                key={row.id}
+                tabIndex={onRowClick ? 0 : undefined}
+                className={
+                  onRowClick
+                    ? 'rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                    : 'rounded-xl border bg-card p-4 shadow-sm'
+                }
+                onClick={
+                  onRowClick
+                    ? (event) => {
+                        if (!isInteractiveTarget(event.target)) {
+                          onRowClick(row.original);
+                        }
+                      }
+                    : undefined
+                }
+                onKeyDown={
+                  onRowClick
+                    ? (event) => {
+                        if (isInteractiveTarget(event.target)) {
+                          return;
+                        }
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          onRowClick(row.original);
+                        }
+                      }
+                    : undefined
+                }
+              >
+                <div className="space-y-3">
+                  {dataCells.map((cell) => (
+                    <div key={cell.id} className="space-y-1">
+                      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                        {getColumnLabel(cell.column)}
+                      </p>
+                      <div className="min-w-0 break-words text-sm leading-5 text-foreground [&_*]:max-w-full [&_p]:whitespace-normal [&_span]:whitespace-normal">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </div>
+                    </div>
+                  ))}
+                  {actionCell ? (
+                    <div className="border-t pt-3" data-row-click-ignore="true">
+                      <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                        {getColumnLabel(actionCell.column)}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {flexRender(actionCell.column.columnDef.cell, actionCell.getContext())}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="rounded-xl border">
+            <div className="p-6">
+              <EmptyState
+                icon={emptyIcon}
+                title={emptyTitle}
+                description={emptyDescription}
+                action={emptyAction}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="hidden min-w-0 max-w-full overflow-hidden rounded-md border md:block">
+        <div className="min-w-0 w-full max-w-full overflow-x-auto">
+          <Table className="w-full min-w-full table-auto">
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-48 text-center">
-                  <EmptyState
-                    icon={emptyIcon}
-                    title={emptyTitle}
-                    description={emptyDescription}
-                    action={emptyAction}
-                  />
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    className={onRowClick ? 'cursor-pointer transition-colors hover:bg-muted/40' : undefined}
+                    onClick={(event) => handleRowClick(row.original, event)}
+                    onKeyDown={(event) => handleRowKeyDown(row.original, event)}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="align-top whitespace-normal break-words">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-48 text-center">
+                    <EmptyState
+                      icon={emptyIcon}
+                      title={emptyTitle}
+                      description={emptyDescription}
+                      action={emptyAction}
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {pagination ? (

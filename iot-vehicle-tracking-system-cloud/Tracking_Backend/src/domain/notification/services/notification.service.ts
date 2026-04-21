@@ -1,14 +1,10 @@
-import { findMany } from '@/infrastructure/database/queries';
-
-interface AlertNotificationRow {
-  id: number;
-  alert_type: string;
-  title: string;
-  message: string | null;
-  created_at: Date;
-}
-
-type NotificationType = 'alert' | 'system' | 'export' | 'firmware' | 'geofence';
+import type { NotificationType } from '@/domain/notification/repositories/notification.repository';
+import {
+  findNotificationRows,
+  hideNotification,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from '@/domain/notification/repositories/notification.repository';
 
 interface NotificationItem {
   id: number;
@@ -18,27 +14,13 @@ interface NotificationItem {
   isRead: boolean;
   referenceId: number | null;
   referenceType: string | null;
+  vehicleId: string | null;
+  vehiclePlateNumber: string | null;
+  deviceId: string | null;
+  deviceName: string | null;
+  contextLabel: string | null;
   createdAt: string;
 }
-
-const readStateByUser = new Map<number, Set<number>>();
-const hiddenStateByUser = new Map<number, Set<number>>();
-
-const getUserReadState = (userId: number): Set<number> => {
-  const existing = readStateByUser.get(userId);
-  if (existing) return existing;
-  const created = new Set<number>();
-  readStateByUser.set(userId, created);
-  return created;
-};
-
-const getUserHiddenState = (userId: number): Set<number> => {
-  const existing = hiddenStateByUser.get(userId);
-  if (existing) return existing;
-  const created = new Set<number>();
-  hiddenStateByUser.set(userId, created);
-  return created;
-};
 
 const toNotificationType = (alertType: string): NotificationType => {
   const normalized = alertType.toLowerCase();
@@ -56,62 +38,21 @@ const toNotificationType = (alertType: string): NotificationType => {
   return 'alert';
 };
 
-const buildWhereClause = (params: {
-  type?: NotificationType;
-  search?: string;
-  from?: string;
-  to?: string;
-}): { where: string; values: unknown[] } => {
-  const conditions: string[] = [];
-  const values: unknown[] = [];
-  let index = 1;
-
-  if (params.type && params.type !== 'alert') {
-    if (params.type === 'geofence') {
-      conditions.push(`alert_type ILIKE $${index++}`);
-      values.push('%geofence%');
-    } else if (params.type === 'firmware') {
-      conditions.push(`alert_type ILIKE $${index++}`);
-      values.push('%firmware%');
-    } else if (params.type === 'export') {
-      conditions.push(`alert_type ILIKE $${index++}`);
-      values.push('%export%');
-    } else if (params.type === 'system') {
-      conditions.push(
-        `(alert_type ILIKE $${index} OR alert_type ILIKE $${index + 1} OR alert_type ILIKE $${index + 2} OR alert_type ILIKE $${index + 3})`,
-      );
-      values.push('%system%', '%offline%', '%database%', '%service%');
-      index += 4;
-    }
-  } else if (params.type === 'alert') {
-    conditions.push(
-      `(alert_type NOT ILIKE $${index} AND alert_type NOT ILIKE $${index + 1} AND alert_type NOT ILIKE $${index + 2} AND alert_type NOT ILIKE $${index + 3})`,
-    );
-    values.push('%geofence%', '%firmware%', '%export%', '%system%');
-    index += 4;
-  }
-
-  if (params.search && params.search.trim().length > 0) {
-    conditions.push(`(title ILIKE $${index} OR COALESCE(message, '') ILIKE $${index})`);
-    values.push(`%${params.search.trim()}%`);
-    index += 1;
-  }
-
-  if (params.from) {
-    conditions.push(`created_at >= $${index++}`);
-    values.push(params.from);
-  }
-
-  if (params.to) {
-    conditions.push(`created_at <= $${index++}`);
-    values.push(params.to);
-  }
-
-  return {
-    where: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-    values,
-  };
-};
+const buildNotificationItem = (row: Awaited<ReturnType<typeof findNotificationRows>>[number]): NotificationItem => ({
+  id: row.id,
+  type: toNotificationType(row.alert_type),
+  title: row.title,
+  message: row.message ?? '',
+  isRead: row.is_read,
+  referenceId: row.id,
+  referenceType: 'alert',
+  vehicleId: row.vehicle_id,
+  vehiclePlateNumber: row.vehicle_plate_number,
+  deviceId: row.device_id,
+  deviceName: row.device_name,
+  contextLabel: row.context_label,
+  createdAt: row.created_at.toISOString(),
+});
 
 export const listNotifications = async (
   userId: number,
@@ -134,62 +75,37 @@ export const listNotifications = async (
   const page = params.page ?? 1;
   const limit = params.limit ?? 20;
   const offset = (page - 1) * limit;
-  const readState = getUserReadState(userId);
-  const hiddenState = getUserHiddenState(userId);
-  const { where, values } = buildWhereClause({
+
+  const rows = await findNotificationRows(userId, {
     type: params.type,
     search: params.search,
     from: params.from,
     to: params.to,
   });
 
-  const rows = await findMany<AlertNotificationRow>(
-    `SELECT id, alert_type, title, message, created_at
-     FROM alerts ${where}
-     ORDER BY created_at DESC`,
-    values,
-  );
-
-  const items = rows
-    .map<NotificationItem>((row) => ({
-      id: row.id,
-      type: toNotificationType(row.alert_type),
-      title: row.title,
-      message: row.message ?? '',
-      isRead: readState.has(row.id),
-      referenceId: row.id,
-      referenceType: 'alert',
-      createdAt: row.created_at.toISOString(),
-    }))
-    .filter((item) => !hiddenState.has(item.id))
+  const filteredItems = rows
+    .map(buildNotificationItem)
     .filter((item) => (params.isRead === undefined ? true : item.isRead === params.isRead));
 
-  const unreadCount = items.reduce((count, item) => (item.isRead ? count : count + 1), 0);
-
   return {
-    items: items.slice(offset, offset + limit),
-    unreadCount,
-    total: items.length,
+    items: filteredItems.slice(offset, offset + limit),
+    unreadCount: filteredItems.reduce((count, item) => (item.isRead ? count : count + 1), 0),
+    total: filteredItems.length,
     page,
     limit,
   };
 };
 
 export const markRead = async (userId: number, id: number): Promise<void> => {
-  getUserReadState(userId).add(id);
+  await markNotificationRead(userId, id);
 };
 
 export const markAllRead = async (userId: number): Promise<void> => {
-  const rows = await findMany<{ id: number }>('SELECT id FROM alerts');
-  const next = getUserReadState(userId);
-  for (const row of rows) {
-    next.add(row.id);
-  }
+  await markAllNotificationsRead(userId);
 };
 
 export const deleteNotification = async (userId: number, id: number): Promise<void> => {
-  getUserReadState(userId).add(id);
-  getUserHiddenState(userId).add(id);
+  await hideNotification(userId, id);
 };
 
 export const getNotificationStats = async (
@@ -199,11 +115,7 @@ export const getNotificationStats = async (
   unreadCount: number;
   byType: Record<NotificationType, number>;
 }> => {
-  const rows = await findMany<Pick<AlertNotificationRow, 'id' | 'alert_type'>>(
-    'SELECT id, alert_type FROM alerts',
-  );
-  const readState = getUserReadState(userId);
-  const hiddenState = getUserHiddenState(userId);
+  const rows = await findNotificationRows(userId, {});
 
   const byType: Record<NotificationType, number> = {
     alert: 0,
@@ -215,12 +127,9 @@ export const getNotificationStats = async (
 
   let unreadCount = 0;
   for (const row of rows) {
-    if (hiddenState.has(row.id)) {
-      continue;
-    }
     const type = toNotificationType(row.alert_type);
     byType[type] += 1;
-    if (!readState.has(row.id)) {
+    if (!row.is_read) {
       unreadCount += 1;
     }
   }

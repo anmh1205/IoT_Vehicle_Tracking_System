@@ -21,12 +21,18 @@ export interface Alert {
   resolution_notes: string | null;
   created_at: Date;
   updated_at: Date;
+  vehicle_plate?: string | null;
+  customer_name?: string | null;
+  device_name?: string | null;
 }
 
 export interface AlertPublic {
   id: number;
   vehicleId: string | null;
   deviceId: string | null;
+  vehiclePlate?: string | null;
+  customerName?: string | null;
+  deviceName?: string | null;
   tripId: number | null;
   geofenceId: number | null;
   alertType: string;

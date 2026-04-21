@@ -1,15 +1,15 @@
 flowchart LR
-    EMQX["EMQX topic<br/>telemetry / alert"] --> Bridge["MQTT Bridge<br/>validate + normalize"]
+    EMQX["EMQX<br/>v1/{device_id}/*"] --> Bridge["MQTT Bridge<br/>Kiểm tra + chuẩn hóa"]
 
-    subgraph Outputs["Dich vu nhan du lieu"]
+    subgraph Outputs["Dịch vụ nhận dữ liệu"]
         direction TB
-        PG["PostgreSQL<br/>business event"]
-        VM["VictoriaMetrics<br/>telemetry metric"]
-        VL["VictoriaLogs<br/>audit log"]
-        WS["Socket.IO<br/>realtime event"]
+        PostgreSQLNode["PostgreSQL<br/>Sự kiện nghiệp vụ"]
+        VictoriaMetricsNode["VictoriaMetrics<br/>Dữ liệu đo theo thời gian"]
+        VictoriaLogsNode["VictoriaLogs<br/>Nhật ký truy vết"]
+        Internal["internal/events/#<br/>Cho Backend listener"]
     end
 
-    Bridge --> PG
-    Bridge --> VM
-    Bridge --> VL
-    Bridge --> WS
+    Bridge --> PostgreSQLNode
+    Bridge --> VictoriaMetricsNode
+    Bridge --> VictoriaLogsNode
+    Bridge --> Internal

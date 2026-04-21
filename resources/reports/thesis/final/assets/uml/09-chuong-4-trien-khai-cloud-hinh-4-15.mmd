@@ -1,9 +1,16 @@
 flowchart TB
-    Device["Thiết bị tracker"] --> EMQX["EMQX Broker"]
-    EMQX --> Bridge["MQTT Bridge"]
-    Bridge --> API["Backend API"]
-    Bridge --> VM["VictoriaMetrics"]
-    Bridge --> VL["VictoriaLogs"]
-    API --> PG["PostgreSQL"]
+    Device["Thiết bị theo dõi"] -->|Rawdata / status / events / firmware| EMQX["EMQX (broker MQTT)"]
+    EMQX -->|Device topics| Bridge["MQTT Bridge"]
+    Bridge --> VictoriaMetricsNode["VictoriaMetrics"]
+    Bridge --> VictoriaLogsNode["VictoriaLogs"]
+    Bridge --> PostgreSQLNode["PostgreSQL"]
+    Bridge -->|Publish internal/events/#| EMQX
+    EMQX -. realtime events .-> API["API phía máy chủ"]
+    PostgreSQLNode --> API
+    VictoriaMetricsNode --> API
+    Dashboard["Giao diện web"] -->|REST requests| API
+    API -->|REST responses| Dashboard
     API --> Socket["Socket.IO"]
-    Socket --> Dashboard["Web Dashboard"]
+    Socket --> Dashboard["Giao diện web"]
+    API -->|Publish commands / OTA| EMQX
+    EMQX -->|Topic commands| Device

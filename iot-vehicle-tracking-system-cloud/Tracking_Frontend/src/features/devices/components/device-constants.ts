@@ -20,7 +20,6 @@ export const DEVICE_STATUS_VARIANTS: Record<
 export const DEVICE_DETAIL_TABS = [
   'overview',
   'route',
-  'sessions',
   'errors',
   'commands',
   'raw',

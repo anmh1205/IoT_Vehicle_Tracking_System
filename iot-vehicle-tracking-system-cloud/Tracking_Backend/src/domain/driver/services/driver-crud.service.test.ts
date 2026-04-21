@@ -39,6 +39,8 @@ const makeDriver = (overrides: Partial<Driver> = {}): Driver => ({
 describe('driver-crud.service', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.mocked(driverRepo.findAssignmentSummaryByName).mockResolvedValue(null);
+    vi.mocked(driverRepo.findRecentTripsByDriverName).mockResolvedValue([]);
   });
 
   // --- getDriverById ---------------------------------------------------------
@@ -65,6 +67,8 @@ describe('driver-crud.service', () => {
         avatarUrl: null,
         status: 'active',
         notes: null,
+        assignment: null,
+        recentTrips: [],
         createdAt: NOW.toISOString(),
         updatedAt: UPDATED.toISOString(),
       });
@@ -78,6 +82,47 @@ describe('driver-crud.service', () => {
 
       expect(result.licenseExpiry).toBeNull();
       expect(result.dateOfBirth).toBeNull();
+    });
+
+    it('should include assignment summary and recent trips when available', async () => {
+      vi.mocked(driverRepo.findById).mockResolvedValue(makeDriver({ full_name: 'Nguyen Van Nam' }));
+      vi.mocked(driverRepo.findAssignmentSummaryByName).mockResolvedValue({
+        tripCount: 2,
+        activeTripCount: 1,
+        latestTripId: 5,
+        latestTripCode: 'MOCK-TRIP-002',
+        latestTripStatus: 'in_progress',
+        latestTripAt: '2026-01-16T09:00:00.000Z',
+        latestVehicleId: 'XE-BUS-77',
+        latestDeviceId: 'MOCK-OBD-002',
+        latestStartLocation: 'Depot',
+        latestEndLocation: 'Hub',
+        activeTripCode: 'MOCK-TRIP-002',
+        activeVehicleId: 'XE-BUS-77',
+        activeDeviceId: 'MOCK-OBD-002',
+      });
+      vi.mocked(driverRepo.findRecentTripsByDriverName).mockResolvedValue([
+        {
+          id: 5,
+          tripCode: 'MOCK-TRIP-002',
+          vehicleId: 'XE-BUS-77',
+          deviceId: 'MOCK-OBD-002',
+          status: 'in_progress',
+          plannedStart: '2026-01-16T08:00:00.000Z',
+          actualStart: '2026-01-16T08:10:00.000Z',
+          actualEnd: null,
+          startLocation: 'Depot',
+          endLocation: 'Hub',
+          distanceKm: 32.5,
+          updatedAt: '2026-01-16T09:00:00.000Z',
+        },
+      ]);
+
+      const result = await getDriverById(1);
+
+      expect(result.assignment?.latestVehicleId).toBe('XE-BUS-77');
+      expect(result.recentTrips).toHaveLength(1);
+      expect(result.recentTrips?.[0].tripCode).toBe('MOCK-TRIP-002');
     });
 
     it('should throw a 404 ApiError when the driver is not found', async () => {

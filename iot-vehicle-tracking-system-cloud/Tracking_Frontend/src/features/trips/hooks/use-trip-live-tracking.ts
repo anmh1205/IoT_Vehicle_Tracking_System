@@ -11,8 +11,11 @@ export const useTripLiveTracking = (tripId: number, isActive: boolean) => {
   const queryClient = useQueryClient();
 
   const onPositionUpdate = useCallback(() => {
-    // Invalidate telemetry query to fetch latest GPS data from VictoriaMetrics
-    void queryClient.invalidateQueries({ queryKey: ['trip-telemetry', tripId] });
+    // Keep detail page and quick preview replay in sync with realtime position pushes.
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['trip-telemetry', tripId] }),
+      queryClient.invalidateQueries({ queryKey: ['trip-preview-telemetry', tripId] }),
+    ]);
   }, [queryClient, tripId]);
 
   useRealtimeSubscription({

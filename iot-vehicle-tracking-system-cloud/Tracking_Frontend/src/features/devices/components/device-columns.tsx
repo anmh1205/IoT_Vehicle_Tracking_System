@@ -15,6 +15,19 @@ import { DEVICE_STATUS_LABELS, DEVICE_STATUS_VARIANTS } from './device-constants
 import { formatRelative } from '@/lib/utils/date/format';
 import type { Device } from '../types';
 
+const AssignmentCell = ({
+  value,
+  emptyLabel,
+}: {
+  value: string | null | undefined;
+  emptyLabel: string;
+}) =>
+  value ? (
+    <span className="font-medium text-foreground">{value}</span>
+  ) : (
+    <span className="text-muted-foreground">{emptyLabel}</span>
+  );
+
 export const getDeviceColumns = (actions: {
   onView: (item: Device) => void;
   onEdit: (item: Device) => void;
@@ -27,6 +40,20 @@ export const getDeviceColumns = (actions: {
   {
     accessorKey: 'deviceName',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Tên thiết bị" />,
+  },
+  {
+    accessorKey: 'vehiclePlate',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Xe đang gắn" />,
+    cell: ({ row }) => (
+      <AssignmentCell value={row.original.vehiclePlate} emptyLabel="Chưa gắn xe" />
+    ),
+  },
+  {
+    accessorKey: 'customerName',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Khách hàng" />,
+    cell: ({ row }) => (
+      <AssignmentCell value={row.original.customerName} emptyLabel="Chưa gắn khách hàng" />
+    ),
   },
   {
     accessorKey: 'currentStatus',

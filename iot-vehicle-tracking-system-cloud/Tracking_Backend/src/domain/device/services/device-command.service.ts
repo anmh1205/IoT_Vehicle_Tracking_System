@@ -1,25 +1,10 @@
 import mqtt from 'mqtt';
 
 import { mqttConfig } from '@/config/env';
+import * as deviceCommandRepo from '@/domain/device/repositories/device-command.repository';
 import { createLogger } from '@/infrastructure/logger';
 
-type DeviceCommandStatus = 'pending' | 'sent' | 'acknowledged' | 'failed';
-
-export interface DeviceCommandRecord {
-  id: number;
-  deviceId: string;
-  command: string;
-  params: Record<string, unknown>;
-  status: DeviceCommandStatus;
-  sentAt: string;
-  ackedAt: string | null;
-  response: string | null;
-}
-
 const logger = createLogger('device-command-service');
-
-const commandStore = new Map<string, DeviceCommandRecord[]>();
-let commandIdCounter = 1;
 
 let mqttClient: mqtt.MqttClient | null = null;
 
@@ -59,20 +44,15 @@ const getMqttClient = (): mqtt.MqttClient => {
 export const sendCommand = async (
   deviceId: string,
   payload: { command: string; params?: Record<string, unknown> },
-): Promise<DeviceCommandRecord> => {
-  const command: DeviceCommandRecord = {
-    id: commandIdCounter++,
+  options?: { actorUserId?: number; correlationId?: string },
+): Promise<deviceCommandRepo.DeviceCommandRecord> => {
+  const command = await deviceCommandRepo.createCommand({
     deviceId,
     command: payload.command,
     params: payload.params ?? {},
-    status: 'pending',
-    sentAt: new Date().toISOString(),
-    ackedAt: null,
-    response: null,
-  };
-
-  const current = commandStore.get(deviceId) ?? [];
-  commandStore.set(deviceId, [command, ...current].slice(0, 500));
+    actorUserId: options?.actorUserId,
+    correlationId: options?.correlationId,
+  });
 
   const topic = `v1/${deviceId}/commands`;
   const message = JSON.stringify({
@@ -93,27 +73,19 @@ export const sendCommand = async (
       });
     });
 
-    command.status = 'sent';
-    return command;
+    return (
+      (await deviceCommandRepo.updateCommandStatus(command.id, 'sent')) ?? {
+        ...command,
+        status: 'sent',
+      }
+    );
   } catch (error) {
-    command.status = 'failed';
-    command.response = error instanceof Error ? error.message : 'publish_failed';
+    const response = error instanceof Error ? error.message : 'publish_failed';
+    await deviceCommandRepo.updateCommandStatus(command.id, 'failed', response);
     throw error;
   }
 };
 
 export const listCommands = async (deviceId: string, page = 1, limit = 20) => {
-  const rows = commandStore.get(deviceId) ?? [];
-  const offset = (page - 1) * limit;
-  const items = rows.slice(offset, offset + limit);
-
-  return {
-    items,
-    pagination: {
-      page,
-      limit,
-      total: rows.length,
-      totalPages: Math.max(Math.ceil(rows.length / limit), 1),
-    },
-  };
+  return deviceCommandRepo.listDeviceCommands(deviceId, page, limit);
 };

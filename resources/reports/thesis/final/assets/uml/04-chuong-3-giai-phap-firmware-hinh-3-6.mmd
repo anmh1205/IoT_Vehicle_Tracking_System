@@ -1,24 +1,26 @@
 flowchart TB
-    IMU["Ngat IMU"] --> PowerTask["power_task"]
+    Wake["Nguồn đánh thức<br/>Timer / IMU EXT0"] --> MainLoop["Vòng điều khiển chính<br/>app_main + state_machine_run()"]
 
-    subgraph WorkerTasks["Cac task nghiep vu"]
+    subgraph Sync["Primitive FreeRTOS dùng có chọn lọc"]
         direction LR
-        OBDTask["obd_task"]
-        GNSSTask["gnss_task"]
-        SensorTask["sensor_task"]
-        CmdTask["command_task"]
+        Nimble["NimBLE<br/>Host task"]
+        BleMgr["ble_mgr<br/>Queue + mutex"]
+        BleObd["ble_obd<br/>Semaphore phản hồi"]
+        ModemAt["modem_at<br/>Mutex UART"]
     end
 
-    Queue["telemetry_queue"]
-    MQTTTask["mqtt_task"]
+    Sensors["ADC / IMU / RTC / GNSS"]
+    Queue["offline_queue<br/>MicroSD replay theo ACK/QoS"]
+    MQTT["mqtt_client<br/>Rawdata / status / events / firmware / commands"]
     Broker["EMQX"]
 
-    PowerTask --> OBDTask
-    PowerTask --> GNSSTask
-    PowerTask --> CmdTask
-    OBDTask --> Queue
-    GNSSTask --> Queue
-    SensorTask --> Queue
-    Queue --> MQTTTask
-    CmdTask --> MQTTTask
-    MQTTTask --> Broker
+    MainLoop --> Sensors
+    MainLoop --> Nimble
+    MainLoop --> BleMgr
+    MainLoop --> BleObd
+    MainLoop --> ModemAt
+    MainLoop --> Queue
+    MainLoop --> MQTT
+    Queue --> MQTT
+    MQTT -->|Rawdata / status / events / firmware| Broker
+    Broker -->|Topic commands| MQTT

@@ -1,61 +1,81 @@
-'use client';
+﻿'use client';
 
 import { AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { DashboardEvent } from '@/features/dashboard/hooks/use-dashboard-stats';
 import { formatRelative } from '@/lib/utils/date/format';
+import { getDashboardSeverityMeta } from './dashboard-event-presenters';
+
+export interface RecentAlertItem {
+  id: string | number;
+  title: string;
+  message?: string | null;
+  severity?: string;
+  createdAt?: string | null;
+  vehiclePlate?: string | null;
+  vehicleId?: string | null;
+  deviceName?: string | null;
+  deviceId?: string | null;
+}
 
 const getSeverityVariant = (
   severity?: string,
 ): 'default' | 'secondary' | 'destructive' | 'outline' => {
-  if (severity === 'critical' || severity === 'high') {
-    return 'destructive';
+  return getDashboardSeverityMeta(severity).variant;
+};
+
+const getSourceLabel = (alert: RecentAlertItem) => {
+  const vehicle = alert.vehiclePlate ?? alert.vehicleId;
+  const device = alert.deviceName ?? alert.deviceId;
+  if (vehicle && device) {
+    return `${vehicle} • ${device}`;
   }
-  if (severity === 'medium') {
-    return 'secondary';
-  }
-  return 'outline';
+  return vehicle ?? device ?? 'Chưa rõ nguồn cảnh báo';
 };
 
 export const RecentAlerts = ({
   alerts,
   isLoading,
 }: {
-  alerts: DashboardEvent[];
+  alerts: RecentAlertItem[];
   isLoading?: boolean;
 }) => {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
           <AlertTriangle className="h-4 w-4" />
           Cảnh báo gần đây
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
         {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
+          <div className="space-y-3">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {alerts.slice(0, 5).map((alert) => (
-              <div key={String(alert.id)} className="rounded-lg border p-3">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-medium">{alert.eventType}</p>
-                  <Badge variant={getSeverityVariant(alert.severity)}>
-                    {alert.severity ?? 'thông tin'}
+              <div key={String(alert.id)} className="rounded-xl border p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 space-y-1">
+                    <p className="line-clamp-2 text-sm font-semibold leading-5">{alert.title}</p>
+                    <p className="line-clamp-1 text-xs leading-5 text-muted-foreground">
+                      {getSourceLabel(alert)}
+                    </p>
+                  </div>
+                  <Badge variant={getSeverityVariant(alert.severity)} className="mt-0.5">
+                    {getDashboardSeverityMeta(alert.severity).label}
                   </Badge>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {alert.message || alert.deviceId || 'Không có nội dung'}
+                <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                  {alert.message || 'Không có nội dung chi tiết'}
                 </p>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  {formatRelative(alert.serverTimestamp)}
+                <p className="mt-2 text-[11px] font-medium text-muted-foreground">
+                  {formatRelative(alert.createdAt)}
                 </p>
               </div>
             ))}

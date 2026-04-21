@@ -18,6 +18,8 @@ interface StatCardProps {
   footer?: React.ReactNode;
 }
 
+const STAT_CARD_CLASS = 'h-full min-h-[148px]';
+
 export const StatCard = ({
   title,
   value,
@@ -29,44 +31,67 @@ export const StatCard = ({
   className,
   footer,
 }: StatCardProps) => {
+  const hasSplitMeta = Boolean(trend && subtitle);
+
+  const normalizedValue = typeof value === 'number' ? formatNumber(value) : value;
+  const isLongValue = typeof normalizedValue === 'string' && normalizedValue.length > 24;
+
   if (isLoading) {
     return (
-      <Card className={cn('min-h-[132px]', className)}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card className={cn(STAT_CARD_CLASS, className)}>
+        <CardHeader className="flex min-h-[44px] flex-row items-start justify-between space-y-0 pb-2">
           <Skeleton className="h-4 w-28" />
           <Skeleton className="h-4 w-4 rounded-full" />
         </CardHeader>
         <CardContent className="space-y-2">
-          <Skeleton className="h-8 w-20" />
-          <Skeleton className="h-3 w-32" />
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-9 w-full" />
         </CardContent>
       </Card>
     );
   }
 
-  const normalizedValue = typeof value === 'number' ? formatNumber(value) : value;
-
   return (
-    <Card className={cn('min-h-[132px]', className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        {icon ? <div className="text-muted-foreground">{icon}</div> : null}
+    <Card className={cn(STAT_CARD_CLASS, className)}>
+      <CardHeader className="flex min-h-[44px] flex-row items-start justify-between gap-2 space-y-0 pb-2">
+        <CardTitle className="min-w-0 break-words text-sm font-medium leading-5 text-muted-foreground">
+          {title}
+        </CardTitle>
+        {icon ? <div className="shrink-0 text-muted-foreground">{icon}</div> : null}
       </CardHeader>
-      <CardContent>
-        <div className={cn('text-2xl font-bold tracking-tight tabular-nums', valueClassName)}>
+      <CardContent className="flex flex-1 flex-col gap-2">
+        <div
+          className={cn(
+            'break-words text-2xl font-bold leading-7 tracking-tight tabular-nums',
+            isLongValue && 'text-lg font-semibold leading-6',
+            valueClassName,
+          )}
+        >
           {normalizedValue}
         </div>
         {(subtitle || trend) && (
-          <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-            {trend && (
-              <span className={cn(trend.positive ? 'text-emerald-600' : 'text-rose-600')}>
+          <div
+            className={cn(
+              'grid min-h-[36px] gap-2 text-xs text-muted-foreground',
+              hasSplitMeta && 'lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start',
+            )}
+          >
+            {trend ? (
+              <span
+                className={cn(
+                  'inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-semibold leading-4',
+                  trend.positive
+                    ? 'bg-emerald-500/10 text-emerald-700'
+                    : 'bg-rose-500/10 text-rose-700',
+                )}
+              >
                 {trend.value}
               </span>
-            )}
-            {subtitle && <span>{subtitle}</span>}
+            ) : null}
+            {subtitle ? <p className="break-words leading-5 text-muted-foreground">{subtitle}</p> : null}
           </div>
         )}
-        {footer ? <div className="mt-2 text-xs text-muted-foreground">{footer}</div> : null}
+        {footer ? <div className="break-words text-xs text-muted-foreground">{footer}</div> : null}
       </CardContent>
     </Card>
   );

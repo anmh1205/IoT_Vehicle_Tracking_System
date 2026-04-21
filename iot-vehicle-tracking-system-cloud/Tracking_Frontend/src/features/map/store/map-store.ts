@@ -30,8 +30,8 @@ export const useMapStore = create<MapState>((set) => ({
   selectedDeviceId: null,
   searchTerm: '',
   statusFilter: 'all',
-  mapLayer: 'street',
-  showGeofences: true,
+  mapLayer: 'satellite',
+  showGeofences: false,
   followMode: false,
   mapViewport: DEFAULT_MAP_VIEWPORT,
   updatePosition: (position) =>

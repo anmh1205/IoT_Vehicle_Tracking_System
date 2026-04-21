@@ -40,7 +40,7 @@ export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }
           <CardTitle className="text-sm">Thiết bị đã chọn</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Chọn một thiết bị để xem ngữ cảnh telemetry, tốc độ, cảm biến và thời điểm cập nhật.
+          Chọn một thiết bị để xem telemetry, tốc độ, cảm biến và thời điểm cập nhật.
         </CardContent>
       </Card>
     );
@@ -62,15 +62,12 @@ export const SelectedDeviceCard = ({ device }: { device: DevicePosition | null }
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
           <StatItem label="Tốc độ" value={`${device.speed} km/h`} />
-          <StatItem label="Hướng" value={`${device.heading}°`} />
-          <StatItem label="Pin" value={formatBatteryMetric(device.battery)} />
+          <StatItem label="Tua máy" value={device.rpm != null ? `${device.rpm} rpm` : 'Chưa có'} />
+          <StatItem label="Pin thiết bị" value={formatBatteryMetric(device.deviceBattery)} />
+          <StatItem label="Ắc quy xe" value={formatBatteryMetric(device.vehicleBattery)} />
           <StatItem
-            label="Nhiệt độ"
-            value={
-              device.temperature !== null && device.temperature !== undefined
-                ? `${device.temperature}°C`
-                : 'Chưa có'
-            }
+            label="Nhiệt độ máy"
+            value={device.engineTemperature != null ? `${device.engineTemperature}°C` : 'Chưa có'}
           />
         </div>
 

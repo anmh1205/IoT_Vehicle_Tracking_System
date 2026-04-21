@@ -23,8 +23,14 @@ export interface RealtimeEventMap {
     timestamp: number;
     status?: string;
     deviceName?: string;
+    vehicleId?: string | null;
     vehiclePlate?: string;
     battery?: number | null;
+    deviceBattery?: number | null;
+    vehicleBattery?: number | null;
+    temperature?: number | null;
+    engineTemperature?: number | null;
+    rpm?: number | null;
     metadata?: RealtimeMetadata;
   };
   'device:session_start': {
@@ -46,12 +52,31 @@ export interface RealtimeEventMap {
   'stats:update': Record<string, unknown>;
   'alert:new': {
     id: number;
-    vehicle_id?: number;
+    vehicle_id?: string;
     device_id?: string;
     alert_type: string;
     severity: string;
     title: string;
     message?: string;
+    latitude?: number;
+    longitude?: number;
+    metadata?: RealtimeMetadata;
+    alertMetadata?: Record<string, unknown>;
+  };
+  'geofence:allowed-zone-updated': {
+    vehicle_id: string;
+    allowed_zone_id: number | null;
+    status: 'active' | 'disabled';
+    membership_state?: 'unknown' | 'inside' | 'outside' | 'suspect';
+    last_changed_at?: string | null;
+  };
+  'geofence:allowed-zone-state-changed': {
+    device_id?: string;
+    vehicle_id: string;
+    allowed_zone_id: number;
+    previous_membership_state: 'unknown' | 'inside' | 'outside' | 'suspect';
+    membership_state: 'unknown' | 'inside' | 'outside' | 'suspect';
+    last_changed_at: string;
     latitude?: number;
     longitude?: number;
     metadata?: RealtimeMetadata;

@@ -684,6 +684,45 @@ export const spec = {
         responses: crud(),
       },
     },
+    '/geofences/vehicles/{vehicleId}/allowed-zone': {
+      get: {
+        tags: ['Geofences'],
+        summary: 'Get active allowed zone for vehicle',
+        parameters: [{ name: 'vehicleId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: crud(),
+      },
+      put: {
+        tags: ['Geofences'],
+        summary: 'Upsert active allowed zone for vehicle',
+        parameters: [{ name: 'vehicleId', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: jsonBody({
+          centerSource: { type: 'string', enum: ['vehicle_position', 'map_pick'] },
+          centerLatitude: { type: 'number' },
+          centerLongitude: { type: 'number' },
+          radiusMeters: { type: 'number' },
+          alertMode: {
+            type: 'string',
+            enum: ['transition_only', 'transition_and_recovery', 'periodic_while_outside', 'silent'],
+          },
+          cooldownSec: { type: 'integer' },
+        }),
+        responses: crud(),
+      },
+      delete: {
+        tags: ['Geofences'],
+        summary: 'Disable active allowed zone for vehicle',
+        parameters: [{ name: 'vehicleId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: crud(),
+      },
+    },
+    '/geofences/vehicles/{vehicleId}/allowed-zone/preview-center': {
+      post: {
+        tags: ['Geofences'],
+        summary: 'Preview allowed-zone center from latest vehicle position',
+        parameters: [{ name: 'vehicleId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: crud(),
+      },
+    },
 
     // ── Maintenance ─────────────────────────────────
     '/maintenance': {
@@ -1018,18 +1057,48 @@ export const spec = {
     '/system-admin/metrics': {
       get: {
         tags: ['System Admin'],
-        summary: 'Query Prometheus/VictoriaMetrics',
-        parameters: [{ name: 'query', in: 'query', schema: { type: 'string' }, description: 'PromQL query' }],
+        summary: 'Query VictoriaMetrics',
+        parameters: [
+          {
+            name: 'query',
+            in: 'query',
+            required: true,
+            schema: { type: 'string' },
+            description: 'PromQL query',
+          },
+          {
+            name: 'time',
+            in: 'query',
+            schema: { type: 'string' },
+            description: 'Optional time or range string (e.g. 1h, 24h)',
+          },
+        ],
         responses: ok(),
       },
     },
     '/system-admin/logs': {
       get: {
         tags: ['System Admin'],
-        summary: 'Query VictoriaLogs',
+        summary: 'Query VictoriaLogs with pagination',
         parameters: [
-          { name: 'query', in: 'query', schema: { type: 'string' } },
-          { name: 'limit', in: 'query', schema: { type: 'integer' } },
+          {
+            name: 'query',
+            in: 'query',
+            schema: { type: 'string', default: '*' },
+            description: 'LogSQL query string',
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'integer', minimum: 1, maximum: 500 },
+            description: 'Page size',
+          },
+          {
+            name: 'offset',
+            in: 'query',
+            schema: { type: 'integer', minimum: 0 },
+            description: 'Start offset',
+          },
         ],
         responses: ok(),
       },
@@ -1042,16 +1111,97 @@ export const spec = {
         responses: ok(),
       },
     },
-    '/system-admin/settings': {
-      get: { tags: ['System Admin'], summary: 'Get system settings', responses: ok() },
+    '/system-admin/vm/settings': {
+      get: {
+        tags: ['System Admin'],
+        summary: 'List VM settings by resource',
+        parameters: [{ name: 'resource', in: 'query', schema: { type: 'string' } }],
+        responses: ok(),
+      },
+      post: {
+        tags: ['System Admin'],
+        summary: 'Create VM setting with revision and idempotency',
+        requestBody: jsonBody({
+          key: { type: 'string' },
+          value: {},
+          description: { type: 'string' },
+          groupName: { type: 'string' },
+          isPublic: { type: 'boolean' },
+          resource: { type: 'string' },
+          idempotencyKey: { type: 'string' },
+        }),
+        responses: crud('VM setting created'),
+      },
     },
-    '/system-admin/settings/{key}': {
+    '/system-admin/vm/settings/{key}': {
       put: {
         tags: ['System Admin'],
-        summary: 'Update a system setting',
+        summary: 'Update VM setting with optimistic lock',
         parameters: [{ name: 'key', in: 'path', required: true, schema: { type: 'string' } }],
-        requestBody: jsonBody({ value: { type: 'string' } }),
+        requestBody: jsonBody({
+          value: {},
+          expectedRevision: { type: 'integer' },
+          resource: { type: 'string' },
+          idempotencyKey: { type: 'string' },
+        }),
         responses: crud(),
+      },
+      delete: {
+        tags: ['System Admin'],
+        summary: 'Delete VM setting with revision guard',
+        parameters: [
+          { name: 'key', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'expectedRevision', in: 'query', required: true, schema: { type: 'integer' } },
+          { name: 'resource', in: 'query', schema: { type: 'string' } },
+          { name: 'idempotencyKey', in: 'query', schema: { type: 'string' } },
+        ],
+        responses: crud(),
+      },
+    },
+    '/system-admin/vm/settings/{key}/validate': {
+      post: {
+        tags: ['System Admin'],
+        summary: 'Validate VM setting before activation',
+        parameters: [{ name: 'key', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: jsonBody({ resource: { type: 'string' } }),
+        responses: ok(),
+      },
+    },
+    '/system-admin/vm/settings/{key}/activate': {
+      post: {
+        tags: ['System Admin'],
+        summary: 'Activate VM setting after validation gate',
+        parameters: [{ name: 'key', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: jsonBody({
+          expectedRevision: { type: 'integer' },
+          resource: { type: 'string' },
+          idempotencyKey: { type: 'string' },
+        }),
+        responses: crud(),
+      },
+    },
+    '/system-admin/vm/settings/{key}/rollback': {
+      post: {
+        tags: ['System Admin'],
+        summary: 'Rollback VM setting to target revision',
+        parameters: [{ name: 'key', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: jsonBody({
+          targetRevision: { type: 'integer' },
+          expectedRevision: { type: 'integer' },
+          idempotencyKey: { type: 'string' },
+        }),
+        responses: crud(),
+      },
+    },
+    '/system-admin/vm/settings/{key}/revisions': {
+      get: {
+        tags: ['System Admin'],
+        summary: 'List VM setting revision history',
+        parameters: [
+          { name: 'key', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100 } },
+        ],
+        responses: ok(),
       },
     },
     '/system-admin/tables': {
@@ -1064,6 +1214,18 @@ export const spec = {
         parameters: [
           { name: 'table', in: 'path', required: true, schema: { type: 'string' } },
           ...paginationParams,
+          {
+            name: 'from',
+            in: 'query',
+            schema: { type: 'string', format: 'date-time' },
+            description: 'Start date filter',
+          },
+          {
+            name: 'to',
+            in: 'query',
+            schema: { type: 'string', format: 'date-time' },
+            description: 'End date filter',
+          },
         ],
         responses: ok(),
       },

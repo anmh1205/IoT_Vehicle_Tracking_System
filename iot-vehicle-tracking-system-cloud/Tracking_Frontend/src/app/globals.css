@@ -151,3 +151,56 @@
     padding-bottom: max(1rem, var(--safe-area-bottom));
   }
 }
+
+.tracking-map-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 3px solid rgb(255 255 255 / 96%);
+  color: #fff;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgb(2 6 23 / 55%);
+  box-shadow:
+    0 14px 30px rgb(15 23 42 / 38%),
+    0 0 0 4px rgb(255 255 255 / 22%),
+    inset 0 -5px 12px rgb(0 0 0 / 20%);
+  backdrop-filter: blur(1px);
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.tracking-map-cluster:hover {
+  transform: scale(1.1);
+  filter: saturate(1.16);
+}
+
+.tracking-map-cluster__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  letter-spacing: 0.01em;
+}
+
+.tracking-map-cluster--sm {
+  background: radial-gradient(circle at 28% 24%, #7dd3fc, #2563eb 68%);
+  font-size: 1rem;
+}
+
+.tracking-map-cluster--md {
+  background: radial-gradient(circle at 28% 24%, #22d3ee, #0369a1 68%);
+  font-size: 1.1rem;
+}
+
+.tracking-map-cluster--lg {
+  background: radial-gradient(circle at 28% 24%, #fb923c, #ea580c 72%);
+  font-size: 1.18rem;
+}
+
+.tracking-map-cluster--xl {
+  background: radial-gradient(circle at 28% 24%, #fb7185, #dc2626 74%);
+  font-size: 1.26rem;
+}

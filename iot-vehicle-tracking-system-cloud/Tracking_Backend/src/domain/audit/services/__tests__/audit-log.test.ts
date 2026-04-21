@@ -50,7 +50,7 @@ describe('audit-log.service', () => {
 
       await record(input);
 
-      expect(auditLogRepo.create).toHaveBeenCalledWith(input);
+      expect(auditLogRepo.create).toHaveBeenCalledWith(input, undefined);
     });
 
     it('should never throw even when repo.create fails (fire-and-forget)', async () => {
@@ -66,6 +66,12 @@ describe('audit-log.service', () => {
       const result = await record(input);
 
       expect(result).toBeUndefined();
+    });
+
+    it('should rethrow when strict option is enabled', async () => {
+      vi.mocked(auditLogRepo.create).mockRejectedValue(new Error('DB connection failed'));
+
+      await expect(record(input, undefined, { strict: true })).rejects.toThrow('DB connection failed');
     });
   });
 

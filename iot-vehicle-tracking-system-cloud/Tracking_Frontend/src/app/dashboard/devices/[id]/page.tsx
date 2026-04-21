@@ -53,8 +53,8 @@ const DeviceDetailPage = ({
   const pageTitle = detail?.deviceName ?? detail?.deviceId ?? `Thiết bị #${id}`;
   const pageDescription =
     detail?.vehiclePlate || detail?.customerName
-      ? `Theo dõi runtime, lỗi và ngữ cảnh telemetry của ${detail.deviceId ?? 'thiết bị'}`
-      : 'Thiết bị này chưa được gắn đầy đủ ngữ cảnh xe/khách hàng nên cần rà soát bổ sung.';
+      ? `Theo dõi runtime, lỗi và telemetry của ${detail.deviceId ?? 'thiết bị'}`
+      : 'Thiết bị này chưa được gắn đầy đủ xe/khách hàng.';
 
   return (
     <PageContainer pageTitle={pageTitle} pageDescription={pageDescription}>

@@ -46,26 +46,28 @@ export const LineChartView = ({ series }: { series: MetricSeries[] }) => {
 
   return (
     <Card>
-      <CardContent className="h-[380px] p-3">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={rows}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="label" minTickGap={20} />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            {series.map((item, index) => (
-              <Line
-                key={item.name}
-                type="monotone"
-                dataKey={item.name}
-                stroke={COLORS[index % COLORS.length]}
-                dot={false}
-                strokeWidth={2}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+      <CardContent className="p-3">
+        <div className="h-[380px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={rows}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="label" minTickGap={20} />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              {series.map((item, index) => (
+                <Line
+                  key={item.name}
+                  type="monotone"
+                  dataKey={item.name}
+                  stroke={COLORS[index % COLORS.length]}
+                  dot={false}
+                  strokeWidth={2}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );

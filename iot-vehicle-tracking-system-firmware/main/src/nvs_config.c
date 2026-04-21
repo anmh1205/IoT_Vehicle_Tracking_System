@@ -28,6 +28,11 @@
 #define CONFIG_TRACKER_DEFAULT_MQTT_HOST "mqtt.thingdock.dev"
 #endif
 
+#define TRACKER_PRODUCTION_DEVICE_ID "TRACKER_001"
+#define TRACKER_PRODUCTION_AUTH_TOKEN "TRACKER_001_Anmh1205"
+#define TRACKER_PRODUCTION_MQTT_USERNAME "device"
+#define TRACKER_PRODUCTION_MQTT_PASSWORD "Anmh1205"
+
 #define TRACKER_LEGACY_MQTT_HOST_LOCALHOST "localhost"
 
 #ifndef CONFIG_TRACKER_DEFAULT_MQTT_PORT
@@ -67,7 +72,7 @@
 #endif
 
 #ifndef CONFIG_TRACKER_DEFAULT_IMU_WAKEUP_ENABLED
-#define CONFIG_TRACKER_DEFAULT_IMU_WAKEUP_ENABLED 0
+#define CONFIG_TRACKER_DEFAULT_IMU_WAKEUP_ENABLED 1
 #endif
 
 #ifndef CONFIG_TRACKER_MODEM_APN
@@ -102,6 +107,54 @@ typedef struct {
 
 static uint16_t app_config_clamp_u16(uint16_t value, uint16_t min_value, uint16_t max_value) {
     return (uint16_t)util_clamp_int((int)value, (int)min_value, (int)max_value);
+}
+
+static bool app_config_targets_production_thingdock(const config_t *config) {
+    if (config == NULL) {
+        return false;
+    }
+
+    return strcmp(config->device_id, TRACKER_PRODUCTION_DEVICE_ID) == 0 &&
+           strcmp(config->mqtt_host, CONFIG_TRACKER_DEFAULT_MQTT_HOST) == 0;
+}
+
+static bool app_config_auth_token_needs_production_repair(const char *auth_token) {
+    if (util_string_empty(auth_token)) {
+        return true;
+    }
+
+    return strcmp(auth_token, "device-secret-token") == 0 || strcmp(auth_token, "Anmh1205") == 0;
+}
+
+static bool app_config_apply_production_thingdock_repair(config_t *config) {
+    if (!app_config_targets_production_thingdock(config)) {
+        return false;
+    }
+
+    bool changed = false;
+
+    if (util_string_empty(config->mqtt_username)) {
+        util_copy_string(config->mqtt_username,
+                         sizeof(config->mqtt_username),
+                         TRACKER_PRODUCTION_MQTT_USERNAME);
+        changed = true;
+    }
+
+    if (util_string_empty(config->mqtt_password)) {
+        util_copy_string(config->mqtt_password,
+                         sizeof(config->mqtt_password),
+                         TRACKER_PRODUCTION_MQTT_PASSWORD);
+        changed = true;
+    }
+
+    if (app_config_auth_token_needs_production_repair(config->auth_token)) {
+        util_copy_string(config->auth_token,
+                         sizeof(config->auth_token),
+                         TRACKER_PRODUCTION_AUTH_TOKEN);
+        changed = true;
+    }
+
+    return changed;
 }
 
 /**
@@ -171,6 +224,7 @@ void app_config_set_defaults(config_t *config) {
     config->command_subscribe_enabled = true;
 #endif
     util_copy_string(config->apn, sizeof(config->apn), CONFIG_TRACKER_MODEM_APN);
+    (void)app_config_apply_production_thingdock_repair(config);
 }
 
 /**
@@ -344,6 +398,19 @@ esp_err_t nvs_config_load(config_t *config) {
                  TRACKER_LEGACY_MQTT_HOST_LOCALHOST,
                  CONFIG_TRACKER_DEFAULT_MQTT_HOST);
         util_copy_string(config->mqtt_host, sizeof(config->mqtt_host), CONFIG_TRACKER_DEFAULT_MQTT_HOST);
+        migrated = true;
+    }
+
+    bool legacy_cadence_pair = config->heartbeat_interval_s == TRACKER_LEGACY_DEFAULT_HEARTBEAT_INTERVAL_S &&
+                               config->tracking_interval_s == TRACKER_LEGACY_DEFAULT_TRACKING_INTERVAL_S;
+    if (!config->imu_wakeup_enabled && config->sleep_enabled && legacy_cadence_pair) {
+        ESP_LOGW(TAG, "Legacy parked config detected, enabling IMU wake for production motion wake");
+        config->imu_wakeup_enabled = true;
+        migrated = true;
+    }
+
+    if (app_config_apply_production_thingdock_repair(config)) {
+        ESP_LOGW(TAG, "Production ThingDock credential repair applied for %s", config->device_id);
         migrated = true;
     }
 

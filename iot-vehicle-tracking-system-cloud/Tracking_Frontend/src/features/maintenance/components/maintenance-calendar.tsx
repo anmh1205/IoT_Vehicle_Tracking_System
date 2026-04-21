@@ -1,24 +1,11 @@
 'use client';
 
 import { Calendar } from '@/components/ui/calendar';
+import {
+  MAINTENANCE_STATUS_LABELS,
+  getMaintenanceTypeLabel,
+} from '@/features/maintenance/maintenance-meta';
 import { formatLocalDateKey } from '@/lib/utils';
-
-const STATUS_LABELS: Record<string, string> = {
-  scheduled: 'Đã lên lịch',
-  in_progress: 'Đang xử lý',
-  completed: 'Hoàn tất',
-  cancelled: 'Đã hủy',
-};
-
-const MAINTENANCE_TYPE_LABELS: Record<string, string> = {
-  oil_change: 'Thay dầu',
-  tire_rotation: 'Đảo lốp',
-  tire_replacement: 'Thay lốp',
-  inspection: 'Kiểm tra định kỳ',
-  battery: 'Ắc quy',
-  brake: 'Phanh',
-  engine: 'Động cơ',
-};
 
 export const MaintenanceCalendar = ({
   day,
@@ -45,8 +32,8 @@ export const MaintenanceCalendar = ({
         {dayRows.length > 0 ? (
           dayRows.map((row: any) => (
             <div key={row.id} className="rounded border p-2">
-              #{row.id} - {MAINTENANCE_TYPE_LABELS[row.maintenanceType] ?? row.maintenanceType} -{' '}
-              {STATUS_LABELS[row.status] ?? row.status}
+              #{row.id} - {getMaintenanceTypeLabel(row.maintenanceType)} -{' '}
+              {MAINTENANCE_STATUS_LABELS[row.status] ?? row.status}
             </div>
           ))
         ) : (

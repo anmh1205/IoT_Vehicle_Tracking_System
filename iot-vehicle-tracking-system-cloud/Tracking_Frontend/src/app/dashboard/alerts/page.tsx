@@ -3,90 +3,24 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CircleCheckBig, CircleDashed, ShieldAlert } from 'lucide-react';
-import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { PageContainer } from '@/components/layout/PageContainer';
 import { StatCard } from '@/components/common/stat-card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { alertServices } from '@/lib/api/alerts';
+import { getAlertColumns } from '@/features/alerts/components/alert-columns';
+import { AlertDetailModal } from '@/features/alerts/components/alert-detail-modal';
+import { AlertFilters } from '@/features/alerts/components/alert-filters';
+import { alertServices, isObdMaintenanceAlert, localizeAlertForDisplay } from '@/lib/api/alerts';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
-import { getAlertColumns } from '@/features/alerts/components/alert-columns';
-import { AlertFilters } from '@/features/alerts/components/alert-filters';
-import { AlertDetailModal } from '@/features/alerts/components/alert-detail-modal';
 
 const PAGE_SIZE = 50;
 
 const getPaginationTotal = (payload: any): number => {
   const parsed = Number(payload?.pagination?.total ?? payload?.data?.pagination?.total ?? 0);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
-};
-
-const isObdMaintenanceAlert = (item: any): boolean => {
-  const title = String(item?.title ?? '').toLowerCase();
-  const message = String(item?.message ?? '').toLowerCase();
-  const signature = `${title} ${message}`;
-
-  return (
-    item?.alertType === 'maintenance_due' &&
-    (signature.includes('obd') ||
-      signature.includes('coolant') ||
-      signature.includes('voltage') ||
-      signature.includes('idle-load') ||
-      signature.includes('channel'))
-  );
-};
-
-const localizeObdAlertTitle = (title: string): string => {
-  const normalized = title.toLowerCase();
-
-  if (normalized.includes('idle-load anomaly')) {
-    return 'OBD: Bất thường không tải';
-  }
-  if (normalized.includes('coolant risk pattern')) {
-    return 'OBD: Rủi ro nhiệt độ nước làm mát';
-  }
-  if (normalized.includes('channel unstable')) {
-    return 'OBD: Kênh kết nối không ổn định';
-  }
-  if (normalized.includes('voltage risk under load')) {
-    return 'OBD: Rủi ro điện áp khi tải cao';
-  }
-
-  return title;
-};
-
-const localizeObdAlertMessage = (message: string): string => {
-  const idleLoadMatch = message.match(
-    /^RPM\s+([\d.]+)\s+while speed\s+([\d.]+)\s+km\/h\s+for\s+([\d.]+)\s+minutes\.?$/i,
-  );
-  if (idleLoadMatch) {
-    return `Vòng tua ${idleLoadMatch[1]} khi tốc độ ${idleLoadMatch[2]} km/h trong ${idleLoadMatch[3]} phút.`;
-  }
-
-  const coolantMatch = message.match(
-    /^Coolant\s+([\d.]+)C\s+with engine load\s+([\d.]+)%\s+sustained at runtime\.?$/i,
-  );
-  if (coolantMatch) {
-    return `Nhiệt độ nước làm mát ${coolantMatch[1]}°C với tải động cơ ${coolantMatch[2]}% trong lúc vận hành.`;
-  }
-
-  const channelMatch = message.match(
-    /^OBD connect\/init failed\s+([\d.]+)\s+times in the last 5 minutes\.?$/i,
-  );
-  if (channelMatch) {
-    return `Kết nối/khởi tạo OBD thất bại ${channelMatch[1]} lần trong 5 phút gần nhất.`;
-  }
-
-  const voltageMatch = message.match(
-    /^Battery top\s+([\d.]+)V\s+while engine load\s+([\d.]+)%\.?$/i,
-  );
-  if (voltageMatch) {
-    return `Điện áp ắc quy chính ${voltageMatch[1]}V khi tải động cơ ${voltageMatch[2]}%.`;
-  }
-
-  return message;
 };
 
 const AlertsPage = () => {
@@ -166,18 +100,9 @@ const AlertsPage = () => {
 
   const allRows = useMemo(
     () =>
-      (alerts.data?.items ?? alerts.data?.data?.items ?? []).map((item: any) => {
-        if (!isObdMaintenanceAlert(item)) {
-          return item;
-        }
-
-        return {
-          ...item,
-          title: localizeObdAlertTitle(String(item.title ?? 'Cảnh báo bảo trì OBD')),
-          message:
-            item.message == null ? null : localizeObdAlertMessage(String(item.message)),
-        };
-      }),
+      (alerts.data?.items ?? alerts.data?.data?.items ?? []).map((item: any) =>
+        localizeAlertForDisplay(item),
+      ),
     [alerts.data],
   );
 
@@ -264,7 +189,6 @@ const AlertsPage = () => {
   return (
     <PageContainer
       pageTitle="Cảnh báo"
-      pageDescription="Quản lý cảnh báo hệ thống theo mức độ, trạng thái và nguồn OBD"
       pageHeaderAction={
         <div className="flex flex-wrap gap-2">
           <Button
@@ -409,11 +333,7 @@ const AlertsPage = () => {
         </div>
       </div>
 
-      <AlertDetailModal
-        open={!!detail}
-        onOpenChange={(value) => !value && setDetail(null)}
-        alert={detail}
-      />
+      <AlertDetailModal open={!!detail} onOpenChange={(value) => !value && setDetail(null)} alert={detail} />
     </PageContainer>
   );
 };

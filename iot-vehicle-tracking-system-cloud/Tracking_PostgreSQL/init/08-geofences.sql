@@ -135,6 +135,41 @@ CREATE TRIGGER trigger_vehicle_policy_state_updated_at
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- -----------------------------------------------------------------------------
+-- vehicle_allowed_zones
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS vehicle_allowed_zones (
+    id BIGSERIAL PRIMARY KEY,
+    vehicle_id VARCHAR(50) NOT NULL REFERENCES vehicles(vehicle_id) ON DELETE CASCADE,
+    zone_type VARCHAR(16) NOT NULL DEFAULT 'circle' CHECK (zone_type = 'circle'),
+    center_lat DECIMAL(10,8) NOT NULL CHECK (center_lat BETWEEN -90 AND 90),
+    center_lon DECIMAL(11,8) NOT NULL CHECK (center_lon BETWEEN -180 AND 180),
+    radius_m DOUBLE PRECISION NOT NULL CHECK (radius_m > 0),
+    center_source VARCHAR(32) NOT NULL CHECK (center_source IN ('vehicle_position', 'map_pick')),
+    center_snapshot_at TIMESTAMPTZ,
+    status VARCHAR(16) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'disabled')),
+    last_membership_state VARCHAR(16) NOT NULL DEFAULT 'unknown' CHECK (last_membership_state IN ('unknown', 'inside', 'outside', 'suspect')),
+    last_membership_changed_at TIMESTAMPTZ,
+    last_alerted_state VARCHAR(16) CHECK (last_alerted_state IN ('unknown', 'inside', 'outside', 'suspect')),
+    last_alerted_at TIMESTAMPTZ,
+    suppression_until TIMESTAMPTZ,
+    alert_mode VARCHAR(32) NOT NULL DEFAULT 'transition_only' CHECK (alert_mode IN ('transition_only', 'transition_and_recovery', 'periodic_while_outside', 'silent')),
+    cooldown_sec INTEGER NOT NULL DEFAULT 300 CHECK (cooldown_sec >= 0),
+    source_warning_json JSONB,
+    created_by INT REFERENCES users(id),
+    updated_by INT REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(vehicle_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_vehicle_allowed_zones_status ON vehicle_allowed_zones(status);
+CREATE INDEX IF NOT EXISTS idx_vehicle_allowed_zones_updated_at ON vehicle_allowed_zones(updated_at DESC);
+
+CREATE TRIGGER trigger_vehicle_allowed_zones_updated_at
+    BEFORE UPDATE ON vehicle_allowed_zones
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- -----------------------------------------------------------------------------
 -- policy_audit_logs
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS policy_audit_logs (

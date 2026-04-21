@@ -1,0 +1,6 @@
+
+===== sync2 monitor COM4 ts=1776506201 =====
+REQ id=0x7DF mode=0x1 pid=0x0
+PID 0x0 rpm=2515 spd=84 mil=on
+REQ id=0x7DF mode=0x1 pid=0xD
+PID 0xD rpm=2515 spd=84 mil=on

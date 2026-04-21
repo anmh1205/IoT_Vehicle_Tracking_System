@@ -34,6 +34,7 @@ const makeDriver = (overrides: Partial<Driver> = {}): Driver => ({
 describe('driver-list.service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(driverRepo.findAssignmentSummariesByNames).mockResolvedValue(new Map());
   });
 
   describe('listDrivers', () => {
@@ -88,8 +89,44 @@ describe('driver-list.service', () => {
       expect(item.licenseNumber).toBe('B2-12345');
       expect(item.licenseType).toBe('B2');
       expect(item.avatarUrl).toBeNull();
+      expect(item.assignment).toBeNull();
       expect(item.createdAt).toBe(NOW.toISOString());
       expect(item.updatedAt).toBe(UPDATED.toISOString());
+    });
+
+    it('should attach real assignment context when repository provides it', async () => {
+      const driver = makeDriver({ full_name: 'Nguyen Van Nam' });
+      vi.mocked(driverRepo.findAll).mockResolvedValue({ drivers: [driver], total: 1 });
+      vi.mocked(driverRepo.findAssignmentSummariesByNames).mockResolvedValue(
+        new Map([
+          [
+            'nguyen van nam',
+            {
+              tripCount: 2,
+              activeTripCount: 1,
+              latestTripId: 9,
+              latestTripCode: 'MOCK-TRIP-002',
+              latestTripStatus: 'in_progress',
+              latestTripAt: '2026-01-16T11:00:00.000Z',
+              latestVehicleId: 'XE-BUS-77',
+              latestDeviceId: 'MOCK-OBD-002',
+              latestStartLocation: 'Depot',
+              latestEndLocation: 'Hub',
+              activeTripCode: 'MOCK-TRIP-002',
+              activeVehicleId: 'XE-BUS-77',
+              activeDeviceId: 'MOCK-OBD-002',
+            },
+          ],
+        ]),
+      );
+
+      const result = await listDrivers({});
+
+      expect(result.items[0].assignment).toMatchObject({
+        tripCount: 2,
+        activeTripCount: 1,
+        latestVehicleId: 'XE-BUS-77',
+      });
     });
 
     it('should convert Date fields to ISO strings and null dates to null', async () => {

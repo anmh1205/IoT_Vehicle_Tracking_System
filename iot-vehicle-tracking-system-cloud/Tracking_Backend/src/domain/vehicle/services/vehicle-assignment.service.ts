@@ -9,6 +9,8 @@ const sanitizeVehicle = (v: Vehicle): VehiclePublic => ({
   plateNumber: v.plate_number,
   deviceId: v.device_id,
   customerId: v.customer_id,
+  customerCode: v.customer_code ?? null,
+  customerName: v.customer_name ?? null,
   vehicleType: v.vehicle_type,
   brand: v.brand,
   model: v.model,
@@ -45,7 +47,8 @@ export const assignDevice = async (vehicleId: number, deviceId: string): Promise
   }
 
   logger.info(`Device "${deviceId}" assigned to vehicle "${vehicle.vehicle_id}"`);
-  return sanitizeVehicle(updated);
+  const hydrated = await vehicleRepo.findById(vehicleId);
+  return sanitizeVehicle(hydrated ?? updated);
 };
 
 export const unassignDevice = async (vehicleId: number): Promise<VehiclePublic> => {
@@ -64,5 +67,6 @@ export const unassignDevice = async (vehicleId: number): Promise<VehiclePublic> 
   }
 
   logger.info(`Device unassigned from vehicle "${vehicle.vehicle_id}"`);
-  return sanitizeVehicle(updated);
+  const hydrated = await vehicleRepo.findById(vehicleId);
+  return sanitizeVehicle(hydrated ?? updated);
 };

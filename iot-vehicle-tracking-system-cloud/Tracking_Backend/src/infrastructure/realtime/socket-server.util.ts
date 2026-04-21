@@ -155,6 +155,18 @@ const registerEventBridges = (server: TypedIOServer): void => {
     recordEventEmission('geofence:exit');
   });
 
+  subscribeEvent('geofence:allowed-zone-updated', (payload) => {
+    server.of('/notifications').emit('geofence:allowed-zone-updated', payload);
+    server.of('/dashboard').emit('geofence:allowed-zone-updated', payload);
+    recordEventEmission('geofence:allowed-zone-updated');
+  });
+
+  subscribeEvent('geofence:allowed-zone-state-changed', (payload) => {
+    server.of('/notifications').emit('geofence:allowed-zone-state-changed', payload);
+    server.of('/dashboard').emit('geofence:allowed-zone-state-changed', payload);
+    recordEventEmission('geofence:allowed-zone-state-changed');
+  });
+
   // Export events → /exports namespace
   subscribeEvent('export:ready', (payload) => {
     server.of('/exports').emit('export:ready', payload);

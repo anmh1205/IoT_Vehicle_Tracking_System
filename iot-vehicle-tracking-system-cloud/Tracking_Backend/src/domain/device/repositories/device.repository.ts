@@ -23,6 +23,18 @@ const ALLOWED_SORT_COLUMNS: Record<string, string> = {
   createdAt: 'created_at',
 };
 
+const DEVICE_LINK_LATERAL = `LEFT JOIN LATERAL (
+  SELECT
+    v.plate_number AS vehicle_plate,
+    c.name AS customer_name,
+    v.vehicle_id AS linked_vehicle_id
+  FROM vehicles v
+  LEFT JOIN customers c ON c.id = v.customer_id
+  WHERE v.device_id = d.device_id OR (d.vehicle_id IS NOT NULL AND v.vehicle_id = d.vehicle_id)
+  ORDER BY CASE WHEN v.device_id = d.device_id THEN 0 ELSE 1 END, v.updated_at DESC, v.id DESC
+  LIMIT 1
+) link ON true`;
+
 export const findAll = async (
   query: DeviceListQuery,
 ): Promise<{ devices: Device[]; total: number }> => {
@@ -35,12 +47,12 @@ export const findAll = async (
   let paramIndex = 1;
 
   if (query.status) {
-    conditions.push(`current_status::text = $${paramIndex++}`);
+    conditions.push(`d.current_status::text = $${paramIndex++}`);
     params.push(query.status);
   }
 
   if (query.search) {
-    conditions.push(`(device_id ILIKE $${paramIndex} OR device_name ILIKE $${paramIndex})`);
+    conditions.push(`(d.device_id ILIKE $${paramIndex} OR d.device_name ILIKE $${paramIndex})`);
     params.push(`%${query.search}%`);
     paramIndex++;
   }
@@ -49,19 +61,25 @@ export const findAll = async (
 
   const sortColumn = ALLOWED_SORT_COLUMNS[query.sortBy ?? ''] ?? 'created_at';
   const sortOrder = query.sortOrder === 'asc' ? 'ASC' : 'DESC';
-  const orderClause = `ORDER BY ${sortColumn} ${sortOrder}`;
+  const orderClause = `ORDER BY d.${sortColumn} ${sortOrder}`;
 
   const countResult = await pool.query(
-    `SELECT COUNT(*) as total FROM devices ${whereClause}`,
+    `SELECT COUNT(*) as total FROM devices d ${whereClause}`,
     params,
   );
   const total = parseInt(countResult.rows[0].total, 10);
 
   const devices = await findMany<Device>(
-    `SELECT *,
-        COALESCE(last_latitude, latitude) AS latitude,
-        COALESCE(last_longitude, longitude) AS longitude
-     FROM devices ${whereClause} ${orderClause} LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+    `SELECT
+        d.*,
+        COALESCE(d.last_latitude, d.latitude) AS latitude,
+        COALESCE(d.last_longitude, d.longitude) AS longitude,
+        link.vehicle_plate,
+        link.customer_name,
+        link.linked_vehicle_id
+     FROM devices d
+     ${DEVICE_LINK_LATERAL}
+     ${whereClause} ${orderClause} LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
 
@@ -70,21 +88,31 @@ export const findAll = async (
 
 export const findById = async (id: number): Promise<Device | null> =>
   findOne<Device>(
-    `SELECT *,
-        COALESCE(last_latitude, latitude) AS latitude,
-        COALESCE(last_longitude, longitude) AS longitude
-     FROM devices
-     WHERE id = $1`,
+    `SELECT
+        d.*,
+        COALESCE(d.last_latitude, d.latitude) AS latitude,
+        COALESCE(d.last_longitude, d.longitude) AS longitude,
+        link.vehicle_plate,
+        link.customer_name,
+        link.linked_vehicle_id
+     FROM devices d
+     ${DEVICE_LINK_LATERAL}
+     WHERE d.id = $1`,
     [id],
   );
 
 export const findByDeviceId = async (deviceId: string): Promise<Device | null> =>
   findOne<Device>(
-    `SELECT *,
-        COALESCE(last_latitude, latitude) AS latitude,
-        COALESCE(last_longitude, longitude) AS longitude
-     FROM devices
-     WHERE device_id = $1`,
+    `SELECT
+        d.*,
+        COALESCE(d.last_latitude, d.latitude) AS latitude,
+        COALESCE(d.last_longitude, d.longitude) AS longitude,
+        link.vehicle_plate,
+        link.customer_name,
+        link.linked_vehicle_id
+     FROM devices d
+     ${DEVICE_LINK_LATERAL}
+     WHERE d.device_id = $1`,
     [deviceId],
   );
 
@@ -161,6 +189,9 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
   const result = await pool.query<{
     device_id: string;
     device_name: string;
+    linked_vehicle_id: string | null;
+    vehicle_plate: string | null;
+    customer_name: string | null;
     latitude: number;
     longitude: number;
     current_status: string;
@@ -168,12 +199,21 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     speed: number | null;
     heading: number | null;
     battery: number | null;
+    device_battery: number | null;
+    vehicle_battery: number | null;
     vibration: number | null;
     temperature: number | null;
+    engine_temperature: number | null;
+    rpm: number | null;
+    active_alert_count: number | null;
+    active_alert_titles: string[] | null;
   }>(
     `SELECT
        d.device_id,
        d.device_name,
+       link.linked_vehicle_id,
+       link.vehicle_plate,
+       link.customer_name,
        COALESCE(d.last_latitude, d.latitude) AS latitude,
        COALESCE(d.last_longitude, d.longitude) AS longitude,
        d.current_status,
@@ -196,6 +236,17 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
          0
        ) AS battery,
        COALESCE(
+         NULLIF(el.context->>'bb', '')::float8,
+         NULLIF(el.context->>'battery_bot', '')::float8,
+         0
+       ) AS device_battery,
+       COALESCE(
+         NULLIF(el.context->>'bt', '')::float8,
+         NULLIF(el.context->>'batt', '')::float8,
+         NULLIF(el.context->>'battery_top', '')::float8,
+         0
+       ) AS vehicle_battery,
+       COALESCE(
          NULLIF(el.context->>'vib', '')::float8,
          NULLIF(el.context->>'vibration', '')::float8,
          0
@@ -206,8 +257,21 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
          NULLIF(el.context#>>'{diagnostics,signals,coolant_c}', '')::float8,
          NULLIF(el.context#>>'{diagnostics,signals,intake_air_temp_c}', '')::float8,
          0
-       ) AS temperature
+       ) AS temperature,
+       COALESCE(
+         NULLIF(el.context#>>'{diagnostics,signals,coolant_c}', '')::float8,
+         NULLIF(el.context->>'temp', '')::float8,
+         NULLIF(el.context->>'temperature', '')::float8,
+         0
+       ) AS engine_temperature,
+       COALESCE(
+         NULLIF(el.context#>>'{diagnostics,signals,rpm}', '')::float8,
+         0
+       ) AS rpm,
+       COALESCE(alerts.active_alert_count, 0) AS active_alert_count,
+       COALESCE(alerts.active_alert_titles, ARRAY[]::text[]) AS active_alert_titles
      FROM devices d
+     ${DEVICE_LINK_LATERAL}
      LEFT JOIN LATERAL (
        SELECT context
        FROM event_logs
@@ -229,6 +293,14 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        ORDER BY server_timestamp DESC
        LIMIT 1
      ) el ON true
+     LEFT JOIN LATERAL (
+       SELECT
+         COUNT(*)::int AS active_alert_count,
+         ARRAY_AGG(a.title ORDER BY a.created_at DESC) FILTER (WHERE a.title IS NOT NULL) AS active_alert_titles
+       FROM alerts a
+       WHERE a.device_id = d.device_id
+         AND a.status = 'active'
+     ) alerts ON true
      WHERE COALESCE(d.last_latitude, d.latitude) IS NOT NULL
        AND COALESCE(d.last_longitude, d.longitude) IS NOT NULL
        AND ABS(COALESCE(d.last_latitude, d.latitude)) <= 90
@@ -242,6 +314,9 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
   return result.rows.map((row) => ({
     deviceId: row.device_id,
     deviceName: row.device_name,
+    vehicleId: row.linked_vehicle_id,
+    vehiclePlate: row.vehicle_plate,
+    customerName: row.customer_name,
     latitude: row.latitude,
     longitude: row.longitude,
     currentStatus: row.current_status,
@@ -249,7 +324,13 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     speed: row.speed ?? 0,
     heading: row.heading ?? 0,
     battery: row.battery ?? 0,
+    deviceBattery: row.device_battery,
+    vehicleBattery: row.vehicle_battery,
     vibration: row.vibration ?? 0,
     temperature: row.temperature ?? 0,
+    engineTemperature: row.engine_temperature,
+    rpm: row.rpm,
+    activeAlertCount: row.active_alert_count ?? 0,
+    activeAlertTitles: row.active_alert_titles ?? [],
   }));
 };

@@ -10,6 +10,21 @@ import {
 import * as systemAdminService from '@/domain/system-admin/services/system-admin.service';
 import * as auditService from '@/domain/audit/services/audit.service';
 import type { AuditQuery } from '@/domain/audit/types/audit.types';
+import {
+  activateVmSettingBodySchema,
+  createVmSettingBodySchema,
+  deleteVmSettingQuerySchema,
+  listVmSettingsQuerySchema,
+  logsQuerySchema,
+  metricsQuerySchema,
+  queryTablePathSchema,
+  queryTableQuerySchema,
+  rollbackVmSettingBodySchema,
+  updateVmSettingBodySchema,
+  validateVmSettingBodySchema,
+  vmSettingPathSchema,
+  vmSettingRevisionsQuerySchema,
+} from '@/api/validators/system-admin.validator';
 
 const ADMIN_ROLES = ['admin', 'root'];
 
@@ -29,25 +44,31 @@ export const getHealth = asyncHandler(async (req: AuthenticatedRequest, res: Res
 export const queryMetrics = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   requireAdminRole(req);
 
-  const promql = req.query.query as string;
-  if (!promql) {
-    throw createValidationError('Missing required query parameter: query');
+  const queryParsed = metricsQuerySchema.safeParse(req.query);
+  if (!queryParsed.success) {
+    throw createValidationError('INVALID_SYSTEM_ADMIN_METRICS_QUERY', queryParsed.error.flatten().fieldErrors);
   }
 
-  const time = req.query.time as string | undefined;
-  const result = await systemAdminService.queryMetrics(promql, time);
+  const result = await systemAdminService.queryMetrics({
+    query: queryParsed.data.query,
+    time: queryParsed.data.time,
+  });
   sendOk(res, result);
 });
 
 export const queryLogs = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   requireAdminRole(req);
 
-  const logsql = typeof req.query.query === 'string' && req.query.query.trim()
-    ? req.query.query.trim()
-    : '*';
+  const queryParsed = logsQuerySchema.safeParse(req.query);
+  if (!queryParsed.success) {
+    throw createValidationError('INVALID_SYSTEM_ADMIN_LOGS_QUERY', queryParsed.error.flatten().fieldErrors);
+  }
 
-  const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : undefined;
-  const result = await systemAdminService.queryLogs(logsql, limit);
+  const result = await systemAdminService.queryLogs({
+    query: queryParsed.data.query ?? '*',
+    limit: queryParsed.data.limit,
+    offset: queryParsed.data.offset,
+  });
   sendOk(res, result);
 });
 
@@ -84,44 +105,272 @@ export const listTables = asyncHandler(async (req: AuthenticatedRequest, res: Re
 
 export const listTableColumns = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   requireAdminRole(req);
-  const table = req.params.table as string;
-  const columns = await systemAdminService.getTableColumns(table);
+
+  const pathParsed = queryTablePathSchema.safeParse(req.params);
+  if (!pathParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_TABLE_PATH',
+      pathParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const columns = await systemAdminService.getTableColumns(pathParsed.data.table);
   sendOk(res, columns);
 });
 
 export const queryTable = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   requireAdminRole(req);
 
-  const table = req.params.table as string;
-  const page = req.query.page ? Number.parseInt(req.query.page as string, 10) : 1;
-  const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 20;
-  const search = req.query.search as string | undefined;
-  const from = req.query.from as string | undefined;
-  const to = req.query.to as string | undefined;
+  const pathParsed = queryTablePathSchema.safeParse(req.params);
+  if (!pathParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_TABLE_PATH',
+      pathParsed.error.flatten().fieldErrors,
+    );
+  }
 
-  const result = await systemAdminService.queryTable(table, { page, limit, search, from, to });
+  const queryParsed = queryTableQuerySchema.safeParse(req.query);
+  if (!queryParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_TABLE_QUERY',
+      queryParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const result = await systemAdminService.queryTable(pathParsed.data.table, {
+    page: queryParsed.data.page,
+    limit: queryParsed.data.limit,
+    search: queryParsed.data.search,
+    from: queryParsed.data.from,
+    to: queryParsed.data.to,
+  });
   sendOk(res, result);
 });
 
-export const getSettings = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+export const listVmSettings = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   requireAdminRole(req);
-  const settings = await systemAdminService.getSystemSettings();
+
+  const queryParsed = listVmSettingsQuerySchema.safeParse(req.query);
+  if (!queryParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_SETTINGS_QUERY',
+      queryParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const settings = await systemAdminService.listVmSettings(queryParsed.data.resource);
   sendOk(res, { settings });
 });
 
-export const updateSetting = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+export const createVmSetting = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   requireAdminRole(req);
-  const key = req.params.key as string;
-  if (!key) {
-    throw createValidationError('Missing setting key');
-  }
-  if (!Object.prototype.hasOwnProperty.call(req.body ?? {}, 'value')) {
-    throw createValidationError('Missing setting value');
+
+  const bodyParsed = createVmSettingBodySchema.safeParse(req.body);
+  if (!bodyParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_CREATE_PAYLOAD',
+      bodyParsed.error.flatten().fieldErrors,
+    );
   }
 
-  const updated = await systemAdminService.updateSystemSetting(key, req.body.value);
-  if (!updated) {
-    throw createNotFoundError('Setting not found');
-  }
-  sendOk(res, { setting: updated });
+  const result = await systemAdminService.createVmSetting({
+    key: bodyParsed.data.key,
+    value: bodyParsed.data.value,
+    description: bodyParsed.data.description,
+    groupName: bodyParsed.data.groupName,
+    isPublic: bodyParsed.data.isPublic,
+    resource: bodyParsed.data.resource,
+    idempotencyKey: bodyParsed.data.idempotencyKey,
+    actorUserId: req.user?.id,
+  });
+
+  sendOk(res, result.data, {
+    reusedIdempotency: result.reused,
+  });
 });
+
+export const updateVmSetting = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  requireAdminRole(req);
+
+  const pathParsed = vmSettingPathSchema.safeParse(req.params);
+  if (!pathParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_SETTING_KEY',
+      pathParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const bodyParsed = updateVmSettingBodySchema.safeParse(req.body);
+  if (!bodyParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_UPDATE_PAYLOAD',
+      bodyParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const result = await systemAdminService.updateVmSetting({
+    key: pathParsed.data.key,
+    value: bodyParsed.data.value,
+    expectedRevision: bodyParsed.data.expectedRevision,
+    resource: bodyParsed.data.resource,
+    idempotencyKey: bodyParsed.data.idempotencyKey,
+    actorUserId: req.user?.id,
+  });
+
+  if (!result) {
+    throw createNotFoundError('SYSTEM_ADMIN_VM_SETTING_NOT_FOUND');
+  }
+
+  sendOk(res, result.data, {
+    reusedIdempotency: result.reused,
+  });
+});
+
+export const deleteVmSetting = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  requireAdminRole(req);
+
+  const pathParsed = vmSettingPathSchema.safeParse(req.params);
+  if (!pathParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_SETTING_KEY',
+      pathParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const queryParsed = deleteVmSettingQuerySchema.safeParse(req.query);
+  if (!queryParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_DELETE_QUERY',
+      queryParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const result = await systemAdminService.deleteVmSetting({
+    key: pathParsed.data.key,
+    ...queryParsed.data,
+    actorUserId: req.user?.id,
+  });
+
+  if (!result) {
+    throw createNotFoundError('SYSTEM_ADMIN_VM_SETTING_NOT_FOUND');
+  }
+
+  sendOk(res, result.data, {
+    reusedIdempotency: result.reused,
+  });
+});
+
+export const validateVmSetting = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  requireAdminRole(req);
+
+  const pathParsed = vmSettingPathSchema.safeParse(req.params);
+  if (!pathParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_SETTING_KEY',
+      pathParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const bodyParsed = validateVmSettingBodySchema.safeParse(req.body ?? {});
+  if (!bodyParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_VALIDATE_PAYLOAD',
+      bodyParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const validation = await systemAdminService.validateVmSetting(
+    pathParsed.data.key,
+    bodyParsed.data.resource,
+  );
+
+  sendOk(res, validation);
+});
+
+export const activateVmSetting = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  requireAdminRole(req);
+
+  const pathParsed = vmSettingPathSchema.safeParse(req.params);
+  if (!pathParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_SETTING_KEY',
+      pathParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const bodyParsed = activateVmSettingBodySchema.safeParse(req.body);
+  if (!bodyParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_ACTIVATE_PAYLOAD',
+      bodyParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const result = await systemAdminService.activateVmSetting({
+    key: pathParsed.data.key,
+    ...bodyParsed.data,
+    actorUserId: req.user?.id,
+  });
+
+  sendOk(res, result.data, {
+    reusedIdempotency: result.reused,
+  });
+});
+
+export const rollbackVmSetting = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  requireAdminRole(req);
+
+  const pathParsed = vmSettingPathSchema.safeParse(req.params);
+  if (!pathParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_SETTING_KEY',
+      pathParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const bodyParsed = rollbackVmSettingBodySchema.safeParse(req.body);
+  if (!bodyParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_ROLLBACK_PAYLOAD',
+      bodyParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const result = await systemAdminService.rollbackVmSetting({
+    key: pathParsed.data.key,
+    ...bodyParsed.data,
+    actorUserId: req.user?.id,
+  });
+
+  sendOk(res, result.data, {
+    reusedIdempotency: result.reused,
+  });
+});
+
+export const listVmSettingRevisions = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  requireAdminRole(req);
+
+  const pathParsed = vmSettingPathSchema.safeParse(req.params);
+  if (!pathParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_SETTING_KEY',
+      pathParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const queryParsed = vmSettingRevisionsQuerySchema.safeParse(req.query);
+  if (!queryParsed.success) {
+    throw createValidationError(
+      'INVALID_SYSTEM_ADMIN_VM_REVISIONS_QUERY',
+      queryParsed.error.flatten().fieldErrors,
+    );
+  }
+
+  const revisions = await systemAdminService.listVmSettingRevisions(
+    pathParsed.data.key,
+    queryParsed.data.limit,
+  );
+
+  sendOk(res, { revisions });
+});
+

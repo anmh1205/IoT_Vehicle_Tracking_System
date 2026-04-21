@@ -9,8 +9,10 @@ services:
       - "-storageDataPath=/storage"
       - "-httpListenAddr=:8428"
       - "-search.latencyOffset=0s"
+      - "-promscrape.config=/etc/victoriametrics/prometheus.yml"
     volumes:
       - ../Tracking_Data/Tracking_VictoriaMetrics:/storage
+      - ../Tracking_Grafana/provisioning/prometheus/prometheus.yml:/etc/victoriametrics/prometheus.yml:ro
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8428/-/healthy"]
       interval: 10s

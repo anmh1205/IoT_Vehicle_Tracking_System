@@ -19,8 +19,9 @@ import { useDeviceTrackingTelemetry } from '@/features/devices/hooks/use-device-
 import { useSendCommand } from '@/features/devices/hooks/use-send-command';
 import { useUpdateDevice } from '@/features/devices/hooks/use-update-device';
 import { useUpdateDeviceSettings } from '@/features/devices/hooks/use-update-device-settings';
+import { getDashboardEventPresentation } from '@/features/dashboard/components/dashboard-event-presenters';
 import { DeviceDetailModal } from './index';
-import { normalizeObdSampleAgeMs } from './normalize-obd-sample-age';
+import { buildDiagnosticsSummary, extractDiagnosticsPayloadFromEventLog } from './obd-diagnostics';
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
 
 const resolveTimestamp = (value: unknown): string | null => {
@@ -33,11 +34,6 @@ const resolveTimestamp = (value: unknown): string | null => {
   return null;
 };
 
-const toFiniteNumber = (value: unknown): number | undefined => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
-};
-
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return null;
@@ -45,84 +41,32 @@ const toRecord = (value: unknown): Record<string, unknown> | null => {
   return value as Record<string, unknown>;
 };
 
-const extractDiagnosticsPayload = (
+const appendConfigParam = (
+  target: Record<string, number>,
+  key: string,
+  value: unknown,
+) => {
+  const parsed = Number(value);
+  if (Number.isFinite(parsed) && parsed > 0) {
+    target[key] = Math.round(parsed);
+  }
+};
+
+const getEventLogPresentation = (
   row: Record<string, unknown>,
-): Record<string, unknown> | null => {
-  const rootDiagnostics = toRecord(row.diagnostics);
-  if (rootDiagnostics) {
-    return rootDiagnostics;
-  }
-
-  const context = toRecord(row.context);
-  if (!context) {
-    return null;
-  }
-
-  return toRecord(context.diagnostics);
-};
-
-const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string => {
-  const channel = toRecord(diagnostics.channel);
-  const signals = toRecord(diagnostics.signals);
-  const quality = toRecord(diagnostics.quality);
-  const dtc = toRecord(diagnostics.dtc);
-
-  const ecuState =
-    typeof channel?.ecu_state === 'string' && channel.ecu_state.trim().length > 0
-      ? channel.ecu_state.trim().toLowerCase()
-      : null;
-  const connected = channel?.ble_obd_connected === true && channel?.elm_ready === true;
-  const rpm = toFiniteNumber(signals?.rpm);
-  const speed = toFiniteNumber(signals?.obd_speed_kph);
-  const coolant = toFiniteNumber(signals?.coolant_c);
-  const load = toFiniteNumber(signals?.engine_load_pct);
-  const sampleAgeMs = normalizeObdSampleAgeMs(quality?.sample_age_ms);
-  const failCount = toFiniteNumber(channel?.connect_fail_count_5m);
-  const storedDtc = Array.isArray(dtc?.stored)
-    ? dtc.stored.filter((item): item is string => typeof item === 'string' && item.length > 0)
-    : [];
-  const pendingDtc = Array.isArray(dtc?.pending)
-    ? dtc.pending.filter((item): item is string => typeof item === 'string' && item.length > 0)
-    : [];
-  const permanentDtc = Array.isArray(dtc?.permanent)
-    ? dtc.permanent.filter((item): item is string => typeof item === 'string' && item.length > 0)
-    : [];
-  const milOn = diagnostics.mil_on === undefined ? undefined : Boolean(diagnostics.mil_on);
-
-  const parts = [
-    ecuState === 'stopped'
-      ? 'ECU dừng'
-      : ecuState === 'live'
-        ? 'OBD ổn định'
-        : connected
-          ? 'OBD đã nối'
-          : 'OBD không ổn định',
-    `mil=${milOn === undefined ? '-' : milOn ? 'on' : 'off'}`,
-    `rpm=${rpm?.toFixed(0) ?? '-'}`,
-    `spd=${speed?.toFixed(1) ?? '-'} km/h`,
-    `coolant=${coolant?.toFixed(1) ?? '-'} C`,
-    `load=${load?.toFixed(1) ?? '-'}%`,
-    `age=${sampleAgeMs?.toFixed(0) ?? '-'} ms`,
-  ];
-
-  if (ecuState && ecuState !== 'live' && ecuState !== 'stopped') {
-    parts.push(`ecu=${ecuState}`);
-  }
-  if (failCount !== undefined) {
-    parts.push(`fail5m=${failCount.toFixed(0)}`);
-  }
-  if (storedDtc.length > 0) {
-    parts.push(`stored=${storedDtc.join(',')}`);
-  }
-  if (pendingDtc.length > 0) {
-    parts.push(`pending=${pendingDtc.join(',')}`);
-  }
-  if (permanentDtc.length > 0) {
-    parts.push(`permanent=${permanentDtc.join(',')}`);
-  }
-
-  return parts.join(' | ');
-};
+  timestamp: string | null,
+) =>
+  getDashboardEventPresentation({
+    id: String(row.id ?? 'event-log'),
+    eventType: String(row.event_type ?? row.eventType ?? 'event'),
+    eventCode:
+      row.event_code === undefined || row.event_code === null ? null : String(row.event_code),
+    message: row.message == null ? null : String(row.message),
+    severity: String(row.severity ?? 'info'),
+    deviceId:
+      row.device_id === undefined || row.device_id === null ? null : String(row.device_id),
+    serverTimestamp: timestamp ?? new Date().toISOString(),
+  });
 
 const buildRawFeed = (params: {
   telemetryRows: any[];
@@ -171,24 +115,30 @@ const buildRawFeed = (params: {
 
   const eventLogRows = params.eventLogs.map((row, index) => {
     const normalizedRow = toRecord(row) ?? {};
-    const diagnostics = extractDiagnosticsPayload(normalizedRow);
-    const eventCode = String(normalizedRow.event_code ?? '').toLowerCase();
-    const isDiagnosticsRow =
-      diagnostics !== null ||
-      eventCode === 'obd_diagnostic_raw';
+    const timestamp = resolveTimestamp(
+      normalizedRow.server_timestamp ?? normalizedRow.created_at ?? normalizedRow.createdAt,
+    );
+    const diagnostics = extractDiagnosticsPayloadFromEventLog(normalizedRow);
+    const isDiagnosticsRow = diagnostics !== null;
     const source: DeviceRawFeedRow['source'] = isDiagnosticsRow ? 'obd-diagnostic' : 'event-log';
+    const presentation = isDiagnosticsRow ? null : getEventLogPresentation(normalizedRow, timestamp);
 
     return {
       id: `event-log-${String(normalizedRow.id ?? index)}`,
-      timestamp: resolveTimestamp(
-        normalizedRow.server_timestamp ?? normalizedRow.created_at ?? normalizedRow.createdAt,
-      ),
+      timestamp,
       source,
-      event: String(normalizedRow.event_type ?? normalizedRow.topic ?? 'event_log'),
+      event: presentation?.title ?? String(normalizedRow.event_type ?? normalizedRow.topic ?? 'event_log'),
       summary: diagnostics
         ? buildDiagnosticsSummary(diagnostics)
-        : String(normalizedRow.message ?? normalizedRow.payload ?? normalizedRow.context ?? '-'),
-      payload: normalizedRow,
+        : presentation?.description ??
+          String(normalizedRow.message ?? normalizedRow.payload ?? normalizedRow.context ?? '-'),
+      payload: diagnostics
+        ? { ...normalizedRow, diagnostics }
+        : {
+            ...normalizedRow,
+            localized_title: presentation?.title ?? null,
+            localized_message: presentation?.description ?? null,
+          },
     };
   });
 
@@ -329,7 +279,7 @@ export const DeviceDetailModalContainer = ({
   const deviceId = device?.id ?? null;
 
   const detail = useDeviceDetail(deviceId);
-  const sessions = useDeviceSessions(deviceId, { pageSize: 10 });
+  const sessions = useDeviceSessions(deviceId, { pageSize: 20 });
   const errors = useDeviceErrorCodes(deviceId, 10);
   const commands = useDeviceCommands(deviceId, 10);
   const tracking = useDeviceTrackingTelemetry(deviceId);
@@ -459,6 +409,7 @@ export const DeviceDetailModalContainer = ({
       errorCodes: errors.items,
       errorCodesTotal: errors.total,
       errorCodesPage: errors.page,
+      errorCodesTotalPages: errors.totalPages,
       errorCodesStatus: errors.status,
       errorCodesType: errors.type,
       onErrorCodesPageChange: errors.onPageChange,
@@ -474,8 +425,11 @@ export const DeviceDetailModalContainer = ({
       onRuntimeRangeChange: runtime.onRangeChange,
       trackingRows: tracking.rows,
       trackingRowsAscending: tracking.rowsAscending,
+      routeRowsAscending: tracking.routeRowsAscending,
       trackingPeriod: tracking.period,
       onTrackingPeriodChange: tracking.onPeriodChange,
+      trackingCustomRange: tracking.customRange,
+      onTrackingCustomRangeChange: tracking.onCustomRangeChange,
       routePoints: tracking.routePoints,
       distanceKm: tracking.distanceKm,
       averageSpeed: tracking.averageSpeed,
@@ -495,22 +449,47 @@ export const DeviceDetailModalContainer = ({
       },
       onUpdateSettings: async (data: Record<string, unknown>) => {
         await updateSettings.mutateAsync(data);
-        const requestInterval = Number(data.requestInterval);
-        if (
-          Number.isFinite(requestInterval) &&
-          requestInterval > 0 &&
-          requestInterval !== (detail.data?.device?.requestInterval ?? device?.requestInterval)
-        ) {
+        const config = toRecord(data.config);
+        const parking = toRecord(config?.parking);
+        const alerts = toRecord(config?.alerts);
+        const commandParams: Record<string, number> = {};
+
+        appendConfigParam(commandParams, 'tracking_interval_s', data.requestInterval);
+        appendConfigParam(
+          commandParams,
+          'parking_interval_s',
+          parking?.trackingIntervalSec ?? parking?.tracking_interval_s,
+        );
+        appendConfigParam(
+          commandParams,
+          'heartbeat_interval_s',
+          parking?.heartbeatIntervalSec ?? parking?.heartbeat_interval_s,
+        );
+        appendConfigParam(
+          commandParams,
+          'overspeed_kph',
+          alerts?.overspeedKph ?? alerts?.overspeed_kph,
+        );
+        appendConfigParam(
+          commandParams,
+          'vibration_threshold',
+          data.vibrationThreshold ?? alerts?.vibrationThreshold ?? alerts?.vibration_threshold,
+        );
+        appendConfigParam(
+          commandParams,
+          'offline_after_s',
+          alerts?.offlineAfterSec ?? alerts?.offline_after_s,
+        );
+
+        if (Object.keys(commandParams).length > 0) {
           try {
             await sendCommand.mutateAsync({
               command: 'update_config',
-              params: {
-                tracking_interval_s: Math.round(requestInterval),
-              },
+              params: commandParams,
             });
           } catch {
             notificationUtils.warning(
-              'Chu kỳ mới chưa được đẩy xuống thiết bị',
+              'Cấu hình mới chưa được đẩy xuống thiết bị',
               'Cấu hình đã lưu ở server, nhưng lệnh update_config chưa gửi thành công.',
             );
           }
@@ -551,6 +530,7 @@ export const DeviceDetailModalContainer = ({
       errors.page,
       errors.status,
       errors.total,
+      errors.totalPages,
       errors.type,
       eventLogs.items,
       eventLogs.total,
@@ -575,10 +555,13 @@ export const DeviceDetailModalContainer = ({
       tracking.latestRow,
       tracking.maxSpeed,
       tracking.onPeriodChange,
+      tracking.onCustomRangeChange,
       tracking.period,
+      tracking.customRange,
       tracking.routePoints,
       tracking.rows,
       tracking.rowsAscending,
+      tracking.routeRowsAscending,
       updateName,
       updateSettings,
     ],

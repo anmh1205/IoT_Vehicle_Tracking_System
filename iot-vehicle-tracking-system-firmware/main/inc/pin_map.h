@@ -33,16 +33,16 @@
 #define PIN_MODEM_NETLIGHT GPIO_NUM_NC
 
 /* I2C sensor bus */
-/** @brief LIS3DSH interrupt pin (INT1). */
-#define PIN_LIS3DSH_INT1 GPIO_NUM_41
-/** @brief LIS3DSH interrupt pin (INT2). */
-#define PIN_LIS3DSH_INT2 GPIO_NUM_42
-/** @brief Active LIS3DSH interrupt pin used by firmware flow. */
-#define PIN_LIS3DSH_INT PIN_LIS3DSH_INT1
-/** @brief LIS3DSH I2C SDA pin. */
-#define PIN_LIS3DSH_SDA GPIO_NUM_2
-/** @brief LIS3DSH I2C SCL pin. */
-#define PIN_LIS3DSH_SCL GPIO_NUM_1
+/** @brief LIS3DH interrupt pin (INT1). */
+#define PIN_LIS3DH_INT1 GPIO_NUM_41
+/** @brief LIS3DH interrupt pin (INT2). */
+#define PIN_LIS3DH_INT2 GPIO_NUM_42
+/** @brief Active LIS3DH interrupt pin used by firmware flow. */
+#define PIN_LIS3DH_INT PIN_LIS3DH_INT1
+/** @brief LIS3DH I2C SDA pin. */
+#define PIN_LIS3DH_SDA GPIO_NUM_2
+/** @brief LIS3DH I2C SCL pin. */
+#define PIN_LIS3DH_SCL GPIO_NUM_1
 /** @brief DS3231 I2C SDA pin. */
 #define PIN_DS3231_SDA GPIO_NUM_2
 /** @brief DS3231 I2C SCL pin. */

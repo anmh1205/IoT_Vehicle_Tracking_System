@@ -12,10 +12,12 @@ import {
   updateVehiclePolicySchema,
   vehiclePolicyListQuerySchema,
   policyViolationListQuerySchema,
+  upsertVehicleAllowedZoneSchema,
 } from '@/api/validators/geofence.validator';
 import * as geofenceCrudService from '@/domain/geofence/services/geofence-crud.service';
 import * as geofenceListService from '@/domain/geofence/services/geofence-list.service';
 import * as vehiclePolicyCrudService from '@/domain/geofence/services/vehicle-policy-crud.service';
+import * as vehicleAllowedZoneService from '@/domain/geofence/services/vehicle-allowed-zone.service';
 
 export const listGeofences = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const parsed = geofenceListQuerySchema.safeParse(req.query);
@@ -149,6 +151,57 @@ export const updateVehiclePolicy = asyncHandler(async (req: AuthenticatedRequest
 
   const policy = await vehiclePolicyCrudService.updateVehiclePolicy(id, parsed.data, req.user?.id);
   sendOk(res, policy);
+});
+
+export const getVehicleAllowedZone = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { vehicleId } = req.params;
+  if (!vehicleId) {
+    throw createValidationError('Vehicle ID is required');
+  }
+
+  const zone = await vehicleAllowedZoneService.getVehicleAllowedZone(vehicleId);
+  sendOk(res, zone);
+});
+
+export const previewVehicleAllowedZoneCenter = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { vehicleId } = req.params;
+    if (!vehicleId) {
+      throw createValidationError('Vehicle ID is required');
+    }
+
+    const preview = await vehicleAllowedZoneService.previewVehicleAllowedZoneCenter(vehicleId);
+    sendOk(res, preview);
+  },
+);
+
+export const upsertVehicleAllowedZone = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { vehicleId } = req.params;
+  if (!vehicleId) {
+    throw createValidationError('Vehicle ID is required');
+  }
+
+  const parsed = upsertVehicleAllowedZoneSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw createValidationError('Invalid allowed zone data', parsed.error.flatten().fieldErrors);
+  }
+
+  const zone = await vehicleAllowedZoneService.upsertVehicleAllowedZone(
+    vehicleId,
+    parsed.data,
+    req.user?.id,
+  );
+  sendOk(res, zone);
+});
+
+export const deleteVehicleAllowedZone = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { vehicleId } = req.params;
+  if (!vehicleId) {
+    throw createValidationError('Vehicle ID is required');
+  }
+
+  const result = await vehicleAllowedZoneService.disableVehicleAllowedZone(vehicleId, req.user?.id);
+  sendOk(res, result);
 });
 
 export const listVehiclePolicyStates = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+﻿import { z } from 'zod';
 
 export const loginSchema = z.object({
   username: z.string().min(1, 'Username is required').max(50),
@@ -19,11 +19,56 @@ export const updateProfileSchema = z.object({
   avatarUrl: z.string().url('Invalid URL format').nullable().optional(),
 });
 
-export const updateNotificationSchema = z.object({
-  emailAlerts: z.boolean().optional(),
-  pushAlerts: z.boolean().optional(),
-  alertTypes: z.array(z.string()).optional(),
-});
+export const updateNotificationSchema = z
+  .object({
+    emailAlerts: z.boolean().optional(),
+    pushAlerts: z.boolean().optional(),
+    alertTypes: z.array(z.string()).optional(),
+    channels: z
+      .object({
+        discord: z
+          .object({
+            enabled: z.boolean().optional(),
+            webhookUrl: z.string().url('Invalid URL format').nullable().optional(),
+          })
+          .optional(),
+        telegram: z
+          .object({
+            enabled: z.boolean().optional(),
+            botToken: z.string().min(1, 'Telegram bot token is required').nullable().optional(),
+            chatId: z.string().min(1, 'Telegram chat ID is required').nullable().optional(),
+          })
+          .optional(),
+      })
+      .optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.channels?.discord?.enabled && !value.channels.discord.webhookUrl) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['channels', 'discord', 'webhookUrl'],
+        message: 'Discord webhook URL is required when Discord is enabled',
+      });
+    }
+
+    if (value.channels?.telegram?.enabled) {
+      if (!value.channels.telegram.botToken) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['channels', 'telegram', 'botToken'],
+          message: 'Telegram bot token is required when Telegram is enabled',
+        });
+      }
+
+      if (!value.channels.telegram.chatId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['channels', 'telegram', 'chatId'],
+          message: 'Telegram chat ID is required when Telegram is enabled',
+        });
+      }
+    }
+  });
 
 export const createUserSchema = z.object({
   username: z

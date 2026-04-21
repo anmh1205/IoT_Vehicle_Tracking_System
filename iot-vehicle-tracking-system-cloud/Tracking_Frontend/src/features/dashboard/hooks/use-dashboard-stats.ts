@@ -8,6 +8,7 @@ import { deriveDeviceStatus } from '@/hooks/use-device-status-realtime';
 export interface DashboardEvent {
   id: string | number;
   eventType: string;
+  eventCode?: string | null;
   message?: string | null;
   severity?: 'critical' | 'high' | 'medium' | 'low' | string;
   deviceId?: string | null;
@@ -78,6 +79,7 @@ const normalizeEvents = (payload: any): DashboardEvent[] => {
   return events.map((event: any, index: number) => ({
     id: event?.id ?? `${event?.serverTimestamp ?? index}-${event?.eventType ?? 'event'}`,
     eventType: String(event?.eventType ?? event?.event_type ?? 'event'),
+    eventCode: event?.eventCode ?? event?.event_code ?? null,
     message: event?.message ?? null,
     severity: event?.severity ?? 'low',
     deviceId: event?.deviceId ?? event?.device_id ?? null,
@@ -97,6 +99,15 @@ const formatRangeLabel = (value: string) =>
   new Intl.DateTimeFormat('vi-VN', { month: '2-digit', day: '2-digit' }).format(
     parseDateKeyAsLocal(value),
   );
+
+const STATUS_NAME_LABELS: Record<string, string> = {
+  running: 'Đang chạy',
+  online: 'Trực tuyến',
+  stopped: 'Đã dừng',
+  offline: 'Ngoại tuyến',
+  error: 'Lỗi',
+  unknown: 'Chưa rõ',
+};
 
 const buildDateBucket = <TValue>(
   days: number,
@@ -539,7 +550,9 @@ export const useDeviceStatusDistribution = () => {
 
         if (rows.length > 0) {
           const normalized = rows.map((row: any, index: number) => ({
-            name: String(row?.name ?? row?.status ?? `Trạng thái ${index + 1}`),
+            name:
+              STATUS_NAME_LABELS[String(row?.name ?? row?.status ?? '').toLowerCase()] ??
+              String(row?.name ?? row?.status ?? `Trạng thái ${index + 1}`),
             value: Number(row?.value ?? row?.count ?? 0),
             color: row?.color ?? ['#22c55e', '#64748b', '#ef4444', '#f59e0b'][index % 4],
           }));

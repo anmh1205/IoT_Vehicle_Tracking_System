@@ -3,7 +3,9 @@ export type DeviceMapStatus = 'running' | 'stopped' | 'error' | 'disconnected' |
 export interface DevicePosition {
   deviceId: string;
   deviceName: string;
+  vehicleId?: string | null;
   vehiclePlate: string | null;
+  customerName?: string | null;
   lat: number;
   lon: number;
   speed: number;
@@ -11,8 +13,14 @@ export interface DevicePosition {
   status: DeviceMapStatus;
   timestamp: number | null;
   battery?: number | null;
+  deviceBattery?: number | null;
+  vehicleBattery?: number | null;
   vibration?: number | null;
   temperature?: number | null;
+  engineTemperature?: number | null;
+  rpm?: number | null;
+  activeAlertCount?: number;
+  activeAlertTitles?: string[];
 }
 
 export type MapLayer = 'street' | 'satellite';

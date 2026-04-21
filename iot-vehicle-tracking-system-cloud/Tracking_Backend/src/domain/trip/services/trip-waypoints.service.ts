@@ -1,4 +1,5 @@
 import { queryRange } from '@/domain/system-admin/repositories/victoriametrics.repository';
+import { findMany } from '@/infrastructure/database/queries';
 
 /** A single GPS waypoint along the trip route */
 export interface TripWaypoint {
@@ -22,6 +23,84 @@ export interface TripRouteSummary {
   endLon: number | null;
 }
 
+interface EventLogWaypointRow {
+  server_timestamp: Date;
+  lat: string | null;
+  lon: string | null;
+  speed: string | null;
+  course: string | null;
+}
+
+const STEP_TO_SECONDS: Record<string, number> = {
+  '15s': 15,
+  '1m': 60,
+  '5m': 300,
+  '10m': 600,
+};
+
+const toFiniteNumber = (value: string | null): number | null => {
+  if (value === null || value.trim().length === 0) {
+    return null;
+  }
+
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const getEventLogWaypoints = async (
+  deviceId: string,
+  startTime: Date,
+  endTime: Date,
+  step: string,
+): Promise<TripWaypoint[]> => {
+  const rows = await findMany<EventLogWaypointRow>(
+    `SELECT
+        server_timestamp,
+        COALESCE(context->>'lat', context->>'latitude', metadata->>'lat', metadata->>'latitude') AS lat,
+        COALESCE(context->>'lon', context->>'longitude', metadata->>'lon', metadata->>'longitude') AS lon,
+        COALESCE(context->>'spd', context->>'speed', metadata->>'spd', metadata->>'speed') AS speed,
+        COALESCE(context->>'crs', context->>'course', context->>'heading', metadata->>'crs', metadata->>'course', metadata->>'heading') AS course
+     FROM event_logs
+     WHERE device_id = $1
+       AND server_timestamp BETWEEN $2 AND $3
+       AND (
+         context ? 'lat' OR context ? 'latitude' OR metadata ? 'lat' OR metadata ? 'latitude'
+       )
+       AND (
+         context ? 'lon' OR context ? 'longitude' OR metadata ? 'lon' OR metadata ? 'longitude'
+       )
+     ORDER BY server_timestamp ASC
+     LIMIT 5000`,
+    [deviceId, startTime.toISOString(), endTime.toISOString()],
+  );
+
+  const minGapSeconds = STEP_TO_SECONDS[step] ?? STEP_TO_SECONDS['15s'];
+  let previousTimestamp = 0;
+
+  return rows.flatMap((row) => {
+    const lat = toFiniteNumber(row.lat);
+    const lon = toFiniteNumber(row.lon);
+    if (lat === null || lon === null || (lat === 0 && lon === 0)) {
+      return [];
+    }
+
+    const ts = Math.floor(row.server_timestamp.getTime() / 1000);
+    if (previousTimestamp > 0 && ts - previousTimestamp < minGapSeconds) {
+      return [];
+    }
+    previousTimestamp = ts;
+
+    return [{
+      ts,
+      timestamp: row.server_timestamp.toISOString(),
+      lat,
+      lon,
+      speed: toFiniteNumber(row.speed),
+      course: toFiniteNumber(row.course),
+    }];
+  });
+};
+
 /**
  * Query VictoriaMetrics for GPS waypoints during a trip's time range.
  * Merges vehicle_latitude, vehicle_longitude, vehicle_speed, vehicle_course series
@@ -33,6 +112,11 @@ export const getWaypoints = async (
   endTime: Date,
   step = '15s',
 ): Promise<TripWaypoint[]> => {
+  const eventLogWaypoints = await getEventLogWaypoints(deviceId, startTime, endTime, step);
+  if (eventLogWaypoints.length > 0) {
+    return eventLogWaypoints;
+  }
+
   const startSec = Math.floor(startTime.getTime() / 1000);
   const endSec = Math.floor(endTime.getTime() / 1000);
 

@@ -3,7 +3,10 @@
 import { createContext, useContext } from 'react';
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
 import type { RuntimeRange } from '@/features/devices/hooks/use-device-runtime-chart';
-import type { TrackingTelemetryPeriod } from '@/features/devices/hooks/use-device-tracking-telemetry';
+import type {
+  TrackingTelemetryCustomRange,
+  TrackingTelemetryPeriod,
+} from '@/features/devices/hooks/use-device-tracking-telemetry';
 import type {
   Device,
   DeviceCommand,
@@ -33,6 +36,7 @@ export interface DeviceDetailModalContextValue {
   errorCodes: DeviceErrorCode[];
   errorCodesTotal: number;
   errorCodesPage: number;
+  errorCodesTotalPages: number;
   errorCodesStatus: 'all' | 'active' | 'resolved';
   errorCodesType: 'all' | 'critical' | 'warning' | 'info';
   onErrorCodesPageChange: (page: number) => void;
@@ -48,8 +52,11 @@ export interface DeviceDetailModalContextValue {
   onRuntimeRangeChange: (range: RuntimeRange) => void;
   trackingRows: DeviceTelemetryRow[];
   trackingRowsAscending: DeviceTelemetryRow[];
+  routeRowsAscending: DeviceTelemetryRow[];
   trackingPeriod: TrackingTelemetryPeriod;
   onTrackingPeriodChange: (period: TrackingTelemetryPeriod) => void;
+  trackingCustomRange: TrackingTelemetryCustomRange;
+  onTrackingCustomRangeChange: (range: TrackingTelemetryCustomRange) => void;
   routePoints: [number, number][];
   distanceKm: number;
   averageSpeed: number;

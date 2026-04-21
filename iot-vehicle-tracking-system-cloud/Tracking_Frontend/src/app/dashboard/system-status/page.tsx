@@ -1,16 +1,43 @@
 'use client';
 
-import { Activity, AlertTriangle, Database, HardDrive, MemoryStick, Server } from 'lucide-react';
+import { useMemo } from 'react';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  CircleOff,
+  HardDrive,
+  MemoryStick,
+  Server,
+} from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { StatCard } from '@/components/common/stat-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { useRoleAccess } from '@/hooks/use-role-access';
+import { formatDateTime } from '@/lib/utils/date/format';
 import { HealthCard } from '@/features/system-status/components/health-card';
 import { MetricCard } from '@/features/system-status/components/metric-card';
 import { useSystemStatus } from '@/features/system-status/hooks/use-system-status';
 
 const SystemStatusPage = () => {
   const access = useRoleAccess();
-  const { services, metrics, healthNotice, metricsNotice } = useSystemStatus(access.canViewSystemInfo);
+  const { services, metrics, healthQuery, healthNotice, metricsNotice } =
+    useSystemStatus(access.canViewSystemInfo);
+
+  const serviceSummary = useMemo(() => {
+    return services.reduce(
+      (acc, service) => {
+        acc.total += 1;
+        acc[service.status] += 1;
+        return acc;
+      },
+      { total: 0, up: 0, degraded: 0, down: 0 },
+    );
+  }, [services]);
+
+  const lastCheckedAt = healthQuery.data?.timestamp
+    ? formatDateTime(healthQuery.data.timestamp)
+    : 'Chưa có dữ liệu';
 
   if (!access.canViewSystemInfo) {
     return (
@@ -27,25 +54,52 @@ const SystemStatusPage = () => {
   return (
     <PageContainer
       pageTitle="Trạng thái hệ thống"
-      pageDescription="Theo dõi tình trạng dịch vụ và telemetry hạ tầng theo thời gian gần thực."
     >
-      {healthNotice || metricsNotice ? (
+      {(healthNotice || metricsNotice) && (
         <Card className="border-amber-200 bg-amber-50/70">
           <CardContent className="flex items-start gap-3 p-4 text-sm text-amber-900">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="space-y-1">
-              {healthNotice ? <p>Health check đang suy giảm: {healthNotice}</p> : null}
-              {metricsNotice ? <p>Metrics hạ tầng chưa sẵn sàng: {metricsNotice}</p> : null}
+              {healthNotice ? <p>Health check đang có vấn đề: {healthNotice}</p> : null}
+              {metricsNotice ? <p>Telemetry hạ tầng chưa sẵn sàng: {metricsNotice}</p> : null}
             </div>
           </CardContent>
         </Card>
-      ) : null}
+      )}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Tổng dịch vụ kiểm tra"
+          value={serviceSummary.total}
+          icon={<Server className="h-4 w-4" />}
+          subtitle={`Kiểm tra gần nhất: ${lastCheckedAt}`}
+          isLoading={healthQuery.isLoading}
+        />
+        <StatCard
+          title="Dịch vụ hoạt động"
+          value={serviceSummary.up}
+          icon={<CheckCircle2 className="h-4 w-4" />}
+          isLoading={healthQuery.isLoading}
+        />
+        <StatCard
+          title="Dịch vụ suy giảm"
+          value={serviceSummary.degraded}
+          icon={<AlertTriangle className="h-4 w-4" />}
+          isLoading={healthQuery.isLoading}
+        />
+        <StatCard
+          title="Dịch vụ ngừng"
+          value={serviceSummary.down}
+          icon={<CircleOff className="h-4 w-4" />}
+          isLoading={healthQuery.isLoading}
+        />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {services.length > 0 ? (
           services.map((service) => <HealthCard key={service.key} service={service} />)
         ) : (
-          <Card className="sm:col-span-2 xl:col-span-4">
+          <Card className="sm:col-span-2 xl:col-span-3">
             <CardContent className="p-4 text-sm text-muted-foreground">
               Chưa có dữ liệu health check để hiển thị.
             </CardContent>
@@ -85,14 +139,6 @@ const SystemStatusPage = () => {
           unavailableText={metricsNotice}
         />
       </div>
-
-      <Card>
-        <CardContent className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
-          <Database className="h-4 w-4" />
-          Dữ liệu được làm mới mỗi 30 giây. Nếu endpoint metrics không phản hồi, giao diện sẽ
-          hiển thị trạng thái thiếu telemetry thay vì nội suy số liệu.
-        </CardContent>
-      </Card>
     </PageContainer>
   );
 };

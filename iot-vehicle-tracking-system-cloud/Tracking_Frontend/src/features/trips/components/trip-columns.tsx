@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
+import { formatDateTime } from '@/lib/utils/date/format';
 import type { ColumnDef } from '@tanstack/react-table';
 
 const TRIP_STATUS_LABELS: Record<string, string> = {
@@ -25,6 +25,7 @@ const TRIP_STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive
 };
 
 export const getTripColumns = (actions: {
+  onPreview: (row: any) => void;
   onEdit: (row: any) => void;
   onDelete: (row: any) => void;
   onStart: (id: number) => void;
@@ -36,9 +37,37 @@ export const getTripColumns = (actions: {
     accessorKey: 'tripCode',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Mã chuyến đi" />,
     meta: { label: 'Mã chuyến đi' },
+    cell: ({ row }) => (
+      <div>
+        <p className="font-medium">{row.original.tripCode}</p>
+        <p className="text-xs text-muted-foreground">{row.original.driverName ?? 'Chưa gán tài xế'}</p>
+      </div>
+    ),
   },
-  { accessorKey: 'vehicleId', header: 'Phương tiện', meta: { label: 'Phương tiện' } },
-  { accessorKey: 'driverName', header: 'Tài xế', meta: { label: 'Tài xế' } },
+  {
+    accessorKey: 'vehiclePrimary',
+    header: 'Phương tiện',
+    meta: { label: 'Phương tiện' },
+    cell: ({ row }) => (
+      <div>
+        <p className="font-medium">{row.original.vehiclePrimary ?? row.original.vehicleId ?? 'Chưa có xe'}</p>
+        <p className="text-xs text-muted-foreground">
+          {row.original.vehicleSecondary ?? row.original.deviceId ?? 'Chưa có thiết bị'}
+        </p>
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'routeLabel',
+    header: 'Lộ trình',
+    meta: { label: 'Lộ trình' },
+    cell: ({ row }) => (
+      <div>
+        <p className="font-medium">{row.original.startLocation ?? 'Chưa có điểm đi'}</p>
+        <p className="text-xs text-muted-foreground">{row.original.endLocation ?? 'Chưa có điểm đến'}</p>
+      </div>
+    ),
+  },
   {
     accessorKey: 'status',
     header: 'Trạng thái',
@@ -51,12 +80,41 @@ export const getTripColumns = (actions: {
   },
   {
     accessorKey: 'plannedStart',
-    header: 'Khởi hành dự kiến',
-    meta: { label: 'Khởi hành dự kiến' },
-    cell: ({ row }) =>
-      row.original.plannedStart
-        ? new Date(row.original.plannedStart).toLocaleString('vi-VN')
-        : '--',
+    header: 'Thời gian',
+    meta: { label: 'Thời gian' },
+    cell: ({ row }) => (
+      <div>
+        <p className="font-medium">
+          {formatDateTime(row.original.actualStart ?? row.original.plannedStart, 'dd/MM HH:mm')}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {row.original.actualEnd
+            ? `Kết thúc ${formatDateTime(row.original.actualEnd, 'dd/MM HH:mm')}`
+            : row.original.plannedEnd
+              ? `Dự kiến ${formatDateTime(row.original.plannedEnd, 'dd/MM HH:mm')}`
+              : 'Chưa có mốc kết thúc'}
+        </p>
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'distanceKm',
+    header: 'Dữ liệu thực tế',
+    meta: { label: 'Dữ liệu thực tế' },
+    cell: ({ row }) => (
+      <div>
+        <p className="font-medium">
+          {row.original.distanceKm !== null && row.original.distanceKm !== undefined
+            ? `${row.original.distanceKm} km`
+            : 'Chưa có quãng đường'}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {row.original.status === 'in_progress'
+            ? 'Có thể mở replay trực tiếp từ bảng'
+            : 'Dùng preview để đối chiếu map và waypoint'}
+        </p>
+      </div>
+    ),
   },
   {
     id: 'actions',
@@ -68,8 +126,8 @@ export const getTripColumns = (actions: {
 
       return (
         <div className="flex flex-wrap gap-1">
-          <Button size="sm" variant="outline" asChild>
-            <Link href={`/dashboard/operations/trips/${row.original.id}`}>Chi tiết</Link>
+          <Button size="sm" variant="outline" onClick={() => actions.onPreview(row.original)}>
+            Xem nhanh
           </Button>
           <Button size="sm" variant="outline" onClick={() => actions.onEdit(row.original)}>
             Sửa

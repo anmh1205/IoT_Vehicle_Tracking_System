@@ -9,6 +9,9 @@ export interface ServiceHealthItem {
   status: ServiceStatus;
   latencyMs?: number;
   error?: string;
+  endpoint?: string;
+  lastSeenAt?: string;
+  details?: Record<string, unknown>;
 }
 
 export interface SystemMetrics {
@@ -24,6 +27,18 @@ const formatServiceLabel = (key: string) =>
     .filter(Boolean)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(' ');
+
+const SERVICE_LABELS: Record<string, string> = {
+  api: 'Backend API',
+  postgresql: 'PostgreSQL',
+  emqx: 'EMQX',
+  mqttBridge: 'MQTT Bridge',
+  victoriametrics: 'VictoriaMetrics',
+  victoriaMetrics: 'VictoriaMetrics',
+  victorialogs: 'VictoriaLogs',
+  victoriaLogs: 'VictoriaLogs',
+  grafana: 'Grafana',
+};
 
 const normalizeStatus = (value: unknown): ServiceStatus => {
   if (value === 'ok' || value === 'up') {
@@ -46,22 +61,17 @@ const normalizeHealth = (payload: any, error?: unknown): ServiceHealthItem[] => 
   const checks = payload?.checks ?? {};
   const rows: ServiceHealthItem[] = [];
 
-  if (payload?.status) {
-    rows.push({
-      key: 'backend',
-      label: 'Backend API',
-      status: normalizeStatus(payload.status),
-    });
-  }
-
   for (const [key, value] of Object.entries<any>(checks)) {
     const latencyMs = Number(value?.latencyMs ?? value?.latency_ms);
     rows.push({
       key,
-      label: formatServiceLabel(key),
+      label: SERVICE_LABELS[key] ?? formatServiceLabel(key),
       status: normalizeStatus(value?.status),
       latencyMs: Number.isFinite(latencyMs) ? latencyMs : undefined,
       error: typeof value?.error === 'string' ? value.error : undefined,
+      endpoint: typeof value?.endpoint === 'string' ? value.endpoint : undefined,
+      lastSeenAt: typeof value?.lastSeenAt === 'string' ? value.lastSeenAt : undefined,
+      details: value?.details && typeof value.details === 'object' ? value.details : undefined,
     });
   }
 
@@ -73,7 +83,7 @@ const normalizeHealth = (payload: any, error?: unknown): ServiceHealthItem[] => 
     return [
       {
         key: 'health',
-        label: 'Health Check',
+        label: 'Kiểm tra sức khỏe',
         status: 'down',
         error: toErrorMessage(error, 'Không tải được trạng thái sức khỏe hệ thống.'),
       },

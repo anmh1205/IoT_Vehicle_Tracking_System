@@ -28,17 +28,24 @@
 static const char *TAG = "RTC_DS3231M";
 
 typedef struct {
+    /** Guards one-time init so other modules can call init defensively. */
     bool initialized;
+    /** Set only when the DS3231M probe/read succeeds. */
     bool available;
+    /** Tracks whether the last known RTC time is plausible and oscillator-stable. */
     bool time_valid;
+    /** True when this module created the I2C bus and therefore owns cleanup. */
     bool owns_bus;
+    /** Shared I2C master bus used by the RTC device handle. */
     i2c_master_bus_handle_t bus_handle;
+    /** Handle bound to DS3231M address 0x68. */
     i2c_master_dev_handle_t dev_handle;
 } rtc_ds3231m_ctx_t;
 
 static rtc_ds3231m_ctx_t s_ctx;
 
 static uint8_t rtc_bcd_to_dec(uint8_t value) {
+    /* DS3231M stores calendar/time fields in packed BCD, not binary. */
     return (uint8_t)(((value >> 4U) * 10U) + (value & 0x0FU));
 }
 
@@ -77,6 +84,10 @@ static esp_err_t rtc_tm_to_epoch_ms_utc(const struct tm *tm_value, uint64_t *out
         return ESP_ERR_INVALID_ARG;
     }
 
+    /*
+     * Avoid libc timezone/localtime dependencies by converting the UTC calendar
+     * fields to epoch time manually.
+     */
     uint64_t days = 0;
     for (int y = 1970; y < year; ++y) {
         days += rtc_is_leap_year(y) ? 366ULL : 365ULL;
@@ -138,6 +149,7 @@ esp_err_t rtc_ds3231m_init(void) {
     if (err == ESP_OK) {
         s_ctx.owns_bus = true;
     } else if (err == ESP_ERR_INVALID_STATE) {
+        /* Another driver already created the bus; attach to it instead of failing. */
         err = i2c_master_get_bus_handle(RTC_DS3231M_I2C_PORT, &s_ctx.bus_handle);
         if (err != ESP_OK) {
             ESP_LOGW(TAG, "i2c bus unavailable: %s", esp_err_to_name(err));
@@ -207,6 +219,7 @@ esp_err_t rtc_ds3231m_get_time_ms(uint64_t *out_time_ms) {
     tm_value.tm_min = (int)rtc_bcd_to_dec((uint8_t)(regs[1] & 0x7FU));
 
     if ((regs[2] & 0x40U) != 0U) {
+        /* Bit 6 selects 12-hour mode; bit 5 then carries AM/PM state. */
         int hour = (int)rtc_bcd_to_dec((uint8_t)(regs[2] & 0x1FU));
         bool pm = (regs[2] & 0x20U) != 0U;
         tm_value.tm_hour = pm ? (hour % 12) + 12 : (hour % 12);
@@ -277,6 +290,7 @@ esp_err_t rtc_ds3231m_set_time_ms(uint64_t time_ms) {
 
     uint8_t status = 0;
     if (rtc_read_regs(RTC_REG_STATUS, &status, 1) == ESP_OK) {
+        /* Clear OSF after a successful write so subsequent reads can be trusted again. */
         (void)rtc_write_reg(RTC_REG_STATUS, (uint8_t)(status & (uint8_t)(~RTC_STATUS_OSF_BIT)));
     }
 

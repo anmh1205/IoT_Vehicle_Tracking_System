@@ -1,6 +1,11 @@
 'use client';
 
+import { useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import { useMap } from 'react-leaflet';
+import { EmptyState } from '@/components/common/empty-state';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -8,10 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyState } from '@/components/common/empty-state';
-import { hasValidMapCoordinates } from '@/features/map/constants/map-config';
+import { createDeviceMarkerIcon } from '@/features/map/components/marker-icon';
+import { hasValidMapCoordinates, MAP_LAYER_CONFIG } from '@/features/map/constants/map-config';
 import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
 
 const MapContainer = dynamic(() => import('react-leaflet').then((m) => m.MapContainer), {
@@ -40,25 +43,189 @@ const ALERT_TYPE_LABELS: Record<string, string> = {
   geofence_enter: 'Vào vùng giám sát',
   geofence_exit: 'Rời vùng giám sát',
   offline: 'Mất kết nối',
+  device_offline: 'Mất kết nối thiết bị',
   maintenance: 'Bảo trì',
   maintenance_due: 'Khuyến nghị bảo trì',
-  other: 'Khác',
   harsh_braking: 'Phanh gấp',
   idle_too_long: 'Dừng quá lâu',
+  other: 'Khác',
 };
 
-const InfoRow = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) => (
-  <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
+const stripAlertMarkup = (value: unknown, fallback: string) => {
+  if (typeof value !== 'string') {
+    return fallback;
+  }
+
+  const normalized = value
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+    .replace(/[`*_>#~]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return normalized || fallback;
+};
+
+const formatMetricValue = (value: unknown, fallback = 'Chưa có') => {
+  if (value === null || value === undefined || value === '') {
+    return fallback;
+  }
+
+  return String(value);
+};
+
+const toNumber = (value: unknown) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const buildAlertExplanation = (alert: any, displayMessage: string) => {
+  const actualValue = toNumber(alert?.actualValue ?? alert?.rawValue ?? alert?.speed);
+  const thresholdValue = toNumber(alert?.thresholdValue);
+  const overThreshold =
+    actualValue !== null && thresholdValue !== null ? actualValue - thresholdValue : null;
+  const geofenceName =
+    alert?.geofenceName ?? (alert?.geofenceId ? `#${alert.geofenceId}` : 'Chưa xác định');
+  const sourceRef = alert?.deviceName ?? alert?.deviceId ?? 'thiết bị chưa xác định';
+  const vehicleRef = alert?.vehiclePlate ?? alert?.vehicleId ?? 'xe chưa xác định';
+
+  switch (alert?.alertType) {
+    case 'speeding':
+      return {
+        summary: `Xe ${vehicleRef} vượt ngưỡng tốc độ trong phiên theo dõi.`,
+        trigger:
+          overThreshold !== null
+            ? `Tốc độ ${actualValue?.toFixed(1)} km/h, cao hơn ${overThreshold.toFixed(1)} km/h so với ngưỡng ${thresholdValue?.toFixed(1)} km/h.`
+            : displayMessage,
+        actions: [
+          'Kiểm tra đoạn đường và giới hạn tốc độ tại thời điểm phát sinh.',
+          'Liên hệ tài xế để xác nhận tình huống và nguyên nhân.',
+          'Nếu tái diễn trong cùng ca, tạo biên bản vi phạm để theo dõi.',
+        ],
+      };
+    case 'geofence':
+    case 'geofence_enter':
+      return {
+        summary: `Xe ${vehicleRef} đi vào vùng giám sát ${geofenceName}.`,
+        trigger: `Nguồn cảnh báo: ${sourceRef}. ${displayMessage}`,
+        actions: [
+          'Đối chiếu lệnh điều phối để xác nhận điểm đến có hợp lệ.',
+          'Nếu không hợp lệ, liên hệ điều phối viên để xử lý ngay.',
+          'Cập nhật ghi chú xác minh trước khi đóng cảnh báo.',
+        ],
+      };
+    case 'geofence_exit':
+      return {
+        summary: `Xe ${vehicleRef} rời khỏi vùng giám sát ${geofenceName}.`,
+        trigger: `Nguồn cảnh báo: ${sourceRef}. ${displayMessage}`,
+        actions: [
+          'Kiểm tra tuyến thực tế và mục đích rời vùng đã đăng ký.',
+          'Liên hệ tài xế hoặc đơn vị liên quan để xác nhận thay đổi lộ trình.',
+          'Ghi lại nguyên nhân rời vùng để phục vụ truy vết sau này.',
+        ],
+      };
+    case 'device_offline':
+    case 'offline':
+      return {
+        summary: `Thiết bị ${sourceRef} trên ${vehicleRef} bị gián đoạn kết nối.`,
+        trigger: `Thời lượng im lặng: ${formatMetricValue(alert?.actualValue, 'Chưa xác định')} • Ngưỡng cảnh báo: ${formatMetricValue(alert?.thresholdValue, 'Chưa cấu hình')}.`,
+        actions: [
+          'Kiểm tra nguồn điện thiết bị, SIM/data và vùng phủ sóng.',
+          'Xác định bản tin cuối cùng để khoanh vùng thời điểm mất kết nối.',
+          'Nếu kéo dài, lập yêu cầu kiểm tra thiết bị tại hiện trường.',
+        ],
+      };
+    case 'maintenance':
+    case 'maintenance_due':
+      return {
+        summary: `Xe ${vehicleRef} đã tới ngưỡng cần bảo trì.`,
+        trigger:
+          actualValue !== null && thresholdValue !== null
+            ? `Chỉ số hiện tại ${actualValue.toFixed(1)} so với ngưỡng ${thresholdValue.toFixed(1)}.`
+            : displayMessage,
+        actions: [
+          'Tạo phiếu bảo trì theo đúng hạng mục cảnh báo.',
+          'Chốt lịch xử lý và người phụ trách trước ca vận hành kế tiếp.',
+          'Xác nhận hoàn tất bảo trì rồi mới đóng cảnh báo.',
+        ],
+      };
+    case 'harsh_braking':
+      return {
+        summary: `Xe ${vehicleRef} phát sinh sự kiện phanh gấp.`,
+        trigger: `Thông điệp từ ${sourceRef}: ${displayMessage}`,
+        actions: [
+          'Đối chiếu tốc độ ngay trước thời điểm phanh và điều kiện giao thông.',
+          'Kiểm tra tần suất phanh gấp trong cùng ngày để đánh giá rủi ro.',
+          'Nếu lặp lại nhiều, lên lịch nhắc nhở hoặc đào tạo lái xe an toàn.',
+        ],
+      };
+    case 'idle_too_long':
+      return {
+        summary: `Xe ${vehicleRef} dừng/đỗ vượt thời gian cho phép.`,
+        trigger:
+          actualValue !== null && thresholdValue !== null
+            ? `Thời gian dừng ${actualValue.toFixed(1)} phút, ngưỡng ${thresholdValue.toFixed(1)} phút.`
+            : displayMessage,
+        actions: [
+          'Xác minh lý do dừng lâu với tài xế hoặc điều phối.',
+          'Kiểm tra mức tiêu hao nhiên liệu và điều kiện an toàn tại điểm dừng.',
+          'Điều chỉnh tuyến hoặc thời lượng nghỉ nếu dừng lâu lặp lại.',
+        ],
+      };
+    default:
+      return {
+        summary: `Cảnh báo ${alert?.alertType ?? 'không xác định'} phát sinh từ ${sourceRef}.`,
+        trigger: `Xe liên quan: ${vehicleRef}. Giá trị thực tế: ${formatMetricValue(alert?.actualValue ?? alert?.rawValue)} • Ngưỡng: ${formatMetricValue(alert?.thresholdValue)}.`,
+        actions: [
+          'Mở log rule để xác định chính xác điều kiện kích hoạt.',
+          'Đối chiếu timeline bản đồ và dữ liệu telemetry cùng thời điểm.',
+          'Ghi rõ nguyên nhân thực tế vào ghi chú xử lý trước khi đóng.',
+        ],
+      };
+  }
+};
+
+const InfoRow = ({ label, value }: { label: string; value: string }) => (
+  <div className="space-y-1 rounded-xl border bg-muted/20 px-3 py-2.5">
     <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-    <p className="mt-1 text-sm font-medium">{value}</p>
+    <p className="text-sm font-medium">{value}</p>
   </div>
 );
+
+const AlertDetailMapSync = ({
+  lat,
+  lon,
+  open,
+}: {
+  lat: number;
+  lon: number;
+  open: boolean;
+}) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    const syncMap = () => {
+      map.invalidateSize({ pan: false, debounceMoveend: true });
+      map.setView([lat, lon], 14, { animate: false });
+    };
+
+    const frame = window.requestAnimationFrame(syncMap);
+    const timeoutId = window.setTimeout(syncMap, 240);
+    const lateTimeoutId = window.setTimeout(syncMap, 900);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timeoutId);
+      window.clearTimeout(lateTimeoutId);
+    };
+  }, [lat, lon, map, open]);
+
+  return null;
+};
 
 export const AlertDetailModal = ({
   open,
@@ -66,7 +233,7 @@ export const AlertDetailModal = ({
   alert,
 }: {
   open: boolean;
-  onOpenChange: (v: boolean) => void;
+  onOpenChange: (value: boolean) => void;
   alert: any | null;
 }) => {
   const coordinates = {
@@ -74,125 +241,212 @@ export const AlertDetailModal = ({
     lon: Number(alert?.longitude),
   };
   const hasCoordinates = hasValidMapCoordinates(coordinates);
+  const displayTitle = stripAlertMarkup(alert?.displayTitle ?? alert?.title, 'Chi tiết cảnh báo');
+  const displayMessage = stripAlertMarkup(
+    alert?.displayMessage ?? alert?.message,
+    'Cảnh báo này chưa có mô tả chi tiết từ hệ thống phát sinh.',
+  );
+  const explanation = buildAlertExplanation(alert, displayMessage);
+  const resolutionNotes = stripAlertMarkup(alert?.resolutionNotes, 'Chưa có ghi chú xử lý.');
+  const mapIcon = useMemo(
+    () =>
+      createDeviceMarkerIcon(
+        alert?.status === 'resolved'
+          ? 'stopped'
+          : alert?.severity === 'critical'
+            ? 'error'
+            : 'running',
+      ),
+    [alert?.severity, alert?.status],
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-5xl">
-        <DialogHeader className="space-y-3">
+      <DialogContent className="flex h-[min(92dvh,920px)] max-h-[92dvh] w-[min(96vw,1220px)] max-w-none flex-col overflow-hidden p-0 sm:w-[min(96vw,1220px)] sm:max-w-none">
+        <DialogHeader className="shrink-0 space-y-3 border-b bg-background px-5 py-4 sm:px-6">
           <div className="flex flex-wrap gap-2">
             <Badge variant={alert?.severity === 'critical' ? 'destructive' : 'secondary'}>
-              {SEVERITY_LABELS[alert?.severity] ?? alert?.severity ?? 'Chưa xác định'}
+              {SEVERITY_LABELS[alert?.severity] ?? formatMetricValue(alert?.severity, 'Chưa xác định')}
             </Badge>
             <Badge variant={alert?.status === 'active' ? 'default' : 'outline'}>
-              {STATUS_LABELS[alert?.status] ?? alert?.status ?? 'Chưa xác định'}
+              {STATUS_LABELS[alert?.status] ?? formatMetricValue(alert?.status, 'Chưa xác định')}
             </Badge>
             <Badge variant="outline">
-              {ALERT_TYPE_LABELS[alert?.alertType] ?? alert?.alertType ?? 'Chưa xác định'}
+              {ALERT_TYPE_LABELS[alert?.alertType] ?? formatMetricValue(alert?.alertType, 'Chưa xác định')}
             </Badge>
           </div>
+
           <div className="space-y-1">
-            <DialogTitle>{alert?.title ?? 'Chi tiết cảnh báo'}</DialogTitle>
-            <DialogDescription>
-              {alert?.message ?? 'Cảnh báo này chưa có mô tả chi tiết từ hệ thống phát sinh.'}
-            </DialogDescription>
+            <DialogTitle>{displayTitle}</DialogTitle>
+            <DialogDescription>{displayMessage}</DialogDescription>
           </div>
         </DialogHeader>
 
-        <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="space-y-4">
-            <Card className="border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
-              <CardContent className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
-                <InfoRow label="Phát sinh" value={formatDateTime(alert?.createdAt)} />
-                <InfoRow
-                  label="Cập nhật gần nhất"
-                  value={
-                    alert?.updatedAt
-                      ? `${formatDateTime(alert.updatedAt)} (${formatRelative(alert.updatedAt)})`
-                      : 'Chưa có dữ liệu'
-                  }
-                />
-                <InfoRow label="Giá trị thực tế" value={alert?.actualValue !== null && alert?.actualValue !== undefined ? String(alert.actualValue) : 'Chưa có'} />
-                <InfoRow label="Ngưỡng cảnh báo" value={alert?.thresholdValue !== null && alert?.thresholdValue !== undefined ? String(alert.thresholdValue) : 'Chưa có'} />
-              </CardContent>
-            </Card>
+        <div className="min-h-0 flex-1 overflow-hidden px-5 py-4 sm:px-6">
+          <div className="grid h-full gap-4 xl:grid-cols-[minmax(0,1.02fr)_minmax(360px,0.98fr)]">
+            <div className="min-h-0 space-y-4 overflow-y-auto pr-1">
+              <Card className="border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
+                <CardContent className="grid gap-3 p-4 sm:grid-cols-2 2xl:grid-cols-4">
+                  <InfoRow label="Phát sinh" value={formatDateTime(alert?.createdAt)} />
+                  <InfoRow
+                    label="Cập nhật gần nhất"
+                    value={
+                      alert?.updatedAt
+                        ? `${formatDateTime(alert.updatedAt)} (${formatRelative(alert.updatedAt)})`
+                        : 'Chưa có dữ liệu'
+                    }
+                  />
+                  <InfoRow label="Giá trị thực tế" value={formatMetricValue(alert?.actualValue)} />
+                  <InfoRow label="Ngưỡng cảnh báo" value={formatMetricValue(alert?.thresholdValue)} />
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Ngữ cảnh cảnh báo</CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-3 sm:grid-cols-2">
-                <InfoRow label="Phương tiện" value={alert?.vehicleId ?? 'Chưa liên kết'} />
-                <InfoRow label="Thiết bị" value={alert?.deviceId ?? 'Chưa liên kết'} />
-                <InfoRow label="Chuyến đi" value={alert?.tripId ? String(alert.tripId) : 'Không gắn chuyến đi'} />
-                <InfoRow label="Geofence" value={alert?.geofenceId ? String(alert.geofenceId) : 'Không gắn geofence'} />
-                <InfoRow label="Tốc độ lúc cảnh báo" value={alert?.speed !== null && alert?.speed !== undefined ? `${alert.speed} km/h` : 'Chưa có'} />
-                <InfoRow label="Loại cảnh báo" value={ALERT_TYPE_LABELS[alert?.alertType] ?? alert?.alertType ?? 'Khác'} />
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Thông tin cảnh báo</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  <InfoRow label="Phương tiện" value={alert?.vehiclePlate ?? alert?.vehicleId ?? 'Chưa liên kết'} />
+                  <InfoRow label="Thiết bị" value={alert?.deviceName ?? alert?.deviceId ?? 'Chưa liên kết'} />
+                  <InfoRow label="Khách hàng" value={alert?.customerName ?? 'Chưa có thông tin khách hàng'} />
+                  <InfoRow label="Chuyến đi" value={alert?.tripId ? String(alert.tripId) : 'Không gắn chuyến đi'} />
+                  <InfoRow
+                    label="Geofence"
+                    value={alert?.geofenceName ?? (alert?.geofenceId ? String(alert.geofenceId) : 'Không gắn geofence')}
+                  />
+                  <InfoRow
+                    label="Tốc độ lúc cảnh báo"
+                    value={alert?.speed !== null && alert?.speed !== undefined ? `${alert.speed} km/h` : 'Chưa có'}
+                  />
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Dòng thời gian xử lý</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="rounded-xl border bg-muted/20 px-4 py-3">
-                  <p className="text-sm font-semibold">Tạo cảnh báo</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{formatDateTime(alert?.createdAt)}</p>
-                </div>
-                <div className="rounded-xl border bg-muted/20 px-4 py-3">
-                  <p className="text-sm font-semibold">Xác nhận</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {alert?.acknowledgedAt
-                      ? `${formatDateTime(alert.acknowledgedAt)} • User ${alert.acknowledgedBy ?? '-'}`
-                      : 'Chưa có thao tác xác nhận'}
-                  </p>
-                </div>
-                <div className="rounded-xl border bg-muted/20 px-4 py-3">
-                  <p className="text-sm font-semibold">Giải quyết</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {alert?.resolvedAt
-                      ? `${formatDateTime(alert.resolvedAt)} • User ${alert.resolvedBy ?? '-'}`
-                      : 'Chưa đóng cảnh báo'}
-                  </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {alert?.resolutionNotes ?? 'Chưa có ghi chú xử lý.'}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Diễn giải và hướng xử lý</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid gap-3 lg:grid-cols-2">
+                    <InfoRow label="Diễn giải" value={explanation.summary} />
+                    <InfoRow label="Thông số nhận diện" value={explanation.trigger} />
+                  </div>
+                  <div className="rounded-xl border bg-muted/20 px-3 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                      Hướng xử lý đề xuất
+                    </p>
+                    <div className="mt-2 space-y-2">
+                      {explanation.actions.map((item: string, index: number) => (
+                        <p key={`${item}-${index}`} className="text-sm leading-relaxed text-foreground">
+                          <span className="mr-1 font-semibold">{index + 1}.</span>
+                          {item}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                  <InfoRow label="Ghi chú xử lý" value={resolutionNotes} />
+                </CardContent>
+              </Card>
+            </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Vị trí phát sinh</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-xl border bg-muted/20 p-3 text-sm">
-                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Tọa độ</p>
-                <p className="mt-1 font-medium">
-                  {hasCoordinates
-                    ? `${coordinates.lat.toFixed(5)}, ${coordinates.lon.toFixed(5)}`
-                    : 'Cảnh báo này không có tọa độ hợp lệ để hiển thị'}
-                </p>
-              </div>
-
-              <div className="h-[320px] overflow-hidden rounded-xl border">
-                {hasCoordinates ? (
-                  <MapContainer center={[coordinates.lat, coordinates.lon]} zoom={14} className="h-full w-full">
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                    <Marker position={[coordinates.lat, coordinates.lon]} />
-                  </MapContainer>
-                ) : (
-                  <div className="flex h-full items-center justify-center p-6">
-                    <EmptyState
-                      title="Không có tọa độ hợp lệ"
-                      description="Hệ thống chỉ hiển thị bản đồ khi cảnh báo có latitude/longitude hợp lệ."
+            <div className="min-h-0 space-y-4 overflow-y-auto pr-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Vị trí phát sinh</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <InfoRow
+                      label="Tọa độ"
+                      value={
+                        hasCoordinates
+                          ? `${coordinates.lat.toFixed(5)}, ${coordinates.lon.toFixed(5)}`
+                          : 'Cảnh báo này không có tọa độ hợp lệ'
+                      }
+                    />
+                    <InfoRow
+                      label="Thời điểm cần lưu ý"
+                      value={formatDateTime(alert?.updatedAt ?? alert?.createdAt)}
                     />
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+
+                  <div className="h-[320px] overflow-hidden rounded-xl border 2xl:h-[360px]">
+                    {hasCoordinates ? (
+                      <MapContainer
+                        key={alert?.id ?? `${coordinates.lat}-${coordinates.lon}`}
+                        center={[coordinates.lat, coordinates.lon]}
+                        zoom={14}
+                        className="h-full w-full"
+                      >
+                        <AlertDetailMapSync lat={coordinates.lat} lon={coordinates.lon} open={open} />
+                        <TileLayer
+                          attribution={MAP_LAYER_CONFIG.street.attribution}
+                          url={MAP_LAYER_CONFIG.street.url}
+                        />
+                        <Marker position={[coordinates.lat, coordinates.lon]} icon={mapIcon} />
+                      </MapContainer>
+                    ) : (
+                      <div className="flex h-full items-center justify-center p-6">
+                        <EmptyState
+                          title="Không có tọa độ hợp lệ"
+                          description="Bản đồ chỉ hiển thị khi cảnh báo có latitude và longitude hợp lệ."
+                        />
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Dòng thời gian xử lý</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-3">
+                  <div className="rounded-xl border bg-muted/20 px-4 py-3">
+                    <p className="text-sm font-semibold">Tạo cảnh báo</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{formatDateTime(alert?.createdAt)}</p>
+                  </div>
+                  <div className="rounded-xl border bg-muted/20 px-4 py-3">
+                    <p className="text-sm font-semibold">Xác nhận</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {alert?.acknowledgedAt
+                        ? `${formatDateTime(alert.acknowledgedAt)} • User ${alert.acknowledgedBy ?? '-'}`
+                        : 'Chưa có thao tác xác nhận'}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border bg-muted/20 px-4 py-3">
+                    <p className="text-sm font-semibold">Giải quyết</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {alert?.resolvedAt
+                        ? `${formatDateTime(alert.resolvedAt)} • User ${alert.resolvedBy ?? '-'}`
+                        : 'Chưa đóng cảnh báo'}
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">{resolutionNotes}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Snapshot sự kiện</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-3 sm:grid-cols-2">
+                  <InfoRow label="ID cảnh báo" value={formatMetricValue(alert?.id)} />
+                  <InfoRow
+                    label="Mức nghiêm trọng"
+                    value={SEVERITY_LABELS[alert?.severity] ?? formatMetricValue(alert?.severity)}
+                  />
+                  <InfoRow
+                    label="Nguồn phản ứng"
+                    value={formatMetricValue(alert?.source ?? alert?.deviceName ?? alert?.deviceId)}
+                  />
+                  <InfoRow
+                    label="Giá trị thô"
+                    value={formatMetricValue(alert?.rawValue ?? alert?.actualValue)}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

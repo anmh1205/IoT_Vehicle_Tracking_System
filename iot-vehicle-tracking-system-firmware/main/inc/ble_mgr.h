@@ -8,6 +8,8 @@
 
 #include "nimble/ble.h"
 
+struct ble_hs_adv_fields;
+
 /**
  * @file ble_mgr.h
  * @brief BLE central manager for discovery, connect, GATT discovery, and notifications.
@@ -45,11 +47,17 @@ typedef struct ble_mgr_svc_def ble_mgr_svc_def_t;
  *
  * @param mgr_ctx BLE manager context.
  * @param addr Discovered device address.
+ * @param adv_fields Parsed advertising fields for this discovery result.
+ * @param service_match True when the expected service UUID was advertised.
  * @param usr_ctx User context pointer.
  *
  * @return true to attempt connection, false to skip this device.
  */
-typedef bool (*ble_mgr_dev_filter_cb_t)(ble_mgr_ctx_t *mgr_ctx, const ble_addr_t *addr, void *usr_ctx);
+typedef bool (*ble_mgr_dev_filter_cb_t)(ble_mgr_ctx_t *mgr_ctx,
+                                        const ble_addr_t *addr,
+                                        const struct ble_hs_adv_fields *adv_fields,
+                                        bool service_match,
+                                        void *usr_ctx);
 
 /**
  * @brief Disconnect callback executed after link termination.

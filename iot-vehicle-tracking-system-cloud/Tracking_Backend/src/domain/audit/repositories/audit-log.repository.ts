@@ -1,5 +1,6 @@
-import { insertOne, findMany } from '@/infrastructure/database/queries';
+import { findMany } from '@/infrastructure/database/queries';
 import { pool } from '@/infrastructure/database/pool';
+import type { PoolClient } from 'pg';
 import type { AuditLog, AuditLogListQuery, RecordAuditInput } from '@/domain/audit/types/audit-log.types';
 
 interface CountRow {
@@ -7,8 +8,12 @@ interface CountRow {
 }
 
 /** Insert a new audit log entry */
-export const create = async (input: RecordAuditInput): Promise<AuditLog> =>
-  insertOne<AuditLog>(
+export const create = async (
+  input: RecordAuditInput,
+  client?: PoolClient,
+): Promise<AuditLog> => {
+  const db = client ?? pool;
+  const result = await db.query<AuditLog>(
     `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, changes, ip_address, user_agent, created_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
      RETURNING *`,
@@ -22,6 +27,8 @@ export const create = async (input: RecordAuditInput): Promise<AuditLog> =>
       input.userAgent ?? null,
     ],
   );
+  return result.rows[0] as AuditLog;
+};
 
 /** Query audit logs with filters + pagination */
 export const findAll = async (

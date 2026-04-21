@@ -2,6 +2,13 @@ import { z } from 'zod';
 
 const policyTypeSchema = z.enum(['ADMIN_BOUNDARY', 'RADIUS', 'DISTANCE_QUOTA']);
 const policyStatusSchema = z.enum(['draft', 'active', 'paused', 'disabled']);
+const allowedZoneCenterSourceSchema = z.enum(['vehicle_position', 'map_pick']);
+const allowedZoneAlertModeSchema = z.enum([
+  'transition_only',
+  'transition_and_recovery',
+  'periodic_while_outside',
+  'silent',
+]);
 
 const parseBooleanQuery = z.preprocess((value) => {
   if (value === undefined || value === null || value === '') {
@@ -102,3 +109,31 @@ export const policyViolationListQuerySchema = z.object({
   status: z.enum(['open', 'acknowledged', 'resolved']).optional(),
   acknowledged: parseBooleanQuery,
 });
+
+export const upsertVehicleAllowedZoneSchema = z
+  .object({
+    centerSource: allowedZoneCenterSourceSchema,
+    centerLatitude: z.number().min(-90).max(90).optional(),
+    centerLongitude: z.number().min(-180).max(180).optional(),
+    radiusMeters: z.number().positive().max(1000000),
+    alertMode: allowedZoneAlertModeSchema.optional(),
+    cooldownSec: z.number().int().min(0).max(86400).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.centerSource === 'map_pick') {
+      if (value.centerLatitude === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['centerLatitude'],
+          message: 'centerLatitude is required when centerSource is map_pick',
+        });
+      }
+      if (value.centerLongitude === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['centerLongitude'],
+          message: 'centerLongitude is required when centerSource is map_pick',
+        });
+      }
+    }
+  });

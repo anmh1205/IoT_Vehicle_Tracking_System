@@ -134,7 +134,11 @@ export const sendCommand = asyncHandler(async (req: AuthenticatedRequest, res: R
     throw createValidationError('Missing command');
   }
 
-  const result = await deviceCommandService.sendCommand(deviceId, { command, params });
+  const result = await deviceCommandService.sendCommand(
+    deviceId,
+    { command, params },
+    { actorUserId: req.user?.id, correlationId: req.correlationId },
+  );
   sendOk(res, result);
 });
 
@@ -161,18 +165,22 @@ export const triggerOta = asyncHandler(async (req: AuthenticatedRequest, res: Re
   const downloadUrl = firmwareDeployService.buildFirmwareDownloadUrl(firmware.id);
 
   const jobId = `ota_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  const result = await deviceCommandService.sendCommand(deviceId, {
-    command: 'ota_update',
-    params: {
-      jobId,
-      version: firmware.version,
-      url: downloadUrl,
-      size: artifact.size,
-      sha256: artifact.sha256,
-      force,
-      confirmTimeoutSec,
+  const result = await deviceCommandService.sendCommand(
+    deviceId,
+    {
+      command: 'ota_update',
+      params: {
+        jobId,
+        version: firmware.version,
+        url: downloadUrl,
+        size: artifact.size,
+        sha256: artifact.sha256,
+        force,
+        confirmTimeoutSec,
+      },
     },
-  });
+    { actorUserId: req.user?.id, correlationId: req.correlationId },
+  );
 
   sendAccepted(res, {
     jobId,
@@ -185,12 +193,16 @@ export const triggerOta = asyncHandler(async (req: AuthenticatedRequest, res: Re
 export const rollbackOta = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const deviceId = await resolveDeviceId(req.params.id);
 
-  const result = await deviceCommandService.sendCommand(deviceId, {
-    command: 'manual_rollback',
-    params: {
-      reason: req.body?.reason ?? 'manual_api',
+  const result = await deviceCommandService.sendCommand(
+    deviceId,
+    {
+      command: 'manual_rollback',
+      params: {
+        reason: req.body?.reason ?? 'manual_api',
+      },
     },
-  });
+    { actorUserId: req.user?.id, correlationId: req.correlationId },
+  );
 
   sendAccepted(res, {
     status: 'rolled_back',

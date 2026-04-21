@@ -17,6 +17,9 @@ export interface Device {
   last_error_code: number;
   created_at: Date;
   updated_at: Date;
+  vehicle_plate?: string | null;
+  customer_name?: string | null;
+  linked_vehicle_id?: string | null;
 }
 
 export interface DeviceSession {
@@ -53,6 +56,9 @@ export interface DevicePublic {
   firmwareVersion: string | null;
   lastErrorCode: number;
   createdAt: string;
+  vehiclePlate?: string | null;
+  customerName?: string | null;
+  vehicleId?: string | null;
 }
 
 export interface DeviceDetail extends DevicePublic {
@@ -78,7 +84,9 @@ export interface DeviceSessionPublic {
 export interface DevicePosition {
   deviceId: string;
   deviceName: string;
+  vehicleId?: string | null;
   vehiclePlate?: string | null;
+  customerName?: string | null;
   latitude: number;
   longitude: number;
   currentStatus: string;
@@ -86,8 +94,14 @@ export interface DevicePosition {
   speed?: number;
   heading?: number;
   battery?: number;
+  deviceBattery?: number | null;
+  vehicleBattery?: number | null;
   vibration?: number;
   temperature?: number;
+  engineTemperature?: number | null;
+  rpm?: number | null;
+  activeAlertCount?: number;
+  activeAlertTitles?: string[];
 }
 
 export interface CreateDeviceInput {

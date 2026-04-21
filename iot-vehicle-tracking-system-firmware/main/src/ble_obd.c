@@ -837,11 +837,13 @@ esp_err_t ble_obd_elm327_init(ble_obd_ctx_t *ctx) {
         "ATE0\r",
         "ATL0\r",
         "ATS0\r",
-        "ATSP0\r",
+        "ATH0\r",
+        "ATSP6\r",
     };
 
     static const uint32_t command_timeouts_ms[] = {
         5000,
+        2000,
         2000,
         2000,
         2000,

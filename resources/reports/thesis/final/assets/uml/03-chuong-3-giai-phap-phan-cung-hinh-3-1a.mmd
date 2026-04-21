@@ -1,7 +1,7 @@
 flowchart TB
-    Input["Khoi nguon<br/>12V/24V -> Buck -> Charge -> Pin 18650"]
-    Control["Khoi dieu khien<br/>ESP32-S3 + LIS3DSH"]
-    Comm["Khoi truyen thong<br/>SIM7600 + OBD2 BLE"]
+    Input["Khối nguồn<br/>12V/24V -> Buck -> Charge -> Pin 18650"]
+    Control["Khối điều khiển<br/>ESP32-S3 + LIS3DSH"]
+    Comm["Khối truyền thông<br/>SIM7600 + OBD2 BLE"]
 
     Input --> Control --> Comm
     Input -. nguon du phong .-> Control

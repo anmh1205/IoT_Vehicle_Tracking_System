@@ -1,13 +1,15 @@
 flowchart TB
-    Header["Header<br/>Lọc severity"]
+    Screen["Trang quản lý cảnh báo"]
+    Header["Thanh đầu<br/>Lọc mức độ"]
     Workspace["Không gian cảnh báo"]
     AlertList["Danh sách cảnh báo"]
     Detail["Chi tiết cảnh báo"]
-    MapPanel["Bản đồ geofence"]
-    History["Lịch sử / timeline"]
+    MapPanel["Bản đồ vùng cho phép"]
+    History["Lịch sử / dòng thời gian"]
 
-    Header --> Workspace
+    Screen --> Header
+    Screen --> Workspace
     Workspace --> AlertList
     Workspace --> Detail
     Workspace --> MapPanel
-    Detail --> History
+    Workspace --> History

@@ -44,6 +44,62 @@ export const buildRouteReplayPoints = (rows: DeviceTelemetryRow[]): RouteReplayP
     }))
     .filter((row) => row.timestampMs > 0);
 
+const toRadians = (value: number) => (value * Math.PI) / 180;
+
+export const haversineKm = (from: [number, number], to: [number, number]): number => {
+  const earthRadiusKm = 6371;
+  const dLat = toRadians(to[0] - from[0]);
+  const dLon = toRadians(to[1] - from[1]);
+  const lat1 = toRadians(from[0]);
+  const lat2 = toRadians(to[0]);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+
+  return 2 * earthRadiusKm * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const MAX_ROUTE_GAP_KM = 25;
+const MAX_ROUTE_GAP_MS = 30 * 60 * 1000;
+
+export const selectLatestContiguousRouteRows = (
+  rowsAscending: DeviceTelemetryRow[],
+): DeviceTelemetryRow[] => {
+  const rowsWithCoordinates = rowsAscending.filter(
+    (row): row is DeviceTelemetryRow & { latitude: number; longitude: number } =>
+      hasValidTelemetryCoordinates(row.latitude, row.longitude),
+  );
+
+  if (rowsWithCoordinates.length <= 1) {
+    return rowsWithCoordinates;
+  }
+
+  const segments: DeviceTelemetryRow[][] = [];
+  let activeSegment: DeviceTelemetryRow[] = [rowsWithCoordinates[0]];
+
+  for (let index = 1; index < rowsWithCoordinates.length; index += 1) {
+    const previous = rowsWithCoordinates[index - 1];
+    const current = rowsWithCoordinates[index];
+    const timeGapMs = Math.max(0, Date.parse(current.timestamp) - Date.parse(previous.timestamp));
+    const distanceGapKm = haversineKm(
+      [previous.latitude, previous.longitude],
+      [current.latitude, current.longitude],
+    );
+
+    if (timeGapMs > MAX_ROUTE_GAP_MS || distanceGapKm > MAX_ROUTE_GAP_KM) {
+      segments.push(activeSegment);
+      activeSegment = [current];
+      continue;
+    }
+
+    activeSegment.push(current);
+  }
+
+  segments.push(activeSegment);
+  return [...segments].reverse().find((segment) => segment.length > 1) ?? activeSegment;
+};
+
 export const getObservedCadenceSeconds = (
   rows: DeviceTelemetryRow[],
   sampleSize = 12,

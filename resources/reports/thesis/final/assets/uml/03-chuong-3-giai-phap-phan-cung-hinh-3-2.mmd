@@ -2,10 +2,10 @@ sequenceDiagram
     participant ESP as ESP32-S3
     participant OBD as vgate iCar Pro
 
-    ESP->>OBD: BLE scan + connect
-    ESP->>OBD: GATT discovery
-    ESP->>OBD: Init ELM327 (ATZ, ATE0, ATSP0)
-    loop Khi IGN ON
+    ESP->>OBD: Quét BLE + kết nối
+    ESP->>OBD: Khám phá GATT
+    ESP->>OBD: Khởi tạo ELM327
+    loop Khi IGN bật
         ESP->>OBD: Đọc PID 010C / 010D / 0105
-        OBD-->>ESP: Trả telemetry
+        OBD-->>ESP: Trả dữ liệu vận hành
     end

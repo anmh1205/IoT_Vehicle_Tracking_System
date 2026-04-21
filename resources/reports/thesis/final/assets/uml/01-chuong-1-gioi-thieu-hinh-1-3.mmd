@@ -1,11 +1,19 @@
 flowchart TB
-    Tracker["Tracker tren xe<br/>ESP32-S3 + SIM7600 + OBD2"]
-    EMQX["EMQX Broker"]
+    Tracker["Thiết bị theo dõi trên xe<br/>ESP32-S3 + SIM7600 + OBD2"]
+    EMQX["EMQX (broker MQTT)"]
     Bridge["MQTT Bridge"]
-    API["Backend API + Socket.IO"]
+    API["API phía máy chủ + Socket.IO"]
     Store["PostgreSQL + VictoriaMetrics + VictoriaLogs"]
-    Clients["Dashboard / Mobile / Grafana"]
+    WebClients["Giao diện web / di động"]
+    Grafana["Grafana"]
 
-    Tracker --> EMQX --> Bridge --> API --> Store
-    API --> Clients
-    Store --> Clients
+    Tracker -->|Rawdata / status / events / firmware| EMQX
+    EMQX -->|Device topics -> bridge| Bridge
+    Bridge --> Store
+    Bridge -->|Publish internal/events/#| EMQX
+    EMQX -->|Backend realtime listener| API
+    WebClients -->|REST requests| API
+    API -->|REST responses + Socket.IO| WebClients
+    API -->|Commands / OTA| EMQX
+    EMQX -->|Topic commands| Tracker
+    Store --> Grafana

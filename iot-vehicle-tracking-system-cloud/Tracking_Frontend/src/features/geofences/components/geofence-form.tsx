@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -18,17 +18,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { GeofenceMapEditor } from './geofence-map-editor';
+
+const DEFAULT_LATITUDE = '10.762622';
+const DEFAULT_LONGITUDE = '106.660172';
 
 const EMPTY_FORM = {
   name: '',
   geofenceType: 'circle',
-  centerLatitude: '10.762622',
-  centerLongitude: '106.660172',
-  radiusMeters: '500',
+  centerLatitude: DEFAULT_LATITUDE,
+  centerLongitude: DEFAULT_LONGITUDE,
+  radiusKm: '1',
   triggerOn: 'both',
   description: '',
+};
+
+const clampRadiusKm = (value: number) => {
+  if (!Number.isFinite(value) || value < 1) {
+    return 1;
+  }
+  return value;
 };
 
 export const GeofenceForm = ({
@@ -57,17 +68,36 @@ export const GeofenceForm = ({
     setForm({
       name: defaultValues.name ?? '',
       geofenceType: defaultValues.geofenceType ?? 'circle',
-      centerLatitude: String(defaultValues.centerLatitude ?? 10.762622),
-      centerLongitude: String(defaultValues.centerLongitude ?? 106.660172),
-      radiusMeters: String(defaultValues.radiusMeters ?? 500),
+      centerLatitude: String(defaultValues.centerLatitude ?? DEFAULT_LATITUDE),
+      centerLongitude: String(defaultValues.centerLongitude ?? DEFAULT_LONGITUDE),
+      radiusKm: String(
+        Math.max(Number(defaultValues.radiusMeters ?? 1000) / 1000, 1).toFixed(
+          Number(defaultValues.radiusMeters ?? 1000) % 1000 === 0 ? 0 : 1,
+        ),
+      ),
       triggerOn: defaultValues.triggerOn ?? 'both',
       description: defaultValues.description ?? '',
     });
   }, [defaultValues, open]);
 
-  const lat = Number(form.centerLatitude || 10.762622);
-  const lon = Number(form.centerLongitude || 106.660172);
-  const radius = Number(form.radiusMeters || 500);
+  const lat = Number(form.centerLatitude || DEFAULT_LATITUDE);
+  const lon = Number(form.centerLongitude || DEFAULT_LONGITUDE);
+  const radiusKm = clampRadiusKm(Number(form.radiusKm || 1));
+  const radiusMeters = Math.round(radiusKm * 1000);
+  const sliderRadiusKm = Math.min(Math.max(radiusKm, 1), 500);
+  const isBeyondSlider = radiusKm > 500;
+  const radiusLabel =
+    radiusKm >= 10 ? `${radiusKm.toLocaleString('vi-VN')} km` : `${radiusKm} km`;
+
+  const helperText = useMemo(() => {
+    if (form.geofenceType === 'circle') {
+      return 'Chạm trực tiếp lên bản đồ để đặt tâm. Thanh kéo tối ưu cho bán kính 1-500 km, còn ô nhập tay vẫn nhận giá trị lớn hơn.';
+    }
+    return 'Loại vùng hiện tại vẫn dùng tâm bản đồ để định hướng vị trí. Nếu cần bán kính lớn hơn 500 km, hãy nhập trực tiếp ở ô số.';
+  }, [form.geofenceType]);
+
+  const isQuickEditSupported = form.geofenceType === 'circle';
+  const typeLabel = form.geofenceType === 'circle' ? 'Hình tròn bán kính' : 'Hình học nâng cao';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -79,6 +109,10 @@ export const GeofenceForm = ({
         </DialogHeader>
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="space-y-4">
+            <div className="rounded-2xl border bg-muted/15 px-4 py-3 text-sm text-muted-foreground">
+              {helperText}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="geofence-name">Tên vùng giám sát</Label>
               <Input
@@ -89,21 +123,41 @@ export const GeofenceForm = ({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="geofence-type">Loại vùng</Label>
-              <Select
-                value={form.geofenceType}
-                onValueChange={(value) => setForm((state) => ({ ...state, geofenceType: value }))}
-              >
-                <SelectTrigger id="geofence-type">
-                  <SelectValue placeholder="Chọn loại vùng" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="circle">Hình tròn</SelectItem>
-                  <SelectItem value="polygon">Đa giác</SelectItem>
-                  <SelectItem value="rectangle">Hình chữ nhật</SelectItem>
-                </SelectContent>
-              </Select>
+            {!isQuickEditSupported ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                Geofence đa giác hoặc hình chữ nhật hiện chưa có trình chỉnh sửa an toàn trong modal
+                này. Hãy dùng trang chi tiết để xem thông tin, tránh làm sai hình học đang lưu.
+              </div>
+            ) : null}
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Loại vùng</Label>
+                <div className="rounded-xl border bg-muted/10 px-3 py-3">
+                  <p className="text-sm font-medium">{typeLabel}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Luồng tạo và chỉnh nhanh ở đây chỉ hỗ trợ geofence hình tròn để đồng bộ đúng với
+                    phần map và logic bán kính theo km.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="geofence-trigger">Kích hoạt cảnh báo</Label>
+                <Select
+                  value={form.triggerOn}
+                  onValueChange={(value) => setForm((state) => ({ ...state, triggerOn: value }))}
+                >
+                  <SelectTrigger id="geofence-trigger">
+                    <SelectValue placeholder="Chọn kiểu kích hoạt" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="enter">Khi đi vào</SelectItem>
+                    <SelectItem value="exit">Khi đi ra</SelectItem>
+                    <SelectItem value="both">Cả hai chiều</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -133,35 +187,48 @@ export const GeofenceForm = ({
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-3 rounded-2xl border bg-muted/10 p-4">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <Label htmlFor="geofence-radius">Bán kính ưu tiên (km)</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Ưu tiên nhập km để đồng bộ với thông tin vận hành.
+                  </p>
+                </div>
+                <p className="text-sm font-medium">{radiusLabel}</p>
+              </div>
+
+              <Input
+                id="geofence-radius"
+                type="number"
+                inputMode="decimal"
+                min={1}
+                value={form.radiusKm}
+                onChange={(event) => setForm((state) => ({ ...state, radiusKm: event.target.value }))}
+              />
+
               <div className="space-y-2">
-                <Label htmlFor="geofence-radius">Bán kính (m)</Label>
-                <Input
-                  id="geofence-radius"
-                  type="number"
-                  inputMode="numeric"
-                  value={form.radiusMeters}
-                  onChange={(event) =>
-                    setForm((state) => ({ ...state, radiusMeters: event.target.value }))
+                <Slider
+                  value={[sliderRadiusKm]}
+                  min={1}
+                  max={500}
+                  step={1}
+                  onValueChange={(value) =>
+                    setForm((state) => ({ ...state, radiusKm: String(value[0] ?? 1) }))
                   }
                 />
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>1 km</span>
+                  <span>{isBeyondSlider ? '500 km+' : `${sliderRadiusKm} km`}</span>
+                  <span>500 km</span>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="geofence-trigger">Kích hoạt cảnh báo</Label>
-                <Select
-                  value={form.triggerOn}
-                  onValueChange={(value) => setForm((state) => ({ ...state, triggerOn: value }))}
-                >
-                  <SelectTrigger id="geofence-trigger">
-                    <SelectValue placeholder="Chọn kiểu kích hoạt" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="enter">Khi đi vào</SelectItem>
-                    <SelectItem value="exit">Khi đi ra</SelectItem>
-                    <SelectItem value="both">Cả hai chiều</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+
+              {isBeyondSlider ? (
+                <p className="text-xs text-muted-foreground">
+                  Giá trị hiện tại vượt vùng kéo tối ưu. Hệ thống vẫn lưu bán kính {radiusLabel}.
+                </p>
+              ) : null}
             </div>
 
             <div className="space-y-2">
@@ -180,7 +247,7 @@ export const GeofenceForm = ({
           <GeofenceMapEditor
             lat={lat}
             lon={lon}
-            radius={radius}
+            radius={radiusMeters}
             onCenterChange={(latitude, longitude) =>
               setForm((state) => ({
                 ...state,
@@ -194,8 +261,16 @@ export const GeofenceForm = ({
           <Button variant="outline" disabled={isPending} onClick={() => onOpenChange(false)}>
             Hủy
           </Button>
-          <Button disabled={isPending} onClick={() => onSubmit(form)}>
-            Lưu vùng giám sát
+          <Button
+            disabled={isPending || !isQuickEditSupported}
+            onClick={() =>
+              onSubmit({
+                ...form,
+                radiusMeters: String(radiusMeters),
+              })
+            }
+          >
+            {isQuickEditSupported ? 'Lưu vùng giám sát' : 'Chỉ hỗ trợ geofence hình tròn'}
           </Button>
         </DialogFooter>
       </DialogContent>

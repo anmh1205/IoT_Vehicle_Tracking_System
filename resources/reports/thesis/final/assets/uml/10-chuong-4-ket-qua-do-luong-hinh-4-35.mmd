@@ -1,12 +1,15 @@
 flowchart TB
-    Header["Trang geofence"]
+    Page["Trang quản lý vùng cho phép"]
+    Header["Thanh đầu quản lý vùng"]
 
-    subgraph Screen["Man hinh canh bao"]
+    subgraph Screen["Màn hình cảnh báo"]
         direction LR
-        Map["Ban do + vung geofence"]
-        Alert["Canh bao dang mo"]
+        Map["Bản đồ + vùng cho phép"]
+        Alert["Cảnh báo đang mở"]
     end
 
-    History["Danh sach canh bao / lich su xu ly"]
+    History["Danh sách cảnh báo / lịch sử xử lý"]
 
-    Header --> Screen --> History
+    Page --> Header
+    Page --> Screen
+    Page --> History

@@ -1,8 +1,13 @@
 stateDiagram-v2
+    state "Khởi động" as Boot
+    state "Lái xe" as Driving
+    state "Đỗ xe" as Parking
+    state "Cảnh báo" as Alert
+
     [*] --> Boot
     Boot --> Driving: Bật IGN
     Boot --> Parking: Tắt IGN
     Parking --> Alert: IMU rung
-    Alert --> Parking: Xử lý xong
-    Alert --> Driving: Xe tiếp tục chạy
+    Alert --> Parking: Đã xử lý
+    Alert --> Driving: Tiếp tục chạy
     Driving --> Parking: Tắt máy

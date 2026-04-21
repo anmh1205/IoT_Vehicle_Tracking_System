@@ -1,19 +1,25 @@
 flowchart TB
-    Device["Tracker"] --> Bridge["MQTT Bridge"]
+    Device["Thiết bị theo dõi"] -->|Rawdata / status / events / firmware| EMQX["EMQX (broker MQTT)"]
+    EMQX -->|Device topics| Bridge["MQTT Bridge"]
 
-    subgraph DataPlane["Tầng lưu trữ và quan sát"]
+    subgraph DataPlane["Tầng lưu trữ<br/>Và quan sát"]
         direction TB
-        PG["PostgreSQL<br/>Dữ liệu nghiệp vụ"]
-        VM["VictoriaMetrics<br/>Dữ liệu đo"]
-        VL["VictoriaLogs<br/>Nhật ký"]
+        PostgreSQLNode["PostgreSQL<br/>Dữ liệu nghiệp vụ"]
+        VictoriaMetricsNode["VictoriaMetrics<br/>Dữ liệu đo"]
+        VictoriaLogsNode["VictoriaLogs<br/>Nhật ký"]
     end
 
-    Bridge --> PG
-    Bridge --> VM
-    Bridge --> VL
+    Bridge --> PostgreSQLNode
+    Bridge --> VictoriaMetricsNode
+    Bridge --> VictoriaLogsNode
+    Bridge -->|Publish internal/events/#| EMQX
 
-    API["Backend API"] --> PG
-    API --> VM
-    Dashboard["Dashboard"] --> API
-    Dashboard --> Socket["Socket.IO"]
-    Socket --> Bridge
+    PostgreSQLNode --> API["API phía máy chủ"]
+    VictoriaMetricsNode --> API
+    EMQX -. realtime events .-> API
+    Dashboard["Giao diện web"] -->|REST requests| API
+    API -->|REST responses| Dashboard
+    API --> Socket["Socket.IO"]
+    Socket --> Dashboard
+    API -->|Publish commands| EMQX
+    EMQX -->|Commands| Device

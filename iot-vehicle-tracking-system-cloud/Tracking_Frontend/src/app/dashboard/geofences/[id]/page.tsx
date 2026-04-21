@@ -44,6 +44,7 @@ const VIOLATION_SEVERITY_VARIANTS: Record<
   medium: 'default',
   low: 'secondary',
 };
+const LOOKUP_LIMIT = 100;
 
 const hasValidCenter = (lat: number | null | undefined, lon: number | null | undefined) =>
   lat !== null &&
@@ -52,6 +53,16 @@ const hasValidCenter = (lat: number | null | undefined, lon: number | null | und
   lon !== undefined &&
   Number.isFinite(lat) &&
   Number.isFinite(lon);
+
+const formatRadiusKm = (radiusMeters: number | null | undefined) => {
+  if (!radiusMeters || !Number.isFinite(radiusMeters)) {
+    return '0 km';
+  }
+
+  return `${(radiusMeters / 1000).toLocaleString('vi-VN', {
+    maximumFractionDigits: radiusMeters % 1000 === 0 ? 0 : 1,
+  })} km`;
+};
 
 const GeofenceDetailPage = ({
   params,
@@ -77,7 +88,7 @@ const GeofenceDetailPage = ({
 
   const policyViolationsQuery = useQuery({
     queryKey: ['geofence-policy-violations', geofenceId],
-    queryFn: () => geofenceServices.getPolicyViolations({ page: 1, limit: 200 }),
+    queryFn: () => geofenceServices.getPolicyViolations({ page: 1, limit: LOOKUP_LIMIT }),
     enabled: query.isSuccess,
   });
 
@@ -183,7 +194,7 @@ const GeofenceDetailPage = ({
               </div>
               <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
                 <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Bán kính</p>
-                <p className="mt-1 text-sm font-medium">{detail.radiusMeters ?? 0} m</p>
+                <p className="mt-1 text-sm font-medium">{formatRadiusKm(detail.radiusMeters)}</p>
               </div>
               <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
                 <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Policy đang mở</p>
@@ -198,7 +209,7 @@ const GeofenceDetailPage = ({
 
           {missingSignals.length > 0 ? (
             <div className="rounded-2xl border border-dashed px-4 py-3 text-sm text-muted-foreground">
-              {missingSignals.join(' • ')}. Nên hoàn thiện để vùng giám sát hoạt động đủ ngữ cảnh.
+              {missingSignals.join(' • ')}. Nên hoàn thiện để vùng giám sát hoạt động đủ thông tin.
             </div>
           ) : null}
         </CardContent>

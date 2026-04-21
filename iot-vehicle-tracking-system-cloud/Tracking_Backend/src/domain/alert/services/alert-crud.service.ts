@@ -9,6 +9,9 @@ const sanitizeAlert = (a: Alert): AlertPublic => ({
   id: a.id,
   vehicleId: a.vehicle_id,
   deviceId: a.device_id,
+  vehiclePlate: a.vehicle_plate ?? null,
+  customerName: a.customer_name ?? null,
+  deviceName: a.device_name ?? null,
   tripId: a.trip_id,
   geofenceId: a.geofence_id,
   alertType: a.alert_type,
@@ -46,7 +49,7 @@ export const createAlert = async (input: CreateAlertInput): Promise<AlertPublic>
 
   publishEvent('alert:new', {
     id: alert.id,
-    vehicle_id: alert.vehicle_id ? Number(alert.vehicle_id) : undefined,
+    vehicle_id: alert.vehicle_id ?? undefined,
     device_id: alert.device_id ?? undefined,
     alert_type: alert.alert_type,
     severity: alert.severity,

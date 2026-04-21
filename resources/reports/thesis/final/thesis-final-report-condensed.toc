@@ -1,0 +1,159 @@
+\contentsline {section}{NHẬN XÉT CỦA GIẢNG VIÊN HƯỚNG DẪN}{i}{section*.1}%
+\contentsline {section}{NHẬN XÉT CỦA GIẢNG VIÊN PHẢN BIỆN}{iii}{section*.2}%
+\contentsline {section}{BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP}{iv}{section*.3}%
+\contentsline {section}{GIẢI TRÌNH CÁC CHỈNH SỬA}{v}{section*.4}%
+\contentsline {section}{LỜI CAM ĐOAN}{vi}{section*.5}%
+\contentsline {section}{TÓM TẮT ĐỒ ÁN TỐT NGHIỆP - ABSTRACT}{vii}{section*.6}%
+\contentsline {section}{LỜI CẢM ƠN - ACKNOWLEDGEMENTS}{ix}{section*.7}%
+\contentsline {section}{MỤC LỤC - TABLE OF CONTENT}{x}{section*.8}%
+\contentsline {section}{DANH MỤC BẢNG - LIST OF TABLES}{xv}{section*.9}%
+\contentsline {section}{DANH MỤC HÌNH ẢNH VÀ ĐỒ THỊ - LIST OF PICTURES AND GRAPHS}{xvii}{section*.10}%
+\contentsline {section}{DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATION}{xviii}{section*.11}%
+\contentsline {section}{CHƯƠNG 1. GIỚI THIỆU DỰ ÁN -- PROJECT OVERVIEW}{1}{section*.12}%
+\contentsline {subsection}{1.1. Đặt vấn đề / Bối cảnh của dự án}{1}{subsection*.13}%
+\contentsline {subsubsection}{1.1.1. Bối cảnh thị trường cho thuê xe tự lái tại Việt Nam}{1}{subsubsection*.14}%
+\contentsline {subsubsection}{1.1.2. Thách thức kỹ thuật}{2}{subsubsection*.15}%
+\contentsline {subsubsection}{1.1.3. Động lực thực hiện dự án}{2}{subsubsection*.17}%
+\contentsline {subsection}{1.2. Mục tiêu và phạm vi của dự án}{3}{subsection*.18}%
+\contentsline {subsubsection}{1.2.1. Mục tiêu tổng quát}{3}{subsubsection*.19}%
+\contentsline {subsubsection}{1.2.2. Phạm vi dự án}{4}{subsubsection*.20}%
+\contentsline {subsection}{1.3. Các tiêu chí cần đạt được của dự án}{6}{subsection*.21}%
+\contentsline {subsubsection}{1.3.1. Tiêu chí phần cứng}{6}{subsubsection*.22}%
+\contentsline {subsubsection}{1.3.2. Tiêu chí firmware}{6}{subsubsection*.23}%
+\contentsline {subsubsection}{1.3.3. Tiêu chí máy chủ và dịch vụ xử lý dữ liệu}{7}{subsubsection*.24}%
+\contentsline {subsubsection}{1.3.4. Tiêu chí giao diện web}{7}{subsubsection*.25}%
+\contentsline {subsection}{1.4. Phương pháp tiếp cận thiết kế kỹ thuật}{8}{subsection*.26}%
+\contentsline {subsubsection}{1.4.1. Phương pháp luận tổng thể}{8}{subsubsection*.27}%
+\contentsline {subsubsection}{1.4.2. Kiến trúc hệ thống}{9}{subsubsection*.29}%
+\contentsline {subsubsection}{1.4.3. Chiến lược quản lý năng lượng}{12}{subsubsection*.31}%
+\contentsline {subsubsection}{1.4.4. Công nghệ sử dụng}{13}{subsubsection*.33}%
+\contentsline {subsection}{1.5. Kết quả và khuyến nghị}{15}{subsection*.34}%
+\contentsline {subsubsection}{1.5.1. Kết quả đạt được}{15}{subsubsection*.35}%
+\contentsline {subsubsection}{1.5.2. Khuyến nghị và hướng phát triển}{16}{subsubsection*.36}%
+\contentsline {section}{CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT}{18}{section*.38}%
+\contentsline {subsection}{2.1. Mô tả vấn đề -- Problem statement}{18}{subsection*.39}%
+\contentsline {subsubsection}{2.1.1. Bối cảnh thực tế}{18}{subsubsection*.40}%
+\contentsline {subsubsection}{2.1.2. Xác định vấn đề kỹ thuật}{18}{subsubsection*.41}%
+\contentsline {subsubsection}{2.1.3. Mục tiêu kỹ thuật}{19}{subsubsection*.42}%
+\contentsline {subsection}{2.2. Bối cảnh và cơ sở kỹ thuật -- Background and Technical reviews}{20}{subsection*.43}%
+\contentsline {subsubsection}{2.2.1. Tổng quan về hệ thống IoT trong giám sát phương tiện}{20}{subsubsection*.44}%
+\contentsline {subsubsection}{2.2.2. Các giải pháp giám sát phương tiện hiện có}{21}{subsubsection*.45}%
+\contentsline {subsubsection}{2.2.3. So sánh giao thức truyền thông IoT}{21}{subsubsection*.46}%
+\contentsline {subsubsection}{2.2.4. So sánh vi điều khiển (MCU)}{23}{subsubsection*.47}%
+\contentsline {subsubsection}{2.2.5. So sánh cơ sở dữ liệu}{24}{subsubsection*.48}%
+\contentsline {subsection}{2.3. Yêu cầu kỹ thuật và các tiêu chuẩn thiết kế -- Design criteria and Constraints}{27}{subsection*.50}%
+\contentsline {subsubsection}{2.3.1. Yêu cầu chức năng}{27}{subsubsection*.51}%
+\contentsline {subsubsection}{2.3.2. Yêu cầu phi chức năng}{28}{subsubsection*.52}%
+\contentsline {subsubsection}{2.3.3. Ràng buộc thiết kế}{29}{subsubsection*.53}%
+\contentsline {subsubsection}{2.3.4. Tiêu chuẩn thiết kế áp dụng}{29}{subsubsection*.54}%
+\contentsline {subsection}{2.4. Yêu cầu từ các bên liên quan -- Stakeholder requirements}{30}{subsection*.55}%
+\contentsline {subsubsection}{2.4.1. Xác định các bên liên quan}{30}{subsubsection*.56}%
+\contentsline {subsubsection}{2.4.2. Ma trận yêu cầu các bên liên quan}{30}{subsubsection*.57}%
+\contentsline {subsubsection}{2.4.3. Phân tích chi tiết yêu cầu}{31}{subsubsection*.58}%
+\contentsline {subsubsection}{2.4.4. Ma trận truy xuất yêu cầu - chức năng}{32}{subsubsection*.59}%
+\contentsline {section}{CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ -- DESIGN SOLUTIONS}{34}{section*.60}%
+\contentsline {subsection}{3.1. Phân tích và đề xuất giải pháp phần cứng -- Hardware analysis and solution}{34}{subsection*.61}%
+\contentsline {subsubsection}{3.1.1. Phân tích và lựa chọn phần cứng}{34}{subsubsection*.62}%
+\contentsline {subsubsection}{3.1.2. Giải pháp phần cứng}{35}{subsubsection*.63}%
+\contentsline {subsection}{3.2. Phân tích và đề xuất giải pháp Firmware -- Firmware analysis and solution}{35}{subsection*.64}%
+\contentsline {subsubsection}{3.2.1. Phân tích và lựa chọn giải pháp Firmware}{35}{subsubsection*.65}%
+\contentsline {subsubsection}{3.2.2. Giải pháp Firmware}{35}{subsubsection*.66}%
+\contentsline {subsection}{3.3. Phân tích và đề xuất kiến trúc máy chủ và xử lý dữ liệu -- Server and data-processing architecture}{36}{subsection*.67}%
+\contentsline {subsubsection}{3.3.1. Phân tích và lựa chọn kiến trúc máy chủ}{36}{subsubsection*.68}%
+\contentsline {subsubsection}{3.3.2. Giải pháp dịch vụ máy chủ và xử lý nghiệp vụ}{36}{subsubsection*.69}%
+\contentsline {subsection}{3.4. Phân tích và đề xuất công nghệ giao diện web -- Web interface analysis and solution}{37}{subsection*.70}%
+\contentsline {subsubsection}{3.4.1. Phân tích và lựa chọn công nghệ giao diện web}{37}{subsubsection*.71}%
+\contentsline {subsubsection}{3.4.2. Giải pháp giao diện web}{37}{subsubsection*.72}%
+\contentsline {subsection}{3.5. Phân tích, đánh giá và lựa chọn phương án khả thi -- Analysis, Evaluation and Selection}{37}{subsection*.73}%
+\contentsline {subsection}{3.6. Tối ưu phương án thiết kế -- The optimal solution}{38}{subsection*.74}%
+\contentsline {section}{CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ -- IMPLEMENTATION AND RESULTS}{39}{section*.75}%
+\contentsline {subsection}{4.1. Thiết kế chi tiết giải pháp -- Detailed design solution}{39}{subsection*.76}%
+\contentsline {subsubsection}{4.1.1. Thiết kế chi tiết phần cứng}{39}{subsubsection*.77}%
+\contentsline {subsubsection}{4.1.2. Triển khai firmware, hạ tầng máy chủ và giao diện điều khiển}{39}{subsubsection*.78}%
+\contentsline {subsection}{4.2. Chế tạo và lắp ráp hệ thống -- Manufacture and Assembly}{40}{subsection*.79}%
+\contentsline {subsection}{4.3. Đo lường và kết quả -- Measurements and Results}{40}{subsection*.80}%
+\contentsline {subsubsection}{4.3.1. Thiết lập môi trường thử nghiệm}{40}{subsubsection*.81}%
+\contentsline {subsubsection}{4.3.2. Kết quả kiểm thử phần cứng}{40}{subsubsection*.82}%
+\contentsline {subsubsection}{4.3.3. Kết quả kiểm thử firmware}{41}{subsubsection*.83}%
+\contentsline {subsubsection}{4.3.4. Kết quả kiểm thử hệ thống máy chủ}{41}{subsubsection*.84}%
+\contentsline {subsubsection}{4.3.5. Kiểm thử tích hợp toàn hệ thống (kiểm thử toàn tuyến)}{42}{subsubsection*.85}%
+\contentsline {subsubsection}{4.3.6. Tổng hợp và so sánh với chỉ tiêu thiết kế}{42}{subsubsection*.86}%
+\contentsline {subsubsection}{4.3.7. Đánh giá độ ổn định vận hành thực tế}{43}{subsubsection*.87}%
+\contentsline {section}{CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ -- EVALUATION AND RECOMMENDATIONS}{44}{section*.88}%
+\contentsline {subsection}{5.1. Đánh giá hiệu năng}{44}{subsection*.89}%
+\contentsline {subsubsection}{5.1.1. Đánh giá hiệu năng phần cứng}{44}{subsubsection*.90}%
+\contentsline {subsubsection}{5.1.2. Đánh giá hiệu năng firmware}{44}{subsubsection*.91}%
+\contentsline {subsubsection}{5.1.3. Đánh giá hiệu năng hệ thống máy chủ và dịch vụ}{44}{subsubsection*.92}%
+\contentsline {subsubsection}{5.1.4. Đánh giá hiệu năng giao diện người dùng (giao diện web)}{44}{subsubsection*.93}%
+\contentsline {subsection}{5.2. Đánh giá kinh tế và môi trường}{45}{subsection*.94}%
+\contentsline {subsubsection}{5.2.1. Phân tích chi phí phần cứng}{45}{subsubsection*.95}%
+\contentsline {subsubsection}{5.2.2. Phân tích chi phí hạ tầng đám mây}{45}{subsubsection*.96}%
+\contentsline {subsubsection}{5.2.3. Lợi thế từ công nghệ mã nguồn mở}{45}{subsubsection*.97}%
+\contentsline {subsubsection}{5.2.4. Đánh giá tác động môi trường}{45}{subsubsection*.98}%
+\contentsline {subsection}{5.3. Đánh giá rủi ro và biện pháp giảm thiểu}{45}{subsection*.99}%
+\contentsline {subsubsection}{5.3.1. Ma trận rủi ro}{45}{subsubsection*.100}%
+\contentsline {subsubsection}{5.3.2. Phân tích chi tiết các rủi ro chính}{45}{subsubsection*.101}%
+\contentsline {subsubsection}{5.3.3. Tổng hợp mức độ rủi ro}{46}{subsubsection*.102}%
+\contentsline {subsection}{5.4. Khuyến nghị cho tương lai}{46}{subsection*.103}%
+\contentsline {subsubsection}{5.4.1. Giai đoạn 2: Mở rộng tính năng (giai đoạn 2)}{46}{subsubsection*.104}%
+\contentsline {subsubsection}{5.4.2. Ứng dụng trí tuệ nhân tạo và học máy}{46}{subsubsection*.105}%
+\contentsline {subsubsection}{5.4.3. Ứng dụng di động (Mobile Application)}{46}{subsubsection*.106}%
+\contentsline {subsubsection}{5.4.4. Tính toán biên (Edge Computing)}{46}{subsubsection*.107}%
+\contentsline {subsubsection}{5.4.5. Triển khai vận hành thực tế}{46}{subsubsection*.108}%
+\contentsline {subsubsection}{5.4.6. Phần cứng phiên bản 2 (Hardware v2)}{47}{subsubsection*.109}%
+\contentsline {subsubsection}{5.4.7. Tóm tắt lộ trình phát triển}{47}{subsubsection*.110}%
+\contentsline {section}{CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM -- REFLECTION AND LESSONS LEARNED}{48}{section*.111}%
+\contentsline {subsection}{6.1. Ứng dụng kiến thức kỹ thuật -- Application of prior coursework}{48}{subsection*.112}%
+\contentsline {subsubsection}{6.1.1. Vi xử lý và Vi điều khiển}{48}{subsubsection*.113}%
+\contentsline {subsubsection}{6.1.2. Mạng máy tính và IoT}{48}{subsubsection*.114}%
+\contentsline {subsubsection}{6.1.3. Cơ sở dữ liệu}{48}{subsubsection*.115}%
+\contentsline {subsubsection}{6.1.4. Lập trình hướng đối tượng}{48}{subsubsection*.116}%
+\contentsline {subsubsection}{6.1.5. Điện tử số và Analog}{48}{subsubsection*.117}%
+\contentsline {subsubsection}{6.1.6. Kỹ thuật phần mềm}{48}{subsubsection*.118}%
+\contentsline {subsection}{6.2. Giải quyết các vấn đề kỹ thuật phức tạp -- Complex engineering problems}{48}{subsection*.119}%
+\contentsline {subsubsection}{6.2.1. Vấn đề 1: Phân tích bản tin OBD2 đa khung qua BLE}{48}{subsubsection*.120}%
+\contentsline {subsubsection}{6.2.2. Vấn đề 2: Đường ống dữ liệu thời gian thực với đảm bảo phân phối}{49}{subsubsection*.121}%
+\contentsline {subsubsection}{6.2.3. Vấn đề 3: Quản lý năng lượng với nhiều nguồn cấp}{49}{subsubsection*.122}%
+\contentsline {subsubsection}{6.2.4. Vấn đề 4: Kiến trúc đám mây có khả năng mở rộng cho IoT}{49}{subsubsection*.123}%
+\contentsline {subsection}{6.3. Tác động đạo đức và xã hội -- Ethical and social impacts}{49}{subsection*.124}%
+\contentsline {subsubsection}{6.3.1. Quyền riêng tư và bảo vệ dữ liệu cá nhân}{49}{subsubsection*.125}%
+\contentsline {subsubsection}{6.3.2. An toàn phương tiện và trách nhiệm kỹ thuật}{49}{subsubsection*.126}%
+\contentsline {subsubsection}{6.3.3. Tác động xã hội tích cực}{49}{subsubsection*.127}%
+\contentsline {subsubsection}{6.3.4. Những lo ngại cần xem xét}{49}{subsubsection*.128}%
+\contentsline {subsection}{6.4. Tổng kết và bài học kinh nghiệm -- Reflection and Lessons Learned}{49}{subsection*.129}%
+\contentsline {subsubsection}{6.4.1. Tầm quan trọng của thiết kế kiến trúc trước khi lập trình}{49}{subsubsection*.130}%
+\contentsline {subsubsection}{6.4.2. Độ phức tạp của hệ thống IoT nhiều tầng}{50}{subsubsection*.131}%
+\contentsline {subsubsection}{6.4.3. Sức mạnh của hệ sinh thái mã nguồn mở}{50}{subsubsection*.132}%
+\contentsline {subsubsection}{6.4.4. Kiểm thử ở mọi tầng là bắt buộc}{50}{subsubsection*.133}%
+\contentsline {subsubsection}{6.4.5. Tổng kết cá nhân}{50}{subsubsection*.134}%
+\contentsline {section}{TÀI LIỆU TRÍCH DẪN - REFERENCES}{51}{section*.135}%
+\contentsline {subsection}{{[}A{]} Tài liệu tiếng Việt}{51}{subsection*.136}%
+\contentsline {subsection}{{[}B{]} Tài liệu tiếng Anh (Books \& Papers)}{51}{subsection*.137}%
+\contentsline {subsection}{{[}C{]} Tài liệu kỹ thuật (Datasheets \& Technical Documents)}{52}{subsection*.138}%
+\contentsline {subsection}{{[}D{]} Tài liệu trực tuyến (Online Resources)}{53}{subsection*.139}%
+\contentsline {section}{PHỤ LỤC - APPENDICES}{57}{section*.140}%
+\contentsline {section}{PHỤ LỤC 1: BÁO CÁO TÀI CHÍNH - FINANCE REPORT}{58}{section*.141}%
+\contentsline {subsection}{1.1. Bảng kê chi phí linh kiện (Bill of Materials - BOM)}{58}{subsection*.142}%
+\contentsline {subsection}{1.2. Chi phí hạ tầng đám mây (ước tính hàng tháng)}{58}{subsection*.143}%
+\contentsline {subsection}{1.3. Tổng hợp chi phí dự án}{58}{subsection*.144}%
+\contentsline {section}{PHỤ LỤC 2: CÁC TIÊU CHUẨN THIẾT KẾ - STANDARDS}{60}{section*.145}%
+\contentsline {subsection}{2.1. Tiêu chuẩn OBD2 (SAE J1979 / ISO 15031--5)}{60}{subsection*.146}%
+\contentsline {subsection}{2.2. MQTT 3.1.1 trong triển khai thiết bị}{60}{subsection*.147}%
+\contentsline {subsection}{2.3. Bảo mật thông tin (ISO 27001 - tham khảo)}{60}{subsection*.148}%
+\contentsline {subsection}{2.4. Thiết kế REST API (RFC 7231 và best practices)}{60}{subsection*.149}%
+\contentsline {subsection}{2.5. Ma trận kiểm soát tuân thủ chuẩn theo thành phần}{60}{subsection*.150}%
+\contentsline {section}{PHỤ LỤC 3: KẾ HOẠCH THỰC HIỆN - ASSIGNMENT AND TIMELINES}{63}{section*.151}%
+\contentsline {subsection}{3.1. Phân chia giai đoạn dự án}{63}{subsection*.152}%
+\contentsline {subsection}{3.2. Kế hoạch thực hiện dự án theo giai đoạn}{63}{subsection*.153}%
+\contentsline {subsection}{3.3. Chi tiết công việc theo giai đoạn}{63}{subsection*.154}%
+\contentsline {subsection}{3.4. Kế hoạch thực hiện theo tuần (24 tuần)}{63}{subsection*.155}%
+\contentsline {section}{PHỤ LỤC 4: TÀI LIỆU BỔ TRỢ - SUPPORTING MATERIALS}{66}{section*.156}%
+\contentsline {subsection}{4.1. Kho mã nguồn của dự án}{66}{subsection*.157}%
+\contentsline {subsection}{4.2. Tham chiếu cơ sở dữ liệu (Lược đồ cơ sở dữ liệu)}{66}{subsection*.158}%
+\contentsline {subsection}{4.3. Tài liệu API (API Documentation)}{66}{subsection*.159}%
+\contentsline {subsection}{4.4. Tài liệu cấu hình môi trường (Environment Configuration)}{66}{subsection*.160}%
+\contentsline {subsection}{4.5. Hướng dẫn cài đặt và chạy hệ thống}{66}{subsection*.161}%
+\contentsline {subsection}{4.6. Checklist vận hành chi tiết theo ca trực}{66}{subsection*.162}%
+\contentsline {subsection}{4.7. Danh mục API và luồng tích hợp vận hành (rút gọn)}{68}{subsection*.163}%
+\contentsline {subsection}{4.8. Quy trình xử lý rút gọn cho các kịch bản sự cố điển hình}{70}{subsection*.164}%
+\contentsline {subsection}{4.9. Ma trận kiểm thử nghiệm thu theo luồng nghiệp vụ chính}{73}{subsection*.165}%

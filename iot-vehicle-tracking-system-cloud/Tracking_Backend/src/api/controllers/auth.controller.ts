@@ -140,11 +140,11 @@ export const updateNotifications = asyncHandler(
       );
     }
 
-    const user = await userManagementService.updateNotificationPreferences(
+    const preferences = await userManagementService.updateNotificationPreferences(
       req.user.id,
       parsed.data,
     );
-    sendOk(res, user);
+    sendOk(res, preferences);
   },
 );
 
@@ -154,13 +154,7 @@ export const getNotificationSettings = asyncHandler(
       throw createUnauthorizedError('Not authenticated');
     }
 
-    const user = await userRepo.findById(req.user.id);
-    const preferences = (user?.preferences as Record<string, unknown> | undefined)
-      ?.notifications ?? {
-      emailAlerts: true,
-      pushAlerts: true,
-      alertTypes: ['critical', 'high'],
-    };
+    const preferences = await userManagementService.getNotificationPreferences(req.user.id);
     sendOk(res, { preferences });
   },
 );

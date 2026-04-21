@@ -6,20 +6,90 @@ import type {
   DeviceTelemetryRow,
   DeviceTrackingMetric,
 } from '@/features/devices/types';
+import {
+  haversineKm,
+  selectLatestContiguousRouteRows,
+} from '@/features/devices/components/device-detail-modal/telemetry-insights';
 
-export type TrackingTelemetryPeriod = '6h' | '24h' | '7d';
+export type TrackingTelemetryPeriod = '6h' | '24h' | '7d' | '30d' | '90d' | 'custom';
 
-const TRACKING_METRICS: DeviceTrackingMetric[] = ['lat', 'lon', 'spd', 'bb', 'bt', 'err', 'vib'];
+export interface TrackingTelemetryCustomRange {
+  from: string;
+  to: string;
+}
 
-const toPeriodStart = (period: TrackingTelemetryPeriod): string => {
+const TRACKING_METRICS: DeviceTrackingMetric[] = [
+  'lat',
+  'lon',
+  'spd',
+  'bb',
+  'bt',
+  'temp',
+  'err',
+  'vib',
+];
+
+const toDateInput = (value: Date) => value.toISOString().slice(0, 10);
+
+const createDefaultCustomRange = (): TrackingTelemetryCustomRange => {
+  const today = new Date();
+  const from = new Date(today);
+  from.setDate(today.getDate() - 6);
+
+  return {
+    from: toDateInput(from),
+    to: toDateInput(today),
+  };
+};
+
+const toBoundaryIso = (value: string, boundary: 'start' | 'end') => {
+  const time = boundary === 'start' ? '00:00:00.000' : '23:59:59.999';
+  return new Date(`${value}T${time}`).toISOString();
+};
+
+const normalizeCustomRange = (
+  range: TrackingTelemetryCustomRange,
+): TrackingTelemetryCustomRange => {
+  if (!range.from || !range.to) {
+    return createDefaultCustomRange();
+  }
+
+  return range.from <= range.to
+    ? range
+    : {
+        from: range.to,
+        to: range.from,
+      };
+};
+
+const resolveRange = (
+  period: TrackingTelemetryPeriod,
+  customRange: TrackingTelemetryCustomRange,
+): { from: string; to: string } => {
+  if (period === 'custom') {
+    const normalized = normalizeCustomRange(customRange);
+    return {
+      from: toBoundaryIso(normalized.from, 'start'),
+      to: toBoundaryIso(normalized.to, 'end'),
+    };
+  }
+
   const now = Date.now();
   const offsetMs =
     period === '6h'
       ? 6 * 60 * 60 * 1000
       : period === '24h'
         ? 24 * 60 * 60 * 1000
-        : 7 * 24 * 60 * 60 * 1000;
-  return new Date(now - offsetMs).toISOString();
+        : period === '7d'
+          ? 7 * 24 * 60 * 60 * 1000
+          : period === '30d'
+            ? 30 * 24 * 60 * 60 * 1000
+            : 90 * 24 * 60 * 60 * 1000;
+
+  return {
+    from: new Date(now - offsetMs).toISOString(),
+    to: new Date(now).toISOString(),
+  };
 };
 
 const hasValidCoordinates = (latitude: number | null, longitude: number | null) =>
@@ -52,29 +122,16 @@ const toTelemetryPoints = (payload: any): DeviceTelemetryPoint[] => {
     );
 };
 
-const toRadians = (value: number) => (value * Math.PI) / 180;
-
-const haversineKm = (from: [number, number], to: [number, number]): number => {
-  const earthRadiusKm = 6371;
-  const dLat = toRadians(to[0] - from[0]);
-  const dLon = toRadians(to[1] - from[1]);
-  const lat1 = toRadians(from[0]);
-  const lat2 = toRadians(to[0]);
-
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-
-  return 2 * earthRadiusKm * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
-
 const emptyRowAt = (timestamp: string): DeviceTelemetryRow => ({
   timestamp,
   latitude: null,
   longitude: null,
   speed: null,
   battery: null,
+  deviceBattery: null,
+  vehicleBattery: null,
   temperature: null,
+  engineTemperature: null,
   errorCode: null,
   vibration: null,
 });
@@ -104,9 +161,14 @@ const buildTelemetryRows = (
     ensureRow(point.timestamp).speed = point.value;
   }
   for (const point of metricSeries.bb) {
+    ensureRow(point.timestamp).deviceBattery = point.value;
     ensureRow(point.timestamp).battery = point.value;
   }
   for (const point of metricSeries.bt) {
+    ensureRow(point.timestamp).vehicleBattery = point.value;
+  }
+  for (const point of metricSeries.temp) {
+    ensureRow(point.timestamp).engineTemperature = point.value;
     ensureRow(point.timestamp).temperature = point.value;
   }
   for (const point of metricSeries.err) {
@@ -123,15 +185,21 @@ const buildTelemetryRows = (
 
 export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
   const [period, setPeriod] = useState<TrackingTelemetryPeriod>('24h');
-  const from = toPeriodStart(period);
-  const to = new Date().toISOString();
+  const [customRange, setCustomRange] = useState<TrackingTelemetryCustomRange>(
+    createDefaultCustomRange,
+  );
+  const range = useMemo(() => resolveRange(period, customRange), [customRange, period]);
 
   const query = useQuery({
-    queryKey: ['device-tracking-telemetry', deviceId, period],
+    queryKey: ['device-tracking-telemetry', deviceId, period, range.from, range.to],
     queryFn: async () => {
       const responses = await Promise.all(
         TRACKING_METRICS.map((metric) =>
-          deviceDetailServices.getTelemetry(deviceId as number, { metric, from, to }),
+          deviceDetailServices.getTelemetry(deviceId as number, {
+            metric,
+            from: range.from,
+            to: range.to,
+          }),
         ),
       );
 
@@ -146,6 +214,7 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
           spd: [],
           bb: [],
           bt: [],
+          temp: [],
           err: [],
           vib: [],
         } as Record<DeviceTrackingMetric, DeviceTelemetryPoint[]>,
@@ -160,15 +229,21 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
     spd: [],
     bb: [],
     bt: [],
+    temp: [],
     err: [],
     vib: [],
   }), [query.data]);
 
+  const routeRowsAscending = useMemo(
+    () => selectLatestContiguousRouteRows(rowsAscending),
+    [rowsAscending],
+  );
+
   const routePoints = useMemo(() => {
-    return rowsAscending
+    return routeRowsAscending
       .filter((row) => hasValidCoordinates(row.latitude, row.longitude))
       .map((row) => [row.latitude as number, row.longitude as number] as [number, number]);
-  }, [rowsAscending]);
+  }, [routeRowsAscending]);
 
   const distanceKm = useMemo(() => {
     if (routePoints.length < 2) {
@@ -183,7 +258,7 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
   }, [routePoints]);
 
   const { averageSpeed, maxSpeed } = useMemo(() => {
-    const values = rowsAscending
+    const values = routeRowsAscending
       .map((row) => row.speed)
       .filter((value): value is number => value !== null && Number.isFinite(value) && value >= 0);
     if (values.length === 0) {
@@ -195,7 +270,7 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
       averageSpeed: sum / values.length,
       maxSpeed: max,
     };
-  }, [rowsAscending]);
+  }, [routeRowsAscending]);
 
   const latestRow = rowsAscending.at(-1) ?? null;
   const rows = useMemo(() => [...rowsAscending].reverse(), [rowsAscending]);
@@ -210,11 +285,13 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
         spd: [],
         bb: [],
         bt: [],
+        temp: [],
         err: [],
         vib: [],
       } as Record<DeviceTrackingMetric, DeviceTelemetryPoint[]>),
     rows,
     rowsAscending,
+    routeRowsAscending,
     routePoints,
     latestRow,
     distanceKm,
@@ -222,5 +299,7 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
     maxSpeed,
     period,
     onPeriodChange: setPeriod,
+    customRange,
+    onCustomRangeChange: setCustomRange,
   };
 };

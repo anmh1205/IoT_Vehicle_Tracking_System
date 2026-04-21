@@ -1,98 +1,176 @@
 ﻿'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CalendarRange, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, SkipForward } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-import { formatDateTime, formatDuration, formatNumber, formatRelative } from '@/lib/utils/date/format';
+import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-constants';
+import type { DeviceSession, DeviceTelemetryRow } from '@/features/devices/types';
+import { formatDateTime, formatDuration, formatNumber } from '@/lib/utils/date/format';
 import { useDeviceDetailModal } from './modal-context';
 import { RouteReplayMap } from './route-replay-map';
 import {
   buildRouteReplayPoints,
   formatCoordinateLabel,
-  formatSecondsLabel,
-  getFreshnessSeconds,
-  getObservedCadenceSeconds,
-  getTelemetryFreshnessState,
   hasValidTelemetryCoordinates,
+  selectLatestContiguousRouteRows,
 } from './telemetry-insights';
 
 const PERIOD_OPTIONS = [
   { label: '6 giờ', value: '6h' },
   { label: '24 giờ', value: '24h' },
   { label: '7 ngày', value: '7d' },
+  { label: '30 ngày', value: '30d' },
+  { label: '90 ngày', value: '90d' },
 ] as const;
 
-const PLAYBACK_SPEEDS = [
-  { label: '1x', value: 1 },
-  { label: '2x', value: 2 },
-  { label: '4x', value: 4 },
-] as const;
-
-const TELEMETRY_STATE_META = {
-  healthy: { label: 'Đúng nhịp', variant: 'default' as const },
-  warning: { label: 'Bắt đầu trễ', variant: 'secondary' as const },
-  stale: { label: 'Trễ rõ rệt', variant: 'outline' as const },
-  offline: { label: 'Mất tín hiệu', variant: 'destructive' as const },
-  unknown: { label: 'Chưa đủ dữ liệu', variant: 'outline' as const },
+const PERIOD_LABELS: Record<(typeof PERIOD_OPTIONS)[number]['value'], string> = {
+  '6h': '6 giờ',
+  '24h': '24 giờ',
+  '7d': '7 ngày',
+  '30d': '30 ngày',
+  '90d': '90 ngày',
 };
 
-const formatBatteryMetric = (value: number | null | undefined): string => {
-  if (value === null || value === undefined || !Number.isFinite(value)) {
-    return '-';
+const SESSION_BADGE_VARIANTS: Record<
+  string,
+  'default' | 'secondary' | 'destructive' | 'outline'
+> = {
+  running: 'default',
+  completed: 'secondary',
+  disconnected: 'destructive',
+};
+
+const toTimestampMs = (value: string | null | undefined): number | null => {
+  if (!value) {
+    return null;
   }
-  const unit = value > 24 ? '%' : 'V';
-  return `${value.toFixed(1)}${unit}`;
+
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
 };
 
 const toDurationSeconds = (from: string | null | undefined, to: string | null | undefined) => {
-  if (!from || !to) {
-    return 0;
-  }
+  const start = toTimestampMs(from);
+  const end = toTimestampMs(to);
 
-  const start = Date.parse(from);
-  const end = Date.parse(to);
-  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+  if (start === null || end === null || end <= start) {
     return 0;
   }
 
   return Math.round((end - start) / 1000);
 };
 
-const StatTile = ({ label, value, helper }: { label: string; value: string; helper?: string }) => (
-  <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
-    <p className="text-xs text-muted-foreground">{label}</p>
-    <p className="mt-1 text-lg font-semibold">{value}</p>
-    {helper ? <p className="mt-1 text-xs text-muted-foreground">{helper}</p> : null}
-  </div>
-);
+const toShortDateLabel = (value: string) => {
+  if (!value) {
+    return '';
+  }
+
+  const [year, month, day] = value.split('-');
+  return year && month && day ? `${day}/${month}/${year}` : value;
+};
+
+const filterRowsBySession = (rows: DeviceTelemetryRow[], session: DeviceSession | null) => {
+  if (!session) {
+    return rows;
+  }
+
+  const start = toTimestampMs(session.serverSessionStart);
+  const end = toTimestampMs(session.serverSessionEnd);
+
+  if (start === null) {
+    return rows;
+  }
+
+  return rows.filter((row) => {
+    const timestamp = toTimestampMs(row.timestamp);
+    if (timestamp === null || timestamp < start) {
+      return false;
+    }
+
+    if (end !== null && timestamp > end) {
+      return false;
+    }
+
+    return true;
+  });
+};
 
 export const RouteTab = () => {
   const {
-    routePoints,
-    distanceKm,
-    averageSpeed,
-    maxSpeed,
-    latestTrackingRow,
-    positionSnapshot,
+    sessions,
+    sessionsLoading,
+    sessionsHasMore,
+    onSessionsLoadMore,
     trackingRowsAscending,
     trackingPeriod,
     onTrackingPeriodChange,
+    trackingCustomRange,
+    onTrackingCustomRangeChange,
+    positionSnapshot,
     device,
   } = useDeviceDetailModal();
 
-  const replayPoints = useMemo(() => buildRouteReplayPoints(trackingRowsAscending), [trackingRowsAscending]);
+  const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
   const [cursor, setCursor] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackRate, setPlaybackRate] = useState<(typeof PLAYBACK_SPEEDS)[number]['value']>(2);
+  const playbackRate = 2;
+  const [customRangeOpen, setCustomRangeOpen] = useState(false);
+  const [customRangeDraft, setCustomRangeDraft] = useState(trackingCustomRange);
+  const [isReplayPanelCollapsed, setIsReplayPanelCollapsed] = useState(false);
+  const sessionsListRef = useRef<HTMLDivElement | null>(null);
+  const hasStartedReplayRef = useRef(false);
+
+  useEffect(() => {
+    setCustomRangeDraft(trackingCustomRange);
+  }, [trackingCustomRange]);
+
+  const selectedSession = useMemo(
+    () => sessions.find((session) => session.id === selectedSessionId) ?? null,
+    [selectedSessionId, sessions],
+  );
+
+  const telemetryCountBySession = useMemo(() => {
+    const entries: Array<[number, number]> = sessions.map((session) => [
+      session.id,
+      filterRowsBySession(trackingRowsAscending, session).length,
+    ]);
+    return new Map<number, number>(entries);
+  }, [sessions, trackingRowsAscending]);
+
+  useEffect(() => {
+    if (sessions.length === 0) {
+      setSelectedSessionId(null);
+      return;
+    }
+
+    const preferredSessionId =
+      sessions.find((session) => (telemetryCountBySession.get(session.id) ?? 0) > 0)?.id ?? sessions[0].id;
+
+    setSelectedSessionId((current) =>
+      current !== null && sessions.some((session) => session.id === current) ? current : preferredSessionId,
+    );
+  }, [sessions, telemetryCountBySession]);
+
+  const selectedRows = useMemo(
+    () => selectLatestContiguousRouteRows(filterRowsBySession(trackingRowsAscending, selectedSession)),
+    [selectedSession, trackingRowsAscending],
+  );
+  const replayPoints = useMemo(() => buildRouteReplayPoints(selectedRows), [selectedRows]);
+  const pathPoints = useMemo(
+    () => replayPoints.map((point) => [point.latitude, point.longitude] as [number, number]),
+    [replayPoints],
+  );
 
   useEffect(() => {
     const nextCursor = replayPoints.length > 0 ? replayPoints.length - 1 : 0;
+    hasStartedReplayRef.current = false;
     setCursor(nextCursor);
     setIsPlaying(false);
-  }, [replayPoints.length, trackingPeriod]);
+  }, [replayPoints.length, selectedSessionId, trackingPeriod]);
 
   useEffect(() => {
     if (!isPlaying || replayPoints.length <= 1) {
@@ -114,234 +192,392 @@ export const RouteTab = () => {
     };
   }, [isPlaying, playbackRate, replayPoints.length]);
 
+  const maybeLoadMoreSessions = useCallback(() => {
+    const element = sessionsListRef.current;
+    if (!element || !sessionsHasMore || sessionsLoading) {
+      return;
+    }
+
+    const distanceToBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
+    if (distanceToBottom <= 120) {
+      onSessionsLoadMore();
+    }
+  }, [onSessionsLoadMore, sessionsHasMore, sessionsLoading]);
+
+  useEffect(() => {
+    maybeLoadMoreSessions();
+  }, [maybeLoadMoreSessions, sessions.length]);
+
   const currentPoint = replayPoints.length > 0 ? replayPoints[Math.min(cursor, replayPoints.length - 1)] : null;
-  const livePoint =
-    hasValidTelemetryCoordinates(positionSnapshot?.latitude, positionSnapshot?.longitude)
-      ? ([positionSnapshot!.latitude!, positionSnapshot!.longitude!] as [number, number])
-      : hasValidTelemetryCoordinates(device?.latitude, device?.longitude)
-        ? ([device!.latitude!, device!.longitude!] as [number, number])
-        : null;
-
-  const observedCadence = getObservedCadenceSeconds(trackingRowsAscending);
-  const latestTelemetryTimestamp = latestTrackingRow?.timestamp ?? positionSnapshot?.timestamp ?? null;
-  const telemetryFreshness = getFreshnessSeconds(latestTelemetryTimestamp);
-  const telemetryState = TELEMETRY_STATE_META[
-    getTelemetryFreshnessState(telemetryFreshness, device?.requestInterval ?? 60)
-  ];
-
   const firstPoint = replayPoints[0] ?? null;
   const lastPoint = replayPoints.at(-1) ?? null;
   const coverageSeconds = toDurationSeconds(firstPoint?.timestamp, lastPoint?.timestamp);
-  const pointLabel = currentPoint
-    ? `${Math.min(cursor + 1, replayPoints.length)}/${replayPoints.length}`
-    : '0/0';
-  const waypointPreview = replayPoints.slice(-6).reverse();
+  const fallbackLivePoint =
+    selectedSession && (selectedSession.status === 'running' || !selectedSession.serverSessionEnd)
+      ? hasValidTelemetryCoordinates(positionSnapshot?.latitude, positionSnapshot?.longitude)
+        ? ([positionSnapshot!.latitude!, positionSnapshot!.longitude!] as [number, number])
+        : hasValidTelemetryCoordinates(device?.latitude, device?.longitude)
+          ? ([device!.latitude!, device!.longitude!] as [number, number])
+          : null
+      : null;
+  const infoPoint = currentPoint ?? lastPoint ?? null;
+  const currentPointLabel = replayPoints.length > 0 ? `${Math.min(cursor + 1, replayPoints.length)}/${replayPoints.length}` : '0/0';
+  const replayMax = Math.max(replayPoints.length - 1, 0);
+  const replaySummary = replayPoints.length > 0
+    ? `${currentPointLabel}${currentPoint?.timestamp ? ` · ${formatDateTime(currentPoint.timestamp, 'HH:mm:ss dd/MM')}` : ''}`
+    : 'Chưa có waypoint để replay';
+  const pointTimeLabel = infoPoint?.timestamp ? formatDateTime(infoPoint.timestamp, 'HH:mm:ss dd/MM') : '-';
+  const pointCoordinateLabel = infoPoint
+    ? formatCoordinateLabel(infoPoint.latitude, infoPoint.longitude, 6)
+    : '-';
+  const pointSpeedLabel =
+    infoPoint?.speed !== null && infoPoint?.speed !== undefined
+      ? `${infoPoint.speed.toFixed(1)} km/h`
+      : '-';
+  const startPointLabel = firstPoint ? formatDateTime(firstPoint.timestamp, 'HH:mm dd/MM') : 'Chưa có mốc đầu';
+  const endPointLabel = lastPoint ? formatDateTime(lastPoint.timestamp, 'HH:mm dd/MM') : 'Chưa có mốc cuối';
+  const coverageLabel = coverageSeconds > 0 ? formatDuration(coverageSeconds) : 'Chưa đủ dữ liệu';
+  const customRangeButtonLabel = trackingPeriod === 'custom'
+    ? `${toShortDateLabel(trackingCustomRange.from)} - ${toShortDateLabel(trackingCustomRange.to)}`
+    : 'Khoảng thời gian';
+  const zeroTelemetryRangeLabel = trackingPeriod === 'custom'
+    ? 'đã chọn'
+    : PERIOD_LABELS[trackingPeriod];
+  const replayInfoRows = [
+    { label: 'Điểm', value: currentPointLabel },
+    { label: 'Mốc hiện tại', value: pointTimeLabel },
+    { label: 'Tọa độ', value: pointCoordinateLabel },
+    { label: 'Tốc độ', value: pointSpeedLabel },
+    { label: 'Bao phủ', value: coverageLabel },
+    { label: 'Trạng thái', value: replayPoints.length > 0 ? replaySummary : 'Chưa có waypoint để replay' },
+  ];
+
+  const handlePlayPause = () => {
+    if (replayPoints.length <= 1) {
+      return;
+    }
+
+    if (isPlaying) {
+      setIsPlaying(false);
+      return;
+    }
+
+    setCursor((current) => {
+      if (!hasStartedReplayRef.current || current >= replayMax) {
+        return 0;
+      }
+      return current;
+    });
+    hasStartedReplayRef.current = true;
+    setIsPlaying(true);
+  };
+
+  const applyCustomRange = () => {
+    if (!customRangeDraft.from || !customRangeDraft.to) {
+      return;
+    }
+
+    const nextRange =
+      customRangeDraft.from <= customRangeDraft.to
+        ? customRangeDraft
+        : {
+            from: customRangeDraft.to,
+            to: customRangeDraft.from,
+          };
+
+    onTrackingCustomRangeChange(nextRange);
+    onTrackingPeriodChange('custom');
+    setCustomRangeOpen(false);
+  };
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <CardTitle className="text-base">Bản đồ hoạt động và replay lộ trình</CardTitle>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Xem vị trí hiện tại, tua lại các mốc GPS và kiểm tra nhịp gửi trên cùng một màn hình.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {PERIOD_OPTIONS.map((option) => (
+    <div className="grid h-full min-h-0 gap-4 xl:grid-cols-[340px_minmax(0,1fr)] 2xl:grid-cols-[380px_minmax(0,1fr)]">
+      <aside className="flex min-h-0 flex-col overflow-hidden rounded-2xl border bg-background">
+        <div className="border-b px-4 py-4">
+          <p className="text-sm font-semibold">Phiên vận hành</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {PERIOD_OPTIONS.map((option) => (
+              <Button
+                key={option.value}
+                size="sm"
+                variant={trackingPeriod === option.value ? 'default' : 'outline'}
+                className="h-8 px-3 text-xs"
+                onClick={() => onTrackingPeriodChange(option.value)}
+              >
+                {option.label}
+              </Button>
+            ))}
+            <Popover open={customRangeOpen} onOpenChange={setCustomRangeOpen}>
+              <PopoverTrigger asChild>
                 <Button
-                  key={option.value}
                   size="sm"
-                  variant={trackingPeriod === option.value ? 'default' : 'outline'}
-                  onClick={() => onTrackingPeriodChange(option.value)}
+                  variant={trackingPeriod === 'custom' ? 'default' : 'outline'}
+                  className="h-8 px-3 text-xs"
                 >
-                  {option.label}
+                  <CalendarRange className="mr-2 h-4 w-4" />
+                  {customRangeButtonLabel}
                 </Button>
-              ))}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-6">
-            <StatTile label="Quãng đường" value={`${distanceKm.toFixed(2)} km`} />
-            <StatTile label="Tốc độ TB" value={`${averageSpeed.toFixed(1)} km/h`} />
-            <StatTile label="Tốc độ tối đa" value={`${maxSpeed.toFixed(1)} km/h`} />
-            <StatTile label="Mốc GPS" value={formatNumber(replayPoints.length)} />
-            <StatTile label="Nhịp quan sát" value={formatSecondsLabel(observedCadence)} />
-            <StatTile label="Độ tươi" value={formatSecondsLabel(telemetryFreshness)} helper={telemetryState.label} />
-          </div>
-
-          <div className="grid gap-4 xl:grid-cols-[1.45fr,0.95fr]">
-            <div className="space-y-4">
-              <div className="h-[420px] overflow-hidden rounded-2xl border bg-muted/10">
-                {replayPoints.length === 0 && !livePoint ? (
-                  <div className="flex h-full items-center justify-center px-4 text-sm text-muted-foreground">
-                    Chưa có dữ liệu tọa độ hợp lệ để hiển thị bản đồ hoạt động.
-                  </div>
-                ) : (
-                  <RouteReplayMap pathPoints={routePoints} currentPoint={currentPoint} livePoint={livePoint} />
-                )}
-              </div>
-
-              <div className="rounded-2xl border bg-muted/10 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold">Replay hành trình</p>
-                    <p className="text-xs text-muted-foreground">
-                      {replayPoints.length > 0
-                        ? `Đang xem mốc ${pointLabel} · ${currentPoint ? formatDateTime(currentPoint.timestamp) : '-'}`
-                        : 'Chưa có đủ waypoint để tua lại hành trình.'}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setCursor(0);
-                        setIsPlaying(false);
-                      }}
-                      disabled={replayPoints.length === 0}
-                    >
-                      <RotateCcw className="mr-2 h-4 w-4" />
-                      Về đầu
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={isPlaying ? 'secondary' : 'default'}
-                      onClick={() => setIsPlaying((value) => !value)}
-                      disabled={replayPoints.length <= 1}
-                    >
-                      {isPlaying ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-                      {isPlaying ? 'Tạm dừng' : 'Phát replay'}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setCursor(Math.max(replayPoints.length - 1, 0));
-                        setIsPlaying(false);
-                      }}
-                      disabled={replayPoints.length === 0}
-                    >
-                      <SkipForward className="mr-2 h-4 w-4" />
-                      Về hiện tại
-                    </Button>
-                  </div>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-[min(92vw,22rem)] space-y-4 p-4">
+                <div>
+                  <p className="text-sm font-semibold">Lọc theo khoảng thời gian</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Chọn khoảng ngày để xem đúng phiên và telemetry theo giai đoạn cần audit.
+                  </p>
                 </div>
-
-                <div className="mt-4 space-y-3">
-                  <Slider
-                    min={0}
-                    max={Math.max(replayPoints.length - 1, 0)}
-                    step={1}
-                    value={[Math.min(cursor, Math.max(replayPoints.length - 1, 0))]}
-                    onValueChange={(value) => {
-                      setIsPlaying(false);
-                      setCursor(value[0] ?? 0);
-                    }}
-                    disabled={replayPoints.length <= 1}
-                  />
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-                    <span>{firstPoint ? formatDateTime(firstPoint.timestamp, 'HH:mm dd/MM') : 'Chưa có mốc đầu'}</span>
-                    <span>{formatDuration(coverageSeconds)}</span>
-                    <span>{lastPoint ? formatDateTime(lastPoint.timestamp, 'HH:mm dd/MM') : 'Chưa có mốc cuối'}</span>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <Badge variant={telemetryState.variant}>{telemetryState.label}</Badge>
-                  {PLAYBACK_SPEEDS.map((speed) => (
-                    <Button
-                      key={speed.value}
-                      size="sm"
-                      variant={playbackRate === speed.value ? 'default' : 'outline'}
-                      className="h-8 px-2 text-xs"
-                      onClick={() => setPlaybackRate(speed.value)}
-                    >
-                      {speed.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Điểm đang xem</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-1">
-                  <StatTile
-                    label="Thời điểm"
-                    value={currentPoint ? `${formatDateTime(currentPoint.timestamp)} (${formatRelative(currentPoint.timestamp)})` : '-'}
-                  />
-                  <StatTile
-                    label="Tọa độ"
-                    value={currentPoint ? formatCoordinateLabel(currentPoint.latitude, currentPoint.longitude, 6) : formatCoordinateLabel(positionSnapshot?.latitude, positionSnapshot?.longitude, 6)}
-                  />
-                  <StatTile label="Tốc độ" value={currentPoint?.speed !== null && currentPoint?.speed !== undefined ? `${currentPoint.speed.toFixed(1)} km/h` : '-'} />
-                  <StatTile
-                    label="Pin / nhiệt độ"
-                    value={`${formatBatteryMetric(currentPoint?.battery)} · ${currentPoint?.temperature !== null && currentPoint?.temperature !== undefined ? `${currentPoint.temperature.toFixed(1)}°C` : '-'}`}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Tuyến và chất lượng dữ liệu</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <StatTile
-                      label="Điểm đầu"
-                      value={firstPoint ? formatCoordinateLabel(firstPoint.latitude, firstPoint.longitude, 6) : '-'}
-                      helper={firstPoint ? formatDateTime(firstPoint.timestamp, 'dd/MM HH:mm') : undefined}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="space-y-1.5 text-xs font-medium">
+                    <span>Từ ngày</span>
+                    <Input
+                      type="date"
+                      value={customRangeDraft.from}
+                      onChange={(event) =>
+                        setCustomRangeDraft((current) => ({ ...current, from: event.target.value }))
+                      }
                     />
-                    <StatTile
-                      label="Điểm cuối"
-                      value={lastPoint ? formatCoordinateLabel(lastPoint.latitude, lastPoint.longitude, 6) : '-'}
-                      helper={lastPoint ? formatDateTime(lastPoint.timestamp, 'dd/MM HH:mm') : undefined}
+                  </label>
+                  <label className="space-y-1.5 text-xs font-medium">
+                    <span>Đến ngày</span>
+                    <Input
+                      type="date"
+                      value={customRangeDraft.to}
+                      onChange={(event) =>
+                        setCustomRangeDraft((current) => ({ ...current, to: event.target.value }))
+                      }
                     />
-                  </div>
-                  <div className="rounded-xl border bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground">
-                    Chu kỳ cấu hình đang được lưu thật ở backend dưới dạng `requestInterval`. Khi đổi ở
-                    tab Cài đặt, modal sẽ đồng thời phát command `update_config`; còn `Nhịp quan sát`
-                    và `Độ tươi` ở đây dùng để kiểm tra thiết bị có thực sự gửi đúng nhịp hay không.
-                  </div>
-                </CardContent>
-              </Card>
+                  </label>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setCustomRangeDraft(trackingCustomRange)}>
+                    Đặt lại
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={applyCustomRange}
+                    disabled={!customRangeDraft.from || !customRangeDraft.to}
+                  >
+                    Áp dụng
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Các mốc GPS mới nhất</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {waypointPreview.length > 0 ? (
-                    waypointPreview.map((point) => (
-                      <div key={`${point.timestamp}-${point.timestampMs}`} className="rounded-xl border bg-muted/20 px-3 py-2.5 text-sm">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="font-medium">{formatDateTime(point.timestamp, 'dd/MM HH:mm:ss')}</p>
-                          <span className="text-xs text-muted-foreground">{point.speed !== null ? `${point.speed.toFixed(1)} km/h` : '-'}</span>
-                        </div>
+        <div
+          ref={sessionsListRef}
+          className="min-h-0 flex-1 overflow-y-auto"
+          onScroll={maybeLoadMoreSessions}
+        >
+          <div className="space-y-2 p-3">
+            {sessionsLoading && sessions.length === 0 ? (
+              <div className="rounded-xl border border-dashed px-3 py-6 text-sm text-muted-foreground">
+                Đang tải danh sách phiên chạy...
+              </div>
+            ) : sessions.length > 0 ? (
+              sessions.map((session) => {
+                const selected = session.id === selectedSession?.id;
+                const telemetryCount = telemetryCountBySession.get(session.id) ?? 0;
+                const durationSeconds = session.uptime ?? toDurationSeconds(session.serverSessionStart, session.serverSessionEnd);
+
+                return (
+                  <button
+                    key={session.id}
+                    type="button"
+                    onClick={() => setSelectedSessionId(session.id)}
+                    className={`w-full rounded-2xl border px-3 py-3 text-left transition-colors ${selected ? 'border-primary bg-primary/5 shadow-sm' : 'bg-background hover:bg-muted/20'}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold">Phiên #{session.id}</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {formatCoordinateLabel(point.latitude, point.longitude, 6)}
+                          {session.serverSessionStart
+                            ? formatDateTime(session.serverSessionStart, 'HH:mm dd/MM')
+                            : 'Chưa có mốc bắt đầu'}{' '}
+                          -{' '}
+                          {session.serverSessionEnd
+                            ? formatDateTime(session.serverSessionEnd, 'HH:mm dd/MM')
+                            : 'Đang chạy'}
                         </p>
                       </div>
-                    ))
-                  ) : (
-                    <div className="rounded-xl border border-dashed px-3 py-5 text-center text-sm text-muted-foreground">
-                      Chưa có waypoint gần đây để hiển thị.
+                      <Badge variant={SESSION_BADGE_VARIANTS[session.status] ?? 'outline'}>
+                        {DEVICE_STATUS_LABELS[session.status] ?? session.status}
+                      </Badge>
                     </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs text-muted-foreground">
+                      <p>
+                        <span className="block uppercase tracking-[0.14em]">Thời lượng</span>
+                        <span className="mt-1 block font-medium text-foreground">{formatDuration(durationSeconds)}</span>
+                      </p>
+                      <p>
+                        <span className="block uppercase tracking-[0.14em]">Dữ liệu trong kỳ</span>
+                        <span className="mt-1 block font-medium text-foreground">{formatNumber(telemetryCount)} điểm</span>
+                      </p>
+                    </div>
+
+                    {telemetryCount === 0 ? (
+                      <p className="mt-3 text-[11px] text-amber-700 dark:text-amber-200">
+                        Phiên này chưa có telemetry trong dải {zeroTelemetryRangeLabel}. Thử mở dải thời gian lớn hơn.
+                      </p>
+                    ) : null}
+                  </button>
+                );
+              })
+            ) : (
+              <div className="rounded-xl border border-dashed px-3 py-6 text-sm text-muted-foreground">
+                Chưa có phiên chạy nào để đối chiếu lộ trình.
+              </div>
+            )}
+
+            {sessionsLoading && sessions.length > 0 ? (
+              <div className="rounded-xl border border-dashed px-3 py-3 text-center text-xs text-muted-foreground">
+                Đang tải thêm phiên...
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </aside>
+
+      <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border bg-background">
+        <div className="border-b px-4 py-3">
+          <p className="text-sm font-semibold">Bản đồ hoạt động và replay lộ trình</p>
+        </div>
+
+        <div className="min-h-0 flex-1 p-4">
+          <div className="relative h-full overflow-hidden rounded-2xl border bg-muted/10">
+            {replayPoints.length === 0 && !fallbackLivePoint ? (
+              <div className="flex h-full items-center justify-center px-6 text-center text-sm text-muted-foreground">
+                {selectedSession
+                  ? 'Phiên đang chọn chưa có dữ liệu tọa độ hợp lệ trong dải thời gian hiện tại.'
+                  : 'Chưa có dữ liệu tọa độ hợp lệ để hiển thị bản đồ hoạt động.'}
+              </div>
+            ) : (
+              <RouteReplayMap
+                pathPoints={pathPoints}
+                currentPoint={currentPoint}
+                livePoint={fallbackLivePoint}
+              />
+            )}
+
+            <div
+              className={`absolute inset-y-0 right-0 z-[520] transition-[width] duration-200 ${isReplayPanelCollapsed ? 'w-12' : 'w-[208px] sm:w-[224px]'}`}
+            >
+              <div className="flex h-full w-full flex-col border-l bg-background/95 shadow-lg backdrop-blur">
+                <div className="flex items-center justify-between border-b px-2 py-2">
+                  {!isReplayPanelCollapsed ? (
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Replay
+                    </p>
+                  ) : (
+                    <span className="sr-only">Replay</span>
                   )}
-                </CardContent>
-              </Card>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0"
+                    aria-label={isReplayPanelCollapsed ? 'Mở rộng bảng replay' : 'Thu gọn bảng replay'}
+                    onClick={() => setIsReplayPanelCollapsed((value) => !value)}
+                  >
+                    {isReplayPanelCollapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </Button>
+                </div>
+
+                {!isReplayPanelCollapsed ? (
+                  <div className="flex min-h-0 flex-1 flex-col gap-2 p-2">
+                    <div className="grid grid-cols-3 gap-1">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-1"
+                        aria-label="Về đầu replay"
+                        onClick={() => {
+                          hasStartedReplayRef.current = true;
+                          setCursor(0);
+                          setIsPlaying(false);
+                        }}
+                        disabled={replayPoints.length === 0}
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={isPlaying ? 'secondary' : 'default'}
+                        className="h-7 px-1"
+                        aria-label={isPlaying ? 'Tạm dừng replay' : 'Phát replay'}
+                        onClick={handlePlayPause}
+                        disabled={replayPoints.length <= 1}
+                      >
+                        {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-1"
+                        aria-label="Về cuối replay"
+                        onClick={() => {
+                          hasStartedReplayRef.current = true;
+                          setCursor(replayMax);
+                          setIsPlaying(false);
+                        }}
+                        disabled={replayPoints.length === 0}
+                      >
+                        <SkipForward className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+
+                    <div className="rounded-md border bg-background/70 px-2 py-1.5">
+                      <Slider
+                        min={0}
+                        max={replayMax}
+                        step={1}
+                        value={[Math.min(cursor, replayMax)]}
+                        onValueChange={(value) => {
+                          hasStartedReplayRef.current = true;
+                          setIsPlaying(false);
+                          setCursor(value[0] ?? 0);
+                        }}
+                        disabled={replayPoints.length <= 1}
+                      />
+                      <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
+                        <span className="truncate">{startPointLabel}</span>
+                        <span className="truncate text-right">{endPointLabel}</span>
+                      </div>
+                    </div>
+
+                    <div className="min-h-0 flex-1 overflow-y-auto rounded-md border bg-background/70">
+                      <table className="w-full table-fixed text-[11px]">
+                        <tbody>
+                          {replayInfoRows.map((row) => (
+                            <tr key={row.label} className="border-b last:border-b-0">
+                              <th className="w-[40%] px-2 py-1.5 text-left font-medium text-muted-foreground">
+                                {row.label}
+                              </th>
+                              <td className="px-2 py-1.5 text-right font-semibold text-foreground">
+                                <span className="break-words">{row.value}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-1 items-center justify-center px-1">
+                    <p className="-rotate-90 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Replay
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   );
 };

@@ -94,7 +94,7 @@ const TripDetailPage = ({
     return () => clearInterval(intervalId);
   }, [playing, points.length, speed]);
 
-  const distanceKm = summary?.distanceKm ?? tripQuery.data?.distanceKm ?? 0;
+  const distanceKm = tripQuery.data?.distanceKm ?? summary?.distanceKm ?? 0;
   const durationMinutes = summary?.durationMinutes ?? 0;
   const avgSpeed = summary?.avgSpeed ?? 0;
   const maxSpeed = summary?.maxSpeed ?? 0;

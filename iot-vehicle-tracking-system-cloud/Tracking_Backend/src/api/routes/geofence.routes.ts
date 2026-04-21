@@ -13,6 +13,13 @@ router.get('/policies/:policyId', geofenceController.getVehiclePolicy);
 router.post('/policies', geofenceController.createVehiclePolicy);
 router.put('/policies/:policyId', geofenceController.updateVehiclePolicy);
 router.get('/policy-violations', geofenceController.listVehiclePolicyViolations);
+router.get('/vehicles/:vehicleId/allowed-zone', geofenceController.getVehicleAllowedZone);
+router.post(
+  '/vehicles/:vehicleId/allowed-zone/preview-center',
+  geofenceController.previewVehicleAllowedZoneCenter,
+);
+router.put('/vehicles/:vehicleId/allowed-zone', geofenceController.upsertVehicleAllowedZone);
+router.delete('/vehicles/:vehicleId/allowed-zone', geofenceController.deleteVehicleAllowedZone);
 router.get('/vehicles/:vehicleId/policy-states', geofenceController.listVehiclePolicyStates);
 router.get('/:id', geofenceController.getGeofence);
 router.post('/', geofenceController.createGeofence);

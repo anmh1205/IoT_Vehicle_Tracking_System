@@ -171,6 +171,10 @@ esp_err_t ble_stack_init(void) {
     return ble_init_stack(&config);
 }
 
+bool ble_stack_is_started(void) {
+    return s_stack_started;
+}
+
 /**
  * @brief Stop NimBLE host task and release stack resources.
  *

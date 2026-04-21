@@ -36,10 +36,10 @@ const AppSidebar = () => {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="IVM26">
+            <SidebarMenuButton asChild tooltip="IVTS V1">
               <Link href="/dashboard/command">
                 <Car className="h-5 w-5" />
-                <span>IVM26</span>
+                <span>IVTS V1</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -1,19 +1,19 @@
 flowchart LR
-    subgraph Current["Hien trang can cai thien"]
+    subgraph Current["Hiện trạng cần cải thiện"]
         direction TB
-        C1["Quan ly thu cong"]
-        C2["Theo doi cham"]
-        C3["Xu ly cham"]
+        C1["Quản lý thủ công"]
+        C2["Theo dõi chậm"]
+        C3["Xử lý chậm"]
         C1 --> C2 --> C3
     end
 
-    Gap["Can chuyen doi so"]
+    Gap["Cần chuyển đổi số"]
 
-    subgraph Proposed["Giai phap de xuat"]
+    subgraph Proposed["Giải pháp đề xuất"]
         direction TB
         P1["Tracker<br/>GPS + OBD2 + IMU + 4G"]
-        P2["Cloud<br/>EMQX + Bridge + Backend"]
-        P3["Dashboard<br/>Ban do + canh bao + bao cao"]
+        P2["Máy chủ<br/>EMQX + Bridge + API"]
+        P3["Giao diện web<br/>Bản đồ + cảnh báo + báo cáo"]
         P1 --> P2 --> P3
     end
 

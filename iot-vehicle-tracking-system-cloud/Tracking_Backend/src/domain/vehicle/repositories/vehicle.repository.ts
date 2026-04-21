@@ -33,18 +33,26 @@ export const findAll = async (
   let paramIndex = 1;
 
   if (query.status) {
-    conditions.push(`status = $${paramIndex++}`);
+    conditions.push(`v.status = $${paramIndex++}`);
     params.push(query.status);
   }
 
   if (query.customerId) {
-    conditions.push(`customer_id = $${paramIndex++}`);
+    conditions.push(`v.customer_id = $${paramIndex++}`);
     params.push(query.customerId);
+  }
+
+  if (query.customerState === 'assigned') {
+    conditions.push('v.customer_id IS NOT NULL');
+  }
+
+  if (query.customerState === 'unassigned') {
+    conditions.push('v.customer_id IS NULL');
   }
 
   if (query.search) {
     conditions.push(
-      `(vehicle_id ILIKE $${paramIndex} OR plate_number ILIKE $${paramIndex} OR brand ILIKE $${paramIndex})`,
+      `(v.vehicle_id ILIKE $${paramIndex} OR v.plate_number ILIKE $${paramIndex} OR v.brand ILIKE $${paramIndex})`,
     );
     params.push(`%${query.search}%`);
     paramIndex++;
@@ -54,16 +62,24 @@ export const findAll = async (
 
   const sortColumn = ALLOWED_SORT_COLUMNS[query.sortBy ?? ''] ?? 'created_at';
   const sortOrder = query.sortOrder === 'asc' ? 'ASC' : 'DESC';
-  const orderClause = `ORDER BY ${sortColumn} ${sortOrder}`;
+  const orderClause = `ORDER BY v.${sortColumn} ${sortOrder}`;
 
   const countResult = await pool.query(
-    `SELECT COUNT(*) as total FROM vehicles ${whereClause}`,
+    `SELECT COUNT(*) as total FROM vehicles v ${whereClause}`,
     params,
   );
   const total = parseInt(countResult.rows[0].total, 10);
 
   const vehicles = await findMany<Vehicle>(
-    `SELECT * FROM vehicles ${whereClause} ${orderClause} LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+    `SELECT
+        v.*,
+        c.customer_code,
+        c.name AS customer_name
+     FROM vehicles v
+     LEFT JOIN customers c ON c.id = v.customer_id
+     ${whereClause}
+     ${orderClause}
+     LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
 
@@ -71,7 +87,16 @@ export const findAll = async (
 };
 
 export const findById = async (id: number): Promise<Vehicle | null> =>
-  findOne<Vehicle>('SELECT * FROM vehicles WHERE id = $1', [id]);
+  findOne<Vehicle>(
+    `SELECT
+        v.*,
+        c.customer_code,
+        c.name AS customer_name
+     FROM vehicles v
+     LEFT JOIN customers c ON c.id = v.customer_id
+     WHERE v.id = $1`,
+    [id],
+  );
 
 export const findByVehicleId = async (vehicleId: string): Promise<Vehicle | null> =>
   findOne<Vehicle>('SELECT * FROM vehicles WHERE vehicle_id = $1', [vehicleId]);

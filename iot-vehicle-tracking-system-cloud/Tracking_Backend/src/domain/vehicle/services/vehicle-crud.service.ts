@@ -15,6 +15,8 @@ const sanitizeVehicle = (v: Vehicle): VehiclePublic => ({
   plateNumber: v.plate_number,
   deviceId: v.device_id,
   customerId: v.customer_id,
+  customerCode: v.customer_code ?? null,
+  customerName: v.customer_name ?? null,
   vehicleType: v.vehicle_type,
   brand: v.brand,
   model: v.model,
@@ -59,7 +61,8 @@ export const createVehicle = async (input: CreateVehicleInput): Promise<VehicleP
     entityId: String(vehicle.id),
   });
 
-  return sanitizeVehicle(vehicle);
+  const created = await vehicleRepo.findById(vehicle.id);
+  return sanitizeVehicle(created ?? vehicle);
 };
 
 export const updateVehicle = async (
@@ -85,7 +88,8 @@ export const updateVehicle = async (
     entityId: String(id),
   });
 
-  return sanitizeVehicle(updated);
+  const hydrated = await vehicleRepo.findById(id);
+  return sanitizeVehicle(hydrated ?? updated);
 };
 
 export const deleteVehicle = async (id: number): Promise<void> => {
