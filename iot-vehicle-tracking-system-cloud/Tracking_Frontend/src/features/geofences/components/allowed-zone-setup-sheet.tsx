@@ -84,7 +84,7 @@ export const AllowedZoneSetupSheet = ({
     defaultValues: createAllowedZoneFormDefaults(zone, undefined),
   });
   const centerSource = form.watch('centerSource');
-  const previewQuery = useVehicleAllowedZonePreview(vehicleId, open && centerSource === 'vehicle_position');
+  const previewQuery = useVehicleAllowedZonePreview(vehicleId, open && zoneQuery.isFetched && centerSource === 'vehicle_position');
   const preview = previewQuery.data;
   const resetKey = getResetKey(zone, preview);
   const radiusMeters = form.watch('radiusMeters');
@@ -318,4 +318,5 @@ export const AllowedZoneSetupSheet = ({
     </>
   );
 };
+
 
