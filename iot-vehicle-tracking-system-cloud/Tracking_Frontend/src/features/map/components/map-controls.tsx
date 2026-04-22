@@ -80,7 +80,7 @@ export const MapControls = ({
   };
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[900]">
+    <div className="pointer-events-none absolute inset-0 z-[920]">
       <div className="pointer-events-auto absolute right-3 top-3 flex flex-col items-end gap-2">
         <div className="flex items-center gap-2 rounded-2xl border border-border/70 bg-background/95 p-1.5 shadow-lg backdrop-blur">
           <MapLayerSwitcher />
