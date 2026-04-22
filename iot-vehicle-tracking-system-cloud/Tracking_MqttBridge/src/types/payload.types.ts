@@ -94,7 +94,7 @@ export interface RawDataPayload {
 export interface StatusPayload {
   device_id: string;
   auth_token: string;
-  status: 'running' | 'stopped';
+  status: 'running' | 'stopped' | 'heartbeat';
   session_id?: number;
   timestamp: number;
   metadata?: PayloadMetadata;

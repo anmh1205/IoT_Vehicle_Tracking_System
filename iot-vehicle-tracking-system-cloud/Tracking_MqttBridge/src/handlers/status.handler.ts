@@ -17,6 +17,7 @@ import { normalizePayloadTimestamp } from '../utils/timestamp.util';
  * Transitions:
  * - running  -> Create or continue session, publish session event
  * - stopped  -> End current session, publish session event
+ * - heartbeat -> Keepalive while parked, normalized to stopped
  */
 export const handleStatus = async (
   deviceIdFromTopic: string,
@@ -61,6 +62,8 @@ export const handleStatus = async (
 
   const previousState = getStatus(payload.device_id);
   const previousStatus = previousState?.status ?? 'offline';
+  const reportedStatus = payload.status;
+  const normalizedStatus = reportedStatus === 'heartbeat' ? 'stopped' : reportedStatus;
   const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
     payload.timestamp,
     payload.metadata?.sent_at,
@@ -79,7 +82,7 @@ export const handleStatus = async (
     );
   }
 
-  if (payload.status === 'running') {
+  if (normalizedStatus === 'running') {
     const ensuredSession = await ensureDeviceSession(
       payload.device_id,
       timestampMs,
@@ -111,6 +114,7 @@ export const handleStatus = async (
       {
         session_id: sessionId,
         previous_status: previousStatus,
+        reported_status: reportedStatus,
         message_id: messageId,
         schema_version: schemaVersion,
         seq_no: seqNo,
@@ -123,7 +127,7 @@ export const handleStatus = async (
     logger.info(
       `Device ${payload.device_id}: ${previousStatus} -> running (session=${sessionId})`,
     );
-  } else if (payload.status === 'stopped') {
+  } else if (normalizedStatus === 'stopped') {
     const endedSessionId = await completeDeviceSession(
       payload.device_id,
       timestampMs,
@@ -155,6 +159,7 @@ export const handleStatus = async (
       {
         session_id: endedSessionId,
         previous_status: previousStatus,
+        reported_status: reportedStatus,
         message_id: messageId,
         schema_version: schemaVersion,
         seq_no: seqNo,
@@ -165,7 +170,9 @@ export const handleStatus = async (
     });
 
     logger.info(
-      `Device ${payload.device_id}: ${previousStatus} -> stopped (session=${endedSessionId} ended)`,
+      reportedStatus === 'heartbeat'
+        ? `Device ${payload.device_id}: heartbeat keepalive handled as stopped (session=${endedSessionId} ended)`
+        : `Device ${payload.device_id}: ${previousStatus} -> stopped (session=${endedSessionId} ended)`,
     );
   }
 
@@ -173,7 +180,8 @@ export const handleStatus = async (
   publishInternalEvent('status', {
     device_id: payload.device_id,
     previous_status: previousStatus,
-    current_status: payload.status,
+    current_status: normalizedStatus,
+    reported_status: reportedStatus,
     message_id: messageId,
     schema_version: schemaVersion,
     seq_no: seqNo,

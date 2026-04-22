@@ -530,7 +530,7 @@ static void state_machine_handle_pending_action(void) {
  * @param read_obd True to poll OBD PIDs.
  */
 static bool state_machine_can_poll_gnss(void) {
-    return s_gnss_started && modem_lte_is_initialized();
+    return s_gnss_started && modem_lte_is_initialized() && modem_gnss_is_query_ready();
 }
 
 static uint64_t state_machine_tracking_interval_ms(void) {
@@ -543,6 +543,14 @@ static uint64_t state_machine_alarm_interval_ms(void) {
 
 static uint64_t state_machine_alarm_timeout_ms(void) {
     return (uint64_t)s_config.alarm_timeout_s * 1000ULL;
+}
+
+static bool state_machine_should_throttle_rawdata(void) {
+    if (tracker_mqtt_is_connected()) {
+        return false;
+    }
+
+    return offline_queue_should_throttle_rawdata();
 }
 
 static uint64_t state_machine_ignition_off_hold_ms(void) {
@@ -764,6 +772,10 @@ static bool state_machine_try_reassert_gnss_power(const char *reason) {
              reason,
              esp_err_to_name(on_err));
     return false;
+}
+
+static void state_machine_clear_gnss_cache(void) {
+    memset(&s_telemetry.gnss, 0, sizeof(s_telemetry.gnss));
 }
 
 static void state_machine_try_start_gnss_nonblocking(void) {
@@ -2112,6 +2124,7 @@ static void state_machine_shutdown_for_sleep(void) {
         }
     }
     s_gnss_started = false;
+    state_machine_clear_gnss_cache();
 
 #if !TRACKER_MQTT_RUNTIME_DISABLED
     esp_err_t mqtt_disconnect_err = tracker_mqtt_disconnect();
@@ -2389,7 +2402,7 @@ app_state_t state_machine_run(app_state_t current_state) {
             uint64_t now_ms = util_uptime_ms();
             bool should_publish_raw = ((now_ms - s_last_raw_publish_ms) >= state_machine_tracking_interval_ms()) ||
                                       command_handler_consume_location_request();
-            if (should_publish_raw && !offline_queue_should_throttle_rawdata()) {
+            if (should_publish_raw && !state_machine_should_throttle_rawdata()) {
                 state_machine_publish_rawdata();
             }
 
@@ -2495,10 +2508,11 @@ app_state_t state_machine_run(app_state_t current_state) {
                 (!s_ble_connect_inflight || heartbeat_timeout) &&
                 (network_ready || heartbeat_timeout) &&
                 gnss_publish_ready) {
-                if (!offline_queue_should_throttle_rawdata()) {
+                if (!state_machine_should_throttle_rawdata()) {
                     state_machine_publish_rawdata();
                 } else {
-                    ESP_LOGW(TAG, "heartbeat rawdata throttled; publishing status only");
+                    ESP_LOGW(TAG,
+                             "heartbeat rawdata throttled while offline queue is near quota; publishing status only");
                 }
 
                 if (!state_machine_has_recent_obd_sample(now_ms, TRACKER_HEARTBEAT_OBD_STALE_WARN_MS)) {

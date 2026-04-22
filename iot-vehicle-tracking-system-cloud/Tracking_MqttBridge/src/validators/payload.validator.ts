@@ -83,7 +83,7 @@ const rawDataPayloadBaseSchema = z.object({
 const statusPayloadBaseSchema = z.object({
   device_id: z.string().min(1),
   auth_token: z.string().min(1),
-  status: z.enum(['running', 'stopped']),
+  status: z.enum(['running', 'stopped', 'heartbeat']),
   session_id: z.number().int().positive().optional(),
   timestamp: z.number().positive(),
   metadata: z.unknown().optional(),
