@@ -5,7 +5,7 @@
 #include "util.h"
 
 #define DATA_FORMATTER_DEFAULT_SCHEMA_VERSION "v1.0.0"
-#define DATA_FORMATTER_RAWDATA_SCHEMA_VERSION "v1.4.0"
+#define DATA_FORMATTER_STATE_SCHEMA_VERSION "v1.5.0"
 #define DATA_FORMATTER_OBD_STALE_SAMPLE_MS 30000U
 
 /**
@@ -70,6 +70,181 @@ static void data_formatter_append_string_item(cJSON *array, const char *value) {
     cJSON *item = cJSON_CreateString(value);
     if (item != NULL) {
         cJSON_AddItemToArray(array, item);
+    }
+}
+
+static const char *data_formatter_ignition_state_label(tracker_ignition_state_t state) {
+    switch (state) {
+        case TRACKER_IGNITION_STATE_ON:
+            return "ON";
+        case TRACKER_IGNITION_STATE_OFF:
+            return "OFF";
+        case TRACKER_IGNITION_STATE_UNKNOWN:
+        default:
+            return "UNKNOWN";
+    }
+}
+
+static const char *data_formatter_motion_state_label(tracker_motion_state_t state) {
+    switch (state) {
+        case TRACKER_MOTION_STATE_MOVING:
+            return "MOVING";
+        case TRACKER_MOTION_STATE_STATIONARY:
+            return "STATIONARY";
+        case TRACKER_MOTION_STATE_UNKNOWN:
+        default:
+            return "UNKNOWN";
+    }
+}
+
+static const char *data_formatter_vehicle_state_label(tracker_vehicle_state_t state) {
+    switch (state) {
+        case TRACKER_VEHICLE_STATE_PARKED_OFF:
+            return "PARKED_OFF";
+        case TRACKER_VEHICLE_STATE_ROLLING_IGN_OFF:
+            return "ROLLING_IGN_OFF";
+        case TRACKER_VEHICLE_STATE_IDLING_ON:
+            return "IDLING_ON";
+        case TRACKER_VEHICLE_STATE_MOVING_ON:
+            return "MOVING_ON";
+        case TRACKER_VEHICLE_STATE_UNKNOWN_STATIONARY:
+            return "UNKNOWN_STATIONARY";
+        case TRACKER_VEHICLE_STATE_UNKNOWN_MOVING:
+            return "UNKNOWN_MOVING";
+        case TRACKER_VEHICLE_STATE_UNKNOWN:
+        default:
+            return "UNKNOWN";
+    }
+}
+
+static const char *data_formatter_device_state_label(tracker_device_state_t state) {
+    switch (state) {
+        case TRACKER_DEVICE_STATE_BOOTING:
+            return "BOOTING";
+        case TRACKER_DEVICE_STATE_ACTIVE:
+            return "ACTIVE";
+        case TRACKER_DEVICE_STATE_SLEEP_PREPARE:
+            return "SLEEP_PREPARE";
+        case TRACKER_DEVICE_STATE_SLEEPING:
+            return "SLEEPING";
+        case TRACKER_DEVICE_STATE_WAKING:
+            return "WAKING";
+        case TRACKER_DEVICE_STATE_ALARM:
+            return "ALARM";
+        case TRACKER_DEVICE_STATE_OTA:
+            return "OTA";
+        case TRACKER_DEVICE_STATE_FAULT:
+            return "FAULT";
+        default:
+            return "ACTIVE";
+    }
+}
+
+static const char *data_formatter_sleep_mode_label(tracker_sleep_mode_t mode) {
+    switch (mode) {
+        case TRACKER_SLEEP_MODE_FAKE:
+            return "FAKE";
+        case TRACKER_SLEEP_MODE_LIGHT:
+            return "LIGHT";
+        case TRACKER_SLEEP_MODE_DEEP:
+            return "DEEP";
+        case TRACKER_SLEEP_MODE_NONE:
+        default:
+            return "NONE";
+    }
+}
+
+static void data_formatter_add_state(cJSON *root, const telemetry_t *telemetry) {
+    if (root == NULL || telemetry == NULL) {
+        return;
+    }
+
+    cJSON *state = cJSON_CreateObject();
+    if (state == NULL) {
+        return;
+    }
+
+    cJSON_AddStringToObject(state,
+                            "ignition_state",
+                            data_formatter_ignition_state_label(telemetry->ignition_state));
+    cJSON_AddStringToObject(state,
+                            "motion_state",
+                            data_formatter_motion_state_label(telemetry->motion_state));
+    cJSON_AddStringToObject(state,
+                            "vehicle_state",
+                            data_formatter_vehicle_state_label(telemetry->vehicle_state));
+    cJSON_AddStringToObject(state,
+                            "device_state",
+                            data_formatter_device_state_label(telemetry->device_state));
+    cJSON_AddStringToObject(state,
+                            "sleep_mode",
+                            data_formatter_sleep_mode_label(telemetry->sleep_mode));
+    cJSON_AddItemToObject(root, "state", state);
+}
+
+static void data_formatter_append_alert(cJSON *array,
+                                        const char *code,
+                                        const char *severity,
+                                        const char *message) {
+    if (array == NULL || util_string_empty(code) || util_string_empty(severity)) {
+        return;
+    }
+
+    cJSON *item = cJSON_CreateObject();
+    if (item == NULL) {
+        return;
+    }
+
+    cJSON_AddStringToObject(item, "code", code);
+    cJSON_AddStringToObject(item, "severity", severity);
+    if (!util_string_empty(message)) {
+        cJSON_AddStringToObject(item, "message", message);
+    }
+    cJSON_AddItemToArray(array, item);
+}
+
+static void data_formatter_add_runtime_alerts(cJSON *root, const telemetry_t *telemetry) {
+    if (root == NULL || telemetry == NULL) {
+        return;
+    }
+
+    cJSON *device_alerts = cJSON_AddArrayToObject(root, "device_alerts");
+    cJSON *ecu_alerts = cJSON_AddArrayToObject(root, "ecu_alerts");
+    if (device_alerts == NULL || ecu_alerts == NULL) {
+        return;
+    }
+
+    if (telemetry->error_code != 0) {
+        data_formatter_append_alert(device_alerts,
+                                    "runtime_error",
+                                    "high",
+                                    "Device reported runtime error code");
+    }
+
+    if (telemetry->obd_connect_fail_count_5m > 0U) {
+        data_formatter_append_alert(device_alerts,
+                                    "obd_connect_failed",
+                                    "medium",
+                                    "OBD connection failed in recent 5-minute window");
+    }
+
+    if (telemetry->obd_readiness.valid && telemetry->obd_readiness.mil_on) {
+        data_formatter_append_alert(ecu_alerts,
+                                    "mil_on",
+                                    "high",
+                                    "ECU reported MIL active");
+    }
+
+    if (telemetry->obd_stored_dtc.count > 0U || telemetry->obd_permanent_dtc.count > 0U) {
+        data_formatter_append_alert(ecu_alerts,
+                                    "dtc_present",
+                                    "high",
+                                    "ECU reported stored or permanent diagnostic trouble codes");
+    } else if (telemetry->obd_pending_dtc.count > 0U) {
+        data_formatter_append_alert(ecu_alerts,
+                                    "dtc_pending",
+                                    "medium",
+                                    "ECU reported pending diagnostic trouble codes");
     }
 }
 
@@ -302,12 +477,14 @@ char *data_format_rawdata(const config_t *cfg,
 
     cJSON_AddItemToObject(root, "data", data);
     data_formatter_add_diagnostics(root, telemetry);
+    data_formatter_add_state(root, telemetry);
+    data_formatter_add_runtime_alerts(root, telemetry);
     data_formatter_add_metadata(root,
                                 effective_ts_ms,
                                 message_id,
                                 seq_no,
                                 boot_id,
-                                DATA_FORMATTER_RAWDATA_SCHEMA_VERSION);
+                                DATA_FORMATTER_STATE_SCHEMA_VERSION);
     return data_formatter_print(root);
 }
 
@@ -323,6 +500,7 @@ char *data_format_rawdata(const config_t *cfg,
 char *data_format_status(const config_t *cfg,
                          const char *status,
                          uint32_t session_id,
+                         const telemetry_t *telemetry,
                          bool include_auth_token,
                          bool timestamp_trusted,
                          uint64_t timestamp_ms,
@@ -351,12 +529,14 @@ char *data_format_status(const config_t *cfg,
         cJSON_AddNumberToObject(root, "session_id", session_id);
     }
 
+    data_formatter_add_state(root, telemetry);
+    data_formatter_add_runtime_alerts(root, telemetry);
     data_formatter_add_metadata(root,
                                 effective_ts_ms,
                                 message_id,
                                 seq_no,
                                 boot_id,
-                                DATA_FORMATTER_DEFAULT_SCHEMA_VERSION);
+                                DATA_FORMATTER_STATE_SCHEMA_VERSION);
     return data_formatter_print(root);
 }
 

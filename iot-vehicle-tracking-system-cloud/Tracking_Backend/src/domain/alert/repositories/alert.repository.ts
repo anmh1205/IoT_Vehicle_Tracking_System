@@ -103,8 +103,8 @@ export const findById = async (id: number): Promise<Alert | null> =>
 
 export const create = async (input: CreateAlertInput): Promise<Alert> =>
   insertOne<Alert>(
-    `INSERT INTO alerts (vehicle_id, device_id, trip_id, geofence_id, alert_type, severity, title, message, latitude, longitude, speed, threshold_value, actual_value, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+    `INSERT INTO alerts (vehicle_id, device_id, trip_id, geofence_id, alert_type, source, severity, title, message, latitude, longitude, speed, threshold_value, actual_value, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
      RETURNING *`,
     [
       input.vehicleId ?? null,
@@ -112,6 +112,7 @@ export const create = async (input: CreateAlertInput): Promise<Alert> =>
       input.tripId ?? null,
       input.geofenceId ?? null,
       input.alertType,
+      input.source ?? 'device',
       input.severity,
       input.title,
       input.message ?? null,

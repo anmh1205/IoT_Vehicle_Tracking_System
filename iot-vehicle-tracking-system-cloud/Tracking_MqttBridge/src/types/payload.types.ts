@@ -1,3 +1,12 @@
+import type {
+  IgnitionState,
+  MotionState,
+  VehicleState,
+  DeviceRuntimeState,
+  SleepMode,
+  RuntimeAlertPayload,
+} from './device-state.types';
+
 export interface PayloadMetadata {
   schema_version: string;
   message_id: string;
@@ -88,6 +97,15 @@ export interface RawDataPayload {
     error_code?: number;
   };
   diagnostics?: RawDiagnostics;
+  state?: {
+    ignition_state?: IgnitionState;
+    motion_state?: MotionState;
+    vehicle_state?: VehicleState;
+    device_state?: DeviceRuntimeState;
+    sleep_mode?: SleepMode;
+  };
+  device_alerts?: RuntimeAlertPayload[];
+  ecu_alerts?: RuntimeAlertPayload[];
   metadata?: PayloadMetadata;
 }
 
@@ -97,6 +115,15 @@ export interface StatusPayload {
   status: 'running' | 'stopped' | 'heartbeat';
   session_id?: number;
   timestamp: number;
+  state?: {
+    ignition_state?: IgnitionState;
+    motion_state?: MotionState;
+    vehicle_state?: VehicleState;
+    device_state?: DeviceRuntimeState;
+    sleep_mode?: SleepMode;
+  };
+  device_alerts?: RuntimeAlertPayload[];
+  ecu_alerts?: RuntimeAlertPayload[];
   metadata?: PayloadMetadata;
 }
 

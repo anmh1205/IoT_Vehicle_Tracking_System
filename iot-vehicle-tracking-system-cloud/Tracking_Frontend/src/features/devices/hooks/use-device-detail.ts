@@ -16,6 +16,13 @@ export interface DeviceDetailData {
   errors: unknown[];
 }
 
+const toAlertSummary = (raw: any, source: 'device' | 'ecu'): Device['deviceAlerts'] => ({
+  source,
+  count: Number(raw?.count ?? 0),
+  highestSeverity: (raw?.highestSeverity ?? raw?.highest_severity ?? 'none') as Device['deviceAlerts']['highestSeverity'],
+  titles: Array.isArray(raw?.titles) ? raw.titles.map((item: unknown) => String(item ?? '')) : [],
+});
+
 const toDeviceSession = (raw: any): DeviceSession => ({
   id: Number(raw?.id ?? 0),
   status: raw?.status ?? 'running',
@@ -34,6 +41,14 @@ const toDevice = (raw: any): Device => ({
   currentStatus: (raw?.currentStatus ??
     raw?.current_status ??
     'disconnected') as Device['currentStatus'],
+  ignitionState: (raw?.ignitionState ?? raw?.ignition_state ?? null) as Device['ignitionState'],
+  motionState: (raw?.motionState ?? raw?.motion_state ?? null) as Device['motionState'],
+  vehicleState: (raw?.vehicleState ?? raw?.vehicle_state ?? null) as Device['vehicleState'],
+  deviceState: (raw?.deviceState ?? raw?.device_state ?? null) as Device['deviceState'],
+  sleepMode: (raw?.sleepMode ?? raw?.sleep_mode ?? null) as Device['sleepMode'],
+  stateUpdatedAt: raw?.stateUpdatedAt ?? raw?.state_updated_at ?? null,
+  deviceAlerts: toAlertSummary(raw?.deviceAlerts ?? raw?.device_alerts ?? {}, 'device'),
+  ecuAlerts: toAlertSummary(raw?.ecuAlerts ?? raw?.ecu_alerts ?? {}, 'ecu'),
   imei: raw?.imei ?? null,
   firmwareVersion: raw?.firmwareVersion ?? raw?.firmware_version ?? null,
   targetFirmwareVersion: raw?.targetFirmwareVersion ?? raw?.target_firmware_version ?? null,

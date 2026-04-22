@@ -5,6 +5,7 @@ export interface Alert {
   trip_id: number | null;
   geofence_id: number | null;
   alert_type: string;
+  source: 'device' | 'ecu';
   severity: 'low' | 'medium' | 'high' | 'critical';
   status: 'active' | 'acknowledged' | 'resolved' | 'dismissed';
   title: string;
@@ -36,6 +37,7 @@ export interface AlertPublic {
   tripId: number | null;
   geofenceId: number | null;
   alertType: string;
+  source: 'device' | 'ecu';
   severity: 'low' | 'medium' | 'high' | 'critical';
   status: 'active' | 'acknowledged' | 'resolved' | 'dismissed';
   title: string;
@@ -60,6 +62,7 @@ export interface CreateAlertInput {
   tripId?: number;
   geofenceId?: number;
   alertType: string;
+  source?: 'device' | 'ecu';
   severity: string;
   title: string;
   message?: string;

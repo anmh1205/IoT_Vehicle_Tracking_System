@@ -17,6 +17,7 @@ import { addUpdate } from '../services/batch-writer.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
 import { normalizePayloadTimestamp } from '../utils/timestamp.util';
+import { normalizeRuntimeState } from '../types/device-state.types';
 
 const VIBRATION_ALERT_THRESHOLD = 500;
 const OBD_RULE_COOLDOWN_MS = 15 * 60 * 1000;
@@ -669,6 +670,14 @@ export const handleRawData = async (
 
   const previousState = getStatus(payload.device_id);
   const previousStatus = previousState?.status;
+  const runtimeState = normalizeRuntimeState({
+    state: payload.state,
+    legacyStatus: previousStatus ?? device.current_status,
+    ignitionHint: payload.data.ignition,
+    speedKph: effectiveSpeed ?? toFiniteNumber(diagnostics?.signals?.obd_speed_kph),
+    previous: previousState?.runtimeState,
+  });
+  const stateUpdatedAt = new Date(receivedAtMs).toISOString();
 
   // 3. Only bind telemetry to a session when the device is already in an active runtime state.
   const canAttachTelemetryToSession =
@@ -796,6 +805,7 @@ export const handleRawData = async (
     speed: effectiveSpeed,
     sessionId: sessionId ?? undefined,
     serverTimestamp: receivedAtMs,
+    runtimeState,
   });
 
   if (sessionId !== null) {
@@ -830,13 +840,19 @@ export const handleRawData = async (
 
   // 8. Check status change
   if (sessionId !== null) {
-    setStatus(payload.device_id, 'online', sessionId);
+    setStatus(payload.device_id, 'online', sessionId, runtimeState);
 
     if (previousStatus && previousStatus !== 'online') {
       publishInternalEvent('status', {
         device_id: payload.device_id,
         previous_status: previousStatus,
         current_status: 'online',
+        ignition_state: runtimeState.ignition_state,
+        motion_state: runtimeState.motion_state,
+        vehicle_state: runtimeState.vehicle_state,
+        device_state: runtimeState.device_state,
+        sleep_mode: runtimeState.sleep_mode,
+        state_updated_at: stateUpdatedAt,
         message_id: messageId,
         schema_version: schemaVersion,
         seq_no: seqNo,
@@ -848,6 +864,7 @@ export const handleRawData = async (
       payload.device_id,
       device.current_status === 'disconnected' ? 'offline' : 'stopped',
       null,
+      runtimeState,
     );
   }
 
@@ -855,6 +872,7 @@ export const handleRawData = async (
     device_id: payload.device_id,
     vehicle_id: device.vehicle_id ?? undefined,
     session_id: sessionId,
+    current_status: sessionId !== null ? 'online' : device.current_status,
     lat: effectiveLatitude,
     lon: effectiveLongitude,
     spd: effectiveSpeed,
@@ -867,6 +885,12 @@ export const handleRawData = async (
     speed: effectiveSpeed,
     course: effectiveCourse,
     battery_top: payload.data.battery_top,
+    ignition_state: runtimeState.ignition_state,
+    motion_state: runtimeState.motion_state,
+    vehicle_state: runtimeState.vehicle_state,
+    device_state: runtimeState.device_state,
+    sleep_mode: runtimeState.sleep_mode,
+    state_updated_at: stateUpdatedAt,
     diagnostics: diagnostics ?? undefined,
     message_id: messageId,
     schema_version: schemaVersion,

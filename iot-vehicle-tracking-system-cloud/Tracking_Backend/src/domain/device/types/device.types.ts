@@ -1,3 +1,33 @@
+export type IgnitionState = 'ON' | 'OFF' | 'UNKNOWN';
+export type MotionState = 'MOVING' | 'STATIONARY' | 'UNKNOWN';
+export type VehicleState =
+  | 'PARKED_OFF'
+  | 'ROLLING_IGN_OFF'
+  | 'IDLING_ON'
+  | 'MOVING_ON'
+  | 'UNKNOWN_STATIONARY'
+  | 'UNKNOWN_MOVING'
+  | 'UNKNOWN';
+export type DeviceRuntimeState =
+  | 'BOOTING'
+  | 'ACTIVE'
+  | 'SLEEP_PREPARE'
+  | 'SLEEPING'
+  | 'WAKING'
+  | 'ALARM'
+  | 'OTA'
+  | 'FAULT';
+export type SleepMode = 'NONE' | 'FAKE' | 'LIGHT' | 'DEEP';
+export type AlertSource = 'device' | 'ecu';
+export type AlertSeverityLevel = 'none' | 'low' | 'medium' | 'high' | 'critical';
+
+export interface DeviceAlertSummary {
+  source: AlertSource;
+  count: number;
+  highestSeverity: AlertSeverityLevel;
+  titles: string[];
+}
+
 export interface Device {
   id: number;
   device_id: string;
@@ -5,6 +35,12 @@ export interface Device {
   auth_token: string;
   last_seen_at: Date | null;
   current_status: 'running' | 'stopped' | 'disconnected' | 'online';
+  ignition_state: IgnitionState | null;
+  motion_state: MotionState | null;
+  vehicle_state: VehicleState | null;
+  device_state: DeviceRuntimeState | null;
+  sleep_mode: SleepMode | null;
+  state_updated_at: Date | null;
   total_runtime_seconds: number;
   imei: string | null;
   vibration_threshold: number;
@@ -20,6 +56,12 @@ export interface Device {
   vehicle_plate?: string | null;
   customer_name?: string | null;
   linked_vehicle_id?: string | null;
+  device_alert_count?: number | null;
+  device_alert_titles?: string[] | null;
+  device_alert_highest_severity?: AlertSeverityLevel | null;
+  ecu_alert_count?: number | null;
+  ecu_alert_titles?: string[] | null;
+  ecu_alert_highest_severity?: AlertSeverityLevel | null;
 }
 
 export interface DeviceSession {
@@ -49,6 +91,14 @@ export interface DevicePublic {
   deviceId: string;
   deviceName: string;
   currentStatus: 'running' | 'stopped' | 'disconnected' | 'online';
+  ignitionState: IgnitionState | null;
+  motionState: MotionState | null;
+  vehicleState: VehicleState | null;
+  deviceState: DeviceRuntimeState | null;
+  sleepMode: SleepMode | null;
+  stateUpdatedAt: string | null;
+  deviceAlerts: DeviceAlertSummary;
+  ecuAlerts: DeviceAlertSummary;
   lastSeenAt: string | null;
   totalRuntimeSeconds: number;
   latitude: number | null;
@@ -90,6 +140,12 @@ export interface DevicePosition {
   latitude: number;
   longitude: number;
   currentStatus: string;
+  ignitionState: IgnitionState | null;
+  motionState: MotionState | null;
+  vehicleState: VehicleState | null;
+  deviceState: DeviceRuntimeState | null;
+  sleepMode: SleepMode | null;
+  stateUpdatedAt: string | null;
   lastSeenAt: string | null;
   speed?: number;
   heading?: number;
@@ -102,6 +158,8 @@ export interface DevicePosition {
   rpm?: number | null;
   activeAlertCount?: number;
   activeAlertTitles?: string[];
+  deviceAlerts: DeviceAlertSummary;
+  ecuAlerts: DeviceAlertSummary;
 }
 
 export interface CreateDeviceInput {

@@ -13,6 +13,12 @@ CREATE TABLE IF NOT EXISTS devices (
     auth_token VARCHAR(64) UNIQUE NOT NULL,
     last_seen_at TIMESTAMPTZ,
     current_status device_status_enum DEFAULT 'stopped',
+    ignition_state ignition_state_enum,
+    motion_state motion_state_enum,
+    vehicle_state vehicle_runtime_state_enum,
+    device_state device_runtime_state_enum,
+    sleep_mode sleep_mode_enum,
+    state_updated_at TIMESTAMPTZ,
     total_runtime_seconds BIGINT DEFAULT 0,
     imei VARCHAR(20),
     vibration_threshold DECIMAL(8,3) DEFAULT 1.000,
@@ -31,6 +37,7 @@ CREATE INDEX IF NOT EXISTS idx_devices_device_id ON devices(device_id);
 CREATE INDEX IF NOT EXISTS idx_devices_auth_token ON devices(auth_token);
 CREATE INDEX IF NOT EXISTS idx_devices_status ON devices(current_status);
 CREATE INDEX IF NOT EXISTS idx_devices_last_seen ON devices(last_seen_at);
+CREATE INDEX IF NOT EXISTS idx_devices_state_updated_at ON devices(state_updated_at DESC);
 
 CREATE TRIGGER trigger_devices_updated_at
     BEFORE UPDATE ON devices

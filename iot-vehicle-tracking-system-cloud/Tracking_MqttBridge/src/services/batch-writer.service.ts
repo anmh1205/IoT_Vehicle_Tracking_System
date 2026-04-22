@@ -1,5 +1,6 @@
 import { pool } from '../infrastructure/database';
 import { logger } from '../infrastructure/logger';
+import type { RuntimeStateSnapshot } from '../types/device-state.types';
 
 interface DeviceUpdate {
   deviceId: string;
@@ -9,6 +10,7 @@ interface DeviceUpdate {
   speed?: number;
   sessionId?: number;
   serverTimestamp: number;
+  runtimeState?: RuntimeStateSnapshot | null;
 }
 
 const MAX_BUFFER_SIZE = 100;
@@ -59,8 +61,25 @@ const flush = async (): Promise<void> => {
                    SELECT 1
                    FROM device_sessions s
                    WHERE s.id = $7 AND s.status = 'running'
-                 ) THEN $2
+               ) THEN $2
                  ELSE current_status
+               END,
+               ignition_state = COALESCE($8, ignition_state),
+               motion_state = COALESCE($9, motion_state),
+               vehicle_state = COALESCE($10, vehicle_state),
+               device_state = COALESCE($11, device_state),
+               sleep_mode = COALESCE($12, sleep_mode),
+               state_updated_at = CASE
+                 WHEN $8::text IS NOT NULL
+                   OR $9::text IS NOT NULL
+                   OR $10::text IS NOT NULL
+                   OR $11::text IS NOT NULL
+                   OR $12::text IS NOT NULL
+                 THEN GREATEST(
+                   COALESCE(state_updated_at, to_timestamp($6 / 1000.0)),
+                   to_timestamp($6 / 1000.0)
+                 )
+                 ELSE state_updated_at
                END,
                last_latitude = COALESCE($3, last_latitude),
                last_longitude = COALESCE($4, last_longitude),
@@ -78,6 +97,11 @@ const flush = async (): Promise<void> => {
             update.speed ?? null,
             update.serverTimestamp,
             update.sessionId ?? null,
+            update.runtimeState?.ignition_state ?? null,
+            update.runtimeState?.motion_state ?? null,
+            update.runtimeState?.vehicle_state ?? null,
+            update.runtimeState?.device_state ?? null,
+            update.runtimeState?.sleep_mode ?? null,
           ],
         );
 

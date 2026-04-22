@@ -37,9 +37,10 @@ export const deriveDeviceStatus = ({
 }: DeriveDeviceStatusParams): DeviceStatusRealtimeState => {
   const lastSeenMs = parseLastSeenAt(lastSeenAt);
   if (!lastSeenMs) {
+    const status = serverStatus ?? 'disconnected';
     return {
-      status: serverStatus ?? 'disconnected',
-      isOnline: false,
+      status,
+      isOnline: status !== 'disconnected',
       secondsSinceLastSeen: null,
     };
   }
@@ -58,6 +59,8 @@ export const deriveDeviceStatus = ({
   }
   if (serverStatus === 'disconnected') {
     status = 'disconnected';
+  } else if (serverStatus) {
+    status = serverStatus;
   }
   return {
     status,

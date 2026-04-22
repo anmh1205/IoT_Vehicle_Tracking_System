@@ -14,9 +14,10 @@ const STATUS_PRIORITY: Record<DevicePosition['status'], number> = {
 export interface MapDeviceStats {
   total: number;
   visible: number;
-  running: number;
-  attention: number;
-  withCoordinates: number;
+  engineOn: number;
+  moving: number;
+  stationary: number;
+  deviceFaults: number;
 }
 
 export const filterDevices = (
@@ -67,9 +68,20 @@ export const buildMapDeviceStats = (
 ): MapDeviceStats => ({
   total: totalDevices,
   visible: visibleDevices.length,
-  running: visibleDevices.filter((device) => device.status === 'running').length,
-  attention: visibleDevices.filter(
-    (device) => device.status === 'error' || device.status === 'disconnected',
+  engineOn: visibleDevices.filter(
+    (device) => device.ignitionState === 'ON' || device.status === 'running',
   ).length,
-  withCoordinates: visibleDevices.filter((device) => hasValidMapCoordinates(device)).length,
+  moving: visibleDevices.filter(
+    (device) => device.motionState === 'MOVING' || device.status === 'running',
+  ).length,
+  stationary: visibleDevices.filter(
+    (device) => device.motionState === 'STATIONARY' || device.status === 'stopped',
+  ).length,
+  deviceFaults: visibleDevices.filter(
+    (device) =>
+      device.deviceState === 'FAULT' ||
+      device.status === 'error' ||
+      device.status === 'disconnected' ||
+      !hasValidMapCoordinates(device),
+  ).length,
 });

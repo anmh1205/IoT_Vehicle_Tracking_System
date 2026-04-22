@@ -11,6 +11,29 @@ export interface RealtimeEventMap {
   'device:status': {
     device_id: string;
     status: string;
+    ignitionState?: 'ON' | 'OFF' | 'UNKNOWN' | null;
+    motionState?: 'MOVING' | 'STATIONARY' | 'UNKNOWN' | null;
+    vehicleState?:
+      | 'PARKED_OFF'
+      | 'ROLLING_IGN_OFF'
+      | 'IDLING_ON'
+      | 'MOVING_ON'
+      | 'UNKNOWN_STATIONARY'
+      | 'UNKNOWN_MOVING'
+      | 'UNKNOWN'
+      | null;
+    deviceState?:
+      | 'BOOTING'
+      | 'ACTIVE'
+      | 'SLEEP_PREPARE'
+      | 'SLEEPING'
+      | 'WAKING'
+      | 'ALARM'
+      | 'OTA'
+      | 'FAULT'
+      | null;
+    sleepMode?: 'NONE' | 'FAKE' | 'LIGHT' | 'DEEP' | null;
+    stateUpdatedAt?: string | null;
     last_seen_at?: string;
     metadata?: RealtimeMetadata;
   };
@@ -22,6 +45,29 @@ export interface RealtimeEventMap {
     heading: number;
     timestamp: number;
     status?: string;
+    ignitionState?: 'ON' | 'OFF' | 'UNKNOWN' | null;
+    motionState?: 'MOVING' | 'STATIONARY' | 'UNKNOWN' | null;
+    vehicleState?:
+      | 'PARKED_OFF'
+      | 'ROLLING_IGN_OFF'
+      | 'IDLING_ON'
+      | 'MOVING_ON'
+      | 'UNKNOWN_STATIONARY'
+      | 'UNKNOWN_MOVING'
+      | 'UNKNOWN'
+      | null;
+    deviceState?:
+      | 'BOOTING'
+      | 'ACTIVE'
+      | 'SLEEP_PREPARE'
+      | 'SLEEPING'
+      | 'WAKING'
+      | 'ALARM'
+      | 'OTA'
+      | 'FAULT'
+      | null;
+    sleepMode?: 'NONE' | 'FAKE' | 'LIGHT' | 'DEEP' | null;
+    stateUpdatedAt?: string | null;
     deviceName?: string;
     vehicleId?: string | null;
     vehiclePlate?: string;
@@ -31,6 +77,16 @@ export interface RealtimeEventMap {
     temperature?: number | null;
     engineTemperature?: number | null;
     rpm?: number | null;
+    deviceAlerts?: {
+      count: number;
+      highestSeverity: 'none' | 'low' | 'medium' | 'high' | 'critical';
+      titles: string[];
+    };
+    ecuAlerts?: {
+      count: number;
+      highestSeverity: 'none' | 'low' | 'medium' | 'high' | 'critical';
+      titles: string[];
+    };
     metadata?: RealtimeMetadata;
   };
   'device:session_start': {
@@ -55,6 +111,7 @@ export interface RealtimeEventMap {
     vehicle_id?: string;
     device_id?: string;
     alert_type: string;
+    source?: 'device' | 'ecu';
     severity: string;
     title: string;
     message?: string;

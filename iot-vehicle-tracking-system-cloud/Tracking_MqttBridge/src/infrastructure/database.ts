@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { dbConfig } from '../config/env';
 import { logger } from './logger';
+import type { RuntimeStateSnapshot } from '../types/device-state.types';
 
 export const pool = new Pool({
   host: dbConfig.host,
@@ -81,10 +82,38 @@ export const updateDeviceStatus = async (
   deviceId: string,
   status: string,
   lastSeenTimestampMs?: number,
+  runtimeState?: RuntimeStateSnapshot | null,
 ): Promise<void> => {
   const lastSeenAt = lastSeenTimestampMs ? toIsoTimestamp(lastSeenTimestampMs) : null;
+  const stateUpdatedAt = lastSeenAt ?? new Date().toISOString();
 
   try {
+    if (lastSeenAt && runtimeState) {
+      await pool.query(
+        `UPDATE devices
+         SET current_status = $2,
+             ignition_state = $3,
+             motion_state = $4,
+             vehicle_state = $5,
+             device_state = $6,
+             sleep_mode = $7,
+             state_updated_at = GREATEST(COALESCE(state_updated_at, $8::timestamptz), $8::timestamptz),
+             last_seen_at = GREATEST(COALESCE(last_seen_at, $8::timestamptz), $8::timestamptz)
+         WHERE device_id = $1`,
+        [
+          deviceId,
+          status,
+          runtimeState.ignition_state,
+          runtimeState.motion_state,
+          runtimeState.vehicle_state,
+          runtimeState.device_state,
+          runtimeState.sleep_mode,
+          stateUpdatedAt,
+        ],
+      );
+      return;
+    }
+
     if (lastSeenAt) {
       await pool.query(
         `UPDATE devices
@@ -92,6 +121,32 @@ export const updateDeviceStatus = async (
              last_seen_at = GREATEST(COALESCE(last_seen_at, $3::timestamptz), $3::timestamptz)
          WHERE device_id = $1`,
         [deviceId, status, lastSeenAt],
+      );
+      return;
+    }
+
+    if (runtimeState) {
+      await pool.query(
+        `UPDATE devices
+         SET current_status = $2,
+             ignition_state = $3,
+             motion_state = $4,
+             vehicle_state = $5,
+             device_state = $6,
+             sleep_mode = $7,
+             state_updated_at = $8::timestamptz,
+             last_seen_at = NOW()
+         WHERE device_id = $1`,
+        [
+          deviceId,
+          status,
+          runtimeState.ignition_state,
+          runtimeState.motion_state,
+          runtimeState.vehicle_state,
+          runtimeState.device_state,
+          runtimeState.sleep_mode,
+          stateUpdatedAt,
+        ],
       );
       return;
     }

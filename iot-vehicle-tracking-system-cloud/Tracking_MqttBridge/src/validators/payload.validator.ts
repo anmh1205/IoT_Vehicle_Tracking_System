@@ -10,6 +10,40 @@ const payloadMetadataSchema = z.object({
 
 const diagnosticMonitorStatusSchema = z.enum(['complete', 'incomplete', 'unsupported']);
 const diagnosticDtcCodeSchema = z.string().regex(/^[PCBU][0-3][0-9A-F]{3}$/i);
+const ignitionStateSchema = z.enum(['ON', 'OFF', 'UNKNOWN']);
+const motionStateSchema = z.enum(['MOVING', 'STATIONARY', 'UNKNOWN']);
+const vehicleStateSchema = z.enum([
+  'PARKED_OFF',
+  'ROLLING_IGN_OFF',
+  'IDLING_ON',
+  'MOVING_ON',
+  'UNKNOWN_STATIONARY',
+  'UNKNOWN_MOVING',
+  'UNKNOWN',
+]);
+const deviceRuntimeStateSchema = z.enum([
+  'BOOTING',
+  'ACTIVE',
+  'SLEEP_PREPARE',
+  'SLEEPING',
+  'WAKING',
+  'ALARM',
+  'OTA',
+  'FAULT',
+]);
+const sleepModeSchema = z.enum(['NONE', 'FAKE', 'LIGHT', 'DEEP']);
+const runtimeAlertSchema = z.object({
+  code: z.string().min(1),
+  severity: z.enum(['low', 'medium', 'high', 'critical']),
+  message: z.string().min(1).optional(),
+});
+const runtimeStateSchema = z.object({
+  ignition_state: ignitionStateSchema.optional(),
+  motion_state: motionStateSchema.optional(),
+  vehicle_state: vehicleStateSchema.optional(),
+  device_state: deviceRuntimeStateSchema.optional(),
+  sleep_mode: sleepModeSchema.optional(),
+});
 
 const rawDataPayloadBaseSchema = z.object({
   device_id: z.string().min(1),
@@ -77,6 +111,9 @@ const rawDataPayloadBaseSchema = z.object({
       permanent: z.array(diagnosticDtcCodeSchema).optional(),
     }).optional(),
   }).optional(),
+  state: runtimeStateSchema.optional(),
+  device_alerts: z.array(runtimeAlertSchema).optional(),
+  ecu_alerts: z.array(runtimeAlertSchema).optional(),
   metadata: z.unknown().optional(),
 });
 
@@ -86,6 +123,9 @@ const statusPayloadBaseSchema = z.object({
   status: z.enum(['running', 'stopped', 'heartbeat']),
   session_id: z.number().int().positive().optional(),
   timestamp: z.number().positive(),
+  state: runtimeStateSchema.optional(),
+  device_alerts: z.array(runtimeAlertSchema).optional(),
+  ecu_alerts: z.array(runtimeAlertSchema).optional(),
   metadata: z.unknown().optional(),
 });
 

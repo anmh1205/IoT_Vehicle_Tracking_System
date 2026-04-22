@@ -8,6 +8,17 @@ const toNumberOrNull = (value: unknown): number | null => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const toAlertSummary = (raw: any, source: 'device' | 'ecu'): DevicePositionSnapshot['deviceAlerts'] => ({
+  source,
+  count: Number(raw?.count ?? 0),
+  highestSeverity: (raw?.highestSeverity ?? raw?.highest_severity ?? 'none') as DevicePositionSnapshot['deviceAlerts']['highestSeverity'],
+  titles: Array.isArray(raw?.titles)
+    ? raw.titles
+        .map((item: unknown) => String(item ?? '').trim())
+        .filter((item: string) => item.length > 0)
+    : [],
+});
+
 const normalizePosition = (row: any): DevicePositionSnapshot => ({
   deviceId: String(row?.deviceId ?? row?.device_id ?? ''),
   deviceName: String(row?.deviceName ?? row?.device_name ?? row?.deviceId ?? row?.device_id ?? ''),
@@ -18,6 +29,12 @@ const normalizePosition = (row: any): DevicePositionSnapshot => ({
   speed: toNumberOrNull(row?.speed),
   heading: toNumberOrNull(row?.heading),
   status: String(row?.currentStatus ?? row?.status ?? 'disconnected'),
+  ignitionState: (row?.ignitionState ?? row?.ignition_state ?? null) as DevicePositionSnapshot['ignitionState'],
+  motionState: (row?.motionState ?? row?.motion_state ?? null) as DevicePositionSnapshot['motionState'],
+  vehicleState: (row?.vehicleState ?? row?.vehicle_state ?? null) as DevicePositionSnapshot['vehicleState'],
+  deviceState: (row?.deviceState ?? row?.device_state ?? null) as DevicePositionSnapshot['deviceState'],
+  sleepMode: (row?.sleepMode ?? row?.sleep_mode ?? null) as DevicePositionSnapshot['sleepMode'],
+  stateUpdatedAt: row?.stateUpdatedAt ?? row?.state_updated_at ?? null,
   timestamp: row?.lastSeenAt ?? row?.last_seen_at ?? row?.timestamp ?? null,
   battery: toNumberOrNull(row?.battery),
   deviceBattery: toNumberOrNull(row?.deviceBattery ?? row?.device_battery),
@@ -32,6 +49,8 @@ const normalizePosition = (row: any): DevicePositionSnapshot => ({
         (item: unknown): item is string => typeof item === 'string' && item.trim().length > 0,
       )
     : [],
+  deviceAlerts: toAlertSummary(row?.deviceAlerts ?? row?.device_alerts ?? {}, 'device'),
+  ecuAlerts: toAlertSummary(row?.ecuAlerts ?? row?.ecu_alerts ?? {}, 'ecu'),
 });
 
 export const useDevicePositionSnapshot = (devicePublicId: string | null, enabled = true) => {

@@ -1,8 +1,46 @@
+export type IgnitionState = 'ON' | 'OFF' | 'UNKNOWN';
+export type MotionState = 'MOVING' | 'STATIONARY' | 'UNKNOWN';
+export type VehicleState =
+  | 'PARKED_OFF'
+  | 'ROLLING_IGN_OFF'
+  | 'IDLING_ON'
+  | 'MOVING_ON'
+  | 'UNKNOWN_STATIONARY'
+  | 'UNKNOWN_MOVING'
+  | 'UNKNOWN';
+export type DeviceRuntimeState =
+  | 'BOOTING'
+  | 'ACTIVE'
+  | 'SLEEP_PREPARE'
+  | 'SLEEPING'
+  | 'WAKING'
+  | 'ALARM'
+  | 'OTA'
+  | 'FAULT';
+export type SleepMode = 'NONE' | 'FAKE' | 'LIGHT' | 'DEEP';
+export type AlertSource = 'device' | 'ecu';
+export type AlertSeverityLevel = 'none' | 'low' | 'medium' | 'high' | 'critical';
+
+export interface DeviceAlertSummary {
+  source: AlertSource;
+  count: number;
+  highestSeverity: AlertSeverityLevel;
+  titles: string[];
+}
+
 export interface Device {
   id: number;
   deviceId: string;
   deviceName: string;
   currentStatus: 'running' | 'stopped' | 'disconnected' | 'online';
+  ignitionState: IgnitionState | null;
+  motionState: MotionState | null;
+  vehicleState: VehicleState | null;
+  deviceState: DeviceRuntimeState | null;
+  sleepMode: SleepMode | null;
+  stateUpdatedAt?: string | null;
+  deviceAlerts: DeviceAlertSummary;
+  ecuAlerts: DeviceAlertSummary;
   imei: string | null;
   firmwareVersion: string | null;
   targetFirmwareVersion?: string | null;
@@ -92,6 +130,12 @@ export interface DevicePositionSnapshot {
   speed: number | null;
   heading: number | null;
   status: string;
+  ignitionState: IgnitionState | null;
+  motionState: MotionState | null;
+  vehicleState: VehicleState | null;
+  deviceState: DeviceRuntimeState | null;
+  sleepMode: SleepMode | null;
+  stateUpdatedAt: string | null;
   timestamp: string | null;
   battery: number | null;
   deviceBattery: number | null;
@@ -102,6 +146,8 @@ export interface DevicePositionSnapshot {
   rpm: number | null;
   activeAlertCount: number;
   activeAlertTitles: string[];
+  deviceAlerts: DeviceAlertSummary;
+  ecuAlerts: DeviceAlertSummary;
 }
 
 export interface DeviceRawFeedRow {

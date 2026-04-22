@@ -24,6 +24,13 @@ const localizeAlertTitles = (value: unknown): string[] => {
     .filter((item): item is string => Boolean(item));
 };
 
+const toAlertSummary = (raw: any, source: 'device' | 'ecu'): DevicePosition['deviceAlerts'] => ({
+  source,
+  count: Number(raw?.count ?? 0),
+  highestSeverity: (raw?.highestSeverity ?? raw?.highest_severity ?? 'none') as DevicePosition['deviceAlerts']['highestSeverity'],
+  titles: localizeAlertTitles(raw?.titles),
+});
+
 const toDevicePosition = (raw: any): DevicePosition => ({
   deviceId: String(raw?.deviceId ?? raw?.device_id ?? ''),
   deviceName: String(
@@ -37,6 +44,12 @@ const toDevicePosition = (raw: any): DevicePosition => ({
   speed: Number(raw?.speed ?? 0),
   heading: Number(raw?.heading ?? 0),
   status: (raw?.status ?? raw?.currentStatus ?? 'disconnected') as DevicePosition['status'],
+  ignitionState: (raw?.ignitionState ?? raw?.ignition_state ?? null) as DevicePosition['ignitionState'],
+  motionState: (raw?.motionState ?? raw?.motion_state ?? null) as DevicePosition['motionState'],
+  vehicleState: (raw?.vehicleState ?? raw?.vehicle_state ?? null) as DevicePosition['vehicleState'],
+  deviceState: (raw?.deviceState ?? raw?.device_state ?? null) as DevicePosition['deviceState'],
+  sleepMode: (raw?.sleepMode ?? raw?.sleep_mode ?? null) as DevicePosition['sleepMode'],
+  stateUpdatedAt: raw?.stateUpdatedAt ?? raw?.state_updated_at ?? null,
   timestamp: parseMapTimestamp(raw?.timestamp ?? raw?.lastSeenAt ?? raw?.last_seen_at),
   battery: toNullableNumber(raw?.battery),
   deviceBattery: toNullableNumber(raw?.deviceBattery ?? raw?.device_battery),
@@ -47,6 +60,8 @@ const toDevicePosition = (raw: any): DevicePosition => ({
   rpm: toNullableNumber(raw?.rpm),
   activeAlertCount: Number(raw?.activeAlertCount ?? raw?.active_alert_count ?? 0),
   activeAlertTitles: localizeAlertTitles(raw?.activeAlertTitles ?? raw?.active_alert_titles),
+  deviceAlerts: toAlertSummary(raw?.deviceAlerts ?? raw?.device_alerts ?? {}, 'device'),
+  ecuAlerts: toAlertSummary(raw?.ecuAlerts ?? raw?.ecu_alerts ?? {}, 'ecu'),
 });
 
 const mergePosition = (
@@ -65,6 +80,12 @@ const mergePosition = (
   speed: Number.isFinite(next.speed) ? next.speed : (previous?.speed ?? 0),
   heading: Number.isFinite(next.heading) ? next.heading : (previous?.heading ?? 0),
   status: next.status ?? previous?.status ?? 'disconnected',
+  ignitionState: next.ignitionState ?? previous?.ignitionState ?? null,
+  motionState: next.motionState ?? previous?.motionState ?? null,
+  vehicleState: next.vehicleState ?? previous?.vehicleState ?? null,
+  deviceState: next.deviceState ?? previous?.deviceState ?? null,
+  sleepMode: next.sleepMode ?? previous?.sleepMode ?? null,
+  stateUpdatedAt: next.stateUpdatedAt ?? previous?.stateUpdatedAt ?? null,
   timestamp: next.timestamp ?? previous?.timestamp ?? null,
   battery: next.battery ?? previous?.battery ?? null,
   deviceBattery: next.deviceBattery ?? previous?.deviceBattery ?? null,
@@ -75,6 +96,18 @@ const mergePosition = (
   rpm: next.rpm ?? previous?.rpm ?? null,
   activeAlertCount: next.activeAlertCount ?? previous?.activeAlertCount ?? 0,
   activeAlertTitles: next.activeAlertTitles ?? previous?.activeAlertTitles ?? [],
+  deviceAlerts: next.deviceAlerts ?? previous?.deviceAlerts ?? {
+    source: 'device',
+    count: 0,
+    highestSeverity: 'none',
+    titles: [],
+  },
+  ecuAlerts: next.ecuAlerts ?? previous?.ecuAlerts ?? {
+    source: 'ecu',
+    count: 0,
+    highestSeverity: 'none',
+    titles: [],
+  },
 });
 
 export const useMapRealtime = () => {

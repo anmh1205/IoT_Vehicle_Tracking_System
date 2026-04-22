@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS alerts (
     trip_id BIGINT REFERENCES trips(id),
     geofence_id INT,
     alert_type alert_type NOT NULL,
+    source alert_source_enum DEFAULT 'device',
     severity alert_severity DEFAULT 'medium',
     status alert_status DEFAULT 'active',
     title VARCHAR(200) NOT NULL,
@@ -72,6 +73,7 @@ CREATE INDEX IF NOT EXISTS idx_alerts_vehicle_id ON alerts(vehicle_id);
 CREATE INDEX IF NOT EXISTS idx_alerts_device_id ON alerts(device_id);
 CREATE INDEX IF NOT EXISTS idx_alerts_status ON alerts(status);
 CREATE INDEX IF NOT EXISTS idx_alerts_type ON alerts(alert_type);
+CREATE INDEX IF NOT EXISTS idx_alerts_source ON alerts(source);
 CREATE INDEX IF NOT EXISTS idx_alerts_severity ON alerts(severity);
 CREATE INDEX IF NOT EXISTS idx_alerts_created ON alerts(created_at DESC);
 

@@ -24,6 +24,13 @@ const localizeAlertTitles = (value: unknown): string[] => {
     .filter((item): item is string => Boolean(item));
 };
 
+const toAlertSummary = (raw: any, source: 'device' | 'ecu'): DevicePosition['deviceAlerts'] => ({
+  source,
+  count: Number(raw?.count ?? 0),
+  highestSeverity: (raw?.highestSeverity ?? raw?.highest_severity ?? 'none') as DevicePosition['deviceAlerts']['highestSeverity'],
+  titles: localizeAlertTitles(raw?.titles),
+});
+
 const toDevicePosition = (raw: any): DevicePosition => ({
   deviceId: String(raw?.deviceId ?? raw?.device_id ?? ''),
   deviceName: String(
@@ -37,6 +44,12 @@ const toDevicePosition = (raw: any): DevicePosition => ({
   speed: Number(raw?.speed ?? 0),
   heading: Number(raw?.heading ?? 0),
   status: (raw?.status ?? raw?.currentStatus ?? 'disconnected') as DevicePosition['status'],
+  ignitionState: (raw?.ignitionState ?? raw?.ignition_state ?? null) as DevicePosition['ignitionState'],
+  motionState: (raw?.motionState ?? raw?.motion_state ?? null) as DevicePosition['motionState'],
+  vehicleState: (raw?.vehicleState ?? raw?.vehicle_state ?? null) as DevicePosition['vehicleState'],
+  deviceState: (raw?.deviceState ?? raw?.device_state ?? null) as DevicePosition['deviceState'],
+  sleepMode: (raw?.sleepMode ?? raw?.sleep_mode ?? null) as DevicePosition['sleepMode'],
+  stateUpdatedAt: raw?.stateUpdatedAt ?? raw?.state_updated_at ?? null,
   timestamp: parseMapTimestamp(raw?.timestamp ?? raw?.lastSeenAt ?? raw?.last_seen_at),
   battery: toNullableNumber(raw?.battery),
   deviceBattery: toNullableNumber(raw?.deviceBattery ?? raw?.device_battery),
@@ -47,6 +60,8 @@ const toDevicePosition = (raw: any): DevicePosition => ({
   rpm: toNullableNumber(raw?.rpm),
   activeAlertCount: Number(raw?.activeAlertCount ?? raw?.active_alert_count ?? 0),
   activeAlertTitles: localizeAlertTitles(raw?.activeAlertTitles ?? raw?.active_alert_titles),
+  deviceAlerts: toAlertSummary(raw?.deviceAlerts ?? raw?.device_alerts ?? {}, 'device'),
+  ecuAlerts: toAlertSummary(raw?.ecuAlerts ?? raw?.ecu_alerts ?? {}, 'ecu'),
 });
 
 export const useDevicePositions = () => {

@@ -33,6 +33,46 @@ typedef enum {
     APP_STATE_SLEEP,
 } app_state_t;
 
+typedef enum {
+    TRACKER_IGNITION_STATE_UNKNOWN = 0,
+    TRACKER_IGNITION_STATE_OFF,
+    TRACKER_IGNITION_STATE_ON,
+} tracker_ignition_state_t;
+
+typedef enum {
+    TRACKER_MOTION_STATE_UNKNOWN = 0,
+    TRACKER_MOTION_STATE_STATIONARY,
+    TRACKER_MOTION_STATE_MOVING,
+} tracker_motion_state_t;
+
+typedef enum {
+    TRACKER_VEHICLE_STATE_UNKNOWN = 0,
+    TRACKER_VEHICLE_STATE_PARKED_OFF,
+    TRACKER_VEHICLE_STATE_ROLLING_IGN_OFF,
+    TRACKER_VEHICLE_STATE_IDLING_ON,
+    TRACKER_VEHICLE_STATE_MOVING_ON,
+    TRACKER_VEHICLE_STATE_UNKNOWN_STATIONARY,
+    TRACKER_VEHICLE_STATE_UNKNOWN_MOVING,
+} tracker_vehicle_state_t;
+
+typedef enum {
+    TRACKER_DEVICE_STATE_BOOTING = 0,
+    TRACKER_DEVICE_STATE_ACTIVE,
+    TRACKER_DEVICE_STATE_SLEEP_PREPARE,
+    TRACKER_DEVICE_STATE_SLEEPING,
+    TRACKER_DEVICE_STATE_WAKING,
+    TRACKER_DEVICE_STATE_ALARM,
+    TRACKER_DEVICE_STATE_OTA,
+    TRACKER_DEVICE_STATE_FAULT,
+} tracker_device_state_t;
+
+typedef enum {
+    TRACKER_SLEEP_MODE_NONE = 0,
+    TRACKER_SLEEP_MODE_FAKE,
+    TRACKER_SLEEP_MODE_LIGHT,
+    TRACKER_SLEEP_MODE_DEEP,
+} tracker_sleep_mode_t;
+
 /**
  * @brief Persistent RTC context retained across deep-sleep resets.
  */
@@ -137,6 +177,16 @@ typedef struct {
     uint16_t vibration;
     /** Derived ignition state. */
     bool ignition;
+    /** Canonical ignition axis for cloud/runtime contracts. */
+    tracker_ignition_state_t ignition_state;
+    /** Canonical motion axis for cloud/runtime contracts. */
+    tracker_motion_state_t motion_state;
+    /** Canonical derived vehicle state for cloud/runtime contracts. */
+    tracker_vehicle_state_t vehicle_state;
+    /** Canonical device runtime axis for cloud/runtime contracts. */
+    tracker_device_state_t device_state;
+    /** Explicit sleep mode currently associated with device runtime. */
+    tracker_sleep_mode_t sleep_mode;
     /** Generic error code for telemetry stream. */
     int error_code;
     /** Engine RPM from OBD PID 0x0C. */

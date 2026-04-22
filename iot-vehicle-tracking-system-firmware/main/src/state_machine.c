@@ -193,6 +193,7 @@ static bool s_deferred_firmware_report_pending = false;
 static bool s_ble_retry_last_ignition = false;
 static bool s_ignition_log_initialized = false;
 static bool s_last_ignition_state = false;
+static app_state_t s_runtime_state_hint = APP_STATE_INIT;
 
 static const retry_policy_t s_ble_retry_policy = {
     .mode = RETRY_MODE_EXPONENTIAL,
@@ -599,6 +600,92 @@ static bool state_machine_has_recent_obd_sample(uint64_t now_ms, uint32_t max_ag
     }
 
     return (now_ms - s_last_obd_sample_ms) <= (uint64_t)max_age_ms;
+}
+
+static tracker_motion_state_t state_machine_resolve_motion_state(uint64_t now_ms) {
+    if (s_telemetry.gnss.fix_valid) {
+        return s_telemetry.gnss.speed_kmh > 3.0f ? TRACKER_MOTION_STATE_MOVING
+                                                 : TRACKER_MOTION_STATE_STATIONARY;
+    }
+
+    if (s_telemetry.obd_elm_ready &&
+        state_machine_has_recent_obd_sample(now_ms, TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS)) {
+        return s_telemetry.obd_speed > 3 ? TRACKER_MOTION_STATE_MOVING
+                                         : TRACKER_MOTION_STATE_STATIONARY;
+    }
+
+    return s_telemetry.ignition ? TRACKER_MOTION_STATE_UNKNOWN
+                                : TRACKER_MOTION_STATE_STATIONARY;
+}
+
+static tracker_vehicle_state_t state_machine_resolve_vehicle_state(tracker_ignition_state_t ignition_state,
+                                                                   tracker_motion_state_t motion_state) {
+    if (ignition_state == TRACKER_IGNITION_STATE_ON && motion_state == TRACKER_MOTION_STATE_MOVING) {
+        return TRACKER_VEHICLE_STATE_MOVING_ON;
+    }
+    if (ignition_state == TRACKER_IGNITION_STATE_ON &&
+        motion_state == TRACKER_MOTION_STATE_STATIONARY) {
+        return TRACKER_VEHICLE_STATE_IDLING_ON;
+    }
+    if (ignition_state == TRACKER_IGNITION_STATE_OFF &&
+        motion_state == TRACKER_MOTION_STATE_MOVING) {
+        return TRACKER_VEHICLE_STATE_ROLLING_IGN_OFF;
+    }
+    if (ignition_state == TRACKER_IGNITION_STATE_OFF &&
+        motion_state == TRACKER_MOTION_STATE_STATIONARY) {
+        return TRACKER_VEHICLE_STATE_PARKED_OFF;
+    }
+    if (motion_state == TRACKER_MOTION_STATE_MOVING) {
+        return TRACKER_VEHICLE_STATE_UNKNOWN_MOVING;
+    }
+    if (motion_state == TRACKER_MOTION_STATE_STATIONARY) {
+        return TRACKER_VEHICLE_STATE_UNKNOWN_STATIONARY;
+    }
+    return TRACKER_VEHICLE_STATE_UNKNOWN;
+}
+
+static tracker_device_state_t state_machine_resolve_device_state(app_state_t app_state) {
+    switch (app_state) {
+        case APP_STATE_INIT:
+            return TRACKER_DEVICE_STATE_BOOTING;
+        case APP_STATE_CHECK_IGN:
+            return TRACKER_DEVICE_STATE_WAKING;
+        case APP_STATE_DRIVING:
+        case APP_STATE_HEARTBEAT:
+            return TRACKER_DEVICE_STATE_ACTIVE;
+        case APP_STATE_PARKED:
+            return TRACKER_DEVICE_STATE_SLEEP_PREPARE;
+        case APP_STATE_ALARM:
+            return TRACKER_DEVICE_STATE_ALARM;
+        case APP_STATE_SLEEP:
+            return TRACKER_DEVICE_STATE_SLEEPING;
+        default:
+            return TRACKER_DEVICE_STATE_ACTIVE;
+    }
+}
+
+static tracker_sleep_mode_t state_machine_resolve_sleep_mode(app_state_t app_state) {
+    if (app_state != APP_STATE_SLEEP) {
+        return TRACKER_SLEEP_MODE_NONE;
+    }
+
+#if TRACKER_FAKE_SLEEP_ENABLED
+    return TRACKER_SLEEP_MODE_FAKE;
+#else
+    return state_machine_should_use_light_sleep_motion_wake() ? TRACKER_SLEEP_MODE_LIGHT
+                                                              : TRACKER_SLEEP_MODE_DEEP;
+#endif
+}
+
+static void state_machine_sync_runtime_axes(app_state_t app_state) {
+    uint64_t now_ms = util_uptime_ms();
+    s_telemetry.ignition_state = s_telemetry.ignition ? TRACKER_IGNITION_STATE_ON
+                                                      : TRACKER_IGNITION_STATE_OFF;
+    s_telemetry.motion_state = state_machine_resolve_motion_state(now_ms);
+    s_telemetry.vehicle_state =
+        state_machine_resolve_vehicle_state(s_telemetry.ignition_state, s_telemetry.motion_state);
+    s_telemetry.device_state = state_machine_resolve_device_state(app_state);
+    s_telemetry.sleep_mode = state_machine_resolve_sleep_mode(app_state);
 }
 
 static bool state_machine_network_ready_for_heartbeat_publish(void) {
@@ -1057,6 +1144,7 @@ telemetry_finalize:
     }
     s_telemetry.ignition = ignition_next;
     s_telemetry.error_code = 0;
+    state_machine_sync_runtime_axes(s_runtime_state_hint);
 
     state_machine_obd_refresh_fail_window(now_ms);
     s_telemetry.obd_connect_fail_count_5m = s_obd_fail_window_count;
@@ -1159,6 +1247,7 @@ static void state_machine_update_time_source(void) {
  */
 static void state_machine_publish_rawdata(void) {
     state_machine_update_time_source();
+    state_machine_sync_runtime_axes(s_runtime_state_hint);
 
     char message_id[TRACKER_METADATA_MESSAGE_ID_LEN] = {0};
     state_machine_fill_message_id(message_id, sizeof(message_id));
@@ -1213,6 +1302,7 @@ static void state_machine_publish_rawdata(void) {
  */
 static void state_machine_publish_status(const char *status) {
     state_machine_update_time_source();
+    state_machine_sync_runtime_axes(s_runtime_state_hint);
 
     char message_id[TRACKER_METADATA_MESSAGE_ID_LEN] = {0};
     state_machine_fill_message_id(message_id, sizeof(message_id));
@@ -1229,6 +1319,7 @@ static void state_machine_publish_status(const char *status) {
     char *payload = data_format_status(&s_config,
                                        status,
                                        s_session_id,
+                                       &s_telemetry,
                                        true,
                                        s_time_trusted,
                                        s_event_timestamp_ms,
@@ -2362,6 +2453,7 @@ esp_err_t state_machine_init(const config_t *config) {
     s_ble_retry_last_ignition = false;
     s_ignition_log_initialized = false;
     s_last_ignition_state = false;
+    s_runtime_state_hint = APP_STATE_INIT;
 
     esp_err_t rtc_init_err = rtc_ds3231m_init();
     if (rtc_init_err != ESP_OK) {
@@ -2415,11 +2507,13 @@ app_state_t state_machine_run(app_state_t current_state) {
 
     switch (current_state) {
         case APP_STATE_INIT:
+            s_runtime_state_hint = APP_STATE_INIT;
             g_rtc_context.last_state = APP_STATE_INIT;
             offline_queue_set_online(tracker_mqtt_is_connected());
             return APP_STATE_CHECK_IGN;
 
         case APP_STATE_CHECK_IGN: {
+            s_runtime_state_hint = APP_STATE_CHECK_IGN;
             /*
              * Startup whole-system check: keep network/RTC bootstrap alive even while
              * ignition is off so modem FSM can progress beyond initial power pulse.
@@ -2436,6 +2530,7 @@ app_state_t state_machine_run(app_state_t current_state) {
         }
 
         case APP_STATE_DRIVING: {
+            s_runtime_state_hint = APP_STATE_DRIVING;
             /* Full online mode with high-frequency telemetry and command handling. */
             state_machine_run_wake_prelude(true);
 
@@ -2488,6 +2583,7 @@ app_state_t state_machine_run(app_state_t current_state) {
         }
 
         case APP_STATE_PARKED:
+            s_runtime_state_hint = APP_STATE_PARKED;
             /*
              * Parked transitions still need one best-effort publish window so the
              * wake sequence finishes as: wake -> modem/sensors -> MQTT publish -> sleep.
@@ -2504,6 +2600,7 @@ app_state_t state_machine_run(app_state_t current_state) {
             return APP_STATE_HEARTBEAT;
 
         case APP_STATE_ALARM: {
+            s_runtime_state_hint = APP_STATE_ALARM;
             /* Alarm mode after motion wakeup: publish event + periodic rawdata. */
             state_machine_run_wake_prelude(true);
 
@@ -2540,6 +2637,7 @@ app_state_t state_machine_run(app_state_t current_state) {
         }
 
         case APP_STATE_HEARTBEAT:
+            s_runtime_state_hint = APP_STATE_HEARTBEAT;
             /*
              * Timer wake heartbeat path:
              * bring modem up first, read local hardware while transport settles,
@@ -2598,6 +2696,7 @@ app_state_t state_machine_run(app_state_t current_state) {
             return APP_STATE_HEARTBEAT;
 
         case APP_STATE_SLEEP:
+            s_runtime_state_hint = APP_STATE_SLEEP;
             /* Sleep path is policy-driven with explicit block reasons. */
             (void)state_machine_handle_ble_connect_result();
             const char *reason = "ok";

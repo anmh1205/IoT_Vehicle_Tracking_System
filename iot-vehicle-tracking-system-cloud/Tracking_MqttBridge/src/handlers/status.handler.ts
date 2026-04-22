@@ -10,6 +10,7 @@ import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { clearSession, getStatus, setStatus } from '../cache/device-state.cache';
 import { logger } from '../infrastructure/logger';
 import { normalizePayloadTimestamp } from '../utils/timestamp.util';
+import { normalizeRuntimeState } from '../types/device-state.types';
 
 /**
  * Handle device status changes on topic v1/{deviceId}/status.
@@ -64,6 +65,12 @@ export const handleStatus = async (
   const previousStatus = previousState?.status ?? 'offline';
   const reportedStatus = payload.status;
   const normalizedStatus = reportedStatus === 'heartbeat' ? 'stopped' : reportedStatus;
+  const runtimeState = normalizeRuntimeState({
+    state: payload.state,
+    legacyStatus: payload.status,
+    previous: previousState?.runtimeState,
+  });
+  const stateUpdatedAt = new Date(receivedAtMs).toISOString();
   const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
     payload.timestamp,
     payload.metadata?.sent_at,
@@ -90,9 +97,9 @@ export const handleStatus = async (
     );
     const sessionId = ensuredSession.sessionId;
     const isNewSession = ensuredSession.isNew;
-    setStatus(payload.device_id, 'running', sessionId);
+    setStatus(payload.device_id, 'running', sessionId, runtimeState);
 
-    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs);
+    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
 
     if (isNewSession) {
       publishInternalEvent('session', {
@@ -137,9 +144,9 @@ export const handleStatus = async (
     );
     const endedSessionId = completedSession.sessionId;
     clearSession(payload.device_id);
-    setStatus(payload.device_id, 'stopped', null);
+    setStatus(payload.device_id, 'stopped', null, runtimeState);
 
-    await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs);
+    await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
 
     if (endedSessionId && !completedSession.discarded) {
       publishInternalEvent('session', {
@@ -186,6 +193,12 @@ export const handleStatus = async (
     previous_status: previousStatus,
     current_status: normalizedStatus,
     reported_status: reportedStatus,
+    ignition_state: runtimeState.ignition_state,
+    motion_state: runtimeState.motion_state,
+    vehicle_state: runtimeState.vehicle_state,
+    device_state: runtimeState.device_state,
+    sleep_mode: runtimeState.sleep_mode,
+    state_updated_at: stateUpdatedAt,
     message_id: messageId,
     schema_version: schemaVersion,
     seq_no: seqNo,

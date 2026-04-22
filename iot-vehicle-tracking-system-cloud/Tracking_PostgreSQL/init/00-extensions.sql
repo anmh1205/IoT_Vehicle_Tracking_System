@@ -17,6 +17,41 @@ CREATE TYPE event_type_enum AS ENUM ('error', 'warning', 'status_change', 'valid
 CREATE TYPE severity_enum AS ENUM ('debug', 'info', 'warning', 'error', 'critical');
 DO $$
 BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ignition_state_enum') THEN
+        CREATE TYPE ignition_state_enum AS ENUM ('ON', 'OFF', 'UNKNOWN');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'motion_state_enum') THEN
+        CREATE TYPE motion_state_enum AS ENUM ('MOVING', 'STATIONARY', 'UNKNOWN');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_runtime_state_enum') THEN
+        CREATE TYPE vehicle_runtime_state_enum AS ENUM (
+            'PARKED_OFF',
+            'ROLLING_IGN_OFF',
+            'IDLING_ON',
+            'MOVING_ON',
+            'UNKNOWN_STATIONARY',
+            'UNKNOWN_MOVING',
+            'UNKNOWN'
+        );
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'device_runtime_state_enum') THEN
+        CREATE TYPE device_runtime_state_enum AS ENUM (
+            'BOOTING',
+            'ACTIVE',
+            'SLEEP_PREPARE',
+            'SLEEPING',
+            'WAKING',
+            'ALARM',
+            'OTA',
+            'FAULT'
+        );
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'sleep_mode_enum') THEN
+        CREATE TYPE sleep_mode_enum AS ENUM ('NONE', 'FAKE', 'LIGHT', 'DEEP');
+    END IF;
+END $$;
+DO $$
+BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'firmware_status_enum') THEN
         CREATE TYPE firmware_status_enum AS ENUM (
             'assigned', 'downloading', 'verifying', 'installing',
@@ -44,6 +79,12 @@ CREATE TYPE alert_type AS ENUM (
     'harsh_braking', 'harsh_acceleration', 'idle_too_long',
     'low_battery', 'device_offline', 'sos', 'maintenance_due'
 );
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'alert_source_enum') THEN
+        CREATE TYPE alert_source_enum AS ENUM ('device', 'ecu');
+    END IF;
+END $$;
 CREATE TYPE alert_status AS ENUM ('active', 'acknowledged', 'resolved', 'dismissed');
 CREATE TYPE alert_severity AS ENUM ('low', 'medium', 'high', 'critical');
 

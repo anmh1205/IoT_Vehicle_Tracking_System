@@ -123,6 +123,31 @@ const normalizeAlertType = (value: unknown): 'speeding' | 'geofence_enter' | 'ge
   return null;
 };
 
+const normalizeAlertSource = (
+  value: unknown,
+  rawAlertType: string,
+  title: string,
+  message: string,
+): 'device' | 'ecu' => {
+  const normalized = String(value ?? '').toLowerCase();
+  if (normalized === 'ecu' || normalized === 'obd') {
+    return 'ecu';
+  }
+  if (normalized === 'device') {
+    return 'device';
+  }
+
+  if (
+    rawAlertType.startsWith('obd_') ||
+    title.startsWith('OBD:') ||
+    /dtc|ecu|mil/i.test(message)
+  ) {
+    return 'ecu';
+  }
+
+  return 'device';
+};
+
 const fallbackAlertTitle = (payload: Record<string, unknown>, rawAlertType: string): string => {
   const title = payload.title == null ? '' : String(payload.title).trim();
   if (title.length > 0) {
@@ -247,6 +272,45 @@ export const initMqttEventListener = (): void => {
         publishEvent('device:status', {
           device_id: String(envelopePayload.device_id ?? ''),
           status: String(envelopePayload.current_status ?? 'unknown'),
+          ignitionState:
+            envelopePayload.ignition_state == null ? undefined : String(envelopePayload.ignition_state) as
+              | 'ON'
+              | 'OFF'
+              | 'UNKNOWN',
+          motionState:
+            envelopePayload.motion_state == null ? undefined : String(envelopePayload.motion_state) as
+              | 'MOVING'
+              | 'STATIONARY'
+              | 'UNKNOWN',
+          vehicleState:
+            envelopePayload.vehicle_state == null ? undefined : String(envelopePayload.vehicle_state) as
+              | 'PARKED_OFF'
+              | 'ROLLING_IGN_OFF'
+              | 'IDLING_ON'
+              | 'MOVING_ON'
+              | 'UNKNOWN_STATIONARY'
+              | 'UNKNOWN_MOVING'
+              | 'UNKNOWN',
+          deviceState:
+            envelopePayload.device_state == null ? undefined : String(envelopePayload.device_state) as
+              | 'BOOTING'
+              | 'ACTIVE'
+              | 'SLEEP_PREPARE'
+              | 'SLEEPING'
+              | 'WAKING'
+              | 'ALARM'
+              | 'OTA'
+              | 'FAULT',
+          sleepMode:
+            envelopePayload.sleep_mode == null ? undefined : String(envelopePayload.sleep_mode) as
+              | 'NONE'
+              | 'FAKE'
+              | 'LIGHT'
+              | 'DEEP',
+          stateUpdatedAt:
+            envelopePayload.state_updated_at == null
+              ? undefined
+              : String(envelopePayload.state_updated_at),
           last_seen_at: data.timestamp,
           metadata,
         });
@@ -273,7 +337,7 @@ export const initMqttEventListener = (): void => {
             getDiagnosticsSignal(envelopePayload, 'rpm') ??
             toOptionalNumber(envelopePayload.rpm);
 
-        publishEvent('device:position', {
+          publishEvent('device:position', {
           device_id: String(envelopePayload.device_id ?? ''),
           lat: Number(envelopePayload.latitude ?? envelopePayload.lat ?? 0),
           lon: Number(envelopePayload.longitude ?? envelopePayload.lon ?? 0),
@@ -284,6 +348,45 @@ export const initMqttEventListener = (): void => {
             envelopePayload.current_status == null
               ? undefined
               : String(envelopePayload.current_status),
+          ignitionState:
+            envelopePayload.ignition_state == null ? undefined : String(envelopePayload.ignition_state) as
+              | 'ON'
+              | 'OFF'
+              | 'UNKNOWN',
+          motionState:
+            envelopePayload.motion_state == null ? undefined : String(envelopePayload.motion_state) as
+              | 'MOVING'
+              | 'STATIONARY'
+              | 'UNKNOWN',
+          vehicleState:
+            envelopePayload.vehicle_state == null ? undefined : String(envelopePayload.vehicle_state) as
+              | 'PARKED_OFF'
+              | 'ROLLING_IGN_OFF'
+              | 'IDLING_ON'
+              | 'MOVING_ON'
+              | 'UNKNOWN_STATIONARY'
+              | 'UNKNOWN_MOVING'
+              | 'UNKNOWN',
+          deviceState:
+            envelopePayload.device_state == null ? undefined : String(envelopePayload.device_state) as
+              | 'BOOTING'
+              | 'ACTIVE'
+              | 'SLEEP_PREPARE'
+              | 'SLEEPING'
+              | 'WAKING'
+              | 'ALARM'
+              | 'OTA'
+              | 'FAULT',
+          sleepMode:
+            envelopePayload.sleep_mode == null ? undefined : String(envelopePayload.sleep_mode) as
+              | 'NONE'
+              | 'FAKE'
+              | 'LIGHT'
+              | 'DEEP',
+          stateUpdatedAt:
+            envelopePayload.state_updated_at == null
+              ? undefined
+              : String(envelopePayload.state_updated_at),
           vehicleId:
             envelopePayload.vehicle_id == null ? null : String(envelopePayload.vehicle_id),
           battery:
@@ -327,6 +430,15 @@ export const initMqttEventListener = (): void => {
         {
           const rawAlertType = String(envelopePayload.alert_type ?? 'unknown');
           const normalizedAlertType = normalizeAlertType(rawAlertType);
+          const title = fallbackAlertTitle(envelopePayload, rawAlertType);
+          const message =
+            envelopePayload.message == null ? '' : String(envelopePayload.message);
+          const source = normalizeAlertSource(
+            envelopePayload.source,
+            rawAlertType,
+            title,
+            message,
+          );
           const severity = toAlertSeverity(envelopePayload.severity);
           const latitude = toOptionalNumber(
             envelopePayload.latitude ??
@@ -358,9 +470,10 @@ export const initMqttEventListener = (): void => {
               envelopePayload.vehicle_id == null ? undefined : String(envelopePayload.vehicle_id),
             device_id: String(envelopePayload.device_id ?? ''),
             alert_type: rawAlertType,
+            source,
             severity,
-            title: fallbackAlertTitle(envelopePayload, rawAlertType),
-            message: envelopePayload.message == null ? undefined : String(envelopePayload.message),
+            title,
+            message: message || undefined,
             latitude,
             longitude,
             metadata,
@@ -379,10 +492,10 @@ export const initMqttEventListener = (): void => {
                   : String(envelopePayload.device_id),
               geofenceId,
               alertType: normalizedAlertType,
+              source,
               severity,
-              title: fallbackAlertTitle(envelopePayload, rawAlertType),
-              message:
-                envelopePayload.message == null ? undefined : String(envelopePayload.message),
+              title,
+              message: message || undefined,
               latitude,
               longitude,
               speed,

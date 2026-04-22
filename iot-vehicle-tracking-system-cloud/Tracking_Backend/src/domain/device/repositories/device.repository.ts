@@ -35,6 +35,60 @@ const DEVICE_LINK_LATERAL = `LEFT JOIN LATERAL (
   LIMIT 1
 ) link ON true`;
 
+const ALERT_SOURCE_EXPR = `COALESCE(
+  a.source::text,
+  CASE
+    WHEN a.title LIKE 'OBD:%'
+      OR COALESCE(a.message, '') ILIKE '%dtc%'
+      OR COALESCE(a.message, '') ILIKE '%ecu%'
+      OR COALESCE(a.message, '') ILIKE '%MIL%'
+    THEN 'ecu'
+    ELSE 'device'
+  END
+)`;
+
+const ALERT_SEVERITY_RANK_EXPR = `CASE a.severity
+  WHEN 'critical' THEN 4
+  WHEN 'high' THEN 3
+  WHEN 'medium' THEN 2
+  WHEN 'low' THEN 1
+  ELSE 0
+END`;
+
+const ALERT_SUMMARY_LATERAL = `LEFT JOIN LATERAL (
+  SELECT
+    COUNT(*) FILTER (WHERE a.status = 'active' AND ${ALERT_SOURCE_EXPR} = 'device')::int AS device_alert_count,
+    ARRAY_AGG(a.title ORDER BY a.created_at DESC)
+      FILTER (WHERE a.status = 'active' AND ${ALERT_SOURCE_EXPR} = 'device' AND a.title IS NOT NULL)
+      AS device_alert_titles,
+    CASE MAX(CASE
+      WHEN a.status = 'active' AND ${ALERT_SOURCE_EXPR} = 'device' THEN ${ALERT_SEVERITY_RANK_EXPR}
+      ELSE 0
+    END)
+      WHEN 4 THEN 'critical'
+      WHEN 3 THEN 'high'
+      WHEN 2 THEN 'medium'
+      WHEN 1 THEN 'low'
+      ELSE 'none'
+    END AS device_alert_highest_severity,
+    COUNT(*) FILTER (WHERE a.status = 'active' AND ${ALERT_SOURCE_EXPR} = 'ecu')::int AS ecu_alert_count,
+    ARRAY_AGG(a.title ORDER BY a.created_at DESC)
+      FILTER (WHERE a.status = 'active' AND ${ALERT_SOURCE_EXPR} = 'ecu' AND a.title IS NOT NULL)
+      AS ecu_alert_titles,
+    CASE MAX(CASE
+      WHEN a.status = 'active' AND ${ALERT_SOURCE_EXPR} = 'ecu' THEN ${ALERT_SEVERITY_RANK_EXPR}
+      ELSE 0
+    END)
+      WHEN 4 THEN 'critical'
+      WHEN 3 THEN 'high'
+      WHEN 2 THEN 'medium'
+      WHEN 1 THEN 'low'
+      ELSE 'none'
+    END AS ecu_alert_highest_severity
+  FROM alerts a
+  WHERE a.device_id = d.device_id
+) alerts ON true`;
+
 export const findAll = async (
   query: DeviceListQuery,
 ): Promise<{ devices: Device[]; total: number }> => {
@@ -74,11 +128,18 @@ export const findAll = async (
         d.*,
         COALESCE(d.last_latitude, d.latitude) AS latitude,
         COALESCE(d.last_longitude, d.longitude) AS longitude,
+        COALESCE(alerts.device_alert_count, 0) AS device_alert_count,
+        COALESCE(alerts.device_alert_titles, ARRAY[]::text[]) AS device_alert_titles,
+        COALESCE(alerts.device_alert_highest_severity, 'none') AS device_alert_highest_severity,
+        COALESCE(alerts.ecu_alert_count, 0) AS ecu_alert_count,
+        COALESCE(alerts.ecu_alert_titles, ARRAY[]::text[]) AS ecu_alert_titles,
+        COALESCE(alerts.ecu_alert_highest_severity, 'none') AS ecu_alert_highest_severity,
         link.vehicle_plate,
         link.customer_name,
         link.linked_vehicle_id
      FROM devices d
      ${DEVICE_LINK_LATERAL}
+     ${ALERT_SUMMARY_LATERAL}
      ${whereClause} ${orderClause} LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
   );
@@ -92,11 +153,18 @@ export const findById = async (id: number): Promise<Device | null> =>
         d.*,
         COALESCE(d.last_latitude, d.latitude) AS latitude,
         COALESCE(d.last_longitude, d.longitude) AS longitude,
+        COALESCE(alerts.device_alert_count, 0) AS device_alert_count,
+        COALESCE(alerts.device_alert_titles, ARRAY[]::text[]) AS device_alert_titles,
+        COALESCE(alerts.device_alert_highest_severity, 'none') AS device_alert_highest_severity,
+        COALESCE(alerts.ecu_alert_count, 0) AS ecu_alert_count,
+        COALESCE(alerts.ecu_alert_titles, ARRAY[]::text[]) AS ecu_alert_titles,
+        COALESCE(alerts.ecu_alert_highest_severity, 'none') AS ecu_alert_highest_severity,
         link.vehicle_plate,
         link.customer_name,
         link.linked_vehicle_id
      FROM devices d
      ${DEVICE_LINK_LATERAL}
+     ${ALERT_SUMMARY_LATERAL}
      WHERE d.id = $1`,
     [id],
   );
@@ -107,11 +175,18 @@ export const findByDeviceId = async (deviceId: string): Promise<Device | null> =
         d.*,
         COALESCE(d.last_latitude, d.latitude) AS latitude,
         COALESCE(d.last_longitude, d.longitude) AS longitude,
+        COALESCE(alerts.device_alert_count, 0) AS device_alert_count,
+        COALESCE(alerts.device_alert_titles, ARRAY[]::text[]) AS device_alert_titles,
+        COALESCE(alerts.device_alert_highest_severity, 'none') AS device_alert_highest_severity,
+        COALESCE(alerts.ecu_alert_count, 0) AS ecu_alert_count,
+        COALESCE(alerts.ecu_alert_titles, ARRAY[]::text[]) AS ecu_alert_titles,
+        COALESCE(alerts.ecu_alert_highest_severity, 'none') AS ecu_alert_highest_severity,
         link.vehicle_plate,
         link.customer_name,
         link.linked_vehicle_id
      FROM devices d
      ${DEVICE_LINK_LATERAL}
+     ${ALERT_SUMMARY_LATERAL}
      WHERE d.device_id = $1`,
     [deviceId],
   );
@@ -195,6 +270,12 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     latitude: number;
     longitude: number;
     current_status: string;
+    ignition_state: Device['ignition_state'];
+    motion_state: Device['motion_state'];
+    vehicle_state: Device['vehicle_state'];
+    device_state: Device['device_state'];
+    sleep_mode: Device['sleep_mode'];
+    state_updated_at: Date | null;
     last_seen_at: Date | null;
     speed: number | null;
     heading: number | null;
@@ -205,8 +286,12 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     temperature: number | null;
     engine_temperature: number | null;
     rpm: number | null;
-    active_alert_count: number | null;
-    active_alert_titles: string[] | null;
+    device_alert_count: number | null;
+    device_alert_titles: string[] | null;
+    device_alert_highest_severity: Device['device_alert_highest_severity'];
+    ecu_alert_count: number | null;
+    ecu_alert_titles: string[] | null;
+    ecu_alert_highest_severity: Device['ecu_alert_highest_severity'];
   }>(
     `SELECT
        d.device_id,
@@ -217,6 +302,12 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        COALESCE(d.last_latitude, d.latitude) AS latitude,
        COALESCE(d.last_longitude, d.longitude) AS longitude,
        d.current_status,
+       d.ignition_state,
+       d.motion_state,
+       d.vehicle_state,
+       d.device_state,
+       d.sleep_mode,
+       d.state_updated_at,
        d.last_seen_at,
        COALESCE(
          d.last_speed,
@@ -268,8 +359,12 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
          NULLIF(el.context#>>'{diagnostics,signals,rpm}', '')::float8,
          0
        ) AS rpm,
-       COALESCE(alerts.active_alert_count, 0) AS active_alert_count,
-       COALESCE(alerts.active_alert_titles, ARRAY[]::text[]) AS active_alert_titles
+       COALESCE(alerts.device_alert_count, 0) AS device_alert_count,
+       COALESCE(alerts.device_alert_titles, ARRAY[]::text[]) AS device_alert_titles,
+       COALESCE(alerts.device_alert_highest_severity, 'none') AS device_alert_highest_severity,
+       COALESCE(alerts.ecu_alert_count, 0) AS ecu_alert_count,
+       COALESCE(alerts.ecu_alert_titles, ARRAY[]::text[]) AS ecu_alert_titles,
+       COALESCE(alerts.ecu_alert_highest_severity, 'none') AS ecu_alert_highest_severity
      FROM devices d
      ${DEVICE_LINK_LATERAL}
      LEFT JOIN LATERAL (
@@ -293,14 +388,7 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        ORDER BY server_timestamp DESC
        LIMIT 1
      ) el ON true
-     LEFT JOIN LATERAL (
-       SELECT
-         COUNT(*)::int AS active_alert_count,
-         ARRAY_AGG(a.title ORDER BY a.created_at DESC) FILTER (WHERE a.title IS NOT NULL) AS active_alert_titles
-       FROM alerts a
-       WHERE a.device_id = d.device_id
-         AND a.status = 'active'
-     ) alerts ON true
+     ${ALERT_SUMMARY_LATERAL}
      WHERE COALESCE(d.last_latitude, d.latitude) IS NOT NULL
        AND COALESCE(d.last_longitude, d.longitude) IS NOT NULL
        AND ABS(COALESCE(d.last_latitude, d.latitude)) <= 90
@@ -320,6 +408,12 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     latitude: row.latitude,
     longitude: row.longitude,
     currentStatus: row.current_status,
+    ignitionState: row.ignition_state,
+    motionState: row.motion_state,
+    vehicleState: row.vehicle_state,
+    deviceState: row.device_state,
+    sleepMode: row.sleep_mode,
+    stateUpdatedAt: row.state_updated_at?.toISOString() ?? null,
     lastSeenAt: row.last_seen_at?.toISOString() ?? null,
     speed: row.speed ?? 0,
     heading: row.heading ?? 0,
@@ -330,7 +424,19 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     temperature: row.temperature ?? 0,
     engineTemperature: row.engine_temperature,
     rpm: row.rpm,
-    activeAlertCount: row.active_alert_count ?? 0,
-    activeAlertTitles: row.active_alert_titles ?? [],
+    activeAlertCount: (row.device_alert_count ?? 0) + (row.ecu_alert_count ?? 0),
+    activeAlertTitles: [...(row.device_alert_titles ?? []), ...(row.ecu_alert_titles ?? [])],
+    deviceAlerts: {
+      source: 'device',
+      count: row.device_alert_count ?? 0,
+      highestSeverity: row.device_alert_highest_severity ?? 'none',
+      titles: row.device_alert_titles ?? [],
+    },
+    ecuAlerts: {
+      source: 'ecu',
+      count: row.ecu_alert_count ?? 0,
+      highestSeverity: row.ecu_alert_highest_severity ?? 'none',
+      titles: row.ecu_alert_titles ?? [],
+    },
   }));
 };

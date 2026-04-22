@@ -8,6 +8,18 @@ import type {
   DeviceSessionPublic,
 } from '@/domain/device/types/device.types';
 
+const toAlertSummary = (
+  source: 'device' | 'ecu',
+  count: number | null | undefined,
+  highestSeverity: Device['device_alert_highest_severity'] | Device['ecu_alert_highest_severity'],
+  titles: string[] | null | undefined,
+) => ({
+  source,
+  count: count ?? 0,
+  highestSeverity: highestSeverity ?? 'none',
+  titles: titles ?? [],
+});
+
 const sanitizeSession = (session: DeviceSession): DeviceSessionPublic => ({
   id: session.id,
   status: session.status,
@@ -27,6 +39,24 @@ const toDeviceDetail = (
   deviceId: device.device_id,
   deviceName: device.device_name,
   currentStatus: device.current_status,
+  ignitionState: device.ignition_state,
+  motionState: device.motion_state,
+  vehicleState: device.vehicle_state,
+  deviceState: device.device_state,
+  sleepMode: device.sleep_mode,
+  stateUpdatedAt: device.state_updated_at?.toISOString() ?? null,
+  deviceAlerts: toAlertSummary(
+    'device',
+    device.device_alert_count,
+    device.device_alert_highest_severity,
+    device.device_alert_titles,
+  ),
+  ecuAlerts: toAlertSummary(
+    'ecu',
+    device.ecu_alert_count,
+    device.ecu_alert_highest_severity,
+    device.ecu_alert_titles,
+  ),
   lastSeenAt: device.last_seen_at?.toISOString() ?? null,
   totalRuntimeSeconds: device.total_runtime_seconds,
   latitude: device.latitude,

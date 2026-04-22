@@ -1,7 +1,10 @@
+import type { RuntimeStateSnapshot } from '../types/device-state.types';
+
 interface DeviceState {
   status: 'online' | 'offline' | 'running' | 'stopped';
   sessionId: number | null;
   lastSeenAt: number;
+  runtimeState: RuntimeStateSnapshot | null;
 }
 
 const deviceStates = new Map<string, DeviceState>();
@@ -20,12 +23,14 @@ export const setStatus = (
   deviceId: string,
   status: DeviceState['status'],
   sessionId?: number | null,
+  runtimeState?: RuntimeStateSnapshot | null,
 ): void => {
   const existing = deviceStates.get(deviceId);
   deviceStates.set(deviceId, {
     status,
     sessionId: sessionId !== undefined ? sessionId : (existing?.sessionId ?? null),
     lastSeenAt: Date.now(),
+    runtimeState: runtimeState !== undefined ? runtimeState : (existing?.runtimeState ?? null),
   });
 };
 

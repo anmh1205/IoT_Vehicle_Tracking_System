@@ -20,6 +20,45 @@ END $$;
 
 DO $$
 BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ignition_state_enum') THEN
+        CREATE TYPE ignition_state_enum AS ENUM ('ON', 'OFF', 'UNKNOWN');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'motion_state_enum') THEN
+        CREATE TYPE motion_state_enum AS ENUM ('MOVING', 'STATIONARY', 'UNKNOWN');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_runtime_state_enum') THEN
+        CREATE TYPE vehicle_runtime_state_enum AS ENUM (
+            'PARKED_OFF',
+            'ROLLING_IGN_OFF',
+            'IDLING_ON',
+            'MOVING_ON',
+            'UNKNOWN_STATIONARY',
+            'UNKNOWN_MOVING',
+            'UNKNOWN'
+        );
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'device_runtime_state_enum') THEN
+        CREATE TYPE device_runtime_state_enum AS ENUM (
+            'BOOTING',
+            'ACTIVE',
+            'SLEEP_PREPARE',
+            'SLEEPING',
+            'WAKING',
+            'ALARM',
+            'OTA',
+            'FAULT'
+        );
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'sleep_mode_enum') THEN
+        CREATE TYPE sleep_mode_enum AS ENUM ('NONE', 'FAKE', 'LIGHT', 'DEEP');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'alert_source_enum') THEN
+        CREATE TYPE alert_source_enum AS ENUM ('device', 'ecu');
+    END IF;
+END $$;
+
+DO $$
+BEGIN
     IF EXISTS (
         SELECT 1
         FROM pg_type
@@ -34,6 +73,82 @@ BEGIN
         ALTER TYPE device_status_enum ADD VALUE 'online';
     END IF;
 END $$;
+
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS ignition_state ignition_state_enum;
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS motion_state motion_state_enum;
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS vehicle_state vehicle_runtime_state_enum;
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS device_state device_runtime_state_enum;
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS sleep_mode sleep_mode_enum;
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS state_updated_at TIMESTAMPTZ;
+
+UPDATE devices
+SET
+    ignition_state = COALESCE(
+        ignition_state,
+        CASE
+            WHEN current_status = 'running' THEN 'ON'::ignition_state_enum
+            WHEN current_status = 'stopped' THEN 'OFF'::ignition_state_enum
+            ELSE 'UNKNOWN'::ignition_state_enum
+        END
+    ),
+    motion_state = COALESCE(
+        motion_state,
+        CASE
+            WHEN current_status = 'stopped' THEN 'STATIONARY'::motion_state_enum
+            ELSE 'UNKNOWN'::motion_state_enum
+        END
+    ),
+    vehicle_state = COALESCE(
+        vehicle_state,
+        CASE
+            WHEN current_status = 'stopped' THEN 'PARKED_OFF'::vehicle_runtime_state_enum
+            ELSE 'UNKNOWN'::vehicle_runtime_state_enum
+        END
+    ),
+    device_state = COALESCE(
+        device_state,
+        CASE
+            WHEN current_status = 'disconnected' THEN 'FAULT'::device_runtime_state_enum
+            ELSE 'ACTIVE'::device_runtime_state_enum
+        END
+    ),
+    sleep_mode = COALESCE(sleep_mode, 'NONE'::sleep_mode_enum),
+    state_updated_at = COALESCE(state_updated_at, last_seen_at, NOW())
+WHERE
+    ignition_state IS NULL
+    OR motion_state IS NULL
+    OR vehicle_state IS NULL
+    OR device_state IS NULL
+    OR sleep_mode IS NULL
+    OR state_updated_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_devices_state_updated_at
+    ON devices(state_updated_at DESC);
+
+ALTER TABLE alerts ADD COLUMN IF NOT EXISTS source alert_source_enum DEFAULT 'device';
+
+UPDATE alerts
+SET source = CASE
+    WHEN title LIKE 'OBD:%'
+      OR message ILIKE '%dtc%'
+      OR message ILIKE '%ecu%'
+      OR message ILIKE '%MIL%'
+    THEN 'ecu'::alert_source_enum
+    ELSE 'device'::alert_source_enum
+END
+WHERE source IS NULL
+   OR (
+        source = 'device'
+        AND (
+            title LIKE 'OBD:%'
+            OR message ILIKE '%dtc%'
+            OR message ILIKE '%ecu%'
+            OR message ILIKE '%MIL%'
+        )
+   );
+
+CREATE INDEX IF NOT EXISTS idx_alerts_source
+    ON alerts(source);
 
 CREATE TABLE IF NOT EXISTS vehicle_allowed_zones (
     id BIGSERIAL PRIMARY KEY,

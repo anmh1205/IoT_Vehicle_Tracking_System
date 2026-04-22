@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ const SummaryItem = ({
   label: string;
   value: string | number;
 }) => (
-  <div className="rounded-lg border bg-background/80 px-2.5 py-2">
+  <div className="min-w-[112px] rounded-xl border border-border/60 bg-background/80 px-3 py-2">
     <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
     <p className="mt-1 text-sm font-semibold">{value}</p>
   </div>
@@ -29,21 +29,25 @@ export const MapDeviceSummary = ({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background p-3',
+        'rounded-2xl border border-border/70 bg-background/90 p-3 shadow-lg backdrop-blur-md',
         className,
       )}
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <p className="text-sm font-semibold">Tổng quan thiết bị</p>
-        <Badge variant={hiddenCount > 0 ? 'outline' : 'secondary'}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold">Toàn đội xe</p>
+          <p className="text-xs text-muted-foreground">Cập nhật realtime trên bản đồ vận hành</p>
+        </div>
+        <Badge variant={hiddenCount > 0 ? 'outline' : 'secondary'} className="shrink-0">
           {stats.visible}/{stats.total}
         </Badge>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <SummaryItem label="Đang chạy" value={stats.running} />
-        <SummaryItem label="Cần chú ý" value={stats.attention} />
-        <SummaryItem label="Đủ tọa độ" value={stats.withCoordinates} />
+      <div className="mt-3 flex flex-wrap gap-2">
+        <SummaryItem label="Động cơ bật" value={stats.engineOn} />
+        <SummaryItem label="Đang di chuyển" value={stats.moving} />
+        <SummaryItem label="Đứng yên" value={stats.stationary} />
+        <SummaryItem label="Thiết bị lỗi" value={stats.deviceFaults} />
         <SummaryItem label="Đang ẩn" value={hiddenCount} />
       </div>
     </div>
