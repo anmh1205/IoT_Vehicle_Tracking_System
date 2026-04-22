@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
+import { formatAllowedZoneRadius } from '@/features/geofences/lib/allowed-zone-form';
 import { useVehicleAllowedZone } from '@/features/geofences/hooks/use-vehicle-allowed-zone';
 
 const membershipMeta: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
@@ -75,7 +76,7 @@ export const AllowedZoneStatusCard = ({
           <>
             <div className="flex flex-wrap gap-2">
               <Badge variant={membership.variant}>{membership.label}</Badge>
-              <Badge variant="outline">{Math.round(zone.radiusMeters)} m</Badge>
+              <Badge variant="outline">{formatAllowedZoneRadius(zone.radiusMeters)}</Badge>
               <Badge variant="secondary">{alertModeLabel[zone.alertMode] ?? zone.alertMode}</Badge>
             </div>
             <div className="grid gap-2 text-sm sm:grid-cols-2">

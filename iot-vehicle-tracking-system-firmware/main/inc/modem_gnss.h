@@ -52,6 +52,13 @@ esp_err_t modem_gnss_power_off(void);
 bool modem_gnss_has_fix(void);
 
 /**
+ * @brief Check whether GNSS startup warm-up window has elapsed.
+ *
+ * @return true when location queries can run without an intentional startup delay.
+ */
+bool modem_gnss_is_query_ready(void);
+
+/**
  * @brief Query modem for current GNSS information and parse result.
  *
  * @param data Output GNSS structure.

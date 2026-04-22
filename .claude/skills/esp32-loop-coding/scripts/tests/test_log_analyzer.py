@@ -22,3 +22,14 @@ def test_analyze_lines_stable_on_boot_without_error():
     result = analyze_lines(["I (454) main_task: Calling app_main()", "I (464) TRACKER_MAIN: Boot #1"])
     assert result.status == "stable"
     assert result.boot_count >= 1
+
+
+def test_analyze_lines_stable_on_runtime_without_boot():
+    result = analyze_lines(
+        [
+            "I (35639) STATE_MACHINE: mqtt status=heartbeat metadata mid=x",
+            "I (36799) STATE_MACHINE: HW diag supply=11.85V batt=4.18V ign=1",
+        ]
+    )
+    assert result.status == "stable"
+    assert result.runtime_count == 2

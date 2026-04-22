@@ -18,6 +18,23 @@ BEGIN
     END IF;
 END $$;
 
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_type
+        WHERE typname = 'device_status_enum'
+    ) AND NOT EXISTS (
+        SELECT 1
+        FROM pg_enum e
+        JOIN pg_type t ON t.oid = e.enumtypid
+        WHERE t.typname = 'device_status_enum'
+          AND e.enumlabel = 'online'
+    ) THEN
+        ALTER TYPE device_status_enum ADD VALUE 'online';
+    END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS vehicle_allowed_zones (
     id BIGSERIAL PRIMARY KEY,
     vehicle_id VARCHAR(50) NOT NULL REFERENCES vehicles(vehicle_id) ON DELETE CASCADE,

@@ -1263,10 +1263,14 @@ thuật}\label{14-phux1b0ux1a1ng-phuxe1p-tiux1ebfp-cux1eadn-thiux1ebft-kux1ebf-k
 \subsubsection{1.4.1. Phương pháp luận tổng
 thể}\label{141-phux1b0ux1a1ng-phuxe1p-luux1eadn-tux1ed5ng-thux1ec3}
 
-Vì đề tài đi qua cả mạch nguồn, phần mềm nhúng trên thiết bị, hạ tầng
-máy chủ và màn hình quản trị tổng hợp, rủi ro lớn nhất không nằm ở việc từng khối có chạy
-riêng lẻ hay không, mà ở việc chúng có còn phối hợp đúng khi ghép thành
-một hệ thống hoàn chỉnh hay không.
+Vì đề tài đi qua đồng thời các tầng mạch nguồn, phần mềm nhúng trên thiết bị, hạ tầng
+máy chủ, dịch vụ backend, giao diện quản trị và lớp vận hành triển khai,
+rủi ro lớn nhất không nằm ở việc từng khối có chạy riêng lẻ hay không, mà ở việc chúng có còn
+phối hợp đúng khi ghép thành một hệ thống hoàn chỉnh hay không. Điều này cũng có nghĩa khối
+lượng công việc của đồ án không dừng ở một nguyên mẫu hẹp, mà trải rộng qua nhiều nhóm việc vốn
+thường được chia cho các vai trò khác nhau trong một nhóm R\&D: thiết kế phần cứng, phát triển
+firmware ESP-IDF, tổ chức dữ liệu và microservice, thiết lập hạ tầng tự vận hành, cùng xây dựng
+quy trình kiểm thử và phát hành liên tầng.
 
 Do đó, dự án chọn cách làm theo hai nguyên tắc. Thứ nhất là \textbf{thiết
 kế từ dưới lên (bottom-up design)}: kiểm chứng trước các giả định rủi ro
@@ -1524,9 +1528,12 @@ nghị}\label{15-kux1ebft-quux1ea3-vuxe0-khuyux1ebfn-nghux1ecb}
 được}\label{151-kux1ebft-quux1ea3-ux111ux1ea1t-ux111ux1b0ux1ee3c}
 
 Nhìn theo cách đó, các kết quả đạt được không nên hiểu như một danh sách
-các khối đã lắp xong, mà như bằng chứng cho thấy chuỗi giá trị từ thiết
-bị đến giao diện quản trị đã được hình thành. Có thể tóm lược theo bốn tầng chính
-như sau:
+các khối đã lắp xong, mà như bằng chứng cho thấy một chuỗi giá trị kỹ thuật hoàn chỉnh đã được
+hình thành từ thiết bị đến giao diện quản trị. Ngay cả ở bản rút gọn này, có thể thấy đồ án đã bao
+phủ phạm vi công việc rộng và tiêu chuẩn thực hiện cao: tự thiết kế phần cứng, tự phát triển
+firmware ESP-IDF có tổ chức, tự dựng hệ thống dịch vụ kiểu microservice, tự triển khai hạ tầng VPS,
+tự thiết lập quan sát vận hành và CI/CD, thay vì phụ thuộc vào các nền tảng dựng sẵn hay dịch vụ
+ngoài như AWS hoặc Vercel. Có thể tóm lược theo bốn tầng chính như sau:
 
 \textbf{Về phần cứng:}
 
@@ -2515,7 +2522,7 @@ năng lượng thông minh và giao diện giám sát thân thiện.
 
 \chapterheading{CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ -- DESIGN SOLUTIONS}
 
-Chương này trình bày bản rút gọn của các quyết định thiết kế cốt lõi. Trọng tâm là giữ rõ chuỗi lập luận: bài toán kỹ thuật, tiêu chí lựa chọn, phương án được chọn và tác động tới kết quả triển khai ở Chương 4.
+Chương này trình bày bản rút gọn của các quyết định thiết kế cốt lõi. Trọng tâm là giữ rõ chuỗi lập luận: bài toán kỹ thuật, tiêu chí lựa chọn, phương án được chọn và tác động tới kết quả triển khai ở Chương 4. Dù rút gọn, chương vẫn cần làm rõ rằng phạm vi thiết kế của đồ án không chỉ là chọn linh kiện hay chọn framework, mà là đồng thời chốt kiến trúc cho một hệ thống IoT hoàn chỉnh gồm thiết bị phần cứng, firmware chuẩn ESP-IDF, chuỗi dịch vụ cloud tách vai trò rõ ràng, giao diện vận hành và hạ tầng tự chủ phục vụ triển khai thực tế.
 
 \subsection{3.1. Phân tích và đề xuất giải pháp phần cứng -- Hardware analysis and solution}
 
@@ -2688,7 +2695,7 @@ Với cấu trúc này, hệ thống đủ nhẹ để triển khai thực tế 
 
 \chapterheading{CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ -- IMPLEMENTATION AND RESULTS}
 
-Chương 4 tập trung vào những gì đã triển khai và những gì đã đo được. Phần mô tả chi tiết từng dòng lệnh, từng endpoint và cấu trúc mã nguồn được lược bỏ; thay vào đó là bằng chứng triển khai, số liệu đo lường trọng yếu và đối chiếu với chỉ tiêu thiết kế.
+Chương 4 tập trung vào những gì đã triển khai và những gì đã đo được. Phần mô tả chi tiết từng dòng lệnh, từng endpoint và cấu trúc mã nguồn được lược bỏ; thay vào đó là bằng chứng triển khai, số liệu đo lường trọng yếu và đối chiếu với chỉ tiêu thiết kế. Điểm cần nhấn mạnh là phần triển khai của đồ án không chỉ dừng ở mức "chạy được" từng thành phần, mà đã đi tới bước build-up một hệ thống nhiều lớp theo hướng chuyên nghiệp: từ chế tạo phần cứng, hoàn thiện firmware, tổ chức backend và frontend, đến dựng hạ tầng VPS, quy trình phát hành và cơ chế giám sát phục vụ vận hành thử nghiệm.
 
 \subsection{4.1. Thiết kế chi tiết giải pháp -- Detailed design solution}
 
@@ -2851,7 +2858,7 @@ Từ các vòng thử nghiệm tích hợp, hệ thống cho thấy độ ổn �
 
 \chapterheading{CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ -- EVALUATION AND RECOMMENDATIONS}
 
-Chương 5 trình bày bản đánh giá rút gọn theo nguyên tắc: giữ chỉ số then chốt, bỏ các bảng so sánh dư thừa và tập trung vào ý nghĩa vận hành của kết quả.
+Chương 5 trình bày bản đánh giá rút gọn theo nguyên tắc: giữ chỉ số then chốt, bỏ các bảng so sánh dư thừa và tập trung vào ý nghĩa vận hành của kết quả. Tuy nhiên, phần đánh giá không chỉ nhằm kết luận từng thành phần "đạt" hay "chưa đạt", mà còn để chỉ ra rằng giá trị của đồ án nằm ở năng lực hoàn thiện đồng thời nhiều lớp kỹ thuật với mức độ tự chủ cao: không phụ thuộc nền tảng cloud dựng sẵn, có tổ chức dịch vụ rõ ràng, có khả năng quan sát vận hành và có tư duy phát triển gần với cách một đội kỹ thuật sản phẩm thực hiện dự án thực tế.
 
 \subsection{5.1. Đánh giá hiệu năng}
 
@@ -3005,7 +3012,7 @@ Giai đoạn 3 & Sản phẩm hóa & Tối ưu chi phí vòng đời thiết b�
 
 \chapterheading{CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM -- REFLECTION AND LESSONS LEARNED}
 
-Chương 6 tóm tắt các bài học cốt lõi rút ra từ quá trình thực hiện đồ án, tập trung vào năng lực giải quyết vấn đề kỹ thuật liên ngành và tính thực tiễn khi chuyển từ thiết kế sang vận hành.
+Chương 6 tóm tắt các bài học cốt lõi rút ra từ quá trình thực hiện đồ án, tập trung vào năng lực giải quyết vấn đề kỹ thuật liên ngành và tính thực tiễn khi chuyển từ thiết kế sang vận hành. Từ góc nhìn tổng thể, bài học quan trọng nhất không chỉ là giải một bài toán kỹ thuật riêng lẻ, mà là cách phối hợp nhiều miền chuyên môn trong cùng một đồ án: từ điện tử và hệ nhúng, qua dữ liệu và microservice, tới triển khai VPS, CI/CD và giám sát vận hành. Chính độ rộng đó cho thấy đồ án có khối lượng và chiều sâu công việc tương đương một phạm vi mà trong môi trường doanh nghiệp thường cần nhiều vai trò cùng tham gia.
 
 \subsection{6.1. Ứng dụng kiến thức kỹ thuật -- Application of prior coursework}
 

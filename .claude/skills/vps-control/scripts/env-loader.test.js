@@ -41,8 +41,31 @@ test('buildRuntimeEnv respects precedence and process.env override', () => {
 
     assert.equal(result.env.KEY, 'process');
     assert.equal(result.loadedFiles.length, 6);
+    assert.equal(result.envSources.KEY, undefined);
     assert.match(result.loadedFiles[0], /cwd[\\/]\.claude[\\/]\.env$/);
     assert.match(result.loadedFiles[5], /home[\\/]\.claude[\\/]skills[\\/]vps-control[\\/]\.env$/);
+  } finally {
+    fs.rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('buildRuntimeEnv tracks the source file for env-backed keys', () => {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'vps-control-env-source-'));
+  const cwd = path.join(base, 'cwd');
+  const home = path.join(base, 'home');
+
+  try {
+    const skillEnvPath = path.join(cwd, '.claude', 'skills', 'vps-control', '.env');
+    writeFile(skillEnvPath, 'VPS_KEY_PATH=..\\keys\\id_ed25519_vps_control\n');
+
+    const result = buildRuntimeEnv({
+      cwd,
+      home,
+      processEnv: {},
+    });
+
+    assert.equal(result.env.VPS_KEY_PATH, '..\\keys\\id_ed25519_vps_control');
+    assert.equal(result.envSources.VPS_KEY_PATH, skillEnvPath);
   } finally {
     fs.rmSync(base, { recursive: true, force: true });
   }

@@ -115,7 +115,7 @@ export const upsertVehicleAllowedZoneSchema = z
     centerSource: allowedZoneCenterSourceSchema,
     centerLatitude: z.number().min(-90).max(90).optional(),
     centerLongitude: z.number().min(-180).max(180).optional(),
-    radiusMeters: z.number().positive().max(1000000),
+    radiusMeters: z.number().int().min(1000).max(2000000),
     alertMode: allowedZoneAlertModeSchema.optional(),
     cooldownSec: z.number().int().min(0).max(86400).optional(),
   })

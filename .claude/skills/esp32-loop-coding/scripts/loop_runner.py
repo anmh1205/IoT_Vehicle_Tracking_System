@@ -121,20 +121,31 @@ def run_loop(
         if log_file.exists():
             current_size = log_file.stat().st_size
             read_size = max(current_size - existing_size, 0)
+            full_lines: list[str] = []
             if read_size > 0:
                 with log_file.open("rb") as lf:
                     lf.seek(existing_size)
                     delta_bytes = lf.read(read_size)
+                    lf.seek(0)
+                    full_bytes = lf.read()
                 delta_text = delta_bytes.decode("utf-8", errors="replace")
+                full_text = full_bytes.decode("utf-8", errors="replace")
                 lines = delta_text.splitlines()[-800:]
+                full_lines = full_text.splitlines()[-800:]
             else:
                 lines = []
+                full_lines = log_file.read_text(encoding="utf-8", errors="replace").splitlines()[-800:]
             existing_size = current_size
         else:
             lines = []
+            full_lines = []
         analyzed = analyze_lines(lines)
+        if analyzed.status == "unknown" and full_lines:
+            analyzed = analyze_lines(full_lines)
 
         effective_status = read_result.status
+        if effective_status == "serial-error" and analyzed.status == "stable":
+            effective_status = "stable"
         if effective_status not in {"stable", "fatal", "unstable", "serial-error"}:
             effective_status = analyzed.status
 
@@ -162,7 +173,9 @@ def run_loop(
             break
 
         if effective_status == "serial-error":
-            results.append(IterationResult(iteration=idx, status="serial-error", action="check-port-and-retry"))
+            results.append(
+                IterationResult(iteration=idx, status="serial-error", action="wait-and-flash-or-check-port")
+            )
             final_status = "serial-error"
             break
 

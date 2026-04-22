@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- ENUM Types: Core
 -- =============================================================================
 
-CREATE TYPE device_status_enum AS ENUM ('running', 'stopped', 'disconnected');
+CREATE TYPE device_status_enum AS ENUM ('running', 'stopped', 'disconnected', 'online');
 CREATE TYPE session_status_enum AS ENUM ('running', 'completed', 'disconnected');
 CREATE TYPE event_type_enum AS ENUM ('error', 'warning', 'status_change', 'validation', 'connection', 'firmware');
 CREATE TYPE severity_enum AS ENUM ('debug', 'info', 'warning', 'error', 'critical');

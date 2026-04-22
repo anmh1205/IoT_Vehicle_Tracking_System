@@ -53,7 +53,15 @@ const flush = async (): Promise<void> => {
       for (const update of batch) {
         await client.query(
           `UPDATE devices
-           SET current_status = $2,
+           SET current_status = CASE
+                 WHEN $7::bigint IS NULL THEN $2
+                 WHEN EXISTS (
+                   SELECT 1
+                   FROM device_sessions s
+                   WHERE s.id = $7 AND s.status = 'running'
+                 ) THEN $2
+                 ELSE current_status
+               END,
                last_latitude = COALESCE($3, last_latitude),
                last_longitude = COALESCE($4, last_longitude),
                last_speed = COALESCE($5, last_speed),
@@ -69,6 +77,7 @@ const flush = async (): Promise<void> => {
             update.longitude ?? null,
             update.speed ?? null,
             update.serverTimestamp,
+            update.sessionId ?? null,
           ],
         );
 

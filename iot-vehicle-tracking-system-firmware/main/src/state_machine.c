@@ -77,12 +77,15 @@
 #define TRACKER_BOOT_ID_LEN 48
 #define TRACKER_OBD_FAIL_ALERT_COOLDOWN_MS 300000ULL
 #define TRACKER_OBD_FAIL_WINDOW_MS 300000ULL
+#define TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS 5000U
 #define TRACKER_EVENT_CODE_OBD_CONNECT_FAILED 2001
 #define TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED 2002
 #define TRACKER_SLEEP_REJECT_LOG_INTERVAL_MS 10000ULL
 #define TRACKER_HW_DIAG_LOG_INTERVAL_MS 15000ULL
 #define TRACKER_PENDING_ACTION_DRAIN_LIMIT 4U
 #define TRACKER_MODEM_POWEROFF_SETTLE_MS 250ULL
+#define TRACKER_FAKE_SLEEP_ENABLED 1
+#define TRACKER_FAKE_SLEEP_LOOP_STEP_MS 200U
 
 /* RTC-retained context survives deep sleep and helps OTA/session continuity. */
 RTC_DATA_ATTR rtc_context_t g_rtc_context = {
@@ -188,6 +191,8 @@ static bool s_imu_invalid_wakeup_gpio_logged = false;
 static firmware_status_t s_deferred_firmware_report = {0};
 static bool s_deferred_firmware_report_pending = false;
 static bool s_ble_retry_last_ignition = false;
+static bool s_ignition_log_initialized = false;
+static bool s_last_ignition_state = false;
 
 static const retry_policy_t s_ble_retry_policy = {
     .mode = RETRY_MODE_EXPONENTIAL,
@@ -569,13 +574,13 @@ static bool state_machine_imu_runtime_enabled(void) {
     return s_config.imu_wakeup_enabled;
 }
 
-static bool state_machine_should_use_light_sleep_motion_wake(void) {
+static bool __attribute__((unused)) state_machine_should_use_light_sleep_motion_wake(void) {
     if (!state_machine_imu_runtime_enabled() || !s_imu_available) {
         return false;
     }
 
     if (esp_sleep_is_valid_wakeup_gpio(PIN_LIS3DH_INT)) {
-        return false;
+        return true;
     }
 
     if (!s_imu_invalid_wakeup_gpio_logged) {
@@ -1008,19 +1013,12 @@ telemetry_finalize:
         s_telemetry.gnss.timestamp_ms = util_uptime_ms();
     }
 
-    /* Ignition fallback combines OBD RPM with board-side ADC voltage threshold. */
-    float ignition_threshold_v = (float)s_config.ignition_adc_threshold_mv / 1000.0f;
-    bool adc_ignition = s_telemetry.battery_top >= ignition_threshold_v;
-    s_telemetry.ignition = s_telemetry.obd_rpm > 0 || adc_ignition;
-    s_telemetry.error_code = 0;
-
     uint64_t now_ms = util_uptime_ms();
     bool obd_connected = s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx);
+    const char *obd_ecu_state = obd_connected ? ble_obd_get_last_ecu_state_label(s_ble_ctx) : "disconnected";
     s_telemetry.obd_ble_connected = obd_connected;
     s_telemetry.obd_elm_ready = s_obd_elm_ready && obd_connected;
-    util_copy_string(s_telemetry.obd_ecu_state,
-                     sizeof(s_telemetry.obd_ecu_state),
-                     obd_connected ? ble_obd_get_last_ecu_state_label(s_ble_ctx) : "disconnected");
+    util_copy_string(s_telemetry.obd_ecu_state, sizeof(s_telemetry.obd_ecu_state), obd_ecu_state);
 
     if (s_last_obd_sample_ms == 0 || now_ms < s_last_obd_sample_ms) {
         s_telemetry.obd_sample_age_ms = UINT32_MAX;
@@ -1028,6 +1026,37 @@ telemetry_finalize:
         uint64_t age_ms = now_ms - s_last_obd_sample_ms;
         s_telemetry.obd_sample_age_ms = age_ms > UINT32_MAX ? UINT32_MAX : (uint32_t)age_ms;
     }
+
+    /*
+     * Ignition decision:
+     * - strong signals: RPM > 0 or ADC supply above threshold
+     * - weak fallback: keep ignition on while BLE OBD is live and samples are fresh
+     *   to avoid dropping to parked mode during short RPM read gaps.
+     */
+    float ignition_threshold_v = (float)s_config.ignition_adc_threshold_mv / 1000.0f;
+    bool adc_ignition = s_telemetry.battery_top >= ignition_threshold_v;
+    bool rpm_ignition = s_telemetry.obd_rpm > 0;
+    bool obd_live_ignition = obd_connected &&
+                             strcmp(obd_ecu_state, "live") == 0 &&
+                             state_machine_has_recent_obd_sample(now_ms, TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS);
+    bool ignition_next = rpm_ignition || adc_ignition || obd_live_ignition;
+    if (!s_ignition_log_initialized || ignition_next != s_last_ignition_state) {
+        ESP_LOGI(TAG,
+                 "ignition transition prev=%d next=%d rpm=%ld adc=%d supply=%.2f threshold=%.2f obd_live=%d sample_age_ms=%lu ecu=%s",
+                 s_ignition_log_initialized ? (s_last_ignition_state ? 1 : 0) : -1,
+                 ignition_next ? 1 : 0,
+                 (long)s_telemetry.obd_rpm,
+                 adc_ignition ? 1 : 0,
+                 s_telemetry.battery_top,
+                 ignition_threshold_v,
+                 obd_live_ignition ? 1 : 0,
+                 (unsigned long)s_telemetry.obd_sample_age_ms,
+                 obd_ecu_state);
+        s_last_ignition_state = ignition_next;
+        s_ignition_log_initialized = true;
+    }
+    s_telemetry.ignition = ignition_next;
+    s_telemetry.error_code = 0;
 
     state_machine_obd_refresh_fail_window(now_ms);
     s_telemetry.obd_connect_fail_count_5m = s_obd_fail_window_count;
@@ -2155,7 +2184,7 @@ static void state_machine_shutdown_for_sleep(void) {
     }
 }
 
-static void state_machine_prepare_deep_sleep_wakeup(void) {
+static void __attribute__((unused)) state_machine_prepare_deep_sleep_wakeup(void) {
     (void)esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
     /* Wake by motion interrupt only when the configured IMU pin is valid for deep sleep wake. */
     if (state_machine_can_arm_imu_deep_sleep_wakeup()) {
@@ -2170,7 +2199,7 @@ static void state_machine_prepare_deep_sleep_wakeup(void) {
     (void)esp_sleep_enable_timer_wakeup((uint64_t)wake_interval_s * 1000000ULL);
 }
 
-static app_state_t state_machine_enter_light_sleep(void) {
+static app_state_t __attribute__((unused)) state_machine_enter_light_sleep(void) {
     (void)esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
 
     esp_err_t clear_int_err = imu_clear_motion_interrupt();
@@ -2225,6 +2254,28 @@ static app_state_t state_machine_enter_light_sleep(void) {
         return APP_STATE_HEARTBEAT;
     }
 
+    return APP_STATE_CHECK_IGN;
+}
+
+static app_state_t state_machine_enter_fake_sleep(void) {
+    uint16_t wake_interval_s = state_machine_parked_wake_interval_s();
+    uint64_t sleep_ms = (uint64_t)wake_interval_s * 1000ULL;
+    uint64_t started_ms = util_uptime_ms();
+
+    ESP_LOGW(TAG,
+             "Fake sleep enabled interval_s=%u step_ms=%u",
+             (unsigned)wake_interval_s,
+             (unsigned)TRACKER_FAKE_SLEEP_LOOP_STEP_MS);
+
+    while ((util_uptime_ms() - started_ms) < sleep_ms) {
+        vTaskDelay(pdMS_TO_TICKS(TRACKER_FAKE_SLEEP_LOOP_STEP_MS));
+    }
+
+    s_timer_wake_count += 1;
+    ESP_LOGI(TAG,
+             "Fake sleep wake elapsed_ms=%llu timer_wake_count=%lu",
+             (unsigned long long)(util_uptime_ms() - started_ms),
+             (unsigned long)s_timer_wake_count);
     return APP_STATE_CHECK_IGN;
 }
 
@@ -2309,6 +2360,8 @@ esp_err_t state_machine_init(const config_t *config) {
     s_status_stopped = true;
     s_ignition_off_started_ms = 0;
     s_ble_retry_last_ignition = false;
+    s_ignition_log_initialized = false;
+    s_last_ignition_state = false;
 
     esp_err_t rtc_init_err = rtc_ds3231m_init();
     if (rtc_init_err != ESP_OK) {
@@ -2570,12 +2623,16 @@ app_state_t state_machine_run(app_state_t current_state) {
                      (unsigned long)s_imu_wake_count,
                      (unsigned long)s_imu_false_wake_count);
             state_machine_shutdown_for_sleep();
+#if TRACKER_FAKE_SLEEP_ENABLED
+            return state_machine_enter_fake_sleep();
+#else
             if (state_machine_should_use_light_sleep_motion_wake()) {
                 return state_machine_enter_light_sleep();
             }
             state_machine_prepare_deep_sleep_wakeup();
             esp_deep_sleep_start();
             return APP_STATE_SLEEP;
+#endif
 
         default:
             return APP_STATE_INIT;

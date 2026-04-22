@@ -128,18 +128,20 @@ export const handleStatus = async (
       `Device ${payload.device_id}: ${previousStatus} -> running (session=${sessionId})`,
     );
   } else if (normalizedStatus === 'stopped') {
-    const endedSessionId = await completeDeviceSession(
+    const completedSession = await completeDeviceSession(
       payload.device_id,
       timestampMs,
       previousState?.sessionId,
       receivedAtMs,
+      reportedStatus === 'heartbeat' ? 'heartbeat' : 'stopped',
     );
+    const endedSessionId = completedSession.sessionId;
     clearSession(payload.device_id);
     setStatus(payload.device_id, 'stopped', null);
 
     await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs);
 
-    if (endedSessionId) {
+    if (endedSessionId && !completedSession.discarded) {
       publishInternalEvent('session', {
         device_id: payload.device_id,
         session_id: endedSessionId,
@@ -171,7 +173,9 @@ export const handleStatus = async (
 
     logger.info(
       reportedStatus === 'heartbeat'
-        ? `Device ${payload.device_id}: heartbeat keepalive handled as stopped (session=${endedSessionId} ended)`
+        ? completedSession.discarded
+          ? `Device ${payload.device_id}: heartbeat keepalive discarded transient session=${endedSessionId}`
+          : `Device ${payload.device_id}: heartbeat keepalive handled as stopped (session=${endedSessionId} ended)`
         : `Device ${payload.device_id}: ${previousStatus} -> stopped (session=${endedSessionId} ended)`,
     );
   }

@@ -39,6 +39,8 @@
 #define IMU_I2C_XFER_TIMEOUT_MS 20U
 #define IMU_READ_FAIL_BACKOFF_MS 2000ULL
 #define IMU_READ_FAIL_BACKOFF_THRESHOLD 3U
+#define IMU_VIBRATION_DEADZONE_MG 60.0f
+#define IMU_VIBRATION_FULL_SCALE_DELTA_MG 600.0f
 
 static const char *TAG = "imu_lis3dh";
 
@@ -63,6 +65,10 @@ static uint8_t s_lis3dh_addr = LIS3DH_ADDR_PRIMARY;
 static imu_chip_t s_imu_chip = IMU_CHIP_LIS3DH;
 static uint32_t s_read_fail_streak = 0;
 static uint64_t s_read_backoff_until_ms = 0;
+static bool s_prev_sample_valid = false;
+static float s_prev_x_mg = 0.0f;
+static float s_prev_y_mg = 0.0f;
+static float s_prev_z_mg = 0.0f;
 
 static bool imu_using_lis3dsh_compat(void) {
     return s_imu_chip == IMU_CHIP_LIS3DSH_COMPAT;
@@ -435,6 +441,7 @@ esp_err_t imu_read_accel(int16_t *x, int16_t *y, int16_t *z) {
 uint16_t imu_get_vibration_composite(void) {
     uint64_t now_ms = util_uptime_ms();
     if (s_read_backoff_until_ms != 0 && now_ms < s_read_backoff_until_ms) {
+        s_prev_sample_valid = false;
         return 0;
     }
 
@@ -443,6 +450,7 @@ uint16_t imu_get_vibration_composite(void) {
     int16_t z = 0;
 
     if (imu_read_accel(&x, &y, &z) != ESP_OK) {
+        s_prev_sample_valid = false;
         s_read_fail_streak += 1U;
         if (s_read_fail_streak >= IMU_READ_FAIL_BACKOFF_THRESHOLD) {
             s_read_backoff_until_ms = now_ms + IMU_READ_FAIL_BACKOFF_MS;
@@ -463,15 +471,33 @@ uint16_t imu_get_vibration_composite(void) {
     float y_mg = y / 16.0f;
     float z_mg = z / 16.0f;
 
-    /* Compute 3D magnitude and subtract 1g static gravity baseline. */
-    float magnitude = sqrtf((x_mg * x_mg) + (y_mg * y_mg) + (z_mg * z_mg));
-    float vibration = magnitude - 1000.0f;
-    if (vibration < 0.0f) {
-        vibration = 0.0f;
+    if (!s_prev_sample_valid) {
+        s_prev_x_mg = x_mg;
+        s_prev_y_mg = y_mg;
+        s_prev_z_mg = z_mg;
+        s_prev_sample_valid = true;
+        return 0;
     }
 
+    /*
+     * Use acceleration delta instead of absolute magnitude so static gravity,
+     * sensor offset, and mounting bias do not pin the score at rest.
+     */
+    float dx_mg = x_mg - s_prev_x_mg;
+    float dy_mg = y_mg - s_prev_y_mg;
+    float dz_mg = z_mg - s_prev_z_mg;
+    s_prev_x_mg = x_mg;
+    s_prev_y_mg = y_mg;
+    s_prev_z_mg = z_mg;
+
+    float delta_mg = sqrtf((dx_mg * dx_mg) + (dy_mg * dy_mg) + (dz_mg * dz_mg));
+    if (delta_mg <= IMU_VIBRATION_DEADZONE_MG) {
+        return 0;
+    }
+
+    float vibration = delta_mg - IMU_VIBRATION_DEADZONE_MG;
     /* Scale to 0..1000 score for payload compactness. */
-    int scaled = (int)((vibration / 2000.0f) * 1000.0f);
+    int scaled = (int)((vibration / IMU_VIBRATION_FULL_SCALE_DELTA_MG) * 1000.0f);
     return (uint16_t)util_clamp_int(scaled, 0, 1000);
 }
 
@@ -492,5 +518,9 @@ void imu_deinit(void) {
     s_imu_chip = IMU_CHIP_LIS3DH;
     s_read_fail_streak = 0;
     s_read_backoff_until_ms = 0;
+    s_prev_sample_valid = false;
+    s_prev_x_mg = 0.0f;
+    s_prev_y_mg = 0.0f;
+    s_prev_z_mg = 0.0f;
 }
 

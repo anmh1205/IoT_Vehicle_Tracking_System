@@ -34,6 +34,9 @@ export const allowedZoneAlertModeOptions: Array<{
   },
 ];
 
+export const ALLOWED_ZONE_MIN_RADIUS_METERS = 1_000;
+export const ALLOWED_ZONE_MAX_RADIUS_METERS = 2_000_000;
+
 const allowedZoneCenterSourceValues = ['vehicle_position', 'map_pick'] as const satisfies readonly VehicleAllowedZoneCenterSource[];
 const allowedZoneAlertModeValues = [
   'transition_only',
@@ -42,12 +45,41 @@ const allowedZoneAlertModeValues = [
   'silent',
 ] as const satisfies readonly VehicleAllowedZoneAlertMode[];
 
+export const clampAllowedZoneRadiusMeters = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return ALLOWED_ZONE_MIN_RADIUS_METERS;
+  }
+
+  return Math.min(
+    Math.max(Math.round(value), ALLOWED_ZONE_MIN_RADIUS_METERS),
+    ALLOWED_ZONE_MAX_RADIUS_METERS,
+  );
+};
+
+export const formatAllowedZoneRadius = (value: number | null | undefined) => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return '--';
+  }
+
+  if (value >= 1_000) {
+    return `${(value / 1_000).toLocaleString('vi-VN', {
+      maximumFractionDigits: value % 1_000 === 0 ? 0 : 1,
+    })} km`;
+  }
+
+  return `${Math.round(value).toLocaleString('vi-VN')} m`;
+};
+
 export const allowedZoneFormSchema = z
   .object({
     centerSource: z.enum(allowedZoneCenterSourceValues),
     centerLatitude: z.number().min(-90).max(90).nullable(),
     centerLongitude: z.number().min(-180).max(180).nullable(),
-    radiusMeters: z.number().int().min(100).max(1_000_000),
+    radiusMeters: z
+      .number()
+      .int()
+      .min(ALLOWED_ZONE_MIN_RADIUS_METERS)
+      .max(ALLOWED_ZONE_MAX_RADIUS_METERS),
     alertMode: z.enum(allowedZoneAlertModeValues),
     cooldownSec: z.number().int().min(0).max(86_400),
   })
@@ -84,7 +116,7 @@ export const createAllowedZoneFormDefaults = (
     zone?.centerSource === 'map_pick'
       ? zone.centerLongitude
       : preview?.centerLongitude ?? zone?.centerLongitude ?? null,
-  radiusMeters: Math.round(zone?.radiusMeters ?? 500),
+  radiusMeters: clampAllowedZoneRadiusMeters(zone?.radiusMeters ?? ALLOWED_ZONE_MIN_RADIUS_METERS),
   alertMode: zone?.alertMode ?? 'transition_only',
   cooldownSec: zone?.cooldownSec ?? 600,
 });
@@ -96,7 +128,7 @@ export const toAllowedZonePayload = (
   centerLatitude: values.centerSource === 'map_pick' ? values.centerLatitude ?? undefined : undefined,
   centerLongitude:
     values.centerSource === 'map_pick' ? values.centerLongitude ?? undefined : undefined,
-  radiusMeters: Math.round(values.radiusMeters),
+  radiusMeters: clampAllowedZoneRadiusMeters(values.radiusMeters),
   alertMode: values.alertMode,
   cooldownSec: Math.round(values.cooldownSec),
 });

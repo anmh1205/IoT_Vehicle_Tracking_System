@@ -29,6 +29,7 @@ import {
   MAP_STATUS_COLORS,
   MAP_STATUS_LABELS,
 } from '@/features/map/constants/map-config';
+import { formatAllowedZoneRadius } from '@/features/geofences/lib/allowed-zone-form';
 import type { DevicePosition } from '@/features/map/types';
 import { formatRelative } from '@/lib/utils/date/format';
 import { cn } from '@/lib/utils';
@@ -433,8 +434,55 @@ export const MapSelectedDeviceOverlay = ({
                     {allowedZone ? 'Đã cấu hình' : 'Chưa thiết lập'}
                   </Badge>
                 ) : null}
-                {allowedZone ? <Badge variant={allowedZoneMembership.variant}>{allowedZoneMembership.label}</Badge> : null}
-                {allowedZone ? <Badge variant="outline">{Math.round(allowedZone.radiusMeters)} m</Badge> : null}
+                {allowedZone ? (
+                  <Badge variant={allowedZoneMembership.variant}>{allowedZoneMembership.label}</Badge>
+                ) : null}
+                {allowedZone ? (
+                  <Badge variant="outline">{formatAllowedZoneRadius(allowedZone.radiusMeters)}</Badge>
+                ) : null}
+
+                <div className="ml-auto flex flex-wrap items-center gap-2">
+                  {allowedZone && onToggleAllowedZoneVisibility ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-8 rounded-lg px-3 text-xs sm:text-sm"
+                      onClick={onToggleAllowedZoneVisibility}
+                    >
+                      {showAllowedZone ? (
+                        <EyeOff className="mr-1.5 h-3.5 w-3.5" />
+                      ) : (
+                        <Eye className="mr-1.5 h-3.5 w-3.5" />
+                      )}
+                      {showAllowedZone ? 'Ẩn vùng' : 'Hiện vùng'}
+                    </Button>
+                  ) : null}
+                  {!allowedZone && onCreateAllowedZone && canEditAllowedZone ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-8 rounded-lg px-3 text-xs sm:text-sm"
+                      onClick={onCreateAllowedZone}
+                    >
+                      <MapPinned className="mr-1.5 h-3.5 w-3.5" />
+                      Tạo vùng
+                    </Button>
+                  ) : null}
+                  {allowedZone && onEditAllowedZone && canEditAllowedZone ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-8 rounded-lg px-3 text-xs sm:text-sm"
+                      onClick={onEditAllowedZone}
+                    >
+                      <MapPinned className="mr-1.5 h-3.5 w-3.5" />
+                      Chỉnh vùng
+                    </Button>
+                  ) : null}
+                </div>
               </div>
 
               {!allowedZoneLoading && !allowedZone ? (
@@ -443,27 +491,6 @@ export const MapSelectedDeviceOverlay = ({
               {allowedZone?.warning ? (
                 <p className="text-xs text-amber-700 dark:text-amber-300">{allowedZone.warning.message}</p>
               ) : null}
-
-              <div className="flex flex-wrap justify-end gap-2">
-                {allowedZone && onToggleAllowedZoneVisibility ? (
-                  <Button type="button" variant="outline" onClick={onToggleAllowedZoneVisibility}>
-                    {showAllowedZone ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
-                    {showAllowedZone ? 'Ẩn vùng' : 'Hiện vùng'}
-                  </Button>
-                ) : null}
-                {!allowedZone && onCreateAllowedZone && canEditAllowedZone ? (
-                  <Button type="button" variant="outline" onClick={onCreateAllowedZone}>
-                    <MapPinned className="mr-2 h-4 w-4" />
-                    Tạo vùng cho phép
-                  </Button>
-                ) : null}
-                {allowedZone && onEditAllowedZone && canEditAllowedZone ? (
-                  <Button type="button" variant="outline" onClick={onEditAllowedZone}>
-                    <MapPinned className="mr-2 h-4 w-4" />
-                    Chỉnh vùng
-                  </Button>
-                ) : null}
-              </div>
             </div>
           ) : (
             <div className="border-t border-border/60 pt-3 text-xs text-muted-foreground">

@@ -306,10 +306,12 @@ static bool tracker_mqtt_extract_error_code_from_response(const char *response, 
     return false;
 }
 
-static esp_err_t tracker_mqtt_send_cmd(const char *cmd,
-                                       uint32_t timeout_ms,
-                                       char *response,
-                                       size_t response_size) {
+static esp_err_t tracker_mqtt_send_cmd_with_policy(const char *cmd,
+                                                   uint32_t timeout_ms,
+                                                   char *response,
+                                                   size_t response_size,
+                                                   bool log_parsed_result,
+                                                   bool log_transport_fail) {
     ESP_RETURN_ON_NULL(cmd, ESP_ERR_INVALID_ARG, TAG, "cmd null");
     ESP_RETURN_ON_NULL(response, ESP_ERR_INVALID_ARG, TAG, "response null");
     ESP_RETURN_ON_FALSE(response_size > 0, ESP_ERR_INVALID_ARG, TAG, "response_size invalid");
@@ -323,22 +325,33 @@ static esp_err_t tracker_mqtt_send_cmd(const char *cmd,
             tracker_mqtt_mark_disconnected("AT_error_response", err_code);
         }
         if (parsed) {
+            if (log_parsed_result) {
+                ESP_LOGW(TAG,
+                         "AT command returned error result, defer parse cmd=\"%s\" err=%s resp=\"%s\"",
+                         cmd,
+                         esp_err_to_name(err),
+                         response);
+            }
+            return ESP_OK;
+        }
+        if (log_transport_fail) {
             ESP_LOGW(TAG,
-                     "AT command returned error result, defer parse cmd=\"%s\" err=%s resp=\"%s\"",
+                     "AT command failed cmd=\"%s\" err=%s resp=\"%s\"",
                      cmd,
                      esp_err_to_name(err),
                      response);
-            return ESP_OK;
         }
-        ESP_LOGW(TAG,
-                 "AT command failed cmd=\"%s\" err=%s resp=\"%s\"",
-                 cmd,
-                 esp_err_to_name(err),
-                 response);
         return err;
     }
 
     return ESP_OK;
+}
+
+static esp_err_t tracker_mqtt_send_cmd(const char *cmd,
+                                       uint32_t timeout_ms,
+                                       char *response,
+                                       size_t response_size) {
+    return tracker_mqtt_send_cmd_with_policy(cmd, timeout_ms, response, response_size, true, true);
 }
 
 static void tracker_mqtt_reset_connect_wait(void) {
@@ -968,15 +981,42 @@ static esp_err_t tracker_mqtt_apply_client_options(void) {
     return ESP_OK;
 }
 
-static bool tracker_mqtt_query_disconnect_state(int *out_disc_state) {
+static bool tracker_mqtt_query_disconnect_state_with_policy(int *out_disc_state, bool quiet) {
     ESP_RETURN_ON_FALSE(out_disc_state != NULL, false, TAG, "out_disc_state null");
 
     char response[MQTT_AT_RESPONSE_MAX_LEN] = {0};
-    if (tracker_mqtt_send_cmd("AT+CMQTTDISC?\r", MQTT_CMD_TIMEOUT_MS, response, sizeof(response)) != ESP_OK) {
+    if (tracker_mqtt_send_cmd_with_policy("AT+CMQTTDISC?\r",
+                                          MQTT_CMD_TIMEOUT_MS,
+                                          response,
+                                          sizeof(response),
+                                          !quiet,
+                                          !quiet) != ESP_OK) {
         return false;
     }
 
     return tracker_mqtt_parse_disconnect_state(response, out_disc_state);
+}
+
+static bool tracker_mqtt_query_disconnect_state(int *out_disc_state) {
+    return tracker_mqtt_query_disconnect_state_with_policy(out_disc_state, false);
+}
+
+static bool tracker_mqtt_resume_connected_session(const char *reason, bool quiet_query) {
+    int disc_state = -1;
+    if (!tracker_mqtt_query_disconnect_state_with_policy(&disc_state, quiet_query) || disc_state != 0) {
+        return false;
+    }
+
+    s_service_started = true;
+    s_client_acquired = true;
+    s_connected = true;
+    s_commands_subscribed = false;
+    tracker_mqtt_reset_connect_wait();
+    ESP_LOGI(TAG,
+             "MQTT resumed existing modem session reason=%s disc_state=%d",
+             reason != NULL ? reason : "unknown",
+             disc_state);
+    return true;
 }
 
 static esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_connect_err_code, bool *out_timed_out) {
@@ -1094,6 +1134,12 @@ static esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_con
     } else {
         tracker_mqtt_reset_connect_wait();
         if (result_err != ESP_OK) {
+            if (tracker_mqtt_resume_connected_session("connect_result_probe", false)) {
+                if (out_connect_err_code != NULL) {
+                    *out_connect_err_code = 0;
+                }
+                return ESP_OK;
+            }
             if (out_connect_err_code != NULL) {
                 *out_connect_err_code = connect_err;
             }
@@ -1347,10 +1393,17 @@ esp_err_t tracker_mqtt_connect(void) {
         return ESP_OK;
     }
 
+    if (tracker_mqtt_resume_connected_session("pre_connect_probe", true)) {
+        return ESP_OK;
+    }
+
     ESP_RETURN_ON_FALSE(tracker_mqtt_start_service() == ESP_OK, ESP_FAIL, TAG, "start service failed");
     ESP_RETURN_ON_FALSE(tracker_mqtt_acquire_client() == ESP_OK, ESP_FAIL, TAG, "acquire client failed");
     ESP_RETURN_ON_FALSE(tracker_mqtt_apply_client_options() == ESP_OK, ESP_FAIL, TAG, "apply options failed");
     ESP_RETURN_ON_FALSE(tracker_mqtt_configure_tls() == ESP_OK, ESP_FAIL, TAG, "configure tls failed");
+    if (tracker_mqtt_resume_connected_session("post_setup_probe", false)) {
+        return ESP_OK;
+    }
 
     int connect_err_code = 0;
     bool connect_timed_out = false;

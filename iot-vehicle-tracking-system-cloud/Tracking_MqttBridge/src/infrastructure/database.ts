@@ -28,6 +28,7 @@ interface DeviceRow {
 interface DeviceSessionRow {
   id: number;
   runtime_seconds?: string | number | null;
+  data_points_count?: string | number | null;
 }
 
 interface ActiveAlertRow {
@@ -41,6 +42,13 @@ interface ActiveAlertMessageRow {
 }
 
 const toIsoTimestamp = (timestampMs: number) => new Date(timestampMs).toISOString();
+const TRANSIENT_HEARTBEAT_SESSION_MAX_RUNTIME_SECONDS = 120;
+const TRANSIENT_HEARTBEAT_SESSION_MAX_DATA_POINTS = 1;
+
+const toInt = (value: string | number | null | undefined): number => {
+  const parsed = Number.parseInt(String(value ?? '0'), 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
 /**
  * Validate device by checking device_id and comparing auth_token hash.
@@ -280,7 +288,8 @@ export const completeDeviceSession = async (
   deviceTimestampMs: number,
   knownSessionId?: number | null,
   serverTimestampMs?: number,
-): Promise<number | null> => {
+  completionSource: 'stopped' | 'heartbeat' = 'stopped',
+): Promise<{ sessionId: number | null; discarded: boolean }> => {
   const client = await pool.connect();
   const deviceOccurredAt = toIsoTimestamp(deviceTimestampMs);
   const serverOccurredAt = toIsoTimestamp(serverTimestampMs ?? Date.now());
@@ -290,7 +299,7 @@ export const completeDeviceSession = async (
 
     const active = knownSessionId
       ? await client.query<DeviceSessionRow>(
-          `SELECT id
+          `SELECT id, COALESCE(data_points_count, 0)::text AS data_points_count
            FROM device_sessions
            WHERE id = $1 AND device_id = $2 AND status = 'running'
            LIMIT 1
@@ -298,7 +307,7 @@ export const completeDeviceSession = async (
           [knownSessionId, deviceId],
         )
       : await client.query<DeviceSessionRow>(
-          `SELECT id
+          `SELECT id, COALESCE(data_points_count, 0)::text AS data_points_count
            FROM device_sessions
            WHERE device_id = $1 AND status = 'running'
            ORDER BY created_at DESC
@@ -310,10 +319,11 @@ export const completeDeviceSession = async (
     const session = active.rows[0];
     if (!session) {
       await client.query('COMMIT');
-      return null;
+      return { sessionId: null, discarded: false };
     }
 
     let runtimeSeconds = 0;
+    const dataPointsCount = toInt(session.data_points_count);
 
     try {
       await client.query('SAVEPOINT complete_device_session');
@@ -365,6 +375,28 @@ export const completeDeviceSession = async (
       runtimeSeconds = Number.parseInt(String(completed.rows[0]?.runtime_seconds ?? '0'), 10);
     }
 
+    const shouldDiscardTransientHeartbeatSession =
+      completionSource === 'heartbeat' &&
+      dataPointsCount <= TRANSIENT_HEARTBEAT_SESSION_MAX_DATA_POINTS &&
+      Math.max(runtimeSeconds, 0) <= TRANSIENT_HEARTBEAT_SESSION_MAX_RUNTIME_SECONDS;
+
+    if (shouldDiscardTransientHeartbeatSession) {
+      await client.query('UPDATE event_logs SET session_id = NULL WHERE session_id = $1', [session.id]);
+      await client.query('DELETE FROM device_sessions WHERE id = $1', [session.id]);
+      await client.query('COMMIT');
+      logger.info(
+        {
+          deviceId,
+          sessionId: session.id,
+          completionSource,
+          dataPointsCount,
+          runtimeSeconds: Math.max(runtimeSeconds, 0),
+        },
+        'Discarded transient heartbeat session',
+      );
+      return { sessionId: session.id, discarded: true };
+    }
+
     await client.query(
       `UPDATE devices
        SET total_runtime_seconds = COALESCE(total_runtime_seconds, 0) + $2, updated_at = NOW()
@@ -373,13 +405,30 @@ export const completeDeviceSession = async (
     );
 
     await client.query('COMMIT');
-    return session.id;
+    return { sessionId: session.id, discarded: false };
   } catch (err) {
     await client.query('ROLLBACK');
     logger.error({ err, deviceId }, 'completeDeviceSession failed');
     throw err;
   } finally {
     client.release();
+  }
+};
+
+export const findActiveDeviceSessionId = async (deviceId: string): Promise<number | null> => {
+  try {
+    const result = await pool.query<DeviceSessionRow>(
+      `SELECT id
+       FROM device_sessions
+       WHERE device_id = $1 AND status = 'running'
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [deviceId],
+    );
+    return result.rows[0]?.id ?? null;
+  } catch (err) {
+    logger.error({ err, deviceId }, 'findActiveDeviceSessionId failed');
+    return null;
   }
 };
 

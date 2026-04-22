@@ -1,5 +1,13 @@
 # Project Changelog
 
+## 2026-04-23
+### MQTT Heartbeat Session Debounce + UAT Schema Sync (Completed)
+- Hardened `Tracking_MqttBridge` so parked heartbeat `rawdata` snapshots no longer auto-open `device_sessions` when the device is already in a stopped/non-active runtime state; telemetry still updates `last_seen` and latest coordinates without inflating runtime/session stats.
+- Added transient heartbeat micro-session cleanup in `Tracking_MqttBridge/src/infrastructure/database.ts` so sessions ended by `status=heartbeat` with `<=1` data point and very short runtime are detached from `event_logs` and removed instead of being kept as false driving sessions.
+- Prevented discarded heartbeat micro-sessions from emitting a normal `session ended` realtime event, avoiding downstream consumers/UI from treating a deleted session as a completed run.
+- Synced PostgreSQL enum expectations by adding `online` to fresh-bootstrap `device_status_enum` in `init/00-extensions.sql` and to long-lived UAT databases through `scripts/uat-runtime-schema-sync.sql`.
+- Validation status: MQTT Bridge typecheck/build passed locally; Backend lint/typecheck/test passed locally; VPS audit confirmed the pre-fix symptom pattern before rollout.
+
 ## 2026-04-21
 ### Allowed-Zone Map UX Refactor (Completed)
 - Refactored the operations map allowed-zone flow in `Tracking_Frontend/src/features/map/components/tracking-map.tsx` so allowed-zone rendering/editing now uses a dedicated map layer and docked panel instead of the generic geofence draft/workspace path.

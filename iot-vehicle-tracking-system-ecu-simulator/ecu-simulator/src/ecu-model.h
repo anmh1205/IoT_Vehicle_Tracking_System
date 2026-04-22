@@ -50,4 +50,9 @@ struct ecu_snapshot_t {
 
 void ecu_model_begin();
 void ecu_model_tick();
+void ecu_model_force_ignition(bool ignition_on);
+void ecu_model_force_ignition_for(bool ignition_on, uint32_t duration_s);
+bool ecu_model_is_ignition_on();
+bool ecu_model_has_ignition_timer();
+uint32_t ecu_model_ignition_timer_remaining_s();
 const ecu_snapshot_t &ecu_model_get();

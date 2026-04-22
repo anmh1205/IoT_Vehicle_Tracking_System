@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 
 const { parseArgs, resolveExecutionPlan, printablePlan, nullDeviceFor, normalizeKeyPath } = require('./ssh-plan');
 
@@ -135,4 +138,40 @@ test('normalizeKeyPath converts /e/... to E:\\... on win32', () => {
     normalized,
     'E:\\anmh1205\\IoT_Vehicle_Tracking_System\\.claude\\skills\\vps-control\\keys\\id_ed25519_vps_control'
   );
+});
+
+test('resolveExecutionPlan resolves relative env VPS_KEY_PATH from the skill script directory first', () => {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'vps-control-plan-'));
+
+  try {
+    const scriptDir = path.join(base, 'scripts');
+    const keyDir = path.join(base, 'keys');
+    const keyPath = path.join(keyDir, 'id_ed25519_vps_control');
+    fs.mkdirSync(scriptDir, { recursive: true });
+    fs.mkdirSync(keyDir, { recursive: true });
+    fs.writeFileSync(keyPath, 'test-key', 'utf8');
+
+    const plan = resolveExecutionPlan(
+      { cmd: 'uptime', positionals: [] },
+      {
+        env: { VPS_HOST: 'h', VPS_USER: 'u', VPS_KEY_PATH: '..\\keys\\id_ed25519_vps_control' },
+        envSources: {
+          VPS_KEY_PATH: path.join(base, '.claude', 'skills', 'vps-control', '.env'),
+        },
+        loadedFiles: [],
+      },
+      {
+        platform: 'win32',
+        processEnv: {},
+        cwd: 'E:\\anmh1205\\IoT_Vehicle_Tracking_System',
+        home: 'C:\\Users\\Admin',
+        scriptDir,
+      }
+    );
+
+    const keyArgIndex = plan.args.indexOf('-i');
+    assert.equal(plan.args[keyArgIndex + 1], keyPath);
+  } finally {
+    fs.rmSync(base, { recursive: true, force: true });
+  }
 });

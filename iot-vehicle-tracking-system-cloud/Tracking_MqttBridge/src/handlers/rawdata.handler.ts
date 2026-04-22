@@ -2,6 +2,7 @@ import { rawDataSchema } from '../validators/payload.validator';
 import type { RawDiagnostics } from '../types/payload.types';
 import {
   ensureDeviceSession,
+  findActiveDeviceSessionId,
   syncActiveMaintenanceAlertsByMessage,
   syncActiveMaintenanceAlertsByTitle,
   syncActiveObdDtcAlerts,
@@ -40,6 +41,9 @@ const OBD_CONNECT_WARNING_MESSAGE = 'obd_connect_failed';
 
 const ruleCooldownUntil = new Map<string, number>();
 const idleAnomalyStartedAt = new Map<string, number>();
+
+const hasActiveRuntimeStatus = (status: string | undefined): boolean =>
+  status === 'running' || status === 'online';
 
 type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 type DtcBucket = 'stored' | 'pending' | 'permanent';
@@ -666,12 +670,21 @@ export const handleRawData = async (
   const previousState = getStatus(payload.device_id);
   const previousStatus = previousState?.status;
 
-  // 3. Get or create session in PostgreSQL, then mirror its ID in local cache.
-  const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs);
-  const sessionId = ensuredSession.sessionId;
-  const isNewSession = ensuredSession.isNew;
+  // 3. Only bind telemetry to a session when the device is already in an active runtime state.
+  const canAttachTelemetryToSession =
+    hasActiveRuntimeStatus(previousStatus) || hasActiveRuntimeStatus(device.current_status);
+  let sessionId = canAttachTelemetryToSession
+    ? await findActiveDeviceSessionId(payload.device_id)
+    : null;
+  let isNewSession = false;
 
-  if (isNewSession) {
+  if (canAttachTelemetryToSession) {
+    const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs);
+    sessionId = ensuredSession.sessionId;
+    isNewSession = ensuredSession.isNew;
+  }
+
+  if (isNewSession && sessionId !== null) {
     publishInternalEvent('session', {
       device_id: payload.device_id,
       session_id: sessionId,
@@ -777,24 +790,26 @@ export const handleRawData = async (
   // 6. Add to batch writer (PostgreSQL)
   addUpdate({
     deviceId: payload.device_id,
-    status: 'running',
+    status: sessionId !== null ? 'running' : device.current_status,
     latitude: effectiveLatitude,
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
-    sessionId,
+    sessionId: sessionId ?? undefined,
     serverTimestamp: receivedAtMs,
   });
 
-  await touchDeviceSession({
-    deviceId: payload.device_id,
-    sessionId,
-    deviceTimestampMs: timestampMs,
-    serverTimestampMs: receivedAtMs,
-    vibration: payload.data.vibration,
-    latitude: effectiveLatitude,
-    longitude: effectiveLongitude,
-    speed: effectiveSpeed,
-  });
+  if (sessionId !== null) {
+    await touchDeviceSession({
+      deviceId: payload.device_id,
+      sessionId,
+      deviceTimestampMs: timestampMs,
+      serverTimestampMs: receivedAtMs,
+      vibration: payload.data.vibration,
+      latitude: effectiveLatitude,
+      longitude: effectiveLongitude,
+      speed: effectiveSpeed,
+    });
+  }
 
   // 7. Check geofences (fire-and-forget, non-blocking)
   if (
@@ -814,18 +829,26 @@ export const handleRawData = async (
   }
 
   // 8. Check status change
-  setStatus(payload.device_id, 'online', sessionId);
+  if (sessionId !== null) {
+    setStatus(payload.device_id, 'online', sessionId);
 
-  if (previousStatus && previousStatus !== 'online') {
-    publishInternalEvent('status', {
-      device_id: payload.device_id,
-      previous_status: previousStatus,
-      current_status: 'online',
-      message_id: messageId,
-      schema_version: schemaVersion,
-      seq_no: seqNo,
-      boot_id: bootId,
-    });
+    if (previousStatus && previousStatus !== 'online') {
+      publishInternalEvent('status', {
+        device_id: payload.device_id,
+        previous_status: previousStatus,
+        current_status: 'online',
+        message_id: messageId,
+        schema_version: schemaVersion,
+        seq_no: seqNo,
+        boot_id: bootId,
+      });
+    }
+  } else {
+    setStatus(
+      payload.device_id,
+      device.current_status === 'disconnected' ? 'offline' : 'stopped',
+      null,
+    );
   }
 
   publishInternalEvent('data', {

@@ -48,17 +48,25 @@ function getEnvCandidates({ skillName = DEFAULT_SKILL_NAME, cwd = process.cwd(),
 
 function buildRuntimeEnv({ skillName = DEFAULT_SKILL_NAME, cwd = process.cwd(), home = os.homedir(), processEnv = process.env } = {}) {
   const merged = {};
+  const envSources = {};
   const loadedFiles = [];
 
   for (const filePath of getEnvCandidates({ skillName, cwd, home })) {
     if (!fs.existsSync(filePath)) continue;
-    Object.assign(merged, loadEnvFile(filePath));
+    const parsed = loadEnvFile(filePath);
+    Object.assign(merged, parsed);
+    for (const key of Object.keys(parsed)) {
+      envSources[key] = filePath;
+    }
     loadedFiles.push(filePath);
   }
 
   Object.assign(merged, processEnv);
+  for (const key of Object.keys(processEnv)) {
+    delete envSources[key];
+  }
 
-  return { env: merged, loadedFiles };
+  return { env: merged, envSources, loadedFiles };
 }
 
 module.exports = {

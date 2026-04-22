@@ -3,6 +3,7 @@ import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import {
   geofenceServices,
   type UpsertVehicleAllowedZonePayload,
+  type VehicleAllowedZone,
 } from '@/lib/api/geofences';
 
 export const zoneQueryKey = (vehicleId: string | null | undefined) => ['vehicle-allowed-zone', vehicleId] as const;
@@ -24,6 +25,10 @@ export const useVehicleAllowedZonePreview = (
 export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
   const queryClient = useQueryClient();
   const enabled = Boolean(vehicleId);
+  const syncZoneCache = (zone: VehicleAllowedZone | null) => {
+    queryClient.setQueryData(zoneQueryKey(vehicleId), zone);
+    queryClient.setQueryData(previewQueryKey(vehicleId), null);
+  };
 
   const zoneQuery = useQuery({
     queryKey: zoneQueryKey(vehicleId),
@@ -36,6 +41,7 @@ export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
       queryClient.invalidateQueries({ queryKey: zoneQueryKey(vehicleId) }),
       queryClient.invalidateQueries({ queryKey: previewQueryKey(vehicleId) }),
       queryClient.invalidateQueries({ queryKey: ['vehicles'] }),
+      queryClient.invalidateQueries({ queryKey: ['vehicles-for-allowed-zone-page'] }),
       queryClient.invalidateQueries({ queryKey: ['device-positions'] }),
       queryClient.invalidateQueries({ queryKey: ['device-detail'] }),
     ]);
@@ -62,12 +68,18 @@ export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
   const upsertMutation = useMutation({
     mutationFn: (payload: UpsertVehicleAllowedZonePayload) =>
       geofenceServices.upsertVehicleAllowedZone(vehicleId as string, payload),
-    onSuccess: invalidate,
+    onSuccess: async (zone) => {
+      syncZoneCache(zone);
+      await invalidate();
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => geofenceServices.deleteVehicleAllowedZone(vehicleId as string),
-    onSuccess: invalidate,
+    onSuccess: async () => {
+      syncZoneCache(null);
+      await invalidate();
+    },
   });
 
   return {

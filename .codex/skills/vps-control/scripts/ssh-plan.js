@@ -109,7 +109,10 @@ function nullDeviceFor(platform) {
   return platform === 'win32' ? 'NUL' : '/dev/null';
 }
 
-function normalizeKeyPath(input, { platform = process.platform, cwd = process.cwd(), home = os.homedir() } = {}) {
+function normalizeKeyPath(
+  input,
+  { platform = process.platform, cwd = process.cwd(), home = os.homedir(), baseDir, candidateDirs = [] } = {}
+) {
   const raw = String(input ?? '').trim();
   if (!raw) return '';
 
@@ -128,7 +131,26 @@ function normalizeKeyPath(input, { platform = process.platform, cwd = process.cw
   }
 
   if (!path.isAbsolute(keyPath)) {
-    keyPath = path.resolve(cwd, keyPath);
+    const searchDirs = [];
+    if (baseDir) {
+      searchDirs.push(baseDir);
+    }
+    for (const candidateDir of candidateDirs) {
+      if (candidateDir) {
+        searchDirs.push(candidateDir);
+      }
+    }
+    searchDirs.push(cwd);
+
+    const uniqueDirs = Array.from(new Set(searchDirs));
+    for (const dir of uniqueDirs) {
+      const candidatePath = path.resolve(dir, keyPath);
+      if (fs.existsSync(candidatePath)) {
+        return candidatePath;
+      }
+    }
+
+    keyPath = path.resolve(uniqueDirs[0] || cwd, keyPath);
   }
 
   return keyPath;
@@ -137,13 +159,21 @@ function normalizeKeyPath(input, { platform = process.platform, cwd = process.cw
 function resolveExecutionPlan(
   cliOptions,
   runtimeEnv,
-  { platform = process.platform, processEnv = process.env, cwd = process.cwd(), home = os.homedir() } = {}
+  { platform = process.platform, processEnv = process.env, cwd = process.cwd(), home = os.homedir(), scriptDir = __dirname } = {}
 ) {
   const env = runtimeEnv.env;
+  const envSources = runtimeEnv.envSources || {};
   const host = cliOptions.host || env.VPS_HOST;
   const user = cliOptions.user || env.VPS_USER;
   const port = parseInteger(cliOptions.port || env.VPS_PORT, 22, { min: 1, max: 65535 });
-  const keyPath = normalizeKeyPath(cliOptions.keyPath || env.VPS_KEY_PATH, { platform, cwd, home });
+  const rawKeyPath = cliOptions.keyPath || env.VPS_KEY_PATH;
+  const keyPath = normalizeKeyPath(rawKeyPath, {
+    platform,
+    cwd,
+    home,
+    baseDir: cliOptions.keyPath ? undefined : scriptDir,
+    candidateDirs: envSources.VPS_KEY_PATH ? [path.dirname(envSources.VPS_KEY_PATH)] : [],
+  });
   const password = env.VPS_PASSWORD;
   const allowPasswordFallback = parseBoolean(env.VPS_ALLOW_PASSWORD_FALLBACK, false);
   const forceKeyAuth = parseBoolean(env.VPS_FORCE_KEY_AUTH, true);

@@ -16,6 +16,7 @@ import { useVehicleAllowedZone, useVehicleAllowedZonePreview } from '@/features/
 import {
   allowedZoneAlertModeOptions,
   allowedZoneFormSchema,
+  formatAllowedZoneRadius,
   createAllowedZoneFormDefaults,
   toAllowedZonePayload,
   type AllowedZoneFormValues,
@@ -192,7 +193,7 @@ export const MapAllowedZonePanel = ({
               </div>
               <div className="rounded-2xl border bg-muted/10 p-3 text-sm">
                 <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Bán kính</p>
-                <p className="mt-1 font-medium">{Math.round(radiusMeters)} m</p>
+                <p className="mt-1 font-medium">{formatAllowedZoneRadius(radiusMeters)}</p>
               </div>
               <div className="rounded-2xl border bg-muted/10 p-3 text-sm">
                 <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Nguồn tâm</p>

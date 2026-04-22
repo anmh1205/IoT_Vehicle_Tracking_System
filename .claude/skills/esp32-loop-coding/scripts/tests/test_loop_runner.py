@@ -104,3 +104,86 @@ def test_run_loop_requires_gnss_streak_before_stop(monkeypatch, tmp_path):
     assert len(result.iterations) == 2
     assert result.iterations[0].status == "stable-no-gnss"
     assert result.iterations[1].action == "stop-gnss-ok"
+
+
+def test_run_loop_accepts_runtime_stable_from_analyzer(monkeypatch, tmp_path):
+    firmware_dir = tmp_path / "fw"
+    log_dir = firmware_dir / "documents" / "test-logs"
+    log_dir.mkdir(parents=True)
+    log_file = log_dir / "com6-monitor-latest.log"
+
+    monkeypatch.setattr(loop_runner, "resolve_port", lambda preferred_port=None: "COM6")
+    
+    def fake_read_serial(**kwargs):
+        with log_file.open("a", encoding="utf-8") as out:
+            out.write("I (1) STATE_MACHINE: mqtt status=heartbeat\n")
+        return type("R", (), {"status": "timeout"})()
+
+    monkeypatch.setattr(loop_runner, "read_serial", fake_read_serial)
+    monkeypatch.setattr(loop_runner, "_has_valid_gnss_fix", lambda lines: False)
+
+    result = loop_runner.run_loop(
+        firmware_dir=firmware_dir,
+        preferred_port=None,
+        max_iterations=1,
+        baud=115200,
+        max_seconds=1,
+        stable_seconds=1,
+        quiet_seconds=1,
+        gnss_streak_target=2,
+    )
+
+    assert result.final_status == "stable-no-gnss"
+    assert result.iterations[0].status == "stable-no-gnss"
+
+
+def test_run_loop_falls_back_to_full_log_tail_when_delta_has_no_signal(monkeypatch, tmp_path):
+    firmware_dir = tmp_path / "fw"
+    log_dir = firmware_dir / "documents" / "test-logs"
+    log_dir.mkdir(parents=True)
+    log_file = log_dir / "com6-monitor-latest.log"
+    log_file.write_text("I (10) STATE_MACHINE: mqtt status=heartbeat\n", encoding="utf-8")
+
+    monkeypatch.setattr(loop_runner, "resolve_port", lambda preferred_port=None: "COM6")
+    monkeypatch.setattr(loop_runner, "read_serial", lambda **kwargs: type("R", (), {"status": "timeout"})())
+    monkeypatch.setattr(loop_runner, "_has_valid_gnss_fix", lambda lines: False)
+
+    result = loop_runner.run_loop(
+        firmware_dir=firmware_dir,
+        preferred_port=None,
+        max_iterations=1,
+        baud=115200,
+        max_seconds=1,
+        stable_seconds=1,
+        quiet_seconds=1,
+        gnss_streak_target=2,
+    )
+
+    assert result.final_status == "stable-no-gnss"
+    assert result.iterations[0].status == "stable-no-gnss"
+
+
+def test_run_loop_uses_full_log_context_when_serial_reader_times_out_unavailable(monkeypatch, tmp_path):
+    firmware_dir = tmp_path / "fw"
+    log_dir = firmware_dir / "documents" / "test-logs"
+    log_dir.mkdir(parents=True)
+    log_file = log_dir / "com6-monitor-latest.log"
+    log_file.write_text("I (10) STATE_MACHINE: mqtt status=heartbeat\n", encoding="utf-8")
+
+    monkeypatch.setattr(loop_runner, "resolve_port", lambda preferred_port=None: "COM6")
+    monkeypatch.setattr(loop_runner, "read_serial", lambda **kwargs: type("R", (), {"status": "serial-error"})())
+    monkeypatch.setattr(loop_runner, "_has_valid_gnss_fix", lambda lines: False)
+
+    result = loop_runner.run_loop(
+        firmware_dir=firmware_dir,
+        preferred_port=None,
+        max_iterations=1,
+        baud=115200,
+        max_seconds=1,
+        stable_seconds=1,
+        quiet_seconds=1,
+        gnss_streak_target=2,
+    )
+
+    assert result.final_status == "stable-no-gnss"
+    assert result.iterations[0].status == "stable-no-gnss"

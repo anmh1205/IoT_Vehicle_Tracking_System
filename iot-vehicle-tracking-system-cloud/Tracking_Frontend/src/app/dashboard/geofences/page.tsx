@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AllowedZoneSetupSheet } from '@/features/geofences/components/allowed-zone-setup-sheet';
+import { formatAllowedZoneRadius } from '@/features/geofences/lib/allowed-zone-form';
 import { zoneQueryKey } from '@/features/geofences/hooks/use-vehicle-allowed-zone';
 import { useRoleAccess } from '@/hooks/use-role-access';
 import { geofenceServices } from '@/lib/api/geofences';
@@ -121,7 +122,7 @@ const columns: ColumnDef<AllowedZoneTableRow>[] = [
     meta: { label: 'Bán kính' },
     cell: ({ row }) => {
       const zone = row.original.allowedZone;
-      return zone ? `${Math.round(zone.radiusMeters)} m` : '—';
+      return zone ? formatAllowedZoneRadius(zone.radiusMeters) : '—';
     },
   },
   {

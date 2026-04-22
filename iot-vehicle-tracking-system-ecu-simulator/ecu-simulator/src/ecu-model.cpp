@@ -39,6 +39,9 @@ uint32_t s_ignition_state_duration_s = k_ignition_on_min_s;
 uint32_t s_ignition_drive_started_s = 0;
 uint8_t s_profile_index = 0;
 uint8_t s_wave_offset = 0;
+bool s_forced_cycle_active = false;
+bool s_forced_cycle_return_state = false;
+uint32_t s_forced_cycle_deadline_s = 0;
 
 const dtc_profile_t k_profiles[] = {
     {{0x0171, 0x0133, 0x2195}, 3, {0x0174, 0x2195, 0x0000}, 2, {0x0420, 0x0000, 0x0000}, 1, 11, 7, 0x24},
@@ -256,6 +259,19 @@ void update_ignition_state(uint32_t now_s) {
   }
   begin_ignition_state(!s_ignition_on, now_s);
 }
+
+void maybe_complete_forced_cycle(uint32_t now_s) {
+  if (!s_forced_cycle_active || now_s < s_forced_cycle_deadline_s) {
+    return;
+  }
+
+  const bool return_state = s_forced_cycle_return_state;
+  s_forced_cycle_active = false;
+  s_forced_cycle_deadline_s = 0;
+  begin_ignition_state(return_state, now_s);
+  Serial.print(F("IGN TIMER END -> "));
+  Serial.println(return_state ? F("ON") : F("OFF"));
+}
 }  // namespace
 
 void ecu_model_begin() {
@@ -268,7 +284,10 @@ void ecu_model_tick() {
   const uint32_t now_s = now_ms / 1000UL;
   const uint32_t delta_ms = s_last_tick_ms == 0 ? 0 : min_value<uint32_t>(1000UL, now_ms - s_last_tick_ms);
   s_last_tick_ms = now_ms;
-  update_ignition_state(now_s);
+  maybe_complete_forced_cycle(now_s);
+  if (!s_forced_cycle_active) {
+    update_ignition_state(now_s);
+  }
 
   const dtc_profile_t &profile = k_profiles[s_profile_index % array_count(k_profiles)];
   copy_bucket(s_snapshot.stored_dtc, profile.stored, profile.stored_count);
@@ -301,6 +320,54 @@ void ecu_model_tick() {
   s_snapshot.distance_with_mil_km = static_cast<uint16_t>(min_value<uint32_t>(65535UL, s_distance_with_mil_m / 1000UL));
   s_snapshot.time_since_clear_min = static_cast<uint16_t>(min_value<uint32_t>(65535UL, now_s / 60UL));
   update_readiness(profile);
+}
+
+void ecu_model_force_ignition(bool ignition_on) {
+  s_forced_cycle_active = false;
+  s_forced_cycle_deadline_s = 0;
+  begin_ignition_state(ignition_on, millis() / 1000UL);
+  Serial.print(F("IGN FORCED "));
+  Serial.println(ignition_on ? F("ON") : F("OFF"));
+}
+
+void ecu_model_force_ignition_for(bool ignition_on, uint32_t duration_s) {
+  if (duration_s == 0) {
+    ecu_model_force_ignition(ignition_on);
+    return;
+  }
+
+  const uint32_t now_s = millis() / 1000UL;
+  begin_ignition_state(ignition_on, now_s);
+  s_forced_cycle_active = true;
+  s_forced_cycle_return_state = !ignition_on;
+  s_forced_cycle_deadline_s = now_s + duration_s;
+
+  Serial.print(F("IGN FORCED "));
+  Serial.print(ignition_on ? F("ON") : F("OFF"));
+  Serial.print(F(" for "));
+  Serial.print(duration_s);
+  Serial.print(F("s then "));
+  Serial.println(s_forced_cycle_return_state ? F("ON") : F("OFF"));
+}
+
+bool ecu_model_is_ignition_on() {
+  return s_ignition_on;
+}
+
+bool ecu_model_has_ignition_timer() {
+  return s_forced_cycle_active;
+}
+
+uint32_t ecu_model_ignition_timer_remaining_s() {
+  if (!s_forced_cycle_active) {
+    return 0;
+  }
+
+  const uint32_t now_s = millis() / 1000UL;
+  if (now_s >= s_forced_cycle_deadline_s) {
+    return 0;
+  }
+  return s_forced_cycle_deadline_s - now_s;
 }
 
 const ecu_snapshot_t &ecu_model_get() {

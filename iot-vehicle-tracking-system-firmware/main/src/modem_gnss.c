@@ -34,6 +34,10 @@ static bool s_gnss_powered = false;
 #define MODEM_GNSS_POWER_CGPS_RESTART_DELAY_MS 2000U
 #define MODEM_GNSS_NO_FIX_RECOVER_THRESHOLD 10U
 #define MODEM_GNSS_NO_FIX_RECOVER_COOLDOWN_MS 180000ULL
+#define MODEM_GNSS_QUERY_READY_HOT_START_MS 1500U
+#define MODEM_GNSS_QUERY_READY_COLD_START_MS 5000U
+#define MODEM_GNSS_QUERY_READY_RESUME_MS 0U
+#define MODEM_GNSS_HOT_START_OFF_WINDOW_MS 5000ULL
 
 typedef enum {
     MODEM_GNSS_READ_OK = 0,
@@ -55,6 +59,8 @@ static uint64_t s_cgnsinf_backoff_until_ms = 0;
 static uint64_t s_last_no_fix_recover_ms = 0;
 static bool s_no_fix_recover_pending = false;
 static uint64_t s_no_fix_recover_ready_ms = 0;
+static uint64_t s_last_power_off_ms = 0;
+static uint64_t s_query_ready_ms = 0;
 
 /**
  * @brief Convert modem UTC timestamp string to milliseconds.
@@ -134,6 +140,41 @@ static void modem_gnss_log_command_response(const char *command, esp_err_t err, 
     char preview[MODEM_GNSS_RESP_PREVIEW_LEN] = {0};
     modem_gnss_prepare_response_preview(preview, sizeof(preview), response);
     ESP_LOGI(TAG, "GNSS cmd=%s err=%s resp=%s", command, esp_err_to_name(err), preview);
+}
+
+static uint32_t modem_gnss_query_ready_delay_ms(bool known_power_off, uint64_t off_duration_ms, bool resumed_session) {
+    if (resumed_session) {
+        return MODEM_GNSS_QUERY_READY_RESUME_MS;
+    }
+
+    if (known_power_off && off_duration_ms <= MODEM_GNSS_HOT_START_OFF_WINDOW_MS) {
+        return MODEM_GNSS_QUERY_READY_HOT_START_MS;
+    }
+
+    return MODEM_GNSS_QUERY_READY_COLD_START_MS;
+}
+
+static void modem_gnss_arm_query_ready_window(const char *start_path,
+                                              bool known_power_off,
+                                              uint64_t off_duration_ms,
+                                              bool resumed_session) {
+    uint64_t now_ms = util_uptime_ms();
+    uint32_t delay_ms = modem_gnss_query_ready_delay_ms(known_power_off, off_duration_ms, resumed_session);
+    s_query_ready_ms = now_ms + delay_ms;
+
+    if (known_power_off) {
+        ESP_LOGI(TAG,
+                 "GNSS startup gate path=%s off_ms=%llu first_query_in_ms=%u",
+                 start_path,
+                 (unsigned long long)off_duration_ms,
+                 (unsigned)delay_ms);
+        return;
+    }
+
+    ESP_LOGI(TAG,
+             "GNSS startup gate path=%s off_ms=unknown first_query_in_ms=%u",
+             start_path,
+             (unsigned)delay_ms);
 }
 
 static uint64_t modem_gnss_parse_cgpsinfo_timestamp(const char *date_ddmmyy, const char *time_hhmmss) {
@@ -427,16 +468,56 @@ static bool modem_gnss_try_no_fix_recover(uint64_t now_ms) {
  */
 esp_err_t modem_gnss_power_on(void) {
     char response[MODEM_GNSS_POWER_DEBUG_BUF_LEN] = {0};
+    uint64_t now_ms = util_uptime_ms();
+    bool known_power_off = s_last_power_off_ms != 0 && now_ms >= s_last_power_off_ms;
+    uint64_t off_duration_ms = known_power_off ? (now_ms - s_last_power_off_ms) : 0;
 
     s_use_cgps_query_only = false;
     s_cgnsinf_fail_streak = 0;
     s_cgnsinf_backoff_until_ms = 0;
 
     ESP_LOGI(TAG, "GNSS power-on sequence start");
-    esp_err_t err = modem_at_send("AT+CGNSPWR=1\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
+
+    if (!known_power_off) {
+        esp_err_t resume_err = modem_at_send("AT+CGPS?\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
+        modem_gnss_log_command_response("AT+CGPS?", resume_err, response);
+        if (resume_err == ESP_OK && strstr(response, "+CGPS: 1") != NULL) {
+            s_gnss_powered = true;
+            s_use_cgps_query_only = true;
+            modem_gnss_arm_query_ready_window("cgps_state_resume", false, 0, true);
+            ESP_LOGI(TAG, "GNSS already active via CGPS? state=1 (query mode=CGPSINFO)");
+            return ESP_OK;
+        }
+    }
+
+    memset(response, 0, sizeof(response));
+    esp_err_t err = modem_at_send("AT+CGPS=1\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
+    modem_gnss_log_command_response("AT+CGPS=1", err, response);
+    if (err == ESP_OK && strstr(response, "OK") != NULL) {
+        s_gnss_powered = true;
+        s_use_cgps_query_only = true;
+        modem_gnss_arm_query_ready_window("cgps_start", known_power_off, off_duration_ms, false);
+        ESP_LOGI(TAG, "GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)");
+        return ESP_OK;
+    }
+
+    memset(response, 0, sizeof(response));
+    err = modem_at_send("AT+CGPS?\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
+    modem_gnss_log_command_response("AT+CGPS?", err, response);
+    if (err == ESP_OK && strstr(response, "+CGPS: 1") != NULL) {
+        s_gnss_powered = true;
+        s_use_cgps_query_only = true;
+        modem_gnss_arm_query_ready_window("cgps_state", known_power_off, off_duration_ms, !known_power_off);
+        ESP_LOGI(TAG, "GNSS power-on fallback accepted via CGPS? state=1 (query mode=CGPSINFO)");
+        return ESP_OK;
+    }
+
+    memset(response, 0, sizeof(response));
+    err = modem_at_send("AT+CGNSPWR=1\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
     modem_gnss_log_command_response("AT+CGNSPWR=1", err, response);
     if (err == ESP_OK && strstr(response, "OK") != NULL) {
         s_gnss_powered = true;
+        modem_gnss_arm_query_ready_window("cgnspwr_start", known_power_off, off_duration_ms, false);
         ESP_LOGI(TAG, "GNSS power-on accepted via CGNSPWR=1");
         return ESP_OK;
     }
@@ -446,28 +527,8 @@ esp_err_t modem_gnss_power_on(void) {
     modem_gnss_log_command_response("AT+CGNSPWR?", err, response);
     if (err == ESP_OK && strstr(response, "+CGNSPWR: 1") != NULL) {
         s_gnss_powered = true;
-        ESP_LOGW(TAG, "GNSS power-on fallback accepted via CGNSPWR? state=1");
-        return ESP_OK;
-    }
-
-    memset(response, 0, sizeof(response));
-    err = modem_at_send("AT+CGPS=1\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
-    modem_gnss_log_command_response("AT+CGPS=1", err, response);
-    if (err == ESP_OK && strstr(response, "OK") != NULL) {
-        s_gnss_powered = true;
-        s_use_cgps_query_only = true;
-        ESP_LOGW(TAG, "GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)");
-        return ESP_OK;
-    }
-
-
-    memset(response, 0, sizeof(response));
-    err = modem_at_send("AT+CGPS?\r", response, sizeof(response), MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
-    modem_gnss_log_command_response("AT+CGPS?", err, response);
-    if (err == ESP_OK && strstr(response, "+CGPS: 1") != NULL) {
-        s_gnss_powered = true;
-        s_use_cgps_query_only = true;
-        ESP_LOGW(TAG, "GNSS power-on fallback accepted via CGPS? state=1 (query mode=CGPSINFO)");
+        modem_gnss_arm_query_ready_window("cgnspwr_state", known_power_off, off_duration_ms, !known_power_off);
+        ESP_LOGI(TAG, "GNSS power-on fallback accepted via CGNSPWR? state=1");
         return ESP_OK;
     }
 
@@ -484,12 +545,16 @@ esp_err_t modem_gnss_power_off(void) {
     esp_err_t err = modem_at_send_expect("AT+CGNSPWR=0\r", "OK", MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
     if (err == ESP_OK) {
         s_gnss_powered = false;
+        s_query_ready_ms = 0;
+        s_last_power_off_ms = util_uptime_ms();
         return ESP_OK;
     }
 
     err = modem_at_send_expect("AT+CGPS=0\r", "OK", MODEM_GNSS_POWER_CMD_TIMEOUT_MS);
     if (err == ESP_OK) {
         s_gnss_powered = false;
+        s_query_ready_ms = 0;
+        s_last_power_off_ms = util_uptime_ms();
         ESP_LOGW(TAG, "GNSS power-off fallback accepted via CGPS=0");
         return ESP_OK;
     }
@@ -504,6 +569,13 @@ esp_err_t modem_gnss_power_off(void) {
  */
 bool modem_gnss_has_fix(void) {
     return s_last_gnss.fix_valid;
+}
+
+bool modem_gnss_is_query_ready(void) {
+    if (!s_gnss_powered) {
+        return false;
+    }
+    return util_uptime_ms() >= s_query_ready_ms;
 }
 
 /**
