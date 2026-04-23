@@ -4,7 +4,13 @@ import { useMemo, useState } from 'react';
 import { List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { useMapStore } from '@/features/map/store/map-store';
 import { DeviceFilterCompact } from './device-filter-compact';
 import { DeviceListItem } from './device-list-item';
@@ -49,6 +55,9 @@ export const MobileDeviceDrawer = () => {
         <SheetContent side="bottom" className="flex h-[min(88dvh,44rem)] flex-col rounded-t-3xl px-4">
           <SheetHeader className="px-0 pb-2">
             <SheetTitle>Thiết bị trên bản đồ</SheetTitle>
+            <SheetDescription className="sr-only">
+              Tìm, lọc và chọn thiết bị để xem nhanh trạng thái trên bản đồ.
+            </SheetDescription>
           </SheetHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-3">
             <div className="flex items-center gap-2">
@@ -60,7 +69,7 @@ export const MobileDeviceDrawer = () => {
 
             <MapDeviceSummary stats={stats} />
 
-            <ScrollArea className="min-h-0 flex-1">
+            <ScrollArea className="min-h-[10rem] flex-1 overflow-hidden">
               <div className="space-y-2 pr-2">
                 {filteredDevices.map((device) => (
                   <DeviceListItem
@@ -81,7 +90,9 @@ export const MobileDeviceDrawer = () => {
               </div>
             </ScrollArea>
 
-            <SelectedDeviceCard device={selectedDevice} />
+            <div className="max-h-[12rem] shrink-0 overflow-y-auto pr-1">
+              <SelectedDeviceCard device={selectedDevice} />
+            </div>
           </div>
         </SheetContent>
       </Sheet>

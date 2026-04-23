@@ -184,13 +184,13 @@ export const MapSelectedDeviceOverlay = ({
   return (
     <div
       className={cn(
-        'pointer-events-none absolute inset-x-2 bottom-0 z-[910] pb-[max(0.35rem,var(--safe-area-bottom))] md:inset-x-3',
+        'pointer-events-none absolute inset-x-2 bottom-0 top-[4.5rem] z-[910] flex items-end pb-[max(0.35rem,var(--safe-area-bottom))] md:inset-x-3 md:top-auto',
         className,
       )}
     >
       <div
         className={cn(
-          'pointer-events-auto w-full overflow-hidden rounded-2xl border border-border/70 bg-background/95 shadow-2xl backdrop-blur-md',
+          'pointer-events-auto max-h-full w-full overflow-y-auto rounded-2xl border border-border/70 bg-background/95 shadow-2xl backdrop-blur-md',
           condensed && 'md:max-w-[880px]',
         )}
       >

@@ -181,11 +181,17 @@ export const TrackingMap = () => {
     setWorkspaceOwnsGeofenceLayer(false);
   }, [toggleGeofences]);
 
+  const hideViewedAllowedZone = useCallback(() => {
+    setShowViewedAllowedZone(false);
+    setViewedAllowedZoneVehicleId(null);
+  }, []);
+
   const closeGeofenceWorkspace = useCallback(() => {
     setGeofenceWorkspaceOpen(false);
     setDraft(null);
+    hideViewedAllowedZone();
     hideWorkspaceGeofenceLayer();
-  }, [hideWorkspaceGeofenceLayer]);
+  }, [hideViewedAllowedZone, hideWorkspaceGeofenceLayer]);
 
   useEffect(() => {
     workspaceOwnsGeofenceLayerRef.current = workspaceOwnsGeofenceLayer;
@@ -202,9 +208,7 @@ export const TrackingMap = () => {
       setAllowedZonePreview,
     );
     closeGeofenceWorkspace();
-    setShowViewedAllowedZone(false);
     if (!selectedVehicleId) {
-      setViewedAllowedZoneVehicleId(null);
       return;
     }
 
