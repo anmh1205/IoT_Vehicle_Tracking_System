@@ -99,6 +99,7 @@ jobs:
           script: |
             mkdir -p /opt/tracking/scripts/deploy
             mkdir -p /opt/tracking/Tracking_Backend
+            mkdir -p /opt/tracking/Tracking_PostgreSQL
 
       - name: Upload deploy scripts to server
         uses: appleboy/scp-action@v0.1.7
@@ -107,8 +108,19 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "scripts/deploy/bootstrap-vps.sh,scripts/deploy/deploy-service.sh"
+          source: "scripts/deploy/bootstrap-vps.sh,scripts/deploy/deploy-service.sh,scripts/deploy/sync-postgres-schema.sh"
           target: /opt/tracking/
+
+      - name: Upload PostgreSQL schema assets to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/.env.example,iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/init/,iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/scripts/"
+          target: /opt/tracking/
+          strip_components: 1
 
       - name: SCP compose file to server
         uses: appleboy/scp-action@v0.1.7
@@ -127,14 +139,16 @@ jobs:
           port: ${{ secrets.SSH_DEPLOY_PORT }}
           username: ${{ secrets.SSH_DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DOCKERHUB_USERNAME,SERVICE_ENV_CONTENT,SERVICE_ENV_OVERRIDES,SERVICE_DIR,COMPOSE_FILE,SERVICE_NAME,HEALTHCHECK_URL
+          envs: DOCKERHUB_USERNAME,SERVICE_ENV_CONTENT,SERVICE_ENV_OVERRIDES,SERVICE_DIR,COMPOSE_FILE,SERVICE_NAME,HEALTHCHECK_URL,POSTGRES_SERVICE_DIR,POSTGRES_COMPOSE_FILE
           script: |
             chmod +x /opt/tracking/scripts/deploy/bootstrap-vps.sh
             chmod +x /opt/tracking/scripts/deploy/deploy-service.sh
+            chmod +x /opt/tracking/scripts/deploy/sync-postgres-schema.sh
             export DOCKERHUB_USERNAME="$DOCKERHUB_USERNAME"
             export SERVICE_ENV_CONTENT="$SERVICE_ENV_CONTENT"
             export SERVICE_ENV_OVERRIDES="$SERVICE_ENV_OVERRIDES"
             /opt/tracking/scripts/deploy/bootstrap-vps.sh "$SERVICE_DIR" "$COMPOSE_FILE"
+            /opt/tracking/scripts/deploy/sync-postgres-schema.sh "$POSTGRES_SERVICE_DIR" "$POSTGRES_COMPOSE_FILE"
             /opt/tracking/scripts/deploy/deploy-service.sh "$SERVICE_DIR" "$COMPOSE_FILE" "$SERVICE_NAME" "$HEALTHCHECK_URL" "3"
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -147,6 +161,8 @@ jobs:
           COMPOSE_FILE: docker-compose.uat.yml
           SERVICE_NAME: backend
           HEALTHCHECK_URL: http://localhost:4000/health/live
+          POSTGRES_SERVICE_DIR: /opt/tracking/Tracking_PostgreSQL
+          POSTGRES_COMPOSE_FILE: docker-compose.yml
 
       - name: Discord Notification
         if: always() && env.DISCORD_WEBHOOK_URL != ''

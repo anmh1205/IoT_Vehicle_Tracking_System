@@ -56,6 +56,93 @@ typedef struct {
 
 static offline_queue_ctx_t s_ctx;
 
+#if CONFIG_TRACKER_SD_DIAG_ENABLE
+static uint32_t offline_queue_depth_from_meta(const sd_log_meta_t *meta) {
+    if (meta == NULL) {
+        return 0;
+    }
+
+    uint32_t replay_seq = meta->replay_seq == 0 ? 1 : meta->replay_seq;
+    if (meta->write_seq < replay_seq) {
+        return 0;
+    }
+
+    return meta->write_seq - replay_seq + 1;
+}
+
+static void offline_queue_log_link_transition(bool previous_online, bool next_online) {
+    if (!sd_log_store_is_mounted()) {
+        ESP_LOGI(TAG,
+                 "link transition prev_online=%d next_online=%d sd_mounted=0",
+                 previous_online ? 1 : 0,
+                 next_online ? 1 : 0);
+        return;
+    }
+
+    sd_log_meta_t meta = {0};
+    if (sd_log_store_get_meta(&meta) != ESP_OK) {
+        ESP_LOGI(TAG,
+                 "link transition prev_online=%d next_online=%d meta=unavailable",
+                 previous_online ? 1 : 0,
+                 next_online ? 1 : 0);
+        return;
+    }
+
+    ESP_LOGI(TAG,
+             "link transition prev_online=%d next_online=%d write_seq=%lu replay_seq=%lu ack_critical=%lu depth=%lu",
+             previous_online ? 1 : 0,
+             next_online ? 1 : 0,
+             (unsigned long)meta.write_seq,
+             (unsigned long)meta.replay_seq,
+             (unsigned long)meta.ack_seq_critical,
+             (unsigned long)offline_queue_depth_from_meta(&meta));
+}
+
+static void offline_queue_log_enqueue_result(const sd_log_record_t *rec) {
+    if (rec == NULL) {
+        return;
+    }
+
+    if (!sd_log_store_is_mounted()) {
+        ESP_LOGI(TAG,
+                 "enqueue seq=%lu type=%u critical=%d net_up=%d gps_fix=%d time_trusted=%d sd_mounted=0",
+                 (unsigned long)rec->seq,
+                 (unsigned int)rec->type,
+                 rec->critical ? 1 : 0,
+                 rec->net_up ? 1 : 0,
+                 rec->gps_fix ? 1 : 0,
+                 rec->time_trusted ? 1 : 0);
+        return;
+    }
+
+    sd_log_meta_t meta = {0};
+    if (sd_log_store_get_meta(&meta) != ESP_OK) {
+        ESP_LOGI(TAG,
+                 "enqueue seq=%lu type=%u critical=%d net_up=%d gps_fix=%d time_trusted=%d meta=unavailable",
+                 (unsigned long)rec->seq,
+                 (unsigned int)rec->type,
+                 rec->critical ? 1 : 0,
+                 rec->net_up ? 1 : 0,
+                 rec->gps_fix ? 1 : 0,
+                 rec->time_trusted ? 1 : 0);
+        return;
+    }
+
+    ESP_LOGI(TAG,
+             "enqueue seq=%lu type=%u critical=%d net_up=%d gps_fix=%d time_trusted=%d write_seq=%lu replay_seq=%lu ack_critical=%lu depth=%lu",
+             (unsigned long)rec->seq,
+             (unsigned int)rec->type,
+             rec->critical ? 1 : 0,
+             rec->net_up ? 1 : 0,
+             rec->gps_fix ? 1 : 0,
+             rec->time_trusted ? 1 : 0,
+             (unsigned long)meta.write_seq,
+             (unsigned long)meta.replay_seq,
+             (unsigned long)meta.ack_seq_critical,
+             (unsigned long)offline_queue_depth_from_meta(&meta));
+}
+#endif
+
 static retry_policy_t offline_queue_replay_retry_policy(void) {
     retry_policy_t policy = {
         .mode = RETRY_MODE_EXPONENTIAL,
@@ -329,6 +416,11 @@ void offline_queue_set_session(uint32_t session_id) {
 }
 
 void offline_queue_set_online(bool online) {
+#if CONFIG_TRACKER_SD_DIAG_ENABLE
+    if (s_ctx.online != online) {
+        offline_queue_log_link_transition(s_ctx.online, online);
+    }
+#endif
     s_ctx.online = online;
 }
 
@@ -356,6 +448,9 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
         /* Treat a temporarily unavailable card as best-effort; do not fail caller telemetry paths. */
         offline_queue_try_mount(util_uptime_ms());
         if (!sd_log_store_is_mounted()) {
+#if CONFIG_TRACKER_SD_DIAG_ENABLE
+            offline_queue_log_enqueue_result(&rec);
+#endif
             return ESP_OK;
         }
 
@@ -372,6 +467,9 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
 #endif
     }
 
+#if CONFIG_TRACKER_SD_DIAG_ENABLE
+    offline_queue_log_enqueue_result(&rec);
+#endif
     s_ctx.next_seq += 1;
     return ESP_OK;
 }

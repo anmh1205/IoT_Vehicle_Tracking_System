@@ -20,6 +20,9 @@ import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 import { normalizeRuntimeState } from '../types/device-state.types';
 
 const VIBRATION_ALERT_THRESHOLD = 500;
+const HIGH_VIBRATION_ALERT_TITLE = 'high_vibration';
+const HIGH_VIBRATION_ALERT_RESOLUTION_NOTES =
+  'Auto-resolved by mqtt bridge: vibration returned below threshold in latest telemetry snapshot.';
 const OBD_RULE_COOLDOWN_MS = 15 * 60 * 1000;
 const OBD_IDLE_ANOMALY_MIN_DURATION_MS = 10 * 60 * 1000;
 const OBD_CHANNEL_UNSTABLE_THRESHOLD = 3;
@@ -429,6 +432,58 @@ const syncObdConnectionWarnings = async (
     [OBD_CONNECT_WARNING_MESSAGE],
     shouldKeepActive ? [OBD_CONNECT_WARNING_MESSAGE] : [],
     'Auto-resolved by mqtt bridge: OBD connection recovered in latest telemetry snapshot.',
+  );
+};
+
+const syncHighVibrationAlert = async (
+  vibration: number | undefined,
+  context: ObdAlertContext,
+): Promise<void> => {
+  const highVibrationActive =
+    vibration !== undefined && vibration > VIBRATION_ALERT_THRESHOLD;
+  const existingActiveTitles = await syncActiveMaintenanceAlertsByTitle(
+    context.deviceId,
+    [HIGH_VIBRATION_ALERT_TITLE],
+    highVibrationActive ? [HIGH_VIBRATION_ALERT_TITLE] : [],
+    HIGH_VIBRATION_ALERT_RESOLUTION_NOTES,
+  );
+
+  if (!highVibrationActive) {
+    ruleCooldownUntil.delete(getRuleKey(context.deviceId, HIGH_VIBRATION_ALERT_TITLE));
+    return;
+  }
+
+  if (existingActiveTitles.has(HIGH_VIBRATION_ALERT_TITLE)) {
+    return;
+  }
+
+  if (!canEmitRule(context.deviceId, HIGH_VIBRATION_ALERT_TITLE, context.timestampMs)) {
+    return;
+  }
+
+  publishInternalEvent('alert', {
+    device_id: context.deviceId,
+    vehicle_id: context.vehicleId ?? undefined,
+    alert_type: 'high_vibration',
+    source: 'device',
+    severity: 'medium',
+    title: HIGH_VIBRATION_ALERT_TITLE,
+    message: `Vibration ${vibration!.toFixed(0)} exceeded threshold ${VIBRATION_ALERT_THRESHOLD}.`,
+    value: vibration,
+    actual_value: vibration,
+    threshold: VIBRATION_ALERT_THRESHOLD,
+    threshold_value: VIBRATION_ALERT_THRESHOLD,
+    latitude: context.latitude,
+    longitude: context.longitude,
+    message_id: context.messageId,
+    schema_version: context.schemaVersion,
+    seq_no: context.seqNo,
+    boot_id: context.bootId,
+    timestamp: new Date(context.timestampMs).toISOString(),
+  });
+
+  logger.info(
+    `ALERT: High vibration (${vibration}) on device ${context.deviceId}`,
   );
 };
 
@@ -920,6 +975,7 @@ export const handleRawData = async (
     ),
     evaluateObdDtcRules(diagnostics, obdAlertContext),
     syncObdConnectionWarnings(diagnostics, obdAlertContext),
+    syncHighVibrationAlert(payload.data.vibration, obdAlertContext),
   ]);
   obdRuleResults.forEach((result, index) => {
     if (result.status === 'rejected') {
@@ -929,27 +985,4 @@ export const handleRawData = async (
       );
     }
   });
-
-  // 8. Check alerts - vibration threshold
-  if (
-    payload.data.vibration !== undefined &&
-    payload.data.vibration > VIBRATION_ALERT_THRESHOLD
-  ) {
-    publishInternalEvent('alert', {
-      device_id: payload.device_id,
-      alert_type: 'high_vibration',
-      value: payload.data.vibration,
-      threshold: VIBRATION_ALERT_THRESHOLD,
-      message_id: messageId,
-      schema_version: schemaVersion,
-      seq_no: seqNo,
-      boot_id: bootId,
-      latitude: effectiveLatitude,
-      longitude: effectiveLongitude,
-    });
-
-    logger.info(
-      `ALERT: High vibration (${payload.data.vibration}) on device ${payload.device_id}`,
-    );
-  }
 };

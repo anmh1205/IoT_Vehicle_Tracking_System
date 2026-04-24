@@ -1,0 +1,55 @@
+- type: evidence_card
+  id: thesis-ch04-docker-service-split
+  domain: deployment
+  subdomain: service-packaging
+  source_kind: thesis_tex
+  source_path: resources/reports/thesis/final/thesis-final-report.tex
+  source_anchor: "4.2.4.1 / Docker infrastructure setup"
+  statement: "The thesis deployment model uses one Docker Compose file per service and one shared Docker network `tracking-network`."
+  evidence_excerpt: "The implementation chapter states that services are packaged independently but join the same shared network."
+  status: validated
+  confidence: high
+  validated_against:
+    - README.md
+    - iot-vehicle-tracking-system-cloud/Tracking_Backend/docker-compose.yml
+    - iot-vehicle-tracking-system-cloud/Tracking_Frontend/docker-compose.yml
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+
+- type: evidence_card
+  id: thesis-ch04-observability-and-hardening
+  domain: observability
+  subdomain: monitoring-and-hardening
+  source_kind: thesis_toc
+  source_path: resources/reports/thesis/final/thesis-final-report.toc
+  source_anchor: "4.2.6 observability + 4.2.7 hardening checklist"
+  statement: "The thesis expects Grafana, VictoriaMetrics, VictoriaLogs, EMQX monitoring, and pre-production hardening before real deployment."
+  evidence_excerpt: "Chapter 4 dedicates explicit sections to monitoring setup and an operational hardening checklist."
+  status: validated
+  confidence: medium
+  validated_against:
+    - README.md
+    - docs/system-architecture.md
+    - iot-vehicle-tracking-system-cloud/Tracking_Grafana/docker-compose.yml
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+
+- type: evidence_card
+  id: thesis-ch04-local-ports-and-env-handbook
+  domain: deployment
+  subdomain: local-bring-up
+  source_kind: thesis_md
+  source_path: resources/reports/thesis/final/thesis-final-report.md
+  source_anchor: "Appendix 4.4-4.5 rendered into thesis markdown"
+  statement: "The thesis appendix claims each service ships `.env.example`, and lists local access as Frontend `4002`, Grafana `4001`, EMQX dashboard `18083`, and VictoriaMetrics `8428`."
+  evidence_excerpt: "The install/run appendix includes env assumptions and a local URL table."
+  status: conflict
+  confidence: high
+  validated_against:
+    - README.md
+    - iot-vehicle-tracking-system-cloud/Tracking_Grafana/docker-compose.yml
+    - iot-vehicle-tracking-system-cloud/Tracking_EMQX/docker-compose.yml
+    - iot-vehicle-tracking-system-cloud/Tracking_VictoriaMetrics/docker-compose.yml
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+

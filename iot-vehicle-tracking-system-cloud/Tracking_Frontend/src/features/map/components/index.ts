@@ -8,5 +8,4 @@ export * from './device-search';
 export * from './map-controls';
 export * from './map-layer-switcher';
 export * from './mobile-device-drawer';
-export * from './selected-device-card';
 export * from './tracking-map';

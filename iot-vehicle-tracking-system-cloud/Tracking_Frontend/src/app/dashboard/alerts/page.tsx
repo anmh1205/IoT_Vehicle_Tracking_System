@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CircleCheckBig, CircleDashed, ShieldAlert } from 'lucide-react';
 import { DataTable } from '@/components/common/data-table';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { StatCard } from '@/components/common/stat-card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -23,23 +25,64 @@ const getPaginationTotal = (payload: any): number => {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
 };
 
+const normalizeSearchParam = (value: string | null) => {
+  const normalized = value?.trim();
+  return normalized ? normalized : undefined;
+};
+
+const normalizeSourceParam = (value: string | null): 'all' | 'obd' | 'system' =>
+  value === 'obd' || value === 'system' ? value : 'all';
+
 const AlertsPage = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const routeFilters = useMemo(
+    () => ({
+      severity: normalizeSearchParam(searchParams.get('severity')),
+      status: normalizeSearchParam(searchParams.get('status')),
+      source: normalizeSourceParam(searchParams.get('source')),
+      deviceId: normalizeSearchParam(searchParams.get('deviceId')),
+      vehicleId: normalizeSearchParam(searchParams.get('vehicleId')),
+    }),
+    [searchParams],
+  );
   const [selected, setSelected] = useState<number[]>([]);
   const [detail, setDetail] = useState<any | null>(null);
-  const [severity, setSeverity] = useState<string | undefined>(undefined);
-  const [status, setStatus] = useState<string | undefined>(undefined);
-  const [source, setSource] = useState<'all' | 'obd' | 'system'>('all');
+  const [severity, setSeverity] = useState<string | undefined>(routeFilters.severity);
+  const [status, setStatus] = useState<string | undefined>(routeFilters.status);
+  const [source, setSource] = useState<'all' | 'obd' | 'system'>(routeFilters.source);
+  const [deviceId, setDeviceId] = useState<string | undefined>(routeFilters.deviceId);
+  const [vehicleId, setVehicleId] = useState<string | undefined>(routeFilters.vehicleId);
   const [page, setPage] = useState(1);
 
+  useEffect(() => {
+    setSelected([]);
+    setDetail(null);
+    setPage(1);
+    setSeverity(routeFilters.severity);
+    setStatus(routeFilters.status);
+    setSource(routeFilters.source);
+    setDeviceId(routeFilters.deviceId);
+    setVehicleId(routeFilters.vehicleId);
+  }, [
+    routeFilters.deviceId,
+    routeFilters.severity,
+    routeFilters.source,
+    routeFilters.status,
+    routeFilters.vehicleId,
+  ]);
+
   const alerts = useQuery({
-    queryKey: ['alerts', { severity, status, page, limit: PAGE_SIZE }],
+    queryKey: ['alerts', { severity, status, source, deviceId, vehicleId, page, limit: PAGE_SIZE }],
     queryFn: () =>
       alertServices.getList({
         page,
         limit: PAGE_SIZE,
         severity,
         status,
+        deviceId,
+        vehicleId,
       }),
   });
 
@@ -53,26 +96,26 @@ const AlertsPage = () => {
       .then((payload) => getPaginationTotal(payload));
 
   const summaryTotal = useQuery({
-    queryKey: ['alerts-summary-total', { severity, status }],
-    queryFn: () => fetchAlertCount({ severity, status }),
+    queryKey: ['alerts-summary-total', { severity, status, deviceId, vehicleId }],
+    queryFn: () => fetchAlertCount({ severity, status, deviceId, vehicleId }),
     enabled: source === 'all',
   });
 
   const summaryActive = useQuery({
-    queryKey: ['alerts-summary-active', { severity, status }],
-    queryFn: () => fetchAlertCount({ severity, status: 'active' }),
+    queryKey: ['alerts-summary-active', { severity, status, deviceId, vehicleId }],
+    queryFn: () => fetchAlertCount({ severity, status: 'active', deviceId, vehicleId }),
     enabled: source === 'all' && (!status || status === 'active'),
   });
 
   const summaryAcknowledged = useQuery({
-    queryKey: ['alerts-summary-acknowledged', { severity, status }],
-    queryFn: () => fetchAlertCount({ severity, status: 'acknowledged' }),
+    queryKey: ['alerts-summary-acknowledged', { severity, status, deviceId, vehicleId }],
+    queryFn: () => fetchAlertCount({ severity, status: 'acknowledged', deviceId, vehicleId }),
     enabled: source === 'all' && (!status || status === 'acknowledged'),
   });
 
   const summaryCritical = useQuery({
-    queryKey: ['alerts-summary-critical', { severity, status }],
-    queryFn: () => fetchAlertCount({ severity: 'critical', status }),
+    queryKey: ['alerts-summary-critical', { severity, status, deviceId, vehicleId }],
+    queryFn: () => fetchAlertCount({ severity: 'critical', status, deviceId, vehicleId }),
     enabled: source === 'all' && (!severity || severity === 'critical'),
   });
 
@@ -81,8 +124,8 @@ const AlertsPage = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
     onError: (error: unknown) => {
       notificationUtils.error(
-        'Xác nhận cảnh báo thất bại',
-        getApiErrorMessage(error, 'Không thể cập nhật trạng thái cảnh báo.'),
+        'XÃ¡c nháº­n cáº£nh bÃ¡o tháº¥t báº¡i',
+        getApiErrorMessage(error, 'KhÃ´ng thá»ƒ cáº­p nháº­t tráº¡ng thÃ¡i cáº£nh bÃ¡o.'),
       );
     },
   });
@@ -92,8 +135,8 @@ const AlertsPage = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
     onError: (error: unknown) => {
       notificationUtils.error(
-        'Đóng cảnh báo thất bại',
-        getApiErrorMessage(error, 'Không thể đóng cảnh báo.'),
+        'ÄÃ³ng cáº£nh bÃ¡o tháº¥t báº¡i',
+        getApiErrorMessage(error, 'KhÃ´ng thá»ƒ Ä‘Ã³ng cáº£nh bÃ¡o.'),
       );
     },
   });
@@ -185,10 +228,23 @@ const AlertsPage = () => {
         summaryActive.isLoading ||
         summaryAcknowledged.isLoading ||
         summaryCritical.isLoading));
+  const hasMapContext = Boolean(deviceId || vehicleId);
+
+  const clearFilters = () => {
+    setPage(1);
+    setSeverity(undefined);
+    setStatus(undefined);
+    setSource('all');
+    setDeviceId(undefined);
+    setVehicleId(undefined);
+    setSelected([]);
+    setDetail(null);
+    router.replace('/dashboard/attention/queue');
+  };
 
   return (
     <PageContainer
-      pageTitle="Cảnh báo"
+      pageTitle="Cáº£nh bÃ¡o"
       pageHeaderAction={
         <div className="flex flex-wrap gap-2">
           <Button
@@ -196,43 +252,43 @@ const AlertsPage = () => {
             disabled={selected.length === 0 || ackMutation.isPending}
             onClick={() => selected.forEach((id) => ackMutation.mutate(id))}
           >
-            Xác nhận đã chọn
+            XÃ¡c nháº­n Ä‘Ã£ chá»n
           </Button>
           <Button
             disabled={selected.length === 0 || resolveMutation.isPending}
             onClick={() => selected.forEach((id) => resolveMutation.mutate(id))}
           >
-            Giải quyết đã chọn
+            Giáº£i quyáº¿t Ä‘Ã£ chá»n
           </Button>
         </div>
       }
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Tổng cảnh báo"
+          title="Tá»•ng cáº£nh bÃ¡o"
           value={stats.total}
           icon={<AlertTriangle className="h-4 w-4" />}
           isLoading={summaryCardsLoading}
         />
         <StatCard
-          title="Chưa xử lý"
+          title="ChÆ°a xá»­ lÃ½"
           value={stats.pending}
           icon={<CircleDashed className="h-4 w-4" />}
           isLoading={summaryCardsLoading}
         />
         <StatCard
-          title="Đã xác nhận"
+          title="ÄÃ£ xÃ¡c nháº­n"
           value={stats.acknowledged}
           icon={<CircleCheckBig className="h-4 w-4" />}
           isLoading={summaryCardsLoading}
         />
         <StatCard
-          title="Mức nghiêm trọng"
+          title="Má»©c nghiÃªm trá»ng"
           value={stats.critical}
           icon={<ShieldAlert className="h-4 w-4" />}
           isLoading={summaryCardsLoading}
           trend={{
-            value: `${stats.total > 0 ? ((stats.critical / stats.total) * 100).toFixed(1) : '0.0'}% tổng cảnh báo`,
+            value: `${stats.total > 0 ? ((stats.critical / stats.total) * 100).toFixed(1) : '0.0'}% tá»•ng cáº£nh bÃ¡o`,
             positive: false,
           }}
         />
@@ -246,7 +302,7 @@ const AlertsPage = () => {
               <div className="flex items-center justify-center">
                 <Checkbox
                   id="alerts-select-all"
-                  aria-label="Chọn tất cả cảnh báo"
+                  aria-label="Chá»n táº¥t cáº£ cáº£nh bÃ¡o"
                   checked={rows.length > 0 && selected.length === rows.length}
                   onCheckedChange={(checked) =>
                     setSelected(checked ? rows.map((alert: any) => alert.id) : [])
@@ -260,7 +316,7 @@ const AlertsPage = () => {
                 <div className="flex items-center justify-center">
                   <Checkbox
                     id={id}
-                    aria-label={`Chọn cảnh báo ${row.original.title}`}
+                    aria-label={`Chá»n cáº£nh bÃ¡o ${row.original.title}`}
                     checked={selected.includes(row.original.id)}
                     onCheckedChange={(checked) =>
                       setSelected((current) =>
@@ -271,7 +327,7 @@ const AlertsPage = () => {
                     }
                   />
                   <Label htmlFor={id} className="sr-only">
-                    Chọn cảnh báo {row.original.title}
+                    Chá»n cáº£nh bÃ¡o {row.original.title}
                   </Label>
                 </div>
               );
@@ -285,33 +341,46 @@ const AlertsPage = () => {
         ]}
         data={rows}
         searchKey="title"
-        searchPlaceholder="Tìm cảnh báo..."
+        searchPlaceholder="TÃ¬m cáº£nh bÃ¡o..."
         isLoading={alerts.isLoading}
         onRowClick={setDetail}
         toolbar={
-          <AlertFilters
-            severity={severity}
-            status={status}
-            source={source}
-            onChange={(next) => {
-              setPage(1);
-              setSeverity(next.severity);
-              setStatus(next.status);
-              setSource(next.source ?? 'all');
-            }}
-            onReset={() => {
-              setPage(1);
-              setSeverity(undefined);
-              setStatus(undefined);
-              setSource('all');
-            }}
-          />
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <AlertFilters
+              severity={severity}
+              status={status}
+              source={source}
+              onChange={(next) => {
+                setPage(1);
+                setSeverity(next.severity);
+                setStatus(next.status);
+                setSource(next.source ?? 'all');
+              }}
+              onReset={clearFilters}
+            />
+            {hasMapContext ? (
+              <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/60 bg-muted/20 px-3 py-2 text-xs">
+                <p className="font-medium text-muted-foreground">Ngá»¯ cáº£nh tá»« báº£n Ä‘á»“</p>
+                {vehicleId ? <Badge variant="secondary">Xe: {vehicleId}</Badge> : null}
+                {deviceId ? <Badge variant="outline">Thiáº¿t bá»‹: {deviceId}</Badge> : null}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 text-xs"
+                  onClick={clearFilters}
+                >
+                  Bá» ngá»¯ cáº£nh
+                </Button>
+              </div>
+            ) : null}
+          </div>
         }
       />
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">
-          Trang {pagination.page} / {pagination.totalPages || 1} · Server: {pagination.total} bản ghi · Hiển thị: {rows.length}
+          Trang {pagination.page} / {pagination.totalPages || 1} Â· Server: {pagination.total} báº£n ghi Â· Hiá»ƒn thá»‹: {rows.length}
         </p>
         <div className="flex gap-2">
           <Button
@@ -320,7 +389,7 @@ const AlertsPage = () => {
             onClick={() => setPage((current) => current - 1)}
             disabled={pagination.page <= 1 || alerts.isFetching}
           >
-            Trang trước
+            Trang trÆ°á»›c
           </Button>
           <Button
             variant="outline"

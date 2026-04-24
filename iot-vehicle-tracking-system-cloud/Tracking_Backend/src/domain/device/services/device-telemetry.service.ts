@@ -5,7 +5,37 @@ interface TelemetryRow {
   value: string | null;
 }
 
-const ALLOWED_METRICS = ['vib', 'spd', 'bt', 'bb', 'temp', 'lat', 'lon', 'err'];
+const DEFAULT_METRIC = 'vib';
+const METRIC_ALIASES: Record<string, string> = {
+  vib: 'vib',
+  vibration: 'vib',
+  spd: 'spd',
+  speed: 'spd',
+  bt: 'bt',
+  batt: 'bt',
+  battery_top: 'bt',
+  vehicle_battery: 'bt',
+  bb: 'bb',
+  battery_bot: 'bb',
+  device_battery: 'bb',
+  temp: 'temp',
+  temperature: 'temp',
+  engine_temp: 'temp',
+  engine_temperature: 'temp',
+  lat: 'lat',
+  latitude: 'lat',
+  lon: 'lon',
+  longitude: 'lon',
+  err: 'err',
+  error: 'err',
+  error_code: 'err',
+  rpm: 'obd_rpm',
+  obd_rpm: 'obd_rpm',
+  obd_speed: 'obd_speed_kph',
+  obd_speed_kph: 'obd_speed_kph',
+  coolant_c: 'obd_coolant_c',
+  obd_coolant_c: 'obd_coolant_c',
+};
 
 const METRIC_SQL: Record<string, { value: string; exists: string }> = {
   vib: {
@@ -54,16 +84,45 @@ const METRIC_SQL: Record<string, { value: string; exists: string }> = {
     value: "COALESCE(context->>'err', metadata->>'err', NULLIF(error_code::text, ''))",
     exists: "(context ? 'err' OR metadata ? 'err' OR error_code IS NOT NULL)",
   },
+  obd_rpm: {
+    value:
+      "COALESCE(context#>>'{diagnostics,signals,rpm}', context->>'rpm', metadata#>>'{diagnostics,signals,rpm}', metadata->>'rpm')",
+    exists:
+      "((context#>>'{diagnostics,signals,rpm}') IS NOT NULL OR context ? 'rpm' OR (metadata#>>'{diagnostics,signals,rpm}') IS NOT NULL OR metadata ? 'rpm')",
+  },
+  obd_speed_kph: {
+    value:
+      "COALESCE(context#>>'{diagnostics,signals,obd_speed_kph}', context->>'obd_speed_kph', metadata#>>'{diagnostics,signals,obd_speed_kph}', metadata->>'obd_speed_kph')",
+    exists:
+      "((context#>>'{diagnostics,signals,obd_speed_kph}') IS NOT NULL OR context ? 'obd_speed_kph' OR (metadata#>>'{diagnostics,signals,obd_speed_kph}') IS NOT NULL OR metadata ? 'obd_speed_kph')",
+  },
+  obd_coolant_c: {
+    value:
+      "COALESCE(context#>>'{diagnostics,signals,coolant_c}', context->>'engineTemp', context->>'engine_temperature', metadata#>>'{diagnostics,signals,coolant_c}', metadata->>'engineTemp', metadata->>'engine_temperature')",
+    exists:
+      "((context#>>'{diagnostics,signals,coolant_c}') IS NOT NULL OR context ? 'engineTemp' OR context ? 'engine_temperature' OR (metadata#>>'{diagnostics,signals,coolant_c}') IS NOT NULL OR metadata ? 'engineTemp' OR metadata ? 'engine_temperature')",
+  },
+};
+
+const resolveMetricKey = (metric: string | undefined): string => {
+  const normalizedMetric = String(metric ?? '')
+    .trim()
+    .toLowerCase();
+
+  return METRIC_ALIASES[normalizedMetric] ?? DEFAULT_METRIC;
 };
 
 export const getTelemetry = async (
   deviceId: string,
   params: { metric: string; from?: string; to?: string },
 ) => {
-  const metric = ALLOWED_METRICS.includes(params.metric) ? params.metric : 'vib';
+  const requestedMetric = String(params.metric ?? '')
+    .trim()
+    .toLowerCase();
+  const metric = resolveMetricKey(requestedMetric);
   const from = params.from ? new Date(params.from) : new Date(Date.now() - 24 * 60 * 60 * 1000);
   const to = params.to ? new Date(params.to) : new Date();
-  const sql = METRIC_SQL[metric] ?? METRIC_SQL.vib;
+  const sql = METRIC_SQL[metric] ?? METRIC_SQL[DEFAULT_METRIC];
 
   const rows = await findMany<TelemetryRow>(
     `SELECT server_timestamp, ${sql.value} AS value
@@ -77,7 +136,10 @@ export const getTelemetry = async (
   );
 
   return {
-    metric,
+    metric:
+      requestedMetric.length > 0 && METRIC_ALIASES[requestedMetric] !== undefined
+        ? requestedMetric
+        : metric,
     data: rows.map((row) => ({
       timestamp: row.server_timestamp.toISOString(),
       value: row.value ? Number.parseFloat(row.value) : 0,

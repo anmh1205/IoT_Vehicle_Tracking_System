@@ -30,6 +30,8 @@ export const DeviceListItem = ({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
+      aria-label={`Chọn ${device.vehiclePlate ?? device.deviceName}`}
       className={cn(
         'w-full rounded-xl border px-3 py-3 text-left transition-colors hover:bg-muted/60',
         active && 'border-primary bg-primary/5 shadow-sm',

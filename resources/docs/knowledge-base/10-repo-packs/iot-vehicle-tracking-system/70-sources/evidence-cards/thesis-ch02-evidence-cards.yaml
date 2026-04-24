@@ -1,0 +1,34 @@
+- type: evidence_card
+  id: thesis-ch02-technical-constraints
+  domain: iot-fleet-tracking
+  subdomain: requirements-and-constraints
+  source_kind: thesis_toc
+  source_path: resources/reports/thesis/final/thesis-final-report.toc
+  source_anchor: "2.3 design criteria and constraints"
+  statement: "The thesis locks the design around unreliable mobile connectivity, power-sensitive firmware behavior, and split storage responsibilities."
+  evidence_excerpt: "Chapter 2 explicitly decomposes functional requirements, non-functional requirements, and design constraints before implementation."
+  status: validated
+  confidence: medium
+  validated_against:
+    - resources/docs/firmware-source-code-reference/README.md
+    - iot-vehicle-tracking-system-cloud/Tracking_MqttBridge/src/mqtt/subscriptions.ts
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+
+- type: evidence_card
+  id: thesis-ch02-stakeholder-observability-needs
+  domain: iot-fleet-tracking
+  subdomain: stakeholder-requirements
+  source_kind: thesis_toc
+  source_path: resources/reports/thesis/final/thesis-final-report.toc
+  source_anchor: "2.4 stakeholder requirements"
+  statement: "Operators need live location, state visibility, and alert feedback rather than raw telemetry alone."
+  evidence_excerpt: "Stakeholder matrix and requirement traceability in Chapter 2 link runtime data to operational decision-making."
+  status: validated
+  confidence: medium
+  validated_against:
+    - README.md
+    - docs/system-architecture.md
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+

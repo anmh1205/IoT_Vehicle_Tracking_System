@@ -624,45 +624,43 @@ Sự phát triển nhanh của dịch vụ cho thuê xe tự lái tại Việt N
 việc xác định vị trí xe, mà còn bao gồm theo dõi trạng thái vận hành và
 phát hiện sớm các dấu hiệu bất thường. Từ yêu cầu đó, đồ án trình bày
 quá trình thiết kế và triển khai một hệ thống giám sát phương tiện theo
-kiến trúc tích hợp, bao gồm thiết bị gắn trên xe, hạ tầng máy chủ tiếp
-nhận dữ liệu và giao diện theo dõi dành cho người quản lý. Hệ thống này
-nhằm hỗ trợ doanh nghiệp nắm được vị trí xe, trạng thái kỹ thuật và phản
-ứng sớm với các rủi ro vận hành.
+kiến trúc tích hợp, gồm ba lớp chính: thiết bị gắn trên xe để thu thập
+và truyền dữ liệu, hệ thống máy chủ để tiếp nhận và xử lý dữ liệu, và
+giao diện theo dõi để người quản lý quan sát tình trạng đội xe. Cách tổ
+chức này giúp liên kết dữ liệu từ phương tiện với nhu cầu theo dõi và ra
+quyết định trong vận hành thực tế.
 
 Ở tầng thiết bị, hệ thống được xây dựng trên bo mạch PCB tự thiết kế.
 Trong đó, ESP32-S3 giữ vai trò bộ điều khiển trung tâm; SIM7600CE-T đảm
-nhiệm truyền dữ liệu 4G và định vị vệ tinh GNSS để xác định vị trí xe;
-LIS3DSH theo dõi rung động để nhận biết chuyển động khi xe đỗ; còn
-adapter vgate iCar Pro cho phép đọc dữ liệu OBD2 từ xe qua BLE. Kiến
-trúc nguồn được tổ chức theo nhiều
-nhánh để thiết bị vẫn duy trì hoạt động khi xe tắt máy, đồng thời hạn
-chế ảnh hưởng tới ắc quy chính.
+nhiệm truyền dữ liệu qua mạng di động và định vị vệ tinh GNSS để xác
+định vị trí xe; LIS3DSH theo dõi rung động để nhận biết chuyển động khi
+xe đỗ; còn adapter vgate iCar Pro cho phép đọc dữ liệu chẩn đoán OBD2 từ
+xe qua BLE. Kiến trúc nguồn được tổ chức theo nhiều nhánh để thiết bị
+vẫn duy trì hoạt động khi xe tắt máy, đồng thời hạn chế ảnh hưởng tới ắc
+quy chính.
 
-Ở tầng phần mềm, dữ liệu từ thiết bị được gửi bằng MQTT 3.1.1 tới EMQX.
-MQTT phù hợp với đường truyền 4G vì gọn và thích hợp cho việc gửi nhiều
-bản tin nhỏ. Trong kiến trúc này, EMQX đóng vai trò broker MQTT trung
-tâm, tiếp nhận và phân phối bản tin. Từ đây, MQTT Bridge theo dõi bốn
-nhóm topic
-\texttt{v1/\{device\_id\}/\{rawdata\textbar status\textbar events\textbar firmware\}},
-chuẩn hóa nội dung bản tin rồi chuyển dữ liệu tới PostgreSQL,
-VictoriaMetrics và VictoriaLogs. Song song với luồng tiếp nhận dữ liệu,
-backend còn lắng nghe nhánh \texttt{internal/events/\#} để gửi cập nhật
-thời gian thực ra giao diện qua Socket.IO.
+Ở tầng xử lý dữ liệu, các bản tin từ thiết bị trước hết được tiếp nhận
+bởi lớp truyền thông trung tâm, rồi được phân loại theo từng nhóm thông
+tin như dữ liệu vận hành, trạng thái thiết bị, sự kiện cảnh báo và tiến
+trình cập nhật phần mềm từ xa. Từ đó, dữ liệu được chuẩn hóa và chuyển
+đến các lớp lưu trữ, xử lý nghiệp vụ và cập nhật thời gian thực, để vừa
+phục vụ giám sát tức thời vừa hỗ trợ tra cứu lịch sử và quản trị hệ
+thống.
 
-Bảng điều khiển web được phát triển bằng Next.js 15 và React 19. Giao
- diện này có thể hiển thị bản đồ, biểu đồ và trạng thái phương tiện gần
-như theo thời gian thực nhờ cơ chế đẩy dữ liệu mới từ máy chủ lên trình
-duyệt qua Socket.IO. Nhờ đó, người vận hành không chỉ quan sát vị trí xe
-mà còn có thể theo dõi lịch sử hành trình, cảnh báo và trạng thái thiết
-bị trên cùng một giao diện thống nhất.
+Ở tầng ứng dụng, bảng điều khiển web được xây dựng để người quản lý theo
+ dõi vị trí xe, trạng thái thiết bị, lịch sử hành trình và các cảnh báo
+trên cùng một giao diện thống nhất. Dữ liệu mới được máy chủ đẩy lên
+trình duyệt khi có thay đổi, nhờ đó người vận hành có thể quan sát diễn
+biến của đội xe gần như theo thời gian thực thay vì phải tải lại dữ liệu
+thủ công.
 
 Kết quả đạt được là một hệ thống IoT giám sát phương tiện hoàn chỉnh từ
 phần cứng đến phần mềm, có khả năng theo dõi vị trí thời gian thực, đọc
 dữ liệu chẩn đoán OBD2, thiết lập vùng cho phép, phát sinh cảnh báo tự
-động, cập nhật firmware từ xa và hỗ trợ quản lý đội xe. Quan trọng hơn,
-hệ thống cho thấy một hướng triển khai phù hợp với bối cảnh doanh nghiệp
-cho thuê xe tự lái trong nước: chi phí hợp lý, có thể tùy biến và đủ dư
-địa để mở rộng trong các giai đoạn sau.
+động, cập nhật firmware từ xa và hỗ trợ quản lý đội xe. Trong bối cảnh
+đó, hệ thống cho thấy một hướng triển khai phù hợp với doanh nghiệp cho
+thuê xe tự lái trong nước: chi phí hợp lý, có thể tùy biến và còn dư địa
+mở rộng trong các giai đoạn tiếp theo.
 
 \textbf{Từ khóa:} IoT, giám sát phương tiện, GPS, OBD2, MQTT, ESP32-S3,
 thời gian thực, vùng cho phép
@@ -1266,11 +1264,10 @@ thể}\label{141-phux1b0ux1a1ng-phuxe1p-luux1eadn-tux1ed5ng-thux1ec3}
 Vì đề tài đi qua đồng thời các tầng mạch nguồn, phần mềm nhúng trên thiết bị, hạ tầng
 máy chủ, dịch vụ backend, giao diện quản trị và lớp vận hành triển khai,
 rủi ro lớn nhất không nằm ở việc từng khối có chạy riêng lẻ hay không, mà ở việc chúng có còn
-phối hợp đúng khi ghép thành một hệ thống hoàn chỉnh hay không. Điều này cũng có nghĩa khối
-lượng công việc của đồ án không dừng ở một nguyên mẫu hẹp, mà trải rộng qua nhiều nhóm việc vốn
-thường được chia cho các vai trò khác nhau trong một nhóm R\&D: thiết kế phần cứng, phát triển
-firmware ESP-IDF, tổ chức dữ liệu và microservice, thiết lập hạ tầng tự vận hành, cùng xây dựng
-quy trình kiểm thử và phát hành liên tầng.
+phối hợp đúng khi ghép thành một hệ thống hoàn chỉnh hay không. Một lựa chọn ở tầng nguồn vì thế
+không chỉ ảnh hưởng tới độ ổn định của bo mạch, mà còn chi phối khả năng giữ phiên làm việc của
+modem, nhịp truyền bản tin, tính liên tục của dữ liệu đi lên máy chủ và cuối cùng là độ tin cậy của
+thông tin hiển thị cho người vận hành.
 
 Do đó, dự án chọn cách làm theo hai nguyên tắc. Thứ nhất là \textbf{thiết
 kế từ dưới lên (bottom-up design)}: kiểm chứng trước các giả định rủi ro
@@ -1529,11 +1526,11 @@ nghị}\label{15-kux1ebft-quux1ea3-vuxe0-khuyux1ebfn-nghux1ecb}
 
 Nhìn theo cách đó, các kết quả đạt được không nên hiểu như một danh sách
 các khối đã lắp xong, mà như bằng chứng cho thấy một chuỗi giá trị kỹ thuật hoàn chỉnh đã được
-hình thành từ thiết bị đến giao diện quản trị. Ngay cả ở bản rút gọn này, có thể thấy đồ án đã bao
-phủ phạm vi công việc rộng và tiêu chuẩn thực hiện cao: tự thiết kế phần cứng, tự phát triển
-firmware ESP-IDF có tổ chức, tự dựng hệ thống dịch vụ kiểu microservice, tự triển khai hạ tầng VPS,
-tự thiết lập quan sát vận hành và CI/CD, thay vì phụ thuộc vào các nền tảng dựng sẵn hay dịch vụ
-ngoài như AWS hoặc Vercel. Có thể tóm lược theo bốn tầng chính như sau:
+hình thành từ thiết bị đến giao diện quản trị. Trong chuỗi đó, mỗi tầng chỉ có ý nghĩa khi giữ được
+sự ăn khớp với tầng còn lại: phần cứng phải đủ bền và đủ ổn định để firmware duy trì trạng thái làm
+việc, firmware phải tổ chức dữ liệu và phục hồi kết nối đủ tốt để lớp máy chủ tiếp nhận nhất quán,
+và lớp máy chủ phải xử lý, lưu trữ và phát dữ liệu đủ đúng lúc để giao diện còn hỗ trợ được quyết
+định vận hành. Có thể tóm lược theo bốn tầng chính như sau:
 
 \textbf{Về phần cứng:}
 
@@ -2522,7 +2519,7 @@ năng lượng thông minh và giao diện giám sát thân thiện.
 
 \chapterheading{CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ -- DESIGN SOLUTIONS}
 
-Chương này trình bày bản rút gọn của các quyết định thiết kế cốt lõi. Trọng tâm là giữ rõ chuỗi lập luận: bài toán kỹ thuật, tiêu chí lựa chọn, phương án được chọn và tác động tới kết quả triển khai ở Chương 4. Dù rút gọn, chương vẫn cần làm rõ rằng phạm vi thiết kế của đồ án không chỉ là chọn linh kiện hay chọn framework, mà là đồng thời chốt kiến trúc cho một hệ thống IoT hoàn chỉnh gồm thiết bị phần cứng, firmware chuẩn ESP-IDF, chuỗi dịch vụ cloud tách vai trò rõ ràng, giao diện vận hành và hạ tầng tự chủ phục vụ triển khai thực tế.
+Chương này trình bày bản rút gọn của các quyết định thiết kế cốt lõi. Trọng tâm là giữ rõ chuỗi lập luận: bài toán kỹ thuật, tiêu chí lựa chọn, phương án được chọn và tác động tới kết quả triển khai ở Chương 4. Theo cách đó, việc chọn phần cứng không thể tách khỏi chiến lược năng lượng và khả năng giao tiếp của firmware; việc chọn kiến trúc dữ liệu không thể tách khỏi nhịp telemetry, cơ chế cảnh báo và nhu cầu quan sát vận hành ở phía giao diện.
 
 \subsection{3.1. Phân tích và đề xuất giải pháp phần cứng -- Hardware analysis and solution}
 
@@ -2695,7 +2692,7 @@ Với cấu trúc này, hệ thống đủ nhẹ để triển khai thực tế 
 
 \chapterheading{CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ -- IMPLEMENTATION AND RESULTS}
 
-Chương 4 tập trung vào những gì đã triển khai và những gì đã đo được. Phần mô tả chi tiết từng dòng lệnh, từng endpoint và cấu trúc mã nguồn được lược bỏ; thay vào đó là bằng chứng triển khai, số liệu đo lường trọng yếu và đối chiếu với chỉ tiêu thiết kế. Điểm cần nhấn mạnh là phần triển khai của đồ án không chỉ dừng ở mức "chạy được" từng thành phần, mà đã đi tới bước build-up một hệ thống nhiều lớp theo hướng chuyên nghiệp: từ chế tạo phần cứng, hoàn thiện firmware, tổ chức backend và frontend, đến dựng hạ tầng VPS, quy trình phát hành và cơ chế giám sát phục vụ vận hành thử nghiệm.
+Chương 4 tập trung vào những gì đã triển khai và những gì đã đo được. Phần mô tả chi tiết từng dòng lệnh, từng endpoint và cấu trúc mã nguồn được lược bỏ; thay vào đó là bằng chứng triển khai, số liệu đo lường trọng yếu và đối chiếu với chỉ tiêu thiết kế. Trình tự trình bày của chương vì thế đi từ phần cứng, firmware, lớp máy chủ đến giao diện không phải để tách chúng thành các khối độc lập, mà để cho thấy mỗi lớp chỉ được xem là hoàn thành khi nó còn giữ được luồng làm việc xuyên suốt với các lớp còn lại trong điều kiện thử nghiệm thực tế.
 
 \subsection{4.1. Thiết kế chi tiết giải pháp -- Detailed design solution}
 
@@ -2858,7 +2855,7 @@ Từ các vòng thử nghiệm tích hợp, hệ thống cho thấy độ ổn �
 
 \chapterheading{CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ -- EVALUATION AND RECOMMENDATIONS}
 
-Chương 5 trình bày bản đánh giá rút gọn theo nguyên tắc: giữ chỉ số then chốt, bỏ các bảng so sánh dư thừa và tập trung vào ý nghĩa vận hành của kết quả. Tuy nhiên, phần đánh giá không chỉ nhằm kết luận từng thành phần "đạt" hay "chưa đạt", mà còn để chỉ ra rằng giá trị của đồ án nằm ở năng lực hoàn thiện đồng thời nhiều lớp kỹ thuật với mức độ tự chủ cao: không phụ thuộc nền tảng cloud dựng sẵn, có tổ chức dịch vụ rõ ràng, có khả năng quan sát vận hành và có tư duy phát triển gần với cách một đội kỹ thuật sản phẩm thực hiện dự án thực tế.
+Chương 5 trình bày bản đánh giá rút gọn theo nguyên tắc: giữ chỉ số then chốt, bỏ các bảng so sánh dư thừa và tập trung vào ý nghĩa vận hành của kết quả. Vì vậy, các nhận xét trong chương không dừng ở việc một chỉ số riêng lẻ đạt hay chưa đạt, mà đặt từng kết quả vào bối cảnh vận hành toàn tuyến: phần cứng có còn giữ nguồn đủ ổn định cho firmware, firmware có còn giữ được nhịp dữ liệu cho lớp máy chủ, và lớp máy chủ có còn cung cấp được phản hồi đủ nhanh và đủ tin cậy cho người dùng cuối.
 
 \subsection{5.1. Đánh giá hiệu năng}
 
@@ -3012,7 +3009,7 @@ Giai đoạn 3 & Sản phẩm hóa & Tối ưu chi phí vòng đời thiết b�
 
 \chapterheading{CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM -- REFLECTION AND LESSONS LEARNED}
 
-Chương 6 tóm tắt các bài học cốt lõi rút ra từ quá trình thực hiện đồ án, tập trung vào năng lực giải quyết vấn đề kỹ thuật liên ngành và tính thực tiễn khi chuyển từ thiết kế sang vận hành. Từ góc nhìn tổng thể, bài học quan trọng nhất không chỉ là giải một bài toán kỹ thuật riêng lẻ, mà là cách phối hợp nhiều miền chuyên môn trong cùng một đồ án: từ điện tử và hệ nhúng, qua dữ liệu và microservice, tới triển khai VPS, CI/CD và giám sát vận hành. Chính độ rộng đó cho thấy đồ án có khối lượng và chiều sâu công việc tương đương một phạm vi mà trong môi trường doanh nghiệp thường cần nhiều vai trò cùng tham gia.
+Chương 6 tóm tắt các bài học cốt lõi rút ra từ quá trình thực hiện đồ án, tập trung vào năng lực giải quyết vấn đề kỹ thuật liên ngành và tính thực tiễn khi chuyển từ thiết kế sang vận hành. Các bài học này được hình thành không phải từ từng phần tách rời, mà từ quá trình phải giữ cho quyết định ở tầng phần cứng, firmware, dữ liệu, dịch vụ và giám sát vận hành còn thống nhất với nhau khi hệ thống đi vào tích hợp và kiểm thử.
 
 \subsection{6.1. Ứng dụng kiến thức kỹ thuật -- Application of prior coursework}
 

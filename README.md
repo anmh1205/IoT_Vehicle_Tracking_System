@@ -303,6 +303,19 @@ Required:
 Required:
 - `POSTGRES_PASSWORD`
 
+Important:
+- Files in `Tracking_PostgreSQL/init/` are mounted into `docker-entrypoint-initdb.d`, so they run only when the Postgres data volume is created the first time.
+- When a running environment already has data and a new `init/*.sql` file is added later, apply it with:
+
+```bash
+node iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/scripts/apply-init-migrations.js
+```
+
+Useful options:
+- `--dry-run`: show what would be executed or baselined
+- `--target 13-device-commands.sql`: apply or baseline one file only
+- `--mode docker|direct`: force Docker `psql` or local `psql`
+
 #### Grafana (`Tracking_Grafana/.env`)
 Required:
 - `GRAFANA_PASSWORD`
