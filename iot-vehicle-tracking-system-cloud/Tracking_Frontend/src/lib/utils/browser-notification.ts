@@ -1,3 +1,5 @@
+import { BRAND_ASSETS } from '@/lib/brand';
+
 // Browser desktop notification utility using the Notification API
 // Shows native OS notifications for alerts when the tab is not focused
 
@@ -25,8 +27,8 @@ export const showBrowserNotification = (title: string, options?: NotificationOpt
 
   try {
     const notification = new Notification(title, {
-      icon: '/favicon.ico',
-      badge: '/favicon.ico',
+      icon: BRAND_ASSETS.mark64,
+      badge: BRAND_ASSETS.mark64,
       ...options,
     });
     // Auto-close after 5 seconds

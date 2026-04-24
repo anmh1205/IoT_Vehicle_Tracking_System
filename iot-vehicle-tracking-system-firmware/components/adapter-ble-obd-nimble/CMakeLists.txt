@@ -1,0 +1,13 @@
+idf_component_register(
+    SRCS
+        "src/ble_init.c"
+        "src/ble_mgr.c"
+        "src/ble_obd.c"
+        "src/ble_util.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        bt
+        log
+        shared-kernel
+)

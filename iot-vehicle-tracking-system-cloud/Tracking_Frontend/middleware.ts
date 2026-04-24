@@ -2,9 +2,14 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const publicPrefixes = ['/login', '/api', '/landing'];
+const publicFilePattern = /\/[^/]+\.[^/]+$/;
 
 const isPublicPath = (pathname: string) => {
   if (pathname === '/') {
+    return true;
+  }
+
+  if (publicFilePattern.test(pathname)) {
     return true;
   }
 

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
-  
-  <g transform="translate(0 4)"><path d="M256 86 286 204 426 256 286 308 256 426 226 308 86 256 226 204Z" fill="#f8fafc"/><path d="M256 122 276 220 390 256 276 292 256 390 236 292 122 256 236 220Z" fill="#0ea5e9"/><path d="M256 176c-35 0-64 29-64 64 0 44 47 87 64 102 17-15 64-58 64-102 0-35-29-64-64-64Z" fill="#0f172a"/><circle cx="256" cy="240" r="20" fill="#f59e0b"/></g>
-</svg>

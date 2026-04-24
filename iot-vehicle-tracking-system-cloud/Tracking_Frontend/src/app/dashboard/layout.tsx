@@ -11,7 +11,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { ThemeSelector } from '@/components/theme-selector';
 
 export const metadata: Metadata = {
-  title: 'Bảng điều khiển | Theo dõi phương tiện IoT',
+  title: 'Bảng điều khiển',
   description: 'Bảng điều khiển hệ thống giám sát phương tiện',
 };
 

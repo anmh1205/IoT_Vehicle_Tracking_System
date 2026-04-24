@@ -90,8 +90,9 @@ const SettingsPage = () => {
     () => ({
       fullName: user?.fullName ?? '',
       email: user?.email ?? '',
+      avatarUrl: user?.avatarUrl ?? null,
     }),
-    [user?.email, user?.fullName],
+    [user?.avatarUrl, user?.email, user?.fullName],
   );
 
   const profileMutation = useMutation({

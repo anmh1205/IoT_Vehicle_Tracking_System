@@ -1,3 +1,5 @@
+import { BRAND_NAME } from '@/lib/brand';
+
 export type DashboardSurface = 'command' | 'operations' | 'fleet' | 'attention' | 'platform';
 
 export type DashboardPermissionKey =
@@ -361,7 +363,7 @@ export const dashboardRouteRegistry: DashboardRouteDef[] = [
 ];
 
 const routeById = new Map(dashboardRouteRegistry.map((route) => [route.id, route]));
-const DASHBOARD_TITLE_SUFFIX = 'Theo dõi phương tiện IoT';
+const DASHBOARD_TITLE_SUFFIX = BRAND_NAME;
 
 const getRouteChain = (route: DashboardRouteDef) => {
   const chain: DashboardRouteDef[] = [];

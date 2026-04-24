@@ -1,0 +1,13 @@
+idf_component_register(
+    SRCS
+        "src/config_store_nvs.c"
+        "src/nvs_config.c"
+        "src/ota_context_store_nvs.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        contracts-device-cloud
+        log
+        nvs_flash
+        shared-kernel
+)

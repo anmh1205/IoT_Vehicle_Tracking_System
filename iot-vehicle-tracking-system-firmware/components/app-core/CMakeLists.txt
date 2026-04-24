@@ -1,0 +1,31 @@
+idf_component_register(
+    SRCS
+        "src/tracker-app-bootstrap.c"
+        "src/state_machine.c"
+        "src/state_machine_core.c"
+        "src/state_runtime_context.c"
+        "src/state_sleep_controller.c"
+        "src/state_wake_prelude.c"
+        "src/state_publish_pipeline.c"
+        "src/state_ota_runtime.c"
+        "src/state_obd_runtime.c"
+        "src/tracker_feature_self_test.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        adapter-ble-obd-nimble
+        adapter-kv-nvs
+        adapter-modem-sim7600-at
+        adapter-mqtt-sim7600-at
+        adapter-rtc-ds3231m
+        contracts-device-cloud
+        domain-connectivity
+        domain-obd
+        domain-ota
+        domain-storage
+        domain-telemetry
+        log
+        platform-board-esp32s3
+        platform-hal-esp-idf
+        shared-kernel
+)

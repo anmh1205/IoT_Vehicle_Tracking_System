@@ -1,0 +1,13 @@
+idf_component_register(
+    SRCS
+        "src/command_handler.c"
+        "src/session_mgr.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        adapter-kv-nvs
+        contracts-device-cloud
+        json
+        log
+        shared-kernel
+)

@@ -2,9 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { UserAvatar } from '@/components/common/user-avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
+type ProfileFormDefaults = {
+  avatarUrl?: string | null;
+  email?: string | null;
+  fullName?: string;
+};
 
 export const ProfileForm = ({
   defaultValues,
@@ -12,7 +19,7 @@ export const ProfileForm = ({
   isPending,
   statusMessage,
 }: {
-  defaultValues?: any;
+  defaultValues?: ProfileFormDefaults;
   onSubmit: (payload: { fullName?: string; email?: string }) => void;
   isPending?: boolean;
   statusMessage?: string | null;
@@ -27,6 +34,20 @@ export const ProfileForm = ({
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-3 rounded-2xl border border-border/70 bg-muted/30 p-3">
+        <UserAvatar
+          size="lg"
+          src={defaultValues?.avatarUrl}
+          name={fullName || defaultValues?.fullName || 'Người dùng'}
+        />
+        <div className="space-y-1">
+          <p className="text-sm font-medium">Ảnh mặc định tài khoản</p>
+          <p className="text-xs leading-5 text-muted-foreground">
+            Khi tài khoản chưa có ảnh riêng, hệ thống sẽ dùng logo IVTS làm avatar mặc định.
+          </p>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="settings-full-name">Họ và tên</Label>
         <Input

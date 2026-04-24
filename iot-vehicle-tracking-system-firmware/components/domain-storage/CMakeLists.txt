@@ -1,0 +1,12 @@
+idf_component_register(
+    SRCS
+        "src/offline_queue.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        adapter-mqtt-sim7600-at
+        adapter-storage-sdmmc-fatfs
+        domain-telemetry
+        log
+        shared-kernel
+)

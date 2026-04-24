@@ -1,0 +1,13 @@
+idf_component_register(
+    SRCS
+        "src/adc_reader.c"
+        "src/imu_lis3dh.c"
+        "src/power_mgr.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        driver
+        esp_adc
+        log
+        shared-kernel
+)

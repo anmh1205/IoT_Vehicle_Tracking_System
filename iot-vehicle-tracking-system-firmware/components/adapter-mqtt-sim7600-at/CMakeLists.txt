@@ -1,0 +1,14 @@
+idf_component_register(
+    SRCS
+        "src/mqtt_client.c"
+        "src/mqtt_publish.c"
+        "src/mqtt_session.c"
+        "src/mqtt_topics.c"
+        "src/mqtt_urc_parser.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        adapter-modem-sim7600-at
+        log
+        shared-kernel
+)

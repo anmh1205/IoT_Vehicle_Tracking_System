@@ -22,6 +22,7 @@ import { useFilteredNavItems } from '@/hooks/use-nav';
 import { ChevronRight, Car } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { BrandLockup } from '@/components/common/brand-mark';
 import { NavUser } from '@/components/nav-user';
 
 const isItemActive = (pathname: string, url: string) => isSameOrDescendantPath(pathname, url);
@@ -36,10 +37,17 @@ const AppSidebar = () => {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="IVTS V1">
+            <SidebarMenuButton asChild size="lg" tooltip="IVTS">
               <Link href="/dashboard/command">
-                <Car className="h-5 w-5" />
-                <span>IVTS V1</span>
+                <BrandLockup
+                  size={34}
+                  supportingText="V1"
+                  textContainerClassName="group-data-[collapsible=icon]:hidden"
+                  nameClassName="text-sm tracking-[0.28em] text-sidebar-foreground"
+                  supportingTextClassName="text-[10px] uppercase tracking-[0.2em] text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden"
+                  className="gap-2.5"
+                  markClassName="shadow-[0_10px_24px_rgba(15,23,42,0.18)]"
+                />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

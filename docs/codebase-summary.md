@@ -12,11 +12,12 @@ _This note is derived from `repomix-output.xml` generated at the root of the rep
 - **UAT schema sync note**: `Tracking_PostgreSQL/scripts/uat-runtime-schema-sync.sql` now also ensures the `device_status_enum` contains `online`, matching backend and MQTT Bridge runtime expectations on long-lived VPS databases.
 
 ## Firmware + hardware alignment
-- Firmware changes continue to concentrate in `iot-vehicle-tracking-system-firmware/main/src/` and related hardware docs.
-- The current firmware hardening work now also covers SD log store recovery, DS3231M RTC UTC-safe validation, offline queue replay ACK handling, and state machine integration.
-- GNSS reliability now includes streak-aware observability in `main/src/modem_gnss.c`, bounded self-heal repower, and tracker-level re-arm logic in `main/src/state_machine.c` after LTE recovery or repeated GNSS poll failures.
-- The current BLE OBD session layer in `main/src/ble_obd.c` now includes diagnostic counters and periodic log instrumentation for request volume, response validity, timeouts, and RX overflow handling.
-- Runtime timing/policy control is centralized through `main/inc/app_config.h` + `main/src/nvs_config.c` + `main/src/command_handler.c`, including cadence and safety gates for sleep/IMU/OTA.
+- Firmware source is now organized as a multi-component ESP-IDF tree under `iot-vehicle-tracking-system-firmware/components/`, with `main/main.c` reduced to a thin bootstrap entry that delegates into `components/app-core/`.
+- The new firmware split groups orchestration in `app-core`, shared models/helpers in `shared-kernel`, cloud payload contracts in `contracts-device-cloud`, hardware and protocol adapters in `adapter-*`, board wiring in `platform-*`, and policy/state helpers in `domain-*`.
+- The current firmware hardening work still covers SD log store recovery, DS3231M RTC UTC-safe validation, offline queue replay ACK handling, and state machine integration, but ownership is now component-scoped instead of concentrated in one `main/src` tree.
+- GNSS reliability now lives behind the SIM7600 adapter and shared telemetry models, preserving the same streak-aware observability and self-heal behavior while removing the old monolithic include layout.
+- The BLE OBD session layer continues to expose diagnostic counters and periodic instrumentation, now built from the `adapter-ble-obd-nimble`, `domain-obd`, and `app-core` split instead of a single translation unit cluster.
+- Runtime timing and safety policy remain centralized through shared config plus connectivity/storage/OTA components, including cadence and safety gates for sleep, IMU wake, OTA, and publish/replay flows.
 - The state machine now uses config-backed cadence and policy for driving, parked heartbeat, alarm mode, ignition hold delay, and sleep eligibility reasons; parked heartbeat now publishes both `rawdata` and `status`.
 - OTA command start is now guarded by runtime safety preconditions (MQTT readiness + minimum battery threshold) before download/install is attempted.
 - OTA apply flow now emits milestone firmware statuses during download/verify/install/reboot transitions and maps failures to stable short error codes for cloud/operator consumption.

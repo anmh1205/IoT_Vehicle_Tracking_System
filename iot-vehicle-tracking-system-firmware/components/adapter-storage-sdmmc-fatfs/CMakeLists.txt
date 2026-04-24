@@ -1,0 +1,15 @@
+idf_component_register(
+    SRCS
+        "src/sd_log_store.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        domain-telemetry
+        driver
+        fatfs
+        log
+        platform-board-esp32s3
+        sdmmc
+        shared-kernel
+        vfs
+)

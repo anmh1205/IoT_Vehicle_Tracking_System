@@ -1,0 +1,9 @@
+idf_component_register(
+    SRCS
+        "src/data_formatter.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        json
+        shared-kernel
+)

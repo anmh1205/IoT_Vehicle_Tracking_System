@@ -1,0 +1,17 @@
+idf_component_register(
+    SRCS
+        "src/modem_at.c"
+        "src/modem_gnss.c"
+        "src/modem_lte.c"
+        "src/modem_lte_fsm.c"
+        "src/modem_lte_recovery.c"
+        "src/modem_lte_steps.c"
+        "src/modem_lte_uart_profile.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        driver
+        log
+        platform-board-esp32s3
+        shared-kernel
+)

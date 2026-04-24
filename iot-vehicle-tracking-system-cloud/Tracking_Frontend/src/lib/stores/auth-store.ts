@@ -5,6 +5,7 @@ export interface User {
   username: string;
   fullName: string;
   email: string | null;
+  avatarUrl?: string | null;
   role: 'root' | 'admin' | 'manager' | 'operator' | 'viewer';
   status?: 'active' | 'inactive' | 'suspended';
   isActive?: boolean;

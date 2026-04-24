@@ -1,62 +1,6 @@
 idf_component_register(
     SRCS
         "main.c"
-        "src/ble_init.c"
-        "src/ble_mgr.c"
-        "src/ble_obd.c"
-        "src/ble_util.c"
-        "src/adc_reader.c"
-        "src/imu_lis3dh.c"
-        "src/power_mgr.c"
-        "src/modem_at.c"
-        "src/modem_lte.c"
-        "src/modem_lte_fsm.c"
-        "src/modem_lte_steps.c"
-        "src/modem_lte_recovery.c"
-        "src/modem_lte_uart_profile.c"
-        "src/modem_gnss.c"
-        "src/rtc_ds3231m.c"
-        "src/mqtt_client.c"
-        "src/mqtt_topics.c"
-        "src/mqtt_urc_parser.c"
-        "src/mqtt_session.c"
-        "src/mqtt_publish.c"
-        "src/data_formatter.c"
-        "src/command_handler.c"
-        "src/app_config_defaults.c"
-        "src/config_store_nvs.c"
-        "src/ota_context_store_nvs.c"
-        "src/tracker_feature_self_test.c"
-        "src/state_machine.c"
-        "src/state_machine_core.c"
-        "src/state_runtime_context.c"
-        "src/state_publish_pipeline.c"
-        "src/state_ota_runtime.c"
-        "src/state_obd_runtime.c"
-        "src/state_wake_prelude.c"
-        "src/state_sleep_controller.c"
-        "src/nvs_config.c"
-        "src/util.c"
-        "src/util_core.c"
-        "src/util_ota_http.c"
-        "src/util_ota_update.c"
-        "src/util_ota_rollback.c"
-        "src/sd_log_store.c"
-        "src/offline_queue.c"
-        "src/session_mgr.c"
-        "src/telemetry_counters.c"
-        "src/retry_manager.c"
-    INCLUDE_DIRS
-        "inc"
     REQUIRES
-        bt
-        driver
-        esp_adc
-        app_update
-        mbedtls
-        json
-        nvs_flash
-        fatfs
-        sdmmc
-        vfs
+        app-core
 )

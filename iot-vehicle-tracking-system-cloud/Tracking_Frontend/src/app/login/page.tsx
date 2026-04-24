@@ -1,6 +1,7 @@
 import { Gauge } from 'lucide-react';
 import { LoginForm } from '@/features/auth/components/login-form';
 import { loginLandingContent } from '@/features/marketing/data/landing-content';
+import { BrandLockup } from '@/components/common/brand-mark';
 
 const LoginPage = () => {
   return (
@@ -12,6 +13,15 @@ const LoginPage = () => {
       <div className="relative mx-auto grid min-h-[100dvh] w-full max-w-7xl items-center gap-8 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
         <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur sm:p-8 lg:p-10">
           <div>
+            <BrandLockup
+              size={52}
+              priority
+              supportingText="IoT Vehicle Tracking System"
+              className="mb-4 items-start"
+              nameClassName="text-base tracking-[0.32em] text-cyan-100"
+              supportingTextClassName="text-sm text-slate-300"
+            />
+
             <span className="inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200">
               <Gauge className="h-3.5 w-3.5" aria-hidden="true" />
               {loginLandingContent.badge}
