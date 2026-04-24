@@ -12,7 +12,7 @@ import { buildMapDeviceStats, filterDevices, sortDevices } from './map-panel-uti
 export const DeviceListPanel = () => {
   const positions = useMapStore((state) => state.positions);
   const selectedDeviceId = useMapStore((state) => state.selectedDeviceId);
-  const toggleSelectedDevice = useMapStore((state) => state.toggleSelectedDevice);
+  const focusDevice = useMapStore((state) => state.focusDevice);
   const searchTerm = useMapStore((state) => state.searchTerm);
   const setSearchTerm = useMapStore((state) => state.setSearchTerm);
   const statusFilter = useMapStore((state) => state.statusFilter);
@@ -29,7 +29,10 @@ export const DeviceListPanel = () => {
   );
 
   return (
-    <aside className="flex h-full min-h-0 w-[340px] flex-col gap-3 overflow-hidden border-r bg-background p-3">
+    <aside
+      aria-label="Danh sách thiết bị trên bản đồ"
+      className="flex h-full min-h-0 w-full flex-col gap-3 overflow-hidden border-r bg-background p-3"
+    >
       <div className="flex flex-nowrap items-center gap-2">
         <DeviceSearch
           value={searchTerm}
@@ -49,7 +52,7 @@ export const DeviceListPanel = () => {
               key={device.deviceId}
               device={device}
               active={device.deviceId === selectedDeviceId}
-              onClick={() => toggleSelectedDevice(device.deviceId)}
+              onClick={() => focusDevice(device.deviceId)}
             />
           ))}
           {filteredDevices.length === 0 ? (

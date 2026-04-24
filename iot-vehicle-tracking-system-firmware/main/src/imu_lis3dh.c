@@ -42,7 +42,7 @@
 #define IMU_VIBRATION_DEADZONE_MG 60.0f
 #define IMU_VIBRATION_FULL_SCALE_DELTA_MG 600.0f
 
-static const char *TAG = "imu_lis3dh";
+static const char *TAG = "IMU_LIS3DH";
 
 typedef enum {
     IMU_CHIP_LIS3DH = 0,

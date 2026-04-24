@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useEffect } from 'react';
 import { Cpu, Database, HardDrive, MapPin, ShieldAlert } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,21 @@ const DeviceDetailPage = ({
   const { id } = use(params);
   const deviceId = Number(id);
   const query = useDeviceDetail(Number.isFinite(deviceId) ? deviceId : null);
+
+  useEffect(() => {
+    if (query.isLoading || typeof window === 'undefined') {
+      return;
+    }
+
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [id, query.isLoading]);
 
   if (query.isError) {
     return (
@@ -256,7 +271,7 @@ const DeviceDetailPage = ({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card id="recent-errors" className="scroll-mt-24">
           <CardHeader>
             <CardTitle className="text-base">Lỗi gần đây</CardTitle>
           </CardHeader>

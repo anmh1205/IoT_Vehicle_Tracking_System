@@ -1,0 +1,34 @@
+- type: evidence_card
+  id: thesis-ch01-architecture-intent
+  domain: iot-fleet-tracking
+  subdomain: architecture-intent
+  source_kind: thesis_tex
+  source_path: resources/reports/thesis/final/thesis-final-report.tex
+  source_anchor: "Ch1 / Abstract + 1.4.2 architecture intent"
+  statement: "The thesis frames the system as one end-to-end stack from tracker hardware through EMQX/MQTT Bridge/backend to the web dashboard."
+  evidence_excerpt: "Abstract and Chapter 1 describe device, cloud, and dashboard as one integrated operating system rather than isolated demos."
+  status: validated
+  confidence: high
+  validated_against:
+    - README.md
+    - docs/system-architecture.md
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+
+- type: evidence_card
+  id: thesis-ch01-scope-and-success-criteria
+  domain: iot-fleet-tracking
+  subdomain: success-criteria
+  source_kind: thesis_toc
+  source_path: resources/reports/thesis/final/thesis-final-report.toc
+  source_anchor: "1.2 scope + 1.3 criteria"
+  statement: "The intended batch-1 capability set includes realtime tracking, alerts, OTA, backend processing, and a usable web interface."
+  evidence_excerpt: "Chapter 1 scope and criteria break targets by hardware, firmware, server/data processing, and web interface."
+  status: validated
+  confidence: high
+  validated_against:
+    - README.md
+    - resources/reports/thesis/final/thesis-final-report.md
+  reviewer_agent: coordinator
+  last_reviewed: 2026-04-24
+

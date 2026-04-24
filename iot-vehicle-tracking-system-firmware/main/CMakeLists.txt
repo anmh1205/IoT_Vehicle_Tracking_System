@@ -10,14 +10,37 @@ idf_component_register(
         "src/power_mgr.c"
         "src/modem_at.c"
         "src/modem_lte.c"
+        "src/modem_lte_fsm.c"
+        "src/modem_lte_steps.c"
+        "src/modem_lte_recovery.c"
+        "src/modem_lte_uart_profile.c"
         "src/modem_gnss.c"
         "src/rtc_ds3231m.c"
         "src/mqtt_client.c"
+        "src/mqtt_topics.c"
+        "src/mqtt_urc_parser.c"
+        "src/mqtt_session.c"
+        "src/mqtt_publish.c"
         "src/data_formatter.c"
         "src/command_handler.c"
+        "src/app_config_defaults.c"
+        "src/config_store_nvs.c"
+        "src/ota_context_store_nvs.c"
+        "src/tracker_feature_self_test.c"
         "src/state_machine.c"
+        "src/state_machine_core.c"
+        "src/state_runtime_context.c"
+        "src/state_publish_pipeline.c"
+        "src/state_ota_runtime.c"
+        "src/state_obd_runtime.c"
+        "src/state_wake_prelude.c"
+        "src/state_sleep_controller.c"
         "src/nvs_config.c"
         "src/util.c"
+        "src/util_core.c"
+        "src/util_ota_http.c"
+        "src/util_ota_update.c"
+        "src/util_ota_rollback.c"
         "src/sd_log_store.c"
         "src/offline_queue.c"
         "src/session_mgr.c"
@@ -29,15 +52,10 @@ idf_component_register(
         bt
         driver
         esp_adc
-        esp_event
-        esp_netif
-        esp_http_client
         app_update
         mbedtls
         json
-        mqtt
         nvs_flash
-        esp_timer
         fatfs
         sdmmc
         vfs

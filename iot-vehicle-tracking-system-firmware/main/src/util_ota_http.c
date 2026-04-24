@@ -1,0 +1,260 @@
+#include "util_internal.h"
+
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#include "modem_at.h"
+
+/**
+ * @file util_ota_http.c
+ * @brief SIM7600 HTTP transport helpers for OTA download flow.
+ */
+
+static const char *util_ota_http_transport_error_name(int status_code) {
+    switch (status_code) {
+        case 701:
+            return "alert_state";
+        case 702:
+            return "unknown_error";
+        case 703:
+            return "busy";
+        case 704:
+            return "connection_closed";
+        case 705:
+            return "timeout";
+        case 706:
+            return "socket_io_failed";
+        case 707:
+            return "file_or_memory_error";
+        case 708:
+            return "invalid_parameter";
+        case 709:
+            return "network_error";
+        case 710:
+            return "ssl_session_start_failed";
+        case 711:
+            return "wrong_state";
+        case 712:
+            return "socket_create_failed";
+        case 713:
+            return "dns_failed";
+        case 714:
+            return "socket_connect_failed";
+        case 715:
+            return "tls_handshake_failed";
+        case 716:
+            return "socket_close_failed";
+        case 717:
+            return "no_network";
+        case 718:
+            return "send_timeout";
+        case 719:
+            return "ca_missing";
+        default:
+            return "n/a";
+    }
+}
+
+void util_ota_http_action_reset(void) {
+    s_ota_http_action.waiting = false;
+    s_ota_http_action.ready = false;
+    s_ota_http_action.method = -1;
+    s_ota_http_action.status_code = -1;
+    s_ota_http_action.data_len = -1;
+}
+
+static bool util_ota_parse_httpaction_urc_line(const char *line,
+                                               int *out_method,
+                                               int *out_status_code,
+                                               int *out_data_len) {
+    if (line == NULL || out_method == NULL || out_status_code == NULL || out_data_len == NULL) {
+        return false;
+    }
+
+    int method = -1;
+    int status_code = -1;
+    int data_len = -1;
+    int parsed = sscanf(line, "+HTTPACTION: %d,%d,%d", &method, &status_code, &data_len);
+    if (parsed != 3) {
+        parsed = sscanf(line, "+HTTPACTION:%d,%d,%d", &method, &status_code, &data_len);
+    }
+    if (parsed != 3) {
+        return false;
+    }
+
+    *out_method = method;
+    *out_status_code = status_code;
+    *out_data_len = data_len;
+    return true;
+}
+
+static void util_ota_httpaction_urc_cb(const char *line) {
+    if (!s_ota_http_action.waiting || line == NULL) {
+        return;
+    }
+
+    int method = -1;
+    int status_code = -1;
+    int data_len = -1;
+    if (!util_ota_parse_httpaction_urc_line(line, &method, &status_code, &data_len)) {
+        return;
+    }
+
+    s_ota_http_action.method = method;
+    s_ota_http_action.status_code = status_code;
+    s_ota_http_action.data_len = data_len;
+    s_ota_http_action.ready = true;
+}
+
+void util_ota_http_register_urc_once(void) {
+    if (s_ota_http_urc_registered) {
+        return;
+    }
+
+    modem_at_register_urc("+HTTPACTION:", util_ota_httpaction_urc_cb);
+    s_ota_http_urc_registered = true;
+}
+
+esp_err_t util_ota_wait_http_action(int *out_status_code, int *out_data_len, uint32_t timeout_ms) {
+    ESP_RETURN_ON_NULL(out_status_code, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_status_code is NULL");
+    ESP_RETURN_ON_NULL(out_data_len, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_data_len is NULL");
+
+    uint64_t deadline_ms = util_uptime_ms() + (uint64_t)timeout_ms;
+    while (util_uptime_ms() < deadline_ms) {
+        if (s_ota_http_action.ready) {
+            *out_status_code = s_ota_http_action.status_code;
+            *out_data_len = s_ota_http_action.data_len;
+            s_ota_http_action.waiting = false;
+            return ESP_OK;
+        }
+
+        (void)modem_at_poll_urc(OTA_HTTP_URC_POLL_BYTES);
+        vTaskDelay(pdMS_TO_TICKS(OTA_HTTP_URC_POLL_INTERVAL_MS));
+    }
+
+    s_ota_http_action.waiting = false;
+    return ESP_ERR_TIMEOUT;
+}
+
+bool util_ota_parse_httpread_payload(const uint8_t *response,
+                                     size_t response_len,
+                                     const uint8_t **out_data,
+                                     size_t *out_len) {
+    if (response == NULL || response_len == 0U || out_data == NULL || out_len == NULL) {
+        return false;
+    }
+
+    const char *prefix = "+HTTPREAD:";
+    size_t prefix_len = strlen(prefix);
+    size_t header_pos = SIZE_MAX;
+    for (size_t i = 0U; i + prefix_len <= response_len; ++i) {
+        if (memcmp(response + i, prefix, prefix_len) == 0) {
+            header_pos = i;
+            break;
+        }
+    }
+    if (header_pos == SIZE_MAX) {
+        return false;
+    }
+
+    size_t cursor = header_pos + prefix_len;
+    while (cursor < response_len && (response[cursor] == ' ' || response[cursor] == '\t')) {
+        ++cursor;
+    }
+    if (cursor + strlen("DATA,") <= response_len &&
+        memcmp(response + cursor, "DATA,", strlen("DATA,")) == 0) {
+        cursor += strlen("DATA,");
+    }
+    if (cursor >= response_len || !isdigit((unsigned char)response[cursor])) {
+        return false;
+    }
+
+    size_t declared_len = 0U;
+    while (cursor < response_len && isdigit((unsigned char)response[cursor])) {
+        declared_len = (declared_len * 10U) + (size_t)(response[cursor] - '0');
+        ++cursor;
+    }
+    if (declared_len == 0U) {
+        return false;
+    }
+
+    while (cursor < response_len && response[cursor] != '\n') {
+        ++cursor;
+    }
+    if (cursor >= response_len) {
+        return false;
+    }
+
+    size_t data_offset = cursor + 1U;
+    if (data_offset + declared_len > response_len) {
+        return false;
+    }
+
+    *out_data = response + data_offset;
+    *out_len = declared_len;
+    return true;
+}
+
+bool util_is_hex_ascii_bytes(const uint8_t *data, size_t len) {
+    if (data == NULL || len == 0U || (len % 2U) != 0U) {
+        return false;
+    }
+
+    for (size_t i = 0; i < len; ++i) {
+        if (!isxdigit((unsigned char)data[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+esp_err_t util_ota_configure_https_ssl_context(void) {
+    char cmd[96] = {0};
+
+    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"sslversion\",%d,4\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
+                        ESP_FAIL,
+                        UTIL_TAG,
+                        "HTTP CSSLCFG sslversion failed");
+
+    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"authmode\",%d,0\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
+                        ESP_FAIL,
+                        UTIL_TAG,
+                        "HTTP CSSLCFG authmode failed");
+
+    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"ignorelocaltime\",%d,1\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
+                        ESP_FAIL,
+                        UTIL_TAG,
+                        "HTTP CSSLCFG ignorelocaltime failed");
+
+    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"negotiatetime\",%d,300\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
+                        ESP_FAIL,
+                        UTIL_TAG,
+                        "HTTP CSSLCFG negotiatetime failed");
+
+    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"enableSNI\",%d,1\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
+                        ESP_FAIL,
+                        UTIL_TAG,
+                        "HTTP CSSLCFG enableSNI failed");
+
+    (void)snprintf(cmd, sizeof(cmd), "AT+HTTPPARA=\"SSLCFG\",%d\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
+                        ESP_FAIL,
+                        UTIL_TAG,
+                        "HTTPPARA SSLCFG failed");
+
+    return ESP_OK;
+}
+
+const char *util_ota_http_status_name(int status_code) {
+    return util_ota_http_transport_error_name(status_code);
+}

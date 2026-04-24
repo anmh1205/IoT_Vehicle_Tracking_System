@@ -19,6 +19,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Ensure VPS directories exist
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p /opt/tracking/scripts/deploy
+            mkdir -p /opt/tracking/Tracking_PostgreSQL
+
       - name: SCP config files to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -29,6 +40,16 @@ jobs:
           source: "iot-vehicle-tracking-system-cloud/Tracking_PostgreSQL/"
           target: /opt/tracking/
           strip_components: 1
+
+      - name: Upload deploy scripts to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_DEPLOY_IP }}
+          port: ${{ secrets.SSH_DEPLOY_PORT }}
+          username: ${{ secrets.SSH_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "scripts/deploy/bootstrap-vps.sh,scripts/deploy/sync-postgres-schema.sh"
+          target: /opt/tracking/
 
       - name: Validate required deploy secrets
         env:
@@ -80,23 +101,14 @@ jobs:
           envs: SERVICE_ENV_CONTENT,SERVICE_DIR,COMPOSE_FILE
           script: |
             chmod +x /opt/tracking/scripts/deploy/bootstrap-vps.sh
+            chmod +x /opt/tracking/scripts/deploy/sync-postgres-schema.sh
             export SERVICE_ENV_CONTENT="$SERVICE_ENV_CONTENT"
             /opt/tracking/scripts/deploy/bootstrap-vps.sh "$SERVICE_DIR" "$COMPOSE_FILE"
             cd "$SERVICE_DIR"
             docker compose pull
             docker compose up -d
             docker compose ps postgres
-            for _ in {1..20}; do
-              if docker compose exec -T postgres sh -lc 'pg_isready -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-vehicle_tracking}"' >/dev/null; then
-                break
-              fi
-              sleep 3
-            done
-            if ! docker compose exec -T postgres sh -lc 'pg_isready -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-vehicle_tracking}"' >/dev/null; then
-              docker compose logs --tail=100 postgres || true
-              exit 1
-            fi
-            docker compose exec -T postgres sh -lc 'export PGPASSWORD="${POSTGRES_PASSWORD:-}"; psql -v ON_ERROR_STOP=1 -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-vehicle_tracking}"' < scripts/uat-runtime-schema-sync.sql
+            /opt/tracking/scripts/deploy/sync-postgres-schema.sh "$SERVICE_DIR" "$COMPOSE_FILE"
         env:
           SERVICE_ENV_CONTENT: ${{ env.SERVICE_ENV_CONTENT }}
           SERVICE_DIR: /opt/tracking/Tracking_PostgreSQL

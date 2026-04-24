@@ -17,6 +17,7 @@ import type {
   DeviceSession,
   DeviceTelemetryRow,
 } from '@/features/devices/types';
+import type { DeviceLinkedVehicle, DeviceWorkspaceAlert } from './workspace-types';
 
 export interface DeviceDetailModalContextValue {
   device: Device | null;
@@ -66,6 +67,10 @@ export interface DeviceDetailModalContextValue {
   eventLogs: Record<string, unknown>[];
   eventLogsTotal: number;
   rawFeed: DeviceRawFeedRow[];
+  linkedVehicle: DeviceLinkedVehicle | null;
+  linkedVehicleLoading: boolean;
+  deviceScopedAlerts: DeviceWorkspaceAlert[];
+  deviceScopedAlertsLoading: boolean;
   obdActiveAlerts: {
     id: number;
     title: string;

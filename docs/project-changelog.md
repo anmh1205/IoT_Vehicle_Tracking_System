@@ -1,5 +1,13 @@
 # Project Changelog
 
+## 2026-04-24
+### Thesis-Anchored Knowledge Base Bootstrap (Completed)
+- Added a repo-local knowledge bootstrap under `resources/docs/knowledge-base/` for `IoT_Vehicle_Tracking_System`, organized as source registry, evidence cards, reconciliation output, repo-pack notes, domain notes, and pattern notes.
+- The bootstrap uses thesis source files as the design anchor, then reconciles them against current repo truth from README, docs, compose manifests, package manifests, env examples, and selected source contracts.
+- Promoted the first official repo-pack for `iot-vehicle-tracking-system`, covering architecture, device-to-cloud and cloud-to-dashboard system flows, MQTT/state-machine/offline-replay/OTA concepts, three source-backed runbooks, a decision note, and an open-questions queue.
+- Preserved unresolved drift explicitly in a conflict queue instead of flattening it into the promoted notes; current blockers include local host-port exposure drift, frontend env-template drift, and thesis-era frontend version/docs drift.
+- Validation status: documentation implementation only; no live full-stack runtime execution was performed in this batch.
+
 ## 2026-04-23
 ### MQTT Heartbeat Session Debounce + UAT Schema Sync (Completed)
 - Hardened `Tracking_MqttBridge` so parked heartbeat `rawdata` snapshots no longer auto-open `device_sessions` when the device is already in a stopped/non-active runtime state; telemetry still updates `last_seen` and latest coordinates without inflating runtime/session stats.

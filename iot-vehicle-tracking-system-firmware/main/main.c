@@ -11,6 +11,7 @@
 
 #include "nvs_config.h"
 #include "retry_manager.h"
+#include "tracker_feature_self_test.h"
 #include "util.h"
 
 /**
@@ -167,6 +168,7 @@ void app_main(void) {
                 err = state_machine_init(&config);
                 if (err == ESP_OK) {
                     retry_state_reset(&s_init_retry);
+                    /* tracker_feature_self_test_run(&config); */
                     state_machine_ready = true;
                 } else {
                     uint32_t delay_ms = retry_state_current_delay_ms(&s_init_retry,

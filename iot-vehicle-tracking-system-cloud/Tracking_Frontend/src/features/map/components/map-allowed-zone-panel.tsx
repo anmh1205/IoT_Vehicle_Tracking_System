@@ -45,6 +45,7 @@ export const MapAllowedZonePanel = ({
   canEdit,
   mapPickValue,
   onClose,
+  onDirtyChange,
   onPreviewChange,
   onSaved,
   onDeleted,
@@ -55,6 +56,7 @@ export const MapAllowedZonePanel = ({
   canEdit: boolean;
   mapPickValue: MapPickValue;
   onClose: () => void;
+  onDirtyChange: (dirty: boolean) => void;
   onPreviewChange: (draft: PreviewDraft) => void;
   onSaved: () => void;
   onDeleted: () => void;
@@ -84,6 +86,7 @@ export const MapAllowedZonePanel = ({
       lastResetKeyRef.current = null;
       setMapPickArmed(false);
       setPreviewReady(false);
+      onDirtyChange(false);
       onPreviewChange(null);
       return;
     }
@@ -94,7 +97,11 @@ export const MapAllowedZonePanel = ({
     lastResetKeyRef.current = resetKey;
     setMapPickArmed(false);
     setPreviewReady(true);
-  }, [form, onPreviewChange, open, preview, resetKey, zone]);
+  }, [form, onDirtyChange, onPreviewChange, open, preview, resetKey, zone]);
+
+  useEffect(() => {
+    onDirtyChange(open ? form.formState.isDirty : false);
+  }, [form.formState.isDirty, onDirtyChange, open]);
 
   useEffect(() => {
     if (!mapPickValue || centerSource !== 'map_pick') return;

@@ -60,6 +60,34 @@ export interface DevicePosition {
 }
 
 export type MapLayer = 'street' | 'satellite';
+export type MapInspectPanelTarget =
+  | 'overview'
+  | 'vehicle'
+  | 'alerts'
+  | 'errors'
+  | 'runtime'
+  | 'route'
+  | 'commands'
+  | 'raw'
+  | 'settings'
+  | 'geofence'
+  | 'allowed-zone';
+export type MapInspectPanelLinkedEntity = 'device' | 'vehicle' | 'alert' | 'geofence' | 'allowed-zone';
+
+export interface MapInspectPanelPayload {
+  highlight?: string | null;
+  linkedEntityType?: MapInspectPanelLinkedEntity | null;
+  linkedEntityId?: number | null;
+  linkedEntityKey?: string | null;
+}
+
+export type MapHardMode =
+  | 'browse'
+  | 'inspect-device'
+  | 'edit-geofence'
+  | 'edit-allowed-zone'
+  | 'mobile-list';
+export type MapShareableHardMode = Exclude<MapHardMode, 'mobile-list'>;
 
 export interface MapViewport {
   center: [number, number];

@@ -31,6 +31,11 @@ config TRACKER_ENABLE_COMMAND_SUBSCRIBE
     bool "Subscribe command topic"
     default y
 
+config TRACKER_FAKE_SLEEP_ENABLED
+    bool "Use fake parked sleep loop instead of real sleep entry"
+    default y if TRACKER_FIELD_VALIDATION_MODE
+    default n
+
 config TRACKER_MODEM_APN
     string "Cellular APN"
     default "internet"

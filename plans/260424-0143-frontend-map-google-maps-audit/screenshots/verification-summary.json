@@ -1,0 +1,37 @@
+[
+  {
+    "step": "desktop-browse",
+    "pass": true,
+    "url": "http://localhost:4001/dashboard/operations/map?lat=10.762622&lng=106.660172&z=12&layer=satellite"
+  },
+  {
+    "step": "desktop-inspect",
+    "pass": true,
+    "url": "http://localhost:4001/dashboard/operations/map?device=MOCK-OBD-003&lat=10.733819&lng=106.731205&z=14&layer=satellite&mode=inspect-device"
+  },
+  {
+    "step": "desktop-edit-geofence",
+    "pass": true,
+    "browsePanelCount": 0,
+    "url": "http://localhost:4001/dashboard/operations/map?device=MOCK-OBD-003&lat=10.733819&lng=106.731205&z=14&layer=satellite&mode=edit-geofence"
+  },
+  {
+    "step": "desktop-discard-confirm",
+    "pass": true
+  },
+  {
+    "step": "desktop-edit-allowed-zone",
+    "pass": true,
+    "url": "http://localhost:4001/dashboard/operations/map?device=MOCK-OBD-003&lat=10.733856&lng=106.731234&z=14&layer=satellite&mode=edit-allowed-zone"
+  },
+  {
+    "step": "mobile-list",
+    "pass": true,
+    "url": "http://localhost:4001/dashboard/operations/map?lat=10.762622&lng=106.660172&z=12&layer=satellite"
+  },
+  {
+    "step": "mobile-inspect",
+    "pass": true,
+    "url": "http://localhost:4001/dashboard/operations/map?device=MOCK-OBD-003&lat=10.733819&lng=106.731205&z=14&layer=satellite&mode=inspect-device"
+  }
+]

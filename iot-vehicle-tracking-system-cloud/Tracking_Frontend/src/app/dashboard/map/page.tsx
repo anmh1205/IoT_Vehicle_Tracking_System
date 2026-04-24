@@ -8,6 +8,9 @@ import { DeviceListPanel } from '@/features/map/components/device-list-panel';
 import { MobileDeviceDrawer } from '@/features/map/components/mobile-device-drawer';
 import { useDevicePositions } from '@/features/map/hooks/use-device-positions';
 import { useMapRealtime } from '@/features/map/hooks/use-map-realtime';
+import { useMapUrlSync } from '@/features/map/hooks/use-map-url-sync';
+import { isMapBrowsePanelMode } from '@/features/map/lib/map-mode';
+import { useMapStore } from '@/features/map/store/map-store';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 
 const TrackingMap = dynamic(
@@ -20,7 +23,11 @@ const TrackingMap = dynamic(
 
 const MapPage = () => {
   const positionsQuery = useDevicePositions();
+  const hardMode = useMapStore((state) => state.hardMode);
+  const showDesktopBrowsePanel = isMapBrowsePanelMode(hardMode);
+
   useMapRealtime();
+  useMapUrlSync();
 
   const mapErrorMessage = positionsQuery.isError
     ? getApiErrorMessage(
@@ -30,15 +37,25 @@ const MapPage = () => {
     : null;
 
   return (
-    <section aria-label="Bản đồ theo dõi" className="flex min-h-0 flex-1 overflow-hidden">
+    <section
+      id="main-content"
+      aria-label="Bản đồ theo dõi"
+      className="flex min-h-0 flex-1 overflow-hidden"
+    >
       <div className="flex min-h-0 flex-1">
-        <div className="hidden md:block md:w-[340px]">
-          <DeviceListPanel />
-        </div>
+        {showDesktopBrowsePanel ? (
+          <div className="hidden md:block md:w-[min(26vw,340px)]">
+            <DeviceListPanel />
+          </div>
+        ) : null}
+
         <div className="relative min-w-0 flex-1">
           {mapErrorMessage ? (
-            <div className="absolute left-3 right-3 top-3 z-[1200]">
-              <Alert variant="destructive" className="border bg-background/95 shadow-lg backdrop-blur">
+            <div className="absolute left-3 right-3 top-3 z-[1200] md:max-w-[34rem]">
+              <Alert
+                variant="destructive"
+                className="border bg-background/95 shadow-lg backdrop-blur"
+              >
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Không thể đồng bộ dữ liệu bản đồ</AlertTitle>
                 <AlertDescription>
@@ -58,6 +75,7 @@ const MapPage = () => {
               </Alert>
             </div>
           ) : null}
+
           <TrackingMap />
           <MobileDeviceDrawer />
         </div>

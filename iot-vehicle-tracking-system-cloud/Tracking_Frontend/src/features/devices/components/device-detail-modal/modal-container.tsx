@@ -4,7 +4,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { useRoleAccess } from '@/hooks/use-role-access';
-import { alertServices } from '@/lib/api/alerts';
+import { alertServices, localizeAlertForDisplay } from '@/lib/api/alerts';
+import { vehicleServices } from '@/lib/api/vehicles';
 import { notificationUtils } from '@/lib/notification';
 import type { Device, DeviceRawFeedRow } from '@/features/devices/types';
 import { useDeleteDevice } from '@/features/devices/hooks/use-delete-device';
@@ -23,6 +24,8 @@ import { getDashboardEventPresentation } from '@/features/dashboard/components/d
 import { DeviceDetailModal } from './index';
 import { buildDiagnosticsSummary, extractDiagnosticsPayloadFromEventLog } from './obd-diagnostics';
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
+import type { DeviceDetailModalPresentation, DeviceLinkedVehicle, DeviceWorkspaceActions, DeviceWorkspaceAlert } from './workspace-types';
+import type { MapInspectPanelPayload, MapInspectPanelTarget } from '@/features/map/types';
 
 const resolveTimestamp = (value: unknown): string | null => {
   if (typeof value === 'string' && value.length > 0) {
@@ -264,14 +267,112 @@ const localizeObdAlertMessage = (message: string): string => {
   return message;
 };
 
+const normalizeIdentifier = (value: string | null | undefined) =>
+  String(value ?? '').trim().toLowerCase();
+
+const toNullableString = (value: unknown): string | null => {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const next = String(value).trim();
+  return next.length > 0 ? next : null;
+};
+
+const toNullableNumber = (value: unknown): number | null => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const toLinkedVehicle = (raw: Record<string, unknown>): DeviceLinkedVehicle => ({
+  id: Number(raw.id ?? 0),
+  vehicleId: toNullableString(raw.vehicleId ?? raw.vehicle_id),
+  plateNumber: toNullableString(raw.plateNumber ?? raw.plate_number),
+  status: toNullableString(raw.status),
+  iconType: toNullableString(raw.iconType ?? raw.icon_type),
+  fuelType: toNullableString(raw.fuelType ?? raw.fuel_type),
+  transmission: toNullableString(raw.transmission),
+  notes: toNullableString(raw.notes),
+  brand: toNullableString(raw.brand),
+  model: toNullableString(raw.model),
+  vehicleType: toNullableString(raw.vehicleType ?? raw.vehicle_type),
+  year: toNullableNumber(raw.year),
+  color: toNullableString(raw.color),
+  vin: toNullableString(raw.vin),
+  registrationNumber: toNullableString(raw.registrationNumber ?? raw.registration_number),
+  insuranceExpiry: toNullableString(raw.insuranceExpiry ?? raw.insurance_expiry),
+  createdAt: toNullableString(raw.createdAt ?? raw.created_at),
+  updatedAt: toNullableString(raw.updatedAt ?? raw.updated_at),
+  deviceId: toNullableString(raw.deviceId ?? raw.device_id),
+  customerId: toNullableNumber(raw.customerId ?? raw.customer_id),
+  customerName: toNullableString(raw.customerName ?? raw.customer_name),
+  customerCode: toNullableString(raw.customerCode ?? raw.customer_code),
+  mileageKm: toNullableNumber(raw.mileageKm ?? raw.mileage_km),
+  seats: toNullableNumber(raw.seats),
+});
+
+const toWorkspaceAlert = (raw: Record<string, unknown>): DeviceWorkspaceAlert => {
+  const localized = localizeAlertForDisplay(raw);
+
+  return {
+    id: Number(localized.id ?? 0),
+    alertType: toNullableString(localized.alertType ?? localized.alert_type),
+    severity: toNullableString(localized.severity),
+    status: toNullableString(localized.status),
+    title: toNullableString(localized.title),
+    message: toNullableString(localized.message),
+    displayTitle: toNullableString(localized.displayTitle),
+    displayMessage: toNullableString(localized.displayMessage),
+    createdAt: toNullableString(localized.createdAt ?? localized.created_at),
+    updatedAt: toNullableString(localized.updatedAt ?? localized.updated_at),
+    acknowledgedAt: toNullableString(localized.acknowledgedAt ?? localized.acknowledged_at),
+    acknowledgedBy: toNullableString(localized.acknowledgedBy ?? localized.acknowledged_by),
+    resolvedAt: toNullableString(localized.resolvedAt ?? localized.resolved_at),
+    resolvedBy: toNullableString(localized.resolvedBy ?? localized.resolved_by),
+    resolutionNotes: toNullableString(localized.resolutionNotes ?? localized.resolution_notes),
+    vehicleId: toNullableString(localized.vehicleId ?? localized.vehicle_id),
+    vehiclePlate: toNullableString(localized.vehiclePlate ?? localized.vehicle_plate),
+    deviceId: toNullableString(localized.deviceId ?? localized.device_id),
+    deviceName: toNullableString(localized.deviceName ?? localized.device_name),
+    customerName: toNullableString(localized.customerName ?? localized.customer_name),
+    geofenceId: toNullableNumber(localized.geofenceId ?? localized.geofence_id),
+    geofenceName: toNullableString(localized.geofenceName ?? localized.geofence_name),
+    latitude: toNullableNumber(localized.latitude),
+    longitude: toNullableNumber(localized.longitude),
+    actualValue: localized.actualValue ?? null,
+    thresholdValue: localized.thresholdValue ?? null,
+    rawValue: localized.rawValue ?? null,
+    speed: toNullableNumber(localized.speed),
+    source: toNullableString(localized.source),
+    tripId: toNullableNumber(localized.tripId ?? localized.trip_id),
+  };
+};
+
 export const DeviceDetailModalContainer = ({
   device,
+  fallbackPaths,
+  launchPayload,
+  launchRequestKey = 0,
+  launchTarget = 'overview',
   open,
   onOpenChange,
+  presentation = 'dialog',
+  workspaceActions,
 }: {
   device: Device | null;
+  fallbackPaths?: {
+    alertsPath: string | null;
+    deviceDetailPath: string | null;
+    geofencesPath: string;
+    vehicleDetailPath: string | null;
+  };
+  launchPayload?: MapInspectPanelPayload | null;
+  launchRequestKey?: number;
+  launchTarget?: MapInspectPanelTarget;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  presentation?: DeviceDetailModalPresentation;
+  workspaceActions?: DeviceWorkspaceActions;
 }) => {
   const [activeTab, setActiveTab] = useState<DeviceDetailTab>('overview');
   const queryClient = useQueryClient();
@@ -290,6 +391,7 @@ export const DeviceDetailModalContainer = ({
   const sendCommand = useSendCommand(deviceId ?? 0);
 
   const devicePublicId = detail.data?.device?.deviceId ?? device?.deviceId ?? null;
+  const linkedVehicleIdentifier = detail.data?.device?.vehicleId ?? device?.vehicleId ?? null;
   const position = useDevicePositionSnapshot(devicePublicId, open);
   const eventLogs = useDeviceEventLogs(devicePublicId, {
     enabled: open && access.canViewSystemInfo,
@@ -304,6 +406,49 @@ export const DeviceDetailModalContainer = ({
         limit: 10,
         status: 'active',
         alertType: 'maintenance_due',
+        deviceId: devicePublicId,
+      }),
+  });
+  const linkedVehicleQuery = useQuery({
+    queryKey: ['device-linked-vehicle', linkedVehicleIdentifier, launchPayload?.linkedEntityId],
+    enabled:
+      open &&
+      (Boolean(linkedVehicleIdentifier) ||
+        (launchPayload?.linkedEntityType === 'vehicle' && Boolean(launchPayload.linkedEntityId))),
+    queryFn: async () => {
+      if (launchPayload?.linkedEntityType === 'vehicle' && launchPayload.linkedEntityId) {
+        try {
+          const response = await vehicleServices.getById(launchPayload.linkedEntityId);
+          return toLinkedVehicle((response ?? {}) as Record<string, unknown>);
+        } catch {
+          // Fall back to public vehicle identifier lookup below.
+        }
+      }
+
+      if (!linkedVehicleIdentifier) {
+        return null;
+      }
+
+      const response = await vehicleServices.getList({ search: linkedVehicleIdentifier, limit: 10 });
+      const items = (response?.items ?? []) as Record<string, unknown>[];
+      const exactMatch =
+        items.find(
+          (item) =>
+            normalizeIdentifier(String(item.vehicleId ?? item.vehicle_id ?? '')) ===
+            normalizeIdentifier(linkedVehicleIdentifier),
+        ) ?? items[0];
+
+      return exactMatch ? toLinkedVehicle(exactMatch) : null;
+    },
+  });
+  const deviceScopedAlertsQuery = useQuery({
+    queryKey: ['device-workspace-alerts', devicePublicId],
+    enabled: open && Boolean(devicePublicId),
+    queryFn: () =>
+      alertServices.getList({
+        page: 1,
+        limit: 20,
+        status: 'active',
         deviceId: devicePublicId,
       }),
   });
@@ -326,8 +471,10 @@ export const DeviceDetailModalContainer = ({
       queryClient.invalidateQueries({ queryKey: ['device-position-snapshot'] }),
       queryClient.invalidateQueries({ queryKey: ['device-event-logs', devicePublicId] }),
       queryClient.invalidateQueries({ queryKey: ['device-obd-alerts', devicePublicId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-linked-vehicle', linkedVehicleIdentifier] }),
+      queryClient.invalidateQueries({ queryKey: ['device-workspace-alerts', devicePublicId] }),
     ]);
-  }, [deviceId, devicePublicId, queryClient]);
+  }, [deviceId, devicePublicId, linkedVehicleIdentifier, queryClient]);
 
   useRealtimeSubscription<any>({
     event: 'device:status',
@@ -392,6 +539,19 @@ export const DeviceDetailModalContainer = ({
       createdAt: item.createdAt == null ? null : String(item.createdAt),
     }));
   }, [obdAlerts.data]);
+  const deviceScopedAlerts = useMemo(
+    () =>
+      ((deviceScopedAlertsQuery.data?.items ?? deviceScopedAlertsQuery.data?.data?.items ?? []) as Record<
+        string,
+        unknown
+      >[])
+        .map((item) => toWorkspaceAlert(item))
+        .sort(
+          (left, right) =>
+            (Date.parse(right.createdAt ?? '') || 0) - (Date.parse(left.createdAt ?? '') || 0),
+        ),
+    [deviceScopedAlertsQuery.data],
+  );
 
   const context = useMemo(
     () => ({
@@ -439,6 +599,11 @@ export const DeviceDetailModalContainer = ({
       eventLogs: eventLogs.items,
       eventLogsTotal: eventLogs.total,
       rawFeed,
+      linkedVehicle: linkedVehicleQuery.data ?? null,
+      linkedVehicleLoading: linkedVehicleQuery.isLoading || linkedVehicleQuery.isFetching,
+      deviceScopedAlerts,
+      deviceScopedAlertsLoading:
+        deviceScopedAlertsQuery.isLoading || deviceScopedAlertsQuery.isFetching,
       obdActiveAlerts,
       obdAlertsLoading: obdAlerts.isLoading || obdAlerts.isFetching,
       activeTab,
@@ -534,6 +699,12 @@ export const DeviceDetailModalContainer = ({
       errors.type,
       eventLogs.items,
       eventLogs.total,
+      deviceScopedAlerts,
+      deviceScopedAlertsQuery.isFetching,
+      deviceScopedAlertsQuery.isLoading,
+      linkedVehicleQuery.data,
+      linkedVehicleQuery.isFetching,
+      linkedVehicleQuery.isLoading,
       obdActiveAlerts,
       obdAlerts.isFetching,
       obdAlerts.isLoading,
@@ -577,6 +748,27 @@ export const DeviceDetailModalContainer = ({
         onOpenChange(next);
       }}
       context={context}
+      fallbackPaths={
+        fallbackPaths ?? {
+          alertsPath: devicePublicId
+            ? `/dashboard/attention/queue?${new URLSearchParams({
+                deviceId: devicePublicId,
+                ...(linkedVehicleIdentifier ? { vehicleId: linkedVehicleIdentifier } : {}),
+              }).toString()}`
+            : null,
+          deviceDetailPath: deviceId ? `/dashboard/fleet/devices/${deviceId}` : null,
+          geofencesPath: '/dashboard/operations/geofences',
+          vehicleDetailPath:
+            linkedVehicleQuery.data?.id != null
+              ? `/dashboard/fleet/vehicles/${linkedVehicleQuery.data.id}`
+              : null,
+        }
+      }
+      launchPayload={launchPayload}
+      launchRequestKey={launchRequestKey}
+      launchTarget={launchTarget}
+      presentation={presentation}
+      workspaceActions={workspaceActions}
     />
   );
 };
