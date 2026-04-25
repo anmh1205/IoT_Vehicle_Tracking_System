@@ -519,11 +519,7 @@ Lê Trọng An
 | **UART**           | Universal Asynchronous Receiver-Transmitter    | Bộ thu phát bất đồng bộ đa năng                           |
 | **WebSocket**      | WebSocket Protocol                             | Giao thức giao tiếp hai chiều thời gian thực                 |
 
-<div class="center">
 
----
-
-</div>
 
 # CHƯƠNG 1. GIỚI THIỆU DỰ ÁN – PROJECT OVERVIEW
 
@@ -623,11 +619,7 @@ lý đội xe, đồng thời tạo cơ sở để phát triển một giải ph
 mở rộng, tùy biến và thích nghi với điều kiện triển khai thực tế tại Việt
 Nam.
 
-<div class="center">
 
----
-
-</div>
 
 ## 1.2. Mục tiêu và phạm vi của dự án
 
@@ -797,11 +789,7 @@ Các tiêu chí trên tạo thành bộ tham chiếu chung cho toàn bộ đồ 
 giá trị kỹ thuật cụ thể dùng để so sánh, ràng buộc và đánh giá phương án
 sẽ được chuẩn hóa ở Chương 2.
 
-<div class="center">
 
----
-
-</div>
 
 ## 1.4. Phương pháp tiếp cận thiết kế kỹ thuật
 
@@ -920,11 +908,7 @@ các loại dữ liệu khác nhau và thuận lợi cho triển khai thử nghi
 Các công nghệ cụ thể được phân tích theo vai trò kỹ thuật ở Chương 2
 và được lựa chọn trong Chương 3.
 
-<div class="center">
 
----
-
-</div>
 
 ## 1.5. Kết quả và khuyến nghị
 
@@ -1007,11 +991,7 @@ Từ kết quả hiện tại, các hướng phát triển tiếp theo được 
 <figcaption>Lộ trình phát triển dự án theo các giai đoạn</figcaption>
 </figure>
 
-<div class="center">
 
----
-
-</div>
 
 # CHƯƠNG 2. PHÂN TÍCH VẤN ĐỀ KỸ THUẬT
 
@@ -2406,13 +2386,7 @@ giữa thiết kế mạch và firmware.
 
 _Hình 4.1: Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần cứng tích hợp_
 
-_[Hình 4.1a: Sơ đồ nguyên lý tổng thể của thiết bị tracker.]_
-
-_[Hình 4.1b: Sơ đồ nguyên lý chi tiết cho các khối nguồn, xử lý, modem và cảm biến.]_
-
-_[Hình 4.1c: Ảnh bố trí PCB trên phần mềm thiết kế - mặt trên.]_
-
-_[ Hình 4.1d: Ảnh bố trí PCB trên phần mềm thiết kế - mặt dưới hoặc mô hình 3D.]_
+_TODO/BLOCKER: Chưa xuất ảnh kiểm chứng đúng tỷ lệ cho các hình phụ Hình 4.1a-4.1d gồm sơ đồ nguyên lý tổng thể, sơ đồ nguyên lý chi tiết và bố trí PCB mặt trên/mặt dưới. Không đánh số hình và không đưa vào danh mục hình cho đến khi có asset xuất trực tiếp từ hồ sơ thiết kế phần cứng._
 
 **Bảng 4.1: Các hạng mục thiết kế phần cứng đã hoàn thành**
 
@@ -2424,9 +2398,7 @@ _[ Hình 4.1d: Ảnh bố trí PCB trên phần mềm thiết kế - mặt dư�
 | Kiến trúc nguồn chính và dự phòng | Đã tích hợp nhánh nguồn logic, nhánh nguồn modem và nguồn dự phòng trên cùng thiết kế | Hỗ trợ mục tiêu vận hành ổn định khi điện áp xe dao động                     |
 | Hồ sơ phục vụ chế tạo              | Đã xuất bộ tệp phục vụ gia công, lắp ráp và kiểm tra nguyên mẫu                         | Cho phép chuyển từ giai đoạn thiết kế sang nguyên mẫu thật                       |
 
-_[Bảng 4.1a: Bảng kê BOM chi tiết của bo mạch thiết bị.]_
-
-_[Bảng 4.1b: Bảng tổng hợp giá trị linh kiện của bo mạch theo VND.]_
+_TODO/BLOCKER: Chưa đưa Bảng 4.1A/4.1B vào bản condensed vì BOM chi tiết và bảng tổng hợp chi phí linh kiện cần được đối chiếu lại với hồ sơ thiết kế cuối. Không đánh số bảng và không đưa vào danh mục bảng cho đến khi có dữ liệu BOM đã chốt._
 
 ### 4.1.2. Gia công, lắp ráp và tích hợp nguyên mẫu
 
@@ -2450,9 +2422,9 @@ không dây với thiết bị.
 | Khối lưu trữ cục bộ                         | microSD đã được tích hợp để lưu đệm khi mất mạng                                                  | Hoàn thành           |
 | Cấu hình lắp đặt trên xe                   | Thiết bị đã được ghép với nguồn trên xe và bộ chuyển đổi OBD2 BLE trong cấu hình thử nghiệm | Hoàn thành           |
 
-_[Vị trí chèn Hình 4.2: Ảnh PCB sau khi gia công và hàn lắp đầy đủ linh kiện.]_
+_TODO/BLOCKER: Chưa có ảnh thật đã kiểm chứng cho Hình 4.2 - ảnh PCB sau khi gia công và hàn lắp đầy đủ linh kiện. Không đánh số hình và không đưa vào danh mục hình cho đến khi có asset đúng nội dung._
 
-_[Vị trí chèn Hình 4.3: Ảnh thiết bị sau khi lắp đặt trên xe thử nghiệm.]_
+_TODO/BLOCKER: Chưa có ảnh thật đã kiểm chứng cho Hình 4.3 - ảnh thiết bị sau khi lắp đặt trên xe thử nghiệm. Không đánh số hình và không đưa vào danh mục hình cho đến khi có asset đúng nội dung._
 
 ## 4.2. Triển khai firmware thiết bị - Firmware implementation
 
@@ -2746,11 +2718,17 @@ quan, bản đồ, thiết bị, cảnh báo, khai thác đội xe và quản tr
 | Cảnh báo và ưu tiên xử lý  | Cung cấp các màn hình cảnh báo, danh sách cần chú ý và hàng đợi xử lý                                              | Đáp ứng yêu cầu hỗ trợ ra quyết định vận hành             |
 | Quản trị nền tảng             | Cung cấp các phân hệ firmware, thống kê, thông báo, trạng thái hệ thống, người dùng, xuất dữ liệu và mô phỏng | Đáp ứng yêu cầu vận hành tập trung trên giao diện web       |
 
-_[Hình 4.7: Ảnh màn hình đăng nhập và trang tổng quan dashboard.]_
+![Hình 4.7 - Giao diện quản lý thiết bị và trạng thái đội xe](./assets/figures/11-chuong-4-trien-khai-frontend-hinh-4-7-device-management-dashboard.png)
 
-_[Hình 4.8: Ảnh màn hình bản đồ giám sát và vùng giám sát.]_
+_Hình 4.7: Giao diện quản lý thiết bị và trạng thái đội xe_
 
-_[Hình 4.9: Ảnh màn hình chi tiết thiết bị với dữ liệu OBD và các nhóm DTC.]_
+![Hình 4.8 - Giao diện bản đồ giám sát và danh sách thiết bị đang theo dõi](./assets/figures/11-chuong-4-trien-khai-frontend-hinh-4-8-map-monitoring.png)
+
+_Hình 4.8: Giao diện bản đồ giám sát và danh sách thiết bị đang theo dõi_
+
+![Hình 4.9 - Giao diện chi tiết thiết bị ở tab dữ liệu thô OBD](./assets/figures/11-chuong-4-trien-khai-frontend-hinh-4-9-device-obd-raw-data.png)
+
+_Hình 4.9: Giao diện chi tiết thiết bị ở tab dữ liệu thô OBD_
 
 ### 4.3.6. Triển khai công khai trên cloud VPS và hướng dẫn dùng thử
 
@@ -2765,13 +2743,13 @@ VictoriaMetrics được giữ ở chế độ nội bộ để giảm bề mặ
 
 | Địa chỉ truy cập                   | Dịch vụ           | Vai trò sử dụng                                                  |
 | -------------------------------------- | ------------------- | ------------------------------------------------------------------- |
-| `https://thingdock.dev`              | Frontend            | Giao diện web quản trị của hệ thống                           |
-| `https://api.thingdock.dev`          | Backend             | Điểm truy cập REST API                                           |
-| `https://api.thingdock.dev/api-docs` | Tài liệu API      | Giao diện tài liệu API phục vụ kiểm tra các điểm truy cập |
-| `mqtt.thingdock.dev`                 | EMQX                | Điểm kết nối MQTT của thiết bị                               |
-| `https://grafana.thingdock.dev`      | Grafana             | Quan sát chỉ số và nhật ký vận hành                         |
-| `https://emqx.thingdock.dev`         | EMQX Dashboard      | Quản trị và theo dõi trạng thái broker                        |
-| `https://npm.thingdock.dev`          | Nginx Proxy Manager | Quản trị lớp chuyển tiếp ngược                               |
+| https://thingdock.dev              | Frontend            | Giao diện web quản trị của hệ thống                           |
+| https://api.thingdock.dev          | Backend             | Điểm truy cập REST API                                           |
+| https://api.thingdock.dev/api-docs | Tài liệu API      | Giao diện tài liệu API phục vụ kiểm tra các điểm truy cập |
+| mqtt.thingdock.dev                 | EMQX                | Điểm kết nối MQTT của thiết bị                               |
+| https://grafana.thingdock.dev      | Grafana             | Quan sát chỉ số và nhật ký vận hành                         |
+| https://emqx.thingdock.dev         | EMQX Dashboard      | Quản trị và theo dõi trạng thái broker                        |
+| https://npm.thingdock.dev          | Nginx Proxy Manager | Quản trị lớp chuyển tiếp ngược                               |
 
 Tài khoản mặc định để dùng thử giao diện quản trị được khởi tạo cùng cơ sở dữ
 liệu là `admin / Admin@2026`.
@@ -2875,14 +2853,14 @@ chọn là đúng về cấu trúc và đủ cho mục tiêu đồ án, nhưng c
 
 Về mặt kinh tế, chi phí của hệ thống được tách thành hai nhóm chính: chi phí chế
 tạo thiết bị và chi phí vận hành hằng năm. Trong đó, chi phí chế tạo mỗi thiết bị
-được lấy theo Bảng 4.1b; còn chi phí vận hành gồm chi phí kết nối dữ liệu di động
+được lấy theo BOM ước tính của thiết bị; còn chi phí vận hành gồm chi phí kết nối dữ liệu di động
 cho từng thiết bị và chi phí hạ tầng dùng chung ở phía máy chủ.
 
 **Bảng 5.2: Cấu phần chi phí chính của hệ thống**
 
 | Hạng mục chi phí            | Cách tính và thông số chính                                                                                                                       | Mức chi phí                                         | Phạm vi áp dụng           | Nhận xét                                                             |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------- | ---------------------------------------------------------------------- |
-| Thiết bị phần cứng         | Theo Bảng 4.1b                                                                                                                                         | Khoảng 1.500.000 VND cho mỗi thiết bị (theo BOM)) | Từng thiết bị             | Là khoản đầu tư ban đầu lớn nhất của hệ thống              |
+| Thiết bị phần cứng         | Theo BOM ước tính của thiết bị                                                                                                                        | Khoảng 1.500.000 VND cho mỗi thiết bị (theo BOM)  | Từng thiết bị             | Là khoản đầu tư ban đầu lớn nhất của hệ thống              |
 | Kết nối dữ liệu di động  | Gói Viettel NB-IoT Connect8, cước 8.000 VND/30 ngày, tốc độ danh nghĩa khoảng 50 Kbps chiều lên và 50 Kbps chiều xuống                    | Khoảng 96.000 VND/năm cho mỗi thiết bị           | Từng thiết bị             | Phù hợp với bản tin telemetry dung lượng nhỏ, gửi theo chu kỳ |
 | Máy chủ VPS trên đám mây | Một VPS cấu hình cơ bản để chạy broker MQTT, MQTT Bridge, backend, frontend và các dịch vụ quan sát vận hành của mô hình thử nghiệm | Khoảng 500.000-900.000 VND/năm                      | Dùng chung toàn hệ thống | Phù hợp với quy mô đồ án và giai đoạn thử nghiệm           |
 | Tên miền                     | Một tên miền chính, dùng thêm các tên miền phụ cho web, API, MQTT và giám sát                                                              | Khoảng 200.000-300.000 VND/năm                      | Dùng chung toàn hệ thống | Không làm tăng theo số lượng thiết bị                          |
@@ -2893,7 +2871,7 @@ khoảng 96.000 VND tiền kết nối dữ liệu, cộng với phần chi phí
 vận hành, thì phần chi phí dùng chung bình quân trên mỗi thiết bị xấp xỉ
 $(700.000-1.200.000)/n$ VND/năm, trong đó máy chủ VPS và tên miền đã được tách
 riêng như trong Bảng 5.2. Như vậy, chi phí năm đầu cho mỗi thiết bị sẽ bằng chi
-phí chế tạo theo Bảng 4.1b cộng với 96.000 VND và phần hạ tầng phân bổ; từ các
+phí chế tạo thiết bị cộng với 96.000 VND và phần hạ tầng phân bổ; từ các
 năm tiếp theo, chi phí duy trì chủ yếu còn lại là tiền kết nối dữ liệu và phần
 chi phí máy chủ dùng chung.
 
@@ -3058,19 +3036,11 @@ Trong phạm vi đồ án tốt nghiệp, hệ thống đã đạt mục tiêu t
 Những phần còn lại cần được tiếp tục đầu tư không làm giảm giá trị của kết quả
 hiện tại, mà cho thấy hướng phát triển kế tiếp của đề tài là rõ ràng và khả thi.
 
-<div class="center">
 
----
-
-</div>
 
 # TÀI LIỆU TRÍCH DẪN - REFERENCES
 
-<div class="center">
 
----
-
-</div>
 
 ## \[A\] Tài liệu tiếng Việt
 
@@ -3082,11 +3052,7 @@ hiện tại, mà cho thấy hướng phát triển kế tiếp của đề tài
 
 \[4\] N. Naik, "Choice of Effective Messaging Protocols for IoT Systems: MQTT, CoAP, AMQP and HTTP," in _Proc. 2017 IEEE International Systems Engineering Symposium (ISSE)_, Vienna, Austria, 2017, pp. 1–7.
 
-<div class="center">
 
----
-
-</div>
 
 ## \[B\] Tài liệu tiếng Anh (Books & Papers)
 
@@ -3146,11 +3112,7 @@ Noninverting, Synchronous Buck-Boost Converter for Portable
 Applications," _IEEE Transactions on Power Electronics_, vol. 19, no. 2,
 pp. 443–452, Mar. 2004.
 
-<div class="center">
 
----
-
-</div>
 
 ## \[C\] Tài liệu kỹ thuật (Datasheets & Technical Documents)
 
@@ -3206,11 +3168,7 @@ Available:
 
 \[31\] Apache NimBLE Project, "NimBLE Host API Reference," Version 1.5, 2023. \[Online\]. Available: [https://mynewt.apache.org/latest/network/](https://mynewt.apache.org/latest/network/)
 
-<div class="center">
 
----
-
-</div>
 
 ## \[D\] Tài liệu trực tuyến (Online Resources)
 
@@ -3363,263 +3321,268 @@ Available: [https://www.ti.com/product/TPS2115A](https://www.ti.com/product/TPS2
 [https://www.alldatasheet.com/html-pdf/1132639/SONGLERELAY/SRD-05VDC-SL-C/1713/2/SRD-05VDC-SL-C.html](https://www.alldatasheet.com/html-pdf/1132639/SONGLERELAY/SRD-05VDC-SL-C/1713/2/SRD-05VDC-SL-C.html).
 \[Accessed: Mar. 02, 2026\].
 
-<div class="center">
 
----
-
-</div>
 
 # PHỤ LỤC - APPENDICES
 
-<div class="center">
 
----
-
-</div>
 
 # PHỤ LỤC 1: BÁO CÁO TÀI CHÍNH - FINANCE REPORT
 
-Phụ lục này tóm tắt cơ cấu chi phí chính của nguyên mẫu. Do đây là bản báo cáo
-ngắn gọn, các nội dung tài chính được trình bày theo nhóm chi phí và mức tỷ
-trọng tương đối, không thay thế cho báo giá chi tiết hoặc sổ sách kế toán khi
-triển khai thương mại.
+Phụ lục này cập nhật cơ cấu chi phí theo cấu hình đã trình bày trong phần thiết
+kế và triển khai của báo cáo rút gọn. Các khoản mục được trình bày theo nhóm
+chi phí và mức độ ảnh hưởng, vì giá linh kiện, gói dữ liệu và hạ tầng đám mây có
+thể thay đổi theo thời điểm mua, số lượng đặt hàng và nhà cung cấp.
 
-## 1.1. Bảng kê chi phí linh kiện (Bill of Materials - BOM)
+## 1.1. Bảng kê nhóm chi phí linh kiện
 
-| Nhóm chi phí phần cứng         | Thành phần đại diện                                                              | Tỷ trọng tương đối | Nhận xét                                                                                     |
-| ---------------------------------- | ------------------------------------------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------- |
-| Khối xử lý và truyền thông   | ESP32-S3, SIM7600CE-T, anten, bộ chuyển đổi OBD2 BLE                              | Rất cao                 | Là nhóm quyết định trực tiếp năng lực thu nhận và truyền dữ liệu của thiết bị |
-| Khối nguồn và bảo vệ          | Buck, LDO, mạch sạc, chuyển nguồn, pin dự phòng, cầu chì, linh kiện bảo vệ | Cao                      | Ảnh hưởng trực tiếp đến độ ổn định và an toàn khi lắp trên xe                  |
-| Khối cảm biến và lưu trữ     | LIS3DH, DS3231M, microSD và linh kiện phụ trợ                                     | Trung bình              | Hỗ trợ cảnh báo chuyển động, lưu đệm và đồng bộ thời gian                       |
-| PCB và lắp ráp                  | Bo mạch in, linh kiện phụ, hàn lắp và kiểm tra                                 | Trung bình              | Là chi phí bắt buộc để chuyển thiết kế thành nguyên mẫu thật                      |
-| Cơ khí và phụ kiện lắp đặt | Vỏ, dây, đầu nối, giá đỡ và phụ kiện lắp xe                               | Trung bình              | Tác động lớn đến khả năng triển khai thực tế và độ bền sau lắp đặt           |
+| Nhóm chi phí phần cứng | Thành phần đang dùng trong thiết kế | Trạng thái trong nội dung chính | Ghi chú kiểm soát chi phí |
+| --- | --- | --- | --- |
+| Bộ xử lý trung tâm | ESP32-S3-WROOM-1, các chân UART, I2C, SPI, ADC, GPIO và BLE tích hợp | Đã chốt ở chương giải pháp phần cứng và chương triển khai firmware | Giữ BOM gọn vì không cần mô-đun BLE rời cho OBD2 |
+| Truyền thông và định vị | SIM7600CE-T, khay SIM, anten LTE, anten GNSS và các đường điều khiển modem | Đã tích hợp với firmware, MQTT và luồng dữ liệu vị trí | Là nhóm chi phí cao, cần ưu tiên linh kiện chính hãng và nguồn ổn định |
+| Thu thập dữ liệu xe | Bộ chuyển đổi OBD2 qua BLE vgate iCar Pro, đầu nối OBD2 và dây lắp đặt | Đã chọn làm phương án đọc PID ít xâm lấn | Bộ chuyển đổi thương mại giúp giảm rủi ro đấu trực tiếp vào bus xe |
+| Cảm biến, thời gian và lưu đệm | LIS3DH, DS3231M, microSD/SDMMC, NVS và linh kiện phụ trợ | Đã dùng cho phát hiện chuyển động, đồng bộ thời gian và lưu đệm cục bộ | Cần kiểm chứng đúng mã linh kiện thực tế khi thay thế linh kiện tương đương |
+| Nguồn và bảo vệ | MP2482, AP2112-3.3, TPS54231, TP5100, SX1308, pin 18650 1S, diode-OR, cầu chì và mạch đo ADC | Đã chốt theo kiến trúc nguồn đa nhánh | Quyết định độ ổn định của thiết bị khi modem phát xung dòng và khi nguồn xe dao động |
+| PCB, vỏ và lắp ráp | PCB nguyên mẫu, vỏ ABS, header, dây nối, phụ kiện cố định, hàn lắp và kiểm tra | Đã dùng cho cấu hình nguyên mẫu | Chi phí phụ thuộc mạnh vào số lượng đặt PCB, vỏ và mức hoàn thiện cơ khí |
 
-## 1.2. Chi phí hạ tầng đám mây (ước tính hàng tháng)
+## 1.2. Chi phí hạ tầng đám mây và vận hành
 
-Chi phí vận hành hạ tầng thay đổi theo số lượng thiết bị, tần suất gửi dữ liệu và
-thời gian lưu lịch sử. Với quy mô nguyên mẫu, hạ tầng có thể duy trì trên một
-cloud VPS tự quản; khi mở rộng, phần chi phí tăng nhanh nhất không còn nằm ở mã
-nguồn, mà chuyển dần sang lưu trữ, kết nối và giám sát vận hành.
+Chi phí vận hành được tách khỏi chi phí thiết bị vì nó tăng theo số lượng xe,
+tần suất gửi bản tin và thời gian lưu dữ liệu. Với quy mô nguyên mẫu, toàn bộ
+hệ thống có thể chạy trên máy chủ VPS tự quản bằng Docker Compose; khi mở rộng,
+các khoản tăng nhanh nhất là gói dữ liệu SIM, lưu trữ dữ liệu đo từ xa, nhật ký
+và quan sát vận hành.
 
-| Khoản mục vận hành         | Nội dung chi phí chính                                            | Xu hướng biến thiên                                          |
-| ------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Máy chủ và tên miền       | Cloud VPS, tên miền và lớp truy cập quản trị                  | Tăng theo số dịch vụ và mức độ sẵn sàng mong muốn     |
-| Kết nối dữ liệu thiết bị | SIM dữ liệu hoặc gói cước truyền dữ liệu                    | Tăng gần tỷ lệ với số lượng thiết bị hoạt động      |
-| Lưu trữ và sao lưu         | PostgreSQL, dữ liệu chuỗi thời gian, nhật ký và bản sao lưu | Tăng theo thời gian lưu và mật độ gửi dữ liệu          |
-| Quan sát vận hành           | Grafana, số đo, nhật ký và cảnh báo                           | Tăng khi cần kiểm soát nhiều dịch vụ hoặc nhiều xe hơn |
+| Khoản mục vận hành | Thành phần hiện dùng trong hệ thống | Xu hướng biến thiên |
+| --- | --- | --- |
+| Máy chủ và truy cập công khai | Máy chủ VPS trên đám mây, Docker Compose theo dịch vụ, Nginx Proxy Manager, tên miền và TLS | Tăng khi cần tách nút triển khai, tăng tài nguyên hoặc nâng mức sẵn sàng |
+| Kết nối thiết bị | SIM 4G/IoT cho từng thiết bị theo dõi và lưu lượng MQTT qua LTE | Gần tỷ lệ thuận với số thiết bị và chu kỳ gửi dữ liệu |
+| Tiếp nhận và cập nhật gần thời gian thực | EMQX, MQTT Bridge, dịch vụ phía máy chủ và Socket.IO/WebSocket | Tăng theo số kết nối đồng thời và số bản tin trong giờ cao điểm |
+| Lưu trữ dữ liệu | PostgreSQL/PostGIS, VictoriaMetrics, VictoriaLogs, chính sách lưu giữ và sao lưu | Tăng theo thời gian lưu lịch sử, mật độ dữ liệu đo từ xa và độ chi tiết nhật ký |
+| Quan sát vận hành | Grafana, bảng theo dõi hệ thống, cảnh báo, nhật ký truy vết và kiểm tra trạng thái dịch vụ | Tăng khi cần giám sát nhiều đội xe, nhiều nút triển khai hoặc nhiều môi trường triển khai |
 
-## 1.3. Tổng hợp chi phí dự án
+## 1.3. Tổng hợp chi phí theo quy mô triển khai
 
-Từ góc độ triển khai, chi phí của hệ thống có thể được nhìn theo từng nấc phát
-triển như sau.
+Từ góc độ triển khai, chi phí không tăng tuyến tính ở mọi lớp. Thiết bị tăng
+theo số xe, trong khi hạ tầng thường tăng theo các ngưỡng tải và ngưỡng lưu trữ.
 
-| Quy mô sử dụng                  | Số thiết bị tham chiếu | Đặc điểm chi phí chính                                                               | Nhận xét                                                         |
-| ---------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| Thử nghiệm nội bộ              | 5-20                       | Chi phí thiết bị chiếm ưu thế, hạ tầng còn gọn                                   | Phù hợp kiểm chứng kỹ thuật và hoàn thiện quy trình      |
-| Thí điểm mở rộng              | 20-100                     | Chi phí hạ tầng, lưu trữ và giám sát bắt đầu tăng rõ                          | Cần chuẩn hóa lắp đặt, cảnh báo và bảo trì              |
-| Triển khai dịch vụ quy mô vừa | 100-300                    | Chi phí vận hành và hỗ trợ kỹ thuật tăng nhanh                                    | Cần tối ưu tầng tiếp nhận dữ liệu và giao diện quản lý |
-| Đội xe lớn hoặc đa khu vực   | Trên 300                  | Hạ tầng, chính sách dữ liệu và quan sát vận hành trở thành chi phí chủ đạo | Cần tính đến mở rộng ngang và quản trị tập trung         |
+| Quy mô sử dụng | Số thiết bị tham chiếu | Đặc điểm chi phí chính | Nhận xét |
+| --- | --- | --- | --- |
+| Nguyên mẫu kỹ thuật | 1-5 | Chi phí linh kiện, PCB, dụng cụ đo và thời gian tích hợp chiếm ưu thế | Phù hợp kiểm chứng kiến trúc phần cứng, firmware và luồng bản tin MQTT |
+| Thử nghiệm nội bộ | 5-20 | Chi phí thiết bị vẫn là chính, hạ tầng còn có thể giữ trên một VPS | Cần chuẩn hóa cấu hình lắp đặt, SIM và quy trình nạp firmware |
+| Thí điểm mở rộng | 20-100 | SIM, lưu trữ dữ liệu đo từ xa, nhật ký và giám sát bắt đầu tăng rõ | Cần kiểm soát chính sách lưu giữ, sao lưu và cảnh báo vận hành |
+| Triển khai quy mô vừa | 100-300 | Chi phí hỗ trợ kỹ thuật, vận hành hạ tầng và tối ưu dữ liệu tăng nhanh | Cần theo dõi tải EMQX, MQTT Bridge, dịch vụ phía máy chủ và cơ sở dữ liệu |
+| Đội xe lớn hoặc đa khu vực | Trên 300 | Hạ tầng, chính sách dữ liệu, phân quyền và quan sát vận hành trở thành chi phí chủ đạo | Cần tính đến mở rộng ngang và quản trị tập trung |
 
-<div class="center">
 
----
-
-</div>
 
 # PHỤ LỤC 2: CÁC TIÊU CHUẨN THIẾT KẾ - STANDARDS
 
-Phụ lục này tổng hợp các tiêu chuẩn và nguyên tắc thiết kế được dùng làm cơ sở
-tham chiếu trong quá trình xây dựng nguyên mẫu. Mục đích của phụ lục không phải
-là sao chép toàn bộ tiêu chuẩn, mà là nêu rõ tiêu chuẩn nào được dùng, dùng ở
-đâu và được kiểm soát như thế nào trong hệ thống.
+Phụ lục này tổng hợp các tiêu chuẩn, giao thức và nguyên tắc thiết kế đang được
+áp dụng trực tiếp trong bản triển khai hiện tại. Nội dung ưu tiên bám theo các
+thành phần đã xuất hiện trong chương 3 và chương 4, không liệt kê các chuẩn
+không còn liên quan đến cấu hình cuối.
 
-## 2.1. Tiêu chuẩn OBD2 (SAE J1979 / ISO 15031–5)
+## 2.1. Dữ liệu xe, định vị và firmware thiết bị
 
-Các chuẩn này được dùng làm nền cho lớp thu thập dữ liệu vận hành xe. Trong đồ
-án, chúng hỗ trợ việc lựa chọn nhóm PID cốt lõi, diễn giải dữ liệu trả về và
-giữ cách biểu diễn thông số vận hành nhất quán giữa firmware, lớp tiếp nhận dữ
-liệu và giao diện quản trị.
+Lớp thiết bị bám theo OBD2 để đọc dữ liệu vận hành cơ bản qua bộ chuyển đổi BLE,
+đồng thời dùng modem SIM7600CE-T cho LTE/GNSS. Firmware được tổ chức trên
+ESP-IDF và FreeRTOS để quản lý tác vụ, ngoại vi, ngủ sâu, lưu đệm và cập nhật
+từ xa.
 
-## 2.2. MQTT 3.1.1 trong triển khai thiết bị
+## 2.2. MQTT, cấu trúc bản tin và kênh thời gian thực
 
-MQTT 3.1.1 được dùng cho kênh truyền dữ liệu giữa thiết bị và máy chủ. Trong
-nguyên mẫu, chuẩn này là cơ sở để xây dựng cây chủ đề bản tin, lựa chọn QoS và
-tổ chức kênh điều khiển ngược từ máy chủ về thiết bị.
+Thiết bị dùng MQTT 3.1.1 qua EMQX. Cây chủ đề bản tin đang dùng gồm
+v1/{device\_id}/rawdata, v1/{device\_id}/status, v1/{device\_id}/events,
+v1/{device\_id}/firmware và v1/{device\_id}/commands. MQTT Bridge tiếp tục phát
+sự kiện nội bộ theo internal/events/# để dịch vụ phía máy chủ đẩy cập nhật ra
+giao diện qua Socket.IO/WebSocket.
 
-## 2.3. Bảo mật thông tin (ISO 27001 - tham khảo)
+## 2.3. API, lưu trữ và quan sát vận hành
 
-ISO 27001 được tham chiếu ở mức nguyên tắc. Trong phạm vi nguyên mẫu, các nội
-dung được tiếp cận chủ yếu là kiểm soát truy cập, phân quyền theo vai trò, ghi
-nhật ký và bảo vệ thông tin nhạy cảm trong quá trình vận hành.
+Dịch vụ phía máy chủ cung cấp HTTP/REST API dưới nhóm /api/v1, tài liệu OpenAPI
+và kênh cập nhật gần thời gian thực. Dữ liệu nghiệp vụ được lưu ở
+PostgreSQL/PostGIS; dữ liệu đo từ xa và chỉ số được lưu ở VictoriaMetrics; nhật ký tập trung dùng
+VictoriaLogs và được quan sát qua Grafana.
 
-## 2.4. Thiết kế REST API (RFC 7231 và thực hành tốt)
+## 2.4. Bảo mật và vận hành
 
-RFC 7231 và các thực hành tốt của REST API được dùng cho lớp giao tiếp giữa
-backend và giao diện web. Phần này giúp chuẩn hóa phương thức gọi, mã trạng thái
-và cách biểu diễn phản hồi lỗi cho các nhóm chức năng quản trị.
+Các nguyên tắc bảo mật được áp dụng ở mức phù hợp với nguyên mẫu: TLS cho cổng
+công khai, xác thực phiên cho người dùng, phân quyền theo vai trò, MQTT ACL theo
+thiết bị, biến môi trường cho bí mật và nhật ký kiểm toán cho thao tác quan
+trọng.
 
-| Chuẩn/nguyên tắc                     | Phạm vi áp dụng                      | Cách hiện thực trong dự án                                                   |
-| --------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------- |
-| SAE J1979 / ISO 15031                   | Dữ liệu OBD2                          | Chọn tập PID cốt lõi, chuẩn hóa bộ phân tích và mô tả đơn vị đo   |
-| MQTT 3.1.1                              | Kênh truyền thiết bị - máy chủ    | Tách chủ đề bản tin theo nghiệp vụ, gán QoS theo mức ưu tiên dữ liệu |
-| ISO 27001 (tham khảo)                  | Vận hành và bảo mật                | Tách quyền truy cập, ghi nhật ký vận hành và theo dõi phiên truy cập   |
-| RFC 7231 và thực hành tốt của REST | HTTP/REST API của máy chủ ứng dụng | Chuẩn hóa phương thức, mã trạng thái và phản hồi lỗi nhất quán      |
-| Nguyên tắc đặc quyền tối thiểu   | Quản trị hệ thống                   | Giới hạn vai trò theo đúng chức năng vận hành và bảo trì              |
+| Chuẩn/nguyên tắc | Phạm vi áp dụng | Cách hiện thực trong dự án |
+| --- | --- | --- |
+| SAE J1979 / ISO 15031-5 | Dữ liệu OBD2 | Chọn nhóm PID cốt lõi, chuẩn hóa đơn vị đo và xử lý DTC cơ bản |
+| Bộ lệnh ELM327 qua BLE | Bộ chuyển đổi OBD2 qua BLE | Firmware gửi lệnh đọc PID qua bộ chuyển đổi thương mại thay vì đấu trực tiếp vào bus xe |
+| MQTT 3.1.1 | Kênh thiết bị - máy chủ | Tách chủ đề bản tin theo nghiệp vụ, dùng QoS 0 cho dữ liệu đo từ xa tần suất cao và QoS 1 cho trạng thái, sự kiện, firmware, lệnh điều khiển |
+| HTTP/REST và OpenAPI | API máy chủ | Chuẩn hóa phương thức, mã trạng thái, tài nguyên /api/v1 và tài liệu API |
+| Socket.IO và WebSocket | Cập nhật giao diện | Đẩy trạng thái thiết bị, dữ liệu bản đồ và cảnh báo gần thời gian thực |
+| PostgreSQL/PostGIS | Dữ liệu nghiệp vụ và không gian | Lưu thiết bị, xe, chuyến đi, vùng giám sát, cảnh báo và quyền truy cập |
+| VictoriaMetrics, VictoriaLogs và Grafana | Dữ liệu đo từ xa, nhật ký và quan sát | Tách dữ liệu chuỗi thời gian, nhật ký tập trung và bảng theo dõi vận hành |
+| ESP-IDF/FreeRTOS | Firmware ESP32-S3 | Tổ chức tác vụ, ngoại vi, ngủ sâu, NVS, lưu đệm và OTA |
+| Docker Compose | Triển khai dịch vụ | Tách EMQX, PostgreSQL, nhóm dịch vụ Victoria, MQTT Bridge, dịch vụ phía máy chủ, giao diện web và Grafana thành dịch vụ độc lập |
+| Nguyên tắc đặc quyền tối thiểu | Bảo mật hệ thống | Giới hạn quyền người dùng, quyền MQTT theo thiết bị và quyền truy cập cổng quản trị |
 
-## 2.5. Ma trận kiểm soát tuân thủ chuẩn theo thành phần
+## 2.5. Ma trận kiểm soát tuân thủ theo thành phần
 
-| ID   | Chuẩn/nguyên tắc                     | Thành phần áp dụng                        | Cách kiểm chứng trong vận hành                                                         |
-| ---- | --------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| S-01 | SAE J1979                               | Bộ giải mã OBD2                            | Đối chiếu PID trả về với mô tả tiêu chuẩn và kiểm tra đơn vị đo hợp lệ    |
-| S-02 | ISO 15031-5                             | Luồng chẩn đoán xe                        | Kiểm tra tính tương thích bản tin giữa các nhóm xe thử nghiệm                    |
-| S-03 | MQTT 3.1.1                              | Kênh dữ liệu vận hành chính             | Kiểm tra xuất bản - đăng ký nhận theo chủ đề bản tin và hành vi kết nối lại |
-| S-04 | Chính sách QoS của MQTT              | Chủ đề bản tin cảnh báo ưu tiên cao   | Đối chiếu mức mất bản tin trong các kịch bản mạng dao động                      |
-| S-05 | Quy ước đặt tên chủ đề bản tin | MQTT broker, MQTT Bridge và backend          | Soát nhật ký để bảo đảm chủ đề bản tin phát sinh đúng miền nghiệp vụ      |
-| S-06 | Kiểm tra cấu trúc dữ liệu          | Khâu tiếp nhận bản tin của MQTT Bridge   | Chặn bản tin sai cấu trúc và ghi nhận nguyên nhân lỗi                              |
-| S-07 | RFC 7231                                | HTTP/REST API của backend                    | Đối chiếu phương thức và mã trạng thái với quy ước thiết kế                  |
-| S-08 | Quy ước phản hồi lỗi REST          | Backend và giao diện web                    | Soát định dạng lỗi nhất quán trên các nhóm chức năng chính                     |
-| S-09 | Đặc quyền tối thiểu                | Tài khoản quản trị hệ thống             | Kiểm tra phân quyền theo vai trò, không cấp quyền dư thừa                          |
-| S-10 | Kiểm soát phiên                      | Dịch vụ xác thực                          | Kiểm tra thời gian hết hạn phiên và cơ chế thu hồi phiên bất thường            |
-| S-11 | Ghi nhật ký kiểm toán               | Backend và cổng truy cập quản trị        | Xác minh thao tác nhạy cảm đều có nhật ký truy vết                                |
-| S-12 | Chính sách lưu giữ dữ liệu        | Kho dữ liệu chuỗi thời gian và nhật ký | Kiểm tra chính sách lưu trữ theo thời gian và dung lượng giới hạn                |
-| S-13 | Chính sách sao lưu                   | PostgreSQL và kho cấu hình                 | Kiểm tra lịch sao lưu và phục hồi thử nghiệm định kỳ                             |
-| S-14 | Kiểm soát thay đổi                  | Quy trình phát hành                        | Mỗi bản phát hành có danh sách kiểm tra, người duyệt và biên bản thay đổi    |
-| S-15 | Bảo vệ đường truyền               | Kênh truy cập quản trị và công khai     | Kiểm tra cấu hình TLS và chặn truy cập không an toàn                                |
-| S-16 | Xử lý bí mật                        | Biến môi trường dịch vụ                 | Kiểm tra không ghi cứng khóa bí mật trong mã nguồn                                  |
-| S-17 | Mục tiêu sẵn sàng                   | Các dịch vụ lõi                           | Theo dõi tỷ lệ sẵn sàng và thời gian gián đoạn theo tuần                         |
-| S-18 | Mức quan sát tối thiểu              | Grafana, số đo, nhật ký và cảnh báo    | Kiểm tra đủ dữ liệu giám sát cho các sự cố điển hình                           |
+| ID | Chuẩn/nguyên tắc | Thành phần áp dụng | Cách kiểm chứng trong vận hành |
+| --- | --- | --- | --- |
+| S-01 | SAE J1979 / ISO 15031-5 | Bộ giải mã OBD2 | Đối chiếu PID trả về với đơn vị đo, miền giá trị và mô tả trong tài liệu |
+| S-02 | Bộ lệnh ELM327 qua BLE | Bộ chuyển đổi OBD2 qua BLE và firmware | Kiểm tra kết nối BLE, lệnh đọc PID và cơ chế tự kết nối lại |
+| S-03 | GNSS qua SIM7600CE-T | Modem và bộ phân tích vị trí | Kiểm tra tọa độ, số vệ tinh, thời điểm ghi nhận và trạng thái định vị hợp lệ trước khi gửi bản tin |
+| S-04 | MQTT 3.1.1 | Thiết bị, EMQX và MQTT Bridge | Kiểm tra gửi/nhận bản tin, giữ phiên, tự kết nối lại và xác thực broker |
+| S-05 | Quy ước chủ đề bản tin | Firmware, MQTT Bridge và dịch vụ phía máy chủ | Soát các chủ đề rawdata, status, events, firmware, commands đúng cây v1/{device\_id} |
+| S-06 | Chính sách QoS | Bản tin MQTT | Đối chiếu QoS 0 cho dữ liệu đo từ xa tần suất cao và QoS 1 cho trạng thái, cảnh báo, firmware, lệnh điều khiển |
+| S-07 | Kiểm tra cấu trúc bản tin | MQTT Bridge | Bản tin sai cấu trúc bị chặn, ghi nhật ký và không làm bẩn kho dữ liệu sau |
+| S-08 | Phân vai lưu trữ | MQTT Bridge và dịch vụ phía máy chủ | Kiểm tra dữ liệu nghiệp vụ vào PostgreSQL, dữ liệu đo từ xa vào VictoriaMetrics và nhật ký vào VictoriaLogs |
+| S-09 | REST API | Dịch vụ phía máy chủ | Đối chiếu phương thức, mã trạng thái, phân trang và định dạng lỗi trên nhóm /api/v1 |
+| S-10 | Socket.IO và WebSocket | Dịch vụ phía máy chủ và giao diện web | Kiểm tra dữ liệu mới được đẩy lên bảng tổng quan, bản đồ và cảnh báo không cần tải lại trang |
+| S-11 | PostGIS | Vùng giám sát và bản đồ | Kiểm tra truy vấn vị trí, vùng giám sát và dữ liệu không gian trên các kịch bản mẫu |
+| S-12 | Chính sách lưu giữ dữ liệu | VictoriaMetrics và VictoriaLogs | Kiểm tra thời gian lưu, dung lượng tăng và khả năng truy vấn lịch sử |
+| S-13 | Docker Compose | Hạ tầng triển khai | Kiểm tra thứ tự khởi động, kiểm tra trạng thái dịch vụ, mạng dùng chung và biến môi trường bắt buộc |
+| S-14 | TLS và proxy | Cổng công khai | Kiểm tra HTTPS/MQTTS, gia hạn chứng chỉ và chặn truy cập không an toàn |
+| S-15 | Xác thực và phiên | Dịch vụ phía máy chủ và giao diện web | Kiểm tra đăng nhập, hết hạn phiên, thu hồi phiên và bảo vệ luồng quản trị |
+| S-16 | RBAC và MQTT ACL | Người dùng và thiết bị | Kiểm tra người dùng hoặc thiết bị không truy cập vượt phạm vi được cấp |
+| S-17 | Xử lý bí mật | Cấu hình dịch vụ | Kiểm tra khóa và mật khẩu chỉ nằm trong biến môi trường hoặc cấu hình triển khai phù hợp |
+| S-18 | Nhật ký kiểm toán | Dịch vụ phía máy chủ, MQTT Bridge và VictoriaLogs | Xác minh thao tác nhạy cảm và lỗi dữ liệu có nhật ký truy vết |
+| S-19 | OTA và lệnh điều khiển | Firmware, dịch vụ phía máy chủ và chủ đề commands | Kiểm tra hàng đợi lệnh, trạng thái cập nhật firmware và cơ chế quay lại khi cần |
+| S-20 | Minh chứng tài liệu | Báo cáo, hình và phụ lục | Chỉ dùng ảnh/sơ đồ có tài nguyên kiểm chứng; thiếu ảnh thật thì ghi TODO/BLOCKER thay vì tạo hình giả |
 
-<div class="center">
 
----
-
-</div>
 
 # PHỤ LỤC 3: KẾ HOẠCH THỰC HIỆN - ASSIGNMENT AND TIMELINES
 
-Phụ lục này tóm tắt kế hoạch thực hiện của đồ án theo giai đoạn, mốc trung gian
-và tiến độ theo tuần. Nội dung được dùng như tài liệu quản lý tiến độ, đối chiếu
-đầu ra kỹ thuật và theo dõi các rủi ro chính trong quá trình thực hiện.
+Phụ lục này cập nhật kế hoạch thực hiện theo cấu trúc công việc thực tế của đồ
+án: phần cứng, firmware, hạ tầng, dịch vụ phía máy chủ, giao diện web, tích hợp,
+kiểm thử và hoàn thiện báo cáo. Các mốc có chồng chéo có chủ đích để có môi
+trường kiểm thử sớm cho từng lớp.
 
 ## 3.1. Phân chia giai đoạn dự án
 
-Kế hoạch được chia thành ba giai đoạn chính như sau.
+| Giai đoạn | Nội dung chính | Thời gian tham chiếu | Đầu ra chốt |
+| --- | --- | --- | --- |
+| GĐ1 | Khảo sát yêu cầu và kiến trúc tổng thể | Tuần 1-3 | Phạm vi, chỉ tiêu nghiệm thu, sơ đồ luồng dữ liệu và lựa chọn công nghệ chính |
+| GĐ2 | Thiết kế phần cứng, nguồn và PCB | Tuần 3-7 | Cấu hình ESP32-S3, SIM7600CE-T, OBD2 BLE, LIS3DH, DS3231M, lưu đệm và nguồn đa nhánh |
+| GĐ3 | Phát triển firmware thiết bị | Tuần 5-13 | Firmware ESP-IDF/FreeRTOS cho modem, GNSS, OBD2 BLE, trạng thái, lưu đệm, ngủ sâu và OTA |
+| GĐ4 | Xây dựng hạ tầng và kênh dữ liệu | Tuần 7-15 | EMQX, MQTT Bridge, PostgreSQL/PostGIS, VictoriaMetrics, VictoriaLogs, Grafana và proxy |
+| GĐ5 | Phát triển dịch vụ phía máy chủ, giao diện web và khung ứng dụng di động | Tuần 10-19 | API, kênh cập nhật gần thời gian thực, các màn hình tổng quan, bản đồ, thiết bị, cảnh báo, cập nhật firmware và giao diện quản trị |
+| GĐ6 | Tích hợp và kiểm thử liên tầng | Tuần 17-22 | Chuỗi thiết bị - EMQX - MQTT Bridge - lưu trữ - dịch vụ phía máy chủ - giao diện web hoạt động thống nhất |
+| GĐ7 | Hoàn thiện đánh giá và báo cáo | Tuần 21-24 | Báo cáo rút gọn, phụ lục, tài nguyên hình/bảng và danh sách kiểm tra bàn giao |
 
-| Giai đoạn                                    | Mục tiêu                                                                                | Đầu ra chốt                                                        |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Giai đoạn 1: Thiết kế và dựng nền tảng | Chốt kiến trúc, linh kiện và nguyên mẫu phần cứng - firmware ban đầu           | Hồ sơ thiết kế, BOM và thiết bị có thể vận hành mẫu       |
-| Giai đoạn 2: Tích hợp và kiểm thử       | Ghép thiết bị, kênh truyền, máy chủ và giao diện thành một chuỗi hoàn chỉnh | Luồng dữ liệu đầu - cuối và báo cáo kiểm chứng liên tầng |
-| Giai đoạn 3: Hoàn thiện và đánh giá    | Đối chiếu kết quả, hoàn thiện tài liệu và rút ra hướng phát triển          | Báo cáo cuối, phụ lục và bộ hồ sơ hỗ trợ nghiệm thu       |
+## 3.2. Điều kiện chuyển giai đoạn
 
-## 3.2. Kế hoạch thực hiện dự án theo giai đoạn
+| Luồng công việc | Điều kiện chốt | Minh chứng cần có |
+| --- | --- | --- |
+| Phần cứng và nguồn | Các đường 5 V, 3,3 V, khoảng 4 V cho modem và nhánh dự phòng được mô tả nhất quán | Sơ đồ kết nối, bảng chọn linh kiện và ghi chú kiểm tra nguồn |
+| Firmware thiết bị | Thiết bị điều phối được modem, GNSS, OBD2 qua BLE, cảm biến, lưu đệm và gửi bản tin MQTT | Nhật ký khởi động, nhật ký đọc dữ liệu, nhật ký gửi bản tin và trạng thái OTA |
+| Hạ tầng dữ liệu | EMQX nhận bản tin, MQTT Bridge phân luồng và các kho lưu trữ sẵn sàng | Nhật ký EMQX, nhật ký MQTT Bridge, bản ghi PostgreSQL, chỉ số VictoriaMetrics và nhật ký VictoriaLogs |
+| Dịch vụ máy chủ và kênh cập nhật thời gian thực | API nghiệp vụ hoạt động và sự kiện nội bộ được đẩy ra Socket.IO/WebSocket | OpenAPI, kiểm tra trạng thái dịch vụ, bảng tổng quan thời gian thực và kiểm thử nhóm điểm truy cập chính |
+| Giao diện web quản trị | Các màn hình tổng quan, thiết bị, bản đồ, cảnh báo, cập nhật firmware và trạng thái hệ thống hiển thị dữ liệu đúng | Ảnh chụp giao diện đã kiểm tra và kịch bản thao tác chính |
+| Báo cáo và phụ lục | Nội dung, hình, bảng và thuật ngữ khớp với bản triển khai cuối | Biên dịch LaTeX sạch, danh mục hình/bảng đúng và không dùng ảnh giả |
 
-Mỗi giai đoạn được gắn với một nhóm công việc trọng tâm và điều kiện chuyển
-giai đoạn riêng.
+## 3.3. Mốc công việc chính
 
-| Giai đoạn   | Công việc trọng tâm                                                            | Điều kiện chuyển giai đoạn                                                        |
-| ------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Giai đoạn 1 | Khảo sát linh kiện, thiết kế nguồn, thiết kế mạch và dựng nền firmware | Thiết bị có thể khởi động, điều khiển ngoại vi chính và gửi bản tin mẫu |
-| Giai đoạn 2 | Dựng MQTT broker, MQTT Bridge, backend, frontend và ghép toàn tuyến           | Dữ liệu từ thiết bị xuất hiện được trên hệ thống quản trị                |
-| Giai đoạn 3 | Kiểm chứng, đánh giá, chuẩn hóa phụ lục và hoàn thiện báo cáo        | Có đủ minh chứng để đối chiếu với chỉ tiêu nghiệm thu                      |
-
-## 3.3. Chi tiết công việc theo giai đoạn
-
-Các mốc trung gian được dùng để theo dõi tiến độ và kiểm soát rủi ro phát sinh.
-
-| Milestone                         | Đầu ra chính                                        | Tiêu chí nghiệm thu                                            | Rủi ro theo dõi                                         |
-| --------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------- | --------------------------------------------------------- |
-| M1: Thiết kế nền tảng         | Kiến trúc hệ thống và BOM chốt                   | Phương án kỹ thuật được rà soát và thông qua nội bộ | Sai lệch linh kiện hoặc chi phí ban đầu             |
-| M2: Dựng nguyên mẫu thiết bị | Thiết bị có thể vận hành và gửi dữ liệu mẫu | Thu thập được dữ liệu vận hành cốt lõi                  | Nhiễu nguồn hoặc reset cục bộ                        |
-| M3: Tích hợp máy chủ          | Luồng dữ liệu đầu - cuối hoạt động            | Có dữ liệu thời gian thực trên giao diện quản lý         | Mất kết nối mạng di động hoặc lỗi lưu trữ       |
-| M4: Kiểm thử liên tầng        | Báo cáo kết quả kiểm chứng                       | Đạt các chỉ tiêu chính theo mục tiêu đồ án             | Sai lệch giữa môi trường kiểm soát và thực địa |
-| M5: Hoàn thiện báo cáo        | Bản báo cáo rút gọn và phụ lục                 | Trình bày đủ logic thiết kế - triển khai - đánh giá     | Thiếu nhất quán giữa số liệu và mô tả            |
+| Mốc | Đầu ra chính | Tiêu chí nghiệm thu | Rủi ro theo dõi |
+| --- | --- | --- | --- |
+| M1 | Kiến trúc và yêu cầu | Chốt mục tiêu, luồng dữ liệu, thành phần và chỉ tiêu đo | Phạm vi lan rộng hoặc thiếu chỉ tiêu kiểm chứng |
+| M2 | Thiết kế phần cứng | Chốt MCU, modem, OBD2 qua BLE, cảm biến, nguồn và PCB | Sai mã linh kiện, sai ngưỡng nguồn hoặc bố trí anten không phù hợp |
+| M3 | Firmware nền | Thiết bị khởi động, quản lý trạng thái, nhật ký và lưu cấu hình | Reset cục bộ, lỗi ngoại vi hoặc thiếu nhật ký chẩn đoán |
+| M4 | Kênh MQTT và lưu trữ | Bản tin đi qua EMQX, MQTT Bridge và vào đúng kho dữ liệu | Sai chủ đề bản tin, sai cấu trúc bản tin hoặc dữ liệu vào sai lớp lưu trữ |
+| M5 | Dịch vụ phía máy chủ và giao diện web | API, kênh cập nhật gần thời gian thực và các màn hình cốt lõi hoạt động | Lệch quy ước giao tiếp API, giao diện không phản ánh trạng thái thật |
+| M6 | Tích hợp toàn tuyến | Chuỗi thiết bị đến giao diện vận hành ổn định trong kịch bản mẫu | Mất mạng, OBD2 qua BLE dao động hoặc nhật ký không đủ truy vết |
+| M7 | Kiểm thử và đánh giá | Có bảng đối chiếu mục tiêu, kết quả và giới hạn còn lại | Thiếu dữ liệu thực địa hoặc chưa đủ kịch bản lỗi |
+| M8 | Báo cáo cuối | PDF, Markdown, phụ lục và tài nguyên minh họa đồng bộ | Lệch hình/bảng, lỗi font, lỗi biên dịch hoặc phụ lục lỗi thời |
 
 ## 3.4. Kế hoạch thực hiện theo tuần (24 tuần)
 
-| Tuần | Mục tiêu chính                 | Công việc trọng tâm                                                   | Đầu ra kiểm chứng                                     |
-| ----- | --------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 1     | Khởi động dự án              | Chốt phạm vi kỹ thuật và chỉ tiêu nghiệm thu ban đầu            | Biên bản phạm vi và danh sách rủi ro ban đầu      |
-| 2     | Khảo sát phần cứng            | So sánh MCU, modem, cảm biến và khả năng tích hợp                 | Bảng so sánh lựa chọn linh kiện                      |
-| 3     | Chốt kiến trúc hệ thống      | Thiết kế luồng dữ liệu thiết bị - máy chủ - giao diện quản lý | Sơ đồ kiến trúc cấp hệ thống                      |
-| 4     | Thiết kế nguồn                 | Chọn kiến trúc nguồn chính, nguồn dự phòng và ngưỡng bảo vệ  | Bộ thông số nguồn và ngưỡng giám sát             |
-| 5     | Thiết kế bo mạch               | Bố trí linh kiện và tối ưu các nhánh giao tiếp chính            | Bản vẽ PCB nguyên mẫu                                 |
-| 6     | Đặt vật tư                    | Chốt BOM, đặt hàng linh kiện và phụ kiện lắp đặt               | Danh sách vật tư đã xác nhận                       |
-| 7     | Dựng firmware nền               | Khởi tạo dự án, tổ chức tác vụ nền và nhật ký cơ bản        | Bản nền firmware chạy ổn định                       |
-| 8     | Tích hợp OBD2 BLE               | Ghép nối bộ chuyển đổi và đọc PID cốt lõi                      | Nhật ký đọc dữ liệu OBD2                            |
-| 9     | Tích hợp modem LTE/GNSS         | Khởi tạo modem, gửi bản tin thử và lấy vị trí                    | Bản tin MQTT thử và vị trí mẫu                      |
-| 10    | Chuẩn hóa dữ liệu vận hành  | Thiết kế cấu trúc bản tin và quy ước chủ đề bản tin           | Bộ cấu trúc dữ liệu và quy ước chủ đề bản tin |
-| 11    | Dựng MQTT broker và MQTT Bridge | Triển khai EMQX và tầng tiếp nhận bản tin                           | Luồng nhận bản tin đầu - cuối                       |
-| 12    | Dựng backend                     | Xây dựng nhóm API lõi cho giao diện quản lý và thiết bị         | Các nhóm API cốt lõi hoạt động                     |
-| 13    | Dựng frontend                    | Hoàn thiện tổng quan, trạng thái thiết bị và bản đồ            | Giao diện có dữ liệu gần thời gian thực            |
-| 14    | Tích hợp liên tầng            | Ghép thiết bị, backend và giao diện web thành một chuỗi xử lý   | Bản trình diễn đầu - cuối đầu tiên               |
-| 15    | Tối ưu quản lý nguồn         | Hoàn thiện logic ngủ, thức và xử lý mất nguồn                    | Nhật ký chuyển trạng thái hợp lệ                   |
-| 16    | Tích hợp cảnh báo             | Đưa cảnh báo vùng giám sát và bất thường lên giao diện       | Cảnh báo xuất hiện theo kịch bản                    |
-| 17    | Triển khai quan sát hệ thống  | Bổ sung số đo, nhật ký tập trung và bảng theo dõi vận hành     | Màn hình quan sát vận hành                           |
-| 18    | Kiểm thử phòng thí nghiệm    | Đo các chỉ số chính trong môi trường kiểm soát                  | Báo cáo đo lường vòng 1                             |
-| 19    | Kiểm thử thực địa            | Lắp trên xe thử nghiệm và chạy hành trình mẫu                    | Nhật ký vận hành thực địa                          |
-| 20    | Tối ưu hiệu năng              | Giảm độ trễ và tăng độ ổn định kết nối lại                  | Báo cáo tối ưu vòng 2                                |
-| 21    | Gia cố vận hành                | Chuẩn hóa danh sách kiểm tra, sao lưu và phục hồi cấu hình      | Bộ sổ tay vận hành chuẩn                             |
-| 22    | Tổng hợp kết quả              | Đối chiếu mục tiêu thiết kế với kết quả đạt được           | Bảng đối chiếu mục tiêu và kết quả               |
-| 23    | Hoàn thiện báo cáo            | Viết bản rút gọn và chuẩn hóa phụ lục                            | Bản thảo gần hoàn chỉnh                              |
-| 24    | Rà soát cuối                   | Soát lỗi tài liệu và chốt hồ sơ nộp                              | Bản nộp cuối và nhật ký kiểm tra                   |
+| Tuần | Mục tiêu chính | Công việc trọng tâm | Đầu ra kiểm chứng |
+| --- | --- | --- | --- |
+| 1 | Khởi động dự án | Chốt phạm vi, bài toán giám sát phương tiện và chỉ tiêu nghiệm thu | Biên bản phạm vi và danh sách rủi ro ban đầu |
+| 2 | Khảo sát công nghệ | So sánh MCU, modem, OBD2, cảm biến, giao thức truyền và hạ tầng | Bảng lựa chọn công nghệ chính |
+| 3 | Chốt kiến trúc | Thiết kế luồng thiết bị - MQTT - lưu trữ - dịch vụ phía máy chủ - giao diện web | Sơ đồ kiến trúc và dữ liệu đầu cuối |
+| 4 | Thiết kế nguồn | Chọn MP2482, AP2112-3.3, TPS54231, TP5100, SX1308 và ngưỡng ADC | Bảng thông số nguồn và chiến lược bảo vệ |
+| 5 | Thiết kế phần cứng | Ghép ESP32-S3, SIM7600CE-T, LIS3DH, DS3231M, microSD và OBD2 BLE | Sơ đồ kết nối và danh sách chân chính |
+| 6 | PCB và vật tư | Rà BOM, phụ kiện lắp đặt, anten, SIM, vỏ và yêu cầu lắp ráp | BOM theo nhóm chi phí và danh sách kiểm tra mua vật tư |
+| 7 | Firmware nền | Dựng ESP-IDF/FreeRTOS, nhật ký, NVS, máy trạng thái và cấu trúc thành phần | Firmware khởi động ổn định |
+| 8 | Modem LTE/GNSS | Điều khiển SIM7600CE-T, lấy vị trí và kiểm tra kết nối dữ liệu | Nhật ký modem, GNSS và bản tin thử |
+| 9 | OBD2 qua BLE và cảm biến | Kết nối bộ chuyển đổi BLE, đọc PID cơ bản và cấu hình LIS3DH | Nhật ký OBD2, chuyển động và cảnh báo mẫu |
+| 10 | Cấu trúc bản tin và chủ đề MQTT | Chuẩn hóa cấu trúc bản tin, chủ đề MQTT, QoS, lưu đệm và trạng thái thiết bị | Quy ước bản tin rawdata, status, events, firmware |
+| 11 | EMQX và MQTT Bridge | Triển khai broker, MQTT Bridge, kiểm tra cấu trúc bản tin và đăng ký nhận chủ đề bản tin | Bản tin đi qua EMQX và MQTT Bridge |
+| 12 | Lưu trữ dữ liệu | Dựng PostgreSQL/PostGIS, VictoriaMetrics, VictoriaLogs và chính sách lưu giữ | Dữ liệu mẫu vào đúng kho lưu trữ |
+| 13 | API lõi máy chủ | Xây API xác thực, thiết bị, xe, chuyến đi, cảnh báo và kiểm tra trạng thái dịch vụ | OpenAPI và nhóm điểm truy cập lõi hoạt động |
+| 14 | Sự kiện và cập nhật thời gian thực | Ghép sự kiện nội bộ, bus sự kiện và Socket.IO/WebSocket | Bảng tổng quan nhận cập nhật mới không cần tải lại |
+| 15 | Giao diện tổng quan | Hoàn thiện tổng quan, bản đồ, trạng thái thiết bị và dữ liệu mới nhất | Giao diện có dữ liệu gần thời gian thực |
+| 16 | Quản trị thiết bị | Hoàn thiện màn hình thiết bị, cập nhật firmware, lệnh điều khiển, cấu hình và luồng OTA | Luồng quản trị thiết bị có thể kiểm thử |
+| 17 | Quan sát vận hành | Bổ sung Grafana, nhật ký tập trung, trạng thái hệ thống và kiểm tra trạng thái dịch vụ | Bảng theo dõi giám sát và nhật ký truy vết |
+| 18 | Tích hợp liên tầng | Ghép firmware, MQTT, MQTT Bridge, dịch vụ phía máy chủ và giao diện web theo kịch bản mẫu | Trình diễn đầu cuối đầu tiên |
+| 19 | Kiểm thử phòng thí nghiệm | Đo nguồn, mất mạng, tự kết nối lại, bản tin lỗi và trạng thái thiết bị | Báo cáo kiểm thử vòng 1 |
+| 20 | Kiểm thử thực địa | Lắp thử trên xe, chạy hành trình mẫu và soát dữ liệu bản đồ/OBD2 | Nhật ký vận hành thực địa |
+| 21 | Tối ưu ổn định | Tối ưu kết nối lại, gửi lại, chính sách lưu giữ, nhật ký và phản ứng khi OBD2 qua BLE dao động | Báo cáo tối ưu vòng 2 |
+| 22 | Đối chiếu mục tiêu | Tổng hợp kết quả, giới hạn, rủi ro còn lại và hướng phát triển | Bảng đối chiếu mục tiêu và kết quả |
+| 23 | Hoàn thiện báo cáo | Đồng bộ Markdown, LaTeX, hình, bảng, phụ lục và tài liệu bổ trợ | Bản thảo gần hoàn chỉnh |
+| 24 | Rà soát cuối | Biên dịch PDF, kiểm tra font, danh mục hình/bảng, bố cục và blocker ảnh thật | Bản nộp cuối và nhật ký kiểm tra |
 
-<div class="center">
 
----
-
-</div>
 
 # PHỤ LỤC 4: TÀI LIỆU BỔ TRỢ - SUPPORTING MATERIALS
 
-<div class="center">
-
----
-
-</div>
-
-Phụ lục này tổng hợp các nhóm tài liệu bổ trợ phục vụ kiểm tra, bàn giao và phát
-triển tiếp nguyên mẫu. Nội dung được trình bày ở dạng danh mục và checklist, nhằm
-giúp người đọc hoặc người tiếp nhận hệ thống định vị được những nhóm hồ sơ cần
-thiết mà không làm tăng độ dài của phần thân báo cáo.
+Phụ lục này liệt kê các nhóm tài liệu và mã nguồn cần dùng khi kiểm tra, bàn
+giao hoặc phát triển tiếp hệ thống. Danh mục được cập nhật theo cấu trúc kho mã nguồn và
+nội dung đã trình bày trong báo cáo rút gọn.
 
 ## 4.1. Hồ sơ thiết kế và mã nguồn
 
-| Nhóm tài liệu                         | Nội dung chính                                                                       | Mục đích sử dụng                                            |
-| ---------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Hồ sơ phần cứng                      | Sơ đồ nguyên lý, PCB, hồ sơ xuất mạch và tài liệu linh kiện chính        | Đối chiếu khi kiểm tra phần cứng và bảo trì bo mạch    |
-| Firmware thiết bị                      | Mã điều khiển trạng thái, modem, GNSS, OBD2 BLE, cảm biến và quản lý nguồn | Nạp thiết bị, phân tích lỗi và phát triển tiếp         |
-| Hệ thống máy chủ                     | Mã MQTT Bridge, backend, frontend và cấu hình các dịch vụ hạ tầng             | Dựng môi trường thử nghiệm và kiểm chứng dữ liệu      |
-| Bộ mô phỏng và dữ liệu kiểm thử  | Bộ mô phỏng ECU, dữ liệu mẫu và nhật ký kiểm chứng                          | Hỗ trợ kiểm thử trong điều kiện không luôn có xe thật |
-| Tài liệu báo cáo và hình minh họa | Báo cáo rút gọn, hình kiến trúc, bảng đối chiếu và nhật ký nghiệm thu   | Phục vụ trình bày, bàn giao và truy xuất minh chứng      |
+| Nhóm tài liệu | Vị trí/nội dung chính | Mục đích sử dụng |
+| --- | --- | --- |
+| Báo cáo và tài nguyên minh họa | resources/reports/thesis/final/: bản LaTeX, bản Markdown, hình, sơ đồ và tài nguyên mạch | Biên dịch PDF, kiểm tra hình/bảng và truy xuất nguồn minh họa |
+| Phần mềm thiết bị (firmware) | iot-vehicle-tracking-system-firmware/components/: lõi ứng dụng, bộ thích nghi modem, MQTT, OBD2 qua BLE, RTC, lưu trữ, dữ liệu đo từ xa và OTA | Nạp thiết bị, phân tích lỗi, kiểm tra luồng trạng thái và phát triển tiếp |
+| Dịch vụ máy chủ và MQTT Bridge | iot-vehicle-tracking-system-cloud/Tracking\_Backend và Tracking\_MqttBridge | Kiểm tra API, kênh cập nhật thời gian thực, cấu trúc bản tin, ghi lưu trữ và xử lý sự kiện |
+| Giao diện web và khung ứng dụng di động | iot-vehicle-tracking-system-cloud/Tracking\_Frontend và Tracking\_Mobile | Kiểm tra bảng tổng quan, bản đồ, thiết bị, cảnh báo, luồng cập nhật firmware và luồng người dùng |
+| Hạ tầng triển khai | Tracking\_EMQX, Tracking\_PostgreSQL, Tracking\_VictoriaMetrics, Tracking\_VictoriaLogs, Tracking\_Grafana | Dựng môi trường thử nghiệm, kiểm tra trạng thái dịch vụ và quan sát vận hành |
+| Tài liệu kiểm chứng | resources/docs, resources/reports/obd-uiux-audit, resources/reports/ui-verification, resources/reports/thesis/final/qa-snapshots | Đối chiếu quyết định thiết kế, ảnh chụp giao diện và kết quả rà soát |
 
 ## 4.2. Tóm tắt nhóm API sử dụng trong nguyên mẫu
 
-| Nhóm giao diện lập trình ứng dụng | Chức năng chính                                                     | Vai trò trong nguyên mẫu                         |
-| --------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------- |
-| Xác thực người dùng                | Đăng nhập, đăng xuất và kiểm tra phiên                        | Phục vụ phân quyền cơ bản                     |
-| Quản lý xe và thiết bị             | Xem danh sách xe, thiết bị và trạng thái hiện tại              | Phục vụ màn hình tổng quan và chi tiết       |
-| Dữ liệu gần thời gian thực         | Lấy vị trí, trạng thái mới nhất và cảnh báo                  | Phục vụ bản đồ và cập nhật vận hành       |
-| Lịch sử hành trình                  | Truy vấn dữ liệu theo xe và khoảng thời gian                     | Phục vụ đối chiếu hành trình sau chuyến đi |
-| Cấu hình thiết bị                   | Đọc hoặc ghi chu kỳ gửi, ngưỡng cảnh báo và chế độ nguồn | Phục vụ thử nghiệm và hiệu chỉnh             |
+| Nhóm chức năng API | Chức năng chính | Vai trò trong nguyên mẫu |
+| --- | --- | --- |
+| Xác thực, phiên và phân quyền | Đăng nhập, kiểm tra phiên, RBAC và kiểm toán truy cập | Bảo vệ các màn hình quản trị và dữ liệu thiết bị |
+| Tổng quan và thời gian thực | Tổng hợp trạng thái, hoạt động gần đây, sự kiện nội bộ và Socket.IO/WebSocket | Cho phép người vận hành nhìn trạng thái đội xe gần thời gian thực |
+| Thiết bị, lệnh điều khiển và firmware | Quản lý thiết bị, hàng đợi lệnh, cấu hình, OTA và nhật ký cập nhật | Hỗ trợ khai thác và bảo trì thiết bị sau lắp đặt |
+| Xe, tài xế và chuyến đi | Quản lý khách hàng, xe, tài xế, hành trình, bảo trì và thống kê chuyến | Cung cấp lớp nghiệp vụ cho hệ thống giám sát đội xe |
+| Bản đồ, vùng giám sát và chính sách | Quản lý vùng giám sát, vùng được phép, chính sách theo xe và trạng thái vi phạm | Hỗ trợ cảnh báo theo không gian và theo chính sách vận hành |
+| Cảnh báo, nhật ký và xuất dữ liệu | Cảnh báo, vi phạm, nhật ký sự kiện, thông báo, tác vụ xuất dữ liệu và truy vấn lịch sử | Phục vụ truy vết, báo cáo và phân tích sau sự kiện |
+| Quản trị hệ thống | Kiểm tra trạng thái dịch vụ, trạng thái hệ thống, cấu hình hệ thống, VictoriaMetrics, VictoriaLogs và Grafana | Theo dõi trạng thái hoạt động của dịch vụ và hỗ trợ vận hành nguyên mẫu |
 
-## 4.3. Checklist kiểm tra nguyên mẫu
+## 4.3. Danh sách kiểm tra nguyên mẫu
 
-| STT | Hạng mục kiểm tra                | Dấu hiệu đạt                                                         | Ý nghĩa                                              |
-| --- | ----------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------ |
-| 1   | Kiểm tra nguồn 12 V/24 V          | Thiết bị khởi động ổn định, các nhánh nguồn đúng điện áp | Xác nhận nền tảng phần cứng sẵn sàng           |
-| 2   | Kiểm tra pin dự phòng            | Thiết bị duy trì hoạt động khi mất nguồn chính ngắn hạn       | Xác nhận khả năng phản ứng khi nguồn dao động |
-| 3   | Kiểm tra GNSS                      | Có tọa độ và thời điểm cập nhật hợp lệ                       | Xác nhận lớp định vị hoạt động                |
-| 4   | Kiểm tra OBD2 BLE                  | Bộ chuyển đổi kết nối được và trả về dữ liệu cơ bản      | Xác nhận lớp thu thập dữ liệu xe                 |
-| 5   | Kiểm tra cảm biến chuyển động | Có cảnh báo khi rung hoặc chuyển động vượt ngưỡng             | Xác nhận cơ chế giám sát khi xe đỗ             |
-| 6   | Kiểm tra gửi bản tin             | Máy chủ nhận và lưu được dữ liệu thiết bị                    | Xác nhận kênh thiết bị - máy chủ                |
-| 7   | Kiểm tra giao diện web            | Vị trí, trạng thái và cảnh báo hiển thị đúng xe               | Xác nhận lớp khai thác cho người vận hành      |
-| 8   | Kiểm tra cấu hình                | Tham số mới được thiết bị nhận và áp dụng                     | Xác nhận kênh điều khiển ngược từ máy chủ   |
+| STT | Hạng mục kiểm tra | Dấu hiệu đạt | Ý nghĩa |
+| --- | --- | --- | --- |
+| 1 | Nguồn 12 V/24 V và đường nguồn nội bộ | Đường 5 V, 3,3 V và đường cấp modem ổn định; không reset khi modem hoạt động | Xác nhận nền tảng nguồn sẵn sàng |
+| 2 | Pin dự phòng và đường chuyển nguồn | Thiết bị duy trì hoạt động ngắn hạn khi nguồn chính gián đoạn | Xác nhận phản ứng khi nguồn xe dao động |
+| 3 | Modem LTE/GNSS | SIM7600CE-T khởi động, đăng ký mạng, lấy vị trí và có nhật ký lỗi rõ ràng | Xác nhận lớp định vị và truyền dữ liệu |
+| 4 | OBD2 qua BLE | Bộ chuyển đổi kết nối được, đọc PID cơ bản và tự kết nối lại khi mất BLE | Xác nhận lớp thu thập dữ liệu xe |
+| 5 | LIS3DH và trạng thái chuyển động | Có ngưỡng rung/chuyển động và cảnh báo đúng kịch bản xe đỗ | Xác nhận cơ chế phát hiện bất thường |
+| 6 | DS3231M và lưu đệm | RTC/lưu đệm hoạt động theo cấu hình; dữ liệu không mất khi mất mạng ngắn hạn | Xác nhận dữ liệu có khả năng phục hồi |
+| 7 | Chủ đề bản tin MQTT | Thiết bị gửi đúng rawdata, status, events, firmware và nhận commands | Xác nhận quy ước giao tiếp thiết bị - máy chủ |
+| 8 | MQTT Bridge và lưu trữ | MQTT Bridge kiểm tra cấu trúc bản tin, ghi đúng PostgreSQL, VictoriaMetrics, VictoriaLogs và phát sự kiện nội bộ | Xác nhận tuyến tiếp nhận dữ liệu |
+| 9 | API máy chủ và cập nhật thời gian thực | API /api/v1 hoạt động, Socket.IO/WebSocket đẩy cập nhật mới ra giao diện | Xác nhận lớp nghiệp vụ và cập nhật thời gian thực |
+| 10 | Giao diện quản trị | Các màn hình tổng quan, thiết bị, bản đồ, cảnh báo, cập nhật firmware và trạng thái hệ thống hiển thị đúng dữ liệu | Xác nhận lớp khai thác cho người vận hành |
+| 11 | Quan sát vận hành | Grafana, VictoriaLogs, bảng quản trị EMQX và kiểm tra trạng thái dịch vụ đủ dữ liệu truy vết | Xác nhận khả năng chẩn đoán lỗi |
+| 12 | OTA và điều khiển từ xa | Lệnh cấu hình/OTA được tạo, gửi, ghi trạng thái và có kết quả phản hồi | Xác nhận kênh điều khiển ngược |
 
 ## 4.4. Ghi chú vận hành thử nghiệm
 
-| Giai đoạn                   | Nội dung cần kiểm tra                                                              | Mục đích                                                            |
-| ----------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Trước khi lắp              | Cầu chì bảo vệ, vị trí lấy nguồn, đầu nối, anten và độ chắc của dây  | Tránh phát sinh lỗi cơ khí hoặc lỗi cấp nguồn ngay từ đầu  |
-| Trong khi chạy thử          | Dữ liệu GNSS, OBD2, trạng thái nguồn và cảnh báo trên giao diện             | Xác nhận luồng dữ liệu toàn tuyến trong điều kiện vận hành |
-| Sau khi kết thúc chạy thử | Nhật ký thiết bị, dữ liệu máy chủ và trạng thái lưu trữ                  | Đối chiếu minh chứng và phát hiện sai lệch nếu có            |
-| Khi có lỗi                  | Kiểm tra lần lượt theo thứ tự nguồn, modem, firmware, máy chủ và giao diện | Khoanh vùng nhanh vị trí lỗi theo kiến trúc phân lớp           |
+| Giai đoạn | Nội dung cần kiểm tra | Mục đích |
+| --- | --- | --- |
+| Trước khi lắp | Cầu chì, vị trí lấy nguồn, anten, SIM, đầu nối OBD2, vỏ và độ chắc dây | Tránh lỗi cơ khí, lỗi cấp nguồn và lỗi tín hiệu ngay từ đầu |
+| Lần khởi động đầu | Nhật ký khởi động, trạng thái modem, GNSS, BLE, RTC, lưu trữ và kết nối MQTT | Khoanh vùng lỗi phần cứng hoặc firmware trước khi chạy thử |
+| Chạy thử trong phòng | Bản tin mẫu, kiểm tra cấu trúc bản tin, lưu trữ và bảng tổng quan thời gian thực | Xác nhận luồng dữ liệu toàn tuyến trong môi trường kiểm soát |
+| Chạy thử trên xe | Vị trí, tốc độ, OBD2, nguồn, chuyển động và cảnh báo theo hành trình mẫu | Đối chiếu hành vi hệ thống với điều kiện vận hành thực tế |
+| Khi phát sinh lỗi | Kiểm tra theo thứ tự nguồn, modem, OBD2 qua BLE, firmware, EMQX, MQTT Bridge, dịch vụ phía máy chủ và giao diện web | Rút ngắn thời gian khoanh vùng theo kiến trúc phân lớp |
+| Bàn giao | Lưu lại cấu hình, nhật ký, phiên bản firmware, danh sách dịch vụ và danh sách kiểm thử | Bảo đảm người tiếp nhận có đủ dữ liệu để tái kiểm tra |
+
+Ảnh phần cứng, PCB hoặc xe thật chỉ được đưa vào báo cáo khi có tài nguyên kiểm chứng
+đúng nội dung. Nếu chưa có ảnh thật phù hợp, báo cáo giữ TODO/BLOCKER rõ ràng và
+không tạo hình đánh số thay thế bằng ảnh giả.
