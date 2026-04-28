@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   npm:
     image: jc21/nginx-proxy-manager:2.11.3
@@ -10,8 +8,8 @@ services:
       - "81:81"
       - "8883:8883"
     volumes:
-      - ../Tracking_Data/Tracking_NPM/data:/data
-      - ../Tracking_Data/Tracking_NPM/letsencrypt:/etc/letsencrypt
+      - ${TRACKING_DATA_ROOT:-../Tracking_Data}/Tracking_NPM/data:/data
+      - ${TRACKING_DATA_ROOT:-../Tracking_Data}/Tracking_NPM/letsencrypt:/etc/letsencrypt
     restart: unless-stopped
     networks:
       - tracking-network

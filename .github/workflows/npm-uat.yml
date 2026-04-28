@@ -67,6 +67,7 @@ jobs:
 
             NPM_DIR="/opt/tracking/Tracking_NPM"
             NPM_DATA_DIR="/opt/tracking/Tracking_Data/Tracking_NPM"
+            export TRACKING_DATA_ROOT="/opt/tracking/Tracking_Data"
 
             TRAEFIK_RUNNING="$(docker ps --filter name='^/traefik$' --format '{{.Names}}')"
             if [ -n "$TRAEFIK_RUNNING" ]; then
@@ -87,6 +88,18 @@ jobs:
             fi
 
             mkdir -p "$NPM_DATA_DIR/data" "$NPM_DATA_DIR/letsencrypt"
+            for name in data letsencrypt; do
+              legacy_path="$NPM_DIR/$name"
+              target_path="$NPM_DATA_DIR/$name"
+              if [ -d "$legacy_path" ] && [ -n "$(find "$legacy_path" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+                if [ -z "$(find "$target_path" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+                  echo "Migrating legacy NPM $name data into $target_path"
+                  cp -a "$legacy_path/." "$target_path/"
+                else
+                  echo "Legacy NPM $name data exists but centralized target is non-empty; keeping centralized Tracking_Data copy"
+                fi
+              fi
+            done
             chmod -R u+rwX,go-rwx "$NPM_DATA_DIR"
 
             cd "$NPM_DIR"
@@ -97,6 +110,17 @@ jobs:
               exit 1
             fi
             docker compose --profile production ps npm
+
+            NPM_MOUNTS="$(docker inspect tracking-npm --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}')"
+            printf '%s\n' "$NPM_MOUNTS"
+            if ! printf '%s\n' "$NPM_MOUNTS" | grep -F "$NPM_DATA_DIR/data -> /data" >/dev/null; then
+              echo "tracking-npm /data is not mounted from centralized Tracking_Data path: $NPM_DATA_DIR/data" >&2
+              exit 1
+            fi
+            if ! printf '%s\n' "$NPM_MOUNTS" | grep -F "$NPM_DATA_DIR/letsencrypt -> /etc/letsencrypt" >/dev/null; then
+              echo "tracking-npm /etc/letsencrypt is not mounted from centralized Tracking_Data path: $NPM_DATA_DIR/letsencrypt" >&2
+              exit 1
+            fi
 
             if ! docker port tracking-npm 81/tcp >/dev/null 2>&1; then
               echo "tracking-npm is running but host port mapping for container port 81/tcp was not found." >&2
