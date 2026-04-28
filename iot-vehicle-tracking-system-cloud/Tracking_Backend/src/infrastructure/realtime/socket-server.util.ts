@@ -144,6 +144,18 @@ const registerEventBridges = (server: TypedIOServer): void => {
     recordEventEmission('activity:new');
   });
 
+  subscribeEvent('zone:updated', (payload) => {
+    server.of('/notifications').emit('zone:updated', payload);
+    server.of('/dashboard').emit('zone:updated', payload);
+    recordEventEmission('zone:updated');
+  });
+
+  subscribeEvent('zone:state-changed', (payload) => {
+    server.of('/notifications').emit('zone:state-changed', payload);
+    server.of('/dashboard').emit('zone:state-changed', payload);
+    recordEventEmission('zone:state-changed');
+  });
+
   // Geofence events → /notifications namespace
   subscribeEvent('geofence:enter', (payload) => {
     server.of('/notifications').emit('geofence:enter', payload);

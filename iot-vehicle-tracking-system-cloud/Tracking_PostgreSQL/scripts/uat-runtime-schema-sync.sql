@@ -286,3 +286,172 @@ BEGIN
             FOR EACH ROW EXECUTE FUNCTION update_updated_at();
     END IF;
 END $$;
+
+ALTER TYPE alert_type ADD VALUE IF NOT EXISTS 'zone_enter';
+ALTER TYPE alert_type ADD VALUE IF NOT EXISTS 'zone_exit';
+ALTER TYPE alert_type ADD VALUE IF NOT EXISTS 'zone_outside_periodic';
+
+CREATE TABLE IF NOT EXISTS gis_admin_units (
+    id BIGSERIAL PRIMARY KEY,
+    provider VARCHAR(64) NOT NULL DEFAULT 'gis.vn',
+    unit_code VARCHAR(64) NOT NULL,
+    unit_name VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255),
+    level VARCHAR(32) NOT NULL CHECK (level IN ('province', 'district', 'ward')),
+    parent_code VARCHAR(64),
+    geom geometry(Geometry, 4326) NOT NULL,
+    geometry_json JSONB,
+    sync_checksum VARCHAR(128),
+    sync_version VARCHAR(64),
+    synced_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(provider, unit_code)
+);
+
+ALTER TABLE gis_admin_units ADD COLUMN IF NOT EXISTS geometry_json JSONB;
+ALTER TABLE gis_admin_units ADD COLUMN IF NOT EXISTS sync_checksum VARCHAR(128);
+ALTER TABLE gis_admin_units ADD COLUMN IF NOT EXISTS sync_version VARCHAR(64);
+ALTER TABLE gis_admin_units ADD COLUMN IF NOT EXISTS synced_at TIMESTAMPTZ;
+ALTER TABLE gis_admin_units ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE gis_admin_units ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+CREATE INDEX IF NOT EXISTS idx_gis_admin_units_parent_code
+    ON gis_admin_units(parent_code);
+CREATE INDEX IF NOT EXISTS idx_gis_admin_units_level
+    ON gis_admin_units(level);
+CREATE INDEX IF NOT EXISTS idx_gis_admin_units_geom
+    ON gis_admin_units USING GIST (geom);
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_trigger
+        WHERE tgname = 'trigger_gis_admin_units_updated_at'
+          AND NOT tgisinternal
+    ) THEN
+        CREATE TRIGGER trigger_gis_admin_units_updated_at
+            BEFORE UPDATE ON gis_admin_units
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+    END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS vehicle_zones (
+    id BIGSERIAL PRIMARY KEY,
+    vehicle_id VARCHAR(50) NOT NULL REFERENCES vehicles(vehicle_id) ON DELETE CASCADE,
+    zone_type VARCHAR(32) NOT NULL DEFAULT 'circle',
+    center_lat DECIMAL(10,8),
+    center_lon DECIMAL(11,8),
+    radius_m DOUBLE PRECISION,
+    center_source VARCHAR(32),
+    center_snapshot_at TIMESTAMPTZ,
+    boundary_selection_json JSONB,
+    geometry_json JSONB,
+    status VARCHAR(16) NOT NULL DEFAULT 'active',
+    membership_state VARCHAR(16) NOT NULL DEFAULT 'unknown',
+    last_membership_changed_at TIMESTAMPTZ,
+    last_alerted_type VARCHAR(32),
+    last_alerted_at TIMESTAMPTZ,
+    suppression_until TIMESTAMPTZ,
+    alert_mode VARCHAR(32) NOT NULL DEFAULT 'transition_only',
+    cooldown_sec INTEGER NOT NULL DEFAULT 300,
+    warning_json JSONB,
+    created_by INT REFERENCES users(id),
+    updated_by INT REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE vehicle_zones ADD COLUMN IF NOT EXISTS boundary_selection_json JSONB;
+ALTER TABLE vehicle_zones ADD COLUMN IF NOT EXISTS geometry_json JSONB;
+ALTER TABLE vehicle_zones ADD COLUMN IF NOT EXISTS membership_state VARCHAR(16) NOT NULL DEFAULT 'unknown';
+ALTER TABLE vehicle_zones ADD COLUMN IF NOT EXISTS last_membership_changed_at TIMESTAMPTZ;
+ALTER TABLE vehicle_zones ADD COLUMN IF NOT EXISTS last_alerted_type VARCHAR(32);
+ALTER TABLE vehicle_zones ADD COLUMN IF NOT EXISTS last_alerted_at TIMESTAMPTZ;
+ALTER TABLE vehicle_zones ADD COLUMN IF NOT EXISTS warning_json JSONB;
+
+UPDATE vehicle_zones
+SET
+    zone_type = COALESCE(zone_type, 'circle'),
+    status = COALESCE(status, 'active'),
+    membership_state = COALESCE(membership_state, 'unknown'),
+    alert_mode = COALESCE(alert_mode, 'transition_only'),
+    cooldown_sec = COALESCE(cooldown_sec, 300),
+    created_at = COALESCE(created_at, NOW()),
+    updated_at = COALESCE(updated_at, NOW())
+WHERE
+    zone_type IS NULL
+    OR status IS NULL
+    OR membership_state IS NULL
+    OR alert_mode IS NULL
+    OR cooldown_sec IS NULL
+    OR created_at IS NULL
+    OR updated_at IS NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_vehicle_zones_vehicle_unique
+    ON vehicle_zones(vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_vehicle_zones_status
+    ON vehicle_zones(status);
+CREATE INDEX IF NOT EXISTS idx_vehicle_zones_updated_at
+    ON vehicle_zones(updated_at DESC);
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_trigger
+        WHERE tgname = 'trigger_vehicle_zones_updated_at'
+          AND NOT tgisinternal
+    ) THEN
+        CREATE TRIGGER trigger_vehicle_zones_updated_at
+            BEFORE UPDATE ON vehicle_zones
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+    END IF;
+END $$;
+
+INSERT INTO vehicle_zones (
+    vehicle_id,
+    zone_type,
+    center_lat,
+    center_lon,
+    radius_m,
+    center_source,
+    center_snapshot_at,
+    geometry_json,
+    status,
+    membership_state,
+    last_membership_changed_at,
+    last_alerted_at,
+    suppression_until,
+    alert_mode,
+    cooldown_sec,
+    warning_json,
+    created_by,
+    updated_by,
+    created_at,
+    updated_at
+)
+SELECT
+    vaz.vehicle_id,
+    'circle',
+    vaz.center_lat,
+    vaz.center_lon,
+    vaz.radius_m,
+    vaz.center_source,
+    vaz.center_snapshot_at,
+    NULL,
+    vaz.status,
+    vaz.last_membership_state,
+    vaz.last_membership_changed_at,
+    vaz.last_alerted_at,
+    vaz.suppression_until,
+    vaz.alert_mode,
+    vaz.cooldown_sec,
+    vaz.source_warning_json,
+    vaz.created_by,
+    vaz.updated_by,
+    vaz.created_at,
+    vaz.updated_at
+FROM vehicle_allowed_zones vaz
+ON CONFLICT (vehicle_id) DO NOTHING;

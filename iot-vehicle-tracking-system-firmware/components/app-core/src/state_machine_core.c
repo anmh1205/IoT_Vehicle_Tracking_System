@@ -56,10 +56,6 @@ static void state_machine_command_callback(const char *topic, const char *payloa
     command_handler_process(payload);
 }
 
-static void state_machine_puback_callback(int msg_id) {
-    offline_queue_handle_publish_ack(msg_id);
-}
-
 uint64_t state_machine_tracking_interval_ms(void) {
     return (uint64_t)s_config.tracking_interval_s * 1000ULL;
 }
@@ -269,8 +265,12 @@ static app_state_t state_machine_handle_check_ign_state(void) {
 
     state_machine_run_wake_prelude(false);
     session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
-    g_rtc_context.ign_last_known = s_telemetry.ignition;
-    return s_telemetry.ignition ? APP_STATE_DRIVING : APP_STATE_PARKED;
+    if (!session_mgr_has_stable_ignition()) {
+        return APP_STATE_CHECK_IGN;
+    }
+
+    g_rtc_context.ign_last_known = session_mgr_stable_ignition();
+    return session_mgr_stable_ignition() ? APP_STATE_DRIVING : APP_STATE_PARKED;
 }
 
 static app_state_t state_machine_handle_driving_state(void) {
@@ -278,7 +278,7 @@ static app_state_t state_machine_handle_driving_state(void) {
     state_machine_run_wake_prelude(true);
     session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
     if (session_mgr_should_start()) {
-        session_mgr_mark_started(util_uptime_ms());
+        session_mgr_mark_started();
         s_session_id = session_mgr_current_session_id();
         offline_queue_set_session(s_session_id);
     }
@@ -299,7 +299,9 @@ static app_state_t state_machine_handle_driving_state(void) {
         state_machine_try_connect_ble();
     }
 
-    bool ignition_active = s_telemetry.ignition && command_handler_is_tracking_enabled();
+    bool debounced_ignition_on =
+        session_mgr_has_stable_ignition() ? session_mgr_stable_ignition() : s_telemetry.ignition;
+    bool ignition_active = debounced_ignition_on && command_handler_is_tracking_enabled();
     if (!ignition_active && s_ignition_off_started_ms == 0) {
         s_ignition_off_started_ms = now_ms;
         state_machine_publish_status("stopped");
@@ -311,7 +313,7 @@ static app_state_t state_machine_handle_driving_state(void) {
     if (s_ignition_off_started_ms != 0 &&
         (now_ms - s_ignition_off_started_ms) >= state_machine_ignition_off_hold_ms()) {
         offline_queue_stop_session(true);
-        session_mgr_mark_stopped(now_ms);
+        session_mgr_mark_stopped();
         s_ignition_off_started_ms = 0;
         return APP_STATE_PARKED;
     }
@@ -392,9 +394,6 @@ static app_state_t state_machine_handle_heartbeat_state(void) {
         s_heartbeat_raw_published = true;
     }
 
-    if (s_heartbeat_raw_published && !heartbeat_timeout && offline_queue_has_pending_ack()) {
-        return APP_STATE_HEARTBEAT;
-    }
     if (s_heartbeat_raw_published || heartbeat_timeout) {
         s_heartbeat_started_ms = 0;
         s_heartbeat_raw_published = false;
@@ -488,11 +487,8 @@ esp_err_t state_machine_core_init(const config_t *config) {
     ESP_RETURN_ON_FALSE(offline_queue_init() == ESP_OK, ESP_FAIL, TAG, "offline_queue_init failed");
     telemetry_counters_reset();
     session_mgr_init();
+    ESP_RETURN_ON_FALSE(command_handler_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "command_handler_init failed");
     tracker_mqtt_set_command_callback(state_machine_command_callback);
-    tracker_mqtt_set_puback_callback(state_machine_puback_callback);
-    if (s_config.command_subscribe_enabled) {
-        command_handler_init(&s_config);
-    }
 
     state_machine_restore_ota_context_from_nvs();
     bool had_pending_confirm = g_rtc_context.ota_pending_confirm;

@@ -16,7 +16,7 @@
 #endif
 
 #ifndef CONFIG_TRACKER_DEFAULT_AUTH_TOKEN
-#define CONFIG_TRACKER_DEFAULT_AUTH_TOKEN "device-secret-token"
+#define CONFIG_TRACKER_DEFAULT_AUTH_TOKEN "provisioning-required"
 #endif
 
 #ifndef CONFIG_TRACKER_DEFAULT_MQTT_HOST

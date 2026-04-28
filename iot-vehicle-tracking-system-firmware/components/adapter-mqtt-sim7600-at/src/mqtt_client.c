@@ -14,7 +14,6 @@
  */
 
 mqtt_command_cb_t s_command_callback = NULL;
-mqtt_puback_cb_t s_puback_callback = NULL;
 config_t s_cfg = {0};
 bool s_connected = false;
 bool s_service_started = false;
@@ -120,10 +119,6 @@ esp_err_t tracker_mqtt_subscribe_commands(void) {
 
 void tracker_mqtt_set_command_callback(mqtt_command_cb_t cb) {
     s_command_callback = cb;
-}
-
-void tracker_mqtt_set_puback_callback(mqtt_puback_cb_t cb) {
-    s_puback_callback = cb;
 }
 
 const char *tracker_mqtt_rawdata_topic(void) {

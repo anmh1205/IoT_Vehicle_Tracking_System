@@ -95,7 +95,7 @@ export const getAlertFrequencyStats = async (params: {
     labels: data.map((item) => item.label),
     series: {
       speeding: data.map((item) => item.speeding),
-      geofence: data.map((item) => item.geofence),
+      zone: data.map((item) => item.zone),
       offline: data.map((item) => item.offline),
       other: data.map((item) => item.other),
     },

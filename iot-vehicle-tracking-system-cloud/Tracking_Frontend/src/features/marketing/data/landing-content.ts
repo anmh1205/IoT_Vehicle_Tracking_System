@@ -50,7 +50,7 @@ export interface LoginLandingContent {
 
 export const heroSignals = [
   'Bản đồ realtime cho đội xe và thiết bị',
-  'Cảnh báo, geofence, trips trong cùng một bề mặt',
+  'Cảnh báo, vùng, trips trong cùng một bề mặt',
   'Web dashboard, mobile shell và system status đi chung',
 ];
 
@@ -69,9 +69,9 @@ export const featureCards: MarketingFeature[] = [
   },
   {
     icon: ShieldCheck,
-    title: 'Giám sát geofence và chuyến đi',
-    description: 'Kết nối vùng giám sát, lộ trình và hành trình để nhìn rõ toàn bộ bối cảnh vận hành.',
-    routeLabel: '/dashboard/geofences + /dashboard/trips',
+    title: 'Giám sát vùng và chuyến đi',
+    description: 'Kết nối vùng, lộ trình và hành trình để nhìn rõ toàn bộ bối cảnh vận hành.',
+    routeLabel: '/dashboard/zones + /dashboard/trips',
   },
   {
     icon: Fuel,

@@ -11,9 +11,9 @@ flowchart LR
 
     subgraph Proposed["Giải pháp đề xuất"]
         direction TB
-        P1["Tracker<br/>GPS + OBD2 + IMU + 4G"]
-        P2["Máy chủ<br/>EMQX + Bridge + API"]
-        P3["Giao diện web<br/>Bản đồ + cảnh báo + báo cáo"]
+        P1["Thiết bị trên xe<br/>Thu thập vị trí, trạng thái, sự kiện"]
+        P2["Lớp xử lý dữ liệu<br/>Tiếp nhận, lưu trữ, cảnh báo"]
+        P3["Giao diện khai thác<br/>Bản đồ, lịch sử, báo cáo"]
         P1 --> P2 --> P3
     end
 

@@ -34,11 +34,9 @@ export const MapControls = ({
   const map = useMap();
   const selectedDeviceId = useMapStore((state) => state.selectedDeviceId);
   const toggleFollowMode = useMapStore((state) => state.toggleFollowMode);
-  const showGeofences = useMapStore((state) => state.showGeofences);
-  const toggleGeofences = useMapStore((state) => state.toggleGeofences);
   const setMapViewport = useMapStore((state) => state.setMapViewport);
   const isInspectMode = isMapInspectMode(hardMode);
-  const isGeofenceEditMode = hardMode === 'edit-geofence';
+  const isZoneEditMode = hardMode === 'edit-zone';
   const desktopOffsetStyle = {
     '--map-controls-right': desktopRightOffset,
   } as CSSProperties;
@@ -134,14 +132,14 @@ export const MapControls = ({
 
             <Button
               size="icon"
-              variant={isGeofenceEditMode ? 'default' : 'ghost'}
+              variant={isZoneEditMode ? 'default' : 'ghost'}
               onClick={onToggleGeofenceWorkspace}
               className="h-8 w-8 rounded-xl"
-              aria-pressed={isGeofenceEditMode}
+              aria-pressed={isZoneEditMode}
               aria-label={
-                isGeofenceEditMode ? 'Đóng panel vùng giám sát' : 'Mở panel vùng giám sát'
+                isZoneEditMode ? 'Đóng panel vùng' : 'Mở panel vùng'
               }
-              title="Vùng giám sát"
+              title="Vùng"
             >
               <MapPinned className="h-4 w-4" aria-hidden="true" />
             </Button>
@@ -155,10 +153,10 @@ export const MapControls = ({
                 aria-pressed={allowedZoneVisible}
                 aria-label={
                   allowedZoneVisible
-                    ? 'Ẩn vùng cho phép đang xem'
-                    : 'Hiện vùng cho phép đang xem'
+                    ? 'Ẩn vùng đang xem'
+                    : 'Hiện vùng đang xem'
                 }
-                title={allowedZoneVisible ? 'Ẩn vùng cho phép' : 'Hiện vùng cho phép'}
+                title={allowedZoneVisible ? 'Ẩn vùng' : 'Hiện vùng'}
               >
                 {allowedZoneVisible ? (
                   <EyeOff className="h-4 w-4" aria-hidden="true" />
@@ -198,17 +196,15 @@ export const MapControls = ({
 
           <Button
             size="icon"
-            variant={showGeofences || isGeofenceEditMode ? 'default' : 'ghost'}
+            variant={allowedZoneVisible || isZoneEditMode ? 'default' : 'ghost'}
             className="h-8 w-8 rounded-lg"
-            onClick={toggleGeofences}
-            disabled={isGeofenceEditMode || isMapEditMode(hardMode)}
-            aria-pressed={showGeofences || isGeofenceEditMode}
+            onClick={onToggleAllowedZoneVisibility}
+            disabled={!canToggleAllowedZone || isZoneEditMode || isMapEditMode(hardMode)}
+            aria-pressed={allowedZoneVisible || isZoneEditMode}
             aria-label={
-              showGeofences || isGeofenceEditMode
-                ? 'Ẩn lớp vùng giám sát'
-                : 'Hiện lớp vùng giám sát'
+              allowedZoneVisible || isZoneEditMode ? 'Ẩn lớp vùng' : 'Hiện lớp vùng'
             }
-            title="Lớp geofence"
+            title="Lớp vùng"
           >
             <Layers2 className="h-4 w-4" aria-hidden="true" />
           </Button>

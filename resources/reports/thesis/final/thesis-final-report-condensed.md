@@ -598,6 +598,13 @@ xử lý đến khai thác thông tin sao cho phù hợp với môi trường v�
 thực tế của đội xe. Các nhóm vấn đề này sẽ được phân tích chi tiết ở
 Chương 2.
 
+![Hình 1.1 - Sơ đồ tổng quan vấn đề và giải pháp đề xuất](./assets/figures/01-chuong-1-gioi-thieu-hinh-1-1.svg)
+
+_Hình 1.1: Sơ đồ tổng quan vấn đề và giải pháp đề xuất_
+
+Hình 1.1 tóm tắt hướng chuyển từ hiện trạng quản lý thủ công và theo dõi
+chậm sang một chuỗi giải pháp gồm thiết bị, máy chủ và giao diện khai thác.
+
 ### 1.1.3. Động lực thực hiện dự án
 
 Động lực thực hiện đề tài xuất phát từ nhu cầu thực tế của doanh nghiệp
@@ -819,9 +826,9 @@ chức như sau:
 3. **Giai đoạn 3 — Xây dựng hạ tầng máy chủ**: Tổ chức lớp tiếp nhận bản
    tin, lớp lưu trữ và lớp nhật ký vận hành để dữ liệu sau khi rời xe có
    thể được tiếp nhận và xử lý liên tục.
-4. **Giai đoạn 4 — Phát triển API máy chủ**: Chuyển dữ liệu kỹ thuật
-   thành các chức năng quản trị như đăng nhập, quản lý xe, xem lịch sử,
-   xử lý cảnh báo và cung cấp dữ liệu thời gian thực cho lớp ứng dụng.
+4. **Giai đoạn 4 — Phát triển dịch vụ máy chủ**: Chuyển dữ liệu kỹ thuật
+  thành các chức năng quản trị như đăng nhập, quản lý xe, xem lịch sử,
+  xử lý cảnh báo và cung cấp dữ liệu cập nhật cho lớp ứng dụng.
 5. **Giai đoạn 5 — Phát triển giao diện web**: Trình bày dữ liệu dưới
    dạng bản đồ, bảng thông tin và biểu đồ để người vận hành quan sát và
    thao tác thuận tiện.
@@ -899,7 +906,7 @@ các loại dữ liệu khác nhau và thuận lợi cho triển khai thử nghi
   phòng.
 - **Tầng firmware**: framework nhúng và cơ chế điều phối tác vụ thời gian
   thực để điều khiển hành vi của thiết bị.
-- **Tầng máy chủ và dữ liệu**: broker bản tin, dịch vụ API, lưu trữ dữ
+- **Tầng máy chủ và dữ liệu**: kênh tiếp nhận bản tin, dịch vụ phía máy chủ, lưu trữ dữ
   liệu nghiệp vụ, chuỗi thời gian và nhật ký.
 - **Tầng ứng dụng và vận hành**: giao diện web quản trị, cơ chế cập nhật
   thời gian thực, công cụ bản đồ và biểu đồ, cùng lớp container hóa và
@@ -1016,6 +1023,14 @@ Từ bối cảnh trên, đề tài tập trung vào bốn nhóm vấn đề k�
 **Vấn đề về truyền dữ liệu.** Xe di chuyển qua nhiều khu vực có chất lượng sóng khác nhau. Thiết bị cần gửi được dữ liệu định kỳ, ưu tiên cảnh báo quan trọng và có khả năng phục hồi sau mất kết nối ngắn hạn.
 
 **Vấn đề về khai thác dữ liệu.** Người quản lý cần nhìn thấy vị trí, lịch sử hành trình, cảnh báo và trạng thái thiết bị trên giao diện tập trung. Do đó, dữ liệu sau khi gửi về máy chủ phải được lưu trữ và trình bày theo cách dễ tra cứu, không chỉ tồn tại dưới dạng bản tin rời rạc.
+
+![Hình 2.1 - Sơ đồ kiến trúc dữ liệu của hệ thống](./assets/figures/02-chuong-2-phan-tich-hinh-2-1.svg)
+
+_Hình 2.1: Sơ đồ kiến trúc dữ liệu của hệ thống_
+
+Hình 2.1 minh họa tuyến dữ liệu ở mức logic: dữ liệu phát sinh từ xe được
+truyền về lớp tiếp nhận, phân loại vào các nhóm dữ liệu khác nhau, sau đó được
+lớp dịch vụ và giao diện quản lý khai thác để theo dõi, tra cứu và cấu hình.
 
 ### 2.1.3. Mục tiêu kỹ thuật của chương
 
@@ -1179,7 +1194,7 @@ Trước khi đi vào từng phương án, cần xác định chuỗi chức nă
 
 _Hình 3.1: Sơ đồ khối tổng thể của hệ thống theo dõi phương tiện_
 
-Hình 3.1 cho thấy hệ thống được tổ chức theo một tuyến dữ liệu liên tục thay vì các khối rời rạc. Vì vậy, một lựa chọn ở tầng thiết bị có thể tạo ràng buộc cho các tầng sau: đọc OBD2 qua BLE yêu cầu vi điều khiển có BLE ổn định; modem LTE/GNSS có dòng tải xung cao nên cần nhánh nguồn riêng; dữ liệu vị trí và trạng thái gửi theo chu kỳ đòi hỏi máy chủ có cơ chế lưu trữ phù hợp với dữ liệu thời gian. Các ràng buộc liên tầng này là cơ sở để xây dựng tiêu chí lựa chọn ở các mục tiếp theo.
+Hình 3.1 cho thấy hệ thống được tổ chức theo một tuyến dữ liệu liên tục thay vì các khối rời rạc. Vì vậy, một lựa chọn ở tầng thiết bị có thể tạo ràng buộc cho các tầng sau: kênh đọc dữ liệu xe yêu cầu giao tiếp ổn định; khối truyền dữ liệu và định vị cần được cấp nguồn riêng phù hợp với tải động; dữ liệu vị trí và trạng thái gửi theo chu kỳ đòi hỏi máy chủ có cơ chế lưu trữ phù hợp với dữ liệu thời gian. Các ràng buộc liên tầng này là cơ sở để xây dựng tiêu chí lựa chọn ở các mục tiếp theo.
 
 ### 3.1.2. Các mâu thuẫn thiết kế chính
 
@@ -1300,7 +1315,7 @@ Mục tiêu của khối OBD2 là lấy được các thông tin vận hành cơ
 
 vgate iCar Pro BLE được chọn vì phù hợp định hướng lắp đặt ít xâm lấn. Thiết bị hỗ trợ BLE, giao tiếp kiểu ELM327 và nhiều giao thức OBD-II thông dụng [29], [64]. Điểm cần lưu ý là bộ chuyển đổi BLE làm firmware phải quản lý trạng thái kết nối lại sau khi thiết bị ngủ sâu. Tuy nhiên, nhược điểm này chấp nhận được vì đổi lại thiết bị gọn hơn, giảm dây trong khoang lái, dễ thay bộ chuyển đổi giữa các xe và giúp vị trí thiết bị chính khó bị phát hiện hơn.
 
-![Hình 3.4 - Minh họa kết nối OBD2 BLE](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-2.svg)
+![Hình 3.4 - Kết nối BLE giữa ESP32-S3 và bộ chuyển đổi OBD2 vgate iCar Pro](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-2.svg)
 
 _Hình 3.4: Kết nối BLE giữa ESP32-S3 và bộ chuyển đổi OBD2 vgate iCar Pro_
 
@@ -1331,7 +1346,7 @@ Khi xe đang đỗ, thiết bị không nên duy trì modem và kết nối OBD2
 
 LIS3DH được chọn vì đủ thông tin cho mục tiêu phát hiện rung/chuyển động bất thường, trong khi vẫn giữ tiêu thụ thấp và mạch đơn giản. So với công tắc rung, LIS3DH cho phép cấu hình ngưỡng bằng phần mềm, giảm khả năng báo giả. So với IMU 6 trục, LIS3DH gọn hơn và không đưa thêm dữ liệu con quay hồi chuyển mà hệ thống chưa dùng đến.
 
-![Hình 3.5 - Minh họa LIS3DH và chân ngắt](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-3.svg)
+![Hình 3.5 - Cảm biến LIS3DH và kết nối I2C/ngắt với ESP32-S3](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-3.svg)
 
 _Hình 3.5: Cảm biến LIS3DH và kết nối I2C/ngắt với ESP32-S3_
 
@@ -1372,12 +1387,12 @@ không rút điện ắc quy xe xuống vùng nguy hiểm khi xe đỗ lâu.
 
 | Tiêu chí                                                   | Một bộ hạ áp cấp chung                                    | Một nhánh chính kèm pin dự phòng                        | Kiến trúc đa nhánh có dự phòng và bảo vệ       |
 | ------------------------------------------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------- |
-| Số rail nguồn chính                                       | 1 rail dùng chung cho logic và modem                         | 2 rail chính và dự phòng cơ bản                         | Bus 5 V, rail 3,3 V logic, rail modem, rail dự phòng   |
-| Cách nuôi modem SIM7600CE-T                                | Dùng chung với logic, dễ sụt áp khi phát xung dòng      | Có cải thiện nhưng chưa tách hẳn                       | Có rail riêng khoảng 4 V cho modem                    |
+| Số nhánh nguồn chính                                      | 1 nhánh nguồn dùng chung cho logic và modem                  | 2 nhánh nguồn chính và dự phòng cơ bản                 | Bus 5 V, nhánh 3,3 V logic, nhánh modem, nhánh dự phòng |
+| Cách nuôi modem SIM7600CE-T                                | Dùng chung với logic, dễ sụt áp khi phát xung dòng      | Có cải thiện nhưng chưa tách hẳn                       | Có nhánh riêng khoảng 4 V cho modem                   |
 | Khả năng duy trì khi mất nguồn xe                       | Không có                                                     | Có, nhưng đường chuyển nguồn còn đơn giản          | Có, nhờ pin 18650 1S + boost + mạch chuyển nguồn    |
 | Giám sát và bảo vệ ắc quy xe                           | Phụ thuộc mạch ngoài hoặc logic tối giản                | Có thể thêm nhưng chưa thành lớp rõ ràng             | Có ADC theo dõi và phản ứng bảo vệ bằng firmware |
-| Ảnh hưởng của xung dòng modem lên rail logic           | Xung dòng đi chung rail, dễ kéo tụt nguồn MCU            | Giảm bớt nhưng vẫn còn chia sẻ một phần đường cấp | Được cô lập nhờ rail modem riêng                  |
-| Khả năng thêm các nhánh 3,3 V, 4 V, sạc và dự phòng | Khó, vì mọi tải bám một rail                             | Thêm được nhưng ranh giới chưa rõ                     | Thuận lợi, mỗi miền nguồn có nhiệm vụ riêng     |
+| Ảnh hưởng của xung dòng modem lên nhánh logic          | Xung dòng đi chung nhánh nguồn, dễ kéo tụt nguồn MCU     | Giảm bớt nhưng vẫn còn chia sẻ một phần đường cấp | Được cô lập nhờ nhánh modem riêng                |
+| Khả năng thêm các nhánh 3,3 V, 4 V, sạc và dự phòng | Khó, vì mọi tải bám một nhánh nguồn                      | Thêm được nhưng ranh giới chưa rõ                     | Thuận lợi, mỗi miền nguồn có nhiệm vụ riêng     |
 | Kết luận chọn                                             | Không đủ ổn định cho tải modem và yêu cầu dự phòng | Chỉ phù hợp nguyên mẫu tối giản                        | Phương án chốt                                       |
 
 Từ so sánh trên, phương án được chọn là kiến trúc đa nhánh: một bus 5 V
@@ -1389,7 +1404,7 @@ có một giải pháp riêng: tải lớn của modem được tách riêng, ng
 có đường đi rõ ràng, còn ắc quy xe và pin dự phòng được bảo vệ nhờ theo
 dõi ADC và chuỗi tắt chủ động bằng firmware.
 
-![Hình 3.6 - Sơ đồ khối hệ thống quản lý nguồn](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-4.svg)
+![Hình 3.6 - Sơ đồ khối hệ thống quản lý nguồn của thiết bị](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-4.svg)
 
 _Hình 3.6: Sơ đồ khối hệ thống quản lý nguồn của thiết bị_
 
@@ -1398,8 +1413,8 @@ _Hình 3.6: Sơ đồ khối hệ thống quản lý nguồn của thiết bị_
 | Miền nguồn / bảo vệ      | Linh kiện chính                      | Tải hoặc tín hiệu liên quan                | Vai trò trong kiến trúc                                                                               |
 | ---------------------------- | -------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | Bus 5 V chính từ nguồn xe | MP2482                                 | Toàn bộ các nhánh phía sau                 | Tạo một đường nguồn trung gian ổn định để phân phối tiếp                                   |
-| Rail logic 3,3 V             | AP2112-3.3                             | ESP32-S3, LIS3DH, RTC và mức logic            | Giữ nguồn sạch cho vi điều khiển và cảm biến                                                    |
-| Rail riêng cho modem        | TPS54231                               | SIM7600CE-T                                     | Tách tải động lớn của modem khỏi miền logic                                                      |
+| Nhánh logic 3,3 V            | AP2112-3.3                             | ESP32-S3, LIS3DH, RTC và mức logic            | Giữ nguồn sạch cho vi điều khiển và cảm biến                                                    |
+| Nhánh riêng cho modem       | TPS54231                               | SIM7600CE-T                                     | Tách tải động lớn của modem khỏi miền logic                                                      |
 | Nhánh nguồn dự phòng     | SX1308 + mạch chuyển nguồn diode-OR | Bus 5 V dự phòng                              | Duy trì hoạt động ngắn hạn khi nguồn chính gián đoạn                                          |
 | Nhánh sạc pin dự phòng   | TP5100 [30]                            | Pin Li-ion 18650 1S                             | Nạp lại pin 1 cell từ bus 5 V chính                                                                  |
 | Giám sát và bảo vệ      | ADC + logic bảo vệ bằng firmware    | Điện áp nguồn xe, điện áp pin dự phòng | Theo dõi trạng thái nguồn và chủ động giảm tải, tắt thiết bị khi điện áp không an toàn |
@@ -1411,7 +1426,7 @@ gian dễ phân phối hơn. Về nguyên tắc, có thể nghĩ tới hai hư�
 thẳng từng mức điện áp riêng ngay từ đầu, hoặc tạo trước một đường nguồn
 trung gian rồi mới tách tiếp thành các nhánh nhỏ hơn. Đối với đồ án này,
 cách thứ hai hợp lý hơn vì nó làm sơ đồ nguồn rõ ràng: 5 V trở thành bus
-trung gian, từ đó mới cấp điện cho nguồn hạ áp 3,3 V cho logic, cấp nguồn 3,9 V cho mô-đun SIM7600CE -T và cấp điện cho mạch sạc.
+trung gian, từ đó mới cấp điện cho nguồn hạ áp 3,3 V cho logic, cấp nguồn 3,9 V cho mô-đun SIM7600CE-T và cấp điện cho mạch sạc.
 
 MP2482 được chọn cho vị trí này vì đây là bộ hạ áp chuyển mạch (buck
 converter) phù hợp với bài toán đầu vào rộng của xe. Linh kiện này làm việc
@@ -1473,7 +1488,7 @@ SIM7600CE-T là tải khó nuôi nhất của thiết bị. Theo tài liệu ph�
 mô-đun, modem làm việc trong miền khoảng 3,4-4,2 V [22]. Điểm khó không chỉ
 nằm ở giá trị điện áp, mà ở việc tải của modem thay đổi rất nhanh theo trạng
 thái mạng. Khi đăng ký mạng, phát LTE hoặc khởi động GNSS, dòng tiêu thụ có
-thể tăng vọt theo từng xung ngắn. Nếu cho modem dùng chung rail với ESP32-S3
+thể tăng vọt theo từng xung ngắn. Nếu cho modem dùng chung nhánh nguồn với ESP32-S3
 hoặc ghép qua một bộ ổn áp tuyến tính đơn giản, rủi ro sụt áp lan sang MCU
 và cảm biến sẽ tăng lên rõ rệt.
 
@@ -1488,7 +1503,7 @@ và cho phép ưu tiên đúng mức cho tải động lớn nhất của bo m�
 
 | Thông số / đặc tính    | Giá trị hoặc mô tả            | Ý nghĩa trong thiết kế                                            |
 | --------------------------- | ---------------------------------- | --------------------------------------------------------------------- |
-| Loại linh kiện            | Bộ hạ áp chuyển mạch TPS54231 | Tạo rail riêng cho modem                                            |
+| Loại linh kiện            | Bộ hạ áp chuyển mạch TPS54231 | Tạo nhánh riêng cho modem                                           |
 | Dải điện áp vào        | 3,5-28 V                           | Phù hợp với nguồn xe 12 V và 24 V                                |
 | Dòng ra liên tục         | Tới 2 A                           | Đáp ứng nhánh tải động lớn của modem khi đi cùng tụ đệm |
 | Tần số chuyển mạch      | 570 kHz                            | Giữ kích thước linh kiện phụ ở mức gọn                       |
@@ -1515,7 +1530,7 @@ lên lại 5 V rồi ghép vào bus nguồn hiện có. Đồ án chọn cách t
 Trong cấu hình này, SX1308 nâng điện áp pin lên 5 V, sau đó mạch chuyển nguồn
 diode-OR sẽ tự động chọn giữa 5 V chính và 5 V dự phòng. Cách làm này giữ
 được sơ đồ nguồn gọn hơn so với việc phải thiết kế một cơ chế chuyển mạch
-phức tạp hoặc tái kiến trúc toàn bộ các rail phía sau.
+phức tạp hoặc tái kiến trúc toàn bộ các nhánh nguồn phía sau.
 
 **Bảng 3.12D: Thông số nhánh nguồn dự phòng**
 
@@ -1614,7 +1629,7 @@ Sau khi so sánh từng khối, cấu hình phần cứng được chốt như B
 | LTE/GNSS          | SIM7600CE-T                                                                       | LTE Cat-4, GNSS tích hợp, nguồn khoảng 3,4-4,2 V, AT command [21], [22]           | Giảm số mô-đun và giảm trạng thái lỗi                                                               |
 | OBD2              | vgate iCar Pro BLE                                                                | BLE, giao tiếp kiểu ELM327, hỗ trợ nhiều giao thức OBD-II [29], [64]            | Lắp nhanh, ít xâm lấn, dễ thay bộ chuyển đổi                                                        |
 | Chuyển động    | LIS3DH                                                                            | 3 trục, 1,71-3,6 V, I2C/SPI, ±2 g đến ±16 g,`INT1/INT2` [23], [24]             | Đánh thức thiết bị khi xe đỗ có rung/chuyển động                                                  |
-| Nguồn            | MP2482, AP2112-3.3, TPS54231, TP5100, SX1308, 18650 1S, mạch chuyển nguồn, ADC | Tách nhánh nguồn logic, rail modem và rail dự phòng; sạc pin bằng TP5100 [30] | Ổn định nhánh nguồn, bảo vệ ắc quy bằng chiến lược phần mềm và duy trì khi mất nguồn ngắn |
+| Nguồn            | MP2482, AP2112-3.3, TPS54231, TP5100, SX1308, 18650 1S, mạch chuyển nguồn, ADC | Tách nhánh nguồn logic, nhánh modem và nhánh dự phòng; sạc pin bằng TP5100 [30] | Ổn định nhánh nguồn, bảo vệ ắc quy bằng chiến lược phần mềm và duy trì khi mất nguồn ngắn |
 
 ## 3.3. Đề xuất và lựa chọn giải pháp firmware - Firmware solution
 
@@ -1640,9 +1655,9 @@ Zephyr RTOS.
 | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | Mức độ bám sát ESP32-S3                                             | Thư viện quen thuộc, phù hợp mẫu nhỏ                                     | Bộ công cụ chính thức của Espressif [47]                                      | Hỗ trợ được nhưng không phải luồng chính của ESP32-S3 |
 | BLE, NVS, OTA và quản lý nguồn                                       | Có thư viện nhưng thường qua lớp bọc                                    | Có sẵn trong hệ sinh thái ESP-IDF [47]                                          | Có nhưng cần tự ghép cấu hình nhiều hơn                 |
-| Tổ chức tác vụ cho modem, BLE, IMU và ADC                           | Chủ yếu theo vòng lặp chính tuần tự, khó tách tải khi ngoại vi tăng | Có FreeRTOS, hàng đợi, semaphore và nhóm sự kiện [10]                       | Có RTOS đầy đủ                                              |
+| Tổ chức tác vụ cho modem, BLE, LIS3DH và ADC                        | Chủ yếu theo vòng lặp chính tuần tự, khó tách tải khi ngoại vi tăng | Có FreeRTOS, hàng đợi, semaphore và nhóm sự kiện [10]                       | Có RTOS đầy đủ                                              |
 | Điều khiển ngủ sâu và nguồn đánh thức                          | Làm được nhưng phải tự giữ nhiều nhánh điều kiện trong ứng dụng  | Hỗ trợ tốt chế độ ngủ sâu, nguồn đánh thức và miền nguồn             | Làm được nhưng công tích hợp cao hơn trên ESP32-S3     |
-| Khả năng giữ cấu trúc mã khi ghép đồng thời modem, BLE và IMU | Khởi đầu nhanh nhưng dễ phình logic trong một luồng chính              | Giữ cấu trúc rõ giữa trình điều khiển, tác vụ nền và lõi trạng thái | Cần thêm thời gian chuẩn hóa thư viện và gỡ lỗi        |
+| Khả năng giữ cấu trúc mã khi ghép đồng thời modem, BLE và LIS3DH | Khởi đầu nhanh nhưng dễ phình logic trong một luồng chính              | Giữ cấu trúc rõ giữa trình điều khiển, tác vụ nền và lõi trạng thái | Cần thêm thời gian chuẩn hóa thư viện và gỡ lỗi        |
 | Kết luận chọn                                                         | Không ưu tiên cho thiết bị nhiều ngoại vi                                | Phương án chốt                                                                  | Có giá trị tham khảo nhưng không thuận bằng ESP-IDF      |
 
 ESP-IDF kết hợp FreeRTOS được chọn vì cân bằng tốt giữa khả năng phát triển và
@@ -1690,7 +1705,7 @@ bật/tắt modem, vào ngủ sâu, gửi cảnh báo hoặc cho phép OTA đề
 thái. Cách tổ chức này làm cho hành vi thiết bị nhất quán hơn khi điều kiện xe
 thay đổi.
 
-![Hình 3.7 - Lưu đồ trạng thái firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-11.svg)
+![Hình 3.7 - Sơ đồ máy trạng thái vận hành chính của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-11.svg)
 
 _Hình 3.7: Sơ đồ máy trạng thái vận hành chính của firmware_
 
@@ -1730,6 +1745,14 @@ trong quá trình vận hành.
 | Lưu tạm khi mất mạng       | Giữ bản tin quan trọng khi mạng 4G hoặc MQTT bị gián đoạn                                                                      | Giảm mất dữ liệu trong điều kiện mạng di động không ổn định                              |
 | Quản lý nguồn và ngủ sâu | Theo dõi nguồn xe, pin dự phòng, tắt tải lớn và đánh thức bằng thời gian hoặc cảm biến                                  | Bảo vệ ắc quy xe và duy trì giám sát khi xe đỗ                                                |
 | Cập nhật firmware từ xa     | Tải, kiểm tra và chuyển sang phiên bản firmware mới khi điều kiện an toàn                                                    | Giảm nhu cầu tháo thiết bị khỏi xe để bảo trì phần mềm                                     |
+
+Riêng nhóm đọc dữ liệu OBD2 BLE được tổ chức thành chuỗi kết nối lại theo
+địa chỉ đã lưu, ghép đôi khi cần, đọc PID và trạng thái IGN trong chu kỳ lái
+xe, đồng thời dùng ADC làm nguồn dự phòng khi BLE bị timeout nhiều lần.
+
+![Hình 3.8 - Luồng kết nối và đọc dữ liệu BLE OBD2 trong firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-8.svg)
+
+_Hình 3.8: Luồng kết nối và đọc dữ liệu BLE OBD2 trong firmware_
 
 Trong các nhóm trên, quản lý nguồn là chức năng có ảnh hưởng lớn nhất tới độ ổn
 định của thiết bị. Firmware theo dõi điện áp nguồn xe và pin dự phòng thông qua
@@ -2328,7 +2351,7 @@ bằng nhất với các ràng buộc đã nêu ở Chương 2: lắp đặt ít
 định, thu dữ liệu đủ dùng, truyền dữ liệu tin cậy, dễ kiểm chứng và có khả năng
 mở rộng thử nghiệm.
 
-![Hình 3.9 - Kiến trúc tổng thể phương án tối ưu](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-23.svg)
+![Hình 3.9 - Kiến trúc tổng thể của phương án thiết kế tối ưu](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-23.svg)
 
 _Hình 3.9: Kiến trúc tổng thể của phương án thiết kế tối ưu_
 
@@ -2555,34 +2578,53 @@ và tiến trình cập nhật firmware.
 {
   "device_id": "TRACKER_001",
   "auth_token": "token_demo",
-  "timestamp": 1710000000000,
+  "timestamp": 1777104000000,
+  "timestamp_trusted": true,
   "uptime": 452130,
   "data": {
-    "latitude": 10.823371,
-    "longitude": 106.740750,
-    "speed": 67.13,
-    "course": 320.22,
+    "latitude": 10.775843,
+    "longitude": 106.700981,
+    "speed": 42.5,
+    "course": 158.4,
     "satellites": 11,
-    "battery_top": 12.54,
-    "battery_bot": 3.96,
+    "battery_top": 12.48,
+    "battery_bot": 4.08,
     "ignition": true,
-    "vibration": 0.63,
+    "vibration": 1.2,
     "error_code": 0
   },
   "diagnostics": {
+    "channel": {
+      "ble_obd_connected": true,
+      "elm_ready": true,
+      "ecu_state": "connected",
+      "poll_interval_ms": 1200,
+      "connect_fail_count_5m": 0
+    },
     "signals": {
       "rpm": 2450,
-      "obd_speed_kph": 67,
+      "obd_speed_kph": 42,
       "coolant_c": 86,
       "fuel_level_pct": 54,
       "engine_load_pct": 31
     },
+    "quality": {
+      "sample_age_ms": 850,
+      "missing_signals": []
+    },
+    "events": [],
     "mil_on": false,
-    "reported_dtc_count": 1,
+    "reported_dtc_count": 0,
+    "readiness": {
+      "misfire": "complete",
+      "fuel_system": "complete",
+      "comprehensive_components": "complete",
+      "catalyst": "unsupported"
+    },
     "dtc": {
-      "stored": ["P0500"],
+      "stored": [],
       "pending": [],
-      "permanent": ["P0171"]
+      "permanent": []
     }
   },
   "state": {
@@ -2591,6 +2633,15 @@ và tiến trình cập nhật firmware.
     "vehicle_state": "MOVING_ON",
     "device_state": "ACTIVE",
     "sleep_mode": "NONE"
+  },
+  "device_alerts": [],
+  "ecu_alerts": [],
+  "metadata": {
+    "schema_version": "v1.5.0",
+    "message_id": "b5b5c5a0-77b4-4c8e-a902-bcc5410f7c01",
+    "sent_at": 1777104000000,
+    "seq_no": 1284,
+    "boot_id": "boot-20260425-001"
   }
 }
 ```
@@ -2601,15 +2652,25 @@ và tiến trình cập nhật firmware.
 {
   "device_id": "TRACKER_001",
   "auth_token": "token_demo",
-  "status": "running",
+  "status": "heartbeat",
   "session_id": 1024,
-  "timestamp": 1710000005123,
+  "timestamp": 1777104005000,
+  "timestamp_trusted": true,
   "state": {
     "ignition_state": "ON",
     "motion_state": "MOVING",
     "vehicle_state": "MOVING_ON",
     "device_state": "ACTIVE",
     "sleep_mode": "NONE"
+  },
+  "device_alerts": [],
+  "ecu_alerts": [],
+  "metadata": {
+    "schema_version": "v1.5.0",
+    "message_id": "51a69dc4-69d2-4c99-9ac1-fb4b8bff72d8",
+    "sent_at": 1777104005000,
+    "seq_no": 1285,
+    "boot_id": "boot-20260425-001"
   }
 }
 ```
@@ -2622,8 +2683,16 @@ và tiến trình cập nhật firmware.
   "auth_token": "token_demo",
   "event_type": "warning",
   "code": 201,
-  "message": "Vehicle movement detected while parked",
-  "timestamp": 1710000009000
+  "message": "Movement detected while ignition is off",
+  "timestamp": 1777104009000,
+  "timestamp_trusted": true,
+  "metadata": {
+    "schema_version": "v1.0.0",
+    "message_id": "151af4fd-e960-4743-9130-ded2a3c0e37c",
+    "sent_at": 1777104009000,
+    "seq_no": 1286,
+    "boot_id": "boot-20260425-001"
+  }
 }
 ```
 
@@ -2633,12 +2702,57 @@ và tiến trình cập nhật firmware.
 {
   "device_id": "TRACKER_001",
   "auth_token": "token_demo",
-  "jobId": "ota_1710000000_ab12cd",
-  "status": "confirming",
-  "progress": 99,
-  "targetVersion": "v2.3.1",
-  "currentVersion": "v2.3.0",
-  "partition": "ota_0"
+  "jobId": "ota_1777104000_ab12cd",
+  "status": "installing",
+  "progress": 64,
+  "targetVersion": "v2.4.0",
+  "currentVersion": "v2.3.1",
+  "partition": "ota_0",
+  "timestamp": 1777104015000,
+  "timestamp_trusted": true,
+  "metadata": {
+    "schema_version": "v1.0.0",
+    "message_id": "fc4e6bda-fac7-46df-8d77-5e38e370e613",
+    "sent_at": 1777104015000,
+    "seq_no": 1287,
+    "boot_id": "boot-20260425-001"
+  }
+}
+```
+
+**Mẫu lệnh từ backend gửi về topic `commands`**
+
+Lệnh cập nhật cấu hình runtime:
+
+```json
+{
+  "command": "update_config",
+  "params": {
+    "tracking_interval_s": 30,
+    "heartbeat_interval_s": 300,
+    "alarm_interval_s": 15,
+    "sleep_enabled": true,
+    "imu_wakeup_enabled": true,
+    "ota_min_battery_mv": 3700
+  }
+}
+```
+
+Lệnh cập nhật firmware OTA:
+
+```json
+{
+  "command": "ota_update",
+  "params": {
+    "jobId": "ota_1777104000_ab12cd",
+    "version": "v2.4.0",
+    "url": "https://api.thingdock.dev/api/v1/firmware/12/download",
+    "size": 1048576,
+    "sha256":
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "force": false,
+    "confirmTimeoutSec": 180
+  }
 }
 ```
 
@@ -2648,9 +2762,9 @@ chỉ số thời gian được lưu trong VictoriaMetrics; còn VictoriaLogs ph
 vận hành và truy vết sự cố. Lược đồ PostgreSQL hiện tại bao quát đầy đủ các nhóm
 dữ liệu chính của hệ thống quản trị đội xe.
 
-![Hình 4.6 - Minh họa lược đồ cơ sở dữ liệu PostgreSQL đang triển khai](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-14.svg)
+![Hình 4.6 - Minh họa các nhóm bảng chính trong PostgreSQL đang triển khai](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-14.svg)
 
-_Hình 4.6: Minh họa lược đồ cơ sở dữ liệu PostgreSQL đang triển khai_
+_Hình 4.6: Minh họa các nhóm bảng chính trong PostgreSQL đang triển khai_
 
 **Bảng 4.9: Các nhóm bảng chính trong cơ sở dữ liệu PostgreSQL hiện tại**
 
@@ -3470,6 +3584,10 @@ trường kiểm thử sớm cho từng lớp.
 | GĐ5 | Phát triển dịch vụ phía máy chủ, giao diện web và khung ứng dụng di động | Tuần 10-19 | API, kênh cập nhật gần thời gian thực, các màn hình tổng quan, bản đồ, thiết bị, cảnh báo, cập nhật firmware và giao diện quản trị |
 | GĐ6 | Tích hợp và kiểm thử liên tầng | Tuần 17-22 | Chuỗi thiết bị - EMQX - MQTT Bridge - lưu trữ - dịch vụ phía máy chủ - giao diện web hoạt động thống nhất |
 | GĐ7 | Hoàn thiện đánh giá và báo cáo | Tuần 21-24 | Báo cáo rút gọn, phụ lục, tài nguyên hình/bảng và danh sách kiểm tra bàn giao |
+
+![Hình PL-3.1 - Kế hoạch thực hiện dự án theo giai đoạn 24 tuần](./assets/figures/14-phu-luc-hinh-pl-3-1.svg)
+
+_Hình PL-3.1: Kế hoạch thực hiện dự án theo giai đoạn (24 tuần)_
 
 ## 3.2. Điều kiện chuyển giai đoạn
 

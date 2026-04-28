@@ -7,6 +7,7 @@ idf_component_register(
     REQUIRES
         adapter-kv-nvs
         contracts-device-cloud
+        freertos
         json
         log
         shared-kernel

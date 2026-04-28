@@ -1,7 +1,7 @@
 'use client';
 
 import { CarFront, Eye, EyeOff, LoaderCircle, MapPinned, X } from 'lucide-react';
-import type { VehicleAllowedZone } from '@/lib/api/geofences';
+import type { VehicleZone } from '@/lib/api/zones';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatAllowedZoneRadius } from '@/features/geofences/lib/allowed-zone-form';
@@ -72,7 +72,7 @@ export const MapSelectedDeviceOverlay = ({
   className,
 }: {
   device: DevicePosition | null;
-  allowedZone?: VehicleAllowedZone | null;
+  allowedZone?: VehicleZone | null;
   allowedZoneLoading?: boolean;
   showAllowedZone?: boolean;
   canEditAllowedZone?: boolean;
@@ -148,7 +148,7 @@ export const MapSelectedDeviceOverlay = ({
             <div className="rounded-xl border border-border/60 bg-background/75 px-3 py-2">
               <div className="flex flex-wrap items-center gap-1.5">
                 <p className="mr-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Đi nhanh</p>
-                {['overview', 'vehicle', 'alerts', 'errors', 'allowed-zone', 'geofence'].map((shortcutId) => {
+                {['overview', 'vehicle', 'alerts', 'errors', 'zone'].map((shortcutId) => {
                   const shortcut = shortcutMap.get(shortcutId);
                   if (!shortcut) {
                     return null;

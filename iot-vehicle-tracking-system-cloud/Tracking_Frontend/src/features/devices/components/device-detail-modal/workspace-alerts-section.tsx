@@ -48,21 +48,21 @@ export const WorkspaceAlertsSection = ({ alertsPath }: { alertsPath: string | nu
 
   return (
     <>
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4 xl:auto-rows-fr xl:grid-cols-2">
         {deviceScopedAlerts.map((alert) => (
-          <Card key={alert.id} className="overflow-hidden border-border/70 bg-background/80">
-            <CardHeader className="space-y-3 border-b bg-muted/20">
+          <Card key={alert.id} className="flex h-full flex-col overflow-hidden border-border/70 bg-background/80">
+            <CardHeader className="flex min-h-[11.5rem] flex-1 flex-col space-y-3 border-b bg-muted/20">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={severityVariants[alert.severity ?? ''] ?? 'outline'}>{alert.severity ?? 'unknown'}</Badge>
                 <Badge variant={alert.status === 'active' ? 'default' : 'outline'}>{alert.status ?? 'unknown'}</Badge>
                 <Badge variant="outline">{alert.alertType ?? 'Khác'}</Badge>
               </div>
-              <div className="space-y-1">
+              <div className="flex-1 space-y-1">
                 <CardTitle className="text-base">{alert.displayTitle ?? alert.title ?? `Cảnh báo #${alert.id}`}</CardTitle>
                 <p className="text-sm leading-6 text-muted-foreground">{alert.displayMessage ?? alert.message ?? 'Chưa có mô tả chi tiết.'}</p>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4 p-4">
+            <CardContent className="flex flex-1 flex-col space-y-4 p-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border bg-muted/15 px-3 py-3">
                   <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Nguồn</p>
@@ -79,7 +79,7 @@ export const WorkspaceAlertsSection = ({ alertsPath }: { alertsPath: string | nu
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="mt-auto flex flex-wrap items-center gap-2">
                 <Button variant="outline" onClick={() => setDetailAlertId(alert.id)}>
                   <AlertTriangle className="mr-2 h-4 w-4" />
                   Xem chi tiết

@@ -321,16 +321,25 @@ static void data_formatter_add_diagnostics(cJSON *root, const telemetry_t *telem
     cJSON_AddNumberToObject(channel, "poll_interval_ms", 1200);
     cJSON_AddNumberToObject(channel, "connect_fail_count_5m", telemetry->obd_connect_fail_count_5m);
 
-    cJSON_AddNumberToObject(signals, "rpm", telemetry->obd_rpm);
-    cJSON_AddNumberToObject(signals, "obd_speed_kph", telemetry->obd_speed);
-    cJSON_AddNumberToObject(signals, "coolant_c", telemetry->obd_coolant_temp);
-    cJSON_AddNumberToObject(signals, "fuel_level_pct", telemetry->obd_fuel_level);
-    cJSON_AddNumberToObject(signals, "engine_load_pct", telemetry->obd_engine_load);
+    /*
+     * Do not serialize cached OBD values unless the channel is connected and the
+     * sample is fresh. This prevents server data from showing "OBD disconnected"
+     * together with old RPM/speed values from a previous connection.
+     */
+    bool obd_signals_valid = telemetry->obd_ble_connected &&
+                             telemetry->obd_elm_ready &&
+                             telemetry->obd_sample_age_ms <= DATA_FORMATTER_OBD_STALE_SAMPLE_MS;
+    if (obd_signals_valid) {
+        cJSON_AddNumberToObject(signals, "rpm", telemetry->obd_rpm);
+        cJSON_AddNumberToObject(signals, "obd_speed_kph", telemetry->obd_speed);
+        cJSON_AddNumberToObject(signals, "coolant_c", telemetry->obd_coolant_temp);
+        cJSON_AddNumberToObject(signals, "fuel_level_pct", telemetry->obd_fuel_level);
+        cJSON_AddNumberToObject(signals, "engine_load_pct", telemetry->obd_engine_load);
+    }
 
     cJSON_AddNumberToObject(quality, "sample_age_ms", telemetry->obd_sample_age_ms);
     cJSON *missing_signals = cJSON_AddArrayToObject(quality, "missing_signals");
-    if (missing_signals != NULL &&
-        (!telemetry->obd_elm_ready || telemetry->obd_sample_age_ms > DATA_FORMATTER_OBD_STALE_SAMPLE_MS)) {
+    if (missing_signals != NULL && !obd_signals_valid) {
         data_formatter_append_string_item(missing_signals, "rpm");
         data_formatter_append_string_item(missing_signals, "obd_speed_kph");
         data_formatter_append_string_item(missing_signals, "coolant_c");

@@ -10,11 +10,15 @@ import {
   PanelRightOpen,
   X,
 } from 'lucide-react';
-import type { VehicleAllowedZone } from '@/lib/api/geofences';
+import type { VehicleZone } from '@/lib/api/zones';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatAllowedZoneRadius } from '@/features/geofences/lib/allowed-zone-form';
+import {
+  describeBoundarySelections,
+  formatAllowedZoneRadius,
+  getZoneTypeLabel,
+} from '@/features/geofences/lib/allowed-zone-form';
 import { useMapInspectShortcuts } from '@/features/map/hooks/use-map-inspect-shortcuts';
 import { useMapStore } from '@/features/map/store/map-store';
 import type { DevicePosition } from '@/features/map/types';
@@ -49,6 +53,23 @@ const MiniStat = ({ label, value, tone }: { label: string; value: string; tone: 
   </div>
 );
 
+const formatCoordinateValue = (lat: number | null | undefined, lon: number | null | undefined) =>
+  Number.isFinite(lat) && Number.isFinite(lon) ? `${lat!.toFixed(5)}, ${lon!.toFixed(5)}` : '--';
+
+const formatSpeedValue = (speed: number | null | undefined) =>
+  Number.isFinite(speed) ? `${speed!.toFixed(1)} km/h` : '--';
+
+const formatElectricalValue = (value: number | null | undefined) => {
+  if (!Number.isFinite(value) || value! <= 0) {
+    return '--';
+  }
+
+  return value! > 24 ? `${value!.toFixed(0)}%` : `${value!.toFixed(1)} V`;
+};
+
+const formatTemperatureValue = (value: number | null | undefined) =>
+  Number.isFinite(value) ? `${value!.toFixed(1)}°C` : '--';
+
 export const MapInspectRail = ({
   device,
   allowedZone,
@@ -61,7 +82,7 @@ export const MapInspectRail = ({
   onToggleAllowedZoneVisibility,
 }: {
   device: DevicePosition | null;
-  allowedZone?: VehicleAllowedZone | null;
+  allowedZone?: VehicleZone | null;
   allowedZoneLoading?: boolean;
   showAllowedZone?: boolean;
   canEditAllowedZone?: boolean;
@@ -84,6 +105,15 @@ export const MapInspectRail = ({
   const runtime = getDeviceRuntimePresentation(device.deviceState);
   const allowedZoneMembership =
     membershipMeta[allowedZone?.membershipState ?? 'unknown'] ?? membershipMeta.unknown;
+  const quickStats = [
+    { label: 'Tốc độ', value: formatSpeedValue(device.speed) },
+    { label: 'Tọa độ', value: formatCoordinateValue(device.lat, device.lon) },
+    { label: 'Ắc quy xe', value: formatElectricalValue(device.vehicleBattery ?? device.battery) },
+    {
+      label: 'Nhiệt độ máy',
+      value: formatTemperatureValue(device.engineTemperature ?? device.temperature),
+    },
+  ];
 
   return (
     <div className="pointer-events-none absolute inset-y-0 right-0 z-[910] hidden md:flex">
@@ -139,14 +169,35 @@ export const MapInspectRail = ({
                 </div>
 
                 <div className="rounded-3xl border border-border/70 bg-background/80 p-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Vùng cho phép</p>
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                    Thông số nhanh
+                  </p>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {quickStats.map((stat) => (
+                      <MiniStat
+                        key={stat.label}
+                        label={stat.label}
+                        value={stat.value}
+                        tone="neutral"
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-3xl border border-border/70 bg-background/80 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Vùng</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <Badge variant={allowedZone ? 'secondary' : 'outline'}>{allowedZone ? 'Đã cấu hình' : 'Chưa có'}</Badge>
                     {allowedZoneLoading ? <Badge variant="outline">Đang tải...</Badge> : null}
                     {allowedZone ? (
                       <>
                         <Badge variant={allowedZoneMembership.variant}>{allowedZoneMembership.label}</Badge>
-                        <Badge variant="outline">{formatAllowedZoneRadius(allowedZone.radiusMeters)}</Badge>
+                        <Badge variant="outline">{getZoneTypeLabel(allowedZone.zoneType)}</Badge>
+                        <Badge variant="outline">
+                          {allowedZone.zoneType === 'administrative_boundary'
+                            ? describeBoundarySelections(allowedZone.boundarySelections)
+                            : formatAllowedZoneRadius(allowedZone.radiusMeters)}
+                        </Badge>
                       </>
                     ) : null}
                   </div>
@@ -187,19 +238,19 @@ export const MapInspectRail = ({
 
           <div className="mt-3 space-y-2">
             {onToggleAllowedZoneVisibility && allowedZone ? (
-              <Button type="button" variant="outline" className={cn('h-11 rounded-2xl', collapsed && 'px-0')} onClick={onToggleAllowedZoneVisibility} aria-label={showAllowedZone ? 'Ẩn vùng cho phép' : 'Hiện vùng cho phép'}>
+              <Button type="button" variant="outline" className={cn('h-11 rounded-2xl', collapsed && 'px-0')} onClick={onToggleAllowedZoneVisibility} aria-label={showAllowedZone ? 'Ẩn vùng' : 'Hiện vùng'}>
                 {showAllowedZone ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 {!collapsed ? <span className="ml-2">{showAllowedZone ? 'Ẩn vùng' : 'Hiện vùng'}</span> : null}
               </Button>
             ) : null}
             {!allowedZone && onCreateAllowedZone && canEditAllowedZone ? (
-              <Button type="button" variant="outline" className={cn('h-11 rounded-2xl', collapsed && 'px-0')} onClick={onCreateAllowedZone} aria-label="Tạo vùng cho phép">
+              <Button type="button" variant="outline" className={cn('h-11 rounded-2xl', collapsed && 'px-0')} onClick={onCreateAllowedZone} aria-label="Tạo vùng">
                 <MapPinned className="h-4 w-4" />
                 {!collapsed ? <span className="ml-2">Tạo vùng</span> : null}
               </Button>
             ) : null}
             {allowedZone && onEditAllowedZone && canEditAllowedZone ? (
-              <Button type="button" variant="outline" className={cn('h-11 rounded-2xl', collapsed && 'px-0')} onClick={onEditAllowedZone} aria-label="Chỉnh vùng cho phép">
+              <Button type="button" variant="outline" className={cn('h-11 rounded-2xl', collapsed && 'px-0')} onClick={onEditAllowedZone} aria-label="Chỉnh vùng">
                 <MapPinned className="h-4 w-4" />
                 {!collapsed ? <span className="ml-2">Chỉnh vùng</span> : null}
               </Button>

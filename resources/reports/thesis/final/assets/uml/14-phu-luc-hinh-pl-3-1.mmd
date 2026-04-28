@@ -3,25 +3,25 @@ flowchart TB
 
     subgraph Row1[" "]
         direction LR
-        P1["GĐ1 | Tuần 1-4<br/>Nghiên cứu yêu cầu<br/>Thiết kế phần cứng"]
-        P2["GĐ2 | Tuần 3-10<br/>Firmware ESP-IDF<br/>OBD2 BLE + power FSM"]
+        P1["GĐ1 | Tuần 1-2<br/>Khảo sát yêu cầu<br/>Chốt phạm vi"]
+        P2["GĐ2 | Tuần 3-7<br/>Thiết kế phần cứng<br/>Nguồn + PCB"]
     end
 
     subgraph Row2[" "]
         direction LR
-        P3["GĐ3 | Tuần 5-8<br/>EMQX + PostgreSQL<br/>Docker Compose"]
-        P4["GĐ4 | Tuần 7-14<br/>API phía máy chủ<br/>MQTT Bridge"]
+        P3["GĐ3 | Tuần 5-13<br/>Firmware ESP-IDF<br/>OBD2 BLE + power FSM"]
+        P4["GĐ4 | Tuần 7-15<br/>EMQX + MQTT Bridge<br/>Lưu trữ dữ liệu"]
     end
 
     subgraph Row3[" "]
         direction LR
-        P5["GĐ5 | Tuần 11-18<br/>Giao diện web<br/>Bản đồ + cảnh báo"]
+        P5["GĐ5 | Tuần 10-19<br/>API + web + mobile shell<br/>Realtime dashboard"]
         P6["GĐ6 | Tuần 17-22<br/>Tích hợp hệ thống<br/>Kiểm thử thực địa"]
     end
 
     subgraph Row4[" "]
         direction LR
-        P7["GĐ7 | Tuần 21-24<br/>Báo cáo khóa luận<br/>Bài trình bày bảo vệ"]
+        P7["GĐ7 | Tuần 21-24<br/>Đánh giá và báo cáo<br/>Phụ lục + kiểm tra PDF"]
     end
 
     Title --> P1

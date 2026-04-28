@@ -14,7 +14,7 @@ export const listNotifications = asyncHandler(async (req: AuthenticatedRequest, 
     | 'system'
     | 'export'
     | 'firmware'
-    | 'geofence'
+    | 'zone'
     | undefined;
   const isRead =
     req.query.isRead === undefined ? undefined : String(req.query.isRead).toLowerCase() === 'true';

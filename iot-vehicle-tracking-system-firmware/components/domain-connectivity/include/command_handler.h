@@ -17,8 +17,8 @@
 typedef enum {
     /** No pending action. */
     COMMAND_ACTION_NONE = 0,
-    /** Force immediate location publish request. */
-    COMMAND_ACTION_REQUEST_LOCATION,
+    /** Apply a queued runtime configuration update on the FSM task. */
+    COMMAND_ACTION_APPLY_CONFIG,
     /** Reboot command requested by cloud. */
     COMMAND_ACTION_REBOOT,
     /** OTA update command accepted and queued. */
@@ -63,6 +63,15 @@ bool command_handler_is_tracking_enabled(void);
  * @return Consumed action value.
  */
 command_action_t command_handler_consume_action(void);
+
+/**
+ * @brief Apply the queued `update_config` payload consumed as current action.
+ *
+ * @return ESP_OK when the pending update was applied or was a no-op.
+ * @return ESP_ERR_INVALID_STATE when no consumed config update is waiting.
+ * @return Another ESP-IDF error code when validation or persistence fails.
+ */
+esp_err_t command_handler_apply_pending_config(void);
 
 /**
  * @brief Consume pending OTA command payload.

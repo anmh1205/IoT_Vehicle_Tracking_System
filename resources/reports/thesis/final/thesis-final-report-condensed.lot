@@ -1,83 +1,83 @@
-\contentsline {table}{\numberline {2.1}{\ignorespaces So sánh các hướng quản lý phương tiện}}{16}{table.condensed-bang-2-1-so-sanh-cac-huong-quan-ly-phuong-tien}%
-\contentsline {table}{\numberline {2.2}{\ignorespaces Đặc điểm kỹ thuật ảnh hưởng đến thiết kế}}{17}{table.condensed-bang-2-2-dac-diem-ky-thuat-anh-huong-den-thiet-ke}%
-\contentsline {table}{\numberline {2.3}{\ignorespaces Yêu cầu chức năng của hệ thống}}{18}{table.condensed-bang-2-3-yeu-cau-chuc-nang-cua-he-thong}%
-\contentsline {table}{\numberline {2.4}{\ignorespaces Yêu cầu phi chức năng}}{18}{table.condensed-bang-2-4-yeu-cau-phi-chuc-nang}%
-\contentsline {table}{\numberline {2.5}{\ignorespaces Ràng buộc thiết kế}}{19}{table.condensed-bang-2-5-rang-buoc-thiet-ke}%
-\contentsline {table}{\numberline {2.6}{\ignorespaces Tiêu chuẩn và tài liệu kỹ thuật tham chiếu}}{20}{table.condensed-bang-2-6-tieu-chuan-va-tai-lieu-ky-thuat-tham-chieu}%
-\contentsline {table}{\numberline {2.7}{\ignorespaces Chỉ tiêu nghiệm thu của nguyên mẫu}}{20}{table.condensed-bang-2-7-chi-tieu-nghiem-thu-cua-nguyen-mau}%
-\contentsline {table}{\numberline {2.8}{\ignorespaces Các bên liên quan và nhu cầu chính}}{21}{table.condensed-bang-2-8-cac-ben-lien-quan-va-nhu-cau-chinh}%
-\contentsline {table}{\numberline {2.9}{\ignorespaces Ma trận liên hệ yêu cầu với bên liên quan}}{22}{table.condensed-bang-2-9-ma-tran-lien-he-yeu-cau-voi-ben-lien-quan}%
-\contentsline {table}{\numberline {3.1}{\ignorespaces Mâu thuẫn thiết kế và hệ quả lựa chọn}}{25}{table.condensed-bang-3-1-mau-thuan-thiet-ke-va-he-qua-lua-chon}%
-\contentsline {table}{\numberline {3.2}{\ignorespaces Tiêu chí lựa chọn theo khối thiết kế}}{26}{table.condensed-bang-3-2-tieu-chi-lua-chon-theo-khoi-thiet-ke}%
-\contentsline {table}{\numberline {3.3}{\ignorespaces So sánh phương án vi điều khiển trung tâm}}{27}{table.condensed-bang-3-3-so-sanh-phuong-an-vi-dieu-khien-trung-tam}%
+\contentsline {table}{\numberline {2.1}{\ignorespaces So sánh các hướng quản lý phương tiện}}{17}{table.condensed-bang-2-1-so-sanh-cac-huong-quan-ly-phuong-tien}%
+\contentsline {table}{\numberline {2.2}{\ignorespaces Đặc điểm kỹ thuật ảnh hưởng đến thiết kế}}{18}{table.condensed-bang-2-2-dac-diem-ky-thuat-anh-huong-den-thiet-ke}%
+\contentsline {table}{\numberline {2.3}{\ignorespaces Yêu cầu chức năng của hệ thống}}{19}{table.condensed-bang-2-3-yeu-cau-chuc-nang-cua-he-thong}%
+\contentsline {table}{\numberline {2.4}{\ignorespaces Yêu cầu phi chức năng}}{19}{table.condensed-bang-2-4-yeu-cau-phi-chuc-nang}%
+\contentsline {table}{\numberline {2.5}{\ignorespaces Ràng buộc thiết kế}}{20}{table.condensed-bang-2-5-rang-buoc-thiet-ke}%
+\contentsline {table}{\numberline {2.6}{\ignorespaces Tiêu chuẩn và tài liệu kỹ thuật tham chiếu}}{21}{table.condensed-bang-2-6-tieu-chuan-va-tai-lieu-ky-thuat-tham-chieu}%
+\contentsline {table}{\numberline {2.7}{\ignorespaces Chỉ tiêu nghiệm thu của nguyên mẫu}}{21}{table.condensed-bang-2-7-chi-tieu-nghiem-thu-cua-nguyen-mau}%
+\contentsline {table}{\numberline {2.8}{\ignorespaces Các bên liên quan và nhu cầu chính}}{22}{table.condensed-bang-2-8-cac-ben-lien-quan-va-nhu-cau-chinh}%
+\contentsline {table}{\numberline {2.9}{\ignorespaces Ma trận liên hệ yêu cầu với bên liên quan}}{23}{table.condensed-bang-2-9-ma-tran-lien-he-yeu-cau-voi-ben-lien-quan}%
+\contentsline {table}{\numberline {3.1}{\ignorespaces Mâu thuẫn thiết kế và hệ quả lựa chọn}}{26}{table.condensed-bang-3-1-mau-thuan-thiet-ke-va-he-qua-lua-chon}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Tiêu chí lựa chọn theo khối thiết kế}}{27}{table.condensed-bang-3-2-tieu-chi-lua-chon-theo-khoi-thiet-ke}%
+\contentsline {table}{\numberline {3.3}{\ignorespaces So sánh phương án vi điều khiển trung tâm}}{28}{table.condensed-bang-3-3-so-sanh-phuong-an-vi-dieu-khien-trung-tam}%
 \contentsline {table}{\numberline {3.4}{\ignorespaces Thông số ESP32-S3 được dùng trong thiết kế}}{29}{table.condensed-bang-3-4-thong-so-esp32-s3-duoc-dung-trong-thiet-ke}%
-\contentsline {table}{\numberline {3.5}{\ignorespaces So sánh phương án LTE/GNSS}}{29}{table.condensed-bang-3-5-so-sanh-phuong-an-lte-gnss}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces So sánh phương án LTE/GNSS}}{30}{table.condensed-bang-3-5-so-sanh-phuong-an-lte-gnss}%
 \contentsline {table}{\numberline {3.6}{\ignorespaces Thông số SIM7600CE-T được dùng trong thiết kế}}{31}{table.condensed-bang-3-6-thong-so-sim7600ce-t-duoc-dung-trong-thiet-ke}%
 \contentsline {table}{\numberline {3.7}{\ignorespaces So sánh phương án đọc dữ liệu OBD2}}{32}{table.condensed-bang-3-7-so-sanh-phuong-an-doc-du-lieu-obd2}%
-\contentsline {table}{\numberline {3.8}{\ignorespaces Thông số OBD2 BLE được dùng trong thiết kế}}{33}{table.condensed-bang-3-8-thong-so-obd2-ble-duoc-dung-trong-thiet-ke}%
+\contentsline {table}{\numberline {3.8}{\ignorespaces Thông số OBD2 BLE được dùng trong thiết kế}}{34}{table.condensed-bang-3-8-thong-so-obd2-ble-duoc-dung-trong-thiet-ke}%
 \contentsline {table}{\numberline {3.9}{\ignorespaces So sánh phương án phát hiện chuyển động khi xe đỗ}}{34}{table.condensed-bang-3-9-so-sanh-phuong-an-phat-hien-chuyen-dong-khi-xe-do}%
-\contentsline {table}{\numberline {3.10}{\ignorespaces Thông số LIS3DH được dùng trong thiết kế}}{35}{table.condensed-bang-3-10-thong-so-lis3dh-duoc-dung-trong-thiet-ke}%
-\contentsline {table}{\numberline {3.11}{\ignorespaces So sánh kiến trúc nguồn}}{36}{table.condensed-bang-3-11-so-sanh-kien-truc-nguon}%
-\contentsline {table}{\numberline {3.12}{\ignorespaces Phân vai các nhánh nguồn trong thiết bị}}{38}{table.condensed-bang-3-12-phan-vai-cac-nhanh-nguon-trong-thiet-bi}%
-\contentsline {table}{\numberline {3.12A}{\ignorespaces Thông số nhánh buck 5 V chính}}{39}{table.condensed-bang-3-12a-thong-so-nhanh-buck-5-v-chinh}%
-\contentsline {table}{\numberline {3.12B}{\ignorespaces Thông số nhánh logic 3,3 V}}{40}{table.condensed-bang-3-12b-thong-so-nhanh-logic-3-3-v}%
-\contentsline {table}{\numberline {3.12C}{\ignorespaces Thông số nhánh nguồn modem}}{41}{table.condensed-bang-3-12c-thong-so-nhanh-nguon-modem}%
-\contentsline {table}{\numberline {3.12D}{\ignorespaces Thông số nhánh nguồn dự phòng}}{42}{table.condensed-bang-3-12d-thong-so-nhanh-nguon-du-phong}%
-\contentsline {table}{\numberline {3.12E}{\ignorespaces Thông số nhánh sạc pin dự phòng}}{43}{table.condensed-bang-3-12e-thong-so-nhanh-sac-pin-du-phong}%
-\contentsline {table}{\numberline {3.12F}{\ignorespaces Thông số giám sát điện áp và bảo vệ bằng firmware}}{44}{table.condensed-bang-3-12f-thong-so-giam-sat-dien-ap-va-bao-ve-bang-firmware}%
-\contentsline {table}{\numberline {3.13}{\ignorespaces Trích thông số chính của phần cứng được chọn}}{45}{table.condensed-bang-3-13-trich-thong-so-chinh-cua-phan-cung-duoc-chon}%
-\contentsline {table}{\numberline {3.14}{\ignorespaces So sánh các phương án nền tảng firmware}}{46}{table.condensed-bang-3-14-so-sanh-cac-phuong-an-nen-tang-firmware}%
-\contentsline {table}{\numberline {3.15}{\ignorespaces Các dịch vụ nền được dùng trong firmware}}{47}{table.condensed-bang-3-15-cac-dich-vu-nen-duoc-dung-trong-firmware}%
-\contentsline {table}{\numberline {3.16}{\ignorespaces So sánh các mô hình điều phối firmware}}{48}{table.condensed-bang-3-16-so-sanh-cac-mo-hinh-dieu-phoi-firmware}%
-\contentsline {table}{\numberline {3.17}{\ignorespaces Các trạng thái vận hành chính của firmware}}{49}{table.condensed-bang-3-17-cac-trang-thai-van-hanh-chinh-cua-firmware}%
-\contentsline {table}{\numberline {3.18}{\ignorespaces Các nhóm chức năng chính của firmware}}{50}{table.condensed-bang-3-18-cac-nhom-chuc-nang-chinh-cua-firmware}%
-\contentsline {table}{\numberline {3.19}{\ignorespaces So sánh giao thức truyền dữ liệu thiết bị - máy chủ}}{53}{table.condensed-bang-3-19-so-sanh-giao-thuc-truyen-du-lieu-thiet-bi-may-chu}%
-\contentsline {table}{\numberline {3.20}{\ignorespaces Nhóm topic và QoS được chọn}}{54}{table.condensed-bang-3-20-nhom-topic-va-qos-duoc-chon}%
-\contentsline {table}{\numberline {3.21}{\ignorespaces So sánh phương án tổ chức hạ tầng máy chủ}}{55}{table.condensed-bang-3-21-so-sanh-phuong-an-to-chuc-ha-tang-may-chu}%
-\contentsline {table}{\numberline {3.22}{\ignorespaces Các lớp dịch vụ được dùng trong thiết kế phía máy chủ}}{56}{table.condensed-bang-3-22-cac-lop-dich-vu-duoc-dung-trong-thiet-ke-phia-may-chu}%
-\contentsline {table}{\numberline {3.23}{\ignorespaces So sánh phương án MQTT broker}}{57}{table.condensed-bang-3-23-so-sanh-phuong-an-mqtt-broker}%
-\contentsline {table}{\numberline {3.24}{\ignorespaces Đặc điểm EMQX được dùng trong thiết kế}}{58}{table.condensed-bang-3-24-dac-diem-emqx-duoc-dung-trong-thiet-ke}%
-\contentsline {table}{\numberline {3.25}{\ignorespaces So sánh phương án cơ sở dữ liệu nghiệp vụ}}{59}{table.condensed-bang-3-25-so-sanh-phuong-an-co-so-du-lieu-nghiep-vu}%
-\contentsline {table}{\numberline {3.26}{\ignorespaces Cấu hình cơ sở dữ liệu nghiệp vụ được chọn}}{60}{table.condensed-bang-3-26-cau-hinh-co-so-du-lieu-nghiep-vu-duoc-chon}%
-\contentsline {table}{\numberline {3.27}{\ignorespaces So sánh phương án cơ sở dữ liệu đo từ xa (telemetry) theo thời gian}}{60}{table.condensed-bang-3-27-so-sanh-phuong-an-co-so-du-lieu-do-tu-xa-telemetry-theo-thoi-gian}%
-\contentsline {table}{\numberline {3.28}{\ignorespaces Cấu hình cơ sở dữ liệu đo từ xa (telemetry) được chọn}}{61}{table.condensed-bang-3-28-cau-hinh-co-so-du-lieu-do-tu-xa-telemetry-duoc-chon}%
-\contentsline {table}{\numberline {3.29}{\ignorespaces So sánh phương án nhật ký và quan sát vận hành}}{62}{table.condensed-bang-3-29-so-sanh-phuong-an-nhat-ky-va-quan-sat-van-hanh}%
-\contentsline {table}{\numberline {3.30}{\ignorespaces Thành phần nhật ký và quan sát vận hành được chọn}}{62}{table.condensed-bang-3-30-thanh-phan-nhat-ky-va-quan-sat-van-hanh-duoc-chon}%
-\contentsline {table}{\numberline {3.31}{\ignorespaces So sánh phương án tổ chức tầng tiếp nhận dữ liệu}}{63}{table.condensed-bang-3-31-so-sanh-phuong-an-to-chuc-tang-tiep-nhan-du-lieu}%
-\contentsline {table}{\numberline {3.32}{\ignorespaces So sánh công nghệ triển khai MQTT Bridge}}{64}{table.condensed-bang-3-32-so-sanh-cong-nghe-trien-khai-mqtt-bridge}%
-\contentsline {table}{\numberline {3.33}{\ignorespaces Cấu hình MQTT Bridge được chọn}}{65}{table.condensed-bang-3-33-cau-hinh-mqtt-bridge-duoc-chon}%
-\contentsline {table}{\numberline {3.34}{\ignorespaces So sánh phương án backend}}{66}{table.condensed-bang-3-34-so-sanh-phuong-an-backend}%
-\contentsline {table}{\numberline {3.35}{\ignorespaces Cấu hình backend được chọn}}{67}{table.condensed-bang-3-35-cau-hinh-backend-duoc-chon}%
-\contentsline {table}{\numberline {3.36}{\ignorespaces So sánh hình thức giao diện khai thác}}{67}{table.condensed-bang-3-36-so-sanh-hinh-thuc-giao-dien-khai-thac}%
-\contentsline {table}{\numberline {3.37}{\ignorespaces So sánh công nghệ frontend web}}{68}{table.condensed-bang-3-37-so-sanh-cong-nghe-frontend-web}%
-\contentsline {table}{\numberline {3.38}{\ignorespaces Cấu hình frontend được chọn}}{69}{table.condensed-bang-3-38-cau-hinh-frontend-duoc-chon}%
-\contentsline {table}{\numberline {3.39}{\ignorespaces So sánh phương án đóng gói dịch vụ}}{71}{table.condensed-bang-3-39-so-sanh-phuong-an-dong-goi-dich-vu}%
-\contentsline {table}{\numberline {3.40}{\ignorespaces Nguyên tắc đóng gói Docker được chọn}}{71}{table.condensed-bang-3-40-nguyen-tac-dong-goi-docker-duoc-chon}%
-\contentsline {table}{\numberline {3.41}{\ignorespaces So sánh phương án triển khai tự động}}{72}{table.condensed-bang-3-41-so-sanh-phuong-an-trien-khai-tu-dong}%
-\contentsline {table}{\numberline {3.42}{\ignorespaces Nguyên tắc triển khai tự động được chọn}}{73}{table.condensed-bang-3-42-nguyen-tac-trien-khai-tu-dong-duoc-chon}%
-\contentsline {table}{\numberline {3.43}{\ignorespaces Đánh giá các phương án tổng thể}}{74}{table.condensed-bang-3-43-danh-gia-cac-phuong-an-tong-the}%
-\contentsline {table}{\numberline {3.44}{\ignorespaces Đối chiếu yêu cầu Chương 2 với phương án được chọn}}{75}{table.condensed-bang-3-44-doi-chieu-yeu-cau-chuong-2-voi-phuong-an-duoc-chon}%
-\contentsline {table}{\numberline {3.45}{\ignorespaces Cấu hình thiết kế tối ưu được chốt}}{76}{table.condensed-bang-3-45-cau-hinh-thiet-ke-toi-uu-duoc-chot}%
-\contentsline {table}{\numberline {4.1}{\ignorespaces Các hạng mục thiết kế phần cứng đã hoàn thành}}{79}{table.condensed-bang-4-1-cac-hang-muc-thiet-ke-phan-cung-da-hoan-thanh}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Kết quả tích hợp phần cứng trên nguyên mẫu thật}}{80}{table.condensed-bang-4-2-ket-qua-tich-hop-phan-cung-tren-nguyen-mau-that}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces Các nhóm mô-đun chính đã được hiện thực trong firmware}}{81}{table.condensed-bang-4-3-cac-nhom-mo-dun-chinh-da-duoc-hien-thuc-trong-firmware}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces Các nhóm chức năng firmware đã được hiện thực}}{84}{table.condensed-bang-4-4-cac-nhom-chuc-nang-firmware-da-duoc-hien-thuc}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Các PID OBD-II đang được firmware thu nhận}}{85}{table.condensed-bang-4-5-cac-pid-obd-ii-dang-duoc-firmware-thu-nhan}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces Các nhóm mã lỗi DTC đang được firmware thu nhận}}{85}{table.condensed-bang-4-6-cac-nhom-ma-loi-dtc-dang-duoc-firmware-thu-nhan}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Các dịch vụ đã được triển khai trên cloud VPS}}{88}{table.condensed-bang-4-7-cac-dich-vu-da-duoc-trien-khai-tren-cloud-vps}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces Cây topic MQTT đang được sử dụng trong hệ thống}}{89}{table.condensed-bang-4-8-cay-topic-mqtt-dang-duoc-su-dung-trong-he-thong}%
-\contentsline {table}{\numberline {4.9}{\ignorespaces Các nhóm bảng chính trong cơ sở dữ liệu PostgreSQL hiện tại}}{93}{table.condensed-bang-4-9-cac-nhom-bang-chinh-trong-co-so-du-lieu-postgresql-hien-tai}%
-\contentsline {table}{\numberline {4.10}{\ignorespaces Các chức năng đã được hiện thực trong MQTT Bridge}}{94}{table.condensed-bang-4-10-cac-chuc-nang-da-duoc-hien-thuc-trong-mqtt-bridge}%
-\contentsline {table}{\numberline {4.11}{\ignorespaces Các nhóm chức năng backend đã được hiện thực}}{94}{table.condensed-bang-4-11-cac-nhom-chuc-nang-backend-da-duoc-hien-thuc}%
-\contentsline {table}{\numberline {4.12}{\ignorespaces Các nhóm chức năng frontend đã được hiện thực}}{95}{table.condensed-bang-4-12-cac-nhom-chuc-nang-frontend-da-duoc-hien-thuc}%
-\contentsline {table}{\numberline {4.13}{\ignorespaces Các điểm truy cập công khai của hệ thống trên cloud VPS}}{98}{table.condensed-bang-4-13-cac-diem-truy-cap-cong-khai-cua-he-thong-tren-cloud-vps}%
-\contentsline {table}{\numberline {4.14}{\ignorespaces Mức độ hoàn thành các hạng mục triển khai chính}}{99}{table.condensed-bang-4-14-muc-do-hoan-thanh-cac-hang-muc-trien-khai-chinh}%
-\contentsline {table}{\numberline {4.15}{\ignorespaces Đối chiếu kết quả triển khai với các chỉ tiêu đặt ra}}{99}{table.condensed-bang-4-15-doi-chieu-ket-qua-trien-khai-voi-cac-chi-tieu-dat-ra}%
-\contentsline {table}{\numberline {5.1}{\ignorespaces Đánh giá hiệu năng theo nhóm chức năng}}{101}{table.condensed-bang-5-1-danh-gia-hieu-nang-theo-nhom-chuc-nang}%
-\contentsline {table}{\numberline {5.2}{\ignorespaces Cấu phần chi phí chính của hệ thống}}{102}{table.condensed-bang-5-2-cau-phan-chi-phi-chinh-cua-he-thong}%
-\contentsline {table}{\numberline {5.3}{\ignorespaces Rủi ro kỹ thuật và biện pháp giảm thiểu}}{104}{table.condensed-bang-5-3-rui-ro-ky-thuat-va-bien-phap-giam-thieu}%
-\contentsline {table}{\numberline {5.4}{\ignorespaces Hướng khuyến nghị cho giai đoạn tiếp theo}}{105}{table.condensed-bang-5-4-huong-khuyen-nghi-cho-giai-doan-tiep-theo}%
-\contentsline {table}{\numberline {6.1}{\ignorespaces Kiến thức đã áp dụng trong đồ án}}{107}{table.condensed-bang-6-1-kien-thuc-da-ap-dung-trong-do-an}%
-\contentsline {table}{\numberline {6.2}{\ignorespaces Vấn đề kỹ thuật và cách xử lý}}{108}{table.condensed-bang-6-2-van-de-ky-thuat-va-cach-xu-ly}%
-\contentsline {table}{\numberline {6.3}{\ignorespaces Các khía cạnh đạo đức và xã hội cần chú ý}}{109}{table.condensed-bang-6-3-cac-khia-canh-dao-duc-va-xa-hoi-can-chu-y}%
-\contentsline {table}{\numberline {6.4}{\ignorespaces Bài học kinh nghiệm chính}}{109}{table.condensed-bang-6-4-bai-hoc-kinh-nghiem-chinh}%
+\contentsline {table}{\numberline {3.10}{\ignorespaces Thông số LIS3DH được dùng trong thiết kế}}{36}{table.condensed-bang-3-10-thong-so-lis3dh-duoc-dung-trong-thiet-ke}%
+\contentsline {table}{\numberline {3.11}{\ignorespaces So sánh kiến trúc nguồn}}{38}{table.condensed-bang-3-11-so-sanh-kien-truc-nguon}%
+\contentsline {table}{\numberline {3.12}{\ignorespaces Phân vai các nhánh nguồn trong thiết bị}}{39}{table.condensed-bang-3-12-phan-vai-cac-nhanh-nguon-trong-thiet-bi}%
+\contentsline {table}{\numberline {3.12A}{\ignorespaces Thông số nhánh buck 5 V chính}}{41}{table.condensed-bang-3-12a-thong-so-nhanh-buck-5-v-chinh}%
+\contentsline {table}{\numberline {3.12B}{\ignorespaces Thông số nhánh logic 3,3 V}}{41}{table.condensed-bang-3-12b-thong-so-nhanh-logic-3-3-v}%
+\contentsline {table}{\numberline {3.12C}{\ignorespaces Thông số nhánh nguồn modem}}{42}{table.condensed-bang-3-12c-thong-so-nhanh-nguon-modem}%
+\contentsline {table}{\numberline {3.12D}{\ignorespaces Thông số nhánh nguồn dự phòng}}{43}{table.condensed-bang-3-12d-thong-so-nhanh-nguon-du-phong}%
+\contentsline {table}{\numberline {3.12E}{\ignorespaces Thông số nhánh sạc pin dự phòng}}{44}{table.condensed-bang-3-12e-thong-so-nhanh-sac-pin-du-phong}%
+\contentsline {table}{\numberline {3.12F}{\ignorespaces Thông số giám sát điện áp và bảo vệ bằng firmware}}{45}{table.condensed-bang-3-12f-thong-so-giam-sat-dien-ap-va-bao-ve-bang-firmware}%
+\contentsline {table}{\numberline {3.13}{\ignorespaces Trích thông số chính của phần cứng được chọn}}{47}{table.condensed-bang-3-13-trich-thong-so-chinh-cua-phan-cung-duoc-chon}%
+\contentsline {table}{\numberline {3.14}{\ignorespaces So sánh các phương án nền tảng firmware}}{48}{table.condensed-bang-3-14-so-sanh-cac-phuong-an-nen-tang-firmware}%
+\contentsline {table}{\numberline {3.15}{\ignorespaces Các dịch vụ nền được dùng trong firmware}}{49}{table.condensed-bang-3-15-cac-dich-vu-nen-duoc-dung-trong-firmware}%
+\contentsline {table}{\numberline {3.16}{\ignorespaces So sánh các mô hình điều phối firmware}}{49}{table.condensed-bang-3-16-so-sanh-cac-mo-hinh-dieu-phoi-firmware}%
+\contentsline {table}{\numberline {3.17}{\ignorespaces Các trạng thái vận hành chính của firmware}}{51}{table.condensed-bang-3-17-cac-trang-thai-van-hanh-chinh-cua-firmware}%
+\contentsline {table}{\numberline {3.18}{\ignorespaces Các nhóm chức năng chính của firmware}}{52}{table.condensed-bang-3-18-cac-nhom-chuc-nang-chinh-cua-firmware}%
+\contentsline {table}{\numberline {3.19}{\ignorespaces So sánh giao thức truyền dữ liệu thiết bị - máy chủ}}{56}{table.condensed-bang-3-19-so-sanh-giao-thuc-truyen-du-lieu-thiet-bi-may-chu}%
+\contentsline {table}{\numberline {3.20}{\ignorespaces Nhóm topic và QoS được chọn}}{57}{table.condensed-bang-3-20-nhom-topic-va-qos-duoc-chon}%
+\contentsline {table}{\numberline {3.21}{\ignorespaces So sánh phương án tổ chức hạ tầng máy chủ}}{58}{table.condensed-bang-3-21-so-sanh-phuong-an-to-chuc-ha-tang-may-chu}%
+\contentsline {table}{\numberline {3.22}{\ignorespaces Các lớp dịch vụ được dùng trong thiết kế phía máy chủ}}{59}{table.condensed-bang-3-22-cac-lop-dich-vu-duoc-dung-trong-thiet-ke-phia-may-chu}%
+\contentsline {table}{\numberline {3.23}{\ignorespaces So sánh phương án MQTT broker}}{60}{table.condensed-bang-3-23-so-sanh-phuong-an-mqtt-broker}%
+\contentsline {table}{\numberline {3.24}{\ignorespaces Đặc điểm EMQX được dùng trong thiết kế}}{61}{table.condensed-bang-3-24-dac-diem-emqx-duoc-dung-trong-thiet-ke}%
+\contentsline {table}{\numberline {3.25}{\ignorespaces So sánh phương án cơ sở dữ liệu nghiệp vụ}}{62}{table.condensed-bang-3-25-so-sanh-phuong-an-co-so-du-lieu-nghiep-vu}%
+\contentsline {table}{\numberline {3.26}{\ignorespaces Cấu hình cơ sở dữ liệu nghiệp vụ được chọn}}{63}{table.condensed-bang-3-26-cau-hinh-co-so-du-lieu-nghiep-vu-duoc-chon}%
+\contentsline {table}{\numberline {3.27}{\ignorespaces So sánh phương án cơ sở dữ liệu đo từ xa (telemetry) theo thời gian}}{64}{table.condensed-bang-3-27-so-sanh-phuong-an-co-so-du-lieu-do-tu-xa-telemetry-theo-thoi-gian}%
+\contentsline {table}{\numberline {3.28}{\ignorespaces Cấu hình cơ sở dữ liệu đo từ xa (telemetry) được chọn}}{65}{table.condensed-bang-3-28-cau-hinh-co-so-du-lieu-do-tu-xa-telemetry-duoc-chon}%
+\contentsline {table}{\numberline {3.29}{\ignorespaces So sánh phương án nhật ký và quan sát vận hành}}{65}{table.condensed-bang-3-29-so-sanh-phuong-an-nhat-ky-va-quan-sat-van-hanh}%
+\contentsline {table}{\numberline {3.30}{\ignorespaces Thành phần nhật ký và quan sát vận hành được chọn}}{66}{table.condensed-bang-3-30-thanh-phan-nhat-ky-va-quan-sat-van-hanh-duoc-chon}%
+\contentsline {table}{\numberline {3.31}{\ignorespaces So sánh phương án tổ chức tầng tiếp nhận dữ liệu}}{67}{table.condensed-bang-3-31-so-sanh-phuong-an-to-chuc-tang-tiep-nhan-du-lieu}%
+\contentsline {table}{\numberline {3.32}{\ignorespaces So sánh công nghệ triển khai MQTT Bridge}}{68}{table.condensed-bang-3-32-so-sanh-cong-nghe-trien-khai-mqtt-bridge}%
+\contentsline {table}{\numberline {3.33}{\ignorespaces Cấu hình MQTT Bridge được chọn}}{68}{table.condensed-bang-3-33-cau-hinh-mqtt-bridge-duoc-chon}%
+\contentsline {table}{\numberline {3.34}{\ignorespaces So sánh phương án backend}}{69}{table.condensed-bang-3-34-so-sanh-phuong-an-backend}%
+\contentsline {table}{\numberline {3.35}{\ignorespaces Cấu hình backend được chọn}}{70}{table.condensed-bang-3-35-cau-hinh-backend-duoc-chon}%
+\contentsline {table}{\numberline {3.36}{\ignorespaces So sánh hình thức giao diện khai thác}}{71}{table.condensed-bang-3-36-so-sanh-hinh-thuc-giao-dien-khai-thac}%
+\contentsline {table}{\numberline {3.37}{\ignorespaces So sánh công nghệ frontend web}}{72}{table.condensed-bang-3-37-so-sanh-cong-nghe-frontend-web}%
+\contentsline {table}{\numberline {3.38}{\ignorespaces Cấu hình frontend được chọn}}{72}{table.condensed-bang-3-38-cau-hinh-frontend-duoc-chon}%
+\contentsline {table}{\numberline {3.39}{\ignorespaces So sánh phương án đóng gói dịch vụ}}{74}{table.condensed-bang-3-39-so-sanh-phuong-an-dong-goi-dich-vu}%
+\contentsline {table}{\numberline {3.40}{\ignorespaces Nguyên tắc đóng gói Docker được chọn}}{74}{table.condensed-bang-3-40-nguyen-tac-dong-goi-docker-duoc-chon}%
+\contentsline {table}{\numberline {3.41}{\ignorespaces So sánh phương án triển khai tự động}}{75}{table.condensed-bang-3-41-so-sanh-phuong-an-trien-khai-tu-dong}%
+\contentsline {table}{\numberline {3.42}{\ignorespaces Nguyên tắc triển khai tự động được chọn}}{76}{table.condensed-bang-3-42-nguyen-tac-trien-khai-tu-dong-duoc-chon}%
+\contentsline {table}{\numberline {3.43}{\ignorespaces Đánh giá các phương án tổng thể}}{77}{table.condensed-bang-3-43-danh-gia-cac-phuong-an-tong-the}%
+\contentsline {table}{\numberline {3.44}{\ignorespaces Đối chiếu yêu cầu Chương 2 với phương án được chọn}}{78}{table.condensed-bang-3-44-doi-chieu-yeu-cau-chuong-2-voi-phuong-an-duoc-chon}%
+\contentsline {table}{\numberline {3.45}{\ignorespaces Cấu hình thiết kế tối ưu được chốt}}{79}{table.condensed-bang-3-45-cau-hinh-thiet-ke-toi-uu-duoc-chot}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Các hạng mục thiết kế phần cứng đã hoàn thành}}{82}{table.condensed-bang-4-1-cac-hang-muc-thiet-ke-phan-cung-da-hoan-thanh}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Kết quả tích hợp phần cứng trên nguyên mẫu thật}}{83}{table.condensed-bang-4-2-ket-qua-tich-hop-phan-cung-tren-nguyen-mau-that}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Các nhóm mô-đun chính đã được hiện thực trong firmware}}{84}{table.condensed-bang-4-3-cac-nhom-mo-dun-chinh-da-duoc-hien-thuc-trong-firmware}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Các nhóm chức năng firmware đã được hiện thực}}{86}{table.condensed-bang-4-4-cac-nhom-chuc-nang-firmware-da-duoc-hien-thuc}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Các PID OBD-II đang được firmware thu nhận}}{87}{table.condensed-bang-4-5-cac-pid-obd-ii-dang-duoc-firmware-thu-nhan}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Các nhóm mã lỗi DTC đang được firmware thu nhận}}{87}{table.condensed-bang-4-6-cac-nhom-ma-loi-dtc-dang-duoc-firmware-thu-nhan}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Các dịch vụ đã được triển khai trên cloud VPS}}{90}{table.condensed-bang-4-7-cac-dich-vu-da-duoc-trien-khai-tren-cloud-vps}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces Cây topic MQTT đang được sử dụng trong hệ thống}}{91}{table.condensed-bang-4-8-cay-topic-mqtt-dang-duoc-su-dung-trong-he-thong}%
+\contentsline {table}{\numberline {4.9}{\ignorespaces Các nhóm bảng chính trong cơ sở dữ liệu PostgreSQL hiện tại}}{96}{table.condensed-bang-4-9-cac-nhom-bang-chinh-trong-co-so-du-lieu-postgresql-hien-tai}%
+\contentsline {table}{\numberline {4.10}{\ignorespaces Các chức năng đã được hiện thực trong MQTT Bridge}}{97}{table.condensed-bang-4-10-cac-chuc-nang-da-duoc-hien-thuc-trong-mqtt-bridge}%
+\contentsline {table}{\numberline {4.11}{\ignorespaces Các nhóm chức năng backend đã được hiện thực}}{98}{table.condensed-bang-4-11-cac-nhom-chuc-nang-backend-da-duoc-hien-thuc}%
+\contentsline {table}{\numberline {4.12}{\ignorespaces Các nhóm chức năng frontend đã được hiện thực}}{99}{table.condensed-bang-4-12-cac-nhom-chuc-nang-frontend-da-duoc-hien-thuc}%
+\contentsline {table}{\numberline {4.13}{\ignorespaces Các điểm truy cập công khai của hệ thống trên cloud VPS}}{102}{table.condensed-bang-4-13-cac-diem-truy-cap-cong-khai-cua-he-thong-tren-cloud-vps}%
+\contentsline {table}{\numberline {4.14}{\ignorespaces Mức độ hoàn thành các hạng mục triển khai chính}}{103}{table.condensed-bang-4-14-muc-do-hoan-thanh-cac-hang-muc-trien-khai-chinh}%
+\contentsline {table}{\numberline {4.15}{\ignorespaces Đối chiếu kết quả triển khai với các chỉ tiêu đặt ra}}{104}{table.condensed-bang-4-15-doi-chieu-ket-qua-trien-khai-voi-cac-chi-tieu-dat-ra}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Đánh giá hiệu năng theo nhóm chức năng}}{106}{table.condensed-bang-5-1-danh-gia-hieu-nang-theo-nhom-chuc-nang}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Cấu phần chi phí chính của hệ thống}}{107}{table.condensed-bang-5-2-cau-phan-chi-phi-chinh-cua-he-thong}%
+\contentsline {table}{\numberline {5.3}{\ignorespaces Rủi ro kỹ thuật và biện pháp giảm thiểu}}{109}{table.condensed-bang-5-3-rui-ro-ky-thuat-va-bien-phap-giam-thieu}%
+\contentsline {table}{\numberline {5.4}{\ignorespaces Hướng khuyến nghị cho giai đoạn tiếp theo}}{110}{table.condensed-bang-5-4-huong-khuyen-nghi-cho-giai-doan-tiep-theo}%
+\contentsline {table}{\numberline {6.1}{\ignorespaces Kiến thức đã áp dụng trong đồ án}}{112}{table.condensed-bang-6-1-kien-thuc-da-ap-dung-trong-do-an}%
+\contentsline {table}{\numberline {6.2}{\ignorespaces Vấn đề kỹ thuật và cách xử lý}}{113}{table.condensed-bang-6-2-van-de-ky-thuat-va-cach-xu-ly}%
+\contentsline {table}{\numberline {6.3}{\ignorespaces Các khía cạnh đạo đức và xã hội cần chú ý}}{114}{table.condensed-bang-6-3-cac-khia-canh-dao-duc-va-xa-hoi-can-chu-y}%
+\contentsline {table}{\numberline {6.4}{\ignorespaces Bài học kinh nghiệm chính}}{114}{table.condensed-bang-6-4-bai-hoc-kinh-nghiem-chinh}%

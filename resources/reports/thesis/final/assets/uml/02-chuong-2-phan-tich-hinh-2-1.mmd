@@ -1,25 +1,26 @@
 flowchart TB
-    Device["Thiết bị theo dõi"] -->|Rawdata / status / events / firmware| EMQX["EMQX (broker MQTT)"]
-    EMQX -->|Device topics| Bridge["MQTT Bridge"]
+    Vehicle["Nguồn dữ liệu trên xe<br/>vị trí, trạng thái, sự kiện"]
+    Channel["Kênh truyền dữ liệu<br/>bản tin định kỳ và cảnh báo"]
+    Ingestion["Lớp tiếp nhận<br/>kiểm tra và phân loại"]
 
-    subgraph DataPlane["Tầng lưu trữ<br/>Và quan sát"]
-        direction TB
-        PostgreSQLNode["PostgreSQL<br/>Dữ liệu nghiệp vụ"]
-        VictoriaMetricsNode["VictoriaMetrics<br/>Dữ liệu đo"]
-        VictoriaLogsNode["VictoriaLogs<br/>Nhật ký"]
+    subgraph DataLayer["Lớp dữ liệu cần có"]
+        direction LR
+        Business["Dữ liệu nghiệp vụ<br/>xe, thiết bị, người dùng"]
+        Timeline["Dữ liệu theo thời gian<br/>vị trí, tốc độ, nguồn"]
+        Logs["Nhật ký vận hành<br/>lỗi, cảnh báo, truy vết"]
     end
 
-    Bridge --> PostgreSQLNode
-    Bridge --> VictoriaMetricsNode
-    Bridge --> VictoriaLogsNode
-    Bridge -->|Publish internal/events/#| EMQX
+    Service["Lớp dịch vụ khai thác<br/>truy vấn, cảnh báo, cấu hình"]
+    Interface["Giao diện quản lý<br/>bản đồ, lịch sử, trạng thái"]
+    Operator["Người quản lý"]
 
-    PostgreSQLNode --> API["API phía máy chủ"]
-    VictoriaMetricsNode --> API
-    EMQX -. realtime events .-> API
-    Dashboard["Giao diện web"] -->|REST requests| API
-    API -->|REST responses| Dashboard
-    API --> Socket["Socket.IO"]
-    Socket --> Dashboard
-    API -->|Publish commands| EMQX
-    EMQX -->|Commands| Device
+    Vehicle --> Channel --> Ingestion
+    Ingestion --> Business
+    Ingestion --> Timeline
+    Ingestion --> Logs
+    Business --> Service
+    Timeline --> Service
+    Logs --> Service
+    Service --> Interface --> Operator
+    Operator -. yêu cầu tra cứu / cấu hình .-> Interface
+    Service -. cấu hình theo dõi .-> Ingestion

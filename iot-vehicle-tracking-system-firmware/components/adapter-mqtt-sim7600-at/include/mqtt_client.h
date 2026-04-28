@@ -17,7 +17,6 @@
  * @param payload Null-terminated command payload.
  */
 typedef void (*mqtt_command_cb_t)(const char *topic, const char *payload);
-typedef void (*mqtt_puback_cb_t)(int msg_id);
 
 /**
  * @brief Initialize MQTT client and derive device-scoped topics.
@@ -110,7 +109,6 @@ esp_err_t tracker_mqtt_subscribe_commands(void);
  * @param cb Callback function.
  */
 void tracker_mqtt_set_command_callback(mqtt_command_cb_t cb);
-void tracker_mqtt_set_puback_callback(mqtt_puback_cb_t cb);
 
 /**
  * @brief Get rawdata topic string.

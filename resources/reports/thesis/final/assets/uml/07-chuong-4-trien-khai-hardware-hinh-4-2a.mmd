@@ -1,5 +1,6 @@
 flowchart LR
-    TX["GPIO16 TX"] --> RXM["SIM RX"]
-    RX["GPIO17 RX"] --> TXM["SIM TX"]
-    PWRKEY["GPIO26 PWR-KEY"] --> SIMPWR["SIM PWR-KEY"]
+    TX["GPIO17 TX"] --> RXM["SIM RX"]
+    RX["GPIO18 RX"] --> TXM["SIM TX"]
+    PWRKEY["GPIO34 PWR-KEY"] --> SIMPWR["SIM PWR-KEY"]
+    RESET["GPIO35 RESET"] --> SIMRST["SIM RESET"]
     V4["Đường 4V"] --> VBAT["SIM VBAT"]

@@ -1,1 +1,7 @@
-export { default } from '../../../geofences/[id]/page';
+import { redirect } from 'next/navigation';
+
+const LegacyOperationsGeofenceDetailPage = () => {
+  redirect('/dashboard/zones');
+};
+
+export default LegacyOperationsGeofenceDetailPage;

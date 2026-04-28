@@ -14,10 +14,6 @@
  * @brief Runtime-config blob load/save with migration and repair logic.
  */
 
-#define TRACKER_PRODUCTION_DEVICE_ID "TRACKER_001"
-#define TRACKER_PRODUCTION_AUTH_TOKEN "TRACKER_001_Anmh1205"
-#define TRACKER_PRODUCTION_MQTT_USERNAME "device"
-#define TRACKER_PRODUCTION_MQTT_PASSWORD "Anmh1205"
 #define TRACKER_LEGACY_MQTT_HOST_LOCALHOST "localhost"
 #define TRACKER_LEGACY_DEFAULT_HEARTBEAT_INTERVAL_S 900U
 #define TRACKER_LEGACY_DEFAULT_TRACKING_INTERVAL_S 10U
@@ -25,6 +21,7 @@
 static const char *TAG = "CONFIG_STORE_NVS";
 
 typedef struct {
+    /** v1 stored only the original runtime fields before OTA/sleep tuning existed. */
     char device_id[TRACKER_DEVICE_ID_MAX_LEN];
     char auth_token[TRACKER_AUTH_TOKEN_MAX_LEN];
     char mqtt_host[TRACKER_HOST_MAX_LEN];
@@ -42,53 +39,15 @@ static uint16_t config_store_clamp_u16(uint16_t value, uint16_t min_value, uint1
     return (uint16_t)util_clamp_int((int)value, (int)min_value, (int)max_value);
 }
 
-static bool config_store_targets_production_thingdock(const config_t *config) {
-    config_t defaults = {0};
-    app_config_set_defaults(&defaults);
-    return config != NULL &&
-           strcmp(config->device_id, TRACKER_PRODUCTION_DEVICE_ID) == 0 &&
-           strcmp(config->mqtt_host, defaults.mqtt_host) == 0;
-}
-
-static bool config_store_auth_token_needs_production_repair(const char *auth_token) {
-    if (util_string_empty(auth_token)) {
-        return true;
-    }
-    return strcmp(auth_token, "device-secret-token") == 0 || strcmp(auth_token, "Anmh1205") == 0;
-}
-
-static bool config_store_apply_production_thingdock_repair(config_t *config) {
-    if (!config_store_targets_production_thingdock(config)) {
-        return false;
-    }
-
-    bool changed = false;
-    if (util_string_empty(config->mqtt_username)) {
-        util_copy_string(config->mqtt_username,
-                         sizeof(config->mqtt_username),
-                         TRACKER_PRODUCTION_MQTT_USERNAME);
-        changed = true;
-    }
-    if (util_string_empty(config->mqtt_password)) {
-        util_copy_string(config->mqtt_password,
-                         sizeof(config->mqtt_password),
-                         TRACKER_PRODUCTION_MQTT_PASSWORD);
-        changed = true;
-    }
-    if (config_store_auth_token_needs_production_repair(config->auth_token)) {
-        util_copy_string(config->auth_token,
-                         sizeof(config->auth_token),
-                         TRACKER_PRODUCTION_AUTH_TOKEN);
-        changed = true;
-    }
-    return changed;
-}
-
 static void config_store_apply_legacy_v1(config_t *config, const config_v1_t *legacy) {
     if (config == NULL || legacy == NULL) {
         return;
     }
 
+    /*
+     * Start from current defaults, then overlay only fields that existed in v1.
+     * Newer fields keep safe defaults instead of inheriting zero-filled memory.
+     */
     util_copy_string(config->device_id, sizeof(config->device_id), legacy->device_id);
     util_copy_string(config->auth_token, sizeof(config->auth_token), legacy->auth_token);
     util_copy_string(config->mqtt_host, sizeof(config->mqtt_host), legacy->mqtt_host);
@@ -148,7 +107,11 @@ esp_err_t config_store_nvs_load(config_t *config) {
         ESP_LOGW(TAG, "Config not found, writing defaults");
         return config_store_nvs_save(config);
     }
-    ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "Failed to query config blob size");
+    if (err != ESP_OK) {
+        nvs_close(handle);
+        ESP_LOGE(TAG, "Failed to query config blob size: %s", esp_err_to_name(err));
+        return err;
+    }
 
     bool migrated = false;
     if (stored_size == sizeof(*config)) {
@@ -186,6 +149,7 @@ esp_err_t config_store_nvs_load(config_t *config) {
     config_t defaults = {0};
     app_config_set_defaults(&defaults);
     if (strcmp(config->mqtt_host, TRACKER_LEGACY_MQTT_HOST_LOCALHOST) == 0) {
+        /* Old bench images persisted localhost, which is invalid on field hardware. */
         ESP_LOGW(TAG,
                  "Legacy MQTT host '%s' detected, migrating to '%s'",
                  TRACKER_LEGACY_MQTT_HOST_LOCALHOST,
@@ -197,13 +161,9 @@ esp_err_t config_store_nvs_load(config_t *config) {
     bool legacy_cadence_pair = config->heartbeat_interval_s == TRACKER_LEGACY_DEFAULT_HEARTBEAT_INTERVAL_S &&
                                config->tracking_interval_s == TRACKER_LEGACY_DEFAULT_TRACKING_INTERVAL_S;
     if (!config->imu_wakeup_enabled && config->sleep_enabled && legacy_cadence_pair) {
+        /* Preserve production parked wake behavior after migrating early parked configs. */
         ESP_LOGW(TAG, "Legacy parked config detected, enabling IMU wake for production motion wake");
         config->imu_wakeup_enabled = true;
-        migrated = true;
-    }
-
-    if (config_store_apply_production_thingdock_repair(config)) {
-        ESP_LOGW(TAG, "Production ThingDock credential repair applied for %s", config->device_id);
         migrated = true;
     }
 

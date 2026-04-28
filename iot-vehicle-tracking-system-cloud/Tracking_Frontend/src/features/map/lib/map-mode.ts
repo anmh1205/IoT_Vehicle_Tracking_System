@@ -5,8 +5,7 @@ import type { MapHardMode, MapShareableHardMode } from '@/features/map/types';
 export const MAP_SHAREABLE_HARD_MODES: MapShareableHardMode[] = [
   'browse',
   'inspect-device',
-  'edit-geofence',
-  'edit-allowed-zone',
+  'edit-zone',
 ];
 
 export const isMapShareableHardMode = (
@@ -14,8 +13,7 @@ export const isMapShareableHardMode = (
 ): value is MapShareableHardMode =>
   MAP_SHAREABLE_HARD_MODES.includes(value as MapShareableHardMode);
 
-export const isMapEditMode = (mode: MapHardMode) =>
-  mode === 'edit-geofence' || mode === 'edit-allowed-zone';
+export const isMapEditMode = (mode: MapHardMode) => mode === 'edit-zone';
 
 export const isMapInspectMode = (mode: MapHardMode) => mode === 'inspect-device';
 
@@ -26,7 +24,7 @@ export const resolveMapHardMode = (
   mode: MapHardMode | MapShareableHardMode | null | undefined,
   selectedDeviceId: string | null,
 ): MapHardMode => {
-  if (mode === 'edit-geofence') {
+  if (mode === 'edit-zone') {
     return mode;
   }
 
@@ -34,7 +32,7 @@ export const resolveMapHardMode = (
     return mode === 'mobile-list' ? mode : 'browse';
   }
 
-  if (mode === 'edit-allowed-zone' || mode === 'inspect-device') {
+  if (mode === 'inspect-device') {
     return mode;
   }
 

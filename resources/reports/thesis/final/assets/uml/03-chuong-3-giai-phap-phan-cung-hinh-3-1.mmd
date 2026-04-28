@@ -1,14 +1,13 @@
+%%{init: {'flowchart': {'nodeSpacing': 90, 'rankSpacing': 110}} }%%
 flowchart TB
-    Power["Nguồn chính 12V/24V<br/>+ Pin dự phòng"]
-    MCU["ESP32-S3 + FSM nguồn"]
-    Modem["SIM7600CE-T<br/>4G + GNSS"]
-    OBD["OBD2 BLE"]
-    IMU["LIS3DSH"]
-    Cloud["MQTT / máy chủ"]
+    Vehicle["Phương tiện cần theo dõi"]
+    Power["Nguồn xe và nguồn dự phòng"]
+    Sources["Nguồn dữ liệu trên xe<br/>vị trí, trạng thái, dữ liệu xe, sự kiện"]
+    Device["Thiết bị theo dõi trên xe<br/>thu thập, tiền xử lý, quản lý trạng thái"]
+    Channel["Kênh truyền dữ liệu"]
+    Server["Lớp máy chủ<br/>tiếp nhận, lưu trữ, cảnh báo"]
+    App["Giao diện quản lý<br/>bản đồ, lịch sử, trạng thái"]
 
-    Power --> MCU
-    MCU --> Modem
-    Modem -->|Uplink telemetry| Cloud
-    Cloud -->|Downlink commands / OTA| Modem
-    MCU --> OBD
-    MCU --> IMU
+    Vehicle --> Power --> Device
+    Vehicle --> Sources --> Device
+    Device --> Channel --> Server --> App

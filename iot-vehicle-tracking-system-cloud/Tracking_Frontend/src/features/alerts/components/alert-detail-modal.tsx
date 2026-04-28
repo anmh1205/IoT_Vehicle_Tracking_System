@@ -39,9 +39,12 @@ const STATUS_LABELS: Record<string, string> = {
 
 const ALERT_TYPE_LABELS: Record<string, string> = {
   speeding: 'Vượt tốc độ',
-  geofence: 'Ra/vào vùng giám sát',
-  geofence_enter: 'Vào vùng giám sát',
-  geofence_exit: 'Rời vùng giám sát',
+  geofence: 'Vùng',
+  geofence_enter: 'Vào vùng',
+  geofence_exit: 'Rời vùng',
+  zone_enter: 'Vào vùng',
+  zone_exit: 'Rời vùng',
+  zone_outside_periodic: 'Đang ở ngoài vùng',
   offline: 'Mất kết nối',
   device_offline: 'Mất kết nối thiết bị',
   maintenance: 'Bảo trì',
@@ -103,10 +106,11 @@ const buildAlertExplanation = (alert: any, displayMessage: string) => {
           'Nếu tái diễn trong cùng ca, tạo biên bản vi phạm để theo dõi.',
         ],
       };
+    case 'zone_enter':
     case 'geofence':
     case 'geofence_enter':
       return {
-        summary: `Xe ${vehicleRef} đi vào vùng giám sát ${geofenceName}.`,
+        summary: `Xe ${vehicleRef} đi vào vùng ${geofenceName}.`,
         trigger: `Nguồn cảnh báo: ${sourceRef}. ${displayMessage}`,
         actions: [
           'Đối chiếu lệnh điều phối để xác nhận điểm đến có hợp lệ.',
@@ -114,14 +118,25 @@ const buildAlertExplanation = (alert: any, displayMessage: string) => {
           'Cập nhật ghi chú xác minh trước khi đóng cảnh báo.',
         ],
       };
+    case 'zone_exit':
     case 'geofence_exit':
       return {
-        summary: `Xe ${vehicleRef} rời khỏi vùng giám sát ${geofenceName}.`,
+        summary: `Xe ${vehicleRef} rời khỏi vùng ${geofenceName}.`,
         trigger: `Nguồn cảnh báo: ${sourceRef}. ${displayMessage}`,
         actions: [
           'Kiểm tra tuyến thực tế và mục đích rời vùng đã đăng ký.',
           'Liên hệ tài xế hoặc đơn vị liên quan để xác nhận thay đổi lộ trình.',
           'Ghi lại nguyên nhân rời vùng để phục vụ truy vết sau này.',
+        ],
+      };
+    case 'zone_outside_periodic':
+      return {
+        summary: `Xe ${vehicleRef} vẫn đang ở ngoài vùng ${geofenceName}.`,
+        trigger: `Nguồn cảnh báo: ${sourceRef}. ${displayMessage}`,
+        actions: [
+          'Kiểm tra lý do xe tiếp tục ở ngoài vùng trong khoảng thời gian kéo dài.',
+          'Xác nhận với điều phối hoặc tài xế xem đây có phải thay đổi hợp lệ hay không.',
+          'Nếu không hợp lệ, escalates ngay để xử lý theo quy trình vận hành.',
         ],
       };
     case 'device_offline':
@@ -311,8 +326,8 @@ export const AlertDetailModal = ({
                   <InfoRow label="Khách hàng" value={alert?.customerName ?? 'Chưa có thông tin khách hàng'} />
                   <InfoRow label="Chuyến đi" value={alert?.tripId ? String(alert.tripId) : 'Không gắn chuyến đi'} />
                   <InfoRow
-                    label="Geofence"
-                    value={alert?.geofenceName ?? (alert?.geofenceId ? String(alert.geofenceId) : 'Không gắn geofence')}
+                    label="Vùng"
+                    value={alert?.geofenceName ?? (alert?.geofenceId ? String(alert.geofenceId) : 'Không gắn vùng')}
                   />
                   <InfoRow
                     label="Tốc độ lúc cảnh báo"

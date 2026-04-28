@@ -7,7 +7,7 @@
 
 /**
  * @file offline_queue.h
- * @brief Queue-first telemetry flow with FIFO replay and ACK pointer semantics.
+ * @brief Queue-first telemetry flow with FIFO replay and publish-result commit.
  */
 
 typedef enum {
@@ -61,24 +61,10 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
 /**
  * @brief Execute one non-blocking replay step.
  *
- * This function advances ACK handling, publish retries, and FIFO replay only
- * when the queue is initialized, online, mounted, and MQTT-connected.
+ * This function advances publish retries and FIFO replay only when the queue
+ * is initialized, online, mounted, and MQTT-connected.
  */
 void offline_queue_replay_tick(void);
-
-/**
- * @brief Feed a QoS1 MQTT publish ACK back into the replay state machine.
- *
- * @param msg_id MQTT message ID acknowledged by the broker/client stack.
- */
-void offline_queue_handle_publish_ack(int msg_id);
-
-/**
- * @brief Report whether replay is currently waiting on a QoS1 ACK.
- *
- * @return true when a critical record was published and not finalized yet.
- */
-bool offline_queue_has_pending_ack(void);
 
 /**
  * @brief Indicate whether raw telemetry should slow down because SD usage is high.

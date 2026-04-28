@@ -33,7 +33,7 @@ export const DeviceDetailModal = ({
       <DeviceDetailModalProvider value={context}>
         {presentation === 'workspace' ? (
           <DeviceWorkspaceShell
-            fallbackPaths={fallbackPaths ?? { alertsPath: null, deviceDetailPath: null, geofencesPath: '/dashboard/operations/geofences', vehicleDetailPath: null }}
+            fallbackPaths={fallbackPaths ?? { alertsPath: null, deviceDetailPath: null, geofencesPath: '/dashboard/zones', vehicleDetailPath: null }}
             launchPayload={launchPayload}
             launchRequestKey={launchRequestKey}
             launchTarget={launchTarget}

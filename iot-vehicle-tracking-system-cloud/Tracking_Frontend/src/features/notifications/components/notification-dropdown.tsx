@@ -18,7 +18,7 @@ const getTarget = (item: any) => {
   if (item.referenceType === 'alert' && item.referenceId) return '/dashboard/attention/queue';
   if (item.type === 'export') return '/dashboard/platform/exports';
   if (item.type === 'firmware') return '/dashboard/platform/firmware';
-  if (item.type === 'geofence') return '/dashboard/operations/map';
+  if (item.type === 'zone') return '/dashboard/zones';
   return '/dashboard/command';
 };
 

@@ -199,12 +199,8 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
 
     if (read_obd && s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
         uint64_t now_ms = util_uptime_ms();
-        static const tracker_obd_diag_query_t s_diag_queries[] = {
-            {.mode = OBD_MODE_CURRENT_DATA, .pid = OBD_PID_MONITOR_STATUS},
-            {.mode = OBD_MODE_STORED_DTC, .pid = -1},
-            {.mode = OBD_MODE_PENDING_DTC, .pid = -1},
-            {.mode = OBD_MODE_PERMANENT_DTC, .pid = -1},
-        };
+        size_t diag_query_count = 0;
+        const tracker_obd_diag_query_t *diag_queries = state_machine_obd_diagnostic_queries(&diag_query_count);
 
         if ((now_ms - s_last_obd_poll_ms) >= TRACKER_OBD_POLL_INTERVAL_MS) {
             static const uint8_t s_aux_pids[] = {0x05, 0x2F, 0x04};
@@ -216,11 +212,13 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
             s_last_obd_poll_ms = now_ms;
         }
 
-        if ((now_ms - s_last_obd_diagnostic_poll_ms) >= TRACKER_OBD_DIAGNOSTIC_POLL_INTERVAL_MS) {
+        if (diag_queries != NULL &&
+            diag_query_count > 0 &&
+            (now_ms - s_last_obd_diagnostic_poll_ms) >= TRACKER_OBD_DIAGNOSTIC_POLL_INTERVAL_MS) {
             const tracker_obd_diag_query_t *diag_query =
-                &s_diag_queries[s_obd_diag_query_cursor % ARRAY_SIZE(s_diag_queries)];
+                &diag_queries[s_obd_diag_query_cursor % diag_query_count];
             state_machine_run_obd_diagnostic_query(s_ble_ctx, diag_query);
-            s_obd_diag_query_cursor = (uint8_t)((s_obd_diag_query_cursor + 1U) % ARRAY_SIZE(s_diag_queries));
+            s_obd_diag_query_cursor = (uint8_t)((s_obd_diag_query_cursor + 1U) % diag_query_count);
             s_last_obd_diagnostic_poll_ms = now_ms;
         }
 
@@ -272,6 +270,13 @@ telemetry_finalize:
     s_telemetry.obd_elm_ready = s_obd_elm_ready && obd_connected;
     util_copy_string(s_telemetry.obd_ecu_state, sizeof(s_telemetry.obd_ecu_state), obd_ecu_state);
 
+    bool obd_signal_fresh =
+        s_telemetry.obd_elm_ready &&
+        state_machine_has_recent_obd_sample(now_ms, TRACKER_OBD_LIVE_SIGNAL_MAX_AGE_MS);
+    if (!obd_signal_fresh) {
+        state_machine_clear_obd_signal_snapshot();
+    }
+
     if (s_last_obd_sample_ms == 0 || now_ms < s_last_obd_sample_ms) {
         s_telemetry.obd_sample_age_ms = UINT32_MAX;
     } else {
@@ -281,10 +286,10 @@ telemetry_finalize:
 
     float ignition_threshold_v = (float)s_config.ignition_adc_threshold_mv / 1000.0f;
     bool adc_ignition = s_telemetry.battery_top >= ignition_threshold_v;
-    bool rpm_ignition = s_telemetry.obd_rpm > 0;
     bool obd_live_ignition = obd_connected &&
                              strcmp(obd_ecu_state, "live") == 0 &&
                              state_machine_has_recent_obd_sample(now_ms, TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS);
+    bool rpm_ignition = obd_live_ignition && s_telemetry.obd_rpm > 0;
     bool ignition_next = rpm_ignition || adc_ignition || obd_live_ignition;
     if (!s_ignition_log_initialized || ignition_next != s_last_ignition_state) {
         ESP_LOGI(TAG,

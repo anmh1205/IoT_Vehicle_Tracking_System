@@ -32,6 +32,7 @@ const OBD_IDLE_RPM_THRESHOLD = 900;
 const OBD_IDLE_SPEED_MAX_KPH = 3;
 const OBD_VOLTAGE_LOW_V = 12;
 const OBD_VOLTAGE_LOAD_MIN = 50;
+const OBD_LIVE_SIGNAL_MAX_SAMPLE_AGE_MS = 30_000;
 const OBD_DTC_MAX_SAMPLE_AGE_MS = 60_000;
 const OBD_SAMPLE_AGE_SENTINEL_MS = 0xffffffff;
 const OBD_RULE_MAINTENANCE_TITLES = [
@@ -254,12 +255,52 @@ const normalizeObdSampleAgeMs = (value: unknown): number | undefined => {
   return parsed >= OBD_SAMPLE_AGE_SENTINEL_MS ? undefined : parsed;
 };
 
+const hasFreshObdSignals = (
+  diagnostics: RawDiagnostics | undefined,
+  normalizedSampleAgeMs: number | undefined,
+): boolean => {
+  const connected = toBoolean(diagnostics?.channel?.ble_obd_connected);
+  const elmReady = toBoolean(diagnostics?.channel?.elm_ready);
+
+  return connected === true &&
+    elmReady === true &&
+    normalizedSampleAgeMs !== undefined &&
+    normalizedSampleAgeMs <= OBD_LIVE_SIGNAL_MAX_SAMPLE_AGE_MS;
+};
+
+const normalizeDiagnosticsForStorage = (
+  diagnostics: RawDiagnostics | undefined,
+  normalizedSampleAgeMs: number | undefined,
+  signalsFresh: boolean,
+): RawDiagnostics | undefined => {
+  if (!diagnostics) {
+    return undefined;
+  }
+
+  const normalized: RawDiagnostics = { ...diagnostics };
+  if (diagnostics.quality) {
+    normalized.quality = { ...diagnostics.quality };
+    if (normalizedSampleAgeMs === undefined) {
+      delete normalized.quality.sample_age_ms;
+    } else {
+      normalized.quality.sample_age_ms = normalizedSampleAgeMs;
+    }
+  }
+  if (!signalsFresh) {
+    delete normalized.signals;
+  }
+  return normalized;
+};
+
 const hasValidDtcQualityGate = (diagnostics: RawDiagnostics): boolean => {
   const connected = toBoolean(diagnostics.channel?.ble_obd_connected);
   const elmReady = toBoolean(diagnostics.channel?.elm_ready);
-  const sampleAgeMs = toFiniteNumber(diagnostics.quality?.sample_age_ms);
+  const sampleAgeMs = normalizeObdSampleAgeMs(diagnostics.quality?.sample_age_ms);
 
-  return connected === true && elmReady === true && (sampleAgeMs === undefined || sampleAgeMs <= OBD_DTC_MAX_SAMPLE_AGE_MS);
+  return connected === true &&
+    elmReady === true &&
+    sampleAgeMs !== undefined &&
+    sampleAgeMs <= OBD_DTC_MAX_SAMPLE_AGE_MS;
 };
 
 interface ObdAlertContext {
@@ -667,19 +708,14 @@ export const handleRawData = async (
   const permanentDtcCodes = normalizeDtcCodes(diagnostics?.dtc?.permanent);
   const milOn = toBoolean(diagnostics?.mil_on) === true;
   const normalizedObdSampleAgeMs = normalizeObdSampleAgeMs(diagnostics?.quality?.sample_age_ms);
-  const normalizedDiagnosticsQualityRest = diagnostics?.quality
-    ? Object.fromEntries(
-        Object.entries(diagnostics.quality).filter(([key]) => key !== 'sample_age_ms'),
-      )
-    : null;
-  const normalizedDiagnosticsQuality = diagnostics?.quality
-    ? {
-        ...normalizedDiagnosticsQualityRest,
-        ...(normalizedObdSampleAgeMs === undefined
-          ? {}
-          : { sample_age_ms: normalizedObdSampleAgeMs }),
-      }
-    : null;
+  const obdSignalsAreFresh = hasFreshObdSignals(diagnostics, normalizedObdSampleAgeMs);
+  const normalizedDiagnostics = normalizeDiagnosticsForStorage(
+    diagnostics,
+    normalizedObdSampleAgeMs,
+    obdSignalsAreFresh,
+  );
+  const normalizedDiagnosticsQuality = normalizedDiagnostics?.quality ?? null;
+  const normalizedObdSignals = normalizedDiagnostics?.signals;
   const normalizedGnss = normalizeGnssLocation(
     payload.data.latitude,
     payload.data.longitude,
@@ -729,7 +765,7 @@ export const handleRawData = async (
     state: payload.state,
     legacyStatus: previousStatus ?? device.current_status,
     ignitionHint: payload.data.ignition,
-    speedKph: effectiveSpeed ?? toFiniteNumber(diagnostics?.signals?.obd_speed_kph),
+    speedKph: effectiveSpeed ?? toFiniteNumber(normalizedObdSignals?.obd_speed_kph),
     previous: previousState?.runtimeState,
   });
   const stateUpdatedAt = new Date(receivedAtMs).toISOString();
@@ -775,11 +811,11 @@ export const handleRawData = async (
       ? (payload.data.ignition ? 1 : 0)
       : undefined,
     error_code: payload.data.error_code,
-    obd_rpm: toFiniteNumber(diagnostics?.signals?.rpm),
-    obd_speed_kph: toFiniteNumber(diagnostics?.signals?.obd_speed_kph),
-    obd_coolant_c: toFiniteNumber(diagnostics?.signals?.coolant_c),
-    obd_fuel_level_pct: toFiniteNumber(diagnostics?.signals?.fuel_level_pct),
-    obd_engine_load_pct: toFiniteNumber(diagnostics?.signals?.engine_load_pct),
+    obd_rpm: toFiniteNumber(normalizedObdSignals?.rpm),
+    obd_speed_kph: toFiniteNumber(normalizedObdSignals?.obd_speed_kph),
+    obd_coolant_c: toFiniteNumber(normalizedObdSignals?.coolant_c),
+    obd_fuel_level_pct: toFiniteNumber(normalizedObdSignals?.fuel_level_pct),
+    obd_engine_load_pct: toFiniteNumber(normalizedObdSignals?.engine_load_pct),
     obd_ble_connected: toBoolean(diagnostics?.channel?.ble_obd_connected) === undefined
       ? undefined
       : (diagnostics?.channel?.ble_obd_connected ? 1 : 0),
@@ -813,19 +849,19 @@ export const handleRawData = async (
     latitude: effectiveLatitude,
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
-    diagnostics: diagnostics ?? null,
+    diagnostics: normalizedDiagnostics ?? null,
   }).catch((err) => {
     logger.error(`VictoriaLogs write failed for ${payload.device_id}`, err);
   });
 
-  if (diagnostics) {
+  if (normalizedDiagnostics) {
     writeDeviceEvent(payload.device_id, 'obd_diagnostic_raw', 'OBD diagnostics snapshot', {
       session_id: sessionId,
       message_id: messageId,
       schema_version: schemaVersion,
       seq_no: seqNo,
       boot_id: bootId,
-      diagnostics,
+      diagnostics: normalizedDiagnostics,
     }).catch((err) => {
       logger.error({ err, deviceId: payload.device_id }, 'OBD diagnostics log write failed');
     });
@@ -836,14 +872,14 @@ export const handleRawData = async (
       schema_version: schemaVersion,
       seq_no: seqNo,
       boot_id: bootId,
-      signals: diagnostics.signals ?? null,
+      signals: normalizedDiagnostics.signals ?? null,
       diagnostic_state: {
         mil_on: milOn,
-        reported_dtc_count: toFiniteNumber(diagnostics.reported_dtc_count),
+        reported_dtc_count: toFiniteNumber(normalizedDiagnostics.reported_dtc_count),
         dtc_stored: storedDtcCodes,
         dtc_pending: pendingDtcCodes,
         dtc_permanent: permanentDtcCodes,
-        readiness: diagnostics.readiness ?? null,
+        readiness: normalizedDiagnostics.readiness ?? null,
       },
       quality: normalizedDiagnosticsQuality,
     }).catch((err) => {
@@ -876,7 +912,7 @@ export const handleRawData = async (
     });
   }
 
-  // 7. Check geofences (fire-and-forget, non-blocking)
+  // 7. Check active vehicle zone (fire-and-forget, non-blocking)
   if (
     effectiveLatitude !== undefined &&
     effectiveLongitude !== undefined &&
@@ -889,7 +925,7 @@ export const handleRawData = async (
       effectiveLongitude,
       new Date(timestampMs).toISOString(),
     ).catch((err) => {
-      logger.error({ err, deviceId: payload.device_id }, 'Geofence check failed');
+      logger.error({ err, deviceId: payload.device_id }, 'Vehicle zone check failed');
     });
   }
 
@@ -946,7 +982,7 @@ export const handleRawData = async (
     device_state: runtimeState.device_state,
     sleep_mode: runtimeState.sleep_mode,
     state_updated_at: stateUpdatedAt,
-    diagnostics: diagnostics ?? undefined,
+    diagnostics: normalizedDiagnostics ?? undefined,
     message_id: messageId,
     schema_version: schemaVersion,
     seq_no: seqNo,
@@ -968,13 +1004,13 @@ export const handleRawData = async (
 
   const obdRuleResults = await Promise.allSettled([
     evaluateObdMaintenanceRules(
-      diagnostics,
+      normalizedDiagnostics,
       obdAlertContext,
       payload.data.battery_top,
       effectiveSpeed,
     ),
-    evaluateObdDtcRules(diagnostics, obdAlertContext),
-    syncObdConnectionWarnings(diagnostics, obdAlertContext),
+    evaluateObdDtcRules(normalizedDiagnostics, obdAlertContext),
+    syncObdConnectionWarnings(normalizedDiagnostics, obdAlertContext),
     syncHighVibrationAlert(payload.data.vibration, obdAlertContext),
   ]);
   obdRuleResults.forEach((result, index) => {

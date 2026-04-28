@@ -11,6 +11,8 @@
  * @brief Durable SD append-only store and replay primitives.
  */
 
+#define SD_LOG_RECORD_PAYLOAD_MAX_LEN 2048U
+
 typedef struct {
     /** Monotonic queue sequence assigned at append time. */
     uint32_t seq;
@@ -29,7 +31,7 @@ typedef struct {
     /** Indicates whether `ts_ms` came from trusted wall-clock time. */
     uint8_t time_trusted;
     /** JSON payload body stored on disk. */
-    char payload[384];
+    char payload[SD_LOG_RECORD_PAYLOAD_MAX_LEN];
 } sd_log_record_t;
 
 typedef struct {

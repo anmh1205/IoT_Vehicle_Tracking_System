@@ -77,8 +77,8 @@ export const getFleetStats = asyncHandler(async (_req: AuthenticatedRequest, res
     pool.query(
       `SELECT
          COALESCE(SUM(CASE WHEN alert_type = 'speeding' THEN 1 ELSE 0 END), 0)::int AS speeding,
-         COALESCE(SUM(CASE WHEN alert_type = 'geofence_enter' OR alert_type = 'geofence_exit' THEN 1 ELSE 0 END), 0)::int AS geofence,
-         COALESCE(SUM(CASE WHEN alert_type NOT IN ('speeding', 'geofence_enter', 'geofence_exit') THEN 1 ELSE 0 END), 0)::int AS other
+         COALESCE(SUM(CASE WHEN alert_type IN ('zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit') THEN 1 ELSE 0 END), 0)::int AS zone,
+         COALESCE(SUM(CASE WHEN alert_type NOT IN ('speeding', 'zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit') THEN 1 ELSE 0 END), 0)::int AS other
        FROM alerts
        WHERE created_at >= NOW() - INTERVAL '30 days'`,
     ),
@@ -90,9 +90,9 @@ export const getFleetStats = asyncHandler(async (_req: AuthenticatedRequest, res
   const idleTimeSeconds = Math.max(Math.floor(activeTimeSeconds * 0.08), 0);
   const avgEfficiency = totalFuelLiters > 0 ? totalDistanceKm / totalFuelLiters : 0;
   const speeding = Number(violations.rows[0]?.speeding ?? 0);
-  const geofence = Number(violations.rows[0]?.geofence ?? 0);
+  const zone = Number(violations.rows[0]?.zone ?? 0);
   const harshBraking = Number(violations.rows[0]?.other ?? 0);
-  const safetyScore = Math.max(0, 100 - speeding * 2 - harshBraking - geofence);
+  const safetyScore = Math.max(0, 100 - speeding * 2 - harshBraking - zone);
 
   sendOk(res, {
     totalDistanceKm,
@@ -104,7 +104,7 @@ export const getFleetStats = asyncHandler(async (_req: AuthenticatedRequest, res
     violations: {
       speeding,
       harshBraking,
-      geofence,
+      zone,
     },
   });
 });

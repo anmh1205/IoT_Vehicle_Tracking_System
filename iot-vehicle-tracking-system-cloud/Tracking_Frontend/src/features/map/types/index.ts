@@ -70,9 +70,16 @@ export type MapInspectPanelTarget =
   | 'commands'
   | 'raw'
   | 'settings'
+  | 'zone'
   | 'geofence'
   | 'allowed-zone';
-export type MapInspectPanelLinkedEntity = 'device' | 'vehicle' | 'alert' | 'geofence' | 'allowed-zone';
+export type MapInspectPanelLinkedEntity =
+  | 'device'
+  | 'vehicle'
+  | 'alert'
+  | 'zone'
+  | 'geofence'
+  | 'allowed-zone';
 
 export interface MapInspectPanelPayload {
   highlight?: string | null;
@@ -84,8 +91,7 @@ export interface MapInspectPanelPayload {
 export type MapHardMode =
   | 'browse'
   | 'inspect-device'
-  | 'edit-geofence'
-  | 'edit-allowed-zone'
+  | 'edit-zone'
   | 'mobile-list';
 export type MapShareableHardMode = Exclude<MapHardMode, 'mobile-list'>;
 

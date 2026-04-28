@@ -17,8 +17,12 @@ export const MAP_URL_PARAM_KEYS = {
   zoom: 'z',
   layer: 'layer',
   follow: 'follow',
-  geofences: 'geofences',
+  zones: 'zones',
   mode: 'mode',
+} as const;
+
+const LEGACY_MAP_URL_PARAM_KEYS = {
+  geofences: 'geofences',
 } as const;
 
 export interface MapUrlState {
@@ -112,7 +116,10 @@ export const parseMapUrlState = (
     },
     mapLayer: parseMapLayer(searchParams.get(MAP_URL_PARAM_KEYS.layer)),
     followMode: parseBooleanFlag(searchParams.get(MAP_URL_PARAM_KEYS.follow)),
-    showGeofences: parseBooleanFlag(searchParams.get(MAP_URL_PARAM_KEYS.geofences)),
+    showGeofences: parseBooleanFlag(
+      searchParams.get(MAP_URL_PARAM_KEYS.zones) ??
+        searchParams.get(LEGACY_MAP_URL_PARAM_KEYS.geofences),
+    ),
     hardMode: isMapShareableHardMode(modeParam)
       ? modeParam
       : selectedDeviceId
@@ -134,7 +141,7 @@ export const serializeMapUrlState = (state: MapUrlState) => {
   params.set(MAP_URL_PARAM_KEYS.layer, state.mapLayer);
 
   if (state.showGeofences) {
-    params.set(MAP_URL_PARAM_KEYS.geofences, '1');
+    params.set(MAP_URL_PARAM_KEYS.zones, '1');
   }
 
   if (state.followMode) {
@@ -153,6 +160,9 @@ export const applyMapUrlStateToSearchParams = (
   state: MapUrlState,
 ) => {
   Object.values(MAP_URL_PARAM_KEYS).forEach((key) => {
+    searchParams.delete(key);
+  });
+  Object.values(LEGACY_MAP_URL_PARAM_KEYS).forEach((key) => {
     searchParams.delete(key);
   });
 

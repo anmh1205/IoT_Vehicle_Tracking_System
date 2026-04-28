@@ -387,6 +387,11 @@ static size_t tracker_mqtt_append_topic_chunk(const char *chunk, size_t chunk_le
         return 0U;
     }
 
+    /*
+     * Consume the modem-reported chunk length even if our topic buffer fills.
+     * The truncation flag makes dispatch drop the frame later, while the parser
+     * stays aligned with the following payload/end URCs.
+     */
     size_t consume_len = (size_t)MIN_VALUE((int)chunk_len, s_rx_ctx.topic_chunk_remaining);
     size_t cap_remaining = sizeof(s_rx_ctx.topic) - 1U - s_rx_ctx.topic_len;
     size_t copy_len = MIN_VALUE(consume_len, cap_remaining);
@@ -396,6 +401,7 @@ static size_t tracker_mqtt_append_topic_chunk(const char *chunk, size_t chunk_le
         s_rx_ctx.topic[s_rx_ctx.topic_len] = '\0';
     }
     if (copy_len < consume_len) {
+        s_rx_ctx.topic_truncated = true;
         ESP_LOGW(TRACKER_MQTT_TAG, "MQTT RX topic truncated chunk=%u", (unsigned)consume_len);
     }
 
@@ -408,6 +414,10 @@ static size_t tracker_mqtt_append_payload_chunk(const char *chunk, size_t chunk_
         return 0U;
     }
 
+    /*
+     * Command payloads must be complete JSON. Keep consuming modem bytes after
+     * local truncation so the next URC starts cleanly, then reject dispatch.
+     */
     size_t consume_len = (size_t)MIN_VALUE((int)chunk_len, s_rx_ctx.payload_chunk_remaining);
     size_t cap_remaining = sizeof(s_rx_ctx.payload) - 1U - s_rx_ctx.payload_len;
     size_t copy_len = MIN_VALUE(consume_len, cap_remaining);
@@ -417,6 +427,7 @@ static size_t tracker_mqtt_append_payload_chunk(const char *chunk, size_t chunk_
         s_rx_ctx.payload[s_rx_ctx.payload_len] = '\0';
     }
     if (copy_len < consume_len) {
+        s_rx_ctx.payload_truncated = true;
         ESP_LOGW(TRACKER_MQTT_TAG, "MQTT RX payload truncated chunk=%u", (unsigned)consume_len);
     }
 
@@ -485,6 +496,29 @@ static bool tracker_mqtt_try_consume_pending_header(const char *line) {
 
 static void tracker_mqtt_dispatch_rx_if_complete(void) {
     if (!s_rx_ctx.active || s_rx_ctx.topic_len == 0 || s_rx_ctx.payload_len == 0) {
+        return;
+    }
+
+    /*
+     * SIM7600 may split RX frames across several URCs. Dispatch only when the
+     * accumulated lengths exactly match the modem header; partial JSON commands
+     * must never reach the command handler.
+     */
+    bool topic_complete = s_rx_ctx.topic_total_len >= 0 &&
+                          s_rx_ctx.topic_len == (size_t)s_rx_ctx.topic_total_len &&
+                          s_rx_ctx.topic_chunk_remaining == 0;
+    bool payload_complete = s_rx_ctx.payload_total_len >= 0 &&
+                            s_rx_ctx.payload_len == (size_t)s_rx_ctx.payload_total_len &&
+                            s_rx_ctx.payload_chunk_remaining == 0;
+    if (s_rx_ctx.topic_truncated || s_rx_ctx.payload_truncated || !topic_complete || !payload_complete) {
+        ESP_LOGW(TRACKER_MQTT_TAG,
+                 "MQTT RX dropped incomplete frame topic_len=%u/%d payload_len=%u/%d topic_trunc=%d payload_trunc=%d",
+                 (unsigned)s_rx_ctx.topic_len,
+                 s_rx_ctx.topic_total_len,
+                 (unsigned)s_rx_ctx.payload_len,
+                 s_rx_ctx.payload_total_len,
+                 s_rx_ctx.topic_truncated ? 1 : 0,
+                 s_rx_ctx.payload_truncated ? 1 : 0);
         return;
     }
 

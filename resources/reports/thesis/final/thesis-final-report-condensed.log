@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999998 (MiKTeX 26.2) (preloaded format=xelatex 2026.4.9)  25 APR 2026 10:10
+This is XeTeX, Version 3.141592653-2.6-0.999998 (MiKTeX 26.2) (preloaded format=xelatex 2026.4.9)  25 APR 2026 19:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1543,52 +1543,56 @@ Package hyperref Info: Option `pageanchor' set `true' on input line 484.
 
 
 
-] [2] [3
+] [2
+
+] [3
 
 ] [4
 
 ] [5
 
+
 ] [6
 
-
-] [7
-
-] [8] [9
+] [7] [8
 
 ]
-(thesis-final-report-condensed.toc [10
+(thesis-final-report-condensed.toc [9
 
-] [11] [12] [13])
+] [10] [11] [12])
 \tf@toc=\write5
 \openout5 = `thesis-final-report-condensed.toc'.
 
- [14]
-(thesis-final-report-condensed.lot [15
+ [13]
+(thesis-final-report-condensed.lot [14
 
-] [16])
+] [15])
 \tf@lot=\write6
 \openout6 = `thesis-final-report-condensed.lot'.
 
- [17]
+ [16]
 (thesis-final-report-condensed.lof)
 \tf@lof=\write7
 \openout7 = `thesis-final-report-condensed.lof'.
 
- [18
+ [17
 
 ]
-ignored: Infinite glue shrinkage found in box being split [19
+ignored: Infinite glue shrinkage found in box being split [18
 
-] [20] [1
+] [19] [1
 
 
-] [2] [3] [4] [5] [6]
+]
+File: ./assets/figures/01-chuong-1-gioi-thieu-hinh-1-1.png Graphic file (type b
+mp)
+<./assets/figures/01-chuong-1-gioi-thieu-hinh-1-1.png>
+ [2] [3] [4] [5] [6]
+[7]
 File: ./assets/figures/01-chuong-1-gioi-thieu-hinh-1-2.png Graphic file (type b
 mp)
 <./assets/figures/01-chuong-1-gioi-thieu-hinh-1-2.png>
-
-[7] [8]
+ [8]
 File: ./assets/figures/01-chuong-1-gioi-thieu-hinh-1-3.png Graphic file (type b
 mp)
 <./assets/figures/01-chuong-1-gioi-thieu-hinh-1-3.png>
@@ -1596,180 +1600,195 @@ mp)
 File: ./assets/figures/01-chuong-1-gioi-thieu-hinh-1-4.png Graphic file (type b
 mp)
 <./assets/figures/01-chuong-1-gioi-thieu-hinh-1-4.png>
- [11] [12]
+ [11] [12] [13]
 File: ./assets/figures/01-chuong-1-gioi-thieu-hinh-1-5.png Graphic file (type b
 mp)
 <./assets/figures/01-chuong-1-gioi-thieu-hinh-1-5.png>
- [13] [14] [15
+ [14]
+File: ./assets/figures/02-chuong-2-phan-tich-hinh-2-1.png Graphic file (type bm
+p)
+<./assets/figures/02-chuong-2-phan-tich-hinh-2-1.png>
+ [15
 
-] [16] [17]
-ignored: Infinite glue shrinkage found in box being split [18] [19]
-ignored: Infinite g
-lue shrinkage found in box being split [20] [21]
-[22]
+] [16] [17] [18]
+ignored: Infinite glue shrinkage found in box being split [19] [20]
+ignored: Infin
+ite glue shrinkage found in box being split [21]
+[22] [23]
 File: ./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-1.png Graphic fil
 e (type bmp)
 <./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-1.png>
- [23
+ [24
 
-] [24] [25] [26] [27]
+] [25] [26] [27] [28]
 File: ./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-1a.png Graphic fi
 le (type bmp)
 <./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-1a.png>
- [28]
-ignored: Infinite glue shrinkage found in box being split [29]
+ [29]
 File: ./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-2.png Graphic fil
 e (type bmp)
 <./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-2.png>
- [30] [31]
+ [30] [31] [32]
 File: ./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-2.png Graphic fil
 e (type bmp)
 <./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-2.png>
- [32]
-ignored: Infinite glue shrinkage found in box being split [33]
-ignored: Infinite glue shrinka
-ge found in box being split [34]
+ [33]
+ignored: Infinite glue shrinkage found in box being split [34]
 File: ./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-3.png Graphic fil
 e (type bmp)
 <./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-3.png>
  [35]
 ignored: Infinite glue shrinkage found in box being split [36]
+[37]
 File: ./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-4.png Graphic fil
 e (type bmp)
 <./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-4.png>
-
-[37]
-ignored: Infinite glue shrinkage found in box being split [38]
-ignored: Infinite glue shrinkag
-e found in box being split [39]
-ignored: Infinite glue shrinkage found in box being split
- [40] [41] [42] [43] [44] [45] [46] [47]
+ [38]
+ignored: Infinite glue shrinkage found in box being split [39] [40]
+ignored: Infinite glue sh
+rinkage found in box being split [41]
+ignored: Infinite glue shrinkage found in box being
+ split [42]
+ignored: Infinite glue shrinkage found in box being split [43]
+ignored: Infinite glue s
+hrinkage found in box being split [44]
+ignored: Infinite glue shrinkage found in box bein
+g split [45] [46] [47] [48]
+ignored: Infinite glue shrinkage found in box being split [49
+]
 File: ./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-11.png Graphic fil
 e (type bmp)
 <./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-11.png>
- [48]
-ignored: Infinite glue shrinkage found in box being split [49]
+ [50]
+ignored: Infinite glue shrinkage found in box being split [51]
 ignored: Infinite glue shrinka
-ge found in box being split [50] [51]
-[52] [53] [54]
-ignored: Infinite glue shrinkage found in box being split [55]
-ignored: Infinite glu
-e shrinkage found in box being split [56]
-ignored: Infinite glue shrinkage found in box b
-eing split [57] [58] [59]
-ignored: Infinite glue shrinkage found in box being split [60] 
-[61]
-ignored: Infinite glue shrinkage found in box being split [62]
-ignored: Infinite glue shrinkag
-e found in box being split [63]
-ignored: Infinite glue shrinkage found in box being split
- [64] [65] [66]
-ignored: Infinite glue shrinkage found in box being split
+ge found in box being split
+[52]
+File: ./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-8.png Graphic file
+ (type bmp)
+<./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-8.png>
+ [53] [54] [55] [56] [57]
+ignored: Infinite glue shrinkage found in box being split [58]
+ignored: I
+nfinite glue shrinkage found in box being split [59]
+ignored: Infinite glue shrinkage fou
+nd in box being split [60]
+ignored: Infinite glue shrinkage found in box being split [61]
+
+ignored: Infinite glue shrinkage found in box being split [62] [63] [64]
+ignored: Infinite glue sh
+rinkage found in box being split [65] [66]
 [67]
 ignored: Infinite glue shrinkage found in box being split [68]
 ignored: Infinite glue shrinkag
-e found in box being split [69] [70]
-ignored: Infinite glue shrinkage found in box being 
-split [71]
-ignored: Infinite glue shrinkage found in box being split [72] [73] [74]
+e found in box being split [69] [70] [71]
+ignored: Infinite glue shrinkage found in box b
+eing split [72] [73]
+ignored: Infinite glue shrinkage found in box being split [74]
+ignored: Infini
+te glue shrinkage found in box being split [75] [76] [77]
 File: ./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-23.png Graphic fil
 e (type bmp)
 <./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-23.png>
- [75]
-ignored: Infinite glue shrinkage found in box being split [76] [77]
+ [78]
+ignored: Infinite glue shrinkage found in box being split [79] [80]
 File: ./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-5.png Graphic fil
 e (type bmp)
 <./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-5.png>
- [78
+ [81
 
 ]
-ignored: Infinite glue shrinkage found in box being split [79]
-ignored: Infinite glue shrinkage f
-ound in box being split [80]
-ignored: Infinite glue shrinkage found in box being split [8
-1]
+[82] [83]
 File: ./assets/figures/08-chuong-4-trien-khai-firmware-hinh-4-17.png Graphic fi
 le (type bmp)
 <./assets/figures/08-chuong-4-trien-khai-firmware-hinh-4-17.png>
-
-[82] [83] [84] [85]
+ [84] [85] [86] [87]
 File: ./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-15.png Graphic file 
 (type bmp)
 <./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-15.png>
- [86] [87] [88]
+ [88] [89] [90]
 LaTeX Font Info:    Font shape `TU/Consolas(0)/m/n' will be
-(Font)              scaled to size 11.8606pt on input line 4037.
- [89] [90]
+(Font)              scaled to size 11.8606pt on input line 3938.
+ [91] [92] [93] [94]
 File: ./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-14.png Graphic file
  (type bmp)
 <./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-14.png>
- [91] [92] [93]
-ignored: Infinite glue shrinkage found in box being split [94]
-ignored: Infinite gl
-ue shrinkage found in box being split [95]
+ [95]
+ignored: Infinite glue shrinkage found in box being split [96]
+ignored: Infinite glue shrinka
+ge found in box being split
+[97]
+ignored: Infinite glue shrinkage found in box being split [98]
 File: ./assets/figures/11-chuong-4-trien-khai-frontend-hinh-4-7-device-manageme
 nt-dashboard.png Graphic file (type bmp)
 <./assets/figures/11-chuong-4-trien-khai-frontend-hinh-4-7-device-management-da
 shboard.png>
+ [99]
 File: ./assets/figures/11-chuong-4-trien-khai-frontend-hinh-4-8-map-monitoring.
 png Graphic file (type bmp)
 <./assets/figures/11-chuong-4-trien-khai-frontend-hinh-4-8-map-monitoring.png>
- [96]
+ [100]
 File: ./assets/figures/11-chuong-4-trien-khai-frontend-hinh-4-9-device-obd-raw-
 data.png Graphic file (type bmp)
 <./assets/figures/11-chuong-4-trien-khai-frontend-hinh-4-9-device-obd-raw-data.
 png>
-
-[97] [98]
-ignored: Infinite glue shrinkage found in box being split [99] [100] [101
+ [101]
+ignored: Infinite glue shrinkage found in box being split [102]
+ignored: Infinite glue shrin
+kage found in box being split [103]
+ignored: Infinite glue shrinkage found in box being s
+plit [104] [105] [106
 
 ]
-ignored: Infinite glue shrinkage found in box being split [102] [103]
+ignored: Infinite glue shrinkage found in box being split [107] [108]
 ignored: Infinite glue shri
-nkage found in box being split [104] [105] [106] [107
+nkage found in box being split [109]
+[110] [111] [112
 
-] [108]
-ignored: Infinite glue shrinkage found in box being split [109]
-[110] [111
+] [113]
+ignored: Infinite glue shrinkage found in box being split [114] [115] [116
 
-] [112] [113] [114] [115] [116] [117
-
-]
-ignored: Infinite glue shrinkage found in box being split [118
-
-] [119] [120]
-ignored: Infinite glue shrinkage found in box being split [121
+] [117] [118] [119] [120] [121]
+[122
 
 ]
-ignored: Infinite glue shrinkage found in box being split
-[122]
-ignored: Infinite glue shrinkage found in box being split [123] [124] [125
+ignored: Infinite glue shrinkage found in box being split [123
+
+] [124] [125]
+ignored: Infinite glue shrinkage found in box being split [126
 
 ]
-ignored: Infinite glue shrinkage found in box being split [126]
+ignored: Infinite glue shrinkage found in box being split [127]
 ignored: Infinite glue shrinkage 
-found in box being split [127]
-ignored: Infinite glue shrinkage found in box being split 
-[128] [129] [130
+found in box being split [128] [129]
+File: ./assets/figures/14-phu-luc-hinh-pl-3-1.png Graphic file (type bmp)
+<./assets/figures/14-phu-luc-hinh-pl-3-1.png>
+ [130
+
+] [131]
+ignored: Infinite glue shrinkage found in box being split [132]
+ignored: Infinite glue shri
+nkage found in box being split [133]
+ignored: Infinite glue shrinkage found in box being
+split
+[134] [135] [136
 
 ]
-ignored: Infinite glue shrinkage found in box being split [131]
+ignored: Infinite glue shrinkage found in box being split [137]
 ignored: Infinite glue shrinkage 
-found in box being split [132] [133]
-(thesis-final-report-condensed.aux)
+found in box being split [138] [139] (thesis-final-report-condensed.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 29532 strings out of 402983
- 600567 string characters out of 5448483
- 1122731 words of memory out of 5000000
- 57751 multiletter control sequences out of 15000+600000
+ 29572 strings out of 402983
+ 602830 string characters out of 5448483
+ 1122073 words of memory out of 5000000
+ 57787 multiletter control sequences out of 15000+600000
  633120 words of font info for 108 fonts, out of 8000000 for 9000
  1357 hyphenation exceptions out of 8191
- 108i,10n,113p,1220b,562s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 108i,10n,113p,1220b,561s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on thesis-final-report-condensed.xdv (157 pages, 2698544 bytes).
-
+Output written on thesis-final-report-condensed.xdv (162 pages, 2740904 bytes).

@@ -24,7 +24,7 @@ interface NotificationItem {
 
 const toNotificationType = (alertType: string): NotificationType => {
   const normalized = alertType.toLowerCase();
-  if (normalized.includes('geofence')) return 'geofence';
+  if (normalized.includes('zone') || normalized.includes('geofence')) return 'zone';
   if (normalized.includes('firmware')) return 'firmware';
   if (normalized.includes('export')) return 'export';
   if (
@@ -122,7 +122,7 @@ export const getNotificationStats = async (
     system: 0,
     export: 0,
     firmware: 0,
-    geofence: 0,
+    zone: 0,
   };
 
   let unreadCount = 0;

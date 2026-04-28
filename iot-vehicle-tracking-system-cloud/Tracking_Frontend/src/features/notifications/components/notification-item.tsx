@@ -11,7 +11,7 @@ const TYPE_LABELS: Record<Notification['type'], string> = {
   system: 'Hệ thống',
   export: 'Xuất dữ liệu',
   firmware: 'Firmware',
-  geofence: 'Vùng giám sát',
+  zone: 'Vùng',
 };
 
 const TYPE_VARIANTS: Record<
@@ -22,7 +22,7 @@ const TYPE_VARIANTS: Record<
   system: 'secondary',
   export: 'outline',
   firmware: 'default',
-  geofence: 'secondary',
+  zone: 'secondary',
 };
 
 const getContextText = (notification: Notification) => {

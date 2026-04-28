@@ -1,6 +1,9 @@
 flowchart TB
-    UBatt["Ắc quy xe"] --> Divider["Bộ chia áp R1 / R2"]
-    Divider --> Node["Nút chia áp"]
-    Node --> ADC["GPIO4 ADC"]
-    Node --> GND["GND tham chiếu"]
-    ADC --> Rule["Firmware xác định IGN / LVD"]
+    Supply["Nguồn xe 12V/24V"] --> Divider1["Bộ chia áp nguồn chính"]
+    Backup["Pin dự phòng 18650"] --> Divider2["Bộ chia áp pin dự phòng"]
+    Divider1 --> ADC1["GPIO3 ADC<br/>U_SUPPLY"]
+    Divider2 --> ADC2["GPIO4 ADC<br/>U_BATT"]
+    ADC1 --> Rule["Firmware xác định IGN / LVD"]
+    ADC2 --> Rule
+    GND["GND tham chiếu"] --> Divider1
+    GND --> Divider2

@@ -16,11 +16,14 @@
  * @brief Shared runtime state and policy constants for split FSM modules.
  */
 
+/* OBD protocol selectors reused across runtime polling flows. */
 #define OBD_MODE_CURRENT_DATA 0x01
 #define OBD_PID_MONITOR_STATUS 0x01
 #define OBD_MODE_STORED_DTC 0x03
 #define OBD_MODE_PENDING_DTC 0x07
 #define OBD_MODE_PERMANENT_DTC 0x0A
+
+/* Retry/backoff bounds for BLE, network, RTC bootstrap, and IMU bootstrap flows. */
 #define TRACKER_BLE_RETRY_MIN_BACKOFF_MS 5000ULL
 #define TRACKER_BLE_RETRY_MAX_BACKOFF_MS 120000ULL
 #define TRACKER_BLE_PARKED_RETRY_MAX_BACKOFF_MS 30000ULL
@@ -28,6 +31,8 @@
 #define TRACKER_NETWORK_RETRY_MAX_BACKOFF_MS 90000ULL
 #define TRACKER_IMU_BOOTSTRAP_RETRY_MIN_BACKOFF_MS 5000ULL
 #define TRACKER_IMU_BOOTSTRAP_RETRY_MAX_BACKOFF_MS 60000ULL
+
+/* Wake, heartbeat, OBD, RTC, and sleep-control timing constants. */
 #define TRACKER_PARKED_WAKE_INTERVAL_CAP_S 120U
 #define TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS 30000ULL
 #define TRACKER_BLE_CONNECT_TASK_STACK_BYTES 8192U
@@ -51,6 +56,7 @@
 #define TRACKER_BOOT_ID_LEN 48
 #define TRACKER_OBD_FAIL_ALERT_COOLDOWN_MS 300000ULL
 #define TRACKER_OBD_FAIL_WINDOW_MS 300000ULL
+#define TRACKER_OBD_LIVE_SIGNAL_MAX_AGE_MS 30000U
 #define TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS 5000U
 #define TRACKER_EVENT_CODE_OBD_CONNECT_FAILED 2001
 #define TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED 2002
@@ -60,18 +66,21 @@
 #define TRACKER_MODEM_POWEROFF_SETTLE_MS 250ULL
 #define TRACKER_FAKE_SLEEP_LOOP_STEP_MS 200U
 
+/** @brief Result codes returned by the async BLE connect worker. */
 typedef enum {
     TRACKER_BLE_CONNECT_RESULT_OK = 0,
     TRACKER_BLE_CONNECT_RESULT_CONNECT_FAILED,
     TRACKER_BLE_CONNECT_RESULT_ELM327_INIT_FAILED,
 } tracker_ble_connect_result_code_t;
 
+/** @brief Lifecycle flag for the publish pipeline. */
 typedef enum {
     TRACKER_PUBLISH_STATUS_UNKNOWN = 0,
     TRACKER_PUBLISH_STATUS_RUNNING,
     TRACKER_PUBLISH_STATUS_STOPPED,
 } tracker_publish_status_t;
 
+/** @brief Mailbox payload sent back from the async BLE connect worker. */
 typedef struct {
     ble_obd_ctx_t *ctx;
     tracker_ble_connect_result_code_t code;
@@ -79,16 +88,19 @@ typedef struct {
     bool prime_sample_ready;
 } tracker_ble_connect_result_t;
 
+/** @brief Arguments passed into the async BLE connect worker task. */
 typedef struct {
     uint64_t started_ms;
     char preferred_mac[TRACKER_MAC_ADDR_STR_LEN];
 } tracker_ble_connect_task_args_t;
 
+/** @brief One diagnostic OBD query scheduled by the runtime poller. */
 typedef struct {
     uint8_t mode;
     int pid;
 } tracker_obd_diag_query_t;
 
+/* Shared runtime state exported across split FSM source files. */
 extern config_t s_config;
 extern telemetry_t s_telemetry;
 extern ble_obd_ctx_t *s_ble_ctx;
@@ -154,6 +166,7 @@ extern bool s_ignition_log_initialized;
 extern bool s_last_ignition_state;
 extern app_state_t s_runtime_state_hint;
 
+/* Shared retry policies used by non-blocking bootstrap/runtime recovery paths. */
 extern const retry_policy_t g_state_ble_retry_policy;
 extern const retry_policy_t g_state_ble_retry_parked_policy;
 extern const retry_policy_t g_state_network_retry_policy;
@@ -161,4 +174,5 @@ extern const retry_policy_t g_state_rtc_bootstrap_retry_policy;
 extern const retry_policy_t g_state_rtc_read_retry_policy;
 extern const retry_policy_t g_state_imu_bootstrap_retry_policy;
 
+/** @brief Reset all shared runtime state before the FSM starts a fresh session. */
 void state_runtime_context_reset(const config_t *config);

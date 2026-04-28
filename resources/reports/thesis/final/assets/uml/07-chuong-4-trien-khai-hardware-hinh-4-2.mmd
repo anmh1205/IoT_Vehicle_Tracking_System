@@ -1,10 +1,12 @@
 flowchart LR
     MCU["ESP32-S3"]
-    UART["UART1<br/>TX / RX"]
-    Ctrl["GPIO26<br/>PWR-KEY"]
+    UART["UART1<br/>TX GPIO17 / RX GPIO18"]
+    Ctrl["GPIO34<br/>PWR-KEY"]
+    Reset["GPIO35<br/>RESET"]
     Power["Rail ~4V modem"]
     Modem["SIM7600CE-T<br/>LTE + GNSS"]
 
     MCU --> UART --> Modem
     MCU --> Ctrl --> Modem
+    MCU --> Reset --> Modem
     Power --> Modem

@@ -19,6 +19,20 @@
 
 static const char *TAG = STATE_MACHINE_TAG;
 
+static const tracker_obd_diag_query_t s_state_obd_diag_queries[] = {
+    {.mode = OBD_MODE_CURRENT_DATA, .pid = OBD_PID_MONITOR_STATUS},
+    {.mode = OBD_MODE_STORED_DTC, .pid = -1},
+    {.mode = OBD_MODE_PENDING_DTC, .pid = -1},
+    {.mode = OBD_MODE_PERMANENT_DTC, .pid = -1},
+};
+
+const tracker_obd_diag_query_t *state_machine_obd_diagnostic_queries(size_t *out_count) {
+    if (out_count != NULL) {
+        *out_count = ARRAY_SIZE(s_state_obd_diag_queries);
+    }
+    return s_state_obd_diag_queries;
+}
+
 static void state_machine_reset_dtc_list(obd_dtc_list_t *list, bool valid) {
     if (list == NULL) {
         return;
@@ -153,6 +167,37 @@ static void state_machine_clear_obd_diagnostic_query(uint8_t mode, int pid) {
         default:
             break;
     }
+}
+
+void state_machine_clear_obd_signal_snapshot(void) {
+    /*
+     * OBD signal fields are scalar values, so a disconnected adapter would
+     * otherwise keep publishing the last successful PID sample. Clear both live
+     * signals and diagnostic snapshots whenever freshness cannot be proven.
+     */
+    s_telemetry.obd_rpm = 0;
+    s_telemetry.obd_speed = 0;
+    s_telemetry.obd_coolant_temp = 0;
+    s_telemetry.obd_fuel_level = 0;
+    s_telemetry.obd_engine_load = 0;
+    memset(&s_telemetry.obd_readiness, 0, sizeof(s_telemetry.obd_readiness));
+    memset(&s_telemetry.obd_stored_dtc, 0, sizeof(s_telemetry.obd_stored_dtc));
+    memset(&s_telemetry.obd_pending_dtc, 0, sizeof(s_telemetry.obd_pending_dtc));
+    memset(&s_telemetry.obd_permanent_dtc, 0, sizeof(s_telemetry.obd_permanent_dtc));
+    s_last_obd_sample_ms = 0;
+    s_telemetry.obd_sample_age_ms = UINT32_MAX;
+}
+
+void state_machine_mark_obd_disconnected(void) {
+    /* Single exit path for BLE disconnect/failure so every caller clears stale OBD state identically. */
+    s_obd_elm_ready = false;
+    state_machine_clear_obd_signal_snapshot();
+    s_last_obd_diagnostic_poll_ms = 0;
+    s_obd_aux_pid_cursor = 0;
+    s_obd_diag_query_cursor = 0;
+    s_telemetry.obd_ble_connected = false;
+    s_telemetry.obd_elm_ready = false;
+    util_copy_string(s_telemetry.obd_ecu_state, sizeof(s_telemetry.obd_ecu_state), "disconnected");
 }
 
 void state_machine_obd_response_cb(uint8_t mode, int pid, const uint8_t *data, size_t len, void *usr_ctx) {
@@ -329,19 +374,14 @@ void state_machine_run_obd_diagnostic_query(ble_obd_ctx_t *ctx, const tracker_ob
 }
 
 static void state_machine_prime_obd_diagnostics_after_connect(ble_obd_ctx_t *ctx) {
-    static const tracker_obd_diag_query_t s_diag_queries[] = {
-        {.mode = OBD_MODE_CURRENT_DATA, .pid = OBD_PID_MONITOR_STATUS},
-        {.mode = OBD_MODE_STORED_DTC, .pid = -1},
-        {.mode = OBD_MODE_PENDING_DTC, .pid = -1},
-        {.mode = OBD_MODE_PERMANENT_DTC, .pid = -1},
-    };
-
     if (ctx == NULL) {
         return;
     }
 
-    for (size_t i = 0; i < ARRAY_SIZE(s_diag_queries); ++i) {
-        state_machine_run_obd_diagnostic_query(ctx, &s_diag_queries[i]);
+    size_t query_count = 0;
+    const tracker_obd_diag_query_t *diag_queries = state_machine_obd_diagnostic_queries(&query_count);
+    for (size_t i = 0; i < query_count; ++i) {
+        state_machine_run_obd_diagnostic_query(ctx, &diag_queries[i]);
         vTaskDelay(pdMS_TO_TICKS(75));
     }
 }
@@ -421,12 +461,8 @@ bool state_machine_handle_ble_connect_result(void) {
             continue;
         }
 
-        s_obd_elm_ready = false;
         s_ble_ctx = NULL;
-        s_last_obd_sample_ms = 0;
-        s_last_obd_diagnostic_poll_ms = 0;
-        s_obd_diag_query_cursor = 0;
-        util_copy_string(s_telemetry.obd_ecu_state, sizeof(s_telemetry.obd_ecu_state), "disconnected");
+        state_machine_mark_obd_disconnected();
         uint64_t now_ms = util_uptime_ms();
         int event_code = result.code == TRACKER_BLE_CONNECT_RESULT_ELM327_INIT_FAILED
                              ? TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED
@@ -477,8 +513,7 @@ void state_machine_try_connect_ble(void) {
     if (s_ble_ctx != NULL) {
         ble_obd_disconnect(s_ble_ctx);
         s_ble_ctx = NULL;
-        s_obd_elm_ready = false;
-        s_last_obd_sample_ms = 0;
+        state_machine_mark_obd_disconnected();
     }
 
     bool has_preferred_mac = !util_string_empty(s_config.obd2_ble_address);
@@ -492,7 +527,7 @@ void state_machine_try_connect_ble(void) {
 
     tracker_ble_connect_task_args_t *task_args = calloc(1, sizeof(*task_args));
     if (task_args == NULL) {
-        s_obd_elm_ready = false;
+        state_machine_mark_obd_disconnected();
         state_machine_publish_obd_failure_event_if_needed(now_ms,
                                                           TRACKER_EVENT_CODE_OBD_CONNECT_FAILED,
                                                           "obd_connect_failed");
@@ -511,7 +546,7 @@ void state_machine_try_connect_ble(void) {
                     5,
                     NULL) != pdPASS) {
         free(task_args);
-        s_obd_elm_ready = false;
+        state_machine_mark_obd_disconnected();
         state_machine_publish_obd_failure_event_if_needed(now_ms,
                                                           TRACKER_EVENT_CODE_OBD_CONNECT_FAILED,
                                                           "obd_connect_failed");

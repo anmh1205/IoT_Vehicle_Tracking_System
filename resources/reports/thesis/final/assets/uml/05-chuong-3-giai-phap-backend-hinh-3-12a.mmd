@@ -1,5 +1,5 @@
 flowchart LR
-    Device["Thiết bị theo dõi"] -->|Rawdata / status / events / firmware| Broker["EMQX"]
+    Device["Thiết bị theo dõi"] -->|rawdata / status / events / firmware| Broker["EMQX"]
     Broker -->|Subscribe| Bridge["MQTT Bridge"]
     Bridge -->|Ghi telemetry| VictoriaMetricsNode["VictoriaMetrics"]
     Bridge -->|Ghi log| VictoriaLogsNode["VictoriaLogs"]

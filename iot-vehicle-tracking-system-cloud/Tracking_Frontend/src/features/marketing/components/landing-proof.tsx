@@ -70,7 +70,7 @@ export const LandingProof = () => {
                 </div>
                 <Image
                   src="/landing/mobile-alerts.svg"
-                  alt="Minh họa màn hình mobile nhận cảnh báo và trạng thái geofence"
+                  alt="Minh họa màn hình mobile nhận cảnh báo và trạng thái vùng"
                   width={720}
                   height={640}
                   className="h-auto w-full rounded-[1.25rem] border border-white/10"

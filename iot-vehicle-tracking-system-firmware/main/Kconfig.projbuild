@@ -6,7 +6,7 @@ config TRACKER_DEFAULT_DEVICE_ID
 
 config TRACKER_DEFAULT_AUTH_TOKEN
     string "Default auth token"
-    default "device-secret-token"
+    default "provisioning-required"
 
 config TRACKER_DEFAULT_MQTT_HOST
     string "Default MQTT host"
@@ -16,6 +16,26 @@ config TRACKER_DEFAULT_MQTT_PORT
     int "Default MQTT port"
     range 1 65535
     default 1883
+
+config TRACKER_TLS_VERIFY_SERVER
+    bool "Verify TLS server certificate"
+    default y
+    help
+        Enable SIM7600 server-certificate verification for MQTT TLS and OTA HTTPS.
+
+config TRACKER_TLS_CA_CERT_NAME
+    string "SIM7600 CA certificate file name"
+    default "isrgrootx1.pem"
+    depends on TRACKER_TLS_VERIFY_SERVER
+    help
+        CA certificate file expected to exist in the modem certificate store.
+
+config TRACKER_TLS_IGNORE_LOCAL_TIME
+    bool "Ignore TLS certificate validity time"
+    default n
+    help
+        Leave disabled for production. Enable only when bench devices have no
+        trusted RTC/network time and TLS date validation blocks test traffic.
 
 config TRACKER_DEFAULT_HEARTBEAT_INTERVAL_S
     int "Heartbeat interval (seconds)"
@@ -77,11 +97,6 @@ config TRACKER_SD_RETRY_MAX_MS
     range 1000 120000
     default 30000
 
-config TRACKER_SD_ACK_TIMEOUT_MS
-    int "QoS1 ACK timeout ms"
-    range 1000 60000
-    default 5000
-
 config TRACKER_IGNITION_DEBOUNCE_MS
     int "Ignition debounce window ms"
     range 100 10000
@@ -112,15 +127,15 @@ config TRACKER_FIELD_VALIDATION_MQTT_HOST
 
 config TRACKER_FIELD_VALIDATION_MQTT_USERNAME
     string "Field-validation MQTT username override"
-    default "device"
+    default ""
 
 config TRACKER_FIELD_VALIDATION_MQTT_PASSWORD
     string "Field-validation MQTT password override"
-    default "Anmh1205"
+    default ""
 
 config TRACKER_FIELD_VALIDATION_AUTH_TOKEN
     string "Field-validation payload auth token override"
-    default "TRACKER_001_Anmh1205"
+    default ""
 
 config TRACKER_FIELD_VALIDATION_DISABLE_COMMAND_SUBSCRIBE
     bool "Disable command subscribe in field-validation mode"

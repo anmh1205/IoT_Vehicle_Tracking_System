@@ -1,4 +1,4 @@
-export type NotificationType = 'alert' | 'system' | 'export' | 'firmware' | 'geofence';
+export type NotificationType = 'alert' | 'system' | 'export' | 'firmware' | 'zone';
 
 export interface NotificationItem {
   id: number;

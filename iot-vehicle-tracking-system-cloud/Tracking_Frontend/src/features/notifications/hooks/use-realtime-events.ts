@@ -1,4 +1,5 @@
 'use client';
+
 import { useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
@@ -8,10 +9,10 @@ import {
   requestNotificationPermission,
   showAlertNotification,
 } from '@/lib/utils/browser-notification';
+
 export const useRealtimeEvents = () => {
   const queryClient = useQueryClient();
 
-  // Request browser notification permission on mount
   useEffect(() => {
     void requestNotificationPermission();
   }, []);
@@ -20,10 +21,8 @@ export const useRealtimeEvents = () => {
     (payload: any) => {
       queryInvalidation.notifications.all(queryClient);
       void queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      // Also invalidate violations query since violations derive from alerts
       void queryClient.invalidateQueries({ queryKey: ['violations'] });
 
-      // Show browser desktop notification when tab is not focused
       showAlertNotification(payload);
 
       if (payload?.severity === 'critical') {
@@ -38,37 +37,51 @@ export const useRealtimeEvents = () => {
     },
     [queryClient],
   );
+
   const onExportReady = useCallback(() => {
     queryInvalidation.exports.all(queryClient);
     queryInvalidation.notifications.all(queryClient);
     notificationUtils.success('Xuất dữ liệu hoàn tất');
   }, [queryClient]);
-  const onGeofenceEnter = useCallback((payload: any) => {
-    notificationUtils.warning(
-      `${payload?.deviceId ?? 'Thiết bị'} vào vùng giám sát ${payload?.geofenceName ?? ''}`.trim(),
-    );
+
+  const onZoneStateChanged = useCallback((payload: any) => {
+    const vehicleId = payload?.vehicle_id ?? payload?.device_id ?? 'Thiết bị';
+    const state = String(payload?.membership_state ?? '').toLowerCase();
+
+    if (state === 'outside') {
+      notificationUtils.warning(`${vehicleId} đang ở ngoài vùng`);
+      return;
+    }
+
+    if (state === 'inside') {
+      notificationUtils.info(`${vehicleId} đã quay lại vùng`);
+    }
   }, []);
-  const onGeofenceExit = useCallback((payload: any) => {
-    notificationUtils.info(
-      `${payload?.deviceId ?? 'Thiết bị'} ra khỏi vùng giám sát ${payload?.geofenceName ?? ''}`.trim(),
-    );
-  }, []);
+
+  const onZoneUpdated = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ['vehicles-for-zones-page'] });
+  }, [queryClient]);
+
   const onStatsUpdated = useCallback(() => {
     queryInvalidation.dashboard.stats(queryClient);
   }, [queryClient]);
+
   const onActivityCreated = useCallback(() => {
     queryInvalidation.dashboard.activity(queryClient);
   }, [queryClient]);
+
   const onDeviceSessionChanged = useCallback(() => {
     queryInvalidation.device.list(queryClient);
   }, [queryClient]);
+
   const onCommandAck = useCallback(() => {
     queryInvalidation.device.commands(queryClient);
   }, [queryClient]);
+
   useRealtimeSubscription({ event: 'alert:new', handler: onAlert });
   useRealtimeSubscription({ event: 'export:ready', handler: onExportReady });
-  useRealtimeSubscription({ event: 'geofence:enter', handler: onGeofenceEnter });
-  useRealtimeSubscription({ event: 'geofence:exit', handler: onGeofenceExit });
+  useRealtimeSubscription({ event: 'zone:updated', handler: onZoneUpdated });
+  useRealtimeSubscription({ event: 'zone:state-changed', handler: onZoneStateChanged });
   useRealtimeSubscription({ event: 'stats:update', handler: onStatsUpdated });
   useRealtimeSubscription({ event: 'activity:new', handler: onActivityCreated });
   useRealtimeSubscription({ event: 'device:session_start', handler: onDeviceSessionChanged });

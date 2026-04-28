@@ -41,15 +41,29 @@
 #define MQTT_CONNECT_CLEANUP_RETRY_DELAY_MS 500U
 
 typedef struct {
+    /** True while a `+CMQTTRXSTART` frame is being assembled. */
     bool active;
+    /** SIM7600 MQTT client index reported by the RX frame. */
     int client_index;
+    /** Total topic length declared by the modem header. */
     int topic_total_len;
+    /** Total payload length declared by the modem header. */
     int payload_total_len;
+    /** Bytes still expected for the current topic chunk. */
     int topic_chunk_remaining;
+    /** Bytes still expected for the current payload chunk. */
     int payload_chunk_remaining;
+    /** Set when topic bytes exceed `topic` capacity; frame must be dropped. */
+    bool topic_truncated;
+    /** Set when payload bytes exceed `payload` capacity; frame must be dropped. */
+    bool payload_truncated;
+    /** Number of topic bytes copied into the bounded buffer. */
     size_t topic_len;
+    /** Number of payload bytes copied into the bounded buffer. */
     size_t payload_len;
+    /** Null-terminated topic buffer used only after full-frame validation. */
     char topic[MQTT_TOPIC_MAX_LEN];
+    /** Null-terminated command payload used only after full-frame validation. */
     char payload[MQTT_COMMAND_PAYLOAD_MAX_LEN];
 } mqtt_rx_ctx_t;
 
@@ -61,7 +75,6 @@ typedef enum {
 } mqtt_rx_pending_header_t;
 
 extern mqtt_command_cb_t s_command_callback;
-extern mqtt_puback_cb_t s_puback_callback;
 extern config_t s_cfg;
 extern bool s_connected;
 extern bool s_service_started;

@@ -757,7 +757,7 @@ export const DeviceDetailModalContainer = ({
               }).toString()}`
             : null,
           deviceDetailPath: deviceId ? `/dashboard/fleet/devices/${deviceId}` : null,
-          geofencesPath: '/dashboard/operations/geofences',
+          geofencesPath: '/dashboard/zones',
           vehicleDetailPath:
             linkedVehicleQuery.data?.id != null
               ? `/dashboard/fleet/vehicles/${linkedVehicleQuery.data.id}`

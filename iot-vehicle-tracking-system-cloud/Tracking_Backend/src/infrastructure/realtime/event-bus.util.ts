@@ -120,6 +120,24 @@ export interface RealtimeEventMap {
     metadata?: RealtimeMetadata;
     alertMetadata?: Record<string, unknown>;
   };
+  'zone:updated': {
+    vehicle_id: string;
+    zone_id: number | null;
+    status: 'active' | 'disabled';
+    membership_state?: 'unknown' | 'inside' | 'outside' | 'suspect';
+    last_changed_at?: string | null;
+  };
+  'zone:state-changed': {
+    device_id?: string;
+    vehicle_id: string;
+    zone_id: number;
+    previous_membership_state: 'unknown' | 'inside' | 'outside' | 'suspect';
+    membership_state: 'unknown' | 'inside' | 'outside' | 'suspect';
+    last_changed_at: string;
+    latitude?: number;
+    longitude?: number;
+    metadata?: RealtimeMetadata;
+  };
   'geofence:allowed-zone-updated': {
     vehicle_id: string;
     allowed_zone_id: number | null;

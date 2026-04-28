@@ -62,7 +62,7 @@ export const spec = {
     { name: 'Customers', description: 'Customer management' },
     { name: 'Trips', description: 'Trip tracking' },
     { name: 'Alerts', description: 'Alert management' },
-    { name: 'Geofences', description: 'Geofence management' },
+    { name: 'Zones', description: 'Vehicle zone management' },
     { name: 'Maintenance', description: 'Maintenance records' },
     { name: 'Firmware', description: 'Firmware & OTA management' },
     { name: 'Exports', description: 'Data export' },
@@ -623,83 +623,43 @@ export const spec = {
       },
     },
 
-    // ── Geofences ───────────────────────────────────
-    '/geofences': {
+    // ── Zones ───────────────────────────────────────
+    '/zones/vehicles': {
       get: {
-        tags: ['Geofences'],
-        summary: 'List geofences',
-        parameters: paginationParams,
+        tags: ['Zones'],
+        summary: 'List vehicles with active zone summary',
         responses: ok(),
       },
-      post: {
-        tags: ['Geofences'],
-        summary: 'Create a geofence',
-        requestBody: jsonBody({
-          name: { type: 'string' },
-          type: { type: 'string', enum: ['circle', 'polygon'] },
-          coordinates: { type: 'array', items: { type: 'number' } },
-          radius: { type: 'number' },
-        }),
-        responses: crud('Geofence created'),
-      },
     },
-    '/geofences/{id}': {
+    '/zones/vehicles/{vehicleId}': {
       get: {
-        tags: ['Geofences'],
-        summary: 'Get geofence by ID',
-        parameters: [idParam],
+        tags: ['Zones'],
+        summary: 'Get active zone for vehicle',
+        parameters: [{ name: 'vehicleId', in: 'path', required: true, schema: { type: 'string' } }],
         responses: crud(),
       },
       put: {
-        tags: ['Geofences'],
-        summary: 'Update geofence',
-        parameters: [idParam],
-        requestBody: jsonBody({ name: { type: 'string' }, radius: { type: 'number' } }),
-        responses: crud(),
-      },
-      delete: {
-        tags: ['Geofences'],
-        summary: 'Delete geofence',
-        parameters: [idParam],
-        responses: crud(),
-      },
-    },
-    '/geofences/{id}/vehicles': {
-      post: {
-        tags: ['Geofences'],
-        summary: 'Assign vehicle to geofence',
-        parameters: [idParam],
-        requestBody: jsonBody({ vehicleId: { type: 'string' } }),
-        responses: crud(),
-      },
-    },
-    '/geofences/{id}/vehicles/{vehicleId}': {
-      delete: {
-        tags: ['Geofences'],
-        summary: 'Unassign vehicle from geofence',
+        tags: ['Zones'],
+        summary: 'Create or update active zone for vehicle',
         parameters: [
-          idParam,
           { name: 'vehicleId', in: 'path', required: true, schema: { type: 'string' } },
         ],
-        responses: crud(),
-      },
-    },
-    '/geofences/vehicles/{vehicleId}/allowed-zone': {
-      get: {
-        tags: ['Geofences'],
-        summary: 'Get active allowed zone for vehicle',
-        parameters: [{ name: 'vehicleId', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: crud(),
-      },
-      put: {
-        tags: ['Geofences'],
-        summary: 'Upsert active allowed zone for vehicle',
-        parameters: [{ name: 'vehicleId', in: 'path', required: true, schema: { type: 'string' } }],
         requestBody: jsonBody({
+          zoneType: { type: 'string', enum: ['circle', 'administrative_boundary'] },
           centerSource: { type: 'string', enum: ['vehicle_position', 'map_pick'] },
-          centerLatitude: { type: 'number' },
-          centerLongitude: { type: 'number' },
-          radiusMeters: { type: 'number' },
+          circleCenterLatitude: { type: 'number' },
+          circleCenterLongitude: { type: 'number' },
+          radiusMeters: { type: 'number', minimum: 100 },
+          boundarySelections: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                provider: { type: 'string' },
+                unitCode: { type: 'string' },
+              },
+            },
+          },
           alertMode: {
             type: 'string',
             enum: ['transition_only', 'transition_and_recovery', 'periodic_while_outside', 'silent'],
@@ -709,17 +669,49 @@ export const spec = {
         responses: crud(),
       },
       delete: {
-        tags: ['Geofences'],
-        summary: 'Disable active allowed zone for vehicle',
+        tags: ['Zones'],
+        summary: 'Disable active zone for vehicle',
         parameters: [{ name: 'vehicleId', in: 'path', required: true, schema: { type: 'string' } }],
         responses: crud(),
       },
     },
-    '/geofences/vehicles/{vehicleId}/allowed-zone/preview-center': {
+    '/zones/vehicles/{vehicleId}/preview-circle-center': {
       post: {
-        tags: ['Geofences'],
-        summary: 'Preview allowed-zone center from latest vehicle position',
+        tags: ['Zones'],
+        summary: 'Preview circle center from latest vehicle position',
         parameters: [{ name: 'vehicleId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: crud(),
+      },
+    },
+    '/zones/boundaries': {
+      get: {
+        tags: ['Zones'],
+        summary: 'Search or browse cached administrative boundaries',
+        parameters: [
+          { name: 'query', in: 'query', schema: { type: 'string' } },
+          { name: 'level', in: 'query', schema: { type: 'string', enum: ['province', 'district', 'ward'] } },
+          { name: 'parentCode', in: 'query', schema: { type: 'string' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100 } },
+        ],
+        responses: ok(),
+      },
+    },
+    '/zones/boundaries/resolve': {
+      post: {
+        tags: ['Zones'],
+        summary: 'Resolve selected administrative boundaries into merged geometry',
+        requestBody: jsonBody({
+          selections: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                provider: { type: 'string' },
+                unitCode: { type: 'string' },
+              },
+            },
+          },
+        }),
         responses: crud(),
       },
     },

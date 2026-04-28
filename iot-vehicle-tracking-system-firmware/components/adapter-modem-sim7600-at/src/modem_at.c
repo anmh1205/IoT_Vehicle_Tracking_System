@@ -246,20 +246,41 @@ esp_err_t modem_at_init(void) {
         .source_clk = UART_SCLK_DEFAULT,
     };
 
-    /* Install UART driver and map modem pins. */
-    ESP_ERROR_CHECK(uart_driver_install(MODEM_UART_NUM,
+    esp_err_t err = uart_driver_install(MODEM_UART_NUM,
                                         MODEM_RX_BUFFER_SIZE,
                                         0,
                                         32,
                                         &s_uart_event_queue,
-                                        0));
-    ESP_ERROR_CHECK(uart_param_config(MODEM_UART_NUM, &uart_cfg));
-    ESP_ERROR_CHECK(uart_set_pin(MODEM_UART_NUM, PIN_MODEM_TX, PIN_MODEM_RX, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-    ESP_ERROR_CHECK(uart_set_line_inverse(MODEM_UART_NUM, MODEM_UART_LINE_INVERSE_MASK));
-    ESP_ERROR_CHECK(uart_flush(MODEM_UART_NUM));
+                                        0);
+    bool driver_installed = err == ESP_OK;
+    if (err == ESP_OK) {
+        err = uart_param_config(MODEM_UART_NUM, &uart_cfg);
+    }
+    if (err == ESP_OK) {
+        err = uart_set_pin(MODEM_UART_NUM, PIN_MODEM_TX, PIN_MODEM_RX, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    }
+    if (err == ESP_OK) {
+        err = uart_set_line_inverse(MODEM_UART_NUM, MODEM_UART_LINE_INVERSE_MASK);
+    }
+    if (err == ESP_OK) {
+        err = uart_flush(MODEM_UART_NUM);
+    }
+    if (err != ESP_OK) {
+        if (driver_installed) {
+            uart_driver_delete(MODEM_UART_NUM);
+        }
+        s_uart_event_queue = NULL;
+        ESP_LOGE(TAG, "UART init failed: %s", esp_err_to_name(err));
+        return err;
+    }
 
     s_at_lock = xSemaphoreCreateMutex();
-    ESP_RETURN_ON_NULL(s_at_lock, ESP_ERR_NO_MEM, TAG, "Failed to create AT mutex");
+    if (s_at_lock == NULL) {
+        uart_driver_delete(MODEM_UART_NUM);
+        s_uart_event_queue = NULL;
+        ESP_LOGE(TAG, "Failed to create AT mutex");
+        return ESP_ERR_NO_MEM;
+    }
 
     s_dispatch_line_len = 0;
     s_dispatch_line_buf[0] = '\0';

@@ -99,6 +99,10 @@ void state_machine_handle_pending_action(void) {
         if (action == COMMAND_ACTION_NONE) {
             return;
         }
+        if (action == COMMAND_ACTION_APPLY_CONFIG) {
+            (void)command_handler_apply_pending_config();
+            continue;
+        }
         if (action == COMMAND_ACTION_REBOOT) {
             esp_restart();
         }

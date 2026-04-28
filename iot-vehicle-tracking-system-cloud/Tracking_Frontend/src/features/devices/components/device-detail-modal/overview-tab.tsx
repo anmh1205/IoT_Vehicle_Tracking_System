@@ -490,7 +490,7 @@ export const OverviewTab = () => {
     <div className="space-y-3">
       <AllowedZoneStatusCard
         vehicleId={device?.vehicleId ?? null}
-        title="Vùng cho phép của phương tiện"
+        title="Vùng"
         canEdit={access.canEditDevice && Boolean(device?.vehicleId)}
         onConfigure={() => setAllowedZoneOpen(true)}
       />

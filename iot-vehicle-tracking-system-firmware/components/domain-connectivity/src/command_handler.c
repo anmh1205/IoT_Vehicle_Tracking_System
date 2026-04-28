@@ -8,6 +8,10 @@
 
 #include "cJSON.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include "freertos/semphr.h"
+
 #include "esp_log.h"
 
 #include "nvs_config.h"
@@ -19,20 +23,24 @@
  */
 
 static const char *TAG = "COMMAND_HANDLER";
+static const TickType_t COMMAND_HANDLER_LOCK_TIMEOUT_TICKS = pdMS_TO_TICKS(250);
+static const TickType_t COMMAND_HANDLER_QUEUE_SEND_TIMEOUT_TICKS = pdMS_TO_TICKS(100);
+
+#define COMMAND_HANDLER_ACTION_QUEUE_LEN 16U
+#define COMMAND_HANDLER_MAX_LOCATION_REQUESTS 255U
+#define COMMAND_HANDLER_U16_RULE_COUNT 7U
+#define COMMAND_HANDLER_BOOL_RULE_COUNT 2U
 
 /* Mutable runtime config pointer shared with state machine. */
 static config_t *s_config = NULL;
+static SemaphoreHandle_t s_lock = NULL;
+static QueueHandle_t s_action_queue = NULL;
 /* Tracking enable flag set by `enable_tracking` command. */
 static bool s_tracking_enabled = true;
-/* One-shot location request flag set by `request_location`. */
-static bool s_location_requested = false;
-/* Reboot command latch consumed by state machine loop. */
-static bool s_reboot_pending = false;
-/* Pending OTA action consumed by state machine loop. */
-static bool s_ota_action_pending = false;
-static command_action_t s_ota_action = COMMAND_ACTION_NONE;
-/* Last parsed OTA command payload. */
-static ota_command_t s_ota_command = {0};
+/* Counts queued one-shot location requests so bursts are not collapsed into one bit. */
+static uint8_t s_location_request_count = 0U;
+/* Tracks command drops without expanding the cloud command contract. */
+static uint32_t s_dropped_command_count = 0U;
 
 /** @brief Canonical command names from cloud payload. */
 static const char *const COMMAND_NAME_UPDATE_CONFIG = "update_config";
@@ -60,6 +68,32 @@ typedef struct {
     const char *field_name;
     size_t field_offset;
 } command_bool_update_rule_t;
+
+typedef struct {
+    /** Parsed bounded uint16 config values, indexed by `s_update_u16_rules`. */
+    uint16_t u16_values[COMMAND_HANDLER_U16_RULE_COUNT];
+    /** Bit mask that marks which uint16 fields were present and valid. */
+    uint32_t u16_present_mask;
+    /** Parsed boolean config values, indexed by `s_update_bool_rules`. */
+    bool bool_values[COMMAND_HANDLER_BOOL_RULE_COUNT];
+    /** Bit mask that marks which bool fields were present and valid. */
+    uint32_t bool_present_mask;
+} command_config_update_t;
+
+typedef struct {
+    /** Runtime action consumed by the FSM task. */
+    command_action_t action;
+    /** OTA payload captured at MQTT callback time and later consumed by FSM. */
+    ota_command_t ota_command;
+    /** Config delta captured without mutating runtime config on the MQTT callback path. */
+    command_config_update_t config_update;
+} command_action_item_t;
+
+/* Payload associated with the action most recently popped from s_action_queue. */
+static ota_command_t s_consumed_ota_command = {0};
+static bool s_consumed_ota_command_valid = false;
+static command_config_update_t s_consumed_config_update = {0};
+static bool s_consumed_config_update_valid = false;
 
 static const command_u16_update_rule_t s_update_u16_rules[] = {
     {
@@ -116,6 +150,36 @@ static const command_bool_update_rule_t s_update_bool_rules[] = {
         .field_offset = offsetof(config_t, imu_wakeup_enabled),
     },
 };
+
+static bool command_handler_take_lock(void) {
+    return s_lock != NULL && xSemaphoreTake(s_lock, COMMAND_HANDLER_LOCK_TIMEOUT_TICKS) == pdTRUE;
+}
+
+/**
+ * @brief Acquire the command mutex and log/drop on contention.
+ *
+ * Command callbacks run from the MQTT/URC path, while command consumers run from
+ * the FSM task. A bounded wait prevents command parsing from blocking modem RX
+ * indefinitely when another path is applying a command.
+ */
+static bool command_handler_take_lock_for(const char *operation) {
+    if (command_handler_take_lock()) {
+        return true;
+    }
+
+    s_dropped_command_count += 1U;
+    ESP_LOGW(TAG,
+             "Dropped command operation=%s because lock is busy dropped_count=%lu",
+             operation != NULL ? operation : "unknown",
+             (unsigned long)s_dropped_command_count);
+    return false;
+}
+
+static void command_handler_give_lock(void) {
+    if (s_lock != NULL) {
+        xSemaphoreGive(s_lock);
+    }
+}
 
 static bool command_is_hex_sha256(const char *value) {
     if (util_string_empty(value) || strlen(value) != 64) {
@@ -216,66 +280,137 @@ static bool command_is_allowed_update_field(const char *name) {
 }
 
 /**
- * @brief Apply one bounded integer `update_config` rule.
+ * @brief Parse one allowed uint16 `update_config` field into a deferred delta.
  *
- * @param config Mutable runtime config.
- * @param params Raw JSON params object.
- * @param rule Rule definition describing destination field and bounds.
- *
- * @return true when field value was modified.
+ * The parser never writes `s_config` directly. It only records valid fields in
+ * `command_config_update_t`; the FSM task later applies and persists the delta
+ * after full config validation.
  */
-static bool command_apply_u16_update_rule(config_t *config,
-                                          const cJSON *params,
-                                          const command_u16_update_rule_t *rule) {
-    if (config == NULL || params == NULL || rule == NULL) {
+static bool command_parse_u16_update_field(const cJSON *params,
+                                           size_t rule_index,
+                                           command_config_update_t *update) {
+    if (params == NULL || update == NULL || rule_index >= ARRAY_SIZE(s_update_u16_rules)) {
         return false;
     }
 
+    const command_u16_update_rule_t *rule = &s_update_u16_rules[rule_index];
     const cJSON *field_value = cJSON_GetObjectItemCaseSensitive(params, rule->field_name);
+    if (field_value == NULL) {
+        return false;
+    }
+
     uint32_t parsed = 0U;
     if (!command_parse_u32_positive(field_value, &parsed)) {
+        ESP_LOGW(TAG, "Rejected update_config field %s because value is invalid", rule->field_name);
         return false;
     }
 
-    uint16_t clamped = (uint16_t)util_clamp_int((int)parsed, (int)rule->min_value, (int)rule->max_value);
-    uint16_t *target = (uint16_t *)((uint8_t *)config + rule->field_offset);
-    if (*target == clamped) {
-        return false;
-    }
-
-    *target = clamped;
+    update->u16_values[rule_index] =
+        (uint16_t)util_clamp_int((int)parsed, (int)rule->min_value, (int)rule->max_value);
+    update->u16_present_mask |= (1UL << rule_index);
     return true;
 }
 
 /**
- * @brief Apply one boolean `update_config` rule.
- *
- * @param config Mutable runtime config.
- * @param params Raw JSON params object.
- * @param rule Rule definition describing destination field.
- *
- * @return true when field value was modified.
+ * @brief Parse one allowed boolean `update_config` field into a deferred delta.
  */
-static bool command_apply_bool_update_rule(config_t *config,
-                                           const cJSON *params,
-                                           const command_bool_update_rule_t *rule) {
-    if (config == NULL || params == NULL || rule == NULL) {
+static bool command_parse_bool_update_field(const cJSON *params,
+                                            size_t rule_index,
+                                            command_config_update_t *update) {
+    if (params == NULL || update == NULL || rule_index >= ARRAY_SIZE(s_update_bool_rules)) {
         return false;
     }
 
+    const command_bool_update_rule_t *rule = &s_update_bool_rules[rule_index];
     const cJSON *field_value = cJSON_GetObjectItemCaseSensitive(params, rule->field_name);
+    if (field_value == NULL) {
+        return false;
+    }
+
     if (!cJSON_IsBool(field_value)) {
+        ESP_LOGW(TAG, "Rejected update_config field %s because value is not boolean", rule->field_name);
         return false;
     }
 
-    bool parsed = cJSON_IsTrue(field_value);
-    bool *target = (bool *)((uint8_t *)config + rule->field_offset);
-    if (*target == parsed) {
-        return false;
-    }
-
-    *target = parsed;
+    update->bool_values[rule_index] = cJSON_IsTrue(field_value);
+    update->bool_present_mask |= (1UL << rule_index);
     return true;
+}
+
+static bool command_config_update_has_changes(const command_config_update_t *update) {
+    return update != NULL && (update->u16_present_mask != 0U || update->bool_present_mask != 0U);
+}
+
+/**
+ * @brief Build a validated config delta from `update_config.params`.
+ *
+ * Unsupported fields are logged but ignored so the cloud can roll out extra
+ * fields without bricking older firmware. Invalid values for supported fields
+ * are also ignored, leaving the current runtime value unchanged.
+ */
+static bool command_parse_config_update(const cJSON *params, command_config_update_t *out_update) {
+    if (params == NULL || out_update == NULL || !cJSON_IsObject(params)) {
+        return false;
+    }
+
+    memset(out_update, 0, sizeof(*out_update));
+
+    const cJSON *field = NULL;
+    cJSON_ArrayForEach(field, params) {
+        if (!command_is_allowed_update_field(field->string)) {
+            ESP_LOGW(TAG, "Rejected unsupported update_config field: %s", field->string);
+        }
+    }
+
+    for (size_t i = 0; i < ARRAY_SIZE(s_update_u16_rules); ++i) {
+        (void)command_parse_u16_update_field(params, i, out_update);
+    }
+
+    for (size_t i = 0; i < ARRAY_SIZE(s_update_bool_rules); ++i) {
+        (void)command_parse_bool_update_field(params, i, out_update);
+    }
+
+    return command_config_update_has_changes(out_update);
+}
+
+static const char *command_action_label(command_action_t action) {
+    switch (action) {
+        case COMMAND_ACTION_APPLY_CONFIG:
+            return "apply_config";
+        case COMMAND_ACTION_REBOOT:
+            return "reboot";
+        case COMMAND_ACTION_OTA_UPDATE:
+            return "ota_update";
+        case COMMAND_ACTION_OTA_ROLLBACK:
+            return "ota_rollback";
+        default:
+            return "none";
+    }
+}
+
+static esp_err_t command_handler_enqueue_action(const command_action_item_t *item) {
+    if (item == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    if (s_action_queue == NULL) {
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    /*
+     * FreeRTOS queues are already thread-safe. Do not hold s_lock while waiting
+     * for a slot, otherwise the FSM consumer cannot acquire the same lock to
+     * drain the queue under burst command traffic.
+     */
+    if (xQueueSendToBack(s_action_queue, item, COMMAND_HANDLER_QUEUE_SEND_TIMEOUT_TICKS) != pdTRUE) {
+        s_dropped_command_count += 1U;
+        ESP_LOGW(TAG,
+                 "Dropped command action=%s because queue is full dropped_count=%lu",
+                 command_action_label(item->action),
+                 (unsigned long)s_dropped_command_count);
+        return ESP_ERR_NO_MEM;
+    }
+
+    return ESP_OK;
 }
 
 /**
@@ -287,13 +422,28 @@ static bool command_apply_bool_update_rule(config_t *config,
  */
 esp_err_t command_handler_init(config_t *config) {
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
+
+    if (s_lock == NULL) {
+        s_lock = xSemaphoreCreateMutex();
+    }
+    if (s_action_queue == NULL) {
+        s_action_queue = xQueueCreate(COMMAND_HANDLER_ACTION_QUEUE_LEN, sizeof(command_action_item_t));
+    }
+    ESP_RETURN_ON_FALSE(s_lock != NULL, ESP_ERR_NO_MEM, TAG, "command lock init failed");
+    ESP_RETURN_ON_FALSE(s_action_queue != NULL, ESP_ERR_NO_MEM, TAG, "command action queue init failed");
+    ESP_RETURN_ON_FALSE(command_handler_take_lock(), ESP_ERR_TIMEOUT, TAG, "command lock busy during init");
+
     s_config = config;
     s_tracking_enabled = true;
-    s_location_requested = false;
-    s_reboot_pending = false;
-    s_ota_action_pending = false;
-    s_ota_action = COMMAND_ACTION_NONE;
-    memset(&s_ota_command, 0, sizeof(s_ota_command));
+    s_location_request_count = 0U;
+    s_dropped_command_count = 0U;
+    s_consumed_ota_command_valid = false;
+    s_consumed_config_update_valid = false;
+    memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
+    memset(&s_consumed_config_update, 0, sizeof(s_consumed_config_update));
+    xQueueReset(s_action_queue);
+
+    command_handler_give_lock();
     return ESP_OK;
 }
 
@@ -385,53 +535,6 @@ static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd
 }
 
 /**
- * @brief Apply remote configuration updates and persist into NVS.
- *
- * @param params JSON params object.
- */
-static void command_apply_update_config(const cJSON *params) {
-    if (s_config == NULL || params == NULL) {
-        return;
-    }
-
-    config_t before_update = *s_config;
-    bool changed = false;
-
-    const cJSON *field = NULL;
-    cJSON_ArrayForEach(field, params) {
-        if (!command_is_allowed_update_field(field->string)) {
-            ESP_LOGW(TAG, "Rejected unsupported update_config field: %s", field->string);
-        }
-    }
-
-    for (size_t i = 0; i < ARRAY_SIZE(s_update_u16_rules); ++i) {
-        if (command_apply_u16_update_rule(s_config, params, &s_update_u16_rules[i])) {
-            changed = true;
-        }
-    }
-
-    for (size_t i = 0; i < ARRAY_SIZE(s_update_bool_rules); ++i) {
-        if (command_apply_bool_update_rule(s_config, params, &s_update_bool_rules[i])) {
-            changed = true;
-        }
-    }
-
-    if (!changed) {
-        return;
-    }
-
-    if (!app_config_is_valid(s_config)) {
-        ESP_LOGW(TAG, "Rejected update_config because resulting config is invalid");
-        *s_config = before_update;
-        return;
-    }
-
-    if (nvs_config_save(s_config) != ESP_OK) {
-        ESP_LOGW(TAG, "Failed to persist updated config");
-    }
-}
-
-/**
  * @brief Parse incoming command JSON and update internal action flags.
  *
  * @param command_json Raw command JSON string.
@@ -458,40 +561,60 @@ void command_handler_process(const char *command_json) {
     ESP_LOGI(TAG, "Command received: %s", command->valuestring);
 
     if (strcmp(command->valuestring, COMMAND_NAME_UPDATE_CONFIG) == 0) {
-        if (cJSON_IsObject(params)) {
-            command_apply_update_config(params);
+        command_config_update_t update = {0};
+        if (command_parse_config_update(params, &update)) {
+            command_action_item_t item = {
+                .action = COMMAND_ACTION_APPLY_CONFIG,
+                .config_update = update,
+            };
+            (void)command_handler_enqueue_action(&item);
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_REQUEST_LOCATION) == 0) {
-        s_location_requested = true;
+        if (command_handler_take_lock_for(COMMAND_NAME_REQUEST_LOCATION)) {
+            if (s_location_request_count < COMMAND_HANDLER_MAX_LOCATION_REQUESTS) {
+                s_location_request_count += 1U;
+            } else {
+                s_dropped_command_count += 1U;
+                ESP_LOGW(TAG, "Dropped request_location because pending counter is saturated");
+            }
+            command_handler_give_lock();
+        }
     } else if (strcmp(command->valuestring, COMMAND_NAME_ENABLE_TRACKING) == 0) {
         const cJSON *enabled = cJSON_GetObjectItemCaseSensitive(params, "enabled");
-        if (cJSON_IsBool(enabled)) {
+        if (!cJSON_IsBool(enabled)) {
+            ESP_LOGW(TAG, "Rejected enable_tracking because enabled is not boolean");
+        } else if (command_handler_take_lock_for(COMMAND_NAME_ENABLE_TRACKING)) {
             s_tracking_enabled = cJSON_IsTrue(enabled);
+            command_handler_give_lock();
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_REBOOT) == 0) {
-        s_reboot_pending = true;
+        command_action_item_t item = {
+            .action = COMMAND_ACTION_REBOOT,
+        };
+        (void)command_handler_enqueue_action(&item);
     } else if (strcmp(command->valuestring, COMMAND_NAME_OTA_UPDATE) == 0) {
         ota_command_t parsed = {0};
         if (command_parse_ota_update(params, &parsed)) {
             ESP_LOGI(TAG,
-                     "ota_update accepted job=%s size=%u url=%s",
+                     "ota_update accepted job=%s size=%u url_len=%u",
                      parsed.job_id,
                      (unsigned)parsed.size,
-                     parsed.url);
-            s_ota_command = parsed;
-            s_ota_action_pending = true;
-            s_ota_action = COMMAND_ACTION_OTA_UPDATE;
+                     (unsigned)strlen(parsed.url));
+            command_action_item_t item = {
+                .action = COMMAND_ACTION_OTA_UPDATE,
+                .ota_command = parsed,
+            };
+            (void)command_handler_enqueue_action(&item);
         } else {
             ESP_LOGW(TAG, "Invalid ota_update params");
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_MANUAL_ROLLBACK) == 0 ||
                strcmp(command->valuestring, COMMAND_NAME_OTA_ROLLBACK) == 0) {
-        /* Create synthetic rollback request payload. */
-        memset(&s_ota_command, 0, sizeof(s_ota_command));
-        s_ota_command.rollback_pending = true;
-        s_ota_command.pending = false;
-        s_ota_action_pending = true;
-        s_ota_action = COMMAND_ACTION_OTA_ROLLBACK;
+        command_action_item_t item = {
+            .action = COMMAND_ACTION_OTA_ROLLBACK,
+        };
+        item.ota_command.rollback_pending = true;
+        (void)command_handler_enqueue_action(&item);
     }
 
     cJSON_Delete(root);
@@ -503,8 +626,15 @@ void command_handler_process(const char *command_json) {
  * @return true when a request existed.
  */
 bool command_handler_consume_location_request(void) {
-    bool current = s_location_requested;
-    s_location_requested = false;
+    if (!command_handler_take_lock()) {
+        return false;
+    }
+
+    bool current = s_location_request_count > 0U;
+    if (current) {
+        s_location_request_count -= 1U;
+    }
+    command_handler_give_lock();
     return current;
 }
 
@@ -514,7 +644,13 @@ bool command_handler_consume_location_request(void) {
  * @return true when tracking is enabled.
  */
 bool command_handler_is_tracking_enabled(void) {
-    return s_tracking_enabled;
+    if (!command_handler_take_lock()) {
+        return true;
+    }
+
+    bool tracking_enabled = s_tracking_enabled;
+    command_handler_give_lock();
+    return tracking_enabled;
 }
 
 /**
@@ -523,19 +659,113 @@ bool command_handler_is_tracking_enabled(void) {
  * @return Action value (or NONE).
  */
 command_action_t command_handler_consume_action(void) {
-    if (s_reboot_pending) {
-        s_reboot_pending = false;
-        return COMMAND_ACTION_REBOOT;
+    if (!command_handler_take_lock()) {
+        return COMMAND_ACTION_NONE;
     }
 
-    if (s_ota_action_pending) {
-        command_action_t action = s_ota_action;
-        s_ota_action_pending = false;
-        s_ota_action = COMMAND_ACTION_NONE;
-        return action;
+    command_action_item_t item = {0};
+    if (s_action_queue == NULL || xQueueReceive(s_action_queue, &item, 0) != pdTRUE) {
+        command_handler_give_lock();
+        return COMMAND_ACTION_NONE;
     }
 
-    return COMMAND_ACTION_NONE;
+    /*
+     * Keep large command payloads out of the action enum. The caller first pops
+     * the action, then fetches the payload with the matching take/apply helper.
+     */
+    s_consumed_ota_command_valid = false;
+    s_consumed_config_update_valid = false;
+    memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
+    memset(&s_consumed_config_update, 0, sizeof(s_consumed_config_update));
+
+    if (item.action == COMMAND_ACTION_OTA_UPDATE || item.action == COMMAND_ACTION_OTA_ROLLBACK) {
+        s_consumed_ota_command = item.ota_command;
+        s_consumed_ota_command_valid = true;
+    } else if (item.action == COMMAND_ACTION_APPLY_CONFIG) {
+        s_consumed_config_update = item.config_update;
+        s_consumed_config_update_valid = true;
+    }
+
+    command_handler_give_lock();
+    return item.action;
+}
+
+/**
+ * @brief Apply the config delta associated with the last consumed action.
+ *
+ * NVS write can be slow, so the mutex is held only while copying the pending
+ * delta and current config snapshot. The final in-memory swap is safe because
+ * the FSM is the only writer for runtime config.
+ */
+esp_err_t command_handler_apply_pending_config(void) {
+    if (!command_handler_take_lock()) {
+        ESP_LOGW(TAG, "command lock busy while applying config");
+        return ESP_ERR_TIMEOUT;
+    }
+    if (!s_consumed_config_update_valid) {
+        command_handler_give_lock();
+        return ESP_ERR_INVALID_STATE;
+    }
+    if (s_config == NULL) {
+        command_handler_give_lock();
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    config_t *runtime_config = s_config;
+    command_config_update_t pending_update = s_consumed_config_update;
+    config_t next_config = *runtime_config;
+    s_consumed_config_update_valid = false;
+    memset(&s_consumed_config_update, 0, sizeof(s_consumed_config_update));
+    command_handler_give_lock();
+
+    bool changed = false;
+
+    for (size_t i = 0; i < ARRAY_SIZE(s_update_u16_rules); ++i) {
+        if ((pending_update.u16_present_mask & (1UL << i)) == 0U) {
+            continue;
+        }
+
+        const command_u16_update_rule_t *rule = &s_update_u16_rules[i];
+        uint16_t *target = (uint16_t *)((uint8_t *)&next_config + rule->field_offset);
+        uint16_t next_value = pending_update.u16_values[i];
+        if (*target != next_value) {
+            *target = next_value;
+            changed = true;
+        }
+    }
+
+    for (size_t i = 0; i < ARRAY_SIZE(s_update_bool_rules); ++i) {
+        if ((pending_update.bool_present_mask & (1UL << i)) == 0U) {
+            continue;
+        }
+
+        const command_bool_update_rule_t *rule = &s_update_bool_rules[i];
+        bool *target = (bool *)((uint8_t *)&next_config + rule->field_offset);
+        bool next_value = pending_update.bool_values[i];
+        if (*target != next_value) {
+            *target = next_value;
+            changed = true;
+        }
+    }
+
+    if (!changed) {
+        return ESP_OK;
+    }
+
+    if (!app_config_is_valid(&next_config)) {
+        ESP_LOGW(TAG, "Rejected queued update_config because resulting config is invalid");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    esp_err_t save_err = nvs_config_save(&next_config);
+    if (save_err != ESP_OK) {
+        ESP_LOGW(TAG, "Failed to persist updated config");
+        return save_err;
+    }
+
+    *runtime_config = next_config;
+    ESP_LOGI(TAG, "Applied queued update_config on FSM task");
+    return ESP_OK;
 }
 
 /**
@@ -550,11 +780,18 @@ bool command_handler_take_ota_command(ota_command_t *out_cmd) {
         return false;
     }
 
-    if (!s_ota_command.pending && !s_ota_command.rollback_pending) {
+    if (!command_handler_take_lock()) {
         return false;
     }
 
-    *out_cmd = s_ota_command;
-    memset(&s_ota_command, 0, sizeof(s_ota_command));
+    if (!s_consumed_ota_command_valid) {
+        command_handler_give_lock();
+        return false;
+    }
+
+    *out_cmd = s_consumed_ota_command;
+    s_consumed_ota_command_valid = false;
+    memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
+    command_handler_give_lock();
     return true;
 }

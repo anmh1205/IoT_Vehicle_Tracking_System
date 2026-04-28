@@ -7,11 +7,10 @@ import {
   MapPinned,
   RadioTower,
   Route,
-  Settings2,
   TerminalSquare,
   TriangleAlert,
 } from 'lucide-react';
-import type { VehicleAllowedZone } from '@/lib/api/geofences';
+import type { VehicleZone } from '@/lib/api/zones';
 import { useMapShortcutTargets } from '@/features/map/hooks/use-map-shortcut-targets';
 import { useMapStore } from '@/features/map/store/map-store';
 import type { DevicePosition, MapInspectPanelPayload, MapInspectPanelTarget } from '@/features/map/types';
@@ -40,7 +39,7 @@ const toBadgeCount = (value: number | null | undefined) =>
 
 export const useMapInspectShortcuts = (
   device: DevicePosition | null,
-  allowedZone: VehicleAllowedZone | null | undefined,
+  allowedZone: VehicleZone | null | undefined,
 ) => {
   const openInspectPanel = useMapStore((state) => state.openInspectPanel);
   const shortcutTargets = useMapShortcutTargets(device);
@@ -111,24 +110,17 @@ export const useMapInspectShortcuts = (
       onSelect: () => openInspectPanel('commands', basePayload()),
     },
     {
-      id: 'allowed-zone',
-      label: 'Vùng cho phép',
+      id: 'zone',
+      label: 'Vùng',
       icon: MapPinned,
-      target: 'allowed-zone',
+      target: 'zone',
       disabled: !shortcutTargets.vehicleIdentifier,
       badge: allowedZone ? 1 : null,
       onSelect: () =>
         openInspectPanel(
-          'allowed-zone',
+          'zone',
           vehiclePayload(allowedZone ? 'allowed-zone-status' : 'allowed-zone-empty'),
         ),
-    },
-    {
-      id: 'geofence',
-      label: 'Geofence',
-      icon: Settings2,
-      target: 'geofence',
-      onSelect: () => openInspectPanel('geofence', vehiclePayload('geofence-context')),
     },
   ];
 

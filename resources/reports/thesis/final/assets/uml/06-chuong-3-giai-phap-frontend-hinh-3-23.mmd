@@ -1,5 +1,5 @@
 flowchart TB
-    Device["Thiết bị theo dõi"] -->|Rawdata / status / events / firmware| EMQX["EMQX"]
+    Device["Thiết bị theo dõi"] -->|rawdata / status / events / firmware| EMQX["EMQX"]
     EMQX -->|Device topics| Bridge["MQTT Bridge"]
 
     subgraph AppLayer["Lớp ứng dụng"]
@@ -20,6 +20,6 @@ flowchart TB
     API -->|Socket.IO push| Store
     Query --> Dashboard
     Store --> Dashboard
-    API -->|Commands / OTA| EMQX
-    EMQX -->|Topic commands| Device
+    API -->|commands / OTA| EMQX
+    EMQX -->|topic commands| Device
 

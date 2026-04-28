@@ -306,8 +306,8 @@ static esp_err_t util_ota_request_chunk(util_ota_update_ctx_t *ctx,
                                          http_read_len,
                                          wire_payload,
                                          wire_payload_len)) {
-        util_log_hex_preview("HTTPREAD raw preview", ctx->http_read_response, OTA_HTTP_READ_RESPONSE_MAX_LEN);
-        ESP_LOGE(UTIL_TAG, "HTTPREAD parse failed raw=%s", (const char *)ctx->http_read_response);
+        util_log_hex_preview("HTTPREAD raw preview", ctx->http_read_response, http_read_len);
+        ESP_LOGE(UTIL_TAG, "HTTPREAD parse failed len=%u", (unsigned)http_read_len);
         return ESP_FAIL;
     }
     if (*wire_payload_len == 0U) {

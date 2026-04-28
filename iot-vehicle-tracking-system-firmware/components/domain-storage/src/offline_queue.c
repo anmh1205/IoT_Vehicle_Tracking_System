@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "esp_log.h"
-#include "freertos/FreeRTOS.h"
 #include "sdkconfig.h"
 
 #include "mqtt_client.h"
@@ -16,14 +15,12 @@
 
 /**
  * @file offline_queue.c
- * @brief SD-backed offline queue with FIFO replay and QoS-aware ACK handling.
+ * @brief SD-backed offline queue with FIFO replay and publish-result commit.
  */
 
 static const char *TAG = "OFFLINE_QUEUE";
 /* Retry delayed SD mounts instead of probing every enqueue/replay tick. */
 #define OFFLINE_QUEUE_SD_MOUNT_RETRY_MS 30000ULL
-/* Sanitize legacy test credentials that may already be persisted on SD. */
-#define OFFLINE_QUEUE_AUTH_TOKEN_REPLAY "\"auth_token\":\"TRACKER_001_Anmh1205\""
 /* Keep replay traffic from monopolizing the MQTT link during recovery. */
 #define OFFLINE_QUEUE_REPLAY_MIN_PUBLISH_INTERVAL_MS 600ULL
 
@@ -36,22 +33,12 @@ typedef struct {
     uint32_t session_id;
     /** Next sequence number assigned on append. */
     uint32_t next_seq;
-    /** In-flight QoS1 MQTT message waiting for ACK, or `-1` when none. */
-    int pending_msg_id;
-    /** Latest ACKed MQTT message ID seen from the client callback. */
-    int acked_msg_id;
-    /** Queue sequence associated with `pending_msg_id`. */
-    uint32_t pending_seq;
-    /** Timestamp when the current QoS1 publish was sent. */
-    uint64_t pending_since_ms;
     /** Last time replay actually published a record. */
     uint64_t last_replay_publish_ms;
-    /** Backoff state for replay publish/ACK failures. */
+    /** Backoff state for replay publish failures. */
     retry_state_t replay_retry;
     /** Backoff state for remount attempts after SD failure/removal. */
     retry_state_t sd_mount_retry;
-    /** Protects the small pending/acked ACK handshake state. */
-    portMUX_TYPE ack_lock;
 } offline_queue_ctx_t;
 
 static offline_queue_ctx_t s_ctx;
@@ -251,33 +238,19 @@ static const char *offline_queue_payload_for_publish(const sd_log_record_t *rec,
     ESP_RETURN_ON_FALSE(rec != NULL, "", TAG, "record null");
     ESP_RETURN_ON_FALSE(scratch_payload != NULL && scratch_len > 0, rec->payload, TAG, "scratch invalid");
 
-    bool needs_auth_patch = strstr(rec->payload, "\"auth_token\":\"device-secret-token\"") != NULL ||
-                            strstr(rec->payload, "\"auth_token\":\"Anmh1205\"") != NULL;
     bool needs_job_patch = rec->type == OFFLINE_RECORD_FIRMWARE &&
                            strstr(rec->payload, "\"jobId\":\"\"") != NULL;
-    if (!needs_auth_patch && !needs_job_patch) {
+    if (!needs_job_patch) {
         return rec->payload;
     }
 
     /*
      * Replay should publish data that matches the current cloud contract even if
-     * older on-disk records were generated with placeholder credentials/job IDs.
+     * older on-disk firmware records were generated without a job ID.
      */
     util_copy_string(scratch_payload, scratch_len, rec->payload);
 
     bool patched = false;
-    if (needs_auth_patch) {
-        bool replaced = false;
-        replaced |= offline_queue_replace_fragment(scratch_payload,
-                                                   scratch_len,
-                                                   "\"auth_token\":\"device-secret-token\"",
-                                                   OFFLINE_QUEUE_AUTH_TOKEN_REPLAY);
-        replaced |= offline_queue_replace_fragment(scratch_payload,
-                                                   scratch_len,
-                                                   "\"auth_token\":\"Anmh1205\"",
-                                                   OFFLINE_QUEUE_AUTH_TOKEN_REPLAY);
-        patched |= replaced;
-    }
     if (needs_job_patch) {
         patched |= offline_queue_replace_fragment(scratch_payload,
                                                   scratch_len,
@@ -285,6 +258,25 @@ static const char *offline_queue_payload_for_publish(const sd_log_record_t *rec,
                                                   "\"jobId\":\"replay\"");
     }
     return patched ? scratch_payload : rec->payload;
+}
+
+/**
+ * @brief Detect legacy rawdata records that contain stale OBD signals.
+ *
+ * Older firmware could serialize `diagnostics.channel` as disconnected/not-ready
+ * while still carrying the previous `signals.rpm` snapshot. Replaying those
+ * records would recreate misleading server-side OBD data, so replay advances
+ * past them instead of publishing.
+ */
+static bool offline_queue_is_stale_obd_rawdata_record(const sd_log_record_t *rec) {
+    if (rec == NULL || rec->type != OFFLINE_RECORD_RAWDATA) {
+        return false;
+    }
+
+    bool channel_not_ready = strstr(rec->payload, "\"ble_obd_connected\":false") != NULL ||
+                             strstr(rec->payload, "\"elm_ready\":false") != NULL;
+    bool contains_obd_signal = strstr(rec->payload, "\"signals\":{\"rpm\"") != NULL;
+    return channel_not_ready && contains_obd_signal;
 }
 
 static bool offline_queue_is_stale_firmware_record(const sd_log_record_t *rec) {
@@ -331,8 +323,6 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
     if (qos == 0) {
         /* QoS0 has no broker ACK; advancing replay_seq immediately is intentional. */
         telemetry_counters_inc_replay_success();
-        s_ctx.pending_msg_id = -1;
-        s_ctx.pending_seq = 0;
         ESP_LOGI(TAG,
                  "replay publish ok seq=%lu type=%u qos=%d topic=%s msg_id=%d",
                  (unsigned long)rec->seq,
@@ -343,34 +333,22 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
         return sd_log_store_set_replay_seq(rec->seq + 1);
     }
 
-    /* QoS1 records advance only after the MQTT client reports the matching ACK. */
-    taskENTER_CRITICAL(&s_ctx.ack_lock);
-    int previous_acked_msg_id = s_ctx.acked_msg_id;
-    s_ctx.pending_msg_id = msg_id;
-    s_ctx.pending_seq = rec->seq;
-    s_ctx.pending_since_ms = util_uptime_ms();
-    if (previous_acked_msg_id != msg_id) {
-        s_ctx.acked_msg_id = -1;
-    }
-    taskEXIT_CRITICAL(&s_ctx.ack_lock);
+    telemetry_counters_inc_replay_success();
     ESP_LOGI(TAG,
-             "replay publish pending-ack seq=%lu type=%u qos=%d topic=%s msg_id=%d",
+             "replay publish accepted seq=%lu type=%u qos=%d topic=%s msg_id=%d",
              (unsigned long)rec->seq,
              (unsigned int)rec->type,
              qos,
              topic,
              msg_id);
-    return ESP_OK;
+    return sd_log_store_ack_critical_and_advance_replay(rec->seq, rec->seq + 1);
 }
 
 esp_err_t offline_queue_init(void) {
     memset(&s_ctx, 0, sizeof(s_ctx));
-    s_ctx.pending_msg_id = -1;
-    s_ctx.acked_msg_id = -1;
     s_ctx.last_replay_publish_ms = 0;
     retry_state_reset(&s_ctx.replay_retry);
     retry_state_reset(&s_ctx.sd_mount_retry);
-    s_ctx.ack_lock = (portMUX_TYPE)portMUX_INITIALIZER_UNLOCKED;
     esp_err_t err = sd_log_store_init();
     ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "sd_log_store_init failed");
     if (CONFIG_TRACKER_SD_LOG_ENABLE) {
@@ -442,7 +420,17 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
     rec.gps_fix = gps_fix ? 1 : 0;
     rec.net_up = net_up ? 1 : 0;
     rec.time_trusted = time_trusted ? 1 : 0;
-    util_copy_string(rec.payload, sizeof(rec.payload), payload);
+    size_t payload_len = strlen(payload);
+    if (payload_len >= sizeof(rec.payload)) {
+        telemetry_counters_inc_sd_write_fail();
+        ESP_LOGW(TAG,
+                 "offline payload too large type=%u len=%u cap=%u",
+                 (unsigned)type,
+                 (unsigned)payload_len,
+                 (unsigned)sizeof(rec.payload));
+        return ESP_ERR_INVALID_SIZE;
+    }
+    memcpy(rec.payload, payload, payload_len + 1U);
 
     if (CONFIG_TRACKER_SD_LOG_ENABLE) {
         /* Treat a temporarily unavailable card as best-effort; do not fail caller telemetry paths. */
@@ -490,67 +478,6 @@ void offline_queue_replay_tick(void) {
 
     uint64_t now_ms = util_uptime_ms();
 
-    int pending_msg_id = -1;
-    uint32_t pending_seq = 0;
-    uint64_t pending_since_ms = 0;
-    int acked_msg_id = -1;
-    taskENTER_CRITICAL(&s_ctx.ack_lock);
-    pending_msg_id = s_ctx.pending_msg_id;
-    pending_seq = s_ctx.pending_seq;
-    pending_since_ms = s_ctx.pending_since_ms;
-    acked_msg_id = s_ctx.acked_msg_id;
-    taskEXIT_CRITICAL(&s_ctx.ack_lock);
-
-    if (acked_msg_id >= 0 && acked_msg_id == pending_msg_id && pending_seq > 0) {
-        /* ACK finalizes the current QoS1 record and advances both critical + replay pointers. */
-        if (sd_log_store_ack_critical_and_advance_replay(pending_seq, pending_seq + 1) == ESP_OK) {
-            telemetry_counters_inc_replay_success();
-            taskENTER_CRITICAL(&s_ctx.ack_lock);
-            if (s_ctx.pending_msg_id == pending_msg_id && s_ctx.pending_seq == pending_seq) {
-                s_ctx.pending_msg_id = -1;
-                s_ctx.pending_seq = 0;
-                s_ctx.pending_since_ms = 0;
-                if (s_ctx.acked_msg_id == acked_msg_id) {
-                    s_ctx.acked_msg_id = -1;
-                }
-            }
-            taskEXIT_CRITICAL(&s_ctx.ack_lock);
-            retry_state_reset(&s_ctx.replay_retry);
-        } else {
-            telemetry_counters_inc_replay_retry();
-        }
-        return;
-    }
-
-    if (pending_msg_id >= 0) {
-        /* One record is still in flight; wait until ACK arrives or the timeout expires. */
-        if ((now_ms - pending_since_ms) >= (uint64_t)CONFIG_TRACKER_SD_ACK_TIMEOUT_MS) {
-            telemetry_counters_inc_replay_retry();
-            taskENTER_CRITICAL(&s_ctx.ack_lock);
-            if (s_ctx.pending_msg_id == pending_msg_id && s_ctx.pending_seq == pending_seq) {
-                s_ctx.pending_msg_id = -1;
-                s_ctx.pending_seq = 0;
-                s_ctx.pending_since_ms = 0;
-                s_ctx.acked_msg_id = -1;
-            }
-            taskEXIT_CRITICAL(&s_ctx.ack_lock);
-            retry_policy_t replay_policy = offline_queue_replay_retry_policy();
-            uint32_t delay_ms = retry_state_current_delay_ms(&s_ctx.replay_retry,
-                                                             &replay_policy,
-                                                             now_ms);
-            (void)retry_state_schedule(&s_ctx.replay_retry,
-                                       &replay_policy,
-                                       now_ms,
-                                       ESP_ERR_TIMEOUT);
-            ESP_LOGW(TAG,
-                     "retry step=replay_ack_timeout err=%s attempt=%lu next_delay_ms=%lu",
-                     esp_err_to_name(ESP_ERR_TIMEOUT),
-                     (unsigned long)s_ctx.replay_retry.attempts,
-                     (unsigned long)delay_ms);
-        }
-        return;
-    }
-
     if (!retry_state_can_run(&s_ctx.replay_retry, now_ms)) {
         return;
     }
@@ -575,6 +502,22 @@ void offline_queue_replay_tick(void) {
         /* Metadata says this critical record was already committed earlier; skip duplicate replay. */
         (void)sd_log_store_set_replay_seq(rec.seq + 1);
         return;
+    }
+
+    if (offline_queue_is_stale_obd_rawdata_record(&rec)) {
+        /*
+         * This only affects already persisted legacy queue rows. New payloads
+         * omit OBD signal fields when the OBD channel is disconnected/stale.
+         */
+        if (sd_log_store_set_replay_seq(rec.seq + 1) == ESP_OK) {
+            telemetry_counters_inc_replay_drop();
+            ESP_LOGW(TAG,
+                     "replay drop stale OBD rawdata seq=%lu",
+                     (unsigned long)rec.seq);
+            retry_state_reset(&s_ctx.replay_retry);
+            return;
+        }
+        telemetry_counters_inc_replay_retry();
     }
 
     if (offline_queue_is_stale_firmware_record(&rec)) {
@@ -609,25 +552,6 @@ void offline_queue_replay_tick(void) {
              esp_err_to_name(ESP_FAIL),
              (unsigned long)s_ctx.replay_retry.attempts,
              (unsigned long)delay_ms);
-}
-
-void offline_queue_handle_publish_ack(int msg_id) {
-    if (msg_id <= 0) {
-        return;
-    }
-    taskENTER_CRITICAL(&s_ctx.ack_lock);
-    if (s_ctx.pending_msg_id < 0 || s_ctx.pending_msg_id == msg_id) {
-        s_ctx.acked_msg_id = msg_id;
-    }
-    taskEXIT_CRITICAL(&s_ctx.ack_lock);
-}
-
-bool offline_queue_has_pending_ack(void) {
-    int pending_msg_id = -1;
-    taskENTER_CRITICAL(&s_ctx.ack_lock);
-    pending_msg_id = s_ctx.pending_msg_id;
-    taskEXIT_CRITICAL(&s_ctx.ack_lock);
-    return pending_msg_id >= 0;
 }
 
 bool offline_queue_should_throttle_rawdata(void) {

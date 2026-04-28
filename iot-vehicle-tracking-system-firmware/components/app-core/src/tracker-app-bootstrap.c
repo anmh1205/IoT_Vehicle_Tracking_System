@@ -21,7 +21,6 @@
 #include "retry_manager.h"
 #include "rtc_ds3231m.h"
 #include "tracker-runtime-ports.h"
-#include "tracker_feature_self_test.h"
 #include "util.h"
 
 /**
@@ -56,10 +55,6 @@ static esp_err_t tracker_storage_queue_enqueue_port(int record_type,
 
 static void tracker_mqtt_set_command_callback_port(tracker_command_message_callback_t cb) {
     tracker_mqtt_set_command_callback(cb);
-}
-
-static void tracker_mqtt_set_puback_callback_port(tracker_mqtt_puback_callback_t cb) {
-    tracker_mqtt_set_puback_callback(cb);
 }
 
 static void *tracker_obd_connect_port(tracker_obd_response_callback_t response_cb,
@@ -110,15 +105,12 @@ static const mqtt_transport_port_t s_mqtt_transport_port = {
     .publish_with_msg_id = tracker_mqtt_publish_with_msg_id,
     .subscribe_commands = tracker_mqtt_subscribe_commands,
     .set_command_callback = tracker_mqtt_set_command_callback_port,
-    .set_puback_callback = tracker_mqtt_set_puback_callback_port,
 };
 
 static const storage_queue_port_t s_storage_queue_port = {
     .init = offline_queue_init,
     .enqueue = tracker_storage_queue_enqueue_port,
     .replay_tick = offline_queue_replay_tick,
-    .handle_publish_ack = offline_queue_handle_publish_ack,
-    .has_pending_ack = offline_queue_has_pending_ack,
 };
 
 static const ota_download_port_t s_ota_download_port = {
@@ -213,15 +205,21 @@ void app_core_bootstrap_run(void) {
         util_copy_string(config.mqtt_host,
                          sizeof(config.mqtt_host),
                          CONFIG_TRACKER_FIELD_VALIDATION_MQTT_HOST);
-        util_copy_string(config.mqtt_username,
-                         sizeof(config.mqtt_username),
-                         CONFIG_TRACKER_FIELD_VALIDATION_MQTT_USERNAME);
-        util_copy_string(config.mqtt_password,
-                         sizeof(config.mqtt_password),
-                         CONFIG_TRACKER_FIELD_VALIDATION_MQTT_PASSWORD);
-        util_copy_string(config.auth_token,
-                         sizeof(config.auth_token),
-                         CONFIG_TRACKER_FIELD_VALIDATION_AUTH_TOKEN);
+        if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_USERNAME)) {
+            util_copy_string(config.mqtt_username,
+                             sizeof(config.mqtt_username),
+                             CONFIG_TRACKER_FIELD_VALIDATION_MQTT_USERNAME);
+        }
+        if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_PASSWORD)) {
+            util_copy_string(config.mqtt_password,
+                             sizeof(config.mqtt_password),
+                             CONFIG_TRACKER_FIELD_VALIDATION_MQTT_PASSWORD);
+        }
+        if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_AUTH_TOKEN)) {
+            util_copy_string(config.auth_token,
+                             sizeof(config.auth_token),
+                             CONFIG_TRACKER_FIELD_VALIDATION_AUTH_TOKEN);
+        }
         ESP_LOGW(TAG,
                  "Field validation override: mqtt broker=%s (default TLS port) user=%s",
                  config.mqtt_host,
@@ -284,7 +282,6 @@ void app_core_bootstrap_run(void) {
                 err = state_machine_init(&config);
                 if (err == ESP_OK) {
                     retry_state_reset(&s_init_retry);
-                    /* tracker_feature_self_test_run(&config); */
                     state_machine_ready = true;
                 } else {
                     uint32_t delay_ms = retry_state_current_delay_ms(&s_init_retry,

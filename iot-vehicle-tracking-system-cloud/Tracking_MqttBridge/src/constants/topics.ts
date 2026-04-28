@@ -10,7 +10,7 @@ export const INTERNAL_TOPICS = {
   DEVICE_ALERT: 'internal/events/device/alert',
   DEVICE_SESSION: 'internal/events/device/session',
   DEVICE_DATA: 'internal/events/device/data',
-  DEVICE_GEOFENCE: 'internal/events/device/geofence',
+  DEVICE_ZONE: 'internal/events/device/zone',
 } as const;
 
 export const INTERNAL_QOS: Record<string, 0 | 1> = {
@@ -18,5 +18,5 @@ export const INTERNAL_QOS: Record<string, 0 | 1> = {
   'device/alert': 1,
   'device/session': 1,
   'device/data': 0,
-  'device/geofence': 1,
+  'device/zone': 1,
 };

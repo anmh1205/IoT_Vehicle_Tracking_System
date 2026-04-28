@@ -90,9 +90,6 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
     if (s_next_msg_id <= 0) {
         s_next_msg_id = 1;
     }
-    if (s_puback_callback != NULL) {
-        s_puback_callback(msg_id);
-    }
     return msg_id;
 }
 

@@ -13,7 +13,7 @@ const operationPillars = [
   },
   {
     title: 'Cảnh báo đồng bộ dữ liệu',
-    description: 'Map, alerts, geofence, trips và trạng thái hệ thống nằm chung một flow.',
+    description: 'Map, alerts, vùng, trips và trạng thái hệ thống nằm chung một flow.',
   },
   {
     title: 'Điều phối từ web tới mobile',
@@ -46,7 +46,7 @@ export const LandingHero = () => {
               Giám sát đội xe theo thời gian thực, từ tín hiệu thiết bị tới quyết định vận hành.
             </h1>
             <p className="max-w-2xl font-[family:var(--font-marketing)] text-base leading-8 text-slate-300 sm:text-lg">
-              Hệ thống gom bản đồ realtime, cảnh báo, geofence, trips, nhiên liệu, bảo trì và sức khỏe
+              Hệ thống gom bản đồ realtime, cảnh báo, vùng, trips, nhiên liệu, bảo trì và sức khỏe
               hạ tầng vào cùng một bề mặt rõ ràng, để đội vận hành phản ứng nhanh mà không đổi màn hình.
             </p>
           </div>
@@ -95,7 +95,7 @@ export const LandingHero = () => {
         <div className="relative">
           <div className="absolute -left-6 top-10 hidden rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 shadow-2xl backdrop-blur lg:block">
             <p className="text-xs uppercase tracking-[0.24em] text-amber-200">Realtime rail</p>
-            <p className="mt-1 text-sm text-slate-200">Map, geofence, trips, alerts đi cùng nhau</p>
+            <p className="mt-1 text-sm text-slate-200">Map, vùng, trips, alerts đi cùng nhau</p>
           </div>
           <div className="absolute -right-2 bottom-10 hidden rounded-2xl border border-teal-300/20 bg-teal-400/10 px-4 py-3 shadow-2xl backdrop-blur lg:block">
             <div className="flex items-center gap-2 text-sm text-white">

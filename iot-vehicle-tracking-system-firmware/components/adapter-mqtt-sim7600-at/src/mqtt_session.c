@@ -16,6 +16,16 @@
  * @brief MQTT service/client/session lifecycle helpers for the SIM7600 facade.
  */
 
+#ifndef CONFIG_TRACKER_TLS_VERIFY_SERVER
+#define CONFIG_TRACKER_TLS_VERIFY_SERVER 0
+#endif
+#ifndef CONFIG_TRACKER_TLS_IGNORE_LOCAL_TIME
+#define CONFIG_TRACKER_TLS_IGNORE_LOCAL_TIME 0
+#endif
+#ifndef CONFIG_TRACKER_TLS_CA_CERT_NAME
+#define CONFIG_TRACKER_TLS_CA_CERT_NAME ""
+#endif
+
 static esp_err_t tracker_mqtt_send_lifecycle_cmd(const char *cmd,
                                                  uint32_t timeout_ms,
                                                  const char *result_prefix,
@@ -76,6 +86,39 @@ static esp_err_t tracker_mqtt_send_lifecycle_cmd(const char *cmd,
     return expect_err == ESP_OK ? ESP_FAIL : expect_err;
 }
 
+static esp_err_t tracker_mqtt_configure_tls_certificate(char *cmd, size_t cmd_size) {
+#if CONFIG_TRACKER_TLS_VERIFY_SERVER
+    /*
+     * SIM7600 validates against certificate files stored inside the modem, not
+     * ESP-IDF's certificate bundle. Provisioning must upload this CA file before
+     * enabling server verification on field devices.
+     */
+    if (util_string_empty(CONFIG_TRACKER_TLS_CA_CERT_NAME)) {
+        ESP_LOGE(TRACKER_MQTT_TAG, "TLS verify enabled but CA certificate name is empty");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    int n = snprintf(cmd,
+                     cmd_size,
+                     "AT+CSSLCFG=\"cacert\",%d,\"%s\"\r",
+                     MQTT_SSL_CTX_INDEX,
+                     CONFIG_TRACKER_TLS_CA_CERT_NAME);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < cmd_size,
+                        ESP_ERR_INVALID_SIZE,
+                        TRACKER_MQTT_TAG,
+                        "CSSLCFG cacert cmd too long");
+    ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", MQTT_CMD_TIMEOUT_MS) == ESP_OK,
+                        ESP_FAIL,
+                        TRACKER_MQTT_TAG,
+                        "CSSLCFG cacert failed");
+#else
+    (void)cmd;
+    (void)cmd_size;
+    ESP_LOGW(TRACKER_MQTT_TAG, "TLS server certificate verification disabled by Kconfig");
+#endif
+    return ESP_OK;
+}
+
 esp_err_t tracker_mqtt_start_service(void) {
     if (s_service_started) {
         return ESP_OK;
@@ -110,13 +153,26 @@ esp_err_t tracker_mqtt_configure_tls(void) {
                         TRACKER_MQTT_TAG,
                         "CSSLCFG sslversion failed");
 
-    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"authmode\",%d,0\r", MQTT_SSL_CTX_INDEX);
+    (void)snprintf(cmd,
+                   sizeof(cmd),
+                   "AT+CSSLCFG=\"authmode\",%d,%d\r",
+                   MQTT_SSL_CTX_INDEX,
+                   CONFIG_TRACKER_TLS_VERIFY_SERVER ? 1 : 0);
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", MQTT_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         TRACKER_MQTT_TAG,
                         "CSSLCFG authmode failed");
 
-    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"ignorelocaltime\",%d,1\r", MQTT_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(tracker_mqtt_configure_tls_certificate(cmd, sizeof(cmd)) == ESP_OK,
+                        ESP_FAIL,
+                        TRACKER_MQTT_TAG,
+                        "CSSLCFG certificate failed");
+
+    (void)snprintf(cmd,
+                   sizeof(cmd),
+                   "AT+CSSLCFG=\"ignorelocaltime\",%d,%d\r",
+                   MQTT_SSL_CTX_INDEX,
+                   CONFIG_TRACKER_TLS_IGNORE_LOCAL_TIME ? 1 : 0);
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", MQTT_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         TRACKER_MQTT_TAG,

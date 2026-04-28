@@ -27,6 +27,7 @@ import { formatRelative } from '@/lib/utils/date/format';
 import { cn } from '@/lib/utils';
 import { useDeviceDetailModal } from './modal-context';
 import { DeviceWorkspaceCanvas } from './workspace-canvas';
+import { WorkspaceOverviewQuickStats } from './workspace-overview-quick-stats';
 import { resolveWorkspaceLaunchState, type DeviceWorkspaceActions, type DeviceWorkspaceFallbackPaths, type DeviceWorkspaceSection } from './workspace-types';
 import type { MapInspectPanelPayload, MapInspectPanelTarget } from '@/features/map/types';
 
@@ -66,7 +67,7 @@ export const DeviceWorkspaceShell = ({
   const initialLaunchRef = useRef(false);
   const lastLaunchSignatureRef = useRef('');
   const { canEditDevice } = useRoleAccess();
-  const { device, loading, error, onRefresh, linkedVehicle, deviceScopedAlerts } = useDeviceDetailModal();
+  const { device, loading, error, onRefresh } = useDeviceDetailModal();
 
   const sections = useMemo(
     () => SECTION_ITEMS.filter((item) => (item.value === 'settings' ? canEditDevice : true)),
@@ -152,6 +153,10 @@ export const DeviceWorkspaceShell = ({
           </div>
         </header>
 
+        <div className="border-b border-border/60 bg-background/72 px-4 py-3 backdrop-blur sm:px-6 xl:hidden">
+          <WorkspaceOverviewQuickStats variant="compact" />
+        </div>
+
         <div className="flex min-h-0 flex-1">
           <aside className="hidden w-[17rem] shrink-0 border-r border-border/70 bg-background/72 p-3 backdrop-blur-lg md:flex md:flex-col">
             <div className="space-y-2">
@@ -180,26 +185,19 @@ export const DeviceWorkspaceShell = ({
             </div>
           </main>
 
-          <aside className="hidden w-[20rem] shrink-0 border-l border-border/70 bg-background/72 p-4 backdrop-blur-lg xl:flex xl:flex-col">
-            <div className="space-y-4">
-              <div className="rounded-3xl border border-border/70 bg-background/80 p-4">
-                <p className="text-sm font-semibold">Context liên kết</p>
-                <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-                  <p>Xe: {linkedVehicle?.plateNumber ?? linkedVehicle?.vehicleId ?? 'Chưa gắn'}</p>
-                  <p>Cảnh báo active: {deviceScopedAlerts.length}</p>
-                  <p>Section: {sections.find((item) => item.value === activeSection)?.label ?? activeSection}</p>
-                </div>
-              </div>
+          <aside className="hidden w-[22rem] shrink-0 border-l border-border/70 bg-background/72 p-4 backdrop-blur-lg xl:flex xl:flex-col">
+              <div className="space-y-4">
+                <WorkspaceOverviewQuickStats />
 
-              <div className="rounded-3xl border border-border/70 bg-background/80 p-4">
-                <p className="text-sm font-semibold">Fallback đầy đủ</p>
-                <div className="mt-3 grid gap-2">
-                  {fallbackPaths.vehicleDetailPath ? <Button asChild variant="outline"><Link href={fallbackPaths.vehicleDetailPath}>Hồ sơ xe <ArrowUpRight className="ml-2 h-4 w-4" /></Link></Button> : null}
-                  {fallbackPaths.alertsPath ? <Button asChild variant="outline"><Link href={fallbackPaths.alertsPath}>Queue cảnh báo <ArrowUpRight className="ml-2 h-4 w-4" /></Link></Button> : null}
-                  <Button asChild variant="outline"><Link href={fallbackPaths.geofencesPath}>Trang geofence <ArrowUpRight className="ml-2 h-4 w-4" /></Link></Button>
+                <div className="rounded-3xl border border-border/70 bg-background/80 p-4">
+                  <p className="text-sm font-semibold">Liên kết nhanh</p>
+                  <div className="mt-3 grid gap-2">
+                    {fallbackPaths.vehicleDetailPath ? <Button asChild variant="outline"><Link href={fallbackPaths.vehicleDetailPath}>Hồ sơ xe <ArrowUpRight className="ml-2 h-4 w-4" /></Link></Button> : null}
+                    {fallbackPaths.alertsPath ? <Button asChild variant="outline"><Link href={fallbackPaths.alertsPath}>Queue cảnh báo <ArrowUpRight className="ml-2 h-4 w-4" /></Link></Button> : null}
+                    <Button asChild variant="outline"><Link href={fallbackPaths.geofencesPath}>Trang vùng <ArrowUpRight className="ml-2 h-4 w-4" /></Link></Button>
+                  </div>
                 </div>
               </div>
-            </div>
           </aside>
         </div>
       </div>

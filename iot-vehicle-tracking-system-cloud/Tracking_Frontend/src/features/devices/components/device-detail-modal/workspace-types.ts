@@ -111,6 +111,7 @@ export const resolveWorkspaceLaunchState = (
       return { section: 'raw', highlight: payload?.highlight ?? null };
     case 'settings':
       return { section: 'settings', highlight: payload?.highlight ?? null };
+    case 'zone':
     case 'geofence':
     case 'allowed-zone':
       return { section: 'zones', highlight: payload?.highlight ?? target };

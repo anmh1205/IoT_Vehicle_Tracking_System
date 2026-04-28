@@ -1,19 +1,23 @@
-\contentsline {figure}{\numberline {1.2}{\ignorespaces Quy trình phát triển dự án theo các giai đoạn}}{8}{figure.caption.27}%
-\contentsline {figure}{\numberline {1.3}{\ignorespaces Kiến trúc tổng thể hệ thống IoT Vehicle Tracking}}{10}{figure.caption.29}%
-\contentsline {figure}{\numberline {1.4}{\ignorespaces Sơ đồ chuyển đổi giữa các chế độ năng lượng}}{11}{figure.caption.31}%
-\contentsline {figure}{\numberline {1.5}{\ignorespaces Lộ trình phát triển dự án theo các giai đoạn}}{14}{figure.caption.36}%
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Sơ đồ khối tổng thể của hệ thống theo dõi phương tiện}}{24}{figure.caption.58}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Phân rã các khối phần cứng chính xoay quanh ESP32-S3}}{28}{figure.caption.63}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Kết nối UART giữa ESP32-S3 và mô-đun SIM7600CE-T}}{31}{figure.caption.65}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Kết nối BLE giữa ESP32-S3 và bộ chuyển đổi OBD2 vgate iCar Pro}}{33}{figure.caption.67}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Cảm biến LIS3DH và kết nối I2C/ngắt với ESP32-S3}}{35}{figure.caption.69}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Sơ đồ khối hệ thống quản lý nguồn của thiết bị}}{38}{figure.caption.71}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Sơ đồ máy trạng thái vận hành chính của firmware}}{49}{figure.caption.76}%
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Kiến trúc tổng thể của phương án thiết kế tối ưu}}{76}{figure.caption.92}%
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần cứng tích hợp}}{79}{figure.caption.96}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Lưu đồ thuật toán chính của firmware thiết bị theo dõi}}{83}{figure.caption.101}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Kiến trúc tổng thể hệ thống máy chủ và luồng dữ liệu}}{87}{figure.caption.105}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Minh họa lược đồ cơ sở dữ liệu PostgreSQL đang triển khai}}{92}{figure.caption.107}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Giao diện quản lý thiết bị và trạng thái đội xe}}{96}{figure.caption.111}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Giao diện bản đồ giám sát và danh sách thiết bị đang theo dõi}}{97}{figure.caption.112}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Giao diện chi tiết thiết bị ở tab dữ liệu thô OBD}}{97}{figure.caption.113}%
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Sơ đồ tổng quan vấn đề và giải pháp đề xuất}}{3}{figure.caption.16}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Quy trình phát triển dự án theo các giai đoạn}}{8}{figure.caption.28}%
+\contentsline {figure}{\numberline {1.3}{\ignorespaces Kiến trúc tổng thể hệ thống IoT Vehicle Tracking}}{10}{figure.caption.30}%
+\contentsline {figure}{\numberline {1.4}{\ignorespaces Sơ đồ chuyển đổi giữa các chế độ năng lượng}}{11}{figure.caption.32}%
+\contentsline {figure}{\numberline {1.5}{\ignorespaces Lộ trình phát triển dự án theo các giai đoạn}}{14}{figure.caption.37}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Sơ đồ kiến trúc dữ liệu của hệ thống}}{16}{figure.caption.42}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Sơ đồ khối tổng thể của hệ thống theo dõi phương tiện}}{25}{figure.caption.60}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Phân rã các khối phần cứng chính xoay quanh ESP32-S3}}{29}{figure.caption.65}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Kết nối UART giữa ESP32-S3 và mô-đun SIM7600CE-T}}{31}{figure.caption.67}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Kết nối BLE giữa ESP32-S3 và bộ chuyển đổi OBD2 vgate iCar Pro}}{33}{figure.caption.69}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Cảm biến LIS3DH và kết nối I2C/ngắt với ESP32-S3}}{36}{figure.caption.71}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Sơ đồ khối hệ thống quản lý nguồn của thiết bị}}{39}{figure.caption.73}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Sơ đồ máy trạng thái vận hành chính của firmware}}{51}{figure.caption.78}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Luồng kết nối và đọc dữ liệu BLE OBD2 trong firmware}}{54}{figure.caption.80}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Kiến trúc tổng thể của phương án thiết kế tối ưu}}{79}{figure.caption.95}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần cứng tích hợp}}{81}{figure.caption.99}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Lưu đồ thuật toán chính của firmware thiết bị theo dõi}}{85}{figure.caption.104}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Kiến trúc tổng thể hệ thống máy chủ và luồng dữ liệu}}{89}{figure.caption.108}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Minh họa các nhóm bảng chính trong PostgreSQL đang triển khai}}{96}{figure.caption.110}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Giao diện quản lý thiết bị và trạng thái đội xe}}{100}{figure.caption.114}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Giao diện bản đồ giám sát và danh sách thiết bị đang theo dõi}}{101}{figure.caption.115}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Giao diện chi tiết thiết bị ở tab dữ liệu thô OBD}}{102}{figure.caption.116}%
+\contentsline {figure}{\numberline {PL-3.1}{\ignorespaces Kế hoạch thực hiện dự án theo giai đoạn (24 tuần)}}{131}{figure.caption.154}%

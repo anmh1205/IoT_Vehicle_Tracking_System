@@ -236,7 +236,7 @@ export const VehicleDetailContent = ({
 
       <AllowedZoneStatusCard
         vehicleId={vehicle.vehicleId ?? null}
-        title="Vùng cho phép của phương tiện"
+        title="Vùng"
         canEdit={access.canEditDevice && Boolean(vehicle.vehicleId)}
         onConfigure={() => setAllowedZoneOpen(true)}
       />

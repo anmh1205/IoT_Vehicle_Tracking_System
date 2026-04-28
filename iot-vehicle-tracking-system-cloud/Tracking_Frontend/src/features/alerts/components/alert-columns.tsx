@@ -21,9 +21,12 @@ const STATUS_LABELS: Record<string, string> = {
 
 const ALERT_TYPE_LABELS: Record<string, string> = {
   speeding: 'Vượt tốc độ',
-  geofence: 'Ra/vào vùng giám sát',
-  geofence_enter: 'Vào vùng giám sát',
-  geofence_exit: 'Rời vùng giám sát',
+  geofence: 'Vùng',
+  geofence_enter: 'Vào vùng',
+  geofence_exit: 'Rời vùng',
+  zone_enter: 'Vào vùng',
+  zone_exit: 'Rời vùng',
+  zone_outside_periodic: 'Đang ở ngoài vùng',
   offline: 'Mất kết nối',
   device_offline: 'Mất kết nối thiết bị',
   maintenance: 'Bảo trì',

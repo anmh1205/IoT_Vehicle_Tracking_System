@@ -183,6 +183,8 @@ const ALLOWED_TABLES = [
   'trips',
   'alerts',
   'geofences',
+  'vehicle_zones',
+  'gis_admin_units',
   'maintenance',
   'event_logs',
   'device_sessions',

@@ -39,6 +39,7 @@ const OBD_EVENT_CODES = new Set([
   'obd_ecu_no_data',
   'obd_ecu_searching',
 ]);
+const OBD_LIVE_SIGNAL_MAX_SAMPLE_AGE_MS = 30_000;
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -66,6 +67,15 @@ const toStringArray = (value: unknown): string[] | undefined => {
 
   return normalized.length > 0 ? normalized : undefined;
 };
+
+const hasFreshObdSignals = (
+  channel: Record<string, unknown> | null,
+  sampleAgeMs: number | undefined,
+): boolean =>
+  channel?.ble_obd_connected === true &&
+  channel?.elm_ready === true &&
+  sampleAgeMs !== undefined &&
+  sampleAgeMs <= OBD_LIVE_SIGNAL_MAX_SAMPLE_AGE_MS;
 
 const toDtcList = (value: unknown): string[] | undefined => {
   if (typeof value === 'string' && value.trim().length > 0) {
@@ -268,6 +278,8 @@ export const snapshotFromDiagnosticsPayload = (
   const quality = toRecord(diagnostics.quality);
   const dtc = toRecord(diagnostics.dtc);
   const readiness = toRecord(diagnostics.readiness);
+  const sampleAgeMs = normalizeObdSampleAgeMs(quality?.sample_age_ms);
+  const liveSignals = hasFreshObdSignals(channel, sampleAgeMs) ? signals : null;
   const readinessIncomplete = readiness
     ? Object.entries(readiness)
         .filter(([, status]) => status === 'incomplete')
@@ -279,14 +291,14 @@ export const snapshotFromDiagnosticsPayload = (
       channel?.ble_obd_connected === undefined ? undefined : Boolean(channel.ble_obd_connected),
     elmReady: channel?.elm_ready === undefined ? undefined : Boolean(channel.elm_ready),
     ecuState: toOptionalString(channel?.ecu_state),
-    sampleAgeMs: normalizeObdSampleAgeMs(quality?.sample_age_ms),
+    sampleAgeMs,
     connectFailCount5m: toFiniteNumber(channel?.connect_fail_count_5m),
     milOn: diagnostics.mil_on === undefined ? undefined : Boolean(diagnostics.mil_on),
     reportedDtcCount: toFiniteNumber(diagnostics.reported_dtc_count),
-    rpm: toFiniteNumber(signals?.rpm),
-    obdSpeedKph: toFiniteNumber(signals?.obd_speed_kph),
-    coolantC: toFiniteNumber(signals?.coolant_c),
-    engineLoadPct: toFiniteNumber(signals?.engine_load_pct),
+    rpm: toFiniteNumber(liveSignals?.rpm),
+    obdSpeedKph: toFiniteNumber(liveSignals?.obd_speed_kph),
+    coolantC: toFiniteNumber(liveSignals?.coolant_c),
+    engineLoadPct: toFiniteNumber(liveSignals?.engine_load_pct),
     dtcStored: toStringArray(dtc?.stored),
     dtcPending: toStringArray(dtc?.pending),
     dtcPermanent: toStringArray(dtc?.permanent),

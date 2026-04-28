@@ -14,8 +14,51 @@
  * @brief SIM7600 HTTP transport helpers for OTA download flow.
  */
 
+#ifndef CONFIG_TRACKER_TLS_VERIFY_SERVER
+#define CONFIG_TRACKER_TLS_VERIFY_SERVER 0
+#endif
+#ifndef CONFIG_TRACKER_TLS_IGNORE_LOCAL_TIME
+#define CONFIG_TRACKER_TLS_IGNORE_LOCAL_TIME 0
+#endif
+#ifndef CONFIG_TRACKER_TLS_CA_CERT_NAME
+#define CONFIG_TRACKER_TLS_CA_CERT_NAME ""
+#endif
+
 ota_http_action_state_t s_ota_http_action = {0};
 bool s_ota_http_urc_registered = false;
+
+static esp_err_t util_ota_configure_https_ca_cert(char *cmd, size_t cmd_size) {
+#if CONFIG_TRACKER_TLS_VERIFY_SERVER
+    /*
+     * HTTP OTA uses the modem SSL context, so CA verification depends on a file
+     * already present in the SIM7600 certificate store. Keep this aligned with
+     * MQTT TLS to avoid split trust behavior between telemetry and OTA.
+     */
+    if (util_string_empty(CONFIG_TRACKER_TLS_CA_CERT_NAME)) {
+        ESP_LOGE(UTIL_TAG, "TLS verify enabled but CA certificate name is empty");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    int n = snprintf(cmd,
+                     cmd_size,
+                     "AT+CSSLCFG=\"cacert\",%d,\"%s\"\r",
+                     OTA_HTTP_SSL_CTX_INDEX,
+                     CONFIG_TRACKER_TLS_CA_CERT_NAME);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < cmd_size,
+                        ESP_ERR_INVALID_SIZE,
+                        UTIL_TAG,
+                        "HTTP CSSLCFG cacert cmd too long");
+    ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
+                        ESP_FAIL,
+                        UTIL_TAG,
+                        "HTTP CSSLCFG cacert failed");
+#else
+    (void)cmd;
+    (void)cmd_size;
+    ESP_LOGW(UTIL_TAG, "TLS server certificate verification disabled by Kconfig");
+#endif
+    return ESP_OK;
+}
 
 static const char *util_ota_http_transport_error_name(int status_code) {
     switch (status_code) {
@@ -225,13 +268,26 @@ esp_err_t util_ota_configure_https_ssl_context(void) {
                         UTIL_TAG,
                         "HTTP CSSLCFG sslversion failed");
 
-    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"authmode\",%d,0\r", OTA_HTTP_SSL_CTX_INDEX);
+    (void)snprintf(cmd,
+                   sizeof(cmd),
+                   "AT+CSSLCFG=\"authmode\",%d,%d\r",
+                   OTA_HTTP_SSL_CTX_INDEX,
+                   CONFIG_TRACKER_TLS_VERIFY_SERVER ? 1 : 0);
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         UTIL_TAG,
                         "HTTP CSSLCFG authmode failed");
 
-    (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"ignorelocaltime\",%d,1\r", OTA_HTTP_SSL_CTX_INDEX);
+    ESP_RETURN_ON_FALSE(util_ota_configure_https_ca_cert(cmd, sizeof(cmd)) == ESP_OK,
+                        ESP_FAIL,
+                        UTIL_TAG,
+                        "HTTP CSSLCFG certificate failed");
+
+    (void)snprintf(cmd,
+                   sizeof(cmd),
+                   "AT+CSSLCFG=\"ignorelocaltime\",%d,%d\r",
+                   OTA_HTTP_SSL_CTX_INDEX,
+                   CONFIG_TRACKER_TLS_IGNORE_LOCAL_TIME ? 1 : 0);
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         UTIL_TAG,

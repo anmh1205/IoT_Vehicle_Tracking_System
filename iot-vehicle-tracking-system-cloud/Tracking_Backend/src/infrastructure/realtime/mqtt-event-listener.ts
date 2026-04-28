@@ -23,7 +23,7 @@ const log = createLogger('mqtt-listener');
 
 interface InternalEnvelope {
   correlation_id: string;
-  event_type: 'status' | 'alert' | 'session' | 'data' | 'geofence' | 'ignition';
+  event_type: 'status' | 'alert' | 'session' | 'data' | 'geofence' | 'zone' | 'ignition';
   timestamp: string;
   payload: Record<string, unknown>;
 }
@@ -104,11 +104,14 @@ const toAlertSeverity = (value: unknown): 'low' | 'medium' | 'high' | 'critical'
   return 'medium';
 };
 
-const normalizeAlertType = (value: unknown): 'speeding' | 'geofence_enter' | 'geofence_exit' | 'device_offline' | 'maintenance_due' | null => {
+const normalizeAlertType = (
+  value: unknown,
+): 'speeding' | 'zone_enter' | 'zone_exit' | 'zone_outside_periodic' | 'device_offline' | 'maintenance_due' | null => {
   const normalized = String(value ?? '').toLowerCase();
   if (normalized === 'speeding') return 'speeding';
-  if (normalized === 'geofence_enter') return 'geofence_enter';
-  if (normalized === 'geofence_exit') return 'geofence_exit';
+  if (normalized === 'zone_enter' || normalized === 'geofence_enter') return 'zone_enter';
+  if (normalized === 'zone_exit' || normalized === 'geofence_exit') return 'zone_exit';
+  if (normalized === 'zone_outside_periodic') return 'zone_outside_periodic';
   if (normalized === 'device_offline') return 'device_offline';
   if (normalized === 'maintenance_due') return 'maintenance_due';
 
@@ -469,7 +472,7 @@ export const initMqttEventListener = (): void => {
             vehicle_id:
               envelopePayload.vehicle_id == null ? undefined : String(envelopePayload.vehicle_id),
             device_id: String(envelopePayload.device_id ?? ''),
-            alert_type: rawAlertType,
+            alert_type: normalizedAlertType ?? rawAlertType,
             source,
             severity,
             title,
@@ -519,17 +522,18 @@ export const initMqttEventListener = (): void => {
         }
         break;
 
-      case 'geofence': {
+      case 'geofence':
+      case 'zone': {
         const eventName = String(envelopePayload.event_name ?? '');
-        if (eventName === 'allowed_zone_state_changed') {
-          const allowedZoneId = toOptionalInt(envelopePayload.allowed_zone_id);
+        if (eventName === 'allowed_zone_state_changed' || eventName === 'state_changed') {
+          const zoneId = toOptionalInt(envelopePayload.zone_id ?? envelopePayload.allowed_zone_id);
           const vehicleId = envelopePayload.vehicle_id == null ? '' : String(envelopePayload.vehicle_id);
-          if (allowedZoneId && vehicleId) {
-            publishEvent('geofence:allowed-zone-state-changed', {
+          if (zoneId && vehicleId) {
+            publishEvent('zone:state-changed', {
               device_id:
                 envelopePayload.device_id == null ? undefined : String(envelopePayload.device_id),
               vehicle_id: vehicleId,
-              allowed_zone_id: allowedZoneId,
+              zone_id: zoneId,
               previous_membership_state:
                 String(envelopePayload.previous_membership_state ?? 'unknown') as
                   | 'unknown'

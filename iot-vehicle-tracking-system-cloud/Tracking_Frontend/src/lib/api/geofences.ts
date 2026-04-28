@@ -1,4 +1,11 @@
 import { apiClient, unwrap } from './client';
+import {
+  zoneServices,
+  type GeoJsonGeometry,
+  type VehicleZone,
+  type VehicleZonePreviewCircleCenter,
+  type ZoneBoundarySelection,
+} from './zones';
 
 export type VehicleAllowedZoneCenterSource = 'vehicle_position' | 'map_pick';
 export type VehicleAllowedZoneMembershipState = 'unknown' | 'inside' | 'outside' | 'suspect';
@@ -18,12 +25,14 @@ export interface VehicleAllowedZoneWarning {
 export interface VehicleAllowedZone {
   id: number;
   vehicleId: string;
-  zoneType: 'circle';
-  centerLatitude: number;
-  centerLongitude: number;
-  radiusMeters: number;
-  centerSource: VehicleAllowedZoneCenterSource;
+  zoneType: 'circle' | 'administrative_boundary';
+  centerLatitude: number | null;
+  centerLongitude: number | null;
+  radiusMeters: number | null;
+  centerSource: VehicleAllowedZoneCenterSource | null;
   centerSnapshotAt: string | null;
+  boundarySelections?: ZoneBoundarySelection[];
+  geometry?: GeoJsonGeometry | null;
   status: 'active' | 'disabled';
   membershipState: VehicleAllowedZoneMembershipState;
   lastMembershipChangedAt: string | null;
@@ -73,15 +82,26 @@ const toNullableNumber = (value: number | string | null | undefined) => {
 };
 
 const normalizeAllowedZoneWarning = (
-  warning: VehicleAllowedZoneWarning | null | undefined,
+  warning:
+    | VehicleAllowedZoneWarning
+    | {
+        code: string;
+        message: string;
+        staleAgeSec?: number | null;
+        snapshotAt?: string | null;
+      }
+    | null
+    | undefined,
 ): VehicleAllowedZoneWarning | null => {
   if (!warning) {
     return null;
   }
 
   return {
-    ...warning,
+    code: warning.code,
+    message: warning.message,
     staleAgeSec: toNullableNumber(warning.staleAgeSec),
+    snapshotAt: warning.snapshotAt ?? null,
   };
 };
 
@@ -95,13 +115,14 @@ const normalizeVehicleAllowedZone = (
   return {
     ...zone,
     id: toNumber(zone.id),
-    centerLatitude: toNumber(zone.centerLatitude),
-    centerLongitude: toNumber(zone.centerLongitude),
-    radiusMeters: toNumber(zone.radiusMeters),
+    centerLatitude: toNullableNumber(zone.centerLatitude),
+    centerLongitude: toNullableNumber(zone.centerLongitude),
+    radiusMeters: toNullableNumber(zone.radiusMeters),
     cooldownSec: toNumber(zone.cooldownSec),
     warning: normalizeAllowedZoneWarning(zone.warning),
     createdBy: toNullableNumber(zone.createdBy),
     updatedBy: toNullableNumber(zone.updatedBy),
+    boundarySelections: Array.isArray(zone.boundarySelections) ? zone.boundarySelections : [],
   };
 };
 
@@ -115,6 +136,70 @@ const normalizeVehicleAllowedZonePreviewCenter = (
   warning: normalizeAllowedZoneWarning(preview.warning),
 });
 
+const toLegacyLastAlertedState = (
+  lastAlertedType: VehicleZone['lastAlertedType'],
+): VehicleAllowedZoneMembershipState | null => {
+  if (lastAlertedType === 'zone_enter') {
+    return 'inside';
+  }
+
+  if (lastAlertedType === 'zone_exit' || lastAlertedType === 'zone_outside_periodic') {
+    return 'outside';
+  }
+
+  return null;
+};
+
+const mapZoneToLegacyAllowedZone = (
+  zone: VehicleZone | null | undefined,
+): VehicleAllowedZone | null => {
+  if (!zone) {
+    return null;
+  }
+
+  return normalizeVehicleAllowedZone({
+    id: zone.id,
+    vehicleId: zone.vehicleId,
+    zoneType: zone.zoneType,
+    centerLatitude: zone.circleCenterLatitude,
+    centerLongitude: zone.circleCenterLongitude,
+    radiusMeters: zone.radiusMeters,
+    centerSource: zone.centerSource,
+    centerSnapshotAt: zone.centerSnapshotAt,
+    boundarySelections: zone.boundarySelections,
+    geometry: zone.geometry,
+    status: zone.status,
+    membershipState: zone.membershipState,
+    lastMembershipChangedAt: zone.lastMembershipChangedAt,
+    lastAlertedState: toLegacyLastAlertedState(zone.lastAlertedType),
+    lastAlertedAt: zone.lastAlertedAt,
+    suppressionUntil: zone.suppressionUntil,
+    alertMode: zone.alertMode,
+    cooldownSec: zone.cooldownSec,
+    warning: normalizeAllowedZoneWarning(zone.warning),
+    createdBy: zone.createdBy,
+    updatedBy: zone.updatedBy,
+    createdAt: zone.createdAt,
+    updatedAt: zone.updatedAt,
+  });
+};
+
+const mapZonePreviewToLegacyPreview = (
+  preview: VehicleZonePreviewCircleCenter,
+): VehicleAllowedZonePreviewCenter =>
+  normalizeVehicleAllowedZonePreviewCenter({
+    vehicleId: preview.vehicleId,
+    plateNumber: preview.plateNumber,
+    deviceId: preview.deviceId,
+    centerLatitude: preview.circleCenterLatitude,
+    centerLongitude: preview.circleCenterLongitude,
+    centerSource: preview.centerSource,
+    snapshotAt: preview.snapshotAt,
+    isStale: preview.isStale,
+    staleAgeSec: preview.staleAgeSec,
+    warning: normalizeAllowedZoneWarning(preview.warning),
+  });
+
 export const geofenceServices = {
   getList: (params?: Record<string, unknown>) =>
     apiClient.get('/geofences', { params }).then((r) => unwrap<any>(r.data)),
@@ -126,21 +211,23 @@ export const geofenceServices = {
       .get(`/geofences/vehicles/${vehicleId}/policy-states`)
       .then((r) => unwrap<any>(r.data)),
   getVehicleAllowedZone: (vehicleId: string) =>
-    apiClient
-      .get(`/geofences/vehicles/${vehicleId}/allowed-zone`)
-      .then((r) => normalizeVehicleAllowedZone(unwrap<VehicleAllowedZone | null>(r.data))),
+    zoneServices.getVehicleZone(vehicleId).then(mapZoneToLegacyAllowedZone),
   previewVehicleAllowedZoneCenter: (vehicleId: string) =>
-    apiClient
-      .post(`/geofences/vehicles/${vehicleId}/allowed-zone/preview-center`)
-      .then((r) =>
-        normalizeVehicleAllowedZonePreviewCenter(unwrap<VehicleAllowedZonePreviewCenter>(r.data)),
-      ),
+    zoneServices.previewVehicleZoneCircleCenter(vehicleId).then(mapZonePreviewToLegacyPreview),
   upsertVehicleAllowedZone: (vehicleId: string, data: UpsertVehicleAllowedZonePayload) =>
-    apiClient
-      .put(`/geofences/vehicles/${vehicleId}/allowed-zone`, data)
-      .then((r) => normalizeVehicleAllowedZone(unwrap<VehicleAllowedZone>(r.data))),
+    zoneServices
+      .upsertVehicleZone(vehicleId, {
+        zoneType: 'circle',
+        centerSource: data.centerSource,
+        circleCenterLatitude: data.centerLatitude,
+        circleCenterLongitude: data.centerLongitude,
+        radiusMeters: data.radiusMeters,
+        alertMode: data.alertMode,
+        cooldownSec: data.cooldownSec,
+      })
+      .then(mapZoneToLegacyAllowedZone),
   deleteVehicleAllowedZone: (vehicleId: string) =>
-    apiClient.delete(`/geofences/vehicles/${vehicleId}/allowed-zone`).then((r) => unwrap<any>(r.data)),
+    zoneServices.deleteVehicleZone(vehicleId),
   create: (data: Record<string, unknown>) =>
     apiClient.post('/geofences', data).then((r) => unwrap<any>(r.data)),
   update: (id: number, data: Record<string, unknown>) =>

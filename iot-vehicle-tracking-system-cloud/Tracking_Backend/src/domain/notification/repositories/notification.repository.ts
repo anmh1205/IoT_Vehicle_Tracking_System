@@ -1,7 +1,7 @@
 import type { QueryResultRow } from 'pg';
 import { executeQuery, findMany } from '@/infrastructure/database/queries';
 
-export type NotificationType = 'alert' | 'system' | 'export' | 'firmware' | 'geofence';
+export type NotificationType = 'alert' | 'system' | 'export' | 'firmware' | 'zone';
 
 export interface NotificationRow extends QueryResultRow {
   id: number;
@@ -49,8 +49,11 @@ const buildTypeClause = (
   type: NotificationType,
   startIndex: number,
 ): { clause: string; values: unknown[] } => {
-  if (type === 'geofence') {
-    return { clause: `a.alert_type ILIKE $${startIndex}`, values: ['%geofence%'] };
+  if (type === 'zone') {
+    return {
+      clause: `(a.alert_type ILIKE $${startIndex} OR a.alert_type ILIKE $${startIndex + 1})`,
+      values: ['%zone%', '%geofence%'],
+    };
   }
 
   if (type === 'firmware') {
@@ -80,7 +83,7 @@ const buildTypeClause = (
       AND a.alert_type NOT ILIKE $${startIndex + 2}
       AND a.alert_type NOT ILIKE $${startIndex + 3}
     )`,
-    values: ['%geofence%', '%firmware%', '%export%', '%system%'],
+    values: ['%zone%', '%geofence%', '%firmware%', '%export%', '%system%'],
   };
 };
 

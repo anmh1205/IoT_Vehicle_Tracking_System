@@ -9,7 +9,6 @@ idf_component_register(
         "src/state_publish_pipeline.c"
         "src/state_ota_runtime.c"
         "src/state_obd_runtime.c"
-        "src/tracker_feature_self_test.c"
     INCLUDE_DIRS
         "include"
     REQUIRES

@@ -3,14 +3,14 @@ import { INTERNAL_TOPICS, INTERNAL_QOS } from '../constants/topics';
 import { logger } from '../infrastructure/logger';
 import { generateCorrelationId } from '../utils/correlation.util';
 
-type InternalEventType = 'status' | 'alert' | 'session' | 'data' | 'geofence';
+type InternalEventType = 'status' | 'alert' | 'session' | 'data' | 'zone';
 
 const TOPIC_MAP: Record<InternalEventType, string> = {
   status: INTERNAL_TOPICS.DEVICE_STATUS,
   alert: INTERNAL_TOPICS.DEVICE_ALERT,
   session: INTERNAL_TOPICS.DEVICE_SESSION,
   data: INTERNAL_TOPICS.DEVICE_DATA,
-  geofence: INTERNAL_TOPICS.DEVICE_GEOFENCE,
+  zone: INTERNAL_TOPICS.DEVICE_ZONE,
 };
 
 /**

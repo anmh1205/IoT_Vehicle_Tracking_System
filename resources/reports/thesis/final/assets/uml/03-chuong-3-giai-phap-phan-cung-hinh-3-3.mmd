@@ -1,11 +1,13 @@
-flowchart LR
+flowchart TB
     MCU["ESP32-S3"]
-    Bus["Bus I2C<br/>SCL + SDA"]
-    IMU["LIS3DSH<br/>Gia tốc 3 trục"]
-    IRQ["INT1 / GPIO wake<br/>Phát hiện rung động"]
-    Power["Nguồn 3.3V"]
+    Bus["I2C0<br/>SDA GPIO2 / SCL GPIO1"]
+    IMU["LIS3DH<br/>Gia tốc 3 trục"]
+    Config["Cấu hình và đọc dữ liệu"]
+    IRQ["INT1 GPIO41<br/>Ngắt chuyển động<br/>đánh thức MCU"]
+    Power["Nguồn logic 3.3V"]
 
     Power --> MCU
     Power --> IMU
-    MCU -->|Cấu hình + đọc dữ liệu| Bus --> IMU
-    IMU -->|Ngắt chuyển động| IRQ --> MCU
+    MCU --> Bus --> Config --> IMU
+    IMU --> IRQ
+    IRQ -.-> MCU

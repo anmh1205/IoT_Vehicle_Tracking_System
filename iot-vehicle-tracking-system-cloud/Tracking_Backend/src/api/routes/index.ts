@@ -9,7 +9,6 @@ import vehicleRoutes from '@/api/routes/vehicle.routes';
 import customerRoutes from '@/api/routes/customer.routes';
 import tripRoutes from '@/api/routes/trip.routes';
 import alertRoutes from '@/api/routes/alert.routes';
-import geofenceRoutes from '@/api/routes/geofence.routes';
 import maintenanceRoutes from '@/api/routes/maintenance.routes';
 import usersRoutes from '@/api/routes/users.routes';
 import statisticsRoutes from '@/api/routes/statistics.routes';
@@ -23,6 +22,7 @@ import fuelAnalyticsRoutes from '@/api/routes/fuel-analytics.routes';
 import driverRoutes from '@/api/routes/driver.routes';
 import violationRoutes from '@/api/routes/violation.routes';
 import auditLogRoutes from '@/api/routes/audit-log.routes';
+import zonesRoutes from '@/api/routes/zones.routes';
 
 const router = Router();
 
@@ -39,7 +39,7 @@ router.use('/vehicles', vehicleRoutes);
 router.use('/customers', customerRoutes);
 router.use('/trips', tripRoutes);
 router.use('/alerts', alertRoutes);
-router.use('/geofences', geofenceRoutes);
+router.use('/zones', zonesRoutes);
 router.use('/maintenance', maintenanceRoutes);
 router.use('/stats', statisticsRoutes);
 router.use('/statistics', statisticsRoutes);

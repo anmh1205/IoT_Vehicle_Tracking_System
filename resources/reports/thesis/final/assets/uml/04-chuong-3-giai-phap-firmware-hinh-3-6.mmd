@@ -11,7 +11,7 @@ flowchart TB
 
     Sensors["ADC / IMU / RTC / GNSS"]
     Queue["offline_queue<br/>MicroSD replay theo ACK/QoS"]
-    MQTT["mqtt_client<br/>Rawdata / status / events / firmware / commands"]
+    MQTT["mqtt_client<br/>rawdata / status / events / firmware / commands"]
     Broker["EMQX"]
 
     MainLoop --> Sensors
@@ -22,5 +22,5 @@ flowchart TB
     MainLoop --> Queue
     MainLoop --> MQTT
     Queue --> MQTT
-    MQTT -->|Rawdata / status / events / firmware| Broker
+    MQTT -->|rawdata / status / events / firmware| Broker
     Broker -->|Topic commands| MQTT

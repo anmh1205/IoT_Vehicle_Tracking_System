@@ -138,7 +138,7 @@ export const useMapStore = create<MapState>((set) => ({
   clearSelection: () =>
     set((state) => ({
       selectedDeviceId: null,
-      hardMode: state.hardMode === 'edit-geofence' ? 'edit-geofence' : 'browse',
+      hardMode: state.hardMode === 'edit-zone' ? 'edit-zone' : 'browse',
       followMode: false,
       showAllowedZone: false,
       inspectPanelOpen: false,

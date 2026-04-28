@@ -1,4 +1,4 @@
-% Options for packages loaded elsewhere
+﻿% Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \documentclass[a4paper]{extarticle}
@@ -345,13 +345,13 @@
 \thesiscoverstart
 \thesisdrawsidebarframe
 \noindent
-\begin{minipage}[t][0.92\textheight][t]{0.16\textwidth}
+\begin{minipage}[t][0.965\textheight][t]{0.16\textwidth}
   \centering
   \vspace*{1.0cm}
   \rotatebox{90}{\textbf{\Large LÊ TRỌNG AN}}\\[1.5cm]
   \rotatebox{90}{\textbf{\large KỸ THUẬT CƠ ĐIỆN TỬ}}
 \end{minipage}\hfill
-\begin{minipage}[t][0.92\textheight][t]{0.77\textwidth}
+\begin{minipage}[t][0.965\textheight][t]{0.77\textwidth}
   \centering
   \textbf{\Large BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\[0.2cm]
   \textbf{\Large ĐẠI HỌC PHENIKAA}\\[-0.05cm]
@@ -375,7 +375,7 @@
   \end{minipage}
 
   \vspace*{\fill}
-  \textbf{\Large Hà Nội - 2026}\par
+  \raisebox{-0.70cm}[0pt][0pt]{\textbf{\Large Hà Nội - 2026}}\par
 \end{minipage}
 \thesiscoverend
 
@@ -483,7 +483,7 @@
 
 \frontmatterstart
 
-\thispagestyle{empty}
+\thispagestyle{plain}
 \thesisofficialheader
 \begin{center}
   \textbf{\Large NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN HƯỚNG DẪN}
@@ -498,26 +498,27 @@
   \textbf{NỘI DUNG NHẬN XÉT}
 \end{center}
 \textbf{I. Nhận xét Đồ án tốt nghiệp:}\\
-- Nhận xét về hình thức: \dotfill\\[0.55cm]
-- Tính cấp thiết của đề tài: \dotfill\\[0.55cm]
-- Mục tiêu của đề tài: \dotfill\\[0.55cm]
-- Nội dung của đề tài: \dotfill\\[0.55cm]
-- Tài liệu tham khảo: \dotfill\\[0.55cm]
-- Phương pháp nghiên cứu: \dotfill\\[0.55cm]
-- Tính sáng tạo và ứng dụng: \dotfill\\[0.55cm]
-\textbf{II. Nhận xét về tinh thần và thái độ làm việc của sinh viên:} \dotfill\\[0.55cm]
-\textbf{III. Kết quả đạt được:} \dotfill\\[0.55cm]
+- Nhận xét về hình thức: \dotfill\\[0.45cm]
+- Tính cấp thiết của đề tài: \dotfill\\[0.45cm]
+- Mục tiêu của đề tài: \dotfill\\[0.45cm]
+- Nội dung của đề tài: \dotfill\\[0.45cm]
+- Tài liệu tham khảo: \dotfill\\[0.45cm]
+- Phương pháp nghiên cứu: \dotfill\\[0.45cm]
+- Tính sáng tạo và ứng dụng: \dotfill\\[0.45cm]
+\textbf{II. Nhận xét về tinh thần và thái độ làm việc của sinh viên:} \dotfill\\[0.45cm]
+\textbf{III. Kết quả đạt được:} \dotfill\\[0.45cm]
 \textbf{IV. Kết luận:} Đồng ý cho bảo vệ: \checkbox \thesisspacer Không đồng ý cho bảo vệ: \checkbox
 
+\vspace*{\fill}
 \begin{flushright}
   Hà Nội, ngày \ldots, tháng \ldots năm 20\ldots\\
   \textbf{GIẢNG VIÊN HƯỚNG DẪN}\\
-  \emph{(Ký, ghi rõ họ tên)}\\[2.6cm]
+  \emph{(Ký, ghi rõ họ tên)}\\[2.15cm]
   TS. Nguyễn Đức Nam
 \end{flushright}
 \clearpage
 
-\thispagestyle{empty}
+\thispagestyle{plain}
 \thesisofficialheader
 \begin{center}
   \textbf{\Large NHẬN XÉT ĐỒ ÁN TỐT NGHIỆP CỦA GIẢNG VIÊN PHẢN BIỆN}
@@ -549,7 +550,7 @@
 \end{flushright}
 \clearpage
 
-\thispagestyle{empty}
+\thispagestyle{plain}
 \thesisofficialheader
 \begin{center}
   \textbf{\Large BIÊN BẢN ĐÁNH GIÁ ĐỒ ÁN TỐT NGHIỆP}
@@ -588,7 +589,7 @@
 \thesissignaturepair{CHỦ TỊCH HỘI ĐỒNG}{}{THƯ KÝ}{}
 \clearpage
 
-\thispagestyle{empty}
+\thispagestyle{plain}
 \begin{center}
   \textbf{\Large GIẢI TRÌNH CÁC CHỈNH SỬA}\\[0.2cm]
   \textit{(Nếu có)}
@@ -767,9 +768,7 @@ Xin chân thành cảm ơn!
 \textbf{Từ viết tắt} & \textbf{Tiếng Anh} & \textbf{Tiếng Việt} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 \textbf{ADC} & Analog-to-Digital Converter & Bộ chuyển đổi tương tự sang số \\\hline
 \textbf{API} & Application Programming Interface & Giao diện lập trình ứng dụng \\\hline
@@ -890,6 +889,18 @@ Vì vậy, thách thức kỹ thuật cốt lõi của đề tài không nằm �
 xử lý đến khai thác thông tin sao cho phù hợp với môi trường vận hành
 thực tế của đội xe. Các nhóm vấn đề này sẽ được phân tích chi tiết ở
 Chương 2.
+
+{\thesissetfigureid{1.1}{condensed-hinh-1-1-so-do-tong-quan-van-de-va-giai-phap-de-xuat}
+\begin{figure}[H]
+\centering
+\pandocbounded{\safeincludesvg{./assets/figures/01-chuong-1-gioi-thieu-hinh-1-1.svg}}
+\caption{Sơ đồ tổng quan vấn đề và giải pháp đề xuất}
+\label{fig:condensed-hinh-1-1-so-do-tong-quan-van-de-va-giai-phap-de-xuat}
+\end{figure}
+}
+
+Hình 1.1 tóm tắt hướng chuyển từ hiện trạng quản lý thủ công và theo dõi
+chậm sang một chuỗi giải pháp gồm thiết bị, máy chủ và giao diện khai thác.
 
 \subsubsection{1.1.3. Động lực thực hiện dự án}\label{ux111ux1ed9ng-lux1ef1c-thux1ef1c-hiux1ec7n-dux1ef1-uxe1n}
 
@@ -1160,9 +1171,9 @@ chức như sau:
   tin, lớp lưu trữ và lớp nhật ký vận hành để dữ liệu sau khi rời xe có
   thể được tiếp nhận và xử lý liên tục.
 \item
-  \textbf{Giai đoạn 4 --- Phát triển API máy chủ}: Chuyển dữ liệu kỹ thuật
+  \textbf{Giai đoạn 4 --- Phát triển dịch vụ máy chủ}: Chuyển dữ liệu kỹ thuật
   thành các chức năng quản trị như đăng nhập, quản lý xe, xem lịch sử,
-  xử lý cảnh báo và cung cấp dữ liệu thời gian thực cho lớp ứng dụng.
+  xử lý cảnh báo và cung cấp dữ liệu cập nhật cho lớp ứng dụng.
 \item
   \textbf{Giai đoạn 5 --- Phát triển giao diện web}: Trình bày dữ liệu dưới
   dạng bản đồ, bảng thông tin và biểu đồ để người vận hành quan sát và
@@ -1263,7 +1274,7 @@ các loại dữ liệu khác nhau và thuận lợi cho triển khai thử nghi
   \textbf{Tầng firmware}: framework nhúng và cơ chế điều phối tác vụ thời gian
   thực để điều khiển hành vi của thiết bị.
 \item
-  \textbf{Tầng máy chủ và dữ liệu}: broker bản tin, dịch vụ API, lưu trữ dữ
+  \textbf{Tầng máy chủ và dữ liệu}: kênh tiếp nhận bản tin, dịch vụ phía máy chủ, lưu trữ dữ
   liệu nghiệp vụ, chuỗi thời gian và nhật ký.
 \item
   \textbf{Tầng ứng dụng và vận hành}: giao diện web quản trị, cơ chế cập nhật
@@ -1418,6 +1429,19 @@ Từ bối cảnh trên, đề tài tập trung vào bốn nhóm vấn đề k�
 
 \textbf{Vấn đề về khai thác dữ liệu.} Người quản lý cần nhìn thấy vị trí, lịch sử hành trình, cảnh báo và trạng thái thiết bị trên giao diện tập trung. Do đó, dữ liệu sau khi gửi về máy chủ phải được lưu trữ và trình bày theo cách dễ tra cứu, không chỉ tồn tại dưới dạng bản tin rời rạc.
 
+{\thesissetfigureid{2.1}{condensed-hinh-2-1-so-do-kien-truc-du-lieu-cua-he-thong}
+\begin{figure}[H]
+\centering
+\pandocbounded{\safeincludesvg{./assets/figures/02-chuong-2-phan-tich-hinh-2-1.svg}}
+\caption{Sơ đồ kiến trúc dữ liệu của hệ thống}
+\label{fig:condensed-hinh-2-1-so-do-kien-truc-du-lieu-cua-he-thong}
+\end{figure}
+}
+
+Hình 2.1 minh họa tuyến dữ liệu ở mức logic: dữ liệu phát sinh từ xe được
+truyền về lớp tiếp nhận, phân loại vào các nhóm dữ liệu khác nhau, sau đó được
+lớp dịch vụ và giao diện quản lý khai thác để theo dõi, tra cứu và cấu hình.
+
 \subsubsection{2.1.3. Mục tiêu kỹ thuật của chương}\label{mux1ee5c-tiuxeau-kux1ef9-thuux1eadt-cux1ee7a-chux1b0ux1a1ng}
 
 Các vấn đề trên được chuyển thành ba nhóm đầu ra kỹ thuật: yêu cầu chức năng, ràng buộc thiết kế và chỉ tiêu nghiệm thu. Những nội dung này là cơ sở để đánh giá phương án ở Chương 3 và đối chiếu kết quả ở Chương 4.
@@ -1441,9 +1465,7 @@ Trong thực tế có ba hướng tiếp cận phổ biến: quản lý thủ c�
 \textbf{Tiêu chí} & \textbf{Quản lý thủ công} & \textbf{Thiết bị định vị cơ bản} & \textbf{Nền tảng thương mại} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Theo dõi vị trí & Phụ thuộc liên lạc với khách thuê & Có vị trí và lịch sử cơ bản & Có vị trí, lịch sử và cảnh báo \\\hline
 Theo dõi trạng thái kỹ thuật & Không có & Hạn chế & Có ở một số hệ thống \\\hline
@@ -1473,9 +1495,7 @@ Từ bảng trên, khoảng trống của đề tài nằm ở một hệ thốn
 \textbf{Nhóm kỹ thuật} & \textbf{Đặc điểm cần xét} & \textbf{Ảnh hưởng đến thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Nguồn trên xe & Điện áp 12 V hoặc 24 V, có dao động khi đề máy và khi tải thay đổi & Cần ổn áp, bảo vệ quá dòng, bảo vệ điện áp thấp và nguồn dự phòng \\\hline
 Định vị & Vị trí cần đủ chính xác để theo dõi hành trình, nhưng không nhất thiết đạt độ chính xác đo đạc địa hình & Cần mô-đun định vị phù hợp và chu kỳ cập nhật hợp lý \\\hline
@@ -1507,9 +1527,7 @@ Từ các đặc điểm trên, hệ thống cần được đánh giá theo nă
 \textbf{Mã yêu cầu} & \textbf{Nội dung yêu cầu} & \textbf{Kết quả cần đạt} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 YC-01 & Theo dõi vị trí phương tiện & Ghi nhận tọa độ, tốc độ và thời điểm cập nhật của xe \\\hline
 YC-02 & Lưu lịch sử hành trình & Cho phép xem lại tuyến đường và các mốc thời gian chính \\\hline
@@ -1539,9 +1557,7 @@ Các yêu cầu phi chức năng xác định mức chất lượng tối thiể
 \textbf{Nhóm yêu cầu} & \textbf{Chỉ tiêu định hướng} & \textbf{Ý nghĩa} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Độ trễ dữ liệu & Dữ liệu từ thiết bị lên giao diện trong điều kiện mạng bình thường không vượt quá vài giây & Người quản lý theo dõi được trạng thái gần thời gian thực \\\hline
 Độ ổn định nguồn & Thiết bị không reset khi mô-đun truyền dữ liệu hoạt động tải cao & Tránh mất dữ liệu và mất kết nối bất thường \\\hline
@@ -1567,9 +1583,7 @@ An toàn dữ liệu & Có xác thực người dùng và giới hạn truy cậ
 \textbf{Loại ràng buộc} & \textbf{Nội dung} & \textbf{Tác động đến đồ án} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Nguồn xe & Thiết bị làm việc với hệ điện 12 V/24 V & Cần dải nguồn vào rộng và mạch bảo vệ \\\hline
 Lắp đặt & Không can thiệp sâu vào hệ thống điều khiển nguyên bản của xe & Ưu tiên kết nối ít xâm lấn, dễ tháo lắp \\\hline
@@ -1597,9 +1611,7 @@ Các tiêu chuẩn và tài liệu kỹ thuật dưới đây được dùng đ�
 \textbf{Nhóm} & \textbf{Tài liệu/chuẩn tham chiếu} & \textbf{Phạm vi áp dụng} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Chẩn đoán trên xe & SAE J1979, ISO 15031-5, ISO 15765-2 & Cơ sở đọc dữ liệu OBD2 ở mức thông số vận hành và mã chẩn đoán liên quan {[}26{]}, {[}27{]}, {[}28{]} \\\hline
 Mạch nguồn và pin & Datasheet IC nguồn, IC sạc, pin 18650 & Xác định miền điện áp, dòng tải và giới hạn sạc/xả {[}30{]} \\\hline
@@ -1624,9 +1636,7 @@ Thiết kế PCB & Quy tắc bố trí nguồn, mass, anten và đường tín h
 \textbf{Nhóm kiểm chứng} & \textbf{Chỉ tiêu cần đạt} & \textbf{Phương pháp kiểm tra} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Nguồn chính & Thiết bị hoạt động ổn định trong dải nguồn 12 V/24 V & Cấp nguồn thử, quan sát điện áp nhánh nguồn và trạng thái reset \\\hline
 Chế độ ngủ sâu & Dòng tiêu thụ ở mức thấp, mục tiêu dưới 500 µA & Đo dòng bằng đồng hồ/máy đo công suất khi thiết bị vào chế độ ngủ \\\hline
@@ -1656,9 +1666,7 @@ Cập nhật cấu hình & Thiết bị nhận và áp dụng cấu hình mới 
 \textbf{Bên liên quan} & \textbf{Nhu cầu} & \textbf{Ảnh hưởng đến thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Chủ doanh nghiệp cho thuê xe & Theo dõi vị trí, lịch sử, trạng thái xe và cảnh báo & Cần giao diện tập trung, dữ liệu dễ tra cứu và cảnh báo đủ kịp thời \\\hline
 Nhân viên vận hành & Lắp đặt nhanh, kiểm tra tình trạng thiết bị và xử lý cảnh báo & Cần thiết bị gọn, báo trạng thái rõ và thao tác vận hành đơn giản \\\hline
@@ -1683,9 +1691,7 @@ Khách thuê xe & Thiết bị không ảnh hưởng tới quá trình sử dụ
 \textbf{Yêu cầu} & \textbf{Chủ doanh nghiệp} & \textbf{Nhân viên vận hành} & \textbf{Khách thuê xe} & \textbf{Đội kỹ thuật/bảo trì} & \textbf{Quản trị dữ liệu} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 YC-01, YC-02: vị trí và hành trình & X & X & & & X \\\hline
 YC-03: trạng thái xe & X & X & & X & \\\hline
@@ -1720,7 +1726,7 @@ Trước khi đi vào từng phương án, cần xác định chuỗi chức nă
 \end{figure}
 }
 
-Hình 3.1 cho thấy hệ thống được tổ chức theo một tuyến dữ liệu liên tục thay vì các khối rời rạc. Vì vậy, một lựa chọn ở tầng thiết bị có thể tạo ràng buộc cho các tầng sau: đọc OBD2 qua BLE yêu cầu vi điều khiển có BLE ổn định; modem LTE/GNSS có dòng tải xung cao nên cần nhánh nguồn riêng; dữ liệu vị trí và trạng thái gửi theo chu kỳ đòi hỏi máy chủ có cơ chế lưu trữ phù hợp với dữ liệu thời gian. Các ràng buộc liên tầng này là cơ sở để xây dựng tiêu chí lựa chọn ở các mục tiếp theo.
+Hình 3.1 cho thấy hệ thống được tổ chức theo một tuyến dữ liệu liên tục thay vì các khối rời rạc. Vì vậy, một lựa chọn ở tầng thiết bị có thể tạo ràng buộc cho các tầng sau: kênh đọc dữ liệu xe yêu cầu giao tiếp ổn định; khối truyền dữ liệu và định vị cần được cấp nguồn riêng phù hợp với tải động; dữ liệu vị trí và trạng thái gửi theo chu kỳ đòi hỏi máy chủ có cơ chế lưu trữ phù hợp với dữ liệu thời gian. Các ràng buộc liên tầng này là cơ sở để xây dựng tiêu chí lựa chọn ở các mục tiếp theo.
 
 \subsubsection{3.1.2. Các mâu thuẫn thiết kế chính}\label{cuxe1c-muxe2u-thuux1eabn-thiux1ebft-kux1ebf-chuxednh}
 
@@ -1739,9 +1745,7 @@ Bài toán của đồ án không chỉ là ghép các linh kiện có sẵn. Kh
 \textbf{Mâu thuẫn thiết kế} & \textbf{Diễn giải} & \textbf{Hệ quả đối với phương án thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Dữ liệu đầy đủ và lắp đặt ít xâm lấn & Muốn đọc nhiều thông tin xe thì dễ phải can thiệp sâu vào hệ thống điện; nhưng xe cho thuê cần thiết bị tháo lắp nhanh và hạn chế thay đổi dây nguyên bản & Ưu tiên đọc OBD2 qua bộ chuyển đổi rời, không đấu trực tiếp vào bus xe trong nguyên mẫu \\\hline
 Sẵn sàng cảnh báo và tiết kiệm năng lượng & Thiết bị cần nhận biết bất thường khi xe đỗ, nhưng không thể để modem và BLE luôn hoạt động & Dùng cảm biến gia tốc có ngắt để đánh thức MCU khi cần \\\hline
@@ -1769,9 +1773,7 @@ Các tiêu chí ở Bảng 3.2 được xác định theo vai trò của từng 
 \textbf{Khối thiết kế} & \textbf{Tiêu chí ưu tiên} & \textbf{Lý do kỹ thuật} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Vi điều khiển trung tâm & Đủ giao tiếp ngoại vi, có BLE, hỗ trợ ngủ sâu, cộng đồng và tài liệu tốt & Phải điều phối modem, OBD2 BLE, cảm biến gia tốc, đo nguồn và các trạng thái vận hành \\\hline
 Truyền dữ liệu và định vị & Có mạng di động~LTE, định vị vệ tinh~GNSS, tài liệu~rõ, bố trí phần cứng gọn & Thiết bị cần vừa gửi dữ liệu qua mạng di động vừa lấy vị trí \\\hline
@@ -1814,9 +1816,7 @@ Vi điều khiển là phần điều phối toàn bộ thiết bị. Nó cần 
 \textbf{Tiêu chí} & \textbf{ESP32-S3} & \textbf{STM32L4 + BLE rời} & \textbf{nRF52840} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 BLE tích hợp để đọc OBD2 & BLE 5.0 tích hợp, tương thích ngược BLE 4.0 {[}19{]}, {[}20{]} & Không tích hợp BLE, phải thêm mô-đun ngoài & BLE 5.x tích hợp \\\hline
 UART phần cứng khả dụng cho modem + gỡ lỗi & 3 UART, đủ cho modem và kênh gỡ lỗi riêng {[}19{]}, {[}20{]} & Có nhiều USART/UART tùy biến thể, nhưng phải chia thêm tài nguyên cho BLE ngoài & Thường dùng 2 UARTE/UART, dư địa hẹp hơn nếu giữ kênh gỡ lỗi riêng \\\hline
@@ -1852,9 +1852,7 @@ ESP32-S3 được chọn vì cân bằng tốt giữa tài nguyên xử lý, ngo
 \textbf{Thông số / đặc tính} & \textbf{Giá trị hoặc mô tả} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Kiến trúc xử lý & Dual-core Xtensa LX7, tối đa 240 MHz {[}19{]} & Có đủ dư địa xử lý cho modem, BLE, cảm biến và logic trạng thái \\\hline
 Kết nối không dây & Wi-Fi và BLE tích hợp {[}19{]}, {[}20{]} & BLE dùng để giao tiếp với bộ chuyển đổi OBD2; Wi-Fi hỗ trợ cấu hình hoặc thử nghiệm \\\hline
@@ -1880,9 +1878,7 @@ Khối truyền dữ liệu phải gửi bản tin qua mạng di động, đồn
 \textbf{Tiêu chí} & \textbf{A7670C + NEO-M8N} & \textbf{EC200U-CN + NEO-M8N} & \textbf{SIM7600CE-T tích hợp} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Số mô-đun cần tích hợp & 2 mô-đun: LTE + GNSS rời & 2 mô-đun: LTE + GNSS rời & 1 mô-đun tích hợp LTE + GNSS {[}21{]}, {[}22{]} \\\hline
 LTE category & Cat-1, đủ cho bản tin IoT nhưng thấp hơn Cat-4 & Cat-1 bis, thiên về bài toán dữ liệu vừa & Cat-4, dư địa truyền dữ liệu lớn hơn \\\hline
@@ -1918,9 +1914,7 @@ SIM7600CE-T được chọn vì đáp ứng đồng thời hai nhiệm vụ: tru
 \textbf{Thông số / đặc tính} & \textbf{Giá trị hoặc mô tả} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Chức năng chính & LTE Cat-4 và GNSS tích hợp {[}21{]}, {[}22{]} & Gộp truyền dữ liệu và định vị vào cùng một khối \\\hline
 Điều khiển & Tập lệnh AT qua UART {[}21{]} & ESP32-S3 có thể điều khiển modem bằng giao tiếp UART \\\hline
@@ -1946,9 +1940,7 @@ Mục tiêu của khối OBD2 là lấy được các thông tin vận hành cơ
 \textbf{Tiêu chí} & \textbf{Đấu dây OBD2 trực tiếp} & \textbf{Bộ chuyển đổi OBD2 có dây} & \textbf{Bộ chuyển đổi OBD2 BLE vgate iCar Pro} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mức can thiệp vào xe & Cao, phải đi dây hoặc chạm sâu vào đường chẩn đoán & Vẫn cần dây từ cổng OBD2 đến tracker & Thấp, chỉ cắm adapter vào cổng OBD2 \\\hline
 Kết nối giữa tracker và OBD2 & Dây tín hiệu trực tiếp, khó tháo lắp & Dây UART/USB từ adapter tới tracker & BLE 4.0, tương thích với BLE tích hợp của ESP32-S3 \\\hline
@@ -1984,9 +1976,7 @@ vgate iCar Pro BLE được chọn vì phù hợp định hướng lắp đặt 
 \textbf{Thông số / đặc tính} & \textbf{Giá trị hoặc mô tả} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Kiểu kết nối & BLE {[}29{]}, {[}64{]} & Không cần kéo dây tín hiệu OBD2 về thiết bị định vị \\\hline
 Kiểu giao tiếp & Dạng tập lệnh ELM327 {[}29{]} & Firmware có thể gửi lệnh đọc PID theo cách phổ biến \\\hline
@@ -2012,9 +2002,7 @@ Khi xe đang đỗ, thiết bị không nên duy trì modem và kết nối OBD2
 \textbf{Tiêu chí} & \textbf{Công tắc rung} & \textbf{Cảm biến gia tốc LIS3DH} & \textbf{IMU 6 trục} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Số chiều dữ liệu & Chỉ cho biết có rung hoặc không & Gia tốc 3 trục {[}23{]}, {[}24{]} & Gia tốc 3 trục + con quay 3 trục \\\hline
 Giao tiếp với MCU & Thường chỉ là mức logic đơn giản & I2C hoặc SPI {[}23{]} & I2C hoặc SPI \\\hline
@@ -2050,9 +2038,7 @@ LIS3DH được chọn vì đủ thông tin cho mục tiêu phát hiện rung/ch
 \textbf{Thông số / đặc tính} & \textbf{Giá trị hoặc mô tả} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Số trục đo & 3 trục gia tốc {[}23{]} & Nhận biết rung/chuyển động theo nhiều hướng \\\hline
 Nguồn cấp & 1,71-3,6 V {[}23{]} & Phù hợp nhánh nguồn logic 3,3 V \\\hline
@@ -2098,16 +2084,14 @@ không rút điện ắc quy xe xuống vùng nguy hiểm khi xe đỗ lâu.
 \textbf{Tiêu chí} & \textbf{Một bộ hạ áp cấp chung} & \textbf{Một nhánh chính kèm pin dự phòng} & \textbf{Kiến trúc đa nhánh có dự phòng và bảo vệ} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
-Số rail nguồn chính & 1 rail dùng chung cho logic và modem & 2 rail chính và dự phòng cơ bản & Bus 5 V, rail 3,3 V logic, rail modem, rail dự phòng \\\hline
-Cách nuôi modem SIM7600CE-T & Dùng chung với logic, dễ sụt áp khi phát xung dòng & Có cải thiện nhưng chưa tách hẳn & Có rail riêng khoảng 4 V cho modem \\\hline
+Số nhánh nguồn chính & 1 nhánh nguồn dùng chung cho logic và modem & 2 nhánh nguồn chính và dự phòng cơ bản & Bus 5 V, nhánh 3,3 V logic, nhánh modem, nhánh dự phòng \\\hline
+Cách nuôi modem SIM7600CE-T & Dùng chung với logic, dễ sụt áp khi phát xung dòng & Có cải thiện nhưng chưa tách hẳn & Có nhánh riêng khoảng 4 V cho modem \\\hline
 Khả năng duy trì khi mất nguồn xe & Không có & Có, nhưng đường chuyển nguồn còn đơn giản & Có, nhờ pin 18650 1S + boost + mạch chuyển nguồn \\\hline
 Giám sát và bảo vệ ắc quy xe & Phụ thuộc mạch ngoài hoặc logic tối giản & Có thể thêm nhưng chưa thành lớp rõ ràng & Có ADC theo dõi và phản ứng bảo vệ bằng firmware \\\hline
-Ảnh hưởng của xung dòng modem lên rail logic & Xung dòng đi chung rail, dễ kéo tụt nguồn MCU & Giảm bớt nhưng vẫn còn chia sẻ một phần đường cấp & Được cô lập nhờ rail modem riêng \\\hline
-Khả năng thêm các nhánh 3,3 V, 4 V, sạc và dự phòng & Khó, vì mọi tải bám một rail & Thêm được nhưng ranh giới chưa rõ & Thuận lợi, mỗi miền nguồn có nhiệm vụ riêng \\\hline
+Ảnh hưởng của xung dòng modem lên nhánh logic & Xung dòng đi chung nhánh nguồn, dễ kéo tụt nguồn MCU & Giảm bớt nhưng vẫn còn chia sẻ một phần đường cấp & Được cô lập nhờ nhánh modem riêng \\\hline
+Khả năng thêm các nhánh 3,3 V, 4 V, sạc và dự phòng & Khó, vì mọi tải bám một nhánh nguồn & Thêm được nhưng ranh giới chưa rõ & Thuận lợi, mỗi miền nguồn có nhiệm vụ riêng \\\hline
 Kết luận chọn & Không đủ ổn định cho tải modem và yêu cầu dự phòng & Chỉ phù hợp nguyên mẫu tối giản & Phương án chốt \\\hline
 \end{longtable}
 }
@@ -2143,13 +2127,11 @@ dõi ADC và chuỗi tắt chủ động bằng firmware.
 \textbf{Miền nguồn / bảo vệ} & \textbf{Linh kiện chính} & \textbf{Tải hoặc tín hiệu liên quan} & \textbf{Vai trò trong kiến trúc} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Bus 5 V chính từ nguồn xe & MP2482 & Toàn bộ các nhánh phía sau & Tạo một đường nguồn trung gian ổn định để phân phối tiếp \\\hline
-Rail logic 3,3 V & AP2112-3.3 & ESP32-S3, LIS3DH, RTC và mức logic & Giữ nguồn sạch cho vi điều khiển và cảm biến \\\hline
-Rail riêng cho modem & TPS54231 & SIM7600CE-T & Tách tải động lớn của modem khỏi miền logic \\\hline
+Nhánh logic 3,3 V & AP2112-3.3 & ESP32-S3, LIS3DH, RTC và mức logic & Giữ nguồn sạch cho vi điều khiển và cảm biến \\\hline
+Nhánh riêng cho modem & TPS54231 & SIM7600CE-T & Tách tải động lớn của modem khỏi miền logic \\\hline
 Nhánh nguồn dự phòng & SX1308 + mạch chuyển nguồn diode-OR & Bus 5 V dự phòng & Duy trì hoạt động ngắn hạn khi nguồn chính gián đoạn \\\hline
 Nhánh sạc pin dự phòng & TP5100 {[}30{]} & Pin Li-ion 18650 1S & Nạp lại pin 1 cell từ bus 5 V chính \\\hline
 Giám sát và bảo vệ & ADC + logic bảo vệ bằng firmware & Điện áp nguồn xe, điện áp pin dự phòng & Theo dõi trạng thái nguồn và chủ động giảm tải, tắt thiết bị khi điện áp không an toàn \\\hline
@@ -2163,7 +2145,7 @@ gian dễ phân phối hơn. Về nguyên tắc, có thể nghĩ tới hai hư�
 thẳng từng mức điện áp riêng ngay từ đầu, hoặc tạo trước một đường nguồn
 trung gian rồi mới tách tiếp thành các nhánh nhỏ hơn. Đối với đồ án này,
 cách thứ hai hợp lý hơn vì nó làm sơ đồ nguồn rõ ràng: 5 V trở thành bus
-trung gian, từ đó mới cấp điện cho nguồn hạ áp 3,3 V cho logic, cấp nguồn 3,9 V cho mô-đun SIM7600CE -T và cấp điện cho mạch sạc.
+trung gian, từ đó mới cấp điện cho nguồn hạ áp 3,3 V cho logic, cấp nguồn 3,9 V cho mô-đun SIM7600CE-T và cấp điện cho mạch sạc.
 
 MP2482 được chọn cho vị trí này vì đây là bộ hạ áp chuyển mạch (buck
 converter) phù hợp với bài toán đầu vào rộng của xe. Linh kiện này làm việc
@@ -2187,9 +2169,7 @@ và dễ bố trí hơn trên PCB.
 \textbf{Thông số / đặc tính} & \textbf{Giá trị hoặc mô tả} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Loại linh kiện & Bộ hạ áp chuyển mạch MP2482 & Thực hiện bước hạ áp đầu tiên từ nguồn xe \\\hline
 Dải điện áp vào & 4,5-30 V & Phù hợp cả hệ điện 12 V và 24 V \\\hline
@@ -2233,9 +2213,7 @@ kiện ngoại vi hơn và dễ ghép vào bus 5 V trung gian.
 \textbf{Thông số / đặc tính} & \textbf{Giá trị hoặc mô tả} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Loại linh kiện & Bộ ổn áp tuyến tính AP2112-3.3 & Tạo nhánh 3,3 V riêng cho logic \\\hline
 Điện áp ra cố định & 3,3 V, sai số ±1,5\% & Phù hợp với ESP32-S3, LIS3DH và mức logic hệ thống \\\hline
@@ -2255,7 +2233,7 @@ SIM7600CE-T là tải khó nuôi nhất của thiết bị. Theo tài liệu ph�
 mô-đun, modem làm việc trong miền khoảng 3,4-4,2 V {[}22{]}. Điểm khó không chỉ
 nằm ở giá trị điện áp, mà ở việc tải của modem thay đổi rất nhanh theo trạng
 thái mạng. Khi đăng ký mạng, phát LTE hoặc khởi động GNSS, dòng tiêu thụ có
-thể tăng vọt theo từng xung ngắn. Nếu cho modem dùng chung rail với ESP32-S3
+thể tăng vọt theo từng xung ngắn. Nếu cho modem dùng chung nhánh nguồn với ESP32-S3
 hoặc ghép qua một bộ ổn áp tuyến tính đơn giản, rủi ro sụt áp lan sang MCU
 và cảm biến sẽ tăng lên rõ rệt.
 
@@ -2279,11 +2257,9 @@ và cho phép ưu tiên đúng mức cho tải động lớn nhất của bo m�
 \textbf{Thông số / đặc tính} & \textbf{Giá trị hoặc mô tả} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
-Loại linh kiện & Bộ hạ áp chuyển mạch TPS54231 & Tạo rail riêng cho modem \\\hline
+Loại linh kiện & Bộ hạ áp chuyển mạch TPS54231 & Tạo nhánh riêng cho modem \\\hline
 Dải điện áp vào & 3,5-28 V & Phù hợp với nguồn xe 12 V và 24 V \\\hline
 Dòng ra liên tục & Tới 2 A & Đáp ứng nhánh tải động lớn của modem khi đi cùng tụ đệm \\\hline
 Tần số chuyển mạch & 570 kHz & Giữ kích thước linh kiện phụ ở mức gọn \\\hline
@@ -2312,7 +2288,7 @@ lên lại 5 V rồi ghép vào bus nguồn hiện có. Đồ án chọn cách t
 Trong cấu hình này, SX1308 nâng điện áp pin lên 5 V, sau đó mạch chuyển nguồn
 diode-OR sẽ tự động chọn giữa 5 V chính và 5 V dự phòng. Cách làm này giữ
 được sơ đồ nguồn gọn hơn so với việc phải thiết kế một cơ chế chuyển mạch
-phức tạp hoặc tái kiến trúc toàn bộ các rail phía sau.
+phức tạp hoặc tái kiến trúc toàn bộ các nhánh nguồn phía sau.
 
 {\thesissettableid{3.12D}{condensed-bang-3-12d-thong-so-nhanh-nguon-du-phong}
 \def\LTcaptype{table}
@@ -2327,9 +2303,7 @@ phức tạp hoặc tái kiến trúc toàn bộ các rail phía sau.
 \textbf{Thông số / đặc tính} & \textbf{Giá trị hoặc mô tả} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Loại linh kiện & Bộ tăng áp SX1308 kết hợp mạch chuyển nguồn diode-OR & Tạo và chuyển sang nhánh 5 V dự phòng \\\hline
 Dải điện áp vào của boost & 2-24 V & Phù hợp với pin 18650 1S ở nhiều mức xả \\\hline
@@ -2371,9 +2345,7 @@ dòng cao và ghép tự nhiên vào bus 5 V do MP2482 tạo ra.
 \textbf{Thông số / đặc tính} & \textbf{Giá trị hoặc mô tả} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Loại linh kiện & IC sạc chuyển mạch TP5100 & Sạc lại pin 18650 1S của thiết bị \\\hline
 Cấu hình pin hỗ trợ & 1 cell, điện áp sạc 4,2 V {[}30{]} & Phù hợp với cấu hình pin dự phòng hiện tại \\\hline
@@ -2419,9 +2391,7 @@ trước khi ắc quy xe bị rút xuống quá sâu.
 \textbf{Thông số / đặc tính} & \textbf{Giá trị hoặc mô tả} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Kênh đo nguồn xe & ADC trên \thesisterm{GPIO3} & Theo dõi điện áp nguồn chính của xe \\\hline
 Kênh đo pin dự phòng & ADC trên \thesisterm{GPIO4} & Theo dõi trạng thái pin dự phòng \\\hline
@@ -2461,15 +2431,13 @@ Sau khi so sánh từng khối, cấu hình phần cứng được chốt như B
 \textbf{Khối chức năng} & \textbf{Linh kiện / phương án chốt} & \textbf{Thông số hoặc đặc tính chính} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 MCU & ESP32-S3 & Dual-core 240 MHz, BLE, UART, I2C, ADC, ngủ sâu {[}19{]}, {[}20{]} & Điều phối modem, OBD2 BLE, cảm biến và nguồn \\\hline
 LTE/GNSS & SIM7600CE-T & LTE Cat-4, GNSS tích hợp, nguồn khoảng 3,4-4,2 V, AT command {[}21{]}, {[}22{]} & Giảm số mô-đun và giảm trạng thái lỗi \\\hline
 OBD2 & vgate iCar Pro BLE & BLE, giao tiếp kiểu ELM327, hỗ trợ nhiều giao thức OBD-II {[}29{]}, {[}64{]} & Lắp nhanh, ít xâm lấn, dễ thay bộ chuyển đổi \\\hline
 Chuyển động & LIS3DH & 3 trục, 1,71-3,6 V, I2C/SPI, ±2 g đến ±16 g,\thesisterm{INT1/INT2} {[}23{]}, {[}24{]} & Đánh thức thiết bị khi xe đỗ có rung/chuyển động \\\hline
-Nguồn & MP2482, AP2112-3.3, TPS54231, TP5100, SX1308, 18650 1S, mạch chuyển nguồn, ADC & Tách nhánh nguồn logic, rail modem và rail dự phòng; sạc pin bằng TP5100 {[}30{]} & Ổn định nhánh nguồn, bảo vệ ắc quy bằng chiến lược phần mềm và duy trì khi mất nguồn ngắn \\\hline
+Nguồn & MP2482, AP2112-3.3, TPS54231, TP5100, SX1308, 18650 1S, mạch chuyển nguồn, ADC & Tách nhánh nguồn logic, nhánh modem và nhánh dự phòng; sạc pin bằng TP5100 {[}30{]} & Ổn định nhánh nguồn, bảo vệ ắc quy bằng chiến lược phần mềm và duy trì khi mất nguồn ngắn \\\hline
 \end{longtable}
 }
 
@@ -2504,15 +2472,13 @@ Zephyr RTOS.
 \textbf{Tiêu chí} & \textbf{Arduino Core} & \textbf{ESP-IDF + FreeRTOS} & \textbf{Zephyr RTOS} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mức độ bám sát ESP32-S3 & Thư viện quen thuộc, phù hợp mẫu nhỏ & Bộ công cụ chính thức của Espressif {[}47{]} & Hỗ trợ được nhưng không phải luồng chính của ESP32-S3 \\\hline
 BLE, NVS, OTA và quản lý nguồn & Có thư viện nhưng thường qua lớp bọc & Có sẵn trong hệ sinh thái ESP-IDF {[}47{]} & Có nhưng cần tự ghép cấu hình nhiều hơn \\\hline
-Tổ chức tác vụ cho modem, BLE, IMU và ADC & Chủ yếu theo vòng lặp chính tuần tự, khó tách tải khi ngoại vi tăng & Có FreeRTOS, hàng đợi, semaphore và nhóm sự kiện {[}10{]} & Có RTOS đầy đủ \\\hline
+Tổ chức tác vụ cho modem, BLE, LIS3DH và ADC & Chủ yếu theo vòng lặp chính tuần tự, khó tách tải khi ngoại vi tăng & Có FreeRTOS, hàng đợi, semaphore và nhóm sự kiện {[}10{]} & Có RTOS đầy đủ \\\hline
 Điều khiển ngủ sâu và nguồn đánh thức & Làm được nhưng phải tự giữ nhiều nhánh điều kiện trong ứng dụng & Hỗ trợ tốt chế độ ngủ sâu, nguồn đánh thức và miền nguồn & Làm được nhưng công tích hợp cao hơn trên ESP32-S3 \\\hline
-Khả năng giữ cấu trúc mã khi ghép đồng thời modem, BLE và IMU & Khởi đầu nhanh nhưng dễ phình logic trong một luồng chính & Giữ cấu trúc rõ giữa trình điều khiển, tác vụ nền và lõi trạng thái & Cần thêm thời gian chuẩn hóa thư viện và gỡ lỗi \\\hline
+Khả năng giữ cấu trúc mã khi ghép đồng thời modem, BLE và LIS3DH & Khởi đầu nhanh nhưng dễ phình logic trong một luồng chính & Giữ cấu trúc rõ giữa trình điều khiển, tác vụ nền và lõi trạng thái & Cần thêm thời gian chuẩn hóa thư viện và gỡ lỗi \\\hline
 Kết luận chọn & Không ưu tiên cho thiết bị nhiều ngoại vi & Phương án chốt & Có giá trị tham khảo nhưng không thuận bằng ESP-IDF \\\hline
 \end{longtable}
 }
@@ -2537,9 +2503,7 @@ xử lý cảm biến không làm nghẽn toàn bộ chương trình {[}10{]}.
 \textbf{Thành phần} & \textbf{Vai trò trong thiết bị} & \textbf{Ý nghĩa kỹ thuật} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 ESP-IDF & Cung cấp trình điều khiển, thư viện hệ thống và công cụ biên dịch & Giảm rủi ro khi tích hợp với ESP32-S3 \\\hline
 FreeRTOS & Điều phối các tác vụ có thời gian phản hồi khác nhau & Phù hợp với hệ thống có modem, BLE, cảm biến và quản lý nguồn \\\hline
@@ -2572,9 +2536,7 @@ trạng thái trung tâm kết hợp các tác vụ nền của FreeRTOS.
 \textbf{Tiêu chí} & \textbf{Vòng lặp tuần tự} & \textbf{Nhiều tác vụ ngang hàng} & \textbf{Máy trạng thái trung tâm + tác vụ nền} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Điểm ra quyết định bật/tắt modem và sleep & Nằm lẫn trong một vòng lặp lớn & Phân tán ở nhiều tác vụ & Tập trung ở lõi trạng thái \\\hline
 Ứng xử khi modem hoặc BLE chờ lâu & Dễ chặn toàn bộ luồng xử lý & Giảm chặn nhưng dễ phát sinh cạnh tranh tài nguyên & Tác vụ nền xử lý chờ, lõi trạng thái vẫn giữ điều phối \\\hline
@@ -2614,9 +2576,7 @@ thay đổi.
 \textbf{Trạng thái} & \textbf{Ý nghĩa trong vận hành} & \textbf{Hành vi ưu tiên} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Khởi tạo & Nạp cấu hình, kiểm tra ngoại vi và chuẩn bị kết nối & Bảo đảm các khối cần thiết sẵn sàng trước khi chạy \\\hline
 Kiểm tra nguồn xe & Xác định xe đang có nguồn vận hành hay đang tắt máy & Chọn nhánh chạy, đỗ hoặc ngủ tiết kiệm điện \\\hline
@@ -2654,9 +2614,7 @@ trong quá trình vận hành.
 \textbf{Nhóm chức năng} & \textbf{Nhiệm vụ chính} & \textbf{Lý do cần có} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Đọc dữ liệu OBD2 BLE & Kết nối bộ chuyển đổi OBD2, đọc các thông số vận hành cơ bản như tốc độ, vòng tua, điện áp và một số mã lỗi & Bổ sung dữ liệu trạng thái xe nhưng vẫn giữ lắp đặt ít xâm lấn \\\hline
 Quản lý LTE/GNSS & Điều khiển SIM7600CE-T để lấy vị trí và duy trì kết nối dữ liệu di động & Cung cấp vị trí và đường truyền về máy chủ \\\hline
@@ -2666,6 +2624,19 @@ Lưu tạm khi mất mạng & Giữ bản tin quan trọng khi mạng 4G hoặc 
 Quản lý nguồn và ngủ sâu & Theo dõi nguồn xe, pin dự phòng, tắt tải lớn và đánh thức bằng thời gian hoặc cảm biến & Bảo vệ ắc quy xe và duy trì giám sát khi xe đỗ \\\hline
 Cập nhật firmware từ xa & Tải, kiểm tra và chuyển sang phiên bản firmware mới khi điều kiện an toàn & Giảm nhu cầu tháo thiết bị khỏi xe để bảo trì phần mềm \\\hline
 \end{longtable}
+}
+
+Riêng nhóm đọc dữ liệu OBD2 BLE được tổ chức thành chuỗi kết nối lại theo
+địa chỉ đã lưu, ghép đôi khi cần, đọc PID và trạng thái IGN trong chu kỳ lái
+xe, đồng thời dùng ADC làm nguồn dự phòng khi BLE bị timeout nhiều lần.
+
+{\thesissetfigureid{3.8}{condensed-hinh-3-8-luong-ket-noi-va-doc-du-lieu-ble-obd2-trong-firmware}
+\begin{figure}[H]
+\centering
+\pandocbounded{\safeincludesvg{./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-8.svg}}
+\caption{Luồng kết nối và đọc dữ liệu BLE OBD2 trong firmware}
+\label{fig:condensed-hinh-3-8-luong-ket-noi-va-doc-du-lieu-ble-obd2-trong-firmware}
+\end{figure}
 }
 
 Trong các nhóm trên, quản lý nguồn là chức năng có ảnh hưởng lớn nhất tới độ ổn
@@ -2719,9 +2690,7 @@ TCP socket tự xây dựng là phương án dùng kết nối TCP thuần rồi
 \textbf{Tiêu chí} & \textbf{HTTP/REST} & \textbf{MQTT} & \textbf{TCP socket tự xây dựng} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mô hình truyền & Yêu cầu - phản hồi (request/response), mỗi lần gửi phải mở chu kỳ yêu cầu - phản hồi & Xuất bản - đăng ký nhận (publish/subscribe) qua broker & Kết nối TCP thuần, tự định nghĩa giao thức \\\hline
 Chi phí phụ trợ cho bản tin nhỏ gửi chu kỳ & Cao hơn do lặp phần đầu bản tin HTTP và phản hồi & Thấp hơn, phù hợp bản tin ngắn & Phụ thuộc hoàn toàn vào khuôn dạng tự thiết kế \\\hline
@@ -2754,9 +2723,7 @@ Sau broker MQTT, một dịch vụ trung gian đọc các topic cần thiết, k
 \textbf{Nhóm topic} & \textbf{Hướng truyền} & \textbf{QoS} & \textbf{Nội dung chính} & \textbf{Lý do chọn} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 \thesisterm{v1/}\newline\thesisterm{\{device\_id\}/}\newline\thesisterm{rawdata} & Thiết bị -\textgreater{} máy chủ & 0 & Tọa độ, tốc độ, điện áp, trạng thái khóa điện, mẫu OBD2 tức thời & Tần suất cao, chấp nhận mất lẻ tẻ để giảm tải đường truyền \\\hline
 \thesisterm{v1/}\newline\thesisterm{\{device\_id\}/}\newline\thesisterm{status} & Thiết bị -\textgreater{} máy chủ & 1 & Trạng thái thiết bị, phiên hoạt động, bản tin duy trì kết nối & Cần hạn chế mất bản tin vì dùng để xác định thiết bị còn hoạt động \\\hline
@@ -2812,9 +2779,7 @@ quản trị vượt quá nhu cầu của nguyên mẫu.
 \textbf{Tiêu chí} & \textbf{Một ứng dụng duy nhất} & \textbf{Nền tảng thương mại đóng} & \textbf{Các dịch vụ tự quản theo vai trò} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Đơn vị triển khai chính & 1 tiến trình hoặc 1 khối ứng dụng lớn & Theo cấu trúc do nhà cung cấp quyết định & Mỗi vai trò là một dịch vụ riêng \\\hline
 Cách tách broker, lưu trữ, API và giao diện & Chung trong một khối & Phụ thuộc nền tảng & Tách thành các dịch vụ độc lập \\\hline
@@ -2847,9 +2812,7 @@ trên hạ tầng đó.
 \textbf{Lớp dịch vụ} & \textbf{Vai trò chính} & \textbf{Ý nghĩa trong kiến trúc} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 MQTT broker & Nhận kết nối MQTT từ thiết bị và phân phối bản tin theo topic & Tách riêng lớp giao tiếp thời gian thực với thiết bị \\\hline
 Tầng tiếp nhận và phân luồng dữ liệu & Kiểm tra nội dung bản tin, chuẩn hóa và chuyển dữ liệu tới các lớp lưu trữ & Giữ tầng tiếp nhận dữ liệu tách khỏi lớp nghiệp vụ \\\hline
@@ -2882,9 +2845,7 @@ HiveMQ/VerneMQ.
 \textbf{Tiêu chí} & \textbf{Mosquitto} & \textbf{EMQX} & \textbf{HiveMQ/}\newline\textbf{VerneMQ} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Giao diện quản trị kết nối và phiên thiết bị & Thường tối giản hoặc cần công cụ ngoài & Có bảng điều khiển quản trị sẵn & Có nhưng thiên về triển khai lớn \\\hline
 Xác thực và danh sách điều khiển truy cập (Access Control List - ACL) theo thiết bị, chủ đề bản tin & Có nhưng thường cấu hình thủ công hơn & Có sẵn cơ chế người dùng, phân quyền và ACL thuận tiện hơn & Có, nhưng vượt nhu cầu nguyên mẫu \\\hline
@@ -2915,9 +2876,7 @@ vụ đo kiểm {[}32{]}.
 \textbf{Mục cấu hình} & \textbf{Phương án chốt} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mô hình chạy & Một nút broker & Đủ cho quy mô nguyên mẫu và đơn giản khi tích hợp \\\hline
 Giao diện truy cập chính & MQTT thường, MQTT bảo mật và cổng quản trị web & Phục vụ kết nối thiết bị, dự phòng bảo mật và quan sát vận hành \\\hline
@@ -2958,9 +2917,7 @@ PostGIS.
 \textbf{Tiêu chí} & \textbf{MySQL/}\newline\textbf{MariaDB} & \textbf{MongoDB} & \textbf{PostgreSQL + PostGIS} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mô hình dữ liệu mặc định & Quan hệ & Tài liệu & Quan hệ + không gian \\\hline
 Khóa ngoại và giao dịch nhiều bảng & Có sẵn & Không phải cơ chế mạnh nhất, thường bù ở tầng ứng dụng & Có sẵn \\\hline
@@ -2990,9 +2947,7 @@ một nền tảng.
 \textbf{Thành phần} & \textbf{Phương án chốt} & \textbf{Vai trò trong hệ thống} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Hệ quản trị cơ sở dữ liệu & PostgreSQL & Lưu dữ liệu quản lý có quan hệ rõ \\\hline
 Phần mở rộng không gian & PostGIS & Hỗ trợ truy vấn vị trí, vùng giám sát và bản đồ \\\hline
@@ -3022,9 +2977,7 @@ InfluxDB và VictoriaMetrics.
 \textbf{Tiêu chí} & \textbf{TimescaleDB} & \textbf{InfluxDB} & \textbf{VictoriaMetrics} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mô hình nền tảng & Phần mở rộng trên PostgreSQL, truy vấn bằng SQL & Cơ sở dữ liệu chuỗi thời gian riêng, dùng Flux/InfluxQL & Cơ sở dữ liệu chuỗi thời gian riêng, dùng MetricsQL tương thích PromQL \\\hline
 Mức tách tải ghi khỏi cơ sở dữ liệu nghiệp vụ & Chưa tách hẳn vì vẫn phụ thuộc cụm PostgreSQL & Tách riêng & Tách riêng \\\hline
@@ -3054,9 +3007,7 @@ theo chuỗi thời gian để vẽ biểu đồ, xem lịch sử và theo dõi 
 \textbf{Thành phần} & \textbf{Phương án chốt} & \textbf{Vai trò trong hệ thống} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Hệ quản trị cơ sở dữ liệu & VictoriaMetrics & Lưu dữ liệu đo từ xa (telemetry) theo thời gian \\\hline
 Nhóm dữ liệu chính & Vị trí, tốc độ, điện áp, trạng thái nguồn, trạng thái kết nối, dữ liệu OBD2 dạng chuỗi thời gian & Phục vụ biểu đồ và lịch sử \\\hline
@@ -3087,9 +3038,7 @@ kết hợp Grafana.
 \textbf{Tiêu chí} & \textbf{Nhật ký rời theo từng dịch vụ} & \textbf{ELK đầy đủ} & \textbf{VictoriaLogs + Grafana} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Thành phần chính khi triển khai & Tệp nhật ký hoặc nhật ký container riêng lẻ & Elasticsearch + Logstash + Kibana & VictoriaLogs + Grafana \\\hline
 Khả năng gom nhật ký từ broker, MQTT Bridge, backend và frontend & Phải mở từng dịch vụ để đối chiếu & Gom tập trung qua chuỗi xử lý nhật ký & Gom tập trung vào một nơi lưu \\\hline
@@ -3120,9 +3069,7 @@ nơi.
 \textbf{Thành phần} & \textbf{Dữ liệu hoặc nhóm theo dõi chính} & \textbf{Vai trò trong hệ thống} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 VictoriaLogs & Nhật ký thiết bị, nhật ký nhận bản tin, lỗi dịch vụ, nhật ký OTA & Truy vết khi hệ thống hoạt động không đúng mong muốn \\\hline
 Grafana & Chỉ số và bảng theo dõi của EMQX, MQTT Bridge, backend, cơ sở dữ liệu và giao diện web & Tập trung quan sát vận hành khi thử nghiệm \\\hline
@@ -3153,9 +3100,7 @@ dịch vụ đó được gọi là MQTT Bridge.
 \textbf{Tiêu chí} & \textbf{Backend đăng ký nhận trực tiếp} & \textbf{Bộ luật xử lý tại broker} & \textbf{MQTT Bridge độc lập} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Nơi đặt logic kiểm tra nội dung bản tin trước khi ghi & Nằm trong backend & Nằm trong bộ luật xử lý của broker & Nằm trong dịch vụ tiếp nhận riêng \\\hline
 Số đích lưu trữ có thể ghi trong cùng luồng tiếp nhận & Làm được nhưng kéo logic tiếp nhận vào backend & Hạn chế hơn & Thuận lợi: PostgreSQL, VictoriaMetrics, VictoriaLogs \\\hline
@@ -3193,9 +3138,7 @@ Go.
 \textbf{Tiêu chí} & \textbf{Node.js + TypeScript} & \textbf{Python bất đồng bộ} & \textbf{Go} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mức dùng chung hệ sinh thái với backend hiện có & Cùng Node.js/TypeScript, thuận lợi chia sẻ quy ước dữ liệu & Khác hệ sinh thái, phải tách mô hình dữ liệu & Khác hệ sinh thái, phải duy trì mô hình dữ liệu riêng \\\hline
 Kiểm tra lược đồ JSON và chuẩn hóa bản tin & Thuận lợi với hệ thư viện MQTT và kiểm tra dữ liệu của hệ TypeScript & Làm được nhưng phải ghép thêm lớp kiểm tra rõ ràng & Làm được nhưng thường phải tổ chức thủ công nhiều hơn \\\hline
@@ -3224,9 +3167,7 @@ nhẹ nhưng vẫn đủ rõ để kiểm thử riêng như một dịch vụ đ
 \textbf{Thành phần} & \textbf{Phương án chốt} & \textbf{Vai trò trong hệ thống} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Nền tảng triển khai & Node.js + TypeScript & Dựng dịch vụ tiếp nhận dữ liệu độc lập \\\hline
 Năng lực kỹ thuật chính & Thư viện MQTT, truy cập cơ sở dữ liệu, kiểm tra lược đồ JSON và ghi nhật ký có cấu trúc & Giữ dịch vụ gọn nhưng đủ kiểm soát đầu vào \\\hline
@@ -3258,9 +3199,7 @@ TypeScript và Go + Gin.
 \textbf{Tiêu chí} & \textbf{Node.js + Express.js + TypeScript} & \textbf{NestJS + TypeScript} & \textbf{Go + Gin} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mức dùng chung ngôn ngữ với MQTT Bridge và frontend & Cùng Node.js/TypeScript & Cùng TypeScript nhưng khuôn kiến trúc nặng hơn & Khác ngôn ngữ so với phần còn lại \\\hline
 Tổ chức tuyến API và tài liệu OpenAPI & Gọn, dễ ghép OpenAPI & Rõ khuôn, hỗ trợ tốt & Làm được nhưng phải ghép thêm công cụ \\\hline
@@ -3290,9 +3229,7 @@ xử lý nghiệp vụ tới phản hồi cho giao diện.
 \textbf{Thành phần} & \textbf{Phương án chốt} & \textbf{Vai trò trong hệ thống} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Nền tảng triển khai & Node.js + Express.js + TypeScript & Tổ chức API và xử lý nghiệp vụ theo cách gọn \\\hline
 Giao tiếp chính & HTTP/REST API, tài liệu OpenAPI và kênh cập nhật theo thời gian thực (WebSocket/Socket.IO) & Phục vụ truy vấn và đẩy cập nhật gần thời gian thực \\\hline
@@ -3325,9 +3262,7 @@ chỉ dùng ứng dụng di động; hoặc phát triển ứng dụng desktop c
 \textbf{Tiêu chí} & \textbf{Giao diện web} & \textbf{Ứng dụng di động là chính} & \textbf{Ứng dụng desktop chuyên dụng} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Khả năng hiển thị đồng thời bản đồ, danh sách xe và cảnh báo & Màn hình lớn qua trình duyệt, phù hợp màn hình tổng quan & Màn hình nhỏ, thường phải chuyển qua nhiều màn & Màn hình lớn nhưng phải cài ứng dụng riêng \\\hline
 Cách phát hành cho nhiều người vận hành & Dùng chung qua URL & Phải cài hoặc phát hành ứng dụng & Phải cài trên từng máy trạm \\\hline
@@ -3362,9 +3297,7 @@ TypeScript.
 \textbf{Tiêu chí} & \textbf{Vite + React} & \textbf{Nuxt (Vue)} & \textbf{Next.js + React + TypeScript} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Tổ chức khung ứng dụng quản trị nhiều màn hình & Gọn nhưng phải tự ghép thêm nhiều phần & Rõ ràng theo hệ Vue & Thuận lợi cho ứng dụng quản trị có nhiều mô-đun \\\hline
 Ghép REST API và kênh cập nhật theo thời gian thực (WebSocket/Socket.IO) & Làm được & Làm được & Thuận lợi, khớp với hệ React và thư viện giao tiếp thời gian thực phổ biến \\\hline
@@ -3394,9 +3327,7 @@ tin thô từ thiết bị.
 \textbf{Thành phần} & \textbf{Phương án chốt} & \textbf{Vai trò trong hệ thống} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Nền tảng triển khai & Next.js + React + TypeScript & Dựng giao diện web quản trị cho người vận hành \\\hline
 Kênh dữ liệu & HTTP/REST API và WebSocket/Socket.IO & Nhận dữ liệu lịch sử và cập nhật gần thời gian thực \\\hline
@@ -3449,9 +3380,7 @@ nhanh, không phù hợp với quy mô nguyên mẫu.
 \textbf{Tiêu chí} & \textbf{Cài trực tiếp trên hệ điều hành} & \textbf{Máy ảo cho từng nhóm dịch vụ} & \textbf{Container Docker} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mức nhất quán giữa máy phát triển và máy chủ thử nghiệm & Dễ lệch do phụ thuộc cài trực tiếp & Tốt hơn nhưng phải duy trì nhiều hệ điều hành khách & Giữ môi trường chạy lặp lại theo ảnh đóng gói dịch vụ (image) \\\hline
 Mức tách biệt phụ thuộc giữa các dịch vụ & Thấp & Cao & Đủ rõ cho từng dịch vụ \\\hline
@@ -3482,9 +3411,7 @@ dễ thay thế hơn.
 \textbf{Nội dung} & \textbf{Phương án chốt} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Đơn vị đóng gói & Mỗi dịch vụ chính là một container riêng & Giữ ranh giới rõ giữa broker, MQTT Bridge, backend, frontend và lưu trữ \\\hline
 Điều phối cục bộ & Dùng Docker Compose để nhóm các container liên quan & Khởi động, dừng và cập nhật theo từng nhóm dịch vụ \\\hline
@@ -3526,9 +3453,7 @@ khai gắn trực tiếp với kho mã nguồn trên GitHub.
 \textbf{Tiêu chí} & \textbf{Triển khai thủ công qua SSH} & \textbf{Máy chủ CI/CD tự quản} & \textbf{GitHub Actions} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mức phụ thuộc vào thao tác thủ công & Cao & Thấp & Thấp \\\hline
 Khả năng gắn kiểm tra chất lượng trước khi triển khai & Phụ thuộc người vận hành tự thực hiện & Làm được & Làm được \\\hline
@@ -3560,9 +3485,7 @@ hợp hơn với quy mô và mục tiêu của đồ án.
 \textbf{Nội dung} & \textbf{Phương án chốt} & \textbf{Ý nghĩa trong thiết kế} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Sự kiện kích hoạt & Kích hoạt khi dịch vụ có thay đổi hoặc khi người vận hành yêu cầu & Giảm triển khai thừa và giữ quyền chủ động khi cần \\\hline
 Bước trước triển khai & Kiểm tra mã nguồn, kiểu dữ liệu, kiểm thử và dựng bản phát hành & Chặn lỗi sớm trước khi cập nhật môi trường thử nghiệm trên cloud VPS \\\hline
@@ -3598,9 +3521,7 @@ mại hoàn chỉnh.
 \textbf{Tiêu chí} & \textbf{Thiết bị định vị cơ bản} & \textbf{Hệ thống IoT tự thiết kế} & \textbf{Nền tảng thương mại hoàn chỉnh} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Phạm vi dữ liệu thu được & Chủ yếu vị trí và trạng thái cơ bản & Vị trí, OBD2 cơ bản, nguồn, rung động và trạng thái thiết bị & Rộng hơn nhưng phụ thuộc gói dịch vụ \\\hline
 Khả năng phát hiện bất thường khi xe đỗ & Hạn chế & Có nhờ cảm biến gia tốc, quản lý nguồn và cảnh báo sự kiện & Có ở một số hệ thống \\\hline
@@ -3632,9 +3553,7 @@ phân vai và frontend hiển thị thông tin vận hành.
 \textbf{Yêu cầu / ràng buộc} & \textbf{Quyết định thiết kế liên quan} & \textbf{Cách kiểm chứng ở Chương 4} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Theo dõi vị trí và hành trình & SIM7600CE-T, MQTT, EMQX, lưu dữ liệu theo thời gian và bản đồ web & Kiểm tra bản tin vị trí, cập nhật bản đồ và truy xuất lịch sử \\\hline
 Đọc trạng thái vận hành cơ bản & ESP32-S3 kết nối vgate iCar Pro BLE & Kiểm tra kết nối OBD2 và dữ liệu đọc được trên xe thử \\\hline
@@ -3677,9 +3596,7 @@ mở rộng thử nghiệm.
 \textbf{Tầng / khối} & \textbf{Phương án chốt} & \textbf{Vai trò trong hệ thống} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Thiết bị trên xe & ESP32-S3, SIM7600CE-T, vgate iCar Pro BLE, LIS3DH, nguồn đa nhánh, TP5100, pin 18650 1S và ADC đo nguồn & Thu thập vị trí, OBD2 cơ bản, chuyển động, trạng thái nguồn và gửi dữ liệu \\\hline
 Firmware & ESP-IDF + FreeRTOS, máy trạng thái trung tâm, quản lý nguồn, lưu cấu hình, ngủ sâu và OTA & Điều phối thiết bị theo trạng thái chạy, đỗ, cảnh báo và cập nhật firmware từ xa \\\hline
@@ -3753,9 +3670,7 @@ giữa thiết kế mạch và firmware.
 \textbf{Hạng mục thiết kế} & \textbf{Kết quả triển khai} & \textbf{Ý nghĩa đối với chỉ tiêu phần cứng} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Sơ đồ nguyên lý theo khối & Đã hoàn thiện sơ đồ cho khối xử lý, modem, nguồn, cảm biến và lưu trữ cục bộ & Bảo đảm thiết bị có thể tích hợp đầy đủ chức năng trên cùng một bo mạch \\\hline
 Bảng mạch in PCB & Đã hoàn thiện bố trí PCB chuyên dụng phục vụ gia công nguyên mẫu & Đáp ứng yêu cầu nhỏ gọn để lắp đặt trên xe thật \\\hline
@@ -3791,9 +3706,7 @@ không dây với thiết bị.
 \textbf{Hạng mục tích hợp} & \textbf{Kết quả đạt được} & \textbf{Mức độ hoàn thành} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Khối nguồn và bảo vệ & Các nhánh nguồn chính, nguồn logic và nguồn dự phòng đã được lắp ráp đầy đủ & Hoàn thành \\\hline
 Khối modem 4G/GNSS & Đã tích hợp modem SIM7600CE-T cho kết nối dữ liệu và định vị & Hoàn thành \\\hline
@@ -3831,9 +3744,7 @@ năng nghiệp vụ và lớp điều phối được giữ rõ ràng.
 \textbf{Nhóm mô-đun} & \textbf{Thành phần tiêu biểu} & \textbf{Vai trò trong hệ thống} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Nền tảng phần cứng & \thesisterm{platform-board-esp32s3}, \thesisterm{platform-hal-esp-idf} & Khởi tạo bo mạch, GPIO, ADC, UART, I2C, SPI, SDMMC và các dịch vụ nền \\\hline
 Bộ thích nghi ngoại vi & \thesisterm{adapter-modem-sim7600-at}, \thesisterm{adapter-mqtt-sim7600-at}, \thesisterm{adapter-ble-obd-nimble}, \thesisterm{adapter-rtc-ds3231m}, \thesisterm{adapter-storage-sdmmc-fatfs}, \thesisterm{adapter-kv-nvs} & Điều khiển modem, MQTT, BLE OBD2, đồng hồ thời gian thực, microSD và bộ nhớ cấu hình \\\hline
@@ -3875,9 +3786,7 @@ hỗ trợ cập nhật firmware từ xa.
 \textbf{Nhóm chức năng cốt lõi} & \textbf{Kết quả triển khai} & \textbf{Liên hệ với chỉ tiêu firmware} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Khởi động và điều phối trạng thái & Nạp cấu hình, nhận biết nguyên nhân đánh thức, điều phối trạng thái thiết bị, trạng thái di chuyển và trạng thái OBD & Đáp ứng yêu cầu quản lý nhiều trạng thái vận hành \\\hline
 Kết nối modem, GNSS và MQTT & Điều khiển SIM7600CE-T, thiết lập 4G, lấy dữ liệu GNSS và truyền bản tin MQTT theo cây topic đã chuẩn hóa & Đáp ứng yêu cầu thu thập, đóng gói và gửi dữ liệu cần thiết \\\hline
@@ -3908,9 +3817,7 @@ và các nhóm mã lỗi DTC nêu trong các bảng sau.
 \textbf{Chế độ/}\newline\textbf{PID} & \textbf{Thông số} & \textbf{Ý nghĩa sử dụng trong hệ thống} & \textbf{Cách biểu diễn trong dữ liệu} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 \thesisterm{01\ 01} & Trạng thái giám sát, đèn MIL và số lượng DTC & Xác định xe đang có cờ lỗi động cơ hay không, đồng thời lấy ảnh chụp trạng thái readiness & \thesisterm{mil\_on}, \thesisterm{reported\_dtc\_count}, \thesisterm{readiness.*} \\\hline
 \thesisterm{01\ 0C} & Vòng tua động cơ & Hỗ trợ suy luận trạng thái đánh lửa và trạng thái vận hành thực của xe & \thesisterm{diagnostics.signals.}\newline\thesisterm{rpm} \\\hline
@@ -3934,9 +3841,7 @@ và các nhóm mã lỗi DTC nêu trong các bảng sau.
 \textbf{Nhóm DTC} & \textbf{Chế độ đọc} & \textbf{Ý nghĩa} & \textbf{Ví dụ minh họa} & \textbf{Cách trình bày trên hệ thống} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 DTC đang lưu & \thesisterm{03} & Các mã lỗi hiện đang được ECU lưu giữ, phản ánh lỗi đã được xác nhận & \thesisterm{P0500} & Mảng \thesisterm{dtc.stored} trong payload MQTT và giao diện chi tiết thiết bị \\\hline
 DTC chờ xác nhận & \thesisterm{07} & Các mã lỗi mới xuất hiện, chưa đủ điều kiện để xác nhận là lỗi ổn định & \thesisterm{P0171} & Mảng \thesisterm{dtc.pending} để hỗ trợ theo dõi xu hướng phát sinh lỗi \\\hline
@@ -3982,9 +3887,7 @@ trữ, lớp xử lý nghiệp vụ và lớp giao diện quản trị.
 \textbf{Dịch vụ} & \textbf{Vai trò chính} & \textbf{Kết quả triển khai} & \textbf{Trạng thái} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 PostgreSQL/\newline PostGIS & Lưu dữ liệu nghiệp vụ, dữ liệu quan hệ và dữ liệu không gian & Đã triển khai và khởi tạo đầy đủ lược đồ dữ liệu của hệ thống & Hoàn thành \\\hline
 EMQX & Tiếp nhận kết nối MQTT từ thiết bị và phân phối bản tin & Đã triển khai làm broker trung tâm của hệ thống & Hoàn thành \\\hline
@@ -4019,9 +3922,7 @@ và tiến trình cập nhật firmware.
 \textbf{Topic} & \textbf{Hướng truyền} & \textbf{QoS} & \textbf{Nội dung chính} & \textbf{Ghi chú triển khai} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 \thesisterm{v1/}\newline\thesisterm{\{device\_id\}/}\newline\thesisterm{rawdata} & Thiết bị -\textgreater{} máy chủ & \thesisterm{0} & Bản tin dữ liệu đo từ xa chính: GNSS, điện áp, trạng thái và mẫu OBD tức thời & Tần suất cao, ưu tiên giảm tải đường truyền \\\hline
 \thesisterm{v1/}\newline\thesisterm{\{device\_id\}/}\newline\thesisterm{status} & Thiết bị -\textgreater{} máy chủ & \thesisterm{1} & Heartbeat, trạng thái phiên và trạng thái thiết bị & Hạn chế mất bản tin vì dùng cho theo dõi thiết bị online/offline \\\hline
@@ -4038,34 +3939,53 @@ và tiến trình cập nhật firmware.
 \FunctionTok{\{}
   \DataTypeTok{"device\_id"}\FunctionTok{:} \StringTok{"TRACKER\_001"}\FunctionTok{,}
   \DataTypeTok{"auth\_token"}\FunctionTok{:} \StringTok{"token\_demo"}\FunctionTok{,}
-  \DataTypeTok{"timestamp"}\FunctionTok{:} \DecValTok{1710000000000}\FunctionTok{,}
+  \DataTypeTok{"timestamp"}\FunctionTok{:} \DecValTok{1777104000000}\FunctionTok{,}
+  \DataTypeTok{"timestamp\_trusted"}\FunctionTok{:} \KeywordTok{true}\FunctionTok{,}
   \DataTypeTok{"uptime"}\FunctionTok{:} \DecValTok{452130}\FunctionTok{,}
   \DataTypeTok{"data"}\FunctionTok{:} \FunctionTok{\{}
-    \DataTypeTok{"latitude"}\FunctionTok{:} \FloatTok{10.823371}\FunctionTok{,}
-    \DataTypeTok{"longitude"}\FunctionTok{:} \FloatTok{106.740750}\FunctionTok{,}
-    \DataTypeTok{"speed"}\FunctionTok{:} \FloatTok{67.13}\FunctionTok{,}
-    \DataTypeTok{"course"}\FunctionTok{:} \FloatTok{320.22}\FunctionTok{,}
+    \DataTypeTok{"latitude"}\FunctionTok{:} \FloatTok{10.775843}\FunctionTok{,}
+    \DataTypeTok{"longitude"}\FunctionTok{:} \FloatTok{106.700981}\FunctionTok{,}
+    \DataTypeTok{"speed"}\FunctionTok{:} \FloatTok{42.5}\FunctionTok{,}
+    \DataTypeTok{"course"}\FunctionTok{:} \FloatTok{158.4}\FunctionTok{,}
     \DataTypeTok{"satellites"}\FunctionTok{:} \DecValTok{11}\FunctionTok{,}
-    \DataTypeTok{"battery\_top"}\FunctionTok{:} \FloatTok{12.54}\FunctionTok{,}
-    \DataTypeTok{"battery\_bot"}\FunctionTok{:} \FloatTok{3.96}\FunctionTok{,}
+    \DataTypeTok{"battery\_top"}\FunctionTok{:} \FloatTok{12.48}\FunctionTok{,}
+    \DataTypeTok{"battery\_bot"}\FunctionTok{:} \FloatTok{4.08}\FunctionTok{,}
     \DataTypeTok{"ignition"}\FunctionTok{:} \KeywordTok{true}\FunctionTok{,}
-    \DataTypeTok{"vibration"}\FunctionTok{:} \FloatTok{0.63}\FunctionTok{,}
+    \DataTypeTok{"vibration"}\FunctionTok{:} \FloatTok{1.2}\FunctionTok{,}
     \DataTypeTok{"error\_code"}\FunctionTok{:} \DecValTok{0}
   \FunctionTok{\},}
   \DataTypeTok{"diagnostics"}\FunctionTok{:} \FunctionTok{\{}
+    \DataTypeTok{"channel"}\FunctionTok{:} \FunctionTok{\{}
+      \DataTypeTok{"ble\_obd\_connected"}\FunctionTok{:} \KeywordTok{true}\FunctionTok{,}
+      \DataTypeTok{"elm\_ready"}\FunctionTok{:} \KeywordTok{true}\FunctionTok{,}
+      \DataTypeTok{"ecu\_state"}\FunctionTok{:} \StringTok{"connected"}\FunctionTok{,}
+      \DataTypeTok{"poll\_interval\_ms"}\FunctionTok{:} \DecValTok{1200}\FunctionTok{,}
+      \DataTypeTok{"connect\_fail\_count\_5m"}\FunctionTok{:} \DecValTok{0}
+    \FunctionTok{\},}
     \DataTypeTok{"signals"}\FunctionTok{:} \FunctionTok{\{}
       \DataTypeTok{"rpm"}\FunctionTok{:} \DecValTok{2450}\FunctionTok{,}
-      \DataTypeTok{"obd\_speed\_kph"}\FunctionTok{:} \DecValTok{67}\FunctionTok{,}
+      \DataTypeTok{"obd\_speed\_kph"}\FunctionTok{:} \DecValTok{42}\FunctionTok{,}
       \DataTypeTok{"coolant\_c"}\FunctionTok{:} \DecValTok{86}\FunctionTok{,}
       \DataTypeTok{"fuel\_level\_pct"}\FunctionTok{:} \DecValTok{54}\FunctionTok{,}
       \DataTypeTok{"engine\_load\_pct"}\FunctionTok{:} \DecValTok{31}
     \FunctionTok{\},}
+    \DataTypeTok{"quality"}\FunctionTok{:} \FunctionTok{\{}
+      \DataTypeTok{"sample\_age\_ms"}\FunctionTok{:} \DecValTok{850}\FunctionTok{,}
+      \DataTypeTok{"missing\_signals"}\FunctionTok{:} \OtherTok{[]}
+    \FunctionTok{\},}
+    \DataTypeTok{"events"}\FunctionTok{:} \OtherTok{[]}\FunctionTok{,}
     \DataTypeTok{"mil\_on"}\FunctionTok{:} \KeywordTok{false}\FunctionTok{,}
-    \DataTypeTok{"reported\_dtc\_count"}\FunctionTok{:} \DecValTok{1}\FunctionTok{,}
+    \DataTypeTok{"reported\_dtc\_count"}\FunctionTok{:} \DecValTok{0}\FunctionTok{,}
+    \DataTypeTok{"readiness"}\FunctionTok{:} \FunctionTok{\{}
+      \DataTypeTok{"misfire"}\FunctionTok{:} \StringTok{"complete"}\FunctionTok{,}
+      \DataTypeTok{"fuel\_system"}\FunctionTok{:} \StringTok{"complete"}\FunctionTok{,}
+      \DataTypeTok{"comprehensive\_components"}\FunctionTok{:} \StringTok{"complete"}\FunctionTok{,}
+      \DataTypeTok{"catalyst"}\FunctionTok{:} \StringTok{"unsupported"}
+    \FunctionTok{\},}
     \DataTypeTok{"dtc"}\FunctionTok{:} \FunctionTok{\{}
-      \DataTypeTok{"stored"}\FunctionTok{:} \OtherTok{[}\StringTok{"P0500"}\OtherTok{]}\FunctionTok{,}
+      \DataTypeTok{"stored"}\FunctionTok{:} \OtherTok{[]}\FunctionTok{,}
       \DataTypeTok{"pending"}\FunctionTok{:} \OtherTok{[]}\FunctionTok{,}
-      \DataTypeTok{"permanent"}\FunctionTok{:} \OtherTok{[}\StringTok{"P0171"}\OtherTok{]}
+      \DataTypeTok{"permanent"}\FunctionTok{:} \OtherTok{[]}
     \FunctionTok{\}}
   \FunctionTok{\},}
   \DataTypeTok{"state"}\FunctionTok{:} \FunctionTok{\{}
@@ -4074,6 +3994,15 @@ và tiến trình cập nhật firmware.
     \DataTypeTok{"vehicle\_state"}\FunctionTok{:} \StringTok{"MOVING\_ON"}\FunctionTok{,}
     \DataTypeTok{"device\_state"}\FunctionTok{:} \StringTok{"ACTIVE"}\FunctionTok{,}
     \DataTypeTok{"sleep\_mode"}\FunctionTok{:} \StringTok{"NONE"}
+  \FunctionTok{\},}
+  \DataTypeTok{"device\_alerts"}\FunctionTok{:} \OtherTok{[]}\FunctionTok{,}
+  \DataTypeTok{"ecu\_alerts"}\FunctionTok{:} \OtherTok{[]}\FunctionTok{,}
+  \DataTypeTok{"metadata"}\FunctionTok{:} \FunctionTok{\{}
+    \DataTypeTok{"schema\_version"}\FunctionTok{:} \StringTok{"v1.5.0"}\FunctionTok{,}
+    \DataTypeTok{"message\_id"}\FunctionTok{:} \StringTok{"b5b5c5a0{-}77b4{-}4c8e{-}a902{-}bcc5410f7c01"}\FunctionTok{,}
+    \DataTypeTok{"sent\_at"}\FunctionTok{:} \DecValTok{1777104000000}\FunctionTok{,}
+    \DataTypeTok{"seq\_no"}\FunctionTok{:} \DecValTok{1284}\FunctionTok{,}
+    \DataTypeTok{"boot\_id"}\FunctionTok{:} \StringTok{"boot{-}20260425{-}001"}
   \FunctionTok{\}}
 \FunctionTok{\}}
 \end{Highlighting}
@@ -4086,15 +4015,25 @@ và tiến trình cập nhật firmware.
 \FunctionTok{\{}
   \DataTypeTok{"device\_id"}\FunctionTok{:} \StringTok{"TRACKER\_001"}\FunctionTok{,}
   \DataTypeTok{"auth\_token"}\FunctionTok{:} \StringTok{"token\_demo"}\FunctionTok{,}
-  \DataTypeTok{"status"}\FunctionTok{:} \StringTok{"running"}\FunctionTok{,}
+  \DataTypeTok{"status"}\FunctionTok{:} \StringTok{"heartbeat"}\FunctionTok{,}
   \DataTypeTok{"session\_id"}\FunctionTok{:} \DecValTok{1024}\FunctionTok{,}
-  \DataTypeTok{"timestamp"}\FunctionTok{:} \DecValTok{1710000005123}\FunctionTok{,}
+  \DataTypeTok{"timestamp"}\FunctionTok{:} \DecValTok{1777104005000}\FunctionTok{,}
+  \DataTypeTok{"timestamp\_trusted"}\FunctionTok{:} \KeywordTok{true}\FunctionTok{,}
   \DataTypeTok{"state"}\FunctionTok{:} \FunctionTok{\{}
     \DataTypeTok{"ignition\_state"}\FunctionTok{:} \StringTok{"ON"}\FunctionTok{,}
     \DataTypeTok{"motion\_state"}\FunctionTok{:} \StringTok{"MOVING"}\FunctionTok{,}
     \DataTypeTok{"vehicle\_state"}\FunctionTok{:} \StringTok{"MOVING\_ON"}\FunctionTok{,}
     \DataTypeTok{"device\_state"}\FunctionTok{:} \StringTok{"ACTIVE"}\FunctionTok{,}
     \DataTypeTok{"sleep\_mode"}\FunctionTok{:} \StringTok{"NONE"}
+  \FunctionTok{\},}
+  \DataTypeTok{"device\_alerts"}\FunctionTok{:} \OtherTok{[]}\FunctionTok{,}
+  \DataTypeTok{"ecu\_alerts"}\FunctionTok{:} \OtherTok{[]}\FunctionTok{,}
+  \DataTypeTok{"metadata"}\FunctionTok{:} \FunctionTok{\{}
+    \DataTypeTok{"schema\_version"}\FunctionTok{:} \StringTok{"v1.5.0"}\FunctionTok{,}
+    \DataTypeTok{"message\_id"}\FunctionTok{:} \StringTok{"51a69dc4{-}69d2{-}4c99{-}9ac1{-}fb4b8bff72d8"}\FunctionTok{,}
+    \DataTypeTok{"sent\_at"}\FunctionTok{:} \DecValTok{1777104005000}\FunctionTok{,}
+    \DataTypeTok{"seq\_no"}\FunctionTok{:} \DecValTok{1285}\FunctionTok{,}
+    \DataTypeTok{"boot\_id"}\FunctionTok{:} \StringTok{"boot{-}20260425{-}001"}
   \FunctionTok{\}}
 \FunctionTok{\}}
 \end{Highlighting}
@@ -4109,8 +4048,16 @@ và tiến trình cập nhật firmware.
   \DataTypeTok{"auth\_token"}\FunctionTok{:} \StringTok{"token\_demo"}\FunctionTok{,}
   \DataTypeTok{"event\_type"}\FunctionTok{:} \StringTok{"warning"}\FunctionTok{,}
   \DataTypeTok{"code"}\FunctionTok{:} \DecValTok{201}\FunctionTok{,}
-  \DataTypeTok{"message"}\FunctionTok{:} \StringTok{"Vehicle movement detected while parked"}\FunctionTok{,}
-  \DataTypeTok{"timestamp"}\FunctionTok{:} \DecValTok{1710000009000}
+  \DataTypeTok{"message"}\FunctionTok{:} \StringTok{"Movement detected while ignition is off"}\FunctionTok{,}
+  \DataTypeTok{"timestamp"}\FunctionTok{:} \DecValTok{1777104009000}\FunctionTok{,}
+  \DataTypeTok{"timestamp\_trusted"}\FunctionTok{:} \KeywordTok{true}\FunctionTok{,}
+  \DataTypeTok{"metadata"}\FunctionTok{:} \FunctionTok{\{}
+    \DataTypeTok{"schema\_version"}\FunctionTok{:} \StringTok{"v1.0.0"}\FunctionTok{,}
+    \DataTypeTok{"message\_id"}\FunctionTok{:} \StringTok{"151af4fd{-}e960{-}4743{-}9130{-}ded2a3c0e37c"}\FunctionTok{,}
+    \DataTypeTok{"sent\_at"}\FunctionTok{:} \DecValTok{1777104009000}\FunctionTok{,}
+    \DataTypeTok{"seq\_no"}\FunctionTok{:} \DecValTok{1286}\FunctionTok{,}
+    \DataTypeTok{"boot\_id"}\FunctionTok{:} \StringTok{"boot{-}20260425{-}001"}
+  \FunctionTok{\}}
 \FunctionTok{\}}
 \end{Highlighting}
 \end{Shaded}
@@ -4122,12 +4069,61 @@ và tiến trình cập nhật firmware.
 \FunctionTok{\{}
   \DataTypeTok{"device\_id"}\FunctionTok{:} \StringTok{"TRACKER\_001"}\FunctionTok{,}
   \DataTypeTok{"auth\_token"}\FunctionTok{:} \StringTok{"token\_demo"}\FunctionTok{,}
-  \DataTypeTok{"jobId"}\FunctionTok{:} \StringTok{"ota\_1710000000\_ab12cd"}\FunctionTok{,}
-  \DataTypeTok{"status"}\FunctionTok{:} \StringTok{"confirming"}\FunctionTok{,}
-  \DataTypeTok{"progress"}\FunctionTok{:} \DecValTok{99}\FunctionTok{,}
-  \DataTypeTok{"targetVersion"}\FunctionTok{:} \StringTok{"v2.3.1"}\FunctionTok{,}
-  \DataTypeTok{"currentVersion"}\FunctionTok{:} \StringTok{"v2.3.0"}\FunctionTok{,}
-  \DataTypeTok{"partition"}\FunctionTok{:} \StringTok{"ota\_0"}
+  \DataTypeTok{"jobId"}\FunctionTok{:} \StringTok{"ota\_1777104000\_ab12cd"}\FunctionTok{,}
+  \DataTypeTok{"status"}\FunctionTok{:} \StringTok{"installing"}\FunctionTok{,}
+  \DataTypeTok{"progress"}\FunctionTok{:} \DecValTok{64}\FunctionTok{,}
+  \DataTypeTok{"targetVersion"}\FunctionTok{:} \StringTok{"v2.4.0"}\FunctionTok{,}
+  \DataTypeTok{"currentVersion"}\FunctionTok{:} \StringTok{"v2.3.1"}\FunctionTok{,}
+  \DataTypeTok{"partition"}\FunctionTok{:} \StringTok{"ota\_0"}\FunctionTok{,}
+  \DataTypeTok{"timestamp"}\FunctionTok{:} \DecValTok{1777104015000}\FunctionTok{,}
+  \DataTypeTok{"timestamp\_trusted"}\FunctionTok{:} \KeywordTok{true}\FunctionTok{,}
+  \DataTypeTok{"metadata"}\FunctionTok{:} \FunctionTok{\{}
+    \DataTypeTok{"schema\_version"}\FunctionTok{:} \StringTok{"v1.0.0"}\FunctionTok{,}
+    \DataTypeTok{"message\_id"}\FunctionTok{:} \StringTok{"fc4e6bda{-}fac7{-}46df{-}8d77{-}5e38e370e613"}\FunctionTok{,}
+    \DataTypeTok{"sent\_at"}\FunctionTok{:} \DecValTok{1777104015000}\FunctionTok{,}
+    \DataTypeTok{"seq\_no"}\FunctionTok{:} \DecValTok{1287}\FunctionTok{,}
+    \DataTypeTok{"boot\_id"}\FunctionTok{:} \StringTok{"boot{-}20260425{-}001"}
+  \FunctionTok{\}}
+\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Mẫu lệnh từ backend gửi về topic \thesisterm{commands}}
+
+Lệnh cập nhật cấu hình runtime:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}
+  \DataTypeTok{"command"}\FunctionTok{:} \StringTok{"update\_config"}\FunctionTok{,}
+  \DataTypeTok{"params"}\FunctionTok{:} \FunctionTok{\{}
+    \DataTypeTok{"tracking\_interval\_s"}\FunctionTok{:} \DecValTok{30}\FunctionTok{,}
+    \DataTypeTok{"heartbeat\_interval\_s"}\FunctionTok{:} \DecValTok{300}\FunctionTok{,}
+    \DataTypeTok{"alarm\_interval\_s"}\FunctionTok{:} \DecValTok{15}\FunctionTok{,}
+    \DataTypeTok{"sleep\_enabled"}\FunctionTok{:} \KeywordTok{true}\FunctionTok{,}
+    \DataTypeTok{"imu\_wakeup\_enabled"}\FunctionTok{:} \KeywordTok{true}\FunctionTok{,}
+    \DataTypeTok{"ota\_min\_battery\_mv"}\FunctionTok{:} \DecValTok{3700}
+  \FunctionTok{\}}
+\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Lệnh cập nhật firmware OTA:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}
+  \DataTypeTok{"command"}\FunctionTok{:} \StringTok{"ota\_update"}\FunctionTok{,}
+  \DataTypeTok{"params"}\FunctionTok{:} \FunctionTok{\{}
+    \DataTypeTok{"jobId"}\FunctionTok{:} \StringTok{"ota\_1777104000\_ab12cd"}\FunctionTok{,}
+    \DataTypeTok{"version"}\FunctionTok{:} \StringTok{"v2.4.0"}\FunctionTok{,}
+    \DataTypeTok{"url"}\FunctionTok{:} \StringTok{"https://api.thingdock.dev/api/v1/firmware/12/download"}\FunctionTok{,}
+    \DataTypeTok{"size"}\FunctionTok{:} \DecValTok{1048576}\FunctionTok{,}
+    \DataTypeTok{"sha256"}\FunctionTok{:}
+      \StringTok{"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}\FunctionTok{,}
+    \DataTypeTok{"force"}\FunctionTok{:} \KeywordTok{false}\FunctionTok{,}
+    \DataTypeTok{"confirmTimeoutSec"}\FunctionTok{:} \DecValTok{180}
+  \FunctionTok{\}}
 \FunctionTok{\}}
 \end{Highlighting}
 \end{Shaded}
@@ -4138,12 +4134,12 @@ chỉ số thời gian được lưu trong VictoriaMetrics; còn VictoriaLogs ph
 vận hành và truy vết sự cố. Lược đồ PostgreSQL hiện tại bao quát đầy đủ các nhóm
 dữ liệu chính của hệ thống quản trị đội xe.
 
-{\thesissetfigureid{4.6}{condensed-hinh-4-6-minh-hoa-luoc-do-co-so-du-lieu-postgresql-dang-trien-khai}
+{\thesissetfigureid{4.6}{condensed-hinh-4-6-minh-hoa-cac-nhom-bang-chinh-trong-postgresql-dang-trien-khai}
 \begin{figure}[H]
 \centering
 \pandocbounded{\safeincludesvg{./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-14.svg}}
-\caption{Minh họa lược đồ cơ sở dữ liệu PostgreSQL đang triển khai}
-\label{fig:condensed-hinh-4-6-minh-hoa-luoc-do-co-so-du-lieu-postgresql-dang-trien-khai}
+\caption{Minh họa các nhóm bảng chính trong PostgreSQL đang triển khai}
+\label{fig:condensed-hinh-4-6-minh-hoa-cac-nhom-bang-chinh-trong-postgresql-dang-trien-khai}
 \end{figure}
 }
 
@@ -4160,9 +4156,7 @@ dữ liệu chính của hệ thống quản trị đội xe.
 \textbf{Nhóm dữ liệu} & \textbf{Bảng tiêu biểu} & \textbf{Vai trò} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Người dùng và phiên đăng nhập & \thesisterm{users}, \thesisterm{user\_sessions}, \thesisterm{user\_device\_access} & Quản lý tài khoản, phiên làm việc và quyền truy cập thiết bị \\\hline
 Thiết bị và phiên thiết bị & \thesisterm{devices}, \thesisterm{device\_sessions}, \thesisterm{device\_commands} & Lưu hồ sơ thiết bị, trạng thái hoạt động và lệnh điều khiển \\\hline
@@ -4195,9 +4189,7 @@ Bridge giúp tuyến tiếp nhận dữ liệu thiết bị không bị trộn v
 \textbf{Nhóm chức năng} & \textbf{Kết quả triển khai} & \textbf{Liên hệ với chỉ tiêu phía máy chủ} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Đăng ký topic và QoS & Đã đăng ký nhận \thesisterm{rawdata}, \thesisterm{status}, \thesisterm{events}, \thesisterm{firmware} với QoS phù hợp cho từng loại bản tin & Đáp ứng yêu cầu tiếp nhận dữ liệu liên tục với mức tin cậy phù hợp \\\hline
 Kiểm tra payload & Đã kiểm tra cấu trúc dữ liệu bằng schema và chuẩn hóa metadata trước khi ghi lưu trữ & Giảm rủi ro dữ liệu lỗi lan sang các lớp sau \\\hline
@@ -4227,9 +4219,7 @@ nghiệp vụ và đẩy cập nhật thời gian thực ra giao diện quản t
 \textbf{Nhóm chức năng} & \textbf{Nội dung đã triển khai} & \textbf{Liên hệ với chỉ tiêu máy chủ} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Xác thực và phiên đăng nhập & Đăng nhập, duy trì phiên, phân quyền và kiểm toán thao tác & Đáp ứng yêu cầu xác thực và phân quyền \\\hline
 Tổng quan dashboard và thời gian thực & Cung cấp số liệu tổng hợp, hoạt động gần đây, trạng thái thiết bị và cập nhật thời gian thực & Đáp ứng yêu cầu giám sát với độ trễ đủ thấp \\\hline
@@ -4260,9 +4250,7 @@ quan, bản đồ, thiết bị, cảnh báo, khai thác đội xe và quản tr
 \textbf{Nhóm giao diện} & \textbf{Nội dung nổi bật đã hoàn thành} & \textbf{Liên hệ với chỉ tiêu giao diện web} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Đăng nhập và trang tổng quan & Cung cấp màn hình đăng nhập, thống kê tổng hợp và trạng thái thiết bị & Đáp ứng yêu cầu quan sát nhanh trên một bề mặt thống nhất \\\hline
 Giám sát thiết bị chi tiết & Hiển thị danh sách thiết bị, trạng thái hiện thời, phiên hoạt động, bản tin dữ liệu thô, dữ liệu OBD và DTC & Đáp ứng yêu cầu theo dõi rõ trạng thái từng thiết bị \\\hline
@@ -4322,9 +4310,7 @@ VictoriaMetrics được giữ ở chế độ nội bộ để giảm bề mặ
 \textbf{Địa chỉ truy cập} & \textbf{Dịch vụ} & \textbf{Vai trò sử dụng} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 \url{https://thingdock.dev} & Frontend & Giao diện web quản trị của hệ thống \\\hline
 \url{https://api.thingdock.dev} & Backend & Điểm truy cập REST API \\\hline
@@ -4375,9 +4361,7 @@ giải pháp.
 \textbf{Hạng mục} & \textbf{Kết quả chính} & \textbf{Mức độ hoàn thành} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Thiết kế mạch và PCB & Đã hoàn thành sơ đồ nguyên lý, bố trí PCB và hồ sơ phục vụ chế tạo & Hoàn thành \\\hline
 Gia công và lắp ráp phần cứng & PCB đã được gia công, linh kiện đã được hàn lắp đầy đủ, hình thành nguyên mẫu thật & Hoàn thành \\\hline
@@ -4411,9 +4395,7 @@ giao diện đã vận hành đồng bộ.
 \textbf{Nhóm chỉ tiêu} & \textbf{Kết quả đã đạt được} & \textbf{Đánh giá} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Phần cứng & Đã hoàn thiện thiết kế mạch, PCB chuyên dụng, nguyên mẫu đã gia công và hàn lắp đầy đủ, có thể lắp đặt trên xe thật & Đạt \\\hline
 Firmware & Đã thu thập dữ liệu GNSS, dữ liệu OBD cơ bản, giám sát nguồn, quản lý trạng thái, lưu đệm ngoại tuyến và hỗ trợ OTA & Đạt \\\hline
@@ -4455,9 +4437,7 @@ hợp toàn tuyến.
 \textbf{Nhóm chức năng} & \textbf{Mức đáp ứng hiện tại} & \textbf{Giới hạn còn lại} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Phần cứng thiết bị & Nguyên mẫu phần cứng đã tích hợp đủ khối xử lý, truyền thông, cảm biến, lưu đệm cục bộ và nguồn dự phòng & Cần kiểm chứng thêm về nhiễu, nhiệt và độ bền cơ khí khi lắp dài ngày \\\hline
 Nguồn và năng lượng & Đã tách nhánh modem, đo điện áp và áp dụng cơ chế ngủ sâu theo trạng thái xe & Cần đo thêm trên nhiều loại ắc quy và nhiều chu kỳ đỗ dài \\\hline
@@ -4506,9 +4486,7 @@ cho từng thiết bị và chi phí hạ tầng dùng chung ở phía máy ch�
 \textbf{Hạng mục chi phí} & \textbf{Cách tính và thông số chính} & \textbf{Mức chi phí} & \textbf{Phạm vi áp dụng} & \textbf{Nhận xét} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Thiết bị phần cứng & Theo BOM ước tính của thiết bị & Khoảng 1.500.000 VND cho mỗi thiết bị (theo BOM) & Từng thiết bị & Là khoản đầu tư ban đầu lớn nhất của hệ thống \\\hline
 Kết nối dữ liệu di động & Gói Viettel NB-IoT Connect8, cước 8.000 VND/30 ngày, tốc độ danh nghĩa khoảng 50 Kbps chiều lên và 50 Kbps chiều xuống & Khoảng 96.000 VND/năm cho mỗi thiết bị & Từng thiết bị & Phù hợp với bản tin telemetry dung lượng nhỏ, gửi theo chu kỳ \\\hline
@@ -4568,9 +4546,7 @@ thiết bị, đường truyền và lớp khai thác.
 \textbf{Rủi ro} & \textbf{Mức ảnh hưởng} & \textbf{Biện pháp đã áp dụng} & \textbf{Hướng giảm thiểu tiếp theo} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Sụt áp khi modem truyền dữ liệu & Cao & Tách nhánh nguồn modem và logic, theo dõi điện áp bằng ADC & Đo dao động nguồn ở nhiều kịch bản tải và hoàn thiện thêm lớp bảo vệ \\\hline
 Hao ắc quy khi xe đỗ lâu & Cao & Dùng ngủ sâu, theo dõi điện áp và tắt bớt tải theo trạng thái & Kiểm thử dài ngày trên nhiều xe và nhiều điều kiện sử dụng \\\hline
@@ -4607,9 +4583,7 @@ theo mức độ ảnh hưởng đến khả năng chuyển từ nguyên mẫu s
 \textbf{Mức ưu tiên} & \textbf{Hướng phát triển} & \textbf{Mục tiêu chính} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Cao & Kiểm thử thực địa dài ngày trên nhiều xe & Xác nhận độ ổn định của nguồn, GNSS, 4G và luồng cảnh báo trong điều kiện thật \\\hline
 Cao & Hoàn thiện vỏ và quy trình lắp đặt & Giảm rủi ro cơ khí, rủi ro đấu nối và tăng tính lặp lại khi triển khai \\\hline
@@ -4647,9 +4621,7 @@ truyền thông dữ liệu, tổ chức phần mềm máy chủ và kiểm ch�
 \textbf{Nhóm kiến thức} & \textbf{Ứng dụng trong đồ án} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mạch điện tử và nguồn & Thiết kế nhánh nguồn, chọn linh kiện hạ áp, bảo vệ nguồn và đo điện áp giám sát \\\hline
 Vi điều khiển và hệ nhúng & Điều khiển ESP32-S3, tổ chức tác vụ, giao tiếp UART, I2C, BLE và chế độ ngủ sâu \\\hline
@@ -4686,9 +4658,7 @@ lẻ, mà là giải bài toán ở cấp hệ thống.
 \textbf{Vấn đề kỹ thuật} & \textbf{Cách xử lý trong đồ án} & \textbf{Bài học rút ra} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Mạch PCB phức tạp, yêu cầu nhiều tính năng và phải nhỏ gọn & Phân tách theo các khối nguồn, xử lý, modem, cảm biến và chốt ánh xạ chân ngay từ giai đoạn sơ đồ - PCB & Với thiết bị gắn trên xe, bài toán bố trí và tích hợp mạch quan trọng không kém lựa chọn linh kiện \\\hline
 Nhiều trạng thái vận hành từ trạng thái thiết bị, trạng thái di chuyển và trạng thái OBD & Tổ chức máy trạng thái trung tâm, kết hợp trạng thái nguồn, chuyển động và OBD để quyết định chu kỳ lấy mẫu, chế độ ngủ và bản tin gửi đi & Với hệ nhúng trên xe, tối ưu năng lượng phải đi cùng với mô hình trạng thái đủ chặt chẽ \\\hline
@@ -4723,9 +4693,7 @@ không phải là nội dung bổ sung sau khi hệ thống đã hoàn thiện k
 \textbf{Khía cạnh} & \textbf{Giá trị tích cực} & \textbf{Yêu cầu kiểm soát} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Quyền riêng tư dữ liệu vị trí & Giúp quản lý xe, đối chiếu hành trình và hỗ trợ xử lý sự cố & Phải giới hạn mục đích sử dụng, thời gian lưu và phạm vi truy cập \\\hline
 An toàn khi lắp đặt trên xe & Thiết bị hỗ trợ giám sát mà không can thiệp điều khiển xe & Cần bảo đảm đấu nối, cầu chì và vị trí lắp không làm phát sinh rủi ro mới \\\hline
@@ -4761,9 +4729,7 @@ chỗ toàn bộ hệ thống đã được kiểm chứng như một chỉnh th
 \textbf{Bài học} & \textbf{Ý nghĩa đối với giai đoạn tiếp theo} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Thiết kế nguồn là nền tảng của toàn hệ thống & Cần tiếp tục ưu tiên kiểm chứng nguồn trước khi mở rộng tính năng phần mềm \\\hline
 Lựa chọn thành phần phải xét theo khả năng phối hợp toàn hệ thống & Không nên tối ưu cục bộ theo một thông số riêng lẻ \\\hline
@@ -5077,9 +5043,7 @@ thể thay đổi theo thời điểm mua, số lượng đặt hàng và nhà c
 \textbf{Nhóm chi phí phần cứng} & \textbf{Thành phần đang dùng trong thiết kế} & \textbf{Trạng thái trong nội dung chính} & \textbf{Ghi chú kiểm soát chi phí} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Bộ xử lý trung tâm & ESP32-S3-WROOM-1, các chân UART, I2C, SPI, ADC, GPIO và BLE tích hợp & Đã chốt ở chương giải pháp phần cứng và chương triển khai firmware & Giữ BOM gọn vì không cần mô-đun BLE rời cho OBD2 \\\hline
 Truyền thông và định vị & SIM7600CE-T, khay SIM, anten LTE, anten GNSS và các đường điều khiển modem & Đã tích hợp với firmware, MQTT và luồng dữ liệu vị trí & Là nhóm chi phí cao, cần ưu tiên linh kiện chính hãng và nguồn ổn định \\\hline
@@ -5104,9 +5068,7 @@ và quan sát vận hành.
 \textbf{Khoản mục vận hành} & \textbf{Thành phần hiện dùng trong hệ thống} & \textbf{Xu hướng biến thiên} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Máy chủ và truy cập công khai & Máy chủ VPS trên đám mây, Docker Compose theo dịch vụ, Nginx Proxy Manager, tên miền và TLS & Tăng khi cần tách nút triển khai, tăng tài nguyên hoặc nâng mức sẵn sàng \\\hline
 Kết nối thiết bị & SIM 4G/IoT cho từng thiết bị theo dõi và lưu lượng MQTT qua LTE & Gần tỷ lệ thuận với số thiết bị và chu kỳ gửi dữ liệu \\\hline
@@ -5127,9 +5089,7 @@ theo số xe, trong khi hạ tầng thường tăng theo các ngưỡng tải v�
 \textbf{Quy mô sử dụng} & \textbf{Số thiết bị tham chiếu} & \textbf{Đặc điểm chi phí chính} & \textbf{Nhận xét} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Nguyên mẫu kỹ thuật & 1-5 & Chi phí linh kiện, PCB, dụng cụ đo và thời gian tích hợp chiếm ưu thế & Phù hợp kiểm chứng kiến trúc phần cứng, firmware và luồng bản tin MQTT \\\hline
 Thử nghiệm nội bộ & 5-20 & Chi phí thiết bị vẫn là chính, hạ tầng còn có thể giữ trên một VPS & Cần chuẩn hóa cấu hình lắp đặt, SIM và quy trình nạp firmware \\\hline
@@ -5183,9 +5143,7 @@ trọng.
 \textbf{Chuẩn/nguyên tắc} & \textbf{Phạm vi áp dụng} & \textbf{Cách hiện thực trong dự án} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 SAE J1979 / ISO 15031-5 & Dữ liệu OBD2 & Chọn nhóm PID cốt lõi, chuẩn hóa đơn vị đo và xử lý DTC cơ bản \\\hline
 Bộ lệnh ELM327 qua BLE & Bộ chuyển đổi OBD2 qua BLE & Firmware gửi lệnh đọc PID qua bộ chuyển đổi thương mại thay vì đấu trực tiếp vào bus xe \\\hline
@@ -5208,9 +5166,7 @@ Nguyên tắc đặc quyền tối thiểu & Bảo mật hệ thống & Giới h
 \textbf{ID} & \textbf{Chuẩn/nguyên tắc} & \textbf{Thành phần áp dụng} & \textbf{Cách kiểm chứng trong vận hành} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 S-01 & SAE J1979 / ISO 15031-5 & Bộ giải mã OBD2 & Đối chiếu PID trả về với đơn vị đo, miền giá trị và mô tả trong tài liệu \\\hline
 S-02 & Bộ lệnh ELM327 qua BLE & Bộ chuyển đổi OBD2 qua BLE và firmware & Kiểm tra kết nối BLE, lệnh đọc PID và cơ chế tự kết nối lại \\\hline
@@ -5251,9 +5207,7 @@ trường kiểm thử sớm cho từng lớp.
 \textbf{Giai đoạn} & \textbf{Nội dung chính} & \textbf{Thời gian tham chiếu} & \textbf{Đầu ra chốt} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 GĐ1 & Khảo sát yêu cầu và kiến trúc tổng thể & Tuần 1--3 & Phạm vi, chỉ tiêu nghiệm thu, sơ đồ luồng dữ liệu và lựa chọn công nghệ chính \\\hline
 GĐ2 & Thiết kế phần cứng, nguồn và PCB & Tuần 3--7 & Cấu hình ESP32-S3, SIM7600CE-T, OBD2 BLE, LIS3DH, DS3231M, lưu đệm và nguồn đa nhánh \\\hline
@@ -5265,6 +5219,15 @@ GĐ7 & Hoàn thiện đánh giá và báo cáo & Tuần 21--24 & Báo cáo rút 
 \end{longtable}
 }
 
+{\thesissetfigureid{PL-3.1}{condensed-hinh-pl-3-1-ke-hoach-thuc-hien-du-an-theo-giai-doan-24-tuan}
+\begin{figure}[H]
+\centering
+\pandocbounded{\safeincludesvg{./assets/figures/14-phu-luc-hinh-pl-3-1.svg}}
+\caption{Kế hoạch thực hiện dự án theo giai đoạn (24 tuần)}
+\label{fig:condensed-hinh-pl-3-1-ke-hoach-thuc-hien-du-an-theo-giai-doan-24-tuan}
+\end{figure}
+}
+
 \subsection{3.2. Điều kiện chuyển giai đoạn}\label{app3-phase-gates-cap-nhat}
 
 {\def\LTcaptype{none} % do not increment counter
@@ -5273,9 +5236,7 @@ GĐ7 & Hoàn thiện đánh giá và báo cáo & Tuần 21--24 & Báo cáo rút 
 \textbf{Luồng công việc} & \textbf{Điều kiện chốt} & \textbf{Minh chứng cần có} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Phần cứng và nguồn & Các đường 5 V, 3,3 V, khoảng 4 V cho modem và nhánh dự phòng được mô tả nhất quán & Sơ đồ kết nối, bảng chọn linh kiện và ghi chú kiểm tra nguồn \\\hline
 Firmware thiết bị & Thiết bị điều phối được modem, GNSS, OBD2 qua BLE, cảm biến, lưu đệm và gửi bản tin MQTT & Nhật ký khởi động, nhật ký đọc dữ liệu, nhật ký gửi bản tin và trạng thái OTA \\\hline
@@ -5294,9 +5255,7 @@ Báo cáo và phụ lục & Nội dung, hình, bảng và thuật ngữ khớp v
 \textbf{Mốc} & \textbf{Đầu ra chính} & \textbf{Tiêu chí nghiệm thu} & \textbf{Rủi ro theo dõi} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 M1 & Kiến trúc và yêu cầu & Chốt mục tiêu, luồng dữ liệu, thành phần và chỉ tiêu đo & Phạm vi lan rộng hoặc thiếu chỉ tiêu kiểm chứng \\\hline
 M2 & Thiết kế phần cứng & Chốt MCU, modem, OBD2 qua BLE, cảm biến, nguồn và PCB & Sai mã linh kiện, sai ngưỡng nguồn hoặc bố trí anten không phù hợp \\\hline
@@ -5317,9 +5276,7 @@ M8 & Báo cáo cuối & PDF, Markdown, phụ lục và tài nguyên minh họa �
 \textbf{Tuần} & \textbf{Mục tiêu chính} & \textbf{Công việc trọng tâm} & \textbf{Đầu ra kiểm chứng} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 1 & Khởi động dự án & Chốt phạm vi, bài toán giám sát phương tiện và chỉ tiêu nghiệm thu & Biên bản phạm vi và danh sách rủi ro ban đầu \\\hline
 2 & Khảo sát công nghệ & So sánh MCU, modem, OBD2, cảm biến, giao thức truyền và hạ tầng & Bảng lựa chọn công nghệ chính \\\hline
@@ -5363,9 +5320,7 @@ nội dung đã trình bày trong báo cáo rút gọn.
 \textbf{Nhóm tài liệu} & \textbf{Vị trí/nội dung chính} & \textbf{Mục đích sử dụng} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Báo cáo và tài nguyên minh họa & \thesisterm{resources/reports/thesis/final/}: bản LaTeX, bản Markdown, hình, sơ đồ và tài nguyên mạch & Biên dịch PDF, kiểm tra hình/bảng và truy xuất nguồn minh họa \\\hline
 Phần mềm thiết bị (firmware) & \thesisterm{iot-vehicle-tracking-system-firmware/components/}: lõi ứng dụng, bộ thích nghi modem, MQTT, OBD2 qua BLE, RTC, lưu trữ, dữ liệu đo từ xa và OTA & Nạp thiết bị, phân tích lỗi, kiểm tra luồng trạng thái và phát triển tiếp \\\hline
@@ -5384,9 +5339,7 @@ Tài liệu kiểm chứng & \thesisterm{resources/docs}, \thesisterm{resources/
 \textbf{Nhóm chức năng API} & \textbf{Chức năng chính} & \textbf{Vai trò trong nguyên mẫu} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Xác thực, phiên và phân quyền & Đăng nhập, kiểm tra phiên, RBAC và kiểm toán truy cập & Bảo vệ các màn hình quản trị và dữ liệu thiết bị \\\hline
 Tổng quan và thời gian thực & Tổng hợp trạng thái, hoạt động gần đây, sự kiện nội bộ và Socket.IO/WebSocket & Cho phép người vận hành nhìn trạng thái đội xe gần thời gian thực \\\hline
@@ -5406,9 +5359,7 @@ Quản trị hệ thống & Kiểm tra trạng thái dịch vụ, trạng thái 
 \textbf{STT} & \textbf{Hạng mục kiểm tra} & \textbf{Dấu hiệu đạt} & \textbf{Ý nghĩa} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 1 & Nguồn 12 V/24 V và đường nguồn nội bộ & Đường 5 V, 3,3 V và đường cấp modem ổn định; không reset khi modem hoạt động & Xác nhận nền tảng nguồn sẵn sàng \\\hline
 2 & Pin dự phòng và đường chuyển nguồn & Thiết bị duy trì hoạt động ngắn hạn khi nguồn chính gián đoạn & Xác nhận phản ứng khi nguồn xe dao động \\\hline
@@ -5433,9 +5384,7 @@ Quản trị hệ thống & Kiểm tra trạng thái dịch vụ, trạng thái 
 \textbf{Giai đoạn} & \textbf{Nội dung cần kiểm tra} & \textbf{Mục đích} \\
 \hline
 \endhead
-\hline
 \endfoot
-\hline
 \endlastfoot
 Trước khi lắp & Cầu chì, vị trí lấy nguồn, anten, SIM, đầu nối OBD2, vỏ và độ chắc dây & Tránh lỗi cơ khí, lỗi cấp nguồn và lỗi tín hiệu ngay từ đầu \\\hline
 Lần khởi động đầu & Nhật ký khởi động, trạng thái modem, GNSS, BLE, RTC, lưu trữ và kết nối MQTT & Khoanh vùng lỗi phần cứng hoặc firmware trước khi chạy thử \\\hline

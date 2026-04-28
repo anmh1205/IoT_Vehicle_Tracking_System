@@ -34,7 +34,7 @@
 #define SD_LOG_DATA_PATH SD_LOG_LOG_DIR "/queue.log"
 #define SD_LOG_DATA_TMP_PATH SD_LOG_LOG_DIR "/queue.tmp"
 #define SD_LOG_DATA_BAK_PATH SD_LOG_LOG_DIR "/queue.bak"
-#define SD_LOG_LINE_MAX 640
+#define SD_LOG_LINE_MAX (SD_LOG_RECORD_PAYLOAD_MAX_LEN + 256U)
 
 static const char *TAG = "SD_LOG_STORE";
 
@@ -348,18 +348,62 @@ static esp_err_t sd_log_store_apply_host_slot(sdmmc_host_t *host, sdmmc_slot_con
     return ESP_OK;
 }
 
+static bool sd_log_store_line_complete(const char *line) {
+    if (line == NULL) {
+        return false;
+    }
+
+    /*
+     * fgets returns a partial line when the on-disk record exceeds our bounded
+     * buffer. Treat that as corruption and discard the remainder so the parser
+     * never replays a truncated JSON payload.
+     */
+    size_t len = strlen(line);
+    return len == 0U || line[len - 1U] == '\n' || len < (SD_LOG_LINE_MAX - 1U);
+}
+
+static void sd_log_store_discard_line_remainder(FILE *fp) {
+    if (fp == NULL) {
+        return;
+    }
+
+    int ch = 0;
+    while ((ch = fgetc(fp)) != EOF && ch != '\n') {
+    }
+}
+
+static esp_err_t sd_log_store_copy_payload_from_line(const char *payload_start, sd_log_record_t *record) {
+    ESP_RETURN_ON_NULL(payload_start, ESP_ERR_INVALID_ARG, TAG, "payload start null");
+    ESP_RETURN_ON_NULL(record, ESP_ERR_INVALID_ARG, TAG, "record null");
+
+    /* Payload is the final pipe-delimited field and may contain JSON punctuation. */
+    size_t payload_len = strcspn(payload_start, "\r\n");
+    ESP_RETURN_ON_FALSE(payload_len > 0U, ESP_FAIL, TAG, "record payload empty");
+    ESP_RETURN_ON_FALSE(payload_len < sizeof(record->payload),
+                        ESP_ERR_INVALID_SIZE,
+                        TAG,
+                        "record payload too long len=%u cap=%u",
+                        (unsigned)payload_len,
+                        (unsigned)sizeof(record->payload));
+
+    memcpy(record->payload, payload_start, payload_len);
+    record->payload[payload_len] = '\0';
+    return ESP_OK;
+}
+
 static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *out_record) {
     ESP_RETURN_ON_NULL(line, ESP_ERR_INVALID_ARG, TAG, "line null");
     ESP_RETURN_ON_NULL(out_record, ESP_ERR_INVALID_ARG, TAG, "record null");
 
     sd_log_record_t rec = {0};
+    int payload_offset = 0;
 
     /*
      * Newer format stores `time_trusted`.
      * Fallback parser keeps older log files readable after firmware upgrades.
      */
     int matched = sscanf(line,
-                         "%" SCNu32 "|%" SCNu64 "|%" SCNu32 "|%hhu|%hhu|%hhu|%hhu|%hhu|%383[^\n]",
+                         "%" SCNu32 "|%" SCNu64 "|%" SCNu32 "|%hhu|%hhu|%hhu|%hhu|%hhu|%n",
                          &rec.seq,
                          &rec.ts_ms,
                          &rec.session_id,
@@ -368,14 +412,17 @@ static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *ou
                          &rec.gps_fix,
                          &rec.net_up,
                          &rec.time_trusted,
-                         rec.payload);
-    if (matched == 9) {
+                         &payload_offset);
+    if (matched == 8 && payload_offset > 0 &&
+        sd_log_store_copy_payload_from_line(&line[payload_offset], &rec) == ESP_OK) {
         *out_record = rec;
         return ESP_OK;
     }
 
+    memset(&rec, 0, sizeof(rec));
+    payload_offset = 0;
     matched = sscanf(line,
-                     "%" SCNu32 "|%" SCNu64 "|%" SCNu32 "|%hhu|%hhu|%hhu|%hhu|%383[^\n]",
+                     "%" SCNu32 "|%" SCNu64 "|%" SCNu32 "|%hhu|%hhu|%hhu|%hhu|%n",
                      &rec.seq,
                      &rec.ts_ms,
                      &rec.session_id,
@@ -383,9 +430,13 @@ static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *ou
                      &rec.critical,
                      &rec.gps_fix,
                      &rec.net_up,
-                     rec.payload);
-    ESP_RETURN_ON_FALSE(matched == 8, ESP_FAIL, TAG, "parse record failed");
+                     &payload_offset);
+    ESP_RETURN_ON_FALSE(matched == 7 && payload_offset > 0, ESP_FAIL, TAG, "parse record failed");
     rec.time_trusted = 0;
+    ESP_RETURN_ON_FALSE(sd_log_store_copy_payload_from_line(&line[payload_offset], &rec) == ESP_OK,
+                        ESP_FAIL,
+                        TAG,
+                        "parse payload failed");
     *out_record = rec;
     return ESP_OK;
 }
@@ -421,7 +472,7 @@ esp_err_t sd_log_store_mount(void) {
     }
 
     esp_vfs_fat_mount_config_t mount_cfg = {
-        .format_if_mount_failed = true,
+        .format_if_mount_failed = false,
         .max_files = 6,
         .allocation_unit_size = 16 * 1024,
     };
@@ -518,6 +569,21 @@ esp_err_t sd_log_store_stop_session(bool clean_shutdown) {
 esp_err_t sd_log_store_append(const sd_log_record_t *record) {
     ESP_RETURN_ON_FALSE(s_ctx.mounted, ESP_ERR_INVALID_STATE, TAG, "not mounted");
     ESP_RETURN_ON_NULL(record, ESP_ERR_INVALID_ARG, TAG, "record null");
+
+    /*
+     * Validate the caller's fixed-size payload buffer before printing it with
+     * `%s`. A non-terminated payload would otherwise let fprintf walk past the
+     * record and corrupt the append-only log line.
+     */
+    const char *payload_end = memchr(record->payload, '\0', sizeof(record->payload));
+    ESP_RETURN_ON_FALSE(payload_end != NULL, ESP_ERR_INVALID_SIZE, TAG, "payload not null terminated");
+    size_t payload_len = (size_t)(payload_end - record->payload);
+    ESP_RETURN_ON_FALSE(payload_len > 0U, ESP_ERR_INVALID_ARG, TAG, "payload empty");
+    ESP_RETURN_ON_FALSE(memchr(record->payload, '\r', payload_len) == NULL &&
+                            memchr(record->payload, '\n', payload_len) == NULL,
+                        ESP_ERR_INVALID_ARG,
+                        TAG,
+                        "payload contains newline");
 
     /* Queue data is append-only; ordering comes from `seq`, not file rewrites. */
     FILE *fp = fopen(SD_LOG_DATA_PATH, "ab");
@@ -659,6 +725,11 @@ esp_err_t sd_log_store_peek_next(uint32_t min_seq, sd_log_record_t *out_record) 
     char line[SD_LOG_LINE_MAX] = {0};
     esp_err_t found = ESP_ERR_NOT_FOUND;
     while (fgets(line, sizeof(line), fp) != NULL) {
+        if (!sd_log_store_line_complete(line)) {
+            sd_log_store_discard_line_remainder(fp);
+            telemetry_counters_inc_replay_drop();
+            continue;
+        }
         sd_log_record_t rec = {0};
         if (sd_log_store_parse_record(line, &rec) != ESP_OK) {
             telemetry_counters_inc_replay_drop();
@@ -725,6 +796,11 @@ esp_err_t sd_log_store_gc_if_needed(void) {
 
     char line[SD_LOG_LINE_MAX] = {0};
     while (fgets(line, sizeof(line), in) != NULL) {
+        if (!sd_log_store_line_complete(line)) {
+            sd_log_store_discard_line_remainder(in);
+            telemetry_counters_inc_replay_drop();
+            continue;
+        }
         sd_log_record_t rec = {0};
         if (sd_log_store_parse_record(line, &rec) != ESP_OK) {
             telemetry_counters_inc_replay_drop();

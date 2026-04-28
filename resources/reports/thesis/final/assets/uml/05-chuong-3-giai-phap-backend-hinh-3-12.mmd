@@ -1,5 +1,5 @@
 flowchart TB
-    Device["Thiết bị theo dõi"] -->|Rawdata / status / events / firmware| EMQX["EMQX (broker MQTT)"]
+    Device["Thiết bị theo dõi"] -->|rawdata / status / events / firmware| EMQX["EMQX (broker MQTT)"]
     EMQX -->|Device topics| Bridge["MQTT Bridge"]
     Bridge --> VictoriaMetricsNode["VictoriaMetrics"]
     Bridge --> VictoriaLogsNode["VictoriaLogs"]

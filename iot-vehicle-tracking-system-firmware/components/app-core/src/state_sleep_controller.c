@@ -22,6 +22,7 @@
 #include "pin_map.h"
 #include "power_mgr.h"
 #include "state_machine_internal.h"
+#include "state_obd_runtime.h"
 #include "state_runtime_context.h"
 #include "util.h"
 
@@ -121,7 +122,7 @@ void state_machine_shutdown_for_sleep(void) {
     if (s_ble_ctx != NULL) {
         ble_obd_disconnect(s_ble_ctx);
         s_ble_ctx = NULL;
-        s_obd_elm_ready = false;
+        state_machine_mark_obd_disconnected();
     }
 
     esp_err_t ble_stack_err = ble_stack_deinit();

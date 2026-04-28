@@ -14,7 +14,7 @@ import {
 
 export interface NotificationFilterState {
   search: string;
-  type: 'all' | 'alert' | 'system' | 'export' | 'firmware' | 'geofence';
+  type: 'all' | 'alert' | 'system' | 'export' | 'firmware' | 'zone';
   readStatus: 'all' | 'read' | 'unread';
   from?: string;
   to?: string;
@@ -58,7 +58,7 @@ export const NotificationFilters = ({
             <SelectItem value="system">Hệ thống</SelectItem>
             <SelectItem value="export">Xuất dữ liệu</SelectItem>
             <SelectItem value="firmware">Firmware</SelectItem>
-            <SelectItem value="geofence">Geofence</SelectItem>
+            <SelectItem value="zone">Vùng</SelectItem>
           </SelectContent>
         </Select>
       </div>

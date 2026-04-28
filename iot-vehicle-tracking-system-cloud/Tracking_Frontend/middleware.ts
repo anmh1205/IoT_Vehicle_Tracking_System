@@ -3,6 +3,12 @@ import type { NextRequest } from 'next/server';
 
 const publicPrefixes = ['/login', '/api', '/landing'];
 const publicFilePattern = /\/[^/]+\.[^/]+$/;
+const legacyZonePathPatterns = [
+  /^\/dashboard\/geofences$/,
+  /^\/dashboard\/operations\/geofences$/,
+  /^\/dashboard\/geofences\/[^/]+$/,
+  /^\/dashboard\/operations\/geofences\/[^/]+$/,
+];
 
 const isPublicPath = (pathname: string) => {
   if (pathname === '/') {
@@ -16,6 +22,14 @@ const isPublicPath = (pathname: string) => {
   return publicPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 };
 
+const canonicalizeProtectedPath = (pathname: string) => {
+  if (legacyZonePathPatterns.some((pattern) => pattern.test(pathname))) {
+    return '/dashboard/zones';
+  }
+
+  return pathname;
+};
+
 export const middleware = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
 
@@ -27,7 +41,7 @@ export const middleware = (request: NextRequest) => {
 
   if (!sessionCookie) {
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
+    loginUrl.searchParams.set('redirect', canonicalizeProtectedPath(pathname));
     return NextResponse.redirect(loginUrl);
   }
 

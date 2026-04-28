@@ -21,7 +21,7 @@ export interface DeviceUptimeItem {
 export interface AlertFrequencyPoint {
   label: string;
   speeding: number;
-  geofence: number;
+  zone: number;
   offline: number;
   other: number;
 }

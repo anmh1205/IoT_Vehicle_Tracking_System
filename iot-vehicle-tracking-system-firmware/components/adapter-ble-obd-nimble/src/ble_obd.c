@@ -125,7 +125,6 @@ static int ble_obd_execute_request(ble_obd_ctx_t *ctx,
                                    uint32_t timeout_ms);
 static ble_obd_response_state_t ble_obd_classify_response_state(ble_obd_ctx_t *ctx, bool has_valid_obd);
 static const char *ble_obd_response_state_to_string(ble_obd_response_state_t state);
-static void ble_obd_format_log_snippet(const char *src, char *dst, size_t dst_len);
 static size_t ble_obd_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, char *buf, size_t buf_len);
 static bool ble_obd_name_contains_keyword(const char *value, const char *keyword);
 static bool ble_obd_name_looks_like_adapter(const char *name);
@@ -437,45 +436,6 @@ static void ble_obd_diag_log_periodic(ble_obd_ctx_t *ctx, bool force_now) {
 }
 
 /**
- * @brief Compact raw ELM327 response into one log-safe line.
- */
-static void ble_obd_format_log_snippet(const char *src, char *dst, size_t dst_len) {
-    if (dst == NULL || dst_len == 0) {
-        return;
-    }
-
-    dst[0] = '\0';
-    if (util_string_empty(src)) {
-        util_copy_string(dst, dst_len, "<empty>");
-        return;
-    }
-
-    size_t out_len = 0;
-    for (size_t i = 0; src[i] != '\0' && out_len + 1U < dst_len; ++i) {
-        unsigned char raw = (unsigned char)src[i];
-        char ch = (char)raw;
-        if (ch == '\r' || ch == '\n' || ch == '\t') {
-            ch = ' ';
-        } else if (!isprint(raw)) {
-            ch = '.';
-        }
-
-        if (out_len > 0 && ch == ' ' && dst[out_len - 1U] == ' ') {
-            continue;
-        }
-
-        dst[out_len++] = ch;
-    }
-
-    if (out_len == 0) {
-        util_copy_string(dst, dst_len, "<empty>");
-        return;
-    }
-
-    dst[out_len] = '\0';
-}
-
-/**
  * @brief Notification handler for OBD RX characteristic.
  *
  * Parses common ELM327 line responses and triggers waiting semaphore.
@@ -535,9 +495,9 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
                 continue;
             }
 
-                has_valid_obd = true;
-                payload_offset = i + required_header_len;
-                break;
+            has_valid_obd = true;
+            payload_offset = i + required_header_len;
+            break;
         }
     }
 
@@ -560,17 +520,15 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
             ctx->tx_data.got_valid_payload = false;
             ctx->diag.notify_invalid++;
             if (ctx->diag.notify_invalid <= 5U || (ctx->diag.notify_invalid % 20U) == 0U) {
-                char raw_buf[128] = {0};
-                ble_obd_format_log_snippet(ctx->rx_data.buf, raw_buf, sizeof(raw_buf));
                 ESP_LOGW(TAG,
-                         "OBD invalid response count=%lu mode=0x%02X pid=0x%02X state=%s has_hex=%d has_error=%d raw=%s",
+                         "OBD invalid response count=%lu mode=0x%02X pid=0x%02X state=%s has_hex=%d has_error=%d rx_len=%u",
                          (unsigned long)ctx->diag.notify_invalid,
                          (unsigned)ctx->tx_data.mode,
                          (unsigned)ctx->tx_data.pid,
                          ble_obd_response_state_to_string(response_state),
                          has_hex ? 1 : 0,
                          ctx->rx_data.has_error ? 1 : 0,
-                         raw_buf);
+                         (unsigned)ctx->rx_data.len);
             }
             if ((ctx->rx_data.has_error || has_hex) && ctx->response_cb != NULL) {
                 ctx->response_cb(ctx->tx_data.mode, -1, NULL, 0, ctx->usr_ctx);
@@ -863,6 +821,5 @@ esp_err_t ble_obd_elm327_init(ble_obd_ctx_t *ctx) {
         }
     }
 
-    (void)OBD_MODE_CURRENT_DATA;
     return ESP_OK;
 }

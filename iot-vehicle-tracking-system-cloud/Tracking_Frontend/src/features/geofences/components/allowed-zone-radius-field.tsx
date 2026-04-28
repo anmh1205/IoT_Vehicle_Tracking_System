@@ -29,7 +29,7 @@ export const AllowedZoneRadiusField = ({
     <div className="space-y-3 rounded-2xl border bg-muted/10 p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <Label htmlFor="allowed-zone-radius">Bán kính vùng cho phép</Label>
+          <Label htmlFor="allowed-zone-radius">Bán kính vùng</Label>
           <p className="text-xs text-muted-foreground">
             Thiết lập trong khoảng 1 km đến 2.000 km.
           </p>

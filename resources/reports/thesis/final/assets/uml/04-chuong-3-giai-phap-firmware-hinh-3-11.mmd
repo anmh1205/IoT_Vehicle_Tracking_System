@@ -1,13 +1,19 @@
-stateDiagram-v2
-    state "Khởi động" as Boot
-    state "Lái xe" as Driving
-    state "Đỗ xe" as Parking
-    state "Cảnh báo" as Alert
+%%{init: {'flowchart': {'nodeSpacing': 80, 'rankSpacing': 100}} }%%
+flowchart TB
+    Boot["Khởi động"]
+    IgnOn["Bật IGN"]
+    IgnOff["Tắt IGN"]
+    Driving["Lái xe"]
+    Parking["Đỗ xe"]
+    Motion["LIS3DH phát hiện rung"]
+    Alert["Cảnh báo"]
+    Done["Đã xử lý"]
+    Continue["Xe tiếp tục chạy"]
+    Stop["Tắt máy"]
 
-    [*] --> Boot
-    Boot --> Driving: Bật IGN
-    Boot --> Parking: Tắt IGN
-    Parking --> Alert: IMU rung
-    Alert --> Parking: Đã xử lý
-    Alert --> Driving: Tiếp tục chạy
-    Driving --> Parking: Tắt máy
+    Boot --> IgnOn --> Driving
+    Boot --> IgnOff --> Parking
+    Driving --> Stop --> Parking
+    Parking --> Motion --> Alert
+    Alert --> Done --> Parking
+    Alert --> Continue --> Driving

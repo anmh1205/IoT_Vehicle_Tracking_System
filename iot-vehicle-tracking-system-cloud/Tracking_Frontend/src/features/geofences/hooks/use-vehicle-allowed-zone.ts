@@ -1,14 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import {
-  geofenceServices,
-  type UpsertVehicleAllowedZonePayload,
-  type VehicleAllowedZone,
-} from '@/lib/api/geofences';
+  zoneServices,
+  type UpsertVehicleZonePayload,
+  type VehicleZone,
+} from '@/lib/api/zones';
 
-export const zoneQueryKey = (vehicleId: string | null | undefined) => ['vehicle-allowed-zone', vehicleId] as const;
+export const zoneQueryKey = (vehicleId: string | null | undefined) => ['vehicle-zone', vehicleId] as const;
 export const previewQueryKey = (vehicleId: string | null | undefined) => [
-  'vehicle-allowed-zone-preview',
+  'vehicle-zone-preview',
   vehicleId,
 ] as const;
 
@@ -19,13 +19,16 @@ export const useVehicleAllowedZonePreview = (
   useQuery({
     queryKey: previewQueryKey(vehicleId),
     enabled: Boolean(vehicleId) && enabled,
-    queryFn: () => geofenceServices.previewVehicleAllowedZoneCenter(vehicleId as string),
+    queryFn: () => zoneServices.previewVehicleZoneCircleCenter(vehicleId as string),
   });
 
-export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
+export const useVehicleAllowedZone = (
+  vehicleId: string | null | undefined,
+  options?: { enabled?: boolean },
+) => {
   const queryClient = useQueryClient();
-  const enabled = Boolean(vehicleId);
-  const syncZoneCache = (zone: VehicleAllowedZone | null) => {
+  const enabled = Boolean(vehicleId) && (options?.enabled ?? true);
+  const syncZoneCache = (zone: VehicleZone | null) => {
     queryClient.setQueryData(zoneQueryKey(vehicleId), zone);
     queryClient.setQueryData(previewQueryKey(vehicleId), null);
   };
@@ -33,7 +36,7 @@ export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
   const zoneQuery = useQuery({
     queryKey: zoneQueryKey(vehicleId),
     enabled,
-    queryFn: () => geofenceServices.getVehicleAllowedZone(vehicleId as string),
+    queryFn: () => zoneServices.getVehicleZone(vehicleId as string),
   });
 
   const invalidate = async () => {
@@ -41,6 +44,7 @@ export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
       queryClient.invalidateQueries({ queryKey: zoneQueryKey(vehicleId) }),
       queryClient.invalidateQueries({ queryKey: previewQueryKey(vehicleId) }),
       queryClient.invalidateQueries({ queryKey: ['vehicles'] }),
+      queryClient.invalidateQueries({ queryKey: ['vehicles-for-zones-page'] }),
       queryClient.invalidateQueries({ queryKey: ['vehicles-for-allowed-zone-page'] }),
       queryClient.invalidateQueries({ queryKey: ['device-positions'] }),
       queryClient.invalidateQueries({ queryKey: ['device-detail'] }),
@@ -48,7 +52,7 @@ export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
   };
 
   useRealtimeSubscription<{ vehicle_id?: string }>({
-    event: 'geofence:allowed-zone-updated',
+    event: 'zone:updated',
     enabled,
     handler: (payload) => {
       if (String(payload?.vehicle_id ?? '') !== vehicleId) return;
@@ -57,7 +61,7 @@ export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
   });
 
   useRealtimeSubscription<{ vehicle_id?: string }>({
-    event: 'geofence:allowed-zone-state-changed',
+    event: 'zone:state-changed',
     enabled,
     handler: (payload) => {
       if (String(payload?.vehicle_id ?? '') !== vehicleId) return;
@@ -66,8 +70,8 @@ export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
   });
 
   const upsertMutation = useMutation({
-    mutationFn: (payload: UpsertVehicleAllowedZonePayload) =>
-      geofenceServices.upsertVehicleAllowedZone(vehicleId as string, payload),
+    mutationFn: (payload: UpsertVehicleZonePayload) =>
+      zoneServices.upsertVehicleZone(vehicleId as string, payload),
     onSuccess: async (zone) => {
       syncZoneCache(zone);
       await invalidate();
@@ -75,7 +79,7 @@ export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => geofenceServices.deleteVehicleAllowedZone(vehicleId as string),
+    mutationFn: () => zoneServices.deleteVehicleZone(vehicleId as string),
     onSuccess: async () => {
       syncZoneCache(null);
       await invalidate();
@@ -89,3 +93,5 @@ export const useVehicleAllowedZone = (vehicleId: string | null | undefined) => {
     refresh: invalidate,
   };
 };
+
+export const useVehicleZone = useVehicleAllowedZone;

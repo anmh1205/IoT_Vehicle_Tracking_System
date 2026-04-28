@@ -133,7 +133,7 @@ export const getDeviceUptime = async (range: StatisticsDateRange): Promise<Devic
 interface AlertFrequencyRow {
   label: Date;
   speeding: string;
-  geofence: string;
+  zone: string;
   offline: string;
   other: string;
 }
@@ -153,9 +153,9 @@ export const getAlertFrequency = async (
       SELECT
         ${bucketExpr.replace('ts', 'created_at')} AS bucket,
         COUNT(*) FILTER (WHERE alert_type = 'speeding')::text AS speeding,
-        COUNT(*) FILTER (WHERE alert_type IN ('geofence_enter', 'geofence_exit'))::text AS geofence,
+        COUNT(*) FILTER (WHERE alert_type IN ('zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit'))::text AS zone,
         COUNT(*) FILTER (WHERE alert_type = 'device_offline')::text AS offline,
-        COUNT(*) FILTER (WHERE alert_type NOT IN ('speeding', 'geofence_enter', 'geofence_exit', 'device_offline'))::text AS other
+        COUNT(*) FILTER (WHERE alert_type NOT IN ('speeding', 'zone_enter', 'zone_exit', 'zone_outside_periodic', 'geofence_enter', 'geofence_exit', 'device_offline'))::text AS other
       FROM alerts
       WHERE created_at BETWEEN $1 AND $2
       GROUP BY bucket
@@ -163,7 +163,7 @@ export const getAlertFrequency = async (
     SELECT
       ${bucketExpr} AS label,
       COALESCE(bucketed.speeding, '0') AS speeding,
-      COALESCE(bucketed.geofence, '0') AS geofence,
+      COALESCE(bucketed.zone, '0') AS zone,
       COALESCE(bucketed.offline, '0') AS offline,
       COALESCE(bucketed.other, '0') AS other
     FROM series
@@ -175,7 +175,7 @@ export const getAlertFrequency = async (
   return result.rows.map((row) => ({
     label: row.label.toISOString(),
     speeding: parseInt(row.speeding, 10),
-    geofence: parseInt(row.geofence, 10),
+    zone: parseInt(row.zone, 10),
     offline: parseInt(row.offline, 10),
     other: parseInt(row.other, 10),
   }));

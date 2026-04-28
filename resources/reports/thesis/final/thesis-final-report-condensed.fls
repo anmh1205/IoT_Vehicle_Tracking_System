@@ -350,6 +350,8 @@ INPUT .\thesis-final-report-condensed.lof
 INPUT .\thesis-final-report-condensed.lof
 INPUT thesis-final-report-condensed.lof
 OUTPUT thesis-final-report-condensed.lof
+INPUT .\assets\figures\01-chuong-1-gioi-thieu-hinh-1-1.png
+INPUT .\assets\figures\01-chuong-1-gioi-thieu-hinh-1-1.png
 INPUT .\assets\figures\01-chuong-1-gioi-thieu-hinh-1-2.png
 INPUT .\assets\figures\01-chuong-1-gioi-thieu-hinh-1-2.png
 INPUT .\assets\figures\01-chuong-1-gioi-thieu-hinh-1-3.png
@@ -358,6 +360,8 @@ INPUT .\assets\figures\01-chuong-1-gioi-thieu-hinh-1-4.png
 INPUT .\assets\figures\01-chuong-1-gioi-thieu-hinh-1-4.png
 INPUT .\assets\figures\01-chuong-1-gioi-thieu-hinh-1-5.png
 INPUT .\assets\figures\01-chuong-1-gioi-thieu-hinh-1-5.png
+INPUT .\assets\figures\02-chuong-2-phan-tich-hinh-2-1.png
+INPUT .\assets\figures\02-chuong-2-phan-tich-hinh-2-1.png
 INPUT .\assets\figures\03-chuong-3-giai-phap-phan-cung-hinh-3-1.png
 INPUT .\assets\figures\03-chuong-3-giai-phap-phan-cung-hinh-3-1.png
 INPUT .\assets\figures\03-chuong-3-giai-phap-phan-cung-hinh-3-1a.png
@@ -372,6 +376,8 @@ INPUT .\assets\figures\03-chuong-3-giai-phap-phan-cung-hinh-3-4.png
 INPUT .\assets\figures\03-chuong-3-giai-phap-phan-cung-hinh-3-4.png
 INPUT .\assets\figures\04-chuong-3-giai-phap-firmware-hinh-3-11.png
 INPUT .\assets\figures\04-chuong-3-giai-phap-firmware-hinh-3-11.png
+INPUT .\assets\figures\04-chuong-3-giai-phap-firmware-hinh-3-8.png
+INPUT .\assets\figures\04-chuong-3-giai-phap-firmware-hinh-3-8.png
 INPUT .\assets\figures\06-chuong-3-giai-phap-frontend-hinh-3-23.png
 INPUT .\assets\figures\06-chuong-3-giai-phap-frontend-hinh-3-23.png
 INPUT .\assets\figures\07-chuong-4-trien-khai-hardware-hinh-4-5.png
@@ -391,4 +397,6 @@ INPUT .\assets\figures\11-chuong-4-trien-khai-frontend-hinh-4-8-map-monitoring.p
 INPUT .\assets\figures\11-chuong-4-trien-khai-frontend-hinh-4-9-device-obd-raw-data.png
 INPUT .\assets\figures\11-chuong-4-trien-khai-frontend-hinh-4-9-device-obd-raw-data.png
 INPUT .\assets\figures\11-chuong-4-trien-khai-frontend-hinh-4-9-device-obd-raw-data.png
+INPUT .\assets\figures\14-phu-luc-hinh-pl-3-1.png
+INPUT .\assets\figures\14-phu-luc-hinh-pl-3-1.png
 INPUT thesis-final-report-condensed.aux

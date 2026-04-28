@@ -8,17 +8,6 @@
  * @brief Ignition-only session lifecycle with debounce and OFF drain window.
  */
 
-typedef enum {
-    /** No active drive session is open. */
-    SESSION_STATE_IDLE = 0,
-    /** Reserved transitional state while a session starts. */
-    SESSION_STATE_STARTING,
-    /** A drive session is active and can receive telemetry. */
-    SESSION_STATE_ACTIVE,
-    /** Reserved transitional state while a session stops. */
-    SESSION_STATE_STOPPING,
-} session_state_t;
-
 /** @brief Reset session manager state and clear pending edge decisions. */
 void session_mgr_init(void);
 
@@ -41,27 +30,14 @@ void session_mgr_on_ignition_sample(bool ignition_on, uint64_t now_ms);
 bool session_mgr_should_start(void);
 
 /**
- * @brief Consume a pending stop request.
- *
- * @return true once when a debounced ignition-off edge should stop a session.
- */
-bool session_mgr_should_stop(void);
-
-/**
  * @brief Mark the current ignition-driven session as started.
- *
- * @param now_ms Current monotonic uptime in milliseconds. Present for future
- *               extension even though the current implementation does not use it.
  */
-void session_mgr_mark_started(uint64_t now_ms);
+void session_mgr_mark_started(void);
 
 /**
  * @brief Mark the current session as stopped.
- *
- * @param now_ms Current monotonic uptime in milliseconds. Present for future
- *               extension even though the current implementation does not use it.
  */
-void session_mgr_mark_stopped(uint64_t now_ms);
+void session_mgr_mark_stopped(void);
 
 /**
  * @brief Return the current monotonically increasing session ID.
@@ -71,24 +47,15 @@ void session_mgr_mark_stopped(uint64_t now_ms);
 uint32_t session_mgr_current_session_id(void);
 
 /**
- * @brief Return the current internal session state.
+ * @brief Report whether the manager has accepted at least one debounced sample.
  *
- * @return Current session state enum.
+ * @return true when a stable ignition level is known.
  */
-session_state_t session_mgr_state(void);
+bool session_mgr_has_stable_ignition(void);
 
 /**
- * @brief Check whether a session is active.
+ * @brief Return the latest debounced ignition state.
  *
- * @return true when the session state is `SESSION_STATE_ACTIVE`.
+ * @return true when the accepted debounced ignition level is ON.
  */
-bool session_mgr_is_active(void);
-
-/**
- * @brief Return the configured ignition-off drain window.
- *
- * This timeout lets the firmware finish final publishes/flushes before sleep.
- *
- * @return Drain timeout in milliseconds.
- */
-uint32_t session_mgr_drain_timeout_ms(void);
+bool session_mgr_stable_ignition(void);

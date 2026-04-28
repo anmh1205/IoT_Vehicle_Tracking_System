@@ -14,7 +14,7 @@ typedef struct {
     uint32_t sd_write_fail;
     /** Failed fsync operations after SD writes. */
     uint32_t sd_fsync_fail;
-    /** Replay records fully acknowledged or auto-advanced. */
+    /** Replay records accepted by the transport or auto-advanced. */
     uint32_t replay_success;
     /** Replay records that had to be retried. */
     uint32_t replay_retry;
