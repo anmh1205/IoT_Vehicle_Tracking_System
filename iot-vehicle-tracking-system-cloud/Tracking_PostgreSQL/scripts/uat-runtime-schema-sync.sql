@@ -1,5 +1,7 @@
 -- Keep long-lived UAT databases aligned with tables added after first bootstrap.
 
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 DO $$
 BEGIN
     IF NOT EXISTS (

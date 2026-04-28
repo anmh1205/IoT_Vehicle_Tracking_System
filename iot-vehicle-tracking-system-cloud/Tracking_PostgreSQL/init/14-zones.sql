@@ -3,6 +3,8 @@
 -- Unified vehicle zones and local GIS admin-unit cache
 -- =============================================================================
 
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 ALTER TYPE alert_type ADD VALUE IF NOT EXISTS 'zone_enter';
 ALTER TYPE alert_type ADD VALUE IF NOT EXISTS 'zone_exit';
 ALTER TYPE alert_type ADD VALUE IF NOT EXISTS 'zone_outside_periodic';

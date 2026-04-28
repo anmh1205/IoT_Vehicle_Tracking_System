@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-const zoneTypeSchema = z.enum(['circle', 'administrative_boundary']);
 const centerSourceSchema = z.enum(['vehicle_position', 'map_pick']);
 const alertModeSchema = z.enum([
   'transition_only',

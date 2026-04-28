@@ -5,7 +5,7 @@ import { buildCircleGeometry, parseGeoJsonGeometry } from '@/shared/utils/zone-g
 import * as vehicleRepo from '@/domain/vehicle/repositories/vehicle.repository';
 import * as vehicleZoneRepo from '@/domain/zone/repositories/vehicle-zone.repository';
 import * as zoneBoundaryService from '@/domain/zone/services/zone-boundary.service';
-import type { ResolveZoneBoundariesInput, ResolveZoneBoundariesResult, SearchZoneBoundariesQuery, UpsertVehicleZoneInput, VehicleZone, VehicleZonePreviewCircleCenter, VehicleZoneVehicleSummary, VehicleZoneWarning } from '@/domain/zone/types/zone.types';
+import type { ResolveZoneBoundariesInput, ResolveZoneBoundariesResult, UpsertVehicleZoneInput, VehicleZone, VehicleZonePreviewCircleCenter, VehicleZoneVehicleSummary, VehicleZoneWarning } from '@/domain/zone/types/zone.types';
 
 const STALE_POSITION_THRESHOLD_MS = 15 * 60 * 1000;
 
