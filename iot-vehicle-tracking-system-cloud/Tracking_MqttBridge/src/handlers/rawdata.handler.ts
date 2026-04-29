@@ -1,5 +1,5 @@
 import { rawDataSchema } from '../validators/payload.validator';
-import type { RawDiagnostics } from '../types/payload.types';
+import type { RawDataPayload, RawDiagnostics } from '../types/payload.types';
 import {
   ensureDeviceSession,
   findActiveDeviceSessionId,
@@ -49,6 +49,11 @@ const idleAnomalyStartedAt = new Map<string, number>();
 
 const hasActiveRuntimeStatus = (status: string | undefined): boolean =>
   status === 'running' || status === 'online';
+
+const buildSanitizedRawPayload = (payload: RawDataPayload): Omit<RawDataPayload, 'auth_token'> => {
+  const { auth_token: _authToken, ...safePayload } = payload;
+  return safePayload;
+};
 
 type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 type DtcBucket = 'stored' | 'pending' | 'permanent';
@@ -983,6 +988,7 @@ export const handleRawData = async (
     sleep_mode: runtimeState.sleep_mode,
     state_updated_at: stateUpdatedAt,
     diagnostics: normalizedDiagnostics ?? undefined,
+    raw_payload: buildSanitizedRawPayload(payload),
     message_id: messageId,
     schema_version: schemaVersion,
     seq_no: seqNo,

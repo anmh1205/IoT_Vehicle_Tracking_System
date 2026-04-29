@@ -130,8 +130,8 @@ const NumberInputField = ({
     control={control}
     name={name}
     render={({ field }) => (
-      <FormItem className="space-y-2">
-        <FormLabel className="flex items-center gap-1.5">
+      <FormItem className="grid grid-rows-[minmax(3rem,auto)_2.25rem_auto] content-start gap-2">
+        <FormLabel className="flex min-h-12 items-start gap-1.5 text-sm leading-4">
           <span>{label}</span>
           <FieldHintTooltip content={hint} />
         </FormLabel>
@@ -139,6 +139,7 @@ const NumberInputField = ({
           <Input
             type="number"
             inputMode="numeric"
+            className="h-9"
             value={field.value}
             onChange={(event) => field.onChange(Number(event.target.value))}
           />

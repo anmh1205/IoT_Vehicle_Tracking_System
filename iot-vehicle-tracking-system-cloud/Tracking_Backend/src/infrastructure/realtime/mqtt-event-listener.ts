@@ -90,6 +90,16 @@ const asRecord = (value: unknown): Record<string, unknown> | undefined => {
   return value as Record<string, unknown>;
 };
 
+const sanitizeRawPayload = (value: unknown): Record<string, unknown> | null => {
+  const rawPayload = asRecord(value);
+  if (!rawPayload) {
+    return null;
+  }
+
+  const { auth_token: _authToken, authToken: _authTokenCamel, ...safePayload } = rawPayload;
+  return safePayload;
+};
+
 const getDiagnosticsSignal = (payload: Record<string, unknown>, signalKey: string): number | undefined => {
   const diagnostics = asRecord(payload.diagnostics);
   const signals = asRecord(diagnostics?.signals);
@@ -191,6 +201,7 @@ const persistRawDataEventLog = async (
     temperature,
     err: toOptionalNumber(payload.err ?? payload.error_code),
     diagnostics: payload.diagnostics ?? null,
+    raw_payload: sanitizeRawPayload(payload.raw_payload),
     source: 'mqtt_bridge_rawdata',
   };
 

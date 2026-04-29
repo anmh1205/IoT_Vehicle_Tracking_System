@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table';
 import type { DeviceRawFeedRow } from '@/features/devices/types';
 import { formatDateTime, formatDuration } from '@/lib/utils/date/format';
+import { cn } from '@/lib/utils';
 import { DeviceDetailEmptyState } from './empty-state';
 import { useDeviceDetailModal } from './modal-context';
 import { extractDiagnosticsSnapshotFromRow } from './obd-diagnostics';
@@ -22,7 +23,7 @@ const SOURCE_LABELS: Record<string, string> = {
   session: 'Phiên',
   error: 'Lỗi',
   command: 'Lệnh',
-  'event-log': 'Sự kiện',
+  'event-log': 'Event log',
   'obd-diagnostic': 'OBD',
 };
 
@@ -40,19 +41,131 @@ const SOURCE_VARIANTS: Record<
 
 const FILTERS = [
   { label: 'Tất cả', value: 'all' },
+  { label: 'Rawdata device', value: 'rawdata' },
   { label: 'Telemetry', value: 'telemetry' },
   { label: 'OBD', value: 'obd-diagnostic' },
   { label: 'Phiên', value: 'session' },
   { label: 'Lỗi', value: 'error' },
   { label: 'Lệnh', value: 'command' },
-  { label: 'Sự kiện', value: 'event-log' },
+  { label: 'Event log hệ thống', value: 'event-log' },
 ] as const;
+
+type RawFeedFilter = (typeof FILTERS)[number]['value'];
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return null;
   }
   return value as Record<string, unknown>;
+};
+
+const compactRecord = (entries: Array<[string, unknown]>): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+
+  entries.forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      result[key] = value;
+    }
+  });
+
+  return result;
+};
+
+const omitAuthToken = (payload: Record<string, unknown>): Record<string, unknown> => {
+  const { auth_token: _authToken, authToken: _authTokenCamel, ...safePayload } = payload;
+  return safePayload;
+};
+
+const toFirmwareTimestamp = (value: unknown): number | undefined => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.length > 0) {
+    const parsed = Date.parse(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+};
+
+const extractFirmwareRawPayload = (
+  row: Pick<DeviceRawFeedRow, 'timestamp' | 'payload'>,
+): Record<string, unknown> | null => {
+  const payload = toRecord(row.payload) ?? {};
+  const context = toRecord(payload.context);
+  const storedRawPayload = toRecord(context?.raw_payload) ?? toRecord(payload.raw_payload);
+
+  if (storedRawPayload) {
+    return omitAuthToken(storedRawPayload);
+  }
+
+  const eventCode = String(payload.event_code ?? '').trim().toLowerCase();
+  const source = String(context?.source ?? payload.source ?? '').trim().toLowerCase();
+
+  if (eventCode !== 'mqtt_bridge_rawdata' && source !== 'mqtt_bridge_rawdata') {
+    return null;
+  }
+
+  const metadata = toRecord(payload.metadata);
+  const diagnostics = toRecord(context?.diagnostics ?? payload.diagnostics);
+  const data = compactRecord([
+    ['vibration', context?.vib ?? context?.vibration],
+    ['battery_top', context?.bt ?? context?.batt ?? context?.battery_top],
+    ['battery_bot', context?.bb ?? context?.battery_bot],
+    ['latitude', context?.lat ?? context?.latitude],
+    ['longitude', context?.lon ?? context?.longitude],
+    ['speed', context?.spd ?? context?.speed],
+    ['course', context?.course ?? context?.heading],
+    ['satellites', context?.satellites],
+    ['ignition', context?.ignition],
+    ['error_code', context?.err ?? context?.error_code],
+  ]);
+
+  return compactRecord([
+    ['device_id', payload.device_id ?? payload.deviceId],
+    ['timestamp', toFirmwareTimestamp(payload.device_timestamp ?? row.timestamp)],
+    ['data', data],
+    ['diagnostics', diagnostics ?? undefined],
+    ['metadata', metadata && Object.keys(metadata).length > 0 ? metadata : undefined],
+  ]);
+};
+
+const isMqttRawDataRow = (row: Pick<DeviceRawFeedRow, 'timestamp' | 'payload'>): boolean =>
+  extractFirmwareRawPayload(row) !== null;
+
+const rowHasObdDiagnostics = (row: Pick<DeviceRawFeedRow, 'source' | 'timestamp' | 'payload'>): boolean => {
+  if (row.source === 'obd-diagnostic') {
+    return true;
+  }
+
+  const firmwarePayload = extractFirmwareRawPayload(row);
+  return Boolean(toRecord(firmwarePayload?.diagnostics));
+};
+
+const rowMatchesFilter = (row: DeviceRawFeedRow, filter: RawFeedFilter): boolean => {
+  if (filter === 'all') {
+    return true;
+  }
+
+  if (filter === 'rawdata') {
+    return isMqttRawDataRow(row);
+  }
+
+  if (filter === 'telemetry') {
+    return row.source === 'telemetry';
+  }
+
+  if (filter === 'obd-diagnostic') {
+    return rowHasObdDiagnostics(row);
+  }
+
+  if (filter === 'event-log') {
+    return row.source === 'event-log' || row.source === 'obd-diagnostic';
+  }
+
+  return row.source === filter;
 };
 
 const stringifyValue = (value: unknown): string => {
@@ -112,7 +225,73 @@ const rowItem = (
   value: stringifyValue(value),
 });
 
-const extractMatrixRows = (row: Pick<DeviceRawFeedRow, 'source' | 'payload'>): RawMatrixRow[] => {
+const extractFirmwareRawMatrixRows = (
+  row: Pick<DeviceRawFeedRow, 'timestamp' | 'payload'>,
+): RawMatrixRow[] | null => {
+  const firmwarePayload = extractFirmwareRawPayload(row);
+  if (!firmwarePayload) {
+    return null;
+  }
+
+  const data = toRecord(firmwarePayload.data) ?? {};
+  const diagnostics = toRecord(firmwarePayload.diagnostics);
+  const channel = toRecord(diagnostics?.channel);
+  const signals = toRecord(diagnostics?.signals);
+  const quality = toRecord(diagnostics?.quality);
+  const dtc = toRecord(diagnostics?.dtc);
+
+  return [
+    rowItem('device_id', 'Thiết bị', 'Mã thiết bị trong payload rawdata firmware.', firmwarePayload.device_id),
+    rowItem('timestamp', 'Timestamp firmware', 'Mốc thời gian firmware gửi lên, đơn vị millisecond.', firmwarePayload.timestamp),
+    rowItem('data.vibration', 'Rung', 'Giá trị rung từ payload data.', data.vibration),
+    rowItem('data.battery_top', 'Ắc quy xe', 'Điện áp nguồn chính/ắc quy xe từ firmware.', data.battery_top),
+    rowItem('data.battery_bot', 'Pin thiết bị', 'Điện áp tracker hoặc pin backup từ firmware.', data.battery_bot),
+    rowItem('data.latitude', 'Vĩ độ', 'Tọa độ vĩ độ GNSS từ firmware.', data.latitude),
+    rowItem('data.longitude', 'Kinh độ', 'Tọa độ kinh độ GNSS từ firmware.', data.longitude),
+    rowItem('data.speed', 'Tốc độ GNSS', 'Tốc độ GNSS trong payload data.', data.speed),
+    rowItem('data.course', 'Hướng di chuyển', 'Course/heading GNSS trong payload data.', data.course),
+    rowItem('data.satellites', 'Vệ tinh', 'Số vệ tinh GNSS firmware báo cáo.', data.satellites),
+    rowItem('data.ignition', 'Ignition', 'Trạng thái đánh lửa firmware gửi lên.', data.ignition),
+    rowItem('data.error_code', 'Mã lỗi thiết bị', 'Mã lỗi kỹ thuật trong payload data.', data.error_code),
+    rowItem('diagnostics.channel.ble_obd_connected', 'BLE OBD', 'Trạng thái kết nối BLE tới adapter OBD.', channel?.ble_obd_connected),
+    rowItem('diagnostics.channel.elm_ready', 'ELM ready', 'Adapter ELM đã sẵn sàng nhận PID hay chưa.', channel?.elm_ready),
+    rowItem('diagnostics.channel.ecu_state', 'Trạng thái ECU', 'Trạng thái ECU firmware ghi nhận.', channel?.ecu_state),
+    rowItem('diagnostics.signals.rpm', 'RPM', 'Vòng tua động cơ trong diagnostics.signals.', signals?.rpm),
+    rowItem('diagnostics.signals.obd_speed_kph', 'Tốc độ OBD', 'Tốc độ xe do ECU cung cấp.', signals?.obd_speed_kph),
+    rowItem('diagnostics.signals.coolant_c', 'Coolant', 'Nhiệt độ nước làm mát động cơ.', signals?.coolant_c),
+    rowItem('diagnostics.signals.engine_load_pct', 'Tải động cơ', 'Engine load do ECU cung cấp.', signals?.engine_load_pct),
+    rowItem('diagnostics.quality.sample_age_ms', 'Độ trễ mẫu', 'Độ cũ của mẫu OBD gần nhất.', quality?.sample_age_ms),
+    rowItem('diagnostics.mil_on', 'MIL', 'Đèn báo lỗi động cơ do ECU trả về.', diagnostics?.mil_on),
+    rowItem('diagnostics.reported_dtc_count', 'Số DTC báo cáo', 'Tổng số mã lỗi ECU báo cáo.', diagnostics?.reported_dtc_count),
+    {
+      code: 'diagnostics.dtc.stored',
+      label: 'DTC đang lưu',
+      meaning: 'Mã lỗi hiện đang lưu trong ECU.',
+      value: stringifyCodes(dtc?.stored),
+    },
+    {
+      code: 'diagnostics.dtc.pending',
+      label: 'DTC chờ xác nhận',
+      meaning: 'Mã lỗi mới xuất hiện, đang chờ xác nhận.',
+      value: stringifyCodes(dtc?.pending),
+    },
+    {
+      code: 'diagnostics.dtc.permanent',
+      label: 'DTC thường trực',
+      meaning: 'Mã lỗi đã được ECU đánh dấu thường trực.',
+      value: stringifyCodes(dtc?.permanent),
+    },
+  ];
+};
+
+const extractMatrixRows = (
+  row: Pick<DeviceRawFeedRow, 'source' | 'timestamp' | 'payload'>,
+): RawMatrixRow[] => {
+  const rawMatrixRows = extractFirmwareRawMatrixRows(row);
+  if (rawMatrixRows) {
+    return rawMatrixRows;
+  }
+
   const payload = toRecord(row.payload) ?? {};
 
   if (row.source === 'telemetry') {
@@ -225,35 +404,100 @@ const extractMatrixRows = (row: Pick<DeviceRawFeedRow, 'source' | 'payload'>): R
     .map(([key, value]) => rowItem(key, key, 'Trường dữ liệu thô từ payload gốc.', value));
 };
 
-const SummaryPill = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-full border bg-background px-2.5 py-1 text-[11px]">
+const SummaryPill = ({
+  active,
+  label,
+  onClick,
+  value,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+  value: string;
+}) => (
+  <button
+    type="button"
+    aria-pressed={active}
+    className={cn(
+      'rounded-full border px-2.5 py-1 text-[11px] transition-colors hover:border-primary/50 hover:bg-primary/10',
+      active ? 'border-primary/50 bg-primary/15' : 'bg-background',
+    )}
+    onClick={onClick}
+  >
     <span className="text-muted-foreground">{label}</span>
     <span className="ml-2 font-semibold text-foreground">{value}</span>
+  </button>
+);
+
+const getSourceBadges = (row: DeviceRawFeedRow): Array<{ label: string; variant: BadgeVariant }> => {
+  if (isMqttRawDataRow(row)) {
+    return [
+      { label: 'Rawdata device', variant: 'default' },
+      { label: 'Event log', variant: 'outline' },
+    ];
+  }
+
+  if (row.source === 'obd-diagnostic') {
+    return [
+      { label: 'OBD', variant: 'secondary' },
+      { label: 'Event log', variant: 'outline' },
+    ];
+  }
+
+  return [
+    {
+      label: SOURCE_LABELS[row.source] ?? row.source,
+      variant: SOURCE_VARIANTS[row.source] ?? 'outline',
+    },
+  ];
+};
+
+const JsonPayloadPanel = ({
+  className,
+  payload,
+  subtitle,
+  title,
+}: {
+  className?: string;
+  payload: unknown;
+  subtitle: string;
+  title: string;
+}) => (
+  <div className={cn('min-h-0 rounded-xl border bg-slate-950 p-3 text-slate-100', className)}>
+    <div className="flex items-center justify-between gap-2">
+      <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-300">
+        {title}
+      </p>
+      <span className="text-right text-[11px] text-slate-400">{subtitle}</span>
+    </div>
+    <ScrollArea className="mt-3 h-[calc(100%-2rem)]">
+      <pre className="pr-4 text-xs leading-5 text-slate-200">
+        {JSON.stringify(payload, null, 2)}
+      </pre>
+    </ScrollArea>
   </div>
 );
 
 export const RawDataTab = () => {
   const { rawFeed, eventLogsTotal } = useDeviceDetailModal();
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]['value']>('all');
+  const [filter, setFilter] = useState<RawFeedFilter>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const counts = useMemo(
     () => ({
-      telemetry: rawFeed.filter((row) => row.source === 'telemetry').length,
-      obd: rawFeed.filter((row) => row.source === 'obd-diagnostic').length,
-      session: rawFeed.filter((row) => row.source === 'session').length,
-      error: rawFeed.filter((row) => row.source === 'error').length,
-      command: rawFeed.filter((row) => row.source === 'command').length,
-      eventLog: rawFeed.filter((row) => row.source === 'event-log').length,
+      rawdata: rawFeed.filter((row) => rowMatchesFilter(row, 'rawdata')).length,
+      telemetry: rawFeed.filter((row) => rowMatchesFilter(row, 'telemetry')).length,
+      obd: rawFeed.filter((row) => rowMatchesFilter(row, 'obd-diagnostic')).length,
+      session: rawFeed.filter((row) => rowMatchesFilter(row, 'session')).length,
+      error: rawFeed.filter((row) => rowMatchesFilter(row, 'error')).length,
+      command: rawFeed.filter((row) => rowMatchesFilter(row, 'command')).length,
+      eventLog: rawFeed.filter((row) => rowMatchesFilter(row, 'event-log')).length,
     }),
     [rawFeed],
   );
 
   const visibleRows = useMemo(() => {
-    if (filter === 'all') {
-      return rawFeed;
-    }
-    return rawFeed.filter((row) => row.source === filter);
+    return rawFeed.filter((row) => rowMatchesFilter(row, filter));
   }, [filter, rawFeed]);
 
   useEffect(() => {
@@ -268,6 +512,7 @@ export const RawDataTab = () => {
   }, [selectedId, visibleRows]);
 
   const selectedRow = visibleRows.find((row) => row.id === selectedId) ?? null;
+  const selectedFirmwarePayload = selectedRow ? extractFirmwareRawPayload(selectedRow) : null;
 
   if (rawFeed.length === 0) {
     return (
@@ -283,12 +528,54 @@ export const RawDataTab = () => {
       <div className="rounded-2xl border bg-muted/10 px-3 py-2.5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap gap-1.5">
-            <SummaryPill label="Bản ghi" value={String(rawFeed.length)} />
-            <SummaryPill label="Telemetry" value={String(counts.telemetry)} />
-            <SummaryPill label="OBD" value={String(counts.obd)} />
-            <SummaryPill label="Phiên" value={String(counts.session)} />
-            <SummaryPill label="Lệnh / lỗi" value={`${counts.command} / ${counts.error}`} />
-            <SummaryPill label="Sự kiện" value={`${counts.eventLog} / ${eventLogsTotal}`} />
+            <SummaryPill
+              active={filter === 'all'}
+              label="Bản ghi"
+              value={String(rawFeed.length)}
+              onClick={() => setFilter('all')}
+            />
+            <SummaryPill
+              active={filter === 'rawdata'}
+              label="Rawdata device"
+              value={String(counts.rawdata)}
+              onClick={() => setFilter('rawdata')}
+            />
+            <SummaryPill
+              active={filter === 'telemetry'}
+              label="Telemetry"
+              value={String(counts.telemetry)}
+              onClick={() => setFilter('telemetry')}
+            />
+            <SummaryPill
+              active={filter === 'obd-diagnostic'}
+              label="OBD"
+              value={String(counts.obd)}
+              onClick={() => setFilter('obd-diagnostic')}
+            />
+            <SummaryPill
+              active={filter === 'session'}
+              label="Phiên"
+              value={String(counts.session)}
+              onClick={() => setFilter('session')}
+            />
+            <SummaryPill
+              active={filter === 'command'}
+              label="Lệnh"
+              value={String(counts.command)}
+              onClick={() => setFilter('command')}
+            />
+            <SummaryPill
+              active={filter === 'error'}
+              label="Lỗi"
+              value={String(counts.error)}
+              onClick={() => setFilter('error')}
+            />
+            <SummaryPill
+              active={filter === 'event-log'}
+              label="Event log"
+              value={`${counts.eventLog} / ${eventLogsTotal}`}
+              onClick={() => setFilter('event-log')}
+            />
           </div>
 
           <div className="flex flex-wrap gap-1.5">
@@ -298,6 +585,7 @@ export const RawDataTab = () => {
                 size="sm"
                 variant={filter === item.value ? 'default' : 'outline'}
                 className="h-7 px-2.5 text-[11px]"
+                aria-pressed={filter === item.value}
                 onClick={() => setFilter(item.value)}
               >
                 {item.label}
@@ -318,6 +606,7 @@ export const RawDataTab = () => {
                 {visibleRows.length > 0 ? (
                   visibleRows.map((row) => {
                     const active = row.id === selectedId;
+                    const badges = getSourceBadges(row);
                     return (
                       <button
                         key={row.id}
@@ -332,9 +621,13 @@ export const RawDataTab = () => {
                               {formatDateTime(row.timestamp)}
                             </p>
                           </div>
-                          <Badge variant={SOURCE_VARIANTS[row.source] ?? 'outline'}>
-                            {SOURCE_LABELS[row.source] ?? row.source}
-                          </Badge>
+                          <div className="flex flex-wrap justify-end gap-1">
+                            {badges.map((badge) => (
+                              <Badge key={`${row.id}-${badge.label}`} variant={badge.variant}>
+                                {badge.label}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
                         <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
                           {row.summary || 'Không có tóm tắt cho bản ghi này.'}
@@ -365,9 +658,13 @@ export const RawDataTab = () => {
                     {selectedRow.summary || 'Không có tóm tắt cho bản ghi này.'}
                   </p>
                 </div>
-                <Badge variant={SOURCE_VARIANTS[selectedRow.source] ?? 'outline'}>
-                  {SOURCE_LABELS[selectedRow.source] ?? selectedRow.source}
-                </Badge>
+                <div className="flex flex-wrap justify-end gap-1">
+                  {getSourceBadges(selectedRow).map((badge) => (
+                    <Badge key={`${selectedRow.id}-${badge.label}`} variant={badge.variant}>
+                      {badge.label}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             ) : (
               <CardTitle className="text-base">Chi tiết bản ghi</CardTitle>
@@ -406,20 +703,30 @@ export const RawDataTab = () => {
                   </ScrollArea>
                 </div>
 
-                <div className="min-h-0 rounded-xl border bg-slate-950 p-3 text-slate-100">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-300">
-                      Payload JSON
-                    </p>
-                    <span className="text-[11px] text-slate-400">
-                      Đối chiếu payload API gốc
-                    </span>
-                  </div>
-                  <ScrollArea className="mt-3 h-[calc(100%-2rem)]">
-                    <pre className="pr-4 text-xs leading-5 text-slate-200">
-                      {JSON.stringify(selectedRow.payload, null, 2)}
-                    </pre>
-                  </ScrollArea>
+                <div className="min-h-0">
+                  {selectedFirmwarePayload ? (
+                    <div className="grid h-full min-h-0 gap-3">
+                      <JsonPayloadPanel
+                        className="min-h-[14rem]"
+                        title="Rawdata device metrics"
+                        subtitle="Payload device gửi lên, đã bỏ auth_token"
+                        payload={selectedFirmwarePayload}
+                      />
+                      <JsonPayloadPanel
+                        className="min-h-[14rem]"
+                        title="Event log hệ thống"
+                        subtitle="Bản ghi backend lưu trong event_logs"
+                        payload={selectedRow.payload}
+                      />
+                    </div>
+                  ) : (
+                    <JsonPayloadPanel
+                      className="h-full"
+                      title="Event log hệ thống"
+                      subtitle="Payload API gốc của bản ghi đang chọn"
+                      payload={selectedRow.payload}
+                    />
+                  )}
                 </div>
               </div>
             ) : (
