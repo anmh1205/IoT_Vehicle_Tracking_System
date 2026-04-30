@@ -52,8 +52,9 @@ const toInt = (value: string | number | null | undefined): number => {
 };
 
 /**
- * Validate device by checking device_id and comparing auth_token hash.
- * The devices table stores auth_token as SHA-256 hash.
+ * Validate device by checking device_id and comparing auth_token.
+ * Devices normally send the raw token; internal simulators may already have
+ * the SHA-256 value stored in devices.auth_token.
  */
 export const validateDevice = async (
   deviceId: string,
@@ -64,9 +65,12 @@ export const validateDevice = async (
       `SELECT id, device_id, vehicle_id, current_status
        FROM devices
        WHERE device_id = $1
-         AND auth_token = encode(sha256($2::bytea), 'hex')
+         AND (
+           auth_token = encode(sha256($2::bytea), 'hex')
+           OR auth_token = $3
+         )
          AND is_active = true`,
-      [deviceId, authToken],
+      [deviceId, authToken, authToken],
     );
     return result.rows[0] ?? null;
   } catch (err) {
