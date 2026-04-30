@@ -133,3 +133,90 @@ def test_run_wait_and_flash_marks_flash_failure(monkeypatch, tmp_path):
     assert result.flash_exit_code == 2
     assert result.flash_stdout_tail[-1] == "flash failed"
     assert result.flash_stderr_tail[-1] == "serial error"
+
+
+def test_run_wait_and_flash_retries_retryable_flash_failure_until_success(monkeypatch, tmp_path):
+    plan = wait_and_flash.FlashPlan(
+        mode="esptool-direct",
+        cwd=str(tmp_path),
+        display="python esptool.py -p <PORT> write_flash",
+        argv=["python", "esptool.py", "-p", "{port}", "write_flash"],
+    )
+    wait_results = iter(
+        [
+            ("COM5", 1, 0.1, ["COM5"], ""),
+            ("COM5", 2, 0.2, ["COM5"], ""),
+        ]
+    )
+    flash_results = iter(
+        [
+            type("Completed", (), {"returncode": 2, "stdout": "Failed to connect to ESP32-S3: No serial data received", "stderr": ""})(),
+            type("Completed", (), {"returncode": 0, "stdout": "flash ok", "stderr": ""})(),
+        ]
+    )
+
+    monkeypatch.setattr(wait_and_flash, "resolve_flash_plan", lambda *args, **kwargs: plan)
+    monkeypatch.setattr(wait_and_flash, "wait_for_ready_port", lambda *args, **kwargs: next(wait_results))
+    monkeypatch.setattr(wait_and_flash, "run_flash", lambda *args, **kwargs: next(flash_results))
+    monkeypatch.setattr(wait_and_flash.time, "sleep", lambda *_: None)
+
+    result = wait_and_flash.run_wait_and_flash(
+        firmware_dir=tmp_path,
+        preferred_port="COM5",
+        vid=None,
+        pid=None,
+        description_contains=None,
+        baud=115200,
+        max_wait_seconds=5,
+        probe_interval_ms=100,
+        export_script=None,
+        flash_command_template="idf.py -p {port} flash",
+        flash_method="auto",
+        flash_baud=460800,
+        esptool_python=None,
+        esptool_script=None,
+        no_flash=False,
+    )
+
+    assert result.status == "flash-ok"
+    assert result.attempts == 3
+    assert result.flash_exit_code == 0
+    assert result.flash_stdout_tail[-1] == "flash ok"
+
+
+def test_run_wait_and_flash_stops_on_non_retryable_flash_failure(monkeypatch, tmp_path):
+    plan = wait_and_flash.FlashPlan(
+        mode="esptool-direct",
+        cwd=str(tmp_path),
+        display="python esptool.py -p <PORT> write_flash",
+        argv=["python", "esptool.py", "-p", "{port}", "write_flash"],
+    )
+    monkeypatch.setattr(wait_and_flash, "resolve_flash_plan", lambda *args, **kwargs: plan)
+    monkeypatch.setattr(wait_and_flash, "wait_for_ready_port", lambda *args, **kwargs: ("COM5", 1, 0.2, ["COM5"], ""))
+    monkeypatch.setattr(
+        wait_and_flash,
+        "run_flash",
+        lambda *args, **kwargs: type("Completed", (), {"returncode": 2, "stdout": "invalid partition table", "stderr": ""})(),
+    )
+
+    result = wait_and_flash.run_wait_and_flash(
+        firmware_dir=tmp_path,
+        preferred_port="COM5",
+        vid=None,
+        pid=None,
+        description_contains=None,
+        baud=115200,
+        max_wait_seconds=5,
+        probe_interval_ms=100,
+        export_script=None,
+        flash_command_template="idf.py -p {port} flash",
+        flash_method="auto",
+        flash_baud=460800,
+        esptool_python=None,
+        esptool_script=None,
+        no_flash=False,
+    )
+
+    assert result.status == "flash-failed"
+    assert result.attempts == 1
+    assert result.flash_exit_code == 2

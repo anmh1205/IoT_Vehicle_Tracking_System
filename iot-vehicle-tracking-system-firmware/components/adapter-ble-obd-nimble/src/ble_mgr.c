@@ -8,6 +8,7 @@
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
+#include "freertos/timers.h"
 
 #include "host/ble_gap.h"
 #include "host/ble_gatt.h"
@@ -47,6 +48,12 @@ struct ble_mgr_ctx {
     const ble_mgr_disc_cfg_t *disc_cfg;
     void *usr_ctx;
     struct {
+        ble_addr_t addr;
+        int8_t rssi;
+        bool service_match;
+        bool armed;
+    } pending_connect;
+    struct {
         uint32_t adv_seen;
         uint32_t parse_failures;
         uint32_t connect_matches;
@@ -75,6 +82,8 @@ static ble_mgr_ctx_t s_mgr = {
 static void ble_mgr_gap_stack_reset_cb(int reason);
 static void ble_mgr_gap_stack_sync_cb(void);
 static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg);
+static void ble_mgr_start_pending_connect_deferred(void *arg1, uint32_t arg2);
+static ble_mgr_status_t ble_mgr_start_pending_connect(ble_mgr_ctx_t *mgr_ctx);
 static int ble_mgr_gatt_svc_discovered_cb(uint16_t conn_handle,
                                           const struct ble_gatt_error *error,
                                           const struct ble_gatt_svc *service,
@@ -198,6 +207,7 @@ static void ble_mgr_reset_context(ble_mgr_ctx_t *mgr_ctx) {
     mgr_ctx->is_connecting = false;
     mgr_ctx->is_connected = false;
     mgr_ctx->conn_handle = BLE_HS_CONN_HANDLE_NONE;
+    memset(&mgr_ctx->pending_connect, 0, sizeof(mgr_ctx->pending_connect));
     memset(&mgr_ctx->scan_diag, 0, sizeof(mgr_ctx->scan_diag));
     mgr_ctx->svc_disc_ctx.svc_disc_completed = false;
     mgr_ctx->svc_disc_ctx.chr_disc_completed = false;
@@ -219,11 +229,52 @@ static ble_mgr_status_t ble_mgr_connect_complete(ble_mgr_ctx_t *mgr_ctx, ble_mgr
 
     mgr_ctx->is_connecting = false;
     mgr_ctx->is_connected = (status == BLE_MGR_E_OK);
+    mgr_ctx->pending_connect.armed = false;
     if (status != BLE_MGR_E_OK) {
         mgr_ctx->conn_handle = BLE_HS_CONN_HANDLE_NONE;
     }
     ble_mgr_queue_send(mgr_ctx, status);
     return status;
+}
+
+static ble_mgr_status_t ble_mgr_start_pending_connect(ble_mgr_ctx_t *mgr_ctx) {
+    if (mgr_ctx == NULL || !mgr_ctx->pending_connect.armed) {
+        return BLE_MGR_E_NULL;
+    }
+
+    char addr_str[BLE_ADDR_STR_LEN] = {0};
+    (void)ble_addr_to_str(&mgr_ctx->pending_connect.addr, addr_str);
+    ESP_LOGI(TAG,
+             "Starting BLE connect addr=%s rssi=%d service_match=%d",
+             addr_str,
+             mgr_ctx->pending_connect.rssi,
+             mgr_ctx->pending_connect.service_match ? 1 : 0);
+
+    ble_mgr_queue_clear(mgr_ctx);
+    int rc = ble_gap_connect(BLE_OWN_ADDR_PUBLIC,
+                             &mgr_ctx->pending_connect.addr,
+                             BLE_CONNECT_ATTEMPT_TIMEOUT_MS,
+                             &s_conn_params,
+                             ble_mgr_gap_event_cb,
+                             mgr_ctx);
+    if (rc != 0) {
+        ESP_LOGW(TAG, "BLE connect start failed addr=%s rc=%d", addr_str, rc);
+        mgr_ctx->pending_connect.armed = false;
+        mgr_ctx->is_connecting = false;
+        return BLE_MGR_E_NOT_CONNECTED;
+    }
+
+    mgr_ctx->pending_connect.armed = false;
+    return BLE_MGR_E_OK;
+}
+
+static void ble_mgr_start_pending_connect_deferred(void *arg1, uint32_t arg2) {
+    (void)arg2;
+
+    ble_mgr_ctx_t *mgr_ctx = (ble_mgr_ctx_t *)arg1;
+    if (ble_mgr_start_pending_connect(mgr_ctx) != BLE_MGR_E_OK) {
+        ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_NOT_CONNECTED);
+    }
 }
 
 /**
@@ -560,24 +611,30 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
             }
 
             mgr_ctx->scan_diag.connect_matches++;
-            /* Stop scan and initiate connection to selected peripheral. */
+            /* Stop scan first; start connect in the discovery-complete event. */
             char addr_str[BLE_ADDR_STR_LEN] = {0};
             (void)ble_addr_to_str(&event->disc.addr, addr_str);
             ESP_LOGI(TAG,
-                     "Connecting to BLE candidate addr=%s rssi=%d service_match=%d",
+                     "Queue BLE candidate addr=%s rssi=%d service_match=%d and stop scan",
                      addr_str,
                      event->disc.rssi,
                      service_match ? 1 : 0);
             mgr_ctx->is_connecting = true;
-            ble_gap_disc_cancel();
-            ble_mgr_queue_clear(mgr_ctx);
-            rc = ble_gap_connect(BLE_OWN_ADDR_PUBLIC,
-                                 &event->disc.addr,
-                                 BLE_CONNECT_ATTEMPT_TIMEOUT_MS,
-                                 &s_conn_params,
-                                 ble_mgr_gap_event_cb,
-                                 mgr_ctx);
-            if (rc != 0) {
+            mgr_ctx->pending_connect.addr = event->disc.addr;
+            mgr_ctx->pending_connect.rssi = event->disc.rssi;
+            mgr_ctx->pending_connect.service_match = service_match;
+            mgr_ctx->pending_connect.armed = true;
+            rc = ble_gap_disc_cancel();
+            if (rc != 0 && rc != BLE_HS_EALREADY) {
+                ESP_LOGW(TAG, "Failed to cancel scan before connect: %d", rc);
+                mgr_ctx->pending_connect.armed = false;
+                mgr_ctx->is_connecting = false;
+                ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_NOT_CONNECTED);
+                break;
+            }
+            if (xTimerPendFunctionCall(ble_mgr_start_pending_connect_deferred, mgr_ctx, 0, 0) != pdPASS) {
+                ESP_LOGW(TAG, "Failed to queue deferred BLE connect start");
+                mgr_ctx->pending_connect.armed = false;
                 mgr_ctx->is_connecting = false;
                 ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_NOT_CONNECTED);
             }
@@ -608,6 +665,7 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
             mgr_ctx->conn_handle = BLE_HS_CONN_HANDLE_NONE;
             mgr_ctx->is_connected = false;
             mgr_ctx->is_connecting = false;
+            mgr_ctx->pending_connect.armed = false;
             if (mgr_ctx->disc_cfg->disconnected_cb != NULL &&
                 mgr_ctx->disc_cfg->disconnected_cb(mgr_ctx, mgr_ctx->usr_ctx)) {
                 int rc = ble_gap_disc(0, BLE_DISCOVERY_TIMEOUT_MS, &s_disc_params, ble_mgr_gap_event_cb, mgr_ctx);
@@ -770,6 +828,7 @@ ble_mgr_status_t ble_mgr_connect_service(ble_mgr_ctx_t *mgr_ctx,
     mgr_ctx->is_connecting = false;
     mgr_ctx->disc_cfg = disc_cfg;
     mgr_ctx->usr_ctx = usr_ctx;
+    memset(&mgr_ctx->pending_connect, 0, sizeof(mgr_ctx->pending_connect));
     memset(&mgr_ctx->scan_diag, 0, sizeof(mgr_ctx->scan_diag));
 
     /* Clear previous characteristic handles before new discovery pass. */

@@ -340,6 +340,33 @@ static esp_err_t util_ota_write_wire_payload(util_ota_update_ctx_t *ctx,
                                              const uint8_t *wire_payload,
                                              size_t wire_payload_len) {
     size_t written_len = 0U;
+    if (ctx->read_offset == 0U) {
+        uint8_t first_byte = 0U;
+        if (ctx->transfer_mode_hex) {
+            if (wire_payload_len < 2U) {
+                ctx->failure_code = TRACKER_OTA_ERROR_HTTP_INVALID_IMAGE;
+                ESP_LOGE(UTIL_TAG, "HTTPREAD first OTA chunk too short for image header");
+                return ESP_FAIL;
+            }
+            if (!util_hex_to_bytes_span((const char *)wire_payload,
+                                        2U,
+                                        &first_byte,
+                                        1U,
+                                        &written_len) || written_len != 1U) {
+                ctx->failure_code = TRACKER_OTA_ERROR_HTTP_INVALID_IMAGE;
+                ESP_LOGE(UTIL_TAG, "HTTPREAD first OTA byte decode failed");
+                return ESP_FAIL;
+            }
+        } else {
+            first_byte = wire_payload[0];
+        }
+        if (first_byte != 0xE9U) {
+            ctx->failure_code = TRACKER_OTA_ERROR_HTTP_INVALID_IMAGE;
+            ESP_LOGE(UTIL_TAG, "HTTPREAD first OTA byte invalid: 0x%02X", first_byte);
+            return ESP_FAIL;
+        }
+    }
+    written_len = 0U;
     if (ctx->transfer_mode_hex) {
         if ((wire_payload_len % 2U) != 0U) {
             ctx->failure_code = TRACKER_OTA_ERROR_HTTP_HEX_DECODE_FAILED;

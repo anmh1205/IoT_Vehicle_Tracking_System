@@ -58,10 +58,10 @@ typedef enum {
 typedef struct {
     /** GNSS sensor fields. */
     gnss_data_t gnss;
-    /** Primary battery voltage. */
-    float battery_top;
-    /** Backup battery voltage placeholder. */
-    float battery_bot;
+    /** Vehicle-side +12V supply / main battery voltage. */
+    float vehicle_battery;
+    /** Tracker backup battery voltage. */
+    float device_battery;
     /** Composite vibration score (0..1000). */
     uint16_t vibration;
     /** Derived ignition state. */

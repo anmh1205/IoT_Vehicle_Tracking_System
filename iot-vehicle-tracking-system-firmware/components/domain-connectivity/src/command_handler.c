@@ -513,6 +513,10 @@ static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd
         ESP_LOGW(TAG, "ota_update url must start with https://");
         return false;
     }
+    if (strstr(url->valuestring, "example.com") != NULL) {
+        ESP_LOGW(TAG, "ota_update url must point to a real firmware host");
+        return false;
+    }
 
     memset(out_cmd, 0, sizeof(*out_cmd));
     out_cmd->pending = true;

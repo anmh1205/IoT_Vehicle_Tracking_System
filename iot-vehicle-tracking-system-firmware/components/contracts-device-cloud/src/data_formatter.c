@@ -5,7 +5,7 @@
 #include "util.h"
 
 #define DATA_FORMATTER_DEFAULT_SCHEMA_VERSION "v1.0.0"
-#define DATA_FORMATTER_STATE_SCHEMA_VERSION "v1.5.0"
+#define DATA_FORMATTER_STATE_SCHEMA_VERSION "v2.0.0"
 #define DATA_FORMATTER_OBD_STALE_SAMPLE_MS 30000U
 
 /**
@@ -469,8 +469,8 @@ char *data_format_rawdata(const config_t *cfg,
 
     /* Nested telemetry object. */
     cJSON_AddNumberToObject(data, "vibration", telemetry->vibration);
-    cJSON_AddNumberToObject(data, "battery_top", telemetry->battery_top);
-    cJSON_AddNumberToObject(data, "battery_bot", telemetry->battery_bot);
+    cJSON_AddNumberToObject(data, "vehicle_battery", telemetry->vehicle_battery);
+    cJSON_AddNumberToObject(data, "device_battery", telemetry->device_battery);
     bool has_valid_gnss_fix = telemetry->gnss.fix_valid &&
                               telemetry->gnss.latitude != 0.0 &&
                               telemetry->gnss.longitude != 0.0;

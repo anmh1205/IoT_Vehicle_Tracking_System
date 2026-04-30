@@ -141,6 +141,14 @@ config TRACKER_FIELD_VALIDATION_DISABLE_COMMAND_SUBSCRIBE
     bool "Disable command subscribe in field-validation mode"
     default y
 
+config TRACKER_FIELD_VALIDATION_SKIP_OBD_AUTODISCOVER
+    bool "Skip OBD BLE auto-discover in field-validation mode when preferred MAC is missing"
+    default y
+    help
+        Keeps publish-path validation stable on field devices that do not have a
+        provisioned OBD adapter MAC yet. BLE OBD still works when an explicit
+        preferred MAC is configured.
+
 endif
 
 endmenu

@@ -50,6 +50,7 @@
 #define TRACKER_OTA_ERROR_HTTP_HEX_DECODE_FAILED "http_hex_decode_failed"
 #define TRACKER_OTA_ERROR_OTA_WRITE_FAILED "ota_write_failed"
 #define TRACKER_OTA_ERROR_HTTP_SIZE_MISMATCH "http_size_mismatch"
+#define TRACKER_OTA_ERROR_HTTP_INVALID_IMAGE "http_invalid_image"
 #define TRACKER_OTA_ERROR_SHA256_MISMATCH "sha256_mismatch"
 #define TRACKER_OTA_ERROR_OTA_END_FAILED "ota_end_failed"
 #define TRACKER_OTA_ERROR_SET_BOOT_PARTITION_FAILED "set_boot_partition_failed"

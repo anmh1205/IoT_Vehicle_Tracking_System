@@ -22,6 +22,7 @@
  */
 
 static const char *TAG = "BLE_INIT";
+static const UBaseType_t BLE_HOST_TASK_PRIORITY = (UBaseType_t)(configMAX_PRIORITIES - 4);
 
 /**
  * @brief Convert controller status enum to readable text.
@@ -83,6 +84,10 @@ static void ble_task(void *param) {
     vTaskDelete(NULL);
 }
 
+static BaseType_t ble_host_task_core(void) {
+    return CONFIG_BT_NIMBLE_PINNED_TO_CORE < portNUM_PROCESSORS ? CONFIG_BT_NIMBLE_PINNED_TO_CORE : tskNO_AFFINITY;
+}
+
 /**
  * @brief Default stack reset callback used when caller does not supply one.
  *
@@ -142,8 +147,20 @@ esp_err_t ble_init_stack(const ble_init_config_t *config) {
         return ESP_ERR_NO_MEM;
     }
 
-    /* Spawn NimBLE host task. */
-    BaseType_t task_result = xTaskCreate(ble_task, "nimble_host", 4096, NULL, 5, NULL);
+    /* Keep host task affinity/priority aligned with the ESP-IDF NimBLE port. */
+    BaseType_t host_core = ble_host_task_core();
+    ESP_LOGI(TAG,
+             "Creating NimBLE host task stack=%u priority=%u core=%ld",
+             (unsigned)CONFIG_BT_NIMBLE_HOST_TASK_STACK_SIZE,
+             (unsigned)BLE_HOST_TASK_PRIORITY,
+             (long)host_core);
+    BaseType_t task_result = xTaskCreatePinnedToCore(ble_task,
+                                                     "nimble_host",
+                                                     CONFIG_BT_NIMBLE_HOST_TASK_STACK_SIZE,
+                                                     NULL,
+                                                     BLE_HOST_TASK_PRIORITY,
+                                                     NULL,
+                                                     host_core);
     if (task_result != pdPASS) {
         /* Full rollback when task creation fails. */
         vSemaphoreDelete(s_ble_stop_sem);

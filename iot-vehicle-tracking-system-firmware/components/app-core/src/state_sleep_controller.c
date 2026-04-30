@@ -116,7 +116,7 @@ bool state_machine_can_enter_sleep(const char **out_reason) {
 void state_machine_shutdown_for_sleep(void) {
     g_rtc_context.last_state = APP_STATE_SLEEP;
     g_rtc_context.ign_last_known = s_telemetry.ignition;
-    g_rtc_context.last_battery_v = s_telemetry.battery_top;
+    g_rtc_context.last_battery_v = s_telemetry.vehicle_battery;
     g_rtc_context.last_heartbeat_ts = (uint32_t)(util_uptime_ms() / 1000ULL);
 
     if (s_ble_ctx != NULL) {

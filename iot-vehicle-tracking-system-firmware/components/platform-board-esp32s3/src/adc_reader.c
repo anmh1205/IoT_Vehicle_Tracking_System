@@ -136,14 +136,14 @@ esp_err_t adc_reader_init(void) {
     return ESP_OK;
 }
 
-float adc_read_battery_voltage(void) {
+float adc_read_device_battery_voltage(void) {
     return adc_reader_read_voltage(ADC_CHANNEL_BATT,
                                    s_batt_cali_handle,
                                    s_batt_calibration_enabled,
                                    ADC_BATT_DIVIDER_RATIO);
 }
 
-float adc_read_supply_voltage(void) {
+float adc_read_vehicle_battery_voltage(void) {
     return adc_reader_read_voltage(ADC_CHANNEL_SUPPLY,
                                    s_supply_cali_handle,
                                    s_supply_calibration_enabled,

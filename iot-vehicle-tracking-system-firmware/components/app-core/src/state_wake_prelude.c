@@ -191,10 +191,10 @@ void state_machine_bootstrap_imu(void) {
 }
 
 void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
-    float supply_raw_v = adc_read_supply_voltage();
-    float batt_raw_v = adc_read_battery_voltage();
-    s_telemetry.battery_top = supply_raw_v * TRACKER_ADC_SUPPLY_CALIB_GAIN;
-    s_telemetry.battery_bot = batt_raw_v * TRACKER_ADC_BATT_CALIB_GAIN;
+    float vehicle_battery_raw_v = adc_read_vehicle_battery_voltage();
+    float device_battery_raw_v = adc_read_device_battery_voltage();
+    s_telemetry.vehicle_battery = vehicle_battery_raw_v * TRACKER_ADC_SUPPLY_CALIB_GAIN;
+    s_telemetry.device_battery = device_battery_raw_v * TRACKER_ADC_BATT_CALIB_GAIN;
     s_telemetry.vibration = s_imu_available ? imu_get_vibration_composite() : 0;
 
     if (read_obd && s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
@@ -285,7 +285,7 @@ telemetry_finalize:
     }
 
     float ignition_threshold_v = (float)s_config.ignition_adc_threshold_mv / 1000.0f;
-    bool adc_ignition = s_telemetry.battery_top >= ignition_threshold_v;
+    bool adc_ignition = s_telemetry.vehicle_battery >= ignition_threshold_v;
     bool obd_live_ignition = obd_connected &&
                              strcmp(obd_ecu_state, "live") == 0 &&
                              state_machine_has_recent_obd_sample(now_ms, TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS);
@@ -293,12 +293,12 @@ telemetry_finalize:
     bool ignition_next = rpm_ignition || adc_ignition || obd_live_ignition;
     if (!s_ignition_log_initialized || ignition_next != s_last_ignition_state) {
         ESP_LOGI(TAG,
-                 "ignition transition prev=%d next=%d rpm=%ld adc=%d supply=%.2f threshold=%.2f obd_live=%d sample_age_ms=%lu ecu=%s",
+                 "ignition transition prev=%d next=%d rpm=%ld adc=%d vehicle_battery=%.2f threshold=%.2f obd_live=%d sample_age_ms=%lu ecu=%s",
                  s_ignition_log_initialized ? (s_last_ignition_state ? 1 : 0) : -1,
                  ignition_next ? 1 : 0,
                  (long)s_telemetry.obd_rpm,
                  adc_ignition ? 1 : 0,
-                 s_telemetry.battery_top,
+                 s_telemetry.vehicle_battery,
                  ignition_threshold_v,
                  obd_live_ignition ? 1 : 0,
                  (unsigned long)s_telemetry.obd_sample_age_ms,
@@ -316,9 +316,9 @@ telemetry_finalize:
     if (s_last_hw_diag_log_ms == 0 || (now_ms - s_last_hw_diag_log_ms) >= TRACKER_HW_DIAG_LOG_INTERVAL_MS) {
         UBaseType_t stack_hwm_words = uxTaskGetStackHighWaterMark(NULL);
         ESP_LOGI(TAG,
-                 "HW diag supply=%.2fV batt=%.2fV ign=%d vib=%u lte=%d mqtt=%d ble=%d gnss_fix=%d stack_hwm_words=%lu",
-                 s_telemetry.battery_top,
-                 s_telemetry.battery_bot,
+                "HW diag vehicle_battery=%.2fV device_battery=%.2fV ign=%d vibration=%u lte=%d mqtt=%d ble=%d gnss_fix=%d stack_hwm_words=%lu",
+                 s_telemetry.vehicle_battery,
+                 s_telemetry.device_battery,
                  s_telemetry.ignition ? 1 : 0,
                  (unsigned)s_telemetry.vibration,
                  modem_lte_is_connected() ? 1 : 0,

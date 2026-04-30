@@ -173,16 +173,16 @@ bool state_machine_ota_start_is_safe(void) {
         ESP_LOGW(TAG, "OTA blocked reason=mqtt_not_connected");
         return false;
     }
-    if (s_telemetry.battery_bot <= 0.0f) {
-        ESP_LOGW(TAG, "OTA blocked reason=battery_unavailable");
+    if (s_telemetry.device_battery <= 0.0f) {
+        ESP_LOGW(TAG, "OTA blocked reason=device_battery_unavailable");
         return false;
     }
 
     float threshold_v = (float)s_config.ota_min_battery_mv / 1000.0f;
-    if (s_telemetry.battery_bot < threshold_v) {
+    if (s_telemetry.device_battery < threshold_v) {
         ESP_LOGW(TAG,
-                 "OTA blocked reason=power_unsafe battery=%.2f threshold=%.2f",
-                 (double)s_telemetry.battery_bot,
+                 "OTA blocked reason=device_battery_unsafe device_battery=%.2f threshold=%.2f",
+                 (double)s_telemetry.device_battery,
                  (double)threshold_v);
         return false;
     }

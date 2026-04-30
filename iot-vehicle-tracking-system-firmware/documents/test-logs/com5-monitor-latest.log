@@ -12049,3 +12049,797 @@ I (6200361) STATE_MACHINE: HW diag supply=11.93V batt=4.25V ign=1 vib=0 lte=1 mq
 I (6200711) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
 I (6200711) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.633050,N,10544.723033,E,240426,184259.0,19.0,0.0,    OK  
 I (6200711) MODEM_GNSS: GNSS fallback fix lat=20.960551 lon=105.745384 speed_kmh=0.00
+
+===== monitor start port=COM5 ts=1777537470 =====
+===== serial open port=COM5 ts=1777537470 =====
+I (20855) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSII (388555) STATE_MACHINE: HW diag supply=11.87V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=6916
+I (389825) STATE_MACHINE: mqtt rawdata metadata mid=e9ea44bd-1e11-4665-a56e-c83a8a1d97fe seq=27 boot=boot-1-586c664d ts=1777537476000
+I (400625) STATE_MACHINE: mqtt rawdata metadata mid=05faafc4-20a4-4b17-9503-92b545a89be9 seq=28 boot=boot-1-586c664d ts=1777537487000
+I (403605) STATE_MACHINE: HW diag supply=11.80V batt=4.20V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=6916
+I (411605) STATE_MACHINE: mqtt rawdata metadata mid=fdbd8adc-de81-450c-bfe5-cbc6a422ebc8 seq=29 boot=boot-1-586c664d ts=1777537498000
+I (418695) STATE_MACHINE: HW diag supply=11.75V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=6916
+I (422495) STATE_MACHINE: mqtt rawdata metadata mid=93d804e3-10f3-4ffe-a681-a3be8b85ad12 seq=30 boot=boot-1-586c664d ts=1777537509000
+I (433475) STATE_MACHINE: mqtt rawdata metadata mid=dcfd68e7-9060-4d75-825a-942e7c4bd2c1 seq=31 boot=boot-1-586c664d ts=1777537520000
+I (434605) STATE_MACHINE: HW diag supply=11.86V batt=4.20V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=6916
+I (444455) STATE_MACHINE: mqtt rawdata metadata mid=509e9924-a831-490d-ba16-2332e217b8d3 seq=32 boot=boot-1-586c664d ts=1777537531000
+I (449715) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=6916
+I (455435) STATE_MACHINE: mqtt rawdata metadata mid=f3707796-08c6-48e7-a983-f7f48f333fed seq=33 boot=boot-1-586c664d ts=1777537542000
+I (464895) STATE_MACHINE: HW diag supply=11.84V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=6916
+I (466415) STATE_MACHINE: mqtt rawdata metadata mid=04c2d176-805c-4963-95d6-dc0959b1464f seq=34 boot=boot-1-586c664d ts=1777537553000
+I (477405) STATE_MACHINE: mqtt rawdata metadata mid=907e5363-b560-4f32-af82-8077282fe596 seq=35 boot=boot-1-586c664d ts=1777537564000
+I (480135) STATE_MACHINE: HW diag supply=11.89V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=6916
+I (488375) STATE_MACHINE: mqtt rawdata metadata mid=a4d9331c-a7b2-49c8-a263-8bfe9b91b38f seq=36 boot=boot-1-586c664d ts=1777537575000
+I (495315) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=6916
+I (499355) STATE_MACHINE: mqtt rawdata metadata mid=a9fee921-71b2-4311-9832-b5c042cac9a7 seq=37 boot=boot-1-586c664d ts=1777537586000
+
+===== monitor start port=COM5 ts=1777538211 =====
+===== serial open port=COM5 ts=1777538211 =====
+I (20731) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (20731) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (20731) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (20731) MODEM_GNSS: GNSS no-fix streak=6 fix_valid=0
+I (22821) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (22821) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (22821) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (24831) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (24831) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (24831) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (26911) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (26911) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (26911) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (28951) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (28951) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (28951) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+W (29171) MODEM_GNSS: GNSS power-off fallback accepted via CGPS=0
+W (29171) MODEM_GNSS: GNSS no-fix recover stage=power-off done; power-on due in 2000 ms
+I (33461) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (35561) STATE_MACHINE: mqtt rawdata metadata mid=b31083a7-448f-4a53-8d43-5b1e1debd080 seq=2 boot=boot-1-081064e0 ts=1777538227000
+I (36361) STATE_MACHINE: mqtt status metadata mid=cc9a84f4-e70b-4a5c-9785-72883339bfee seq=3 boot=boot-1-081064e0 ts=1777538227000
+W (37141) STATE_MACHINE: Sleep blocked reason=ignition_on blocked_count=1
+I (48481) STATE_MACHINE: HW diag supply=11.83V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (63531) STATE_MACHINE: HW diag supply=11.94V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (67751) STATE_MACHINE: mqtt rawdata metadata mid=eca5b9a2-c7ea-42a5-a4d2-931d5314d597 seq=4 boot=boot-1-081064e0 ts=1777538259000
+I (68591) STATE_MACHINE: mqtt status metadata mid=8b1b47ae-35ba-4917-af96-0050c0d81f50 seq=5 boot=boot-1-081064e0 ts=1777538260000
+W (69371) STATE_MACHINE: Sleep blocked reason=ignition_on blocked_count=2
+I (96891) OFFLINE_QUEUE: replay publish accepted seq=19236 type=3 qos=1 topic=v1/TRACKER_001/firmware msg_id=5
+I (98741) STATE_MACHINE: mqtt status metadata mid=6e33f67e-e81f-47d3-a998-1f61483d7b89 seq=6 boot=boot-1-081064e0 ts=1777538290000
+I (99421) STATE_MACHINE: mqtt rawdata metadata mid=fc5f09dc-6c32-46cb-b05e-77c6fca57236 seq=7 boot=boot-1-081064e0 ts=1777538291000
+I (100451) STATE_MACHINE: HW diag supply=11.78V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (110301) STATE_MACHINE: mqtt rawdata metadata mid=e51a8e5c-0ec7-4d21-9070-554110cc467d seq=8 boot=boot-1-081064e0 ts=1777538301000
+I (115531) STATE_MACHINE: HW diag supply=11.84V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (121491) STATE_MACHINE: mqtt rawdata metadata mid=3437581d-58eb-43d6-8cc1-d7c42fa6a46f seq=9 boot=boot-1-081064e0 ts=1777538313000
+I (130621) STATE_MACHINE: HW diag supply=11.93V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (132381) STATE_MACHINE: mqtt rawdata metadata mid=db500355-e594-4630-a4a6-06dfe6bea913 seq=10 boot=boot-1-081064e0 ts=1777538324000
+I (143391) STATE_MACHINE: mqtt rawdata metadata mid=1fb38f1b-43ca-4c2d-a106-c965b243de77 seq=11 boot=boot-1-081064e0 ts=1777538335000
+I (145891) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (154371) STATE_MACHINE: mqtt rawdata metadata mid=a1d22237-d362-46f5-bb57-f0726110ff63 seq=12 boot=boot-1-081064e0 ts=1777538346000
+I (161071) STATE_MACHINE: HW diag supply=11.96V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (165351) STATE_MACHINE: mqtt rawdata metadata mid=aadcf9a0-4e31-4328-94cb-4c151c43876b seq=13 boot=boot-1-081064e0 ts=1777538356000
+I (176191) STATE_MACHINE: HW diag supply=11.91V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (176331) STATE_MACHINE: mqtt rawdata metadata mid=199dbaad-4ffa-4bcb-9dd8-1ed584b50742 seq=14 boot=boot-1-081064e0 ts=1777538367000
+I (187311) STATE_MACHINE: mqtt rawdata metadata mid=c032e868-a672-4a36-ae0c-c0bf0d14e575 seq=15 boot=boot-1-081064e0 ts=1777538378000
+I (191191) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (198291) STATE_MACHINE: mqtt rawdata metadata mid=13eb6c56-743d-406e-8abe-d9fc2d07739e seq=16 boot=boot-1-081064e0 ts=1777538389000
+
+===== monitor start port=COM5 ts=1777539868 =====
+===== serial open port=COM5 ts=1777539868 =====
+I (4702) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
+I (4912) MODEM_LTE: PDP IP check response="..+CGPADDR: 1,53.190.83.173....OK.."
+I (4912) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
+I (4912) MODEM_LTE: LTE connected and PDP active
+I (4912) MODEM_GNSS: GNSS power-on sequence start
+I (5032) MODEM_GNSS: GNSS cmd=AT+CGPS? err=ESP_OK resp=  +CGPS: 0,1    OK  
+I (5142) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK  
+I (5142) MODEM_GNSS: GNSS startup gate path=cgps_start off_ms=unknown first_query_in_ms=5000
+I (5142) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
+I (5152) STATE_MACHINE: GNSS power-on OK
+I (5262) TRACKER_MQTT: MQTT resumed existing modem session reason=pre_connect_probe disc_state=0
+I (5482) TRACKER_MQTT: MQTT subscribed commands topic=v1/TRACKER_001/commands
+I (5482) OFFLINE_QUEUE: link transition prev_online=0 next_online=1 write_seq=19239 replay_seq=19239 ack_critical=19236 depth=1
+I (6542) STATE_MACHINE: OBD prime sample ready pid=0x0D
+I (7482) STATE_MACHINE: BLE OBD connected + ELM327 ready duration_ms=4210
+I (7852) STATE_MACHINE: ignition transition prev=0 next=1 rpm=1890 adc=0 supply=11.90 threshold=13.00 obd_live=1 sample_age_ms=90 ecu=live
+I (10262) TRACKER_MQTT: MQTT subscribe URC client=0 err=0
+I (10382) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (10382) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (10382) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (10382) MODEM_GNSS: GNSS no-fix streak=1 fix_valid=0
+I (12422) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (12422) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (12422) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (14442) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (14442) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (14442) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (16572) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (16572) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (16572) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (18392) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (18602) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (18602) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (18602) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (20662) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (20662) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (20662) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (20662) MODEM_GNSS: GNSS no-fix streak=6 fix_valid=0
+I (22732) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (22732) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (22732) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (24762) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (24762) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (24762) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (26812) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (26812) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (26812) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (29022) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (29022) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (29022) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+W (29252) MODEM_GNSS: GNSS power-off fallback accepted via CGPS=0
+W (29252) MODEM_GNSS: GNSS no-fix recover stage=power-off done; power-on due in 2000 ms
+I (33422) STATE_MACHINE: HW diag supply=11.91V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (35662) STATE_MACHINE: mqtt rawdata metadata mid=009c04b2-9de2-4f6f-9c7a-015defb4ab0b seq=2 boot=boot-1-f97742d4 ts=1777539899000
+I (36762) STATE_MACHINE: mqtt status metadata mid=cec1eb02-ce4c-47e4-8bca-a0bd2fd7c0e1 seq=3 boot=boot-1-f97742d4 ts=1777539900000
+W (37542) STATE_MACHINE: Sleep blocked reason=ignition_on blocked_count=1
+I (48502) STATE_MACHINE: HW diag supply=11.90V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (63592) STATE_MACHINE: HW diag supply=11.81V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (67922) STATE_MACHINE: mqtt rawdata metadata mid=0eb01bb5-e20a-4b9e-90b9-d517ae7ab503 seq=4 boot=boot-1-f97742d4 ts=1777539931000
+I (68712) STATE_MACHINE: mqtt status metadata mid=a1dbf78c-cf1f-494e-b83a-95a95c1815f8 seq=5 boot=boot-1-f97742d4 ts=1777539932000
+W (69502) STATE_MACHINE: Sleep blocked reason=ignition_on blocked_count=2
+I (96852) OFFLINE_QUEUE: replay publish accepted seq=19239 type=3 qos=1 topic=v1/TRACKER_001/firmware msg_id=5
+I (98702) STATE_MACHINE: mqtt status metadata mid=9d9acacb-058a-4be2-affa-4ef093349585 seq=6 boot=boot-1-f97742d4 ts=1777539962000
+I (99402) STATE_MACHINE: mqtt rawdata metadata mid=c66f910f-ca9a-4046-8dba-917de8a4d021 seq=7 boot=boot-1-f97742d4 ts=1777539963000
+I (100432) STATE_MACHINE: HW diag supply=11.87V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (110292) STATE_MACHINE: mqtt rawdata metadata mid=14ff9120-c0fd-447d-a151-4fb58b659e4c seq=8 boot=boot-1-f97742d4 ts=1777539973000
+I (115552) STATE_MACHINE: HW diag supply=11.88V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (121272) STATE_MACHINE: mqtt rawdata metadata mid=d93330f9-1465-4403-a749-caee8532a6cb seq=9 boot=boot-1-f97742d4 ts=1777539984000
+I (130762) STATE_MACHINE: HW diag supply=11.93V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (132282) STATE_MACHINE: mqtt rawdata metadata mid=45cfdb89-7a66-4fe4-bacf-e21aca5fe552 seq=10 boot=boot-1-f97742d4 ts=1777539995000
+I (143262) STATE_MACHINE: mqtt rawdata metadata mid=f6232cd9-800c-4009-a059-d47d72da757d seq=11 boot=boot-1-f97742d4 ts=1777540006000
+I (145772) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (154242) STATE_MACHINE: mqtt rawdata metadata mid=befca7e1-b28f-4cc8-90b4-7ede1b6355ac seq=12 boot=boot-1-f97742d4 ts=1777540017000
+I (160942) STATE_MACHINE: HW diag supply=11.93V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (165222) STATE_MACHINE: mqtt rawdata metadata mid=92db1f59-ed6a-4d5f-8fee-440497291f61 seq=13 boot=boot-1-f97742d4 ts=1777540028000
+I (176092) STATE_MACHINE: HW diag supply=11.85V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (176232) STATE_MACHINE: mqtt rawdata metadata mid=bccd3d18-fd5e-4261-8bb4-9c6c35adc0d8 seq=14 boot=boot-1-f97742d4 ts=1777540039000
+
+===== monitor start port=COM5 ts=1777540566 =====
+===== serial open port=COM5 ts=1777540566 =====
+I (187212) STATE_MACHINE: mqtt rawdata metadata mid=e94e9e13-d59I (708682) STATE_MACHINE: HW diag supply=11.88V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (709962) STATE_MACHINE: mqtt rawdata metadata mid=5d84d1f7-0bc7-4b06-a5e1-dda1eb107f99 seq=60 boot=boot-1-f97742d4 ts=1777540573000
+
+===== monitor start port=COM5 ts=1777540605 =====
+===== serial open port=COM5 ts=1777540605 =====
+I (720942) STATE_MACHINE: mqtt rawdata metadata mid=e558093b-533I (742962) STATE_MACHINE: mqtt rawdata metadata mid=d4a9cbdb-4711-49ff-80da-e3cf2c226ffe seq=63 boot=boot-1-f97742d4 ts=1777540606000
+I (754012) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (754152) STATE_MACHINE: mqtt rawdata metadata mid=eddc52cd-79ee-4565-860d-71f662d0e103 seq=64 boot=boot-1-f97742d4 ts=1777540617000
+I (765132) STATE_MACHINE: mqtt rawdata metadata mid=d7f82b06-ebdb-462d-a5fa-398b1f174093 seq=65 boot=boot-1-f97742d4 ts=1777540628000
+I (769252) STATE_MACHINE: HW diag supply=11.92V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (776112) STATE_MACHINE: mqtt rawdata metadata mid=04299790-0b57-46aa-aafc-adfb477782dd seq=66 boot=boot-1-f97742d4 ts=1777540639000
+I (784432) STATE_MACHINE: HW diag supply=11.92V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (787092) STATE_MACHINE: mqtt rawdata metadata mid=9b2e78da-8899-492b-8f0f-d26c58e9c2ad seq=67 boot=boot-1-f97742d4 ts=1777540650000
+I (798072) STATE_MACHINE: mqtt rawdata metadata mid=1a54fad8-d0d5-41cd-b36e-a2236aff548b seq=68 boot=boot-1-f97742d4 ts=1777540661000
+I (799432) STATE_MACHINE: HW diag supply=11.89V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (809052) STATE_MACHINE: mqtt rawdata metadata mid=c8253d4f-f948-4b8a-bd3d-0a12bd560e2f seq=69 boot=boot-1-f97742d4 ts=1777540672000
+I (814552) STATE_MACHINE: HW diag supply=11.84V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (820042) STATE_MACHINE: mqtt rawdata metadata mid=12ac1a39-f688-4edf-a951-39081476b1d1 seq=70 boot=boot-1-f97742d4 ts=1777540683000
+I (829762) STATE_MACHINE: HW diag supply=11.86V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (831042) STATE_MACHINE: mqtt rawdata metadata mid=8a21fb41-4c3b-43b2-a240-d152e684e418 seq=71 boot=boot-1-f97742d4 ts=1777540694000
+I (842022) STATE_MACHINE: mqtt rawdata metadata mid=b17e2586-0043-43ff-8240-b73a3b39ff6c seq=72 boot=boot-1-f97742d4 ts=1777540705000
+I (844762) STATE_MACHINE: HW diag supply=11.83V batt=4.19V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (853002) STATE_MACHINE: mqtt rawdata metadata mid=1565679f-afb6-45c3-8a99-75cdc2712476 seq=73 boot=boot-1-f97742d4 ts=1777540716000
+W (861562) TRACKER_MQTT: AT input data interrupted err=ESP_ERR_TIMEOUT connected=1
+W (861562) TRACKER_MQTT: CMQTTPAYLOAD failed
+W (861562) STATE_MACHINE: mqtt rawdata live publish failed err=ESP_FAIL fallback=offline_queue
+I (862772) OFFLINE_QUEUE: enqueue seq=19241 type=0 critical=0 net_up=1 gps_fix=0 time_trusted=1 write_seq=19241 replay_seq=19241 ack_critical=19239 depth=1
+I (863122) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+W (863392) TRACKER_MQTT: AT input prompt missing cmd="AT+CMQTTTOPIC=0,22"
+W (863392) TRACKER_MQTT: CMQTTTOPIC failed
+W (863392) OFFLINE_QUEUE: replay publish failed seq=19241 type=0 qos=0 topic=v1/TRACKER_001/rawdata
+W (863392) OFFLINE_QUEUE: retry step=replay_publish err=ESP_FAIL attempt=1 next_delay_ms=1072
+I (891132) OFFLINE_QUEUE: replay publish ok seq=19241 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=73
+I (892062) STATE_MACHINE: mqtt rawdata metadata mid=0ce3bef4-e146-432e-93e1-85a4006944f5 seq=74 boot=boot-1-f97742d4 ts=1777540755000
+I (893102) STATE_MACHINE: HW diag supply=11.89V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (902962) STATE_MACHINE: mqtt rawdata metadata mid=54a4d8f5-f87f-49dd-86e4-9ff018ab3e10 seq=75 boot=boot-1-f97742d4 ts=1777540766000
+I (908422) STATE_MACHINE: HW diag supply=11.88V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (914142) STATE_MACHINE: mqtt rawdata metadata mid=d9750486-96da-4668-84e4-2e087f6b8deb seq=76 boot=boot-1-f97742d4 ts=1777540777000
+I (923602) STATE_MACHINE: HW diag supply=11.89V batt=4.13V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (925122) STATE_MACHINE: mqtt rawdata metadata mid=9032344b-be36-459e-a534-98800af9ed5a seq=77 boot=boot-1-f97742d4 ts=1777540788000
+I (936012) STATE_MACHINE: mqtt rawdata metadata mid=8fd12d25-350d-4484-9aef-0287bc20ee53 seq=78 boot=boot-1-f97742d4 ts=1777540799000
+I (938752) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (946992) STATE_MACHINE: mqtt rawdata metadata mid=b9e624a9-bb15-4c77-92f5-a658d6e72e58 seq=79 boot=boot-1-f97742d4 ts=1777540810000
+I (953932) STATE_MACHINE: HW diag supply=11.89V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (957972) STATE_MACHINE: mqtt rawdata metadata mid=d4164380-d673-482f-a3a4-e535a2b251a3 seq=80 boot=boot-1-f97742d4 ts=1777540821000
+I (968952) STATE_MACHINE: mqtt rawdata metadata mid=b68ab18e-e9ab-44cc-983f-2ffdb99ac2bf seq=81 boot=boot-1-f97742d4 ts=1777540832000
+W (977512) TRACKER_MQTT: AT input data interrupted err=ESP_ERR_TIMEOUT connected=1
+W (977512) TRACKER_MQTT: CMQTTPAYLOAD failed
+W (977512) STATE_MACHINE: mqtt rawdata live publish failed err=ESP_FAIL fallback=offline_queue
+I (978722) OFFLINE_QUEUE: enqueue seq=19242 type=0 critical=0 net_up=1 gps_fix=0 time_trusted=1 write_seq=19242 replay_seq=19242 ack_critical=19239 depth=1
+I (979052) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+W (979322) TRACKER_MQTT: AT input prompt missing cmd="AT+CMQTTTOPIC=0,22"
+W (979322) TRACKER_MQTT: CMQTTTOPIC failed
+W (979322) OFFLINE_QUEUE: replay publish failed seq=19242 type=0 qos=0 topic=v1/TRACKER_001/rawdata
+W (979322) OFFLINE_QUEUE: retry step=replay_publish err=ESP_FAIL attempt=1 next_delay_ms=1045
+
+===== monitor start port=COM5 ts=1777540881 =====
+===== serial open port=COM5 ts=1777540881 =====
+I (1007072) OFFLINE_QUEUE: replay publish ok seq=19242 type=0 qoI (1018932) STATE_MACHINE: mqtt rawdata metadata mid=c8836f8e-0099-4f4d-831f-a62db03801ee seq=83 boot=boot-1-f97742d4 ts=1777540882000
+I (1024102) STATE_MACHINE: HW diag supply=11.89V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1029822) STATE_MACHINE: mqtt rawdata metadata mid=bac4d18c-0e47-4ebb-8128-84c636ca1806 seq=84 boot=boot-1-f97742d4 ts=1777540893000
+I (1039192) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1040712) STATE_MACHINE: mqtt rawdata metadata mid=e4263d98-55c9-4a23-b5e0-22931016215c seq=85 boot=boot-1-f97742d4 ts=1777540904000
+W (1049272) TRACKER_MQTT: AT input data interrupted err=ESP_ERR_TIMEOUT connected=1
+W (1049272) TRACKER_MQTT: CMQTTPAYLOAD failed
+W (1049272) STATE_MACHINE: mqtt rawdata live publish failed err=ESP_FAIL fallback=offline_queue
+I (1050482) OFFLINE_QUEUE: enqueue seq=19243 type=0 critical=0 net_up=1 gps_fix=0 time_trusted=1 write_seq=19243 replay_seq=19243 ack_critical=19239 depth=1
+W (1051082) TRACKER_MQTT: AT input prompt missing cmd="AT+CMQTTTOPIC=0,22"
+W (1051082) TRACKER_MQTT: CMQTTTOPIC failed
+W (1051082) OFFLINE_QUEUE: replay publish failed seq=19243 type=0 qos=0 topic=v1/TRACKER_001/rawdata
+W (1051082) OFFLINE_QUEUE: retry step=replay_publish err=ESP_FAIL attempt=1 next_delay_ms=1018
+I (1078842) OFFLINE_QUEUE: replay publish ok seq=19243 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=85
+I (1079772) STATE_MACHINE: mqtt rawdata metadata mid=adfb12a0-1f1d-4944-bb68-b8a87ce24f7f seq=86 boot=boot-1-f97742d4 ts=1777540943000
+I (1080782) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1090632) STATE_MACHINE: mqtt rawdata metadata mid=f55daeaa-b04a-4866-8e05-437b8a308720 seq=87 boot=boot-1-f97742d4 ts=1777540954000
+I (1095892) STATE_MACHINE: HW diag supply=11.92V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1101612) STATE_MACHINE: mqtt rawdata metadata mid=ecfd3e9a-6765-4bce-b444-f799d144be92 seq=88 boot=boot-1-f97742d4 ts=1777540965000
+I (1111072) STATE_MACHINE: HW diag supply=11.88V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1112592) STATE_MACHINE: mqtt rawdata metadata mid=71b04fa5-95aa-47bf-9188-4def68ed8734 seq=89 boot=boot-1-f97742d4 ts=1777540976000
+I (1123782) STATE_MACHINE: mqtt rawdata metadata mid=5dccf5c5-8da2-4596-92af-4880a41fb9fa seq=90 boot=boot-1-f97742d4 ts=1777540987000
+I (1126282) STATE_MACHINE: HW diag supply=11.89V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1134762) STATE_MACHINE: mqtt rawdata metadata mid=a8b10804-b7b3-4612-a701-08208369d855 seq=91 boot=boot-1-f97742d4 ts=1777540998000
+I (1141462) STATE_MACHINE: HW diag supply=11.82V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1145742) STATE_MACHINE: mqtt rawdata metadata mid=0283b2d1-d9a5-4c56-be5a-add07b666976 seq=92 boot=boot-1-f97742d4 ts=1777541009000
+I (1156582) STATE_MACHINE: HW diag supply=11.84V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1156722) STATE_MACHINE: mqtt rawdata metadata mid=645eb1ae-68a1-4283-bfc1-0263dea171a4 seq=93 boot=boot-1-f97742d4 ts=1777541020000
+I (1167712) STATE_MACHINE: mqtt rawdata metadata mid=0239f2f5-d348-4cb0-8b84-16aa558f7b57 seq=94 boot=boot-1-f97742d4 ts=1777541031000
+I (1171822) STATE_MACHINE: HW diag supply=11.88V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1178682) STATE_MACHINE: mqtt rawdata metadata mid=fc319102-152e-4a8f-b041-a98facd389fb seq=95 boot=boot-1-f97742d4 ts=1777541042000
+I (1187002) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1189662) STATE_MACHINE: mqtt rawdata metadata mid=d17a5ae0-f840-4745-b49e-ff2ef6dd88e9 seq=96 boot=boot-1-f97742d4 ts=1777541053000
+I (1200642) STATE_MACHINE: mqtt rawdata metadata mid=f0865b8b-ebc7-4991-8ae4-c2f1717c2288 seq=97 boot=boot-1-f97742d4 ts=1777541064000
+W (1209202) TRACKER_MQTT: AT input data interrupted err=ESP_ERR_TIMEOUT connected=1
+W (1209202) TRACKER_MQTT: CMQTTPAYLOAD failed
+W (1209202) STATE_MACHINE: mqtt rawdata live publish failed err=ESP_FAIL fallback=offline_queue
+I (1210412) OFFLINE_QUEUE: enqueue seq=19244 type=0 critical=0 net_up=1 gps_fix=0 time_trusted=1 write_seq=19244 replay_seq=19244 ack_critical=19239 depth=1
+I (1210742) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+W (1211012) TRACKER_MQTT: AT input prompt missing cmd="AT+CMQTTTOPIC=0,22"
+W (1211012) TRACKER_MQTT: CMQTTTOPIC failed
+W (1211012) OFFLINE_QUEUE: replay publish failed seq=19244 type=0 qos=0 topic=v1/TRACKER_001/rawdata
+W (1211012) OFFLINE_QUEUE: retry step=replay_publish err=ESP_FAIL attempt=1 next_delay_ms=1062
+I (1238792) OFFLINE_QUEUE: replay publish ok seq=19244 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=97
+I (1239712) STATE_MACHINE: mqtt rawdata metadata mid=b11625b6-00ba-4ad4-85b8-8ef9bd491279 seq=98 boot=boot-1-f97742d4 ts=1777541103000
+I (1240732) STATE_MACHINE: HW diag supply=11.78V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1250592) STATE_MACHINE: mqtt rawdata metadata mid=295900b6-858d-401e-be02-3f4785ef3281 seq=99 boot=boot-1-f97742d4 ts=1777541114000
+I (1255852) STATE_MACHINE: HW diag supply=11.89V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1261572) STATE_MACHINE: mqtt rawdata metadata mid=1617d674-66a1-4c6b-a960-67035d17d57d seq=100 boot=boot-1-f97742d4 ts=1777541125000
+I (1271032) STATE_MACHINE: HW diag supply=11.88V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1272552) STATE_MACHINE: mqtt rawdata metadata mid=9521a8ba-354c-4e85-9970-03c7d20f5b67 seq=101 boot=boot-1-f97742d4 ts=1777541136000
+I (1283742) STATE_MACHINE: mqtt rawdata metadata mid=1810b492-2a70-4929-9598-a67f2241cad6 seq=102 boot=boot-1-f97742d4 ts=1777541147000
+I (1286242) STATE_MACHINE: HW diag supply=11.94V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1294722) STATE_MACHINE: mqtt rawdata metadata mid=24cbceaf-707e-4364-b654-cd27f900f13f seq=103 boot=boot-1-f97742d4 ts=1777541158000
+I (1301422) STATE_MACHINE: HW diag supply=11.93V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1305702) STATE_MACHINE: mqtt rawdata metadata mid=0367b427-f29d-486e-af1d-753ce9bd5f7d seq=104 boot=boot-1-f97742d4 ts=1777541169000
+I (1316542) STATE_MACHINE: HW diag supply=11.86V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1316682) STATE_MACHINE: mqtt rawdata metadata mid=35dfcb00-e57f-40b3-9d08-7c965184e1cd seq=105 boot=boot-1-f97742d4 ts=1777541180000
+I (1327662) STATE_MACHINE: mqtt rawdata metadata mid=6d06e7b5-1c47-4a33-b489-91b5a0a28952 seq=106 boot=boot-1-f97742d4 ts=1777541191000
+I (1331782) STATE_MACHINE: HW diag supply=11.89V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1338642) STATE_MACHINE: mqtt rawdata metadata mid=28f83a9c-0e98-4492-8d1c-78230ea4f7d3 seq=107 boot=boot-1-f97742d4 ts=1777541202000
+I (1346962) STATE_MACHINE: HW diag supply=11.82V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (1349622) STATE_MACHINE: mqtt rawdata metadata mid=e5bff323-5eab-4a5d-9dd5-caf65ad4a38b seq=108 boot=boot-1-f97742d4 ts=1777541213000
+I (1360602) STATE_MACHINE: mqtt rawdata metadata mid=ab4b847d-7a89-41ef-a83e-42b5381ee75c seq=109 boot=boot-1-f97742d4 ts=1777541224000
+W (1369172) TRACKER_MQTT: AT input data interrupted err=ESP_ERR_TIMEOUT connected=1
+W (1369172) TRACKER_MQTT: CMQTTPAYLOAD failed
+W (1369172) STATE_MACHINE: mqtt rawdata live publish failed err=ESP_FAIL fallback=offline_queue
+I (1370392) OFFLINE_QUEUE: enqueue seq=19245 type=0 critical=0 net_up=1 gps_fix=0 time_trusted=1 write_seq=19245 replay_seq=19245 ack_critical=19239 depth=1
+I (1370722) STATE_MACHINE: HW diag supply=11.82V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+W (1370982) TRACKER_MQTT: AT input prompt missing cmd="AT+CMQTTTOPIC=0,22"
+W (1370982) TRACKER_MQTT: CMQTTTOPIC failed
+W (1370982) OFFLINE_QUEUE: replay publish failed seq=19245 type=0 qos=0 topic=v1/TRACKER_001/rawdata
+W (1370982) OFFLINE_QUEUE: retry step=replay_publish err=ESP_FAIL attempt=1 next_delay_ms=1150
+
+===== monitor start port=COM5 ts=1777544181 =====
+===== serial open port=COM5 ts=1777544181 =====
+I (16512) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (16512) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (16512) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (18542) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (18542) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (18542) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (18542) STATE_MACHINE: HW diag supply=11.92V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (20612) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (20612) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (20612) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (20612) MODEM_GNSS: GNSS no-fix streak=6 fix_valid=0
+I (22782) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (22782) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (22782) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (24822) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (24822) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (24822) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (26872) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (26872) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (26872) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (29082) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (29082) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (29082) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+W (29312) MODEM_GNSS: GNSS power-off fallback accepted via CGPS=0
+W (29312) MODEM_GNSS: GNSS no-fix recover stage=power-off done; power-on due in 2000 ms
+I (33582) STATE_MACHINE: HW diag supply=11.94V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (35622) STATE_MACHINE: mqtt rawdata metadata mid=eba47745-b742-4c5a-a7e5-e1e24b50616f seq=2 boot=boot-1-2a1ee3a7 ts=1777544201000
+I (36632) STATE_MACHINE: mqtt status metadata mid=2878c77d-039f-46ff-b535-fad88ba0f028 seq=3 boot=boot-1-2a1ee3a7 ts=1777544202000
+W (37422) STATE_MACHINE: Sleep blocked reason=ignition_on blocked_count=1
+I (48642) STATE_MACHINE: HW diag supply=11.93V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (63662) STATE_MACHINE: HW diag supply=11.94V batt=4.19V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (67952) STATE_MACHINE: mqtt rawdata metadata mid=17809292-3a71-4518-aa54-1111299b2507 seq=4 boot=boot-1-2a1ee3a7 ts=1777544234000
+I (68742) STATE_MACHINE: mqtt status metadata mid=044b0530-0f7b-43f0-a53c-546cdfd8cdfd seq=5 boot=boot-1-2a1ee3a7 ts=1777544234000
+W (69532) STATE_MACHINE: Sleep blocked reason=ignition_on blocked_count=2
+I (96912) OFFLINE_QUEUE: replay publish accepted seq=19256 type=3 qos=1 topic=v1/TRACKER_001/firmware msg_id=5
+I (98752) STATE_MACHINE: mqtt status metadata mid=36cf4523-3c78-4eec-8ae5-4a8b3b4ff6b7 seq=6 boot=boot-1-2a1ee3a7 ts=1777544264000
+I (99452) STATE_MACHINE: mqtt rawdata metadata mid=005d8f52-2db1-4cd5-90cf-b841d49aa64f seq=7 boot=boot-1-2a1ee3a7 ts=1777544265000
+W (108012) TRACKER_MQTT: AT input data interrupted err=ESP_ERR_TIMEOUT connected=1
+W (108012) TRACKER_MQTT: CMQTTPAYLOAD failed
+W (108012) STATE_MACHINE: mqtt rawdata live publish failed err=ESP_FAIL fallback=offline_queue
+I (109232) OFFLINE_QUEUE: enqueue seq=19257 type=0 critical=0 net_up=1 gps_fix=0 time_trusted=1 write_seq=19257 replay_seq=19257 ack_critical=19256 depth=1
+I (109562) STATE_MACHINE: HW diag supply=11.90V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+W (109822) TRACKER_MQTT: AT input data interrupted err=ESP_FAIL connected=1
+W (109822) TRACKER_MQTT: CMQTTTOPIC failed
+W (109822) OFFLINE_QUEUE: replay publish failed seq=19257 type=0 qos=0 topic=v1/TRACKER_001/rawdata
+W (109822) OFFLINE_QUEUE: retry step=replay_publish err=ESP_FAIL attempt=1 next_delay_ms=1019
+I (137782) OFFLINE_QUEUE: replay publish ok seq=19257 type=0 qos=0 topic=v1/TRACKER_001/rawdata msg_id=7
+I (138702) STATE_MACHINE: mqtt rawdata metadata mid=eaec9a21-e3b7-419f-927b-1be927e78dc2 seq=8 boot=boot-1-2a1ee3a7 ts=1777544304000
+I (139732) STATE_MACHINE: HW diag supply=11.93V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (149592) STATE_MACHINE: mqtt rawdata metadata mid=f62b43dc-8225-4780-b1ba-df811c7493c6 seq=9 boot=boot-1-2a1ee3a7 ts=1777544315000
+I (154852) STATE_MACHINE: HW diag supply=11.84V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (160572) STATE_MACHINE: mqtt rawdata metadata mid=218f5a8f-294e-443d-ae51-8d85ccad2f04 seq=10 boot=boot-1-2a1ee3a7 ts=1777544326000
+I (170062) STATE_MACHINE: HW diag supply=11.92V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (171582) STATE_MACHINE: mqtt rawdata metadata mid=ede29d67-626a-4e27-b24f-1d30461474ef seq=11 boot=boot-1-2a1ee3a7 ts=1777544337000
+I (182682) STATE_MACHINE: mqtt rawdata metadata mid=ae811e2b-18ad-494f-9297-b85c2128d417 seq=12 boot=boot-1-2a1ee3a7 ts=1777544348000
+I (185182) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (193662) STATE_MACHINE: mqtt rawdata metadata mid=814121b2-7d2e-436e-b517-cb6585c08a97 seq=13 boot=boot-1-2a1ee3a7 ts=1777544359000
+I (200362) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (204652) STATE_MACHINE: mqtt rawdata metadata mid=e75a0868-1c92-4bba-a575-060808934ac7 seq=14 boot=boot-1-2a1ee3a7 ts=1777544370000
+I (215482) STATE_MACHINE: HW diag supply=11.94V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (215622) STATE_MACHINE: mqtt rawdata metadata mid=72cb68f3-5896-4967-be28-564c70535cc2 seq=15 boot=boot-1-2a1ee3a7 ts=1777544381000
+I (226602) STATE_MACHINE: mqtt rawdata metadata mid=6555abf6-7191-4891-8278-b9649312c1f3 seq=16 boot=boot-1-2a1ee3a7 ts=1777544392000
+I (230692) STATE_MACHINE: HW diag supply=11.93V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (237792) STATE_MACHINE: mqtt rawdata metadata mid=b78d935d-bc27-460f-a088-7b30eb7ac5e8 seq=17 boot=boot-1-2a1ee3a7 ts=1777544403000
+I (245872) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (248772) STATE_MACHINE: mqtt rawdata metadata mid=0ae9752d-e449-4786-8f0a-3240d4202820 seq=18 boot=boot-1-2a1ee3a7 ts=1777544414000
+I (259752) STATE_MACHINE: mqtt rawdata metadata mid=1cd54b0a-7f0f-49be-83ae-a7acfe8ee3e9 seq=19 boot=boot-1-2a1ee3a7 ts=1777544425000
+I (261112) STATE_MACHINE: HW diag supply=11.85V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (270732) STATE_MACHINE: mqtt rawdata metadata mid=50f286bf-185f-4afd-8399-b7febf458ca9 seq=20 boot=boot-1-2a1ee3a7 ts=1777544436000
+I (276232) STATE_MACHINE: HW diag supply=11.90V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (281712) STATE_MACHINE: mqtt rawdata metadata mid=94dc6261-cd6b-49d1-9993-04f6f07992e9 seq=21 boot=boot-1-2a1ee3a7 ts=1777544447000
+I (291412) STATE_MACHINE: HW diag supply=11.93V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (292692) STATE_MACHINE: mqtt rawdata metadata mid=59b3c7c1-3bb9-404d-9e1a-996942901adb seq=22 boot=boot-1-2a1ee3a7 ts=1777544458000
+I (303672) STATE_MACHINE: mqtt rawdata metadata mid=bb7784a2-f858-47ec-bad4-65391747b396 seq=23 boot=boot-1-2a1ee3a7 ts=1777544469000
+I (306412) STATE_MACHINE: HW diag supply=11.87V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (314652) STATE_MACHINE: mqtt rawdata metadata mid=b581e6e5-5b70-4fc4-8634-3ae67a19759f seq=24 boot=boot-1-2a1ee3a7 ts=1777544480000
+I (321592) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (325632) STATE_MACHINE: mqtt rawdata metadata mid=a02bff11-3017-4491-babe-c397327ff848 seq=25 boot=boot-1-2a1ee3a7 ts=1777544491000
+I (336622) STATE_MACHINE: mqtt rawdata metadata mid=f148799f-94c1-47fa-9a90-482ef7a4b966 seq=26 boot=boot-1-2a1ee3a7 ts=1777544502000
+I (337762) STATE_MACHINE: HW diag supply=11.89V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (347622) STATE_MACHINE: mqtt rawdata metadata mid=d3893585-f724-4eda-95d0-0fbb5f9cd828 seq=27 boot=boot-1-2a1ee3a7 ts=1777544513000
+I (352852) STATE_MACHINE: HW diag supply=11.89V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (358812) STATE_MACHINE: mqtt rawdata metadata mid=53365b45-fc6e-43ac-9d10-0d3e90a72438 seq=28 boot=boot-1-2a1ee3a7 ts=1777544524000
+I (368062) STATE_MACHINE: HW diag supply=11.86V batt=4.20V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (369822) STATE_MACHINE: mqtt rawdata metadata mid=a5c9b8ec-28c7-438e-b3c5-1d728f90f250 seq=29 boot=boot-1-2a1ee3a7 ts=1777544535000
+
+===== monitor start port=COM5 ts=1777544884 =====
+===== serial open port=COM5 ts=1777544884 =====
+I (120602) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+I (125762) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+I (126202) STATE_MACHINE: HW diag supply=11.92V batt=4.17V ign=1 vib=0 lte=0 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (130922) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+I (136082) MODEM_LTE: WAIT_RDY gate blocked waiting UART RDY token
+W (140632) MODEM_LTE: WAIT_RDY timeout without RDY token, fallback to AT sync
+I (140632) MODEM_LTE: FSM WAIT_RDY -> AT_SYNC
+W (142622) MODEM_LTE: AT not ready (ESP_ERR_TIMEOUT, cmd=AT, tx=17 rx=18, baud=115200 invert=OFF fmt=8N1 clk=DEFAULT fe=0 pe=0 ovf=0 full=0 brk=0), retry in 500ms
+I (142792) STATE_MACHINE: HW diag supply=11.92V batt=4.17V ign=1 vib=0 lte=0 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+W (146672) MODEM_LTE: recover skipped step=AT sync threshold reason=ESP_ERR_TIMEOUT rdy_seen=0 cooldown_left_ms=0
+E (146672) MODEM_LTE: retry step=recover_guard err=ESP_ERR_TIMEOUT attempt=3 next_delay_ms=12000
+
+===== monitor start port=COM5 ts=1777545147 =====
+===== serial open port=COM5 ts=1777545147 =====
+I (385542) STATE_MACHINE: HW diag supply=11.86V batt=4.18V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (400582) STATE_MACHINE: HW diag supply=11.89V batt=4.18V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (415612) STATE_MACHINE: HW diag supply=11.88V batt=4.18V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (430612) STATE_MACHINE: HW diag supply=11.91V batt=4.17V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (445662) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (460682) STATE_MACHINE: HW diag supply=11.85V batt=4.17V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+E (470382) TRACKER_MQTT: CSSLCFG cacert failed
+
+===== monitor start port=COM5 ts=1777545519 =====
+===== serial open port=COM5 ts=1777545519 =====
+E (470382) STATE_MACHINE: retry step=tracker_mqtt_connect err=ESI (762462) STATE_MACHINE: HW diag supply=11.91V batt=4.17V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+
+===== monitor start port=COM5 ts=1777545880 =====
+===== serial unavailable port=COM5 ts=1777545880 detail=could not open port 'COM5': FileNotFoundError(2, 'The system cannot find the file specified.', None, 2) =====
+
+===== monitor start port=COM5 ts=1777546674 =====
+===== serial open port=COM5 ts=1777546674 =====
+I (818392) STATE_MACHINE: HW diag supply=11.94V batt=4.17V ign=1I (984292) STATE_MACHINE: HW diag supply=11.92V batt=4.18V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (999492) STATE_MACHINE: HW diag supply=11.89V batt=4.14V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (1014532) STATE_MACHINE: HW diag supply=11.93V batt=4.19V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (1029622) STATE_MACHINE: HW diag supply=11.93V batt=4.18V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (1044672) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+I (1059712) STATE_MACHINE: HW diag supply=11.95V batt=4.17V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+W (1062592) TRACKER_MQTT: TLS cmd retry after 500ms cmd="AT+CSSLCFG="cacert",1,"isrgrootx1.pem""
+E (1063202) TRACKER_MQTT: CSSLCFG cacert failed
+
+===== monitor start port=COM5 ts=1777547378 =====
+===== serial open port=COM5 ts=1777547379 =====
+I (33642) STATE_MACHINE: HW diag supply=11.87V batt=4.18V ign=1 vib=0 lte=1 mqtt=0 ble=1 gnss_fix=0 stack_hwm_words=3236
+W (36312) STATE_MACHINE: heartbeat rawdata throttled while offline queue is near quota; publishing status only
+I (36312) STATE_MACHINE: mqtt status metadata mid=9b95c6e3-f1b6-48e6-9c7b-73f866abe7a2 seq=2 boot=boot-1-cb5a09f8 ts=1777547382000
+I (37522) OFFLINE_QUEUE: enqueue seq=19267 type=1 critical=1 net_up=0 gps_fix=0 time_trusted=1 write_seq=19267 replay_seq=19258 ack_critical=19256 depth=10
+W (37632) STATE_MACHINE: Sleep blocked reason=ignition_on blocked_count=1
+E (40592) TRACKER_MQTT: CSSLCFG cacert failed
+
+===== monitor start port=COM5 ts=1777550060 =====
+===== serial open port=COM5 ts=1777550060 =====
+W (5282) TRACKER_MQTT: Recovered lifecycle cmd via parsed result cmd="AT+CMQTTSTART" err=ESP_FAIL code=23
+W (5282) TRACKER_MQTT: CMQTTSTART reports already-started service
+W (5402) TRACKER_MQTT: Recovered lifecycle cmd via parsed result cmd="AT+CMQTTACCQ=0,"TRACKER_001",1,4" err=ESP_FAIL code=19
+W (5402) TRACKER_MQTT: CMQTTACCQ reports client already acquired
+W (5842) TRACKER_MQTT: TLS server certificate verification disabled by Kconfig
+I (6292) STATE_MACHINE: OBD prime sample ready pid=0x0D
+I (8082) TRACKER_MQTT: CMQTTCONNECT session probe connected (disc_state=0)
+I (8302) TRACKER_MQTT: MQTT subscribed commands topic=v1/TRACKER_001/commands
+I (8302) STATE_MACHINE: BLE OBD connected + ELM327 ready duration_ms=5120
+I (8702) STATE_MACHINE: ignition transition prev=0 next=1 rpm=0 adc=0 supply=11.87 threshold=13.00 obd_live=1 sample_age_ms=105 ecu=live
+I (8702) OFFLINE_QUEUE: link transition prev_online=0 next_online=1 write_seq=19270 replay_seq=19258 ack_critical=19256 depth=13
+I (10072) TRACKER_MQTT: MQTT subscribe URC client=0 err=0
+I (10182) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (10182) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (10182) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (10182) MODEM_GNSS: GNSS no-fix streak=1 fix_valid=0
+I (37622) OFFLINE_QUEUE: replay publish accepted seq=19258 type=3 qos=1 topic=v1/TRACKER_001/firmware msg_id=1
+I (39452) STATE_MACHINE: mqtt status metadata mid=337d8fbb-d1c3-431f-a9c6-5ad73e039f61 seq=2 boot=boot-1-ed7c07ab ts=1777550093000
+I (40132) STATE_MACHINE: mqtt rawdata metadata mid=4e83e6a7-5192-4a6e-96f8-de2d923b5655 seq=3 boot=boot-1-ed7c07ab ts=1777550094000
+I (41392) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (41392) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (41392) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (41392) MODEM_GNSS: GNSS no-fix streak=2 fix_valid=0
+I (41402) STATE_MACHINE: HW diag supply=11.92V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (42262) OFFLINE_QUEUE: replay publish accepted seq=19259 type=1 qos=1 topic=v1/TRACKER_001/status msg_id=4
+I (43612) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (43612) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (43612) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (44432) OFFLINE_QUEUE: replay publish accepted seq=19260 type=1 qos=1 topic=v1/TRACKER_001/status msg_id=5
+I (45792) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (45792) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (45792) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (46642) OFFLINE_QUEUE: replay publish accepted seq=19261 type=1 qos=1 topic=v1/TRACKER_001/status msg_id=6
+I (48072) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (48072) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (48072) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (48902) OFFLINE_QUEUE: replay publish accepted seq=19262 type=3 qos=1 topic=v1/TRACKER_001/firmware msg_id=7
+I (50242) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (50242) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (50242) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (51102) OFFLINE_QUEUE: replay publish accepted seq=19263 type=1 qos=1 topic=v1/TRACKER_001/status msg_id=8
+I (52022) STATE_MACHINE: mqtt rawdata metadata mid=2d0dd4c0-51b2-4685-b1e5-9e5e623d6a54 seq=4 boot=boot-1-ed7c07ab ts=1777550106000
+I (53152) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (53152) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (53152) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (53152) MODEM_GNSS: GNSS no-fix streak=7 fix_valid=0
+I (54012) OFFLINE_QUEUE: replay publish accepted seq=19264 type=1 qos=1 topic=v1/TRACKER_001/status msg_id=10
+I (55312) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (55312) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (55312) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (56162) OFFLINE_QUEUE: replay publish accepted seq=19265 type=1 qos=1 topic=v1/TRACKER_001/status msg_id=11
+I (57462) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (57462) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (57462) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+I (57462) STATE_MACHINE: HW diag supply=11.88V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (58302) OFFLINE_QUEUE: replay publish accepted seq=19266 type=3 qos=1 topic=v1/TRACKER_001/firmware msg_id=12
+I (59662) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (59662) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK  
+I (59662) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
+W (59892) MODEM_GNSS: GNSS power-off fallback accepted via CGPS=0
+W (59892) MODEM_GNSS: GNSS no-fix recover stage=power-off done; power-on due in 2000 ms
+I (60722) OFFLINE_QUEUE: replay publish accepted seq=19267 type=1 qos=1 topic=v1/TRACKER_001/status msg_id=13
+I (62752) OFFLINE_QUEUE: replay publish accepted seq=19268 type=1 qos=1 topic=v1/TRACKER_001/status msg_id=14
+I (63672) STATE_MACHINE: mqtt rawdata metadata mid=d438588f-04c3-4501-babe-b88a9020fef4 seq=5 boot=boot-1-ed7c07ab ts=1777550118000
+I (65552) OFFLINE_QUEUE: replay publish accepted seq=19269 type=1 qos=1 topic=v1/TRACKER_001/status msg_id=16
+I (67612) OFFLINE_QUEUE: replay publish accepted seq=19270 type=3 qos=1 topic=v1/TRACKER_001/firmware msg_id=17
+I (72772) STATE_MACHINE: HW diag supply=11.96V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (74532) STATE_MACHINE: mqtt rawdata metadata mid=97f37663-1691-44a2-936e-555d51825307 seq=6 boot=boot-1-ed7c07ab ts=1777550128000
+I (85422) STATE_MACHINE: mqtt rawdata metadata mid=79681cd5-7e32-4df7-b377-b624f4465e80 seq=7 boot=boot-1-ed7c07ab ts=1777550139000
+I (87922) STATE_MACHINE: HW diag supply=11.93V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (96402) STATE_MACHINE: mqtt rawdata metadata mid=fabf6c94-aaf1-47b9-bf6f-c186cdb90a5f seq=8 boot=boot-1-ed7c07ab ts=1777550150000
+I (103112) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (107382) STATE_MACHINE: mqtt rawdata metadata mid=f046300f-bdc7-412a-bb50-ce22fb2f6ee0 seq=9 boot=boot-1-ed7c07ab ts=1777550161000
+I (118132) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (118272) STATE_MACHINE: mqtt rawdata metadata mid=54fbd453-d0c4-40f0-9fe7-8ff8d2aca5e5 seq=10 boot=boot-1-ed7c07ab ts=1777550172000
+I (129162) STATE_MACHINE: mqtt rawdata metadata mid=77945133-eb08-47c5-84c2-94b12ca71b0d seq=11 boot=boot-1-ed7c07ab ts=1777550183000
+I (133192) STATE_MACHINE: HW diag supply=11.88V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (140052) STATE_MACHINE: mqtt rawdata metadata mid=70662bb5-ab90-497a-835c-e157c23bfeba seq=12 boot=boot-1-ed7c07ab ts=1777550194000
+I (148372) STATE_MACHINE: HW diag supply=11.81V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (151032) STATE_MACHINE: mqtt rawdata metadata mid=0c3a59ad-9534-4c15-8bca-42d4eef9b86d seq=13 boot=boot-1-ed7c07ab ts=1777550205000
+I (162012) STATE_MACHINE: mqtt rawdata metadata mid=2c0de503-8def-40d6-b79a-fdae415fb9a9 seq=14 boot=boot-1-ed7c07ab ts=1777550216000
+I (163532) STATE_MACHINE: HW diag supply=11.89V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (172902) STATE_MACHINE: mqtt rawdata metadata mid=5b217691-609c-4b6a-953d-2e092c0956f6 seq=15 boot=boot-1-ed7c07ab ts=1777550227000
+I (178642) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (183882) STATE_MACHINE: mqtt rawdata metadata mid=de8e8487-2f83-47eb-80ed-892f65cc3c06 seq=16 boot=boot-1-ed7c07ab ts=1777550238000
+I (193642) STATE_MACHINE: HW diag supply=11.89V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (194682) STATE_MACHINE: mqtt rawdata metadata mid=4b790205-a128-4edf-b573-ce3c69c4fae5 seq=17 boot=boot-1-ed7c07ab ts=1777550249000
+I (205842) STATE_MACHINE: mqtt rawdata metadata mid=30e2a858-435f-4cdb-be67-96ceab85e1bf seq=18 boot=boot-1-ed7c07ab ts=1777550260000
+I (208822) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (216822) STATE_MACHINE: mqtt rawdata metadata mid=f32c5e21-eee1-4a8e-bd9f-4231b36abf12 seq=19 boot=boot-1-ed7c07ab ts=1777550271000
+I (224002) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (227802) STATE_MACHINE: mqtt rawdata metadata mid=bca12eeb-7797-4c31-87a0-a04b6bc73fe0 seq=20 boot=boot-1-ed7c07ab ts=1777550282000
+I (238782) STATE_MACHINE: mqtt rawdata metadata mid=bb0dcb23-3588-4693-8755-73468933f072 seq=21 boot=boot-1-ed7c07ab ts=1777550293000
+I (239932) STATE_MACHINE: HW diag supply=11.80V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (249792) STATE_MACHINE: mqtt rawdata metadata mid=6df6d52a-61de-43e4-8198-ff8edf177cf1 seq=22 boot=boot-1-ed7c07ab ts=1777550304000
+I (255052) STATE_MACHINE: HW diag supply=11.86V batt=4.13V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (260772) STATE_MACHINE: mqtt rawdata metadata mid=69f94709-5915-422f-93f3-62e65c663373 seq=23 boot=boot-1-ed7c07ab ts=1777550315000
+I (270232) STATE_MACHINE: HW diag supply=11.89V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (271752) STATE_MACHINE: mqtt rawdata metadata mid=fff11557-6484-42f3-a1d9-769cdb6c9e3b seq=24 boot=boot-1-ed7c07ab ts=1777550326000
+I (282742) STATE_MACHINE: mqtt rawdata metadata mid=96cfd848-f0d4-4545-a735-19c96cf24272 seq=25 boot=boot-1-ed7c07ab ts=1777550337000
+I (285472) STATE_MACHINE: HW diag supply=11.97V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (293712) STATE_MACHINE: mqtt rawdata metadata mid=8501ee25-5892-4aad-b2ad-6197d0c3411f seq=26 boot=boot-1-ed7c07ab ts=1777550348000
+I (300652) STATE_MACHINE: HW diag supply=11.91V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (304692) STATE_MACHINE: mqtt rawdata metadata mid=5276551d-81b3-4a29-905a-cba6350915ba seq=27 boot=boot-1-ed7c07ab ts=1777550359000
+I (315702) STATE_MACHINE: mqtt rawdata metadata mid=392395a4-5aac-4444-8318-cb8131add085 seq=28 boot=boot-1-ed7c07ab ts=1777550370000
+I (317032) STATE_MACHINE: HW diag supply=11.95V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (326892) STATE_MACHINE: mqtt rawdata metadata mid=6074d4c9-f454-405f-8da6-3aa678b4fc7d seq=29 boot=boot-1-ed7c07ab ts=1777550381000
+I (332152) STATE_MACHINE: HW diag supply=11.93V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (337872) STATE_MACHINE: mqtt rawdata metadata mid=770b5605-df38-4573-a1c6-8204d56df3a3 seq=30 boot=boot-1-ed7c07ab ts=1777550392000
+I (347332) STATE_MACHINE: HW diag supply=11.82V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (348852) STATE_MACHINE: mqtt rawdata metadata mid=8a235993-0893-47e6-8ece-da3dbf292e0d seq=31 boot=boot-1-ed7c07ab ts=1777550403000
+I (359872) STATE_MACHINE: mqtt rawdata metadata mid=a555b183-d293-4fe0-9eb1-7bf27a90b8e9 seq=32 boot=boot-1-ed7c07ab ts=1777550414000
+I (362362) STATE_MACHINE: HW diag supply=11.94V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+
+===== monitor start port=COM5 ts=1777561360 =====
+===== serial open port=COM5 ts=1777561360 =====
+I (370842) STATE_MACHINE: mqtt rawdata metadata mid=3edb2329-7bfI (11311542) STATE_MACHINE: mqtt rawdata metadata mid=e7b07741-de6a-4585-93c6-c6a3ad995a40 seq=992 boot=boot-1-ed7c07ab ts=1777561366000
+I (11314042) STATE_MACHINE: HW diag supply=11.89V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11322522) STATE_MACHINE: mqtt rawdata metadata mid=72feb4d2-cb80-4923-b264-c041bbc1dcbd seq=993 boot=boot-1-ed7c07ab ts=1777561377000
+I (11329192) STATE_MACHINE: HW diag supply=11.91V batt=4.13V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11333712) STATE_MACHINE: mqtt rawdata metadata mid=c6b7c986-6c41-4cb3-8975-5ffe8341fb2b seq=994 boot=boot-1-ed7c07ab ts=1777561388000
+I (11344222) STATE_MACHINE: HW diag supply=11.89V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11344602) STATE_MACHINE: mqtt rawdata metadata mid=47a0dcdd-a374-4406-bf65-776c16722834 seq=995 boot=boot-1-ed7c07ab ts=1777561399000
+I (11355492) STATE_MACHINE: mqtt rawdata metadata mid=a6c38388-8a7f-43e6-aae2-0d6d353a0deb seq=996 boot=boot-1-ed7c07ab ts=1777561410000
+I (11359372) STATE_MACHINE: HW diag supply=11.92V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11366472) STATE_MACHINE: mqtt rawdata metadata mid=f166e01a-24e9-4fc0-8f7f-dff2ee726c8c seq=997 boot=boot-1-ed7c07ab ts=1777561421000
+I (11374472) STATE_MACHINE: HW diag supply=11.89V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11377362) STATE_MACHINE: mqtt rawdata metadata mid=af35fb9e-7f97-4e33-8ad6-b8cbadc39b5f seq=998 boot=boot-1-ed7c07ab ts=1777561432000
+I (11388252) STATE_MACHINE: mqtt rawdata metadata mid=9f66ee14-a27b-4f3e-bfc9-a9c4b9cac241 seq=999 boot=boot-1-ed7c07ab ts=1777561443000
+I (11389522) STATE_MACHINE: HW diag supply=11.80V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11399142) STATE_MACHINE: mqtt rawdata metadata mid=83006125-0b14-492f-8f73-3610515634c7 seq=1000 boot=boot-1-ed7c07ab ts=1777561454000
+I (11404552) STATE_MACHINE: HW diag supply=11.94V batt=4.14V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11410072) STATE_MACHINE: mqtt rawdata metadata mid=86c02b25-fb5b-45e3-a06e-b0f05f067269 seq=1001 boot=boot-1-ed7c07ab ts=1777561465000
+I (11419672) STATE_MACHINE: HW diag supply=11.85V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11420952) STATE_MACHINE: mqtt rawdata metadata mid=5bd63067-119b-4746-9fbe-3d709db96a81 seq=1002 boot=boot-1-ed7c07ab ts=1777561476000
+I (11431932) STATE_MACHINE: mqtt rawdata metadata mid=018f5ef1-1d46-4eac-a898-98d2147a51b3 seq=1003 boot=boot-1-ed7c07ab ts=1777561486000
+I (11434702) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11442942) STATE_MACHINE: mqtt rawdata metadata mid=a4491cca-de26-496c-8aaf-c06da95fb8e8 seq=1004 boot=boot-1-ed7c07ab ts=1777561498000
+I (11449882) STATE_MACHINE: HW diag supply=11.85V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11453922) STATE_MACHINE: mqtt rawdata metadata mid=d9edaadb-f41d-40f1-9832-a66cac7837ea seq=1005 boot=boot-1-ed7c07ab ts=1777561508000
+I (11464972) STATE_MACHINE: HW diag supply=11.90V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11465112) STATE_MACHINE: mqtt rawdata metadata mid=0ed29ade-a80c-48d4-9bb3-bd80f49addf7 seq=1006 boot=boot-1-ed7c07ab ts=1777561520000
+I (11476092) STATE_MACHINE: mqtt rawdata metadata mid=95cbc009-d90d-494e-943a-5dd788f753ec seq=1007 boot=boot-1-ed7c07ab ts=1777561531000
+I (11480212) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11487072) STATE_MACHINE: mqtt rawdata metadata mid=c3f0c0e1-e03f-4c6c-978f-549e90c0bc35 seq=1008 boot=boot-1-ed7c07ab ts=1777561542000
+I (11495392) STATE_MACHINE: HW diag supply=11.86V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11498052) STATE_MACHINE: mqtt rawdata metadata mid=e1957884-e34d-4afc-89fb-e7db3f909644 seq=1009 boot=boot-1-ed7c07ab ts=1777561553000
+I (11509062) STATE_MACHINE: mqtt rawdata metadata mid=c4398a05-784c-4fb4-81ef-d00e4257182a seq=1010 boot=boot-1-ed7c07ab ts=1777561564000
+I (11510422) STATE_MACHINE: HW diag supply=11.86V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11520042) STATE_MACHINE: mqtt rawdata metadata mid=bd57dbe5-fe53-4b5a-8307-174d08c8c2c8 seq=1011 boot=boot-1-ed7c07ab ts=1777561575000
+I (11525552) STATE_MACHINE: HW diag supply=11.87V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11531022) STATE_MACHINE: mqtt rawdata metadata mid=425a74c5-45be-43f7-bf38-0bcb73b4a5ee seq=1012 boot=boot-1-ed7c07ab ts=1777561586000
+I (11540722) STATE_MACHINE: HW diag supply=11.91V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11542002) STATE_MACHINE: mqtt rawdata metadata mid=5efda270-7991-4516-88f9-3ed3fb4581b5 seq=1013 boot=boot-1-ed7c07ab ts=1777561597000
+I (11552982) STATE_MACHINE: mqtt rawdata metadata mid=d2bfd32f-d1f2-4e07-8733-3a70095da761 seq=1014 boot=boot-1-ed7c07ab ts=1777561608000
+I (11555722) STATE_MACHINE: HW diag supply=11.89V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11563962) STATE_MACHINE: mqtt rawdata metadata mid=0604ae2d-5d34-4ced-b1d3-8cfdfc6ad04a seq=1015 boot=boot-1-ed7c07ab ts=1777561619000
+I (11570902) STATE_MACHINE: HW diag supply=11.85V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11574942) STATE_MACHINE: mqtt rawdata metadata mid=2e51aaf6-17ec-48cf-802c-af0733d14481 seq=1016 boot=boot-1-ed7c07ab ts=1777561630000
+I (11585992) STATE_MACHINE: HW diag supply=11.92V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11586132) STATE_MACHINE: mqtt rawdata metadata mid=bfa6b9bc-31a0-485b-81de-e82d559dd15c seq=1017 boot=boot-1-ed7c07ab ts=1777561641000
+I (11597142) STATE_MACHINE: mqtt rawdata metadata mid=16772118-8cc7-4550-b05b-7d792b2af2cb seq=1018 boot=boot-1-ed7c07ab ts=1777561652000
+I (11601022) STATE_MACHINE: HW diag supply=11.86V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11608122) STATE_MACHINE: mqtt rawdata metadata mid=acd15b51-2abb-41db-aa56-9d16f04a713f seq=1019 boot=boot-1-ed7c07ab ts=1777561663000
+I (11616202) STATE_MACHINE: HW diag supply=11.92V batt=4.13V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11619102) STATE_MACHINE: mqtt rawdata metadata mid=b1bc65b7-ffbd-44d9-939c-29c080f89d52 seq=1020 boot=boot-1-ed7c07ab ts=1777561674000
+I (11630082) STATE_MACHINE: mqtt rawdata metadata mid=a4be122f-c184-49d4-b8ce-4926b223b760 seq=1021 boot=boot-1-ed7c07ab ts=1777561685000
+I (11631442) STATE_MACHINE: HW diag supply=11.89V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11641062) STATE_MACHINE: mqtt rawdata metadata mid=8f51f935-1f4a-4fa9-9357-20f8d47f1094 seq=1022 boot=boot-1-ed7c07ab ts=1777561696000
+I (11646602) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11652072) STATE_MACHINE: mqtt rawdata metadata mid=d91e157c-889b-4fa3-9e5a-0eb54b4301c0 seq=1023 boot=boot-1-ed7c07ab ts=1777561707000
+I (11661772) STATE_MACHINE: HW diag supply=11.81V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11663052) STATE_MACHINE: mqtt rawdata metadata mid=d41da314-6a29-4024-9a69-79ef55a889de seq=1024 boot=boot-1-ed7c07ab ts=1777561718000
+I (11674062) STATE_MACHINE: mqtt rawdata metadata mid=d3ca38f0-5d28-4e63-8f7d-fbfd48103230 seq=1025 boot=boot-1-ed7c07ab ts=1777561729000
+I (11676802) STATE_MACHINE: HW diag supply=11.91V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11685042) STATE_MACHINE: mqtt rawdata metadata mid=f40ada9b-d2aa-416b-95d4-b9275af0e35e seq=1026 boot=boot-1-ed7c07ab ts=1777561740000
+I (11691982) STATE_MACHINE: HW diag supply=11.87V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11696032) STATE_MACHINE: mqtt rawdata metadata mid=8f8a8ab3-4a6e-4b33-8c2c-c6f51f701c47 seq=1027 boot=boot-1-ed7c07ab ts=1777561751000
+I (11707072) STATE_MACHINE: HW diag supply=11.89V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11707212) STATE_MACHINE: mqtt rawdata metadata mid=612b239a-2b0c-481b-bf4c-839f0ce1d9ea seq=1028 boot=boot-1-ed7c07ab ts=1777561762000
+I (11718222) STATE_MACHINE: mqtt rawdata metadata mid=6f5bc95b-64fe-439c-b9b4-5868abfd89b0 seq=1029 boot=boot-1-ed7c07ab ts=1777561773000
+I (11722132) STATE_MACHINE: HW diag supply=11.90V batt=4.18V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11729232) STATE_MACHINE: mqtt rawdata metadata mid=a7e659ee-01c8-4182-bbf6-e4825535e1e4 seq=1030 boot=boot-1-ed7c07ab ts=1777561784000
+I (11737312) STATE_MACHINE: HW diag supply=11.84V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11740212) STATE_MACHINE: mqtt rawdata metadata mid=6f8ba3fa-b251-4af8-afcf-c3f4c52a4604 seq=1031 boot=boot-1-ed7c07ab ts=1777561795000
+I (11751192) STATE_MACHINE: mqtt rawdata metadata mid=fcc3f9ff-5ffd-4596-b697-8b0303333981 seq=1032 boot=boot-1-ed7c07ab ts=1777561806000
+I (11752322) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11762172) STATE_MACHINE: mqtt rawdata metadata mid=d9a27500-f080-4548-a834-4c62fa1effe4 seq=1033 boot=boot-1-ed7c07ab ts=1777561817000
+I (11767432) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11773152) STATE_MACHINE: mqtt rawdata metadata mid=c7bfb7b9-c44b-4e0b-b8f0-255d83caac9a seq=1034 boot=boot-1-ed7c07ab ts=1777561828000
+I (11782612) STATE_MACHINE: HW diag supply=11.90V batt=4.15V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11784132) STATE_MACHINE: mqtt rawdata metadata mid=a5012941-9074-4e9e-9b71-657d53944e6a seq=1035 boot=boot-1-ed7c07ab ts=1777561839000
+I (11795142) STATE_MACHINE: mqtt rawdata metadata mid=251f6f12-135b-44e0-a0e2-666f16a468cb seq=1036 boot=boot-1-ed7c07ab ts=1777561850000
+I (11797642) STATE_MACHINE: HW diag supply=11.92V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11806122) STATE_MACHINE: mqtt rawdata metadata mid=de2f0288-5b3c-4e38-9b03-d19846527e0b seq=1037 boot=boot-1-ed7c07ab ts=1777561861000
+I (11812822) STATE_MACHINE: HW diag supply=11.86V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11817102) STATE_MACHINE: mqtt rawdata metadata mid=8f47ef75-a66b-47ec-9e0d-e0efe2768d4a seq=1038 boot=boot-1-ed7c07ab ts=1777561872000
+I (11827912) STATE_MACHINE: HW diag supply=11.85V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11828292) STATE_MACHINE: mqtt rawdata metadata mid=47b47fa2-9525-4ac1-b1a0-f288c9c9fd2d seq=1039 boot=boot-1-ed7c07ab ts=1777561883000
+I (11839272) STATE_MACHINE: mqtt rawdata metadata mid=cfbec919-89ec-4490-8017-333641c81c70 seq=1040 boot=boot-1-ed7c07ab ts=1777561894000
+I (11843152) STATE_MACHINE: HW diag supply=11.84V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11850252) STATE_MACHINE: mqtt rawdata metadata mid=63027599-b9de-4da8-8c79-d25305ed8d37 seq=1041 boot=boot-1-ed7c07ab ts=1777561905000
+I (11858362) STATE_MACHINE: HW diag supply=11.86V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11861262) STATE_MACHINE: mqtt rawdata metadata mid=4e03955e-a4ae-40d2-9800-8b989f0f4f75 seq=1042 boot=boot-1-ed7c07ab ts=1777561916000
+I (11872242) STATE_MACHINE: mqtt rawdata metadata mid=4cf7cc4e-1710-4fcc-8dbc-20a9a2edc530 seq=1043 boot=boot-1-ed7c07ab ts=1777561927000
+I (11873372) STATE_MACHINE: HW diag supply=11.88V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11883222) STATE_MACHINE: mqtt rawdata metadata mid=ebaea387-0e61-4513-893b-a36dce955b40 seq=1044 boot=boot-1-ed7c07ab ts=1777561938000
+I (11888482) STATE_MACHINE: HW diag supply=11.87V batt=4.16V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+I (11894202) STATE_MACHINE: mqtt rawdata metadata mid=db7bc555-4d01-4245-9be0-14a5875745df seq=1045 boot=boot-1-ed7c07ab ts=1777561949000
+I (11903662) STATE_MACHINE: HW diag supply=11.88V batt=4.17V ign=1 vib=0 lte=1 mqtt=1 ble=1 gnss_fix=0 stack_hwm_words=1572
+
+===== monitor start port=COM5 ts=1777567497 =====
+===== serial open port=COM5 ts=1777567497 =====
+I (10772) STATE_MACHINE: mqtt status metadata mid=34d18efd-04c4-4ed7-9c35-b58100c35bcc seq=5 boot=boot-1-4e21690f ts=1777567496000
+I (12002) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (12002) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.635575,N,10544.720882,E,300426,164459.0,7.3,0.6,253.4    OK  
+I (12002) MODEM_GNSS: GNSS fallback fix lat=20.960593 lon=105.745348 speed_kmh=1.11
+
+===== monitor start port=COM5 ts=1777567567 =====
+===== serial open port=COM5 ts=1777567567 =====
+I (39722) OFFLINE_QUEUE: replay publish accepted seq=19331 type=I (80682) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (80682) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.632810,N,10544.719836,E,300426,164607.0,-7.1,0.0,    OK  
+I (80682) MODEM_GNSS: GNSS fallback fix lat=20.960547 lon=105.745331 speed_kmh=0.00
+I (82722) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (82722) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.632580,N,10544.719634,E,300426,164609.0,-7.9,0.7,357.8    OK  
+I (82722) MODEM_GNSS: GNSS fallback fix lat=20.960543 lon=105.745327 speed_kmh=1.30
+I (84882) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (84882) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.632088,N,10544.719116,E,300426,164611.0,-8.2,0.0,    OK  
+I (84882) MODEM_GNSS: GNSS fallback fix lat=20.960535 lon=105.745319 speed_kmh=0.00
+I (85932) STATE_MACHINE: mqtt rawdata metadata mid=d1435358-f905-4397-a041-f80c5c693a79 seq=11 boot=boot-1-4e21690f ts=1777567571000
+I (86892) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (86892) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.632134,N,10544.719073,E,300426,164613.0,-6.6,0.0,    OK  
+I (86892) MODEM_GNSS: GNSS fallback fix lat=20.960536 lon=105.745318 speed_kmh=0.00
+I (86902) MODEM_GNSS: GNSS fix success lat=20.960536 lon=105.745318 sat=1 streak=25
+I (89062) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (89062) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.632472,N,10544.719126,E,300426,164616.0,-6.0,0.0,    OK  
+I (89062) MODEM_GNSS: GNSS fallback fix lat=20.960541 lon=105.745319 speed_kmh=0.00
+I (89072) STATE_MACHINE: HW diag vehicle_battery=11.88V device_battery=4.15V ign=1 vibration=0 lte=1 mqtt=1 ble=1 gnss_fix=1 stack_hwm_words=1572
+I (91452) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (91452) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.632595,N,10544.719017,E,300426,164618.0,-5.9,0.0,    OK  
+I (91452) MODEM_GNSS: GNSS fallback fix lat=20.960543 lon=105.745317 speed_kmh=0.00
+I (93492) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (93492) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.632922,N,10544.719012,E,300426,164620.0,-4.9,0.9,358.7    OK  
+I (93492) MODEM_GNSS: GNSS fallback fix lat=20.960549 lon=105.745317 speed_kmh=1.67
+I (95662) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (95662) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.634489,N,10544.719493,E,300426,164622.0,3.6,0.8,358.4    OK  
+I (95662) MODEM_GNSS: GNSS fallback fix lat=20.960575 lon=105.745325 speed_kmh=1.48
+I (96702) STATE_MACHINE: mqtt rawdata metadata mid=eae0126d-7ffd-4e22-ae8b-dbce5fd64b32 seq=12 boot=boot-1-4e21690f ts=1777567582000
+I (97662) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (97662) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.636123,N,10544.720551,E,300426,164624.0,5.7,0.0,    OK  
+I (97662) MODEM_GNSS: GNSS fallback fix lat=20.960602 lon=105.745343 speed_kmh=0.00
+I (97672) MODEM_GNSS: GNSS fix success lat=20.960602 lon=105.745343 sat=1 streak=30
+I (99822) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (99822) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.636686,N,10544.720994,E,300426,164626.0,5.9,0.0,    OK  
+I (99822) MODEM_GNSS: GNSS fallback fix lat=20.960611 lon=105.745350 speed_kmh=0.00
+I (102222) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (102222) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.636122,N,10544.720588,E,300426,164629.0,4.9,0.0,    OK  
+I (102222) MODEM_GNSS: GNSS fallback fix lat=20.960602 lon=105.745343 speed_kmh=0.00
+I (104262) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (104262) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.635735,N,10544.720288,E,300426,164631.0,3.4,0.0,    OK  
+I (104262) MODEM_GNSS: GNSS fallback fix lat=20.960596 lon=105.745338 speed_kmh=0.00
+I (104272) STATE_MACHINE: HW diag vehicle_battery=11.85V device_battery=4.15V ign=1 vibration=0 lte=1 mqtt=1 ble=1 gnss_fix=1 stack_hwm_words=1572
+I (106422) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (106422) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.635222,N,10544.719951,E,300426,164633.0,3.0,0.0,    OK  
+I (106422) MODEM_GNSS: GNSS fallback fix lat=20.960587 lon=105.745333 speed_kmh=0.00
+I (107482) STATE_MACHINE: mqtt rawdata metadata mid=c9df6a28-620f-43da-bf85-6b90dc1dbf2c seq=13 boot=boot-1-4e21690f ts=1777567593000
+I (108732) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (108732) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.635017,N,10544.719826,E,300426,164635.0,3.1,0.0,    OK  
+I (108732) MODEM_GNSS: GNSS fallback fix lat=20.960584 lon=105.745330 speed_kmh=0.00
+I (108742) MODEM_GNSS: GNSS fix success lat=20.960584 lon=105.745330 sat=1 streak=35
+I (110962) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (110962) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.635626,N,10544.720465,E,300426,164638.0,6.6,0.0,    OK  
+I (110962) MODEM_GNSS: GNSS fallback fix lat=20.960594 lon=105.745341 speed_kmh=0.00
+I (113112) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (113112) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.636209,N,10544.720810,E,300426,164640.0,7.7,0.7,347.9    OK  
+I (113112) MODEM_GNSS: GNSS fallback fix lat=20.960603 lon=105.745347 speed_kmh=1.30
+I (115152) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (115152) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.636705,N,10544.721129,E,300426,164642.0,7.7,0.0,    OK  
+I (115152) MODEM_GNSS: GNSS fallback fix lat=20.960612 lon=105.745352 speed_kmh=0.00
+I (117312) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (117312) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.637190,N,10544.721053,E,300426,164644.0,7.5,0.5,332.0    OK  
+I (117312) MODEM_GNSS: GNSS fallback fix lat=20.960620 lon=105.745351 speed_kmh=0.93
+I (118362) STATE_MACHINE: mqtt rawdata metadata mid=db4e437c-64ab-4e3b-972d-f27fb97c91ca seq=14 boot=boot-1-4e21690f ts=1777567604000
+I (119592) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (119592) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.637273,N,10544.721167,E,300426,164646.0,8.2,0.3,76.5    OK  
+I (119592) MODEM_GNSS: GNSS fallback fix lat=20.960621 lon=105.745353 speed_kmh=0.56
+I (119602) MODEM_GNSS: GNSS fix success lat=20.960621 lon=105.745353 sat=1 streak=40
+I (119612) STATE_MACHINE: HW diag vehicle_battery=11.82V device_battery=4.16V ign=1 vibration=0 lte=1 mqtt=1 ble=1 gnss_fix=1 stack_hwm_words=1572
+I (121832) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (121832) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.636965,N,10544.721466,E,300426,164648.0,10.3,0.6,156.6    OK  
+I (121832) MODEM_GNSS: GNSS fallback fix lat=20.960616 lon=105.745358 speed_kmh=1.11
+I (123972) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (123972) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.636509,N,10544.721725,E,300426,164651.0,10.8,0.0,    OK  
+I (123972) MODEM_GNSS: GNSS fallback fix lat=20.960608 lon=105.745362 speed_kmh=0.00
+I (126012) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (126012) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.636003,N,10544.721569,E,300426,164653.0,11.2,0.0,    OK  
+I (126012) MODEM_GNSS: GNSS fallback fix lat=20.960600 lon=105.745359 speed_kmh=0.00
+I (128172) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (128172) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.635614,N,10544.721405,E,300426,164655.0,11.5,0.4,186.1    OK  
+I (128172) MODEM_GNSS: GNSS fallback fix lat=20.960594 lon=105.745357 speed_kmh=0.74
+I (129222) RTC_DS3231M: RTC set time ms=1777567615000
+I (129222) STATE_MACHINE: mqtt rawdata metadata mid=3c2e6641-4bb4-4dfe-a5d4-aa274ccaf685 seq=15 boot=boot-1-4e21690f ts=1777567615000
+I (130482) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (130482) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.635100,N,10544.721134,E,300426,164657.0,11.6,0.0,    OK  
+I (130482) MODEM_GNSS: GNSS fallback fix lat=20.960585 lon=105.745352 speed_kmh=0.00
+I (130492) MODEM_GNSS: GNSS fix success lat=20.960585 lon=105.745352 sat=1 streak=45
+I (132702) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (132702) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.634748,N,10544.720901,E,300426,164659.0,11.5,0.0,    OK  
+I (132702) MODEM_GNSS: GNSS fallback fix lat=20.960579 lon=105.745348 speed_kmh=0.00
+I (134862) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (134862) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.634281,N,10544.720659,E,300426,164701.0,11.4,0.0,    OK  
+I (134862) MODEM_GNSS: GNSS fallback fix lat=20.960571 lon=105.745344 speed_kmh=0.00
+I (134872) STATE_MACHINE: HW diag vehicle_battery=11.89V device_battery=4.16V ign=1 vibration=0 lte=1 mqtt=1 ble=1 gnss_fix=1 stack_hwm_words=1572
+I (136902) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
+I (136902) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.634212,N,10544.720535,E,300426,164704.0,11.7,0.0,    OK  
+I (136902) MODEM_GNSS: GNSS fallback fix lat=20.960570 lon=105.745342 speed_kmh=0.00
+
+===== monitor start port=COM5 ts=1777568836 =====
+===== serial open port=COM5 ts=1777568836 =====
+E (564836) task_wdt: Task watchdog got triggered. The following tasks/users did not reset the watchdog in time:
+
+===== monitor start port=COM5 ts=1777568940 =====
+===== serial open port=COM5 ts=1777568940 =====
+W (2887) OFFLINE_QUEUE: Field validation override: defer synchronous SD GC to keep OTA loop responsive
+I (2887) OFFLINE_QUEUE: enqueue seq=19350 type=3 critical=1 net_up=0 gps_fix=0 time_trusted=1 write_seq=19350 replay_seq=19348 ack_critical=19347 depth=3
+I (3007) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
+I (3107) STATE_MACHINE: Startup system check: ADC/BLE/RTC/LTE/MQTT
+I (3107) uart: queue free spaces: 32
+I (3217) MODEM_LTE: startup fast-path: modem alive, skip PWRKEY/RESET pulse
+I (3217) MODEM_LTE: FSM POWER_ON_PULSE -> ATE0
+I (3217) STATE_MACHINE: BLE connect attempt=1 mode=parked timeout_ms=8000
+W (3217) STATE_MACHINE: BLE connect mode: auto-discover (preferred MAC missing/invalid)
+I (3227) BLE_INIT: BLE init stage=enter controller_status=IDLE(0)
+I (3237) BLE_INIT: BLE init stage=before-nimble_port_init controller_status=IDLE(0)
+I (3237) BLE_INIT: BT controller compile version [1bb2f50]
+I (3247) BLE_INIT: Using main XTAL as clock source
+W (3247) BLE_INIT: light sleep mode will not be able to apply when bluetooth is enabled.
+I (3257) BLE_INIT: Feature Config, ADV:1, BLE_50:1, DTM:1, SCAN:1, CCA:0, SMP:1, CONNECT:1
+I (3267) BLE_INIT: Bluetooth MAC: d0:cf:13:1b:92:86
+I (3267) phy_init: phy_version 711,97bcf0a2,Aug 25 2025,19:04:10
+I (3277) IMU_LIS3DH: Reusing shared I2C bus port=0
+W (3277) IMU_LIS3DH: IMU probe addr=0x18 failed err=ESP_ERR_NOT_FOUND
+W (3287) IMU_LIS3DH: IMU probe addr=0x19 failed err=ESP_ERR_NOT_FOUND
+W (3297) IMU_LIS3DH: IMU probe addr=0x1E failed err=ESP_ERR_NOT_FOUND
+I (3297) IMU_LIS3DH: IMU initialized chip=lis3dsh-compat addr=0x1D who_am_i=0x3F speed=400000Hz
+I (3297) STATE_MACHINE: IMU bootstrap ready (motion interrupt configured)
+I (3297) BLE_INIT: BLE init stage=after-nimble_port_init-ok controller_status=ENABLED(2)
+I (3297) STATE_MACHINE: ignition transition prev=-1 next=0 rpm=0 adc=0 vehicle_battery=11.87 threshold=13.00 obd_live=0 sample_age_ms=4294967295 ecu=disconnected
+I (3297) BLE_INIT: NimBLE host task started
+I (3297) BLE_INIT: BLE init stage=init-success controller_status=ENABLED(2)
+I (3297) BLE_MGR: NimBLE stack synced
+I (3297) STATE_MACHINE: HW diag vehicle_battery=11.87V device_battery=4.16V ign=0 vibration=0 lte=0 mqtt=0 ble=0 gnss_fix=0 stack_hwm_words=6916
+I (3297) BLE_MGR: BLE adv #1 addr=54:D6:0D:26:15:70 rssi=-66 name=<no-name> service_match=0
+I (3297) BLE_MGR: BLE adv #2 addr=54:D6:0D:26:15:70 rssi=-65 name=BC1935598 service_match=0
+I (3297) BLE_MGR: BLE adv #3 addr=D2:E0:2F:8D:50:8C rssi=-44 name=<no-name> service_match=1
+I (3297) BLE_OBD: BLE candidate discovered service-match addr=D2:E0:2F:8D:50:8C name=<no-name>
+I (3297) BLE_MGR: Connecting to BLE candidate addr=D2:E0:2F:8D:50:8C rssi=-44 service_match=1
+Guru Meditation Error: Core  0 panic'ed (Interrupt wdt timeout on CPU0). 
+
+===== monitor start port=COM5 ts=1777568968 =====
+===== serial open port=COM5 ts=1777568968 =====
+
+===== monitor start port=COM5 ts=1777571418 =====
+===== serial open port=COM5 ts=1777571418 =====
+
+===== monitor start port=COM5 ts=1777571500 =====
+===== serial open port=COM5 ts=1777571500 =====

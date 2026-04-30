@@ -337,44 +337,21 @@ esp_err_t tracker_mqtt_input_data(const char *prepare_cmd,
     ESP_RETURN_ON_FALSE(data[0] != '\0', ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "data empty");
 
     char response[MQTT_AT_RESPONSE_MAX_LEN] = {0};
-    esp_err_t prepare_err = modem_at_send(prepare_cmd, response, sizeof(response), MQTT_INPUT_TIMEOUT_MS);
-    if (prepare_err == ESP_ERR_TIMEOUT && tracker_mqtt_response_has_prompt(response)) {
-        prepare_err = ESP_OK;
-    }
-    if (prepare_err != ESP_OK) {
+    esp_err_t err = modem_at_send_prompt_data(prepare_cmd,
+                                              (const uint8_t *)data,
+                                              strlen(data),
+                                              response,
+                                              sizeof(response),
+                                              MQTT_INPUT_TIMEOUT_MS);
+    if (err != ESP_OK) {
         int err_code = 0;
         bool parsed = tracker_mqtt_extract_error_code_from_response(response, &err_code);
         if (parsed && tracker_mqtt_err_indicates_disconnect(err_code)) {
-            tracker_mqtt_mark_disconnected("AT_prepare_input", err_code);
+            tracker_mqtt_mark_disconnected("prompt_data", err_code);
         }
-        if (parsed) {
-            ESP_LOGW(TRACKER_MQTT_TAG,
-                     "AT prepare-input returned error, cmd=\"%s\" err=%s resp=\"%s\"",
-                     prepare_cmd,
-                     esp_err_to_name(prepare_err),
-                     response);
-        } else {
-            ESP_LOGW(TRACKER_MQTT_TAG,
-                     "AT prepare-input failed cmd=\"%s\" err=%s resp=\"%s\"",
-                     prepare_cmd,
-                     esp_err_to_name(prepare_err),
-                     response);
-        }
-    }
-    if (prepare_err != ESP_OK) {
-        return ESP_FAIL;
-    }
-    if (!tracker_mqtt_response_has_prompt(response)) {
-        ESP_LOGW(TRACKER_MQTT_TAG, "AT input prompt missing cmd=\"%s\"", prepare_cmd);
-        return ESP_FAIL;
-    }
-
-    memset(response, 0, sizeof(response));
-    esp_err_t data_err = tracker_mqtt_send_cmd(data, MQTT_INPUT_TIMEOUT_MS, response, sizeof(response));
-    if (data_err != ESP_OK) {
         ESP_LOGW(TRACKER_MQTT_TAG,
                  "AT input data interrupted err=%s connected=%d",
-                 esp_err_to_name(data_err),
+                 esp_err_to_name(err),
                  s_connected ? 1 : 0);
         return ESP_FAIL;
     }

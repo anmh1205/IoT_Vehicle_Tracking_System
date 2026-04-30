@@ -194,10 +194,109 @@ static bool modem_at_response_done(const char *buffer) {
 
     bool ends_with_ok = len >= 2 && strncmp(buffer + (len - 2), "OK", 2) == 0;
     bool ends_with_error = len >= 5 && strncmp(buffer + (len - 5), "ERROR", 5) == 0;
-    bool ends_with_prompt = len >= 1 && buffer[len - 1] == '>';
 
     return strstr(buffer, "\r\nOK\r\n") != NULL || strstr(buffer, "\r\nERROR\r\n") != NULL ||
-           strstr(buffer, "+CME ERROR") != NULL || ends_with_ok || ends_with_error || ends_with_prompt;
+           strstr(buffer, "+CME ERROR") != NULL || ends_with_ok || ends_with_error;
+}
+
+static bool modem_at_response_has_prompt(const char *buffer) {
+    if (buffer == NULL) {
+        return false;
+    }
+
+    size_t len = strlen(buffer);
+    while (len > 0) {
+        char c = buffer[len - 1];
+        if (c != '\r' && c != '\n' && c != ' ' && c != '\t') {
+            break;
+        }
+        len -= 1;
+    }
+
+    return strstr(buffer, "\r\n>\r\n") != NULL || strstr(buffer, "\n>\n") != NULL ||
+           strstr(buffer, "\r\n>") != NULL || strstr(buffer, "\n>") != NULL ||
+           (len >= 1U && buffer[len - 1] == '>');
+}
+
+static void modem_at_append_response_probe(char *probe,
+                                           size_t *probe_len,
+                                           const char *chunk,
+                                           size_t chunk_len);
+
+static esp_err_t modem_at_collect_response_until(char *response,
+                                                 size_t resp_len,
+                                                 uint32_t timeout_ms,
+                                                 bool stop_on_prompt) {
+    size_t used = 0U;
+    uint64_t deadline = esp_timer_get_time() + ((uint64_t)timeout_ms * 1000ULL);
+    char chunk[128];
+    char response_probe[MODEM_RESPONSE_PROBE_SIZE] = {0};
+    size_t response_probe_len = 0U;
+
+    if (response != NULL && resp_len > 0U) {
+        response[0] = '\0';
+    }
+
+    while (esp_timer_get_time() < deadline) {
+        modem_at_drain_uart_events();
+        int read = uart_read_bytes(MODEM_UART_NUM, (uint8_t *)chunk, sizeof(chunk) - 1, pdMS_TO_TICKS(100));
+        if (read <= 0) {
+            continue;
+        }
+
+        chunk[read] = '\0';
+        if (response != NULL && resp_len > 1U && used < resp_len - 1U) {
+            size_t copy_len = MIN_VALUE((size_t)read, resp_len - used - 1U);
+            memcpy(response + used, chunk, copy_len);
+            used += copy_len;
+            response[used] = '\0';
+        }
+        modem_at_append_response_probe(response_probe, &response_probe_len, chunk, (size_t)read);
+        modem_at_dispatch_chunk_lines(chunk, (size_t)read);
+
+        bool response_done = false;
+        if (response != NULL) {
+            response_done = modem_at_response_done(response) || (stop_on_prompt && modem_at_response_has_prompt(response));
+        }
+        if (!response_done) {
+            response_done = modem_at_response_done(response_probe) ||
+                            (stop_on_prompt && modem_at_response_has_prompt(response_probe));
+        }
+
+        if (response_done) {
+            bool has_error = strstr(response_probe, "ERROR") != NULL || strstr(response_probe, "+CME ERROR") != NULL;
+            if (!has_error && response != NULL) {
+                has_error = strstr(response, "ERROR") != NULL;
+            }
+            return has_error ? ESP_FAIL : ESP_OK;
+        }
+    }
+
+    modem_at_drain_uart_events();
+    return ESP_ERR_TIMEOUT;
+}
+
+static esp_err_t modem_at_write_all_bytes(const uint8_t *data, size_t data_len) {
+    ESP_RETURN_ON_FALSE(data != NULL, ESP_ERR_INVALID_ARG, TAG, "data null");
+    ESP_RETURN_ON_FALSE(data_len > 0U, ESP_ERR_INVALID_ARG, TAG, "data_len invalid");
+
+    size_t written_total = 0U;
+    while (written_total < data_len) {
+        int written = uart_write_bytes(MODEM_UART_NUM,
+                                       (const char *)data + written_total,
+                                       data_len - written_total);
+        if (written <= 0) {
+            return ESP_FAIL;
+        }
+        written_total += (size_t)written;
+    }
+
+    return uart_wait_tx_done(MODEM_UART_NUM, pdMS_TO_TICKS(1000));
+}
+
+static void modem_at_clear_pending_after_failure(void) {
+    modem_at_drain_uart_events();
+    modem_at_drain_pending_input(MODEM_RX_BUFFER_SIZE);
 }
 
 static void modem_at_append_response_probe(char *probe,
@@ -339,14 +438,6 @@ esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32
         return ESP_ERR_TIMEOUT;
     }
 
-    if (response != NULL && resp_len > 0) {
-        response[0] = '\0';
-    }
-
-    /*
-     * Preserve asynchronous URCs (especially MQTT RX commands) instead of
-     * dropping them with a raw UART flush before each AT command.
-     */
     modem_at_drain_uart_events();
     modem_at_drain_pending_input(MODEM_RX_BUFFER_SIZE);
     int written = uart_write_bytes(MODEM_UART_NUM, cmd, strlen(cmd));
@@ -355,51 +446,59 @@ esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32
         return ESP_FAIL;
     }
 
-    size_t used = 0;
-    uint64_t deadline = esp_timer_get_time() + ((uint64_t)timeout_ms * 1000ULL);
-    char chunk[128];
-    char response_probe[MODEM_RESPONSE_PROBE_SIZE] = {0};
-    size_t response_probe_len = 0U;
+    esp_err_t err = modem_at_collect_response_until(response, resp_len, timeout_ms, false);
+    if (err != ESP_OK) {
+        modem_at_clear_pending_after_failure();
+    }
+    xSemaphoreGive(s_at_lock);
+    return err;
+}
 
-    while (esp_timer_get_time() < deadline) {
-        modem_at_drain_uart_events();
-        int read = uart_read_bytes(MODEM_UART_NUM, (uint8_t *)chunk, sizeof(chunk) - 1, pdMS_TO_TICKS(100));
-        if (read <= 0) {
-            continue;
-        }
+esp_err_t modem_at_send_prompt_data(const char *prepare_cmd,
+                                    const uint8_t *data,
+                                    size_t data_len,
+                                    char *response,
+                                    size_t resp_len,
+                                    uint32_t timeout_ms) {
+    ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
+    ESP_RETURN_ON_NULL(prepare_cmd, ESP_ERR_INVALID_ARG, TAG, "prepare_cmd null");
+    ESP_RETURN_ON_FALSE(data != NULL && data_len > 0U, ESP_ERR_INVALID_ARG, TAG, "prompt data invalid");
 
-        chunk[read] = '\0';
-        if (response != NULL && resp_len > 1) {
-            size_t copy_len = MIN_VALUE((size_t)read, resp_len - used - 1);
-            memcpy(response + used, chunk, copy_len);
-            used += copy_len;
-            response[used] = '\0';
-        }
-        modem_at_append_response_probe(response_probe, &response_probe_len, chunk, (size_t)read);
-
-        modem_at_dispatch_chunk_lines(chunk, (size_t)read);
-
-        bool response_done = false;
-        if (response != NULL) {
-            response_done = modem_at_response_done(response);
-        }
-        if (!response_done) {
-            response_done = modem_at_response_done(response_probe);
-        }
-
-        if (response_done) {
-            xSemaphoreGive(s_at_lock);
-            bool has_error = strstr(response_probe, "ERROR") != NULL || strstr(response_probe, "+CME ERROR") != NULL;
-            if (!has_error && response != NULL) {
-                has_error = strstr(response, "ERROR") != NULL;
-            }
-            return has_error ? ESP_FAIL : ESP_OK;
-        }
+    if (xSemaphoreTake(s_at_lock, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
+        return ESP_ERR_TIMEOUT;
     }
 
     modem_at_drain_uart_events();
+    modem_at_drain_pending_input(MODEM_RX_BUFFER_SIZE);
+    int written = uart_write_bytes(MODEM_UART_NUM, prepare_cmd, strlen(prepare_cmd));
+    if (written < 0) {
+        xSemaphoreGive(s_at_lock);
+        return ESP_FAIL;
+    }
+
+    esp_err_t err = modem_at_collect_response_until(response, resp_len, timeout_ms, true);
+    if (err != ESP_OK || !modem_at_response_has_prompt(response)) {
+        if (err == ESP_OK) {
+            err = ESP_FAIL;
+        }
+        modem_at_clear_pending_after_failure();
+        xSemaphoreGive(s_at_lock);
+        return err;
+    }
+
+    err = modem_at_write_all_bytes(data, data_len);
+    if (err != ESP_OK) {
+        modem_at_clear_pending_after_failure();
+        xSemaphoreGive(s_at_lock);
+        return err;
+    }
+
+    err = modem_at_collect_response_until(response, resp_len, timeout_ms, false);
+    if (err != ESP_OK) {
+        modem_at_clear_pending_after_failure();
+    }
     xSemaphoreGive(s_at_lock);
-    return ESP_ERR_TIMEOUT;
+    return err;
 }
 
 esp_err_t modem_at_send_collect(const char *cmd,
@@ -474,15 +573,6 @@ esp_err_t modem_at_send_collect(const char *cmd,
     return ESP_OK;
 }
 
-/**
- * @brief Send AT command and assert expected marker in response.
- *
- * @param cmd AT command.
- * @param expect Expected substring or NULL.
- * @param timeout_ms Timeout in milliseconds.
- *
- * @return ESP_OK on success, otherwise an error code.
- */
 esp_err_t modem_at_send_expect(const char *cmd, const char *expect, uint32_t timeout_ms) {
     char response[MODEM_RX_BUFFER_SIZE] = {0};
     esp_err_t err = modem_at_send(cmd, response, sizeof(response), timeout_ms);

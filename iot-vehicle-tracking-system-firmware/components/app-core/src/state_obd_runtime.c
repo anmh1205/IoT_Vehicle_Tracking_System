@@ -18,6 +18,7 @@
  */
 
 static const char *TAG = STATE_MACHINE_TAG;
+static bool s_field_validation_ble_skip_logged = false;
 
 static const tracker_obd_diag_query_t s_state_obd_diag_queries[] = {
     {.mode = OBD_MODE_CURRENT_DATA, .pid = OBD_PID_MONITOR_STATUS},
@@ -517,6 +518,20 @@ void state_machine_try_connect_ble(void) {
     }
 
     bool has_preferred_mac = !util_string_empty(s_config.obd2_ble_address);
+#if defined(CONFIG_TRACKER_FIELD_VALIDATION_SKIP_OBD_AUTODISCOVER) && CONFIG_TRACKER_FIELD_VALIDATION_SKIP_OBD_AUTODISCOVER
+    if (!has_preferred_mac) {
+        if (!s_field_validation_ble_skip_logged) {
+            ESP_LOGW(TAG,
+                     "Field validation override: skip BLE OBD auto-discover until preferred MAC is configured");
+            s_field_validation_ble_skip_logged = true;
+        }
+        state_machine_mark_obd_disconnected();
+        retry_state_reset(&s_ble_retry);
+        return;
+    }
+#endif
+    s_field_validation_ble_skip_logged = false;
+
     if (!has_preferred_mac) {
         if ((s_ble_retry.attempts % 10U) == 0U) {
             ESP_LOGW(TAG, "BLE connect mode: auto-discover (preferred MAC missing/invalid)");

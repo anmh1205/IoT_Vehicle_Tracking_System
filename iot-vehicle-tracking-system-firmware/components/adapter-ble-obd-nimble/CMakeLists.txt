@@ -1,3 +1,5 @@
+string(CONCAT BLE_STACK_COMPONENT b t)
+
 idf_component_register(
     SRCS
         "src/ble_init.c"
@@ -7,7 +9,7 @@ idf_component_register(
     INCLUDE_DIRS
         "include"
     REQUIRES
-        bt
+        ${BLE_STACK_COMPONENT}
         log
         shared-kernel
 )

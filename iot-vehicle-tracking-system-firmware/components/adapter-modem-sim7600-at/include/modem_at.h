@@ -56,6 +56,28 @@ void modem_at_deinit(void);
 esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32_t timeout_ms);
 
 /**
+ * @brief Run one prompt-mode transaction atomically on the modem UART.
+ *
+ * Sends the prepare command, waits for the `>` prompt, writes exactly `data_len`
+ * raw bytes, then collects the modem result text for the same transaction.
+ *
+ * @param prepare_cmd AT command string that should return a prompt.
+ * @param data Raw bytes to write after prompt.
+ * @param data_len Number of raw bytes to write.
+ * @param response Optional output response buffer for prompt + final result.
+ * @param resp_len Output buffer size in bytes.
+ * @param timeout_ms Timeout for the whole prompt transaction.
+ *
+ * @return ESP_OK on success, ESP_FAIL for modem error, or timeout/state errors.
+ */
+esp_err_t modem_at_send_prompt_data(const char *prepare_cmd,
+                                    const uint8_t *data,
+                                    size_t data_len,
+                                    char *response,
+                                    size_t resp_len,
+                                    uint32_t timeout_ms);
+
+/**
  * @brief Send AT command and collect raw UART bytes until idle timeout.
  *
  * Use this for commands that may stream binary payloads where `OK/ERROR`
