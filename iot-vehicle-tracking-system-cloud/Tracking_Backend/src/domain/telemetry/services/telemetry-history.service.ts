@@ -6,9 +6,22 @@ interface EventLogRow {
   metadata: Record<string, unknown> | null;
 }
 
-const normalizeField = (field: string): string => {
-  if (field === 'speed') return 'spd';
-  return field;
+interface TelemetryFieldDescriptor {
+  outputKey: string;
+  storageKey: string;
+}
+
+const DEFAULT_FIELDS = ['latitude', 'longitude', 'speed'];
+const FIELD_ALIASES: Record<string, TelemetryFieldDescriptor> = {
+  latitude: { outputKey: 'latitude', storageKey: 'latitude' },
+  longitude: { outputKey: 'longitude', storageKey: 'longitude' },
+  speed: { outputKey: 'speed', storageKey: 'speed' },
+  course: { outputKey: 'course', storageKey: 'course' },
+  vibration: { outputKey: 'vibration', storageKey: 'vibration' },
+  temperature: { outputKey: 'temperature', storageKey: 'temperature' },
+  vehiclebattery: { outputKey: 'vehicleBattery', storageKey: 'vehicle_battery' },
+  devicebattery: { outputKey: 'deviceBattery', storageKey: 'device_battery' },
+  errorcode: { outputKey: 'errorCode', storageKey: 'error_code' },
 };
 
 const readValue = (source: Record<string, unknown> | null, key: string): number | string | null => {
@@ -31,11 +44,12 @@ export const getTelemetryHistory = async (params: {
 }) => {
   const from = params.from ? new Date(params.from) : new Date(Date.now() - 24 * 60 * 60 * 1000);
   const to = params.to ? new Date(params.to) : new Date();
-  const fields = (params.fields ?? 'lat,lon,spd')
+  const fields = (params.fields ?? DEFAULT_FIELDS.join(','))
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean)
-    .map(normalizeField);
+    .map((item) => FIELD_ALIASES[item.toLowerCase()])
+    .filter((item): item is TelemetryFieldDescriptor => item !== undefined);
 
   const rows = await findMany<EventLogRow>(
     `SELECT server_timestamp, context, metadata
@@ -53,9 +67,9 @@ export const getTelemetryHistory = async (params: {
       timestamp: row.server_timestamp.toISOString(),
     };
     for (const field of fields) {
-      const fromContext = readValue(row.context, field);
-      const fromMetadata = readValue(row.metadata, field);
-      point[field] = fromContext ?? fromMetadata ?? null;
+      const fromContext = readValue(row.context, field.storageKey);
+      const fromMetadata = readValue(row.metadata, field.storageKey);
+      point[field.outputKey] = fromContext ?? fromMetadata ?? null;
     }
     return point;
   });

@@ -225,6 +225,11 @@ Grafana hiển thị dữ liệu từ VictoriaMetrics và VictoriaLogs.
 | `v1/{device_id}/firmware` | Device -> Server | 1 | Tiến trình/kết quả OTA |
 | `v1/{device_id}/commands` | Server -> Device | 1 | Lệnh từ xa/cập nhật cấu hình |
 
+Các trường canonical của `v1/{device_id}/rawdata.data`:
+- `vibration`, `vehicle_battery`, `device_battery`
+- `latitude`, `longitude`, `speed`, `course`
+- `satellites`, `ignition`, `error_code`
+
 ### Ví dụ lệnh từ xa
 
 | Command | Mục đích | Trường thường dùng |

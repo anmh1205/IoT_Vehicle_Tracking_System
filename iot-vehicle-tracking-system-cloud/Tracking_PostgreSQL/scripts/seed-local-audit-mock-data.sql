@@ -236,7 +236,7 @@ VALUES
   ('XE-LOGI-01','inspection','MOCK MTN: Truck monthly safety inspection','Checklist completed',CURRENT_DATE-6,CURRENT_DATE-5,94020,101000,CURRENT_DATE+25,900000,'Thu Duc Inspection Bay','completed','mock-audit',1);
 
 -- sessions
-INSERT INTO device_sessions (device_id, status, server_session_start, server_session_end, session_start, session_end, uptime, avg_vibration, min_vibration, max_vibration, avg_battery_top, avg_battery_bot, data_points_count, last_update, start_correlation_id, end_correlation_id, last_latitude, last_longitude, last_speed)
+INSERT INTO device_sessions (device_id, status, server_session_start, server_session_end, session_start, session_end, uptime, avg_vibration, min_vibration, max_vibration, avg_vehicle_battery, avg_device_battery, data_points_count, last_update, start_correlation_id, end_correlation_id, last_latitude, last_longitude, last_speed)
 VALUES
   ('TRACKER_001','completed',NOW()-INTERVAL '1 day 3 hours',NOW()-INTERVAL '1 day 1 hour 50 minutes',NOW()-INTERVAL '1 day 3 hours',NOW()-INTERVAL '1 day 1 hour 50 minutes',4200,1.26,0.44,2.10,12.5,4.08,260,NOW()-INTERVAL '1 day 1 hour 50 minutes','mock-audit-session-001','mock-audit-session-001-end',10.775843,106.700981,12.4),
   ('MOCK-OBD-002','running',NOW()-INTERVAL '90 minutes',NULL,NOW()-INTERVAL '90 minutes',NULL,5400,1.42,0.51,2.44,13.6,4.12,320,NOW()-INTERVAL '1 minute','mock-audit-session-002',NULL,10.730644,106.719981,55.8),
@@ -300,7 +300,7 @@ WITH trip1_points AS (
     ROUND((10.843145 - (idx * 0.00286) + SIN(idx / 2.4) * 0.00062)::numeric, 6) AS lat,
     ROUND((106.759982 - (idx * 0.00251) + COS(idx / 2.9) * 0.00054)::numeric, 6) AS lon,
     ROUND((24 + ABS(SIN(idx / 3.2)) * 28 + ((idx % 5) * 1.7))::numeric, 1) AS speed,
-    ROUND((4.08 + ((idx % 4) * 0.03))::numeric, 2) AS bb,
+    ROUND((4.08 + ((idx % 4) * 0.03))::numeric, 2) AS device_battery,
     ROUND((12.58 - (idx * 0.008))::numeric, 2) AS vehicle_battery,
     ROUND((0.58 + ABS(SIN(idx / 4.1)) * 0.88)::numeric, 2) AS vibration,
     ROUND((81.5 + ABS(SIN(idx / 4.8)) * 11.2)::numeric, 1) AS temperature,
@@ -320,15 +320,14 @@ SELECT
   'route_sample',
   'info',
   jsonb_build_object(
-    'spd', speed,
-    'bb', bb,
-    'batt', vehicle_battery,
-    'bt', vehicle_battery,
-    'vib', vibration,
-    'temp', temperature,
-    'lat', lat,
-    'lon', lon,
-    'heading', heading
+    'speed', speed,
+    'device_battery', device_battery,
+    'vehicle_battery', vehicle_battery,
+    'vibration', vibration,
+    'temperature', temperature,
+    'latitude', lat,
+    'longitude', lon,
+    'course', heading
   ),
   jsonb_build_object(
     'tripCode', 'MOCK-TRIP-001',
@@ -347,15 +346,15 @@ FROM trip1_points;
 
 INSERT INTO event_logs (correlation_id, device_id, session_id, event_type, event_code, severity, context, metadata, message, device_timestamp, server_timestamp, error_code, resolved_at, resolved_by, resolution_notes, error_status)
 VALUES
-  ('mock-audit-evt-001','TRACKER_001',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-001'),'status_change','normal_run','info','{"spd":42.5,"bb":4.16,"batt":12.48,"bt":12.48,"vib":1.24,"temp":88.4,"lat":10.781221,"lon":106.712334,"heading":112}'::jsonb,'{"tripCode":"MOCK-TRIP-001"}'::jsonb,'Vehicle running stable on district route',NOW()-INTERVAL '32 minutes',NOW()-INTERVAL '32 minutes',NULL,NULL,NULL,NULL,'resolved'),
-  ('mock-audit-evt-002','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'warning','idle_too_long','warning','{"spd":0,"bb":4.09,"batt":12.7,"bt":12.7,"vib":0.32,"temp":91.5,"lat":10.854221,"lon":106.771138,"heading":225}'::jsonb,'{"tripCode":"MOCK-TRIP-002"}'::jsonb,'Idle too long at pickup point',NOW()-INTERVAL '14 minutes',NOW()-INTERVAL '14 minutes',NULL,NULL,NULL,NULL,'acknowledged'),
-  ('mock-audit-evt-003','MOCK-OBD-003',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-003'),'connection','device_offline','error','{"spd":0,"bb":3.92,"batt":12.1,"bt":12.1,"vib":0,"temp":39.8,"heading":0}'::jsonb,'{"tripCode":"MOCK-TRIP-003"}'::jsonb,'Device offline for 12 minutes',NOW()-INTERVAL '17 minutes',NOW()-INTERVAL '17 minutes',7,NULL,NULL,NULL,'active'),
-  ('mock-audit-evt-004','sim-uat-001',NULL,'status_change','session_end','info','{"spd":0,"bb":3.98,"batt":12.2,"bt":12.2,"vib":0.15,"temp":33.2,"heading":65}'::jsonb,'{"tripCode":"MOCK-TRIP-005"}'::jsonb,'Session ended after depot handover',NOW()-INTERVAL '7 hours',NOW()-INTERVAL '7 hours',NULL,NOW()-INTERVAL '6 hours 55 minutes',1,'Normal stop at depot','resolved'),
-  ('mock-audit-evt-005','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'error','dtc_pending','error','{"spd":18.4,"bb":4.04,"batt":13.4,"bt":13.4,"vib":0.91,"temp":92.4,"lat":10.823114,"lon":106.756992,"heading":188}'::jsonb,'{"tripCode":"MOCK-TRIP-002","dtc":"P0500"}'::jsonb,'Pending OBD fault P0500 detected during shuttle route',NOW()-INTERVAL '11 minutes',NOW()-INTERVAL '11 minutes',4,NULL,NULL,NULL,'active'),
-  ('mock-audit-evt-006','TRACKER_001',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-001'),'warning','gps_signal_recovered','warning','{"spd":36.2,"bb":4.05,"batt":12.36,"bt":12.36,"vib":1.18,"temp":84.0,"heading":141}'::jsonb,'{"tripCode":"MOCK-TRIP-001","hint":"urban_canyon"}'::jsonb,'GPS jitter spike resolved after dense urban segment',NOW()-INTERVAL '1 day 2 hours 18 minutes',NOW()-INTERVAL '1 day 2 hours 18 minutes',8,NOW()-INTERVAL '1 day 2 hours 12 minutes',1,'Recovered on next valid fix','resolved'),
-  ('mock-audit-evt-007','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','obd_live_data','info','{"spd":32.7,"bb":4.08,"batt":13.8,"bt":13.8,"vib":1.04,"temp":89.6,"lat":10.794812,"lon":106.744638,"heading":197}'::jsonb,'{"tripCode":"MOCK-TRIP-002","sample":"mid-route"}'::jsonb,'Live OBD telemetry synced during corridor segment',NOW()-INTERVAL '8 minutes',NOW()-INTERVAL '8 minutes',NULL,NULL,NULL,NULL,'resolved'),
-  ('mock-audit-evt-008','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','obd_live_data','info','{"spd":46.2,"bb":4.07,"batt":14.1,"bt":14.1,"vib":1.22,"temp":91.3,"lat":10.762115,"lon":106.731844,"heading":214}'::jsonb,'{"tripCode":"MOCK-TRIP-002","sample":"urban-lane"}'::jsonb,'Live OBD telemetry updated near inner-city segment',NOW()-INTERVAL '5 minutes',NOW()-INTERVAL '5 minutes',NULL,NULL,NULL,NULL,'resolved'),
-  ('mock-audit-evt-009','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','obd_live_data','info','{"spd":55.8,"bb":4.05,"batt":14.4,"bt":14.4,"vib":1.37,"temp":93.1,"lat":10.730644,"lon":106.719981,"heading":233}'::jsonb,'{"tripCode":"MOCK-TRIP-002","sample":"latest"}'::jsonb,'Latest OBD telemetry sample matched with current device snapshot',NOW()-INTERVAL '1 minute',NOW()-INTERVAL '1 minute',NULL,NULL,NULL,NULL,'resolved'),
-  ('mock-audit-evt-010','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','mqtt_bridge_rawdata','info','{"source":"mqtt_bridge_rawdata","spd":55.8,"bb":4.05,"batt":14.4,"bt":14.4,"vib":1.37,"temp":93.1,"lat":10.730644,"lon":106.719981,"heading":233}'::jsonb,'{"tripCode":"MOCK-TRIP-002","ingestion":"mqtt-bridge"}'::jsonb,'Recent MQTT Bridge rawdata heartbeat for local audit runtime',NOW()-INTERVAL '30 seconds',NOW()-INTERVAL '30 seconds',NULL,NULL,NULL,NULL,'resolved');
+  ('mock-audit-evt-001','TRACKER_001',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-001'),'status_change','normal_run','info','{"speed":42.5,"device_battery":4.16,"vehicle_battery":12.48,"vibration":1.24,"temperature":88.4,"latitude":10.781221,"longitude":106.712334,"course":112}'::jsonb,'{"tripCode":"MOCK-TRIP-001"}'::jsonb,'Vehicle running stable on district route',NOW()-INTERVAL '32 minutes',NOW()-INTERVAL '32 minutes',NULL,NULL,NULL,NULL,'resolved'),
+  ('mock-audit-evt-002','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'warning','idle_too_long','warning','{"speed":0,"device_battery":4.09,"vehicle_battery":12.7,"vibration":0.32,"temperature":91.5,"latitude":10.854221,"longitude":106.771138,"course":225}'::jsonb,'{"tripCode":"MOCK-TRIP-002"}'::jsonb,'Idle too long at pickup point',NOW()-INTERVAL '14 minutes',NOW()-INTERVAL '14 minutes',NULL,NULL,NULL,NULL,'acknowledged'),
+  ('mock-audit-evt-003','MOCK-OBD-003',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-003'),'connection','device_offline','error','{"speed":0,"device_battery":3.92,"vehicle_battery":12.1,"vibration":0,"temperature":39.8,"course":0}'::jsonb,'{"tripCode":"MOCK-TRIP-003"}'::jsonb,'Device offline for 12 minutes',NOW()-INTERVAL '17 minutes',NOW()-INTERVAL '17 minutes',7,NULL,NULL,NULL,'active'),
+  ('mock-audit-evt-004','sim-uat-001',NULL,'status_change','session_end','info','{"speed":0,"device_battery":3.98,"vehicle_battery":12.2,"vibration":0.15,"temperature":33.2,"course":65}'::jsonb,'{"tripCode":"MOCK-TRIP-005"}'::jsonb,'Session ended after depot handover',NOW()-INTERVAL '7 hours',NOW()-INTERVAL '7 hours',NULL,NOW()-INTERVAL '6 hours 55 minutes',1,'Normal stop at depot','resolved'),
+  ('mock-audit-evt-005','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'error','dtc_pending','error','{"speed":18.4,"device_battery":4.04,"vehicle_battery":13.4,"vibration":0.91,"temperature":92.4,"latitude":10.823114,"longitude":106.756992,"course":188}'::jsonb,'{"tripCode":"MOCK-TRIP-002","dtc":"P0500"}'::jsonb,'Pending OBD fault P0500 detected during shuttle route',NOW()-INTERVAL '11 minutes',NOW()-INTERVAL '11 minutes',4,NULL,NULL,NULL,'active'),
+  ('mock-audit-evt-006','TRACKER_001',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-001'),'warning','gps_signal_recovered','warning','{"speed":36.2,"device_battery":4.05,"vehicle_battery":12.36,"vibration":1.18,"temperature":84.0,"course":141}'::jsonb,'{"tripCode":"MOCK-TRIP-001","hint":"urban_canyon"}'::jsonb,'GPS jitter spike resolved after dense urban segment',NOW()-INTERVAL '1 day 2 hours 18 minutes',NOW()-INTERVAL '1 day 2 hours 18 minutes',8,NOW()-INTERVAL '1 day 2 hours 12 minutes',1,'Recovered on next valid fix','resolved'),
+  ('mock-audit-evt-007','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','obd_live_data','info','{"speed":32.7,"device_battery":4.08,"vehicle_battery":13.8,"vibration":1.04,"temperature":89.6,"latitude":10.794812,"longitude":106.744638,"course":197}'::jsonb,'{"tripCode":"MOCK-TRIP-002","sample":"mid-route"}'::jsonb,'Live OBD telemetry synced during corridor segment',NOW()-INTERVAL '8 minutes',NOW()-INTERVAL '8 minutes',NULL,NULL,NULL,NULL,'resolved'),
+  ('mock-audit-evt-008','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','obd_live_data','info','{"speed":46.2,"device_battery":4.07,"vehicle_battery":14.1,"vibration":1.22,"temperature":91.3,"latitude":10.762115,"longitude":106.731844,"course":214}'::jsonb,'{"tripCode":"MOCK-TRIP-002","sample":"urban-lane"}'::jsonb,'Live OBD telemetry updated near inner-city segment',NOW()-INTERVAL '5 minutes',NOW()-INTERVAL '5 minutes',NULL,NULL,NULL,NULL,'resolved'),
+  ('mock-audit-evt-009','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','obd_live_data','info','{"speed":55.8,"device_battery":4.05,"vehicle_battery":14.4,"vibration":1.37,"temperature":93.1,"latitude":10.730644,"longitude":106.719981,"course":233}'::jsonb,'{"tripCode":"MOCK-TRIP-002","sample":"latest"}'::jsonb,'Latest OBD telemetry sample matched with current device snapshot',NOW()-INTERVAL '1 minute',NOW()-INTERVAL '1 minute',NULL,NULL,NULL,NULL,'resolved'),
+  ('mock-audit-evt-010','MOCK-OBD-002',(SELECT id FROM device_sessions WHERE start_correlation_id='mock-audit-session-002'),'status_change','mqtt_bridge_rawdata','info','{"source":"mqtt_bridge_rawdata","speed":55.8,"device_battery":4.05,"vehicle_battery":14.4,"vibration":1.37,"temperature":93.1,"latitude":10.730644,"longitude":106.719981,"course":233}'::jsonb,'{"tripCode":"MOCK-TRIP-002","ingestion":"mqtt-bridge"}'::jsonb,'Recent MQTT Bridge rawdata heartbeat for local audit runtime',NOW()-INTERVAL '30 seconds',NOW()-INTERVAL '30 seconds',NULL,NULL,NULL,NULL,'resolved');
 
 COMMIT;

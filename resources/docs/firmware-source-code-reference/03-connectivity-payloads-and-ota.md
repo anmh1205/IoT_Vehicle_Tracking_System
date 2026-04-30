@@ -134,8 +134,8 @@ Nguồn: [`main/src/data_formatter.c`](../../../iot-vehicle-tracking-system-firm
   - `uptime`
 - nested `data`:
   - vibration
-  - battery_top
-  - battery_bot
+  - vehicle_battery
+  - device_battery
   - latitude/longitude
   - speed/course
   - satellites
@@ -204,8 +204,8 @@ Trình tự:
 3. FSM consume action
 4. `state_machine_ota_start_is_safe()` check:
    - MQTT connected
-   - `battery_bot` available
-   - `battery_bot >= ota_min_battery_mv`
+   - `device_battery` available
+   - `device_battery >= ota_min_battery_mv`
 5. `util_ota_apply_update()`:
    - mở HTTPS stream
    - chọn OTA partition

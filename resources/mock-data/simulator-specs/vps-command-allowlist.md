@@ -7,16 +7,17 @@
 
 ## Allowed Read-Only Commands
 - `docker ps --format '{{.Names}}|{{.Status}}'`
-- `docker logs --tail 120 mqtt-bridge`
-- `docker logs --tail 120 backend`
+- `docker logs --tail 120 tracking-mqtt-bridge`
+- `docker logs --tail 120 tracking-backend`
 - `curl -sS --max-time 5 http://127.0.0.1:4000/health`
 - `curl -sS --max-time 5 http://127.0.0.1:4000/ws-health`
-- `docker inspect --format '{{json .State.Health}}' backend`
-- `docker inspect --format '{{json .State.Health}}' mqtt-bridge`
+- `docker inspect --format '{{json .State.Health}}' tracking-backend`
+- `docker inspect --format '{{json .State.Health}}' tracking-mqtt-bridge`
+- `docker exec tracking-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c 'SELECT 1'`
 
 ## Allowed Minimal Fix Commands
-- `docker restart mqtt-bridge`
-- `docker restart backend`
+- `docker restart tracking-mqtt-bridge`
+- `docker restart tracking-backend`
 
 ## Explicitly Forbidden Commands
 - `rm -rf *`

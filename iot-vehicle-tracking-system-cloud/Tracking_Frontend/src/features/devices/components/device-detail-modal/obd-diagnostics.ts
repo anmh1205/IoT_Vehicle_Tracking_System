@@ -238,7 +238,6 @@ export const extractDiagnosticsPayloadFromEventLog = (
       obd_speed_kph:
         context?.obd_speed_kph ??
         context?.speed_kph ??
-        context?.spd ??
         metadata.obd_speed_kph ??
         metadata.speed_kph,
       coolant_c:
@@ -355,7 +354,7 @@ export const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): s
           : 'OBD không ổn định',
     `mil=${snapshot.milOn === undefined ? '-' : snapshot.milOn ? 'on' : 'off'}`,
     `rpm=${snapshot.rpm?.toFixed(0) ?? '-'}`,
-    `spd=${snapshot.obdSpeedKph?.toFixed(1) ?? '-'} km/h`,
+    `speed=${snapshot.obdSpeedKph?.toFixed(1) ?? '-'} km/h`,
     `coolant=${snapshot.coolantC?.toFixed(1) ?? '-'} C`,
     `load=${snapshot.engineLoadPct?.toFixed(1) ?? '-'}%`,
     `age=${snapshot.sampleAgeMs?.toFixed(0) ?? '-'} ms`,

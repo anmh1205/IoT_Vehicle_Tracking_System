@@ -56,13 +56,13 @@ const DEVICE_LIST_LIMIT = 100;
 const DEVICE_LIST_MAX_PAGES = 50;
 
 const normalizeStats = (raw: any): DashboardOverviewStats => ({
-  totalDevices: Number(raw?.totalDevices ?? raw?.total_devices ?? 0),
-  activeDevices: Number(raw?.activeDevices ?? raw?.active_devices ?? 0),
-  offlineDevices: Number(raw?.offlineDevices ?? raw?.offline_devices ?? 0),
-  alertsCount: Number(raw?.alertsCount ?? raw?.alerts_count ?? 0),
-  totalRuntimeToday: Number(raw?.totalRuntimeToday ?? raw?.total_runtime_today ?? 0),
-  totalRuntimeWeek: Number(raw?.totalRuntimeWeek ?? raw?.total_runtime_week ?? 0),
-  sessionsToday: Number(raw?.sessionsToday ?? raw?.sessions_today ?? 0),
+  totalDevices: Number(raw?.totalDevices ?? 0),
+  activeDevices: Number(raw?.activeDevices ?? 0),
+  offlineDevices: Number(raw?.offlineDevices ?? 0),
+  alertsCount: Number(raw?.alertsCount ?? 0),
+  totalRuntimeToday: Number(raw?.totalRuntimeToday ?? 0),
+  totalRuntimeWeek: Number(raw?.totalRuntimeWeek ?? 0),
+  sessionsToday: Number(raw?.sessionsToday ?? 0),
 });
 
 const normalizeEvents = (payload: any): DashboardEvent[] => {
@@ -78,12 +78,12 @@ const normalizeEvents = (payload: any): DashboardEvent[] => {
 
   return events.map((event: any, index: number) => ({
     id: event?.id ?? `${event?.serverTimestamp ?? index}-${event?.eventType ?? 'event'}`,
-    eventType: String(event?.eventType ?? event?.event_type ?? 'event'),
-    eventCode: event?.eventCode ?? event?.event_code ?? null,
+    eventType: String(event?.eventType ?? 'event'),
+    eventCode: event?.eventCode ?? null,
     message: event?.message ?? null,
     severity: event?.severity ?? 'low',
-    deviceId: event?.deviceId ?? event?.device_id ?? null,
-    serverTimestamp: event?.serverTimestamp ?? event?.server_timestamp ?? new Date().toISOString(),
+    deviceId: event?.deviceId ?? null,
+    serverTimestamp: event?.serverTimestamp ?? new Date().toISOString(),
   }));
 };
 
@@ -183,14 +183,13 @@ const groupRuntimeByDay = (events: DashboardEvent[], days: number) => {
 };
 
 const toDeviceSnapshot = (raw: any): DashboardDeviceSnapshot => ({
-  deviceId: String(raw?.deviceId ?? raw?.device_id ?? ''),
-  deviceName: String(raw?.deviceName ?? raw?.device_name ?? raw?.deviceId ?? 'Thiết bị'),
+  deviceId: String(raw?.deviceId ?? ''),
+  deviceName: String(raw?.deviceName ?? raw?.deviceId ?? 'Thiết bị'),
   currentStatus: (raw?.currentStatus ??
-    raw?.current_status ??
     'disconnected') as DashboardDeviceSnapshot['currentStatus'],
-  lastSeenAt: raw?.lastSeenAt ?? raw?.last_seen_at ?? null,
-  requestInterval: Number(raw?.requestInterval ?? raw?.request_interval ?? 60),
-  totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? raw?.total_runtime_seconds ?? 0),
+  lastSeenAt: raw?.lastSeenAt ?? null,
+  requestInterval: Number(raw?.requestInterval ?? 60),
+  totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? 0),
 });
 
 const loadDeviceSnapshot = async (): Promise<DashboardDeviceSnapshot[]> => {

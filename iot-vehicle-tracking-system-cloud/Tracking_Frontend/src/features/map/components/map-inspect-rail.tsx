@@ -24,18 +24,21 @@ import { useMapStore } from '@/features/map/store/map-store';
 import type { DevicePosition } from '@/features/map/types';
 import { formatRelative } from '@/lib/utils/date/format';
 import {
-  getFreshnessPresentation,
-  getMotionPresentation,
   getDeviceRuntimePresentation,
   getEnginePresentation,
+  getFreshnessPresentation,
+  getMotionPresentation,
 } from '@/lib/utils/device-state';
 import { cn } from '@/lib/utils';
 
-const membershipMeta: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  inside: { label: 'Đang trong vùng', variant: 'default' },
-  outside: { label: 'Đang ngoài vùng', variant: 'destructive' },
-  suspect: { label: 'Sát mép vùng', variant: 'secondary' },
-  unknown: { label: 'Chưa đánh giá', variant: 'outline' },
+const membershipMeta: Record<
+  string,
+  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+> = {
+  inside: { label: 'Dang trong vung', variant: 'default' },
+  outside: { label: 'Dang ngoai vung', variant: 'destructive' },
+  suspect: { label: 'Sat mep vung', variant: 'secondary' },
+  unknown: { label: 'Chua danh gia', variant: 'outline' },
 };
 
 const toneClasses = {
@@ -46,7 +49,15 @@ const toneClasses = {
   danger: 'border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-300',
 } as const;
 
-const MiniStat = ({ label, value, tone }: { label: string; value: string; tone: keyof typeof toneClasses }) => (
+const MiniStat = ({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: keyof typeof toneClasses;
+}) => (
   <div className={cn('rounded-2xl border px-3 py-2', toneClasses[tone])}>
     <p className="text-[10px] uppercase tracking-[0.16em] opacity-70">{label}</p>
     <p className="mt-1 text-sm font-semibold">{value}</p>
@@ -69,6 +80,12 @@ const formatElectricalValue = (value: number | null | undefined) => {
 
 const formatTemperatureValue = (value: number | null | undefined) =>
   Number.isFinite(value) ? `${value!.toFixed(1)}°C` : '--';
+
+const formatCountValue = (value: number | null | undefined, suffix = '') =>
+  Number.isFinite(value) ? `${Math.round(value!)}${suffix}` : '--';
+
+const formatErrorCodeValue = (value: number | null | undefined) =>
+  Number.isFinite(value) ? String(Math.round(value!)) : '--';
 
 export const MapInspectRail = ({
   device,
@@ -105,14 +122,19 @@ export const MapInspectRail = ({
   const runtime = getDeviceRuntimePresentation(device.deviceState);
   const allowedZoneMembership =
     membershipMeta[allowedZone?.membershipState ?? 'unknown'] ?? membershipMeta.unknown;
+
   const quickStats = [
-    { label: 'Tốc độ', value: formatSpeedValue(device.speed) },
-    { label: 'Tọa độ', value: formatCoordinateValue(device.lat, device.lon) },
-    { label: 'Ắc quy xe', value: formatElectricalValue(device.vehicleBattery ?? device.battery) },
+    { label: 'Toc do', value: formatSpeedValue(device.speed) },
+    { label: 'Toa do', value: formatCoordinateValue(device.lat, device.lon) },
+    { label: 'Ac quy xe', value: formatElectricalValue(device.vehicleBattery ?? device.battery) },
+    { label: 'Pin thiet bi', value: formatElectricalValue(device.deviceBattery) },
     {
-      label: 'Nhiệt độ máy',
+      label: 'Nhiet do may',
       value: formatTemperatureValue(device.engineTemperature ?? device.temperature),
     },
+    { label: 'GNSS', value: formatCountValue(device.satellites, ' sat') },
+    { label: 'Rung', value: formatCountValue(device.vibration) },
+    { label: 'Ma loi', value: formatErrorCodeValue(device.errorCode) },
   ];
 
   return (
@@ -132,10 +154,26 @@ export const MapInspectRail = ({
               </p>
             </div>
             <div className="flex items-center gap-1">
-              <Button size="icon" variant="ghost" className="h-10 w-10 rounded-2xl" onClick={toggleCollapsed} aria-label={collapsed ? 'Mở rộng thanh tác vụ' : 'Thu gọn thanh tác vụ'}>
-                {collapsed ? <PanelRightOpen className="h-4 w-4" /> : <PanelRightClose className="h-4 w-4" />}
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-10 w-10 rounded-2xl"
+                onClick={toggleCollapsed}
+                aria-label={collapsed ? 'Mo rong thanh tac vu' : 'Thu gon thanh tac vu'}
+              >
+                {collapsed ? (
+                  <PanelRightOpen className="h-4 w-4" />
+                ) : (
+                  <PanelRightClose className="h-4 w-4" />
+                )}
               </Button>
-              <Button size="icon" variant="ghost" className="h-10 w-10 rounded-2xl" onClick={onClose} aria-label="Bỏ chọn thiết bị">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-10 w-10 rounded-2xl"
+                onClick={onClose}
+                aria-label="Bo chon thiet bi"
+              >
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -151,13 +189,15 @@ export const MapInspectRail = ({
                     </span>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-sm font-semibold">{device.vehiclePlate ?? device.deviceName}</p>
+                        <p className="truncate text-sm font-semibold">
+                          {device.vehiclePlate ?? device.deviceName}
+                        </p>
                         <Badge variant="outline" className={cn('text-[11px]', toneClasses[freshness.tone])}>
                           {freshness.label}
                         </Badge>
                       </div>
                       <p className="truncate text-xs text-muted-foreground">
-                        Cập nhật {device.timestamp ? formatRelative(device.timestamp) : '--'}
+                        Cap nhat {device.timestamp ? formatRelative(device.timestamp) : '--'}
                       </p>
                     </div>
                   </div>
@@ -170,28 +210,27 @@ export const MapInspectRail = ({
 
                 <div className="rounded-3xl border border-border/70 bg-background/80 p-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                    Thông số nhanh
+                    Thong so nhanh
                   </p>
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     {quickStats.map((stat) => (
-                      <MiniStat
-                        key={stat.label}
-                        label={stat.label}
-                        value={stat.value}
-                        tone="neutral"
-                      />
+                      <MiniStat key={stat.label} label={stat.label} value={stat.value} tone="neutral" />
                     ))}
                   </div>
                 </div>
 
                 <div className="rounded-3xl border border-border/70 bg-background/80 p-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Vùng</p>
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Vung</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge variant={allowedZone ? 'secondary' : 'outline'}>{allowedZone ? 'Đã cấu hình' : 'Chưa có'}</Badge>
-                    {allowedZoneLoading ? <Badge variant="outline">Đang tải...</Badge> : null}
+                    <Badge variant={allowedZone ? 'secondary' : 'outline'}>
+                      {allowedZone ? 'Da cau hinh' : 'Chua co'}
+                    </Badge>
+                    {allowedZoneLoading ? <Badge variant="outline">Dang tai...</Badge> : null}
                     {allowedZone ? (
                       <>
-                        <Badge variant={allowedZoneMembership.variant}>{allowedZoneMembership.label}</Badge>
+                        <Badge variant={allowedZoneMembership.variant}>
+                          {allowedZoneMembership.label}
+                        </Badge>
                         <Badge variant="outline">{getZoneTypeLabel(allowedZone.zoneType)}</Badge>
                         <Badge variant="outline">
                           {allowedZone.zoneType === 'administrative_boundary'
@@ -213,14 +252,25 @@ export const MapInspectRail = ({
                     key={shortcut.id}
                     type="button"
                     variant="outline"
-                    className={cn('h-11 justify-start rounded-2xl border-border/70 bg-background/70 px-3', collapsed && 'justify-center px-0')}
+                    className={cn(
+                      'h-11 justify-start rounded-2xl border-border/70 bg-background/70 px-3',
+                      collapsed && 'justify-center px-0',
+                    )}
                     disabled={shortcut.disabled || shortcut.loading}
                     onClick={shortcut.onSelect}
                     aria-label={shortcut.label}
                   >
-                    {shortcut.loading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" aria-hidden="true" />}
+                    {shortcut.loading ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                    )}
                     {!collapsed ? <span className="ml-2 truncate text-sm">{shortcut.label}</span> : null}
-                    {!collapsed && shortcut.badge ? <Badge className="ml-auto min-w-6 justify-center rounded-full px-1.5">{shortcut.badge}</Badge> : null}
+                    {!collapsed && shortcut.badge ? (
+                      <Badge className="ml-auto min-w-6 justify-center rounded-full px-1.5">
+                        {shortcut.badge}
+                      </Badge>
+                    ) : null}
                   </Button>
                 );
 
@@ -238,21 +288,39 @@ export const MapInspectRail = ({
 
           <div className="mt-3 space-y-2">
             {onToggleAllowedZoneVisibility && allowedZone ? (
-              <Button type="button" variant="outline" className={cn('h-11 rounded-2xl', collapsed && 'px-0')} onClick={onToggleAllowedZoneVisibility} aria-label={showAllowedZone ? 'Ẩn vùng' : 'Hiện vùng'}>
+              <Button
+                type="button"
+                variant="outline"
+                className={cn('h-11 rounded-2xl', collapsed && 'px-0')}
+                onClick={onToggleAllowedZoneVisibility}
+                aria-label={showAllowedZone ? 'An vung' : 'Hien vung'}
+              >
                 {showAllowedZone ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                {!collapsed ? <span className="ml-2">{showAllowedZone ? 'Ẩn vùng' : 'Hiện vùng'}</span> : null}
+                {!collapsed ? <span className="ml-2">{showAllowedZone ? 'An vung' : 'Hien vung'}</span> : null}
               </Button>
             ) : null}
             {!allowedZone && onCreateAllowedZone && canEditAllowedZone ? (
-              <Button type="button" variant="outline" className={cn('h-11 rounded-2xl', collapsed && 'px-0')} onClick={onCreateAllowedZone} aria-label="Tạo vùng">
+              <Button
+                type="button"
+                variant="outline"
+                className={cn('h-11 rounded-2xl', collapsed && 'px-0')}
+                onClick={onCreateAllowedZone}
+                aria-label="Tao vung"
+              >
                 <MapPinned className="h-4 w-4" />
-                {!collapsed ? <span className="ml-2">Tạo vùng</span> : null}
+                {!collapsed ? <span className="ml-2">Tao vung</span> : null}
               </Button>
             ) : null}
             {allowedZone && onEditAllowedZone && canEditAllowedZone ? (
-              <Button type="button" variant="outline" className={cn('h-11 rounded-2xl', collapsed && 'px-0')} onClick={onEditAllowedZone} aria-label="Chỉnh vùng">
+              <Button
+                type="button"
+                variant="outline"
+                className={cn('h-11 rounded-2xl', collapsed && 'px-0')}
+                onClick={onEditAllowedZone}
+                aria-label="Chinh vung"
+              >
                 <MapPinned className="h-4 w-4" />
-                {!collapsed ? <span className="ml-2">Chỉnh vùng</span> : null}
+                {!collapsed ? <span className="ml-2">Chinh vung</span> : null}
               </Button>
             ) : null}
           </div>

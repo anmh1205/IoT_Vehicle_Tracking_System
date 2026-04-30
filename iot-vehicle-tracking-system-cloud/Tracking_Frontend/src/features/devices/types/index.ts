@@ -99,7 +99,15 @@ export interface DeviceCommand {
   response: string | null;
 }
 
-export type DeviceTrackingMetric = 'lat' | 'lon' | 'spd' | 'bb' | 'bt' | 'temp' | 'err' | 'vib';
+export type DeviceTrackingMetric =
+  | 'latitude'
+  | 'longitude'
+  | 'speed'
+  | 'deviceBattery'
+  | 'vehicleBattery'
+  | 'temperature'
+  | 'errorCode'
+  | 'vibration';
 
 export interface DeviceTelemetryPoint {
   timestamp: string;
@@ -111,7 +119,6 @@ export interface DeviceTelemetryRow {
   latitude: number | null;
   longitude: number | null;
   speed: number | null;
-  battery: number | null;
   deviceBattery: number | null;
   vehicleBattery: number | null;
   temperature: number | null;
@@ -137,10 +144,10 @@ export interface DevicePositionSnapshot {
   sleepMode: SleepMode | null;
   stateUpdatedAt: string | null;
   timestamp: string | null;
-  battery: number | null;
   deviceBattery: number | null;
   vehicleBattery: number | null;
   vibration: number | null;
+  errorCode: number | null;
   temperature: number | null;
   engineTemperature: number | null;
   rpm: number | null;

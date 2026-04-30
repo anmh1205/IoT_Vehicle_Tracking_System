@@ -85,7 +85,7 @@ const buildRawFeed = (params: {
     timestamp: resolveTimestamp(row.timestamp),
     source: 'telemetry' as const,
     event: 'telemetry_snapshot',
-    summary: `spd=${row.speed ?? '-'} | lat=${row.latitude ?? '-'} | lon=${row.longitude ?? '-'}`,
+    summary: `speed=${row.speed ?? '-'} | latitude=${row.latitude ?? '-'} | longitude=${row.longitude ?? '-'}`,
     payload: row,
   }));
 
@@ -102,7 +102,7 @@ const buildRawFeed = (params: {
     id: `error-${String(row.id ?? Math.random())}`,
     timestamp: resolveTimestamp(row.occurredAt ?? row.occurred_at ?? row.createdAt),
     source: 'error' as const,
-    event: `error_${String(row.errorCode ?? row.error_code ?? 'unknown')}`,
+    event: `error_${String(row.errorCode ?? 'unknown')}`,
     summary: String(row.description ?? row.message ?? '-'),
     payload: row,
   }));
@@ -154,7 +154,7 @@ const buildRawFeed = (params: {
             timestamp: new Date().toISOString(),
             source: 'obd-diagnostic',
             event: 'mock_obd_preview',
-            summary: 'OBD UI mock | rpm=1650 | spd=38.0 km/h | coolant=92.0 C | load=46.0% | age=900 ms | fail5m=0',
+            summary: 'OBD UI mock | rpm=1650 | speed=38.0 km/h | coolant=92.0 C | load=46.0% | age=900 ms | fail5m=0',
             payload: {
               event_type: 'connection',
               event_code: 'mqtt_bridge_rawdata',
@@ -258,7 +258,7 @@ const localizeObdAlertMessage = (message: string): string => {
   }
 
   const voltageMatch = message.match(
-    /^Battery top\s+([\d.]+)V\s+while engine load\s+([\d.]+)%\.?$/i,
+    /^Vehicle battery\s+([\d.]+)V\s+while engine load\s+([\d.]+)%\.?$/i,
   );
   if (voltageMatch) {
     return `Điện áp ắc quy chính ${voltageMatch[1]}V khi tải động cơ ${voltageMatch[2]}%.`;
@@ -480,7 +480,7 @@ export const DeviceDetailModalContainer = ({
     event: 'device:status',
     enabled: open && !!deviceId,
     handler: (payload) => {
-      const payloadId = String(payload?.device_id ?? payload?.deviceId ?? '');
+      const payloadId = String(payload?.deviceId ?? '');
       if (payloadId && payloadId !== String(detail.data?.device?.deviceId)) return;
       void refreshCurrent();
     },
@@ -490,7 +490,7 @@ export const DeviceDetailModalContainer = ({
     event: 'device:session_start',
     enabled: open && !!deviceId,
     handler: (payload) => {
-      const payloadId = String(payload?.device_id ?? payload?.deviceId ?? '');
+      const payloadId = String(payload?.deviceId ?? '');
       if (payloadId && payloadId !== String(detail.data?.device?.deviceId)) return;
       void refreshCurrent();
     },
@@ -500,7 +500,7 @@ export const DeviceDetailModalContainer = ({
     event: 'device:session_end',
     enabled: open && !!deviceId,
     handler: (payload) => {
-      const payloadId = String(payload?.device_id ?? payload?.deviceId ?? '');
+      const payloadId = String(payload?.deviceId ?? '');
       if (payloadId && payloadId !== String(detail.data?.device?.deviceId)) return;
       void refreshCurrent();
     },

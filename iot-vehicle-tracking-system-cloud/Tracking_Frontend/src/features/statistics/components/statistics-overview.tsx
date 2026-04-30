@@ -58,8 +58,8 @@ export const StatisticsOverview = () => {
   const uptimeData = useMemo(
     () =>
       (uptimeQuery.data?.devices ?? []).map((row: any) => ({
-        label: String(row?.deviceId ?? row?.deviceName ?? row?.device_id ?? '-'),
-        uptimePercent: Number(row?.uptimePercent ?? row?.uptime_percent ?? 0),
+        label: String(row?.deviceId ?? row?.deviceName ?? '-'),
+        uptimePercent: Number(row?.uptimePercent ?? 0),
       })),
     [uptimeQuery.data],
   );

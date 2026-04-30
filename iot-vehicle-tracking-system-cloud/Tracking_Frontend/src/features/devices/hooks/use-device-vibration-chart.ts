@@ -22,7 +22,7 @@ export const useDeviceVibrationChart = (deviceId: number | null) => {
     queryFn: () =>
       deviceDetailServices
         .getTelemetry(deviceId as number, {
-          metric: 'vib',
+          metric: 'vibration',
           from: periodToFrom(period),
           to: new Date().toISOString(),
         })

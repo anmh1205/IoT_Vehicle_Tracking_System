@@ -31,6 +31,18 @@ The completed remediation spans two UI layers:
    - Updated status copy to user locale (Vietnamese).
    - Kept retry/loading actions in clear, touchable controls.
 
+## Public MQTT Entrypoint via Nginx Proxy Manager
+The canonical public MQTT domain is `mqtt.thingdock.dev`, served through `tracking-npm`:
+
+| Protocol | Public endpoint | NPM object | Upstream |
+|---|---|---|---|
+| WSS (browser) | `wss://mqtt.thingdock.dev/mqtt` | Proxy Host `mqtt.thingdock.dev` | `http://tracking-emqx:8083` |
+| MQTTS (device) | `mqtts://mqtt.thingdock.dev` | Stream Host (port 8883) | `tracking-emqx:8883` (TCP passthrough) |
+
+- TLS termination for WSS happens at NPM (Let's Encrypt cert `npm-3` covering `*.thingdock.dev` subdomains).
+- TLS termination for MQTTS happens at EMQX (NPM forwards raw TCP on 8883 without TLS interception).
+- EMQX is internal-only; it does not expose any host ports directly.
+
 ## Integration Notes
 - No new backend contracts were added for the HTTP transport layer beyond the standardized response/error shapes.
 - Web root `/` now redirects to `/login`, while the protected dashboard shell remains under `/dashboard/*`.

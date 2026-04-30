@@ -57,7 +57,8 @@ Tài liệu này áp dụng cho luồng deploy tối giản kiểu IVM26:
   - Auto reconcile target routes:
     - `thingdock.dev` → `tracking-frontend:4001`
     - `be.thingdock.dev` → `tracking-backend:4000`
-    - `mqtt.thingdock.dev` → `tracking-emqx:8083`
+    - `mqtt.thingdock.dev` (WSS, path `/mqtt`) → `tracking-emqx:8083`
+    - `mqtt.thingdock.dev` (MQTTS, TCP stream passthrough) → `tracking-emqx:8883`
 
 ## Runtime behavior notes
 - `bootstrap-vps.sh` chỉ tạo `$SERVICE_DIR/.env` khi file chưa tồn tại; khi file đã tồn tại, script sẽ **reconcile** `SERVICE_ENV_CONTENT` theo cơ chế upsert (key đã có sẽ được cập nhật), đồng thời backup file cũ thành `.env.bak`.

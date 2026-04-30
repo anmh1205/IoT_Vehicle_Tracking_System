@@ -3,7 +3,7 @@
 ## 1. Pre-rollback Snapshot
 1. Ghi nhận `run_id`, iteration hiện tại, classifier lỗi.
 2. Snapshot trạng thái container: `docker ps --format '{{.Names}}|{{.Status}}'`.
-3. Snapshot tail logs backend/bridge (120 lines).
+3. Snapshot tail logs `tracking-backend` / `tracking-mqtt-bridge` (120 lines).
 4. Lưu artifacts trace hiện tại trước khi can thiệp.
 
 ## 2. Rollback Levels
@@ -14,7 +14,7 @@
 - Re-run checkpoint sequence.
 
 ### L2 — Targeted Service Rollback
-- Rollback image/tag hoặc compose override của `mqtt-bridge` hoặc `backend`.
+- Rollback image/tag hoặc compose override của `tracking-mqtt-bridge` hoặc `tracking-backend`.
 - Không rollback nhiều service cùng lúc trong cùng iteration.
 - Re-run baseline smoke scenario.
 

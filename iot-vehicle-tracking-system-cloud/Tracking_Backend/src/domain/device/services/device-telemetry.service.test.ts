@@ -8,7 +8,7 @@ describe('device-telemetry.service', () => {
     vi.resetAllMocks();
   });
 
-  it('maps battery_top alias to the battery-top telemetry query', async () => {
+  it('maps vehicleBattery to the canonical vehicle battery telemetry query', async () => {
     vi.mocked(findMany).mockResolvedValue([
       {
         server_timestamp: new Date('2026-04-23T00:00:00.000Z'),
@@ -16,11 +16,11 @@ describe('device-telemetry.service', () => {
       },
     ]);
 
-    const result = await getTelemetry('TRACKER_001', { metric: 'battery_top' });
+    const result = await getTelemetry('TRACKER_001', { metric: 'vehicleBattery' });
     const [sql] = vi.mocked(findMany).mock.calls[0] ?? [];
 
-    expect(sql).toContain("context->>'bt'");
-    expect(result.metric).toBe('battery_top');
+    expect(sql).toContain("context->>'vehicle_battery'");
+    expect(result.metric).toBe('vehicleBattery');
     expect(result.data).toEqual([
       {
         timestamp: '2026-04-23T00:00:00.000Z',
@@ -45,7 +45,29 @@ describe('device-telemetry.service', () => {
     const result = await getTelemetry('TRACKER_001', { metric: 'unsupported_metric' });
     const [sql] = vi.mocked(findMany).mock.calls[0] ?? [];
 
-    expect(sql).toContain("context->>'vib'");
-    expect(result.metric).toBe('vib');
+    expect(sql).toContain("context->>'vibration'");
+    expect(result.metric).toBe('vibration');
+  });
+
+  it('skips null telemetry values instead of coercing them to zero', async () => {
+    vi.mocked(findMany).mockResolvedValue([
+      {
+        server_timestamp: new Date('2026-04-23T00:00:00.000Z'),
+        value: null,
+      },
+      {
+        server_timestamp: new Date('2026-04-23T00:01:00.000Z'),
+        value: '13.2',
+      },
+    ]);
+
+    const result = await getTelemetry('TRACKER_001', { metric: 'vehicleBattery' });
+
+    expect(result.data).toEqual([
+      {
+        timestamp: '2026-04-23T00:01:00.000Z',
+        value: 13.2,
+      },
+    ]);
   });
 });

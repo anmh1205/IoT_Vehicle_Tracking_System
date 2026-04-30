@@ -223,6 +223,8 @@ export const touchDeviceSession = async (params: {
   deviceTimestampMs: number;
   serverTimestampMs?: number;
   vibration?: number;
+  vehicleBattery?: number;
+  deviceBattery?: number;
   latitude?: number;
   longitude?: number;
   speed?: number;
@@ -250,15 +252,27 @@ export const touchDeviceSession = async (params: {
            WHEN avg_vibration IS NULL THEN $3::numeric
            ELSE ROUND(((avg_vibration + $3::numeric) / 2)::numeric, 2)
          END,
-         last_latitude = COALESCE($4, last_latitude),
-         last_longitude = COALESCE($5, last_longitude),
-         last_speed = COALESCE($6, last_speed),
+         avg_vehicle_battery = CASE
+           WHEN $4::numeric IS NULL THEN avg_vehicle_battery
+           WHEN avg_vehicle_battery IS NULL THEN $4::numeric
+           ELSE ROUND(((avg_vehicle_battery + $4::numeric) / 2)::numeric, 2)
+         END,
+         avg_device_battery = CASE
+           WHEN $5::numeric IS NULL THEN avg_device_battery
+           WHEN avg_device_battery IS NULL THEN $5::numeric
+           ELSE ROUND(((avg_device_battery + $5::numeric) / 2)::numeric, 2)
+         END,
+         last_latitude = COALESCE($6, last_latitude),
+         last_longitude = COALESCE($7, last_longitude),
+         last_speed = COALESCE($8, last_speed),
          updated_at = NOW()
        WHERE id = $1`,
       [
         params.sessionId,
         serverOccurredAt,
         params.vibration ?? null,
+        params.vehicleBattery ?? null,
+        params.deviceBattery ?? null,
         params.latitude ?? null,
         params.longitude ?? null,
         params.speed ?? null,
@@ -299,15 +313,27 @@ export const touchDeviceSession = async (params: {
              WHEN avg_vibration IS NULL THEN $3::numeric
              ELSE ROUND(((avg_vibration + $3::numeric) / 2)::numeric, 2)
            END,
-           last_latitude = COALESCE($4, last_latitude),
-           last_longitude = COALESCE($5, last_longitude),
-           last_speed = COALESCE($6, last_speed),
+           avg_vehicle_battery = CASE
+             WHEN $4::numeric IS NULL THEN avg_vehicle_battery
+             WHEN avg_vehicle_battery IS NULL THEN $4::numeric
+             ELSE ROUND(((avg_vehicle_battery + $4::numeric) / 2)::numeric, 2)
+           END,
+           avg_device_battery = CASE
+             WHEN $5::numeric IS NULL THEN avg_device_battery
+             WHEN avg_device_battery IS NULL THEN $5::numeric
+             ELSE ROUND(((avg_device_battery + $5::numeric) / 2)::numeric, 2)
+           END,
+           last_latitude = COALESCE($6, last_latitude),
+           last_longitude = COALESCE($7, last_longitude),
+           last_speed = COALESCE($8, last_speed),
            updated_at = NOW()
          WHERE id = $1`,
         [
           params.sessionId,
           serverOccurredAt,
           params.vibration ?? null,
+          params.vehicleBattery ?? null,
+          params.deviceBattery ?? null,
           params.latitude ?? null,
           params.longitude ?? null,
           params.speed ?? null,

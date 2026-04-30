@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026-04-10",
-  "targetServices": ["mqtt-bridge", "backend"],
+  "targetServices": ["tracking-mqtt-bridge", "tracking-backend"],
   "checkpointOrder": [
     "health-backend",
     "docker-service-state",
@@ -17,7 +17,7 @@
     },
     "docker-service-state": {
       "type": "ssh",
-      "command": "docker ps --format '{{.Names}}|{{.Status}}' | grep -E 'backend|mqtt-bridge'",
+      "command": "docker ps --format '{{.Names}}|{{.Status}}' | grep -E 'tracking-backend|tracking-mqtt-bridge'",
       "timeoutMs": 10000
     },
     "broker-connectivity": {
@@ -27,12 +27,12 @@
     },
     "bridge-logs": {
       "type": "ssh",
-      "command": "docker logs --tail 120 mqtt-bridge",
+      "command": "docker logs --tail 120 tracking-mqtt-bridge",
       "timeoutMs": 30000
     },
     "backend-logs": {
       "type": "ssh",
-      "command": "docker logs --tail 120 backend",
+      "command": "docker logs --tail 120 tracking-backend",
       "timeoutMs": 30000
     }
   }

@@ -13,13 +13,13 @@ interface DeviceCommandsResult {
 
 const normalizeCommand = (row: any): DeviceCommand => ({
   id: Number(row?.id ?? 0),
-  deviceId: String(row?.deviceId ?? row?.device_id ?? ''),
+  deviceId: String(row?.deviceId ?? ''),
   command: String(row?.command ?? ''),
   params:
     row?.params && typeof row.params === 'object' && !Array.isArray(row.params) ? row.params : {},
   status: String(row?.status ?? 'pending'),
-  sentAt: row?.sentAt ?? row?.sent_at ?? null,
-  ackedAt: row?.ackedAt ?? row?.acked_at ?? null,
+  sentAt: row?.sentAt ?? null,
+  ackedAt: row?.ackedAt ?? null,
   response: row?.response ? String(row.response) : null,
 });
 

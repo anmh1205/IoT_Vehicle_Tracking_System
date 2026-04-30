@@ -135,7 +135,7 @@ const ZonesPage = () => {
     queryFn: () => zoneServices.listVehicleZones(),
   });
 
-  const rows = zonesQuery.data?.items ?? [];
+  const rows = useMemo(() => zonesQuery.data?.items ?? [], [zonesQuery.data?.items]);
 
   const filteredRows = useMemo(() => {
     const keyword = deferredSearch.trim().toLowerCase();

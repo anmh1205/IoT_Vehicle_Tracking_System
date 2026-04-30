@@ -8,6 +8,6 @@
   "targetedRestartPolicy": {
     "enabled": true,
     "maxRestartPerRun": 1,
-    "allowedServices": ["mqtt-bridge", "backend"]
+    "allowedServices": ["tracking-mqtt-bridge", "tracking-backend"]
   }
 }

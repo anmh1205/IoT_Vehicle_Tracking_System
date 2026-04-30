@@ -19,15 +19,26 @@ export interface TrackingTelemetryCustomRange {
 }
 
 const TRACKING_METRICS: DeviceTrackingMetric[] = [
-  'lat',
-  'lon',
-  'spd',
-  'bb',
-  'bt',
-  'temp',
-  'err',
-  'vib',
+  'latitude',
+  'longitude',
+  'speed',
+  'deviceBattery',
+  'vehicleBattery',
+  'temperature',
+  'errorCode',
+  'vibration',
 ];
+
+const createEmptyMetricSeries = (): Record<DeviceTrackingMetric, DeviceTelemetryPoint[]> => ({
+  latitude: [],
+  longitude: [],
+  speed: [],
+  deviceBattery: [],
+  vehicleBattery: [],
+  temperature: [],
+  errorCode: [],
+  vibration: [],
+});
 
 const toDateInput = (value: Date) => value.toISOString().slice(0, 10);
 
@@ -127,7 +138,6 @@ const emptyRowAt = (timestamp: string): DeviceTelemetryRow => ({
   latitude: null,
   longitude: null,
   speed: null,
-  battery: null,
   deviceBattery: null,
   vehicleBattery: null,
   temperature: null,
@@ -151,30 +161,29 @@ const buildTelemetryRows = (
     return created;
   };
 
-  for (const point of metricSeries.lat) {
+  for (const point of metricSeries.latitude) {
     ensureRow(point.timestamp).latitude = point.value;
   }
-  for (const point of metricSeries.lon) {
+  for (const point of metricSeries.longitude) {
     ensureRow(point.timestamp).longitude = point.value;
   }
-  for (const point of metricSeries.spd) {
+  for (const point of metricSeries.speed) {
     ensureRow(point.timestamp).speed = point.value;
   }
-  for (const point of metricSeries.bb) {
+  for (const point of metricSeries.deviceBattery) {
     ensureRow(point.timestamp).deviceBattery = point.value;
-    ensureRow(point.timestamp).battery = point.value;
   }
-  for (const point of metricSeries.bt) {
+  for (const point of metricSeries.vehicleBattery) {
     ensureRow(point.timestamp).vehicleBattery = point.value;
   }
-  for (const point of metricSeries.temp) {
+  for (const point of metricSeries.temperature) {
     ensureRow(point.timestamp).engineTemperature = point.value;
     ensureRow(point.timestamp).temperature = point.value;
   }
-  for (const point of metricSeries.err) {
+  for (const point of metricSeries.errorCode) {
     ensureRow(point.timestamp).errorCode = point.value;
   }
-  for (const point of metricSeries.vib) {
+  for (const point of metricSeries.vibration) {
     ensureRow(point.timestamp).vibration = point.value;
   }
 
@@ -208,31 +217,16 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
           accumulator[metric] = toTelemetryPoints(responses[index]);
           return accumulator;
         },
-        {
-          lat: [],
-          lon: [],
-          spd: [],
-          bb: [],
-          bt: [],
-          temp: [],
-          err: [],
-          vib: [],
-        } as Record<DeviceTrackingMetric, DeviceTelemetryPoint[]>,
+        createEmptyMetricSeries(),
       );
     },
     enabled: !!deviceId,
   });
 
-  const rowsAscending = useMemo(() => buildTelemetryRows(query.data ?? {
-    lat: [],
-    lon: [],
-    spd: [],
-    bb: [],
-    bt: [],
-    temp: [],
-    err: [],
-    vib: [],
-  }), [query.data]);
+  const rowsAscending = useMemo(
+    () => buildTelemetryRows(query.data ?? createEmptyMetricSeries()),
+    [query.data],
+  );
 
   const routeRowsAscending = useMemo(
     () => selectLatestContiguousRouteRows(rowsAscending),
@@ -277,18 +271,7 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
 
   return {
     ...query,
-    dataByMetric:
-      query.data ??
-      ({
-        lat: [],
-        lon: [],
-        spd: [],
-        bb: [],
-        bt: [],
-        temp: [],
-        err: [],
-        vib: [],
-      } as Record<DeviceTrackingMetric, DeviceTelemetryPoint[]>),
+    dataByMetric: query.data ?? createEmptyMetricSeries(),
     rows,
     rowsAscending,
     routeRowsAscending,

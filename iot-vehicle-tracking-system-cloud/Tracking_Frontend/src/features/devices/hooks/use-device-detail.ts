@@ -19,61 +19,52 @@ export interface DeviceDetailData {
 const toAlertSummary = (raw: any, source: 'device' | 'ecu'): Device['deviceAlerts'] => ({
   source,
   count: Number(raw?.count ?? 0),
-  highestSeverity: (raw?.highestSeverity ?? raw?.highest_severity ?? 'none') as Device['deviceAlerts']['highestSeverity'],
+  highestSeverity: (raw?.highestSeverity ?? 'none') as Device['deviceAlerts']['highestSeverity'],
   titles: Array.isArray(raw?.titles) ? raw.titles.map((item: unknown) => String(item ?? '')) : [],
 });
 
 const toDeviceSession = (raw: any): DeviceSession => ({
   id: Number(raw?.id ?? 0),
   status: raw?.status ?? 'running',
-  serverSessionStart: raw?.serverSessionStart ?? raw?.server_session_start ?? null,
-  serverSessionEnd: raw?.serverSessionEnd ?? raw?.server_session_end ?? null,
+  serverSessionStart: raw?.serverSessionStart ?? null,
+  serverSessionEnd: raw?.serverSessionEnd ?? null,
   uptime: raw?.uptime !== undefined && raw?.uptime !== null ? Number(raw.uptime) : null,
   avgVibration:
     raw?.avgVibration !== undefined && raw?.avgVibration !== null ? Number(raw.avgVibration) : null,
-  dataPointsCount: Number(raw?.dataPointsCount ?? raw?.data_points_count ?? 0),
+  dataPointsCount: Number(raw?.dataPointsCount ?? 0),
 });
 
 const toDevice = (raw: any): Device => ({
   id: Number(raw?.id ?? 0),
-  deviceId: String(raw?.deviceId ?? raw?.device_id ?? ''),
-  deviceName: String(raw?.deviceName ?? raw?.device_name ?? ''),
-  currentStatus: (raw?.currentStatus ??
-    raw?.current_status ??
-    'disconnected') as Device['currentStatus'],
-  ignitionState: (raw?.ignitionState ?? raw?.ignition_state ?? null) as Device['ignitionState'],
-  motionState: (raw?.motionState ?? raw?.motion_state ?? null) as Device['motionState'],
-  vehicleState: (raw?.vehicleState ?? raw?.vehicle_state ?? null) as Device['vehicleState'],
-  deviceState: (raw?.deviceState ?? raw?.device_state ?? null) as Device['deviceState'],
-  sleepMode: (raw?.sleepMode ?? raw?.sleep_mode ?? null) as Device['sleepMode'],
-  stateUpdatedAt: raw?.stateUpdatedAt ?? raw?.state_updated_at ?? null,
-  deviceAlerts: toAlertSummary(raw?.deviceAlerts ?? raw?.device_alerts ?? {}, 'device'),
-  ecuAlerts: toAlertSummary(raw?.ecuAlerts ?? raw?.ecu_alerts ?? {}, 'ecu'),
+  deviceId: String(raw?.deviceId ?? ''),
+  deviceName: String(raw?.deviceName ?? ''),
+  currentStatus: (raw?.currentStatus ?? 'disconnected') as Device['currentStatus'],
+  ignitionState: (raw?.ignitionState ?? null) as Device['ignitionState'],
+  motionState: (raw?.motionState ?? null) as Device['motionState'],
+  vehicleState: (raw?.vehicleState ?? null) as Device['vehicleState'],
+  deviceState: (raw?.deviceState ?? null) as Device['deviceState'],
+  sleepMode: (raw?.sleepMode ?? null) as Device['sleepMode'],
+  stateUpdatedAt: raw?.stateUpdatedAt ?? null,
+  deviceAlerts: toAlertSummary(raw?.deviceAlerts ?? {}, 'device'),
+  ecuAlerts: toAlertSummary(raw?.ecuAlerts ?? {}, 'ecu'),
   imei: raw?.imei ?? null,
-  firmwareVersion: raw?.firmwareVersion ?? raw?.firmware_version ?? null,
-  targetFirmwareVersion: raw?.targetFirmwareVersion ?? raw?.target_firmware_version ?? null,
-  vehicleId: raw?.vehicleId ?? raw?.vehicle_id ?? null,
-  vehiclePlate: raw?.vehiclePlate ?? raw?.vehicle_plate ?? null,
-  customerName: raw?.customerName ?? raw?.customer_name ?? null,
-  lastSeenAt: raw?.lastSeenAt ?? raw?.last_seen_at ?? null,
+  firmwareVersion: raw?.firmwareVersion ?? null,
+  targetFirmwareVersion: raw?.targetFirmwareVersion ?? null,
+  vehicleId: raw?.vehicleId ?? null,
+  vehiclePlate: raw?.vehiclePlate ?? null,
+  customerName: raw?.customerName ?? null,
+  lastSeenAt: raw?.lastSeenAt ?? null,
   latitude: raw?.latitude !== undefined ? Number(raw.latitude) : null,
   longitude: raw?.longitude !== undefined ? Number(raw.longitude) : null,
-  totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? raw?.total_runtime_seconds ?? 0),
-  requestInterval: Number(raw?.requestInterval ?? raw?.request_interval ?? 60),
-  vibrationThreshold: Number(raw?.vibrationThreshold ?? raw?.vibration_threshold ?? 0),
-  lastErrorCode:
-    raw?.lastErrorCode !== undefined && raw?.lastErrorCode !== null
-      ? Number(raw.lastErrorCode)
-      : raw?.last_error_code !== undefined && raw?.last_error_code !== null
-        ? Number(raw.last_error_code)
-        : null,
+  totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? 0),
+  requestInterval: Number(raw?.requestInterval ?? 60),
+  vibrationThreshold: Number(raw?.vibrationThreshold ?? 0),
+  lastErrorCode: raw?.lastErrorCode !== undefined && raw?.lastErrorCode !== null
+    ? Number(raw.lastErrorCode)
+    : null,
   config: raw?.config ?? null,
   currentSession: raw?.currentSession ? toDeviceSession(raw.currentSession) : null,
-  recentSessions: Array.isArray(raw?.recentSessions)
-    ? raw.recentSessions.map(toDeviceSession)
-    : Array.isArray(raw?.recent_sessions)
-      ? raw.recent_sessions.map(toDeviceSession)
-      : [],
+  recentSessions: Array.isArray(raw?.recentSessions) ? raw.recentSessions.map(toDeviceSession) : [],
 });
 
 export const useDeviceDetail = (id: number | null) =>

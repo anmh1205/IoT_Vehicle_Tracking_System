@@ -278,11 +278,12 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     state_updated_at: Date | null;
     last_seen_at: Date | null;
     speed: number | null;
-    heading: number | null;
-    battery: number | null;
+    course: number | null;
     device_battery: number | null;
     vehicle_battery: number | null;
+    satellites: number | null;
     vibration: number | null;
+    error_code: number | null;
     temperature: number | null;
     engine_temperature: number | null;
     rpm: number | null;
@@ -311,54 +312,27 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        d.last_seen_at,
        COALESCE(
          d.last_speed,
-         NULLIF(el.context->>'spd', '')::float8,
-         NULLIF(el.context->>'speed', '')::float8,
-         0
+         NULLIF(el.context->>'speed', '')::float8
        ) AS speed,
+       NULLIF(el.context->>'course', '')::float8 AS course,
+       NULLIF(el.context->>'device_battery', '')::float8 AS device_battery,
+       NULLIF(el.context->>'vehicle_battery', '')::float8 AS vehicle_battery,
+       NULLIF(el.context->>'satellites', '')::int AS satellites,
+       NULLIF(el.context->>'vibration', '')::float8 AS vibration,
        COALESCE(
-         NULLIF(el.context->>'heading', '')::float8,
-         NULLIF(el.context->>'course', '')::float8,
-         0
-       ) AS heading,
+         NULLIF(el.context->>'error_code', '')::int,
+         d.last_error_code
+       ) AS error_code,
        COALESCE(
-         NULLIF(el.context->>'batt', '')::float8,
-         NULLIF(el.context->>'bt', '')::float8,
-         NULLIF(el.context->>'battery_top', '')::float8,
-         0
-       ) AS battery,
-       COALESCE(
-         NULLIF(el.context->>'bb', '')::float8,
-         NULLIF(el.context->>'battery_bot', '')::float8,
-         0
-       ) AS device_battery,
-       COALESCE(
-         NULLIF(el.context->>'bt', '')::float8,
-         NULLIF(el.context->>'batt', '')::float8,
-         NULLIF(el.context->>'battery_top', '')::float8,
-         0
-       ) AS vehicle_battery,
-       COALESCE(
-         NULLIF(el.context->>'vib', '')::float8,
-         NULLIF(el.context->>'vibration', '')::float8,
-         0
-       ) AS vibration,
-       COALESCE(
-         NULLIF(el.context->>'temp', '')::float8,
          NULLIF(el.context->>'temperature', '')::float8,
          NULLIF(el.context#>>'{diagnostics,signals,coolant_c}', '')::float8,
-         NULLIF(el.context#>>'{diagnostics,signals,intake_air_temp_c}', '')::float8,
-         0
+         NULLIF(el.context#>>'{diagnostics,signals,intake_air_temp_c}', '')::float8
        ) AS temperature,
        COALESCE(
          NULLIF(el.context#>>'{diagnostics,signals,coolant_c}', '')::float8,
-         NULLIF(el.context->>'temp', '')::float8,
-         NULLIF(el.context->>'temperature', '')::float8,
-         0
+         NULLIF(el.context->>'temperature', '')::float8
        ) AS engine_temperature,
-       COALESCE(
-         NULLIF(el.context#>>'{diagnostics,signals,rpm}', '')::float8,
-         0
-       ) AS rpm,
+       NULLIF(el.context#>>'{diagnostics,signals,rpm}', '')::float8 AS rpm,
        COALESCE(alerts.device_alert_count, 0) AS device_alert_count,
        COALESCE(alerts.device_alert_titles, ARRAY[]::text[]) AS device_alert_titles,
        COALESCE(alerts.device_alert_highest_severity, 'none') AS device_alert_highest_severity,
@@ -372,16 +346,13 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        FROM event_logs
        WHERE device_id = d.device_id
          AND context ?| ARRAY[
-           'spd',
            'speed',
-           'heading',
            'course',
-           'batt',
-           'bt',
-           'battery_top',
-           'vib',
+           'vehicle_battery',
+           'device_battery',
+           'satellites',
            'vibration',
-           'temp',
+           'error_code',
            'temperature',
            'diagnostics'
          ]
@@ -415,13 +386,14 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     sleepMode: row.sleep_mode,
     stateUpdatedAt: row.state_updated_at?.toISOString() ?? null,
     lastSeenAt: row.last_seen_at?.toISOString() ?? null,
-    speed: row.speed ?? 0,
-    heading: row.heading ?? 0,
-    battery: row.battery ?? 0,
+    speed: row.speed,
+    course: row.course,
     deviceBattery: row.device_battery,
     vehicleBattery: row.vehicle_battery,
-    vibration: row.vibration ?? 0,
-    temperature: row.temperature ?? 0,
+    satellites: row.satellites,
+    vibration: row.vibration,
+    errorCode: row.error_code,
+    temperature: row.temperature,
     engineTemperature: row.engine_temperature,
     rpm: row.rpm,
     activeAlertCount: (row.device_alert_count ?? 0) + (row.ecu_alert_count ?? 0),

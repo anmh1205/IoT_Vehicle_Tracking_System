@@ -6,12 +6,13 @@ import { getApiErrorMessage } from '@/lib/utils/api-error';
 export interface SimulatorPayload {
   deviceId: string;
   timestamp: string;
-  lat: number;
-  lon: number;
+  latitude: number;
+  longitude: number;
   speed: number;
   heading?: number;
   vibration: number;
-  battery: number;
+  vehicleBattery: number;
+  deviceBattery: number;
   errorCode?: number | null;
 }
 interface SimulatorStatusPayload {
@@ -41,20 +42,19 @@ export const DEFAULT_SIMULATOR_STATE: SimulatorState = {
   lon: 106.660172,
 };
 const normalizePoint = (raw: any): SimulatorPayload => ({
-  deviceId: String(raw?.deviceId ?? raw?.device_id ?? ''),
+  deviceId: String(raw?.deviceId ?? ''),
   timestamp: String(raw?.timestamp ?? new Date().toISOString()),
-  lat: Number(raw?.lat ?? raw?.latitude ?? 0),
-  lon: Number(raw?.lon ?? raw?.longitude ?? 0),
+  latitude: Number(raw?.latitude ?? 0),
+  longitude: Number(raw?.longitude ?? 0),
   speed: Number(raw?.speed ?? 0),
   heading: raw?.heading !== undefined && raw?.heading !== null ? Number(raw.heading) : undefined,
-  vibration: Number(raw?.vibration ?? raw?.vib ?? 0),
-  battery: Number(raw?.battery ?? raw?.batt ?? 0),
+  vibration: Number(raw?.vibration ?? 0),
+  vehicleBattery: Number(raw?.vehicleBattery ?? 0),
+  deviceBattery: Number(raw?.deviceBattery ?? 0),
   errorCode:
     raw?.errorCode !== undefined && raw?.errorCode !== null
       ? Number(raw.errorCode)
-      : raw?.err !== undefined && raw?.err !== null
-        ? Number(raw.err)
-        : null,
+      : null,
 });
 const normalizeStatus = (raw: any): SimulatorStatusPayload => ({
   running: Boolean(raw?.running),

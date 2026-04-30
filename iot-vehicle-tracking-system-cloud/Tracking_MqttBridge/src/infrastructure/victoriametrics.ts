@@ -54,7 +54,7 @@ export const writeDeviceTelemetry = async (
 
   for (const [key, value] of Object.entries(data)) {
     if (value === undefined) continue;
-    const metricName = `vehicle_${sanitizeLabel(key)}`;
+    const metricName = `tracker_telemetry_${sanitizeLabel(key)}`;
     lines.push(`${metricName}{device_id="${sanitizedDeviceId}"} ${value} ${timestampMs}`);
   }
 

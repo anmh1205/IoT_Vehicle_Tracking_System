@@ -19,7 +19,7 @@ interface DeviceSimulatorRuntime {
   lat: number;
   lon: number;
   heading: number;
-  battery: number;
+  vehicleBattery: number;
   fuelLevel: number;
   obdConnectFailCount5m: number;
   seqNo: number;
@@ -91,7 +91,7 @@ interface PayloadMetadata {
   boot_id: string;
 }
 
-const RAWDATA_SCHEMA_VERSION = 'v1.3.0';
+const RAWDATA_SCHEMA_VERSION = 'v2.0.0';
 const DEFAULT_SCHEMA_VERSION = 'v1.0.0';
 
 const clamp = (value: number, min: number, max: number): number =>
@@ -273,8 +273,8 @@ const publishDeviceRawData = (
   timestamp: number,
   data: {
     vibration: number;
-    batteryTop: number;
-    batteryBot: number;
+    vehicleBattery: number;
+    deviceBattery: number;
     latitude: number;
     longitude: number;
     speed: number;
@@ -301,8 +301,8 @@ const publishDeviceRawData = (
       uptime: data.uptimeMs,
       data: {
         vibration: data.vibration,
-        battery_top: data.batteryTop,
-        battery_bot: data.batteryBot,
+        vehicle_battery: data.vehicleBattery,
+        device_battery: data.deviceBattery,
         latitude: data.latitude,
         longitude: data.longitude,
         speed: data.speed,
@@ -627,9 +627,9 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
     );
     device.lat = Number.isFinite(nextLat) ? nextLat : roundTo(state.config.lat, 6);
     device.lon = Number.isFinite(nextLon) ? nextLon : roundTo(state.config.lon, 6);
-    device.battery = roundTo(
+    device.vehicleBattery = roundTo(
       clamp(
-        device.battery - randomBetween(0, 0.25),
+        device.vehicleBattery - randomBetween(0, 0.25),
         state.config.batteryMin,
         state.config.batteryMax,
       ),
@@ -651,7 +651,10 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
     const coolantC = roundTo(clamp(76 + engineLoadPct * 0.32 + randomBetween(-2, 2), 70, 118), 1);
     const sampleAgeMs = Math.round(randomBetween(80, 1400));
     const satellites = Math.round(randomBetween(6, 16));
-    const batteryBot = roundTo(clamp(device.battery - randomBetween(0.15, 0.9), 0, 100), 2);
+    const deviceBattery = roundTo(
+      clamp(device.vehicleBattery - randomBetween(0.15, 0.9), 0, 100),
+      2,
+    );
 
     const thermalRisk = coolantC > 104 && engineLoadPct > 65;
     const errorCode =
@@ -660,8 +663,8 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
     const timestamp = now.getTime();
     await publishDeviceRawData(state.mqttClient, device, timestamp, {
       vibration,
-      batteryTop: device.battery,
-      batteryBot,
+      vehicleBattery: device.vehicleBattery,
+      deviceBattery,
       latitude: device.lat,
       longitude: device.lon,
       speed,
@@ -703,12 +706,13 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
     const point: SimulatorPoint = {
       deviceId: device.deviceId,
       timestamp: now.toISOString(),
-      lat: device.lat,
-      lon: device.lon,
+      latitude: device.lat,
+      longitude: device.lon,
       speed,
       heading: roundTo(device.heading, 2),
       vibration,
-      battery: device.battery,
+      vehicleBattery: device.vehicleBattery,
+      deviceBattery,
       errorCode,
     };
 
@@ -811,7 +815,7 @@ export const startSimulation = async (
       lat: initialLat,
       lon: initialLon,
       heading: normalizeHeading(randomBetween(0, 359)),
-      battery: roundTo(randomBetween(input.batteryMin, input.batteryMax), 2),
+      vehicleBattery: roundTo(randomBetween(input.batteryMin, input.batteryMax), 2),
       fuelLevel: roundTo(randomBetween(35, 95), 2),
       obdConnectFailCount5m: 0,
       seqNo: 0,

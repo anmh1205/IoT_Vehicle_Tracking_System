@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p 4001",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && node -e \"const fs=require('fs'); const path=require('path'); const target=path.join('.next','types','cache-life.d.ts'); const source=path.join('.next','dev','types','cache-life.d.ts'); fs.mkdirSync(path.dirname(target), { recursive: true }); if (!fs.existsSync(target)) { fs.writeFileSync(target, fs.existsSync(source) ? fs.readFileSync(source) : 'export {};\\n'); }\" && tsc --noEmit --incremental false",
     "test": "echo \"No tests configured\""
   },
   "dependencies": {

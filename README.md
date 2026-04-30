@@ -225,6 +225,11 @@ Grafana visualizes VictoriaMetrics and VictoriaLogs.
 | `v1/{device_id}/firmware` | Device -> Server | 1 | OTA progress and results |
 | `v1/{device_id}/commands` | Server -> Device | 1 | Remote commands/config updates |
 
+Canonical `v1/{device_id}/rawdata.data` fields:
+- `vibration`, `vehicle_battery`, `device_battery`
+- `latitude`, `longitude`, `speed`, `course`
+- `satellites`, `ignition`, `error_code`
+
 ### Remote command examples
 
 | Command | Purpose | Typical fields |

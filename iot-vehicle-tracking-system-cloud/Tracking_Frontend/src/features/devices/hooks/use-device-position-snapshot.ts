@@ -20,37 +20,37 @@ const toAlertSummary = (raw: any, source: 'device' | 'ecu'): DevicePositionSnaps
 });
 
 const normalizePosition = (row: any): DevicePositionSnapshot => ({
-  deviceId: String(row?.deviceId ?? row?.device_id ?? ''),
-  deviceName: String(row?.deviceName ?? row?.device_name ?? row?.deviceId ?? row?.device_id ?? ''),
-  vehiclePlate: row?.vehiclePlate ?? row?.vehicle_plate ?? null,
-  customerName: row?.customerName ?? row?.customer_name ?? null,
-  latitude: toNumberOrNull(row?.latitude ?? row?.lat),
-  longitude: toNumberOrNull(row?.longitude ?? row?.lon),
+  deviceId: String(row?.deviceId ?? ''),
+  deviceName: String(row?.deviceName ?? row?.deviceId ?? ''),
+  vehiclePlate: row?.vehiclePlate ?? null,
+  customerName: row?.customerName ?? null,
+  latitude: toNumberOrNull(row?.latitude),
+  longitude: toNumberOrNull(row?.longitude),
   speed: toNumberOrNull(row?.speed),
-  heading: toNumberOrNull(row?.heading),
+  heading: toNumberOrNull(row?.course),
   status: String(row?.currentStatus ?? row?.status ?? 'disconnected'),
-  ignitionState: (row?.ignitionState ?? row?.ignition_state ?? null) as DevicePositionSnapshot['ignitionState'],
-  motionState: (row?.motionState ?? row?.motion_state ?? null) as DevicePositionSnapshot['motionState'],
-  vehicleState: (row?.vehicleState ?? row?.vehicle_state ?? null) as DevicePositionSnapshot['vehicleState'],
-  deviceState: (row?.deviceState ?? row?.device_state ?? null) as DevicePositionSnapshot['deviceState'],
-  sleepMode: (row?.sleepMode ?? row?.sleep_mode ?? null) as DevicePositionSnapshot['sleepMode'],
-  stateUpdatedAt: row?.stateUpdatedAt ?? row?.state_updated_at ?? null,
-  timestamp: row?.lastSeenAt ?? row?.last_seen_at ?? row?.timestamp ?? null,
-  battery: toNumberOrNull(row?.battery),
-  deviceBattery: toNumberOrNull(row?.deviceBattery ?? row?.device_battery),
-  vehicleBattery: toNumberOrNull(row?.vehicleBattery ?? row?.vehicle_battery),
+  ignitionState: (row?.ignitionState ?? null) as DevicePositionSnapshot['ignitionState'],
+  motionState: (row?.motionState ?? null) as DevicePositionSnapshot['motionState'],
+  vehicleState: (row?.vehicleState ?? null) as DevicePositionSnapshot['vehicleState'],
+  deviceState: (row?.deviceState ?? null) as DevicePositionSnapshot['deviceState'],
+  sleepMode: (row?.sleepMode ?? null) as DevicePositionSnapshot['sleepMode'],
+  stateUpdatedAt: row?.stateUpdatedAt ?? null,
+  timestamp: row?.lastSeenAt ?? row?.timestamp ?? null,
+  deviceBattery: toNumberOrNull(row?.deviceBattery),
+  vehicleBattery: toNumberOrNull(row?.vehicleBattery),
   vibration: toNumberOrNull(row?.vibration),
+  errorCode: toNumberOrNull(row?.errorCode),
   temperature: toNumberOrNull(row?.temperature),
-  engineTemperature: toNumberOrNull(row?.engineTemperature ?? row?.engine_temperature),
+  engineTemperature: toNumberOrNull(row?.engineTemperature),
   rpm: toNumberOrNull(row?.rpm),
-  activeAlertCount: Math.max(0, Number(row?.activeAlertCount ?? row?.active_alert_count ?? 0) || 0),
-  activeAlertTitles: Array.isArray(row?.activeAlertTitles ?? row?.active_alert_titles)
-    ? (row?.activeAlertTitles ?? row?.active_alert_titles).filter(
+  activeAlertCount: Math.max(0, Number(row?.activeAlertCount ?? 0) || 0),
+  activeAlertTitles: Array.isArray(row?.activeAlertTitles)
+    ? row.activeAlertTitles.filter(
         (item: unknown): item is string => typeof item === 'string' && item.trim().length > 0,
       )
     : [],
-  deviceAlerts: toAlertSummary(row?.deviceAlerts ?? row?.device_alerts ?? {}, 'device'),
-  ecuAlerts: toAlertSummary(row?.ecuAlerts ?? row?.ecu_alerts ?? {}, 'ecu'),
+  deviceAlerts: toAlertSummary(row?.deviceAlerts ?? {}, 'device'),
+  ecuAlerts: toAlertSummary(row?.ecuAlerts ?? {}, 'ecu'),
 });
 
 export const useDevicePositionSnapshot = (devicePublicId: string | null, enabled = true) => {
@@ -73,8 +73,7 @@ export const useDevicePositionSnapshot = (devicePublicId: string | null, enabled
             : [];
 
     const matched = items.find(
-      (item: any) =>
-        String(item?.deviceId ?? item?.device_id ?? '') === String(devicePublicId ?? ''),
+      (item: any) => String(item?.deviceId ?? '') === String(devicePublicId ?? ''),
     );
 
     return matched ? normalizePosition(matched) : null;

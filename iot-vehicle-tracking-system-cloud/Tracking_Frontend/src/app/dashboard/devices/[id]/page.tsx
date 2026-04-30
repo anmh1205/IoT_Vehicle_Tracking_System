@@ -280,7 +280,7 @@ const DeviceDetailPage = ({
               recentErrors.map((error: any, index: number) => (
                 <div key={error.id ?? index} className="rounded-xl border bg-muted/20 px-3 py-3 text-sm">
                   <p className="font-medium">
-                    Mã lỗi {error.errorCode ?? error.error_code ?? error.code ?? 'không rõ'}
+                    Mã lỗi {error.errorCode ?? error.code ?? 'không rõ'}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {error.errorName ?? error.name ?? error.description ?? 'Chưa có mô tả lỗi'}

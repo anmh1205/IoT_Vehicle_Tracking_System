@@ -22,7 +22,7 @@ export const VMQueryViewer = ({
         <Textarea
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Ví dụ: avg_over_time(vehicle_speed[15m])"
+          placeholder="Ví dụ: avg_over_time(tracker_telemetry_speed[15m])"
           spellCheck={false}
         />
       </div>

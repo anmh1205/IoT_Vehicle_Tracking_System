@@ -86,8 +86,8 @@ export interface RawDataPayload {
   uptime?: number;
   data: {
     vibration?: number;
-    battery_top?: number;
-    battery_bot?: number;
+    vehicle_battery?: number;
+    device_battery?: number;
     latitude?: number;
     longitude?: number;
     speed?: number;

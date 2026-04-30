@@ -536,7 +536,7 @@ const syncHighVibrationAlert = async (
 const evaluateObdMaintenanceRules = (
   diagnostics: RawDiagnostics | undefined,
   context: ObdAlertContext,
-  fallbackBatteryTop: number | undefined,
+  fallbackVehicleBattery: number | undefined,
   fallbackSpeed: number | undefined,
 ): Promise<void> => {
   if (!diagnostics) {
@@ -550,7 +550,7 @@ const evaluateObdMaintenanceRules = (
   const rpm = toFiniteNumber(diagnostics.signals?.rpm);
   const obdSpeed = toFiniteNumber(diagnostics.signals?.obd_speed_kph);
   const speed = obdSpeed ?? fallbackSpeed;
-  const batteryTop = fallbackBatteryTop;
+  const vehicleBattery = fallbackVehicleBattery;
   const activeRuleTitles = new Set<string>();
   const channelUnstableActive =
     connectFailCount !== undefined && connectFailCount >= OBD_CHANNEL_UNSTABLE_THRESHOLD;
@@ -560,9 +560,9 @@ const evaluateObdMaintenanceRules = (
     coolant >= OBD_COOLANT_HIGH_C &&
     engineLoad >= OBD_HIGH_ENGINE_LOAD;
   const voltageRiskActive =
-    batteryTop !== undefined &&
+    vehicleBattery !== undefined &&
     engineLoad !== undefined &&
-    batteryTop < OBD_VOLTAGE_LOW_V &&
+    vehicleBattery < OBD_VOLTAGE_LOW_V &&
     engineLoad > OBD_VOLTAGE_LOAD_MIN;
   let idleAnomalyEligible = false;
   let idleAnomalyElapsedMs = 0;
@@ -657,10 +657,10 @@ const evaluateObdMaintenanceRules = (
         ruleId: 'voltage_risk_combined',
         severity: 'high',
         title: 'OBD: Voltage risk under load',
-        message: `Battery top ${batteryTop!.toFixed(2)}V while engine load ${engineLoad!.toFixed(1)}%.`,
+        message: `Vehicle battery ${vehicleBattery!.toFixed(2)}V while engine load ${engineLoad!.toFixed(1)}%.`,
         confidence: 0.84,
         threshold: OBD_VOLTAGE_LOW_V,
-        value: batteryTop,
+        value: vehicleBattery,
       });
     }
   });
@@ -805,8 +805,8 @@ export const handleRawData = async (
   // 4. Write to VictoriaMetrics
   const metricsData: Record<string, number | undefined> = {
     vibration: payload.data.vibration,
-    battery_top: payload.data.battery_top,
-    battery_bot: payload.data.battery_bot,
+    vehicle_battery: payload.data.vehicle_battery,
+    device_battery: payload.data.device_battery,
     latitude: effectiveLatitude,
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
@@ -911,6 +911,8 @@ export const handleRawData = async (
       deviceTimestampMs: timestampMs,
       serverTimestampMs: receivedAtMs,
       vibration: payload.data.vibration,
+      vehicleBattery: payload.data.vehicle_battery,
+      deviceBattery: payload.data.device_battery,
       latitude: effectiveLatitude,
       longitude: effectiveLongitude,
       speed: effectiveSpeed,
@@ -969,18 +971,15 @@ export const handleRawData = async (
     vehicle_id: device.vehicle_id ?? undefined,
     session_id: sessionId,
     current_status: sessionId !== null ? 'online' : device.current_status,
-    lat: effectiveLatitude,
-    lon: effectiveLongitude,
-    spd: effectiveSpeed,
-    bb: payload.data.battery_bot,
-    bt: payload.data.battery_top,
-    err: payload.data.error_code,
-    vib: payload.data.vibration,
     latitude: effectiveLatitude,
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
     course: effectiveCourse,
-    battery_top: payload.data.battery_top,
+    satellites: payload.data.satellites,
+    vehicle_battery: payload.data.vehicle_battery,
+    device_battery: payload.data.device_battery,
+    vibration: payload.data.vibration,
+    error_code: payload.data.error_code,
     ignition_state: runtimeState.ignition_state,
     motion_state: runtimeState.motion_state,
     vehicle_state: runtimeState.vehicle_state,
@@ -1012,7 +1011,7 @@ export const handleRawData = async (
     evaluateObdMaintenanceRules(
       normalizedDiagnostics,
       obdAlertContext,
-      payload.data.battery_top,
+      payload.data.vehicle_battery,
       effectiveSpeed,
     ),
     evaluateObdDtcRules(normalizedDiagnostics, obdAlertContext),

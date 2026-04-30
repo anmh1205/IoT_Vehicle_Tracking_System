@@ -15,7 +15,7 @@ interface DeviceSimulatorRuntime {
   lat: number;
   lon: number;
   heading: number;
-  battery: number;
+  vehicleBattery: number;
   sessionIdBeforeStart: number | null;
 }
 
@@ -300,12 +300,16 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
       moved.lon * (1 - pullFactor) + state.config.lon * pullFactor + noiseLon,
       6,
     );
-    device.battery = roundTo(
+    device.vehicleBattery = roundTo(
       clamp(
-        device.battery - randomBetween(0, 0.25),
+        device.vehicleBattery - randomBetween(0, 0.25),
         state.config.batteryMin,
         state.config.batteryMax,
       ),
+      2,
+    );
+    const deviceBattery = roundTo(
+      clamp(device.vehicleBattery - randomBetween(0.15, 0.9), 0, 100),
       2,
     );
 
@@ -316,13 +320,14 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
       authToken: device.authToken,
       timestamp: now.getTime(),
       data: {
-        lat: device.lat,
-        lon: device.lon,
-        spd: speed,
-        vib: vibration,
-        batt: device.battery,
-        heading: roundTo(device.heading, 2),
-        err: errorCode ?? undefined,
+        latitude: device.lat,
+        longitude: device.lon,
+        speed,
+        vibration,
+        vehicleBattery: device.vehicleBattery,
+        deviceBattery,
+        course: roundTo(device.heading, 2),
+        errorCode: errorCode ?? undefined,
       },
     });
 
@@ -334,7 +339,8 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
       speed,
       heading: roundTo(device.heading, 2),
       vibration,
-      battery: device.battery,
+      vehicleBattery: device.vehicleBattery,
+      deviceBattery,
       errorCode,
     };
 
@@ -426,7 +432,7 @@ export const startSimulation = async (
       lat: initialLat,
       lon: initialLon,
       heading: normalizeHeading(randomBetween(0, 359)),
-      battery: roundTo(randomBetween(input.batteryMin, input.batteryMax), 2),
+      vehicleBattery: roundTo(randomBetween(input.batteryMin, input.batteryMax), 2),
       sessionIdBeforeStart: activeSessionResult.rows[0]?.id ?? null,
     });
   }

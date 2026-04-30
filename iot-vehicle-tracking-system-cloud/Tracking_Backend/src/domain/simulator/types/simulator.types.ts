@@ -15,12 +15,13 @@ export interface SimulatorStartInput {
 export interface SimulatorPoint {
   deviceId: string;
   timestamp: string;
-  lat: number;
-  lon: number;
+  latitude: number;
+  longitude: number;
   speed: number;
   heading: number;
   vibration: number;
-  battery: number;
+  vehicleBattery: number;
+  deviceBattery: number;
   errorCode: number | null;
 }
 

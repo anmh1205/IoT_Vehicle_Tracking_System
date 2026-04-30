@@ -49,7 +49,9 @@ export interface DevicePosition {
   battery?: number | null;
   deviceBattery?: number | null;
   vehicleBattery?: number | null;
+  satellites?: number | null;
   vibration?: number | null;
+  errorCode?: number | null;
   temperature?: number | null;
   engineTemperature?: number | null;
   rpm?: number | null;

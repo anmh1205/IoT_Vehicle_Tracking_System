@@ -53,20 +53,18 @@ const toErrorCodes = (
       : [];
   return {
     items: items.map((row: any) => {
-      const errorCode = Number(row?.errorCode ?? row?.error_code ?? 0);
+      const errorCode = Number(row?.errorCode ?? 0);
       const rawDescription = String(row?.description ?? row?.message ?? '');
       const description = localizeErrorDescription(rawDescription);
-      const rawName = String(row?.errorName ?? row?.error_name ?? `Code ${errorCode}`);
+      const rawName = String(row?.errorName ?? `Code ${errorCode}`);
 
       return {
         id: Number(row?.id ?? 0),
         errorCode,
         errorName: localizeErrorName(rawName, rawDescription, errorCode),
         description,
-        occurredAt: String(
-          row?.occurredAt ?? row?.occurred_at ?? row?.createdAt ?? row?.created_at ?? '',
-        ),
-        resolvedAt: row?.resolvedAt ?? row?.resolved_at ?? null,
+        occurredAt: String(row?.occurredAt ?? row?.createdAt ?? ''),
+        resolvedAt: row?.resolvedAt ?? null,
       };
     }),
     total: Number(payload?.total ?? payload?.pagination?.total ?? items.length),

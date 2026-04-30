@@ -56,19 +56,15 @@ const getEventLogWaypoints = async (
   const rows = await findMany<EventLogWaypointRow>(
     `SELECT
         server_timestamp,
-        COALESCE(context->>'lat', context->>'latitude', metadata->>'lat', metadata->>'latitude') AS lat,
-        COALESCE(context->>'lon', context->>'longitude', metadata->>'lon', metadata->>'longitude') AS lon,
-        COALESCE(context->>'spd', context->>'speed', metadata->>'spd', metadata->>'speed') AS speed,
-        COALESCE(context->>'crs', context->>'course', context->>'heading', metadata->>'crs', metadata->>'course', metadata->>'heading') AS course
+        COALESCE(context->>'latitude', metadata->>'latitude') AS lat,
+        COALESCE(context->>'longitude', metadata->>'longitude') AS lon,
+        COALESCE(context->>'speed', metadata->>'speed') AS speed,
+        COALESCE(context->>'course', metadata->>'course') AS course
      FROM event_logs
      WHERE device_id = $1
        AND server_timestamp BETWEEN $2 AND $3
-       AND (
-         context ? 'lat' OR context ? 'latitude' OR metadata ? 'lat' OR metadata ? 'latitude'
-       )
-       AND (
-         context ? 'lon' OR context ? 'longitude' OR metadata ? 'lon' OR metadata ? 'longitude'
-       )
+       AND (context ? 'latitude' OR metadata ? 'latitude')
+       AND (context ? 'longitude' OR metadata ? 'longitude')
      ORDER BY server_timestamp ASC
      LIMIT 5000`,
     [deviceId, startTime.toISOString(), endTime.toISOString()],
@@ -103,7 +99,8 @@ const getEventLogWaypoints = async (
 
 /**
  * Query VictoriaMetrics for GPS waypoints during a trip's time range.
- * Merges vehicle_latitude, vehicle_longitude, vehicle_speed, vehicle_course series
+ * Merges tracker_telemetry_latitude, tracker_telemetry_longitude,
+ * tracker_telemetry_speed, and tracker_telemetry_course series
  * into unified waypoint objects aligned by timestamp.
  */
 export const getWaypoints = async (
@@ -122,10 +119,10 @@ export const getWaypoints = async (
 
   // Query all metrics in parallel
   const [latResult, lonResult, spdResult, crsResult] = await Promise.all([
-    queryRange(`vehicle_latitude{device_id="${deviceId}"}`, startSec, endSec, step),
-    queryRange(`vehicle_longitude{device_id="${deviceId}"}`, startSec, endSec, step),
-    queryRange(`vehicle_speed{device_id="${deviceId}"}`, startSec, endSec, step),
-    queryRange(`vehicle_course{device_id="${deviceId}"}`, startSec, endSec, step),
+    queryRange(`tracker_telemetry_latitude{device_id="${deviceId}"}`, startSec, endSec, step),
+    queryRange(`tracker_telemetry_longitude{device_id="${deviceId}"}`, startSec, endSec, step),
+    queryRange(`tracker_telemetry_speed{device_id="${deviceId}"}`, startSec, endSec, step),
+    queryRange(`tracker_telemetry_course{device_id="${deviceId}"}`, startSec, endSec, step),
   ]);
 
   const latValues = latResult.series[0]?.values ?? [];

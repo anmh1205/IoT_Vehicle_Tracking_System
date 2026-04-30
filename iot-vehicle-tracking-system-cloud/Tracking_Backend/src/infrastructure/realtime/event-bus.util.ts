@@ -9,7 +9,7 @@ interface RealtimeMetadata {
 
 export interface RealtimeEventMap {
   'device:status': {
-    device_id: string;
+    deviceId: string;
     status: string;
     ignitionState?: 'ON' | 'OFF' | 'UNKNOWN' | null;
     motionState?: 'MOVING' | 'STATIONARY' | 'UNKNOWN' | null;
@@ -34,15 +34,15 @@ export interface RealtimeEventMap {
       | null;
     sleepMode?: 'NONE' | 'FAKE' | 'LIGHT' | 'DEEP' | null;
     stateUpdatedAt?: string | null;
-    last_seen_at?: string;
+    lastSeenAt?: string;
     metadata?: RealtimeMetadata;
   };
   'device:position': {
-    device_id: string;
-    lat: number;
-    lon: number;
-    speed: number;
-    heading: number;
+    deviceId: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    speed?: number | null;
+    course?: number | null;
     timestamp: number;
     status?: string;
     ignitionState?: 'ON' | 'OFF' | 'UNKNOWN' | null;
@@ -70,10 +70,12 @@ export interface RealtimeEventMap {
     stateUpdatedAt?: string | null;
     deviceName?: string;
     vehicleId?: string | null;
-    vehiclePlate?: string;
-    battery?: number | null;
+    vehiclePlate?: string | null;
     deviceBattery?: number | null;
     vehicleBattery?: number | null;
+    satellites?: number | null;
+    vibration?: number | null;
+    errorCode?: number | null;
     temperature?: number | null;
     engineTemperature?: number | null;
     rpm?: number | null;
@@ -90,13 +92,13 @@ export interface RealtimeEventMap {
     metadata?: RealtimeMetadata;
   };
   'device:session_start': {
-    device_id: string;
-    session_id: number;
+    deviceId: string;
+    sessionId: number;
     metadata?: RealtimeMetadata;
   };
   'device:session_end': {
-    device_id: string;
-    session_id: number;
+    deviceId: string;
+    sessionId: number;
     metadata?: RealtimeMetadata;
   };
   'command:ack': {

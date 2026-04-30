@@ -52,8 +52,8 @@ const rawDataPayloadBaseSchema = z.object({
   uptime: z.number().nonnegative().optional(),
   data: z.object({
     vibration: z.number().optional(),
-    battery_top: z.number().optional(),
-    battery_bot: z.number().optional(),
+    vehicle_battery: z.number().optional(),
+    device_battery: z.number().optional(),
     latitude: z.number().min(-90).max(90).optional(),
     longitude: z.number().min(-180).max(180).optional(),
     speed: z.number().nonnegative().optional(),
@@ -61,7 +61,7 @@ const rawDataPayloadBaseSchema = z.object({
     satellites: z.number().int().nonnegative().optional(),
     ignition: z.boolean().optional(),
     error_code: z.number().int().optional(),
-  }),
+  }).strict(),
   diagnostics: z.object({
     channel: z.object({
       ble_obd_connected: z.boolean().optional(),

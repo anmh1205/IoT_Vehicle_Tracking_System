@@ -40,7 +40,7 @@ export const query = async (promql: string, time?: string): Promise<VmQueryResul
 /**
  * Range query — returns time-series data points between start and end.
  * Uses /api/v1/query_range endpoint.
- * @param promql - PromQL expression (e.g. vehicle_latitude{device_id="xxx"})
+ * @param promql - PromQL expression (e.g. tracker_telemetry_latitude{device_id="xxx"})
  * @param start  - ISO string or unix timestamp (seconds)
  * @param end    - ISO string or unix timestamp (seconds)
  * @param step   - Resolution step (e.g. "15s", "1m"). Defaults to "15s".

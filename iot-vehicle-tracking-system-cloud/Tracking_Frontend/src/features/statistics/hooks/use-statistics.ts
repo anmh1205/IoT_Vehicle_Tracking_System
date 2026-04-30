@@ -52,14 +52,13 @@ const normalizeSummary = (payload: any): StatisticsSummary => ({
 });
 
 const toDeviceSnapshot = (raw: any): StatisticsDeviceSnapshot => ({
-  deviceId: String(raw?.deviceId ?? raw?.device_id ?? ''),
-  deviceName: String(raw?.deviceName ?? raw?.device_name ?? raw?.deviceId ?? 'Thiết bị'),
+  deviceId: String(raw?.deviceId ?? ''),
+  deviceName: String(raw?.deviceName ?? raw?.deviceId ?? 'Thiết bị'),
   currentStatus: (raw?.currentStatus ??
-    raw?.current_status ??
     'disconnected') as StatisticsDeviceSnapshot['currentStatus'],
-  lastSeenAt: raw?.lastSeenAt ?? raw?.last_seen_at ?? null,
-  requestInterval: Number(raw?.requestInterval ?? raw?.request_interval ?? 60),
-  totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? raw?.total_runtime_seconds ?? 0),
+  lastSeenAt: raw?.lastSeenAt ?? null,
+  requestInterval: Number(raw?.requestInterval ?? 60),
+  totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? 0),
 });
 
 const loadDeviceSnapshot = async (): Promise<StatisticsDeviceSnapshot[]> => {

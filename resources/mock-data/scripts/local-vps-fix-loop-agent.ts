@@ -72,10 +72,14 @@ const pickRestartTarget = (
 ): string | null => {
   if (!policy.allowedServices.length) return null;
   if (classifier === 'backend_runtime' || classifier === 'db_persistence') {
-    return policy.allowedServices.includes('backend') ? 'backend' : policy.allowedServices[0];
+    return policy.allowedServices.includes('tracking-backend')
+      ? 'tracking-backend'
+      : policy.allowedServices[0];
   }
   if (classifier === 'broker_connectivity' || classifier === 'bridge_parse') {
-    return policy.allowedServices.includes('mqtt-bridge') ? 'mqtt-bridge' : policy.allowedServices[0];
+    return policy.allowedServices.includes('tracking-mqtt-bridge')
+      ? 'tracking-mqtt-bridge'
+      : policy.allowedServices[0];
   }
   return policy.allowedServices[0];
 };

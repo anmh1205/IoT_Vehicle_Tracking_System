@@ -77,8 +77,11 @@ const createPayload = (
   runId: string,
   topicTemplate: string,
 ): SimulatorPayload => {
+  const speed = Number((20 + (eventIndex % 7) * 5).toFixed(1));
+  const vehicleBattery = Number((14.2 - eventIndex * 0.02).toFixed(2));
+  const deviceBattery = Number((4.12 - eventIndex * 0.01).toFixed(2));
   const payload: SimulatorPayload = {
-    schema_version: '1.0.0',
+    schema_version: topicTemplate === 'v1/{device_id}/rawdata' ? 'v2.0.0' : 'v1.0.0',
     message_id: `${runId}-${eventIndex}`,
     sent_at: nowIso(),
     seq_no: eventIndex + 1,
@@ -86,10 +89,16 @@ const createPayload = (
     device_id: scenario.deviceId,
     status: eventIndex % 12 === 0 ? 'online' : 'running',
     data: {
-      speed: Number((20 + (eventIndex % 7) * 5).toFixed(1)),
-      battery: Number((90 - eventIndex * 0.02).toFixed(2)),
-      sat: 9 + (eventIndex % 3),
+      vibration: Number((1 + (eventIndex % 5) * 0.35).toFixed(2)),
+      vehicle_battery: vehicleBattery,
+      device_battery: deviceBattery,
+      latitude: Number((10.762622 + eventIndex * 0.00012).toFixed(6)),
+      longitude: Number((106.660172 + eventIndex * 0.00008).toFixed(6)),
+      speed,
+      course: (90 + eventIndex * 5) % 360,
+      satellites: 9 + (eventIndex % 3),
       ignition: eventIndex % 17 === 0,
+      error_code: eventIndex % 19 === 0 ? 201 : undefined,
     },
   };
 
@@ -117,7 +126,15 @@ const applyFault = (
   if (fault === 'out-of-order') return [{ ...event, scheduled_at_ms: event.scheduled_at_ms + 5 }, { ...event, scheduled_at_ms: event.scheduled_at_ms - 5 }];
   if (fault === 'jitter') return [{ ...event, scheduled_at_ms: event.scheduled_at_ms + Math.floor((rng() - 0.5) * profile.jitterWindowMs) }];
   if (fault === 'spike') {
-    const payload = { ...event.payload, data: { ...(event.payload.data as object), speed: 230, battery: 10 } };
+    const payload = {
+      ...event.payload,
+      data: {
+        ...(event.payload.data as object),
+        speed: 230,
+        vehicle_battery: 10,
+        device_battery: 3.6,
+      },
+    };
     return [{ ...event, payload, expected_effect: 'ingest' }];
   }
   if (fault === 'reconnect') {

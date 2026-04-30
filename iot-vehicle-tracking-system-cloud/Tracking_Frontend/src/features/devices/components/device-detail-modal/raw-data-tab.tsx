@@ -90,6 +90,37 @@ const toFirmwareTimestamp = (value: unknown): number | undefined => {
   return undefined;
 };
 
+const normalizeCanonicalFirmwarePayload = (
+  payload: Record<string, unknown>,
+): Record<string, unknown> => {
+  const sanitizedPayload = omitAuthToken(payload);
+  const data = toRecord(sanitizedPayload.data) ?? {};
+  const diagnostics = toRecord(sanitizedPayload.diagnostics);
+  const metadata = toRecord(sanitizedPayload.metadata);
+  const state = toRecord(sanitizedPayload.state);
+
+  return compactRecord([
+    ['device_id', sanitizedPayload.device_id ?? sanitizedPayload.deviceId],
+    ['timestamp', toFirmwareTimestamp(sanitizedPayload.timestamp)],
+    ['uptime', sanitizedPayload.uptime],
+    ['data', compactRecord([
+      ['vibration', data.vibration],
+      ['vehicle_battery', data.vehicle_battery],
+      ['device_battery', data.device_battery],
+      ['latitude', data.latitude],
+      ['longitude', data.longitude],
+      ['speed', data.speed],
+      ['course', data.course],
+      ['satellites', data.satellites],
+      ['ignition', data.ignition],
+      ['error_code', data.error_code],
+    ])],
+    ['diagnostics', diagnostics && Object.keys(diagnostics).length > 0 ? diagnostics : undefined],
+    ['state', state && Object.keys(state).length > 0 ? state : undefined],
+    ['metadata', metadata && Object.keys(metadata).length > 0 ? metadata : undefined],
+  ]);
+};
+
 const extractFirmwareRawPayload = (
   row: Pick<DeviceRawFeedRow, 'timestamp' | 'payload'>,
 ): Record<string, unknown> | null => {
@@ -98,7 +129,7 @@ const extractFirmwareRawPayload = (
   const storedRawPayload = toRecord(context?.raw_payload) ?? toRecord(payload.raw_payload);
 
   if (storedRawPayload) {
-    return omitAuthToken(storedRawPayload);
+    return normalizeCanonicalFirmwarePayload(storedRawPayload);
   }
 
   const eventCode = String(payload.event_code ?? '').trim().toLowerCase();
@@ -111,16 +142,16 @@ const extractFirmwareRawPayload = (
   const metadata = toRecord(payload.metadata);
   const diagnostics = toRecord(context?.diagnostics ?? payload.diagnostics);
   const data = compactRecord([
-    ['vibration', context?.vib ?? context?.vibration],
-    ['battery_top', context?.bt ?? context?.batt ?? context?.battery_top],
-    ['battery_bot', context?.bb ?? context?.battery_bot],
-    ['latitude', context?.lat ?? context?.latitude],
-    ['longitude', context?.lon ?? context?.longitude],
-    ['speed', context?.spd ?? context?.speed],
-    ['course', context?.course ?? context?.heading],
+    ['vibration', context?.vibration],
+    ['vehicle_battery', context?.vehicle_battery],
+    ['device_battery', context?.device_battery],
+    ['latitude', context?.latitude],
+    ['longitude', context?.longitude],
+    ['speed', context?.speed],
+    ['course', context?.course],
     ['satellites', context?.satellites],
     ['ignition', context?.ignition],
-    ['error_code', context?.err ?? context?.error_code],
+    ['error_code', context?.error_code],
   ]);
 
   return compactRecord([
@@ -244,8 +275,8 @@ const extractFirmwareRawMatrixRows = (
     rowItem('device_id', 'Thiết bị', 'Mã thiết bị trong payload rawdata firmware.', firmwarePayload.device_id),
     rowItem('timestamp', 'Timestamp firmware', 'Mốc thời gian firmware gửi lên, đơn vị millisecond.', firmwarePayload.timestamp),
     rowItem('data.vibration', 'Rung', 'Giá trị rung từ payload data.', data.vibration),
-    rowItem('data.battery_top', 'Ắc quy xe', 'Điện áp nguồn chính/ắc quy xe từ firmware.', data.battery_top),
-    rowItem('data.battery_bot', 'Pin thiết bị', 'Điện áp tracker hoặc pin backup từ firmware.', data.battery_bot),
+    rowItem('data.vehicle_battery', 'Ắc quy xe', 'Điện áp nguồn chính/ắc quy xe từ firmware.', data.vehicle_battery),
+    rowItem('data.device_battery', 'Pin thiết bị', 'Điện áp tracker hoặc pin backup từ firmware.', data.device_battery),
     rowItem('data.latitude', 'Vĩ độ', 'Tọa độ vĩ độ GNSS từ firmware.', data.latitude),
     rowItem('data.longitude', 'Kinh độ', 'Tọa độ kinh độ GNSS từ firmware.', data.longitude),
     rowItem('data.speed', 'Tốc độ GNSS', 'Tốc độ GNSS trong payload data.', data.speed),
@@ -296,18 +327,18 @@ const extractMatrixRows = (
 
   if (row.source === 'telemetry') {
     return [
-      rowItem('spd', 'Tốc độ', 'Tốc độ hiện tại trong bản tin telemetry.', payload.speed),
-      rowItem('lat', 'Vĩ độ', 'Tọa độ vĩ độ từ GPS.', payload.latitude),
-      rowItem('lon', 'Kinh độ', 'Tọa độ kinh độ từ GPS.', payload.longitude),
-      rowItem('bb', 'Pin thiết bị', 'Nguồn nuôi tracker hoặc pin backup.', payload.deviceBattery),
-      rowItem('bt', 'Ắc quy xe', 'Điện áp phía xe hoặc nguồn OBD.', payload.vehicleBattery),
+      rowItem('speed', 'Tốc độ', 'Tốc độ hiện tại trong bản tin telemetry.', payload.speed),
+      rowItem('latitude', 'Vĩ độ', 'Tọa độ vĩ độ từ GPS.', payload.latitude),
+      rowItem('longitude', 'Kinh độ', 'Tọa độ kinh độ từ GPS.', payload.longitude),
+      rowItem('deviceBattery', 'Pin thiết bị', 'Nguồn nuôi tracker hoặc pin backup.', payload.deviceBattery),
+      rowItem('vehicleBattery', 'Ắc quy xe', 'Điện áp phía xe hoặc nguồn OBD.', payload.vehicleBattery),
       rowItem(
-        'temp',
+        'temperature',
         'Nhiệt độ động cơ',
         'Nhiệt độ vận hành ưu tiên từ động cơ hoặc coolant OBD.',
         payload.engineTemperature ?? payload.temperature,
       ),
-      rowItem('err', 'Mã lỗi', 'Mã lỗi kỹ thuật được firmware gửi kèm bản tin.', payload.errorCode),
+      rowItem('errorCode', 'Mã lỗi', 'Mã lỗi kỹ thuật được firmware gửi kèm bản tin.', payload.errorCode),
     ];
   }
 
@@ -322,7 +353,7 @@ const extractMatrixRows = (
 
   if (row.source === 'error') {
     return [
-      rowItem('error_code', 'Mã lỗi', 'Mã lỗi do thiết bị hoặc cloud ghi nhận.', payload.errorCode ?? payload.error_code),
+      rowItem('errorCode', 'Mã lỗi', 'Mã lỗi do thiết bị hoặc cloud ghi nhận.', payload.errorCode),
       rowItem('description', 'Mô tả', 'Diễn giải lỗi để vận hành xử lý.', payload.description ?? payload.message),
       rowItem('occurred_at', 'Xảy ra lúc', 'Thời điểm lỗi phát sinh.', payload.occurredAt ?? payload.occurred_at),
       rowItem('resolved_at', 'Đã xử lý', 'Thời điểm lỗi được đóng hoặc xóa.', payload.resolvedAt ?? payload.resolved_at),
@@ -708,8 +739,8 @@ export const RawDataTab = () => {
                     <div className="grid h-full min-h-0 gap-3">
                       <JsonPayloadPanel
                         className="min-h-[14rem]"
-                        title="Rawdata device metrics"
-                        subtitle="Payload device gửi lên, đã bỏ auth_token"
+                        title="Rawdata device canonical"
+                        subtitle="Payload canonical do device gui len, da bo auth_token"
                         payload={selectedFirmwarePayload}
                       />
                       <JsonPayloadPanel
