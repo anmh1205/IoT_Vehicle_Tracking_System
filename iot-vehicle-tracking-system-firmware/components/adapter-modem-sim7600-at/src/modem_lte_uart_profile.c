@@ -36,7 +36,7 @@ void modem_lte_on_urc_rdy(const char *urc_line) {
 
     if (strcmp(urc_line, "RDY") == 0) {
         modem_lte_mark_rdy_seen();
-        ESP_LOGI(MODEM_LTE_TAG, "RDY token seen from UART");
+        ESP_LOGI(MODEM_LTE_TAG, "RDY marker seen from UART");
     }
 }
 
@@ -181,29 +181,10 @@ void modem_lte_log_at_probe_response(const char *response) {
         return;
     }
 
-    char preview[81] = {0};
-    char hexbuf[193] = {0};
-    size_t src_len = strnlen(response, 64);
-    modem_lte_response_preview(response, preview, sizeof(preview));
-
-    size_t hex_len = 0;
-    for (size_t i = 0; i < src_len && hex_len + 4 < sizeof(hexbuf); ++i) {
-        int written = snprintf(hexbuf + hex_len,
-                               sizeof(hexbuf) - hex_len,
-                               "%02X%s",
-                               (unsigned char)response[i],
-                               (i + 1U < src_len) ? " " : "");
-        if (written <= 0) {
-            break;
-        }
-        hex_len += (size_t)written;
-    }
-
     ESP_LOGW(MODEM_LTE_TAG,
-             "AT probe partial-response len=%u preview=\"%s\" hex=[%s]",
-             (unsigned)src_len,
-             preview,
-             hexbuf);
+             "AT probe partial_response len=%u has_ok=%d",
+             (unsigned)strnlen(response, 64),
+             strstr(response, "OK") != NULL ? 1 : 0);
 }
 
 void modem_lte_log_fixed_uart_cfg(void) {

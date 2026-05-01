@@ -33,7 +33,7 @@ export const WorkspaceAlertsSection = ({ alertsPath }: { alertsPath: string | nu
   if (deviceScopedAlerts.length === 0) {
     return (
       <div className="space-y-4">
-        <EmptyState title="Không có cảnh báo đang mở" description="Thiết bị hiện không có cảnh báo active nào cần xử lý trong workspace này." />
+        <EmptyState title="Không có cảnh báo đang mở" description="Thiết bị hiện không có cảnh báo đang mở nào cần xử lý trong không gian làm việc này." />
         {alertsPath ? (
           <Button asChild variant="outline">
             <Link href={alertsPath}>

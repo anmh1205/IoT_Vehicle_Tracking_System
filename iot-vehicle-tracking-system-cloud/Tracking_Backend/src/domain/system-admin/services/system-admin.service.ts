@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import { pool } from '@/infrastructure/database/pool';
+import { publishEvent } from '@/infrastructure/realtime';
 import * as vmRepo from '@/domain/system-admin/repositories/victoriametrics.repository';
 import * as vlRepo from '@/domain/system-admin/repositories/victorialogs.repository';
 import {
@@ -347,6 +348,20 @@ const toVmSetting = (row: SystemSettingRow): VmSetting => ({
 });
 
 const DEFAULT_VM_GROUP = 'victoria_metrics';
+
+const publishSystemAdminSettingsEvent = (
+  key: string,
+  action: 'create' | 'update' | 'delete' | 'activate' | 'rollback',
+  params: { resource?: VmSettingResource; revision?: number; actorUserId?: number } = {},
+): void => {
+  publishEvent('system-admin:settings', {
+    key,
+    action,
+    resource: params.resource,
+    revision: params.revision,
+    actorUserId: params.actorUserId,
+  });
+};
 
 const normalizeVmResource = (resource: VmSettingResource | undefined, key: string): VmSettingResource => {
   if (resource) {
@@ -781,6 +796,11 @@ export const createVmSetting = async (
         requestPayload,
         payload,
       );
+      publishSystemAdminSettingsEvent(key, 'create', {
+        resource: requestPayload.resource,
+        revision: revision.revision,
+        actorUserId: params.actorUserId,
+      });
 
       return {
         reused: false,
@@ -885,6 +905,11 @@ export const updateVmSetting = async (
       requestPayload,
       payload,
     );
+    publishSystemAdminSettingsEvent(key, 'update', {
+      resource: requestPayload.resource,
+      revision: revision.revision,
+      actorUserId: params.actorUserId,
+    });
 
     return {
       reused: false,
@@ -978,6 +1003,11 @@ export const deleteVmSetting = async (
       requestPayload,
       payload,
     );
+    publishSystemAdminSettingsEvent(key, 'delete', {
+      resource: requestPayload.resource,
+      revision: revision.revision,
+      actorUserId: params.actorUserId,
+    });
 
     return {
       reused: false,
@@ -1206,6 +1236,11 @@ export const activateVmSetting = async (
       requestPayload,
       payload,
     );
+    publishSystemAdminSettingsEvent(key, 'activate', {
+      resource: requestPayload.resource,
+      revision: revision.revision,
+      actorUserId: params.actorUserId,
+    });
 
     return {
       reused: false,
@@ -1323,6 +1358,10 @@ export const rollbackVmSetting = async (
       requestPayload,
       payload,
     );
+    publishSystemAdminSettingsEvent(key, 'rollback', {
+      revision: revision.revision,
+      actorUserId: params.actorUserId,
+    });
 
     return {
       reused: false,

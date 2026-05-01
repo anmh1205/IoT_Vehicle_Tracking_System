@@ -26,6 +26,13 @@
 #define CONFIG_TRACKER_TLS_CA_CERT_NAME ""
 #endif
 
+static const char *tracker_mqtt_endpoint_class(const char *server_addr) {
+    if (!util_string_empty(server_addr) && strcmp(server_addr, s_server_addr_fallback) == 0) {
+        return "fallback";
+    }
+    return "primary";
+}
+
 static esp_err_t tracker_mqtt_send_lifecycle_cmd(const char *cmd,
                                                  uint32_t timeout_ms,
                                                  const char *result_prefix,
@@ -71,14 +78,14 @@ static esp_err_t tracker_mqtt_send_lifecycle_cmd(const char *cmd,
     int extracted_err_code = 0;
     bool extracted = tracker_mqtt_extract_error_code_from_response(response, &extracted_err_code);
     ESP_LOGW(TRACKER_MQTT_TAG,
-             "Lifecycle cmd failed cmd=\"%s\" send_err=%s expect_err=%s parsed=%d err_code=%d extracted=%d resp=\"%s\"",
+             "lifecycle cmd failed cmd=\"%s\" send_err=%s expect_err=%s parsed=%d err_code=%d extracted=%d response_len=%u",
              cmd,
              esp_err_to_name(send_err),
              esp_err_to_name(expect_err),
              parsed ? 1 : 0,
              err_code,
              extracted ? extracted_err_code : -1,
-             response);
+             (unsigned)strlen(response));
 
     if (send_err != ESP_OK) {
         return send_err;
@@ -356,7 +363,10 @@ static esp_err_t tracker_mqtt_handle_connect_timeout(const char *server_addr,
         return ESP_OK;
     }
 
-    ESP_LOGW(TRACKER_MQTT_TAG, "CMQTTCONNECT result timeout server=%s", server_addr);
+    ESP_LOGW(TRACKER_MQTT_TAG,
+             "CMQTTCONNECT result timeout endpoint=%s configured=%d",
+             tracker_mqtt_endpoint_class(server_addr),
+             util_string_empty(server_addr) ? 0 : 1);
     tracker_mqtt_mark_disconnected("+CMQTTCONNECT_timeout", MQTT_ERR_NO_CONNECTION);
     if (out_connect_err_code != NULL) {
         *out_connect_err_code = MQTT_ERR_NO_CONNECTION;
@@ -374,7 +384,10 @@ static esp_err_t tracker_mqtt_handle_connect_rejection(const char *server_addr,
         tracker_mqtt_mark_disconnected("+CMQTTCONNECT", connect_err);
     }
 
-    ESP_LOGW(TRACKER_MQTT_TAG, "CMQTTCONNECT rejected server=%s err=%d", server_addr, connect_err);
+    ESP_LOGW(TRACKER_MQTT_TAG,
+             "CMQTTCONNECT rejected endpoint=%s err=%d",
+             tracker_mqtt_endpoint_class(server_addr),
+             connect_err);
     if (out_connect_err_code != NULL) {
         *out_connect_err_code = connect_err;
     }
@@ -453,7 +466,10 @@ esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_connect_er
 
     s_connected = true;
     s_commands_subscribed = false;
-    ESP_LOGI(TRACKER_MQTT_TAG, "MQTT connected server=%s", server_addr);
+    ESP_LOGI(TRACKER_MQTT_TAG,
+             "mqtt connected endpoint=%s tls=%d",
+             tracker_mqtt_endpoint_class(server_addr),
+             s_tls_enabled ? 1 : 0);
     return ESP_OK;
 }
 
@@ -467,14 +483,17 @@ static void tracker_mqtt_log_diag_cmd(const char *cmd, uint32_t timeout_ms) {
     esp_err_t err = tracker_mqtt_send_cmd(cmd, timeout_ms, response, sizeof(response));
     if (err != ESP_OK) {
         ESP_LOGW(TRACKER_MQTT_TAG,
-                 "MQTT diag command failed cmd=\"%s\" err=%s resp=\"%s\"",
+                 "mqtt diag command failed cmd=\"%s\" err=%s response_len=%u",
                  cmd,
                  esp_err_to_name(err),
-                 response);
+                 (unsigned)strlen(response));
         return;
     }
 
-    ESP_LOGI(TRACKER_MQTT_TAG, "MQTT diag cmd=\"%s\" resp=\"%s\"", cmd, response);
+    ESP_LOGI(TRACKER_MQTT_TAG,
+             "mqtt diag cmd=\"%s\" response_len=%u",
+             cmd,
+             (unsigned)strlen(response));
 }
 
 void tracker_mqtt_log_connect_diagnostics(void) {
@@ -651,7 +670,9 @@ esp_err_t tracker_mqtt_session_connect(void) {
                  "MQTT fallback skipped after TLS primary timeout; keep retry path on direct TLS endpoint");
     }
     if (err != ESP_OK && should_try_fallback) {
-        ESP_LOGW(TRACKER_MQTT_TAG, "MQTT primary connect failed, retry fallback server=%s", s_server_addr_fallback);
+        ESP_LOGW(TRACKER_MQTT_TAG,
+                 "mqtt primary connect failed retry=fallback configured=%d",
+                 util_string_empty(s_server_addr_fallback) ? 0 : 1);
         connect_err_code = 0;
         connect_timed_out = false;
         err = tracker_mqtt_connect_once(s_server_addr_fallback, &connect_err_code, &connect_timed_out);

@@ -54,15 +54,15 @@ export const FirmwareSummaryCards = ({
           isLoading={isLoading}
         />
         <StatCard
-          title="Bản active trong kho"
+          title="Bản đang kích hoạt trong kho"
           value={activeFirmwares.length}
           icon={<ShieldCheck className="h-4 w-4" />}
           subtitle={
             activeFirmware
               ? getFirmwareDisplayVersion(activeFirmware.version)
               : hasCompletedDelivery
-                ? 'Kho firmware chưa gắn cờ active'
-                : 'Chưa có bản active'
+                ? 'Kho firmware chưa gắn cờ kích hoạt'
+                : 'Chưa có bản đang kích hoạt'
           }
           isLoading={isLoading}
         />
@@ -88,18 +88,18 @@ export const FirmwareSummaryCards = ({
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Tình trạng phát hành hiện hành</CardTitle>
           <CardDescription>
-            Tổng dung lượng lưu trữ: {formatBytes(totalSize)} · Cờ active phản ánh kho firmware, còn OTA phản ánh lịch sử triển khai trên thiết bị.
+            Tổng dung lượng lưu trữ: {formatBytes(totalSize)} · Cờ kích hoạt phản ánh kho firmware, còn OTA phản ánh lịch sử triển khai trên thiết bị.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-lg border bg-background p-3">
-            <p className="text-xs text-muted-foreground">Bản active trong kho</p>
+            <p className="text-xs text-muted-foreground">Bản đang kích hoạt trong kho</p>
             <p className="mt-1 font-semibold">{activeFirmware ? getFirmwareDisplayVersion(activeFirmware.version) : '--'}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               {activeFirmware
                 ? `Tạo lúc ${formatDateTime(activeFirmware.createdAt)}`
                 : hasCompletedDelivery
-                  ? 'Thiết bị có OTA nhưng kho chưa gắn cờ active'
+                  ? 'Thiết bị có OTA nhưng kho chưa gắn cờ kích hoạt'
                   : 'Chưa có bản đang kích hoạt'}
             </p>
           </div>

@@ -135,12 +135,12 @@ export const TripDetail = ({
     points.length > 1 ? Math.round((Math.min(cursor, points.length - 1) / (points.length - 1)) * 100) : 0;
   const telemetryBadge =
     points.length === 0
-      ? { label: 'Chưa có telemetry', variant: 'secondary' as const }
+      ? { label: 'Chưa có dữ liệu đo từ xa', variant: 'secondary' as const }
       : averageGapSeconds <= 30
-        ? { label: 'Telemetry dày', variant: 'default' as const }
+        ? { label: 'Dữ liệu đo từ xa dày', variant: 'default' as const }
         : averageGapSeconds <= 120
-          ? { label: 'Telemetry ổn định', variant: 'outline' as const }
-          : { label: 'Telemetry thưa', variant: 'destructive' as const };
+          ? { label: 'Dữ liệu đo từ xa ổn định', variant: 'outline' as const }
+          : { label: 'Dữ liệu đo từ xa thưa', variant: 'destructive' as const };
 
   const timeline = [
     {
@@ -159,12 +159,12 @@ export const TripDetail = ({
       description: peakPoint ? `${peakPoint.speed ?? 0} km/h` : 'Chưa có dữ liệu tốc độ',
     },
     {
-      label: 'Điểm replay hiện tại',
+      label: 'Điểm phát lại hiện tại',
       time: moving?.timestamp,
       description:
         moving && points.length > 0
           ? `Mốc ${Math.min(cursor + 1, points.length)}/${points.length} • ${moving.speed ?? 0} km/h`
-          : 'Chưa bắt đầu replay',
+          : 'Chưa bắt đầu phát lại',
     },
     {
       label: 'Kết thúc',
@@ -243,7 +243,7 @@ export const TripDetail = ({
         <Card>
           <CardHeader className="gap-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <CardTitle>Tóm tắt tuyến và chất lượng telemetry</CardTitle>
+              <CardTitle>Tóm tắt tuyến và chất lượng dữ liệu đo từ xa</CardTitle>
               <Badge variant="outline">
                 {coverageSeconds > 0 ? formatDuration(coverageSeconds) : 'Chưa có phủ sóng thời gian'}
               </Badge>
@@ -261,8 +261,8 @@ export const TripDetail = ({
               description={formatDateTime(trip?.actualEnd ?? endPoint?.timestamp)}
             />
             <InfoRow
-              label="Phủ sóng telemetry"
-              value={points.length ? `${points.length} waypoint` : 'Chưa có waypoint'}
+              label="Phủ sóng dữ liệu đo từ xa"
+              value={points.length ? `${points.length} mốc GPS` : 'Chưa có mốc GPS'}
             />
             <InfoRow
               label="Khoảng cách giữa các mốc"
@@ -294,7 +294,7 @@ export const TripDetail = ({
             {points.length === 0 ? (
               <EmptyState
                 title="Chưa có dữ liệu tốc độ"
-                description="Biểu đồ tốc độ sẽ xuất hiện khi chuyến đi ghi nhận waypoint từ telemetry."
+                description="Biểu đồ tốc độ sẽ xuất hiện khi chuyến đi ghi nhận mốc GPS từ dữ liệu đo từ xa."
               />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -323,12 +323,12 @@ export const TripDetail = ({
 
         <Card>
           <CardHeader>
-            <CardTitle>Điểm hiện tại trong replay</CardTitle>
+            <CardTitle>Điểm hiện tại trong phát lại</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Tiến độ replay</span>
+                <span className="text-muted-foreground">Tiến độ phát lại</span>
                 <span className="font-medium">
                   {points.length > 0 ? `${Math.min(cursor + 1, points.length)}/${points.length}` : '0/0'}
                 </span>

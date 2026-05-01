@@ -2,6 +2,7 @@ import { firmwareStatusSchema } from '../validators/payload.validator';
 import { pool } from '../infrastructure/database';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { logger } from '../infrastructure/logger';
+import { publishInternalEvent } from '../publishers/internal-event.publisher';
 import { verifyDeviceToken } from '../services/device-auth.service';
 
 const OTA_TERMINAL_STATUSES = new Set(['success', 'failed', 'rolled_back']);
@@ -257,6 +258,21 @@ export const handleFirmware = async (
     );
     return;
   }
+
+  publishInternalEvent('firmware', {
+    jobId: payload.jobId,
+    device_id: payload.device_id,
+    status: payload.status,
+    progress: payload.progress,
+    targetVersion: payload.targetVersion,
+    currentVersion: payload.currentVersion,
+    partition: payload.partition,
+    error: payload.error,
+    message_id: messageId,
+    schema_version: schemaVersion,
+    seq_no: seqNo,
+    boot_id: bootId,
+  });
 
   writeDeviceEvent(
     payload.device_id,

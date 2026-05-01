@@ -1,7 +1,7 @@
 ---
 title: "Firmware Log Monitor Governance"
 description: "Quy hoạch log monitoring firmware ESP32-S3 để đủ quan sát luồng chính, giảm nhiễu, giữ chi phí runtime thấp."
-status: pending
+status: completed
 priority: P2
 effort: 14h
 branch: uat
@@ -19,10 +19,10 @@ Plan-only. Mục tiêu: chuẩn hóa logging/monitoring toàn firmware ESP32-S3 
 
 | # | Phase | Status | Progress | Effort | Link |
 |---|-------|--------|----------|--------|------|
-| 1 | Log policy, tags, budget | Pending | 0% | 3h | [phase-01-log-policy-tag-taxonomy-and-budget.md](./phase-01-log-policy-tag-taxonomy-and-budget.md) |
-| 2 | Local gates + counters/snapshots | Pending | 0% | 4h | [phase-02-minimal-log-helper-rate-limit-and-health-snapshot.md](./phase-02-minimal-log-helper-rate-limit-and-health-snapshot.md) |
-| 3 | Apply governance to high-value modules | Pending | 0% | 5h | [phase-03-apply-governance-to-firmware-hotspots.md](./phase-03-apply-governance-to-firmware-hotspots.md) |
-| 4 | Validation and docs handoff | Pending | 0% | 2h | [phase-04-validation-and-documentation-handoff.md](./phase-04-validation-and-documentation-handoff.md) |
+| 1 | Log policy, tags, budget | Complete | 100% | 3h | [phase-01-log-policy-tag-taxonomy-and-budget.md](./phase-01-log-policy-tag-taxonomy-and-budget.md) |
+| 2 | Local gates + counters/snapshots | Complete | 100% | 4h | [phase-02-minimal-log-helper-rate-limit-and-health-snapshot.md](./phase-02-minimal-log-helper-rate-limit-and-health-snapshot.md) |
+| 3 | Apply governance to high-value modules | Complete | 100% | 5h | [phase-03-apply-governance-to-firmware-hotspots.md](./phase-03-apply-governance-to-firmware-hotspots.md) |
+| 4 | Validation and docs handoff | Complete | 100% | 2h | [phase-04-validation-and-documentation-handoff.md](./phase-04-validation-and-documentation-handoff.md) |
 
 ## Key dependencies
 
@@ -126,7 +126,16 @@ Plan-only. Mục tiêu: chuẩn hóa logging/monitoring toàn firmware ESP32-S3 
 - Phase 03: Scope includes whole-firmware audit, with hotspot-first changes.
 - Phase 04: Validation includes whole-firmware static log scan, not only touched files.
 
+## Implementation completion — 2026-05-01
+
+- Firmware log governance implemented hotspot-first across app-core FSM, publish pipeline, offline queue, SIM7600 LTE/GNSS/MQTT adapters, BLE OBD, OTA HTTP, and tracked firmware test-log artifacts.
+- Validation passed with `idf.py -C "iot-vehicle-tracking-system-firmware" reconfigure build size`; final checked image size: `0xc6d20`, smallest app partition `0x180000`, free `0xb92e0` (48%), total image size `814237` bytes.
+- Static source scan found no active `ESP_LOG*` leaks for raw responses, payloads, full coordinates, MQTT endpoints, APN, URLs, IMEI/IMSI, password/secret patterns.
+- Tracked `documents/test-logs` artifacts were sanitized to remove old MQTT password, endpoints, raw AT bodies, and full GNSS coordinate markers.
+- `git diff --check -- "iot-vehicle-tracking-system-firmware"` has no whitespace errors after cleanup; remaining output is CRLF normalization warnings only.
+- Code-reviewer blocker report is stored at `plans/reports/code-reviewer-260501-0437-firmware-log-monitor-governance.md`; blockers were fixed before final validation.
+
 ## Unresolved questions
 
-- Exact log budget during LTE recovery/offline replay under Broader INFO?
-- Which config/profile should enable 1-5m diagnostic health snapshot?
+- Real hardware runtime scenario validation is still recommended for normal drive, LTE loss/recovery, queue replay, noisy OBD adapter, and OTA HTTP failure paths.
+- Rotate the previously exposed MQTT password if it was ever valid outside local field-validation use.

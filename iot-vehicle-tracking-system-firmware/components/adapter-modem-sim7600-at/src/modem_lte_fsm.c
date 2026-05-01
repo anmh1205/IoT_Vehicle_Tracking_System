@@ -7,6 +7,7 @@
 
 #include "modem_at.h"
 #include "power_mgr.h"
+#include "telemetry_counters.h"
 #include "util.h"
 
 /**
@@ -53,7 +54,11 @@ const char *modem_lte_state_name(modem_lte_state_t state) {
 
 void modem_lte_transition(modem_lte_state_t next_state, uint64_t now_ms, uint64_t delay_ms) {
     if (s_state != next_state) {
-        ESP_LOGI(MODEM_LTE_TAG, "FSM %s -> %s", modem_lte_state_name(s_state), modem_lte_state_name(next_state));
+        ESP_LOGI(MODEM_LTE_TAG,
+                 "fsm transition from=%s to=%s delay_ms=%llu",
+                 modem_lte_state_name(s_state),
+                 modem_lte_state_name(next_state),
+                 (unsigned long long)delay_ms);
     }
     s_state = next_state;
     s_next_action_ms = now_ms + delay_ms;
@@ -126,11 +131,11 @@ static esp_err_t modem_lte_handle_wait_rdy(uint64_t now_ms) {
     }
 
     if (modem_lte_diag_log_due(now_ms, &s_rdy_diag_log_ms, MODEM_LTE_REG_LOG_INTERVAL_MS)) {
-        ESP_LOGI(MODEM_LTE_TAG, "WAIT_RDY gate blocked waiting UART RDY token");
+        ESP_LOGI(MODEM_LTE_TAG, "WAIT_RDY gate blocked waiting UART RDY marker");
     }
 
     if (now_ms >= s_state_deadline_ms) {
-        ESP_LOGW(MODEM_LTE_TAG, "WAIT_RDY timeout without RDY token, fallback to AT sync");
+        ESP_LOGW(MODEM_LTE_TAG, "WAIT_RDY timeout without RDY marker, fallback to AT sync");
         modem_lte_transition(MODEM_LTE_STATE_AT_SYNC, now_ms, MODEM_LTE_WAKE_DTR_SETTLE_MS);
         return ESP_ERR_NOT_FINISHED;
     }
@@ -240,9 +245,11 @@ static esp_err_t modem_lte_handle_cpin_check(uint64_t now_ms) {
         if (err != ESP_OK) {
             ESP_LOGW(MODEM_LTE_TAG, "CPIN wait: AT+CPIN? failed: %s", esp_err_to_name(err));
         } else {
-            char preview[97] = {0};
-            modem_lte_response_preview(response, preview, sizeof(preview));
-            ESP_LOGI(MODEM_LTE_TAG, "CPIN wait response=\"%s\"", preview);
+            ESP_LOGI(MODEM_LTE_TAG,
+                     "CPIN wait response_len=%u ready=%d sim_missing=%d",
+                     (unsigned)strlen(response),
+                     strstr(response, "+CPIN: READY") != NULL ? 1 : 0,
+                     strstr(response, "SIM not inserted") != NULL ? 1 : 0);
         }
     }
 
@@ -276,7 +283,7 @@ static esp_err_t modem_lte_handle_set_pdp(uint64_t now_ms) {
         return ESP_ERR_NOT_FINISHED;
     }
 
-    ESP_LOGI(MODEM_LTE_TAG, "PDP profile configured apn=%s", s_active_apn);
+    ESP_LOGI(MODEM_LTE_TAG, "pdp profile configured apn_configured=1");
     modem_lte_log_hw_lines_if_available();
     s_lte_initialized = true;
     s_cereg_diag_log_ms = 0;
@@ -313,9 +320,9 @@ static esp_err_t modem_lte_handle_cereg_wait(uint64_t now_ms) {
                 return ESP_ERR_NOT_FINISHED;
             }
         } else if (modem_lte_diag_log_due(now_ms, &s_cereg_diag_log_ms, MODEM_LTE_REG_LOG_INTERVAL_MS)) {
-            char preview[97] = {0};
-            modem_lte_response_preview(response, preview, sizeof(preview));
-            ESP_LOGW(MODEM_LTE_TAG, "CEREG wait: parse-miss response=\"%s\"", preview);
+            ESP_LOGW(MODEM_LTE_TAG,
+                     "CEREG wait parse_miss response_len=%u",
+                     (unsigned)strlen(response));
         }
     } else if (modem_lte_diag_log_due(now_ms, &s_cereg_diag_log_ms, MODEM_LTE_REG_LOG_INTERVAL_MS)) {
         ESP_LOGW(MODEM_LTE_TAG, "CEREG wait: AT+CEREG? failed: %s", esp_err_to_name(err));
@@ -343,6 +350,10 @@ static esp_err_t modem_lte_handle_pdp_activate(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_finalize_connected(uint64_t now_ms) {
+    bool recovered = s_recover_attempts > 0 || s_last_hw_recover_ms != 0;
+    if (recovered) {
+        telemetry_counters_inc_lte_recovery_success();
+    }
     s_lte_connected = true;
     s_connect_requested = false;
     retry_state_reset(&s_lte_backoff_retry);
@@ -359,7 +370,7 @@ static esp_err_t modem_lte_finalize_connected(uint64_t now_ms) {
     (void)modem_lte_apply_at_sync_config();
     s_last_err = ESP_OK;
     modem_lte_transition(MODEM_LTE_STATE_CONNECTED, now_ms, 0);
-    ESP_LOGI(MODEM_LTE_TAG, "LTE connected and PDP active");
+    ESP_LOGI(MODEM_LTE_TAG, "lte connected pdp_active=1 recovered=%d", recovered ? 1 : 0);
     return ESP_OK;
 }
 
@@ -372,9 +383,9 @@ static esp_err_t modem_lte_handle_pdp_ip_check(uint64_t now_ms) {
         return ESP_ERR_NOT_FINISHED;
     }
 
-    char preview[97] = {0};
-    modem_lte_response_preview(response, preview, sizeof(preview));
-    ESP_LOGI(MODEM_LTE_TAG, "PDP IP check response=\"%s\"", preview);
+    ESP_LOGI(MODEM_LTE_TAG,
+             "PDP IP check ok response_len=%u",
+             (unsigned)strlen(response));
     return modem_lte_finalize_connected(now_ms);
 }
 
@@ -386,6 +397,7 @@ static esp_err_t modem_lte_handle_recover_reset(void) {
     }
 
     if (reset_err != ESP_OK) {
+        telemetry_counters_inc_lte_recovery_fail();
         modem_lte_enter_backoff(util_uptime_ms(), reset_err, "recover reset");
         return ESP_ERR_NOT_FINISHED;
     }

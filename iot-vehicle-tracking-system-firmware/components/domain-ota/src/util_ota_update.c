@@ -12,6 +12,7 @@
 #include "mbedtls/sha256.h"
 
 #include "modem_at.h"
+#include "telemetry_counters.h"
 
 /**
  * @file util_ota_update.c
@@ -132,7 +133,7 @@ static esp_err_t util_ota_http_init_session(util_ota_update_ctx_t *ctx) {
 static esp_err_t util_ota_http_apply_request_config(util_ota_update_ctx_t *ctx, const ota_command_t *cmd) {
     if (strncmp(cmd->url, "https://", strlen("https://")) != 0) {
         ctx->failure_code = TRACKER_OTA_ERROR_HTTP_SSL_CONFIG_FAILED;
-        ESP_LOGE(UTIL_TAG, "OTA URL must use HTTPS");
+        ESP_LOGE(UTIL_TAG, "ota request target must use HTTPS");
         return ESP_FAIL;
     }
 
@@ -154,14 +155,14 @@ static esp_err_t util_ota_http_apply_request_config(util_ota_update_ctx_t *ctx, 
                                     cmd->url);
     if (http_url_cmd_len <= 0 || (size_t)http_url_cmd_len >= sizeof(http_url_cmd)) {
         ctx->failure_code = TRACKER_OTA_ERROR_HTTP_CONFIG_FAILED;
-        ESP_LOGE(UTIL_TAG, "HTTPPARA URL command too long");
+        ESP_LOGE(UTIL_TAG, "HTTPPARA request command too long");
         return ESP_FAIL;
     }
 
     ctx->failure_code = TRACKER_OTA_ERROR_HTTP_CONFIG_FAILED;
     err = modem_at_send_expect(http_url_cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS);
     if (err != ESP_OK) {
-        ESP_LOGE(UTIL_TAG, "HTTPPARA URL failed: %s", esp_err_to_name(err));
+        ESP_LOGE(UTIL_TAG, "HTTPPARA request failed: %s", esp_err_to_name(err));
         return err;
     }
 
@@ -175,11 +176,14 @@ static esp_err_t util_ota_http_apply_request_config(util_ota_update_ctx_t *ctx, 
 }
 
 static esp_err_t util_ota_http_start_download(util_ota_update_ctx_t *ctx, const ota_command_t *cmd) {
+    telemetry_counters_inc_ota_http_start();
+    ESP_LOGI(UTIL_TAG, "ota http start job=%s", cmd->job_id);
     s_ota_http_action.waiting = true;
     ctx->failure_code = TRACKER_OTA_ERROR_HTTP_ACTION_FAILED;
     esp_err_t err = modem_at_send_expect("AT+HTTPACTION=0\r", "OK", OTA_HTTP_CMD_TIMEOUT_MS);
     if (err != ESP_OK) {
-        ESP_LOGE(UTIL_TAG, "HTTPACTION failed: %s", esp_err_to_name(err));
+        telemetry_counters_inc_ota_http_fail();
+        ESP_LOGE(UTIL_TAG, "ota http failed stage=action err=%s job=%s", esp_err_to_name(err), cmd->job_id);
         return err;
     }
 
@@ -188,30 +192,40 @@ static esp_err_t util_ota_http_start_download(util_ota_update_ctx_t *ctx, const 
     ctx->failure_code = TRACKER_OTA_ERROR_HTTP_ACTION_TIMEOUT;
     err = util_ota_wait_http_action(&http_status_code, &http_body_len, OTA_HTTP_ACTION_TIMEOUT_MS);
     if (err != ESP_OK) {
-        ESP_LOGE(UTIL_TAG, "HTTPACTION wait timeout: %s", esp_err_to_name(err));
+        telemetry_counters_inc_ota_http_fail();
+        ESP_LOGE(UTIL_TAG, "ota http failed stage=wait err=%s job=%s", esp_err_to_name(err), cmd->job_id);
         return err;
     }
 
     if (http_status_code != 200) {
+        telemetry_counters_inc_ota_http_fail();
         ctx->failure_code = TRACKER_OTA_ERROR_HTTP_STATUS_NOT_200;
         if (http_status_code >= 700) {
             ESP_LOGE(UTIL_TAG,
-                     "HTTP transport status=%d (%s) body_len=%d",
+                     "ota http failed stage=status status=%d reason=%s body_len=%d job=%s",
                      http_status_code,
                      util_ota_http_status_name(http_status_code),
-                     http_body_len);
+                     http_body_len,
+                     cmd->job_id);
         } else {
-            ESP_LOGE(UTIL_TAG, "HTTP status=%d body_len=%d", http_status_code, http_body_len);
+            ESP_LOGE(UTIL_TAG,
+                     "ota http failed stage=status status=%d body_len=%d job=%s",
+                     http_status_code,
+                     http_body_len,
+                     cmd->job_id);
         }
         return ESP_FAIL;
     }
 
     if (cmd->size == 0U) {
+        telemetry_counters_inc_ota_http_fail();
         ctx->failure_code = TRACKER_OTA_ERROR_HTTP_EMPTY_BODY;
-        ESP_LOGE(UTIL_TAG, "OTA command size invalid");
+        ESP_LOGE(UTIL_TAG, "ota http failed stage=size reason=empty_body job=%s", cmd->job_id);
         return ESP_FAIL;
     }
 
+    telemetry_counters_inc_ota_http_success();
+    ESP_LOGI(UTIL_TAG, "ota http accepted status=200 body_len=%d job=%s", http_body_len, cmd->job_id);
     return ESP_OK;
 }
 

@@ -2,6 +2,8 @@
 
 #include "esp_log.h"
 
+#include "telemetry_counters.h"
+
 /**
  * @file modem_lte_recovery.c
  * @brief Backoff and hardware-recovery helpers for LTE bring-up failures.
@@ -88,6 +90,7 @@ void modem_lte_enter_recover_or_backoff(uint64_t now_ms, esp_err_t err, const ch
             cooldown_left_ms = MODEM_LTE_RECOVER_COOLDOWN_MS - (now_ms - s_last_hw_recover_ms);
         }
 
+        telemetry_counters_inc_lte_recovery_fail();
         ESP_LOGW(MODEM_LTE_TAG,
                  "recover skipped step=%s reason=%s rdy_seen=%d cooldown_left_ms=%llu",
                  reason,
@@ -99,6 +102,7 @@ void modem_lte_enter_recover_or_backoff(uint64_t now_ms, esp_err_t err, const ch
     }
 
     if (s_recover_attempts >= MODEM_LTE_MAX_RECOVER_ATTEMPTS) {
+        telemetry_counters_inc_lte_recovery_fail();
         modem_lte_enter_backoff(now_ms, err, reason);
         return;
     }
@@ -108,8 +112,9 @@ void modem_lte_enter_recover_or_backoff(uint64_t now_ms, esp_err_t err, const ch
     s_last_hw_recover_ms = now_ms;
     s_state_deadline_ms = 0;
     modem_lte_reset_recovery_markers();
+    telemetry_counters_inc_lte_recovery_start();
     ESP_LOGW(MODEM_LTE_TAG,
-             "%s failed: %s, recover reset (%lu/%u)",
+             "recover start step=%s err=%s attempt=%lu max_attempts=%u",
              reason,
              esp_err_to_name(err),
              (unsigned long)s_recover_attempts,

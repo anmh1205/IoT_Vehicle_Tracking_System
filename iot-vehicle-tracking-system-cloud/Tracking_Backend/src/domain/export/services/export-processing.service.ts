@@ -6,15 +6,31 @@ import type { ExportJob } from '@/domain/export/types/export.types';
 
 const log = createLogger('export-processing');
 
+const publishExportProgress = (
+  job: ExportJob,
+  progress: number,
+  status: 'pending' | 'processing' | 'completed' | 'failed',
+): void => {
+  publishEvent('export:progress', {
+    id: job.id,
+    user_id: job.user_id,
+    progress,
+    status,
+  });
+};
+
 export const processExport = async (job: ExportJob): Promise<void> => {
   log.info(`Processing export job #${job.id} (type: ${job.export_type})`);
 
   await exportRepo.updateStatus(job.id, 'processing');
+  publishExportProgress(job, 10, 'processing');
 
   try {
     const filePath = await generateExcelFile(job.export_type, job.id);
+    publishExportProgress(job, 90, 'processing');
 
     await exportRepo.updateStatus(job.id, 'completed', filePath);
+    publishExportProgress(job, 100, 'completed');
 
     publishEvent('export:ready', {
       id: job.id,
@@ -29,6 +45,7 @@ export const processExport = async (job: ExportJob): Promise<void> => {
     log.error(`Export job #${job.id} failed: ${message}`);
 
     await exportRepo.updateStatus(job.id, 'failed');
+    publishExportProgress(job, 100, 'failed');
 
     publishEvent('export:ready', {
       id: job.id,

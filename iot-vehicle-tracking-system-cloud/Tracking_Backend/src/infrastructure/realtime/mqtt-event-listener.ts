@@ -23,7 +23,7 @@ const log = createLogger('mqtt-listener');
 
 interface InternalEnvelope {
   correlation_id: string;
-  event_type: 'status' | 'alert' | 'session' | 'data' | 'geofence' | 'zone' | 'ignition';
+  event_type: 'status' | 'alert' | 'session' | 'data' | 'geofence' | 'zone' | 'ignition' | 'firmware';
   timestamp: string;
   payload: Record<string, unknown>;
 }
@@ -574,6 +574,28 @@ export const initMqttEventListener = (): void => {
             state: ignitionState,
           });
         }
+        break;
+      }
+
+      case 'firmware': {
+        publishEvent('firmware:progress', {
+          jobId: String(envelopePayload.jobId ?? envelopePayload.job_id ?? ''),
+          deviceId: String(envelopePayload.device_id ?? ''),
+          status: String(envelopePayload.status ?? 'unknown'),
+          progress: toOptionalNumber(envelopePayload.progress) ?? null,
+          targetVersion:
+            envelopePayload.targetVersion == null
+              ? undefined
+              : String(envelopePayload.targetVersion),
+          currentVersion:
+            envelopePayload.currentVersion == null
+              ? undefined
+              : String(envelopePayload.currentVersion),
+          partition:
+            envelopePayload.partition == null ? null : String(envelopePayload.partition),
+          error: envelopePayload.error == null ? null : String(envelopePayload.error),
+          metadata,
+        });
         break;
       }
 

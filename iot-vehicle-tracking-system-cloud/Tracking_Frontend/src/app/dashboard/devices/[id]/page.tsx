@@ -68,7 +68,7 @@ const DeviceDetailPage = ({
   const pageTitle = detail?.deviceName ?? detail?.deviceId ?? `Thiết bị #${id}`;
   const pageDescription =
     detail?.vehiclePlate || detail?.customerName
-      ? `Theo dõi runtime, lỗi và telemetry của ${detail.deviceId ?? 'thiết bị'}`
+      ? `Theo dõi trạng thái vận hành, lỗi và dữ liệu đo từ xa của ${detail.deviceId ?? 'thiết bị'}`
       : 'Thiết bị này chưa được gắn đầy đủ xe/khách hàng.';
 
   return (
@@ -81,7 +81,7 @@ const DeviceDetailPage = ({
           isLoading={query.isLoading}
         />
         <StatCard
-          title="Tổng runtime"
+          title="Tổng thời gian vận hành"
           value={formatDuration(runtime?.totalRuntime ?? 0)}
           icon={<HardDrive className="h-4 w-4" />}
           isLoading={query.isLoading}
@@ -154,7 +154,7 @@ const DeviceDetailPage = ({
       <div className="grid gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Snapshot telemetry</CardTitle>
+            <CardTitle className="text-base">Ảnh chụp dữ liệu đo từ xa</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
@@ -167,14 +167,14 @@ const DeviceDetailPage = ({
             </div>
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
               <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                Uptime phiên
+                Thời gian hoạt động phiên
               </p>
               <p className="mt-1 text-sm font-medium">
                 {detail?.currentSession ? formatDuration(detail.currentSession.uptime ?? 0) : '-'}
               </p>
             </div>
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Session hiện tại</p>
+              <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Phiên hiện tại</p>
               <p className="mt-1 text-sm font-medium">
                 {detail?.currentSession
                   ? `${DEVICE_STATUS_LABELS[detail.currentSession.status] ?? detail.currentSession.status}`
@@ -206,11 +206,11 @@ const DeviceDetailPage = ({
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Runtime tổng hợp</CardTitle>
+            <CardTitle className="text-base">Thời gian vận hành tổng hợp</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Tổng runtime</p>
+              <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Tổng thời gian vận hành</p>
               <p className="mt-1 text-sm font-medium">{formatDuration(runtime?.totalRuntime ?? 0)}</p>
             </div>
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
@@ -218,7 +218,7 @@ const DeviceDetailPage = ({
               <p className="mt-1 text-sm font-medium">{runtime?.totalSessions ?? 0}</p>
             </div>
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Phiên TB</p>
+              <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Thời lượng phiên trung bình</p>
               <p className="mt-1 text-sm font-medium">{formatDuration(runtime?.avgSessionDuration ?? 0)}</p>
             </div>
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">

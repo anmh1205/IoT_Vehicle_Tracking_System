@@ -82,8 +82,9 @@ const toDeviceListResult = (payload: any): DeviceListResult => {
   };
 };
 
-export const useDevices = (filters?: DeviceFilters) =>
+export const useDevices = (filters?: DeviceFilters, enabled = true) =>
   useQuery({
     queryKey: ['devices', filters],
     queryFn: () => deviceServices.getList(filters).then(toDeviceListResult),
+    enabled,
   });

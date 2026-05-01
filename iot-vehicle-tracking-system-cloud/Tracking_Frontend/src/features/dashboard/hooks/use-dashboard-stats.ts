@@ -468,7 +468,6 @@ export const useDashboardStats = () =>
       const devices = await loadDeviceSnapshot();
       return buildOverviewStatsFromDevices(devices);
     },
-    refetchInterval: 60000,
   });
 
 export const useDashboardActivity = (limit = 20) =>
@@ -487,7 +486,6 @@ export const useDashboardActivity = (limit = 20) =>
       const devices = await loadDeviceSnapshot();
       return buildSyntheticEvents(devices).slice(0, limit);
     },
-    refetchInterval: 30000,
   });
 
 export const useDeviceActivity = (days = 7) =>

@@ -10,6 +10,7 @@ idf_component_register(
     INCLUDE_DIRS
         "include"
     REQUIRES
+        domain-telemetry
         driver
         log
         platform-board-esp32s3

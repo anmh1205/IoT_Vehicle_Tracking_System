@@ -140,16 +140,16 @@ export const FirmwareDeploymentHistory = ({
                     <div className="space-y-3">
                       <div className="grid gap-2 sm:grid-cols-2">
                         <div className="rounded-lg border bg-muted/20 p-3 text-xs">
-                          <p className="text-muted-foreground">Luồng version</p>
+                          <p className="text-muted-foreground">Luồng phiên bản</p>
                           <p className="mt-1 font-medium">
                             {getFirmwareDisplayVersion(item.currentVersion)} →{' '}
                             {getFirmwareDisplayVersion(item.targetVersion)}
                           </p>
                         </div>
                         <div className="rounded-lg border bg-muted/20 p-3 text-xs">
-                          <p className="text-muted-foreground">Job / boot</p>
+                          <p className="text-muted-foreground">Tác vụ / lần khởi động</p>
                           <p className="mt-1 font-medium">
-                            {item.jobId ?? 'Chưa có job'} • {item.lastBootId ?? '--'}
+                            {item.jobId ?? 'Chưa có tác vụ'} • {item.lastBootId ?? '--'}
                           </p>
                         </div>
                       </div>

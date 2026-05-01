@@ -55,7 +55,7 @@ export const OverviewStats = ({
   const summaryItems = [
     { label: 'Tỷ lệ hoạt động', value: `${activeRate.toFixed(1)}%` },
     { label: 'Tỷ lệ ngoại tuyến', value: `${offlineRate.toFixed(1)}%` },
-    { label: 'Runtime hôm nay', value: formatDelta(runtimeDelta) },
+    { label: 'Thời gian hoạt động hôm nay', value: formatDelta(runtimeDelta) },
   ];
 
   return (

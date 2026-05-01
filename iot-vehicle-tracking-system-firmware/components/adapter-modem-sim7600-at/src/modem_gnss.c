@@ -28,7 +28,6 @@ static bool s_gnss_powered = false;
 #define MODEM_GNSS_LOG_THROTTLE_MS 10000ULL
 #define MODEM_GNSS_POWER_CMD_TIMEOUT_MS 3000U
 #define MODEM_GNSS_POWER_DEBUG_BUF_LEN 256U
-#define MODEM_GNSS_RESP_PREVIEW_LEN 160U
 #define MODEM_GNSS_QUERY_PRIMARY_BACKOFF_FAIL_THRESHOLD 3U
 #define MODEM_GNSS_QUERY_PRIMARY_BACKOFF_COOLDOWN_MS 60000ULL
 #define MODEM_GNSS_POWER_CGPS_RESTART_DELAY_MS 2000U
@@ -113,33 +112,14 @@ static bool modem_gnss_log_due(uint64_t *last_log_ms, uint64_t now_ms) {
     return false;
 }
 
-static void modem_gnss_prepare_response_preview(char *dst, size_t dst_size, const char *src) {
-    if (dst == NULL || dst_size == 0) {
-        return;
-    }
-
-    if (src == NULL) {
-        util_copy_string(dst, dst_size, "<null>");
-        return;
-    }
-
-    size_t src_len = strlen(src);
-    size_t copy_len = src_len < (dst_size - 1U) ? src_len : (dst_size - 1U);
-    for (size_t i = 0; i < copy_len; ++i) {
-        char c = src[i];
-        if (c == '\r' || c == '\n' || c == '\t') {
-            dst[i] = ' ';
-        } else {
-            dst[i] = c;
-        }
-    }
-    dst[copy_len] = '\0';
-}
-
 static void modem_gnss_log_command_response(const char *command, esp_err_t err, const char *response) {
-    char preview[MODEM_GNSS_RESP_PREVIEW_LEN] = {0};
-    modem_gnss_prepare_response_preview(preview, sizeof(preview), response);
-    ESP_LOGI(TAG, "GNSS cmd=%s err=%s resp=%s", command, esp_err_to_name(err), preview);
+    ESP_LOGI(TAG,
+             "gnss command cmd=%s err=%s response_len=%u has_ok=%d has_fix=%d",
+             command,
+             esp_err_to_name(err),
+             response == NULL ? 0U : (unsigned)strlen(response),
+             response != NULL && strstr(response, "OK") != NULL ? 1 : 0,
+             response != NULL && (strstr(response, "+CGNSINF:") != NULL || strstr(response, "+CGPSINFO:") != NULL) ? 1 : 0);
 }
 
 static uint32_t modem_gnss_query_ready_delay_ms(bool known_power_off, uint64_t off_duration_ms, bool resumed_session) {
@@ -305,7 +285,7 @@ static modem_gnss_read_result_t modem_gnss_send_cgpsinfo_and_parse(gnss_data_t *
     double longitude = 0.0;
     if (!modem_gnss_parse_nmea_degrees(fields[0], fields[1][0], &latitude) ||
         !modem_gnss_parse_nmea_degrees(fields[2], fields[3][0], &longitude)) {
-        ESP_LOGW(TAG, "GNSS fallback parse failed: invalid lat/lon format");
+        ESP_LOGW(TAG, "gnss fallback parse failed reason=invalid_coordinate_format");
         return MODEM_GNSS_READ_PARSE_FAIL;
     }
 
@@ -318,10 +298,9 @@ static modem_gnss_read_result_t modem_gnss_send_cgpsinfo_and_parse(gnss_data_t *
     data->course_deg = (field_count > 8 && fields[8] != NULL && fields[8][0] != '\0') ? (float)atof(fields[8]) : 0.0f;
 
     ESP_LOGI(TAG,
-             "GNSS fallback fix lat=%.6f lon=%.6f speed_kmh=%.2f",
-             data->latitude,
-             data->longitude,
-             data->speed_kmh);
+             "gnss fallback fix_valid=1 speed_kmh=%.2f sat=%u",
+             data->speed_kmh,
+             (unsigned)data->satellites);
     return MODEM_GNSS_READ_OK;
 }
 
@@ -688,11 +667,10 @@ esp_err_t modem_gnss_get_location(gnss_data_t *data) {
         s_no_fix_streak = 0;
         if (modem_gnss_log_due(&s_last_fix_success_log_ms, now_ms)) {
             ESP_LOGI(TAG,
-                     "GNSS fix success lat=%.6f lon=%.6f sat=%u streak=%lu",
-                     data->latitude,
-                     data->longitude,
+                     "gnss fix success sat=%u streak=%lu speed_kmh=%.2f",
                      (unsigned)data->satellites,
-                     (unsigned long)s_fix_success_streak);
+                     (unsigned long)s_fix_success_streak,
+                     data->speed_kmh);
         }
     } else {
         s_no_fix_streak += 1;

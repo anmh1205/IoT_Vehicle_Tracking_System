@@ -9,6 +9,7 @@ idf_component_register(
         adapter-modem-sim7600-at
         app_update
         contracts-device-cloud
+        domain-telemetry
         log
         mbedtls
         shared-kernel

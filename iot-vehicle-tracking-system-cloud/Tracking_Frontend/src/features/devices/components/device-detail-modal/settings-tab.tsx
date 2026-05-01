@@ -314,7 +314,7 @@ export const SettingsTab = () => {
                   }
                 />
                 <ContextCell
-                  label="Profile cloud"
+                  label="Hồ sơ cloud"
                   value={`${configSummary.activeProfileLabel} · ${formatSecondsLabel(configSummary.activeIntervalSec)} / lần`}
                   hint={configSummary.activeProfileHint}
                 />
@@ -329,7 +329,7 @@ export const SettingsTab = () => {
                   hint={
                     latestTelemetryTimestamp
                       ? `Thời điểm: ${formatDateTime(latestTelemetryTimestamp)}`
-                      : 'Chưa có mốc telemetry hợp lệ.'
+                      : 'Chưa có mốc dữ liệu đo từ xa hợp lệ.'
                   }
                 />
               </CardContent>
@@ -348,7 +348,7 @@ export const SettingsTab = () => {
                       <FormItem className="space-y-2 md:col-span-2 xl:col-span-3">
                         <FormLabel className="flex items-center gap-1.5">
                           <span>Tên thiết bị</span>
-                          <FieldHintTooltip content="Tên hiển thị ở dashboard, modal thiết bị và bản đồ." />
+                          <FieldHintTooltip content="Tên hiển thị ở bảng điều khiển, màn hình thiết bị và bản đồ." />
                         </FormLabel>
                         <FormControl>
                           <Input {...field} autoComplete="off" spellCheck={false} />
@@ -362,7 +362,7 @@ export const SettingsTab = () => {
                     control={form.control}
                     name="drivingIntervalSec"
                     label="Chu kỳ gửi khi đang chạy (giây)"
-                    hint="Đây là nhịp telemetry chính và là requestInterval cloud dùng để điều phối."
+                    hint="Đây là nhịp gửi dữ liệu đo từ xa chính và là requestInterval cloud dùng để điều phối."
                   />
                   <NumberInputField
                     control={form.control}
@@ -374,7 +374,7 @@ export const SettingsTab = () => {
                     control={form.control}
                     name="parkingHeartbeatSec"
                     label="Heartbeat khi đỗ (giây)"
-                    hint="Giữ thiết bị không bị đánh dấu offline quá sớm khi dừng lâu."
+                    hint="Giữ thiết bị không bị đánh dấu mất tín hiệu quá sớm khi dừng lâu."
                   />
                 </CardContent>
               </Card>
@@ -388,13 +388,13 @@ export const SettingsTab = () => {
                     control={form.control}
                     name="overspeedKph"
                     label="Ngưỡng quá tốc độ (km/h)"
-                    hint="Giữ cùng một mốc giữa rule cloud, audit UI và dữ liệu firmware."
+                    hint="Giữ cùng một mốc giữa quy tắc cloud, giao diện kiểm tra và dữ liệu firmware."
                   />
                   <NumberInputField
                     control={form.control}
                     name="vibrationThreshold"
                     label="Ngưỡng rung"
-                    hint="Dùng chung cho rule cảnh báo và đối chiếu trạng thái chuyển động."
+                    hint="Dùng chung cho quy tắc cảnh báo và đối chiếu trạng thái chuyển động."
                   />
                   <NumberInputField
                     control={form.control}
@@ -433,7 +433,7 @@ export const SettingsTab = () => {
                 <SummaryRow label="Tên hiển thị" value={preview.deviceName || '-'} />
                 <SummaryRow label="Nhịp chạy" value={`${preview.drivingIntervalSec}s / lần`} />
                 <SummaryRow label="Nhịp đỗ" value={`${preview.parkingIntervalSec}s / lần`} />
-                <SummaryRow label="Offline sau" value={`${preview.offlineAfterSec}s`} />
+                <SummaryRow label="Mất tín hiệu sau" value={`${preview.offlineAfterSec}s`} />
 
                 <Collapsible open={payloadPreviewOpen} onOpenChange={setPayloadPreviewOpen}>
                   <CollapsibleTrigger asChild>
@@ -470,7 +470,7 @@ export const SettingsTab = () => {
 
           <div className="sticky bottom-0 z-20 mt-4 rounded-xl border bg-background/95 px-3 py-2 shadow-lg backdrop-blur xl:hidden">
             <p className="text-xs text-muted-foreground">
-              Nhịp chạy {preview.drivingIntervalSec}s · Nhịp đỗ {preview.parkingIntervalSec}s · Offline{' '}
+              Nhịp chạy {preview.drivingIntervalSec}s · Nhịp đỗ {preview.parkingIntervalSec}s · Mất tín hiệu sau{' '}
               {preview.offlineAfterSec}s
             </p>
             <div className="mt-2 grid grid-cols-2 gap-2">

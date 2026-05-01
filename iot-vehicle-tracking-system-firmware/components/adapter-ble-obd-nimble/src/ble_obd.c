@@ -15,6 +15,7 @@
 
 #include "ble_mgr.h"
 #include "ble_util.h"
+#include "telemetry_counters.h"
 #include "util.h"
 
 /**
@@ -508,6 +509,7 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
         if (has_valid_obd) {
             ctx->tx_data.got_valid_payload = true;
             ctx->diag.notify_valid++;
+            telemetry_counters_inc_obd_read_ok();
             if (ctx->response_cb != NULL) {
                 int response_pid = ctx->tx_data.expect_pid_header ? (int)ctx->tx_data.pid : -1;
                 ctx->response_cb(ctx->tx_data.mode,
@@ -519,16 +521,19 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
         } else {
             ctx->tx_data.got_valid_payload = false;
             ctx->diag.notify_invalid++;
+            telemetry_counters_inc_obd_invalid_response();
             if (ctx->diag.notify_invalid <= 5U || (ctx->diag.notify_invalid % 20U) == 0U) {
+                uint32_t suppressed = ctx->diag.notify_invalid <= 5U ? 0U : (ctx->diag.notify_invalid == 20U ? 14U : 19U);
                 ESP_LOGW(TAG,
-                         "OBD invalid response count=%lu mode=0x%02X pid=0x%02X state=%s has_hex=%d has_error=%d rx_len=%u",
+                         "obd invalid_response count=%lu mode=0x%02X pid=0x%02X state=%s has_hex=%d has_error=%d rx_len=%u suppressed=%lu",
                          (unsigned long)ctx->diag.notify_invalid,
                          (unsigned)ctx->tx_data.mode,
                          (unsigned)ctx->tx_data.pid,
                          ble_obd_response_state_to_string(response_state),
                          has_hex ? 1 : 0,
                          ctx->rx_data.has_error ? 1 : 0,
-                         (unsigned)ctx->rx_data.len);
+                         (unsigned)ctx->rx_data.len,
+                         (unsigned long)suppressed);
             }
             if ((ctx->rx_data.has_error || has_hex) && ctx->response_cb != NULL) {
                 ctx->response_cb(ctx->tx_data.mode, -1, NULL, 0, ctx->usr_ctx);
@@ -761,6 +766,7 @@ static int ble_obd_execute_request(ble_obd_ctx_t *ctx,
     BaseType_t has_response = xSemaphoreTake(ctx->response_sem, pdMS_TO_TICKS(timeout_ms));
     if (has_response != pdTRUE) {
         ctx->diag.rxtx_timeout++;
+        telemetry_counters_inc_obd_timeout();
     }
 
     bool has_valid_payload = has_response == pdTRUE && ctx->tx_data.got_valid_payload;

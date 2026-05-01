@@ -33,10 +33,10 @@ const SECTION_ITEMS = [
   { value: 'vehicle', label: 'Xe', icon: CarFront },
   { value: 'alerts', label: 'Cảnh báo', icon: TriangleAlert },
   { value: 'errors', label: 'Lỗi', icon: Activity },
-  { value: 'runtime', label: 'Runtime', icon: Activity },
+  { value: 'runtime', label: 'Vận hành', icon: Activity },
   { value: 'route', label: 'Lộ trình', icon: MapPinned },
   { value: 'commands', label: 'Lệnh', icon: TerminalSquare },
-  { value: 'raw', label: 'Raw data', icon: Database },
+  { value: 'raw', label: 'Dữ liệu thô', icon: Database },
   { value: 'zones', label: 'Vùng', icon: MapPinned },
   { value: 'settings', label: 'Cài đặt', icon: Settings2 },
 ] as const satisfies Array<{ value: DeviceWorkspaceSection; label: string; icon: React.ComponentType<{ className?: string }> }>;
@@ -124,15 +124,15 @@ export const DeviceWorkspaceShell = ({
       showCloseButton={false}
       className="!inset-0 !left-0 !top-0 !grid !h-[100dvh] !max-h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 flex flex-col overflow-hidden rounded-none border-0 p-0"
     >
-      <DialogTitle className="sr-only">{device?.deviceName ?? 'Workspace thiết bị'}</DialogTitle>
-      <DialogDescription className="sr-only">Workspace vận hành thiết bị gồm thiết bị, xe, cảnh báo, vùng và dữ liệu runtime trong cùng một modal toàn màn hình.</DialogDescription>
+      <DialogTitle className="sr-only">{device?.deviceName ?? 'Không gian làm việc thiết bị'}</DialogTitle>
+      <DialogDescription className="sr-only">Không gian làm việc vận hành thiết bị gồm thiết bị, xe, cảnh báo, vùng và dữ liệu vận hành trong cùng một hộp thoại toàn màn hình.</DialogDescription>
 
       <div className="flex min-h-0 flex-1 flex-col bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.14),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.12),transparent_32%)]">
         <header className="border-b border-border/70 bg-background/88 px-4 py-4 backdrop-blur-xl sm:px-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="truncate text-xl font-semibold">{device?.vehiclePlate ?? device?.deviceName ?? 'Workspace thiết bị'}</p>
+                <p className="truncate text-xl font-semibold">{device?.vehiclePlate ?? device?.deviceName ?? 'Không gian làm việc thiết bị'}</p>
                 {device?.currentStatus ? <Badge variant="outline">{device.currentStatus}</Badge> : null}
                 {device?.lastSeenAt ? <Badge variant="secondary">Cập nhật {formatRelative(device.lastSeenAt)}</Badge> : null}
               </div>

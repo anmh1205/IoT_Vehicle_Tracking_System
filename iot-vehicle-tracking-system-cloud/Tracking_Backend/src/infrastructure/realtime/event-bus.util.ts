@@ -178,6 +178,32 @@ export interface RealtimeEventMap {
     timestamp: string;
   };
 
+  'notification:new': {
+    id: number;
+    type: string;
+    title: string;
+    message?: string;
+    isRead?: boolean;
+    referenceId?: number | null;
+    referenceType?: string | null;
+    vehicleId?: string | null;
+    deviceId?: string | null;
+    createdAt: string;
+  };
+  'notification:updated': {
+    user_id?: number | null;
+    id?: number;
+    ids?: number[];
+    unreadCount?: number;
+    action: 'read' | 'read_all' | 'hidden';
+  };
+
+  'export:progress': {
+    id: number;
+    user_id: number;
+    progress: number;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+  };
   'export:ready': {
     id: number;
     user_id: number;
@@ -189,6 +215,42 @@ export interface RealtimeEventMap {
     firmware_id: number;
     device_ids: string[];
     status: string;
+  };
+  'firmware:progress': {
+    jobId: string;
+    deviceId: string;
+    status: string;
+    progress?: number | null;
+    targetVersion?: string;
+    currentVersion?: string;
+    partition?: string | null;
+    error?: string | null;
+    metadata?: RealtimeMetadata;
+  };
+
+  'simulator:status': {
+    running: boolean;
+    paused: boolean;
+    jobId: string | null;
+    startedBy: number | null;
+    startedAt: string | null;
+    stoppedAt: string | null;
+    expiresAt: string | null;
+    lastTickAt: string | null;
+    intervalSec: number | null;
+    durationMin: number | null;
+    ticks: number;
+    sentPoints: number;
+    deviceIds: string[];
+    reason: string | null;
+    preview: Array<Record<string, unknown>>;
+  };
+  'system-admin:settings': {
+    key: string;
+    action: 'create' | 'update' | 'delete' | 'activate' | 'rollback';
+    resource?: string;
+    revision?: number;
+    actorUserId?: number;
   };
 }
 

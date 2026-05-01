@@ -35,10 +35,10 @@ const membershipMeta: Record<
   string,
   { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
 > = {
-  inside: { label: 'Dang trong vung', variant: 'default' },
-  outside: { label: 'Dang ngoai vung', variant: 'destructive' },
-  suspect: { label: 'Sat mep vung', variant: 'secondary' },
-  unknown: { label: 'Chua danh gia', variant: 'outline' },
+  inside: { label: 'Đang trong vùng', variant: 'default' },
+  outside: { label: 'Đang ngoài vùng', variant: 'destructive' },
+  suspect: { label: 'Sát mép vùng', variant: 'secondary' },
+  unknown: { label: 'Chưa đánh giá', variant: 'outline' },
 };
 
 const toneClasses = {
@@ -124,17 +124,17 @@ export const MapInspectRail = ({
     membershipMeta[allowedZone?.membershipState ?? 'unknown'] ?? membershipMeta.unknown;
 
   const quickStats = [
-    { label: 'Toc do', value: formatSpeedValue(device.speed) },
-    { label: 'Toa do', value: formatCoordinateValue(device.lat, device.lon) },
-    { label: 'Ac quy xe', value: formatElectricalValue(device.vehicleBattery ?? device.battery) },
-    { label: 'Pin thiet bi', value: formatElectricalValue(device.deviceBattery) },
+    { label: 'Tốc độ', value: formatSpeedValue(device.speed) },
+    { label: 'Tọa độ', value: formatCoordinateValue(device.lat, device.lon) },
+    { label: 'Ắc quy xe', value: formatElectricalValue(device.vehicleBattery ?? device.battery) },
+    { label: 'Pin thiết bị', value: formatElectricalValue(device.deviceBattery) },
     {
-      label: 'Nhiet do may',
+      label: 'Nhiệt độ máy',
       value: formatTemperatureValue(device.engineTemperature ?? device.temperature),
     },
-    { label: 'GNSS', value: formatCountValue(device.satellites, ' sat') },
+    { label: 'GNSS', value: formatCountValue(device.satellites, ' vệ tinh') },
     { label: 'Rung', value: formatCountValue(device.vibration) },
-    { label: 'Ma loi', value: formatErrorCodeValue(device.errorCode) },
+    { label: 'Mã lỗi', value: formatErrorCodeValue(device.errorCode) },
   ];
 
   return (
@@ -159,7 +159,7 @@ export const MapInspectRail = ({
                 variant="ghost"
                 className="h-10 w-10 rounded-2xl"
                 onClick={toggleCollapsed}
-                aria-label={collapsed ? 'Mo rong thanh tac vu' : 'Thu gon thanh tac vu'}
+                aria-label={collapsed ? 'Mở rộng thanh tác vụ' : 'Thu gọn thanh tác vụ'}
               >
                 {collapsed ? (
                   <PanelRightOpen className="h-4 w-4" />
@@ -172,7 +172,7 @@ export const MapInspectRail = ({
                 variant="ghost"
                 className="h-10 w-10 rounded-2xl"
                 onClick={onClose}
-                aria-label="Bo chon thiet bi"
+                aria-label="Bỏ chọn thiết bị"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -197,7 +197,7 @@ export const MapInspectRail = ({
                         </Badge>
                       </div>
                       <p className="truncate text-xs text-muted-foreground">
-                        Cap nhat {device.timestamp ? formatRelative(device.timestamp) : '--'}
+                        Cập nhật {device.timestamp ? formatRelative(device.timestamp) : '--'}
                       </p>
                     </div>
                   </div>
@@ -210,7 +210,7 @@ export const MapInspectRail = ({
 
                 <div className="rounded-3xl border border-border/70 bg-background/80 p-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                    Thong so nhanh
+                    Thông số nhanh
                   </p>
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     {quickStats.map((stat) => (
@@ -220,12 +220,12 @@ export const MapInspectRail = ({
                 </div>
 
                 <div className="rounded-3xl border border-border/70 bg-background/80 p-3">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Vung</p>
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Vùng</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <Badge variant={allowedZone ? 'secondary' : 'outline'}>
-                      {allowedZone ? 'Da cau hinh' : 'Chua co'}
+                      {allowedZone ? 'Đã cấu hình' : 'Chưa có'}
                     </Badge>
-                    {allowedZoneLoading ? <Badge variant="outline">Dang tai...</Badge> : null}
+                    {allowedZoneLoading ? <Badge variant="outline">Đang tải...</Badge> : null}
                     {allowedZone ? (
                       <>
                         <Badge variant={allowedZoneMembership.variant}>
@@ -293,10 +293,10 @@ export const MapInspectRail = ({
                 variant="outline"
                 className={cn('h-11 rounded-2xl', collapsed && 'px-0')}
                 onClick={onToggleAllowedZoneVisibility}
-                aria-label={showAllowedZone ? 'An vung' : 'Hien vung'}
+                aria-label={showAllowedZone ? 'Ẩn vùng' : 'Hiện vùng'}
               >
                 {showAllowedZone ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                {!collapsed ? <span className="ml-2">{showAllowedZone ? 'An vung' : 'Hien vung'}</span> : null}
+                {!collapsed ? <span className="ml-2">{showAllowedZone ? 'Ẩn vùng' : 'Hiện vùng'}</span> : null}
               </Button>
             ) : null}
             {!allowedZone && onCreateAllowedZone && canEditAllowedZone ? (
@@ -305,10 +305,10 @@ export const MapInspectRail = ({
                 variant="outline"
                 className={cn('h-11 rounded-2xl', collapsed && 'px-0')}
                 onClick={onCreateAllowedZone}
-                aria-label="Tao vung"
+                aria-label="Tạo vùng"
               >
                 <MapPinned className="h-4 w-4" />
-                {!collapsed ? <span className="ml-2">Tao vung</span> : null}
+                {!collapsed ? <span className="ml-2">Tạo vùng</span> : null}
               </Button>
             ) : null}
             {allowedZone && onEditAllowedZone && canEditAllowedZone ? (
@@ -317,10 +317,10 @@ export const MapInspectRail = ({
                 variant="outline"
                 className={cn('h-11 rounded-2xl', collapsed && 'px-0')}
                 onClick={onEditAllowedZone}
-                aria-label="Chinh vung"
+                aria-label="Chỉnh vùng"
               >
                 <MapPinned className="h-4 w-4" />
-                {!collapsed ? <span className="ml-2">Chinh vung</span> : null}
+                {!collapsed ? <span className="ml-2">Chỉnh vùng</span> : null}
               </Button>
             ) : null}
           </div>

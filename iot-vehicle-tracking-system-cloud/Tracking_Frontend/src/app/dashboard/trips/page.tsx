@@ -223,7 +223,7 @@ const TripsPage = () => {
   return (
     <PageContainer
       pageTitle="Chuyến đi"
-      pageDescription="Đối chiếu danh sách chuyến đi với dữ liệu thực tế và mở replay map ngay từ bảng"
+      pageDescription="Đối chiếu danh sách chuyến đi với dữ liệu thực tế và mở bản đồ phát lại ngay từ bảng"
       pageHeaderAction={
         <Button
           onClick={() => {

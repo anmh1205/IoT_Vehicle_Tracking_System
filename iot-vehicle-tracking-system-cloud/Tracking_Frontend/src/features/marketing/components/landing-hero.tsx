@@ -8,16 +8,16 @@ import { heroSignals } from '@/features/marketing/data/landing-content';
 
 const operationPillars = [
   {
-    title: 'Realtime tracking',
+    title: 'Theo dõi thời gian thực',
     description: 'Giữ vị trí xe, tuyến đường và trạng thái thiết bị trong một nhịp quan sát.',
   },
   {
     title: 'Cảnh báo đồng bộ dữ liệu',
-    description: 'Map, alerts, vùng, trips và trạng thái hệ thống nằm chung một flow.',
+    description: 'Bản đồ, cảnh báo, vùng, chuyến đi và trạng thái hệ thống nằm chung một luồng.',
   },
   {
-    title: 'Điều phối từ web tới mobile',
-    description: 'Dashboard điều hành và mobile shell bám cùng một hạ tầng telemetry.',
+    title: 'Điều phối từ web tới di động',
+    description: 'Bảng điều khiển vận hành và vỏ ứng dụng di động bám cùng một hạ tầng dữ liệu đo từ xa.',
   },
 ];
 

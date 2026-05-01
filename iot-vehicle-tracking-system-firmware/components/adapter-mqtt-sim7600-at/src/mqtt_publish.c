@@ -12,6 +12,25 @@
  * @brief Publish and subscribe helpers behind the tracker MQTT facade.
  */
 
+static const char *tracker_mqtt_topic_class(const char *topic) {
+    if (topic == s_topic_rawdata || (topic != NULL && strcmp(topic, s_topic_rawdata) == 0)) {
+        return "rawdata";
+    }
+    if (topic == s_topic_status || (topic != NULL && strcmp(topic, s_topic_status) == 0)) {
+        return "status";
+    }
+    if (topic == s_topic_events || (topic != NULL && strcmp(topic, s_topic_events) == 0)) {
+        return "events";
+    }
+    if (topic == s_topic_firmware || (topic != NULL && strcmp(topic, s_topic_firmware) == 0)) {
+        return "firmware";
+    }
+    if (topic == s_topic_commands || (topic != NULL && strcmp(topic, s_topic_commands) == 0)) {
+        return "commands";
+    }
+    return "external";
+}
+
 int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *payload, int qos) {
     ESP_RETURN_ON_FALSE(s_connected, -1, TRACKER_MQTT_TAG, "MQTT not connected");
     ESP_RETURN_ON_NULL(topic, -1, TRACKER_MQTT_TAG, "topic is NULL");
@@ -20,6 +39,7 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
     ESP_RETURN_ON_FALSE(payload[0] != '\0', -1, TRACKER_MQTT_TAG, "payload empty");
     ESP_RETURN_ON_FALSE(qos >= 0 && qos <= 2, -1, TRACKER_MQTT_TAG, "invalid qos=%d", qos);
 
+    const char *topic_class = tracker_mqtt_topic_class(topic);
     size_t topic_len = strlen(topic);
     size_t payload_len = strlen(payload);
     ESP_RETURN_ON_FALSE(topic_len <= 1024, -1, TRACKER_MQTT_TAG, "topic too long len=%u", (unsigned)topic_len);
@@ -32,13 +52,19 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
     char cmd[96] = {0};
     (void)snprintf(cmd, sizeof(cmd), "AT+CMQTTTOPIC=%d,%u\r", MQTT_CLIENT_INDEX, (unsigned int)topic_len);
     if (tracker_mqtt_input_data(cmd, topic, "+CMQTTTOPIC:", true) != ESP_OK) {
-        ESP_LOGW(TRACKER_MQTT_TAG, "CMQTTTOPIC failed");
+        ESP_LOGW(TRACKER_MQTT_TAG,
+                 "publish failed stage=topic topic_class=%s topic_len=%u",
+                 topic_class,
+                 (unsigned)topic_len);
         return -1;
     }
 
     (void)snprintf(cmd, sizeof(cmd), "AT+CMQTTPAYLOAD=%d,%u\r", MQTT_CLIENT_INDEX, (unsigned int)payload_len);
     if (tracker_mqtt_input_data(cmd, payload, "+CMQTTPAYLOAD:", true) != ESP_OK) {
-        ESP_LOGW(TRACKER_MQTT_TAG, "CMQTTPAYLOAD failed");
+        ESP_LOGW(TRACKER_MQTT_TAG,
+                 "publish failed stage=payload topic_class=%s payload_len=%u",
+                 topic_class,
+                 (unsigned)payload_len);
         return -1;
     }
 
@@ -53,7 +79,10 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
     char response[MQTT_AT_RESPONSE_MAX_LEN] = {0};
     if (tracker_mqtt_send_cmd(cmd, MQTT_CONNECT_TIMEOUT_MS, response, sizeof(response)) != ESP_OK) {
         tracker_mqtt_reset_publish_wait();
-        ESP_LOGW(TRACKER_MQTT_TAG, "CMQTTPUB failed");
+        ESP_LOGW(TRACKER_MQTT_TAG,
+                 "publish failed stage=pub topic_class=%s qos=%d",
+                 topic_class,
+                 qos);
         return -1;
     }
 
@@ -71,17 +100,25 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
         esp_err_t wait_err = tracker_mqtt_wait_publish_result(&publish_err);
         tracker_mqtt_reset_publish_wait();
         if (wait_err != ESP_OK) {
-            ESP_LOGW(TRACKER_MQTT_TAG, "CMQTTPUB result timeout topic=%s", topic);
+            ESP_LOGW(TRACKER_MQTT_TAG,
+                     "publish failed stage=result topic_class=%s err=timeout",
+                     topic_class);
             return -1;
         }
         if (publish_err != 0) {
-            ESP_LOGW(TRACKER_MQTT_TAG, "CMQTTPUB rejected topic=%s err=%d", topic, publish_err);
+            ESP_LOGW(TRACKER_MQTT_TAG,
+                     "publish failed stage=result topic_class=%s err=%d",
+                     topic_class,
+                     publish_err);
             return -1;
         }
     } else {
         tracker_mqtt_reset_publish_wait();
         if (result_err != ESP_OK) {
-            ESP_LOGW(TRACKER_MQTT_TAG, "CMQTTPUB result failed topic=%s err=%d", topic, publish_err);
+            ESP_LOGW(TRACKER_MQTT_TAG,
+                     "publish failed stage=result topic_class=%s err=%d",
+                     topic_class,
+                     publish_err);
             return -1;
         }
     }
@@ -117,6 +154,6 @@ esp_err_t tracker_mqtt_subscribe_commands_internal(void) {
     }
 
     s_commands_subscribed = true;
-    ESP_LOGI(TRACKER_MQTT_TAG, "MQTT subscribed commands topic=%s", s_topic_commands);
+    ESP_LOGI(TRACKER_MQTT_TAG, "mqtt subscribed topic_class=commands");
     return ESP_OK;
 }

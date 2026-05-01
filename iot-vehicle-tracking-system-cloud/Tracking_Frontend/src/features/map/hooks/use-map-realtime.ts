@@ -64,6 +64,12 @@ const toDevicePosition = (raw: any): DevicePosition => ({
   ecuAlerts: toAlertSummary(raw?.ecuAlerts ?? {}, 'ecu'),
 });
 
+const isOlderPosition = (
+  next: DevicePosition,
+  previous: DevicePosition | undefined,
+): boolean =>
+  next.timestamp !== null && previous?.timestamp != null && next.timestamp < previous.timestamp;
+
 const mergePosition = (
   next: DevicePosition,
   previous: DevicePosition | undefined,
@@ -123,15 +129,21 @@ export const useMapRealtime = () => {
     }
     const buffered = bufferRef.current.get(position.deviceId);
     const existing = useMapStore.getState().positions.get(position.deviceId);
-    bufferRef.current.set(position.deviceId, mergePosition(position, buffered ?? existing));
+    const previous = buffered ?? existing;
+    if (isOlderPosition(position, previous)) {
+      return;
+    }
+    bufferRef.current.set(position.deviceId, mergePosition(position, previous));
   }, []);
 
   useRealtimeSubscription({
+    namespace: 'devices',
     event: 'device:position',
     handler: enqueuePosition,
   });
 
   useRealtimeSubscription({
+    namespace: 'devices',
     event: 'device:status',
     handler: enqueuePosition,
   });

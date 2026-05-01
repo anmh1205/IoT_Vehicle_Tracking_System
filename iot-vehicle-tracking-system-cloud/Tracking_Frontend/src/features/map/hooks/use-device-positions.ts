@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useRealtimeContext, useSocket } from '@/components/providers/socket-provider';
 import { mapServices } from '@/lib/api/map';
 import { localizeAlertTitle } from '@/lib/api/alerts';
 import { parseMapTimestamp } from '@/features/map/constants/map-config';
@@ -66,11 +67,12 @@ const toDevicePosition = (raw: any): DevicePosition => ({
 
 export const useDevicePositions = () => {
   const updateBatch = useMapStore((state) => state.updateBatch);
+  const deviceSocket = useSocket('devices');
+  const { joinDeviceRoom, leaveDeviceRoom } = useRealtimeContext();
 
   const query = useQuery({
     queryKey: ['device-positions'],
     queryFn: () => mapServices.getPositions(),
-    refetchInterval: 2_000,
   });
 
   useEffect(() => {
@@ -79,8 +81,30 @@ export const useDevicePositions = () => {
     if (!Array.isArray(rows)) {
       return;
     }
-    updateBatch(rows.map(toDevicePosition));
-  }, [query.data, updateBatch]);
+
+    const positions = rows.map(toDevicePosition);
+    updateBatch(positions);
+    positions.forEach((position) => joinDeviceRoom(position.deviceId));
+
+    return () => {
+      positions.forEach((position) => leaveDeviceRoom(position.deviceId));
+    };
+  }, [query.data, updateBatch, joinDeviceRoom, leaveDeviceRoom]);
+
+  useEffect(() => {
+    if (!deviceSocket) {
+      return;
+    }
+
+    const refetchPositions = () => {
+      void query.refetch();
+    };
+    deviceSocket.on('connect', refetchPositions);
+
+    return () => {
+      deviceSocket.off('connect', refetchPositions);
+    };
+  }, [deviceSocket, query]);
 
   return query;
 };

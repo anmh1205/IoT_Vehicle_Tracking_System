@@ -8,6 +8,7 @@
 #include "driver/gpio.h"
 
 #include "esp_log.h"
+#include "sdkconfig.h"
 
 #include "adc_reader.h"
 #include "command_handler.h"
@@ -46,10 +47,17 @@ RTC_DATA_ATTR rtc_context_t g_rtc_context = {
 };
 
 static const char *TAG = STATE_MACHINE_TAG;
+static uint64_t s_state_entered_ms = 0;
+static uint64_t s_last_health_snapshot_log_ms = 0;
 
 #ifndef CONFIG_APP_PROJECT_VER
 #define CONFIG_APP_PROJECT_VER "unknown"
 #endif
+#ifndef CONFIG_TRACKER_FIELD_VALIDATION_MODE
+#define CONFIG_TRACKER_FIELD_VALIDATION_MODE 0
+#endif
+
+#define TRACKER_HEALTH_SNAPSHOT_INTERVAL_MS 60000ULL
 
 static void state_machine_command_callback(const char *topic, const char *payload) {
     (void)topic;
@@ -166,6 +174,116 @@ bool state_machine_network_ready_for_heartbeat_publish(void) {
 #else
     return tracker_mqtt_is_connected() || s_network_retry.attempts > 0;
 #endif
+}
+
+static const char *state_machine_app_state_name(app_state_t state) {
+    switch (state) {
+        case APP_STATE_INIT:
+            return "init";
+        case APP_STATE_CHECK_IGN:
+            return "check_ign";
+        case APP_STATE_DRIVING:
+            return "driving";
+        case APP_STATE_PARKED:
+            return "parked";
+        case APP_STATE_ALARM:
+            return "alarm";
+        case APP_STATE_HEARTBEAT:
+            return "heartbeat";
+        case APP_STATE_SLEEP:
+            return "sleep";
+        default:
+            return "unknown";
+    }
+}
+
+static const char *state_machine_transition_reason(app_state_t from, app_state_t to) {
+    if (from == APP_STATE_INIT && to == APP_STATE_CHECK_IGN) {
+        return "boot_ready";
+    }
+    if (from == APP_STATE_CHECK_IGN && to == APP_STATE_DRIVING) {
+        return "ignition_stable_on";
+    }
+    if (from == APP_STATE_CHECK_IGN && to == APP_STATE_PARKED) {
+        return "ignition_stable_off";
+    }
+    if (from == APP_STATE_DRIVING && to == APP_STATE_PARKED) {
+        return "ignition_off_hold_elapsed";
+    }
+    if (from == APP_STATE_PARKED && to == APP_STATE_HEARTBEAT) {
+        return "parked_heartbeat_start";
+    }
+    if (from == APP_STATE_ALARM && to == APP_STATE_DRIVING) {
+        return "ignition_on_during_alarm";
+    }
+    if (from == APP_STATE_ALARM && to == APP_STATE_PARKED) {
+        return "alarm_window_done";
+    }
+    if (from == APP_STATE_HEARTBEAT && to == APP_STATE_SLEEP) {
+        return "heartbeat_window_done";
+    }
+    if (from == APP_STATE_SLEEP && to == APP_STATE_CHECK_IGN) {
+        return "sleep_blocked";
+    }
+    if (from == APP_STATE_SLEEP && to != APP_STATE_SLEEP) {
+        return "wake_after_sleep";
+    }
+    return "handler_decision";
+}
+
+static void state_machine_log_health_snapshot(uint64_t now_ms, bool force) {
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE
+    bool due = force || s_last_health_snapshot_log_ms == 0 ||
+               (now_ms - s_last_health_snapshot_log_ms) >= TRACKER_HEALTH_SNAPSHOT_INTERVAL_MS;
+    if (!due) {
+        return;
+    }
+
+    telemetry_counters_t counters = telemetry_counters_get();
+    ESP_LOGI(TAG,
+             "health snapshot uptime_s=%llu state=%s mqtt_connected=%d mqtt_ok=%lu mqtt_fail=%lu mqtt_fallback=%lu queue_depth=%lu replay_ok=%lu replay_retry=%lu replay_drop=%lu sd_fail=%lu quota_hit=%lu lte_recovery_start=%lu lte_recovery_ok=%lu lte_recovery_fail=%lu obd_ok=%lu obd_timeout=%lu obd_invalid=%lu ota_http_start=%lu ota_http_ok=%lu ota_http_fail=%lu",
+             (unsigned long long)(now_ms / 1000ULL),
+             state_machine_app_state_name(s_runtime_state_hint),
+             tracker_mqtt_is_connected() ? 1 : 0,
+             (unsigned long)counters.mqtt_publish_ok,
+             (unsigned long)counters.mqtt_publish_fail,
+             (unsigned long)counters.mqtt_publish_fallback,
+             (unsigned long)offline_queue_depth(),
+             (unsigned long)counters.replay_success,
+             (unsigned long)counters.replay_retry,
+             (unsigned long)counters.replay_drop,
+             (unsigned long)counters.sd_write_fail,
+             (unsigned long)counters.quota_hit,
+             (unsigned long)counters.lte_recovery_start,
+             (unsigned long)counters.lte_recovery_success,
+             (unsigned long)counters.lte_recovery_fail,
+             (unsigned long)counters.obd_read_ok,
+             (unsigned long)counters.obd_timeout,
+             (unsigned long)counters.obd_invalid_response,
+             (unsigned long)counters.ota_http_start,
+             (unsigned long)counters.ota_http_success,
+             (unsigned long)counters.ota_http_fail);
+    s_last_health_snapshot_log_ms = now_ms;
+#else
+    (void)now_ms;
+    (void)force;
+#endif
+}
+
+static void state_machine_log_transition(app_state_t from, app_state_t to, uint64_t now_ms) {
+    if (from == to) {
+        return;
+    }
+
+    uint64_t dwell_ms = s_state_entered_ms == 0 || now_ms < s_state_entered_ms ? 0 : now_ms - s_state_entered_ms;
+    ESP_LOGI(TAG,
+             "state transition from=%s to=%s reason=%s dwell_ms=%llu",
+             state_machine_app_state_name(from),
+             state_machine_app_state_name(to),
+             state_machine_transition_reason(from, to),
+             (unsigned long long)dwell_ms);
+    s_state_entered_ms = now_ms;
+    g_rtc_context.last_state = to;
 }
 
 bool state_machine_ota_start_is_safe(void) {
@@ -438,11 +556,11 @@ esp_err_t state_machine_core_init(const config_t *config) {
     state_runtime_context_reset(config);
     util_copy_string(s_telemetry.obd_ecu_state, sizeof(s_telemetry.obd_ecu_state), "unknown");
     ESP_LOGI(TAG,
-             "Runtime config device=%s mqtt_host=%s mqtt_port=%u apn=%s tracking=%us heartbeat=%us alarm=%us ign_hold_ms=%u sleep=%d imu_wake=%d ota_min_mv=%u",
+             "runtime config device=%s mqtt_configured=%d mqtt_port=%u apn_configured=%d tracking=%us heartbeat=%us alarm=%us ign_hold_ms=%u sleep=%d imu_wake=%d ota_min_mv=%u",
              s_config.device_id,
-             s_config.mqtt_host,
+             util_string_empty(s_config.mqtt_host) ? 0 : 1,
              (unsigned int)s_config.mqtt_port,
-             s_config.apn,
+             util_string_empty(s_config.apn) ? 0 : 1,
              (unsigned int)s_config.tracking_interval_s,
              (unsigned int)s_config.heartbeat_interval_s,
              (unsigned int)s_config.alarm_interval_s,
@@ -463,6 +581,8 @@ esp_err_t state_machine_core_init(const config_t *config) {
         util_copy_string(s_current_version, sizeof(s_current_version), CONFIG_APP_PROJECT_VER);
     }
     state_machine_init_boot_metadata();
+    s_state_entered_ms = util_uptime_ms();
+    s_last_health_snapshot_log_ms = 0;
 
     ESP_RETURN_ON_FALSE(adc_reader_init() == ESP_OK, ESP_FAIL, TAG, "adc_reader_init failed");
     if (!state_machine_imu_runtime_enabled()) {
@@ -508,16 +628,19 @@ app_state_t state_machine_core_run(app_state_t current_state) {
     state_machine_update_user_led();
     util_set_sleep_enabled(s_config.sleep_enabled);
 
+    app_state_t next_state = current_state;
     switch (current_state) {
         case APP_STATE_INIT:
             s_runtime_state_hint = APP_STATE_INIT;
-            g_rtc_context.last_state = APP_STATE_INIT;
             offline_queue_set_online(tracker_mqtt_is_connected());
-            return APP_STATE_CHECK_IGN;
+            next_state = APP_STATE_CHECK_IGN;
+            break;
         case APP_STATE_CHECK_IGN:
-            return state_machine_handle_check_ign_state();
+            next_state = state_machine_handle_check_ign_state();
+            break;
         case APP_STATE_DRIVING:
-            return state_machine_handle_driving_state();
+            next_state = state_machine_handle_driving_state();
+            break;
         case APP_STATE_PARKED:
             s_runtime_state_hint = APP_STATE_PARKED;
             if (s_publish_status != TRACKER_PUBLISH_STATUS_STOPPED) {
@@ -528,16 +651,27 @@ app_state_t state_machine_core_run(app_state_t current_state) {
                 s_heartbeat_started_ms = util_uptime_ms();
                 s_heartbeat_raw_published = false;
             }
-            return APP_STATE_HEARTBEAT;
+            next_state = APP_STATE_HEARTBEAT;
+            break;
         case APP_STATE_ALARM:
-            return state_machine_handle_alarm_state();
+            next_state = state_machine_handle_alarm_state();
+            break;
         case APP_STATE_HEARTBEAT:
-            return state_machine_handle_heartbeat_state();
+            next_state = state_machine_handle_heartbeat_state();
+            break;
         case APP_STATE_SLEEP:
-            return state_machine_handle_sleep_state();
+            next_state = state_machine_handle_sleep_state();
+            break;
         default:
-            return APP_STATE_INIT;
+            next_state = APP_STATE_INIT;
+            break;
     }
+
+    uint64_t now_ms = util_uptime_ms();
+    bool state_changed = next_state != current_state;
+    state_machine_log_transition(current_state, next_state, now_ms);
+    state_machine_log_health_snapshot(now_ms, state_changed || current_state == APP_STATE_INIT);
+    return next_state;
 }
 
 telemetry_t state_machine_core_get_telemetry(void) {

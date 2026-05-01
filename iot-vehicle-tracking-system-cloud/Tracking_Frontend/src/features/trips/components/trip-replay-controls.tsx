@@ -33,7 +33,7 @@ export const TripReplayControls = ({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <Button onClick={onToggle}>{playing ? 'Tạm dừng' : 'Phát replay'}</Button>
+        <Button onClick={onToggle}>{playing ? 'Tạm dừng' : 'Phát lại'}</Button>
         <Button variant="outline" onClick={onReset}>
           Về đầu hành trình
         </Button>

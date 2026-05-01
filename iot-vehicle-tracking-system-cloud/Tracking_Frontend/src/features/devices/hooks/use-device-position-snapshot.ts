@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDeviceRoom } from '@/components/providers/socket-provider';
+import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { deviceServices } from '@/lib/api/devices';
 import type { DevicePositionSnapshot } from '@/features/devices/types';
 
@@ -54,11 +56,34 @@ const normalizePosition = (row: any): DevicePositionSnapshot => ({
 });
 
 export const useDevicePositionSnapshot = (devicePublicId: string | null, enabled = true) => {
+  const queryClient = useQueryClient();
+  useDeviceRoom(devicePublicId, enabled && !!devicePublicId);
+
   const query = useQuery({
     queryKey: ['device-position-snapshot', devicePublicId],
     queryFn: () => deviceServices.getPositions(),
-    refetchInterval: enabled ? 15000 : false,
     enabled: enabled && !!devicePublicId,
+  });
+
+  const refreshSnapshot = (payload: { deviceId?: string; device_id?: string }) => {
+    const nextDeviceId = String(payload.deviceId ?? payload.device_id ?? '');
+    if (nextDeviceId === String(devicePublicId ?? '')) {
+      void queryClient.invalidateQueries({ queryKey: ['device-position-snapshot', devicePublicId] });
+    }
+  };
+
+  useRealtimeSubscription({
+    namespace: 'devices',
+    event: 'device:position',
+    enabled: enabled && !!devicePublicId,
+    handler: refreshSnapshot,
+  });
+
+  useRealtimeSubscription({
+    namespace: 'devices',
+    event: 'device:status',
+    enabled: enabled && !!devicePublicId,
+    handler: refreshSnapshot,
   });
 
   const position = useMemo(() => {

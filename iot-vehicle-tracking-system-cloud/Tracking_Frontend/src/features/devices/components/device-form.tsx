@@ -119,7 +119,7 @@ export const DeviceForm = ({
               name="deviceId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Device ID</FormLabel>
+                  <FormLabel>Mã thiết bị</FormLabel>
                   <FormControl>
                     <Input {...field} disabled={!!defaultValues?.id} />
                   </FormControl>

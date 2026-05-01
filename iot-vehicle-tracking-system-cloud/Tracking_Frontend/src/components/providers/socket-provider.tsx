@@ -1,86 +1,203 @@
 'use client';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { io, type Socket } from 'socket.io-client';
 import { useAuthStore } from '@/lib/stores/auth-store';
+
+export type RealtimeNamespace = 'dashboard' | 'devices' | 'notifications' | 'exports' | 'firmware';
 type RealtimeStatus = 'disconnected' | 'connecting' | 'connected';
+type NamespaceSockets = Record<RealtimeNamespace, Socket | null>;
+type NamespaceStatuses = Record<RealtimeNamespace, RealtimeStatus>;
+
 interface RealtimeContextValue {
   socket: Socket | null;
+  sockets: NamespaceSockets;
   status: RealtimeStatus;
+  statuses: NamespaceStatuses;
+  getSocket: (namespace?: RealtimeNamespace) => Socket | null;
   joinDeviceRoom: (deviceId: string | number) => void;
   leaveDeviceRoom: (deviceId: string | number) => void;
 }
+
+const namespaces: RealtimeNamespace[] = ['dashboard', 'devices', 'notifications', 'exports', 'firmware'];
+const adminNamespaces = new Set<RealtimeNamespace>(['firmware']);
+const adminRoles = new Set(['root', 'admin']);
+const emptySockets = Object.fromEntries(
+  namespaces.map((namespace) => [namespace, null]),
+) as NamespaceSockets;
+const disconnectedStatuses = Object.fromEntries(
+  namespaces.map((namespace) => [namespace, 'disconnected']),
+) as NamespaceStatuses;
+
 const SocketContext = createContext<RealtimeContextValue | null>(null);
+
+const buildNamespaceUrl = (baseUrl: string, namespace: RealtimeNamespace): string =>
+  `${baseUrl.replace(/\/$/, '')}/${namespace}`;
+
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [status, setStatus] = useState<RealtimeStatus>('disconnected');
+  const [sockets, setSockets] = useState<NamespaceSockets>(emptySockets);
+  const [statuses, setStatuses] = useState<NamespaceStatuses>(disconnectedStatuses);
+  const joinedDeviceIdsRef = useRef<Map<string, number>>(new Map());
   const token = useAuthStore((s) => s.token);
+  const role = useAuthStore((s) => s.user?.role);
+  const isAdmin = adminRoles.has(role ?? 'viewer');
+  const activeNamespaces = useMemo(
+    () => namespaces.filter((namespace) => !adminNamespaces.has(namespace) || isAdmin),
+    [isAdmin],
+  );
+
   useEffect(() => {
     if (!token) {
-      setSocket(null);
-      setStatus('disconnected');
+      joinedDeviceIdsRef.current.clear();
+      setSockets(emptySockets);
+      setStatuses(disconnectedStatuses);
       return;
     }
-    setStatus('connecting');
+
+    setStatuses(
+      Object.fromEntries(
+        namespaces.map((namespace) => [
+          namespace,
+          activeNamespaces.includes(namespace) ? 'connecting' : 'disconnected',
+        ]),
+      ) as NamespaceStatuses,
+    );
+
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
     const wsPath = process.env.NEXT_PUBLIC_WS_PATH || '/ws';
-    const s = io(wsUrl, {
-      auth: { token },
-      path: wsPath,
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 30000,
+    const nextSockets: NamespaceSockets = { ...emptySockets };
+
+    activeNamespaces.forEach((namespace) => {
+      nextSockets[namespace] = io(buildNamespaceUrl(wsUrl, namespace), {
+        auth: { token },
+        path: wsPath,
+        transports: ['websocket'],
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 30000,
+      });
     });
-    const handleConnect = () => setStatus('connected');
-    const handleDisconnect = () => setStatus('disconnected');
-    const handleConnectError = () => setStatus('disconnected');
-    s.on('connect', handleConnect);
-    s.on('disconnect', handleDisconnect);
-    s.on('connect_error', handleConnectError);
-    setSocket(s);
+
+    activeNamespaces.forEach((namespace) => {
+      const socket = nextSockets[namespace];
+      if (!socket) {
+        return;
+      }
+
+      socket.on('connect', () => {
+        setStatuses((current) => ({ ...current, [namespace]: 'connected' }));
+        if (namespace === 'devices') {
+          joinedDeviceIdsRef.current.forEach((_count, deviceId) => {
+            socket.emit('device:join', { deviceId });
+          });
+        }
+      });
+      socket.on('disconnect', () => {
+        setStatuses((current) => ({ ...current, [namespace]: 'disconnected' }));
+      });
+      socket.on('connect_error', () => {
+        setStatuses((current) => ({ ...current, [namespace]: 'disconnected' }));
+      });
+    });
+
+    setSockets(nextSockets);
+
     return () => {
-      s.off('connect', handleConnect);
-      s.off('disconnect', handleDisconnect);
-      s.off('connect_error', handleConnectError);
-      s.disconnect();
-      setStatus('disconnected');
+      activeNamespaces.forEach((namespace) => {
+        nextSockets[namespace]?.removeAllListeners();
+        nextSockets[namespace]?.disconnect();
+      });
+      setSockets(emptySockets);
+      setStatuses(disconnectedStatuses);
     };
-  }, [token]);
+  }, [activeNamespaces, token]);
+
+  const getSocket = useCallback(
+    (namespace: RealtimeNamespace = 'dashboard') => sockets[namespace] ?? null,
+    [sockets],
+  );
+
   const joinDeviceRoom = useCallback(
     (deviceId: string | number) => {
-      if (!socket || !deviceId) {
+      if (!deviceId) {
         return;
       }
-      socket.emit('device:join', { deviceId: String(deviceId) });
+      const normalizedDeviceId = String(deviceId).trim();
+      if (!normalizedDeviceId) {
+        return;
+      }
+      const currentCount = joinedDeviceIdsRef.current.get(normalizedDeviceId) ?? 0;
+      joinedDeviceIdsRef.current.set(normalizedDeviceId, currentCount + 1);
+      if (currentCount === 0) {
+        getSocket('devices')?.emit('device:join', { deviceId: normalizedDeviceId });
+      }
     },
-    [socket],
+    [getSocket],
   );
+
   const leaveDeviceRoom = useCallback(
     (deviceId: string | number) => {
-      if (!socket || !deviceId) {
+      if (!deviceId) {
         return;
       }
-      socket.emit('device:leave', { deviceId: String(deviceId) });
+      const normalizedDeviceId = String(deviceId).trim();
+      if (!normalizedDeviceId) {
+        return;
+      }
+      const currentCount = joinedDeviceIdsRef.current.get(normalizedDeviceId) ?? 0;
+      if (currentCount > 1) {
+        joinedDeviceIdsRef.current.set(normalizedDeviceId, currentCount - 1);
+        return;
+      }
+      joinedDeviceIdsRef.current.delete(normalizedDeviceId);
+      getSocket('devices')?.emit('device:leave', { deviceId: normalizedDeviceId });
     },
-    [socket],
+    [getSocket],
   );
+
+  const status = statuses.dashboard;
   const value = useMemo<RealtimeContextValue>(
     () => ({
-      socket,
+      socket: sockets.dashboard,
+      sockets,
       status,
+      statuses,
+      getSocket,
       joinDeviceRoom,
       leaveDeviceRoom,
     }),
-    [socket, status, joinDeviceRoom, leaveDeviceRoom],
+    [sockets, status, statuses, getSocket, joinDeviceRoom, leaveDeviceRoom],
   );
+
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
 };
-export const useSocket = () => useContext(SocketContext)?.socket ?? null;
+
+export const useSocket = (namespace: RealtimeNamespace = 'dashboard') =>
+  useContext(SocketContext)?.getSocket(namespace) ?? null;
+
 export const useRealtimeContext = (): RealtimeContextValue => {
   const context = useContext(SocketContext);
   if (!context) {
     throw new Error('useRealtimeContext must be used within SocketProvider');
   }
   return context;
+};
+
+export const useDeviceRoom = (
+  deviceId: string | number | null | undefined,
+  enabled = true,
+) => {
+  const { joinDeviceRoom, leaveDeviceRoom } = useRealtimeContext();
+
+  useEffect(() => {
+    if (!enabled || !deviceId) {
+      return;
+    }
+
+    joinDeviceRoom(deviceId);
+    return () => {
+      leaveDeviceRoom(deviceId);
+    };
+  }, [deviceId, enabled, joinDeviceRoom, leaveDeviceRoom]);
 };

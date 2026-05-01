@@ -10,6 +10,7 @@ idf_component_register(
         "include"
     REQUIRES
         ${BLE_STACK_COMPONENT}
+        domain-telemetry
         log
         shared-kernel
 )

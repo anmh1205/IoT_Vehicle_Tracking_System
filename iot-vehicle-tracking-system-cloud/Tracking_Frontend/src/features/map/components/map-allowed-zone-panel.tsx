@@ -250,7 +250,7 @@ export const MapAllowedZonePanel = ({
     ) {
       notificationUtils.error(
         'Không thể lưu vùng',
-        'Các đơn vị hành chính đã chọn chưa resolve được geometry để preview và lưu.',
+        'Các đơn vị hành chính đã chọn chưa phân giải được dữ liệu hình học để xem trước và lưu.',
       );
       return;
     }
@@ -302,7 +302,7 @@ export const MapAllowedZonePanel = ({
               {vehicleLabel ?? vehicleId ?? 'Phương tiện chưa xác định'} · mỗi xe chỉ có một vùng đang hoạt động.
             </p>
           </div>
-          <Button size="icon" variant="ghost" onClick={onClose} aria-label="Đóng panel vùng">
+          <Button size="icon" variant="ghost" onClick={onClose} aria-label="Đóng khung vùng">
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -498,7 +498,7 @@ export const MapAllowedZonePanel = ({
                 />
 
                 <div className="rounded-2xl border bg-muted/10 p-4 text-sm">
-                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Preview hợp vùng</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Xem trước hợp vùng</p>
                   <p className="mt-1 font-medium">
                     {boundarySelections.length > 0
                       ? describeBoundarySelections(boundarySelections)
@@ -506,10 +506,10 @@ export const MapAllowedZonePanel = ({
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {resolvedBoundaryQuery.isFetching
-                      ? 'Đang resolve geometry từ cache địa giới...'
+                      ? 'Đang phân giải dữ liệu hình học từ bộ nhớ đệm địa giới...'
                       : resolvedBoundaryGeometry
-                        ? 'Geometry đã sẵn sàng để preview và lưu.'
-                        : 'Chưa có geometry để preview.'}
+                        ? 'Dữ liệu hình học đã sẵn sàng để xem trước và lưu.'
+                        : 'Chưa có dữ liệu hình học để xem trước.'}
                   </p>
                   {form.formState.errors.boundarySelections?.message ? (
                     <p className="mt-2 text-xs text-destructive">

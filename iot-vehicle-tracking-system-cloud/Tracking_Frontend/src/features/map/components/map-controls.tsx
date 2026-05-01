@@ -137,7 +137,7 @@ export const MapControls = ({
               className="h-8 w-8 rounded-xl"
               aria-pressed={isZoneEditMode}
               aria-label={
-                isZoneEditMode ? 'Đóng panel vùng' : 'Mở panel vùng'
+                isZoneEditMode ? 'Đóng khung vùng' : 'Mở khung vùng'
               }
               title="Vùng"
             >

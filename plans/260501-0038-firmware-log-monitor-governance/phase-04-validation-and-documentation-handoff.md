@@ -10,8 +10,8 @@
 ## Overview
 
 - Priority: P2
-- Status: Pending
-- Goal: validate compile/static health, scan firmware-wide log compliance, and document logging policy after implementation. This phase is plan-only now; commands listed must be run by implementation/test agents later.
+- Status: Complete
+- Goal: validate compile/static health, scan firmware-wide log compliance, and document logging policy after implementation. Build/static/docs handoff completed; hardware runtime scenarios remain recommended.
 
 ## Key Insights
 
@@ -79,13 +79,13 @@
 
 ## Todo list
 
-- [ ] Run `idf.py reconfigure` after implementation.
-- [ ] Run `idf.py build` after implementation.
-- [ ] Run `idf.py size` after implementation.
-- [ ] Review forbidden fields in `ESP_LOG*` calls.
+- [x] Run `idf.py reconfigure` after implementation.
+- [x] Run `idf.py build` after implementation.
+- [x] Run `idf.py size` after implementation.
+- [x] Review forbidden fields in `ESP_LOG*` calls.
 - [ ] Execute runtime scenario checklist or simulator/bench equivalent.
-- [ ] Update docs/changelog after validation.
-- [ ] Request code review after tests pass.
+- [x] Update docs/changelog after validation.
+- [x] Request code review after tests pass.
 
 ## Success Criteria
 

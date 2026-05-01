@@ -17,9 +17,14 @@ export const useRealtimeEvents = () => {
     void requestNotificationPermission();
   }, []);
 
+  const refreshNotifications = useCallback(() => {
+    queryInvalidation.notifications.all(queryClient);
+    void queryClient.invalidateQueries({ queryKey: ['notification-stats'] });
+  }, [queryClient]);
+
   const onAlert = useCallback(
     (payload: any) => {
-      queryInvalidation.notifications.all(queryClient);
+      refreshNotifications();
       void queryClient.invalidateQueries({ queryKey: ['alerts'] });
       void queryClient.invalidateQueries({ queryKey: ['violations'] });
 
@@ -35,14 +40,14 @@ export const useRealtimeEvents = () => {
       }
       notificationUtils.info(payload?.title ?? 'Cảnh báo mới');
     },
-    [queryClient],
+    [queryClient, refreshNotifications],
   );
 
   const onExportReady = useCallback(() => {
     queryInvalidation.exports.all(queryClient);
-    queryInvalidation.notifications.all(queryClient);
+    refreshNotifications();
     notificationUtils.success('Xuất dữ liệu hoàn tất');
-  }, [queryClient]);
+  }, [queryClient, refreshNotifications]);
 
   const onZoneStateChanged = useCallback((payload: any) => {
     const vehicleId = payload?.vehicle_id ?? payload?.device_id ?? 'Thiết bị';
@@ -70,21 +75,12 @@ export const useRealtimeEvents = () => {
     queryInvalidation.dashboard.activity(queryClient);
   }, [queryClient]);
 
-  const onDeviceSessionChanged = useCallback(() => {
-    queryInvalidation.device.list(queryClient);
-  }, [queryClient]);
-
-  const onCommandAck = useCallback(() => {
-    queryInvalidation.device.commands(queryClient);
-  }, [queryClient]);
-
-  useRealtimeSubscription({ event: 'alert:new', handler: onAlert });
-  useRealtimeSubscription({ event: 'export:ready', handler: onExportReady });
-  useRealtimeSubscription({ event: 'zone:updated', handler: onZoneUpdated });
-  useRealtimeSubscription({ event: 'zone:state-changed', handler: onZoneStateChanged });
-  useRealtimeSubscription({ event: 'stats:update', handler: onStatsUpdated });
-  useRealtimeSubscription({ event: 'activity:new', handler: onActivityCreated });
-  useRealtimeSubscription({ event: 'device:session_start', handler: onDeviceSessionChanged });
-  useRealtimeSubscription({ event: 'device:session_end', handler: onDeviceSessionChanged });
-  useRealtimeSubscription({ event: 'command:ack', handler: onCommandAck });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'alert:new', handler: onAlert });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'notification:new', handler: refreshNotifications });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'notification:updated', handler: refreshNotifications });
+  useRealtimeSubscription({ namespace: 'exports', event: 'export:ready', handler: onExportReady });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'zone:updated', handler: onZoneUpdated });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'zone:state-changed', handler: onZoneStateChanged });
+  useRealtimeSubscription({ namespace: 'dashboard', event: 'stats:update', handler: onStatsUpdated });
+  useRealtimeSubscription({ namespace: 'dashboard', event: 'activity:new', handler: onActivityCreated });
 };

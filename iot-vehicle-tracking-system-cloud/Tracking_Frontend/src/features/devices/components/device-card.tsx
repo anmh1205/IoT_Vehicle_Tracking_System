@@ -105,7 +105,7 @@ export const DeviceCard = ({ device, onClick }: DeviceCardProps) => {
           </span>
           <span className="inline-flex items-center gap-1">
             <Clock3 className="h-3.5 w-3.5" />
-            {device.lastSeenAt ? `Cập nhật ${new Date(device.lastSeenAt).toLocaleString('vi-VN')}` : 'Chưa có telemetry'}
+            {device.lastSeenAt ? `Cập nhật ${new Date(device.lastSeenAt).toLocaleString('vi-VN')}` : 'Chưa có dữ liệu đo từ xa'}
           </span>
         </div>
 

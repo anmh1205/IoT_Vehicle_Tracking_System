@@ -10,7 +10,7 @@
 ## Overview
 
 - Priority: P2
-- Status: Pending
+- Status: Complete
 - Goal: add the smallest local mechanism for rate-limited logs and aggregate health snapshots. Avoid a new framework or shared helper in first pass.
 
 ## Key Insights
@@ -76,11 +76,11 @@
 
 ## Todo list
 
-- [ ] Use local per-module gates for repeated warnings in first pass.
-- [ ] Extend counters only for fields used by Phase 03.
-- [ ] Add snapshot location and interval constant.
-- [ ] Ensure no helper logs by itself.
-- [ ] Ensure all changes compile with ESP-IDF.
+- [x] Use local per-module gates for repeated warnings in first pass.
+- [x] Extend counters only for fields used by Phase 03.
+- [x] Add snapshot location and interval constant.
+- [x] Ensure no helper logs by itself.
+- [x] Ensure all changes compile with ESP-IDF.
 
 ## Success Criteria
 

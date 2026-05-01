@@ -11,6 +11,7 @@
 #include "state_machine_internal.h"
 #include "state_runtime_context.h"
 #include "state_wake_prelude.h"
+#include "telemetry_counters.h"
 #include "util.h"
 
 /**
@@ -148,8 +149,8 @@ static void state_publish_via_pipeline(const char *log_label,
     state_machine_fill_message_id(message_id, sizeof(message_id));
     uint32_t seq_no = state_machine_next_seq_no();
 
-    ESP_LOGI(TAG,
-             "mqtt %s metadata mid=%s seq=%lu boot=%s ts=%llu",
+    ESP_LOGD(TAG,
+             "mqtt metadata topic_class=%s mid=%s seq=%lu boot=%s ts=%llu",
              log_label,
              message_id,
              (unsigned long)seq_no,
@@ -169,9 +170,11 @@ static void state_publish_via_pipeline(const char *log_label,
         return;
     }
 
-    if (tracker_mqtt_is_connected()) {
+    bool live_connected = tracker_mqtt_is_connected();
+    if (live_connected) {
         esp_err_t live_err = sender(payload);
         if (live_err == ESP_OK) {
+            telemetry_counters_inc_mqtt_publish_ok();
             cJSON_free(payload);
             if (update_raw_publish_ms) {
                 s_last_raw_publish_ms = util_uptime_ms();
@@ -179,18 +182,28 @@ static void state_publish_via_pipeline(const char *log_label,
             return;
         }
 
+        telemetry_counters_inc_mqtt_publish_fail();
         ESP_LOGW(TAG,
-                 "mqtt %s live publish failed err=%s fallback=offline_queue",
+                 "mqtt publish failed topic_class=%s err=%s seq=%lu fallback=offline_queue",
                  log_label,
-                 esp_err_to_name(live_err));
+                 esp_err_to_name(live_err),
+                 (unsigned long)seq_no);
     }
 
-    (void)offline_queue_enqueue(record_type,
-                                payload,
-                                s_telemetry.gnss.fix_valid,
-                                tracker_mqtt_is_connected(),
-                                s_time_trusted,
-                                s_event_timestamp_ms);
+    telemetry_counters_inc_mqtt_publish_fallback();
+    esp_err_t queue_err = offline_queue_enqueue(record_type,
+                                                payload,
+                                                s_telemetry.gnss.fix_valid,
+                                                live_connected,
+                                                s_time_trusted,
+                                                s_event_timestamp_ms);
+    if (queue_err != ESP_OK) {
+        ESP_LOGW(TAG,
+                 "mqtt fallback enqueue failed topic_class=%s err=%s seq=%lu",
+                 log_label,
+                 esp_err_to_name(queue_err),
+                 (unsigned long)seq_no);
+    }
     cJSON_free(payload);
     if (update_raw_publish_ms) {
         s_last_raw_publish_ms = util_uptime_ms();

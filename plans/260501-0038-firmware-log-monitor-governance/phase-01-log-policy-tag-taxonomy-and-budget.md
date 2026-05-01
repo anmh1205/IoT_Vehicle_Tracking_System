@@ -10,7 +10,7 @@
 ## Overview
 
 - Priority: P2
-- Status: Pending
+- Status: Complete
 - Goal: define the concrete firmware-wide logging contract before touching code. Decide tags, levels, field format, forbidden fields, and per-module log budget.
 
 ## Key Insights
@@ -63,7 +63,7 @@
 - Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/domain-storage/src/offline_queue.c` — define queue/replay budget.
 - Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/app-core/src/state_publish_pipeline.c` — demote per-publish metadata.
 - Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/adapter-ble-obd-nimble/src/ble_obd.c` — define OBD scan/quality log budget.
-- Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/domain-ota/src/util_ota_http.c` — add OTA HTTP lifecycle events.
+- Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/domain-ota/src/util_ota_update.c` — add OTA HTTP lifecycle events.
 - Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/adapter-mqtt-sim7600-at/src/mqtt_publish.c` — add publish attribution fields.
 - Create: none in this phase.
 - Delete: none.
@@ -87,10 +87,10 @@
 
 ## Todo list
 
-- [ ] Approve tag taxonomy and levels.
-- [ ] Approve forbidden-field list.
-- [ ] Approve initial log budgets per hotspot.
-- [ ] Decide what remains INFO in release build.
+- [x] Approve tag taxonomy and levels.
+- [x] Approve forbidden-field list.
+- [x] Approve initial log budgets per hotspot.
+- [x] Decide what remains INFO in release build.
 
 ## Success Criteria
 

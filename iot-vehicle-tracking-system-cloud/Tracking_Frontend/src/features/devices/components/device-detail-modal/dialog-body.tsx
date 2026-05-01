@@ -35,7 +35,7 @@ import { useDeviceDetailModal } from './modal-context';
 const TELEMETRY_STATE_META = {
   healthy: { label: 'Đúng chu kỳ', description: 'Thiết bị đang gửi dữ liệu gần sát chu kỳ đã cấu hình.', variant: 'default' as const },
   warning: { label: 'Hơi chậm', description: 'Thiết bị vẫn đang gửi nhưng nhịp thực tế chậm hơn mức mong đợi.', variant: 'secondary' as const },
-  stale: { label: 'Trễ rõ rệt', description: 'Telemetry đã cũ, nên kiểm tra lại kết nối hoặc tín hiệu GPS.', variant: 'outline' as const },
+  stale: { label: 'Trễ rõ rệt', description: 'Dữ liệu đo từ xa đã cũ, nên kiểm tra lại kết nối hoặc tín hiệu GPS.', variant: 'outline' as const },
   offline: { label: 'Mất tín hiệu', description: 'Thiết bị đang vượt ngưỡng mất tín hiệu theo cấu hình hiện tại.', variant: 'destructive' as const },
   unknown: { label: 'Chưa đủ dữ liệu', description: 'Chưa có đủ mốc thời gian để đánh giá nhịp gửi hiện tại.', variant: 'outline' as const },
 };
@@ -79,7 +79,7 @@ export const DeviceDetailDialogBody = () => {
               <TooltipProvider delayDuration={120}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-muted-foreground/40 text-muted-foreground transition-colors hover:text-foreground" aria-label="Thông tin trạng thái telemetry">
+                    <button type="button" className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-muted-foreground/40 text-muted-foreground transition-colors hover:text-foreground" aria-label="Thông tin trạng thái dữ liệu đo từ xa">
                       <Info className="h-3 w-3" />
                     </button>
                   </TooltipTrigger>

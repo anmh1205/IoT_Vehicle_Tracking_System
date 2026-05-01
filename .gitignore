@@ -64,3 +64,4 @@ logs/security/
 .codex/skills/vps-control/keys/
 .playwright-mcp/
 resources/reports/db-sync/**/*.sql
+/iot-vehicle-tracking-system-cloud/Tracking_Backend/coverage

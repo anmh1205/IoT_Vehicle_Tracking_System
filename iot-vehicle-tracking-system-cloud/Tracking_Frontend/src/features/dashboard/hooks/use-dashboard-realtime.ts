@@ -11,14 +11,17 @@ export const useDashboardRealtime = () => {
     queryInvalidation.dashboard.activity(queryClient);
   }, [queryClient]);
   useRealtimeSubscription({
+    namespace: 'dashboard',
     event: 'stats:update',
     handler: refreshStats,
   });
   useRealtimeSubscription({
+    namespace: 'dashboard',
     event: 'alert:new',
     handler: refreshActivity,
   });
   useRealtimeSubscription({
+    namespace: 'dashboard',
     event: 'activity:new',
     handler: refreshActivity,
   });

@@ -129,7 +129,7 @@ const resolveObdHealthState = (snapshot: DiagnosticsSnapshot | null): ObdHealthS
 
 const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[] => {
   if (!snapshot) {
-    return ['Chưa có snapshot OBD. Hãy kết nối adapter rồi gửi telemetry để modal phân tích.'];
+    return ['Chưa có ảnh chụp OBD. Hãy kết nối bộ chuyển đổi rồi gửi dữ liệu đo từ xa để màn hình phân tích.'];
   }
 
   const recommendations: string[] = [];
@@ -138,10 +138,10 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
   const permanentDtc = snapshot.dtcPermanent ?? [];
 
   if (snapshot.bleConnected === false || snapshot.elmReady === false) {
-    recommendations.push('Kiểm tra adapter OBD BLE, nguồn cổng OBD và trạng thái wakeup của thiết bị.');
+    recommendations.push('Kiểm tra bộ chuyển đổi OBD BLE, nguồn cổng OBD và trạng thái đánh thức của thiết bị.');
   }
   if (snapshot.milOn === true) {
-    recommendations.push('MIL đang bật. Nên kiểm tra ngay DTC stored và pending để xác định nguyên nhân gốc.');
+    recommendations.push('MIL đang bật. Nên kiểm tra ngay DTC đã lưu và DTC chờ xác nhận để xác định nguyên nhân gốc.');
   }
   if (storedDtc.length > 0) {
     recommendations.push(`DTC đang lưu: ${storedDtc.join(', ')}.`);
@@ -153,7 +153,7 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
     recommendations.push(`DTC thường trực: ${permanentDtc.join(', ')}.`);
   }
   if (snapshot.ecuState === 'stopped') {
-    recommendations.push('ECU đang ở trạng thái dừng. Cần bật ignition hoặc đánh thức bus OBD trước khi chờ PID thời gian thực.');
+    recommendations.push('ECU đang ở trạng thái dừng. Cần bật khóa điện hoặc đánh thức bus OBD trước khi chờ PID thời gian thực.');
   }
   if (snapshot.ecuState === 'searching' || snapshot.ecuState === 'no_data') {
     recommendations.push('OBD đã nối nhưng ECU chưa trả PID hợp lệ. Kiểm tra giao thức xe và thứ tự wakeup.');
@@ -178,7 +178,7 @@ const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[]
 
   return recommendations.length > 0
     ? recommendations.slice(0, 3)
-    : ['OBD đang ổn định. Tiếp tục theo dõi định kỳ trong modal thiết bị.'];
+    : ['OBD đang ổn định. Tiếp tục theo dõi định kỳ trong màn hình thiết bị.'];
 };
 
 const InfoMatrixCard = ({
@@ -356,7 +356,7 @@ export const OverviewTab = () => {
       {
         label: 'Bản tin gần nhất',
         value: latestTelemetryTimestamp ? formatDateTime(latestTelemetryTimestamp) : '-',
-        note: latestTelemetryTimestamp ? formatRelative(latestTelemetryTimestamp) : 'Chưa có telemetry.',
+        note: latestTelemetryTimestamp ? formatRelative(latestTelemetryTimestamp) : 'Chưa có dữ liệu đo từ xa.',
       },
     ],
     [
@@ -397,7 +397,7 @@ export const OverviewTab = () => {
         diagnosticsSnapshot.bleConnected === true ? 'BLE ổn' : diagnosticsSnapshot.bleConnected === false ? 'BLE ngắt' : 'BLE chưa rõ',
         diagnosticsSnapshot.elmReady === true ? 'ELM sẵn sàng' : diagnosticsSnapshot.elmReady === false ? 'ELM chưa sẵn sàng' : 'ELM chưa rõ',
       ].join(' · ')
-    : 'Chưa có snapshot OBD để đánh giá kết nối.';
+    : 'Chưa có ảnh chụp OBD để đánh giá kết nối.';
 
   const obdRows: MatrixCell[][] = [
     [
@@ -443,13 +443,13 @@ export const OverviewTab = () => {
     [
       {
         label: 'DTC hiện có',
-        value: `Stored ${storedDtc.length} · Pending ${pendingDtc.length} · Permanent ${permanentDtc.length}`,
+        value: `Đã lưu ${storedDtc.length} · Chờ xác nhận ${pendingDtc.length} · Thường trực ${permanentDtc.length}`,
         note:
           storedDtc.length + pendingDtc.length + permanentDtc.length > 0
             ? [
-                storedDtc.length > 0 ? `Stored: ${storedDtc.join(', ')}` : '',
-                pendingDtc.length > 0 ? `Pending: ${pendingDtc.join(', ')}` : '',
-                permanentDtc.length > 0 ? `Permanent: ${permanentDtc.join(', ')}` : '',
+                storedDtc.length > 0 ? `Đã lưu: ${storedDtc.join(', ')}` : '',
+                pendingDtc.length > 0 ? `Chờ xác nhận: ${pendingDtc.join(', ')}` : '',
+                permanentDtc.length > 0 ? `Thường trực: ${permanentDtc.join(', ')}` : '',
               ]
                 .filter(Boolean)
                 .join(' · ')
@@ -464,7 +464,7 @@ export const OverviewTab = () => {
           diagnosticsSnapshot?.readinessIncomplete && diagnosticsSnapshot.readinessIncomplete.length > 0
             ? diagnosticsSnapshot.readinessIncomplete.join(', ')
             : '-',
-        note: 'Dùng để đánh giá readiness của ECU trước khi kết luận trạng thái OBD.',
+        note: 'Dùng để đánh giá trạng thái sẵn sàng của ECU trước khi kết luận trạng thái OBD.',
         colSpan: 2,
       },
     ],
@@ -502,7 +502,7 @@ export const OverviewTab = () => {
           className="xl:w-[31%] xl:flex-none"
         />
         <InfoMatrixCard
-          title="Tình trạng telemetry"
+          title="Tình trạng dữ liệu đo từ xa"
           rows={telemetryRows}
           badge={<Badge variant={telemetryState.variant}>{telemetryState.label}</Badge>}
           className="xl:w-[31%] xl:flex-none"

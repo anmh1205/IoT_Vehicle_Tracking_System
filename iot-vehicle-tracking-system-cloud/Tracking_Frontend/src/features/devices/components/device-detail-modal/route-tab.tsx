@@ -225,7 +225,7 @@ export const RouteTab = () => {
   const replayMax = Math.max(replayPoints.length - 1, 0);
   const replaySummary = replayPoints.length > 0
     ? `${currentPointLabel}${currentPoint?.timestamp ? ` · ${formatDateTime(currentPoint.timestamp, 'HH:mm:ss dd/MM')}` : ''}`
-    : 'Chưa có waypoint để replay';
+    : 'Chưa có mốc GPS để phát lại';
   const pointTimeLabel = infoPoint?.timestamp ? formatDateTime(infoPoint.timestamp, 'HH:mm:ss dd/MM') : '-';
   const pointCoordinateLabel = infoPoint
     ? formatCoordinateLabel(infoPoint.latitude, infoPoint.longitude, 6)
@@ -249,7 +249,7 @@ export const RouteTab = () => {
     { label: 'Tọa độ', value: pointCoordinateLabel },
     { label: 'Tốc độ', value: pointSpeedLabel },
     { label: 'Bao phủ', value: coverageLabel },
-    { label: 'Trạng thái', value: replayPoints.length > 0 ? replaySummary : 'Chưa có waypoint để replay' },
+    { label: 'Trạng thái', value: replayPoints.length > 0 ? replaySummary : 'Chưa có mốc GPS để phát lại' },
   ];
 
   const handlePlayPause = () => {
@@ -441,7 +441,7 @@ export const RouteTab = () => {
 
       <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border bg-background">
         <div className="border-b px-4 py-3">
-          <p className="text-sm font-semibold">Bản đồ hoạt động và replay lộ trình</p>
+          <p className="text-sm font-semibold">Bản đồ hoạt động và phát lại lộ trình</p>
         </div>
 
         <div className="min-h-0 flex-1 p-4">
@@ -467,17 +467,17 @@ export const RouteTab = () => {
                 <div className="flex items-center justify-between border-b px-2 py-2">
                   {!isReplayPanelCollapsed ? (
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      Replay
+                      Phát lại
                     </p>
                   ) : (
-                    <span className="sr-only">Replay</span>
+                    <span className="sr-only">Phát lại</span>
                   )}
                   <Button
                     type="button"
                     size="sm"
                     variant="ghost"
                     className="h-7 w-7 p-0"
-                    aria-label={isReplayPanelCollapsed ? 'Mở rộng bảng replay' : 'Thu gọn bảng replay'}
+                    aria-label={isReplayPanelCollapsed ? 'Mở rộng bảng phát lại' : 'Thu gọn bảng phát lại'}
                     onClick={() => setIsReplayPanelCollapsed((value) => !value)}
                   >
                     {isReplayPanelCollapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -492,7 +492,7 @@ export const RouteTab = () => {
                         size="sm"
                         variant="outline"
                         className="h-7 px-1"
-                        aria-label="Về đầu replay"
+                        aria-label="Về đầu phần phát lại"
                         onClick={() => {
                           hasStartedReplayRef.current = true;
                           setCursor(0);
@@ -507,7 +507,7 @@ export const RouteTab = () => {
                         size="sm"
                         variant={isPlaying ? 'secondary' : 'default'}
                         className="h-7 px-1"
-                        aria-label={isPlaying ? 'Tạm dừng replay' : 'Phát replay'}
+                        aria-label={isPlaying ? 'Tạm dừng phát lại' : 'Phát lại'}
                         onClick={handlePlayPause}
                         disabled={replayPoints.length <= 1}
                       >
@@ -518,7 +518,7 @@ export const RouteTab = () => {
                         size="sm"
                         variant="outline"
                         className="h-7 px-1"
-                        aria-label="Về cuối replay"
+                        aria-label="Về cuối phần phát lại"
                         onClick={() => {
                           hasStartedReplayRef.current = true;
                           setCursor(replayMax);
@@ -569,7 +569,7 @@ export const RouteTab = () => {
                 ) : (
                   <div className="flex flex-1 items-center justify-center px-1">
                     <p className="-rotate-90 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      Replay
+                      Phát lại
                     </p>
                   </div>
                 )}

@@ -9,7 +9,7 @@
 ## Overview
 
 - Priority: P2
-- Status: Pending
+- Status: Complete
 - Goal: add/fix logs in the highest-value modules first, then audit the whole firmware for standard compliance, reduce spam, keep operational visibility.
 
 ## Key Insights
@@ -53,7 +53,7 @@
 - Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/app-core/src/state_publish_pipeline.c` — demote metadata success log to DEBUG or gated INFO; add publish fallback counter and topic/class field.
 - Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/adapter-mqtt-sim7600-at/src/mqtt_publish.c` — enrich error logs with topic/class/stage/duration where cheap.
 - Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/adapter-ble-obd-nimble/src/ble_obd.c` — summarize scan/connect/read quality; rate-limit malformed response warnings.
-- Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/domain-ota/src/util_ota_http.c` — add OTA HTTP lifecycle and failure reason logs.
+- Modify: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/domain-ota/src/util_ota_update.c` — add OTA HTTP lifecycle and failure reason logs.
 - Modify if counters extended: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/domain-telemetry/include/telemetry_counters.h`.
 - Modify if counters extended: `E:/anmh1205/IoT_Vehicle_Tracking_System/iot-vehicle-tracking-system-firmware/components/domain-telemetry/src/telemetry_counters.c`.
 - Create: none for shared rate gate in first implementation pass; use local per-module gates.
@@ -99,14 +99,14 @@
 
 ## Todo list
 
-- [ ] State transition reason logs implemented.
-- [ ] LTE retry/recovery logs rate-gated.
-- [ ] Offline queue summaries replace release per-record chatter.
-- [ ] MQTT publish successes counted, failures attributed.
-- [ ] OBD quality metrics summarized.
-- [ ] OTA HTTP lifecycle logs added.
-- [ ] Firmware-wide `ESP_LOG*` audit completed.
-- [ ] Forbidden fields reviewed.
+- [x] State transition reason logs implemented.
+- [x] LTE retry/recovery logs rate-gated.
+- [x] Offline queue summaries replace release per-record chatter.
+- [x] MQTT publish successes counted, failures attributed.
+- [x] OBD quality metrics summarized.
+- [x] OTA HTTP lifecycle logs added.
+- [x] Firmware-wide `ESP_LOG*` audit completed.
+- [x] Forbidden fields reviewed.
 
 ## Success Criteria
 

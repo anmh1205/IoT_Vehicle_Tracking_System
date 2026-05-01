@@ -43,6 +43,13 @@ The canonical public MQTT domain is `mqtt.thingdock.dev`, served through `tracki
 - TLS termination for MQTTS happens at EMQX (NPM forwards raw TCP on 8883 without TLS interception).
 - EMQX is internal-only; it does not expose any host ports directly.
 
+## Realtime WebSocket Architecture
+- The backend exposes namespace-specific Socket.IO channels for `/dashboard`, `/devices`, `/notifications`, `/exports`, and `/firmware`, all authenticated through the shared socket auth middleware.
+- Firmware and system-admin realtime traffic is restricted to admin/root roles, while device and notification delivery is scoped through `device:{deviceId}`, `user:{userId}`, and `role:system-admin` rooms instead of namespace-wide broadcast.
+- The frontend `SocketProvider` only instantiates namespaces the current user can access, and `useDeviceRoom` keeps device-room membership reference-counted so multiple features can share one subscription safely.
+- Dashboard features now prefer event-driven cache patching and invalidation for device, trip, notification, export, firmware, simulator, and system-status updates, while snapshot fetches remain the boundary fallback for initial load, reconnect, and manual retry.
+- Backend producers emit real events for notification, export, firmware, simulator, and system-admin changes so UI surfaces stay in sync without hot-path polling.
+
 ## Integration Notes
 - No new backend contracts were added for the HTTP transport layer beyond the standardized response/error shapes.
 - Web root `/` now redirects to `/login`, while the protected dashboard shell remains under `/dashboard/*`.
@@ -68,6 +75,8 @@ The canonical public MQTT domain is `mqtt.thingdock.dev`, served through `tracki
 - Parked heartbeat wake now publishes both telemetry snapshot (`rawdata`) and runtime visibility (`status`) before returning to sleep when policy allows.
 - GNSS queries in `modem_gnss.c` now emit streak-aware observability for transport failure, parse failure, no-fix, and fix-success paths, then perform bounded self-heal repower with cooldown when failures persist.
 - The tracker state machine re-arms GNSS after LTE recovery or repeated GNSS poll failures, gating repeat re-arm attempts with cooldown to avoid modem thrash.
+- Firmware observability now uses source-side log governance instead of a central logging framework: app-core emits state transition and diagnostic health snapshots, adapters emit redacted stage/recovery/fallback events, and `domain-telemetry` counters aggregate MQTT/LTE/OBD/OTA outcomes.
+- Firmware logs intentionally expose stable trace IDs for correlation but redact transport bodies and sensitive config values, using summaries such as `response_len`, `topic_class`, `endpoint_configured`, `apn_configured`, and `fix_valid`.
 - Simulator token flow and rollback/race handling were hardened to avoid replaying legacy ingestion behavior during the cutover.
 - OTA lifecycle now uses one canonical raw state set end-to-end: `assigned`, `downloading`, `verifying`, `installing`, `rebooting`, `confirming`, `success`, `failed`, `rolled_back`; backend/frontend derive `in_progress` and `stuck_timeout` for operator grouping without mutating firmware-native raw states.
 - Backend OTA deploy now treats artifact readiness and command dispatch as explicit preconditions, and firmware download responses are hardened for device fetch semantics (binary-only headers, no session redirect dependency).

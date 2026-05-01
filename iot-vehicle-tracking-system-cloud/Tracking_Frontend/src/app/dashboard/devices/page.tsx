@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AlertTriangle, Cpu, LayoutGrid, Plus, Table2 } from 'lucide-react';
 import { DataTable } from '@/components/common/data-table';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
@@ -36,10 +36,10 @@ const DevicesPage = () => {
   const isMobile = useIsMobile();
   const devicesQuery = useDevices(filters);
   const deleteMutation = useDeleteDevice();
+  const rows = useMemo(() => devicesQuery.data?.items ?? [], [devicesQuery.data?.items]);
+  const realtimeDeviceIds = useMemo(() => rows.map((device) => device.deviceId), [rows]);
 
-  useDeviceRealtime();
-
-  const rows = devicesQuery.data?.items ?? [];
+  useDeviceRealtime(realtimeDeviceIds);
   const activeViewMode: ViewMode = isMobile ? 'cards' : viewMode;
   const devicesErrorMessage = devicesQuery.isError
     ? getApiErrorMessage(

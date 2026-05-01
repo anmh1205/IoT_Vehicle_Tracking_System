@@ -110,8 +110,8 @@ export const getTripColumns = (actions: {
         </p>
         <p className="text-xs text-muted-foreground">
           {row.original.status === 'in_progress'
-            ? 'Có thể mở replay trực tiếp từ bảng'
-            : 'Dùng preview để đối chiếu map và waypoint'}
+            ? 'Có thể mở phát lại trực tiếp từ bảng'
+            : 'Dùng bản xem trước để đối chiếu bản đồ và mốc GPS'}
         </p>
       </div>
     ),

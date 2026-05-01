@@ -28,7 +28,7 @@ const SimulatorPage = () => {
   return (
     <PageContainer
       pageTitle="Trình mô phỏng"
-      pageDescription="Tạo telemetry giả lập để kiểm thử end-to-end, kiểm tra dashboard và mô phỏng hành vi thiết bị"
+      pageDescription="Tạo dữ liệu đo từ xa giả lập để kiểm thử xuyên suốt, kiểm tra bảng điều khiển và mô phỏng hành vi thiết bị"
     >
       <Card>
         <CardHeader>
@@ -37,7 +37,7 @@ const SimulatorPage = () => {
         <CardContent className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
           <p>1. Chọn thiết bị hoặc một nhóm thiết bị cần phát dữ liệu giả lập.</p>
           <p>2. Cấu hình biên độ cảm biến, vị trí và chu kỳ phát để mô phỏng đúng kịch bản kiểm thử.</p>
-          <p>3. Theo dõi preview, lịch sử đã gửi và trạng thái chạy ở panel bên phải.</p>
+          <p>3. Theo dõi bản xem trước, lịch sử đã gửi và trạng thái chạy ở khung bên phải.</p>
         </CardContent>
       </Card>
 

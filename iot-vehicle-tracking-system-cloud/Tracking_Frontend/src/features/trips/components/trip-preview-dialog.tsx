@@ -75,10 +75,13 @@ export const TripPreviewDialog = ({
     queryKey: ['trip-preview-telemetry', tripId, interval],
     queryFn: () => tripServices.getTelemetry(Number(tripId), { interval }),
     enabled: open && Boolean(tripId),
-    refetchInterval: isInProgress ? 30000 : false,
   });
 
-  useTripLiveTracking(Number(tripId ?? 0), Boolean(tripId) && isInProgress);
+  useTripLiveTracking(
+    Number(tripId ?? 0),
+    Boolean(tripId) && isInProgress,
+    tripQuery.data?.deviceId ?? null,
+  );
 
   const points = useMemo(() => telemetryQuery.data?.points ?? [], [telemetryQuery.data?.points]);
   const summary = telemetryQuery.data?.summary;
@@ -193,8 +196,8 @@ export const TripPreviewDialog = ({
 
               {telemetryQuery.isError ? (
                 <EmptyState
-                  title="Không thể tải replay"
-                  description="Telemetry hành trình hiện chưa sẵn sàng."
+                  title="Không thể tải phần phát lại"
+                  description="Dữ liệu đo từ xa của hành trình hiện chưa sẵn sàng."
                   action={{ label: 'Thử lại', onClick: () => void telemetryQuery.refetch() }}
                 />
               ) : (
@@ -202,8 +205,8 @@ export const TripPreviewDialog = ({
                   <div className="rounded-2xl border bg-muted/10 p-4">
                     {points.length === 0 ? (
                       <EmptyState
-                        title="Chưa có dữ liệu replay"
-                        description="Chuyến đi chưa ghi nhận đủ waypoint để phát lại hành trình."
+                        title="Chưa có dữ liệu phát lại"
+                        description="Chuyến đi chưa ghi nhận đủ mốc GPS để phát lại hành trình."
                       />
                     ) : (
                       <TripReplayControls

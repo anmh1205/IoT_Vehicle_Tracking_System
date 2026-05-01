@@ -477,7 +477,7 @@ static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd
         return false;
     }
     if (!cJSON_IsString(url) || util_string_empty(url->valuestring)) {
-        ESP_LOGW(TAG, "ota_update invalid url");
+        ESP_LOGW(TAG, "ota_update invalid request_target");
         return false;
     }
     if (!cJSON_IsString(sha256) || !command_is_hex_sha256(sha256->valuestring)) {
@@ -488,7 +488,7 @@ static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd
     uint32_t parsed_size = 0U;
     if (!command_parse_u32_positive(size, &parsed_size)) {
         if (cJSON_IsString(size) && !util_string_empty(size->valuestring)) {
-            ESP_LOGW(TAG, "ota_update invalid size value=%s", size->valuestring);
+            ESP_LOGW(TAG, "ota_update invalid size value_present=1");
         } else {
             ESP_LOGW(TAG, "ota_update invalid size type");
         }
@@ -504,17 +504,17 @@ static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd
         return false;
     }
     if (strlen(url->valuestring) >= TRACKER_OTA_URL_MAX_LEN) {
-        ESP_LOGW(TAG, "ota_update url too long");
+        ESP_LOGW(TAG, "ota_update request_target too long");
         return false;
     }
 
     /* OTA URL must stay on HTTPS transport. */
     if (strncmp(url->valuestring, "https://", strlen("https://")) != 0) {
-        ESP_LOGW(TAG, "ota_update url must start with https://");
+        ESP_LOGW(TAG, "ota_update request_target must start with https://");
         return false;
     }
     if (strstr(url->valuestring, "example.com") != NULL) {
-        ESP_LOGW(TAG, "ota_update url must point to a real firmware host");
+        ESP_LOGW(TAG, "ota_update request_target must point to real firmware host");
         return false;
     }
 

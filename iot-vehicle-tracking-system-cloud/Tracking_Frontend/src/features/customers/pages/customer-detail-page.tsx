@@ -88,7 +88,7 @@ const VehicleItem = ({
           'Chưa đủ dữ liệu nhận diện'}
       </p>
       <p className="text-xs text-muted-foreground">
-        {vehicle.deviceId ? `Thiết bị ${vehicle.deviceId}` : 'Chưa gắn thiết bị telemetry'}
+        {vehicle.deviceId ? `Thiết bị ${vehicle.deviceId}` : 'Chưa gắn thiết bị đo từ xa'}
       </p>
     </div>
 

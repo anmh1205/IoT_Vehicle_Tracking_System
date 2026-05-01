@@ -59,7 +59,7 @@ export const WorkspaceZonesSection = ({
           <p className="leading-6">
             {linkedVehicle
               ? `Thiết bị đang gắn với xe ${linkedVehicle.plateNumber ?? linkedVehicle.vehicleId ?? 'chưa định danh'}. Mọi cấu hình vùng, trạng thái trong/ngoài vùng và cảnh báo liên quan đều được quản lý tập trung từ một nguồn dữ liệu duy nhất theo xe.`
-              : 'Thiết bị chưa gắn phương tiện nên chưa thể cấu hình vùng từ workspace này. Vùng luôn thuộc về một xe cụ thể.'}
+              : 'Thiết bị chưa gắn phương tiện nên chưa thể cấu hình vùng từ không gian làm việc này. Vùng luôn thuộc về một xe cụ thể.'}
           </p>
 
           <div className="flex flex-wrap items-center gap-2">

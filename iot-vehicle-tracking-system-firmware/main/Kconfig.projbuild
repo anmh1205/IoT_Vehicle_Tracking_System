@@ -115,7 +115,7 @@ if TRACKER_FIELD_VALIDATION_MODE
 
 config TRACKER_FIELD_VALIDATION_KEEP_AWAKE
     bool "Disable sleep in field-validation mode"
-    default y
+    default n
 
 config TRACKER_FIELD_VALIDATION_FORCE_IMU_WAKE
     bool "Force IMU wake enabled in field-validation mode"

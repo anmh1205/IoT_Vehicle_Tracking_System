@@ -66,10 +66,9 @@ const TripDetailPage = ({
   const telemetryQuery = useQuery({
     queryKey: ['trip-telemetry', tripId, interval],
     queryFn: () => tripServices.getTelemetry(tripId, { interval }),
-    refetchInterval: isInProgress ? 30000 : false,
   });
 
-  useTripLiveTracking(tripId, isInProgress);
+  useTripLiveTracking(tripId, isInProgress, tripQuery.data?.deviceId ?? null);
 
   const points = useMemo(() => telemetryQuery.data?.points ?? [], [telemetryQuery.data?.points]);
   const summary = telemetryQuery.data?.summary;
@@ -104,7 +103,7 @@ const TripDetailPage = ({
   const pageTitle = tripQuery.data?.tripCode ?? `Chuyến đi #${tripId}`;
 
   return (
-    <PageContainer pageTitle={pageTitle} pageDescription="Chi tiết hành trình, timeline và replay telemetry">
+    <PageContainer pageTitle={pageTitle} pageDescription="Chi tiết hành trình, dòng thời gian và phát lại dữ liệu đo từ xa">
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Card>
           <CardHeader className="gap-4">
@@ -144,9 +143,9 @@ const TripDetailPage = ({
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
               <StatTile label="Khoảng cách" value={`${distanceKm} km`} />
               <StatTile label="Thời gian" value={formatDuration(durationMinutes * 60)} />
-              <StatTile label="TB tốc độ" value={`${avgSpeed} km/h`} />
+              <StatTile label="Tốc độ trung bình" value={`${avgSpeed} km/h`} />
               <StatTile label="Đỉnh tốc độ" value={`${maxSpeed} km/h`} />
-              <StatTile label="Waypoint" value={`${points.length}`} />
+              <StatTile label="Mốc GPS" value={`${points.length}`} />
             </div>
 
             <div className="grid gap-3 rounded-2xl border bg-muted/20 p-4 text-sm lg:grid-cols-2">
@@ -168,7 +167,7 @@ const TripDetailPage = ({
                 <p className="text-xs text-muted-foreground">Trạng thái đồng bộ</p>
                 <p className="font-medium">
                   {isInProgress
-                    ? 'Đang làm mới telemetry mỗi 30 giây'
+                    ? 'Đang làm mới dữ liệu đo từ xa theo sự kiện thiết bị'
                     : 'Đã dùng dữ liệu chốt tại thời điểm truy vấn'}
                 </p>
               </div>
@@ -178,13 +177,13 @@ const TripDetailPage = ({
 
         <Card>
           <CardHeader>
-            <CardTitle>Replay hành trình</CardTitle>
+            <CardTitle>Phát lại hành trình</CardTitle>
           </CardHeader>
           <CardContent>
             {points.length === 0 ? (
               <EmptyState
-                title="Chưa có dữ liệu replay"
-                description="Chuyến đi chưa có đủ dữ liệu telemetry để chạy lại hành trình."
+                title="Chưa có dữ liệu phát lại"
+                description="Chuyến đi chưa có đủ dữ liệu đo từ xa để chạy lại hành trình."
               />
             ) : (
               <TripReplayControls
@@ -207,7 +206,7 @@ const TripDetailPage = ({
 
       {telemetryQuery.isError ? (
         <EmptyState
-          title="Không thể tải telemetry"
+          title="Không thể tải dữ liệu đo từ xa"
           description="Dữ liệu hành trình hiện chưa sẵn sàng. Hãy thử làm mới lại sau."
           action={{ label: 'Thử lại', onClick: () => void telemetryQuery.refetch() }}
         />

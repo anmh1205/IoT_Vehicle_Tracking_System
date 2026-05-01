@@ -49,7 +49,7 @@ export const AreaGraph = ({
         <p className="text-sm text-muted-foreground">
           {totalRuntime > 0
             ? `${totalRuntime.toFixed(1)} giờ hoạt động được ghi nhận trong 30 ngày gần nhất`
-            : 'Lịch sử runtime đang được làm đầy từ tín hiệu vận hành mới'}
+            : 'Lịch sử thời gian hoạt động đang được làm đầy từ tín hiệu vận hành mới'}
         </p>
       </CardHeader>
       <CardContent className="min-w-0">
@@ -58,7 +58,7 @@ export const AreaGraph = ({
             <Skeleton className="h-full w-full" />
           ) : data.length === 0 ? (
             <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-              Chưa có dữ liệu runtime trong giai đoạn này.
+              Chưa có dữ liệu thời gian hoạt động trong giai đoạn này.
             </div>
           ) : (
             <AreaChart width={chartSize.width} height={chartSize.height} data={data}>

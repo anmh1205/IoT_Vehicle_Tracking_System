@@ -41,18 +41,21 @@ const normalizeVersion = (value: string | null | undefined) =>
     .replace(/^v/i, '')
     .toLowerCase();
 
+const terminalFirmwareStatuses = new Set(['completed', 'success', 'failed', 'stuck_timeout']);
+
 const FirmwarePage = () => {
   const access = useRoleAccess();
   const queryClient = useQueryClient();
-  const socket = useSocket();
+  const socket = useSocket('firmware');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [deployTarget, setDeployTarget] = useState<FirmwareRecord | null>(null);
 
   const firmwareQuery = useQuery({
     queryKey: ['firmware'],
     queryFn: () => firmwareServices.getList({ limit: 100 }),
+    enabled: access.canManageFirmware,
   });
-  const devicesQuery = useDevices({ limit: 100 });
+  const devicesQuery = useDevices({ limit: 100 }, access.canManageFirmware);
 
   const firmwareRows = useMemo(
     () =>
@@ -66,7 +69,7 @@ const FirmwarePage = () => {
 
   const deploymentsQuery = useQuery({
     queryKey: ['firmware-deployments-summary', firmwareKey],
-    enabled: firmwareRows.length > 0,
+    enabled: access.canManageFirmware && firmwareRows.length > 0,
     queryFn: async () => {
       const results = await Promise.allSettled(
         firmwareRows.map((item) => firmwareServices.getDeployments(item.id)),
@@ -139,21 +142,32 @@ const FirmwarePage = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const onProgress = (payload: { deviceId?: string; progress?: number }) => {
-      toast.info(`Thiết bị ${payload.deviceId ?? '--'}: ${payload.progress ?? 0}%`);
-    };
+    const onProgress = (payload: {
+      deviceId?: string;
+      progress?: number | null;
+      status?: string;
+      error?: string | null;
+    }) => {
+      const status = String(payload.status ?? '').toLowerCase();
+      const label = payload.deviceId ?? 'thiết bị';
 
-    const onComplete = (payload: { deviceId?: string }) => {
-      toast.success(`Hoàn tất cập nhật firmware cho ${payload.deviceId ?? 'thiết bị'}`);
-      void queryClient.invalidateQueries({ queryKey: ['firmware-deployments-summary'] });
+      if (status === 'completed' || status === 'success') {
+        toast.success(`Hoàn tất cập nhật firmware cho ${label}`);
+      } else if (status === 'failed' || status === 'stuck_timeout') {
+        toast.error(payload.error ?? `Cập nhật firmware thất bại cho ${label}`);
+      } else {
+        toast.info(`Thiết bị ${label}: ${payload.progress ?? 0}%`);
+      }
+
+      if (terminalFirmwareStatuses.has(status)) {
+        void queryClient.invalidateQueries({ queryKey: ['firmware-deployments-summary'] });
+      }
     };
 
     socket.on('firmware:progress', onProgress);
-    socket.on('firmware:complete', onComplete);
 
     return () => {
       socket.off('firmware:progress', onProgress);
-      socket.off('firmware:complete', onComplete);
     };
   }, [socket, queryClient]);
 
@@ -267,12 +281,12 @@ const FirmwarePage = () => {
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border bg-muted/20 p-3">
-              <p className="text-xs text-muted-foreground">Bản active trong kho</p>
+              <p className="text-xs text-muted-foreground">Bản đang kích hoạt trong kho</p>
               <p className="mt-1 font-semibold">
                 {activeFirmware ? getFirmwareDisplayVersion(activeFirmware.version) : '--'}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {activeFirmware ? `Tạo lúc ${formatDateTime(activeFirmware.createdAt)}` : 'Chưa có bản active'}
+                {activeFirmware ? `Tạo lúc ${formatDateTime(activeFirmware.createdAt)}` : 'Chưa có bản đang kích hoạt'}
               </p>
             </div>
             <div className="rounded-lg border bg-muted/20 p-3">
@@ -285,12 +299,12 @@ const FirmwarePage = () => {
               </p>
             </div>
             <div className="rounded-lg border bg-muted/20 p-3">
-              <p className="text-xs text-muted-foreground">Thiết bị đang đúng bản active</p>
+              <p className="text-xs text-muted-foreground">Thiết bị đang đúng bản đang kích hoạt</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">{devicesOnActiveFirmware}</p>
               <p className="mt-1 text-xs text-muted-foreground">Trong {devices.length} thiết bị OTA</p>
             </div>
             <div className="rounded-lg border bg-muted/20 p-3">
-              <p className="text-xs text-muted-foreground">Thiết bị lệch active</p>
+              <p className="text-xs text-muted-foreground">Thiết bị lệch bản đang kích hoạt</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">{driftCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Cần đối chiếu giữa firmware kho và firmware thực tế trên thiết bị
@@ -305,14 +319,14 @@ const FirmwarePage = () => {
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border bg-muted/20 p-3">
-              <p className="text-xs text-muted-foreground">Job OTA</p>
-              <p className="mt-1 font-semibold">{latestDeployment?.jobId ?? 'Chưa có job'}</p>
+              <p className="text-xs text-muted-foreground">Tác vụ OTA</p>
+              <p className="mt-1 font-semibold">{latestDeployment?.jobId ?? 'Chưa có tác vụ'}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Device {latestDeployment?.deviceId ?? '--'}
+                Thiết bị {latestDeployment?.deviceId ?? '--'}
               </p>
             </div>
             <div className="rounded-lg border bg-muted/20 p-3">
-              <p className="text-xs text-muted-foreground">Version đích</p>
+              <p className="text-xs text-muted-foreground">Phiên bản đích</p>
               <p className="mt-1 font-semibold">
                 {getFirmwareDisplayVersion(latestDeployment?.targetVersion)}
               </p>

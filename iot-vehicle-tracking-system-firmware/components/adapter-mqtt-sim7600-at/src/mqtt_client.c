@@ -65,10 +65,9 @@ esp_err_t tracker_mqtt_init(const config_t *cfg) {
     tracker_mqtt_register_urc_handler();
 
     ESP_LOGI(TRACKER_MQTT_TAG,
-             "MQTT init via SIM7600 host=%s tls=%d server=%s port_mode=%s fallback=%d user_set=%d command_subscribe=%d",
-             s_cfg.mqtt_host,
+             "mqtt init tls=%d endpoint_configured=%d port_mode=%s fallback=%d user_set=%d command_subscribe=%d",
              s_tls_enabled ? 1 : 0,
-             s_server_addr_primary,
+             util_string_empty(s_server_addr_primary) ? 0 : 1,
              tracker_mqtt_host_forces_tls_default_port(s_cfg.mqtt_host) ? "tls8883_primary" : "explicit",
              s_server_addr_has_fallback ? 1 : 0,
              !util_string_empty(s_cfg.mqtt_username) ? 1 : 0,

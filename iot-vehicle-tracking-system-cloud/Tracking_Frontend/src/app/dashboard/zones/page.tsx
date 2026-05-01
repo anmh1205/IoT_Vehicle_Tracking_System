@@ -174,7 +174,7 @@ const ZonesPage = () => {
   return (
     <PageContainer
       pageTitle="Vùng"
-      pageDescription="Quản lý vùng active theo từng xe, hỗ trợ cả bán kính và địa lý hành chính từ một luồng duy nhất."
+      pageDescription="Quản lý vùng đang kích hoạt theo từng xe, hỗ trợ cả bán kính và địa lý hành chính từ một luồng duy nhất."
       pageHeaderAction={
         <Button
           variant="outline"

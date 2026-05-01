@@ -19,7 +19,7 @@ import { VehicleDetailContent } from '@/features/vehicles/components/vehicle-det
 
 const MissingVehicleState = ({ vehicleDetailPath }: { vehicleDetailPath: string | null }) => (
   <div className="space-y-4">
-    <EmptyState title="Thiết bị chưa có ngữ cảnh xe" description="Thiết bị hiện chưa map sang hồ sơ phương tiện nên workspace chưa thể hiển thị summary liên kết." />
+    <EmptyState title="Thiết bị chưa có ngữ cảnh xe" description="Thiết bị hiện chưa liên kết với hồ sơ phương tiện nên không gian làm việc chưa thể hiển thị tóm tắt liên kết." />
     {vehicleDetailPath ? (
       <Button asChild variant="outline">
         <Link href={vehicleDetailPath}>

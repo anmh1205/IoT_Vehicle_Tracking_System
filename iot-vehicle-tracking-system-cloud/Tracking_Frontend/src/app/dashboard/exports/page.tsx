@@ -184,8 +184,8 @@ const ExportsPage = () => {
     queryInvalidation.exports.all(queryClient);
   }, [queryClient]);
 
-  useRealtimeSubscription({ event: 'export:progress', handler: onProgress });
-  useRealtimeSubscription({ event: 'export:ready', handler: onReady });
+  useRealtimeSubscription({ namespace: 'exports', event: 'export:progress', handler: onProgress });
+  useRealtimeSubscription({ namespace: 'exports', event: 'export:ready', handler: onReady });
 
   const rows = useMemo(() => exportsQuery.data?.items ?? [], [exportsQuery.data?.items]);
   const filteredRows = useMemo(

@@ -119,12 +119,12 @@ export const flowSteps: FlowStep[] = [
   },
   {
     icon: Wifi,
-    title: 'MQTT và hạ tầng message',
-    description: 'Bridge và broker tiếp nhận telemetry để không đứt mạch giám sát.',
+    title: 'MQTT và hạ tầng thông điệp',
+    description: 'Bridge và broker tiếp nhận dữ liệu đo từ xa để không đứt mạch giám sát.',
   },
   {
     icon: Activity,
-    title: 'Backend và rule xử lý',
+    title: 'Backend và quy tắc xử lý',
     description: 'Chuẩn hóa dữ liệu, phát cảnh báo và duy trì phiên vận hành.',
   },
   {

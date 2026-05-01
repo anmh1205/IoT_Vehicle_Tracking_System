@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDeviceRoom } from '@/components/providers/socket-provider';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { useRoleAccess } from '@/hooks/use-role-access';
 import { alertServices, localizeAlertForDisplay } from '@/lib/api/alerts';
@@ -186,7 +187,7 @@ const buildRawFeed = (params: {
                   },
                 },
               },
-              message: 'Mock diagnostics row for UI preview',
+              message: 'Dòng chẩn đoán mẫu để xem trước giao diện',
             },
           },
         ]
@@ -392,6 +393,7 @@ export const DeviceDetailModalContainer = ({
 
   const devicePublicId = detail.data?.device?.deviceId ?? device?.deviceId ?? null;
   const linkedVehicleIdentifier = detail.data?.device?.vehicleId ?? device?.vehicleId ?? null;
+  useDeviceRoom(devicePublicId, open && !!devicePublicId);
   const position = useDevicePositionSnapshot(devicePublicId, open);
   const eventLogs = useDeviceEventLogs(devicePublicId, {
     enabled: open && access.canViewSystemInfo,
@@ -477,31 +479,45 @@ export const DeviceDetailModalContainer = ({
   }, [deviceId, devicePublicId, linkedVehicleIdentifier, queryClient]);
 
   useRealtimeSubscription<any>({
+    namespace: 'devices',
     event: 'device:status',
-    enabled: open && !!deviceId,
+    enabled: open && !!devicePublicId,
     handler: (payload) => {
-      const payloadId = String(payload?.deviceId ?? '');
-      if (payloadId && payloadId !== String(detail.data?.device?.deviceId)) return;
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
       void refreshCurrent();
     },
   });
 
   useRealtimeSubscription<any>({
+    namespace: 'devices',
     event: 'device:session_start',
-    enabled: open && !!deviceId,
+    enabled: open && !!devicePublicId,
     handler: (payload) => {
-      const payloadId = String(payload?.deviceId ?? '');
-      if (payloadId && payloadId !== String(detail.data?.device?.deviceId)) return;
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
       void refreshCurrent();
     },
   });
 
   useRealtimeSubscription<any>({
+    namespace: 'devices',
     event: 'device:session_end',
-    enabled: open && !!deviceId,
+    enabled: open && !!devicePublicId,
     handler: (payload) => {
-      const payloadId = String(payload?.deviceId ?? '');
-      if (payloadId && payloadId !== String(detail.data?.device?.deviceId)) return;
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
+      void refreshCurrent();
+    },
+  });
+
+  useRealtimeSubscription<any>({
+    namespace: 'devices',
+    event: 'command:ack',
+    enabled: open && !!devicePublicId,
+    handler: (payload) => {
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
       void refreshCurrent();
     },
   });

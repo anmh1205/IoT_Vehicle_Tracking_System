@@ -6,5 +6,4 @@ export const useNotificationStats = () =>
   useQuery<NotificationStatsSummary>({
     queryKey: ['notification-stats'],
     queryFn: () => notificationServices.getStats(),
-    refetchInterval: 30000,
   });

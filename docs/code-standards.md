@@ -49,6 +49,8 @@
 - Treat MQTT as the canonical ingest path for both real devices and simulator flows.
 - Remove legacy runtime exposure such as `/iot/data` rather than keeping parallel entry points.
 - Use colon-style realtime event names as the canonical contract and update consumers in lockstep when names change.
+- Keep realtime namespace access explicit: admin-only channels such as firmware and system-admin settings must enforce role checks, and device/user delivery must stay room-scoped.
+- Prefer event-driven cache patching or invalidation over periodic polling in realtime consumers; use fetches only for initial snapshot, reconnect fallback, or manual retry boundaries.
 - Treat simulator token handling as security-sensitive; do not rely on stored token hashes as replayable bearer material.
 - Apply rollback/race mitigations around simulator publish flows when state transitions can overlap.
 - Keep deterministic simulator artifacts, fault catalogs, checkpoint thresholds, and stop conditions in `resources/mock-data/simulator-specs/` so ops automation stays reproducible.
@@ -60,3 +62,11 @@
 - Log GNSS transport failures, parse failures, no-fix streaks, and fix-success streaks separately so recovery behavior stays observable.
 - Re-arm GNSS from the tracker state machine after LTE recovery or repeated GNSS poll failures, not from ad hoc caller loops.
 - Keep GNSS power-cycle recovery localized to the modem/GNSS layer and state machine lifecycle, not spread across unrelated subsystems.
+
+## Firmware Logging Governance Standards
+- Use structured key-value logs for new or changed firmware lifecycle events, especially `from`, `to`, `reason`, `err`, `stage`, `seq`, `dwell_ms`, `topic_class`, `suppressed`, and stable boot/message/job IDs.
+- Keep high-rate success metadata at DEBUG or counters; keep INFO for low-rate lifecycle, transition, recovery, OTA stage, and diagnostic health snapshot events.
+- Use local per-module gates/counters for repeated warnings instead of adding a shared logging framework unless duplication becomes harmful.
+- Treat UART logs as leakable: do not log MQTT credentials/endpoints, APNs, auth tokens, secrets, OTA URLs, raw payloads, raw AT bodies, full GNSS coordinates, IMEI, or IMSI.
+- Prefer redacted summaries such as `response_len`, `has_ok`, `has_fix`, `topic_class`, `apn_configured`, `endpoint_configured`, and `fix_valid` when protocol data may contain sensitive values.
+- Keep tracked diagnostic/test logs sanitized before committing; archived logs must not contain credentials, endpoints, raw AT bodies, payloads, or full coordinates.

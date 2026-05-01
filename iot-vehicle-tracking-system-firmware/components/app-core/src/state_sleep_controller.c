@@ -26,6 +26,10 @@
 #include "state_runtime_context.h"
 #include "util.h"
 
+#ifndef CONFIG_TRACKER_FIELD_VALIDATION_KEEP_AWAKE
+#define CONFIG_TRACKER_FIELD_VALIDATION_KEEP_AWAKE 0
+#endif
+
 /**
  * @file state_sleep_controller.c
  * @brief Sleep decision and entry helpers for the tracker FSM.
@@ -69,6 +73,8 @@ tracker_sleep_mode_t state_machine_resolve_sleep_mode(app_state_t app_state) {
 
 #if CONFIG_TRACKER_FAKE_SLEEP_ENABLED
     return TRACKER_SLEEP_MODE_FAKE;
+#elif CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_KEEP_AWAKE
+    return TRACKER_SLEEP_MODE_NONE;
 #else
     return state_machine_should_use_light_sleep_motion_wake() ? TRACKER_SLEEP_MODE_LIGHT
                                                               : TRACKER_SLEEP_MODE_DEEP;
@@ -76,6 +82,12 @@ tracker_sleep_mode_t state_machine_resolve_sleep_mode(app_state_t app_state) {
 }
 
 bool state_machine_can_enter_sleep(const char **out_reason) {
+#if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_KEEP_AWAKE
+    if (out_reason != NULL) {
+        *out_reason = "field_validation_keep_awake";
+    }
+    return false;
+#endif
     if (!s_config.sleep_enabled) {
         if (out_reason != NULL) {
             *out_reason = "sleep_policy_disabled";

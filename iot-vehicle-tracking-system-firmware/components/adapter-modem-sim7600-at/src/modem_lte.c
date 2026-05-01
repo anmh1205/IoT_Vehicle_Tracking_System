@@ -65,7 +65,7 @@ void modem_lte_set_apn(const char *apn) {
     }
 
     util_copy_string(s_active_apn, sizeof(s_active_apn), next_apn);
-    ESP_LOGI(MODEM_LTE_TAG, "APN override applied apn=%s", s_active_apn);
+    ESP_LOGI(MODEM_LTE_TAG, "apn override applied configured=1");
 }
 
 void modem_lte_request_connect(void) {

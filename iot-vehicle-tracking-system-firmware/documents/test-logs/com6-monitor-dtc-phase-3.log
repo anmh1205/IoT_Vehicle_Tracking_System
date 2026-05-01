@@ -63,14 +63,14 @@ I (388) coexist: coexist rom version e7ae62f
 I (389) main_task: Started on CPU0
 I (409) main_task: Calling app_main()
 I (419) TRACKER_MAIN: Boot #1 wakeup=0 initial_state=0
-I (419) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_host=mqtt.thingdock.dev mqtt_port=1883 apn=internet tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=1 imu_wake=1 ota_min_mv=3850
+I (419) STATE_MACHINE: Runtime config device=TRACKER_001 mqtt_configured=1 mqtt_port=1883 apn_configured=1 tracking=10s heartbeat=900s alarm=3s ign_hold_ms=3000 sleep=1 imu_wake=1 ota_min_mv=3850
 I (429) STATE_MACHINE: metadata boot initialized boot_id=boot-1-4892e9f6 boot_count=1
 I (439) ADC_READER: ADC reader initialized batt_gpio=4 supply_gpio=3
 I (439) POWER_MGR: PWRKEY profile=INVERTED_STAGE default_inverted_stage=1
 I (449) RTC_DS3231M: RTC init available=1 time_valid=1
 I (459) STATE_MACHINE: RTC health available=1 valid=1
 I (459) MODEM_LTE: FSM IDLE -> POWER_ON_PULSE
-I (459) TRACKER_MQTT: MQTT init via SIM7600 host=mqtt.thingdock.dev tls=1 server=tcp://mqtt.thingdock.dev:8883 port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
+I (459) TRACKER_MQTT: MQTT init via SIM7600 endpoint_configured=1 tls=1 endpoint=primary port_mode=tls8883_primary fallback=1 user_set=1 command_subscribe=1
 I (1759) SD_LOG_STORE: SD mounted root=/sdcard/tracker session=1 write_seq=18575 replay_seq=18519 ack_critical=18492
 I (1759) STATE_MACHINE: mqtt firmware status=success progress=100 metadata mid=e9188ad5-fb77-4d28-9e83-a360d4f25fd5 seq=1 boot=boot-1-4892e9f6 ts=1776499743000
 I (3069) STATE_MACHINE: User LED initialized pin=15 active_level=1 blink_period_ms=3000 on_ms=300
@@ -109,18 +109,18 @@ I (3639) BLE_MGR: Connecting to BLE candidate addr=D2:E0:2F:8D:50:8C rssi=-39 se
 I (3699) MODEM_LTE: FSM ATE0 -> CPIN_CHECK
 I (3909) MODEM_LTE: FSM CPIN_CHECK -> SET_NET_MODE
 I (4119) MODEM_LTE: FSM SET_NET_MODE -> SET_PDP
-I (4349) MODEM_LTE: PDP profile configured apn=internet
+I (4349) MODEM_LTE: PDP profile configured apn_configured=1
 I (4349) MODEM_LTE: SIM7600 STATUS unsupported (GPIO_NUM_NC)
 I (4349) MODEM_LTE: SIM7600 NET-LIGHT unsupported (GPIO_NUM_NC)
 I (4349) MODEM_LTE: FSM SET_PDP -> CEREG_WAIT
 I (4349) MODEM_GNSS: GNSS power-on sequence start
-I (4469) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL resp=  ERROR
-I (4579) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL resp=  ERROR
-I (4689) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK resp=  OK
+I (4469) MODEM_GNSS: GNSS cmd=AT+CGNSPWR=1 err=ESP_FAIL at_body_redacted=1
+I (4579) MODEM_GNSS: GNSS cmd=AT+CGNSPWR? err=ESP_FAIL at_body_redacted=1
+I (4689) MODEM_GNSS: GNSS cmd=AT+CGPS=1 err=ESP_OK at_body_redacted=1
 W (4689) MODEM_GNSS: GNSS power-on fallback accepted via CGPS=1 (query mode=CGPSINFO)
 I (4689) STATE_MACHINE: GNSS power-on OK
 I (4809) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
-I (4809) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK
+I (4809) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK at_body_redacted=1
 I (4809) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
 I (4809) MODEM_GNSS: GNSS no-fix streak=1 fix_valid=0
 I (5029) MODEM_LTE: CEREG n=0 stat=1 (registered_home) [registered]
@@ -129,32 +129,32 @@ I (5249) MODEM_LTE: FSM PDP_ACTIVATE -> PDP_IP_CHECK
 I (5459) MODEM_LTE: PDP IP check response="..+CGPADDR: 1,11.59.115.234....OK.."
 I (5459) MODEM_LTE: FSM PDP_IP_CHECK -> CONNECTED
 I (5459) MODEM_LTE: LTE connected and PDP active
-W (5849) BLE_OBD: OBD invalid response count=1 mode=0x01 pid=0x0D state=stopped has_hex=0 has_error=0 raw=STOPPED >
-W (6719) BLE_OBD: OBD invalid response count=2 mode=0x01 pid=0x0C state=stopped has_hex=0 has_error=0 raw=STOPPED >
-W (7589) BLE_OBD: OBD invalid response count=3 mode=0x01 pid=0x05 state=stopped has_hex=0 has_error=0 raw=STOPPED >
+W (5849) BLE_OBD: OBD invalid response count=1 mode=0x01 pid=0x0D state=stopped has_hex=0 has_error=0 body_redacted=1
+W (6719) BLE_OBD: OBD invalid response count=2 mode=0x01 pid=0x0C state=stopped has_hex=0 has_error=0 body_redacted=1
+W (7589) BLE_OBD: OBD invalid response count=3 mode=0x01 pid=0x05 state=stopped has_hex=0 has_error=0 body_redacted=1
 I (8319) TRACKER_MQTT: CMQTTCONNECT session probe connected (disc_state=0)
-W (8459) BLE_OBD: OBD invalid response count=4 mode=0x01 pid=0x0D state=stopped has_hex=0 has_error=0 raw=STOPPED >
+W (8459) BLE_OBD: OBD invalid response count=4 mode=0x01 pid=0x0D state=stopped has_hex=0 has_error=0 body_redacted=1
 I (8539) TRACKER_MQTT: MQTT subscribed commands topic=v1/TRACKER_001/commands
 I (8659) TRACKER_MQTT: MQTT subscribe URC client=0 err=0
 I (8659) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
-I (8659) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK    +CMQTTSUB: 0,0
+I (8659) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK at_body_redacted=1
 I (8659) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
 W (9299) STATE_MACHINE: OBD prime finished without fresh PID sample after connect state=stopped
-W (9329) BLE_OBD: OBD invalid response count=5 mode=0x01 pid=0x01 state=stopped has_hex=0 has_error=0 raw=STOPPED >
+W (9329) BLE_OBD: OBD invalid response count=5 mode=0x01 pid=0x01 state=stopped has_hex=0 has_error=0 body_redacted=1
 W (9329) STATE_MACHINE: OBD diagnostic query failed mode=0x01 pid=1 state=stopped clear=0
 W (10099) STATE_MACHINE: OBD diagnostic query failed mode=0x03 pid=-1 state=stopped clear=0
 W (10199) STATE_MACHINE: OBD diagnostic query failed mode=0x07 pid=-1 state=stopped clear=0
 I (10679) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
-I (10679) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: ,,,,,,,,    OK
+I (10679) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK at_body_redacted=1
 I (10679) MODEM_GNSS: GNSS fallback AT+CGPSINFO reports no-fix
 W (10969) STATE_MACHINE: OBD diagnostic query failed mode=0x0A pid=-1 state=stopped clear=0
 I (11079) STATE_MACHINE: BLE OBD connected + ELM327 ready duration_ms=7800
 W (11079) STATE_MACHINE: BLE OBD connected but ECU has not returned a fresh PID sample yet
 W (12179) STATE_MACHINE: OBD diagnostic query failed mode=0x01 pid=1 state=stopped clear=0
 I (13239) MODEM_GNSS: GNSS fallback query attempt=1 cmd=AT+CGPSINFO
-I (13239) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK resp=  +CGPSINFO: 2057.633194,N,10544.729714,E,180426,080917.0,9.9,0.0,    OK
-I (13239) MODEM_GNSS: GNSS fallback fix lat=20.960553 lon=105.745495 speed_kmh=0.00
-I (13249) MODEM_GNSS: GNSS fix success lat=20.960553 lon=105.745495 sat=1 streak=1
+I (13239) MODEM_GNSS: GNSS cmd=AT+CGPSINFO err=ESP_OK at_body_redacted=1
+I (13239) MODEM_GNSS: GNSS fallback fix coord_lat_redacted=1 coord_lon_redacted=1 speed_kmh=0.00
+I (13249) MODEM_GNSS: GNSS fix success coord_lat_redacted=1 coord_lon_redacted=1 sat=1 streak=1
 I (14009) STATE_MACHINE: heartbeat publish without fresh OBD sample because ECU state=stopped
 I (14009) STATE_MACHINE: mqtt status=heartbeat metadata mid=a01cb4d9-e06d-4173-a9cd-8bc75bc33cf3 seq=3 boot=boot-1-4892e9f6 ts=1776499757000
 I (14789) STATE_MACHINE: Sleep accepted enter_count=1 timer_wake_count=0 imu_wake_count=0 false_wake_count=0

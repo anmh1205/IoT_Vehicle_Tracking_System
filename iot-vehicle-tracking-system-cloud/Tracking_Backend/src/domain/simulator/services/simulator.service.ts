@@ -5,6 +5,7 @@ import { logger } from '@/infrastructure/logger';
 import { mqttConfig } from '@/config/env';
 import { hashToken } from '@/shared/utils/crypto.util';
 import { createValidationError } from '@/shared/utils/errors.util';
+import { publishEvent } from '@/infrastructure/realtime';
 import type {
   SimulatorPoint,
   SimulatorStartInput,
@@ -419,6 +420,11 @@ const toStatus = (
   };
 };
 
+const publishSimulatorStatus = (status: SimulatorStatus): void => {
+  const preview: Array<Record<string, unknown>> = status.preview.map((point) => ({ ...point }));
+  publishEvent('simulator:status', { ...status, preview });
+};
+
 const closeSimulatorOwnedSession = async (sessionId: number, deviceId: string): Promise<void> => {
   const nowIso = new Date().toISOString();
   const stopCorrelationId = `simulator-stop:${randomUUID()}`;
@@ -594,7 +600,9 @@ const stopSimulationInternal = async (reason: string): Promise<SimulatorStatus> 
     preview: current.preview,
   };
 
-  return toStatus(lastSnapshot, false);
+  const status = toStatus(lastSnapshot, false);
+  publishSimulatorStatus(status);
+  return status;
 };
 
 const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
@@ -739,12 +747,18 @@ const executeTickSafely = async (): Promise<void> => {
   }
   state.ticking = true;
 
+  let ticked = false;
   try {
     await tickSimulation(state);
+    ticked = true;
   } catch (error) {
     logger.error('Simulator tick failed', { error: (error as Error).message });
   } finally {
     state.ticking = false;
+  }
+
+  if (ticked && runningSimulation === state) {
+    publishSimulatorStatus(toStatus(state, true));
   }
 
   if (Date.now() >= state.expiresAt.getTime()) {
@@ -882,9 +896,10 @@ export const startSimulation = async (
     mqttClient: mqttClient!,
   };
 
+  publishSimulatorStatus(toStatus(runningSimulation, true));
   await executeTickSafely();
 
-  return toStatus(runningSimulation, true);
+  return getSimulationStatus();
 };
 
 export const stopSimulation = async (): Promise<SimulatorStatus> =>
@@ -902,7 +917,9 @@ export const pauseSimulation = (): SimulatorStatus => {
     return toStatus(lastSnapshot, false);
   }
   runningSimulation.paused = true;
-  return toStatus(runningSimulation, true);
+  const status = toStatus(runningSimulation, true);
+  publishSimulatorStatus(status);
+  return status;
 };
 
 export const resumeSimulation = (): SimulatorStatus => {
@@ -910,5 +927,7 @@ export const resumeSimulation = (): SimulatorStatus => {
     return toStatus(lastSnapshot, false);
   }
   runningSimulation.paused = false;
-  return toStatus(runningSimulation, true);
+  const status = toStatus(runningSimulation, true);
+  publishSimulatorStatus(status);
+  return status;
 };

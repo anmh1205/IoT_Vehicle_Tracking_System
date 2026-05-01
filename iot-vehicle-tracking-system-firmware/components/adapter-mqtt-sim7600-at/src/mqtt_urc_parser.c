@@ -148,7 +148,10 @@ esp_err_t tracker_mqtt_expect_result(const char *response,
 
     if (!parsed) {
         if (require_prefix) {
-            ESP_LOGW(TRACKER_MQTT_TAG, "AT result missing prefix=%s raw=\"%s\"", prefix, response);
+            ESP_LOGW(TRACKER_MQTT_TAG,
+                     "AT result missing prefix=%s response_len=%u",
+                     prefix,
+                     (unsigned)strlen(response));
             return ESP_FAIL;
         }
         if (out_err_code != NULL) {
@@ -162,7 +165,11 @@ esp_err_t tracker_mqtt_expect_result(const char *response,
         *out_err_code = err_code;
     }
     if (!tracker_mqtt_err_allowed(err_code, allowed_codes, allowed_count)) {
-        ESP_LOGW(TRACKER_MQTT_TAG, "AT result prefix=%s err=%d raw=\"%s\"", prefix, err_code, response);
+        ESP_LOGW(TRACKER_MQTT_TAG,
+                 "AT result rejected prefix=%s err=%d response_len=%u",
+                 prefix,
+                 err_code,
+                 (unsigned)strlen(response));
         return ESP_FAIL;
     }
     return ESP_OK;
@@ -225,13 +232,17 @@ esp_err_t tracker_mqtt_send_cmd_with_policy(const char *cmd,
             tracker_mqtt_mark_disconnected(cmd, err_code);
         }
         if (log_result) {
-            ESP_LOGW(TRACKER_MQTT_TAG, "AT %s failed err=%s resp=\"%s\"", cmd, esp_err_to_name(err), response);
+            ESP_LOGW(TRACKER_MQTT_TAG,
+                     "AT %s failed err=%s response_len=%u",
+                     cmd,
+                     esp_err_to_name(err),
+                     (unsigned)strlen(response));
         }
         return err;
     }
 
     if (log_result) {
-        ESP_LOGD(TRACKER_MQTT_TAG, "AT RX: %s", response);
+        ESP_LOGD(TRACKER_MQTT_TAG, "AT RX response_len=%u", (unsigned)strlen(response));
     }
     return ESP_OK;
 }
@@ -405,7 +416,7 @@ static size_t tracker_mqtt_append_payload_chunk(const char *chunk, size_t chunk_
     }
     if (copy_len < consume_len) {
         s_rx_ctx.payload_truncated = true;
-        ESP_LOGW(TRACKER_MQTT_TAG, "MQTT RX payload truncated chunk=%u", (unsigned)consume_len);
+        ESP_LOGW(TRACKER_MQTT_TAG, "mqtt rx body truncated chunk=%u", (unsigned)consume_len);
     }
 
     s_rx_ctx.payload_chunk_remaining -= (int)consume_len;
@@ -443,7 +454,7 @@ static bool tracker_mqtt_try_consume_pending_header(const char *line) {
             s_rx_ctx.topic_total_len = values[1];
             s_rx_ctx.payload_total_len = values[2];
             ESP_LOGI(TRACKER_MQTT_TAG,
-                     "MQTT RX start client=%d topic_len=%d payload_len=%d",
+                     "mqtt rx start client=%d topic_len=%d body_len=%d",
                      s_rx_ctx.client_index,
                      s_rx_ctx.topic_total_len,
                      s_rx_ctx.payload_total_len);
@@ -455,7 +466,7 @@ static bool tracker_mqtt_try_consume_pending_header(const char *line) {
             }
             s_rx_ctx.topic_chunk_remaining = values[1];
             s_rx_pending_header = MQTT_RX_PENDING_NONE;
-            ESP_LOGI(TRACKER_MQTT_TAG, "MQTT RX topic chunk expect=%d", s_rx_ctx.topic_chunk_remaining);
+            ESP_LOGD(TRACKER_MQTT_TAG, "mqtt rx topic chunk expect=%d", s_rx_ctx.topic_chunk_remaining);
             return true;
         case MQTT_RX_PENDING_PAYLOAD_HEADER:
             if (!tracker_mqtt_parse_plain_int_list(line, values, 2) || !s_rx_ctx.active) {
@@ -463,7 +474,7 @@ static bool tracker_mqtt_try_consume_pending_header(const char *line) {
             }
             s_rx_ctx.payload_chunk_remaining = values[1];
             s_rx_pending_header = MQTT_RX_PENDING_NONE;
-            ESP_LOGI(TRACKER_MQTT_TAG, "MQTT RX payload chunk expect=%d", s_rx_ctx.payload_chunk_remaining);
+            ESP_LOGD(TRACKER_MQTT_TAG, "mqtt rx body chunk expect=%d", s_rx_ctx.payload_chunk_remaining);
             return true;
         case MQTT_RX_PENDING_NONE:
         default:
@@ -489,7 +500,7 @@ static void tracker_mqtt_dispatch_rx_if_complete(void) {
                             s_rx_ctx.payload_chunk_remaining == 0;
     if (s_rx_ctx.topic_truncated || s_rx_ctx.payload_truncated || !topic_complete || !payload_complete) {
         ESP_LOGW(TRACKER_MQTT_TAG,
-                 "MQTT RX dropped incomplete frame topic_len=%u/%d payload_len=%u/%d topic_trunc=%d payload_trunc=%d",
+                 "mqtt rx dropped incomplete frame topic_len=%u/%d body_len=%u/%d topic_trunc=%d body_trunc=%d",
                  (unsigned)s_rx_ctx.topic_len,
                  s_rx_ctx.topic_total_len,
                  (unsigned)s_rx_ctx.payload_len,
@@ -501,14 +512,16 @@ static void tracker_mqtt_dispatch_rx_if_complete(void) {
 
     if (s_command_callback != NULL && strcmp(s_rx_ctx.topic, s_topic_commands) == 0) {
         ESP_LOGI(TRACKER_MQTT_TAG,
-                 "MQTT RX command topic=%s payload_len=%u",
-                 s_rx_ctx.topic,
+                 "mqtt rx command topic_class=commands body_len=%u",
                  (unsigned)s_rx_ctx.payload_len);
         s_command_callback(s_rx_ctx.topic, s_rx_ctx.payload);
         return;
     }
 
-    ESP_LOGI(TRACKER_MQTT_TAG, "MQTT RX ignored topic=%s len=%u", s_rx_ctx.topic, (unsigned)s_rx_ctx.payload_len);
+    ESP_LOGI(TRACKER_MQTT_TAG,
+             "mqtt rx ignored topic_len=%u body_len=%u",
+             (unsigned)s_rx_ctx.topic_len,
+             (unsigned)s_rx_ctx.payload_len);
 }
 
 static const char *tracker_mqtt_seek_urc_prefix(const char *cursor) {
@@ -570,7 +583,7 @@ static bool tracker_mqtt_handle_rx_urc(const char *cursor, const char **out_next
             s_rx_ctx.topic_total_len = values[1];
             s_rx_ctx.payload_total_len = values[2];
             ESP_LOGI(TRACKER_MQTT_TAG,
-                     "MQTT RX start client=%d topic_len=%d payload_len=%d",
+                     "mqtt rx start client=%d topic_len=%d body_len=%d",
                      s_rx_ctx.client_index,
                      s_rx_ctx.topic_total_len,
                      s_rx_ctx.payload_total_len);
@@ -585,7 +598,7 @@ static bool tracker_mqtt_handle_rx_urc(const char *cursor, const char **out_next
         int values[2] = {0};
         if (tracker_mqtt_parse_int_list_from_text(cursor, "+CMQTTRXTOPIC:", values, 2) && s_rx_ctx.active) {
             s_rx_ctx.topic_chunk_remaining = values[1];
-            ESP_LOGI(TRACKER_MQTT_TAG, "MQTT RX topic chunk expect=%d", s_rx_ctx.topic_chunk_remaining);
+            ESP_LOGD(TRACKER_MQTT_TAG, "mqtt rx topic chunk expect=%d", s_rx_ctx.topic_chunk_remaining);
         } else if (s_rx_ctx.active) {
             s_rx_pending_header = MQTT_RX_PENDING_TOPIC_HEADER;
         }
@@ -597,7 +610,7 @@ static bool tracker_mqtt_handle_rx_urc(const char *cursor, const char **out_next
         int values[2] = {0};
         if (tracker_mqtt_parse_int_list_from_text(cursor, "+CMQTTRXPAYLOAD:", values, 2) && s_rx_ctx.active) {
             s_rx_ctx.payload_chunk_remaining = values[1];
-            ESP_LOGI(TRACKER_MQTT_TAG, "MQTT RX payload chunk expect=%d", s_rx_ctx.payload_chunk_remaining);
+            ESP_LOGD(TRACKER_MQTT_TAG, "mqtt rx body chunk expect=%d", s_rx_ctx.payload_chunk_remaining);
         } else if (s_rx_ctx.active) {
             s_rx_pending_header = MQTT_RX_PENDING_PAYLOAD_HEADER;
         }
@@ -607,7 +620,7 @@ static bool tracker_mqtt_handle_rx_urc(const char *cursor, const char **out_next
 
     if (strncmp(cursor, "+CMQTTRXEND:", strlen("+CMQTTRXEND:")) == 0) {
         ESP_LOGI(TRACKER_MQTT_TAG,
-                 "MQTT RX end topic_len=%u payload_len=%u",
+                 "mqtt rx end topic_len=%u body_len=%u",
                  (unsigned)s_rx_ctx.topic_len,
                  (unsigned)s_rx_ctx.payload_len);
         tracker_mqtt_dispatch_rx_if_complete();

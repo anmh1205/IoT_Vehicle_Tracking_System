@@ -182,7 +182,7 @@ const VehiclesPage = () => {
   return (
     <PageContainer
       pageTitle="Phương tiện"
-      pageDescription="Quản lý danh sách phương tiện, trạng thái vận hành và thiết bị telemetry đang gắn"
+      pageDescription="Quản lý danh sách phương tiện, trạng thái vận hành và thiết bị đo từ xa đang gắn"
       pageHeaderAction={
         <Button
           onClick={() => {
@@ -242,7 +242,7 @@ const VehiclesPage = () => {
         isLoading={vehicles.isLoading}
         onRowClick={setDetailItem}
         emptyTitle="Chưa có phương tiện phù hợp"
-        emptyDescription="Thử nới bộ lọc hoặc thêm phương tiện mới để bắt đầu ghép thiết bị telemetry."
+        emptyDescription="Thử nới bộ lọc hoặc thêm phương tiện mới để bắt đầu ghép thiết bị đo từ xa."
         emptyAction={{
           label: 'Thêm phương tiện',
           onClick: () => {

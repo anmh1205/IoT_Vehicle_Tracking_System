@@ -39,9 +39,11 @@ export const queryInvalidation = {
       void queryClient.invalidateQueries({ queryKey: ['dashboard-activity'] });
     },
     stats: (queryClient: QueryClient) => {
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats'] });
       void queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     },
     activity: (queryClient: QueryClient) => {
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'activity'] });
       void queryClient.invalidateQueries({ queryKey: ['dashboard-activity'] });
     },
   },

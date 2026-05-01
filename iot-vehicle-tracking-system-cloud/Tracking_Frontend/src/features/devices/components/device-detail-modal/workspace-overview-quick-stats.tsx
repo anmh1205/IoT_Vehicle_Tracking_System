@@ -112,7 +112,7 @@ export const WorkspaceOverviewQuickStats = ({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-semibold">Thông số nhanh</p>
           <p className="text-xs text-muted-foreground">
-            {latestTelemetryTimestamp ? `Cập nhật ${formatRelative(latestTelemetryTimestamp)}` : 'Chưa có telemetry'}
+            {latestTelemetryTimestamp ? `Cập nhật ${formatRelative(latestTelemetryTimestamp)}` : 'Chưa có dữ liệu đo từ xa'}
           </p>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
@@ -137,7 +137,7 @@ export const WorkspaceOverviewQuickStats = ({
   const zoneNote = activeZone
     ? `${getZoneTypeLabel(activeZone.zoneType)} · ${MEMBERSHIP_LABELS[activeZone.membershipState] ?? 'Đang theo dõi'}`
     : vehicleId
-      ? 'Mỗi xe chỉ có một vùng active'
+      ? 'Mỗi xe chỉ có một vùng đang kích hoạt'
       : 'Cần gắn thiết bị với xe trước khi cấu hình';
 
   const tiles = [
@@ -149,7 +149,7 @@ export const WorkspaceOverviewQuickStats = ({
     {
       label: 'Cập nhật',
       value: latestTelemetryTimestamp ? formatRelative(latestTelemetryTimestamp) : 'Chưa có bản tin',
-      note: latestTelemetryTimestamp ? formatDateTime(latestTelemetryTimestamp) : 'Chưa có telemetry mới',
+      note: latestTelemetryTimestamp ? formatDateTime(latestTelemetryTimestamp) : 'Chưa có dữ liệu đo từ xa mới',
     },
     {
       label: 'Xe liên kết',
@@ -161,17 +161,17 @@ export const WorkspaceOverviewQuickStats = ({
       note: linkedVehicle?.customerName ?? device?.customerName ?? 'Chưa gắn khách hàng',
     },
     {
-      label: 'Cảnh báo active',
+      label: 'Cảnh báo đang mở',
       value: `${activeAlertCount}`,
       note:
         activeAlertCount > 0
-          ? 'Có cảnh báo cần theo dõi trong workspace'
+          ? 'Có cảnh báo cần theo dõi trong không gian làm việc'
           : 'Hiện không có cảnh báo mở',
     },
     {
       label: 'Tốc độ gần nhất',
       value: latestSpeed !== null ? `${latestSpeed.toFixed(1)} km/h` : 'Chưa có dữ liệu',
-      note: latestTrackingRow ? 'Lấy từ telemetry gần nhất' : 'Đang dùng snapshot hiện có',
+      note: latestTrackingRow ? 'Lấy từ dữ liệu đo từ xa gần nhất' : 'Đang dùng ảnh chụp hiện có',
     },
     {
       label: 'Tọa độ',
@@ -189,7 +189,7 @@ export const WorkspaceOverviewQuickStats = ({
     {
       label: 'Cảnh báo vùng',
       value: zoneAlertCount > 0 ? `${zoneAlertCount} cảnh báo` : 'Không có cảnh báo',
-      note: 'Gộp lịch sử cảnh báo vùng trong cùng một bucket.',
+      note: 'Gộp lịch sử cảnh báo vùng trong cùng một nhóm.',
     },
   ];
 
@@ -198,7 +198,7 @@ export const WorkspaceOverviewQuickStats = ({
       <div>
         <p className="text-sm font-semibold">Thông số xem nhanh</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          Giữ các tín hiệu vận hành cần đọc nhanh mà không chiếm phần canvas chính.
+          Giữ các tín hiệu vận hành cần đọc nhanh mà không chiếm vùng nội dung chính.
         </p>
       </div>
 

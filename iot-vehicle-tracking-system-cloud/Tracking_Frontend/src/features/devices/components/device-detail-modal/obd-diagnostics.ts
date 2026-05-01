@@ -341,7 +341,7 @@ export const extractLatestDiagnosticsSnapshot = (
 export const buildDiagnosticsSummary = (diagnostics: Record<string, unknown>): string => {
   const snapshot = snapshotFromDiagnosticsPayload(diagnostics);
   if (!snapshot) {
-    return 'Không đọc được snapshot OBD';
+    return 'Không đọc được ảnh chụp OBD';
   }
 
   const parts = [

@@ -34,6 +34,22 @@ const sanitizeAlert = (a: Alert): AlertPublic => ({
   updatedAt: a.updated_at.toISOString(),
 });
 
+const toNotificationType = (alertType: string): string => {
+  const normalized = alertType.toLowerCase();
+  if (normalized.includes('zone') || normalized.includes('geofence')) return 'zone';
+  if (normalized.includes('firmware')) return 'firmware';
+  if (normalized.includes('export')) return 'export';
+  if (
+    normalized.includes('system') ||
+    normalized.includes('offline') ||
+    normalized.includes('database') ||
+    normalized.includes('service')
+  ) {
+    return 'system';
+  }
+  return 'alert';
+};
+
 export const getAlertById = async (id: number): Promise<AlertPublic> => {
   const alert = await alertRepo.findById(id);
   if (!alert) {
@@ -59,6 +75,19 @@ export const createAlert = async (input: CreateAlertInput): Promise<AlertPublic>
     message: alert.message ?? undefined,
     latitude: alert.latitude ?? undefined,
     longitude: alert.longitude ?? undefined,
+  });
+
+  publishEvent('notification:new', {
+    id: alert.id,
+    type: toNotificationType(alert.alert_type),
+    title: alert.title,
+    message: alert.message ?? undefined,
+    isRead: false,
+    referenceId: alert.id,
+    referenceType: 'alert',
+    vehicleId: alert.vehicle_id,
+    deviceId: alert.device_id,
+    createdAt: alert.created_at.toISOString(),
   });
 
   publishEvent('activity:new', {

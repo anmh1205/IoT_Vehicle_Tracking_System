@@ -1,5 +1,20 @@
 # Project Changelog
 
+## 2026-05-01
+### Realtime WebSocket Audit and Event-Driven Dashboard Cutover (Completed)
+- Hardened the Socket.IO gateway with namespace-specific auth and delivery scopes across dashboard, devices, notifications, exports, and firmware.
+- Moved device, notification, export, firmware, simulator, and system-admin updates to real backend realtime producers instead of periodic polling or broad broadcasts.
+- Updated frontend consumers to use namespace-aware sockets, room-scoped device membership, and event-driven cache patching or invalidation with snapshot fetches only at load, reconnect, or manual retry boundaries.
+- Kept firmware realtime traffic restricted to admin/root access and system-admin settings limited to the admin room.
+- Validation status: backend lint, typecheck, test, and coverage passed; frontend lint, typecheck, and build passed; Docker rebuild/restart and smoke checks on `/login` and `/ws-health` passed.
+
+### Firmware Log Monitor Governance (Completed)
+- Standardized firmware logging across app-core FSM, MQTT publish/fallback, offline queue replay, SIM7600 LTE/GNSS/MQTT adapters, BLE OBD diagnostics, and OTA HTTP lifecycle paths.
+- Added telemetry counters for MQTT publish outcomes, LTE recovery, OBD quality, and OTA HTTP results so repeated success/noise can be summarized instead of logged per event.
+- Redacted sensitive firmware logs and tracked test-log artifacts: no raw AT bodies, MQTT credentials/endpoints, APNs, URLs, payloads, full GNSS coordinates, IMEI/IMSI, or secrets in governed logs; stable boot/message/job IDs remain allowed.
+- Cleared the tracked field-validation MQTT password in `iot-vehicle-tracking-system-firmware/sdkconfig`; rotate the previously exposed password if it was valid outside local validation.
+- Validation status: `idf.py -C "iot-vehicle-tracking-system-firmware" reconfigure build size` passed; source/artifact static redaction scans passed; `git diff --check -- "iot-vehicle-tracking-system-firmware"` reported only CRLF normalization warnings.
+
 ## 2026-04-24
 ### Thesis-Anchored Knowledge Base Bootstrap (Completed)
 - Added a repo-local knowledge bootstrap under `resources/docs/knowledge-base/` for `IoT_Vehicle_Tracking_System`, organized as source registry, evidence cards, reconciliation output, repo-pack notes, domain notes, and pattern notes.

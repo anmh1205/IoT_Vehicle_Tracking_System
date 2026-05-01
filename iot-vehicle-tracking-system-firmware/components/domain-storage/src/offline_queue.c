@@ -154,6 +154,20 @@ static bool offline_queue_is_critical(offline_record_type_t type) {
            type == OFFLINE_RECORD_FIRMWARE;
 }
 
+static const char *offline_queue_type_name(offline_record_type_t type) {
+    switch (type) {
+        case OFFLINE_RECORD_STATUS:
+            return "status";
+        case OFFLINE_RECORD_EVENT:
+            return "event";
+        case OFFLINE_RECORD_FIRMWARE:
+            return "firmware";
+        case OFFLINE_RECORD_RAWDATA:
+        default:
+            return "rawdata";
+    }
+}
+
 static const char *offline_queue_topic_from_type(offline_record_type_t type) {
     switch (type) {
         case OFFLINE_RECORD_STATUS:
@@ -219,7 +233,7 @@ static bool offline_queue_replace_fragment(char *payload,
     size_t new_len = strlen(replacement);
     size_t current_len = strlen(payload);
     if (new_len > old_len && (current_len + (new_len - old_len)) >= payload_len) {
-        ESP_LOGW(TAG, "payload sanitize skipped (buffer too small)");
+        ESP_LOGW(TAG, "record sanitize skipped reason=buffer_too_small");
         return false;
     }
 
@@ -305,41 +319,40 @@ static bool offline_queue_is_stale_firmware_record(const sd_log_record_t *rec) {
 }
 
 static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
-    const char *topic = offline_queue_topic_from_type((offline_record_type_t)rec->type);
+    offline_record_type_t type = (offline_record_type_t)rec->type;
+    const char *topic = offline_queue_topic_from_type(type);
+    const char *topic_class = offline_queue_type_name(type);
     int qos = rec->critical ? 1 : 0;
     char payload_scratch[sizeof(rec->payload)] = {0};
     const char *payload = offline_queue_payload_for_publish(rec, payload_scratch, sizeof(payload_scratch));
     int msg_id = tracker_mqtt_publish_with_msg_id(topic, payload, qos);
     if (msg_id < 0) {
         ESP_LOGW(TAG,
-                 "replay publish failed seq=%lu type=%u qos=%d topic=%s",
+                 "replay publish failed seq=%lu topic_class=%s qos=%d",
                  (unsigned long)rec->seq,
-                 (unsigned int)rec->type,
-                 qos,
-                 topic);
+                 topic_class,
+                 qos);
         return ESP_FAIL;
     }
 
     if (qos == 0) {
         /* QoS0 has no broker ACK; advancing replay_seq immediately is intentional. */
         telemetry_counters_inc_replay_success();
-        ESP_LOGI(TAG,
-                 "replay publish ok seq=%lu type=%u qos=%d topic=%s msg_id=%d",
+        ESP_LOGD(TAG,
+                 "replay publish ok seq=%lu topic_class=%s qos=%d msg_id=%d",
                  (unsigned long)rec->seq,
-                 (unsigned int)rec->type,
+                 topic_class,
                  qos,
-                 topic,
                  msg_id);
         return sd_log_store_set_replay_seq(rec->seq + 1);
     }
 
     telemetry_counters_inc_replay_success();
-    ESP_LOGI(TAG,
-             "replay publish accepted seq=%lu type=%u qos=%d topic=%s msg_id=%d",
+    ESP_LOGD(TAG,
+             "replay publish accepted seq=%lu topic_class=%s qos=%d msg_id=%d",
              (unsigned long)rec->seq,
-             (unsigned int)rec->type,
+             topic_class,
              qos,
-             topic,
              msg_id);
     return sd_log_store_ack_critical_and_advance_replay(rec->seq, rec->seq + 1);
 }

@@ -156,8 +156,9 @@ void modem_lte_log_registration_snapshot(void) {
             continue;
         }
 
-        char preview[97] = {0};
-        modem_lte_response_preview(response, preview, sizeof(preview));
-        ESP_LOGW(MODEM_LTE_TAG, "diag %s response=\"%s\"", k_diag_cmds[i].label, preview);
+        ESP_LOGW(MODEM_LTE_TAG,
+                 "diag %s response_len=%u",
+                 k_diag_cmds[i].label,
+                 (unsigned)strlen(response));
     }
 }

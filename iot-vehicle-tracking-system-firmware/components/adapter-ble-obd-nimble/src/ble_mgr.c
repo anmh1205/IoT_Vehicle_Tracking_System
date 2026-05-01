@@ -8,7 +8,6 @@
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
-#include "freertos/timers.h"
 
 #include "host/ble_gap.h"
 #include "host/ble_gatt.h"
@@ -82,7 +81,6 @@ static ble_mgr_ctx_t s_mgr = {
 static void ble_mgr_gap_stack_reset_cb(int reason);
 static void ble_mgr_gap_stack_sync_cb(void);
 static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg);
-static void ble_mgr_start_pending_connect_deferred(void *arg1, uint32_t arg2);
 static ble_mgr_status_t ble_mgr_start_pending_connect(ble_mgr_ctx_t *mgr_ctx);
 static int ble_mgr_gatt_svc_discovered_cb(uint16_t conn_handle,
                                           const struct ble_gatt_error *error,
@@ -266,15 +264,6 @@ static ble_mgr_status_t ble_mgr_start_pending_connect(ble_mgr_ctx_t *mgr_ctx) {
 
     mgr_ctx->pending_connect.armed = false;
     return BLE_MGR_E_OK;
-}
-
-static void ble_mgr_start_pending_connect_deferred(void *arg1, uint32_t arg2) {
-    (void)arg2;
-
-    ble_mgr_ctx_t *mgr_ctx = (ble_mgr_ctx_t *)arg1;
-    if (ble_mgr_start_pending_connect(mgr_ctx) != BLE_MGR_E_OK) {
-        ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_NOT_CONNECTED);
-    }
 }
 
 /**
@@ -611,7 +600,7 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
             }
 
             mgr_ctx->scan_diag.connect_matches++;
-            /* Stop scan first; start connect in the discovery-complete event. */
+            /* Stop scan before starting connect, matching NimBLE central examples. */
             char addr_str[BLE_ADDR_STR_LEN] = {0};
             (void)ble_addr_to_str(&event->disc.addr, addr_str);
             ESP_LOGI(TAG,
@@ -632,10 +621,7 @@ static int ble_mgr_gap_event_cb(struct ble_gap_event *event, void *arg) {
                 ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_NOT_CONNECTED);
                 break;
             }
-            if (xTimerPendFunctionCall(ble_mgr_start_pending_connect_deferred, mgr_ctx, 0, 0) != pdPASS) {
-                ESP_LOGW(TAG, "Failed to queue deferred BLE connect start");
-                mgr_ctx->pending_connect.armed = false;
-                mgr_ctx->is_connecting = false;
+            if (ble_mgr_start_pending_connect(mgr_ctx) != BLE_MGR_E_OK) {
                 ble_mgr_connect_complete(mgr_ctx, BLE_MGR_E_NOT_CONNECTED);
             }
             break;
@@ -850,7 +836,10 @@ ble_mgr_status_t ble_mgr_connect_service(ble_mgr_ctx_t *mgr_ctx,
 
     ble_mgr_status_t status = BLE_MGR_E_OK;
     if (!ble_mgr_queue_wait(mgr_ctx, &status, timeout_ms)) {
-        ble_gap_disc_cancel();
+        (void)ble_gap_disc_cancel();
+        (void)ble_gap_conn_cancel();
+        mgr_ctx->pending_connect.armed = false;
+        mgr_ctx->is_connecting = false;
         xSemaphoreGive(mgr_ctx->lock_mtx);
         return BLE_MGR_E_TIMEOUT;
     }

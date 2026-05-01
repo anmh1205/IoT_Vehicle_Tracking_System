@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { simulatorServices, type SimulatorConfig } from '@/lib/api/simulator';
+import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 export interface SimulatorPayload {
@@ -100,14 +101,6 @@ export const useSimulator = () => {
   const statusQuery = useQuery({
     queryKey: ['simulator', 'status'],
     queryFn: () => simulatorServices.status().then((payload) => normalizeStatus(payload)),
-    refetchInterval: (query) => {
-      const status = query.state.data as SimulatorStatusPayload | undefined;
-      if (!status?.running) {
-        return 10000;
-      }
-      const intervalSec = Number(status.intervalSec ?? state.intervalSec ?? 5);
-      return Math.max(1000, Math.min(intervalSec * 1000, 5000));
-    },
   });
   useEffect(() => {
     if (!statusQuery.data) {
@@ -115,6 +108,16 @@ export const useSimulator = () => {
     }
     applyStatus(statusQuery.data);
   }, [statusQuery.data, applyStatus]);
+
+  useRealtimeSubscription({
+    namespace: 'dashboard',
+    event: 'simulator:status',
+    handler: (payload: unknown) => {
+      const status = normalizeStatus(payload);
+      applyStatus(status);
+      queryClient.setQueryData(['simulator', 'status'], status);
+    },
+  });
   const startMutation = useMutation({
     mutationFn: async () => {
       const payload: SimulatorConfig = {
@@ -125,7 +128,7 @@ export const useSimulator = () => {
     },
     onSuccess: (status) => {
       applyStatus(status);
-      void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
+      queryClient.setQueryData(['simulator', 'status'], status);
       notificationUtils.success('Đã bắt đầu mô phỏng');
     },
     onError: (error: unknown) => {
@@ -136,7 +139,7 @@ export const useSimulator = () => {
     mutationFn: async () => simulatorServices.stop().then((response) => normalizeStatus(response)),
     onSuccess: (status) => {
       applyStatus(status);
-      void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
+      queryClient.setQueryData(['simulator', 'status'], status);
       notificationUtils.info('Đã dừng mô phỏng');
     },
     onError: (error: unknown) => {
@@ -158,7 +161,7 @@ export const useSimulator = () => {
     mutationFn: async () => simulatorServices.pause().then((response) => normalizeStatus(response)),
     onSuccess: (status) => {
       applyStatus(status);
-      void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
+      queryClient.setQueryData(['simulator', 'status'], status);
       notificationUtils.info('Đã tạm dừng mô phỏng');
     },
     onError: (error: unknown) => {
@@ -173,7 +176,7 @@ export const useSimulator = () => {
       simulatorServices.resume().then((response) => normalizeStatus(response)),
     onSuccess: (status) => {
       applyStatus(status);
-      void queryClient.invalidateQueries({ queryKey: ['simulator', 'status'] });
+      queryClient.setQueryData(['simulator', 'status'], status);
       notificationUtils.info('Đã tiếp tục mô phỏng');
     },
     onError: (error: unknown) => {

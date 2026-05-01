@@ -192,8 +192,8 @@ const buildAlertExplanation = (alert: any, displayMessage: string) => {
         summary: `Cảnh báo ${alert?.alertType ?? 'không xác định'} phát sinh từ ${sourceRef}.`,
         trigger: `Xe liên quan: ${vehicleRef}. Giá trị thực tế: ${formatMetricValue(alert?.actualValue ?? alert?.rawValue)} • Ngưỡng: ${formatMetricValue(alert?.thresholdValue)}.`,
         actions: [
-          'Mở log rule để xác định chính xác điều kiện kích hoạt.',
-          'Đối chiếu timeline bản đồ và dữ liệu telemetry cùng thời điểm.',
+          'Mở nhật ký quy tắc để xác định chính xác điều kiện kích hoạt.',
+          'Đối chiếu dòng thời gian bản đồ và dữ liệu đo từ xa cùng thời điểm.',
           'Ghi rõ nguyên nhân thực tế vào ghi chú xử lý trước khi đóng.',
         ],
       };

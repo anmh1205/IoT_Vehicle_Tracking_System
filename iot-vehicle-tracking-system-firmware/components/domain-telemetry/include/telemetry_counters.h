@@ -26,6 +26,30 @@ typedef struct {
     uint32_t mqtt_connected;
     /** MQTT link-down events seen by the firmware runtime. */
     uint32_t mqtt_disconnected;
+    /** Live MQTT publishes accepted by the modem path. */
+    uint32_t mqtt_publish_ok;
+    /** Live MQTT publish attempts that failed. */
+    uint32_t mqtt_publish_fail;
+    /** Publish attempts routed through offline queue fallback. */
+    uint32_t mqtt_publish_fallback;
+    /** LTE hardware/software recovery attempts started. */
+    uint32_t lte_recovery_start;
+    /** LTE recovery attempts that reached connected state. */
+    uint32_t lte_recovery_success;
+    /** LTE recovery attempts that fell back after reset/startup failure. */
+    uint32_t lte_recovery_fail;
+    /** OBD transactions that returned valid decoded payloads. */
+    uint32_t obd_read_ok;
+    /** OBD transactions that timed out. */
+    uint32_t obd_timeout;
+    /** OBD transactions that returned invalid/error payloads. */
+    uint32_t obd_invalid_response;
+    /** OTA HTTP downloads started. */
+    uint32_t ota_http_start;
+    /** OTA HTTP downloads accepted with HTTP 200. */
+    uint32_t ota_http_success;
+    /** OTA HTTP downloads failed before payload streaming. */
+    uint32_t ota_http_fail;
 } telemetry_counters_t;
 
 /** @brief Reset every runtime counter to zero. */
@@ -48,6 +72,30 @@ void telemetry_counters_inc_quota_hit(void);
 void telemetry_counters_inc_mqtt_connected(void);
 /** @brief Increment MQTT disconnected counter. */
 void telemetry_counters_inc_mqtt_disconnected(void);
+/** @brief Increment successful live MQTT publish counter. */
+void telemetry_counters_inc_mqtt_publish_ok(void);
+/** @brief Increment failed live MQTT publish counter. */
+void telemetry_counters_inc_mqtt_publish_fail(void);
+/** @brief Increment MQTT offline fallback counter. */
+void telemetry_counters_inc_mqtt_publish_fallback(void);
+/** @brief Increment LTE recovery-start counter. */
+void telemetry_counters_inc_lte_recovery_start(void);
+/** @brief Increment LTE recovery-success counter. */
+void telemetry_counters_inc_lte_recovery_success(void);
+/** @brief Increment LTE recovery-fail counter. */
+void telemetry_counters_inc_lte_recovery_fail(void);
+/** @brief Increment successful OBD read counter. */
+void telemetry_counters_inc_obd_read_ok(void);
+/** @brief Increment OBD timeout counter. */
+void telemetry_counters_inc_obd_timeout(void);
+/** @brief Increment invalid OBD response counter. */
+void telemetry_counters_inc_obd_invalid_response(void);
+/** @brief Increment OTA HTTP start counter. */
+void telemetry_counters_inc_ota_http_start(void);
+/** @brief Increment OTA HTTP success counter. */
+void telemetry_counters_inc_ota_http_success(void);
+/** @brief Increment OTA HTTP failure counter. */
+void telemetry_counters_inc_ota_http_fail(void);
 
 /**
  * @brief Return a copy of the current counters snapshot.

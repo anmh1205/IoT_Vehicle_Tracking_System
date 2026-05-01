@@ -254,7 +254,7 @@ export const AllowedZoneSetupSheet = ({
     ) {
       notificationUtils.error(
         'Không thể lưu vùng',
-        'Các đơn vị hành chính đã chọn chưa resolve được geometry để preview và lưu.',
+        'Các đơn vị hành chính đã chọn chưa phân giải được dữ liệu hình học để xem trước và lưu.',
       );
       return;
     }
@@ -483,15 +483,15 @@ export const AllowedZoneSetupSheet = ({
                 />
 
                 <div className="rounded-2xl border bg-muted/10 p-4 text-sm">
-                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Preview hợp vùng</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Xem trước hợp vùng</p>
                   <p className="mt-1 font-medium">
                     {resolvedBoundaryGeometry
-                      ? 'Geometry đã sẵn sàng để preview và lưu.'
-                      : 'Chưa có geometry để preview.'}
+                      ? 'Dữ liệu hình học đã sẵn sàng để xem trước và lưu.'
+                      : 'Chưa có dữ liệu hình học để xem trước.'}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {resolvedBoundaryQuery.isFetching
-                      ? 'Đang resolve geometry từ cache địa giới...'
+                      ? 'Đang phân giải dữ liệu hình học từ bộ nhớ đệm địa giới...'
                       : 'Backend sẽ hợp các đơn vị đã chọn thành một vùng duy nhất cho xe.'}
                   </p>
                 </div>
