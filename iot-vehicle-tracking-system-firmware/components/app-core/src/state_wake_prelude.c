@@ -75,10 +75,18 @@ static bool state_machine_try_reassert_gnss_power(const char *reason) {
     return false;
 }
 
+/**
+ * @brief Check if GNSS can be polled.
+ *
+ * @return True if ready.
+ */
 bool state_machine_can_poll_gnss(void) {
     return s_gnss_started && modem_lte_is_initialized() && modem_gnss_is_query_ready();
 }
 
+/**
+ * @brief Try to start GNSS non-blocking.
+ */
 void state_machine_try_start_gnss_nonblocking(void) {
     if (s_gnss_started || !modem_lte_is_initialized()) {
         return;
@@ -105,6 +113,9 @@ void state_machine_try_start_gnss_nonblocking(void) {
              esp_err_to_name(err));
 }
 
+/**
+ * @brief Bootstrap RTC hardware.
+ */
 void state_machine_bootstrap_rtc(void) {
     if (s_hw_bootstrap_done || !rtc_ds3231m_is_available()) {
         return;

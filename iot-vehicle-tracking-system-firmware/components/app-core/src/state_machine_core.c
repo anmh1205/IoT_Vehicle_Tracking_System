@@ -34,6 +34,40 @@
 /**
  * @file state_machine_core.c
  * @brief Core tracker FSM orchestration and shared runtime-policy helpers.
+ *
+ * ## Main FSM State Transitions
+ *
+ *     INIT -> CHECK_IGN -> DRIVING/PARKED -> SLEEP -> (wake) -> CHECK_IGN
+ *                       -> ALARM (IMU wake) -> PARKED/DRIVING
+ *                       -> HEARTBEAT (periodic) -> PARKED
+ *
+ * ### State Definitions
+ *    - INIT: Boot, initialize peripherals
+ *    - CHECK_IGN: Decide ignition state, set initial transition
+ *    - DRIVING: High-frequency telemetry, OBD connected
+ *    - PARKED: Low-frequency, waiting for ignition-off timeout
+ *    - ALARM: Motion detected, high-frequency alarm
+ *    - HEARTBEAT: Periodic wake for connectivity check
+ *    - SLEEP: Deep sleep with timer/IMU wake
+ *
+ * ### Runtime Flow Per Iteration
+ *    1. Refresh telemetry (GNSS, battery, OBD)
+ *    2. Check for cloud commands
+ *    3. Process pending actions (OTA, config update)
+ *    4. Publish telemetry
+ *    5. Handle offline queue replay
+ *    6. Evaluate next state transition
+ *
+ * ## Key Runtime Variables
+ *    - g_rtc_context: RTC-retained across deep sleep (last_state, boot_count, etc.)
+ *    - s_config: Cached runtime configuration from NVS
+ *    - s_telemetry: Current telemetry snapshot
+ *    - s_state_entered_ms: Timestamp when current state entered
+ *
+ * ## Health Monitoring
+ *    - Periodic health snapshot logged every 60s
+ *    - Tracks MQTT 连接状态, OBD 连接状态, GNSS fix state
+ *    - Used for remote diagnostics
  */
 
 RTC_DATA_ATTR rtc_context_t g_rtc_context = {
@@ -76,24 +110,56 @@ uint64_t state_machine_alarm_timeout_ms(void) {
     return (uint64_t)s_config.alarm_timeout_s * 1000ULL;
 }
 
+/**
+ * @brief Check if rawdata should be throttled.
+ *
+ * Returns true when MQTT is disconnected and offline queue
+ * is near capacity.
+ *
+ * @return true if should throttle, false otherwise.
+ */
 bool state_machine_should_throttle_rawdata(void) {
     return !tracker_mqtt_is_connected() && offline_queue_should_throttle_rawdata();
 }
 
+/**
+ * @brief Get ignition-off hold duration.
+ *
+ * @return Hold duration in milliseconds.
+ */
 uint64_t state_machine_ignition_off_hold_ms(void) {
     return (uint64_t)s_config.ignition_off_hold_ms;
 }
 
+/**
+ * @brief Get parked wake interval with cap.
+ *
+ * Returns heartbeat interval capped to maximum allowed during parked.
+ *
+ * @return Interval in seconds.
+ */
 uint16_t state_machine_parked_wake_interval_s(void) {
     return s_config.heartbeat_interval_s > TRACKER_PARKED_WAKE_INTERVAL_CAP_S
                ? TRACKER_PARKED_WAKE_INTERVAL_CAP_S
                : s_config.heartbeat_interval_s;
 }
 
+/**
+ * @brief Check if IMU wake is enabled in config.
+ *
+ * @return true if IMU wake is enabled.
+ */
 bool state_machine_imu_runtime_enabled(void) {
     return s_config.imu_wakeup_enabled;
 }
 
+/**
+ * @brief Check if OBD sample exists within time window.
+ *
+ * @param now_ms Current timestamp.
+ * @param max_age_ms Maximum age in milliseconds.
+ * @return true if sample is recent enough.
+ */
 bool state_machine_has_recent_obd_sample(uint64_t now_ms, uint32_t max_age_ms) {
     if (s_last_obd_sample_ms == 0 || now_ms < s_last_obd_sample_ms) {
         return false;

@@ -10,6 +10,12 @@
 /* Prevent undefined `1U << shift` behavior and runaway multiplication. */
 #define RETRY_EXP_SHIFT_CAP 20U
 
+/**
+ * @brief Get base delay from policy, ensure non-zero.
+ *
+ * @param policy Retry policy.
+ * @return Base delay in ms (minimum 1).
+ */
 static uint32_t retry_policy_base_delay_ms(const retry_policy_t *policy) {
     if (policy == NULL || policy->base_delay_ms == 0U) {
         /* Never return zero; callers expect retries to eventually move forward. */
@@ -18,6 +24,13 @@ static uint32_t retry_policy_base_delay_ms(const retry_policy_t *policy) {
     return policy->base_delay_ms;
 }
 
+/**
+ * @brief Apply max delay cap from policy.
+ *
+ * @param policy Retry policy.
+ * @param delay_ms Current delay.
+ * @return Capped delay.
+ */
 static uint32_t retry_policy_cap_delay_ms(const retry_policy_t *policy, uint32_t delay_ms) {
     if (policy == NULL || policy->max_delay_ms == 0U) {
         return delay_ms;
@@ -25,6 +38,11 @@ static uint32_t retry_policy_cap_delay_ms(const retry_policy_t *policy, uint32_t
     return delay_ms > policy->max_delay_ms ? policy->max_delay_ms : delay_ms;
 }
 
+/**
+ * @brief Reset retry state for fresh attempt sequence.
+ *
+ * @param state Retry state to reset.
+ */
 void retry_state_reset(retry_state_t *state) {
     if (state == NULL) {
         return;
@@ -35,6 +53,13 @@ void retry_state_reset(retry_state_t *state) {
     state->last_err = ESP_OK;
 }
 
+/**
+ * @brief Check if retry is allowed now.
+ *
+ * @param state Current retry state.
+ * @param now_ms Current timestamp.
+ * @return true if delay has elapsed, false if must wait.
+ */
 bool retry_state_can_run(const retry_state_t *state, uint64_t now_ms) {
     if (state == NULL) {
         return false;
@@ -42,6 +67,14 @@ bool retry_state_can_run(const retry_state_t *state, uint64_t now_ms) {
     return now_ms >= state->next_allowed_ms;
 }
 
+/**
+ * @brief Calculate current delay based on policy and attempts.
+ *
+ * @param state Retry state.
+ * @param policy Retry policy.
+ * @param seed_ms Timestamp for jitter calculation.
+ * @return Delay in ms for next retry.
+ */
 uint32_t retry_state_current_delay_ms(const retry_state_t *state,
                                       const retry_policy_t *policy,
                                       uint64_t seed_ms) {
@@ -87,6 +120,17 @@ uint32_t retry_state_current_delay_ms(const retry_state_t *state,
     return retry_policy_cap_delay_ms(policy, delay_ms);
 }
 
+/**
+ * @brief Schedule next retry with backoff.
+ *
+ * Advances attempt counter and calculates next allowed timestamp.
+ *
+ * @param state Retry state to update.
+ * @param policy Retry policy to use.
+ * @param now_ms Current timestamp.
+ * @param err Last error that triggered retry.
+ * @return ESP_OK if scheduled, ESP_ERR_INVALID_STATE if max attempts reached.
+ */
 esp_err_t retry_state_schedule(retry_state_t *state,
                                const retry_policy_t *policy,
                                uint64_t now_ms,

@@ -170,6 +170,9 @@ static void state_machine_clear_obd_diagnostic_query(uint8_t mode, int pid) {
     }
 }
 
+/**
+ * @brief Clear OBD signal snapshot.
+ */
 void state_machine_clear_obd_signal_snapshot(void) {
     /*
      * OBD signal fields are scalar values, so a disconnected adapter would
@@ -189,6 +192,9 @@ void state_machine_clear_obd_signal_snapshot(void) {
     s_telemetry.obd_sample_age_ms = UINT32_MAX;
 }
 
+/**
+ * @brief Mark OBD as disconnected.
+ */
 void state_machine_mark_obd_disconnected(void) {
     /* Single exit path for BLE disconnect/failure so every caller clears stale OBD state identically. */
     s_obd_elm_ready = false;
@@ -271,6 +277,11 @@ void state_machine_obd_response_cb(uint8_t mode, int pid, const uint8_t *data, s
     }
 }
 
+/**
+ * @brief Refresh OBD fail window.
+ *
+ * @param now_ms Current timestamp.
+ */
 void state_machine_obd_refresh_fail_window(uint64_t now_ms) {
     if (s_obd_fail_window_started_ms == 0 ||
         now_ms < s_obd_fail_window_started_ms ||

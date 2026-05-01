@@ -67,6 +67,14 @@
 #define CONFIG_TRACKER_MODEM_APN "internet"
 #endif
 
+/**
+ * @brief Set default runtime configuration values.
+ *
+ * Populates config structure with built-in default values
+ * from Kconfig or hardcoded defaults.
+ *
+ * @param config Output config structure (cannot be NULL).
+ */
 void app_config_set_defaults(config_t *config) {
     if (config == NULL) {
         return;
@@ -94,6 +102,15 @@ void app_config_set_defaults(config_t *config) {
     util_copy_string(config->apn, sizeof(config->apn), CONFIG_TRACKER_MODEM_APN);
 }
 
+/**
+ * @brief Validate runtime configuration.
+ *
+ * Checks that all required fields are present and within
+ * valid ranges. Used before applying config from NVS.
+ *
+ * @param config Config to validate.
+ * @return true if valid, false if any field is invalid.
+ */
 bool app_config_is_valid(const config_t *config) {
     if (config == NULL) {
         return false;

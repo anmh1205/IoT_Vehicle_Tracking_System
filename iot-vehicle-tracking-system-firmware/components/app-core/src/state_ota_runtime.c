@@ -46,6 +46,9 @@ static void state_machine_clear_persisted_ota_context(void) {
     }
 }
 
+/**
+ * @brief Restore OTA context from NVS.
+ */
 void state_machine_restore_ota_context_from_nvs(void) {
     if (g_rtc_context.ota_pending_confirm) {
         return;

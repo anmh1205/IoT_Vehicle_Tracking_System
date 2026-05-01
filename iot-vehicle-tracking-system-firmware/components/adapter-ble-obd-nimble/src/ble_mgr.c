@@ -711,9 +711,11 @@ const char *ble_mgr_status_to_string(ble_mgr_status_t status) {
 /**
  * @brief Initialize BLE manager singleton and wait for NimBLE sync.
  *
- * @param timeout_ms Timeout waiting for sync signal.
+ * Creates the BLE manager context with result queue and lock.
+ * Waits for NimBLE host stack to synchronize before returning.
  *
- * @return Context pointer on success, NULL on failure.
+ * @param timeout_ms Maximum time to wait for sync.
+ * @return Manager context pointer on success, NULL on timeout/failure.
  */
 ble_mgr_ctx_t *ble_mgr_init(uint32_t timeout_ms) {
     ble_mgr_ctx_t *mgr_ctx = &s_mgr;
@@ -883,6 +885,12 @@ ble_mgr_status_t ble_mgr_send(ble_mgr_ctx_t *mgr_ctx, uint16_t chr_handle, const
  * @param mgr_ctx BLE manager context.
  *
  * @return true when connected.
+ */
+/**
+ * @brief Check BLE manager connection state.
+ *
+ * @param mgr_ctx BLE manager context.
+ * @return True if connected.
  */
 bool ble_mgr_is_connected(ble_mgr_ctx_t *mgr_ctx) {
     return mgr_ctx != NULL && mgr_ctx->is_connected;

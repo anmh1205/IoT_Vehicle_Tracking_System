@@ -29,6 +29,13 @@ void modem_lte_mark_rdy_seen(void) {
     s_rdy_seen = true;
 }
 
+/**
+ * @brief Handle RDY URC from modem.
+ *
+ * Detects "RDY" message indicating modem is ready.
+ *
+ * @param urc_line URC line from modem.
+ */
 void modem_lte_on_urc_rdy(const char *urc_line) {
     if (urc_line == NULL) {
         return;
@@ -40,10 +47,22 @@ void modem_lte_on_urc_rdy(const char *urc_line) {
     }
 }
 
+/**
+ * @brief Get inverse setting name for logging.
+ *
+ * @param inverse_mask Inverse mask value.
+ * @return String name ("ON" or "OFF").
+ */
 const char *modem_lte_inverse_name(uint32_t inverse_mask) {
     return (inverse_mask & UART_SIGNAL_RXD_INV) != 0U ? "ON" : "OFF";
 }
 
+/**
+ * @brief Get data bits name for logging.
+ *
+ * @param data_bits UART data bits setting.
+ * @return String representation ("5"-"8").
+ */
 const char *modem_lte_data_bits_name(uart_word_length_t data_bits) {
     switch (data_bits) {
         case UART_DATA_5_BITS:
@@ -59,6 +78,12 @@ const char *modem_lte_data_bits_name(uart_word_length_t data_bits) {
     }
 }
 
+/**
+ * @brief Get parity name for logging.
+ *
+ * @param parity UART parity setting.
+ * @return String representation ("N", "E", "O").
+ */
 const char *modem_lte_parity_name(uart_parity_t parity) {
     switch (parity) {
         case UART_PARITY_DISABLE:
@@ -72,6 +97,12 @@ const char *modem_lte_parity_name(uart_parity_t parity) {
     }
 }
 
+/**
+ * @brief Get stop bits name for logging.
+ *
+ * @param stop_bits UART stop bits setting.
+ * @return String representation ("1", "1.5", "2").
+ */
 const char *modem_lte_stop_bits_name(uart_stop_bits_t stop_bits) {
     switch (stop_bits) {
         case UART_STOP_BITS_1:
@@ -85,6 +116,12 @@ const char *modem_lte_stop_bits_name(uart_stop_bits_t stop_bits) {
     }
 }
 
+/**
+ * @brief Get source clock name for logging.
+ *
+ * @param source_clk UART clock source.
+ * @return String name.
+ */
 const char *modem_lte_source_clk_name(uart_sclk_t source_clk) {
     if (source_clk == UART_SCLK_DEFAULT) {
         return "DEFAULT";
@@ -112,6 +149,12 @@ const char *modem_lte_source_clk_name(uart_sclk_t source_clk) {
     return "UNKNOWN";
 }
 
+/**
+ * @brief Apply UART configuration to modem.
+ *
+ * @param cfg UART configuration to apply.
+ * @return ESP_OK on success, error code on failure.
+ */
 static esp_err_t modem_lte_apply_uart_cfg(const modem_lte_uart_probe_cfg_t *cfg) {
     if (cfg == NULL) {
         return ESP_ERR_INVALID_ARG;
@@ -140,10 +183,22 @@ static esp_err_t modem_lte_apply_uart_cfg(const modem_lte_uart_probe_cfg_t *cfg)
     return modem_at_set_frame_format(cfg->data_bits, cfg->parity, cfg->stop_bits);
 }
 
+/**
+ * @brief Apply saved AT-sync UART config.
+ *
+ * Applies the stored UART configuration for AT sync.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t modem_lte_apply_at_sync_config(void) {
     return modem_lte_apply_uart_cfg(&s_active_uart_cfg);
 }
 
+/**
+ * @brief Reset UART config to defaults.
+ *
+ * Sets active config to default values.
+ */
 void modem_lte_set_fixed_uart_cfg(void) {
     s_active_uart_cfg = (modem_lte_uart_probe_cfg_t){
         .tx_pin = PIN_MODEM_TX,
@@ -157,6 +212,16 @@ void modem_lte_set_fixed_uart_cfg(void) {
     };
 }
 
+/**
+ * @brief Create printable preview of response.
+ *
+ * Copies response to preview buffer, replacing non-printable
+ * chars with dots.
+ *
+ * @param response Source response string.
+ * @param preview Output buffer.
+ * @param preview_size Buffer capacity.
+ */
 void modem_lte_response_preview(const char *response, char *preview, size_t preview_size) {
     if (preview == NULL || preview_size == 0U) {
         return;
@@ -176,6 +241,13 @@ void modem_lte_response_preview(const char *response, char *preview, size_t prev
     preview[copy_len] = '\0';
 }
 
+/**
+ * @brief Log partial AT probe response.
+ *
+ * Logs warning with response preview for debugging.
+ *
+ * @param response Response to log.
+ */
 void modem_lte_log_at_probe_response(const char *response) {
     if (response == NULL || response[0] == '\0') {
         return;
@@ -187,6 +259,11 @@ void modem_lte_log_at_probe_response(const char *response) {
              strstr(response, "OK") != NULL ? 1 : 0);
 }
 
+/**
+ * @brief Log current UART config.
+ *
+ * Logs active UART configuration for debugging.
+ */
 void modem_lte_log_fixed_uart_cfg(void) {
     ESP_LOGI(MODEM_LTE_TAG,
              "AT sync fixed UART tx=%d rx=%d baud=%lu invert=%s fmt=%s%s%s clk=%s",
@@ -200,6 +277,16 @@ void modem_lte_log_fixed_uart_cfg(void) {
              modem_lte_source_clk_name(s_active_uart_cfg.source_clk));
 }
 
+/**
+ * @brief Force DTR toggle for wake.
+ *
+ * Toggles DTR line to wake modem from sleep.
+ */
+/**
+ * @brief Force DTR toggle for wake.
+ *
+ * Toggles DTR line to wake modem from sleep.
+ */
 void modem_lte_force_dtr_wake_pulse(void) {
 #if !MODEM_LTE_ENABLE_DTR_WAKE_PULSE
     return;

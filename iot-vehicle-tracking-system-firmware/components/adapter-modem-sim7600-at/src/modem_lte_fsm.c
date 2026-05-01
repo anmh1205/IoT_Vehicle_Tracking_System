@@ -15,6 +15,12 @@
  * @brief LTE connection state machine handlers behind the modem facade.
  */
 
+/**
+ * @brief Get state name string.
+ *
+ * @param state State enum.
+ * @return State name string.
+ */
 const char *modem_lte_state_name(modem_lte_state_t state) {
     switch (state) {
         case MODEM_LTE_STATE_IDLE:
@@ -52,6 +58,13 @@ const char *modem_lte_state_name(modem_lte_state_t state) {
     }
 }
 
+/**
+ * @brief Transition to new state.
+ *
+ * @param next_state Target state.
+ * @param now_ms Current timestamp.
+ * @param delay_ms Delay before transition.
+ */
 void modem_lte_transition(modem_lte_state_t next_state, uint64_t now_ms, uint64_t delay_ms) {
     if (s_state != next_state) {
         ESP_LOGI(MODEM_LTE_TAG,

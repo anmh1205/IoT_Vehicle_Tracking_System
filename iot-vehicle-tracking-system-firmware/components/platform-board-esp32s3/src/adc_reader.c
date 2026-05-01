@@ -102,6 +102,19 @@ static float adc_reader_read_voltage(adc_channel_t channel,
     return (mv_avg / 1000.0f) * divider_ratio;
 }
 
+/**
+ * @brief Initialize ADC one-shot unit and calibration.
+ *
+ * Initializes the ESP32 ADC1 in one-shot mode for reading
+ * board supply voltage and vehicle battery voltage.
+ * Uses voltage divider networks (11:1 ratio) to scale voltages
+ * into ADC input range.
+ *
+ * Configures both GPIO3 (battery) and GPIO4 (supply) ADC channels.
+ * Attempts to enable calibration scheme for accuracy.
+ *
+ * @return ESP_OK on success, ESP_FAIL on initialization failure.
+ */
 esp_err_t adc_reader_init(void) {
     adc_oneshot_unit_init_cfg_t unit_cfg = {
         .unit_id = ADC_UNIT_USED,
@@ -136,6 +149,17 @@ esp_err_t adc_reader_init(void) {
     return ESP_OK;
 }
 
+/**
+ * @brief Read device (ESP32) input voltage.
+ *
+ * Reads the voltage at the device's power input after the
+ * voltage divider. This reflects the battery voltage after
+ * the reverse-protection circuit.
+ *
+ * Takes multiple samples and averages for stability.
+ *
+ * @return Voltage in volts (V), 0.0 if ADC not initialized.
+ */
 float adc_read_device_battery_voltage(void) {
     return adc_reader_read_voltage(ADC_CHANNEL_BATT,
                                    s_batt_cali_handle,
@@ -143,6 +167,16 @@ float adc_read_device_battery_voltage(void) {
                                    ADC_BATT_DIVIDER_RATIO);
 }
 
+/**
+ * @brief Read vehicle battery (external) voltage.
+ *
+ * Reads the voltage at the external vehicle battery input after
+ * the voltage divider. This is the main vehicle system voltage.
+ *
+ * Takes multiple samples and averages for stability.
+ *
+ * @return Voltage in volts (V), 0.0 if ADC not initialized.
+ */
 float adc_read_vehicle_battery_voltage(void) {
     return adc_reader_read_voltage(ADC_CHANNEL_SUPPLY,
                                    s_supply_cali_handle,
@@ -150,6 +184,12 @@ float adc_read_vehicle_battery_voltage(void) {
                                    ADC_SUPPLY_DIVIDER_RATIO);
 }
 
+/**
+ * @brief Release ADC resources.
+ *
+ * Deletes calibration handles and ADC unit.
+ * Called during shutdown or when ADC is no longer needed.
+ */
 void adc_reader_deinit(void) {
     if (s_batt_cali_handle != NULL) {
 #if ADC_CALI_SCHEME_CURVE_FITTING_SUPPORTED

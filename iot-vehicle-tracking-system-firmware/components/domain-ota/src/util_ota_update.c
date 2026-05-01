@@ -17,8 +17,50 @@
 /**
  * @file util_ota_update.c
  * @brief OTA download, verify, and install flow behind the public util facade.
+ *
+ * ## OTA Update Flow
+ *
+ * ### 1. Pre-Update Checks
+ *    - Check min battery voltage (ota_min_battery_mv config)
+ *    - Validate URL format (http:// or https://)
+ *    - Parse optional ?encoding=hex query param
+ *    - Select update partition (ota / non-ota)
+ *
+ * ### 2. HTTP Session Setup
+ *    - Initialize HTTP service (AT+HTTPTERM/AT+HTTPSTART)
+ *    - Configure SSL context for HTTPS
+ *    - Configure HTTP parameter (AT+HTTPPARA)
+ *    - Initiate request (AT+HTTPACTION=0 for GET)
+ *    - Read response header (AT+HTTPREAD)
+ *
+ * ### 3. Download and Verify
+ *    - Transfer mode: binary (default) or hex-encoded
+ *    - Read response in chunks (4KB buffers)
+ *    - SHA-256 hash running computation
+ *    - Write to OTA partition handle
+ *    - Progress callback every 4KB
+ *
+ * ### 4. Validation
+ *    - Verify magic byte (0xEOF = valid ESP image)
+ *    - Compute SHA-256 of downloaded image
+ *    - Compare against ?hash= query param (if provided)
+ *
+ * ### 5. Commit or Rollback
+ *    - Success: esp_ota_set_boot_partition()
+ *    - Failure: trigger rollback, reset
+ *
+ * ## Transfer Encoding
+ *    - Binary: raw HTTP response body
+ *    - Hex: ASCII hex string, decode to binary before OTA write
+ *
+ * ## Error Recovery
+ *    - Battery low: reject OTA, log warning
+ *    - HTTP timeout: retry with backoff
+ *    - Invalid image: rollback, log error
+ *    - SHA mismatch: reject, log error
  */
 
+/** OTA update context. */
 typedef struct {
     esp_err_t err;
     esp_ota_handle_t ota_handle;
@@ -38,6 +80,13 @@ typedef struct {
     uint8_t last_emitted_download_progress;
 } util_ota_update_ctx_t;
 
+/**
+ * @brief Fill partition label into output buffer.
+ *
+ * @param partition Source partition.
+ * @param out Output buffer.
+ * @param out_size Buffer size.
+ */
 void util_fill_partition_label(const esp_partition_t *partition, char *out, size_t out_size) {
     if (partition == NULL) {
         util_copy_string(out, out_size, "unknown");
@@ -590,6 +639,17 @@ static void util_ota_cleanup_update(util_ota_update_ctx_t *ctx,
     }
 }
 
+/**
+ * @brief Apply OTA update.
+ *
+ * @param cfg Configuration.
+ * @param current_version Current firmware version.
+ * @param cmd OTA command.
+ * @param out_status Output status.
+ * @param status_callback Status callback.
+ * @param status_callback_ctx Callback context.
+ * @return ESP_OK on success.
+ */
 esp_err_t util_ota_apply_update(const config_t *cfg,
                                 const char *current_version,
                                 const ota_command_t *cmd,

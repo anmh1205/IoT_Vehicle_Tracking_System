@@ -101,6 +101,13 @@ static uint64_t modem_gnss_parse_timestamp(const char *utc_string) {
     return ((uint64_t)epoch * 1000ULL) + (uint64_t)atoi(fractional);
 }
 
+/**
+ * @brief Check if log is due based on throttle interval.
+ *
+ * @param last_log_ms Last log timestamp.
+ * @param now_ms Current time.
+ * @return True if logging is allowed.
+ */
 static bool modem_gnss_log_due(uint64_t *last_log_ms, uint64_t now_ms) {
     if (last_log_ms == NULL) {
         return false;
@@ -112,6 +119,13 @@ static bool modem_gnss_log_due(uint64_t *last_log_ms, uint64_t now_ms) {
     return false;
 }
 
+/**
+ * @brief Log GNSS command and response.
+ *
+ * @param command AT command.
+ * @param err Error code.
+ * @param response Response buffer.
+ */
 static void modem_gnss_log_command_response(const char *command, esp_err_t err, const char *response) {
     ESP_LOGI(TAG,
              "gnss command cmd=%s err=%s response_len=%u has_ok=%d has_fix=%d",
@@ -122,6 +136,14 @@ static void modem_gnss_log_command_response(const char *command, esp_err_t err, 
              response != NULL && (strstr(response, "+CGNSINF:") != NULL || strstr(response, "+CGPSINFO:") != NULL) ? 1 : 0);
 }
 
+/**
+ * @brief Calculate query ready delay based on power state.
+ *
+ * @param known_power_off Whether power was off.
+ * @param off_duration_ms Duration of power off.
+ * @param resumed_session Whether resuming session.
+ * @return Delay in ms.
+ */
 static uint32_t modem_gnss_query_ready_delay_ms(bool known_power_off, uint64_t off_duration_ms, bool resumed_session) {
     if (resumed_session) {
         return MODEM_GNSS_QUERY_READY_RESUME_MS;
@@ -134,6 +156,14 @@ static uint32_t modem_gnss_query_ready_delay_ms(bool known_power_off, uint64_t o
     return MODEM_GNSS_QUERY_READY_COLD_START_MS;
 }
 
+/**
+ * @brief Arm query ready window after power on.
+ *
+ * @param start_path Start path name.
+ * @param known_power_off Whether power was off.
+ * @param off_duration_ms Off duration.
+ * @param resumed_session Whether resuming session.
+ */
 static void modem_gnss_arm_query_ready_window(const char *start_path,
                                               bool known_power_off,
                                               uint64_t off_duration_ms,
@@ -550,6 +580,11 @@ bool modem_gnss_has_fix(void) {
     return s_last_gnss.fix_valid;
 }
 
+/**
+ * @brief Check if GNSS query is ready.
+ *
+ * @return True if ready.
+ */
 bool modem_gnss_is_query_ready(void) {
     if (!s_gnss_powered) {
         return false;

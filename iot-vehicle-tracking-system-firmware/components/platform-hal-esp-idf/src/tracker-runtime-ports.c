@@ -11,6 +11,12 @@
 
 static const char *TAG = "RUNTIME_PORTS";
 
+/**
+ * @brief Validate runtime ports registry.
+ *
+ * @param ports Port registry structure.
+ * @return ESP_OK if valid.
+ */
 esp_err_t tracker_runtime_ports_validate(const tracker_runtime_ports_t *ports) {
     ESP_RETURN_ON_NULL(ports, ESP_ERR_INVALID_ARG, TAG, "ports registry is NULL");
 

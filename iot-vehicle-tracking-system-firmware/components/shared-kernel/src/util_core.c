@@ -15,6 +15,17 @@
 static const char *UTIL_TAG = "UTIL";
 static bool s_sleep_enabled = false;
 
+/**
+ * @brief Safe string copy with guaranteed null termination.
+ *
+ * Copies string from src to dst with bounds checking.
+ * Always null-terminates dst even if truncation occurs.
+ *
+ * @param dst Destination buffer.
+ * @param dst_size Size of destination buffer.
+ * @param src Source string (can be NULL).
+ * @return Number of characters copied (excluding null terminator).
+ */
 size_t util_copy_string(char *dst, size_t dst_size, const char *src) {
     if (dst == NULL || dst_size == 0) {
         return 0;
@@ -31,10 +42,26 @@ size_t util_copy_string(char *dst, size_t dst_size, const char *src) {
     return src_len;
 }
 
+/**
+ * @brief Get ESP32 high-resolution timer in milliseconds.
+ *
+ * Returns uptime since boot in milliseconds.
+ *
+ * @return Uptime in milliseconds.
+ */
 uint64_t util_uptime_ms(void) {
     return (uint64_t)(esp_timer_get_time() / 1000ULL);
 }
 
+/**
+ * @brief Generate RFC 4122 compliant UUID v4.
+ *
+ * Generates a random UUID using ESP32 random number generator.
+ * Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+ *
+ * @param out Output buffer (minimum 37 bytes).
+ * @param out_size Size of output buffer.
+ */
 void util_generate_uuid_v4(char *out, size_t out_size) {
     if (out == NULL || out_size < 37) {
         return;
@@ -73,6 +100,16 @@ void util_generate_uuid_v4(char *out, size_t out_size) {
                    bytes[15]);
 }
 
+/**
+ * @brief Generate unique boot identifier.
+ *
+ * Creates a boot identifier string including boot count
+ * and random salt. Used for crash dump tracking.
+ *
+ * @param out Output buffer.
+ * @param out_size Buffer size.
+ * @param boot_count Sequential boot number.
+ */
 void util_generate_boot_id(char *out, size_t out_size, uint32_t boot_count) {
     if (out == NULL || out_size == 0) {
         return;
@@ -86,14 +123,32 @@ void util_generate_boot_id(char *out, size_t out_size, uint32_t boot_count) {
                    (unsigned long)salt);
 }
 
+/**
+ * @brief Enable/disable sleep mode globally.
+ *
+ * @param enabled true to allow sleep, false to disable.
+ */
 void util_set_sleep_enabled(bool enabled) {
     s_sleep_enabled = enabled;
 }
 
+/**
+ * @brief Check if sleep mode is enabled.
+ *
+ * @return true if sleep is permitted, false otherwise.
+ */
 bool util_is_sleep_enabled(void) {
     return s_sleep_enabled;
 }
 
+/**
+ * @brief Clamp float value to inclusive range.
+ *
+ * @param value Input value.
+ * @param min_value Lower bound.
+ * @param max_value Upper bound.
+ * @return Clamped value within bounds.
+ */
 float util_clamp_float(float value, float min_value, float max_value) {
     if (value < min_value) {
         return min_value;
@@ -104,6 +159,14 @@ float util_clamp_float(float value, float min_value, float max_value) {
     return value;
 }
 
+/**
+ * @brief Clamp integer value to inclusive range.
+ *
+ * @param value Input value.
+ * @param min_value Lower bound.
+ * @param max_value Upper bound.
+ * @return Clamped value within bounds.
+ */
 int util_clamp_int(int value, int min_value, int max_value) {
     if (value < min_value) {
         return min_value;
@@ -114,10 +177,24 @@ int util_clamp_int(int value, int min_value, int max_value) {
     return value;
 }
 
+/**
+ * @brief Check if string is NULL or empty.
+ *
+ * @param value String to check (can be NULL).
+ * @return true if NULL or empty, false otherwise.
+ */
 bool util_string_empty(const char *value) {
     return value == NULL || value[0] == '\0';
 }
 
+/**
+ * @brief Convert hex string to byte array (fixed length).
+ *
+ * @param hex Hex string (e.g., "deadbeef").
+ * @param out Output byte buffer.
+ * @param out_len Exact number of bytes to convert.
+ * @return true on success, false on invalid hex.
+ */
 bool util_hex_to_bytes(const char *hex, uint8_t *out, size_t out_len) {
     if (hex == NULL || out == NULL) {
         return false;
@@ -138,6 +215,16 @@ bool util_hex_to_bytes(const char *hex, uint8_t *out, size_t out_len) {
     return true;
 }
 
+/**
+ * @brief Convert hex string to byte array (variable length).
+ *
+ * @param hex Input hex string.
+ * @param hex_len Length of hex string (must be even).
+ * @param out Output byte buffer.
+ * @param out_cap Capacity of output buffer.
+ * @param out_written Number of bytes written.
+ * @return true on success, false on invalid input.
+ */
 bool util_hex_to_bytes_span(const char *hex,
                             size_t hex_len,
                             uint8_t *out,
@@ -168,6 +255,15 @@ bool util_hex_to_bytes_span(const char *hex,
     return true;
 }
 
+/**
+ * @brief Log hex data preview for diagnostics.
+ *
+ * Logs first 24 bytes of data in hex format for debugging.
+ *
+ * @param label Descriptive label for log line.
+ * @param data Byte array to log.
+ * @param len Length of data.
+ */
 void util_log_hex_preview(const char *label, const uint8_t *data, size_t len) {
     if (data == NULL || len == 0U) {
         return;

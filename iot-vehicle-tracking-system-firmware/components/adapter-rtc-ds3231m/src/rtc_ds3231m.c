@@ -49,6 +49,12 @@ static uint8_t rtc_bcd_to_dec(uint8_t value) {
     return (uint8_t)(((value >> 4U) * 10U) + (value & 0x0FU));
 }
 
+/**
+ * @brief Convert decimal to BCD.
+ *
+ * @param value Decimal value.
+ * @return BCD value.
+ */
 static uint8_t rtc_dec_to_bcd(uint8_t value) {
     return (uint8_t)(((value / 10U) << 4U) | (value % 10U));
 }
@@ -57,6 +63,13 @@ static bool rtc_is_leap_year(int year) {
     return ((year % 4) == 0 && (year % 100) != 0) || ((year % 400) == 0);
 }
 
+/**
+ * @brief Get days in month.
+ *
+ * @param year Year.
+ * @param month_1_to_12 Month (1-12).
+ * @return Days in month.
+ */
 static uint8_t rtc_days_in_month(int year, int month_1_to_12) {
     static const uint8_t days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     if (month_1_to_12 == 2 && rtc_is_leap_year(year)) {

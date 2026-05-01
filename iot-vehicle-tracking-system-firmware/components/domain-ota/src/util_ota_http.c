@@ -105,6 +105,9 @@ static const char *util_ota_http_transport_error_name(int status_code) {
     }
 }
 
+/**
+ * @brief Reset HTTP action state.
+ */
 void util_ota_http_action_reset(void) {
     s_ota_http_action.waiting = false;
     s_ota_http_action.ready = false;
@@ -156,6 +159,9 @@ static void util_ota_httpaction_urc_cb(const char *line) {
     s_ota_http_action.ready = true;
 }
 
+/**
+ * @brief Register HTTP URC once.
+ */
 void util_ota_http_register_urc_once(void) {
     if (s_ota_http_urc_registered) {
         return;
@@ -165,6 +171,14 @@ void util_ota_http_register_urc_once(void) {
     s_ota_http_urc_registered = true;
 }
 
+/**
+ * @brief Wait for HTTP action response.
+ *
+ * @param out_status_code Output status code.
+ * @param out_data_len Output data length.
+ * @param timeout_ms Timeout in ms.
+ * @return ESP_OK on success.
+ */
 esp_err_t util_ota_wait_http_action(int *out_status_code, int *out_data_len, uint32_t timeout_ms) {
     ESP_RETURN_ON_NULL(out_status_code, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_status_code is NULL");
     ESP_RETURN_ON_NULL(out_data_len, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_data_len is NULL");
@@ -186,6 +200,15 @@ esp_err_t util_ota_wait_http_action(int *out_status_code, int *out_data_len, uin
     return ESP_ERR_TIMEOUT;
 }
 
+/**
+ * @brief Parse HTTPREAD payload from response.
+ *
+ * @param response Response buffer.
+ * @param response_len Buffer length.
+ * @param out_data Output data pointer.
+ * @param out_len Output data length.
+ * @return True if parsed successfully.
+ */
 bool util_ota_parse_httpread_payload(const uint8_t *response,
                                      size_t response_len,
                                      const uint8_t **out_data,
@@ -245,6 +268,13 @@ bool util_ota_parse_httpread_payload(const uint8_t *response,
     return true;
 }
 
+/**
+ * @brief Check if data is hex ASCII bytes.
+ *
+ * @param data Data buffer.
+ * @param len Buffer length.
+ * @return True if all bytes are hex digits.
+ */
 bool util_is_hex_ascii_bytes(const uint8_t *data, size_t len) {
     if (data == NULL || len == 0U || (len % 2U) != 0U) {
         return false;

@@ -10,8 +10,46 @@
 /**
  * @file mqtt_publish.c
  * @brief Publish and subscribe helpers behind the tracker MQTT facade.
+ *
+ * ## MQTT Publish/Subscribe Flow
+ *
+ * ### 1. Publish Path (tracker_mqtt_publish)
+ *    - Validates topic and payload
+ *    - Formats AT+CMQTTTOPIC command with topic
+ *    - Sends AT+CMQTTPAYLOAD with JSON data
+ *    - Sends AT+CMQTTPUB for publish
+ *    - Waits for OK/ERROR response
+ *    - Falls back to offline_queue on failure
+ *
+ * ### 2. Subscribe Path (tracker_mqtt_subscribe)
+ *    - Formats AT+CMQTTSUB with topic + QoS
+ *    - Sends command, waits for result
+ *    - Command topic uses QoS 1 for reliability
+ *
+ * ### 3. Topic Classes
+ *    - rawdata: High-frequency telemetry (QoS 0)
+ *    - status: Device status updates (QoS 1)
+ *    - events: Event notifications (QoS 1)
+ *    - firmware: OTA status (QoS 1)
+ *    - commands: Incoming commands (QoS 1)
+ *
+ * ### 4. Error Handling
+ *    - MQTT disconnected: enqueue to offline_queue
+ *    - AT command timeout: retry with backoff
+ *    - Modem error: log, return ESP_FAIL
+ *
+ * ## Publish vs Subscribe Thread Safety
+ *    - Publish uses blocking AT send
+ *    - URC parser handles async responses
+ *    - Only one in-flight publish at a time
  */
 
+/**
+ * @brief Get topic class name.
+ *
+ * @param topic Topic string.
+ * @return Class name.
+ */
 static const char *tracker_mqtt_topic_class(const char *topic) {
     if (topic == s_topic_rawdata || (topic != NULL && strcmp(topic, s_topic_rawdata) == 0)) {
         return "rawdata";
@@ -31,6 +69,14 @@ static const char *tracker_mqtt_topic_class(const char *topic) {
     return "external";
 }
 
+/**
+ * @brief Publish with message ID.
+ *
+ * @param topic Topic.
+ * @param payload Payload.
+ * @param qos QoS level.
+ * @return Message ID or -1 on failure.
+ */
 int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *payload, int qos) {
     ESP_RETURN_ON_FALSE(s_connected, -1, TRACKER_MQTT_TAG, "MQTT not connected");
     ESP_RETURN_ON_NULL(topic, -1, TRACKER_MQTT_TAG, "topic is NULL");

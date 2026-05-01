@@ -14,6 +14,38 @@
 /**
  * @file mqtt_session.c
  * @brief MQTT service/client/session lifecycle helpers for the SIM7600 facade.
+ *
+ * ## MQTT Session Lifecycle Flow
+ *
+ * ### 1. Service Start (tracker_mqtt_start_service)
+ *    AT+CMQTTSTART -> Start MQTT service on modem
+ *    Error codes: 0=success, 23=already started
+ *
+ * ### 2. TLS Configuration (tracker_mqtt_configure_tls)
+ *    AT+CSSLCFG (sslversion, authmode, certificate, ignorelocaltime, negotiateTime, enableSNI)
+ *    Configures TLS context for secure connections
+ *    Can be skipped if TLS disabled in config
+ *
+ * ### 3. Client Acquisition (tracker_mqtt_acquire_client)
+ *    AT+CMQTTACCQ -> Acquire MQTT client with device ID
+ *    Error codes: 0=success, 19=client already in use
+ *
+ * ### 4. Client Options (tracker_mqtt_apply_client_options)
+ *    AT+CMQTTCFG -> Set UTF-8 check, operation timeout
+ *
+ * ### 5. Connection (tracker_mqtt_connect)
+ *    AT+CMQTTCONNECT -> Connect to broker with keepalive
+ *    AT+CMQTTSUB -> Subscribe to command topic
+ *    Polls for session window until connected
+ *
+ * ### 6. Disconnect (tracker_mqtt_disconnect)
+ *    AT+CMQTTDISCONN -> Graceful disconnect from broker
+ *    Resets s_connected, s_commands_subscribed
+ *
+ * ## Error Recovery
+ * - Connection timeout: probe session window, retry with backoff
+ * - Client in use: force disconnect, reacquire
+ * - TLS errors: fallback to non-TLS if configured
  */
 
 #ifndef CONFIG_TRACKER_TLS_VERIFY_SERVER
@@ -26,6 +58,12 @@
 #define CONFIG_TRACKER_TLS_CA_CERT_NAME ""
 #endif
 
+/**
+ * @brief Get endpoint class name.
+ *
+ * @param server_addr Server address.
+ * @return Class name ("primary" or "fallback").
+ */
 static const char *tracker_mqtt_endpoint_class(const char *server_addr) {
     if (!util_string_empty(server_addr) && strcmp(server_addr, s_server_addr_fallback) == 0) {
         return "fallback";
@@ -33,6 +71,18 @@ static const char *tracker_mqtt_endpoint_class(const char *server_addr) {
     return "primary";
 }
 
+/**
+ * @brief Send lifecycle command to modem.
+ *
+ * @param cmd AT command.
+ * @param timeout_ms Timeout in ms.
+ * @param result_prefix Expected result prefix.
+ * @param has_client_index Whether client index is used.
+ * @param allowed_codes Allowed error codes.
+ * @param allowed_count Count of allowed codes.
+ * @param out_err_code Output error code.
+ * @return ESP_OK on success.
+ */
 static esp_err_t tracker_mqtt_send_lifecycle_cmd(const char *cmd,
                                                  uint32_t timeout_ms,
                                                  const char *result_prefix,
@@ -126,6 +176,11 @@ static esp_err_t tracker_mqtt_configure_tls_certificate(char *cmd, size_t cmd_si
     return ESP_OK;
 }
 
+/**
+ * @brief Start MQTT service.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t tracker_mqtt_start_service(void) {
     if (s_service_started) {
         return ESP_OK;

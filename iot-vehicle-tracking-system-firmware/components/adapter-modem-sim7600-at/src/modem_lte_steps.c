@@ -13,10 +13,30 @@
  * @brief Reusable LTE step helpers for AT commands, registration parsing, and diagnostics.
  */
 
+/**
+ * @brief Send AT command and check expected response.
+ *
+ * Simple wrapper for sending AT with expect token.
+ *
+ * @param cmd AT command to send.
+ * @param expect Expected token in response.
+ * @param timeout_ms Timeout in ms.
+ * @return ESP_OK on success, error on failure.
+ */
 esp_err_t modem_lte_send_simple(const char *cmd, const char *expect, uint32_t timeout_ms) {
     return modem_at_send_expect(cmd, expect, timeout_ms);
 }
 
+/**
+ * @brief Check if diagnostic log is due.
+ *
+ * Timestamps-based logging throttle.
+ *
+ * @param now_ms Current time in ms.
+ * @param last_log_ms Pointer to last log timestamp.
+ * @param interval_ms Interval threshold.
+ * @return True if logging is due.
+ */
 bool modem_lte_diag_log_due(uint64_t now_ms, uint64_t *last_log_ms, uint64_t interval_ms) {
     if (last_log_ms == NULL) {
         return true;
@@ -30,6 +50,14 @@ bool modem_lte_diag_log_due(uint64_t now_ms, uint64_t *last_log_ms, uint64_t int
     return false;
 }
 
+/**
+ * @brief Try to resume alive modem via AT probe.
+ *
+ * Fast-path: probe AT, skip power/RESET toggle on success.
+ *
+ * @param now_ms Current timestamp.
+ * @return True if modem is alive.
+ */
 bool modem_lte_try_resume_alive_modem(uint64_t now_ms) {
     esp_err_t at_init_err = modem_at_init();
     if (at_init_err != ESP_OK) {
@@ -68,6 +96,11 @@ bool modem_lte_try_resume_alive_modem(uint64_t now_ms) {
     return true;
 }
 
+/**
+ * @brief Log modem hardware lines if available.
+ *
+ * Logs STATUS and NET-LIGHT GPIO states for diagnostics.
+ */
 void modem_lte_log_hw_lines_if_available(void) {
     bool level = false;
 
@@ -90,6 +123,16 @@ void modem_lte_log_hw_lines_if_available(void) {
     }
 }
 
+/**
+ * @brief Parse +CEREG registration response.
+ *
+ * Extracts n and stat values from +CEREG URC.
+ *
+ * @param response AT response.
+ * @param out_n Output for n value (optional).
+ * @param out_stat Output for stat value (optional).
+ * @return True if parsed successfully.
+ */
 bool modem_lte_parse_cereg(const char *response, int *out_n, int *out_stat) {
     if (response == NULL) {
         return false;
@@ -115,6 +158,12 @@ bool modem_lte_parse_cereg(const char *response, int *out_n, int *out_stat) {
     return true;
 }
 
+/**
+ * @brief Get registration state name.
+ *
+ * @param stat CEREG stat value.
+ * @return String name for stat value.
+ */
 const char *modem_lte_cereg_stat_name(int stat) {
     switch (stat) {
         case 0:
@@ -134,6 +183,11 @@ const char *modem_lte_cereg_stat_name(int stat) {
     }
 }
 
+/**
+ * @brief Log registration diagnostics snapshot.
+ *
+ * Logs CPIN, CEREG, CSQ, COPS for debugging.
+ */
 void modem_lte_log_registration_snapshot(void) {
     static const struct {
         const char *cmd;

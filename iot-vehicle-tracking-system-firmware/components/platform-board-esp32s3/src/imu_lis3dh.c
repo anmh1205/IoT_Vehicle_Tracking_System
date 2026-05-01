@@ -74,6 +74,11 @@ static bool imu_using_lis3dsh_compat(void) {
     return s_imu_chip == IMU_CHIP_LIS3DSH_COMPAT;
 }
 
+/**
+ * @brief Get detected chip name.
+ *
+ * @return String name.
+ */
 static const char *imu_detected_chip_name(void) {
     return imu_using_lis3dsh_compat() ? "lis3dsh-compat" : "lis3dh";
 }
@@ -389,6 +394,11 @@ esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_
     return ESP_OK;
 }
 
+/**
+ * @brief Clear motion interrupt flag.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t imu_clear_motion_interrupt(void) {
     ESP_RETURN_ON_NULL(s_dev_handle, ESP_ERR_INVALID_STATE, TAG, "IMU not initialized");
 
@@ -400,6 +410,11 @@ esp_err_t imu_clear_motion_interrupt(void) {
  * @brief Read digital state of motion interrupt pin.
  *
  * @return true when interrupt line is high.
+ */
+/**
+ * @brief Check motion interrupt status.
+ *
+ * @return True if motion detected.
  */
 bool imu_motion_detected(void) {
     return gpio_get_level(PIN_LIS3DH_INT) == 1;

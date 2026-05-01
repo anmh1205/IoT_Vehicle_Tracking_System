@@ -553,6 +553,12 @@ static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_han
  *
  * @return ESP_OK on success, otherwise ESP_ERR_INVALID_ARG.
  */
+/**
+ * @brief Set preferred OBD adapter address.
+ *
+ * @param address MAC address string.
+ * @return ESP_OK on success.
+ */
 esp_err_t ble_obd_set_preferred_address(const char *address) {
     if (util_string_empty(address)) {
         s_has_preferred_addr = false;

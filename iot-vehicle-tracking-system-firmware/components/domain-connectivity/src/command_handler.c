@@ -20,6 +20,43 @@
 /**
  * @file command_handler.c
  * @brief Parse command payloads from cloud and expose consumable runtime actions.
+ *
+ * ## Cloud Command Processing Flow
+ *
+ * ### 1. Command Reception
+ *    - MQTT subscribes to v1/{device_id}/commands
+ *    - Incoming JSON payload parsed from command topic
+ *    - Lock ensures thread-safe processing
+ *
+ * ### 2. Command Parsing (command_handler_process)
+ *    - Parse JSON using cJSON
+ *    - Extract command "action" field
+ *    - Validate required parameters per action type
+ *    - Enqueue action for FSM consumption
+ *
+ * ### 3. Supported Commands
+ *    - update_config: Apply new runtime config, persist to NVS
+ *    - ota_update: Trigger OTA download/install
+ *    - request_location: One-shot location request
+ *    - enable_tracking: Toggle telemetry publishing
+ *    - reset_device: Reboot device
+ *
+ * ### 4. Action Consumption
+ *    - FSM consumes actions via command_handler_consume_action()
+ *    - OTA commands have priority over config
+ *    - Location requests consumed immediately
+ *    - Tracking toggle is event-driven
+ *
+ * ## Thread Safety
+ *    - Uses FreeRTOS mutex for JSON parsing
+ *    - Command queue is ISR-safe for enqueue
+ *    - FSM only consumes from task context
+ *
+ * ## Error Handling
+ *    - Invalid JSON: log error, drop command
+ *    - Unknown action: log warning, drop command
+ *    - Parameter validation fail: log error, drop
+ *    - NVS write fail: log error, action not persisted
  */
 
 static const char *TAG = "COMMAND_HANDLER";

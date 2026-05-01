@@ -16,6 +16,37 @@
 /**
  * @file offline_queue.c
  * @brief SD-backed offline queue with FIFO replay and publish-result commit.
+ *
+ * ## Offline Queue Operation Flow
+ *
+ * ### 1. Initialization (offline_queue_init)
+ *    - Opens SD log file for read/write
+ *    - Loads metadata (write_seq, replay_seq, session_id)
+ *    - Initializes retry backoff states
+ *
+ * ### 2. Enqueue (offline_queue_enqueue)
+ *    - When MQTT is offline, append JSON payload to SD file
+ *    - Increments write_seq atomically
+ *    - Returns immediately (non-blocking)
+ *
+ * ### 3. Replay (offline_queue_tick/replay)
+ *    - Called periodically from FSM when MQTT is online
+ *    - Reads oldest unacked record (replay_seq)
+ *    - Publishes to MQTT topic
+ *    - On success: advances replay_seq, commits to SD
+ *    - On failure: applies retry backoff, delays next attempt
+ *
+ * ### 4. Queue Depth Check (offline_queue_depth)
+ *    - Returns write_seq - replay_seq + 1
+ *    - Used for diagnostics and throttling decisions
+ *
+ * ## Record Format
+ *    Each record: session_id (4B) + seq (4B) + timestamp (8B) + payload_len (2B) + payload (variable)
+ *
+ * ## Error Handling
+ *    - SD mount failure: retry with backoff (30s intervals)
+ *    - Publish failure: retry with backoff (exponential)
+ *    - Corrupt record: skip and advance replay_seq
  */
 
 static const char *TAG = "OFFLINE_QUEUE";
@@ -399,6 +430,11 @@ esp_err_t offline_queue_init(void) {
     return ESP_OK;
 }
 
+/**
+ * @brief Set session ID for new records.
+ *
+ * @param session_id Session ID.
+ */
 void offline_queue_set_session(uint32_t session_id) {
     s_ctx.session_id = session_id;
     if (session_id != 0 && sd_log_store_is_mounted()) {
@@ -406,6 +442,11 @@ void offline_queue_set_session(uint32_t session_id) {
     }
 }
 
+/**
+ * @brief Set online state for queue.
+ *
+ * @param online True if online.
+ */
 void offline_queue_set_online(bool online) {
 #if CONFIG_TRACKER_SD_DIAG_ENABLE
     if (s_ctx.online != online) {

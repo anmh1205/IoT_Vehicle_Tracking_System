@@ -16,11 +16,23 @@
  * @brief AT/URC parsing, result waits, and raw data-entry helpers for tracker MQTT.
  */
 
+/**
+ * @brief Check if MQTT error code indicates disconnection.
+ *
+ * @param err_code Error code from modem MQTT.
+ * @return true if error means disconnected, false otherwise.
+ */
 bool tracker_mqtt_err_indicates_disconnect(int err_code) {
     return err_code == MQTT_ERR_NETWORK_NOT_OPENED || err_code == MQTT_ERR_NO_CONNECTION ||
            err_code == MQTT_ERR_NOT_SUPPORTED_OPERATION || err_code == MQTT_ERR_SOCKET_CLOSED_BY_SERVER;
 }
 
+/**
+ * @brief Mark MQTT as disconnected and update state.
+ *
+ * @param reason Disconnection reason string.
+ * @param err_code Error code from modem.
+ */
 void tracker_mqtt_mark_disconnected(const char *reason, int err_code) {
     if (s_connected) {
         ESP_LOGW(TRACKER_MQTT_TAG,
@@ -32,12 +44,26 @@ void tracker_mqtt_mark_disconnected(const char *reason, int err_code) {
     s_commands_subscribed = false;
 }
 
+/**
+ * @brief Reset MQTT RX parser state.
+ *
+ * Clears all pending RX context for fresh parsing.
+ */
 void tracker_mqtt_rx_reset(void) {
     memset(&s_rx_ctx, 0, sizeof(s_rx_ctx));
     s_rx_ctx.client_index = -1;
     s_rx_pending_header = MQTT_RX_PENDING_NONE;
 }
 
+/**
+ * @brief Parse next integer from text cursor.
+ *
+ * Parses decimal integer, advances cursor past parsed value.
+ *
+ * @param cursor In/out pointer to text position.
+ * @param out_value Output for parsed integer.
+ * @return true on success, false on parse failure.
+ */
 bool tracker_mqtt_parse_next_int(const char **cursor, int *out_value) {
     ESP_RETURN_ON_FALSE(cursor != NULL, false, TRACKER_MQTT_TAG, "parse cursor null");
     ESP_RETURN_ON_FALSE(*cursor != NULL, false, TRACKER_MQTT_TAG, "parse cursor pointee null");
@@ -73,6 +99,17 @@ static const char *tracker_mqtt_find_last(const char *text, const char *needle) 
     return last;
 }
 
+/**
+ * @brief Parse list of integers from text by prefix.
+ *
+ * Finds last occurrence of prefix, then parses N integers.
+ *
+ * @param text Input text to search.
+ * @param prefix Prefix to find (e.g., "+CMQTTCONN:").
+ * @param out_values Output array for parsed values.
+ * @param value_count Number of integers to parse.
+ * @return true on full parse success, false on failure.
+ */
 bool tracker_mqtt_parse_int_list_from_text(const char *text,
                                            const char *prefix,
                                            int *out_values,
@@ -96,6 +133,15 @@ bool tracker_mqtt_parse_int_list_from_text(const char *text,
     return true;
 }
 
+/**
+ * @brief Parse disconnect state from MQTT response.
+ *
+ * Extracts disconnect state value from +CMQTTDISC response.
+ *
+ * @param response Modem response text.
+ * @param out_disc_state Output for disconnect state.
+ * @return true if parse success, false if not found.
+ */
 bool tracker_mqtt_parse_disconnect_state(const char *response, int *out_disc_state) {
     ESP_RETURN_ON_FALSE(response != NULL, false, TRACKER_MQTT_TAG, "response null");
     ESP_RETURN_ON_FALSE(out_disc_state != NULL, false, TRACKER_MQTT_TAG, "out_disc_state null");
@@ -209,6 +255,20 @@ bool tracker_mqtt_extract_error_code_from_response(const char *response, int *ou
     return false;
 }
 
+/**
+ * @brief Send AT command with retry policy.
+ *
+ * Sends MQTT AT command with optional logging and
+ * automatic disconnect detection.
+ *
+ * @param cmd AT command to send.
+ * @param timeout_ms Timeout in ms.
+ * @param response Response buffer.
+ * @param response_size Buffer capacity.
+ * @param log_command Whether to log command.
+ * @param log_result Whether to log response.
+ * @return ESP_OK on success, error on failure.
+ */
 esp_err_t tracker_mqtt_send_cmd_with_policy(const char *cmd,
                                             uint32_t timeout_ms,
                                             char *response,
@@ -247,32 +307,61 @@ esp_err_t tracker_mqtt_send_cmd_with_policy(const char *cmd,
     return ESP_OK;
 }
 
+/**
+ * @brief Send AT command without logging.
+ *
+ * Wrapper with defaults for silent operation.
+ *
+ * @param cmd AT command.
+ * @param timeout_ms Timeout.
+ * @param response Response buffer.
+ * @param response_size Buffer size.
+ * @return ESP_OK on success.
+ */
 esp_err_t tracker_mqtt_send_cmd(const char *cmd, uint32_t timeout_ms, char *response, size_t response_size) {
     return tracker_mqtt_send_cmd_with_policy(cmd, timeout_ms, response, response_size, false, false);
 }
 
+/**
+ * @brief Reset connect result wait state.
+ */
 void tracker_mqtt_reset_connect_wait(void) {
     s_connect_result_pending = false;
     s_connect_result_ready = false;
     s_connect_result_err = -1;
 }
 
+/**
+ * @brief Begin waiting for connect result.
+ */
 void tracker_mqtt_begin_connect_wait(void) {
     tracker_mqtt_reset_connect_wait();
     s_connect_result_pending = true;
 }
 
+/**
+ * @brief Reset publish result wait state.
+ */
 void tracker_mqtt_reset_publish_wait(void) {
     s_publish_result_pending = false;
     s_publish_result_ready = false;
     s_publish_result_err = -1;
 }
 
+/**
+ * @brief Begin waiting for publish result.
+ */
 void tracker_mqtt_begin_publish_wait(void) {
     tracker_mqtt_reset_publish_wait();
     s_publish_result_pending = true;
 }
 
+/**
+ * @brief Handle connect result from modem.
+ *
+ * @param client_index Client index from modem.
+ * @param err_code Error code from modem.
+ */
 void tracker_mqtt_on_connect_result_line(int client_index, int err_code) {
     if (!s_connect_result_pending || client_index != MQTT_CLIENT_INDEX) {
         return;

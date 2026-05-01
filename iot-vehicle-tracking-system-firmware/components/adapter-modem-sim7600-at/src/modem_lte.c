@@ -15,22 +15,39 @@
  * @brief Public compatibility facade for split LTE modem modules.
  */
 
+/** LTE initialization state. */
 bool s_lte_initialized = false;
+/** LTE data connection state. */
 bool s_lte_connected = false;
+/** LTE connect request flag. */
 bool s_connect_requested = false;
+/** LTE FSM state. */
 modem_lte_state_t s_state = MODEM_LTE_STATE_IDLE;
+/** Next action timestamp. */
 uint64_t s_next_action_ms = 0;
+/** State deadline timestamp. */
 uint64_t s_state_deadline_ms = 0;
+/** Backoff retry state. */
 retry_state_t s_lte_backoff_retry = {0};
+/** Recovery attempt counter. */
 uint32_t s_recover_attempts = 0;
+/** AT sync fail counter. */
 uint32_t s_at_sync_fail_count = 0;
+/** Last CPIN diagnostic log timestamp. */
 uint64_t s_cpin_diag_log_ms = 0;
+/** Last CEREG diagnostic log timestamp. */
 uint64_t s_cereg_diag_log_ms = 0;
+/** Last RDY diagnostic log timestamp. */
 uint64_t s_rdy_diag_log_ms = 0;
+/** Last AT sync diagnostic log timestamp. */
 uint64_t s_at_sync_diag_log_ms = 0;
+/** Last CEREG stat value. */
 int s_last_cereg_stat = -1;
+/** Last error code. */
 esp_err_t s_last_err = ESP_OK;
+/** RDY URC registered flag. */
 bool s_rdy_urc_registered = false;
+/** Active UART configuration. */
 modem_lte_uart_probe_cfg_t s_active_uart_cfg = {
     .tx_pin = PIN_MODEM_TX,
     .rx_pin = PIN_MODEM_RX,
@@ -41,6 +58,7 @@ modem_lte_uart_probe_cfg_t s_active_uart_cfg = {
     .stop_bits = UART_STOP_BITS_1,
     .source_clk = UART_SCLK_DEFAULT,
 };
+/** LTE backoff retry policy. */
 const retry_policy_t s_lte_backoff_policy = {
     .mode = RETRY_MODE_EXPONENTIAL,
     .base_delay_ms = (uint32_t)MODEM_LTE_BACKOFF_BASE_MS,
@@ -48,11 +66,20 @@ const retry_policy_t s_lte_backoff_policy = {
     .max_attempts = 0,
     .jitter_ms = 0,
 };
+/** RDY token seen flag. */
 bool s_rdy_seen = false;
+/** Last hardware recovery timestamp. */
 uint64_t s_last_hw_recover_ms = 0;
+/** CPIN soft retry counter. */
 uint32_t s_cpin_soft_retry_count = 0;
+/** Active APN string. */
 char s_active_apn[TRACKER_HOST_MAX_LEN] = CONFIG_TRACKER_MODEM_APN;
 
+/**
+ * @brief Set active APN for PDP context.
+ *
+ * @param apn APN string.
+ */
 void modem_lte_set_apn(const char *apn) {
     if (util_string_empty(apn)) {
         return;
@@ -68,6 +95,11 @@ void modem_lte_set_apn(const char *apn) {
     ESP_LOGI(MODEM_LTE_TAG, "apn override applied configured=1");
 }
 
+/**
+ * @brief Request LTE connection.
+ *
+ * Triggers connection if not already connected.
+ */
 void modem_lte_request_connect(void) {
     s_connect_requested = true;
 
@@ -96,6 +128,11 @@ void modem_lte_request_connect(void) {
     }
 }
 
+/**
+ * @brief Initialize LTE modem.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t modem_lte_init(void) {
     if (s_lte_initialized) {
         return ESP_OK;
@@ -110,6 +147,11 @@ esp_err_t modem_lte_init(void) {
     return err;
 }
 
+/**
+ * @brief Connect LTE data path.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t modem_lte_connect(void) {
     if (s_lte_connected) {
         return ESP_OK;
@@ -119,6 +161,11 @@ esp_err_t modem_lte_connect(void) {
     return modem_lte_tick(util_uptime_ms());
 }
 
+/**
+ * @brief Disconnect LTE data path.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t modem_lte_disconnect(void) {
     esp_err_t err = ESP_OK;
 
@@ -149,6 +196,11 @@ esp_err_t modem_lte_disconnect(void) {
     return err;
 }
 
+/**
+ * @brief Put modem into low-power sleep mode.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t modem_lte_sleep(void) {
     if (!util_is_sleep_enabled()) {
         ESP_LOGI(MODEM_LTE_TAG, "modem_lte_sleep bypassed (sleep disabled)");
@@ -163,6 +215,11 @@ esp_err_t modem_lte_sleep(void) {
     return modem_lte_send_simple("AT+CSCLK=1\r", "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
 }
 
+/**
+ * @brief Wake modem from low-power sleep mode.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t modem_lte_wakeup(void) {
     if (!util_is_sleep_enabled()) {
         ESP_LOGI(MODEM_LTE_TAG, "modem_lte_wakeup bypassed (sleep disabled)");
@@ -177,6 +234,11 @@ esp_err_t modem_lte_wakeup(void) {
     return modem_lte_send_simple("AT\r", "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
 }
 
+/**
+ * @brief Get RSSI value.
+ *
+ * @return RSSI in dBm, or -1 on failure.
+ */
 int modem_lte_get_rssi(void) {
     char response[256] = {0};
     if (modem_at_send("AT+CSQ\r", response, sizeof(response), MODEM_LTE_SHORT_CMD_TIMEOUT_MS) != ESP_OK) {
@@ -196,10 +258,20 @@ int modem_lte_get_rssi(void) {
     return -113 + (2 * rssi);
 }
 
+/**
+ * @brief Check LTE connection state.
+ *
+ * @return True if connected.
+ */
 bool modem_lte_is_connected(void) {
     return s_lte_connected;
 }
 
+/**
+ * @brief Check LTE initialization state.
+ *
+ * @return True if initialized.
+ */
 bool modem_lte_is_initialized(void) {
     return s_lte_initialized;
 }

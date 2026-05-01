@@ -5,6 +5,35 @@
 /**
  * @file session_mgr.c
  * @brief Debounced ignition-to-session mapper.
+ *
+ * ## Session Management Flow
+ *
+ * ### Purpose
+ *    Maps raw ignition signal transitions to logical sessions
+ *    - Debounces ignition signal noise
+ *    - Tracks session boundaries for telemetry
+ *    - Provides stable ignition state to FSM
+ *
+ * ### State Machine
+ *
+ *    IDLE --(ignition on)--> ACTIVE --(ignition off)--> IDLE
+ *
+ * ### Debounce Logic
+ *    - First sample: initialize timer, capture raw value
+ *    - Same value: restart debounce timer
+ *    - Stable for DEBOUNCE_MS: accept as stable state
+ *    - New session triggers on rising edge (off->on transition)
+ *
+ * ### Key Functions
+ *    - session_mgr_init(): Reset all state
+ *    - session_mgr_on_ignition_sample(): Process raw sample with debounce
+ *    - session_mgr_stable_ignition(): Returns debounced ignition state
+ *    - session_mgr_current_session_id(): Returns active session ID
+ *    - session_mgr_should_start(): Returns true if session just started
+ *
+ * ## Tuning Parameters
+ *    - DEBOUNCE_MS: Ignition signal stability window (500ms default)
+ *    - Session ID: Monotonically increasing, wraps at 0xFFFFFFFF
  */
 
 typedef enum {
@@ -42,6 +71,11 @@ static uint32_t session_mgr_next_session_id(void) {
     return s_ctx.current_session_id;
 }
 
+/**
+ * @brief Initialize session manager.
+ *
+ * Resets debounce state and clears session ID.
+ */
 void session_mgr_init(void) {
     s_ctx.state = SESSION_STATE_IDLE;
     s_ctx.last_sample = false;
@@ -53,6 +87,15 @@ void session_mgr_init(void) {
     s_ctx.current_session_id = 0;
 }
 
+/**
+ * @brief Process ignition sample with debounce.
+ *
+ * Takes raw ignition input and applies debounce logic.
+ * When signal is stable for DEBOUNCE_MS, updates stable state.
+ *
+ * @param ignition_on Raw ignition reading.
+ * @param now_ms Current timestamp.
+ */
 void session_mgr_on_ignition_sample(bool ignition_on, uint64_t now_ms) {
     if (!s_ctx.sample_initialized) {
         s_ctx.last_sample = ignition_on;
@@ -98,6 +141,14 @@ void session_mgr_on_ignition_sample(bool ignition_on, uint64_t now_ms) {
     }
 }
 
+/**
+ * @brief Check if session should start.
+ *
+ * Consumer checks this to detect ignition-on edge.
+ * Returns true once per ignition-on transition.
+ *
+ * @return true if session should start now.
+ */
 bool session_mgr_should_start(void) {
     if (!s_ctx.pending_start || s_ctx.state != SESSION_STATE_IDLE) {
         return false;
@@ -106,20 +157,40 @@ bool session_mgr_should_start(void) {
     return true;
 }
 
+/**
+ * @brief Mark session as started.
+ *
+ * Called when FSM accepts start event.
+ */
 void session_mgr_mark_started(void) {
     s_ctx.state = SESSION_STATE_ACTIVE;
     /* Session ID changes only after the state machine accepts the start event. */
     session_mgr_next_session_id();
 }
 
+/**
+ * @brief Mark session as stopped.
+ *
+ * Called when ignition turns off and session ends.
+ */
 void session_mgr_mark_stopped(void) {
     s_ctx.state = SESSION_STATE_IDLE;
 }
 
+/**
+ * @brief Get current session ID.
+ *
+ * @return Current session ID (0 if none started).
+ */
 uint32_t session_mgr_current_session_id(void) {
     return s_ctx.current_session_id;
 }
 
+/**
+ * @brief Check if stable ignition state is known.
+ *
+ * @return true if debounce has resolved ignition state.
+ */
 bool session_mgr_has_stable_ignition(void) {
     return s_ctx.stable_known;
 }

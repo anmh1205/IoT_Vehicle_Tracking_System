@@ -30,7 +30,9 @@
 
 static const char *TAG = "TRACKER_MAIN";
 
+/** Init retry state. */
 static retry_state_t s_init_retry = {0};
+/** Init retry policy. */
 static const retry_policy_t s_init_retry_policy = {
     .mode = RETRY_MODE_FIXED,
     .base_delay_ms = 10000,
@@ -39,6 +41,9 @@ static const retry_policy_t s_init_retry_policy = {
     .jitter_ms = 0,
 };
 
+/**
+ * @brief Port wrapper for offline queue enqueue.
+ */
 static esp_err_t tracker_storage_queue_enqueue_port(int record_type,
                                                     const char *payload,
                                                     bool gps_fix,

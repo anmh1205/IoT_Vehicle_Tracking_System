@@ -9,6 +9,9 @@
  * @brief Backoff and hardware-recovery helpers for LTE bring-up failures.
  */
 
+/**
+ * @brief Reset recovery markers to initial state.
+ */
 static void modem_lte_reset_recovery_markers(void) {
     s_lte_initialized = false;
     s_lte_connected = false;
@@ -24,6 +27,12 @@ static void modem_lte_reset_recovery_markers(void) {
     (void)modem_lte_apply_at_sync_config();
 }
 
+/**
+ * @brief Check if hardware recovery is allowed.
+ *
+ * @param now_ms Current timestamp.
+ * @return True if recovery allowed.
+ */
 bool modem_lte_can_hw_recover(uint64_t now_ms) {
     bool rdy_seen = modem_lte_rdy_seen_in_cycle();
     bool force_no_rdy_recover = !rdy_seen &&
@@ -51,10 +60,20 @@ bool modem_lte_can_hw_recover(uint64_t now_ms) {
     return cooldown_elapsed;
 }
 
+/**
+ * @brief Reset AT sync sweep counter.
+ */
 void modem_lte_reset_at_sync_sweep(void) {
     s_at_sync_fail_count = 0;
 }
 
+/**
+ * @brief Enter backoff state after failure.
+ *
+ * @param now_ms Current timestamp.
+ * @param err Error code.
+ * @param reason Failure reason.
+ */
 void modem_lte_enter_backoff(uint64_t now_ms, esp_err_t err, const char *reason) {
     uint32_t delay_ms = retry_state_current_delay_ms(&s_lte_backoff_retry,
                                                      &s_lte_backoff_policy,

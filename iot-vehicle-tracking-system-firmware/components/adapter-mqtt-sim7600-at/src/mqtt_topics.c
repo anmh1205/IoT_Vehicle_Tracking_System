@@ -11,10 +11,22 @@
  * @brief Topic and server-address builders for the tracker MQTT facade.
  */
 
+/**
+ * @brief Check if host forces default TLS port.
+ *
+ * @param host Server host.
+ * @return True if forces TLS.
+ */
 bool tracker_mqtt_host_forces_tls_default_port(const char *host) {
     return !util_string_empty(host) && strcmp(host, TRACKER_MQTT_TLS_HOST) == 0;
 }
 
+/**
+ * @brief Check if TLS should be used.
+ *
+ * @param cfg Configuration.
+ * @return True if TLS required.
+ */
 bool tracker_mqtt_use_tls(const config_t *cfg) {
     return cfg != NULL &&
            (tracker_mqtt_host_forces_tls_default_port(cfg->mqtt_host) || cfg->mqtt_port == MQTT_IMPLICIT_TLS_PORT);
@@ -60,6 +72,9 @@ esp_err_t tracker_mqtt_build_server_addrs(const config_t *cfg) {
     return ESP_OK;
 }
 
+/**
+ * @brief Build MQTT topics from device ID.
+ */
 void tracker_mqtt_build_topics(void) {
     int n = snprintf(s_topic_rawdata, sizeof(s_topic_rawdata), "v1/%s/rawdata", s_cfg.device_id);
     if (n < 0 || (size_t)n >= sizeof(s_topic_rawdata)) {

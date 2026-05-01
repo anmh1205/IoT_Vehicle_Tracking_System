@@ -441,6 +441,11 @@ static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *ou
     return ESP_OK;
 }
 
+/**
+ * @brief Initialize SD log store.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t sd_log_store_init(void) {
     memset(&s_ctx, 0, sizeof(s_ctx));
     sd_log_store_set_state(SD_LOG_STATE_UNAVAILABLE);
@@ -449,6 +454,11 @@ esp_err_t sd_log_store_init(void) {
     return ESP_OK;
 }
 
+/**
+ * @brief Mount SD card and initialize store.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t sd_log_store_mount(void) {
     ESP_RETURN_ON_FALSE(s_ctx.initialized, ESP_ERR_INVALID_STATE, TAG, "not initialized");
     if (s_ctx.mounted) {
@@ -529,6 +539,9 @@ esp_err_t sd_log_store_mount(void) {
     return ESP_OK;
 }
 
+/**
+ * @brief Unmount SD card.
+ */
 void sd_log_store_unmount(void) {
     if (!s_ctx.mounted) {
         sd_log_store_set_state(SD_LOG_STATE_UNAVAILABLE);
@@ -539,6 +552,11 @@ void sd_log_store_unmount(void) {
     sd_log_store_set_state(SD_LOG_STATE_UNAVAILABLE);
 }
 
+/**
+ * @brief Check if SD card is mounted.
+ *
+ * @return True if mounted.
+ */
 bool sd_log_store_is_mounted(void) {
     if (!s_ctx.mounted) {
         return false;
@@ -553,6 +571,12 @@ bool sd_log_store_is_mounted(void) {
     return true;
 }
 
+/**
+ * @brief Start new session with ID.
+ *
+ * @param session_id Session ID.
+ * @return ESP_OK on success.
+ */
 esp_err_t sd_log_store_start_session(uint32_t session_id) {
     ESP_RETURN_ON_FALSE(s_ctx.mounted, ESP_ERR_INVALID_STATE, TAG, "not mounted");
     s_ctx.meta.session_id = session_id;
@@ -560,6 +584,12 @@ esp_err_t sd_log_store_start_session(uint32_t session_id) {
     return sd_log_store_write_meta();
 }
 
+/**
+ * @brief Stop current session.
+ *
+ * @param clean_shutdown True for clean shutdown.
+ * @return ESP_OK on success.
+ */
 esp_err_t sd_log_store_stop_session(bool clean_shutdown) {
     ESP_RETURN_ON_FALSE(s_ctx.mounted, ESP_ERR_INVALID_STATE, TAG, "not mounted");
     s_ctx.meta.clean_shutdown = clean_shutdown ? 1 : 0;

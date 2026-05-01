@@ -20,8 +20,8 @@
 
 static const char *TAG = "CONFIG_STORE_NVS";
 
+/** Legacy config v1 structure. */
 typedef struct {
-    /** v1 stored only the original runtime fields before OTA/sleep tuning existed. */
     char device_id[TRACKER_DEVICE_ID_MAX_LEN];
     char auth_token[TRACKER_AUTH_TOKEN_MAX_LEN];
     char mqtt_host[TRACKER_HOST_MAX_LEN];
@@ -35,6 +35,9 @@ typedef struct {
     char apn[TRACKER_HOST_MAX_LEN];
 } config_v1_t;
 
+/**
+ * @brief Clamp unsigned 16-bit value.
+ */
 static uint16_t config_store_clamp_u16(uint16_t value, uint16_t min_value, uint16_t max_value) {
     return (uint16_t)util_clamp_int((int)value, (int)min_value, (int)max_value);
 }
@@ -72,6 +75,12 @@ static void config_store_apply_legacy_v1(config_t *config, const config_v1_t *le
     }
 }
 
+/**
+ * @brief Save config to NVS.
+ *
+ * @param config Configuration.
+ * @return ESP_OK on success.
+ */
 esp_err_t config_store_nvs_save(const config_t *config) {
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
 

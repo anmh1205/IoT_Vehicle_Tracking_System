@@ -9,6 +9,12 @@
  * @brief Manual OTA rollback helpers behind the public util facade.
  */
 
+/**
+ * @brief Trigger manual rollback to previous partition.
+ *
+ * @param out_status Output status.
+ * @return ESP_OK on success.
+ */
 esp_err_t util_ota_trigger_manual_rollback(firmware_status_t *out_status) {
     ESP_RETURN_ON_NULL(out_status, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_status is NULL");
 

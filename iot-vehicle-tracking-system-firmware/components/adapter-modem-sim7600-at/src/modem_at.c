@@ -18,6 +18,43 @@
 /**
  * @file modem_at.c
  * @brief Thread-safe AT command transport over UART with URC dispatch support.
+ *
+ * ## AT Command Transport Flow
+ *
+ * ### 1. Initialization (modem_at_init)
+ *    - Install UART driver with RTS/CTS flow control
+ *    - Create mutex for thread-safe access
+ *    - Create URC callback registry
+ *    - Register default URC handlers (+CMSE: +CGEV for network events)
+ *
+ * ### 2. Send Command (modem_at_send)
+ *    - Take mutex lock
+ *    - Clear response buffer
+ *    - Send AT command via UART
+ *    - Wait for response (configurable timeout)
+ *    - Copy response to caller's buffer
+ *    - Release mutex
+ *
+ * ### 3. Send with Expect (modem_at_send_expect)
+ *    - Wraps modem_at_send()
+ *    - Checks for expected token in response
+ *    - Returns ESP_OK if found, ESP_FAIL if not
+ *
+ * ### 4. URC (Unsolicited Result Code) Handling
+ *    - URCs are async messages from modem
+ *    - Registered callbacks invoked when prefix matches
+ *    - Examples: +CMT (SMS), +CGEV (PDP), +CMQTTCONNLOST (MQTT)
+ *    - Polled in FSM loop via modem_at_poll_urc()
+ *
+ * ## Thread Safety
+ *    - Single mutex protects UART send/receive
+ *    - URC callbacks execute in ISR context (must be fast)
+ *    - Response buffer not protected (single consumer assumed)
+ *
+ * ## UART Configuration
+ *    - Default: 115200 baud, 8N1
+ *    - Flow control: RTS/CTS (hardware)
+ *    - Buffer sizes: 2KB RX, 2KB TX
  */
 
 #define MODEM_RX_BUFFER_SIZE 1024
@@ -199,6 +236,16 @@ static bool modem_at_response_done(const char *buffer) {
            strstr(buffer, "+CME ERROR") != NULL || ends_with_ok || ends_with_error;
 }
 
+/**
+ * @brief Check if response buffer indicates modem is waiting for input prompt.
+ *
+ * The SIM7600 modem sends ">" prompt when it expects additional input data
+ * after certain AT commands (e.g., AT+CMGS for SMS, AT+HTTPPARA for HTTP POST data).
+ * This function detects various prompt formats that the modem may send.
+ *
+ * @param buffer Response buffer containing modem output.
+ * @return true if prompt detected, false otherwise.
+ */
 static bool modem_at_response_has_prompt(const char *buffer) {
     if (buffer == NULL) {
         return false;
@@ -223,10 +270,27 @@ static void modem_at_append_response_probe(char *probe,
                                            const char *chunk,
                                            size_t chunk_len);
 
+/**
+ * @brief Collect modem response until completion marker or timeout.
+ *
+ * Reads from UART continuously until:
+ * - OK/ERROR marker detected in response
+ * - Prompt ">" detected (when stop_on_prompt=true)
+ * - Timeout expires
+ *
+ * This function handles both single-line responses and multi-line modem outputs.
+ * It also dispatches URC (Unsolicited Result Code) lines to registered callbacks.
+ *
+ * @param response Output buffer for response text (can be NULL to discard).
+ * @param resp_len Size of response buffer.
+ * @param timeout_ms Maximum time to wait for response completion.
+ * @param stop_on_prompt If true, stop collection when prompt ">" is detected.
+ * @return ESP_OK on success, ESP_FAIL on error, ESP_ERR_TIMEOUT on timeout.
+ */
 static esp_err_t modem_at_collect_response_until(char *response,
-                                                 size_t resp_len,
-                                                 uint32_t timeout_ms,
-                                                 bool stop_on_prompt) {
+                                                  size_t resp_len,
+                                                  uint32_t timeout_ms,
+                                                  bool stop_on_prompt) {
     size_t used = 0U;
     uint64_t deadline = esp_timer_get_time() + ((uint64_t)timeout_ms * 1000ULL);
     char chunk[128];
@@ -276,6 +340,16 @@ static esp_err_t modem_at_collect_response_until(char *response,
     return ESP_ERR_TIMEOUT;
 }
 
+/**
+ * @brief Write raw data bytes to UART TX FIFO.
+ *
+ * Writes data in a loop to ensure all bytes are transmitted.
+ * Waits for TX FIFO to drain completely before returning.
+ *
+ * @param data Pointer to data bytes to write.
+ * @param data_len Number of bytes to write.
+ * @return ESP_OK on success, ESP_FAIL on write failure.
+ */
 static esp_err_t modem_at_write_all_bytes(const uint8_t *data, size_t data_len) {
     ESP_RETURN_ON_FALSE(data != NULL, ESP_ERR_INVALID_ARG, TAG, "data null");
     ESP_RETURN_ON_FALSE(data_len > 0U, ESP_ERR_INVALID_ARG, TAG, "data_len invalid");
@@ -294,11 +368,31 @@ static esp_err_t modem_at_write_all_bytes(const uint8_t *data, size_t data_len) 
     return uart_wait_tx_done(MODEM_UART_NUM, pdMS_TO_TICKS(1000));
 }
 
+/**
+ * @brief Clear pending UART data after command failure.
+ *
+ * When an AT command fails, the modem may have leftover data in its UART buffers.
+ * This function drains both the event queue and pending input to prepare
+ * for the next command attempt.
+ */
 static void modem_at_clear_pending_after_failure(void) {
     modem_at_drain_uart_events();
     modem_at_drain_pending_input(MODEM_RX_BUFFER_SIZE);
 }
 
+/**
+ * @brief Append new chunk to response probe buffer with sliding window.
+ *
+ * Maintains a fixed-size sliding window of the most recent response data.
+ * When new data exceeds buffer size, older data is discarded.
+ * This probe is used for quick completion detection without
+ * scanning the full potentially-large response buffer.
+ *
+ * @param probe Probe buffer to append to.
+ * @param probe_len In/out pointer to current probe length.
+ * @param chunk New data chunk to append.
+ * @param chunk_len Length of new chunk.
+ */
 static void modem_at_append_response_probe(char *probe,
                                            size_t *probe_len,
                                            const char *chunk,
@@ -454,6 +548,23 @@ esp_err_t modem_at_send(const char *cmd, char *response, size_t resp_len, uint32
     return err;
 }
 
+/**
+ * @brief Send AT command that requires data input after prompt.
+ *
+ * Two-phase send for commands that need additional data after receiving
+ * the modem prompt (">"). Example: AT+CMGS (SMS send), AT+HTTPPOST.
+ *
+ * Phase 1: Send prepare_cmd, wait for ">" prompt.
+ * Phase 2: Send data payload, wait for final response.
+ *
+ * @param prepare_cmd Initial AT command (e.g., "AT+CMGS=number\r").
+ * @param data Data payload to send after prompt.
+ * @param data_len Length of data payload.
+ * @param response Output response buffer (optional).
+ * @param resp_len Response buffer size.
+ * @param timeout_ms Timeout for each phase.
+ * @return ESP_OK on success, ESP_FAIL/ESP_ERR_TIMEOUT on failure.
+ */
 esp_err_t modem_at_send_prompt_data(const char *prepare_cmd,
                                     const uint8_t *data,
                                     size_t data_len,
@@ -501,6 +612,21 @@ esp_err_t modem_at_send_prompt_data(const char *prepare_cmd,
     return err;
 }
 
+/**
+ * @brief Send AT command and collect response with idle timeout.
+ *
+ * Variant of modem_at_send that allows specifying idle timeout.
+ * Stops collection early if no more data arrives after idle_timeout_ms.
+ * Useful for commands that return variable-length responses.
+ *
+ * @param cmd AT command to send.
+ * @param response Output buffer for response data.
+ * @param resp_len Response buffer size.
+ * @param out_len Actual bytes written to response buffer.
+ * @param timeout_ms Maximum time to wait for first data.
+ * @param idle_timeout_ms Maximum idle time after first data arrives.
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT if no data received.
+ */
 esp_err_t modem_at_send_collect(const char *cmd,
                                 uint8_t *response,
                                 size_t resp_len,
@@ -573,6 +699,18 @@ esp_err_t modem_at_send_collect(const char *cmd,
     return ESP_OK;
 }
 
+/**
+ * @brief Send AT command and verify expected token in response.
+ *
+ * Convenience wrapper that sends a command and checks if the expected
+ * token string appears in the response. Useful for simple
+ * "verify X succeeded" checks.
+ *
+ * @param cmd AT command to send.
+ * @param expect Expected token in response (can be NULL to skip check).
+ * @param timeout_ms Timeout in milliseconds.
+ * @return ESP_OK if response contains expect token, ESP_FAIL otherwise.
+ */
 esp_err_t modem_at_send_expect(const char *cmd, const char *expect, uint32_t timeout_ms) {
     char response[MODEM_RX_BUFFER_SIZE] = {0};
     esp_err_t err = modem_at_send(cmd, response, sizeof(response), timeout_ms);
@@ -587,6 +725,17 @@ esp_err_t modem_at_send_expect(const char *cmd, const char *expect, uint32_t tim
     return ESP_OK;
 }
 
+/**
+ * @brief Change UART baudrate at runtime.
+ *
+ * Dynamically changes the UART baudrate for the modem transport.
+ * Used for high-speed data transfers that support higher
+ * baud rates than the default.
+ *
+ * @param baud New baudrate value.
+ * @return ESP_OK on success, ESP_ERR_INVALID_ARG on invalid baud,
+ *         ESP_ERR_TIMEOUT on mutex timeout.
+ */
 esp_err_t modem_at_set_baud(uint32_t baud) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
     ESP_RETURN_ON_FALSE(baud > 0, ESP_ERR_INVALID_ARG, TAG, "Invalid baud");
@@ -610,10 +759,25 @@ esp_err_t modem_at_set_baud(uint32_t baud) {
     return err;
 }
 
+/**
+ * @brief Get current UART baudrate.
+ *
+ * @return Current baudrate value.
+ */
 uint32_t modem_at_get_baud(void) {
     return s_uart_baud;
 }
 
+/**
+ * @brief Change UART TX/RX pins at runtime.
+ *
+ * Reconfigures the GPIO pins used for UART communication.
+ * Requires UART driver to be initialized first.
+ *
+ * @param tx_pin New TX GPIO pin number.
+ * @param rx_pin New RX GPIO pin number.
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT on mutex timeout.
+ */
 esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
@@ -632,6 +796,15 @@ esp_err_t modem_at_set_pins(gpio_num_t tx_pin, gpio_num_t rx_pin) {
     return err;
 }
 
+/**
+ * @brief Get current UART pin configuration.
+ *
+ * Retrieves the current TX and RX GPIO pin numbers
+ * used for UART communication.
+ *
+ * @param out_tx_pin Output pointer for TX pin (can be NULL).
+ * @param out_rx_pin Output pointer for RX pin (can be NULL).
+ */
 void modem_at_get_pins(gpio_num_t *out_tx_pin, gpio_num_t *out_rx_pin) {
     if (out_tx_pin != NULL) {
         *out_tx_pin = s_uart_tx_pin;
@@ -641,6 +814,15 @@ void modem_at_get_pins(gpio_num_t *out_tx_pin, gpio_num_t *out_rx_pin) {
     }
 }
 
+/**
+ * @brief Set UART line inverse mask for signal level reversal.
+ *
+ * Some modem designs use inverted signal levels.
+ * This function configures which signals are inverted.
+ *
+ * @param inverse_mask Bitmask of signals to invert.
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT on mutex timeout.
+ */
 esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
@@ -663,10 +845,27 @@ esp_err_t modem_at_set_line_inverse(uint32_t inverse_mask) {
     return err;
 }
 
+/**
+ * @brief Get current UART line inverse mask.
+ *
+ * @return Current inverse mask value.
+ */
 uint32_t modem_at_get_line_inverse(void) {
     return s_uart_inverse_mask;
 }
 
+/**
+ * @brief Set UART frame format (data bits, parity, stop bits).
+ *
+ * Configures the serial frame parameters for UART communication.
+ * Default is 8N1 (8 data bits, no parity, 1 stop bit).
+ *
+ * @param data_bits Number of data bits (5-8).
+ * @param parity Parity mode (UART_PARITY_DISABLE, EVEN, ODD).
+ * @param stop_bits Number of stop bits (1, 1.5, 2).
+ * @return ESP_OK on success, ESP_ERR_INVALID_ARG on invalid params,
+ *         ESP_ERR_TIMEOUT on mutex timeout.
+ */
 esp_err_t modem_at_set_frame_format(uart_word_length_t data_bits,
                                     uart_parity_t parity,
                                     uart_stop_bits_t stop_bits) {
@@ -700,6 +899,13 @@ esp_err_t modem_at_set_frame_format(uart_word_length_t data_bits,
     return err;
 }
 
+/**
+ * @brief Get current UART frame format configuration.
+ *
+ * @param out_data_bits Output pointer for data bits (can be NULL).
+ * @param out_parity Output pointer for parity mode (can be NULL).
+ * @param out_stop_bits Output pointer for stop bits (can be NULL).
+ */
 void modem_at_get_frame_format(uart_word_length_t *out_data_bits,
                                uart_parity_t *out_parity,
                                uart_stop_bits_t *out_stop_bits) {
@@ -714,6 +920,16 @@ void modem_at_get_frame_format(uart_word_length_t *out_data_bits,
     }
 }
 
+/**
+ * @brief Set UART source clock.
+ *
+ * Configures the clock source for UART operation.
+ * Default is APB clock. Changing may be needed for
+ * specific power or accuracy requirements.
+ *
+ * @param source_clk Clock source (UART_SCLK_APB, UART_SCLK_RTOS, etc.).
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT on mutex timeout.
+ */
 esp_err_t modem_at_set_source_clk(uart_sclk_t source_clk) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 
@@ -744,10 +960,23 @@ esp_err_t modem_at_set_source_clk(uart_sclk_t source_clk) {
     return err;
 }
 
+/**
+ * @brief Get current UART source clock.
+ *
+ * @return Current source clock setting.
+ */
 uart_sclk_t modem_at_get_source_clk(void) {
     return s_uart_source_clk;
 }
 
+/**
+ * @brief Get aggregated UART diagnostics.
+ *
+ * Returns cumulative error and event counters since last reset.
+ * Includes FIFO overflow, buffer full, parity errors, etc.
+ *
+ * @param out_diag Output structure for diagnostics (cannot be NULL).
+ */
 void modem_at_get_uart_diag(modem_at_uart_diag_t *out_diag) {
     if (out_diag == NULL) {
         return;
@@ -757,6 +986,13 @@ void modem_at_get_uart_diag(modem_at_uart_diag_t *out_diag) {
     *out_diag = s_uart_diag;
 }
 
+/**
+ * @brief Reset UART diagnostics counters to zero.
+ *
+ * Clears all cumulative error and event counters.
+ * Should be called after clearing a fault condition
+ * to start fresh diagnostics accumulation.
+ */
 void modem_at_reset_uart_diag(void) {
     modem_at_drain_uart_events();
     memset(&s_uart_diag, 0, sizeof(s_uart_diag));
@@ -814,6 +1050,17 @@ void modem_at_register_urc(const char *prefix, modem_urc_cb_t cb) {
              prefix);
 }
 
+/**
+ * @brief Poll for URC (Unsolicited Result Code) data.
+ *
+ * Non-blocking poll that reads up to max_read_bytes from UART
+ * and dispatches complete lines to registered URC handlers.
+ * Must be called regularly to process async modem events.
+ *
+ * @param max_read_bytes Maximum bytes to read in this call.
+ * @return ESP_OK on success, ESP_ERR_INVALID_STATE if not initialized,
+ *         ESP_ERR_TIMEOUT if lock could not be acquired immediately.
+ */
 esp_err_t modem_at_poll_urc(uint32_t max_read_bytes) {
     ESP_RETURN_ON_FALSE(s_uart_ready, ESP_ERR_INVALID_STATE, TAG, "AT UART not initialized");
 

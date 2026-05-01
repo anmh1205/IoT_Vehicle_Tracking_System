@@ -33,6 +33,45 @@
 /**
  * @file state_sleep_controller.c
  * @brief Sleep decision and entry helpers for the tracker FSM.
+ *
+ * ## Sleep Decision Flow
+ *
+ * ### 1. Sleep Eligibility Check (state_machine_can_sleep)
+ *    - Ignition must be OFF (from OBD/BLE or ADC)
+ *    - Config must have sleep_enabled=true
+ *    - No active MQTT session
+ *    - No pending OTA operations
+ *    - Device battery above safe threshold
+ *
+ * ### 2. Sleep Mode Selection
+ *    - LIGHT_SLEEP: IMU motion wake available, faster wake
+ *    - DEEP_SLEEP: Timer wake only, lowest power
+ *    - FAKE_SLEEP (debug): No actual sleep, just idle
+ *
+ * ### 3. Pre-Sleep Sequence
+ *    - Disconnect BLE OBD session
+ *    - Stop GNSS polling
+ *    - MQTT disconnect and cleanup
+ *    - LTE PDP deactivate
+ *    - Save state to NVS (for crash recovery)
+ *    - Set RTC wake timer
+ *
+ * ### 4. Wake Sources
+ *    - RTC timer: Periodic heartbeat
+ *    - IMU motion: LIS3DH interrupt
+ *    - Ignition on: OBD/BLE detection
+ *
+ * ## Sleep Blockers
+ *    - ignition_on (from OBD live or ADC threshold)
+ *    - OBD connected or connecting
+ *    - Active OTA operation
+ *    - MQTT publish pending
+ *    - Field validation mode (configurable)
+ *
+ * ## Power Consumption
+ *    - DEEP_SLEEP: ~50-100µA (ESP32 deep sleep)
+ *    - LIGHT_SLEEP: ~500µA (ESP32 light sleep)
+ *    - FAKE_SLEEP: ~20-30mA (idle, no sleep)
  */
 
 static const char *TAG = STATE_MACHINE_TAG;

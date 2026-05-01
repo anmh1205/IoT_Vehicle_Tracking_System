@@ -87,6 +87,17 @@ static uint64_t power_gpio_mask(gpio_num_t pin) {
     return (1ULL << (uint32_t)pin);
 }
 
+/**
+ * @brief Initialize power control GPIOs.
+ *
+ * Configures GPIO pins for modem control:
+ * - Output: PWRKEY (power on/off), RESET, DTR (sleep control)
+ * - Input: STATUS, NETLIGHT (status LEDs)
+ *
+ * All outputs are initialized to inactive/low state.
+ *
+ * @return ESP_OK on success.
+ */
 esp_err_t power_mgr_init(void) {
     uint64_t output_mask = power_gpio_mask(PIN_MODEM_PWRKEY);
     if (PIN_MODEM_RESET != GPIO_NUM_NC) {
@@ -156,14 +167,40 @@ static esp_err_t modem_power_key_pulse(uint32_t pulse_ms) {
     return ESP_OK;
 }
 
+/**
+ * @brief Power on the modem using PWRKEY pulse sequence.
+ *
+ * Sends a 500ms active-low PWRKEY pulse to turn on the SIM7600 modem.
+ * This is the standard power-on sequence per SIM7600 hardware guide.
+ *
+ * @return ESP_OK on pulse sent, ESP_FAIL on error.
+ */
 esp_err_t modem_power_on(void) {
     return modem_power_key_pulse(MODEM_PWRKEY_ON_PULSE_MS);
 }
 
+/**
+ * @brief Power off the modem using extended PWRKEY pulse.
+ *
+ * Sends a 3-second active-low PWRKEY pulse to safely power off
+ * the SIM7600 modem. This is the standard power-off sequence.
+ *
+ * @return ESP_OK on pulse sent, ESP_FAIL on error.
+ */
 esp_err_t modem_power_off(void) {
     return modem_power_key_pulse(MODEM_PWRKEY_OFF_PULSE_MS);
 }
 
+/**
+ * @brief Configure PWRKEY inversion stage.
+ *
+ * Some board designs use an inverting transistor between the ESP32
+ * and modem PWRKEY. This allows polarity configuration
+ * to match the hardware design.
+ *
+ * @param inverted true if hardware uses inverting stage, false for direct drive.
+ * @return ESP_OK.
+ */
 esp_err_t modem_set_pwrkey_inverted_stage(bool inverted) {
     s_pwrkey_inverted_stage = inverted;
     modem_pwrkey_drive(false);
@@ -173,10 +210,23 @@ esp_err_t modem_set_pwrkey_inverted_stage(bool inverted) {
     return ESP_OK;
 }
 
+/**
+ * @brief Get current PWRKEY inversion stage setting.
+ *
+ * @return true if inverted stage is configured.
+ */
 bool modem_get_pwrkey_inverted_stage(void) {
     return s_pwrkey_inverted_stage;
 }
 
+/**
+ * @brief Send modem RESET pulse.
+ *
+ * Sends a 200ms pulse to the modem RESET line to trigger
+ * a hardware reset. This is used for recover scenarios.
+ *
+ * @return ESP_OK on success, ESP_ERR_NOT_SUPPORTED if RESET pin not connected.
+ */
 esp_err_t modem_reset_pulse(void) {
     if (PIN_MODEM_RESET == GPIO_NUM_NC) {
         return ESP_ERR_NOT_SUPPORTED;
@@ -193,6 +243,15 @@ esp_err_t modem_reset_pulse(void) {
     return ESP_OK;
 }
 
+/**
+ * @brief Set modem DTR line for sleep/wake control.
+ *
+ * The DTR line controls modem low-power state. Setting high
+ * tells modem it can enter sleep mode when idle.
+ *
+ * @param high true for active/high (allow sleep), false for active/wake.
+ * @return ESP_OK on success, ESP_ERR_NOT_SUPPORTED if DTR pin not connected.
+ */
 esp_err_t modem_set_dtr(bool high) {
     if (PIN_MODEM_DTR == GPIO_NUM_NC) {
         return ESP_ERR_NOT_SUPPORTED;
@@ -213,6 +272,15 @@ esp_err_t modem_set_dtr(bool high) {
     return ESP_OK;
 }
 
+/**
+ * @brief Read modem STATUS pin.
+ *
+ * Reads the hardware STATUS output from the modem, which indicates
+ * the modem's power state.
+ *
+ * @param level Output for pin level (true=high, false=low).
+ * @return ESP_OK on success, ESP_ERR_NOT_SUPPORTED if STATUS pin not connected.
+ */
 esp_err_t modem_read_status(bool *level) {
     if (PIN_MODEM_STATUS == GPIO_NUM_NC) {
         return ESP_ERR_NOT_SUPPORTED;
@@ -225,6 +293,15 @@ esp_err_t modem_read_status(bool *level) {
     return ESP_OK;
 }
 
+/**
+ * @brief Read modem NETLIGHT (network LED) pin.
+ *
+ * Reads the NETLIGHT output which indicates network
+ * registration and activity status.
+ *
+ * @param level Output for pin level.
+ * @return ESP_OK on success, ESP_ERR_NOT_SUPPORTED if pin not connected.
+ */
 esp_err_t modem_read_netlight(bool *level) {
     if (PIN_MODEM_NETLIGHT == GPIO_NUM_NC) {
         return ESP_ERR_NOT_SUPPORTED;
