@@ -12,7 +12,9 @@
  * @brief Generic utility helpers shared across firmware modules.
  */
 
+/* Logging tag for utility functions. */
 static const char *UTIL_TAG = "UTIL";
+/* Global flag indicating if sleep mode is enabled. */
 static bool s_sleep_enabled = false;
 
 /**

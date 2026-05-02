@@ -40,7 +40,7 @@ const schema = z.object({
   parkingIntervalSec: z.number().int().min(30).max(21600),
   parkingHeartbeatSec: z.number().int().min(30).max(21600),
   overspeedKph: z.number().int().min(20).max(180),
-  vibrationThreshold: z.number().min(0).max(100),
+  imuAccelDeltaThresholdMps2: z.number().min(0).max(100),
   offlineAfterSec: z.number().int().min(60).max(86400),
 });
 
@@ -64,6 +64,13 @@ const pickNumber = (sources: unknown[], fallback: number) => {
   }
   return fallback;
 };
+
+const omitLegacyThresholdKeys = (value: ConfigRecord | null): ConfigRecord =>
+  Object.fromEntries(
+    Object.entries(value ?? {}).filter(
+      ([key]) => key !== 'vibrationThreshold' && key !== 'vibration_threshold',
+    ),
+  );
 
 const resolveDefaultValues = (device: DeviceState): SettingsFormValues => {
   const config = toRecord(device?.config);
@@ -90,8 +97,14 @@ const resolveDefaultValues = (device: DeviceState): SettingsFormValues => {
       900,
     ),
     overspeedKph: pickNumber([alertConfig?.overspeedKph, alertConfig?.overspeed_kph], 80),
-    vibrationThreshold: pickNumber(
-      [alertConfig?.vibrationThreshold, alertConfig?.vibration_threshold, device?.vibrationThreshold],
+    imuAccelDeltaThresholdMps2: pickNumber(
+      [
+        alertConfig?.imuAccelDeltaThresholdMps2,
+        alertConfig?.imu_accel_delta_threshold_mps2,
+        alertConfig?.vibrationThreshold,
+        alertConfig?.vibration_threshold,
+        device?.imuAccelDeltaThresholdMps2,
+      ],
       2,
     ),
     offlineAfterSec: pickNumber([alertConfig?.offlineAfterSec, alertConfig?.offline_after_s], 600),
@@ -189,6 +202,7 @@ export const SettingsTab = () => {
   const drivingConfig = toRecord(config?.driving);
   const parkingConfig = toRecord(config?.parking);
   const alertConfig = toRecord(config?.alerts);
+  const alertConfigWithoutLegacyThreshold = omitLegacyThresholdKeys(alertConfig);
   const configSummary = getDeviceConfigSummary(device);
   const observedCadence = getObservedCadenceSeconds(trackingRowsAscending);
   const latestTelemetryTimestamp =
@@ -241,7 +255,7 @@ export const SettingsTab = () => {
         },
         alerts: {
           overspeed_kph: preview.overspeedKph,
-          vibration_threshold: preview.vibrationThreshold,
+          imu_accel_delta_threshold_mps2: preview.imuAccelDeltaThresholdMps2,
           offline_after_s: preview.offlineAfterSec,
         },
       },
@@ -269,11 +283,11 @@ export const SettingsTab = () => {
         heartbeat_interval_s: values.parkingHeartbeatSec,
       },
       alerts: {
-        ...(alertConfig ?? {}),
+        ...alertConfigWithoutLegacyThreshold,
         overspeedKph: values.overspeedKph,
         overspeed_kph: values.overspeedKph,
-        vibrationThreshold: values.vibrationThreshold,
-        vibration_threshold: values.vibrationThreshold,
+        imuAccelDeltaThresholdMps2: values.imuAccelDeltaThresholdMps2,
+        imu_accel_delta_threshold_mps2: values.imuAccelDeltaThresholdMps2,
         offlineAfterSec: values.offlineAfterSec,
         offline_after_s: values.offlineAfterSec,
       },
@@ -282,7 +296,7 @@ export const SettingsTab = () => {
     await onUpdateNameId({ deviceName: values.deviceName });
     await onUpdateSettings({
       requestInterval: values.drivingIntervalSec,
-      vibrationThreshold: values.vibrationThreshold,
+      imuAccelDeltaThresholdMps2: values.imuAccelDeltaThresholdMps2,
       config: nextConfig,
     });
   };
@@ -392,9 +406,9 @@ export const SettingsTab = () => {
                   />
                   <NumberInputField
                     control={form.control}
-                    name="vibrationThreshold"
-                    label="Ngưỡng rung"
-                    hint="Dùng chung cho quy tắc cảnh báo và đối chiếu trạng thái chuyển động."
+                    name="imuAccelDeltaThresholdMps2"
+                    label="Ngưỡng gia tốc IMU Δ (m/s²)"
+                    hint="Dùng chung cho quy tắc cảnh báo với đơn vị gia tốc chuẩn hóa m/s²."
                   />
                   <NumberInputField
                     control={form.control}

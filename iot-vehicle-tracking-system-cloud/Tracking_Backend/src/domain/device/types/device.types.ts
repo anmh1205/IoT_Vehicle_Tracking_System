@@ -43,7 +43,8 @@ export interface Device {
   state_updated_at: Date | null;
   total_runtime_seconds: number;
   imei: string | null;
-  vibration_threshold: number;
+  imu_accel_delta_threshold_mps2?: number | null;
+  vibration_threshold?: number | null;
   request_interval: number;
   firmware_version: string | null;
   target_firmware_version: string | null;
@@ -72,10 +73,19 @@ export interface DeviceSession {
   server_session_end: Date | null;
   session_start: Date | null;
   session_end: Date | null;
+  local_session_key: number | null;
+  firmware_boot_id: string | null;
+  canonical_source: string;
+  boundary_source: string;
+  start_reason: string | null;
+  end_reason: string | null;
   uptime: number | null;
-  avg_vibration: number | null;
-  min_vibration: number | null;
-  max_vibration: number | null;
+  avg_imu_accel_delta_mps2?: number | null;
+  avg_vibration?: number | null;
+  min_imu_accel_delta_mps2?: number | null;
+  min_vibration?: number | null;
+  max_imu_accel_delta_mps2?: number | null;
+  max_vibration?: number | null;
   avg_vehicle_battery: number | null;
   avg_device_battery: number | null;
   data_points_count: number;
@@ -113,7 +123,7 @@ export interface DevicePublic {
 
 export interface DeviceDetail extends DevicePublic {
   imei: string | null;
-  vibrationThreshold: number;
+  imuAccelDeltaThresholdMps2: number;
   requestInterval: number;
   targetFirmwareVersion: string | null;
   config: Record<string, unknown> | null;
@@ -126,8 +136,16 @@ export interface DeviceSessionPublic {
   status: 'running' | 'completed' | 'disconnected';
   serverSessionStart: string | null;
   serverSessionEnd: string | null;
+  sessionStart: string | null;
+  sessionEnd: string | null;
+  localSessionKey: number | null;
+  firmwareBootId: string | null;
+  canonicalSource: string;
+  boundarySource: string;
+  startReason: string | null;
+  endReason: string | null;
   uptime: number | null;
-  avgVibration: number | null;
+  avgImuAccelDeltaMps2: number | null;
   dataPointsCount: number;
 }
 
@@ -152,7 +170,7 @@ export interface DevicePosition {
   deviceBattery?: number | null;
   vehicleBattery?: number | null;
   satellites?: number | null;
-  vibration?: number | null;
+  imuAccelDeltaMps2?: number | null;
   errorCode?: number | null;
   temperature?: number | null;
   engineTemperature?: number | null;
@@ -167,6 +185,7 @@ export interface CreateDeviceInput {
   deviceId: string;
   deviceName: string;
   imei?: string;
+  imuAccelDeltaThresholdMps2?: number;
   vibrationThreshold?: number;
   requestInterval?: number;
   config?: Record<string, unknown>;
@@ -175,6 +194,7 @@ export interface CreateDeviceInput {
 export interface UpdateDeviceInput {
   deviceName?: string;
   imei?: string | null;
+  imuAccelDeltaThresholdMps2?: number;
   vibrationThreshold?: number;
   requestInterval?: number;
   targetFirmwareVersion?: string | null;
@@ -194,7 +214,7 @@ export interface RuntimeStats {
   totalRuntime: number;
   totalSessions: number;
   avgSessionDuration: number;
-  avgVibration: number;
+  avgImuAccelDeltaMps2: number;
   totalDataPoints: number;
   lastSession: DeviceSessionPublic | null;
 }

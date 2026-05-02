@@ -468,7 +468,7 @@ export const DeviceDetailModalContainer = ({
       queryClient.invalidateQueries({ queryKey: ['device-errors', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-commands', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-runtime-chart', deviceId] }),
-      queryClient.invalidateQueries({ queryKey: ['device-vibration-chart', deviceId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-imu-accel-delta-chart', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-tracking-telemetry', deviceId] }),
       queryClient.invalidateQueries({ queryKey: ['device-position-snapshot'] }),
       queryClient.invalidateQueries({ queryKey: ['device-event-logs', devicePublicId] }),
@@ -653,8 +653,12 @@ export const DeviceDetailModalContainer = ({
         );
         appendConfigParam(
           commandParams,
-          'vibration_threshold',
-          data.vibrationThreshold ?? alerts?.vibrationThreshold ?? alerts?.vibration_threshold,
+          'imu_accel_delta_threshold_mps2',
+          data.imuAccelDeltaThresholdMps2 ??
+            alerts?.imuAccelDeltaThresholdMps2 ??
+            alerts?.imu_accel_delta_threshold_mps2 ??
+            alerts?.vibrationThreshold ??
+            alerts?.vibration_threshold,
         );
         appendConfigParam(
           commandParams,

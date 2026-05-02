@@ -1,5 +1,8 @@
 #include "data_formatter.h"
 
+#include <inttypes.h>
+#include <stdio.h>
+
 #include "cJSON.h"
 
 #include "util.h"
@@ -60,6 +63,34 @@ static void data_formatter_add_metadata(cJSON *root,
     }
 
     cJSON_AddItemToObject(root, "metadata", metadata);
+}
+
+static void data_formatter_add_session_identity(cJSON *root,
+                                                uint32_t local_session_key,
+                                                uint64_t canonical_session_id,
+                                                const char *session_boot_id,
+                                                const char *boundary_event) {
+    if (root == NULL) {
+        return;
+    }
+
+    if (local_session_key > 0U) {
+        cJSON_AddNumberToObject(root, "local_session_key", (double)local_session_key);
+    }
+    if (canonical_session_id > 0U) {
+        char canonical_session_id_text[32] = {0};
+        (void)snprintf(canonical_session_id_text,
+                       sizeof(canonical_session_id_text),
+                       "%" PRIu64,
+                       canonical_session_id);
+        cJSON_AddStringToObject(root, "canonical_session_id", canonical_session_id_text);
+    }
+    if (!util_string_empty(session_boot_id)) {
+        cJSON_AddStringToObject(root, "boot_id", session_boot_id);
+    }
+    if (!util_string_empty(boundary_event)) {
+        cJSON_AddStringToObject(root, "boundary_event", boundary_event);
+    }
 }
 
 static void data_formatter_append_string_item(cJSON *array, const char *value) {
@@ -438,7 +469,10 @@ char *data_format_rawdata(const config_t *cfg,
                           uint64_t timestamp_ms,
                           const char *message_id,
                           uint32_t seq_no,
-                          const char *boot_id) {
+                          const char *metadata_boot_id,
+                          uint32_t local_session_key,
+                          uint64_t canonical_session_id,
+                          const char *session_boot_id) {
     if (cfg == NULL || telemetry == NULL) {
         return NULL;
     }
@@ -468,7 +502,7 @@ char *data_format_rawdata(const config_t *cfg,
     cJSON_AddNumberToObject(root, "uptime", (double)util_uptime_ms());
 
     /* Nested telemetry object. */
-    cJSON_AddNumberToObject(data, "vibration", telemetry->vibration);
+    cJSON_AddNumberToObject(data, "imu_accel_delta_mps2", telemetry->imu_accel_delta_mps2);
     cJSON_AddNumberToObject(data, "vehicle_battery", telemetry->vehicle_battery);
     cJSON_AddNumberToObject(data, "device_battery", telemetry->device_battery);
     bool has_valid_gnss_fix = telemetry->gnss.fix_valid &&
@@ -488,11 +522,16 @@ char *data_format_rawdata(const config_t *cfg,
     data_formatter_add_diagnostics(root, telemetry);
     data_formatter_add_state(root, telemetry);
     data_formatter_add_runtime_alerts(root, telemetry);
+    data_formatter_add_session_identity(root,
+                                        local_session_key,
+                                        canonical_session_id,
+                                        session_boot_id,
+                                        NULL);
     data_formatter_add_metadata(root,
                                 effective_ts_ms,
                                 message_id,
                                 seq_no,
-                                boot_id,
+                                metadata_boot_id,
                                 DATA_FORMATTER_STATE_SCHEMA_VERSION);
     return data_formatter_print(root);
 }
@@ -515,7 +554,11 @@ char *data_format_status(const config_t *cfg,
                          uint64_t timestamp_ms,
                          const char *message_id,
                          uint32_t seq_no,
-                         const char *boot_id) {
+                         const char *metadata_boot_id,
+                         uint32_t local_session_key,
+                         uint64_t canonical_session_id,
+                         const char *session_boot_id,
+                         const char *boundary_event) {
     if (cfg == NULL || status == NULL) {
         return NULL;
     }
@@ -540,11 +583,16 @@ char *data_format_status(const config_t *cfg,
 
     data_formatter_add_state(root, telemetry);
     data_formatter_add_runtime_alerts(root, telemetry);
+    data_formatter_add_session_identity(root,
+                                        local_session_key,
+                                        canonical_session_id,
+                                        session_boot_id,
+                                        util_string_empty(boundary_event) ? "none" : boundary_event);
     data_formatter_add_metadata(root,
                                 effective_ts_ms,
                                 message_id,
                                 seq_no,
-                                boot_id,
+                                metadata_boot_id,
                                 DATA_FORMATTER_STATE_SCHEMA_VERSION);
     return data_formatter_print(root);
 }

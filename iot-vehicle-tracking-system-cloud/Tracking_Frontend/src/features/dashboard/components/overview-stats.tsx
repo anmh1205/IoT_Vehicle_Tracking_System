@@ -53,7 +53,7 @@ export const OverviewStats = ({
   const tripsTrend =
     sessionsToday > 0 ? `${sessionsPerDevice.toFixed(1)} phiên mỗi thiết bị` : 'Chưa phát sinh phiên mới';
   const summaryItems = [
-    { label: 'Tỷ lệ hoạt động', value: `${activeRate.toFixed(1)}%` },
+    { label: 'Tỷ lệ trực tuyến', value: `${activeRate.toFixed(1)}%` },
     { label: 'Tỷ lệ ngoại tuyến', value: `${offlineRate.toFixed(1)}%` },
     { label: 'Thời gian hoạt động hôm nay', value: formatDelta(runtimeDelta) },
   ];
@@ -73,11 +73,11 @@ export const OverviewStats = ({
           isLoading={isLoading}
         />
         <StatCard
-          title="Thiết bị đang chạy"
+          title="Thiết bị trực tuyến"
           value={activeDevices}
           icon={<Cpu className="h-4 w-4 text-muted-foreground" />}
           subtitle={activeDevicesSubtitle}
-          trend={{ value: `${activeRate.toFixed(1)}% hoạt động`, positive: activeRate >= 60 }}
+          trend={{ value: `${activeRate.toFixed(1)}% trực tuyến`, positive: activeRate >= 60 }}
           isLoading={isLoading}
         />
         <StatCard

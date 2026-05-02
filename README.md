@@ -226,7 +226,7 @@ Grafana visualizes VictoriaMetrics and VictoriaLogs.
 | `v1/{device_id}/commands` | Server -> Device | 1 | Remote commands/config updates |
 
 Canonical `v1/{device_id}/rawdata.data` fields:
-- `vibration`, `vehicle_battery`, `device_battery`
+- `imu_accel_delta_mps2`, `vehicle_battery`, `device_battery`
 - `latitude`, `longitude`, `speed`, `course`
 - `satellites`, `ignition`, `error_code`
 
@@ -472,7 +472,7 @@ As documented in the thesis draft and aligned with current project assets:
 
 - **MCU**: ESP32-S3 as central controller.
 - **Cellular + GNSS**: SIM7600CE-T (integrated LTE + GNSS), driven via AT command flow.
-- **IMU**: LIS3DH for motion-triggered wake patterns.
+- **IMU**: LIS3DSH for motion-triggered wake patterns and IMU acceleration-delta telemetry in `m/s^2`.
 - **OBD2 integration**: BLE adapter flow (vgate iCar Pro class).
 
 Relevant operational behaviors:

@@ -40,7 +40,9 @@
  *    - connect_fail count -> BLE OBD reliability
  */
 
+/* Telemetry counters instance for runtime diagnostics. */
 static telemetry_counters_t s_counters;
+/* Spinlock for thread-safe counter updates. */
 static portMUX_TYPE s_counters_mux = portMUX_INITIALIZER_UNLOCKED;
 
 static void telemetry_counters_inc_field(uint32_t *field) {

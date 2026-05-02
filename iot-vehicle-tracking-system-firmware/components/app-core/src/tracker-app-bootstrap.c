@@ -28,6 +28,7 @@
  * @brief Main firmware bootstrap and runtime loop with explicit port-registry validation.
  */
 
+/* Logging tag for main application module. */
 static const char *TAG = "TRACKER_MAIN";
 
 /** Init retry state. */

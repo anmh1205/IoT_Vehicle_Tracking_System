@@ -45,13 +45,13 @@ INSERT INTO devices (
   device_id, device_name, auth_token, current_status, last_seen_at,
   firmware_version, target_firmware_version, latitude, longitude,
   last_latitude, last_longitude, last_speed, total_runtime_seconds,
-  vibration_threshold, request_interval, is_active, config, last_error_code
+  imu_accel_delta_threshold_mps2, request_interval, is_active, config, last_error_code
 )
 VALUES
-  ('TRACKER_001','Tracker Sedan 001','seed-token-tracker-001','running',NOW()-INTERVAL '2 minutes','v2.3.1','v2.4.0',10.775843,106.700981,10.775843,106.700981,42.5,158400,1.20,30,TRUE,'{"source":"mock-audit","driving":{"trackingIntervalSec":30,"tracking_interval_s":30},"parking":{"trackingIntervalSec":300,"tracking_interval_s":300,"heartbeatIntervalSec":900,"heartbeat_interval_s":900},"alerts":{"overspeedKph":80,"overspeed_kph":80,"vibrationThreshold":1.2,"vibration_threshold":1.2,"offlineAfterSec":900,"offline_after_s":900}}'::jsonb,0),
-  ('sim-uat-001','Simulator UAT 001','seed-token-sim-001','stopped',NOW()-INTERVAL '5 minutes','v2.1.9','v2.4.0',10.879015,106.809112,10.879015,106.809112,0,86420,1.00,60,TRUE,'{"source":"mock-audit","driving":{"trackingIntervalSec":60,"tracking_interval_s":60},"parking":{"trackingIntervalSec":600,"tracking_interval_s":600,"heartbeatIntervalSec":1800,"heartbeat_interval_s":1800},"alerts":{"overspeedKph":75,"overspeed_kph":75,"vibrationThreshold":1.0,"vibration_threshold":1.0,"offlineAfterSec":1800,"offline_after_s":1800}}'::jsonb,0),
-  ('MOCK-OBD-002','Bus Tracker 002','seed-token-bus-002','running',NOW()-INTERVAL '1 minutes','v2.3.1','v2.4.0',10.730644,106.719981,10.730644,106.719981,55.8,120560,1.35,20,TRUE,'{"source":"mock-audit","driving":{"trackingIntervalSec":20,"tracking_interval_s":20},"parking":{"trackingIntervalSec":180,"tracking_interval_s":180,"heartbeatIntervalSec":600,"heartbeat_interval_s":600},"alerts":{"overspeedKph":70,"overspeed_kph":70,"vibrationThreshold":1.35,"vibration_threshold":1.35,"offlineAfterSec":600,"offline_after_s":600}}'::jsonb,0),
-  ('MOCK-OBD-003','Van Tracker 003','seed-token-van-003','disconnected',NOW()-INTERVAL '18 minutes','v2.2.5','v2.4.0',10.733819,106.731205,10.733819,106.731205,0,49320,1.10,45,TRUE,'{"source":"mock-audit","driving":{"trackingIntervalSec":45,"tracking_interval_s":45},"parking":{"trackingIntervalSec":480,"tracking_interval_s":480,"heartbeatIntervalSec":1200,"heartbeat_interval_s":1200},"alerts":{"overspeedKph":85,"overspeed_kph":85,"vibrationThreshold":1.1,"vibration_threshold":1.1,"offlineAfterSec":1200,"offline_after_s":1200}}'::jsonb,7)
+  ('TRACKER_001','Tracker Sedan 001','seed-token-tracker-001','running',NOW()-INTERVAL '2 minutes','v2.3.1','v2.4.0',10.775843,106.700981,10.775843,106.700981,42.5,158400,1.20,30,TRUE,'{"source":"mock-audit","driving":{"trackingIntervalSec":30,"tracking_interval_s":30},"parking":{"trackingIntervalSec":300,"tracking_interval_s":300,"heartbeatIntervalSec":900,"heartbeat_interval_s":900},"alerts":{"overspeedKph":80,"overspeed_kph":80,"imuAccelDeltaThresholdMps2":1.2,"imu_accel_delta_threshold_mps2":1.2,"offlineAfterSec":900,"offline_after_s":900}}'::jsonb,0),
+  ('sim-uat-001','Simulator UAT 001','seed-token-sim-001','stopped',NOW()-INTERVAL '5 minutes','v2.1.9','v2.4.0',10.879015,106.809112,10.879015,106.809112,0,86420,1.00,60,TRUE,'{"source":"mock-audit","driving":{"trackingIntervalSec":60,"tracking_interval_s":60},"parking":{"trackingIntervalSec":600,"tracking_interval_s":600,"heartbeatIntervalSec":1800,"heartbeat_interval_s":1800},"alerts":{"overspeedKph":75,"overspeed_kph":75,"imuAccelDeltaThresholdMps2":1.0,"imu_accel_delta_threshold_mps2":1.0,"offlineAfterSec":1800,"offline_after_s":1800}}'::jsonb,0),
+  ('MOCK-OBD-002','Bus Tracker 002','seed-token-bus-002','running',NOW()-INTERVAL '1 minutes','v2.3.1','v2.4.0',10.730644,106.719981,10.730644,106.719981,55.8,120560,1.35,20,TRUE,'{"source":"mock-audit","driving":{"trackingIntervalSec":20,"tracking_interval_s":20},"parking":{"trackingIntervalSec":180,"tracking_interval_s":180,"heartbeatIntervalSec":600,"heartbeat_interval_s":600},"alerts":{"overspeedKph":70,"overspeed_kph":70,"imuAccelDeltaThresholdMps2":1.35,"imu_accel_delta_threshold_mps2":1.35,"offlineAfterSec":600,"offline_after_s":600}}'::jsonb,0),
+  ('MOCK-OBD-003','Van Tracker 003','seed-token-van-003','disconnected',NOW()-INTERVAL '18 minutes','v2.2.5','v2.4.0',10.733819,106.731205,10.733819,106.731205,0,49320,1.10,45,TRUE,'{"source":"mock-audit","driving":{"trackingIntervalSec":45,"tracking_interval_s":45},"parking":{"trackingIntervalSec":480,"tracking_interval_s":480,"heartbeatIntervalSec":1200,"heartbeat_interval_s":1200},"alerts":{"overspeedKph":85,"overspeed_kph":85,"imuAccelDeltaThresholdMps2":1.1,"imu_accel_delta_threshold_mps2":1.1,"offlineAfterSec":1200,"offline_after_s":1200}}'::jsonb,7)
 ON CONFLICT (device_id) DO UPDATE
 SET device_name = EXCLUDED.device_name,
     auth_token = EXCLUDED.auth_token,
@@ -65,7 +65,7 @@ SET device_name = EXCLUDED.device_name,
     last_longitude = EXCLUDED.last_longitude,
     last_speed = EXCLUDED.last_speed,
     total_runtime_seconds = EXCLUDED.total_runtime_seconds,
-    vibration_threshold = EXCLUDED.vibration_threshold,
+    imu_accel_delta_threshold_mps2 = EXCLUDED.imu_accel_delta_threshold_mps2,
     request_interval = EXCLUDED.request_interval,
     is_active = EXCLUDED.is_active,
     config = EXCLUDED.config,
@@ -236,7 +236,7 @@ VALUES
   ('XE-LOGI-01','inspection','MOCK MTN: Truck monthly safety inspection','Checklist completed',CURRENT_DATE-6,CURRENT_DATE-5,94020,101000,CURRENT_DATE+25,900000,'Thu Duc Inspection Bay','completed','mock-audit',1);
 
 -- sessions
-INSERT INTO device_sessions (device_id, status, server_session_start, server_session_end, session_start, session_end, uptime, avg_vibration, min_vibration, max_vibration, avg_vehicle_battery, avg_device_battery, data_points_count, last_update, start_correlation_id, end_correlation_id, last_latitude, last_longitude, last_speed)
+INSERT INTO device_sessions (device_id, status, server_session_start, server_session_end, session_start, session_end, uptime, avg_imu_accel_delta_mps2, min_imu_accel_delta_mps2, max_imu_accel_delta_mps2, avg_vehicle_battery, avg_device_battery, data_points_count, last_update, start_correlation_id, end_correlation_id, last_latitude, last_longitude, last_speed)
 VALUES
   ('TRACKER_001','completed',NOW()-INTERVAL '1 day 3 hours',NOW()-INTERVAL '1 day 1 hour 50 minutes',NOW()-INTERVAL '1 day 3 hours',NOW()-INTERVAL '1 day 1 hour 50 minutes',4200,1.26,0.44,2.10,12.5,4.08,260,NOW()-INTERVAL '1 day 1 hour 50 minutes','mock-audit-session-001','mock-audit-session-001-end',10.775843,106.700981,12.4),
   ('MOCK-OBD-002','running',NOW()-INTERVAL '90 minutes',NULL,NOW()-INTERVAL '90 minutes',NULL,5400,1.42,0.51,2.44,13.6,4.12,320,NOW()-INTERVAL '1 minute','mock-audit-session-002',NULL,10.730644,106.719981,55.8),

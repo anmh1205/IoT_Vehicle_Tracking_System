@@ -11,6 +11,10 @@ export interface RealtimeEventMap {
   'device:status': {
     deviceId: string;
     status: string;
+    boundaryEvent?: 'started' | 'ended' | 'none';
+    boundarySource?: string | null;
+    localSessionKey?: number | null;
+    canonicalSessionId?: string | null;
     ignitionState?: 'ON' | 'OFF' | 'UNKNOWN' | null;
     motionState?: 'MOVING' | 'STATIONARY' | 'UNKNOWN' | null;
     vehicleState?:
@@ -45,6 +49,8 @@ export interface RealtimeEventMap {
     course?: number | null;
     timestamp: number;
     status?: string;
+    localSessionKey?: number | null;
+    canonicalSessionId?: string | null;
     ignitionState?: 'ON' | 'OFF' | 'UNKNOWN' | null;
     motionState?: 'MOVING' | 'STATIONARY' | 'UNKNOWN' | null;
     vehicleState?:
@@ -74,7 +80,7 @@ export interface RealtimeEventMap {
     deviceBattery?: number | null;
     vehicleBattery?: number | null;
     satellites?: number | null;
-    vibration?: number | null;
+    imuAccelDeltaMps2?: number | null;
     errorCode?: number | null;
     temperature?: number | null;
     engineTemperature?: number | null;
@@ -94,11 +100,17 @@ export interface RealtimeEventMap {
   'device:session_start': {
     deviceId: string;
     sessionId: number;
+    boundarySource?: string | null;
+    localSessionKey?: number | null;
+    canonicalSessionId?: string | null;
     metadata?: RealtimeMetadata;
   };
   'device:session_end': {
     deviceId: string;
     sessionId: number;
+    boundarySource?: string | null;
+    localSessionKey?: number | null;
+    canonicalSessionId?: string | null;
     metadata?: RealtimeMetadata;
   };
   'command:ack': {

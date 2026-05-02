@@ -9,6 +9,7 @@
  * @brief Validation helpers for the firmware runtime port registry.
  */
 
+/* Logging tag for runtime ports module. */
 static const char *TAG = "RUNTIME_PORTS";
 
 /**

@@ -18,8 +18,10 @@
  */
 
 static const char *TAG = STATE_MACHINE_TAG;
+/* Flag to prevent repeated BLE skip warnings in field validation mode. */
 static bool s_field_validation_ble_skip_logged = false;
 
+/* Diagnostic query sequence for OBD DTC modes. */
 static const tracker_obd_diag_query_t s_state_obd_diag_queries[] = {
     {.mode = OBD_MODE_CURRENT_DATA, .pid = OBD_PID_MONITOR_STATUS},
     {.mode = OBD_MODE_STORED_DTC, .pid = -1},

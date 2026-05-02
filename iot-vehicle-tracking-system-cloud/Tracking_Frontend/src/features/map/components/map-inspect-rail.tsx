@@ -133,7 +133,7 @@ export const MapInspectRail = ({
       value: formatTemperatureValue(device.engineTemperature ?? device.temperature),
     },
     { label: 'GNSS', value: formatCountValue(device.satellites, ' vệ tinh') },
-    { label: 'Rung', value: formatCountValue(device.vibration) },
+    { label: 'Gia tốc IMU Δ', value: formatCountValue(device.imuAccelDeltaMps2, ' m/s²') },
     { label: 'Mã lỗi', value: formatErrorCodeValue(device.errorCode) },
   ];
 

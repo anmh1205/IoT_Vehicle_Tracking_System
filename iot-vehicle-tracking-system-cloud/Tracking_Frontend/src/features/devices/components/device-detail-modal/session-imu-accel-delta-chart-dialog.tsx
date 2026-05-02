@@ -1,8 +1,10 @@
 'use client';
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis } from 'recharts';
-import type { DeviceVibrationPoint } from '@/features/devices/types';
-export const SessionVibrationChartDialog = ({
+import type { DeviceImuAccelDeltaPoint } from '@/features/devices/types';
+
+export const SessionImuAccelDeltaChartDialog = ({
   open,
   onOpenChange,
   title,
@@ -11,19 +13,20 @@ export const SessionVibrationChartDialog = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  data: DeviceVibrationPoint[];
+  data: DeviceImuAccelDeltaPoint[];
 }) => {
   const chartData = data.map((point) => ({
     ...point,
     label: point.timestamp.slice(11, 19),
   }));
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Biểu đồ rung của phiên chạy, dùng để đối chiếu biên độ theo mốc thời gian trong phiên đã chọn.
+            Time series for IMU acceleration delta in the selected session.
           </DialogDescription>
         </DialogHeader>
         <div className="h-[320px]">

@@ -96,11 +96,25 @@ static QueueHandle_t s_uart_event_queue = NULL;
 static modem_at_uart_diag_t s_uart_diag = {0};
 /* Incremental line-assembly buffer for URC/response dispatch across UART chunks. */
 static char s_dispatch_line_buf[MODEM_URC_LINE_BUFFER_SIZE] = {0};
+/* Current length of assembled line in dispatch buffer. */
 static size_t s_dispatch_line_len = 0;
+/* Flag indicating dispatch line buffer has overflowed. */
 static bool s_dispatch_line_overflow = false;
 
 /**
  * @brief Drain UART event queue and aggregate error counters.
+ *
+ * Processes all pending UART events from the driver event queue and aggregates
+ * diagnostic counters for various error conditions. Called periodically to
+ * prevent queue overflow and maintain diagnostic visibility.
+ *
+ * Workflow:
+ * 1. Loop: xQueueReceive until queue empty (non-blocking, 0 timeout)
+ * 2. Switch: categorize event type (FIFO overflow, buffer full, parity, frame, break)
+ * 3. Increment: corresponding diagnostic counter for each error type
+ * 4. Flush: input buffer on overflow/buffer-full to recover
+ *
+ * Counter values are exposed via s_uart_diag for runtime health monitoring.
  */
 static void modem_at_drain_uart_events(void) {
     if (s_uart_event_queue == NULL) {

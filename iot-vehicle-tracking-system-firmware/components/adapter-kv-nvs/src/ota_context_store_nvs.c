@@ -14,6 +14,7 @@
  * @brief OTA confirm-context blob persistence helpers.
  */
 
+/* Logging tag for OTA context store NVS module. */
 static const char *TAG = "OTA_CONTEXT_STORE";
 
 esp_err_t ota_context_store_nvs_save(const ota_persist_context_t *context) {

@@ -5,9 +5,10 @@ interface TelemetryRow {
   value: string | null;
 }
 
-const DEFAULT_METRIC = 'vibration';
+const DEFAULT_METRIC = 'imuAccelDeltaMps2';
 const METRIC_ALIASES: Record<string, string> = {
-  vibration: 'vibration',
+  imuacceldeltamps2: 'imuAccelDeltaMps2',
+  vibration: 'imuAccelDeltaMps2',
   speed: 'speed',
   vehiclebattery: 'vehicleBattery',
   devicebattery: 'deviceBattery',
@@ -24,9 +25,9 @@ const METRIC_ALIASES: Record<string, string> = {
 };
 
 const METRIC_SQL: Record<string, { value: string; exists: string }> = {
-  vibration: {
-    value: "COALESCE(context->>'vibration', metadata->>'vibration')",
-    exists: "(context ? 'vibration' OR metadata ? 'vibration')",
+  imuAccelDeltaMps2: {
+    value: "COALESCE(context->>'imu_accel_delta_mps2', metadata->>'imu_accel_delta_mps2', context->>'vibration', metadata->>'vibration')",
+    exists: "(context ? 'imu_accel_delta_mps2' OR metadata ? 'imu_accel_delta_mps2' OR context ? 'vibration' OR metadata ? 'vibration')",
   },
   speed: {
     value: "COALESCE(context->>'speed', metadata->>'speed')",

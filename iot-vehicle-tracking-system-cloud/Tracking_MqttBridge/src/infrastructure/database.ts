@@ -28,8 +28,19 @@ interface DeviceRow {
 
 interface DeviceSessionRow {
   id: number;
+  status?: string | null;
   runtime_seconds?: string | number | null;
   data_points_count?: string | number | null;
+}
+
+interface SessionIdentityInput {
+  localSessionKey?: number;
+  canonicalSessionId?: string | null;
+  bootId?: string;
+  canonicalSource?: string;
+  boundarySource?: string;
+  startReason?: string;
+  endReason?: string;
 }
 
 interface ActiveAlertRow {
@@ -49,6 +60,11 @@ const TRANSIENT_HEARTBEAT_SESSION_MAX_DATA_POINTS = 1;
 const toInt = (value: string | number | null | undefined): number => {
   const parsed = Number.parseInt(String(value ?? '0'), 10);
   return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const toOptionalPositiveInt = (value: string | number | null | undefined): number | null => {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
 };
 
 /**
@@ -170,28 +186,79 @@ export const ensureDeviceSession = async (
   deviceId: string,
   deviceTimestampMs: number,
   serverTimestampMs = Date.now(),
-): Promise<{ sessionId: number; isNew: boolean }> => {
+  sessionIdentity: SessionIdentityInput = {},
+): Promise<{ sessionId: number; isNew: boolean; status: string }> => {
   const client = await pool.connect();
   const deviceOccurredAt = toIsoTimestamp(deviceTimestampMs);
   const serverOccurredAt = toIsoTimestamp(serverTimestampMs);
+  const localSessionKey = sessionIdentity.localSessionKey ?? null;
+  const firmwareBootId = sessionIdentity.bootId?.trim() || null;
+  const canonicalSource = sessionIdentity.canonicalSource ?? 'server';
+  const boundarySource = sessionIdentity.boundarySource ?? 'firmware';
+  const startReason = sessionIdentity.startReason ?? 'ignition_on';
+  const hasAuthoritativeIdentity = localSessionKey !== null && firmwareBootId !== null;
 
   try {
     await client.query('BEGIN');
 
-    const active = await client.query<DeviceSessionRow>(
-      `SELECT id
-       FROM device_sessions
-       WHERE device_id = $1 AND status = 'running'
-       ORDER BY created_at DESC
-       LIMIT 1
-       FOR UPDATE`,
-      [deviceId],
-    );
+    if (hasAuthoritativeIdentity) {
+      const matchedByIdentity = await client.query<DeviceSessionRow>(
+        `SELECT id, status
+         FROM device_sessions
+         WHERE device_id = $1
+           AND firmware_boot_id = $2
+           AND local_session_key = $3
+         ORDER BY created_at DESC
+         LIMIT 1
+         FOR UPDATE`,
+        [deviceId, firmwareBootId, localSessionKey],
+      );
 
-    const existing = active.rows[0];
-    if (existing) {
-      await client.query('COMMIT');
-      return { sessionId: existing.id, isNew: false };
+      const existingByIdentity = matchedByIdentity.rows[0];
+      if (existingByIdentity) {
+        await client.query(
+          `UPDATE device_sessions
+           SET canonical_source = $2,
+               boundary_source = $3,
+               start_reason = COALESCE(start_reason, $4),
+               updated_at = NOW()
+           WHERE id = $1`,
+          [existingByIdentity.id, canonicalSource, boundarySource, startReason],
+        );
+        await client.query('COMMIT');
+        return {
+          sessionId: existingByIdentity.id,
+          isNew: false,
+          status: existingByIdentity.status ?? 'running',
+        };
+      }
+    }
+
+    if (!hasAuthoritativeIdentity) {
+      const active = await client.query<DeviceSessionRow>(
+        `SELECT id, status
+         FROM device_sessions
+         WHERE device_id = $1 AND status = 'running'
+         ORDER BY created_at DESC
+         LIMIT 1
+         FOR UPDATE`,
+        [deviceId],
+      );
+
+      const existing = active.rows[0];
+      if (existing) {
+        await client.query(
+          `UPDATE device_sessions
+           SET canonical_source = $2,
+               boundary_source = $3,
+               start_reason = COALESCE(start_reason, $4),
+               updated_at = NOW()
+           WHERE id = $1`,
+          [existing.id, canonicalSource, boundarySource, startReason],
+        );
+        await client.query('COMMIT');
+        return { sessionId: existing.id, isNew: false, status: existing.status ?? 'running' };
+      }
     }
 
     const created = await client.query<DeviceSessionRow>(
@@ -200,24 +267,75 @@ export const ensureDeviceSession = async (
          status,
          server_session_start,
          session_start,
+         local_session_key,
+         firmware_boot_id,
+         canonical_source,
+         boundary_source,
+         start_reason,
          data_points_count,
          last_update,
          created_at,
          updated_at
        )
-       VALUES ($1, 'running', $2, $3, 0, $2, NOW(), NOW())
-       RETURNING id`,
-      [deviceId, serverOccurredAt, deviceOccurredAt],
+       VALUES ($1, 'running', $2, $3, $4, $5, $6, $7, $8, 0, $2, NOW(), NOW())
+       RETURNING id, status`,
+      [
+        deviceId,
+        serverOccurredAt,
+        deviceOccurredAt,
+        localSessionKey,
+        firmwareBootId,
+        canonicalSource,
+        boundarySource,
+        startReason,
+      ],
     );
 
     await client.query('COMMIT');
-    return { sessionId: created.rows[0].id, isNew: true };
+    return {
+      sessionId: created.rows[0].id,
+      isNew: true,
+      status: created.rows[0].status ?? 'running',
+    };
   } catch (err) {
     await client.query('ROLLBACK');
-    logger.error({ err, deviceId }, 'ensureDeviceSession failed');
+    logger.error({ err, deviceId, localSessionKey, firmwareBootId }, 'ensureDeviceSession failed');
     throw err;
   } finally {
     client.release();
+  }
+};
+
+export const findDeviceSessionIdByIdentity = async (
+  deviceId: string,
+  sessionIdentity: Pick<SessionIdentityInput, 'localSessionKey' | 'canonicalSessionId' | 'bootId'>,
+): Promise<number | null> => {
+  const canonicalSessionId = toOptionalPositiveInt(sessionIdentity.canonicalSessionId);
+  if (canonicalSessionId !== null) {
+    return canonicalSessionId;
+  }
+
+  const localSessionKey = sessionIdentity.localSessionKey ?? null;
+  const firmwareBootId = sessionIdentity.bootId?.trim() || null;
+  if (localSessionKey === null || firmwareBootId === null) {
+    return null;
+  }
+
+  try {
+    const result = await pool.query<DeviceSessionRow>(
+      `SELECT id
+       FROM device_sessions
+       WHERE device_id = $1
+         AND firmware_boot_id = $2
+         AND local_session_key = $3
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [deviceId, firmwareBootId, localSessionKey],
+    );
+    return result.rows[0]?.id ?? null;
+  } catch (err) {
+    logger.error({ err, deviceId, localSessionKey, firmwareBootId }, 'findDeviceSessionIdByIdentity failed');
+    return null;
   }
 };
 
@@ -226,7 +344,7 @@ export const touchDeviceSession = async (params: {
   sessionId: number;
   deviceTimestampMs: number;
   serverTimestampMs?: number;
-  vibration?: number;
+  imuAccelDeltaMps2?: number;
   vehicleBattery?: number;
   deviceBattery?: number;
   latitude?: number;
@@ -251,10 +369,10 @@ export const touchDeviceSession = async (params: {
            EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
            0
          ),
-         avg_vibration = CASE
-           WHEN $3::numeric IS NULL THEN avg_vibration
-           WHEN avg_vibration IS NULL THEN $3::numeric
-           ELSE ROUND(((avg_vibration + $3::numeric) / 2)::numeric, 2)
+         avg_imu_accel_delta_mps2 = CASE
+           WHEN $3::numeric IS NULL THEN avg_imu_accel_delta_mps2
+           WHEN avg_imu_accel_delta_mps2 IS NULL THEN $3::numeric
+           ELSE ROUND(((avg_imu_accel_delta_mps2 + $3::numeric) / 2)::numeric, 3)
          END,
          avg_vehicle_battery = CASE
            WHEN $4::numeric IS NULL THEN avg_vehicle_battery
@@ -274,7 +392,7 @@ export const touchDeviceSession = async (params: {
       [
         params.sessionId,
         serverOccurredAt,
-        params.vibration ?? null,
+        params.imuAccelDeltaMps2 ?? null,
         params.vehicleBattery ?? null,
         params.deviceBattery ?? null,
         params.latitude ?? null,
@@ -312,10 +430,10 @@ export const touchDeviceSession = async (params: {
              EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
              0
            ),
-           avg_vibration = CASE
-             WHEN $3::numeric IS NULL THEN avg_vibration
-             WHEN avg_vibration IS NULL THEN $3::numeric
-             ELSE ROUND(((avg_vibration + $3::numeric) / 2)::numeric, 2)
+           avg_imu_accel_delta_mps2 = CASE
+             WHEN $3::numeric IS NULL THEN avg_imu_accel_delta_mps2
+             WHEN avg_imu_accel_delta_mps2 IS NULL THEN $3::numeric
+             ELSE ROUND(((avg_imu_accel_delta_mps2 + $3::numeric) / 2)::numeric, 3)
            END,
            avg_vehicle_battery = CASE
              WHEN $4::numeric IS NULL THEN avg_vehicle_battery
@@ -335,7 +453,7 @@ export const touchDeviceSession = async (params: {
         [
           params.sessionId,
           serverOccurredAt,
-          params.vibration ?? null,
+          params.imuAccelDeltaMps2 ?? null,
           params.vehicleBattery ?? null,
           params.deviceBattery ?? null,
           params.latitude ?? null,
@@ -374,25 +492,31 @@ export const completeDeviceSession = async (
   knownSessionId?: number | null,
   serverTimestampMs?: number,
   completionSource: 'stopped' | 'heartbeat' = 'stopped',
+  sessionIdentity: SessionIdentityInput = {},
 ): Promise<{ sessionId: number | null; discarded: boolean }> => {
   const client = await pool.connect();
   const deviceOccurredAt = toIsoTimestamp(deviceTimestampMs);
   const serverOccurredAt = toIsoTimestamp(serverTimestampMs ?? Date.now());
+  const localSessionKey = sessionIdentity.localSessionKey ?? null;
+  const firmwareBootId = sessionIdentity.bootId?.trim() || null;
+  const boundarySource = sessionIdentity.boundarySource ?? 'firmware';
+  const endReason = sessionIdentity.endReason
+    ?? (completionSource === 'heartbeat' ? 'heartbeat' : 'ignition_off');
 
   try {
     await client.query('BEGIN');
 
     const active = knownSessionId
       ? await client.query<DeviceSessionRow>(
-          `SELECT id, COALESCE(data_points_count, 0)::text AS data_points_count
+          `SELECT id, status, COALESCE(data_points_count, 0)::text AS data_points_count
            FROM device_sessions
-           WHERE id = $1 AND device_id = $2 AND status = 'running'
+           WHERE id = $1 AND device_id = $2
            LIMIT 1
            FOR UPDATE`,
           [knownSessionId, deviceId],
         )
       : await client.query<DeviceSessionRow>(
-          `SELECT id, COALESCE(data_points_count, 0)::text AS data_points_count
+          `SELECT id, status, COALESCE(data_points_count, 0)::text AS data_points_count
            FROM device_sessions
            WHERE device_id = $1 AND status = 'running'
            ORDER BY created_at DESC
@@ -407,6 +531,11 @@ export const completeDeviceSession = async (
       return { sessionId: null, discarded: false };
     }
 
+    if (session.status && session.status !== 'running') {
+      await client.query('COMMIT');
+      return { sessionId: session.id, discarded: false };
+    }
+
     let runtimeSeconds = 0;
     const dataPointsCount = toInt(session.data_points_count);
 
@@ -419,6 +548,10 @@ export const completeDeviceSession = async (
            status = 'completed',
            server_session_end = $2,
            session_end = $3,
+           local_session_key = COALESCE(local_session_key, $4::bigint),
+           firmware_boot_id = COALESCE(firmware_boot_id, $5),
+           boundary_source = COALESCE($6, boundary_source),
+           end_reason = COALESCE($7, end_reason),
            last_update = $2,
            uptime = GREATEST(
              EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
@@ -431,7 +564,7 @@ export const completeDeviceSession = async (
            updated_at = NOW()
          WHERE id = $1
          RETURNING COALESCE(total_runtime_seconds, uptime, 0)::text AS runtime_seconds`,
-        [session.id, serverOccurredAt, deviceOccurredAt],
+        [session.id, serverOccurredAt, deviceOccurredAt, localSessionKey, firmwareBootId, boundarySource, endReason],
       );
 
       runtimeSeconds = Number.parseInt(String(completed.rows[0]?.runtime_seconds ?? '0'), 10);
@@ -446,6 +579,10 @@ export const completeDeviceSession = async (
            status = 'completed',
            server_session_end = $2,
            session_end = $3,
+           local_session_key = COALESCE(local_session_key, $4::bigint),
+           firmware_boot_id = COALESCE(firmware_boot_id, $5),
+           boundary_source = COALESCE($6, boundary_source),
+           end_reason = COALESCE($7, end_reason),
            last_update = $2,
            uptime = GREATEST(
              EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
@@ -454,7 +591,7 @@ export const completeDeviceSession = async (
            updated_at = NOW()
          WHERE id = $1
          RETURNING COALESCE(uptime, 0)::text AS runtime_seconds`,
-        [session.id, serverOccurredAt, deviceOccurredAt],
+        [session.id, serverOccurredAt, deviceOccurredAt, localSessionKey, firmwareBootId, boundarySource, endReason],
       );
 
       runtimeSeconds = Number.parseInt(String(completed.rows[0]?.runtime_seconds ?? '0'), 10);

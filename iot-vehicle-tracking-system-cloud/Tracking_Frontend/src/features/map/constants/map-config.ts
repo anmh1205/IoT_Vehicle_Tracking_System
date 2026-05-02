@@ -27,7 +27,7 @@ export const MAP_LAYER_CONFIG: Record<
 
 export const MAP_STATUS_COLORS: Record<DeviceMapStatus, string> = {
   running: '#22c55e',
-  online: '#22c55e',
+  online: '#0ea5e9',
   stopped: '#6b7280',
   error: '#ef4444',
   disconnected: '#eab308',
@@ -35,7 +35,7 @@ export const MAP_STATUS_COLORS: Record<DeviceMapStatus, string> = {
 
 export const MAP_STATUS_LABELS: Record<DeviceMapStatus, string> = {
   running: 'Đang chạy',
-  online: 'Trực tuyến',
+  online: 'Đỗ xe / còn online',
   stopped: 'Đã dừng',
   error: 'Lỗi',
   disconnected: 'Mất kết nối',

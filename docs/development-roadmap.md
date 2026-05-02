@@ -2,6 +2,17 @@
 
 ## Phase Status
 
+### P1 - Firmware-Authoritative Session Lifecycle Rollout In Progress
+- Scope: move session authority from cloud-inferred status chatter to firmware ignition boundaries across bridge persistence, backend contracts, and frontend semantics.
+- Milestones in progress:
+  - Added additive `device_sessions` provenance fields for provisional identity and boundary/canonical source tracking in PostgreSQL bootstrap + migration files.
+  - Updated MQTT Bridge so only firmware `boundary_event` opens/closes sessions, with bridge-side matching/backfill by `(device_id, boot_id, local_session_key)` and canonical assignment handoff to the device.
+  - Exposed authoritative session timestamps/provenance through backend session DTOs and realtime payload contracts.
+  - Updated frontend session parsers and status labels so `online` means parked heartbeat visibility rather than a driving-equivalent state.
+- Remaining closure:
+  - Resolve shell-wrapper blocker preventing service-level `npm run typecheck`/build verification in this environment.
+  - Continue downstream UI/runtime consumers and historical cleanup/audit phases from the authoritative-session plan.
+
 ### P1 - Cloud Realtime WebSocket Audit Complete
 - Scope: end-to-end Socket.IO audit across backend namespace auth/scoping, frontend namespace-aware consumers, and event-driven dashboard updates.
 - Milestones completed:

@@ -24,9 +24,29 @@
 #define CONFIG_TRACKER_TLS_CA_CERT_NAME ""
 #endif
 
+/* OTA HTTP action state for tracking in-flight requests. */
 ota_http_action_state_t s_ota_http_action = {0};
+/* Flag indicating HTTP URC handler has been registered. */
 bool s_ota_http_urc_registered = false;
 
+/**
+ * @brief Configure HTTPS CA certificate for modem OTA HTTP requests.
+ *
+ * Configures the SIM7600 modem's SSL context for OTA HTTP/HTTPS transfers.
+ * This ensures OTA downloads use the same TLS verification settings as MQTT
+ * to avoid split trust (different CA stores for telemetry vs firmware).
+ *
+ * Workflow:
+ * 1. If CONFIG_TRACKER_TLS_VERIFY_SERVER is enabled:
+ *    - Validate CA certificate name is configured (non-empty)
+ *    - Build AT+CSSLCFG command to register CA cert for OTA SSL context
+ *    - Send command to modem and verify "OK" response
+ * 2. If TLS verification disabled: log warning and skip configuration
+ *
+ * @param[out] cmd Buffer to build AT command string into.
+ * @param cmd_size Size of command buffer.
+ * @return ESP_OK if configuration successful or skipped, ESP_ERR_* on failure.
+ */
 static esp_err_t util_ota_configure_https_ca_cert(char *cmd, size_t cmd_size) {
 #if CONFIG_TRACKER_TLS_VERIFY_SERVER
     /*
@@ -57,9 +77,26 @@ static esp_err_t util_ota_configure_https_ca_cert(char *cmd, size_t cmd_size) {
     (void)cmd_size;
     ESP_LOGW(UTIL_TAG, "TLS server certificate verification disabled by Kconfig");
 #endif
-    return ESP_OK;
+return ESP_OK;
 }
 
+/**
+ * @brief Convert SIM7600 HTTP transport error code to human-readable string.
+ *
+ * Maps numeric HTTPACTION result codes from SIM7600 modem to descriptive names.
+ * Used for logging and diagnostic purposes to understand OTA transfer failures.
+ *
+ * Error code mapping:
+ * - 701: alert_state (SSL alert received)
+ * - 702: unknown_error (generic transport failure)
+ * - 703: connect_error (connection to server failed)
+ * - 704: timeout (server did not respond in time)
+ * - 705: send_error (failed to send request)
+ * - 706: receive_error (incomplete response from server)
+ *
+ * @param status_code Numeric HTTP transport status code from modem.
+ * @return const char* Human-readable error name, "unknown" for unmapped codes.
+ */
 static const char *util_ota_http_transport_error_name(int status_code) {
     switch (status_code) {
         case 701:

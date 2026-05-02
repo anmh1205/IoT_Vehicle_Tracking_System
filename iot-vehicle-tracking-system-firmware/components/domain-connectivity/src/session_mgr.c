@@ -4,36 +4,7 @@
 
 /**
  * @file session_mgr.c
- * @brief Debounced ignition-to-session mapper.
- *
- * ## Session Management Flow
- *
- * ### Purpose
- *    Maps raw ignition signal transitions to logical sessions
- *    - Debounces ignition signal noise
- *    - Tracks session boundaries for telemetry
- *    - Provides stable ignition state to FSM
- *
- * ### State Machine
- *
- *    IDLE --(ignition on)--> ACTIVE --(ignition off)--> IDLE
- *
- * ### Debounce Logic
- *    - First sample: initialize timer, capture raw value
- *    - Same value: restart debounce timer
- *    - Stable for DEBOUNCE_MS: accept as stable state
- *    - New session triggers on rising edge (off->on transition)
- *
- * ### Key Functions
- *    - session_mgr_init(): Reset all state
- *    - session_mgr_on_ignition_sample(): Process raw sample with debounce
- *    - session_mgr_stable_ignition(): Returns debounced ignition state
- *    - session_mgr_current_session_id(): Returns active session ID
- *    - session_mgr_should_start(): Returns true if session just started
- *
- * ## Tuning Parameters
- *    - DEBOUNCE_MS: Ignition signal stability window (500ms default)
- *    - Session ID: Monotonically increasing, wraps at 0xFFFFFFFF
+ * @brief Debounce ignition samples and map them to session edges.
  */
 
 typedef enum {
@@ -178,6 +149,23 @@ void session_mgr_mark_stopped(void) {
 }
 
 /**
+ * @brief Restore an already-active session after reboot.
+ *
+ * @param session_id Session ID that should remain open.
+ */
+void session_mgr_restore_active(uint32_t session_id) {
+    if (session_id == 0U) {
+        return;
+    }
+
+    s_ctx.state = SESSION_STATE_ACTIVE;
+    s_ctx.current_session_id = session_id;
+    s_ctx.pending_start = false;
+    s_ctx.sample_initialized = false;
+    s_ctx.stable_known = false;
+}
+
+/**
  * @brief Get current session ID.
  *
  * @return Current session ID (0 if none started).
@@ -195,6 +183,11 @@ bool session_mgr_has_stable_ignition(void) {
     return s_ctx.stable_known;
 }
 
+/**
+ * @brief Return the latest accepted debounced ignition level.
+ *
+ * @return true when the stable ignition level is ON.
+ */
 bool session_mgr_stable_ignition(void) {
     return s_ctx.stable_ignition;
 }

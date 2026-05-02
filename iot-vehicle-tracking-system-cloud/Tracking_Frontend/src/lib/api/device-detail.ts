@@ -5,7 +5,7 @@ export interface DeviceRuntimeStats {
   totalRuntime: number;
   totalSessions: number;
   avgSessionDuration: number;
-  avgVibration: number;
+  avgImuAccelDeltaMps2: number;
   totalDataPoints: number;
   lastSession: Record<string, unknown> | null;
 }
@@ -43,7 +43,13 @@ const parseRuntimeStats = (payload: any): DeviceRuntimeStats | null => {
     totalRuntime: Number(payload.totalRuntime ?? payload.total_runtime ?? 0),
     totalSessions: Number(payload.totalSessions ?? payload.total_sessions ?? 0),
     avgSessionDuration: Number(payload.avgSessionDuration ?? payload.avg_session_duration ?? 0),
-    avgVibration: Number(payload.avgVibration ?? payload.avg_vibration ?? 0),
+    avgImuAccelDeltaMps2: Number(
+      payload.avgImuAccelDeltaMps2 ??
+      payload.avg_imu_accel_delta_mps2 ??
+      payload.avgVibration ??
+      payload.avg_vibration ??
+      0,
+    ),
     totalDataPoints: Number(payload.totalDataPoints ?? payload.total_data_points ?? 0),
     lastSession: payload.lastSession ?? payload.last_session ?? null,
   };

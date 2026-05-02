@@ -42,7 +42,12 @@ const toDevice = (raw: any): Device => ({
   longitude: raw?.longitude !== undefined ? Number(raw.longitude) : null,
   totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? 0),
   requestInterval: Number(raw?.requestInterval ?? 60),
-  vibrationThreshold: Number(raw?.vibrationThreshold ?? 0),
+  imuAccelDeltaThresholdMps2: Number(
+    raw?.imuAccelDeltaThresholdMps2 ??
+      raw?.imu_accel_delta_threshold_mps2 ??
+      raw?.vibrationThreshold ??
+      0,
+  ),
   config: raw?.config ?? null,
 });
 

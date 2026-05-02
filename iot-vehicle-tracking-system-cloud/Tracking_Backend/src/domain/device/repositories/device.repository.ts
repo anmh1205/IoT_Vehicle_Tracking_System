@@ -89,6 +89,12 @@ const ALERT_SUMMARY_LATERAL = `LEFT JOIN LATERAL (
   WHERE a.device_id = d.device_id
 ) alerts ON true`;
 
+const isMissingColumnError = (error: unknown): boolean =>
+  typeof error === 'object'
+  && error !== null
+  && 'code' in error
+  && error.code === '42703';
+
 export const findAll = async (
   query: DeviceListQuery,
 ): Promise<{ devices: Device[]; total: number }> => {
@@ -193,61 +199,104 @@ export const findByDeviceId = async (deviceId: string): Promise<Device | null> =
 
 export const create = async (input: CreateDeviceInput, authToken: string): Promise<Device> => {
   const hashedAuthToken = hashToken(authToken);
+  const imuAccelDeltaThresholdMps2 =
+    input.imuAccelDeltaThresholdMps2 ?? input.vibrationThreshold ?? 2.0;
+
+  const params = [
+    input.deviceId,
+    input.deviceName,
+    hashedAuthToken,
+    input.imei ?? null,
+    imuAccelDeltaThresholdMps2,
+    input.requestInterval ?? 10,
+    input.config ? JSON.stringify(input.config) : null,
+  ];
+
+  try {
+    return await insertOne<Device>(
+      `INSERT INTO devices (device_id, device_name, auth_token, imei, imu_accel_delta_threshold_mps2, request_interval, config, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+       RETURNING *`,
+      params,
+    );
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+  }
 
   return insertOne<Device>(
     `INSERT INTO devices (device_id, device_name, auth_token, imei, vibration_threshold, request_interval, config, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
      RETURNING *`,
-    [
-      input.deviceId,
-      input.deviceName,
-      hashedAuthToken,
-      input.imei ?? null,
-      input.vibrationThreshold ?? 2.0,
-      input.requestInterval ?? 10,
-      input.config ? JSON.stringify(input.config) : null,
-    ],
+    params,
   );
 };
 
 export const update = async (id: number, input: UpdateDeviceInput): Promise<Device | null> => {
-  const setClauses: string[] = [];
-  const values: unknown[] = [];
-  let paramIndex = 1;
+  const imuAccelDeltaThresholdMps2 =
+    input.imuAccelDeltaThresholdMps2 ?? input.vibrationThreshold;
 
-  if (input.deviceName !== undefined) {
-    setClauses.push(`device_name = $${paramIndex++}`);
-    values.push(input.deviceName);
-  }
-  if (input.imei !== undefined) {
-    setClauses.push(`imei = $${paramIndex++}`);
-    values.push(input.imei);
-  }
-  if (input.vibrationThreshold !== undefined) {
-    setClauses.push(`vibration_threshold = $${paramIndex++}`);
-    values.push(input.vibrationThreshold);
-  }
-  if (input.requestInterval !== undefined) {
-    setClauses.push(`request_interval = $${paramIndex++}`);
-    values.push(input.requestInterval);
-  }
-  if (input.targetFirmwareVersion !== undefined) {
-    setClauses.push(`target_firmware_version = $${paramIndex++}`);
-    values.push(input.targetFirmwareVersion);
-  }
-  if (input.config !== undefined) {
-    setClauses.push(`config = $${paramIndex++}`);
-    values.push(JSON.stringify(input.config));
+  const buildUpdateQuery = (thresholdColumn: 'imu_accel_delta_threshold_mps2' | 'vibration_threshold') => {
+    const setClauses: string[] = [];
+    const values: unknown[] = [];
+    let paramIndex = 1;
+
+    if (input.deviceName !== undefined) {
+      setClauses.push(`device_name = $${paramIndex++}`);
+      values.push(input.deviceName);
+    }
+    if (input.imei !== undefined) {
+      setClauses.push(`imei = $${paramIndex++}`);
+      values.push(input.imei);
+    }
+    if (imuAccelDeltaThresholdMps2 !== undefined) {
+      setClauses.push(`${thresholdColumn} = $${paramIndex++}`);
+      values.push(imuAccelDeltaThresholdMps2);
+    }
+    if (input.requestInterval !== undefined) {
+      setClauses.push(`request_interval = $${paramIndex++}`);
+      values.push(input.requestInterval);
+    }
+    if (input.targetFirmwareVersion !== undefined) {
+      setClauses.push(`target_firmware_version = $${paramIndex++}`);
+      values.push(input.targetFirmwareVersion);
+    }
+    if (input.config !== undefined) {
+      setClauses.push(`config = $${paramIndex++}`);
+      values.push(JSON.stringify(input.config));
+    }
+
+    if (setClauses.length === 0) {
+      return null;
+    }
+
+    setClauses.push(`updated_at = NOW()`);
+    values.push(id);
+
+    return {
+      query: `UPDATE devices SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+      values,
+    };
+  };
+
+  const canonicalUpdate = buildUpdateQuery('imu_accel_delta_threshold_mps2');
+  if (canonicalUpdate === null) {
+    return findById(id);
   }
 
-  if (setClauses.length === 0) return findById(id);
+  try {
+    return await updateOne<Device>(canonicalUpdate.query, canonicalUpdate.values);
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+  }
 
-  setClauses.push(`updated_at = NOW()`);
-  values.push(id);
-
+  const legacyUpdate = buildUpdateQuery('vibration_threshold');
   return updateOne<Device>(
-    `UPDATE devices SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
-    values,
+    legacyUpdate?.query ?? '',
+    legacyUpdate?.values,
   );
 };
 
@@ -282,7 +331,7 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     device_battery: number | null;
     vehicle_battery: number | null;
     satellites: number | null;
-    vibration: number | null;
+    imu_accel_delta_mps2: number | null;
     error_code: number | null;
     temperature: number | null;
     engine_temperature: number | null;
@@ -318,7 +367,10 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
        NULLIF(el.context->>'device_battery', '')::float8 AS device_battery,
        NULLIF(el.context->>'vehicle_battery', '')::float8 AS vehicle_battery,
        NULLIF(el.context->>'satellites', '')::int AS satellites,
-       NULLIF(el.context->>'vibration', '')::float8 AS vibration,
+       COALESCE(
+         NULLIF(el.context->>'imu_accel_delta_mps2', '')::float8,
+         NULLIF(el.context->>'vibration', '')::float8
+       ) AS imu_accel_delta_mps2,
        COALESCE(
          NULLIF(el.context->>'error_code', '')::int,
          d.last_error_code
@@ -351,6 +403,7 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
            'vehicle_battery',
            'device_battery',
            'satellites',
+           'imu_accel_delta_mps2',
            'vibration',
            'error_code',
            'temperature',
@@ -391,7 +444,7 @@ export const findAllPositions = async (): Promise<DevicePosition[]> => {
     deviceBattery: row.device_battery,
     vehicleBattery: row.vehicle_battery,
     satellites: row.satellites,
-    vibration: row.vibration,
+    imuAccelDeltaMps2: row.imu_accel_delta_mps2,
     errorCode: row.error_code,
     temperature: row.temperature,
     engineTemperature: row.engine_temperature,

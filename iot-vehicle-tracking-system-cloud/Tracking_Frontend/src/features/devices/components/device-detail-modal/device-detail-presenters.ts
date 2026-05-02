@@ -23,7 +23,7 @@ export interface DeviceConfigSummary {
   parkingIntervalSec: number | null;
   parkingHeartbeatSec: number | null;
   overspeedKph: number | null;
-  vibrationThreshold: number | null;
+  imuAccelDeltaThresholdMps2: number | null;
   offlineAfterSec: number | null;
   activeIntervalSec: number | null;
   activeProfileLabel: string;
@@ -31,7 +31,10 @@ export interface DeviceConfigSummary {
 }
 
 export const getDeviceConfigSummary = (
-  device: Pick<Device, 'config' | 'requestInterval' | 'currentStatus' | 'vibrationThreshold'> | null,
+  device: Pick<
+    Device,
+    'config' | 'requestInterval' | 'currentStatus' | 'imuAccelDeltaThresholdMps2'
+  > | null,
 ): DeviceConfigSummary => {
   const config = toRecord(device?.config);
   const driving = toRecord(config?.driving);
@@ -50,28 +53,34 @@ export const getDeviceConfigSummary = (
     900,
   );
   const overspeedKph = pickNumber([alerts?.overspeedKph, alerts?.overspeed_kph], 80);
-  const vibrationThreshold = pickNumber(
-    [alerts?.vibrationThreshold, alerts?.vibration_threshold, device?.vibrationThreshold],
+  const imuAccelDeltaThresholdMps2 = pickNumber(
+    [
+      alerts?.imuAccelDeltaThresholdMps2,
+      alerts?.imu_accel_delta_threshold_mps2,
+      alerts?.vibrationThreshold,
+      alerts?.vibration_threshold,
+      device?.imuAccelDeltaThresholdMps2,
+    ],
     2,
   );
-  const offlineAfterSec = pickNumber(
-    [alerts?.offlineAfterSec, alerts?.offline_after_s],
-    900,
-  );
-  const isDriving = device?.currentStatus === 'running' || device?.currentStatus === 'online';
+  const offlineAfterSec = pickNumber([alerts?.offlineAfterSec, alerts?.offline_after_s], 900);
+  const isDriving = device?.currentStatus === 'running';
+  const isParkedOnline = device?.currentStatus === 'online';
 
   return {
     drivingIntervalSec,
     parkingIntervalSec,
     parkingHeartbeatSec,
     overspeedKph,
-    vibrationThreshold,
+    imuAccelDeltaThresholdMps2,
     offlineAfterSec,
     activeIntervalSec: isDriving ? drivingIntervalSec : parkingIntervalSec,
-    activeProfileLabel: isDriving ? 'Chạy xe' : 'Đỗ xe',
+    activeProfileLabel: isDriving ? 'Cháº¡y xe' : (isParkedOnline ? 'Äá»— xe / cÃ²n online' : 'Äá»— xe'),
     activeProfileHint: isDriving
-      ? 'Thiết bị đang ở trạng thái chạy nên cloud dùng chu kỳ driving.'
-      : 'Thiết bị không chạy nên cloud dùng chu kỳ parking để giảm tiêu thụ.',
+      ? 'Thiáº¿t bá»‹ Ä‘ang á»Ÿ tráº¡ng thÃ¡i cháº¡y nÃªn cloud dÃ¹ng chu ká»³ driving.'
+      : isParkedOnline
+        ? 'PhiÃªn lÃ¡i Ä‘Ã£ káº¿t thÃºc nhÆ°ng thiáº¿t bá»‹ váº«n cÃ²n heartbeat parking nÃªn cloud dÃ¹ng chu ká»³ parking.'
+        : 'Thiáº¿t bá»‹ khÃ´ng cháº¡y nÃªn cloud dÃ¹ng chu ká»³ parking Ä‘á»ƒ giáº£m tiÃªu thá»¥.',
   };
 };
 
@@ -88,7 +97,7 @@ export const formatElectricalMetric = (value: number | null | undefined): string
 };
 
 export const formatTemperatureMetric = (value: number | null | undefined): string =>
-  value === null || value === undefined || !Number.isFinite(value) ? '-' : `${value.toFixed(1)}°C`;
+  value === null || value === undefined || !Number.isFinite(value) ? '-' : `${value.toFixed(1)}Â°C`;
 
 export const resolveDeviceBatteryValue = (
   row: DeviceTelemetryRow | null | undefined,

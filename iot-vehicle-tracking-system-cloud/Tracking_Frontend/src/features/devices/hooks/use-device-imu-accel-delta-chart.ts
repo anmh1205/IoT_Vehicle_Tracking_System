@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { deviceDetailServices } from '@/lib/api/device-detail';
-import type { DeviceVibrationPoint } from '@/features/devices/types';
-export type VibrationPeriod = '1h' | '6h' | '24h' | '7d';
-const periodToFrom = (period: VibrationPeriod): string => {
+import type { DeviceImuAccelDeltaPoint } from '@/features/devices/types';
+export type ImuAccelDeltaPeriod = '1h' | '6h' | '24h' | '7d';
+
+const periodToFrom = (period: ImuAccelDeltaPeriod): string => {
   const now = Date.now();
   const ms =
     period === '1h'
@@ -15,14 +16,15 @@ const periodToFrom = (period: VibrationPeriod): string => {
           : 604800000;
   return new Date(now - ms).toISOString();
 };
-export const useDeviceVibrationChart = (deviceId: number | null) => {
-  const [period, setPeriod] = useState<VibrationPeriod>('24h');
+
+export const useDeviceImuAccelDeltaChart = (deviceId: number | null) => {
+  const [period, setPeriod] = useState<ImuAccelDeltaPeriod>('24h');
   const query = useQuery({
-    queryKey: ['device-vibration-chart', deviceId, period],
+    queryKey: ['device-imu-accel-delta-chart', deviceId, period],
     queryFn: () =>
       deviceDetailServices
         .getTelemetry(deviceId as number, {
-          metric: 'vibration',
+          metric: 'imuAccelDeltaMps2',
           from: periodToFrom(period),
           to: new Date().toISOString(),
         })
@@ -37,7 +39,7 @@ export const useDeviceVibrationChart = (deviceId: number | null) => {
           return points.map((row: any) => ({
             timestamp: String(row?.timestamp ?? ''),
             value: Number(row?.value ?? 0),
-          })) as DeviceVibrationPoint[];
+          })) as DeviceImuAccelDeltaPoint[];
         }),
     enabled: !!deviceId,
   });

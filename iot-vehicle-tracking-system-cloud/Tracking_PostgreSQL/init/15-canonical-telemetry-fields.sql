@@ -89,9 +89,12 @@ SET context = jsonb_strip_nulls(
       )
     END
     || CASE
-      WHEN COALESCE(context->'vibration', context->'vib') IS NULL
+      WHEN COALESCE(context->'imu_accel_delta_mps2', context->'vibration', context->'vib') IS NULL
         THEN '{}'::jsonb
-      ELSE jsonb_build_object('vibration', COALESCE(context->'vibration', context->'vib'))
+      ELSE jsonb_build_object(
+        'imu_accel_delta_mps2',
+        COALESCE(context->'imu_accel_delta_mps2', context->'vibration', context->'vib')
+      )
     END
     || CASE
       WHEN COALESCE(context->'temperature', context->'temp') IS NULL
@@ -147,7 +150,12 @@ SET context = jsonb_set(
       'timestamp', context#>'{raw_payload,timestamp}',
       'uptime', context#>'{raw_payload,uptime}',
       'data', jsonb_strip_nulls(jsonb_build_object(
-        'vibration', COALESCE(context#>'{raw_payload,data,vibration}', context#>'{raw_payload,data,vib}'),
+        'imu_accel_delta_mps2',
+        COALESCE(
+          context#>'{raw_payload,data,imu_accel_delta_mps2}',
+          context#>'{raw_payload,data,vibration}',
+          context#>'{raw_payload,data,vib}'
+        ),
         'vehicle_battery', COALESCE(
           context#>'{raw_payload,data,vehicle_battery}',
           context#>'{raw_payload,data,battery_top}',

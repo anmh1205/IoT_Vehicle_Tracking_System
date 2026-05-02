@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS devices (
     state_updated_at TIMESTAMPTZ,
     total_runtime_seconds BIGINT DEFAULT 0,
     imei VARCHAR(20),
-    vibration_threshold DECIMAL(8,3) DEFAULT 1.000,
+    imu_accel_delta_threshold_mps2 DECIMAL(8,3) DEFAULT 1.000,
     request_interval INT DEFAULT 2000,
     firmware_version VARCHAR(20),
     target_firmware_version VARCHAR(20),
@@ -54,10 +54,17 @@ CREATE TABLE IF NOT EXISTS device_sessions (
     server_session_end TIMESTAMPTZ,
     session_start TIMESTAMPTZ,
     session_end TIMESTAMPTZ,
+    local_session_key BIGINT,
+    firmware_boot_id TEXT,
+    canonical_source TEXT NOT NULL DEFAULT 'server',
+    boundary_source TEXT NOT NULL DEFAULT 'firmware',
+    start_reason TEXT,
+    end_reason TEXT,
     uptime INT,
-    avg_vibration DECIMAL(8,3),
-    min_vibration DECIMAL(8,3),
-    max_vibration DECIMAL(8,3),
+    total_runtime_seconds BIGINT,
+    avg_imu_accel_delta_mps2 DECIMAL(8,3),
+    min_imu_accel_delta_mps2 DECIMAL(8,3),
+    max_imu_accel_delta_mps2 DECIMAL(8,3),
     avg_vehicle_battery DECIMAL(4,2),
     avg_device_battery DECIMAL(4,2),
     data_points_count INT DEFAULT 0,
@@ -70,6 +77,9 @@ CREATE TABLE IF NOT EXISTS device_sessions (
 
 CREATE INDEX IF NOT EXISTS idx_device_sessions_device_id ON device_sessions(device_id);
 CREATE INDEX IF NOT EXISTS idx_device_sessions_status ON device_sessions(status);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_device_sessions_device_boot_local
+    ON device_sessions(device_id, firmware_boot_id, local_session_key)
+    WHERE firmware_boot_id IS NOT NULL AND local_session_key IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_device_sessions_device_end_null ON device_sessions(device_id)
     WHERE session_end IS NULL;
 

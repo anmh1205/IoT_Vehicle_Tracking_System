@@ -4,8 +4,8 @@ export interface SimulatorStartInput {
   durationMin: number;
   speedMin: number;
   speedMax: number;
-  vibrationMin: number;
-  vibrationMax: number;
+  imuAccelDeltaMinMps2: number;
+  imuAccelDeltaMaxMps2: number;
   batteryMin: number;
   batteryMax: number;
   lat: number;
@@ -19,7 +19,7 @@ export interface SimulatorPoint {
   longitude: number;
   speed: number;
   heading: number;
-  vibration: number;
+  imuAccelDeltaMps2: number;
   vehicleBattery: number;
   deviceBattery: number;
   errorCode: number | null;

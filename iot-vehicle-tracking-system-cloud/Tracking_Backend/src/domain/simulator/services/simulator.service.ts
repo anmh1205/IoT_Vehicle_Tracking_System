@@ -273,7 +273,7 @@ const publishDeviceRawData = (
   device: DeviceSimulatorRuntime,
   timestamp: number,
   data: {
-    vibration: number;
+    imuAccelDeltaMps2: number;
     vehicleBattery: number;
     deviceBattery: number;
     latitude: number;
@@ -301,7 +301,7 @@ const publishDeviceRawData = (
       timestamp,
       uptime: data.uptimeMs,
       data: {
-        vibration: data.vibration,
+        imu_accel_delta_mps2: data.imuAccelDeltaMps2,
         vehicle_battery: data.vehicleBattery,
         device_battery: data.deviceBattery,
         latitude: data.latitude,
@@ -613,8 +613,8 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
 
   for (const device of state.devices) {
     const speed = roundTo(randomBetween(state.config.speedMin, state.config.speedMax), 2);
-    const vibration = roundTo(
-      randomBetween(state.config.vibrationMin, state.config.vibrationMax),
+    const imuAccelDeltaMps2 = roundTo(
+      randomBetween(state.config.imuAccelDeltaMinMps2, state.config.imuAccelDeltaMaxMps2),
       2,
     );
 
@@ -655,7 +655,10 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
         : randomBetween(850 + speed * 26, 980 + speed * 38),
       0,
     );
-    const engineLoadPct = roundTo(clamp(speed * 0.9 + vibration * 5 + randomBetween(5, 20), 10, 98), 2);
+    const engineLoadPct = roundTo(
+      clamp(speed * 0.9 + imuAccelDeltaMps2 * 5 + randomBetween(5, 20), 10, 98),
+      2,
+    );
     const coolantC = roundTo(clamp(76 + engineLoadPct * 0.32 + randomBetween(-2, 2), 70, 118), 1);
     const sampleAgeMs = Math.round(randomBetween(80, 1400));
     const satellites = Math.round(randomBetween(6, 16));
@@ -670,7 +673,7 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
 
     const timestamp = now.getTime();
     await publishDeviceRawData(state.mqttClient, device, timestamp, {
-      vibration,
+      imuAccelDeltaMps2,
       vehicleBattery: device.vehicleBattery,
       deviceBattery,
       latitude: device.lat,
@@ -718,7 +721,7 @@ const tickSimulation = async (state: RunningSimulationState): Promise<void> => {
       longitude: device.lon,
       speed,
       heading: roundTo(device.heading, 2),
-      vibration,
+      imuAccelDeltaMps2,
       vehicleBattery: device.vehicleBattery,
       deviceBattery,
       errorCode,

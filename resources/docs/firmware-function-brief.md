@@ -110,19 +110,19 @@ Generated from in-code Doxygen comments in iot-vehicle-tracking-system-firmware/
 | data_format_event | Format event payload. | const config_t *cfg, const char *event_type, int code, const char *message | char * |
 | data_format_firmware | Format firmware status payload. | const config_t *cfg, const firmware_status_t *status | char * |
 
-## iot-vehicle-tracking-system-firmware/main/src/imu_lis3dh.c
-- File brief: LIS3DH I2C driver with motion interrupt setup and vibration metric.
+## iot-vehicle-tracking-system-firmware/main/src/imu_lis3dsh.c
+- File brief: LIS3DSH I2C driver with motion interrupt setup and IMU acceleration-delta metric.
 
 | Function | Brief | Input | Output |
 |---|---|---|---|
-| imu_write_reg | Write one LIS3DH register. | uint8_t reg, uint8_t value | static esp_err_t |
-| imu_read_reg | Read one LIS3DH register. | uint8_t reg, uint8_t *value | static esp_err_t |
-| imu_read_regs | Read consecutive LIS3DH registers. | uint8_t reg, uint8_t *data, size_t len | static esp_err_t |
-| imu_init | Initialize LIS3DH bus/device and default runtime registers. | void | esp_err_t |
+| imu_write_reg | Write one IMU register. | uint8_t reg, uint8_t value | static esp_err_t |
+| imu_read_reg | Read one IMU register. | uint8_t reg, uint8_t *value | static esp_err_t |
+| imu_read_regs | Read consecutive IMU registers. | uint8_t reg, uint8_t *data, size_t len | static esp_err_t |
+| imu_init | Initialize IMU bus/device and default runtime registers. | void | esp_err_t |
 | imu_configure_motion_interrupt | Configure hardware motion interrupt for wakeup detection. | uint8_t threshold_mg, uint8_t duration_ms | esp_err_t |
 | imu_motion_detected | Read digital state of motion interrupt pin. | void | bool |
 | imu_read_accel | Read raw acceleration for X/Y/Z axes. | int16_t *x, int16_t *y, int16_t *z | esp_err_t |
-| imu_get_vibration_composite | Compute normalized vibration score from acceleration magnitude. | void | uint16_t |
+| imu_get_peak_accel_delta_mps2 | Compute peak acceleration delta for the current publish window. | void | float |
 | imu_deinit | Deinitialize IMU I2C resources. | void | void |
 
 ## iot-vehicle-tracking-system-firmware/main/src/modem_at.c

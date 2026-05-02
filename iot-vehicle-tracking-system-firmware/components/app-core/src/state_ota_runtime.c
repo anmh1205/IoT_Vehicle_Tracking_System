@@ -39,6 +39,16 @@ static void state_machine_persist_ota_context(void) {
     }
 }
 
+/**
+ * @brief Clear OTA context from NVS storage.
+ *
+ * Removes any persisted OTA context from NVS, called after successful OTA
+ * confirmation or when OTA operation is cancelled/aborted.
+ *
+ * Workflow:
+ * 1. Call nvs_config_clear_ota_context() to erase OTA keys from NVS
+ * 2. Log warning if clear operation fails (non-fatal)
+ */
 static void state_machine_clear_persisted_ota_context(void) {
     esp_err_t err = nvs_config_clear_ota_context();
     if (err != ESP_OK) {
@@ -47,7 +57,20 @@ static void state_machine_clear_persisted_ota_context(void) {
 }
 
 /**
- * @brief Restore OTA context from NVS.
+ * @brief Restore OTA context from NVS on boot.
+ *
+ * Called during initialization to recover any pending OTA confirmations that
+ * survived a reboot. If OTA was in progress when device rebooted, this restores
+ * the confirm deadline and job details so confirm check can proceed.
+ *
+ * Workflow:
+ * 1. If ota_pending_confirm already set, skip (already processed this boot)
+ * 2. Load OTA context from NVS via nvs_config_load_ota_context()
+ * 3. If not found or no pending confirm, return (nothing to restore)
+ * 4. Restore all OTA fields into g_rtc_context (job_id, version, partition, deadline)
+ * 5. Log restored context for debugging
+ *
+ * @note If NVS load fails or context invalid, operation is skipped silently.
  */
 void state_machine_restore_ota_context_from_nvs(void) {
     if (g_rtc_context.ota_pending_confirm) {
@@ -108,6 +131,15 @@ void state_machine_handle_pending_action(void) {
         }
         if (action == COMMAND_ACTION_REBOOT) {
             esp_restart();
+        }
+        if (action == COMMAND_ACTION_ASSIGN_SESSION) {
+            command_session_assignment_t assignment = {0};
+            if (command_handler_take_session_assignment(&assignment)) {
+                state_machine_apply_session_assignment(assignment.local_session_key,
+                                                       assignment.canonical_session_id,
+                                                       assignment.boot_id);
+            }
+            continue;
         }
 
         state_machine_process_ota_command(action);

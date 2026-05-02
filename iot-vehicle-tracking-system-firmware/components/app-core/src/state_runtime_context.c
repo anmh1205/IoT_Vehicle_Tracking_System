@@ -7,38 +7,114 @@
  * @brief Shared mutable runtime state for split FSM modules.
  */
 
+/*==============================================================================
+ * Global Telemetry & Config State
+ *============================================================================*/
+
+/** @brief Current runtime configuration (loaded from NVS on init). */
 config_t s_config = {0};
+/** @brief Latest aggregated telemetry from all sensor inputs. */
 telemetry_t s_telemetry = {0};
+/** @brief Active BLE OBD connection context; NULL when disconnected. */
 ble_obd_ctx_t *s_ble_ctx = NULL;
+/** @brief Queue for BLE connection results from async connect tasks. */
 QueueHandle_t s_ble_connect_result_queue = NULL;
+
+/*==============================================================================
+ * Timing & Event Tracking
+ *============================================================================*/
+
+/** @brief Timestamp (uptime ms) of the most recent rawdata publish. */
 uint64_t s_last_raw_publish_ms = 0;
+/** @brief Timestamp when alarm state was entered. */
 uint64_t s_alarm_enter_ms = 0;
+/** @brief Timestamp of last OBD debug log emission (throttle). */
 uint64_t s_last_obd_debug_log_ms = 0;
+/** @brief Timestamp of last standard OBD PID poll. */
 uint64_t s_last_obd_poll_ms = 0;
+/** @brief Timestamp of last OBD diagnostic (extended) poll. */
 uint64_t s_last_obd_diagnostic_poll_ms = 0;
+/** @brief Cursor for cycling through auxiliary OBD PIDs. */
 uint8_t s_obd_aux_pid_cursor = 0;
+/** @brief Cursor for cycling through diagnostic queries. */
 uint8_t s_obd_diag_query_cursor = 0;
-uint32_t s_session_id = 1;
+/** @brief Current local session key (incremented on ignition-on boundaries). */
+uint32_t s_session_id = 0;
+/** @brief Canonical cloud session identifier once assigned by server. */
+uint64_t s_canonical_session_id = 0;
+/** @brief Session-correlation boot ID that remains stable across mid-session reboot. */
+char s_session_boot_id[TRACKER_BOOT_ID_LEN] = {0};
+/** @brief True when an active session was loaded from NVS and awaits ignition confirmation. */
+bool s_session_restore_pending = false;
+/** @brief Timestamp when ignition transitioned to OFF. */
 uint64_t s_ignition_off_started_ms = 0;
+/*==============================================================================
+ * Subsystem Status Flags
+ *============================================================================*/
+
+/** @brief Current MQTT publish pipeline status. */
 tracker_publish_status_t s_publish_status = TRACKER_PUBLISH_STATUS_STOPPED;
+/** @brief Flag indicating MQTT stack has been initialized. */
 bool s_mqtt_started = false;
+/** @brief Flag indicating GNSS/GPS has been started. */
 bool s_gnss_started = false;
+/** @brief Flag indicating OTA confirm-check has been performed this boot. */
 bool s_ota_confirm_checked = false;
+/** @brief Flag indicating an OTA update is currently in progress. */
 bool s_ota_in_progress = false;
+/** @brief Flag indicating IMU (accelerometer) hardware is detected and available. */
 bool s_imu_available = false;
+
+/*==============================================================================
+ * Retry State Machines
+ *============================================================================*/
+
+/** @brief Retry state for BLE connection attempts. */
 retry_state_t s_ble_retry = {0};
+/** @brief Retry state for network/MQTT connection attempts. */
 retry_state_t s_network_retry = {0};
+/** @brief Retry state for RTC bootstrap initialization. */
 retry_state_t s_rtc_bootstrap_retry = {0};
+/** @brief Retry state for RTC time read operations. */
 retry_state_t s_rtc_read_retry = {0};
+/** @brief Retry state for IMU bootstrap initialization. */
 retry_state_t s_imu_bootstrap_retry = {0};
+/*==============================================================================
+ * RTC & Time Trust
+ *============================================================================*/
+
+/** @brief Timestamp of the last successful RTC sync. */
 uint64_t s_last_rtc_sync_ms = 0;
+/** @brief Flag indicating system time has been trusted (RTC synchronized). */
 bool s_time_trusted = false;
+/** @brief Timestamp assigned to the current event payload. */
 uint64_t s_event_timestamp_ms = 0;
+
+/*==============================================================================
+ * LTE/Modem State
+ *============================================================================*/
+
+/** @brief Flag indicating LTE was initialized in the previous boot cycle. */
 bool s_prev_lte_initialized = false;
+/** @brief Flag indicating LTE has ever been successfully initialized. */
 bool s_lte_ever_initialized = false;
+
+/*==============================================================================
+ * GNSS State
+ *============================================================================*/
+
+/** @brief Consecutive GNSS poll failures (resets on success). */
 uint32_t s_gnss_poll_fail_streak = 0;
+/** @brief Timestamp of last GNSS poll re-arm attempt. */
 uint64_t s_last_gnss_rearm_ms = 0;
+/** @brief Timestamp of last GNSS poll. */
 uint64_t s_last_gnss_poll_ms = 0;
+
+/*==============================================================================
+ * Hardware Bootstrap State
+ *============================================================================*/
+
+/** @brief Flag indicating hardware bootstrap sequence has completed. */
 bool s_hw_bootstrap_done = false;
 uint64_t s_last_sleep_reject_log_ms = 0;
 uint32_t s_sleep_blocked_count = 0;
@@ -131,7 +207,10 @@ void state_runtime_context_reset(const config_t *config) {
     s_last_obd_diagnostic_poll_ms = 0;
     s_obd_aux_pid_cursor = 0;
     s_obd_diag_query_cursor = 0;
-    s_session_id = 1;
+    s_session_id = 0;
+    s_canonical_session_id = 0;
+    memset(s_session_boot_id, 0, sizeof(s_session_boot_id));
+    s_session_restore_pending = false;
     s_ignition_off_started_ms = 0;
     s_publish_status = TRACKER_PUBLISH_STATUS_STOPPED;
     s_mqtt_started = false;

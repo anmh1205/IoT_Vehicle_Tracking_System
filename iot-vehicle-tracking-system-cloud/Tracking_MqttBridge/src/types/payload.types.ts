@@ -79,12 +79,18 @@ export interface RawDiagnostics {
   dtc?: RawDiagnosticsDtc;
 }
 
+export type BoundaryEvent = 'started' | 'ended' | 'none';
+
 export interface RawDataPayload {
   device_id: string;
   auth_token: string;
   timestamp: number;
   uptime?: number;
+  local_session_key?: number;
+  canonical_session_id?: string;
+  boot_id?: string;
   data: {
+    imu_accel_delta_mps2?: number;
     vibration?: number;
     vehicle_battery?: number;
     device_battery?: number;
@@ -114,6 +120,10 @@ export interface StatusPayload {
   auth_token: string;
   status: 'running' | 'stopped' | 'heartbeat';
   session_id?: number;
+  local_session_key?: number;
+  canonical_session_id?: string;
+  boot_id?: string;
+  boundary_event?: BoundaryEvent;
   timestamp: number;
   state?: {
     ignition_state?: IgnitionState;

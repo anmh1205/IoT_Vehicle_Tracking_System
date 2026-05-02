@@ -16,7 +16,7 @@ const log = createLogger('mqtt-listener');
  *
  * Topic map (published by MqttBridge/publishers/internal-event.publisher.ts):
  *   internal/events/device/status   QoS 1  — device online/offline transitions
- *   internal/events/device/alert    QoS 1  — vibration alerts, device errors
+ *   internal/events/device/alert    QoS 1  — IMU acceleration alerts, device errors
  *   internal/events/device/session  QoS 1  — session started/ended
  *   internal/events/device/data     QoS 0  — telemetry position updates
  */
@@ -128,6 +128,7 @@ const normalizeAlertType = (
   if (
     normalized.startsWith('obd_') ||
     normalized === 'high_vibration' ||
+    normalized === 'high_imu_accel_delta' ||
     normalized.startsWith('device_')
   ) {
     return 'maintenance_due';
@@ -197,7 +198,7 @@ const persistRawDataEventLog = async (
     satellites,
     vehicle_battery: vehicleBattery,
     device_battery: deviceBattery,
-    vibration: toOptionalNumber(payload.vibration),
+    imu_accel_delta_mps2: toOptionalNumber(payload.imu_accel_delta_mps2 ?? payload.vibration),
     temperature,
     error_code: toOptionalNumber(payload.error_code),
     diagnostics: payload.diagnostics ?? null,
@@ -286,6 +287,19 @@ export const initMqttEventListener = (): void => {
         publishEvent('device:status', {
           deviceId: String(envelopePayload.device_id ?? ''),
           status: String(envelopePayload.current_status ?? 'unknown'),
+          boundaryEvent:
+            envelopePayload.boundary_event == null
+              ? undefined
+              : String(envelopePayload.boundary_event) as 'started' | 'ended' | 'none',
+          boundarySource:
+            envelopePayload.boundary_source == null
+              ? undefined
+              : String(envelopePayload.boundary_source),
+          localSessionKey: toOptionalInt(envelopePayload.local_session_key) ?? null,
+          canonicalSessionId:
+            envelopePayload.canonical_session_id == null
+              ? null
+              : String(envelopePayload.canonical_session_id),
           ignitionState:
             envelopePayload.ignition_state == null ? undefined : String(envelopePayload.ignition_state) as
               | 'ON'
@@ -355,6 +369,11 @@ export const initMqttEventListener = (): void => {
               envelopePayload.current_status == null
                 ? undefined
                 : String(envelopePayload.current_status),
+            localSessionKey: toOptionalInt(envelopePayload.local_session_key) ?? null,
+            canonicalSessionId:
+              envelopePayload.canonical_session_id == null
+                ? null
+                : String(envelopePayload.canonical_session_id),
             ignitionState:
               envelopePayload.ignition_state == null ? undefined : String(envelopePayload.ignition_state) as
                 | 'ON'
@@ -399,7 +418,8 @@ export const initMqttEventListener = (): void => {
             deviceBattery: deviceBattery == null ? null : Number(deviceBattery),
             vehicleBattery: vehicleBattery == null ? null : Number(vehicleBattery),
             satellites: toOptionalInt(envelopePayload.satellites) ?? null,
-            vibration: toOptionalNumber(envelopePayload.vibration) ?? null,
+            imuAccelDeltaMps2:
+              toOptionalNumber(envelopePayload.imu_accel_delta_mps2 ?? envelopePayload.vibration) ?? null,
             errorCode: toOptionalNumber(envelopePayload.error_code) ?? null,
             temperature: ambientTemperature == null ? null : Number(ambientTemperature),
             engineTemperature: engineTemperature == null ? null : Number(engineTemperature),
@@ -422,12 +442,30 @@ export const initMqttEventListener = (): void => {
           publishEvent('device:session_start', {
             deviceId: String(envelopePayload.device_id ?? ''),
             sessionId,
+            boundarySource:
+              envelopePayload.boundary_source == null
+                ? undefined
+                : String(envelopePayload.boundary_source),
+            localSessionKey: toOptionalInt(envelopePayload.local_session_key) ?? null,
+            canonicalSessionId:
+              envelopePayload.canonical_session_id == null
+                ? null
+                : String(envelopePayload.canonical_session_id),
             metadata,
           });
         } else if (action === 'ended') {
           publishEvent('device:session_end', {
             deviceId: String(envelopePayload.device_id ?? ''),
             sessionId,
+            boundarySource:
+              envelopePayload.boundary_source == null
+                ? undefined
+                : String(envelopePayload.boundary_source),
+            localSessionKey: toOptionalInt(envelopePayload.local_session_key) ?? null,
+            canonicalSessionId:
+              envelopePayload.canonical_session_id == null
+                ? null
+                : String(envelopePayload.canonical_session_id),
             metadata,
           });
         }

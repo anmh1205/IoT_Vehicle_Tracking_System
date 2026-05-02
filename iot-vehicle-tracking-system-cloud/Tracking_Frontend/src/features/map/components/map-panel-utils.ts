@@ -75,7 +75,10 @@ export const buildMapDeviceStats = (
     (device) => device.motionState === 'MOVING' || device.status === 'running',
   ).length,
   stationary: visibleDevices.filter(
-    (device) => device.motionState === 'STATIONARY' || device.status === 'stopped',
+    (device) =>
+      device.motionState === 'STATIONARY' ||
+      device.status === 'stopped' ||
+      device.status === 'online',
   ).length,
   deviceFaults: visibleDevices.filter(
     (device) =>

@@ -1,5 +1,12 @@
 # Project Changelog
 
+## 2026-05-02
+### Firmware-Authoritative Session Identity Rollout (In Progress)
+- Added additive PostgreSQL session provenance migration in `Tracking_PostgreSQL/init/16-authoritative-session-identity.sql` and aligned fresh bootstrap schema in `init/02-devices.sql` with `local_session_key`, `firmware_boot_id`, `canonical_source`, `boundary_source`, `start_reason`, and `end_reason`.
+- Updated `Tracking_MqttBridge` session persistence so `status.boundary_event=started|ended` is the only path that opens/closes `device_sessions`; bridge rows are now matched and backfilled by provisional identity `(device_id, boot_id, local_session_key)` instead of by status chatter alone.
+- Exposed authoritative session provenance through backend device session DTOs and realtime events, then updated frontend parsing/types so parked heartbeat (`online`) is rendered as `Đỗ xe / còn online` instead of being treated like a driving state.
+- Validation status: IDE diagnostics passed for all touched TypeScript files; service-level `npm run typecheck` remains blocked by a shell-wrapper failure (`/usr/bin/bash: -c: line 174: unexpected EOF while looking for matching '"'`), so end-to-end build verification is still pending.
+
 ## 2026-05-01
 ### Realtime WebSocket Audit and Event-Driven Dashboard Cutover (Completed)
 - Hardened the Socket.IO gateway with namespace-specific auth and delivery scopes across dashboard, devices, notifications, exports, and firmware.

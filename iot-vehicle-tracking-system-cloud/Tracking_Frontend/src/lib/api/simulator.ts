@@ -6,8 +6,8 @@ export interface SimulatorConfig {
   durationMin: number;
   speedMin: number;
   speedMax: number;
-  vibrationMin: number;
-  vibrationMax: number;
+  imuAccelDeltaMinMps2: number;
+  imuAccelDeltaMaxMps2: number;
   batteryMin: number;
   batteryMax: number;
   lat: number;

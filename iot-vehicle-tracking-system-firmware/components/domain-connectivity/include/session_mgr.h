@@ -40,6 +40,13 @@ void session_mgr_mark_started(void);
 void session_mgr_mark_stopped(void);
 
 /**
+ * @brief Restore an already-open session after reboot.
+ *
+ * @param session_id Session identifier that should remain active.
+ */
+void session_mgr_restore_active(uint32_t session_id);
+
+/**
  * @brief Return the current monotonically increasing session ID.
  *
  * @return Current session identifier, or `0` before the first session starts.

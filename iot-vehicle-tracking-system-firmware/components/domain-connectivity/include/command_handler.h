@@ -4,6 +4,7 @@
 
 #include "esp_err.h"
 #include "app_config.h"
+#include "nvs_config.h"
 #include "ota_contract.h"
 
 /**
@@ -25,7 +26,18 @@ typedef enum {
     COMMAND_ACTION_OTA_UPDATE,
     /** OTA rollback command accepted and queued. */
     COMMAND_ACTION_OTA_ROLLBACK,
+    /** Canonical session assignment command accepted and queued. */
+    COMMAND_ACTION_ASSIGN_SESSION,
 } command_action_t;
+
+/**
+ * @brief Canonical session mapping sent back from cloud.
+ */
+typedef struct {
+    uint32_t local_session_key;
+    uint64_t canonical_session_id;
+    char boot_id[TRACKER_SESSION_BOOT_ID_LEN];
+} command_session_assignment_t;
 
 /**
  * @brief Initialize command handler with writable runtime config.
@@ -82,3 +94,13 @@ esp_err_t command_handler_apply_pending_config(void);
  * @return false when no OTA command is pending.
  */
 bool command_handler_take_ota_command(ota_command_t *out_cmd);
+
+/**
+ * @brief Consume pending canonical session assignment payload.
+ *
+ * @param out_assignment Output canonical session mapping from cloud.
+ *
+ * @return true when a session assignment was available and copied.
+ * @return false when no assignment is pending.
+ */
+bool command_handler_take_session_assignment(command_session_assignment_t *out_assignment);

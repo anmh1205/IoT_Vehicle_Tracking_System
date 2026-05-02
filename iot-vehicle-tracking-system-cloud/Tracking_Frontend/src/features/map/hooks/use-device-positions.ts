@@ -54,7 +54,7 @@ const toDevicePosition = (raw: any): DevicePosition => ({
   deviceBattery: toNullableNumber(raw?.deviceBattery),
   vehicleBattery: toNullableNumber(raw?.vehicleBattery),
   satellites: toNullableNumber(raw?.satellites),
-  vibration: toNullableNumber(raw?.vibration),
+  imuAccelDeltaMps2: toNullableNumber(raw?.imuAccelDeltaMps2 ?? raw?.imu_accel_delta_mps2 ?? raw?.vibration),
   errorCode: toNullableNumber(raw?.errorCode),
   temperature: toNullableNumber(raw?.temperature),
   engineTemperature: toNullableNumber(raw?.engineTemperature),

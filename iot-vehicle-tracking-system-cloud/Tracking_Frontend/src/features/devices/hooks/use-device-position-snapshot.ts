@@ -40,7 +40,7 @@ const normalizePosition = (row: any): DevicePositionSnapshot => ({
   timestamp: row?.lastSeenAt ?? row?.timestamp ?? null,
   deviceBattery: toNumberOrNull(row?.deviceBattery),
   vehicleBattery: toNumberOrNull(row?.vehicleBattery),
-  vibration: toNumberOrNull(row?.vibration),
+  imuAccelDeltaMps2: toNumberOrNull(row?.imuAccelDeltaMps2 ?? row?.imu_accel_delta_mps2 ?? row?.vibration),
   errorCode: toNumberOrNull(row?.errorCode),
   temperature: toNumberOrNull(row?.temperature),
   engineTemperature: toNumberOrNull(row?.engineTemperature),

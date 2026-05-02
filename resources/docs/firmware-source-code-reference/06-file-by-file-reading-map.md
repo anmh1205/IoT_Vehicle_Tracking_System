@@ -34,7 +34,7 @@ Nếu bạn không biết mở file nào trước, dùng bảng này để đi t
 | `nvs_config.c` | config load/save/migrate lỗi | NVS config source of truth |
 | `power_mgr.c` | power rail, modem pulse, LVD | power abstraction |
 | `adc_reader.c` | voltage đọc sai | ADC oneshot + calibration |
-| `imu_lis3dsh.c` | motion wake/vibration bug | IMU driver + interrupt |
+| `imu_lis3dsh.c` | motion wake/IMU accel-delta bug | IMU driver + interrupt |
 | `rtc_ds3231m.c` | time/trust issue | RTC read/write/health |
 | `modem_at.c` | AT command treo | UART transport + URC |
 | `modem_lte.c` | attach/PDP lỗi | LTE sub-FSM |

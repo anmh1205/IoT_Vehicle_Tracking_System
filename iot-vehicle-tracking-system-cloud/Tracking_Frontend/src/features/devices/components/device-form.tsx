@@ -25,11 +25,11 @@ import { useCreateDevice } from '../hooks/use-create-device';
 import { useUpdateDevice } from '../hooks/use-update-device';
 
 const schema = z.object({
-  deviceId: z.string().min(1, 'Bắt buộc'),
-  deviceName: z.string().min(1, 'Bắt buộc'),
+  deviceId: z.string().min(1, 'Báº¯t buá»™c'),
+  deviceName: z.string().min(1, 'Báº¯t buá»™c'),
   imei: z.string().optional(),
   requestInterval: z.number().min(10).max(3600),
-  vibrationThreshold: z.number().min(0).max(1000).optional(),
+  imuAccelDeltaThresholdMps2: z.number().min(0).max(1000).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -54,7 +54,7 @@ export const DeviceForm = ({
       deviceName: '',
       imei: '',
       requestInterval: 60,
-      vibrationThreshold: 5,
+      imuAccelDeltaThresholdMps2: 5,
     },
   });
 
@@ -65,7 +65,7 @@ export const DeviceForm = ({
         deviceName: '',
         imei: '',
         requestInterval: 60,
-        vibrationThreshold: 5,
+        imuAccelDeltaThresholdMps2: 5,
       });
       return;
     }
@@ -75,14 +75,21 @@ export const DeviceForm = ({
       deviceName: defaultValues.deviceName ?? '',
       imei: defaultValues.imei ?? '',
       requestInterval: Number(defaultValues.requestInterval ?? 60),
-      vibrationThreshold: Number(defaultValues.vibrationThreshold ?? 5),
+      imuAccelDeltaThresholdMps2: Number(
+        defaultValues.imuAccelDeltaThresholdMps2 ?? defaultValues.vibrationThreshold ?? 5,
+      ),
     });
   }, [defaultValues, form]);
 
   const onSubmit = (values: FormValues) => {
     const payload = {
       ...values,
-      vibrationThreshold: Number(defaultValues?.vibrationThreshold ?? values.vibrationThreshold ?? 5),
+      imuAccelDeltaThresholdMps2: Number(
+        defaultValues?.imuAccelDeltaThresholdMps2 ??
+          defaultValues?.vibrationThreshold ??
+          values.imuAccelDeltaThresholdMps2 ??
+          5,
+      ),
     };
 
     if (defaultValues?.id) {
@@ -107,9 +114,9 @@ export const DeviceForm = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{defaultValues?.id ? 'Cập nhật thiết bị' : 'Tạo thiết bị'}</DialogTitle>
+          <DialogTitle>{defaultValues?.id ? 'Cáº­p nháº­t thiáº¿t bá»‹' : 'Táº¡o thiáº¿t bá»‹'}</DialogTitle>
           <DialogDescription>
-            Nhập thông tin thiết bị và chu kỳ gửi để cấu hình bản ghi cơ bản.
+            Nháº­p thÃ´ng tin thiáº¿t bá»‹ vÃ  chu ká»³ gá»­i Ä‘á»ƒ cáº¥u hÃ¬nh báº£n ghi cÆ¡ báº£n.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -119,7 +126,7 @@ export const DeviceForm = ({
               name="deviceId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mã thiết bị</FormLabel>
+                  <FormLabel>MÃ£ thiáº¿t bá»‹</FormLabel>
                   <FormControl>
                     <Input {...field} disabled={!!defaultValues?.id} />
                   </FormControl>
@@ -132,7 +139,7 @@ export const DeviceForm = ({
               name="deviceName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tên thiết bị</FormLabel>
+                  <FormLabel>TÃªn thiáº¿t bá»‹</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -145,7 +152,7 @@ export const DeviceForm = ({
               name="requestInterval"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Chu kỳ gửi (giây)</FormLabel>
+                  <FormLabel>Chu ká»³ gá»­i (giÃ¢y)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -173,10 +180,10 @@ export const DeviceForm = ({
 
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                Hủy
+                Há»§y
               </Button>
               <Button type="submit" disabled={pending}>
-                {defaultValues?.id ? 'Lưu' : 'Tạo'}
+                {defaultValues?.id ? 'LÆ°u' : 'Táº¡o'}
               </Button>
             </DialogFooter>
           </form>

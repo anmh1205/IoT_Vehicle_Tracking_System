@@ -42,8 +42,20 @@ typedef struct {
     i2c_master_dev_handle_t dev_handle;
 } rtc_ds3231m_ctx_t;
 
+/* Runtime context for DS3231M RTC module. */
 static rtc_ds3231m_ctx_t s_ctx;
 
+/**
+ * @brief Convert BCD (binary-coded decimal) to decimal value.
+ *
+ * DS3231M RTC stores calendar/time fields in packed BCD format where each
+ * nibble represents a decimal digit. This function reverses that encoding.
+ *
+ * Example: 0x45 (BCD) -> 45 (decimal)
+ *
+ * @param value BCD-encoded byte from RTC register.
+ * @return uint8_t Decimal representation of the BCD value.
+ */
 static uint8_t rtc_bcd_to_dec(uint8_t value) {
     /* DS3231M stores calendar/time fields in packed BCD, not binary. */
     return (uint8_t)(((value >> 4U) * 10U) + (value & 0x0FU));
@@ -59,6 +71,17 @@ static uint8_t rtc_dec_to_bcd(uint8_t value) {
     return (uint8_t)(((value / 10U) << 4U) | (value % 10U));
 }
 
+/**
+ * @brief Check if year is a leap year per Gregorian calendar rules.
+ *
+ * Leap year rules:
+ * - Divisible by 4: leap year
+ * - Divisible by 100: not leap year
+ * - Divisible by 400: leap year
+ *
+ * @param year Year to check (e.g., 2024).
+ * @return true if leap year, false otherwise.
+ */
 static bool rtc_is_leap_year(int year) {
     return ((year % 4) == 0 && (year % 100) != 0) || ((year % 400) == 0);
 }
@@ -78,6 +101,24 @@ static uint8_t rtc_days_in_month(int year, int month_1_to_12) {
     return days[month_1_to_12 - 1];
 }
 
+/**
+ * @brief Convert struct tm to epoch milliseconds (UTC).
+ *
+ * Validates and converts a broken-down calendar time (struct tm) to Unix epoch
+ * milliseconds. Performs range validation on all fields before conversion.
+ *
+ * Workflow:
+ * 1. Validate input pointers non-null
+ * 2. Convert tm_year/tm_mon to 1-based year/month
+ * 3. Validate year >= 1970 (Unix epoch start)
+ * 4. Validate month 1-12, day within valid range for given month
+ * 5. Use mktime() to convert to epoch seconds (assumes UTC)
+ * 6. Multiply by 1000 to get milliseconds
+ *
+ * @param[in] tm_value Broken-down time structure (struct tm).
+ * @param[out] out_ms Output epoch milliseconds (must be non-null).
+ * @return ESP_OK on success, ESP_ERR_INVALID_ARG on validation failure.
+ */
 static esp_err_t rtc_tm_to_epoch_ms_utc(const struct tm *tm_value, uint64_t *out_ms) {
     ESP_RETURN_ON_NULL(tm_value, ESP_ERR_INVALID_ARG, TAG, "tm_value null");
     ESP_RETURN_ON_NULL(out_ms, ESP_ERR_INVALID_ARG, TAG, "out_ms null");

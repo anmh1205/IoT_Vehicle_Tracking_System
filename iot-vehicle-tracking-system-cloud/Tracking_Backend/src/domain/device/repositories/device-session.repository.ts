@@ -22,37 +22,63 @@ export const getSessionStats = async (
 ): Promise<{
   totalSessions: number;
   avgUptime: number;
-  avgVibration: number;
+  avgImuAccelDeltaMps2: number;
   totalDataPoints: number;
 }> => {
-  const result = await pool.query(
-    `SELECT
-       COUNT(*)::int AS total_sessions,
-       COALESCE(
-         AVG(
-           COALESCE(
-             uptime,
-             EXTRACT(
-               EPOCH FROM (
-                 COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at)
+  let result;
+  try {
+    result = await pool.query(
+      `SELECT
+         COUNT(*)::int AS total_sessions,
+         COALESCE(
+           AVG(
+             COALESCE(
+               uptime,
+               EXTRACT(
+                 EPOCH FROM (
+                   COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at)
+                 )
                )
              )
-           )
-         ),
-         0
-       ) AS avg_uptime,
-       COALESCE(AVG(avg_vibration), 0) AS avg_vibration,
-       COALESCE(SUM(data_points_count), 0)::int AS total_data_points
-     FROM device_sessions
-     WHERE device_id = $1`,
-    [deviceId],
-  );
+           ),
+           0
+         ) AS avg_uptime,
+         COALESCE(AVG(avg_imu_accel_delta_mps2), 0) AS avg_imu_accel_delta_mps2,
+         COALESCE(SUM(data_points_count), 0)::int AS total_data_points
+       FROM device_sessions
+       WHERE device_id = $1`,
+      [deviceId],
+    );
+  } catch {
+    result = await pool.query(
+      `SELECT
+         COUNT(*)::int AS total_sessions,
+         COALESCE(
+           AVG(
+             COALESCE(
+               uptime,
+               EXTRACT(
+                 EPOCH FROM (
+                   COALESCE(server_session_end, NOW()) - COALESCE(server_session_start, created_at)
+                 )
+               )
+             )
+           ),
+           0
+         ) AS avg_uptime,
+         COALESCE(AVG(avg_vibration), 0) AS avg_vibration,
+         COALESCE(SUM(data_points_count), 0)::int AS total_data_points
+       FROM device_sessions
+       WHERE device_id = $1`,
+      [deviceId],
+    );
+  }
 
   const row = result.rows[0];
   return {
     totalSessions: parseInt(row.total_sessions, 10),
     avgUptime: parseFloat(row.avg_uptime),
-    avgVibration: parseFloat(row.avg_vibration),
+    avgImuAccelDeltaMps2: parseFloat(row.avg_imu_accel_delta_mps2 ?? row.avg_vibration),
     totalDataPoints: parseInt(row.total_data_points, 10),
   };
 };

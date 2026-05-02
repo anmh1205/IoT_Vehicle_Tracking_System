@@ -11,6 +11,14 @@ interface DeviceSessionsResult {
   page: number;
   limit: number;
 }
+
+const toOptionalNumber = (value: unknown): number | null => {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
 const toSessionsResult = (
   payload: any,
   fallbackPage: number,
@@ -31,8 +39,18 @@ const toSessionsResult = (
       status: row?.status ?? 'running',
       serverSessionStart: row?.serverSessionStart ?? row?.server_session_start ?? null,
       serverSessionEnd: row?.serverSessionEnd ?? row?.server_session_end ?? null,
-      uptime: row?.uptime !== undefined ? Number(row.uptime) : null,
-      avgVibration: row?.avgVibration !== undefined ? Number(row.avgVibration) : null,
+      sessionStart: row?.sessionStart ?? row?.session_start ?? null,
+      sessionEnd: row?.sessionEnd ?? row?.session_end ?? null,
+      localSessionKey: toOptionalNumber(row?.localSessionKey ?? row?.local_session_key),
+      firmwareBootId: row?.firmwareBootId ?? row?.firmware_boot_id ?? null,
+      canonicalSource: row?.canonicalSource ?? row?.canonical_source ?? null,
+      boundarySource: row?.boundarySource ?? row?.boundary_source ?? null,
+      startReason: row?.startReason ?? row?.start_reason ?? null,
+      endReason: row?.endReason ?? row?.end_reason ?? null,
+      uptime: toOptionalNumber(row?.uptime),
+      avgImuAccelDeltaMps2: toOptionalNumber(
+        row?.avgImuAccelDeltaMps2 ?? row?.avg_imu_accel_delta_mps2 ?? row?.avgVibration,
+      ),
       dataPointsCount: Number(row?.dataPointsCount ?? row?.data_points_count ?? 0),
     })),
     total: Number(payload?.total ?? payload?.pagination?.total ?? sessions.length),

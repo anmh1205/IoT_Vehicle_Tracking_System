@@ -1,12 +1,14 @@
 'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis } from 'recharts';
-import type { DeviceVibrationPoint } from '@/features/devices/types';
-export const DeviceVibrationChart = ({
+import type { DeviceImuAccelDeltaPoint } from '@/features/devices/types';
+
+export const DeviceImuAccelDeltaChart = ({
   data,
   threshold = 0,
 }: {
-  data: DeviceVibrationPoint[];
+  data: DeviceImuAccelDeltaPoint[];
   threshold?: number;
 }) => {
   const chartData = data.map((item) => ({
@@ -14,10 +16,11 @@ export const DeviceVibrationChart = ({
     label: item.timestamp.slice(11, 16),
     threshold,
   }));
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">Độ rung gần đây</CardTitle>
+        <CardTitle className="text-sm">IMU accel delta</CardTitle>
       </CardHeader>
       <CardContent className="h-[180px]">
         <ResponsiveContainer width="100%" height="100%">

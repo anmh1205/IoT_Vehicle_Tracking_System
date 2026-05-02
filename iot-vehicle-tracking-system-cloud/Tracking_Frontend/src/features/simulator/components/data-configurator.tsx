@@ -51,19 +51,19 @@ export const DataConfigurator = ({
 
       <div className="grid gap-2 sm:grid-cols-2">
         <div className="space-y-1">
-          <Label>Vibration min</Label>
+          <Label>IMU accel Δ min (m/s²)</Label>
           <Input
             type="number"
-            value={state.vibrationMin}
-            onChange={(event) => onChange('vibrationMin', Number(event.target.value))}
+            value={state.imuAccelDeltaMinMps2}
+            onChange={(event) => onChange('imuAccelDeltaMinMps2', Number(event.target.value))}
           />
         </div>
         <div className="space-y-1">
-          <Label>Vibration max</Label>
+          <Label>IMU accel Δ max (m/s²)</Label>
           <Input
             type="number"
-            value={state.vibrationMax}
-            onChange={(event) => onChange('vibrationMax', Number(event.target.value))}
+            value={state.imuAccelDeltaMaxMps2}
+            onChange={(event) => onChange('imuAccelDeltaMaxMps2', Number(event.target.value))}
           />
         </div>
       </div>

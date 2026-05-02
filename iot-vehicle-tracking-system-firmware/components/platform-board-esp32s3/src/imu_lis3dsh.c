@@ -1,4 +1,4 @@
-#include "imu_lis3dh.h"
+#include "imu_lis3dsh.h"
 
 #include <math.h>
 #include <string.h>
@@ -12,41 +12,43 @@
 #include "util.h"
 
 /**
- * @file imu_lis3dh.c
- * @brief LIS3DH I2C driver with motion interrupt setup and vibration metric.
+ * @file imu_lis3dsh.c
+ * @brief LIS3DSH I2C driver with motion interrupt setup and acceleration-delta metric.
  */
 
-#define LIS3DH_I2C_PORT I2C_NUM_0
-#define LIS3DH_I2C_FREQ_HZ 400000
-#define LIS3DH_I2C_FREQ_FALLBACK_HZ 100000
-#define LIS3DH_ADDR_PRIMARY 0x18
-#define LIS3DH_ADDR_SECONDARY 0x19
+#define IMU_I2C_PORT I2C_NUM_0
+#define IMU_I2C_FREQ_HZ 400000
+#define IMU_I2C_FREQ_FALLBACK_HZ 100000
+#define LIS3DH_LEGACY_ADDR_PRIMARY 0x18
+#define LIS3DH_LEGACY_ADDR_SECONDARY 0x19
 #define LIS3DSH_ADDR_PRIMARY 0x1D
 #define LIS3DSH_ADDR_SECONDARY 0x1E
-#define LIS3DH_WHO_AM_I_REG 0x0F
-#define LIS3DH_WHO_AM_I_VALUE 0x33
+#define IMU_WHO_AM_I_REG 0x0F
+#define LIS3DH_LEGACY_WHO_AM_I_VALUE 0x33
 #define LIS3DSH_WHO_AM_I_VALUE 0x3F
-#define LIS3DH_OUT_X_L 0x28
-#define LIS3DH_CTRL_REG1 0x20
-#define LIS3DH_CTRL_REG2 0x21
-#define LIS3DH_CTRL_REG3 0x22
-#define LIS3DH_CTRL_REG4 0x23
-#define LIS3DH_CTRL_REG5 0x24
-#define LIS3DH_INT1_CFG 0x30
-#define LIS3DH_INT1_SRC 0x31
-#define LIS3DH_INT1_THS 0x32
-#define LIS3DH_INT1_DURATION 0x33
+#define IMU_OUT_X_L_REG 0x28
+#define LIS3DH_LEGACY_CTRL_REG1 0x20
+#define LIS3DH_LEGACY_CTRL_REG2 0x21
+#define LIS3DH_LEGACY_CTRL_REG3 0x22
+#define LIS3DH_LEGACY_CTRL_REG4 0x23
+#define LIS3DH_LEGACY_CTRL_REG5 0x24
+#define LIS3DSH_CTRL_REG4 0x20
+#define LIS3DSH_CTRL_REG5 0x24
+#define IMU_INT1_CFG_REG 0x30
+#define IMU_INT1_SRC_REG 0x31
+#define IMU_INT1_THS_REG 0x32
+#define IMU_INT1_DURATION_REG 0x33
 #define IMU_I2C_XFER_TIMEOUT_MS 20U
 #define IMU_READ_FAIL_BACKOFF_MS 2000ULL
 #define IMU_READ_FAIL_BACKOFF_THRESHOLD 3U
-#define IMU_VIBRATION_DEADZONE_MG 60.0f
-#define IMU_VIBRATION_FULL_SCALE_DELTA_MG 600.0f
+#define IMU_ACCEL_DELTA_DEADZONE_MG 60.0f
+#define IMU_MG_TO_MPS2 0.00980665f
 
-static const char *TAG = "IMU_LIS3DH";
+static const char *TAG = "IMU_LIS3DSH";
 
 typedef enum {
-    IMU_CHIP_LIS3DH = 0,
-    IMU_CHIP_LIS3DSH_COMPAT,
+    IMU_CHIP_LIS3DH_LEGACY = 0,
+    IMU_CHIP_LIS3DSH,
 } imu_chip_t;
 
 typedef struct {
@@ -57,21 +59,31 @@ typedef struct {
 
 /* I2C bus/device handles owned by this module. */
 static i2c_master_bus_handle_t s_bus_handle = NULL;
+/* I2C device handle for IMU chip. */
 static i2c_master_dev_handle_t s_dev_handle = NULL;
 /* True when this module created the bus and is responsible for deleting it. */
 static bool s_bus_owned = false;
 /* Detected IMU I2C address. */
-static uint8_t s_lis3dh_addr = LIS3DH_ADDR_PRIMARY;
-static imu_chip_t s_imu_chip = IMU_CHIP_LIS3DH;
+static uint8_t s_imu_addr = LIS3DSH_ADDR_PRIMARY;
+/* Detected IMU chip type. */
+static imu_chip_t s_imu_chip = IMU_CHIP_LIS3DSH;
+/* Consecutive I2C read failure count. */
 static uint32_t s_read_fail_streak = 0;
+/* Backoff deadline for I2C read retries. */
 static uint64_t s_read_backoff_until_ms = 0;
+/* Flag indicating previous sample was valid. */
 static bool s_prev_sample_valid = false;
+/* Previous X-axis acceleration sample in milli-g. */
 static float s_prev_x_mg = 0.0f;
+/* Previous Y-axis acceleration sample in milli-g. */
 static float s_prev_y_mg = 0.0f;
+/* Previous Z-axis acceleration sample in milli-g. */
 static float s_prev_z_mg = 0.0f;
+/* Peak acceleration delta captured since the last rawdata publish. */
+static float s_accel_delta_window_peak_mps2 = 0.0f;
 
-static bool imu_using_lis3dsh_compat(void) {
-    return s_imu_chip == IMU_CHIP_LIS3DSH_COMPAT;
+static bool imu_is_lis3dsh(void) {
+    return s_imu_chip == IMU_CHIP_LIS3DSH;
 }
 
 /**
@@ -80,11 +92,11 @@ static bool imu_using_lis3dsh_compat(void) {
  * @return String name.
  */
 static const char *imu_detected_chip_name(void) {
-    return imu_using_lis3dsh_compat() ? "lis3dsh-compat" : "lis3dh";
+    return imu_is_lis3dsh() ? "lis3dsh" : "lis3dh-legacy";
 }
 
 /**
- * @brief Write one LIS3DH register.
+ * @brief Write one IMU register.
  *
  * @param reg Register address.
  * @param value Register value.
@@ -100,7 +112,7 @@ static esp_err_t imu_write_reg(uint8_t reg, uint8_t value) {
 }
 
 /**
- * @brief Read one LIS3DH register.
+ * @brief Read one IMU register.
  *
  * @param reg Register address.
  * @param value Output value pointer.
@@ -132,7 +144,7 @@ static esp_err_t imu_read_reg(uint8_t reg, uint8_t *value) {
 }
 
 /**
- * @brief Read consecutive LIS3DH registers.
+ * @brief Read consecutive IMU registers.
  *
  * @param reg Start register address.
  * @param data Output byte buffer.
@@ -142,8 +154,12 @@ static esp_err_t imu_read_reg(uint8_t reg, uint8_t *value) {
  */
 static esp_err_t imu_read_regs(uint8_t reg, uint8_t *data, size_t len) {
     ESP_RETURN_ON_NULL(data, ESP_ERR_INVALID_ARG, TAG, "data is NULL");
-    /* Set auto-increment bit for multi-byte reads. */
-    uint8_t read_reg = reg | 0x80;
+    /*
+     * LIS3DH uses SUB[7] to enable address auto-increment on multi-byte reads.
+     * LIS3DSH uses CTRL_REG6.ADD_INC instead, so the register address must stay
+     * unchanged on I2C burst reads.
+     */
+    uint8_t read_reg = imu_is_lis3dsh() ? reg : (uint8_t)(reg | 0x80);
     esp_err_t err = i2c_master_transmit_receive(s_dev_handle,
                                                 &read_reg,
                                                 1,
@@ -170,9 +186,9 @@ static esp_err_t imu_read_regs(uint8_t reg, uint8_t *data, size_t len) {
 }
 
 /**
- * @brief Attach LIS3DH device handle, then verify WHO_AM_I register.
+ * @brief Attach IMU device handle, then verify WHO_AM_I register.
  *
- * @param device_addr Candidate LIS3DH I2C address.
+ * @param device_addr Candidate IMU I2C address.
  * @param scl_speed_hz Per-device SCL frequency to use for transfers.
  * @param out_who_am_i Output WHO_AM_I value.
  *
@@ -198,7 +214,7 @@ static esp_err_t imu_try_bind_device(uint8_t device_addr,
     }
 
     uint8_t who_am_i = 0;
-    err = imu_read_reg(LIS3DH_WHO_AM_I_REG, &who_am_i);
+    err = imu_read_reg(IMU_WHO_AM_I_REG, &who_am_i);
     if (err != ESP_OK || who_am_i != expected_who_am_i) {
         i2c_master_bus_rm_device(s_dev_handle);
         s_dev_handle = NULL;
@@ -210,7 +226,7 @@ static esp_err_t imu_try_bind_device(uint8_t device_addr,
 }
 
 /**
- * @brief Initialize LIS3DH bus/device and default runtime registers.
+ * @brief Initialize IMU bus/device and default runtime registers.
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
@@ -222,9 +238,9 @@ esp_err_t imu_init(void) {
     }
 
     i2c_master_bus_config_t bus_cfg = {
-        .i2c_port = LIS3DH_I2C_PORT,
-        .sda_io_num = PIN_LIS3DH_SDA,
-        .scl_io_num = PIN_LIS3DH_SCL,
+        .i2c_port = IMU_I2C_PORT,
+        .sda_io_num = PIN_LIS3DSH_SDA,
+        .scl_io_num = PIN_LIS3DSH_SCL,
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .glitch_ignore_cnt = 7,
         .intr_priority = 0,
@@ -234,20 +250,20 @@ esp_err_t imu_init(void) {
     };
 
     bool bus_reused = false;
-    esp_err_t bus_err = i2c_master_get_bus_handle(LIS3DH_I2C_PORT, &s_bus_handle);
+    esp_err_t bus_err = i2c_master_get_bus_handle(IMU_I2C_PORT, &s_bus_handle);
     if (bus_err == ESP_OK) {
         bus_reused = true;
-        ESP_LOGI(TAG, "Reusing shared I2C bus port=%d", (int)LIS3DH_I2C_PORT);
+        ESP_LOGI(TAG, "Reusing shared I2C bus port=%d", (int)IMU_I2C_PORT);
     } else {
         bus_err = i2c_new_master_bus(&bus_cfg, &s_bus_handle);
     }
 
     if (bus_err == ESP_ERR_INVALID_STATE) {
         /* Resolve races where another module acquires the bus between checks. */
-        bus_err = i2c_master_get_bus_handle(LIS3DH_I2C_PORT, &s_bus_handle);
+        bus_err = i2c_master_get_bus_handle(IMU_I2C_PORT, &s_bus_handle);
         if (bus_err == ESP_OK) {
             bus_reused = true;
-            ESP_LOGI(TAG, "Reusing shared I2C bus port=%d", (int)LIS3DH_I2C_PORT);
+            ESP_LOGI(TAG, "Reusing shared I2C bus port=%d", (int)IMU_I2C_PORT);
         }
     }
     if (bus_err == ESP_OK) {
@@ -256,10 +272,10 @@ esp_err_t imu_init(void) {
     ESP_GOTO_ON_ERROR(bus_err, fail, TAG, "I2C bus setup failed");
 
     static const imu_probe_target_t s_probe_targets[] = {
-        {.addr = LIS3DH_ADDR_PRIMARY, .who_am_i = LIS3DH_WHO_AM_I_VALUE, .chip = IMU_CHIP_LIS3DH},
-        {.addr = LIS3DH_ADDR_SECONDARY, .who_am_i = LIS3DH_WHO_AM_I_VALUE, .chip = IMU_CHIP_LIS3DH},
-        {.addr = LIS3DSH_ADDR_PRIMARY, .who_am_i = LIS3DSH_WHO_AM_I_VALUE, .chip = IMU_CHIP_LIS3DSH_COMPAT},
-        {.addr = LIS3DSH_ADDR_SECONDARY, .who_am_i = LIS3DSH_WHO_AM_I_VALUE, .chip = IMU_CHIP_LIS3DSH_COMPAT},
+        {.addr = LIS3DH_LEGACY_ADDR_PRIMARY, .who_am_i = LIS3DH_LEGACY_WHO_AM_I_VALUE, .chip = IMU_CHIP_LIS3DH_LEGACY},
+        {.addr = LIS3DH_LEGACY_ADDR_SECONDARY, .who_am_i = LIS3DH_LEGACY_WHO_AM_I_VALUE, .chip = IMU_CHIP_LIS3DH_LEGACY},
+        {.addr = LIS3DSH_ADDR_PRIMARY, .who_am_i = LIS3DSH_WHO_AM_I_VALUE, .chip = IMU_CHIP_LIS3DSH},
+        {.addr = LIS3DSH_ADDR_SECONDARY, .who_am_i = LIS3DSH_WHO_AM_I_VALUE, .chip = IMU_CHIP_LIS3DSH},
     };
     imu_probe_target_t candidate_targets[ARRAY_SIZE(s_probe_targets)] = {0};
     size_t candidate_count = 0;
@@ -284,8 +300,8 @@ esp_err_t imu_init(void) {
     }
 
     static const uint32_t s_probe_speeds_hz[] = {
-        LIS3DH_I2C_FREQ_HZ,
-        LIS3DH_I2C_FREQ_FALLBACK_HZ,
+        IMU_I2C_FREQ_HZ,
+        IMU_I2C_FREQ_FALLBACK_HZ,
     };
 
     uint8_t who_am_i = 0;
@@ -297,7 +313,7 @@ esp_err_t imu_init(void) {
             imu_probe_target_t target = candidate_targets[target_idx];
             err = imu_try_bind_device(target.addr, speed_hz, target.who_am_i, &who_am_i);
             if (err == ESP_OK) {
-                s_lis3dh_addr = target.addr;
+                s_imu_addr = target.addr;
                 s_imu_chip = target.chip;
                 active_speed_hz = speed_hz;
                 imu_ready = true;
@@ -305,7 +321,7 @@ esp_err_t imu_init(void) {
             }
             ESP_LOGW(TAG,
                      "IMU WHO_AM_I failed chip=%s addr=0x%02X speed=%lu err=%s",
-                     target.chip == IMU_CHIP_LIS3DSH_COMPAT ? "lis3dsh-compat" : "lis3dh",
+                     target.chip == IMU_CHIP_LIS3DSH ? "lis3dsh" : "lis3dh-legacy",
                      target.addr,
                      (unsigned long)speed_hz,
                      esp_err_to_name(err));
@@ -317,21 +333,26 @@ esp_err_t imu_init(void) {
 
     ESP_GOTO_ON_FALSE(imu_ready, fail, TAG, "WHO_AM_I read failed for all address/speed candidates");
 
-    if (imu_using_lis3dsh_compat()) {
-        /* ODR=12.5Hz, BDU=1, XYZ enabled for LIS3DSH-compatible boards. */
-        ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_CTRL_REG4, 0x3F), fail, TAG, "CTRL_REG4 write failed");
-        ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_CTRL_REG5, 0x00), fail, TAG, "CTRL_REG5 write failed");
+    if (imu_is_lis3dsh()) {
+        /*
+         * LIS3DSH control register addresses differ from LIS3DH.
+         * Use CTRL_REG4 (0x20) for ODR/BDU/axis enable and CTRL_REG5 (0x24)
+         * for the full-scale/bandwidth bank. Writing the LIS3DH map here left
+         * the output registers pinned and the acceleration delta stayed at zero.
+         */
+        ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DSH_CTRL_REG4, 0x6F), fail, TAG, "LIS3DSH CTRL_REG4 write failed");
+        ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DSH_CTRL_REG5, 0x00), fail, TAG, "LIS3DSH CTRL_REG5 write failed");
     } else {
-        /* 10 Hz, XYZ enabled; combine with high-resolution mode for stable vibration sampling. */
-        ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_CTRL_REG1, 0x27), fail, TAG, "CTRL_REG1 write failed");
+        /* 10 Hz, XYZ enabled; combine with high-resolution mode for stable delta sampling. */
+        ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_LEGACY_CTRL_REG1, 0x27), fail, TAG, "CTRL_REG1 write failed");
         /* BDU=1, high-resolution enabled, full-scale +/-2g. */
-        ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_CTRL_REG4, 0x88), fail, TAG, "CTRL_REG4 write failed");
-        ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_CTRL_REG5, 0x00), fail, TAG, "CTRL_REG5 write failed");
+        ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_LEGACY_CTRL_REG4, 0x88), fail, TAG, "CTRL_REG4 write failed");
+        ESP_GOTO_ON_ERROR(imu_write_reg(LIS3DH_LEGACY_CTRL_REG5, 0x00), fail, TAG, "CTRL_REG5 write failed");
     }
 
     /* Configure interrupt GPIO as input. */
     gpio_config_t int_cfg = {
-        .pin_bit_mask = 1ULL << PIN_LIS3DH_INT,
+        .pin_bit_mask = 1ULL << PIN_LIS3DSH_INT,
         .mode = GPIO_MODE_INPUT,
         .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_ENABLE,
@@ -342,7 +363,7 @@ esp_err_t imu_init(void) {
     ESP_LOGI(TAG,
              "IMU initialized chip=%s addr=0x%02X who_am_i=0x%02X speed=%luHz",
              imu_detected_chip_name(),
-             s_lis3dh_addr,
+             s_imu_addr,
              who_am_i,
              (unsigned long)active_speed_hz);
     s_read_fail_streak = 0;
@@ -370,23 +391,23 @@ esp_err_t imu_configure_motion_interrupt(uint8_t threshold_mg, uint8_t duration_
     /* Duration LSB ~= 100ms at 10 Hz ODR. */
     uint8_t duration = (uint8_t)util_clamp_int((int)((duration_ms + 99U) / 100U), 0, 127);
 
-    if (imu_using_lis3dsh_compat()) {
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_CTRL_REG2, 0x01) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG2 write failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_CTRL_REG3, 0x40) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG3 write failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_CTRL_REG5, 0x00) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG5 write failed");
+    if (imu_is_lis3dsh()) {
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG2, 0x01) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG2 write failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG3, 0x40) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG3 write failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG5, 0x00) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG5 write failed");
     } else {
         /* Keep runtime ODR aligned with the interrupt generator configuration. */
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_CTRL_REG1, 0x27) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG1 write failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG1, 0x27) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG1 write failed");
         /* Enable high-pass filtering on interrupt 1 to reject static gravity. */
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_CTRL_REG2, 0x01) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG2 write failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG2, 0x01) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG2 write failed");
         /* Route IA1 interrupt generator to INT1 pin. */
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_CTRL_REG3, 0x40) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG3 write failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_CTRL_REG4, 0x88) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG4 write failed");
-        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_CTRL_REG5, 0x00) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG5 write failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG3, 0x40) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG3 write failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG4, 0x88) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG4 write failed");
+        ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_LEGACY_CTRL_REG5, 0x00) == ESP_OK, ESP_FAIL, TAG, "CTRL_REG5 write failed");
     }
-    ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_INT1_CFG, 0x2A) == ESP_OK, ESP_FAIL, TAG, "INT1_CFG write failed");
-    ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_INT1_THS, threshold) == ESP_OK, ESP_FAIL, TAG, "INT1_THS write failed");
-    ESP_RETURN_ON_FALSE(imu_write_reg(LIS3DH_INT1_DURATION, duration) == ESP_OK,
+    ESP_RETURN_ON_FALSE(imu_write_reg(IMU_INT1_CFG_REG, 0x2A) == ESP_OK, ESP_FAIL, TAG, "INT1_CFG write failed");
+    ESP_RETURN_ON_FALSE(imu_write_reg(IMU_INT1_THS_REG, threshold) == ESP_OK, ESP_FAIL, TAG, "INT1_THS write failed");
+    ESP_RETURN_ON_FALSE(imu_write_reg(IMU_INT1_DURATION_REG, duration) == ESP_OK,
                         ESP_FAIL,
                         TAG,
                         "INT1_DURATION write failed");
@@ -403,7 +424,7 @@ esp_err_t imu_clear_motion_interrupt(void) {
     ESP_RETURN_ON_NULL(s_dev_handle, ESP_ERR_INVALID_STATE, TAG, "IMU not initialized");
 
     uint8_t src = 0;
-    return imu_read_reg(LIS3DH_INT1_SRC, &src);
+    return imu_read_reg(IMU_INT1_SRC_REG, &src);
 }
 
 /**
@@ -417,7 +438,7 @@ esp_err_t imu_clear_motion_interrupt(void) {
  * @return True if motion detected.
  */
 bool imu_motion_detected(void) {
-    return gpio_get_level(PIN_LIS3DH_INT) == 1;
+    return gpio_get_level(PIN_LIS3DSH_INT) == 1;
 }
 
 /**
@@ -436,7 +457,7 @@ esp_err_t imu_read_accel(int16_t *x, int16_t *y, int16_t *z) {
     ESP_RETURN_ON_NULL(z, ESP_ERR_INVALID_ARG, TAG, "z is NULL");
 
     uint8_t raw[6] = {0};
-    ESP_RETURN_ON_FALSE(imu_read_regs(LIS3DH_OUT_X_L, raw, sizeof(raw)) == ESP_OK,
+    ESP_RETURN_ON_FALSE(imu_read_regs(IMU_OUT_X_L_REG, raw, sizeof(raw)) == ESP_OK,
                         ESP_FAIL,
                         TAG,
                         "Accel read failed");
@@ -449,15 +470,15 @@ esp_err_t imu_read_accel(int16_t *x, int16_t *y, int16_t *z) {
 }
 
 /**
- * @brief Compute normalized vibration score from acceleration magnitude.
+ * @brief Compute peak acceleration delta for the current publish window.
  *
- * @return Score from 0..1000.
+ * @return Peak acceleration delta in m/s^2.
  */
-uint16_t imu_get_vibration_composite(void) {
+float imu_get_peak_accel_delta_mps2(void) {
     uint64_t now_ms = util_uptime_ms();
     if (s_read_backoff_until_ms != 0 && now_ms < s_read_backoff_until_ms) {
         s_prev_sample_valid = false;
-        return 0;
+        return s_accel_delta_window_peak_mps2;
     }
 
     int16_t x = 0;
@@ -475,7 +496,7 @@ uint16_t imu_get_vibration_composite(void) {
                      (unsigned long long)IMU_READ_FAIL_BACKOFF_MS);
             s_read_fail_streak = 0;
         }
-        return 0;
+        return s_accel_delta_window_peak_mps2;
     }
 
     s_read_fail_streak = 0;
@@ -491,7 +512,7 @@ uint16_t imu_get_vibration_composite(void) {
         s_prev_y_mg = y_mg;
         s_prev_z_mg = z_mg;
         s_prev_sample_valid = true;
-        return 0;
+        return s_accel_delta_window_peak_mps2;
     }
 
     /*
@@ -506,14 +527,19 @@ uint16_t imu_get_vibration_composite(void) {
     s_prev_z_mg = z_mg;
 
     float delta_mg = sqrtf((dx_mg * dx_mg) + (dy_mg * dy_mg) + (dz_mg * dz_mg));
-    if (delta_mg <= IMU_VIBRATION_DEADZONE_MG) {
-        return 0;
+    if (delta_mg <= IMU_ACCEL_DELTA_DEADZONE_MG) {
+        return s_accel_delta_window_peak_mps2;
     }
 
-    float vibration = delta_mg - IMU_VIBRATION_DEADZONE_MG;
-    /* Scale to 0..1000 score for payload compactness. */
-    int scaled = (int)((vibration / IMU_VIBRATION_FULL_SCALE_DELTA_MG) * 1000.0f);
-    return (uint16_t)util_clamp_int(scaled, 0, 1000);
+    float accel_delta_mps2 = delta_mg * IMU_MG_TO_MPS2;
+    if (accel_delta_mps2 > s_accel_delta_window_peak_mps2) {
+        s_accel_delta_window_peak_mps2 = accel_delta_mps2;
+    }
+    return s_accel_delta_window_peak_mps2;
+}
+
+void imu_reset_accel_delta_window(void) {
+    s_accel_delta_window_peak_mps2 = 0.0f;
 }
 
 /**
@@ -530,12 +556,13 @@ void imu_deinit(void) {
     }
     s_bus_handle = NULL;
     s_bus_owned = false;
-    s_imu_chip = IMU_CHIP_LIS3DH;
+    s_imu_chip = IMU_CHIP_LIS3DSH;
     s_read_fail_streak = 0;
     s_read_backoff_until_ms = 0;
     s_prev_sample_valid = false;
     s_prev_x_mg = 0.0f;
     s_prev_y_mg = 0.0f;
     s_prev_z_mg = 0.0f;
+    s_accel_delta_window_peak_mps2 = 0.0f;
 }
 

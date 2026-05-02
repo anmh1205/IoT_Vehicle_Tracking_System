@@ -9,12 +9,13 @@
 
 #include "adc_reader.h"
 #include "ble_obd.h"
-#include "imu_lis3dh.h"
+#include "imu_lis3dsh.h"
 #include "modem_gnss.h"
 #include "modem_lte.h"
 #include "mqtt_client.h"
 #include "offline_queue.h"
 #include "rtc_ds3231m.h"
+#include "session_mgr.h"
 #include "state_machine_internal.h"
 #include "state_obd_runtime.h"
 #include "state_ota_runtime.h"
@@ -53,6 +54,15 @@ static bool state_machine_try_rearm_gnss(const char *reason) {
     return false;
 }
 
+/**
+ * @brief Attempt to reassert GNSS power without full power cycle.
+ *
+ * Differs from rearm_gnss by skipping the power-off step - only powers on.
+ * Includes cooldown check to prevent rapid reassert attempts.
+ *
+ * @param reason Reason for reassert attempt (logging).
+ * @return true if power-on succeeded, false otherwise.
+ */
 static bool state_machine_try_reassert_gnss_power(const char *reason) {
     uint64_t now_ms = util_uptime_ms();
     if (s_last_gnss_rearm_ms != 0 && (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
@@ -206,7 +216,7 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
     float device_battery_raw_v = adc_read_device_battery_voltage();
     s_telemetry.vehicle_battery = vehicle_battery_raw_v * TRACKER_ADC_SUPPLY_CALIB_GAIN;
     s_telemetry.device_battery = device_battery_raw_v * TRACKER_ADC_BATT_CALIB_GAIN;
-    s_telemetry.vibration = s_imu_available ? imu_get_vibration_composite() : 0;
+    s_telemetry.imu_accel_delta_mps2 = s_imu_available ? imu_get_peak_accel_delta_mps2() : 0.0f;
 
     if (read_obd && s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
         uint64_t now_ms = util_uptime_ms();
@@ -297,14 +307,22 @@ telemetry_finalize:
 
     float ignition_threshold_v = (float)s_config.ignition_adc_threshold_mv / 1000.0f;
     bool adc_ignition = s_telemetry.vehicle_battery >= ignition_threshold_v;
+    bool obd_sample_fresh =
+        state_machine_has_recent_obd_sample(now_ms, TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS);
     bool obd_live_ignition = obd_connected &&
                              strcmp(obd_ecu_state, "live") == 0 &&
-                             state_machine_has_recent_obd_sample(now_ms, TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS);
+                             obd_sample_fresh;
     bool rpm_ignition = obd_live_ignition && s_telemetry.obd_rpm > 0;
-    bool ignition_next = rpm_ignition || adc_ignition || obd_live_ignition;
+    bool preserve_degraded_ignition_on =
+        !adc_ignition &&
+        !obd_live_ignition &&
+        session_mgr_has_stable_ignition() &&
+        session_mgr_stable_ignition() &&
+        (!obd_connected || !obd_sample_fresh);
+    bool ignition_next = rpm_ignition || adc_ignition || obd_live_ignition || preserve_degraded_ignition_on;
     if (!s_ignition_log_initialized || ignition_next != s_last_ignition_state) {
         ESP_LOGI(TAG,
-                 "ignition transition prev=%d next=%d rpm=%ld adc=%d vehicle_battery=%.2f threshold=%.2f obd_live=%d sample_age_ms=%lu ecu=%s",
+                 "ignition transition prev=%d next=%d rpm=%ld adc=%d vehicle_battery=%.2f threshold=%.2f obd_live=%d hold_on=%d sample_age_ms=%lu ecu=%s",
                  s_ignition_log_initialized ? (s_last_ignition_state ? 1 : 0) : -1,
                  ignition_next ? 1 : 0,
                  (long)s_telemetry.obd_rpm,
@@ -312,6 +330,7 @@ telemetry_finalize:
                  s_telemetry.vehicle_battery,
                  ignition_threshold_v,
                  obd_live_ignition ? 1 : 0,
+                 preserve_degraded_ignition_on ? 1 : 0,
                  (unsigned long)s_telemetry.obd_sample_age_ms,
                  obd_ecu_state);
         s_last_ignition_state = ignition_next;
@@ -327,11 +346,11 @@ telemetry_finalize:
     if (s_last_hw_diag_log_ms == 0 || (now_ms - s_last_hw_diag_log_ms) >= TRACKER_HW_DIAG_LOG_INTERVAL_MS) {
         UBaseType_t stack_hwm_words = uxTaskGetStackHighWaterMark(NULL);
         ESP_LOGI(TAG,
-                "HW diag vehicle_battery=%.2fV device_battery=%.2fV ign=%d vibration=%u lte=%d mqtt=%d ble=%d gnss_fix=%d stack_hwm_words=%lu",
+                "HW diag vehicle_battery=%.2fV device_battery=%.2fV ign=%d imu_accel_delta=%.3fm/s2 lte=%d mqtt=%d ble=%d gnss_fix=%d stack_hwm_words=%lu",
                  s_telemetry.vehicle_battery,
                  s_telemetry.device_battery,
                  s_telemetry.ignition ? 1 : 0,
-                 (unsigned)s_telemetry.vibration,
+                 (double)s_telemetry.imu_accel_delta_mps2,
                  modem_lte_is_connected() ? 1 : 0,
                  tracker_mqtt_is_connected() ? 1 : 0,
                  obd_connected ? 1 : 0,

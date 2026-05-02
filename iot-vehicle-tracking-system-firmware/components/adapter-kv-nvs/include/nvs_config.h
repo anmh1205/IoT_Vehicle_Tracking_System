@@ -49,6 +49,15 @@ typedef struct {
     char partition[TRACKER_PARTITION_MAX_LEN];
 } ota_persist_context_t;
 
+#define TRACKER_SESSION_BOOT_ID_LEN 48
+
+typedef struct {
+    bool active;
+    uint32_t local_session_key;
+    uint64_t canonical_session_id;
+    char boot_id[TRACKER_SESSION_BOOT_ID_LEN];
+} session_persist_context_t;
+
 /**
  * @brief Persist OTA confirmation context for post-reboot reconciliation.
  *
@@ -74,3 +83,7 @@ esp_err_t nvs_config_load_ota_context(ota_persist_context_t *out_context, bool *
  * @return ESP_OK on success, otherwise NVS error.
  */
 esp_err_t nvs_config_clear_ota_context(void);
+
+esp_err_t nvs_config_save_session_context(const session_persist_context_t *context);
+esp_err_t nvs_config_load_session_context(session_persist_context_t *out_context, bool *out_found);
+esp_err_t nvs_config_clear_session_context(void);

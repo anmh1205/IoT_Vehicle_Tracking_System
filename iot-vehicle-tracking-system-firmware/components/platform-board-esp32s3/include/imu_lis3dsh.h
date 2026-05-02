@@ -6,19 +6,19 @@
 #include "esp_err.h"
 
 /**
- * @file imu_lis3dh.h
- * @brief LIS3DH accelerometer driver interface.
+ * @file imu_lis3dsh.h
+ * @brief LIS3DSH accelerometer driver interface.
  */
 
 /**
- * @brief Initialize LIS3DH over I2C and basic measurement configuration.
+ * @brief Initialize LIS3DSH over I2C and basic measurement configuration.
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t imu_init(void);
 
 /**
- * @brief Configure LIS3DH motion interrupt threshold and duration.
+ * @brief Configure LIS3DSH motion interrupt threshold and duration.
  *
  * @param threshold_mg Threshold in milli-g.
  * @param duration_ms Duration in milliseconds.
@@ -53,13 +53,21 @@ esp_err_t imu_clear_motion_interrupt(void);
 esp_err_t imu_read_accel(int16_t *x, int16_t *y, int16_t *z);
 
 /**
- * @brief Compute vibration score (0..1000) from acceleration magnitude.
+ * @brief Read the peak IMU acceleration delta for the current publish window.
  *
- * @return Composite vibration score.
+ * Returns the peak delta acceleration seen since the last reset so short
+ * spikes survive until the next telemetry publish window.
+ *
+ * @return Peak acceleration delta in m/s^2.
  */
-uint16_t imu_get_vibration_composite(void);
+float imu_get_peak_accel_delta_mps2(void);
 
 /**
- * @brief Deinitialize LIS3DH resources.
+ * @brief Reset the latched acceleration-delta peak after raw telemetry is emitted.
+ */
+void imu_reset_accel_delta_window(void);
+
+/**
+ * @brief Deinitialize LIS3DSH resources.
  */
 void imu_deinit(void);

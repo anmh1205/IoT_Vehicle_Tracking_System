@@ -1,7 +1,7 @@
 ﻿export const DEVICE_STATUS_LABELS: Record<string, string> = {
   running: 'Đang chạy',
-  online: 'Trực tuyến',
-  stopped: 'Tạm dừng',
+  online: 'Đỗ xe / còn online',
+  stopped: 'Đã dừng',
   disconnected: 'Mất kết nối',
   completed: 'Hoàn thành',
 };
@@ -11,8 +11,8 @@ export const DEVICE_STATUS_VARIANTS: Record<
   'default' | 'secondary' | 'destructive' | 'outline'
 > = {
   running: 'default',
-  online: 'default',
-  stopped: 'secondary',
+  online: 'secondary',
+  stopped: 'outline',
   disconnected: 'destructive',
   completed: 'outline',
 };

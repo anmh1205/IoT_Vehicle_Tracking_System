@@ -6,6 +6,7 @@
 #include "esp_log.h"
 
 #include "data_formatter.h"
+#include "imu_lis3dsh.h"
 #include "mqtt_client.h"
 #include "offline_queue.h"
 #include "state_machine_internal.h"
@@ -34,6 +35,7 @@ typedef esp_err_t (*state_publish_sender_t)(const char *payload);
 typedef struct {
     const char *status;
     uint32_t session_id;
+    const char *boundary_event;
 } state_publish_status_args_t;
 
 typedef struct {
@@ -43,6 +45,13 @@ typedef struct {
 } state_publish_event_args_t;
 
 static const char *TAG = STATE_MACHINE_TAG;
+
+/**
+ * @brief Return the boot ID that should tag the current session-aware payload.
+ */
+static const char *state_publish_effective_session_boot_id(void) {
+    return util_string_empty(s_session_boot_id) ? s_boot_id : s_session_boot_id;
+}
 
 static char *state_publish_format_rawdata(const config_t *cfg,
                                          const telemetry_t *telemetry,
@@ -61,7 +70,10 @@ static char *state_publish_format_rawdata(const config_t *cfg,
                                timestamp_ms,
                                message_id,
                                seq_no,
-                               boot_id);
+                               boot_id,
+                               s_session_id,
+                               s_canonical_session_id,
+                               state_publish_effective_session_boot_id());
 }
 
 static char *state_publish_format_status(const config_t *cfg,
@@ -83,7 +95,11 @@ static char *state_publish_format_status(const config_t *cfg,
                               timestamp_ms,
                               message_id,
                               seq_no,
-                              boot_id);
+                              boot_id,
+                              s_session_id,
+                              s_canonical_session_id,
+                              state_publish_effective_session_boot_id(),
+                              args->boundary_event);
 }
 
 static char *state_publish_format_event(const config_t *cfg,
@@ -129,7 +145,14 @@ static char *state_publish_format_firmware(const config_t *cfg,
                                 boot_id);
 }
 
-static void state_publish_via_pipeline(const char *log_label,
+/**
+ * @brief Format, publish, and offline-buffer one outbound tracker payload.
+ *
+ * All rawdata/status/event/firmware publishes flow through this helper so
+ * metadata stamping, live publish attempts, counters, and offline fallback
+ * stay consistent across topic classes.
+ */
+static bool state_publish_via_pipeline(const char *log_label,
                                        offline_record_type_t record_type,
                                        const void *format_arg,
                                        state_publish_formatter_t formatter,
@@ -137,7 +160,7 @@ static void state_publish_via_pipeline(const char *log_label,
                                        bool sync_axes,
                                        bool update_raw_publish_ms) {
     if (formatter == NULL || sender == NULL) {
-        return;
+        return false;
     }
 
     state_machine_update_time_source();
@@ -167,7 +190,7 @@ static void state_publish_via_pipeline(const char *log_label,
                               seq_no,
                               s_boot_id);
     if (payload == NULL) {
-        return;
+        return false;
     }
 
     bool live_connected = tracker_mqtt_is_connected();
@@ -179,7 +202,7 @@ static void state_publish_via_pipeline(const char *log_label,
             if (update_raw_publish_ms) {
                 s_last_raw_publish_ms = util_uptime_ms();
             }
-            return;
+            return true;
         }
 
         telemetry_counters_inc_mqtt_publish_fail();
@@ -208,8 +231,12 @@ static void state_publish_via_pipeline(const char *log_label,
     if (update_raw_publish_ms) {
         s_last_raw_publish_ms = util_uptime_ms();
     }
+    return queue_err == ESP_OK;
 }
 
+/**
+ * @brief Keep firmware status for the next connected publish opportunity.
+ */
 static void state_machine_defer_firmware_report(const firmware_status_t *firmware) {
     if (firmware == NULL) {
         return;
@@ -250,27 +277,31 @@ static void state_machine_fill_firmware_status(firmware_status_t *firmware,
 }
 
 void state_machine_publish_rawdata(void) {
-    state_publish_via_pipeline("rawdata",
-                               OFFLINE_RECORD_RAWDATA,
-                               NULL,
-                               state_publish_format_rawdata,
-                               tracker_mqtt_publish_rawdata,
-                               true,
-                               true);
+    bool published = state_publish_via_pipeline("rawdata",
+                                                OFFLINE_RECORD_RAWDATA,
+                                                NULL,
+                                                state_publish_format_rawdata,
+                                                tracker_mqtt_publish_rawdata,
+                                                true,
+                                                true);
+    if (published) {
+        imu_reset_accel_delta_window();
+    }
 }
 
-void state_machine_publish_status(const char *status) {
+void state_machine_publish_status(const char *status, const char *boundary_event) {
     const state_publish_status_args_t args = {
         .status = status,
         .session_id = s_session_id,
+        .boundary_event = boundary_event,
     };
-    state_publish_via_pipeline("status",
-                               OFFLINE_RECORD_STATUS,
-                               &args,
-                               state_publish_format_status,
-                               tracker_mqtt_publish_status,
-                               true,
-                               false);
+    (void)state_publish_via_pipeline("status",
+                                     OFFLINE_RECORD_STATUS,
+                                     &args,
+                                     state_publish_format_status,
+                                     tracker_mqtt_publish_status,
+                                     true,
+                                     false);
 }
 
 void state_machine_publish_event(const char *event_type, int code, const char *message) {
@@ -279,23 +310,23 @@ void state_machine_publish_event(const char *event_type, int code, const char *m
         .code = code,
         .message = message,
     };
-    state_publish_via_pipeline("event",
-                               OFFLINE_RECORD_EVENT,
-                               &args,
-                               state_publish_format_event,
-                               tracker_mqtt_publish_event,
-                               false,
-                               false);
+    (void)state_publish_via_pipeline("event",
+                                     OFFLINE_RECORD_EVENT,
+                                     &args,
+                                     state_publish_format_event,
+                                     tracker_mqtt_publish_event,
+                                     false,
+                                     false);
 }
 
 void state_machine_publish_firmware_payload(const firmware_status_t *firmware) {
-    state_publish_via_pipeline("firmware",
-                               OFFLINE_RECORD_FIRMWARE,
-                               firmware,
-                               state_publish_format_firmware,
-                               tracker_mqtt_publish_firmware,
-                               false,
-                               false);
+    (void)state_publish_via_pipeline("firmware",
+                                     OFFLINE_RECORD_FIRMWARE,
+                                     firmware,
+                                     state_publish_format_firmware,
+                                     tracker_mqtt_publish_firmware,
+                                     false,
+                                     false);
 }
 
 void state_machine_publish_firmware_status(const char *status,

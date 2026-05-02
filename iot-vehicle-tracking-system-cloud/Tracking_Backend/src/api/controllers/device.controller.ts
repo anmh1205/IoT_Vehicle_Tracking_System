@@ -117,7 +117,7 @@ export const regenerateToken = asyncHandler(async (req: AuthenticatedRequest, re
 
 export const getTelemetry = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const deviceId = await resolveDeviceId(req.params.id);
-  const metric = (req.query.metric as string | undefined) ?? 'vibration';
+  const metric = (req.query.metric as string | undefined) ?? 'imuAccelDeltaMps2';
   const from = req.query.from as string | undefined;
   const to = req.query.to as string | undefined;
 

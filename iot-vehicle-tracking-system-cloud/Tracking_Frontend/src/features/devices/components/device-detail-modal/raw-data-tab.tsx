@@ -104,7 +104,7 @@ const normalizeCanonicalFirmwarePayload = (
     ['timestamp', toFirmwareTimestamp(sanitizedPayload.timestamp)],
     ['uptime', sanitizedPayload.uptime],
     ['data', compactRecord([
-      ['vibration', data.vibration],
+      ['imu_accel_delta_mps2', data.imu_accel_delta_mps2 ?? data.vibration],
       ['vehicle_battery', data.vehicle_battery],
       ['device_battery', data.device_battery],
       ['latitude', data.latitude],
@@ -142,7 +142,7 @@ const extractFirmwareRawPayload = (
   const metadata = toRecord(payload.metadata);
   const diagnostics = toRecord(context?.diagnostics ?? payload.diagnostics);
   const data = compactRecord([
-    ['vibration', context?.vibration],
+    ['imu_accel_delta_mps2', context?.imu_accel_delta_mps2 ?? context?.vibration],
     ['vehicle_battery', context?.vehicle_battery],
     ['device_battery', context?.device_battery],
     ['latitude', context?.latitude],
@@ -274,7 +274,12 @@ const extractFirmwareRawMatrixRows = (
   return [
     rowItem('device_id', 'Thiết bị', 'Mã thiết bị trong payload dữ liệu thô firmware.', firmwarePayload.device_id),
     rowItem('timestamp', 'Mốc thời gian firmware', 'Mốc thời gian firmware gửi lên, đơn vị mili giây.', firmwarePayload.timestamp),
-    rowItem('data.vibration', 'Rung', 'Giá trị rung từ payload data.', data.vibration),
+    rowItem(
+      'data.imu_accel_delta_mps2',
+      'Gia tốc IMU Δ',
+      'Độ biến thiên gia tốc IMU trong cửa sổ publish, đơn vị m/s².',
+      data.imu_accel_delta_mps2 ?? data.vibration,
+    ),
     rowItem('data.vehicle_battery', 'Ắc quy xe', 'Điện áp nguồn chính/ắc quy xe từ firmware.', data.vehicle_battery),
     rowItem('data.device_battery', 'Pin thiết bị', 'Điện áp tracker hoặc pin backup từ firmware.', data.device_battery),
     rowItem('data.latitude', 'Vĩ độ', 'Tọa độ vĩ độ GNSS từ firmware.', data.latitude),
@@ -771,4 +776,3 @@ export const RawDataTab = () => {
     </div>
   );
 };
-

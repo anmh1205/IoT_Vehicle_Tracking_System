@@ -25,7 +25,7 @@ export interface DeviceDetailModalContextValue {
     totalRuntime: number;
     totalSessions: number;
     avgSessionDuration: number;
-    avgVibration: number;
+    avgImuAccelDeltaMps2: number;
     totalDataPoints: number;
   } | null;
   loading: boolean;

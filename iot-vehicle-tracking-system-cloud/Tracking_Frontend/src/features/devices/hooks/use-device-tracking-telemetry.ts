@@ -26,7 +26,7 @@ const TRACKING_METRICS: DeviceTrackingMetric[] = [
   'vehicleBattery',
   'temperature',
   'errorCode',
-  'vibration',
+  'imuAccelDeltaMps2',
 ];
 
 const createEmptyMetricSeries = (): Record<DeviceTrackingMetric, DeviceTelemetryPoint[]> => ({
@@ -37,7 +37,7 @@ const createEmptyMetricSeries = (): Record<DeviceTrackingMetric, DeviceTelemetry
   vehicleBattery: [],
   temperature: [],
   errorCode: [],
-  vibration: [],
+  imuAccelDeltaMps2: [],
 });
 
 const toDateInput = (value: Date) => value.toISOString().slice(0, 10);
@@ -143,7 +143,7 @@ const emptyRowAt = (timestamp: string): DeviceTelemetryRow => ({
   temperature: null,
   engineTemperature: null,
   errorCode: null,
-  vibration: null,
+  imuAccelDeltaMps2: null,
 });
 
 const buildTelemetryRows = (
@@ -183,8 +183,8 @@ const buildTelemetryRows = (
   for (const point of metricSeries.errorCode) {
     ensureRow(point.timestamp).errorCode = point.value;
   }
-  for (const point of metricSeries.vibration) {
-    ensureRow(point.timestamp).vibration = point.value;
+  for (const point of metricSeries.imuAccelDeltaMps2) {
+    ensureRow(point.timestamp).imuAccelDeltaMps2 = point.value;
   }
 
   return Array.from(bucket.values()).sort(

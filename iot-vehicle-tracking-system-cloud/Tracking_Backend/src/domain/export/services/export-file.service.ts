@@ -14,10 +14,18 @@ interface ColumnDef {
   width?: number;
 }
 
-const EXPORT_CONFIGS: Record<string, { sheetName: string; query: string; columns: ColumnDef[] }> = {
+interface ExportConfig {
+  sheetName: string;
+  query: string;
+  fallbackQuery?: string;
+  columns: ColumnDef[];
+}
+
+const EXPORT_CONFIGS: Record<string, ExportConfig> = {
   devices: {
     sheetName: 'Devices',
-    query: 'SELECT id, device_id, device_name, current_status, imei, firmware_version, vibration_threshold, request_interval, latitude, longitude, last_seen_at, created_at FROM devices ORDER BY created_at DESC',
+    query: 'SELECT id, device_id, device_name, current_status, imei, firmware_version, imu_accel_delta_threshold_mps2, request_interval, latitude, longitude, last_seen_at, created_at FROM devices ORDER BY created_at DESC',
+    fallbackQuery: 'SELECT id, device_id, device_name, current_status, imei, firmware_version, vibration_threshold AS imu_accel_delta_threshold_mps2, request_interval, latitude, longitude, last_seen_at, created_at FROM devices ORDER BY created_at DESC',
     columns: [
       { header: 'ID', key: 'id', width: 8 },
       { header: 'Device ID', key: 'device_id', width: 20 },
@@ -25,7 +33,7 @@ const EXPORT_CONFIGS: Record<string, { sheetName: string; query: string; columns
       { header: 'Status', key: 'current_status', width: 15 },
       { header: 'IMEI', key: 'imei', width: 20 },
       { header: 'Firmware', key: 'firmware_version', width: 15 },
-      { header: 'Vibration Threshold', key: 'vibration_threshold', width: 20 },
+      { header: 'IMU Accel Delta Threshold (m/s^2)', key: 'imu_accel_delta_threshold_mps2', width: 28 },
       { header: 'Request Interval (s)', key: 'request_interval', width: 20 },
       { header: 'Latitude', key: 'latitude', width: 14 },
       { header: 'Longitude', key: 'longitude', width: 14 },
@@ -155,7 +163,15 @@ export const generateExcelFile = async (
 
   mkdirSync(EXPORTS_DIR, { recursive: true });
 
-  const rows = await findMany<Record<string, unknown>>(config.query);
+  let rows: Record<string, unknown>[];
+  try {
+    rows = await findMany<Record<string, unknown>>(config.query);
+  } catch (error) {
+    if (!config.fallbackQuery) {
+      throw error;
+    }
+    rows = await findMany<Record<string, unknown>>(config.fallbackQuery);
+  }
   log.info(`Fetched ${rows.length} rows for export type "${exportType}"`);
 
   const workbook = new ExcelJS.Workbook();

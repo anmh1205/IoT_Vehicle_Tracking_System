@@ -7,30 +7,27 @@
 
 ## Critical Priority (0% - Must Fix)
 
-- [ ] main/main.c - Add Doxygen file header comment
-- [ ] main/main.c - Add @brief, @param, @return for app_main()
+- [x] main/main.c - Add Doxygen file header comment
+- [x] main/main.c - Add @brief, @param, @return for app_main()
 
 ## High Priority (8% - Poor)
 
 ### app-core/src/*.c - Add block comments to all functions
 
-- [ ] app-core/src/state_machine.c
-- [ ] app-core/src/state_runtime_context.c
-- [ ] app-core/src/tracker_mqtt.c
-- [ ] app-core/src/tracker_ble.c
-- [ ] app-core/src/tracker_sdmgr.c
-- [ ] app-core/src/tracker_i2c.c
-- [ ] app-core/src/tracker_pwr_mgmt.c
-- [ ] app-core/src/tracker_gps.c
-- [ ] app-core/src/tracker_sensors.c
-- [ ] app-core/src/tracker_events.c
-- [ ] app-core/src/tracker_config.c
-- [ ] app-core/src/tracker_init.c
+- [x] app-core/src/state_machine.c - Added function documentation
+- [ ] app-core/src/state_runtime_context.c - Partially documented (global vars)
+- [ ] app-core/src/state_publish_pipeline.c - Has @file header, needs function docs
+- [ ] app-core/src/state_machine_core.c - Needs review
+- [ ] app-core/src/state_obd_runtime.c - Needs review
+- [ ] app-core/src/state_ota_runtime.c - Needs review
+- [ ] app-core/src/state_wake_prelude.c - Needs review
+- [ ] app-core/src/state_sleep_controller.c - Needs review
+- [ ] app-core/src/tracker-app-bootstrap.c - Has @file, needs function docs
 
 ## Medium Priority (10% - Poor)
 
-- [ ] adapter-kv-nvs/include/nvs_store_keys.h - Add Doxygen comments
-- [ ] adapter-kv-nvs/src/nvs_store_keys.c - Add Doxygen comments
+- [x] adapter-kv-nvs/include/nvs_store_keys.h - Added Doxygen comments
+- [ ] adapter-kv-nvs/src/nvs_store_keys.c - File doesn't exist (keys defined in header)
 
 ## Maintain Excellence (88-95% - Already Good)
 

@@ -4,6 +4,7 @@ import { simulatorServices, type SimulatorConfig } from '@/lib/api/simulator';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
+
 export interface SimulatorPayload {
   deviceId: string;
   timestamp: string;
@@ -11,11 +12,12 @@ export interface SimulatorPayload {
   longitude: number;
   speed: number;
   heading?: number;
-  vibration: number;
+  imuAccelDeltaMps2: number;
   vehicleBattery: number;
   deviceBattery: number;
   errorCode?: number | null;
 }
+
 interface SimulatorStatusPayload {
   running: boolean;
   paused: boolean;
@@ -25,9 +27,11 @@ interface SimulatorStatusPayload {
   durationMin: number | null;
   preview: unknown[];
 }
+
 export interface SimulatorState extends SimulatorConfig {
   selectedDeviceIds: string[];
 }
+
 export const DEFAULT_SIMULATOR_STATE: SimulatorState = {
   selectedDeviceIds: [],
   deviceIds: [],
@@ -35,13 +39,14 @@ export const DEFAULT_SIMULATOR_STATE: SimulatorState = {
   durationMin: 15,
   speedMin: 10,
   speedMax: 80,
-  vibrationMin: 1,
-  vibrationMax: 10,
+  imuAccelDeltaMinMps2: 1,
+  imuAccelDeltaMaxMps2: 10,
   batteryMin: 30,
   batteryMax: 100,
   lat: 10.762622,
   lon: 106.660172,
 };
+
 const normalizePoint = (raw: any): SimulatorPayload => ({
   deviceId: String(raw?.deviceId ?? ''),
   timestamp: String(raw?.timestamp ?? new Date().toISOString()),
@@ -49,14 +54,15 @@ const normalizePoint = (raw: any): SimulatorPayload => ({
   longitude: Number(raw?.longitude ?? 0),
   speed: Number(raw?.speed ?? 0),
   heading: raw?.heading !== undefined && raw?.heading !== null ? Number(raw.heading) : undefined,
-  vibration: Number(raw?.vibration ?? 0),
+  imuAccelDeltaMps2: Number(
+    raw?.imuAccelDeltaMps2 ?? raw?.imu_accel_delta_mps2 ?? raw?.vibration ?? 0,
+  ),
   vehicleBattery: Number(raw?.vehicleBattery ?? 0),
   deviceBattery: Number(raw?.deviceBattery ?? 0),
   errorCode:
-    raw?.errorCode !== undefined && raw?.errorCode !== null
-      ? Number(raw.errorCode)
-      : null,
+    raw?.errorCode !== undefined && raw?.errorCode !== null ? Number(raw.errorCode) : null,
 });
+
 const normalizeStatus = (raw: any): SimulatorStatusPayload => ({
   running: Boolean(raw?.running),
   paused: Boolean(raw?.paused),
@@ -66,24 +72,26 @@ const normalizeStatus = (raw: any): SimulatorStatusPayload => ({
   durationMin: raw?.durationMin ?? null,
   preview: Array.isArray(raw?.preview) ? raw.preview : [],
 });
+
 const validateBeforeStart = (state: SimulatorState): string | null => {
   if (state.selectedDeviceIds.length === 0) {
-    return 'Vui lòng chọn ít nhất một thiết bị.';
+    return 'Vui lÃ²ng chá»n Ã­t nháº¥t má»™t thiáº¿t bá»‹.';
   }
   if (state.speedMin > state.speedMax) {
-    return 'Tốc độ tối thiểu phải nhỏ hơn hoặc bằng tốc độ tối đa.';
+    return 'Tá»‘c Ä‘á»™ tá»‘i thiá»ƒu pháº£i nhá» hÆ¡n hoáº·c báº±ng tá»‘c Ä‘á»™ tá»‘i Ä‘a.';
   }
-  if (state.vibrationMin > state.vibrationMax) {
-    return 'Rung động tối thiểu phải nhỏ hơn hoặc bằng rung động tối đa.';
+  if (state.imuAccelDeltaMinMps2 > state.imuAccelDeltaMaxMps2) {
+    return 'Gia tá»‘c IMU Î” tá»‘i thiá»ƒu pháº£i nhá» hÆ¡n hoáº·c báº±ng gia tá»‘c IMU Î” tá»‘i Ä‘a.';
   }
   if (state.batteryMin > state.batteryMax) {
-    return 'Pin tối thiểu phải nhỏ hơn hoặc bằng pin tối đa.';
+    return 'Pin tá»‘i thiá»ƒu pháº£i nhá» hÆ¡n hoáº·c báº±ng pin tá»‘i Ä‘a.';
   }
   if (!Number.isFinite(state.lat) || !Number.isFinite(state.lon)) {
-    return 'Vĩ độ và kinh độ phải là số hợp lệ.';
+    return 'VÄ© Ä‘á»™ vÃ  kinh Ä‘á»™ pháº£i lÃ  sá»‘ há»£p lá»‡.';
   }
   return null;
 };
+
 export const useSimulator = () => {
   const queryClient = useQueryClient();
   const [state, setState] = useState<SimulatorState>(DEFAULT_SIMULATOR_STATE);
@@ -91,6 +99,7 @@ export const useSimulator = () => {
   const [paused, setPaused] = useState(false);
   const [preview, setPreview] = useState<SimulatorPayload | null>(null);
   const [history, setHistory] = useState<SimulatorPayload[]>([]);
+
   const applyStatus = useCallback((payload: SimulatorStatusPayload) => {
     setRunning(payload.running);
     setPaused(payload.running ? payload.paused : false);
@@ -98,10 +107,12 @@ export const useSimulator = () => {
     setPreview(points[0] ?? null);
     setHistory(points.slice(0, 80));
   }, []);
+
   const statusQuery = useQuery({
     queryKey: ['simulator', 'status'],
     queryFn: () => simulatorServices.status().then((payload) => normalizeStatus(payload)),
   });
+
   useEffect(() => {
     if (!statusQuery.data) {
       return;
@@ -118,6 +129,7 @@ export const useSimulator = () => {
       queryClient.setQueryData(['simulator', 'status'], status);
     },
   });
+
   const startMutation = useMutation({
     mutationFn: async () => {
       const payload: SimulatorConfig = {
@@ -129,23 +141,31 @@ export const useSimulator = () => {
     onSuccess: (status) => {
       applyStatus(status);
       queryClient.setQueryData(['simulator', 'status'], status);
-      notificationUtils.success('Đã bắt đầu mô phỏng');
+      notificationUtils.success('ÄÃ£ báº¯t Ä‘áº§u mÃ´ phá»ng');
     },
     onError: (error: unknown) => {
-      notificationUtils.error('Không thể bắt đầu mô phỏng', getApiErrorMessage(error, 'Lỗi không xác định'));
+      notificationUtils.error(
+        'KhÃ´ng thá»ƒ báº¯t Ä‘áº§u mÃ´ phá»ng',
+        getApiErrorMessage(error, 'Lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh'),
+      );
     },
   });
+
   const stopMutation = useMutation({
     mutationFn: async () => simulatorServices.stop().then((response) => normalizeStatus(response)),
     onSuccess: (status) => {
       applyStatus(status);
       queryClient.setQueryData(['simulator', 'status'], status);
-      notificationUtils.info('Đã dừng mô phỏng');
+      notificationUtils.info('ÄÃ£ dá»«ng mÃ´ phá»ng');
     },
     onError: (error: unknown) => {
-      notificationUtils.error('Không thể dừng mô phỏng', getApiErrorMessage(error, 'Lỗi không xác định'));
+      notificationUtils.error(
+        'KhÃ´ng thá»ƒ dá»«ng mÃ´ phá»ng',
+        getApiErrorMessage(error, 'Lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh'),
+      );
     },
   });
+
   const start = async () => {
     const validationError = validateBeforeStart(state);
     if (validationError) {
@@ -154,56 +174,64 @@ export const useSimulator = () => {
     }
     await startMutation.mutateAsync();
   };
+
   const stop = async () => {
     await stopMutation.mutateAsync();
   };
+
   const pauseMutation = useMutation({
     mutationFn: async () => simulatorServices.pause().then((response) => normalizeStatus(response)),
     onSuccess: (status) => {
       applyStatus(status);
       queryClient.setQueryData(['simulator', 'status'], status);
-      notificationUtils.info('Đã tạm dừng mô phỏng');
+      notificationUtils.info('ÄÃ£ táº¡m dá»«ng mÃ´ phá»ng');
     },
     onError: (error: unknown) => {
       notificationUtils.error(
-        'Không thể tạm dừng mô phỏng',
-        getApiErrorMessage(error, 'Lỗi không xác định'),
+        'KhÃ´ng thá»ƒ táº¡m dá»«ng mÃ´ phá»ng',
+        getApiErrorMessage(error, 'Lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh'),
       );
     },
   });
+
   const resumeMutation = useMutation({
-    mutationFn: async () =>
-      simulatorServices.resume().then((response) => normalizeStatus(response)),
+    mutationFn: async () => simulatorServices.resume().then((response) => normalizeStatus(response)),
     onSuccess: (status) => {
       applyStatus(status);
       queryClient.setQueryData(['simulator', 'status'], status);
-      notificationUtils.info('Đã tiếp tục mô phỏng');
+      notificationUtils.info('ÄÃ£ tiáº¿p tá»¥c mÃ´ phá»ng');
     },
     onError: (error: unknown) => {
       notificationUtils.error(
-        'Không thể tiếp tục mô phỏng',
-        getApiErrorMessage(error, 'Lỗi không xác định'),
+        'KhÃ´ng thá»ƒ tiáº¿p tá»¥c mÃ´ phá»ng',
+        getApiErrorMessage(error, 'Lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh'),
       );
     },
   });
+
   const pause = () => {
     void pauseMutation.mutateAsync();
   };
+
   const resume = () => {
     void resumeMutation.mutateAsync();
   };
+
   const setSelectedDeviceIds = (deviceIds: string[]) => {
     setState((prev) => ({ ...prev, selectedDeviceIds: deviceIds, deviceIds }));
   };
+
   const setConfig = <TKey extends keyof SimulatorState>(key: TKey, value: SimulatorState[TKey]) => {
     setState((prev) => ({ ...prev, [key]: value }));
   };
+
   const statusLabel = useMemo(() => {
     if (!running) {
-      return 'Đã dừng';
+      return 'ÄÃ£ dá»«ng';
     }
-    return paused ? 'Đã tạm dừng (xem trước)' : 'Đang chạy';
+    return paused ? 'ÄÃ£ táº¡m dá»«ng (xem trÆ°á»›c)' : 'Äang cháº¡y';
   }, [paused, running]);
+
   return {
     state,
     running,

@@ -62,8 +62,8 @@ typedef struct {
     float vehicle_battery;
     /** Tracker backup battery voltage. */
     float device_battery;
-    /** Composite vibration score (0..1000). */
-    uint16_t vibration;
+    /** Peak IMU acceleration delta for the publish window, in m/s^2. */
+    float imu_accel_delta_mps2;
     /** Derived ignition state. */
     bool ignition;
     /** Canonical ignition axis for cloud/runtime contracts. */

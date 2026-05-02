@@ -19,48 +19,17 @@
 
 /**
  * @file command_handler.c
- * @brief Parse command payloads from cloud and expose consumable runtime actions.
+ * @brief Parse cloud commands and expose deferred actions to the FSM task.
  *
- * ## Cloud Command Processing Flow
- *
- * ### 1. Command Reception
- *    - MQTT subscribes to v1/{device_id}/commands
- *    - Incoming JSON payload parsed from command topic
- *    - Lock ensures thread-safe processing
- *
- * ### 2. Command Parsing (command_handler_process)
- *    - Parse JSON using cJSON
- *    - Extract command "action" field
- *    - Validate required parameters per action type
- *    - Enqueue action for FSM consumption
- *
- * ### 3. Supported Commands
- *    - update_config: Apply new runtime config, persist to NVS
- *    - ota_update: Trigger OTA download/install
- *    - request_location: One-shot location request
- *    - enable_tracking: Toggle telemetry publishing
- *    - reset_device: Reboot device
- *
- * ### 4. Action Consumption
- *    - FSM consumes actions via command_handler_consume_action()
- *    - OTA commands have priority over config
- *    - Location requests consumed immediately
- *    - Tracking toggle is event-driven
- *
- * ## Thread Safety
- *    - Uses FreeRTOS mutex for JSON parsing
- *    - Command queue is ISR-safe for enqueue
- *    - FSM only consumes from task context
- *
- * ## Error Handling
- *    - Invalid JSON: log error, drop command
- *    - Unknown action: log warning, drop command
- *    - Parameter validation fail: log error, drop
- *    - NVS write fail: log error, action not persisted
+ * The MQTT callback path only validates payloads and stages immutable action
+ * data. The FSM task later consumes and applies those staged actions so the
+ * runtime control path stays single-threaded.
  */
 
 static const char *TAG = "COMMAND_HANDLER";
+/* Mutex lock timeout for command handler operations. */
 static const TickType_t COMMAND_HANDLER_LOCK_TIMEOUT_TICKS = pdMS_TO_TICKS(250);
+/* Queue send timeout for action enqueue operations. */
 static const TickType_t COMMAND_HANDLER_QUEUE_SEND_TIMEOUT_TICKS = pdMS_TO_TICKS(100);
 
 #define COMMAND_HANDLER_ACTION_QUEUE_LEN 16U
@@ -70,7 +39,9 @@ static const TickType_t COMMAND_HANDLER_QUEUE_SEND_TIMEOUT_TICKS = pdMS_TO_TICKS
 
 /* Mutable runtime config pointer shared with state machine. */
 static config_t *s_config = NULL;
+/* Mutex protecting command handler state. */
 static SemaphoreHandle_t s_lock = NULL;
+/* Queue for pending command actions. */
 static QueueHandle_t s_action_queue = NULL;
 /* Tracking enable flag set by `enable_tracking` command. */
 static bool s_tracking_enabled = true;
@@ -87,6 +58,7 @@ static const char *const COMMAND_NAME_REBOOT = "reboot";
 static const char *const COMMAND_NAME_OTA_UPDATE = "ota_update";
 static const char *const COMMAND_NAME_MANUAL_ROLLBACK = "manual_rollback";
 static const char *const COMMAND_NAME_OTA_ROLLBACK = "ota_rollback";
+static const char *const COMMAND_NAME_ASSIGN_SESSION = "assign_session";
 
 /**
  * @brief Numeric update rule mapping JSON key to bounded `config_t` uint16 field.
@@ -124,6 +96,8 @@ typedef struct {
     ota_command_t ota_command;
     /** Config delta captured without mutating runtime config on the MQTT callback path. */
     command_config_update_t config_update;
+    /** Session assignment payload matched to the current firmware session. */
+    command_session_assignment_t session_assignment;
 } command_action_item_t;
 
 /* Payload associated with the action most recently popped from s_action_queue. */
@@ -131,6 +105,8 @@ static ota_command_t s_consumed_ota_command = {0};
 static bool s_consumed_ota_command_valid = false;
 static command_config_update_t s_consumed_config_update = {0};
 static bool s_consumed_config_update_valid = false;
+static command_session_assignment_t s_consumed_session_assignment = {0};
+static bool s_consumed_session_assignment_valid = false;
 
 static const command_u16_update_rule_t s_update_u16_rules[] = {
     {
@@ -212,12 +188,28 @@ static bool command_handler_take_lock_for(const char *operation) {
     return false;
 }
 
+/**
+ * @brief Release the command handler mutex lock.
+ *
+ * Called after command parsing completes to unblock other command consumers
+ * (FSM task can now acquire lock for processing). Safe to call even if lock
+ * was never acquired or was already given (null check protects against both).
+ */
 static void command_handler_give_lock(void) {
     if (s_lock != NULL) {
         xSemaphoreGive(s_lock);
     }
 }
 
+/**
+ * @brief Validate if string is a valid 64-character hex SHA256 hash.
+ *
+ * Used for validating OTA firmware hashes received from cloud commands.
+ * Checks: exact length 64, all characters are hexadecimal digits [0-9a-fA-F].
+ *
+ * @param value String to validate (null/empty returns false).
+ * @return true if valid hex string of SHA256 length, false otherwise.
+ */
 static bool command_is_hex_sha256(const char *value) {
     if (util_string_empty(value) || strlen(value) != 64) {
         return false;
@@ -231,6 +223,20 @@ static bool command_is_hex_sha256(const char *value) {
     return true;
 }
 
+/**
+ * @brief Parse unsigned 32-bit positive integer from JSON value.
+ *
+ * Supports two JSON value types:
+ * - Number: validates range (0 < value <= UINT32_MAX) and checks for truncation
+ * - String: uses strtoul() for base-10 parsing with overflow/error checking
+ *
+ * Both paths reject non-positive values (0 or negative) to enforce positive-only
+ * constraint for config parameters like intervals and timeouts.
+ *
+ * @param[in] value cJSON value to parse (must be non-null).
+ * @param[out] out_value Parsed uint32 result (must be non-null).
+ * @return true if valid positive uint32 parsed, false on invalid input/range.
+ */
 static bool command_parse_u32_positive(const cJSON *value, uint32_t *out_value) {
     if (value == NULL || out_value == NULL) {
         return false;
@@ -273,6 +279,48 @@ static bool command_parse_u32_positive(const cJSON *value, uint32_t *out_value) 
     return false;
 }
 
+static bool command_parse_u64_positive(const cJSON *value, uint64_t *out_value) {
+    if (value == NULL || out_value == NULL) {
+        return false;
+    }
+
+    if (cJSON_IsNumber(value)) {
+        if (value->valuedouble <= 0.0 || value->valuedouble > (double)UINT64_MAX) {
+            return false;
+        }
+
+        uint64_t parsed = (uint64_t)value->valuedouble;
+        if ((double)parsed != value->valuedouble) {
+            return false;
+        }
+
+        *out_value = parsed;
+        return true;
+    }
+
+    if (cJSON_IsString(value) && !util_string_empty(value->valuestring)) {
+        errno = 0;
+        char *end_ptr = NULL;
+        unsigned long long parsed = strtoull(value->valuestring, &end_ptr, 10);
+        if (end_ptr == value->valuestring || errno != 0) {
+            return false;
+        }
+
+        while (end_ptr != NULL && (*end_ptr == ' ' || *end_ptr == '\t')) {
+            ++end_ptr;
+        }
+
+        if (end_ptr == NULL || *end_ptr != '\0' || parsed == 0ULL) {
+            return false;
+        }
+
+        *out_value = (uint64_t)parsed;
+        return true;
+    }
+
+    return false;
+}
+
 /**
  * @brief Parse optional OTA confirm-timeout and clamp to runtime-safe range.
  *
@@ -296,6 +344,17 @@ static uint32_t command_parse_confirm_timeout_sec(const cJSON *params) {
                                     (int)TRACKER_OTA_CONFIRM_TIMEOUT_MAX_SEC);
 }
 
+/**
+ * @brief Check if field name is in the allowed update_config whitelist.
+ *
+ * Scans both uint16 and bool rule arrays to validate that the incoming
+ * field name is authorized for remote configuration updates. This prevents
+ * arbitrary NVS key manipulation from cloud commands - only whitelisted
+ * fields can be updated remotely.
+ *
+ * @param name Field name string to check (null/empty returns false).
+ * @return true if field is in whitelist, false otherwise.
+ */
 static bool command_is_allowed_update_field(const char *name) {
     if (util_string_empty(name)) {
         return false;
@@ -420,6 +479,8 @@ static const char *command_action_label(command_action_t action) {
             return "ota_update";
         case COMMAND_ACTION_OTA_ROLLBACK:
             return "ota_rollback";
+        case COMMAND_ACTION_ASSIGN_SESSION:
+            return "assign_session";
         default:
             return "none";
     }
@@ -476,8 +537,10 @@ esp_err_t command_handler_init(config_t *config) {
     s_dropped_command_count = 0U;
     s_consumed_ota_command_valid = false;
     s_consumed_config_update_valid = false;
+    s_consumed_session_assignment_valid = false;
     memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
     memset(&s_consumed_config_update, 0, sizeof(s_consumed_config_update));
+    memset(&s_consumed_session_assignment, 0, sizeof(s_consumed_session_assignment));
     xQueueReset(s_action_queue);
 
     command_handler_give_lock();
@@ -575,6 +638,32 @@ static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd
     return true;
 }
 
+static bool command_parse_session_assignment(const cJSON *params,
+                                             command_session_assignment_t *out_assignment) {
+    if (params == NULL || out_assignment == NULL || !cJSON_IsObject(params)) {
+        return false;
+    }
+
+    const cJSON *local_session_key = cJSON_GetObjectItemCaseSensitive(params, "local_session_key");
+    const cJSON *canonical_session_id = cJSON_GetObjectItemCaseSensitive(params, "canonical_session_id");
+    const cJSON *boot_id = cJSON_GetObjectItemCaseSensitive(params, "boot_id");
+
+    uint32_t parsed_local_session_key = 0U;
+    uint64_t parsed_canonical_session_id = 0U;
+    if (!command_parse_u32_positive(local_session_key, &parsed_local_session_key) ||
+        !command_parse_u64_positive(canonical_session_id, &parsed_canonical_session_id) ||
+        !cJSON_IsString(boot_id) ||
+        util_string_empty(boot_id->valuestring)) {
+        return false;
+    }
+
+    memset(out_assignment, 0, sizeof(*out_assignment));
+    out_assignment->local_session_key = parsed_local_session_key;
+    out_assignment->canonical_session_id = parsed_canonical_session_id;
+    util_copy_string(out_assignment->boot_id, sizeof(out_assignment->boot_id), boot_id->valuestring);
+    return true;
+}
+
 /**
  * @brief Parse incoming command JSON and update internal action flags.
  *
@@ -656,6 +745,17 @@ void command_handler_process(const char *command_json) {
         };
         item.ota_command.rollback_pending = true;
         (void)command_handler_enqueue_action(&item);
+    } else if (strcmp(command->valuestring, COMMAND_NAME_ASSIGN_SESSION) == 0) {
+        command_session_assignment_t assignment = {0};
+        if (command_parse_session_assignment(params, &assignment)) {
+            command_action_item_t item = {
+                .action = COMMAND_ACTION_ASSIGN_SESSION,
+                .session_assignment = assignment,
+            };
+            (void)command_handler_enqueue_action(&item);
+        } else {
+            ESP_LOGW(TAG, "Invalid assign_session params");
+        }
     }
 
     cJSON_Delete(root);
@@ -716,8 +816,10 @@ command_action_t command_handler_consume_action(void) {
      */
     s_consumed_ota_command_valid = false;
     s_consumed_config_update_valid = false;
+    s_consumed_session_assignment_valid = false;
     memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
     memset(&s_consumed_config_update, 0, sizeof(s_consumed_config_update));
+    memset(&s_consumed_session_assignment, 0, sizeof(s_consumed_session_assignment));
 
     if (item.action == COMMAND_ACTION_OTA_UPDATE || item.action == COMMAND_ACTION_OTA_ROLLBACK) {
         s_consumed_ota_command = item.ota_command;
@@ -725,6 +827,9 @@ command_action_t command_handler_consume_action(void) {
     } else if (item.action == COMMAND_ACTION_APPLY_CONFIG) {
         s_consumed_config_update = item.config_update;
         s_consumed_config_update_valid = true;
+    } else if (item.action == COMMAND_ACTION_ASSIGN_SESSION) {
+        s_consumed_session_assignment = item.session_assignment;
+        s_consumed_session_assignment_valid = true;
     }
 
     command_handler_give_lock();
@@ -833,6 +938,34 @@ bool command_handler_take_ota_command(ota_command_t *out_cmd) {
     *out_cmd = s_consumed_ota_command;
     s_consumed_ota_command_valid = false;
     memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
+    command_handler_give_lock();
+    return true;
+}
+
+/**
+ * @brief Consume the latest staged canonical session assignment.
+ *
+ * @param out_assignment Output mapping payload from the cloud command.
+ *
+ * @return true if a pending assignment was copied.
+ */
+bool command_handler_take_session_assignment(command_session_assignment_t *out_assignment) {
+    if (out_assignment == NULL) {
+        return false;
+    }
+
+    if (!command_handler_take_lock()) {
+        return false;
+    }
+
+    if (!s_consumed_session_assignment_valid) {
+        command_handler_give_lock();
+        return false;
+    }
+
+    *out_assignment = s_consumed_session_assignment;
+    s_consumed_session_assignment_valid = false;
+    memset(&s_consumed_session_assignment, 0, sizeof(s_consumed_session_assignment));
     command_handler_give_lock();
     return true;
 }

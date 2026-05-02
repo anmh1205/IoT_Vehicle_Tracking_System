@@ -79,7 +79,7 @@ Runtime hiện dùng `imu_lis3dsh.c` và WHO_AM_I của LIS3DSH.
 Nếu board thực tế lại gắn part khác thì:
 - init sẽ fail,
 - interrupt config sai,
-- vibration score sai,
+- IMU accel delta sai đơn vị/ngữ nghĩa,
 - wake behavior sai.
 
 ### 5.2 RTC bus

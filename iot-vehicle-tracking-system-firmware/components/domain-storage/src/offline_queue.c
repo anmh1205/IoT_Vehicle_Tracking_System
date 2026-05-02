@@ -172,6 +172,7 @@ static retry_policy_t offline_queue_replay_retry_policy(void) {
     return policy;
 }
 
+/* Retry policy for SD card mount retry attempts. */
 static const retry_policy_t s_sd_mount_retry_policy = {
     .mode = RETRY_MODE_FIXED,
     .base_delay_ms = (uint32_t)OFFLINE_QUEUE_SD_MOUNT_RETRY_MS,
@@ -324,6 +325,22 @@ static bool offline_queue_is_stale_obd_rawdata_record(const sd_log_record_t *rec
     return channel_not_ready && contains_obd_signal;
 }
 
+/**
+ * @brief Detect legacy firmware records that should not be replayed.
+ *
+ * Older firmware versions could create stale firmware status records with:
+ * - status: "success"
+ * - targetVersion: "unknown"
+ * - currentVersion: "unknown"
+ * - jobId: "replay", "", or "boot"
+ *
+ * These records represent recovery/boot scenarios that are not useful once the
+ * device is healthy - replaying them creates confusing duplicate firmware
+ * history in the backend. This function detects and filters them out.
+ *
+ * @param[in] rec SD log record to inspect (must be non-null, type=FIRMWARE).
+ * @return true if record is stale and should be skipped during replay.
+ */
 static bool offline_queue_is_stale_firmware_record(const sd_log_record_t *rec) {
     if (rec == NULL || rec->type != OFFLINE_RECORD_FIRMWARE) {
         return false;
@@ -349,6 +366,20 @@ static bool offline_queue_is_stale_firmware_record(const sd_log_record_t *rec) {
            strstr(payload, "\"jobId\":\"boot\"") != NULL;
 }
 
+/**
+ * @brief Publish one offline record to cloud via MQTT.
+ *
+ * Dispatches the record to the appropriate MQTT topic based on record type:
+ * - RAWDATA -> rawdata topic (telemetry)
+ * - STATUS -> status topic (device state)
+ * - EVENT -> events topic (alerts/notifications)
+ * - FIRMWARE -> firmware topic (OTA status)
+ *
+ * If MQTT publish fails, the record remains in queue for retry on next cycle.
+ *
+ * @param[in] rec SD log record to publish (must be non-null).
+ * @return esp_err_t ESP_OK on MQTT enqueue, ESP_FAIL on publish error.
+ */
 static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
     offline_record_type_t type = (offline_record_type_t)rec->type;
     const char *topic = offline_queue_topic_from_type(type);

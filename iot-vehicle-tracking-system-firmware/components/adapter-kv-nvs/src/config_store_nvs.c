@@ -18,6 +18,7 @@
 #define TRACKER_LEGACY_DEFAULT_HEARTBEAT_INTERVAL_S 900U
 #define TRACKER_LEGACY_DEFAULT_TRACKING_INTERVAL_S 10U
 
+/* Logging tag for config store NVS module. */
 static const char *TAG = "CONFIG_STORE_NVS";
 
 /** Legacy config v1 structure. */

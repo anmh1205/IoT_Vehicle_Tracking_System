@@ -33,11 +33,11 @@
 - [ ] state_machine.c
 - [ ] state_runtime_context.c
 - [ ] state_publish_pipeline.c
+- [ ] state_machine_core.c
 - [ ] state_obd_runtime.c
 - [ ] state_ota_runtime.c
 - [ ] state_wake_prelude.c
 - [ ] state_sleep_controller.c
-- [ ] state_machine_core.c
 - [ ] tracker-app-bootstrap.c
 
 ### Phase 3: Medium Priority - nvs_store_keys (10%)

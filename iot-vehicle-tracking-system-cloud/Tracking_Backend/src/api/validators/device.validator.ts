@@ -14,6 +14,7 @@ export const createDeviceSchema = z.object({
     .min(3, 'Device name must be at least 3 characters')
     .max(100, 'Device name must not exceed 100 characters'),
   imei: z.string().max(20).optional(),
+  imuAccelDeltaThresholdMps2: z.number().min(0).max(100).optional(),
   vibrationThreshold: z.number().min(0).max(100).optional(),
   requestInterval: z.number().int().min(1).max(3600).optional(),
   config: z.record(z.unknown()).optional(),
@@ -22,6 +23,7 @@ export const createDeviceSchema = z.object({
 export const updateDeviceSchema = z.object({
   deviceName: z.string().min(3).max(100).optional(),
   imei: z.string().max(20).nullable().optional(),
+  imuAccelDeltaThresholdMps2: z.number().min(0).max(100).optional(),
   vibrationThreshold: z.number().min(0).max(100).optional(),
   requestInterval: z.number().int().min(1).max(3600).optional(),
   targetFirmwareVersion: z.string().max(50).nullable().optional(),

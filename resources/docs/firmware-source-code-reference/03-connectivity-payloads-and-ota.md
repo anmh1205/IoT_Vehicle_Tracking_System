@@ -133,7 +133,7 @@ Nguồn: [`main/src/data_formatter.c`](../../../iot-vehicle-tracking-system-firm
   - `timestamp_trusted`
   - `uptime`
 - nested `data`:
-  - vibration
+  - imu_accel_delta_mps2
   - vehicle_battery
   - device_battery
   - latitude/longitude

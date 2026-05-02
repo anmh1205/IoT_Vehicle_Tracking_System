@@ -102,7 +102,7 @@ const formatRangeLabel = (value: string) =>
 
 const STATUS_NAME_LABELS: Record<string, string> = {
   running: 'Đang chạy',
-  online: 'Trực tuyến',
+  online: 'Đỗ xe / còn online',
   stopped: 'Đã dừng',
   offline: 'Ngoại tuyến',
   error: 'Lỗi',
@@ -269,14 +269,14 @@ const estimateRuntimeHours = (device: DashboardDeviceSnapshot) => {
 
   const status = getSnapshotStatus(device);
   const freshnessHours = Math.max(
-    (device.requestInterval * (status === 'running' || status === 'online' ? 8 : 3)) / 3600,
-    status === 'running' || status === 'online' ? 0.2 : 0.05,
+    (device.requestInterval * (status === 'running' ? 8 : 3)) / 3600,
+    status === 'running' ? 0.2 : 0.05,
   );
 
-  if (status === 'running' || status === 'online') {
+  if (status === 'running') {
     return Number(Math.min(freshnessHours, 2).toFixed(1));
   }
-  if (status === 'stopped') {
+  if (status === 'stopped' || status === 'online') {
     return Number(Math.min(freshnessHours, 0.5).toFixed(1));
   }
   return 0;
@@ -292,7 +292,7 @@ const buildOverviewStatsFromDevices = (
   }).length;
   const offlineDevices = devices.filter((device) => getSnapshotStatus(device) === 'disconnected').length;
   const alertsCount = offlineDevices;
-  const sessionsToday = devices.filter((device) => isToday(device.lastSeenAt)).length;
+  const sessionsToday = 0;
   const totalRuntimeToday = Number(
     devices
       .filter((device) => isToday(device.lastSeenAt))
@@ -342,10 +342,20 @@ const buildSyntheticEvents = (devices: DashboardDeviceSnapshot[]): DashboardEven
           serverTimestamp: device.lastSeenAt ?? new Date().toISOString(),
         };
       }
+      if (status === 'online') {
+        return {
+          id: `${device.deviceId}-online`,
+          eventType: 'Thiết bị còn online',
+          message: `${device.deviceName} đã kết thúc phiên lái nhưng vẫn còn heartbeat parking`,
+          severity: 'low',
+          deviceId: device.deviceId,
+          serverTimestamp: device.lastSeenAt ?? new Date().toISOString(),
+        };
+      }
       return {
         id: `${device.deviceId}-running`,
-        eventType: 'Thiết bị đang hoạt động',
-        message: `${device.deviceName} đang gửi dữ liệu bình thường`,
+        eventType: 'Thiết bị đang chạy',
+        message: `${device.deviceName} đang gửi dữ liệu driving bình thường`,
         severity: 'low',
         deviceId: device.deviceId,
         serverTimestamp: device.lastSeenAt ?? new Date().toISOString(),
@@ -385,7 +395,7 @@ const buildActivityFromDevices = (
     const status = getSnapshotStatus(device);
     if (status === 'disconnected') {
       current.offline += 1;
-    } else if (status === 'stopped') {
+    } else if (status === 'stopped' || status === 'online') {
       current.idle += 1;
     } else {
       current.running += 1;
@@ -430,14 +440,17 @@ const buildStatusDistributionFromDevices = (
 ): PieStatusPoint[] => {
   const counts = {
     running: 0,
+    online: 0,
     stopped: 0,
     disconnected: 0,
   };
 
   for (const device of devices) {
     const status = getSnapshotStatus(device);
-    if (status === 'running' || status === 'online') {
+    if (status === 'running') {
       counts.running += 1;
+    } else if (status === 'online') {
+      counts.online += 1;
     } else if (status === 'stopped') {
       counts.stopped += 1;
     } else {
@@ -447,6 +460,7 @@ const buildStatusDistributionFromDevices = (
 
   return [
     { name: 'Đang chạy', value: counts.running, color: '#22c55e' },
+    { name: 'Đỗ xe / còn online', value: counts.online, color: '#0ea5e9' },
     { name: 'Đã dừng', value: counts.stopped, color: '#64748b' },
     { name: 'Ngoại tuyến', value: counts.disconnected, color: '#ef4444' },
   ];
@@ -574,7 +588,7 @@ export const useDeviceStatusDistribution = () => {
       const stopped = Math.max(0, Number(stats.totalDevices ?? 0) - active - offline);
 
       return [
-        { name: 'Đang chạy', value: active, color: '#22c55e' },
+        { name: 'Trực tuyến', value: active, color: '#22c55e' },
         { name: 'Đã dừng', value: stopped, color: '#64748b' },
         { name: 'Ngoại tuyến', value: offline, color: '#ef4444' },
       ];

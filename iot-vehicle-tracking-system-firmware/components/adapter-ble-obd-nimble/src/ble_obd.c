@@ -112,6 +112,7 @@ static ble_mgr_svc_def_t s_obd_service = {
 
 /* Optional preferred BLE address configured from persisted config. */
 static ble_addr_t s_preferred_addr;
+/* Flag indicating preferred address has been set. */
 static bool s_has_preferred_addr = false;
 
 static void ble_obd_notify_cb(const uint8_t *data, size_t len, uint16_t attr_handle, void *usr_ctx);
@@ -164,6 +165,21 @@ static uint16_t ble_obd_rx_handle(void) {
 
 /**
  * @brief Copy advertising name into a null-terminated scratch buffer.
+ *
+ * Extracts the device name from BLE advertising fields (if present) and copies
+ * it to the caller's buffer with null termination. Handles edge cases: null
+ * input, zero-length name, and buffer overflow protection.
+ *
+ * Workflow:
+ * 1. Validate output buffer exists and has space
+ * 2. Check advertising fields contain name data
+ * 3. Calculate safe copy length (name_len vs buffer_capacity-1)
+ * 4. memcpy name bytes and null-terminate
+ *
+ * @param[in] adv_fields BLE advertising fields containing optional name.
+ * @param[out] buf Destination buffer for copied name (must be non-null).
+ * @param buf_len Size of destination buffer in bytes.
+ * @return size_t Number of characters copied (excluding null), 0 on failure.
  */
 static size_t ble_obd_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, char *buf, size_t buf_len) {
     if (buf == NULL || buf_len == 0) {
@@ -183,6 +199,20 @@ static size_t ble_obd_copy_adv_name(const struct ble_hs_adv_fields *adv_fields, 
 
 /**
  * @brief Case-insensitive substring check used for OBD adapter names.
+ *
+ * Performs case-insensitive search for keyword substring within value string.
+ * Used to identify common OBD adapter naming patterns (e.g., "OBD", "Vgate",
+ * "ScanTool") without exact matching requirements.
+ *
+ * Workflow:
+ * 1. Validate both strings are non-empty
+ * 2. Early-exit if keyword longer than value
+ * 3. Slide window across value, compare each position case-insensitively
+ * 4. Return true on first match, false if no match found
+ *
+ * @param[in] value String to search within (e.g., device advertising name).
+ * @param[in] keyword Substring to find (e.g., "OBD").
+ * @return true if keyword found (case-insensitive), false otherwise.
  */
 static bool ble_obd_name_contains_keyword(const char *value, const char *keyword) {
     if (util_string_empty(value) || util_string_empty(keyword)) {

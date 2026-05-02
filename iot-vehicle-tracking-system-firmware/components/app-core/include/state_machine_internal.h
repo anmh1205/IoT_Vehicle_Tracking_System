@@ -40,3 +40,7 @@ uint32_t state_machine_next_seq_no(void);
 void state_machine_fill_message_id(char *out, size_t out_size);
 /** @brief Refresh boot/session metadata derived from RTC-retained state. */
 void state_machine_init_boot_metadata(void);
+/** @brief Apply cloud-assigned canonical session mapping to the active local session. */
+void state_machine_apply_session_assignment(uint32_t local_session_key,
+                                           uint64_t canonical_session_id,
+                                           const char *session_boot_id);

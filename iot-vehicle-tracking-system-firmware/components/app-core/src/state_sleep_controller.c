@@ -14,7 +14,7 @@
 
 #include "ble_init.h"
 #include "ble_obd.h"
-#include "imu_lis3dh.h"
+#include "imu_lis3dsh.h"
 #include "modem_gnss.h"
 #include "modem_lte.h"
 #include "mqtt_client.h"
@@ -58,7 +58,7 @@
  *
  * ### 4. Wake Sources
  *    - RTC timer: Periodic heartbeat
- *    - IMU motion: LIS3DH interrupt
+ *    - IMU motion: LIS3DSH interrupt
  *    - Ignition on: OBD/BLE detection
  *
  * ## Sleep Blockers
@@ -81,14 +81,14 @@ static bool state_machine_should_use_light_sleep_motion_wake(void) {
         return false;
     }
 
-    if (esp_sleep_is_valid_wakeup_gpio(PIN_LIS3DH_INT)) {
+    if (esp_sleep_is_valid_wakeup_gpio(PIN_LIS3DSH_INT)) {
         return true;
     }
 
     if (!s_imu_invalid_wakeup_gpio_logged) {
         ESP_LOGW(TAG,
                  "IMU wake pin gpio=%d is not RTC-capable; parked motion wake will use light sleep GPIO wake",
-                 (int)PIN_LIS3DH_INT);
+                 (int)PIN_LIS3DSH_INT);
         s_imu_invalid_wakeup_gpio_logged = true;
     }
     return true;
@@ -98,7 +98,7 @@ static bool state_machine_can_arm_imu_deep_sleep_wakeup(void) {
     if (!state_machine_imu_runtime_enabled() || !s_imu_available) {
         return false;
     }
-    return esp_sleep_is_valid_wakeup_gpio(PIN_LIS3DH_INT);
+    return esp_sleep_is_valid_wakeup_gpio(PIN_LIS3DSH_INT);
 }
 
 static void state_machine_clear_gnss_cache(void) {
@@ -222,7 +222,7 @@ void state_machine_shutdown_for_sleep(void) {
 void state_machine_prepare_deep_sleep_wakeup(void) {
     (void)esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
     if (state_machine_can_arm_imu_deep_sleep_wakeup()) {
-        esp_err_t wake_err = esp_sleep_enable_ext0_wakeup(PIN_LIS3DH_INT, 1);
+        esp_err_t wake_err = esp_sleep_enable_ext0_wakeup(PIN_LIS3DSH_INT, 1);
         if (wake_err != ESP_OK) {
             ESP_LOGW(TAG, "IMU ext0 wake arm failed: %s (timer-only fallback)", esp_err_to_name(wake_err));
         }
@@ -246,9 +246,9 @@ app_state_t state_machine_enter_light_sleep(void) {
         return APP_STATE_ALARM;
     }
 
-    esp_err_t gpio_wake_err = gpio_wakeup_enable(PIN_LIS3DH_INT, GPIO_INTR_HIGH_LEVEL);
+    esp_err_t gpio_wake_err = gpio_wakeup_enable(PIN_LIS3DSH_INT, GPIO_INTR_HIGH_LEVEL);
     if (gpio_wake_err != ESP_OK) {
-        ESP_LOGW(TAG, "GPIO wake arm failed gpio=%d err=%s", (int)PIN_LIS3DH_INT, esp_err_to_name(gpio_wake_err));
+        ESP_LOGW(TAG, "GPIO wake arm failed gpio=%d err=%s", (int)PIN_LIS3DSH_INT, esp_err_to_name(gpio_wake_err));
         return APP_STATE_CHECK_IGN;
     }
 
@@ -265,7 +265,7 @@ app_state_t state_machine_enter_light_sleep(void) {
         return APP_STATE_CHECK_IGN;
     }
 
-    ESP_LOGI(TAG, "Entering light sleep interval_s=%u imu_gpio=%d", (unsigned)wake_interval_s, (int)PIN_LIS3DH_INT);
+    ESP_LOGI(TAG, "Entering light sleep interval_s=%u imu_gpio=%d", (unsigned)wake_interval_s, (int)PIN_LIS3DSH_INT);
     esp_err_t sleep_err = esp_light_sleep_start();
     if (sleep_err != ESP_OK) {
         ESP_LOGW(TAG, "esp_light_sleep_start failed: %s", esp_err_to_name(sleep_err));

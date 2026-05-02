@@ -12,7 +12,7 @@
 
 #include "adc_reader.h"
 #include "command_handler.h"
-#include "imu_lis3dh.h"
+#include "imu_lis3dsh.h"
 #include "modem_lte.h"
 #include "mqtt_client.h"
 #include "nvs_config.h"
@@ -66,7 +66,7 @@
  *
  * ## Health Monitoring
  *    - Periodic health snapshot logged every 60s
- *    - Tracks MQTT 连接状态, OBD 连接状态, GNSS fix state
+ *    - Tracks MQTT connection state, OBD connection state, and GNSS fix state
  *    - Used for remote diagnostics
  */
 
@@ -81,7 +81,9 @@ RTC_DATA_ATTR rtc_context_t g_rtc_context = {
 };
 
 static const char *TAG = STATE_MACHINE_TAG;
+/* Timestamp when current state was entered (for dwell time calculation). */
 static uint64_t s_state_entered_ms = 0;
+/* Timestamp of last health snapshot log. */
 static uint64_t s_last_health_snapshot_log_ms = 0;
 
 #ifndef CONFIG_APP_PROJECT_VER
@@ -167,6 +169,17 @@ bool state_machine_has_recent_obd_sample(uint64_t now_ms, uint32_t max_age_ms) {
     return (now_ms - s_last_obd_sample_ms) <= (uint64_t)max_age_ms;
 }
 
+/**
+ * @brief Resolve current motion state from available sensor inputs.
+ *
+ * Resolution priority order:
+ * 1. GNSS speed: If valid fix exists, use speed > 3 km/h as MOVING threshold
+ * 2. OBD speed: If BLE OBD is connected and sample is recent (<30s), use speed > 3 km/h
+ * 3. Fallback: If no ignition signal, assume STATIONARY; otherwise return UNKNOWN
+ *
+ * @param now_ms Current timestamp in milliseconds (from esp_log_timestamp()).
+ * @return tracker_motion_state_t: MOVING, STATIONARY, or UNKNOWN based on sensor fusion.
+ */
 static tracker_motion_state_t state_machine_resolve_motion_state(uint64_t now_ms) {
     if (s_telemetry.gnss.fix_valid) {
         return s_telemetry.gnss.speed_kmh > 3.0f ? TRACKER_MOTION_STATE_MOVING
@@ -180,6 +193,23 @@ static tracker_motion_state_t state_machine_resolve_motion_state(uint64_t now_ms
     return s_telemetry.ignition ? TRACKER_MOTION_STATE_UNKNOWN : TRACKER_MOTION_STATE_STATIONARY;
 }
 
+/**
+ * @brief Resolve vehicle state from ignition and motion state combination.
+ *
+ * State resolution logic maps ignition+motion pairs to vehicle states:
+ * - ON + MOVING -> MOVING_ON (driving with ignition on)
+ * - ON + STATIONARY -> IDLING_ON (ignition on but not moving)
+ * - OFF + MOVING -> ROLLING_IGN_OFF (coasting with ignition off - rare)
+ * - OFF + STATIONARY -> PARKED_OFF (properly parked)
+ * - UNKNOWN motion + any ignition -> UNKNOWN (insufficient data)
+ *
+ * This 2D state resolution replaces simple ignition-only state machine,
+ * enabling differentiation between idling and parked states for telemetry.
+ *
+ * @param ignition_state Current ignition state from FSM sensor inputs.
+ * @param motion_state Current motion state (MOVING/STATIONARY/UNKNOWN).
+ * @return tracker_vehicle_state_t Resolved vehicle state enum.
+ */
 static tracker_vehicle_state_t state_machine_resolve_vehicle_state(tracker_ignition_state_t ignition_state,
                                                                    tracker_motion_state_t motion_state) {
     if (ignition_state == TRACKER_IGNITION_STATE_ON && motion_state == TRACKER_MOTION_STATE_MOVING) {
@@ -203,6 +233,24 @@ static tracker_vehicle_state_t state_machine_resolve_vehicle_state(tracker_ignit
     return TRACKER_VEHICLE_STATE_UNKNOWN;
 }
 
+/**
+ * @brief Map FSM application state to device-level state for cloud reporting.
+ *
+ * This mapping provides a simplified device state for backend/UI consumption,
+ * abstracting away the internal FSM states into meaningful device conditions:
+ * - INIT -> BOOTING (device is starting up)
+ * - CHECK_IGN -> WAKING (sensors initializing, checking ignition)
+ * - DRIVING/HEARTBEAT -> ACTIVE (normal tracking operation)
+ * - PARKED -> SLEEP_PREPARE (vehicle parked, preparing for sleep)
+ * - ALARM -> ALARM (triggered by motion/ignition event)
+ * - SLEEP -> SLEEP (deep sleep low-power mode)
+ *
+ * The cloud device state differs from internal FSM state - it's optimized
+ * for UI display and backend analytics rather than internal control flow.
+ *
+ * @param app_state Current FSM application state (APP_STATE_*).
+ * @return tracker_device_state_t Mapped device state for cloud reporting.
+ */
 static tracker_device_state_t state_machine_resolve_device_state(app_state_t app_state) {
     switch (app_state) {
         case APP_STATE_INIT:
@@ -224,24 +272,33 @@ static tracker_device_state_t state_machine_resolve_device_state(app_state_t app
 }
 
 void state_machine_sync_runtime_axes(app_state_t app_state) {
+    tracker_ignition_state_t ignition_state = TRACKER_IGNITION_STATE_UNKNOWN;
+    if (session_mgr_has_stable_ignition()) {
+        ignition_state = session_mgr_stable_ignition() ? TRACKER_IGNITION_STATE_ON : TRACKER_IGNITION_STATE_OFF;
+    }
+
     uint64_t now_ms = util_uptime_ms();
-    s_telemetry.ignition_state = s_telemetry.ignition ? TRACKER_IGNITION_STATE_ON
-                                                      : TRACKER_IGNITION_STATE_OFF;
+    s_telemetry.ignition_state = ignition_state;
     s_telemetry.motion_state = state_machine_resolve_motion_state(now_ms);
-    s_telemetry.vehicle_state =
-        state_machine_resolve_vehicle_state(s_telemetry.ignition_state, s_telemetry.motion_state);
+    s_telemetry.vehicle_state = state_machine_resolve_vehicle_state(s_telemetry.ignition_state,
+                                                                    s_telemetry.motion_state);
     s_telemetry.device_state = state_machine_resolve_device_state(app_state);
     s_telemetry.sleep_mode = state_machine_resolve_sleep_mode(app_state);
 }
 
 bool state_machine_network_ready_for_heartbeat_publish(void) {
-#if TRACKER_MQTT_RUNTIME_DISABLED
-    return modem_lte_is_initialized() || s_network_retry.attempts > 0;
-#else
-    return tracker_mqtt_is_connected() || s_network_retry.attempts > 0;
-#endif
+    return tracker_mqtt_is_connected();
 }
 
+/**
+ * @brief Convert app_state enum to human-readable string for logging.
+ *
+ * Used throughout FSM to produce consistent, readable state names in logs.
+ * Ensures debug output is uniform regardless of which state transition occurs.
+ *
+ * @param state Application state enum value (APP_STATE_*).
+ * @return const char* String representation of state name.
+ */
 static const char *state_machine_app_state_name(app_state_t state) {
     switch (state) {
         case APP_STATE_INIT:
@@ -278,6 +335,9 @@ static const char *state_machine_transition_reason(app_state_t from, app_state_t
     }
     if (from == APP_STATE_PARKED && to == APP_STATE_HEARTBEAT) {
         return "parked_heartbeat_start";
+    }
+    if (from == APP_STATE_HEARTBEAT && to == APP_STATE_DRIVING) {
+        return "ignition_stable_on_during_heartbeat";
     }
     if (from == APP_STATE_ALARM && to == APP_STATE_DRIVING) {
         return "ignition_on_during_alarm";
@@ -433,11 +493,171 @@ void state_machine_fill_message_id(char *out, size_t out_size) {
 
 void state_machine_init_boot_metadata(void) {
     util_generate_boot_id(s_boot_id, sizeof(s_boot_id), g_rtc_context.boot_count);
+    util_copy_string(s_session_boot_id, sizeof(s_session_boot_id), s_boot_id);
     s_metadata_seq_no = 0;
     ESP_LOGI(TAG,
              "metadata boot initialized boot_id=%s boot_count=%lu",
              s_boot_id,
              (unsigned long)g_rtc_context.boot_count);
+}
+
+static void state_machine_reset_session_runtime(void) {
+    s_session_id = 0;
+    s_canonical_session_id = 0;
+    util_copy_string(s_session_boot_id, sizeof(s_session_boot_id), s_boot_id);
+    s_session_restore_pending = false;
+}
+
+/**
+ * @brief Persist the active session identity for reboot-in-place recovery.
+ */
+static void state_machine_persist_active_session(void) {
+    session_persist_context_t context = {
+        .active = true,
+        .local_session_key = s_session_id,
+        .canonical_session_id = s_canonical_session_id,
+    };
+    util_copy_string(context.boot_id, sizeof(context.boot_id), s_session_boot_id);
+    esp_err_t err = nvs_config_save_session_context(&context);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG,
+                 "persist active session failed session=%lu canonical=%llu err=%s",
+                 (unsigned long)s_session_id,
+                 (unsigned long long)s_canonical_session_id,
+                 esp_err_to_name(err));
+    }
+}
+
+static void state_machine_clear_persisted_session(void) {
+    esp_err_t err = nvs_config_clear_session_context();
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "clear persisted session failed err=%s", esp_err_to_name(err));
+    }
+}
+
+/**
+ * @brief Restore a persisted session candidate from NVS.
+ *
+ * The candidate remains provisional until the current ignition sample confirms
+ * the vehicle is still ON. Otherwise the caller drops the stale context.
+ */
+static void state_machine_restore_session_context_from_nvs(void) {
+    session_persist_context_t context = {0};
+    bool found = false;
+    esp_err_t err = nvs_config_load_session_context(&context, &found);
+    if (err != ESP_OK || !found || !context.active || context.local_session_key == 0U) {
+        if (err != ESP_OK) {
+            ESP_LOGW(TAG, "load session context failed err=%s", esp_err_to_name(err));
+        }
+        return;
+    }
+
+    s_session_id = context.local_session_key;
+    s_canonical_session_id = context.canonical_session_id;
+    util_copy_string(s_session_boot_id, sizeof(s_session_boot_id), context.boot_id);
+    if (util_string_empty(s_session_boot_id)) {
+        util_copy_string(s_session_boot_id, sizeof(s_session_boot_id), s_boot_id);
+    }
+    s_session_restore_pending = true;
+    ESP_LOGI(TAG,
+             "restored session candidate local=%lu canonical=%llu boot_id=%s",
+             (unsigned long)s_session_id,
+             (unsigned long long)s_canonical_session_id,
+             s_session_boot_id);
+}
+
+static void state_machine_start_new_session(void) {
+    session_mgr_mark_started();
+    s_session_id = session_mgr_current_session_id();
+    s_canonical_session_id = 0;
+    util_copy_string(s_session_boot_id, sizeof(s_session_boot_id), s_boot_id);
+    s_session_restore_pending = false;
+    offline_queue_set_session(s_session_id);
+    state_machine_persist_active_session();
+}
+
+static void state_machine_resume_active_session(void) {
+    if (s_session_id == 0U) {
+        return;
+    }
+
+    session_mgr_restore_active(s_session_id);
+    offline_queue_set_session(s_session_id);
+    s_session_restore_pending = false;
+    ESP_LOGI(TAG,
+             "resumed active session local=%lu canonical=%llu boot_id=%s",
+             (unsigned long)s_session_id,
+             (unsigned long long)s_canonical_session_id,
+             s_session_boot_id);
+}
+
+static void state_machine_drop_stale_restored_session(void) {
+    if (s_session_id == 0U && !s_session_restore_pending) {
+        return;
+    }
+
+    ESP_LOGI(TAG,
+             "drop stale restored session local=%lu canonical=%llu boot_id=%s",
+             (unsigned long)s_session_id,
+             (unsigned long long)s_canonical_session_id,
+             s_session_boot_id);
+    offline_queue_set_session(0);
+    state_machine_clear_persisted_session();
+    state_machine_reset_session_runtime();
+}
+
+/**
+ * @brief Emit the final session boundary, then tear down runtime session state.
+ *
+ * The final `stopped` status must be published before queue/session metadata is
+ * cleared so the closing boundary still carries the active identifiers.
+ */
+static void state_machine_commit_session_end(void) {
+    state_machine_publish_status("stopped", "ended");
+    offline_queue_stop_session(true);
+    offline_queue_set_session(0);
+    session_mgr_mark_stopped();
+    state_machine_clear_persisted_session();
+    state_machine_reset_session_runtime();
+    s_publish_status = TRACKER_PUBLISH_STATUS_STOPPED;
+}
+
+/**
+ * @brief Bind the active local session to the canonical cloud session ID.
+ *
+ * The assignment is accepted only when local session key and boot ID still
+ * match the active runtime session. That prevents stale downlink commands from
+ * overwriting a newer session after reconnect or reboot.
+ */
+void state_machine_apply_session_assignment(uint32_t local_session_key,
+                                           uint64_t canonical_session_id,
+                                           const char *session_boot_id) {
+    if (local_session_key == 0U || canonical_session_id == 0U || util_string_empty(session_boot_id)) {
+        return;
+    }
+
+    if (s_session_id != local_session_key || strcmp(s_session_boot_id, session_boot_id) != 0) {
+        ESP_LOGW(TAG,
+                 "ignore session assignment local=%lu canonical=%llu boot_id=%s current_local=%lu current_boot=%s",
+                 (unsigned long)local_session_key,
+                 (unsigned long long)canonical_session_id,
+                 session_boot_id,
+                 (unsigned long)s_session_id,
+                 s_session_boot_id);
+        return;
+    }
+
+    if (s_canonical_session_id == canonical_session_id) {
+        return;
+    }
+
+    s_canonical_session_id = canonical_session_id;
+    state_machine_persist_active_session();
+    ESP_LOGI(TAG,
+             "session canonical assigned local=%lu canonical=%llu boot_id=%s",
+             (unsigned long)s_session_id,
+             (unsigned long long)s_canonical_session_id,
+             s_session_boot_id);
 }
 
 static app_state_t state_machine_handle_check_ign_state(void) {
@@ -453,22 +673,29 @@ static app_state_t state_machine_handle_check_ign_state(void) {
         return APP_STATE_CHECK_IGN;
     }
 
-    g_rtc_context.ign_last_known = session_mgr_stable_ignition();
-    return session_mgr_stable_ignition() ? APP_STATE_DRIVING : APP_STATE_PARKED;
+    bool ignition_on = session_mgr_stable_ignition();
+    if (s_session_restore_pending) {
+        if (ignition_on) {
+            state_machine_resume_active_session();
+        }
+    }
+
+    g_rtc_context.ign_last_known = ignition_on;
+    return ignition_on ? APP_STATE_DRIVING : APP_STATE_PARKED;
 }
 
 static app_state_t state_machine_handle_driving_state(void) {
     s_runtime_state_hint = APP_STATE_DRIVING;
     state_machine_run_wake_prelude(true);
     session_mgr_on_ignition_sample(s_telemetry.ignition, util_uptime_ms());
+    bool started_session = false;
     if (session_mgr_should_start()) {
-        session_mgr_mark_started();
-        s_session_id = session_mgr_current_session_id();
-        offline_queue_set_session(s_session_id);
+        state_machine_start_new_session();
+        started_session = true;
     }
 
     if (s_publish_status != TRACKER_PUBLISH_STATUS_RUNNING) {
-        state_machine_publish_status("running");
+        state_machine_publish_status("running", started_session ? "started" : "none");
         s_publish_status = TRACKER_PUBLISH_STATUS_RUNNING;
     }
 
@@ -488,16 +715,14 @@ static app_state_t state_machine_handle_driving_state(void) {
     bool ignition_active = debounced_ignition_on && command_handler_is_tracking_enabled();
     if (!ignition_active && s_ignition_off_started_ms == 0) {
         s_ignition_off_started_ms = now_ms;
-        state_machine_publish_status("stopped");
-        s_publish_status = TRACKER_PUBLISH_STATUS_STOPPED;
+        ESP_LOGI(TAG, "ignition off pending hold_ms=%llu", (unsigned long long)state_machine_ignition_off_hold_ms());
     }
     if (ignition_active) {
         s_ignition_off_started_ms = 0;
     }
     if (s_ignition_off_started_ms != 0 &&
         (now_ms - s_ignition_off_started_ms) >= state_machine_ignition_off_hold_ms()) {
-        offline_queue_stop_session(true);
-        session_mgr_mark_stopped();
+        state_machine_commit_session_end();
         s_ignition_off_started_ms = 0;
         return APP_STATE_PARKED;
     }
@@ -546,6 +771,18 @@ static app_state_t state_machine_handle_heartbeat_state(void) {
 
     state_machine_run_wake_prelude(false);
     uint64_t now_ms = util_uptime_ms();
+    session_mgr_on_ignition_sample(s_telemetry.ignition, now_ms);
+    if (session_mgr_has_stable_ignition() &&
+        session_mgr_stable_ignition() &&
+        command_handler_is_tracking_enabled()) {
+        if (s_session_restore_pending) {
+            state_machine_resume_active_session();
+        }
+        s_heartbeat_started_ms = 0;
+        s_heartbeat_raw_published = false;
+        return APP_STATE_DRIVING;
+    }
+
     bool heartbeat_timeout = (now_ms - s_heartbeat_started_ms) >= TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS;
     bool obd_connected = s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx);
     bool gnss_publish_ready = !s_gnss_started || s_telemetry.gnss.fix_valid || heartbeat_timeout;
@@ -574,11 +811,14 @@ static app_state_t state_machine_handle_heartbeat_state(void) {
             }
         }
 
-        state_machine_publish_status("heartbeat");
+        state_machine_publish_status("heartbeat", "none");
         s_heartbeat_raw_published = true;
     }
 
     if (s_heartbeat_raw_published || heartbeat_timeout) {
+        if (s_session_restore_pending) {
+            state_machine_drop_stale_restored_session();
+        }
         s_heartbeat_started_ms = 0;
         s_heartbeat_raw_published = false;
         return APP_STATE_SLEEP;
@@ -673,6 +913,7 @@ esp_err_t state_machine_core_init(const config_t *config) {
     ESP_RETURN_ON_FALSE(offline_queue_init() == ESP_OK, ESP_FAIL, TAG, "offline_queue_init failed");
     telemetry_counters_reset();
     session_mgr_init();
+    state_machine_restore_session_context_from_nvs();
     ESP_RETURN_ON_FALSE(command_handler_init(&s_config) == ESP_OK, ESP_FAIL, TAG, "command_handler_init failed");
     tracker_mqtt_set_command_callback(state_machine_command_callback);
 
@@ -709,10 +950,6 @@ app_state_t state_machine_core_run(app_state_t current_state) {
             break;
         case APP_STATE_PARKED:
             s_runtime_state_hint = APP_STATE_PARKED;
-            if (s_publish_status != TRACKER_PUBLISH_STATUS_STOPPED) {
-                state_machine_publish_status("stopped");
-                s_publish_status = TRACKER_PUBLISH_STATUS_STOPPED;
-            }
             if (s_heartbeat_started_ms == 0) {
                 s_heartbeat_started_ms = util_uptime_ms();
                 s_heartbeat_raw_published = false;

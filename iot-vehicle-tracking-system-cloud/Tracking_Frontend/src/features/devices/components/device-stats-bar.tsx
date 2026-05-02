@@ -18,7 +18,7 @@ export const DeviceStatsBar = ({ devices }: { devices: Device[] }) => {
         value={online}
         icon={<Radio className="h-4 w-4 text-emerald-600" />}
         trend={{
-          value: `${total > 0 ? ((online / total) * 100).toFixed(1) : '0.0'}% hoạt động`,
+          value: `${total > 0 ? ((online / total) * 100).toFixed(1) : '0.0'}% trực tuyến`,
           positive: online >= stopped,
         }}
       />

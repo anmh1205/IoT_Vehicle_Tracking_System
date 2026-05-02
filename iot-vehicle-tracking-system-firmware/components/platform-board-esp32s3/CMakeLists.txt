@@ -1,7 +1,7 @@
 idf_component_register(
     SRCS
         "src/adc_reader.c"
-        "src/imu_lis3dh.c"
+        "src/imu_lis3dsh.c"
         "src/power_mgr.c"
     INCLUDE_DIRS
         "include"

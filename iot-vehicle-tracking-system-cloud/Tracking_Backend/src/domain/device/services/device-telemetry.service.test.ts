@@ -39,14 +39,14 @@ describe('device-telemetry.service', () => {
     expect(result.metric).toBe('rpm');
   });
 
-  it('falls back to vibration for unsupported metrics', async () => {
+  it('falls back to IMU acceleration delta for unsupported metrics', async () => {
     vi.mocked(findMany).mockResolvedValue([]);
 
     const result = await getTelemetry('TRACKER_001', { metric: 'unsupported_metric' });
     const [sql] = vi.mocked(findMany).mock.calls[0] ?? [];
 
-    expect(sql).toContain("context->>'vibration'");
-    expect(result.metric).toBe('vibration');
+    expect(sql).toContain("context->>'imu_accel_delta_mps2'");
+    expect(result.metric).toBe('imuAccelDeltaMps2');
   });
 
   it('skips null telemetry values instead of coercing them to zero', async () => {
