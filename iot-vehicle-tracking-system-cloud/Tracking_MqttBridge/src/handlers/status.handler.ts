@@ -64,12 +64,17 @@ export const handleStatus = async (
   const previousState = getStatus(payload.device_id);
   const previousStatus = previousState?.status ?? 'offline';
   const reportedStatus = payload.status;
-  const normalizedStatus = reportedStatus === 'heartbeat' ? 'stopped' : reportedStatus;
   const runtimeState = normalizeRuntimeState({
     state: payload.state,
     legacyStatus: payload.status,
     previous: previousState?.runtimeState,
   });
+  const normalizedStatus =
+    reportedStatus === 'running' ||
+    runtimeState.ignition_state === 'ON' ||
+    runtimeState.motion_state === 'MOVING'
+      ? 'running'
+      : (reportedStatus === 'heartbeat' ? 'stopped' : reportedStatus);
   const stateUpdatedAt = new Date(receivedAtMs).toISOString();
   const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
     payload.timestamp,

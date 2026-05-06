@@ -2,7 +2,6 @@ import { rawDataSchema } from '../validators/payload.validator';
 import type { RawDataPayload, RawDiagnostics } from '../types/payload.types';
 import {
   ensureDeviceSession,
-  findActiveDeviceSessionId,
   syncActiveMaintenanceAlertsByMessage,
   syncActiveMaintenanceAlertsByTitle,
   syncActiveObdDtcAlerts,
@@ -43,12 +42,33 @@ const OBD_RULE_MAINTENANCE_TITLES = [
 ] as const;
 const OBD_CONNECT_WARNING_TITLE = 'device_warning';
 const OBD_CONNECT_WARNING_MESSAGE = 'obd_connect_failed';
+const SESSION_FALLBACK_SPEED_THRESHOLD_KPH = 3;
 
 const ruleCooldownUntil = new Map<string, number>();
 const idleAnomalyStartedAt = new Map<string, number>();
 
 const hasActiveRuntimeStatus = (status: string | undefined): boolean =>
   status === 'running' || status === 'online';
+
+const isLikelyActiveSessionTelemetry = (params: {
+  ignition?: boolean;
+  speed?: number;
+  runtimeIgnitionState: 'ON' | 'OFF' | 'UNKNOWN';
+  runtimeMotionState: 'MOVING' | 'STATIONARY' | 'UNKNOWN';
+}): boolean => {
+  if (params.ignition === true || params.runtimeIgnitionState === 'ON') {
+    return true;
+  }
+
+  if (
+    params.runtimeMotionState === 'MOVING' ||
+    (params.speed !== undefined && params.speed > SESSION_FALLBACK_SPEED_THRESHOLD_KPH)
+  ) {
+    return true;
+  }
+
+  return false;
+};
 
 const buildSanitizedRawPayload = (payload: RawDataPayload): Omit<RawDataPayload, 'auth_token'> => {
   const { auth_token: _authToken, ...safePayload } = payload;
@@ -775,15 +795,21 @@ export const handleRawData = async (
   });
   const stateUpdatedAt = new Date(receivedAtMs).toISOString();
 
-  // 3. Only bind telemetry to a session when the device is already in an active runtime state.
-  const canAttachTelemetryToSession =
-    hasActiveRuntimeStatus(previousStatus) || hasActiveRuntimeStatus(device.current_status);
-  let sessionId = canAttachTelemetryToSession
-    ? await findActiveDeviceSessionId(payload.device_id)
-    : null;
+  // 3. Create or continue a session when telemetry shows an active drive, even if
+  // the latest cached device status has already fallen back to stopped/offline.
+  const shouldEnsureSession =
+    hasActiveRuntimeStatus(previousStatus) ||
+    hasActiveRuntimeStatus(device.current_status) ||
+    isLikelyActiveSessionTelemetry({
+      ignition: payload.data.ignition,
+      speed: effectiveSpeed,
+      runtimeIgnitionState: runtimeState.ignition_state,
+      runtimeMotionState: runtimeState.motion_state,
+    });
+  let sessionId: number | null = null;
   let isNewSession = false;
 
-  if (canAttachTelemetryToSession) {
+  if (shouldEnsureSession) {
     const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs);
     sessionId = ensuredSession.sessionId;
     isNewSession = ensuredSession.isNew;
