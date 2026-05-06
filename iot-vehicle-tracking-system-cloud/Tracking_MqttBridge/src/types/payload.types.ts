@@ -85,6 +85,7 @@ export interface RawDataPayload {
   timestamp: number;
   uptime?: number;
   data: {
+    imu_accel_delta_mps2?: number;
     vibration?: number;
     vehicle_battery?: number;
     device_battery?: number;

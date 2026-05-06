@@ -51,6 +51,7 @@ const rawDataPayloadBaseSchema = z.object({
   timestamp: z.number().positive(),
   uptime: z.number().nonnegative().optional(),
   data: z.object({
+    imu_accel_delta_mps2: z.number().optional(),
     vibration: z.number().optional(),
     vehicle_battery: z.number().optional(),
     device_battery: z.number().optional(),

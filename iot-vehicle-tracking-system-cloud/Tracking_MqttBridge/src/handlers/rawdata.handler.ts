@@ -182,6 +182,16 @@ const toFiniteNumber = (value: unknown): number | undefined => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
+const resolveVibration = (
+  data: RawDataPayload['data'] | undefined,
+): number | undefined => {
+  if (!data) {
+    return undefined;
+  }
+
+  return toFiniteNumber(data.imu_accel_delta_mps2 ?? data.vibration);
+};
+
 const toBoolean = (value: unknown): boolean | undefined => {
   if (typeof value === 'boolean') {
     return value;
@@ -786,6 +796,7 @@ export const handleRawData = async (
 
   const previousState = getStatus(payload.device_id);
   const previousStatus = previousState?.status;
+  const vibration = resolveVibration(payload.data);
   const runtimeState = normalizeRuntimeState({
     state: payload.state,
     legacyStatus: previousStatus ?? device.current_status,
@@ -830,7 +841,7 @@ export const handleRawData = async (
 
   // 4. Write to VictoriaMetrics
   const metricsData: Record<string, number | undefined> = {
-    vibration: payload.data.vibration,
+    vibration,
     vehicle_battery: payload.data.vehicle_battery,
     device_battery: payload.data.device_battery,
     latitude: effectiveLatitude,
@@ -936,7 +947,7 @@ export const handleRawData = async (
       sessionId,
       deviceTimestampMs: timestampMs,
       serverTimestampMs: receivedAtMs,
-      vibration: payload.data.vibration,
+      vibration,
       vehicleBattery: payload.data.vehicle_battery,
       deviceBattery: payload.data.device_battery,
       latitude: effectiveLatitude,
@@ -1004,7 +1015,7 @@ export const handleRawData = async (
     satellites: payload.data.satellites,
     vehicle_battery: payload.data.vehicle_battery,
     device_battery: payload.data.device_battery,
-    vibration: payload.data.vibration,
+    vibration,
     error_code: payload.data.error_code,
     ignition_state: runtimeState.ignition_state,
     motion_state: runtimeState.motion_state,
@@ -1042,7 +1053,7 @@ export const handleRawData = async (
     ),
     evaluateObdDtcRules(normalizedDiagnostics, obdAlertContext),
     syncObdConnectionWarnings(normalizedDiagnostics, obdAlertContext),
-    syncHighVibrationAlert(payload.data.vibration, obdAlertContext),
+    syncHighVibrationAlert(vibration, obdAlertContext),
   ]);
   obdRuleResults.forEach((result, index) => {
     if (result.status === 'rejected') {
