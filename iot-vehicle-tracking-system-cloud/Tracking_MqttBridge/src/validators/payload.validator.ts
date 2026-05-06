@@ -44,12 +44,20 @@ const runtimeStateSchema = z.object({
   device_state: deviceRuntimeStateSchema.optional(),
   sleep_mode: sleepModeSchema.optional(),
 });
+const canonicalSessionIdSchema = z.string().regex(/^\d+$/).refine((value) => {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0;
+}, 'canonical_session_id must be a positive safe integer');
+const boundaryEventSchema = z.enum(['started', 'ended', 'none']);
 
 const rawDataPayloadBaseSchema = z.object({
   device_id: z.string().min(1),
   auth_token: z.string().min(1),
   timestamp: z.number().positive(),
   uptime: z.number().nonnegative().optional(),
+  local_session_key: z.number().int().positive().optional(),
+  canonical_session_id: canonicalSessionIdSchema.optional(),
+  boot_id: z.string().min(1).optional(),
   data: z.object({
     imu_accel_delta_mps2: z.number().optional(),
     vibration: z.number().optional(),
@@ -123,6 +131,10 @@ const statusPayloadBaseSchema = z.object({
   auth_token: z.string().min(1),
   status: z.enum(['running', 'stopped', 'heartbeat']),
   session_id: z.number().int().positive().optional(),
+  local_session_key: z.number().int().positive().optional(),
+  canonical_session_id: canonicalSessionIdSchema.optional(),
+  boot_id: z.string().min(1).optional(),
+  boundary_event: boundaryEventSchema.optional(),
   timestamp: z.number().positive(),
   state: runtimeStateSchema.optional(),
   device_alerts: z.array(runtimeAlertSchema).optional(),

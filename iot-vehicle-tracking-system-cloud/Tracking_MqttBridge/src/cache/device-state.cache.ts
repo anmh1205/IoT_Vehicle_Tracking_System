@@ -5,52 +5,131 @@ interface DeviceState {
   sessionId: number | null;
   lastSeenAt: number;
   runtimeState: RuntimeStateSnapshot | null;
+  localSessionKey: number | null;
+  canonicalSessionId: string | null;
+  bootId: string | null;
+}
+
+interface DeviceStateUpdate {
+  sessionId?: number | null;
+  runtimeState?: RuntimeStateSnapshot | null;
+  localSessionKey?: number | null;
+  canonicalSessionId?: string | null;
+  bootId?: string | null;
 }
 
 const deviceStates = new Map<string, DeviceState>();
 
-/**
- * Get the cached status of a device.
- */
+const normalizeCanonicalSessionId = (
+  canonicalSessionId: string | null | undefined,
+): string | null => {
+  const normalized = canonicalSessionId?.trim();
+  return normalized ? normalized : null;
+};
+
+const parseCanonicalSessionId = (
+  canonicalSessionId: string | null | undefined,
+): number | null => {
+  const normalized = normalizeCanonicalSessionId(canonicalSessionId);
+  if (!normalized) {
+    return null;
+  }
+
+  const parsed = Number(normalized);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
 export const getStatus = (deviceId: string): DeviceState | undefined => {
   return deviceStates.get(deviceId);
 };
 
-/**
- * Set the cached status of a device.
- */
 export const setStatus = (
   deviceId: string,
   status: DeviceState['status'],
-  sessionId?: number | null,
-  runtimeState?: RuntimeStateSnapshot | null,
+  update: DeviceStateUpdate = {},
 ): void => {
   const existing = deviceStates.get(deviceId);
+  const parsedCanonicalSessionId = parseCanonicalSessionId(update.canonicalSessionId);
+
   deviceStates.set(deviceId, {
     status,
-    sessionId: sessionId !== undefined ? sessionId : (existing?.sessionId ?? null),
+    sessionId:
+      update.sessionId !== undefined
+        ? update.sessionId
+        : (existing?.sessionId ?? parsedCanonicalSessionId ?? null),
     lastSeenAt: Date.now(),
-    runtimeState: runtimeState !== undefined ? runtimeState : (existing?.runtimeState ?? null),
+    runtimeState:
+      update.runtimeState !== undefined ? update.runtimeState : (existing?.runtimeState ?? null),
+    localSessionKey:
+      update.localSessionKey !== undefined
+        ? update.localSessionKey
+        : (existing?.localSessionKey ?? null),
+    canonicalSessionId:
+      update.canonicalSessionId !== undefined
+        ? normalizeCanonicalSessionId(update.canonicalSessionId)
+        : (existing?.canonicalSessionId ?? null),
+    bootId: update.bootId !== undefined ? update.bootId : (existing?.bootId ?? null),
   });
 };
 
-/**
- * Clear the session for a device (e.g., when device goes offline or stops).
- */
 export const clearSession = (deviceId: string): number | null => {
   const state = deviceStates.get(deviceId);
-  if (!state) return null;
+  if (!state) {
+    return null;
+  }
 
   const oldSessionId = state.sessionId;
   state.sessionId = null;
   state.lastSeenAt = Date.now();
+  state.localSessionKey = null;
+  state.canonicalSessionId = null;
+  state.bootId = null;
 
   return oldSessionId;
 };
 
-/**
- * Get the total number of tracked devices.
- */
+export const resolveSessionId = (
+  deviceId: string,
+  sessionIdentity: {
+    localSessionKey?: number;
+    canonicalSessionId?: string | null;
+    bootId?: string | null;
+  },
+): number | null => {
+  const canonicalSessionId = parseCanonicalSessionId(sessionIdentity.canonicalSessionId);
+  if (canonicalSessionId !== null) {
+    return canonicalSessionId;
+  }
+
+  const state = deviceStates.get(deviceId);
+  if (!state || state.sessionId === null) {
+    return null;
+  }
+
+  if (
+    sessionIdentity.localSessionKey !== undefined &&
+    state.localSessionKey === sessionIdentity.localSessionKey &&
+    (
+      !sessionIdentity.bootId ||
+      !state.bootId ||
+      state.bootId === sessionIdentity.bootId
+    )
+  ) {
+    return state.sessionId;
+  }
+
+  if (
+    sessionIdentity.localSessionKey === undefined &&
+    sessionIdentity.bootId &&
+    state.status === 'running' &&
+    state.bootId === sessionIdentity.bootId
+  ) {
+    return state.sessionId;
+  }
+
+  return null;
+};
+
 export const getTrackedDeviceCount = (): number => {
   return deviceStates.size;
 };

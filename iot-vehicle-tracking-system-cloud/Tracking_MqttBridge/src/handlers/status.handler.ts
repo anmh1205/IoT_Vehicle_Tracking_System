@@ -1,25 +1,60 @@
+import type { StatusPayload } from '../types/payload.types';
 import { statusSchema } from '../validators/payload.validator';
 import {
   completeDeviceSession,
   ensureDeviceSession,
+  findDeviceSessionIdByIdentity,
   updateDeviceStatus,
 } from '../infrastructure/database';
 import { verifyDeviceToken } from '../services/device-auth.service';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
-import { clearSession, getStatus, setStatus } from '../cache/device-state.cache';
+import { publishToDevice } from '../mqtt/client';
+import {
+  clearSession,
+  getStatus,
+  resolveSessionId,
+  setStatus,
+} from '../cache/device-state.cache';
 import { logger } from '../infrastructure/logger';
 import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 import { normalizeRuntimeState } from '../types/device-state.types';
 
-/**
- * Handle device status changes on topic v1/{deviceId}/status.
- *
- * Transitions:
- * - running  -> Create or continue session, publish session event
- * - stopped  -> End current session, publish session event
- * - heartbeat -> Keepalive while parked, normalized to stopped
- */
+const toCachedStatus = (status: StatusPayload['status']): 'running' | 'stopped' | 'online' => {
+  return status === 'heartbeat' ? 'online' : status;
+};
+
+const SESSION_FALLBACK_BOUNDARY_SOURCE = 'bridge_fallback';
+
+const publishAssignSession = (params: {
+  deviceId: string;
+  localSessionKey?: number;
+  canonicalSessionId: string;
+  bootId?: string;
+}): void => {
+  if (!params.localSessionKey || !params.bootId) {
+    logger.warn(
+      {
+        deviceId: params.deviceId,
+        localSessionKey: params.localSessionKey,
+        bootId: params.bootId,
+        canonicalSessionId: params.canonicalSessionId,
+      },
+      'Skipped assign_session publish because firmware session identity is incomplete',
+    );
+    return;
+  }
+
+  publishToDevice(params.deviceId, 'commands', {
+    command: 'assign_session',
+    params: {
+      local_session_key: params.localSessionKey,
+      canonical_session_id: params.canonicalSessionId,
+      boot_id: params.bootId,
+    },
+  });
+};
+
 export const handleStatus = async (
   deviceIdFromTopic: string,
   message: Buffer,
@@ -46,7 +81,11 @@ export const handleStatus = async (
   const messageId = payload.metadata?.message_id;
   const schemaVersion = payload.metadata?.schema_version;
   const seqNo = payload.metadata?.seq_no;
-  const bootId = payload.metadata?.boot_id;
+  const metadataBootId = payload.metadata?.boot_id;
+  const sessionBootId = payload.boot_id ?? metadataBootId;
+  const localSessionKey = payload.local_session_key ?? payload.session_id;
+  const payloadCanonicalSessionId = payload.canonical_session_id ?? null;
+  const boundaryEvent = payload.boundary_event ?? 'none';
 
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
@@ -63,18 +102,12 @@ export const handleStatus = async (
 
   const previousState = getStatus(payload.device_id);
   const previousStatus = previousState?.status ?? 'offline';
-  const reportedStatus = payload.status;
+  const cachedStatus = toCachedStatus(payload.status);
   const runtimeState = normalizeRuntimeState({
     state: payload.state,
     legacyStatus: payload.status,
     previous: previousState?.runtimeState,
   });
-  const normalizedStatus =
-    reportedStatus === 'running' ||
-    runtimeState.ignition_state === 'ON' ||
-    runtimeState.motion_state === 'MOVING'
-      ? 'running'
-      : (reportedStatus === 'heartbeat' ? 'stopped' : reportedStatus);
   const stateUpdatedAt = new Date(receivedAtMs).toISOString();
   const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
     payload.timestamp,
@@ -94,110 +127,261 @@ export const handleStatus = async (
     );
   }
 
-  if (normalizedStatus === 'running') {
-    const ensuredSession = await ensureDeviceSession(
-      payload.device_id,
-      timestampMs,
-      receivedAtMs,
-    );
-    const sessionId = ensuredSession.sessionId;
-    const isNewSession = ensuredSession.isNew;
-    setStatus(payload.device_id, 'running', sessionId, runtimeState);
+  const cachedResolvedSessionId = resolveSessionId(payload.device_id, {
+    localSessionKey,
+    canonicalSessionId: payloadCanonicalSessionId,
+    bootId: sessionBootId,
+  });
+  const databaseResolvedSessionId =
+    cachedResolvedSessionId === null
+      ? await findDeviceSessionIdByIdentity(payload.device_id, {
+          localSessionKey,
+          canonicalSessionId: payloadCanonicalSessionId,
+          bootId: sessionBootId,
+        })
+      : null;
+  const resolvedSessionId = cachedResolvedSessionId ?? databaseResolvedSessionId;
+  let sessionId = resolvedSessionId ?? previousState?.sessionId ?? null;
+  let canonicalSessionId =
+    payloadCanonicalSessionId ??
+    previousState?.canonicalSessionId ??
+    (resolvedSessionId !== null ? String(resolvedSessionId) : null);
+  let sessionBoundarySource = 'firmware';
 
+  if (boundaryEvent === 'started') {
+    const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs, {
+      localSessionKey,
+      bootId: sessionBootId,
+      canonicalSource: 'server',
+      boundarySource: 'firmware',
+      startReason: 'ignition_on',
+    });
+
+    if (!ensuredSession.isNew && ensuredSession.status !== 'running') {
+      logger.warn(
+        {
+          deviceId: payload.device_id,
+          sessionId: ensuredSession.sessionId,
+          localSessionKey,
+          bootId: sessionBootId,
+          existingStatus: ensuredSession.status,
+          messageId,
+        },
+        'Ignored stale started boundary for a completed authoritative session',
+      );
+      return;
+    }
+
+    sessionId = ensuredSession.sessionId;
+    canonicalSessionId = String(ensuredSession.sessionId);
+
+    setStatus(payload.device_id, 'running', {
+      sessionId,
+      runtimeState,
+      localSessionKey,
+      canonicalSessionId,
+      bootId: sessionBootId,
+    });
     await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
+    publishAssignSession({
+      deviceId: payload.device_id,
+      localSessionKey,
+      canonicalSessionId,
+      bootId: sessionBootId,
+    });
 
-    if (isNewSession) {
+    if (ensuredSession.isNew) {
       publishInternalEvent('session', {
         device_id: payload.device_id,
         session_id: sessionId,
         action: 'started',
+        boundary_source: 'firmware',
+        local_session_key: localSessionKey,
+        canonical_session_id: canonicalSessionId,
+        boot_id: sessionBootId,
         message_id: messageId,
         schema_version: schemaVersion,
         seq_no: seqNo,
-        boot_id: bootId,
         timestamp: new Date(timestampMs).toISOString(),
       });
     }
+  } else if (boundaryEvent === 'ended') {
+    if (resolvedSessionId === null) {
+      logger.warn(
+        {
+          deviceId: payload.device_id,
+          localSessionKey,
+          canonicalSessionId,
+          bootId: sessionBootId,
+          messageId,
+        },
+        'Ignored ended boundary without authoritative session match',
+      );
+      return;
+    } else {
+      const completedSession = await completeDeviceSession(
+        payload.device_id,
+        timestampMs,
+        resolvedSessionId,
+        receivedAtMs,
+        'stopped',
+        {
+          localSessionKey,
+          bootId: sessionBootId,
+          boundarySource: 'firmware',
+          endReason: 'ignition_off',
+        },
+      );
+      sessionId = completedSession.sessionId;
+      clearSession(payload.device_id);
+      setStatus(payload.device_id, 'stopped', {
+        sessionId: null,
+        runtimeState,
+      });
+      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
 
-    writeDeviceEvent(
-      payload.device_id,
-      'status_change',
-      `Device status: ${previousStatus} -> running`,
-      {
+      if (sessionId && !completedSession.discarded) {
+        publishInternalEvent('session', {
+          device_id: payload.device_id,
+          session_id: sessionId,
+          action: 'ended',
+          boundary_source: 'firmware',
+          local_session_key: localSessionKey,
+          canonical_session_id: canonicalSessionId,
+          boot_id: sessionBootId,
+          message_id: messageId,
+          schema_version: schemaVersion,
+          seq_no: seqNo,
+          timestamp: new Date(timestampMs).toISOString(),
+        });
+      }
+    }
+  } else if (cachedStatus === 'running' && sessionId === null) {
+    const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs, {
+      localSessionKey,
+      bootId: sessionBootId,
+      canonicalSource: 'server',
+      boundarySource: SESSION_FALLBACK_BOUNDARY_SOURCE,
+      startReason: 'status_running',
+    });
+
+    sessionId = ensuredSession.sessionId;
+    canonicalSessionId = String(ensuredSession.sessionId);
+    sessionBoundarySource = SESSION_FALLBACK_BOUNDARY_SOURCE;
+
+    setStatus(payload.device_id, 'running', {
+      sessionId,
+      runtimeState,
+      localSessionKey,
+      canonicalSessionId,
+      bootId: sessionBootId,
+    });
+    await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
+    publishAssignSession({
+      deviceId: payload.device_id,
+      localSessionKey,
+      canonicalSessionId,
+      bootId: sessionBootId,
+    });
+
+    if (ensuredSession.isNew) {
+      publishInternalEvent('session', {
+        device_id: payload.device_id,
         session_id: sessionId,
-        previous_status: previousStatus,
-        reported_status: reportedStatus,
+        action: 'started',
+        boundary_source: SESSION_FALLBACK_BOUNDARY_SOURCE,
+        local_session_key: localSessionKey,
+        canonical_session_id: canonicalSessionId,
+        boot_id: sessionBootId,
         message_id: messageId,
         schema_version: schemaVersion,
         seq_no: seqNo,
-        boot_id: bootId,
-      },
-    ).catch((err) => {
-      logger.error(`VictoriaLogs write failed for status change`, err);
-    });
-
-    logger.info(
-      `Device ${payload.device_id}: ${previousStatus} -> running (session=${sessionId})`,
-    );
-  } else if (normalizedStatus === 'stopped') {
+        timestamp: new Date(timestampMs).toISOString(),
+      });
+    }
+  } else if (cachedStatus === 'stopped') {
     const completedSession = await completeDeviceSession(
       payload.device_id,
       timestampMs,
-      previousState?.sessionId,
+      sessionId,
       receivedAtMs,
-      reportedStatus === 'heartbeat' ? 'heartbeat' : 'stopped',
+      'stopped',
+      {
+        localSessionKey,
+        bootId: sessionBootId,
+        boundarySource: SESSION_FALLBACK_BOUNDARY_SOURCE,
+        endReason: 'status_stopped',
+      },
     );
-    const endedSessionId = completedSession.sessionId;
-    clearSession(payload.device_id);
-    setStatus(payload.device_id, 'stopped', null, runtimeState);
 
+    sessionId = completedSession.sessionId;
+    sessionBoundarySource = SESSION_FALLBACK_BOUNDARY_SOURCE;
+    clearSession(payload.device_id);
+    setStatus(payload.device_id, 'stopped', {
+      sessionId: null,
+      runtimeState,
+    });
     await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
 
-    if (endedSessionId && !completedSession.discarded) {
+    if (sessionId && !completedSession.discarded) {
       publishInternalEvent('session', {
         device_id: payload.device_id,
-        session_id: endedSessionId,
+        session_id: sessionId,
         action: 'ended',
+        boundary_source: SESSION_FALLBACK_BOUNDARY_SOURCE,
+        local_session_key: localSessionKey,
+        canonical_session_id: canonicalSessionId,
+        boot_id: sessionBootId,
         message_id: messageId,
         schema_version: schemaVersion,
         seq_no: seqNo,
-        boot_id: bootId,
         timestamp: new Date(timestampMs).toISOString(),
       });
     }
-
-    writeDeviceEvent(
-      payload.device_id,
-      'status_change',
-      `Device status: ${previousStatus} -> stopped`,
-      {
-        session_id: endedSessionId,
-        previous_status: previousStatus,
-        reported_status: reportedStatus,
-        message_id: messageId,
-        schema_version: schemaVersion,
-        seq_no: seqNo,
-        boot_id: bootId,
-      },
-    ).catch((err) => {
-      logger.error(`VictoriaLogs write failed for status change`, err);
+  } else {
+    setStatus(payload.device_id, cachedStatus, {
+      sessionId,
+      runtimeState,
+      localSessionKey,
+      canonicalSessionId,
+      bootId: sessionBootId,
     });
-
-    logger.info(
-      reportedStatus === 'heartbeat'
-        ? completedSession.discarded
-          ? `Device ${payload.device_id}: heartbeat keepalive discarded transient session=${endedSessionId}`
-          : `Device ${payload.device_id}: heartbeat keepalive handled as stopped (session=${endedSessionId} ended)`
-        : `Device ${payload.device_id}: ${previousStatus} -> stopped (session=${endedSessionId} ended)`,
-    );
+    await updateDeviceStatus(payload.device_id, cachedStatus, receivedAtMs, runtimeState);
   }
 
-  // Publish status change internal event
+  const effectiveStatus = boundaryEvent === 'ended' ? 'stopped' : cachedStatus;
+
+  writeDeviceEvent(
+    payload.device_id,
+    'status_change',
+    `Device status: ${previousStatus} -> ${effectiveStatus}`,
+    {
+      session_id: sessionId,
+      previous_status: previousStatus,
+      current_status: effectiveStatus,
+      reported_status: payload.status,
+      boundary_event: boundaryEvent,
+      boundary_source: sessionBoundarySource,
+      local_session_key: localSessionKey,
+      canonical_session_id: canonicalSessionId,
+      message_id: messageId,
+      schema_version: schemaVersion,
+      seq_no: seqNo,
+      boot_id: sessionBootId,
+    },
+  ).catch((err) => {
+    logger.error({ err, deviceId: payload.device_id }, 'VictoriaLogs write failed for status change');
+  });
+
   publishInternalEvent('status', {
     device_id: payload.device_id,
     previous_status: previousStatus,
-    current_status: normalizedStatus,
-    reported_status: reportedStatus,
+    current_status: effectiveStatus,
+    reported_status: payload.status,
+    boundary_event: boundaryEvent,
+    boundary_source: sessionBoundarySource,
+    local_session_key: localSessionKey,
+    canonical_session_id: canonicalSessionId,
     ignition_state: runtimeState.ignition_state,
     motion_state: runtimeState.motion_state,
     vehicle_state: runtimeState.vehicle_state,
@@ -207,6 +391,6 @@ export const handleStatus = async (
     message_id: messageId,
     schema_version: schemaVersion,
     seq_no: seqNo,
-    boot_id: bootId,
+    boot_id: sessionBootId,
   });
 };

@@ -2,6 +2,7 @@ import { rawDataSchema } from '../validators/payload.validator';
 import type { RawDataPayload, RawDiagnostics } from '../types/payload.types';
 import {
   ensureDeviceSession,
+  findDeviceSessionIdByIdentity,
   syncActiveMaintenanceAlertsByMessage,
   syncActiveMaintenanceAlertsByTitle,
   syncActiveObdDtcAlerts,
@@ -11,17 +12,17 @@ import {
 import { writeDeviceTelemetry } from '../infrastructure/victoriametrics';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
-import { getStatus, setStatus } from '../cache/device-state.cache';
+import { getStatus, resolveSessionId, setStatus } from '../cache/device-state.cache';
 import { addUpdate } from '../services/batch-writer.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
 import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 import { normalizeRuntimeState } from '../types/device-state.types';
 
-const VIBRATION_ALERT_THRESHOLD = 500;
-const HIGH_VIBRATION_ALERT_TITLE = 'high_vibration';
-const HIGH_VIBRATION_ALERT_RESOLUTION_NOTES =
-  'Auto-resolved by mqtt bridge: vibration returned below threshold in latest telemetry snapshot.';
+const IMU_ACCEL_DELTA_ALERT_THRESHOLD_MPS2 = 3.5;
+const HIGH_IMU_ACCEL_DELTA_ALERT_TITLE = 'high_imu_accel_delta';
+const HIGH_IMU_ACCEL_DELTA_ALERT_RESOLUTION_NOTES =
+  'Auto-resolved by mqtt bridge: IMU acceleration delta returned below threshold in latest telemetry snapshot.';
 const OBD_RULE_COOLDOWN_MS = 15 * 60 * 1000;
 const OBD_IDLE_ANOMALY_MIN_DURATION_MS = 10 * 60 * 1000;
 const OBD_CHANNEL_UNSTABLE_THRESHOLD = 3;
@@ -42,33 +43,14 @@ const OBD_RULE_MAINTENANCE_TITLES = [
 ] as const;
 const OBD_CONNECT_WARNING_TITLE = 'device_warning';
 const OBD_CONNECT_WARNING_MESSAGE = 'obd_connect_failed';
+const SESSION_FALLBACK_BOUNDARY_SOURCE = 'bridge_fallback';
 const SESSION_FALLBACK_SPEED_THRESHOLD_KPH = 3;
+const GENERIC_DTC_ACTION =
+  'Doc freeze frame, tra cuu tai lieu hang/SAE va kiem tra he thong lien quan den ma loi nay.';
 
 const ruleCooldownUntil = new Map<string, number>();
 const idleAnomalyStartedAt = new Map<string, number>();
-
-const hasActiveRuntimeStatus = (status: string | undefined): boolean =>
-  status === 'running' || status === 'online';
-
-const isLikelyActiveSessionTelemetry = (params: {
-  ignition?: boolean;
-  speed?: number;
-  runtimeIgnitionState: 'ON' | 'OFF' | 'UNKNOWN';
-  runtimeMotionState: 'MOVING' | 'STATIONARY' | 'UNKNOWN';
-}): boolean => {
-  if (params.ignition === true || params.runtimeIgnitionState === 'ON') {
-    return true;
-  }
-
-  if (
-    params.runtimeMotionState === 'MOVING' ||
-    (params.speed !== undefined && params.speed > SESSION_FALLBACK_SPEED_THRESHOLD_KPH)
-  ) {
-    return true;
-  }
-
-  return false;
-};
+const activeDtcRuleKeysByDevice = new Map<string, Set<string>>();
 
 const buildSanitizedRawPayload = (payload: RawDataPayload): Omit<RawDataPayload, 'auth_token'> => {
   const { auth_token: _authToken, ...safePayload } = payload;
@@ -182,7 +164,7 @@ const toFiniteNumber = (value: unknown): number | undefined => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
-const resolveVibration = (
+const resolveImuAccelDeltaMps2 = (
   data: RawDataPayload['data'] | undefined,
 ): number | undefined => {
   if (!data) {
@@ -231,6 +213,28 @@ const normalizeGnssLocation = (
   };
 };
 
+const isLikelyActiveSessionTelemetry = (params: {
+  ignition?: boolean;
+  speed?: number;
+  runtimeIgnitionState: 'ON' | 'OFF' | 'UNKNOWN';
+  runtimeMotionState: 'MOVING' | 'STATIONARY' | 'UNKNOWN';
+  previousStatus?: 'online' | 'offline' | 'running' | 'stopped';
+  persistedStatus?: string;
+}): boolean => {
+  if (params.ignition === true || params.runtimeIgnitionState === 'ON') {
+    return true;
+  }
+
+  if (
+    params.runtimeMotionState === 'MOVING' ||
+    (params.speed !== undefined && params.speed > SESSION_FALLBACK_SPEED_THRESHOLD_KPH)
+  ) {
+    return true;
+  }
+
+  return params.previousStatus === 'running' || params.persistedStatus === 'running';
+};
+
 const getRuleKey = (deviceId: string, ruleId: string) => `${deviceId}:${ruleId}`;
 
 const canEmitRule = (deviceId: string, ruleId: string, timestampMs: number): boolean => {
@@ -271,8 +275,46 @@ const lowerSeverity = (severity: AlertSeverity): AlertSeverity => {
   return 'low';
 };
 
-const resolveDtcRule = (code: string): DtcRuleDefinition | undefined =>
-  dtcRuleDefinitions.find((definition) => definition.matches(code));
+const resolveDtcRule = (code: string): DtcRuleDefinition | null =>
+  dtcRuleDefinitions.find((definition) => definition.matches(code)) ?? null;
+
+const deriveGenericDtcSeverity = (buckets: Set<DtcBucket>): AlertSeverity => {
+  if (buckets.has('permanent')) return 'high';
+  if (buckets.has('stored')) return 'medium';
+  return 'low';
+};
+
+const resolveDtcDefinition = (
+  code: string,
+  buckets: Set<DtcBucket>,
+): Pick<DtcRuleDefinition, 'severity' | 'confidence' | 'action'> => {
+  const matchedRule = resolveDtcRule(code);
+  if (matchedRule) {
+    return matchedRule;
+  }
+
+  return {
+    severity: deriveGenericDtcSeverity(buckets),
+    confidence: buckets.has('permanent') ? 0.78 : buckets.has('stored') ? 0.72 : 0.62,
+    action: GENERIC_DTC_ACTION,
+  };
+};
+
+const syncDtcCooldownState = (deviceId: string, currentRuleKeys: Set<string>): void => {
+  const previousRuleKeys = activeDtcRuleKeysByDevice.get(deviceId);
+  previousRuleKeys?.forEach((ruleKey) => {
+    if (!currentRuleKeys.has(ruleKey)) {
+      ruleCooldownUntil.delete(getRuleKey(deviceId, ruleKey));
+    }
+  });
+
+  if (currentRuleKeys.size > 0) {
+    activeDtcRuleKeysByDevice.set(deviceId, new Set(currentRuleKeys));
+    return;
+  }
+
+  activeDtcRuleKeysByDevice.delete(deviceId);
+};
 
 const describeDtcBuckets = (buckets: Set<DtcBucket>): string => {
   const ordered = (['stored', 'pending', 'permanent'] as DtcBucket[]).filter((bucket) =>
@@ -437,8 +479,11 @@ const evaluateObdDtcRules = async (
   appendBucket('permanent', normalizeDtcCodes(diagnostics.dtc.permanent));
 
   const activeDtcTitles = Array.from(dtcBuckets.keys())
-    .filter((code) => resolveDtcRule(code) !== undefined)
     .map((code) => `OBD: DTC ${code}`);
+  const currentRuleKeys = new Set(
+    Array.from(dtcBuckets.keys()).map((code) => `obd_dtc_${code.toLowerCase()}`),
+  );
+  syncDtcCooldownState(context.deviceId, currentRuleKeys);
   const existingActiveTitles = await syncActiveObdDtcAlerts(
     context.deviceId,
     activeDtcTitles,
@@ -446,11 +491,7 @@ const evaluateObdDtcRules = async (
   );
 
   dtcBuckets.forEach((buckets, code) => {
-    const rule = resolveDtcRule(code);
-    if (!rule) {
-      return;
-    }
-
+    const rule = resolveDtcDefinition(code, buckets);
     const isPendingOnly =
       buckets.size === 1 && buckets.has('pending') && !buckets.has('stored') && !buckets.has('permanent');
     let severity = rule.severity;
@@ -511,44 +552,44 @@ const syncObdConnectionWarnings = async (
   );
 };
 
-const syncHighVibrationAlert = async (
-  vibration: number | undefined,
+const syncHighImuAccelDeltaAlert = async (
+  imuAccelDeltaMps2: number | undefined,
   context: ObdAlertContext,
 ): Promise<void> => {
-  const highVibrationActive =
-    vibration !== undefined && vibration > VIBRATION_ALERT_THRESHOLD;
+  const highImuAccelDeltaActive =
+    imuAccelDeltaMps2 !== undefined && imuAccelDeltaMps2 > IMU_ACCEL_DELTA_ALERT_THRESHOLD_MPS2;
   const existingActiveTitles = await syncActiveMaintenanceAlertsByTitle(
     context.deviceId,
-    [HIGH_VIBRATION_ALERT_TITLE],
-    highVibrationActive ? [HIGH_VIBRATION_ALERT_TITLE] : [],
-    HIGH_VIBRATION_ALERT_RESOLUTION_NOTES,
+    [HIGH_IMU_ACCEL_DELTA_ALERT_TITLE],
+    highImuAccelDeltaActive ? [HIGH_IMU_ACCEL_DELTA_ALERT_TITLE] : [],
+    HIGH_IMU_ACCEL_DELTA_ALERT_RESOLUTION_NOTES,
   );
 
-  if (!highVibrationActive) {
-    ruleCooldownUntil.delete(getRuleKey(context.deviceId, HIGH_VIBRATION_ALERT_TITLE));
+  if (!highImuAccelDeltaActive) {
+    ruleCooldownUntil.delete(getRuleKey(context.deviceId, HIGH_IMU_ACCEL_DELTA_ALERT_TITLE));
     return;
   }
 
-  if (existingActiveTitles.has(HIGH_VIBRATION_ALERT_TITLE)) {
+  if (existingActiveTitles.has(HIGH_IMU_ACCEL_DELTA_ALERT_TITLE)) {
     return;
   }
 
-  if (!canEmitRule(context.deviceId, HIGH_VIBRATION_ALERT_TITLE, context.timestampMs)) {
+  if (!canEmitRule(context.deviceId, HIGH_IMU_ACCEL_DELTA_ALERT_TITLE, context.timestampMs)) {
     return;
   }
 
   publishInternalEvent('alert', {
     device_id: context.deviceId,
     vehicle_id: context.vehicleId ?? undefined,
-    alert_type: 'high_vibration',
+    alert_type: 'high_imu_accel_delta',
     source: 'device',
     severity: 'medium',
-    title: HIGH_VIBRATION_ALERT_TITLE,
-    message: `Vibration ${vibration!.toFixed(0)} exceeded threshold ${VIBRATION_ALERT_THRESHOLD}.`,
-    value: vibration,
-    actual_value: vibration,
-    threshold: VIBRATION_ALERT_THRESHOLD,
-    threshold_value: VIBRATION_ALERT_THRESHOLD,
+    title: HIGH_IMU_ACCEL_DELTA_ALERT_TITLE,
+    message: `IMU acceleration delta ${imuAccelDeltaMps2!.toFixed(3)} m/s^2 exceeded threshold ${IMU_ACCEL_DELTA_ALERT_THRESHOLD_MPS2.toFixed(1)} m/s^2.`,
+    value: imuAccelDeltaMps2,
+    actual_value: imuAccelDeltaMps2,
+    threshold: IMU_ACCEL_DELTA_ALERT_THRESHOLD_MPS2,
+    threshold_value: IMU_ACCEL_DELTA_ALERT_THRESHOLD_MPS2,
     latitude: context.latitude,
     longitude: context.longitude,
     message_id: context.messageId,
@@ -559,7 +600,7 @@ const syncHighVibrationAlert = async (
   });
 
   logger.info(
-    `ALERT: High vibration (${vibration}) on device ${context.deviceId}`,
+    `ALERT: High IMU acceleration delta (${imuAccelDeltaMps2}) on device ${context.deviceId}`,
   );
 };
 
@@ -707,7 +748,7 @@ const evaluateObdMaintenanceRules = (
  * 5. Write to VictoriaLogs (event log)
  * 6. Add to batch writer (PostgreSQL)
  * 7. Check status change -> publish internal event
- * 8. Check alerts (vibration threshold) -> publish internal event
+ * 8. Check alerts (IMU acceleration delta threshold) -> publish internal event
  */
 export const handleRawData = async (
   deviceIdFromTopic: string,
@@ -736,7 +777,7 @@ export const handleRawData = async (
   const messageId = payload.metadata?.message_id;
   const schemaVersion = payload.metadata?.schema_version;
   const seqNo = payload.metadata?.seq_no;
-  const bootId = payload.metadata?.boot_id;
+  const bootId = payload.boot_id ?? payload.metadata?.boot_id;
   const diagnostics = payload.diagnostics;
   const storedDtcCodes = normalizeDtcCodes(diagnostics?.dtc?.stored);
   const pendingDtcCodes = normalizeDtcCodes(diagnostics?.dtc?.pending);
@@ -756,6 +797,7 @@ export const handleRawData = async (
     payload.data.longitude,
     payload.data.satellites,
   );
+  const imuAccelDeltaMps2 = resolveImuAccelDeltaMps2(payload.data);
   const effectiveLatitude = normalizedGnss.latitude;
   const effectiveLongitude = normalizedGnss.longitude;
   const effectiveSpeed = normalizedGnss.speedAllowed ? payload.data.speed : undefined;
@@ -796,7 +838,6 @@ export const handleRawData = async (
 
   const previousState = getStatus(payload.device_id);
   const previousStatus = previousState?.status;
-  const vibration = resolveVibration(payload.data);
   const runtimeState = normalizeRuntimeState({
     state: payload.state,
     legacyStatus: previousStatus ?? device.current_status,
@@ -806,42 +847,92 @@ export const handleRawData = async (
   });
   const stateUpdatedAt = new Date(receivedAtMs).toISOString();
 
-  // 3. Create or continue a session when telemetry shows an active drive, even if
-  // the latest cached device status has already fallen back to stopped/offline.
-  const shouldEnsureSession =
-    hasActiveRuntimeStatus(previousStatus) ||
-    hasActiveRuntimeStatus(device.current_status) ||
+  // 3. Attach telemetry only to an authoritative session identity from firmware.
+  const localSessionKey = payload.local_session_key;
+  const sessionBootId = payload.boot_id ?? payload.metadata?.boot_id;
+  const payloadCanonicalSessionId = payload.canonical_session_id ?? null;
+  const cachedResolvedSessionId = resolveSessionId(payload.device_id, {
+    localSessionKey,
+    canonicalSessionId: payloadCanonicalSessionId,
+    bootId: sessionBootId,
+  });
+  const databaseResolvedSessionId =
+    cachedResolvedSessionId === null
+      ? await findDeviceSessionIdByIdentity(payload.device_id, {
+          localSessionKey,
+          canonicalSessionId: payloadCanonicalSessionId,
+          bootId: sessionBootId,
+        })
+      : null;
+  let sessionId = cachedResolvedSessionId ?? databaseResolvedSessionId;
+  let canonicalSessionId =
+    payloadCanonicalSessionId ??
+    (sessionId !== null && previousState?.sessionId === sessionId
+      ? previousState.canonicalSessionId
+      : (sessionId !== null ? String(sessionId) : null));
+  const hasAuthoritativeSessionIdentity =
+    payloadCanonicalSessionId !== null || localSessionKey !== undefined;
+  const canCreateFallbackSession =
+    sessionId === null &&
     isLikelyActiveSessionTelemetry({
       ignition: payload.data.ignition,
       speed: effectiveSpeed,
       runtimeIgnitionState: runtimeState.ignition_state,
       runtimeMotionState: runtimeState.motion_state,
-    });
-  let sessionId: number | null = null;
-  let isNewSession = false;
+      previousStatus,
+      persistedStatus: device.current_status,
+    }) &&
+    (
+      sessionBootId !== undefined ||
+      localSessionKey !== undefined ||
+      previousState?.status === 'running' ||
+      device.current_status === 'running'
+    );
 
-  if (shouldEnsureSession) {
-    const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs);
+  if (canCreateFallbackSession) {
+    const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs, {
+      localSessionKey,
+      bootId: sessionBootId,
+      canonicalSource: 'server',
+      boundarySource: SESSION_FALLBACK_BOUNDARY_SOURCE,
+      startReason: 'telemetry_active',
+    });
     sessionId = ensuredSession.sessionId;
-    isNewSession = ensuredSession.isNew;
+    canonicalSessionId = String(ensuredSession.sessionId);
+
+    if (ensuredSession.isNew) {
+      publishInternalEvent('session', {
+        device_id: payload.device_id,
+        session_id: sessionId,
+        action: 'started',
+        boundary_source: SESSION_FALLBACK_BOUNDARY_SOURCE,
+        local_session_key: localSessionKey,
+        canonical_session_id: canonicalSessionId,
+        boot_id: sessionBootId,
+        message_id: messageId,
+        schema_version: schemaVersion,
+        seq_no: seqNo,
+        timestamp: new Date(timestampMs).toISOString(),
+      });
+    }
   }
 
-  if (isNewSession && sessionId !== null) {
-    publishInternalEvent('session', {
-      device_id: payload.device_id,
-      session_id: sessionId,
-      action: 'started',
-      message_id: messageId,
-      schema_version: schemaVersion,
-      seq_no: seqNo,
-      boot_id: bootId,
-      timestamp: new Date(timestampMs).toISOString(),
-    });
+  if (sessionId === null && hasAuthoritativeSessionIdentity) {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        localSessionKey,
+        canonicalSessionId,
+        bootId: sessionBootId,
+        messageId,
+      },
+      'Telemetry arrived without authoritative session mapping',
+    );
   }
 
   // 4. Write to VictoriaMetrics
   const metricsData: Record<string, number | undefined> = {
-    vibration,
+    imu_accel_delta_mps2: imuAccelDeltaMps2,
     vehicle_battery: payload.data.vehicle_battery,
     device_battery: payload.data.device_battery,
     latitude: effectiveLatitude,
@@ -929,10 +1020,18 @@ export const handleRawData = async (
     });
   }
 
+  const fallbackStatus =
+    device.current_status === 'disconnected'
+      ? 'offline'
+      : device.current_status === 'running' || device.current_status === 'online'
+        ? device.current_status
+        : 'stopped';
+  const effectiveStatus = sessionId !== null ? 'running' : (previousState?.status ?? fallbackStatus);
+
   // 6. Add to batch writer (PostgreSQL)
   addUpdate({
     deviceId: payload.device_id,
-    status: sessionId !== null ? 'running' : device.current_status,
+    status: effectiveStatus === 'offline' ? 'disconnected' : effectiveStatus,
     latitude: effectiveLatitude,
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
@@ -947,7 +1046,7 @@ export const handleRawData = async (
       sessionId,
       deviceTimestampMs: timestampMs,
       serverTimestampMs: receivedAtMs,
-      vibration,
+      imuAccelDeltaMps2,
       vehicleBattery: payload.data.vehicle_battery,
       deviceBattery: payload.data.device_battery,
       latitude: effectiveLatitude,
@@ -973,41 +1072,19 @@ export const handleRawData = async (
     });
   }
 
-  // 8. Check status change
-  if (sessionId !== null) {
-    setStatus(payload.device_id, 'online', sessionId, runtimeState);
-
-    if (previousStatus && previousStatus !== 'online') {
-      publishInternalEvent('status', {
-        device_id: payload.device_id,
-        previous_status: previousStatus,
-        current_status: 'online',
-        ignition_state: runtimeState.ignition_state,
-        motion_state: runtimeState.motion_state,
-        vehicle_state: runtimeState.vehicle_state,
-        device_state: runtimeState.device_state,
-        sleep_mode: runtimeState.sleep_mode,
-        state_updated_at: stateUpdatedAt,
-        message_id: messageId,
-        schema_version: schemaVersion,
-        seq_no: seqNo,
-        boot_id: bootId,
-      });
-    }
-  } else {
-    setStatus(
-      payload.device_id,
-      device.current_status === 'disconnected' ? 'offline' : 'stopped',
-      null,
-      runtimeState,
-    );
-  }
+  setStatus(payload.device_id, effectiveStatus, {
+    sessionId,
+    runtimeState,
+    localSessionKey,
+    canonicalSessionId,
+    bootId: sessionBootId,
+  });
 
   publishInternalEvent('data', {
     device_id: payload.device_id,
     vehicle_id: device.vehicle_id ?? undefined,
     session_id: sessionId,
-    current_status: sessionId !== null ? 'online' : device.current_status,
+    current_status: effectiveStatus,
     latitude: effectiveLatitude,
     longitude: effectiveLongitude,
     speed: effectiveSpeed,
@@ -1015,7 +1092,7 @@ export const handleRawData = async (
     satellites: payload.data.satellites,
     vehicle_battery: payload.data.vehicle_battery,
     device_battery: payload.data.device_battery,
-    vibration,
+    imu_accel_delta_mps2: imuAccelDeltaMps2,
     error_code: payload.data.error_code,
     ignition_state: runtimeState.ignition_state,
     motion_state: runtimeState.motion_state,
@@ -1053,7 +1130,7 @@ export const handleRawData = async (
     ),
     evaluateObdDtcRules(normalizedDiagnostics, obdAlertContext),
     syncObdConnectionWarnings(normalizedDiagnostics, obdAlertContext),
-    syncHighVibrationAlert(vibration, obdAlertContext),
+    syncHighImuAccelDeltaAlert(imuAccelDeltaMps2, obdAlertContext),
   ]);
   obdRuleResults.forEach((result, index) => {
     if (result.status === 'rejected') {
