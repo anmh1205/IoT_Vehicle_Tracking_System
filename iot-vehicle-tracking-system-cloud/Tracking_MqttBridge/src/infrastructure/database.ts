@@ -251,10 +251,10 @@ export const touchDeviceSession = async (params: {
            EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
            0
          ),
-         avg_vibration = CASE
-           WHEN $3::numeric IS NULL THEN avg_vibration
-           WHEN avg_vibration IS NULL THEN $3::numeric
-           ELSE ROUND(((avg_vibration + $3::numeric) / 2)::numeric, 2)
+         avg_imu_accel_delta_mps2 = CASE
+           WHEN $3::numeric IS NULL THEN avg_imu_accel_delta_mps2
+           WHEN avg_imu_accel_delta_mps2 IS NULL THEN $3::numeric
+           ELSE ROUND(((avg_imu_accel_delta_mps2 + $3::numeric) / 2)::numeric, 3)
          END,
          avg_vehicle_battery = CASE
            WHEN $4::numeric IS NULL THEN avg_vehicle_battery
@@ -312,10 +312,10 @@ export const touchDeviceSession = async (params: {
              EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
              0
            ),
-           avg_vibration = CASE
-             WHEN $3::numeric IS NULL THEN avg_vibration
-             WHEN avg_vibration IS NULL THEN $3::numeric
-             ELSE ROUND(((avg_vibration + $3::numeric) / 2)::numeric, 2)
+           avg_imu_accel_delta_mps2 = CASE
+             WHEN $3::numeric IS NULL THEN avg_imu_accel_delta_mps2
+             WHEN avg_imu_accel_delta_mps2 IS NULL THEN $3::numeric
+             ELSE ROUND(((avg_imu_accel_delta_mps2 + $3::numeric) / 2)::numeric, 3)
            END,
            avg_vehicle_battery = CASE
              WHEN $4::numeric IS NULL THEN avg_vehicle_battery
