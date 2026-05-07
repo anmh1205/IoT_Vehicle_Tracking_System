@@ -17,7 +17,7 @@ const operationPillars = [
   },
   {
     title: 'Điều phối từ web tới di động',
-    description: 'Bảng điều khiển vận hành và vỏ ứng dụng di động bám cùng một hạ tầng dữ liệu đo từ xa.',
+    description: 'Bảng điều khiển vận hành và vỏ ứng dụng di động bám cùng một hạ tầng telemetry.',
   },
 ];
 

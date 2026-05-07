@@ -6,7 +6,12 @@
 /**
  * @file ble_util.c
  * @brief BLE address string/byte conversion helpers.
+ * This translation unit belongs to the BLE OBD NimBLE adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 /**
  * @brief Convert BLE address bytes into standard MAC string.
@@ -17,6 +22,7 @@
  * @return `dst` on success, otherwise NULL.
  */
 const char *ble_addr_to_str(const ble_addr_t *addr, char dst[BLE_ADDR_STR_LEN]) {
+    // Translate addr to str into a readable label so logs and diagnostics stay easy to follow.
     /* Validate pointers before formatting. */
     if (addr == NULL || dst == NULL) {
         return NULL;
@@ -44,6 +50,7 @@ const char *ble_addr_to_str(const ble_addr_t *addr, char dst[BLE_ADDR_STR_LEN]) 
  * @return true when parse succeeds.
  */
 bool ble_addr_from_str(const char *src, ble_addr_t *addr) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     /* Reject invalid pointers early. */
     if (src == NULL || addr == NULL) {
         return false;

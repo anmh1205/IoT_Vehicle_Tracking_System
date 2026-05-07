@@ -7,7 +7,12 @@
 /**
  * @file data_formatter.h
  * @brief JSON payload formatting helpers for MQTT publications.
+ * This header belongs to the device-cloud contract layer and describes the payload contract that firmware and cloud services must interpret the same way.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Build raw telemetry payload JSON string.

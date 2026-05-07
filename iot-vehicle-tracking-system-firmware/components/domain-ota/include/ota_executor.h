@@ -7,7 +7,12 @@
 /**
  * @file ota_executor.h
  * @brief OTA apply and rollback entrypoints owned by the OTA domain.
+ * This header belongs to the OTA domain layer and defines the OTA policy boundary that adapters and app-core use without duplicating upgrade rules.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 typedef void (*ota_status_callback_t)(const firmware_status_t *status, void *user_ctx);
 

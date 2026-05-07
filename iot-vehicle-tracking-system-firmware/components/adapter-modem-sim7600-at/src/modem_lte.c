@@ -13,7 +13,12 @@
 /**
  * @file modem_lte.c
  * @brief Public compatibility facade for split LTE modem modules.
+ * This translation unit belongs to the SIM7600 AT modem adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 /** LTE initialization state. */
 bool s_lte_initialized = false;
@@ -81,6 +86,7 @@ char s_active_apn[TRACKER_HOST_MAX_LEN] = CONFIG_TRACKER_MODEM_APN;
  * @param apn APN string.
  */
 void modem_lte_set_apn(const char *apn) {
+    // Copy the caller-provided LTE set APN into module-local state after lightweight guards.
     if (util_string_empty(apn)) {
         return;
     }
@@ -92,7 +98,7 @@ void modem_lte_set_apn(const char *apn) {
     }
 
     util_copy_string(s_active_apn, sizeof(s_active_apn), next_apn);
-    ESP_LOGI(MODEM_LTE_TAG, "apn override applied configured=1");
+    ESP_LOGI(MODEM_LTE_TAG, "event=lte_apn_override_applied configured=1");
 }
 
 /**
@@ -101,6 +107,7 @@ void modem_lte_set_apn(const char *apn) {
  * Triggers connection if not already connected.
  */
 void modem_lte_request_connect(void) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     s_connect_requested = true;
 
     if (s_lte_connected && s_state == MODEM_LTE_STATE_CONNECTED) {
@@ -134,6 +141,7 @@ void modem_lte_request_connect(void) {
  * @return ESP_OK on success.
  */
 esp_err_t modem_lte_init(void) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_lte_initialized) {
         return ESP_OK;
     }
@@ -153,6 +161,7 @@ esp_err_t modem_lte_init(void) {
  * @return ESP_OK on success.
  */
 esp_err_t modem_lte_connect(void) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (s_lte_connected) {
         return ESP_OK;
     }
@@ -167,6 +176,7 @@ esp_err_t modem_lte_connect(void) {
  * @return ESP_OK on success.
  */
 esp_err_t modem_lte_disconnect(void) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     esp_err_t err = ESP_OK;
 
     if (s_lte_connected) {
@@ -202,14 +212,15 @@ esp_err_t modem_lte_disconnect(void) {
  * @return ESP_OK on success.
  */
 esp_err_t modem_lte_sleep(void) {
+    // Program the low-power path here so the next wake cycle resumes from predictable state.
     if (!util_is_sleep_enabled()) {
-        ESP_LOGI(MODEM_LTE_TAG, "modem_lte_sleep bypassed (sleep disabled)");
+        ESP_LOGI(MODEM_LTE_TAG, "event=lte_sleep_skipped reason=sleep_disabled");
         return ESP_OK;
     }
 
     esp_err_t dtr_err = modem_set_dtr(true);
     if (dtr_err != ESP_OK && dtr_err != ESP_ERR_NOT_SUPPORTED) {
-        ESP_LOGW(MODEM_LTE_TAG, "Set DTR sleep failed: %s", esp_err_to_name(dtr_err));
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_sleep_dtr_set_failed err=%s", esp_err_to_name(dtr_err));
     }
 
     return modem_lte_send_simple("AT+CSCLK=1\r", "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
@@ -221,14 +232,15 @@ esp_err_t modem_lte_sleep(void) {
  * @return ESP_OK on success.
  */
 esp_err_t modem_lte_wakeup(void) {
+    // Undo low-power gating here before active I/O touches the hardware again.
     if (!util_is_sleep_enabled()) {
-        ESP_LOGI(MODEM_LTE_TAG, "modem_lte_wakeup bypassed (sleep disabled)");
+        ESP_LOGI(MODEM_LTE_TAG, "event=lte_wakeup_skipped reason=sleep_disabled");
         return ESP_OK;
     }
 
     esp_err_t dtr_err = modem_set_dtr(false);
     if (dtr_err != ESP_OK && dtr_err != ESP_ERR_NOT_SUPPORTED) {
-        ESP_LOGW(MODEM_LTE_TAG, "Set DTR wake failed: %s", esp_err_to_name(dtr_err));
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_wakeup_dtr_set_failed err=%s", esp_err_to_name(dtr_err));
     }
 
     return modem_lte_send_simple("AT\r", "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
@@ -240,6 +252,7 @@ esp_err_t modem_lte_wakeup(void) {
  * @return RSSI in dBm, or -1 on failure.
  */
 int modem_lte_get_rssi(void) {
+    // Read LTE get RSSI without widening the mutation surface of this module.
     char response[256] = {0};
     if (modem_at_send("AT+CSQ\r", response, sizeof(response), MODEM_LTE_SHORT_CMD_TIMEOUT_MS) != ESP_OK) {
         return -1;
@@ -264,6 +277,7 @@ int modem_lte_get_rssi(void) {
  * @return True if connected.
  */
 bool modem_lte_is_connected(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_lte_connected;
 }
 
@@ -273,5 +287,6 @@ bool modem_lte_is_connected(void) {
  * @return True if initialized.
  */
 bool modem_lte_is_initialized(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_lte_initialized;
 }

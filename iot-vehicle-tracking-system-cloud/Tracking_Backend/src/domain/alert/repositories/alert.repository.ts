@@ -10,10 +10,14 @@ import type { Alert, AlertListQuery, CreateAlertInput } from '@/domain/alert/typ
 
 const ALERT_LINK_SELECT = `a.*,
   d.device_name,
+  t.trip_code,
+  g.name AS geofence_name,
   link.vehicle_plate,
   link.customer_name`;
 
 const ALERT_LINK_JOINS = `LEFT JOIN devices d ON d.device_id = a.device_id
+  LEFT JOIN trips t ON t.id = a.trip_id
+  LEFT JOIN geofences g ON g.id = a.geofence_id
   LEFT JOIN LATERAL (
     SELECT
       v.plate_number AS vehicle_plate,
@@ -34,6 +38,19 @@ const ALERT_LINK_JOINS = `LEFT JOIN devices d ON d.device_id = a.device_id
       v.id DESC
     LIMIT 1
   ) link ON true`;
+
+const OBD_MAINTENANCE_ALERT_CONDITION = `(a.alert_type = 'maintenance_due' AND (
+  a.source::text = 'ecu'
+  OR CONCAT_WS(' ', COALESCE(a.title, ''), COALESCE(a.message, '')) ~* '(^|[^a-z0-9])(obd|dtc|mil|ecu|[pcbu][0-3][0-9a-f]{3})([^a-z0-9]|$)'
+  OR COALESCE(a.title, '') ILIKE '%coolant%'
+  OR COALESCE(a.message, '') ILIKE '%coolant%'
+  OR COALESCE(a.title, '') ILIKE '%voltage%'
+  OR COALESCE(a.message, '') ILIKE '%voltage%'
+  OR COALESCE(a.title, '') ILIKE '%idle-load%'
+  OR COALESCE(a.message, '') ILIKE '%idle-load%'
+  OR COALESCE(a.title, '') ILIKE '%channel%'
+  OR COALESCE(a.message, '') ILIKE '%channel%'
+))`;
 
 export const findAll = async (
   query: AlertListQuery,
@@ -59,6 +76,29 @@ export const findAll = async (
   if (query.alertType) {
     conditions.push(`a.alert_type = $${paramIndex++}`);
     params.push(query.alertType);
+  }
+
+  if (query.source) {
+    if (query.source === 'obd') {
+      conditions.push(OBD_MAINTENANCE_ALERT_CONDITION);
+    } else if (query.source === 'system') {
+      conditions.push(`NOT ${OBD_MAINTENANCE_ALERT_CONDITION}`);
+    } else {
+      conditions.push(`a.source::text = $${paramIndex++}`);
+      params.push(query.source);
+    }
+  }
+
+  if (query.search) {
+    conditions.push(`(
+      a.title ILIKE $${paramIndex}
+      OR COALESCE(a.message, '') ILIKE $${paramIndex}
+      OR a.alert_type::text ILIKE $${paramIndex}
+      OR COALESCE(a.vehicle_id, '') ILIKE $${paramIndex}
+      OR COALESCE(a.device_id, '') ILIKE $${paramIndex}
+    )`);
+    params.push(`%${query.search}%`);
+    paramIndex++;
   }
 
   if (query.vehicleId) {

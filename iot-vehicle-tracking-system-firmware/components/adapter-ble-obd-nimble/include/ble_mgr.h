@@ -13,7 +13,12 @@ struct ble_hs_adv_fields;
 /**
  * @file ble_mgr.h
  * @brief BLE central manager for discovery, connect, GATT discovery, and notifications.
+ * This header belongs to the BLE OBD NimBLE adapter layer and exposes the adapter boundary so higher layers do not depend on hardware- or transport-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief BLE manager operation status codes.
@@ -168,6 +173,16 @@ ble_mgr_status_t ble_mgr_send(ble_mgr_ctx_t *mgr_ctx, uint16_t chr_handle, const
  * @return true when connected.
  */
 bool ble_mgr_is_connected(ble_mgr_ctx_t *mgr_ctx);
+
+/**
+ * @brief Copy the currently connected peer address into caller storage.
+ *
+ * @param mgr_ctx BLE manager context.
+ * @param out_addr Destination BLE address.
+ *
+ * @return true when a peer address is available.
+ */
+bool ble_mgr_get_peer_address(ble_mgr_ctx_t *mgr_ctx, ble_addr_t *out_addr);
 
 /**
  * @brief Terminate active BLE connection.

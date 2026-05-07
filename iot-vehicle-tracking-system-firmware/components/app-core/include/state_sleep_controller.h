@@ -5,7 +5,12 @@
 /**
  * @file state_sleep_controller.h
  * @brief Sleep decision and entry helpers for the tracker FSM.
+ * This header belongs to the app-core orchestration layer and defines the orchestration boundary that bootstrap code and adapters rely on during runtime.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 tracker_sleep_mode_t state_machine_resolve_sleep_mode(app_state_t app_state);
 bool state_machine_can_enter_sleep(const char **out_reason);

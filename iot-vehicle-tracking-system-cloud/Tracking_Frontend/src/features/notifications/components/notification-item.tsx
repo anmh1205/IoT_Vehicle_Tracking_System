@@ -80,7 +80,9 @@ export const NotificationRow = ({
         </div>
         <div className="mt-2 space-y-1">
           <div className="text-sm font-medium">{displayTitle}</div>
-          <div className={compact ? 'truncate text-xs text-muted-foreground' : 'text-sm text-muted-foreground'}>
+          <div
+            className={compact ? 'truncate text-xs text-muted-foreground' : 'text-sm text-muted-foreground'}
+          >
             {displayMessage || 'Không có mô tả chi tiết.'}
           </div>
           {contextText ? (

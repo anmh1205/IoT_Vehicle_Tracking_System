@@ -3,28 +3,22 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { EmptyState } from '@/components/common/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { EmptyState } from '@/components/common/empty-state';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { tripServices } from '@/lib/api/trips';
-import { formatDateTime, formatDuration } from '@/lib/utils/date/format';
 import { TripDetail } from '@/features/trips/components/trip-detail';
 import { TripReplayControls } from '@/features/trips/components/trip-replay-controls';
 import { useTripLiveTracking } from '@/features/trips/hooks/use-trip-live-tracking';
+import { tripServices } from '@/lib/api/trips';
+import { formatDateTime, formatDuration } from '@/lib/utils/date/format';
 
 const SPEED_MS: Record<string, number> = { '1x': 500, '2x': 250, '4x': 125 };
 
@@ -62,7 +56,7 @@ export const TripPreviewDialog = ({
   const [playing, setPlaying] = useState(false);
   const [cursor, setCursor] = useState(0);
   const [speed, setSpeed] = useState<'1x' | '2x' | '4x'>('1x');
-  const [interval, setInterval_] = useState<string>('15s');
+  const [interval, setInterval_] = useState<'15s' | '1m' | '5m' | '10m'>('15s');
 
   const tripQuery = useQuery({
     queryKey: ['trip-preview-detail', tripId],
@@ -103,7 +97,9 @@ export const TripPreviewDialog = ({
   }, [open, tripId]);
 
   useEffect(() => {
-    if (!playing || points.length === 0) return;
+    if (!playing || points.length === 0) {
+      return;
+    }
 
     const intervalId = setInterval(() => {
       setCursor((prev) => {
@@ -126,32 +122,30 @@ export const TripPreviewDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex h-[min(92dvh,960px)] max-h-[92dvh] w-[min(96vw,1320px)] max-w-none flex-col overflow-hidden p-0 sm:w-[min(96vw,1320px)] sm:max-w-none">
-        <DialogHeader className="shrink-0 gap-3 border-b bg-background px-6 py-4">
+        <DialogHeader className="shrink-0 gap-3 border-b bg-background px-6 py-4 pr-14">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <DialogTitle>{tripQuery.data?.tripCode ?? 'Xem nhanh chuyến đi'}</DialogTitle>
+              <DialogDescription className="sr-only">
+                Xem nhanh trạng thái, hành trình phát lại và thống kê chi tiết của chuyến đi.
+              </DialogDescription>
               <div className="flex flex-wrap gap-2">
                 {tripQuery.data?.status ? (
                   <Badge variant={tripQuery.data.status === 'in_progress' ? 'default' : 'secondary'}>
                     {STATUS_LABELS[tripQuery.data.status] ?? tripQuery.data.status}
                   </Badge>
                 ) : null}
-                {tripQuery.data?.vehicleId ? <Badge variant="outline">{tripQuery.data.vehicleId}</Badge> : null}
+                {tripQuery.data?.vehiclePlate ? (
+                  <Badge variant="outline">{tripQuery.data.vehiclePlate}</Badge>
+                ) : tripQuery.data?.vehicleId ? (
+                  <Badge variant="outline">{tripQuery.data.vehicleId}</Badge>
+                ) : null}
                 {tripQuery.data?.deviceId ? <Badge variant="outline">{tripQuery.data.deviceId}</Badge> : null}
+                {tripQuery.data?.customerName ? (
+                  <Badge variant="outline">{tripQuery.data.customerName}</Badge>
+                ) : null}
               </div>
             </div>
-
-            <Select value={interval} onValueChange={setInterval_}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Độ phân giải" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="15s">15 giây</SelectItem>
-                <SelectItem value="1m">1 phút</SelectItem>
-                <SelectItem value="5m">5 phút</SelectItem>
-                <SelectItem value="10m">10 phút</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </DialogHeader>
 
@@ -176,7 +170,7 @@ export const TripPreviewDialog = ({
               </div>
 
               <div className="rounded-2xl border bg-muted/20 p-4 text-sm">
-                <div className="grid gap-3 lg:grid-cols-2">
+                <div className="grid gap-3 lg:grid-cols-3">
                   <div>
                     <p className="text-xs text-muted-foreground">Điểm đi</p>
                     <p className="font-medium">{tripQuery.data.startLocation ?? 'Chưa cấu hình'}</p>
@@ -191,39 +185,56 @@ export const TripPreviewDialog = ({
                       {formatDateTime(tripQuery.data.actualEnd ?? tripQuery.data.plannedEnd)}
                     </p>
                   </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Phương tiện / khách hàng</p>
+                    <p className="font-medium">
+                      {tripQuery.data.vehiclePlate ?? tripQuery.data.vehicleId ?? 'Chưa gắn xe'}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {tripQuery.data.customerName ?? tripQuery.data.deviceId ?? 'Chưa có ngữ cảnh bổ sung'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {telemetryQuery.isError ? (
                 <EmptyState
                   title="Không thể tải phần phát lại"
-                  description="Dữ liệu đo từ xa của hành trình hiện chưa sẵn sàng."
+                  description="Telemetry của hành trình hiện chưa sẵn sàng."
                   action={{ label: 'Thử lại', onClick: () => void telemetryQuery.refetch() }}
                 />
+              ) : telemetryQuery.isLoading ? (
+                <div className="rounded-2xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+                  Đang tải dữ liệu phát lại...
+                </div>
               ) : (
                 <>
-                  <div className="rounded-2xl border bg-muted/10 p-4">
-                    {points.length === 0 ? (
+                  {points.length === 0 ? (
+                    <div className="rounded-2xl border bg-muted/10 p-4">
                       <EmptyState
                         title="Chưa có dữ liệu phát lại"
                         description="Chuyến đi chưa ghi nhận đủ mốc GPS để phát lại hành trình."
                       />
-                    ) : (
-                      <TripReplayControls
-                        playing={playing}
-                        cursor={cursor}
-                        max={Math.max(points.length - 1, 0)}
-                        speed={speed}
-                        onToggle={() => setPlaying((value) => !value)}
-                        onReset={() => {
-                          setCursor(0);
-                          setPlaying(false);
-                        }}
-                        onCursorChange={setCursor}
-                        onSpeedChange={setSpeed}
-                      />
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <TripReplayControls
+                      playing={playing}
+                      cursor={cursor}
+                      max={Math.max(points.length - 1, 0)}
+                      speed={speed}
+                      interval={interval}
+                      currentTimestamp={moving?.timestamp ?? null}
+                      currentSpeed={moving?.speed ?? null}
+                      onToggle={() => setPlaying((value) => !value)}
+                      onReset={() => {
+                        setCursor(0);
+                        setPlaying(false);
+                      }}
+                      onCursorChange={setCursor}
+                      onSpeedChange={setSpeed}
+                      onIntervalChange={setInterval_}
+                    />
+                  )}
 
                   <TripDetail
                     trip={tripQuery.data}
@@ -243,7 +254,7 @@ export const TripPreviewDialog = ({
           )}
         </div>
 
-        <DialogFooter className="shrink-0 border-t bg-background px-6 py-4">
+        <DialogFooter className="shrink-0 border-t bg-background px-6 py-4 sm:justify-between">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Đóng
           </Button>

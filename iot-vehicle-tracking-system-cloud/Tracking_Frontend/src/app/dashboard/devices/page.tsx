@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { AlertTriangle, Cpu, LayoutGrid, Plus, Table2 } from 'lucide-react';
 import { DataTable } from '@/components/common/data-table';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ import { DeviceStatsBar } from '@/features/devices/components/device-stats-bar';
 import { DeviceCardSkeletonGrid } from '@/features/devices/components/device-skeletons';
 import { useDeleteDevice } from '@/features/devices/hooks/use-delete-device';
 import { useDeviceRealtime } from '@/features/devices/hooks/use-device-realtime';
-import { useDevices } from '@/features/devices/hooks/use-devices';
+import { useInfiniteDevices } from '@/features/devices/hooks/use-devices';
 import type { Device } from '@/features/devices/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { DeviceFilters as DeviceFiltersParams } from '@/lib/api/devices';
@@ -27,16 +28,24 @@ import { getApiErrorMessage } from '@/lib/utils/api-error';
 type ViewMode = 'table' | 'cards';
 
 const DevicesPage = () => {
-  const [filters, setFilters] = useState<DeviceFiltersParams>({ page: 1, limit: 20 });
+  const [filters, setFilters] = useState<DeviceFiltersParams>({ limit: 20 });
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [createOpen, setCreateOpen] = useState(false);
   const [editDevice, setEditDevice] = useState<Device | null>(null);
   const [viewDevice, setViewDevice] = useState<Device | null>(null);
   const [deleteDevice, setDeleteDevice] = useState<Device | null>(null);
   const isMobile = useIsMobile();
-  const devicesQuery = useDevices(filters);
+  const devicesQuery = useInfiniteDevices(
+    {
+      search: filters.search,
+      status: filters.status,
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
+    },
+    filters.limit ?? 20,
+  );
   const deleteMutation = useDeleteDevice();
-  const rows = useMemo(() => devicesQuery.data?.items ?? [], [devicesQuery.data?.items]);
+  const rows = devicesQuery.items;
   const realtimeDeviceIds = useMemo(() => rows.map((device) => device.deviceId), [rows]);
 
   useDeviceRealtime(realtimeDeviceIds);
@@ -51,7 +60,6 @@ const DevicesPage = () => {
   const resetDeviceListView = () => {
     setViewMode('table');
     setFilters({
-      page: 1,
       limit: filters.limit ?? 20,
       sortBy: 'createdAt',
       sortOrder: 'desc',
@@ -69,7 +77,7 @@ const DevicesPage = () => {
         </Button>
       }
     >
-      <DeviceStatsBar devices={rows} />
+      <DeviceStatsBar devices={rows} totalCount={devicesQuery.total} />
 
       {devicesErrorMessage ? (
         <Alert variant="destructive">
@@ -121,6 +129,7 @@ const DevicesPage = () => {
               onDelete: setDeleteDevice,
             })}
             data={rows}
+            pagination={false}
             isLoading={devicesQuery.isLoading}
             emptyIcon={<Cpu className="h-10 w-10" />}
             emptyTitle="Chưa có thiết bị"
@@ -133,6 +142,15 @@ const DevicesPage = () => {
           {devicesQuery.isLoading ? <DeviceCardSkeletonGrid /> : <DeviceGrid devices={rows} onOpen={setViewDevice} />}
         </TabsContent>
       </Tabs>
+
+      <InfiniteScrollTrigger
+        hasMore={devicesQuery.hasMore}
+        isLoadingMore={devicesQuery.isFetchingNextPage}
+        onLoadMore={devicesQuery.loadMore}
+        loadedCount={devicesQuery.loadedCount}
+        totalCount={devicesQuery.total}
+        itemLabel="thiết bị"
+      />
 
       <DeviceCreateModal
         open={createOpen}
@@ -158,6 +176,7 @@ const DevicesPage = () => {
             setViewDevice(null);
           }
         }}
+        presentation="workspace"
       />
 
       <ConfirmDialog

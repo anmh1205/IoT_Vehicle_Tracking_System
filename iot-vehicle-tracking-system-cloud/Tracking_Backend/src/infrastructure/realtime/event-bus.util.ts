@@ -117,6 +117,7 @@ export interface RealtimeEventMap {
     device_id: string;
     command_id: string;
     status: string;
+    response?: string | null;
   };
 
   'stats:update': Record<string, unknown>;
@@ -133,6 +134,36 @@ export interface RealtimeEventMap {
     longitude?: number;
     metadata?: RealtimeMetadata;
     alertMetadata?: Record<string, unknown>;
+  };
+  'alert:updated': {
+    id: number;
+    vehicle_id?: string | null;
+    device_id?: string | null;
+    status: 'active' | 'acknowledged' | 'resolved' | 'dismissed';
+    action: 'acknowledge' | 'resolve' | 'dismiss';
+    updated_at: string;
+  };
+  'alert:deleted': {
+    id: number;
+    vehicle_id?: string | null;
+    device_id?: string | null;
+    deleted_at: string;
+  };
+  'violation:new': {
+    id: number;
+    alert_id?: number | null;
+    vehicle_id?: string | null;
+    violation_type: string;
+    severity: string;
+    created_at: string;
+  };
+  'violation:updated': {
+    id: number;
+    alert_id?: number | null;
+    vehicle_id?: string | null;
+    action: 'acknowledge';
+    acknowledged: boolean;
+    updated_at: string;
   };
   'zone:updated': {
     vehicle_id: string;
@@ -152,29 +183,13 @@ export interface RealtimeEventMap {
     longitude?: number;
     metadata?: RealtimeMetadata;
   };
-  'geofence:allowed-zone-updated': {
-    vehicle_id: string;
-    allowed_zone_id: number | null;
-    status: 'active' | 'disabled';
-    membership_state?: 'unknown' | 'inside' | 'outside' | 'suspect';
-    last_changed_at?: string | null;
-  };
-  'geofence:allowed-zone-state-changed': {
-    device_id?: string;
-    vehicle_id: string;
-    allowed_zone_id: number;
-    previous_membership_state: 'unknown' | 'inside' | 'outside' | 'suspect';
-    membership_state: 'unknown' | 'inside' | 'outside' | 'suspect';
-    last_changed_at: string;
-    latitude?: number;
-    longitude?: number;
-    metadata?: RealtimeMetadata;
-  };
   'activity:new': {
     id: number;
     type: string;
     message: string;
     timestamp: string;
+    vehicle_id?: string | null;
+    device_id?: string | null;
   };
 
   'geofence:enter': {

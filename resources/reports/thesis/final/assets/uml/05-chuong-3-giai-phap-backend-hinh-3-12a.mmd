@@ -1,13 +1,14 @@
 flowchart LR
-    Device["Thiết bị theo dõi"] -->|rawdata / status / events / firmware| Broker["EMQX"]
-    Broker -->|Subscribe| Bridge["MQTT Bridge"]
-    Bridge -->|Ghi telemetry| VictoriaMetricsNode["VictoriaMetrics"]
-    Bridge -->|Ghi log| VictoriaLogsNode["VictoriaLogs"]
-    Bridge -->|Cập nhật trạng thái / session| PostgreSQLNode["PostgreSQL"]
-    Bridge -->|Publish internal/events/#| Broker
-    Broker -->|Realtime listener| API["Backend API"]
-    Dash["Giao diện web"] -->|REST request| API
-    API -->|Socket.IO| Dash["Giao diện web"]
-    API -->|Publish topic commands| Broker
-    Broker -->|Commands| Device
+    Device["Thiết bị theo dõi"] -->|publish telemetry| Broker["EMQX"]
+    Broker --> Bridge["MQTT Bridge"]
+    Bridge --> Stores["PostgreSQL / Metrics / Logs"]
+    Bridge -->|publish internal/events/#| Broker
+
+    Dashboard["Dashboard web"] -->|REST: trạng thái / lịch sử / hành trình| API["Backend API"]
+    Broker -->|listener thời gian thực| API
+    API -->|Socket.IO / WebSocket| Dashboard
+
+    Dashboard -->|lệnh OTA / cấu hình| API
+    API -->|publish commands| Broker
+    Broker -->|topic commands| Device
 

@@ -1,18 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { MapPinned, Radio } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { MapPinned, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { deviceServices } from '@/lib/api/devices';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DeviceDetailModalContainer } from '@/features/devices/components/device-detail-modal/modal-container';
+import { deviceServices } from '@/lib/api/devices';
 import { VehicleDetailContent } from './vehicle-detail-content';
 
 export const VehicleDetailModal = ({
@@ -40,11 +35,11 @@ export const VehicleDetailModal = ({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="flex max-h-[95dvh] w-[min(calc(100vw-1rem),1320px)] max-w-none flex-col overflow-hidden p-0 sm:w-[min(calc(100vw-4rem),1320px)] sm:max-w-none">
-          <DialogHeader className="border-b px-6 py-5 pr-14">
+          <DialogHeader className="shrink-0 border-b px-6 py-5 pr-14">
             <DialogTitle>{vehicle?.plateNumber ?? vehicle?.vehicleId ?? 'Chi tiết phương tiện'}</DialogTitle>
           </DialogHeader>
 
-          <div className="flex flex-wrap items-center gap-2 border-b bg-muted/10 px-6 py-3">
+          <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-muted/10 px-6 py-3">
             <Button asChild variant="outline" size="sm">
               <Link href="/dashboard/operations/map">
                 <MapPinned className="mr-2 h-4 w-4" />

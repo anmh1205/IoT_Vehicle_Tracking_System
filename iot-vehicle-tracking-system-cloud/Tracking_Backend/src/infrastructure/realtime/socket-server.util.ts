@@ -238,10 +238,10 @@ const getVehicleDeviceId = async (vehicleId: string): Promise<string | null> => 
 };
 
 const resolvePayloadDeviceId = async (payload: {
-  deviceId?: string | null;
-  device_id?: string | null;
-  vehicleId?: string | null;
-  vehicle_id?: string | null;
+  deviceId?: unknown;
+  device_id?: unknown;
+  vehicleId?: unknown;
+  vehicle_id?: unknown;
 }): Promise<string | null> => {
   const directDeviceId = normalizeDeviceId(payload.deviceId ?? payload.device_id);
   if (directDeviceId) {
@@ -295,6 +295,32 @@ const emitNotificationEvent = async <T extends {
   recordEventEmission(event);
 };
 
+const emitDashboardDeviceEvent = async <T extends {
+  deviceId?: unknown;
+  device_id?: unknown;
+  vehicleId?: unknown;
+  vehicle_id?: unknown;
+}>(
+  server: TypedIOServer,
+  event: string,
+  payload: T,
+): Promise<void> => {
+  const namespace = server.of('/dashboard');
+  const deviceId = await resolvePayloadDeviceId(payload);
+
+  if (!deviceId) {
+    namespace.to(SYSTEM_ADMIN_ROOM).emit(event, payload);
+    recordEventEmission(event);
+    return;
+  }
+
+  const userIds = await getDeviceNotificationUserIds(deviceId);
+  userIds.forEach((userId) => {
+    namespace.to(`user:${userId}`).emit(event, payload);
+  });
+  recordEventEmission(event);
+};
+
 const registerEventBridges = (server: TypedIOServer): void => {
   subscribeEvent('device:status', (payload) => emitDeviceEvent(server, 'device:status', payload));
   subscribeEvent('device:position', (payload) => emitDeviceEvent(server, 'device:position', payload));
@@ -316,14 +342,53 @@ const registerEventBridges = (server: TypedIOServer): void => {
   });
 
   subscribeEvent('stats:update', (payload) => {
-    server.of('/dashboard').emit('stats:update', payload);
-    recordEventEmission('stats:update');
+    void emitDashboardDeviceEvent(server, 'stats:update', payload).catch((error) => {
+      log.error('Failed to emit scoped dashboard stats update', { error });
+    });
   });
 
   subscribeEvent('alert:new', (payload) => {
-    server.of('/dashboard').emit('alert:new', payload);
+    void emitDashboardDeviceEvent(server, 'alert:new', payload).catch((error) => {
+      log.error('Failed to emit scoped dashboard alert', { error });
+    });
     void emitNotificationEvent(server, 'alert:new', payload).catch((error) => {
       log.error('Failed to emit scoped alert notification', { error });
+    });
+  });
+
+  subscribeEvent('alert:updated', (payload) => {
+    void emitDashboardDeviceEvent(server, 'alert:updated', payload).catch((error) => {
+      log.error('Failed to emit scoped dashboard alert update', { error });
+    });
+    void emitNotificationEvent(server, 'alert:updated', payload).catch((error) => {
+      log.error('Failed to emit scoped alert update notification', { error });
+    });
+  });
+
+  subscribeEvent('alert:deleted', (payload) => {
+    void emitDashboardDeviceEvent(server, 'alert:deleted', payload).catch((error) => {
+      log.error('Failed to emit scoped dashboard alert deletion', { error });
+    });
+    void emitNotificationEvent(server, 'alert:deleted', payload).catch((error) => {
+      log.error('Failed to emit scoped alert deletion notification', { error });
+    });
+  });
+
+  subscribeEvent('violation:new', (payload) => {
+    void emitDashboardDeviceEvent(server, 'violation:new', payload).catch((error) => {
+      log.error('Failed to emit scoped dashboard violation', { error });
+    });
+    void emitNotificationEvent(server, 'violation:new', payload).catch((error) => {
+      log.error('Failed to emit scoped violation notification', { error });
+    });
+  });
+
+  subscribeEvent('violation:updated', (payload) => {
+    void emitDashboardDeviceEvent(server, 'violation:updated', payload).catch((error) => {
+      log.error('Failed to emit scoped dashboard violation update', { error });
+    });
+    void emitNotificationEvent(server, 'violation:updated', payload).catch((error) => {
+      log.error('Failed to emit scoped violation update notification', { error });
     });
   });
 
@@ -338,42 +403,39 @@ const registerEventBridges = (server: TypedIOServer): void => {
   });
 
   subscribeEvent('activity:new', (payload) => {
-    server.of('/dashboard').emit('activity:new', payload);
-    recordEventEmission('activity:new');
+    void emitDashboardDeviceEvent(server, 'activity:new', payload).catch((error) => {
+      log.error('Failed to emit scoped dashboard activity', { error });
+    });
   });
 
   subscribeEvent('zone:updated', (payload) => {
-    server.of('/notifications').emit('zone:updated', payload);
-    server.of('/dashboard').emit('zone:updated', payload);
-    recordEventEmission('zone:updated');
+    void emitNotificationEvent(server, 'zone:updated', payload).catch((error) => {
+      log.error('Failed to emit scoped zone notification', { error });
+    });
+    void emitDashboardDeviceEvent(server, 'zone:updated', payload).catch((error) => {
+      log.error('Failed to emit scoped dashboard zone update', { error });
+    });
   });
 
   subscribeEvent('zone:state-changed', (payload) => {
-    server.of('/notifications').emit('zone:state-changed', payload);
-    server.of('/dashboard').emit('zone:state-changed', payload);
-    recordEventEmission('zone:state-changed');
+    void emitNotificationEvent(server, 'zone:state-changed', payload).catch((error) => {
+      log.error('Failed to emit scoped zone state notification', { error });
+    });
+    void emitDashboardDeviceEvent(server, 'zone:state-changed', payload).catch((error) => {
+      log.error('Failed to emit scoped dashboard zone state update', { error });
+    });
   });
 
   subscribeEvent('geofence:enter', (payload) => {
-    server.of('/notifications').emit('geofence:enter', payload);
-    recordEventEmission('geofence:enter');
+    void emitNotificationEvent(server, 'geofence:enter', payload).catch((error) => {
+      log.error('Failed to emit scoped legacy geofence enter notification', { error });
+    });
   });
 
   subscribeEvent('geofence:exit', (payload) => {
-    server.of('/notifications').emit('geofence:exit', payload);
-    recordEventEmission('geofence:exit');
-  });
-
-  subscribeEvent('geofence:allowed-zone-updated', (payload) => {
-    server.of('/notifications').emit('geofence:allowed-zone-updated', payload);
-    server.of('/dashboard').emit('geofence:allowed-zone-updated', payload);
-    recordEventEmission('geofence:allowed-zone-updated');
-  });
-
-  subscribeEvent('geofence:allowed-zone-state-changed', (payload) => {
-    server.of('/notifications').emit('geofence:allowed-zone-state-changed', payload);
-    server.of('/dashboard').emit('geofence:allowed-zone-state-changed', payload);
-    recordEventEmission('geofence:allowed-zone-state-changed');
+    void emitNotificationEvent(server, 'geofence:exit', payload).catch((error) => {
+      log.error('Failed to emit scoped legacy geofence exit notification', { error });
+    });
   });
 
   subscribeEvent('export:progress', (payload) => {

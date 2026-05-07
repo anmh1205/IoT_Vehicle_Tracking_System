@@ -25,6 +25,8 @@ export interface Alert {
   vehicle_plate?: string | null;
   customer_name?: string | null;
   device_name?: string | null;
+  trip_code?: string | null;
+  geofence_name?: string | null;
 }
 
 export interface AlertPublic {
@@ -36,6 +38,8 @@ export interface AlertPublic {
   deviceName?: string | null;
   tripId: number | null;
   geofenceId: number | null;
+  tripCode?: string | null;
+  geofenceName?: string | null;
   alertType: string;
   source: 'device' | 'ecu';
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -84,6 +88,8 @@ export interface AlertListQuery {
   status?: string;
   severity?: string;
   alertType?: string;
+  source?: 'device' | 'ecu' | 'obd' | 'system';
+  search?: string;
   vehicleId?: string;
   deviceId?: string;
 }

@@ -3,7 +3,7 @@ import { INTERNAL_TOPICS, INTERNAL_QOS } from '../constants/topics';
 import { logger } from '../infrastructure/logger';
 import { generateCorrelationId } from '../utils/correlation.util';
 
-type InternalEventType = 'status' | 'alert' | 'session' | 'data' | 'zone' | 'firmware';
+type InternalEventType = 'status' | 'alert' | 'session' | 'data' | 'zone' | 'firmware' | 'command';
 
 const TOPIC_MAP: Record<InternalEventType, string> = {
   status: INTERNAL_TOPICS.DEVICE_STATUS,
@@ -12,6 +12,7 @@ const TOPIC_MAP: Record<InternalEventType, string> = {
   data: INTERNAL_TOPICS.DEVICE_DATA,
   zone: INTERNAL_TOPICS.DEVICE_ZONE,
   firmware: INTERNAL_TOPICS.DEVICE_FIRMWARE,
+  command: INTERNAL_TOPICS.DEVICE_COMMAND,
 };
 
 /**
@@ -24,7 +25,10 @@ export const publishInternalEvent = (
 ): void => {
   const client = getClient();
   if (!client?.connected) {
-    logger.warn(`Cannot publish internal event ${eventType}: MQTT not connected`);
+    logger.warn(
+      { eventType, event: 'internal_event_publish_skipped', reason: 'mqtt_not_connected' },
+      'Internal event publish skipped',
+    );
     return;
   }
 
@@ -41,7 +45,7 @@ export const publishInternalEvent = (
 
   client.publish(topic, JSON.stringify(envelope), { qos }, (err) => {
     if (err) {
-      logger.error({ err, eventType }, 'Failed to publish internal event');
+      logger.error({ err, eventType, topic, qos, event: 'internal_event_publish_failed' }, 'Internal event publish failed');
     }
   });
 };

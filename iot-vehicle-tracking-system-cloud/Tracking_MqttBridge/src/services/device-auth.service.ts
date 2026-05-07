@@ -31,7 +31,7 @@ export const verifyDeviceToken = async (
     );
     return result.rows[0] ?? null;
   } catch (err) {
-    logger.error({ err, deviceId }, 'Device auth verification failed');
+    logger.error({ err, deviceId, event: 'device_auth_verification_failed' }, 'Device auth verification failed');
     return null;
   }
 };

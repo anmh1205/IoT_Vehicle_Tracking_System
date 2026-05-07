@@ -54,6 +54,14 @@
   --safe-area-right: env(safe-area-inset-right, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
+  --layer-sidebar: 80;
+  --layer-header: 100;
+  --layer-map-overlay: 40;
+  --layer-map-surface: 45;
+  --layer-floating: 1450;
+  --layer-dialog-backdrop: 1400;
+  --layer-dialog: 1410;
+  --layer-toast: 1500;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -203,4 +211,40 @@
 .tracking-map-cluster--xl {
   background: radial-gradient(circle at 28% 24%, #fb7185, #dc2626 74%);
   font-size: 1.26rem;
+}
+
+.leaflet-container {
+  z-index: 0;
+}
+
+.leaflet-pane {
+  z-index: 10;
+}
+
+.leaflet-tile-pane {
+  z-index: 10;
+}
+
+.leaflet-overlay-pane {
+  z-index: 20;
+}
+
+.leaflet-shadow-pane {
+  z-index: 25;
+}
+
+.leaflet-marker-pane {
+  z-index: 30;
+}
+
+.leaflet-tooltip-pane {
+  z-index: 35;
+}
+
+.leaflet-popup-pane {
+  z-index: 40;
+}
+
+.leaflet-control {
+  z-index: 45;
 }

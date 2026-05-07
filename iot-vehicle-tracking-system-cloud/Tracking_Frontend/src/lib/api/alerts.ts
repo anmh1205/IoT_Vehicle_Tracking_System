@@ -5,7 +5,57 @@ const EXACT_ALERT_TITLE_LABELS: Record<string, string> = {
   'mock alert: harsh braking detected': 'Cảnh báo mô phỏng: Phát hiện phanh gấp',
   'mock alert: vehicle exited warehouse perimeter': 'Cảnh báo mô phỏng: Xe đã rời chu vi kho',
   'mock alert: speed threshold exceeded': 'Cảnh báo mô phỏng: Vượt ngưỡng tốc độ',
-  'mock alert: device offline during transfer': 'Cảnh báo mô phỏng: Thiết bị mất kết nối khi truyền dữ liệu',
+  'mock alert: device offline during transfer':
+    'Cảnh báo mô phỏng: Thiết bị mất kết nối khi truyền dữ liệu',
+};
+
+const ALERT_SEVERITY_LABELS: Record<string, string> = {
+  critical: 'Nghiêm trọng',
+  high: 'Cao',
+  medium: 'Trung bình',
+  low: 'Thấp',
+};
+
+const ALERT_STATUS_LABELS: Record<string, string> = {
+  active: 'Đang hoạt động',
+  acknowledged: 'Đã xác nhận',
+  resolved: 'Đã giải quyết',
+  dismissed: 'Đã bỏ qua',
+};
+
+const ALERT_TYPE_LABELS: Record<string, string> = {
+  speeding: 'Vượt tốc độ',
+  geofence: 'Vùng',
+  geofence_enter: 'Vào vùng',
+  geofence_exit: 'Rời vùng',
+  zone_enter: 'Vào vùng',
+  zone_exit: 'Rời vùng',
+  zone_outside_periodic: 'Đang ở ngoài vùng',
+  offline: 'Mất kết nối',
+  device_offline: 'Mất kết nối thiết bị',
+  maintenance: 'Bảo trì',
+  maintenance_due: 'Khuyến nghị bảo trì',
+  high_imu_accel_delta: 'Gia tốc IMU cao',
+  harsh_braking: 'Phanh gấp',
+  idle_too_long: 'Dừng quá lâu',
+  other: 'Khác',
+};
+
+const normalizeLabelKey = (value: unknown) => String(value ?? '').trim().toLowerCase();
+
+export const getAlertSeverityLabel = (value: unknown, fallback = 'Chưa xác định') => {
+  const key = normalizeLabelKey(value);
+  return ALERT_SEVERITY_LABELS[key] ?? (key || fallback);
+};
+
+export const getAlertStatusLabel = (value: unknown, fallback = 'Chưa xác định') => {
+  const key = normalizeLabelKey(value);
+  return ALERT_STATUS_LABELS[key] ?? (key || fallback);
+};
+
+export const getAlertTypeLabel = (value: unknown, fallback = 'Chưa xác định') => {
+  const key = normalizeLabelKey(value);
+  return ALERT_TYPE_LABELS[key] ?? (key || fallback);
 };
 
 const translateDtcStatus = (value: string) =>
@@ -38,17 +88,20 @@ const translateInspectionTargets = (value: string) =>
 
 export const isObdMaintenanceAlert = (item: any): boolean => {
   const signature = `${String(item?.title ?? '')} ${String(item?.message ?? '')}`.toLowerCase();
+  const source = String(item?.source ?? '').toLowerCase();
+  const hasObdToken = /(^|[^a-z0-9])(obd|dtc|mil|ecu|[pcbu][0-3][0-9a-f]{3})([^a-z0-9]|$)/i.test(
+    signature,
+  );
 
   return (
     item?.alertType === 'maintenance_due' &&
-    (signature.includes('obd') ||
-      signature.includes('dtc') ||
+    (source === 'ecu' ||
+      source === 'obd' ||
+      hasObdToken ||
       signature.includes('coolant') ||
       signature.includes('voltage') ||
       signature.includes('idle-load') ||
-      signature.includes('channel') ||
-      signature.includes('brake') ||
-      signature.includes('maintenance'))
+      signature.includes('channel'))
   );
 };
 
@@ -56,7 +109,9 @@ export const localizeAlertTitle = (
   title: string | null | undefined,
   alertType?: string | null,
 ): string | null => {
-  if (!title) return title ?? null;
+  if (!title) {
+    return title ?? null;
+  }
 
   const normalized = title.trim().toLowerCase();
   const exactMatch = EXACT_ALERT_TITLE_LABELS[normalized];
@@ -92,7 +147,9 @@ export const localizeAlertMessage = (
   message: string | null | undefined,
   _alertType?: string | null,
 ): string | null => {
-  if (!message) return message ?? null;
+  if (!message) {
+    return message ?? null;
+  }
 
   const trimmed = message.trim();
   const exactLabels: Record<string, string> = {
@@ -154,7 +211,9 @@ export const localizeAlertMessage = (
   return message;
 };
 
-export const localizeAlertForDisplay = <T extends Record<string, any>>(alert: T): T & {
+export const localizeAlertForDisplay = <T extends Record<string, any>>(
+  alert: T,
+): T & {
   displayTitle: string | null;
   displayMessage: string | null;
 } => ({

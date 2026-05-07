@@ -15,17 +15,25 @@
 /**
  * @file modem_lte_uart_profile.c
  * @brief UART profile, RDY token, and AT-sync diagnostics for LTE startup.
+ * This translation unit belongs to the SIM7600 AT modem adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
 
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
+
 bool modem_lte_rdy_seen_in_cycle(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_rdy_seen;
 }
 
 void modem_lte_clear_rdy_token(void) {
+    // Reset LTE clear RDY token here so stale data does not leak into the next cycle.
     s_rdy_seen = false;
 }
 
 void modem_lte_mark_rdy_seen(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     s_rdy_seen = true;
 }
 
@@ -37,6 +45,7 @@ void modem_lte_mark_rdy_seen(void) {
  * @param urc_line URC line from modem.
  */
 void modem_lte_on_urc_rdy(const char *urc_line) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (urc_line == NULL) {
         return;
     }
@@ -54,6 +63,7 @@ void modem_lte_on_urc_rdy(const char *urc_line) {
  * @return String name ("ON" or "OFF").
  */
 const char *modem_lte_inverse_name(uint32_t inverse_mask) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return (inverse_mask & UART_SIGNAL_RXD_INV) != 0U ? "ON" : "OFF";
 }
 
@@ -64,6 +74,7 @@ const char *modem_lte_inverse_name(uint32_t inverse_mask) {
  * @return String representation ("5"-"8").
  */
 const char *modem_lte_data_bits_name(uart_word_length_t data_bits) {
+    // Translate LTE data bits name into a readable label so logs and diagnostics stay easy to follow.
     switch (data_bits) {
         case UART_DATA_5_BITS:
             return "5";
@@ -85,6 +96,7 @@ const char *modem_lte_data_bits_name(uart_word_length_t data_bits) {
  * @return String representation ("N", "E", "O").
  */
 const char *modem_lte_parity_name(uart_parity_t parity) {
+    // Translate LTE parity name into a readable label so logs and diagnostics stay easy to follow.
     switch (parity) {
         case UART_PARITY_DISABLE:
             return "N";
@@ -104,6 +116,7 @@ const char *modem_lte_parity_name(uart_parity_t parity) {
  * @return String representation ("1", "1.5", "2").
  */
 const char *modem_lte_stop_bits_name(uart_stop_bits_t stop_bits) {
+    // Translate LTE stop bits name into a readable label so logs and diagnostics stay easy to follow.
     switch (stop_bits) {
         case UART_STOP_BITS_1:
             return "1";
@@ -123,6 +136,7 @@ const char *modem_lte_stop_bits_name(uart_stop_bits_t stop_bits) {
  * @return String name.
  */
 const char *modem_lte_source_clk_name(uart_sclk_t source_clk) {
+    // Translate LTE source clk name into a readable label so logs and diagnostics stay easy to follow.
     if (source_clk == UART_SCLK_DEFAULT) {
         return "DEFAULT";
     }
@@ -156,6 +170,7 @@ const char *modem_lte_source_clk_name(uart_sclk_t source_clk) {
  * @return ESP_OK on success, error code on failure.
  */
 static esp_err_t modem_lte_apply_uart_cfg(const modem_lte_uart_probe_cfg_t *cfg) {
+    // Apply LTE apply uart cfg in one place so this module keeps a single authoritative writer.
     if (cfg == NULL) {
         return ESP_ERR_INVALID_ARG;
     }
@@ -191,6 +206,7 @@ static esp_err_t modem_lte_apply_uart_cfg(const modem_lte_uart_probe_cfg_t *cfg)
  * @return ESP_OK on success.
  */
 esp_err_t modem_lte_apply_at_sync_config(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return modem_lte_apply_uart_cfg(&s_active_uart_cfg);
 }
 
@@ -200,6 +216,7 @@ esp_err_t modem_lte_apply_at_sync_config(void) {
  * Sets active config to default values.
  */
 void modem_lte_set_fixed_uart_cfg(void) {
+    // Copy the caller-provided LTE set fixed uart cfg into module-local state after lightweight guards.
     s_active_uart_cfg = (modem_lte_uart_probe_cfg_t){
         .tx_pin = PIN_MODEM_TX,
         .rx_pin = PIN_MODEM_RX,
@@ -223,6 +240,7 @@ void modem_lte_set_fixed_uart_cfg(void) {
  * @param preview_size Buffer capacity.
  */
 void modem_lte_response_preview(const char *response, char *preview, size_t preview_size) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (preview == NULL || preview_size == 0U) {
         return;
     }
@@ -249,6 +267,7 @@ void modem_lte_response_preview(const char *response, char *preview, size_t prev
  * @param response Response to log.
  */
 void modem_lte_log_at_probe_response(const char *response) {
+    // Emit a focused LTE log AT probe response diagnostic here so field logs explain the current stage.
     if (response == NULL || response[0] == '\0') {
         return;
     }
@@ -265,6 +284,7 @@ void modem_lte_log_at_probe_response(const char *response) {
  * Logs active UART configuration for debugging.
  */
 void modem_lte_log_fixed_uart_cfg(void) {
+    // Emit a focused LTE log fixed uart cfg diagnostic here so field logs explain the current stage.
     ESP_LOGI(MODEM_LTE_TAG,
              "AT sync fixed UART tx=%d rx=%d baud=%lu invert=%s fmt=%s%s%s clk=%s",
              (int)s_active_uart_cfg.tx_pin,
@@ -288,6 +308,7 @@ void modem_lte_log_fixed_uart_cfg(void) {
  * Toggles DTR line to wake modem from sleep.
  */
 void modem_lte_force_dtr_wake_pulse(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
 #if !MODEM_LTE_ENABLE_DTR_WAKE_PULSE
     return;
 #else

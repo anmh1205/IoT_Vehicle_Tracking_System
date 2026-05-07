@@ -9,7 +9,12 @@
 /**
  * @file rtc_context.h
  * @brief RTC-retained runtime continuity model.
+ * This header belongs to the shared kernel layer and collects the shared models, bounds, and helper contracts that multiple components reuse.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Persistent RTC context retained across deep-sleep resets.

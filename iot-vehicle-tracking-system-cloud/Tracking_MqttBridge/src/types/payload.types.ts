@@ -86,6 +86,7 @@ export interface RawDataPayload {
   auth_token: string;
   timestamp: number;
   uptime?: number;
+  session_id?: number;
   local_session_key?: number;
   canonical_session_id?: string;
   boot_id?: string;

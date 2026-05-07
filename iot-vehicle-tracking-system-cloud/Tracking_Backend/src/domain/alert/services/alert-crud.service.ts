@@ -14,6 +14,8 @@ const sanitizeAlert = (a: Alert): AlertPublic => ({
   deviceName: a.device_name ?? null,
   tripId: a.trip_id,
   geofenceId: a.geofence_id,
+  tripCode: a.trip_code ?? null,
+  geofenceName: a.geofence_name ?? null,
   alertType: a.alert_type,
   source: a.source,
   severity: a.severity,
@@ -95,6 +97,16 @@ export const createAlert = async (input: CreateAlertInput): Promise<AlertPublic>
     type: 'alert',
     message: `New ${alert.severity} alert: ${alert.title}`,
     timestamp: alert.created_at.toISOString(),
+    vehicle_id: alert.vehicle_id,
+    device_id: alert.device_id,
+  });
+
+  publishEvent('stats:update', {
+    reason: 'alert:new',
+    alertId: alert.id,
+    device_id: alert.device_id,
+    vehicle_id: alert.vehicle_id,
+    timestamp: alert.created_at.toISOString(),
   });
 
   return result;
@@ -126,7 +138,24 @@ export const acknowledgeAlert = async (id: number, userId: number): Promise<Aler
     entityId: String(id),
   });
 
-  return sanitizeAlert(updated);
+  const result = sanitizeAlert(updated);
+  publishEvent('alert:updated', {
+    id: updated.id,
+    vehicle_id: updated.vehicle_id,
+    device_id: updated.device_id,
+    status: updated.status,
+    action: 'acknowledge',
+    updated_at: updated.updated_at.toISOString(),
+  });
+  publishEvent('stats:update', {
+    reason: 'alert:updated',
+    alertId: updated.id,
+    device_id: updated.device_id,
+    vehicle_id: updated.vehicle_id,
+    timestamp: updated.updated_at.toISOString(),
+  });
+
+  return result;
 };
 
 export const resolveAlert = async (
@@ -159,7 +188,24 @@ export const resolveAlert = async (
     entityId: String(id),
   });
 
-  return sanitizeAlert(updated);
+  const result = sanitizeAlert(updated);
+  publishEvent('alert:updated', {
+    id: updated.id,
+    vehicle_id: updated.vehicle_id,
+    device_id: updated.device_id,
+    status: updated.status,
+    action: 'resolve',
+    updated_at: updated.updated_at.toISOString(),
+  });
+  publishEvent('stats:update', {
+    reason: 'alert:updated',
+    alertId: updated.id,
+    device_id: updated.device_id,
+    vehicle_id: updated.vehicle_id,
+    timestamp: updated.updated_at.toISOString(),
+  });
+
+  return result;
 };
 
 export const dismissAlert = async (id: number): Promise<AlertPublic> => {
@@ -178,7 +224,24 @@ export const dismissAlert = async (id: number): Promise<AlertPublic> => {
   }
 
   logger.info(`Alert ${id} dismissed`);
-  return sanitizeAlert(updated);
+  const result = sanitizeAlert(updated);
+  publishEvent('alert:updated', {
+    id: updated.id,
+    vehicle_id: updated.vehicle_id,
+    device_id: updated.device_id,
+    status: updated.status,
+    action: 'dismiss',
+    updated_at: updated.updated_at.toISOString(),
+  });
+  publishEvent('stats:update', {
+    reason: 'alert:updated',
+    alertId: updated.id,
+    device_id: updated.device_id,
+    vehicle_id: updated.vehicle_id,
+    timestamp: updated.updated_at.toISOString(),
+  });
+
+  return result;
 };
 
 export const deleteAlert = async (id: number): Promise<void> => {
@@ -189,4 +252,17 @@ export const deleteAlert = async (id: number): Promise<void> => {
 
   await alertRepo.remove(id);
   logger.info(`Alert ${id} deleted`);
+  publishEvent('alert:deleted', {
+    id: existing.id,
+    vehicle_id: existing.vehicle_id,
+    device_id: existing.device_id,
+    deleted_at: new Date().toISOString(),
+  });
+  publishEvent('stats:update', {
+    reason: 'alert:deleted',
+    alertId: existing.id,
+    device_id: existing.device_id,
+    vehicle_id: existing.vehicle_id,
+    timestamp: new Date().toISOString(),
+  });
 };

@@ -49,6 +49,10 @@
  *    - Corrupt record: skip and advance replay_seq
  */
 
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
+
 static const char *TAG = "OFFLINE_QUEUE";
 /* Retry delayed SD mounts instead of probing every enqueue/replay tick. */
 #define OFFLINE_QUEUE_SD_MOUNT_RETRY_MS 30000ULL
@@ -75,7 +79,14 @@ typedef struct {
 static offline_queue_ctx_t s_ctx;
 
 #if CONFIG_TRACKER_SD_DIAG_ENABLE
+/**
+ * @brief Compute queue depth directly from persisted metadata.
+ *
+ * @param[in] meta Queue metadata snapshot from the SD log store.
+ * @return Number of unread records represented by `meta`.
+ */
 static uint32_t offline_queue_depth_from_meta(const sd_log_meta_t *meta) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (meta == NULL) {
         return 0;
     }
@@ -88,7 +99,14 @@ static uint32_t offline_queue_depth_from_meta(const sd_log_meta_t *meta) {
     return meta->write_seq - replay_seq + 1;
 }
 
+/**
+ * @brief Emit a diagnostic line when the online/offline gate changes.
+ *
+ * @param[in] previous_online Previous queue online state.
+ * @param[in] next_online New queue online state.
+ */
 static void offline_queue_log_link_transition(bool previous_online, bool next_online) {
+    // Log the link-state transition here so replay depth and SD availability are visible when connectivity changes.
     if (!sd_log_store_is_mounted()) {
         ESP_LOGI(TAG,
                  "link transition prev_online=%d next_online=%d sd_mounted=0",
@@ -116,7 +134,13 @@ static void offline_queue_log_link_transition(bool previous_online, bool next_on
              (unsigned long)offline_queue_depth_from_meta(&meta));
 }
 
+/**
+ * @brief Emit a diagnostic summary for an enqueue attempt/result.
+ *
+ * @param[in] rec Record that was just staged for append.
+ */
 static void offline_queue_log_enqueue_result(const sd_log_record_t *rec) {
+    // Log the enqueue result here so field traces show exactly what entered offline storage.
     if (rec == NULL) {
         return;
     }
@@ -161,7 +185,13 @@ static void offline_queue_log_enqueue_result(const sd_log_record_t *rec) {
 }
 #endif
 
+/**
+ * @brief Build the replay retry policy used after publish failures.
+ *
+ * @return Copy of the retry policy configuration for replay failures.
+ */
 static retry_policy_t offline_queue_replay_retry_policy(void) {
+    // Replay replay retry policy in order while preserving retry timing and commit semantics.
     retry_policy_t policy = {
         .mode = RETRY_MODE_EXPONENTIAL,
         .base_delay_ms = (uint32_t)CONFIG_TRACKER_SD_RETRY_BASE_MS,
@@ -181,12 +211,20 @@ static const retry_policy_t s_sd_mount_retry_policy = {
     .jitter_ms = 0,
 };
 
+/**
+ * @brief Classify whether a record type is critical enough for QoS1 replay.
+ *
+ * @param[in] type Offline record type.
+ * @return true when the record should be treated as critical.
+ */
 static bool offline_queue_is_critical(offline_record_type_t type) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return type == OFFLINE_RECORD_STATUS || type == OFFLINE_RECORD_EVENT ||
            type == OFFLINE_RECORD_FIRMWARE;
 }
 
 static const char *offline_queue_type_name(offline_record_type_t type) {
+    // Translate type name into a readable label so logs and diagnostics stay easy to follow.
     switch (type) {
         case OFFLINE_RECORD_STATUS:
             return "status";
@@ -201,6 +239,7 @@ static const char *offline_queue_type_name(offline_record_type_t type) {
 }
 
 static const char *offline_queue_topic_from_type(offline_record_type_t type) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     switch (type) {
         case OFFLINE_RECORD_STATUS:
             return tracker_mqtt_status_topic();
@@ -214,7 +253,13 @@ static const char *offline_queue_topic_from_type(offline_record_type_t type) {
     }
 }
 
+/**
+ * @brief Try mounting the SD log store when logging is enabled and unmounted.
+ *
+ * @param[in] now_ms Current uptime used for retry bookkeeping.
+ */
 static void offline_queue_try_mount(uint64_t now_ms) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!CONFIG_TRACKER_SD_LOG_ENABLE || sd_log_store_is_mounted()) {
         return;
     }
@@ -248,10 +293,20 @@ static void offline_queue_try_mount(uint64_t now_ms) {
              (unsigned long)delay_ms);
 }
 
+/**
+ * @brief Replace one string fragment inside a mutable payload buffer.
+ *
+ * @param[in,out] payload Mutable payload buffer.
+ * @param[in] payload_len Total capacity of `payload`.
+ * @param[in] needle Fragment to replace.
+ * @param[in] replacement Replacement text.
+ * @return true when the replacement succeeded.
+ */
 static bool offline_queue_replace_fragment(char *payload,
                                            size_t payload_len,
                                            const char *needle,
                                            const char *replacement) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (payload == NULL || payload_len == 0 || needle == NULL || replacement == NULL) {
         return false;
     }
@@ -278,9 +333,22 @@ static bool offline_queue_replace_fragment(char *payload,
     return true;
 }
 
+/**
+ * @brief Produce the replay payload string for one stored record.
+ *
+ * Most records replay their persisted payload verbatim. Legacy firmware-status
+ * rows without a job ID are patched into a cloud-safe representation so replay
+ * does not reintroduce stale contract variants.
+ *
+ * @param[in] rec Persisted SD record.
+ * @param[out] scratch_payload Caller-owned mutable buffer for patched payloads.
+ * @param[in] scratch_len Capacity of `scratch_payload`.
+ * @return Pointer to the payload string that should be published.
+ */
 static const char *offline_queue_payload_for_publish(const sd_log_record_t *rec,
                                                      char *scratch_payload,
                                                      size_t scratch_len) {
+    // Rehydrate payload for publish here so later logic reads one coherent snapshot after reset or sleep.
     ESP_RETURN_ON_FALSE(rec != NULL, "", TAG, "record null");
     ESP_RETURN_ON_FALSE(scratch_payload != NULL && scratch_len > 0, rec->payload, TAG, "scratch invalid");
 
@@ -315,10 +383,12 @@ static const char *offline_queue_payload_for_publish(const sd_log_record_t *rec,
  * past them instead of publishing.
  */
 static bool offline_queue_is_stale_obd_rawdata_record(const sd_log_record_t *rec) {
+    // Detect the old "disconnected channel but stale RPM payload" pattern before replay republishes misleading OBD data.
     if (rec == NULL || rec->type != OFFLINE_RECORD_RAWDATA) {
         return false;
     }
 
+    // The replay filter only trips when the channel flags say OBD is unavailable but the payload still carries live signals.
     bool channel_not_ready = strstr(rec->payload, "\"ble_obd_connected\":false") != NULL ||
                              strstr(rec->payload, "\"elm_ready\":false") != NULL;
     bool contains_obd_signal = strstr(rec->payload, "\"signals\":{\"rpm\"") != NULL;
@@ -381,6 +451,7 @@ static bool offline_queue_is_stale_firmware_record(const sd_log_record_t *rec) {
  * @return esp_err_t ESP_OK on MQTT enqueue, ESP_FAIL on publish error.
  */
 static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
+    // Map the persisted record back into the same topic/QoS contract used by live publishes.
     offline_record_type_t type = (offline_record_type_t)rec->type;
     const char *topic = offline_queue_topic_from_type(type);
     const char *topic_class = offline_queue_type_name(type);
@@ -410,6 +481,7 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
     }
 
     telemetry_counters_inc_replay_success();
+    // Critical/QoS1 records only advance once their durable ACK watermark and replay cursor move together.
     ESP_LOGD(TAG,
              "replay publish accepted seq=%lu topic_class=%s qos=%d msg_id=%d",
              (unsigned long)rec->seq,
@@ -419,7 +491,13 @@ static esp_err_t offline_queue_publish_record(const sd_log_record_t *rec) {
     return sd_log_store_ack_critical_and_advance_replay(rec->seq, rec->seq + 1);
 }
 
+/**
+ * @brief Initialize offline queue runtime state and optional SD mount.
+ *
+ * @return ESP_OK when the queue runtime is ready for enqueue/replay calls.
+ */
 esp_err_t offline_queue_init(void) {
+    // Reset runtime-only replay timers and retry state before touching any persisted SD metadata.
     memset(&s_ctx, 0, sizeof(s_ctx));
     s_ctx.last_replay_publish_ms = 0;
     retry_state_reset(&s_ctx.replay_retry);
@@ -505,6 +583,7 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
     rec.gps_fix = gps_fix ? 1 : 0;
     rec.net_up = net_up ? 1 : 0;
     rec.time_trusted = time_trusted ? 1 : 0;
+    // Bound payload size before copying so the persisted fixed-width record always stays NUL-terminated.
     size_t payload_len = strlen(payload);
     if (payload_len >= sizeof(rec.payload)) {
         telemetry_counters_inc_sd_write_fail();
@@ -547,11 +626,18 @@ esp_err_t offline_queue_enqueue(offline_record_type_t type,
     return ESP_OK;
 }
 
+/**
+ * @brief Run one replay step if the queue is online and retry policy allows it.
+ *
+ * The replay loop intentionally publishes at most one record per tick to keep
+ * recovery traffic cooperative with live publishes and modem bandwidth.
+ */
 void offline_queue_replay_tick(void) {
     if (!s_ctx.initialized || !CONFIG_TRACKER_SD_REPLAY_ENABLE || !s_ctx.online) {
         return;
     }
 
+    // Replay only runs when storage and live MQTT path are both usable; otherwise the queue remains purely append-only.
     offline_queue_try_mount(util_uptime_ms());
     if (!sd_log_store_is_mounted()) {
         return;
@@ -567,6 +653,7 @@ void offline_queue_replay_tick(void) {
         return;
     }
 
+    // A minimum inter-publish gap keeps backlog drain cooperative with fresh live telemetry on narrow modem links.
     if (s_ctx.last_replay_publish_ms != 0 &&
         (now_ms - s_ctx.last_replay_publish_ms) < OFFLINE_QUEUE_REPLAY_MIN_PUBLISH_INTERVAL_MS) {
         return;
@@ -606,6 +693,7 @@ void offline_queue_replay_tick(void) {
     }
 
     if (offline_queue_is_stale_firmware_record(&rec)) {
+        // Old boot/replay firmware status rows are acknowledged away so they do not resurrect stale OTA narratives.
         if (sd_log_store_ack_critical_and_advance_replay(rec.seq, rec.seq + 1) == ESP_OK) {
             telemetry_counters_inc_replay_success();
             ESP_LOGI(TAG,
@@ -639,6 +727,11 @@ void offline_queue_replay_tick(void) {
              (unsigned long)delay_ms);
 }
 
+/**
+ * @brief Decide whether live rawdata should slow down due to SD soft quota pressure.
+ *
+ * @return true when the queue is above the soft quota threshold.
+ */
 bool offline_queue_should_throttle_rawdata(void) {
     sd_log_stats_t stats = {0};
     if (sd_log_store_get_stats(&stats) != ESP_OK || stats.quota_bytes == 0) {
@@ -650,6 +743,11 @@ bool offline_queue_should_throttle_rawdata(void) {
     return stats.bytes_used >= soft_limit;
 }
 
+/**
+ * @brief Close the current persisted SD session, if one is active.
+ *
+ * @param[in] clean_shutdown True when the session ended normally.
+ */
 void offline_queue_stop_session(bool clean_shutdown) {
     if (!sd_log_store_is_mounted()) {
         return;
@@ -657,6 +755,11 @@ void offline_queue_stop_session(bool clean_shutdown) {
     (void)sd_log_store_stop_session(clean_shutdown);
 }
 
+/**
+ * @brief Return the current persisted replay depth.
+ *
+ * @return Number of queued records awaiting replay.
+ */
 uint32_t offline_queue_depth(void) {
     sd_log_meta_t meta = {0};
     if (sd_log_store_get_meta(&meta) != ESP_OK) {

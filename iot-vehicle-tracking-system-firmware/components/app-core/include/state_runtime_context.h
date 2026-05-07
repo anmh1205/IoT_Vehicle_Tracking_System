@@ -14,7 +14,12 @@
 /**
  * @file state_runtime_context.h
  * @brief Shared runtime state and policy constants for split FSM modules.
+ * This header belongs to the app-core orchestration layer and defines the orchestration boundary that bootstrap code and adapters rely on during runtime.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /* OBD protocol selectors reused across runtime polling flows. */
 #define OBD_MODE_CURRENT_DATA 0x01
@@ -58,6 +63,7 @@
 #define TRACKER_OBD_FAIL_WINDOW_MS 300000ULL
 #define TRACKER_OBD_LIVE_SIGNAL_MAX_AGE_MS 30000U
 #define TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS 5000U
+#define TRACKER_OBD_ENGINE_ON_EVIDENCE_HOLD_MS 5000U
 #define TRACKER_EVENT_CODE_OBD_CONNECT_FAILED 2001
 #define TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED 2002
 #define TRACKER_SLEEP_REJECT_LOG_INTERVAL_MS 10000ULL
@@ -65,6 +71,7 @@
 #define TRACKER_PENDING_ACTION_DRAIN_LIMIT 4U
 #define TRACKER_MODEM_POWEROFF_SETTLE_MS 250ULL
 #define TRACKER_FAKE_SLEEP_LOOP_STEP_MS 200U
+#define TRACKER_OBD_SLEEP_BLOCK_MAX_AGE_MS 12000U
 
 /** @brief Result codes returned by the async BLE connect worker. */
 typedef enum {
@@ -80,18 +87,27 @@ typedef enum {
     TRACKER_PUBLISH_STATUS_STOPPED,
 } tracker_publish_status_t;
 
+/** @brief Optional override for the user LED state machine. */
+typedef enum {
+    TRACKER_USER_LED_OVERRIDE_NONE = 0,
+    TRACKER_USER_LED_OVERRIDE_ON,
+    TRACKER_USER_LED_OVERRIDE_OFF,
+} tracker_user_led_override_t;
+
 /** @brief Mailbox payload sent back from the async BLE connect worker. */
 typedef struct {
     ble_obd_ctx_t *ctx;
     tracker_ble_connect_result_code_t code;
     uint64_t started_ms;
     bool prime_sample_ready;
+    bool preferred_from_rtc;
 } tracker_ble_connect_result_t;
 
 /** @brief Arguments passed into the async BLE connect worker task. */
 typedef struct {
     uint64_t started_ms;
     char preferred_mac[TRACKER_MAC_ADDR_STR_LEN];
+    bool preferred_from_rtc;
 } tracker_ble_connect_task_args_t;
 
 /** @brief One diagnostic OBD query scheduled by the runtime poller. */
@@ -146,6 +162,7 @@ extern uint32_t s_imu_false_wake_count;
 extern bool s_startup_system_check_log_once;
 extern bool s_user_led_initialized;
 extern uint64_t s_user_led_cycle_started_ms;
+extern tracker_user_led_override_t s_user_led_override;
 extern uint64_t s_last_hw_diag_log_ms;
 extern uint64_t s_heartbeat_started_ms;
 extern bool s_heartbeat_raw_published;
@@ -156,6 +173,7 @@ extern bool s_obd_fail_alert_emitted;
 extern int s_last_obd_fail_alert_code;
 extern uint64_t s_last_obd_fail_alert_ms;
 extern uint64_t s_last_obd_sample_ms;
+extern uint64_t s_last_obd_engine_on_evidence_ms;
 extern bool s_obd_elm_ready;
 extern uint64_t s_obd_fail_window_started_ms;
 extern uint32_t s_obd_fail_window_count;

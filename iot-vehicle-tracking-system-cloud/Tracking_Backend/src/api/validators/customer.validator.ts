@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+const nullableString = (max: number) => z.string().max(max).nullable().optional();
+const nullableEmail = z.union([z.string().email().max(255), z.null()]).optional();
+
 export const createCustomerSchema = z.object({
   customerCode: z
     .string()
@@ -25,12 +28,12 @@ export const createCustomerSchema = z.object({
 export const updateCustomerSchema = z.object({
   name: z.string().min(2).max(200).optional(),
   customerType: z.enum(['individual', 'company']).optional(),
-  email: z.string().email().max(255).optional(),
-  phone: z.string().max(20).optional(),
-  address: z.string().max(500).optional(),
-  taxCode: z.string().max(50).optional(),
-  contactPerson: z.string().max(200).optional(),
-  notes: z.string().max(500).optional(),
+  email: nullableEmail,
+  phone: nullableString(20),
+  address: nullableString(500),
+  taxCode: nullableString(50),
+  contactPerson: nullableString(200),
+  notes: nullableString(500),
   status: z.enum(['active', 'inactive', 'suspended']).optional(),
 });
 

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#222222"/>
+    </marker>
+    <style>
+      .title { font-family: Arial, Helvetica, sans-serif; font-size: 24px; font-weight: 700; fill: #111111; }
+      .label { font-family: Arial, Helvetica, sans-serif; font-size: 26px; font-weight: 700; fill: #1d1d1f; }
+      .text { font-family: Arial, Helvetica, sans-serif; font-size: 21px; fill: #1d1d1f; }
+      .small { font-family: Arial, Helvetica, sans-serif; font-size: 19px; fill: #333333; }
+      .edge { stroke: #222222; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .edge-both { stroke: #222222; stroke-width: 2.5; fill: none; marker-start: url(#arrow); marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="900" fill="#ffffff"/>
+
+  <text x="160" y="112" class="small">MỐI TƯƠNG QUAN GIỮA CÁC NHÓM VẤN ĐỀ KỸ THUẬT CHÍNH</text>
+
+  <rect x="585" y="85" width="430" height="125" rx="14" ry="14" fill="#fde7e7" stroke="#d97676" stroke-width="3"/>
+  <text x="800" y="132" text-anchor="middle" class="label">A</text>
+  <text x="800" y="165" text-anchor="middle" class="text">THEO DÕI HÀNH TRÌNH</text>
+  <text x="800" y="193" text-anchor="middle" class="text">(vị trí, trạng thái, dữ liệu đủ liên tục)</text>
+
+  <rect x="160" y="555" width="445" height="145" rx="14" ry="14" fill="#e8f3ff" stroke="#69a7df" stroke-width="3"/>
+  <text x="382.5" y="602" text-anchor="middle" class="label">B</text>
+  <text x="382.5" y="635" text-anchor="middle" class="text">DỮ LIỆU VẬN HÀNH VÀ CẢNH BÁO</text>
+  <text x="382.5" y="663" text-anchor="middle" class="text">(thu OBD-II cơ bản, phát hiện bất thường)</text>
+
+  <rect x="995" y="555" width="445" height="145" rx="14" ry="14" fill="#ecf7ea" stroke="#7eb47a" stroke-width="3"/>
+  <text x="1217.5" y="602" text-anchor="middle" class="label">C</text>
+  <text x="1217.5" y="635" text-anchor="middle" class="text">NĂNG LƯỢNG VÀ KHAI THÁC</text>
+  <text x="1217.5" y="663" text-anchor="middle" class="text">(không hao ắc quy, dữ liệu dễ theo dõi)</text>
+
+  <circle cx="800" cy="430" r="108" fill="#ffe98f" stroke="#d8b246" stroke-width="3"/>
+  <text x="800" y="397" text-anchor="middle" class="label">ĐIỂM CÂN BẰNG</text>
+  <text x="800" y="428" text-anchor="middle" class="label">CỦA ĐỒ ÁN</text>
+  <text x="800" y="462" text-anchor="middle" class="small">thiết bị gắn trên xe,</text>
+  <text x="800" y="488" text-anchor="middle" class="small">máy chủ xử lý dữ liệu,</text>
+  <text x="800" y="514" text-anchor="middle" class="small">giao diện quản trị tập trung</text>
+
+  <path class="edge-both" d="M 665 210 L 470 555"/>
+  <path class="edge-both" d="M 935 210 L 1130 555"/>
+  <path class="edge-both" d="M 605 627 L 995 627"/>
+
+  <path class="edge" d="M 748 333 L 520 560"/>
+  <path class="edge" d="M 852 333 L 1080 560"/>
+  <path class="edge" d="M 470 555 L 710 465"/>
+  <path class="edge" d="M 1130 555 L 890 465"/>
+
+  <text x="265" y="327" class="small">Tăng dữ liệu và cảnh báo</text>
+  <text x="260" y="353" class="small">thường làm tải xử lý lớn hơn</text>
+
+  <text x="1075" y="327" class="small">Theo dõi liên tục đòi hỏi</text>
+  <text x="1100" y="353" class="small">nguồn và truyền dữ liệu ổn định</text>
+
+  <text x="655" y="741" class="small">Khai thác sâu hơn thường kéo theo</text>
+  <text x="685" y="767" class="small">chi phí năng lượng và hiển thị tăng</text>
+</svg>

@@ -125,8 +125,8 @@ export const GeofenceForm = ({
 
             {!isQuickEditSupported ? (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Geofence đa giác hoặc hình chữ nhật hiện chưa có trình chỉnh sửa an toàn trong modal
-                này. Hãy dùng trang chi tiết để xem thông tin, tránh làm sai hình học đang lưu.
+                Vùng đa giác hoặc hình chữ nhật hiện chưa có trình chỉnh sửa an toàn trong hộp thoại
+                này. Hãy dùng trang vùng để xem thông tin, tránh làm sai hình học đang lưu.
               </div>
             ) : null}
 
@@ -136,8 +136,8 @@ export const GeofenceForm = ({
                 <div className="rounded-xl border bg-muted/10 px-3 py-3">
                   <p className="text-sm font-medium">{typeLabel}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Luồng tạo và chỉnh nhanh ở đây chỉ hỗ trợ geofence hình tròn để đồng bộ đúng với
-                    phần map và logic bán kính theo km.
+                    Luồng tạo và chỉnh nhanh ở đây chỉ hỗ trợ vùng hình tròn để đồng bộ đúng với
+                    bản đồ và logic bán kính theo km.
                   </p>
                 </div>
               </div>
@@ -270,7 +270,7 @@ export const GeofenceForm = ({
               })
             }
           >
-            {isQuickEditSupported ? 'Lưu vùng giám sát' : 'Chỉ hỗ trợ geofence hình tròn'}
+            {isQuickEditSupported ? 'Lưu vùng giám sát' : 'Chỉ hỗ trợ vùng hình tròn'}
           </Button>
         </DialogFooter>
       </DialogContent>

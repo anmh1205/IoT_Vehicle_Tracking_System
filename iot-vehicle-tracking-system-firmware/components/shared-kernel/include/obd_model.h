@@ -8,7 +8,12 @@
 /**
  * @file obd_model.h
  * @brief Shared OBD telemetry/readiness model types.
+ * This header belongs to the shared kernel layer and collects the shared models, bounds, and helper contracts that multiple components reuse.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 #define TRACKER_OBD_MAX_DTC_CODES 8
 #define TRACKER_OBD_DTC_CODE_LEN 6

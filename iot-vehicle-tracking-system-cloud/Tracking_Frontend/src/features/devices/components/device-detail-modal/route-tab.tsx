@@ -1,13 +1,13 @@
 ﻿'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CalendarRange, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, SkipForward } from 'lucide-react';
+import { CalendarRange, Pause, Play, RotateCcw, SkipForward } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-constants';
+import { SESSION_STATUS_LABELS } from '@/features/devices/components/device-constants';
 import type { DeviceSession, DeviceTelemetryRow } from '@/features/devices/types';
 import { formatDateTime, formatDuration, formatNumber } from '@/lib/utils/date/format';
 import { useDeviceDetailModal } from './modal-context';
@@ -34,6 +34,8 @@ const PERIOD_LABELS: Record<(typeof PERIOD_OPTIONS)[number]['value'], string> = 
   '30d': '30 ngày',
   '90d': '90 ngày',
 };
+
+const PLAYBACK_RATE_OPTIONS = [1, 2, 4] as const;
 
 const SESSION_BADGE_VARIANTS: Record<
   string,
@@ -117,10 +119,9 @@ export const RouteTab = () => {
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
   const [cursor, setCursor] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const playbackRate = 2;
+  const [playbackRate, setPlaybackRate] = useState<(typeof PLAYBACK_RATE_OPTIONS)[number]>(2);
   const [customRangeOpen, setCustomRangeOpen] = useState(false);
   const [customRangeDraft, setCustomRangeDraft] = useState(trackingCustomRange);
-  const [isReplayPanelCollapsed, setIsReplayPanelCollapsed] = useState(false);
   const sessionsListRef = useRef<HTMLDivElement | null>(null);
   const hasStartedReplayRef = useRef(false);
 
@@ -237,6 +238,11 @@ export const RouteTab = () => {
   const startPointLabel = firstPoint ? formatDateTime(firstPoint.timestamp, 'HH:mm dd/MM') : 'Chưa có mốc đầu';
   const endPointLabel = lastPoint ? formatDateTime(lastPoint.timestamp, 'HH:mm dd/MM') : 'Chưa có mốc cuối';
   const coverageLabel = coverageSeconds > 0 ? formatDuration(coverageSeconds) : 'Chưa đủ dữ liệu';
+  const selectedSessionWindowLabel = selectedSession
+    ? `${selectedSession.serverSessionStart ? formatDateTime(selectedSession.serverSessionStart, 'HH:mm dd/MM') : 'Chưa có mốc bắt đầu'} - ${
+        selectedSession.serverSessionEnd ? formatDateTime(selectedSession.serverSessionEnd, 'HH:mm dd/MM') : 'Đang chạy'
+      }`
+    : 'Chọn một phiên bên trái để phát lại lộ trình.';
   const customRangeButtonLabel = trackingPeriod === 'custom'
     ? `${toShortDateLabel(trackingCustomRange.from)} - ${toShortDateLabel(trackingCustomRange.to)}`
     : 'Khoảng thời gian';
@@ -251,6 +257,12 @@ export const RouteTab = () => {
     { label: 'Bao phủ', value: coverageLabel },
     { label: 'Trạng thái', value: replayPoints.length > 0 ? replaySummary : 'Chưa có mốc GPS để phát lại' },
   ];
+  const replayHeadline =
+    replayPoints.length > 0
+      ? replaySummary
+      : fallbackLivePoint
+        ? 'Phiên hiện chỉ có điểm live hiện tại, chưa đủ dữ liệu để phát lại'
+        : 'Chưa có mốc GPS để phát lại';
 
   const handlePlayPause = () => {
     if (replayPoints.length <= 1) {
@@ -401,7 +413,7 @@ export const RouteTab = () => {
                         </p>
                       </div>
                       <Badge variant={SESSION_BADGE_VARIANTS[session.status] ?? 'outline'}>
-                        {DEVICE_STATUS_LABELS[session.status] ?? session.status}
+                        {SESSION_STATUS_LABELS[session.status] ?? session.status}
                       </Badge>
                     </div>
 
@@ -441,140 +453,141 @@ export const RouteTab = () => {
 
       <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border bg-background">
         <div className="border-b px-4 py-3">
-          <p className="text-sm font-semibold">Bản đồ hoạt động và phát lại lộ trình</p>
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-semibold">Bản đồ hoạt động và phát lại lộ trình</p>
+              <p className="mt-1 text-xs text-muted-foreground">{selectedSessionWindowLabel}</p>
+            </div>
+            {selectedSession ? (
+              <Badge variant={SESSION_BADGE_VARIANTS[selectedSession.status] ?? 'outline'}>
+                {SESSION_STATUS_LABELS[selectedSession.status] ?? selectedSession.status}
+              </Badge>
+            ) : null}
+          </div>
         </div>
 
         <div className="min-h-0 flex-1 p-4">
-          <div className="relative h-full overflow-hidden rounded-2xl border bg-muted/10">
-            {replayPoints.length === 0 && !fallbackLivePoint ? (
-              <div className="flex h-full items-center justify-center px-6 text-center text-sm text-muted-foreground">
-                {selectedSession
-                  ? 'Phiên đang chọn chưa có dữ liệu tọa độ hợp lệ trong dải thời gian hiện tại.'
-                  : 'Chưa có dữ liệu tọa độ hợp lệ để hiển thị bản đồ hoạt động.'}
-              </div>
-            ) : (
-              <RouteReplayMap
-                pathPoints={pathPoints}
-                currentPoint={currentPoint}
-                livePoint={fallbackLivePoint}
-              />
-            )}
-
-            <div
-              className={`absolute inset-y-0 right-0 z-[520] transition-[width] duration-200 ${isReplayPanelCollapsed ? 'w-12' : 'w-[208px] sm:w-[224px]'}`}
-            >
-              <div className="flex h-full w-full flex-col border-l bg-background/95 shadow-lg backdrop-blur">
-                <div className="flex items-center justify-between border-b px-2 py-2">
-                  {!isReplayPanelCollapsed ? (
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      Phát lại
-                    </p>
-                  ) : (
-                    <span className="sr-only">Phát lại</span>
-                  )}
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 w-7 p-0"
-                    aria-label={isReplayPanelCollapsed ? 'Mở rộng bảng phát lại' : 'Thu gọn bảng phát lại'}
-                    onClick={() => setIsReplayPanelCollapsed((value) => !value)}
-                  >
-                    {isReplayPanelCollapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </Button>
+          <div className="grid h-full min-h-0 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="min-h-[24rem] overflow-hidden rounded-2xl border bg-muted/10 xl:min-h-0">
+              {replayPoints.length === 0 && !fallbackLivePoint ? (
+                <div className="flex h-full items-center justify-center px-6 text-center text-sm text-muted-foreground">
+                  {selectedSession
+                    ? 'Phiên đang chọn chưa có dữ liệu tọa độ hợp lệ trong dải thời gian hiện tại.'
+                    : 'Chưa có dữ liệu tọa độ hợp lệ để hiển thị bản đồ hoạt động.'}
                 </div>
-
-                {!isReplayPanelCollapsed ? (
-                  <div className="flex min-h-0 flex-1 flex-col gap-2 p-2">
-                    <div className="grid grid-cols-3 gap-1">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-7 px-1"
-                        aria-label="Về đầu phần phát lại"
-                        onClick={() => {
-                          hasStartedReplayRef.current = true;
-                          setCursor(0);
-                          setIsPlaying(false);
-                        }}
-                        disabled={replayPoints.length === 0}
-                      >
-                        <RotateCcw className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={isPlaying ? 'secondary' : 'default'}
-                        className="h-7 px-1"
-                        aria-label={isPlaying ? 'Tạm dừng phát lại' : 'Phát lại'}
-                        onClick={handlePlayPause}
-                        disabled={replayPoints.length <= 1}
-                      >
-                        {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-7 px-1"
-                        aria-label="Về cuối phần phát lại"
-                        onClick={() => {
-                          hasStartedReplayRef.current = true;
-                          setCursor(replayMax);
-                          setIsPlaying(false);
-                        }}
-                        disabled={replayPoints.length === 0}
-                      >
-                        <SkipForward className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-
-                    <div className="rounded-md border bg-background/70 px-2 py-1.5">
-                      <Slider
-                        min={0}
-                        max={replayMax}
-                        step={1}
-                        value={[Math.min(cursor, replayMax)]}
-                        onValueChange={(value) => {
-                          hasStartedReplayRef.current = true;
-                          setIsPlaying(false);
-                          setCursor(value[0] ?? 0);
-                        }}
-                        disabled={replayPoints.length <= 1}
-                      />
-                      <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
-                        <span className="truncate">{startPointLabel}</span>
-                        <span className="truncate text-right">{endPointLabel}</span>
-                      </div>
-                    </div>
-
-                    <div className="min-h-0 flex-1 overflow-y-auto rounded-md border bg-background/70">
-                      <table className="w-full table-fixed text-[11px]">
-                        <tbody>
-                          {replayInfoRows.map((row) => (
-                            <tr key={row.label} className="border-b last:border-b-0">
-                              <th className="w-[40%] px-2 py-1.5 text-left font-medium text-muted-foreground">
-                                {row.label}
-                              </th>
-                              <td className="px-2 py-1.5 text-right font-semibold text-foreground">
-                                <span className="break-words">{row.value}</span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-1 items-center justify-center px-1">
-                    <p className="-rotate-90 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      Phát lại
-                    </p>
-                  </div>
-                )}
-              </div>
+              ) : (
+                <RouteReplayMap
+                  pathPoints={pathPoints}
+                  currentPoint={currentPoint}
+                  livePoint={fallbackLivePoint}
+                />
+              )}
             </div>
+
+            <aside className="flex min-h-0 flex-col gap-4">
+              <div className="rounded-2xl border bg-muted/10 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Tóm tắt phát lại
+                </p>
+                <p className="mt-2 text-sm font-semibold">{replayHeadline}</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                  <div className="rounded-xl border bg-background px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Bao phủ</p>
+                    <p className="mt-1 text-sm font-semibold">{coverageLabel}</p>
+                  </div>
+                  <div className="rounded-xl border bg-background px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Mốc hiện tại</p>
+                    <p className="mt-1 text-sm font-semibold">{pointTimeLabel}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border bg-background p-4">
+                <div className="grid gap-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      aria-label="Về đầu phần phát lại"
+                      onClick={() => {
+                        hasStartedReplayRef.current = true;
+                        setCursor(0);
+                        setIsPlaying(false);
+                      }}
+                      disabled={replayPoints.length === 0}
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={isPlaying ? 'secondary' : 'default'}
+                      aria-label={isPlaying ? 'Tạm dừng phát lại' : 'Phát lại'}
+                      onClick={handlePlayPause}
+                      disabled={replayPoints.length <= 1}
+                    >
+                      {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      aria-label="Về cuối phần phát lại"
+                      onClick={() => {
+                        hasStartedReplayRef.current = true;
+                        setCursor(replayMax);
+                        setIsPlaying(false);
+                      }}
+                      disabled={replayPoints.length === 0}
+                    >
+                      <SkipForward className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-medium text-muted-foreground">Tốc độ phát</span>
+                    {PLAYBACK_RATE_OPTIONS.map((rate) => (
+                      <Button
+                        key={rate}
+                        type="button"
+                        size="sm"
+                        variant={playbackRate === rate ? 'default' : 'outline'}
+                        className="h-8 px-3 text-xs"
+                        onClick={() => setPlaybackRate(rate)}
+                      >
+                        {rate}x
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border bg-background p-4">
+                <Slider
+                  min={0}
+                  max={replayMax}
+                  step={1}
+                  value={[Math.min(cursor, replayMax)]}
+                  onValueChange={(value) => {
+                    hasStartedReplayRef.current = true;
+                    setIsPlaying(false);
+                    setCursor(value[0] ?? 0);
+                  }}
+                  disabled={replayPoints.length <= 1}
+                />
+                <div className="mt-3 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                  <span className="truncate">{startPointLabel}</span>
+                  <span className="truncate text-right">{endPointLabel}</span>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                {replayInfoRows.map((row) => (
+                  <div key={row.label} className="rounded-2xl border bg-background px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{row.label}</p>
+                    <p className="mt-2 break-words text-sm font-semibold">{row.value}</p>
+                  </div>
+                ))}
+              </div>
+            </aside>
           </div>
         </div>
       </section>

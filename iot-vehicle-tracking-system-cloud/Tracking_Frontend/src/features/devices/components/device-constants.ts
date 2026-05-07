@@ -1,9 +1,8 @@
-﻿export const DEVICE_STATUS_LABELS: Record<string, string> = {
-  running: 'Đang chạy',
-  online: 'Đỗ xe / còn online',
-  stopped: 'Đã dừng',
+export const DEVICE_STATUS_LABELS: Record<string, string> = {
+  running: 'Đang gửi dữ liệu',
+  online: 'Còn heartbeat',
+  stopped: 'Chậm nhịp',
   disconnected: 'Mất kết nối',
-  completed: 'Hoàn thành',
 };
 
 export const DEVICE_STATUS_VARIANTS: Record<
@@ -14,7 +13,13 @@ export const DEVICE_STATUS_VARIANTS: Record<
   online: 'secondary',
   stopped: 'outline',
   disconnected: 'destructive',
-  completed: 'outline',
+};
+
+export const SESSION_STATUS_LABELS: Record<string, string> = {
+  running: 'Đang hoạt động',
+  completed: 'Hoàn thành',
+  disconnected: 'Gián đoạn',
+  stopped: 'Đã dừng',
 };
 
 export const DEVICE_DETAIL_TABS = [

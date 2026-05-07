@@ -101,11 +101,12 @@ const formatRangeLabel = (value: string) =>
   );
 
 const STATUS_NAME_LABELS: Record<string, string> = {
-  running: 'Đang chạy',
-  online: 'Đỗ xe / còn online',
-  stopped: 'Đã dừng',
-  offline: 'Ngoại tuyến',
-  error: 'Lỗi',
+  running: 'Đang gửi dữ liệu',
+  online: 'Còn heartbeat',
+  stopped: 'Chậm nhịp',
+  offline: 'Mất kết nối',
+  disconnected: 'Mất kết nối',
+  error: 'Lỗi telemetry',
   unknown: 'Chưa rõ',
 };
 
@@ -147,9 +148,14 @@ const groupEventsByDay = (events: DashboardEvent[], days: number) => {
     }
 
     const message = `${event.eventType} ${event.message ?? ''}`.toLowerCase();
-    if (message.includes('offline') || message.includes('disconnect')) {
+    if (message.includes('offline') || message.includes('disconnect') || message.includes('mất kết nối')) {
       current.offline += 1;
-    } else if (message.includes('idle') || message.includes('stop')) {
+    } else if (
+      message.includes('idle') ||
+      message.includes('stop') ||
+      message.includes('chậm nhịp') ||
+      message.includes('heartbeat')
+    ) {
       current.idle += 1;
     } else {
       current.running += 1;
@@ -185,8 +191,7 @@ const groupRuntimeByDay = (events: DashboardEvent[], days: number) => {
 const toDeviceSnapshot = (raw: any): DashboardDeviceSnapshot => ({
   deviceId: String(raw?.deviceId ?? ''),
   deviceName: String(raw?.deviceName ?? raw?.deviceId ?? 'Thiết bị'),
-  currentStatus: (raw?.currentStatus ??
-    'disconnected') as DashboardDeviceSnapshot['currentStatus'],
+  currentStatus: (raw?.currentStatus ?? 'disconnected') as DashboardDeviceSnapshot['currentStatus'],
   lastSeenAt: raw?.lastSeenAt ?? null,
   requestInterval: Number(raw?.requestInterval ?? 60),
   totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? 0),
@@ -325,8 +330,8 @@ const buildSyntheticEvents = (devices: DashboardDeviceSnapshot[]): DashboardEven
       if (status === 'disconnected') {
         return {
           id: `${device.deviceId}-offline`,
-          eventType: 'Thiết bị ngoại tuyến',
-          message: `${device.deviceName} chưa gửi dữ liệu gần đây`,
+          eventType: 'Thiết bị mất kết nối',
+          message: `${device.deviceName} đã vượt ngưỡng mất tín hiệu telemetry`,
           severity: 'high',
           deviceId: device.deviceId,
           serverTimestamp: device.lastSeenAt ?? new Date().toISOString(),
@@ -335,8 +340,8 @@ const buildSyntheticEvents = (devices: DashboardDeviceSnapshot[]): DashboardEven
       if (status === 'stopped') {
         return {
           id: `${device.deviceId}-stopped`,
-          eventType: 'Thiết bị tạm dừng',
-          message: `${device.deviceName} vẫn được nhìn thấy nhưng đã chậm nhịp gửi`,
+          eventType: 'Thiết bị chậm nhịp',
+          message: `${device.deviceName} vẫn còn dữ liệu nhưng cadence telemetry đang chậm`,
           severity: 'medium',
           deviceId: device.deviceId,
           serverTimestamp: device.lastSeenAt ?? new Date().toISOString(),
@@ -345,8 +350,8 @@ const buildSyntheticEvents = (devices: DashboardDeviceSnapshot[]): DashboardEven
       if (status === 'online') {
         return {
           id: `${device.deviceId}-online`,
-          eventType: 'Thiết bị còn online',
-          message: `${device.deviceName} đã kết thúc phiên lái nhưng vẫn còn heartbeat parking`,
+          eventType: 'Thiết bị còn heartbeat',
+          message: `${device.deviceName} vẫn còn heartbeat nhưng chưa có luồng dữ liệu đầy đủ`,
           severity: 'low',
           deviceId: device.deviceId,
           serverTimestamp: device.lastSeenAt ?? new Date().toISOString(),
@@ -354,8 +359,8 @@ const buildSyntheticEvents = (devices: DashboardDeviceSnapshot[]): DashboardEven
       }
       return {
         id: `${device.deviceId}-running`,
-        eventType: 'Thiết bị đang chạy',
-        message: `${device.deviceName} đang gửi dữ liệu driving bình thường`,
+        eventType: 'Thiết bị đang gửi dữ liệu',
+        message: `${device.deviceName} đang gửi telemetry đều theo nhịp hoạt động`,
         severity: 'low',
         deviceId: device.deviceId,
         serverTimestamp: device.lastSeenAt ?? new Date().toISOString(),
@@ -459,10 +464,10 @@ const buildStatusDistributionFromDevices = (
   }
 
   return [
-    { name: 'Đang chạy', value: counts.running, color: '#22c55e' },
-    { name: 'Đỗ xe / còn online', value: counts.online, color: '#0ea5e9' },
-    { name: 'Đã dừng', value: counts.stopped, color: '#64748b' },
-    { name: 'Ngoại tuyến', value: counts.disconnected, color: '#ef4444' },
+    { name: 'Đang gửi dữ liệu', value: counts.running, color: '#22c55e' },
+    { name: 'Còn heartbeat', value: counts.online, color: '#0ea5e9' },
+    { name: 'Chậm nhịp', value: counts.stopped, color: '#64748b' },
+    { name: 'Mất kết nối', value: counts.disconnected, color: '#ef4444' },
   ];
 };
 
@@ -588,9 +593,9 @@ export const useDeviceStatusDistribution = () => {
       const stopped = Math.max(0, Number(stats.totalDevices ?? 0) - active - offline);
 
       return [
-        { name: 'Trực tuyến', value: active, color: '#22c55e' },
-        { name: 'Đã dừng', value: stopped, color: '#64748b' },
-        { name: 'Ngoại tuyến', value: offline, color: '#ef4444' },
+        { name: 'Còn tín hiệu', value: active, color: '#22c55e' },
+        { name: 'Chậm nhịp', value: stopped, color: '#64748b' },
+        { name: 'Mất kết nối', value: offline, color: '#ef4444' },
       ];
     },
   });

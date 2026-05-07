@@ -4,6 +4,7 @@
 -- =============================================================================
 
 CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS unaccent;
 
 ALTER TYPE alert_type ADD VALUE IF NOT EXISTS 'zone_enter';
 ALTER TYPE alert_type ADD VALUE IF NOT EXISTS 'zone_exit';

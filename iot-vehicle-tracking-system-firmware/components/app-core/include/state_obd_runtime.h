@@ -9,7 +9,12 @@
 /**
  * @file state_obd_runtime.h
  * @brief OBD decoding and BLE OBD session helpers for the tracker FSM.
+ * This header belongs to the app-core orchestration layer and defines the orchestration boundary that bootstrap code and adapters rely on during runtime.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 const tracker_obd_diag_query_t *state_machine_obd_diagnostic_queries(size_t *out_count);
 void state_machine_obd_response_cb(uint8_t mode, int pid, const uint8_t *data, size_t len, void *usr_ctx);

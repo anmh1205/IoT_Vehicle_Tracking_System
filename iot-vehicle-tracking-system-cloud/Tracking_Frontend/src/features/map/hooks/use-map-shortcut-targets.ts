@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { deviceServices } from '@/lib/api/devices';
 import { vehicleServices } from '@/lib/api/vehicles';
+import { buildAlertQueueHref } from '@/features/alerts/lib/alert-queue-route';
 import type { DevicePosition } from '@/features/map/types';
 
 const SHORTCUT_LOOKUP_LIMIT = 10;
@@ -55,12 +56,11 @@ export const useMapShortcutTargets = (device: DevicePosition | null) => {
       return null;
     }
 
-    const params = new URLSearchParams({ status: 'active', deviceId: deviceIdentifier });
-    if (vehicleIdentifier) {
-      params.set('vehicleId', vehicleIdentifier);
-    }
-
-    return `/dashboard/attention/queue?${params.toString()}`;
+    return buildAlertQueueHref({
+      deviceId: deviceIdentifier,
+      vehicleId: vehicleIdentifier,
+      status: 'active',
+    });
   }, [deviceIdentifier, vehicleIdentifier]);
 
   return {

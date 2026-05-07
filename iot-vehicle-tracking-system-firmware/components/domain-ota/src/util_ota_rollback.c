@@ -7,7 +7,12 @@
 /**
  * @file util_ota_rollback.c
  * @brief Manual OTA rollback helpers behind the public util facade.
+ * This translation unit belongs to the OTA domain layer and keeps domain rules, staging helpers, and policy decisions separate from transport and board adapters.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 /**
  * @brief Trigger manual rollback to previous partition.
@@ -16,6 +21,7 @@
  * @return ESP_OK on success.
  */
 esp_err_t util_ota_trigger_manual_rollback(firmware_status_t *out_status) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_RETURN_ON_NULL(out_status, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_status is NULL");
 
     memset(out_status, 0, sizeof(*out_status));

@@ -9,7 +9,12 @@
 /**
  * @file mqtt_internal.h
  * @brief Shared runtime state and helper declarations for split MQTT modules.
+ * This header belongs to the SIM7600 AT MQTT adapter layer and exposes the MQTT transport boundary so higher layers do not depend on CMQTT command details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 #define TRACKER_MQTT_TAG "TRACKER_MQTT"
 #define MQTT_TOPIC_MAX_LEN 96

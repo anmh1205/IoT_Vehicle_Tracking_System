@@ -6,7 +6,12 @@
 /**
  * @file gnss_model.h
  * @brief Shared GNSS fix snapshot model used across modem and telemetry layers.
+ * This header belongs to the shared kernel layer and collects the shared models, bounds, and helper contracts that multiple components reuse.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 typedef struct {
     /** Latitude in decimal degrees. */

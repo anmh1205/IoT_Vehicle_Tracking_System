@@ -4,7 +4,9 @@ import { createLogger } from '@/infrastructure/logger';
 import { publishEvent } from './event-bus.util';
 import { handleIgnitionEvent } from '@/domain/trip/services/trip-auto.service';
 import * as alertCrudService from '@/domain/alert/services/alert-crud.service';
+import * as deviceCommandRepo from '@/domain/device/repositories/device-command.repository';
 import { pool } from '@/infrastructure/database/pool';
+import { createMqttClientId } from '@/infrastructure/mqtt-client-id.util';
 
 const log = createLogger('mqtt-listener');
 
@@ -23,7 +25,16 @@ const log = createLogger('mqtt-listener');
 
 interface InternalEnvelope {
   correlation_id: string;
-  event_type: 'status' | 'alert' | 'session' | 'data' | 'geofence' | 'zone' | 'ignition' | 'firmware';
+  event_type:
+    | 'status'
+    | 'alert'
+    | 'session'
+    | 'data'
+    | 'geofence'
+    | 'zone'
+    | 'ignition'
+    | 'firmware'
+    | 'command';
   timestamp: string;
   payload: Record<string, unknown>;
 }
@@ -81,6 +92,55 @@ const toOptionalInt = (value: unknown): number | undefined => {
   }
   const rounded = Math.floor(parsed);
   return rounded > 0 ? rounded : undefined;
+};
+
+const publishStatsUpdate = (
+  reason: string,
+  payload: Record<string, unknown>,
+  timestamp: string,
+): void => {
+  const deviceId = payload.device_id == null ? undefined : String(payload.device_id);
+  const vehicleId = payload.vehicle_id == null ? undefined : String(payload.vehicle_id);
+
+  publishEvent('stats:update', {
+    reason,
+    device_id: deviceId,
+    deviceId,
+    vehicle_id: vehicleId,
+    vehicleId,
+    timestamp,
+  });
+};
+
+const normalizeCommandStatus = (value: unknown): deviceCommandRepo.DeviceCommandStatus => {
+  const status = String(value ?? '').toLowerCase();
+  return status === 'failed' ? 'failed' : 'acknowledged';
+};
+
+const processCommandAck = async (
+  payload: Record<string, unknown>,
+  timestamp: string,
+): Promise<void> => {
+  const commandId = toOptionalInt(payload.command_id ?? payload.commandId);
+  const status = normalizeCommandStatus(payload.status);
+  const response =
+    payload.response == null && payload.error == null
+      ? null
+      : String(payload.response ?? payload.error);
+
+  if (commandId) {
+    await deviceCommandRepo.updateCommandStatus(commandId, status, response, {
+      markAcknowledged: true,
+    });
+  }
+
+  publishEvent('command:ack', {
+    device_id: String(payload.device_id ?? ''),
+    command_id: String(commandId ?? payload.command_id ?? payload.commandId ?? ''),
+    status,
+    response,
+  });
+  publishStatsUpdate('command:ack', payload, timestamp);
 };
 
 const asRecord = (value: unknown): Record<string, unknown> | undefined => {
@@ -230,7 +290,7 @@ const persistRawDataEventLog = async (
       device_timestamp,
       server_timestamp
     )
-    VALUES ($1, $2, $3, 'connection', 'mqtt_bridge_rawdata', 'info', $4::jsonb, $5::jsonb, $6, $7, NOW())`,
+    VALUES ($1, $2, $3, 'status_change', 'mqtt_bridge_rawdata', 'info', $4::jsonb, $5::jsonb, $6, $7, NOW())`,
     [
       envelope.correlation_id || `bridge-${Date.now()}`,
       deviceId,
@@ -253,7 +313,7 @@ export const initMqttEventListener = (): void => {
   client = mqtt.connect(brokerUrl, {
     username: mqttConfig.username,
     password: mqttConfig.password,
-    clientId: `backend-listener-${process.pid}`,
+    clientId: createMqttClientId('backend-listener'),
     reconnectPeriod: 5000,
     clean: true,
     rejectUnauthorized: mqttConfig.rejectUnauthorized,
@@ -342,6 +402,7 @@ export const initMqttEventListener = (): void => {
           lastSeenAt: data.timestamp,
           metadata,
         });
+        publishStatsUpdate('device:status', envelopePayload, data.timestamp);
         break;
 
       case 'data':
@@ -453,6 +514,7 @@ export const initMqttEventListener = (): void => {
                 : String(envelopePayload.canonical_session_id),
             metadata,
           });
+          publishStatsUpdate('device:session_start', envelopePayload, data.timestamp);
         } else if (action === 'ended') {
           publishEvent('device:session_end', {
             deviceId: String(envelopePayload.device_id ?? ''),
@@ -468,6 +530,7 @@ export const initMqttEventListener = (): void => {
                 : String(envelopePayload.canonical_session_id),
             metadata,
           });
+          publishStatsUpdate('device:session_end', envelopePayload, data.timestamp);
         }
         break;
       }
@@ -558,9 +621,11 @@ export const initMqttEventListener = (): void => {
                 },
               );
               publishEvent('alert:new', realtimePayload);
+              publishStatsUpdate('alert:new', envelopePayload, data.timestamp);
             });
           } else {
             publishEvent('alert:new', realtimePayload);
+            publishStatsUpdate('alert:new', envelopePayload, data.timestamp);
           }
         }
         break;
@@ -636,6 +701,12 @@ export const initMqttEventListener = (): void => {
         });
         break;
       }
+
+      case 'command':
+        void processCommandAck(envelopePayload, data.timestamp).catch((error) => {
+          log.error('Failed to process command ack event', { error, payload: envelopePayload });
+        });
+        break;
 
       default:
         log.debug(`Unknown internal event type: ${data.event_type} on ${topic}`);

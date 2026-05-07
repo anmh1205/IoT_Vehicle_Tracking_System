@@ -73,7 +73,7 @@ export const StatCard = ({
           <div
             className={cn(
               'grid min-h-[36px] gap-2 text-xs text-muted-foreground',
-              hasSplitMeta && 'lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start',
+              hasSplitMeta && '2xl:grid-cols-[auto_minmax(10rem,1fr)] 2xl:items-start',
             )}
           >
             {trend ? (
@@ -88,7 +88,9 @@ export const StatCard = ({
                 {trend.value}
               </span>
             ) : null}
-            {subtitle ? <p className="break-words leading-5 text-muted-foreground">{subtitle}</p> : null}
+            {subtitle ? (
+              <p className="break-words leading-5 text-muted-foreground">{subtitle}</p>
+            ) : null}
           </div>
         )}
         {footer ? <div className="break-words text-xs text-muted-foreground">{footer}</div> : null}

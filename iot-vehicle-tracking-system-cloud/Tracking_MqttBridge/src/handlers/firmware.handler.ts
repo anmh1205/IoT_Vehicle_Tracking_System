@@ -94,14 +94,14 @@ export const handleFirmware = async (
   try {
     parsed = JSON.parse(message.toString());
   } catch {
-    logger.warn(`Invalid JSON firmware status from device ${deviceIdFromTopic}`);
+    logger.warn({ deviceId: deviceIdFromTopic, event: 'firmware_payload_invalid_json' }, 'Invalid firmware payload');
     return;
   }
 
   const result = firmwareStatusSchema.safeParse(parsed);
   if (!result.success) {
     logger.warn(
-      { deviceId: deviceIdFromTopic, issues: result.error.issues },
+      { deviceId: deviceIdFromTopic, issues: result.error.issues, event: 'firmware_payload_validation_failed' },
       'Invalid firmware payload',
     );
     return;
@@ -116,14 +116,15 @@ export const handleFirmware = async (
 
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
-      `Device ID mismatch: topic=${deviceIdFromTopic}, payload=${payload.device_id}`,
+      { topicDeviceId: deviceIdFromTopic, payloadDeviceId: payload.device_id, event: 'firmware_device_id_mismatch' },
+      'Firmware device id mismatch',
     );
     return;
   }
 
   const device = await verifyDeviceToken(payload.device_id, payload.auth_token);
   if (!device) {
-    logger.warn(`Auth failed for device ${payload.device_id}`);
+    logger.warn({ deviceId: payload.device_id, event: 'device_auth_failed' }, 'Device auth failed');
     return;
   }
 
@@ -152,6 +153,7 @@ export const handleFirmware = async (
           seqNo,
           messageId,
           reason: updateDecision.reason,
+          event: 'firmware_update_ignored',
         },
         'Ignored firmware update payload',
       );
@@ -253,8 +255,8 @@ export const handleFirmware = async (
     }
   } catch (err) {
     logger.error(
-      { err, deviceId: payload.device_id, jobId: payload.jobId },
-      'Failed to log firmware status',
+      { err, deviceId: payload.device_id, jobId: payload.jobId, event: 'firmware_status_log_failed' },
+      'Firmware status log failed',
     );
     return;
   }
@@ -293,13 +295,21 @@ export const handleFirmware = async (
       update_reason: updateDecision.reason,
     },
   ).catch((err) => {
-    logger.error(`VictoriaLogs write failed for firmware event`, err);
+    logger.error({ err, deviceId: payload.device_id, jobId: payload.jobId, event: 'firmware_event_log_write_failed' }, 'Firmware event log write failed');
   });
 
   logger.info(
-    `Firmware ${payload.status} for ${payload.device_id}: ` +
-      `job=${payload.jobId} target=${payload.targetVersion} current=${payload.currentVersion} ` +
-      `partition=${payload.partition ?? 'n/a'} progress=${payload.progress ?? 0}%` +
-      (payload.error ? ` error=${payload.error}` : ''),
+    {
+      deviceId: payload.device_id,
+      jobId: payload.jobId,
+      status: payload.status,
+      targetVersion: payload.targetVersion,
+      currentVersion: payload.currentVersion,
+      partition: payload.partition ?? null,
+      progress: payload.progress ?? 0,
+      error: payload.error ?? null,
+      event: 'firmware_status_processed',
+    },
+    'Firmware status processed',
   );
 };

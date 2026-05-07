@@ -1,19 +1,22 @@
-%%{init: {'flowchart': {'nodeSpacing': 80, 'rankSpacing': 100}} }%%
-flowchart TB
-    Boot["Khởi động"]
-    IgnOn["Bật IGN"]
-    IgnOff["Tắt IGN"]
-    Driving["Lái xe"]
-    Parking["Đỗ xe"]
-    Motion["LIS3DH phát hiện rung"]
-    Alert["Cảnh báo"]
-    Done["Đã xử lý"]
-    Continue["Xe tiếp tục chạy"]
-    Stop["Tắt máy"]
+stateDiagram-v2
+    [*] --> CHECK_IGN
 
-    Boot --> IgnOn --> Driving
-    Boot --> IgnOff --> Parking
-    Driving --> Stop --> Parking
-    Parking --> Motion --> Alert
-    Alert --> Done --> Parking
-    Alert --> Continue --> Driving
+    CHECK_IGN --> DRIVING : ignition = ON
+    CHECK_IGN --> PARKED : ignition = OFF
+
+    DRIVING --> DRIVING : GNSS + OBD-II + publish
+    DRIVING --> PARKED : ignition OFF
+
+    PARKED --> HEARTBEAT : timer wake
+    PARKED --> ALARM : IMU phát hiện rung
+    PARKED --> DRIVING : ignition ON trở lại
+
+    HEARTBEAT --> PARKED : tiếp tục theo dõi nền
+    HEARTBEAT --> SLEEP : đã flush dữ liệu<br>không rung<br>ignition vẫn OFF
+
+    ALARM --> PARKED : đã gửi cảnh báo
+    ALARM --> DRIVING : ignition ON trở lại
+
+    SLEEP --> HEARTBEAT : RTC wake
+    SLEEP --> ALARM : IMU wake
+    SLEEP --> DRIVING : ignition ON

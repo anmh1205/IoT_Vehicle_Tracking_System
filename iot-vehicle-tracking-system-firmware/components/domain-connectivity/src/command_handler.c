@@ -21,10 +21,32 @@
  * @file command_handler.c
  * @brief Parse cloud commands and expose deferred actions to the FSM task.
  *
- * The MQTT callback path only validates payloads and stages immutable action
- * data. The FSM task later consumes and applies those staged actions so the
- * runtime control path stays single-threaded.
+ * ## Ownership split
+ *    - MQTT callback path: parse JSON, validate payloads, stage immutable data
+ *    - FSM task path: consume the staged action, apply side effects, persist state
+ *
+ * ## Why the split exists
+ *    - The MQTT callback path should stay short and non-blocking.
+ *    - Slow operations such as NVS writes or OTA state changes belong to the FSM.
+ *    - Runtime policy stays single-writer even when commands arrive in bursts.
+ *
+ * ## Command flow
+ *    1. MQTT receives payload on `v1/{device_id}/commands`.
+ *    2. `command_handler_process()` parses `command` + `params`.
+ *    3. Valid action data is staged in a queue item.
+ *    4. FSM calls `command_handler_consume_action()`.
+ *    5. FSM fetches the matching staged payload with a dedicated take/apply helper.
+ *
+ * ## Supported command families
+ *    - `update_config`: staged as a config delta, validated again on the FSM task
+ *    - `ota_update` / `ota_rollback`: staged as OTA command payload
+ *    - `assign_session`: staged as canonical cloud session mapping
+ *    - `request_location`, `enable_tracking`, `reboot`: reduced to small runtime flags/actions
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 static const char *TAG = "COMMAND_HANDLER";
 /* Mutex lock timeout for command handler operations. */
@@ -108,6 +130,23 @@ static bool s_consumed_config_update_valid = false;
 static command_session_assignment_t s_consumed_session_assignment = {0};
 static bool s_consumed_session_assignment_valid = false;
 
+/**
+ * @brief Clear every staged payload associated with the last consumed action.
+ *
+ * The action enum is popped from the queue first, then the caller fetches the
+ * matching payload through a second helper. Resetting every staged payload here
+ * guarantees that only one action payload is live at a time.
+ */
+static void command_handler_reset_consumed_payloads(void) {
+    // Rehydrate handler reset consumed payloads here so later logic reads one coherent snapshot after reset or sleep.
+    s_consumed_ota_command_valid = false;
+    s_consumed_config_update_valid = false;
+    s_consumed_session_assignment_valid = false;
+    memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
+    memset(&s_consumed_config_update, 0, sizeof(s_consumed_config_update));
+    memset(&s_consumed_session_assignment, 0, sizeof(s_consumed_session_assignment));
+}
+
 static const command_u16_update_rule_t s_update_u16_rules[] = {
     {
         .field_name = "tracking_interval_s",
@@ -164,7 +203,13 @@ static const command_bool_update_rule_t s_update_bool_rules[] = {
     },
 };
 
+/**
+ * @brief Acquire the command mutex with the default bounded timeout.
+ *
+ * @return true when the command mutex was acquired.
+ */
 static bool command_handler_take_lock(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_lock != NULL && xSemaphoreTake(s_lock, COMMAND_HANDLER_LOCK_TIMEOUT_TICKS) == pdTRUE;
 }
 
@@ -176,13 +221,14 @@ static bool command_handler_take_lock(void) {
  * indefinitely when another path is applying a command.
  */
 static bool command_handler_take_lock_for(const char *operation) {
+    // Keep the branchy handler take lock for flow centralized here so side effects remain easy to audit.
     if (command_handler_take_lock()) {
         return true;
     }
 
     s_dropped_command_count += 1U;
     ESP_LOGW(TAG,
-             "Dropped command operation=%s because lock is busy dropped_count=%lu",
+             "event=command_dropped operation=%s reason=lock_busy dropped_count=%lu",
              operation != NULL ? operation : "unknown",
              (unsigned long)s_dropped_command_count);
     return false;
@@ -196,6 +242,7 @@ static bool command_handler_take_lock_for(const char *operation) {
  * was never acquired or was already given (null check protects against both).
  */
 static void command_handler_give_lock(void) {
+    // Keep the branchy handler give lock flow centralized here so side effects remain easy to audit.
     if (s_lock != NULL) {
         xSemaphoreGive(s_lock);
     }
@@ -211,6 +258,7 @@ static void command_handler_give_lock(void) {
  * @return true if valid hex string of SHA256 length, false otherwise.
  */
 static bool command_is_hex_sha256(const char *value) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (util_string_empty(value) || strlen(value) != 64) {
         return false;
     }
@@ -238,6 +286,7 @@ static bool command_is_hex_sha256(const char *value) {
  * @return true if valid positive uint32 parsed, false on invalid input/range.
  */
 static bool command_parse_u32_positive(const cJSON *value, uint32_t *out_value) {
+    // Decode raw parse u32 positive into the normalized form the rest of the module expects.
     if (value == NULL || out_value == NULL) {
         return false;
     }
@@ -279,7 +328,15 @@ static bool command_parse_u32_positive(const cJSON *value, uint32_t *out_value) 
     return false;
 }
 
+/**
+ * @brief Parse unsigned 64-bit positive integer from a JSON value.
+ *
+ * @param[in] value cJSON value to parse.
+ * @param[out] out_value Parsed uint64 result.
+ * @return true when a valid positive uint64 value was parsed.
+ */
 static bool command_parse_u64_positive(const cJSON *value, uint64_t *out_value) {
+    // Decode raw parse u64 positive into the normalized form the rest of the module expects.
     if (value == NULL || out_value == NULL) {
         return false;
     }
@@ -329,6 +386,7 @@ static bool command_parse_u64_positive(const cJSON *value, uint64_t *out_value) 
  * @return Confirm timeout in seconds.
  */
 static uint32_t command_parse_confirm_timeout_sec(const cJSON *params) {
+    // Decode raw parse confirm timeout sec into the normalized form the rest of the module expects.
     if (params == NULL || !cJSON_IsObject(params)) {
         return TRACKER_OTA_CONFIRM_TIMEOUT_DEFAULT_SEC;
     }
@@ -356,6 +414,7 @@ static uint32_t command_parse_confirm_timeout_sec(const cJSON *params) {
  * @return true if field is in whitelist, false otherwise.
  */
 static bool command_is_allowed_update_field(const char *name) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (util_string_empty(name)) {
         return false;
     }
@@ -385,6 +444,7 @@ static bool command_is_allowed_update_field(const char *name) {
 static bool command_parse_u16_update_field(const cJSON *params,
                                            size_t rule_index,
                                            command_config_update_t *update) {
+    // Decode raw parse u16 update field into the normalized form the rest of the module expects.
     if (params == NULL || update == NULL || rule_index >= ARRAY_SIZE(s_update_u16_rules)) {
         return false;
     }
@@ -397,7 +457,7 @@ static bool command_parse_u16_update_field(const cJSON *params,
 
     uint32_t parsed = 0U;
     if (!command_parse_u32_positive(field_value, &parsed)) {
-        ESP_LOGW(TAG, "Rejected update_config field %s because value is invalid", rule->field_name);
+        ESP_LOGW(TAG, "event=update_config_field_rejected field=%s reason=invalid_u32_value", rule->field_name);
         return false;
     }
 
@@ -413,6 +473,7 @@ static bool command_parse_u16_update_field(const cJSON *params,
 static bool command_parse_bool_update_field(const cJSON *params,
                                             size_t rule_index,
                                             command_config_update_t *update) {
+    // Decode raw parse bool update field into the normalized form the rest of the module expects.
     if (params == NULL || update == NULL || rule_index >= ARRAY_SIZE(s_update_bool_rules)) {
         return false;
     }
@@ -424,7 +485,7 @@ static bool command_parse_bool_update_field(const cJSON *params,
     }
 
     if (!cJSON_IsBool(field_value)) {
-        ESP_LOGW(TAG, "Rejected update_config field %s because value is not boolean", rule->field_name);
+        ESP_LOGW(TAG, "event=update_config_field_rejected field=%s reason=not_boolean", rule->field_name);
         return false;
     }
 
@@ -433,8 +494,79 @@ static bool command_parse_bool_update_field(const cJSON *params,
     return true;
 }
 
+/**
+ * @brief Check whether a parsed config delta contains any staged fields.
+ *
+ * @param[in] update Parsed config delta.
+ * @return true when at least one field was staged.
+ */
 static bool command_config_update_has_changes(const command_config_update_t *update) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return update != NULL && (update->u16_present_mask != 0U || update->bool_present_mask != 0U);
+}
+
+/**
+ * @brief Apply staged uint16 config fields into a writable config snapshot.
+ *
+ * @param next_config Mutable config snapshot owned by the FSM.
+ * @param pending_update Parsed config delta staged by the MQTT callback path.
+ *
+ * @return true when at least one uint16 field changed.
+ */
+static bool command_apply_u16_updates(config_t *next_config, const command_config_update_t *pending_update) {
+    // Apply the validated uint16 config deltas here so runtime policy changes from one controlled path.
+    if (next_config == NULL || pending_update == NULL) {
+        return false;
+    }
+
+    bool changed = false;
+    for (size_t i = 0; i < ARRAY_SIZE(s_update_u16_rules); ++i) {
+        if ((pending_update->u16_present_mask & (1UL << i)) == 0U) {
+            continue;
+        }
+
+        const command_u16_update_rule_t *rule = &s_update_u16_rules[i];
+        uint16_t *target = (uint16_t *)((uint8_t *)next_config + rule->field_offset);
+        uint16_t next_value = pending_update->u16_values[i];
+        if (*target != next_value) {
+            *target = next_value;
+            changed = true;
+        }
+    }
+
+    return changed;
+}
+
+/**
+ * @brief Apply staged boolean config fields into a writable config snapshot.
+ *
+ * @param next_config Mutable config snapshot owned by the FSM.
+ * @param pending_update Parsed config delta staged by the MQTT callback path.
+ *
+ * @return true when at least one boolean field changed.
+ */
+static bool command_apply_bool_updates(config_t *next_config, const command_config_update_t *pending_update) {
+    // Apply the validated boolean config deltas here so feature toggles stay synchronized with persisted config.
+    if (next_config == NULL || pending_update == NULL) {
+        return false;
+    }
+
+    bool changed = false;
+    for (size_t i = 0; i < ARRAY_SIZE(s_update_bool_rules); ++i) {
+        if ((pending_update->bool_present_mask & (1UL << i)) == 0U) {
+            continue;
+        }
+
+        const command_bool_update_rule_t *rule = &s_update_bool_rules[i];
+        bool *target = (bool *)((uint8_t *)next_config + rule->field_offset);
+        bool next_value = pending_update->bool_values[i];
+        if (*target != next_value) {
+            *target = next_value;
+            changed = true;
+        }
+    }
+
+    return changed;
 }
 
 /**
@@ -445,6 +577,7 @@ static bool command_config_update_has_changes(const command_config_update_t *upd
  * are also ignored, leaving the current runtime value unchanged.
  */
 static bool command_parse_config_update(const cJSON *params, command_config_update_t *out_update) {
+    // Decode raw parse config update into the normalized form the rest of the module expects.
     if (params == NULL || out_update == NULL || !cJSON_IsObject(params)) {
         return false;
     }
@@ -454,7 +587,7 @@ static bool command_parse_config_update(const cJSON *params, command_config_upda
     const cJSON *field = NULL;
     cJSON_ArrayForEach(field, params) {
         if (!command_is_allowed_update_field(field->string)) {
-            ESP_LOGW(TAG, "Rejected unsupported update_config field: %s", field->string);
+            ESP_LOGW(TAG, "event=update_config_field_ignored field=%s reason=unsupported", field->string);
         }
     }
 
@@ -470,6 +603,7 @@ static bool command_parse_config_update(const cJSON *params, command_config_upda
 }
 
 static const char *command_action_label(command_action_t action) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     switch (action) {
         case COMMAND_ACTION_APPLY_CONFIG:
             return "apply_config";
@@ -486,7 +620,71 @@ static const char *command_action_label(command_action_t action) {
     }
 }
 
+/**
+ * @brief Stage the payload that matches the action just popped from the queue.
+ *
+ * Queue consumers always read the action enum first. Large payload structs stay
+ * in side buffers so the caller can fetch only the payload type that belongs to
+ * that action.
+ */
+static void command_handler_stage_consumed_action_payloads(const command_action_item_t *item) {
+    // Rehydrate handler stage consumed action payloads here so later logic reads one coherent snapshot after reset or sleep.
+    command_handler_reset_consumed_payloads();
+    if (item == NULL) {
+        return;
+    }
+
+    if (item->action == COMMAND_ACTION_OTA_UPDATE || item->action == COMMAND_ACTION_OTA_ROLLBACK) {
+        s_consumed_ota_command = item->ota_command;
+        s_consumed_ota_command_valid = true;
+        return;
+    }
+
+    if (item->action == COMMAND_ACTION_APPLY_CONFIG) {
+        s_consumed_config_update = item->config_update;
+        s_consumed_config_update_valid = true;
+        return;
+    }
+
+    if (item->action == COMMAND_ACTION_ASSIGN_SESSION) {
+        s_consumed_session_assignment = item->session_assignment;
+        s_consumed_session_assignment_valid = true;
+    }
+}
+
+/**
+ * @brief Copy one staged payload out while the command lock is already held.
+ *
+ * @param out_payload Destination object to fill.
+ * @param payload_size Size in bytes for both source and destination payloads.
+ * @param stored_payload Mutable staged payload buffer.
+ * @param valid_flag Valid bit paired with the staged payload buffer.
+ *
+ * @return true when a staged payload was copied.
+ */
+static bool command_handler_take_consumed_payload_locked(void *out_payload,
+                                                         size_t payload_size,
+                                                         void *stored_payload,
+                                                         bool *valid_flag) {
+    // Rehydrate handler take consumed payload locked here so later logic reads one coherent snapshot after reset or sleep.
+    if (out_payload == NULL || stored_payload == NULL || valid_flag == NULL || !(*valid_flag)) {
+        return false;
+    }
+
+    memcpy(out_payload, stored_payload, payload_size);
+    *valid_flag = false;
+    memset(stored_payload, 0, payload_size);
+    return true;
+}
+
+/**
+ * @brief Enqueue one fully parsed command action for later FSM consumption.
+ *
+ * @param[in] item Parsed action item to enqueue.
+ * @return ESP_OK on success, or an error when the queue is unavailable/full.
+ */
 static esp_err_t command_handler_enqueue_action(const command_action_item_t *item) {
+    // Stage handler enqueue action durably here so transient link loss cannot drop the caller's payload.
     if (item == NULL) {
         return ESP_ERR_INVALID_ARG;
     }
@@ -502,7 +700,7 @@ static esp_err_t command_handler_enqueue_action(const command_action_item_t *ite
     if (xQueueSendToBack(s_action_queue, item, COMMAND_HANDLER_QUEUE_SEND_TIMEOUT_TICKS) != pdTRUE) {
         s_dropped_command_count += 1U;
         ESP_LOGW(TAG,
-                 "Dropped command action=%s because queue is full dropped_count=%lu",
+                 "event=command_dropped action=%s reason=queue_full dropped_count=%lu",
                  command_action_label(item->action),
                  (unsigned long)s_dropped_command_count);
         return ESP_ERR_NO_MEM;
@@ -519,6 +717,7 @@ static esp_err_t command_handler_enqueue_action(const command_action_item_t *ite
  * @return ESP_OK on success.
  */
 esp_err_t command_handler_init(config_t *config) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
 
     if (s_lock == NULL) {
@@ -535,12 +734,7 @@ esp_err_t command_handler_init(config_t *config) {
     s_tracking_enabled = true;
     s_location_request_count = 0U;
     s_dropped_command_count = 0U;
-    s_consumed_ota_command_valid = false;
-    s_consumed_config_update_valid = false;
-    s_consumed_session_assignment_valid = false;
-    memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
-    memset(&s_consumed_config_update, 0, sizeof(s_consumed_config_update));
-    memset(&s_consumed_session_assignment, 0, sizeof(s_consumed_session_assignment));
+    command_handler_reset_consumed_payloads();
     xQueueReset(s_action_queue);
 
     command_handler_give_lock();
@@ -556,8 +750,9 @@ esp_err_t command_handler_init(config_t *config) {
  * @return true when params are valid and parsed.
  */
 static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd) {
+    // Decode raw parse OTA update into the normalized form the rest of the module expects.
     if (params == NULL || out_cmd == NULL || !cJSON_IsObject(params)) {
-        ESP_LOGW(TAG, "ota_update params missing or not object");
+        ESP_LOGW(TAG, "event=ota_update_rejected reason=params_missing_or_not_object");
         return false;
     }
 
@@ -568,56 +763,59 @@ static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd
     const cJSON *size = cJSON_GetObjectItemCaseSensitive(params, "size");
     const cJSON *sha256 = cJSON_GetObjectItemCaseSensitive(params, "sha256");
 
+    // Validate each required field independently so field logs show which contract item the cloud payload violated.
     if (!cJSON_IsString(job_id) || util_string_empty(job_id->valuestring)) {
-        ESP_LOGW(TAG, "ota_update invalid jobId");
+        ESP_LOGW(TAG, "event=ota_update_rejected reason=invalid_job_id");
         return false;
     }
     if (!cJSON_IsString(version) || util_string_empty(version->valuestring)) {
-        ESP_LOGW(TAG, "ota_update invalid version");
+        ESP_LOGW(TAG, "event=ota_update_rejected reason=invalid_version");
         return false;
     }
     if (!cJSON_IsString(url) || util_string_empty(url->valuestring)) {
-        ESP_LOGW(TAG, "ota_update invalid request_target");
+        ESP_LOGW(TAG, "event=ota_update_rejected reason=invalid_request_target");
         return false;
     }
     if (!cJSON_IsString(sha256) || !command_is_hex_sha256(sha256->valuestring)) {
-        ESP_LOGW(TAG, "ota_update invalid sha256");
+        ESP_LOGW(TAG, "event=ota_update_rejected reason=invalid_sha256");
         return false;
     }
 
     uint32_t parsed_size = 0U;
     if (!command_parse_u32_positive(size, &parsed_size)) {
+        // Size may arrive as number or decimal string, but it still has to decode into one positive u32 manifest length.
         if (cJSON_IsString(size) && !util_string_empty(size->valuestring)) {
-            ESP_LOGW(TAG, "ota_update invalid size value_present=1");
+            ESP_LOGW(TAG, "event=ota_update_rejected reason=invalid_size value_present=1");
         } else {
-            ESP_LOGW(TAG, "ota_update invalid size type");
+            ESP_LOGW(TAG, "event=ota_update_rejected reason=invalid_size_type");
         }
         return false;
     }
 
     if (strlen(job_id->valuestring) >= TRACKER_JOB_ID_MAX_LEN) {
-        ESP_LOGW(TAG, "ota_update jobId too long");
+        ESP_LOGW(TAG, "event=ota_update_rejected reason=job_id_too_long");
         return false;
     }
     if (strlen(version->valuestring) >= TRACKER_TARGET_VERSION_MAX_LEN) {
-        ESP_LOGW(TAG, "ota_update version too long");
+        ESP_LOGW(TAG, "event=ota_update_rejected reason=version_too_long");
         return false;
     }
     if (strlen(url->valuestring) >= TRACKER_OTA_URL_MAX_LEN) {
-        ESP_LOGW(TAG, "ota_update request_target too long");
+        ESP_LOGW(TAG, "event=ota_update_rejected reason=request_target_too_long");
         return false;
     }
 
     /* OTA URL must stay on HTTPS transport. */
     if (strncmp(url->valuestring, "https://", strlen("https://")) != 0) {
-        ESP_LOGW(TAG, "ota_update request_target must start with https://");
+        ESP_LOGW(TAG, "event=ota_update_rejected reason=request_target_not_https");
         return false;
     }
     if (strstr(url->valuestring, "example.com") != NULL) {
-        ESP_LOGW(TAG, "ota_update request_target must point to real firmware host");
+        ESP_LOGW(TAG, "event=ota_update_rejected reason=request_target_placeholder_host");
         return false;
     }
 
+    // Zero the output first so any omitted optional fields fall back to a predictable disabled state.
     memset(out_cmd, 0, sizeof(*out_cmd));
     out_cmd->pending = true;
     out_cmd->rollback_pending = false;
@@ -630,6 +828,7 @@ static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd
     /* Optional confirm timeout with safe default. */
     out_cmd->confirm_timeout_sec = command_parse_confirm_timeout_sec(params);
 
+    // Copy validated strings only after all structural checks pass, so callers never observe a half-filled OTA command.
     util_copy_string(out_cmd->job_id, sizeof(out_cmd->job_id), job_id->valuestring);
     util_copy_string(out_cmd->version, sizeof(out_cmd->version), version->valuestring);
     util_copy_string(out_cmd->url, sizeof(out_cmd->url), url->valuestring);
@@ -638,8 +837,16 @@ static bool command_parse_ota_update(const cJSON *params, ota_command_t *out_cmd
     return true;
 }
 
+/**
+ * @brief Parse the server-issued session assignment payload.
+ *
+ * @param[in] params `assign_session.params` object.
+ * @param[out] out_assignment Parsed assignment result.
+ * @return true when the payload is complete and valid.
+ */
 static bool command_parse_session_assignment(const cJSON *params,
                                              command_session_assignment_t *out_assignment) {
+    // Decode raw parse session assignment into the normalized form the rest of the module expects.
     if (params == NULL || out_assignment == NULL || !cJSON_IsObject(params)) {
         return false;
     }
@@ -670,16 +877,18 @@ static bool command_parse_session_assignment(const cJSON *params,
  * @param command_json Raw command JSON string.
  */
 void command_handler_process(const char *command_json) {
+    // Parse the cloud command once here, then fan out into the staged action path that the FSM consumes safely later.
     if (util_string_empty(command_json)) {
         return;
     }
 
     cJSON *root = cJSON_Parse(command_json);
     if (root == NULL) {
-        ESP_LOGW(TAG, "Invalid command JSON");
+        ESP_LOGW(TAG, "event=command_json_invalid");
         return;
     }
 
+    // Extract the command verb first; every later branch depends on it being a non-empty string.
     const cJSON *command = cJSON_GetObjectItemCaseSensitive(root, "command");
     const cJSON *params = cJSON_GetObjectItemCaseSensitive(root, "params");
 
@@ -688,9 +897,10 @@ void command_handler_process(const char *command_json) {
         return;
     }
 
-    ESP_LOGI(TAG, "Command received: %s", command->valuestring);
+    ESP_LOGI(TAG, "event=command_received command=%s", command->valuestring);
 
     if (strcmp(command->valuestring, COMMAND_NAME_UPDATE_CONFIG) == 0) {
+        // Config updates are parsed into a delta object first so the MQTT callback path never mutates runtime config directly.
         command_config_update_t update = {0};
         if (command_parse_config_update(params, &update)) {
             command_action_item_t item = {
@@ -700,33 +910,37 @@ void command_handler_process(const char *command_json) {
             (void)command_handler_enqueue_action(&item);
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_REQUEST_LOCATION) == 0) {
+        // Location requests collapse into a bounded counter so bursts do not allocate unbounded queue state.
         if (command_handler_take_lock_for(COMMAND_NAME_REQUEST_LOCATION)) {
             if (s_location_request_count < COMMAND_HANDLER_MAX_LOCATION_REQUESTS) {
                 s_location_request_count += 1U;
             } else {
                 s_dropped_command_count += 1U;
-                ESP_LOGW(TAG, "Dropped request_location because pending counter is saturated");
+                ESP_LOGW(TAG, "event=command_dropped operation=request_location reason=pending_counter_saturated");
             }
             command_handler_give_lock();
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_ENABLE_TRACKING) == 0) {
+        // Tracking enable is a small runtime flag, so it can be updated under lock without staging a full queue item.
         const cJSON *enabled = cJSON_GetObjectItemCaseSensitive(params, "enabled");
         if (!cJSON_IsBool(enabled)) {
-            ESP_LOGW(TAG, "Rejected enable_tracking because enabled is not boolean");
+            ESP_LOGW(TAG, "event=enable_tracking_rejected reason=enabled_not_boolean");
         } else if (command_handler_take_lock_for(COMMAND_NAME_ENABLE_TRACKING)) {
             s_tracking_enabled = cJSON_IsTrue(enabled);
             command_handler_give_lock();
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_REBOOT) == 0) {
+        // Reboot is intentionally deferred into the FSM thread so shutdown side effects stay single-writer.
         command_action_item_t item = {
             .action = COMMAND_ACTION_REBOOT,
         };
         (void)command_handler_enqueue_action(&item);
     } else if (strcmp(command->valuestring, COMMAND_NAME_OTA_UPDATE) == 0) {
+        // OTA commands are fully validated and copied now because the original JSON buffer disappears after this callback.
         ota_command_t parsed = {0};
         if (command_parse_ota_update(params, &parsed)) {
             ESP_LOGI(TAG,
-                     "ota_update accepted job=%s size=%u url_len=%u",
+                     "event=ota_update_accepted job=%s size=%u url_len=%u",
                      parsed.job_id,
                      (unsigned)parsed.size,
                      (unsigned)strlen(parsed.url));
@@ -736,16 +950,18 @@ void command_handler_process(const char *command_json) {
             };
             (void)command_handler_enqueue_action(&item);
         } else {
-            ESP_LOGW(TAG, "Invalid ota_update params");
+            ESP_LOGW(TAG, "event=ota_update_rejected reason=invalid_params");
         }
     } else if (strcmp(command->valuestring, COMMAND_NAME_MANUAL_ROLLBACK) == 0 ||
                strcmp(command->valuestring, COMMAND_NAME_OTA_ROLLBACK) == 0) {
+        // Manual and explicit rollback commands converge into the same staged OTA rollback action.
         command_action_item_t item = {
             .action = COMMAND_ACTION_OTA_ROLLBACK,
         };
         item.ota_command.rollback_pending = true;
         (void)command_handler_enqueue_action(&item);
     } else if (strcmp(command->valuestring, COMMAND_NAME_ASSIGN_SESSION) == 0) {
+        // Session assignments are staged so the FSM can atomically align local and canonical session identifiers.
         command_session_assignment_t assignment = {0};
         if (command_parse_session_assignment(params, &assignment)) {
             command_action_item_t item = {
@@ -754,7 +970,7 @@ void command_handler_process(const char *command_json) {
             };
             (void)command_handler_enqueue_action(&item);
         } else {
-            ESP_LOGW(TAG, "Invalid assign_session params");
+            ESP_LOGW(TAG, "event=assign_session_rejected reason=invalid_params");
         }
     }
 
@@ -767,6 +983,7 @@ void command_handler_process(const char *command_json) {
  * @return true when a request existed.
  */
 bool command_handler_consume_location_request(void) {
+    // Keep the branchy handler consume location request flow centralized here so side effects remain easy to audit.
     if (!command_handler_take_lock()) {
         return false;
     }
@@ -785,6 +1002,7 @@ bool command_handler_consume_location_request(void) {
  * @return true when tracking is enabled.
  */
 bool command_handler_is_tracking_enabled(void) {
+    // Keep the branchy handler is tracking enabled flow centralized here so side effects remain easy to audit.
     if (!command_handler_take_lock()) {
         return true;
     }
@@ -800,6 +1018,7 @@ bool command_handler_is_tracking_enabled(void) {
  * @return Action value (or NONE).
  */
 command_action_t command_handler_consume_action(void) {
+    // Keep the branchy handler consume action flow centralized here so side effects remain easy to audit.
     if (!command_handler_take_lock()) {
         return COMMAND_ACTION_NONE;
     }
@@ -810,27 +1029,7 @@ command_action_t command_handler_consume_action(void) {
         return COMMAND_ACTION_NONE;
     }
 
-    /*
-     * Keep large command payloads out of the action enum. The caller first pops
-     * the action, then fetches the payload with the matching take/apply helper.
-     */
-    s_consumed_ota_command_valid = false;
-    s_consumed_config_update_valid = false;
-    s_consumed_session_assignment_valid = false;
-    memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
-    memset(&s_consumed_config_update, 0, sizeof(s_consumed_config_update));
-    memset(&s_consumed_session_assignment, 0, sizeof(s_consumed_session_assignment));
-
-    if (item.action == COMMAND_ACTION_OTA_UPDATE || item.action == COMMAND_ACTION_OTA_ROLLBACK) {
-        s_consumed_ota_command = item.ota_command;
-        s_consumed_ota_command_valid = true;
-    } else if (item.action == COMMAND_ACTION_APPLY_CONFIG) {
-        s_consumed_config_update = item.config_update;
-        s_consumed_config_update_valid = true;
-    } else if (item.action == COMMAND_ACTION_ASSIGN_SESSION) {
-        s_consumed_session_assignment = item.session_assignment;
-        s_consumed_session_assignment_valid = true;
-    }
+    command_handler_stage_consumed_action_payloads(&item);
 
     command_handler_give_lock();
     return item.action;
@@ -844,8 +1043,9 @@ command_action_t command_handler_consume_action(void) {
  * the FSM is the only writer for runtime config.
  */
 esp_err_t command_handler_apply_pending_config(void) {
+    // Keep the branchy handler apply pending config flow centralized here so side effects remain easy to audit.
     if (!command_handler_take_lock()) {
-        ESP_LOGW(TAG, "command lock busy while applying config");
+        ESP_LOGW(TAG, "event=apply_config_skipped reason=lock_busy");
         return ESP_ERR_TIMEOUT;
     }
     if (!s_consumed_config_update_valid) {
@@ -864,34 +1064,9 @@ esp_err_t command_handler_apply_pending_config(void) {
     memset(&s_consumed_config_update, 0, sizeof(s_consumed_config_update));
     command_handler_give_lock();
 
-    bool changed = false;
-
-    for (size_t i = 0; i < ARRAY_SIZE(s_update_u16_rules); ++i) {
-        if ((pending_update.u16_present_mask & (1UL << i)) == 0U) {
-            continue;
-        }
-
-        const command_u16_update_rule_t *rule = &s_update_u16_rules[i];
-        uint16_t *target = (uint16_t *)((uint8_t *)&next_config + rule->field_offset);
-        uint16_t next_value = pending_update.u16_values[i];
-        if (*target != next_value) {
-            *target = next_value;
-            changed = true;
-        }
-    }
-
-    for (size_t i = 0; i < ARRAY_SIZE(s_update_bool_rules); ++i) {
-        if ((pending_update.bool_present_mask & (1UL << i)) == 0U) {
-            continue;
-        }
-
-        const command_bool_update_rule_t *rule = &s_update_bool_rules[i];
-        bool *target = (bool *)((uint8_t *)&next_config + rule->field_offset);
-        bool next_value = pending_update.bool_values[i];
-        if (*target != next_value) {
-            *target = next_value;
-            changed = true;
-        }
+    bool changed = command_apply_u16_updates(&next_config, &pending_update);
+    if (command_apply_bool_updates(&next_config, &pending_update)) {
+        changed = true;
     }
 
     if (!changed) {
@@ -899,18 +1074,18 @@ esp_err_t command_handler_apply_pending_config(void) {
     }
 
     if (!app_config_is_valid(&next_config)) {
-        ESP_LOGW(TAG, "Rejected queued update_config because resulting config is invalid");
+        ESP_LOGW(TAG, "event=update_config_rejected reason=resulting_config_invalid");
         return ESP_ERR_INVALID_ARG;
     }
 
     esp_err_t save_err = nvs_config_save(&next_config);
     if (save_err != ESP_OK) {
-        ESP_LOGW(TAG, "Failed to persist updated config");
+        ESP_LOGW(TAG, "event=update_config_persist_failed err=%s", esp_err_to_name(save_err));
         return save_err;
     }
 
     *runtime_config = next_config;
-    ESP_LOGI(TAG, "Applied queued update_config on FSM task");
+    ESP_LOGI(TAG, "event=update_config_applied");
     return ESP_OK;
 }
 
@@ -922,6 +1097,7 @@ esp_err_t command_handler_apply_pending_config(void) {
  * @return true if OTA payload was copied.
  */
 bool command_handler_take_ota_command(ota_command_t *out_cmd) {
+    // Keep the branchy handler take OTA command flow centralized here so side effects remain easy to audit.
     if (out_cmd == NULL) {
         return false;
     }
@@ -930,16 +1106,12 @@ bool command_handler_take_ota_command(ota_command_t *out_cmd) {
         return false;
     }
 
-    if (!s_consumed_ota_command_valid) {
-        command_handler_give_lock();
-        return false;
-    }
-
-    *out_cmd = s_consumed_ota_command;
-    s_consumed_ota_command_valid = false;
-    memset(&s_consumed_ota_command, 0, sizeof(s_consumed_ota_command));
+    bool copied = command_handler_take_consumed_payload_locked(out_cmd,
+                                                               sizeof(*out_cmd),
+                                                               &s_consumed_ota_command,
+                                                               &s_consumed_ota_command_valid);
     command_handler_give_lock();
-    return true;
+    return copied;
 }
 
 /**
@@ -950,6 +1122,7 @@ bool command_handler_take_ota_command(ota_command_t *out_cmd) {
  * @return true if a pending assignment was copied.
  */
 bool command_handler_take_session_assignment(command_session_assignment_t *out_assignment) {
+    // Keep the branchy handler take session assignment flow centralized here so side effects remain easy to audit.
     if (out_assignment == NULL) {
         return false;
     }
@@ -958,14 +1131,10 @@ bool command_handler_take_session_assignment(command_session_assignment_t *out_a
         return false;
     }
 
-    if (!s_consumed_session_assignment_valid) {
-        command_handler_give_lock();
-        return false;
-    }
-
-    *out_assignment = s_consumed_session_assignment;
-    s_consumed_session_assignment_valid = false;
-    memset(&s_consumed_session_assignment, 0, sizeof(s_consumed_session_assignment));
+    bool copied = command_handler_take_consumed_payload_locked(out_assignment,
+                                                               sizeof(*out_assignment),
+                                                               &s_consumed_session_assignment,
+                                                               &s_consumed_session_assignment_valid);
     command_handler_give_lock();
-    return true;
+    return copied;
 }

@@ -1,11 +1,14 @@
 sequenceDiagram
+    participant ECU as Cổng OBD-II trên xe
+    participant Adapter as vgate iCar Pro
     participant ESP as ESP32-S3
-    participant OBD as vgate iCar Pro
 
-    ESP->>OBD: Quét BLE + kết nối
-    ESP->>OBD: Khám phá GATT
-    ESP->>OBD: Khởi tạo ELM327
-    loop Khi IGN bật
-        ESP->>OBD: Đọc PID 010C / 010D / 0105
-        OBD-->>ESP: Trả dữ liệu vận hành
+    ESP->>Adapter: Quét BLE và ghép nối
+    ESP->>Adapter: Khởi tạo phiên ELM327
+    loop Khi ignition bật
+        ESP->>Adapter: Gửi PID 010C / 010D / 0105
+        Adapter->>ECU: Chuyển yêu cầu OBD-II
+        ECU-->>Adapter: RPM, tốc độ, nhiệt độ nước
+        Adapter-->>ESP: Trả dữ liệu vận hành
     end
+    ESP->>ESP: Lọc lỗi và đóng gói bản tin

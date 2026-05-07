@@ -19,7 +19,12 @@
 /**
  * @file ble_init.c
  * @brief NimBLE host stack startup/shutdown sequence for ESP-IDF.
+ * This translation unit belongs to the BLE OBD NimBLE adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 static const char *TAG = "BLE_INIT";
 static const UBaseType_t BLE_HOST_TASK_PRIORITY = (UBaseType_t)(configMAX_PRIORITIES - 4);
@@ -28,6 +33,7 @@ static const UBaseType_t BLE_HOST_TASK_PRIORITY = (UBaseType_t)(configMAX_PRIORI
  * @brief Convert controller status enum to readable text.
  */
 static const char *ble_controller_status_to_str(esp_bt_controller_status_t status) {
+    // Translate controller status to str into a readable label so logs and diagnostics stay easy to follow.
     switch (status) {
         case ESP_BT_CONTROLLER_STATUS_IDLE:
             return "IDLE";
@@ -44,9 +50,10 @@ static const char *ble_controller_status_to_str(esp_bt_controller_status_t statu
  * @brief Log BLE init stage with current controller status.
  */
 static void ble_log_controller_stage(const char *stage) {
+    // Log the controller bring-up stage here so BLE stack bootstrap failures are easier to pinpoint.
     esp_bt_controller_status_t status = esp_bt_controller_get_status();
     ESP_LOGI(TAG,
-             "BLE init stage=%s controller_status=%s(%d)",
+             "event=ble_init_stage stage=%s controller_status=%s status_code=%d",
              stage,
              ble_controller_status_to_str(status),
              (int)status);
@@ -66,8 +73,9 @@ void ble_store_config_init(void);
  * @param param Unused.
  */
 static void ble_task(void *param) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     (void)param;
-    ESP_LOGI(TAG, "NimBLE host task started");
+    ESP_LOGI(TAG, "event=nimble_host_task_started");
 
     /* Blocks until `nimble_port_stop()` is called. */
     nimble_port_run();
@@ -85,6 +93,7 @@ static void ble_task(void *param) {
 }
 
 static BaseType_t ble_host_task_core(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return CONFIG_BT_NIMBLE_PINNED_TO_CORE < portNUM_PROCESSORS ? CONFIG_BT_NIMBLE_PINNED_TO_CORE : tskNO_AFFINITY;
 }
 
@@ -94,14 +103,16 @@ static BaseType_t ble_host_task_core(void) {
  * @param reason NimBLE reset reason code.
  */
 static void default_reset_cb(int reason) {
-    ESP_LOGW(TAG, "NimBLE reset reason=%d", reason);
+    // Keep this public facade thin and forward the real work to the focused implementation below.
+    ESP_LOGW(TAG, "event=nimble_reset reason=%d", reason);
 }
 
 /**
  * @brief Default stack sync callback used when caller does not supply one.
  */
 static void default_sync_cb(void) {
-    ESP_LOGI(TAG, "NimBLE host synced");
+    // Keep this public facade thin and forward the real work to the focused implementation below.
+    ESP_LOGI(TAG, "event=nimble_host_synced");
 }
 
 /**
@@ -112,13 +123,14 @@ static void default_sync_cb(void) {
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t ble_init_stack(const ble_init_config_t *config) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
 
     ble_log_controller_stage("enter");
 
     /* Idempotent init: repeated calls are accepted. */
     if (s_stack_started) {
-        ESP_LOGW(TAG, "ble_init_stack called while stack already started");
+        ESP_LOGW(TAG, "event=ble_stack_init_skipped reason=already_started");
         ble_log_controller_stage("already-started");
         return ESP_OK;
     }
@@ -127,7 +139,7 @@ esp_err_t ble_init_stack(const ble_init_config_t *config) {
     ble_log_controller_stage("before-nimble_port_init");
     esp_err_t err = nimble_port_init();
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "nimble_port_init failed: %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "event=nimble_port_init_failed err=%s", esp_err_to_name(err));
         ble_log_controller_stage("after-nimble_port_init-fail");
         return err;
     }
@@ -143,14 +155,14 @@ esp_err_t ble_init_stack(const ble_init_config_t *config) {
     s_ble_stop_sem = xSemaphoreCreateBinary();
     if (s_ble_stop_sem == NULL) {
         nimble_port_deinit();
-        ESP_LOGE(TAG, "Failed to create BLE stop semaphore");
+        ESP_LOGE(TAG, "event=ble_stop_semaphore_create_failed");
         return ESP_ERR_NO_MEM;
     }
 
     /* Keep host task affinity/priority aligned with the ESP-IDF NimBLE port. */
     BaseType_t host_core = ble_host_task_core();
     ESP_LOGI(TAG,
-             "Creating NimBLE host task stack=%u priority=%u core=%ld",
+             "event=nimble_host_task_create stack=%u priority=%u core=%ld",
              (unsigned)CONFIG_BT_NIMBLE_HOST_TASK_STACK_SIZE,
              (unsigned)BLE_HOST_TASK_PRIORITY,
              (long)host_core);
@@ -181,6 +193,7 @@ esp_err_t ble_init_stack(const ble_init_config_t *config) {
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t ble_stack_init(void) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     static ble_init_config_t config = {
         .reset_cb = default_reset_cb,
         .sync_cb = default_sync_cb,
@@ -189,6 +202,7 @@ esp_err_t ble_stack_init(void) {
 }
 
 bool ble_stack_is_started(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_stack_started;
 }
 
@@ -198,11 +212,12 @@ bool ble_stack_is_started(void) {
  * @return ESP_OK on success, otherwise an ESP-IDF error code.
  */
 esp_err_t ble_stack_deinit(void) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     ble_log_controller_stage("deinit-enter");
 
     /* Idempotent deinit for safe repeated calls. */
     if (!s_stack_started) {
-        ESP_LOGW(TAG, "ble_stack_deinit called while stack not started");
+        ESP_LOGW(TAG, "event=ble_stack_deinit_skipped reason=not_started");
         return ESP_OK;
     }
 
@@ -211,7 +226,7 @@ esp_err_t ble_stack_deinit(void) {
     if (s_ble_stop_sem != NULL) {
         /* Wait briefly for host task graceful exit. */
         if (xSemaphoreTake(s_ble_stop_sem, pdMS_TO_TICKS(1000)) != pdTRUE) {
-            ESP_LOGW(TAG, "Timed out waiting for NimBLE host task to stop");
+            ESP_LOGW(TAG, "event=nimble_host_task_stop_timeout");
         }
         vSemaphoreDelete(s_ble_stop_sem);
         s_ble_stop_sem = NULL;
@@ -221,6 +236,6 @@ esp_err_t ble_stack_deinit(void) {
     nimble_port_deinit();
     s_stack_started = false;
     ble_log_controller_stage("deinit-done");
-    ESP_LOGI(TAG, "NimBLE stack deinitialized");
+    ESP_LOGI(TAG, "event=nimble_stack_deinitialized");
     return ESP_OK;
 }

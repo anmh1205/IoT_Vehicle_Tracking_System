@@ -21,14 +21,14 @@ export const handleEvent = async (
   try {
     parsed = JSON.parse(message.toString());
   } catch {
-    logger.warn({ deviceId: deviceIdFromTopic }, 'Invalid JSON event payload');
+    logger.warn({ deviceId: deviceIdFromTopic, event: 'event_payload_invalid_json' }, 'Invalid event payload');
     return;
   }
 
   const result = eventSchema.safeParse(parsed);
   if (!result.success) {
     logger.warn(
-      { deviceId: deviceIdFromTopic, issues: result.error.issues },
+      { deviceId: deviceIdFromTopic, issues: result.error.issues, event: 'event_payload_validation_failed' },
       'Invalid event payload',
     );
     return;
@@ -46,15 +46,15 @@ export const handleEvent = async (
 
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
-      { topic: deviceIdFromTopic, payload: payload.device_id },
-      'Device ID mismatch in event',
+      { topicDeviceId: deviceIdFromTopic, payloadDeviceId: payload.device_id, event: 'event_device_id_mismatch' },
+      'Event device id mismatch',
     );
     return;
   }
 
   const device = await verifyDeviceToken(payload.device_id, payload.auth_token);
   if (!device) {
-    logger.warn(`Auth failed for device ${payload.device_id}`);
+    logger.warn({ deviceId: payload.device_id, event: 'device_auth_failed' }, 'Device auth failed');
     return;
   }
 
@@ -66,8 +66,9 @@ export const handleEvent = async (
         metadataSentAt: payload.metadata?.sent_at,
         normalizedTimestampMs: timestampMs,
         timestampSource,
+        event: 'event_timestamp_normalized',
       },
-      'Normalized invalid event timestamp before publishing alerts',
+      'Event timestamp normalized before publishing alerts',
     );
   }
 
@@ -85,7 +86,7 @@ export const handleEvent = async (
       boot_id: bootId,
     },
   ).catch((err) => {
-    logger.error({ err, deviceId: payload.device_id }, 'VictoriaLogs write failed for device event');
+    logger.error({ err, deviceId: payload.device_id, event: 'device_event_log_write_failed' }, 'Device event log write failed');
   });
 
   // Publish error/warning events as alerts for Backend consumption
@@ -104,7 +105,7 @@ export const handleEvent = async (
   }
 
   logger.info(
-    { deviceId: payload.device_id, eventType: payload.event_type, code: payload.code },
+    { deviceId: payload.device_id, eventType: payload.event_type, code: payload.code, event: 'device_event_processed' },
     'Device event processed',
   );
 };

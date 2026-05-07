@@ -5,7 +5,21 @@
 /**
  * @file session_mgr.c
  * @brief Debounce ignition samples and map them to session edges.
+ *
+ * ## Responsibility boundary
+ *    - This module decides when ignition has become stably ON or OFF.
+ *    - It raises only the start edge (`pending_start`) for the FSM.
+ *    - The actual stop boundary remains owned by the FSM hold/drain policy.
+ *
+ * ## Why stop stays outside this module
+ *    - Session end depends on more than a raw OFF sample.
+ *    - The FSM must coordinate OFF hold timing, publish order, sleep flow,
+ *      and offline queue teardown at the same boundary point.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 typedef enum {
     SESSION_STATE_IDLE = 0,
@@ -33,7 +47,13 @@ typedef struct {
 
 static session_mgr_ctx_t s_ctx;
 
+/**
+ * @brief Advance the monotonic local session key while keeping zero reserved.
+ *
+ * @return Next non-zero local session key.
+ */
 static uint32_t session_mgr_next_session_id(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     s_ctx.current_session_id += 1;
     if (s_ctx.current_session_id == 0) {
         /* Keep `0` reserved for "no session has started yet". */
@@ -43,11 +63,26 @@ static uint32_t session_mgr_next_session_id(void) {
 }
 
 /**
+ * @brief Accept one ignition level as the new debounced stable state.
+ *
+ * The manager raises a pending start only on OFF->ON acceptance while idle.
+ * OFF acceptance merely clears any pending start so the state machine controls
+ * the later stop boundary through its own hold/drain policy.
+ */
+static void session_mgr_accept_stable_ignition(bool ignition_on) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
+    s_ctx.stable_ignition = ignition_on;
+    s_ctx.stable_known = true;
+    s_ctx.pending_start = ignition_on && s_ctx.state == SESSION_STATE_IDLE;
+}
+
+/**
  * @brief Initialize session manager.
  *
  * Resets debounce state and clears session ID.
  */
 void session_mgr_init(void) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     s_ctx.state = SESSION_STATE_IDLE;
     s_ctx.last_sample = false;
     s_ctx.sample_initialized = false;
@@ -59,16 +94,18 @@ void session_mgr_init(void) {
 }
 
 /**
- * @brief Process ignition sample with debounce.
+ * @brief Process one raw ignition sample through the debounce state machine.
  *
- * Takes raw ignition input and applies debounce logic.
- * When signal is stable for DEBOUNCE_MS, updates stable state.
+ * Takes raw ignition input and accepts it as the new stable value only after it
+ * remains unchanged for `CONFIG_TRACKER_IGNITION_DEBOUNCE_MS`. The OFF edge is
+ * remembered here, but the final session stop boundary still belongs to the FSM.
  *
  * @param ignition_on Raw ignition reading.
  * @param now_ms Current timestamp.
  */
 void session_mgr_on_ignition_sample(bool ignition_on, uint64_t now_ms) {
     if (!s_ctx.sample_initialized) {
+        // The very first sample only seeds debounce timing; it should not create a stable edge yet.
         s_ctx.last_sample = ignition_on;
         s_ctx.edge_ms = now_ms;
         s_ctx.sample_initialized = true;
@@ -92,9 +129,8 @@ void session_mgr_on_ignition_sample(bool ignition_on, uint64_t now_ms) {
     }
 
     if (!s_ctx.stable_known) {
-        s_ctx.stable_ignition = ignition_on;
-        s_ctx.stable_known = true;
-        s_ctx.pending_start = (ignition_on && s_ctx.state == SESSION_STATE_IDLE);
+        // First accepted stable level initializes debounce state without inventing prior history.
+        session_mgr_accept_stable_ignition(ignition_on);
         return;
     }
 
@@ -104,12 +140,7 @@ void session_mgr_on_ignition_sample(bool ignition_on, uint64_t now_ms) {
     }
 
     /* Stable state changed, so raise exactly one pending transition for the FSM. */
-    s_ctx.stable_ignition = ignition_on;
-    if (ignition_on) {
-        s_ctx.pending_start = true;
-    } else {
-        s_ctx.pending_start = false;
-    }
+    session_mgr_accept_stable_ignition(ignition_on);
 }
 
 /**
@@ -124,6 +155,7 @@ bool session_mgr_should_start(void) {
     if (!s_ctx.pending_start || s_ctx.state != SESSION_STATE_IDLE) {
         return false;
     }
+    // Consume the one-shot start edge here so only one FSM loop can act on it.
     s_ctx.pending_start = false;
     return true;
 }
@@ -134,6 +166,7 @@ bool session_mgr_should_start(void) {
  * Called when FSM accepts start event.
  */
 void session_mgr_mark_started(void) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     s_ctx.state = SESSION_STATE_ACTIVE;
     /* Session ID changes only after the state machine accepts the start event. */
     session_mgr_next_session_id();
@@ -145,6 +178,7 @@ void session_mgr_mark_started(void) {
  * Called when ignition turns off and session ends.
  */
 void session_mgr_mark_stopped(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     s_ctx.state = SESSION_STATE_IDLE;
 }
 
@@ -158,6 +192,7 @@ void session_mgr_restore_active(uint32_t session_id) {
         return;
     }
 
+    // Reboot recovery restores the active session key, then waits for fresh ignition samples to re-stabilize.
     s_ctx.state = SESSION_STATE_ACTIVE;
     s_ctx.current_session_id = session_id;
     s_ctx.pending_start = false;
@@ -171,6 +206,7 @@ void session_mgr_restore_active(uint32_t session_id) {
  * @return Current session ID (0 if none started).
  */
 uint32_t session_mgr_current_session_id(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_ctx.current_session_id;
 }
 
@@ -180,6 +216,7 @@ uint32_t session_mgr_current_session_id(void) {
  * @return true if debounce has resolved ignition state.
  */
 bool session_mgr_has_stable_ignition(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_ctx.stable_known;
 }
 
@@ -189,5 +226,6 @@ bool session_mgr_has_stable_ignition(void) {
  * @return true when the stable ignition level is ON.
  */
 bool session_mgr_stable_ignition(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_ctx.stable_ignition;
 }

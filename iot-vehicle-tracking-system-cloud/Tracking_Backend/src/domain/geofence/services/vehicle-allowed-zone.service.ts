@@ -145,9 +145,9 @@ export const upsertVehicleAllowedZone = async (
   });
 
   const publicZone = toPublic(zone as VehicleAllowedZone);
-  publishEvent('geofence:allowed-zone-updated', {
+  publishEvent('zone:updated', {
     vehicle_id: vehicleId,
-    allowed_zone_id: publicZone.id,
+    zone_id: publicZone.id,
     status: publicZone.status,
     membership_state: publicZone.membershipState,
     last_changed_at: publicZone.lastMembershipChangedAt,
@@ -166,9 +166,9 @@ export const disableVehicleAllowedZone = async (
   }
 
   logger.info('Vehicle allowed zone disabled', { vehicleId, actorId: actorId ?? null });
-  publishEvent('geofence:allowed-zone-updated', {
+  publishEvent('zone:updated', {
     vehicle_id: vehicleId,
-    allowed_zone_id: null,
+    zone_id: null,
     status: 'disabled',
   });
   return { success: true };

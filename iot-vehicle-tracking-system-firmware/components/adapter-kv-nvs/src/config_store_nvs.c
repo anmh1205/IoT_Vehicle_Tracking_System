@@ -12,7 +12,12 @@
 /**
  * @file config_store_nvs.c
  * @brief Runtime-config blob load/save with migration and repair logic.
+ * This translation unit belongs to the KV/NVS persistence adapter layer and keeps adapter-local state, migration rules, and persistence policy isolated behind the exported entry points.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 #define TRACKER_LEGACY_MQTT_HOST_LOCALHOST "localhost"
 #define TRACKER_LEGACY_DEFAULT_HEARTBEAT_INTERVAL_S 900U
@@ -40,10 +45,12 @@ typedef struct {
  * @brief Clamp unsigned 16-bit value.
  */
 static uint16_t config_store_clamp_u16(uint16_t value, uint16_t min_value, uint16_t max_value) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return (uint16_t)util_clamp_int((int)value, (int)min_value, (int)max_value);
 }
 
 static void config_store_apply_legacy_v1(config_t *config, const config_v1_t *legacy) {
+    // Apply store apply legacy v1 in one place so this module keeps a single authoritative writer.
     if (config == NULL || legacy == NULL) {
         return;
     }
@@ -83,6 +90,7 @@ static void config_store_apply_legacy_v1(config_t *config, const config_v1_t *le
  * @return ESP_OK on success.
  */
 esp_err_t config_store_nvs_save(const config_t *config) {
+    // Persist store NVS save here so later boots, retries, or recovery paths can resume cleanly.
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
 
     nvs_handle_t handle = 0;
@@ -98,8 +106,10 @@ esp_err_t config_store_nvs_save(const config_t *config) {
 }
 
 esp_err_t config_store_nvs_load(config_t *config) {
+    // Rehydrate store NVS load here so later logic reads one coherent snapshot after reset or sleep.
     ESP_RETURN_ON_NULL(config, ESP_ERR_INVALID_ARG, TAG, "config is NULL");
 
+    // Start from compiled defaults so partial NVS reads and legacy migrations always have a safe baseline to overlay.
     app_config_set_defaults(config);
 
     nvs_handle_t handle = 0;
@@ -125,9 +135,11 @@ esp_err_t config_store_nvs_load(config_t *config) {
 
     bool migrated = false;
     if (stored_size == sizeof(*config)) {
+        // Current-format blobs can be copied straight into the runtime config snapshot.
         size_t required_size = sizeof(*config);
         err = nvs_get_blob(handle, TRACKER_NVS_CONFIG_KEY, config, &required_size);
     } else if (stored_size == sizeof(config_v1_t)) {
+        // Legacy blobs are expanded onto fresh defaults so newer fields still end up with valid values.
         config_v1_t legacy = {0};
         size_t required_size = sizeof(legacy);
         err = nvs_get_blob(handle, TRACKER_NVS_CONFIG_KEY, &legacy, &required_size);
@@ -156,6 +168,7 @@ esp_err_t config_store_nvs_load(config_t *config) {
         return config_store_nvs_save(config);
     }
 
+    // Post-load fixups migrate a few known bad legacy values even when the blob shape itself was readable.
     config_t defaults = {0};
     app_config_set_defaults(&defaults);
     if (strcmp(config->mqtt_host, TRACKER_LEGACY_MQTT_HOST_LOCALHOST) == 0) {

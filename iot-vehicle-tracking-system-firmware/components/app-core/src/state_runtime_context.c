@@ -5,7 +5,12 @@
 /**
  * @file state_runtime_context.c
  * @brief Shared mutable runtime state for split FSM modules.
+ * This translation unit belongs to the app-core orchestration layer and keeps FSM transitions, retained runtime state, and orchestration policy centralized inside app-core.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 /*==============================================================================
  * Global Telemetry & Config State
@@ -116,36 +121,71 @@ uint64_t s_last_gnss_poll_ms = 0;
 
 /** @brief Flag indicating hardware bootstrap sequence has completed. */
 bool s_hw_bootstrap_done = false;
+/** @brief Last timestamp when a sleep rejection log was emitted. */
 uint64_t s_last_sleep_reject_log_ms = 0;
+/** @brief Count of consecutive/total sleep rejections in this boot. */
 uint32_t s_sleep_blocked_count = 0;
+/** @brief Count of accepted sleep entries in this boot. */
 uint32_t s_sleep_enter_count = 0;
+/** @brief Number of timer-driven wakeups observed in this boot. */
 uint32_t s_timer_wake_count = 0;
+/** @brief Number of IMU-driven wakeups observed in this boot. */
 uint32_t s_imu_wake_count = 0;
+/** @brief Number of IMU wakeups later classified as false/benign. */
 uint32_t s_imu_false_wake_count = 0;
+/** @brief Ensures startup system-check banner is logged once. */
 bool s_startup_system_check_log_once = false;
+/** @brief True once the user LED GPIO has been configured. */
 bool s_user_led_initialized = false;
+/** @brief Start timestamp of the current user LED blink cycle. */
 uint64_t s_user_led_cycle_started_ms = 0;
+/** @brief Optional override for the user LED state machine. */
+tracker_user_led_override_t s_user_led_override = TRACKER_USER_LED_OVERRIDE_NONE;
+/** @brief Last timestamp when hardware diagnostics were logged. */
 uint64_t s_last_hw_diag_log_ms = 0;
+/** @brief Timestamp when the current heartbeat wake window started. */
 uint64_t s_heartbeat_started_ms = 0;
+/** @brief True once heartbeat rawdata has been published in the current window. */
 bool s_heartbeat_raw_published = false;
+/** @brief Firmware version currently running on this boot. */
 char s_current_version[TRACKER_TARGET_VERSION_MAX_LEN] = {0};
+/** @brief Monotonic metadata sequence number stamped into outbound payloads. */
 uint32_t s_metadata_seq_no = 0;
+/** @brief Boot identifier shared across payloads from this boot. */
 char s_boot_id[TRACKER_BOOT_ID_LEN] = {0};
+/** @brief Tracks whether an OBD failure alert was emitted recently. */
 bool s_obd_fail_alert_emitted = false;
+/** @brief Last OBD failure alert code that was emitted. */
 int s_last_obd_fail_alert_code = 0;
+/** @brief Timestamp of the last emitted OBD failure alert. */
 uint64_t s_last_obd_fail_alert_ms = 0;
+/** @brief Timestamp of the latest fresh OBD scalar sample. */
 uint64_t s_last_obd_sample_ms = 0;
+/** @brief Timestamp of the latest positive OBD engine-on evidence. */
+uint64_t s_last_obd_engine_on_evidence_ms = 0;
+/** @brief True once ELM327 initialization succeeded on the current BLE session. */
 bool s_obd_elm_ready = false;
+/** @brief Start timestamp of the rolling OBD failure window. */
 uint64_t s_obd_fail_window_started_ms = 0;
+/** @brief Number of OBD connect failures inside the current rolling window. */
 uint32_t s_obd_fail_window_count = 0;
+/** @brief True while an asynchronous BLE connect task is still running. */
 bool s_ble_connect_inflight = false;
+/** @brief Timestamp when the current BLE connect attempt started. */
 uint64_t s_ble_connect_started_ms = 0;
+/** @brief Suppresses repeated logs for non-RTC-capable IMU wake pins. */
 bool s_imu_invalid_wakeup_gpio_logged = false;
+/** @brief Deferred firmware status payload to flush when MQTT reconnects. */
 firmware_status_t s_deferred_firmware_report = {0};
+/** @brief True when `s_deferred_firmware_report` should publish later. */
 bool s_deferred_firmware_report_pending = false;
+/** @brief Previous ignition state used to reset parked/driving BLE retry cadence. */
 bool s_ble_retry_last_ignition = false;
+/** @brief True once ignition transition logging has an initialized previous state. */
 bool s_ignition_log_initialized = false;
+/** @brief Last ignition value logged by the ignition-fusion diagnostics. */
 bool s_last_ignition_state = false;
+/** @brief Current FSM state hint used by shared helpers outside the main switch. */
 app_state_t s_runtime_state_hint = APP_STATE_INIT;
 
 const retry_policy_t g_state_ble_retry_policy = {
@@ -196,7 +236,13 @@ const retry_policy_t g_state_imu_bootstrap_retry_policy = {
     .jitter_ms = 0,
 };
 
+/**
+ * @brief Reset all shared runtime state to a clean boot-time baseline.
+ *
+ * @param[in] config Optional runtime configuration snapshot to copy into context.
+ */
 void state_runtime_context_reset(const config_t *config) {
+    // Clear the shared runtime snapshot here so every boot or forced re-init starts from the same clean baseline.
     memset(&s_telemetry, 0, sizeof(s_telemetry));
     s_config = (config != NULL) ? *config : (config_t){0};
     s_ble_ctx = NULL;
@@ -218,6 +264,7 @@ void state_runtime_context_reset(const config_t *config) {
     s_ota_confirm_checked = false;
     s_ota_in_progress = false;
     s_imu_available = false;
+    // Retry helpers are reset as a group so earlier BLE/network/RTC failures do not bias the next runtime window.
     retry_state_reset(&s_ble_retry);
     retry_state_reset(&s_network_retry);
     retry_state_reset(&s_rtc_bootstrap_retry);
@@ -241,16 +288,19 @@ void state_runtime_context_reset(const config_t *config) {
     s_startup_system_check_log_once = false;
     s_user_led_initialized = false;
     s_user_led_cycle_started_ms = 0;
+    s_user_led_override = TRACKER_USER_LED_OVERRIDE_NONE;
     s_last_hw_diag_log_ms = 0;
     s_heartbeat_started_ms = 0;
     s_heartbeat_raw_published = false;
     memset(s_current_version, 0, sizeof(s_current_version));
     s_metadata_seq_no = 0;
     memset(s_boot_id, 0, sizeof(s_boot_id));
+    // Session and OTA-reporting state is cleared last so later publish code cannot accidentally reuse stale identifiers.
     s_obd_fail_alert_emitted = false;
     s_last_obd_fail_alert_code = 0;
     s_last_obd_fail_alert_ms = 0;
     s_last_obd_sample_ms = 0;
+    s_last_obd_engine_on_evidence_ms = 0;
     s_obd_elm_ready = false;
     s_obd_fail_window_started_ms = 0;
     s_obd_fail_window_count = 0;

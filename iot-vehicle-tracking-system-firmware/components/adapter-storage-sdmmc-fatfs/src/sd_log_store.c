@@ -22,7 +22,12 @@
 /**
  * @file sd_log_store.c
  * @brief SD-backed append-only queue with crash-safe metadata rotation.
+ * This translation unit belongs to the SDMMC FATFS storage adapter layer and keeps adapter-local state, crash-recovery sequencing, and storage policy isolated behind the exported entry points.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 #define SD_LOG_MOUNT_POINT "/sdcard"
 #define SD_LOG_ROOT_DIR SD_LOG_MOUNT_POINT "/tracker"
@@ -71,12 +76,14 @@ typedef struct {
 static sd_log_store_ctx_t s_ctx;
 
 static void sd_log_store_reset_peek_cache(void) {
+    // Reset the peek cache here whenever card state changes so replay never resumes from a stale file offset.
     s_ctx.peek_cache_valid = false;
     s_ctx.peek_cache_min_seq = 0;
     s_ctx.peek_cache_offset = 0;
 }
 
 static void sd_log_store_set_state(sd_log_state_t state) {
+    // Mirror the storage health state here so mount availability and cache validity stay in sync.
     s_ctx.state = state;
     s_ctx.mounted = state == SD_LOG_STATE_MOUNTED;
     if (state != SD_LOG_STATE_MOUNTED) {
@@ -86,6 +93,7 @@ static void sd_log_store_set_state(sd_log_state_t state) {
 }
 
 static void sd_log_store_mark_degraded(void) {
+    // Mark the store degraded here when I/O guarantees weaken but the card is still partially usable.
     if (s_ctx.state == SD_LOG_STATE_MOUNTED) {
         /* Degraded means "still mounted, but prior I/O guarantees may have weakened". */
         s_ctx.state = SD_LOG_STATE_DEGRADED;
@@ -93,6 +101,7 @@ static void sd_log_store_mark_degraded(void) {
 }
 
 static esp_err_t sd_log_store_write_meta_snapshot(const sd_log_meta_t *meta) {
+    // Write one crash-safe metadata snapshot here before the live queue pointers move forward.
     ESP_RETURN_ON_NULL(meta, ESP_ERR_INVALID_ARG, TAG, "meta null");
 
     /* Write metadata through temp -> backup -> live rotation to survive reset mid-update. */
@@ -150,6 +159,7 @@ static esp_err_t sd_log_store_write_meta_snapshot(const sd_log_meta_t *meta) {
 }
 
 static esp_err_t sd_log_store_read_meta(void) {
+    // Read the persisted queue metadata here so replay and append logic resume from the last committed cursor set.
     FILE *fp = fopen(SD_LOG_META_PATH, "rb");
     if (fp == NULL) {
         if (errno != ENOENT) {
@@ -175,6 +185,7 @@ static esp_err_t sd_log_store_read_meta(void) {
 }
 
 static esp_err_t sd_log_store_write_meta(void) {
+    // Persist the in-memory metadata copy here after callers update replay or acknowledgement cursors.
     esp_err_t err = sd_log_store_write_meta_snapshot(&s_ctx.meta);
     if (err != ESP_OK) {
         return err;
@@ -187,6 +198,7 @@ static esp_err_t sd_log_store_write_meta(void) {
 }
 
 static bool sd_log_store_card_present(void) {
+    // Check card presence here so mount and replay paths can bail out before touching an absent SD bus.
     if (!s_ctx.cd_configured || PIN_SDMMC_CD == GPIO_NUM_NC) {
         return true;
     }
@@ -196,6 +208,7 @@ static bool sd_log_store_card_present(void) {
 }
 
 static esp_err_t sd_log_store_ensure_dirs(void) {
+    // Ensure the tracker directory layout exists here before metadata or queue files are opened.
     if (mkdir(SD_LOG_ROOT_DIR, 0775) != 0 && errno != EEXIST) {
         return ESP_FAIL;
     }
@@ -209,6 +222,7 @@ static esp_err_t sd_log_store_ensure_dirs(void) {
 }
 
 static esp_err_t sd_log_store_recover_meta_if_needed(void) {
+    // Recover metadata from backup files here when the primary snapshot was interrupted mid-rotation.
     struct stat meta_st = {0};
     struct stat bak_st = {0};
     struct stat tmp_st = {0};
@@ -255,6 +269,7 @@ static esp_err_t sd_log_store_recover_meta_if_needed(void) {
 }
 
 static esp_err_t sd_log_store_recover_data_if_needed(void) {
+    // Recover the queue log here when a temp or backup file indicates an interrupted append or compaction pass.
     sd_log_store_reset_peek_cache();
 
     struct stat log_st = {0};
@@ -303,6 +318,7 @@ static esp_err_t sd_log_store_recover_data_if_needed(void) {
 }
 
 static esp_err_t sd_log_store_apply_host_slot(sdmmc_host_t *host, sdmmc_slot_config_t *slot) {
+    // Apply the board-specific SDMMC slot selection here before mounting so the host controller matches wiring.
     if (PIN_SDMMC_CLK == GPIO_NUM_NC || PIN_SDMMC_CMD == GPIO_NUM_NC || PIN_SDMMC_D0 == GPIO_NUM_NC) {
         ESP_LOGW(TAG,
                  "SD GPIO map unset (clk=%d cmd=%d d0=%d); skip SD mount",
@@ -349,6 +365,7 @@ static esp_err_t sd_log_store_apply_host_slot(sdmmc_host_t *host, sdmmc_slot_con
 }
 
 static bool sd_log_store_line_complete(const char *line) {
+    // Decide here whether the current log line is complete enough to parse into one offline queue record.
     if (line == NULL) {
         return false;
     }
@@ -363,6 +380,7 @@ static bool sd_log_store_line_complete(const char *line) {
 }
 
 static void sd_log_store_discard_line_remainder(FILE *fp) {
+    // Drop the unread tail of a corrupt line here so the next parse attempt resumes at a clean record boundary.
     if (fp == NULL) {
         return;
     }
@@ -373,6 +391,7 @@ static void sd_log_store_discard_line_remainder(FILE *fp) {
 }
 
 static esp_err_t sd_log_store_copy_payload_from_line(const char *payload_start, sd_log_record_t *record) {
+    // Copy log store copy payload from line into the destination buffer or struct while keeping bounds checks local here.
     ESP_RETURN_ON_NULL(payload_start, ESP_ERR_INVALID_ARG, TAG, "payload start null");
     ESP_RETURN_ON_NULL(record, ESP_ERR_INVALID_ARG, TAG, "record null");
 
@@ -392,6 +411,7 @@ static esp_err_t sd_log_store_copy_payload_from_line(const char *payload_start, 
 }
 
 static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *out_record) {
+    // Decode raw log store parse record into the normalized form the rest of the module expects.
     ESP_RETURN_ON_NULL(line, ESP_ERR_INVALID_ARG, TAG, "line null");
     ESP_RETURN_ON_NULL(out_record, ESP_ERR_INVALID_ARG, TAG, "record null");
 
@@ -447,6 +467,7 @@ static esp_err_t sd_log_store_parse_record(const char *line, sd_log_record_t *ou
  * @return ESP_OK on success.
  */
 esp_err_t sd_log_store_init(void) {
+    // Initialize the SD-backed store context here before any mount or replay logic starts using it.
     memset(&s_ctx, 0, sizeof(s_ctx));
     sd_log_store_set_state(SD_LOG_STATE_UNAVAILABLE);
     sd_log_store_reset_peek_cache();
@@ -460,6 +481,7 @@ esp_err_t sd_log_store_init(void) {
  * @return ESP_OK on success.
  */
 esp_err_t sd_log_store_mount(void) {
+    // Mount the FATFS volume here and restore queue metadata so offline logging can resume after boot.
     ESP_RETURN_ON_FALSE(s_ctx.initialized, ESP_ERR_INVALID_STATE, TAG, "not initialized");
     if (s_ctx.mounted) {
         return ESP_OK;
@@ -471,12 +493,14 @@ esp_err_t sd_log_store_mount(void) {
     sdmmc_slot_config_t slot = SDMMC_SLOT_CONFIG_DEFAULT();
     esp_err_t err = sd_log_store_apply_host_slot(&host, &slot);
     if (err == ESP_ERR_NOT_SUPPORTED) {
+        // Boards without SD routing keep the store disabled cleanly instead of surfacing repeated mount noise.
         sd_log_store_set_state(SD_LOG_STATE_UNAVAILABLE);
         return ESP_ERR_NOT_SUPPORTED;
     }
     ESP_RETURN_ON_FALSE(err == ESP_OK, err, TAG, "slot config failed");
 
     if (!sd_log_store_card_present()) {
+        // A missing card is treated as a runtime availability issue, not a fatal initialization error for the firmware.
         sd_log_store_set_state(SD_LOG_STATE_UNAVAILABLE);
         return ESP_ERR_NOT_FOUND;
     }
@@ -500,6 +524,7 @@ esp_err_t sd_log_store_mount(void) {
     }
 
     sd_log_store_set_state(SD_LOG_STATE_MOUNTED);
+    // Directory/bootstrap recovery runs before metadata load so later reads see the most salvageable on-disk state.
     err = sd_log_store_ensure_dirs();
     if (err != ESP_OK) {
         sd_log_store_unmount();
@@ -543,6 +568,7 @@ esp_err_t sd_log_store_mount(void) {
  * @brief Unmount SD card.
  */
 void sd_log_store_unmount(void) {
+    // Unmount the card here and clear fast-path state so later calls cannot reuse stale file handles.
     if (!s_ctx.mounted) {
         sd_log_store_set_state(SD_LOG_STATE_UNAVAILABLE);
         return;
@@ -558,6 +584,7 @@ void sd_log_store_unmount(void) {
  * @return True if mounted.
  */
 bool sd_log_store_is_mounted(void) {
+    // Report the cached mount state here so callers can cheaply gate replay and append operations.
     if (!s_ctx.mounted) {
         return false;
     }
@@ -578,6 +605,7 @@ bool sd_log_store_is_mounted(void) {
  * @return ESP_OK on success.
  */
 esp_err_t sd_log_store_start_session(uint32_t session_id) {
+    // Stamp the active session ID here so every subsequent append carries the correct drive context.
     ESP_RETURN_ON_FALSE(s_ctx.mounted, ESP_ERR_INVALID_STATE, TAG, "not mounted");
     s_ctx.meta.session_id = session_id;
     s_ctx.meta.clean_shutdown = 0;
@@ -591,12 +619,14 @@ esp_err_t sd_log_store_start_session(uint32_t session_id) {
  * @return ESP_OK on success.
  */
 esp_err_t sd_log_store_stop_session(bool clean_shutdown) {
+    // Clear the active session marker here when the producer no longer wants new records tied to that drive.
     ESP_RETURN_ON_FALSE(s_ctx.mounted, ESP_ERR_INVALID_STATE, TAG, "not mounted");
     s_ctx.meta.clean_shutdown = clean_shutdown ? 1 : 0;
     return sd_log_store_write_meta();
 }
 
 esp_err_t sd_log_store_append(const sd_log_record_t *record) {
+    // Append one serialized queue record here so offline telemetry survives modem or broker outages.
     ESP_RETURN_ON_FALSE(s_ctx.mounted, ESP_ERR_INVALID_STATE, TAG, "not mounted");
     ESP_RETURN_ON_NULL(record, ESP_ERR_INVALID_ARG, TAG, "record null");
 
@@ -635,6 +665,7 @@ esp_err_t sd_log_store_append(const sd_log_record_t *record) {
                             (unsigned)record->time_trusted,
                             record->payload);
     if (write_len <= 0) {
+        // A short/failed fprintf means the append-only journal line never became durable enough to advance metadata.
         fclose(fp);
         telemetry_counters_inc_sd_write_fail();
         sd_log_store_mark_degraded();
@@ -675,12 +706,14 @@ esp_err_t sd_log_store_append(const sd_log_record_t *record) {
 }
 
 esp_err_t sd_log_store_get_meta(sd_log_meta_t *out_meta) {
+    // Return the current metadata snapshot here so diagnostics and replay code can inspect queue position.
     ESP_RETURN_ON_NULL(out_meta, ESP_ERR_INVALID_ARG, TAG, "out_meta null");
     *out_meta = s_ctx.meta;
     return ESP_OK;
 }
 
 esp_err_t sd_log_store_set_ack_seq_critical(uint32_t ack_seq_critical) {
+    // Advance the critical-ack watermark here once the cloud has durably accepted important records.
     sd_log_meta_t meta = s_ctx.meta;
     if (ack_seq_critical > meta.ack_seq_critical) {
         /* ACK watermark is monotonic; never move it backward. */
@@ -700,6 +733,7 @@ esp_err_t sd_log_store_set_ack_seq_critical(uint32_t ack_seq_critical) {
 }
 
 esp_err_t sd_log_store_set_replay_seq(uint32_t replay_seq) {
+    // Persist the replay cursor here after one or more queued records have been drained successfully.
     sd_log_meta_t meta = s_ctx.meta;
     meta.replay_seq = replay_seq;
 
@@ -716,6 +750,7 @@ esp_err_t sd_log_store_set_replay_seq(uint32_t replay_seq) {
 }
 
 esp_err_t sd_log_store_ack_critical_and_advance_replay(uint32_t ack_seq_critical, uint32_t replay_seq) {
+    // Commit both critical acknowledgement and replay-cursor progress together so crash recovery keeps them aligned.
     sd_log_meta_t meta = s_ctx.meta;
     if (ack_seq_critical > meta.ack_seq_critical) {
         meta.ack_seq_critical = ack_seq_critical;
@@ -736,6 +771,7 @@ esp_err_t sd_log_store_ack_critical_and_advance_replay(uint32_t ack_seq_critical
 }
 
 esp_err_t sd_log_store_peek_next(uint32_t min_seq, sd_log_record_t *out_record) {
+    // Read the next replay candidate here without mutating durable cursors so callers can publish before committing.
     ESP_RETURN_ON_FALSE(s_ctx.mounted, ESP_ERR_INVALID_STATE, TAG, "not mounted");
     ESP_RETURN_ON_NULL(out_record, ESP_ERR_INVALID_ARG, TAG, "out_record null");
 
@@ -755,6 +791,7 @@ esp_err_t sd_log_store_peek_next(uint32_t min_seq, sd_log_record_t *out_record) 
     char line[SD_LOG_LINE_MAX] = {0};
     esp_err_t found = ESP_ERR_NOT_FOUND;
     while (fgets(line, sizeof(line), fp) != NULL) {
+        // Scan forward until the first record at or above the requested replay cursor survives validation.
         if (!sd_log_store_line_complete(line)) {
             sd_log_store_discard_line_remainder(fp);
             telemetry_counters_inc_replay_drop();
@@ -799,6 +836,7 @@ esp_err_t sd_log_store_peek_next(uint32_t min_seq, sd_log_record_t *out_record) 
 }
 
 esp_err_t sd_log_store_gc_if_needed(void) {
+    // Compact the queue files here when replay progress leaves enough acknowledged history behind.
     ESP_RETURN_ON_FALSE(s_ctx.mounted, ESP_ERR_INVALID_STATE, TAG, "not mounted");
 
     sd_log_stats_t stats = {0};
@@ -807,6 +845,7 @@ esp_err_t sd_log_store_gc_if_needed(void) {
 
     size_t hard_limit = (stats.quota_bytes * (size_t)CONFIG_TRACKER_SD_LOG_HARD_QUOTA_PERCENT) / 100U;
     if (stats.bytes_used <= hard_limit) {
+        // Stay append-only until the hard quota is crossed; normal replay movement does not rewrite the log eagerly.
         return ESP_OK;
     }
 
@@ -814,6 +853,7 @@ esp_err_t sd_log_store_gc_if_needed(void) {
 
     FILE *in = fopen(SD_LOG_DATA_PATH, "rb");
     if (in == NULL) {
+        // Missing data file means there is nothing left to compact, so treat GC as a no-op.
         return ESP_OK;
     }
 
@@ -826,6 +866,7 @@ esp_err_t sd_log_store_gc_if_needed(void) {
 
     char line[SD_LOG_LINE_MAX] = {0};
     while (fgets(line, sizeof(line), in) != NULL) {
+        // Re-parse each persisted line through the normal record decoder before deciding whether to keep it.
         if (!sd_log_store_line_complete(line)) {
             sd_log_store_discard_line_remainder(in);
             telemetry_counters_inc_replay_drop();
@@ -844,6 +885,7 @@ esp_err_t sd_log_store_gc_if_needed(void) {
             continue;
         }
         if (fputs(line, out) == EOF) {
+            // Abort compaction immediately on write failure so the original log stays intact until promotion time.
             fclose(out);
             fclose(in);
             remove(SD_LOG_DATA_TMP_PATH);
@@ -884,11 +926,13 @@ esp_err_t sd_log_store_gc_if_needed(void) {
     }
 
     remove(SD_LOG_DATA_BAK_PATH);
+    // Any offset cached against the old file layout becomes invalid once the compacted file is promoted.
     sd_log_store_reset_peek_cache();
     return ESP_OK;
 }
 
 esp_err_t sd_log_store_get_stats(sd_log_stats_t *out_stats) {
+    // Summarize current queue depth and health here so diagnostics can report SD-backed buffering state.
     ESP_RETURN_ON_NULL(out_stats, ESP_ERR_INVALID_ARG, TAG, "out_stats null");
     memset(out_stats, 0, sizeof(*out_stats));
 

@@ -34,12 +34,23 @@ export const MAP_STATUS_COLORS: Record<DeviceMapStatus, string> = {
 };
 
 export const MAP_STATUS_LABELS: Record<DeviceMapStatus, string> = {
-  running: 'Đang chạy',
-  online: 'Đỗ xe / còn online',
-  stopped: 'Đã dừng',
-  error: 'Lỗi',
+  running: 'Đang gửi dữ liệu',
+  online: 'Còn heartbeat',
+  stopped: 'Chậm nhịp',
+  error: 'Lỗi telemetry',
   disconnected: 'Mất kết nối',
 };
+
+export const MAP_STATUS_FILTER_OPTIONS: Array<{
+  value: DeviceMapStatus;
+  label: string;
+}> = [
+  { value: 'running', label: MAP_STATUS_LABELS.running },
+  { value: 'online', label: MAP_STATUS_LABELS.online },
+  { value: 'stopped', label: MAP_STATUS_LABELS.stopped },
+  { value: 'error', label: MAP_STATUS_LABELS.error },
+  { value: 'disconnected', label: MAP_STATUS_LABELS.disconnected },
+];
 
 export const MAP_REALTIME_THROTTLE_MS = 500;
 

@@ -79,7 +79,7 @@ export const getActiveZone = async (vehicleId: string): Promise<VehicleZoneRow |
     zoneCache.set(vehicleId, { zone, loadedAt: Date.now() });
     return zone;
   } catch (err) {
-    logger.error({ err, vehicleId }, 'Failed to load active vehicle zone');
+    logger.error({ err, vehicleId, event: 'active_vehicle_zone_load_failed' }, 'Active vehicle zone load failed');
     return cached?.zone ?? null;
   }
 };
@@ -154,7 +154,7 @@ export const updateZoneEvaluation = async (
     zoneCache.set(params.vehicleId, { zone, loadedAt: Date.now() });
     return zone;
   } catch (err) {
-    logger.error({ err, zoneId: params.zoneId }, 'Failed to update vehicle zone evaluation');
+    logger.error({ err, zoneId: params.zoneId, vehicleId: params.vehicleId, event: 'vehicle_zone_evaluation_update_failed' }, 'Vehicle zone evaluation update failed');
     zoneCache.delete(params.vehicleId);
     return null;
   }

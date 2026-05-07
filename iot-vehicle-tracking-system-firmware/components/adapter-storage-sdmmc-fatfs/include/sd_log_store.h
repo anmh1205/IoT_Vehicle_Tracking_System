@@ -9,7 +9,12 @@
 /**
  * @file sd_log_store.h
  * @brief Durable SD append-only store and replay primitives.
+ * This header belongs to the SDMMC FATFS storage adapter layer and exposes the storage boundary so higher layers do not depend on SD card or FATFS-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 #define SD_LOG_RECORD_PAYLOAD_MAX_LEN 2048U
 

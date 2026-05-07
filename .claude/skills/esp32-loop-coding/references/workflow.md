@@ -25,20 +25,20 @@
 
 1. Monitor serial for the chosen mode:
    - local: `scripts/serial_reader.py`
-   - remote: `scripts/remote-esp32.py monitor --port COM13 --seconds 120` and append raw stdout into the same local log file on machine B
+   - remote: `scripts/remote-esp32.py monitor --port COM13 --seconds 120` and append stdout into the same local log file on machine B
 2. Stop monitoring when:
    - a fatal pattern appears, or
-   - the system is stable for the configured window.
+   - the system is stable for the configured window
 3. Analyze the captured log slice with `scripts/log_analyzer.py`.
 4. If the device sleeps and the USB port disappears during monitoring:
    - keep the same log file
    - let `serial_reader.py` retry and append reconnect markers in local mode
-   - in remote mode, reconnect SSH and reopen the same COM, then keep appending into the same local log file
+   - in remote mode, let `remote-esp32.py monitor` probe, reopen, and keep appending into the same local log file
    - treat resumed runtime lines such as `STATE_MACHINE`, `MODEM_GNSS`, heartbeat status, and HW diag as valid stability signals even if boot banners are absent
 5. If status is `fatal` or `unstable`:
    - fix the real code
    - run `idf.py build` on machine B
-   - flash on the chosen mode: local direct flash, or `scripts/remote-esp32.py flash --port COM13 --flasher-args iot-vehicle-tracking-system-firmware/build/flasher_args.json` on machine A
+   - flash on the chosen mode: local direct flash, or `scripts/remote-esp32.py flash --port COM13 --flasher-args iot-vehicle-tracking-system-firmware/build/flasher_args.json --json` on machine A
    - if remote flash uses machine B artifacts, copy the required `build/` outputs or specific `.bin` files to machine A before flashing
    - if you need mirrored-repo `idf.py flash` on machine A, treat that as a separate manual fallback outside the helper
 6. Monitor again to confirm behavior.
@@ -50,20 +50,17 @@ Use this when the board is ESP32-S3 native `USB Serial/JTAG` and the port:
 - disappears during sleep
 - returns `serial-error`
 - intermittently fails to open on Windows
+- fails remote flash with `No serial data received`, `PermissionError`, or device error 31
 
 Recommended flow:
 1. Build first:
    - `idf.py build`
 2. Arm the wait:
-   - `python <skill-root>/scripts/wait_and_flash.py --port COM5 --firmware-dir iot-vehicle-tracking-system-firmware --flash-method auto --max-wait-seconds 600 --json`
-3. The script polls until the COM is both enumerated and openable.
-4. In `auto` mode it prefers direct `esptool` from `build/flasher_args.json`, so flash starts with less overhead than `idf.py flash`.
-5. Return to `serial_reader.py` or `loop_runner.py` for post-flash verification.
-
-Why split build and flash:
-- `build flash` is too slow for a short wake window.
-- native USB boards can disappear again before flash starts.
-- prebuilding keeps the critical section short.
+   - local: `python <skill-root>/scripts/wait_and_flash.py --port COM5 --firmware-dir iot-vehicle-tracking-system-firmware --flash-method auto --max-wait-seconds 600 --json`
+   - remote: `python <skill-root>/scripts/remote-esp32.py flash --port COM13 --flasher-args iot-vehicle-tracking-system-firmware/build/flasher_args.json --json`
+3. The helper polls until the COM is both enumerated and openable.
+4. Remote flash retries automatically when native USB reconnects but the first open/attach still fails transiently.
+5. Return to `serial_reader.py`, `remote-esp32.py monitor`, or `loop_runner.py` for post-flash verification.
 
 ## Notes
 

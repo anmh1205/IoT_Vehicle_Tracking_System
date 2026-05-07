@@ -13,7 +13,12 @@
 /**
  * @file modem_lte_fsm.c
  * @brief LTE connection state machine handlers behind the modem facade.
+ * This translation unit belongs to the SIM7600 AT modem adapter layer and keeps adapter-local state, protocol sequencing, and recovery policy isolated behind the exported entry points.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 /**
  * @brief Get state name string.
@@ -22,6 +27,7 @@
  * @return State name string.
  */
 const char *modem_lte_state_name(modem_lte_state_t state) {
+    // Translate LTE name into a readable label so logs and diagnostics stay easy to follow.
     switch (state) {
         case MODEM_LTE_STATE_IDLE:
             return "IDLE";
@@ -66,9 +72,10 @@ const char *modem_lte_state_name(modem_lte_state_t state) {
  * @param delay_ms Delay before transition.
  */
 void modem_lte_transition(modem_lte_state_t next_state, uint64_t now_ms, uint64_t delay_ms) {
+    // Update the LTE transition path here so later asynchronous work sees the latest intent.
     if (s_state != next_state) {
         ESP_LOGI(MODEM_LTE_TAG,
-                 "fsm transition from=%s to=%s delay_ms=%llu",
+                 "event=lte_fsm_transition from=%s to=%s delay_ms=%llu",
                  modem_lte_state_name(s_state),
                  modem_lte_state_name(next_state),
                  (unsigned long long)delay_ms);
@@ -78,6 +85,7 @@ void modem_lte_transition(modem_lte_state_t next_state, uint64_t now_ms, uint64_
 }
 
 static esp_err_t modem_lte_handle_idle(uint64_t now_ms) {
+    // Keep the branchy LTE handle idle flow centralized here so side effects remain easy to audit.
     if (!retry_state_can_run(&s_lte_backoff_retry, now_ms)) {
         return ESP_ERR_NOT_FINISHED;
     }
@@ -87,9 +95,10 @@ static esp_err_t modem_lte_handle_idle(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_handle_power_on_pulse(uint64_t now_ms) {
+    // Keep the branchy LTE handle power on pulse flow centralized here so side effects remain easy to audit.
     esp_err_t dtr_err = modem_set_dtr(false);
     if (dtr_err != ESP_OK && dtr_err != ESP_ERR_NOT_SUPPORTED) {
-        ESP_LOGW(MODEM_LTE_TAG, "Set DTR wake failed: %s", esp_err_to_name(dtr_err));
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_wakeup_dtr_set_failed err=%s", esp_err_to_name(dtr_err));
     }
 
     modem_lte_force_dtr_wake_pulse();
@@ -108,6 +117,7 @@ static esp_err_t modem_lte_handle_power_on_pulse(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_handle_wait_boot(uint64_t now_ms) {
+    // Keep the branchy LTE handle wait boot flow centralized here so side effects remain easy to audit.
     esp_err_t err = modem_at_init();
     if (err != ESP_OK) {
         modem_lte_enter_backoff(now_ms, err, "modem_at_init");
@@ -136,19 +146,20 @@ static esp_err_t modem_lte_handle_wait_boot(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_handle_wait_rdy(uint64_t now_ms) {
+    // Keep the branchy LTE handle wait RDY flow centralized here so side effects remain easy to audit.
     (void)modem_at_poll_urc(MODEM_LTE_URC_POLL_MAX_BYTES);
     if (modem_lte_rdy_seen_in_cycle()) {
-        ESP_LOGI(MODEM_LTE_TAG, "RDY gate open, continue to AT sync");
+        ESP_LOGI(MODEM_LTE_TAG, "event=lte_rdy_gate_open next_state=AT_SYNC");
         modem_lte_transition(MODEM_LTE_STATE_AT_SYNC, now_ms, MODEM_LTE_WAKE_DTR_SETTLE_MS);
         return ESP_ERR_NOT_FINISHED;
     }
 
     if (modem_lte_diag_log_due(now_ms, &s_rdy_diag_log_ms, MODEM_LTE_REG_LOG_INTERVAL_MS)) {
-        ESP_LOGI(MODEM_LTE_TAG, "WAIT_RDY gate blocked waiting UART RDY marker");
+        ESP_LOGI(MODEM_LTE_TAG, "event=lte_rdy_wait_pending reason=marker_missing");
     }
 
     if (now_ms >= s_state_deadline_ms) {
-        ESP_LOGW(MODEM_LTE_TAG, "WAIT_RDY timeout without RDY marker, fallback to AT sync");
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_rdy_wait_timeout action=fallback_at_sync");
         modem_lte_transition(MODEM_LTE_STATE_AT_SYNC, now_ms, MODEM_LTE_WAKE_DTR_SETTLE_MS);
         return ESP_ERR_NOT_FINISHED;
     }
@@ -158,6 +169,7 @@ static esp_err_t modem_lte_handle_wait_rdy(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_handle_at_sync(uint64_t now_ms) {
+    // Keep the branchy LTE handle AT sync flow centralized here so side effects remain easy to audit.
     char response[256] = {0};
     modem_at_reset_uart_diag();
     esp_err_t err = modem_at_send("AT\r", response, sizeof(response), MODEM_LTE_AT_SYNC_CMD_TIMEOUT_MS);
@@ -166,7 +178,7 @@ static esp_err_t modem_lte_handle_at_sync(uint64_t now_ms) {
         s_at_sync_fail_count = 0;
         s_at_sync_diag_log_ms = 0;
         ESP_LOGI(MODEM_LTE_TAG,
-                 "AT sync ready tx=%d rx=%d baud=%lu invert=%s fmt=%s%s%s clk=%s",
+                 "event=lte_at_sync_ready tx=%d rx=%d baud=%lu invert=%s fmt=%s%s%s clk=%s",
                  (int)s_active_uart_cfg.tx_pin,
                  (int)s_active_uart_cfg.rx_pin,
                  (unsigned long)s_active_uart_cfg.baud,
@@ -195,7 +207,7 @@ static esp_err_t modem_lte_handle_at_sync(uint64_t now_ms) {
         modem_at_uart_diag_t diag = {0};
         modem_at_get_uart_diag(&diag);
         ESP_LOGW(MODEM_LTE_TAG,
-                 "AT not ready (%s, cmd=AT, tx=%d rx=%d, baud=%lu invert=%s fmt=%s%s%s clk=%s fe=%u pe=%u ovf=%u full=%u brk=%u), retry in %llums",
+                 "event=lte_at_sync_not_ready reason=%s cmd=AT tx=%d rx=%d baud=%lu invert=%s fmt=%s%s%s clk=%s fe=%u pe=%u ovf=%u full=%u brk=%u retry_ms=%llu",
                  err == ESP_OK ? "unexpected_response" : esp_err_to_name(err),
                  (int)s_active_uart_cfg.tx_pin,
                  (int)s_active_uart_cfg.rx_pin,
@@ -218,6 +230,7 @@ static esp_err_t modem_lte_handle_at_sync(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_handle_ate0(uint64_t now_ms) {
+    // Keep the branchy LTE handle ate0 flow centralized here so side effects remain easy to audit.
     esp_err_t err = modem_lte_send_simple("ATE0\r", "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
     if (err != ESP_OK) {
         modem_lte_enter_recover_or_backoff(now_ms, err, "ATE0");
@@ -232,6 +245,7 @@ static esp_err_t modem_lte_handle_ate0(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_handle_cpin_check(uint64_t now_ms) {
+    // Keep the branchy LTE handle CPIN check flow centralized here so side effects remain easy to audit.
     char response[256] = {0};
     esp_err_t err = modem_at_send("AT+CPIN?\r", response, sizeof(response), MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
     bool cpin_ready = (err == ESP_OK) && (strstr(response, "+CPIN: READY") != NULL);
@@ -247,7 +261,7 @@ static esp_err_t modem_lte_handle_cpin_check(uint64_t now_ms) {
     if (sim_not_inserted && s_cpin_soft_retry_count < MODEM_LTE_CPIN_SOFT_RETRY_LIMIT) {
         s_cpin_soft_retry_count += 1U;
         ESP_LOGW(MODEM_LTE_TAG,
-                 "CPIN soft-retry %lu/%u before recover",
+                 "event=lte_cpin_soft_retry attempt=%lu limit=%u",
                  (unsigned long)s_cpin_soft_retry_count,
                  (unsigned)MODEM_LTE_CPIN_SOFT_RETRY_LIMIT);
         modem_lte_transition(MODEM_LTE_STATE_CPIN_CHECK, now_ms, MODEM_LTE_CPIN_POLL_MS);
@@ -256,10 +270,10 @@ static esp_err_t modem_lte_handle_cpin_check(uint64_t now_ms) {
 
     if (modem_lte_diag_log_due(now_ms, &s_cpin_diag_log_ms, MODEM_LTE_REG_LOG_INTERVAL_MS)) {
         if (err != ESP_OK) {
-            ESP_LOGW(MODEM_LTE_TAG, "CPIN wait: AT+CPIN? failed: %s", esp_err_to_name(err));
+            ESP_LOGW(MODEM_LTE_TAG, "event=lte_cpin_query_failed err=%s", esp_err_to_name(err));
         } else {
             ESP_LOGI(MODEM_LTE_TAG,
-                     "CPIN wait response_len=%u ready=%d sim_missing=%d",
+                     "event=lte_cpin_wait response_len=%u ready=%d sim_missing=%d",
                      (unsigned)strlen(response),
                      strstr(response, "+CPIN: READY") != NULL ? 1 : 0,
                      strstr(response, "SIM not inserted") != NULL ? 1 : 0);
@@ -277,6 +291,7 @@ static esp_err_t modem_lte_handle_cpin_check(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_handle_set_net_mode(uint64_t now_ms) {
+    // Keep the branchy LTE handle set net mode flow centralized here so side effects remain easy to audit.
     esp_err_t err = modem_lte_send_simple("AT+CNMP=2\r", "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
     if (err != ESP_OK) {
         modem_lte_enter_recover_or_backoff(now_ms, err, "AT+CNMP=2");
@@ -288,6 +303,7 @@ static esp_err_t modem_lte_handle_set_net_mode(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_handle_set_pdp(uint64_t now_ms) {
+    // Keep the branchy LTE handle set pdp flow centralized here so side effects remain easy to audit.
     char pdp_cmd[96] = {0};
     (void)snprintf(pdp_cmd, sizeof(pdp_cmd), "AT+CGDCONT=1,\"IP\",\"%s\"\r", s_active_apn);
     esp_err_t err = modem_lte_send_simple(pdp_cmd, "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
@@ -296,7 +312,7 @@ static esp_err_t modem_lte_handle_set_pdp(uint64_t now_ms) {
         return ESP_ERR_NOT_FINISHED;
     }
 
-    ESP_LOGI(MODEM_LTE_TAG, "pdp profile configured apn_configured=1");
+    ESP_LOGI(MODEM_LTE_TAG, "event=lte_pdp_profile_configured apn_configured=1");
     modem_lte_log_hw_lines_if_available();
     s_lte_initialized = true;
     s_cereg_diag_log_ms = 0;
@@ -307,6 +323,7 @@ static esp_err_t modem_lte_handle_set_pdp(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_handle_cereg_wait(uint64_t now_ms) {
+    // Keep the branchy LTE handle CEREG wait flow centralized here so side effects remain easy to audit.
     char response[256] = {0};
     esp_err_t err = modem_at_send("AT+CEREG?\r", response, sizeof(response), MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
     if (err == ESP_OK) {
@@ -320,11 +337,11 @@ static esp_err_t modem_lte_handle_cereg_wait(uint64_t now_ms) {
             }
             if (should_log) {
                 ESP_LOGI(MODEM_LTE_TAG,
-                         "CEREG n=%d stat=%d (%s)%s",
+                         "event=lte_cereg_status n=%d stat=%d state=%s registered=%d",
                          n,
                          stat,
                          modem_lte_cereg_stat_name(stat),
-                         is_registered ? " [registered]" : "");
+                         is_registered ? 1 : 0);
                 s_cereg_diag_log_ms = now_ms;
             }
             s_last_cereg_stat = stat;
@@ -334,11 +351,11 @@ static esp_err_t modem_lte_handle_cereg_wait(uint64_t now_ms) {
             }
         } else if (modem_lte_diag_log_due(now_ms, &s_cereg_diag_log_ms, MODEM_LTE_REG_LOG_INTERVAL_MS)) {
             ESP_LOGW(MODEM_LTE_TAG,
-                     "CEREG wait parse_miss response_len=%u",
+                     "event=lte_cereg_parse_miss response_len=%u",
                      (unsigned)strlen(response));
         }
     } else if (modem_lte_diag_log_due(now_ms, &s_cereg_diag_log_ms, MODEM_LTE_REG_LOG_INTERVAL_MS)) {
-        ESP_LOGW(MODEM_LTE_TAG, "CEREG wait: AT+CEREG? failed: %s", esp_err_to_name(err));
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_cereg_query_failed err=%s", esp_err_to_name(err));
     }
 
     if (now_ms >= s_state_deadline_ms) {
@@ -352,6 +369,7 @@ static esp_err_t modem_lte_handle_cereg_wait(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_handle_pdp_activate(uint64_t now_ms) {
+    // Keep the branchy LTE handle pdp activate flow centralized here so side effects remain easy to audit.
     esp_err_t err = modem_lte_send_simple("AT+CGACT=1,1\r", "OK", MODEM_LTE_PDP_ACT_TIMEOUT_MS);
     if (err != ESP_OK) {
         modem_lte_enter_recover_or_backoff(now_ms, err, "AT+CGACT=1,1");
@@ -363,6 +381,7 @@ static esp_err_t modem_lte_handle_pdp_activate(uint64_t now_ms) {
 }
 
 static esp_err_t modem_lte_finalize_connected(uint64_t now_ms) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     bool recovered = s_recover_attempts > 0 || s_last_hw_recover_ms != 0;
     if (recovered) {
         telemetry_counters_inc_lte_recovery_success();
@@ -383,11 +402,12 @@ static esp_err_t modem_lte_finalize_connected(uint64_t now_ms) {
     (void)modem_lte_apply_at_sync_config();
     s_last_err = ESP_OK;
     modem_lte_transition(MODEM_LTE_STATE_CONNECTED, now_ms, 0);
-    ESP_LOGI(MODEM_LTE_TAG, "lte connected pdp_active=1 recovered=%d", recovered ? 1 : 0);
+    ESP_LOGI(MODEM_LTE_TAG, "event=lte_connected pdp_active=1 recovered=%d", recovered ? 1 : 0);
     return ESP_OK;
 }
 
 static esp_err_t modem_lte_handle_pdp_ip_check(uint64_t now_ms) {
+    // Keep the branchy LTE handle pdp ip check flow centralized here so side effects remain easy to audit.
     char response[256] = {0};
     esp_err_t err = modem_at_send("AT+CGPADDR=1\r", response, sizeof(response), MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
     bool has_cgpaddr = err == ESP_OK && strstr(response, "+CGPADDR:") != NULL;
@@ -397,15 +417,16 @@ static esp_err_t modem_lte_handle_pdp_ip_check(uint64_t now_ms) {
     }
 
     ESP_LOGI(MODEM_LTE_TAG,
-             "PDP IP check ok response_len=%u",
+             "event=lte_pdp_ip_check_ok response_len=%u",
              (unsigned)strlen(response));
     return modem_lte_finalize_connected(now_ms);
 }
 
 static esp_err_t modem_lte_handle_recover_reset(void) {
+    // Reset LTE handle recover reset here so stale data does not leak into the next cycle.
     esp_err_t reset_err = modem_reset_pulse();
     if (reset_err == ESP_ERR_NOT_SUPPORTED) {
-        ESP_LOGW(MODEM_LTE_TAG, "RESET pin unavailable, retrying startup with PWRKEY pulse");
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_reset_pin_unavailable action=fallback_power_on");
         reset_err = modem_power_on();
     }
 
@@ -420,11 +441,13 @@ static esp_err_t modem_lte_handle_recover_reset(void) {
 }
 
 static esp_err_t modem_lte_handle_connected(void) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     (void)modem_at_poll_urc(MODEM_LTE_URC_POLL_MAX_BYTES);
     return s_lte_connected ? ESP_OK : ESP_ERR_NOT_FINISHED;
 }
 
 esp_err_t modem_lte_tick(uint64_t now_ms) {
+    // Advance one cooperative step here using the current state, time gates, and retry policy.
     if (s_lte_connected && s_state == MODEM_LTE_STATE_CONNECTED) {
         return ESP_OK;
     }

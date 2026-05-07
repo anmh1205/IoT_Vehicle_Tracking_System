@@ -59,19 +59,19 @@ export const featureCards: MarketingFeature[] = [
     icon: MapPinned,
     title: 'Theo dõi xe theo thời gian thực',
     description: 'Giữ vị trí, tuyến đường và trạng thái đội xe trong một màn hình vận hành tập trung.',
-    routeLabel: '/dashboard/map',
+    routeLabel: '/dashboard/operations/map',
   },
   {
     icon: BellRing,
     title: 'Cảnh báo tức thời',
     description: 'Theo dõi cảnh báo, thông báo và sự kiện quan trọng để phản ứng nhanh hơn.',
-    routeLabel: '/dashboard/alerts',
+    routeLabel: '/dashboard/attention/queue',
   },
   {
     icon: ShieldCheck,
     title: 'Giám sát vùng và chuyến đi',
     description: 'Kết nối vùng, lộ trình và hành trình để nhìn rõ toàn bộ bối cảnh vận hành.',
-    routeLabel: '/dashboard/zones + /dashboard/trips',
+    routeLabel: '/dashboard/zones + /dashboard/operations/trips',
   },
   {
     icon: Fuel,
@@ -83,13 +83,13 @@ export const featureCards: MarketingFeature[] = [
     icon: Wrench,
     title: 'Bảo trì và sức khỏe hệ thống',
     description: 'Quản lý bảo trì, firmware và tình trạng hạ tầng mà không phải đổi màn hình.',
-    routeLabel: '/dashboard/maintenance + /dashboard/system-status',
+    routeLabel: '/dashboard/attention/maintenance + /dashboard/platform/system-status',
   },
   {
     icon: Upload,
     title: 'Xuất dữ liệu cho vận hành',
     description: 'Đẩy dữ liệu ra ngoài khi cần tổng hợp, đối soát hoặc chia sẻ giữa các bộ phận.',
-    routeLabel: '/dashboard/exports',
+    routeLabel: '/dashboard/platform/exports',
   },
 ];
 
@@ -120,7 +120,7 @@ export const flowSteps: FlowStep[] = [
   {
     icon: Wifi,
     title: 'MQTT và hạ tầng thông điệp',
-    description: 'Bridge và broker tiếp nhận dữ liệu đo từ xa để không đứt mạch giám sát.',
+    description: 'Bridge và broker tiếp nhận telemetry để không đứt mạch giám sát.',
   },
   {
     icon: Activity,

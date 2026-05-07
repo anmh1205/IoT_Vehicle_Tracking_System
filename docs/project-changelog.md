@@ -1,5 +1,11 @@
 # Project Changelog
 
+## 2026-05-03
+### ECU Simulator State-Driven Refactor (Completed)
+- Refactored `iot-vehicle-tracking-system-ecu-simulator/ecu-simulator/src/` from phase-scripted snapshot mutation into state-driven modules: `driver-input-profile`, `powertrain-state-model`, `diagnostic-state-model`, and `obd-snapshot-builder`.
+- Kept `main.cpp` as the tick owner, narrowed `obd-can.cpp` to CAN transport and OBD reply encoding, and moved snapshot ownership to the ECU model so the CAN layer reads a prebuilt `ecu_snapshot_t` instead of mutating phase-scripted values inline.
+- Validation status: Uno PlatformIO build passed for the refactored simulator scope.
+
 ## 2026-05-02
 ### Firmware-Authoritative Session Identity Rollout (In Progress)
 - Added additive PostgreSQL session provenance migration in `Tracking_PostgreSQL/init/16-authoritative-session-identity.sql` and aligned fresh bootstrap schema in `init/02-devices.sql` with `local_session_key`, `firmware_boot_id`, `canonical_source`, `boundary_source`, `start_reason`, and `end_reason`.

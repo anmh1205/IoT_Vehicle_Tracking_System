@@ -5,7 +5,12 @@
 /**
  * @file telemetry_counters.h
  * @brief Lightweight runtime counters for SD queue/replay diagnostics.
+ * This header belongs to the telemetry domain layer and defines the diagnostics boundary that other components use without duplicating counter semantics.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 typedef struct {
     /** Successful SD append + metadata sync operations. */

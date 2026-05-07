@@ -139,8 +139,8 @@ export const getVehiclePositionSnapshot = async (
        v.vehicle_id,
        v.plate_number,
        v.device_id,
-       d.latitude,
-       d.longitude,
+       COALESCE(d.last_latitude, d.latitude)::double precision AS latitude,
+       COALESCE(d.last_longitude, d.longitude)::double precision AS longitude,
        d.last_seen_at
      FROM vehicles v
      LEFT JOIN devices d ON d.device_id = v.device_id

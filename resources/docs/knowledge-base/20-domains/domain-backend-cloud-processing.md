@@ -25,6 +25,11 @@ owner_scope: personal
 - [Cloud To Dashboard Flow](../10-repo-packs/iot-vehicle-tracking-system/20-systems/system-cloud-to-dashboard-flow.md)
 - [Validate Frontend Backend Health](../10-repo-packs/iot-vehicle-tracking-system/40-runbooks/runbook-validate-frontend-backend-health.md)
 
+## Logging Convention
+- Prefer structured logger payloads with `event` plus identifiers such as `deviceId`, `jobId`, `sessionId`, `topic`, `reason`.
+- Keep the human message short and stable; avoid interpolated sentences when the same data can live in fields.
+- Use warn/error for ingest anomalies, retries, sink failures, and dropped work; keep CRUD/business audit logs readable but still favor explicit fields over string assembly in new code.
+
 ## Current Domain Risks
 - Local host-port exposure for broker/metrics services is still unresolved.
 - Env contract naming drift can still mislead new operators.

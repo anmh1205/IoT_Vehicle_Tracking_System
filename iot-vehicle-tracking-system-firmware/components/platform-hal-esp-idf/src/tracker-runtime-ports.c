@@ -7,7 +7,12 @@
 /**
  * @file tracker-runtime-ports.c
  * @brief Validation helpers for the firmware runtime port registry.
+ * This translation unit belongs to the ESP-IDF runtime port layer and bridges portable runtime expectations onto concrete ESP-IDF services and platform helpers.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 /* Logging tag for runtime ports module. */
 static const char *TAG = "RUNTIME_PORTS";
@@ -19,6 +24,7 @@ static const char *TAG = "RUNTIME_PORTS";
  * @return ESP_OK if valid.
  */
 esp_err_t tracker_runtime_ports_validate(const tracker_runtime_ports_t *ports) {
+    // Validate runtime ports validate here before it can influence shared or persisted runtime state.
     ESP_RETURN_ON_NULL(ports, ESP_ERR_INVALID_ARG, TAG, "ports registry is NULL");
 
     ESP_RETURN_ON_NULL(ports->modem, ESP_ERR_INVALID_ARG, TAG, "modem port missing");

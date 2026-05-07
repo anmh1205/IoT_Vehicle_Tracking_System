@@ -10,7 +10,12 @@
 /**
  * @file telemetry_model.h
  * @brief Runtime telemetry axes and aggregated telemetry snapshot types.
+ * This header belongs to the shared kernel layer and collects the shared models, bounds, and helper contracts that multiple components reuse.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 typedef enum {
     TRACKER_IGNITION_STATE_UNKNOWN = 0,

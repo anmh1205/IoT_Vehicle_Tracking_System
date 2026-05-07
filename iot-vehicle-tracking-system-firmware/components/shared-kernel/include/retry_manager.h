@@ -8,7 +8,12 @@
 /**
  * @file retry_manager.h
  * @brief Shared retry policy/state helpers for non-blocking retry scheduling.
+ * This header belongs to the shared kernel layer and collects the shared models, bounds, and helper contracts that multiple components reuse.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 typedef enum {
     /** Always wait the same base delay between attempts. */

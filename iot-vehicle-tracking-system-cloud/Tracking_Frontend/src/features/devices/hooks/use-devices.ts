@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { deviceServices } from '@/lib/api/devices';
 import type { DeviceFilters } from '@/lib/api/devices';
 import type { Device } from '@/features/devices/types';
+import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 
 interface DeviceListResult {
   items: Device[];
@@ -35,8 +36,10 @@ const toDevice = (raw: any): Device => ({
   ecuAlerts: toAlertSummary(raw?.ecuAlerts ?? {}, 'ecu'),
   imei: raw?.imei ?? null,
   firmwareVersion: raw?.firmwareVersion ?? null,
+  targetFirmwareVersion: raw?.targetFirmwareVersion ?? null,
   vehiclePlate: raw?.vehiclePlate ?? null,
   customerName: raw?.customerName ?? null,
+  vehicleId: raw?.vehicleId ?? null,
   lastSeenAt: raw?.lastSeenAt ?? null,
   latitude: raw?.latitude !== undefined ? Number(raw.latitude) : null,
   longitude: raw?.longitude !== undefined ? Number(raw.longitude) : null,
@@ -48,6 +51,10 @@ const toDevice = (raw: any): Device => ({
       raw?.vibrationThreshold ??
       0,
   ),
+  lastErrorCode:
+    raw?.lastErrorCode !== undefined && raw?.lastErrorCode !== null
+      ? Number(raw.lastErrorCode)
+      : null,
   config: raw?.config ?? null,
 });
 
@@ -92,4 +99,13 @@ export const useDevices = (filters?: DeviceFilters, enabled = true) =>
     queryKey: ['devices', filters],
     queryFn: () => deviceServices.getList(filters).then(toDeviceListResult),
     enabled,
+  });
+
+export const useInfiniteDevices = (filters?: Omit<DeviceFilters, 'page' | 'limit'>, pageSize = 20, enabled = true) =>
+  useInfiniteListQuery<Device>({
+    queryKey: ['devices', filters],
+    pageSize,
+    enabled,
+    queryFn: ({ page, limit }) => deviceServices.getList({ ...filters, page, limit }),
+    selectItems: (payload) => toDeviceListResult(payload).items,
   });

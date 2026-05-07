@@ -31,9 +31,20 @@ const FIELD_ALIASES: Record<string, TelemetryFieldDescriptor> = {
   errorcode: { outputKey: 'errorCode', storageKeys: ['error_code'] },
 };
 
-const readValue = (source: Record<string, unknown> | null, key: string): number | string | null => {
+const readValueAtPath = (
+  source: Record<string, unknown> | null,
+  path: string[],
+): number | string | null => {
   if (!source) return null;
-  const value = source[key];
+  let value: unknown = source;
+
+  for (const segment of path) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return null;
+    }
+    value = (value as Record<string, unknown>)[segment];
+  }
+
   if (value === undefined || value === null) return null;
   if (typeof value === 'number') return value;
   if (typeof value === 'string') {
@@ -42,6 +53,47 @@ const readValue = (source: Record<string, unknown> | null, key: string): number 
   }
   return null;
 };
+
+const buildCandidatePaths = (key: string): string[][] => {
+  const topLevel = [key];
+
+  switch (key) {
+    case 'latitude':
+    case 'longitude':
+    case 'speed':
+    case 'course':
+    case 'error_code':
+    case 'satellites':
+    case 'device_battery':
+    case 'vehicle_battery':
+    case 'imu_accel_delta_mps2':
+      return [
+        ['raw_payload', 'data', key],
+        topLevel,
+      ];
+    case 'temperature':
+      return [
+        topLevel,
+        ['raw_payload', 'diagnostics', 'signals', 'coolant_c'],
+        ['diagnostics', 'signals', 'coolant_c'],
+        ['raw_payload', 'diagnostics', 'signals', 'intake_air_temp_c'],
+        ['diagnostics', 'signals', 'intake_air_temp_c'],
+      ];
+    case 'vibration':
+      return [
+        ['raw_payload', 'data', 'imu_accel_delta_mps2'],
+        ['imu_accel_delta_mps2'],
+        topLevel,
+      ];
+    default:
+      return [topLevel];
+  }
+};
+
+const readValue = (source: Record<string, unknown> | null, key: string): number | string | null =>
+  buildCandidatePaths(key)
+    .map((path) => readValueAtPath(source, path))
+    .find((value) => value !== null) ?? null;
 
 export const getTelemetryHistory = async (params: {
   deviceId: string;

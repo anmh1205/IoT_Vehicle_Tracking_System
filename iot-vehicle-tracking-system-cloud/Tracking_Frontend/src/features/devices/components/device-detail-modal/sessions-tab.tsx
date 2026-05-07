@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDateTime, formatDuration, formatNumber } from '@/lib/utils/date/format';
-import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-constants';
+import { SESSION_STATUS_LABELS } from '@/features/devices/components/device-constants';
 import { DeviceDetailEmptyState } from './empty-state';
 import { useDeviceDetailModal } from './modal-context';
 
@@ -31,7 +31,7 @@ export const SessionsTab = ({
           <CardHeader className="pb-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="text-sm">Phiên #{session.id}</CardTitle>
-              <Badge variant="outline">{DEVICE_STATUS_LABELS[session.status] ?? session.status}</Badge>
+              <Badge variant="outline">{SESSION_STATUS_LABELS[session.status] ?? session.status}</Badge>
             </div>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">

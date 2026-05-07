@@ -21,6 +21,8 @@ import { filterDevices } from './map-panel-utils';
 import { MapSelectedDeviceOverlay } from './map-selected-device-overlay';
 
 const VIEWPORT_SYNC_EPSILON = 0.000001;
+const FOLLOW_MIN_MOVE_METERS = 8;
+const FOLLOW_CENTER_EPSILON_METERS = 4;
 
 type PendingDiscardDialog = {
   description: string;
@@ -35,17 +37,62 @@ const FollowSelectedDevice = ({
   enabled: boolean;
 }) => {
   const map = useMap();
+  const deviceId = device?.deviceId ?? null;
+  const deviceLat = device?.lat ?? Number.NaN;
+  const deviceLon = device?.lon ?? Number.NaN;
+  const hasValidDevicePosition = device ? hasValidMapCoordinates(device) : false;
+  const lastFollowedRef = useRef<{
+    deviceId: string;
+    lat: number;
+    lon: number;
+  } | null>(null);
 
   useEffect(() => {
-    if (!enabled || !device || !hasValidMapCoordinates(device)) {
+    if (!enabled || !deviceId || !hasValidDevicePosition) {
+      lastFollowedRef.current = null;
       return;
     }
 
-    map.flyTo([device.lat, device.lon], Math.max(map.getZoom(), 14), {
-      animate: true,
-      duration: 0.5,
-    });
-  }, [device, enabled, map]);
+    const currentZoom = map.getZoom();
+    const target = [deviceLat, deviceLon] as [number, number];
+    const lastFollowed = lastFollowedRef.current;
+    const isSameDevice = lastFollowed?.deviceId === deviceId;
+    const movedSinceLastFollow =
+      !lastFollowed ||
+      !isSameDevice ||
+      map.distance([lastFollowed.lat, lastFollowed.lon], target) >= FOLLOW_MIN_MOVE_METERS;
+    const centerDistance = map.distance(map.getCenter(), target);
+    const needsInitialZoom = currentZoom < 14;
+
+    if (
+      isSameDevice &&
+      !movedSinceLastFollow &&
+      !needsInitialZoom &&
+      centerDistance < FOLLOW_CENTER_EPSILON_METERS
+    ) {
+      return;
+    }
+
+    map.stop();
+
+    if (!isSameDevice || needsInitialZoom) {
+      map.flyTo(target, Math.max(currentZoom, 14), {
+        animate: true,
+        duration: 0.45,
+      });
+    } else {
+      map.panTo(target, {
+        animate: true,
+        duration: 0.25,
+      });
+    }
+
+    lastFollowedRef.current = {
+      deviceId,
+      lat: deviceLat,
+      lon: deviceLon,
+    };
+  }, [deviceId, deviceLat, deviceLon, enabled, hasValidDevicePosition, map]);
 
   return null;
 };
@@ -58,24 +105,28 @@ const RevealSelectedDevice = ({
   enabled: boolean;
 }) => {
   const map = useMap();
+  const deviceId = device?.deviceId ?? null;
+  const deviceLat = device?.lat ?? Number.NaN;
+  const deviceLon = device?.lon ?? Number.NaN;
+  const hasValidDevicePosition = device ? hasValidMapCoordinates(device) : false;
   const previousDeviceIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (enabled || !device || !hasValidMapCoordinates(device)) {
-      previousDeviceIdRef.current = device?.deviceId ?? null;
+    if (enabled || !deviceId || !hasValidDevicePosition) {
+      previousDeviceIdRef.current = deviceId;
       return;
     }
 
-    if (previousDeviceIdRef.current === device.deviceId) {
+    if (previousDeviceIdRef.current === deviceId) {
       return;
     }
 
-    previousDeviceIdRef.current = device.deviceId;
-    map.flyTo([device.lat, device.lon], Math.max(map.getZoom(), 14), {
+    previousDeviceIdRef.current = deviceId;
+    map.flyTo([deviceLat, deviceLon], Math.max(map.getZoom(), 14), {
       animate: true,
       duration: 0.55,
     });
-  }, [device, enabled, map]);
+  }, [deviceId, deviceLat, deviceLon, enabled, hasValidDevicePosition, map]);
 
   return null;
 };

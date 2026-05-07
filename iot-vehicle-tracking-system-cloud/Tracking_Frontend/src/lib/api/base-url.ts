@@ -1,6 +1,6 @@
 const trimTrailingSlash = (value: string): string => value.replace(/\/+$/u, '');
 
-const normalizeDirectApiBase = (rawValue: string | undefined): string | null => {
+export const normalizeDirectApiBase = (rawValue: string | undefined): string | null => {
   const value = String(rawValue ?? '')
     .trim()
     .replace(/^['"]+|['"]+$/gu, '');

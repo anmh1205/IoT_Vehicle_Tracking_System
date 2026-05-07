@@ -15,7 +15,12 @@
 /**
  * @file modem_lte_internal.h
  * @brief Shared LTE FSM state and helper declarations for split modem modules.
+ * This header belongs to the SIM7600 AT modem adapter layer and exposes the modem boundary so higher layers do not depend on UART- or AT-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 #ifndef CONFIG_TRACKER_MODEM_APN
 #define CONFIG_TRACKER_MODEM_APN "internet"

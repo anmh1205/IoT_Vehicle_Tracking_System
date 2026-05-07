@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Form,
@@ -212,6 +213,8 @@ export const SettingsTab = () => {
     configSummary.activeIntervalSec,
   );
   const [payloadPreviewOpen, setPayloadPreviewOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletePending, setDeletePending] = useState(false);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(schema),
@@ -266,6 +269,16 @@ export const SettingsTab = () => {
 
   const isDirty = form.formState.isDirty;
   const isSubmitting = form.formState.isSubmitting;
+
+  const handleDelete = async () => {
+    setDeletePending(true);
+    try {
+      await onDeleteDevice();
+      setDeleteConfirmOpen(false);
+    } finally {
+      setDeletePending(false);
+    }
+  };
 
   const onSubmit = async (values: SettingsFormValues) => {
     const nextConfig = {
@@ -343,7 +356,7 @@ export const SettingsTab = () => {
                   hint={
                     latestTelemetryTimestamp
                       ? `Thời điểm: ${formatDateTime(latestTelemetryTimestamp)}`
-                      : 'Chưa có mốc dữ liệu đo từ xa hợp lệ.'
+                      : 'Chưa có mốc telemetry hợp lệ.'
                   }
                 />
               </CardContent>
@@ -376,7 +389,7 @@ export const SettingsTab = () => {
                     control={form.control}
                     name="drivingIntervalSec"
                     label="Chu kỳ gửi khi đang chạy (giây)"
-                    hint="Đây là nhịp gửi dữ liệu đo từ xa chính và là requestInterval cloud dùng để điều phối."
+                    hint="Đây là nhịp gửi telemetry chính và là requestInterval cloud dùng để điều phối."
                   />
                   <NumberInputField
                     control={form.control}
@@ -426,11 +439,10 @@ export const SettingsTab = () => {
               </CardHeader>
               <CardContent className="px-4 pb-4">
                 <Button
+                  type="button"
                   variant="destructive"
-                  disabled={isSubmitting}
-                  onClick={async () => {
-                    await onDeleteDevice();
-                  }}
+                  disabled={isSubmitting || deletePending}
+                  onClick={() => setDeleteConfirmOpen(true)}
                 >
                   Xóa thiết bị
                 </Button>
@@ -503,6 +515,22 @@ export const SettingsTab = () => {
             </div>
           </div>
         </form>
+        <ConfirmDialog
+          open={deleteConfirmOpen}
+          onCancel={() => {
+            if (!deletePending) {
+              setDeleteConfirmOpen(false);
+            }
+          }}
+          onConfirm={() => {
+            void handleDelete();
+          }}
+          title="Xóa thiết bị"
+          description={`Bạn có chắc muốn xóa thiết bị ${device?.deviceName ?? device?.deviceId ?? ''}?`}
+          confirmLabel="Xóa"
+          variant="destructive"
+          isPending={deletePending}
+        />
       </TooltipProvider>
     </Form>
   );

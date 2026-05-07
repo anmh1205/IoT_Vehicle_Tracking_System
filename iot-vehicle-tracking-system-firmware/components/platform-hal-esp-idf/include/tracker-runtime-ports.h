@@ -11,7 +11,12 @@
 /**
  * @file tracker-runtime-ports.h
  * @brief Explicit runtime port registry used by bootstrap-time dependency wiring.
+ * This header belongs to the ESP-IDF runtime port layer and defines the port boundary that lets runtime code call ESP-IDF services through a narrow surface.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /** @brief Receive one MQTT command payload delivered from the transport adapter. */
 typedef void (*tracker_command_message_callback_t)(const char *topic, const char *payload);

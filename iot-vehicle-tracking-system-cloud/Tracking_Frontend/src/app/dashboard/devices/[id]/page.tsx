@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useEffect } from 'react';
-import { Cpu, Database, HardDrive, MapPin, ShieldAlert } from 'lucide-react';
+import { ActivitySquare, Cpu, HardDrive, MapPin, ShieldAlert } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,9 +11,15 @@ import { StatCard } from '@/components/common/stat-card';
 import {
   DEVICE_STATUS_LABELS,
   DEVICE_STATUS_VARIANTS,
+  SESSION_STATUS_LABELS,
 } from '@/features/devices/components/device-constants';
 import { useDeviceDetail } from '@/features/devices/hooks/use-device-detail';
 import { formatDateTime, formatDuration, formatRelative } from '@/lib/utils/date/format';
+import {
+  getConnectivityPresentation,
+  getDeviceRuntimePresentation,
+  getVehicleStatePresentation,
+} from '@/lib/utils/device-state';
 
 const DeviceDetailPage = ({
   params,
@@ -68,28 +74,32 @@ const DeviceDetailPage = ({
   const pageTitle = detail?.deviceName ?? detail?.deviceId ?? `Thiết bị #${id}`;
   const pageDescription =
     detail?.vehiclePlate || detail?.customerName
-      ? `Theo dõi trạng thái vận hành, lỗi và dữ liệu đo từ xa của ${detail.deviceId ?? 'thiết bị'}`
-      : 'Thiết bị này chưa được gắn đầy đủ xe/khách hàng.';
+      ? `Theo dõi xe, kết nối, lỗi và telemetry của ${detail.deviceId ?? 'thiết bị'}`
+      : 'Thiết bị này chưa được gắn đầy đủ xe hoặc khách hàng.';
+
+  const connectivity = getConnectivityPresentation(detail?.currentStatus);
+  const vehicle = getVehicleStatePresentation(detail?.vehicleState);
+  const runtimeState = getDeviceRuntimePresentation(detail?.deviceState);
 
   return (
     <PageContainer pageTitle={pageTitle} pageDescription={pageDescription}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Trạng thái"
-          value={DEVICE_STATUS_LABELS[detail?.currentStatus ?? ''] ?? detail?.currentStatus ?? '-'}
+          title="Kết nối"
+          value={connectivity.value}
           icon={<Cpu className="h-4 w-4" />}
+          isLoading={query.isLoading}
+        />
+        <StatCard
+          title="Trạng thái xe"
+          value={vehicle.value}
+          icon={<ActivitySquare className="h-4 w-4" />}
           isLoading={query.isLoading}
         />
         <StatCard
           title="Tổng thời gian vận hành"
           value={formatDuration(runtime?.totalRuntime ?? 0)}
           icon={<HardDrive className="h-4 w-4" />}
-          isLoading={query.isLoading}
-        />
-        <StatCard
-          title="Tổng phiên"
-          value={runtime?.totalSessions ?? 0}
-          icon={<Database className="h-4 w-4" />}
           isLoading={query.isLoading}
         />
         <StatCard
@@ -111,8 +121,10 @@ const DeviceDetailPage = ({
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-2">
                   <Badge variant={DEVICE_STATUS_VARIANTS[detail.currentStatus] ?? 'secondary'}>
-                    {DEVICE_STATUS_LABELS[detail.currentStatus] ?? detail.currentStatus}
+                    Kết nối: {DEVICE_STATUS_LABELS[detail.currentStatus] ?? detail.currentStatus}
                   </Badge>
+                  <Badge variant="outline">Xe: {vehicle.value}</Badge>
+                  <Badge variant="outline">Thiết bị: {runtimeState.value}</Badge>
                   {detail.vehiclePlate ? <Badge variant="outline">{detail.vehiclePlate}</Badge> : null}
                   {detail.customerName ? <Badge variant="outline">{detail.customerName}</Badge> : null}
                 </div>
@@ -154,7 +166,7 @@ const DeviceDetailPage = ({
       <div className="grid gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Ảnh chụp dữ liệu đo từ xa</CardTitle>
+            <CardTitle className="text-base">Ảnh chụp telemetry</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border bg-muted/20 px-3 py-2.5">
@@ -177,7 +189,7 @@ const DeviceDetailPage = ({
               <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Phiên hiện tại</p>
               <p className="mt-1 text-sm font-medium">
                 {detail?.currentSession
-                  ? `${DEVICE_STATUS_LABELS[detail.currentSession.status] ?? detail.currentSession.status}`
+                  ? `${SESSION_STATUS_LABELS[detail.currentSession.status] ?? detail.currentSession.status}`
                   : 'Chưa có'}
               </p>
             </div>
@@ -242,9 +254,9 @@ const DeviceDetailPage = ({
                   className="grid gap-3 rounded-xl border bg-muted/20 px-3 py-3 text-sm md:grid-cols-4"
                 >
                   <div>
-                    <p className="text-xs text-muted-foreground">Trạng thái</p>
+                    <p className="text-xs text-muted-foreground">Trạng thái phiên</p>
                     <p className="font-medium">
-                      {DEVICE_STATUS_LABELS[session.status] ?? session.status}
+                      {SESSION_STATUS_LABELS[session.status] ?? session.status}
                     </p>
                   </div>
                   <div>

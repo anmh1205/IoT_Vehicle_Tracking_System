@@ -1,10 +1,11 @@
 'use client';
 
 import { useDeferredValue, useMemo, useState } from 'react';
-import { CircleCheckBig, CirclePlay, CircleX, Plus, Route } from 'lucide-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CalendarClock, CircleCheckBig, CirclePlay, CircleX, Plus, Route } from 'lucide-react';
+import { useMutation, useQueries, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { StatCard } from '@/components/common/stat-card';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { Button } from '@/components/ui/button';
@@ -16,78 +17,90 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { customerServices } from '@/lib/api/customers';
 import { tripServices } from '@/lib/api/trips';
-import { vehicleServices } from '@/lib/api/vehicles';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { getTripColumns } from '@/features/trips/components/trip-columns';
 import { TripForm } from '@/features/trips/components/trip-form';
 import { TripPreviewDialog } from '@/features/trips/components/trip-preview-dialog';
+import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 
 const PAGE_SIZE = 20;
-const LOOKUP_LIMIT = 100;
+const TRIP_STATUSES = ['planned', 'in_progress', 'completed', 'cancelled'] as const;
 
-type TripVehicleContext = {
-  vehicleId?: string | null;
-  customerId?: number | string | null;
-  plateNumber?: string | null;
-  deviceId?: string | null;
+type TripStatusFilter = 'all' | (typeof TRIP_STATUSES)[number];
+
+const emptyToNull = (value: unknown) => {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return normalized.length > 0 ? normalized : null;
 };
 
-type TripCustomerContext = {
-  id?: number | string | null;
-  name?: string | null;
-};
+const emptyToUndefined = (value: unknown) => emptyToNull(value) ?? undefined;
+
+const getTripCount = (payload: any) =>
+  Number(payload?.pagination?.total ?? payload?.data?.pagination?.total ?? payload?.total ?? 0);
 
 const TripsPage = () => {
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any | null>(null);
   const [deleteItem, setDeleteItem] = useState<any | null>(null);
   const [previewTripId, setPreviewTripId] = useState<number | null>(null);
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<'all' | 'planned' | 'in_progress' | 'completed' | 'cancelled'>('all');
-  const deferredSearch = useDeferredValue(search);
+  const [status, setStatus] = useState<TripStatusFilter>('all');
+  const deferredSearch = useDeferredValue(search.trim());
   const queryClient = useQueryClient();
 
-  const trips = useQuery({
-    queryKey: ['trips', page, deferredSearch, status],
-    queryFn: () =>
+  const trips = useInfiniteListQuery<any>({
+    queryKey: ['trips', deferredSearch, status],
+    pageSize: PAGE_SIZE,
+    queryFn: ({ page, limit }) =>
       tripServices.getList({
         page,
-        limit: PAGE_SIZE,
+        limit,
         search: deferredSearch || undefined,
         status: status === 'all' ? undefined : status,
       }),
   });
 
-  const vehiclesQuery = useQuery({
-    queryKey: ['trip-vehicles'],
-    queryFn: () => vehicleServices.getList({ limit: LOOKUP_LIMIT }),
-  });
-
-  const customersQuery = useQuery({
-    queryKey: ['trip-customers'],
-    queryFn: () => customerServices.getList({ limit: LOOKUP_LIMIT }),
+  const tripStatQueries = useQueries({
+    queries: [
+      {
+        queryKey: ['trip-stats', 'all', deferredSearch],
+        queryFn: () =>
+          tripServices.getList({
+            page: 1,
+            limit: 1,
+            search: deferredSearch || undefined,
+          }),
+      },
+      ...TRIP_STATUSES.map((item) => ({
+        queryKey: ['trip-stats', item, deferredSearch],
+        queryFn: () =>
+          tripServices.getList({
+            page: 1,
+            limit: 1,
+            search: deferredSearch || undefined,
+            status: item,
+          }),
+      })),
+    ],
   });
 
   const createMutation = useMutation({
     mutationFn: (payload: any) =>
       tripServices.create({
-        tripCode: payload.tripCode,
-        vehicleId: payload.vehicleId || undefined,
-        deviceId: payload.deviceId || undefined,
-        driverName: payload.driverName || undefined,
-        driverPhone: payload.driverPhone || undefined,
-        startLocation: payload.startLocation || undefined,
-        endLocation: payload.endLocation || undefined,
+        tripCode: String(payload.tripCode ?? '').trim(),
+        vehicleId: emptyToUndefined(payload.vehicleId),
+        deviceId: emptyToUndefined(payload.deviceId),
+        driverName: emptyToUndefined(payload.driverName),
+        driverPhone: emptyToUndefined(payload.driverPhone),
+        startLocation: emptyToUndefined(payload.startLocation),
+        endLocation: emptyToUndefined(payload.endLocation),
         plannedStart: payload.plannedStart ? new Date(payload.plannedStart).toISOString() : undefined,
         plannedEnd: payload.plannedEnd ? new Date(payload.plannedEnd).toISOString() : undefined,
-        notes: payload.notes || undefined,
+        notes: emptyToUndefined(payload.notes),
       }),
     onSuccess: async () => {
-      setPage(1);
       setSearch('');
       setStatus('all');
       await queryClient.invalidateQueries({ queryKey: ['trips'] });
@@ -104,18 +117,18 @@ const TripsPage = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: any) =>
       tripServices.update(id, {
-        vehicleId: payload.vehicleId || undefined,
-        deviceId: payload.deviceId || undefined,
-        driverName: payload.driverName || undefined,
-        driverPhone: payload.driverPhone || undefined,
-        startLocation: payload.startLocation || undefined,
-        endLocation: payload.endLocation || undefined,
-        plannedStart: payload.plannedStart ? new Date(payload.plannedStart).toISOString() : undefined,
-        plannedEnd: payload.plannedEnd ? new Date(payload.plannedEnd).toISOString() : undefined,
-        notes: payload.notes || undefined,
+        vehicleId: emptyToNull(payload.vehicleId),
+        deviceId: emptyToNull(payload.deviceId),
+        driverName: emptyToNull(payload.driverName),
+        driverPhone: emptyToNull(payload.driverPhone),
+        startLocation: emptyToNull(payload.startLocation),
+        endLocation: emptyToNull(payload.endLocation),
+        plannedStart: payload.plannedStart ? new Date(payload.plannedStart).toISOString() : null,
+        plannedEnd: payload.plannedEnd ? new Date(payload.plannedEnd).toISOString() : null,
+        notes: emptyToNull(payload.notes),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trips'] });
+      void queryClient.invalidateQueries({ queryKey: ['trips'] });
       setOpen(false);
       setEditItem(null);
     },
@@ -129,7 +142,7 @@ const TripsPage = () => {
 
   const startMutation = useMutation({
     mutationFn: (id: number) => tripServices.start(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trips'] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['trips'] }),
     onError: (error: unknown) => {
       notificationUtils.error(
         'Bắt đầu chuyến đi thất bại',
@@ -140,7 +153,7 @@ const TripsPage = () => {
 
   const endMutation = useMutation({
     mutationFn: (id: number) => tripServices.end(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trips'] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['trips'] }),
     onError: (error: unknown) => {
       notificationUtils.error(
         'Kết thúc chuyến đi thất bại',
@@ -152,7 +165,7 @@ const TripsPage = () => {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => tripServices.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trips'] });
+      void queryClient.invalidateQueries({ queryKey: ['trips'] });
       setDeleteItem(null);
     },
     onError: (error: unknown) => {
@@ -163,67 +176,38 @@ const TripsPage = () => {
     },
   });
 
-  const rows = useMemo(() => trips.data?.items ?? trips.data?.data?.items ?? [], [trips.data]);
-  const vehicles = useMemo<TripVehicleContext[]>(
-    () => (vehiclesQuery.data?.items ?? vehiclesQuery.data?.data?.items ?? []) as TripVehicleContext[],
-    [vehiclesQuery.data],
-  );
-  const customers = useMemo<TripCustomerContext[]>(
-    () => (customersQuery.data?.items ?? customersQuery.data?.data?.items ?? []) as TripCustomerContext[],
-    [customersQuery.data],
-  );
-  const vehicleById = useMemo(
-    () => new Map(vehicles.map((vehicle) => [String(vehicle.vehicleId), vehicle])),
-    [vehicles],
-  );
-  const customerById = useMemo(
-    () => new Map(customers.map((customer) => [Number(customer.id), customer])),
-    [customers],
-  );
+  const rows = trips.items;
   const tableRows = useMemo(
     () =>
-      rows.map((row: any) => {
-        const vehicle: TripVehicleContext | null = row.vehicleId
-          ? (vehicleById.get(String(row.vehicleId)) ?? null)
-          : null;
-        const customer: TripCustomerContext | null = vehicle?.customerId
-          ? (customerById.get(Number(vehicle.customerId)) ?? null)
-          : null;
-
-        return {
-          ...row,
-          vehiclePrimary: row.vehicleId
-            ? vehicle?.plateNumber
-              ? `${vehicle.plateNumber} - ${row.vehicleId}`
-              : row.vehicleId
-            : 'Chưa có xe',
-          vehicleSecondary: [customer?.name, row.deviceId ?? vehicle?.deviceId]
-            .filter(Boolean)
-            .join(' • '),
-          routeLabel: [row.startLocation, row.endLocation].filter(Boolean).join(' -> '),
-        };
-      }),
-    [customerById, rows, vehicleById],
+      rows.map((row: any) => ({
+        ...row,
+        vehiclePrimary: row.vehicleId
+          ? row.vehiclePlate
+            ? `${row.vehiclePlate} - ${row.vehicleId}`
+            : row.vehicleId
+          : 'Chưa có xe',
+        vehicleSecondary: [row.customerName, row.deviceId].filter(Boolean).join(' • '),
+        routeLabel: [row.startLocation, row.endLocation].filter(Boolean).join(' -> '),
+      })),
+    [rows],
   );
-
-  const pagination = trips.data?.pagination ?? trips.data?.data?.pagination;
+  const statsLoading = tripStatQueries.some((query) => query.isLoading);
   const stats = useMemo(
     () => ({
-      total: pagination?.total ?? rows.length,
-      inProgress: rows.filter((row: any) => row.status === 'in_progress' || row.status === 'started').length,
-      completed: rows.filter((row: any) => row.status === 'completed' || row.status === 'ended').length,
-      cancelled: rows.filter((row: any) => row.status === 'cancelled').length,
+      total: getTripCount(tripStatQueries[0]?.data) || trips.total || rows.length,
+      planned: getTripCount(tripStatQueries[1]?.data),
+      inProgress: getTripCount(tripStatQueries[2]?.data),
+      completed: getTripCount(tripStatQueries[3]?.data),
+      cancelled: getTripCount(tripStatQueries[4]?.data),
     }),
-    [pagination?.total, rows],
+    [trips.total, rows.length, tripStatQueries],
   );
-
-  const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
     <PageContainer
       pageTitle="Chuyến đi"
-      pageDescription="Đối chiếu danh sách chuyến đi với dữ liệu thực tế và mở bản đồ phát lại ngay từ bảng"
+      pageDescription="Đối chiếu danh sách chuyến đi với dữ liệu thực tế và mở bản đồ phát lại ngay từ bảng."
       pageHeaderAction={
         <Button
           onClick={() => {
@@ -236,11 +220,38 @@ const TripsPage = () => {
         </Button>
       }
     >
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Tổng chuyến đi" value={stats.total} icon={<Route className="h-4 w-4" />} isLoading={trips.isLoading} />
-        <StatCard title="Đang diễn ra trên trang" value={stats.inProgress} icon={<CirclePlay className="h-4 w-4" />} isLoading={trips.isLoading} />
-        <StatCard title="Hoàn tất trên trang" value={stats.completed} icon={<CircleCheckBig className="h-4 w-4" />} isLoading={trips.isLoading} />
-        <StatCard title="Đã hủy trên trang" value={stats.cancelled} icon={<CircleX className="h-4 w-4" />} isLoading={trips.isLoading} />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StatCard
+          title="Tổng chuyến đi"
+          value={stats.total}
+          icon={<Route className="h-4 w-4" />}
+          subtitle="Theo từ khóa tìm kiếm hiện tại"
+          isLoading={trips.isLoading || statsLoading}
+        />
+        <StatCard
+          title="Đã lên kế hoạch"
+          value={stats.planned}
+          icon={<CalendarClock className="h-4 w-4" />}
+          isLoading={trips.isLoading || statsLoading}
+        />
+        <StatCard
+          title="Đang diễn ra"
+          value={stats.inProgress}
+          icon={<CirclePlay className="h-4 w-4" />}
+          isLoading={trips.isLoading || statsLoading}
+        />
+        <StatCard
+          title="Hoàn tất"
+          value={stats.completed}
+          icon={<CircleCheckBig className="h-4 w-4" />}
+          isLoading={trips.isLoading || statsLoading}
+        />
+        <StatCard
+          title="Đã hủy"
+          value={stats.cancelled}
+          icon={<CircleX className="h-4 w-4" />}
+          isLoading={trips.isLoading || statsLoading}
+        />
       </div>
 
       <DataTable
@@ -276,19 +287,13 @@ const TripsPage = () => {
           <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:gap-2 lg:flex-nowrap">
             <Input
               value={search}
-              onChange={(event) => {
-                setPage(1);
-                setSearch(event.target.value);
-              }}
-              placeholder="Tìm theo mã chuyến, xe, thiết bị, tài xế hoặc điểm đi/đến..."
-              className="w-full md:min-w-[320px] md:max-w-[460px]"
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Tìm theo mã chuyến, xe, khách hàng, thiết bị, tài xế hoặc điểm đi/đến..."
+              className="w-full md:min-w-[320px] md:max-w-[520px]"
             />
             <Select
               value={status}
-              onValueChange={(value: 'all' | 'planned' | 'in_progress' | 'completed' | 'cancelled') => {
-                setPage(1);
-                setStatus(value);
-              }}
+              onValueChange={(value: TripStatusFilter) => setStatus(value)}
             >
               <SelectTrigger className="w-full sm:w-[220px]">
                 <SelectValue placeholder="Trạng thái" />
@@ -305,25 +310,14 @@ const TripsPage = () => {
         }
       />
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Trang {pagination?.page ?? page} / {totalPages}. Hiển thị {rows.length} chuyến trên tổng{' '}
-          {pagination?.total ?? rows.length} bản ghi.
-        </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
-            Trang trước
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => setPage((value) => value + 1)}
-          >
-            Trang sau
-          </Button>
-        </div>
-      </div>
+      <InfiniteScrollTrigger
+        hasMore={trips.hasMore}
+        isLoadingMore={trips.isFetchingNextPage}
+        onLoadMore={trips.loadMore}
+        loadedCount={trips.loadedCount}
+        totalCount={trips.total}
+        itemLabel="chuyến đi"
+      />
 
       <TripForm
         open={open}

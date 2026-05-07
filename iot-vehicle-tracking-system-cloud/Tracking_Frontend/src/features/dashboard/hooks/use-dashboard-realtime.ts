@@ -10,6 +10,9 @@ export const useDashboardRealtime = () => {
   const refreshActivity = useCallback(() => {
     queryInvalidation.dashboard.activity(queryClient);
   }, [queryClient]);
+  const refreshDashboard = useCallback(() => {
+    queryInvalidation.dashboard.all(queryClient);
+  }, [queryClient]);
   useRealtimeSubscription({
     namespace: 'dashboard',
     event: 'stats:update',
@@ -18,7 +21,27 @@ export const useDashboardRealtime = () => {
   useRealtimeSubscription({
     namespace: 'dashboard',
     event: 'alert:new',
-    handler: refreshActivity,
+    handler: refreshDashboard,
+  });
+  useRealtimeSubscription({
+    namespace: 'dashboard',
+    event: 'alert:updated',
+    handler: refreshDashboard,
+  });
+  useRealtimeSubscription({
+    namespace: 'dashboard',
+    event: 'alert:deleted',
+    handler: refreshDashboard,
+  });
+  useRealtimeSubscription({
+    namespace: 'dashboard',
+    event: 'violation:new',
+    handler: refreshDashboard,
+  });
+  useRealtimeSubscription({
+    namespace: 'dashboard',
+    event: 'violation:updated',
+    handler: refreshDashboard,
   });
   useRealtimeSubscription({
     namespace: 'dashboard',

@@ -44,6 +44,10 @@
  *    - Only one in-flight publish at a time
  */
 
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
+
 /**
  * @brief Get topic class name.
  *
@@ -51,6 +55,7 @@
  * @return Class name.
  */
 static const char *tracker_mqtt_topic_class(const char *topic) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (topic == s_topic_rawdata || (topic != NULL && strcmp(topic, s_topic_rawdata) == 0)) {
         return "rawdata";
     }
@@ -78,6 +83,7 @@ static const char *tracker_mqtt_topic_class(const char *topic) {
  * @return Message ID or -1 on failure.
  */
 int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *payload, int qos) {
+    // Drive one full modem publish transaction here so topic/payload staging and PUB result handling stay in one place.
     ESP_RETURN_ON_FALSE(s_connected, -1, TRACKER_MQTT_TAG, "MQTT not connected");
     ESP_RETURN_ON_NULL(topic, -1, TRACKER_MQTT_TAG, "topic is NULL");
     ESP_RETURN_ON_NULL(payload, -1, TRACKER_MQTT_TAG, "payload is NULL");
@@ -88,6 +94,7 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
     const char *topic_class = tracker_mqtt_topic_class(topic);
     size_t topic_len = strlen(topic);
     size_t payload_len = strlen(payload);
+    // Validate modem-facing limits before staging topic or payload into separate CMQTT* commands.
     ESP_RETURN_ON_FALSE(topic_len <= 1024, -1, TRACKER_MQTT_TAG, "topic too long len=%u", (unsigned)topic_len);
     ESP_RETURN_ON_FALSE(payload_len <= 10240,
                         -1,
@@ -96,6 +103,7 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
                         (unsigned)payload_len);
 
     char cmd[96] = {0};
+    // Topic bytes are staged first because the modem expects the publish envelope in distinct topic/payload phases.
     (void)snprintf(cmd, sizeof(cmd), "AT+CMQTTTOPIC=%d,%u\r", MQTT_CLIENT_INDEX, (unsigned int)topic_len);
     if (tracker_mqtt_input_data(cmd, topic, "+CMQTTTOPIC:", true) != ESP_OK) {
         ESP_LOGW(TRACKER_MQTT_TAG,
@@ -105,6 +113,7 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
         return -1;
     }
 
+    // Only after the topic is accepted do we stream the JSON payload into the modem's publish buffer.
     (void)snprintf(cmd, sizeof(cmd), "AT+CMQTTPAYLOAD=%d,%u\r", MQTT_CLIENT_INDEX, (unsigned int)payload_len);
     if (tracker_mqtt_input_data(cmd, payload, "+CMQTTPAYLOAD:", true) != ESP_OK) {
         ESP_LOGW(TRACKER_MQTT_TAG,
@@ -121,6 +130,7 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
                    qos,
                    (unsigned int)MQTT_DEFAULT_PUBLISH_TIMEOUT_S);
 
+    // Arm publish-result tracking before sending PUB so synchronous and asynchronous completion paths share one state machine.
     tracker_mqtt_begin_publish_wait();
     char response[MQTT_AT_RESPONSE_MAX_LEN] = {0};
     if (tracker_mqtt_send_cmd(cmd, MQTT_CONNECT_TIMEOUT_MS, response, sizeof(response)) != ESP_OK) {
@@ -143,6 +153,7 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
                                                       &publish_err,
                                                       &parsed);
     if (!parsed) {
+        // Some modem firmware only reports final publish status later via URC, so wait that path out before failing.
         esp_err_t wait_err = tracker_mqtt_wait_publish_result(&publish_err);
         tracker_mqtt_reset_publish_wait();
         if (wait_err != ESP_OK) {
@@ -159,6 +170,7 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
             return -1;
         }
     } else {
+        // Inline modem results can close the publish wait immediately without touching the asynchronous path.
         tracker_mqtt_reset_publish_wait();
         if (result_err != ESP_OK) {
             ESP_LOGW(TRACKER_MQTT_TAG,
@@ -169,6 +181,7 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
         }
     }
 
+    // The modem path does not return a broker message ID, so track one locally for higher-level correlation.
     int msg_id = s_next_msg_id++;
     if (s_next_msg_id <= 0) {
         s_next_msg_id = 1;
@@ -177,6 +190,7 @@ int tracker_mqtt_publish_with_msg_id_internal(const char *topic, const char *pay
 }
 
 esp_err_t tracker_mqtt_subscribe_commands_internal(void) {
+    // Update the subscribe commands internal path here so later asynchronous work sees the latest intent.
     ESP_RETURN_ON_FALSE(s_connected, ESP_ERR_INVALID_STATE, TRACKER_MQTT_TAG, "MQTT not connected");
     if (s_commands_subscribed) {
         return ESP_OK;

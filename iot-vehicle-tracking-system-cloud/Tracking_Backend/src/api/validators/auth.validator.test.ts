@@ -1,4 +1,4 @@
-import { createUserSchema, loginSchema, updateUserSchema } from './auth.validator';
+import { createUserSchema, loginSchema, updateProfileSchema, updateUserSchema } from './auth.validator';
 
 describe('auth.validator', () => {
   it('accepts valid login payload', () => {
@@ -24,5 +24,10 @@ describe('auth.validator', () => {
   it('accepts partial update user payload', () => {
     const parsed = updateUserSchema.parse({ status: 'inactive' });
     expect(parsed.status).toBe('inactive');
+  });
+
+  it('accepts clearing profile email', () => {
+    const parsed = updateProfileSchema.parse({ fullName: 'Test User', email: null });
+    expect(parsed.email).toBeNull();
   });
 });

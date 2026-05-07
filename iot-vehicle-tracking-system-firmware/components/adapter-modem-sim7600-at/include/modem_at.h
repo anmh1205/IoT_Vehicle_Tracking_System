@@ -11,7 +11,12 @@
 /**
  * @file modem_at.h
  * @brief AT command transport interface over modem UART.
+ * This header belongs to the SIM7600 AT modem adapter layer and exposes the modem boundary so higher layers do not depend on UART- or AT-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Callback type for unsolicited modem result codes (URC).

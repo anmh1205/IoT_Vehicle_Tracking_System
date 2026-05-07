@@ -24,10 +24,10 @@ import { useMapStore } from '@/features/map/store/map-store';
 import type { DevicePosition } from '@/features/map/types';
 import { formatRelative } from '@/lib/utils/date/format';
 import {
+  getConnectivityPresentation,
   getDeviceRuntimePresentation,
-  getEnginePresentation,
   getFreshnessPresentation,
-  getMotionPresentation,
+  getVehicleStatePresentation,
 } from '@/lib/utils/device-state';
 import { cn } from '@/lib/utils';
 
@@ -117,9 +117,9 @@ export const MapInspectRail = ({
   }
 
   const freshness = getFreshnessPresentation(device.stateUpdatedAt ?? device.timestamp);
-  const engine = getEnginePresentation(device.ignitionState);
-  const motion = getMotionPresentation(device.motionState);
+  const vehicle = getVehicleStatePresentation(device.vehicleState);
   const runtime = getDeviceRuntimePresentation(device.deviceState);
+  const connectivity = getConnectivityPresentation(device.status);
   const allowedZoneMembership =
     membershipMeta[allowedZone?.membershipState ?? 'unknown'] ?? membershipMeta.unknown;
 
@@ -138,7 +138,7 @@ export const MapInspectRail = ({
   ];
 
   return (
-    <div className="pointer-events-none absolute inset-y-0 right-0 z-[910] hidden md:flex">
+    <div className="pointer-events-none absolute inset-y-0 right-0 z-[var(--layer-map-overlay)] hidden md:flex">
       <TooltipProvider delayDuration={120}>
         <aside
           className={cn(
@@ -202,9 +202,13 @@ export const MapInspectRail = ({
                     </div>
                   </div>
                   <div className="mt-3 grid gap-2">
-                    <MiniStat label={engine.label} value={engine.value} tone={engine.tone} />
-                    <MiniStat label={motion.label} value={motion.value} tone={motion.tone} />
+                    <MiniStat label={vehicle.label} value={vehicle.value} tone={vehicle.tone} />
                     <MiniStat label={runtime.label} value={runtime.value} tone={runtime.tone} />
+                    <MiniStat
+                      label={connectivity.label}
+                      value={connectivity.value}
+                      tone={connectivity.tone}
+                    />
                   </div>
                 </div>
 

@@ -2,6 +2,10 @@ import { Pool } from 'pg';
 import { dbConfig } from '../config/env';
 import { logger } from './logger';
 import type { RuntimeStateSnapshot } from '../types/device-state.types';
+import {
+  canHydrateSessionIdentity,
+  hasSessionIdentityConflict,
+} from '../utils/session-identity.util';
 
 export const pool = new Pool({
   host: dbConfig.host,
@@ -31,6 +35,9 @@ interface DeviceSessionRow {
   status?: string | null;
   runtime_seconds?: string | number | null;
   data_points_count?: string | number | null;
+  local_session_key?: string | number | null;
+  firmware_boot_id?: string | null;
+  boundary_source?: string | null;
 }
 
 interface SessionIdentityInput {
@@ -56,6 +63,8 @@ interface ActiveAlertMessageRow {
 const toIsoTimestamp = (timestampMs: number) => new Date(timestampMs).toISOString();
 const TRANSIENT_HEARTBEAT_SESSION_MAX_RUNTIME_SECONDS = 120;
 const TRANSIENT_HEARTBEAT_SESSION_MAX_DATA_POINTS = 1;
+const TRANSIENT_AUTHORITATIVE_SESSION_MAX_RUNTIME_SECONDS = 180;
+const TRANSIENT_AUTHORITATIVE_SESSION_MAX_DATA_POINTS = 0;
 
 const toInt = (value: string | number | null | undefined): number => {
   const parsed = Number.parseInt(String(value ?? '0'), 10);
@@ -90,7 +99,7 @@ export const validateDevice = async (
     );
     return result.rows[0] ?? null;
   } catch (err) {
-    logger.error({ err, deviceId }, 'validateDevice failed');
+    logger.error({ err, deviceId, event: 'validate_device_failed' }, 'Validate device failed');
     return null;
   }
 };
@@ -178,7 +187,7 @@ export const updateDeviceStatus = async (
       [deviceId, status],
     );
   } catch (err) {
-    logger.error({ err, deviceId }, 'updateDeviceStatus failed');
+    logger.error({ err, deviceId, event: 'update_device_status_failed' }, 'Update device status failed');
   }
 };
 
@@ -201,6 +210,46 @@ export const ensureDeviceSession = async (
   try {
     await client.query('BEGIN');
 
+    const retireStaleRunningSessions = async (
+      keepSessionId?: number,
+    ): Promise<void> => {
+      await client.query(
+        `UPDATE device_sessions
+         SET
+           status = 'completed',
+           server_session_end = COALESCE(server_session_end, $2),
+           session_end = COALESCE(session_end, $3),
+           end_reason = COALESCE(end_reason, 'superseded'),
+           boundary_source = COALESCE(boundary_source, $4),
+           last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
+           uptime = GREATEST(
+             COALESCE(
+               uptime,
+               EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int
+             ),
+             0
+           ),
+           total_runtime_seconds = GREATEST(
+             COALESCE(
+               total_runtime_seconds,
+               EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int
+             ),
+             0
+           ),
+           updated_at = NOW()
+         WHERE device_id = $1
+           AND status = 'running'
+           AND ($5::bigint IS NULL OR id <> $5::bigint)`,
+        [
+          deviceId,
+          serverOccurredAt,
+          deviceOccurredAt,
+          boundarySource,
+          keepSessionId ?? null,
+        ],
+      );
+    };
+
     if (hasAuthoritativeIdentity) {
       const matchedByIdentity = await client.query<DeviceSessionRow>(
         `SELECT id, status
@@ -216,6 +265,7 @@ export const ensureDeviceSession = async (
 
       const existingByIdentity = matchedByIdentity.rows[0];
       if (existingByIdentity) {
+        await retireStaleRunningSessions(existingByIdentity.id);
         await client.query(
           `UPDATE device_sessions
            SET canonical_source = $2,
@@ -232,11 +282,74 @@ export const ensureDeviceSession = async (
           status: existingByIdentity.status ?? 'running',
         };
       }
+
+      const active = await client.query<DeviceSessionRow>(
+        `SELECT id, status, local_session_key, firmware_boot_id, boundary_source
+         FROM device_sessions
+         WHERE device_id = $1 AND status = 'running'
+         ORDER BY created_at DESC
+         LIMIT 1
+         FOR UPDATE`,
+        [deviceId],
+      );
+
+      const existing = active.rows[0];
+      if (
+        existing &&
+        !hasSessionIdentityConflict(
+          {
+            localSessionKey: toOptionalPositiveInt(existing.local_session_key),
+            bootId: existing.firmware_boot_id,
+          },
+          {
+            localSessionKey,
+            bootId: firmwareBootId,
+          },
+        ) &&
+        (
+          existing.boundary_source === 'bridge_fallback' ||
+          canHydrateSessionIdentity(
+            {
+              localSessionKey: toOptionalPositiveInt(existing.local_session_key),
+              bootId: existing.firmware_boot_id,
+            },
+            {
+              localSessionKey,
+              bootId: firmwareBootId,
+            },
+          )
+        )
+      ) {
+        await client.query(
+          `UPDATE device_sessions
+           SET local_session_key = COALESCE(local_session_key, $2::bigint),
+               firmware_boot_id = COALESCE(firmware_boot_id, $3),
+               canonical_source = $4,
+               boundary_source = $5,
+               start_reason = COALESCE(start_reason, $6),
+               updated_at = NOW()
+           WHERE id = $1`,
+          [
+            existing.id,
+            localSessionKey,
+            firmwareBootId,
+            canonicalSource,
+            boundarySource,
+            startReason,
+          ],
+        );
+        await client.query('COMMIT');
+        return {
+          sessionId: existing.id,
+          isNew: false,
+          status: existing.status ?? 'running',
+        };
+      }
     }
 
     if (!hasAuthoritativeIdentity) {
       const active = await client.query<DeviceSessionRow>(
-        `SELECT id, status
+        `SELECT id, status, local_session_key, firmware_boot_id
          FROM device_sessions
          WHERE device_id = $1 AND status = 'running'
          ORDER BY created_at DESC
@@ -247,19 +360,36 @@ export const ensureDeviceSession = async (
 
       const existing = active.rows[0];
       if (existing) {
-        await client.query(
-          `UPDATE device_sessions
-           SET canonical_source = $2,
-               boundary_source = $3,
-               start_reason = COALESCE(start_reason, $4),
-               updated_at = NOW()
-           WHERE id = $1`,
-          [existing.id, canonicalSource, boundarySource, startReason],
-        );
-        await client.query('COMMIT');
-        return { sessionId: existing.id, isNew: false, status: existing.status ?? 'running' };
+        if (
+          hasSessionIdentityConflict(
+            {
+              localSessionKey: toOptionalPositiveInt(existing.local_session_key),
+              bootId: existing.firmware_boot_id,
+            },
+            {
+              localSessionKey,
+              bootId: firmwareBootId,
+            },
+          )
+        ) {
+          await retireStaleRunningSessions();
+        } else {
+          await client.query(
+            `UPDATE device_sessions
+             SET canonical_source = $2,
+                 boundary_source = $3,
+                 start_reason = COALESCE(start_reason, $4),
+                 updated_at = NOW()
+             WHERE id = $1`,
+            [existing.id, canonicalSource, boundarySource, startReason],
+          );
+          await client.query('COMMIT');
+          return { sessionId: existing.id, isNew: false, status: existing.status ?? 'running' };
+        }
       }
     }
+
+    await retireStaleRunningSessions();
 
     const created = await client.query<DeviceSessionRow>(
       `INSERT INTO device_sessions (
@@ -299,7 +429,10 @@ export const ensureDeviceSession = async (
     };
   } catch (err) {
     await client.query('ROLLBACK');
-    logger.error({ err, deviceId, localSessionKey, firmwareBootId }, 'ensureDeviceSession failed');
+    logger.error(
+      { err, deviceId, localSessionKey, firmwareBootId, event: 'ensure_device_session_failed' },
+      'Ensure device session failed',
+    );
     throw err;
   } finally {
     client.release();
@@ -317,24 +450,87 @@ export const findDeviceSessionIdByIdentity = async (
 
   const localSessionKey = sessionIdentity.localSessionKey ?? null;
   const firmwareBootId = sessionIdentity.bootId?.trim() || null;
-  if (localSessionKey === null || firmwareBootId === null) {
-    return null;
-  }
 
   try {
-    const result = await pool.query<DeviceSessionRow>(
-      `SELECT id
-       FROM device_sessions
-       WHERE device_id = $1
-         AND firmware_boot_id = $2
-         AND local_session_key = $3
-       ORDER BY created_at DESC
-       LIMIT 1`,
-      [deviceId, firmwareBootId, localSessionKey],
-    );
-    return result.rows[0]?.id ?? null;
+    if (localSessionKey !== null && firmwareBootId !== null) {
+      const result = await pool.query<DeviceSessionRow>(
+        `SELECT id
+         FROM device_sessions
+         WHERE device_id = $1
+           AND firmware_boot_id = $2
+           AND local_session_key = $3
+         ORDER BY created_at DESC
+         LIMIT 1`,
+        [deviceId, firmwareBootId, localSessionKey],
+      );
+      if (result.rows[0]?.id) {
+        return result.rows[0].id;
+      }
+
+      const fallbackCandidate = await pool.query<DeviceSessionRow>(
+        `SELECT id, local_session_key, firmware_boot_id, boundary_source
+         FROM device_sessions
+         WHERE device_id = $1
+           AND status = 'running'
+           AND (
+             boundary_source = 'bridge_fallback'
+             OR local_session_key IS NULL
+             OR firmware_boot_id IS NULL
+           )
+         ORDER BY created_at DESC
+         LIMIT 5`,
+        [deviceId],
+      );
+
+      const adopted = fallbackCandidate.rows.find((candidate) =>
+        !hasSessionIdentityConflict(
+          {
+            localSessionKey: toOptionalPositiveInt(candidate.local_session_key),
+            bootId: candidate.firmware_boot_id,
+          },
+          {
+            localSessionKey,
+            bootId: firmwareBootId,
+          },
+        ),
+      );
+      return adopted?.id ?? null;
+    }
+
+    if (localSessionKey !== null) {
+      const result = await pool.query<DeviceSessionRow>(
+        `SELECT id
+         FROM device_sessions
+         WHERE device_id = $1
+           AND local_session_key = $2
+           AND status = 'running'
+         ORDER BY created_at DESC
+         LIMIT 1`,
+        [deviceId, localSessionKey],
+      );
+      return result.rows[0]?.id ?? null;
+    }
+
+    if (firmwareBootId !== null) {
+      const result = await pool.query<DeviceSessionRow>(
+        `SELECT id
+         FROM device_sessions
+         WHERE device_id = $1
+           AND firmware_boot_id = $2
+           AND status = 'running'
+         ORDER BY created_at DESC
+         LIMIT 1`,
+        [deviceId, firmwareBootId],
+      );
+      return result.rows[0]?.id ?? null;
+    }
+
+    return null;
   } catch (err) {
-    logger.error({ err, deviceId, localSessionKey, firmwareBootId }, 'findDeviceSessionIdByIdentity failed');
+    logger.error(
+      { err, deviceId, localSessionKey, firmwareBootId, event: 'find_device_session_id_by_identity_failed' },
+      'Find device session by identity failed',
+    );
     return null;
   }
 };
@@ -480,7 +676,10 @@ export const touchDeviceSession = async (params: {
         ],
       );
     } catch (fallbackErr) {
-      logger.error({ err: fallbackErr, sessionId: params.sessionId }, 'touchDeviceSession failed');
+      logger.error(
+        { err: fallbackErr, sessionId: params.sessionId, deviceId: params.deviceId, event: 'touch_device_session_failed' },
+        'Touch device session failed',
+      );
       throw fallbackErr;
     }
   }
@@ -602,7 +801,12 @@ export const completeDeviceSession = async (
       dataPointsCount <= TRANSIENT_HEARTBEAT_SESSION_MAX_DATA_POINTS &&
       Math.max(runtimeSeconds, 0) <= TRANSIENT_HEARTBEAT_SESSION_MAX_RUNTIME_SECONDS;
 
-    if (shouldDiscardTransientHeartbeatSession) {
+    const shouldDiscardTransientAuthoritativeSession =
+      completionSource !== 'heartbeat' &&
+      dataPointsCount <= TRANSIENT_AUTHORITATIVE_SESSION_MAX_DATA_POINTS &&
+      Math.max(runtimeSeconds, 0) <= TRANSIENT_AUTHORITATIVE_SESSION_MAX_RUNTIME_SECONDS;
+
+    if (shouldDiscardTransientHeartbeatSession || shouldDiscardTransientAuthoritativeSession) {
       await client.query('UPDATE event_logs SET session_id = NULL WHERE session_id = $1', [session.id]);
       await client.query('DELETE FROM device_sessions WHERE id = $1', [session.id]);
       await client.query('COMMIT');
@@ -613,8 +817,12 @@ export const completeDeviceSession = async (
           completionSource,
           dataPointsCount,
           runtimeSeconds: Math.max(runtimeSeconds, 0),
+          event: 'device_session_discarded',
+          reason: shouldDiscardTransientHeartbeatSession
+            ? 'transient_heartbeat'
+            : 'transient_authoritative_without_telemetry',
         },
-        'Discarded transient heartbeat session',
+        'Device session discarded',
       );
       return { sessionId: session.id, discarded: true };
     }
@@ -630,7 +838,7 @@ export const completeDeviceSession = async (
     return { sessionId: session.id, discarded: false };
   } catch (err) {
     await client.query('ROLLBACK');
-    logger.error({ err, deviceId }, 'completeDeviceSession failed');
+    logger.error({ err, deviceId, event: 'complete_device_session_failed' }, 'Complete device session failed');
     throw err;
   } finally {
     client.release();
@@ -649,7 +857,7 @@ export const findActiveDeviceSessionId = async (deviceId: string): Promise<numbe
     );
     return result.rows[0]?.id ?? null;
   } catch (err) {
-    logger.error({ err, deviceId }, 'findActiveDeviceSessionId failed');
+    logger.error({ err, deviceId, event: 'find_active_device_session_failed' }, 'Find active device session failed');
     return null;
   }
 };
@@ -717,7 +925,7 @@ export const syncActiveObdDtcAlerts = async (
 
     return existingActiveTitles;
   } catch (err) {
-    logger.error({ err, deviceId }, 'syncActiveObdDtcAlerts failed');
+    logger.error({ err, deviceId, event: 'sync_active_obd_dtc_alerts_failed' }, 'Sync active OBD DTC alerts failed');
     return new Set<string>();
   }
 };
@@ -797,7 +1005,10 @@ export const syncActiveMaintenanceAlertsByTitle = async (
 
     return existingActiveTitles;
   } catch (err) {
-    logger.error({ err, deviceId }, 'syncActiveMaintenanceAlertsByTitle failed');
+    logger.error(
+      { err, deviceId, event: 'sync_active_maintenance_alerts_by_title_failed' },
+      'Sync active maintenance alerts by title failed',
+    );
     return new Set<string>();
   }
 };
@@ -880,7 +1091,10 @@ export const syncActiveMaintenanceAlertsByMessage = async (
 
     return existingActiveMessages;
   } catch (err) {
-    logger.error({ err, deviceId, title: normalizedTitle }, 'syncActiveMaintenanceAlertsByMessage failed');
+    logger.error(
+      { err, deviceId, title: normalizedTitle, event: 'sync_active_maintenance_alerts_by_message_failed' },
+      'Sync active maintenance alerts by message failed',
+    );
     return new Set<string>();
   }
 };

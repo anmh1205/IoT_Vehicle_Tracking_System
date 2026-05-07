@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDeviceRoom } from '@/components/providers/socket-provider';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
 import { useRoleAccess } from '@/hooks/use-role-access';
-import { alertServices, localizeAlertForDisplay } from '@/lib/api/alerts';
+import { alertServices, isObdMaintenanceAlert, localizeAlertForDisplay } from '@/lib/api/alerts';
 import { vehicleServices } from '@/lib/api/vehicles';
 import { notificationUtils } from '@/lib/notification';
 import type { Device, DeviceRawFeedRow } from '@/features/devices/types';
@@ -27,6 +27,7 @@ import { buildDiagnosticsSummary, extractDiagnosticsPayloadFromEventLog } from '
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
 import type { DeviceDetailModalPresentation, DeviceLinkedVehicle, DeviceWorkspaceActions, DeviceWorkspaceAlert } from './workspace-types';
 import type { MapInspectPanelPayload, MapInspectPanelTarget } from '@/features/map/types';
+import { buildAlertQueueHref } from '@/features/alerts/lib/alert-queue-route';
 
 const resolveTimestamp = (value: unknown): string | null => {
   if (typeof value === 'string' && value.length > 0) {
@@ -200,21 +201,6 @@ const buildRawFeed = (params: {
       return rightTime - leftTime;
     })
     .slice(0, 200);
-};
-
-const isObdMaintenanceAlert = (item: Record<string, unknown>): boolean => {
-  const title = String(item.title ?? '').toLowerCase();
-  const message = String(item.message ?? '').toLowerCase();
-  const signature = `${title} ${message}`;
-
-  return (
-    item.alertType === 'maintenance_due' &&
-    (signature.includes('obd') ||
-      signature.includes('coolant') ||
-      signature.includes('voltage') ||
-      signature.includes('idle-load') ||
-      signature.includes('channel'))
-  );
 };
 
 const localizeObdAlertTitle = (title: string): string => {
@@ -407,7 +393,7 @@ export const DeviceDetailModalContainer = ({
         page: 1,
         limit: 10,
         status: 'active',
-        alertType: 'maintenance_due',
+        source: 'obd',
         deviceId: devicePublicId,
       }),
   });
@@ -584,18 +570,18 @@ export const DeviceDetailModalContainer = ({
       onSessionsLoadMore: sessions.onLoadMore,
       errorCodes: errors.items,
       errorCodesTotal: errors.total,
-      errorCodesPage: errors.page,
-      errorCodesTotalPages: errors.totalPages,
+      errorCodesLoadedCount: errors.loadedCount,
+      errorCodesHasMore: errors.hasMore,
       errorCodesStatus: errors.status,
       errorCodesType: errors.type,
-      onErrorCodesPageChange: errors.onPageChange,
+      onErrorCodesLoadMore: errors.onLoadMore,
       onErrorCodesStatusChange: errors.onStatusChange,
       onErrorCodesTypeChange: errors.onTypeChange,
       commands: commands.items,
       commandsTotal: commands.total,
-      commandsPage: commands.page,
-      commandsTotalPages: commands.totalPages,
-      onCommandsPageChange: commands.onPageChange,
+      commandsLoadedCount: commands.loadedCount,
+      commandsHasMore: commands.hasMore,
+      onCommandsLoadMore: commands.onLoadMore,
       runtimeChart: runtime.data,
       runtimeRange: runtime.range,
       onRuntimeRangeChange: runtime.onRangeChange,
@@ -697,10 +683,10 @@ export const DeviceDetailModalContainer = ({
     [
       activeTab,
       commands.items,
-      commands.onPageChange,
-      commands.page,
+      commands.onLoadMore,
+      commands.hasMore,
+      commands.loadedCount,
       commands.total,
-      commands.totalPages,
       deleteDevice,
       detail.data?.device,
       detail.data?.runtime,
@@ -709,13 +695,13 @@ export const DeviceDetailModalContainer = ({
       device,
       deviceId,
       errors.items,
-      errors.onPageChange,
+      errors.onLoadMore,
       errors.onStatusChange,
       errors.onTypeChange,
-      errors.page,
+      errors.hasMore,
+      errors.loadedCount,
       errors.status,
       errors.total,
-      errors.totalPages,
       errors.type,
       eventLogs.items,
       eventLogs.total,
@@ -771,10 +757,11 @@ export const DeviceDetailModalContainer = ({
       fallbackPaths={
         fallbackPaths ?? {
           alertsPath: devicePublicId
-            ? `/dashboard/attention/queue?${new URLSearchParams({
+            ? buildAlertQueueHref({
                 deviceId: devicePublicId,
-                ...(linkedVehicleIdentifier ? { vehicleId: linkedVehicleIdentifier } : {}),
-              }).toString()}`
+                vehicleId: linkedVehicleIdentifier,
+                status: 'active',
+              })
             : null,
           deviceDetailPath: deviceId ? `/dashboard/fleet/devices/${deviceId}` : null,
           geofencesPath: '/dashboard/zones',

@@ -28,7 +28,7 @@ const SimulatorPage = () => {
   return (
     <PageContainer
       pageTitle="Trình mô phỏng"
-      pageDescription="Tạo dữ liệu đo từ xa giả lập để kiểm thử xuyên suốt, kiểm tra bảng điều khiển và mô phỏng hành vi thiết bị"
+      pageDescription="Tạo telemetry giả lập để kiểm thử xuyên suốt, kiểm tra bảng điều khiển và mô phỏng hành vi thiết bị"
     >
       <Card>
         <CardHeader>

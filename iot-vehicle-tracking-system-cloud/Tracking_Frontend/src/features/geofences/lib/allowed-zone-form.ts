@@ -90,8 +90,47 @@ export const getZoneTypeLabel = (zoneType: VehicleZoneType | null | undefined) =
   return 'Bán kính';
 };
 
-export const formatBoundarySelectionLabel = (selection: Pick<ZoneBoundarySelection, 'fullName' | 'unitName'>) =>
-  selection.fullName?.trim() || selection.unitName;
+type BoundaryLabelSource = Pick<ZoneBoundarySelection, 'fullName' | 'unitName'> &
+  Partial<Pick<ZoneBoundarySelection, 'provider'>>;
+
+export const getBoundaryProviderLabel = (provider: string | null | undefined) => {
+  const normalizedProvider = provider?.trim();
+  if (!normalizedProvider) {
+    return null;
+  }
+
+  if (normalizedProvider === 'gis.vn') {
+    return 'Hiện hành 2025';
+  }
+
+  if (normalizedProvider === 'gis.vn-legacy') {
+    return 'Trước 01/07/2025';
+  }
+
+  if (normalizedProvider === 'osm') {
+    return 'OSM';
+  }
+
+  return normalizedProvider;
+};
+
+export const formatBoundarySelectionLabel = (
+  selection: Pick<ZoneBoundarySelection, 'fullName' | 'unitName'>,
+) => selection.unitName?.trim() || selection.fullName?.trim() || '--';
+
+export const formatBoundarySelectionDetail = (
+  selection: Pick<ZoneBoundarySelection, 'fullName' | 'unitName'>,
+) => {
+  const fullName = selection.fullName?.trim();
+  const unitName = selection.unitName?.trim();
+  return fullName && fullName !== unitName ? fullName : null;
+};
+
+export const formatBoundarySelectionSummary = (selection: BoundaryLabelSource) => {
+  const providerLabel = getBoundaryProviderLabel(selection.provider);
+  const label = formatBoundarySelectionLabel(selection);
+  return providerLabel ? `${label} - ${providerLabel}` : label;
+};
 
 export const describeBoundarySelections = (
   selections: ZoneBoundarySelection[] | null | undefined,
@@ -102,10 +141,10 @@ export const describeBoundarySelections = (
   }
 
   if (normalizedSelections.length === 1) {
-    return formatBoundarySelectionLabel(normalizedSelections[0]);
+    return formatBoundarySelectionSummary(normalizedSelections[0]);
   }
 
-  return `${formatBoundarySelectionLabel(normalizedSelections[0])} +${normalizedSelections.length - 1}`;
+  return `${formatBoundarySelectionSummary(normalizedSelections[0])} +${normalizedSelections.length - 1}`;
 };
 
 export const allowedZoneFormSchema = z

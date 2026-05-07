@@ -5,9 +5,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Inbox, Loader2 } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { NotificationBadge } from './notification-badge';
 import { NotificationRow } from './notification-item';
@@ -15,10 +14,18 @@ import { useNotifications } from '../hooks/use-notifications';
 import { notificationServices } from '@/lib/api/notifications';
 
 const getTarget = (item: any) => {
-  if (item.referenceType === 'alert' && item.referenceId) return '/dashboard/attention/queue';
-  if (item.type === 'export') return '/dashboard/platform/exports';
-  if (item.type === 'firmware') return '/dashboard/platform/firmware';
-  if (item.type === 'zone') return '/dashboard/zones';
+  if (item.referenceType === 'alert' && item.referenceId) {
+    return '/dashboard/attention/queue';
+  }
+  if (item.type === 'export') {
+    return '/dashboard/platform/exports';
+  }
+  if (item.type === 'firmware') {
+    return '/dashboard/platform/firmware';
+  }
+  if (item.type === 'zone') {
+    return '/dashboard/zones';
+  }
   return '/dashboard/command';
 };
 
@@ -52,8 +59,11 @@ export const NotificationDropdown = () => {
           <NotificationBadge onClick={() => setOpen((value) => !value)} />
         </div>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[min(92vw,24rem)] p-0">
-        <div className="flex items-center justify-between border-b p-3">
+      <PopoverContent
+        align="end"
+        className="flex max-h-[min(calc(100vh-5rem),34rem)] w-[min(92vw,24rem)] flex-col overflow-hidden p-0"
+      >
+        <div className="flex shrink-0 items-center justify-between border-b p-3">
           <div className="text-sm font-semibold">Thông báo</div>
           <Button
             variant="ghost"
@@ -66,8 +76,8 @@ export const NotificationDropdown = () => {
           </Button>
         </div>
 
-        <ScrollArea className="max-h-[min(65vh,24rem)] p-3">
-          <div className="space-y-2">
+        <div className="min-h-0 max-h-[min(65vh,24rem)] overflow-y-auto overflow-x-hidden overscroll-contain">
+          <div className="space-y-2 p-3">
             {notifications.isLoading ? (
               <>
                 <Skeleton className="h-16 w-full" />
@@ -102,9 +112,9 @@ export const NotificationDropdown = () => {
               />
             ))}
           </div>
-        </ScrollArea>
+        </div>
 
-        <div className="border-t p-2 text-center text-xs text-muted-foreground">
+        <div className="shrink-0 border-t bg-popover p-2 text-center text-xs text-muted-foreground">
           <Link href="/dashboard/attention/notifications" className="underline">
             Xem toàn bộ thông báo
           </Link>

@@ -3,9 +3,11 @@ import type {
   DeviceRuntimeState,
   IgnitionState,
   MotionState,
+  VehicleState,
 } from '@/features/devices/types';
 
 export type StateTone = 'neutral' | 'info' | 'success' | 'warn' | 'danger';
+export type DeviceConnectivityStatus = 'running' | 'stopped' | 'disconnected' | 'online' | 'error';
 
 export interface StatePresentation {
   label: string;
@@ -78,6 +80,65 @@ export const getMotionPresentation = (
     return { label: 'Di chuyển', value: 'Đứng yên', tone: 'neutral' };
   }
   return { label: 'Di chuyển', value: 'Chưa rõ', tone: 'info' };
+};
+
+export const isVehicleEngineOnState = (vehicleState: VehicleState | null | undefined): boolean =>
+  vehicleState === 'IDLING_ON' || vehicleState === 'MOVING_ON';
+
+export const isVehicleMovingState = (vehicleState: VehicleState | null | undefined): boolean =>
+  vehicleState === 'MOVING_ON' ||
+  vehicleState === 'ROLLING_IGN_OFF' ||
+  vehicleState === 'UNKNOWN_MOVING';
+
+export const isVehicleStationaryState = (
+  vehicleState: VehicleState | null | undefined,
+): boolean =>
+  vehicleState === 'PARKED_OFF' ||
+  vehicleState === 'IDLING_ON' ||
+  vehicleState === 'UNKNOWN_STATIONARY';
+
+export const isVehicleParkedOffState = (
+  vehicleState: VehicleState | null | undefined,
+): boolean => vehicleState === 'PARKED_OFF';
+
+export const getVehicleStatePresentation = (
+  vehicleState: VehicleState | null | undefined,
+): StatePresentation => {
+  switch (vehicleState) {
+    case 'MOVING_ON':
+      return { label: 'Xe', value: 'Đang chạy', tone: 'success' };
+    case 'IDLING_ON':
+      return { label: 'Xe', value: 'Nổ máy / đứng yên', tone: 'warn' };
+    case 'PARKED_OFF':
+      return { label: 'Xe', value: 'Đỗ xe / tắt máy', tone: 'neutral' };
+    case 'ROLLING_IGN_OFF':
+      return { label: 'Xe', value: 'Trôi xe / tắt máy', tone: 'danger' };
+    case 'UNKNOWN_STATIONARY':
+      return { label: 'Xe', value: 'Đứng yên / chưa rõ máy', tone: 'info' };
+    case 'UNKNOWN_MOVING':
+      return { label: 'Xe', value: 'Di chuyển / chưa rõ máy', tone: 'info' };
+    default:
+      return { label: 'Xe', value: 'Chưa rõ', tone: 'info' };
+  }
+};
+
+export const getConnectivityPresentation = (
+  status: DeviceConnectivityStatus | null | undefined,
+): StatePresentation => {
+  switch (status) {
+    case 'running':
+      return { label: 'Kết nối', value: 'Đang gửi dữ liệu', tone: 'success' };
+    case 'online':
+      return { label: 'Kết nối', value: 'Còn heartbeat', tone: 'info' };
+    case 'stopped':
+      return { label: 'Kết nối', value: 'Chậm nhịp', tone: 'warn' };
+    case 'disconnected':
+      return { label: 'Kết nối', value: 'Mất kết nối', tone: 'danger' };
+    case 'error':
+      return { label: 'Kết nối', value: 'Lỗi telemetry', tone: 'danger' };
+    default:
+      return { label: 'Kết nối', value: 'Chưa rõ', tone: 'info' };
+  }
 };
 
 export const getDeviceRuntimePresentation = (

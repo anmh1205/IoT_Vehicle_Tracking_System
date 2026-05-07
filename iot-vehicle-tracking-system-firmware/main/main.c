@@ -7,7 +7,12 @@
  *
  * @author IoT Vehicle Tracking System
  * @date 2026-05-01
+ * This translation unit belongs to the firmware bootstrap layer and keeps the ESP-IDF entry path thin and delegates runtime behavior to app-core.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 #include "tracker-app-bootstrap.h"
 
@@ -21,5 +26,6 @@
  *       the state machine loop indefinitely until power-off or reset.
  */
 void app_main(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     app_core_bootstrap_run();
 }

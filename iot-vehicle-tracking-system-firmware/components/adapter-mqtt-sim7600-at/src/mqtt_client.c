@@ -11,7 +11,12 @@
 /**
  * @file mqtt_client.c
  * @brief Public compatibility facade for split MQTT topic/session helpers.
+ * This translation unit belongs to the SIM7600 AT MQTT adapter layer and keeps adapter-local state, topic wiring, and broker command sequencing isolated behind the exported entry points.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 /** Callback invoked when command message received on command topic. */
 mqtt_command_cb_t s_command_callback = NULL;
@@ -79,6 +84,7 @@ bool s_server_addr_has_fallback = false;
  * @return ESP_OK on success, ESP_ERR_INVALID_ARG on invalid config.
  */
 esp_err_t tracker_mqtt_init(const config_t *cfg) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     ESP_RETURN_ON_NULL(cfg, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "cfg is NULL");
     ESP_RETURN_ON_FALSE(!util_string_empty(cfg->mqtt_host),
                         ESP_ERR_INVALID_ARG,
@@ -124,6 +130,7 @@ esp_err_t tracker_mqtt_init(const config_t *cfg) {
  * @return ESP_OK if connection initiated, ESP_FAIL on immediate failure.
  */
 esp_err_t tracker_mqtt_connect(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_session_connect();
 }
 
@@ -136,6 +143,7 @@ esp_err_t tracker_mqtt_connect(void) {
  * @return ESP_OK on success.
  */
 esp_err_t tracker_mqtt_disconnect(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_session_disconnect();
 }
 
@@ -148,6 +156,7 @@ esp_err_t tracker_mqtt_disconnect(void) {
  * @return true if connected, false otherwise.
  */
 bool tracker_mqtt_is_connected(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_connected;
 }
 
@@ -163,6 +172,7 @@ bool tracker_mqtt_is_connected(void) {
  * @return ESP_OK on success, ESP_FAIL on publish failure.
  */
 esp_err_t tracker_mqtt_publish(const char *topic, const char *payload, int qos) {
+    // Forward the publish through the shared helper so topic validation and modem result handling stay consistent.
     int msg_id = tracker_mqtt_publish_with_msg_id_internal(topic, payload, qos);
     return msg_id >= 0 ? ESP_OK : ESP_FAIL;
 }
@@ -179,6 +189,7 @@ esp_err_t tracker_mqtt_publish(const char *topic, const char *payload, int qos) 
  * @return Message ID (>=0) on success, -1 on failure.
  */
 int tracker_mqtt_publish_with_msg_id(const char *topic, const char *payload, int qos) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_publish_with_msg_id_internal(topic, payload, qos);
 }
 
@@ -192,6 +203,7 @@ int tracker_mqtt_publish_with_msg_id(const char *topic, const char *payload, int
  * @return ESP_OK on success, ESP_FAIL on failure.
  */
 esp_err_t tracker_mqtt_publish_rawdata(const char *json_payload) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_publish(s_topic_rawdata, json_payload, 0);
 }
 
@@ -205,6 +217,7 @@ esp_err_t tracker_mqtt_publish_rawdata(const char *json_payload) {
  * @return ESP_OK on success, ESP_FAIL on failure.
  */
 esp_err_t tracker_mqtt_publish_status(const char *json_payload) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_publish(s_topic_status, json_payload, 1);
 }
 
@@ -218,6 +231,7 @@ esp_err_t tracker_mqtt_publish_status(const char *json_payload) {
  * @return ESP_OK on success, ESP_FAIL on failure.
  */
 esp_err_t tracker_mqtt_publish_event(const char *json_payload) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_publish(s_topic_events, json_payload, 1);
 }
 
@@ -231,6 +245,7 @@ esp_err_t tracker_mqtt_publish_event(const char *json_payload) {
  * @return ESP_OK on success, ESP_FAIL on failure.
  */
 esp_err_t tracker_mqtt_publish_firmware(const char *json_payload) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_publish(s_topic_firmware, json_payload, 1);
 }
 
@@ -243,6 +258,7 @@ esp_err_t tracker_mqtt_publish_firmware(const char *json_payload) {
  * @return ESP_OK on success, ESP_FAIL on failure.
  */
 esp_err_t tracker_mqtt_subscribe_commands(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_subscribe_commands_internal();
 }
 
@@ -256,25 +272,31 @@ esp_err_t tracker_mqtt_subscribe_commands(void) {
  * @param cb Command callback function (cannot be NULL).
  */
 void tracker_mqtt_set_command_callback(mqtt_command_cb_t cb) {
+    // Copy the caller-provided set command callback into module-local state after lightweight guards.
     s_command_callback = cb;
 }
 
 const char *tracker_mqtt_rawdata_topic(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_topic_rawdata;
 }
 
 const char *tracker_mqtt_status_topic(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_topic_status;
 }
 
 const char *tracker_mqtt_events_topic(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_topic_events;
 }
 
 const char *tracker_mqtt_firmware_topic(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_topic_firmware;
 }
 
 const char *tracker_mqtt_commands_topic(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_topic_commands;
 }

@@ -28,7 +28,10 @@ let isCircuitOpen = false;
  */
 export const addUpdate = (update: DeviceUpdate): void => {
   if (isCircuitOpen) {
-    logger.warn(`Circuit breaker OPEN: dropping update for ${update.deviceId}`);
+    logger.warn(
+      { deviceId: update.deviceId, event: 'batch_write_dropped', reason: 'circuit_open' },
+      'Batch update dropped',
+    );
     return;
   }
 
@@ -128,7 +131,7 @@ const flush = async (): Promise<void> => {
       consecutiveFailures = 0;
       if (isCircuitOpen) {
         isCircuitOpen = false;
-        logger.info('Circuit breaker CLOSED: database writes resumed');
+        logger.info({ event: 'batch_writer_circuit_closed' }, 'Batch writer circuit closed');
       }
     } catch (err) {
       await client.query('ROLLBACK');
@@ -139,15 +142,20 @@ const flush = async (): Promise<void> => {
   } catch (err) {
     consecutiveFailures += 1;
     logger.error(
-      { err, failures: consecutiveFailures, max: MAX_CONSECUTIVE_FAILURES },
+      { err, failures: consecutiveFailures, max: MAX_CONSECUTIVE_FAILURES, event: 'batch_write_failed' },
       'Batch write failed',
     );
 
     if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
       isCircuitOpen = true;
       logger.error(
-        'Circuit breaker OPEN: dropping data to prevent OOM. ' +
-        'Check PostgreSQL connectivity.',
+        {
+          failures: consecutiveFailures,
+          max: MAX_CONSECUTIVE_FAILURES,
+          event: 'batch_writer_circuit_open',
+          reason: 'consecutive_failures_exceeded',
+        },
+        'Batch writer circuit opened',
       );
     }
   }
@@ -161,12 +169,13 @@ export const startBatchWriter = (): void => {
 
   flushTimer = setInterval(() => {
     flush().catch((err) => {
-      logger.error('Scheduled flush error', err);
+      logger.error({ err, event: 'batch_writer_scheduled_flush_failed' }, 'Scheduled batch flush failed');
     });
   }, FLUSH_INTERVAL_MS);
 
   logger.info(
-    `Batch writer started (interval=${FLUSH_INTERVAL_MS}ms, maxBuffer=${MAX_BUFFER_SIZE})`,
+    { intervalMs: FLUSH_INTERVAL_MS, maxBufferSize: MAX_BUFFER_SIZE, event: 'batch_writer_started' },
+    'Batch writer started',
   );
 };
 
@@ -180,5 +189,5 @@ export const stopBatchWriter = async (): Promise<void> => {
   }
 
   await flush();
-  logger.info('Batch writer stopped, remaining data flushed');
+  logger.info({ event: 'batch_writer_stopped' }, 'Batch writer stopped');
 };

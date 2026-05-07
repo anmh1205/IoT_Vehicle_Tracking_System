@@ -12,7 +12,12 @@
 /**
  * @file util_ota_http.c
  * @brief SIM7600 HTTP transport helpers for OTA download flow.
+ * This translation unit belongs to the OTA domain layer and keeps domain rules, staging helpers, and policy decisions separate from transport and board adapters.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 #ifndef CONFIG_TRACKER_TLS_VERIFY_SERVER
 #define CONFIG_TRACKER_TLS_VERIFY_SERVER 0
@@ -48,6 +53,7 @@ bool s_ota_http_urc_registered = false;
  * @return ESP_OK if configuration successful or skipped, ESP_ERR_* on failure.
  */
 static esp_err_t util_ota_configure_https_ca_cert(char *cmd, size_t cmd_size) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
 #if CONFIG_TRACKER_TLS_VERIFY_SERVER
     /*
      * HTTP OTA uses the modem SSL context, so CA verification depends on a file
@@ -98,6 +104,7 @@ return ESP_OK;
  * @return const char* Human-readable error name, "unknown" for unmapped codes.
  */
 static const char *util_ota_http_transport_error_name(int status_code) {
+    // Translate OTA http transport error name into a readable label so logs and diagnostics stay easy to follow.
     switch (status_code) {
         case 701:
             return "alert_state";
@@ -146,6 +153,7 @@ static const char *util_ota_http_transport_error_name(int status_code) {
  * @brief Reset HTTP action state.
  */
 void util_ota_http_action_reset(void) {
+    // Reset OTA http action reset here so stale data does not leak into the next cycle.
     s_ota_http_action.waiting = false;
     s_ota_http_action.ready = false;
     s_ota_http_action.method = -1;
@@ -157,6 +165,7 @@ static bool util_ota_parse_httpaction_urc_line(const char *line,
                                                int *out_method,
                                                int *out_status_code,
                                                int *out_data_len) {
+    // Decode raw OTA parse httpaction URC line into the normalized form the rest of the module expects.
     if (line == NULL || out_method == NULL || out_status_code == NULL || out_data_len == NULL) {
         return false;
     }
@@ -179,6 +188,7 @@ static bool util_ota_parse_httpaction_urc_line(const char *line,
 }
 
 static void util_ota_httpaction_urc_cb(const char *line) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_ota_http_action.waiting || line == NULL) {
         return;
     }
@@ -200,6 +210,7 @@ static void util_ota_httpaction_urc_cb(const char *line) {
  * @brief Register HTTP URC once.
  */
 void util_ota_http_register_urc_once(void) {
+    // Update the OTA http register URC once path here so later asynchronous work sees the latest intent.
     if (s_ota_http_urc_registered) {
         return;
     }
@@ -217,6 +228,7 @@ void util_ota_http_register_urc_once(void) {
  * @return ESP_OK on success.
  */
 esp_err_t util_ota_wait_http_action(int *out_status_code, int *out_data_len, uint32_t timeout_ms) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_RETURN_ON_NULL(out_status_code, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_status_code is NULL");
     ESP_RETURN_ON_NULL(out_data_len, ESP_ERR_INVALID_ARG, UTIL_TAG, "out_data_len is NULL");
 
@@ -250,6 +262,7 @@ bool util_ota_parse_httpread_payload(const uint8_t *response,
                                      size_t response_len,
                                      const uint8_t **out_data,
                                      size_t *out_len) {
+    // Decode raw OTA parse httpread payload into the normalized form the rest of the module expects.
     if (response == NULL || response_len == 0U || out_data == NULL || out_len == NULL) {
         return false;
     }
@@ -313,6 +326,7 @@ bool util_ota_parse_httpread_payload(const uint8_t *response,
  * @return True if all bytes are hex digits.
  */
 bool util_is_hex_ascii_bytes(const uint8_t *data, size_t len) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (data == NULL || len == 0U || (len % 2U) != 0U) {
         return false;
     }
@@ -327,14 +341,17 @@ bool util_is_hex_ascii_bytes(const uint8_t *data, size_t len) {
 }
 
 esp_err_t util_ota_configure_https_ssl_context(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     char cmd[96] = {0};
 
+    // Pin the modem SSL context to a modern TLS profile before loading any verification settings.
     (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"sslversion\",%d,4\r", OTA_HTTP_SSL_CTX_INDEX);
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         UTIL_TAG,
                         "HTTP CSSLCFG sslversion failed");
 
+    // Auth mode follows build-time policy so field validation can temporarily relax server verification if required.
     (void)snprintf(cmd,
                    sizeof(cmd),
                    "AT+CSSLCFG=\"authmode\",%d,%d\r",
@@ -350,6 +367,7 @@ esp_err_t util_ota_configure_https_ssl_context(void) {
                         UTIL_TAG,
                         "HTTP CSSLCFG certificate failed");
 
+    // Local-time policy matters for certificate validation on devices that may boot before RTC trust is restored.
     (void)snprintf(cmd,
                    sizeof(cmd),
                    "AT+CSSLCFG=\"ignorelocaltime\",%d,%d\r",
@@ -366,12 +384,14 @@ esp_err_t util_ota_configure_https_ssl_context(void) {
                         UTIL_TAG,
                         "HTTP CSSLCFG negotiatetime failed");
 
+    // SNI stays enabled so shared-hostname firmware CDNs present the correct leaf certificate.
     (void)snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"enableSNI\",%d,1\r", OTA_HTTP_SSL_CTX_INDEX);
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         UTIL_TAG,
                         "HTTP CSSLCFG enableSNI failed");
 
+    // Finally bind the prepared SSL context to the modem HTTP client profile that subsequent OTA requests use.
     (void)snprintf(cmd, sizeof(cmd), "AT+HTTPPARA=\"SSLCFG\",%d\r", OTA_HTTP_SSL_CTX_INDEX);
     ESP_RETURN_ON_FALSE(modem_at_send_expect(cmd, "OK", OTA_HTTP_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
@@ -382,5 +402,6 @@ esp_err_t util_ota_configure_https_ssl_context(void) {
 }
 
 const char *util_ota_http_status_name(int status_code) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return util_ota_http_transport_error_name(status_code);
 }

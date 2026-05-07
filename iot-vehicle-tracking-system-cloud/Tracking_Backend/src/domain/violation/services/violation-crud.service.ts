@@ -1,6 +1,7 @@
 import { createNotFoundError, createValidationError } from '@/shared/utils/errors.util';
 import * as violationRepo from '@/domain/violation/repositories/violation.repository';
 import { logger } from '@/infrastructure/logger';
+import { publishEvent } from '@/infrastructure/realtime/event-bus.util';
 import type {
   Violation,
   ViolationPublic,
@@ -40,7 +41,23 @@ export const getViolationById = async (id: number): Promise<ViolationPublic> => 
 export const createViolation = async (input: CreateViolationInput): Promise<ViolationPublic> => {
   const violation = await violationRepo.create(input);
   logger.info(`Violation "${input.violationType}" created for vehicle "${input.vehicleId}"`);
-  return sanitizeViolation(violation);
+  const result = sanitizeViolation(violation);
+  publishEvent('violation:new', {
+    id: violation.id,
+    alert_id: violation.alert_id,
+    vehicle_id: violation.vehicle_id,
+    violation_type: violation.violation_type,
+    severity: violation.severity,
+    created_at: violation.created_at.toISOString(),
+  });
+  publishEvent('stats:update', {
+    reason: 'violation:new',
+    violationId: violation.id,
+    vehicle_id: violation.vehicle_id,
+    timestamp: violation.created_at.toISOString(),
+  });
+
+  return result;
 };
 
 export const acknowledgeViolation = async (
@@ -63,5 +80,21 @@ export const acknowledgeViolation = async (
   }
 
   logger.info(`Violation ${id} acknowledged by user ${userId}`);
-  return sanitizeViolation(updated);
+  const result = sanitizeViolation(updated);
+  publishEvent('violation:updated', {
+    id: updated.id,
+    alert_id: updated.alert_id,
+    vehicle_id: updated.vehicle_id,
+    action: 'acknowledge',
+    acknowledged: updated.acknowledged,
+    updated_at: updated.updated_at.toISOString(),
+  });
+  publishEvent('stats:update', {
+    reason: 'violation:updated',
+    violationId: updated.id,
+    vehicle_id: updated.vehicle_id,
+    timestamp: updated.updated_at.toISOString(),
+  });
+
+  return result;
 };

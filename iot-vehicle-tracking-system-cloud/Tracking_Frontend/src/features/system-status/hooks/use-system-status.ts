@@ -144,7 +144,7 @@ export const useSystemStatus = (enabled = true) => {
       ? toErrorMessage(healthQuery.error, 'Không tải được trạng thái các dịch vụ.')
       : null,
     metricsNotice: metricsQuery.isError
-      ? toErrorMessage(metricsQuery.error, 'Chưa nhận được dữ liệu đo từ xa hạ tầng từ endpoint số liệu.')
+      ? toErrorMessage(metricsQuery.error, 'Chưa nhận được telemetry hạ tầng từ endpoint số liệu.')
       : null,
   };
 };

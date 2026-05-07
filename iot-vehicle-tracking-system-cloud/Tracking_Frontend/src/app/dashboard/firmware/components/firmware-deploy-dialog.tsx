@@ -1,14 +1,21 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { CheckSquare2, Loader2, Search } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -19,22 +26,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useInfiniteDevices } from '@/features/devices/hooks/use-devices';
 import type { Device } from '@/features/devices/types';
 import { firmwareServices, type FirmwareRecord } from '@/lib/api/firmware';
 import {
+  DEVICE_STATUS_FILTER_OPTIONS,
   DEVICE_STATUS_LABELS,
   DEPLOYMENT_STRATEGY_LABELS,
   formatBytes,
   formatDateTime,
   getFirmwareDisplayVersion,
+  type FirmwareDeviceStatusFilter,
 } from './firmware-utils';
 
-type FirmwareDeployDialogProps = {
-  firmware: FirmwareRecord | null;
-  devices: Device[];
-  open: boolean;
-  onOpenChange: (value: boolean) => void;
-};
+const PAGE_SIZE = 20;
 
 const normalizeVersion = (value: string | null | undefined) =>
   String(value ?? '')
@@ -44,61 +49,90 @@ const normalizeVersion = (value: string | null | undefined) =>
 
 export const FirmwareDeployDialog = ({
   firmware,
-  devices,
   open,
   onOpenChange,
-}: FirmwareDeployDialogProps) => {
+}: {
+  firmware: FirmwareRecord | null;
+  open: boolean;
+  onOpenChange: (value: boolean) => void;
+}) => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<FirmwareDeviceStatusFilter>('all');
   const [strategy, setStrategy] = useState<'rolling' | 'all_at_once'>('rolling');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedDevicesById, setSelectedDevicesById] = useState<Record<string, Device>>({});
+  const deferredSearch = useDeferredValue(search.trim());
 
   useEffect(() => {
     if (!open) {
       setSearch('');
+      setStatusFilter('all');
       setStrategy('rolling');
-      setSelectedIds([]);
+      setSelectedDevicesById({});
     }
   }, [open]);
 
-  const filteredDevices = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    if (!term) {
-      return devices;
+  const devicesQuery = useInfiniteDevices(
+    {
+      search: deferredSearch || undefined,
+      status: statusFilter === 'all' ? undefined : statusFilter,
+    },
+    PAGE_SIZE,
+    open,
+  );
+
+  const devices = devicesQuery.items;
+
+  useEffect(() => {
+    if (devices.length === 0) {
+      return;
     }
 
-    return devices.filter((device) =>
-      [device.deviceId, device.deviceName, device.vehiclePlate, device.firmwareVersion]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(term)),
-    );
-  }, [devices, search]);
+    setSelectedDevicesById((current) => {
+      const next = { ...current };
+      for (const device of devices) {
+        if (next[device.deviceId]) {
+          next[device.deviceId] = device;
+        }
+      }
+      return next;
+    });
+  }, [devices]);
 
-  const visibleIds = useMemo(() => filteredDevices.map((device) => device.deviceId), [filteredDevices]);
-  const selectedDevices = useMemo(
-    () => devices.filter((device) => selectedIds.includes(device.deviceId)),
-    [devices, selectedIds],
-  );
+  const selectedDevices = useMemo(() => Object.values(selectedDevicesById), [selectedDevicesById]);
+  const selectedIds = useMemo(() => Object.keys(selectedDevicesById), [selectedDevicesById]);
   const selectedCount = selectedIds.length;
-  const onlineCount = filteredDevices.filter((device) =>
-    ['running', 'online'].includes(device.currentStatus),
-  ).length;
-  const disconnectedCount = filteredDevices.filter((device) => device.currentStatus === 'disconnected').length;
   const targetVersion = normalizeVersion(firmware?.version);
+  const connectivityCounts = useMemo(
+    () =>
+      devices.reduce(
+        (counts, device) => {
+          counts[device.currentStatus] += 1;
+          return counts;
+        },
+        {
+          running: 0,
+          online: 0,
+          stopped: 0,
+          disconnected: 0,
+        },
+      ),
+    [devices],
+  );
   const alreadyOnTargetCount = selectedDevices.filter(
     (device) => normalizeVersion(device.firmwareVersion) === targetVersion,
   ).length;
   const versionDistribution = useMemo(() => {
     const counts = new Map<string, number>();
-    filteredDevices.forEach((device) => {
+    for (const device of devices) {
       const key = device.firmwareVersion ?? 'Chưa ghi nhận';
       counts.set(key, (counts.get(key) ?? 0) + 1);
-    });
+    }
 
     return [...counts.entries()]
       .sort((left, right) => right[1] - left[1])
       .slice(0, 4);
-  }, [filteredDevices]);
+  }, [devices]);
   const selectedVehicleLabels = [...new Set(selectedDevices.map((device) => device.vehiclePlate).filter(Boolean))]
     .slice(0, 6)
     .join(', ');
@@ -124,16 +158,29 @@ export const FirmwareDeployDialog = ({
     },
   });
 
-  const toggleDevice = (deviceId: string) => {
-    setSelectedIds((current) =>
-      current.includes(deviceId)
-        ? current.filter((item) => item !== deviceId)
-        : [...current, deviceId],
-    );
+  const toggleDevice = (device: Device) => {
+    setSelectedDevicesById((current) => {
+      if (current[device.deviceId]) {
+        const next = { ...current };
+        delete next[device.deviceId];
+        return next;
+      }
+
+      return {
+        ...current,
+        [device.deviceId]: device,
+      };
+    });
   };
 
   const selectVisibleDevices = () => {
-    setSelectedIds((current) => Array.from(new Set([...current, ...visibleIds])));
+    setSelectedDevicesById((current) => {
+      const next = { ...current };
+      for (const device of devices) {
+        next[device.deviceId] = device;
+      }
+      return next;
+    });
   };
 
   return (
@@ -170,49 +217,74 @@ export const FirmwareDeployDialog = ({
               </CardContent>
             </Card>
 
-            <div className="space-y-2">
-              <Label htmlFor="deploy-search">Tìm thiết bị</Label>
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="deploy-search"
-                  value={search}
-                  placeholder="Tìm theo mã, tên, biển số hoặc firmware hiện tại..."
-                  onChange={(event) => setSearch(event.target.value)}
-                  type="search"
-                  className="pl-9"
-                />
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+              <div className="space-y-2">
+                <Label htmlFor="deploy-search">Tìm thiết bị</Label>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="deploy-search"
+                    value={search}
+                    placeholder="Tìm theo mã, tên, biển số hoặc firmware hiện tại..."
+                    onChange={(event) => setSearch(event.target.value)}
+                    type="search"
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Kết nối thiết bị</Label>
+                <Select
+                  value={statusFilter}
+                  onValueChange={(value) => setStatusFilter(value as FirmwareDeviceStatusFilter)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Kết nối thiết bị" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEVICE_STATUS_FILTER_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" size="sm" onClick={selectVisibleDevices}>
                 <CheckSquare2 className="mr-2 h-4 w-4" />
-                Chọn tất cả đang lọc
+                Chọn trang hiện tại
               </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => setSelectedIds([])}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setSelectedDevicesById({})}>
                 Bỏ chọn
               </Button>
             </div>
 
             <ScrollArea className="h-[30rem] rounded-lg border">
               <div className="space-y-2 p-3">
-                {filteredDevices.length === 0 ? (
+                {devicesQuery.isLoading ? (
+                  <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                    Đang tải danh sách thiết bị...
+                  </div>
+                ) : devices.length === 0 ? (
                   <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                     Không tìm thấy thiết bị phù hợp.
                   </div>
                 ) : (
-                  filteredDevices.map((device) => {
-                    const checked = selectedIds.includes(device.deviceId);
+                  devices.map((device) => {
+                    const checked = Boolean(selectedDevicesById[device.deviceId]);
                     return (
                       <label
-                        key={device.id}
+                        key={device.deviceId}
                         className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/30"
                       >
-                        <Checkbox checked={checked} onCheckedChange={() => toggleDevice(device.deviceId)} />
+                        <Checkbox checked={checked} onCheckedChange={() => toggleDevice(device)} />
                         <div className="min-w-0 flex-1 space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-medium">{device.deviceName}</p>
+                            <p className="font-medium">{device.deviceName || device.deviceId}</p>
                             <Badge variant="outline">
                               {DEVICE_STATUS_LABELS[device.currentStatus] ?? device.currentStatus}
                             </Badge>
@@ -220,7 +292,13 @@ export const FirmwareDeployDialog = ({
                           <p className="truncate text-sm text-muted-foreground">{device.deviceId}</p>
                           <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                             {device.vehiclePlate ? <span>Biển số: {device.vehiclePlate}</span> : null}
-                            <span>Firmware hiện tại: {device.firmwareVersion ?? 'Chưa ghi nhận'}</span>
+                            {device.customerName ? <span>Khách hàng: {device.customerName}</span> : null}
+                            <span>
+                              Firmware hiện tại:{' '}
+                              {device.firmwareVersion
+                                ? getFirmwareDisplayVersion(device.firmwareVersion)
+                                : 'Chưa ghi nhận'}
+                            </span>
                           </div>
                         </div>
                       </label>
@@ -229,6 +307,15 @@ export const FirmwareDeployDialog = ({
                 )}
               </div>
             </ScrollArea>
+
+            <InfiniteScrollTrigger
+              hasMore={devicesQuery.hasMore}
+              isLoadingMore={devicesQuery.isFetchingNextPage}
+              onLoadMore={devicesQuery.loadMore}
+              loadedCount={devicesQuery.loadedCount}
+              totalCount={devicesQuery.total}
+              itemLabel="thiết bị"
+            />
           </div>
 
           <div className="space-y-4 rounded-xl border bg-muted/20 p-4">
@@ -252,7 +339,9 @@ export const FirmwareDeployDialog = ({
               <div className="rounded-lg border bg-background p-3">
                 <p className="text-xs text-muted-foreground">Thiết bị đã chọn</p>
                 <p className="mt-1 text-2xl font-semibold tabular-nums">{selectedCount}</p>
-                <p className="mt-1 text-xs text-muted-foreground">Trong {filteredDevices.length} thiết bị đang lọc</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Đã chọn qua nhiều trang; trang này đang hiển thị {devices.length} thiết bị
+                </p>
               </div>
               <div className="rounded-lg border bg-background p-3">
                 <p className="text-xs text-muted-foreground">Đã đúng firmware đích</p>
@@ -265,42 +354,51 @@ export const FirmwareDeployDialog = ({
 
             <Card className="border-dashed bg-background">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Thông tin đợt triển khai</CardTitle>
+                <CardTitle className="text-base">Kết nối trên trang hiện tại</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm text-muted-foreground">
-                <p>Firmware đích: {getFirmwareDisplayVersion(firmware?.version)}</p>
-                <p>Tệp: {firmware?.filename ?? '--'}</p>
-                <p>Dung lượng: {formatBytes(firmware?.size ?? 0)}</p>
-                <p>Chiến lược: {DEPLOYMENT_STRATEGY_LABELS[strategy]}</p>
-                <p>Thiết bị online/trực tuyến: {onlineCount}</p>
-                <p>Thiết bị mất kết nối: {disconnectedCount}</p>
-              </CardContent>
-            </Card>
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="rounded-lg border bg-muted/20 p-3">
+                    <p className="text-xs text-muted-foreground">Đang gửi dữ liệu</p>
+                    <p className="mt-1 font-medium text-foreground">{connectivityCounts.running}</p>
+                  </div>
+                  <div className="rounded-lg border bg-muted/20 p-3">
+                    <p className="text-xs text-muted-foreground">Còn heartbeat</p>
+                    <p className="mt-1 font-medium text-foreground">{connectivityCounts.online}</p>
+                  </div>
+                  <div className="rounded-lg border bg-muted/20 p-3">
+                    <p className="text-xs text-muted-foreground">Chậm nhịp</p>
+                    <p className="mt-1 font-medium text-foreground">{connectivityCounts.stopped}</p>
+                  </div>
+                  <div className="rounded-lg border bg-muted/20 p-3">
+                    <p className="text-xs text-muted-foreground">Mất kết nối</p>
+                    <p className="mt-1 font-medium text-foreground">{connectivityCounts.disconnected}</p>
+                  </div>
+                </div>
 
-            <Card className="border-dashed bg-background">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Phân bố firmware hiện tại</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
                 {versionDistribution.length > 0 ? (
-                  versionDistribution.map(([version, count]) => (
-                    <div key={version} className="flex items-center justify-between rounded-lg border px-3 py-2">
-                      <span className="truncate text-muted-foreground">
-                        {getFirmwareDisplayVersion(version === 'Chưa ghi nhận' ? null : version)}
-                      </span>
-                      <span className="font-medium">{count}</span>
+                  <div className="space-y-2">
+                    <p className="font-medium text-foreground">Phân bố firmware trên trang hiện tại</p>
+                    <div className="flex flex-wrap gap-2">
+                      {versionDistribution.map(([version, count]) => (
+                        <Badge key={version} variant="outline">
+                          {getFirmwareDisplayVersion(version)} • {count}
+                        </Badge>
+                      ))}
                     </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground">Chưa có dữ liệu firmware hiện tại.</p>
-                )}
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
 
             <div className="rounded-lg border bg-background p-3 text-sm">
-              <p className="font-medium">Phạm vi phương tiện đã chọn</p>
+              <p className="font-medium">Phạm vi triển khai</p>
               <p className="mt-1 text-muted-foreground">
-                {selectedVehicleLabels || 'Chưa có phương tiện gắn với các thiết bị đang chọn.'}
+                {selectedVehicleLabels
+                  ? `Biển số: ${selectedVehicleLabels}`
+                  : selectedCount > 0
+                    ? 'Đã chọn thiết bị nhưng chưa có biển số gắn kèm.'
+                    : 'Chưa chọn thiết bị nào.'}
               </p>
             </div>
           </div>
@@ -314,7 +412,7 @@ export const FirmwareDeployDialog = ({
             {deployMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Đang triển khai...
+                Đang xếp lịch...
               </>
             ) : (
               'Triển khai OTA'

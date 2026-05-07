@@ -102,7 +102,7 @@ export const MaintenanceForm = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[92dvh] w-[min(96vw,1100px)] max-w-none flex-col overflow-hidden p-0 sm:w-[min(96vw,1100px)] sm:max-w-none">
-        <DialogHeader className="shrink-0 border-b bg-background px-6 py-4">
+        <DialogHeader className="shrink-0 border-b bg-background px-6 py-4 pr-14">
           <DialogTitle>Tạo lịch bảo trì</DialogTitle>
         </DialogHeader>
 
@@ -292,7 +292,7 @@ export const MaintenanceForm = ({
               </section>
             </div>
 
-            <aside className="space-y-4 pr-1 lg:sticky lg:top-0">
+            <aside className="space-y-4 pr-1 lg:sticky lg:top-4">
               <div className="rounded-2xl border bg-muted/15 p-4">
                 <p className="text-sm font-semibold">Thông tin phương tiện</p>
               </div>

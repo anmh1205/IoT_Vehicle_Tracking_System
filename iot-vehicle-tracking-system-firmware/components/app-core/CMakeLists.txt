@@ -23,6 +23,7 @@ idf_component_register(
         domain-ota
         domain-storage
         domain-telemetry
+        esp_driver_usb_serial_jtag
         log
         platform-board-esp32s3
         platform-hal-esp-idf

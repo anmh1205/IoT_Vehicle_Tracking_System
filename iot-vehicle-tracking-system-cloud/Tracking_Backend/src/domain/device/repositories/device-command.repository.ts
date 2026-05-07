@@ -77,19 +77,20 @@ export const updateCommandStatus = async (
   id: number,
   status: DeviceCommandStatus,
   response?: string | null,
+  options?: { markAcknowledged?: boolean },
 ): Promise<DeviceCommandRecord | null> => {
   const result = await pool.query<DeviceCommandRow>(
     `UPDATE device_commands
      SET status = $2::varchar,
          response = COALESCE($3, response),
          acked_at = CASE
-           WHEN $2::varchar = 'acknowledged' AND acked_at IS NULL THEN NOW()
-           ELSE acked_at
-         END,
-         updated_at = NOW()
-     WHERE id = $1
-     RETURNING id, device_id, command, params, status, sent_at, acked_at, response`,
-    [id, status, response ?? null],
+            WHEN ($2::varchar = 'acknowledged' OR $4::boolean = TRUE) AND acked_at IS NULL THEN NOW()
+            ELSE acked_at
+          END,
+          updated_at = NOW()
+      WHERE id = $1
+      RETURNING id, device_id, command, params, status, sent_at, acked_at, response`,
+    [id, status, response ?? null, options?.markAcknowledged ?? false],
   );
 
   return result.rows[0] ? mapRow(result.rows[0]) : null;

@@ -2,7 +2,7 @@
 name: esp32-loop-coding
 description: "Run an ESP32 firmware debug loop: detect COM, monitor serial, analyze logs, fix code, build, and wait-and-flash native USB boards that sleep."
 license: MIT
-version: 1.3.0
+version: 1.4.0
 ---
 
 # ESP32 Loop Coding
@@ -24,7 +24,7 @@ Remote mode means:
 - flash and monitor happen on machine A over SSH
 - logs still append into the local repo on machine B unless the user explicitly asks to keep them on machine A
 
-For ESP32-S3 boards that use native `USB Serial/JTAG`, add the `wait-and-flash` branch when sleep or flaky USB makes the port disappear or return Windows `PermissionError 31`.
+For ESP32-S3 boards that use native `USB Serial/JTAG`, add the `wait-and-flash` branch when sleep or flaky USB makes the port disappear or return Windows `PermissionError 31`. This rule applies to both local and remote USB access.
 
 ## When to use
 
@@ -62,10 +62,9 @@ Activate this skill when the task includes one or more of these:
 
 1. Read serial for the chosen mode until:
    - local: use `serial_reader.py`
-   - remote: use `remote-esp32.py monitor` and append raw stdout into the same local log file on machine B
+   - remote: use `remote-esp32.py monitor` and append stdout into the same local log file on machine B
    - a fatal or unstable signal appears, or
-   - the system is stable for the required window.
-   - When sleep or native USB re-enumeration interrupts the port, keep the same log file and continue the same session after the port becomes usable again.
+   - the system is stable for the required window
 2. Analyze the newest log slice with `log_analyzer.py`.
 3. If the session is fatal or unstable:
    - fix the real source code
@@ -75,7 +74,7 @@ Activate this skill when the task includes one or more of these:
    - stop the loop
 5. If the port fails because native USB is sleeping or re-enumerating:
    - local mode: switch to `wait_and_flash.py`
-   - remote mode: wait for the COM to become openable on machine A, then flash immediately over SSH
+   - remote mode: let `remote-esp32.py monitor` keep the same log file and wait for reopen, and let `remote-esp32.py flash` wait for the COM to become openable before flashing
    - return to serial monitoring
 
 ## Native USB wait-and-flash
@@ -83,17 +82,20 @@ Activate this skill when the task includes one or more of these:
 Use this branch for ESP32-S3 native `USB Serial/JTAG` boards when:
 - the port disappears during sleep
 - Windows reports `A device attached to the system is not functioning.`
-- `serial_reader.py` or `loop_runner.py` ends with `serial-error`
+- `serial_reader.py`, `loop_runner.py`, or remote flash returns transient USB/open-port failures
 
-For normal monitoring after flash, `serial_reader.py` already tolerates sleep and reconnect. Use `wait_and_flash.py` specifically for the flash race window, not as a replacement for regular monitoring.
+For normal monitoring after flash, `serial_reader.py` already tolerates sleep and reconnect. Remote monitoring now does the same. Use `wait_and_flash.py` or remote `flash` wait mode specifically for the flash race window, not as a replacement for regular monitoring.
 
 Important rule: build before arming the wait. Do not use `build flash` inside the short wake window.
-`wait_and_flash.py` now defaults to `--flash-method auto`, which prefers direct `esptool` from `build/flasher_args.json` and only falls back to `idf.py` when the direct path cannot be resolved.
+`wait_and_flash.py` defaults to `--flash-method auto`, which prefers direct `esptool` from `build/flasher_args.json` and only falls back to `idf.py` when the direct path cannot be resolved.
 
 Recommended sequence:
 1. `idf.py build`
-2. `python <skill-root>/scripts/wait_and_flash.py --port COM5 --firmware-dir iot-vehicle-tracking-system-firmware --flash-method auto --max-wait-seconds 600 --json`
-3. After flash, go back to `serial_reader.py` or `loop_runner.py`
+2. Local native USB:
+   - `python <skill-root>/scripts/wait_and_flash.py --port COM5 --firmware-dir iot-vehicle-tracking-system-firmware --flash-method auto --max-wait-seconds 600 --json`
+3. Remote native USB:
+   - `python <skill-root>/scripts/remote-esp32.py flash --port COM13 --flasher-args iot-vehicle-tracking-system-firmware/build/flasher_args.json --json`
+4. After flash, go back to `serial_reader.py`, `remote-esp32.py monitor`, or `loop_runner.py`
 
 ## Remote SSH branch
 
@@ -108,17 +110,19 @@ Recommended remote flow:
 
 Remote monitor template:
 - `python <skill-root>/scripts/remote-esp32.py monitor --port COM13 --seconds 120 | tee -a iot-vehicle-tracking-system-firmware/documents/test-logs/com13-monitor-latest.log`
-- The helper uses PowerShell `-EncodedCommand`, so it avoids the Bash → SSH → PowerShell quoting failures that happen with raw inline commands.
-- The helper streams raw serial lines only; it does not add reconnect markers like `serial_reader.py`.
+- The helper uses PowerShell `-EncodedCommand`, so it avoids the Bash -> SSH -> PowerShell quoting failures that happen with raw inline commands.
+- The helper now adds `serial open`, `serial unavailable`, `serial disconnect`, and `serial reconnect` markers so one local log preserves the full native USB sleep/re-enumeration timeline on machine A.
 - Append stdout into `com{N}-monitor-latest.log` on machine B, then analyze it with `log_analyzer.py` exactly like local mode.
 
 Remote flash templates:
 - Helper-supported path:
   - copy the required `build/` outputs or specific `.bin` files from machine B to machine A first with `scp`
-  - then run `python <skill-root>/scripts/remote-esp32.py flash --port COM13 --flasher-args iot-vehicle-tracking-system-firmware/build/flasher_args.json`
+  - then run `python <skill-root>/scripts/remote-esp32.py flash --port COM13 --flasher-args iot-vehicle-tracking-system-firmware/build/flasher_args.json --json`
 - Manual fallback path:
   - if machine A already has a mirrored firmware repo and ESP-IDF, you can still run a separate remote `idf.py flash` flow outside the helper
 - The helper defaults match the proven machine A setup in the repo-local `.env`: `D:/ESP_IDF/.../python.exe`, `.../esptool.py`, `C:/Users/anmh1/esp32-remote-flash`, and preferred VID/PID `303A:1001`.
+- `flash` now waits until the COM is both enumerated and openable before flashing, then retries automatically on transient native USB failures such as `No serial data received` or Windows device error 31.
+- Use `--no-wait` only when you explicitly want one immediate flash attempt.
 - Do not start a long remote build inside the short native USB wake window.
 
 ## Command templates
@@ -136,7 +140,7 @@ Remote flash templates:
 - Monitor a remote port and append locally:
   - `python <skill-root>/scripts/remote-esp32.py monitor --port COM13 --seconds 120 | tee -a iot-vehicle-tracking-system-firmware/documents/test-logs/com13-monitor-latest.log`
 - Flash a remote port from local `flasher_args.json`:
-  - `python <skill-root>/scripts/remote-esp32.py flash --port COM13 --flasher-args iot-vehicle-tracking-system-firmware/build/flasher_args.json`
+  - `python <skill-root>/scripts/remote-esp32.py flash --port COM13 --flasher-args iot-vehicle-tracking-system-firmware/build/flasher_args.json --json`
 
 ## ESP-IDF command policy on Windows
 
@@ -152,6 +156,7 @@ Remote flash templates:
 - Flash only after code was changed or a prebuilt image is ready.
 - Always append to `com{N}-monitor-latest.log` so the session history stays intact.
 - `serial_reader.py` writes markers such as `serial unavailable`, `serial disconnect`, and `serial reconnect` so one log file preserves the full sleep/wake timeline.
+- `remote-esp32.py monitor` now follows the same marker model for remote native USB.
 - For native USB sleep boards, separate `build` from `flash` so the ready window is not wasted.
 - After every wait-and-flash recovery, monitor serial again to confirm behavior.
 

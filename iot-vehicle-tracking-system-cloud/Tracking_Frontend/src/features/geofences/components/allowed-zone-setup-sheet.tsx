@@ -215,7 +215,17 @@ export const AllowedZoneSetupSheet = ({
     }
 
     if (!resolvedCenter) {
-      onPreviewChange(null);
+      onPreviewChange(
+        centerSource === 'map_pick' && mapPickArmed
+          ? {
+              zoneType: 'circle',
+              centerLatitude: null,
+              centerLongitude: null,
+              radiusMeters,
+              isPickingCenter: true,
+            }
+          : null,
+      );
       return;
     }
 

@@ -1,4 +1,5 @@
 'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/common/empty-state';
@@ -11,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+
 export const DeviceUptimeChart = ({
   data,
   isLoading,
@@ -29,11 +31,11 @@ export const DeviceUptimeChart = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Xu hướng uptime thiết bị</CardTitle>
+        <CardTitle>Xu hướng độ ổn định kết nối thiết bị</CardTitle>
         <p className="text-sm text-muted-foreground">
           {data.length > 0
-            ? `Uptime trung bình hiện tại: ${averageUptime.toFixed(1)}%`
-            : 'Chưa có đủ dữ liệu uptime thiết bị'}
+            ? `Tỷ lệ ổn định kết nối trung bình hiện tại: ${averageUptime.toFixed(1)}%`
+            : 'Chưa có đủ dữ liệu độ ổn định kết nối thiết bị'}
         </p>
       </CardHeader>
       <CardContent className="h-[320px]">
@@ -43,7 +45,7 @@ export const DeviceUptimeChart = ({
           <div className="flex h-full items-center justify-center">
             <EmptyState
               title="Chưa có dữ liệu"
-              description="Không có dữ liệu uptime thiết bị cho khoảng thời gian đã chọn"
+              description="Không có dữ liệu độ ổn định kết nối thiết bị cho khoảng thời gian đã chọn"
             />
           </div>
         ) : (

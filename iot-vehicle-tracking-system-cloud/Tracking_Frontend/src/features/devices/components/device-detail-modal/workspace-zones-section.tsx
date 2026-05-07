@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { ArrowUpRight, MapPinned } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AllowedZoneStatusCard } from '@/features/geofences/components/allowed-zone-status-card';
 import { useRoleAccess } from '@/hooks/use-role-access';
 import { useDeviceDetailModal } from './modal-context';
@@ -42,50 +41,37 @@ export const WorkspaceZonesSection = ({
       <div className={highlight ? highlightClasses[highlight] ?? '' : ''}>
         <AllowedZoneStatusCard
           vehicleId={device?.vehicleId ?? null}
-          title="Vùng đang áp dụng"
+          title="Vùng được phép"
           canEdit={access.canEditDevice && Boolean(device?.vehicleId)}
           onConfigure={workspaceActions?.onEnterAllowedZoneEdit}
         />
       </div>
 
-      <Card className="border-border/70 bg-background/80">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <MapPinned className="h-4 w-4" />
-            Điều khiển vùng
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p className="leading-6">
-            {linkedVehicle
-              ? `Thiết bị đang gắn với xe ${linkedVehicle.plateNumber ?? linkedVehicle.vehicleId ?? 'chưa định danh'}. Mọi cấu hình vùng, trạng thái trong/ngoài vùng và cảnh báo liên quan đều được quản lý tập trung từ một nguồn dữ liệu duy nhất theo xe.`
-              : 'Thiết bị chưa gắn phương tiện nên chưa thể cấu hình vùng từ không gian làm việc này. Vùng luôn thuộc về một xe cụ thể.'}
-          </p>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/80 p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <MapPinned className="h-4 w-4 text-muted-foreground" />
+          <Badge variant="outline">
+            {zoneAlertCount > 0 ? `${zoneAlertCount} cảnh báo vùng gần đây` : 'Không có cảnh báo vùng gần đây'}
+          </Badge>
+          {linkedVehicle ? (
+            <Badge variant="secondary">{linkedVehicle.plateNumber ?? linkedVehicle.vehicleId}</Badge>
+          ) : null}
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">
-              {zoneAlertCount > 0 ? `${zoneAlertCount} cảnh báo vùng gần đây` : 'Không có cảnh báo vùng gần đây'}
-            </Badge>
-            {linkedVehicle ? (
-              <Badge variant="secondary">{linkedVehicle.plateNumber ?? linkedVehicle.vehicleId}</Badge>
-            ) : null}
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {workspaceActions?.onEnterAllowedZoneEdit ? (
-              <Button onClick={workspaceActions.onEnterAllowedZoneEdit} disabled={!device?.vehicleId}>
-                Chỉnh vùng trên bản đồ
-              </Button>
-            ) : null}
-            <Button asChild variant="outline">
-              <Link href={geofencesPath}>
-                Mở trang vùng
-                <ArrowUpRight className="ml-2 h-4 w-4" />
-              </Link>
+        <div className="flex flex-wrap gap-2">
+          {workspaceActions?.onEnterAllowedZoneEdit ? (
+            <Button className="cursor-pointer" onClick={workspaceActions.onEnterAllowedZoneEdit} disabled={!device?.vehicleId}>
+              Chỉnh vùng trên bản đồ
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+          ) : null}
+          <Button asChild className="cursor-pointer" variant="outline">
+            <Link href={geofencesPath}>
+              Mở trang vùng
+              <ArrowUpRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

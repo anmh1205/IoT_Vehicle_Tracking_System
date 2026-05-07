@@ -135,7 +135,7 @@ export const VehicleDetailContent = ({
   const statusLabel =
     VEHICLE_STATUS_LABELS[vehicle.status] ?? formatValue(vehicle.status, 'Chưa xác định');
   const missingAssignments = [
-    !vehicle.deviceId ? 'Chưa gắn thiết bị đo từ xa' : null,
+    !vehicle.deviceId ? 'Chưa gắn thiết bị telemetry' : null,
     !vehicle.customerId ? 'Chưa gắn khách hàng sở hữu' : null,
   ].filter(Boolean);
 
@@ -185,7 +185,7 @@ export const VehicleDetailContent = ({
                 {statusLabel}
               </Badge>
               <Badge variant={vehicle.deviceId ? 'secondary' : 'outline'}>
-                {vehicle.deviceId ? 'Đã gắn thiết bị đo từ xa' : 'Thiếu thiết bị đo từ xa'}
+                {vehicle.deviceId ? 'Đã gắn thiết bị telemetry' : 'Thiếu thiết bị telemetry'}
               </Badge>
               <Badge variant={insuranceBadge.variant}>{insuranceBadge.label}</Badge>
               {missingAssignments.length > 0 ? (

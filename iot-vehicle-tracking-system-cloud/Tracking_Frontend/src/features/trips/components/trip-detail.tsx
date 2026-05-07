@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyState } from '@/components/common/empty-state';
-import { Progress } from '@/components/ui/progress';
-import { formatDateTime, formatDuration, formatRelative } from '@/lib/utils/date/format';
 import { ResponsiveContainer, Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 import { useMap } from 'react-leaflet';
+import { EmptyState } from '@/components/common/empty-state';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { formatDateTime, formatDuration, formatRelative } from '@/lib/utils/date/format';
 
 const MapContainer = dynamic(() => import('react-leaflet').then((m) => m.MapContainer), {
   ssr: false,
@@ -55,37 +55,67 @@ const TripViewportSync = ({
 }) => {
   const map = useMap();
   const fittedRef = useRef(false);
+  const canUseMap = useCallback(() => {
+    try {
+      return map.getContainer().isConnected;
+    } catch {
+      return false;
+    }
+  }, [map]);
+  const safeStop = useCallback(() => {
+    if (!canUseMap()) {
+      return;
+    }
+
+    try {
+      map.stop();
+    } catch {
+      // Ignore stop calls after the modal map begins unmounting.
+    }
+  }, [canUseMap, map]);
   const boundsKey = useMemo(
     () => pathPoints.map(([lat, lon]) => `${lat.toFixed(5)},${lon.toFixed(5)}`).join('|'),
     [pathPoints],
   );
 
   useEffect(() => {
-    if (pathPoints.length === 0) {
+    if (pathPoints.length === 0 || !canUseMap()) {
       fittedRef.current = false;
       return;
     }
 
     if (!fittedRef.current) {
       if (pathPoints.length === 1) {
-        map.setView(pathPoints[0], Math.max(map.getZoom(), 14), { animate: true });
+        safeStop();
+        map.setView(pathPoints[0], Math.max(map.getZoom(), 14), { animate: false });
       } else {
+        safeStop();
         map.fitBounds(pathPoints, {
           padding: [28, 28],
           maxZoom: 14,
+          animate: false,
         });
       }
       fittedRef.current = true;
     }
-  }, [boundsKey, map, pathPoints]);
+
+    return () => {
+      safeStop();
+    };
+  }, [boundsKey, canUseMap, safeStop, map, pathPoints]);
 
   useEffect(() => {
-    if (!movingPoint) {
+    if (!movingPoint || !canUseMap()) {
       return;
     }
 
-    map.panTo(movingPoint, { animate: true, duration: 0.45 });
-  }, [map, movingPoint]);
+    safeStop();
+    map.panTo(movingPoint, { animate: false });
+
+    return () => {
+      safeStop();
+    };
+  }, [canUseMap, safeStop, map, movingPoint]);
 
   return null;
 };
@@ -135,12 +165,12 @@ export const TripDetail = ({
     points.length > 1 ? Math.round((Math.min(cursor, points.length - 1) / (points.length - 1)) * 100) : 0;
   const telemetryBadge =
     points.length === 0
-      ? { label: 'Chưa có dữ liệu đo từ xa', variant: 'secondary' as const }
+      ? { label: 'Chưa có telemetry', variant: 'secondary' as const }
       : averageGapSeconds <= 30
-        ? { label: 'Dữ liệu đo từ xa dày', variant: 'default' as const }
+        ? { label: 'Telemetry dày', variant: 'default' as const }
         : averageGapSeconds <= 120
-          ? { label: 'Dữ liệu đo từ xa ổn định', variant: 'outline' as const }
-          : { label: 'Dữ liệu đo từ xa thưa', variant: 'destructive' as const };
+          ? { label: 'Telemetry ổn định', variant: 'outline' as const }
+          : { label: 'Telemetry thưa', variant: 'destructive' as const };
 
   const timeline = [
     {
@@ -195,7 +225,7 @@ export const TripDetail = ({
               </div>
             </div>
           </CardHeader>
-          <CardContent className="h-[360px] p-0 sm:h-[440px] xl:h-[500px]">
+          <CardContent className="h-[360px] overflow-hidden p-0 sm:h-[440px] xl:h-[500px]">
             {pathPoints.length === 0 ? (
               <div className="flex h-full items-center justify-center p-6">
                 <EmptyState
@@ -208,6 +238,9 @@ export const TripDetail = ({
                 center={movingPoint ?? pathPoints[0] ?? [10.762622, 106.660172]}
                 zoom={12}
                 className="h-full w-full"
+                zoomAnimation={false}
+                fadeAnimation={false}
+                markerZoomAnimation={false}
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <TripViewportSync pathPoints={pathPoints} movingPoint={movingPoint} />
@@ -243,7 +276,7 @@ export const TripDetail = ({
         <Card>
           <CardHeader className="gap-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <CardTitle>Tóm tắt tuyến và chất lượng dữ liệu đo từ xa</CardTitle>
+              <CardTitle>Tóm tắt tuyến và chất lượng telemetry</CardTitle>
               <Badge variant="outline">
                 {coverageSeconds > 0 ? formatDuration(coverageSeconds) : 'Chưa có phủ sóng thời gian'}
               </Badge>
@@ -261,7 +294,7 @@ export const TripDetail = ({
               description={formatDateTime(trip?.actualEnd ?? endPoint?.timestamp)}
             />
             <InfoRow
-              label="Phủ sóng dữ liệu đo từ xa"
+              label="Phủ sóng telemetry"
               value={points.length ? `${points.length} mốc GPS` : 'Chưa có mốc GPS'}
             />
             <InfoRow
@@ -294,7 +327,7 @@ export const TripDetail = ({
             {points.length === 0 ? (
               <EmptyState
                 title="Chưa có dữ liệu tốc độ"
-                description="Biểu đồ tốc độ sẽ xuất hiện khi chuyến đi ghi nhận mốc GPS từ dữ liệu đo từ xa."
+                description="Biểu đồ tốc độ sẽ xuất hiện khi chuyến đi ghi nhận mốc GPS từ telemetry."
               />
             ) : (
               <ResponsiveContainer width="100%" height="100%">

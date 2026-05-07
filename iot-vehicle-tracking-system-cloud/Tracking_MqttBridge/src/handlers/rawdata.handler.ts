@@ -1,6 +1,8 @@
 import { rawDataSchema } from '../validators/payload.validator';
 import type { RawDataPayload, RawDiagnostics } from '../types/payload.types';
 import {
+  ensureDeviceSession,
+  findDeviceSessionIdByIdentity,
   syncActiveMaintenanceAlertsByMessage,
   syncActiveMaintenanceAlertsByTitle,
   syncActiveObdDtcAlerts,
@@ -15,6 +17,7 @@ import { addUpdate } from '../services/batch-writer.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
 import { normalizePayloadTimestamp } from '../utils/timestamp.util';
+import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState } from '../types/device-state.types';
 
 const IMU_ACCEL_DELTA_ALERT_THRESHOLD_MPS2 = 3.5;
@@ -41,9 +44,14 @@ const OBD_RULE_MAINTENANCE_TITLES = [
 ] as const;
 const OBD_CONNECT_WARNING_TITLE = 'device_warning';
 const OBD_CONNECT_WARNING_MESSAGE = 'obd_connect_failed';
+const SESSION_FALLBACK_BOUNDARY_SOURCE = 'bridge_fallback';
+const SESSION_FALLBACK_SPEED_THRESHOLD_KPH = 3;
+const GENERIC_DTC_ACTION =
+  'Doc freeze frame, tra cuu tai lieu hang/SAE va kiem tra he thong lien quan den ma loi nay.';
 
 const ruleCooldownUntil = new Map<string, number>();
 const idleAnomalyStartedAt = new Map<string, number>();
+const activeDtcRuleKeysByDevice = new Map<string, Set<string>>();
 
 const buildSanitizedRawPayload = (payload: RawDataPayload): Omit<RawDataPayload, 'auth_token'> => {
   const { auth_token: _authToken, ...safePayload } = payload;
@@ -206,6 +214,28 @@ const normalizeGnssLocation = (
   };
 };
 
+const isLikelyActiveSessionTelemetry = (params: {
+  ignition?: boolean;
+  speed?: number;
+  runtimeIgnitionState: 'ON' | 'OFF' | 'UNKNOWN';
+  runtimeMotionState: 'MOVING' | 'STATIONARY' | 'UNKNOWN';
+  previousStatus?: 'online' | 'offline' | 'running' | 'stopped';
+  persistedStatus?: string;
+}): boolean => {
+  if (params.ignition === true || params.runtimeIgnitionState === 'ON') {
+    return true;
+  }
+
+  if (
+    params.runtimeMotionState === 'MOVING' ||
+    (params.speed !== undefined && params.speed > SESSION_FALLBACK_SPEED_THRESHOLD_KPH)
+  ) {
+    return true;
+  }
+
+  return params.previousStatus === 'running' || params.persistedStatus === 'running';
+};
+
 const getRuleKey = (deviceId: string, ruleId: string) => `${deviceId}:${ruleId}`;
 
 const canEmitRule = (deviceId: string, ruleId: string, timestampMs: number): boolean => {
@@ -246,8 +276,46 @@ const lowerSeverity = (severity: AlertSeverity): AlertSeverity => {
   return 'low';
 };
 
-const resolveDtcRule = (code: string): DtcRuleDefinition | undefined =>
-  dtcRuleDefinitions.find((definition) => definition.matches(code));
+const resolveDtcRule = (code: string): DtcRuleDefinition | null =>
+  dtcRuleDefinitions.find((definition) => definition.matches(code)) ?? null;
+
+const deriveGenericDtcSeverity = (buckets: Set<DtcBucket>): AlertSeverity => {
+  if (buckets.has('permanent')) return 'high';
+  if (buckets.has('stored')) return 'medium';
+  return 'low';
+};
+
+const resolveDtcDefinition = (
+  code: string,
+  buckets: Set<DtcBucket>,
+): Pick<DtcRuleDefinition, 'severity' | 'confidence' | 'action'> => {
+  const matchedRule = resolveDtcRule(code);
+  if (matchedRule) {
+    return matchedRule;
+  }
+
+  return {
+    severity: deriveGenericDtcSeverity(buckets),
+    confidence: buckets.has('permanent') ? 0.78 : buckets.has('stored') ? 0.72 : 0.62,
+    action: GENERIC_DTC_ACTION,
+  };
+};
+
+const syncDtcCooldownState = (deviceId: string, currentRuleKeys: Set<string>): void => {
+  const previousRuleKeys = activeDtcRuleKeysByDevice.get(deviceId);
+  previousRuleKeys?.forEach((ruleKey) => {
+    if (!currentRuleKeys.has(ruleKey)) {
+      ruleCooldownUntil.delete(getRuleKey(deviceId, ruleKey));
+    }
+  });
+
+  if (currentRuleKeys.size > 0) {
+    activeDtcRuleKeysByDevice.set(deviceId, new Set(currentRuleKeys));
+    return;
+  }
+
+  activeDtcRuleKeysByDevice.delete(deviceId);
+};
 
 const describeDtcBuckets = (buckets: Set<DtcBucket>): string => {
   const ordered = (['stored', 'pending', 'permanent'] as DtcBucket[]).filter((bucket) =>
@@ -385,7 +453,10 @@ const publishObdMaintenanceAlert = (
     seq_no: context.seqNo,
     boot_id: context.bootId,
   }).catch((err) => {
-    logger.error({ err, deviceId: context.deviceId, ruleId: input.ruleId }, 'OBD alert log write failed');
+    logger.error(
+      { err, deviceId: context.deviceId, ruleId: input.ruleId, event: 'obd_alert_log_write_failed' },
+      'OBD alert log write failed',
+    );
   });
 };
 
@@ -412,8 +483,11 @@ const evaluateObdDtcRules = async (
   appendBucket('permanent', normalizeDtcCodes(diagnostics.dtc.permanent));
 
   const activeDtcTitles = Array.from(dtcBuckets.keys())
-    .filter((code) => resolveDtcRule(code) !== undefined)
     .map((code) => `OBD: DTC ${code}`);
+  const currentRuleKeys = new Set(
+    Array.from(dtcBuckets.keys()).map((code) => `obd_dtc_${code.toLowerCase()}`),
+  );
+  syncDtcCooldownState(context.deviceId, currentRuleKeys);
   const existingActiveTitles = await syncActiveObdDtcAlerts(
     context.deviceId,
     activeDtcTitles,
@@ -421,11 +495,7 @@ const evaluateObdDtcRules = async (
   );
 
   dtcBuckets.forEach((buckets, code) => {
-    const rule = resolveDtcRule(code);
-    if (!rule) {
-      return;
-    }
-
+    const rule = resolveDtcDefinition(code, buckets);
     const isPendingOnly =
       buckets.size === 1 && buckets.has('pending') && !buckets.has('stored') && !buckets.has('permanent');
     let severity = rule.severity;
@@ -534,7 +604,13 @@ const syncHighImuAccelDeltaAlert = async (
   });
 
   logger.info(
-    `ALERT: High IMU acceleration delta (${imuAccelDeltaMps2}) on device ${context.deviceId}`,
+    {
+      deviceId: context.deviceId,
+      value: imuAccelDeltaMps2,
+      threshold: IMU_ACCEL_DELTA_ALERT_THRESHOLD_MPS2,
+      event: 'high_imu_accel_alert_emitted',
+    },
+    'High IMU acceleration alert emitted',
   );
 };
 
@@ -692,7 +768,7 @@ export const handleRawData = async (
   try {
     parsed = JSON.parse(message.toString());
   } catch {
-    logger.warn(`Invalid JSON from device ${deviceIdFromTopic}`);
+    logger.warn({ deviceId: deviceIdFromTopic, event: 'rawdata_payload_invalid_json' }, 'Invalid rawdata payload');
     return;
   }
 
@@ -700,7 +776,7 @@ export const handleRawData = async (
   const result = rawDataSchema.safeParse(parsed);
   if (!result.success) {
     logger.warn(
-      { deviceId: deviceIdFromTopic, issues: result.error.issues },
+      { deviceId: deviceIdFromTopic, issues: result.error.issues, event: 'rawdata_payload_validation_failed' },
       'Invalid rawdata payload',
     );
     return;
@@ -740,7 +816,8 @@ export const handleRawData = async (
   // Verify topic deviceId matches payload deviceId
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
-      `Device ID mismatch: topic=${deviceIdFromTopic}, payload=${payload.device_id}`,
+      { topicDeviceId: deviceIdFromTopic, payloadDeviceId: payload.device_id, event: 'rawdata_device_id_mismatch' },
+      'Rawdata device id mismatch',
     );
     return;
   }
@@ -748,7 +825,7 @@ export const handleRawData = async (
   // 2. Validate device auth
   const device = await validateDevice(payload.device_id, payload.auth_token);
   if (!device) {
-    logger.warn(`Auth failed for device ${payload.device_id}`);
+    logger.warn({ deviceId: payload.device_id, event: 'device_auth_failed' }, 'Device auth failed');
     return;
   }
 
@@ -765,8 +842,9 @@ export const handleRawData = async (
         metadataSentAt: payload.metadata?.sent_at,
         normalizedTimestampMs: timestampMs,
         timestampSource,
+        event: 'rawdata_timestamp_normalized',
       },
-      'Normalized invalid telemetry timestamp before persistence',
+      'Telemetry timestamp normalized before persistence',
     );
   }
 
@@ -782,21 +860,79 @@ export const handleRawData = async (
   const stateUpdatedAt = new Date(receivedAtMs).toISOString();
 
   // 3. Attach telemetry only to an authoritative session identity from firmware.
-  const localSessionKey = payload.local_session_key;
+  const localSessionKey = resolveLocalSessionKey(
+    payload.local_session_key,
+    payload.session_id,
+  );
   const sessionBootId = payload.boot_id ?? payload.metadata?.boot_id;
   const payloadCanonicalSessionId = payload.canonical_session_id ?? null;
-  const sessionId = resolveSessionId(payload.device_id, {
+  const cachedResolvedSessionId = resolveSessionId(payload.device_id, {
     localSessionKey,
     canonicalSessionId: payloadCanonicalSessionId,
     bootId: sessionBootId,
   });
-  const canonicalSessionId =
+  const databaseResolvedSessionId =
+    cachedResolvedSessionId === null
+      ? await findDeviceSessionIdByIdentity(payload.device_id, {
+          localSessionKey,
+          canonicalSessionId: payloadCanonicalSessionId,
+          bootId: sessionBootId,
+        })
+      : null;
+  let sessionId = cachedResolvedSessionId ?? databaseResolvedSessionId;
+  let canonicalSessionId =
     payloadCanonicalSessionId ??
     (sessionId !== null && previousState?.sessionId === sessionId
       ? previousState.canonicalSessionId
-      : null);
+      : (sessionId !== null ? String(sessionId) : null));
+  const hasAuthoritativeSessionIdentity =
+    payloadCanonicalSessionId !== null || localSessionKey !== undefined;
+  const canCreateFallbackSession =
+    sessionId === null &&
+    isLikelyActiveSessionTelemetry({
+      ignition: payload.data.ignition,
+      speed: effectiveSpeed,
+      runtimeIgnitionState: runtimeState.ignition_state,
+      runtimeMotionState: runtimeState.motion_state,
+      previousStatus,
+      persistedStatus: device.current_status,
+    }) &&
+    (
+      sessionBootId !== undefined ||
+      localSessionKey !== undefined ||
+      previousState?.status === 'running' ||
+      device.current_status === 'running'
+    );
 
-  if (sessionId === null && (payloadCanonicalSessionId || payload.local_session_key !== undefined)) {
+  if (canCreateFallbackSession) {
+    const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs, {
+      localSessionKey,
+      bootId: sessionBootId,
+      canonicalSource: 'server',
+      boundarySource: SESSION_FALLBACK_BOUNDARY_SOURCE,
+      startReason: 'telemetry_active',
+    });
+    sessionId = ensuredSession.sessionId;
+    canonicalSessionId = String(ensuredSession.sessionId);
+
+    if (ensuredSession.isNew) {
+      publishInternalEvent('session', {
+        device_id: payload.device_id,
+        session_id: sessionId,
+        action: 'started',
+        boundary_source: SESSION_FALLBACK_BOUNDARY_SOURCE,
+        local_session_key: localSessionKey,
+        canonical_session_id: canonicalSessionId,
+        boot_id: sessionBootId,
+        message_id: messageId,
+        schema_version: schemaVersion,
+        seq_no: seqNo,
+        timestamp: new Date(timestampMs).toISOString(),
+      });
+    }
+  }
+
+  if (sessionId === null && hasAuthoritativeSessionIdentity) {
     logger.warn(
       {
         deviceId: payload.device_id,
@@ -804,8 +940,10 @@ export const handleRawData = async (
         canonicalSessionId,
         bootId: sessionBootId,
         messageId,
+        event: 'telemetry_session_unmapped',
+        reason: 'authoritative_identity_unresolved',
       },
-      'Telemetry arrived without authoritative session mapping',
+      'Telemetry session unresolved',
     );
   }
 
@@ -848,7 +986,7 @@ export const handleRawData = async (
   }
 
   writeDeviceTelemetry(payload.device_id, metricsData, timestampMs).catch((err) => {
-    logger.error(`VictoriaMetrics write failed for ${payload.device_id}`, err);
+    logger.error({ err, deviceId: payload.device_id, event: 'rawdata_metrics_write_failed' }, 'Telemetry metrics write failed');
   });
 
   // 5. Write to VictoriaLogs
@@ -863,7 +1001,7 @@ export const handleRawData = async (
     speed: effectiveSpeed,
     diagnostics: normalizedDiagnostics ?? null,
   }).catch((err) => {
-    logger.error(`VictoriaLogs write failed for ${payload.device_id}`, err);
+    logger.error({ err, deviceId: payload.device_id, event: 'rawdata_event_log_write_failed' }, 'Telemetry event log write failed');
   });
 
   if (normalizedDiagnostics) {
@@ -875,7 +1013,10 @@ export const handleRawData = async (
       boot_id: bootId,
       diagnostics: normalizedDiagnostics,
     }).catch((err) => {
-      logger.error({ err, deviceId: payload.device_id }, 'OBD diagnostics log write failed');
+      logger.error(
+        { err, deviceId: payload.device_id, event: 'obd_diagnostics_log_write_failed' },
+        'OBD diagnostics log write failed',
+      );
     });
 
     writeDeviceEvent(payload.device_id, 'obd_diagnostic_snapshot', 'Normalized OBD diagnostic snapshot', {
@@ -895,7 +1036,10 @@ export const handleRawData = async (
       },
       quality: normalizedDiagnosticsQuality,
     }).catch((err) => {
-      logger.error({ err, deviceId: payload.device_id }, 'OBD normalized diagnostic log write failed');
+      logger.error(
+        { err, deviceId: payload.device_id, event: 'obd_diagnostics_snapshot_log_write_failed' },
+        'OBD normalized diagnostic log write failed',
+      );
     });
   }
 
@@ -947,7 +1091,7 @@ export const handleRawData = async (
       effectiveLongitude,
       new Date(timestampMs).toISOString(),
     ).catch((err) => {
-      logger.error({ err, deviceId: payload.device_id }, 'Vehicle zone check failed');
+      logger.error({ err, deviceId: payload.device_id, event: 'vehicle_zone_check_failed' }, 'Vehicle zone check failed');
     });
   }
 
@@ -1014,8 +1158,8 @@ export const handleRawData = async (
   obdRuleResults.forEach((result, index) => {
     if (result.status === 'rejected') {
       logger.error(
-        { err: result.reason, deviceId: payload.device_id, taskIndex: index },
-        'OBD rule evaluation failed without blocking telemetry ingest',
+        { err: result.reason, deviceId: payload.device_id, taskIndex: index, event: 'obd_rule_evaluation_failed' },
+        'OBD rule evaluation failed',
       );
     }
   });

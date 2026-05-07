@@ -35,38 +35,41 @@ export const connectMqtt = (): Promise<MqttClient> => {
         try {
           options.ca = fs.readFileSync(mqttConfig.caCertPath);
         } catch (err) {
-          logger.error({ err, caCertPath: mqttConfig.caCertPath }, 'Failed to load MQTT CA certificate');
+          logger.error(
+            { err, caCertPath: mqttConfig.caCertPath, event: 'mqtt_ca_cert_load_failed' },
+            'MQTT CA certificate load failed',
+          );
           reject(err as Error);
           return;
         }
       }
     }
 
-    logger.info(`Connecting to MQTT broker at ${brokerUrl}...`);
+    logger.info({ brokerUrl, clientId: CLIENT_ID, event: 'mqtt_connecting' }, 'MQTT connection starting');
     client = mqtt.connect(brokerUrl, options);
 
     client.on('connect', () => {
-      logger.info('MQTT connected successfully');
+      logger.info({ brokerUrl, clientId: CLIENT_ID, event: 'mqtt_connected' }, 'MQTT connected');
       resolve(client!);
     });
 
     client.on('reconnect', () => {
-      logger.warn('MQTT reconnecting...');
+      logger.warn({ brokerUrl, clientId: CLIENT_ID, event: 'mqtt_reconnecting' }, 'MQTT reconnecting');
     });
 
     client.on('error', (err) => {
-      logger.error({ err }, 'MQTT connection error');
+      logger.error({ err, brokerUrl, clientId: CLIENT_ID, event: 'mqtt_connection_error' }, 'MQTT connection error');
       if (!client?.connected) {
         reject(err);
       }
     });
 
     client.on('close', () => {
-      logger.warn('MQTT connection closed');
+      logger.warn({ brokerUrl, clientId: CLIENT_ID, event: 'mqtt_connection_closed' }, 'MQTT connection closed');
     });
 
     client.on('offline', () => {
-      logger.warn('MQTT client offline');
+      logger.warn({ brokerUrl, clientId: CLIENT_ID, event: 'mqtt_client_offline' }, 'MQTT client offline');
     });
   });
 };
@@ -81,7 +84,7 @@ export const disconnectMqtt = (): Promise<void> => {
       return;
     }
     client.end(false, {}, () => {
-      logger.info('MQTT disconnected');
+      logger.info({ clientId: CLIENT_ID, event: 'mqtt_disconnected' }, 'MQTT disconnected');
       client = null;
       resolve();
     });
@@ -105,14 +108,14 @@ export const publishToDevice = (
   qos: 0 | 1 | 2 = 1,
 ): void => {
   if (!client?.connected) {
-    logger.warn(`Cannot publish to ${topic}: MQTT not connected`);
+    logger.warn({ deviceId, topic, qos, event: 'device_publish_skipped', reason: 'mqtt_not_connected' }, 'Device publish skipped');
     return;
   }
 
   const fullTopic = `v1/${deviceId}/${topic}`;
   client.publish(fullTopic, JSON.stringify(payload), { qos }, (err) => {
     if (err) {
-      logger.error({ err, topic: fullTopic }, 'Failed to publish to device');
+      logger.error({ err, deviceId, topic: fullTopic, qos, event: 'device_publish_failed' }, 'Device publish failed');
     }
   });
 };

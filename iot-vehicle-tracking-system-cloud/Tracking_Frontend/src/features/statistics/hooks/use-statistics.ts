@@ -54,8 +54,7 @@ const normalizeSummary = (payload: any): StatisticsSummary => ({
 const toDeviceSnapshot = (raw: any): StatisticsDeviceSnapshot => ({
   deviceId: String(raw?.deviceId ?? ''),
   deviceName: String(raw?.deviceName ?? raw?.deviceId ?? 'Thiết bị'),
-  currentStatus: (raw?.currentStatus ??
-    'disconnected') as StatisticsDeviceSnapshot['currentStatus'],
+  currentStatus: (raw?.currentStatus ?? 'disconnected') as StatisticsDeviceSnapshot['currentStatus'],
   lastSeenAt: raw?.lastSeenAt ?? null,
   requestInterval: Number(raw?.requestInterval ?? 60),
   totalRuntimeSeconds: Number(raw?.totalRuntimeSeconds ?? 0),
@@ -116,16 +115,16 @@ const isMeaningfulSeries = (values: number[]) => values.some((value) => Number(v
 const buildFleetUsageFromDevices = (devices: StatisticsDeviceSnapshot[], params: StatisticsParams) => {
   const labels = buildLabels(params);
   const lastIndex = Math.max(labels.length - 1, 0);
-  const activeCount = devices.filter((device) => {
+  const connectedCount = devices.filter((device) => {
     const status = getSnapshotStatus(device);
     return status === 'running' || status === 'online';
   }).length;
-  const inactiveCount = Math.max(devices.length - activeCount, 0);
+  const disconnectedCount = devices.filter((device) => getSnapshotStatus(device) === 'disconnected').length;
 
   return {
     labels,
-    activeVehicles: labels.map((_, index) => (index === lastIndex ? activeCount : 0)),
-    inactiveVehicles: labels.map((_, index) => (index === lastIndex ? inactiveCount : 0)),
+    activeVehicles: labels.map((_, index) => (index === lastIndex ? connectedCount : 0)),
+    inactiveVehicles: labels.map((_, index) => (index === lastIndex ? disconnectedCount : 0)),
   };
 };
 
@@ -139,7 +138,14 @@ const buildDeviceUptimeFromDevices = (devices: StatisticsDeviceSnapshot[], param
   return {
     devices: devices.map((device) => {
       const status = getSnapshotStatus(device);
-      const uptimePercent = status === 'running' || status === 'online' ? 100 : status === 'stopped' ? 60 : 0;
+      const uptimePercent =
+        status === 'running'
+          ? 100
+          : status === 'online'
+            ? 85
+            : status === 'stopped'
+              ? 55
+              : 0;
       const downHours = Math.max(totalHours * (1 - uptimePercent / 100), 0);
 
       return {
@@ -164,9 +170,7 @@ const buildSummaryFromDevices = (
   const runtimeFallback = activeLike.length * 0.2;
 
   return {
-    totalRuntimeHours: Number(
-      (runtimeFromTotals > 0 ? runtimeFromTotals : runtimeFallback).toFixed(1),
-    ),
+    totalRuntimeHours: Number((runtimeFromTotals > 0 ? runtimeFromTotals : runtimeFallback).toFixed(1)),
     averageUptimePercent:
       uptimeDevices.length > 0
         ? Number(

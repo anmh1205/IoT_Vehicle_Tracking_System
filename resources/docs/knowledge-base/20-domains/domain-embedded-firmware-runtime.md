@@ -24,6 +24,15 @@ owner_scope: personal
 - [Offline Buffering And Replay](../10-repo-packs/iot-vehicle-tracking-system/30-concepts/concept-offline-buffering-and-replay.md)
 - [OTA And Config Flow](../10-repo-packs/iot-vehicle-tracking-system/30-concepts/concept-ota-and-config-flow.md)
 
+## Logging Convention
+- Prefer `event=... key=value ...` logs for runtime and field diagnostics.
+- Put the stable event name first; keep it short and grep-friendly.
+- Name events in lower snake case and bias toward `subsystem_action[_result]`.
+- Encode machine-useful context as explicit keys such as `reason`, `err`, `mode`, `gpio`, `boot_id`, `seq`, `state`.
+- Reuse the same keys across modules for the same concept: `timeout_ms`, `response_len`, `count`, `from`, `to`, `action`.
+- Reserve prose-heavy text for comments and docs; serial logs should optimize for triage under noisy field conditions.
+- Prefer one event per line and avoid parenthetical prose when the same fact can be expressed as keys.
+
 ## Still Open
 - Hardware-vs-firmware certainty for modem control pins remains lower than for the runtime state model.
 

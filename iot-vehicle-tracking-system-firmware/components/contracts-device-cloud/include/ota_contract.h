@@ -8,7 +8,12 @@
 /**
  * @file ota_contract.h
  * @brief OTA payload contract, status strings, and progress/error constants.
+ * This header belongs to the device-cloud contract layer and describes the payload contract that firmware and cloud services must interpret the same way.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /** @brief OTA confirm timeout defaults and bounds (seconds). */
 #define TRACKER_OTA_CONFIRM_TIMEOUT_DEFAULT_SEC 180U

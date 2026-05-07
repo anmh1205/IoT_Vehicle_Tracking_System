@@ -1,4 +1,5 @@
 import type { Device, DevicePositionSnapshot, DeviceTelemetryRow } from '@/features/devices/types';
+import { isVehicleEngineOnState, isVehicleParkedOffState } from '@/lib/utils/device-state';
 import type { ObdDiagnosticsSnapshot } from './obd-diagnostics';
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
@@ -33,7 +34,7 @@ export interface DeviceConfigSummary {
 export const getDeviceConfigSummary = (
   device: Pick<
     Device,
-    'config' | 'requestInterval' | 'currentStatus' | 'imuAccelDeltaThresholdMps2'
+    'config' | 'requestInterval' | 'currentStatus' | 'imuAccelDeltaThresholdMps2' | 'vehicleState'
   > | null,
 ): DeviceConfigSummary => {
   const config = toRecord(device?.config);
@@ -64,8 +65,8 @@ export const getDeviceConfigSummary = (
     2,
   );
   const offlineAfterSec = pickNumber([alerts?.offlineAfterSec, alerts?.offline_after_s], 900);
-  const isDriving = device?.currentStatus === 'running';
-  const isParkedOnline = device?.currentStatus === 'online';
+  const isEngineOn = isVehicleEngineOnState(device?.vehicleState);
+  const isParkedOff = isVehicleParkedOffState(device?.vehicleState);
 
   return {
     drivingIntervalSec,
@@ -74,13 +75,17 @@ export const getDeviceConfigSummary = (
     overspeedKph,
     imuAccelDeltaThresholdMps2,
     offlineAfterSec,
-    activeIntervalSec: isDriving ? drivingIntervalSec : parkingIntervalSec,
-    activeProfileLabel: isDriving ? 'Cháº¡y xe' : (isParkedOnline ? 'Äá»— xe / cÃ²n online' : 'Äá»— xe'),
-    activeProfileHint: isDriving
-      ? 'Thiáº¿t bá»‹ Ä‘ang á»Ÿ tráº¡ng thÃ¡i cháº¡y nÃªn cloud dÃ¹ng chu ká»³ driving.'
-      : isParkedOnline
-        ? 'PhiÃªn lÃ¡i Ä‘Ã£ káº¿t thÃºc nhÆ°ng thiáº¿t bá»‹ váº«n cÃ²n heartbeat parking nÃªn cloud dÃ¹ng chu ká»³ parking.'
-        : 'Thiáº¿t bá»‹ khÃ´ng cháº¡y nÃªn cloud dÃ¹ng chu ká»³ parking Ä‘á»ƒ giáº£m tiÃªu thá»¥.',
+    activeIntervalSec: isEngineOn ? drivingIntervalSec : parkingIntervalSec,
+    activeProfileLabel: isEngineOn
+      ? 'Máy đang bật'
+      : isParkedOff
+        ? 'Đỗ xe / tắt máy'
+        : 'Đứng yên / chưa rõ máy',
+    activeProfileHint: isEngineOn
+      ? 'Xe đang ở trạng thái máy bật nên theo dõi bằng profile driving.'
+      : isParkedOff
+        ? 'Xe đã tắt máy nên dùng profile parking và heartbeat thưa hơn.'
+        : 'Chưa xác định chắc máy bật hay tắt, tạm dùng profile parking để đánh giá nhịp gửi.',
   };
 };
 
@@ -97,7 +102,7 @@ export const formatElectricalMetric = (value: number | null | undefined): string
 };
 
 export const formatTemperatureMetric = (value: number | null | undefined): string =>
-  value === null || value === undefined || !Number.isFinite(value) ? '-' : `${value.toFixed(1)}Â°C`;
+  value === null || value === undefined || !Number.isFinite(value) ? '-' : `${value.toFixed(1)}°C`;
 
 export const resolveDeviceBatteryValue = (
   row: DeviceTelemetryRow | null | undefined,

@@ -10,7 +10,12 @@
 /**
  * @file command_handler.h
  * @brief MQTT command parser and command-consume interface for the state machine.
+ * This header belongs to the connectivity domain layer and defines the domain boundary that adapters and app-core use without reimplementing the same rules.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief High-level actions produced by parsed cloud commands.
@@ -34,8 +39,11 @@ typedef enum {
  * @brief Canonical session mapping sent back from cloud.
  */
 typedef struct {
+    /** Local session key created by firmware at IGN ON. */
     uint32_t local_session_key;
+    /** Canonical cloud-wide session ID assigned by the server. */
     uint64_t canonical_session_id;
+    /** Boot/session correlation ID that the assignment must match. */
     char boot_id[TRACKER_SESSION_BOOT_ID_LEN];
 } command_session_assignment_t;
 

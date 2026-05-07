@@ -1,5 +1,6 @@
-﻿'use client';
-import { Car, Cpu, Bell, Route } from 'lucide-react';
+'use client';
+
+import { Bell, Car, Cpu, Route } from 'lucide-react';
 import { StatCard } from '@/components/common/stat-card';
 
 export const StatCards = ({ stats, isLoading }: { stats: any; isLoading?: boolean }) => {
@@ -12,7 +13,7 @@ export const StatCards = ({ stats, isLoading }: { stats: any; isLoading?: boolea
         isLoading={isLoading}
       />
       <StatCard
-        title="Thiết bị trực tuyến"
+        title="Thiết bị còn tín hiệu"
         value={stats?.activeDevices ?? 0}
         icon={<Cpu className="h-4 w-4" />}
         isLoading={isLoading}

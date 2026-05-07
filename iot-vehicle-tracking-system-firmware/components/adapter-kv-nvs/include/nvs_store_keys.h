@@ -6,7 +6,12 @@
  *
  * Defines the namespace and key names used for persistent storage of
  * tracker configuration and OTA context in ESP32 NVS flash.
+ * This header belongs to the KV/NVS persistence adapter layer and exposes the persistence boundary so higher layers do not depend on raw NVS keys or blob layouts.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /** @brief NVS namespace for tracker configuration storage. */
 #define TRACKER_NVS_NAMESPACE "tracker_cfg"

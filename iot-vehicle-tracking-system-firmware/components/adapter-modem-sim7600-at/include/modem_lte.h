@@ -8,7 +8,12 @@
 /**
  * @file modem_lte.h
  * @brief LTE registration and PDP session management interface.
+ * This header belongs to the SIM7600 AT modem adapter layer and exposes the modem boundary so higher layers do not depend on UART- or AT-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Initialize modem for LTE operation (power, AT session, APN profile).

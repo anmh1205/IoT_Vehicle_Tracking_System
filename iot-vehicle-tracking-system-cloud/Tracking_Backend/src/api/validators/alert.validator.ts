@@ -26,6 +26,8 @@ export const alertListQuerySchema = z.object({
   status: z.enum(['active', 'acknowledged', 'resolved', 'dismissed']).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   alertType: z.string().max(100).optional(),
+  source: z.enum(['device', 'ecu', 'obd', 'system']).optional(),
+  search: z.string().max(100).optional(),
   vehicleId: z.string().max(50).optional(),
   deviceId: z.string().max(50).optional(),
 });

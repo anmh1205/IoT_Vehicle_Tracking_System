@@ -11,7 +11,12 @@
 /**
  * @file rtc_ds3231m.c
  * @brief Minimal DS3231M RTC integration for trusted timestamp fallback.
+ * This translation unit belongs to the DS3231M RTC adapter layer and keeps adapter-local state, register policy, and recovery behavior isolated behind the exported entry points.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 #define RTC_DS3231M_I2C_PORT I2C_NUM_0
 #define RTC_DS3231M_I2C_FREQ_HZ 100000
@@ -57,6 +62,7 @@ static rtc_ds3231m_ctx_t s_ctx;
  * @return uint8_t Decimal representation of the BCD value.
  */
 static uint8_t rtc_bcd_to_dec(uint8_t value) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     /* DS3231M stores calendar/time fields in packed BCD, not binary. */
     return (uint8_t)(((value >> 4U) * 10U) + (value & 0x0FU));
 }
@@ -68,6 +74,7 @@ static uint8_t rtc_bcd_to_dec(uint8_t value) {
  * @return BCD value.
  */
 static uint8_t rtc_dec_to_bcd(uint8_t value) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return (uint8_t)(((value / 10U) << 4U) | (value % 10U));
 }
 
@@ -83,6 +90,7 @@ static uint8_t rtc_dec_to_bcd(uint8_t value) {
  * @return true if leap year, false otherwise.
  */
 static bool rtc_is_leap_year(int year) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ((year % 4) == 0 && (year % 100) != 0) || ((year % 400) == 0);
 }
 
@@ -94,6 +102,7 @@ static bool rtc_is_leap_year(int year) {
  * @return Days in month.
  */
 static uint8_t rtc_days_in_month(int year, int month_1_to_12) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     static const uint8_t days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     if (month_1_to_12 == 2 && rtc_is_leap_year(year)) {
         return 29;
@@ -120,6 +129,7 @@ static uint8_t rtc_days_in_month(int year, int month_1_to_12) {
  * @return ESP_OK on success, ESP_ERR_INVALID_ARG on validation failure.
  */
 static esp_err_t rtc_tm_to_epoch_ms_utc(const struct tm *tm_value, uint64_t *out_ms) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_RETURN_ON_NULL(tm_value, ESP_ERR_INVALID_ARG, TAG, "tm_value null");
     ESP_RETURN_ON_NULL(out_ms, ESP_ERR_INVALID_ARG, TAG, "out_ms null");
 
@@ -160,6 +170,7 @@ static esp_err_t rtc_tm_to_epoch_ms_utc(const struct tm *tm_value, uint64_t *out
 }
 
 static esp_err_t rtc_read_regs(uint8_t reg, uint8_t *data, size_t len) {
+    // Read read regs without widening the mutation surface of this module.
     ESP_RETURN_ON_NULL(data, ESP_ERR_INVALID_ARG, TAG, "rtc_read_regs data null");
     ESP_RETURN_ON_NULL(s_ctx.dev_handle, ESP_ERR_INVALID_STATE, TAG, "rtc_read_regs device not ready");
 
@@ -172,6 +183,7 @@ static esp_err_t rtc_read_regs(uint8_t reg, uint8_t *data, size_t len) {
 }
 
 static esp_err_t rtc_write_reg(uint8_t reg, uint8_t value) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     ESP_RETURN_ON_NULL(s_ctx.dev_handle, ESP_ERR_INVALID_STATE, TAG, "rtc_write_reg device not ready");
 
     uint8_t payload[2] = {reg, value};
@@ -179,10 +191,12 @@ static esp_err_t rtc_write_reg(uint8_t reg, uint8_t value) {
 }
 
 bool rtc_ds3231m_is_time_valid_ms(uint64_t time_ms) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return time_ms >= RTC_VALID_MIN_EPOCH_MS && time_ms < RTC_VALID_MAX_EPOCH_MS;
 }
 
 esp_err_t rtc_ds3231m_init(void) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_ctx.initialized) {
         return s_ctx.available ? ESP_OK : ESP_FAIL;
     }
@@ -201,6 +215,7 @@ esp_err_t rtc_ds3231m_init(void) {
 
     esp_err_t err = i2c_new_master_bus(&bus_cfg, &s_ctx.bus_handle);
     if (err == ESP_OK) {
+        // Remember bus ownership so cleanup only tears down buses that this driver created itself.
         s_ctx.owns_bus = true;
     } else if (err == ESP_ERR_INVALID_STATE) {
         /* Another driver already created the bus; attach to it instead of failing. */
@@ -228,6 +243,7 @@ esp_err_t rtc_ds3231m_init(void) {
     if (err != ESP_OK) {
         ESP_LOGW(TAG, "i2c_master_bus_add_device failed: %s", esp_err_to_name(err));
         if (s_ctx.owns_bus) {
+            // Only delete the bus on attach failure when this module created it; shared buses must remain available to peers.
             i2c_del_master_bus(s_ctx.bus_handle);
             s_ctx.bus_handle = NULL;
             s_ctx.owns_bus = false;
@@ -240,10 +256,12 @@ esp_err_t rtc_ds3231m_init(void) {
     uint8_t status = 0;
     err = rtc_read_regs(RTC_REG_STATUS, &status, 1);
     if (err != ESP_OK) {
+        // Probe failure leaves the driver initialized-but-unavailable so callers can degrade gracefully without retry storms.
         ESP_LOGW(TAG, "DS3231M probe failed: %s", esp_err_to_name(err));
         s_ctx.available = false;
         s_ctx.time_valid = false;
     } else {
+        // OSF cleared means the oscillator has kept time since the last power-loss/reset event.
         s_ctx.available = true;
         s_ctx.time_valid = (status & RTC_STATUS_OSF_BIT) == 0;
     }
@@ -254,13 +272,16 @@ esp_err_t rtc_ds3231m_init(void) {
 }
 
 bool rtc_ds3231m_is_available(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_ctx.available;
 }
 
 esp_err_t rtc_ds3231m_get_time_ms(uint64_t *out_time_ms) {
+    // Read ds3231m get time ms without widening the mutation surface of this module.
     ESP_RETURN_ON_NULL(out_time_ms, ESP_ERR_INVALID_ARG, TAG, "out_time_ms null");
     ESP_RETURN_ON_FALSE(s_ctx.available, ESP_ERR_INVALID_STATE, TAG, "RTC unavailable");
 
+    // Read the full clock register block in one shot so BCD fields describe one coherent RTC second.
     uint8_t regs[7] = {0};
     esp_err_t read_err = rtc_read_regs(RTC_REG_SECONDS, regs, sizeof(regs));
     if (read_err != ESP_OK) {
@@ -281,6 +302,7 @@ esp_err_t rtc_ds3231m_get_time_ms(uint64_t *out_time_ms) {
         tm_value.tm_hour = (int)rtc_bcd_to_dec((uint8_t)(regs[2] & 0x3FU));
     }
 
+    // Convert the remaining calendar fields from RTC BCD layout into the standard `struct tm` representation.
     tm_value.tm_mday = (int)rtc_bcd_to_dec((uint8_t)(regs[4] & 0x3FU));
     tm_value.tm_mon = (int)rtc_bcd_to_dec((uint8_t)(regs[5] & 0x1FU)) - 1;
     tm_value.tm_year = 100 + (int)rtc_bcd_to_dec(regs[6]);
@@ -308,6 +330,7 @@ esp_err_t rtc_ds3231m_get_time_ms(uint64_t *out_time_ms) {
     }
 
     *out_time_ms = epoch_ms;
+    // Final range validation filters out RTC garbage such as reset defaults that still convert mathematically.
     s_ctx.time_valid = rtc_ds3231m_is_time_valid_ms(*out_time_ms);
     if (!s_ctx.time_valid) {
         ESP_LOGW(TAG, "RTC read out-of-range ms=%llu", (unsigned long long)*out_time_ms);
@@ -317,6 +340,7 @@ esp_err_t rtc_ds3231m_get_time_ms(uint64_t *out_time_ms) {
 }
 
 esp_err_t rtc_ds3231m_set_time_ms(uint64_t time_ms) {
+    // Copy the caller-provided ds3231m set time ms into module-local state after lightweight guards.
     ESP_RETURN_ON_FALSE(s_ctx.available, ESP_ERR_INVALID_STATE, TAG, "RTC unavailable");
     ESP_RETURN_ON_FALSE(rtc_ds3231m_is_time_valid_ms(time_ms), ESP_ERR_INVALID_ARG, TAG, "RTC set invalid time");
 
@@ -354,6 +378,7 @@ esp_err_t rtc_ds3231m_set_time_ms(uint64_t time_ms) {
 }
 
 esp_err_t rtc_ds3231m_get_health(bool *available, bool *time_valid) {
+    // Read ds3231m get health without widening the mutation surface of this module.
     ESP_RETURN_ON_NULL(available, ESP_ERR_INVALID_ARG, TAG, "available null");
     ESP_RETURN_ON_NULL(time_valid, ESP_ERR_INVALID_ARG, TAG, "time_valid null");
 

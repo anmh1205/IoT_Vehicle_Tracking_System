@@ -211,14 +211,24 @@ export const MapAllowedZonePanel = ({
     }
 
     if (!resolvedCenter) {
-      onPreviewChange(null);
+      onPreviewChange(
+        centerSource === 'map_pick' && mapPickArmed
+          ? {
+              zoneType: 'circle',
+              centerLatitude: null,
+              centerLongitude: null,
+              radiusMeters,
+              isPickingCenter: true,
+            }
+          : null,
+      );
       return;
     }
 
     onPreviewChange({
       zoneType: 'circle',
-      centerLatitude: resolvedCenter.latitude ?? 0,
-      centerLongitude: resolvedCenter.longitude ?? 0,
+      centerLatitude: resolvedCenter.latitude,
+      centerLongitude: resolvedCenter.longitude,
       radiusMeters,
       isPickingCenter: centerSource === 'map_pick' && mapPickArmed,
     });
@@ -237,6 +247,15 @@ export const MapAllowedZonePanel = ({
     zoneType === 'circle' && centerSource === 'vehicle_position'
       ? preview?.warning ?? zone?.warning
       : zone?.warning;
+  const previewErrorMessage =
+    zoneType === 'circle' && centerSource === 'vehicle_position' && previewQuery.isError
+      ? getApiErrorMessage(previewQuery.error, 'Không lấy được vị trí telemetry gần nhất của xe.')
+      : null;
+  const vehicleCenterUnavailable =
+    zoneType === 'circle' &&
+    centerSource === 'vehicle_position' &&
+    previewQuery.isError &&
+    !resolvedCenter;
 
   const handleSave = form.handleSubmit(async (values) => {
     if (!vehicleId) {
@@ -291,7 +310,7 @@ export const MapAllowedZonePanel = ({
 
   return (
     <>
-      <div className="pointer-events-auto absolute bottom-3 left-3 right-3 z-[1000] flex max-h-[78dvh] flex-col overflow-hidden rounded-2xl border border-border/70 bg-background/96 shadow-2xl backdrop-blur md:bottom-3 md:left-auto md:right-3 md:top-3 md:w-[440px] md:max-h-[calc(100dvh-5rem)]">
+      <div className="pointer-events-auto absolute bottom-3 left-3 right-3 z-[var(--layer-map-overlay)] flex max-h-[78dvh] flex-col overflow-hidden rounded-2xl border border-border/70 bg-background/96 shadow-2xl backdrop-blur md:bottom-3 md:left-auto md:right-3 md:top-3 md:w-[440px] md:max-h-[calc(100dvh-5rem)]">
         <div className="flex items-start justify-between gap-3 border-b px-4 py-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -307,7 +326,7 @@ export const MapAllowedZonePanel = ({
           </Button>
         </div>
 
-        <ScrollArea className="min-h-0 flex-1">
+        <ScrollArea className="min-h-0 flex-1 overflow-hidden">
           <div className="space-y-4 p-4">
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border bg-muted/10 p-3 text-sm">
@@ -483,6 +502,14 @@ export const MapAllowedZonePanel = ({
                     ) : null}
                   </div>
                 ) : null}
+
+                {previewErrorMessage ? (
+                  <Alert variant="destructive">
+                    <ShieldAlert className="h-4 w-4" />
+                    <AlertTitle>Không lấy được tâm vùng từ telemetry</AlertTitle>
+                    <AlertDescription>{previewErrorMessage}</AlertDescription>
+                  </Alert>
+                ) : null}
               </>
             ) : (
               <>
@@ -572,7 +599,7 @@ export const MapAllowedZonePanel = ({
           </div>
         </ScrollArea>
 
-        <div className="border-t bg-background/96 px-4 py-3">
+        <div className="relative z-10 shrink-0 border-t bg-background/96 px-4 py-3">
           <div className="flex flex-wrap justify-end gap-2">
             {zone ? (
               <Button
@@ -596,6 +623,7 @@ export const MapAllowedZonePanel = ({
                 upsertMutation.isPending ||
                 zoneQuery.isLoading ||
                 previewQuery.isLoading ||
+                vehicleCenterUnavailable ||
                 resolvedBoundaryQuery.isFetching
               }
               onClick={handleSave}

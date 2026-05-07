@@ -88,7 +88,7 @@ const VehicleItem = ({
           'Chưa đủ dữ liệu nhận diện'}
       </p>
       <p className="text-xs text-muted-foreground">
-        {vehicle.deviceId ? `Thiết bị ${vehicle.deviceId}` : 'Chưa gắn thiết bị đo từ xa'}
+        {vehicle.deviceId ? `Thiết bị ${vehicle.deviceId}` : 'Chưa gắn thiết bị telemetry'}
       </p>
     </div>
 
@@ -110,7 +110,7 @@ const CustomerDetailPage = ({
   const customerId = Number(id);
   const [assignOpen, setAssignOpen] = useState(false);
   const [vehicleSearch, setVehicleSearch] = useState('');
-  const deferredVehicleSearch = useDeferredValue(vehicleSearch);
+  const deferredVehicleSearch = useDeferredValue(vehicleSearch.trim());
   const queryClient = useQueryClient();
 
   const query = useQuery({

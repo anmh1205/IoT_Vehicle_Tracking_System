@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { XIcon } from 'lucide-react';
-import { Dialog as SheetPrimitive } from 'radix-ui';
+import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cn } from '@/lib/utils';
 
 const Sheet = ({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) => {
@@ -29,7 +29,7 @@ const SheetOverlay = ({
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[1400] bg-black/50',
+        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[var(--layer-dialog-backdrop)] bg-black/50',
         className,
       )}
       {...props}
@@ -53,7 +53,7 @@ const SheetContent = ({
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-[1410] flex flex-col gap-4 overflow-hidden shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-[var(--layer-dialog)] flex flex-col gap-4 overflow-hidden shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
           side === 'right' &&
             'data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-[min(90vw,24rem)] border-l pt-[max(1rem,var(--safe-area-top))] pb-[max(1rem,var(--safe-area-bottom))] pl-4 pr-[max(1rem,var(--safe-area-right))]',
           side === 'left' &&
@@ -68,7 +68,7 @@ const SheetContent = ({
       >
         {children}
         {showCloseButton && (
-          <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-[max(1rem,var(--safe-area-top))] right-[max(1rem,var(--safe-area-right))] rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
+          <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-[max(1rem,var(--safe-area-top))] right-[max(1rem,var(--safe-area-right))] inline-flex size-9 items-center justify-center rounded-full border bg-background/95 opacity-80 shadow-sm transition-[opacity,background-color] hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
             <XIcon className="size-4" />
             <span className="sr-only">Đóng</span>
           </SheetPrimitive.Close>

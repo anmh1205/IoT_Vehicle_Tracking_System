@@ -38,7 +38,7 @@ export const deviceListQuerySchema = z.object({
     .min(1)
     .default(20)
     .transform((value) => Math.min(value, 100)),
-  status: z.enum(['running', 'stopped', 'disconnected']).optional(),
+  status: z.enum(['running', 'stopped', 'disconnected', 'online']).optional(),
   search: z.string().max(100).optional(),
   sortBy: z.enum(['deviceId', 'deviceName', 'currentStatus', 'lastSeenAt', 'createdAt']).optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),

@@ -6,7 +6,12 @@
 /**
  * @file ble_init.h
  * @brief NimBLE host stack lifecycle helpers.
+ * This header belongs to the BLE OBD NimBLE adapter layer and exposes the adapter boundary so higher layers do not depend on hardware- or transport-private details.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Optional callback configuration for BLE host initialization.

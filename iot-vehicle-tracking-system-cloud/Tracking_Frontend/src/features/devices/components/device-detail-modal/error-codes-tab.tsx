@@ -1,5 +1,5 @@
 ﻿import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import {
   Select,
   SelectContent,
@@ -32,12 +32,12 @@ const formatErrorCodeLabel = (errorCode: number, errorName: string): string =>
 export const ErrorCodesTab = () => {
   const {
     errorCodes,
-    errorCodesPage,
     errorCodesTotal,
-    errorCodesTotalPages,
+    errorCodesLoadedCount,
+    errorCodesHasMore,
     errorCodesStatus,
     errorCodesType,
-    onErrorCodesPageChange,
+    onErrorCodesLoadMore,
     onErrorCodesStatusChange,
     onErrorCodesTypeChange,
   } = useDeviceDetailModal();
@@ -120,29 +120,17 @@ export const ErrorCodesTab = () => {
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">Tổng lỗi: {errorCodesTotal}</p>
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={errorCodesPage <= 1}
-            onClick={() => onErrorCodesPageChange(errorCodesPage - 1)}
-          >
-            Trang trước
-          </Button>
-          <span className="text-xs text-muted-foreground">
-            Trang {errorCodesPage} / {errorCodesTotalPages}
-          </span>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={errorCodesPage >= errorCodesTotalPages}
-            onClick={() => onErrorCodesPageChange(errorCodesPage + 1)}
-          >
-            Trang sau
-          </Button>
-        </div>
+      <div className="space-y-2">
+        <p className="text-xs text-muted-foreground">
+          Hiển thị {errorCodes.length} lỗi từ {errorCodesLoadedCount} mục đã tải.
+        </p>
+        <InfiniteScrollTrigger
+          hasMore={errorCodesHasMore}
+          onLoadMore={onErrorCodesLoadMore}
+          loadedCount={errorCodesLoadedCount}
+          totalCount={errorCodesTotal}
+          itemLabel="mã lỗi"
+        />
       </div>
     </div>
   );

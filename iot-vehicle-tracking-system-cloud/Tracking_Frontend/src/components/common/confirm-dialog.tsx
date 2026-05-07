@@ -27,7 +27,7 @@ export const ConfirmDialog = ({
   title,
   description,
   variant = 'default',
-  confirmLabel = 'Xac nhan',
+  confirmLabel = 'Xác nhận',
   cancelLabel = 'Hủy',
   onCancel,
   onConfirm,

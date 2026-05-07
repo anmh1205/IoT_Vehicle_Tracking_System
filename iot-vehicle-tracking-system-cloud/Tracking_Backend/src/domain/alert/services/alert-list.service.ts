@@ -10,6 +10,8 @@ const sanitizeAlert = (a: Alert): AlertPublic => ({
   deviceName: a.device_name ?? null,
   tripId: a.trip_id,
   geofenceId: a.geofence_id,
+  tripCode: a.trip_code ?? null,
+  geofenceName: a.geofence_name ?? null,
   alertType: a.alert_type,
   source: a.source,
   severity: a.severity,

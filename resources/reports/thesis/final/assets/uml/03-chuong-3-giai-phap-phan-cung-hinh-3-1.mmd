@@ -1,13 +1,19 @@
-%%{init: {'flowchart': {'nodeSpacing': 90, 'rankSpacing': 110}} }%%
-flowchart TB
-    Vehicle["Phương tiện cần theo dõi"]
-    Power["Nguồn xe và nguồn dự phòng"]
-    Sources["Nguồn dữ liệu trên xe<br/>vị trí, trạng thái, dữ liệu xe, sự kiện"]
-    Device["Thiết bị theo dõi trên xe<br/>thu thập, tiền xử lý, quản lý trạng thái"]
-    Channel["Kênh truyền dữ liệu"]
-    Server["Lớp máy chủ<br/>tiếp nhận, lưu trữ, cảnh báo"]
-    App["Giao diện quản lý<br/>bản đồ, lịch sử, trạng thái"]
+flowchart LR
+    Vehicle["Trạng thái của phương tiện<br>vị trí, vận hành, chuyển động"]
 
-    Vehicle --> Power --> Device
-    Vehicle --> Sources --> Device
-    Device --> Channel --> Server --> App
+    subgraph Device["Thiết bị theo dõi trên xe"]
+        Acquire["Thu nhận tín hiệu<br>GNSS, OBD-II, IMU"]
+        Packet["Tiền xử lý và đóng gói<br>bản tin giám sát"]
+    end
+
+    Server["Máy chủ<br>tiếp nhận, chuẩn hóa,<br>lưu trữ và phát cảnh báo"]
+
+    Interface["Giao diện khai thác<br>bản đồ, trạng thái, dữ liệu chi tiết"]
+
+    Manager["Người quản lý"]
+
+    Vehicle -->|quan sát và số hóa| Acquire
+    Acquire --> Packet
+    Packet -->|truyền bản tin qua mạng di động| Server
+    Server -->|biểu diễn thông tin| Interface
+    Interface --> Manager

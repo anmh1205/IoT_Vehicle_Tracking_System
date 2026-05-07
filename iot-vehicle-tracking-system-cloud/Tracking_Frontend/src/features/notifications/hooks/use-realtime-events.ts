@@ -75,7 +75,19 @@ export const useRealtimeEvents = () => {
     queryInvalidation.dashboard.activity(queryClient);
   }, [queryClient]);
 
+  const refreshAlertViews = useCallback(() => {
+    refreshNotifications();
+    void queryClient.invalidateQueries({ queryKey: ['alerts'] });
+    void queryClient.invalidateQueries({ queryKey: ['violations'] });
+    void queryClient.invalidateQueries({ queryKey: ['dashboard-recent-alerts'] });
+    queryInvalidation.dashboard.stats(queryClient);
+  }, [queryClient, refreshNotifications]);
+
   useRealtimeSubscription({ namespace: 'notifications', event: 'alert:new', handler: onAlert });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'alert:updated', handler: refreshAlertViews });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'alert:deleted', handler: refreshAlertViews });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'violation:new', handler: refreshAlertViews });
+  useRealtimeSubscription({ namespace: 'notifications', event: 'violation:updated', handler: refreshAlertViews });
   useRealtimeSubscription({ namespace: 'notifications', event: 'notification:new', handler: refreshNotifications });
   useRealtimeSubscription({ namespace: 'notifications', event: 'notification:updated', handler: refreshNotifications });
   useRealtimeSubscription({ namespace: 'exports', event: 'export:ready', handler: onExportReady });

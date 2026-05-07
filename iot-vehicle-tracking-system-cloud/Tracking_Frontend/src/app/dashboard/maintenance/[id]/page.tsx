@@ -73,7 +73,7 @@ const MaintenanceDetailPage = ({
         page: 1,
         limit: 6,
         status: 'active',
-        alertType: 'maintenance_due',
+        source: 'obd',
         vehicleId: query.data?.vehicleId,
       }),
     enabled: Boolean(query.data?.vehicleId),

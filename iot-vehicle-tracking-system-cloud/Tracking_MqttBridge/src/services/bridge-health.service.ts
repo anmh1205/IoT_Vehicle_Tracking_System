@@ -64,7 +64,7 @@ export const startBridgeHealthServer = async ({
     server!.listen(port, '0.0.0.0', () => resolve());
   });
 
-  logger.info({ port }, 'Bridge health server listening');
+  logger.info({ port, event: 'bridge_health_server_started' }, 'Bridge health server started');
 };
 
 export const stopBridgeHealthServer = async (): Promise<void> => {
@@ -85,5 +85,5 @@ export const stopBridgeHealthServer = async (): Promise<void> => {
     });
   });
 
-  logger.info('Bridge health server stopped');
+  logger.info({ event: 'bridge_health_server_stopped' }, 'Bridge health server stopped');
 };

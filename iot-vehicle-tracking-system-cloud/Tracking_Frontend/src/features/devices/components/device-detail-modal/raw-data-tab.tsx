@@ -19,7 +19,7 @@ import { useDeviceDetailModal } from './modal-context';
 import { extractDiagnosticsSnapshotFromRow } from './obd-diagnostics';
 
 const SOURCE_LABELS: Record<string, string> = {
-  telemetry: 'Dữ liệu đo từ xa',
+  telemetry: 'Telemetry',
   session: 'Phiên',
   error: 'Lỗi',
   command: 'Lệnh',
@@ -42,7 +42,7 @@ const SOURCE_VARIANTS: Record<
 const FILTERS = [
   { label: 'Tất cả', value: 'all' },
   { label: 'Dữ liệu thô thiết bị', value: 'rawdata' },
-  { label: 'Dữ liệu đo từ xa', value: 'telemetry' },
+  { label: 'Telemetry', value: 'telemetry' },
   { label: 'OBD', value: 'obd-diagnostic' },
   { label: 'Phiên', value: 'session' },
   { label: 'Lỗi', value: 'error' },
@@ -332,7 +332,7 @@ const extractMatrixRows = (
 
   if (row.source === 'telemetry') {
     return [
-      rowItem('speed', 'Tốc độ', 'Tốc độ hiện tại trong bản tin đo từ xa.', payload.speed),
+      rowItem('speed', 'Tốc độ', 'Tốc độ hiện tại trong bản tin telemetry.', payload.speed),
       rowItem('latitude', 'Vĩ độ', 'Tọa độ vĩ độ từ GPS.', payload.latitude),
       rowItem('longitude', 'Kinh độ', 'Tọa độ kinh độ từ GPS.', payload.longitude),
       rowItem('deviceBattery', 'Pin thiết bị', 'Nguồn nuôi tracker hoặc pin backup.', payload.deviceBattery),
@@ -404,7 +404,7 @@ const extractMatrixRows = (
       rowItem('server_session_start', 'Bắt đầu', 'Mốc server ghi nhận bắt đầu phiên.', payload.serverSessionStart ?? payload.server_session_start),
       rowItem('server_session_end', 'Kết thúc', 'Mốc server ghi nhận kết thúc phiên.', payload.serverSessionEnd ?? payload.server_session_end),
       rowItem('uptime', 'Uptime', 'Tổng thời lượng phiên vận hành.', payload.uptime),
-      rowItem('data_points_count', 'Điểm dữ liệu', 'Số điểm đo từ xa thuộc phiên này.', payload.dataPointsCount ?? payload.data_points_count),
+      rowItem('data_points_count', 'Điểm dữ liệu', 'Số điểm telemetry thuộc phiên này.', payload.dataPointsCount ?? payload.data_points_count),
       {
         code: 'cadence',
         label: 'Chu kỳ trung bình',
@@ -554,7 +554,7 @@ export const RawDataTab = () => {
     return (
       <DeviceDetailEmptyState
         title="Chưa có dữ liệu thô"
-        description="Bảng dữ liệu thô sẽ hiển thị khi backend ghi nhận dữ liệu đo từ xa, phiên chạy, lỗi hoặc lệnh."
+        description="Bảng dữ liệu thô sẽ hiển thị khi backend ghi nhận telemetry, phiên chạy, lỗi hoặc lệnh."
       />
     );
   }
@@ -578,7 +578,7 @@ export const RawDataTab = () => {
             />
             <SummaryPill
               active={filter === 'telemetry'}
-              label="Dữ liệu đo từ xa"
+              label="Telemetry"
               value={String(counts.telemetry)}
               onClick={() => setFilter('telemetry')}
             />

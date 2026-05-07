@@ -25,14 +25,31 @@ import { useCreateDevice } from '../hooks/use-create-device';
 import { useUpdateDevice } from '../hooks/use-update-device';
 
 const schema = z.object({
-  deviceId: z.string().min(1, 'Báº¯t buá»™c'),
-  deviceName: z.string().min(1, 'Báº¯t buá»™c'),
-  imei: z.string().optional(),
-  requestInterval: z.number().min(10).max(3600),
-  imuAccelDeltaThresholdMps2: z.number().min(0).max(1000).optional(),
+  deviceId: z
+    .string()
+    .trim()
+    .min(3, 'Device ID must be at least 3 characters')
+    .max(50, 'Device ID must not exceed 50 characters')
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Device ID can only contain letters, numbers, dashes, and underscores'),
+  deviceName: z.string().trim().min(3, 'Device name must be at least 3 characters').max(100),
+  imei: z.string().trim().max(20).optional(),
+  requestInterval: z.number().int().min(1).max(3600),
+  imuAccelDeltaThresholdMps2: z.number().min(0).max(100).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
+
+export const buildDeviceFormPayload = (values: FormValues, isUpdate = false) => {
+  const imei = values.imei?.trim();
+
+  return {
+    deviceId: values.deviceId.trim(),
+    deviceName: values.deviceName.trim(),
+    imei: imei ? imei : isUpdate ? null : undefined,
+    requestInterval: values.requestInterval,
+    imuAccelDeltaThresholdMps2: Number(values.imuAccelDeltaThresholdMps2 ?? 5),
+  };
+};
 
 export const DeviceForm = ({
   open,
@@ -82,15 +99,7 @@ export const DeviceForm = ({
   }, [defaultValues, form]);
 
   const onSubmit = (values: FormValues) => {
-    const payload = {
-      ...values,
-      imuAccelDeltaThresholdMps2: Number(
-        defaultValues?.imuAccelDeltaThresholdMps2 ??
-          defaultValues?.vibrationThreshold ??
-          values.imuAccelDeltaThresholdMps2 ??
-          5,
-      ),
-    };
+    const payload = buildDeviceFormPayload(values, Boolean(defaultValues?.id));
 
     if (defaultValues?.id) {
       updateMutation.mutate(
@@ -114,9 +123,9 @@ export const DeviceForm = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{defaultValues?.id ? 'Cáº­p nháº­t thiáº¿t bá»‹' : 'Táº¡o thiáº¿t bá»‹'}</DialogTitle>
+          <DialogTitle>{defaultValues?.id ? 'Cập nhật thiết bị' : 'Tạo thiết bị'}</DialogTitle>
           <DialogDescription>
-            Nháº­p thÃ´ng tin thiáº¿t bá»‹ vÃ  chu ká»³ gá»­i Ä‘á»ƒ cáº¥u hÃ¬nh báº£n ghi cÆ¡ báº£n.
+            Nhập thông tin thiết bị và chu kỳ gửi để cấu hình bản ghi cơ bản.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -126,7 +135,7 @@ export const DeviceForm = ({
               name="deviceId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>MÃ£ thiáº¿t bá»‹</FormLabel>
+                  <FormLabel>Mã thiết bị</FormLabel>
                   <FormControl>
                     <Input {...field} disabled={!!defaultValues?.id} />
                   </FormControl>
@@ -139,7 +148,7 @@ export const DeviceForm = ({
               name="deviceName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>TÃªn thiáº¿t bá»‹</FormLabel>
+                  <FormLabel>Tên thiết bị</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -152,12 +161,36 @@ export const DeviceForm = ({
               name="requestInterval"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Chu ká»³ gá»­i (giÃ¢y)</FormLabel>
+                  <FormLabel>Chu kỳ gửi (giây)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       value={field.value}
                       onChange={(event) => field.onChange(Number(event.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="imuAccelDeltaThresholdMps2"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ngưỡng IMU (m/s²)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      step={0.1}
+                      value={field.value ?? ''}
+                      onChange={(event) =>
+                        field.onChange(
+                          event.target.value === '' ? undefined : Number(event.target.value),
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -180,10 +213,10 @@ export const DeviceForm = ({
 
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                Há»§y
+                Hủy
               </Button>
               <Button type="submit" disabled={pending}>
-                {defaultValues?.id ? 'LÆ°u' : 'Táº¡o'}
+                {defaultValues?.id ? 'Lưu' : 'Tạo'}
               </Button>
             </DialogFooter>
           </form>

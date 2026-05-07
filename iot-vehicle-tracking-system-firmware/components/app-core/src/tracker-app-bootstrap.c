@@ -26,7 +26,12 @@
 /**
  * @file tracker-app-bootstrap.c
  * @brief Main firmware bootstrap and runtime loop with explicit port-registry validation.
+ * This translation unit belongs to the app-core orchestration layer and keeps FSM transitions, retained runtime state, and orchestration policy centralized inside app-core.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 /* Logging tag for main application module. */
 static const char *TAG = "TRACKER_MAIN";
@@ -51,6 +56,7 @@ static esp_err_t tracker_storage_queue_enqueue_port(int record_type,
                                                     bool net_up,
                                                     bool time_trusted,
                                                     uint64_t timestamp_ms) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return offline_queue_enqueue((offline_record_type_t)record_type,
                                  payload,
                                  gps_fix,
@@ -59,37 +65,99 @@ static esp_err_t tracker_storage_queue_enqueue_port(int record_type,
                                  timestamp_ms);
 }
 
+/**
+ * @brief Port wrapper that routes command callback registration to the MQTT adapter.
+ *
+ * @param[in] cb Callback invoked for incoming command payloads.
+ */
 static void tracker_mqtt_set_command_callback_port(tracker_command_message_callback_t cb) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     tracker_mqtt_set_command_callback(cb);
 }
 
+/**
+ * @brief Port wrapper that opens a BLE OBD session.
+ *
+ * @param[in] response_cb OBD response callback.
+ * @param[in] user_ctx User context forwarded to the callback.
+ * @param[in] connect_timeout_ms Connect timeout in milliseconds.
+ * @return Opaque BLE OBD context pointer, or `NULL` on failure.
+ */
 static void *tracker_obd_connect_port(tracker_obd_response_callback_t response_cb,
                                       void *user_ctx,
                                       uint32_t connect_timeout_ms) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_connect((ble_obd_response_cb_t)response_cb, user_ctx, connect_timeout_ms);
 }
 
+/**
+ * @brief Port wrapper that disconnects a BLE OBD session.
+ *
+ * @param[in] ctx Opaque BLE OBD context.
+ * @return ESP-IDF style status code from the BLE OBD adapter.
+ */
 static esp_err_t tracker_obd_disconnect_port(void *ctx) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_disconnect((ble_obd_ctx_t *)ctx);
 }
 
+/**
+ * @brief Port wrapper that checks BLE OBD connection state.
+ *
+ * @param[in] ctx Opaque BLE OBD context.
+ * @return true when the BLE OBD session is connected.
+ */
 static bool tracker_obd_is_connected_port(void *ctx) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_is_connected((ble_obd_ctx_t *)ctx);
 }
 
+/**
+ * @brief Port wrapper that issues a mode/PID request over BLE OBD.
+ *
+ * @param[in] ctx Opaque BLE OBD context.
+ * @param[in] mode OBD mode.
+ * @param[in] pid OBD PID.
+ * @param[in] timeout_ms Request timeout in milliseconds.
+ * @return BLE OBD adapter return code.
+ */
 static int tracker_obd_request_pid_port(void *ctx, uint8_t mode, uint8_t pid, uint32_t timeout_ms) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_rxtx((ble_obd_ctx_t *)ctx, mode, pid, timeout_ms);
 }
 
+/**
+ * @brief Port wrapper that issues a mode-only request over BLE OBD.
+ *
+ * @param[in] ctx Opaque BLE OBD context.
+ * @param[in] mode OBD mode.
+ * @param[in] timeout_ms Request timeout in milliseconds.
+ * @return BLE OBD adapter return code.
+ */
 static int tracker_obd_request_mode_port(void *ctx, uint8_t mode, uint32_t timeout_ms) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_request_mode((ble_obd_ctx_t *)ctx, mode, timeout_ms);
 }
 
+/**
+ * @brief Port wrapper that runs ELM327 initialization on a connected adapter.
+ *
+ * @param[in] ctx Opaque BLE OBD context.
+ * @return ESP-IDF style status code from the BLE OBD adapter.
+ */
 static esp_err_t tracker_obd_elm327_init_port(void *ctx) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_elm327_init((ble_obd_ctx_t *)ctx);
 }
 
+/**
+ * @brief Port wrapper that returns the last ECU-state label from the BLE adapter.
+ *
+ * @param[in] ctx Opaque BLE OBD context.
+ * @return ECU-state label string.
+ */
 static const char *tracker_obd_get_ecu_state_label_port(void *ctx) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return ble_obd_get_last_ecu_state_label((ble_obd_ctx_t *)ctx);
 }
 
@@ -167,7 +235,14 @@ static const tracker_runtime_ports_t s_runtime_ports = {
 };
 
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_ESP_TASK_WDT_EN
+/**
+ * @brief Relax the task watchdog during field-validation sessions.
+ *
+ * Long OTA/network acceptance loops can legitimately exceed the production WDT
+ * budget. This override is limited to validation builds.
+ */
 static void tracker_main_relax_task_wdt_for_field_validation(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     const esp_task_wdt_config_t wdt_cfg = {
         .timeout_ms = 30000,
         .idle_core_mask = (1U << portNUM_PROCESSORS) - 1U,
@@ -176,37 +251,53 @@ static void tracker_main_relax_task_wdt_for_field_validation(void) {
 
     esp_err_t err = esp_task_wdt_reconfigure(&wdt_cfg);
     if (err == ESP_OK) {
-        ESP_LOGW(TAG, "Field validation override: task WDT timeout set to %ums", (unsigned)wdt_cfg.timeout_ms);
+        ESP_LOGW(TAG, "event=field_validation_wdt_override timeout_ms=%u", (unsigned)wdt_cfg.timeout_ms);
     } else {
-        ESP_LOGW(TAG, "Field validation task WDT reconfigure failed: %s", esp_err_to_name(err));
+        ESP_LOGW(TAG, "event=field_validation_wdt_override_failed err=%s", esp_err_to_name(err));
     }
 }
 #endif
 
+/**
+ * @brief Bootstrap the firmware runtime and execute the main FSM loop forever.
+ *
+ * Responsibilities:
+ * - validate the runtime-port registry that decouples app-core from adapters
+ * - load configuration with field-validation overrides when enabled
+ * - derive the initial wake state from ESP wakeup cause
+ * - retry `state_machine_init()` until the app-core is ready
+ * - drive `state_machine_run()` on a fixed cooperative loop cadence
+ */
 void app_core_bootstrap_run(void) {
+    // Fail fast if any required adapter port was not wired into app-core correctly.
     ESP_ERROR_CHECK(tracker_runtime_ports_validate(&s_runtime_ports));
 
+    // Keep firmware logs readable while still surfacing NimBLE warnings during bring-up.
     esp_log_level_set("*", ESP_LOG_INFO);
     esp_log_level_set("NimBLE", ESP_LOG_WARN);
 
+    // Initialize config storage first so later loads can decide between persisted and default policy.
     esp_err_t err = nvs_config_init();
     if (err != ESP_OK) {
-        ESP_LOGW(TAG, "nvs_config_init failed: %s (using in-memory defaults)", esp_err_to_name(err));
+        ESP_LOGW(TAG, "event=nvs_config_init_failed err=%s fallback=in_memory_defaults", esp_err_to_name(err));
     }
 
+    // Load the runtime snapshot once at boot; if that fails, continue with compiled defaults.
     config_t config = {0};
     err = nvs_config_load(&config);
     if (err != ESP_OK) {
-        ESP_LOGW(TAG, "nvs_config_load failed: %s (using defaults)", esp_err_to_name(err));
+        ESP_LOGW(TAG, "event=nvs_config_load_failed err=%s fallback=compiled_defaults", esp_err_to_name(err));
         app_config_set_defaults(&config);
     }
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_FORCE_IMU_WAKE
+    // Validation builds can force IMU wake so parked-motion acceptance tests stay reproducible.
     if (!config.imu_wakeup_enabled) {
-        ESP_LOGW(TAG, "Field validation override: IMU wake enabled for hardware acceptance");
+        ESP_LOGW(TAG, "event=field_validation_imu_wake_forced reason=hardware_acceptance");
     }
     config.imu_wakeup_enabled = true;
 #endif
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE
+    // Validation builds may temporarily point the device at a lab broker without rewriting NVS.
     if (!util_string_empty(CONFIG_TRACKER_FIELD_VALIDATION_MQTT_HOST)) {
         util_copy_string(config.mqtt_host,
                          sizeof(config.mqtt_host),
@@ -227,31 +318,36 @@ void app_core_bootstrap_run(void) {
                              CONFIG_TRACKER_FIELD_VALIDATION_AUTH_TOKEN);
         }
         ESP_LOGW(TAG,
-                 "Field validation override: mqtt broker=%s (default TLS port) user=%s",
+                 "event=field_validation_mqtt_override host=%s user=%s tls_port=default",
                  config.mqtt_host,
                  config.mqtt_username);
     }
 #if CONFIG_TRACKER_FIELD_VALIDATION_DISABLE_COMMAND_SUBSCRIBE
+    // Some publish-path tests intentionally suppress downlink commands to remove OTA/control noise.
     if (config.command_subscribe_enabled) {
-        ESP_LOGW(TAG, "Field validation override: command subscribe disabled (publish-path validation)");
+        ESP_LOGW(TAG, "event=field_validation_command_subscribe_disabled reason=publish_path_validation");
     }
     config.command_subscribe_enabled = false;
 #else
+    // OTA validation loops need command subscribe on even if the persisted config disabled it earlier.
     if (!config.command_subscribe_enabled) {
-        ESP_LOGW(TAG, "Field validation override: command subscribe re-enabled for OTA loop");
+        ESP_LOGW(TAG, "event=field_validation_command_subscribe_enabled reason=ota_loop");
     }
     config.command_subscribe_enabled = true;
 #endif
 #endif
 #if CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_ESP_TASK_WDT_EN
+    // Relax the task watchdog only after config overrides are known for this boot profile.
     tracker_main_relax_task_wdt_for_field_validation();
 #endif
+    // Mirror the persisted sleep policy into the shared runtime helper before any wake-state decisions.
     util_set_sleep_enabled(config.sleep_enabled);
 
+    // Capture current OTA partition metadata once so reboot/rollback diagnostics have a stable reference.
     const esp_partition_t *running = esp_ota_get_running_partition();
     const esp_partition_t *boot = esp_ota_get_boot_partition();
     if (running != NULL && boot != NULL && running != boot) {
-        ESP_LOGW(TAG, "Running partition differs from boot partition");
+        ESP_LOGW(TAG, "event=ota_partition_mismatch");
     }
 
     if (running != NULL && !util_string_empty(running->label)) {
@@ -260,11 +356,13 @@ void app_core_bootstrap_run(void) {
                          running->label);
     }
 
+    // Boot count lives in RTC-retained context so deep-sleep wakeups keep a monotonic local history.
     g_rtc_context.boot_count += 1U;
 
     app_state_t state = APP_STATE_INIT;
     esp_sleep_wakeup_cause_t wakeup = esp_sleep_get_wakeup_cause();
     if (util_is_sleep_enabled()) {
+        // Wake cause remaps the very first FSM state only when parked sleep is actually part of runtime policy.
         if (wakeup == ESP_SLEEP_WAKEUP_TIMER) {
             state = APP_STATE_HEARTBEAT;
         } else if (wakeup == ESP_SLEEP_WAKEUP_EXT0 && config.imu_wakeup_enabled) {
@@ -275,7 +373,7 @@ void app_core_bootstrap_run(void) {
     }
 
     ESP_LOGI(TAG,
-             "Boot #%lu wakeup=%d initial_state=%d",
+             "event=boot_summary boot_count=%lu wakeup=%d initial_state=%d",
              (unsigned long)g_rtc_context.boot_count,
              (int)wakeup,
              (int)state);
@@ -284,12 +382,14 @@ void app_core_bootstrap_run(void) {
     while (true) {
         uint64_t now_ms = util_uptime_ms();
         if (!state_machine_ready) {
+            // Hold the system in a bounded retry loop until app-core can bring every subsystem up cleanly.
             if (retry_state_can_run(&s_init_retry, now_ms)) {
                 err = state_machine_init(&config);
                 if (err == ESP_OK) {
                     retry_state_reset(&s_init_retry);
                     state_machine_ready = true;
                 } else {
+                    // Keep retry timing deterministic so field logs show exactly when the next init attempt should fire.
                     uint32_t delay_ms = retry_state_current_delay_ms(&s_init_retry,
                                                                      &s_init_retry_policy,
                                                                      now_ms);
@@ -298,16 +398,18 @@ void app_core_bootstrap_run(void) {
                                                now_ms,
                                                err);
                     ESP_LOGW(TAG,
-                             "retry step=state_machine_init err=%s attempt=%lu next_delay_ms=%lu",
+                             "event=retry_scheduled step=state_machine_init err=%s attempt=%lu next_delay_ms=%lu",
                              esp_err_to_name(err),
                              (unsigned long)s_init_retry.attempts,
                              (unsigned long)delay_ms);
                 }
             }
+            // Yield between failed init attempts so background drivers and timers can settle.
             vTaskDelay(pdMS_TO_TICKS(100));
             continue;
         }
 
+        // Once initialized, every loop iteration is just "run one cooperative FSM step, then yield".
         state = state_machine_run(state);
         vTaskDelay(pdMS_TO_TICKS(100));
     }

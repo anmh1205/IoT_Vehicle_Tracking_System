@@ -75,6 +75,11 @@ Copy/prepare these files:
 - `iot-vehicle-tracking-system-cloud/Tracking_Mobile/.env` (for mobile flow)
 
 Templates are available at corresponding `.env.example` files where present.
+Replace every `CHANGE_ME_*` placeholder before starting services. Generate strong local secrets with:
+
+```bash
+openssl rand -base64 32
+```
 
 #### 3) Start infrastructure services first
 ```bash
@@ -153,6 +158,7 @@ Frontend:
 cd iot-vehicle-tracking-system-cloud/Tracking_Frontend
 npm run lint
 npm run typecheck
+npm run test
 npm run build
 ```
 
@@ -160,6 +166,7 @@ MQTT Bridge:
 ```bash
 cd iot-vehicle-tracking-system-cloud/Tracking_MqttBridge
 npm run typecheck
+npm run test
 npm run build
 ```
 
@@ -383,7 +390,9 @@ Common commands:
 ```bash
 npm run lint
 npm run typecheck
+npm run test
 npm run build
+npm run verify
 ```
 
 ### MQTT Bridge
@@ -396,6 +405,7 @@ npm run dev
 Common commands:
 ```bash
 npm run typecheck
+npm run test
 npm run build
 npm run verify
 ```
@@ -415,8 +425,8 @@ flutter run
 Before pushing service changes:
 
 - Backend: lint + typecheck + test + build
-- Frontend: lint + typecheck + build
-- MQTT Bridge: typecheck + build
+- Frontend: lint + typecheck + test + build
+- MQTT Bridge: typecheck + test + build
 - Mobile: test + release artifacts (for release workflows)
 
 This mirrors the quality sections in UAT workflows.

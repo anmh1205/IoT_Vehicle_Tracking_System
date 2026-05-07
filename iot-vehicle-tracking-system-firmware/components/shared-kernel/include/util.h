@@ -10,7 +10,12 @@
 /**
  * @file util.h
  * @brief Common helpers, guard macros, and generic byte/string utilities.
+ * This header belongs to the shared kernel layer and collects the shared models, bounds, and helper contracts that multiple components reuse.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /** @brief Compile-time array length helper. */
 #ifndef ARRAY_SIZE

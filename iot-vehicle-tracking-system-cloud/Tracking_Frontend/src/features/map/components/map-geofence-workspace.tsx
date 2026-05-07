@@ -170,7 +170,7 @@ export const MapGeofenceWorkspace = ({
   };
 
   return (
-    <div className="pointer-events-auto absolute bottom-3 left-3 right-3 z-[1000] flex max-h-[78dvh] flex-col overflow-hidden rounded-2xl border border-border/70 bg-background/96 shadow-2xl backdrop-blur md:top-3 md:bottom-3 md:left-auto md:w-[420px] md:max-h-[calc(100dvh-5rem)]">
+    <div className="pointer-events-auto absolute bottom-3 left-3 right-3 z-[var(--layer-map-overlay)] flex max-h-[78dvh] flex-col overflow-hidden rounded-2xl border border-border/70 bg-background/96 shadow-2xl backdrop-blur md:top-3 md:bottom-3 md:left-auto md:w-[420px] md:max-h-[calc(100dvh-5rem)]">
       <div className="flex items-start justify-between gap-3 border-b px-5 py-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -389,13 +389,13 @@ export const MapGeofenceWorkspace = ({
                 ))
               ) : (
                 <div className="rounded-2xl border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
-                  Chưa có geofence hình tròn nào. Bấm nút tạo mới để bắt đầu.
+                  Chưa có vùng bán kính nào. Bấm nút tạo mới để bắt đầu.
                 </div>
               )}
             </div>
 
             <Button asChild variant="ghost" className="w-full justify-start px-0 text-xs text-muted-foreground">
-              <Link href="/dashboard/operations/geofences">Mở trang vùng giám sát đầy đủ</Link>
+              <Link href="/dashboard/zones">Mở trang vùng giám sát đầy đủ</Link>
             </Button>
           </div>
         </ScrollArea>

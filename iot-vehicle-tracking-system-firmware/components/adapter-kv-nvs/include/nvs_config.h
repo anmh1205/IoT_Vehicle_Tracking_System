@@ -9,7 +9,12 @@
 /**
  * @file nvs_config.h
  * @brief NVS-backed persistence helpers for tracker runtime configuration.
+ * This header belongs to the KV/NVS persistence adapter layer and exposes the persistence boundary so higher layers do not depend on raw NVS keys or blob layouts.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Initialize NVS flash storage subsystem.

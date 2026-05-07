@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/common/empty-state';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { notificationServices } from '@/lib/api/notifications';
 import { NotificationRow } from './notification-item';
 import type { NotificationItem } from '@/features/notifications/types';
@@ -13,28 +14,27 @@ import type { NotificationItem } from '@/features/notifications/types';
 export const NotificationList = ({
   items,
   total,
-  page,
-  pageSize,
+  loadedCount,
   unreadCount,
   isLoading,
   isFetching,
   onRefresh,
-  onPageChange,
+  hasMore,
+  isFetchingNextPage,
+  onLoadMore,
 }: {
   items: NotificationItem[];
   total: number;
-  page: number;
-  pageSize: number;
+  loadedCount: number;
   unreadCount: number;
   isLoading?: boolean;
   isFetching?: boolean;
   onRefresh?: () => void;
-  onPageChange?: (page: number) => void;
+  hasMore?: boolean;
+  isFetchingNextPage?: boolean;
+  onLoadMore?: () => void;
 }) => {
   const queryClient = useQueryClient();
-  const lastPage = Math.max(1, Math.ceil(total / Math.max(1, pageSize)));
-  const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
-  const rangeEnd = Math.min(total, page * pageSize);
 
   const markReadMutation = useMutation({
     mutationFn: (id: number) => notificationServices.markRead(id),
@@ -68,7 +68,7 @@ export const NotificationList = ({
           <div className="space-y-1">
             <p className="text-sm font-medium">Hàng đợi xử lý thông báo</p>
             <p className="text-xs text-muted-foreground">
-              Hiển thị {rangeStart}-{rangeEnd} / {total} thông báo, còn {unreadCount} mục chưa đọc.
+              Hiển thị {loadedCount} / {total} thông báo, còn {unreadCount} mục chưa đọc.
             </p>
           </div>
           {onRefresh ? (
@@ -128,31 +128,15 @@ export const NotificationList = ({
             />
           </div>
         ) : null}
-
-        {onPageChange && total > pageSize ? (
-          <div className="flex flex-col gap-2 border-t border-border/60 pt-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-muted-foreground">
-              Trang {page} / {lastPage}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(page - 1)}
-                disabled={page <= 1 || isFetching}
-              >
-                Trang trước
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(page + 1)}
-                disabled={page >= lastPage || isFetching}
-              >
-                Trang sau
-              </Button>
-            </div>
-          </div>
+        {onLoadMore ? (
+          <InfiniteScrollTrigger
+            hasMore={Boolean(hasMore)}
+            isLoadingMore={isFetchingNextPage}
+            onLoadMore={onLoadMore}
+            loadedCount={loadedCount}
+            totalCount={total}
+            itemLabel="thông báo"
+          />
         ) : null}
 
         {deleteMutation.isPending || markReadMutation.isPending ? (

@@ -75,19 +75,19 @@ const normalizeStatus = (raw: any): SimulatorStatusPayload => ({
 
 const validateBeforeStart = (state: SimulatorState): string | null => {
   if (state.selectedDeviceIds.length === 0) {
-    return 'Vui lÃ²ng chá»n Ã­t nháº¥t má»™t thiáº¿t bá»‹.';
+    return 'Vui lòng chọn ít nhất một thiết bị.';
   }
   if (state.speedMin > state.speedMax) {
-    return 'Tá»‘c Ä‘á»™ tá»‘i thiá»ƒu pháº£i nhá» hÆ¡n hoáº·c báº±ng tá»‘c Ä‘á»™ tá»‘i Ä‘a.';
+    return 'Tốc độ tối thiểu phải nhỏ hơn hoặc bằng tốc độ tối đa.';
   }
   if (state.imuAccelDeltaMinMps2 > state.imuAccelDeltaMaxMps2) {
-    return 'Gia tá»‘c IMU Î” tá»‘i thiá»ƒu pháº£i nhá» hÆ¡n hoáº·c báº±ng gia tá»‘c IMU Î” tá»‘i Ä‘a.';
+    return 'Gia tốc IMU Δ tối thiểu phải nhỏ hơn hoặc bằng gia tốc IMU Δ tối đa.';
   }
   if (state.batteryMin > state.batteryMax) {
-    return 'Pin tá»‘i thiá»ƒu pháº£i nhá» hÆ¡n hoáº·c báº±ng pin tá»‘i Ä‘a.';
+    return 'Pin tối thiểu phải nhỏ hơn hoặc bằng pin tối đa.';
   }
   if (!Number.isFinite(state.lat) || !Number.isFinite(state.lon)) {
-    return 'VÄ© Ä‘á»™ vÃ  kinh Ä‘á»™ pháº£i lÃ  sá»‘ há»£p lá»‡.';
+    return 'Vĩ độ và kinh độ phải là số hợp lệ.';
   }
   return null;
 };
@@ -141,12 +141,12 @@ export const useSimulator = () => {
     onSuccess: (status) => {
       applyStatus(status);
       queryClient.setQueryData(['simulator', 'status'], status);
-      notificationUtils.success('ÄÃ£ báº¯t Ä‘áº§u mÃ´ phá»ng');
+      notificationUtils.success('Đã bắt đầu mô phỏng');
     },
     onError: (error: unknown) => {
       notificationUtils.error(
-        'KhÃ´ng thá»ƒ báº¯t Ä‘áº§u mÃ´ phá»ng',
-        getApiErrorMessage(error, 'Lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh'),
+        'Không thể bắt đầu mô phỏng',
+        getApiErrorMessage(error, 'Lỗi không xác định'),
       );
     },
   });
@@ -156,12 +156,12 @@ export const useSimulator = () => {
     onSuccess: (status) => {
       applyStatus(status);
       queryClient.setQueryData(['simulator', 'status'], status);
-      notificationUtils.info('ÄÃ£ dá»«ng mÃ´ phá»ng');
+      notificationUtils.info('Đã dừng mô phỏng');
     },
     onError: (error: unknown) => {
       notificationUtils.error(
-        'KhÃ´ng thá»ƒ dá»«ng mÃ´ phá»ng',
-        getApiErrorMessage(error, 'Lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh'),
+        'Không thể dừng mô phỏng',
+        getApiErrorMessage(error, 'Lỗi không xác định'),
       );
     },
   });
@@ -184,12 +184,12 @@ export const useSimulator = () => {
     onSuccess: (status) => {
       applyStatus(status);
       queryClient.setQueryData(['simulator', 'status'], status);
-      notificationUtils.info('ÄÃ£ táº¡m dá»«ng mÃ´ phá»ng');
+      notificationUtils.info('Đã tạm dừng mô phỏng');
     },
     onError: (error: unknown) => {
       notificationUtils.error(
-        'KhÃ´ng thá»ƒ táº¡m dá»«ng mÃ´ phá»ng',
-        getApiErrorMessage(error, 'Lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh'),
+        'Không thể tạm dừng mô phỏng',
+        getApiErrorMessage(error, 'Lỗi không xác định'),
       );
     },
   });
@@ -199,12 +199,12 @@ export const useSimulator = () => {
     onSuccess: (status) => {
       applyStatus(status);
       queryClient.setQueryData(['simulator', 'status'], status);
-      notificationUtils.info('ÄÃ£ tiáº¿p tá»¥c mÃ´ phá»ng');
+      notificationUtils.info('Đã tiếp tục mô phỏng');
     },
     onError: (error: unknown) => {
       notificationUtils.error(
-        'KhÃ´ng thá»ƒ tiáº¿p tá»¥c mÃ´ phá»ng',
-        getApiErrorMessage(error, 'Lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh'),
+        'Không thể tiếp tục mô phỏng',
+        getApiErrorMessage(error, 'Lỗi không xác định'),
       );
     },
   });
@@ -227,9 +227,9 @@ export const useSimulator = () => {
 
   const statusLabel = useMemo(() => {
     if (!running) {
-      return 'ÄÃ£ dá»«ng';
+      return 'Đã dừng';
     }
-    return paused ? 'ÄÃ£ táº¡m dá»«ng (xem trÆ°á»›c)' : 'Äang cháº¡y';
+    return paused ? 'Đã tạm dừng (xem trước)' : 'Đang chạy';
   }, [paused, running]);
 
   return {

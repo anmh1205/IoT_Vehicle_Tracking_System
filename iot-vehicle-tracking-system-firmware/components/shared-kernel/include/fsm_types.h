@@ -3,7 +3,12 @@
 /**
  * @file fsm_types.h
  * @brief Main tracker finite-state-machine state definitions.
+ * This header belongs to the shared kernel layer and collects the shared models, bounds, and helper contracts that multiple components reuse.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Main runtime states of the tracker finite-state machine.

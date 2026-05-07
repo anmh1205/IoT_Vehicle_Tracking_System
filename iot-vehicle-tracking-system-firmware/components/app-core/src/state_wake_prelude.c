@@ -26,11 +26,27 @@
 /**
  * @file state_wake_prelude.c
  * @brief Wake/bootstrap/network/telemetry helpers for the tracker FSM.
+ * This translation unit belongs to the app-core orchestration layer and keeps FSM transitions, retained runtime state, and orchestration policy centralized inside app-core.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 static const char *TAG = STATE_MACHINE_TAG;
 
+/**
+ * @brief Power-cycle GNSS after repeated poll failures.
+ *
+ * This is the strongest GNSS recovery path used by the wake prelude. It is
+ * rate-limited by `TRACKER_GNSS_REARM_COOLDOWN_MS` so a noisy modem or weak
+ * antenna environment does not thrash the GNSS power domain on every loop.
+ *
+ * @param[in] reason Short reason string emitted in diagnostics.
+ * @return true when the GNSS power cycle completed successfully.
+ */
 static bool state_machine_try_rearm_gnss(const char *reason) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint64_t now_ms = util_uptime_ms();
     if (s_last_gnss_rearm_ms != 0 && (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
         return false;
@@ -42,12 +58,12 @@ static bool state_machine_try_rearm_gnss(const char *reason) {
     if (off_err == ESP_OK && on_err == ESP_OK) {
         s_gnss_started = true;
         s_gnss_poll_fail_streak = 0;
-        ESP_LOGW(TAG, "GNSS re-armed reason=%s", reason);
+        ESP_LOGW(TAG, "event=gnss_rearmed reason=%s", reason);
         return true;
     }
 
     ESP_LOGW(TAG,
-             "GNSS re-arm failed reason=%s off=%s on=%s",
+             "event=gnss_rearm_failed reason=%s off_err=%s on_err=%s",
              reason,
              esp_err_to_name(off_err),
              esp_err_to_name(on_err));
@@ -64,6 +80,7 @@ static bool state_machine_try_rearm_gnss(const char *reason) {
  * @return true if power-on succeeded, false otherwise.
  */
 static bool state_machine_try_reassert_gnss_power(const char *reason) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint64_t now_ms = util_uptime_ms();
     if (s_last_gnss_rearm_ms != 0 && (now_ms - s_last_gnss_rearm_ms) < TRACKER_GNSS_REARM_COOLDOWN_MS) {
         return false;
@@ -74,12 +91,12 @@ static bool state_machine_try_reassert_gnss_power(const char *reason) {
     if (on_err == ESP_OK) {
         s_gnss_started = true;
         s_gnss_poll_fail_streak = 0;
-        ESP_LOGW(TAG, "GNSS power reasserted reason=%s", reason);
+        ESP_LOGW(TAG, "event=gnss_power_reasserted reason=%s", reason);
         return true;
     }
 
     ESP_LOGW(TAG,
-             "GNSS power reassert failed reason=%s on=%s",
+             "event=gnss_power_reassert_failed reason=%s on_err=%s",
              reason,
              esp_err_to_name(on_err));
     return false;
@@ -91,6 +108,7 @@ static bool state_machine_try_reassert_gnss_power(const char *reason) {
  * @return True if ready.
  */
 bool state_machine_can_poll_gnss(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_gnss_started && modem_lte_is_initialized() && modem_gnss_is_query_ready();
 }
 
@@ -98,6 +116,7 @@ bool state_machine_can_poll_gnss(void) {
  * @brief Try to start GNSS non-blocking.
  */
 void state_machine_try_start_gnss_nonblocking(void) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_gnss_started || !modem_lte_is_initialized()) {
         return;
     }
@@ -114,12 +133,12 @@ void state_machine_try_start_gnss_nonblocking(void) {
     if (err == ESP_OK) {
         s_gnss_started = true;
         s_gnss_poll_fail_streak = 0;
-        ESP_LOGI(TAG, "GNSS power-on OK");
+        ESP_LOGI(TAG, "event=gnss_power_on_ok");
         return;
     }
 
     ESP_LOGW(TAG,
-             "GNSS power-on failed err=%s (continue publish path without GNSS)",
+             "event=gnss_power_on_failed err=%s fallback=publish_without_gnss",
              esp_err_to_name(err));
 }
 
@@ -127,6 +146,7 @@ void state_machine_try_start_gnss_nonblocking(void) {
  * @brief Bootstrap RTC hardware.
  */
 void state_machine_bootstrap_rtc(void) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_hw_bootstrap_done || !rtc_ds3231m_is_available()) {
         return;
     }
@@ -150,7 +170,7 @@ void state_machine_bootstrap_rtc(void) {
         uint64_t verify_ms = 0;
         if (rtc_ds3231m_get_time_ms(&verify_ms) == ESP_OK && rtc_ds3231m_is_time_valid_ms(verify_ms)) {
             ESP_LOGI(TAG,
-                     "RTC bootstrap OK set=%llu read=%llu",
+                     "event=rtc_bootstrap_ok set_ms=%llu read_ms=%llu",
                      (unsigned long long)fallback_ms,
                      (unsigned long long)verify_ms);
             s_hw_bootstrap_done = true;
@@ -167,14 +187,23 @@ void state_machine_bootstrap_rtc(void) {
                              now_ms,
                              ESP_FAIL) == ESP_OK) {
         ESP_LOGW(TAG,
-                 "retry step=rtc_bootstrap err=%s attempt=%lu next_delay_ms=%lu",
+                 "event=retry_scheduled step=rtc_bootstrap err=%s attempt=%lu next_delay_ms=%lu",
                  esp_err_to_name(ESP_FAIL),
                  (unsigned long)s_rtc_bootstrap_retry.attempts,
                  (unsigned long)delay_ms);
     }
 }
 
+/**
+ * @brief Bootstrap IMU hardware and motion interrupt policy.
+ *
+ * The wake prelude keeps IMU bring-up idempotent and non-blocking by routing
+ * failures through the retry manager. Once initialization succeeds, the motion
+ * interrupt is configured immediately so later sleep states can rely on the
+ * same runtime policy without redoing basic setup.
+ */
 void state_machine_bootstrap_imu(void) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (!state_machine_imu_runtime_enabled() || s_imu_available) {
         return;
     }
@@ -190,9 +219,9 @@ void state_machine_bootstrap_imu(void) {
         retry_state_reset(&s_imu_bootstrap_retry);
         esp_err_t motion_cfg_err = imu_configure_motion_interrupt(120, 200);
         if (motion_cfg_err != ESP_OK) {
-            ESP_LOGW(TAG, "imu_configure_motion_interrupt failed: %s", esp_err_to_name(motion_cfg_err));
+            ESP_LOGW(TAG, "event=imu_motion_interrupt_config_failed err=%s", esp_err_to_name(motion_cfg_err));
         } else {
-            ESP_LOGI(TAG, "IMU bootstrap ready (motion interrupt configured)");
+            ESP_LOGI(TAG, "event=imu_bootstrap_ready motion_interrupt=1");
         }
         return;
     }
@@ -205,13 +234,24 @@ void state_machine_bootstrap_imu(void) {
                                now_ms,
                                imu_err);
     ESP_LOGW(TAG,
-             "retry step=imu_init err=%s attempt=%lu next_delay_ms=%lu",
+             "event=retry_scheduled step=imu_init err=%s attempt=%lu next_delay_ms=%lu",
              esp_err_to_name(imu_err),
              (unsigned long)s_imu_bootstrap_retry.attempts,
              (unsigned long)delay_ms);
 }
 
+/**
+ * @brief Refresh the shared telemetry snapshot from ADC, OBD, and GNSS.
+ *
+ * This function is the main sensor-fusion pass for the FSM loop. It updates
+ * battery rails, IMU vibration magnitude, optional OBD telemetry, GNSS fixes,
+ * and the synthesized ignition signal that downstream state handlers consume.
+ *
+ * @param[in] read_gnss True to poll GNSS when the modem/GNSS path is ready.
+ * @param[in] read_obd True to poll OBD when a BLE session is connected.
+ */
 void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
+    // Refresh the always-on analog and IMU snapshot first so every later branch works from one coherent baseline.
     float vehicle_battery_raw_v = adc_read_vehicle_battery_voltage();
     float device_battery_raw_v = adc_read_device_battery_voltage();
     s_telemetry.vehicle_battery = vehicle_battery_raw_v * TRACKER_ADC_SUPPLY_CALIB_GAIN;
@@ -224,6 +264,8 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
         const tracker_obd_diag_query_t *diag_queries = state_machine_obd_diagnostic_queries(&diag_query_count);
 
         if ((now_ms - s_last_obd_poll_ms) >= TRACKER_OBD_POLL_INTERVAL_MS) {
+            // Poll the live-drive PIDs first, then rotate one auxiliary PID so the BLE link stays responsive.
+            /* Interleave a few auxiliary PIDs instead of requesting every signal every loop. */
             static const uint8_t s_aux_pids[] = {0x05, 0x2F, 0x04};
             (void)ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0C, TRACKER_OBD_PID_TIMEOUT_MS);
             (void)ble_obd_rxtx(s_ble_ctx, OBD_MODE_CURRENT_DATA, 0x0D, TRACKER_OBD_PID_TIMEOUT_MS);
@@ -236,6 +278,7 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
         if (diag_queries != NULL &&
             diag_query_count > 0 &&
             (now_ms - s_last_obd_diagnostic_poll_ms) >= TRACKER_OBD_DIAGNOSTIC_POLL_INTERVAL_MS) {
+            // Diagnostic readiness/DTC queries run on their own slower cadence so they do not starve live signals.
             const tracker_obd_diag_query_t *diag_query =
                 &diag_queries[s_obd_diag_query_cursor % diag_query_count];
             state_machine_run_obd_diagnostic_query(s_ble_ctx, diag_query);
@@ -245,7 +288,7 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
 
         if ((now_ms - s_last_obd_debug_log_ms) >= TRACKER_OBD_DEBUG_LOG_INTERVAL_MS) {
             ESP_LOGD(TAG,
-                     "OBD pid-values rpm=%ld speed=%ld coolant=%ld fuel=%ld load=%ld mil=%d dtc=%u/%u/%u",
+                     "event=obd_pid_values rpm=%ld speed=%ld coolant=%ld fuel=%ld load=%ld mil=%d dtc=%u/%u/%u",
                      (long)s_telemetry.obd_rpm,
                      (long)s_telemetry.obd_speed,
                      (long)s_telemetry.obd_coolant_temp,
@@ -265,6 +308,7 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
             goto telemetry_finalize;
         }
 
+        // GNSS polls are rate-limited separately so the modem is not hammered every FSM iteration.
         s_last_gnss_poll_ms = now_ms;
         gnss_data_t gnss = {0};
         if (modem_gnss_get_location(&gnss) == ESP_OK) {
@@ -272,6 +316,7 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
             s_gnss_poll_fail_streak = 0;
         } else {
             s_gnss_poll_fail_streak += 1;
+            // Escalate from transient poll failures to a GNSS re-arm only after the streak crosses the configured threshold.
             if (s_gnss_poll_fail_streak >= TRACKER_GNSS_FAIL_REARM_THRESHOLD &&
                 state_machine_try_rearm_gnss("poll_fail_threshold")) {
                 s_gnss_poll_fail_streak = 0;
@@ -280,6 +325,7 @@ void state_machine_refresh_telemetry(bool read_gnss, bool read_obd) {
     }
 
 telemetry_finalize:
+    // Guarantee a non-zero timestamp so downstream formatters always have something monotonic to serialize.
     if (s_telemetry.gnss.timestamp_ms == 0) {
         s_telemetry.gnss.timestamp_ms = util_uptime_ms();
     }
@@ -295,6 +341,7 @@ telemetry_finalize:
         s_telemetry.obd_elm_ready &&
         state_machine_has_recent_obd_sample(now_ms, TRACKER_OBD_LIVE_SIGNAL_MAX_AGE_MS);
     if (!obd_signal_fresh) {
+        // Once the OBD sample ages out, clear the cached signal snapshot before publish code can reuse stale values.
         state_machine_clear_obd_signal_snapshot();
     }
 
@@ -309,29 +356,52 @@ telemetry_finalize:
     bool adc_ignition = s_telemetry.vehicle_battery >= ignition_threshold_v;
     bool obd_sample_fresh =
         state_machine_has_recent_obd_sample(now_ms, TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS);
+    bool stable_ignition_on =
+        session_mgr_has_stable_ignition() &&
+        session_mgr_stable_ignition();
     bool obd_live_ignition = obd_connected &&
                              strcmp(obd_ecu_state, "live") == 0 &&
                              obd_sample_fresh;
+    bool obd_engine_on_evidence = obd_live_ignition &&
+                                  state_machine_has_recent_obd_engine_on_evidence(now_ms);
     bool rpm_ignition = obd_live_ignition && s_telemetry.obd_rpm > 0;
     bool preserve_degraded_ignition_on =
         !adc_ignition &&
         !obd_live_ignition &&
-        session_mgr_has_stable_ignition() &&
-        session_mgr_stable_ignition() &&
+        stable_ignition_on &&
         (!obd_connected || !obd_sample_fresh);
-    bool ignition_next = rpm_ignition || adc_ignition || obd_live_ignition || preserve_degraded_ignition_on;
+    // Combine positive ignition evidence into the single ignition bit consumed by the FSM.
+    /*
+     * Treat temporary OBD loss as degraded quality, not an automatic boundary.
+     * If stable ignition was already ON and current evidence is merely absent,
+     * the session remains open until OFF is confirmed elsewhere.
+     * A debounced ON edge still comes from `session_mgr_on_ignition_sample()`.
+     * Here we only expose the raw ignition candidate so the debounce path can
+     * actually observe sustained OBD/RPM evidence during wake windows.
+     */
+    bool ignition_next = rpm_ignition || obd_engine_on_evidence || adc_ignition || preserve_degraded_ignition_on;
     if (!s_ignition_log_initialized || ignition_next != s_last_ignition_state) {
+        uint32_t evidence_age_ms = UINT32_MAX;
+        if (s_last_obd_engine_on_evidence_ms != 0 && now_ms >= s_last_obd_engine_on_evidence_ms) {
+            uint64_t age_ms = now_ms - s_last_obd_engine_on_evidence_ms;
+            evidence_age_ms = age_ms > UINT32_MAX ? UINT32_MAX : (uint32_t)age_ms;
+        }
         ESP_LOGI(TAG,
-                 "ignition transition prev=%d next=%d rpm=%ld adc=%d vehicle_battery=%.2f threshold=%.2f obd_live=%d hold_on=%d sample_age_ms=%lu ecu=%s",
+                 "event=ignition_transition prev=%d next=%d rpm=%ld load=%ld adc=%d rpm_ign=%d obd_hold=%d stable_on=%d vehicle_battery=%.2f threshold=%.2f obd_live=%d hold_on=%d sample_age_ms=%lu evidence_age_ms=%lu ecu=%s",
                  s_ignition_log_initialized ? (s_last_ignition_state ? 1 : 0) : -1,
                  ignition_next ? 1 : 0,
                  (long)s_telemetry.obd_rpm,
+                 (long)s_telemetry.obd_engine_load,
                  adc_ignition ? 1 : 0,
+                 rpm_ignition ? 1 : 0,
+                 obd_engine_on_evidence ? 1 : 0,
+                 stable_ignition_on ? 1 : 0,
                  s_telemetry.vehicle_battery,
                  ignition_threshold_v,
                  obd_live_ignition ? 1 : 0,
                  preserve_degraded_ignition_on ? 1 : 0,
                  (unsigned long)s_telemetry.obd_sample_age_ms,
+                 (unsigned long)evidence_age_ms,
                  obd_ecu_state);
         s_last_ignition_state = ignition_next;
         s_ignition_log_initialized = true;
@@ -344,9 +414,10 @@ telemetry_finalize:
     s_telemetry.obd_connect_fail_count_5m = s_obd_fail_window_count;
 
     if (s_last_hw_diag_log_ms == 0 || (now_ms - s_last_hw_diag_log_ms) >= TRACKER_HW_DIAG_LOG_INTERVAL_MS) {
+        // Periodic hardware diagnostics summarize the fused runtime picture without waiting for a state transition.
         UBaseType_t stack_hwm_words = uxTaskGetStackHighWaterMark(NULL);
         ESP_LOGI(TAG,
-                "HW diag vehicle_battery=%.2fV device_battery=%.2fV ign=%d imu_accel_delta=%.3fm/s2 lte=%d mqtt=%d ble=%d gnss_fix=%d stack_hwm_words=%lu",
+                "event=hw_diag vehicle_battery=%.2fV device_battery=%.2fV ign=%d imu_accel_delta=%.3fm/s2 lte=%d mqtt=%d ble=%d gnss_fix=%d stack_hwm_words=%lu",
                  s_telemetry.vehicle_battery,
                  s_telemetry.device_battery,
                  s_telemetry.ignition ? 1 : 0,
@@ -360,7 +431,14 @@ telemetry_finalize:
     }
 }
 
+/**
+ * @brief Check whether GNSS currently provides a trusted wall-clock time.
+ *
+ * @param[out] out_time_ms Optional destination for the GNSS timestamp.
+ * @return true when GNSS has a valid fix and its timestamp passes RTC validity checks.
+ */
 static bool state_machine_network_time_valid(uint64_t *out_time_ms) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_telemetry.gnss.fix_valid) {
         return false;
     }
@@ -376,7 +454,15 @@ static bool state_machine_network_time_valid(uint64_t *out_time_ms) {
     return true;
 }
 
+/**
+ * @brief Try reading a trusted time from the external RTC with retry gating.
+ *
+ * @param[in] now_ms Current uptime used for retry policy bookkeeping.
+ * @param[out] out_rtc_ms Optional destination for the RTC timestamp.
+ * @return true when a valid RTC timestamp was obtained.
+ */
 static bool state_machine_try_get_rtc_time(uint64_t now_ms, uint64_t *out_rtc_ms) {
+    // Read try get RTC time without widening the mutation surface of this module.
     if (!rtc_ds3231m_is_available() || !retry_state_can_run(&s_rtc_read_retry, now_ms)) {
         return false;
     }
@@ -398,14 +484,26 @@ static bool state_machine_try_get_rtc_time(uint64_t now_ms, uint64_t *out_rtc_ms
                                now_ms,
                                ESP_FAIL);
     ESP_LOGW(TAG,
-             "retry step=rtc_read err=%s attempt=%lu next_delay_ms=%lu",
+             "event=retry_scheduled step=rtc_read err=%s attempt=%lu next_delay_ms=%lu",
              esp_err_to_name(ESP_FAIL),
              (unsigned long)s_rtc_read_retry.attempts,
              (unsigned long)delay_ms);
     return false;
 }
 
+/**
+ * @brief Refresh the event timestamp source used by status/event publishing.
+ *
+ * Priority order:
+ * 1. Trusted GNSS time when a fresh fix is available.
+ * 2. Trusted RTC time when GNSS time is unavailable.
+ * 3. Local uptime as an untrusted fallback.
+ *
+ * Successful GNSS time also backfills the RTC periodically so deep-sleep boots
+ * can recover a trusted clock earlier in the next cycle.
+ */
 void state_machine_update_time_source(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint64_t now_ms = util_uptime_ms();
     uint64_t selected_time_ms = now_ms;
     bool trusted = false;
@@ -431,26 +529,44 @@ void state_machine_update_time_source(void) {
     s_time_trusted = trusted;
 }
 
+/**
+ * @brief Schedule the shared LTE/MQTT retry state and emit one diagnostic line.
+ *
+ * @param[in] now_ms Current uptime.
+ * @param[in] step Subsystem step name used in logs.
+ * @param[in] err Failure code that triggered the retry.
+ */
 static void state_machine_schedule_network_retry(uint64_t now_ms, const char *step, esp_err_t err) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     uint32_t delay_ms = retry_state_current_delay_ms(&s_network_retry, &g_state_network_retry_policy, now_ms);
     if (retry_state_schedule(&s_network_retry, &g_state_network_retry_policy, now_ms, err) != ESP_OK) {
         return;
     }
 
     ESP_LOGE(TAG,
-             "retry step=%s err=%s attempt=%lu next_delay_ms=%lu",
+             "event=retry_scheduled step=%s err=%s attempt=%lu next_delay_ms=%lu",
              step,
              esp_err_to_name(err),
              (unsigned long)s_network_retry.attempts,
              (unsigned long)delay_ms);
 }
 
+/**
+ * @brief Advance the LTE, MQTT, GNSS, and command-subscribe connection path.
+ *
+ * This helper is intentionally non-blocking. Each subsystem gets one chance to
+ * progress per FSM loop and failures feed the shared network retry state. Once
+ * LTE recovers after an earlier outage, GNSS power is reasserted so location
+ * polling resumes without waiting for a full reboot.
+ */
 static void state_machine_try_connect_network(void) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     uint64_t now_ms = util_uptime_ms();
     if (!retry_state_can_run(&s_network_retry, now_ms)) {
         return;
     }
 
+    // Keep the LTE FSM hot each pass; it owns dial-up, registration, PDP, and modem recovery sequencing.
     modem_lte_request_connect();
     esp_err_t err = modem_lte_tick(now_ms);
     bool lte_now_initialized = modem_lte_is_initialized();
@@ -464,11 +580,13 @@ static void state_machine_try_connect_network(void) {
     }
 
     if (lte_now_initialized) {
+        // GNSS startup is decoupled from LTE so network recovery can re-arm location without blocking this loop.
         state_machine_try_start_gnss_nonblocking();
     }
 
 #if !TRACKER_MQTT_RUNTIME_DISABLED
     if (lte_now_initialized && (!s_mqtt_started || !tracker_mqtt_is_connected())) {
+        // MQTT connection only starts once LTE is up; otherwise failures would mix transport and broker states together.
         err = tracker_mqtt_connect();
         if (err != ESP_OK) {
             state_machine_schedule_network_retry(now_ms, "tracker_mqtt_connect", err);
@@ -481,6 +599,7 @@ static void state_machine_try_connect_network(void) {
     retry_state_reset(&s_network_retry);
     if (lte_now_initialized && !s_prev_lte_initialized) {
         if (s_lte_ever_initialized) {
+            // LTE recovery after an earlier outage can leave GNSS unpowered, so explicitly reassert it on the rising edge.
             (void)state_machine_try_reassert_gnss_power("lte_recovered");
         }
         s_lte_ever_initialized = true;
@@ -489,6 +608,7 @@ static void state_machine_try_connect_network(void) {
 
 #if !TRACKER_MQTT_RUNTIME_DISABLED
     if (s_config.command_subscribe_enabled && tracker_mqtt_is_connected()) {
+        // Command subscription is retried separately so publish-path recovery is not blocked by one failed SUB command.
         err = tracker_mqtt_subscribe_commands();
         if (err == ESP_ERR_NOT_FINISHED) {
             return;
@@ -500,11 +620,26 @@ static void state_machine_try_connect_network(void) {
     }
 #endif
 
+    // Deferred firmware status flush is attempted only after LTE/MQTT path is known-good for this iteration.
     state_machine_try_flush_deferred_firmware_report();
     retry_state_reset(&s_network_retry);
 }
 
+/**
+ * @brief Run the full wake-prelude service loop for a single FSM iteration.
+ *
+ * The prelude centralizes:
+ * - pending command/action handling
+ * - asynchronous BLE connect completion
+ * - LTE/MQTT/GNSS bootstrap and recovery
+ * - RTC and IMU bootstrap
+ * - telemetry refresh
+ * - optional offline replay once the publish path is online
+ *
+ * @param[in] allow_replay True to let the offline queue drain during this pass.
+ */
 void state_machine_run_wake_prelude(bool allow_replay) {
+    // Advance one cooperative step here using the current state, time gates, and retry policy.
     state_machine_handle_pending_action();
     bool ble_result_handled = state_machine_handle_ble_connect_result();
     state_machine_try_connect_network();

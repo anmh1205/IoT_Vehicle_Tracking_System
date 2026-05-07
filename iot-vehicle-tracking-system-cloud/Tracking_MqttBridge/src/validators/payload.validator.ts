@@ -55,6 +55,7 @@ const rawDataPayloadBaseSchema = z.object({
   auth_token: z.string().min(1),
   timestamp: z.number().positive(),
   uptime: z.number().nonnegative().optional(),
+  session_id: z.number().int().positive().optional(),
   local_session_key: z.number().int().positive().optional(),
   canonical_session_id: canonicalSessionIdSchema.optional(),
   boot_id: z.string().min(1).optional(),

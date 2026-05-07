@@ -34,7 +34,7 @@ export const listDevices = asyncHandler(async (req: AuthenticatedRequest, res: R
     throw createValidationError('Invalid query parameters', parsed.error.flatten().fieldErrors);
   }
 
-  const result = await deviceListService.listDevices(parsed.data);
+  const result = await deviceListService.listDevices(parsed.data, req.user);
   sendOk(res, result);
 });
 
@@ -99,8 +99,8 @@ export const getRuntimeStats = asyncHandler(async (req: AuthenticatedRequest, re
 });
 
 export const getDevicePositions = asyncHandler(
-  async (_req: AuthenticatedRequest, res: Response) => {
-    const positions = await deviceListService.getDevicePositions();
+  async (req: AuthenticatedRequest, res: Response) => {
+    const positions = await deviceListService.getDevicePositions(req.user);
     sendOk(res, positions);
   },
 );

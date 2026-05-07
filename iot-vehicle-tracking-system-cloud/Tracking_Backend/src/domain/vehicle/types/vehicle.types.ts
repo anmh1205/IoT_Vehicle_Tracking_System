@@ -76,7 +76,13 @@ export interface CreateVehicleInput {
   notes?: string;
 }
 
-export interface UpdateVehicleInput extends Partial<CreateVehicleInput> {}
+export interface UpdateVehicleInput
+  extends Omit<Partial<CreateVehicleInput>, 'brand' | 'model' | 'plateNumber' | 'year'> {
+  brand?: string | null;
+  model?: string | null;
+  plateNumber?: string | null;
+  year?: number | null;
+}
 
 export interface VehicleListQuery {
   page?: number;

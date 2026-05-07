@@ -102,19 +102,32 @@ export const resolveSessionId = (
   }
 
   const state = deviceStates.get(deviceId);
-  if (
-    !state ||
-    state.sessionId === null ||
-    sessionIdentity.localSessionKey === undefined ||
-    !sessionIdentity.bootId
-  ) {
+  if (!state || state.sessionId === null) {
     return null;
   }
 
-  return state.localSessionKey === sessionIdentity.localSessionKey &&
+  if (
+    sessionIdentity.localSessionKey !== undefined &&
+    state.localSessionKey === sessionIdentity.localSessionKey &&
+    (
+      !sessionIdentity.bootId ||
+      !state.bootId ||
+      state.bootId === sessionIdentity.bootId
+    )
+  ) {
+    return state.sessionId;
+  }
+
+  if (
+    sessionIdentity.localSessionKey === undefined &&
+    sessionIdentity.bootId &&
+    state.status === 'running' &&
     state.bootId === sessionIdentity.bootId
-    ? state.sessionId
-    : null;
+  ) {
+    return state.sessionId;
+  }
+
+  return null;
 };
 
 export const getTrackedDeviceCount = (): number => {

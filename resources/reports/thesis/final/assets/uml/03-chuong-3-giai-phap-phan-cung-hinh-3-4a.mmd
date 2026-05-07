@@ -1,30 +1,15 @@
-flowchart TB
-    Fsm["FSM nguồn<br/>GPIO5 / GPIO18 / GPIO19"]
+flowchart LR
+    Vin["Nguồn xe 12-24 V"] --> Protect["Bảo vệ áp thấp<br>chống đảo cực"]
+    Protect --> Main5["Nguồn chính 5 V"]
+    Protect --> Charger["Sạc pin 1S<br>TP5100"]
+    Charger --> Cell["Pin 18650"]
+    Cell --> Boost["Boost 5 V dự phòng"]
 
-    subgraph MainRail["Nhánh chính 5V"]
-        direction TB
-        Vin["Nguồn xe 12V/24V"]
-        Buck["MP2482 giảm áp 5V"]
-        MainBus["Bus chính 5V"]
-        Rail33["Đường 3.3V<br/>MCU + IMU"]
-        Rail4["Đường ~4V<br/>Modem LTE"]
-        Vin --> Buck --> MainBus
-        MainBus --> Rail33
-        MainBus --> Rail4
-    end
+    Main5 --> Or["OR nguồn"]
+    Boost --> Or
+    Or --> Bus["Bus 5 V hệ thống"]
+    Bus --> Rail33["3.3 V<br>ESP32-S3 + IMU"]
+    Bus --> Rail4["~4 V<br>SIM7600CE-T"]
 
-    subgraph BackupRail["Nhánh dự phòng"]
-        direction TB
-        Charge["TP5100 sạc pin 1S"]
-        Cell["Pin 18650"]
-        Boost["SX1308 tăng áp 5V"]
-        BackupBus["Bus dự phòng 5V"]
-        Charge --> Cell --> Boost --> BackupBus
-    end
-
-    Or["Diode OR / đường nguồn ra"]
-
-    Fsm -. điều khiển .-> Buck
-    Fsm -. ưu tiên nguồn .-> BackupBus
-    MainBus --> Or
-    BackupBus --> Or
+    Fsm["FSM nguồn<br>GPIO điều khiển"] -. bật / tắt .-> Main5
+    Fsm -. chọn nguồn .-> Or

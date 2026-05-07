@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="520" viewBox="0 0 1400 520">
+  <style>
+    .box { fill: #eef3fa; stroke: #6e7c91; stroke-width: 2; rx: 12; ry: 12; }
+    .arrow { stroke: #3f4c5f; stroke-width: 2.5; fill: none; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size: 31px; font-weight: 600; fill: #1f2b3a; text-anchor: middle; }
+    .body { font-family: Arial, Helvetica, sans-serif; font-size: 24px; fill: #1f2b3a; text-anchor: middle; }
+  </style>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3f4c5f"/>
+    </marker>
+  </defs>
+
+  <rect class="box" x="40" y="120" width="360" height="240"/>
+  <text class="title" x="220" y="180">Thiết bị trên xe</text>
+  <text class="body" x="220" y="235">Thu vị trí, OBD-II,</text>
+  <text class="body" x="220" y="275">trạng thái nguồn</text>
+  <text class="body" x="220" y="315">và sự kiện</text>
+
+  <rect class="box" x="520" y="120" width="360" height="240"/>
+  <text class="title" x="700" y="180">Máy chủ</text>
+  <text class="body" x="700" y="235">Tiếp nhận dữ liệu,</text>
+  <text class="body" x="700" y="275">lưu hành trình,</text>
+  <text class="body" x="700" y="315">xử lý cảnh báo</text>
+
+  <rect class="box" x="1000" y="120" width="360" height="240"/>
+  <text class="title" x="1180" y="180">Giao diện quản lý</text>
+  <text class="body" x="1180" y="235">Bản đồ, trạng thái xe,</text>
+  <text class="body" x="1180" y="275">lịch sử chuyến đi</text>
+  <text class="body" x="1180" y="315">và tra cứu</text>
+
+  <line class="arrow" x1="400" y1="240" x2="520" y2="240" marker-end="url(#arrowhead)"/>
+  <line class="arrow" x1="880" y1="240" x2="1000" y2="240" marker-end="url(#arrowhead)"/>
+</svg>

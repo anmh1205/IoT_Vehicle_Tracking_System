@@ -8,7 +8,12 @@
 /**
  * @file imu_lis3dsh.h
  * @brief LIS3DSH accelerometer driver interface.
+ * This header belongs to the ESP32-S3 board support layer and describes the board-facing contract that runtime code uses without baking GPIO details into app-core.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Initialize LIS3DSH over I2C and basic measurement configuration.

@@ -2,8 +2,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-constants';
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/utils/date/format';
+import {
+  getConnectivityPresentation,
+  getDeviceRuntimePresentation,
+  getVehicleStatePresentation,
+} from '@/lib/utils/device-state';
 import {
   formatElectricalMetric,
   formatTemperatureMetric,
@@ -129,7 +133,7 @@ const resolveObdHealthState = (snapshot: DiagnosticsSnapshot | null): ObdHealthS
 
 const buildObdRecommendations = (snapshot: DiagnosticsSnapshot | null): string[] => {
   if (!snapshot) {
-    return ['Chưa có ảnh chụp OBD. Hãy kết nối bộ chuyển đổi rồi gửi dữ liệu đo từ xa để màn hình phân tích.'];
+    return ['Chưa có ảnh chụp OBD. Hãy kết nối bộ chuyển đổi rồi gửi telemetry để màn hình phân tích.'];
   }
 
   const recommendations: string[] = [];
@@ -276,6 +280,9 @@ export const OverviewTab = () => {
     longitude:
       latestTrackingRow?.longitude ?? positionSnapshot?.longitude ?? device?.longitude ?? null,
   };
+  const vehicleState = getVehicleStatePresentation(device?.vehicleState);
+  const deviceRuntimeState = getDeviceRuntimePresentation(device?.deviceState);
+  const connectivityState = getConnectivityPresentation(device?.currentStatus);
   const latestSpeed = latestTrackingRow?.speed ?? positionSnapshot?.speed ?? null;
   const latestDeviceBattery = resolveDeviceBatteryValue(latestTrackingRow, positionSnapshot);
   const latestVehicleBattery = resolveVehicleBatteryValue(latestTrackingRow, positionSnapshot);
@@ -301,8 +308,8 @@ export const OverviewTab = () => {
         emphasize: true,
       },
       {
-        label: 'Trạng thái',
-        value: DEVICE_STATUS_LABELS[device?.currentStatus ?? ''] ?? device?.currentStatus ?? '-',
+        label: vehicleState.label,
+        value: vehicleState.value,
         note: device?.vehiclePlate ? `Biển số ${device.vehiclePlate}` : 'Chưa gán biển số',
       },
     ],
@@ -314,6 +321,16 @@ export const OverviewTab = () => {
       {
         label: 'Tọa độ gần nhất',
         value: formatCoordinateLabel(latestPosition.latitude, latestPosition.longitude, 6),
+      },
+    ],
+    [
+      {
+        label: deviceRuntimeState.label,
+        value: deviceRuntimeState.value,
+      },
+      {
+        label: connectivityState.label,
+        value: connectivityState.value,
       },
     ],
     [
@@ -356,7 +373,7 @@ export const OverviewTab = () => {
       {
         label: 'Bản tin gần nhất',
         value: latestTelemetryTimestamp ? formatDateTime(latestTelemetryTimestamp) : '-',
-        note: latestTelemetryTimestamp ? formatRelative(latestTelemetryTimestamp) : 'Chưa có dữ liệu đo từ xa.',
+        note: latestTelemetryTimestamp ? formatRelative(latestTelemetryTimestamp) : 'Chưa có telemetry.',
       },
     ],
     [
@@ -491,18 +508,19 @@ export const OverviewTab = () => {
       <AllowedZoneStatusCard
         vehicleId={device?.vehicleId ?? null}
         title="Vùng"
+        variant="compact"
         canEdit={access.canEditDevice && Boolean(device?.vehicleId)}
         onConfigure={() => setAllowedZoneOpen(true)}
       />
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start">
           <InfoMatrixCard
-          title="Trạng thái thiết bị"
+          title="Xe / Thiết bị / Kết nối"
           rows={deviceRows}
           className="xl:w-[31%] xl:flex-none"
         />
         <InfoMatrixCard
-          title="Tình trạng dữ liệu đo từ xa"
+          title="Telemetry"
           rows={telemetryRows}
           badge={<Badge variant={telemetryState.variant}>{telemetryState.label}</Badge>}
           className="xl:w-[31%] xl:flex-none"

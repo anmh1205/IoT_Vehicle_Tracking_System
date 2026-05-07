@@ -6,7 +6,12 @@
 /**
  * @file runtime_config.h
  * @brief Shared runtime configuration limits and persisted config model.
+ * This header belongs to the shared kernel layer and collects the shared models, bounds, and helper contracts that multiple components reuse.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /** @brief Maximum length for unique tracker device ID (including null terminator). */
 #define TRACKER_DEVICE_ID_MAX_LEN 32

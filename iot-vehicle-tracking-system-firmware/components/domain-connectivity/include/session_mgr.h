@@ -6,7 +6,15 @@
 /**
  * @file session_mgr.h
  * @brief Ignition-only session lifecycle with debounce and OFF drain window.
+ *
+ * This module owns ignition debouncing and start-edge detection. The final stop
+ * boundary still belongs to the FSM, which must coordinate OFF hold timing,
+ * status publish order, offline queue teardown, and sleep entry.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /** @brief Reset session manager state and clear pending edge decisions. */
 void session_mgr_init(void);

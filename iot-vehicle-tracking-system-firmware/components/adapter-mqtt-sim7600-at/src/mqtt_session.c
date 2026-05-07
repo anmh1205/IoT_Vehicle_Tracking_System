@@ -48,6 +48,10 @@
  * - TLS errors: fallback to non-TLS if configured
  */
 
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
+
 #ifndef CONFIG_TRACKER_TLS_VERIFY_SERVER
 #define CONFIG_TRACKER_TLS_VERIFY_SERVER 0
 #endif
@@ -65,6 +69,7 @@
  * @return Class name ("primary" or "fallback").
  */
 static const char *tracker_mqtt_endpoint_class(const char *server_addr) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!util_string_empty(server_addr) && strcmp(server_addr, s_server_addr_fallback) == 0) {
         return "fallback";
     }
@@ -90,6 +95,7 @@ static esp_err_t tracker_mqtt_send_lifecycle_cmd(const char *cmd,
                                                  const int *allowed_codes,
                                                  size_t allowed_count,
                                                  int *out_err_code) {
+    // Send the lifecycle AT command through one shared helper so result parsing and errors stay consistent.
     ESP_RETURN_ON_NULL(cmd, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "cmd is NULL");
     ESP_RETURN_ON_NULL(result_prefix, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "result_prefix is NULL");
 
@@ -144,6 +150,7 @@ static esp_err_t tracker_mqtt_send_lifecycle_cmd(const char *cmd,
 }
 
 static esp_err_t tracker_mqtt_configure_tls_certificate(char *cmd, size_t cmd_size) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
 #if CONFIG_TRACKER_TLS_VERIFY_SERVER
     /*
      * SIM7600 validates against certificate files stored inside the modem, not
@@ -182,6 +189,7 @@ static esp_err_t tracker_mqtt_configure_tls_certificate(char *cmd, size_t cmd_si
  * @return ESP_OK on success.
  */
 esp_err_t tracker_mqtt_start_service(void) {
+    // Initialize module-local state and dependencies before later runtime paths rely on them.
     if (s_service_started) {
         return ESP_OK;
     }
@@ -204,6 +212,7 @@ esp_err_t tracker_mqtt_start_service(void) {
 }
 
 esp_err_t tracker_mqtt_configure_tls(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_tls_enabled) {
         return ESP_OK;
     }
@@ -261,6 +270,7 @@ esp_err_t tracker_mqtt_configure_tls(void) {
 }
 
 esp_err_t tracker_mqtt_acquire_client(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (s_client_acquired) {
         return ESP_OK;
     }
@@ -295,6 +305,7 @@ esp_err_t tracker_mqtt_acquire_client(void) {
 }
 
 esp_err_t tracker_mqtt_apply_client_options(void) {
+    // Apply the client-option defaults in one place so the modem session uses one consistent policy.
     ESP_RETURN_ON_FALSE(modem_at_send_expect("AT+CMQTTCFG=\"checkUTF8\",0,0\r", "OK", MQTT_CMD_TIMEOUT_MS) == ESP_OK,
                         ESP_FAIL,
                         TRACKER_MQTT_TAG,
@@ -314,6 +325,7 @@ esp_err_t tracker_mqtt_apply_client_options(void) {
 }
 
 bool tracker_mqtt_query_disconnect_state_with_policy(int *out_disc_state, bool quiet) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     ESP_RETURN_ON_FALSE(out_disc_state != NULL, false, TRACKER_MQTT_TAG, "out_disc_state null");
 
     char response[MQTT_AT_RESPONSE_MAX_LEN] = {0};
@@ -329,10 +341,12 @@ bool tracker_mqtt_query_disconnect_state_with_policy(int *out_disc_state, bool q
 }
 
 bool tracker_mqtt_query_disconnect_state(int *out_disc_state) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return tracker_mqtt_query_disconnect_state_with_policy(out_disc_state, false);
 }
 
 bool tracker_mqtt_resume_connected_session(const char *reason, bool quiet_query) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     int disc_state = -1;
     if (!tracker_mqtt_query_disconnect_state_with_policy(&disc_state, quiet_query) || disc_state != 0) {
         return false;
@@ -351,6 +365,7 @@ bool tracker_mqtt_resume_connected_session(const char *reason, bool quiet_query)
 }
 
 static esp_err_t tracker_mqtt_build_connect_cmd(const char *server_addr, char *cmd, size_t cmd_size) {
+    // Build the CMQTTCONNECT command once here so every connect attempt uses the same broker contract.
     int n = 0;
     if (util_string_empty(s_cfg.mqtt_username)) {
         n = snprintf(cmd,
@@ -378,6 +393,7 @@ static esp_err_t tracker_mqtt_build_connect_cmd(const char *server_addr, char *c
 }
 
 static bool tracker_mqtt_probe_connected_session_window(int *out_connect_err_code) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     uint64_t probe_start_ms = util_uptime_ms();
     while ((util_uptime_ms() - probe_start_ms) < MQTT_CONNECT_SESSION_PROBE_WINDOW_MS) {
         int disc_state = -1;
@@ -405,6 +421,7 @@ static bool tracker_mqtt_probe_connected_session_window(int *out_connect_err_cod
 static esp_err_t tracker_mqtt_handle_connect_timeout(const char *server_addr,
                                                      int *out_connect_err_code,
                                                      bool *out_timed_out) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     int disc_state = -1;
     if (tracker_mqtt_query_disconnect_state(&disc_state) && disc_state == 0) {
         s_connected = true;
@@ -435,6 +452,7 @@ static esp_err_t tracker_mqtt_handle_connect_timeout(const char *server_addr,
 static esp_err_t tracker_mqtt_handle_connect_rejection(const char *server_addr,
                                                        int connect_err,
                                                        int *out_connect_err_code) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (tracker_mqtt_err_indicates_disconnect(connect_err)) {
         tracker_mqtt_mark_disconnected("+CMQTTCONNECT", connect_err);
     }
@@ -450,6 +468,7 @@ static esp_err_t tracker_mqtt_handle_connect_rejection(const char *server_addr,
 }
 
 esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_connect_err_code, bool *out_timed_out) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     ESP_RETURN_ON_FALSE(!util_string_empty(server_addr),
                         ESP_ERR_INVALID_ARG,
                         TRACKER_MQTT_TAG,
@@ -468,6 +487,7 @@ esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_connect_er
                         TRACKER_MQTT_TAG,
                         "CMQTTCONNECT cmd build failed");
 
+    // Start watching for connect completion before issuing CMQTTCONNECT because some modem builds answer asynchronously.
     tracker_mqtt_begin_connect_wait();
     char response[MQTT_AT_RESPONSE_MAX_LEN] = {0};
     esp_err_t send_err = tracker_mqtt_send_cmd(cmd, MQTT_CONNECT_TIMEOUT_MS, response, sizeof(response));
@@ -490,10 +510,12 @@ esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_connect_er
                                                       &connect_err,
                                                       &parsed);
     if (!parsed) {
+        // If the immediate response is inconclusive, probe for an already-open session before waiting out the full timeout.
         if (tracker_mqtt_probe_connected_session_window(out_connect_err_code)) {
             return ESP_OK;
         }
 
+        // Fall back to the async connect-result wait path when no inline +CMQTTCONNECT result was parsed.
         esp_err_t wait_err = tracker_mqtt_wait_connect_result(&connect_err);
         tracker_mqtt_reset_connect_wait();
         if (wait_err != ESP_OK) {
@@ -504,6 +526,7 @@ esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_connect_er
             return tracker_mqtt_handle_connect_rejection(server_addr, connect_err, out_connect_err_code);
         }
     } else {
+        // Inline results are preferred, but a probe can still rescue the session if the modem response looked inconsistent.
         tracker_mqtt_reset_connect_wait();
         if (result_err != ESP_OK) {
             if (tracker_mqtt_resume_connected_session("connect_result_probe", false)) {
@@ -519,6 +542,7 @@ esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_connect_er
         }
     }
 
+    // A fresh broker session always clears the subscription cache so the command topic can be reasserted afterwards.
     s_connected = true;
     s_commands_subscribed = false;
     ESP_LOGI(TRACKER_MQTT_TAG,
@@ -529,6 +553,7 @@ esp_err_t tracker_mqtt_connect_once(const char *server_addr, int *out_connect_er
 }
 
 static void tracker_mqtt_log_diag_cmd(const char *cmd, uint32_t timeout_ms) {
+    // Emit one diagnostic-command snapshot here so field logs show the modem view of MQTT state.
     if (util_string_empty(cmd)) {
         ESP_LOGW(TRACKER_MQTT_TAG, "diag cmd empty");
         return;
@@ -552,12 +577,14 @@ static void tracker_mqtt_log_diag_cmd(const char *cmd, uint32_t timeout_ms) {
 }
 
 void tracker_mqtt_log_connect_diagnostics(void) {
+    // Emit the standard MQTT connectivity diagnostic bundle here when a connect path needs more context.
     tracker_mqtt_log_diag_cmd("AT+CMQTTDISC?\r", MQTT_CMD_TIMEOUT_MS);
     tracker_mqtt_log_diag_cmd("AT+CMQTTACCQ?\r", MQTT_CMD_TIMEOUT_MS);
     tracker_mqtt_log_diag_cmd("AT+CMQTTCONNECT?\r", MQTT_CMD_TIMEOUT_MS);
 }
 
 esp_err_t tracker_mqtt_send_disconnect(void) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (!s_connected && !s_client_acquired) {
         return ESP_OK;
     }
@@ -583,6 +610,7 @@ esp_err_t tracker_mqtt_send_disconnect(void) {
 }
 
 esp_err_t tracker_mqtt_release_client(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_client_acquired) {
         return ESP_OK;
     }
@@ -608,6 +636,7 @@ esp_err_t tracker_mqtt_release_client(void) {
 }
 
 esp_err_t tracker_mqtt_stop_service(void) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
     if (!s_service_started) {
         return ESP_OK;
     }
@@ -633,6 +662,7 @@ esp_err_t tracker_mqtt_stop_service(void) {
 }
 
 esp_err_t tracker_mqtt_cleanup_after_connect_failure(void) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     esp_err_t first_err = ESP_OK;
     esp_err_t disc_err = tracker_mqtt_send_disconnect();
     if (first_err == ESP_OK && disc_err != ESP_OK) {
@@ -692,6 +722,7 @@ esp_err_t tracker_mqtt_cleanup_after_connect_failure(void) {
 }
 
 esp_err_t tracker_mqtt_session_connect(void) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     if (s_connected) {
         return ESP_OK;
     }
@@ -746,6 +777,7 @@ esp_err_t tracker_mqtt_session_connect(void) {
 }
 
 esp_err_t tracker_mqtt_session_disconnect(void) {
+    // Drive the transport or session toward a connected state while keeping retries explicit.
     esp_err_t first_err = ESP_OK;
 
     esp_err_t err = tracker_mqtt_send_disconnect();

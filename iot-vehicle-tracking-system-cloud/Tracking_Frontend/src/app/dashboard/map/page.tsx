@@ -51,7 +51,7 @@ const MapPage = () => {
 
         <div className="relative min-w-0 flex-1">
           {mapErrorMessage ? (
-            <div className="absolute left-3 right-3 top-3 z-[1200] md:max-w-[34rem]">
+            <div className="absolute left-3 right-3 top-3 z-[60] md:max-w-[34rem]">
               <Alert
                 variant="destructive"
                 className="border bg-background/95 shadow-lg backdrop-blur"

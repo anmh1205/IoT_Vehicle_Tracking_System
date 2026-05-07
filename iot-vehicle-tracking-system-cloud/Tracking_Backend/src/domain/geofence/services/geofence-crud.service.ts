@@ -52,7 +52,7 @@ const hydrateVehicleIds = async (geofence: Geofence): Promise<GeofencePublic> =>
 export const getGeofenceById = async (id: number): Promise<GeofencePublic> => {
   const geofence = await geofenceRepo.findById(id);
   if (!geofence) {
-    throw createNotFoundError(`Geofence with ID ${id} not found`);
+    throw createNotFoundError(`Vùng với ID ${id} không tồn tại`);
   }
   return hydrateVehicleIds(geofence);
 };
@@ -62,7 +62,7 @@ export const createGeofence = async (
   createdBy?: number,
 ): Promise<GeofencePublic> => {
   const geofence = await geofenceRepo.create(input, createdBy);
-  logger.info(`Geofence "${input.name}" created successfully`);
+  logger.info(`Zone "${input.name}" created successfully`);
   return hydrateVehicleIds(geofence);
 };
 
@@ -72,26 +72,26 @@ export const updateGeofence = async (
 ): Promise<GeofencePublic> => {
   const existing = await geofenceRepo.findById(id);
   if (!existing) {
-    throw createNotFoundError(`Geofence with ID ${id} not found`);
+    throw createNotFoundError(`Vùng với ID ${id} không tồn tại`);
   }
 
   const updated = await geofenceRepo.update(id, input);
   if (!updated) {
-    throw createNotFoundError(`Geofence with ID ${id} not found`);
+    throw createNotFoundError(`Vùng với ID ${id} không tồn tại`);
   }
 
-  logger.info(`Geofence "${existing.name}" updated successfully`);
+  logger.info(`Zone "${existing.name}" updated successfully`);
   return hydrateVehicleIds(updated);
 };
 
 export const deleteGeofence = async (id: number): Promise<void> => {
   const existing = await geofenceRepo.findById(id);
   if (!existing) {
-    throw createNotFoundError(`Geofence with ID ${id} not found`);
+    throw createNotFoundError(`Vùng với ID ${id} không tồn tại`);
   }
 
   await geofenceRepo.remove(id);
-  logger.info(`Geofence "${existing.name}" deleted successfully`);
+  logger.info(`Zone "${existing.name}" deleted successfully`);
 };
 
 export const assignVehicleToGeofence = async (
@@ -100,11 +100,11 @@ export const assignVehicleToGeofence = async (
 ): Promise<{ success: true }> => {
   const geofence = await geofenceRepo.findById(geofenceId);
   if (!geofence) {
-    throw createNotFoundError(`Geofence with ID ${geofenceId} not found`);
+    throw createNotFoundError(`Vùng với ID ${geofenceId} không tồn tại`);
   }
 
   await geofenceRepo.assignVehicle(geofenceId, vehicleId);
-  logger.info(`Vehicle "${vehicleId}" assigned to geofence "${geofence.name}"`);
+  logger.info(`Vehicle "${vehicleId}" assigned to zone "${geofence.name}"`);
   return { success: true };
 };
 
@@ -114,15 +114,15 @@ export const unassignVehicleFromGeofence = async (
 ): Promise<{ success: true }> => {
   const geofence = await geofenceRepo.findById(geofenceId);
   if (!geofence) {
-    throw createNotFoundError(`Geofence with ID ${geofenceId} not found`);
+    throw createNotFoundError(`Vùng với ID ${geofenceId} không tồn tại`);
   }
 
   const removed = await geofenceRepo.unassignVehicle(geofenceId, vehicleId);
   if (!removed) {
-    throw createNotFoundError(`Vehicle "${vehicleId}" is not assigned to this geofence`);
+    throw createNotFoundError(`Phương tiện "${vehicleId}" chưa được gán vào vùng này`);
   }
 
-  logger.info(`Vehicle "${vehicleId}" unassigned from geofence "${geofence.name}"`);
+  logger.info(`Vehicle "${vehicleId}" unassigned from zone "${geofence.name}"`);
   return { success: true };
 };
 

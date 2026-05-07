@@ -39,7 +39,7 @@ export const PieGraph = ({ data, isLoading }: { data: PieStatusPoint[]; isLoadin
   return (
     <Card className="min-w-0">
       <CardHeader>
-        <CardTitle>Phân bố trạng thái thiết bị</CardTitle>
+        <CardTitle>Phân bố trạng thái kết nối thiết bị</CardTitle>
       </CardHeader>
       <CardContent className="min-w-0">
         <div ref={chartContainerRef} className="h-[320px] min-w-0">
@@ -47,7 +47,7 @@ export const PieGraph = ({ data, isLoading }: { data: PieStatusPoint[]; isLoadin
             <Skeleton className="h-full w-full" />
           ) : data.length === 0 || !hasMeaningfulData ? (
             <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-              Chưa có dữ liệu trạng thái thiết bị.
+              Chưa có dữ liệu trạng thái kết nối thiết bị.
             </div>
           ) : (
             <PieChart width={chartSize.width} height={chartSize.height}>

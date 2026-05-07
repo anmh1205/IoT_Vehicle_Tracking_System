@@ -1,12 +1,13 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
 import { AlertTriangle, Car, CircleOff, Gauge, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/common/data-table';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { StatCard } from '@/components/common/stat-card';
@@ -22,6 +23,7 @@ import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { ViolationDetailModal } from '@/features/violations/components/violation-detail-modal';
 import { getViolationTypeLabel, VIOLATION_TYPE_LABELS } from '@/features/violations/utils/violation-labels';
+import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 
 const SEVERITY_LABELS: Record<string, string> = {
   critical: 'Nghiêm trọng',
@@ -36,15 +38,15 @@ const PAGE_SIZE = 20;
 const ViolationsPage = () => {
   const queryClient = useQueryClient();
   const [typeFilter, setTypeFilter] = useState<string>(ALL_TYPES);
-  const [page, setPage] = useState(1);
   const [detailItem, setDetailItem] = useState<any | null>(null);
 
-  const violations = useQuery({
-    queryKey: ['violations', page, typeFilter],
-    queryFn: () =>
+  const violations = useInfiniteListQuery<any>({
+    queryKey: ['violations', typeFilter],
+    pageSize: PAGE_SIZE,
+    queryFn: ({ page, limit }) =>
       violationServices.getList({
         page,
-        limit: PAGE_SIZE,
+        limit,
         ...(typeFilter !== ALL_TYPES ? { violationType: typeFilter } : {}),
       }),
   });
@@ -60,19 +62,16 @@ const ViolationsPage = () => {
     },
   });
 
-  const rows = useMemo(() => {
-    return violations.data?.items ?? violations.data?.data?.items ?? [];
-  }, [violations.data]);
-  const pagination = violations.data?.pagination ?? violations.data?.data?.pagination;
+  const rows = violations.items;
 
   const stats = useMemo(
     () => ({
-      total: rows.length,
+      total: violations.total || rows.length,
       speeding: rows.filter((row: any) => row.violationType === 'speeding').length,
       harsh: rows.filter((row: any) => row.violationType === 'harsh_braking').length,
       idle: rows.filter((row: any) => row.violationType === 'idle_too_long').length,
     }),
-    [rows],
+    [rows, violations.total],
   );
 
   const columns: ColumnDef<any>[] = [
@@ -144,25 +143,25 @@ const ViolationsPage = () => {
     <PageContainer pageTitle="Vi phạm" pageDescription="Lịch sử vi phạm vận hành">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Tổng vi phạm"
+          title="Vi phạm đã tải"
           value={stats.total}
           icon={<AlertTriangle className="h-4 w-4" />}
           isLoading={violations.isLoading}
         />
         <StatCard
-          title="Vượt tốc độ"
+          title="Vượt tốc độ đã tải"
           value={stats.speeding}
           icon={<Gauge className="h-4 w-4" />}
           isLoading={violations.isLoading}
         />
         <StatCard
-          title="Phanh gấp"
+          title="Phanh gấp đã tải"
           value={stats.harsh}
           icon={<Car className="h-4 w-4" />}
           isLoading={violations.isLoading}
         />
         <StatCard
-          title="Dừng quá lâu"
+          title="Dừng lâu đã tải"
           value={stats.idle}
           icon={<CircleOff className="h-4 w-4" />}
           isLoading={violations.isLoading}
@@ -181,10 +180,7 @@ const ViolationsPage = () => {
           <div className="w-full sm:w-auto">
             <Select
               value={typeFilter}
-              onValueChange={(value) => {
-                setPage(1);
-                setTypeFilter(value);
-              }}
+              onValueChange={(value) => setTypeFilter(value)}
             >
               <SelectTrigger aria-label="Lọc theo loại vi phạm" className="sm:w-[14rem]">
                 <SelectValue placeholder="Loại vi phạm" />
@@ -202,25 +198,14 @@ const ViolationsPage = () => {
         }
       />
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Trang {pagination?.page ?? page} / {Math.max(pagination?.totalPages ?? 1, 1)}. Hiển thị{' '}
-          {rows.length} vi phạm trên tổng {pagination?.total ?? rows.length} bản ghi.
-        </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
-            Trang trước
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= Math.max(pagination?.totalPages ?? 1, 1)}
-            onClick={() => setPage((value) => value + 1)}
-          >
-            Trang sau
-          </Button>
-        </div>
-      </div>
+      <InfiniteScrollTrigger
+        hasMore={violations.hasMore}
+        isLoadingMore={violations.isFetchingNextPage}
+        onLoadMore={violations.loadMore}
+        loadedCount={violations.loadedCount}
+        totalCount={violations.total}
+        itemLabel="vi phạm"
+      />
 
       <ViolationDetailModal
         open={Boolean(detailItem)}

@@ -1,6 +1,5 @@
 'use client';
 
-import { DEVICE_STATUS_LABELS } from '@/features/devices/components/device-constants';
 import { useVehicleAllowedZone } from '@/features/geofences/hooks/use-vehicle-allowed-zone';
 import {
   describeBoundarySelections,
@@ -8,6 +7,11 @@ import {
   getZoneTypeLabel,
 } from '@/features/geofences/lib/allowed-zone-form';
 import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
+import {
+  getConnectivityPresentation,
+  getDeviceRuntimePresentation,
+  getVehicleStatePresentation,
+} from '@/lib/utils/device-state';
 import {
   formatElectricalMetric,
   formatTemperatureMetric,
@@ -83,19 +87,19 @@ export const WorkspaceOverviewQuickStats = ({
   const vehicleBatteryValue = resolveVehicleBatteryValue(latestTrackingRow, positionSnapshot);
   const engineTemperatureValue = resolveEngineTemperatureValue(latestTrackingRow, positionSnapshot);
   const activeZone = zoneQuery.data ?? null;
+  const vehicleState = getVehicleStatePresentation(device?.vehicleState);
+  const runtimeState = getDeviceRuntimePresentation(device?.deviceState);
+  const connectivityState = getConnectivityPresentation(device?.currentStatus);
 
   if (variant === 'compact') {
     const compactTiles = [
       {
-        label: 'Tốc độ',
-        value:
-          latestSpeed !== null && Number.isFinite(latestSpeed)
-            ? `${latestSpeed.toFixed(1)} km/h`
-            : 'Chưa có',
+        label: vehicleState.label,
+        value: vehicleState.value,
       },
       {
-        label: 'Tọa độ',
-        value: coordinateLabel,
+        label: connectivityState.label,
+        value: connectivityState.value,
       },
       {
         label: 'Ắc quy xe',
@@ -112,7 +116,7 @@ export const WorkspaceOverviewQuickStats = ({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-semibold">Thông số nhanh</p>
           <p className="text-xs text-muted-foreground">
-            {latestTelemetryTimestamp ? `Cập nhật ${formatRelative(latestTelemetryTimestamp)}` : 'Chưa có dữ liệu đo từ xa'}
+            {latestTelemetryTimestamp ? `Cập nhật ${formatRelative(latestTelemetryTimestamp)}` : 'Chưa có telemetry'}
           </p>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
@@ -142,14 +146,19 @@ export const WorkspaceOverviewQuickStats = ({
 
   const tiles = [
     {
-      label: 'Trạng thái',
-      value: DEVICE_STATUS_LABELS[device?.currentStatus ?? ''] ?? device?.currentStatus ?? 'Chưa có',
+      label: vehicleState.label,
+      value: vehicleState.value,
+      note: device?.vehiclePlate ?? 'Chưa gắn biển số',
+    },
+    {
+      label: connectivityState.label,
+      value: connectivityState.value,
       note: device?.deviceId ?? 'Chưa có mã thiết bị',
     },
     {
-      label: 'Cập nhật',
-      value: latestTelemetryTimestamp ? formatRelative(latestTelemetryTimestamp) : 'Chưa có bản tin',
-      note: latestTelemetryTimestamp ? formatDateTime(latestTelemetryTimestamp) : 'Chưa có dữ liệu đo từ xa mới',
+      label: runtimeState.label,
+      value: runtimeState.value,
+      note: latestTelemetryTimestamp ? `Cập nhật ${formatRelative(latestTelemetryTimestamp)}` : 'Chưa có telemetry',
     },
     {
       label: 'Xe liên kết',
@@ -171,7 +180,7 @@ export const WorkspaceOverviewQuickStats = ({
     {
       label: 'Tốc độ gần nhất',
       value: latestSpeed !== null ? `${latestSpeed.toFixed(1)} km/h` : 'Chưa có dữ liệu',
-      note: latestTrackingRow ? 'Lấy từ dữ liệu đo từ xa gần nhất' : 'Đang dùng ảnh chụp hiện có',
+      note: latestTrackingRow ? 'Lấy từ telemetry gần nhất' : 'Đang dùng ảnh chụp hiện có',
     },
     {
       label: 'Tọa độ',
@@ -190,6 +199,16 @@ export const WorkspaceOverviewQuickStats = ({
       label: 'Cảnh báo vùng',
       value: zoneAlertCount > 0 ? `${zoneAlertCount} cảnh báo` : 'Không có cảnh báo',
       note: 'Gộp lịch sử cảnh báo vùng trong cùng một nhóm.',
+    },
+    {
+      label: 'Ắc quy xe',
+      value: formatElectricalMetric(vehicleBatteryValue),
+      note: latestTelemetryTimestamp ? formatDateTime(latestTelemetryTimestamp) : 'Chưa có mốc telemetry',
+    },
+    {
+      label: 'Nhiệt độ máy',
+      value: formatTemperatureMetric(engineTemperatureValue),
+      note: 'Ưu tiên telemetry mới nhất hoặc snapshot vị trí',
     },
   ];
 

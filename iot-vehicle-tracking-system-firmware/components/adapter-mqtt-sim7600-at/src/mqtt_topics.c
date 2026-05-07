@@ -9,7 +9,12 @@
 /**
  * @file mqtt_topics.c
  * @brief Topic and server-address builders for the tracker MQTT facade.
+ * This translation unit belongs to the SIM7600 AT MQTT adapter layer and keeps adapter-local state, topic wiring, and broker command sequencing isolated behind the exported entry points.
  */
+
+// File-local constants, retained state, and helper wiring stay private here so
+// higher layers interact with this module through its exported contract.
+
 
 /**
  * @brief Check if host forces default TLS port.
@@ -18,6 +23,7 @@
  * @return True if forces TLS.
  */
 bool tracker_mqtt_host_forces_tls_default_port(const char *host) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return !util_string_empty(host) && strcmp(host, TRACKER_MQTT_TLS_HOST) == 0;
 }
 
@@ -28,11 +34,13 @@ bool tracker_mqtt_host_forces_tls_default_port(const char *host) {
  * @return True if TLS required.
  */
 bool tracker_mqtt_use_tls(const config_t *cfg) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
     return cfg != NULL &&
            (tracker_mqtt_host_forces_tls_default_port(cfg->mqtt_host) || cfg->mqtt_port == MQTT_IMPLICIT_TLS_PORT);
 }
 
 esp_err_t tracker_mqtt_build_server_addrs(const config_t *cfg) {
+    // Build the broker endpoint strings here once so connect logic can switch between primary and fallback cleanly.
     ESP_RETURN_ON_NULL(cfg, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "cfg null");
     ESP_RETURN_ON_FALSE(!util_string_empty(cfg->mqtt_host),
                         ESP_ERR_INVALID_ARG,
@@ -76,6 +84,7 @@ esp_err_t tracker_mqtt_build_server_addrs(const config_t *cfg) {
  * @brief Build MQTT topics from device ID.
  */
 void tracker_mqtt_build_topics(void) {
+    // Compose every device-scoped topic here once so publish and subscribe paths share the exact same names.
     int n = snprintf(s_topic_rawdata, sizeof(s_topic_rawdata), "v1/%s/rawdata", s_cfg.device_id);
     if (n < 0 || (size_t)n >= sizeof(s_topic_rawdata)) {
         ESP_LOGW(TRACKER_MQTT_TAG, "rawdata topic truncated");

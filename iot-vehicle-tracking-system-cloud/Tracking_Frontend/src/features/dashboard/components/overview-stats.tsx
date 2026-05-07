@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Bell, Car, Cpu, Route } from 'lucide-react';
 import { StatCard } from '@/components/common/stat-card';
@@ -40,11 +40,11 @@ export const OverviewStats = ({
   const runtimeDelta = runtimeToday - averageDailyRuntime;
 
   const totalDevicesSubtitle =
-    offlineDevices > 0 ? `${offlineDevices} thiết bị đang ngoại tuyến` : 'Không có thiết bị ngoại tuyến';
+    offlineDevices > 0 ? `${offlineDevices} thiết bị đang mất kết nối` : 'Không có thiết bị mất kết nối';
   const activeDevicesSubtitle =
     inactiveDevices > 0
-      ? `${inactiveDevices} thiết bị còn lại đang dừng hoặc mất kết nối`
-      : 'Toàn bộ thiết bị đang gửi dữ liệu';
+      ? `${inactiveDevices} thiết bị còn lại đang chậm nhịp hoặc mất kết nối`
+      : 'Toàn bộ thiết bị đang có tín hiệu';
   const alertsSubtitle =
     offlineDevices > 0
       ? `${offlineDevices} thiết bị cần kiểm tra kết nối`
@@ -53,8 +53,8 @@ export const OverviewStats = ({
   const tripsTrend =
     sessionsToday > 0 ? `${sessionsPerDevice.toFixed(1)} phiên mỗi thiết bị` : 'Chưa phát sinh phiên mới';
   const summaryItems = [
-    { label: 'Tỷ lệ trực tuyến', value: `${activeRate.toFixed(1)}%` },
-    { label: 'Tỷ lệ ngoại tuyến', value: `${offlineRate.toFixed(1)}%` },
+    { label: 'Tỷ lệ còn tín hiệu', value: `${activeRate.toFixed(1)}%` },
+    { label: 'Tỷ lệ mất kết nối', value: `${offlineRate.toFixed(1)}%` },
     { label: 'Thời gian hoạt động hôm nay', value: formatDelta(runtimeDelta) },
   ];
 
@@ -67,17 +67,17 @@ export const OverviewStats = ({
           icon={<Car className="h-4 w-4 text-muted-foreground" />}
           subtitle={totalDevicesSubtitle}
           trend={{
-            value: `${activeDevices}/${totalDevices || 1} đang gửi đều`,
+            value: `${activeDevices}/${totalDevices || 1} còn tín hiệu`,
             positive: activeRate >= 70,
           }}
           isLoading={isLoading}
         />
         <StatCard
-          title="Thiết bị trực tuyến"
+          title="Thiết bị còn tín hiệu"
           value={activeDevices}
           icon={<Cpu className="h-4 w-4 text-muted-foreground" />}
           subtitle={activeDevicesSubtitle}
-          trend={{ value: `${activeRate.toFixed(1)}% trực tuyến`, positive: activeRate >= 60 }}
+          trend={{ value: `${activeRate.toFixed(1)}% còn tín hiệu`, positive: activeRate >= 60 }}
           isLoading={isLoading}
         />
         <StatCard

@@ -2,9 +2,10 @@
 
 import { useDeferredValue, useMemo, useState } from 'react';
 import { AlertTriangle, CircleCheckBig, CircleOff, IdCard, Plus, UserRound } from 'lucide-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DataTable } from '@/components/common/data-table';
+import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger';
 import { StatCard } from '@/components/common/stat-card';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { Button } from '@/components/ui/button';
@@ -23,26 +24,34 @@ import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { getDriverColumns } from '@/features/drivers/components/driver-columns';
 import { DriverForm } from '@/features/drivers/components/driver-form';
 import { DriverDetailModal } from '@/features/drivers/components/driver-detail-modal';
+import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 
 const PAGE_SIZE = 20;
+
+const emptyToNull = (value: unknown) => {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return normalized.length > 0 ? normalized : null;
+};
+
+const emptyToUndefined = (value: unknown) => emptyToNull(value) ?? undefined;
 
 const DriversPage = () => {
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any | null>(null);
   const [detailItem, setDetailItem] = useState<any | null>(null);
   const [deleteItem, setDeleteItem] = useState<any | null>(null);
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'all' | 'active' | 'inactive' | 'suspended'>('all');
-  const deferredSearch = useDeferredValue(search);
+  const deferredSearch = useDeferredValue(search.trim());
   const queryClient = useQueryClient();
 
-  const drivers = useQuery({
-    queryKey: ['drivers', page, deferredSearch, status],
-    queryFn: () =>
+  const drivers = useInfiniteListQuery<any>({
+    queryKey: ['drivers', deferredSearch, status],
+    pageSize: PAGE_SIZE,
+    queryFn: ({ page, limit }) =>
       driverServices.getList({
         page,
-        limit: PAGE_SIZE,
+        limit,
         search: deferredSearch || undefined,
         status: status === 'all' ? undefined : status,
       }),
@@ -51,20 +60,19 @@ const DriversPage = () => {
   const createMutation = useMutation({
     mutationFn: (payload: any) =>
       driverServices.create({
-        driverCode: payload.driverCode,
-        fullName: payload.fullName,
-        phone: payload.phone || undefined,
-        email: payload.email || undefined,
-        licenseNumber: payload.licenseNumber || undefined,
-        licenseType: payload.licenseType || undefined,
-        licenseExpiry: payload.licenseExpiry || undefined,
-        dateOfBirth: payload.dateOfBirth || undefined,
-        address: payload.address || undefined,
+        driverCode: String(payload.driverCode ?? '').trim(),
+        fullName: String(payload.fullName ?? '').trim(),
+        phone: emptyToUndefined(payload.phone),
+        email: emptyToUndefined(payload.email),
+        licenseNumber: emptyToUndefined(payload.licenseNumber),
+        licenseType: emptyToUndefined(payload.licenseType),
+        licenseExpiry: emptyToUndefined(payload.licenseExpiry),
+        dateOfBirth: emptyToUndefined(payload.dateOfBirth),
+        address: emptyToUndefined(payload.address),
         status: payload.status || undefined,
-        notes: payload.notes || undefined,
+        notes: emptyToUndefined(payload.notes),
       }),
     onSuccess: async () => {
-      setPage(1);
       setSearch('');
       setStatus('all');
       await queryClient.invalidateQueries({ queryKey: ['drivers'] });
@@ -81,16 +89,16 @@ const DriversPage = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: any) =>
       driverServices.update(id, {
-        fullName: payload.fullName || undefined,
-        phone: payload.phone || undefined,
-        email: payload.email || undefined,
-        licenseNumber: payload.licenseNumber || undefined,
-        licenseType: payload.licenseType || undefined,
-        licenseExpiry: payload.licenseExpiry || undefined,
-        dateOfBirth: payload.dateOfBirth || undefined,
-        address: payload.address || undefined,
+        fullName: String(payload.fullName ?? '').trim(),
+        phone: emptyToNull(payload.phone),
+        email: emptyToNull(payload.email),
+        licenseNumber: emptyToNull(payload.licenseNumber),
+        licenseType: emptyToNull(payload.licenseType),
+        licenseExpiry: emptyToNull(payload.licenseExpiry),
+        dateOfBirth: emptyToNull(payload.dateOfBirth),
+        address: emptyToNull(payload.address),
         status: payload.status || undefined,
-        notes: payload.notes || undefined,
+        notes: emptyToNull(payload.notes),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['drivers'] });
@@ -119,19 +127,16 @@ const DriversPage = () => {
     },
   });
 
-  const rows = useMemo(() => drivers.data?.items ?? drivers.data?.data?.items ?? [], [drivers.data]);
-  const pagination = drivers.data?.pagination ?? drivers.data?.data?.pagination;
+  const rows = drivers.items;
   const stats = useMemo(
     () => ({
-      total: pagination?.total ?? rows.length,
+      total: drivers.total || rows.length,
       active: rows.filter((row: any) => row.status === 'active').length,
       inactive: rows.filter((row: any) => row.status === 'inactive').length,
       withLicense: rows.filter((row: any) => Boolean(row.licenseNumber)).length,
     }),
-    [pagination?.total, rows],
+    [drivers.total, rows],
   );
-
-  const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
   const driversErrorMessage = drivers.isError
     ? getApiErrorMessage(
@@ -164,19 +169,19 @@ const DriversPage = () => {
           isLoading={drivers.isLoading}
         />
         <StatCard
-          title="Hoạt động trên trang"
+          title="Hoạt động đã tải"
           value={stats.active}
           icon={<CircleCheckBig className="h-4 w-4" />}
           isLoading={drivers.isLoading}
         />
         <StatCard
-          title="Ngưng hoạt động trên trang"
+          title="Ngưng hoạt động đã tải"
           value={stats.inactive}
           icon={<CircleOff className="h-4 w-4" />}
           isLoading={drivers.isLoading}
         />
         <StatCard
-          title="Có GPLX"
+          title="Có GPLX đã tải"
           value={stats.withLicense}
           icon={<IdCard className="h-4 w-4" />}
           isLoading={drivers.isLoading}
@@ -230,19 +235,13 @@ const DriversPage = () => {
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Input
               value={search}
-              onChange={(event) => {
-                setPage(1);
-                setSearch(event.target.value);
-              }}
+              onChange={(event) => setSearch(event.target.value)}
               placeholder="Tìm theo mã, tên, số điện thoại hoặc GPLX..."
               className="w-full sm:max-w-sm"
             />
             <Select
               value={status}
-              onValueChange={(value: 'all' | 'active' | 'inactive' | 'suspended') => {
-                setPage(1);
-                setStatus(value);
-              }}
+              onValueChange={(value: 'all' | 'active' | 'inactive' | 'suspended') => setStatus(value)}
             >
               <SelectTrigger className="w-full sm:w-[220px]">
                 <SelectValue placeholder="Trạng thái" />
@@ -258,25 +257,14 @@ const DriversPage = () => {
         }
       />
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Trang {pagination?.page ?? page} / {totalPages}. Hiển thị {rows.length} hồ sơ trên tổng{' '}
-          {pagination?.total ?? rows.length} tài xế.
-        </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
-            Trang trước
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => setPage((value) => value + 1)}
-          >
-            Trang sau
-          </Button>
-        </div>
-      </div>
+      <InfiniteScrollTrigger
+        hasMore={drivers.hasMore}
+        isLoadingMore={drivers.isFetchingNextPage}
+        onLoadMore={drivers.loadMore}
+        loadedCount={drivers.loadedCount}
+        totalCount={drivers.total}
+        itemLabel="tài xế"
+      />
 
       <DriverForm
         open={open}

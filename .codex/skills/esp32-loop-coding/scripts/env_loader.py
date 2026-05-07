@@ -25,21 +25,21 @@ def _parse_env_file(file_path: Path) -> dict[str, str]:
 
 
 def load_skill_env(skill_name: str, cwd: str | None = None) -> dict[str, str]:
-    """Load env with priority: process.env > HOME files > CWD files."""
+    """Load env with priority: process.env > CWD files > HOME files."""
     home = Path.home()
     current = Path(cwd or os.getcwd())
 
     ordered_files = [
-        home / ".claude" / "skills" / skill_name / ".env",
-        home / ".claude" / "skills" / ".env",
         home / ".claude" / ".env",
-        current / ".claude" / "skills" / skill_name / ".env",
-        current / ".claude" / "skills" / ".env",
+        home / ".claude" / "skills" / ".env",
+        home / ".claude" / "skills" / skill_name / ".env",
         current / ".claude" / ".env",
+        current / ".claude" / "skills" / ".env",
+        current / ".claude" / "skills" / skill_name / ".env",
     ]
 
     merged: dict[str, str] = {}
-    for env_file in reversed(ordered_files):
+    for env_file in ordered_files:
         merged.update(_parse_env_file(env_file))
 
     for key, value in merged.items():

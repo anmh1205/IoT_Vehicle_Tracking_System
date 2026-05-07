@@ -121,25 +121,6 @@ def _tail_lines(text: str, limit: int = 60) -> list[str]:
     return text.splitlines()[-limit:]
 
 
-def _is_retryable_flash_failure(completed: subprocess.CompletedProcess[str]) -> bool:
-    combined = "\n".join(
-        part for part in [completed.stdout or "", completed.stderr or ""] if part
-    ).lower()
-    retryable_markers = [
-        "failed to connect to esp32",
-        "no serial data received",
-        "could not open com",
-        "could not open port",
-        "access is denied",
-        "port is busy",
-        "device attached to the system is not functioning",
-        "permissionerror",
-        "doesn't exist",
-        "cannot configure port",
-    ]
-    return any(marker in combined for marker in retryable_markers)
-
-
 def find_esptool_python(explicit_python: str | None) -> str | None:
     candidates: list[Path] = []
     for raw in [explicit_python, os.getenv("ESP32_ESPTOOL_PYTHON")]:
@@ -283,7 +264,6 @@ def run_wait_and_flash(
     esptool_script: str | None,
     no_flash: bool,
 ) -> WaitAndFlashResult:
-    started_at = time.monotonic()
     try:
         flash_plan = resolve_flash_plan(
             firmware_dir, flash_method, export_script, flash_command_template, flash_baud, esptool_python, esptool_script
@@ -303,107 +283,55 @@ def run_wait_and_flash(
             flash_stderr_tail=[],
         )
 
-    total_attempts = 0
-    candidate_ports: list[str] = []
-    last_error = ""
-    last_port: str | None = None
-    last_rendered_command = flash_plan.display
-    last_flash_exit_code: int | None = None
-    last_flash_stdout_tail: list[str] = []
-    last_flash_stderr_tail: list[str] = []
-
-    while True:
-        elapsed_before_wait = time.monotonic() - started_at
-        remaining_wait_seconds = max_wait_seconds - int(elapsed_before_wait)
-        if remaining_wait_seconds <= 0:
-            status = "flash-failed" if last_flash_exit_code is not None else "timeout"
-            return WaitAndFlashResult(
-                status=status,
-                flash_mode=flash_plan.mode,
-                port=last_port,
-                attempts=total_attempts,
-                elapsed_seconds=round(time.monotonic() - started_at, 2),
-                candidate_ports=candidate_ports,
-                last_error=last_error,
-                flash_command=last_rendered_command,
-                flash_exit_code=last_flash_exit_code,
-                flash_stdout_tail=last_flash_stdout_tail,
-                flash_stderr_tail=last_flash_stderr_tail,
-            )
-
-        port, attempts, _, candidate_ports, last_error = wait_for_ready_port(
-            preferred_port, vid, pid, description_contains, baud, remaining_wait_seconds, probe_interval_ms
+    port, attempts, elapsed, candidate_ports, last_error = wait_for_ready_port(
+        preferred_port, vid, pid, description_contains, baud, max_wait_seconds, probe_interval_ms
+    )
+    if not port:
+        return WaitAndFlashResult(
+            status="timeout",
+            flash_mode=flash_plan.mode,
+            port=None,
+            attempts=attempts,
+            elapsed_seconds=elapsed,
+            candidate_ports=candidate_ports,
+            last_error=last_error,
+            flash_command=flash_plan.display,
+            flash_exit_code=None,
+            flash_stdout_tail=[],
+            flash_stderr_tail=[],
         )
-        total_attempts += attempts
-        if not port:
-            status = "flash-failed" if last_flash_exit_code is not None else "timeout"
-            return WaitAndFlashResult(
-                status=status,
-                flash_mode=flash_plan.mode,
-                port=last_port,
-                attempts=total_attempts,
-                elapsed_seconds=round(time.monotonic() - started_at, 2),
-                candidate_ports=candidate_ports,
-                last_error=last_error,
-                flash_command=last_rendered_command,
-                flash_exit_code=last_flash_exit_code,
-                flash_stdout_tail=last_flash_stdout_tail,
-                flash_stderr_tail=last_flash_stderr_tail,
-            )
 
-        rendered_command = flash_plan.display.replace("<PORT>", port)
-        last_port = port
-        last_rendered_command = rendered_command
-        if no_flash:
-            return WaitAndFlashResult(
-                status="ready-no-flash",
-                flash_mode=flash_plan.mode,
-                port=port,
-                attempts=total_attempts,
-                elapsed_seconds=round(time.monotonic() - started_at, 2),
-                candidate_ports=candidate_ports,
-                last_error=last_error,
-                flash_command=rendered_command,
-                flash_exit_code=None,
-                flash_stdout_tail=[],
-                flash_stderr_tail=[],
-            )
+    rendered_command = flash_plan.display.replace("<PORT>", port)
+    if no_flash:
+        return WaitAndFlashResult(
+            status="ready-no-flash",
+            flash_mode=flash_plan.mode,
+            port=port,
+            attempts=attempts,
+            elapsed_seconds=elapsed,
+            candidate_ports=candidate_ports,
+            last_error=last_error,
+            flash_command=rendered_command,
+            flash_exit_code=None,
+            flash_stdout_tail=[],
+            flash_stderr_tail=[],
+        )
 
-        completed = run_flash(flash_plan, port)
-        last_flash_exit_code = completed.returncode
-        last_flash_stdout_tail = _tail_lines(completed.stdout)
-        last_flash_stderr_tail = _tail_lines(completed.stderr)
-        if completed.returncode == 0:
-            return WaitAndFlashResult(
-                status="flash-ok",
-                flash_mode=flash_plan.mode,
-                port=port,
-                attempts=total_attempts,
-                elapsed_seconds=round(time.monotonic() - started_at, 2),
-                candidate_ports=candidate_ports,
-                last_error=last_error,
-                flash_command=rendered_command,
-                flash_exit_code=completed.returncode,
-                flash_stdout_tail=last_flash_stdout_tail,
-                flash_stderr_tail=last_flash_stderr_tail,
-            )
-
-        if not _is_retryable_flash_failure(completed):
-            return WaitAndFlashResult(
-                status="flash-failed",
-                flash_mode=flash_plan.mode,
-                port=port,
-                attempts=total_attempts,
-                elapsed_seconds=round(time.monotonic() - started_at, 2),
-                candidate_ports=candidate_ports,
-                last_error=last_error,
-                flash_command=rendered_command,
-                flash_exit_code=completed.returncode,
-                flash_stdout_tail=last_flash_stdout_tail,
-                flash_stderr_tail=last_flash_stderr_tail,
-            )
-
-        time.sleep(max(probe_interval_ms, 100) / 1000.0)
+    completed = run_flash(flash_plan, port)
+    status = "flash-ok" if completed.returncode == 0 else "flash-failed"
+    return WaitAndFlashResult(
+        status=status,
+        flash_mode=flash_plan.mode,
+        port=port,
+        attempts=attempts,
+        elapsed_seconds=elapsed,
+        candidate_ports=candidate_ports,
+        last_error=last_error,
+        flash_command=rendered_command,
+        flash_exit_code=completed.returncode,
+        flash_stdout_tail=_tail_lines(completed.stdout),
+        flash_stderr_tail=_tail_lines(completed.stderr),
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:

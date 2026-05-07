@@ -7,7 +7,12 @@
 /**
  * @file power_mgr.h
  * @brief Modem control helpers for SIM7600 hardware lines.
+ * This header belongs to the ESP32-S3 board support layer and describes the board-facing contract that runtime code uses without baking GPIO details into app-core.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /**
  * @brief Initialize GPIOs used by modem control/status lines.

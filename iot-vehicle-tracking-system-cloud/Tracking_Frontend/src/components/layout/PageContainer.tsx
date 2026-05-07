@@ -32,7 +32,7 @@ export const PageContainer = ({
       {(pageTitle || pageHeaderAction) && (
         <div
           className={cn(
-            'flex flex-col gap-3 border-b pb-3 sm:flex-row sm:items-center sm:justify-between',
+            'relative z-10 flex flex-col gap-3 border-b bg-background/95 pb-3 backdrop-blur sm:flex-row sm:items-center sm:justify-between',
             headerClassName,
           )}
         >

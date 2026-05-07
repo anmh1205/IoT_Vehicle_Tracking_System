@@ -1,6 +1,8 @@
 # Firmware Source Code Reference Pack
 
-**Last updated:** 2026-04-13  
+> New reader entrypoint: [00-beginner-start-here.md](./00-beginner-start-here.md)
+
+**Last updated:** 2026-05-05  
 **Scope:** `iot-vehicle-tracking-system-firmware/`  
 **Primary source of truth:** firmware source code đang build thực tế, không phải ghi chú cũ.
 
@@ -12,7 +14,7 @@
 
 ## Điều quan trọng nhất
 1. Firmware hiện tại là một **state machine không-blocking**; hầu hết subsystem được tick dần, không init một phát rồi chờ.
-2. MQTT hiện đi qua **SIM7600 AT MQTT** trong [`main/src/mqtt_client.c`](../../../iot-vehicle-tracking-system-firmware/main/src/mqtt_client.c), không phải ESP-MQTT client thuần.
+2. MQTT hiện đi qua **SIM7600 AT MQTT** trong [`components/adapter-mqtt-sim7600-at/src/mqtt_client.c`](../../../iot-vehicle-tracking-system-firmware/components/adapter-mqtt-sim7600-at/src/mqtt_client.c), không phải ESP-MQTT client thuần.
 3. Runtime hiện đã có **RTC DS3231M**, **offline queue**, **SD replay**, **session manager**, **retry manager**, **telemetry counters**.
 4. Một số tài liệu cũ trong `documents/programming-knowledge/` vẫn hữu ích cho deep dive, nhưng không còn phản ánh đầy đủ runtime mới.
 5. `main/main.c` đang có **field-validation overrides** cho sleep/IMU/MQTT/command subscribe. Đây là hành vi runtime thật của source hiện tại, không phải ghi chú lý thuyết.
@@ -30,8 +32,15 @@
 
 ### Nếu cần rà hardware, pin, wake, modem
 1. [05-hardware-boundary-and-field-validation.md](./05-hardware-boundary-and-field-validation.md)
-2. `resources/docs/hardware-datasheets/`
-3. `iot-vehicle-tracking-system-firmware/documents/hardware-specs/`
+2. [07-hardware-module-reading-map.md](./07-hardware-module-reading-map.md)
+3. [08-sim7600-lte-gnss-mqtt-at-walkthrough.md](./08-sim7600-lte-gnss-mqtt-at-walkthrough.md)
+4. [09-ble-obd-elm327-walkthrough.md](./09-ble-obd-elm327-walkthrough.md)
+5. [10-rtc-ds3231m-walkthrough.md](./10-rtc-ds3231m-walkthrough.md)
+6. [11-imu-lis3dsh-motion-walkthrough.md](./11-imu-lis3dsh-motion-walkthrough.md)
+7. [12-adc-power-and-sd-storage-walkthrough.md](./12-adc-power-and-sd-storage-walkthrough.md)
+8. [13-sleep-wake-hardware-orchestration-walkthrough.md](./13-sleep-wake-hardware-orchestration-walkthrough.md)
+9. `resources/docs/hardware-datasheets/`
+10. `iot-vehicle-tracking-system-firmware/documents/hardware-specs/`
 
 ## Bộ tài liệu
 - [01-source-map-and-build-boundary.md](./01-source-map-and-build-boundary.md): build map, config, partition, layering.
@@ -39,7 +48,15 @@
 - [03-connectivity-payloads-and-ota.md](./03-connectivity-payloads-and-ota.md): LTE, GNSS, BLE OBD, MQTT, command, OTA.
 - [04-persistence-replay-and-diagnostics.md](./04-persistence-replay-and-diagnostics.md): NVS, RTC, SD log store, offline replay, counters.
 - [05-hardware-boundary-and-field-validation.md](./05-hardware-boundary-and-field-validation.md): pin map, external modules, what is proven vs pending.
-- [06-file-by-file-reading-map.md](./06-file-by-file-reading-map.md): file-by-file navigation for `main/inc` + `main/src`.
+- [06-file-by-file-reading-map.md](./06-file-by-file-reading-map.md): file-by-file navigation for current `components/*` firmware layout.
+- [07-hardware-module-reading-map.md](./07-hardware-module-reading-map.md): bus, pin, driver, app-core hotspot của từng module phần cứng.
+- [08-sim7600-lte-gnss-mqtt-at-walkthrough.md](./08-sim7600-lte-gnss-mqtt-at-walkthrough.md): modem power, LTE FSM, GNSS, MQTT AT, command path.
+- [09-ble-obd-elm327-walkthrough.md](./09-ble-obd-elm327-walkthrough.md): NimBLE host, BLE central manager, ELM327, PID/DTC parsing.
+- [10-rtc-ds3231m-walkthrough.md](./10-rtc-ds3231m-walkthrough.md): trusted time fallback và I2C RTC.
+- [11-imu-lis3dsh-motion-walkthrough.md](./11-imu-lis3dsh-motion-walkthrough.md): motion wake, chip detect, accel delta metric.
+- [12-adc-power-and-sd-storage-walkthrough.md](./12-adc-power-and-sd-storage-walkthrough.md): điện áp, modem control lines, SD persistence engine.
+- [13-sleep-wake-hardware-orchestration-walkthrough.md](./13-sleep-wake-hardware-orchestration-walkthrough.md): ai chặn sleep, shutdown subsystem thế nào, arm wake source ra sao, wake xong bootstrap lại module nào trước.
+- [firmware-documentation-improvement-research.md](./firmware-documentation-improvement-research.md): ý tưởng nâng cấp tài liệu từ nguồn chính thống.
 
 ## Bộ sơ đồ và ảnh
 - [assets/figures/firmware-source-overview.svg](./assets/figures/firmware-source-overview.svg)
@@ -69,10 +86,10 @@
   - background modem/IMU,
   - note validation trước đây.
 - Nhưng cần đọc cẩn thận vì hiện có drift ở ít nhất 4 vùng:
-  - RTC không còn là draft-only, source đã có [`main/src/rtc_ds3231m.c`](../../../iot-vehicle-tracking-system-firmware/main/src/rtc_ds3231m.c).
+  - RTC không còn là draft-only, source đã có [`components/adapter-rtc-ds3231m/src/rtc_ds3231m.c`](../../../iot-vehicle-tracking-system-firmware/components/adapter-rtc-ds3231m/src/rtc_ds3231m.c).
   - runtime đã có `offline_queue`, `sd_log_store`, `session_mgr`, `retry_manager`, `telemetry_counters`.
   - MQTT transport hiện là `AT+CMQTT*`.
-  - IMU runtime hiện là `imu_lis3dsh.c`, không phải naming cũ LIS3DH.
+  - IMU runtime hiện là [`components/platform-board-esp32s3/src/imu_lis3dsh.c`](../../../iot-vehicle-tracking-system-firmware/components/platform-board-esp32s3/src/imu_lis3dsh.c), không phải naming cũ LIS3DH.
 
 ## Tái tạo hình
 - Mermaid source: [`assets/uml/`](./assets/uml/)

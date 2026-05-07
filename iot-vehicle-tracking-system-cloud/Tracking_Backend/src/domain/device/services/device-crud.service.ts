@@ -49,6 +49,7 @@ const sanitizeDevice = (device: Device): DevicePublic => ({
   latitude: device.latitude,
   longitude: device.longitude,
   firmwareVersion: device.firmware_version,
+  targetFirmwareVersion: device.target_firmware_version,
   lastErrorCode: device.last_error_code,
   createdAt: device.created_at.toISOString(),
 });

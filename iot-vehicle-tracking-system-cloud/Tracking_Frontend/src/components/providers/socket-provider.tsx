@@ -34,6 +34,37 @@ const SocketContext = createContext<RealtimeContextValue | null>(null);
 const buildNamespaceUrl = (baseUrl: string, namespace: RealtimeNamespace): string =>
   `${baseUrl.replace(/\/$/, '')}/${namespace}`;
 
+const normalizeSocketUrl = (value: string | undefined): string | null => {
+  const normalized = String(value ?? '')
+    .trim()
+    .replace(/^['"]+|['"]+$/g, '')
+    .replace(/\/+$/g, '');
+
+  return normalized || null;
+};
+
+const resolveSocketBaseUrl = (): string => {
+  const fromEnv = normalizeSocketUrl(process.env.NEXT_PUBLIC_WS_URL || process.env.NEXT_PUBLIC_SOCKET_URL);
+  if (fromEnv) {
+    return fromEnv;
+  }
+
+  if (typeof window === 'undefined') {
+    return 'http://localhost:4000';
+  }
+
+  const { hostname, origin, protocol } = window.location;
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]') {
+    return 'http://localhost:4000';
+  }
+
+  if (hostname === 'thingdock.dev' || hostname.endsWith('.thingdock.dev')) {
+    return `${protocol}//api.thingdock.dev`;
+  }
+
+  return origin;
+};
+
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [sockets, setSockets] = useState<NamespaceSockets>(emptySockets);
   const [statuses, setStatuses] = useState<NamespaceStatuses>(disconnectedStatuses);
@@ -63,7 +94,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       ) as NamespaceStatuses,
     );
 
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+    const wsUrl = resolveSocketBaseUrl();
     const wsPath = process.env.NEXT_PUBLIC_WS_PATH || '/ws';
     const nextSockets: NamespaceSockets = { ...emptySockets };
 

@@ -30,8 +30,10 @@ const METRIC_SQL: Record<string, { value: string; exists: string }> = {
     exists: "(context ? 'imu_accel_delta_mps2' OR metadata ? 'imu_accel_delta_mps2' OR context ? 'vibration' OR metadata ? 'vibration')",
   },
   speed: {
-    value: "COALESCE(context->>'speed', metadata->>'speed')",
-    exists: "(context ? 'speed' OR metadata ? 'speed')",
+    value:
+      "COALESCE(context#>>'{raw_payload,data,speed}', context->>'speed', metadata->>'speed')",
+    exists:
+      "((context#>>'{raw_payload,data,speed}') IS NOT NULL OR context ? 'speed' OR metadata ? 'speed')",
   },
   vehicleBattery: {
     value: "COALESCE(context->>'vehicle_battery', metadata->>'vehicle_battery')",
@@ -54,12 +56,16 @@ const METRIC_SQL: Record<string, { value: string; exists: string }> = {
       "((context#>>'{diagnostics,signals,coolant_c}') IS NOT NULL OR context ? 'temperature' OR (metadata#>>'{diagnostics,signals,coolant_c}') IS NOT NULL OR metadata ? 'temperature')",
   },
   latitude: {
-    value: "COALESCE(context->>'latitude', metadata->>'latitude')",
-    exists: "(context ? 'latitude' OR metadata ? 'latitude')",
+    value:
+      "COALESCE(context#>>'{raw_payload,data,latitude}', context->>'latitude', metadata->>'latitude')",
+    exists:
+      "((context#>>'{raw_payload,data,latitude}') IS NOT NULL OR context ? 'latitude' OR metadata ? 'latitude')",
   },
   longitude: {
-    value: "COALESCE(context->>'longitude', metadata->>'longitude')",
-    exists: "(context ? 'longitude' OR metadata ? 'longitude')",
+    value:
+      "COALESCE(context#>>'{raw_payload,data,longitude}', context->>'longitude', metadata->>'longitude')",
+    exists:
+      "((context#>>'{raw_payload,data,longitude}') IS NOT NULL OR context ? 'longitude' OR metadata ? 'longitude')",
   },
   errorCode: {
     value: "COALESCE(context->>'error_code', metadata->>'error_code', NULLIF(error_code::text, ''))",

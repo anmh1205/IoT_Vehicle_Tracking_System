@@ -114,6 +114,7 @@ export interface DevicePublic {
   latitude: number | null;
   longitude: number | null;
   firmwareVersion: string | null;
+  targetFirmwareVersion: string | null;
   lastErrorCode: number;
   createdAt: string;
   vehiclePlate?: string | null;
@@ -208,6 +209,12 @@ export interface DeviceListQuery {
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+export interface DeviceAccessScope {
+  userId?: number;
+  role?: string;
+  deviceAccessMode?: string;
 }
 
 export interface RuntimeStats {

@@ -1,0 +1,6 @@
+- generic [active] [ref=e1]:
+  - link "Bỏ qua đến nội dung chính" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - img [ref=e4]
+  - region "Notifications alt+T"
+  - alert [ref=e6]

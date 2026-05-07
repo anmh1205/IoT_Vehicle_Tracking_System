@@ -10,7 +10,12 @@
 /**
  * @file app_state.h
  * @brief Compatibility facade for FSM, RTC, and telemetry model headers.
+ * This header belongs to the app-core orchestration layer and defines the orchestration boundary that bootstrap code and adapters rely on during runtime.
  */
+
+// Public declarations stay grouped here so other components consume the
+// module contract without reaching into private implementation details.
+
 
 /** @brief Global RTC-retained context instance. */
 extern rtc_context_t g_rtc_context;

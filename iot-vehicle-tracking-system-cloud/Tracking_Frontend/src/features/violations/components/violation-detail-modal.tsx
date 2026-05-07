@@ -87,7 +87,7 @@ export const ViolationDetailModal = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex h-[min(92dvh,880px)] max-h-[92dvh] w-[min(96vw,1100px)] max-w-none flex-col overflow-hidden p-0 sm:w-[min(96vw,1100px)] sm:max-w-none">
-        <DialogHeader className="shrink-0 border-b bg-background px-5 py-4 sm:px-6">
+        <DialogHeader className="shrink-0 border-b bg-background px-5 py-4 pr-14 sm:px-6">
           <DialogTitle>Chi tiết vi phạm</DialogTitle>
         </DialogHeader>
 
