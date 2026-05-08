@@ -1,4 +1,4 @@
-a  `<div class="center">`
+ `<div class="center">`
 
 **ĐẠI HỌC PHENIKAA**
 
@@ -137,27 +137,31 @@ Lê Trọng An
 
 # DANH MỤC TỪ VIẾT TẮT - LIST OF ABBREVIATIONS
 
-| Từ viết tắt | Nghĩa                                 |
-| :------------- | :------------------------------------- |
-| ADC            | Bộ chuyển đổi tương tự sang số |
-| API            | Giao diện lập trình ứng dụng      |
-| BLE            | Bluetooth năng lượng thấp          |
-| BOM            | Danh sách linh kiện                  |
-| ECU            | Bộ điều khiển điện tử trên xe  |
-| ESP            | Nền tảng vi điều khiển Espressif  |
-| GNSS           | Hệ thống vệ tinh dẫn đường      |
-| GPS            | Hệ thống định vị toàn cầu       |
-| IMU            | Cảm biến quán tính                 |
-| IoT            | Internet vạn vật                     |
-| LTE            | Mạng dữ liệu di động 4G           |
-| MCU            | Vi điều khiển trung tâm            |
-| MQTT           | Giao thức truyền bản tin nhẹ       |
-| OBD-II         | Cổng chẩn đoán trên xe            |
-| OTA            | Cập nhật phần mềm từ xa           |
-| PCB            | Bảng mạch in                         |
-| QoS            | Mức đảm bảo truyền bản tin       |
-| RTC            | Đồng hồ thời gian thực            |
-| VPS            | Máy chủ ảo                          |
+| Từ viết tắt | Nghĩa                                       |
+| :------------- | :------------------------------------------- |
+| ADC            | Bộ chuyển đổi tương tự sang số       |
+| API            | Giao diện lập trình ứng dụng            |
+| BLE            | Bluetooth năng lượng thấp                |
+| BOM            | Danh sách linh kiện                        |
+| ECU            | Bộ điều khiển điện tử trên xe        |
+| ESP            | Nền tảng vi điều khiển Espressif        |
+| GNSS           | Hệ thống vệ tinh dẫn đường            |
+| GPS            | Hệ thống định vị toàn cầu             |
+| HTTPS          | Giao thức HTTP bảo mật qua TLS            |
+| IMU            | Cảm biến quán tính                       |
+| IoT            | Internet vạn vật                           |
+| LTE            | Mạng dữ liệu di động 4G                 |
+| MCU            | Vi điều khiển trung tâm                  |
+| MQTT           | Giao thức truyền bản tin nhẹ             |
+| OBD-II         | Cổng chẩn đoán trên xe                  |
+| OTA            | Cập nhật phần mềm từ xa                 |
+| PCB            | Bảng mạch in                               |
+| QoS            | Mức đảm bảo truyền bản tin             |
+| REST           | Kiểu giao tiếp API dựa trên tài nguyên |
+| RTC            | Đồng hồ thời gian thực                  |
+| TCP            | Giao thức điều khiển truyền vận        |
+| TLS            | Lớp bảo mật truyền tải                  |
+| VPS            | Máy chủ ảo                                |
 
 # CHƯƠNG 1. GIỚI THIỆU ĐỒ ÁN - SUMMARY
 
@@ -401,385 +405,578 @@ hành chỉ nên tập trung vào các thông tin chính như vị trí, trạng
 
 # CHƯƠNG 3. CÁC GIẢI PHÁP THIẾT KẾ - DESIGN SOLUTIONS
 
-Chương này chuyển các vấn đề kỹ thuật đã nêu ở Chương 2 thành các phương án thiết kế
-cụ thể cho thiết bị, firmware, tuyến truyền dữ liệu và bề mặt khai thác. Trình tự
-trình bày đi từ phân tích nguyên lý và ràng buộc, sang đề xuất các khả năng triển khai,
-tiếp theo là đánh giá để chọn phương án khả thi, và cuối cùng là chốt cấu hình tối ưu
-cho toàn hệ thống.
-
 ## 3.1. Phân tích tổng hợp
 
 ### 3.1.1. Nguyên lý làm việc
 
-Về nguyên lý, hệ thống được tổ chức theo một tuyến dữ liệu liên tục từ xe đến người
-quản lý. Ở đầu xe, thiết bị thu vị trí từ mô-đun LTE/GNSS, đọc dữ liệu vận hành qua
-OBD-II (chuẩn cổng chẩn đoán dùng chung trên ô tô), ghi nhận chuyển động bằng IMU và
-đóng gói bản tin để truyền về máy chủ. Ở phía cloud, bản tin được tiếp nhận, chuẩn hóa,
-lưu trữ và phát lại cho giao diện. Ở lớp khai thác, người quản lý cần nhìn được bản đồ,
-trạng thái xe, dữ liệu chi tiết và cảnh báo trên cùng một bề mặt làm việc.
+Để đáp ứng yêu cầu giám sát phương tiện trong khai thác cho thuê xe tự lái, nguyên lý làm
+việc của hệ thống có thể trình bày theo năm bước liên tiếp như sau:
 
-![Hình 3.1 - Sơ đồ tổng thể của hệ thống thiết bị theo dõi](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-1-concept.svg)
+- **Bước 1 - Ghi nhận trạng thái thực của xe:** Trên phương tiện tồn tại ba nhóm thông tin
+  đầu vào chính gồm vị trí, dữ liệu vận hành và chuyển động. Đây là lớp thông tin phản ánh
+  trực tiếp trạng thái vật lý của xe trong quá trình khai thác.
+- **Bước 2 - Thu nhận và xử lý tại thiết bị theo dõi:** Thiết bị trên xe tiếp nhận tín hiệu định vị
+  từ GNSS, cổng chẩn đoán OBD-II và cảm biến gia tốc IMU, sau đó thực hiện tiền xử lý, chọn lọc và đóng gói dữ liệu. Nói
+  cách khác, bản tin giám sát được hình thành ngay tại thiết bị chứ không phải ở mạng truyền dẫn.
+- **Bước 3 - Tạo và truyền bản tin giám sát:** Sau khi được đóng gói, dữ liệu được tổ chức
+  thành bản tin giám sát định kỳ hoặc theo sự kiện và truyền về máy chủ qua mạng di động.
+  Vai trò của kênh 4G/LTE trong giai đoạn này chỉ là mang bản tin đã tạo đi khỏi phương tiện.
+- **Bước 4 - Xử lý tại máy chủ:** Máy chủ tiếp nhận bản tin, thực hiện chuẩn hóa, lưu trữ,
+  đối chiếu và phát hiện các trạng thái cần cảnh báo. Kết quả của bước này là lớp thông tin
+  có thể dùng trực tiếp cho khai thác và theo dõi đội xe.
+- **Bước 5 - Biểu diễn thông tin quản lý:** Dữ liệu sau xử lý được đưa lên giao diện để hiển
+  thị vị trí hiện thời, trạng thái hoạt động, lịch sử hành trình, dữ liệu chi tiết và các cảnh
+  báo liên quan. Nhờ đó, người quản lý có thể theo dõi tập trung tình trạng phương tiện trên
+  cùng một giao diện quản lý.
+
+Theo cách tổ chức trên, hệ thống không chỉ dừng ở chức năng thu thập dữ liệu mà còn bảo đảm
+quá trình chuyển hóa từ trạng thái thực của phương tiện thành thông tin có ý nghĩa quản lý.
+
+![Hình 3.1 - Sơ đồ tổng thể của hệ thống thiết bị theo dõi](./assets/result/thesis-figure-3-1/hinh-3-1-nguyen-ly-chuyen-hoa-du-lieu-gpt-image.png)
 
 _Hình 3.1: Nguyên lý chuyển hóa dữ liệu từ phương tiện thành thông tin quản lý_
 
 ### 3.1.2. Các ràng buộc kỹ thuật chi phối phương án
 
-Ràng buộc thứ nhất nằm ở lớp thiết bị. Bộ theo dõi phải gọn, ít dây, dễ chuyển giữa
-nhiều xe và không làm tăng mức can thiệp lên hệ điện hay ECU. Điều này khiến việc chọn
-MCU, mô-đun LTE/GNSS và cách lấy OBD-II không thể tách rời nhau.
+Các ràng buộc kỹ thuật chi phối phương án thiết kế có thể quy về bốn nhóm chính như sau:
 
-Ràng buộc thứ hai là năng lượng. Thiết bị bám vào ắc quy xe nên không được để dòng nền
-tích lũy thành mức hao điện đáng kể khi xe đỗ dài ngày. Tuy nhiên, hệ thống vẫn phải
-giữ được khả năng thức dậy để phát hiện rung, dịch chuyển hoặc thay đổi trạng thái xe.
-Vì vậy, phần nguồn, cảm biến và logic sleep/wake phải được xét như một cụm chung.
-
-Ràng buộc thứ ba là môi trường truyền dữ liệu. Xe hoạt động trong điều kiện sóng thay
-đổi liên tục; do đó phương án truyền không thể giả định kết nối luôn ổn định. Kiến trúc
-được chọn phải chấp nhận mất sóng cục bộ, có hàng đệm phù hợp và phục hồi được tuyến
-dữ liệu sau reconnect.
-
-Ràng buộc thứ tư là cách khai thác thông tin. Dữ liệu thu được có nhiều lớp, nhưng bề
-mặt vận hành không thể trở thành một nơi dồn mọi thứ. Phương án tốt chỉ được xem là đạt
-khi phần phức tạp được giữ ở lớp thiết bị và lớp máy chủ, còn giao diện chỉ giữ những
-tín hiệu thực sự cần cho quyết định quản lý.
+- **Ràng buộc ở lớp thiết bị:** Bộ theo dõi phải gọn, ít dây, dễ tháo lắp khi đổi xe, đồng
+  thời không làm tăng mức can thiệp vào hệ điện hay ECU của xe. Vì vậy, khối điều khiển trung tâm,
+  khối truyền dữ liệu - định vị và cách lấy dữ liệu OBD-II phải được cân nhắc cùng nhau.
+- **Ràng buộc về năng lượng:** Thiết bị bám vào ắc quy xe nên không được để dòng nền tích
+  lũy thành mức hao điện đáng kể khi xe đỗ dài ngày. Tuy nhiên, hệ thống vẫn phải giữ được
+  khả năng trở lại trạng thái hoạt động để phát hiện rung, dịch chuyển hoặc thay đổi trạng thái xe;
+  do đó phần nguồn, cảm biến và cơ chế chuyển giữa hoạt động và ngủ sâu phải được xét như một
+  cụm chung.
+- **Ràng buộc ở tuyến truyền dữ liệu:** Xe hoạt động trong điều kiện sóng thay đổi liên tục,
+  nên phương án truyền không thể giả định kết nối luôn ổn định. Kiến trúc được chọn phải
+  chấp nhận mất sóng cục bộ, có bộ nhớ đệm phù hợp và phục hồi được tuyến dữ liệu sau khi
+  kết nối lại.
+- **Ràng buộc ở lớp khai thác thông tin:** Dữ liệu thu được có nhiều lớp, nhưng giao diện
+  vận hành không thể trở thành nơi dồn mọi thứ. Phương án chỉ được xem là đạt khi phần phức
+  tạp được giữ ở lớp thiết bị và lớp máy chủ, còn giao diện chỉ giữ những tín hiệu thực sự
+  cần cho quyết định quản lý.
 
 ## 3.2. Đề xuất các giải pháp
 
 ### 3.2.1. Đề xuất giải pháp phần cứng thiết bị
 
-Ở lớp phần cứng, có bốn nhóm quyết định chính. Thứ nhất là khối điều khiển trung tâm,
-với các hướng thường gặp gồm MCU tích hợp BLE sẵn, MCU low-power phải ghép BLE rời, hoặc
-MCU mạnh về radio nhưng hạn chế hơn ở số cổng giao tiếp đồng thời. Thứ hai là khối
-truyền dữ liệu và định vị, có thể đi theo hướng dùng một mô-đun tích hợp LTE/GNSS hoặc
-tách riêng mô-đun LTE và mô-đun GPS. Thứ ba là cách lấy dữ liệu OBD-II, có thể đấu trực
-tiếp, dùng bộ chuyển đổi có dây hoặc dùng bộ chuyển đổi Bluetooth. Thứ tư là cơ chế phát
-hiện chuyển động và sơ đồ nguồn đi kèm, bao gồm lựa chọn cảm biến wake-up, pin dự phòng
-và nhánh bảo vệ điện áp thấp.
+a, Phương án lấy dữ liệu từ cổng chẩn đoán OBD-II
 
-Nếu ưu tiên mức độ tích hợp cao và giảm dây trong cabin, hướng dùng MCU có BLE tích hợp
-kết hợp mô-đun LTE/GNSS tích hợp là một khả năng hợp lý. Nếu ưu tiên cực đại hóa low
-power ở lõi xử lý, hướng MCU tiết kiệm điện ghép BLE rời là một phương án khác, nhưng
-đổi lại phần cứng dài hơn và phức tạp hơn ở khâu tích hợp. Tương tự, nếu ưu tiên dữ liệu
-OBD sâu, giải pháp có dây hoặc đấu trực tiếp có lợi thế hơn; nhưng nếu ưu tiên lắp đặt
-nhanh và ít xâm lấn, giải pháp Bluetooth lại phù hợp hơn.
+Ở nhánh OBD-II, đồ án chỉ cần thu nhóm dữ liệu phục vụ quản lý nên không đi theo hướng chẩn
+đoán sâu hay can thiệp nhiều vào xe. Từ yêu cầu đó, ba hướng khai thác được xét gồm ghép trực
+tiếp vào tuyến OBD-II, dùng bộ chuyển đổi ELM327 có dây và dùng bộ chuyển đổi Bluetooth
+`vgate iCar Pro`.
 
-### 3.2.2. Đề xuất giải pháp firmware và quản lý năng lượng
+**Bảng 3.1: Ma trận đánh giá phương án thu dữ liệu OBD-II**
 
-Ở lớp firmware, có ba hướng tổ chức chính. Hướng thứ nhất là giữ toàn bộ thiết bị ở chế
-độ làm việc liên tục. Cách này đơn giản, nhưng khó chấp nhận khi thiết bị dùng chung nguồn
-với xe. Hướng thứ hai là chia thành hai trạng thái lớn chạy/ngủ theo ignition. Cách này
-đỡ tốn điện hơn, nhưng khó xử lý các tình huống biên như xe vừa tắt máy, xe bật máy nhưng
-đang đứng yên, hoặc cần thức định kỳ để kiểm tra lại trạng thái khi xe đỗ. Hướng thứ ba
-là tổ chức thành máy trạng thái nhiều pha, trong đó trạng thái vận hành của xe và trạng
-thái nguồn của thiết bị được tách riêng rồi đồng bộ lại qua cùng một logic điều khiển.
+| Tiêu chí đánh giá                                                   | Trọng số (%) | Ghép trực tiếp vào tuyến OBD-II | ELM327 có dây | `vgate iCar Pro` |
+| :----------------------------------------------------------------------- | :------------- | :----------------------------------- | :-------------- | :----------------- |
+| Mức xâm lấn lên hệ điện và khả năng trả xe về nguyên trạng | 35             | 1                                    | 3               | 5                  |
+| Khả năng tương thích giao thức trên nhiều dòng xe               | 30             | 1                                    | 3               | 5                  |
+| Thuận tiện khi tháo lắp, chuyển xe và khoanh vùng lỗi            | 20             | 1                                    | 2               | 5                  |
+| Mức đáp ứng nhóm tham số quản lý cần theo dõi                  | 15             | 5                                    | 4               | 4                  |
+| **Tổng điểm quy đổi**                                         | **100**  | **1,60**                       | **3,00**  | **4,85**     |
 
-Trong bài toán này, cần phân biệt rõ "đỗ" với "ngủ". Đỗ là trạng thái của xe khi ignition
-đã tắt và hệ thống đang ở pha chờ để xác nhận điều kiện trước khi hạ công suất; ngủ mới là
-trạng thái công suất thấp của thiết bị. Ngoài ra, xe bật máy nhưng đứng yên cũng không nên
-bị gộp chung với xe đỗ, vì hai trạng thái này dẫn đến hai cách lấy dữ liệu và hai hành vi
-nguồn khác nhau. Vì vậy, ngay ở bước đề xuất giải pháp firmware, hướng máy trạng thái nhiều
-pha đã cho thấy ưu thế rõ về mặt mô tả đúng bản chất vận hành.
+Kết quả ở Bảng 3.1 cho thấy `vgate iCar Pro` phù hợp hơn hai phương án còn lại. Phương án
+này vẫn giữ được nhóm dữ liệu cần thiết, nhưng ít xâm lấn hơn và thuận tiện hơn khi đội xe có nhiều loại xe khác nhau.
 
-### 3.2.3. Đề xuất giải pháp truyền dữ liệu, xử lý và khai thác
+![Hình 3.2 - Bộ đọc OBD-II vgate iCar Pro BLE](./assets/result/chapter-3-selected-components/hinh-3-2-vgate-icar-pro-ble.png)
 
-Ở lớp truyền thông và xử lý, có thể xét ba hướng chính. Hướng thứ nhất là để thiết bị gửi
-trực tiếp vào API ứng dụng theo kiểu yêu cầu - đáp ứng. Hướng thứ hai là dùng MQTT nhưng
-gom toàn bộ phần nhận bản tin, lưu trữ và nghiệp vụ vào một dịch vụ phía máy chủ. Hướng
-thứ ba là tách thành broker MQTT, dịch vụ trung gian để kiểm tra và phân luồng bản tin,
-các kho lưu trữ theo từng loại dữ liệu, rồi mới đến lớp API và giao diện.
+_Hình 3.2: Bộ đọc OBD-II Bluetooth vgate iCar Pro được chọn cho nhánh thu dữ liệu vận hành_
 
-Tương tự, khi xét xử lý mất sóng, có thể đi theo ba mức: bỏ bản tin nếu gửi lỗi, giữ đệm
-ngắn trong RAM, hoặc ghi xuống bộ nhớ cục bộ rồi phát lại sau khi kết nối phục hồi. Ở lớp
-khai thác, có thể đi theo hướng giao diện thiên về báo cáo hậu kiểm hoặc giao diện thiên về
-điều hành gần thời gian thực. Với bài toán quản lý phương tiện, hai phần này phải được xét
-cùng nhau, vì cách tổ chức dữ liệu ở phía máy chủ sẽ quyết định trực tiếp bề mặt thao tác ở
-phía người dùng.
+b, Phương án duy trì giám sát khi xe đỗ
+
+Khi khóa điện tắt, thiết bị không nên duy trì toàn bộ hoạt động (modem 4G, GNSS và OBD-II) như lúc xe
+đang hoạt động; nhưng cũng không thể tắt hẳn vì vẫn cần nhận biết rung hoặc dịch chuyển
+bất thường. Vì vậy, phương án ở nhánh này được xét như một cặp: phần tử đánh thức tiêu
+thụ thấp và cách cấp nguồn cho các khối còn lại. Nguồn chung là cách cấp cùng một nhánh
+cho phần giám sát và các tải lớn; nguồn theo khóa điện chỉ còn nguồn khi xe bật khóa và
+mất nguồn khi xe tắt khóa; còn nguồn chia nhánh giữ một nhánh nhỏ luôn cấp cho đánh thức,
+trong khi modem, GNSS và OBD-II được đóng cắt riêng.
+
+**Bảng 3.2: Ma trận đánh giá phương án duy trì giám sát khi xe đỗ**
+
+| Tiêu chí đánh giá                                                                   | Trọng số (%) | SW-420 + cấp chung toàn thiết bị | MPU6050 + cấp theo khóa điện | LIS3DSH + nhánh đánh thức riêng |
+| :--------------------------------------------------------------------------------------- | :------------- | :----------------------------------- | :------------------------------- | :----------------------------------- |
+| Mức tiêu thụ khi chỉ giữ giám sát trong thời gian xe đỗ                        | 35             | 2                                    | 2                                | 5                                    |
+| Khả năng đánh thức thiết bị bằng chuyển động khi MCU và modem đã ngủ sâu | 25             | 2                                    | 4                                | 4                                    |
+| Khả năng tách modem, GNSS và OBD-II khỏi nhánh luôn cấp                          | 25             | 1                                    | 2                                | 5                                    |
+| Mức an toàn với ắc quy và độ ổn định khi modem phát dòng xung                | 15             | 2                                    | 3                                | 5                                    |
+| **Tổng điểm quy đổi**                                                         | **100**  | **1,75**                       | **2,65**                   | **4,75**                       |
+
+Theo Bảng 3.2, LIS3DSH kết hợp nhánh đánh thức riêng phù hợp hơn cho trạng thái xe đỗ. Phương
+án này giữ lại đường đánh thức tiêu thụ thấp, đồng thời cho phép đưa phần lớn thiết bị về
+ngủ sâu và cô lập nhánh modem khỏi nguồn logic khi có xung dòng lớn.
+
+![Hình 3.3 - Cảm biến gia tốc LIS3DSH](./assets/result/chapter-3-selected-components/hinh-3-3-lis3dsh-mat-truoc-lcsc-front.png)
+
+_Hình 3.3: Cảm biến gia tốc LIS3DSH được chọn cho nhánh phát hiện chuyển động khi xe đỗ_
+
+c, Phương án truyền dữ liệu và định vị
+
+Ở tuyến truyền dữ liệu và định vị, thiết bị chỉ gửi các bản tin nhỏ như vị trí, trạng thái
+và cảnh báo; do đó vấn đề chính không phải là tốc độ truyền cực đại. Điều cần cân nhắc là
+cách ghép khối truyền dữ liệu di động với khối định vị sao cho ít khối phải điều khiển, nguồn
+ổn định và phù hợp với không gian lắp trong xe. Các mô-đun chỉ hỗ trợ 2G không được đưa vào
+so sánh vì không còn phù hợp với điều kiện mạng di động tại Việt Nam [13]. Ba phương án đại diện
+được xét gồm:
+
+1. **EC200U-CN + L76K:** EC200U-CN đảm nhiệm truyền dữ liệu LTE Cat 1, còn L76K là mô-đun
+   GNSS rời. Cách này dùng được mạng 4G hiện nay, nhưng thiết bị vẫn phải điều khiển riêng
+   khối truyền dữ liệu và khối định vị.
+2. **A7670C + ATGM336H:** A7670C đảm nhiệm truyền dữ liệu LTE, ATGM336H đảm nhiệm định vị
+   GNSS. Phương án này cũng đi theo hướng 4G, nhưng phần định vị vẫn tách thành một khối riêng.
+3. **SIM7600CE-T:** Mô-đun này tích hợp LTE và GNSS trong cùng một khối, giúp gom phần truyền
+   dữ liệu và định vị về cùng một đường điều khiển.
+
+**Bảng 3.3: Ma trận đánh giá phương án truyền dữ liệu và định vị**
+
+| Tiêu chí đánh giá                                                               | Trọng số (%) | EC200U-CN + L76K | A7670C + ATGM336H | SIM7600CE-T LTE/GNSS |
+| :----------------------------------------------------------------------------------- | :------------- | :--------------- | :---------------- | :------------------- |
+| Số khối phải khởi tạo và giám sát cho truyền dữ liệu và định vị       | 30             | 2                | 2                 | 5                    |
+| Độ phức tạp của nguồn, mạch vô tuyến và bố trí ăng ten trên thiết bị | 30             | 3                | 3                 | 5                    |
+| Khả năng giữ và khôi phục đường truyền, vị trí khi xe di động          | 25             | 4                | 4                 | 4                    |
+| Mức phù hợp với không gian lắp trên xe và vỏ thiết bị                     | 15             | 3                | 3                 | 5                    |
+| **Tổng điểm quy đổi**                                                     | **100**  | **2,95**   | **3,00**    | **4,75**       |
+
+Theo Bảng 3.3, SIM7600CE-T là phương án phù hợp hơn trong nhóm so sánh. Lợi thế cốt lõi
+của mô-đun này là gom đường truyền dữ liệu và định vị về một khối thống nhất, từ đó giảm
+rõ phần nguồn, ăng ten và trình tự khởi tạo phải xử lý trên thiết bị.
+
+![Hình 3.4 - Mô-đun SIM7600CE-T](./assets/result/chapter-3-selected-components/hinh-3-4-sim7600ce-t.png)
+
+_Hình 3.4: Mô-đun SIM7600CE-T tích hợp LTE và GNSS được chọn cho tuyến truyền dữ liệu - định vị_
+
+d, Phương án bộ điều khiển trung tâm
+
+Bộ điều khiển trung tâm là khối điều phối các phần đã chọn ở trên: modem LTE/GNSS, kết nối
+OBD-II không dây, cảm biến đánh thức, bộ nhớ đệm và cổng bảo trì. Vì vậy, phương án MCU không
+chỉ được xét theo năng lực xử lý, mà chủ yếu theo số giao tiếp còn đủ, mức tích hợp không dây,
+khả năng ngủ sâu và lượng phần cứng phụ phải ghép thêm. Ba hướng đại diện được đưa vào so sánh
+gồm ESP32-S3, STM32L4 ghép Bluetooth rời và nRF52840.
+
+**Bảng 3.4: Ma trận đánh giá phương án bộ điều khiển trung tâm**
+
+| Tiêu chí đánh giá                                                                                | Trọng số (%) | ESP32-S3       | STM32L4 + Bluetooth rời | nRF52840       |
+| :---------------------------------------------------------------------------------------------------- | :------------- | :------------- | :----------------------- | :------------- |
+| Khả năng giữ đồng thời các giao tiếp cho modem, BLE OBD-II, IMU và cổng bảo trì           | 35             | 5              | 4                        | 3              |
+| Phần nhớ và tài nguyên còn lại cho lưu đệm bản tin, nhật ký lỗi và cập nhật firmware | 25             | 4              | 3                        | 2              |
+| Khả năng vào ngủ sâu và đánh thức bằng tín hiệu ngoài                                    | 20             | 4              | 5                        | 4              |
+| Mức phải ghép thêm chip vô tuyến và mạch phụ trợ                                            | 20             | 5              | 2                        | 3              |
+| **Tổng điểm quy đổi**                                                                      | **100**  | **4,55** | **3,55**           | **2,95** |
+
+Từ Bảng 3.4, ESP32-S3 là phương án phù hợp hơn trong nhóm so sánh. Điểm quyết định của
+lựa chọn này là giữ được đủ giao tiếp cho toàn bộ thiết bị mà không phải hy sinh tài nguyên
+cho một khối Bluetooth rời.
+
+![Hình 3.5 - Chip ESP32-S3](./assets/result/chapter-3-selected-components/hinh-3-5-esp32-s3-chip-lcsc-front.png)
+
+_Hình 3.5: Chip ESP32-S3 được chọn làm bộ điều khiển trung tâm của thiết bị_
+
+### 3.2.2. Đề xuất giải pháp phần mềm nhúng
+
+Ở lớp phần mềm nhúng, vấn đề cần xác định trước hết là nền tảng phát triển và cách tổ chức
+thực thi trên ESP32-S3. Thiết bị phải đồng thời làm việc với modem LTE/GNSS, kết nối BLE tới
+bộ đọc OBD-II, lưu đệm cục bộ và giữ khả năng mở rộng cho bảo trì sau này. Vì vậy, ở bước
+đề xuất giải pháp, phần mềm nhúng được xét theo ba hướng sau:
+
+1. **Arduino core trên ESP32:** Cách này thuận tiện khi dựng nguyên mẫu nhanh, thư viện phong
+   phú và dễ tiếp cận, nhưng việc kiểm soát tài nguyên, tác vụ nền và mở rộng hệ thống dài hạn
+   không phải là điểm mạnh.
+2. **ESP-IDF theo vòng lặp chính:** Hướng này bám sát SDK chính thức của hãng Espressif, giúp kiểm
+   soát phần cứng tốt hơn và khai thác đầy đủ driver hệ thống, nhưng khi số khối ngoại vi tăng lên
+   thì việc dồn phần lớn xử lý vào một luồng chính sẽ sớm chật.
+3. **ESP-IDF kết hợp FreeRTOS:** Đây là hướng dùng SDK chính thức đồng thời tổ chức các tác vụ
+   theo cơ chế thời gian thực, phù hợp hơn khi thiết bị phải ghép nhiều nhánh xử lý có nhịp làm việc khác nhau.
+
+Các phương án được so sánh theo bốn tiêu chí: mức phù hợp khi tích hợp nhiều khối ngoại vi,
+khả năng kiểm soát tài nguyên và tác vụ nền, thuận lợi cho bảo trì - mở rộng firmware, và mức
+dựa vào nền tảng chính thức của nhà sản xuất.
+
+**Bảng 3.5: Ma trận đánh giá phương án phần mềm nhúng trên thiết bị**
+
+| Tiêu chí đánh giá                                                                        | Trọng số (%) | Arduino core trên ESP32 | ESP-IDF theo vòng lặp chính | ESP-IDF + FreeRTOS |
+| :-------------------------------------------------------------------------------------------- | :------------- | :----------------------- | :----------------------------- | :----------------- |
+| Mức phù hợp khi tích hợp đồng thời modem, BLE OBD-II, lưu đệm và nhánh bảo trì | 35             | 3                        | 4                              | 5                  |
+| Khả năng kiểm soát tài nguyên, tác vụ nền và nhịp xử lý của hệ thống          | 25             | 2                        | 3                              | 5                  |
+| Thuận lợi cho bảo trì, mở rộng và tổ chức lại firmware khi hệ thống lớn dần     | 25             | 3                        | 4                              | 5                  |
+| Mức bám sát nền tảng chính thức của Espressif                                         | 15             | 2                        | 5                              | 5                  |
+| **Tổng điểm quy đổi**                                                              | **100**  | **2,70**           | **4,00**                 | **5,00**     |
+
+Từ Bảng 3.5, hướng ESP-IDF kết hợp FreeRTOS có điểm cao nhất nên được giữ lại. Điểm mạnh
+của phương án này là vừa bám SDK chính thức của Espressif, vừa thuận lợi hơn khi thiết bị
+phải điều phối nhiều khối ngoại vi trong cùng một phần mềm nhúng (firmware).
+
+### 3.2.3. Đề xuất giải pháp truyền bản tin và định hướng tổ chức phía máy chủ
+
+Ở lớp truyền dữ liệu, bước đầu tiên là chọn kênh đưa bản tin từ thiết bị lên máy chủ. Dữ liệu của hệ
+thống chủ yếu là các gói tin nhỏ, phát sinh theo chu kỳ hoặc theo sự kiện, đi qua mạng di động
+và có thể bị gián đoạn. Vì vậy, giao thức được chọn phải đủ nhẹ cho thiết bị, dễ tách nhóm dữ
+liệu và hỗ trợ tốt cho tình huống mất sóng rồi gửi bù. Ba hướng được xét gồm:
+
+- **HTTPS/REST - giao thức gửi yêu cầu tới API (Application Programming Interface - giao diện lập trình ứng dụng) của máy chủ**
+
+  + Cách này cho thiết bị gửi từng yêu cầu riêng lên API của máy chủ; máy chủ nhận xong thì trả phản
+    hồi và kết thúc phiên trao đổi. Về bản chất, mỗi bản tin dữ liệu tương ứng với một lần yêu cầu -
+    phản hồi riêng biệt giữa thiết bị và máy chủ.
+  + Ưu điểm là quen thuộc, dễ lập trình và dễ kiểm thử bằng các công cụ web thông dụng.
+  + Hạn chế là khi dữ liệu phát sinh lặp lại theo chu kỳ ngắn, việc phải mở và đóng nhiều phiên trao
+    đổi làm tuyến truyền nặng hơn mức cần thiết.
+- **WebSocket/TCP - cơ chế duy trì kết nối liên tục giữa thiết bị và máy chủ**
+
+  + Cách này cho thiết bị tạo một kết nối liên tục với máy chủ và giữ kết nối đó trong suốt thời gian
+    làm việc, nên dữ liệu có thể đi hai chiều trên cùng một đường truyền. Về bản chất, thiết bị và
+    máy chủ duy trì một phiên kết nối kéo dài để trao đổi dữ liệu liên tục.
+  + Ưu điểm là thuận lợi khi cần cập nhật liên tục.
+  + Hạn chế là phụ thuộc nhiều vào việc kết nối phải được giữ ổn định, trong khi thiết bị có thể đi
+    vào ngủ sâu hoặc di chuyển qua vùng sóng yếu.
+- **MQTT qua TLS - giao thức bản tin nhẹ có mã hóa đường truyền**
+
+  + Cách này không gửi dữ liệu thẳng vào một API cố định mà đưa từng bản tin lên các kênh chủ đề; phía
+    máy chủ sẽ đăng ký nhận theo từng nhóm chủ đề tương ứng. Về bản chất, bản tin được phân loại theo
+    từng chủ đề ngay từ khi phát đi, nhờ đó phía nhận chỉ cần xử lý đúng nhóm dữ liệu liên quan.
+  + `MQTT` (Message Queuing Telemetry Transport - giao thức truyền bản tin nhẹ) được thiết kế cho bản
+    tin nhỏ và thiết bị tài nguyên hạn chế, còn `TLS` (Transport Layer Security - giao thức bảo mật lớp
+    truyền tải) là lớp mã hóa bổ sung để bảo vệ dữ liệu khi truyền qua mạng di động công cộng.
+  + Vì vậy, hướng này gọn hơn cho bài toán giám sát lặp lại và thuận lợi hơn khi cần tách riêng dữ liệu
+    vị trí, trạng thái và cảnh báo.
+
+**Bảng 3.6: Ma trận đánh giá giao thức truyền bản tin từ thiết bị**
+
+| Tiêu chí đánh giá                                                                | Trọng số (%) | HTTPS/REST     | WebSocket/TCP  | MQTT qua TLS   |
+| :------------------------------------------------------------------------------------ | :------------- | :------------- | :------------- | :------------- |
+| Phù hợp với bản tin nhỏ, gửi định kỳ hoặc theo sự kiện                    | 30             | 3              | 4              | 5              |
+| Mức nhẹ cho thiết bị và modem khi truyền qua mạng di động                    | 25             | 3              | 3              | 5              |
+| Khả năng phân tách dữ liệu vị trí, trạng thái và cảnh báo theo chủ đề | 25             | 2              | 3              | 5              |
+| Thuận lợi cho gửi lại, gửi bù sau gián đoạn kết nối                        | 20             | 3              | 2              | 4              |
+| **Tổng điểm quy đổi**                                                      | **100**  | **2,75** | **3,10** | **4,80** |
+
+Từ Bảng 3.6, `MQTT qua TLS` được chọn làm giao thức truyền bản tin chính từ thiết bị lên máy chủ,
+vì phù hợp hơn với đặc điểm dữ liệu nhỏ, phát sinh lặp lại và có thể bị gián đoạn theo chất lượng
+mạng di động. Trong khi đó, `HTTPS/REST` vẫn phù hợp cho các API cấu hình, quản trị hoặc trao đổi
+giữa giao diện và `backend` (lớp xử lý nghiệp vụ phía máy chủ), nhưng không phải kênh chính cho luồng
+dữ liệu giám sát phát sinh liên tục từ thiết bị.
+
+Khi giao thức truyền bản tin đã được xác định, vấn đề tiếp theo là cách tổ chức phần máy chủ để tiếp
+nhận, xử lý và lưu trữ dữ liệu. Ba hướng chính được xem xét gồm:
+
+- **Backend (lớp xử lý nghiệp vụ phía máy chủ) nhận và xử lý trực tiếp - một ứng dụng duy nhất đảm nhiệm toàn bộ tuyến dữ liệu**
+
+  + Cách này gom phần nhận bản tin, xử lý nghiệp vụ và lưu trữ vào cùng một ứng dụng.
+  + Về bản chất, toàn bộ tuyến xử lý dữ liệu được đặt trong một khối chức năng duy nhất.
+  + Ưu điểm là số lượng dịch vụ ít, cấu trúc ban đầu tương đối đơn giản.
+  + Hạn chế là khi khối lượng dữ liệu tăng lên, phần tiếp nhận bản tin và phần nghiệp vụ dễ ảnh hưởng
+    lẫn nhau, đồng thời việc mở rộng hoặc khoanh vùng lỗi cũng kém thuận lợi hơn.
+- **MQTT broker (lớp tiếp nhận và phân phối bản tin) + backend xử lý tập trung - tách lớp nhận bản tin nhưng vẫn dồn xử lý vào backend**
+
+  + Cách này tách riêng lớp tiếp nhận bản tin bằng broker, còn phần backend phía sau vẫn đảm nhiệm gần
+    như toàn bộ việc chuẩn hóa, lưu trữ và phát sinh cảnh báo.
+  + Về bản chất, tuyến dữ liệu đã có lớp vào riêng, nhưng phần xử lý phía sau vẫn tập trung nặng vào
+    một ứng dụng chính.
+  + Ưu điểm là đỡ tải hơn so với phương án gom toàn bộ vào backend.
+  + Hạn chế là backend vẫn phải gánh phần lớn trách nhiệm của tuyến xử lý dữ liệu, nên dư địa tách lớp
+    và mở rộng hệ thống chưa thật sự rõ ràng.
+- **MQTT broker (lớp tiếp nhận và phân phối bản tin) + lớp trung gian + lưu trữ tách vai trò - chia tuyến dữ liệu thành nhiều lớp chức năng**
+
+  + Cách này để broker tiếp nhận bản tin, lớp trung gian thực hiện chuẩn hóa và phân luồng, còn các kho
+    dữ liệu được tách theo mục đích sử dụng.
+  + Về bản chất, tuyến dữ liệu được chia thành các lớp tiếp nhận, xử lý và lưu trữ với vai trò rõ ràng
+    hơn ngay từ đầu.
+  + Ưu điểm là thuận lợi cho việc tách riêng dữ liệu nghiệp vụ, dữ liệu chuỗi thời gian và log, đồng thời
+    phù hợp hơn khi cần tiếp nhận dữ liệu gửi dồn hoặc mở rộng phạm vi giám sát.
+  + Hạn chế là cấu trúc nhiều lớp hơn và đòi hỏi tổ chức hệ thống chặt chẽ hơn ở phía máy chủ.
+
+**Bảng 3.7: Ma trận đánh giá định hướng tổ chức tiếp nhận và xử lý dữ liệu phía máy chủ**
+
+| Tiêu chí đánh giá                                                         | Trọng số (%) | Backend nhận và xử lý trực tiếp | MQTT broker + backend xử lý tập trung | MQTT broker + lớp trung gian + lưu trữ tách vai trò |
+| :----------------------------------------------------------------------------- | :------------- | :------------------------------------ | :--------------------------------------- | :------------------------------------------------------- |
+| Tách tuyến nhận bản tin khỏi lớp nghiệp vụ và giao diện              | 30             | 1                                     | 3                                        | 5                                                        |
+| Hấp thụ được bản tin gửi dồn khi thiết bị có lại kết nối         | 25             | 2                                     | 3                                        | 5                                                        |
+| Dễ tách riêng dữ liệu nghiệp vụ, dữ liệu chuỗi thời gian và log    | 25             | 2                                     | 3                                        | 5                                                        |
+| Phục vụ đồng thời cập nhật gần thời gian thực và tra cứu lịch sử | 20             | 3                                     | 4                                        | 4                                                        |
+| **Tổng điểm quy đổi**                                               | **100**  | **1,90**                        | **3,20**                           | **4,80**                                           |
+
+Từ Bảng 3.7, hướng tổ chức theo MQTT broker, lớp trung gian và lưu trữ tách vai trò được chọn cho phần
+máy chủ. Cách tổ chức này giúp tách lớp nhận bản tin khỏi lớp xử lý nghiệp vụ, nên phù hợp hơn khi
+thiết bị gửi bù dữ liệu hoặc khi hệ thống cần mở rộng giám sát.
 
 ## 3.3. Phân tích, đánh giá và lựa chọn phương án khả thi
 
-Từ các hướng đề xuất ở trên, các phương án được đối chiếu theo cùng một nhóm tiêu chí:
-mức đáp ứng chức năng, mức can thiệp lên xe, khả năng duy trì năng lượng khi xe đỗ, độ
-đơn giản khi tích hợp và dư địa mở rộng về sau.
+### 3.3.1. Kiến trúc hệ thống được chọn
 
-**Lựa chọn vi điều khiển trung tâm**
+Từ các lựa chọn ở Mục 3.2, hệ thống được tổ chức theo kiến trúc gồm ba khối chính:
+thiết bị theo dõi trên xe, cụm tiếp nhận - xử lý dữ liệu ở máy chủ và giao diện khai thác. Hình 3.6
+trình bày mối liên hệ giữa ba khối này trên cùng một tuyến giám sát.
 
-**Bảng 3.1: Ma trận đánh giá phương án vi điều khiển**
+![Hình 3.6 - Phương án tổng thể của hệ thống được chọn](./assets/result/chapter-3-ai-figures/hinh-3-6-phuong-an-tong-the-duoc-chon-v2.png)
 
-| Tiêu chí                           | Trọng số | ESP32-S3     | STM32L4 + Bluetooth rời | nRF52840 |
-| :----------------------------------- | :--------- | :----------- | :----------------------- | :------- |
-| Đủ cổng giao tiếp cho hệ thống | 3          | 5            | 4                        | 3        |
-| Có sẵn Bluetooth để đọc OBD-II | 3          | 5            | 2                        | 5        |
-| Hỗ trợ ngủ sâu                   | 2          | 4            | 4                        | 4        |
-| Dễ tích hợp trên một bo mạch   | 3          | 5            | 3                        | 3        |
-| Điểm tổng                         |            | **46** | 32                       | 37       |
+_Hình 3.6: Kiến trúc tổng thể của phương án hệ thống được chọn_
 
-ESP32-S3 đạt điểm cao nhất vì giải được đúng cụm yêu cầu của đồ án: có BLE tích hợp,
-đủ UART để đồng thời giữ modem, debug và phần mở rộng, đồng thời vẫn thuận lợi cho việc
-gom toàn bộ hệ thống lên một PCB. STM32L4 có lợi thế về low-power ở lõi MCU, nhưng phải
-trả giá bằng phần BLE rời. nRF52840 mạnh ở radio, song dư địa giao tiếp đồng thời cho cấu
-hình hiện tại hẹp hơn.
+Kiến trúc này làm rõ vai trò của từng khối trong toàn tuyến: thiết bị trên xe tạo bản tin giám sát,
+máy chủ tiếp nhận và xử lý dữ liệu, còn giao diện giữ vai trò biểu diễn thông tin phục vụ khai thác.
 
-**Lựa chọn mô-đun truyền dữ liệu và định vị**
+### 3.3.2. Phân tích chức năng các khối trong phương án được chọn
 
-**Bảng 3.2: Ma trận đánh giá phương án LTE/GNSS**
+- **Khối 1 - Thiết bị theo dõi trên xe**
 
-| Tiêu chí                              | Trọng số | A7670C + GPS rời | EC200U + GPS rời | SIM7600CE-T  |
-| :-------------------------------------- | :--------- | :---------------- | :---------------- | :----------- |
-| Số lượng mô-đun cần lắp          | 3          | 2                 | 2                 | 5            |
-| Độ gọn của phần cứng              | 3          | 3                 | 3                 | 5            |
-| Mức độ đơn giản khi điều khiển | 2          | 3                 | 3                 | 5            |
-| Phù hợp lắp trên xe thử nghiệm    | 3          | 3                 | 3                 | 5            |
-| Điểm tổng                            |            | 28                | 28                | **50** |
+  + Vai trò của khối này là thu nhận trạng thái thực của phương tiện và tạo bản tin giám sát gửi về
+    máy chủ.
+  + Ở khối này, ESP32-S3 giữ vai trò điều phối trung tâm; SIM7600CE-T đảm nhiệm truyền dữ liệu và
+    định vị; `vgate iCar Pro` cung cấp dữ liệu OBD-II; LIS3DSH giữ nhánh phát hiện chuyển động khi
+    xe đỗ; còn cấu trúc nguồn chia nhánh hỗ trợ chuyển giữa hoạt động và ngủ sâu.
+  + Với cách ghép đó, khối thiết bị đáp ứng đồng thời yêu cầu gọn, ít xâm lấn, đủ dữ liệu và có khả
+    năng giảm tiêu thụ điện khi xe dừng lâu.
+- **Khối 2 - Cụm tiếp nhận và xử lý dữ liệu ở máy chủ**
 
-Ở bài toán này, lợi thế quyết định không nằm ở thông số lẻ của từng chip, mà ở việc giảm
-số lượng mô-đun, dây nối và điểm hỏng tiềm ẩn trong cabin. Vì vậy, SIM7600CE-T được chọn
-thay cho các phương án LTE + GPS rời. Cách chọn này làm phần cứng gọn hơn và cũng làm
-đường firmware đơn giản hơn, vì toàn bộ kênh dữ liệu di động và vị trí đi qua cùng một
-khối modem.
+  + Vai trò của khối này là tiếp nhận bản tin từ thiết bị, chuẩn hóa, lưu trữ và xử lý dữ liệu trước
+    khi cấp lại cho giao diện khai thác.
+  + Hướng tổ chức được chọn là tách lớp nhận bản tin khỏi lớp xử lý nghiệp vụ, đồng thời phân dữ liệu
+    theo vai trò sử dụng.
+  + Cách tổ chức này cho phép hệ thống tiếp nhận tốt hơn các bản tin gửi dồn sau mất sóng, đồng thời
+    giữ rõ phần tiếp nhận, phần xử lý và phần khai thác dữ liệu.
+- **Khối 3 - Giao diện khai thác**
 
-**Lựa chọn cách lấy dữ liệu OBD-II**
+  + Vai trò của khối này là biểu diễn thông tin phục vụ theo dõi và cảnh báo trong quá trình vận hành.
+  + Giao diện được giữ theo hướng giao diện giám sát tập trung trên nền web, ưu tiên bản đồ, trạng thái xe và cảnh báo, còn
+    dữ liệu kỹ thuật sâu hơn được đưa về các vùng tra cứu phụ.
+  + Nhờ đó, người sử dụng có thể theo dõi được các tín hiệu chính mà không bị dồn quá nhiều chi tiết
+    kỹ thuật lên cùng một màn hình.
 
-**Bảng 3.3: Ma trận đánh giá phương án thu dữ liệu OBD-II**
+Mối liên hệ giữa bốn nhóm ràng buộc kỹ thuật và các lựa chọn chính trong phương án được khái quát
+trong Hình 3.7.
 
-| Tiêu chí                   | Trọng số | Đấu trực tiếp | Bộ chuyển đổi có dây | Bộ chuyển đổi Bluetooth |
-| :--------------------------- | :--------- | :---------------- | :------------------------- | :-------------------------- |
-| Ít can thiệp vào xe       | 3          | 1                 | 3                          | 5                           |
-| Dễ lắp và tháo           | 3          | 1                 | 3                          | 5                           |
-| Dễ thay thế khi đổi xe   | 2          | 1                 | 3                          | 5                           |
-| Đủ dữ liệu cho quản lý | 3          | 5                 | 4                          | 4                           |
-| Điểm tổng                 |            | 23                | 36                         | **52**                |
+![Hình 3.7 - Sự ăn khớp của phương án được chọn](./assets/result/chapter-3-ai-figures/hinh-3-7-su-an-khop-cua-phuong-an-duoc-chon.png)
 
-Phương án bộ chuyển đổi Bluetooth cho điểm cao nhất vì giữ được đúng mức cân bằng mà đồ
-án cần: đủ dữ liệu vận hành cơ bản cho quản lý, nhưng vẫn ít xâm lấn, dễ lắp và dễ đổi
-xe. Trên cơ sở đó, bộ chuyển đổi `vgate iCar Pro` được chọn làm giải pháp khai thác OBD-II
-cho nguyên mẫu.
+_Hình 3.7: Mối liên hệ giữa các ràng buộc kỹ thuật và các lựa chọn chính của phương án_
 
-![Hình 3.2 - Kết nối không dây giữa thiết bị và bộ đọc OBD-II](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-2.svg)
+- **Với yêu cầu ít xâm lấn lên xe**
 
-_Hình 3.2: Thiết bị nhận dữ liệu xe qua bộ đọc OBD-II không dây_
+  + Bộ đọc OBD-II Bluetooth giúp giảm dây tín hiệu phát sinh trong cabin và thuận tiện hơn khi chuyển
+    lắp giữa nhiều xe.
+  + Mô-đun SIM7600CE-T tích hợp LTE và GNSS trong cùng một khối, từ đó giảm số phần cứng phải bố trí
+    và điều khiển trên thiết bị.
+- **Với yêu cầu tiết kiệm điện khi xe đỗ**
 
-**Lựa chọn cảm biến chuyển động và hướng thiết kế nguồn**
+  + LIS3DSH kết hợp nhánh đánh thức riêng cho phép giữ lại đường phát hiện chuyển động với mức tiêu
+    thụ thấp, trong khi các tải lớn có thể được đưa về ngủ sâu.
+  + Hướng phần mềm nhúng ESP-IDF kết hợp FreeRTOS tạo điều kiện thuận lợi hơn cho việc điều phối các
+    nhánh tác vụ và tổ chức lại hoạt động của thiết bị theo từng trạng thái vận hành.
+- **Với yêu cầu giữ ổn định tuyến truyền dữ liệu**
 
-**Bảng 3.4: Ma trận đánh giá phương án cảm biến chuyển động**
+  + MQTT qua TLS phù hợp với bản tin nhỏ, phát sinh lặp lại và có thể bị gián đoạn bởi chất lượng
+    mạng di động.
+  + Có bộ nhớ đệm cục bộ để lưu trữ dữ liệu trong trường hợp mất kết nối mạng hoàn toàn.
+  + Hướng tổ chức máy chủ theo broker, lớp trung gian và lưu trữ tách vai trò giúp tuyến dữ liệu chịu
+    đựng tốt hơn khi thiết bị phải gửi bù dữ liệu sau mất sóng.
+- **Với yêu cầu giao diện gọn cho vận hành**
 
-| Tiêu chí                           | Trọng số | Công tắc rung | IMU 6 trục | LIS3DSH      |
-| :----------------------------------- | :--------- | :-------------- | :---------- | :----------- |
-| Tiêu thụ điện thấp              | 3          | 4               | 2           | 5            |
-| Độ ổn định khi phát hiện rung | 3          | 2               | 4           | 4            |
-| Dễ dùng với MCU                   | 2          | 3               | 3           | 5            |
-| Phù hợp mục tiêu của đồ án   | 3          | 2               | 3           | 5            |
-| Điểm tổng                         |            | 28              | 31          | **50** |
+  + Giao diện được giữ theo hướng giao diện giám sát tập trung trên nền web, ưu tiên bản đồ, trạng thái và cảnh báo.
+  + Cách tổ chức này giúp người vận hành theo dõi được thông tin chính mà không phải xử lý cùng lúc
+    toàn bộ dữ liệu kỹ thuật phát sinh từ hệ thống.
 
-LIS3DSH được chọn vì đáp ứng đúng vai trò cần có trong hệ thống: tiêu thụ thấp, có chân
-ngắt, đủ độ ổn định để làm nguồn wake-up khi xe đỗ. Cùng với lựa chọn này, sơ đồ nguồn đi
-theo hướng tách rõ nhánh 3,3 V cho logic, nhánh khoảng 4 V cho modem, nhánh sạc/pin dự
-phòng và nhánh bảo vệ điện áp thấp để không kéo tụt ắc quy xe.
-
-![Hình 3.3 - Kiến trúc phân phối nguồn trong thiết bị](./assets/figures/03-chuong-3-giai-phap-phan-cung-hinh-3-4a.svg)
-
-_Hình 3.3: Các nhánh nguồn chính của thiết bị theo dõi_
-
-**Lựa chọn cách tổ chức firmware và quản lý năng lượng**
-
-**Bảng 3.5: Ma trận đánh giá phương án firmware và sleep/wake**
-
-| Tiêu chí                                  | Trọng số | Vòng lặp luôn bật | Hai trạng thái chạy/ngủ | Máy trạng thái nhiều pha |
-| :------------------------------------------ | :--------- | :-------------------- | :-------------------------- | :--------------------------- |
-| Bám đúng trạng thái vận hành của xe | 3          | 2                     | 3                           | 5                            |
-| Giảm tiêu thụ điện khi xe đỗ         | 3          | 1                     | 4                           | 5                            |
-| Giữ được giám sát khi xe tắt máy    | 3          | 2                     | 3                           | 5                            |
-| Kiểm soát reconnect, OTA và replay       | 2          | 2                     | 3                           | 5                            |
-| Điểm tổng                                |            | 19                    | 36                          | **55**                 |
-
-Kết quả trên dẫn đến lựa chọn firmware theo máy trạng thái nhiều pha. Ở tầng runtime,
-thiết bị đi qua các pha `CHECK_IGN`, `DRIVING`, `PARKED`, `HEARTBEAT`, `ALARM` và `SLEEP`.
-Cách tổ chức này cho phép tách rõ việc xe đang bật máy nhưng đứng yên với việc xe đã tắt
-máy và chuẩn bị đi vào chế độ ngủ. Đồng thời, nó cũng tạo chỗ đứng tự nhiên cho các nhánh
-timer wake, IMU wake, OTA, reconnect và phát lại dữ liệu đã lưu.
-
-![Hình 3.4 - Kiến trúc vận hành chính của firmware](./assets/figures/04-chuong-3-giai-phap-firmware-hinh-3-11.svg)
-
-_Hình 3.4: Firmware chuyển trạng thái theo ignition, chuyển động và điều kiện sleep/wake_
-
-**Lựa chọn kiến trúc truyền dữ liệu và xử lý phía máy chủ**
-
-**Bảng 3.6: Ma trận đánh giá phương án truyền dữ liệu và xử lý**
-
-| Tiêu chí                                              | Trọng số | HTTP trực tiếp vào API | MQTT vào backend đơn khối | Broker + Bridge + lưu trữ tách lớp |
-| :------------------------------------------------------ | :--------- | :------------------------ | :---------------------------- | :------------------------------------- |
-| Phù hợp bản tin nhỏ gửi lặp lại                  | 3          | 2                         | 4                             | 5                                      |
-| Chịu được mạng di động chập chờn               | 3          | 2                         | 3                             | 5                                      |
-| Tách được lớp lưu trữ và nghiệp vụ            | 2          | 2                         | 3                             | 5                                      |
-| Hỗ trợ gần thời gian thực và mở rộng giám sát | 3          | 2                         | 4                             | 5                                      |
-| Điểm tổng                                            |            | 22                        | 39                            | **55**                           |
-
-Phương án có broker và bridge trung gian được chọn vì phù hợp hơn với tính chất dữ liệu
-của hệ thống. EMQX làm điểm tiếp nhận MQTT; MQTT Bridge chịu trách nhiệm kiểm tra payload,
-phân luồng và phát sự kiện nội bộ; lớp dịch vụ phía sau tiếp tục ghi xuống PostgreSQL/
-PostGIS, VictoriaMetrics và VictoriaLogs tùy loại dữ liệu. Song song với kiến trúc đó,
-thiết bị giữ một hàng đệm cục bộ trên microSD để không làm đứt tuyến dữ liệu khi mạng
-di động mất ổn định trong thời gian ngắn.
-
-![Hình 3.5 - Kiến trúc xử lý dữ liệu ở máy chủ](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-12.svg)
-
-_Hình 3.5: Dữ liệu từ xe được tiếp nhận, phân luồng và lưu trữ tại máy chủ_
-
-![Hình 3.6 - Luồng dữ liệu từ thiết bị đến giao diện quản lý](./assets/figures/05-chuong-3-giai-phap-backend-hinh-3-12a.svg)
-
-_Hình 3.6: Tuyến dữ liệu từ thiết bị đến màn hình theo dõi và cảnh báo_
+Nhìn chung, ba khối trong kiến trúc đã chọn giữ được cùng một mạch từ thiết bị, máy chủ đến giao
+diện khai thác, nên có thể xem là phương án khả thi cho bài toán của đồ án.
 
 ## 3.4. Tối ưu phương án thiết kế
 
-Sau bước đánh giá, phương án tối ưu của đồ án được chốt theo nguyên tắc: giảm mức can
-thiệp lên xe, giữ thiết bị gọn, tiết kiệm năng lượng khi xe đỗ, nhưng vẫn bảo đảm được
-tuyến dữ liệu đủ ổn định cho quản lý vận hành.
+Từ phần phân tích ở Mục 3.1, phần đề xuất và so sánh ở Mục 3.2, cùng phương án khả thi ở Mục 3.3,
+cấu hình thiết kế tổng thể của hệ thống theo dõi xe được tổng hợp trong Bảng 3.8.
 
-**Bảng 3.7: Phương án thiết kế tối ưu của hệ thống**
+**Bảng 3.8: Bảng tổng hợp cấu hình hệ thống theo dõi xe**
 
-| Lớp hệ thống                  | Phương án chốt                                                                  | Vai trò chính                                                        |
-| :------------------------------- | :---------------------------------------------------------------------------------- | :--------------------------------------------------------------------- |
-| Điều khiển trung tâm         | ESP32-S3                                                                            | Điều phối modem, BLE OBD-II, IMU, nguồn và publish dữ liệu      |
-| Truyền dữ liệu và định vị | SIM7600CE-T                                                                         | Cung cấp LTE uplink và GNSS trên cùng một mô-đun                |
-| Thu dữ liệu vận hành         | `vgate iCar Pro` qua Bluetooth                                                    | Đọc nhóm dữ liệu OBD-II cơ bản với mức can thiệp thấp       |
-| Giám sát khi xe đỗ           | LIS3DSH + timer wake                                                                | Phát hiện chuyển động và duy trì heartbeat định kỳ           |
-| Nguồn và dự phòng            | Nhánh logic 3,3 V, nhánh modem khoảng 4 V, sạc 1S và bảo vệ điện áp thấp | Giữ ổn định nguồn và bảo vệ ắc quy xe                         |
-| Firmware thiết bị              | Máy trạng thái nhiều pha + RTC context + replay cục bộ                        | Quản lý sleep/wake, reconnect, OTA và khôi phục dữ liệu         |
-| Tiếp nhận bản tin             | EMQX + MQTT Bridge                                                                  | Nhận, kiểm tra và phân luồng dữ liệu từ thiết bị             |
-| Lưu trữ và giám sát         | PostgreSQL/PostGIS + VictoriaMetrics + VictoriaLogs + Grafana                       | Lưu dữ liệu nghiệp vụ, time-series, logs và quan sát vận hành |
-| Lớp dịch vụ                   | Backend API + Socket.IO/WebSocket                                                   | Xử lý nghiệp vụ và đẩy cập nhật gần thời gian thực         |
-| Giao diện khai thác            | Dashboard web tập trung bản đồ - trạng thái - cảnh báo                      | Bề mặt thao tác chính cho người quản lý                        |
-
-Ở cấu hình này, lớp OBD-II được giữ theo hướng không dây để giảm xâm lấn khi lắp đặt.
-Lớp nguồn được chia nhánh để tách phần logic, modem và pin dự phòng. Ở tầng firmware,
-thiết bị không quyết định ngủ chỉ bằng một tín hiệu ignition, mà đi qua chuỗi kiểm tra
-trạng thái để tránh lẫn xe đỗ với xe nổ máy nhưng đang đứng yên. Ở tầng cloud, phần tiếp
-nhận, lưu trữ và khai thác được tách lớp để tránh dồn toàn bộ tải lên một điểm xử lý.
-
-![Hình 3.7 - Cách tổ chức giao diện khai thác chính](./assets/figures/06-chuong-3-giai-phap-frontend-hinh-3-21.svg)
-
-_Hình 3.7: Giao diện khai thác tập trung vào bản đồ, trạng thái và cảnh báo_
-
-## Kết luận chương 3
-
-Qua bước phân tích và đánh giá, đồ án không chọn lời giải tối ưu cục bộ cho từng linh
-kiện, mà chọn một cấu hình giữ được sự nhất quán cho toàn tuyến từ xe đến giao diện.
-Kết quả là một phương án tích hợp vừa đủ: ít xâm lấn ở phía xe, tiết kiệm điện ở trạng
-thái đỗ, chịu được biến động của mạng di động và vẫn giữ được dữ liệu cần cho khai thác.
-
-Đó là cơ sở để Chương 4 chuyển sang phần triển khai: hiện thực phần cứng, tổ chức
-firmware, dựng hạ tầng cloud và kiểm chứng toàn tuyến bằng các số đo thực nghiệm.
+| Phân hệ              | Hạng mục                        | Phương án / thông số đã chọn                            | Ghi chú kỹ thuật                                                                             |
+| :--------------------- | :-------------------------------- | :-------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| 1. Thiết bị trên xe | Bộ điều khiển trung tâm      | ESP32-S3                                                        | Điều phối modem LTE/GNSS, BLE OBD-II, IMU và các nhánh nguồn                             |
+| 1. Thiết bị trên xe | Truyền dữ liệu và định vị  | SIM7600CE-T                                                     | Tích hợp LTE và GNSS trong cùng một mô-đun                                               |
+| 1. Thiết bị trên xe | Thu dữ liệu vận hành          | `vgate iCar Pro` qua Bluetooth                                | Lấy nhóm dữ liệu quản lý qua OBD-II, giảm dây nối trong cabin                          |
+| 1. Thiết bị trên xe | Giám sát khi xe đỗ            | LIS3DSH + nhánh đánh thức riêng                            | Giữ phát hiện chuyển động khi phần tải lớn đã đưa về ngủ sâu                    |
+| 1. Thiết bị trên xe | Nguồn cấp                       | Nguồn chia nhánh + pin dự phòng + bảo vệ điện áp thấp | Tách nhánh luôn cấp và nhánh tải lớn, hạn chế ảnh hưởng lên ắc quy xe            |
+| 1. Thiết bị trên xe | Nền tảng firmware               | ESP-IDF + FreeRTOS                                              | Phù hợp khi thiết bị phải điều phối nhiều ngoại vi và nhiều trạng thái            |
+| 2. Máy chủ           | Giao thức truyền bản tin       | MQTT qua TLS                                                    | Phù hợp với bản tin nhỏ, lặp lại và có thể gián đoạn theo mạng di động          |
+| 2. Máy chủ           | Tiếp nhận và xử lý dữ liệu | Broker + lớp trung gian + lưu trữ tách vai trò             | Tách lớp nhận bản tin, xử lý và lưu trữ để thuận lợi hơn khi mở rộng            |
+| 3. Khai thác          | Giao diện quản lý              | Giao diện giám sát tập trung trên nền web                 | Ưu tiên thông tin phục vụ vận hành; dữ liệu sâu hơn được đưa về vùng tra cứu |
 
 # CHƯƠNG 4. TRIỂN KHAI GIẢI PHÁP VÀ KẾT QUẢ - IMPLEMENTATION AND RESULTS
 
-## 4.1. Phần cứng thiết bị
+## 4.1. Triển khai phần cứng thiết bị
 
-Phần cứng của hệ thống được triển khai thành một bộ thiết bị hoàn chỉnh gồm bo mạch
-trung tâm, mô-đun LTE/GNSS, nguồn dự phòng, vỏ in 3D và bộ đọc OBD-II không dây.
-Toàn bộ cụm thiết bị được tổ chức theo hướng lắp được trên xe thật, đồng thời vẫn cho
-phép tháo lắp lại khi cần đổi xe hoặc bảo trì.
+Quá trình triển khai đi từ việc xác lập kiến trúc thiết bị, đưa mạch xuống
+PCB, gia công - hàn lắp, hoàn thiện vỏ đến bước lắp thử trên xe.
 
-Về bố trí phần cứng, vùng nguồn, vùng xử lý-truyền thông và vùng kết nối được tách rõ
-để giảm ảnh hưởng chéo và thuận tiện cho kiểm tra sau lắp ráp. Cách tổ chức này trực
-tiếp phục vụ mục tiêu vận hành ổn định dài giờ trên nguồn xe.
+![Hình 4.1 - Sơ đồ khối tổng quan phần cứng thiết bị](./assets/result/chapter-4-ai-figures/hinh-4-1-kien-truc-tong-the-ai.png)
 
-![Hình 4.1 - Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các phần cứng tích hợp](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-5.svg)
+_Hình 4.1: Sơ đồ khối tổng quan của thiết bị theo dõi trên xe_
 
-_Hình 4.1: Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các phần cứng tích hợp_
+Từ Hình 4.1, có thể rút ra các ý chính sau:
 
-Nhánh nguồn 12-24 VDC được phân tách cho logic 3,3 V, modem LTE/GNSS, mạch sạc
-và nguồn dự phòng. Nhờ đó, thiết bị vẫn giữ được vùng làm việc ổn định trong các
-trạng thái như xe nổ máy, modem phát công suất cao hoặc nguồn chính bị gián đoạn.
+- Thiết bị thu bốn nhóm thông tin chính: dữ liệu vận hành, vị trí, chuyển động và trạng thái nguồn.
+- `ESP32-S3` giữ vai trò điều phối trung tâm, ghép các thông tin này thành bản tin giám sát.
+- Bản tin sau đó được truyền về máy chủ để phục vụ theo dõi và khai thác.
 
-![Hình 4.2 - Sơ đồ phân nhánh nguồn](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-6.png)
+![Hình 4.2 - Sơ đồ khối điều khiển trung tâm của thiết bị](./assets/figures-condensed-r2/07-chuong-4-trien-khai-hardware-hinh-4-12.png)
 
-_Hình 4.2: Nguồn xe 12-24 VDC được phân nhánh cho logic, modem và nguồn dự phòng_
+_Hình 4.2: Khối ESP32-S3 và các nhánh mà bộ điều khiển trung tâm trực tiếp quản lý_
 
-Về cách bố trí trên xe, bộ đọc OBD-II được đặt trực tiếp tại cổng chẩn đoán dưới táp
-lô, còn thiết bị theo dõi được đặt tách rời trong cabin và kết nối với bộ đọc qua
-Bluetooth. Phương án này giúp hạn chế việc kéo thêm dây trong khoang lái, đồng thời
-giữ tính linh hoạt khi lắp trên nhiều mẫu xe khác nhau.
+Vai trò của khối điều khiển trung tâm trong Hình 4.2 có thể tóm tắt như sau:
 
-![Hình 4.2a - Sơ đồ nguyên lý bố trí bộ đọc OBD-II và thiết bị theo dõi trên xe](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-14.png)
+- `ESP32-S3` là khối xử lý trung tâm của thiết bị.
+- Khối này tiếp nhận tín hiệu nguồn, dữ liệu xe, tín hiệu chuyển động, mốc thời gian và dữ liệu lưu đệm.
+- Các chuyển đổi giữa hoạt động, chờ và ngủ sâu đều do `ESP32-S3` điều phối.
 
-_Hình 4.2a: Bộ đọc OBD-II đặt ở cổng xe, còn thiết bị theo dõi đặt tách rời trong cabin_
+![Hình 4.2a - Sơ đồ các mô-đun chính có trên bo mạch](./assets/figures-condensed-r2/07-chuong-4-trien-khai-hardware-hinh-4-14.png)
 
-**Bảng 4.1: Các phần cứng đã hoàn thành**
+_Hình 4.2a: Các mô-đun chính có trên bo mạch và quan hệ giữa các cụm chức năng_
 
-| Thành phần                     | Kết quả                                                         |
-| :------------------------------- | :---------------------------------------------------------------- |
-| PCB thiết bị                   | Thiết kế, gia công và lắp ráp hoàn chỉnh                  |
-| Nguồn 12-24 VDC                 | Hoạt động ổn định trên dải điện áp mục tiêu          |
-| MCU trung tâm                   | ESP32-S3 vận hành ổn định                                    |
-| Truyền dữ liệu và định vị | SIM7600CE-T gửi dữ liệu và định vị tốt                    |
-| OBD-II                           | Kết nối Bluetooth với vgate iCar Pro, đọc dữ liệu cơ bản |
-| Cảm biến chuyển động        | LIS3DSH đánh thức thiết bị và tạo cảnh báo               |
-| Nguồn dự phòng                | Giữ thiết bị hoạt động khi mất nguồn chính               |
-| Cơ khí                         | PCB và vỏ in 3D, lắp được trên xe thử nghiệm             |
+Ở mức mô-đun, Hình 4.2a cho thấy các cụm chức năng chính của bo mạch như sau:
 
-Bảng 4.1 tổng hợp các phần cứng chính đã được triển khai trong nguyên mẫu. Kết quả
-ở giai đoạn này cho thấy phần cứng đã hoàn thành các bước chính của đồ án gồm thiết
-kế PCB, lắp ráp, đóng vỏ và lắp thử trên xe. Hình 4.3a trình bày trình tự lắp nguyên
-mẫu theo từng bước để bảo đảm việc triển khai có thể lặp lại.
+- Bo mạch được chia thành các cụm chức năng chính thay vì bố trí linh kiện rời rạc.
+- Nhánh nguồn tạo các mức điện áp làm việc và nguồn dự phòng.
+- Nhánh cảm biến - lưu trữ phục vụ phát hiện chuyển động, giữ thời gian và lưu dữ liệu cục bộ.
+- Nhánh truyền thông - định vị đảm nhiệm lấy vị trí và gửi bản tin.
 
-![Hình 4.3a - Quy trình triển khai nguyên mẫu phần cứng](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-12.png)
+![Hình 4.2b - Cấu trúc khối nguồn của thiết bị](./assets/figures-condensed-r2/07-chuong-4-trien-khai-hardware-hinh-4-6.png)
 
-_Hình 4.3a: Trình tự lắp nguyên mẫu từ kiểm tra linh kiện đến đóng vỏ_
+_Hình 4.2b: Cấu trúc khối nguồn chính, nguồn dự phòng và các mức nguồn làm việc của thiết bị_
 
-## 4.2. Hoạt động của thiết bị và máy chủ
+Từ Hình 4.2b, có thể thấy cách tổ chức nguồn của thiết bị qua các điểm sau:
 
-Trong vận hành thực, thiết bị làm việc theo một chuỗi trạng thái tương đối cố định:
-khởi động, kiểm tra nguồn, lấy vị trí, ghép OBD-II, gửi dữ liệu; sau đó chuyển sang
-trạng thái tiêu thụ thấp khi xe dừng và tự đánh thức khi có rung hoặc đến chu kỳ gửi
-tin. Chuỗi này cho phép thiết bị bám sát trạng thái xe nhưng vẫn giữ tiêu thụ điện
-trong vùng an toàn cho ắc quy.
+- Nguồn từ xe trước hết tạo bus 5 V làm nguồn trung gian cho toàn thiết bị.
+- Từ bus này, hệ thống tách ra 3.3 V cho điều khiển và cảm biến, khoảng 4 V riêng cho `SIM7600E`.
+- Pin dự phòng `18650` được sạc trong quá trình làm việc và tạo lại đường 5 V khi mất nguồn xe.
+- Cách tổ chức này giúp nhánh modem không kéo sụt nhánh điều khiển.
 
-Ở lớp thiết bị, khi xe bắt đầu hoạt động, bộ theo dõi chuyển sang trạng thái làm việc,
-bật modem, đồng bộ GPS và ghép OBD-II. Trong pha xe chạy, dữ liệu vị trí, tốc độ và
-trạng thái được gửi đều về máy chủ; khi xe dừng, thiết bị hạ tiêu thụ nhưng vẫn duy
-trì cơ chế giám sát rung hoặc dịch chuyển để không bỏ lỡ sự kiện vận hành.
+Sau khi chốt các khối chức năng, thiết bị được đưa xuống thiết kế PCB trên Altium Designer.
 
-**Bảng 4.2: Các chức năng chính trên thiết bị đã chạy ổn định**
+![Hình 4.2c - Thiết kế bố trí mặt trước của PCB trên phần mềm Altium](./assets/result/thiet-bi/thiet-ke-altium-mat-truoc.jpg)
 
-| Nhóm chức năng        | Kết quả                                                                             |
-| :----------------------- | :------------------------------------------------------------------------------------ |
-| Quản lý trạng thái   | Thiết bị chuyển đúng giữa chạy, đỗ, cảnh báo và ngủ                      |
-| Đọc vị trí GPS       | Thu được vị trí, số vệ tinh, tốc độ                                         |
-| Đọc OBD-II             | Thu được RPM, tốc độ xe, nhiệt độ nước, mức nhiên liệu, tải động cơ |
-| Quản lý nguồn         | Theo dõi điện áp, bảo vệ ắc quy, dùng pin dự phòng                          |
-| Gửi dữ liệu           | Gửi đều dữ liệu vị trí, trạng thái và sự kiện lên máy chủ              |
-| Cảnh báo               | Phát hiện vượt tốc độ, rung khi xe đỗ, ra khỏi vùng cho phép              |
-| Lưu tạm khi mất mạng | Giữ dữ liệu và gửi bù khi có lại kết nối                                    |
+_Hình 4.2c: Bố trí mặt trước của PCB sau khi hoàn thiện thiết kế trên phần mềm_
 
-![Hình 4.4 - Sơ đồ hệ thống máy chủ](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-15.svg)
+Ở mức layout, Hình 4.2c thể hiện ba điểm chính:
 
-_Hình 4.4: Luồng dữ liệu từ thiết bị lên máy chủ và ra giao diện khai thác_
+- Các khối chức năng đã được bố trí trên cùng một bo mạch tích hợp.
+- Khe SIM, khe nhớ, đầu anten, cổng nguồn và pin dự phòng đều được đưa lên cùng một layout.
+- Cách bố trí này giúp giảm mạch rời, rút gọn dây nối và thuận tiện hơn khi đặt thiết bị trong cabin.
 
-![Hình 4.4a - Cấu trúc triển khai các dịch vụ máy chủ](./assets/figures/09-chuong-4-trien-khai-cloud-hinh-4-16.png)
+Từ layout này, nguyên mẫu phần cứng được hiện thực qua các bước sau:
 
-_Hình 4.4a: Các dịch vụ nhận dữ liệu, lưu trữ và khai thác của máy chủ_
+- Từ bản thiết kế này, PCB được gia công và hàn lắp để tạo thành nguyên mẫu phần cứng.
+- Các cụm `microSIM`, `microSD`, bộ điều khiển, pin dự phòng, đầu nối anten và cổng nguồn đã cùng nằm
+  trên một bo duy nhất.
+- Đây là bước chuyển từ bản thiết kế sang sản phẩm thử nghiệm thực tế.
 
-Ở tầng máy chủ, luồng dữ liệu được tổ chức thành ba lớp: tiếp nhận bản tin, xử lý-lưu
-trữ và cung cấp kết quả ra giao diện khai thác. Việc tách vai trò theo lớp giúp phần
-trên xe giữ mức đơn giản cần thiết, trong khi các logic tổng hợp, cảnh báo và quản lý
-dữ liệu được tập trung về phía máy chủ để dễ kiểm soát khi tăng số lượng thiết bị
-đồng thời.
+![Hình 4.3 - Bo mạch nguyên mẫu sau khi hàn lắp đầy đủ linh kiện](./assets/result/thiet-bi/thiet-bi-mach-thanh-pham-day-du-linh-kien-khong-housing.jpg)
 
-**Bảng 4.3: Các phần chính trên máy chủ**
+_Hình 4.3: Bo mạch nguyên mẫu sau khi hàn lắp đầy đủ linh kiện và kiểm tra hoạt động ban đầu_
 
-| Thành phần          | Kết quả triển khai                                                   |
-| :-------------------- | :---------------------------------------------------------------------- |
-| Kênh nhận dữ liệu | Nhận ổn định dữ liệu gửi từ thiết bị                          |
-| Xử lý trung gian    | Chuẩn hóa dữ liệu, tách vị trí, trạng thái và cảnh báo      |
-| Lưu trữ             | Lưu hành trình, dữ liệu vận hành, thiết bị và cảnh báo      |
-| Ứng dụng            | Cung cấp giao diện web và ứng dụng di động cho người quản lý |
+Sau khi hoàn thiện lắp ráp, nguyên mẫu phần cứng có các đặc điểm chính sau:
 
-## 4.3. Giao diện khai thác
+- Nguyên mẫu được đưa vào vỏ để cố định bo mạch.
+- Các đường anten và kết nối chính được sắp xếp lại theo cấu hình lắp đặt thực tế.
 
-Giao diện khai thác là lớp cuối cùng của toàn bộ chuỗi xử lý nên được ưu tiên theo
-hướng dễ quan sát và dễ thao tác. Bố cục giao diện tập trung vào ba tác vụ chính: theo
-dõi vị trí, nhận biết cảnh báo và tra cứu dữ liệu chuyến đi. Vì vậy, các thành phần bản
-đồ, trạng thái và cảnh báo được đặt ở lớp hiển thị chính, còn các thông tin thiên về
-kỹ thuật được đưa vào các màn hình chi tiết.
+![Hình 4.3a - Nguyên mẫu phần cứng khi lắp trong vỏ](./assets/result/thiet-bi/thiett-bi-mach-housing-dang-mo.jpg)
+
+_Hình 4.3a: Nguyên mẫu phần cứng sau khi lắp trong vỏ và hoàn thiện các kết nối chính_
+
+![Hình 4.3b - Thiết bị sau khi đóng vỏ hoàn thiện](./assets/result/thiet-bi/thiett-bi-mach-housing-dang-dong-nap.jpg)
+
+_Hình 4.3b: Thiết bị sau khi đóng vỏ, sẵn sàng cho bước lắp thử và đo kiểm trên xe_
+
+Khi đưa thiết bị lên xe thử nghiệm, cách bố trí được chốt theo các điểm sau:
+
+- `vgate iCar Pro` được cắm trực tiếp vào cổng `OBD-II` của xe.
+- Thiết bị theo dõi được đặt trong cabin, ưu tiên khu vực dưới táp-lô.
+- Dữ liệu xe đi không dây từ `OBD-II`, còn thiết bị chỉ lấy nguồn từ xe và đặt anten ở vị trí thuận lợi
+  cho thu sóng.
+- Cách bố trí này giữ đúng định hướng ít xâm lấn và cho phép chuyển sang bước đo kiểm trên xe thật.
+
+**Bảng 4.1: Tóm tắt các bước triển khai phần cứng**
+
+| Bước triển khai                                       | Kết quả đạt được                                                                                                                    |
+| :------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| Chốt kiến trúc tổng thể                             | Xác định rõ các cụm nguồn, điều khiển, cảm biến - lưu trữ và truyền thông - định vị trong cùng một tuyến giám sát |
+| Thiết kế PCB                                           | Gom các khối chính, khe SIM, khe nhớ, đầu anten, cổng nguồn và pin dự phòng lên một bo mạch chung                            |
+| Hoàn thiện khối điều khiển và phân cụm mô-đun | Xác lập vai trò của `ESP32-S3` và quan hệ phối hợp giữa các nhánh trên bo mạch                                              |
+| Hoàn thiện nhánh nguồn                               | Tạo các mức 5 V, 4 V, 3.3 V, bổ sung pin dự phòng và giữ điều kiện cho chế độ ngủ sâu                                      |
+| Gia công và hàn lắp nguyên mẫu                     | PCB được chế tạo, lắp đầy đủ linh kiện và kiểm tra hoạt động ban đầu                                                     |
+| Hoàn thiện cơ khí và lắp thử trên xe             | Đưa bo vào vỏ, bố trí anten, kết nối với `OBD-II` và kiểm tra khả năng làm việc trong xe thật                            |
+
+Đến đây, phần cứng của đồ án đã hình thành một nguyên mẫu hoàn chỉnh, trong đó các tuyến nguồn, thu
+dữ liệu, định vị, truyền bản tin và lưu đệm đã được ghép trên cùng một thiết bị. Đây là cơ sở để chuyển
+sang bước đo kiểm ở Mục 4.3.
+
+## 4.2. Triển khai phần mềm hệ thống
+
+Phần mềm là lớp làm cho thiết bị trên xe, máy chủ và giao diện vận hành như một hệ thống thống nhất.
+Ở phía thiết bị, firmware quyết định khi nào thu dữ liệu, khi nào gửi bản tin và khi nào chuyển về ngủ
+sâu. Ở phía máy chủ và giao diện, dữ liệu được tiếp nhận, xử lý, lưu trữ và đưa lên màn hình quản lý
+theo đúng ngữ cảnh khai thác.
+
+### 4.2.1. Phần điều khiển trên thiết bị
+
+Ở phía thiết bị, firmware quyết định thiết bị thức dậy khi nào, lấy dữ liệu theo nhịp nào, gửi bản tin
+ra sao và chuyển về ngủ sâu trong điều kiện nào. Bản triển khai hiện tại chạy trên `ESP32-S3`, phát
+triển bằng `ESP-IDF 5.4`; `FreeRTOS` dùng để điều phối các nhánh việc chính, `NimBLE` dùng cho
+kết nối với `vgate iCar Pro`, còn `UART` dùng để trao đổi với `SIM7600E`.
+
+**Bảng 4.2: Các thành phần và chức năng chính đã triển khai ở firmware**
+
+| Nhóm triển khai                 | Nội dung đã hiện thực                                                                                                                    |
+| :-------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nền tảng chạy                  | `ESP-IDF 5.4`, `FreeRTOS` và cấu hình vận hành trên `ESP32-S3`                                                                    |
+| Thu dữ liệu xe                  | `NimBLE` kết nối với `vgate iCar Pro`, đọc được nhóm dữ liệu OBD-II cơ bản như trạng thái khóa điện, tốc độ và RPM |
+| Định vị và gửi bản tin      | `SIM7600E` đảm nhiệm lấy vị trí `GNSS`, đăng ký mạng `4G` và gửi bản tin `MQTT`                                          |
+| Theo dõi nguồn                  | Firmware đọc điện áp nguồn xe, điều khiển các nhánh cấp nguồn và phối hợp với nguồn dự phòng khi cần                     |
+| Lưu đệm và gửi bù           | Dữ liệu được giữ cục bộ khi mất kết nối và gửi bù khi có mạng trở lại                                                       |
+| Tổ chức trạng thái vận hành | Logic làm việc được chia theo các pha khởi tạo, kiểm tra trạng thái xe, hoạt động, đỗ xe, cảnh báo và ngủ sâu            |
+
+Điểm cốt lõi của firmware nằm ở cách các nhánh phần cứng được ghép lại theo trạng thái vận hành của
+xe. Khi xe hoạt động, thiết bị duy trì nhịp lấy vị trí, đọc dữ liệu `OBD-II` và gửi bản tin đều lên máy
+chủ. Khi xe dừng, các tải lớn được hạ xuống; thiết bị chuyển sang chờ hoặc ngủ sâu, chỉ giữ đường
+đánh thức từ `LIS3DSH` và các mốc kiểm tra định kỳ. Nhờ vậy, phần lớn năng lượng được cắt giảm
+trong quãng xe đỗ nhưng đường giám sát vẫn không bị bỏ trống.
+
+### 4.2.2. Hạ tầng máy chủ và xử lý dữ liệu
+
+Phía máy chủ được triển khai theo hướng tách riêng lớp nhận bản tin, lớp xử lý nghiệp vụ và các kho
+lưu trữ. Cách tổ chức này giúp hệ thống giữ ổn định khi thiết bị gửi dữ liệu liên tục hoặc gửi bù sau
+mất sóng.
+
+![Hình 4.4 - Sơ đồ hệ thống máy chủ](./assets/figures-condensed-r2/09-chuong-4-trien-khai-cloud-hinh-4-15.png)
+
+_Hình 4.4: Tuyến tiếp nhận, xử lý, lưu trữ và khai thác dữ liệu phía máy chủ_
+
+![Hình 4.4a - Cấu trúc triển khai các dịch vụ máy chủ](./assets/figures-condensed-r2/09-chuong-4-trien-khai-cloud-hinh-4-16.png)
+
+_Hình 4.4a: Các nhóm chức năng chính trong không gian triển khai phía máy chủ_
+
+Trong cấu hình hiện tại, `EMQX` là điểm tiếp nhận bản tin `MQTT` từ thiết bị. Từ đó, `MQTT Bridge`
+kiểm tra cấu trúc, phân luồng và ghi dữ liệu vào đúng nơi; `PostgreSQL` giữ dữ liệu nghiệp vụ;
+`VictoriaMetrics` giữ dữ liệu chuỗi thời gian; `VictoriaLogs` giữ nhật ký vận hành; còn lớp xử lý phía
+máy chủ viết bằng `Express + TypeScript` cung cấp `API` và đẩy cập nhật mới ra giao diện. Các dịch
+vụ này được đóng gói riêng bằng `Docker Compose`, nên việc khởi động, cập nhật hay dò lỗi từng lớp
+đều rõ ràng hơn.
+
+**Bảng 4.3: Các thành phần chính ở máy chủ**
+
+| Thành phần                                            | Vai trò triển khai                                                                            |
+| :------------------------------------------------------ | :---------------------------------------------------------------------------------------------- |
+| `EMQX`                                                | Nhận kết nối MQTT từ thiết bị và giữ lớp trung chuyển bản tin                        |
+| `MQTT Bridge`                                         | Kiểm tra cấu trúc bản tin, phân luồng và ghi dữ liệu vào các kho lưu trữ           |
+| `PostgreSQL`                                          | Lưu dữ liệu nghiệp vụ như thiết bị, phương tiện, cảnh báo và lịch sử khai thác |
+| `VictoriaMetrics` và `VictoriaLogs`                | Lưu dữ liệu chuỗi thời gian và nhật ký vận hành để truy vết, giám sát            |
+| Lớp xử lý phía máy chủ (`Express + TypeScript`) | Cung cấp API, xử lý nghiệp vụ và đẩy cập nhật mới ra giao diện                      |
+
+Điểm mạnh của cấu trúc này là tuyến nhận bản tin được tách khỏi phần phục vụ giao diện. Vì vậy, khi
+thiết bị gửi bù dữ liệu sau mất sóng hoặc khi số bản tin tăng lên, hệ thống vẫn giữ được nhịp xử lý và
+không làm phần khai thác bị nghẽn theo.
+
+### 4.2.3. Giao diện khai thác
+
+Ở lớp khai thác, dữ liệu sau xử lý được đưa lên giao diện quản lý trên nền web; trong bản triển khai
+hiện tại, giao diện được xây dựng bằng `Next.js` và `React`, bản đồ dùng `Leaflet`, còn cập nhật gần
+thời gian thực đi qua `Socket.IO`. Cách bố trí màn hình không dồn mọi thông số kỹ thuật lên một nơi,
+mà ưu tiên đúng các thao tác người quản lý thường dùng.
 
 ![Hình 4.5 - Giao diện chi tiết thiết bị trên hệ thống thật](./assets/result/anh-bien-tap-tu-nguon-that-r2/he-thong-thuc-te-chi-tiet-thiet-bi-live.png)
 
@@ -789,78 +986,73 @@ _Hình 4.5: Màn hình chi tiết thiết bị với trạng thái, thời gian 
 
 _Hình 4.6: Màn hình bản đồ theo dõi vị trí và trạng thái xe_
 
-![Hình 4.7 - Màn hình dữ liệu OBD-II và dữ liệu thô trên hệ thống](./assets/result/anh-bien-tap-tu-nguon-that-r2/he-thong-thuc-te-du-lieu-obd-raw-data.png)
+![Hình 4.7 - Màn hình dữ liệu xe và dữ liệu gốc trên hệ thống](./assets/result/anh-bien-tap-tu-nguon-that-r2/he-thong-thuc-te-du-lieu-obd-raw-data.png)
 
-_Hình 4.7: Màn hình kiểm tra dữ liệu OBD-II và bản tin thiết bị gửi về_
+_Hình 4.7: Màn hình kiểm tra dữ liệu xe và bản tin thiết bị gửi về_
 
-Hình 4.5 trình bày màn hình chi tiết thiết bị với trạng thái kết nối, thời gian hoạt
-động và vị trí gần nhất. Hình 4.6 là màn hình bản đồ, dùng để theo dõi hành trình và
-vùng quản lý theo thời gian thực. Hình 4.7 là lớp dữ liệu kỹ thuật, phục vụ kiểm tra
-bản tin thiết bị và các thông số OBD-II cơ bản trong quá trình khai thác.
+Ba màn hình này tương ứng với ba việc xuất hiện thường xuyên nhất trong vận hành: xem nhanh tình
+trạng một xe, theo dõi đội xe trên bản đồ và đối chiếu dữ liệu khi cần kiểm tra sâu hơn. Nhờ cách tách
+này, màn hình chính vẫn dễ quan sát, còn dữ liệu kỹ thuật chỉ mở ra ở phần chi tiết.
 
-Bên cạnh giao diện web, hệ thống còn có giao diện theo dõi trên điện thoại để nhận cảnh báo
-đẩy và kiểm tra nhanh khi người quản lý không ngồi trước máy tính. Nhờ đó, cùng một
-sự kiện có thể được quan sát liên tục trên cả màn hình trung tâm và thiết bị di động.
+## 4.3. Kết quả kiểm thử và đo lường
 
-## 4.4. Kết quả kiểm thử theo mục tiêu
+Đo kiểm được thực hiện sau khi toàn tuyến từ thiết bị đến giao diện đã vận hành ổn định. Mục tiêu của
+phần này không phải đo cho đủ danh mục, mà là trả lời những câu hỏi rất thực dụng: khi xe đỗ thiết bị
+có thật sự tiết kiệm điện không, dữ liệu xe có lấy được đủ nhanh không, vị trí có theo kịp hành trình
+không, cảnh báo có lên kịp cho người quản lý không và hệ thống có chịu được một nhóm xe nhỏ trong
+vận hành đồng thời hay không.
 
-Để đánh giá mức độ đáp ứng của hệ thống so với các mục tiêu đã nêu ở Chương 1, đồ án
-tiến hành kiểm thử trên cả bàn thử và xe thử nghiệm. Câu hỏi cần trả lời ở giai đoạn
-này không chỉ là hệ thống có vận hành hay không, mà là hệ thống có đạt được các
-ngưỡng làm việc cần thiết khi triển khai trên xe thật hay không. Các phép đo được chia
-thành hai nhóm chính:
+Việc đo kiểm được thực hiện trên hai bối cảnh:
 
-- Trên bàn thử: kiểm tra dòng ngủ, dòng hoạt động, chuyển nguồn, phản hồi OBD-II
-  và độ trễ truyền dữ liệu.
-- Trên xe: kiểm tra GPS, hành trình, cảnh báo và khả năng khai thác trên giao
-  diện.
+- Trên bàn thử: kiểm tra dòng ngủ, dòng hoạt động, chuyển nguồn, phản hồi dữ liệu xe và
+  độ trễ truyền dữ liệu.
+- Trên xe: kiểm tra vị trí, hành trình, cảnh báo và khả năng khai thác trên giao diện.
 
-![Hình 4.7a - Sơ đồ bố trí đo kiểm trong phòng thí nghiệm](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-20.png)
+![Hình 4.7a - Sơ đồ bố trí đo kiểm trong phòng thí nghiệm](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-20.png)
 
-_Hình 4.7a: Bố trí đo kiểm trong phòng thí nghiệm_
+_Hình 4.7a: Bố trí nguồn cấp, tín hiệu thử và thiết bị ghi nhận trên bàn thử_
 
-![Hình 4.7b - Thiết bị lắp trên xe thử nghiệm](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-21.svg)
+![Hình 4.7b - Thiết bị lắp trên xe thử nghiệm](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-21.png)
 
-_Hình 4.7b: Phương án thử trên xe với thiết bị theo dõi và bộ đọc OBD-II_
+_Hình 4.7b: Bố trí bộ đọc dữ liệu xe và thiết bị theo dõi trên xe thử nghiệm_
 
-![Hình 4.7c - Sơ đồ chuỗi kiểm thử tổng thể](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-22.svg)
+![Hình 4.7c - Sơ đồ chuỗi kiểm thử tổng thể](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-22.png)
 
-_Hình 4.7c: Chuỗi kiểm thử từ thiết bị đến giao diện quan sát_
+_Hình 4.7c: Chuỗi kiểm thử từ nguồn dữ liệu đến màn hình quan sát kết quả_
 
-**Bảng 4.4a: Cơ sở của các phép đo chính**
+**Bảng 4.4a: Cơ sở các phép đo chính**
 
-| Nhóm đo                        | Điều kiện đo                                                                        | Căn cứ đánh giá                                                         |
-| :------------------------------- | :-------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------- |
-| Nguồn và tiêu thụ điện     | Cấp nguồn DC mô phỏng nguồn xe, theo dõi dòng và chuyển nguồn                 | Đánh giá ảnh hưởng lên ắc quy và khả năng duy trì hoạt động   |
-| Đọc dữ liệu OBD-II           | Ghép bộ đọc Bluetooth, đọc lặp các PID cơ bản                                 | Đánh giá tốc độ kết nối và độ ổn định của dữ liệu xe        |
-| Định vị GPS                   | Lắp trên xe, chạy ngoài trời và quan sát bản đồ                               | Đánh giá thời gian lên vị trí và độ chính xác ngoài thực địa |
-| Truyền dữ liệu và giao diện | So sánh thời điểm thiết bị gửi dữ liệu với thời điểm giao diện cập nhật | Đánh giá mức thời gian thực của toàn hệ thống                      |
-| Cảnh báo và xử lý sự kiện | Tạo vùng thử, kịch bản đỗ lâu, rung hoặc mất mạng                            | Đánh giá khả năng phục vụ trực tiếp cho quản lý xe                |
+| Nhóm đo                        | Điều kiện đo                                                                        | Căn cứ đánh giá                                                          |
+| :------------------------------- | :-------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
+| Nguồn và tiêu thụ điện     | Cấp nguồn DC mô phỏng nguồn xe, theo dõi dòng và chuyển nguồn                 | Đánh giá ảnh hưởng lên ắc quy và hiệu quả của chế độ ngủ sâu |
+| Lấy dữ liệu xe                | Ghép `vgate iCar Pro`, đọc lặp các tham số xe cơ bản                          | Đánh giá thời gian kết nối và độ ổn định của dữ liệu OBD-II    |
+| Định vị và hành trình      | Lắp trên xe, chạy ngoài trời và quan sát bản đồ                               | Đánh giá thời gian lên vị trí và độ chính xác ngoài thực địa  |
+| Truyền dữ liệu và giao diện | So sánh thời điểm thiết bị gửi dữ liệu với thời điểm giao diện cập nhật | Đánh giá độ trễ toàn tuyến ở mức gần thời gian thực              |
+| Cảnh báo và xử lý sự kiện | Tạo vùng thử, kịch bản đỗ lâu, rung hoặc mất mạng                            | Đánh giá khả năng phục vụ trực tiếp cho quản lý xe                 |
 
 **Bảng 4.4: Kết quả kiểm thử theo mục tiêu vận hành**
 
 | Mục tiêu kiểm tra                                       | Cách quan sát                                                                        | Kết quả                                                                             |
 | :--------------------------------------------------------- | :------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
 | Xe vừa hoạt động thì thiết bị có thức dậy không | Quan sát trạng thái thiết bị sau khi cấp nguồn hoạt động                     | Thiết bị thức dậy sau khoảng 2 s                                                 |
-| Dữ liệu xe có đọc được không                      | Kết nối OBD-II không dây và đọc dữ liệu cơ bản                              | Kết nối sau khoảng 4 s, phản hồi dữ liệu khoảng 60-75 ms                      |
+| Dữ liệu xe có đọc được không                      | Kết nối bộ đọc dữ liệu xe không dây và đọc dữ liệu cơ bản              | Kết nối sau khoảng 4 s, phản hồi dữ liệu khoảng 60-75 ms                      |
 | Vị trí xe có lên nhanh không                          | Quan sát vị trí xe trên bản đồ                                                  | Sau khoảng 5 s thiết bị lấy lại vị trí, bản đồ cập nhật sau khoảng 1-2 s |
 | Dữ liệu có lên máy chủ ổn định không             | So sánh thời điểm thiết bị gửi dữ liệu và thời điểm giao diện cập nhật | Độ trễ truyền dữ liệu khoảng 120-180 ms                                        |
 | Khi mất mạng có bị mất hẳn dữ liệu không          | Ngắt mạng rồi cho kết nối lại                                                    | Thiết bị lưu đệm và gửi bù khi có mạng                                      |
 | Khi xe ra khỏi vùng cho phép có báo không            | Tạo vùng thử và chạy xe qua ranh giới                                            | Cảnh báo xuất hiện sau khoảng 5-7 s                                              |
 | Hệ thống có đủ sức phục vụ nhóm xe nhỏ không    | Tăng số thiết bị mô phỏng đồng thời                                           | Ổn định với từ 50 thiết bị trở lên                                           |
 
-Bảng 4.4 cho thấy hệ thống đáp ứng các mục tiêu vận hành cốt lõi: thiết bị chuyển sang
-trạng thái hoạt động nhanh sau khi xe khởi hành, OBD-II phản hồi trong vùng chấp nhận, vị trí cập nhật kịp
-theo chuyến đi, dữ liệu hiển thị gần thời gian thực và các cảnh báo xuất hiện đủ sớm
-để phục vụ can thiệp vận hành.
+Nhìn vào nhóm phép thử cốt lõi, có thể thấy nguyên mẫu đã đáp ứng đúng các yêu cầu vận hành quan
+trọng: thiết bị thức dậy đủ nhanh, dữ liệu xe xuất hiện từ đầu chuyến, vị trí bám được hành trình thực
+tế, dữ liệu lên giao diện gần thời gian thực và cảnh báo xuất hiện trong khoảng có thể sử dụng được.
 
-![Hình 4.8 - Cảnh báo geofence trên giao diện quản lý](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-35.svg)
+![Hình 4.8 - Cảnh báo vượt vùng trên giao diện quản lý](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-35.png)
 
-_Hình 4.8: Giao diện cảnh báo khi xe ra khỏi vùng cho phép_
+_Hình 4.8: Các khu vực chính trên màn hình cảnh báo vượt vùng_
 
-![Hình 4.9 - Phục hồi hành trình sau khi có lại kết nối](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-37.svg)
+![Hình 4.9 - Phục hồi hành trình sau khi có lại kết nối](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-37.png)
 
-_Hình 4.9: Bản đồ tiếp tục cập nhật hành trình sau khi kết nối được phục hồi_
+_Hình 4.9: Trình tự cập nhật lại hành trình sau khi kết nối được phục hồi_
 
 **Bảng 4.5: Các số liệu đo kiểm chính**
 
@@ -869,9 +1061,9 @@ _Hình 4.9: Bản đồ tiếp tục cập nhật hành trình sau khi kết n�
 | Dòng ngủ sâu                                 | ~500 µA (~0,5 mA)      |
 | Dòng hoạt động trung bình                  | ~180-220 mA             |
 | Thời lượng pin dự phòng                    | ~2,6-3,0 giờ           |
-| Độ chính xác GPS ngoài trời               | ~2-3 m                  |
-| Kết nối OBD-II không dây                    | ~4 s                    |
-| Phản hồi dữ liệu OBD-II                     | ~60-75 ms               |
+| Độ chính xác vị trí ngoài trời          | ~2-3 m                  |
+| Kết nối bộ đọc dữ liệu xe không dây    | ~4 s                    |
+| Phản hồi dữ liệu xe                         | ~60-75 ms               |
 | Độ trễ truyền dữ liệu qua mạng di động | ~120-180 ms             |
 | Thời gian khôi phục kết nối                | ~15-30 s                |
 | Cập nhật bản đồ thời gian thực           | ~1-2 s                  |
@@ -879,171 +1071,141 @@ _Hình 4.9: Bản đồ tiếp tục cập nhật hành trình sau khi kết n�
 | Thời gian phản hồi máy chủ                 | ~95-200 ms              |
 | Số thiết bị đồng thời                     | 50+ thiết bị          |
 
-Các số đo chính đều nằm trong khoảng mục tiêu. Dòng ngủ sâu khoảng 0,5 mA giúp hạn
-chế ảnh hưởng lên ắc quy khi xe đỗ lâu. GPS, OBD-II và độ trễ cập nhật đáp ứng nhu
-cầu theo dõi thời gian thực. Hệ thống cũng giữ ổn định khi tăng tải lên mức 50+
-thiết bị. Các đồ thị dưới đây cho thấy rõ hơn những kết quả này.
+Các số liệu tổng hợp cho thấy những ràng buộc chính đặt ra ở đầu bài vẫn được giữ: dòng ngủ sâu ở
+mức thấp, độ trễ toàn tuyến không lớn, còn lớp dữ liệu định vị và dữ liệu xe đủ cho theo dõi và cảnh
+báo cơ bản. Ở phía máy chủ, hệ thống vẫn giữ được ổn định khi tăng lên mức 50+ thiết bị đồng thời.
 
-![Hình 4.10 - Dòng tiêu thụ theo chu kỳ hoạt động](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-23.svg)
+![Hình 4.10 - Dòng tiêu thụ theo chu kỳ hoạt động](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-23.png)
 
-_Hình 4.10: Dòng tiêu thụ thay đổi theo các trạng thái chạy, đỗ, cảnh báo và ngủ sâu của thiết bị_
+_Hình 4.10: Dòng tiêu thụ thay đổi theo từng pha vận hành chính của thiết bị_
 
-Đồ thị dòng cho thấy rõ hai trạng thái làm việc. Khi modem phát 4G, dòng tăng theo
-các đỉnh ngắn; khi xe đỗ, dòng hạ xuống vùng deep sleep và giữ ở mức rất thấp. Đây
-là phần cần quan tâm trực tiếp vì liên quan tới ảnh hưởng của thiết bị lên ắc quy xe.
+![Hình 4.11 - Phân bố thời gian kết nối bộ đọc dữ liệu xe](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-26.png)
 
-![Hình 4.11 - Phân bố thời gian kết nối OBD-II Bluetooth](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-26.svg)
+_Hình 4.11: Phần lớn các lần kết nối bộ đọc dữ liệu xe hoàn thành trong khoảng 3-5 giây_
 
-_Hình 4.11: Phần lớn các lần ghép nối OBD-II hoàn thành trong vùng 3-5 s, phù hợp với yêu cầu vận hành thực tế_
+![Hình 4.12 - Thời gian thiết bị lấy lại vị trí sau khởi động](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-27.png)
 
-Thời gian ghép OBD-II tập trung chủ yếu trong khoảng 3-5 s. Mức này đủ để thiết bị
-lấy dữ liệu xe ngay sau khi xe bắt đầu hoạt động.
+_Hình 4.12: Thời gian lấy lại vị trí thay đổi theo trạng thái khởi động của khối định vị_
 
-![Hình 4.12 - Thời gian lấy lại vị trí GPS](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-27.svg)
+![Hình 4.13 - Các phần tạo nên độ trễ từ thiết bị đến màn hình quản lý](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-30.png)
 
-_Hình 4.12: Ở các lần khởi động lại thông thường, thiết bị lấy lại vị trí nhanh nhờ điều kiện warm start và hot start_
+_Hình 4.13: Phần lớn độ trễ toàn tuyến nằm ở nhánh truyền qua mạng di động_
 
-Với bài toán này, điều quan trọng là xe vừa di chuyển thì vị trí phải lên kịp. Kết quả
-ở Hình 4.12 cho biết thiết bị lấy lại vị trí trong vài giây và theo kịp chuyến đi.
+![Hình 4.14 - So sánh chỉ tiêu thiết kế và kết quả đạt được](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-38.png)
 
-![Hình 4.13 - Phân bố độ trễ từ thiết bị đến giao diện](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-30.svg)
+_Hình 4.14: Mức đáp ứng của một số chỉ tiêu chính so với mục tiêu thiết kế_
 
-_Hình 4.13: Độ trễ toàn tuyến tập trung chủ yếu ở khâu truyền qua mạng di động, còn phần xử lý trong máy chủ chiếm tỷ trọng nhỏ_
+Chuỗi đồ thị từ Hình 4.10 đến Hình 4.14 giúp nhìn rõ hơn bản chất vận hành của hệ thống. Khi thiết bị
+vào ngủ sâu, dòng tiêu thụ giảm mạnh; khi quay lại hoạt động, thời gian nối lại `OBD-II` và lấy lại vị
+trí vẫn đủ nhanh cho đầu chuyến; còn phần lớn độ trễ toàn tuyến nằm ở nhánh truyền qua mạng di
+động, không phải ở nhánh xử lý phía máy chủ.
 
-Độ trễ lớn nhất nằm ở đoạn truyền qua mạng 4G. Sau khi bản tin vào máy chủ, phần lưu
-trữ và cập nhật giao diện diễn ra nhanh hơn đáng kể.
+## 4.4. Đối chiếu với mục tiêu của đồ án
 
-![Hình 4.14 - So sánh chỉ tiêu thiết kế và kết quả đạt được](./assets/figures/10-chuong-4-ket-qua-do-luong-hinh-4-38.svg)
+Từ các kết quả đo kiểm ở phần trên, nguyên mẫu được đối chiếu lại theo hai nhóm: mục tiêu chức năng
+của hệ thống và các ràng buộc triển khai thực tế.
 
-_Hình 4.14: Các chỉ tiêu chính đều nằm trong vùng mục tiêu đã đặt ra từ đầu_
+**Bảng 4.6: Đối chiếu các mục tiêu chức năng**
 
-Hình 4.14 đặt kết quả đo cạnh các chỉ tiêu đã chốt từ đầu. Các chỉ tiêu về nguồn, GPS,
-OBD-II, độ trễ và khả năng phục vụ đồng thời đều nằm trong giới hạn đã đặt ra.
+| Mục tiêu theo đồ án     | Kết quả đối chiếu                                                                                                            |
+| :--------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| Nguồn cấp thiết bị       | Thiết bị làm việc ổn định trên nguồn xe 12-24 VDC                                                                        |
+| Bộ điều khiển trung tâm | Hệ thống được triển khai trên ESP32-S3                                                                                     |
+| Giao tiếp với xe           | Đọc được dữ liệu OBD-II qua kết nối Bluetooth                                                                            |
+| Dữ liệu chính cần thu    | Theo dõi được tọa độ GPS, tốc độ và nhóm dữ liệu OBD-II cơ bản phục vụ quản lý                                |
+| Cảnh báo chính            | Đã triển khai cảnh báo vượt tốc độ, đỗ lâu và ra khỏi vùng quản lý                                              |
+| Chức năng tổng hợp       | Tổng hợp được quãng đường, thời gian sử dụng; dữ liệu vận hành là đầu vào cho ước tính chi phí khai thác |
+| Khả năng chế tạo         | Đã hoàn thành nguyên mẫu PCB, vỏ in 3D và lắp thử trên xe                                                              |
 
-## 4.5. Đối chiếu với mục tiêu của đồ án
+**Bảng 4.7: Đối chiếu các ràng buộc triển khai**
 
-Bảng 4.6 đối chiếu trực tiếp từng mục tiêu của đồ án với kết quả triển khai trên nguyên
-mẫu hoàn chỉnh.
+| Ràng buộc thiết kế         | Kết quả đối chiếu                                                                                      |
+| :----------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| Ràng buộc chi phí           | Tổng chi phí triển khai ở mức 4.504.000-5.704.000 VND                                                  |
+| Môi trường kiểm chứng     | Đã đo trong phòng thí nghiệm và trên xe thử nghiệm                                                |
+| Khả năng chế tạo thực tế | Đã chế tạo PCB chuyên dụng, vỏ in 3D và lắp thử trên xe                                          |
+| Chuẩn tham chiếu             | Bố trí mạch nguồn và khoảng cách an toàn cơ bản được tham chiếu theo IPC-2221 và IEC 60664-1 |
 
-**Bảng 4.6: Kiểm chứng chỉ tiêu thiết kế**
-
-| Mục tiêu theo đồ án               | Kết quả triển khai                                                               |
-| :------------------------------------- | :---------------------------------------------------------------------------------- |
-| Nguồn 12-24 VDC                       | Thiết bị làm việc ổn định trên nguồn xe 12-24 VDC                          |
-| Nền tảng ESP                         | Đã triển khai trên ESP32-S3                                                     |
-| Giao tiếp OBD-II                      | Đã đọc dữ liệu OBD-II qua Bluetooth                                           |
-| Theo dõi tọa độ GPS, tốc độ     | Đã theo dõi theo thời gian thực trên bản đồ                                |
-| Tính quãng đường                  | Đã tổng hợp theo hành trình thực tế của xe                                 |
-| Tính thời gian sử dụng             | Đã tổng hợp theo chuyến đi và thời gian xe hoạt động                     |
-| Ước tính chi phí khai thác        | Đã tổng hợp theo quãng đường, thời gian sử dụng và dữ liệu vận hành |
-| Cảnh báo vượt tốc độ            | Đã triển khai và hiển thị trên giao diện web                                |
-| Cảnh báo đỗ lâu                   | Đã triển khai qua trạng thái đỗ và thời gian không hoạt động           |
-| Chế tạo PCB và lắp đặt thực tế | Đã hoàn thành PCB, vỏ in 3D và kiểm thử trên xe                            |
-
-Ngoài các mục tiêu chính, hệ thống còn triển khai quản lý vùng và cảnh báo ra khỏi vùng
-cho phép để hỗ trợ kiểm soát phạm vi khai thác xe.
-
-**Bảng 4.7: Kiểm chứng các ràng buộc thiết kế**
-
-| Ràng buộc thiết kế                                   | Kết quả                                                                                                 |
-| :------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
-| Chi phí toàn bộ đồ án không vượt 20.000.000 VND | Tổng chi phí triển khai ở mức 4.504.000-5.704.000 VND                                                |
-| Thiết bị chế tạo được bằng PCB và vỏ in 3D     | Đã chế tạo PCB, lắp trong vỏ in 3D và lắp thử trên xe                                           |
-| Kiểm chứng trong phòng thí nghiệm                   | Đã đo dòng ngủ, dòng hoạt động, độ trễ truyền dữ liệu và phản hồi OBD-II                |
-| Kiểm chứng trên xe thử nghiệm                       | Đã theo dõi vị trí, tốc độ, hành trình, cảnh báo và dữ liệu OBD-II trên xe                |
-| Tuân theo IPC-2221 và IEC 60664-1                      | Đã dùng để bố trí mạch nguồn, phân tách các nhánh điện và khoảng cách an toàn cơ bản |
-
-Kết quả ở Bảng 4.6 và Bảng 4.7 cho thấy hệ thống đồng thời đáp ứng hai lớp yêu cầu
-của đề tài: mục tiêu chức năng và ràng buộc triển khai. Như vậy, Chương 4 đã làm rõ
-quá trình hiện thực hóa phương án đã lựa chọn, đồng thời cung cấp cơ sở thực nghiệm
-để chuyển sang Chương 5, nơi đồ án sẽ được đánh giá theo các mặt hiệu năng kỹ thuật,
-hiệu quả chi phí và mức độ phù hợp vận hành.
+Nhìn từ hai nhóm đối chiếu trên, nguyên mẫu đã đạt phần cốt lõi của đồ án: lắp được trên xe thật, thu
+được dữ liệu vị trí và dữ liệu vận hành cơ bản, truyền dữ liệu về máy chủ và hiển thị được trên giao
+diện quản lý. Những phần còn lại chủ yếu là kiểm chứng dài hạn và mở rộng quy mô, không phải thiếu
+hụt ở chức năng vận hành cơ bản.
 
 # CHƯƠNG 5. ĐÁNH GIÁ VÀ KHUYẾN NGHỊ - EVALUATION AND RECOMMENDATIONS
 
 ## 5.1. Đánh giá hiệu năng
 
-Dựa trên các kết quả đo ở Chương 4, hệ thống đáp ứng được các yêu cầu kỹ thuật chính
-của đề tài.
+Các kết quả ở Chương 4 cho thấy nguyên mẫu đã đáp ứng được các yêu cầu kỹ thuật cốt
+lõi của đồ án. Điểm quan trọng là thiết bị, máy chủ và giao diện đã chạy được như một
+tuyến hoàn chỉnh, không chỉ là các khối rời.
 
-Về nguồn và chế độ nghỉ, dòng ngủ sâu khoảng 0,5 mA và dòng hoạt động trung bình
-khoảng 180-220 mA cho thấy thiết bị giữ được hai trạng thái tiêu thụ khác nhau khá rõ.
-Kết quả này phù hợp với yêu cầu dùng chung nguồn 12-24 VDC trên xe nhưng vẫn hạn
-chế ảnh hưởng lên ắc quy khi phương tiện đỗ lâu.
+**Bảng 5.1: Đánh giá hiệu năng theo các nhóm chính**
 
-Về thu nhận dữ liệu vận hành, thời gian kết nối OBD-II không dây khoảng 4 s và thời
-gian phản hồi dữ liệu khoảng 60-75 ms. Mức này đủ để hệ thống lấy các thông số cơ
-bản của xe ngay từ đầu chuyến đi, đồng thời vẫn giữ cách lắp đặt ít xâm lấn đối với
-phương tiện.
+| Nhóm đánh giá               | Mức đáp ứng hiện tại                                                                                                         | Giới hạn còn lại                                                       |
+| :------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- |
+| Phần cứng và lắp đặt      | Đã chế tạo được nguyên mẫu PCB và vỏ in 3D, lắp thử trên xe thật                                                    | Cần kiểm chứng thêm độ bền dài ngày và tính ổn định cơ khí |
+| Nguồn và năng lượng        | Nguồn 12-24 VDC hoạt động ổn định, dòng ngủ sâu khoảng 0,5 mA, có nguồn dự phòng                                    | Cần đo thêm trên nhiều loại ắc quy và nhiều chu kỳ đỗ dài     |
+| Thu nhận và truyền dữ liệu | GPS, OBD-II và tuyến truyền dữ liệu đáp ứng yêu cầu theo dõi gần thời gian thực                                      | Cần kiểm thử thêm ở vùng sóng yếu và trên nhiều dòng xe        |
+| Máy chủ và giao diện        | Dữ liệu được tiếp nhận, lưu trữ, hiển thị và cảnh báo ổn định; hệ thống đạt mức 50+ thiết bị đồng thời | Cần đánh giá sâu hơn khi mở rộng quy mô                           |
 
-Về định vị và truyền dữ liệu, độ chính xác GPS ngoài trời đạt khoảng 2-3 m, độ trễ
-truyền qua mạng di động ở mức 120-180 ms, thời gian cập nhật bản đồ khoảng 1-2 s và
-thời gian khôi phục kết nối khoảng 15-30 s. Với các giá trị này, hệ thống đáp ứng được
-yêu cầu theo dõi gần thời gian thực trong điều kiện mạng thay đổi.
+Ở mức nguyên mẫu, thực nghiệm cho thấy dữ liệu từ xe đã lên được giao diện ở dạng có
+thể khai thác; thiết bị giữ được mức tiêu thụ điện phù hợp cho bối cảnh lắp trên xe; và
+các lớp thu nhận, lưu trữ, khai thác dữ liệu đã phối hợp ổn định trong cùng một tuyến
+vận hành.
 
-Về khả năng phục vụ, máy chủ phản hồi trong khoảng 95-200 ms và hệ thống giữ ổn
-định ở mức 50+ thiết bị đồng thời. Kết quả đối chiếu tại Bảng 4.6 và Bảng 4.7 cũng cho
-thấy các chỉ tiêu chính về nguồn, nền tảng ESP, giao tiếp OBD-II, theo dõi GPS, cảnh
-báo và chế tạo nguyên mẫu đều đã được đáp ứng.
+Tuy vậy, kết quả hiện tại mới phản ánh mức hoàn thiện của một nguyên mẫu tích hợp.
+Độ bền dài ngày, độ ổn định trên nhiều dòng xe, phạm vi tương thích OBD-II rộng hơn
+và khả năng mở rộng ở quy mô lớn vẫn cần kiểm chứng thêm trước khi có thể xem như
+một phương án triển khai diện rộng.
 
 ## 5.2. Đánh giá kinh tế và môi trường
 
-Về mặt kinh tế, chi phí phần cứng cho một thiết bị khoảng **1.514.000 VND**; chi phí
-SIM dữ liệu khoảng **70.000 VND/tháng/thiết bị**; chi phí máy chủ cho giai đoạn phát
-triển và thử nghiệm 6 tháng khoảng **2.370.000-3.570.000 VND**. Tổng chi phí triển
-khai của nguyên mẫu vì vậy nằm trong khoảng **4.504.000-5.704.000 VND**, thấp hơn
-đáng kể so với giới hạn **20.000.000 VND** của đề tài.
+Về kinh tế, chi phí phần cứng cho một thiết bị khoảng **1.514.000 VND**; chi phí SIM
+dữ liệu khoảng **70.000 VND/tháng/thiết bị**; chi phí máy chủ cho giai đoạn phát triển
+và thử nghiệm 6 tháng khoảng **2.370.000-3.570.000 VND**. Tổng chi phí triển khai
+của nguyên mẫu vì vậy nằm trong khoảng **4.504.000-5.704.000 VND**, thấp hơn đáng
+kể so với giới hạn **20.000.000 VND** của đồ án. Cấu trúc chi phí này phù hợp với bối
+cảnh đội xe nhỏ và vừa vì chi phí tăng theo số xe chủ yếu nằm ở thiết bị và SIM, còn
+máy chủ và giao diện có thể dùng chung.
 
-Cấu trúc chi phí này phù hợp với bài toán đội xe nhỏ và vừa. Phần chi phí tăng theo số
-lượng xe chủ yếu nằm ở thiết bị và SIM, trong khi hạ tầng xử lý và giao diện có thể dùng
-chung cho nhiều phương tiện.
-
-Về mặt môi trường và mức can thiệp triển khai, thiết bị được lắp qua giao tiếp OBD-II
-và nguồn 12-24 VDC, nên không đòi hỏi thay đổi sâu vào kết cấu điện nguyên bản của xe
-trong quá trình thử nghiệm. Cùng với dòng nền thấp ở trạng thái ngủ sâu, cách tiếp cận
-này giúp giảm ảnh hưởng năng lượng và giữ cho nguyên mẫu phù hợp với giai đoạn kiểm
-chứng.
+Về môi trường triển khai, thiết bị lấy nguồn 12-24 VDC và đọc dữ liệu qua OBD-II nên
+không cần can thiệp sâu vào hệ điện nguyên bản của xe. Dòng ngủ sâu khoảng 0,5 mA
+cũng giúp giảm ảnh hưởng năng lượng khi xe dừng lâu. Tuy nhiên, khi chuyển sang
+triển khai dài hạn, vẫn cần tính đến việc thay thế, thu hồi và xử lý PCB, pin dự phòng
+và các linh kiện điện tử hỏng để hạn chế chất thải điện tử.
 
 ## 5.3. Đánh giá rủi ro và biện pháp giảm thiểu
 
-Trong quá trình thử nghiệm, một số rủi ro kỹ thuật chính của hệ thống có thể nhận thấy
-như sau.
+Trong phạm vi nguyên mẫu, bốn rủi ro kỹ thuật cần quan tâm nhất gồm:
 
-Rủi ro thứ nhất là sự biến động của mạng di động. Khi xe đi qua khu vực sóng yếu, độ
-trễ tăng và bản tin có thể bị gián đoạn. Biện pháp đã áp dụng là phân mức ưu tiên bản
-tin, dùng MQTT làm tuyến truyền chính và bổ sung cơ chế lưu đệm, phát lại sau khi kết
-nối được phục hồi.
-
-Rủi ro thứ hai là ảnh hưởng của thiết bị lên nguồn xe khi phương tiện đỗ lâu. Nếu toàn
-bộ khối đo và truyền thông luôn duy trì trạng thái hoạt động, dòng nền sẽ tích lũy theo
-thời gian. Biện pháp của nguyên mẫu là tổ chức các trạng thái Driving, Parking, Alert và
-Deep Sleep để chỉ giữ lại các khối thật sự cần thiết ở từng thời điểm.
-
-Rủi ro thứ ba là độ tin cậy của lớp giám sát khi xe đỗ. Ngưỡng phát hiện chuyển động
-đặt không phù hợp có thể gây báo giả hoặc bỏ sót sự kiện. Trong nguyên mẫu, rủi ro
-này được giảm bằng cách kết hợp trạng thái đỗ, tín hiệu IMU và thời gian không hoạt
-động; tuy nhiên phần hiệu chỉnh ngưỡng vẫn cần tiếp tục kiểm chứng trên nhiều điều
-kiện xe và môi trường khác nhau.
-
-Rủi ro thứ tư là tính tương thích của dữ liệu OBD-II giữa các dòng xe. Thiết bị hiện đã
-đọc được dữ liệu cơ bản trên cấu hình thử nghiệm, nhưng tập tham số và tốc độ phản
-hồi có thể thay đổi theo từng xe. Vì vậy, lớp thu nhận cần được giữ theo hướng mô-đun,
-cho phép hệ thống vẫn duy trì theo dõi vị trí và trạng thái ngay cả khi dữ liệu OBD-II
-không đầy đủ.
+- **Biến động mạng di động:** Khi xe đi qua khu vực sóng yếu, độ trễ tăng và bản tin có
+  thể bị gián đoạn. Hướng giảm thiểu đã áp dụng là dùng MQTT làm tuyến truyền chính,
+  đồng thời bổ sung cơ chế lưu đệm và gửi bù sau khi kết nối phục hồi.
+- **Ảnh hưởng lên ắc quy khi xe đỗ lâu:** Nếu toàn bộ khối đo và truyền thông luôn giữ
+  trạng thái hoạt động, dòng nền sẽ tích lũy theo thời gian. Đồ án xử lý vấn đề này bằng
+  cách tổ chức các trạng thái vận hành và chỉ giữ lại những khối thật sự cần thiết ở từng
+  thời điểm.
+- **Báo giả hoặc bỏ sót khi giám sát xe dừng:** Ngưỡng phát hiện chuyển động không phù
+  hợp có thể làm cảnh báo thiếu ổn định. Vì vậy, nguyên mẫu kết hợp trạng thái đỗ, tín
+  hiệu IMU và thời gian không hoạt động; tuy nhiên phần hiệu chỉnh ngưỡng vẫn cần tiếp
+  tục kiểm chứng trên nhiều điều kiện xe khác nhau.
+- **Khác biệt dữ liệu OBD-II giữa các dòng xe:** Tập tham số hỗ trợ và tốc độ phản hồi
+  có thể thay đổi giữa các xe, làm dữ liệu thu được không đồng đều. Do đó, lớp thu
+  nhận được tổ chức theo hướng mô-đun để hệ thống vẫn giữ được theo dõi vị trí, trạng
+  thái và cảnh báo ngay cả khi dữ liệu OBD-II không đầy đủ.
 
 ## 5.4. Khuyến nghị cho tương lai
 
-Từ kết quả của nguyên mẫu hiện tại, các hướng phát triển tiếp theo có thể tập trung vào
-những nội dung sau:
+Từ những giới hạn còn lại của nguyên mẫu, các hướng phát triển tiếp theo nên ưu tiên:
 
-1. **Kiểm thử dài hạn trên nhiều dòng xe và nhiều điều kiện sóng**, nhằm hiệu chỉnh
-   ngưỡng cảnh báo, thời gian khôi phục kết nối và độ ổn định của dữ liệu OBD-II.
-2. **Hoàn thiện phần cứng phiên bản tiếp theo**, theo hướng gọn hơn, ổn định hơn và
-   thuận tiện hơn cho lắp đặt thực tế trên xe.
-3. **Bổ sung lớp an toàn và quản trị thiết bị**, như watchdog, bảo mật MQTT/TLS, quản
-   lý cấu hình từ xa và nhật ký sự kiện phục vụ bảo trì.
-4. **Phát triển sâu hơn lớp khai thác dữ liệu**, theo hướng báo cáo chuyến đi, thống kê
-   sử dụng, ưu tiên cảnh báo và hỗ trợ tốt hơn cho vận hành trên thiết bị di động.
+- Kiểm thử dài hạn trên nhiều dòng xe và nhiều điều kiện sóng để xác nhận thêm độ ổn
+  định của nguồn, OBD-II, GPS và luồng cảnh báo trong điều kiện thực tế.
+- Hoàn thiện phần cứng và quy trình lắp đặt theo hướng gọn hơn, ổn định hơn và lặp lại
+  dễ hơn khi triển khai trên nhiều xe.
+- Tăng mức an toàn và quản trị dữ liệu, gồm bảo mật đường truyền, quản lý cấu hình từ
+  xa, nhật ký sự kiện và quyền truy cập.
+- Mở rộng dữ liệu OBD-II, tối ưu thêm chiến lược năng lượng và hoàn thiện lớp khai
+  thác trên thiết bị di động.
 
 # CHƯƠNG 6. PHẢN HỒI VÀ BÀI HỌC KINH NGHIỆM - REFLECTION AND LESSONS LEARNED
 
@@ -1115,6 +1277,22 @@ https://www.teltonika-gps.com/products/trackers/obd-data/fmm003
 
 [12] Queclink, _GV305CEU_, truy cập tháng 05/2026, tại:
 https://www.queclink.com/product/gv305ceu/
+
+[13] Báo Chính phủ, _Bộ TT&TT tạm dừng việc tắt sóng 2G Only đến 15/10_,
+2024, truy cập tháng 05/2026, tại:
+https://baochinhphu.vn/bo-tttt-tam-dung-viec-tat-song-2g-only-den-15-10-10224091320532248.htm
+
+[14] LCSC, _Espressif Systems ESP32-S3_, truy cập tháng 05/2026,
+tại: https://www.lcsc.com/product-detail/C2913192.html
+
+[15] LCSC, _SIMCom Wireless Solutions SIM7600CE-T_, truy cập tháng 05/2026,
+tại: https://www.lcsc.com/product-detail/Wireless-Modules_SIMCom-Wireless-Solutions-SIM7600CE-T_C520538.html
+
+[16] LCSC, _STMicroelectronics LIS3DSHTR_, truy cập tháng 05/2026,
+tại: https://www.lcsc.com/product-detail/C1884688.html
+
+[17] VgateMall, _Vgate iCar Pro_, truy cập tháng 05/2026,
+tại: https://www.vgatemall.com/products-detail/i-9/?s=1
 
 # PHỤ LỤC
 

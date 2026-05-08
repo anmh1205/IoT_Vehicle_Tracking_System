@@ -77,14 +77,14 @@ const toShortDateLabel = (value: string) => {
 
 const filterRowsBySession = (rows: DeviceTelemetryRow[], session: DeviceSession | null) => {
   if (!session) {
-    return rows;
+    return [];
   }
 
   const start = toTimestampMs(session.serverSessionStart);
   const end = toTimestampMs(session.serverSessionEnd);
 
   if (start === null) {
-    return rows;
+    return [];
   }
 
   return rows.filter((row) => {
@@ -233,7 +233,7 @@ export const RouteTab = () => {
     : '-';
   const pointSpeedLabel =
     infoPoint?.speed !== null && infoPoint?.speed !== undefined
-      ? `${infoPoint.speed.toFixed(1)} km/h`
+      ? `${formatNumber(infoPoint.speed)} km/h`
       : '-';
   const startPointLabel = firstPoint ? formatDateTime(firstPoint.timestamp, 'HH:mm dd/MM') : 'Chưa có mốc đầu';
   const endPointLabel = lastPoint ? formatDateTime(lastPoint.timestamp, 'HH:mm dd/MM') : 'Chưa có mốc cuối';

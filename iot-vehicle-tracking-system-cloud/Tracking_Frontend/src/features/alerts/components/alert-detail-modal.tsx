@@ -20,7 +20,7 @@ import {
   getAlertStatusLabel,
   getAlertTypeLabel,
 } from '@/lib/api/alerts';
-import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
+import { formatDateTime, formatNumber, formatRelative } from '@/lib/utils/date/format';
 
 const MapContainer = dynamic(() => import('react-leaflet').then((m) => m.MapContainer), {
   ssr: false,
@@ -72,7 +72,7 @@ const buildAlertExplanation = (alert: any, displayMessage: string) => {
         summary: `Xe ${vehicleRef} vượt ngưỡng tốc độ trong phiên theo dõi.`,
         trigger:
           overThreshold !== null
-            ? `Tốc độ ${actualValue?.toFixed(1)} km/h, cao hơn ${overThreshold.toFixed(1)} km/h so với ngưỡng ${thresholdValue?.toFixed(1)} km/h.`
+            ? `Tốc độ ${formatNumber(actualValue)} km/h, cao hơn ${formatNumber(overThreshold)} km/h so với ngưỡng ${formatNumber(thresholdValue)} km/h.`
             : displayMessage,
         actions: [
           'Kiểm tra đoạn đường và giới hạn tốc độ tại thời điểm phát sinh.',
@@ -130,7 +130,7 @@ const buildAlertExplanation = (alert: any, displayMessage: string) => {
         summary: `Xe ${vehicleRef} đã tới ngưỡng cần bảo trì.`,
         trigger:
           actualValue !== null && thresholdValue !== null
-            ? `Chỉ số hiện tại ${actualValue.toFixed(1)} so với ngưỡng ${thresholdValue.toFixed(1)}.`
+            ? `Chỉ số hiện tại ${formatNumber(actualValue)} so với ngưỡng ${formatNumber(thresholdValue)}.`
             : displayMessage,
         actions: [
           'Tạo phiếu bảo trì theo đúng hạng mục cảnh báo.',
@@ -153,7 +153,7 @@ const buildAlertExplanation = (alert: any, displayMessage: string) => {
         summary: `Xe ${vehicleRef} dừng/đỗ vượt thời gian cho phép.`,
         trigger:
           actualValue !== null && thresholdValue !== null
-            ? `Thời gian dừng ${actualValue.toFixed(1)} phút, ngưỡng ${thresholdValue.toFixed(1)} phút.`
+            ? `Thời gian dừng ${formatNumber(actualValue)} phút, ngưỡng ${formatNumber(thresholdValue)} phút.`
             : displayMessage,
         actions: [
           'Xác minh lý do dừng lâu với tài xế hoặc điều phối.',
@@ -353,7 +353,7 @@ export const AlertDetailModal = ({
                     label="Tốc độ lúc cảnh báo"
                     value={
                       alert?.speed !== null && alert?.speed !== undefined
-                        ? `${alert.speed} km/h`
+                        ? `${formatNumber(alert.speed)} km/h`
                         : 'Chưa có'
                     }
                   />

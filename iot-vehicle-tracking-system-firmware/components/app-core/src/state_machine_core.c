@@ -254,6 +254,47 @@ static void state_machine_reset_heartbeat_window(void) {
 }
 
 /**
+ * @brief Resolve the effective ignition axis consumed by cloud/runtime state.
+ *
+ * The FSM can intentionally stay in driving mode while fresh live OBD evidence
+ * is still present, even if the debounced ignition axis has not yet caught up
+ * or is temporarily OFF. Runtime payload axes must mirror that same decision so
+ * the cloud never sees "engine off" while the local FSM is logically driving.
+ *
+ * @param[in] now_ms Current uptime.
+ * @return Effective ignition state exposed to runtime/publish consumers.
+ */
+static tracker_ignition_state_t state_machine_resolve_effective_ignition_state(uint64_t now_ms) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
+    bool obd_recently_active =
+        command_handler_is_tracking_enabled() && state_machine_obd_recently_active(now_ms);
+
+    if (session_mgr_has_stable_ignition()) {
+        if (session_mgr_stable_ignition() || obd_recently_active) {
+            return TRACKER_IGNITION_STATE_ON;
+        }
+        return TRACKER_IGNITION_STATE_OFF;
+    }
+
+    if (s_telemetry.ignition || obd_recently_active) {
+        return TRACKER_IGNITION_STATE_ON;
+    }
+
+    return TRACKER_IGNITION_STATE_UNKNOWN;
+}
+
+/**
+ * @brief Check whether the effective ignition axis currently resolves to ON.
+ *
+ * @param[in] now_ms Current uptime.
+ * @return true when runtime/cloud semantics should treat the engine as ON.
+ */
+static bool state_machine_effective_ignition_on(uint64_t now_ms) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
+    return state_machine_resolve_effective_ignition_state(now_ms) == TRACKER_IGNITION_STATE_ON;
+}
+
+/**
  * @brief Resolve current motion state from available sensor inputs.
  *
  * Resolution priority order:
@@ -275,7 +316,8 @@ static tracker_motion_state_t state_machine_resolve_motion_state(uint64_t now_ms
         return s_telemetry.obd_speed > 3 ? TRACKER_MOTION_STATE_MOVING
                                          : TRACKER_MOTION_STATE_STATIONARY;
     }
-    return s_telemetry.ignition ? TRACKER_MOTION_STATE_UNKNOWN : TRACKER_MOTION_STATE_STATIONARY;
+    return state_machine_effective_ignition_on(now_ms) ? TRACKER_MOTION_STATE_UNKNOWN
+                                                        : TRACKER_MOTION_STATE_STATIONARY;
 }
 
 /**
@@ -368,12 +410,8 @@ static tracker_device_state_t state_machine_resolve_device_state(app_state_t app
  */
 void state_machine_sync_runtime_axes(app_state_t app_state) {
     // Advance one cooperative step here using the current state, time gates, and retry policy.
-    tracker_ignition_state_t ignition_state = TRACKER_IGNITION_STATE_UNKNOWN;
-    if (session_mgr_has_stable_ignition()) {
-        ignition_state = session_mgr_stable_ignition() ? TRACKER_IGNITION_STATE_ON : TRACKER_IGNITION_STATE_OFF;
-    }
-
     uint64_t now_ms = util_uptime_ms();
+    tracker_ignition_state_t ignition_state = state_machine_resolve_effective_ignition_state(now_ms);
     s_telemetry.ignition_state = ignition_state;
     s_telemetry.motion_state = state_machine_resolve_motion_state(now_ms);
     s_telemetry.vehicle_state = state_machine_resolve_vehicle_state(s_telemetry.ignition_state,
@@ -918,11 +956,17 @@ static void state_machine_resume_restored_session_if_needed(bool ignition_on) {
  */
 static void state_machine_publish_running_status_if_needed(bool started_session) {
     // Publish a running-status heartbeat here when the current state transition needs an immediate lifecycle marker.
+    if (started_session) {
+        state_machine_publish_status("running", "started");
+        s_publish_status = TRACKER_PUBLISH_STATUS_RUNNING;
+        return;
+    }
+
     if (s_publish_status == TRACKER_PUBLISH_STATUS_RUNNING) {
         return;
     }
 
-    state_machine_publish_status("running", started_session ? "started" : "none");
+    state_machine_publish_status("running", "none");
     s_publish_status = TRACKER_PUBLISH_STATUS_RUNNING;
 }
 
@@ -947,10 +991,8 @@ static bool state_machine_should_publish_driving_rawdata(uint64_t now_ms) {
  */
 static bool state_machine_driving_ignition_active(void) {
     // Keep this helper boundary explicit so its local policy and side effects stay predictable.
-    bool debounced_ignition_on =
-        session_mgr_has_stable_ignition() ? session_mgr_stable_ignition() : s_telemetry.ignition;
-    bool obd_recently_active = state_machine_obd_recently_active(util_uptime_ms());
-    return command_handler_is_tracking_enabled() && (debounced_ignition_on || obd_recently_active);
+    uint64_t now_ms = util_uptime_ms();
+    return command_handler_is_tracking_enabled() && state_machine_effective_ignition_on(now_ms);
 }
 
 /**
@@ -1011,15 +1053,13 @@ static app_state_t state_machine_handle_check_ign_state(void) {
         return APP_STATE_CHECK_IGN;
     }
 
-    bool ignition_on = session_mgr_stable_ignition();
-    if (!ignition_on &&
-        command_handler_is_tracking_enabled() &&
-        state_machine_obd_recently_active(now_ms)) {
+    bool stable_ignition_on = session_mgr_stable_ignition();
+    bool ignition_on = state_machine_effective_ignition_on(now_ms);
+    if (!stable_ignition_on && ignition_on) {
         ESP_LOGW(TAG,
                  "event=check_ign_keep_driving reason=recent_obd_activity sample_age_ms=%lu ecu=%s",
                  (unsigned long)s_telemetry.obd_sample_age_ms,
                  s_telemetry.obd_ecu_state);
-        ignition_on = true;
     }
     // Resume a recovered session only after ignition is confirmed to be ON on this boot.
     state_machine_resume_restored_session_if_needed(ignition_on);

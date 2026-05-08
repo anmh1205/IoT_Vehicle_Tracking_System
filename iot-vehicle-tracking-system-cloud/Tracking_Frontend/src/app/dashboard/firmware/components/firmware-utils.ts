@@ -1,4 +1,5 @@
 import type { FirmwareDeployment } from '@/lib/api/firmware';
+import { formatNumber } from '@/lib/utils/date/format';
 
 export type FirmwareDeviceStatusFilter =
   | 'all'
@@ -80,7 +81,7 @@ export const formatBytes = (value: number | string | null | undefined) => {
   const units = ['B', 'KB', 'MB', 'GB'];
   const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   const size = bytes / 1024 ** exponent;
-  return `${size.toFixed(exponent === 0 ? 0 : 1)} ${units[exponent]}`;
+  return `${formatNumber(size, { maximumFractionDigits: exponent === 0 ? 0 : 1 })} ${units[exponent]}`;
 };
 
 export const formatDateTime = (value: string | null | undefined) => {

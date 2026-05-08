@@ -1,4 +1,5 @@
 import type { Device, DevicePositionSnapshot, DeviceTelemetryRow } from '@/features/devices/types';
+import { formatNumber } from '@/lib/utils/date/format';
 import { isVehicleEngineOnState, isVehicleParkedOffState } from '@/lib/utils/device-state';
 import type { ObdDiagnosticsSnapshot } from './obd-diagnostics';
 
@@ -17,6 +18,15 @@ const pickNumber = (sources: unknown[], fallback: number | null = null): number 
     }
   }
   return fallback;
+};
+
+const toTimestampMs = (value: string | null | undefined): number => {
+  if (!value) {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : Number.NEGATIVE_INFINITY;
 };
 
 export interface DeviceConfigSummary {
@@ -95,33 +105,87 @@ export const formatElectricalMetric = (value: number | null | undefined): string
   }
 
   if (value > 24) {
-    return `${value.toFixed(1)}%`;
+    return `${formatNumber(value)}%`;
   }
 
-  return `${value.toFixed(1)} V`;
+  return `${formatNumber(value)} V`;
 };
 
 export const formatTemperatureMetric = (value: number | null | undefined): string =>
-  value === null || value === undefined || !Number.isFinite(value) ? '-' : `${value.toFixed(1)}°C`;
+  value === null || value === undefined || !Number.isFinite(value) ? '-' : `${formatNumber(value)}°C`;
+
+export const pickLatestTelemetryValue = <TValue>(
+  rowValue: TValue | null | undefined,
+  rowTimestamp: string | null | undefined,
+  snapshotValue: TValue | null | undefined,
+  snapshotTimestamp: string | null | undefined,
+  fallbackValue: TValue | null | undefined = null,
+): TValue | null => {
+  const normalizedFallback = fallbackValue ?? null;
+  const rowHasValue = rowValue !== null && rowValue !== undefined;
+  const snapshotHasValue = snapshotValue !== null && snapshotValue !== undefined;
+
+  if (!rowHasValue && !snapshotHasValue) {
+    return normalizedFallback;
+  }
+
+  if (rowHasValue && !snapshotHasValue) {
+    return rowValue as TValue;
+  }
+
+  if (!rowHasValue && snapshotHasValue) {
+    return snapshotValue as TValue;
+  }
+
+  return toTimestampMs(snapshotTimestamp) > toTimestampMs(rowTimestamp)
+    ? (snapshotValue as TValue)
+    : (rowValue as TValue);
+};
+
+export const pickLatestTelemetryTimestamp = (
+  rowTimestamp: string | null | undefined,
+  snapshotTimestamp: string | null | undefined,
+  fallbackTimestamp: string | null | undefined = null,
+): string | null =>
+  pickLatestTelemetryValue(
+    rowTimestamp ?? null,
+    rowTimestamp,
+    snapshotTimestamp ?? null,
+    snapshotTimestamp,
+    fallbackTimestamp ?? null,
+  );
 
 export const resolveDeviceBatteryValue = (
   row: DeviceTelemetryRow | null | undefined,
   snapshot: DevicePositionSnapshot | null | undefined,
-): number | null => row?.deviceBattery ?? snapshot?.deviceBattery ?? null;
+): number | null =>
+  pickLatestTelemetryValue(
+    row?.deviceBattery,
+    row?.timestamp,
+    snapshot?.deviceBattery,
+    snapshot?.timestamp,
+  );
 
 export const resolveVehicleBatteryValue = (
   row: DeviceTelemetryRow | null | undefined,
   snapshot: DevicePositionSnapshot | null | undefined,
-): number | null => row?.vehicleBattery ?? snapshot?.vehicleBattery ?? null;
+): number | null =>
+  pickLatestTelemetryValue(
+    row?.vehicleBattery,
+    row?.timestamp,
+    snapshot?.vehicleBattery,
+    snapshot?.timestamp,
+  );
 
 export const resolveEngineTemperatureValue = (
   row: DeviceTelemetryRow | null | undefined,
   snapshot: DevicePositionSnapshot | null | undefined,
   diagnosticsSnapshot?: ObdDiagnosticsSnapshot | null,
 ): number | null =>
-  row?.engineTemperature ??
-  snapshot?.engineTemperature ??
-  diagnosticsSnapshot?.coolantC ??
-  row?.temperature ??
-  snapshot?.temperature ??
-  null;
+  pickLatestTelemetryValue(
+    row?.engineTemperature ?? row?.temperature,
+    row?.timestamp,
+    snapshot?.engineTemperature ?? snapshot?.temperature,
+    snapshot?.timestamp,
+    diagnosticsSnapshot?.coolantC ?? null,
+  );

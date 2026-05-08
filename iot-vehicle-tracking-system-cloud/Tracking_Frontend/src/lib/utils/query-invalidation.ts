@@ -44,8 +44,10 @@ export const queryInvalidation = {
       void queryClient.invalidateQueries({ queryKey: ['dashboard', 'device-status'] });
       void queryClient.invalidateQueries({ queryKey: ['dashboard', 'device-activity'] });
       void queryClient.invalidateQueries({ queryKey: ['dashboard', 'fleet-runtime'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'activity'] });
       void queryClient.invalidateQueries({ queryKey: ['dashboard-recent-alerts'] });
       void queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-activity'] });
     },
     activity: (queryClient: QueryClient) => {
       void queryClient.invalidateQueries({ queryKey: ['dashboard', 'activity'] });

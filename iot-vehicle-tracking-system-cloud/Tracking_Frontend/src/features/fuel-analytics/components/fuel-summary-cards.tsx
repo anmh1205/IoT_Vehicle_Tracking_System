@@ -12,10 +12,10 @@ interface FuelSummaryCardsProps {
 
 const formatCost = (cost: number): string => {
   if (cost >= 1_000_000) {
-    return `${formatNumber((cost / 1_000_000).toFixed(1))}M`;
+    return `${formatNumber(cost / 1_000_000, { maximumFractionDigits: 1 })}M`;
   }
   if (cost >= 1_000) {
-    return `${formatNumber((cost / 1_000).toFixed(0))}K`;
+    return `${formatNumber(cost / 1_000, { maximumFractionDigits: 0 })}K`;
   }
   return formatNumber(cost);
 };

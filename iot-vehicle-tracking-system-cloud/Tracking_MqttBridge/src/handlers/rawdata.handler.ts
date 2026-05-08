@@ -18,7 +18,11 @@ import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
 import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 import { resolveLocalSessionKey } from '../utils/session-identity.util';
-import { normalizeRuntimeState } from '../types/device-state.types';
+import { normalizeRuntimeState, type RuntimeStateSnapshot } from '../types/device-state.types';
+import {
+  hasAuthoritativeSessionIdentity,
+  telemetryReportsEngineOff,
+} from '../utils/session-runtime.util';
 
 const IMU_ACCEL_DELTA_ALERT_THRESHOLD_MPS2 = 3.5;
 const HIGH_IMU_ACCEL_DELTA_ALERT_TITLE = 'high_imu_accel_delta';
@@ -217,17 +221,20 @@ const normalizeGnssLocation = (
 const isLikelyActiveSessionTelemetry = (params: {
   ignition?: boolean;
   speed?: number;
-  runtimeIgnitionState: 'ON' | 'OFF' | 'UNKNOWN';
-  runtimeMotionState: 'MOVING' | 'STATIONARY' | 'UNKNOWN';
+  runtimeState: RuntimeStateSnapshot;
   previousStatus?: 'online' | 'offline' | 'running' | 'stopped';
   persistedStatus?: string;
 }): boolean => {
-  if (params.ignition === true || params.runtimeIgnitionState === 'ON') {
+  if (telemetryReportsEngineOff({ ignition: params.ignition, runtimeState: params.runtimeState })) {
+    return false;
+  }
+
+  if (params.ignition === true || params.runtimeState.ignition_state === 'ON') {
     return true;
   }
 
   if (
-    params.runtimeMotionState === 'MOVING' ||
+    params.runtimeState.motion_state === 'MOVING' ||
     (params.speed !== undefined && params.speed > SESSION_FALLBACK_SPEED_THRESHOLD_KPH)
   ) {
     return true;
@@ -857,6 +864,10 @@ export const handleRawData = async (
     speedKph: effectiveSpeed ?? toFiniteNumber(normalizedObdSignals?.obd_speed_kph),
     previous: previousState?.runtimeState,
   });
+  const reportsEngineOff = telemetryReportsEngineOff({
+    ignition: payload.data.ignition,
+    runtimeState,
+  });
   const stateUpdatedAt = new Date(receivedAtMs).toISOString();
 
   // 3. Attach telemetry only to an authoritative session identity from firmware.
@@ -885,15 +896,17 @@ export const handleRawData = async (
     (sessionId !== null && previousState?.sessionId === sessionId
       ? previousState.canonicalSessionId
       : (sessionId !== null ? String(sessionId) : null));
-  const hasAuthoritativeSessionIdentity =
-    payloadCanonicalSessionId !== null || localSessionKey !== undefined;
+  const hasAuthoritativeIdentity = hasAuthoritativeSessionIdentity({
+    localSessionKey,
+    canonicalSessionId: payloadCanonicalSessionId,
+  });
   const canCreateFallbackSession =
     sessionId === null &&
+    !hasAuthoritativeIdentity &&
     isLikelyActiveSessionTelemetry({
       ignition: payload.data.ignition,
       speed: effectiveSpeed,
-      runtimeIgnitionState: runtimeState.ignition_state,
-      runtimeMotionState: runtimeState.motion_state,
+      runtimeState,
       previousStatus,
       persistedStatus: device.current_status,
     }) &&
@@ -932,7 +945,7 @@ export const handleRawData = async (
     }
   }
 
-  if (sessionId === null && hasAuthoritativeSessionIdentity) {
+  if (sessionId === null && hasAuthoritativeIdentity) {
     logger.warn(
       {
         deviceId: payload.device_id,

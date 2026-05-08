@@ -691,21 +691,22 @@ trên xe, đến hành vi vận hành và các số đo toàn tuyến dữ liệ
 
 ## 4.1. Phần cứng thiết bị
 
-Bộ phần cứng cuối gồm bo mạch chính, anten LTE/GNSS, nguồn dự phòng, vỏ in 3D và bộ
-đọc OBD-II không dây. Tổ hợp này đã được lắp trên xe thật và vẫn bảo đảm thao tác tháo
-lắp lại khi cần đổi xe hoặc bảo trì.
+Phần cứng của thiết bị gồm khối nguồn, bo mạch xử lý trung tâm, khối truyền thông,
+bộ nhớ, cảm biến và bộ đọc OBD-II không dây. Các khối này được ghép thành một bộ
+hoàn chỉnh để lắp thử trên xe thật.
 
-Trong cấu trúc cơ khí, vùng nguồn, vùng xử lý-truyền thông và vùng kết nối được tách
-rõ để giảm nhiễu chéo và đơn giản hóa thao tác kiểm tra sau lắp ráp. Cách bố trí này
-trực tiếp hỗ trợ mục tiêu vận hành ổn định dài giờ.
+![Hình 4.1 - Sơ đồ các khối chính của thiết bị phần cứng](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-1.png)
 
-![Hình 4.1 - Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các phần cứng tích hợp](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-5.svg)
+_Hình 4.1: Các khối chính của thiết bị, trong đó khối nguồn được ghi rõ theo các mô-đun nguồn sử dụng_
 
-_Hình 4.1: Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các phần cứng tích hợp_
+Hình 4.1 cho thấy cách các khối chính nối với nhau. Nguồn xe 12V/24V đi vào khối
+nguồn trên PCB, sau đó cấp cho khối xử lý trung tâm, khối truyền thông và các phần
+phụ trợ. Bộ đọc OBD-II đặt rời ngoài PCB và trao đổi dữ liệu với bo mạch qua
+Bluetooth. Cách chia khối này giúp sơ đồ dễ theo dõi và thuận tiện hơn khi kiểm tra.
 
-Nhánh nguồn 12-24 VDC được chia riêng cho logic 3,3 V, modem LTE/GNSS, sạc pin
-và nguồn dự phòng. Cách chia này giúp thiết bị giữ mức làm việc vững khi xe nổ
-máy, khi modem phát công suất cao và khi nguồn chính bị ngắt.
+Hình 4.2 tách riêng phần nguồn để thấy rõ các nhánh cấp cho mạch logic, modem và
+nguồn dự phòng. Cách cấp nguồn này giúp thiết bị làm việc ổn định hơn khi điện áp
+trên xe thay đổi hoặc khi modem phát công suất cao.
 
 ![Hình 4.2 - Sơ đồ phân nhánh nguồn](./assets/figures/07-chuong-4-trien-khai-hardware-hinh-4-6.png)
 

@@ -52,12 +52,17 @@ const toErrorCodes = (
       errorCode,
       errorName: localizeErrorName(rawName, rawDescription, errorCode),
       description,
+      severity: row?.severity ? String(row.severity) : undefined,
+      status: row?.status ? String(row.status) : undefined,
       occurredAt: String(row?.occurredAt ?? row?.createdAt ?? ''),
       resolvedAt: row?.resolvedAt ?? null,
     };
   });
 };
 const getErrorType = (row: DeviceErrorCode): ErrorTypeFilter => {
+  const severity = String(row.severity ?? '').toLowerCase();
+  if (severity === 'critical' || severity === 'high') return 'critical';
+  if (severity === 'medium' || severity === 'low') return 'warning';
   if (/^[PCBU][0-9A-F]{4}$/i.test(row.errorName)) return 'warning';
   if (row.errorCode >= 500) return 'critical';
   if (row.errorCode >= 200) return 'warning';

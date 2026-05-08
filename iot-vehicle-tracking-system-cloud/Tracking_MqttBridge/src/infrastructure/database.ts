@@ -550,7 +550,7 @@ export const touchDeviceSession = async (params: {
   const serverOccurredAt = toIsoTimestamp(params.serverTimestampMs ?? Date.now());
 
   try {
-    await pool.query(
+    const touched = await pool.query(
       `UPDATE device_sessions
        SET
          last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
@@ -584,7 +584,8 @@ export const touchDeviceSession = async (params: {
          last_longitude = COALESCE($7, last_longitude),
          last_speed = COALESCE($8, last_speed),
          updated_at = NOW()
-       WHERE id = $1`,
+       WHERE id = $1 AND device_id = $9 AND status = 'running'
+       RETURNING id`,
       [
         params.sessionId,
         serverOccurredAt,
@@ -594,8 +595,17 @@ export const touchDeviceSession = async (params: {
         params.latitude ?? null,
         params.longitude ?? null,
         params.speed ?? null,
+        params.deviceId,
       ],
     );
+
+    if (touched.rowCount === 0) {
+      logger.warn(
+        { sessionId: params.sessionId, deviceId: params.deviceId, event: 'touch_device_session_skipped', reason: 'session_not_running' },
+        'Touch device session skipped',
+      );
+      return;
+    }
 
     await pool.query(
       `UPDATE devices
@@ -616,7 +626,7 @@ export const touchDeviceSession = async (params: {
     );
   } catch (err) {
     try {
-      await pool.query(
+      const touched = await pool.query(
         `UPDATE device_sessions
          SET
            last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
@@ -645,7 +655,8 @@ export const touchDeviceSession = async (params: {
            last_longitude = COALESCE($7, last_longitude),
            last_speed = COALESCE($8, last_speed),
            updated_at = NOW()
-         WHERE id = $1`,
+         WHERE id = $1 AND device_id = $9 AND status = 'running'
+         RETURNING id`,
         [
           params.sessionId,
           serverOccurredAt,
@@ -655,8 +666,17 @@ export const touchDeviceSession = async (params: {
           params.latitude ?? null,
           params.longitude ?? null,
           params.speed ?? null,
+          params.deviceId,
         ],
       );
+
+      if (touched.rowCount === 0) {
+        logger.warn(
+          { sessionId: params.sessionId, deviceId: params.deviceId, event: 'touch_device_session_skipped', reason: 'session_not_running' },
+          'Touch device session skipped',
+        );
+        return;
+      }
 
       await pool.query(
         `UPDATE devices

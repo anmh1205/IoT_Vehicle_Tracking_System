@@ -3,8 +3,9 @@
 import { Bell, Car, Cpu, Route } from 'lucide-react';
 import { StatCard } from '@/components/common/stat-card';
 import type { DashboardOverviewStats } from '@/features/dashboard/hooks/use-dashboard-stats';
+import { formatNumber } from '@/lib/utils/date/format';
 
-const formatHours = (value: number) => `${value.toFixed(1)} giờ`;
+const formatHours = (value: number) => `${formatNumber(value)} giờ`;
 
 const formatDelta = (value: number) => {
   if (Math.abs(value) < 0.05) {
@@ -51,10 +52,10 @@ export const OverviewStats = ({
       : 'Không có thiết bị cần kiểm tra kết nối';
   const tripsSubtitle = `${formatHours(runtimeToday)} hôm nay • TB ${formatHours(averageDailyRuntime)}/ngày`;
   const tripsTrend =
-    sessionsToday > 0 ? `${sessionsPerDevice.toFixed(1)} phiên mỗi thiết bị` : 'Chưa phát sinh phiên mới';
+    sessionsToday > 0 ? `${formatNumber(sessionsPerDevice)} phiên mỗi thiết bị` : 'Chưa phát sinh phiên mới';
   const summaryItems = [
-    { label: 'Tỷ lệ còn tín hiệu', value: `${activeRate.toFixed(1)}%` },
-    { label: 'Tỷ lệ mất kết nối', value: `${offlineRate.toFixed(1)}%` },
+    { label: 'Tỷ lệ còn tín hiệu', value: `${formatNumber(activeRate)}%` },
+    { label: 'Tỷ lệ mất kết nối', value: `${formatNumber(offlineRate)}%` },
     { label: 'Thời gian hoạt động hôm nay', value: formatDelta(runtimeDelta) },
   ];
 
@@ -77,7 +78,7 @@ export const OverviewStats = ({
           value={activeDevices}
           icon={<Cpu className="h-4 w-4 text-muted-foreground" />}
           subtitle={activeDevicesSubtitle}
-          trend={{ value: `${activeRate.toFixed(1)}% còn tín hiệu`, positive: activeRate >= 60 }}
+          trend={{ value: `${formatNumber(activeRate)}% còn tín hiệu`, positive: activeRate >= 60 }}
           isLoading={isLoading}
         />
         <StatCard

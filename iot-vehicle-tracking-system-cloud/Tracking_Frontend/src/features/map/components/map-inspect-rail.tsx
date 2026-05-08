@@ -10,7 +10,6 @@ import {
   PanelRightOpen,
   X,
 } from 'lucide-react';
-import type { VehicleZone } from '@/lib/api/zones';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -22,13 +21,14 @@ import {
 import { useMapInspectShortcuts } from '@/features/map/hooks/use-map-inspect-shortcuts';
 import { useMapStore } from '@/features/map/store/map-store';
 import type { DevicePosition } from '@/features/map/types';
-import { formatRelative } from '@/lib/utils/date/format';
+import { formatNumber, formatRelative } from '@/lib/utils/date/format';
 import {
   getConnectivityPresentation,
   getDeviceRuntimePresentation,
   getFreshnessPresentation,
   getVehicleStatePresentation,
 } from '@/lib/utils/device-state';
+import type { VehicleZone } from '@/lib/api/zones';
 import { cn } from '@/lib/utils';
 
 const membershipMeta: Record<
@@ -68,21 +68,23 @@ const formatCoordinateValue = (lat: number | null | undefined, lon: number | nul
   Number.isFinite(lat) && Number.isFinite(lon) ? `${lat!.toFixed(5)}, ${lon!.toFixed(5)}` : '--';
 
 const formatSpeedValue = (speed: number | null | undefined) =>
-  Number.isFinite(speed) ? `${speed!.toFixed(1)} km/h` : '--';
+  Number.isFinite(speed) ? `${formatNumber(speed)} km/h` : '--';
 
 const formatElectricalValue = (value: number | null | undefined) => {
   if (!Number.isFinite(value) || value! <= 0) {
     return '--';
   }
 
-  return value! > 24 ? `${value!.toFixed(0)}%` : `${value!.toFixed(1)} V`;
+  return value! > 24
+    ? `${formatNumber(value, { maximumFractionDigits: 0 })}%`
+    : `${formatNumber(value)} V`;
 };
 
 const formatTemperatureValue = (value: number | null | undefined) =>
-  Number.isFinite(value) ? `${value!.toFixed(1)}°C` : '--';
+  Number.isFinite(value) ? `${formatNumber(value)}°C` : '--';
 
 const formatCountValue = (value: number | null | undefined, suffix = '') =>
-  Number.isFinite(value) ? `${Math.round(value!)}${suffix}` : '--';
+  Number.isFinite(value) ? `${formatNumber(value)}${suffix}` : '--';
 
 const formatErrorCodeValue = (value: number | null | undefined) =>
   Number.isFinite(value) ? String(Math.round(value!)) : '--';

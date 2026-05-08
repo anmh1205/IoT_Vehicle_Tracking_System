@@ -464,6 +464,23 @@ export const DeviceDetailModalContainer = ({
     ]);
   }, [deviceId, devicePublicId, linkedVehicleIdentifier, queryClient]);
 
+  const refreshTelemetryViews = useCallback(async () => {
+    if (!deviceId) {
+      return;
+    }
+
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['devices'] }),
+      queryClient.invalidateQueries({ queryKey: ['device', deviceId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-detail', deviceId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-tracking-telemetry', deviceId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-position-snapshot', devicePublicId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-event-logs', devicePublicId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-obd-alerts', devicePublicId] }),
+      queryClient.invalidateQueries({ queryKey: ['device-workspace-alerts', devicePublicId] }),
+    ]);
+  }, [deviceId, devicePublicId, queryClient]);
+
   useRealtimeSubscription<any>({
     namespace: 'devices',
     event: 'device:status',
@@ -472,6 +489,17 @@ export const DeviceDetailModalContainer = ({
       const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
       if (payloadId && payloadId !== devicePublicId) return;
       void refreshCurrent();
+    },
+  });
+
+  useRealtimeSubscription<any>({
+    namespace: 'devices',
+    event: 'device:position',
+    enabled: open && !!devicePublicId,
+    handler: (payload) => {
+      const payloadId = String(payload?.deviceId ?? payload?.device_id ?? '');
+      if (payloadId && payloadId !== devicePublicId) return;
+      void refreshTelemetryViews();
     },
   });
 

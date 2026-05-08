@@ -1,13 +1,23 @@
-flowchart TB
-    MCU["ESP32-S3"]
+flowchart LR
+    Vehicle["Nguồn và trạng thái từ xe"]
+    OBD["vgate iCar Pro<br/>Bộ đọc dữ liệu OBD-II"]
+    Cloud["Máy chủ xử lý<br/>và giao diện quản lý"]
 
-    Source["Nguồn xe 12V/24V"] --> ADC["GPIO3 ADC<br/>U_SUPPLY"] --> MCU
-    Backup["Pin dự phòng 18650"] --> BADC["GPIO4 ADC<br/>U_BATT"] --> MCU
+    subgraph Device["Thiết bị theo dõi trên xe"]
+        direction TB
+        Power["Khối nguồn<br/>MP2482, AP2112,<br/>TPS54231, TP5100, SX1308"]
+        MCU["ESP32-S3<br/>Điều phối dữ liệu và trạng thái"]
+        Motion["LIS3DSH<br/>Phát hiện chuyển động"]
+        Keep["DS3231M, W25Q128, microSD<br/>Giữ thời gian, lưu đệm dữ liệu"]
+        Modem["SIM7600E + khe microSIM<br/>Lấy vị trí GNSS, gửi dữ liệu 4G"]
 
-    MCU --> Modem["SIM7600CE-T<br/>UART1 GPIO17/18<br/>PWRKEY GPIO34 + RESET GPIO35<br/>Rail ~4V modem"]
-    MCU --> I2C["I2C0<br/>SDA GPIO2 / SCL GPIO1"]
-    I2C --> IMU["LIS3DH<br/>INT1 GPIO41"]
-    I2C --> RTC["DS3231M"]
-    MCU -. BLE .-> OBD["vgate iCar Pro<br/>OBD2 BLE"]
-    MCU --> Storage["microSD<br/>SDMMC GPIO7-13"]
-    MCU --> Logic["Máy trạng thái"]
+        Power --> MCU
+        Power --> Modem
+        Motion --> MCU
+        Keep --> MCU
+        MCU <--> Modem
+    end
+
+    Vehicle --> Power
+    OBD -. BLE .-> MCU
+    Modem --> Cloud

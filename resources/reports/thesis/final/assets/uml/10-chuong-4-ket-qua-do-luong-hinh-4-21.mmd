@@ -1,5 +1,5 @@
 flowchart TB
-    OBD["Cổng OBD2"] --> Dongle["Vgate iCar Pro"]
-    Dongle -.->|BLE| Tracker["Tracker trong cabin"]
-    Tracker --> LTE["Anten LTE"]
-    Tracker --> GNSS["Anten GNSS"]
+    OBD["Cổng dữ liệu của xe"] --> Dongle["Bộ đọc dữ liệu xe"]
+    Dongle -. Kết nối không dây .-> Tracker["Thiết bị theo dõi trong cabin"]
+    Tracker --> LTE["Ăng ten truyền dữ liệu"]
+    Tracker --> GNSS["Ăng ten định vị"]

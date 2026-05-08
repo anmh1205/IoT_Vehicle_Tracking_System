@@ -487,6 +487,7 @@ export const initMqttEventListener = (): void => {
             rpm: rpm == null ? null : Number(rpm),
             metadata,
           });
+          publishStatsUpdate('device:position', envelopePayload, data.timestamp);
           void persistRawDataEventLog(data, envelopePayload).catch((error) => {
             log.error(
               'Failed to persist rawdata event log from mqtt bridge',

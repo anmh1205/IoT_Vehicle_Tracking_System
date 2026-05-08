@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/common/empty-state';
+import { formatNumber } from '@/lib/utils/date/format';
 import {
   Area,
   AreaChart,
@@ -34,7 +35,7 @@ export const DeviceUptimeChart = ({
         <CardTitle>Xu hướng độ ổn định kết nối thiết bị</CardTitle>
         <p className="text-sm text-muted-foreground">
           {data.length > 0
-            ? `Tỷ lệ ổn định kết nối trung bình hiện tại: ${averageUptime.toFixed(1)}%`
+            ? `Tỷ lệ ổn định kết nối trung bình hiện tại: ${formatNumber(averageUptime)}%`
             : 'Chưa có đủ dữ liệu độ ổn định kết nối thiết bị'}
         </p>
       </CardHeader>

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { API_BASE_URL } from '@/lib/api/base-url';
+import { resolvePublicApiOrigin } from '@/lib/runtime/public-origin';
 import type { SystemAdminHealthResponse } from '@/lib/api/system-admin';
 import { StatusBadge } from '@/features/system-status/components/status-badge';
 
@@ -25,6 +26,15 @@ const formatUptime = (uptimeSeconds?: number) => {
 };
 
 const getBackendOrigin = () => {
+  const publicOrigin = resolvePublicApiOrigin(
+    process.env.NEXT_PUBLIC_API_DIRECT_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL,
+  );
+  if (publicOrigin) {
+    return publicOrigin;
+  }
+
   try {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4001';
     return new URL(API_BASE_URL, baseUrl).origin;

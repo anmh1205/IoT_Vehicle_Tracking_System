@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { resolvePublicApiOrigin } from '@/lib/runtime/public-origin';
 
 export type RealtimeNamespace = 'dashboard' | 'devices' | 'notifications' | 'exports' | 'firmware';
 type RealtimeStatus = 'disconnected' | 'connecting' | 'connected';
@@ -34,35 +35,11 @@ const SocketContext = createContext<RealtimeContextValue | null>(null);
 const buildNamespaceUrl = (baseUrl: string, namespace: RealtimeNamespace): string =>
   `${baseUrl.replace(/\/$/, '')}/${namespace}`;
 
-const normalizeSocketUrl = (value: string | undefined): string | null => {
-  const normalized = String(value ?? '')
-    .trim()
-    .replace(/^['"]+|['"]+$/g, '')
-    .replace(/\/+$/g, '');
-
-  return normalized || null;
-};
-
 const resolveSocketBaseUrl = (): string => {
-  const fromEnv = normalizeSocketUrl(process.env.NEXT_PUBLIC_WS_URL || process.env.NEXT_PUBLIC_SOCKET_URL);
-  if (fromEnv) {
-    return fromEnv;
-  }
-
-  if (typeof window === 'undefined') {
-    return 'http://localhost:4000';
-  }
-
-  const { hostname, origin, protocol } = window.location;
-  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]') {
-    return 'http://localhost:4000';
-  }
-
-  if (hostname === 'thingdock.dev' || hostname.endsWith('.thingdock.dev')) {
-    return `${protocol}//api.thingdock.dev`;
-  }
-
-  return origin;
+  return (
+    resolvePublicApiOrigin(process.env.NEXT_PUBLIC_WS_URL || process.env.NEXT_PUBLIC_SOCKET_URL) ??
+    'http://localhost:4000'
+  );
 };
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {

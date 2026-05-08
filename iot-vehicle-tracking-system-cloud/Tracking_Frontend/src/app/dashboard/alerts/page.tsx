@@ -19,6 +19,7 @@ import { AlertFilters } from '@/features/alerts/components/alert-filters';
 import { alertServices, localizeAlertForDisplay } from '@/lib/api/alerts';
 import { notificationUtils } from '@/lib/notification';
 import { getApiErrorMessage } from '@/lib/utils/api-error';
+import { formatNumber } from '@/lib/utils/date/format';
 import { useInfiniteListQuery } from '@/hooks/use-infinite-list-query';
 
 const PAGE_SIZE = 50;
@@ -317,7 +318,7 @@ const AlertsPage = () => {
           icon={<ShieldAlert className="h-4 w-4" />}
           isLoading={summaryCardsLoading}
           trend={{
-            value: `${stats.total > 0 ? ((stats.critical / stats.total) * 100).toFixed(1) : '0.0'}% tổng cảnh báo`,
+            value: `${stats.total > 0 ? formatNumber((stats.critical / stats.total) * 100) : '0'}% tổng cảnh báo`,
             positive: false,
           }}
         />

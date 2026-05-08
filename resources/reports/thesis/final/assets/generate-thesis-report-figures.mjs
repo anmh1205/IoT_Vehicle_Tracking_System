@@ -1,13 +1,12 @@
 ﻿import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { diagramByFileName } from "./thesis-mermaid-diagrams.mjs";
 
 const assetsDir = dirname(fileURLToPath(import.meta.url));
 const chaptersDir = dirname(assetsDir);
-const figuresDir = join(assetsDir, "figures");
 const mermaidConfigPath = join(assetsDir, "mermaid-thesis-config.json");
 const mermaidTempDir = mkdtempSync(join(tmpdir(), "ivts-thesis-mermaid-"));
 const npxBin = process.platform === "win32" ? "npx.cmd" : "npx";
@@ -18,6 +17,40 @@ const clusterLabelStripFill = "#f1f5f9";
 const clusterLabelStripHorizontalPadding = 8;
 const clusterLabelStripYOffset = -6;
 const clusterLabelStripHeight = 30;
+const cliArgs = process.argv.slice(2);
+
+const getOptionValue = (optionName) => {
+  const directArg = cliArgs.find((arg) => arg.startsWith(`${optionName}=`));
+  if (directArg) {
+    return directArg.slice(optionName.length + 1).trim();
+  }
+
+  const optionIndex = cliArgs.indexOf(optionName);
+  if (optionIndex >= 0) {
+    const nextArg = cliArgs[optionIndex + 1];
+    if (nextArg && !nextArg.startsWith("--")) {
+      return nextArg.trim();
+    }
+  }
+
+  return null;
+};
+
+const normalizeFiguresSubdir = (value) =>
+  (value ?? "figures")
+    .replace(/\\/gu, "/")
+    .replace(/^\.?\//u, "")
+    .replace(/^assets\//u, "")
+    .replace(/\/+$/u, "") || "figures";
+
+const resolveCliPath = (value, baseDir) => (isAbsolute(value) ? value : join(baseDir, value));
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+
+const reportArg = getOptionValue("--report");
+const reportPath = reportArg ? resolveCliPath(reportArg, chaptersDir) : join(chaptersDir, "thesis-final-report.md");
+const figuresSubdir = normalizeFiguresSubdir(getOptionValue("--figures-subdir"));
+const figuresDir = join(assetsDir, ...figuresSubdir.split("/"));
+const figureReferencePrefix = `assets/${figuresSubdir}/`;
 
 mkdirSync(figuresDir, { recursive: true });
 
@@ -34,17 +67,24 @@ const renderSizeByFileName = {
   "06-chuong-3-giai-phap-frontend-hinh-3-18.svg": { width: 3200, height: 1900 },
   "06-chuong-3-giai-phap-frontend-hinh-3-20.svg": { width: 3400, height: 2100 },
   "07-chuong-4-trien-khai-hardware-hinh-4-1.svg": { width: 3400, height: 2000 },
+  "07-chuong-4-trien-khai-hardware-hinh-4-5.svg": { width: 3800, height: 1800 },
   "07-chuong-4-trien-khai-hardware-hinh-4-2.svg": { width: 2800, height: 1500 },
   "07-chuong-4-trien-khai-hardware-hinh-4-6.svg": { width: 3400, height: 2000 },
+  "07-chuong-4-trien-khai-hardware-hinh-4-12.svg": { width: 3400, height: 1800 },
   "07-chuong-4-trien-khai-hardware-hinh-4-9.svg": { width: 3200, height: 1900 },
   "07-chuong-4-trien-khai-hardware-hinh-4-13.svg": { width: 3400, height: 2200 },
+  "07-chuong-4-trien-khai-hardware-hinh-4-14.svg": { width: 3600, height: 1800 },
+  "09-chuong-4-trien-khai-cloud-hinh-4-15.svg": { width: 3800, height: 2300 },
   "09-chuong-4-trien-khai-cloud-hinh-4-20.svg": { width: 3200, height: 1900 },
   "09-chuong-4-trien-khai-cloud-hinh-4-21.svg": { width: 3200, height: 1900 },
   "09-chuong-4-trien-khai-cloud-hinh-4-22.svg": { width: 3400, height: 2100 },
   "09-chuong-4-trien-khai-cloud-hinh-4-23.svg": { width: 3200, height: 1900 },
-  "09-chuong-4-trien-khai-cloud-hinh-4-16.svg": { width: 3800, height: 2100 },
+  "09-chuong-4-trien-khai-cloud-hinh-4-16.svg": { width: 2800, height: 2600 },
   "10-chuong-4-ket-qua-do-luong-hinh-4-20.svg": { width: 3200, height: 1900 },
-  "10-chuong-4-ket-qua-do-luong-hinh-4-30.svg": { width: 4200, height: 1500 },
+  "10-chuong-4-ket-qua-do-luong-hinh-4-23.svg": { width: 5200, height: 1500 },
+  "10-chuong-4-ket-qua-do-luong-hinh-4-27.svg": { width: 5200, height: 1500 },
+  "10-chuong-4-ket-qua-do-luong-hinh-4-30.svg": { width: 5200, height: 1500 },
+  "10-chuong-4-ket-qua-do-luong-hinh-4-38.svg": { width: 5200, height: 1500 },
   "10-chuong-4-ket-qua-do-luong-hinh-4-33.svg": { width: 3600, height: 2100 },
   "06-chuong-3-giai-phap-frontend-hinh-3-19a.svg": { width: 3200, height: 2000 },
 };
@@ -83,12 +123,35 @@ const getRenderSize = (figureName, code) => {
   return { width: 2600, height: 1700 };
 };
 
-const canonicalChapterPath = join(chaptersDir, "thesis-final-report.md");
+const parseOnlyArgs = () => {
+  const directOnlyArg = cliArgs.find((arg) => arg.startsWith("--only="));
+  if (directOnlyArg) {
+    return directOnlyArg
+      .slice("--only=".length)
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean);
+  }
+
+  const onlyIndex = cliArgs.indexOf("--only");
+  if (onlyIndex >= 0) {
+    return cliArgs
+      .slice(onlyIndex + 1)
+      .filter((arg) => !arg.startsWith("--"))
+      .flatMap((arg) => arg.split(","))
+      .map((name) => name.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+const hasFlag = (flag) => cliArgs.includes(flag);
 
 const collectReferencedFigureNames = () => {
-  const figureNameRegex = /(?:\.\/)?assets\/figures\/([^\s)]+)/gu;
+  const figureNameRegex = new RegExp(`(?:\\.\\/)?${escapeRegExp(figureReferencePrefix)}([^\\s)]+)`, "gu");
   const names = new Set();
-  const content = readFileSync(canonicalChapterPath, "utf8");
+  const content = readFileSync(reportPath, "utf8");
 
   let match = figureNameRegex.exec(content);
   while (match) {
@@ -99,11 +162,12 @@ const collectReferencedFigureNames = () => {
   return [...names].sort();
 };
 
-const purgeExistingFigureAssets = () => {
-  for (const entry of readdirSync(figuresDir, { withFileTypes: true })) {
-    if (!entry.isFile()) continue;
-    if (!imageExtension.test(entry.name)) continue;
-    rmSync(join(figuresDir, entry.name), { force: true });
+const purgeExistingFigureAssets = (figureNames) => {
+  for (const figureName of figureNames) {
+    const svgPath = join(figuresDir, figureName);
+    const pngPath = join(figuresDir, figureName.replace(/\.svg$/u, ".png"));
+    rmSync(svgPath, { force: true });
+    rmSync(pngPath, { force: true });
   }
 };
 
@@ -184,7 +248,14 @@ const postProcessRenderedSvg = (outputPath) => {
   }
 };
 
-const figureNames = collectReferencedFigureNames();
+const normalizeFigureName = (name) => (name.endsWith(".svg") ? name : `${name}.svg`);
+const requestedOnlyNames = parseOnlyArgs().map(normalizeFigureName);
+const chapter4FigureNames = collectReferencedFigureNames().filter((name) => /^(?:07|08|09|10)-chuong-4-/u.test(name));
+const figureNames = requestedOnlyNames.length > 0
+  ? requestedOnlyNames
+  : hasFlag("--chapter4")
+    ? chapter4FigureNames
+    : collectReferencedFigureNames();
 const missingMappings = figureNames.filter((name) => !diagramByFileName[name]);
 
 if (missingMappings.length > 0) {
@@ -192,7 +263,7 @@ if (missingMappings.length > 0) {
   throw new Error(`Missing Mermaid mapping for:\n - ${missingList}`);
 }
 
-purgeExistingFigureAssets();
+purgeExistingFigureAssets(figureNames);
 
 try {
   for (const figureName of figureNames) {

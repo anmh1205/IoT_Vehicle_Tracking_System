@@ -1,3 +1,5 @@
+import { isLoopbackHostname } from '@/lib/runtime/public-origin';
+
 const trimTrailingSlash = (value: string): string => value.replace(/\/+$/u, '');
 
 export const normalizeDirectApiBase = (rawValue: string | undefined): string | null => {
@@ -28,7 +30,7 @@ const resolveApiBaseUrl = (): string => {
 
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
-    if (host === 'localhost' || host === '127.0.0.1') {
+    if (isLoopbackHostname(host)) {
       return 'http://localhost:4000/api/v1';
     }
   }

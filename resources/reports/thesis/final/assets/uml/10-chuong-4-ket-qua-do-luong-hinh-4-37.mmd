@@ -1,8 +1,8 @@
 flowchart TB
-    Before["Bản đồ hành trình"]
-    Outage["Mất kết nối tạm thời<br/>Thiết bị lưu đệm cục bộ"]
-    Recover["Khôi phục mạng 4G"]
-    Replay["Bridge nhận dữ liệu phát lại"]
-    Sync["Bản đồ cập nhật đầy đủ"]
+    Before["Hành trình được cập nhật bình thường"]
+    Outage["Mất mạng tạm thời<br/>Dữ liệu được giữ tạm"]
+    Recover["Kết nối được phục hồi"]
+    Replay["Hệ thống nhận lại dữ liệu gửi bù"]
+    Sync["Hành trình trên bản đồ<br/>được cập nhật đầy đủ"]
 
     Before --> Outage --> Recover --> Replay --> Sync

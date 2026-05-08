@@ -32,7 +32,7 @@ import {
   getVehicleStatePresentation,
 } from '@/lib/utils/device-state';
 import { CommandsTab } from './commands-tab';
-import { getDeviceConfigSummary } from './device-detail-presenters';
+import { getDeviceConfigSummary, pickLatestTelemetryTimestamp } from './device-detail-presenters';
 import { ErrorCodesTab } from './error-codes-tab';
 import { useDeviceDetailModal } from './modal-context';
 import { OverviewTab } from './overview-tab';
@@ -95,8 +95,11 @@ export const DeviceDetailDialogBody = () => {
 
   const settingsTabVisible = access.canEditDevice;
   const configSummary = getDeviceConfigSummary(device);
-  const latestTelemetryTimestamp =
-    latestTrackingRow?.timestamp ?? positionSnapshot?.timestamp ?? device?.lastSeenAt ?? null;
+  const latestTelemetryTimestamp = pickLatestTelemetryTimestamp(
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.timestamp,
+    device?.lastSeenAt ?? null,
+  );
   const telemetryFreshness = getFreshnessSeconds(latestTelemetryTimestamp);
   const telemetryState =
     TELEMETRY_STATE_META[

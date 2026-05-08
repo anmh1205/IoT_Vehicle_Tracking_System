@@ -26,7 +26,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
-import { getDeviceConfigSummary } from './device-detail-presenters';
+import { getDeviceConfigSummary, pickLatestTelemetryTimestamp } from './device-detail-presenters';
 import { useDeviceDetailModal } from './modal-context';
 import {
   formatSecondsLabel,
@@ -206,8 +206,11 @@ export const SettingsTab = () => {
   const alertConfigWithoutLegacyThreshold = omitLegacyThresholdKeys(alertConfig);
   const configSummary = getDeviceConfigSummary(device);
   const observedCadence = getObservedCadenceSeconds(trackingRowsAscending);
-  const latestTelemetryTimestamp =
-    latestTrackingRow?.timestamp ?? positionSnapshot?.timestamp ?? device?.lastSeenAt ?? null;
+  const latestTelemetryTimestamp = pickLatestTelemetryTimestamp(
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.timestamp,
+    device?.lastSeenAt ?? null,
+  );
   const telemetryState = getTelemetryFreshnessState(
     getFreshnessSeconds(latestTelemetryTimestamp),
     configSummary.activeIntervalSec,

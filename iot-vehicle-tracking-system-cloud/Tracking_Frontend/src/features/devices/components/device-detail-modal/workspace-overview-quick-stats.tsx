@@ -15,11 +15,14 @@ import {
 import {
   formatElectricalMetric,
   formatTemperatureMetric,
+  pickLatestTelemetryTimestamp,
+  pickLatestTelemetryValue,
   resolveEngineTemperatureValue,
   resolveVehicleBatteryValue,
 } from './device-detail-presenters';
 import { useDeviceDetailModal } from './modal-context';
 import { formatCoordinateLabel } from './telemetry-insights';
+import { formatNumber } from '@/lib/utils/date/format';
 
 const MEMBERSHIP_LABELS: Record<string, string> = {
   inside: 'Đang ở trong vùng',
@@ -76,13 +79,31 @@ export const WorkspaceOverviewQuickStats = ({
     return normalized.startsWith('zone_') || normalized.startsWith('geofence');
   }).length;
 
-  const latestTelemetryTimestamp =
-    latestTrackingRow?.timestamp ?? positionSnapshot?.timestamp ?? device?.lastSeenAt ?? null;
-  const latestSpeed = latestTrackingRow?.speed ?? positionSnapshot?.speed ?? null;
-  const latestLatitude =
-    latestTrackingRow?.latitude ?? positionSnapshot?.latitude ?? device?.latitude ?? null;
-  const latestLongitude =
-    latestTrackingRow?.longitude ?? positionSnapshot?.longitude ?? device?.longitude ?? null;
+  const latestTelemetryTimestamp = pickLatestTelemetryTimestamp(
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.timestamp,
+    device?.lastSeenAt ?? null,
+  );
+  const latestSpeed = pickLatestTelemetryValue(
+    latestTrackingRow?.speed,
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.speed,
+    positionSnapshot?.timestamp,
+  );
+  const latestLatitude = pickLatestTelemetryValue(
+    latestTrackingRow?.latitude,
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.latitude,
+    positionSnapshot?.timestamp,
+    device?.latitude ?? null,
+  );
+  const latestLongitude = pickLatestTelemetryValue(
+    latestTrackingRow?.longitude,
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.longitude,
+    positionSnapshot?.timestamp,
+    device?.longitude ?? null,
+  );
   const coordinateLabel = formatCoordinateLabel(latestLatitude, latestLongitude, 5);
   const vehicleBatteryValue = resolveVehicleBatteryValue(latestTrackingRow, positionSnapshot);
   const engineTemperatureValue = resolveEngineTemperatureValue(latestTrackingRow, positionSnapshot);
@@ -179,7 +200,7 @@ export const WorkspaceOverviewQuickStats = ({
     },
     {
       label: 'Tốc độ gần nhất',
-      value: latestSpeed !== null ? `${latestSpeed.toFixed(1)} km/h` : 'Chưa có dữ liệu',
+      value: latestSpeed !== null ? `${formatNumber(latestSpeed)} km/h` : 'Chưa có dữ liệu',
       note: latestTrackingRow ? 'Lấy từ telemetry gần nhất' : 'Đang dùng ảnh chụp hiện có',
     },
     {

@@ -590,7 +590,13 @@ char *data_format_rawdata(const config_t *cfg,
         cJSON_AddNumberToObject(data, "course", telemetry->gnss.course_deg);
     }
     cJSON_AddNumberToObject(data, "satellites", telemetry->gnss.satellites);
-    cJSON_AddBoolToObject(data, "ignition", telemetry->ignition);
+    bool published_ignition = telemetry->ignition;
+    if (telemetry->ignition_state == TRACKER_IGNITION_STATE_ON) {
+        published_ignition = true;
+    } else if (telemetry->ignition_state == TRACKER_IGNITION_STATE_OFF) {
+        published_ignition = false;
+    }
+    cJSON_AddBoolToObject(data, "ignition", published_ignition);
     cJSON_AddNumberToObject(data, "error_code", telemetry->error_code);
 
     cJSON_AddItemToObject(root, "data", data);

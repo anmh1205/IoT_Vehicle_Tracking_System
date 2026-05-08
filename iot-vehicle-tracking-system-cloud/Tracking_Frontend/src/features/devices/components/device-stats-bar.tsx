@@ -1,6 +1,7 @@
 import { Activity, CircleOff, PlugZap, Radio } from 'lucide-react';
 import { StatCard } from '@/components/common/stat-card';
 import type { Device } from '@/features/devices/types';
+import { formatNumber } from '@/lib/utils/date/format';
 
 export const DeviceStatsBar = ({
   devices,
@@ -28,7 +29,7 @@ export const DeviceStatsBar = ({
         value={connected}
         icon={<Radio className="h-4 w-4 text-emerald-600" />}
         trend={{
-          value: `${totalOnPage > 0 ? ((connected / totalOnPage) * 100).toFixed(1) : '0.0'}% trên trang`,
+          value: `${totalOnPage > 0 ? formatNumber((connected / totalOnPage) * 100) : '0'}% trên trang`,
           positive: connected >= slowTelemetry,
         }}
       />
@@ -42,7 +43,7 @@ export const DeviceStatsBar = ({
         value={disconnected}
         icon={<CircleOff className="h-4 w-4 text-rose-600" />}
         trend={{
-          value: `${totalOnPage > 0 ? ((disconnected / totalOnPage) * 100).toFixed(1) : '0.0'}% trên trang`,
+          value: `${totalOnPage > 0 ? formatNumber((disconnected / totalOnPage) * 100) : '0'}% trên trang`,
           positive: false,
         }}
       />

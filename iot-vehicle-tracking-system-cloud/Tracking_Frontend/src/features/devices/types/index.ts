@@ -82,6 +82,8 @@ export interface DeviceErrorCode {
   errorCode: number;
   errorName: string;
   description: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical' | string;
+  status?: string;
   occurredAt: string;
   resolvedAt: string | null;
 }

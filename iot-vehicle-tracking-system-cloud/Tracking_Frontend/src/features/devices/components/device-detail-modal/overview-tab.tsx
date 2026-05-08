@@ -10,6 +10,8 @@ import {
 } from '@/lib/utils/device-state';
 import {
   formatElectricalMetric,
+  pickLatestTelemetryTimestamp,
+  pickLatestTelemetryValue,
   formatTemperatureMetric,
   getDeviceConfigSummary,
   resolveDeviceBatteryValue,
@@ -264,8 +266,11 @@ export const OverviewTab = () => {
   const obdRecommendations = buildObdRecommendations(diagnosticsSnapshot);
   const configSummary = getDeviceConfigSummary(device);
   const observedCadence = getObservedCadenceSeconds(trackingRowsAscending);
-  const latestTelemetryTimestamp =
-    latestTrackingRow?.timestamp ?? positionSnapshot?.timestamp ?? device?.lastSeenAt ?? null;
+  const latestTelemetryTimestamp = pickLatestTelemetryTimestamp(
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.timestamp,
+    device?.lastSeenAt ?? null,
+  );
   const telemetryFreshness = getFreshnessSeconds(latestTelemetryTimestamp);
   const telemetryFreshnessState = getTelemetryFreshnessState(
     telemetryFreshness,
@@ -276,14 +281,30 @@ export const OverviewTab = () => {
     telemetryFreshnessState === 'stale' || telemetryFreshnessState === 'offline';
 
   const latestPosition = {
-    latitude: latestTrackingRow?.latitude ?? positionSnapshot?.latitude ?? device?.latitude ?? null,
-    longitude:
-      latestTrackingRow?.longitude ?? positionSnapshot?.longitude ?? device?.longitude ?? null,
+    latitude: pickLatestTelemetryValue(
+      latestTrackingRow?.latitude,
+      latestTrackingRow?.timestamp,
+      positionSnapshot?.latitude,
+      positionSnapshot?.timestamp,
+      device?.latitude ?? null,
+    ),
+    longitude: pickLatestTelemetryValue(
+      latestTrackingRow?.longitude,
+      latestTrackingRow?.timestamp,
+      positionSnapshot?.longitude,
+      positionSnapshot?.timestamp,
+      device?.longitude ?? null,
+    ),
   };
   const vehicleState = getVehicleStatePresentation(device?.vehicleState);
   const deviceRuntimeState = getDeviceRuntimePresentation(device?.deviceState);
   const connectivityState = getConnectivityPresentation(device?.currentStatus);
-  const latestSpeed = latestTrackingRow?.speed ?? positionSnapshot?.speed ?? null;
+  const latestSpeed = pickLatestTelemetryValue(
+    latestTrackingRow?.speed,
+    latestTrackingRow?.timestamp,
+    positionSnapshot?.speed,
+    positionSnapshot?.timestamp,
+  );
   const latestDeviceBattery = resolveDeviceBatteryValue(latestTrackingRow, positionSnapshot);
   const latestVehicleBattery = resolveVehicleBatteryValue(latestTrackingRow, positionSnapshot);
   const latestEngineTemperature = resolveEngineTemperatureValue(
@@ -336,7 +357,7 @@ export const OverviewTab = () => {
     [
       {
         label: speedLabel,
-        value: latestSpeed !== null ? `${latestSpeed.toFixed(1)} km/h` : '-',
+        value: latestSpeed !== null ? `${formatNumber(latestSpeed)} km/h` : '-',
       },
       {
         label: vehicleBatteryLabel,
@@ -379,7 +400,7 @@ export const OverviewTab = () => {
     [
       {
         label: 'Quãng đường theo dải dữ liệu',
-        value: `${distanceKm.toFixed(2)} km`,
+        value: `${formatNumber(distanceKm)} km`,
       },
       {
         label: 'Bản tin đã nhận',
@@ -389,7 +410,7 @@ export const OverviewTab = () => {
     [
       {
         label: 'Tốc độ TB / tối đa',
-        value: `${averageSpeed.toFixed(1)} / ${maxSpeed.toFixed(1)} km/h`,
+        value: `${formatNumber(averageSpeed)} / ${formatNumber(maxSpeed)} km/h`,
       },
       {
         label: 'Phiên vận hành / mã lỗi',
@@ -428,7 +449,7 @@ export const OverviewTab = () => {
       },
       {
         label: 'MIL / số DTC báo cáo',
-        value: `${diagnosticsSnapshot?.milOn === undefined ? '-' : diagnosticsSnapshot.milOn ? 'ON' : 'OFF'} / ${diagnosticsSnapshot?.reportedDtcCount !== undefined ? diagnosticsSnapshot.reportedDtcCount.toFixed(0) : '-'}`,
+        value: `${diagnosticsSnapshot?.milOn === undefined ? '-' : diagnosticsSnapshot.milOn ? 'ON' : 'OFF'} / ${diagnosticsSnapshot?.reportedDtcCount !== undefined ? formatNumber(diagnosticsSnapshot.reportedDtcCount, { maximumFractionDigits: 0 }) : '-'}`,
       },
     ],
     [
@@ -436,25 +457,25 @@ export const OverviewTab = () => {
         label: 'Độ trễ mẫu',
         value:
           diagnosticsSnapshot?.sampleAgeMs !== undefined
-            ? `${diagnosticsSnapshot.sampleAgeMs.toFixed(0)} ms`
+            ? `${formatNumber(diagnosticsSnapshot.sampleAgeMs, { maximumFractionDigits: 0 })} ms`
             : '-',
       },
       {
         label: 'Lỗi kết nối / 5 phút',
         value:
           diagnosticsSnapshot?.connectFailCount5m !== undefined
-            ? diagnosticsSnapshot.connectFailCount5m.toFixed(0)
+            ? formatNumber(diagnosticsSnapshot.connectFailCount5m, { maximumFractionDigits: 0 })
             : '-',
       },
     ],
     [
       {
         label: 'RPM / tốc độ OBD',
-        value: `${diagnosticsSnapshot?.rpm !== undefined ? diagnosticsSnapshot.rpm.toFixed(0) : '-'} / ${diagnosticsSnapshot?.obdSpeedKph !== undefined ? `${diagnosticsSnapshot.obdSpeedKph.toFixed(1)} km/h` : '-'}`,
+        value: `${diagnosticsSnapshot?.rpm !== undefined ? formatNumber(diagnosticsSnapshot.rpm, { maximumFractionDigits: 0 }) : '-'} / ${diagnosticsSnapshot?.obdSpeedKph !== undefined ? `${formatNumber(diagnosticsSnapshot.obdSpeedKph)} km/h` : '-'}`,
       },
       {
         label: 'Nhiệt độ / tải máy',
-        value: `${diagnosticsSnapshot?.coolantC !== undefined ? `${diagnosticsSnapshot.coolantC.toFixed(1)}°C` : '-'} / ${diagnosticsSnapshot?.engineLoadPct !== undefined ? `${diagnosticsSnapshot.engineLoadPct.toFixed(1)}%` : '-'}`,
+        value: `${diagnosticsSnapshot?.coolantC !== undefined ? `${formatNumber(diagnosticsSnapshot.coolantC)}°C` : '-'} / ${diagnosticsSnapshot?.engineLoadPct !== undefined ? `${formatNumber(diagnosticsSnapshot.engineLoadPct)}%` : '-'}`,
       },
     ],
     [

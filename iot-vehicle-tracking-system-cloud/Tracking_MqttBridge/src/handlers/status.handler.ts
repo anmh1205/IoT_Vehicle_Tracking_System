@@ -20,6 +20,11 @@ import { logger } from '../infrastructure/logger';
 import { normalizePayloadTimestamp } from '../utils/timestamp.util';
 import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState } from '../types/device-state.types';
+import {
+  canUseRunningStatusForSession,
+  hasAuthoritativeSessionIdentity,
+  normalizeStatusForSessionRuntime,
+} from '../utils/session-runtime.util';
 
 const toCachedStatus = (status: StatusPayload['status']): 'running' | 'stopped' | 'online' => {
   return status === 'heartbeat' ? 'online' : status;
@@ -114,6 +119,20 @@ export const handleStatus = async (
     state: payload.state,
     legacyStatus: payload.status,
     previous: previousState?.runtimeState,
+  });
+  const hasAuthoritativeIdentity = hasAuthoritativeSessionIdentity({
+    localSessionKey,
+    canonicalSessionId: payloadCanonicalSessionId,
+  });
+  const effectiveCachedStatus = normalizeStatusForSessionRuntime({
+    cachedStatus,
+    runtimeState,
+    hasAuthoritativeIdentity,
+  });
+  const canStartSessionFromStatus = canUseRunningStatusForSession({
+    cachedStatus,
+    runtimeState,
+    hasAuthoritativeIdentity,
   });
   const stateUpdatedAt = new Date(receivedAtMs).toISOString();
   const { timestampMs, source: timestampSource } = normalizePayloadTimestamp(
@@ -216,7 +235,8 @@ export const handleStatus = async (
       });
     }
   } else if (boundaryEvent === 'ended') {
-    if (resolvedSessionId === null) {
+    const sessionIdToComplete = resolvedSessionId ?? sessionId;
+    if (sessionIdToComplete === null) {
       logger.warn(
         {
           deviceId: payload.device_id,
@@ -229,12 +249,19 @@ export const handleStatus = async (
         },
         'Ended boundary ignored',
       );
-      return;
+      sessionId = null;
+      sessionBoundarySource = 'firmware';
+      clearSession(payload.device_id);
+      setStatus(payload.device_id, 'stopped', {
+        sessionId: null,
+        runtimeState,
+      });
+      await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
     } else {
       const completedSession = await completeDeviceSession(
         payload.device_id,
         timestampMs,
-        resolvedSessionId,
+        sessionIdToComplete,
         receivedAtMs,
         'stopped',
         {
@@ -268,18 +295,20 @@ export const handleStatus = async (
         });
       }
     }
-  } else if (cachedStatus === 'running' && sessionId === null) {
+  } else if (canStartSessionFromStatus && sessionId === null) {
+    const boundarySource = hasAuthoritativeIdentity ? 'firmware' : SESSION_FALLBACK_BOUNDARY_SOURCE;
+    const startReason = hasAuthoritativeIdentity ? 'status_running_authoritative' : 'status_running';
     const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs, {
       localSessionKey,
       bootId: sessionBootId,
       canonicalSource: 'server',
-      boundarySource: SESSION_FALLBACK_BOUNDARY_SOURCE,
-      startReason: 'status_running',
+      boundarySource,
+      startReason,
     });
 
     sessionId = ensuredSession.sessionId;
     canonicalSessionId = String(ensuredSession.sessionId);
-    sessionBoundarySource = SESSION_FALLBACK_BOUNDARY_SOURCE;
+    sessionBoundarySource = boundarySource;
 
     setStatus(payload.device_id, 'running', {
       sessionId,
@@ -301,7 +330,7 @@ export const handleStatus = async (
         device_id: payload.device_id,
         session_id: sessionId,
         action: 'started',
-        boundary_source: SESSION_FALLBACK_BOUNDARY_SOURCE,
+        boundary_source: boundarySource,
         local_session_key: localSessionKey,
         canonical_session_id: canonicalSessionId,
         boot_id: sessionBootId,
@@ -311,7 +340,7 @@ export const handleStatus = async (
         timestamp: new Date(timestampMs).toISOString(),
       });
     }
-  } else if (cachedStatus === 'stopped') {
+  } else if (effectiveCachedStatus === 'stopped') {
     const completedSession = await completeDeviceSession(
       payload.device_id,
       timestampMs,
@@ -351,17 +380,17 @@ export const handleStatus = async (
       });
     }
   } else {
-    setStatus(payload.device_id, cachedStatus, {
+    setStatus(payload.device_id, effectiveCachedStatus, {
       sessionId,
       runtimeState,
       localSessionKey,
       canonicalSessionId,
       bootId: sessionBootId,
     });
-    await updateDeviceStatus(payload.device_id, cachedStatus, receivedAtMs, runtimeState);
+    await updateDeviceStatus(payload.device_id, effectiveCachedStatus, receivedAtMs, runtimeState);
   }
 
-  const effectiveStatus = boundaryEvent === 'ended' ? 'stopped' : cachedStatus;
+  const effectiveStatus = boundaryEvent === 'ended' ? 'stopped' : effectiveCachedStatus;
 
   writeDeviceEvent(
     payload.device_id,

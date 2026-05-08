@@ -1,17 +1,22 @@
 flowchart TB
-    Vehicle["Ắc quy xe 12V/24V"]
-    Main5["MP2482<br/>Bus 5V chính"]
-    LDO3v3["AP2112-3.3<br/>Rail 3.3V logic"]
-    Modem4V["TPS54231<br/>Rail ~4V modem"]
-    Charger["TP5100<br/>Sạc pin 18650 1S"]
-    Backup5["SX1308<br/>Nhánh 5V dự phòng"]
-    ORing["Diode OR + FSM nguồn"]
-    Load["Tải hệ thống<br/>ESP32-S3 + SIM7600 + ngoại vi"]
+    Vin["Nguồn xe 12 - 24 V"]
+    Sense["Nhánh đo điện áp nguồn<br/>Đưa trạng thái nguồn về ESP32-S3"]
+    Buck5["MP2482<br/>Tạo nguồn 5 V chính"]
+    Bus5["Đường 5 V làm việc của thiết bị"]
+    Charge["TP5100<br/>Sạc pin dự phòng"]
+    Battery["Pin Li-ion 18650"]
+    Boost5["SX1308<br/>Tạo lại 5 V khi mất nguồn xe"]
+    Logic3["AP2112<br/>Tạo 3.3 V cho điều khiển, cảm biến và bộ nhớ"]
+    Modem4["TPS54231<br/>Tạo 4 V riêng cho SIM7600E"]
+    Aux5["Nhánh 5 V phụ<br/>USB-C, đèn báo và các phần hỗ trợ"]
 
-    Vehicle --> Main5
-    Main5 --> LDO3v3
-    Main5 --> Modem4V
-    Main5 --> Charger --> Backup5
-    Main5 --> ORing
-    Backup5 --> ORing
-    ORing --> Load
+    Vin --> Buck5
+    Vin --> Sense
+    Buck5 --> Bus5
+    Buck5 --> Charge
+    Charge <--> Battery
+    Battery --> Boost5
+    Boost5 --> Bus5
+    Bus5 --> Logic3
+    Bus5 --> Modem4
+    Bus5 --> Aux5

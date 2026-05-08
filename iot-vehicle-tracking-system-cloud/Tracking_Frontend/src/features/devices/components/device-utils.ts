@@ -1,8 +1,9 @@
 import type { Device } from '@/features/devices/types';
 import { deriveDeviceStatus } from '@/hooks/use-device-status-realtime';
+import { formatNumber } from '@/lib/utils/date/format';
 
-export const getDeviceRuntimeHours = (device: Device): number =>
-  Number(((device.totalRuntimeSeconds ?? 0) / 3600).toFixed(1));
+export const getDeviceRuntimeHours = (device: Device): string =>
+  formatNumber((device.totalRuntimeSeconds ?? 0) / 3600);
 
 export const getDeviceStatus = (device: Device): Device['currentStatus'] =>
   deriveDeviceStatus({

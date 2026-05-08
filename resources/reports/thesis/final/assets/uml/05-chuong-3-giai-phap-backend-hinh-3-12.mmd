@@ -1,25 +1,21 @@
-flowchart LR
-    Device["Thiết bị theo dõi"] -->|MQTT rawdata / status / events / firmware| Broker["EMQX"]
-    Broker -->|device topics| Bridge["MQTT Bridge"]
+flowchart TB
+    Device["Thiết bị theo dõi"]
+    Broker["EMQX"]
+    Bridge["MQTT Bridge"]
+    Events["internal/events/#"]
+    Listener["Realtime listener"]
+    API["Backend API"]
 
     subgraph Storage["Lớp lưu trữ"]
+        direction LR
         PG["PostgreSQL / PostGIS"]
         Metrics["VictoriaMetrics"]
         Logs["VictoriaLogs"]
     end
 
-    subgraph Service["Lớp dịch vụ"]
-        Listener["Realtime listener"]
-        API["Backend API"]
-    end
-
-    Bridge -->|trạng thái, hành trình, phiên| PG
-    Bridge -->|telemetry| Metrics
-    Bridge -->|nhật ký / lỗi| Logs
-    Bridge -->|publish internal/events/#| Broker
-    Broker -->|subscribe| Listener
-    Listener --> API
-    API -->|truy vấn nghiệp vụ| PG
-    API -->|truy vấn chuỗi thời gian| Metrics
-    API -->|tra cứu log| Logs
+    Device --> Broker --> Bridge
+    Bridge --> Events --> Listener --> API
+    Bridge --> PG
+    Bridge --> Metrics
+    Bridge --> Logs
 

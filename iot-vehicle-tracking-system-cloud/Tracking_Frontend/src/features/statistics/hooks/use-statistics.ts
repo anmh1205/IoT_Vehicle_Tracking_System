@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { deviceServices } from '@/lib/api/devices';
 import { apiClient, unwrap } from '@/lib/api/client';
 import { statisticsServices } from '@/lib/api/statistics';
+import { roundNumber } from '@/lib/utils/date/format';
 import { formatLocalDateKey, parseDateKeyAsLocal, toLocalDateInputValue } from '@/lib/utils';
 import { deriveDeviceStatus } from '@/hooks/use-device-status-realtime';
 
@@ -152,8 +153,8 @@ const buildDeviceUptimeFromDevices = (devices: StatisticsDeviceSnapshot[], param
         deviceId: device.deviceId,
         deviceName: device.deviceName,
         uptimePercent,
-        totalHours: Number(totalHours.toFixed(1)),
-        downHours: Number(downHours.toFixed(1)),
+        totalHours: roundNumber(totalHours, 1),
+        downHours: roundNumber(downHours, 1),
       };
     }),
   };
@@ -170,14 +171,13 @@ const buildSummaryFromDevices = (
   const runtimeFallback = activeLike.length * 0.2;
 
   return {
-    totalRuntimeHours: Number((runtimeFromTotals > 0 ? runtimeFromTotals : runtimeFallback).toFixed(1)),
+    totalRuntimeHours: roundNumber(runtimeFromTotals > 0 ? runtimeFromTotals : runtimeFallback, 1),
     averageUptimePercent:
       uptimeDevices.length > 0
-        ? Number(
-            (
-              uptimeDevices.reduce((sum, item) => sum + Number(item.uptimePercent ?? 0), 0) /
-              uptimeDevices.length
-            ).toFixed(1),
+        ? roundNumber(
+            uptimeDevices.reduce((sum, item) => sum + Number(item.uptimePercent ?? 0), 0) /
+              uptimeDevices.length,
+            1,
           )
         : 0,
     totalSessions: activeLike.length,
@@ -239,8 +239,8 @@ export const useStatisticsSummary = (params: StatisticsParams) => {
           ? trips.totalTrips.reduce((sum: number, value: number) => sum + Number(value ?? 0), 0)
           : 0;
         const fallback = {
-          totalRuntimeHours: Number(runtimeHours.toFixed(1)),
-          averageUptimePercent: Number(averageUptimePercent.toFixed(1)),
+          totalRuntimeHours: roundNumber(runtimeHours, 1),
+          averageUptimePercent: roundNumber(averageUptimePercent, 1),
           totalSessions,
           totalAlerts,
         };

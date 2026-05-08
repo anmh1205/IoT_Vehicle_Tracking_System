@@ -1,22 +1,25 @@
-stateDiagram-v2
-    [*] --> CHECK_IGN
+flowchart TB
+    Check{"Ignition?"}
+    Drive["DRIVING"]
+    Park["PARKED"]
+    Beat["HEARTBEAT"]
+    Sleep["SLEEP"]
+    Alarm["ALARM"]
 
-    CHECK_IGN --> DRIVING : ignition = ON
-    CHECK_IGN --> PARKED : ignition = OFF
+    Check -->|ON| Drive
+    Check -->|OFF| Park
 
-    DRIVING --> DRIVING : GNSS + OBD-II + publish
-    DRIVING --> PARKED : ignition OFF
+    Drive -->|OFF| Park
+    Park -->|ON| Drive
 
-    PARKED --> HEARTBEAT : timer wake
-    PARKED --> ALARM : IMU phát hiện rung
-    PARKED --> DRIVING : ignition ON trở lại
+    Park -->|timer| Beat
+    Beat -->|theo dõi nền| Park
+    Beat -->|sleep OK| Sleep
 
-    HEARTBEAT --> PARKED : tiếp tục theo dõi nền
-    HEARTBEAT --> SLEEP : đã flush dữ liệu<br>không rung<br>ignition vẫn OFF
+    Park -. IMU .-> Alarm
+    Sleep -->|RTC| Beat
+    Sleep -. IMU .-> Alarm
+    Sleep -->|ON| Drive
 
-    ALARM --> PARKED : đã gửi cảnh báo
-    ALARM --> DRIVING : ignition ON trở lại
-
-    SLEEP --> HEARTBEAT : RTC wake
-    SLEEP --> ALARM : IMU wake
-    SLEEP --> DRIVING : ignition ON
+    Alarm -->|xử lý xong| Park
+    Alarm -->|ON| Drive

@@ -1,5 +1,6 @@
-flowchart LR
+flowchart TB
     Vin["Nguồn xe 12-24 V"] --> Protect["Bảo vệ áp thấp<br>chống đảo cực"]
+
     Protect --> Main5["Nguồn chính 5 V"]
     Protect --> Charger["Sạc pin 1S<br>TP5100"]
     Charger --> Cell["Pin 18650"]
@@ -8,8 +9,9 @@ flowchart LR
     Main5 --> Or["OR nguồn"]
     Boost --> Or
     Or --> Bus["Bus 5 V hệ thống"]
+
     Bus --> Rail33["3.3 V<br>ESP32-S3 + IMU"]
     Bus --> Rail4["~4 V<br>SIM7600CE-T"]
 
-    Fsm["FSM nguồn<br>GPIO điều khiển"] -. bật / tắt .-> Main5
-    Fsm -. chọn nguồn .-> Or
+    Fsm["FSM nguồn<br>GPIO điều khiển"] -.-> Main5
+    Fsm -.-> Or

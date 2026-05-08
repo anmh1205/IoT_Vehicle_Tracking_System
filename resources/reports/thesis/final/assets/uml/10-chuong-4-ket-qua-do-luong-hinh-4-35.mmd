@@ -1,14 +1,14 @@
 flowchart TB
-    Page["Trang quản lý vùng cho phép"]
-    Header["Thanh đầu quản lý vùng"]
+    Page["Màn hình cảnh báo vùng"]
+    Header["Vùng thiết lập"]
 
-    subgraph Screen["Màn hình cảnh báo"]
+    subgraph Screen["Vùng hiển thị chính"]
         direction LR
-        Map["Bản đồ + vùng cho phép"]
-        Alert["Cảnh báo đang mở"]
+        Map["Bản đồ và ranh giới vùng"]
+        Alert["Thông tin cảnh báo"]
     end
 
-    History["Danh sách cảnh báo / lịch sử xử lý"]
+    History["Danh sách cảnh báo và lịch sử xử lý"]
 
     Page --> Header
     Page --> Screen

@@ -3,6 +3,7 @@ import { dashboardServices } from '@/lib/api/dashboard';
 import { deviceServices } from '@/lib/api/devices';
 import { apiClient, unwrap } from '@/lib/api/client';
 import { formatLocalDateKey, parseDateKeyAsLocal } from '@/lib/utils';
+import { roundNumber } from '@/lib/utils/date/format';
 import { deriveDeviceStatus } from '@/hooks/use-device-status-realtime';
 
 export interface DashboardEvent {
@@ -184,7 +185,7 @@ const groupRuntimeByDay = (events: DashboardEvent[], days: number) => {
 
   return Array.from(bucket.entries()).map(([dateKey, runtime]) => ({
     label: formatRangeLabel(dateKey),
-    runtime: Number(runtime.toFixed(1)),
+    runtime: roundNumber(runtime, 1),
   }));
 };
 
@@ -279,10 +280,10 @@ const estimateRuntimeHours = (device: DashboardDeviceSnapshot) => {
   );
 
   if (status === 'running') {
-    return Number(Math.min(freshnessHours, 2).toFixed(1));
+    return roundNumber(Math.min(freshnessHours, 2), 1);
   }
   if (status === 'stopped' || status === 'online') {
-    return Number(Math.min(freshnessHours, 0.5).toFixed(1));
+    return roundNumber(Math.min(freshnessHours, 0.5), 1);
   }
   return 0;
 };
@@ -298,17 +299,17 @@ const buildOverviewStatsFromDevices = (
   const offlineDevices = devices.filter((device) => getSnapshotStatus(device) === 'disconnected').length;
   const alertsCount = offlineDevices;
   const sessionsToday = 0;
-  const totalRuntimeToday = Number(
+  const totalRuntimeToday = roundNumber(
     devices
       .filter((device) => isToday(device.lastSeenAt))
-      .reduce((sum, device) => sum + estimateRuntimeHours(device), 0)
-      .toFixed(1),
+      .reduce((sum, device) => sum + estimateRuntimeHours(device), 0),
+    1,
   );
-  const totalRuntimeWeek = Number(
+  const totalRuntimeWeek = roundNumber(
     devices
       .filter((device) => isSameOrAfter(device.lastSeenAt, 7))
-      .reduce((sum, device) => sum + estimateRuntimeHours(device), 0)
-      .toFixed(1),
+      .reduce((sum, device) => sum + estimateRuntimeHours(device), 0),
+    1,
   );
 
   return {
@@ -436,7 +437,7 @@ const buildRuntimeFromDevices = (
 
   return Array.from(bucket.entries()).map(([dateKey, runtime]) => ({
     label: formatRangeLabel(dateKey),
-    runtime: Number(runtime.toFixed(1)),
+    runtime: roundNumber(runtime, 1),
   }));
 };
 

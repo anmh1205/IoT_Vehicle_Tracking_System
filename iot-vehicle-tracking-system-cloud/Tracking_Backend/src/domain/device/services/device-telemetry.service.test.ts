@@ -70,4 +70,16 @@ describe('device-telemetry.service', () => {
       },
     ]);
   });
+
+  it('queries the newest telemetry points first before returning them in ascending order', async () => {
+    vi.mocked(findMany).mockResolvedValue([]);
+
+    await getTelemetry('TRACKER_001', { metric: 'latitude' });
+    const [sql] = vi.mocked(findMany).mock.calls[0] ?? [];
+
+    expect(sql).toContain('ORDER BY server_timestamp DESC');
+    expect(sql).toContain('LIMIT 5000');
+    expect(sql).toContain(') recent_points');
+    expect(sql).toContain('ORDER BY server_timestamp ASC');
+  });
 });
