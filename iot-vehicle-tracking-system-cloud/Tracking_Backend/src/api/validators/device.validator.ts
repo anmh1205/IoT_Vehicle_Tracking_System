@@ -43,3 +43,40 @@ export const deviceListQuerySchema = z.object({
   sortBy: z.enum(['deviceId', 'deviceName', 'currentStatus', 'lastSeenAt', 'createdAt']).optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
 });
+
+const firmwareConfigParamSchema = z.object({
+  tracking_interval_s: z.number().int().min(1).max(3600).optional(),
+  heartbeat_interval_s: z.number().int().min(60).max(65535).optional(),
+  alarm_interval_s: z.number().int().min(1).max(60).optional(),
+  ignition_off_hold_ms: z.number().int().min(1000).max(60000).optional(),
+  alarm_timeout_s: z.number().int().min(30).max(3600).optional(),
+  ota_min_battery_mv: z.number().int().min(3300).max(4500).optional(),
+  ignition_adc_threshold_mv: z.number().int().min(11000).max(15000).optional(),
+  sleep_enabled: z.boolean().optional(),
+  imu_wakeup_enabled: z.boolean().optional(),
+}).strict();
+
+export const sendDeviceCommandSchema = z
+  .object({
+    command: z.string().min(1),
+    params: z.record(z.unknown()).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.command !== 'update_config') {
+      return;
+    }
+
+    const parsed = firmwareConfigParamSchema.safeParse(value.params ?? {});
+    if (parsed.success) {
+      return;
+    }
+
+    for (const issue of parsed.error.issues) {
+      const path = issue.path.length > 0 ? ['params', ...issue.path] : ['params'];
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path,
+        message: issue.message,
+      });
+    }
+  });

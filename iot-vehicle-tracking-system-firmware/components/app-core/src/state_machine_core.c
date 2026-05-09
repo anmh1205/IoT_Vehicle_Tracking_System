@@ -256,27 +256,24 @@ static void state_machine_reset_heartbeat_window(void) {
 /**
  * @brief Resolve the effective ignition axis consumed by cloud/runtime state.
  *
- * The FSM can intentionally stay in driving mode while fresh live OBD evidence
- * is still present, even if the debounced ignition axis has not yet caught up
- * or is temporarily OFF. Runtime payload axes must mirror that same decision so
- * the cloud never sees "engine off" while the local FSM is logically driving.
+ * Runtime payload axes must follow the same ignition semantics as the session
+ * debouncer. Fresh OBD transport activity alone is not enough to say the
+ * engine is ON; only the fused raw ignition candidate or the debounced
+ * ignition state may elevate the cloud/runtime ignition axis.
  *
  * @param[in] now_ms Current uptime.
  * @return Effective ignition state exposed to runtime/publish consumers.
  */
 static tracker_ignition_state_t state_machine_resolve_effective_ignition_state(uint64_t now_ms) {
     // Keep this helper boundary explicit so its local policy and side effects stay predictable.
-    bool obd_recently_active =
-        command_handler_is_tracking_enabled() && state_machine_obd_recently_active(now_ms);
+    (void)now_ms;
 
     if (session_mgr_has_stable_ignition()) {
-        if (session_mgr_stable_ignition() || obd_recently_active) {
-            return TRACKER_IGNITION_STATE_ON;
-        }
-        return TRACKER_IGNITION_STATE_OFF;
+        return session_mgr_stable_ignition() ? TRACKER_IGNITION_STATE_ON
+                                             : TRACKER_IGNITION_STATE_OFF;
     }
 
-    if (s_telemetry.ignition || obd_recently_active) {
+    if (s_telemetry.ignition) {
         return TRACKER_IGNITION_STATE_ON;
     }
 
@@ -971,6 +968,33 @@ static void state_machine_publish_running_status_if_needed(bool started_session)
 }
 
 /**
+ * @brief Publish the first rawdata snapshot immediately after a new session starts.
+ *
+ * The server treats session boundaries and rawdata as separate streams. If a
+ * session opens just after a heartbeat rawdata publish, the normal driving
+ * cadence can delay the next rawdata long enough for the whole session to end
+ * with zero points. Emit one rawdata snapshot immediately so every real
+ * engine-on window carries at least one telemetry point under the new session.
+ *
+ * @param[in] started_session True when the current driving loop opened a fresh session.
+ * @return true when an immediate session-start rawdata publish was attempted.
+ */
+static bool state_machine_publish_session_start_rawdata_if_needed(bool started_session) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
+    if (!started_session) {
+        return false;
+    }
+
+    if (state_machine_should_throttle_rawdata()) {
+        ESP_LOGW(TAG,
+                 "event=session_start_rawdata_force reason=new_session action=throttle_bypass");
+    }
+
+    state_machine_publish_rawdata();
+    return true;
+}
+
+/**
  * @brief Check whether driving rawdata should publish in the current loop.
  *
  * A queued one-shot location request bypasses the normal cadence so operators
@@ -991,8 +1015,8 @@ static bool state_machine_should_publish_driving_rawdata(uint64_t now_ms) {
  */
 static bool state_machine_driving_ignition_active(void) {
     // Keep this helper boundary explicit so its local policy and side effects stay predictable.
-    uint64_t now_ms = util_uptime_ms();
-    return command_handler_is_tracking_enabled() && state_machine_effective_ignition_on(now_ms);
+    bool stable_ignition_on = session_mgr_has_stable_ignition() && session_mgr_stable_ignition();
+    return command_handler_is_tracking_enabled() && (s_telemetry.ignition || stable_ignition_on);
 }
 
 /**
@@ -1053,14 +1077,7 @@ static app_state_t state_machine_handle_check_ign_state(void) {
         return APP_STATE_CHECK_IGN;
     }
 
-    bool stable_ignition_on = session_mgr_stable_ignition();
-    bool ignition_on = state_machine_effective_ignition_on(now_ms);
-    if (!stable_ignition_on && ignition_on) {
-        ESP_LOGW(TAG,
-                 "event=check_ign_keep_driving reason=recent_obd_activity sample_age_ms=%lu ecu=%s",
-                 (unsigned long)s_telemetry.obd_sample_age_ms,
-                 s_telemetry.obd_ecu_state);
-    }
+    bool ignition_on = session_mgr_stable_ignition();
     // Resume a recovered session only after ignition is confirmed to be ON on this boot.
     state_machine_resume_restored_session_if_needed(ignition_on);
 
@@ -1088,9 +1105,13 @@ static app_state_t state_machine_handle_driving_state(void) {
 
     // Emit the authoritative running boundary once per active driving phase.
     state_machine_publish_running_status_if_needed(started_session);
+    bool published_session_start_rawdata =
+        state_machine_publish_session_start_rawdata_if_needed(started_session);
 
     uint64_t now_ms = util_uptime_ms();
-    if (state_machine_should_publish_driving_rawdata(now_ms) && !state_machine_should_throttle_rawdata()) {
+    if (!published_session_start_rawdata &&
+        state_machine_should_publish_driving_rawdata(now_ms) &&
+        !state_machine_should_throttle_rawdata()) {
         // Rawdata cadence can be bypassed by a one-shot location request, but quota throttling still wins.
         state_machine_publish_rawdata();
     }
@@ -1177,13 +1198,6 @@ static app_state_t state_machine_handle_heartbeat_state(void) {
         state_machine_reset_heartbeat_window();
         return APP_STATE_DRIVING;
     }
-    if (state_machine_obd_recently_active(now_ms) && command_handler_is_tracking_enabled()) {
-        // A fresh live OBD session should route back through ignition debounce
-        // rather than allowing the parked heartbeat to time out toward sleep.
-        state_machine_reset_heartbeat_window();
-        return APP_STATE_CHECK_IGN;
-    }
-
     bool heartbeat_timeout = (now_ms - s_heartbeat_started_ms) >= TRACKER_HEARTBEAT_ACTIVE_WINDOW_MS;
     bool obd_connected = s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx);
     bool gnss_publish_ready = !s_gnss_started || s_telemetry.gnss.fix_valid || heartbeat_timeout;

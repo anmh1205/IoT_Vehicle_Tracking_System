@@ -16,11 +16,12 @@ import { getStatus, resolveSessionId, setStatus } from '../cache/device-state.ca
 import { addUpdate } from '../services/batch-writer.service';
 import { checkGeofences } from '../services/geofence-checker.service';
 import { logger } from '../infrastructure/logger';
-import { normalizePayloadTimestamp } from '../utils/timestamp.util';
+import { maxTimestampMs, normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
 import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState, type RuntimeStateSnapshot } from '../types/device-state.types';
 import {
   hasAuthoritativeSessionIdentity,
+  shouldAcceptLiveMutation,
   telemetryReportsEngineOff,
 } from '../utils/session-runtime.util';
 
@@ -840,6 +841,10 @@ export const handleRawData = async (
     payload.timestamp,
     payload.metadata?.sent_at,
   );
+  const persistedWatermarkMs = maxTimestampMs(
+    parseIsoTimestampMs(device.last_seen_at),
+    parseIsoTimestampMs(device.state_updated_at),
+  );
 
   if (timestampSource !== 'payload') {
     logger.warn(
@@ -877,6 +882,17 @@ export const handleRawData = async (
   );
   const sessionBootId = payload.boot_id ?? payload.metadata?.boot_id;
   const payloadCanonicalSessionId = payload.canonical_session_id ?? null;
+  const liveMutationDecision = shouldAcceptLiveMutation({
+    incomingTimestampMs: timestampMs,
+    incomingSeqNo: seqNo,
+    incomingBootId: sessionBootId,
+    incomingLocalSessionKey: localSessionKey,
+    cachedLastPayloadTimestampMs: previousState?.lastPayloadTimestampMs ?? null,
+    cachedLastSeqNo: previousState?.lastSeqNo ?? null,
+    cachedBootId: previousState?.bootId ?? null,
+    cachedLocalSessionKey: previousState?.localSessionKey ?? null,
+    persistedWatermarkMs,
+  });
   const cachedResolvedSessionId = resolveSessionId(payload.device_id, {
     localSessionKey,
     canonicalSessionId: payloadCanonicalSessionId,
@@ -901,6 +917,7 @@ export const handleRawData = async (
     canonicalSessionId: payloadCanonicalSessionId,
   });
   const canCreateFallbackSession =
+    liveMutationDecision.accept &&
     sessionId === null &&
     !hasAuthoritativeIdentity &&
     isLikelyActiveSessionTelemetry({
@@ -945,7 +962,7 @@ export const handleRawData = async (
     }
   }
 
-  if (sessionId === null && hasAuthoritativeIdentity) {
+  if (sessionId === null && hasAuthoritativeIdentity && liveMutationDecision.accept) {
     logger.warn(
       {
         deviceId: payload.device_id,
@@ -957,6 +974,23 @@ export const handleRawData = async (
         reason: 'authoritative_identity_unresolved',
       },
       'Telemetry session unresolved',
+    );
+  }
+
+  if (!liveMutationDecision.accept) {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        localSessionKey,
+        canonicalSessionId: payloadCanonicalSessionId,
+        bootId: sessionBootId,
+        seqNo,
+        timestampMs,
+        watermarkMs: liveMutationDecision.watermarkMs,
+        reason: liveMutationDecision.reason,
+        event: 'rawdata_live_mutation_ignored',
+      },
+      'Telemetry live mutation ignored',
     );
   }
 
@@ -1065,85 +1099,89 @@ export const handleRawData = async (
   const effectiveStatus = sessionId !== null ? 'running' : (previousState?.status ?? fallbackStatus);
 
   // 6. Add to batch writer (PostgreSQL)
-  addUpdate({
-    deviceId: payload.device_id,
-    status: effectiveStatus === 'offline' ? 'disconnected' : effectiveStatus,
-    latitude: effectiveLatitude,
-    longitude: effectiveLongitude,
-    speed: effectiveSpeed,
-    sessionId: sessionId ?? undefined,
-    serverTimestamp: receivedAtMs,
-    runtimeState,
-  });
-
-  if (sessionId !== null) {
-    await touchDeviceSession({
+  if (liveMutationDecision.accept) {
+    addUpdate({
       deviceId: payload.device_id,
-      sessionId,
-      deviceTimestampMs: timestampMs,
-      serverTimestampMs: receivedAtMs,
-      imuAccelDeltaMps2,
-      vehicleBattery: payload.data.vehicle_battery,
-      deviceBattery: payload.data.device_battery,
+      status: effectiveStatus === 'offline' ? 'disconnected' : effectiveStatus,
       latitude: effectiveLatitude,
       longitude: effectiveLongitude,
       speed: effectiveSpeed,
+      sessionId: sessionId ?? undefined,
+      serverTimestamp: receivedAtMs,
+      runtimeState,
+    });
+
+    if (sessionId !== null) {
+      await touchDeviceSession({
+        deviceId: payload.device_id,
+        sessionId,
+        deviceTimestampMs: timestampMs,
+        serverTimestampMs: receivedAtMs,
+        imuAccelDeltaMps2,
+        vehicleBattery: payload.data.vehicle_battery,
+        deviceBattery: payload.data.device_battery,
+        latitude: effectiveLatitude,
+        longitude: effectiveLongitude,
+        speed: effectiveSpeed,
+      });
+    }
+
+    // 7. Check active vehicle zone (fire-and-forget, non-blocking)
+    if (
+      effectiveLatitude !== undefined &&
+      effectiveLongitude !== undefined &&
+      device.vehicle_id
+    ) {
+      checkGeofences(
+        payload.device_id,
+        device.vehicle_id,
+        effectiveLatitude,
+        effectiveLongitude,
+        new Date(timestampMs).toISOString(),
+      ).catch((err) => {
+        logger.error({ err, deviceId: payload.device_id, event: 'vehicle_zone_check_failed' }, 'Vehicle zone check failed');
+      });
+    }
+
+    setStatus(payload.device_id, effectiveStatus, {
+      sessionId,
+      lastPayloadTimestampMs: timestampMs,
+      lastSeqNo: seqNo ?? null,
+      runtimeState,
+      localSessionKey,
+      canonicalSessionId,
+      bootId: sessionBootId,
+    });
+
+    publishInternalEvent('data', {
+      device_id: payload.device_id,
+      vehicle_id: device.vehicle_id ?? undefined,
+      session_id: sessionId,
+      current_status: effectiveStatus,
+      latitude: effectiveLatitude,
+      longitude: effectiveLongitude,
+      speed: effectiveSpeed,
+      course: effectiveCourse,
+      satellites: payload.data.satellites,
+      vehicle_battery: payload.data.vehicle_battery,
+      device_battery: payload.data.device_battery,
+      imu_accel_delta_mps2: imuAccelDeltaMps2,
+      error_code: payload.data.error_code,
+      ignition_state: runtimeState.ignition_state,
+      motion_state: runtimeState.motion_state,
+      vehicle_state: runtimeState.vehicle_state,
+      device_state: runtimeState.device_state,
+      sleep_mode: runtimeState.sleep_mode,
+      state_updated_at: stateUpdatedAt,
+      diagnostics: normalizedDiagnostics ?? undefined,
+      raw_payload: buildSanitizedRawPayload(payload),
+      message_id: messageId,
+      schema_version: schemaVersion,
+      seq_no: seqNo,
+      boot_id: bootId,
+      timestamp: new Date(timestampMs).toISOString(),
     });
   }
-
-  // 7. Check active vehicle zone (fire-and-forget, non-blocking)
-  if (
-    effectiveLatitude !== undefined &&
-    effectiveLongitude !== undefined &&
-    device.vehicle_id
-  ) {
-    checkGeofences(
-      payload.device_id,
-      device.vehicle_id,
-      effectiveLatitude,
-      effectiveLongitude,
-      new Date(timestampMs).toISOString(),
-    ).catch((err) => {
-      logger.error({ err, deviceId: payload.device_id, event: 'vehicle_zone_check_failed' }, 'Vehicle zone check failed');
-    });
-  }
-
-  setStatus(payload.device_id, effectiveStatus, {
-    sessionId,
-    runtimeState,
-    localSessionKey,
-    canonicalSessionId,
-    bootId: sessionBootId,
-  });
-
-  publishInternalEvent('data', {
-    device_id: payload.device_id,
-    vehicle_id: device.vehicle_id ?? undefined,
-    session_id: sessionId,
-    current_status: effectiveStatus,
-    latitude: effectiveLatitude,
-    longitude: effectiveLongitude,
-    speed: effectiveSpeed,
-    course: effectiveCourse,
-    satellites: payload.data.satellites,
-    vehicle_battery: payload.data.vehicle_battery,
-    device_battery: payload.data.device_battery,
-    imu_accel_delta_mps2: imuAccelDeltaMps2,
-    error_code: payload.data.error_code,
-    ignition_state: runtimeState.ignition_state,
-    motion_state: runtimeState.motion_state,
-    vehicle_state: runtimeState.vehicle_state,
-    device_state: runtimeState.device_state,
-    sleep_mode: runtimeState.sleep_mode,
-    state_updated_at: stateUpdatedAt,
-    diagnostics: normalizedDiagnostics ?? undefined,
-    raw_payload: buildSanitizedRawPayload(payload),
-    message_id: messageId,
-    schema_version: schemaVersion,
-    seq_no: seqNo,
-    boot_id: bootId,
-    timestamp: new Date(timestampMs).toISOString(),
-  });
 
   const obdAlertContext: ObdAlertContext = {
     deviceId: payload.device_id,
@@ -1157,23 +1195,25 @@ export const handleRawData = async (
     bootId,
   };
 
-  const obdRuleResults = await Promise.allSettled([
-    evaluateObdMaintenanceRules(
-      normalizedDiagnostics,
-      obdAlertContext,
-      payload.data.vehicle_battery,
-      effectiveSpeed,
-    ),
-    evaluateObdDtcRules(normalizedDiagnostics, obdAlertContext),
-    syncObdConnectionWarnings(normalizedDiagnostics, obdAlertContext),
-    syncHighImuAccelDeltaAlert(imuAccelDeltaMps2, obdAlertContext),
-  ]);
-  obdRuleResults.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      logger.error(
-        { err: result.reason, deviceId: payload.device_id, taskIndex: index, event: 'obd_rule_evaluation_failed' },
-        'OBD rule evaluation failed',
-      );
-    }
-  });
+  if (liveMutationDecision.accept) {
+    const obdRuleResults = await Promise.allSettled([
+      evaluateObdMaintenanceRules(
+        normalizedDiagnostics,
+        obdAlertContext,
+        payload.data.vehicle_battery,
+        effectiveSpeed,
+      ),
+      evaluateObdDtcRules(normalizedDiagnostics, obdAlertContext),
+      syncObdConnectionWarnings(normalizedDiagnostics, obdAlertContext),
+      syncHighImuAccelDeltaAlert(imuAccelDeltaMps2, obdAlertContext),
+    ]);
+    obdRuleResults.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        logger.error(
+          { err: result.reason, deviceId: payload.device_id, taskIndex: index, event: 'obd_rule_evaluation_failed' },
+          'OBD rule evaluation failed',
+        );
+      }
+    });
+  }
 };

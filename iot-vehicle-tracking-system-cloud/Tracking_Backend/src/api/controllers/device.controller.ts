@@ -7,6 +7,7 @@ import {
   createDeviceSchema,
   updateDeviceSchema,
   deviceListQuerySchema,
+  sendDeviceCommandSchema,
 } from '@/api/validators/device.validator';
 import * as deviceCrudService from '@/domain/device/services/device-crud.service';
 import * as deviceListService from '@/domain/device/services/device-list.service';
@@ -127,16 +128,17 @@ export const getTelemetry = asyncHandler(async (req: AuthenticatedRequest, res: 
 
 export const sendCommand = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const deviceId = await resolveDeviceId(req.params.id);
-  const command = req.body?.command as string | undefined;
-  const params = (req.body?.params as Record<string, unknown> | undefined) ?? {};
-
-  if (!command) {
-    throw createValidationError('Missing command');
+  const parsed = sendDeviceCommandSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw createValidationError('Invalid command payload', parsed.error.flatten().fieldErrors);
   }
 
   const result = await deviceCommandService.sendCommand(
     deviceId,
-    { command, params },
+    {
+      command: parsed.data.command,
+      params: (parsed.data.params as Record<string, unknown> | undefined) ?? {},
+    },
     { actorUserId: req.user?.id, correlationId: req.correlationId },
   );
   sendOk(res, result);

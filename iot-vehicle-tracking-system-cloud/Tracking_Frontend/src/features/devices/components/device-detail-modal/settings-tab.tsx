@@ -26,7 +26,11 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { formatDateTime, formatRelative } from '@/lib/utils/date/format';
-import { getDeviceConfigSummary, pickLatestTelemetryTimestamp } from './device-detail-presenters';
+import {
+  buildFirmwareConfigCommandParams,
+  getDeviceConfigSummary,
+  pickLatestTelemetryTimestamp,
+} from './device-detail-presenters';
 import { useDeviceDetailModal } from './modal-context';
 import {
   formatSecondsLabel,
@@ -247,24 +251,15 @@ export const SettingsTab = () => {
           ? { label: 'Đang mất tín hiệu', variant: 'destructive' as const }
           : { label: 'Chưa đủ dữ liệu', variant: 'outline' as const };
 
+  const firmwareCommandParams = buildFirmwareConfigCommandParams({
+    drivingIntervalSec: preview.drivingIntervalSec,
+    parkingHeartbeatSec: preview.parkingHeartbeatSec,
+  });
+
   const commandPreview = JSON.stringify(
     {
       command: 'update_config',
-      requestInterval: preview.drivingIntervalSec,
-      config: {
-        driving: {
-          tracking_interval_s: preview.drivingIntervalSec,
-        },
-        parking: {
-          tracking_interval_s: preview.parkingIntervalSec,
-          heartbeat_interval_s: preview.parkingHeartbeatSec,
-        },
-        alerts: {
-          overspeed_kph: preview.overspeedKph,
-          imu_accel_delta_threshold_mps2: preview.imuAccelDeltaThresholdMps2,
-          offline_after_s: preview.offlineAfterSec,
-        },
-      },
+      params: firmwareCommandParams,
     },
     null,
     2,
@@ -397,14 +392,14 @@ export const SettingsTab = () => {
                   <NumberInputField
                     control={form.control}
                     name="parkingIntervalSec"
-                    label="Chu kỳ gửi khi đỗ (giây)"
-                    hint="Giảm lưu lượng khi đỗ nhưng vẫn đủ dữ liệu cho bản đồ và cảnh báo."
+                    label="Nhịp tham chiếu khi đỗ ở cloud (giây)"
+                    hint="Chỉ dùng cho hồ sơ cloud và đánh giá nhịp; firmware hiện không có tracking_interval_s riêng cho trạng thái đỗ."
                   />
                   <NumberInputField
                     control={form.control}
                     name="parkingHeartbeatSec"
                     label="Heartbeat khi đỗ (giây)"
-                    hint="Giữ thiết bị không bị đánh dấu mất tín hiệu quá sớm khi dừng lâu."
+                    hint="Đây là tham số firmware thực sự dùng cho parked wake; hiện firmware giới hạn wake tối đa 120 giây để bắt lại IGN."
                   />
                 </CardContent>
               </Card>
@@ -461,7 +456,10 @@ export const SettingsTab = () => {
               <CardContent className="space-y-3 px-4 pb-4">
                 <SummaryRow label="Tên hiển thị" value={preview.deviceName || '-'} />
                 <SummaryRow label="Nhịp chạy" value={`${preview.drivingIntervalSec}s / lần`} />
-                <SummaryRow label="Nhịp đỗ" value={`${preview.parkingIntervalSec}s / lần`} />
+                <SummaryRow
+                  label="Heartbeat parked áp dụng"
+                  value={`${configSummary.appliedParkingWakeIntervalSec ?? preview.parkingHeartbeatSec}s / lần`}
+                />
                 <SummaryRow label="Mất tín hiệu sau" value={`${preview.offlineAfterSec}s`} />
 
                 <Collapsible open={payloadPreviewOpen} onOpenChange={setPayloadPreviewOpen}>
@@ -499,7 +497,7 @@ export const SettingsTab = () => {
 
           <div className="sticky bottom-0 z-20 mt-4 rounded-xl border bg-background/95 px-3 py-2 shadow-lg backdrop-blur xl:hidden">
             <p className="text-xs text-muted-foreground">
-              Nhịp chạy {preview.drivingIntervalSec}s · Nhịp đỗ {preview.parkingIntervalSec}s · Mất tín hiệu sau{' '}
+              Nhịp chạy {preview.drivingIntervalSec}s · Heartbeat parked {configSummary.appliedParkingWakeIntervalSec ?? preview.parkingHeartbeatSec}s · Mất tín hiệu sau{' '}
               {preview.offlineAfterSec}s
             </p>
             <div className="mt-2 grid grid-cols-2 gap-2">

@@ -23,6 +23,7 @@ import { useUpdateDevice } from '@/features/devices/hooks/use-update-device';
 import { useUpdateDeviceSettings } from '@/features/devices/hooks/use-update-device-settings';
 import { getDashboardEventPresentation } from '@/features/dashboard/components/dashboard-event-presenters';
 import { DeviceDetailModal } from './index';
+import { buildFirmwareConfigCommandParams } from './device-detail-presenters';
 import { buildDiagnosticsSummary, extractDiagnosticsPayloadFromEventLog } from './obd-diagnostics';
 import type { DeviceDetailTab } from '@/features/devices/components/device-constants';
 import type { DeviceDetailModalPresentation, DeviceLinkedVehicle, DeviceWorkspaceActions, DeviceWorkspaceAlert } from './workspace-types';
@@ -44,17 +45,6 @@ const toRecord = (value: unknown): Record<string, unknown> | null => {
     return null;
   }
   return value as Record<string, unknown>;
-};
-
-const appendConfigParam = (
-  target: Record<string, number>,
-  key: string,
-  value: unknown,
-) => {
-  const parsed = Number(value);
-  if (Number.isFinite(parsed) && parsed > 0) {
-    target[key] = Math.round(parsed);
-  }
 };
 
 const getEventLogPresentation = (
@@ -646,45 +636,22 @@ export const DeviceDetailModalContainer = ({
         await updateSettings.mutateAsync(data);
         const config = toRecord(data.config);
         const parking = toRecord(config?.parking);
-        const alerts = toRecord(config?.alerts);
-        const commandParams: Record<string, number> = {};
-
-        appendConfigParam(commandParams, 'tracking_interval_s', data.requestInterval);
-        appendConfigParam(
-          commandParams,
-          'parking_interval_s',
-          parking?.trackingIntervalSec ?? parking?.tracking_interval_s,
-        );
-        appendConfigParam(
-          commandParams,
-          'heartbeat_interval_s',
-          parking?.heartbeatIntervalSec ?? parking?.heartbeat_interval_s,
-        );
-        appendConfigParam(
-          commandParams,
-          'overspeed_kph',
-          alerts?.overspeedKph ?? alerts?.overspeed_kph,
-        );
-        appendConfigParam(
-          commandParams,
-          'imu_accel_delta_threshold_mps2',
-          data.imuAccelDeltaThresholdMps2 ??
-            alerts?.imuAccelDeltaThresholdMps2 ??
-            alerts?.imu_accel_delta_threshold_mps2 ??
-            alerts?.vibrationThreshold ??
-            alerts?.vibration_threshold,
-        );
-        appendConfigParam(
-          commandParams,
-          'offline_after_s',
-          alerts?.offlineAfterSec ?? alerts?.offline_after_s,
-        );
+        const commandParams = buildFirmwareConfigCommandParams({
+          drivingIntervalSec:
+            typeof data.requestInterval === 'number' ? data.requestInterval : null,
+          parkingHeartbeatSec:
+            typeof parking?.heartbeatIntervalSec === 'number'
+              ? parking.heartbeatIntervalSec
+              : typeof parking?.heartbeat_interval_s === 'number'
+                ? parking.heartbeat_interval_s
+                : null,
+        });
 
         if (Object.keys(commandParams).length > 0) {
           try {
             await sendCommand.mutateAsync({
               command: 'update_config',
-              params: commandParams,
+              params: { ...commandParams },
             });
           } catch {
             notificationUtils.warning(

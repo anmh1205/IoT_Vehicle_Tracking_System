@@ -1,11 +1,43 @@
-flowchart LR
-    Device["Thiết bị theo dõi<br/>trên xe"]
-    Intake["Nhận dữ liệu từ xe"]
-    Process["Xử lý và phân loại dữ liệu"]
-    Storage["Lưu dữ liệu hành trình,<br/>trạng thái và sự kiện"]
-    Update["Cập nhật nhanh<br/>cho màn hình quản lý"]
-    Dashboard["Giao diện theo dõi<br/>và quản lý"]
+---
+config:
+  theme: base
+  look: classic
+  fontFamily: Noto Sans, Segoe UI, Arial, sans-serif
+  flowchart:
+    htmlLabels: true
+    nodeSpacing: 50
+    rankSpacing: 70
+---
+flowchart TB
+    Device["Thiết bị trên xe<br/>Tạo bản tin giám sát"]
+    Broker["EMQX<br/>Tiếp nhận bản tin"]
+    Bridge["MQTT Bridge<br/>Kiểm tra và phân luồng"]
 
-    Device --> Intake --> Process --> Storage --> Dashboard
-    Process --> Update --> Dashboard
-    Dashboard -->|Lệnh điều chỉnh khi cần| Intake
+    subgraph Storage["Các nơi lưu dữ liệu"]
+        direction LR
+        Biz["Dữ liệu quản lý<br/>thiết bị, phương tiện, cảnh báo"]
+        Time["Dữ liệu theo thời gian<br/>vị trí và số liệu vận hành"]
+        Logs["Sự kiện và nhật ký<br/>phục vụ theo dõi, truy vết"]
+    end
+
+    Backend["Lớp xử lý phía máy chủ<br/>Tra cứu, cảnh báo và API"]
+    UI["Giao diện quản lý<br/>Bản đồ, trạng thái, cảnh báo"]
+
+    Device --> Broker --> Bridge
+    Bridge --> Biz
+    Bridge --> Time
+    Bridge --> Logs
+    Biz --> Backend
+    Time --> Backend
+    Logs --> Backend
+    Backend --> UI
+
+    classDef intake fill:#e0f2fe,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+    classDef storage fill:#fff7ed,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+    classDef process fill:#ecfccb,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+    classDef output fill:#f5f3ff,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+
+    class Device,Broker,Bridge intake;
+    class Biz,Time,Logs storage;
+    class Backend process;
+    class UI output;

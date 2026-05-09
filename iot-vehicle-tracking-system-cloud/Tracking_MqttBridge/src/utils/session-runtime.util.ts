@@ -1,5 +1,7 @@
 import type { RuntimeStateSnapshot } from '../types/device-state.types';
 
+const LIVE_MUTATION_REORDER_TOLERANCE_MS = 15_000;
+
 export const isEngineOffRuntimeState = (runtimeState: RuntimeStateSnapshot): boolean =>
   runtimeState.ignition_state === 'OFF' ||
   runtimeState.vehicle_state === 'PARKED_OFF' ||
@@ -42,4 +44,66 @@ export const normalizeStatusForSessionRuntime = (params: {
   }
 
   return 'stopped';
+};
+
+export const shouldAcceptLiveMutation = (params: {
+  incomingTimestampMs: number;
+  incomingSeqNo?: number;
+  incomingBootId?: string | null;
+  incomingLocalSessionKey?: number;
+  cachedLastPayloadTimestampMs?: number | null;
+  cachedLastSeqNo?: number | null;
+  cachedBootId?: string | null;
+  cachedLocalSessionKey?: number | null;
+  persistedWatermarkMs?: number | null;
+}): { accept: boolean; reason: string; watermarkMs: number | null } => {
+  const watermarkMs = Math.max(
+    params.cachedLastPayloadTimestampMs ?? Number.NEGATIVE_INFINITY,
+    params.persistedWatermarkMs ?? Number.NEGATIVE_INFINITY,
+  );
+  const normalizedWatermarkMs = Number.isFinite(watermarkMs) ? watermarkMs : null;
+
+  if (
+    normalizedWatermarkMs !== null &&
+    params.incomingTimestampMs + LIVE_MUTATION_REORDER_TOLERANCE_MS < normalizedWatermarkMs
+  ) {
+    return { accept: false, reason: 'stale_timestamp', watermarkMs: normalizedWatermarkMs };
+  }
+
+  if (
+    params.cachedBootId &&
+    params.incomingBootId &&
+    params.cachedBootId === params.incomingBootId &&
+    params.cachedLastSeqNo !== null &&
+    params.cachedLastSeqNo !== undefined &&
+    params.incomingSeqNo !== undefined &&
+    params.incomingSeqNo < params.cachedLastSeqNo
+  ) {
+    return { accept: false, reason: 'stale_seq', watermarkMs: normalizedWatermarkMs };
+  }
+
+  if (
+    normalizedWatermarkMs !== null &&
+    params.cachedBootId &&
+    params.incomingBootId &&
+    params.cachedBootId !== params.incomingBootId &&
+    params.incomingTimestampMs <= normalizedWatermarkMs
+  ) {
+    return { accept: false, reason: 'stale_boot_identity', watermarkMs: normalizedWatermarkMs };
+  }
+
+  if (
+    normalizedWatermarkMs !== null &&
+    params.cachedLocalSessionKey &&
+    params.incomingLocalSessionKey &&
+    params.cachedLocalSessionKey !== params.incomingLocalSessionKey &&
+    params.cachedBootId &&
+    params.incomingBootId &&
+    params.cachedBootId === params.incomingBootId &&
+    params.incomingTimestampMs <= normalizedWatermarkMs
+  ) {
+    return { accept: false, reason: 'stale_session_identity', watermarkMs: normalizedWatermarkMs };
+  }
+
+  return { accept: true, reason: 'fresh', watermarkMs: normalizedWatermarkMs };
 };

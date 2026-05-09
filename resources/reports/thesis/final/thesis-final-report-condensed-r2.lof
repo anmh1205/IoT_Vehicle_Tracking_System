@@ -1,0 +1,15 @@
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Nguyên lý chuyển hóa dữ liệu từ phương tiện thành thông tin quản lý}}{10}{figure.caption.26}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Bộ đọc OBD-II Bluetooth vgate iCar Pro được chọn cho nhánh thu dữ liệu vận hành}}{12}{figure.caption.30}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Cảm biến gia tốc LIS3DSH được chọn cho nhánh phát hiện chuyển động khi xe đỗ}}{13}{figure.caption.31}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Mô-đun SIM7600CE-T tích hợp LTE và GNSS được chọn cho tuyến truyền dữ liệu - định vị}}{15}{figure.caption.32}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Chip ESP32-S3 được chọn làm bộ điều khiển trung tâm của thiết bị}}{16}{figure.caption.33}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Kiến trúc tổng thể của phương án hệ thống được chọn}}{21}{figure.caption.38}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Mối liên hệ giữa các ràng buộc kỹ thuật và các lựa chọn chính của phương án}}{22}{figure.caption.40}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần cứng tích hợp}}{25}{figure.caption.45}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Lưu đồ thuật toán chính của firmware thiết bị theo dõi}}{29}{figure.caption.50}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Kiến trúc tổng thể hệ thống máy chủ và luồng dữ liệu}}{32}{figure.caption.54}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Minh họa các nhóm bảng chính trong PostgreSQL đang triển khai}}{39}{figure.caption.56}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Giao diện quản lý thiết bị và trạng thái đội xe}}{43}{figure.caption.60}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Giao diện bản đồ giám sát và danh sách thiết bị đang theo dõi}}{43}{figure.caption.61}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Giao diện chi tiết thiết bị ở tab dữ liệu thô OBD}}{44}{figure.caption.62}%
+\contentsline {figure}{\numberline {PL-3.1}{\ignorespaces Kế hoạch thực hiện dự án theo giai đoạn (24 tuần)}}{73}{figure.caption.100}%

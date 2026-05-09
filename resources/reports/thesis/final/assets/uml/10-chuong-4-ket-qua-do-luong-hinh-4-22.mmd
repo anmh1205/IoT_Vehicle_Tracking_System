@@ -1,17 +1,21 @@
-flowchart TB
-    subgraph Inputs["Bối cảnh kiểm thử"]
-        direction LR
+flowchart LR
+    subgraph Inputs["Hai bối cảnh kiểm thử"]
+        direction TB
         Bench["Bàn thử trong phòng thí nghiệm"]
         Vehicle["Xe thử ngoài thực địa"]
     end
 
-    Network["Mạng truyền dữ liệu"]
+    Network["Mạng di động"]
     Cloud["Khối tiếp nhận và xử lý"]
 
     subgraph Outputs["Kênh quan sát kết quả"]
-        direction LR
-        Dashboard["Màn hình quản lý"]
+        direction TB
+        Dashboard["Giao diện quản lý"]
         Report["Đồ thị đo và nhật ký vận hành"]
     end
 
-    Inputs --> Network --> Cloud --> Outputs
+    Bench --> Network
+    Vehicle --> Network
+    Network --> Cloud
+    Cloud --> Dashboard
+    Cloud --> Report

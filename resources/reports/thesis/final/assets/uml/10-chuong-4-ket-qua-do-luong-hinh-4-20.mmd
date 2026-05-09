@@ -1,15 +1,15 @@
-flowchart TB
-    Tracker["Nguyên mẫu thiết bị theo dõi"]
-
-    subgraph Inputs["Nguồn cấp và tín hiệu thử"]
-        direction LR
+flowchart LR
+    subgraph Inputs["Nguồn cấp và dữ liệu đưa vào"]
+        direction TB
         Supply["Nguồn DC mô phỏng nguồn xe"]
         OBD["Bộ mô phỏng dữ liệu xe"]
     end
 
+    Tracker["Nguyên mẫu thiết bị theo dõi"]
+
     subgraph Instruments["Thiết bị đo và ghi nhận"]
-        direction LR
-        DMM["Đồng hồ đo điện"]
+        direction TB
+        DMM["Đồng hồ đo dòng và điện áp"]
         Scope["Máy hiện sóng"]
         Laptop["Máy tính ghi nhận kết quả"]
     end

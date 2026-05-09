@@ -1,7 +1,14 @@
+---
+config:
+  xyChart:
+    showDataLabel: true
+    showDataLabelOutsideBar: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: "#FFA07A"
+---
 xychart-beta
-    title "Thời gian thiết bị lấy lại vị trí sau khởi động"
-    x-axis ["Khởi động nguội", "Khởi động ấm", "Khởi động nóng"]
-    y-axis "Giây" 0 --> 65
-    bar "Nhanh nhất" [20, 3, 1]
-    bar "Trung bình" [30, 5, 2]
-    bar "Chậm nhất" [60, 12, 3]
+    title "Thời gian lấy lại vị trí theo trạng thái khởi động"
+    x-axis ["Cold Start\n(khởi động từ trạng thái chưa có dữ liệu vệ tinh gần trước đó)", "Warm Start\n(khởi động khi còn giữ một phần dữ liệu hỗ trợ)", "Hot Start\n(khởi động khi vẫn còn dữ liệu hỗ trợ và thời gian gần đúng)"]
+    y-axis "Giây" 0 --> 35
+    bar [30, 5, 2]

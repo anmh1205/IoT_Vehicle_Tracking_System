@@ -3,6 +3,9 @@ import { formatNumber } from '@/lib/utils/date/format';
 import { isVehicleEngineOnState, isVehicleParkedOffState } from '@/lib/utils/device-state';
 import type { ObdDiagnosticsSnapshot } from './obd-diagnostics';
 
+const PARKED_WAKE_INTERVAL_CAP_SEC = 120;
+const PARKED_WAKE_INTERVAL_MIN_SEC = 60;
+
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return null;
@@ -20,6 +23,15 @@ const pickNumber = (sources: unknown[], fallback: number | null = null): number 
   return fallback;
 };
 
+const pickRoundedPositiveInt = (value: unknown): number | null => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null;
+  }
+
+  return Math.round(parsed);
+};
+
 const toTimestampMs = (value: string | null | undefined): number => {
   if (!value) {
     return Number.NEGATIVE_INFINITY;
@@ -33,6 +45,7 @@ export interface DeviceConfigSummary {
   drivingIntervalSec: number | null;
   parkingIntervalSec: number | null;
   parkingHeartbeatSec: number | null;
+  appliedParkingWakeIntervalSec: number | null;
   overspeedKph: number | null;
   imuAccelDeltaThresholdMps2: number | null;
   offlineAfterSec: number | null;
@@ -40,6 +53,43 @@ export interface DeviceConfigSummary {
   activeProfileLabel: string;
   activeProfileHint: string;
 }
+
+export interface FirmwareConfigCommandParams {
+  tracking_interval_s?: number;
+  heartbeat_interval_s?: number;
+}
+
+export const getAppliedParkingWakeIntervalSec = (
+  heartbeatIntervalSec: number | null | undefined,
+): number | null => {
+  const resolved = pickNumber([heartbeatIntervalSec], null);
+  if (resolved === null) {
+    return null;
+  }
+
+  return Math.min(
+    Math.max(resolved, PARKED_WAKE_INTERVAL_MIN_SEC),
+    PARKED_WAKE_INTERVAL_CAP_SEC,
+  );
+};
+
+export const buildFirmwareConfigCommandParams = (input: {
+  drivingIntervalSec?: number | null;
+  parkingHeartbeatSec?: number | null;
+}): FirmwareConfigCommandParams => {
+  const params: FirmwareConfigCommandParams = {};
+  const trackingIntervalSec = pickRoundedPositiveInt(input.drivingIntervalSec);
+  const heartbeatIntervalSec = pickRoundedPositiveInt(input.parkingHeartbeatSec);
+
+  if (trackingIntervalSec !== null) {
+    params.tracking_interval_s = trackingIntervalSec;
+  }
+  if (heartbeatIntervalSec !== null) {
+    params.heartbeat_interval_s = heartbeatIntervalSec;
+  }
+
+  return params;
+};
 
 export const getDeviceConfigSummary = (
   device: Pick<
@@ -63,6 +113,7 @@ export const getDeviceConfigSummary = (
     [parking?.heartbeatIntervalSec, parking?.heartbeat_interval_s],
     900,
   );
+  const appliedParkingWakeIntervalSec = getAppliedParkingWakeIntervalSec(parkingHeartbeatSec);
   const overspeedKph = pickNumber([alerts?.overspeedKph, alerts?.overspeed_kph], 80);
   const imuAccelDeltaThresholdMps2 = pickNumber(
     [
@@ -82,10 +133,11 @@ export const getDeviceConfigSummary = (
     drivingIntervalSec,
     parkingIntervalSec,
     parkingHeartbeatSec,
+    appliedParkingWakeIntervalSec,
     overspeedKph,
     imuAccelDeltaThresholdMps2,
     offlineAfterSec,
-    activeIntervalSec: isEngineOn ? drivingIntervalSec : parkingIntervalSec,
+    activeIntervalSec: isEngineOn ? drivingIntervalSec : appliedParkingWakeIntervalSec,
     activeProfileLabel: isEngineOn
       ? 'Máy đang bật'
       : isParkedOff
@@ -94,8 +146,8 @@ export const getDeviceConfigSummary = (
     activeProfileHint: isEngineOn
       ? 'Xe đang ở trạng thái máy bật nên theo dõi bằng profile driving.'
       : isParkedOff
-        ? 'Xe đã tắt máy nên dùng profile parking và heartbeat thưa hơn.'
-        : 'Chưa xác định chắc máy bật hay tắt, tạm dùng profile parking để đánh giá nhịp gửi.',
+        ? 'Xe đã tắt máy nên firmware thức theo heartbeat parked và hiện bị giới hạn tối đa 120 giây để bắt lại IGN.'
+        : 'Chưa xác định chắc máy bật hay tắt, tạm đánh giá theo cadence parked wake của firmware.',
   };
 };
 

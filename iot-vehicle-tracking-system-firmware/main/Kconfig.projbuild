@@ -17,6 +17,15 @@ config TRACKER_DEFAULT_MQTT_PORT
     range 1 65535
     default 1883
 
+config TRACKER_MQTT_DNS_FALLBACK_IPV4
+    string "Fallback MQTT IPv4 when modem DNS resolution fails"
+    default ""
+    help
+        Optional broker IPv4 literal used only when the SIM7600 cannot resolve
+        the configured MQTT hostname. Primary MQTT connect still uses the
+        configured hostname first; this value is a resilience fallback for
+        field networks where modem DNS intermittently fails.
+
 config TRACKER_TLS_VERIFY_SERVER
     bool "Verify TLS server certificate"
     default y

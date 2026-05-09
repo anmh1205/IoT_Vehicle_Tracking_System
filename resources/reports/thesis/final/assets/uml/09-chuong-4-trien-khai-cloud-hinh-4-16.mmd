@@ -1,30 +1,54 @@
-flowchart TB
-    Root["Không gian triển khai phía máy chủ"]
-
-    subgraph Applications["Nhóm khai thác và xử lý"]
-        direction TB
-        Backend["Xử lý dữ liệu<br/>và phục vụ tra cứu"]
-        Bridge["Nhận và chuyển dữ liệu<br/>từ xe"]
-        Frontend["Giao diện quản lý<br/>trên trình duyệt"]
-        Mobile["Ứng dụng hỗ trợ<br/>trên thiết bị di động"]
-        Backend --> Bridge --> Frontend --> Mobile
+---
+config:
+  theme: base
+  look: classic
+  fontFamily: Noto Sans, Segoe UI, Arial, sans-serif
+  flowchart:
+    htmlLabels: true
+    nodeSpacing: 55
+    rankSpacing: 75
+---
+flowchart LR
+    subgraph A["Nhóm tiếp nhận bản tin"]
+        direction LR
+        EMQX["EMQX<br/>Nhận kết nối và bản tin MQTT"]
+        Bridge["MQTT Bridge<br/>Kiểm tra và phân luồng"]
+        EMQX --> Bridge
     end
 
-    subgraph Infrastructure["Nhóm tiếp nhận, lưu trữ và giám sát"]
-        direction TB
-        EMQX["Tiếp nhận dữ liệu từ xe"]
-        PostgreSQLNode["Lưu dữ liệu hành trình<br/>và trạng thái"]
-        VictoriaMetricsNode["Lưu số liệu theo dõi"]
-        VictoriaLogsNode["Lưu nhật ký vận hành"]
-        Grafana["Theo dõi tình trạng hệ thống"]
-        NPM["Điều phối truy cập bên ngoài"]
-        EMQX --> PostgreSQLNode --> VictoriaMetricsNode --> VictoriaLogsNode --> Grafana --> NPM
+    subgraph B["Nhóm lưu trữ"]
+        direction LR
+        PostgreSQLNode["PostgreSQL<br/>Dữ liệu quản lý"]
+        VictoriaMetricsNode["VictoriaMetrics<br/>Dữ liệu theo thời gian"]
+        VictoriaLogsNode["VictoriaLogs<br/>Sự kiện và nhật ký"]
     end
 
-    Data["Kho dữ liệu vận hành"]
+    subgraph C["Nhóm xử lý nghiệp vụ"]
+        direction TB
+        Backend["Backend<br/>Tra cứu, cảnh báo và API"]
+    end
 
-    Root --> Applications
-    Root --> Infrastructure
-    Root --> Data
+    subgraph D["Nhóm khai thác"]
+        direction TB
+        Frontend["Giao diện web<br/>Theo dõi và tra cứu"]
+    end
 
-    linkStyle 0,1,2,3,4,5,6,7 stroke:transparent,color:transparent
+    Bridge --> PostgreSQLNode
+    Bridge --> VictoriaMetricsNode
+    Bridge --> VictoriaLogsNode
+
+    PostgreSQLNode --> Backend
+    VictoriaMetricsNode --> Backend
+    VictoriaLogsNode --> Backend
+
+    Backend --> Frontend
+
+    classDef intake fill:#e0f2fe,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+    classDef storage fill:#fff7ed,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+    classDef process fill:#ecfccb,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+    classDef output fill:#f5f3ff,stroke:#334155,color:#0f172a,stroke-width:1.2px;
+
+    class EMQX,Bridge intake;
+    class PostgreSQLNode,VictoriaMetricsNode,VictoriaLogsNode storage;
+    class Backend process;
+    class Frontend output;

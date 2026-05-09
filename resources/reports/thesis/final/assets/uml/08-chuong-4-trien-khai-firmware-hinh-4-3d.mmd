@@ -1,0 +1,35 @@
+---
+config:
+  theme: base
+  sequence:
+    mirrorActors: false
+    actorMargin: 155
+    messageMargin: 55
+    noteMargin: 24
+    diagramMarginX: 36
+    diagramMarginY: 20
+    boxMargin: 12
+    boxTextMargin: 8
+    actorFontSize: 14
+    messageFontSize: 14
+---
+sequenceDiagram
+    autonumber
+    participant CTRL as Bộ điều khiển
+    participant OBD as Bộ đọc dữ liệu xe
+    participant POS as Bộ định vị
+    participant NET as Máy chủ
+    participant BUF as Bộ nhớ tạm
+
+    CTRL->>OBD: Nhận dữ liệu vận hành<br/>từ xe
+    OBD-->>CTRL: Trả tốc độ, vòng tua<br/>và trạng thái khóa điện
+    CTRL->>POS: Lấy vị trí và trạng thái mạng
+    POS-->>CTRL: Trả tọa độ và tín hiệu định vị
+    CTRL->>CTRL: Ghép dữ liệu xe,<br/>vị trí và nguồn
+    alt Kết nối đang ổn định
+        CTRL->>NET: Gửi bản tin giám sát
+        NET-->>CTRL: Xác nhận đã nhận
+        CTRL->>BUF: Gửi bù các bản tin<br/>còn lưu
+    else Mất mạng<br/>hoặc gửi lỗi
+        CTRL->>BUF: Lưu bản tin vào<br/>bộ nhớ tạm
+    end

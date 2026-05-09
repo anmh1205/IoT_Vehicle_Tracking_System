@@ -61,6 +61,15 @@
 #ifndef CONFIG_TRACKER_TLS_CA_CERT_NAME
 #define CONFIG_TRACKER_TLS_CA_CERT_NAME ""
 #endif
+#ifndef CONFIG_TRACKER_MQTT_DNS_FALLBACK_IPV4
+#define CONFIG_TRACKER_MQTT_DNS_FALLBACK_IPV4 ""
+#endif
+
+#define MQTT_DNS_LOOKUP_TIMEOUT_MS 60000U
+#define MQTT_DNS_LOOKUP_IDLE_TIMEOUT_MS 1500U
+#define MQTT_RESOLVED_IPV4_MAX_LEN 16U
+
+static bool tracker_mqtt_parse_ipv4_literal(const char *value, char *out_ip, size_t out_ip_size);
 
 /**
  * @brief Get endpoint class name.
@@ -73,7 +82,289 @@ static const char *tracker_mqtt_endpoint_class(const char *server_addr) {
     if (!util_string_empty(server_addr) && strcmp(server_addr, s_server_addr_fallback) == 0) {
         return "fallback";
     }
+    if (!util_string_empty(server_addr)) {
+        const char *scheme = "tcp://";
+        size_t scheme_len = strlen(scheme);
+        if (strncmp(server_addr, scheme, scheme_len) == 0) {
+            char host[TRACKER_HOST_MAX_LEN] = {0};
+            const char *host_start = server_addr + scheme_len;
+            const char *host_end = strchr(host_start, ':');
+            size_t host_len = host_end != NULL ? (size_t)(host_end - host_start) : strlen(host_start);
+            if (host_len > 0U && host_len < sizeof(host)) {
+                memcpy(host, host_start, host_len);
+                host[host_len] = '\0';
+                if (tracker_mqtt_parse_ipv4_literal(host, host, sizeof(host))) {
+                    return "resolved_ip";
+                }
+            }
+        }
+    }
     return "primary";
+}
+
+static const char *tracker_mqtt_connect_err_name(int err_code) {
+    // Keep the modem MQTT error labels centralized so field logs stay legible.
+    switch (err_code) {
+        case 0:
+            return "ok";
+        case MQTT_ERR_NETWORK_NOT_OPENED:
+            return "network_not_opened";
+        case MQTT_ERR_NO_CONNECTION:
+            return "no_connection";
+        case MQTT_ERR_NOT_SUPPORTED_OPERATION:
+            return "not_supported_operation";
+        case MQTT_ERR_TIMEOUT:
+            return "timeout";
+        case MQTT_ERR_CLIENT_IS_USED:
+            return "client_in_use";
+        case MQTT_ERR_CLIENT_NOT_RELEASED:
+            return "client_not_released";
+        case MQTT_ERR_DNS_FAILURE:
+            return "dns_failure";
+        case MQTT_ERR_SOCKET_CLOSED_BY_SERVER:
+            return "socket_closed_by_server";
+        default:
+            return "unknown";
+    }
+}
+
+static void tracker_mqtt_log_response_excerpt(const char *label, const char *response) {
+    // Log a bounded modem-response excerpt so DNS and connect diagnostics can be read from field logs.
+    if (util_string_empty(label)) {
+        return;
+    }
+
+    if (response == NULL || response[0] == '\0') {
+        ESP_LOGW(TRACKER_MQTT_TAG, "%s response=<empty>", label);
+        return;
+    }
+
+    ESP_LOGW(TRACKER_MQTT_TAG, "%s response=\"%s\"", label, response);
+}
+
+static const char *tracker_mqtt_find_last_text(const char *text, const char *needle) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
+    if (text == NULL || needle == NULL || needle[0] == '\0') {
+        return NULL;
+    }
+
+    const char *cursor = text;
+    const char *last = NULL;
+    while ((cursor = strstr(cursor, needle)) != NULL) {
+        last = cursor;
+        cursor += strlen(needle);
+    }
+    return last;
+}
+
+static bool tracker_mqtt_parse_ipv4_literal(const char *value, char *out_ip, size_t out_ip_size) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
+    if (util_string_empty(value) || out_ip == NULL || out_ip_size < MQTT_RESOLVED_IPV4_MAX_LEN) {
+        return false;
+    }
+
+    unsigned int octets[4] = {0};
+    char tail = '\0';
+    int parsed = sscanf(value,
+                        "%u.%u.%u.%u%c",
+                        &octets[0],
+                        &octets[1],
+                        &octets[2],
+                        &octets[3],
+                        &tail);
+    if (parsed != 4) {
+        return false;
+    }
+
+    for (size_t i = 0; i < ARRAY_SIZE(octets); ++i) {
+        if (octets[i] > 255U) {
+            return false;
+        }
+    }
+
+    util_copy_string(out_ip, out_ip_size, value);
+    return true;
+}
+
+static bool tracker_mqtt_parse_dns_success(const char *response,
+                                           const char *host,
+                                           char *out_ip,
+                                           size_t out_ip_size) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
+    if (response == NULL || util_string_empty(host) || out_ip == NULL || out_ip_size < MQTT_RESOLVED_IPV4_MAX_LEN) {
+        return false;
+    }
+
+    const char *line = tracker_mqtt_find_last_text(response, "+CDNSGIP:");
+    if (line == NULL) {
+        return false;
+    }
+
+    int status = 0;
+    char resolved_host[TRACKER_HOST_MAX_LEN] = {0};
+    char resolved_ip[MQTT_RESOLVED_IPV4_MAX_LEN] = {0};
+    int parsed = sscanf(line,
+                        "+CDNSGIP: %d,\"%63[^\"]\",\"%15[^\"]\"",
+                        &status,
+                        resolved_host,
+                        resolved_ip);
+    if (parsed != 3) {
+        parsed = sscanf(line,
+                        "+CDNSGIP:%d,\"%63[^\"]\",\"%15[^\"]\"",
+                        &status,
+                        resolved_host,
+                        resolved_ip);
+    }
+    if (parsed != 3 || status != 1) {
+        return false;
+    }
+
+    if (strcmp(resolved_host, host) != 0 || !tracker_mqtt_parse_ipv4_literal(resolved_ip, out_ip, out_ip_size)) {
+        return false;
+    }
+    return true;
+}
+
+static bool tracker_mqtt_parse_dns_error(const char *response, int *out_dns_err_code) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
+    if (response == NULL || out_dns_err_code == NULL) {
+        return false;
+    }
+
+    const char *line = tracker_mqtt_find_last_text(response, "+CDNSGIP:");
+    if (line == NULL) {
+        return false;
+    }
+
+    int status = 0;
+    int dns_err_code = 0;
+    int parsed = sscanf(line, "+CDNSGIP: %d,%d", &status, &dns_err_code);
+    if (parsed != 2) {
+        parsed = sscanf(line, "+CDNSGIP:%d,%d", &status, &dns_err_code);
+    }
+    if (parsed != 2 || status != 0) {
+        return false;
+    }
+
+    *out_dns_err_code = dns_err_code;
+    return true;
+}
+
+static bool tracker_mqtt_resolve_host_ipv4(const char *host, char *out_ip, size_t out_ip_size) {
+    // Resolve the broker host explicitly so DNS failures can be isolated from broker or TLS failures.
+    ESP_RETURN_ON_FALSE(!util_string_empty(host), false, TRACKER_MQTT_TAG, "dns host empty");
+    ESP_RETURN_ON_FALSE(out_ip != NULL, false, TRACKER_MQTT_TAG, "dns out_ip null");
+    ESP_RETURN_ON_FALSE(out_ip_size >= MQTT_RESOLVED_IPV4_MAX_LEN,
+                        false,
+                        TRACKER_MQTT_TAG,
+                        "dns out_ip buffer too small");
+
+    if (tracker_mqtt_parse_ipv4_literal(host, out_ip, out_ip_size)) {
+        return true;
+    }
+
+    char cmd[96] = {0};
+    int n = snprintf(cmd, sizeof(cmd), "AT+CDNSGIP=\"%s\"\r", host);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < sizeof(cmd),
+                        false,
+                        TRACKER_MQTT_TAG,
+                        "CDNSGIP cmd too long");
+
+    char response[MQTT_AT_RESPONSE_MAX_LEN] = {0};
+    size_t response_len = 0U;
+    esp_err_t err = modem_at_send_collect(cmd,
+                                          (uint8_t *)response,
+                                          sizeof(response),
+                                          &response_len,
+                                          MQTT_DNS_LOOKUP_TIMEOUT_MS,
+                                          MQTT_DNS_LOOKUP_IDLE_TIMEOUT_MS);
+    if (err != ESP_OK) {
+        ESP_LOGW(TRACKER_MQTT_TAG,
+                 "mqtt dns lookup transport failed host=%s err=%s response_len=%u",
+                 host,
+                 esp_err_to_name(err),
+                 (unsigned)response_len);
+        tracker_mqtt_log_response_excerpt("mqtt dns lookup transport", response);
+        return false;
+    }
+
+    if (tracker_mqtt_parse_dns_success(response, host, out_ip, out_ip_size)) {
+        ESP_LOGI(TRACKER_MQTT_TAG, "mqtt dns lookup host=%s resolved_ip=%s", host, out_ip);
+        return true;
+    }
+
+    int dns_err_code = 0;
+    if (tracker_mqtt_parse_dns_error(response, &dns_err_code)) {
+        ESP_LOGW(TRACKER_MQTT_TAG,
+                 "mqtt dns lookup failed host=%s dns_err=%d response_len=%u",
+                 host,
+                 dns_err_code,
+                 (unsigned)response_len);
+        tracker_mqtt_log_response_excerpt("mqtt dns lookup failed", response);
+        return false;
+    }
+
+    ESP_LOGW(TRACKER_MQTT_TAG,
+             "mqtt dns lookup parse miss host=%s response_len=%u",
+             host,
+             (unsigned)response_len);
+    tracker_mqtt_log_response_excerpt("mqtt dns lookup parse_miss", response);
+    return false;
+}
+
+static esp_err_t tracker_mqtt_build_resolved_server_addr(const char *resolved_ip,
+                                                         char *server_addr,
+                                                         size_t server_addr_size) {
+    // Keep this helper boundary explicit so its local policy and side effects stay predictable.
+    ESP_RETURN_ON_FALSE(!util_string_empty(resolved_ip),
+                        ESP_ERR_INVALID_ARG,
+                        TRACKER_MQTT_TAG,
+                        "resolved_ip empty");
+    ESP_RETURN_ON_NULL(server_addr, ESP_ERR_INVALID_ARG, TRACKER_MQTT_TAG, "server_addr null");
+
+    uint16_t port = s_tls_enabled ? MQTT_IMPLICIT_TLS_PORT : s_cfg.mqtt_port;
+    int n = snprintf(server_addr, server_addr_size, "tcp://%s:%u", resolved_ip, (unsigned int)port);
+    ESP_RETURN_ON_FALSE(n > 0 && (size_t)n < server_addr_size,
+                        ESP_ERR_INVALID_SIZE,
+                        TRACKER_MQTT_TAG,
+                        "resolved server addr too long");
+    return ESP_OK;
+}
+
+static esp_err_t tracker_mqtt_connect_via_resolved_ip(int *out_connect_err_code, bool *out_timed_out) {
+    // Retry the broker connect against an explicitly resolved IPv4 address when the modem reports hostname DNS failure.
+    char resolved_ip[MQTT_RESOLVED_IPV4_MAX_LEN] = {0};
+    if (!tracker_mqtt_resolve_host_ipv4(s_cfg.mqtt_host, resolved_ip, sizeof(resolved_ip))) {
+        if (!util_string_empty(CONFIG_TRACKER_MQTT_DNS_FALLBACK_IPV4) &&
+            tracker_mqtt_parse_ipv4_literal(CONFIG_TRACKER_MQTT_DNS_FALLBACK_IPV4,
+                                            resolved_ip,
+                                            sizeof(resolved_ip))) {
+            ESP_LOGW(TRACKER_MQTT_TAG,
+                     "mqtt dns lookup failed host=%s fallback_ip=%s source=kconfig",
+                     s_cfg.mqtt_host,
+                     resolved_ip);
+        } else {
+            if (out_connect_err_code != NULL) {
+                *out_connect_err_code = MQTT_ERR_DNS_FAILURE;
+            }
+            return ESP_FAIL;
+        }
+    }
+
+    char server_addr[MQTT_SERVER_ADDR_MAX_LEN] = {0};
+    ESP_RETURN_ON_FALSE(tracker_mqtt_build_resolved_server_addr(resolved_ip,
+                                                                server_addr,
+                                                                sizeof(server_addr)) == ESP_OK,
+                        ESP_ERR_INVALID_SIZE,
+                        TRACKER_MQTT_TAG,
+                        "resolved server addr build failed");
+
+    ESP_LOGW(TRACKER_MQTT_TAG,
+             "mqtt retry resolved_ip host=%s resolved_ip=%s endpoint=%s",
+             s_cfg.mqtt_host,
+             resolved_ip,
+             server_addr);
+    return tracker_mqtt_connect_once(server_addr, out_connect_err_code, out_timed_out);
 }
 
 /**
@@ -458,9 +749,10 @@ static esp_err_t tracker_mqtt_handle_connect_rejection(const char *server_addr,
     }
 
     ESP_LOGW(TRACKER_MQTT_TAG,
-             "CMQTTCONNECT rejected endpoint=%s err=%d",
+             "CMQTTCONNECT rejected endpoint=%s err=%d err_name=%s",
              tracker_mqtt_endpoint_class(server_addr),
-             connect_err);
+             connect_err,
+             tracker_mqtt_connect_err_name(connect_err));
     if (out_connect_err_code != NULL) {
         *out_connect_err_code = connect_err;
     }
@@ -574,6 +866,9 @@ static void tracker_mqtt_log_diag_cmd(const char *cmd, uint32_t timeout_ms) {
              "mqtt diag cmd=\"%s\" response_len=%u",
              cmd,
              (unsigned)strlen(response));
+    if (strstr(cmd, "AT+CMQTTCONNECT?") == NULL) {
+        tracker_mqtt_log_response_excerpt("mqtt diag", response);
+    }
 }
 
 void tracker_mqtt_log_connect_diagnostics(void) {
@@ -581,6 +876,12 @@ void tracker_mqtt_log_connect_diagnostics(void) {
     tracker_mqtt_log_diag_cmd("AT+CMQTTDISC?\r", MQTT_CMD_TIMEOUT_MS);
     tracker_mqtt_log_diag_cmd("AT+CMQTTACCQ?\r", MQTT_CMD_TIMEOUT_MS);
     tracker_mqtt_log_diag_cmd("AT+CMQTTCONNECT?\r", MQTT_CMD_TIMEOUT_MS);
+    tracker_mqtt_log_diag_cmd("AT+CGCONTRDP=1\r", MQTT_CMD_TIMEOUT_MS);
+    tracker_mqtt_log_diag_cmd("AT+CDNSCFG?\r", MQTT_CMD_TIMEOUT_MS);
+    if (!util_string_empty(s_cfg.mqtt_host)) {
+        char resolved_ip[MQTT_RESOLVED_IPV4_MAX_LEN] = {0};
+        (void)tracker_mqtt_resolve_host_ipv4(s_cfg.mqtt_host, resolved_ip, sizeof(resolved_ip));
+    }
 }
 
 esp_err_t tracker_mqtt_send_disconnect(void) {
@@ -745,7 +1046,24 @@ esp_err_t tracker_mqtt_session_connect(void) {
     bool connect_timed_out = false;
     esp_err_t err = tracker_mqtt_connect_once(s_server_addr_primary, &connect_err_code, &connect_timed_out);
 
+    if (err != ESP_OK && connect_err_code == MQTT_ERR_DNS_FAILURE) {
+        ESP_LOGW(TRACKER_MQTT_TAG,
+                 "mqtt primary connect failed due to dns retry=resolved_ip host=%s",
+                 s_cfg.mqtt_host);
+        connect_err_code = 0;
+        connect_timed_out = false;
+        err = tracker_mqtt_connect_via_resolved_ip(&connect_err_code, &connect_timed_out);
+    }
+
     bool should_try_fallback = s_server_addr_has_fallback;
+    if (should_try_fallback &&
+        (connect_err_code == MQTT_ERR_DNS_FAILURE || connect_err_code == MQTT_ERR_TIMEOUT)) {
+        should_try_fallback = false;
+        ESP_LOGW(TRACKER_MQTT_TAG,
+                 "MQTT hostname fallback skipped after post-primary retry connect_err=%d err_name=%s",
+                 connect_err_code,
+                 tracker_mqtt_connect_err_name(connect_err_code));
+    }
     if (should_try_fallback && connect_err_code == MQTT_ERR_NOT_SUPPORTED_OPERATION) {
         should_try_fallback = false;
         ESP_LOGW(TRACKER_MQTT_TAG, "MQTT fallback skipped connect_err=%d; forcing cleanup", connect_err_code);

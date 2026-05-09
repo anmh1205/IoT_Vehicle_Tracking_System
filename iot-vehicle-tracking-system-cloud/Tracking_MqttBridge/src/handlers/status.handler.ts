@@ -17,13 +17,14 @@ import {
   setStatus,
 } from '../cache/device-state.cache';
 import { logger } from '../infrastructure/logger';
-import { normalizePayloadTimestamp } from '../utils/timestamp.util';
+import { maxTimestampMs, normalizePayloadTimestamp, parseIsoTimestampMs } from '../utils/timestamp.util';
 import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState } from '../types/device-state.types';
 import {
   canUseRunningStatusForSession,
   hasAuthoritativeSessionIdentity,
   normalizeStatusForSessionRuntime,
+  shouldAcceptLiveMutation,
 } from '../utils/session-runtime.util';
 
 const toCachedStatus = (status: StatusPayload['status']): 'running' | 'stopped' | 'online' => {
@@ -139,6 +140,21 @@ export const handleStatus = async (
     payload.timestamp,
     payload.metadata?.sent_at,
   );
+  const persistedWatermarkMs = maxTimestampMs(
+    parseIsoTimestampMs(device.last_seen_at),
+    parseIsoTimestampMs(device.state_updated_at),
+  );
+  const liveMutationDecision = shouldAcceptLiveMutation({
+    incomingTimestampMs: timestampMs,
+    incomingSeqNo: seqNo,
+    incomingBootId: sessionBootId,
+    incomingLocalSessionKey: localSessionKey,
+    cachedLastPayloadTimestampMs: previousState?.lastPayloadTimestampMs ?? null,
+    cachedLastSeqNo: previousState?.lastSeqNo ?? null,
+    cachedBootId: previousState?.bootId ?? null,
+    cachedLocalSessionKey: previousState?.localSessionKey ?? null,
+    persistedWatermarkMs,
+  });
 
   if (timestampSource !== 'payload') {
     logger.warn(
@@ -152,6 +168,25 @@ export const handleStatus = async (
       },
       'Status timestamp normalized before publishing realtime events',
     );
+  }
+
+  if (!liveMutationDecision.accept) {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        boundaryEvent,
+        localSessionKey,
+        canonicalSessionId: payloadCanonicalSessionId,
+        bootId: sessionBootId,
+        seqNo,
+        timestampMs,
+        watermarkMs: liveMutationDecision.watermarkMs,
+        reason: liveMutationDecision.reason,
+        event: 'status_live_mutation_ignored',
+      },
+      'Status live mutation ignored',
+    );
+    return;
   }
 
   const cachedResolvedSessionId = resolveSessionId(payload.device_id, {
@@ -206,6 +241,8 @@ export const handleStatus = async (
 
     setStatus(payload.device_id, 'running', {
       sessionId,
+      lastPayloadTimestampMs: timestampMs,
+      lastSeqNo: seqNo ?? null,
       runtimeState,
       localSessionKey,
       canonicalSessionId,
@@ -254,6 +291,8 @@ export const handleStatus = async (
       clearSession(payload.device_id);
       setStatus(payload.device_id, 'stopped', {
         sessionId: null,
+        lastPayloadTimestampMs: timestampMs,
+        lastSeqNo: seqNo ?? null,
         runtimeState,
       });
       await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
@@ -275,6 +314,8 @@ export const handleStatus = async (
       clearSession(payload.device_id);
       setStatus(payload.device_id, 'stopped', {
         sessionId: null,
+        lastPayloadTimestampMs: timestampMs,
+        lastSeqNo: seqNo ?? null,
         runtimeState,
       });
       await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
@@ -312,6 +353,8 @@ export const handleStatus = async (
 
     setStatus(payload.device_id, 'running', {
       sessionId,
+      lastPayloadTimestampMs: timestampMs,
+      lastSeqNo: seqNo ?? null,
       runtimeState,
       localSessionKey,
       canonicalSessionId,
@@ -360,6 +403,8 @@ export const handleStatus = async (
     clearSession(payload.device_id);
     setStatus(payload.device_id, 'stopped', {
       sessionId: null,
+      lastPayloadTimestampMs: timestampMs,
+      lastSeqNo: seqNo ?? null,
       runtimeState,
     });
     await updateDeviceStatus(payload.device_id, 'stopped', receivedAtMs, runtimeState);
@@ -382,6 +427,8 @@ export const handleStatus = async (
   } else {
     setStatus(payload.device_id, effectiveCachedStatus, {
       sessionId,
+      lastPayloadTimestampMs: timestampMs,
+      lastSeqNo: seqNo ?? null,
       runtimeState,
       localSessionKey,
       canonicalSessionId,

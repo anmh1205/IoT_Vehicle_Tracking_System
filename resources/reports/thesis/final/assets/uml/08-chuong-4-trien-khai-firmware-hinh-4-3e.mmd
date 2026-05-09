@@ -1,0 +1,46 @@
+---
+config:
+  theme: base
+  sequence:
+    mirrorActors: false
+    actorMargin: 150
+    messageMargin: 55
+    noteMargin: 28
+    diagramMarginX: 40
+    diagramMarginY: 20
+    boxMargin: 12
+    boxTextMargin: 8
+    actorFontSize: 14
+    messageFontSize: 14
+    noteFontSize: 13
+---
+sequenceDiagram
+    autonumber
+    participant CTRL as Bộ điều khiển
+    participant OBD as Bộ đọc dữ liệu xe
+    participant NET as Mạng và định vị
+    participant PWR as Phần quản lý nguồn
+    participant IMU as Cảm biến chuyển động
+    participant RTC as Bộ hẹn giờ
+
+    CTRL->>CTRL: Kiểm tra điều kiện<br/>chuyển sang ngủ
+    Note over CTRL: Xe đã dừng,<br/>không còn việc cần xử lý
+    CTRL->>OBD: Ngắt kết nối đọc dữ liệu xe
+    CTRL->>NET: Tắt các kết nối đang hoạt động
+    CTRL->>PWR: Giữ lại các trạng thái cần thiết
+    alt Giữ tín hiệu đánh thức<br/>khi có chuyển động
+        PWR->>IMU: Giữ tín hiệu đánh thức<br/>theo chuyển động
+        PWR->>RTC: Đặt mốc kiểm tra định kỳ
+        PWR->>PWR: Chuyển sang chế độ chờ<br/>tiết kiệm điện
+    else Chỉ đánh thức<br/>theo thời gian
+        PWR->>RTC: Đặt mốc kiểm tra định kỳ
+        PWR->>PWR: Chuyển sang ngủ sâu
+    end
+    alt Đánh thức do<br/>chuyển động
+        IMU-->>CTRL: Báo có rung hoặc dịch chuyển
+        CTRL->>CTRL: Chuyển sang chế độ cảnh báo
+    else Đánh thức<br/>theo thời gian
+        RTC-->>CTRL: Báo đến mốc kiểm tra
+        CTRL->>CTRL: Chuyển sang kiểm tra định kỳ
+    end
+    CTRL->>CTRL: Kiểm tra lại trạng thái xe<br/>để chọn chế độ tiếp theo

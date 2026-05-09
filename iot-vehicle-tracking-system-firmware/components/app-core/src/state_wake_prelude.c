@@ -365,6 +365,13 @@ telemetry_finalize:
     bool obd_engine_on_evidence = obd_live_ignition &&
                                   state_machine_has_recent_obd_engine_on_evidence(now_ms);
     bool rpm_ignition = obd_live_ignition && s_telemetry.obd_rpm > 0;
+    bool confirmed_obd_live_grace =
+        stable_ignition_on &&
+        obd_live_ignition &&
+        s_last_obd_engine_on_evidence_ms != 0 &&
+        now_ms >= s_last_obd_engine_on_evidence_ms &&
+        (now_ms - s_last_obd_engine_on_evidence_ms) <=
+            (uint64_t)TRACKER_OBD_ENGINE_ON_CONFIRMED_GRACE_MS;
     bool preserve_degraded_ignition_on =
         !adc_ignition &&
         !obd_live_ignition &&
@@ -379,7 +386,12 @@ telemetry_finalize:
      * Here we only expose the raw ignition candidate so the debounce path can
      * actually observe sustained OBD/RPM evidence during wake windows.
      */
-    bool ignition_next = rpm_ignition || obd_engine_on_evidence || adc_ignition || preserve_degraded_ignition_on;
+    bool ignition_next =
+        rpm_ignition ||
+        obd_engine_on_evidence ||
+        adc_ignition ||
+        confirmed_obd_live_grace ||
+        preserve_degraded_ignition_on;
     if (!s_ignition_log_initialized || ignition_next != s_last_ignition_state) {
         uint32_t evidence_age_ms = UINT32_MAX;
         if (s_last_obd_engine_on_evidence_ms != 0 && now_ms >= s_last_obd_engine_on_evidence_ms) {
@@ -387,7 +399,7 @@ telemetry_finalize:
             evidence_age_ms = age_ms > UINT32_MAX ? UINT32_MAX : (uint32_t)age_ms;
         }
         ESP_LOGI(TAG,
-                 "event=ignition_transition prev=%d next=%d rpm=%ld load=%ld adc=%d rpm_ign=%d obd_hold=%d stable_on=%d vehicle_battery=%.2f threshold=%.2f obd_live=%d hold_on=%d sample_age_ms=%lu evidence_age_ms=%lu ecu=%s",
+                 "event=ignition_transition prev=%d next=%d rpm=%ld load=%ld adc=%d rpm_ign=%d obd_hold=%d stable_on=%d vehicle_battery=%.2f threshold=%.2f obd_live=%d confirmed_live_grace=%d hold_on=%d sample_age_ms=%lu evidence_age_ms=%lu ecu=%s",
                  s_ignition_log_initialized ? (s_last_ignition_state ? 1 : 0) : -1,
                  ignition_next ? 1 : 0,
                  (long)s_telemetry.obd_rpm,
@@ -399,6 +411,7 @@ telemetry_finalize:
                  s_telemetry.vehicle_battery,
                  ignition_threshold_v,
                  obd_live_ignition ? 1 : 0,
+                 confirmed_obd_live_grace ? 1 : 0,
                  preserve_degraded_ignition_on ? 1 : 0,
                  (unsigned long)s_telemetry.obd_sample_age_ms,
                  (unsigned long)evidence_age_ms,

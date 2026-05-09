@@ -308,12 +308,6 @@ bool state_machine_can_enter_sleep(const char **out_reason) {
         }
         return false;
     }
-    if (state_machine_obd_recently_active(util_uptime_ms())) {
-        if (out_reason != NULL) {
-            *out_reason = "obd_recently_active";
-        }
-        return false;
-    }
     if (s_ble_connect_inflight) {
         if (out_reason != NULL) {
             *out_reason = "ble_connect_inflight";
