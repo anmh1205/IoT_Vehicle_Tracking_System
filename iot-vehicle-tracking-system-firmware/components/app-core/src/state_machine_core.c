@@ -1076,6 +1076,12 @@ static app_state_t state_machine_handle_check_ign_state(void) {
         // Stay in CHECK_IGN until ignition chatter settles and the debounce window closes.
         return APP_STATE_CHECK_IGN;
     }
+    if (s_telemetry.ignition != session_mgr_stable_ignition()) {
+        // A previously stable OFF level can remain latched while a fresh ON
+        // sample is still inside the debounce window. Hold CHECK_IGN here so
+        // the FSM does not bounce through PARKED before the new level settles.
+        return APP_STATE_CHECK_IGN;
+    }
 
     bool ignition_on = session_mgr_stable_ignition();
     // Resume a recovered session only after ignition is confirmed to be ON on this boot.

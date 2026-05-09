@@ -10,30 +10,16 @@
 \contentsline {table}{\numberline {3.2}{\ignorespaces Ma trận đánh giá phương án duy trì giám sát khi xe đỗ}}{12}{table.condensed-r2-bang-3-2-ma-tran-danh-gia-phuong-an-duy-tri-giam-sat-khi-xe-do}%
 \contentsline {table}{\numberline {3.3}{\ignorespaces Ma trận đánh giá phương án truyền dữ liệu và định vị}}{14}{table.condensed-r2-bang-3-3-ma-tran-danh-gia-phuong-an-truyen-du-lieu-va-dinh-vi}%
 \contentsline {table}{\numberline {3.4}{\ignorespaces Ma trận đánh giá phương án bộ điều khiển trung tâm}}{15}{table.condensed-r2-bang-3-4-ma-tran-danh-gia-phuong-an-bo-dieu-khien-trung-tam}%
-\contentsline {table}{\numberline {3.5}{\ignorespaces Ma trận đánh giá phương án phần mềm nhúng trên thiết bị}}{17}{table.condensed-r2-bang-3-5-ma-tran-danh-gia-phuong-an-phan-mem-nhung-tren-thiet-bi}%
-\contentsline {table}{\numberline {3.6}{\ignorespaces Ma trận đánh giá giao thức truyền bản tin từ thiết bị}}{19}{table.condensed-r2-bang-3-6-ma-tran-danh-gia-giao-thuc-truyen-ban-tin-tu-thiet-bi}%
-\contentsline {table}{\numberline {3.7}{\ignorespaces Ma trận đánh giá định hướng tổ chức tiếp nhận và xử lý dữ liệu phía máy chủ}}{20}{table.condensed-r2-bang-3-7-ma-tran-danh-gia-dinh-huong-to-chuc-tiep-nhan-va-xu-ly-du-lieu-phia-may-chu}%
-\contentsline {table}{\numberline {3.8}{\ignorespaces Bảng tổng hợp cấu hình hệ thống theo dõi xe}}{23}{table.condensed-r2-bang-3-8-bang-tong-hop-cau-hinh-he-thong-theo-doi-xe}%
-\contentsline {table}{\numberline {4.1}{\ignorespaces Các hạng mục thiết kế phần cứng đã hoàn thành}}{26}{table.condensed-bang-4-1-cac-hang-muc-thiet-ke-phan-cung-da-hoan-thanh}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Kết quả tích hợp phần cứng trên nguyên mẫu thật}}{27}{table.condensed-bang-4-2-ket-qua-tich-hop-phan-cung-tren-nguyen-mau-that}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces Các nhóm mô-đun chính đã được hiện thực trong firmware}}{28}{table.condensed-bang-4-3-cac-nhom-mo-dun-chinh-da-duoc-hien-thuc-trong-firmware}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces Các nhóm chức năng firmware đã được hiện thực}}{30}{table.condensed-bang-4-4-cac-nhom-chuc-nang-firmware-da-duoc-hien-thuc}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Các PID OBD-II đang được firmware thu nhận}}{31}{table.condensed-bang-4-5-cac-pid-obd-ii-dang-duoc-firmware-thu-nhan}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces Các nhóm mã lỗi DTC đang được firmware thu nhận}}{31}{table.condensed-bang-4-6-cac-nhom-ma-loi-dtc-dang-duoc-firmware-thu-nhan}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Các dịch vụ đã được triển khai trên cloud VPS}}{32}{table.condensed-bang-4-7-cac-dich-vu-da-duoc-trien-khai-tren-cloud-vps}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces Cây topic MQTT đang được sử dụng trong hệ thống}}{33}{table.condensed-bang-4-8-cay-topic-mqtt-dang-duoc-su-dung-trong-he-thong}%
-\contentsline {table}{\numberline {4.9}{\ignorespaces Các nhóm bảng chính trong cơ sở dữ liệu PostgreSQL hiện tại}}{39}{table.condensed-bang-4-9-cac-nhom-bang-chinh-trong-co-so-du-lieu-postgresql-hien-tai}%
-\contentsline {table}{\numberline {4.10}{\ignorespaces Các chức năng đã được hiện thực trong MQTT Bridge}}{40}{table.condensed-bang-4-10-cac-chuc-nang-da-duoc-hien-thuc-trong-mqtt-bridge}%
-\contentsline {table}{\numberline {4.11}{\ignorespaces Các nhóm chức năng backend đã được hiện thực}}{41}{table.condensed-bang-4-11-cac-nhom-chuc-nang-backend-da-duoc-hien-thuc}%
-\contentsline {table}{\numberline {4.12}{\ignorespaces Các nhóm chức năng frontend đã được hiện thực}}{42}{table.condensed-bang-4-12-cac-nhom-chuc-nang-frontend-da-duoc-hien-thuc}%
-\contentsline {table}{\numberline {4.13}{\ignorespaces Các điểm truy cập công khai của hệ thống trên cloud VPS}}{44}{table.condensed-bang-4-13-cac-diem-truy-cap-cong-khai-cua-he-thong-tren-cloud-vps}%
-\contentsline {table}{\numberline {4.14}{\ignorespaces Mức độ hoàn thành các hạng mục triển khai chính}}{45}{table.condensed-bang-4-14-muc-do-hoan-thanh-cac-hang-muc-trien-khai-chinh}%
-\contentsline {table}{\numberline {4.15}{\ignorespaces Đối chiếu kết quả triển khai với các chỉ tiêu đặt ra}}{46}{table.condensed-bang-4-15-doi-chieu-ket-qua-trien-khai-voi-cac-chi-tieu-dat-ra}%
-\contentsline {table}{\numberline {5.1}{\ignorespaces Đánh giá hiệu năng theo nhóm chức năng}}{48}{table.condensed-bang-5-1-danh-gia-hieu-nang-theo-nhom-chuc-nang}%
-\contentsline {table}{\numberline {5.2}{\ignorespaces Cấu phần chi phí chính của hệ thống}}{49}{table.condensed-bang-5-2-cau-phan-chi-phi-chinh-cua-he-thong}%
-\contentsline {table}{\numberline {5.3}{\ignorespaces Rủi ro kỹ thuật và biện pháp giảm thiểu}}{51}{table.condensed-bang-5-3-rui-ro-ky-thuat-va-bien-phap-giam-thieu}%
-\contentsline {table}{\numberline {5.4}{\ignorespaces Hướng khuyến nghị cho giai đoạn tiếp theo}}{52}{table.condensed-bang-5-4-huong-khuyen-nghi-cho-giai-doan-tiep-theo}%
-\contentsline {table}{\numberline {6.1}{\ignorespaces Kiến thức đã áp dụng trong đồ án}}{54}{table.condensed-bang-6-1-kien-thuc-da-ap-dung-trong-do-an}%
-\contentsline {table}{\numberline {6.2}{\ignorespaces Vấn đề kỹ thuật và cách xử lý}}{55}{table.condensed-bang-6-2-van-de-ky-thuat-va-cach-xu-ly}%
-\contentsline {table}{\numberline {6.3}{\ignorespaces Các khía cạnh đạo đức và xã hội cần chú ý}}{56}{table.condensed-bang-6-3-cac-khia-canh-dao-duc-va-xa-hoi-can-chu-y}%
-\contentsline {table}{\numberline {6.4}{\ignorespaces Bài học kinh nghiệm chính}}{56}{table.condensed-bang-6-4-bai-hoc-kinh-nghiem-chinh}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces Ma trận đánh giá phương án phần mềm nhúng trên thiết bị}}{16}{table.condensed-r2-bang-3-5-ma-tran-danh-gia-phuong-an-phan-mem-nhung-tren-thiet-bi}%
+\contentsline {table}{\numberline {3.6}{\ignorespaces Ma trận đánh giá giao thức truyền bản tin từ thiết bị}}{18}{table.condensed-r2-bang-3-6-ma-tran-danh-gia-giao-thuc-truyen-ban-tin-tu-thiet-bi}%
+\contentsline {table}{\numberline {3.7}{\ignorespaces Ma trận đánh giá định hướng tổ chức tiếp nhận và xử lý dữ liệu phía máy chủ}}{19}{table.condensed-r2-bang-3-7-ma-tran-danh-gia-dinh-huong-to-chuc-tiep-nhan-va-xu-ly-du-lieu-phia-may-chu}%
+\contentsline {table}{\numberline {3.8}{\ignorespaces Bảng tổng hợp cấu hình hệ thống theo dõi xe}}{22}{table.condensed-r2-bang-3-8-bang-tong-hop-cau-hinh-he-thong-theo-doi-xe}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Các chức năng chính đã hiện thực ở firmware}}{32}{table.condensed-r2-bang-4-1-cac-chuc-nang-chinh-da-hien-thuc-o-firmware}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Các chức năng chính đã hiện thực ở phía máy chủ}}{35}{table.condensed-r2-bang-4-2-cac-chuc-nang-chinh-da-hien-thuc-o-phia-may-chu}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Cơ sở các phép đo chính}}{41}{table.condensed-r2-bang-4-3-co-so-cac-phep-do-chinh}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Đối chiếu kết quả kiểm thử với mục tiêu vận hành}}{41}{table.condensed-r2-bang-4-4-doi-chieu-ket-qua-kiem-thu-voi-muc-tieu-van-hanh}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Các số liệu đo kiểm chính}}{47}{table.condensed-r2-bang-4-5-cac-so-lieu-do-kiem-chinh}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Đối chiếu các chỉ tiêu thiết kế theo Phụ lục I}}{48}{table.condensed-r2-bang-4-6-doi-chieu-cac-chi-tieu-thiet-ke-theo-phu-luc-i}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Đối chiếu các ràng buộc thiết kế theo Phụ lục I}}{49}{table.condensed-r2-bang-4-7-doi-chieu-cac-rang-buoc-thiet-ke-theo-phu-luc-i}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Đánh giá mức đáp ứng theo các chỉ tiêu chính của đồ án}}{50}{table.condensed-r2-bang-5-1-danh-gia-muc-dap-ung-theo-cac-chi-tieu-chinh-cua-do-an}%
+\contentsline {table}{\numberline {PL-1.1}{\ignorespaces Tóm tắt chi phí của phương án đồ án}}{58}{table.condensed-r2-bang-PL-1-1-tom-tat-chi-phi-cua-phuong-an-do-an}%

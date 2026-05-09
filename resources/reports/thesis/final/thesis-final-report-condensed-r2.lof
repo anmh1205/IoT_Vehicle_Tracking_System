@@ -1,15 +1,29 @@
 \contentsline {figure}{\numberline {3.1}{\ignorespaces Nguyên lý chuyển hóa dữ liệu từ phương tiện thành thông tin quản lý}}{10}{figure.caption.26}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Bộ đọc OBD-II Bluetooth vgate iCar Pro được chọn cho nhánh thu dữ liệu vận hành}}{12}{figure.caption.30}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Bộ đọc OBD-II Bluetooth vgate iCar Pro được chọn cho nhánh thu dữ liệu vận hành}}{11}{figure.caption.30}%
 \contentsline {figure}{\numberline {3.3}{\ignorespaces Cảm biến gia tốc LIS3DSH được chọn cho nhánh phát hiện chuyển động khi xe đỗ}}{13}{figure.caption.31}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Mô-đun SIM7600CE-T tích hợp LTE và GNSS được chọn cho tuyến truyền dữ liệu - định vị}}{15}{figure.caption.32}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Chip ESP32-S3 được chọn làm bộ điều khiển trung tâm của thiết bị}}{16}{figure.caption.33}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Kiến trúc tổng thể của phương án hệ thống được chọn}}{21}{figure.caption.38}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Mối liên hệ giữa các ràng buộc kỹ thuật và các lựa chọn chính của phương án}}{22}{figure.caption.40}%
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Sơ đồ đấu nối tổng thể giữa ESP32-S3 và các khối phần cứng tích hợp}}{25}{figure.caption.45}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Lưu đồ thuật toán chính của firmware thiết bị theo dõi}}{29}{figure.caption.50}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Kiến trúc tổng thể hệ thống máy chủ và luồng dữ liệu}}{32}{figure.caption.54}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Minh họa các nhóm bảng chính trong PostgreSQL đang triển khai}}{39}{figure.caption.56}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Giao diện quản lý thiết bị và trạng thái đội xe}}{43}{figure.caption.60}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Giao diện bản đồ giám sát và danh sách thiết bị đang theo dõi}}{43}{figure.caption.61}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Giao diện chi tiết thiết bị ở tab dữ liệu thô OBD}}{44}{figure.caption.62}%
-\contentsline {figure}{\numberline {PL-3.1}{\ignorespaces Kế hoạch thực hiện dự án theo giai đoạn (24 tuần)}}{73}{figure.caption.100}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Mô-đun SIM7600CE-T tích hợp LTE và GNSS được chọn cho tuyến truyền dữ liệu - định vị}}{14}{figure.caption.32}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Chip ESP32-S3 được chọn làm bộ điều khiển trung tâm của thiết bị}}{15}{figure.caption.33}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Kiến trúc tổng thể của phương án hệ thống được chọn}}{20}{figure.caption.38}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Mối liên hệ giữa các ràng buộc kỹ thuật và các lựa chọn chính của phương án}}{21}{figure.caption.40}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Sơ đồ khối tổng quan của thiết bị theo dõi trên xe}}{24}{figure.caption.44}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Khối ESP32-S3 và các nhánh mà bộ điều khiển trung tâm trực tiếp quản lý}}{25}{figure.caption.45}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Các mô-đun chính có trên bo mạch và quan hệ giữa các cụm chức năng}}{25}{figure.caption.46}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Cấu trúc khối nguồn chính, nguồn dự phòng và các mức nguồn làm việc của thiết bị}}{26}{figure.caption.47}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Bố trí mặt trước của PCB sau khi hoàn thiện thiết kế trên phần mềm}}{27}{figure.caption.48}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Bo mạch nguyên mẫu sau khi hàn lắp đầy đủ linh kiện và kiểm tra hoạt động ban đầu}}{28}{figure.caption.49}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Nguyên mẫu phần cứng sau khi lắp trong vỏ và hoàn thiện các kết nối chính}}{30}{figure.caption.50}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Thiết bị sau khi đóng vỏ, sẵn sàng cho bước lắp thử và đo kiểm trên xe}}{31}{figure.caption.51}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Nguyên lý khởi động và chọn nhịp làm việc ban đầu của thiết bị}}{33}{figure.caption.54}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Nguyên lý thu dữ liệu và gửi bản tin trong pha hoạt động của thiết bị}}{34}{figure.caption.55}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Nguyên lý chuyển thiết bị sang chế độ ngủ và đánh thức lại khi xe đỗ}}{35}{figure.caption.56}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Tuyến tiếp nhận, xử lý, lưu trữ và khai thác dữ liệu phía máy chủ}}{36}{figure.caption.58}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Các nhóm chức năng chính trong không gian triển khai phía máy chủ}}{37}{figure.caption.59}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces Màn hình danh sách thiết bị với thẻ tổng quan, bộ lọc và bảng tra cứu nhanh}}{38}{figure.caption.61}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Màn hình bản đồ theo dõi với vị trí xe, bảng tóm tắt ở bên trái và dải thông tin nhanh ở bên phải}}{39}{figure.caption.62}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Màn hình chi tiết thiết bị với trạng thái xe, dữ liệu vận hành và tình trạng OBD}}{40}{figure.caption.63}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Màn hình hàng đợi cảnh báo với bộ lọc, mức độ và trạng thái xử lý}}{40}{figure.caption.64}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces Dòng tiêu thụ thay đổi rõ theo từng pha vận hành, trong đó mức ngủ sâu giảm rất mạnh}}{43}{figure.caption.66}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces Phần lớn các lần nối lại bộ đọc dữ liệu xe hoàn thành trong khoảng 3-5 giây}}{44}{figure.caption.67}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Ở trạng thái Warm Start hoặc Hot Start, thời gian lấy lại vị trí ngắn hơn rõ rệt so với Cold Start}}{45}{figure.caption.68}%
+\contentsline {figure}{\numberline {4.21}{\ignorespaces Phần lớn độ trễ toàn tuyến nằm ở nhánh truyền qua mạng di động}}{46}{figure.caption.69}%
+\contentsline {figure}{\numberline {4.22}{\ignorespaces Mức đáp ứng của các chỉ tiêu chính đều giữ gần sát mục tiêu thiết kế ban đầu}}{47}{figure.caption.70}%
