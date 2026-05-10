@@ -5,8 +5,30 @@ interface TelemetryRow {
   value: string | null;
 }
 
+interface SessionTelemetryRow {
+  telemetry_timestamp: Date;
+  latitude: string | null;
+  longitude: string | null;
+  speed: string | null;
+  device_battery: string | null;
+  vehicle_battery: string | null;
+  temperature: string | null;
+  engine_temperature: string | null;
+  error_code: string | null;
+  imu_accel_delta_mps2: string | null;
+}
+
 const DEFAULT_METRIC = 'imuAccelDeltaMps2';
 const TELEMETRY_TIMESTAMP_SQL = 'COALESCE(device_timestamp, server_timestamp)';
+const SESSION_TELEMETRY_TIMESTAMP_SQL = 'COALESCE(e.device_timestamp, e.server_timestamp)';
+const SESSION_CLOSE_TIMESTAMP_SQL = 'COALESCE(s.session_end, s.server_session_end)';
+const SESSION_LATITUDE_SQL =
+  "COALESCE(e.context#>>'{raw_payload,data,latitude}', e.context->>'latitude', e.metadata->>'latitude')";
+const SESSION_LONGITUDE_SQL =
+  "COALESCE(e.context#>>'{raw_payload,data,longitude}', e.context->>'longitude', e.metadata->>'longitude')";
+const SESSION_LOCAL_KEY_SQL = "e.context#>>'{raw_payload,local_session_key}'";
+const SESSION_BOOT_ID_SQL =
+  "COALESCE(e.context#>>'{raw_payload,boot_id}', e.context#>>'{raw_payload,metadata,boot_id}')";
 const METRIC_ALIASES: Record<string, string> = {
   imuacceldeltamps2: 'imuAccelDeltaMps2',
   vibration: 'imuAccelDeltaMps2',
@@ -105,6 +127,15 @@ const resolveMetricKey = (metric: string | undefined): string => {
   return METRIC_ALIASES[normalizedMetric] ?? DEFAULT_METRIC;
 };
 
+const parseNullableNumber = (value: string | null): number | null => {
+  if (value === null || value.trim() === '') {
+    return null;
+  }
+
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 export const getTelemetry = async (
   deviceId: string,
   params: { metric: string; from?: string; to?: string },
@@ -147,5 +178,72 @@ export const getTelemetry = async (
         value,
       }];
     }),
+  };
+};
+
+export const getSessionTelemetry = async (deviceId: string, sessionId: number) => {
+  const rows = await findMany<SessionTelemetryRow>(
+    `WITH target_session AS (
+       SELECT *
+       FROM device_sessions
+       WHERE id = $2 AND device_id = $1
+       LIMIT 1
+     )
+     SELECT
+       ${SESSION_TELEMETRY_TIMESTAMP_SQL} AS telemetry_timestamp,
+       ${SESSION_LATITUDE_SQL} AS latitude,
+       ${SESSION_LONGITUDE_SQL} AS longitude,
+       COALESCE(e.context#>>'{raw_payload,data,speed}', e.context->>'speed', e.metadata->>'speed') AS speed,
+       COALESCE(e.context#>>'{raw_payload,data,device_battery}', e.context->>'device_battery', e.metadata->>'device_battery') AS device_battery,
+       COALESCE(e.context#>>'{raw_payload,data,vehicle_battery}', e.context->>'vehicle_battery', e.metadata->>'vehicle_battery') AS vehicle_battery,
+       COALESCE(e.context->>'temperature', e.metadata->>'temperature', e.context#>>'{raw_payload,diagnostics,signals,coolant_c}', e.context#>>'{diagnostics,signals,coolant_c}') AS temperature,
+       COALESCE(e.context#>>'{raw_payload,diagnostics,signals,coolant_c}', e.context#>>'{diagnostics,signals,coolant_c}', e.context->>'temperature', e.metadata->>'temperature') AS engine_temperature,
+       COALESCE(e.context#>>'{raw_payload,data,error_code}', e.context->>'error_code', e.metadata->>'error_code', NULLIF(e.error_code::text, '')) AS error_code,
+       COALESCE(e.context#>>'{raw_payload,data,imu_accel_delta_mps2}', e.context->>'imu_accel_delta_mps2', e.metadata->>'imu_accel_delta_mps2') AS imu_accel_delta_mps2
+     FROM target_session s
+     JOIN event_logs e ON e.device_id = s.device_id
+      AND e.event_code = 'mqtt_bridge_rawdata'
+      AND (
+        e.session_id = s.id
+        OR (
+          e.session_id IS NULL
+          AND s.status = 'completed'
+          AND ${SESSION_CLOSE_TIMESTAMP_SQL} IS NOT NULL
+          AND ${SESSION_TELEMETRY_TIMESTAMP_SQL} BETWEEN
+            ${SESSION_CLOSE_TIMESTAMP_SQL} - INTERVAL '15 seconds'
+            AND ${SESSION_CLOSE_TIMESTAMP_SQL} + INTERVAL '60 seconds'
+          AND (
+            (
+              ${SESSION_LOCAL_KEY_SQL} ~ '^[0-9]+$'
+              AND s.local_session_key IS NOT NULL
+              AND (${SESSION_LOCAL_KEY_SQL})::bigint = s.local_session_key
+            )
+            OR (
+              ${SESSION_BOOT_ID_SQL} IS NOT NULL
+              AND s.firmware_boot_id IS NOT NULL
+              AND ${SESSION_BOOT_ID_SQL} = s.firmware_boot_id
+            )
+          )
+        )
+      )
+     ORDER BY ${SESSION_TELEMETRY_TIMESTAMP_SQL} ASC, e.server_timestamp ASC
+     LIMIT 10000`,
+    [deviceId, sessionId],
+  );
+
+  return {
+    sessionId,
+    data: rows.map((row) => ({
+      timestamp: row.telemetry_timestamp.toISOString(),
+      latitude: parseNullableNumber(row.latitude),
+      longitude: parseNullableNumber(row.longitude),
+      speed: parseNullableNumber(row.speed),
+      deviceBattery: parseNullableNumber(row.device_battery),
+      vehicleBattery: parseNullableNumber(row.vehicle_battery),
+      temperature: parseNullableNumber(row.temperature),
+      engineTemperature: parseNullableNumber(row.engine_temperature),
+      errorCode: parseNullableNumber(row.error_code),
+      imuAccelDeltaMps2: parseNullableNumber(row.imu_accel_delta_mps2),
+    })),
   };
 };

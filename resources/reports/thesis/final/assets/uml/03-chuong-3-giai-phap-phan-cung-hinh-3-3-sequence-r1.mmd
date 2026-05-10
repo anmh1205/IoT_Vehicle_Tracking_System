@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant Xe as Xe đang đỗ
+    participant Nguon as Khối nguồn
+    participant LIS as LIS3DSH
+    participant ESP32 as ESP32-S3
+    participant Tai as Modem / GNSS / OBD-II
+    participant MayChu as Máy chủ
+
+    Xe->>Nguon: Khóa điện tắt
+    Nguon->>ESP32: Chuyển sang chế độ tiết kiệm
+    ESP32->>Tai: Cho ngủ sâu hoặc tạm ngắt nguồn
+    Nguon->>LIS: Duy trì nhánh cấp nguồn nhỏ
+
+    loop Trong thời gian xe đỗ
+        LIS->>LIS: Theo dõi rung hoặc dịch chuyển
+    end
+
+    alt Không vượt ngưỡng
+        LIS-->>Nguon: Tiếp tục giám sát tiêu thụ thấp
+    else Vượt ngưỡng
+        LIS-->>ESP32: Phát tín hiệu đánh thức
+        ESP32->>Tai: Bật lại các khối cần dùng
+        Tai-->>ESP32: Trả dữ liệu xe, vị trí và trạng thái
+        ESP32->>MayChu: Gửi bản tin giám sát hoặc cảnh báo
+    end

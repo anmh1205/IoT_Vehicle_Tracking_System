@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant Nguon as Nguồn thiết bị
+    participant FW as Firmware ESP32-S3
+    participant CauHinh as Cấu hình và trạng thái lưu
+    participant CamBien as Cảm biến / OBD-II / GNSS
+    participant Mang as LTE/MQTT
+
+    Nguon->>FW: Cấp nguồn hoặc đánh thức
+    FW->>CauHinh: Nạp cấu hình làm việc
+    CauHinh-->>FW: Trả tham số và trạng thái trước đó
+    FW->>FW: Xác định nguyên nhân khởi động
+    FW->>CamBien: Kiểm tra trạng thái xe hiện tại
+    CamBien-->>FW: Trả dữ liệu ban đầu
+    FW->>Mang: Chuẩn bị tuyến truyền nếu cần
+    FW->>FW: Chọn nhịp làm việc ban đầu

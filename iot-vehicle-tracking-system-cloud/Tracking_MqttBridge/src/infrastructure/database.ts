@@ -67,6 +67,8 @@ const TRANSIENT_HEARTBEAT_SESSION_MAX_RUNTIME_SECONDS = 120;
 const TRANSIENT_HEARTBEAT_SESSION_MAX_DATA_POINTS = 1;
 const TRANSIENT_AUTHORITATIVE_SESSION_MAX_RUNTIME_SECONDS = 180;
 const TRANSIENT_AUTHORITATIVE_SESSION_MAX_DATA_POINTS = 0;
+const SESSION_CLOSE_LOOKBACK_MS = 15_000;
+const SESSION_CLOSE_LOOKAHEAD_MS = 60_000;
 const toInt = (value: string | number | null | undefined): number => {
   const parsed = Number.parseInt(String(value ?? '0'), 10);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -539,6 +541,74 @@ export const findDeviceSessionIdByIdentity = async (
     logger.error(
       { err, deviceId, localSessionKey, firmwareBootId, event: 'find_device_session_id_by_identity_failed' },
       'Find device session by identity failed',
+    );
+    return null;
+  }
+};
+
+export const findClosingDeviceSessionIdByIdentity = async (
+  deviceId: string,
+  sessionIdentity: Pick<SessionIdentityInput, 'localSessionKey' | 'bootId'>,
+  deviceTimestampMs: number,
+  serverTimestampMs = Date.now(),
+): Promise<number | null> => {
+  const localSessionKey = sessionIdentity.localSessionKey ?? null;
+  const firmwareBootId = sessionIdentity.bootId?.trim() || null;
+
+  if (localSessionKey === null && firmwareBootId === null) {
+    return null;
+  }
+
+  try {
+    const result = await pool.query<DeviceSessionRow>(
+      `SELECT id
+       FROM device_sessions
+       WHERE device_id = $1
+         AND status = 'completed'
+         AND (
+           ($4::bigint IS NOT NULL AND local_session_key = $4::bigint)
+           OR ($5::text IS NOT NULL AND firmware_boot_id = $5)
+         )
+         AND (
+           (
+             session_end IS NOT NULL
+             AND $2::timestamptz BETWEEN
+               session_end - ($6::int * INTERVAL '1 millisecond')
+               AND session_end + ($7::int * INTERVAL '1 millisecond')
+           )
+           OR (
+             server_session_end IS NOT NULL
+             AND $3::timestamptz BETWEEN
+               server_session_end - ($6::int * INTERVAL '1 millisecond')
+               AND server_session_end + ($7::int * INTERVAL '1 millisecond')
+           )
+         )
+       ORDER BY
+         CASE
+           WHEN session_end IS NULL THEN 999999999
+           ELSE ABS(EXTRACT(EPOCH FROM ($2::timestamptz - session_end)))
+         END ASC,
+         CASE
+           WHEN server_session_end IS NULL THEN 999999999
+           ELSE ABS(EXTRACT(EPOCH FROM ($3::timestamptz - server_session_end)))
+         END ASC,
+         id DESC
+       LIMIT 1`,
+      [
+        deviceId,
+        toIsoTimestamp(deviceTimestampMs),
+        toIsoTimestamp(serverTimestampMs),
+        localSessionKey,
+        firmwareBootId,
+        SESSION_CLOSE_LOOKBACK_MS,
+        SESSION_CLOSE_LOOKAHEAD_MS,
+      ],
+    );
+    return result.rows[0]?.id ?? null;
+  } catch (err) {
+    logger.error(
+      { err, deviceId, localSessionKey, firmwareBootId, event: 'find_closing_device_session_id_failed' },
+      'Find closing device session failed',
     );
     return null;
   }

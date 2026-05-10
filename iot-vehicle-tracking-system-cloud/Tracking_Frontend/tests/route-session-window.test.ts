@@ -22,6 +22,7 @@ const createSession = (overrides: Partial<DeviceSession> = {}): DeviceSession =>
   uptime: 104,
   avgImuAccelDeltaMps2: null,
   dataPointsCount: 2,
+  gpsPointsCount: 2,
   ...overrides,
 });
 

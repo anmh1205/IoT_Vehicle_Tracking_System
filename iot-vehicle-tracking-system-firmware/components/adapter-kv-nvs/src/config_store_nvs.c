@@ -190,6 +190,15 @@ esp_err_t config_store_nvs_load(config_t *config) {
         migrated = true;
     }
 
+    if (config->ignition_off_hold_ms < TRACKER_CONFIG_EFFECTIVE_MIN_IGNITION_OFF_HOLD_MS) {
+        ESP_LOGW(TAG,
+                 "Unsafe ignition OFF hold %u ms detected, migrating to %u ms",
+                 (unsigned int)config->ignition_off_hold_ms,
+                 (unsigned int)TRACKER_CONFIG_EFFECTIVE_MIN_IGNITION_OFF_HOLD_MS);
+        config->ignition_off_hold_ms = TRACKER_CONFIG_EFFECTIVE_MIN_IGNITION_OFF_HOLD_MS;
+        migrated = true;
+    }
+
     if (migrated) {
         return config_store_nvs_save(config);
     }

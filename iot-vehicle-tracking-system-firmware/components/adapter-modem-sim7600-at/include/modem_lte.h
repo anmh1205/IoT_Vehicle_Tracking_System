@@ -59,6 +59,16 @@ esp_err_t modem_lte_tick(uint64_t now_ms);
 bool modem_lte_is_initialized(void);
 
 /**
+ * @brief Read whether the modem AT command channel is usable.
+ *
+ * This becomes true earlier than LTE PDP readiness, so GNSS can warm up while
+ * SIM/network registration continues in parallel.
+ *
+ * @return true when AT commands can be exchanged safely.
+ */
+bool modem_lte_is_at_ready(void);
+
+/**
  * @brief Deactivate PDP context if connected.
  *
  * @return ESP_OK on success, otherwise an ESP-IDF error code.

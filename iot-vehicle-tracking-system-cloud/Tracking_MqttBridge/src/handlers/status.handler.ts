@@ -9,7 +9,7 @@ import {
 import { verifyDeviceToken } from '../services/device-auth.service';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
-import { publishToDevice } from '../mqtt/client';
+import { publishSessionAssignment } from '../publishers/session-assignment.publisher';
 import {
   clearSession,
   getStatus,
@@ -32,37 +32,6 @@ const toCachedStatus = (status: StatusPayload['status']): 'running' | 'stopped' 
 };
 
 const SESSION_FALLBACK_BOUNDARY_SOURCE = 'bridge_fallback';
-
-const publishAssignSession = (params: {
-  deviceId: string;
-  localSessionKey?: number;
-  canonicalSessionId: string;
-  bootId?: string;
-}): void => {
-  if (!params.localSessionKey || !params.bootId) {
-    logger.warn(
-      {
-        deviceId: params.deviceId,
-        localSessionKey: params.localSessionKey,
-        bootId: params.bootId,
-        canonicalSessionId: params.canonicalSessionId,
-        event: 'assign_session_skipped',
-        reason: 'incomplete_identity',
-      },
-      'Assign session skipped',
-    );
-    return;
-  }
-
-  publishToDevice(params.deviceId, 'commands', {
-    command: 'assign_session',
-    params: {
-      local_session_key: params.localSessionKey,
-      canonical_session_id: params.canonicalSessionId,
-      boot_id: params.bootId,
-    },
-  });
-};
 
 export const handleStatus = async (
   deviceIdFromTopic: string,
@@ -249,7 +218,7 @@ export const handleStatus = async (
       bootId: sessionBootId,
     });
     await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
-    publishAssignSession({
+    publishSessionAssignment({
       deviceId: payload.device_id,
       localSessionKey,
       canonicalSessionId,
@@ -361,7 +330,7 @@ export const handleStatus = async (
       bootId: sessionBootId,
     });
     await updateDeviceStatus(payload.device_id, 'running', receivedAtMs, runtimeState);
-    publishAssignSession({
+    publishSessionAssignment({
       deviceId: payload.device_id,
       localSessionKey,
       canonicalSessionId,

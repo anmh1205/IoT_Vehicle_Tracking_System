@@ -163,6 +163,8 @@ uint64_t s_last_obd_fail_alert_ms = 0;
 uint64_t s_last_obd_sample_ms = 0;
 /** @brief Timestamp of the latest positive OBD engine-on evidence. */
 uint64_t s_last_obd_engine_on_evidence_ms = 0;
+/** @brief Timestamp when a live ECU first reported all zero motion/engine signals. */
+uint64_t s_obd_live_zero_started_ms = 0;
 /** @brief True once ELM327 initialization succeeded on the current BLE session. */
 bool s_obd_elm_ready = false;
 /** @brief Start timestamp of the rolling OBD failure window. */
@@ -301,6 +303,7 @@ void state_runtime_context_reset(const config_t *config) {
     s_last_obd_fail_alert_ms = 0;
     s_last_obd_sample_ms = 0;
     s_last_obd_engine_on_evidence_ms = 0;
+    s_obd_live_zero_started_ms = 0;
     s_obd_elm_ready = false;
     s_obd_fail_window_started_ms = 0;
     s_obd_fail_window_count = 0;

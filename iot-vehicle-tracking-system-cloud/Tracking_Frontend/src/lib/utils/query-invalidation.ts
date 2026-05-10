@@ -7,9 +7,15 @@ export const queryInvalidation = {
     },
     all: (queryClient: QueryClient, deviceId?: number | string) => {
       void queryClient.invalidateQueries({ queryKey: ['devices'] });
+      void queryClient.invalidateQueries({ queryKey: ['device-positions'] });
       if (deviceId !== undefined) {
         void queryClient.invalidateQueries({ queryKey: ['device', deviceId] });
         void queryClient.invalidateQueries({ queryKey: ['device-detail', deviceId] });
+        void queryClient.invalidateQueries({ queryKey: ['device-sessions', deviceId] });
+        void queryClient.invalidateQueries({ queryKey: ['device-runtime-chart', deviceId] });
+        void queryClient.invalidateQueries({ queryKey: ['device-imu-accel-delta-chart', deviceId] });
+        void queryClient.invalidateQueries({ queryKey: ['device-tracking-telemetry', deviceId] });
+        void queryClient.invalidateQueries({ queryKey: ['device-position-snapshot', deviceId] });
       }
     },
     detail: (queryClient: QueryClient, deviceId: number | string) => {
@@ -18,12 +24,16 @@ export const queryInvalidation = {
     },
     sessions: (queryClient: QueryClient, deviceId: number | string) => {
       void queryClient.invalidateQueries({ queryKey: ['device-sessions', deviceId] });
+      void queryClient.invalidateQueries({ queryKey: ['device-runtime-chart', deviceId] });
     },
     errorCodes: (queryClient: QueryClient, deviceId: number | string) => {
       void queryClient.invalidateQueries({ queryKey: ['device-errors', deviceId] });
     },
     telemetry: (queryClient: QueryClient, deviceId: number | string) => {
       void queryClient.invalidateQueries({ queryKey: ['device-telemetry', deviceId] });
+      void queryClient.invalidateQueries({ queryKey: ['device-tracking-telemetry', deviceId] });
+      void queryClient.invalidateQueries({ queryKey: ['device-position-snapshot', deviceId] });
+      void queryClient.invalidateQueries({ queryKey: ['device-positions'] });
     },
     commands: (queryClient: QueryClient, deviceId?: number | string) => {
       void queryClient.invalidateQueries({ queryKey: ['device-commands'] });
@@ -70,6 +80,9 @@ export const queryInvalidation = {
   map: {
     positions: (queryClient: QueryClient) => {
       void queryClient.invalidateQueries({ queryKey: ['device-positions'] });
+    },
+    roomIds: (queryClient: QueryClient) => {
+      void queryClient.invalidateQueries({ queryKey: ['map-device-room-ids'] });
     },
   },
 } as const;

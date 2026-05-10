@@ -169,7 +169,7 @@ static const command_u16_update_rule_t s_update_u16_rules[] = {
     {
         .field_name = "ignition_off_hold_ms",
         .field_offset = offsetof(config_t, ignition_off_hold_ms),
-        .min_value = TRACKER_CONFIG_MIN_IGNITION_OFF_HOLD_MS,
+        .min_value = TRACKER_CONFIG_EFFECTIVE_MIN_IGNITION_OFF_HOLD_MS,
         .max_value = TRACKER_CONFIG_MAX_IGNITION_OFF_HOLD_MS,
     },
     {

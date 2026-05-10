@@ -66,6 +66,9 @@ export const deviceDetailServices = {
   getSessions: (id: number | string, params?: { page?: number; limit?: number }) =>
     deviceServices.getSessions(id, params),
 
+  getSessionTelemetry: (id: number | string, sessionId: number | string) =>
+    deviceServices.getSessionTelemetry(id, sessionId),
+
   getCommands: (id: number | string, params?: { page?: number; limit?: number }) =>
     deviceServices.getCommands(id, params),
 

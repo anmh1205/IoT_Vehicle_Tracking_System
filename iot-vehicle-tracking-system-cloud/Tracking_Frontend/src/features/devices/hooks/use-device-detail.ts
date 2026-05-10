@@ -49,6 +49,9 @@ const toDeviceSession = (raw: any): DeviceSession => ({
     raw?.avgImuAccelDeltaMps2 ?? raw?.avg_imu_accel_delta_mps2 ?? raw?.avgVibration,
   ),
   dataPointsCount: Number(raw?.dataPointsCount ?? raw?.data_points_count ?? 0),
+  gpsPointsCount: Number(
+    raw?.gpsPointsCount ?? raw?.gps_points_count ?? raw?.dataPointsCount ?? raw?.data_points_count ?? 0,
+  ),
 });
 
 const toDevice = (raw: any): Device => ({

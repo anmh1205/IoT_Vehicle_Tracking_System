@@ -89,6 +89,7 @@ export interface DeviceSession {
   avg_vehicle_battery: number | null;
   avg_device_battery: number | null;
   data_points_count: number;
+  gps_points_count?: number | null;
   last_update: Date | null;
   start_correlation_id: string | null;
   end_correlation_id: string | null;
@@ -148,6 +149,7 @@ export interface DeviceSessionPublic {
   uptime: number | null;
   avgImuAccelDeltaMps2: number | null;
   dataPointsCount: number;
+  gpsPointsCount: number;
 }
 
 export interface DevicePosition {

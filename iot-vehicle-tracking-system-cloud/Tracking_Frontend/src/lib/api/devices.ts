@@ -58,6 +58,8 @@ export const deviceServices = {
   delete: (id: number) => apiClient.delete(`/devices/${id}`).then((r) => unwrap<any>(r.data)),
   getSessions: (id: number | string, params?: { page?: number; limit?: number }) =>
     apiClient.get(`/devices/${id}/sessions`, { params }).then((r) => unwrap<any>(r.data)),
+  getSessionTelemetry: (id: number | string, sessionId: number | string) =>
+    apiClient.get(`/devices/${id}/sessions/${sessionId}/telemetry`).then((r) => unwrap<any>(r.data)),
   getTelemetry: (id: number | string, params?: { metric?: string; from?: string; to?: string }) =>
     apiClient.get(`/devices/${id}/telemetry`, { params }).then((r) => unwrap<any>(r.data)),
   sendCommand: (id: number | string, data: { command: string; params?: Record<string, unknown> }) =>

@@ -161,7 +161,9 @@ bool state_machine_should_throttle_rawdata(void) {
  */
 uint64_t state_machine_ignition_off_hold_ms(void) {
     // Keep this public facade thin and forward the real work to the focused implementation below.
-    return (uint64_t)s_config.ignition_off_hold_ms;
+    return (uint64_t)util_clamp_int((int)s_config.ignition_off_hold_ms,
+                                    (int)TRACKER_CONFIG_EFFECTIVE_MIN_IGNITION_OFF_HOLD_MS,
+                                    (int)TRACKER_CONFIG_MAX_IGNITION_OFF_HOLD_MS);
 }
 
 /**

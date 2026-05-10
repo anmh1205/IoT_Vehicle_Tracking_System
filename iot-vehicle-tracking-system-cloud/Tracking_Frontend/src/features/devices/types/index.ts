@@ -75,6 +75,7 @@ export interface DeviceSession {
   uptime: number | null;
   avgImuAccelDeltaMps2: number | null;
   dataPointsCount: number;
+  gpsPointsCount: number;
 }
 
 export interface DeviceErrorCode {

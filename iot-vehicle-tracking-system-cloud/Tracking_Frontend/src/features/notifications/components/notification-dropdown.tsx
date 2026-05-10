@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Inbox, Loader2 } from 'lucide-react';
+import { Bell, BellOff, Inbox, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,6 +12,8 @@ import { NotificationBadge } from './notification-badge';
 import { NotificationRow } from './notification-item';
 import { useNotifications } from '../hooks/use-notifications';
 import { notificationServices } from '@/lib/api/notifications';
+
+const NOTIFICATION_BADGE_HIDDEN_KEY = 'tracking.notificationBadgeHidden';
 
 const getTarget = (item: any) => {
   if (item.referenceType === 'alert' && item.referenceId) {
@@ -31,6 +33,7 @@ const getTarget = (item: any) => {
 
 export const NotificationDropdown = () => {
   const [open, setOpen] = useState(false);
+  const [badgeHidden, setBadgeHidden] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
@@ -52,11 +55,23 @@ export const NotificationDropdown = () => {
   const items = notifications.data?.items ?? [];
   const unreadCount = notifications.data?.unreadCount ?? items.filter((item) => !item.isRead).length;
 
+  useEffect(() => {
+    setBadgeHidden(window.localStorage.getItem(NOTIFICATION_BADGE_HIDDEN_KEY) === '1');
+  }, []);
+
+  const toggleBadgeHidden = () => {
+    setBadgeHidden((current) => {
+      const next = !current;
+      window.localStorage.setItem(NOTIFICATION_BADGE_HIDDEN_KEY, next ? '1' : '0');
+      return next;
+    });
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div>
-          <NotificationBadge onClick={() => setOpen((value) => !value)} />
+          <NotificationBadge hidden={badgeHidden} onClick={() => setOpen((value) => !value)} />
         </div>
       </PopoverTrigger>
       <PopoverContent
@@ -65,15 +80,26 @@ export const NotificationDropdown = () => {
       >
         <div className="flex shrink-0 items-center justify-between border-b p-3">
           <div className="text-sm font-semibold">Thông báo</div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => markAllMutation.mutate()}
-            disabled={markAllMutation.isPending || unreadCount === 0}
-          >
-            {markAllMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={toggleBadgeHidden}
+              aria-label={badgeHidden ? 'Show notification badge' : 'Hide notification badge'}
+            >
+              {badgeHidden ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => markAllMutation.mutate()}
+              disabled={markAllMutation.isPending || unreadCount === 0}
+            >
+              {markAllMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Đánh dấu tất cả
-          </Button>
+            </Button>
+          </div>
         </div>
 
         <div className="min-h-0 max-h-[min(65vh,24rem)] overflow-y-auto overflow-x-hidden overscroll-contain">

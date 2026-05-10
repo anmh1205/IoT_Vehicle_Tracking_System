@@ -73,9 +73,10 @@ const normalizeCustomRange = (
       };
 };
 
-const resolveRange = (
+export const resolveTrackingTelemetryRange = (
   period: TrackingTelemetryPeriod,
   customRange: TrackingTelemetryCustomRange,
+  nowMs = Date.now(),
 ): { from: string; to: string } => {
   if (period === 'custom') {
     const normalized = normalizeCustomRange(customRange);
@@ -85,7 +86,6 @@ const resolveRange = (
     };
   }
 
-  const now = Date.now();
   const offsetMs =
     period === '6h'
       ? 6 * 60 * 60 * 1000
@@ -98,8 +98,8 @@ const resolveRange = (
             : 90 * 24 * 60 * 60 * 1000;
 
   return {
-    from: new Date(now - offsetMs).toISOString(),
-    to: new Date(now).toISOString(),
+    from: new Date(nowMs - offsetMs).toISOString(),
+    to: new Date(nowMs).toISOString(),
   };
 };
 
@@ -197,11 +197,18 @@ export const useDeviceTrackingTelemetry = (deviceId: number | null) => {
   const [customRange, setCustomRange] = useState<TrackingTelemetryCustomRange>(
     createDefaultCustomRange,
   );
-  const range = useMemo(() => resolveRange(period, customRange), [customRange, period]);
+  const customRangeKey = useMemo(() => normalizeCustomRange(customRange), [customRange]);
 
   const query = useQuery({
-    queryKey: ['device-tracking-telemetry', deviceId, period, range.from, range.to],
+    queryKey: [
+      'device-tracking-telemetry',
+      deviceId,
+      period,
+      period === 'custom' ? customRangeKey.from : null,
+      period === 'custom' ? customRangeKey.to : null,
+    ],
     queryFn: async () => {
+      const range = resolveTrackingTelemetryRange(period, customRange);
       const responses = await Promise.all(
         TRACKING_METRICS.map((metric) =>
           deviceDetailServices.getTelemetry(deviceId as number, {

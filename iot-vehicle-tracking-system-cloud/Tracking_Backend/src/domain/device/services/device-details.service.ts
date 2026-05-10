@@ -36,6 +36,7 @@ const sanitizeSession = (session: DeviceSession): DeviceSessionPublic => ({
   uptime: session.uptime,
   avgImuAccelDeltaMps2: session.avg_imu_accel_delta_mps2 ?? session.avg_vibration ?? null,
   dataPointsCount: session.data_points_count,
+  gpsPointsCount: session.gps_points_count ?? 0,
 });
 
 const toDeviceDetail = (

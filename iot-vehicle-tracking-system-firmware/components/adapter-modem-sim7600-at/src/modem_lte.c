@@ -290,3 +290,21 @@ bool modem_lte_is_initialized(void) {
     // Keep this public facade thin and forward the real work to the focused implementation below.
     return s_lte_initialized;
 }
+
+/**
+ * @brief Check whether the AT command channel is usable.
+ *
+ * GNSS control does not need PDP activation, so app-core can start GNSS as soon
+ * as the modem has passed AT sync and echo setup.
+ *
+ * @return True if AT commands can be exchanged.
+ */
+bool modem_lte_is_at_ready(void) {
+    // Keep this public facade thin and forward the real work to the focused implementation below.
+    if (s_lte_initialized || s_lte_connected) {
+        return true;
+    }
+
+    return s_state >= MODEM_LTE_STATE_CPIN_CHECK &&
+           s_state <= MODEM_LTE_STATE_PDP_IP_CHECK;
+}

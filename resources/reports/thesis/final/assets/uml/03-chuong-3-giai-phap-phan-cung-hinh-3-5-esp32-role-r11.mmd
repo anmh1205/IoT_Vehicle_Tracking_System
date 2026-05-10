@@ -1,0 +1,17 @@
+flowchart LR
+    OBD["Dữ liệu xe<br/>OBD-II"]
+    Motion["Chuyển động<br/>khi xe đỗ"]
+    Power["Nguồn và<br/>trạng thái thiết bị"]
+    ESP["ESP32-S3<br/>điều phối trạng thái<br/>và tạo bản tin"]
+    Link["Vị trí và kết nối<br/>LTE/GNSS"]
+    Buffer["Bộ nhớ tạm<br/>và thời gian"]
+    Packet["Bản tin<br/>giám sát"]
+    Alert["Cảnh báo<br/>sự kiện"]
+
+    OBD --> ESP
+    Motion --> ESP
+    Power --> ESP
+    ESP --> Link
+    ESP --> Buffer
+    ESP --> Packet
+    ESP --> Alert

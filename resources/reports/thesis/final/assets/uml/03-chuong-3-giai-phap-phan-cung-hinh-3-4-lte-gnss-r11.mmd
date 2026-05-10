@@ -1,0 +1,9 @@
+flowchart LR
+    Device["Thiết bị theo dõi"]
+    Module["SIM7600CE-T<br/>LTE + GNSS"]
+    Gnss["Vệ tinh GNSS<br/>cung cấp vị trí"]
+    Mobile["Mạng di động<br/>gửi bản tin"]
+
+    Device --> Module
+    Module --> Gnss
+    Module --> Mobile

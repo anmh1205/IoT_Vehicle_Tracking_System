@@ -1,7 +1,7 @@
 vi.mock('@/infrastructure/database/queries');
 
 import { findMany } from '@/infrastructure/database/queries';
-import { getTelemetry } from './device-telemetry.service';
+import { getSessionTelemetry, getTelemetry } from './device-telemetry.service';
 
 describe('device-telemetry.service', () => {
   beforeEach(() => {
@@ -83,5 +83,50 @@ describe('device-telemetry.service', () => {
     expect(sql).toContain('LIMIT 5000');
     expect(sql).toContain(') recent_points');
     expect(sql).toContain('ORDER BY telemetry_timestamp ASC');
+  });
+
+  it('returns exact session telemetry rows by session_id for route replay', async () => {
+    vi.mocked(findMany).mockResolvedValue([
+      {
+        telemetry_timestamp: new Date('2026-05-10T18:54:43.000Z'),
+        latitude: '20.99023622',
+        longitude: '105.74042885',
+        speed: '12.5',
+        device_battery: '4.1',
+        vehicle_battery: '12.7',
+        temperature: null,
+        engine_temperature: '92',
+        error_code: null,
+        imu_accel_delta_mps2: '0.02',
+      },
+    ]);
+
+    const result = await getSessionTelemetry('TRACKER_001', 220);
+    const [sql, params] = vi.mocked(findMany).mock.calls[0] ?? [];
+
+    expect(sql).toContain('WITH target_session AS');
+    expect(sql).toContain('e.session_id = s.id');
+    expect(sql).toContain('e.session_id IS NULL');
+    expect(sql).toContain("e.event_code = 'mqtt_bridge_rawdata'");
+    expect(sql).toContain("context#>>'{raw_payload,data,latitude}'");
+    expect(sql).toContain('LIMIT 10000');
+    expect(params).toEqual(['TRACKER_001', 220]);
+    expect(result).toEqual({
+      sessionId: 220,
+      data: [
+        {
+          timestamp: '2026-05-10T18:54:43.000Z',
+          latitude: 20.99023622,
+          longitude: 105.74042885,
+          speed: 12.5,
+          deviceBattery: 4.1,
+          vehicleBattery: 12.7,
+          temperature: null,
+          engineTemperature: 92,
+          errorCode: null,
+          imuAccelDeltaMps2: 0.02,
+        },
+      ],
+    });
   });
 });

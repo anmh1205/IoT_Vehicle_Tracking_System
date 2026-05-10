@@ -126,6 +126,17 @@ export const getTelemetry = asyncHandler(async (req: AuthenticatedRequest, res: 
   sendOk(res, data);
 });
 
+export const getSessionTelemetry = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const deviceId = await resolveDeviceId(req.params.id);
+  const sessionId = Number.parseInt(req.params.sessionId, 10);
+  if (Number.isNaN(sessionId)) {
+    throw createValidationError('Invalid session ID');
+  }
+
+  const data = await deviceTelemetryService.getSessionTelemetry(deviceId, sessionId);
+  sendOk(res, data);
+});
+
 export const sendCommand = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const deviceId = await resolveDeviceId(req.params.id);
   const parsed = sendDeviceCommandSchema.safeParse(req.body);

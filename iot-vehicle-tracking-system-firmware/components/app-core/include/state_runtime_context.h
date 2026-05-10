@@ -65,6 +65,7 @@
 #define TRACKER_IGNITION_OBD_LIVE_SAMPLE_MAX_AGE_MS 5000U
 #define TRACKER_OBD_ENGINE_ON_EVIDENCE_HOLD_MS 5000U
 #define TRACKER_OBD_ENGINE_ON_CONFIRMED_GRACE_MS 20000U
+#define TRACKER_OBD_LIVE_ZERO_OFF_CONFIRM_MS 30000U
 #define TRACKER_EVENT_CODE_OBD_CONNECT_FAILED 2001
 #define TRACKER_EVENT_CODE_OBD_ELM327_INIT_FAILED 2002
 #define TRACKER_SLEEP_REJECT_LOG_INTERVAL_MS 10000ULL
@@ -175,6 +176,7 @@ extern int s_last_obd_fail_alert_code;
 extern uint64_t s_last_obd_fail_alert_ms;
 extern uint64_t s_last_obd_sample_ms;
 extern uint64_t s_last_obd_engine_on_evidence_ms;
+extern uint64_t s_obd_live_zero_started_ms;
 extern bool s_obd_elm_ready;
 extern uint64_t s_obd_fail_window_started_ms;
 extern uint32_t s_obd_fail_window_count;

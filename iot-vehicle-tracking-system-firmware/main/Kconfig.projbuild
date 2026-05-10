@@ -56,9 +56,26 @@ config TRACKER_DEFAULT_TRACKING_INTERVAL_S
     range 1 3600
     default 10
 
+config TRACKER_DEFAULT_IGNITION_OFF_HOLD_MS
+    int "Ignition OFF hold window (milliseconds)"
+    range 1000 60000
+    default 15000
+    help
+        Minimum sustained OFF evidence before a running trip session can close.
+        Keep this above short ECU idle/deceleration gaps so RPM=0 chatter does
+        not split one drive into many tiny sessions.
+
 config TRACKER_ENABLE_COMMAND_SUBSCRIBE
     bool "Subscribe command topic"
     default y
+
+config TRACKER_PARKED_KEEP_MODEM_GNSS_WARM
+    bool "Keep modem and GNSS warm while parked"
+    default y
+    help
+        Leave SIM7600/GNSS powered across parked light-sleep heartbeat windows
+        so OFF-state tracking keeps a warm fix and the next ignition ON edge is
+        not delayed by a full modem/GNSS cold start.
 
 config TRACKER_FAKE_SLEEP_ENABLED
     bool "Use fake parked sleep loop instead of real sleep entry"

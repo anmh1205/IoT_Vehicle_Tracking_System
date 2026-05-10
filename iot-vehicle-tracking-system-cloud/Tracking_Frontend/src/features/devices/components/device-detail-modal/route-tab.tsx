@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { CalendarRange, Pause, Play, RotateCcw, SkipForward } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,9 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { SESSION_STATUS_LABELS } from '@/features/devices/components/device-constants';
+import { deviceDetailServices } from '@/lib/api/device-detail';
 import { formatDateTime, formatDuration, formatNumber } from '@/lib/utils/date/format';
 import { useDeviceDetailModal } from './modal-context';
 import { RouteReplayMap } from './route-replay-map';
+import type { DeviceSession, DeviceTelemetryRow } from '@/features/devices/types';
 import {
   buildRouteReplayPoints,
   countRouteReplayPointsForSession,
@@ -37,6 +40,7 @@ const PERIOD_LABELS: Record<(typeof PERIOD_OPTIONS)[number]['value'], string> = 
 };
 
 const PLAYBACK_RATE_OPTIONS = [1, 2, 4] as const;
+const EMPTY_TELEMETRY_ROWS: DeviceTelemetryRow[] = [];
 
 const SESSION_BADGE_VARIANTS: Record<
   string,
@@ -67,6 +71,9 @@ const toDurationSeconds = (from: string | null | undefined, to: string | null | 
   return Math.round((end - start) / 1000);
 };
 
+const getSessionGpsPointCount = (session: DeviceSession) =>
+  Math.max(0, Number(session.gpsPointsCount ?? session.dataPointsCount ?? 0));
+
 const toShortDateLabel = (value: string) => {
   if (!value) {
     return '';
@@ -74,6 +81,44 @@ const toShortDateLabel = (value: string) => {
 
   const [year, month, day] = value.split('-');
   return year && month && day ? `${day}/${month}/${year}` : value;
+};
+
+const toOptionalNumber = (value: unknown): number | null => {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const toSessionTelemetryRows = (payload: any): DeviceTelemetryRow[] => {
+  const items = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload?.items)
+      ? payload.items
+      : Array.isArray(payload?.data?.items)
+        ? payload.data.items
+        : [];
+
+  return items
+    .map((row: any): DeviceTelemetryRow => ({
+      timestamp: String(row?.timestamp ?? ''),
+      latitude: toOptionalNumber(row?.latitude),
+      longitude: toOptionalNumber(row?.longitude),
+      speed: toOptionalNumber(row?.speed),
+      deviceBattery: toOptionalNumber(row?.deviceBattery ?? row?.device_battery),
+      vehicleBattery: toOptionalNumber(row?.vehicleBattery ?? row?.vehicle_battery),
+      temperature: toOptionalNumber(row?.temperature),
+      engineTemperature: toOptionalNumber(row?.engineTemperature ?? row?.engine_temperature),
+      errorCode: toOptionalNumber(row?.errorCode ?? row?.error_code),
+      imuAccelDeltaMps2: toOptionalNumber(row?.imuAccelDeltaMps2 ?? row?.imu_accel_delta_mps2),
+    }))
+    .filter((row: DeviceTelemetryRow) => row.timestamp.length > 0)
+    .sort(
+      (left: DeviceTelemetryRow, right: DeviceTelemetryRow) =>
+        Date.parse(left.timestamp) - Date.parse(right.timestamp),
+    );
 };
 
 export const RouteTab = () => {
@@ -108,6 +153,15 @@ export const RouteTab = () => {
     () => sessions.find((session) => session.id === selectedSessionId) ?? null,
     [selectedSessionId, sessions],
   );
+  const selectedSessionTelemetry = useQuery({
+    queryKey: ['device-session-telemetry', device?.id ?? null, selectedSessionId],
+    queryFn: () =>
+      deviceDetailServices
+        .getSessionTelemetry(device!.id, selectedSessionId!)
+        .then(toSessionTelemetryRows),
+    enabled: Boolean(device?.id && selectedSessionId),
+    staleTime: 5000,
+  });
 
   const replayPointCountBySession = useMemo(() => {
     const entries: Array<[number, number]> = sessions.map((session) => [
@@ -124,17 +178,26 @@ export const RouteTab = () => {
     }
 
     const preferredSessionId =
-      sessions.find((session) => (replayPointCountBySession.get(session.id) ?? 0) > 0)?.id ?? sessions[0].id;
+      sessions.find((session) => {
+        const replayPointCount = replayPointCountBySession.get(session.id) ?? 0;
+        return Math.max(replayPointCount, getSessionGpsPointCount(session)) > 0;
+      })?.id ?? sessions[0].id;
 
     setSelectedSessionId((current) =>
       current !== null && sessions.some((session) => session.id === current) ? current : preferredSessionId,
     );
   }, [sessions, replayPointCountBySession]);
 
-  const selectedRows = useMemo(
-    () => selectLatestContiguousRouteRows(filterTelemetryRowsBySession(trackingRowsAscending, selectedSession)),
-    [selectedSession, trackingRowsAscending],
-  );
+  const selectedRawRows = selectedSessionTelemetry.data ?? EMPTY_TELEMETRY_ROWS;
+  const selectedRows = useMemo(() => {
+    if (selectedSessionTelemetry.isFetched || selectedRawRows.length > 0) {
+      return selectLatestContiguousRouteRows(selectedRawRows);
+    }
+
+    return selectLatestContiguousRouteRows(
+      filterTelemetryRowsBySession(trackingRowsAscending, selectedSession),
+    );
+  }, [selectedRawRows, selectedSession, selectedSessionTelemetry.isFetched, trackingRowsAscending]);
   const replayPoints = useMemo(() => buildRouteReplayPoints(selectedRows), [selectedRows]);
   const pathPoints = useMemo(
     () => replayPoints.map((point) => [point.latitude, point.longitude] as [number, number]),
@@ -202,6 +265,8 @@ export const RouteTab = () => {
   const replaySummary = replayPoints.length > 0
     ? `${currentPointLabel}${currentPoint?.timestamp ? ` · ${formatDateTime(currentPoint.timestamp, 'HH:mm:ss dd/MM')}` : ''}`
     : 'Chưa có mốc GPS để phát lại';
+  const selectedRecordedGpsPointCount = selectedSession ? getSessionGpsPointCount(selectedSession) : 0;
+  const selectedRawRowCount = selectedSessionTelemetry.isFetched ? selectedRawRows.length : 0;
   const pointTimeLabel = infoPoint?.timestamp ? formatDateTime(infoPoint.timestamp, 'HH:mm:ss dd/MM') : '-';
   const pointCoordinateLabel = infoPoint
     ? formatCoordinateLabel(infoPoint.latitude, infoPoint.longitude, 6)
@@ -235,7 +300,13 @@ export const RouteTab = () => {
   const replayHeadline =
     replayPoints.length > 0
       ? replaySummary
-      : fallbackLivePoint
+      : selectedRecordedGpsPointCount > 0
+        ? selectedSessionTelemetry.isFetching
+          ? 'Đã ghi nhận GPS trên server, đang tải dữ liệu phát lại'
+          : 'Đã ghi nhận GPS trên server nhưng chưa dựng được đoạn phát lại liên tục'
+        : selectedRawRowCount > 0
+        ? 'Phiên có rawdata nhưng GNSS chưa có fix hợp lệ'
+        : fallbackLivePoint
         ? 'Phiên hiện chỉ có điểm live hiện tại, chưa đủ dữ liệu để phát lại'
         : 'Chưa có mốc GPS để phát lại';
 
@@ -365,6 +436,8 @@ export const RouteTab = () => {
               sessions.map((session) => {
                 const selected = session.id === selectedSession?.id;
                 const replayPointCount = replayPointCountBySession.get(session.id) ?? 0;
+                const recordedGpsPointCount = getSessionGpsPointCount(session);
+                const displayPointCount = Math.max(replayPointCount, recordedGpsPointCount);
                 const durationSeconds = session.uptime ?? toDurationSeconds(session.serverSessionStart, session.serverSessionEnd);
 
                 return (
@@ -398,14 +471,18 @@ export const RouteTab = () => {
                         <span className="mt-1 block font-medium text-foreground">{formatDuration(durationSeconds)}</span>
                       </p>
                       <p>
-                        <span className="block uppercase tracking-[0.14em]">Điểm GPS trong kỳ</span>
-                        <span className="mt-1 block font-medium text-foreground">{formatNumber(replayPointCount)} điểm</span>
+                        <span className="block uppercase tracking-[0.14em]">Điểm GPS</span>
+                        <span className="mt-1 block font-medium text-foreground">{formatNumber(displayPointCount)} điểm</span>
                       </p>
                     </div>
 
-                    {replayPointCount === 0 ? (
+                    {displayPointCount === 0 ? (
                       <p className="mt-3 text-[11px] text-amber-700 dark:text-amber-200">
-                        Phiên này chưa có điểm GPS hợp lệ trong dải {zeroTelemetryRangeLabel}. Thử mở dải thời gian lớn hơn.
+                        Phiên này chưa có điểm GPS hợp lệ trong hệ thống.
+                      </p>
+                    ) : replayPointCount === 0 ? (
+                      <p className="mt-3 text-[11px] text-amber-700 dark:text-amber-200">
+                        Đã ghi nhận GPS trên server. Nếu chưa phát lại được, chờ đồng bộ hoặc mở dải {zeroTelemetryRangeLabel}.
                       </p>
                     ) : replayPointCount === 1 ? (
                       <p className="mt-3 text-[11px] text-amber-700 dark:text-amber-200">

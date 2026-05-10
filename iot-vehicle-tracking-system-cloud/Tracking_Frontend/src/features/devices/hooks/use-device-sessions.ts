@@ -52,6 +52,9 @@ const toSessionsResult = (
         row?.avgImuAccelDeltaMps2 ?? row?.avg_imu_accel_delta_mps2 ?? row?.avgVibration,
       ),
       dataPointsCount: Number(row?.dataPointsCount ?? row?.data_points_count ?? 0),
+      gpsPointsCount: Number(
+        row?.gpsPointsCount ?? row?.gps_points_count ?? row?.dataPointsCount ?? row?.data_points_count ?? 0,
+      ),
     })),
     total: Number(payload?.total ?? payload?.pagination?.total ?? sessions.length),
     page: Number(payload?.page ?? payload?.pagination?.page ?? fallbackPage),

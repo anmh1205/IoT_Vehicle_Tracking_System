@@ -33,6 +33,9 @@
 #ifndef CONFIG_TRACKER_FIELD_VALIDATION_KEEP_AWAKE
 #define CONFIG_TRACKER_FIELD_VALIDATION_KEEP_AWAKE 0
 #endif
+#ifndef CONFIG_TRACKER_PARKED_KEEP_MODEM_GNSS_WARM
+#define CONFIG_TRACKER_PARKED_KEEP_MODEM_GNSS_WARM 1
+#endif
 
 /**
  * @file state_sleep_controller.c
@@ -87,6 +90,10 @@ static const char *TAG = STATE_MACHINE_TAG;
 static void state_machine_prepare_deep_sleep_wakeup_for_interval_us(uint64_t wake_interval_us);
 static app_state_t state_machine_enter_light_sleep_for_interval_us(uint64_t wake_interval_us,
                                                                    bool allow_usb_guard);
+
+static bool state_machine_should_keep_parked_modem_gnss_warm(void) {
+    return CONFIG_TRACKER_PARKED_KEEP_MODEM_GNSS_WARM != 0;
+}
 
 /**
  * @brief Report whether a USB Serial/JTAG host is still attached.
@@ -255,6 +262,8 @@ tracker_sleep_mode_t state_machine_resolve_sleep_mode(app_state_t app_state) {
     return TRACKER_SLEEP_MODE_FAKE;
 #elif CONFIG_TRACKER_FIELD_VALIDATION_MODE && CONFIG_TRACKER_FIELD_VALIDATION_KEEP_AWAKE
     return TRACKER_SLEEP_MODE_NONE;
+#elif CONFIG_TRACKER_PARKED_KEEP_MODEM_GNSS_WARM
+    return TRACKER_SLEEP_MODE_LIGHT;
 #else
     return state_machine_should_use_light_sleep_motion_wake() ? TRACKER_SLEEP_MODE_LIGHT
                                                               : TRACKER_SLEEP_MODE_DEEP;
@@ -329,6 +338,7 @@ bool state_machine_can_enter_sleep(const char **out_reason) {
  */
 void state_machine_shutdown_for_sleep(void) {
     // Snapshot the last meaningful runtime facts before volatile state disappears during sleep.
+    bool keep_modem_gnss_warm = state_machine_should_keep_parked_modem_gnss_warm();
     g_rtc_context.last_state = APP_STATE_SLEEP;
     g_rtc_context.ign_last_known = s_telemetry.ignition;
     g_rtc_context.last_battery_v = s_telemetry.vehicle_battery;
@@ -347,46 +357,60 @@ void state_machine_shutdown_for_sleep(void) {
         ESP_LOGW(TAG, "event=pre_sleep_ble_deinit_failed err=%s", esp_err_to_name(ble_stack_err));
     }
 
-    if (s_gnss_started) {
+    if (keep_modem_gnss_warm) {
+        ESP_LOGI(TAG,
+                 "event=pre_sleep_modem_gnss_kept_warm gnss_started=%d mqtt=%d lte=%d",
+                 s_gnss_started ? 1 : 0,
+                 tracker_mqtt_is_connected() ? 1 : 0,
+                 modem_lte_is_initialized() ? 1 : 0);
+    } else if (s_gnss_started) {
         // Power GNSS down explicitly so the next wake prelude re-arms it from a known state.
         esp_err_t gnss_off_err = modem_gnss_power_off();
         if (gnss_off_err != ESP_OK) {
             ESP_LOGW(TAG, "event=pre_sleep_gnss_power_off_failed err=%s", esp_err_to_name(gnss_off_err));
         }
     }
-    s_gnss_started = false;
-    state_machine_clear_gnss_cache();
+    if (!keep_modem_gnss_warm) {
+        s_gnss_started = false;
+        state_machine_clear_gnss_cache();
+    }
 
 #if !TRACKER_MQTT_RUNTIME_DISABLED
-    // Disconnect MQTT before LTE teardown so the publish path closes in the same order it opened.
-    esp_err_t mqtt_disconnect_err = tracker_mqtt_disconnect();
-    if (mqtt_disconnect_err != ESP_OK) {
-        ESP_LOGW(TAG, "event=pre_sleep_mqtt_disconnect_failed err=%s", esp_err_to_name(mqtt_disconnect_err));
+    if (!keep_modem_gnss_warm) {
+        // Disconnect MQTT before LTE teardown so the publish path closes in the same order it opened.
+        esp_err_t mqtt_disconnect_err = tracker_mqtt_disconnect();
+        if (mqtt_disconnect_err != ESP_OK) {
+            ESP_LOGW(TAG, "event=pre_sleep_mqtt_disconnect_failed err=%s", esp_err_to_name(mqtt_disconnect_err));
+        }
+        s_mqtt_started = false;
     }
-    s_mqtt_started = false;
 #endif
 
-    // Collapse the LTE data path and then drop modem power so parked current stays predictable.
-    esp_err_t lte_disconnect_err = modem_lte_disconnect();
-    if (lte_disconnect_err != ESP_OK) {
-        ESP_LOGW(TAG, "event=pre_sleep_lte_disconnect_failed err=%s", esp_err_to_name(lte_disconnect_err));
-    }
-    s_prev_lte_initialized = false;
-
-    esp_err_t modem_power_off_err = modem_power_off();
-    if (modem_power_off_err != ESP_OK) {
-        ESP_LOGW(TAG, "event=pre_sleep_modem_power_off_failed err=%s", esp_err_to_name(modem_power_off_err));
+    if (keep_modem_gnss_warm) {
+        offline_queue_set_online(tracker_mqtt_is_connected());
     } else {
-        // Let the modem rail settle fully before wake sources are armed.
-        vTaskDelay(pdMS_TO_TICKS((uint32_t)TRACKER_MODEM_POWEROFF_SETTLE_MS));
-    }
+        // Collapse the LTE data path and then drop modem power so parked current stays predictable.
+        esp_err_t lte_disconnect_err = modem_lte_disconnect();
+        if (lte_disconnect_err != ESP_OK) {
+            ESP_LOGW(TAG, "event=pre_sleep_lte_disconnect_failed err=%s", esp_err_to_name(lte_disconnect_err));
+        }
+        s_prev_lte_initialized = false;
 
-    // Replay must remain paused until wake-time connectivity comes back.
-    offline_queue_set_online(false);
+        esp_err_t modem_power_off_err = modem_power_off();
+        if (modem_power_off_err != ESP_OK) {
+            ESP_LOGW(TAG, "event=pre_sleep_modem_power_off_failed err=%s", esp_err_to_name(modem_power_off_err));
+        } else {
+            // Let the modem rail settle fully before wake sources are armed.
+            vTaskDelay(pdMS_TO_TICKS((uint32_t)TRACKER_MODEM_POWEROFF_SETTLE_MS));
+        }
 
-    esp_err_t dtr_sleep_err = modem_set_dtr(true);
-    if (dtr_sleep_err != ESP_OK && dtr_sleep_err != ESP_ERR_NOT_SUPPORTED) {
-        ESP_LOGW(TAG, "event=pre_sleep_dtr_set_failed err=%s", esp_err_to_name(dtr_sleep_err));
+        // Replay must remain paused until wake-time connectivity comes back.
+        offline_queue_set_online(false);
+
+        esp_err_t dtr_sleep_err = modem_set_dtr(true);
+        if (dtr_sleep_err != ESP_OK && dtr_sleep_err != ESP_ERR_NOT_SUPPORTED) {
+            ESP_LOGW(TAG, "event=pre_sleep_dtr_set_failed err=%s", esp_err_to_name(dtr_sleep_err));
+        }
     }
 }
 
@@ -418,38 +442,46 @@ void state_machine_prepare_deep_sleep_wakeup(void) {
  * @return Next FSM state after the light-sleep wake event.
  */
 static app_state_t state_machine_enter_light_sleep_for_interval_us(uint64_t wake_interval_us, bool allow_usb_guard) {
+    bool use_imu_wake = state_machine_should_use_light_sleep_motion_wake();
     if (allow_usb_guard && state_machine_usb_console_host_connected()) {
-        return state_machine_enter_usb_guarded_sleep(true);
+        return state_machine_enter_usb_guarded_sleep(use_imu_wake);
     }
 
     state_machine_force_user_led_off();
 
     (void)esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
 
-    // Clear any stale IMU interrupt latch so the device does not bounce awake immediately.
-    esp_err_t clear_int_err = imu_clear_motion_interrupt();
-    if (clear_int_err != ESP_OK) {
-        ESP_LOGW(TAG, "event=light_sleep_imu_int_clear_failed err=%s", esp_err_to_name(clear_int_err));
-    }
-    vTaskDelay(pdMS_TO_TICKS(TRACKER_LIGHT_SLEEP_IMU_CLEAR_SETTLE_MS));
+    if (use_imu_wake) {
+        // Clear any stale IMU interrupt latch so the device does not bounce awake immediately.
+        esp_err_t clear_int_err = imu_clear_motion_interrupt();
+        if (clear_int_err != ESP_OK) {
+            ESP_LOGW(TAG, "event=light_sleep_imu_int_clear_failed err=%s", esp_err_to_name(clear_int_err));
+        }
+        vTaskDelay(pdMS_TO_TICKS(TRACKER_LIGHT_SLEEP_IMU_CLEAR_SETTLE_MS));
 
-    if (imu_motion_detected()) {
-        /* Do not sleep with a latched IMU interrupt, otherwise wake happens immediately. */
-        ESP_LOGW(TAG, "event=light_sleep_skipped reason=imu_interrupt_asserted next_state=alarm");
-        return APP_STATE_ALARM;
+        if (imu_motion_detected()) {
+            /* Do not sleep with a latched IMU interrupt, otherwise wake happens immediately. */
+            ESP_LOGW(TAG, "event=light_sleep_skipped reason=imu_interrupt_asserted next_state=alarm");
+            return APP_STATE_ALARM;
+        }
+
+        // Arm GPIO wake before the timer so either motion or cadence can break light sleep.
+        esp_err_t gpio_wake_err = gpio_wakeup_enable(PIN_LIS3DSH_INT, GPIO_INTR_HIGH_LEVEL);
+        if (gpio_wake_err != ESP_OK) {
+            ESP_LOGW(TAG,
+                     "event=light_sleep_gpio_wake_arm_failed gpio=%d err=%s",
+                     (int)PIN_LIS3DSH_INT,
+                     esp_err_to_name(gpio_wake_err));
+            return APP_STATE_CHECK_IGN;
+        }
     }
 
-    // Arm GPIO wake before the timer so either motion or cadence can break light sleep.
-    esp_err_t gpio_wake_err = gpio_wakeup_enable(PIN_LIS3DSH_INT, GPIO_INTR_HIGH_LEVEL);
-    if (gpio_wake_err != ESP_OK) {
-        ESP_LOGW(TAG, "event=light_sleep_gpio_wake_arm_failed gpio=%d err=%s", (int)PIN_LIS3DSH_INT, esp_err_to_name(gpio_wake_err));
-        return APP_STATE_CHECK_IGN;
-    }
-
-    esp_err_t sleep_gpio_err = esp_sleep_enable_gpio_wakeup();
-    if (sleep_gpio_err != ESP_OK) {
-        ESP_LOGW(TAG, "event=light_sleep_gpio_wake_enable_failed err=%s", esp_err_to_name(sleep_gpio_err));
-        return APP_STATE_CHECK_IGN;
+    if (use_imu_wake) {
+        esp_err_t sleep_gpio_err = esp_sleep_enable_gpio_wakeup();
+        if (sleep_gpio_err != ESP_OK) {
+            ESP_LOGW(TAG, "event=light_sleep_gpio_wake_enable_failed err=%s", esp_err_to_name(sleep_gpio_err));
+            return APP_STATE_CHECK_IGN;
+        }
     }
 
     uint64_t effective_wake_interval_us = wake_interval_us > 0 ? wake_interval_us : 1000ULL;
@@ -466,9 +498,11 @@ static app_state_t state_machine_enter_light_sleep_for_interval_us(uint64_t wake
 
     // From this point the wake cause decides whether we resume alarm, heartbeat, or plain ignition checking.
     ESP_LOGI(TAG,
-             "event=light_sleep_enter interval_ms=%llu imu_gpio=%d",
+             "event=light_sleep_enter interval_ms=%llu imu_wake=%d imu_gpio=%d keep_modem_gnss_warm=%d",
              (unsigned long long)wake_interval_ms,
-             (int)PIN_LIS3DSH_INT);
+             use_imu_wake ? 1 : 0,
+             (int)PIN_LIS3DSH_INT,
+             state_machine_should_keep_parked_modem_gnss_warm() ? 1 : 0);
     esp_err_t sleep_err = esp_light_sleep_start();
     if (sleep_err != ESP_OK) {
         state_machine_resume_user_led_pattern();
@@ -479,7 +513,7 @@ static app_state_t state_machine_enter_light_sleep_for_interval_us(uint64_t wake
     esp_sleep_wakeup_cause_t wakeup = esp_sleep_get_wakeup_cause();
     state_machine_resume_user_led_pattern();
     ESP_LOGI(TAG, "event=light_sleep_wakeup cause=%d", (int)wakeup);
-    if (wakeup == ESP_SLEEP_WAKEUP_GPIO && state_machine_imu_runtime_enabled()) {
+    if (wakeup == ESP_SLEEP_WAKEUP_GPIO && use_imu_wake) {
         return APP_STATE_ALARM;
     }
     if (wakeup == ESP_SLEEP_WAKEUP_TIMER) {
@@ -534,7 +568,7 @@ app_state_t state_machine_enter_configured_sleep(void) {
     // Bench/debug builds can replace real sleep with a timed idle loop.
     return state_machine_enter_fake_sleep();
 #else
-    if (state_machine_should_use_light_sleep_motion_wake()) {
+    if (state_machine_should_keep_parked_modem_gnss_warm() || state_machine_should_use_light_sleep_motion_wake()) {
         // Prefer light sleep when motion wake must use the regular GPIO wake path.
         return state_machine_enter_light_sleep();
     }

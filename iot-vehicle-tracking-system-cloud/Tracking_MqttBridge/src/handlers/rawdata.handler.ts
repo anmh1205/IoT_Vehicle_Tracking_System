@@ -2,6 +2,7 @@ import { rawDataSchema } from '../validators/payload.validator';
 import type { RawDataPayload, RawDiagnostics } from '../types/payload.types';
 import {
   ensureDeviceSession,
+  findClosingDeviceSessionIdByIdentity,
   findDeviceSessionIdByIdentity,
   syncActiveMaintenanceAlertsByMessage,
   syncActiveMaintenanceAlertsByTitle,
@@ -12,7 +13,7 @@ import {
 import { writeDeviceTelemetry } from '../infrastructure/victoriametrics';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
-import { publishToDevice } from '../mqtt/client';
+import { publishSessionAssignment } from '../publishers/session-assignment.publisher';
 import { getStatus, resolveSessionId, setStatus } from '../cache/device-state.cache';
 import { addUpdate } from '../services/batch-writer.service';
 import { checkGeofences } from '../services/geofence-checker.service';
@@ -60,26 +61,6 @@ const GENERIC_DTC_ACTION =
 const ruleCooldownUntil = new Map<string, number>();
 const idleAnomalyStartedAt = new Map<string, number>();
 const activeDtcRuleKeysByDevice = new Map<string, Set<string>>();
-
-const publishAssignSession = (params: {
-  deviceId: string;
-  localSessionKey?: number;
-  canonicalSessionId: string;
-  bootId?: string;
-}): void => {
-  if (!params.localSessionKey || !params.bootId) {
-    return;
-  }
-
-  publishToDevice(params.deviceId, 'commands', {
-    command: 'assign_session',
-    params: {
-      local_session_key: params.localSessionKey,
-      canonical_session_id: params.canonicalSessionId,
-      boot_id: params.bootId,
-    },
-  });
-};
 
 const buildSanitizedRawPayload = (payload: RawDataPayload): Omit<RawDataPayload, 'auth_token'> => {
   const { auth_token: _authToken, ...safePayload } = payload;
@@ -929,7 +910,20 @@ export const handleRawData = async (
           bootId: sessionBootId,
         })
       : null;
-  let sessionId = cachedResolvedSessionId ?? databaseResolvedSessionId;
+  const closingResolvedSessionId =
+    cachedResolvedSessionId === null && databaseResolvedSessionId === null && reportsEngineOff
+      ? await findClosingDeviceSessionIdByIdentity(
+          payload.device_id,
+          {
+            localSessionKey,
+            bootId: sessionBootId,
+          },
+          timestampMs,
+          receivedAtMs,
+        )
+      : null;
+  const resolvedClosingTelemetry = closingResolvedSessionId !== null;
+  let sessionId = cachedResolvedSessionId ?? databaseResolvedSessionId ?? closingResolvedSessionId;
   let canonicalSessionId =
     payloadCanonicalSessionId ??
     (sessionId !== null && previousState?.sessionId === sessionId
@@ -969,7 +963,7 @@ export const handleRawData = async (
     });
     sessionId = ensuredSession.sessionId;
     canonicalSessionId = String(ensuredSession.sessionId);
-    publishAssignSession({
+    publishSessionAssignment({
       deviceId: payload.device_id,
       localSessionKey,
       canonicalSessionId,
@@ -1039,7 +1033,8 @@ export const handleRawData = async (
     device.current_status !== 'running';
   const shouldAppendHistoricalSessionTelemetry =
     shouldRetainStaleSessionTelemetry ||
-    shouldTreatEngineOffTelemetryAsHistorical;
+    shouldTreatEngineOffTelemetryAsHistorical ||
+    resolvedClosingTelemetry;
   const shouldMutateLiveState =
     liveMutationDecision.accept && !shouldAppendHistoricalSessionTelemetry;
   const shouldPublishDataEvent = shouldMutateLiveState || shouldAppendHistoricalSessionTelemetry;
@@ -1056,6 +1051,7 @@ export const handleRawData = async (
         timestampMs,
         liveMutationReason: liveMutationDecision.reason,
         engineOffTelemetry: shouldTreatEngineOffTelemetryAsHistorical,
+        closingTelemetry: resolvedClosingTelemetry,
         event: 'rawdata_session_history_retained',
       },
       'Telemetry retained for session history',

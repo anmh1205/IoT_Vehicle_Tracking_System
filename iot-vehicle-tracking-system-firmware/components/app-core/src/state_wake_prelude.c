@@ -109,7 +109,7 @@ static bool state_machine_try_reassert_gnss_power(const char *reason) {
  */
 bool state_machine_can_poll_gnss(void) {
     // Keep this public facade thin and forward the real work to the focused implementation below.
-    return s_gnss_started && modem_lte_is_initialized() && modem_gnss_is_query_ready();
+    return s_gnss_started && modem_lte_is_at_ready() && modem_gnss_is_query_ready();
 }
 
 /**
@@ -117,7 +117,7 @@ bool state_machine_can_poll_gnss(void) {
  */
 void state_machine_try_start_gnss_nonblocking(void) {
     // Initialize module-local state and dependencies before later runtime paths rely on them.
-    if (s_gnss_started || !modem_lte_is_initialized()) {
+    if (s_gnss_started || !modem_lte_is_at_ready()) {
         return;
     }
 
@@ -365,9 +365,29 @@ telemetry_finalize:
     bool obd_engine_on_evidence = obd_live_ignition &&
                                   state_machine_has_recent_obd_engine_on_evidence(now_ms);
     bool rpm_ignition = obd_live_ignition && s_telemetry.obd_rpm > 0;
+    bool obd_live_zero_candidate =
+        obd_live_ignition &&
+        stable_ignition_on &&
+        s_telemetry.obd_rpm == 0 &&
+        s_telemetry.obd_speed == 0 &&
+        s_telemetry.obd_engine_load == 0;
+    if (obd_live_zero_candidate) {
+        if (s_obd_live_zero_started_ms == 0 || now_ms < s_obd_live_zero_started_ms) {
+            s_obd_live_zero_started_ms = now_ms;
+        }
+    } else {
+        s_obd_live_zero_started_ms = 0;
+    }
+    bool obd_live_zero_confirmed_off =
+        obd_live_zero_candidate &&
+        s_obd_live_zero_started_ms != 0 &&
+        now_ms >= s_obd_live_zero_started_ms &&
+        (now_ms - s_obd_live_zero_started_ms) >= (uint64_t)TRACKER_OBD_LIVE_ZERO_OFF_CONFIRM_MS;
+    bool hold_live_zero_on = obd_live_zero_candidate && !obd_live_zero_confirmed_off;
     bool confirmed_obd_live_grace =
         stable_ignition_on &&
         obd_live_ignition &&
+        !obd_live_zero_confirmed_off &&
         s_last_obd_engine_on_evidence_ms != 0 &&
         now_ms >= s_last_obd_engine_on_evidence_ms &&
         (now_ms - s_last_obd_engine_on_evidence_ms) <=
@@ -391,15 +411,21 @@ telemetry_finalize:
         obd_engine_on_evidence ||
         adc_ignition ||
         confirmed_obd_live_grace ||
+        hold_live_zero_on ||
         preserve_degraded_ignition_on;
     if (!s_ignition_log_initialized || ignition_next != s_last_ignition_state) {
         uint32_t evidence_age_ms = UINT32_MAX;
+        uint32_t live_zero_age_ms = UINT32_MAX;
         if (s_last_obd_engine_on_evidence_ms != 0 && now_ms >= s_last_obd_engine_on_evidence_ms) {
             uint64_t age_ms = now_ms - s_last_obd_engine_on_evidence_ms;
             evidence_age_ms = age_ms > UINT32_MAX ? UINT32_MAX : (uint32_t)age_ms;
         }
+        if (s_obd_live_zero_started_ms != 0 && now_ms >= s_obd_live_zero_started_ms) {
+            uint64_t age_ms = now_ms - s_obd_live_zero_started_ms;
+            live_zero_age_ms = age_ms > UINT32_MAX ? UINT32_MAX : (uint32_t)age_ms;
+        }
         ESP_LOGI(TAG,
-                 "event=ignition_transition prev=%d next=%d rpm=%ld load=%ld adc=%d rpm_ign=%d obd_hold=%d stable_on=%d vehicle_battery=%.2f threshold=%.2f obd_live=%d confirmed_live_grace=%d hold_on=%d sample_age_ms=%lu evidence_age_ms=%lu ecu=%s",
+                 "event=ignition_transition prev=%d next=%d rpm=%ld load=%ld adc=%d rpm_ign=%d obd_hold=%d stable_on=%d vehicle_battery=%.2f threshold=%.2f obd_live=%d confirmed_live_grace=%d hold_on=%d live_zero_hold=%d live_zero_confirmed_off=%d sample_age_ms=%lu evidence_age_ms=%lu live_zero_age_ms=%lu ecu=%s",
                  s_ignition_log_initialized ? (s_last_ignition_state ? 1 : 0) : -1,
                  ignition_next ? 1 : 0,
                  (long)s_telemetry.obd_rpm,
@@ -413,8 +439,11 @@ telemetry_finalize:
                  obd_live_ignition ? 1 : 0,
                  confirmed_obd_live_grace ? 1 : 0,
                  preserve_degraded_ignition_on ? 1 : 0,
+                 hold_live_zero_on ? 1 : 0,
+                 obd_live_zero_confirmed_off ? 1 : 0,
                  (unsigned long)s_telemetry.obd_sample_age_ms,
                  (unsigned long)evidence_age_ms,
+                 (unsigned long)live_zero_age_ms,
                  obd_ecu_state);
         s_last_ignition_state = ignition_next;
         s_ignition_log_initialized = true;
@@ -584,6 +613,7 @@ static void state_machine_try_connect_network(void) {
     esp_err_t err = modem_lte_tick(now_ms);
     bool lte_now_initialized = modem_lte_is_initialized();
     if (err == ESP_ERR_NOT_FINISHED) {
+        state_machine_try_start_gnss_nonblocking();
         return;
     }
     if (err != ESP_OK) {
@@ -592,10 +622,8 @@ static void state_machine_try_connect_network(void) {
         return;
     }
 
-    if (lte_now_initialized) {
-        // GNSS startup is decoupled from LTE so network recovery can re-arm location without blocking this loop.
-        state_machine_try_start_gnss_nonblocking();
-    }
+    // GNSS startup is decoupled from LTE so location can warm while PDP/MQTT continue.
+    state_machine_try_start_gnss_nonblocking();
 
 #if !TRACKER_MQTT_RUNTIME_DISABLED
     if (lte_now_initialized && (!s_mqtt_started || !tracker_mqtt_is_connected())) {
