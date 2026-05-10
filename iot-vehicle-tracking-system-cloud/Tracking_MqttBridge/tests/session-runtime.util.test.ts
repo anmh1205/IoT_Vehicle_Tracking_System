@@ -5,6 +5,8 @@ import {
   hasAuthoritativeSessionIdentity,
   isEngineOffRuntimeState,
   normalizeStatusForSessionRuntime,
+  shouldEnsureSessionForTelemetry,
+  shouldRetainSessionHistory,
   telemetryReportsEngineOff,
 } from '../src/utils/session-runtime.util';
 import type { RuntimeStateSnapshot } from '../src/types/device-state.types';
@@ -73,6 +75,108 @@ test('authoritative identity keeps running status active across temporary engine
       hasAuthoritativeIdentity: true,
     }),
     'running',
+  );
+});
+
+test('stale telemetry with a resolved authoritative session is retained for session history only', () => {
+  assert.equal(
+    shouldRetainSessionHistory({
+      liveMutationAccepted: false,
+      resolvedSessionId: 155,
+      hasAuthoritativeIdentity: true,
+    }),
+    true,
+  );
+  assert.equal(
+    shouldRetainSessionHistory({
+      liveMutationAccepted: true,
+      resolvedSessionId: 155,
+      hasAuthoritativeIdentity: true,
+    }),
+    false,
+  );
+  assert.equal(
+    shouldRetainSessionHistory({
+      liveMutationAccepted: false,
+      resolvedSessionId: null,
+      hasAuthoritativeIdentity: true,
+    }),
+    false,
+  );
+  assert.equal(
+    shouldRetainSessionHistory({
+      liveMutationAccepted: false,
+      resolvedSessionId: 155,
+      hasAuthoritativeIdentity: false,
+    }),
+    false,
+  );
+});
+
+test('anonymous engine-off telemetry is not retained as completed session history', () => {
+  assert.equal(
+    shouldRetainSessionHistory({
+      liveMutationAccepted: true,
+      resolvedSessionId: null,
+      hasAuthoritativeIdentity: false,
+    }),
+    false,
+  );
+  assert.equal(
+    shouldRetainSessionHistory({
+      liveMutationAccepted: false,
+      resolvedSessionId: 155,
+      hasAuthoritativeIdentity: false,
+    }),
+    false,
+  );
+});
+
+test('active firmware telemetry with unresolved identity can ensure a session', () => {
+  assert.equal(
+    shouldEnsureSessionForTelemetry({
+      liveMutationAccepted: true,
+      resolvedSessionId: null,
+      hasAuthoritativeIdentity: true,
+      hasFallbackIdentity: true,
+      isActiveTelemetry: true,
+    }),
+    true,
+  );
+
+  assert.equal(
+    shouldEnsureSessionForTelemetry({
+      liveMutationAccepted: true,
+      resolvedSessionId: null,
+      hasAuthoritativeIdentity: false,
+      hasFallbackIdentity: true,
+      isActiveTelemetry: true,
+    }),
+    true,
+  );
+});
+
+test('engine-off heartbeat cannot create a telemetry fallback session', () => {
+  assert.equal(
+    shouldEnsureSessionForTelemetry({
+      liveMutationAccepted: true,
+      resolvedSessionId: null,
+      hasAuthoritativeIdentity: true,
+      hasFallbackIdentity: true,
+      isActiveTelemetry: false,
+    }),
+    false,
+  );
+
+  assert.equal(
+    shouldEnsureSessionForTelemetry({
+      liveMutationAccepted: true,
+      resolvedSessionId: 155,
+      hasAuthoritativeIdentity: true,
+      hasFallbackIdentity: true,
+      isActiveTelemetry: true,
+    }),
+    false,
   );
 });
 

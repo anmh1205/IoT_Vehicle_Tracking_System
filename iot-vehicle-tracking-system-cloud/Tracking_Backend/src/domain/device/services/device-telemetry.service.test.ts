@@ -11,7 +11,7 @@ describe('device-telemetry.service', () => {
   it('maps vehicleBattery to the canonical vehicle battery telemetry query', async () => {
     vi.mocked(findMany).mockResolvedValue([
       {
-        server_timestamp: new Date('2026-04-23T00:00:00.000Z'),
+        telemetry_timestamp: new Date('2026-04-23T00:00:00.000Z'),
         value: '12.45',
       },
     ]);
@@ -52,11 +52,11 @@ describe('device-telemetry.service', () => {
   it('skips null telemetry values instead of coercing them to zero', async () => {
     vi.mocked(findMany).mockResolvedValue([
       {
-        server_timestamp: new Date('2026-04-23T00:00:00.000Z'),
+        telemetry_timestamp: new Date('2026-04-23T00:00:00.000Z'),
         value: null,
       },
       {
-        server_timestamp: new Date('2026-04-23T00:01:00.000Z'),
+        telemetry_timestamp: new Date('2026-04-23T00:01:00.000Z'),
         value: '13.2',
       },
     ]);
@@ -77,9 +77,11 @@ describe('device-telemetry.service', () => {
     await getTelemetry('TRACKER_001', { metric: 'latitude' });
     const [sql] = vi.mocked(findMany).mock.calls[0] ?? [];
 
-    expect(sql).toContain('ORDER BY server_timestamp DESC');
+    expect(sql).toContain('COALESCE(device_timestamp, server_timestamp) AS telemetry_timestamp');
+    expect(sql).toContain('COALESCE(device_timestamp, server_timestamp) BETWEEN $2 AND $3');
+    expect(sql).toContain('ORDER BY telemetry_timestamp DESC, server_timestamp DESC');
     expect(sql).toContain('LIMIT 5000');
     expect(sql).toContain(') recent_points');
-    expect(sql).toContain('ORDER BY server_timestamp ASC');
+    expect(sql).toContain('ORDER BY telemetry_timestamp ASC');
   });
 });

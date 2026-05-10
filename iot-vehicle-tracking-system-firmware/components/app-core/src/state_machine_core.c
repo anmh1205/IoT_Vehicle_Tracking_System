@@ -875,11 +875,17 @@ static void state_machine_drop_stale_restored_session(void) {
 /**
  * @brief Emit the final session boundary, then tear down runtime session state.
  *
- * The final `stopped` status must be published before queue/session metadata is
- * cleared so the closing boundary still carries the active identifiers.
+ * A final rawdata snapshot and the final `stopped` status must be published
+ * before queue/session metadata is cleared so the closing boundary still
+ * carries the active identifiers.
  */
 static void state_machine_commit_session_end(void) {
     // Persist commit session end here so later boots, retries, or recovery paths can resume cleanly.
+    if (state_machine_should_throttle_rawdata()) {
+        ESP_LOGW(TAG,
+                 "event=session_end_rawdata_force reason=closing_session action=throttle_bypass");
+    }
+    state_machine_publish_rawdata();
     state_machine_publish_status("stopped", "ended");
     offline_queue_stop_session(true);
     offline_queue_set_session(0);

@@ -25,6 +25,27 @@ export const telemetryReportsEngineOff = (params: {
   runtimeState: RuntimeStateSnapshot;
 }): boolean => params.ignition === false || isEngineOffRuntimeState(params.runtimeState);
 
+export const shouldRetainSessionHistory = (params: {
+  liveMutationAccepted: boolean;
+  resolvedSessionId: number | null;
+  hasAuthoritativeIdentity: boolean;
+}): boolean =>
+  !params.liveMutationAccepted &&
+  params.resolvedSessionId !== null &&
+  params.hasAuthoritativeIdentity;
+
+export const shouldEnsureSessionForTelemetry = (params: {
+  liveMutationAccepted: boolean;
+  resolvedSessionId: number | null;
+  hasAuthoritativeIdentity: boolean;
+  hasFallbackIdentity: boolean;
+  isActiveTelemetry: boolean;
+}): boolean =>
+  params.liveMutationAccepted &&
+  params.resolvedSessionId === null &&
+  params.isActiveTelemetry &&
+  (params.hasAuthoritativeIdentity || params.hasFallbackIdentity);
+
 export const canUseRunningStatusForSession = (params: {
   cachedStatus: 'running' | 'stopped' | 'online';
   runtimeState: RuntimeStateSnapshot;

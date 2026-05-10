@@ -12,6 +12,7 @@ import {
 import { writeDeviceTelemetry } from '../infrastructure/victoriametrics';
 import { writeDeviceEvent } from '../infrastructure/victorialogs';
 import { publishInternalEvent } from '../publishers/internal-event.publisher';
+import { publishToDevice } from '../mqtt/client';
 import { getStatus, resolveSessionId, setStatus } from '../cache/device-state.cache';
 import { addUpdate } from '../services/batch-writer.service';
 import { checkGeofences } from '../services/geofence-checker.service';
@@ -21,6 +22,8 @@ import { resolveLocalSessionKey } from '../utils/session-identity.util';
 import { normalizeRuntimeState, type RuntimeStateSnapshot } from '../types/device-state.types';
 import {
   hasAuthoritativeSessionIdentity,
+  shouldEnsureSessionForTelemetry,
+  shouldRetainSessionHistory,
   shouldAcceptLiveMutation,
   telemetryReportsEngineOff,
 } from '../utils/session-runtime.util';
@@ -57,6 +60,26 @@ const GENERIC_DTC_ACTION =
 const ruleCooldownUntil = new Map<string, number>();
 const idleAnomalyStartedAt = new Map<string, number>();
 const activeDtcRuleKeysByDevice = new Map<string, Set<string>>();
+
+const publishAssignSession = (params: {
+  deviceId: string;
+  localSessionKey?: number;
+  canonicalSessionId: string;
+  bootId?: string;
+}): void => {
+  if (!params.localSessionKey || !params.bootId) {
+    return;
+  }
+
+  publishToDevice(params.deviceId, 'commands', {
+    command: 'assign_session',
+    params: {
+      local_session_key: params.localSessionKey,
+      canonical_session_id: params.canonicalSessionId,
+      boot_id: params.bootId,
+    },
+  });
+};
 
 const buildSanitizedRawPayload = (payload: RawDataPayload): Omit<RawDataPayload, 'auth_token'> => {
   const { auth_token: _authToken, ...safePayload } = payload;
@@ -916,23 +939,25 @@ export const handleRawData = async (
     localSessionKey,
     canonicalSessionId: payloadCanonicalSessionId,
   });
-  const canCreateFallbackSession =
-    liveMutationDecision.accept &&
-    sessionId === null &&
-    !hasAuthoritativeIdentity &&
-    isLikelyActiveSessionTelemetry({
-      ignition: payload.data.ignition,
-      speed: effectiveSpeed,
-      runtimeState,
-      previousStatus,
-      persistedStatus: device.current_status,
-    }) &&
-    (
-      sessionBootId !== undefined ||
-      localSessionKey !== undefined ||
-      previousState?.status === 'running' ||
-      device.current_status === 'running'
-    );
+  const isActiveSessionTelemetry = isLikelyActiveSessionTelemetry({
+    ignition: payload.data.ignition,
+    speed: effectiveSpeed,
+    runtimeState,
+    previousStatus,
+    persistedStatus: device.current_status,
+  });
+  const hasFallbackIdentity =
+    sessionBootId !== undefined ||
+    localSessionKey !== undefined ||
+    previousState?.status === 'running' ||
+    device.current_status === 'running';
+  const canCreateFallbackSession = shouldEnsureSessionForTelemetry({
+    liveMutationAccepted: liveMutationDecision.accept,
+    resolvedSessionId: sessionId,
+    hasAuthoritativeIdentity,
+    hasFallbackIdentity,
+    isActiveTelemetry: isActiveSessionTelemetry,
+  });
 
   if (canCreateFallbackSession) {
     const ensuredSession = await ensureDeviceSession(payload.device_id, timestampMs, receivedAtMs, {
@@ -944,6 +969,12 @@ export const handleRawData = async (
     });
     sessionId = ensuredSession.sessionId;
     canonicalSessionId = String(ensuredSession.sessionId);
+    publishAssignSession({
+      deviceId: payload.device_id,
+      localSessionKey,
+      canonicalSessionId,
+      bootId: sessionBootId,
+    });
 
     if (ensuredSession.isNew) {
       publishInternalEvent('session', {
@@ -991,6 +1022,43 @@ export const handleRawData = async (
         event: 'rawdata_live_mutation_ignored',
       },
       'Telemetry live mutation ignored',
+    );
+  }
+
+  const shouldRetainStaleSessionTelemetry = shouldRetainSessionHistory({
+    liveMutationAccepted: liveMutationDecision.accept,
+    resolvedSessionId: sessionId,
+    hasAuthoritativeIdentity,
+  });
+  const shouldTreatEngineOffTelemetryAsHistorical =
+    liveMutationDecision.accept &&
+    sessionId !== null &&
+    hasAuthoritativeIdentity &&
+    reportsEngineOff &&
+    previousState?.status !== 'running' &&
+    device.current_status !== 'running';
+  const shouldAppendHistoricalSessionTelemetry =
+    shouldRetainStaleSessionTelemetry ||
+    shouldTreatEngineOffTelemetryAsHistorical;
+  const shouldMutateLiveState =
+    liveMutationDecision.accept && !shouldAppendHistoricalSessionTelemetry;
+  const shouldPublishDataEvent = shouldMutateLiveState || shouldAppendHistoricalSessionTelemetry;
+
+  if (shouldAppendHistoricalSessionTelemetry) {
+    logger.info(
+      {
+        deviceId: payload.device_id,
+        sessionId,
+        localSessionKey,
+        canonicalSessionId,
+        bootId: sessionBootId,
+        seqNo,
+        timestampMs,
+        liveMutationReason: liveMutationDecision.reason,
+        engineOffTelemetry: shouldTreatEngineOffTelemetryAsHistorical,
+        event: 'rawdata_session_history_retained',
+      },
+      'Telemetry retained for session history',
     );
   }
 
@@ -1096,10 +1164,16 @@ export const handleRawData = async (
       : device.current_status === 'running' || device.current_status === 'online'
         ? device.current_status
         : 'stopped';
-  const effectiveStatus = sessionId !== null ? 'running' : (previousState?.status ?? fallbackStatus);
+  const effectiveStatus =
+    sessionId !== null && !shouldAppendHistoricalSessionTelemetry
+      ? 'running'
+      : (previousState?.status ?? fallbackStatus);
+  const eventStatus = shouldMutateLiveState
+    ? effectiveStatus
+    : (previousState?.status ?? fallbackStatus);
 
   // 6. Add to batch writer (PostgreSQL)
-  if (liveMutationDecision.accept) {
+  if (shouldMutateLiveState) {
     addUpdate({
       deviceId: payload.device_id,
       status: effectiveStatus === 'offline' ? 'disconnected' : effectiveStatus,
@@ -1110,22 +1184,26 @@ export const handleRawData = async (
       serverTimestamp: receivedAtMs,
       runtimeState,
     });
+  }
 
-    if (sessionId !== null) {
-      await touchDeviceSession({
-        deviceId: payload.device_id,
-        sessionId,
-        deviceTimestampMs: timestampMs,
-        serverTimestampMs: receivedAtMs,
-        imuAccelDeltaMps2,
-        vehicleBattery: payload.data.vehicle_battery,
-        deviceBattery: payload.data.device_battery,
-        latitude: effectiveLatitude,
-        longitude: effectiveLongitude,
-        speed: effectiveSpeed,
-      });
-    }
+  if (sessionId !== null && shouldPublishDataEvent) {
+    await touchDeviceSession({
+      deviceId: payload.device_id,
+      sessionId,
+      deviceTimestampMs: timestampMs,
+      serverTimestampMs: receivedAtMs,
+      imuAccelDeltaMps2,
+      vehicleBattery: payload.data.vehicle_battery,
+      deviceBattery: payload.data.device_battery,
+      latitude: effectiveLatitude,
+      longitude: effectiveLongitude,
+      speed: effectiveSpeed,
+      allowCompleted: shouldAppendHistoricalSessionTelemetry,
+      updateDeviceState: shouldMutateLiveState,
+    });
+  }
 
+  if (shouldMutateLiveState) {
     // 7. Check active vehicle zone (fire-and-forget, non-blocking)
     if (
       effectiveLatitude !== undefined &&
@@ -1152,12 +1230,14 @@ export const handleRawData = async (
       canonicalSessionId,
       bootId: sessionBootId,
     });
+  }
 
+  if (shouldPublishDataEvent) {
     publishInternalEvent('data', {
       device_id: payload.device_id,
       vehicle_id: device.vehicle_id ?? undefined,
       session_id: sessionId,
-      current_status: effectiveStatus,
+      current_status: eventStatus,
       latitude: effectiveLatitude,
       longitude: effectiveLongitude,
       speed: effectiveSpeed,
@@ -1179,6 +1259,9 @@ export const handleRawData = async (
       schema_version: schemaVersion,
       seq_no: seqNo,
       boot_id: bootId,
+      live_mutation: shouldMutateLiveState,
+      historical_session_append: shouldAppendHistoricalSessionTelemetry,
+      stale_reason: shouldRetainStaleSessionTelemetry ? liveMutationDecision.reason : undefined,
       timestamp: new Date(timestampMs).toISOString(),
     });
   }
@@ -1195,7 +1278,7 @@ export const handleRawData = async (
     bootId,
   };
 
-  if (liveMutationDecision.accept) {
+  if (shouldMutateLiveState) {
     const obdRuleResults = await Promise.allSettled([
       evaluateObdMaintenanceRules(
         normalizedDiagnostics,

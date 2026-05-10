@@ -263,6 +263,9 @@ const persistRawDataEventLog = async (
     error_code: toOptionalNumber(payload.error_code),
     diagnostics: payload.diagnostics ?? null,
     raw_payload: sanitizeRawPayload(payload.raw_payload),
+    live_mutation: payload.live_mutation !== false,
+    historical_session_append: payload.historical_session_append === true,
+    stale_reason: payload.stale_reason ?? null,
     source: 'mqtt_bridge_rawdata',
   };
 
@@ -274,7 +277,8 @@ const persistRawDataEventLog = async (
   };
 
   const sessionId = toOptionalInt(payload.session_id);
-  const eventTimestamp = new Date(toTimestampMs(envelope.timestamp)).toISOString();
+  const payloadTimestamp = payload.timestamp == null ? envelope.timestamp : String(payload.timestamp);
+  const eventTimestamp = new Date(toTimestampMs(payloadTimestamp)).toISOString();
 
   await pool.query(
     `INSERT INTO event_logs (
@@ -407,6 +411,7 @@ export const initMqttEventListener = (): void => {
 
       case 'data':
         {
+          const isLiveMutation = envelopePayload.live_mutation !== false;
           const vehicleBattery = toOptionalNumber(envelopePayload.vehicle_battery);
           const deviceBattery = toOptionalNumber(envelopePayload.device_battery);
           const engineTemperature =
@@ -419,75 +424,77 @@ export const initMqttEventListener = (): void => {
             getDiagnosticsSignal(envelopePayload, 'rpm') ??
             toOptionalNumber(envelopePayload.rpm);
 
-          publishEvent('device:position', {
-            deviceId: String(envelopePayload.device_id ?? ''),
-            latitude: toOptionalNumber(envelopePayload.latitude),
-            longitude: toOptionalNumber(envelopePayload.longitude),
-            speed: toOptionalNumber(envelopePayload.speed),
-            course: toOptionalNumber(envelopePayload.course),
-            timestamp: toTimestampMs(data.timestamp),
-            status:
-              envelopePayload.current_status == null
-                ? undefined
-                : String(envelopePayload.current_status),
-            localSessionKey: toOptionalInt(envelopePayload.local_session_key) ?? null,
-            canonicalSessionId:
-              envelopePayload.canonical_session_id == null
-                ? null
-                : String(envelopePayload.canonical_session_id),
-            ignitionState:
-              envelopePayload.ignition_state == null ? undefined : String(envelopePayload.ignition_state) as
-                | 'ON'
-                | 'OFF'
-                | 'UNKNOWN',
-            motionState:
-              envelopePayload.motion_state == null ? undefined : String(envelopePayload.motion_state) as
-                | 'MOVING'
-                | 'STATIONARY'
-                | 'UNKNOWN',
-            vehicleState:
-              envelopePayload.vehicle_state == null ? undefined : String(envelopePayload.vehicle_state) as
-                | 'PARKED_OFF'
-                | 'ROLLING_IGN_OFF'
-                | 'IDLING_ON'
-                | 'MOVING_ON'
-                | 'UNKNOWN_STATIONARY'
-                | 'UNKNOWN_MOVING'
-                | 'UNKNOWN',
-            deviceState:
-              envelopePayload.device_state == null ? undefined : String(envelopePayload.device_state) as
-                | 'BOOTING'
-                | 'ACTIVE'
-                | 'SLEEP_PREPARE'
-                | 'SLEEPING'
-                | 'WAKING'
-                | 'ALARM'
-                | 'OTA'
-                | 'FAULT',
-            sleepMode:
-              envelopePayload.sleep_mode == null ? undefined : String(envelopePayload.sleep_mode) as
-                | 'NONE'
-                | 'FAKE'
-                | 'LIGHT'
-                | 'DEEP',
-            stateUpdatedAt:
-              envelopePayload.state_updated_at == null
-                ? undefined
-                : String(envelopePayload.state_updated_at),
-            vehicleId:
-              envelopePayload.vehicle_id == null ? null : String(envelopePayload.vehicle_id),
-            deviceBattery: deviceBattery == null ? null : Number(deviceBattery),
-            vehicleBattery: vehicleBattery == null ? null : Number(vehicleBattery),
-            satellites: toOptionalInt(envelopePayload.satellites) ?? null,
-            imuAccelDeltaMps2:
-              toOptionalNumber(envelopePayload.imu_accel_delta_mps2 ?? envelopePayload.vibration) ?? null,
-            errorCode: toOptionalNumber(envelopePayload.error_code) ?? null,
-            temperature: ambientTemperature == null ? null : Number(ambientTemperature),
-            engineTemperature: engineTemperature == null ? null : Number(engineTemperature),
-            rpm: rpm == null ? null : Number(rpm),
-            metadata,
-          });
-          publishStatsUpdate('device:position', envelopePayload, data.timestamp);
+          if (isLiveMutation) {
+            publishEvent('device:position', {
+              deviceId: String(envelopePayload.device_id ?? ''),
+              latitude: toOptionalNumber(envelopePayload.latitude),
+              longitude: toOptionalNumber(envelopePayload.longitude),
+              speed: toOptionalNumber(envelopePayload.speed),
+              course: toOptionalNumber(envelopePayload.course),
+              timestamp: toTimestampMs(data.timestamp),
+              status:
+                envelopePayload.current_status == null
+                  ? undefined
+                  : String(envelopePayload.current_status),
+              localSessionKey: toOptionalInt(envelopePayload.local_session_key) ?? null,
+              canonicalSessionId:
+                envelopePayload.canonical_session_id == null
+                  ? null
+                  : String(envelopePayload.canonical_session_id),
+              ignitionState:
+                envelopePayload.ignition_state == null ? undefined : String(envelopePayload.ignition_state) as
+                  | 'ON'
+                  | 'OFF'
+                  | 'UNKNOWN',
+              motionState:
+                envelopePayload.motion_state == null ? undefined : String(envelopePayload.motion_state) as
+                  | 'MOVING'
+                  | 'STATIONARY'
+                  | 'UNKNOWN',
+              vehicleState:
+                envelopePayload.vehicle_state == null ? undefined : String(envelopePayload.vehicle_state) as
+                  | 'PARKED_OFF'
+                  | 'ROLLING_IGN_OFF'
+                  | 'IDLING_ON'
+                  | 'MOVING_ON'
+                  | 'UNKNOWN_STATIONARY'
+                  | 'UNKNOWN_MOVING'
+                  | 'UNKNOWN',
+              deviceState:
+                envelopePayload.device_state == null ? undefined : String(envelopePayload.device_state) as
+                  | 'BOOTING'
+                  | 'ACTIVE'
+                  | 'SLEEP_PREPARE'
+                  | 'SLEEPING'
+                  | 'WAKING'
+                  | 'ALARM'
+                  | 'OTA'
+                  | 'FAULT',
+              sleepMode:
+                envelopePayload.sleep_mode == null ? undefined : String(envelopePayload.sleep_mode) as
+                  | 'NONE'
+                  | 'FAKE'
+                  | 'LIGHT'
+                  | 'DEEP',
+              stateUpdatedAt:
+                envelopePayload.state_updated_at == null
+                  ? undefined
+                  : String(envelopePayload.state_updated_at),
+              vehicleId:
+                envelopePayload.vehicle_id == null ? null : String(envelopePayload.vehicle_id),
+              deviceBattery: deviceBattery == null ? null : Number(deviceBattery),
+              vehicleBattery: vehicleBattery == null ? null : Number(vehicleBattery),
+              satellites: toOptionalInt(envelopePayload.satellites) ?? null,
+              imuAccelDeltaMps2:
+                toOptionalNumber(envelopePayload.imu_accel_delta_mps2 ?? envelopePayload.vibration) ?? null,
+              errorCode: toOptionalNumber(envelopePayload.error_code) ?? null,
+              temperature: ambientTemperature == null ? null : Number(ambientTemperature),
+              engineTemperature: engineTemperature == null ? null : Number(engineTemperature),
+              rpm: rpm == null ? null : Number(rpm),
+              metadata,
+            });
+            publishStatsUpdate('device:position', envelopePayload, data.timestamp);
+          }
           void persistRawDataEventLog(data, envelopePayload).catch((error) => {
             log.error(
               'Failed to persist rawdata event log from mqtt bridge',

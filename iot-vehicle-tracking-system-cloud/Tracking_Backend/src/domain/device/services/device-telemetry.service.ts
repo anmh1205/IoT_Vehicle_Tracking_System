@@ -1,11 +1,12 @@
 import { findMany } from '@/infrastructure/database/queries';
 
 interface TelemetryRow {
-  server_timestamp: Date;
+  telemetry_timestamp: Date;
   value: string | null;
 }
 
 const DEFAULT_METRIC = 'imuAccelDeltaMps2';
+const TELEMETRY_TIMESTAMP_SQL = 'COALESCE(device_timestamp, server_timestamp)';
 const METRIC_ALIASES: Record<string, string> = {
   imuacceldeltamps2: 'imuAccelDeltaMps2',
   vibration: 'imuAccelDeltaMps2',
@@ -115,17 +116,17 @@ export const getTelemetry = async (
   const sql = METRIC_SQL[metric] ?? METRIC_SQL[DEFAULT_METRIC];
 
   const rows = await findMany<TelemetryRow>(
-    `SELECT server_timestamp, value
+    `SELECT telemetry_timestamp, value
      FROM (
-       SELECT server_timestamp, ${sql.value} AS value
+       SELECT ${TELEMETRY_TIMESTAMP_SQL} AS telemetry_timestamp, ${sql.value} AS value
        FROM event_logs
        WHERE device_id = $1
-         AND server_timestamp BETWEEN $2 AND $3
+         AND ${TELEMETRY_TIMESTAMP_SQL} BETWEEN $2 AND $3
          AND ${sql.exists}
-       ORDER BY server_timestamp DESC
+       ORDER BY telemetry_timestamp DESC, server_timestamp DESC
        LIMIT 5000
      ) recent_points
-     ORDER BY server_timestamp ASC`,
+     ORDER BY telemetry_timestamp ASC`,
     [deviceId, from.toISOString(), to.toISOString()],
   );
 
@@ -142,7 +143,7 @@ export const getTelemetry = async (
       }
 
       return [{
-        timestamp: row.server_timestamp.toISOString(),
+        timestamp: row.telemetry_timestamp.toISOString(),
         value,
       }];
     }),

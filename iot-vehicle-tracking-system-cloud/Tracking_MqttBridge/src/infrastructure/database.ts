@@ -67,7 +67,6 @@ const TRANSIENT_HEARTBEAT_SESSION_MAX_RUNTIME_SECONDS = 120;
 const TRANSIENT_HEARTBEAT_SESSION_MAX_DATA_POINTS = 1;
 const TRANSIENT_AUTHORITATIVE_SESSION_MAX_RUNTIME_SECONDS = 180;
 const TRANSIENT_AUTHORITATIVE_SESSION_MAX_DATA_POINTS = 0;
-
 const toInt = (value: string | number | null | undefined): number => {
   const parsed = Number.parseInt(String(value ?? '0'), 10);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -447,14 +446,21 @@ export const findDeviceSessionIdByIdentity = async (
   sessionIdentity: Pick<SessionIdentityInput, 'localSessionKey' | 'canonicalSessionId' | 'bootId'>,
 ): Promise<number | null> => {
   const canonicalSessionId = toOptionalPositiveInt(sessionIdentity.canonicalSessionId);
-  if (canonicalSessionId !== null) {
-    return canonicalSessionId;
-  }
-
   const localSessionKey = sessionIdentity.localSessionKey ?? null;
   const firmwareBootId = sessionIdentity.bootId?.trim() || null;
 
   try {
+    if (canonicalSessionId !== null) {
+      const result = await pool.query<DeviceSessionRow>(
+        `SELECT id
+         FROM device_sessions
+         WHERE id = $1 AND device_id = $2
+         LIMIT 1`,
+        [canonicalSessionId, deviceId],
+      );
+      return result.rows[0]?.id ?? null;
+    }
+
     if (localSessionKey !== null && firmwareBootId !== null) {
       const result = await pool.query<DeviceSessionRow>(
         `SELECT id
@@ -549,8 +555,16 @@ export const touchDeviceSession = async (params: {
   latitude?: number;
   longitude?: number;
   speed?: number;
+  allowCompleted?: boolean;
+  updateDeviceState?: boolean;
 }): Promise<void> => {
   const serverOccurredAt = toIsoTimestamp(params.serverTimestampMs ?? Date.now());
+  const deviceOccurredAt = toIsoTimestamp(params.deviceTimestampMs);
+  const allowCompleted = params.allowCompleted === true;
+  const updateDeviceState = params.updateDeviceState !== false;
+  const sessionStatusPredicate = allowCompleted
+    ? "status IN ('running', 'completed')"
+    : "status = 'running'";
 
   try {
     const touched = await pool.query(
@@ -558,6 +572,16 @@ export const touchDeviceSession = async (params: {
        SET
          last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
          data_points_count = COALESCE(data_points_count, 0) + 1,
+         server_session_end = CASE
+           WHEN $10::boolean AND status = 'completed'
+             THEN GREATEST(COALESCE(server_session_end, $2::timestamptz), $2::timestamptz)
+           ELSE server_session_end
+         END,
+         session_end = CASE
+           WHEN $10::boolean AND status = 'completed'
+             THEN GREATEST(COALESCE(session_end, $11::timestamptz), $11::timestamptz)
+           ELSE session_end
+         END,
          uptime = GREATEST(
            COALESCE(uptime, 0),
            EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
@@ -587,7 +611,7 @@ export const touchDeviceSession = async (params: {
          last_longitude = COALESCE($7, last_longitude),
          last_speed = COALESCE($8, last_speed),
          updated_at = NOW()
-       WHERE id = $1 AND device_id = $9 AND status = 'running'
+       WHERE id = $1 AND device_id = $9 AND ${sessionStatusPredicate}
        RETURNING id`,
       [
         params.sessionId,
@@ -599,14 +623,20 @@ export const touchDeviceSession = async (params: {
         params.longitude ?? null,
         params.speed ?? null,
         params.deviceId,
+        allowCompleted,
+        deviceOccurredAt,
       ],
     );
 
     if (touched.rowCount === 0) {
       logger.warn(
-        { sessionId: params.sessionId, deviceId: params.deviceId, event: 'touch_device_session_skipped', reason: 'session_not_running' },
+        { sessionId: params.sessionId, deviceId: params.deviceId, event: 'touch_device_session_skipped', reason: 'session_not_touchable' },
         'Touch device session skipped',
       );
+      return;
+    }
+
+    if (!updateDeviceState) {
       return;
     }
 
@@ -634,6 +664,16 @@ export const touchDeviceSession = async (params: {
          SET
            last_update = GREATEST(COALESCE(last_update, $2::timestamptz), $2::timestamptz),
            data_points_count = COALESCE(data_points_count, 0) + 1,
+           server_session_end = CASE
+             WHEN $10::boolean AND status = 'completed'
+               THEN GREATEST(COALESCE(server_session_end, $2::timestamptz), $2::timestamptz)
+             ELSE server_session_end
+           END,
+           session_end = CASE
+             WHEN $10::boolean AND status = 'completed'
+               THEN GREATEST(COALESCE(session_end, $11::timestamptz), $11::timestamptz)
+             ELSE session_end
+           END,
            uptime = GREATEST(
              COALESCE(uptime, 0),
              EXTRACT(EPOCH FROM ($2::timestamptz - COALESCE(server_session_start, created_at)))::int,
@@ -658,7 +698,7 @@ export const touchDeviceSession = async (params: {
            last_longitude = COALESCE($7, last_longitude),
            last_speed = COALESCE($8, last_speed),
            updated_at = NOW()
-         WHERE id = $1 AND device_id = $9 AND status = 'running'
+         WHERE id = $1 AND device_id = $9 AND ${sessionStatusPredicate}
          RETURNING id`,
         [
           params.sessionId,
@@ -670,14 +710,20 @@ export const touchDeviceSession = async (params: {
           params.longitude ?? null,
           params.speed ?? null,
           params.deviceId,
+          allowCompleted,
+          deviceOccurredAt,
         ],
       );
 
       if (touched.rowCount === 0) {
         logger.warn(
-          { sessionId: params.sessionId, deviceId: params.deviceId, event: 'touch_device_session_skipped', reason: 'session_not_running' },
+          { sessionId: params.sessionId, deviceId: params.deviceId, event: 'touch_device_session_skipped', reason: 'session_not_touchable' },
           'Touch device session skipped',
         );
+        return;
+      }
+
+      if (!updateDeviceState) {
         return;
       }
 

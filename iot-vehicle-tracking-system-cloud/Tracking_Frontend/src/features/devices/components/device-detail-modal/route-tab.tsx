@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { SESSION_STATUS_LABELS } from '@/features/devices/components/device-constants';
-import type { DeviceSession, DeviceTelemetryRow } from '@/features/devices/types';
 import { formatDateTime, formatDuration, formatNumber } from '@/lib/utils/date/format';
 import { useDeviceDetailModal } from './modal-context';
 import { RouteReplayMap } from './route-replay-map';
 import {
   buildRouteReplayPoints,
+  countRouteReplayPointsForSession,
+  filterTelemetryRowsBySession,
   formatCoordinateLabel,
   hasValidTelemetryCoordinates,
   selectLatestContiguousRouteRows,
@@ -75,32 +76,6 @@ const toShortDateLabel = (value: string) => {
   return year && month && day ? `${day}/${month}/${year}` : value;
 };
 
-const filterRowsBySession = (rows: DeviceTelemetryRow[], session: DeviceSession | null) => {
-  if (!session) {
-    return [];
-  }
-
-  const start = toTimestampMs(session.serverSessionStart);
-  const end = toTimestampMs(session.serverSessionEnd);
-
-  if (start === null) {
-    return [];
-  }
-
-  return rows.filter((row) => {
-    const timestamp = toTimestampMs(row.timestamp);
-    if (timestamp === null || timestamp < start) {
-      return false;
-    }
-
-    if (end !== null && timestamp > end) {
-      return false;
-    }
-
-    return true;
-  });
-};
-
 export const RouteTab = () => {
   const {
     sessions,
@@ -134,10 +109,10 @@ export const RouteTab = () => {
     [selectedSessionId, sessions],
   );
 
-  const telemetryCountBySession = useMemo(() => {
+  const replayPointCountBySession = useMemo(() => {
     const entries: Array<[number, number]> = sessions.map((session) => [
       session.id,
-      filterRowsBySession(trackingRowsAscending, session).length,
+      countRouteReplayPointsForSession(trackingRowsAscending, session),
     ]);
     return new Map<number, number>(entries);
   }, [sessions, trackingRowsAscending]);
@@ -149,15 +124,15 @@ export const RouteTab = () => {
     }
 
     const preferredSessionId =
-      sessions.find((session) => (telemetryCountBySession.get(session.id) ?? 0) > 0)?.id ?? sessions[0].id;
+      sessions.find((session) => (replayPointCountBySession.get(session.id) ?? 0) > 0)?.id ?? sessions[0].id;
 
     setSelectedSessionId((current) =>
       current !== null && sessions.some((session) => session.id === current) ? current : preferredSessionId,
     );
-  }, [sessions, telemetryCountBySession]);
+  }, [sessions, replayPointCountBySession]);
 
   const selectedRows = useMemo(
-    () => selectLatestContiguousRouteRows(filterRowsBySession(trackingRowsAscending, selectedSession)),
+    () => selectLatestContiguousRouteRows(filterTelemetryRowsBySession(trackingRowsAscending, selectedSession)),
     [selectedSession, trackingRowsAscending],
   );
   const replayPoints = useMemo(() => buildRouteReplayPoints(selectedRows), [selectedRows]);
@@ -389,7 +364,7 @@ export const RouteTab = () => {
             ) : sessions.length > 0 ? (
               sessions.map((session) => {
                 const selected = session.id === selectedSession?.id;
-                const telemetryCount = telemetryCountBySession.get(session.id) ?? 0;
+                const replayPointCount = replayPointCountBySession.get(session.id) ?? 0;
                 const durationSeconds = session.uptime ?? toDurationSeconds(session.serverSessionStart, session.serverSessionEnd);
 
                 return (
@@ -423,14 +398,18 @@ export const RouteTab = () => {
                         <span className="mt-1 block font-medium text-foreground">{formatDuration(durationSeconds)}</span>
                       </p>
                       <p>
-                        <span className="block uppercase tracking-[0.14em]">Dữ liệu trong kỳ</span>
-                        <span className="mt-1 block font-medium text-foreground">{formatNumber(telemetryCount)} điểm</span>
+                        <span className="block uppercase tracking-[0.14em]">Điểm GPS trong kỳ</span>
+                        <span className="mt-1 block font-medium text-foreground">{formatNumber(replayPointCount)} điểm</span>
                       </p>
                     </div>
 
-                    {telemetryCount === 0 ? (
+                    {replayPointCount === 0 ? (
                       <p className="mt-3 text-[11px] text-amber-700 dark:text-amber-200">
-                        Phiên này chưa có telemetry trong dải {zeroTelemetryRangeLabel}. Thử mở dải thời gian lớn hơn.
+                        Phiên này chưa có điểm GPS hợp lệ trong dải {zeroTelemetryRangeLabel}. Thử mở dải thời gian lớn hơn.
+                      </p>
+                    ) : replayPointCount === 1 ? (
+                      <p className="mt-3 text-[11px] text-amber-700 dark:text-amber-200">
+                        Phiên này mới có 1 điểm GPS hợp lệ, chưa đủ để phát lại lộ trình.
                       </p>
                     ) : null}
                   </button>

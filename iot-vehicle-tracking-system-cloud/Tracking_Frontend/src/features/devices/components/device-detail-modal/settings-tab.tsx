@@ -41,7 +41,7 @@ import {
 
 const schema = z.object({
   deviceName: z.string().min(1),
-  drivingIntervalSec: z.number().int().min(10).max(3600),
+  drivingIntervalSec: z.number().int().min(1).max(3600),
   parkingIntervalSec: z.number().int().min(30).max(21600),
   parkingHeartbeatSec: z.number().int().min(30).max(21600),
   overspeedKph: z.number().int().min(20).max(180),
