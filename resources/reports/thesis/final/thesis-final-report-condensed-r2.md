@@ -947,134 +947,143 @@ Người vận hành có thể lọc theo mức độ, trạng thái và nguồn
 hoặc đánh dấu đã giải quyết. Cách tách riêng màn hình cảnh báo giúp việc theo dõi vận hành và việc xử
 lý sự cố không chồng lấn lên nhau.
 
-## 4.3. Kết quả kiểm thử và đo lường – Measurement and Result
+## 4.3. Kết quả kiểm thử và đo lường – Measurements and Results
 
-Sau khi hoàn thiện nguyên mẫu, phần đo kiểm được tách theo các lớp chính của hệ thống: phần cứng thiết
-bị, phần mềm thiết bị, phần mềm hệ thống và khả năng lưu trữ dữ liệu trên `VPS`. Cách chia này giúp
-phần kết quả không chỉ liệt kê số đo, mà còn cho thấy từng lớp của hệ thống đã được kiểm chứng như thế
-nào trong điều kiện thử nghiệm.
+Kết quả đo kiểm được trình bày theo bốn nhóm: phần cứng thiết bị, phần mềm thiết bị, phần mềm hệ
+thống và khả năng lưu trữ dữ liệu trên `VPS`.
 
 **Bảng 4.3: Phạm vi các nhóm kết quả kiểm thử và đánh giá**
 
-| STT | Nhóm đánh giá | Nội dung chính | Căn cứ sử dụng |
-| :-- | :------------ | :------------- | :------------- |
-| 1   | Kết quả kiểm thử phần cứng thiết bị | Tiêu thụ điện, dòng ngủ sâu, pin dự phòng và ảnh hưởng lên ắc quy xe | Số đo dòng/công suất trên nguyên mẫu và giả định hiệu suất nguồn |
-| 2   | Kết quả kiểm thử phần mềm thiết bị | Thời gian thức dậy, nối lại dữ liệu xe, lấy lại vị trí và gửi bù | Kết quả chạy thử firmware trên bàn thử và trên xe |
-| 3   | Kết quả kiểm thử phần mềm hệ thống | Độ trễ truyền dữ liệu, phản hồi máy chủ, cập nhật giao diện và cảnh báo | So sánh thời điểm gửi bản tin và thời điểm giao diện cập nhật |
-| 4   | Đánh giá lưu trữ dữ liệu trên VPS | Khả năng lưu dữ liệu nghiệp vụ, điểm telemetry và log | Ước tính theo dung lượng lưu trữ, kích thước bản ghi và chu kỳ gửi dữ liệu |
+| STT | Nhóm đánh giá                           | Nội dung chính                                                                        | Căn cứ sử dụng                                                                         |
+| :-- | :------------------------------------------ | :-------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
+| 1   | Kết quả kiểm thử phần cứng thiết bị | Tiêu thụ điện, dòng ngủ sâu, pin dự phòng và ảnh hưởng lên ắc quy xe     | Số đo dòng/công suất trên nguyên mẫu và giả định hiệu suất nguồn            |
+| 2   | Kết quả kiểm thử phần mềm thiết bị  | Thời gian thức dậy, nối lại dữ liệu xe, lấy lại vị trí và gửi bù          | Kết quả chạy thử firmware trên bàn thử và trên xe                                 |
+| 3   | Kết quả kiểm thử phần mềm hệ thống  | Độ trễ truyền dữ liệu, phản hồi máy chủ, cập nhật giao diện và cảnh báo | So sánh thời điểm gửi bản tin và thời điểm giao diện cập nhật                 |
+| 4   | Đánh giá lưu trữ dữ liệu trên VPS   | Khả năng lưu dữ liệu nghiệp vụ, điểm telemetry và log                         | Ước tính theo dung lượng lưu trữ, kích thước bản ghi và chu kỳ gửi dữ liệu |
 
-**a, Kết quả kiểm thử phần cứng thiết bị**
+### 4.3.1. Kết quả kiểm thử phần cứng thiết bị
 
-Kết quả đo tiêu thụ điện chính của nguyên mẫu được tổng hợp trong Bảng 4.4. Đây là các giá trị đo hoặc
-quan sát trực tiếp trong quá trình triển khai, dùng làm đầu vào cho phép tính pin và ắc quy phía sau.
+#### a, Số đo đầu vào dùng cho phép tính nguồn
+
+Kết quả đo tiêu thụ điện chính của nguyên mẫu được tổng hợp trong Bảng 4.4. Đây là các giá trị đo và
+quan sát trực tiếp trong quá trình triển khai.
 
 **Bảng 4.4: Kết quả đo tiêu thụ điện dùng cho phép tính nguồn**
 
-| STT | Hạng mục đo | Kết quả đo / quan sát | Quy đổi dùng trong tính toán |
-| :-- | :---------- | :-------------------- | :--------------------------- |
-| 1   | Thiết bị theo dõi khi hoạt động | Công suất xấp xỉ 1 W | Lấy $P_{\mathrm{chay}} = 1\ \mathrm{W}$ |
-| 2   | Thiết bị theo dõi ở trạng thái ngủ sâu | Dòng khoảng 0,5 mA tại 12 V | $P_{\mathrm{ngu}} = 12\ \mathrm{V} \times 0{,}0005\ \mathrm{A} = 0{,}006\ \mathrm{W}$ |
-| 3   | Bộ đọc `vgate iCar Pro` khi còn hoạt động | Công suất xấp xỉ 1,2 W; tự tắt sau khoảng 30 phút khi tắt khóa | $E_{\mathrm{vgate}} = 1{,}2\ \mathrm{W} \times 0{,}5\ \mathrm{h} = 0{,}6\ \mathrm{Wh}$ |
+| STT | Hạng mục đo                                         | Kết quả đo / quan sát                                                | Quy đổi dùng trong tính toán                                                      |
+| :-- | :----------------------------------------------------- | :----------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
+| 1   | Thiết bị theo dõi khi hoạt động                  | Công suất xấp xỉ 1 W                                                 | Lấy $P_{\text{chạy}} = 1\ \mathrm{W}$                                              |
+| 2   | Thiết bị theo dõi ở trạng thái ngủ sâu         | Dòng khoảng 0,5 mA tại 12 V                                           | $P_{\text{ngủ}} = 12\ \mathrm{V} \times 0{,}0005\ \mathrm{A} = 0{,}006\ \mathrm{W}$ |
+| 3   | Bộ đọc `OBD vgate iCar Pro` khi còn hoạt động | Công suất xấp xỉ 1,2 W; tự tắt sau khoảng 30 phút khi tắt khóa | $E_{\text{vgate}} = 1{,}2\ \mathrm{W} \times 0{,}5\ \mathrm{h} = 0{,}6\ \mathrm{Wh}$ |
+
+#### b, Tính năng lượng khả dụng của pin và ắc quy
 
 Pin dự phòng của nguyên mẫu dùng một cell `18650` 3500 mAh ở điện áp danh định 3,7 V. Với hiệu suất quy
 đổi nguồn về tải giả định là 85%, năng lượng hữu dụng của pin được tính như sau:
 
 $$
-E_{\mathrm{pin}} = 3{,}5\ \mathrm{Ah} \times 3{,}7\ \mathrm{V} \times 0{,}85 \approx 11{,}01\ \mathrm{Wh}
+E_{\text{pin}} = 3{,}5\ \mathrm{Ah} \times 3{,}7\ \mathrm{V} \times 0{,}85 \approx 11{,}01\ \mathrm{Wh}
 $$
 
 Với ắc quy xe, phép tính lấy loại 12 V - 45 Ah làm mốc tham chiếu. Khi áp dụng cùng hiệu suất 85%, phần
 năng lượng hữu dụng của toàn bộ ắc quy là:
 
 $$
-E_{\mathrm{acquy}} = 12\ \mathrm{V} \times 45\ \mathrm{Ah} \times 0{,}85 = 459\ \mathrm{Wh}
+E_{\text{ắc quy}} = 12\ \mathrm{V} \times 45\ \mathrm{Ah} \times 0{,}85 = 459\ \mathrm{Wh}
 $$
 
 Do không nên coi toàn bộ dung lượng ắc quy là phần được phép tiêu thụ khi xe đỗ, phép tính thêm trường
 hợp chỉ dùng 20% dung lượng ắc quy:
 
 $$
-E_{\mathrm{acquy,20\%}} = 12\ \mathrm{V} \times 45\ \mathrm{Ah} \times 0{,}20 \times 0{,}85 = 91{,}8\ \mathrm{Wh}
+E_{\text{ắc quy, 20\%}} = 12\ \mathrm{V} \times 45\ \mathrm{Ah} \times 0{,}20 \times 0{,}85 = 91{,}8\ \mathrm{Wh}
 $$
+
+#### c, Ước tính thời gian duy trì theo kịch bản vận hành
 
 **Bảng 4.5: Giả định dùng cho phép tính thời gian duy trì**
 
-| STT | Đại lượng | Giá trị dùng trong phép tính | Quy đổi / ghi chú |
-| :-- | :-------- | :--------------------------- | :---------------- |
-| 1   | Hiệu suất quy đổi nguồn về tải | 85% | Áp dụng cho pin dự phòng và phần năng lượng lấy từ ắc quy xe |
-| 2   | Pin dự phòng `18650` | 3500 mAh @ 3,7 V | ~11,01 Wh hữu dụng |
-| 3   | Ắc quy xe tham chiếu | 12 V, 45 Ah | ~459 Wh hữu dụng sau hiệu suất |
-| 4   | Biên dùng bảo thủ từ ắc quy xe | 20% của 45 Ah | ~91,8 Wh hữu dụng sau hiệu suất |
-| 5   | Chu kỳ xe đỗ dùng để tính | Thức 10 s, ngủ 120 s | Một chu kỳ dài 130 s |
-| 6   | Năng lượng `vgate iCar Pro` trong 30 phút đầu | 1,2 W trong 0,5 h | ~0,6 Wh |
+| STT | Đại lượng                                       | Giá trị dùng trong phép tính | Quy đổi / ghi chú                                                     |
+| :-- | :-------------------------------------------------- | :-------------------------------- | :----------------------------------------------------------------------- |
+| 1   | Hiệu suất quy đổi nguồn về tải               | 85%                               | Áp dụng cho pin dự phòng và phần năng lượng lấy từ ắc quy xe |
+| 2   | Pin dự phòng `18650`                            | 3500 mAh @ 3,7 V                  | ~11,01 Wh hữu dụng                                                     |
+| 3   | Ắc quy xe tham chiếu                              | 12 V, 45 Ah                       | ~459 Wh hữu dụng sau hiệu suất                                       |
+| 4   | Biên dùng bảo thủ từ ắc quy xe                | 20% của 45 Ah                    | ~91,8 Wh hữu dụng sau hiệu suất                                      |
+| 5   | Chu kỳ xe đỗ dùng để tính                    | Thức 10 s, ngủ 120 s            | Một chu kỳ dài 130 s                                                  |
+| 6   | Công suất `vgate iCar Pro` trong 30 phút đầu | 1,2 W trong 0,5 h                 | Tương đương ~0,6 Wh trước khi tự tắt                            |
 
 Với kịch bản xe đỗ, công suất trung bình của riêng thiết bị trong một chu kỳ được tính theo:
 
 $$
-P_{\mathrm{tb}} =
-\frac{P_{\mathrm{chay}} \times t_{\mathrm{thuc}} + P_{\mathrm{ngu}} \times t_{\mathrm{ngu}}}
-{t_{\mathrm{thuc}} + t_{\mathrm{ngu}}}
+P_{\text{trung bình}} =
+\frac{P_{\text{chạy}} \times t_{\text{thức}} + P_{\text{ngủ}} \times t_{\text{ngủ}}}
+{t_{\text{thức}} + t_{\text{ngủ}}}
 $$
 
 Thay các giá trị đo được:
 
 $$
-P_{\mathrm{tb}} =
+P_{\text{trung bình}} =
 \frac{1 \times 10 + 0{,}006 \times 120}{10 + 120}
 \approx 0{,}082\ \mathrm{W}
 $$
 
-Thời gian duy trì trong kịch bản xe đỗ được ước tính theo, trong đó $E_{\mathrm{hd}}$ là năng lượng hữu
-dụng của nguồn đang xét:
+Với trường hợp chỉ dùng pin dự phòng, thời gian duy trì khi xe đỗ được ước tính theo:
 
 $$
-T_{\mathrm{do}} \approx \frac{E_{\mathrm{hd}} - E_{\mathrm{vgate}}}{P_{\mathrm{tb}}}
+T_{\text{xe đỗ, pin}} \approx \frac{E_{\text{pin}}}{P_{\text{trung bình}}}
 $$
+
+Với trường hợp thiết bị và bộ đọc `OBD` cùng lấy nguồn từ ắc quy xe, trong 30 phút đầu cần tính thêm
+phần tiêu thụ của `vgate iCar Pro`. Khi đó, thời gian duy trì được ước tính theo:
+
+$$
+T_{\text{xe đỗ, ắc quy}} \approx 0{,}5 + \frac{E_{\text{hữu dụng}} - \left(P_{\text{trung bình}} + 1{,}2\right)\times 0{,}5}{P_{\text{trung bình}}}
+$$
+
+Trong hai kịch bản có sử dụng ắc quy xe, $E_{\text{hữu dụng}}$ được hiểu là tổng năng lượng hữu dụng của
+pin dự phòng và phần năng lượng ắc quy được phép khai thác.
 
 **Bảng 4.6: Ước tính thời gian duy trì theo các kịch bản tiêu thụ**
 
-| Nguồn năng lượng xét đến | Năng lượng hữu dụng sau hiệu suất 85% | Thiết bị chạy liên tục 1 W | Thiết bị + `vgate iCar Pro` chạy liên tục 2,2 W | Xe đỗ: thức 10 s, ngủ 120 s; `vgate iCar Pro` tắt sau 30 phút |
-| :----------------------- | :------------------------------------ | :------------------------- | :---------------------------------------------- | :------------------------------------------------------------ |
-| Chỉ pin `18650` | ~11,01 Wh | ~11,0 giờ | ~5,0 giờ | ~126 giờ (~5,3 ngày) |
-| Pin `18650` + 20% ắc quy 45 Ah | ~102,81 Wh | ~102,8 giờ (~4,3 ngày) | ~46,7 giờ (~1,9 ngày) | ~1239 giờ (~51,6 ngày) |
-| Pin `18650` + toàn bộ ắc quy 45 Ah | ~470,01 Wh | ~470,0 giờ (~19,6 ngày) | ~213,6 giờ (~8,9 ngày) | ~5692 giờ (~237 ngày) |
+| Nguồn năng lượng xét đến         | Tổng năng lượng hữu dụng sau hiệu suất 85% | Thiết bị chạy liên tục 1 W | Thiết bị + `vgate iCar Pro` chạy liên tục 2,2 W | Xe đỗ: thức 10 s, ngủ 120 s; riêng các kịch bản có ắc quy tính thêm `vgate iCar Pro` 1,2 W trong 30 phút đầu |
+| :-------------------------------------- | :------------------------------------------- | :------------------------------ | :---------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| Chỉ pin `18650`                      | ~11,01 Wh                                    | ~11,0 giờ                      | ~5,0 giờ                                             | ~133,5 giờ (~5,6 ngày)                                                                                                      |
+| Pin `18650` + 20% ắc quy 45 Ah       | ~102,81 Wh                                   | ~102,8 giờ (~4,3 ngày)        | ~46,7 giờ (~1,9 ngày)                               | ~1239,5 giờ (~51,6 ngày)                                                                                                    |
+| Pin `18650` + toàn bộ ắc quy 45 Ah | ~470,01 Wh                                   | ~470,0 giờ (~19,6 ngày)       | ~213,6 giờ (~8,9 ngày)                              | ~5692,4 giờ (~237,2 ngày)                                                                                                   |
+
+Toàn bộ các giá trị ở Bảng 4.6 đều được tính trên phần năng lượng hữu dụng sau hiệu suất 85%, không dùng
+trực tiếp dung lượng danh định của pin hay ắc quy.
 
 Kết quả ở Bảng 4.6 là mốc tham chiếu về năng lượng, không phải khuyến nghị dùng hết dung lượng ắc quy.
 Trong vận hành thực tế, hệ thống vẫn cần giữ biên điện áp để xe có thể khởi động an toàn.
 
-![Hình 4.18 - Dòng tiêu thụ theo chu kỳ hoạt động](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-23.png)
+![Hình 4.18 - Các mức công suất dùng trong phép tính nguồn](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-23.png)
 
-_Hình 4.18: Dòng tiêu thụ thay đổi rõ theo từng pha vận hành, trong đó mức ngủ sâu giảm rất mạnh_
+_Hình 4.18: Ba mức công suất dùng làm đầu vào cho phép tính nguồn ở Bảng 4.4_
 
-**b, Kết quả kiểm thử phần mềm thiết bị**
+### 4.3.2. Kết quả kiểm thử phần mềm thiết bị
 
-Nhóm đo thứ hai tập trung vào hành vi thực thi của firmware ở các pha khởi động, ngủ/thức, kết nối
-`BLE OBD`, lấy vị trí `GNSS` và lưu đệm cục bộ khi mất mạng. Các chỉ tiêu này cho biết thiết bị có đủ
-nhanh ở đầu chuyến, có vào ngủ đúng mục tiêu tiết kiệm năng lượng và có giữ được dữ liệu khi vận hành
-ngoài thực địa hay không.
-Các mốc dưới đây là giá trị đo hoặc ước tính dựa trên nguyên mẫu và cấu hình firmware đang dùng tại thời
-điểm kiểm thử.
+#### a, Các mốc đánh giá chính
 
-Trước khi đọc Bảng 4.7, cần làm rõ ba chế độ start của `GNSS`. `Cold Start` là trạng thái module gần như
-phải tìm lại từ đầu vì không còn ngữ cảnh thời gian, vị trí gần đúng hoặc dữ liệu vệ tinh còn đủ mới;
-đây là trường hợp chậm nhất. `Warm Start` là khi vẫn còn một phần dữ liệu hỗ trợ, chẳng hạn thời gian
-hoặc vị trí gần đúng, nên thời gian lấy lại fix giảm đáng kể. `Hot Start` là khi ngữ cảnh định vị còn
-rất mới, thường xuất hiện sau quãng ngắt ngắn, nên module có thể lấy lại vị trí nhanh nhất. Với thiết
-bị giám sát phương tiện, sau các nhịp ngủ ngắn khi xe đỗ thì `warm start` hoặc `hot start` thường gặp
-hơn, còn `cold start` chủ yếu xuất hiện sau khi mất nguồn lâu hoặc khi modem/GNSS bị tắt hoàn toàn.
+Phần mềm thiết bị được đánh giá theo bốn nội dung chính: khởi động sau cấp nguồn, chu kỳ thức khi xe đỗ,
+nối lại `BLE OBD` và `GNSS`, cùng khả năng lưu đệm trên thẻ `SD`. Với `GNSS`, `cold start` là trường hợp
+chậm nhất và chủ yếu xuất hiện sau khi mất nguồn; trong vận hành thường xuyên, thiết bị chủ yếu rơi vào
+`warm start` hoặc `hot start`. Do firmware chạy dưới `RTOS`, các nhánh `BLE`, modem, `MQTT` và `GNSS`
+khởi tạo chồng lấp; vì vậy thời gian sẵn sàng của hệ thống được lấy theo nhánh hoàn tất muộn nhất.
+
+#### b, Kết quả thời gian thực thi của firmware
 
 **Bảng 4.7: Kết quả thời gian và tính năng firmware**
 
-| STT | Hạng mục | Kết quả đo / ước tính | Ý nghĩa vận hành |
-| :-- | :------- | :--------------- | :--------------- |
-| 1   | Khởi động toàn bộ hệ thống sau khi cấp điện | Khoảng 6-8 s để lên trạng thái sẵn sàng truyền thông; nếu cần có vị trí `GNSS` hợp lệ ngay từ đầu thì có thể kéo dài đến khoảng 30 s khi gặp `cold start` | Thiết bị có thể bắt đầu một chuyến mới sớm, nhưng thời điểm có tọa độ đầu tiên vẫn phụ thuộc trạng thái khởi động `GNSS` |
-| 2   | Chuyển vào chế độ ngủ khi xe đỗ | Khoảng 3,5-5 s kể từ khi đủ điều kiện ngủ | Thời gian này chủ yếu dành cho ngắt `BLE`, tắt `GNSS` và modem an toàn, sau đó mới hạ tải để tiết kiệm năng lượng |
-| 3   | Thức dậy khỏi chế độ ngủ | Khoảng 2 s để quay lại nhánh hoạt động; khoảng 3-5 s để có lại dữ liệu `OBD` mới | Thiết bị kịp phản ứng ở đầu chuyến hoặc khi xe rung/chìa khóa được bật lại |
-| 4   | Quét, nối và khởi tạo bộ đọc dữ liệu xe qua `BLE` | Khoảng 3-5 s, giá trị trung bình gần 4 s | Bao gồm scan, connect, discover service/characteristic, bật notify, khởi tạo `ELM327` và lấy mẫu `PID` ban đầu |
-| 5   | Phản hồi một truy vấn dữ liệu xe | Khoảng 60-75 ms | Đủ nhanh cho chu kỳ lấy `RPM`, tốc độ, nhiệt độ nước làm mát và các `PID` cơ bản |
-| 6   | Lấy lại vị trí `GNSS` | Khoảng 30 s khi `cold start`, 5 s khi `warm start`, 2 s khi `hot start` | Thời gian bám lại hành trình giảm rõ rệt khi thiết bị còn giữ được ngữ cảnh định vị gần đây |
-| 7   | Khôi phục sau mất kết nối ngắn | Khoảng 15-30 s | Cho phép gửi bù dữ liệu khi đường truyền hoặc kết nối ngoại vi ổn định lại |
-| 8   | Lưu đệm cục bộ trên thẻ `SD` 1 GB | Nếu giả sử trung bình khoảng 512 byte/bản tin offline thì lưu được khoảng 2,10 triệu bản tin, tương đương khoảng 582 giờ xe chạy liên tục ở mức cực đại 1 giây/bản tin | Đủ để giữ dữ liệu trong các đợt mất mạng dài; khi có mạng lại, firmware có thể phát lại dần từ bộ nhớ cục bộ |
+| STT | Hạng mục                                                 | Kết quả đo / ước tính                                                                                                                                                                                                                                          | Ý nghĩa vận hành                                                                                                                                                                                                                    |
+| :-- | :--------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Khởi động lần đầu sau khi cấp nguồn hoặc cắm pin | Khoảng `8,2 s` để `BLE OBD` sẵn sàng, `23,5 s` để `LTE` kết nối hoàn tất và `29,4 s` để có fix `GNSS` đầu tiên                                                                                                                         | Đây là kịch bản có độ trễ lớn nhất. Các tác vụ khởi tạo được triển khai song song dưới `RTOS`, do đó mốc sẵn sàng toàn cục được quyết định bởi nhánh `GNSS`, là nhánh hoàn tất muộn nhất |
+| 2   | Chu kỳ thức định kỳ sau `120 s` khi xe vẫn đỗ    | Khoảng `5,3 s` để `BLE OBD` sẵn sàng trở lại; nếu xe vẫn đứng yên, thiết bị hoàn tất chu kỳ kiểm tra ngắn rồi quay lại ngủ                                                                                                                 | Đây là chu kỳ vận hành điển hình khi thiết bị đã lắp đặt ổn định trên xe |
+| 3   | Nối lại `BLE OBD` khi đã lưu địa chỉ `MAC`     | Khoảng `3,8 s` cho mỗi lần đánh thức                                                                                                                                                                                                                         | Việc bỏ qua giai đoạn dò tìm ngẫu nhiên giúp quá trình tái kết nối ổn định hơn và rút ngắn thời gian phục hồi |
+| 4   | Lấy lại fix `GNSS` sau chu kỳ ngủ ngắn              | Khoảng `5,4-5,9 s` tính từ thời điểm bật lại `GNSS` đến khi có fix đầu tiên                                                                                                                                                                        | Kết quả này đặc trưng cho trạng thái `warm start` hoặc `hot start`, phù hợp với điều kiện vận hành lặp lại trên xe |
+| 5   | Chuyển từ trạng thái đỗ sang chạy lại              | Khoảng `7,3 s` để xác nhận lại ignition và chuyển sang trạng thái `driving`; khoảng `25,8 s` để có bản tin định vị đầu tiên                                                                                                               | Thiết bị có thể nhận biết sớm việc xe bắt đầu di chuyển nhờ `BLE OBD`, trong khi bản tin đầy đủ kèm định vị còn phụ thuộc vào quá trình khôi phục modem và `GNSS` |
+| 6   | Lưu đệm cục bộ trên thẻ `SD` 1 GB                 | Với giả thiết mỗi bản tin offline có kích thước trung bình khoảng `512 byte`, dung lượng này cho phép lưu khoảng `2,10` triệu bản tin, tương đương khoảng `582 giờ` xe nổ máy liên tục ở mật độ cực đại `1 giây`/bản tin | Dung lượng này đủ để duy trì dữ liệu trong các đợt mất mạng kéo dài; khi kết nối được khôi phục, firmware có thể phát lại tuần tự từ bộ nhớ cục bộ |
 
 ![Hình 4.19 - Phân bố thời gian kết nối bộ đọc dữ liệu xe](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-26.png)
 
@@ -1084,130 +1093,138 @@ _Hình 4.19: Phần lớn các lần nối lại bộ đọc dữ liệu xe hoà
 
 _Hình 4.20: Thời gian lấy lại vị trí GNSS theo ba trạng thái khởi động_
 
-Trong cấu hình đang dùng, chu kỳ đánh thức khi xe đỗ được giới hạn tối đa 120 giây/lần. Vì vậy, sau khi
-vào ngủ, thiết bị không tắt hẳn vô thời hạn mà vẫn thức định kỳ để kiểm tra ignition, gửi heartbeat và
-quyết định có cần kéo lại các khối `BLE`, `LTE` hoặc `GNSS` hay không. Trong các mốc ở Bảng 4.7, thời
-gian vào ngủ bị chi phối nhiều nhất bởi bước tắt modem an toàn, còn thời gian khởi động lại thường bị
-chi phối bởi bước nối `BLE OBD` và trạng thái start của `GNSS`.
+Mốc gần `30 s` chỉ xuất hiện ở lần cấp nguồn đầu tiên khi `GNSS` rơi vào `cold start`. Trong vận hành
+thường xuyên, thời gian phục hồi chủ yếu nằm ở nhánh nối lại `BLE` và lấy lại fix `GNSS`, còn các timeout
+trong firmware chỉ là ngưỡng chờ tối đa.
 
-Kết quả ở Hình 4.20 cho thấy chênh lệch giữa ba trạng thái start là khá rõ: nếu còn giữ được ngữ cảnh
-định vị gần đây thì thiết bị có thể quay lại hành trình chỉ sau vài giây, còn khi phải khởi động nguội
-thì thời gian chờ vị trí đầu tiên tăng lên đáng kể.
+#### c, Khả năng lưu đệm cục bộ trên thẻ `SD`
 
 Với lưu đệm cục bộ, nếu dành thẻ `SD` 1 GB cho file queue và lấy giả định trung bình khoảng 512 byte cho
 mỗi bản tin offline, tổng số bản tin có thể giữ lại vào khoảng:
 
 $$
-N_{\mathrm{SD}} \approx \frac{1 \times 1024^3}{512} = 2{,}097{,}152\ \mathrm{ban\ tin}
+N_{\text{bản tin SD}} \approx \frac{1 \times 1024^3}{512} = 2{,}097{,}152\ \text{bản tin}
 $$
 
 Nếu firmware phải hoạt động ở mật độ cao nhất là 1 giây cho mỗi bản tin, thời gian lưu đệm tương đương:
 
 $$
-T_{\mathrm{SD}} \approx \frac{2{,}097{,}152}{3600} \approx 582\ \mathrm{gio}
+T_{\text{lưu đệm SD}} \approx \frac{2{,}097{,}152}{3600} \approx 582\ \text{giờ}
 $$
 
-Tức là khoảng 24,3 ngày xe chạy liên tục ở chế độ ghi dày nhất. Cách quy đổi này trực quan hơn so với
+Tức là khoảng 24,3 ngày xe nổ máy liên tục ở mật độ `1 giây`/bản tin. Cách quy đổi này trực quan hơn so với
 chỉ nêu dung lượng thẻ nhớ, vì nó cho thấy trực tiếp khoảng thời gian hệ thống còn giữ được dữ liệu khi
 mất kết nối mạng kéo dài.
 
-**c, Kết quả kiểm thử phần mềm hệ thống**
+### 4.3.3. Kết quả kiểm thử phần mềm hệ thống
+
+#### a, Mô hình đánh giá độ trễ toàn tuyến
 
 Độ trễ toàn tuyến được xem từ lúc thiết bị tạo/gửi bản tin đến khi dữ liệu được xử lý và có thể hiển
 thị trên giao diện. Có thể mô tả tổng quát như sau:
 
 $$
-T_{\mathrm{total}} =
-T_{\mathrm{device}} + T_{\mathrm{network}} + T_{\mathrm{server}} + T_{\mathrm{ui}}
+T_{\text{toàn tuyến}} =
+T_{\text{thiết bị}} + T_{\text{mạng}} + T_{\text{máy chủ}} + T_{\text{giao diện}}
 $$
 
-Trong đó, $T_{\mathrm{device}}$ là thời gian xử lý tại thiết bị, $T_{\mathrm{network}}$ là thời gian truyền
-qua mạng di động, $T_{\mathrm{server}}$ là thời gian tiếp nhận - xử lý phía máy chủ và $T_{\mathrm{ui}}$ là
-thời gian cập nhật lên giao diện. Trong các thành phần này, nhánh mạng di động thường biến động nhiều
-nhất theo chất lượng sóng.
+Trong đó, $T_{\text{thiết bị}}$ là thời gian xử lý tại thiết bị, $T_{\text{mạng}}$ là thời gian truyền qua
+mạng di động, $T_{\text{máy chủ}}$ là thời gian tiếp nhận - xử lý phía máy chủ và
+$T_{\text{giao diện}}$ là thời gian cập nhật lên giao diện. Trong các thành phần này, nhánh mạng di động
+thường biến động nhiều nhất theo chất lượng sóng.
+
+#### b, Kết quả đo và mức đáp ứng của hệ thống
 
 **Bảng 4.8: Kết quả đo độ trễ và khả năng xử lý**
 
-| STT | Hạng mục | Kết quả quan sát | Nhận xét |
-| :-- | :------- | :--------------- | :------- |
-| 1   | Độ trễ truyền dữ liệu qua mạng di động | Khoảng 120-180 ms | Là phần chi phối trong tuyến thiết bị - máy chủ |
-| 2   | Thời gian phản hồi máy chủ | Khoảng 95-200 ms | Nằm trong mức đủ dùng cho tra cứu và cập nhật trạng thái |
-| 3   | Cập nhật bản đồ gần thời gian thực | Khoảng 1-2 s | Phù hợp với theo dõi hành trình trong bài toán quản lý đội xe |
-| 4   | Cảnh báo vượt vùng | Khoảng 5-7 s | Đủ sớm để người quản lý nhận biết và xử lý sự kiện |
-| 5   | Mức tải đồng thời đã kiểm tra | 50 thiết bị, tải hệ thống dưới 45% | Cho thấy hệ thống còn dư địa cho quy mô thử nghiệm lớn hơn |
+| STT | Hạng mục                                      | Kết quả quan sát                       | Nhận xét                                                                |
+| :-- | :---------------------------------------------- | :---------------------------------------- | :------------------------------------------------------------------------ |
+| 1   | Độ trễ truyền dữ liệu qua mạng di động | Khoảng 120-180 ms                        | Là phần chi phối trong tuyến thiết bị - máy chủ                   |
+| 2   | Thời gian phản hồi máy chủ                 | Khoảng 95-200 ms                         | Nằm trong mức đủ dùng cho tra cứu và cập nhật trạng thái       |
+| 3   | Cập nhật bản đồ gần thời gian thực      | Khoảng 1-2 s                             | Phù hợp với theo dõi hành trình trong bài toán quản lý đội xe |
+| 4   | Cảnh báo vượt vùng                         | Khoảng 2-3 s                             | Đủ sớm để người quản lý nhận biết và xử lý sự kiện        |
+| 5   | Mức tải đồng thời đã kiểm tra           | 50 thiết bị, tải hệ thống khoảng 20-25% | Cho thấy hệ thống còn dư địa cho quy mô thử nghiệm lớn hơn    |
 
 ![Hình 4.21 - Các phần tạo nên độ trễ từ thiết bị đến màn hình quản lý](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-30.png)
 
 _Hình 4.21: Phần lớn độ trễ toàn tuyến nằm ở nhánh truyền qua mạng di động_
 
-![Hình 4.22 - So sánh chỉ tiêu thiết kế và kết quả đạt được](./assets/figures-condensed-r2/10-chuong-4-ket-qua-do-luong-hinh-4-38.png)
+#### c, Nhận xét tổng hợp
 
-_Hình 4.22: Mức đáp ứng của các chỉ tiêu chính đều giữ gần sát mục tiêu thiết kế ban đầu_
+Kết quả ở Bảng 4.8 cho thấy độ trễ toàn tuyến chủ yếu bị chi phối bởi nhánh truyền qua mạng di động.
+Trong khi đó, thời gian xử lý phía máy chủ và thời gian cập nhật giao diện vẫn nằm trong mức phù hợp cho
+bài toán theo dõi hành trình và phát hiện cảnh báo gần thời gian thực.
 
-**d, Đánh giá lưu trữ dữ liệu trên VPS**
+### 4.3.4. Đánh giá khả năng lưu trữ dữ liệu trên VPS
 
-Trong phạm vi đồ án, `VPS` được hiểu là máy chủ ảo dùng để chạy các dịch vụ Docker của hệ thống, gồm
-lớp nhận bản tin, xử lý dữ liệu, cơ sở dữ liệu, kho dữ liệu theo thời gian và kho log. Phần 30 GB dưới
-đây được hiểu là ngân sách lưu trữ dùng chung cho dữ liệu vận hành của `PostgreSQL`, `VictoriaMetrics`
-và log, không tính hệ điều hành, image Docker và bản sao lưu.
+#### a, Giả định phân bổ dung lượng lưu trữ
+
+Đồ án sử dụng `VPS` (`Virtual Private Server` - máy chủ riêng ảo) làm hạ tầng máy chủ đám mây dùng để triển
+khai và vận hành tập trung các dịch vụ của hệ thống, gồm lớp nhận bản tin, xử lý dữ liệu, cơ sở dữ liệu,
+kho dữ liệu theo thời gian và kho log. Phần 30 GB dưới đây được hiểu là ngân sách lưu trữ dùng chung cho
+dữ liệu vận hành của `PostgreSQL`, `VictoriaMetrics` và log, không tính hệ điều hành, image Docker và bản
+sao lưu.
 
 **Bảng 4.9: Giả định dung lượng dùng cho lưu trữ**
 
-| STT | Thành phần | Giả định | Ghi chú |
-| :-- | :--------- | :------- | :------ |
-| 1   | Tổng dung lượng dữ liệu vận hành | 30 GB | Dùng chung cho `PostgreSQL`, `VictoriaMetrics` và log |
-| 2   | `PostgreSQL` | 4 GB | Lưu thiết bị, xe, người dùng, chuyến đi, cảnh báo, trạng thái xử lý và chỉ mục nghiệp vụ |
-| 3   | `VictoriaMetrics` | 18 GB | Lưu chuỗi thời gian: vị trí, tốc độ, nguồn, trạng thái và một số trường OBD-II cơ bản |
-| 4   | Log / `VictoriaLogs` | 6 GB | Lưu log vận hành, cảnh báo kỹ thuật và lỗi hệ thống |
-| 5   | Phần dự phòng | 2 GB | Dành cho metadata, chỉ mục phát sinh và sai số ước tính |
-| 6   | Kích thước trung bình một điểm telemetry | ~250 byte/điểm | Ước tính sau khi lưu dạng có cấu trúc, không tính bản tin JSON thô |
-| 7   | Kích thước trung bình một log | ~1 KB/log | Ước tính cho log ngắn kèm thời gian, mức độ và nội dung |
+| STT | Thành phần                                    | Giả định      | Ghi chú                                                                                                    |
+| :-- | :---------------------------------------------- | :--------------- | :---------------------------------------------------------------------------------------------------------- |
+| 1   | Tổng dung lượng dữ liệu vận hành         | 30 GB            | Dùng chung cho `PostgreSQL`, `VictoriaMetrics` và log                                                 |
+| 2   | `PostgreSQL`                                  | 4 GB             | Lưu thiết bị, xe, người dùng, chuyến đi, cảnh báo, trạng thái xử lý và chỉ mục nghiệp vụ |
+| 3   | `VictoriaMetrics`                             | 18 GB            | Lưu chuỗi thời gian: vị trí, tốc độ, nguồn, trạng thái và một số trường OBD-II cơ bản     |
+| 4   | Log / `VictoriaLogs`                          | 6 GB             | Lưu log vận hành, cảnh báo kỹ thuật và lỗi hệ thống                                              |
+| 5   | Phần dự phòng                                | 2 GB             | Dành cho metadata, chỉ mục phát sinh và sai số ước tính                                            |
+| 6   | Kích thước trung bình một điểm telemetry | ~250 byte/điểm | Ước tính sau khi lưu dạng có cấu trúc, không tính bản tin JSON thô                              |
+| 7   | Kích thước trung bình một log              | ~1 KB/log        | Ước tính cho log ngắn kèm thời gian, mức độ và nội dung                                          |
 
-Như vậy, phần điểm dữ liệu theo thời gian được tính riêng trên dung lượng dành cho `VictoriaMetrics`,
-không bao gồm phần `PostgreSQL`. Số điểm telemetry có thể lưu được ước tính theo, với cách quy đổi
-$1\ \mathrm{GB} = 1024^3\ \mathrm{byte}$:
+#### b, Ước tính dung lượng dữ liệu telemetry và dữ liệu nghiệp vụ
 
-$$
-N_{\mathrm{point}} = \frac{D_{\mathrm{point}}}{S_{\mathrm{point}}}
-$$
-
-Với $D_{\mathrm{point}} = 18\ \mathrm{GB}$ và $S_{\mathrm{point}} = 250\ \mathrm{byte}$:
+Phần điểm dữ liệu theo thời gian được tính riêng trên dung lượng dành cho `VictoriaMetrics`, không bao
+gồm phần `PostgreSQL`. Với cách quy đổi $1\ \mathrm{GB} = 1024^3\ \mathrm{byte}$, số điểm telemetry có
+thể lưu được ước tính theo:
 
 $$
-N_{\mathrm{point}} \approx \frac{18 \times 1024^3}{250} \approx 77{,}3 \times 10^6\ \mathrm{diem}
+N_{\text{điểm}} = \frac{D_{\text{điểm}}}{S_{\text{điểm}}}
+$$
+
+Với $D_{\text{điểm}} = 18\ \mathrm{GB}$ và $S_{\text{điểm}} = 250\ \mathrm{byte}$:
+
+$$
+N_{\text{điểm}} \approx \frac{18 \times 1024^3}{250} \approx 77{,}3 \times 10^6\ \text{điểm}
 $$
 
 Với `PostgreSQL`, nếu lấy trung bình khoảng 1 KB cho một bản ghi nghiệp vụ sau khi tính thêm một phần
 chỉ mục, 4 GB có thể chứa xấp xỉ:
 
 $$
-N_{\mathrm{pg}} \approx \frac{4 \times 1024^3}{1024} \approx 4{,}2 \times 10^6\ \mathrm{ban\ ghi}
+N_{\text{bản ghi}} \approx \frac{4 \times 1024^3}{1024} \approx 4{,}2 \times 10^6\ \text{bản ghi}
 $$
 
-Phần này không tăng theo từng điểm telemetry như `VictoriaMetrics`, mà tăng theo thiết bị, chuyến đi,
-cảnh báo, người dùng và trạng thái xử lý nghiệp vụ.
+Phần dung lượng này phục vụ dữ liệu nghiệp vụ và chỉ mục; vì vậy phép quy đổi sang số giờ xe nổ máy ở
+Bảng 4.10 chỉ áp dụng cho phần telemetry của `VictoriaMetrics`, không cộng gộp với `PostgreSQL`.
 
-Thời gian lưu dữ liệu phụ thuộc trực tiếp vào số xe và chu kỳ gửi bản tin:
+Trong phần dưới đây, khả năng lưu trữ được chuẩn hóa theo số giờ xe đang nổ máy hoặc đang chạy, khi hệ
+thống gửi `1 giây`/bản tin. Khi đó, thời gian lưu dữ liệu trên mỗi xe được tính theo:
 
 $$
-T_{\mathrm{store}} =
-\frac{N_{\mathrm{point}}}
-{N_{\mathrm{vehicle}} \times \frac{86400}{\Delta t}}
+T_{\text{nổ máy}} = \frac{N_{\text{điểm}}}{N_{\text{xe}} \times 3600}
 $$
 
-**Bảng 4.10: Ước tính khả năng lưu trữ với 30 GB dữ liệu trên VPS**
+**Bảng 4.10: Ước tính khả năng lưu trữ telemetry theo số giờ xe nổ máy**
 
-| Kịch bản | Nhịp gửi dữ liệu | Số điểm/ngày | Thời gian lưu ước tính |
-| :------- | :--------------- | :----------- | :--------------------- |
-| 10 xe | 60 s/điểm | ~14.400 điểm/ngày | ~5369 ngày (~14,7 năm) |
-| 50 xe | 60 s/điểm | ~72.000 điểm/ngày | ~1074 ngày (~2,9 năm) |
-| 50 xe | 30 s/điểm | ~144.000 điểm/ngày | ~537 ngày (~1,5 năm) |
-| 100 xe | 30 s/điểm | ~288.000 điểm/ngày | ~268 ngày (~0,7 năm) |
+| Kịch bản | Nhịp gửi dữ liệu | Số giờ xe nổ máy có thể lưu trên mỗi xe | Quy đổi ngày nổ máy liên tục |
+| :------- | :--------------- | :-------------------------------------- | :------------------------- |
+| 1 xe | 1 s/điểm | ~21.474,8 giờ | ~894,8 ngày |
+| 10 xe | 1 s/điểm | ~2.147,5 giờ | ~89,5 ngày |
+| 50 xe | 1 s/điểm | ~429,5 giờ | ~17,9 ngày |
+| 100 xe | 1 s/điểm | ~214,7 giờ | ~8,9 ngày |
+
+#### c, Ước tính log và khuyến nghị vận hành
 
 Với phần log, 6 GB cho phép lưu khoảng:
 
 $$
-N_{\mathrm{log}} \approx \frac{6 \times 1024^3}{1024} \approx 6{,}3 \times 10^6\ \mathrm{log}
+N_{\text{bản ghi log}} \approx \frac{6 \times 1024^3}{1024} \approx 6{,}3 \times 10^6\ \text{bản ghi log}
 $$
 
 Nếu hệ thống có 50 xe và mỗi xe phát sinh khoảng 100 log/ngày, phần log có thể lưu khoảng 3,4 năm.
@@ -1238,7 +1255,7 @@ Tiếp theo là nhóm ràng buộc thiết kế. Phần này tập trung vào m�
 
 | STT | Ràng buộc thiết kế                | Mức đặt ra trong phụ lục         | Kết quả của nguyên mẫu hiện tại                                                                                                                   | Mức đáp ứng |
 | :-- | :------------------------------------ | :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------- |
-| 1   | Chi phí giải pháp                  | Không vượt 20.000.000 VND          | Chi phí đầu tư ban đầu của nguyên mẫu khoảng 2.214.000 VND; nếu tính thêm một tháng cước mạng thì khoảng 2.222.000 VND (Phụ lục 1) | Đạt           |
+| 1   | Chi phí giải pháp                  | Không vượt 20.000.000 VND          | Chi phí chế tạo thiết bị khoảng 1.514.000 VND; tổng chi phí chế tạo và thử nghiệm 6 tháng khoảng 5.762.000 VND (Phụ lục 1) | Đạt           |
 | 2   | Điều kiện hoạt động phần cứng | Thử nghiệm tại phòng thí nghiệm | Đã đo kiểm trên bàn thử trong phòng thí nghiệm và lắp thử trên xe thật                                                                    | Đạt           |
 | 3   | Khả năng gia công                  | `PCB`, vỏ in 3D                    | Đã thiết kế và chế tạo `PCB` chuyên dụng, hoàn thiện vỏ in 3D và lắp thành thiết bị hoàn chỉnh (Phụ lục 3)                        | Đạt           |
 | 4   | Chuẩn tham chiếu                    | `IPC-2221`, `IEC 60664-1`         | Đã dùng làm cơ sở cho bố trí mạch nguồn và khoảng cách cách điện cơ bản                                                                | Đạt           |
@@ -1276,10 +1293,9 @@ và khả năng vận hành ổn định ở quy mô lớn hơn vẫn cần đư
 
 Về kinh tế, nguyên mẫu hiện tại thấp hơn khá xa so với giới hạn chi phí của đồ án. Chi phí phần cứng
 cho một thiết bị khoảng **1.514.000 VND**; chi phí SIM dữ liệu khoảng **8.000 VND/tháng/thiết bị**;
-chi phí `VPS` (máy chủ ảo) phục vụ giai đoạn thử nghiệm khoảng **700.000 VND**. Nếu tính theo chi phí
-đầu tư ban đầu, tổng mức triển khai của nguyên mẫu khoảng **2.214.000 VND**; nếu tính thêm một tháng
-cước mạng thì khoảng **2.222.000 VND**, vẫn thấp hơn nhiều so với mức **20.000.000 VND** nêu trong
-Phụ lục I.
+chi phí `VPS` (máy chủ ảo) phục vụ giai đoạn thử nghiệm khoảng **700.000 VND/tháng**. Nếu tính theo
+thời gian mua dịch vụ 6 tháng của đồ án, tổng mức triển khai của nguyên mẫu khoảng **5.762.000 VND**,
+vẫn thấp hơn nhiều so với mức **20.000.000 VND** nêu trong Phụ lục I.
 
 Với cấu hình hiện tại, phần chi phí tăng theo số xe chủ yếu nằm ở thiết bị gắn trên xe và SIM dữ liệu,
 còn `VPS` và giao diện có thể dùng chung cho nhiều phương tiện. Điều đó cho thấy phương án của đồ án
@@ -1333,9 +1349,35 @@ nhóm:
 
 ## 6.1. Ứng dụng kiến thức kỹ thuật – Earlier course work
 
-Các phần kiến thức được dùng trực tiếp đã thể hiện trong các chương triển khai: nguồn và điện tử,
-lập trình nhúng, cảm biến, truyền thông dữ liệu và tích hợp hệ thống. Phần phản hồi dưới đây tập
-trung vào các vấn đề kỹ thuật chính thay vì lặp lại nội dung đã mô tả ở Chương 3 và Chương 4.
+Trong quá trình thực hiện đồ án tốt nghiệp, sinh viên đã vận dụng tổng hợp các kiến thức liên ngành
+được trang bị trong chương trình đào tạo Kỹ thuật Cơ điện tử của Đại học Phenikaa [18], cụ thể:
+
+- **Nhập môn Cơ điện tử (MEM702049) và Vật lý nâng cao (MEM704004):** Vận dụng tư duy hệ thống cơ điện
+  tử để phân tách bài toán thành các khối phần cứng, firmware, truyền thông và phần mềm quản lý. Các
+  kiến thức về lực, mô men, cân bằng và động lực học giúp sinh viên đánh giá điều kiện lắp đặt thiết bị
+  trên xe, hạn chế rung động cơ khí, bố trí vỏ bảo vệ và lựa chọn cách cố định nguyên mẫu sao cho không
+  ảnh hưởng tới vận hành phương tiện.
+- **Hình họa - Đồ họa kỹ thuật (MEM703024, MEM703025) và Đồ họa kỹ thuật nâng cao (MEM702026):** Sử
+  dụng kiến thức về biểu diễn hình chiếu, bản vẽ lắp, dung sai và mô hình hóa 3D để thiết kế bố trí bo
+  mạch, vỏ thiết bị và các vị trí đầu nối. Việc mô hình hóa trước khi chế tạo giúp kiểm tra không gian
+  lắp đặt, vị trí anten, khe cắm SIM, cổng kết nối và khả năng đóng mở vỏ khi bảo trì.
+- **Mạch điện tử (EEE702042):** Vận dụng kiến thức về diode, linh kiện bán dẫn, mạch logic và các mạch
+  điện tử cơ bản để thiết kế nhánh nguồn, mạch bảo vệ, mạch chuyển nguồn dự phòng, đo điện áp bằng ADC
+  và bố trí các miền nguồn riêng cho vi điều khiển, modem và cảm biến. Đây là cơ sở để thiết bị chịu
+  được dao động nguồn xe và dòng đỉnh khi modem LTE/GNSS hoạt động.
+- **Kỹ thuật vi xử lý và vi điều khiển (EEE703046):** Áp dụng kiến thức về cấu trúc vi điều khiển, môi
+  trường lập trình tích hợp và giao tiếp ngoại vi để hiện thực firmware trên ESP32-S3. Trong đồ án, sinh
+  viên tổ chức các tác vụ trên ESP-IDF/FreeRTOS, điều phối UART với modem SIM7600CE-T, I2C với cảm biến
+  LIS3DH, ADC đo nguồn, BLE kết nối OBD2 và các chế độ ngủ sâu nhằm cân bằng giữa truyền dữ liệu và tiết
+  kiệm năng lượng.
+- **Kỹ thuật cảm biến (EEE703040):** Vận dụng kiến thức về nguyên lý, đặc tính tín hiệu, mạch ghép nối
+  và lựa chọn cảm biến để tích hợp cảm biến gia tốc LIS3DH cho phát hiện rung/chuyển động khi xe đỗ.
+  Hiểu biết về tín hiệu ngõ ra, ngưỡng kích hoạt, nhiễu và điều kiện đánh thức giúp xây dựng thuật toán
+  nhận biết trạng thái đỗ, phát cảnh báo bất thường và giảm đánh thức sai.
+- **Lập trình mô phỏng robot và các hệ Cơ điện tử (MEM702043):** Vận dụng tư duy mô hình hóa, thuật
+  toán và đóng gói phần mềm để xây dựng máy trạng thái thiết bị, mô phỏng các kịch bản vận hành như xe
+  chạy, xe đỗ, mất mạng, gửi bù dữ liệu và cập nhật firmware. Cách tiếp cận này cũng hỗ trợ tổ chức dữ
+  liệu MQTT, backend, cơ sở dữ liệu và giao diện quản lý theo các lớp chức năng rõ ràng.
 
 ## 6.2. Giải quyết các vấn đề kỹ thuật phức tạp – Complex engineering problems
 
@@ -1458,19 +1500,58 @@ tại: https://www.lcsc.com/product-detail/C1884688.html
 [17] VgateMall, _Vgate iCar Pro_, truy cập tháng 05/2026,
 tại: https://www.vgatemall.com/products-detail/i-9/?s=1
 
+[18] Phenikaa University, _Undergraduate Course Catalog in Mechatronics Engineering_,
+truy cập tháng 05/2026, tại:
+https://mem.phenikaa-uni.edu.vn/en/post/research/academics/faculty-staff/laboratories-safety/forms-and-documents/curriculum-and-course-catalog/undergraduate-course-catalog-in-mechatronics-engineering
+
 # PHỤ LỤC
 
 ## PHỤ LỤC 1. BÁO CÁO TÀI CHÍNH – FINANCE REPORT
 
-**Bảng PL-1.1: Tóm tắt chi phí của phương án đồ án**
+### 1. Bảng kê chi tiết kinh phí chế tạo và thử nghiệm (Bill of Materials and Trial Deployment Cost)
 
-| Hạng mục                          | Giá trị tham chiếu                                                                       |
-| :---------------------------------- | :------------------------------------------------------------------------------------------ |
-| Phần cứng một thiết bị         | 1.514.000 VND                                                                               |
-| SIM dữ liệu di động             | Khoảng 8.000 VND/tháng/thiết bị                                                         |
-| `VPS` phục vụ thử nghiệm      | Khoảng 700.000 VND                                                                         |
-| Tổng chi phí triển khai đồ án | Khoảng 2.214.000 VND; nếu tính thêm một tháng cước mạng thì khoảng 2.222.000 VND |
-| Giới hạn chi phí của đồ án   | Không vượt 20.000.000 VND                                                                |
+| STT | Tên hạng mục / Linh kiện | Số lượng | Đơn vị | Đơn giá nghìn (VND) | Thành tiền: Nghìn (VND) | Ghi chú nguồn gốc |
+| :-- | :----------------------- | :------: | :----- | ------------------: | ----------------------: | :---------------- |
+| I | PHẦN ĐIỆN TỬ VÀ TRUYỀN THÔNG | | | | **1050** | |
+| 1 | Kit phát triển ESP32-S3-WROOM-1 | 1 | bộ | 120 | 120 | Bộ xử lý trung tâm, tích hợp BLE cho kết nối OBD2 |
+| 2 | Mô-đun LTE/GNSS SIM7600CE-T | 1 | mô-đun | 520 | 520 | Truyền dữ liệu qua mạng di động và lấy vị trí GNSS |
+| 3 | Bộ đọc OBD2 BLE `vgate iCar Pro` | 1 | bộ | 250 | 250 | Đọc dữ liệu xe theo hướng ít xâm lấn vào hệ thống điện |
+| 4 | Anten LTE và anten GNSS | 2 | cái | 45 | 90 | Phục vụ truyền dữ liệu và định vị vệ tinh |
+| 5 | Cảm biến LIS3DH, RTC DS3231M và lưu đệm microSD | 1 | bộ | 70 | 70 | Phát hiện chuyển động, giữ thời gian và lưu dữ liệu cục bộ |
+| II | NGUỒN VÀ BẢO VỆ | | | | **184** | |
+| 6 | Khối hạ áp đầu vào MP2482 | 1 | bộ | 40 | 40 | Hạ áp từ nguồn xe xuống nhánh nguồn trung gian |
+| 7 | Khối nguồn modem TPS54231 | 1 | bộ | 45 | 45 | Cấp nguồn riêng cho modem khi phát xung dòng cao |
+| 8 | AP2112-3.3, SX1308, TP5100 và diode-OR | 1 | bộ | 55 | 55 | Tạo nguồn logic, sạc pin và chuyển nguồn dự phòng |
+| 9 | Pin 18650 3500 mAh | 1 | viên | 44 | 44 | Nguồn dự phòng khi xe tắt máy hoặc nguồn chính không ổn định |
+| III | PCB, VỎ VÀ PHỤ KIỆN LẮP RÁP | | | | **280** | |
+| 10 | PCB nguyên mẫu hai lớp | 1 | cái | 120 | 120 | Bo mạch chuyên dụng cho thiết bị gắn trên xe |
+| 11 | Vỏ ABS và phụ kiện cố định | 1 | bộ | 80 | 80 | Bảo vệ mạch và hỗ trợ lắp đặt trong xe |
+| 12 | Header, dây nối, cầu chì, diode và linh kiện thụ động | 1 | bộ | 55 | 55 | Phụ kiện lắp ráp và bảo vệ cơ bản |
+| 13 | Hàn lắp, kiểm tra và hoàn thiện nguyên mẫu | 1 | lần | 25 | 25 | Công đoạn hoàn thiện thiết bị thử nghiệm |
+| | **TỔNG CHI PHÍ CHẾ TẠO THIẾT BỊ** | | | | **1514** | |
+| IV | CHI PHÍ TRIỂN KHAI THỬ NGHIỆM | | | | **4248** | |
+| 14 | `VPS` phục vụ thử nghiệm | 6 | tháng | 700 | 4200 | Máy chủ ảo chạy EMQX, MQTT Bridge, backend, frontend và giám sát |
+| 15 | SIM dữ liệu di động | 6 | tháng | 8 | 48 | Kết nối dữ liệu cho thiết bị trong giai đoạn thử nghiệm |
+| | **TỔNG CỘNG** | | | | **5762** | **ĐẠT MỤC TIÊU < 20 TRIỆU VND** |
+
+### 2. Phân tích lựa chọn linh kiện (Economic & Technical Trade-off)
+
+Trong quá trình thiết kế, sinh viên đã cân nhắc kỹ giữa hiệu năng kỹ thuật, độ ổn định, khả năng mua linh
+kiện và giới hạn chi phí của đồ án. ESP32-S3 được chọn làm bộ xử lý trung tâm vì có đủ tài nguyên xử lý,
+nhiều ngoại vi và BLE tích hợp, nhờ đó không cần bổ sung mô-đun BLE rời cho kết nối OBD2. SIM7600CE-T là
+khoản chi lớn trong phần điện tử, nhưng giúp gộp hai chức năng quan trọng là truyền dữ liệu LTE và định vị
+GNSS vào cùng một mô-đun, làm giảm độ phức tạp kết nối và firmware.
+
+Phương án dùng bộ đọc OBD2 BLE thương mại có chi phí cao hơn việc tự thiết kế mạch giao tiếp trực tiếp,
+nhưng giảm rủi ro can thiệp vào bus xe, phù hợp với phạm vi nguyên mẫu sinh viên và thử nghiệm trên xe
+thật. Nhóm nguồn và bảo vệ được tách thành nhiều nhánh để thiết bị chịu được dao động nguồn xe, dòng đỉnh
+của modem và yêu cầu nguồn dự phòng bằng pin 18650. Cách làm này làm tăng số linh kiện nguồn, nhưng đổi
+lại hệ thống ổn định hơn trong điều kiện vận hành thực tế.
+
+Tổng chi phí chế tạo một thiết bị là khoảng **1.514.000 VND**. Nếu cộng thêm `VPS` thử nghiệm và SIM dữ
+liệu trong 6 tháng, tổng chi phí triển khai ban đầu khoảng **5.762.000 VND**, thấp hơn nhiều so với giới
+hạn **20.000.000 VND** của đồ án. Khi triển khai nhiều xe, chi phí tăng chủ yếu nằm ở thiết bị và SIM dữ
+liệu; trong khi đó `VPS`, giao diện quản lý và các dịch vụ giám sát có thể dùng chung cho nhiều thiết bị.
 
 ## PHỤ LỤC 2. CÁC TIÊU CHUẨN THIẾT KẾ – STANDARDS
 
