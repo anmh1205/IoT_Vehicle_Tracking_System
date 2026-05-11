@@ -118,13 +118,11 @@ export const resolveSessionId = (
 
   if (
     sessionIdentity.localSessionKey !== undefined &&
-    state.localSessionKey === sessionIdentity.localSessionKey &&
-    (
-      !sessionIdentity.bootId ||
-      !state.bootId ||
-      state.bootId === sessionIdentity.bootId
-    )
+    state.localSessionKey === sessionIdentity.localSessionKey
   ) {
+    if (state.bootId && sessionIdentity.bootId !== state.bootId) {
+      return null;
+    }
     return state.sessionId;
   }
 

@@ -65,7 +65,6 @@ interface ActiveAlertMessageRow {
 const toIsoTimestamp = (timestampMs: number) => new Date(timestampMs).toISOString();
 const TRANSIENT_HEARTBEAT_SESSION_MAX_RUNTIME_SECONDS = 120;
 const TRANSIENT_HEARTBEAT_SESSION_MAX_DATA_POINTS = 1;
-const TRANSIENT_AUTHORITATIVE_SESSION_MAX_RUNTIME_SECONDS = 180;
 const TRANSIENT_AUTHORITATIVE_SESSION_MAX_DATA_POINTS = 0;
 const SESSION_CLOSE_LOOKBACK_MS = 15_000;
 const SESSION_CLOSE_LOOKAHEAD_MS = 60_000;
@@ -508,20 +507,6 @@ export const findDeviceSessionIdByIdentity = async (
       return adopted?.id ?? null;
     }
 
-    if (localSessionKey !== null) {
-      const result = await pool.query<DeviceSessionRow>(
-        `SELECT id
-         FROM device_sessions
-         WHERE device_id = $1
-           AND local_session_key = $2
-           AND status = 'running'
-         ORDER BY created_at DESC
-         LIMIT 1`,
-        [deviceId, localSessionKey],
-      );
-      return result.rows[0]?.id ?? null;
-    }
-
     if (firmwareBootId !== null) {
       const result = await pool.query<DeviceSessionRow>(
         `SELECT id
@@ -942,8 +927,7 @@ export const completeDeviceSession = async (
 
     const shouldDiscardTransientAuthoritativeSession =
       completionSource !== 'heartbeat' &&
-      dataPointsCount <= TRANSIENT_AUTHORITATIVE_SESSION_MAX_DATA_POINTS &&
-      Math.max(runtimeSeconds, 0) <= TRANSIENT_AUTHORITATIVE_SESSION_MAX_RUNTIME_SECONDS;
+      dataPointsCount <= TRANSIENT_AUTHORITATIVE_SESSION_MAX_DATA_POINTS;
 
     if (shouldDiscardTransientHeartbeatSession || shouldDiscardTransientAuthoritativeSession) {
       await client.query('UPDATE event_logs SET session_id = NULL WHERE session_id = $1', [session.id]);

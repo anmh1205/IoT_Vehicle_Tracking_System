@@ -10,14 +10,17 @@ export const isEngineOffRuntimeState = (runtimeState: RuntimeStateSnapshot): boo
 export const hasAuthoritativeSessionIdentity = (params: {
   localSessionKey?: number | null;
   canonicalSessionId?: string | null;
+  bootId?: string | null;
 }): boolean => {
   const localSessionKey = Number(params.localSessionKey);
   const canonicalSessionId = Number(params.canonicalSessionId?.trim() ?? '');
+  const bootId = params.bootId?.trim();
 
-  return (
-    (Number.isSafeInteger(localSessionKey) && localSessionKey > 0) ||
-    (Number.isSafeInteger(canonicalSessionId) && canonicalSessionId > 0)
-  );
+  if (Number.isSafeInteger(canonicalSessionId) && canonicalSessionId > 0) {
+    return true;
+  }
+
+  return Number.isSafeInteger(localSessionKey) && localSessionKey > 0 && !!bootId;
 };
 
 export const telemetryReportsEngineOff = (params: {

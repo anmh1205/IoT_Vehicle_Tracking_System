@@ -66,7 +66,7 @@ export const handleStatus = async (
     payload.session_id,
   );
   const payloadCanonicalSessionId = payload.canonical_session_id ?? null;
-  const boundaryEvent = payload.boundary_event ?? 'none';
+  const reportedBoundaryEvent = payload.boundary_event ?? 'none';
 
   if (payload.device_id !== deviceIdFromTopic) {
     logger.warn(
@@ -93,7 +93,24 @@ export const handleStatus = async (
   const hasAuthoritativeIdentity = hasAuthoritativeSessionIdentity({
     localSessionKey,
     canonicalSessionId: payloadCanonicalSessionId,
+    bootId: sessionBootId,
   });
+  let boundaryEvent = reportedBoundaryEvent;
+  if (reportedBoundaryEvent === 'started' && !hasAuthoritativeIdentity) {
+    logger.warn(
+      {
+        deviceId: payload.device_id,
+        localSessionKey,
+        canonicalSessionId: payloadCanonicalSessionId,
+        bootId: sessionBootId,
+        messageId,
+        event: 'status_boundary_started_degraded',
+        reason: 'missing_authoritative_session_identity',
+      },
+      'Started boundary degraded to status update',
+    );
+    boundaryEvent = 'none';
+  }
   const effectiveCachedStatus = normalizeStatusForSessionRuntime({
     cachedStatus,
     runtimeState,

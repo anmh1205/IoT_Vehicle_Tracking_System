@@ -19,7 +19,7 @@ test('resolveSessionId reuses a running session when only boot_id is available',
   );
 });
 
-test('resolveSessionId reuses a running session when legacy local session key has no boot id', () => {
+test('resolveSessionId does not reuse a boot-scoped session from local key alone', () => {
   const deviceId = 'device-cache-local-only';
   setStatus(deviceId, 'running', {
     sessionId: 84,
@@ -32,6 +32,48 @@ test('resolveSessionId reuses a running session when legacy local session key ha
     resolveSessionId(deviceId, {
       localSessionKey: 9,
     }),
-    84,
+    null,
+  );
+});
+
+test('resolveSessionId still supports legacy local-only running sessions', () => {
+  const deviceId = 'device-cache-legacy-local-only';
+  setStatus(deviceId, 'running', {
+    sessionId: 85,
+    localSessionKey: 9,
+    canonicalSessionId: null,
+    bootId: null,
+  });
+
+  assert.equal(
+    resolveSessionId(deviceId, {
+      localSessionKey: 9,
+    }),
+    85,
+  );
+});
+
+test('resolveSessionId reuses a local key when boot id matches', () => {
+  const deviceId = 'device-cache-local-boot-match';
+  setStatus(deviceId, 'running', {
+    sessionId: 86,
+    localSessionKey: 10,
+    canonicalSessionId: null,
+    bootId: 'boot-86',
+  });
+
+  assert.equal(
+    resolveSessionId(deviceId, {
+      localSessionKey: 10,
+      bootId: 'boot-86',
+    }),
+    86,
+  );
+  assert.equal(
+    resolveSessionId(deviceId, {
+      localSessionKey: 10,
+      bootId: 'boot-other',
+    }),
+    null,
   );
 });

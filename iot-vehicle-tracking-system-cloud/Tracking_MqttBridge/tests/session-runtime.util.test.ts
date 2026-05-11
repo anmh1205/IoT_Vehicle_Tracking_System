@@ -48,12 +48,16 @@ test('telemetryReportsEngineOff lets explicit ignition false override stale runn
   );
 });
 
-test('hasAuthoritativeSessionIdentity only accepts real session identifiers', () => {
-  assert.equal(hasAuthoritativeSessionIdentity({ localSessionKey: 12 }), true);
+test('hasAuthoritativeSessionIdentity requires canonical id or boot-scoped local key', () => {
+  assert.equal(hasAuthoritativeSessionIdentity({ localSessionKey: 12 }), false);
+  assert.equal(hasAuthoritativeSessionIdentity({ localSessionKey: 12, bootId: 'boot-a' }), true);
   assert.equal(hasAuthoritativeSessionIdentity({ canonicalSessionId: '57' }), true);
   assert.equal(hasAuthoritativeSessionIdentity({ canonicalSessionId: ' 57 ' }), true);
-  assert.equal(hasAuthoritativeSessionIdentity({ localSessionKey: 0, canonicalSessionId: '0' }), false);
-  assert.equal(hasAuthoritativeSessionIdentity({ localSessionKey: undefined, canonicalSessionId: undefined }), false);
+  assert.equal(hasAuthoritativeSessionIdentity({ localSessionKey: 0, canonicalSessionId: '0', bootId: 'boot-a' }), false);
+  assert.equal(
+    hasAuthoritativeSessionIdentity({ localSessionKey: undefined, canonicalSessionId: undefined, bootId: 'boot-a' }),
+    false,
+  );
 });
 
 test('authoritative identity keeps running status active across temporary engine-off runtime snapshots', () => {

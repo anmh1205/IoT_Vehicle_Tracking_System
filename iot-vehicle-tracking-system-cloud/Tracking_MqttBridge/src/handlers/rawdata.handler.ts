@@ -932,6 +932,7 @@ export const handleRawData = async (
   const hasAuthoritativeIdentity = hasAuthoritativeSessionIdentity({
     localSessionKey,
     canonicalSessionId: payloadCanonicalSessionId,
+    bootId: sessionBootId,
   });
   const isActiveSessionTelemetry = isLikelyActiveSessionTelemetry({
     ignition: payload.data.ignition,
