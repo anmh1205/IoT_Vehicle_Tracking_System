@@ -1,14 +1,41 @@
 ﻿import type { NextConfig } from 'next';
 
-const normalizeApiBaseForRewrite = (rawValue: string | undefined): string => {
+const INTERNAL_API_BASE = 'http://tracking-backend:4000';
+
+export const normalizeApiBaseForRewrite = (rawValue: string | undefined): string => {
   const value = String(rawValue ?? '')
     .trim()
     .replace(/^['"]+|['"]+$/g, '');
 
-  if (!value) return 'http://tracking-backend:4000';
+  if (!value) return INTERNAL_API_BASE;
   if (value.startsWith('/') || value.startsWith('http://') || value.startsWith('https://')) return value;
 
   return `https://${value}`;
+};
+
+const isPublicThingdockApi = (value: string): boolean => {
+  try {
+    return new URL(value).hostname === 'api.thingdock.dev';
+  } catch {
+    return false;
+  }
+};
+
+export const resolveApiBaseForRewrite = (): string => {
+  const serverApiBase =
+    process.env.NEXT_SERVER_API_URL ||
+    process.env.NEXT_INTERNAL_API_URL ||
+    process.env.API_INTERNAL_URL;
+
+  if (serverApiBase) {
+    return normalizeApiBaseForRewrite(serverApiBase);
+  }
+
+  const publicApiBase = normalizeApiBaseForRewrite(
+    process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL,
+  );
+
+  return isPublicThingdockApi(publicApiBase) ? INTERNAL_API_BASE : publicApiBase;
 };
 
 const nextConfig: NextConfig = {
@@ -56,9 +83,7 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    const apiBase = normalizeApiBaseForRewrite(
-      process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL,
-    );
+    const apiBase = resolveApiBaseForRewrite();
 
     return [
       {
