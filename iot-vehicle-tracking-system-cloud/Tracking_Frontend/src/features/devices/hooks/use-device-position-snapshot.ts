@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDeviceRoom } from '@/components/providers/socket-provider';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
@@ -55,8 +55,11 @@ const normalizePosition = (row: any): DevicePositionSnapshot => ({
   ecuAlerts: toAlertSummary(row?.ecuAlerts ?? {}, 'ecu'),
 });
 
+const POSITION_SNAPSHOT_REFRESH_THROTTLE_MS = 5_000;
+
 export const useDevicePositionSnapshot = (devicePublicId: string | null, enabled = true) => {
   const queryClient = useQueryClient();
+  const lastSnapshotRefreshAtRef = useRef(0);
   useDeviceRoom(devicePublicId, enabled && !!devicePublicId);
 
   const query = useQuery({
@@ -65,12 +68,17 @@ export const useDevicePositionSnapshot = (devicePublicId: string | null, enabled
     enabled: enabled && !!devicePublicId,
   });
 
-  const refreshSnapshot = (payload: { deviceId?: string; device_id?: string }) => {
+  const refreshSnapshot = useCallback((payload: { deviceId?: string; device_id?: string }) => {
     const nextDeviceId = String(payload.deviceId ?? payload.device_id ?? '');
     if (nextDeviceId === String(devicePublicId ?? '')) {
+      const now = Date.now();
+      if (now - lastSnapshotRefreshAtRef.current < POSITION_SNAPSHOT_REFRESH_THROTTLE_MS) {
+        return;
+      }
+      lastSnapshotRefreshAtRef.current = now;
       void queryClient.invalidateQueries({ queryKey: ['device-position-snapshot', devicePublicId] });
     }
-  };
+  }, [devicePublicId, queryClient]);
 
   useRealtimeSubscription({
     namespace: 'devices',

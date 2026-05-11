@@ -79,7 +79,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       nextSockets[namespace] = io(buildNamespaceUrl(wsUrl, namespace), {
         auth: { token },
         path: wsPath,
-        transports: ['websocket'],
+        transports: ['websocket', 'polling'],
+        tryAllTransports: true,
         reconnection: true,
         reconnectionAttempts: Infinity,
         reconnectionDelay: 1000,

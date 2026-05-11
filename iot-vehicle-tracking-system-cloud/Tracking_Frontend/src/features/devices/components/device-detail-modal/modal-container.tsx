@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDeviceRoom } from '@/components/providers/socket-provider';
 import { useRealtimeSubscription } from '@/hooks/use-realtime-subscription';
@@ -39,6 +39,8 @@ const resolveTimestamp = (value: unknown): string | null => {
   }
   return null;
 };
+
+const TELEMETRY_REFRESH_THROTTLE_MS = 10_000;
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -353,6 +355,7 @@ export const DeviceDetailModalContainer = ({
 }) => {
   const [activeTab, setActiveTab] = useState<DeviceDetailTab>('overview');
   const queryClient = useQueryClient();
+  const lastTelemetryRefreshAtRef = useRef(0);
   const access = useRoleAccess();
   const deviceId = device?.id ?? null;
 
@@ -460,17 +463,29 @@ export const DeviceDetailModalContainer = ({
       return;
     }
 
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['devices'] }),
-      queryClient.invalidateQueries({ queryKey: ['device', deviceId] }),
-      queryClient.invalidateQueries({ queryKey: ['device-detail', deviceId] }),
-      queryClient.invalidateQueries({ queryKey: ['device-tracking-telemetry', deviceId] }),
-      queryClient.invalidateQueries({ queryKey: ['device-session-telemetry', deviceId] }),
-      queryClient.invalidateQueries({ queryKey: ['device-position-snapshot', devicePublicId] }),
-      queryClient.invalidateQueries({ queryKey: ['device-event-logs', devicePublicId] }),
-      queryClient.invalidateQueries({ queryKey: ['device-obd-alerts', devicePublicId] }),
-      queryClient.invalidateQueries({ queryKey: ['device-workspace-alerts', devicePublicId] }),
-    ]);
+    const now = Date.now();
+    const shouldRefreshHeavyViews =
+      now - lastTelemetryRefreshAtRef.current >= TELEMETRY_REFRESH_THROTTLE_MS;
+
+    const invalidations: Array<Promise<unknown>> = [];
+
+    if (shouldRefreshHeavyViews) {
+      lastTelemetryRefreshAtRef.current = now;
+      invalidations.push(
+        queryClient.invalidateQueries({ queryKey: ['device', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-detail', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-tracking-telemetry', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-session-telemetry', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-sessions', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-runtime-chart', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-imu-accel-delta-chart', deviceId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-event-logs', devicePublicId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-obd-alerts', devicePublicId] }),
+        queryClient.invalidateQueries({ queryKey: ['device-workspace-alerts', devicePublicId] }),
+      );
+    }
+
+    await Promise.all(invalidations);
   }, [deviceId, devicePublicId, queryClient]);
 
   useRealtimeSubscription<any>({

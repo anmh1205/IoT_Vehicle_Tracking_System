@@ -6,43 +6,12 @@ const GPS_LATITUDE_SQL =
   "COALESCE(e.context#>>'{raw_payload,data,latitude}', e.context->>'latitude', e.metadata->>'latitude')";
 const GPS_LONGITUDE_SQL =
   "COALESCE(e.context#>>'{raw_payload,data,longitude}', e.context->>'longitude', e.metadata->>'longitude')";
-const GPS_EVENT_LOCAL_SESSION_KEY_SQL = "e.context#>>'{raw_payload,local_session_key}'";
-const GPS_EVENT_BOOT_ID_SQL =
-  "COALESCE(e.context#>>'{raw_payload,boot_id}', e.context#>>'{raw_payload,metadata,boot_id}')";
-const SESSION_CLOSE_TIMESTAMP_SQL = 'COALESCE(s.session_end, s.server_session_end)';
-const EVENT_TIMESTAMP_SQL = 'COALESCE(e.device_timestamp, e.server_timestamp)';
-const SESSION_WITH_GPS_COUNT_SQL = `
-  s.*,
-  COALESCE(gps.gps_points_count, 0)::int AS gps_points_count
-`;
+const SESSION_WITH_GPS_COUNT_SQL = `s.*, COALESCE(gps.gps_points_count, 0)::int AS gps_points_count`;
 const GPS_COUNT_JOIN_SQL = `
   LEFT JOIN LATERAL (
     SELECT COUNT(*)::int AS gps_points_count
     FROM event_logs e
-    WHERE (
-        e.session_id = s.id
-        OR (
-          e.session_id IS NULL
-          AND e.device_id = s.device_id
-          AND s.status = 'completed'
-          AND ${SESSION_CLOSE_TIMESTAMP_SQL} IS NOT NULL
-          AND ${EVENT_TIMESTAMP_SQL} BETWEEN
-            ${SESSION_CLOSE_TIMESTAMP_SQL} - INTERVAL '15 seconds'
-            AND ${SESSION_CLOSE_TIMESTAMP_SQL} + INTERVAL '60 seconds'
-          AND (
-            (
-              ${GPS_EVENT_LOCAL_SESSION_KEY_SQL} ~ '^[0-9]+$'
-              AND s.local_session_key IS NOT NULL
-              AND (${GPS_EVENT_LOCAL_SESSION_KEY_SQL})::bigint = s.local_session_key
-            )
-            OR (
-              ${GPS_EVENT_BOOT_ID_SQL} IS NOT NULL
-              AND s.firmware_boot_id IS NOT NULL
-              AND ${GPS_EVENT_BOOT_ID_SQL} = s.firmware_boot_id
-            )
-          )
-        )
-      )
+    WHERE e.session_id = s.id
       AND e.event_code = 'mqtt_bridge_rawdata'
       AND ${GPS_LATITUDE_SQL} IS NOT NULL
       AND ${GPS_LONGITUDE_SQL} IS NOT NULL

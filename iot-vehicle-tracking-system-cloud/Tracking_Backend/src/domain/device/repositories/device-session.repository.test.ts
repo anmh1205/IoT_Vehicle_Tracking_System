@@ -26,9 +26,10 @@ describe('device-session.repository', () => {
     expect(sql).toContain("context#>>'{raw_payload,data,latitude}'");
     expect(sql).toContain("context->>'latitude'");
     expect(sql).toContain("context#>>'{raw_payload,data,longitude}'");
-    expect(sql).toContain('e.session_id IS NULL');
-    expect(sql).toContain("INTERVAL '60 seconds'");
-    expect(sql).toContain("context#>>'{raw_payload,boot_id}'");
+    expect(sql).toContain('e.session_id = s.id');
+    expect(sql).toContain("e.event_code = 'mqtt_bridge_rawdata'");
+    expect(sql).not.toContain('e.session_id IS NULL');
+    expect(sql).not.toContain("INTERVAL '60 seconds'");
     expect(params).toEqual(['TRACKER_001', 20, 20]);
   });
 
