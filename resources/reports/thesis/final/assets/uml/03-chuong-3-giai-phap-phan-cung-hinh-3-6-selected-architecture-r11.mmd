@@ -1,10 +1,10 @@
 flowchart LR
     subgraph Device["Thiết bị trên xe"]
         ESP["ESP32-S3 điều phối"]
-        OBD["OBD-II Bluetooth"]
+        OBD["Bộ đọc OBD-II BLE"]
         LTE["SIM7600CE-T LTE/GNSS"]
         IMU["LIS3DSH đánh thức"]
-        Queue["Bộ nhớ đệm"]
+        Queue["Bộ nhớ đệm cục bộ"]
     end
 
     subgraph Process["Tiếp nhận và xử lý"]

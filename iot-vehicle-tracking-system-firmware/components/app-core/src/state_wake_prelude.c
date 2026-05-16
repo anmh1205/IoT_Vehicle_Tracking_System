@@ -594,6 +594,35 @@ static void state_machine_schedule_network_retry(uint64_t now_ms, const char *st
 }
 
 /**
+ * @brief Wake a modem that was left warm but low-power during parked sleep.
+ *
+ * When GNSS is kept warm across parked windows the modem is not power-cycled,
+ * so the wake prelude only needs to restore the AT channel before GNSS/LTE/MQTT
+ * work resumes. Failures stay on the normal network retry rail.
+ */
+static bool state_machine_wakeup_low_power_modem_if_needed(void) {
+    if (!s_modem_low_power_pending_wakeup) {
+        return true;
+    }
+
+    uint64_t now_ms = util_uptime_ms();
+    if (!retry_state_can_run(&s_network_retry, now_ms)) {
+        return false;
+    }
+
+    esp_err_t err = modem_lte_wakeup();
+    if (err != ESP_OK) {
+        state_machine_schedule_network_retry(now_ms, "modem_lte_wakeup", err);
+        return false;
+    }
+
+    s_modem_low_power_pending_wakeup = false;
+    retry_state_reset(&s_network_retry);
+    ESP_LOGI(TAG, "event=parked_modem_wakeup_ok");
+    return true;
+}
+
+/**
  * @brief Advance the LTE, MQTT, GNSS, and command-subscribe connection path.
  *
  * This helper is intentionally non-blocking. Each subsystem gets one chance to
@@ -683,18 +712,21 @@ void state_machine_run_wake_prelude(bool allow_replay) {
     // Advance one cooperative step here using the current state, time gates, and retry policy.
     state_machine_handle_pending_action();
     bool ble_result_handled = state_machine_handle_ble_connect_result();
-    state_machine_try_connect_network();
+    bool modem_ready = state_machine_wakeup_low_power_modem_if_needed();
+    if (modem_ready) {
+        state_machine_try_connect_network();
+    }
     state_machine_try_connect_ble();
     state_machine_bootstrap_rtc();
     state_machine_bootstrap_imu();
-    state_machine_refresh_telemetry(true, true);
+    state_machine_refresh_telemetry(modem_ready, true);
     ble_result_handled = state_machine_handle_ble_connect_result() || ble_result_handled;
     if (ble_result_handled && s_ble_ctx != NULL && ble_obd_is_connected(s_ble_ctx)) {
-        state_machine_refresh_telemetry(true, true);
+        state_machine_refresh_telemetry(modem_ready, true);
     }
 
     state_machine_handle_pending_action();
-    offline_queue_set_online(tracker_mqtt_is_connected());
+    offline_queue_set_online(modem_ready && tracker_mqtt_is_connected());
     if (allow_replay) {
         offline_queue_replay_tick();
     }

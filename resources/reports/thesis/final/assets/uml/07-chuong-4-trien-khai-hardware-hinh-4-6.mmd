@@ -7,14 +7,14 @@ flowchart TB
     Battery["Pin Li-ion 18650"]
     Boost5["SX1308<br/>Tạo lại 5 V khi mất nguồn xe"]
     Logic3["AP2112<br/>Tạo 3.3 V cho điều khiển, cảm biến và bộ nhớ"]
-    Modem4["TPS54231<br/>Tạo 4 V riêng cho SIM7600E"]
+    Modem4["TPS54231<br/>Tạo 4 V riêng cho SIM7600CE-T"]
     Aux5["Nhánh 5 V phụ<br/>USB-C, đèn báo và các phần hỗ trợ"]
 
     Vin --> Buck5
     Vin --> Sense
     Buck5 --> Bus5
     Buck5 --> Charge
-    Charge <--> Battery
+    Charge --> Battery
     Battery --> Boost5
     Boost5 --> Bus5
     Bus5 --> Logic3

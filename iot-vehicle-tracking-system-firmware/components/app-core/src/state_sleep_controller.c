@@ -333,7 +333,8 @@ bool state_machine_can_enter_sleep(const char **out_reason) {
  * @brief Shut down active subsystems and snapshot runtime state before sleep.
  *
  * This is the single pre-sleep teardown path shared by deep sleep and light
- * sleep preparation. It disconnects BLE/LTE/MQTT, powers down GNSS/modem, and
+ * sleep preparation. It disconnects BLE and either places the warm modem/GNSS
+ * path into low-power idle or powers down LTE/GNSS/modem completely, then
  * captures the last known runtime context into RTC-retained memory.
  */
 void state_machine_shutdown_for_sleep(void) {
@@ -363,6 +364,19 @@ void state_machine_shutdown_for_sleep(void) {
                  s_gnss_started ? 1 : 0,
                  tracker_mqtt_is_connected() ? 1 : 0,
                  modem_lte_is_initialized() ? 1 : 0);
+        esp_err_t modem_sleep_err = modem_lte_sleep();
+        if (modem_sleep_err == ESP_OK) {
+            s_modem_low_power_pending_wakeup = true;
+            ESP_LOGI(TAG, "event=pre_sleep_modem_low_power_entered mode=warm_gnss");
+        } else if (modem_sleep_err == ESP_ERR_NOT_SUPPORTED) {
+            s_modem_low_power_pending_wakeup = false;
+            ESP_LOGW(TAG, "event=pre_sleep_modem_low_power_skipped reason=dtr_unmapped fallback=keep_active");
+        } else {
+            s_modem_low_power_pending_wakeup = false;
+            ESP_LOGW(TAG,
+                     "event=pre_sleep_modem_low_power_failed err=%s fallback=keep_active",
+                     esp_err_to_name(modem_sleep_err));
+        }
     } else if (s_gnss_started) {
         // Power GNSS down explicitly so the next wake prelude re-arms it from a known state.
         esp_err_t gnss_off_err = modem_gnss_power_off();
@@ -371,6 +385,7 @@ void state_machine_shutdown_for_sleep(void) {
         }
     }
     if (!keep_modem_gnss_warm) {
+        s_modem_low_power_pending_wakeup = false;
         s_gnss_started = false;
         state_machine_clear_gnss_cache();
     }

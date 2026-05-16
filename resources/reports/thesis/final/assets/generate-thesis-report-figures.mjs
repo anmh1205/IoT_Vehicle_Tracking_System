@@ -88,6 +88,18 @@ const renderSizeByFileName = {
   "10-chuong-4-ket-qua-do-luong-hinh-4-33.svg": { width: 3600, height: 2100 },
   "06-chuong-3-giai-phap-frontend-hinh-3-19a.svg": { width: 3200, height: 2000 },
 };
+const renderScaleByFileName = {
+  "07-chuong-4-trien-khai-hardware-hinh-4-6.png": 3,
+  "07-chuong-4-trien-khai-hardware-hinh-4-12.png": 3,
+  "07-chuong-4-trien-khai-hardware-hinh-4-14.png": 3,
+  "08-chuong-4-trien-khai-firmware-hinh-4-9-sequence-r2.png": 3,
+  "08-chuong-4-trien-khai-firmware-hinh-4-3d.png": 3,
+  "08-chuong-4-trien-khai-firmware-hinh-4-3e.png": 3,
+  "09-chuong-4-trien-khai-cloud-hinh-4-15.png": 3,
+  "09-chuong-4-trien-khai-cloud-hinh-4-16.png": 3,
+  "10-chuong-4-ket-qua-do-luong-hinh-4-23.png": 3,
+  "10-chuong-4-ket-qua-do-luong-hinh-4-27.png": 3,
+};
 
 const findCachedMermaidCli = () => {
   const cacheRoots = [
@@ -171,7 +183,7 @@ const purgeExistingFigureAssets = (figureNames) => {
   }
 };
 
-const renderMermaid = (inputPath, outputPath, width, height) => {
+const renderMermaid = (inputPath, outputPath, width, height, scale = 1) => {
   const baseArgs = [
     "-i",
     inputPath,
@@ -185,6 +197,8 @@ const renderMermaid = (inputPath, outputPath, width, height) => {
     String(width),
     "-H",
     String(height),
+    "-s",
+    String(scale),
     "-q",
   ];
 
@@ -272,13 +286,15 @@ try {
     const sourcePath = join(mermaidTempDir, figureName.replace(/\.[^.]+$/u, ".mmd"));
     const outputPath = join(figuresDir, figureName);
     const outputPngPath = join(figuresDir, figureName.replace(/\.svg$/u, ".png"));
+    const svgScale = renderScaleByFileName[figureName] ?? 1;
+    const pngScale = renderScaleByFileName[figureName.replace(/\.svg$/u, ".png")] ?? 1;
 
     writeFileSync(sourcePath, code, "utf8");
 
     try {
-      renderMermaid(sourcePath, outputPath, width, height);
+      renderMermaid(sourcePath, outputPath, width, height, svgScale);
       postProcessRenderedSvg(outputPath);
-      renderMermaid(sourcePath, outputPngPath, width, height);
+      renderMermaid(sourcePath, outputPngPath, width, height, pngScale);
       process.stdout.write(`Rendered: ${figureName} (+PNG)\n`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

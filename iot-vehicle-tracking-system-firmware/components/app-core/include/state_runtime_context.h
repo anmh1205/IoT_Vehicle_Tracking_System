@@ -151,6 +151,7 @@ extern bool s_time_trusted;
 extern uint64_t s_event_timestamp_ms;
 extern bool s_prev_lte_initialized;
 extern bool s_lte_ever_initialized;
+extern bool s_modem_low_power_pending_wakeup;
 extern uint32_t s_gnss_poll_fail_streak;
 extern uint64_t s_last_gnss_rearm_ms;
 extern uint64_t s_last_gnss_poll_ms;

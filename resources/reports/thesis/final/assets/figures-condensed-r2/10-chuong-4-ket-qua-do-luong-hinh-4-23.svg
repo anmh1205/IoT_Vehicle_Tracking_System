@@ -1,29 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
-<rect width="100%" height="100%" fill="white"/>
-<g font-family="Cambria, Arial, serif" fill="#111">
-<line x1="210" y1="810.0" x2="1510" y2="810.0" stroke="#d2d2d2" stroke-width="2"/>
-<text x="190" y="820.0" text-anchor="end" font-size="26">0.001</text>
-<line x1="210" y1="585.8" x2="1510" y2="585.8" stroke="#d2d2d2" stroke-width="2"/>
-<text x="190" y="595.8" text-anchor="end" font-size="26">0.01</text>
-<line x1="210" y1="361.7" x2="1510" y2="361.7" stroke="#d2d2d2" stroke-width="2"/>
-<text x="190" y="371.7" text-anchor="end" font-size="26">0.1</text>
-<line x1="210" y1="137.5" x2="1510" y2="137.5" stroke="#d2d2d2" stroke-width="2"/>
-<text x="190" y="147.5" text-anchor="end" font-size="26">1</text>
-<line x1="210" y1="70.0" x2="1510" y2="70.0" stroke="#d2d2d2" stroke-width="2"/>
-<text x="190" y="80.0" text-anchor="end" font-size="26">2</text>
-<line x1="210" y1="70" x2="210" y2="810" stroke="#111" stroke-width="4"/>
-<line x1="210" y1="810" x2="1510" y2="810" stroke="#111" stroke-width="4"/>
-<text x="80" y="500.0" font-size="30" transform="rotate(-90 80 500.0)">Công suất (W), thang log</text>
-<rect x="334.0" y="137.5" width="220" height="672.5" fill="#666" stroke="#1e1e1e" stroke-width="3"/>
-<text x="444.0" y="119.5" text-anchor="middle" font-size="34" font-weight="700">1,000 W</text>
-<text x="444.0" y="866.0" text-anchor="middle" font-size="34">Thiết bị
-hoạt động</text>
-<rect x="750.0" y="635.6" width="220" height="174.4" fill="#666" stroke="#1e1e1e" stroke-width="3"/>
-<text x="860.0" y="617.6" text-anchor="middle" font-size="34" font-weight="700">0,006 W</text>
-<text x="860.0" y="866.0" text-anchor="middle" font-size="34">Ngủ sâu</text>
-<rect x="1166.0" y="119.7" width="220" height="690.3" fill="#666" stroke="#1e1e1e" stroke-width="3"/>
-<text x="1276.0" y="101.7" text-anchor="middle" font-size="34" font-weight="700">1,200 W</text>
-<text x="1276.0" y="866.0" text-anchor="middle" font-size="34">Bộ đọc
-OBD</text>
-</g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<style>
+  text { font-family: 'Times New Roman', Times, serif; fill: #000000; }
+</style>
+
+<!-- Title -->
+<text x="450" y="38" text-anchor="middle" font-size="24" font-weight="bold">Dòng tiêu thụ theo các pha vận hành chính</text>
+
+<!-- Y-axis -->
+<line x1="100" y1="70" x2="100" y2="400" stroke="#000000" stroke-width="2"/>
+<!-- X-axis -->
+<line x1="100" y1="400" x2="860" y2="400" stroke="#000000" stroke-width="2"/>
+
+<!-- Y-axis title -->
+<text x="30" y="235" text-anchor="middle" font-size="18" transform="rotate(-90 30 235)">mA</text>
+<text x="90" y="405" text-anchor="end" font-size="15">0</text><line x1="100" y1="345" x2="860" y2="345" stroke="#000000" stroke-width="0.4" stroke-dasharray="4 3"/><text x="90" y="350" text-anchor="end" font-size="15">40</text><line x1="100" y1="290" x2="860" y2="290" stroke="#000000" stroke-width="0.4" stroke-dasharray="4 3"/><text x="90" y="295" text-anchor="end" font-size="15">80</text><line x1="100" y1="235" x2="860" y2="235" stroke="#000000" stroke-width="0.4" stroke-dasharray="4 3"/><text x="90" y="240" text-anchor="end" font-size="15">120</text><line x1="100" y1="180" x2="860" y2="180" stroke="#000000" stroke-width="0.4" stroke-dasharray="4 3"/><text x="90" y="185" text-anchor="end" font-size="15">160</text><line x1="100" y1="125" x2="860" y2="125" stroke="#000000" stroke-width="0.4" stroke-dasharray="4 3"/><text x="90" y="130" text-anchor="end" font-size="15">200</text><line x1="100" y1="70" x2="860" y2="70" stroke="#000000" stroke-width="0.4" stroke-dasharray="4 3"/><text x="90" y="75" text-anchor="end" font-size="15">240</text><rect x="116" y="111.25" width="90.28571428571429" height="288.75" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="161.14285714285714" y="101.25" text-anchor="middle" font-size="17" font-weight="bold">210</text><text x="161.14285714285714" y="425" text-anchor="middle" font-size="15">Hoạt động</text><rect x="222.28571428571428" y="103" width="90.28571428571429" height="297" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="267.42857142857144" y="93" text-anchor="middle" font-size="17" font-weight="bold">216</text><text x="267.42857142857144" y="425" text-anchor="middle" font-size="15">Gửi tin</text><rect x="328.57142857142856" y="251.5" width="90.28571428571429" height="148.5" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="373.7142857142857" y="241.5" text-anchor="middle" font-size="17" font-weight="bold">108</text><text x="373.7142857142857" y="425" text-anchor="middle" font-size="15">Chờ</text><rect x="434.8571428571429" y="387.625" width="90.28571428571429" height="12.375" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="480.00000000000006" y="377.625" text-anchor="middle" font-size="17" font-weight="bold">9</text><text x="480.00000000000006" y="425" text-anchor="middle" font-size="15">Đỗ</text><rect x="541.1428571428571" y="399.175" width="90.28571428571429" height="0.8250000000000001" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="586.2857142857142" y="389.175" text-anchor="middle" font-size="17" font-weight="bold">0.6</text><text x="586.2857142857142" y="425" text-anchor="middle" font-size="15">Ngủ sâu</text><rect x="647.4285714285714" y="86.5" width="90.28571428571429" height="313.5" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="692.5714285714286" y="76.5" text-anchor="middle" font-size="17" font-weight="bold">228</text><text x="692.5714285714286" y="425" text-anchor="middle" font-size="15">Cảnh báo</text><rect x="753.7142857142858" y="387.625" width="90.28571428571429" height="12.375" fill="#ffffff" stroke="#000000" stroke-width="2.5"/><text x="798.8571428571429" y="377.625" text-anchor="middle" font-size="17" font-weight="bold">9</text><text x="798.8571428571429" y="425" text-anchor="middle" font-size="15">Ổn định lại</text></svg>

@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 #include "esp_log.h"
 
 #include "modem_at.h"
@@ -18,6 +21,9 @@
 
 // File-local constants, retained state, and helper wiring stay private here so
 // higher layers interact with this module through its exported contract.
+
+#define MODEM_LTE_WAKE_AT_RETRY_COUNT 3U
+#define MODEM_LTE_WAKE_AT_RETRY_DELAY_MS 200U
 
 
 /** LTE initialization state. */
@@ -218,12 +224,30 @@ esp_err_t modem_lte_sleep(void) {
         return ESP_OK;
     }
 
-    esp_err_t dtr_err = modem_set_dtr(true);
+    esp_err_t dtr_err = modem_set_dtr(false);
+    if (dtr_err == ESP_ERR_NOT_SUPPORTED) {
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_sleep_skipped reason=dtr_unmapped");
+        return ESP_ERR_NOT_SUPPORTED;
+    }
     if (dtr_err != ESP_OK && dtr_err != ESP_ERR_NOT_SUPPORTED) {
-        ESP_LOGW(MODEM_LTE_TAG, "event=lte_sleep_dtr_set_failed err=%s", esp_err_to_name(dtr_err));
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_sleep_dtr_wake_set_failed err=%s", esp_err_to_name(dtr_err));
+        return dtr_err;
     }
 
-    return modem_lte_send_simple("AT+CSCLK=1\r", "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
+    esp_err_t csclk_err = modem_lte_send_simple("AT+CSCLK=1\r", "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
+    if (csclk_err != ESP_OK) {
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_sleep_csclk_failed err=%s", esp_err_to_name(csclk_err));
+        return csclk_err;
+    }
+
+    dtr_err = modem_set_dtr(true);
+    if (dtr_err != ESP_OK) {
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_sleep_dtr_set_failed err=%s", esp_err_to_name(dtr_err));
+        return dtr_err;
+    }
+
+    ESP_LOGI(MODEM_LTE_TAG, "event=lte_sleep_entered dtr=1 csclk=1");
+    return ESP_OK;
 }
 
 /**
@@ -239,11 +263,31 @@ esp_err_t modem_lte_wakeup(void) {
     }
 
     esp_err_t dtr_err = modem_set_dtr(false);
+    if (dtr_err == ESP_ERR_NOT_SUPPORTED) {
+        ESP_LOGW(MODEM_LTE_TAG, "event=lte_wakeup_limited reason=dtr_unmapped");
+    }
     if (dtr_err != ESP_OK && dtr_err != ESP_ERR_NOT_SUPPORTED) {
         ESP_LOGW(MODEM_LTE_TAG, "event=lte_wakeup_dtr_set_failed err=%s", esp_err_to_name(dtr_err));
+        return dtr_err;
     }
 
-    return modem_lte_send_simple("AT\r", "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
+    vTaskDelay(pdMS_TO_TICKS((uint32_t)MODEM_LTE_WAKE_DTR_SETTLE_MS));
+
+    esp_err_t at_err = ESP_FAIL;
+    for (uint32_t attempt = 1; attempt <= MODEM_LTE_WAKE_AT_RETRY_COUNT; ++attempt) {
+        at_err = modem_lte_send_simple("AT\r", "OK", MODEM_LTE_SHORT_CMD_TIMEOUT_MS);
+        if (at_err == ESP_OK) {
+            ESP_LOGI(MODEM_LTE_TAG, "event=lte_wakeup_ok attempt=%lu", (unsigned long)attempt);
+            return ESP_OK;
+        }
+        ESP_LOGW(MODEM_LTE_TAG,
+                 "event=lte_wakeup_at_failed attempt=%lu err=%s",
+                 (unsigned long)attempt,
+                 esp_err_to_name(at_err));
+        vTaskDelay(pdMS_TO_TICKS((uint32_t)MODEM_LTE_WAKE_AT_RETRY_DELAY_MS));
+    }
+
+    return at_err;
 }
 
 /**

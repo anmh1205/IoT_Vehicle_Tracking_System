@@ -3,44 +3,72 @@ config:
   theme: base
   sequence:
     mirrorActors: false
-    actorMargin: 150
-    messageMargin: 55
-    noteMargin: 28
-    diagramMarginX: 40
+    actorMargin: 145
+    messageMargin: 48
+    noteMargin: 24
+    diagramMarginX: 28
     diagramMarginY: 20
     boxMargin: 12
     boxTextMargin: 8
-    actorFontSize: 14
-    messageFontSize: 14
-    noteFontSize: 13
+    actorFontSize: 18
+    messageFontSize: 18
+  themeVariables:
+    primaryColor: "#ffffff"
+    primaryBorderColor: "#000000"
+    primaryTextColor: "#000000"
+    secondaryColor: "#ffffff"
+    tertiaryColor: "#ffffff"
+    lineColor: "#000000"
+  themeCSS: |
+    .actor,
+    .actor-top,
+    .actor-bottom,
+    .labelBox {
+      fill: #ffffff !important;
+      stroke: #000000 !important;
+    }
+    .actor-line,
+    .messageLine0,
+    .messageLine1,
+    .loopLine,
+    .innerArc {
+      stroke: #000000 !important;
+      stroke-width: 2.2px !important;
+    }
+    [id$="-arrowhead"] path,
+    .marker,
+    .marker.cross {
+      fill: #000000 !important;
+      stroke: #000000 !important;
+    }
+    .messageText, .messageText tspan, .loopText, .loopText tspan {
+      paint-order: stroke;
+      stroke: #ffffff;
+      stroke-width: 10px;
+      stroke-linejoin: round;
+    }
+    .actor text,
+    .actor tspan,
+    .messageText,
+    .loopText,
+    .labelText {
+      fill: #000000 !important;
+    }
 ---
 sequenceDiagram
     autonumber
     participant CTRL as Bộ điều khiển
-    participant OBD as Bộ đọc dữ liệu xe
-    participant NET as Mạng và định vị
-    participant PWR as Phần quản lý nguồn
-    participant IMU as Cảm biến chuyển động
-    participant RTC as Bộ hẹn giờ
+    participant IO as Ngoại vi công suất cao
+    participant WAKE as IMU và hẹn giờ
 
-    CTRL->>CTRL: Kiểm tra điều kiện<br/>chuyển sang ngủ
-    Note over CTRL: Xe đã dừng,<br/>không còn việc cần xử lý
-    CTRL->>OBD: Ngắt kết nối đọc dữ liệu xe
-    CTRL->>NET: Tắt các kết nối đang hoạt động
-    CTRL->>PWR: Giữ lại các trạng thái cần thiết
-    alt Giữ tín hiệu đánh thức<br/>khi có chuyển động
-        PWR->>IMU: Giữ tín hiệu đánh thức<br/>theo chuyển động
-        PWR->>RTC: Đặt mốc kiểm tra định kỳ
-        PWR->>PWR: Chuyển sang chế độ chờ<br/>tiết kiệm điện
-    else Chỉ đánh thức<br/>theo thời gian
-        PWR->>RTC: Đặt mốc kiểm tra định kỳ
-        PWR->>PWR: Chuyển sang ngủ sâu
-    end
-    alt Đánh thức do<br/>chuyển động
-        IMU-->>CTRL: Báo có rung hoặc dịch chuyển
-        CTRL->>CTRL: Chuyển sang chế độ cảnh báo
-    else Đánh thức<br/>theo thời gian
-        RTC-->>CTRL: Báo đến mốc kiểm tra
+    CTRL->>CTRL: Xác nhận xe đã dừng<br/>và đủ điều kiện ngủ
+    CTRL->>IO: Tắt nhánh OBD, GNSS,<br/>4G và kết nối đang mở
+    CTRL->>WAKE: Cấu hình đánh thức<br/>theo IMU hoặc chu kỳ 120 s
+    CTRL->>CTRL: Chuyển sang ngủ sâu<br/>và giữ trạng thái cần thiết
+    alt Có chuyển động
+        WAKE-->>CTRL: Báo đánh thức
+        CTRL->>CTRL: Chuyển sang kiểm tra cảnh báo
+    else Đến mốc kiểm tra
+        WAKE-->>CTRL: Báo đánh thức định kỳ
         CTRL->>CTRL: Chuyển sang kiểm tra định kỳ
     end
-    CTRL->>CTRL: Kiểm tra lại trạng thái xe<br/>để chọn chế độ tiếp theo

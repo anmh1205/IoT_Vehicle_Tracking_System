@@ -103,6 +103,8 @@ uint64_t s_event_timestamp_ms = 0;
 bool s_prev_lte_initialized = false;
 /** @brief Flag indicating LTE has ever been successfully initialized. */
 bool s_lte_ever_initialized = false;
+/** @brief True after parked sleep requested modem low-power and wake prelude must re-arm AT. */
+bool s_modem_low_power_pending_wakeup = false;
 
 /*==============================================================================
  * GNSS State
@@ -277,6 +279,7 @@ void state_runtime_context_reset(const config_t *config) {
     s_event_timestamp_ms = 0;
     s_prev_lte_initialized = false;
     s_lte_ever_initialized = false;
+    s_modem_low_power_pending_wakeup = false;
     s_gnss_poll_fail_streak = 0;
     s_last_gnss_rearm_ms = 0;
     s_last_gnss_poll_ms = 0;

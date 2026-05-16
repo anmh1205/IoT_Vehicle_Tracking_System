@@ -5,19 +5,29 @@ config:
   fontFamily: Noto Sans, Segoe UI, Arial, sans-serif
   flowchart:
     htmlLabels: true
-    nodeSpacing: 55
-    rankSpacing: 75
+    nodeSpacing: 42
+    rankSpacing: 58
+  themeCSS: |
+    .cluster rect {
+      fill: #ffffff !important;
+      stroke: #cbd5e1 !important;
+      stroke-width: 1px !important;
+    }
+    .cluster text,
+    .cluster tspan {
+      fill: #475569 !important;
+    }
 ---
 flowchart LR
     subgraph A["Nhóm tiếp nhận bản tin"]
-        direction LR
+        direction TB
         EMQX["EMQX<br/>Nhận kết nối và bản tin MQTT"]
         Bridge["MQTT Bridge<br/>Kiểm tra và phân luồng"]
         EMQX --> Bridge
     end
 
     subgraph B["Nhóm lưu trữ"]
-        direction LR
+        direction TB
         PostgreSQLNode["PostgreSQL<br/>Dữ liệu quản lý"]
         VictoriaMetricsNode["VictoriaMetrics<br/>Dữ liệu theo thời gian"]
         VictoriaLogsNode["VictoriaLogs<br/>Sự kiện và nhật ký"]

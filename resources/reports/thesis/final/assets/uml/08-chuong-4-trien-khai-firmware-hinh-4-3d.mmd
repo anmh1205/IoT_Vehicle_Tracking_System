@@ -12,13 +12,20 @@ config:
     boxTextMargin: 8
     actorFontSize: 14
     messageFontSize: 14
+  themeCSS: |
+    .messageText, .messageText tspan, .loopText, .loopText tspan {
+      paint-order: stroke;
+      stroke: #ffffff;
+      stroke-width: 10px;
+      stroke-linejoin: round;
+    }
 ---
 sequenceDiagram
     autonumber
     participant CTRL as Bộ điều khiển
-    participant OBD as Bộ đọc dữ liệu xe
-    participant POS as Bộ định vị
-    participant NET as Máy chủ
+    participant OBD as Bộ đọc OBD BLE
+    participant POS as SIM7600CE-T
+    participant NET as Máy chủ tiếp nhận
     participant BUF as Bộ nhớ tạm
 
     CTRL->>OBD: Nhận dữ liệu vận hành<br/>từ xe
@@ -29,7 +36,12 @@ sequenceDiagram
     alt Kết nối đang ổn định
         CTRL->>NET: Gửi bản tin giám sát
         NET-->>CTRL: Xác nhận đã nhận
-        CTRL->>BUF: Gửi bù các bản tin<br/>còn lưu
+        opt Còn bản tin lưu cục bộ
+            CTRL->>BUF: Đọc bản tin chờ gửi bù
+            BUF-->>CTRL: Trả dữ liệu còn lưu
+            CTRL->>NET: Gửi bù bản tin đã lưu
+            NET-->>CTRL: Xác nhận đã nhận
+        end
     else Mất mạng<br/>hoặc gửi lỗi
         CTRL->>BUF: Lưu bản tin vào<br/>bộ nhớ tạm
     end

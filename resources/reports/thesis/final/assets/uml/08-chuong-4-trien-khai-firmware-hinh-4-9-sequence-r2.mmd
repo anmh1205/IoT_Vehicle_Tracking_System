@@ -1,15 +1,45 @@
+---
+config:
+  theme: base
+  sequence:
+    mirrorActors: false
+    actorMargin: 150
+    messageMargin: 58
+    noteMargin: 24
+    diagramMarginX: 36
+    diagramMarginY: 20
+    boxMargin: 12
+    boxTextMargin: 8
+    actorFontSize: 14
+    messageFontSize: 14
+  themeCSS: |
+    .messageText, .messageText tspan, .loopText, .loopText tspan {
+      paint-order: stroke;
+      stroke: #ffffff;
+      stroke-width: 10px;
+      stroke-linejoin: round;
+    }
+---
 sequenceDiagram
-    participant Nguon as Nguồn thiết bị
-    participant FW as Firmware ESP32-S3
-    participant CauHinh as Cấu hình và trạng thái lưu
-    participant CamBien as Cảm biến / OBD-II / GNSS
-    participant Mang as LTE/MQTT
+    autonumber
+    participant PWR as Nguồn thiết bị
+    participant CTRL as Bộ điều khiển
+    participant CFG as Bộ nhớ cấu hình
+    participant IO as Ngoại vi xe
+    participant NET as Mạng và định vị
 
-    Nguon->>FW: Cấp nguồn hoặc đánh thức
-    FW->>CauHinh: Nạp cấu hình làm việc
-    CauHinh-->>FW: Trả tham số và trạng thái trước đó
-    FW->>FW: Xác định nguyên nhân khởi động
-    FW->>CamBien: Kiểm tra trạng thái xe hiện tại
-    CamBien-->>FW: Trả dữ liệu ban đầu
-    FW->>Mang: Chuẩn bị tuyến truyền nếu cần
-    FW->>FW: Chọn nhịp làm việc ban đầu
+    PWR->>CTRL: Cấp nguồn hoặc đánh thức
+    CTRL->>CFG: Nạp cấu hình làm việc
+    CFG-->>CTRL: Trả tham số và trạng thái trước đó
+    CTRL->>CTRL: Xác định nguyên nhân đánh thức
+    CTRL->>IO: Kiểm tra trạng thái xe hiện tại
+    IO-->>CTRL: Trả dữ liệu ban đầu
+    CTRL->>NET: Chuẩn bị tuyến kết nối nếu cần
+    alt Bật nguồn hoặc khởi động lại
+        CTRL->>CTRL: Chọn pha khởi động đầy đủ
+    else Đánh thức theo bộ hẹn giờ
+        CTRL->>CTRL: Chuyển sang kiểm tra định kỳ
+    else Đánh thức do chuyển động
+        CTRL->>CTRL: Chuyển sang kiểm tra cảnh báo
+    end
+    CTRL->>CTRL: Chọn nhịp làm việc ban đầu

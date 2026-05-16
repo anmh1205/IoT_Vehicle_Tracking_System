@@ -426,7 +426,7 @@ void state_machine_sync_runtime_axes(app_state_t app_state) {
  */
 bool state_machine_network_ready_for_heartbeat_publish(void) {
     // Keep this public facade thin and forward the real work to the focused implementation below.
-    return tracker_mqtt_is_connected();
+    return !s_modem_low_power_pending_wakeup && tracker_mqtt_is_connected();
 }
 
 /**

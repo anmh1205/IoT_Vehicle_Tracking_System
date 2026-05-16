@@ -6,9 +6,9 @@ flowchart LR
 
         Control["Khối điều khiển<br/>Chức năng: Điều phối toàn bộ thiết bị<br/>(Module: ESP32-S3, USB-C,<br/>đầu nạp, nút nhấn,<br/>đèn báo, anten BLE)"]
 
-        Data["Khối cảm biến và lưu trữ<br/>Chức năng: Phát hiện chuyển động,<br/>Giữ thời gian, Lưu đệm<br/>(Module: LIS3DSH, DS3231M,<br/>W25Q128, khe microSD)"]
+        Data["Khối cảm biến và lưu trữ<br/>Chức năng: Phát hiện chuyển động,<br/>giữ thời gian, lưu đệm<br/>(Module: LIS3DSH, DS3231M,<br/>W25Q128, khe microSD)"]
 
-        Comm["Khối truyền thông - định vị<br/>Chức năng: Lấy vị trí, gửi bản tin<br/>(Module: SIM7600E, khe microSIM,<br/>anten 4G/GNSS)"]
+        Comm["Khối truyền thông - định vị<br/>Chức năng: Lấy vị trí, gửi bản tin<br/>(Module: SIM7600CE-T, khe microSIM,<br/>anten 4G/GNSS)"]
     end
 
     Power --> Control
@@ -22,4 +22,3 @@ flowchart LR
     style Control fill:#ffffff,stroke:#64748b,color:#111827
     style Data fill:#ffffff,stroke:#64748b,color:#111827
     style Comm fill:#ffffff,stroke:#64748b,color:#111827
-
