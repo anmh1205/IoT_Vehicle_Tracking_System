@@ -1,14 +1,16 @@
 ﻿'use client';
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, MapPin } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertTriangle, CheckCircle2, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { violationServices } from '@/lib/api/violations';
+import { notificationUtils } from '@/lib/notification';
+import { getApiErrorMessage } from '@/lib/utils/api-error';
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/utils/date/format';
 import { getViolationTypeLabel } from '@/features/violations/utils/violation-labels';
 
@@ -58,10 +60,23 @@ export const ViolationDetailModal = ({
   onOpenChange: (value: boolean) => void;
   violationId: number | null;
 }) => {
+  const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ['violation-detail', violationId],
     queryFn: () => violationServices.getById(violationId as number),
     enabled: open && violationId !== null,
+  });
+
+  const ackMutation = useMutation({
+    mutationFn: () => violationServices.acknowledge(violationId as number),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['violations'] });
+      void queryClient.invalidateQueries({ queryKey: ['violation-detail', violationId] });
+      notificationUtils.success('Đã xác nhận vi phạm');
+    },
+    onError: (error: unknown) => {
+      notificationUtils.error('Xác nhận vi phạm thất bại', getApiErrorMessage(error, 'Không thể xác nhận vi phạm.'));
+    },
   });
 
   const detail = query.data ?? {};
@@ -112,6 +127,17 @@ export const ViolationDetailModal = ({
                         <Badge variant={detail.acknowledged ? 'secondary' : 'default'}>
                           {detail.acknowledged ? 'Đã xác nhận' : 'Chưa xử lý'}
                         </Badge>
+                        {!detail.acknowledged && violationId ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={ackMutation.isPending}
+                            onClick={() => ackMutation.mutate()}
+                          >
+                            <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                            {ackMutation.isPending ? 'Đang xử lý...' : 'Xác nhận vi phạm'}
+                          </Button>
+                        ) : null}
                       </div>
                       <div>
                         <p className="text-2xl font-semibold tracking-tight">

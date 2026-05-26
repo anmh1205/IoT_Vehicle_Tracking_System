@@ -294,6 +294,7 @@ const UsersPage = () => {
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<(User & { status?: UserStatus }) | null>(null);
   const [deleteItem, setDeleteItem] = useState<User | null>(null);
+  const [resetPasswordTarget, setResetPasswordTarget] = useState<User | null>(null);
   const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [role, setRole] = useState<'all' | 'admin' | 'manager' | 'operator' | 'viewer'>('all');
@@ -414,7 +415,7 @@ const UsersPage = () => {
             size="sm"
             variant="outline"
             disabled={resetPasswordMutation.isPending}
-            onClick={() => resetPasswordMutation.mutate(row.original.id)}
+            onClick={() => setResetPasswordTarget(row.original)}
           >
             Đặt lại mật khẩu
           </Button>
@@ -568,6 +569,23 @@ const UsersPage = () => {
         confirmLabel="Xóa"
         variant="destructive"
         isPending={deleteMutation.isPending}
+      />
+
+      <ConfirmDialog
+        open={Boolean(resetPasswordTarget)}
+        onCancel={() => setResetPasswordTarget(null)}
+        onConfirm={() => {
+          if (resetPasswordTarget) {
+            resetPasswordMutation.mutate(resetPasswordTarget.id, {
+              onSettled: () => setResetPasswordTarget(null),
+            });
+          }
+        }}
+        title="Đặt lại mật khẩu"
+        description={`Bạn có chắc muốn đặt lại mật khẩu cho tài khoản ${resetPasswordTarget?.username ?? ''}? Mật khẩu hiện tại sẽ bị vô hiệu hóa ngay lập tức.`}
+        confirmLabel="Đặt lại"
+        variant="destructive"
+        isPending={resetPasswordMutation.isPending}
       />
     </PageContainer>
   );

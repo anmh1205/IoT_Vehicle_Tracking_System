@@ -179,6 +179,17 @@ const CustomerDetailPage = ({
     );
   }
 
+  if (query.isLoading) {
+    return (
+      <PageContainer pageTitle={`Khách hàng #${id}`} pageDescription="Chi tiết khách hàng">
+        <div className="space-y-4">
+          <div className="h-48 animate-pulse rounded-xl border bg-muted/30" />
+          <div className="h-64 animate-pulse rounded-xl border bg-muted/30" />
+        </div>
+      </PageContainer>
+    );
+  }
+
   const detail = query.data ?? {};
   const pageTitle = detail.name ?? detail.customerCode ?? `Khách hàng #${id}`;
   const statusLabel = STATUS_LABELS[detail.status] ?? detail.status ?? 'Chưa xác định';
